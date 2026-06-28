@@ -47,16 +47,15 @@
 ## 组件发布规则
 
 - 已发布组件只以 `.design_library/wegoux/components/index.json` 为准。
-- 当前稳定组件为 17 个：`button`、`card`、`avatar`、`chip`、`bottom-nav`、`input`、`badge`、`cell`、`checkbox`、`form`、`image`、`link`、`radio`、`stack`、`switch`、`navbar`、`navbar-action-button`。
+- 当前稳定组件为 18 个：`button`、`card`、`avatar`、`chip`、`bottom-nav`、`input`、`counter`、`badge`、`cell`、`checkbox`、`form`、`image`、`link`、`radio`、`stack`、`switch`、`navbar`、`navbar-action-button`。
 - `navbar-action-button` 是 `navbar` 内嵌组件，没有独立预览页时不要强行当独立页面组件使用。
-- `components/counter.json` 当前只是未发布契约；未注册、无预览页前，不能当稳定组件使用。
 - UI Kit 中的 `biz-*`、`.phone-*`、`.uikit-shell`、`.phone-frame`、`.phone-screen` 都是 Showcase 演示外壳或业务样式，不是通用组件。
 
 新增或发布组件必须同时完成：
 
 1. 新增或更新 `components/{slug}.json`。
-2. 新增或更新 `preview/component-{slug}.html`。
-3. 同步 `components.css`。
+2. 新增或更新 `preview/component-{slug}.html`（组件 CSS 内联并用 `/* @component-css-start */` / `/* @component-css-end */` 标记包裹）。
+3. 运行 `node scripts/extract-components-css.mjs .` 重新生成 `components.css`（禁止手动编辑此文件）。
 4. 注册到 `components/index.json`。
 5. 同步 `uikit-plan.json`。
 6. 同步 `library-consumption.json`。
@@ -73,10 +72,10 @@
 
 改组件样式：
 
-- 优先改对应 `preview/component-*.html` 的组件样式块。
+- 优先改对应 `preview/component-*.html` 的组件样式块（在 `/* @component-css-start */` / `/* @component-css-end */` 标记之内）。
 - 同步对应 `components/{slug}.json` 的结构、状态、变体和 Token 消费记录。
-- 再同步 `components.css`。
-- 不直接把 `components.css` 当首选编辑入口。
+- 再运行 `node scripts/extract-components-css.mjs .` 重新生成 `components.css`。
+- **严禁直接手动编辑 `components.css`**——它是自动聚合输出，文件头部已标注 `DO NOT EDIT MANUALLY`。任何直接修改都会在下一次重新生成时丢失。
 
 改 UI Kit：
 
@@ -122,6 +121,7 @@
 
 - `colors_and_type.css` 与 `css.json` 没有明显不同步。
 - 组件注册表、组件契约、预览页、聚合样式没有漏改。
+- **`components.css` 通过 `scripts/extract-components-css.mjs` 重新生成过**，不是手动编辑的。
 - `uikit-plan.json` 和 `library-consumption.json` 与当前组件状态一致。
 - `README.md` 和 `SKILL.md` 没有过期组件数量、状态或读取路径。
 - `quality-report.json` 与 UI Kit 当前状态一致。
