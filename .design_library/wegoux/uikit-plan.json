@@ -53,16 +53,17 @@
   ],
   "supportEvidenceComponents": [
     { "slug": "input", "reason": "独立输入和资料编辑场景。", "evidenceFile": "components/input.json", "previewFile": "preview/component-input.html", "priority": 7, "slot": "input" },
-    { "slug": "chip", "reason": "筛选、状态和业务标签。", "evidenceFile": "components/chip.json", "previewFile": "preview/component-chip.html", "priority": 8, "slot": "tag-filter" },
-    { "slug": "badge", "reason": "未读、促销、提醒和角标。", "evidenceFile": "components/badge.json", "previewFile": "preview/component-badge.html", "priority": 9, "slot": "badge" },
-    { "slug": "avatar", "reason": "用户资料和成员信息。", "evidenceFile": "components/avatar.json", "previewFile": "preview/component-avatar.html", "priority": 10, "slot": "identity" },
-    { "slug": "image", "reason": "商品图、头像图和加载失败状态。", "evidenceFile": "components/image.json", "previewFile": "preview/component-image.html", "priority": 11, "slot": "media" },
-    { "slug": "switch", "reason": "设置页布尔开关。", "evidenceFile": "components/switch.json", "previewFile": "preview/component-switch.html", "priority": 12, "slot": "boolean-toggle" },
-    { "slug": "checkbox", "reason": "多选、权限项和半选状态。", "evidenceFile": "components/checkbox.json", "previewFile": "preview/component-checkbox.html", "priority": 13, "slot": "multi-select" },
-    { "slug": "radio", "reason": "互斥选择。", "evidenceFile": "components/radio.json", "previewFile": "preview/component-radio.html", "priority": 14, "slot": "single-select" },
-    { "slug": "link", "reason": "文字跳转和内联操作。", "evidenceFile": "components/link.json", "previewFile": "preview/component-link.html", "priority": 15, "slot": "text-action" },
-    { "slug": "stack", "reason": "方块式选项卡和选择项。", "evidenceFile": "components/stack.json", "previewFile": "preview/component-stack.html", "priority": 16, "slot": "option-stack" },
-    { "slug": "navbar-action-button", "reason": "NavBar 右侧操作子组件，嵌入 navbar 预览使用。", "evidenceFile": "components/navbar-action-button.json", "previewFile": "preview/component-navbar.html", "priority": 17, "slot": "navbar-action" }
+    { "slug": "counter", "reason": "商品详情和购物车数量增减。", "evidenceFile": "components/counter.json", "previewFile": "preview/component-counter.html", "priority": 8, "slot": "quantity-stepper" },
+    { "slug": "chip", "reason": "筛选、状态和业务标签。", "evidenceFile": "components/chip.json", "previewFile": "preview/component-chip.html", "priority": 9, "slot": "tag-filter" },
+    { "slug": "badge", "reason": "未读、促销、提醒和角标。", "evidenceFile": "components/badge.json", "previewFile": "preview/component-badge.html", "priority": 10, "slot": "badge" },
+    { "slug": "avatar", "reason": "用户资料和成员信息。", "evidenceFile": "components/avatar.json", "previewFile": "preview/component-avatar.html", "priority": 11, "slot": "identity" },
+    { "slug": "image", "reason": "商品图、头像图和加载失败状态。", "evidenceFile": "components/image.json", "previewFile": "preview/component-image.html", "priority": 12, "slot": "media" },
+    { "slug": "switch", "reason": "设置页布尔开关。", "evidenceFile": "components/switch.json", "previewFile": "preview/component-switch.html", "priority": 13, "slot": "boolean-toggle" },
+    { "slug": "checkbox", "reason": "多选、权限项和半选状态。", "evidenceFile": "components/checkbox.json", "previewFile": "preview/component-checkbox.html", "priority": 14, "slot": "multi-select" },
+    { "slug": "radio", "reason": "互斥选择。", "evidenceFile": "components/radio.json", "previewFile": "preview/component-radio.html", "priority": 15, "slot": "single-select" },
+    { "slug": "link", "reason": "文字跳转和内联操作。", "evidenceFile": "components/link.json", "previewFile": "preview/component-link.html", "priority": 16, "slot": "text-action" },
+    { "slug": "stack", "reason": "方块式选项卡和选择项。", "evidenceFile": "components/stack.json", "previewFile": "preview/component-stack.html", "priority": 17, "slot": "option-stack" },
+    { "slug": "navbar-action-button", "reason": "NavBar 右侧操作子组件，嵌入 navbar 预览使用。", "evidenceFile": "components/navbar-action-button.json", "previewFile": "preview/component-navbar.html", "priority": 18, "slot": "navbar-action" }
   ],
   "allowedComponents": [
     "button",
@@ -71,6 +72,7 @@
     "chip",
     "bottom-nav",
     "input",
+    "counter",
     "badge",
     "cell",
     "checkbox",
@@ -91,7 +93,7 @@
     },
     {
       "name": "商品详情",
-      "componentSlugs": ["navbar", "image", "card", "chip", "button", "badge"],
+      "componentSlugs": ["navbar", "image", "card", "chip", "counter", "button", "badge"],
       "role": "primary"
     },
     {
@@ -129,12 +131,7 @@
       "reason": "右侧操作区属于 NavBar 内部组合，不单独出预览页。"
     }
   ],
-  "unpublishedContracts": [
-    {
-      "slug": "counter",
-      "reason": "存在契约文件，但未注册、无预览页，暂不进入 allowedComponents。"
-    }
-  ],
+  "unpublishedContracts": [],
   "forbiddenInventedComponents": [
     "desktop-sidebar",
     "marketing-hero",

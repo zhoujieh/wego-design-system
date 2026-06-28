@@ -3,7 +3,7 @@
   "name": "计数器",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "数字计数器组件，用于数值增减操作。包含减号按钮、数值输入区、加号按钮三部分。支持 sm(80px) / default(96px) / lg(120px) 三种宽度，32px 整体高度。减号和加号按钮 28x28px，0.5px #e7e9ee 边框。数值输入区自适应宽度，WegoKeyboard N9 数字字体，14px Medium。支持 hint 提示和 error 错误消息（绝对定位在组件下方，10px 字号）。disabled 态 50% 透明度。",
+  "description": "数字计数器组件，用于商品数量、库存数量等数值增减操作。包含减号按钮、数值输入区、加号按钮三部分。视觉高度保持 32px，按钮视觉尺寸保持 28x28px；触控热区通过按钮伪元素扩展到至少 40x40px，不改变组件布局。",
   "variants": [
     {
       "name": "默认 (Default)",
@@ -16,14 +16,14 @@
       "type": "sm",
       "className": "counter--sm",
       "width": "80px",
-      "description": "紧凑型，宽度 80px，其余规格与默认一致"
+      "description": "紧凑型，宽度 80px，其余视觉规格与默认一致"
     },
     {
       "name": "大尺寸 (Large)",
       "type": "lg",
       "className": "counter--lg",
       "width": "120px",
-      "description": "宽型，宽度 120px，其余规格与默认一致"
+      "description": "宽型，宽度 120px，其余视觉规格与默认一致"
     }
   ],
   "states": [
@@ -47,35 +47,65 @@
     }
   ],
   "slots": [
-    { "name": "counter__body", "description": "主容器，flex 水平布局，gap 4px，高度 32px，2px 内边距，圆角 sm，背景 --color-neutral-alpha-03" },
-    { "name": "counter__btn", "description": "加减按钮，28x28px，圆角 xs，白色背景，0.5px #e7e9ee 边框，hover/active 有背景色变化，内含 16x16px SVG 图标" },
-    { "name": "counter__value", "description": "数值输入区，flex 1 自适应宽度，无边框透明背景，text-align center，WegoKeyboard N9 字体，14px Medium（--font-number-nf14）" },
-    { "name": "counter__hint", "description": "提示文字，绝对定位在 body 下方，居中，10px 字号，--color-text-disabled，默认 hidden" },
-    { "name": "counter__error", "description": "错误文字，绝对定位在 body 下方，居中，10px 字号，--color-danger，默认 hidden" }
+    {
+      "name": "counter__body",
+      "description": "主容器，flex 水平布局，gap 4px，高度 32px，2px 内边距，圆角 sm，背景 --color-neutral-alpha-03"
+    },
+    {
+      "name": "counter__btn",
+      "description": "加减按钮，视觉尺寸 28x28px，圆角 xs，白色背景，0.5px Token 描边；通过 ::before 扩展热区，不占布局空间"
+    },
+    {
+      "name": "counter__icon",
+      "description": "按钮图标，使用 wego-iconfont-s：减号 icon-jian16，加号 icon-jia16"
+    },
+    {
+      "name": "counter__value",
+      "description": "数值输入区，flex 1 自适应宽度，无边框透明背景，text-align center，WegoKeyboard N9 数字字体，14px Medium（--font-number-nf14）"
+    },
+    {
+      "name": "counter__hint",
+      "description": "提示文字，绝对定位在 body 下方，居中，10px 字号，--color-text-disabled，默认 hidden"
+    },
+    {
+      "name": "counter__error",
+      "description": "错误文字，绝对定位在 body 下方，居中，10px 字号，--color-danger，默认 hidden"
+    }
   ],
   "designTokens": {
     "defaultWidth": "96px",
     "smallWidth": "80px",
     "largeWidth": "120px",
     "height": "32px",
-    "btnSize": "28px",
+    "btnVisualSize": "28px",
+    "btnTouchTarget": "40px",
+    "btnTouchMethod": "counter__btn::before",
+    "btnTouchInsetY": "-6px",
+    "btnTouchInsetMinus": "left -8px / right -4px",
+    "btnTouchInsetPlus": "left -4px / right -8px",
     "btnBackground": "var(--color-bg-surface)",
-    "btnBorder": "0.5px solid #e7e9ee",
+    "btnBorder": "var(--stroke-width-hairline) solid var(--color-border-default)",
     "btnBorderRadius": "var(--radius-xs)",
     "bodyBackground": "var(--color-neutral-alpha-03)",
     "bodyBorderRadius": "var(--radius-sm)",
-    "bodyPadding": "2px",
-    "bodyGap": "4px",
-    "fontFamilyNumber": "WegoKeyboard N9",
-    "valueFontSize": "14px",
+    "bodyPadding": "var(--space-2)",
+    "bodyGap": "var(--space-4)",
+    "fontFamilyNumber": "var(--font-family-number)",
+    "valueFontSize": "var(--font-number-nf14)",
     "valueFontWeight": 500,
-    "iconSize": "16px",
-    "messageFontSize": "10px",
+    "iconSize": "var(--size-16)",
+    "minusIcon": "icon-jian16",
+    "plusIcon": "icon-jia16",
+    "messageFontSize": "var(--font-size-10)",
     "hintColor": "var(--color-text-disabled)",
     "errorColor": "var(--color-danger)",
     "disabledOpacity": 0.5,
-    "overflow": "hidden",
     "textOverflow": "ellipsis"
+  },
+  "accessibility": {
+    "buttonLabels": ["减少", "增加"],
+    "inputMode": "numeric",
+    "touchRule": "视觉尺寸不为热区让位；按钮使用伪元素扩展到至少 40x40px，避免改变 32px 组件高度和水平排版。"
   },
   "unknowns": []
 }

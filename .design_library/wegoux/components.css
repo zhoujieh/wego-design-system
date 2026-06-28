@@ -582,23 +582,22 @@
 .counter { position: relative; display: inline-flex; flex-direction: column; gap: var(--space-2); flex-shrink: 0; width: 96px; }
 .counter--sm { width: 80px; }
 .counter--lg { width: 120px; }
-.counter__body { display: flex; align-items: center; gap: var(--space-4); height: var(--size-32); padding: var(--space-2); background: var(--color-neutral-alpha-03); border-radius: var(--radius-sm); width: 100%; box-sizing: border-box; }
-.counter__btn { display: flex; align-items: center; justify-content: center; width: var(--size-28); height: var(--size-28); border: 0.5px solid #e7e9ee; border-radius: var(--radius-xs); background: var(--color-bg-surface); cursor: pointer; flex-shrink: 0; color: var(--color-text-primary); transition: background var(--duration-fast) var(--ease-standard); }
+.counter__body { display: flex; align-items: center; gap: var(--space-4); width: 100%; height: var(--size-32); padding: var(--space-2); background: var(--color-neutral-alpha-03); border-radius: var(--radius-sm); box-sizing: border-box; }
+.counter__btn { position: relative; display: flex; align-items: center; justify-content: center; width: var(--size-28); height: var(--size-28); border: var(--stroke-width-hairline) solid var(--color-border-default); border-radius: var(--radius-xs); background: var(--color-bg-surface); cursor: pointer; flex-shrink: 0; color: var(--color-text-primary); transition: background var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard); }
+.counter__btn::before { content: ""; position: absolute; top: -6px; bottom: -6px; }
+.counter__btn--minus::before { left: -8px; right: -4px; }
+.counter__btn--plus::before { left: -4px; right: -8px; }
 .counter__btn:hover { background: var(--color-neutral-alpha-03); }
 .counter__btn:active { background: var(--color-neutral-alpha-06); }
-.counter__btn svg { width: var(--size-16); height: var(--size-16); }
+.counter__icon { font-family: "wego-iconfont-s" !important; font-style: normal; font-size: var(--size-16); line-height: 1; pointer-events: none; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 .counter__value { flex: 1 1 0; min-width: 0; height: 100%; border: none; outline: none; background: transparent; text-align: center; font-family: var(--font-family-number); font-size: var(--font-number-nf14); font-weight: var(--font-weight-medium); color: var(--color-text-primary); padding: 0; font-feature-settings: "zero"; line-height: normal; }
 .counter__value::placeholder { color: var(--color-text-placeholder); }
 .counter__value:focus { color: var(--color-text-primary); }
-/* Counter hint / error message — absolutely positioned below the body */
 .counter__message { position: absolute; top: calc(var(--size-32) + var(--space-2)); left: 0; width: 100%; overflow: hidden; text-align: center; font-size: var(--font-size-10); font-family: var(--font-family-text); font-weight: var(--font-weight-regular); white-space: nowrap; text-overflow: ellipsis; font-feature-settings: "zero"; line-height: normal; pointer-events: none; }
 .counter__hint { color: var(--color-text-disabled); display: none; }
 .counter__error { color: var(--color-danger); display: none; }
-/* State: hint visible */
 .counter.is-hint .counter__hint { display: block; }
-/* State: error visible */
 .counter.is-error .counter__error { display: block; }
-/* State: disabled */
 .counter.is-disabled .counter__body { opacity: 0.5; pointer-events: none; }
 
 /* ── Number Input (数字输入框) ──────────────────────────────── */

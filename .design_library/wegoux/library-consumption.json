@@ -29,7 +29,7 @@
       "downstreamRule": "组件和预览页优先使用 <i class=\"wego-iconfont-s icon-{name}\"></i>；不要为了常规图标引入 Lucide/CDN 或临时内联 SVG。icons/*.svg 仅用于已有 Tab、标签、选择态等资产参考。"
     },
     "specs": {
-      "files": ["specs/*/*.md"],
+      "files": ["specs/*.md"],
       "copyable": false,
       "purpose": "品牌、布局、交互、动效、图标、文案和数据格式的细则",
       "downstreamRule": "遇到页面布局、日期金额、状态反馈、图标尺寸、点击热区等问题时读取对应规范。"
@@ -66,11 +66,11 @@
       "consume": "复制预览页中的组件 markup，链接 colors_and_type.css、iconfont.css 和 components.css。"
     },
     "buildMobileAppPage": {
-      "read": ["ui_kits/app/index.html", "components/index.json", "preview/component-{slug}.html", "specs/微购设计规范 - 布局与间距规范/微购设计规范 - 布局与间距规范.md"],
+      "read": ["ui_kits/app/index.html", "components/index.json", "preview/component-{slug}.html", "specs/布局与间距规范.md"],
       "consume": "参考 UI Kit 的页面结构，使用组件预览页中的稳定 class，在真实移动端画布中重新组织页面。"
     },
     "writeChineseCopyOrData": {
-      "read": ["specs/微购设计规范 - 文案与数据规范/微购设计规范 - 文案与数据规范.md"],
+      "read": ["specs/文案与数据规范.md"],
       "consume": "金额、日期、时间、空数据、省略和中文标点按规范输出。"
     }
   },
@@ -89,7 +89,7 @@
     "components/index.json",
     "components/{slug}.json",
     "preview/component-{slug}.html",
-    "specs/*/*.md",
+    "specs/*.md",
     "ui_kits/app/index.html"
   ],
   "coreComponents": [
@@ -106,6 +106,7 @@
     "badge",
     "checkbox",
     "chip",
+    "counter",
     "image",
     "link",
     "radio",
@@ -119,11 +120,6 @@
       "reason": "已注册为 NavBar 右侧操作区子组件，但没有独立 preview；示例位于 preview/component-navbar.html。"
     }
   ],
-  "unpublishedContracts": [
-    {
-      "slug": "counter",
-      "reason": "存在 components/counter.json，但未注册到 components/index.json，也没有 preview/component-counter.html。"
-    }
-  ],
+  "unpublishedContracts": [],
   "uiKits": ["app"]
 }

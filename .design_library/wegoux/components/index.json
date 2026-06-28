@@ -6,6 +6,7 @@
     { "slug": "chip", "name": "标签", "category": "display", "status": "stable" },
     { "slug": "bottom-nav", "name": "底部导航", "category": "navigation", "status": "stable" },
     { "slug": "input", "name": "输入框", "category": "form", "status": "stable" },
+    { "slug": "counter", "name": "计数器", "category": "form", "status": "stable" },
     { "slug": "badge", "name": "角标", "category": "display", "status": "stable" },
     { "slug": "cell", "name": "列表单元格", "category": "display", "status": "stable" },
     { "slug": "checkbox", "name": "复选框", "category": "form", "status": "stable" },

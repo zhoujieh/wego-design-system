@@ -131,7 +131,7 @@ name: "微购设计系统"
 
 ## 组件清单
 
-本设计系统包含 **17** 个组件，覆盖操作、展示、导航、表单四大类别。
+本设计系统包含 **18** 个组件，覆盖操作、展示、导航、表单四大类别。
 
 ### 操作类（action）
 
@@ -165,12 +165,13 @@ name: "微购设计系统"
 | 组件 | Slug | 状态 | 说明 |
 |------|------|------|------|
 | 输入框 | `input` | stable | 文本输入控件，支持占位符、前后缀、清除按钮等 |
+| 计数器 | `counter` | stable | 数字增减控件，用于商品数量和库存数量；视觉紧凑，热区通过伪元素扩展 |
 | 复选框 | `checkbox` | stable | 多选控件，支持未选、已选、半选、计数和禁用 |
 | 单选 | `radio` | stable | 互斥选择控件，支持 24px / 20px 两种尺寸 |
 | 开关 | `switch` | stable | 布尔切换控件，适合设置项开启/关闭 |
 | 表单容器 | `form` | stable | 表单字段容器，支持水平/垂直布局和多种输入类型 |
 
-> `components/counter.json` 当前仅为未发布契约：未注册到 `components/index.json`，也没有对应预览页。
+> `counter` 保持 32px 视觉高度和 28px 按钮视觉尺寸；为满足移动端触控要求，通过 `counter__btn::before` 扩展按钮热区，不改变组件布局。
 
 ## 文件清单
 
@@ -194,7 +195,7 @@ name: "微购设计系统"
 │   ├── cell.json                      # 列表单元格组件契约
 │   ├── checkbox.json                  # 复选框组件契约
 │   ├── chip.json                      # 标签组件契约
-│   ├── counter.json                   # 计数器契约（未发布）
+│   ├── counter.json                   # 计数器组件契约
 │   ├── form.json                      # 表单容器组件契约
 │   ├── image.json                     # 图片组件契约
 │   ├── input.json                     # 输入框组件契约
@@ -211,6 +212,7 @@ name: "微购设计系统"
 │   ├── component-input.html           # 输入框组件预览页
 │   ├── component-avatar.html          # 头像组件预览页
 │   ├── component-chip.html            # 标签组件预览页
+│   ├── component-counter.html         # 计数器组件预览页
 │   ├── component-navbar.html          # 导航栏组件预览页
 │   ├── component-badge.html           # 角标组件预览页
 │   ├── component-cell.html            # 列表单元格预览页
@@ -254,7 +256,7 @@ name: "微购设计系统"
 | Token | `colors_and_type.css` + `css.json` | 颜色、字体、字号、间距、圆角、阴影、动效 | 是 |
 | Component | `components.css` + `components/*.json` + `preview/component-*.html` | 单组件结构、class、状态和尺寸 | 是 |
 | Icon | `iconfont.css` + `assets/fonts/` + `icons/` | 图标字体和固定 SVG 资产 | 是 |
-| Spec | `specs/*/*.md` | 品牌、布局、交互、动效、文案细则 | 作为规则参考 |
+| Spec | `specs/*.md` | 品牌、布局、交互、动效、文案细则 | 作为规则参考 |
 | UI Kit | `ui_kits/app/index.html` + `quality-report.json` | 页面级 Showcase | 不要直接复制外壳 |
 
 推荐读取顺序：`README.md` → `library-consumption.json` → `uikit-plan.json` → `colors_and_type.css` → `components/index.json` → 对应组件契约和预览页。

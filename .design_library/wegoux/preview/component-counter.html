@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>计数器 - 微购设计系统</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../iconfont.css">
+<style>
+/* Page scaffold — NOT extracted */
+body { margin: 0; padding: 32px !important; background: var(--color-bg-page); font-family: var(--font-family-text); color: var(--color-text-primary); }
+.specimen { display: flex; flex-direction: column; gap: var(--space-0); }
+.story { display: flex; flex-direction: column; gap: var(--space-8); margin-bottom: var(--space-16); }
+.story:last-child { margin-bottom: var(--space-0); }
+.story-label { width: 92px; flex-shrink: 0; font-size: var(--font-size-12); font-weight: var(--font-weight-medium); color: var(--color-text-secondary); line-height: var(--font-lineheight-12); }
+.rail { display: flex; gap: var(--space-32); align-items: flex-start; flex-wrap: wrap; }
+.divider { border: none; border-top: 1px solid var(--color-divider-default); margin: var(--space-0) var(--space-0) var(--space-12); }
+
+/* @component-css-start */
+.counter { position: relative; display: inline-flex; flex-direction: column; gap: var(--space-2); flex-shrink: 0; width: 96px; }
+.counter--sm { width: 80px; }
+.counter--lg { width: 120px; }
+.counter__body { display: flex; align-items: center; gap: var(--space-4); width: 100%; height: var(--size-32); padding: var(--space-2); background: var(--color-neutral-alpha-03); border-radius: var(--radius-sm); box-sizing: border-box; }
+.counter__btn { position: relative; display: flex; align-items: center; justify-content: center; width: var(--size-28); height: var(--size-28); border: var(--stroke-width-hairline) solid var(--color-border-default); border-radius: var(--radius-xs); background: var(--color-bg-surface); cursor: pointer; flex-shrink: 0; color: var(--color-text-primary); transition: background var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard); }
+.counter__btn::before { content: ""; position: absolute; top: -6px; bottom: -6px; }
+.counter__btn--minus::before { left: -8px; right: -4px; }
+.counter__btn--plus::before { left: -4px; right: -8px; }
+.counter__btn:hover { background: var(--color-neutral-alpha-03); }
+.counter__btn:active { background: var(--color-neutral-alpha-06); }
+.counter__icon { font-family: "wego-iconfont-s" !important; font-style: normal; font-size: var(--size-16); line-height: 1; pointer-events: none; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+.counter__value { flex: 1 1 0; min-width: 0; height: 100%; border: none; outline: none; background: transparent; text-align: center; font-family: var(--font-family-number); font-size: var(--font-number-nf14); font-weight: var(--font-weight-medium); color: var(--color-text-primary); padding: 0; font-feature-settings: "zero"; line-height: normal; }
+.counter__value::placeholder { color: var(--color-text-placeholder); }
+.counter__value:focus { color: var(--color-text-primary); }
+.counter__message { position: absolute; top: calc(var(--size-32) + var(--space-2)); left: 0; width: 100%; overflow: hidden; text-align: center; font-size: var(--font-size-10); font-family: var(--font-family-text); font-weight: var(--font-weight-regular); white-space: nowrap; text-overflow: ellipsis; font-feature-settings: "zero"; line-height: normal; pointer-events: none; }
+.counter__hint { color: var(--color-text-disabled); display: none; }
+.counter__error { color: var(--color-danger); display: none; }
+.counter.is-hint .counter__hint { display: block; }
+.counter.is-error .counter__error { display: block; }
+.counter.is-disabled .counter__body { opacity: 0.5; pointer-events: none; }
+/* @component-css-end */
+</style>
+</head>
+<body>
+<div class="specimen">
+  <div class="story">
+    <span class="story-label">尺寸</span>
+    <div class="rail">
+      <div class="counter counter--sm" data-counter data-counter-min="1">
+        <div class="counter__body">
+          <button class="counter__btn counter__btn--minus" type="button" aria-label="减少">
+            <i class="counter__icon icon-jian16"></i>
+          </button>
+          <input class="counter__value" type="text" inputmode="numeric" value="1" maxlength="7">
+          <button class="counter__btn counter__btn--plus" type="button" aria-label="增加">
+            <i class="counter__icon icon-jia16"></i>
+          </button>
+        </div>
+        <div class="counter__message counter__hint"></div>
+        <div class="counter__message counter__error"></div>
+      </div>
+      <div class="counter" data-counter data-counter-min="1">
+        <div class="counter__body">
+          <button class="counter__btn counter__btn--minus" type="button" aria-label="减少">
+            <i class="counter__icon icon-jian16"></i>
+          </button>
+          <input class="counter__value" type="text" inputmode="numeric" value="12" maxlength="7">
+          <button class="counter__btn counter__btn--plus" type="button" aria-label="增加">
+            <i class="counter__icon icon-jia16"></i>
+          </button>
+        </div>
+        <div class="counter__message counter__hint"></div>
+        <div class="counter__message counter__error"></div>
+      </div>
+      <div class="counter counter--lg" data-counter data-counter-min="1">
+        <div class="counter__body">
+          <button class="counter__btn counter__btn--minus" type="button" aria-label="减少">
+            <i class="counter__icon icon-jian16"></i>
+          </button>
+          <input class="counter__value" type="text" inputmode="numeric" value="128" maxlength="7">
+          <button class="counter__btn counter__btn--plus" type="button" aria-label="增加">
+            <i class="counter__icon icon-jia16"></i>
+          </button>
+        </div>
+        <div class="counter__message counter__hint"></div>
+        <div class="counter__message counter__error"></div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="story">
+    <span class="story-label">状态</span>
+    <div class="rail">
+      <div class="counter is-hint" data-counter data-counter-min="1" data-counter-max="100" data-counter-hinttext="库存100">
+        <div class="counter__body">
+          <button class="counter__btn counter__btn--minus" type="button" aria-label="减少">
+            <i class="counter__icon icon-jian16"></i>
+          </button>
+          <input class="counter__value" type="text" inputmode="numeric" value="1" maxlength="7">
+          <button class="counter__btn counter__btn--plus" type="button" aria-label="增加">
+            <i class="counter__icon icon-jia16"></i>
+          </button>
+        </div>
+        <div class="counter__message counter__hint">库存100</div>
+        <div class="counter__message counter__error"></div>
+      </div>
+      <div class="counter is-error" data-counter data-counter-min="1" data-counter-max="99" data-counter-errortext="数量不能超过99" data-counter-hinttext="库存99">
+        <div class="counter__body">
+          <button class="counter__btn counter__btn--minus" type="button" aria-label="减少">
+            <i class="counter__icon icon-jian16"></i>
+          </button>
+          <input class="counter__value" type="text" inputmode="numeric" value="99" maxlength="7">
+          <button class="counter__btn counter__btn--plus" type="button" aria-label="增加">
+            <i class="counter__icon icon-jia16"></i>
+          </button>
+        </div>
+        <div class="counter__message counter__hint">库存99</div>
+        <div class="counter__message counter__error">数量不能超过99</div>
+      </div>
+      <div class="counter is-disabled">
+        <div class="counter__body">
+          <button class="counter__btn counter__btn--minus" type="button" aria-label="减少" disabled>
+            <i class="counter__icon icon-jian16"></i>
+          </button>
+          <input class="counter__value" type="text" inputmode="numeric" value="1" maxlength="7" disabled>
+          <button class="counter__btn counter__btn--plus" type="button" aria-label="增加" disabled>
+            <i class="counter__icon icon-jia16"></i>
+          </button>
+        </div>
+        <div class="counter__message counter__hint"></div>
+        <div class="counter__message counter__error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+document.querySelectorAll('[data-counter]').forEach(counter => {
+  const valueEl = counter.querySelector('.counter__value');
+  const minusBtn = counter.querySelector('.counter__btn--minus');
+  const plusBtn = counter.querySelector('.counter__btn--plus');
+  const hintEl = counter.querySelector('.counter__hint');
+  const errorEl = counter.querySelector('.counter__error');
+  const max = Number.parseInt(counter.dataset.counterMax, 10) || Infinity;
+  const min = Number.parseInt(counter.dataset.counterMin, 10) || -Infinity;
+  const errorText = counter.dataset.counterErrortext || '';
+  const hintText = counter.dataset.counterHinttext || '';
+
+  function getValue() {
+    const raw = valueEl.value.replace(/[^\d-]/g, '');
+    return raw === '' ? 0 : Number.parseInt(raw, 10);
+  }
+
+  function setValue(value) {
+    valueEl.value = value;
+  }
+
+  function validate() {
+    const value = getValue();
+    if (errorText && value >= max) {
+      counter.classList.add('is-error');
+      counter.classList.remove('is-hint');
+      errorEl.textContent = errorText;
+    } else if (hintText) {
+      counter.classList.remove('is-error');
+      counter.classList.add('is-hint');
+      hintEl.textContent = hintText;
+    } else {
+      counter.classList.remove('is-error');
+      counter.classList.remove('is-hint');
+    }
+  }
+
+  valueEl.addEventListener('input', () => {
+    let raw = valueEl.value.replace(/[^\d-]/g, '');
+    if (raw.indexOf('-') > 0) raw = raw.replace(/-/g, '');
+    if (raw.length > 7) raw = raw.slice(0, 7);
+    valueEl.value = raw;
+  });
+
+  valueEl.addEventListener('blur', validate);
+  valueEl.addEventListener('keydown', event => {
+    if (event.key === 'Enter') valueEl.blur();
+  });
+
+  minusBtn.addEventListener('click', () => {
+    const value = getValue();
+    if (value > min) {
+      setValue(value - 1);
+      validate();
+    }
+  });
+
+  plusBtn.addEventListener('click', () => {
+    const value = getValue();
+    if (value < max) {
+      setValue(value + 1);
+      validate();
+    }
+  });
+});
+</script>
+</body>
+</html>
