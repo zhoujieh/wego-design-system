@@ -225,8 +225,11 @@ name: "微购设计系统"
 │   └── component-switch.html          # 开关组件预览页
 ├── ui_kits/
 │   └── app/
-│       ├── index.html                 # 移动端应用 UI Kit 示例
+│       ├── index.html                 # 移动端应用 UI Kit 示例（完整 4 屏结构）
 │       └── quality-report.json        # UI Kit 质量报告
+│   └── biz-settings/
+│       ├── index.html                 # 业务设置底部面板模式 UI Kit
+│       └── quality-report.json
 └── specs/                             # 品牌、布局、交互、动效、图标、文案规范
 ```
 

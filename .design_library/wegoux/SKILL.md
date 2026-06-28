@@ -116,8 +116,10 @@ description: "用于生成符合微购设计系统的移动端中文界面。包
 
 | 路径 | 说明 |
 |------|------|
-| `ui_kits/app/index.html` | 移动端应用示例，使用手机框展示页面组合，引用 `colors_and_type.css` 和 `components.css`。 |
-| `ui_kits/app/quality-report.json` | UI Kit 质量报告，记录使用组件、复用率、演示样式和风险提示。 |
+| `ui_kits/app/index.html` | 移动端应用示例，展示完整 App 结构（首页/详情/我的/业务设置），引用 `colors_and_type.css` 和 `components.css`。 |
+| `ui_kits/biz-settings/index.html` | 业务设置页面模式示例，展示 bottom-sheet 模式下的 navbar/cell/checkbox/switch 组合使用。 |
+| `ui_kits/app/quality-report.json` | `app` UI Kit 质量报告。 |
+| `ui_kits/biz-settings/quality-report.json` | `biz-settings` UI Kit 质量报告。 |
 
 UI Kit 是组合示例，不是固定页面模板。生成业务界面时应遵守微购风格，但根据实际信息架构重新组织页面。
 

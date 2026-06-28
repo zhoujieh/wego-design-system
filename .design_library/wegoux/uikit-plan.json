@@ -112,7 +112,7 @@
     "productType": "移动端电商/微信生态工具",
     "dominantCopy": ["首页", "商品详情", "我的", "业务设置", "权限", "加入购物车", "立即购买"],
     "pageNames": ["首页", "商品详情", "我的", "业务设置"],
-    "selectedFrameNames": ["ui_kits/app/index.html"]
+    "selectedFrameNames": ["ui_kits/app/index.html", "ui_kits/biz-settings/index.html"]
   },
   "selectionPolicy": "mobile-app-fixed-slots-first",
   "slotAssignments": [
@@ -137,6 +137,21 @@
     "marketing-hero",
     "large-gradient-hero",
     "decorative-orb-background"
+  ],
+  "pagePatterns": [
+    {
+      "name": "业务设置",
+      "slug": "biz-settings",
+      "presentation": "bottom-sheet",
+      "transition": "slide-up",
+      "dismissAction": "cancel-button",
+      "overlayLevel": "overlay",
+      "preserveTabBar": true,
+      "componentSlugs": ["navbar", "cell", "checkbox", "switch", "avatar", "chip", "link"],
+      "uikitFile": "ui_kits/biz-settings/index.html",
+      "specRef": "specs/交互设计原则.md#页面模式与转场",
+      "templates": ["岗位权限设置", "业务配置", "商品筛选", "详情操作面板"]
+    }
   ],
   "lowConfidence": false,
   "warnings": [

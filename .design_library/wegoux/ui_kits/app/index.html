@@ -285,279 +285,19 @@ html, body {
   flex-shrink: 0;
 }
 
-/* ═══ Business Settings Styles ═══ */
-.biz-navbar {
-  height: 44px;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  padding: 0 var(--space-8);
-  background: var(--color-bg-surface);
-  flex-shrink: 0;
-}
-
-.biz-navbar-left {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding-left: var(--space-8);
-}
-
-.biz-navbar-left span {
-  font-size: var(--font-size-16);
-  color: var(--color-text-primary);
-  cursor: pointer;
-}
-
-.biz-navbar-center {
-  text-align: center;
-  font-size: var(--font-size-18);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  min-width: 120px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.biz-navbar-right {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: var(--space-8);
-  padding-right: var(--space-8);
-}
-
-.biz-save-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 32px;
-  min-width: 32px;
-  padding: 0 var(--space-8);
-  background: var(--color-success);
-  color: white;
-  font-size: var(--font-size-14);
-  font-weight: var(--font-weight-medium);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  border: none;
-  position: relative;
-}
-
-.biz-save-btn::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow: inset 0 -0.5px 0 rgba(32,47,100,0.08);
-  pointer-events: none;
-}
-
-.biz-business-info {
-  display: flex;
-  align-items: center;
-  gap: var(--space-8);
-  padding: var(--space-16);
-  background: var(--color-bg-surface);
-}
-
-.biz-business-avatar {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--color-bg-muted);
-  border: 0.5px solid var(--color-border-subtle);
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.biz-business-name {
-  font-size: var(--font-size-16);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
-}
-
-.biz-business-tag {
-  display: inline-flex;
-  align-items: center;
-  height: 16px;
-  padding: 0 4px;
-  font-size: 10px;
-  color: var(--color-success);
-  background: var(--color-success-bg);
-  border-radius: 2px;
-}
-
-.biz-business-info-main {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex: 1;
-  min-width: 0;
-}
-
-.biz-switch-link {
-  font-size: var(--font-size-14);
-  color: var(--color-link);
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.biz-section-title {
+.section-title {
   font-size: var(--font-size-12);
   color: var(--color-text-tertiary);
   padding: var(--space-16) var(--space-16) var(--space-8);
 }
 
-.biz-cell {
-  display: flex;
-  align-items: center;
+.section-group {
   background: var(--color-bg-surface);
-  min-height: 56px;
-  padding: 0 var(--space-16);
-  position: relative;
+  width: 100%;
 }
 
-.biz-cell::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: var(--space-16);
-  right: var(--space-16);
-  height: 0.5px;
-  background: var(--color-border-subtle);
-}
-
-.biz-cell:last-child::after {
-  left: 0;
-  right: 0;
-}
-
-.biz-cell-label {
-  flex: 1;
-  min-width: 0;
-  font-size: var(--font-size-16);
-  color: var(--color-text-primary);
-  padding: var(--space-16) 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.biz-cell-label--multiline {
-  white-space: normal;
-  padding: var(--space-12) 0;
-}
-
-.biz-cell-sub {
-  font-size: var(--font-size-12);
-  color: var(--color-text-secondary);
-  line-height: 1.5;
-  margin-top: 2px;
-  white-space: normal;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.biz-cell-checkbox {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  border: 1.5px solid var(--color-border);
-  flex-shrink: 0;
-  margin-right: var(--space-12);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-}
-
-.biz-cell-checkbox--checked {
-  background: var(--color-success);
-  border-color: var(--color-success);
-}
-
-.biz-cell-checkbox--checked::after {
-  content: '';
-  display: block;
-  width: 8px;
-  height: 4px;
-  border-left: 2px solid white;
-  border-bottom: 2px solid white;
-  transform: rotate(-45deg) translate(0, -1px);
-}
-
-.biz-cell-right {
-  font-size: var(--font-size-14);
-  color: var(--color-link);
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.biz-switch {
-  width: 44px;
-  height: 24px;
-  border-radius: 12px;
-  background: var(--color-success);
-  flex-shrink: 0;
-  cursor: pointer;
-  position: relative;
-  transition: background 0.2s;
-}
-
-.biz-switch--off {
-  background: var(--color-border);
-}
-
-.biz-switch-thumb {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: white;
-  position: absolute;
-  top: 2px;
-  left: 22px;
-  transition: left 0.2s;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-}
-
-.biz-switch--off .biz-switch-thumb {
-  left: 2px;
-}
-
-.biz-section-spacer {
+.section-gap {
   height: var(--space-8);
-}
-
-.biz-cell-selector {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--color-link);
-  font-size: var(--font-size-16);
-  flex-shrink: 0;
-  cursor: pointer;
-}
-
-.biz-cell-selector--disabled {
-  color: var(--color-text-tertiary);
-  cursor: default;
-}
-
-.biz-cell-arrow {
-  width: 16px;
-  height: 16px;
-  color: var(--color-link);
-  flex-shrink: 0;
-}
-
-.biz-cell-arrow--disabled {
-  color: var(--color-text-tertiary);
 }
 
 /* ═══ Responsive ═══ */
@@ -823,6 +563,10 @@ function ProfileScreen({ onBizSettings }) {
           <i data-lucide="chevron-right" className="menu-arrow" style={{width:20,height:20}}></i>
           <span className="badge badge--corner badge--yellow">2</span>
         </div>
+        <div className="menu-item" onClick={onBizSettings} style={{cursor:'pointer'}}>
+          <span className="menu-label">业务设置</span>
+          <i data-lucide="chevron-right" className="menu-arrow" style={{width:20,height:20}}></i>
+        </div>
         <div className="menu-item">
           <span className="menu-label">收货地址</span>
           <i data-lucide="chevron-right" className="menu-arrow" style={{width:20,height:20}}></i>
@@ -831,10 +575,6 @@ function ProfileScreen({ onBizSettings }) {
           <span className="menu-label">我的优惠券</span>
           <i data-lucide="chevron-right" className="menu-arrow" style={{width:20,height:20}}></i>
           <span className="badge badge--corner badge--green">5</span>
-        </div>
-        <div className="menu-item" onClick={onBizSettings} style={{cursor:'pointer'}}>
-          <span className="menu-label">业务设置</span>
-          <i data-lucide="chevron-right" className="menu-arrow" style={{width:20,height:20}}></i>
         </div>
         <div className="menu-item">
           <span className="menu-label">设置</span>
@@ -863,351 +603,110 @@ function ProfileScreen({ onBizSettings }) {
   );
 }
 
+/* ═══ Checkmark SVG (from component-checkbox.html) ═══ */
+const CHECK_SVG = (
+  <svg width="13" height="10" viewBox="0 0 13 10" fill="none">
+    <path fillRule="evenodd" clipRule="evenodd" d="M4.41406 6.5L1.41406 3.5L0 4.91406L4.41406 9.32812L12.3281 1.41406L10.9141 0L4.41406 6.5Z" fill="white"/>
+  </svg>
+);
+
 /* ═══ Screen 4: 业务设置 (岗位权限设置) ═══ */
 function BizSettingsScreen({ onBack }) {
   const [attributionChecked, setAttributionChecked] = useState(true);
   const [switches, setSwitches] = useState({
-    selection: true,
-    fans: true,
-    order: true,
-    purchase: true,
-    delivery: true,
-    finance: true,
-    ops: true,
-    warehouse: true
+    selection: true, fans: true, order: true, purchase: true,
+    delivery: true, finance: true, ops: true, warehouse: true
   });
-
-  const toggleSwitch = (key) => {
-    setSwitches(prev => ({ ...prev, [key]: !prev[key] }));
-  };
-
+  const toggleSwitch = (key) => setSwitches(prev => ({ ...prev, [key]: !prev[key] }));
   const [permissions, setPermissions] = useState({
-    contactInfo: true,
-    pinnedStatus: true,
-    moments: true,
-    followToggle: true,
-    publishEdit: true,
-    inventory: true,
-    price: false,
-    viewFans: true,
-    approveFans: true,
-    deleteFans: true,
-    changeFansBinding: true,
-    viewVisitors: true,
-    createCustomer: true,
-    viewOrders: true,
-    createOrder: true,
-    viewPhone: true,
-    modifyOrder: true,
-    modifySender: true,
-    modifyPayment: true,
-    purchaseOrder: true,
-    viewSupplier: true,
-    manageSupplier: true,
-    buyFromUp: true,
-    managePurchase: true,
-    manageBackup: true,
-    deliveryGoods: true,
-    setShipping: true,
-    walletOp: true,
-    viewTransaction: true,
-    privateDomain: true,
-    createManageTask: true,
-    shopDeco: true,
-    marketingGames: true
+    contactInfo: true, pinnedStatus: true, moments: true, followToggle: true,
+    publishEdit: true, inventory: true, price: false,
+    viewFans: true, approveFans: true, deleteFans: true, changeFansBinding: true,
+    viewVisitors: true, createCustomer: true,
+    viewOrders: true, createOrder: true, viewPhone: true,
+    modifyOrder: true, modifySender: true, modifyPayment: true,
+    purchaseOrder: true, viewSupplier: true, manageSupplier: true,
+    buyFromUp: true, managePurchase: true, manageBackup: true,
+    deliveryGoods: true, setShipping: true,
+    walletOp: true, viewTransaction: true,
+    privateDomain: true, createManageTask: true, shopDeco: true, marketingGames: true
   });
-
-  const togglePermission = (key) => {
-    setPermissions(prev => ({ ...prev, [key]: !prev[key] }));
-  };
+  const togglePermission = (key) => setPermissions(prev => ({ ...prev, [key]: !prev[key] }));
 
   return (
     <div>
-      {/* Business Info */}
-      <div className="biz-business-info">
-        <div className="biz-business-info-main">
-          <div className="biz-business-avatar">
-            <i data-lucide="smile" style={{width:16,height:16,color:'var(--color-text-tertiary)'}}></i>
+      <div style={{display:'flex',alignItems:'center',gap:'var(--space-8)',padding:'var(--space-16)',background:'var(--color-bg-surface)'}}>
+        <div style={{display:'flex',alignItems:'center',gap:'var(--space-4)',flex:1,minWidth:0}}>
+          <div className="avatar avatar--24 avatar--initials">车</div>
+          <span style={{fontSize:'var(--font-size-16)',fontWeight:'var(--font-weight-medium)',color:'var(--color-text-primary)'}}>车车</span>
+          <span className="chip chip--sm chip--success chip--filled">管理员</span>
+        </div>
+        <a className="link link--inline" style={{fontSize:'var(--font-size-14)',flexShrink:0}}>切换岗位</a>
+      </div>
+      <div className="section-title">选款与上架</div>
+      <div className="section-group">
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" onClick={() => toggleSwitch('selection')}>
+          <div className="cell__body">
+            <div className="cell__content"><div className="cell__title-row"><span className="cell__title">选款与上架</span></div></div>
+            <div className="cell__action"><div className={`switch${switches.selection?' switch--on':' switch--off'}`}><div className="switch__thumb"></div></div></div>
           </div>
-          <span className="biz-business-name">车车</span>
-          <span className="biz-business-tag">管理员</span>
         </div>
-        <span className="biz-switch-link">切换岗位</span>
-      </div>
-
-      {/* ── 业绩归属 ── */}
-      <div className="biz-section-title">业绩归属</div>
-      <div className="biz-cell" style={{cursor:'pointer'}}>
-        <span className="biz-cell-label">业绩归属</span>
-        <span className="biz-cell-right">查看归属设置</span>
-      </div>
-      <div className="biz-cell" onClick={() => setAttributionChecked(!attributionChecked)} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${attributionChecked ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <div style={{flex:1,minWidth:0,padding:'var(--space-12) 0'}}>
-          <div className="biz-cell-label--multiline">允许已归属粉丝被其他员工划分</div>
-          <div className="biz-cell-sub">粉丝从其他员工处访问店铺或开单，将会更改归属到对应员工</div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" onClick={() => togglePermission('contactInfo')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.contactInfo?' checkbox--checked':''}`}><div className="checkbox__inner"></div>{permissions.contactInfo && <div className="checkbox__icon">{CHECK_SVG}</div>}</div>
+          </div>
+          <div className="cell__body"><div className="cell__content"><div className="cell__title-row"><span className="cell__title">允许查看上家的联系方式</span></div></div></div>
         </div>
-      </div>
-
-      <div className="biz-section-spacer"></div>
-
-      {/* ── 选款与上架 ── */}
-      <div className="biz-section-title">选款与上架</div>
-      <div className="biz-cell" onClick={() => toggleSwitch('selection')} style={{cursor:'pointer'}}>
-        <span className="biz-cell-label">选款与上架</span>
-        <div className={`biz-switch${switches.selection ? '' : ' biz-switch--off'}`}>
-          <div className="biz-switch-thumb"></div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" onClick={() => togglePermission('publishEdit')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.publishEdit?' checkbox--checked':''}`}><div className="checkbox__inner"></div>{permissions.publishEdit && <div className="checkbox__icon">{CHECK_SVG}</div>}</div>
+          </div>
+          <div className="cell__body"><div className="cell__content"><div className="cell__title-row"><span className="cell__title">允许发布、编辑、上下架商品</span></div></div></div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" onClick={() => togglePermission('inventory')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.inventory?' checkbox--checked':''}`}><div className="checkbox__inner"></div>{permissions.inventory && <div className="checkbox__icon">{CHECK_SVG}</div>}</div>
+          </div>
+          <div className="cell__body"><div className="cell__content"><div className="cell__title-row"><span className="cell__title">允许查看和编辑库存</span></div></div></div>
         </div>
       </div>
-      <div className="biz-cell" onClick={() => togglePermission('contactInfo')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.contactInfo ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <span className="biz-cell-label">允许查看上家的联系方式</span>
-      </div>
-      <div className="biz-cell" onClick={() => togglePermission('pinnedStatus')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.pinnedStatus ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <span className="biz-cell-label">允许查看上家的置顶动态和签名</span>
-      </div>
-      <div className="biz-cell" onClick={() => togglePermission('moments')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.moments ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <span className="biz-cell-label">允许查看上家的动态(不含置顶)</span>
-      </div>
-      <div className="biz-cell" onClick={() => togglePermission('followToggle')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.followToggle ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <span className="biz-cell-label">允许关注或取关上家</span>
-      </div>
-      <div className="biz-cell" onClick={() => togglePermission('publishEdit')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.publishEdit ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <div style={{flex:1,minWidth:0,padding:'var(--space-12) 0'}}>
-          <div className="biz-cell-label--multiline">允许发布、转发、编辑、删除、恢复和上下架、设置帮卖佣金、推广员佣金</div>
+      <div className="section-gap"></div>
+      <div className="section-title">订单</div>
+      <div className="section-group">
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" onClick={() => toggleSwitch('order')}>
+          <div className="cell__body">
+            <div className="cell__content"><div className="cell__title-row"><span className="cell__title">订单</span></div></div>
+            <div className="cell__action"><div className={`switch${switches.order?' switch--on':' switch--off'}`}><div className="switch__thumb"></div></div></div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" onClick={() => togglePermission('viewOrders')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.viewOrders?' checkbox--checked':''}`}><div className="checkbox__inner"></div>{permissions.viewOrders && <div className="checkbox__icon">{CHECK_SVG}</div>}</div>
+          </div>
+          <div className="cell__body"><div className="cell__content"><div className="cell__title-row"><span className="cell__title">允许查看订单</span></div></div></div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" onClick={() => togglePermission('modifyOrder')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.modifyOrder?' checkbox--checked':''}`}><div className="checkbox__inner"></div>{permissions.modifyOrder && <div className="checkbox__icon">{CHECK_SVG}</div>}</div>
+          </div>
+          <div className="cell__body"><div className="cell__content"><div className="cell__title-row"><span className="cell__title">允许修改订单(包括改单、改价等)</span></div></div></div>
         </div>
       </div>
-      <div className="biz-cell" onClick={() => togglePermission('inventory')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.inventory ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <span className="biz-cell-label">允许查看和编辑库存</span>
-      </div>
-      <div className="biz-cell" onClick={() => togglePermission('price')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.price ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <span className="biz-cell-label">允许查看本店商品价格</span>
-      </div>
-
-      <div className="biz-section-spacer"></div>
-
-      {/* ── 粉丝与客户 ── */}
-      <div className="biz-section-title">粉丝与客户</div>
-      <div className="biz-cell" onClick={() => toggleSwitch('fans')} style={{cursor:'pointer'}}>
-        <span className="biz-cell-label">粉丝与客户</span>
-        <div className={`biz-switch${switches.fans ? '' : ' biz-switch--off'}`}>
-          <div className="biz-switch-thumb"></div>
+      <div className="section-gap"></div>
+      <div className="section-title">运营</div>
+      <div className="section-group">
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" onClick={() => toggleSwitch('ops')}>
+          <div className="cell__body">
+            <div className="cell__content"><div className="cell__title-row"><span className="cell__title">运营</span></div></div>
+            <div className="cell__action"><div className={`switch${switches.ops?' switch--on':' switch--off'}`}><div className="switch__thumb"></div></div></div>
+          </div>
         </div>
-      </div>
-      <div className="biz-cell" style={{cursor:'pointer'}}>
-        <span className="biz-cell-label">权限范围</span>
-        <div className="biz-cell-selector">
-          仅自己带来的粉丝
-          <i data-lucide="chevron-down" style={{width:16,height:16}}></i>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" onClick={() => togglePermission('createManageTask')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.createManageTask?' checkbox--checked':''}`}><div className="checkbox__inner"></div>{permissions.createManageTask && <div className="checkbox__icon">{CHECK_SVG}</div>}</div>
+          </div>
+          <div className="cell__body"><div className="cell__content"><div className="cell__title-row"><span className="cell__title">允许创建并管理任务</span></div></div></div>
         </div>
-      </div>
-      <div className="biz-cell" onClick={() => togglePermission('viewFans')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.viewFans ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <span className="biz-cell-label">允许查看粉丝</span>
-      </div>
-      <div className="biz-cell" onClick={() => togglePermission('approveFans')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.approveFans ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <span className="biz-cell-label">允许审批粉丝关注申请</span>
-      </div>
-      <div className="biz-cell" onClick={() => togglePermission('deleteFans')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.deleteFans ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <span className="biz-cell-label">允许删除粉丝</span>
-      </div>
-      <div className="biz-cell" onClick={() => togglePermission('changeFansBinding')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.changeFansBinding ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <span className="biz-cell-label">允许修改粉丝的绑定员工</span>
-      </div>
-      <div className="biz-cell" onClick={() => togglePermission('viewVisitors')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.viewVisitors ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <span className="biz-cell-label">允许查看访客记录</span>
-      </div>
-      <div className="biz-cell" onClick={() => togglePermission('createCustomer')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.createCustomer ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <span className="biz-cell-label">允许创建客户</span>
-      </div>
-
-      <div className="biz-section-spacer"></div>
-
-      {/* ── 仓库 ── */}
-      <div className="biz-section-title">仓库</div>
-      <div className="biz-cell" onClick={() => toggleSwitch('warehouse')} style={{cursor:'pointer'}}>
-        <span className="biz-cell-label">仓库</span>
-        <div className={`biz-switch${switches.warehouse ? '' : ' biz-switch--off'}`}>
-          <div className="biz-switch-thumb"></div>
-        </div>
-      </div>
-      <div className="biz-cell" onClick={() => togglePermission('manageSupplier')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.manageSupplier ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <span className="biz-cell-label">允许新增仓库、设置多仓发货</span>
-      </div>
-      <div className="biz-cell" style={{cursor:'pointer'}}>
-        <span className="biz-cell-label">可管理的仓库</span>
-        <div className="biz-cell-selector biz-cell-selector--disabled">
-          未分配
-          <i data-lucide="chevron-right" style={{width:16,height:16,color:'var(--color-text-tertiary)'}}></i>
-        </div>
-      </div>
-
-      <div className="biz-section-spacer"></div>
-
-      {/* ── 订单 ── */}
-      <div className="biz-section-title">订单</div>
-      <div className="biz-cell" onClick={() => toggleSwitch('order')} style={{cursor:'pointer'}}>
-        <span className="biz-cell-label">订单</span>
-        <div className={`biz-switch${switches.order ? '' : ' biz-switch--off'}`}>
-          <div className="biz-switch-thumb"></div>
-        </div>
-      </div>
-      <div className="biz-cell" style={{cursor:'pointer'}}>
-        <span className="biz-cell-label">权限范围</span>
-        <div className="biz-cell-selector">
-          仅自己的订单
-          <i data-lucide="chevron-down" style={{width:16,height:16}}></i>
-        </div>
-      </div>
-      <div className="biz-cell" onClick={() => togglePermission('viewOrders')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.viewOrders ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <span className="biz-cell-label">允许查看订单</span>
-      </div>
-      <div className="biz-cell" onClick={() => togglePermission('createOrder')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.createOrder ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <span className="biz-cell-label">允许使用开单</span>
-      </div>
-      <div className="biz-cell" onClick={() => togglePermission('viewPhone')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.viewPhone ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <span className="biz-cell-label">允许查看完整的客户收件电话</span>
-      </div>
-      <div className="biz-cell" onClick={() => togglePermission('modifyOrder')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.modifyOrder ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <span className="biz-cell-label">允许修改订单(包括改单、改价等)</span>
-      </div>
-      <div className="biz-cell" onClick={() => togglePermission('modifySender')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.modifySender ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <span className="biz-cell-label">允许修改发件人信息</span>
-      </div>
-      <div className="biz-cell" onClick={() => togglePermission('modifyPayment')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.modifyPayment ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <span className="biz-cell-label">允许修改收款状态(私下收款)</span>
-      </div>
-
-      <div className="biz-section-spacer"></div>
-
-      {/* ── 采购 ── */}
-      <div className="biz-section-title">采购</div>
-      <div className="biz-cell" onClick={() => toggleSwitch('purchase')} style={{cursor:'pointer'}}>
-        <span className="biz-cell-label">采购</span>
-        <div className={`biz-switch${switches.purchase ? '' : ' biz-switch--off'}`}>
-          <div className="biz-switch-thumb"></div>
-        </div>
-      </div>
-      <div className="biz-cell" onClick={() => togglePermission('purchaseOrder')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.purchaseOrder ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <span className="biz-cell-label">允许采购开单</span>
-      </div>
-      <div className="biz-cell" onClick={() => togglePermission('viewSupplier')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.viewSupplier ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <span className="biz-cell-label">允许查看供应商</span>
-      </div>
-      <div className="biz-cell" onClick={() => togglePermission('manageSupplier')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.manageSupplier ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <span className="biz-cell-label">允许管理供应商</span>
-      </div>
-      <div className="biz-cell" onClick={() => togglePermission('buyFromUp')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.buyFromUp ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <span className="biz-cell-label">允许购买上家的商品</span>
-      </div>
-      <div className="biz-cell" onClick={() => togglePermission('managePurchase')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.managePurchase ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <span className="biz-cell-label">允许管理和导出采购单</span>
-      </div>
-      <div className="biz-cell" onClick={() => togglePermission('manageBackup')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.manageBackup ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <span className="biz-cell-label">允许管理和导出备货单</span>
-      </div>
-
-      <div className="biz-section-spacer"></div>
-
-      {/* ── 发货 ── */}
-      <div className="biz-section-title">发货</div>
-      <div className="biz-cell" onClick={() => toggleSwitch('delivery')} style={{cursor:'pointer'}}>
-        <span className="biz-cell-label">发货</span>
-        <div className={`biz-switch${switches.delivery ? '' : ' biz-switch--off'}`}>
-          <div className="biz-switch-thumb"></div>
-        </div>
-      </div>
-      <div className="biz-cell" onClick={() => togglePermission('deliveryGoods')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.deliveryGoods ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <span className="biz-cell-label">允许对销售单进行发货操作</span>
-      </div>
-      <div className="biz-cell" onClick={() => togglePermission('setShipping')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.setShipping ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <span className="biz-cell-label">可设置运费与配送方式</span>
-      </div>
-
-      <div className="biz-section-spacer"></div>
-
-      {/* ── 财务 ── */}
-      <div className="biz-section-title">财务</div>
-      <div className="biz-cell" onClick={() => toggleSwitch('finance')} style={{cursor:'pointer'}}>
-        <span className="biz-cell-label">财务</span>
-        <div className={`biz-switch${switches.finance ? '' : ' biz-switch--off'}`}>
-          <div className="biz-switch-thumb"></div>
-        </div>
-      </div>
-      <div className="biz-cell" onClick={() => togglePermission('walletOp')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.walletOp ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <span className="biz-cell-label">允许对钱包进行充值和提现操作</span>
-      </div>
-      <div className="biz-cell" onClick={() => togglePermission('viewTransaction')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.viewTransaction ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <span className="biz-cell-label">允许查看交易数据</span>
-      </div>
-
-      <div className="biz-section-spacer"></div>
-
-      {/* ── 运营 ── */}
-      <div className="biz-section-title">运营</div>
-      <div className="biz-cell" onClick={() => toggleSwitch('ops')} style={{cursor:'pointer'}}>
-        <span className="biz-cell-label">运营</span>
-        <div className={`biz-switch${switches.ops ? '' : ' biz-switch--off'}`}>
-          <div className="biz-switch-thumb"></div>
-        </div>
-      </div>
-      <div className="biz-cell" onClick={() => togglePermission('privateDomain')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.privateDomain ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <span className="biz-cell-label">允许使用私域销售管理</span>
-      </div>
-      <div className="biz-cell" style={{cursor:'pointer'}}>
-        <span className="biz-cell-label">权限范围</span>
-        <div className="biz-cell-selector">
-          仅自己的数据
-          <i data-lucide="chevron-down" style={{width:16,height:16}}></i>
-        </div>
-      </div>
-      <div className="biz-cell" onClick={() => togglePermission('createManageTask')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.createManageTask ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <span className="biz-cell-label">允许创建并管理任务</span>
-      </div>
-      <div className="biz-cell" style={{cursor:'pointer'}}>
-        <span className="biz-cell-label">权限范围</span>
-        <div className="biz-cell-selector">
-          仅自己创建的任务
-          <i data-lucide="chevron-down" style={{width:16,height:16}}></i>
-        </div>
-      </div>
-      <div className="biz-cell" onClick={() => togglePermission('shopDeco')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.shopDeco ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <span className="biz-cell-label">允许使用店铺装修与复制装修</span>
-      </div>
-      <div className="biz-cell" onClick={() => togglePermission('marketingGames')} style={{cursor:'pointer'}}>
-        <div className={`biz-cell-checkbox${permissions.marketingGames ? ' biz-cell-checkbox--checked' : ''}`}></div>
-        <span className="biz-cell-label">允许使用所有的营销与互动小游戏</span>
       </div>
     </div>
   );
@@ -1243,14 +742,11 @@ function App() {
         </div>
       )}
       {screen === 'bizSettings' && (
-        <div className="biz-navbar" style={{flexShrink:0}}>
-          <div className="biz-navbar-left">
-            <span onClick={() => setScreen('profile')}>取消</span>
+        <div className="phone-header">
+          <div className="phone-header-back" onClick={() => setScreen('profile')}>
+            <i data-lucide="chevron-left" style={{width:24,height:24}}></i>
           </div>
-          <div className="biz-navbar-center">岗位权限设置</div>
-          <div className="biz-navbar-right">
-            <button className="biz-save-btn" onClick={() => setScreen('profile')}>保存</button>
-          </div>
+          <span className="phone-header-title">岗位权限设置</span>
         </div>
       )}
       <div className="phone-body">

@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>业务设置 - 岗位权限</title>
+<link rel="stylesheet" href="../../colors_and_type.css">
+<link rel="stylesheet" href="../../components.css">
+<link rel="stylesheet" href="../../iconfont.css">
+<style>
+/* ═══ Page Layer: UIKit Shell & Phone Frame ═══ */
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg-page);
+  font-family: var(--font-family-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+.uikit-shell {
+  width: 100%;
+  max-width: 1184px;
+  margin: 0 auto;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: var(--space-16);
+}
+
+/* ═══ Phone Frame ═══ */
+.phone-frame {
+  width: 390px;
+  height: 780px;
+  border-radius: 40px;
+  border: 8px solid var(--color-bg-inverse);
+  overflow: hidden;
+  position: relative;
+  box-shadow: var(--shadow-xl);
+  background: var(--color-bg-page);
+  flex-shrink: 0;
+}
+
+.phone-screen {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--color-bg-page);
+}
+
+/* navbar width fix — component sets width:375px, override for phone-frame */
+.phone-screen .navbar { width: 100%; }
+
+/* ═══ Phone Internal Elements ═══ */
+.phone-status {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-16);
+  background: var(--color-bg-surface);
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  flex-shrink: 0;
+}
+
+.phone-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.phone-body::-webkit-scrollbar { display: none; }
+
+.phone-indicator {
+  height: 34px;
+  background: var(--color-bg-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.phone-indicator-bar {
+  width: 134px;
+  height: 5px;
+  background: var(--color-text-primary);
+  border-radius: var(--radius-full);
+  opacity: 0.2;
+}
+
+/* ═══ Layout Helpers ═══ */
+.section-title {
+  font-size: var(--font-size-12);
+  color: var(--color-text-tertiary);
+  padding: var(--space-16) var(--space-16) var(--space-8);
+}
+
+.section-group {
+  background: var(--color-bg-surface);
+  width: 100%;
+}
+
+.section-gap {
+  height: var(--space-8);
+}
+
+/* ═══ Responsive ═══ */
+@media (max-width: 640px) {
+  .uikit-shell {
+    padding: var(--space-8);
+    align-items: flex-start;
+  }
+  .phone-frame {
+    width: 100%;
+    height: auto;
+    min-height: 100vh;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+  }
+}
+</style>
+</head>
+<body>
+<div class="uikit-shell">
+  <div class="phone-frame">
+    <div class="phone-screen" id="root"></div>
+  </div>
+</div>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script type="text/babel">
+const { useState } = React;
+
+/* ═══ Status Bar ═══ */
+function StatusBar() {
+  return (
+    <div className="phone-status">
+      <span>9:41</span>
+      <span>5G</span>
+    </div>
+  );
+}
+
+/* ═══ Home Indicator ═══ */
+function HomeIndicator() {
+  return (
+    <div className="phone-indicator">
+      <div className="phone-indicator-bar"></div>
+    </div>
+  );
+}
+
+/* ═══ Checkmark SVG (from component-checkbox.html) ═══ */
+const CHECKMARK_SVG = (
+  <svg width="13" height="10" viewBox="0 0 13 10" fill="none">
+    <path fillRule="evenodd" clipRule="evenodd" d="M4.41406 6.5L1.41406 3.5L0 4.91406L4.41406 9.32812L12.3281 1.41406L10.9141 0L4.41406 6.5Z" fill="white"/>
+  </svg>
+);
+
+/* ═══ Business Settings Screen ═══ */
+function BizSettingsScreen() {
+  const [attributionChecked, setAttributionChecked] = useState(true);
+  const [switches, setSwitches] = useState({
+    selection: true, fans: true, order: true, purchase: true,
+    delivery: true, finance: true, ops: true, warehouse: true
+  });
+  const toggleSwitch = (key) => setSwitches(prev => ({ ...prev, [key]: !prev[key] }));
+
+  const [permissions, setPermissions] = useState({
+    contactInfo: true, pinnedStatus: true, moments: true, followToggle: true,
+    publishEdit: true, inventory: true, price: false,
+    viewFans: true, approveFans: true, deleteFans: true, changeFansBinding: true,
+    viewVisitors: true, createCustomer: true,
+    viewOrders: true, createOrder: true, viewPhone: true,
+    modifyOrder: true, modifySender: true, modifyPayment: true,
+    purchaseOrder: true, viewSupplier: true, manageSupplier: true,
+    buyFromUp: true, managePurchase: true, manageBackup: true,
+    deliveryGoods: true, setShipping: true,
+    walletOp: true, viewTransaction: true,
+    privateDomain: true, createManageTask: true, shopDeco: true, marketingGames: true
+  });
+  const togglePermission = (key) => setPermissions(prev => ({ ...prev, [key]: !prev[key] }));
+
+  return (
+    <div>
+      {/* ═════════ 业务信息 ═════════ */}
+      <div style={{display:'flex',alignItems:'center',gap:'var(--space-8)',padding:'var(--space-16)',background:'var(--color-bg-surface)'}}>
+        <div style={{display:'flex',alignItems:'center',gap:'var(--space-4)',flex:1,minWidth:0}}>
+          <div className="avatar avatar--24 avatar--initials">车</div>
+          <span style={{fontSize:'var(--font-size-16)',fontWeight:'var(--font-weight-medium)',color:'var(--color-text-primary)'}}>车车</span>
+          <span className="chip chip--sm chip--success chip--filled">管理员</span>
+        </div>
+        <a className="link link--inline" style={{fontSize:'var(--font-size-14)',flexShrink:0}}>切换岗位</a>
+      </div>
+
+      {/* ═════════ 业绩归属 ═════════ */}
+      <div className="section-title">业绩归属</div>
+      <div className="section-group">
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">业绩归属</span></div>
+            </div>
+            <div className="cell__action">
+              <span className="cell__action-text">查看归属设置</span>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => setAttributionChecked(!attributionChecked)}>
+          <div className="cell__select">
+            <div className={`checkbox${attributionChecked ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {attributionChecked && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">允许已归属粉丝被其他员工划分</span></div>
+              <div className="cell__subtitle">粉丝从其他员工处访问店铺或开单，将会更改归属到对应员工</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="section-gap"></div>
+
+      {/* ═════════ 选款与上架 ═════════ */}
+      <div className="section-title">选款与上架</div>
+      <div className="section-group">
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => toggleSwitch('selection')}>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">选款与上架</span></div>
+            </div>
+            <div className="cell__action">
+              <div className={`switch${switches.selection ? ' switch--on' : ' switch--off'}`}>
+                <div className="switch__thumb"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => togglePermission('contactInfo')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.contactInfo ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.contactInfo && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">允许查看上家的联系方式</span></div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => togglePermission('pinnedStatus')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.pinnedStatus ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.pinnedStatus && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">允许查看上家的置顶动态和签名</span></div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => togglePermission('moments')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.moments ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.moments && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">允许查看上家的动态(不含置顶)</span></div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => togglePermission('followToggle')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.followToggle ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.followToggle && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">允许关注或取关上家</span></div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => togglePermission('publishEdit')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.publishEdit ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.publishEdit && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">允许发布、转发、编辑、删除、恢复和上下架、设置帮卖佣金、推广员佣金</span></div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => togglePermission('inventory')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.inventory ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.inventory && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">允许查看和编辑库存</span></div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => togglePermission('price')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.price ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.price && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">允许查看本店商品价格</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="section-gap"></div>
+
+      {/* ═════════ 粉丝与客户 ═════════ */}
+      <div className="section-title">粉丝与客户</div>
+      <div className="section-group">
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => toggleSwitch('fans')}>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">粉丝与客户</span></div>
+            </div>
+            <div className="cell__action">
+              <div className={`switch${switches.fans ? ' switch--on' : ' switch--off'}`}>
+                <div className="switch__thumb"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">权限范围</span></div>
+            </div>
+            <div className="cell__action">
+              <span className="cell__action-text">仅自己带来的粉丝</span>
+              <i className="wego-iconfont-s icon-xiajiantou16 cell__arrow"></i>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => togglePermission('viewFans')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.viewFans ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.viewFans && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">允许查看粉丝</span></div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => togglePermission('approveFans')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.approveFans ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.approveFans && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">允许审批粉丝关注申请</span></div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => togglePermission('deleteFans')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.deleteFans ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.deleteFans && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">允许删除粉丝</span></div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => togglePermission('changeFansBinding')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.changeFansBinding ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.changeFansBinding && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">允许修改粉丝的绑定员工</span></div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => togglePermission('viewVisitors')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.viewVisitors ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.viewVisitors && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">允许查看访客记录</span></div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => togglePermission('createCustomer')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.createCustomer ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.createCustomer && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">允许创建客户</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="section-gap"></div>
+
+      {/* ═════════ 仓库 ═════════ */}
+      <div className="section-title">仓库</div>
+      <div className="section-group">
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => toggleSwitch('warehouse')}>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">仓库</span></div>
+            </div>
+            <div className="cell__action">
+              <div className={`switch${switches.warehouse ? ' switch--on' : ' switch--off'}`}>
+                <div className="switch__thumb"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => togglePermission('manageSupplier')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.manageSupplier ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.manageSupplier && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">允许新增仓库、设置多仓发货</span></div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">可管理的仓库</span></div>
+            </div>
+            <div className="cell__action">
+              <span className="cell__action-text" style={{color:'var(--color-text-tertiary)'}}>未分配</span>
+              <i className="wego-iconfont-s icon-youjiantou16 cell__arrow" style={{color:'var(--color-text-tertiary)'}}></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="section-gap"></div>
+
+      {/* ═════════ 订单 ═════════ */}
+      <div className="section-title">订单</div>
+      <div className="section-group">
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => toggleSwitch('order')}>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">订单</span></div>
+            </div>
+            <div className="cell__action">
+              <div className={`switch${switches.order ? ' switch--on' : ' switch--off'}`}>
+                <div className="switch__thumb"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">权限范围</span></div>
+            </div>
+            <div className="cell__action">
+              <span className="cell__action-text">仅自己的订单</span>
+              <i className="wego-iconfont-s icon-xiajiantou16 cell__arrow"></i>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => togglePermission('viewOrders')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.viewOrders ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.viewOrders && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">允许查看订单</span></div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => togglePermission('createOrder')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.createOrder ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.createOrder && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">允许使用开单</span></div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => togglePermission('viewPhone')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.viewPhone ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.viewPhone && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">允许查看完整的客户收件电话</span></div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => togglePermission('modifyOrder')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.modifyOrder ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.modifyOrder && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">允许修改订单(包括改单、改价等)</span></div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => togglePermission('modifySender')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.modifySender ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.modifySender && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">允许修改发件人信息</span></div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => togglePermission('modifyPayment')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.modifyPayment ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.modifyPayment && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">允许修改收款状态(私下收款)</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="section-gap"></div>
+
+      {/* ═════════ 采购 ═════════ */}
+      <div className="section-title">采购</div>
+      <div className="section-group">
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => toggleSwitch('purchase')}>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">采购</span></div>
+            </div>
+            <div className="cell__action">
+              <div className={`switch${switches.purchase ? ' switch--on' : ' switch--off'}`}>
+                <div className="switch__thumb"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => togglePermission('purchaseOrder')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.purchaseOrder ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.purchaseOrder && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">允许采购开单</span></div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => togglePermission('viewSupplier')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.viewSupplier ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.viewSupplier && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">允许查看供应商</span></div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => togglePermission('buyFromUp')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.buyFromUp ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.buyFromUp && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">允许购买上家的商品</span></div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => togglePermission('managePurchase')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.managePurchase ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.managePurchase && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">允许管理和导出采购单</span></div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => togglePermission('manageBackup')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.manageBackup ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.manageBackup && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">允许管理和导出备货单</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="section-gap"></div>
+
+      {/* ═════════ 发货 ═════════ */}
+      <div className="section-title">发货</div>
+      <div className="section-group">
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => toggleSwitch('delivery')}>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">发货</span></div>
+            </div>
+            <div className="cell__action">
+              <div className={`switch${switches.delivery ? ' switch--on' : ' switch--off'}`}>
+                <div className="switch__thumb"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => togglePermission('deliveryGoods')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.deliveryGoods ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.deliveryGoods && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">允许对销售单进行发货操作</span></div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => togglePermission('setShipping')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.setShipping ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.setShipping && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">可设置运费与配送方式</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="section-gap"></div>
+
+      {/* ═════════ 财务 ═════════ */}
+      <div className="section-title">财务</div>
+      <div className="section-group">
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => toggleSwitch('finance')}>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">财务</span></div>
+            </div>
+            <div className="cell__action">
+              <div className={`switch${switches.finance ? ' switch--on' : ' switch--off'}`}>
+                <div className="switch__thumb"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => togglePermission('walletOp')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.walletOp ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.walletOp && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">允许对钱包进行充值和提现操作</span></div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => togglePermission('viewTransaction')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.viewTransaction ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.viewTransaction && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">允许查看交易数据</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="section-gap"></div>
+
+      {/* ═════════ 运营 ═════════ */}
+      <div className="section-title">运营</div>
+      <div className="section-group">
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => toggleSwitch('ops')}>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">运营</span></div>
+            </div>
+            <div className="cell__action">
+              <div className={`switch${switches.ops ? ' switch--on' : ' switch--off'}`}>
+                <div className="switch__thumb"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => togglePermission('privateDomain')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.privateDomain ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.privateDomain && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">允许使用私域销售管理</span></div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">权限范围</span></div>
+            </div>
+            <div className="cell__action">
+              <span className="cell__action-text">仅自己的数据</span>
+              <i className="wego-iconfont-s icon-xiajiantou16 cell__arrow"></i>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => togglePermission('createManageTask')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.createManageTask ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.createManageTask && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">允许创建并管理任务</span></div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">权限范围</span></div>
+            </div>
+            <div className="cell__action">
+              <span className="cell__action-text">仅自己创建的任务</span>
+              <i className="wego-iconfont-s icon-xiajiantou16 cell__arrow"></i>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => togglePermission('shopDeco')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.shopDeco ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.shopDeco && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">允许使用店铺装修与复制装修</span></div>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+          onClick={() => togglePermission('marketingGames')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.marketingGames ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.marketingGames && <div className="checkbox__icon">{CHECKMARK_SVG}</div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">允许使用所有的营销与互动小游戏</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══ App Root ═══ */
+function App() {
+  return (
+    <div className="phone-screen">
+      <StatusBar />
+      <div className="navbar" style={{flexShrink:0}}>
+        <div className="navbar__body navbar__body--spaced">
+          <div className="navbar__left">
+            <span className="navbar__left-text" onClick={() => window.history.back()}>取消</span>
+          </div>
+          <div className="navbar__center">
+            <span className="navbar__title">岗位权限设置</span>
+          </div>
+          <div className="navbar__right">
+            <div className="navbar__action navbar__action--button">
+              <button className="navbar__action-btn">保存</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="phone-body">
+        <BizSettingsScreen />
+      </div>
+      <HomeIndicator />
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

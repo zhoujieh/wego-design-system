@@ -1,0 +1,27 @@
+{
+  "kitType": "biz-settings",
+  "presentation": "bottom-sheet",
+  "transition": "slide-up",
+  "screensGenerated": 1,
+  "coreComponentsUsed": ["navbar", "cell", "checkbox", "switch", "avatar", "chip", "link"],
+  "supportComponentsUsed": [],
+  "previewClassReuseRate": 1.0,
+  "reuseAssessment": "全部使用已注册组件重写。navbar 用于导航栏，cell 用于列表行，checkbox 用于权限子项，switch 用于分类总开关，avatar+chip+link 用于业务信息头部。",
+  "inventedComponents": ["phone-status", "phone-indicator"],
+  "recommendedRefactors": {},
+  "interactiveStatesRendered": ["active", "disabled", "selected", "on", "off"],
+  "primaryActionPerScreen": true,
+  "mockDataDensity": {
+    "settingSections": 8,
+    "switchRows": 8,
+    "checkboxRows": 35,
+    "selectRows": 4,
+    "attributionRow": 1
+  },
+  "warnings": [
+    "本 UI Kit 展示业务设置/权限设置的典型页面模式。",
+    "phone-status 和 phone-indicator 为 Showcase 外壳，非通用组件。",
+    "真实项目中使用时应通过底部面板（bottom-sheet）方式从底部滑入。",
+    "iconfont 图标用于下拉指示器（icon-xiajiantou16、icon-youjiantou16）。"
+  ]
+}
