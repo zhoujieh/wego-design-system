@@ -26,6 +26,27 @@ hr.divider { border:none; border-top:1px solid var(--color-divider-default); mar
 .interactive-row .checkbox { cursor:pointer; }
 .interactive-row:hover .interactive-text { color:var(--color-text-primary); }
 .interactive-text { font-size:var(--font-size-14); color:var(--color-text-secondary); transition:color var(--duration-fast) var(--ease-standard); }
+
+/* @component-css-start */
+.checkbox{position:relative;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;flex:0 0 24px;box-sizing:border-box;border-radius:var(--radius-xs);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.checkbox__inner{position:absolute;inset:0;box-sizing:border-box;border:1.5px solid rgba(0,0,0,0.15);border-radius:var(--radius-xs);background:var(--color-bg-surface);transition:background var(--duration-fast) var(--ease-standard),border-color var(--duration-fast) var(--ease-standard)}
+.checkbox__icon,
+.checkbox__minus,
+.checkbox__count{position:relative;z-index:1;display:none;align-items:center;justify-content:center;color:var(--color-text-inverse)}
+.checkbox--checked,
+.checkbox--indeterminate,
+.checkbox--count{background:var(--color-brand)}
+.checkbox--checked .checkbox__inner,
+.checkbox--indeterminate .checkbox__inner,
+.checkbox--count .checkbox__inner{background:var(--color-brand);border-color:var(--color-brand)}
+.checkbox--checked .checkbox__icon{display:flex}
+.checkbox--indeterminate .checkbox__minus{display:flex}
+.checkbox--count .checkbox__count{display:flex;width:100%;height:100%;font-family:var(--font-family-number);font-size:var(--font-size-10);font-weight:var(--font-weight-medium);line-height:1;color:var(--color-text-inverse);font-feature-settings:"zero"}
+.checkbox--sm{width:20px;height:20px;flex-basis:20px}
+.checkbox--sm .checkbox__icon svg{width:11px;height:8px}
+.checkbox--sm .checkbox__minus svg{width:6px;height:2px}
+.checkbox--disabled{opacity:0.4;pointer-events:none;cursor:not-allowed}
+/* @component-css-end */
 </style>
 </head>
 <body>

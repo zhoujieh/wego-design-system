@@ -30,6 +30,16 @@ hr.divider { border:none; border-top:1px solid var(--color-divider-default); mar
 /* Toast feedback */
 .toast { position:fixed; bottom:40px; left:50%; transform:translateX(-50%) translateY(20px); background:rgba(0,0,0,0.75); color:#fff; font-size:var(--font-size-12); padding:8px 20px; border-radius:20px; opacity:0; transition:opacity .25s ease, transform .25s ease; pointer-events:none; z-index:100; white-space:nowrap; }
 .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* @component-css-start */
+.switch{position:relative;display:inline-flex;align-items:center;width:52px;height:32px;box-sizing:border-box;border-radius:100px;background:#E5E5EA;cursor:pointer;flex-shrink:0;transition:background var(--duration-fast) var(--ease-standard);-webkit-tap-highlight-color:transparent}
+.switch--on{background:var(--color-brand)}
+.switch--off{background:#E5E5EA}
+.switch__thumb{position:absolute;top:2px;left:2px;width:28px;height:28px;border-radius:50%;background:var(--color-text-inverse);box-shadow:0 2px 4px rgba(0,0,0,0.12),0 0 0 0.5px rgba(0,0,0,0.04);transition:left var(--duration-fast) var(--ease-standard)}
+.switch--on .switch__thumb{left:22px}
+.switch--off .switch__thumb{left:2px}
+.switch--disabled{opacity:0.4;pointer-events:none;cursor:not-allowed}
+/* @component-css-end */
 </style>
 </head>
 <body>

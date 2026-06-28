@@ -77,6 +77,15 @@
 - 再运行 `node scripts/extract-components-css.mjs .` 重新生成 `components.css`。
 - **严禁直接手动编辑 `components.css`**——它是自动聚合输出，文件头部已标注 `DO NOT EDIT MANUALLY`。任何直接修改都会在下一次重新生成时丢失。
 
+### CSS 提取标记强制规则
+
+每个 `preview/component-*.html` 的 `<style>` 块中必须包含：
+
+- `/* @component-css-start */` — 在第一个组件 CSS 规则前。
+- `/* @component-css-end */` — 在最后一个组件 CSS 规则后。
+
+两标记之间只允许包含该组件的核心 CSS 规则，scaffold 样式（`body`、`.row`、`.label`、`.demo-hint` 等）必须在标记之外。
+
 改 UI Kit：
 
 - 同步 `ui_kits/app/index.html` 和 `ui_kits/app/quality-report.json`。

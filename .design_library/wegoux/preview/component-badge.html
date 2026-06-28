@@ -42,6 +42,122 @@
       border-radius: var(--wg-radius-sm);
       background: linear-gradient(135deg, var(--wg-color-base-neutral-alpha-06), var(--wg-color-base-neutral-alpha-10));
     }
+
+    /* @component-css-start */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      max-width: 100%;
+      flex-shrink: 0;
+      font-family: var(--font-family-text);
+      font-weight: var(--font-weight-regular);
+      line-height: 1;
+      white-space: nowrap;
+      vertical-align: middle;
+      font-feature-settings: "zero";
+    }
+    .badge--dot {
+      width: 8px;
+      height: 8px;
+      min-width: 8px;
+      padding: 0;
+      background: var(--color-danger);
+      border-radius: var(--radius-full);
+    }
+    .badge--number {
+      min-width: 16px;
+      height: 16px;
+      padding: 0 4px;
+      background: var(--color-danger);
+      color: var(--color-text-inverse);
+      font-family: var(--font-family-number);
+      font-size: var(--font-size-10);
+      font-weight: var(--font-weight-medium);
+      border-radius: var(--radius-full);
+    }
+    .badge--number-multi { min-width: 28px; }
+    .badge--yellow {
+      height: 16px;
+      padding: 0 4px;
+      background: var(--wg-color-base-accent-yellow-alpha-10);
+      color: var(--wg-color-base-accent-yellow-500);
+      font-size: var(--font-size-10);
+      border-radius: var(--radius-xs);
+    }
+    .badge--green {
+      height: 16px;
+      padding: 0 4px;
+      background: var(--color-brand-bg);
+      color: var(--color-brand);
+      font-size: var(--font-size-10);
+      border-radius: var(--radius-xs);
+    }
+    .badge--bubble {
+      height: 16px;
+      padding: 0 4px;
+      background: var(--color-text-promotion);
+      color: var(--color-text-inverse);
+      font-size: var(--font-size-10);
+      border-radius: var(--radius-xs);
+    }
+    .badge--delete {
+      position: relative;
+      width: 16px;
+      height: 16px;
+      min-width: 16px;
+      padding: 0;
+      background: var(--color-text-disabled);
+      border-radius: var(--radius-full);
+    }
+    .badge--delete::before,
+    .badge--delete::after {
+      content: "";
+      position: absolute;
+      left: 4px;
+      right: 4px;
+      top: 7px;
+      height: 1.5px;
+      background: var(--color-text-inverse);
+      border-radius: var(--radius-full);
+    }
+    .badge--delete::before { transform: rotate(45deg); }
+    .badge--delete::after { transform: rotate(-45deg); }
+    .badge--corner {
+      position: absolute;
+      top: 0;
+      right: 0;
+      z-index: 1;
+      transform: translate(50%, -50%);
+    }
+    .badge--round { border-radius: var(--radius-full); }
+    .badge--sharp { border-radius: var(--radius-none); }
+    .badge--align-left { justify-content: flex-start; text-align: left; }
+    .badge--align-center { justify-content: center; text-align: center; }
+    .badge--align-right { justify-content: flex-end; text-align: right; }
+    .badge--scrollable {
+      max-width: 28px;
+      overflow: hidden;
+      justify-content: flex-start;
+      text-overflow: clip;
+    }
+    .badge--corner-expand-left {
+      right: 0;
+      transform: translate(0, -50%);
+      transform-origin: right center;
+    }
+    .badge--corner-expand-right {
+      right: 0;
+      transform: translate(100%, -50%);
+      transform-origin: left center;
+    }
+    .badge--corner-expand-center {
+      right: 0;
+      transform: translate(50%, -50%);
+      transform-origin: center center;
+    }
+    /* @component-css-end */
   </style>
 </head>
 <body>

@@ -57,6 +57,7 @@
     "body": [
       { "name": "cell__body", "description": "主容器，flex 布局，gap 12px" },
       { "name": "cell__content", "description": "内容区（标题 + 副标题），flex 1，文字溢出省略" },
+      { "name": "cell__title-row", "description": "标题行，横向承载标题、标题图标和标题角标，gap 4px" },
       { "name": "cell__title", "description": "标题文字，16px Regular，--color-text-primary" },
       { "name": "cell__title-icon", "description": "标题旁的图标（wego-iconfont-s），16px，--color-text-secondary" },
       { "name": "cell__subtitle", "description": "副标题文字，12px Regular，--color-text-tertiary，margin-top 2px" }

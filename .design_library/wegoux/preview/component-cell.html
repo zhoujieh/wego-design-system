@@ -13,18 +13,44 @@ body{margin:0;padding:0;background:var(--color-bg-page);font-family:var(--font-f
 .section-title{font-size:var(--font-size-12);font-weight:var(--font-weight-medium);color:var(--color-text-tertiary);padding:24px 16px 8px}
 .section-group{background:var(--color-bg-surface);width:100%}
 .section-gap{height:8px;background:var(--color-bg-page)}
-/* 按钮样式复用（btn--sm 对应 SCALE_32） */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--space-4);border:none;cursor:pointer;font-family:var(--font-family-text);font-weight:var(--font-weight-medium);white-space:nowrap;transition:background var(--duration-fast) var(--ease-standard);flex-shrink:0}
-.btn--sm{height:var(--size-32);min-width:var(--size-32);max-width:120px;padding:0 12px;font-size:var(--font-size-f14);border-radius:var(--radius-sm)}
-.btn--medium{background:var(--color-neutral-alpha-03);color:var(--color-brand)}
-.btn--medium:active{background:var(--color-neutral-alpha-10)}
-.btn--strong{background:var(--color-brand);color:var(--color-text-inverse)}
-.btn--strong:active{background:var(--color-brand-disabled)}
-/* title badge: 行内跟随，与其他内容一致 */
-/* backspace icon */
+
+/* @component-css-start */
+.cell{position:relative;display:flex;align-items:center;width:100%;box-sizing:border-box;background:var(--color-bg-surface);color:var(--color-text-primary);overflow:hidden}
+.cell--single{min-height:56px}
+.cell--double{min-height:76px}
+.cell--bg-white{background:var(--color-bg-surface)}
+.cell--bg-grey{background:var(--color-bg-subtle)}
+.cell--clickable{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.cell--clickable:active{background:var(--color-state-pressed)}
+.cell__body{display:flex;align-items:center;gap:12px;width:100%;min-width:0;padding:0 16px;box-sizing:border-box}
+.cell__select ~ .cell__body,
+.cell__avatar ~ .cell__body,
+.cell__backspace ~ .cell__body{padding-left:0}
+.cell--indent .cell__body{padding-left:32px}
+.cell__content{flex:1;min-width:0;overflow:hidden}
+.cell__title-row{display:flex;align-items:center;gap:4px;min-width:0}
+.cell__title{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--font-size-16);font-weight:var(--font-weight-regular);line-height:var(--font-lineheight-16);color:var(--color-text-primary);font-feature-settings:"zero"}
+.cell__title-icon{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;flex-shrink:0;font-size:16px;color:var(--color-text-secondary)}
+.cell__subtitle{display:block;margin-top:2px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:var(--font-size-12);font-weight:var(--font-weight-regular);line-height:var(--font-lineheight-12);color:var(--color-text-tertiary);font-feature-settings:"zero"}
+.cell__action{display:flex;align-items:center;justify-content:flex-end;gap:4px;min-width:0;flex-shrink:0;margin-left:auto}
+.cell__action-text{display:block;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--font-size-14);font-weight:var(--font-weight-regular);line-height:var(--font-lineheight-14);color:var(--color-text-secondary);font-feature-settings:"zero"}
+.cell__action-badge{display:flex;align-items:center;gap:4px;min-width:0}
+.cell__arrow{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;flex-shrink:0;font-size:16px;color:var(--color-text-tertiary)}
+.cell__select,
+.cell__avatar,
+.cell__backspace{display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cell__select{min-width:28px;margin-left:12px;padding-left:4px;box-sizing:border-box}
+.cell__avatar{margin-left:16px;margin-right:12px}
+.cell__select + .cell__avatar{margin-left:8px}
+.cell__backspace{width:24px;min-width:24px;min-height:24px;margin-left:16px;color:var(--color-text-tertiary)}
+.cell__backspace + .cell__select{margin-left:8px}
+.cell__backspace-icon,
 .cell__backspace-icon svg{width:24px;height:24px;display:block}
-/* switch toggle helper */
-function toggleSwitch(el){if(el.classList.contains('switch--on')){el.classList.remove('switch--on');el.classList.add('switch--off')}else{el.classList.remove('switch--off');el.classList.add('switch--on')}}
+.cell--divider-right-edge::after,
+.cell--divider-center::after{content:"";position:absolute;bottom:0;border-bottom:0.5px solid var(--color-divider-default);pointer-events:none}
+.cell--divider-right-edge::after{left:16px;right:0}
+.cell--divider-center::after{left:16px;right:16px}
+/* @component-css-end */
 </style>
 </head>
 <body>

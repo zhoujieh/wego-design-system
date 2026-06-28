@@ -109,8 +109,8 @@ description: "用于生成符合微购设计系统的移动端中文界面。包
 `components.css` 是聚合组件样式，文件头部声明为自动生成，不应作为首选编辑入口。
 
 - 带有 `/* @component-css-start */` 和 `/* @component-css-end */` 的预览页，是可抽取组件 CSS 的来源。
-- 当前已标记预览页包括：`avatar`、`bottom-nav`、`button`、`card`、`chip`、`counter`、`input`、`link`、`navbar`。
-- 其余预览页主要通过 `<link rel="stylesheet" href="../components.css">` 复用已聚合样式。
+- 当前已有独立预览页 17 个，均已包含精确提取标记，覆盖率 100%：`avatar`、`badge`、`bottom-nav`、`button`、`card`、`cell`、`checkbox`、`chip`、`counter`、`form`、`image`、`input`、`link`、`navbar`、`radio`、`stack`、`switch`。
+- `navbar-action-button` 是 `navbar` 的内嵌组件，没有独立预览页；样式随 `preview/component-navbar.html` 提取。
 - 如需修改组件样式，优先改对应 `preview/component-*.html` 中的组件样式块和 `components/{slug}.json` 契约，再重新生成 `components.css`。
 - 本库内置生成脚本：`scripts/extract-components-css.mjs`。
 - 用法：在 `{WEGOUX_ROOT}` 下执行 `node scripts/extract-components-css.mjs .`，自动扫描 `preview/component-*.html` 中 `/* @component-css-start */` / `/* @component-css-end */` 标记内的样式，聚合输出为 `components.css`。

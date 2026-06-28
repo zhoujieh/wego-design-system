@@ -66,6 +66,10 @@
   ],
   "modifiers": [
     { "name": "右上角定位", "slug": "corner", "description": "absolute 定位在父元素右上角" },
+    { "name": "右上角向左展开", "slug": "corner-expand-left", "description": "角标右侧固定在父元素右上角，内容向左延展" },
+    { "name": "右上角向右展开", "slug": "corner-expand-right", "description": "角标左侧从父元素右上角向右延展" },
+    { "name": "右上角居中展开", "slug": "corner-expand-center", "description": "角标以父元素右上角为中心延展" },
+    { "name": "可滚动", "slug": "scrollable", "description": "限制最大宽度 28px，超出内容隐藏，适合滚动或轮播文案场景" },
     { "name": "圆角无边", "slug": "round" },
     { "name": "直角", "slug": "sharp" },
     { "name": "左对齐", "slug": "align-left" },
