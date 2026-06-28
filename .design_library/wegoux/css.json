@@ -714,7 +714,7 @@
       "font-family-number": "\"WegoKeyboard N9\", \"DIN Alternate\", \"SF Pro Display\", -apple-system, BlinkMacSystemFont, sans-serif",
       "font-family-number-fallback": "\"DIN Alternate\", \"SF Pro Display\", -apple-system, BlinkMacSystemFont, sans-serif",
       "font-family-system": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Helvetica Neue\", Arial, sans-serif",
-      "font-family-icon": "\"wego-iconfont-s\", \"wego-iconfont\", sans-serif"
+      "font-family-icon": "\"wego-iconfont-s\", sans-serif"
     },
     "size": {
       "font-size-f10": "10px",
@@ -763,14 +763,7 @@
       "wg-font-number-nf24": "24px",
       "wg-font-number-nf32": "32px"
     },
-    "assets": {
-      "wego-iconfont": {
-        "family": "wego-iconfont",
-        "source": "custom",
-        "uri": "tos-cn-i-yrq8zg7rhv/cn/1563940073772891/design_library/JK8-AAR9P6RYIB",
-        "zipPath": "assets/fonts/wego-iconfont.woff2"
-      }
-    }
+    "assets": {}
   },
   "shadow": {
     "shadow-xs": {

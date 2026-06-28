@@ -1,13 +1,14 @@
-@font-face {
-  font-family: "wego-iconfont";
-  src: url("./assets/fonts/wego-iconfont.woff2") format("woff2");
-  font-display: swap;
-}
-
 /**
  * Wego design system tokens.
  * Source of truth for mobile, WeChat-ecosystem, ecommerce/tool UI.
  * Keep public token names stable; css.json is the machine-readable projection.
+ *
+ * AI write rules:
+ * - Only edit tokens; do not add component or page styles here.
+ * - Preserve existing public token names and final values unless the task asks to change them.
+ * - Add new tokens to the matching section; avoid duplicate declarations in the same scope.
+ * - Do not import TRAE desktop, IDE, code, or dark-first token semantics.
+ * - Sync css.json and metadata version when token values or public tokens change.
  */
 
 :root {
@@ -343,7 +344,7 @@
   --heading-lg-font-size: var(--font-size-22);
   --heading-lg-font-weight: var(--font-weight-semibold);
   --heading-lg-line-height: var(--font-lineheight-22);
-  --font-family-icon: "wego-iconfont-s", "wego-iconfont", sans-serif;
+  --font-family-icon: "wego-iconfont-s", sans-serif;
   --wg-font-size-f10: 10px;
   --wg-font-size-f12: 12px;
   --wg-font-size-f14: 14px;
