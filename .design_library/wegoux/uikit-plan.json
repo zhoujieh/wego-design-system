@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "headBoilerplate": "<link rel=\"stylesheet\" href=\"../../colors_and_type.css\"><link rel=\"stylesheet\" href=\"../../iconfont.css\"><link rel=\"stylesheet\" href=\"../../components.css\">",
+  "corePreviewComponents": [
+    {
+      "slug": "navbar",
+      "reason": "移动端页面固定顶部导航 slot；承载返回、标题和右侧操作。",
+      "evidenceFile": "components/navbar.json",
+      "previewFile": "preview/component-navbar.html",
+      "priority": 1,
+      "slot": "top-navigation"
+    },
+    {
+      "slug": "bottom-nav",
+      "reason": "移动端应用主 Tab 固定 slot；适合微信生态 App 主框架。",
+      "evidenceFile": "components/bottom-nav.json",
+      "previewFile": "preview/component-bottom-nav.html",
+      "priority": 2,
+      "slot": "primary-tabbar"
+    },
+    {
+      "slug": "button",
+      "reason": "主要操作固定 slot；用于保存、提交、购买、添加等关键动作。",
+      "evidenceFile": "components/button.json",
+      "previewFile": "preview/component-button.html",
+      "priority": 3,
+      "slot": "primary-action"
+    },
+    {
+      "slug": "cell",
+      "reason": "移动端列表和设置页基础信息行。",
+      "evidenceFile": "components/cell.json",
+      "previewFile": "preview/component-cell.html",
+      "priority": 4,
+      "slot": "list-row"
+    },
+    {
+      "slug": "form",
+      "reason": "业务设置、资料编辑和表单页基础容器。",
+      "evidenceFile": "components/form.json",
+      "previewFile": "preview/component-form.html",
+      "priority": 5,
+      "slot": "form"
+    },
+    {
+      "slug": "card",
+      "reason": "商品、订单、账户信息等内容容器。",
+      "evidenceFile": "components/card.json",
+      "previewFile": "preview/component-card.html",
+      "priority": 6,
+      "slot": "content-card"
+    }
+  ],
+  "supportEvidenceComponents": [
+    { "slug": "input", "reason": "独立输入和资料编辑场景。", "evidenceFile": "components/input.json", "previewFile": "preview/component-input.html", "priority": 7, "slot": "input" },
+    { "slug": "chip", "reason": "筛选、状态和业务标签。", "evidenceFile": "components/chip.json", "previewFile": "preview/component-chip.html", "priority": 8, "slot": "tag-filter" },
+    { "slug": "badge", "reason": "未读、促销、提醒和角标。", "evidenceFile": "components/badge.json", "previewFile": "preview/component-badge.html", "priority": 9, "slot": "badge" },
+    { "slug": "avatar", "reason": "用户资料和成员信息。", "evidenceFile": "components/avatar.json", "previewFile": "preview/component-avatar.html", "priority": 10, "slot": "identity" },
+    { "slug": "image", "reason": "商品图、头像图和加载失败状态。", "evidenceFile": "components/image.json", "previewFile": "preview/component-image.html", "priority": 11, "slot": "media" },
+    { "slug": "switch", "reason": "设置页布尔开关。", "evidenceFile": "components/switch.json", "previewFile": "preview/component-switch.html", "priority": 12, "slot": "boolean-toggle" },
+    { "slug": "checkbox", "reason": "多选、权限项和半选状态。", "evidenceFile": "components/checkbox.json", "previewFile": "preview/component-checkbox.html", "priority": 13, "slot": "multi-select" },
+    { "slug": "radio", "reason": "互斥选择。", "evidenceFile": "components/radio.json", "previewFile": "preview/component-radio.html", "priority": 14, "slot": "single-select" },
+    { "slug": "link", "reason": "文字跳转和内联操作。", "evidenceFile": "components/link.json", "previewFile": "preview/component-link.html", "priority": 15, "slot": "text-action" },
+    { "slug": "stack", "reason": "方块式选项卡和选择项。", "evidenceFile": "components/stack.json", "previewFile": "preview/component-stack.html", "priority": 16, "slot": "option-stack" },
+    { "slug": "navbar-action-button", "reason": "NavBar 右侧操作子组件，嵌入 navbar 预览使用。", "evidenceFile": "components/navbar-action-button.json", "previewFile": "preview/component-navbar.html", "priority": 17, "slot": "navbar-action" }
+  ],
+  "allowedComponents": [
+    "button",
+    "card",
+    "avatar",
+    "chip",
+    "bottom-nav",
+    "input",
+    "badge",
+    "cell",
+    "checkbox",
+    "form",
+    "image",
+    "link",
+    "radio",
+    "stack",
+    "switch",
+    "navbar",
+    "navbar-action-button"
+  ],
+  "screenBlueprints": [
+    {
+      "name": "首页/商品流",
+      "componentSlugs": ["bottom-nav", "chip", "card", "badge", "button", "image"],
+      "role": "primary"
+    },
+    {
+      "name": "商品详情",
+      "componentSlugs": ["navbar", "image", "card", "chip", "button", "badge"],
+      "role": "primary"
+    },
+    {
+      "name": "我的/资料编辑",
+      "componentSlugs": ["navbar", "avatar", "chip", "cell", "input", "button"],
+      "role": "secondary"
+    },
+    {
+      "name": "业务设置/权限",
+      "componentSlugs": ["navbar", "cell", "checkbox", "switch", "form", "link"],
+      "role": "secondary"
+    }
+  ],
+  "productContext": {
+    "kitType": "app",
+    "productType": "移动端电商/微信生态工具",
+    "dominantCopy": ["首页", "商品详情", "我的", "业务设置", "权限", "加入购物车", "立即购买"],
+    "pageNames": ["首页", "商品详情", "我的", "业务设置"],
+    "selectedFrameNames": ["ui_kits/app/index.html"]
+  },
+  "selectionPolicy": "mobile-app-fixed-slots-first",
+  "slotAssignments": [
+    { "slot": "top-navigation", "slug": "navbar", "reason": "移动端页面顶部导航固定需求" },
+    { "slot": "primary-tabbar", "slug": "bottom-nav", "reason": "App 主导航固定需求" },
+    { "slot": "primary-action", "slug": "button", "reason": "关键操作固定需求" },
+    { "slot": "list-row", "slug": "cell", "reason": "设置和信息列表固定需求" },
+    { "slot": "form", "slug": "form", "reason": "表单页固定需求" }
+  ],
+  "missingFixedSlots": [],
+  "fallbackComponents": [],
+  "embeddedComponents": [
+    {
+      "slug": "navbar-action-button",
+      "hostComponent": "navbar",
+      "reason": "右侧操作区属于 NavBar 内部组合，不单独出预览页。"
+    }
+  ],
+  "unpublishedContracts": [
+    {
+      "slug": "counter",
+      "reason": "存在契约文件，但未注册、无预览页，暂不进入 allowedComponents。"
+    }
+  ],
+  "forbiddenInventedComponents": [
+    "desktop-sidebar",
+    "marketing-hero",
+    "large-gradient-hero",
+    "decorative-orb-background"
+  ],
+  "lowConfidence": false,
+  "warnings": [
+    "ui_kits/app/index.html 是 Showcase，含演示用手机壳和部分业务样式，不应整体复制为通用页面模板。",
+    "生产组件图标应优先使用 iconfont.css；UI Kit 中的演示图标如使用 CDN，应在真实项目中替换为库内图标体系。"
+  ]
+}

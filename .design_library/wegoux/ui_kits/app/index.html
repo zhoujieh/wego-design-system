@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../colors_and_type.css">
+<link rel="stylesheet" href="../../components.css">
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+<style>
+/* ═══ Page Layer: UIKit Shell & Phone Frame ═══ */
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg-page);
+  font-family: var(--font-family-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+.uikit-shell {
+  width: 100%;
+  max-width: 1184px;
+  margin: 0 auto;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: var(--space-16);
+}
+
+.uikit-sidebar, .uikit-main, .uikit-toolbar { min-width: 0; }
+.uikit-sidebar { overflow: hidden; max-width: 100%; }
+
+[data-component] { min-width: 0; max-width: 100%; overflow: hidden; }
+
+.uikit-responsive-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.uikit-table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.uikit-truncate {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.uikit-nowrap {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.uikit-action-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: 160px;
+  overflow: hidden;
+}
+
+.uikit-action {
+  min-width: 0;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ═══ Phone Frame ═══ */
+.phone-frame {
+  width: 390px;
+  height: 780px;
+  border-radius: 40px;
+  border: 8px solid var(--color-bg-inverse);
+  overflow: hidden;
+  position: relative;
+  box-shadow: var(--shadow-xl);
+  background: var(--color-bg-page);
+  flex-shrink: 0;
+}
+
+.phone-screen {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--color-bg-page);
+}
+
+/* ═══ Phone Internal: Status Bar, Header, Body, Bottom Nav, Home Indicator ═══ */
+.phone-status {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-16);
+  background: var(--color-bg-surface);
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  flex-shrink: 0;
+}
+
+.phone-header {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-16);
+  background: var(--color-bg-surface);
+  font-size: var(--font-size-18);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  flex-shrink: 0;
+  gap: var(--space-8);
+}
+
+.phone-header-back {
+  width: var(--size-32);
+  height: var(--size-32);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.phone-header-back:hover {
+  background: var(--color-state-hover);
+}
+
+.phone-header-title {
+  font-size: var(--font-size-18);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.phone-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.phone-body::-webkit-scrollbar { display: none; }
+
+.phone-indicator {
+  height: 34px;
+  background: var(--color-bg-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.phone-indicator-bar {
+  width: 134px;
+  height: 5px;
+  background: var(--color-text-primary);
+  border-radius: var(--radius-full);
+  opacity: 0.2;
+}
+
+/* ═══ Screen-specific Layout Helpers ═══ */
+.section-pad {
+  padding: var(--space-12);
+}
+
+.section-gap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+
+.chip-row {
+  display: flex;
+  gap: var(--space-8);
+  padding: var(--space-12);
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+
+.chip-row::-webkit-scrollbar { display: none; }
+
+.card-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+
+.profile-section {
+  background: var(--color-bg-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-16);
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-12) var(--space-16);
+  background: var(--color-bg-surface);
+  cursor: pointer;
+  min-width: 0;
+}
+
+.menu-item:hover {
+  background: var(--color-state-hover);
+}
+
+.menu-item:first-of-type {
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.menu-item:last-of-type {
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+.menu-item:only-of-type {
+  border-radius: var(--radius-lg);
+}
+
+.menu-item + .menu-item {
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.menu-label {
+  font-size: var(--font-size-16);
+  color: var(--color-text-primary);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.menu-arrow {
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+}
+
+.form-block {
+  background: var(--color-bg-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-16);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+
+.form-actions {
+  display: flex;
+  gap: var(--space-8);
+  margin-top: var(--space-8);
+}
+
+.color-select-row {
+  display: flex;
+  gap: var(--space-8);
+  align-items: center;
+}
+
+.color-select-label {
+  font-size: var(--font-size-14);
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+}
+
+/* ═══ Business Settings Styles ═══ */
+.biz-navbar {
+  height: 44px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 0 var(--space-8);
+  background: var(--color-bg-surface);
+  flex-shrink: 0;
+}
+
+.biz-navbar-left {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: var(--space-8);
+}
+
+.biz-navbar-left span {
+  font-size: var(--font-size-16);
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.biz-navbar-center {
+  text-align: center;
+  font-size: var(--font-size-18);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  min-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.biz-navbar-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-8);
+  padding-right: var(--space-8);
+}
+
+.biz-save-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  min-width: 32px;
+  padding: 0 var(--space-8);
+  background: var(--color-success);
+  color: white;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  border: none;
+  position: relative;
+}
+
+.biz-save-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 -0.5px 0 rgba(32,47,100,0.08);
+  pointer-events: none;
+}
+
+.biz-business-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  padding: var(--space-16);
+  background: var(--color-bg-surface);
+}
+
+.biz-business-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-bg-muted);
+  border: 0.5px solid var(--color-border-subtle);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.biz-business-name {
+  font-size: var(--font-size-16);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.biz-business-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 16px;
+  padding: 0 4px;
+  font-size: 10px;
+  color: var(--color-success);
+  background: var(--color-success-bg);
+  border-radius: 2px;
+}
+
+.biz-business-info-main {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.biz-switch-link {
+  font-size: var(--font-size-14);
+  color: var(--color-link);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.biz-section-title {
+  font-size: var(--font-size-12);
+  color: var(--color-text-tertiary);
+  padding: var(--space-16) var(--space-16) var(--space-8);
+}
+
+.biz-cell {
+  display: flex;
+  align-items: center;
+  background: var(--color-bg-surface);
+  min-height: 56px;
+  padding: 0 var(--space-16);
+  position: relative;
+}
+
+.biz-cell::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: var(--space-16);
+  right: var(--space-16);
+  height: 0.5px;
+  background: var(--color-border-subtle);
+}
+
+.biz-cell:last-child::after {
+  left: 0;
+  right: 0;
+}
+
+.biz-cell-label {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--font-size-16);
+  color: var(--color-text-primary);
+  padding: var(--space-16) 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.biz-cell-label--multiline {
+  white-space: normal;
+  padding: var(--space-12) 0;
+}
+
+.biz-cell-sub {
+  font-size: var(--font-size-12);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin-top: 2px;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.biz-cell-checkbox {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-border);
+  flex-shrink: 0;
+  margin-right: var(--space-12);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.biz-cell-checkbox--checked {
+  background: var(--color-success);
+  border-color: var(--color-success);
+}
+
+.biz-cell-checkbox--checked::after {
+  content: '';
+  display: block;
+  width: 8px;
+  height: 4px;
+  border-left: 2px solid white;
+  border-bottom: 2px solid white;
+  transform: rotate(-45deg) translate(0, -1px);
+}
+
+.biz-cell-right {
+  font-size: var(--font-size-14);
+  color: var(--color-link);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.biz-switch {
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  background: var(--color-success);
+  flex-shrink: 0;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.2s;
+}
+
+.biz-switch--off {
+  background: var(--color-border);
+}
+
+.biz-switch-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: white;
+  position: absolute;
+  top: 2px;
+  left: 22px;
+  transition: left 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+.biz-switch--off .biz-switch-thumb {
+  left: 2px;
+}
+
+.biz-section-spacer {
+  height: var(--space-8);
+}
+
+.biz-cell-selector {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-link);
+  font-size: var(--font-size-16);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.biz-cell-selector--disabled {
+  color: var(--color-text-tertiary);
+  cursor: default;
+}
+
+.biz-cell-arrow {
+  width: 16px;
+  height: 16px;
+  color: var(--color-link);
+  flex-shrink: 0;
+}
+
+.biz-cell-arrow--disabled {
+  color: var(--color-text-tertiary);
+}
+
+/* ═══ Responsive ═══ */
+@media (max-width: 640px) {
+  .uikit-shell {
+    padding: var(--space-8);
+    align-items: flex-start;
+  }
+  .phone-frame {
+    width: 100%;
+    height: auto;
+    min-height: 100vh;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+  }
+}
+</style>
+</head>
+<body>
+<div class="uikit-shell" data-layout-guard="uikit-v1">
+  <div class="phone-frame">
+    <div class="phone-screen" id="root"></div>
+  </div>
+</div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+/* ═══ Status Bar ═══ */
+function StatusBar() {
+  return (
+    <div className="phone-status">
+      <span>9:41</span>
+      <span>5G</span>
+    </div>
+  );
+}
+
+/* ═══ Home Indicator ═══ */
+function HomeIndicator() {
+  return (
+    <div className="phone-indicator">
+      <div className="phone-indicator-bar"></div>
+    </div>
+  );
+}
+
+/* ═══ Bottom Navigation ═══ */
+function BottomNav({ current, onNavigate }) {
+  const tabs = [
+    { id: 'home', label: '首页', icon: 'home' },
+    { id: 'discover', label: '发现', icon: 'compass' },
+    { id: 'cart', label: '购物车', icon: 'shopping-cart' },
+    { id: 'profile', label: '我的', icon: 'user' }
+  ];
+
+  const handleNav = (id) => {
+    if (id === 'home') {
+      onNavigate(id);
+    }
+    if (id === 'profile') {
+      onNavigate(id);
+    }
+  };
+
+  return (
+    <div data-component="bottom-nav" className="bottom-nav">
+      {tabs.map(tab => (
+        <div
+          key={tab.id}
+          className={`bottom-nav__item${current === tab.id ? ' active' : ''}`}
+          onClick={() => handleNav(tab.id)}
+        >
+          <i data-lucide={tab.icon} className="bottom-nav__icon" style={{width:24,height:24}}></i>
+          <span className="bottom-nav__label">{tab.label}</span>
+          {tab.id === 'home' && <span className="badge badge--corner badge--dot"></span>}
+          {tab.id === 'cart' && <span className="badge badge--corner badge--number badge--number-multi">99+</span>}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ═══ Screen 1: 首页 Home ═══ */
+function HomeScreen({ onProductClick }) {
+  return (
+    <div className="section-gap">
+      {/* Category Chips */}
+      <div className="chip-row">
+        <span data-component="chip" className="chip chip--md chip--brand chip--filled uikit-nowrap">全部</span>
+        <span data-component="chip" className="chip chip--md chip--default chip--filled uikit-nowrap">数码</span>
+        <span data-component="chip" className="chip chip--md chip--info chip--outlined uikit-nowrap">服饰</span>
+        <span data-component="chip" className="chip chip--md chip--success chip--filled uikit-nowrap">美妆</span>
+        <span data-component="chip" className="chip chip--md chip--warning chip--filled uikit-nowrap">食品</span>
+        <span data-component="chip" className="chip chip--md chip--default chip--outlined uikit-nowrap">家居</span>
+      </div>
+
+      {/* Product Cards */}
+      <div className="section-pad card-grid">
+        {/* Card 1 */}
+        <div data-component="card" className="card card--elevated" onClick={onProductClick} style={{cursor:'pointer'}}>
+          <div className="card__media" style={{position:'relative', overflow:'visible'}}>
+            <i data-lucide="headphones" style={{width:36,height:36,color:'var(--color-text-tertiary)'}}></i>
+            <span className="badge badge--corner badge--bubble">NEW</span>
+          </div>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',minWidth:0}}>
+            <div className="uikit-truncate" style={{flex:1}}>
+              <div className="card__header">Apple AirPods Pro</div>
+              <div className="card__body">第二代 主动降噪 无线蓝牙耳机</div>
+            </div>
+            <span data-component="chip" className="chip chip--sm chip--brand chip--filled uikit-nowrap">新品</span>
+          </div>
+          <div className="card__footer">
+            <span className="card__price">¥1,899</span>
+          </div>
+        </div>
+
+        {/* Card 2 */}
+        <div data-component="card" className="card card--elevated">
+          <div className="card__media">
+            <i data-lucide="smartphone" style={{width:36,height:36,color:'var(--color-text-tertiary)'}}></i>
+          </div>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',minWidth:0}}>
+            <div className="uikit-truncate" style={{flex:1}}>
+              <div className="card__header">小米14 Ultra</div>
+              <div className="card__body">徕卡光学 骁龙8Gen3 澎湃OS</div>
+            </div>
+            <span data-component="chip" className="chip chip--sm chip--danger chip--filled uikit-nowrap">热销</span>
+          </div>
+          <div className="card__footer">
+            <span className="card__price">¥5,999</span>
+          </div>
+        </div>
+
+        {/* Card 3 */}
+        <div data-component="card" className="card card--elevated">
+          <div className="card__media">
+            <i data-lucide="toy-brick" style={{width:36,height:36,color:'var(--color-text-tertiary)'}}></i>
+          </div>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',minWidth:0}}>
+            <div className="uikit-truncate" style={{flex:1}}>
+              <div className="card__header">戴森V12吸尘器</div>
+              <div className="card__body">轻量无线 激光探测 整机HEPA过滤</div>
+            </div>
+            <span data-component="chip" className="chip chip--sm chip--success chip--filled uikit-nowrap">推荐</span>
+          </div>
+          <div className="card__footer">
+            <span className="card__price">¥3,499</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Primary CTA Banner */}
+      <div className="section-pad">
+        <div style={{background:'var(--color-brand-bg)',borderRadius:'var(--radius-lg)',padding:'var(--space-16)',display:'flex',alignItems:'center',justifyContent:'space-between',minWidth:0}}>
+          <div style={{minWidth:0,flex:1}}>
+            <div style={{fontSize:'var(--font-size-14)',color:'var(--color-text-secondary)'}}>限时特惠</div>
+            <div style={{fontSize:'var(--font-size-16)',fontWeight:'var(--font-weight-semibold)',color:'var(--color-text-primary)',marginTop:4}}>爆款直降 低至5折</div>
+          </div>
+          <button data-component="button" className="btn btn--strong uikit-nowrap">立即抢购</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══ Screen 2: 商品详情 Detail ═══ */
+function DetailScreen() {
+  const [qty, setQty] = useState(1);
+
+  return (
+    <div className="section-gap">
+      {/* Product Image */}
+      <div style={{width:'100%',height:200,background:'var(--color-bg-muted)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+        <i data-lucide="headphones" style={{width:64,height:64,color:'var(--color-text-tertiary)'}}></i>
+      </div>
+
+      {/* Product Info Card */}
+      <div className="section-pad">
+        <div data-component="card" className="card card--elevated">
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',minWidth:0}}>
+            <div className="uikit-truncate" style={{flex:1}}>
+              <div className="card__header">Apple AirPods Pro (第二代)</div>
+              <div className="card__body" style={{marginTop:4}}>主动降噪 自适应音频 通透模式</div>
+            </div>
+          </div>
+          <div style={{display:'flex',gap:'var(--space-8)',marginTop:'var(--space-8)',flexWrap:'wrap'}}>
+            <span data-component="chip" className="chip chip--sm chip--brand chip--filled uikit-nowrap">新品</span>
+            <span data-component="chip" className="chip chip--sm chip--default chip--filled uikit-nowrap">官方正品</span>
+            <span data-component="chip" className="chip chip--sm chip--success chip--filled uikit-nowrap">2年保修</span>
+          </div>
+          <div className="card__footer" style={{marginTop:'var(--space-8)'}}>
+            <span className="card__price">¥1,899.00</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Color Selection */}
+      <div className="section-pad">
+        <div className="color-select-row" style={{marginBottom:'var(--space-8)'}}>
+          <span className="color-select-label">颜色选择</span>
+        </div>
+        <div style={{display:'flex',gap:'var(--space-8)'}}>
+          <span data-component="chip" className="chip chip--md chip--brand chip--filled uikit-nowrap">白色</span>
+          <span data-component="chip" className="chip chip--md chip--default chip--outlined uikit-nowrap">黑色</span>
+        </div>
+      </div>
+
+      {/* Quantity Selector */}
+      <div className="section-pad">
+        <div className="color-select-label" style={{marginBottom:'var(--space-8)'}}>数量</div>
+        <div style={{display:'flex',alignItems:'center',gap:'var(--space-8)'}}>
+          <button
+            className="btn btn--medium btn--sm"
+            onClick={() => setQty(Math.max(1, qty - 1))}
+            style={{minWidth:36,padding:'0 var(--space-8)'}}
+          >-</button>
+          <span style={{fontSize:'var(--font-size-16)',fontWeight:'var(--font-weight-medium)',minWidth:32,textAlign:'center'}}>{qty}</span>
+          <button
+            className="btn btn--medium btn--sm"
+            onClick={() => setQty(qty + 1)}
+            style={{minWidth:36,padding:'0 var(--space-8)'}}
+          >+</button>
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="section-pad" style={{display:'flex',gap:'var(--space-8)'}}>
+        <button data-component="button" className="btn btn--strong btn--lg uikit-nowrap" style={{flex:1}}>加入购物车</button>
+      </div>
+      <div className="section-pad" style={{paddingTop:0,display:'flex',gap:'var(--space-8)'}}>
+        <button data-component="button" className="btn btn--medium uikit-nowrap" style={{flex:1}}>立即购买</button>
+        <button data-component="button" className="btn btn--weak uikit-nowrap" style={{flex:1}}>
+          <i data-lucide="heart" style={{width:20,height:20}}></i>收藏
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ═══ Screen 3: 我的 Profile ═══ */
+function ProfileScreen({ onBizSettings }) {
+  return (
+    <div className="section-gap">
+      {/* User Profile */}
+      <div className="section-pad">
+        <div className="profile-section">
+          <div data-component="avatar" className="avatar avatar--lg avatar--initials uikit-nowrap">张</div>
+          <div style={{minWidth:0,flex:1}}>
+            <div className="uikit-truncate" style={{fontSize:'var(--font-size-18)',fontWeight:'var(--font-weight-semibold)',color:'var(--color-text-primary)'}}>张小明</div>
+            <div style={{display:'flex',alignItems:'center',gap:'var(--space-4)',marginTop:'var(--space-4)'}}>
+              <span data-component="chip" className="chip chip--sm chip--warning chip--filled uikit-nowrap">金牌会员</span>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" style={{width:20,height:20,color:'var(--color-text-tertiary)',flexShrink:0}}></i>
+        </div>
+      </div>
+
+      {/* Menu List */}
+      <div className="section-pad" style={{paddingTop:0}}>
+        <div className="menu-item" style={{position:'relative', overflow:'visible'}}>
+          <span className="menu-label">我的订单</span>
+          <i data-lucide="chevron-right" className="menu-arrow" style={{width:20,height:20}}></i>
+          <span className="badge badge--corner badge--yellow">2</span>
+        </div>
+        <div className="menu-item">
+          <span className="menu-label">收货地址</span>
+          <i data-lucide="chevron-right" className="menu-arrow" style={{width:20,height:20}}></i>
+        </div>
+        <div className="menu-item" style={{position:'relative', overflow:'visible'}}>
+          <span className="menu-label">我的优惠券</span>
+          <i data-lucide="chevron-right" className="menu-arrow" style={{width:20,height:20}}></i>
+          <span className="badge badge--corner badge--green">5</span>
+        </div>
+        <div className="menu-item" onClick={onBizSettings} style={{cursor:'pointer'}}>
+          <span className="menu-label">业务设置</span>
+          <i data-lucide="chevron-right" className="menu-arrow" style={{width:20,height:20}}></i>
+        </div>
+        <div className="menu-item">
+          <span className="menu-label">设置</span>
+          <i data-lucide="chevron-right" className="menu-arrow" style={{width:20,height:20}}></i>
+        </div>
+      </div>
+
+      {/* Nickname Edit Form */}
+      <div className="section-pad" style={{paddingTop:0}}>
+        <div className="form-block">
+          <div data-component="input" className="input-group" style={{maxWidth:'100%'}}>
+            <span className="field-label">修改昵称</span>
+            <input type="text" placeholder="请输入昵称" defaultValue="张小明" />
+          </div>
+          <div data-component="input" className="input-group is-disabled" style={{maxWidth:'100%'}}>
+            <span className="field-label">绑定手机</span>
+            <input type="text" placeholder="请输入手机号" defaultValue="138****8888" disabled />
+          </div>
+          <div className="form-actions">
+            <button data-component="button" className="btn btn--strong uikit-nowrap" style={{flex:1}}>保存</button>
+            <button data-component="button" className="btn btn--medium btn--disabled uikit-nowrap" style={{flex:1}}>退出登录</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══ Screen 4: 业务设置 (岗位权限设置) ═══ */
+function BizSettingsScreen({ onBack }) {
+  const [attributionChecked, setAttributionChecked] = useState(true);
+  const [switches, setSwitches] = useState({
+    selection: true,
+    fans: true,
+    order: true,
+    purchase: true,
+    delivery: true,
+    finance: true,
+    ops: true,
+    warehouse: true
+  });
+
+  const toggleSwitch = (key) => {
+    setSwitches(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const [permissions, setPermissions] = useState({
+    contactInfo: true,
+    pinnedStatus: true,
+    moments: true,
+    followToggle: true,
+    publishEdit: true,
+    inventory: true,
+    price: false,
+    viewFans: true,
+    approveFans: true,
+    deleteFans: true,
+    changeFansBinding: true,
+    viewVisitors: true,
+    createCustomer: true,
+    viewOrders: true,
+    createOrder: true,
+    viewPhone: true,
+    modifyOrder: true,
+    modifySender: true,
+    modifyPayment: true,
+    purchaseOrder: true,
+    viewSupplier: true,
+    manageSupplier: true,
+    buyFromUp: true,
+    managePurchase: true,
+    manageBackup: true,
+    deliveryGoods: true,
+    setShipping: true,
+    walletOp: true,
+    viewTransaction: true,
+    privateDomain: true,
+    createManageTask: true,
+    shopDeco: true,
+    marketingGames: true
+  });
+
+  const togglePermission = (key) => {
+    setPermissions(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  return (
+    <div>
+      {/* Business Info */}
+      <div className="biz-business-info">
+        <div className="biz-business-info-main">
+          <div className="biz-business-avatar">
+            <i data-lucide="smile" style={{width:16,height:16,color:'var(--color-text-tertiary)'}}></i>
+          </div>
+          <span className="biz-business-name">车车</span>
+          <span className="biz-business-tag">管理员</span>
+        </div>
+        <span className="biz-switch-link">切换岗位</span>
+      </div>
+
+      {/* ── 业绩归属 ── */}
+      <div className="biz-section-title">业绩归属</div>
+      <div className="biz-cell" style={{cursor:'pointer'}}>
+        <span className="biz-cell-label">业绩归属</span>
+        <span className="biz-cell-right">查看归属设置</span>
+      </div>
+      <div className="biz-cell" onClick={() => setAttributionChecked(!attributionChecked)} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${attributionChecked ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <div style={{flex:1,minWidth:0,padding:'var(--space-12) 0'}}>
+          <div className="biz-cell-label--multiline">允许已归属粉丝被其他员工划分</div>
+          <div className="biz-cell-sub">粉丝从其他员工处访问店铺或开单，将会更改归属到对应员工</div>
+        </div>
+      </div>
+
+      <div className="biz-section-spacer"></div>
+
+      {/* ── 选款与上架 ── */}
+      <div className="biz-section-title">选款与上架</div>
+      <div className="biz-cell" onClick={() => toggleSwitch('selection')} style={{cursor:'pointer'}}>
+        <span className="biz-cell-label">选款与上架</span>
+        <div className={`biz-switch${switches.selection ? '' : ' biz-switch--off'}`}>
+          <div className="biz-switch-thumb"></div>
+        </div>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('contactInfo')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.contactInfo ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <span className="biz-cell-label">允许查看上家的联系方式</span>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('pinnedStatus')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.pinnedStatus ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <span className="biz-cell-label">允许查看上家的置顶动态和签名</span>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('moments')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.moments ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <span className="biz-cell-label">允许查看上家的动态(不含置顶)</span>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('followToggle')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.followToggle ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <span className="biz-cell-label">允许关注或取关上家</span>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('publishEdit')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.publishEdit ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <div style={{flex:1,minWidth:0,padding:'var(--space-12) 0'}}>
+          <div className="biz-cell-label--multiline">允许发布、转发、编辑、删除、恢复和上下架、设置帮卖佣金、推广员佣金</div>
+        </div>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('inventory')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.inventory ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <span className="biz-cell-label">允许查看和编辑库存</span>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('price')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.price ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <span className="biz-cell-label">允许查看本店商品价格</span>
+      </div>
+
+      <div className="biz-section-spacer"></div>
+
+      {/* ── 粉丝与客户 ── */}
+      <div className="biz-section-title">粉丝与客户</div>
+      <div className="biz-cell" onClick={() => toggleSwitch('fans')} style={{cursor:'pointer'}}>
+        <span className="biz-cell-label">粉丝与客户</span>
+        <div className={`biz-switch${switches.fans ? '' : ' biz-switch--off'}`}>
+          <div className="biz-switch-thumb"></div>
+        </div>
+      </div>
+      <div className="biz-cell" style={{cursor:'pointer'}}>
+        <span className="biz-cell-label">权限范围</span>
+        <div className="biz-cell-selector">
+          仅自己带来的粉丝
+          <i data-lucide="chevron-down" style={{width:16,height:16}}></i>
+        </div>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('viewFans')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.viewFans ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <span className="biz-cell-label">允许查看粉丝</span>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('approveFans')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.approveFans ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <span className="biz-cell-label">允许审批粉丝关注申请</span>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('deleteFans')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.deleteFans ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <span className="biz-cell-label">允许删除粉丝</span>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('changeFansBinding')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.changeFansBinding ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <span className="biz-cell-label">允许修改粉丝的绑定员工</span>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('viewVisitors')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.viewVisitors ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <span className="biz-cell-label">允许查看访客记录</span>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('createCustomer')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.createCustomer ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <span className="biz-cell-label">允许创建客户</span>
+      </div>
+
+      <div className="biz-section-spacer"></div>
+
+      {/* ── 仓库 ── */}
+      <div className="biz-section-title">仓库</div>
+      <div className="biz-cell" onClick={() => toggleSwitch('warehouse')} style={{cursor:'pointer'}}>
+        <span className="biz-cell-label">仓库</span>
+        <div className={`biz-switch${switches.warehouse ? '' : ' biz-switch--off'}`}>
+          <div className="biz-switch-thumb"></div>
+        </div>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('manageSupplier')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.manageSupplier ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <span className="biz-cell-label">允许新增仓库、设置多仓发货</span>
+      </div>
+      <div className="biz-cell" style={{cursor:'pointer'}}>
+        <span className="biz-cell-label">可管理的仓库</span>
+        <div className="biz-cell-selector biz-cell-selector--disabled">
+          未分配
+          <i data-lucide="chevron-right" style={{width:16,height:16,color:'var(--color-text-tertiary)'}}></i>
+        </div>
+      </div>
+
+      <div className="biz-section-spacer"></div>
+
+      {/* ── 订单 ── */}
+      <div className="biz-section-title">订单</div>
+      <div className="biz-cell" onClick={() => toggleSwitch('order')} style={{cursor:'pointer'}}>
+        <span className="biz-cell-label">订单</span>
+        <div className={`biz-switch${switches.order ? '' : ' biz-switch--off'}`}>
+          <div className="biz-switch-thumb"></div>
+        </div>
+      </div>
+      <div className="biz-cell" style={{cursor:'pointer'}}>
+        <span className="biz-cell-label">权限范围</span>
+        <div className="biz-cell-selector">
+          仅自己的订单
+          <i data-lucide="chevron-down" style={{width:16,height:16}}></i>
+        </div>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('viewOrders')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.viewOrders ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <span className="biz-cell-label">允许查看订单</span>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('createOrder')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.createOrder ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <span className="biz-cell-label">允许使用开单</span>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('viewPhone')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.viewPhone ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <span className="biz-cell-label">允许查看完整的客户收件电话</span>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('modifyOrder')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.modifyOrder ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <span className="biz-cell-label">允许修改订单(包括改单、改价等)</span>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('modifySender')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.modifySender ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <span className="biz-cell-label">允许修改发件人信息</span>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('modifyPayment')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.modifyPayment ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <span className="biz-cell-label">允许修改收款状态(私下收款)</span>
+      </div>
+
+      <div className="biz-section-spacer"></div>
+
+      {/* ── 采购 ── */}
+      <div className="biz-section-title">采购</div>
+      <div className="biz-cell" onClick={() => toggleSwitch('purchase')} style={{cursor:'pointer'}}>
+        <span className="biz-cell-label">采购</span>
+        <div className={`biz-switch${switches.purchase ? '' : ' biz-switch--off'}`}>
+          <div className="biz-switch-thumb"></div>
+        </div>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('purchaseOrder')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.purchaseOrder ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <span className="biz-cell-label">允许采购开单</span>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('viewSupplier')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.viewSupplier ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <span className="biz-cell-label">允许查看供应商</span>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('manageSupplier')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.manageSupplier ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <span className="biz-cell-label">允许管理供应商</span>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('buyFromUp')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.buyFromUp ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <span className="biz-cell-label">允许购买上家的商品</span>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('managePurchase')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.managePurchase ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <span className="biz-cell-label">允许管理和导出采购单</span>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('manageBackup')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.manageBackup ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <span className="biz-cell-label">允许管理和导出备货单</span>
+      </div>
+
+      <div className="biz-section-spacer"></div>
+
+      {/* ── 发货 ── */}
+      <div className="biz-section-title">发货</div>
+      <div className="biz-cell" onClick={() => toggleSwitch('delivery')} style={{cursor:'pointer'}}>
+        <span className="biz-cell-label">发货</span>
+        <div className={`biz-switch${switches.delivery ? '' : ' biz-switch--off'}`}>
+          <div className="biz-switch-thumb"></div>
+        </div>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('deliveryGoods')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.deliveryGoods ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <span className="biz-cell-label">允许对销售单进行发货操作</span>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('setShipping')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.setShipping ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <span className="biz-cell-label">可设置运费与配送方式</span>
+      </div>
+
+      <div className="biz-section-spacer"></div>
+
+      {/* ── 财务 ── */}
+      <div className="biz-section-title">财务</div>
+      <div className="biz-cell" onClick={() => toggleSwitch('finance')} style={{cursor:'pointer'}}>
+        <span className="biz-cell-label">财务</span>
+        <div className={`biz-switch${switches.finance ? '' : ' biz-switch--off'}`}>
+          <div className="biz-switch-thumb"></div>
+        </div>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('walletOp')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.walletOp ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <span className="biz-cell-label">允许对钱包进行充值和提现操作</span>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('viewTransaction')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.viewTransaction ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <span className="biz-cell-label">允许查看交易数据</span>
+      </div>
+
+      <div className="biz-section-spacer"></div>
+
+      {/* ── 运营 ── */}
+      <div className="biz-section-title">运营</div>
+      <div className="biz-cell" onClick={() => toggleSwitch('ops')} style={{cursor:'pointer'}}>
+        <span className="biz-cell-label">运营</span>
+        <div className={`biz-switch${switches.ops ? '' : ' biz-switch--off'}`}>
+          <div className="biz-switch-thumb"></div>
+        </div>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('privateDomain')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.privateDomain ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <span className="biz-cell-label">允许使用私域销售管理</span>
+      </div>
+      <div className="biz-cell" style={{cursor:'pointer'}}>
+        <span className="biz-cell-label">权限范围</span>
+        <div className="biz-cell-selector">
+          仅自己的数据
+          <i data-lucide="chevron-down" style={{width:16,height:16}}></i>
+        </div>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('createManageTask')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.createManageTask ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <span className="biz-cell-label">允许创建并管理任务</span>
+      </div>
+      <div className="biz-cell" style={{cursor:'pointer'}}>
+        <span className="biz-cell-label">权限范围</span>
+        <div className="biz-cell-selector">
+          仅自己创建的任务
+          <i data-lucide="chevron-down" style={{width:16,height:16}}></i>
+        </div>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('shopDeco')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.shopDeco ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <span className="biz-cell-label">允许使用店铺装修与复制装修</span>
+      </div>
+      <div className="biz-cell" onClick={() => togglePermission('marketingGames')} style={{cursor:'pointer'}}>
+        <div className={`biz-cell-checkbox${permissions.marketingGames ? ' biz-cell-checkbox--checked' : ''}`}></div>
+        <span className="biz-cell-label">允许使用所有的营销与互动小游戏</span>
+      </div>
+    </div>
+  );
+}
+
+/* ═══ App Root ═══ */
+function App() {
+  const [screen, setScreen] = useState('home');
+
+  useEffect(() => {
+    lucide.createIcons();
+  }, [screen]);
+
+  return (
+    <div className="phone-screen">
+      <StatusBar />
+      {screen === 'home' && (
+        <div className="phone-header">
+          <span className="phone-header-title">微购精选</span>
+        </div>
+      )}
+      {screen === 'detail' && (
+        <div className="phone-header">
+          <div className="phone-header-back" onClick={() => setScreen('home')}>
+            <i data-lucide="chevron-left" style={{width:24,height:24}}></i>
+          </div>
+          <span className="phone-header-title">商品详情</span>
+        </div>
+      )}
+      {screen === 'profile' && (
+        <div className="phone-header">
+          <span className="phone-header-title">我的</span>
+        </div>
+      )}
+      {screen === 'bizSettings' && (
+        <div className="biz-navbar" style={{flexShrink:0}}>
+          <div className="biz-navbar-left">
+            <span onClick={() => setScreen('profile')}>取消</span>
+          </div>
+          <div className="biz-navbar-center">岗位权限设置</div>
+          <div className="biz-navbar-right">
+            <button className="biz-save-btn" onClick={() => setScreen('profile')}>保存</button>
+          </div>
+        </div>
+      )}
+      <div className="phone-body">
+        {screen === 'home' && <HomeScreen onProductClick={() => setScreen('detail')} />}
+        {screen === 'detail' && <DetailScreen />}
+        {screen === 'profile' && <ProfileScreen onBizSettings={() => setScreen('bizSettings')} />}
+        {screen === 'bizSettings' && <BizSettingsScreen onBack={() => setScreen('profile')} />}
+      </div>
+      <BottomNav current={screen === 'bizSettings' ? 'profile' : screen} onNavigate={setScreen} />
+      <HomeIndicator />
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

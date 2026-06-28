@@ -1,0 +1,140 @@
+{
+  "slug": "form",
+  "name": "表单容器",
+  "sourceKind": "inferred",
+  "confidence": "high",
+  "description": "表单容器组件，封装表单字段项（FormBody）。支持水平/垂直两种布局，默认 labelWidth 96px，支持自定义 80/120px。内置 text / phone / money / textarea / select 等多种输入类型，支持 error 错误提示、counter 字数计数、upload 上传占位、expand 展开内容等功能。",
+  "variants": [
+    {
+      "name": "水平布局 (Horizontal)",
+      "type": "horizontal",
+      "description": "默认布局，Label 与输入区左右排列，align-items center，gap 24px，min-height 56px"
+    },
+    {
+      "name": "垂直布局 (Vertical)",
+      "type": "vertical",
+      "description": "Label 与输入区上下排列，flex-direction column，align-items stretch，padding 16px"
+    }
+  ],
+  "inputTypes": [
+    {
+      "name": "纯文本 (Text)",
+      "type": "text",
+      "description": "单行文本输入，无边框透明背景，16px Regular，placeholder 灰字"
+    },
+    {
+      "name": "手机号 (Phone)",
+      "type": "phone",
+      "description": "包含区号输入（49px 宽）与号码输入，中间 0.5px 竖线分隔"
+    },
+    {
+      "name": "金额 (Money)",
+      "type": "money",
+      "description": "货币符号（如 ¥）+ 数字输入，数字区使用 WegoKeyboard N9 字体"
+    },
+    {
+      "name": "多行文本 (Textarea)",
+      "type": "textarea",
+      "description": "多行输入，支持固定高度 120px（--fixed-height），resize none"
+    },
+    {
+      "name": "选择 (Select)",
+      "type": "select",
+      "description": "点击展开选择，右侧箭头图标，placeholder 文字 + has-value 状态，整行点击有按压态"
+    }
+  ],
+  "modifiers": [
+    {
+      "name": "无分割线",
+      "slug": "no-divider",
+      "description": "隐藏所有 form-body 底部的 0.5px 分割线"
+    },
+    {
+      "name": "标签宽度 80",
+      "slug": "label-w80",
+      "description": "Label 宽度设为 80px"
+    },
+    {
+      "name": "标签宽度 120",
+      "slug": "label-w120",
+      "description": "Label 宽度设为 120px"
+    },
+    {
+      "name": "固定高度",
+      "slug": "fixed-height",
+      "description": "配合 vertical 布局使用，整体高度 120px，textarea 自适应填充"
+    },
+    {
+      "name": "可点击行",
+      "slug": "clickable",
+      "description": "整行可点击（Select 右箭头模式），按压时背景变为 --color-state-pressed"
+    },
+    {
+      "name": "错误状态",
+      "slug": "error",
+      "description": "显示错误消息（form-body__error），隐藏字数计数"
+    }
+  ],
+  "features": [
+    {
+      "name": "计数 (Counter)",
+      "description": "字数计数显示，位于输入框下方，绝对定位，10px 字号，--color-text-disabled"
+    },
+    {
+      "name": "错误消息 (Error)",
+      "description": "错误提示文字，位于输入框下方，绝对定位，10px 字号，--color-danger，优先于 counter 显示"
+    },
+    {
+      "name": "上传 (Upload)",
+      "description": "64x64px 虚线边框占位区，内含图标 + 文字提示，点击有按压态"
+    },
+    {
+      "name": "右侧按钮 (Right Button)",
+      "description": "右侧内嵌按钮/链接区域，支持 Link、Button、IconText 三种类型"
+    },
+    {
+      "name": "展开内容 (Expand)",
+      "description": "可展开的内容区域，14px Regular，--color-text-secondary"
+    },
+    {
+      "name": "图标操作 (Icon Actions)",
+      "description": "右侧水平排列的图标按钮组，gap 16px，32x32px 区域"
+    },
+    {
+      "name": "下拉区域 (Dropdown)",
+      "description": "展开后的下拉选项区域，8px 上内边距，12px 下内边距"
+    }
+  ],
+  "designTokens": {
+    "defaultLabelWidth": "96px",
+    "customLabelWidths": ["80px", "120px"],
+    "horizontalGap": "24px",
+    "paddingHorizontal": "16px",
+    "paddingVertical": "12px",
+    "verticalPadding": "16px",
+    "minHeight": "56px",
+    "fixedHeight": "120px",
+    "labelFontSize": "16px",
+    "labelFontWeight": 400,
+    "labelLineHeight": "16px",
+    "inputFontSize": "16px",
+    "inputFontWeight": 400,
+    "inputLineHeight": "16px",
+    "fontFamily": "PingFang SC",
+    "fontFamilyNumber": "WegoKeyboard N9",
+    "placeholderColor": "var(--color-text-placeholder)",
+    "dividerHeight": "0.5px",
+    "dividerColor": "var(--color-divider-default)",
+    "errorColor": "var(--color-danger)",
+    "counterColor": "var(--color-text-disabled)",
+    "messageFontSize": "10px",
+    "uploadSize": "64px",
+    "uploadBorder": "1px dashed var(--color-border-default)",
+    "uploadBorderRadius": "var(--radius-md)",
+    "iconActionSize": "32px",
+    "phoneCodeWidth": "49px",
+    "phoneDividerWidth": "0.5px",
+    "phoneDividerHeight": "14px"
+  },
+  "unknowns": []
+}

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../components.css">
+<link rel="stylesheet" href="../iconfont.css">
+<style>
+/* Page scaffold */
+body { margin:0; padding:32px !important; background:var(--color-bg-page); font-family:var(--font-family-text); color:var(--color-text-primary); }
+.row { display:flex; gap:var(--space-8); align-items:center; margin-bottom:var(--space-8); flex-wrap:wrap; }
+.label { font-size:var(--font-size-12); color:var(--color-text-tertiary); width:92px; flex-shrink:0; white-space:nowrap; }
+.section-title { font-size:var(--font-size-14); font-weight:var(--font-weight-semibold); margin:var(--space-16) 0 var(--space-8); color:var(--color-text-primary); }
+hr.divider { border:none; border-top:1px solid var(--color-divider-default); margin:4px 0 var(--space-8); }
+.sub-label { font-size:var(--font-size-12); color:var(--color-text-tertiary); margin:var(--space-8) 0 var(--space-4); }
+
+/* Dark mode preview strip */
+.dark-strip { background:#1C1C1E; border-radius:var(--radius-sm); padding:var(--space-16); margin:0 0 var(--space-8); }
+.dark-strip .label { color:rgba(255,255,255,0.6); }
+
+/* Interactive demo */
+.demo-hint { font-size:var(--font-size-12); color:var(--color-brand); margin:var(--space-8) 0 var(--space-4); font-weight:var(--font-weight-medium); }
+.setting-row { display:flex; align-items:center; justify-content:space-between; padding:var(--space-12) 0; border-bottom:0.5px solid var(--color-divider-default); max-width:560px; }
+.setting-row:last-child { border-bottom:none; }
+.setting-info { display:flex; flex-direction:column; gap:2px; }
+.setting-name { font-size:var(--font-size-14); font-weight:var(--font-weight-medium); color:var(--color-text-primary); }
+.setting-desc { font-size:var(--font-size-12); color:var(--color-text-tertiary); }
+
+/* Toast feedback */
+.toast { position:fixed; bottom:40px; left:50%; transform:translateX(-50%) translateY(20px); background:rgba(0,0,0,0.75); color:#fff; font-size:var(--font-size-12); padding:8px 20px; border-radius:20px; opacity:0; transition:opacity .25s ease, transform .25s ease; pointer-events:none; z-index:100; white-space:nowrap; }
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div class="section-title">默认状态</div>
+<div class="row">
+  <span class="label">开启 (On)</span>
+  <div class="switch switch--on"><div class="switch__thumb"></div></div>
+  <span class="label">关闭 (Off)</span>
+  <div class="switch switch--off"><div class="switch__thumb"></div></div>
+  <span class="label">开启+禁用</span>
+  <div class="switch switch--on switch--disabled"><div class="switch__thumb"></div></div>
+  <span class="label">关闭+禁用</span>
+  <div class="switch switch--off switch--disabled"><div class="switch__thumb"></div></div>
+</div>
+
+<hr class="divider">
+
+<div class="section-title">暗色模式</div>
+<div class="dark-strip dark-mode">
+  <div class="row">
+    <span class="label">暗色开启</span>
+    <div class="switch switch--on"><div class="switch__thumb"></div></div>
+    <span class="label">暗色关闭</span>
+    <div class="switch switch--off"><div class="switch__thumb"></div></div>
+    <span class="label">暗色开启+禁用</span>
+    <div class="switch switch--on switch--disabled"><div class="switch__thumb"></div></div>
+    <span class="label">暗色关闭+禁用</span>
+    <div class="switch switch--off switch--disabled"><div class="switch__thumb"></div></div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<div class="section-title">交互演示</div>
+<p class="demo-hint">点击开关试试</p>
+<div class="setting-row">
+  <div class="setting-info">
+    <span class="setting-name">消息通知</span>
+    <span class="setting-desc">接收新消息推送提醒</span>
+  </div>
+  <div class="switch switch--on" data-toggle="notifications"><div class="switch__thumb"></div></div>
+</div>
+<div class="setting-row">
+  <div class="setting-info">
+    <span class="setting-name">深色模式</span>
+    <span class="setting-desc">切换页面为深色主题</span>
+  </div>
+  <div class="switch switch--off" data-toggle="darkmode"><div class="switch__thumb"></div></div>
+</div>
+<div class="setting-row">
+  <div class="setting-info">
+    <span class="setting-name">自动播放</span>
+    <span class="setting-desc">在 Wi-Fi 环境下自动播放视频</span>
+  </div>
+  <div class="switch switch--on" data-toggle="autoplay"><div class="switch__thumb"></div></div>
+</div>
+<div class="setting-row">
+  <div class="setting-info">
+    <span class="setting-name">定位服务</span>
+    <span class="setting-desc">允许应用获取地理位置信息</span>
+  </div>
+  <div class="switch switch--off" data-toggle="location"><div class="switch__thumb"></div></div>
+</div>
+<div class="setting-row">
+  <div class="setting-info">
+    <span class="setting-name">免打扰模式</span>
+    <span class="setting-desc">已禁用，无法手动更改</span>
+  </div>
+  <div class="switch switch--off switch--disabled" data-toggle="dnd"><div class="switch__thumb"></div></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function() {
+  document.querySelectorAll('.switch[data-toggle]').forEach(function(sw) {
+    sw.addEventListener('click', function() {
+      if (sw.classList.contains('switch--disabled')) return;
+      var isOn = sw.classList.contains('switch--on');
+      var name = sw.getAttribute('data-toggle');
+      if (isOn) { sw.classList.remove('switch--on'); sw.classList.add('switch--off'); }
+      else { sw.classList.remove('switch--off'); sw.classList.add('switch--on'); }
+      showToast(name, !isOn);
+    });
+  });
+  var toastTimer = null;
+  var labels = { notifications:'消息通知', darkmode:'深色模式', autoplay:'自动播放', location:'定位服务', dnd:'免打扰模式' };
+  function showToast(key, isOn) {
+    var el = document.getElementById('toast');
+    var label = labels[key] || key;
+    el.textContent = label + (isOn ? ' 已开启' : ' 已关闭');
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function() { el.classList.remove('show'); }, 1500);
+  }
+})();
+</script>
+</body>
+</html>

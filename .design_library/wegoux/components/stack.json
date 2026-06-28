@@ -1,0 +1,47 @@
+{
+  "slug": "stack",
+  "name": "选项卡",
+  "sourceKind": "inferred",
+  "confidence": "high",
+  "description": "选项卡组件，用于多项选择的方块式选项。24x24px 选项块，纵向图标上文字下布局。支持未选/已选两种状态，品牌绿填充 + 白色勾标记，borderRadius 4px。",
+  "variants": [
+    {
+      "name": "未选中 (Unselected)",
+      "type": "unselected",
+      "description": "默认状态，白色背景（--color-bg-surface），1px 灰色边框 rgba(0,0,0,0.12)，无勾标记"
+    },
+    {
+      "name": "已选中 (Selected)",
+      "type": "selected",
+      "className": "stack--selected",
+      "description": "品牌绿色填充背景和边框（--color-brand），选项块内部显示白色勾标记（16x16px SVG 图标）",
+      "tokens": {
+        "background": "var(--color-brand)",
+        "borderColor": "var(--color-brand)"
+      }
+    }
+  ],
+  "slots": [
+    { "name": "stack__bg", "description": "24x24px 选项块，边框圆角 4px，flex 居中，transition 过渡动画" },
+    { "name": "stack__check-badge", "description": "白色勾选标记，16x16px，默认隐藏，选中时 flex 显示" },
+    { "name": "stack__label", "description": "选项文字标签，14px Regular，--color-text-primary，text-align center" }
+  ],
+  "designTokens": {
+    "blockSize": "24px",
+    "borderRadius": "4px",
+    "borderWidth": "1px",
+    "defaultBorderColor": "rgba(0,0,0,0.12)",
+    "defaultBackground": "var(--color-bg-surface)",
+    "selectedBackground": "var(--color-brand)",
+    "selectedBorderColor": "var(--color-brand)",
+    "checkSize": "16px",
+    "labelFontSize": "14px",
+    "labelFontWeight": 400,
+    "fontFamily": "PingFang SC",
+    "gap": "4px",
+    "transitionDuration": "var(--duration-fast)",
+    "transitionEasing": "var(--ease-standard)",
+    "cursor": "pointer"
+  },
+  "unknowns": []
+}

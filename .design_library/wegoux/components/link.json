@@ -1,0 +1,69 @@
+{
+  "slug": "link",
+  "name": "链接",
+  "sourceKind": "inferred",
+  "confidence": "high",
+  "description": "链接组件，用于文字跳转操作。支持 standalone（20px 高）/ inline（自适应高度）两种模式，链接色 #285B9A，14px Medium 字体，active 态灰色背景按压，disabled 态 20% 透明度。",
+  "variants": [
+    {
+      "name": "独立链接 (Standalone)",
+      "type": "standalone",
+      "className": "link",
+      "description": "独立的链接块，高度 20px，左右有 4px 水平内边距作为点击热区，块级 flex 布局",
+      "tokens": {
+        "height": "20px",
+        "display": "inline-flex",
+        "paddingHorizontal": "4px",
+        "gap": "4px"
+      }
+    },
+    {
+      "name": "内联链接 (Inline)",
+      "type": "inline",
+      "className": "link--inline",
+      "description": "内联在文本中的链接，高度自适应（auto），无内边距，随文字流排列",
+      "tokens": {
+        "height": "auto",
+        "padding": "0"
+      }
+    }
+  ],
+  "states": [
+    {
+      "name": "默认 (Default)",
+      "type": "default",
+      "description": "蓝色文字 #285B9A，正常可点击状态"
+    },
+    {
+      "name": "按压 (Active)",
+      "type": "active",
+      "description": "背景变为灰色（--color-neutral-alpha-06），文字颜色保持不变"
+    },
+    {
+      "name": "禁用 (Disabled)",
+      "type": "disabled",
+      "className": "link--disabled",
+      "description": "整体透明度 20%，pointer-events none，cursor not-allowed，active 态背景不受影响"
+    }
+  ],
+  "designTokens": {
+    "color": "#285B9A",
+    "fontSize": "14px",
+    "fontWeight": 500,
+    "fontFamily": "PingFang SC",
+    "lineHeight": "14px",
+    "standaloneHeight": "20px",
+    "standalonePaddingHorizontal": "4px",
+    "gap": "4px",
+    "activeBackground": "var(--color-neutral-alpha-06)",
+    "disabledOpacity": 0.2,
+    "borderRadius": "0",
+    "cursor": "pointer",
+    "textDecoration": "none",
+    "userSelect": "none",
+    "tapHighlightColor": "transparent",
+    "transitionDuration": "var(--duration-fast)",
+    "transitionEasing": "var(--ease-standard)"
+  },
+  "unknowns": []
+}

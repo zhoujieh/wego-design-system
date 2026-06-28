@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../iconfont.css">
+<style>
+/* Page scaffold */
+body { margin:0; padding:32px !important; background:var(--color-bg-page); font-family:var(--font-family-text); color:var(--color-text-primary); }
+.row { display:flex; gap:var(--space-8); align-items:center; margin-bottom:var(--space-8); flex-wrap:wrap; }
+.label { font-size:var(--font-size-12); color:var(--color-text-tertiary); width:92px; flex-shrink:0; white-space:nowrap; }
+.section-title { font-size:var(--font-size-14); font-weight:var(--font-weight-semibold); margin:var(--space-16) 0 var(--space-8); color:var(--color-text-primary); }
+hr.divider { border:none; border-top:1px solid var(--color-divider-default); margin:4px 0 var(--space-8); }
+
+/* @component-css-start */
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:var(--space-4); border:none; cursor:pointer; font-family:var(--font-family-text); font-weight:var(--font-weight-medium); white-space:nowrap; transition:background var(--duration-fast) var(--ease-standard); flex-shrink:0; }
+
+/* ── Icon (iconfont，仅支持加号图标，用于新建场景) ── */
+.btn__icon { font-family:"wego-iconfont-s" !important; font-style:normal; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; line-height:1; flex-shrink:0; }
+.btn--sm .btn__icon { font-size:16px; }
+.btn--md .btn__icon, .btn--lg .btn__icon { font-size:20px; }
+.btn--icon-only { padding:0 !important; width:var(--size-40); min-width:unset; max-width:unset; }
+.btn--sm.btn--icon-only { width:var(--size-32); }
+
+/* ── Emphasis ── */
+.btn--strong { background:var(--color-brand); color:var(--color-text-inverse); }
+.btn--strong:hover { background:var(--color-brand-hover); }
+.btn--strong:active { background:var(--color-brand-disabled); }
+.btn--strong.btn--disabled { background:var(--color-neutral-alpha-03); color:var(--color-text-disabled); pointer-events:none; cursor:not-allowed; }
+.btn--medium { background:var(--color-neutral-alpha-03); color:var(--color-brand); }
+.btn--medium:hover { background:var(--color-neutral-alpha-06); }
+.btn--medium:active { background:var(--color-neutral-alpha-10); }
+.btn--medium.btn--disabled { background:var(--color-neutral-alpha-03); color:var(--color-text-disabled); pointer-events:none; cursor:not-allowed; }
+.btn--weak { background:var(--color-neutral-alpha-03); color:var(--color-text-primary); }
+.btn--weak:hover { background:var(--color-neutral-alpha-06); }
+.btn--weak:active { background:var(--color-neutral-alpha-10); }
+.btn--weak.btn--disabled { background:var(--color-neutral-alpha-03); color:var(--color-text-disabled); pointer-events:none; cursor:not-allowed; }
+
+/* ── Size ── */
+.btn--lg { height:var(--size-48); min-width:144px; max-width:180px; padding:0 14px; font-size:var(--font-size-f18); border-radius:var(--radius-md); }
+.btn--md { height:var(--size-40); min-width:var(--size-40); padding:0 14px; font-size:var(--font-size-f16); border-radius:var(--radius-md); }
+.btn--sm { height:var(--size-32); min-width:var(--size-32); max-width:120px; padding:0 12px; font-size:var(--font-size-f14); border-radius:var(--radius-sm); }
+/* @component-css-end */
+</style>
+</head>
+<body>
+<div class="section-title">强调级别 (Emphasis) — Size: Medium (40px)</div>
+<div class="row">
+  <span class="label">强 / Strong</span>
+  <button class="btn btn--strong btn--md">主要操作</button>
+</div>
+<div class="row">
+  <span class="label">中 / Medium</span>
+  <button class="btn btn--medium btn--md">灰底绿字</button>
+</div>
+<div class="row">
+  <span class="label">弱 / Weak</span>
+  <button class="btn btn--weak btn--md">灰底深字</button>
+</div>
+
+<hr class="divider">
+
+<div class="section-title">尺寸 (Size) — Emphasis: Strong</div>
+<div class="row">
+  <span class="label">大 / Large</span>
+  <button class="btn btn--strong btn--lg">大型 48px</button>
+</div>
+<div class="row">
+  <span class="label">中 / Medium</span>
+  <button class="btn btn--strong btn--md">中型 40px</button>
+</div>
+<div class="row">
+  <span class="label">小 / Small</span>
+  <button class="btn btn--strong btn--sm">小型 32px</button>
+</div>
+
+<hr class="divider">
+
+<div class="section-title">带加号图标 (icon-jia16, 新建场景)</div>
+<div class="row">
+  <span class="label">文字 + 图标</span>
+  <button class="btn btn--strong btn--md"><i class="btn__icon icon-jia16"></i>新建商品</button>
+  <button class="btn btn--medium btn--md"><i class="btn__icon icon-jia16"></i>添加</button>
+  <button class="btn btn--weak btn--md"><i class="btn__icon icon-jia16"></i>新建</button>
+</div>
+<div class="row">
+  <span class="label">仅图标(正方形)</span>
+  <button class="btn btn--strong btn--md btn--icon-only"><i class="btn__icon icon-jia16"></i></button>
+  <button class="btn btn--medium btn--md btn--icon-only"><i class="btn__icon icon-jia16"></i></button>
+  <button class="btn btn--weak btn--sm btn--icon-only"><i class="btn__icon icon-jia16"></i></button>
+</div>
+
+<hr class="divider">
+
+<div class="section-title">状态 (State)</div>
+<div class="row">
+  <span class="label">默认</span>
+  <button class="btn btn--strong btn--md">Strong 默认</button>
+  <button class="btn btn--medium btn--md">Medium 默认</button>
+  <button class="btn btn--weak btn--md">Weak 默认</button>
+</div>
+<div class="row">
+  <span class="label">禁用</span>
+  <button class="btn btn--strong btn--md btn--disabled" disabled>Strong 禁用</button>
+  <button class="btn btn--medium btn--md btn--disabled" disabled>Medium 禁用</button>
+  <button class="btn btn--weak btn--md btn--disabled" disabled>Weak 禁用</button>
+</div>
+
+<hr class="divider">
+
+<div class="section-title">完整矩阵 — 大/中/小 × 强/中/弱</div>
+<div class="row">
+  <span class="label">大·强</span>
+  <button class="btn btn--strong btn--lg">确认提交</button>
+  <span class="label">大·中</span>
+  <button class="btn btn--medium btn--lg">取消返回</button>
+  <span class="label">大·弱</span>
+  <button class="btn btn--weak btn--lg">查看详情</button>
+</div>
+<div class="row">
+  <span class="label">中·强</span>
+  <button class="btn btn--strong btn--md">确认</button>
+  <span class="label">中·中</span>
+  <button class="btn btn--medium btn--md">取消</button>
+  <span class="label">中·弱</span>
+  <button class="btn btn--weak btn--md">编辑</button>
+</div>
+<div class="row">
+  <span class="label">小·强</span>
+  <button class="btn btn--strong btn--sm">分享</button>
+  <span class="label">小·中</span>
+  <button class="btn btn--medium btn--sm">保存</button>
+  <span class="label">小·弱</span>
+  <button class="btn btn--weak btn--sm">更多</button>
+</div>
+
+</body>
+</html>

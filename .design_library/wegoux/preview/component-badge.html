@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>角标 — 微购设计系统</title>
+  <link rel="stylesheet" href="../colors_and_type.css">
+  <link rel="stylesheet" href="../components.css">
+  <link rel="stylesheet" href="../iconfont.css">
+  <style>
+    /* Page scaffold — 与其他组件预览页统一 */
+    body { margin:0; padding:32px !important; background:var(--wg-color-bg-page); font-family:var(--wg-font-family-text); color:var(--wg-color-text-primary); }
+    .section { margin-bottom:32px; }
+    .section-title { font-size:var(--wg-font-size-f14); font-weight:var(--wg-font-weight-medium); color:var(--wg-color-text-primary); margin:0 0 12px 0; }
+    .section-desc { font-size:var(--wg-font-size-f10); color:var(--wg-color-text-tertiary); margin:0 0 12px 0; }
+    .row { display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
+    .label { font-size:var(--wg-font-size-f10); color:var(--wg-color-text-tertiary); min-width:72px; flex-shrink:0; }
+    .divider { border:none; border-top:1px solid var(--wg-color-divider-default); margin:16px 0; }
+
+    /* Demo helpers */
+    .demo-cell {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 48px;
+      padding: 0 16px;
+      background: var(--wg-color-base-static-white);
+      border: 0.5px solid var(--wg-color-base-neutral-alpha-08);
+      border-radius: var(--wg-radius-sm);
+    }
+    .demo-img-wrap {
+      position: relative;
+      width: 64px;
+      height: 64px;
+      border-radius: var(--wg-radius-sm);
+      overflow: visible;
+    }
+    .demo-img {
+      width: 64px;
+      height: 64px;
+      border-radius: var(--wg-radius-sm);
+      background: linear-gradient(135deg, var(--wg-color-base-neutral-alpha-06), var(--wg-color-base-neutral-alpha-10));
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== Section 1: 行内显示 ===== -->
+  <div class="section">
+    <div class="section-title">行内显示</div>
+    <div class="section-desc">Badge 行内显示，数字默认居中对齐。文字类 badge 支持左/中/右对齐。</div>
+
+    <div class="row">
+      <span class="label">默认</span>
+      <span class="badge badge--dot"></span>
+      <span class="badge badge--number">3</span>
+      <span class="badge badge--number badge--number-multi">99+</span>
+      <span class="badge badge--yellow">HOT</span>
+      <span class="badge badge--green">新品首发特惠</span>
+      <span class="badge badge--bubble">限时折扣推荐</span>
+      <span class="badge badge--delete"></span>
+    </div>
+
+    <div class="row">
+      <span class="label">圆角(行内)</span>
+      <span style="font-size:var(--wg-font-size-f14);">微购</span>
+      <span class="badge badge--round" style="background:var(--wg-color-base-accent-green-500); color:var(--wg-color-base-static-white); height:16px; padding:0 4px; font-size:var(--wg-font-size-f10);">限时折扣推荐</span>
+      <span style="font-size:var(--wg-font-size-f14);">热门</span>
+      <span class="badge badge--round" style="background:var(--wg-color-base-danger-500); color:var(--wg-color-base-static-white); height:16px; padding:0 4px; font-size:var(--wg-font-size-f10);">新品首发特惠</span>
+    </div>
+
+    <hr class="divider">
+
+    <div class="section-desc" style="margin-top:0;">对齐方式：数字类 badge 始终居中，不受对齐配置影响。文字类 badge 在行内模式下可通过 badge--align-left / badge--align-center / badge--align-right 控制交叉轴对齐。</div>
+
+    <div class="row">
+      <span class="label">数字(始终居中)</span>
+      <span class="badge badge--number">3</span>
+      <span class="badge badge--number badge--number-multi">99+</span>
+    </div>
+    <div class="row">
+      <span class="label">文字-居左</span>
+      <span class="badge badge--yellow badge--align-left">HOT</span>
+      <span class="badge badge--green badge--align-left">新品首发特惠</span>
+    </div>
+    <div class="row">
+      <span class="label">文字-居中</span>
+      <span class="badge badge--yellow badge--align-center">HOT</span>
+      <span class="badge badge--green badge--align-center">新品首发特惠</span>
+    </div>
+    <div class="row">
+      <span class="label">文字-居右</span>
+      <span class="badge badge--yellow badge--align-right">HOT</span>
+      <span class="badge badge--green badge--align-right">新品首发特惠</span>
+    </div>
+  </div>
+
+  <!-- ===== Section 2: 右上角显示 ===== -->
+  <div class="section">
+    <div class="section-title">右上角显示</div>
+    <div class="section-desc">Badge 绝对定位于父元素右上角。父元素需设置 position: relative; overflow: visible。</div>
+
+    <div class="row">
+      <span class="label">小红点</span>
+      <div class="demo-cell" style="width:80px; position:relative; overflow:visible;">
+        消息
+        <span class="badge badge--corner badge--dot"></span>
+      </div>
+      <div class="demo-img-wrap">
+        <div class="demo-img"></div>
+        <span class="badge badge--corner badge--dot"></span>
+      </div>
+    </div>
+
+    <div class="row">
+      <span class="label">数字</span>
+      <div class="demo-cell" style="width:80px; position:relative; overflow:visible;">
+        微信
+        <span class="badge badge--corner badge--number">3</span>
+      </div>
+      <div class="demo-cell" style="width:80px; position:relative; overflow:visible;">
+        购物车
+        <span class="badge badge--corner badge--number badge--number-multi">99+</span>
+      </div>
+    </div>
+
+    <div class="row">
+      <span class="label">气泡标签</span>
+      <div class="demo-img-wrap">
+        <div class="demo-img"></div>
+        <span class="badge badge--corner badge--bubble">新品首发特惠</span>
+      </div>
+      <div class="demo-img-wrap">
+        <div class="demo-img"></div>
+        <span class="badge badge--corner badge--bubble">限时折扣推荐</span>
+      </div>
+    </div>
+
+    <div class="row">
+      <span class="label">黄/绿文字</span>
+      <div class="demo-img-wrap">
+        <div class="demo-img"></div>
+        <span class="badge badge--corner badge--yellow">HOT</span>
+      </div>
+      <div class="demo-img-wrap">
+        <div class="demo-img"></div>
+        <span class="badge badge--corner badge--green">新品首发特惠</span>
+      </div>
+    </div>
+
+    <div class="row">
+      <span class="label">删除</span>
+      <div class="demo-img-wrap">
+        <div class="demo-img"></div>
+        <span class="badge badge--corner badge--delete"></span>
+      </div>
+    </div>
+
+    <div class="row">
+      <span class="label">尖角(右上角)</span>
+      <div class="demo-img-wrap">
+        <div class="demo-img"></div>
+        <span class="badge badge--corner badge--sharp" style="background:var(--wg-color-base-accent-green-500); color:var(--wg-color-base-static-white); height:16px; padding:0 4px; font-size:var(--wg-font-size-f10);">限时折扣推荐</span>
+      </div>
+      <div class="demo-img-wrap">
+        <div class="demo-img"></div>
+        <span class="badge badge--corner badge--sharp" style="background:var(--wg-color-base-danger-500); color:var(--wg-color-base-static-white); height:16px; padding:0 4px; font-size:var(--wg-font-size-f10);">新品首发特惠</span>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="section-desc" style="margin-top:0;">展开方向：角标始终固定于右上角，通过 badge--corner-expand-left / badge--corner-expand-right / badge--corner-expand-center 控制内容延展方向。</div>
+
+    <div class="row">
+      <span class="label">expand-left(默认)</span>
+      <div class="demo-img-wrap">
+        <div class="demo-img"></div>
+        <span class="badge badge--corner badge--bubble badge--corner-expand-left">新品首发特惠</span>
+      </div>
+      <div class="demo-img-wrap">
+        <div class="demo-img"></div>
+        <span class="badge badge--corner badge--sharp badge--corner-expand-left" style="background:var(--wg-color-base-danger-500); color:var(--wg-color-base-static-white); height:16px; padding:0 4px; font-size:var(--wg-font-size-f10);">限时折扣推荐</span>
+      </div>
+    </div>
+    <div class="row">
+      <span class="label">expand-right</span>
+      <div class="demo-img-wrap">
+        <div class="demo-img"></div>
+        <span class="badge badge--corner badge--bubble badge--corner-expand-right">新品首发特惠</span>
+      </div>
+      <div class="demo-img-wrap">
+        <div class="demo-img"></div>
+        <span class="badge badge--corner badge--sharp badge--corner-expand-right" style="background:var(--wg-color-base-danger-500); color:var(--wg-color-base-static-white); height:16px; padding:0 4px; font-size:var(--wg-font-size-f10);">限时折扣推荐</span>
+      </div>
+    </div>
+    <div class="row">
+      <span class="label">expand-center</span>
+      <div class="demo-img-wrap">
+        <div class="demo-img"></div>
+        <span class="badge badge--corner badge--bubble badge--corner-expand-center">新品首发特惠</span>
+      </div>
+      <div class="demo-img-wrap">
+        <div class="demo-img"></div>
+        <span class="badge badge--corner badge--sharp badge--corner-expand-center" style="background:var(--wg-color-base-danger-500); color:var(--wg-color-base-static-white); height:16px; padding:0 4px; font-size:var(--wg-font-size-f10);">限时折扣推荐</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Section 3: 可滚动 ===== -->
+  <div class="section">
+    <div class="section-title">可滚动</div>
+    <div class="section-desc">独立配置，可与任意类型组合。限制最大宽度 28px，内容超出时溢出隐藏，配合滚动交互使用。默认左对齐，显示首个文字。</div>
+
+    <div class="row">
+      <span class="label">行内可滚动</span>
+      <span class="badge badge--round badge--scrollable" style="background:var(--wg-color-base-accent-green-500); color:var(--wg-color-base-static-white); height:16px; padding:0 4px; font-size:var(--wg-font-size-f10);">限时折扣推荐</span>
+      <span class="badge badge--round badge--scrollable" style="background:var(--wg-color-base-danger-500); color:var(--wg-color-base-static-white); height:16px; padding:0 4px; font-size:var(--wg-font-size-f10);">新品首发特惠</span>
+    </div>
+
+    <div class="row">
+      <span class="label">右上角可滚动</span>
+      <div class="demo-img-wrap">
+        <div class="demo-img"></div>
+        <span class="badge badge--corner badge--scrollable badge--sharp" style="background:var(--wg-color-base-accent-green-500); color:var(--wg-color-base-static-white); height:16px; padding:0 4px; font-size:var(--wg-font-size-f10);">限时折扣推荐</span>
+      </div>
+      <div class="demo-img-wrap">
+        <div class="demo-img"></div>
+        <span class="badge badge--corner badge--scrollable badge--sharp" style="background:var(--wg-color-base-danger-500); color:var(--wg-color-base-static-white); height:16px; padding:0 4px; font-size:var(--wg-font-size-f10);">新品首发特惠</span>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../components.css">
+<link rel="stylesheet" href="../iconfont.css">
+<style>
+/* Page scaffold */
+body { margin:0; padding:32px !important; background:var(--color-bg-page); font-family:var(--font-family-text); color:var(--color-text-primary); }
+.row { display:flex; gap:var(--space-8); align-items:center; margin-bottom:var(--space-8); flex-wrap:wrap; }
+.label { font-size:var(--font-size-12); color:var(--color-text-tertiary); width:92px; flex-shrink:0; white-space:nowrap; }
+.section-title { font-size:var(--font-size-14); font-weight:var(--font-weight-semibold); margin:var(--space-16) 0 var(--space-8); color:var(--color-text-primary); }
+hr.divider { border:none; border-top:1px solid var(--color-divider-default); margin:4px 0 var(--space-8); }
+.sub-label { font-size:var(--font-size-12); color:var(--color-text-tertiary); margin:var(--space-8) 0 var(--space-4); }
+
+/* Dark mode preview strip */
+.dark-strip { background:#1C1C1E; border-radius:var(--radius-sm); padding:var(--space-16); margin:0 0 var(--space-8); }
+.dark-strip .label { color:rgba(255,255,255,0.6); }
+
+/* Interactive demo */
+.demo-hint { font-size:var(--font-size-12); color:var(--color-brand); margin:var(--space-8) 0 var(--space-4); font-weight:var(--font-weight-medium); }
+.interactive-row { display:flex; align-items:center; gap:var(--space-12); padding:var(--space-8) 0; border-bottom:0.5px solid var(--color-divider-default); cursor:pointer; max-width:560px; }
+.interactive-row:last-child { border-bottom:none; }
+.interactive-row .checkbox { cursor:pointer; }
+.interactive-row:hover .interactive-text { color:var(--color-text-primary); }
+.interactive-text { font-size:var(--font-size-14); color:var(--color-text-secondary); transition:color var(--duration-fast) var(--ease-standard); }
+</style>
+</head>
+<body>
+<div class="section-title">默认状态 — 24px</div>
+<div class="row">
+  <span class="label">未选中</span>
+  <div class="checkbox"><div class="checkbox__inner"></div></div>
+  <span class="label">选中</span>
+  <div class="checkbox checkbox--checked">
+    <div class="checkbox__inner"></div>
+    <div class="checkbox__icon">
+      <svg width="13" height="10" viewBox="0 0 13 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M4.41406 6.5L1.41406 3.5L0 4.91406L4.41406 9.32812L12.3281 1.41406L10.9141 0L4.41406 6.5Z" fill="white"/>
+      </svg>
+    </div>
+  </div>
+  <span class="label">部分选中</span>
+  <div class="checkbox checkbox--indeterminate">
+    <div class="checkbox__inner"></div>
+    <div class="checkbox__minus">
+      <svg width="8" height="2" viewBox="0 0 8 2" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6.75 1.5C7.16421 1.5 7.5 1.16421 7.5 0.75C7.5 0.335787 7.16421 0 6.75 0H0.75C0.335786 0 0 0.335787 0 0.75C0 1.16421 0.335786 1.5 0.75 1.5H6.75Z" fill="white"/>
+      </svg>
+    </div>
+  </div>
+  <span class="label">标记数量</span>
+  <div class="checkbox checkbox--count">
+    <div class="checkbox__count"><span>2</span></div>
+  </div>
+  <span class="label">超量 (99+)</span>
+  <div class="checkbox checkbox--count">
+    <div class="checkbox__count"><span>999</span></div>
+  </div>
+</div>
+
+<div class="section-title">默认状态 — 20px</div>
+<div class="row">
+  <span class="label">未选中</span>
+  <div class="checkbox checkbox--sm"><div class="checkbox__inner"></div></div>
+  <span class="label">选中</span>
+  <div class="checkbox checkbox--checked checkbox--sm">
+    <div class="checkbox__inner"></div>
+    <div class="checkbox__icon">
+      <svg width="13" height="10" viewBox="0 0 13 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M4.41406 6.5L1.41406 3.5L0 4.91406L4.41406 9.32812L12.3281 1.41406L10.9141 0L4.41406 6.5Z" fill="white"/>
+      </svg>
+    </div>
+  </div>
+  <span class="label">部分选中</span>
+  <div class="checkbox checkbox--indeterminate checkbox--sm">
+    <div class="checkbox__inner"></div>
+    <div class="checkbox__minus">
+      <svg width="8" height="2" viewBox="0 0 8 2" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6.75 1.5C7.16421 1.5 7.5 1.16421 7.5 0.75C7.5 0.335787 7.16421 0 6.75 0H0.75C0.335786 0 0 0.335787 0 0.75C0 1.16421 0.335786 1.5 0.75 1.5H6.75Z" fill="white"/>
+      </svg>
+    </div>
+  </div>
+  <span class="label">标记数量</span>
+  <div class="checkbox checkbox--count checkbox--sm">
+    <div class="checkbox__count"><span>2</span></div>
+  </div>
+  <span class="label">超量 (99+)</span>
+  <div class="checkbox checkbox--count checkbox--sm">
+    <div class="checkbox__count"><span>999</span></div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<div class="section-title">禁用状态 — 24px</div>
+<div class="row">
+  <span class="label">禁用未选中</span>
+  <div class="checkbox checkbox--disabled"><div class="checkbox__inner"></div></div>
+  <span class="label">禁用选中</span>
+  <div class="checkbox checkbox--checked checkbox--disabled">
+    <div class="checkbox__inner"></div>
+    <div class="checkbox__icon">
+      <svg width="13" height="10" viewBox="0 0 13 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M4.41406 6.5L1.41406 3.5L0 4.91406L4.41406 9.32812L12.3281 1.41406L10.9141 0L4.41406 6.5Z" fill="white"/>
+      </svg>
+    </div>
+  </div>
+  <span class="label">禁用部分选中</span>
+  <div class="checkbox checkbox--indeterminate checkbox--disabled">
+    <div class="checkbox__inner"></div>
+    <div class="checkbox__minus">
+      <svg width="8" height="2" viewBox="0 0 8 2" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6.75 1.5C7.16421 1.5 7.5 1.16421 7.5 0.75C7.5 0.335787 7.16421 0 6.75 0H0.75C0.335786 0 0 0.335787 0 0.75C0 1.16421 0.335786 1.5 0.75 1.5H6.75Z" fill="white"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<div class="section-title">禁用状态 — 20px</div>
+<div class="row">
+  <span class="label">禁用未选中</span>
+  <div class="checkbox checkbox--disabled checkbox--sm"><div class="checkbox__inner"></div></div>
+  <span class="label">禁用选中</span>
+  <div class="checkbox checkbox--checked checkbox--disabled checkbox--sm">
+    <div class="checkbox__inner"></div>
+    <div class="checkbox__icon">
+      <svg width="13" height="10" viewBox="0 0 13 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M4.41406 6.5L1.41406 3.5L0 4.91406L4.41406 9.32812L12.3281 1.41406L10.9141 0L4.41406 6.5Z" fill="white"/>
+      </svg>
+    </div>
+  </div>
+  <span class="label">禁用部分选中</span>
+  <div class="checkbox checkbox--indeterminate checkbox--disabled checkbox--sm">
+    <div class="checkbox__inner"></div>
+    <div class="checkbox__minus">
+      <svg width="8" height="2" viewBox="0 0 8 2" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6.75 1.5C7.16421 1.5 7.5 1.16421 7.5 0.75C7.5 0.335787 7.16421 0 6.75 0H0.75C0.335786 0 0 0.335787 0 0.75C0 1.16421 0.335786 1.5 0.75 1.5H6.75Z" fill="white"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<div class="section-title">暗色模式 — 24px</div>
+<div class="dark-strip dark-mode">
+  <div class="row">
+    <span class="label">暗色未选中</span>
+    <div class="checkbox"><div class="checkbox__inner"></div></div>
+    <span class="label">暗色选中</span>
+    <div class="checkbox checkbox--checked">
+      <div class="checkbox__inner"></div>
+      <div class="checkbox__icon">
+        <svg width="13" height="10" viewBox="0 0 13 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M4.41406 6.5L1.41406 3.5L0 4.91406L4.41406 9.32812L12.3281 1.41406L10.9141 0L4.41406 6.5Z" fill="white"/>
+        </svg>
+      </div>
+    </div>
+    <span class="label">暗色禁用未选中</span>
+    <div class="checkbox checkbox--disabled"><div class="checkbox__inner"></div></div>
+    <span class="label">暗色禁用选中</span>
+    <div class="checkbox checkbox--checked checkbox--disabled">
+      <div class="checkbox__inner"></div>
+      <div class="checkbox__icon">
+        <svg width="13" height="10" viewBox="0 0 13 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M4.41406 6.5L1.41406 3.5L0 4.91406L4.41406 9.32812L12.3281 1.41406L10.9141 0L4.41406 6.5Z" fill="white"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section-title">暗色模式 — 20px</div>
+<div class="dark-strip dark-mode">
+  <div class="row">
+    <span class="label">暗色未选中</span>
+    <div class="checkbox checkbox--sm"><div class="checkbox__inner"></div></div>
+    <span class="label">暗色选中</span>
+    <div class="checkbox checkbox--checked checkbox--sm">
+      <div class="checkbox__inner"></div>
+      <div class="checkbox__icon">
+        <svg width="13" height="10" viewBox="0 0 13 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M4.41406 6.5L1.41406 3.5L0 4.91406L4.41406 9.32812L12.3281 1.41406L10.9141 0L4.41406 6.5Z" fill="white"/>
+        </svg>
+      </div>
+    </div>
+    <span class="label">暗色禁用未选中</span>
+    <div class="checkbox checkbox--disabled checkbox--sm"><div class="checkbox__inner"></div></div>
+    <span class="label">暗色禁用选中</span>
+    <div class="checkbox checkbox--checked checkbox--disabled checkbox--sm">
+      <div class="checkbox__inner"></div>
+      <div class="checkbox__icon">
+        <svg width="13" height="10" viewBox="0 0 13 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M4.41406 6.5L1.41406 3.5L0 4.91406L4.41406 9.32812L12.3281 1.41406L10.9141 0L4.41406 6.5Z" fill="white"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<div class="section-title">交互演示</div>
+<p class="demo-hint">复选框点击切换选中/未选中；父级根据子级状态自动计算（全选/部分选/全不选）</p>
+
+<div class="sub-label">基础交互 — 24px</div>
+<div class="interactive-row" data-mode="toggle" data-size="24">
+  <div class="checkbox"><div class="checkbox__inner"></div></div>
+  <span class="interactive-text">选项 A</span>
+</div>
+<div class="interactive-row" data-mode="toggle" data-size="24">
+  <div class="checkbox"><div class="checkbox__inner"></div></div>
+  <span class="interactive-text">选项 B</span>
+</div>
+<div class="interactive-row" data-mode="toggle" data-size="24">
+  <div class="checkbox"><div class="checkbox__inner"></div></div>
+  <span class="interactive-text">选项 C</span>
+</div>
+
+<div class="sub-label">基础交互 — 20px</div>
+<div class="interactive-row" data-mode="toggle" data-size="20">
+  <div class="checkbox checkbox--sm"><div class="checkbox__inner"></div></div>
+  <span class="interactive-text">选项 X</span>
+</div>
+<div class="interactive-row" data-mode="toggle" data-size="20">
+  <div class="checkbox checkbox--sm"><div class="checkbox__inner"></div></div>
+  <span class="interactive-text">选项 Y</span>
+</div>
+<div class="interactive-row" data-mode="toggle" data-size="20">
+  <div class="checkbox checkbox--sm"><div class="checkbox__inner"></div></div>
+  <span class="interactive-text">选项 Z</span>
+</div>
+
+<div class="sub-label">父子联动（部分选中的实际场景）</div>
+<div class="interactive-row" data-mode="parent" data-children="child-group-1" data-size="24">
+  <div class="checkbox"><div class="checkbox__inner"></div></div>
+  <span class="interactive-text" style="font-weight:var(--font-weight-medium);color:var(--color-text-primary)">全选</span>
+</div>
+<div id="child-group-1" style="padding-left:36px;">
+  <div class="interactive-row" data-mode="child" data-size="20">
+    <div class="checkbox checkbox--sm"><div class="checkbox__inner"></div></div>
+    <span class="interactive-text">子项 1</span>
+  </div>
+  <div class="interactive-row" data-mode="child" data-size="20">
+    <div class="checkbox checkbox--sm"><div class="checkbox__inner"></div></div>
+    <span class="interactive-text">子项 2</span>
+  </div>
+  <div class="interactive-row" data-mode="child" data-size="20">
+    <div class="checkbox checkbox--sm"><div class="checkbox__inner"></div></div>
+    <span class="interactive-text">子项 3</span>
+  </div>
+</div>
+
+<script>
+(function() {
+  var CHECK_SVG = '<svg width="13" height="10" viewBox="0 0 13 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M4.41406 6.5L1.41406 3.5L0 4.91406L4.41406 9.32812L12.3281 1.41406L10.9141 0L4.41406 6.5Z" fill="white"/></svg>';
+  var MINUS_SVG = '<svg width="8" height="2" viewBox="0 0 8 2" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6.75 1.5C7.16421 1.5 7.5 1.16421 7.5 0.75C7.5 0.335787 7.16421 0 6.75 0H0.75C0.335786 0 0 0.335787 0 0.75C0 1.16421 0.335786 1.5 0.75 1.5H6.75Z" fill="white"/></svg>';
+
+  function setChecked(cb, size) {
+    cb.classList.remove('checkbox--indeterminate');
+    cb.classList.add('checkbox--checked');
+    var old = cb.querySelector('.checkbox__icon'); if (old) old.remove();
+    old = cb.querySelector('.checkbox__minus'); if (old) old.remove();
+    var icon = document.createElement('div'); icon.className = 'checkbox__icon'; icon.innerHTML = CHECK_SVG; cb.appendChild(icon);
+  }
+  function setUnchecked(cb) {
+    cb.classList.remove('checkbox--checked', 'checkbox--indeterminate');
+    var old = cb.querySelector('.checkbox__icon'); if (old) old.remove();
+    old = cb.querySelector('.checkbox__minus'); if (old) old.remove();
+  }
+  function setIndeterminate(cb) {
+    cb.classList.remove('checkbox--checked');
+    cb.classList.add('checkbox--indeterminate');
+    var old = cb.querySelector('.checkbox__icon'); if (old) old.remove();
+    old = cb.querySelector('.checkbox__minus'); if (old) old.remove();
+    var minus = document.createElement('div'); minus.className = 'checkbox__minus'; minus.innerHTML = MINUS_SVG; cb.appendChild(minus);
+  }
+  function isChecked(cb) { return cb.classList.contains('checkbox--checked'); }
+
+  // Toggle mode: simple checked/unchecked
+  document.querySelectorAll('.interactive-row[data-mode="toggle"]').forEach(function(row) {
+    row.addEventListener('click', function() {
+      var cb = row.querySelector('.checkbox');
+      if (isChecked(cb)) { setUnchecked(cb); }
+      else { setChecked(cb); }
+    });
+  });
+
+  // Parent-child mode
+  function updateParent(parentRow) {
+    var groupId = parentRow.getAttribute('data-children');
+    var group = document.getElementById(groupId);
+    if (!group) return;
+    var children = group.querySelectorAll('.interactive-row[data-mode="child"] .checkbox');
+    var checkedCount = 0;
+    children.forEach(function(c) { if (isChecked(c)) checkedCount++; });
+    var parentCb = parentRow.querySelector('.checkbox');
+    if (checkedCount === children.length) { setChecked(parentCb); }
+    else if (checkedCount === 0) { setUnchecked(parentCb); }
+    else { setIndeterminate(parentCb); }
+  }
+
+  // Child click
+  document.querySelectorAll('.interactive-row[data-mode="child"]').forEach(function(row) {
+    row.addEventListener('click', function() {
+      var cb = row.querySelector('.checkbox');
+      if (isChecked(cb)) { setUnchecked(cb); }
+      else { setChecked(cb); }
+      // Find parent and update
+      var group = row.closest('[id^="child-group"]');
+      if (group) {
+        var parentRow = document.querySelector('.interactive-row[data-children="' + group.id + '"]');
+        if (parentRow) updateParent(parentRow);
+      }
+    });
+  });
+
+  // Parent click: toggle all children
+  document.querySelectorAll('.interactive-row[data-mode="parent"]').forEach(function(row) {
+    row.addEventListener('click', function() {
+      var groupId = row.getAttribute('data-children');
+      var group = document.getElementById(groupId);
+      if (!group) return;
+      var parentCb = row.querySelector('.checkbox');
+      var allChecked = true;
+      var children = group.querySelectorAll('.interactive-row[data-mode="child"] .checkbox');
+      children.forEach(function(c) { if (!isChecked(c)) allChecked = false; });
+      children.forEach(function(c) {
+        if (allChecked) { setUnchecked(c); }
+        else { setChecked(c); }
+      });
+      updateParent(row);
+    });
+  });
+})();
+</script>
+</body>
+</html>

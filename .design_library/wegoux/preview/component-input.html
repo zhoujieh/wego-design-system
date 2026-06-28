@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>输入框 - 微购设计系统</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+/* Page scaffold — NOT extracted */
+body { margin: 0; padding: 32px !important; background: var(--color-bg-page); font-family: var(--font-family-text); color: var(--color-text-primary); }
+.specimen { display: flex; flex-direction: column; gap: var(--space-0); }
+.stage { display: flex; flex-direction: column; gap: var(--space-0); }
+.story { display: flex; flex-direction: column; gap: var(--space-8); margin-bottom: var(--space-12); }
+.story:last-child { margin-bottom: var(--space-0); }
+.story-label { width: 92px; flex-shrink: 0; font-size: var(--font-size-12); font-weight: var(--font-weight-medium); color: var(--color-text-secondary); line-height: var(--font-lineheight-12); }
+.rail { display: flex; gap: var(--space-16); align-items: flex-start; flex-wrap: wrap; }
+.rail.counter-rail { gap: var(--space-32); align-items: flex-start; }
+.divider { border: none; border-top: 1px solid var(--color-divider-default); margin: var(--space-0) var(--space-0) var(--space-12); }
+
+/* @component-css-start */
+.input-group { display: flex; flex-direction: column; gap: var(--space-8); width: 100%; max-width: 320px; flex-shrink: 0; }
+.input-group .field-label { font-size: var(--font-size-14); font-weight: var(--font-weight-medium); color: var(--color-text-primary); line-height: var(--font-lineheight-14); white-space: nowrap; }
+.input-group input, .input-group textarea { width: 100%; box-sizing: border-box; border: 1px solid var(--color-border-default); border-radius: var(--radius-sm); background: var(--color-bg-surface); color: var(--color-text-primary); font-size: 14px; font-family: var(--font-family-text); line-height: 14px; padding: 0 12px; outline: none; transition: border-color var(--duration-fast) var(--ease-standard); }
+.input-group input { height: 36px; }
+.input-group textarea { min-height: 96px; resize: vertical; padding: 8px; }
+.input-group input::placeholder, .input-group textarea::placeholder { color: var(--color-text-placeholder); }
+.input-group input:focus, .input-group textarea:focus { border-color: var(--color-brand); }
+.input-group.is-error input, .input-group.is-error textarea { border-color: var(--color-danger); color: var(--color-danger); }
+.input-group.is-disabled input, .input-group.is-disabled textarea { background: var(--color-bg-muted); color: var(--color-text-disabled); cursor: not-allowed; }
+.input-group.is-disabled .field-label { color: var(--color-text-disabled); }
+
+/* ── Counter ────────────────────────────────────────────────── */
+.counter { position: relative; display: inline-flex; flex-direction: column; gap: var(--space-2); flex-shrink: 0; width: 96px; }
+.counter--sm { width: 80px; }
+.counter--lg { width: 120px; }
+.counter__body { display: flex; align-items: center; gap: var(--space-4); height: var(--size-32); padding: var(--space-2); background: var(--color-neutral-alpha-03); border-radius: var(--radius-sm); width: 100%; box-sizing: border-box; }
+.counter__btn { display: flex; align-items: center; justify-content: center; width: var(--size-28); height: var(--size-28); border: 0.5px solid #e7e9ee; border-radius: var(--radius-xs); background: var(--color-bg-surface); cursor: pointer; flex-shrink: 0; color: var(--color-text-primary); transition: background var(--duration-fast) var(--ease-standard); }
+.counter__btn:hover { background: var(--color-neutral-alpha-03); }
+.counter__btn:active { background: var(--color-neutral-alpha-06); }
+.counter__btn svg { width: var(--size-16); height: var(--size-16); }
+.counter__value { flex: 1 1 0; min-width: 0; height: 100%; border: none; outline: none; background: transparent; text-align: center; font-family: var(--font-family-number); font-size: var(--font-number-nf14); font-weight: var(--font-weight-medium); color: var(--color-text-primary); padding: 0; font-feature-settings: "zero"; line-height: normal; }
+.counter__value::placeholder { color: var(--color-text-placeholder); }
+.counter__value:focus { color: var(--color-text-primary); }
+/* Counter hint / error message — absolutely positioned below the body */
+.counter__message { position: absolute; top: calc(var(--size-32) + var(--space-2)); left: 0; width: 100%; overflow: hidden; text-align: center; font-size: var(--font-size-10); font-family: var(--font-family-text); font-weight: var(--font-weight-regular); white-space: nowrap; text-overflow: ellipsis; font-feature-settings: "zero"; line-height: normal; pointer-events: none; }
+.counter__hint { color: var(--color-text-disabled); display: none; }
+.counter__error { color: var(--color-danger); display: none; }
+/* State: hint visible */
+.counter.is-hint .counter__hint { display: block; }
+/* State: error visible */
+.counter.is-error .counter__error { display: block; }
+/* State: disabled */
+.counter.is-disabled .counter__body { opacity: 0.5; pointer-events: none; }
+
+/* ── Number Input (数字输入框) ──────────────────────────────── */
+.number-input { display: flex; align-items: center; gap: var(--space-8); width: 120px; min-width: 80px; max-width: 128px; height: var(--size-32); padding: 6px var(--space-8); background: #f8f9fa; border: 0.5px solid rgba(32, 47, 100, 0.08); border-radius: var(--radius-sm); box-sizing: border-box; transition: border-color var(--duration-fast) var(--ease-standard); }
+.number-input__field { flex: 1 1 0; min-width: 0; border: none; outline: none; background: transparent; text-align: center; font-family: var(--font-family-number); font-size: var(--font-size-16); font-weight: var(--font-weight-medium); color: var(--color-text-primary); line-height: 20px; padding: 0; font-feature-settings: "zero"; }
+.number-input__field::placeholder { color: var(--color-text-disabled); font-size: var(--font-size-14); font-weight: var(--font-weight-regular); }
+.number-input__suffix { flex-shrink: 0; font-size: var(--font-size-14); font-weight: var(--font-weight-regular); color: var(--color-text-secondary); text-align: right; white-space: nowrap; font-feature-settings: "zero"; }
+/* Focus */
+.number-input.is-focus { border-color: var(--color-text-primary); }
+/* Error */
+.number-input.is-error { background: rgba(255, 51, 51, 0.1); border-color: #f33; }
+.number-input.is-error .number-input__field { color: var(--color-danger); }
+/* Disabled */
+.number-input.is-disabled { opacity: 0.5; pointer-events: none; }
+/* @component-css-end */
+</style>
+</head>
+<body>
+<div class="specimen">
+<div class="stage">
+<!-- Text Input -->
+<div class="story">
+<span class="story-label">标准文本输入</span>
+<div class="rail">
+<div class="input-group">
+<span class="field-label">手机号</span>
+<input type="text" placeholder="请输入手机号码">
+</div>
+<div class="input-group">
+<span class="field-label">手机号</span>
+<input type="text" value="13800138000">
+</div>
+<div class="input-group is-error">
+<span class="field-label">手机号</span>
+<input type="text" value="15011102223">
+</div>
+<div class="input-group is-disabled">
+<span class="field-label">手机号</span>
+<input type="text" value="13800138000" disabled>
+</div>
+</div>
+</div>
+<hr class="divider">
+<!-- Textarea -->
+<div class="story">
+<span class="story-label">多行文本输入</span>
+<div class="rail">
+<div class="input-group">
+<span class="field-label">备注</span>
+<textarea placeholder="请输入备注信息（最多200字）"></textarea>
+</div>
+<div class="input-group">
+<span class="field-label">备注</span>
+<textarea>商品已收到，包装完好，物流很快。</textarea>
+</div>
+</div>
+</div>
+<hr class="divider">
+<!-- Number Input -->
+<div class="story">
+<span class="story-label">数字输入框</span>
+<div class="rail">
+<div class="number-input" data-number-input>
+<input class="number-input__field" type="text" inputmode="decimal" placeholder="请输入">
+<span class="number-input__suffix">元</span>
+</div>
+<div class="number-input" data-number-input>
+<input class="number-input__field" type="text" inputmode="decimal" value="888">
+<span class="number-input__suffix">元</span>
+</div>
+<div class="number-input is-error" data-number-input>
+<input class="number-input__field" type="text" inputmode="decimal" value="888">
+<span class="number-input__suffix">元</span>
+</div>
+<div class="number-input is-error" data-number-input>
+<input class="number-input__field" type="text" inputmode="decimal" placeholder="请输入">
+<span class="number-input__suffix">元</span>
+</div>
+<div class="number-input is-disabled">
+<input class="number-input__field" type="text" inputmode="decimal" value="888" disabled>
+<span class="number-input__suffix">元</span>
+</div>
+</div>
+</div>
+<hr class="divider">
+<!-- Counter -->
+<div class="story">
+<span class="story-label">计数器</span>
+<div class="rail counter-rail">
+<!-- Counter: 默认态 (96px) -->
+<div class="counter" data-counter>
+<div class="counter__body">
+<button class="counter__btn counter__btn--minus" aria-label="减少">
+<svg viewBox="0 0 16 16" fill="none"><path d="M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+</button>
+<input class="counter__value" type="text" inputmode="numeric" value="1" maxlength="7">
+<button class="counter__btn counter__btn--plus" aria-label="增加">
+<svg viewBox="0 0 16 16" fill="none"><path d="M3 8H13M8 3V13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+</button>
+</div>
+<div class="counter__message counter__hint"></div>
+<div class="counter__message counter__error"></div>
+</div>
+<!-- Counter: 提示态 (库存信息) -->
+<div class="counter is-hint" data-counter data-counter-max="100" data-counter-hinttext="库存100">
+<div class="counter__body">
+<button class="counter__btn counter__btn--minus" aria-label="减少">
+<svg viewBox="0 0 16 16" fill="none"><path d="M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+</button>
+<input class="counter__value" type="text" inputmode="numeric" value="1" maxlength="7">
+<button class="counter__btn counter__btn--plus" aria-label="增加">
+<svg viewBox="0 0 16 16" fill="none"><path d="M3 8H13M8 3V13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+</button>
+</div>
+<div class="counter__message counter__hint">库存100</div>
+<div class="counter__message counter__error"></div>
+</div>
+<!-- Counter: 报错态 (点击减号可恢复) -->
+<div class="counter is-error" data-counter data-counter-max="99" data-counter-min="1" data-counter-errortext="数量不能超过99" data-counter-hinttext="库存99">
+<div class="counter__body">
+<button class="counter__btn counter__btn--minus" aria-label="减少">
+<svg viewBox="0 0 16 16" fill="none"><path d="M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+</button>
+<input class="counter__value" type="text" inputmode="numeric" value="99" maxlength="7">
+<button class="counter__btn counter__btn--plus" aria-label="增加">
+<svg viewBox="0 0 16 16" fill="none"><path d="M3 8H13M8 3V13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+</button>
+</div>
+<div class="counter__message counter__hint">库存99</div>
+<div class="counter__message counter__error">数量不能超过99</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+// ── Number Input: focus state ──
+document.querySelectorAll('[data-number-input]').forEach(wrapper => {
+  const field = wrapper.querySelector('.number-input__field');
+  field.addEventListener('focus', () => wrapper.classList.add('is-focus'));
+  field.addEventListener('blur', () => wrapper.classList.remove('is-focus'));
+});
+
+// ── Counter: editable input with +/- buttons ──
+document.querySelectorAll('[data-counter]').forEach(counter => {
+  const valueEl = counter.querySelector('.counter__value');
+  const minusBtn = counter.querySelector('.counter__btn--minus');
+  const plusBtn = counter.querySelector('.counter__btn--plus');
+  const hintEl = counter.querySelector('.counter__hint');
+  const errorEl = counter.querySelector('.counter__error');
+  const max = parseInt(counter.dataset.counterMax) || Infinity;
+  const min = parseInt(counter.dataset.counterMin) || -Infinity;
+  const errorText = counter.dataset.counterErrortext || '';
+  const hintText = counter.dataset.counterHinttext || '';
+
+  function getValue() {
+    const raw = valueEl.value.replace(/[^\d\-]/g, '');
+    return raw === '' ? 0 : parseInt(raw, 10);
+  }
+
+  function setValue(v) {
+    valueEl.value = v;
+  }
+
+  function validate() {
+    const val = getValue();
+    if (errorText && val >= max) {
+      counter.classList.add('is-error');
+      counter.classList.remove('is-hint');
+      errorEl.textContent = errorText;
+    } else if (hintText) {
+      counter.classList.remove('is-error');
+      counter.classList.add('is-hint');
+      hintEl.textContent = hintText;
+    } else {
+      counter.classList.remove('is-error');
+      counter.classList.remove('is-hint');
+    }
+  }
+
+  // Only allow digits (and optional leading minus), max 7 chars
+  valueEl.addEventListener('input', () => {
+    let raw = valueEl.value.replace(/[^\d\-]/g, '');
+    if (raw.indexOf('-') > 0) raw = raw.replace(/-/g, '');
+    if (raw.length > 7) raw = raw.slice(0, 7);
+    valueEl.value = raw;
+  });
+
+  // Validate on blur
+  valueEl.addEventListener('blur', () => { validate(); });
+
+  // Validate on Enter
+  valueEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { valueEl.blur(); }
+  });
+
+  minusBtn.addEventListener('click', () => {
+    let val = getValue();
+    if (val > min) { setValue(val - 1); validate(); }
+  });
+  plusBtn.addEventListener('click', () => {
+    let val = getValue();
+    if (val < max) { setValue(val + 1); validate(); }
+  });
+});
+</script>
+</body>
+</html>

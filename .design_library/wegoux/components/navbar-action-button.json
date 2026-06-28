@@ -1,0 +1,68 @@
+{
+  "slug": "navbar-action-button",
+  "name": "导航栏操作按钮",
+  "sourceKind": "inferred",
+  "confidence": "high",
+  "description": "导航栏右侧操作区按钮组件，配合 NavBar 的 actionComponent1/2/3 使用。支持纯文字、图标、图标+文字、按钮样式和完全自定义五种类型。一个 NavBar 最多可放置 3 个。",
+  "variants": [
+    {
+      "name": "纯文字按钮 (TEXT)",
+      "actionType": "TEXT",
+      "text": "操作区",
+      "fontSize": "16px",
+      "maxChars": 4
+    },
+    {
+      "name": "图标按钮 (ICON)",
+      "actionType": "ICON",
+      "iconSize": "24px",
+      "iconHorizontalPadding": "8px"
+    },
+    {
+      "name": "图标+文字 (ICON_TEXT)",
+      "actionType": "ICON_TEXT",
+      "iconSize": "20px",
+      "textSize": "10px",
+      "iconHorizontalPadding": "4px",
+      "layout": "vertical"
+    },
+    {
+      "name": "按钮样式 (BUTTON)",
+      "actionType": "BUTTON",
+      "text": "确认收货",
+      "buttonHeight": "32px",
+      "buttonRadius": "6px",
+      "buttonBg": "#03C160",
+      "textSize": "14px",
+      "textColor": "#FFFFFF",
+      "minWidth": "32px",
+      "maxWidth": "120px"
+    },
+    {
+      "name": "图片按钮 (PICTURE)",
+      "actionType": "PICTURE",
+      "iconSize": "24px",
+      "rendersVia": "WGImage"
+    }
+  ],
+  "designTokens": {
+    "defaultIconSize": "24px",
+    "defaultIconTextIconSize": "20px",
+    "defaultTextFontSize": "16px",
+    "defaultIconTextFontSize": "10px",
+    "defaultHorizontalPadding": "8px",
+    "iconTextHorizontalPadding": "4px",
+    "buttonMinHeight": "32px",
+    "buttonMaxHeight": "32px",
+    "buttonMinWidth": "32px",
+    "buttonMaxWidth": "120px",
+    "buttonRadius": "6px",
+    "buttonBgColor": "#03C160",
+    "buttonTextColor": "#FFFFFF",
+    "buttonTextSize": "14px",
+    "maxTextChars": 4,
+    "activeOpacity": 0.6,
+    "actionItemWidth": "44px"
+  },
+  "unknowns": []
+}

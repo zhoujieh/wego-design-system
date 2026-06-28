@@ -1,0 +1,29 @@
+{
+  "kitType": "app",
+  "screensGenerated": 4,
+  "coreComponentsUsed": ["bottom-nav", "button", "card", "chip", "badge", "avatar", "input"],
+  "supportComponentsUsed": [],
+  "previewClassReuseRate": 0.52,
+  "reuseAssessment": "人工审计估算：商品流和资料页复用了较多组件 class；业务设置页和手机外壳存在较多演示样式。",
+  "inventedComponents": ["phone-status", "phone-header", "phone-indicator", "biz-cell", "biz-switch", "biz-cell-checkbox"],
+  "recommendedRefactors": {
+    "phone-header": "navbar",
+    "biz-cell": "cell",
+    "biz-switch": "switch",
+    "biz-cell-checkbox": "checkbox",
+    "product-media-placeholder": "image"
+  },
+  "interactiveStatesRendered": ["active", "disabled", "selected"],
+  "primaryActionPerScreen": true,
+  "mockDataDensity": {
+    "productCards": 3,
+    "settingRows": 12,
+    "tableRows": 0,
+    "chartPoints": 0
+  },
+  "warnings": [
+    "UI Kit 是移动端应用 Showcase，不是可直接复制的页面模板。",
+    "部分演示图标来自 Lucide CDN；生产使用应优先替换为 iconfont.css 或 icons/ 中已有资产。",
+    "业务设置页的 biz-* 样式尚未沉淀为注册组件；若要复用，应先补组件契约和预览页。"
+  ]
+}

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>头像 - 微购设计系统</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+/* Page scaffold -- NOT extracted */
+body { margin: 0; padding: 32px !important; background: var(--color-bg-page); font-family: var(--font-family-text); color: var(--color-text-primary); }
+.row { display: flex; gap: 20px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
+.label { font-size: var(--font-size-12); color: var(--color-text-tertiary); min-width: 92px; flex-shrink: 0; }
+.divider { border: none; border-top: var(--stroke-width-hairline) var(--stroke-style-solid) var(--color-divider-default); margin: 8px 0 12px; }
+
+/* @component-css-start */
+.avatar { border-radius: 100px; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; box-sizing: border-box; border: 0.5px solid var(--wg-color-base-neutral-alpha-08); position: relative; }
+.avatar--24 { width: 24px; height: 24px; }
+.avatar--40 { width: 40px; height: 40px; }
+.avatar--56 { width: 56px; height: 56px; }
+/* Image avatar */
+.avatar--image img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 100px; position: absolute; inset: 0; pointer-events: none; }
+/* Initials avatar */
+.avatar--initials { background: var(--wg-color-base-neutral-500); color: var(--wg-color-base-static-white); font-family: var(--wg-font-family-text); font-weight: 500; user-select: none; white-space: nowrap; line-height: normal; font-feature-settings: "zero"; }
+.avatar--24.avatar--initials { font-size: 12px; }
+.avatar--40.avatar--initials { font-size: 20px; }
+.avatar--56.avatar--initials { font-size: 28px; }
+/* @component-css-end */
+</style>
+</head>
+<body>
+
+<!-- Row 1: Default avatar (placeholder image) -->
+<div class="row">
+  <span class="label">默认头像</span>
+  <div class="avatar avatar--24 avatar--image"><img src="http://localhost:3845/assets/65374637c9ef72970e810198a41540824752d176.png" alt=""></div>
+  <div class="avatar avatar--40 avatar--image"><img src="http://localhost:3845/assets/65374637c9ef72970e810198a41540824752d176.png" alt=""></div>
+  <div class="avatar avatar--56 avatar--image"><img src="http://localhost:3845/assets/65374637c9ef72970e810198a41540824752d176.png" alt=""></div>
+</div>
+
+<hr class="divider">
+
+<!-- Row 2: Text avatar (initials) -->
+<div class="row">
+  <span class="label">文字头像</span>
+  <div class="avatar avatar--24 avatar--initials">首</div>
+  <div class="avatar avatar--40 avatar--initials">首</div>
+  <div class="avatar avatar--56 avatar--initials">首</div>
+</div>
+
+<hr class="divider">
+
+<!-- Row 3: Real image avatar -->
+<div class="row">
+  <span class="label">图片头像</span>
+  <div class="avatar avatar--24 avatar--image"><img src="http://localhost:3845/assets/6e4e2e588a30611a3cf07a679637dde6dba8f66d.png" alt=""></div>
+  <div class="avatar avatar--40 avatar--image"><img src="http://localhost:3845/assets/6e4e2e588a30611a3cf07a679637dde6dba8f66d.png" alt=""></div>
+  <div class="avatar avatar--56 avatar--image"><img src="http://localhost:3845/assets/6e4e2e588a30611a3cf07a679637dde6dba8f66d.png" alt=""></div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,85 @@
+{
+  "slug": "badge",
+  "name": "角标",
+  "sourceKind": "inferred",
+  "confidence": "high",
+  "description": "角标组件，用于标识未读数量、红点提醒、促销标签等。支持数字角标、红点、黄色/绿色/气泡文字角标、删除角标，以及右上角绝对定位模式。",
+  "variants": [
+    {
+      "name": "红点 (Dot)",
+      "type": "dot",
+      "width": "8px",
+      "height": "8px",
+      "background": "#FA5051",
+      "borderRadius": "999px"
+    },
+    {
+      "name": "数字角标 (Number)",
+      "type": "number",
+      "minWidth": "16px",
+      "height": "16px",
+      "background": "#FA5051",
+      "color": "#FFFFFF",
+      "fontSize": "10px",
+      "borderRadius": "999px",
+      "subTypes": [
+        { "name": "单数字", "description": "1-9" },
+        { "name": "多数字", "slug": "number-multi", "minWidth": "28px", "description": "99+" }
+      ]
+    },
+    {
+      "name": "黄色标签 (Yellow)",
+      "type": "yellow",
+      "height": "16px",
+      "background": "rgba(255,195,0,0.1)",
+      "color": "#FFC300",
+      "fontSize": "10px",
+      "borderRadius": "4px"
+    },
+    {
+      "name": "绿色标签 (Green)",
+      "type": "green",
+      "height": "16px",
+      "background": "rgba(3,193,96,0.1)",
+      "color": "#03C160",
+      "fontSize": "10px",
+      "borderRadius": "4px"
+    },
+    {
+      "name": "气泡标签 (Bubble)",
+      "type": "bubble",
+      "height": "16px",
+      "background": "#FF6045",
+      "color": "#FFFFFF",
+      "fontSize": "10px",
+      "borderRadius": "4px"
+    },
+    {
+      "name": "删除 (Delete)",
+      "type": "delete",
+      "width": "16px",
+      "height": "16px",
+      "background": "#B7BEC5",
+      "icon": "X 形交叉线",
+      "borderRadius": "999px"
+    }
+  ],
+  "modifiers": [
+    { "name": "右上角定位", "slug": "corner", "description": "absolute 定位在父元素右上角" },
+    { "name": "圆角无边", "slug": "round" },
+    { "name": "直角", "slug": "sharp" },
+    { "name": "左对齐", "slug": "align-left" },
+    { "name": "居中", "slug": "align-center" },
+    { "name": "右对齐", "slug": "align-right" }
+  ],
+  "designTokens": {
+    "fontFamily": "PingFang SC",
+    "fontWeight": 400,
+    "dotSize": "8px",
+    "numberMinWidth": "16px",
+    "numberMultiMinWidth": "28px",
+    "labelHeight": "16px",
+    "deleteSize": "16px"
+  },
+  "unknowns": []
+}

@@ -1,0 +1,59 @@
+{
+  "slug": "button",
+  "name": "按钮",
+  "sourceKind": "inferred",
+  "confidence": "high",
+  "description": "移动端按钮组件，支持强/中/弱三种强调级别和大/中/小三种尺寸。支持带图标模式（加号图标用于新建场景），以及纯图标正方形模式。",
+  "variants": [
+    {
+      "name": "强强调 (Strong)",
+      "emphasis": "strong",
+      "background": "#03C160",
+      "textColor": "#FFFFFF"
+    },
+    {
+      "name": "中强调 (Medium)",
+      "emphasis": "medium",
+      "background": "rgba(32, 47, 100, 0.03)",
+      "textColor": "#03C160"
+    },
+    {
+      "name": "弱强调 (Weak)",
+      "emphasis": "weak",
+      "background": "rgba(32, 47, 100, 0.03)",
+      "textColor": "#1E2028"
+    },
+    {
+      "name": "仅图标 (Icon Only)",
+      "emphasis": "any",
+      "type": "icon-only",
+      "shape": "square"
+    }
+  ],
+  "sizes": [
+    { "name": "大 (Large)", "slug": "lg", "height": "48px", "minWidth": "144px", "maxWidth": "180px", "fontSize": "18px", "borderRadius": "8px" },
+    { "name": "中 (Medium)", "slug": "md", "height": "40px", "minWidth": "40px", "fontSize": "16px", "borderRadius": "8px" },
+    { "name": "小 (Small)", "slug": "sm", "height": "32px", "minWidth": "32px", "maxWidth": "120px", "fontSize": "14px", "borderRadius": "6px" }
+  ],
+  "states": [
+    { "name": "默认", "slug": "default" },
+    { "name": "悬浮", "slug": "hover" },
+    { "name": "按下", "slug": "active" },
+    { "name": "禁用", "slug": "disabled" }
+  ],
+  "slots": [
+    { "name": "icon", "description": "图标（使用 wego-iconfont-s，仅加号图标）" },
+    { "name": "label", "description": "按钮文字" }
+  ],
+  "designTokens": {
+    "fontFamily": "PingFang SC",
+    "fontWeight": 500,
+    "strongBg": "#03C160",
+    "mediumWeakBg": "rgba(32, 47, 100, 0.03)",
+    "disabledBg": "rgba(32, 47, 100, 0.03)",
+    "disabledTextColor": "#B7BEC5",
+    "iconOnlyWidth": "40px",
+    "iconOnlyWidthSm": "32px"
+  },
+  "unknowns": []
+}

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Link 链接 — 微购设计系统</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+/* Page scaffold */
+body { margin:0; padding:32px !important; background:var(--color-bg-page); font-family:var(--font-family-text); color:var(--color-text-primary); }
+.row { display:flex; gap:var(--space-8); align-items:center; margin-bottom:var(--space-8); flex-wrap:wrap; }
+.label { font-size:var(--font-size-12); color:var(--color-text-tertiary); width:120px; flex-shrink:0; white-space:nowrap; }
+.section-title { font-size:var(--font-size-14); font-weight:var(--font-weight-semibold); margin:var(--space-16) 0 var(--space-8); color:var(--color-text-primary); }
+hr.divider { border:none; border-top:1px solid var(--color-divider-default); margin:4px 0 var(--space-8); }
+
+/* @component-css-start */
+/* ── Link (Standalone) ── */
+.link { display:inline-flex; align-items:center; height:20px; gap:var(--space-4); color:var(--color-text-link); font-size:var(--font-size-14); font-weight:var(--font-weight-medium); line-height:var(--font-lineheight-14); cursor:pointer; text-decoration:none; transition:background var(--duration-fast) var(--ease-standard), opacity var(--duration-fast) var(--ease-standard); border-radius:0; padding:0 var(--space-4); user-select:none; -webkit-tap-highlight-color:transparent; }
+/* Pressed state — 无圆角 */
+.link:active { background:var(--color-neutral-alpha-06); }
+/* Disabled state */
+.link--disabled { opacity:0.2; pointer-events:none; cursor:not-allowed; }
+.link--disabled:active { background:transparent; }
+
+/* ── LinkSpan (Inline) ── */
+.link--inline { height:auto; padding:0; }
+.link--inline:active { background:var(--color-neutral-alpha-06); }
+
+/* @component-css-end */
+</style>
+</head>
+<body>
+
+<div class="section-title">Standalone — 默认态</div>
+<div class="row">
+  <span class="label">纯文本</span>
+  <a class="link" href="javascript:void(0)">View details</a>
+</div>
+
+<hr class="divider">
+
+<div class="section-title">Standalone — 禁用态</div>
+<div class="row">
+  <span class="label">纯文本禁用</span>
+  <a class="link link--disabled" href="javascript:void(0)">View details</a>
+</div>
+
+<hr class="divider">
+
+<div class="section-title">Inline — RichText 内联链接</div>
+<div class="row" style="max-width:320px; flex-wrap:wrap;">
+  <span style="font-size:var(--font-size-14); color:var(--color-text-secondary); line-height:var(--font-lineheight-14);">请阅读 </span>
+  <a class="link link--inline" href="javascript:void(0)">服务协议</a>
+  <span style="font-size:var(--font-size-14); color:var(--color-text-secondary); line-height:var(--font-lineheight-14);"> 和 </span>
+  <a class="link link--inline" href="javascript:void(0)">隐私政策</a>
+</div>
+<div class="row" style="max-width:320px; flex-wrap:wrap; margin-top:var(--space-16);">
+  <span style="font-size:var(--font-size-16); color:var(--color-text-secondary); line-height:var(--font-lineheight-16);">订单详情请 </span>
+  <a class="link link--inline" href="javascript:void(0)" style="font-size:var(--font-size-16); line-height:var(--font-lineheight-16);">查看详情</a>
+  <span style="font-size:var(--font-size-16); color:var(--color-text-secondary); line-height:var(--font-lineheight-16);"> 了解更多信息</span>
+</div>
+
+<hr class="divider">
+
+<div class="section-title">交互提示</div>
+<div style="font-size:var(--font-size-12); color:var(--color-text-tertiary); max-width:400px; line-height:1.6;">
+  Standalone 和 Inline 链接按下时背景均变为 neutral-alpha-06，无圆角，松手恢复。禁用时不透明度降至 20%，不响应点击。按住任意链接可体验按下态。
+</div>
+
+</body>
+</html>

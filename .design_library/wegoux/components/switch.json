@@ -1,0 +1,58 @@
+{
+  "slug": "switch",
+  "name": "开关",
+  "sourceKind": "inferred",
+  "confidence": "high",
+  "description": "开关组件，用于布尔值切换操作。52x32px 整体尺寸，品牌绿 #03C160 on 态 / #E5E5EA off 态背景，28x28px 白色圆形滑块带阴影，滑块位置过渡 150ms 动画，disabled 态 opacity 0.4。",
+  "variants": [
+    {
+      "name": "开启 (On)",
+      "type": "on",
+      "className": "switch--on",
+      "description": "开关开启状态，品牌绿色背景（--color-brand），滑块位于右侧（left: 22px）",
+      "tokens": {
+        "background": "var(--color-brand)",
+        "thumbLeft": "22px"
+      }
+    },
+    {
+      "name": "关闭 (Off)",
+      "type": "off",
+      "className": "switch--off",
+      "description": "开关关闭状态，浅灰背景 #E5E5EA，滑块位于左侧（left: 2px）",
+      "tokens": {
+        "background": "#E5E5EA",
+        "thumbLeft": "2px"
+      }
+    }
+  ],
+  "states": [
+    {
+      "name": "禁用 (Disabled)",
+      "type": "disabled",
+      "className": "switch--disabled",
+      "description": "opacity 0.4，pointer-events none，cursor not-allowed，适用于 on/off 两种状态"
+    }
+  ],
+  "designTokens": {
+    "width": "52px",
+    "height": "32px",
+    "borderRadius": "100px",
+    "onBackground": "var(--color-brand)",
+    "offBackground": "#E5E5EA",
+    "thumbWidth": "28px",
+    "thumbHeight": "28px",
+    "thumbBorderRadius": "50%",
+    "thumbBackground": "var(--color-text-inverse)",
+    "thumbShadow": "0px 2px 4px 0px rgba(0,0,0,0.12), 0px 0px 0px 0.5px rgba(0,0,0,0.04)",
+    "thumbTop": "2px",
+    "thumbLeftOn": "22px",
+    "thumbLeftOff": "2px",
+    "disabledOpacity": 0.4,
+    "transitionDuration": "var(--duration-fast)",
+    "transitionEasing": "var(--ease-standard)",
+    "transitionProperty": "background, left",
+    "cursor": "pointer"
+  },
+  "unknowns": []
+}

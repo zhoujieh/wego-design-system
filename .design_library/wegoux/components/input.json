@@ -1,0 +1,81 @@
+{
+  "slug": "input",
+  "name": "输入框",
+  "sourceKind": "inferred",
+  "confidence": "high",
+  "description": "独立输入框组件（非 Form 内嵌），采用 Label + Input 上下垂直布局。最大宽度 320px，支持 text/textarea 两种类型，包含 default/focus/error/disabled 四种状态。",
+  "variants": [
+    {
+      "name": "默认 (Default)",
+      "type": "default",
+      "description": "正常输入状态，边框色 --color-border-default，背景 --color-bg-surface",
+      "tokens": {
+        "borderColor": "var(--color-border-default)",
+        "background": "var(--color-bg-surface)"
+      }
+    },
+    {
+      "name": "聚焦 (Focus)",
+      "type": "focus",
+      "description": "输入框获得焦点，边框变为品牌绿色",
+      "tokens": {
+        "borderColor": "var(--color-brand)"
+      }
+    },
+    {
+      "name": "错误 (Error)",
+      "type": "error",
+      "description": "输入内容校验失败，边框变为红色，文字颜色也变为红色",
+      "className": "is-error",
+      "tokens": {
+        "borderColor": "var(--color-danger)",
+        "color": "var(--color-danger)"
+      }
+    },
+    {
+      "name": "禁用 (Disabled)",
+      "type": "disabled",
+      "description": "输入框不可用，背景变灰，文字变 disabled 色，cursor not-allowed，Label 颜色也变淡",
+      "className": "is-disabled",
+      "tokens": {
+        "background": "var(--color-bg-muted)",
+        "color": "var(--color-text-disabled)"
+      }
+    }
+  ],
+  "subTypes": [
+    {
+      "name": "文本输入 (Text)",
+      "type": "text",
+      "description": "单行文本输入，高度 36px，padding 0 12px"
+    },
+    {
+      "name": "多行文本 (Textarea)",
+      "type": "textarea",
+      "description": "多行文本输入，最小高度 96px，支持垂直 resize，padding 8px"
+    }
+  ],
+  "designTokens": {
+    "maxWidth": "320px",
+    "inputHeight": "36px",
+    "textareaMinHeight": "96px",
+    "fontSize": "14px",
+    "fontFamily": "PingFang SC",
+    "lineHeight": "14px",
+    "paddingHorizontal": "12px",
+    "textareaPadding": "8px",
+    "borderRadius": "var(--radius-sm)",
+    "borderWidth": "1px",
+    "defaultBorderColor": "var(--color-border-default)",
+    "focusBorderColor": "var(--color-brand)",
+    "errorBorderColor": "var(--color-danger)",
+    "placeholderColor": "var(--color-text-placeholder)",
+    "disabledBackground": "var(--color-bg-muted)",
+    "disabledColor": "var(--color-text-disabled)",
+    "labelFontSize": "14px",
+    "labelFontWeight": 500,
+    "labelColor": "var(--color-text-primary)",
+    "gap": "8px"
+  },
+  "unknowns": []
+}

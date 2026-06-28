@@ -1,0 +1,90 @@
+{
+  "slug": "cell",
+  "name": "列表单元格",
+  "sourceKind": "inferred",
+  "confidence": "high",
+  "description": "列表单元格组件，用于信息展示列表项。支持 single(56px) / double(76px) 两种行高，bg-white / bg-grey 两种底色，clickable / indent / divider 变体，左侧可配置 select / avatar / backspace 插槽，右侧 action 支持文字 / 角标 / 箭头。",
+  "variants": [
+    {
+      "name": "单行 (Single)",
+      "type": "single",
+      "description": "最小高度 56px，标题单行显示，副标题单行截断"
+    },
+    {
+      "name": "双行 (Double)",
+      "type": "double",
+      "description": "最小高度 76px，副标题可换行显示"
+    }
+  ],
+  "modifiers": [
+    {
+      "name": "白色底",
+      "slug": "bg-white",
+      "description": "背景色为 --color-bg-surface"
+    },
+    {
+      "name": "灰色底",
+      "slug": "bg-grey",
+      "description": "背景色为 --color-bg-subtle"
+    },
+    {
+      "name": "可点击",
+      "slug": "clickable",
+      "description": "cursor pointer，点击时背景变为 --color-state-pressed"
+    },
+    {
+      "name": "缩进",
+      "slug": "indent",
+      "description": "左侧 padding 加倍（padding-left: 16px + 16px）"
+    },
+    {
+      "name": "分割线右贴边",
+      "slug": "divider-right-edge",
+      "description": "底部 0.5px 分割线从 left 16px 延伸到 right 0"
+    },
+    {
+      "name": "分割线居中",
+      "slug": "divider-center",
+      "description": "底部 0.5px 分割线左右各留 16px"
+    }
+  ],
+  "slots": {
+    "left": [
+      { "name": "cell__select", "description": "左侧选择区域（如 checkbox/radio），包含 4px 左内边距" },
+      { "name": "cell__avatar", "description": "左侧头像区域，margin-right 12px" },
+      { "name": "cell__backspace", "description": "左侧返回/回退按钮区域" }
+    ],
+    "body": [
+      { "name": "cell__body", "description": "主容器，flex 布局，gap 12px" },
+      { "name": "cell__content", "description": "内容区（标题 + 副标题），flex 1，文字溢出省略" },
+      { "name": "cell__title", "description": "标题文字，16px Regular，--color-text-primary" },
+      { "name": "cell__title-icon", "description": "标题旁的图标（wego-iconfont-s），16px，--color-text-secondary" },
+      { "name": "cell__subtitle", "description": "副标题文字，12px Regular，--color-text-tertiary，margin-top 2px" }
+    ],
+    "right": [
+      { "name": "cell__action", "description": "右侧操作区，flex-shrink 0，margin-left auto" },
+      { "name": "cell__action-text", "description": "右侧文字，14px Regular，--color-text-secondary" },
+      { "name": "cell__action-badge", "description": "右侧角标容器，支持嵌套 Badge 组件" },
+      { "name": "cell__arrow", "description": "右侧箭头图标（wego-iconfont-s icon-youjiantou16），16px，--color-text-tertiary" }
+    ]
+  },
+  "designTokens": {
+    "singleHeight": "56px",
+    "doubleHeight": "76px",
+    "paddingHorizontal": "16px",
+    "fontFamily": "PingFang SC",
+    "titleFontSize": "16px",
+    "titleLineHeight": "16px",
+    "titleFontWeight": 400,
+    "subtitleFontSize": "12px",
+    "subtitleLineHeight": "1.5",
+    "subtitleFontWeight": 400,
+    "actionTextFontSize": "14px",
+    "dividerHeight": "0.5px",
+    "dividerColor": "var(--color-divider-default)",
+    "arrowFontSize": "16px",
+    "gap": "12px",
+    "pressedColor": "var(--color-state-pressed)"
+  },
+  "unknowns": []
+}

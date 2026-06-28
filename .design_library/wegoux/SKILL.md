@@ -1,0 +1,196 @@
+---
+name: "wego-design"
+description: "用于生成符合微购设计系统的移动端中文界面。包含品牌原则、设计 Token、组件契约、图标字体、预览页和 UI Kit。"
+---
+
+# 微购设计系统（wegoux）
+
+> 面向移动应用和微信生态的中文产品设计系统。风格关键词是**简洁、干净、淡雅、克制**；设计优先级是：清晰 > 一致 > 效率 > 美观 > 创新。使用本 Skill 时，先阅读 `README.md`，再按任务需要读取 Token、组件契约、预览页和 `specs/` 规范。
+
+## 库布局
+
+> 以下路径均相对于本 Skill 根目录，根目录可记为 `{WEGOUX_ROOT}`。消费者可把它放在项目任意位置，使用时自行解析根路径。
+
+```text
+{WEGOUX_ROOT}/
+├── SKILL.md                    # Skill 入口说明
+├── README.md                   # 品牌背景、视觉基础、命名规则、组件概览
+├── colors_and_type.css         # 权威 CSS Token 源：源 Token + 便携别名 + 字体定义
+├── css.json                    # 机器可读 Token 投影
+├── components.css              # 聚合组件样式，来源于组件预览页
+├── iconfont.css                # wego-iconfont 图标字体 class
+├── library-consumption.json    # AI / 下游消费推荐读取顺序和复制规则
+├── uikit-plan.json             # 组件白名单、槽位分配和页面蓝图
+├── metadata.json               # 库元信息
+├── assets/
+│   └── fonts/                  # wego-iconfont 字体文件
+├── icons/                      # Tab、标签、选择类 SVG 资产
+├── components/                 # 组件契约 JSON
+│   ├── index.json              # 当前权威组件注册表
+│   └── *.json                  # 单组件契约
+├── preview/                    # 组件 HTML 预览页
+├── ui_kits/
+│   └── app/
+│       ├── index.html          # 移动端应用 UI Kit 示例
+│       └── quality-report.json # UI Kit 质量报告
+└── specs/                      # 微购专项设计规范
+```
+
+## 读取顺序
+
+1. 先读 `README.md`，理解品牌、视觉基础和命名规则。
+2. 读 `library-consumption.json`，确认下游消费场景、文件读取顺序和复制边界。
+3. 需要页面组合时，读 `uikit-plan.json`，确认允许使用的组件、核心槽位和页面蓝图。
+4. 需要用 Token 时，优先读 `colors_and_type.css`；需要结构化处理时再读 `css.json`。
+5. 需要组件时，先读 `components/index.json`，再读对应 `components/{slug}.json` 和 `preview/component-{slug}.html`。
+6. 需要页面组合示例时，参考 `ui_kits/app/index.html` 和 `ui_kits/app/quality-report.json`。
+7. 需要更细的行为、文案、图标、布局和动效规则时，读取 `specs/` 下对应规范。
+
+## 品牌要素
+
+- **主色**：微信绿 `#03C160`，用于主按钮、选中态、成功反馈和品牌识别。
+- **背景**：页面底色 `#EDEDED`，内容表面 `#FFFFFF`，弱表面 `#F8F9FA` / `#F2F3F6`。
+- **文字**：一级文字 `#1E2028`，二级文字 `#6E7382`，弱化文字 `#9097A3`，禁用/占位 `#B7BEC5`。
+- **状态色**：危险 `#FA5051`，警告 `#FA9D3B`，信息 `#208BF1`，促销 `#FF6045`，黄色强调 `#FFC300`。
+- **字体**：正文使用 `PingFang SC`；金额和数字优先使用 `WegoKeyboard N9`，回退到 `DIN Alternate` / `SF Pro Display`。
+- **字号**：常用 10 / 12 / 14 / 16 / 18 / 22px；数字常用 12 / 14 / 16 / 20 / 24 / 32px。
+- **圆角**：4 / 6 / 8 / 12 / 16 / 999px。
+- **间距**：0 / 2 / 4 / 8 / 12 / 16 / 24 / 32 / 40 / 48 / 72px。
+- **触控**：最小触控区域 40px，默认 44px，舒适 48px。
+
+## Token 命名规范
+
+`colors_and_type.css` 是权威来源。不要随意新增色值或重命名 Token。
+
+- `--wg-*`：源 Token，例如 `--wg-color-base-brand-500`、`--wg-font-size-f14`、`--wg-spacing-16`。
+- `--color-*`：语义色别名，例如 `--color-brand`、`--color-text-primary`、`--color-bg-surface`。
+- `--font-*`：字体、字号、字重、行高别名。
+- `--space-*` / `--radius-*` / `--shadow-*`：间距、圆角、阴影别名。
+- `--duration-*` / `--ease-*`：动效时长和缓动别名。
+- `--size-*` / `--touch-*` / `--z-*`：尺寸、触控热区和层级别名。
+- `--stroke-*` / `--layout-*`：描边和布局别名。
+
+## 组件（注册表 17 个）
+
+`components/index.json` 是当前权威注册表。组件实现时，优先复用已有 class、结构和 Token。
+
+| Slug | 名称 | 类型 | 说明 |
+|------|------|------|------|
+| `button` | 按钮 | action | 强/中/弱三种强调级别，大/中/小三种尺寸，支持图标和纯图标模式。 |
+| `link` | 链接 | action | 独立链接和内联链接，适合文字跳转操作。 |
+| `card` | 卡片 | display | 浮起、线框、填充三种样式，可承载商品、订单、余额等内容。 |
+| `avatar` | 头像 | display | 图片头像和文字头像，支持 24 / 40 / 56px。 |
+| `chip` | 标签 | display | 状态标识、筛选标签、添加标签和优惠券业务标签。 |
+| `badge` | 角标 | display | 红点、数字、黄色/绿色/气泡文字角标和删除角标。 |
+| `cell` | 列表单元格 | display | 单行/双行信息项，支持左右插槽、分割线、点击态和角标。 |
+| `image` | 图片 | display | 预设尺寸、自定义矩形/宽幅、cover/contain、加载和错误态。 |
+| `bottom-nav` | 底部导航 | navigation | 移动端主 Tab，默认 5 个 Tab，支持选中态和角标。 |
+| `navbar` | 导航栏 | navigation | 顶部导航，支持返回/关闭、居中/左对齐标题、右侧操作区。 |
+| `navbar-action-button` | 导航栏操作按钮 | navigation | NavBar 右侧操作按钮，支持文字、图标、图文、按钮和图片类型。 |
+| `stack` | 选项卡 | navigation | 方块式选项，多项选择场景，支持未选和已选态。 |
+| `input` | 输入框 | form | 独立输入框，支持 text/textarea、聚焦、错误、禁用状态。 |
+| `checkbox` | 复选框 | form | 24 / 20px，支持未选、已选、半选、计数和禁用。 |
+| `radio` | 单选 | form | 24 / 20px，品牌绿圆点选中态。 |
+| `switch` | 开关 | form | 52x32px 布尔切换，品牌绿开启态，支持禁用。 |
+| `form` | 表单容器 | form | 表单字段容器，支持水平/垂直布局、多输入类型、错误和计数。 |
+
+> `components/counter.json` 存在数字计数器契约，但当前未出现在 `components/index.json`，也没有对应预览页。除非任务明确要求，否则不要把它当作已发布组件使用。
+
+## 组件发布状态
+
+- **已发布组件**：以 `components/index.json` 为准，共 17 个。
+- **嵌入式组件**：`navbar-action-button` 已注册，但没有独立预览页；它作为 NavBar 右侧操作区使用，示例在 `preview/component-navbar.html`。
+- **未发布契约**：`components/counter.json` 仅有契约文件，未注册、无预览页，不进入 `uikit-plan.json` 的 `allowedComponents`。
+- **新增组件流程**：先补 `components/{slug}.json`，再补 `preview/component-{slug}.html`，然后同步 `components/index.json`、`uikit-plan.json` 和 `library-consumption.json`。
+
+## 组件 CSS 生成规则
+
+`components.css` 是聚合组件样式，文件头部声明为自动生成，不应作为首选编辑入口。
+
+- 带有 `/* @component-css-start */` 和 `/* @component-css-end */` 的预览页，是可抽取组件 CSS 的来源。
+- 当前已标记预览页包括：`avatar`、`bottom-nav`、`button`、`card`、`chip`、`input`、`link`、`navbar`。
+- 其余预览页主要通过 `<link rel="stylesheet" href="../components.css">` 复用已聚合样式。
+- 如需修改组件样式，优先改对应 `preview/component-*.html` 中的组件样式块和 `components/{slug}.json` 契约，再重新生成 `components.css`。
+- 本库未内置生成脚本；参考 trae 约定，生成器名称为 `extract-components-css.mjs`，来源通常在上游 `design-library-creator/scripts/`。
+
+## UI Kit
+
+| 路径 | 说明 |
+|------|------|
+| `ui_kits/app/index.html` | 移动端应用示例，使用手机框展示页面组合，引用 `colors_and_type.css` 和 `components.css`。 |
+| `ui_kits/app/quality-report.json` | UI Kit 质量报告，记录使用组件、复用率、演示样式和风险提示。 |
+
+UI Kit 是组合示例，不是固定页面模板。生成业务界面时应遵守微购风格，但根据实际信息架构重新组织页面。
+
+### UI Kit 使用边界
+
+- `ui_kits/app/index.html` 是 Showcase，用来观察页面结构和组件组合。
+- 不要直接复制 `.uikit-shell`、`.phone-frame`、`.phone-screen` 作为真实业务页面外壳。
+- 业务演示里的 `biz-*` 样式还不是注册组件；要复用时应先沉淀为组件契约和预览页。
+- 若 UI Kit 中出现 Lucide/CDN 图标，只视为演示占位；生产组件仍优先使用 `iconfont.css`。
+
+## 下游消费契约
+
+`library-consumption.json` 和 `uikit-plan.json` 是给 AI 与下游项目读取的机器化契约。
+
+| 文件 | 作用 |
+|------|------|
+| `library-consumption.json` | 定义 Token、组件、图标、规范和 UI Kit 的读取顺序、复制规则和边界。 |
+| `uikit-plan.json` | 定义移动端应用的核心组件、辅助组件、允许组件、页面蓝图和固定槽位。 |
+
+常见消费方式：
+
+1. **只用 Token**：读取 `colors_and_type.css`，在页面中直接 `<link>` 或 `@import`。
+2. **写单个组件**：读取 `components/index.json`、对应组件契约、对应 preview 和 `components.css`。
+3. **写完整移动端页面**：用 UI Kit 看结构，用 preview 拿组件 markup，用真实页面尺寸重写外层布局。
+4. **写中文文案和数据**：读取 `specs/微购设计规范 - 文案与数据规范/`。
+
+## 图标和资产
+
+- 预览页和组件中的图标优先使用 `wego-iconfont`：`<i class="wego-iconfont-s icon-{name}"></i>`。
+- 预览页必须引入 `../iconfont.css`。
+- 字体文件位于 `assets/fonts/`。
+- `iconfont.css` 当前包含 435 个 `.icon-*` class。
+- `icons/` 中的 SVG 可作为已有资产参考，但不要在需要 iconfont 的组件里随意改用内联 SVG。
+- 若缺少图标，优先复用语义接近的现有图标；不要为了装饰新增无意义图标。
+
+## 创作规则
+
+1. **优先使用 Token**：颜色、字号、间距、圆角、阴影、动效都引用 CSS 变量。
+2. **保持移动端密度**：界面应高效、清晰，不做营销页式的大留白和夸张装饰。
+3. **主色克制使用**：品牌绿用于主操作、选中和成功，不要铺满大面积背景。
+4. **遵守 4N 节奏**：尺寸和间距尽量取 4 的倍数，列表内边距通常为 16px。
+5. **触控可用**：可点击元素热区不小于 40px。
+6. **状态一致**：hover 多用于 Web，移动端重点关注 active / disabled；点击态通常用透明度或浅灰底表达。
+7. **文案自然中文**：短、准、直接；金额、日期、时间、空数据按 `specs/微购设计规范 - 文案与数据规范/` 处理。
+8. **少用阴影**：优先用底色、描边和分组建立层级，只有重叠或可点击强调时再用轻阴影。
+9. **不要直接硬改聚合样式**：`components.css` 是聚合输出；改组件时同步查看对应 `preview/component-*.html` 和 `components/*.json`。
+10. **不要脱离微信生态质感**：避免高饱和渐变、大面积插画、过度圆角、过强阴影和复杂动效。
+
+## 规范索引
+
+| 规范 | 适用场景 |
+|------|----------|
+| `specs/微购设计规范 - 设计风格与品牌原则/` | 品牌气质、色彩定位、整体视觉方向。 |
+| `specs/微购设计规范 - 布局与间距规范/` | 页面边距、分组、列表、卡片、操作热区。 |
+| `specs/微购设计规范 - 交互设计原则/` | 操作位置、状态定义、按钮和内容状态。 |
+| `specs/微购设计规范 - 动效与视觉效果/` | 描边、分割线、圆角、阴影、动效、毛玻璃。 |
+| `specs/微购设计规范 - 图标设计规范/` | 图标命名、画布、描边、尺寸和使用原则。 |
+| `specs/微购设计规范 - 文案与数据规范/` | 标点、日期、时间、金额、数字、省略和中文表达。 |
+
+## 超出范围
+
+- 不自动生成新的品牌色阶或主题。
+- 不把桌面后台、营销落地页、强视觉活动页当作默认方向。
+- 不为了装饰新增复杂插画、渐变背景或大面积阴影。
+- 不擅自发布未在 `components/index.json` 注册的组件。
+- 不绕过 `iconfont.css` 为组件临时接入第三方图标库。
+- 不把 UI Kit 的手机壳、Showcase 外壳或 `biz-*` 演示样式当成通用组件。
+
+## 会话连续性
+
+- 新增组件：`expand-components`，先补组件契约和预览页，再同步注册表、`uikit-plan.json` 和聚合样式。
+- 优化 Token：`refine-library`，先改 `colors_and_type.css`，再同步 `css.json` 和受影响组件。
+- 生成额外 Kit：`generate-additional-kit`，先确认移动端业务场景，再产出 UI Kit 和 `quality-report.json`。
+- 刷新消费契约：`refresh-consumption-contracts`，当组件、图标、规范或 UI Kit 变化时，同步 `library-consumption.json` 和 `uikit-plan.json`。
+- 审计 UI Kit：`audit-uikit-quality`，检查组件复用率、演示样式、未注册组件和图标来源。

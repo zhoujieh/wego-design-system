@@ -1,0 +1,62 @@
+{
+  "slug": "radio",
+  "name": "单选",
+  "sourceKind": "inferred",
+  "confidence": "high",
+  "description": "单选按钮组件，用于互斥选项选择。支持 24px/20px 两种尺寸，包含 unchecked / checked / disabled 三种状态，品牌绿色圆点 + 圆形边框，borderRadius 50%。",
+  "variants": [
+    {
+      "name": "未选中 (Unchecked)",
+      "type": "unchecked",
+      "description": "默认状态，白色圆底，1.5px 灰色圆形边框 rgba(0,0,0,0.15)，24x24px"
+    },
+    {
+      "name": "已选中 (Checked)",
+      "type": "checked",
+      "description": "品牌绿色圆形边框（--color-brand），内部显示品牌绿色实心圆点（12x12px SVG）"
+    }
+  ],
+  "sizes": [
+    {
+      "name": "默认 (Default)",
+      "slug": "default",
+      "width": "24px",
+      "height": "24px",
+      "dotSize": "12x12px",
+      "borderWidth": "1.5px"
+    },
+    {
+      "name": "小尺寸 (Small)",
+      "slug": "sm",
+      "width": "20px",
+      "height": "20px",
+      "dotSize": "8x8px",
+      "borderWidth": "1.5px"
+    }
+  ],
+  "states": [
+    {
+      "name": "禁用 (Disabled)",
+      "type": "disabled",
+      "description": "opacity 0.4，pointer-events none，cursor not-allowed，选中/未选中状态均适用"
+    }
+  ],
+  "designTokens": {
+    "width": "24px",
+    "height": "24px",
+    "smallWidth": "20px",
+    "smallHeight": "20px",
+    "borderRadius": "50%",
+    "borderWidth": "1.5px",
+    "defaultBorderColor": "rgba(0,0,0,0.15)",
+    "defaultBackground": "var(--color-bg-surface)",
+    "checkedBorderColor": "var(--color-brand)",
+    "dotColor": "var(--color-brand)",
+    "dotSize": "12px",
+    "smallDotSize": "8px",
+    "disabledOpacity": 0.4,
+    "transitionDuration": "var(--duration-fast)",
+    "transitionEasing": "var(--ease-standard)"
+  },
+  "unknowns": []
+}

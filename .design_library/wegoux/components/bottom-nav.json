@@ -1,0 +1,47 @@
+{
+  "slug": "bottom-nav",
+  "name": "底部导航",
+  "sourceKind": "inferred",
+  "confidence": "high",
+  "description": "移动端底部导航栏组件，用于应用主 Tab 切换。支持5个Tab（动态/工作台/好友/消息/我的），56px高度，品牌绿选中态，支持数字角标和红点提醒，底部适配 safe-area-inset-bottom。",
+  "variants": [
+    {
+      "name": "默认态",
+      "type": "default",
+      "description": "Tab 未选中状态，图标和文字均为中性灰色（--wg-color-base-neutral-900）"
+    },
+    {
+      "name": "选中态 (Active)",
+      "type": "active",
+      "description": "当前 Tab 选中，图标和文字变为品牌绿色（--wg-color-base-brand-500）",
+      "tokens": {
+        "color": "var(--wg-color-base-brand-500)"
+      }
+    }
+  ],
+  "slots": [
+    { "name": "bottom-nav__item", "description": "单个 Tab 项容器，flex 列布局，图标在上文字在下" },
+    { "name": "bottom-nav__icon", "description": "图标区域，32x32px，可嵌入 SVG/IMG，支持角标嵌套" },
+    { "name": "bottom-nav__label", "description": "文字标签，10px Regular，PingFang SC" }
+  ],
+  "modifiers": [
+    { "name": "数字角标", "slug": "badge-number", "description": "在 bottom-nav__icon 内嵌套 badge--corner badge--number" },
+    { "name": "红点角标", "slug": "badge-dot", "description": "在 bottom-nav__icon 内嵌套 badge--corner badge--dot" },
+    { "name": "多数字角标", "slug": "badge-number-multi", "description": "数字 99+ 时使用 badge--number-multi" }
+  ],
+  "designTokens": {
+    "height": "56px",
+    "iconSize": "32px",
+    "labelFontSize": "10px",
+    "labelFontWeight": 400,
+    "fontFamily": "PingFang SC",
+    "paddingHorizontal": "16px",
+    "safeAreaBottom": "env(safe-area-inset-bottom, 0px)",
+    "borderTop": "0.5px solid var(--wg-color-base-neutral-alpha-08)",
+    "activeColor": "var(--wg-color-base-brand-500)",
+    "defaultColor": "var(--wg-color-base-neutral-900)",
+    "tabCount": 5,
+    "tabs": ["动态", "工作台", "好友", "消息", "我的"]
+  },
+  "unknowns": []
+}

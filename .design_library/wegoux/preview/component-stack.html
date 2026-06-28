@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stack (选项卡) - 微购设计系统</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../components.css">
+<link rel="stylesheet" href="../iconfont.css">
+<style>
+/* Page scaffold */
+body { margin:0; padding:32px !important; background:var(--color-bg-page); font-family:var(--font-family-text); color:var(--color-text-primary); }
+.row { display:flex; gap:var(--space-8); align-items:center; margin-bottom:var(--space-8); flex-wrap:wrap; }
+.label { font-size:var(--font-size-12); color:var(--color-text-tertiary); width:92px; flex-shrink:0; white-space:nowrap; }
+.section-title { font-size:var(--font-size-14); font-weight:var(--font-weight-semibold); margin:var(--space-16) 0 var(--space-8); color:var(--color-text-primary); }
+hr.divider { border:none; border-top:1px solid var(--color-divider-default); margin:4px 0 var(--space-8); }
+.sub-label { font-size:var(--font-size-12); color:var(--color-text-tertiary); margin:var(--space-8) 0 var(--space-4); }
+
+/* Dark mode preview strip */
+.dark-strip { background:#1C1C1E; border-radius:var(--radius-sm); padding:var(--space-16); margin:0 0 var(--space-8); }
+.dark-strip .label { color:rgba(255,255,255,0.6); }
+
+/* Interactive demo */
+.demo-hint { font-size:var(--font-size-12); color:var(--color-brand); margin:var(--space-8) 0 var(--space-4); font-weight:var(--font-weight-medium); }
+.interactive-row { display:flex; align-items:center; gap:var(--space-12); padding:var(--space-8) 0; border-bottom:0.5px solid var(--color-divider-default); cursor:pointer; max-width:560px; }
+.interactive-row:last-child { border-bottom:none; }
+.interactive-row .stack { cursor:pointer; }
+.interactive-row:hover .interactive-text { color:var(--color-text-primary); }
+.interactive-text { font-size:var(--font-size-14); color:var(--color-text-secondary); transition:color var(--duration-fast) var(--ease-standard); }
+</style>
+</head>
+<body>
+
+<div class="section-title">默认状态</div>
+<div class="row">
+  <span class="label">未选中</span>
+  <div class="stack">
+    <div class="stack__bg"></div>
+    <span class="stack__label">选项</span>
+  </div>
+  <span class="label">选中</span>
+  <div class="stack stack--selected">
+    <div class="stack__bg">
+      <div class="stack__check-badge">
+        <img src="../icons/checkbox-check.svg" alt="">
+      </div>
+    </div>
+    <span class="stack__label">选项</span>
+  </div>
+</div>
+
+<hr class="divider">
+
+<div class="section-title">暗色模式</div>
+<div class="dark-strip">
+  <div class="row">
+    <span class="label">暗色未选中</span>
+    <div class="stack">
+      <div class="stack__bg"></div>
+      <span class="stack__label">选项</span>
+    </div>
+    <span class="label">暗色选中</span>
+    <div class="stack stack--selected">
+      <div class="stack__bg">
+        <div class="stack__check-badge">
+          <img src="../icons/checkbox-check.svg" alt="">
+        </div>
+      </div>
+      <span class="stack__label">选项</span>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<div class="section-title">交互演示</div>
+<p class="demo-hint">点击选项卡切换选中/未选中状态</p>
+
+<div class="interactive-row">
+  <div class="stack" data-selected="false">
+    <div class="stack__bg"></div>
+    <span class="stack__label">全部</span>
+  </div>
+  <span class="interactive-text">全部商品</span>
+</div>
+<div class="interactive-row">
+  <div class="stack stack--selected" data-selected="true">
+    <div class="stack__bg">
+      <div class="stack__check-badge">
+        <img src="../icons/checkbox-check.svg" alt="">
+      </div>
+    </div>
+    <span class="stack__label">数码</span>
+  </div>
+  <span class="interactive-text">数码产品</span>
+</div>
+<div class="interactive-row">
+  <div class="stack" data-selected="false">
+    <div class="stack__bg"></div>
+    <span class="stack__label">食品</span>
+  </div>
+  <span class="interactive-text">食品饮料</span>
+</div>
+<div class="interactive-row">
+  <div class="stack" data-selected="false">
+    <div class="stack__bg"></div>
+    <span class="stack__label">服饰</span>
+  </div>
+  <span class="interactive-text">服饰鞋包</span>
+</div>
+
+<script>
+(function() {
+  var BADGE_HTML = '<div class="stack__check-badge"><img src="../icons/checkbox-check.svg" alt=""></div>';
+
+  document.querySelectorAll('.interactive-row').forEach(function(row) {
+    row.addEventListener('click', function() {
+      var stack = row.querySelector('.stack');
+      var isSelected = stack.getAttribute('data-selected') === 'true';
+
+      if (isSelected) {
+        stack.classList.remove('stack--selected');
+        stack.setAttribute('data-selected', 'false');
+        var badge = stack.querySelector('.stack__check-badge');
+        if (badge) badge.remove();
+      } else {
+        stack.classList.add('stack--selected');
+        stack.setAttribute('data-selected', 'true');
+        var bg = stack.querySelector('.stack__bg');
+        bg.insertAdjacentHTML('beforeend', BADGE_HTML);
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../components.css">
+<link rel="stylesheet" href="../iconfont.css">
+<style>
+/* Page scaffold */
+body { margin:0; padding:32px !important; background:var(--color-bg-page); font-family:var(--font-family-text); color:var(--color-text-primary); }
+.row { display:flex; gap:var(--space-8); align-items:center; margin-bottom:var(--space-8); flex-wrap:wrap; }
+.label { font-size:var(--font-size-12); color:var(--color-text-tertiary); width:92px; flex-shrink:0; white-space:nowrap; }
+.section-title { font-size:var(--font-size-14); font-weight:var(--font-weight-semibold); margin:var(--space-16) 0 var(--space-8); color:var(--color-text-primary); }
+hr.divider { border:none; border-top:1px solid var(--color-divider-default); margin:4px 0 var(--space-8); }
+
+/* Dark mode preview strip */
+.dark-strip { background:#1C1C1E; border-radius:var(--radius-sm); padding:var(--space-16); margin:0 0 var(--space-8); }
+.dark-strip .label { color:rgba(255,255,255,0.6); }
+</style>
+</head>
+<body>
+<div class="section-title">默认状态 — 24px</div>
+<div class="row">
+  <span class="label">未选中</span>
+  <div class="radio"><div class="radio__inner"></div></div>
+  <span class="label">选中</span>
+  <div class="radio radio--checked">
+    <div class="radio__inner"></div>
+    <div class="radio__dot">
+      <svg width="11" height="11" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="6" cy="6" r="6" fill="#03C160"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<div class="section-title">默认状态 — 20px</div>
+<div class="row">
+  <span class="label">未选中</span>
+  <div class="radio radio--sm"><div class="radio__inner"></div></div>
+  <span class="label">选中</span>
+  <div class="radio radio--sm radio--checked">
+    <div class="radio__inner"></div>
+    <div class="radio__dot">
+      <svg width="8" height="8" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="6" cy="6" r="6" fill="#03C160"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<div class="section-title">禁用状态 — 24px</div>
+<div class="row">
+  <span class="label">禁用未选中</span>
+  <div class="radio radio--disabled"><div class="radio__inner"></div></div>
+  <span class="label">禁用选中</span>
+  <div class="radio radio--checked radio--disabled">
+    <div class="radio__inner"></div>
+    <div class="radio__dot">
+      <svg width="11" height="11" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="6" cy="6" r="6"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<div class="section-title">禁用状态 — 20px</div>
+<div class="row">
+  <span class="label">禁用未选中</span>
+  <div class="radio radio--sm radio--disabled"><div class="radio__inner"></div></div>
+  <span class="label">禁用选中</span>
+  <div class="radio radio--sm radio--checked radio--disabled">
+    <div class="radio__inner"></div>
+    <div class="radio__dot">
+      <svg width="8" height="8" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="6" cy="6" r="6"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<div class="section-title">暗色模式 — 24px</div>
+<div class="dark-strip dark-mode">
+  <div class="row">
+    <span class="label">暗色未选中</span>
+    <div class="radio"><div class="radio__inner"></div></div>
+    <span class="label">暗色选中</span>
+    <div class="radio radio--checked">
+      <div class="radio__inner"></div>
+      <div class="radio__dot">
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="6" cy="6" r="6" fill="#03C160"/>
+        </svg>
+      </div>
+    </div>
+    <span class="label">暗色禁用未选中</span>
+    <div class="radio radio--disabled"><div class="radio__inner"></div></div>
+    <span class="label">暗色禁用选中</span>
+    <div class="radio radio--checked radio--disabled">
+      <div class="radio__inner"></div>
+      <div class="radio__dot">
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="6" cy="6" r="6"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section-title">暗色模式 — 20px</div>
+<div class="dark-strip dark-mode">
+  <div class="row">
+    <span class="label">暗色未选中</span>
+    <div class="radio radio--sm"><div class="radio__inner"></div></div>
+    <span class="label">暗色选中</span>
+    <div class="radio radio--sm radio--checked">
+      <div class="radio__inner"></div>
+      <div class="radio__dot">
+        <svg width="8" height="8" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="6" cy="6" r="6" fill="#03C160"/>
+        </svg>
+      </div>
+    </div>
+    <span class="label">暗色禁用未选中</span>
+    <div class="radio radio--sm radio--disabled"><div class="radio__inner"></div></div>
+    <span class="label">暗色禁用选中</span>
+    <div class="radio radio--sm radio--checked radio--disabled">
+      <div class="radio__inner"></div>
+      <div class="radio__dot">
+        <svg width="8" height="8" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="6" cy="6" r="6"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

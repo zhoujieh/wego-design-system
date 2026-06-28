@@ -1,0 +1,33 @@
+{
+  "slug": "avatar",
+  "name": "头像",
+  "sourceKind": "inferred",
+  "confidence": "high",
+  "description": "用户头像展示组件，支持图片头像和文字首字母头像两种类型。提供 24px / 40px / 56px 三种尺寸，均为圆形。",
+  "variants": [
+    {
+      "name": "图片头像",
+      "type": "image",
+      "description": "使用 <img> 标签显示用户头像图片"
+    },
+    {
+      "name": "文字头像",
+      "type": "initials",
+      "description": "显示用户名称首字母，背景为中性灰色"
+    }
+  ],
+  "sizes": [
+    { "name": "小", "slug": "24", "width": "24px", "height": "24px", "initialsFontSize": "12px" },
+    { "name": "中", "slug": "40", "width": "40px", "height": "40px", "initialsFontSize": "20px" },
+    { "name": "大", "slug": "56", "width": "56px", "height": "56px", "initialsFontSize": "28px" }
+  ],
+  "designTokens": {
+    "borderRadius": "100px",
+    "border": "0.5px solid rgba(32,47,100,0.08)",
+    "initialsBg": "#B7BEC5",
+    "initialsColor": "#FFFFFF",
+    "initialsFontWeight": 500,
+    "imageObjectFit": "cover"
+  },
+  "unknowns": []
+}

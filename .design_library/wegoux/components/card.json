@@ -1,0 +1,57 @@
+{
+  "slug": "card",
+  "name": "卡片",
+  "sourceKind": "inferred",
+  "confidence": "high",
+  "description": "移动端内容容器组件，支持浮起、线框、填充三种样式。可组合媒体区、标题、正文、价格、标签等子元素。适用于商品展示、订单通知、余额展示等场景。",
+  "variants": [
+    {
+      "name": "浮起卡片 (Elevated)",
+      "style": "elevated",
+      "background": "#FFFFFF",
+      "borderRadius": "12px",
+      "shadow": "0px 2px 8px rgba(30,32,40,0.06)",
+      "padding": "16px"
+    },
+    {
+      "name": "线框卡片 (Outlined)",
+      "style": "outlined",
+      "background": "#FFFFFF",
+      "border": "1px solid rgba(32,47,100,0.08)",
+      "borderRadius": "8px",
+      "padding": "16px"
+    },
+    {
+      "name": "填充卡片 (Filled)",
+      "style": "filled",
+      "background": "#F8F9FA",
+      "borderRadius": "8px",
+      "padding": "12px"
+    }
+  ],
+  "slots": [
+    { "name": "media", "description": "媒体区，通常放置商品图片", "optional": true },
+    { "name": "header", "description": "标题区，卡片主标题", "optional": true },
+    { "name": "body", "description": "内容区，辅助描述文字" },
+    { "name": "footer", "description": "底部区，放置价格、标签、时间等", "optional": true }
+  ],
+  "subElements": [
+    { "name": "card__price", "description": "价格展示，字号18px Semibold" },
+    { "name": "card__tag", "description": "标签，字号10px，灰底圆角" }
+  ],
+  "designTokens": {
+    "gap": "12px",
+    "mediaMinHeight": "150px",
+    "headerFontSize": "16px",
+    "headerFontWeight": 600,
+    "bodyFontSize": "14px",
+    "bodyColor": "#6E7382",
+    "footerFontSize": "12px",
+    "priceFontSize": "18px",
+    "priceFontWeight": 600,
+    "tagFontSize": "10px",
+    "tagBorderRadius": "4px",
+    "mediaBorderRadius": "6px"
+  },
+  "unknowns": []
+}

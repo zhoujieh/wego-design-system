@@ -1,0 +1,74 @@
+{
+  "slug": "checkbox",
+  "name": "复选框",
+  "sourceKind": "inferred",
+  "confidence": "high",
+  "description": "复选选择框组件，支持 24px/20px 两种尺寸。包含 unchecked / checked / indeterminate / count / disabled 五种状态，品牌绿填充，圆角 4px。",
+  "variants": [
+    {
+      "name": "未选中 (Unchecked)",
+      "type": "unchecked",
+      "description": "默认状态，白色背景，1.5px 边框 rgba(0,0,0,0.15)，24x24px"
+    },
+    {
+      "name": "已选中 (Checked)",
+      "type": "checked",
+      "description": "品牌绿色填充背景和边框，内部显示白色勾选图标（13x10px SVG）"
+    },
+    {
+      "name": "半选 (Indeterminate)",
+      "type": "indeterminate",
+      "description": "品牌绿色填充，内部显示白色减号横线（8x2px SVG），用于部分选中场景"
+    },
+    {
+      "name": "计数 (Count)",
+      "type": "count",
+      "description": "品牌绿色填充，内部显示白色数字（WegoKeyboard N9 数字字体，10px Medium），用于多选计数场景"
+    }
+  ],
+  "sizes": [
+    {
+      "name": "默认 (Default)",
+      "slug": "default",
+      "width": "24px",
+      "height": "24px",
+      "checkIcon": "13x10px",
+      "minusIcon": "8x2px"
+    },
+    {
+      "name": "小尺寸 (Small)",
+      "slug": "sm",
+      "width": "20px",
+      "height": "20px",
+      "checkIcon": "11x8px",
+      "minusIcon": "6x2px"
+    }
+  ],
+  "states": [
+    {
+      "name": "禁用 (Disabled)",
+      "type": "disabled",
+      "description": "opacity 0.4，pointer-events none，cursor not-allowed"
+    }
+  ],
+  "designTokens": {
+    "width": "24px",
+    "height": "24px",
+    "smallWidth": "20px",
+    "smallHeight": "20px",
+    "borderRadius": "4px",
+    "borderWidth": "1.5px",
+    "defaultBorderColor": "rgba(0,0,0,0.15)",
+    "defaultBackground": "var(--color-bg-surface)",
+    "checkedBackground": "var(--color-brand)",
+    "checkedBorderColor": "var(--color-brand)",
+    "checkColor": "#FFFFFF",
+    "fontFamily": "WegoKeyboard N9 (count 模式)",
+    "countFontSize": "10px",
+    "countFontWeight": 500,
+    "disabledOpacity": 0.4,
+    "transitionDuration": "var(--duration-fast)",
+    "transitionEasing": "var(--ease-standard)"
+  },
+  "unknowns": []
+}
