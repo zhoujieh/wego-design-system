@@ -207,6 +207,10 @@
       "color-border-warning": {
         "hex": "#fa9d3b",
         "opacity": "0.20"
+      },
+      "color-border-disabled": {
+        "hex": "#202f64",
+        "opacity": "0.06"
       }
     },
     "wg-color-base-neutral": {
@@ -366,6 +370,10 @@
       "color-state-disabled-bg": {
         "hex": "#f2f3f6",
         "opacity": "1"
+      },
+      "color-state-disabled-surface": {
+        "hex": "#202f64",
+        "opacity": "0.03"
       }
     },
     "wg-color-base-brand": {

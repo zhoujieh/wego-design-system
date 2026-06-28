@@ -3,17 +3,28 @@
   "name": "单选",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "单选按钮组件，用于互斥选项选择。支持 24px/20px 两种尺寸，包含 unchecked / checked / disabled 三种状态，品牌绿色圆点 + 圆形边框，borderRadius 50%。",
+  "description": "单选按钮组件，用于互斥选项选择，始终成组出现（≥2个）。外容器 24px/20px，内部两层：radio__inner 为边框圆环层（外容器内缩 2px），radio__dot 为选中时填充圆（11px/9px，CSS 实现）。同一 data-group 内只能选中一项，不可取消选择。",
+  "structure": {
+    "outer": ".radio (24px / 20px flex center container, position:relative, cursor:pointer)",
+    "ring": ".radio__inner (20px / 16.5px border circle, 1.5px border, 2px inset from outer)",
+    "dot": ".radio__dot (11px / 9px filled circle, absolute centered, hidden by default)"
+  },
+  "behavior": {
+    "group": "同一 data-group 内的 radio 互斥；始终成组使用（≥2个）",
+    "select": "selectRadio(el): 清除同组其他选项的 radio--checked，为自己添加 radio--checked",
+    "cannotDeselect": "点击已选中项不取消选中（radio--checked 不可通过再次点击移除）",
+    "disabled": "radio--disabled 时不响应点击"
+  },
   "variants": [
     {
       "name": "未选中 (Unchecked)",
       "type": "unchecked",
-      "description": "默认状态，白色圆底，1.5px 灰色圆形边框 rgba(0,0,0,0.15)，24x24px"
+      "description": "radio__inner 显示 1.5px 灰色边框 rgba(0,0,0,0.15)，透明背景；radio__dot 隐藏"
     },
     {
       "name": "已选中 (Checked)",
       "type": "checked",
-      "description": "品牌绿色圆形边框（--color-brand），内部显示品牌绿色实心圆点（12x12px SVG）"
+      "description": "radio__inner 边框变为品牌绿 --color-brand（无额外背景）；radio__dot 显示品牌绿实心圆点"
     }
   ],
   "sizes": [
@@ -22,23 +33,27 @@
       "slug": "default",
       "width": "24px",
       "height": "24px",
-      "dotSize": "12x12px",
-      "borderWidth": "1.5px"
+      "innerSize": "20px",
+      "dotSize": "11px",
+      "borderWidth": "1.5px",
+      "innerGap": "2px"
     },
     {
       "name": "小尺寸 (Small)",
       "slug": "sm",
       "width": "20px",
       "height": "20px",
-      "dotSize": "8x8px",
-      "borderWidth": "1.5px"
+      "innerSize": "16.5px",
+      "dotSize": "9px",
+      "borderWidth": "1.5px",
+      "innerGap": "1.75px (5/6 of 2px)"
     }
   ],
   "states": [
     {
       "name": "禁用 (Disabled)",
       "type": "disabled",
-      "description": "opacity 0.4，pointer-events none，cursor not-allowed，选中/未选中状态均适用"
+      "description": "禁用未选中：radio__inner 边框变 --color-border-disabled，背景变 --color-state-disabled-surface（#202F64 3%）。禁用选中：radio__inner 边框+背景同前，radio__dot 颜色与边框一致（--color-border-disabled）。暗色模式下 Token 自动切换。"
     }
   ],
   "designTokens": {
@@ -48,15 +63,32 @@
     "smallHeight": "20px",
     "borderRadius": "50%",
     "borderWidth": "1.5px",
+    "innerSize": "20px",
+    "smallInnerSize": "16.5px",
+    "dotSize": "11px",
+    "smallDotSize": "9px",
+    "innerGap": "2px",
+    "smallInnerGap": "1.75px",
     "defaultBorderColor": "rgba(0,0,0,0.15)",
-    "defaultBackground": "var(--color-bg-surface)",
+    "defaultBackground": "transparent",
     "checkedBorderColor": "var(--color-brand)",
+    "checkedBackground": "transparent",
     "dotColor": "var(--color-brand)",
-    "dotSize": "12px",
-    "smallDotSize": "8px",
-    "disabledOpacity": 0.4,
+    "disabledBorderColor": "var(--color-border-disabled)",
+    "disabledBackground": "var(--color-state-disabled-surface)",
+    "disabledDotColor": "var(--color-border-disabled)",
     "transitionDuration": "var(--duration-fast)",
-    "transitionEasing": "var(--ease-standard)"
+    "transitionEasing": "var(--ease-standard)",
+    "darkDefaultBorderColor": "rgba(255,255,255,0.2)",
+    "darkDisabledBorderColor": "rgba(255,255,255,0.06)",
+    "darkDisabledBackground": "rgba(255,255,255,0.03)",
+    "darkDisabledDotColor": "rgba(255,255,255,0.12)"
   },
-  "unknowns": []
+  "unknowns": [],
+  "darkMode": {
+    "unchecked": "radio__inner 边框 rgba(255,255,255,0.2)，背景透明",
+    "checked": "radio__inner 边框 --color-brand，背景透明；radio__dot --color-brand",
+    "disabledUnchecked": "radio__inner 边框 rgba(255,255,255,0.06)，背景 rgba(255,255,255,0.03)",
+    "disabledChecked": "radio__inner 边框 rgba(255,255,255,0.12)，背景 rgba(255,255,255,0.03)；radio__dot rgba(255,255,255,0.12)"
+  }
 }

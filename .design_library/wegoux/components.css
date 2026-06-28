@@ -684,20 +684,41 @@
 
 /* ── Radio ─────────────────────────────────────────────────── */
 /* @anatomy
-   <span class="label">未选中</span> <div class="radio"><div class="radio__inner">
+   <span class="label">未选中</span>
+   <div class="radio">
+     <div class="radio__inner"></div>   ← border ring (2px inset from outer)
+     <div class="radio__dot"></div>     ← filled dot (shown on checked)
+   </div>
+
+   Outer 24px → radio__inner 20px (2px gap each side) → 1.5px border → dot 11px centered.
+   20px version scales proportionally (5/6 ratio).
+   Click toggles .radio--checked via JS. No :active background.
 */
-.radio { width:24px; height:24px; border-radius:50%; background:var(--color-bg-surface); border:1.5px solid rgba(0,0,0,0.15); display:flex; align-items:center; justify-content:center; flex-shrink:0; position:relative; box-sizing:border-box; cursor:pointer; transition:border-color var(--duration-fast) var(--ease-standard); }
-.radio__inner { display:none; }
+.radio { width:24px; height:24px; display:flex; align-items:center; justify-content:center; flex-shrink:0; position:relative; cursor:pointer; }
+.radio__inner { width:20px; height:20px; border-radius:50%; border:1.5px solid rgba(0,0,0,0.15); background:transparent; box-sizing:border-box; transition:border-color var(--duration-fast) var(--ease-standard); }
+.radio__dot { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:11px; height:11px; border-radius:50%; background:var(--color-brand); display:none; }
 
-.radio--checked { border-color:var(--color-brand); }
-.radio--checked .radio__dot { display:flex; align-items:center; justify-content:center; }
-.radio__dot { display:none; }
-.radio__dot svg { width:12px; height:12px; }
+.radio--checked .radio__inner { border-color:var(--color-brand); }
+.radio--checked .radio__dot { display:block; }
 
+/* 20px = 24px * 5/6; inner: ~16.5px; dot: 11*(5/6)≈9px */
 .radio--sm { width:20px; height:20px; }
-.radio--sm .radio__dot svg { width:8px; height:8px; }
+.radio--sm .radio__inner { width:16.5px; height:16.5px; }
+.radio--sm .radio__dot { width:9px; height:9px; }
 
-.radio--disabled { opacity:0.4; pointer-events:none; cursor:not-allowed; }
+/* Disabled — unchecked: subtle border + 3% #202F64 bg */
+.radio--disabled:not(.radio--checked) { pointer-events:none; cursor:not-allowed; }
+.radio--disabled:not(.radio--checked) .radio__inner { border-color:var(--color-border-disabled); background:var(--color-state-disabled-surface); }
+/* Disabled — checked: subtle border + bg; dot matches border */
+.radio--checked.radio--disabled { pointer-events:none; cursor:not-allowed; }
+.radio--checked.radio--disabled .radio__inner { border-color:var(--color-border-disabled); background:var(--color-state-disabled-surface); }
+.radio--checked.radio--disabled .radio__dot { background:var(--color-border-disabled); }
+
+/* Dark mode overrides for .dark context */
+.dark .radio .radio__inner { border-color:rgba(255,255,255,0.2); }
+.dark .radio--disabled:not(.radio--checked) .radio__inner { border-color:var(--color-border-disabled); background:var(--color-state-disabled-surface); }
+.dark .radio--checked.radio--disabled .radio__inner { border-color:rgba(255,255,255,0.12); background:var(--color-state-disabled-surface); }
+.dark .radio--checked.radio--disabled .radio__dot { background:rgba(255,255,255,0.12); }
 
 /* ── Stack ─────────────────────────────────────────────────── */
 /* @anatomy

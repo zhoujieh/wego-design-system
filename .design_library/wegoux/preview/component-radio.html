@@ -14,40 +14,49 @@ body { margin:0; padding:32px !important; background:var(--color-bg-page); font-
 .section-title { font-size:var(--font-size-14); font-weight:var(--font-weight-semibold); margin:var(--space-16) 0 var(--space-8); color:var(--color-text-primary); }
 hr.divider { border:none; border-top:1px solid var(--color-divider-default); margin:4px 0 var(--space-8); }
 
-/* Dark mode preview strip */
+/* Dark mode preview strip — simulate .dark token values */
 .dark-strip { background:#1C1C1E; border-radius:var(--radius-sm); padding:var(--space-16); margin:0 0 var(--space-8); }
 .dark-strip .label { color:rgba(255,255,255,0.6); }
+.dark-mode .radio .radio__inner { border-color:rgba(255,255,255,0.2); }
+.dark-mode .radio--disabled:not(.radio--checked) .radio__inner { border-color:rgba(255,255,255,0.06); background:rgba(255,255,255,0.03); }
+.dark-mode .radio--checked.radio--disabled .radio__inner { border-color:rgba(255,255,255,0.12); background:rgba(255,255,255,0.03); }
+.dark-mode .radio--checked.radio--disabled .radio__dot { background:rgba(255,255,255,0.12); }
 </style>
 </head>
 <body>
+<div class="section-title">交互演示 — 24px（互斥单选，不可取消选择）</div>
+<div class="row">
+  <span class="label">选项</span>
+  <div class="radio radio--checked" onclick="selectRadio(this)" data-group="demo1">
+    <div class="radio__inner"></div><div class="radio__dot"></div>
+  </div>
+  <span style="font-size:var(--font-size-14)">选项A</span>
+  <div class="radio" onclick="selectRadio(this)" data-group="demo1">
+    <div class="radio__inner"></div><div class="radio__dot"></div>
+  </div>
+  <span style="font-size:var(--font-size-14)">选项B</span>
+  <div class="radio" onclick="selectRadio(this)" data-group="demo1">
+    <div class="radio__inner"></div><div class="radio__dot"></div>
+  </div>
+  <span style="font-size:var(--font-size-14)">选项C</span>
+</div>
+
+<hr class="divider">
+
 <div class="section-title">默认状态 — 24px</div>
 <div class="row">
   <span class="label">未选中</span>
-  <div class="radio"><div class="radio__inner"></div></div>
+  <div class="radio radio--static" data-sample="default-unchecked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
   <span class="label">选中</span>
-  <div class="radio radio--checked">
-    <div class="radio__inner"></div>
-    <div class="radio__dot">
-      <svg width="11" height="11" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="6" cy="6" r="6" fill="#03C160"/>
-      </svg>
-    </div>
-  </div>
+  <div class="radio radio--checked radio--static" data-sample="default-checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
 </div>
 
 <div class="section-title">默认状态 — 20px</div>
 <div class="row">
   <span class="label">未选中</span>
-  <div class="radio radio--sm"><div class="radio__inner"></div></div>
+  <div class="radio radio--sm radio--static" data-sample="sm-unchecked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
   <span class="label">选中</span>
-  <div class="radio radio--sm radio--checked">
-    <div class="radio__inner"></div>
-    <div class="radio__dot">
-      <svg width="8" height="8" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="6" cy="6" r="6" fill="#03C160"/>
-      </svg>
-    </div>
-  </div>
+  <div class="radio radio--sm radio--checked radio--static" data-sample="sm-checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
 </div>
 
 <hr class="divider">
@@ -55,31 +64,17 @@ hr.divider { border:none; border-top:1px solid var(--color-divider-default); mar
 <div class="section-title">禁用状态 — 24px</div>
 <div class="row">
   <span class="label">禁用未选中</span>
-  <div class="radio radio--disabled"><div class="radio__inner"></div></div>
+  <div class="radio radio--disabled radio--static" data-sample="disabled-unchecked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
   <span class="label">禁用选中</span>
-  <div class="radio radio--checked radio--disabled">
-    <div class="radio__inner"></div>
-    <div class="radio__dot">
-      <svg width="11" height="11" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="6" cy="6" r="6"/>
-      </svg>
-    </div>
-  </div>
+  <div class="radio radio--checked radio--disabled radio--static" data-sample="disabled-checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
 </div>
 
 <div class="section-title">禁用状态 — 20px</div>
 <div class="row">
   <span class="label">禁用未选中</span>
-  <div class="radio radio--sm radio--disabled"><div class="radio__inner"></div></div>
+  <div class="radio radio--sm radio--disabled radio--static" data-sample="sm-disabled-unchecked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
   <span class="label">禁用选中</span>
-  <div class="radio radio--sm radio--checked radio--disabled">
-    <div class="radio__inner"></div>
-    <div class="radio__dot">
-      <svg width="8" height="8" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="6" cy="6" r="6"/>
-      </svg>
-    </div>
-  </div>
+  <div class="radio radio--sm radio--checked radio--disabled radio--static" data-sample="sm-disabled-checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
 </div>
 
 <hr class="divider">
@@ -88,27 +83,13 @@ hr.divider { border:none; border-top:1px solid var(--color-divider-default); mar
 <div class="dark-strip dark-mode">
   <div class="row">
     <span class="label">暗色未选中</span>
-    <div class="radio"><div class="radio__inner"></div></div>
+    <div class="radio radio--static" data-sample="dark-unchecked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
     <span class="label">暗色选中</span>
-    <div class="radio radio--checked">
-      <div class="radio__inner"></div>
-      <div class="radio__dot">
-        <svg width="11" height="11" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="6" cy="6" r="6" fill="#03C160"/>
-        </svg>
-      </div>
-    </div>
+    <div class="radio radio--checked radio--static" data-sample="dark-checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
     <span class="label">暗色禁用未选中</span>
-    <div class="radio radio--disabled"><div class="radio__inner"></div></div>
+    <div class="radio radio--disabled radio--static" data-sample="dark-disabled-unchecked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
     <span class="label">暗色禁用选中</span>
-    <div class="radio radio--checked radio--disabled">
-      <div class="radio__inner"></div>
-      <div class="radio__dot">
-        <svg width="11" height="11" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="6" cy="6" r="6"/>
-        </svg>
-      </div>
-    </div>
+    <div class="radio radio--checked radio--disabled radio--static" data-sample="dark-disabled-checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
   </div>
 </div>
 
@@ -116,28 +97,37 @@ hr.divider { border:none; border-top:1px solid var(--color-divider-default); mar
 <div class="dark-strip dark-mode">
   <div class="row">
     <span class="label">暗色未选中</span>
-    <div class="radio radio--sm"><div class="radio__inner"></div></div>
+    <div class="radio radio--sm radio--static" data-sample="dark-sm-unchecked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
     <span class="label">暗色选中</span>
-    <div class="radio radio--sm radio--checked">
-      <div class="radio__inner"></div>
-      <div class="radio__dot">
-        <svg width="8" height="8" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="6" cy="6" r="6" fill="#03C160"/>
-        </svg>
-      </div>
-    </div>
+    <div class="radio radio--sm radio--checked radio--static" data-sample="dark-sm-checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
     <span class="label">暗色禁用未选中</span>
-    <div class="radio radio--sm radio--disabled"><div class="radio__inner"></div></div>
+    <div class="radio radio--sm radio--disabled radio--static" data-sample="dark-sm-disabled-unchecked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
     <span class="label">暗色禁用选中</span>
-    <div class="radio radio--sm radio--checked radio--disabled">
-      <div class="radio__inner"></div>
-      <div class="radio__dot">
-        <svg width="8" height="8" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="6" cy="6" r="6"/>
-        </svg>
-      </div>
-    </div>
+    <div class="radio radio--sm radio--checked radio--disabled radio--static" data-sample="dark-sm-disabled-checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
   </div>
 </div>
+
+<script>
+/*
+ * Radio group — mutually exclusive, cannot deselect.
+ * All radios in a group share the same data-group attribute.
+ * Clicking another radio deselects the current one and selects the target.
+ * Clicking the already-selected radio does nothing.
+ * Disabled radios are ignored.
+ */
+function selectRadio(el) {
+  if (el.classList.contains('radio--disabled')) return;
+  if (el.classList.contains('radio--checked')) return; // 不可取消
+
+  var group = el.getAttribute('data-group');
+  if (group) {
+    var siblings = document.querySelectorAll('[data-group="' + group + '"]');
+    for (var i = 0; i < siblings.length; i++) {
+      siblings[i].classList.remove('radio--checked');
+    }
+  }
+  el.classList.add('radio--checked');
+}
+</script>
 </body>
 </html>

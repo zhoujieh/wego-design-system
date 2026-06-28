@@ -59,6 +59,7 @@
   --Border-color-border-success: rgba(3, 193, 96, 0.2);
   --Border-color-border-loading-indicator: #03c160;
   --Border-color-border-warning: rgba(250, 157, 59, 0.2);
+  --Border-color-border-disabled: rgba(32, 47, 100, 0.06);
   /* wg-color-base-neutral */
   --wg-color-base-neutral-900: #1e2028;
   --wg-color-base-neutral-800: #3f434c;
@@ -100,6 +101,7 @@
   --State-color-state-focus: #03c160;
   --State-color-state-disabled-text: #b7bec5;
   --State-color-state-disabled-bg: #f2f3f6;
+  --State-color-state-disabled-surface: rgba(32, 47, 100, 0.03);
   /* wg-color-base-accent-yellow-alpha */
   --wg-color-base-accent-yellow-alpha-10: rgba(255, 195, 0, 0.1);
   --wg-color-base-accent-yellow-alpha-20: rgba(255, 195, 0, 0.2);
@@ -222,6 +224,7 @@
   --color-border-focus: var(--Border-color-border-focus);
   --color-border-loading-track: var(--Border-color-border-loading-track);
   --color-border-loading-indicator: var(--Border-color-border-loading-indicator);
+  --color-border-disabled: var(--Border-color-border-disabled);
   /* Divider */
   --color-divider-default: var(--Divider-color-divider-default);
   --color-divider-strong: var(--Divider-color-divider-strong);
@@ -233,6 +236,7 @@
   --color-state-focus: var(--State-color-state-focus);
   --color-state-disabled-bg: var(--State-color-state-disabled-bg);
   --color-state-disabled-text: var(--State-color-state-disabled-text);
+  --color-state-disabled-surface: var(--State-color-state-disabled-surface);
   /* Danger (short alias) */
   --color-danger: var(--Text-color-text-danger);
   /* Surface (short aliases) */
@@ -699,6 +703,7 @@
   --Border-color-border-strong: rgba(255, 255, 255, 0.10);
   --Border-color-border-subtle: rgba(255, 255, 255, 0.03);
   --Border-color-border-loading-track: rgba(255, 255, 255, 0.06);
+  --Border-color-border-disabled: rgba(255, 255, 255, 0.06);
   --Divider-color-divider-default: rgba(255, 255, 255, 0.06);
   --Divider-color-divider-strong: rgba(255, 255, 255, 0.10);
   --Divider-color-divider-subtle: rgba(255, 255, 255, 0.03);
@@ -714,6 +719,7 @@
   --State-color-state-selected: rgba(255, 255, 255, 0.12);
   --State-color-state-disabled-text: #4e5460;
   --State-color-state-disabled-bg: #1c1e24;
+  --State-color-state-disabled-surface: rgba(255, 255, 255, 0.03);
 
   /* === Brand — keep weigoux green, slight adjustments for dark === */
   --Brand-color-brand: #03c160;
