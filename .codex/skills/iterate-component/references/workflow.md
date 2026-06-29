@@ -14,9 +14,9 @@
 
 ## 2. 已注册组件迭代标准步骤
 
-1. 读取 `.design_library/wegoux/SKILL.md`、`.design_library/wegoux/README.md`、`.design_library/wegoux/library-consumption.json`、`.design_library/wegoux/uikit-plan.json`
-2. 读取 `.design_library/wegoux/components/index.json`，确认 slug 已注册
-3. 读取 `.design_library/wegoux/components/{slug}.json` 与 `.design_library/wegoux/preview/component-{slug}.html`
+1. 读取 `wegoux/SKILL.md`、`wegoux/README.md`、`wegoux/library-consumption.json`、`wegoux/uikit-plan.json`
+2. 读取 `wegoux/components/index.json`，确认 slug 已注册
+3. 读取 `wegoux/components/{slug}.json` 与 `wegoux/preview/component-{slug}.html`
 4. 判断这次变化落在哪些面：
    - 契约结构
    - 样式与状态
@@ -26,13 +26,13 @@
    - 是否存在 preview 靠 inline style 才成立的组件语义
    - 是否需要先收敛公开类型、挂载方式或宿主边界
    - 是否属于圆角、偏移、滚动、描边这类必须看真实渲染结果的视觉改动
-5. 修改 `.design_library/wegoux/components/{slug}.json`
-6. 修改 `.design_library/wegoux/preview/component-{slug}.html`
+5. 修改 `wegoux/components/{slug}.json`
+6. 修改 `wegoux/preview/component-{slug}.html`
    - 组件 CSS 只改 `/* @component-css-start */` 与 `/* @component-css-end */` 之间
    - 脚手架样式不要混进组件核心样式区
-7. 若样式有变化，在仓库根执行 `node .design_library/wegoux/scripts/extract-components-css.mjs .design_library/wegoux`
-8. 若影响 `.design_library/wegoux/README.md`、顶层 `.design_library/wegoux/SKILL.md`、`.design_library/wegoux/library-consumption.json`、`.design_library/wegoux/uikit-plan.json`，一并同步
-9. 递增 `.design_library/wegoux/metadata.json.version`
+7. 若样式有变化，在仓库根执行 `node wegoux/scripts/extract-components-css.mjs wegoux`
+8. 若影响 `wegoux/README.md`、顶层 `wegoux/SKILL.md`、`wegoux/library-consumption.json`、`wegoux/uikit-plan.json`，一并同步
+9. 递增 `wegoux/metadata.json.version`
 10. 做最小必要验证并汇报风险
 
 补充：
@@ -58,19 +58,19 @@
 ## 3. 新增组件发布标准步骤
 
 1. 先确认它不是已有组件或嵌入式组件的变体
-2. 新增 `.design_library/wegoux/components/{slug}.json`
-3. 新增 `.design_library/wegoux/preview/component-{slug}.html`
-4. 注册到 `.design_library/wegoux/components/index.json`
-5. 在仓库根执行 `node .design_library/wegoux/scripts/extract-components-css.mjs .design_library/wegoux` 生成 `.design_library/wegoux/components.css`
-6. 同步 `.design_library/wegoux/uikit-plan.json`
-7. 同步 `.design_library/wegoux/library-consumption.json`
-8. 同步 `.design_library/wegoux/README.md` 与顶层 `.design_library/wegoux/SKILL.md` 中的组件数量、清单、状态和边界
-9. 递增 `.design_library/wegoux/metadata.json.version`
+2. 新增 `wegoux/components/{slug}.json`
+3. 新增 `wegoux/preview/component-{slug}.html`
+4. 注册到 `wegoux/components/index.json`
+5. 在仓库根执行 `node wegoux/scripts/extract-components-css.mjs wegoux` 生成 `wegoux/components.css`
+6. 同步 `wegoux/uikit-plan.json`
+7. 同步 `wegoux/library-consumption.json`
+8. 同步 `wegoux/README.md` 与顶层 `wegoux/SKILL.md` 中的组件数量、清单、状态和边界
+9. 递增 `wegoux/metadata.json.version`
 10. 验证新增组件是否符合移动端、微信生态、电商/工具场景
 
 ## 4. 什么时候同步顶层文档
 
-出现下面任一情况时，要考虑同步 `.design_library/wegoux/README.md` 和顶层 `.design_library/wegoux/SKILL.md`：
+出现下面任一情况时，要考虑同步 `wegoux/README.md` 和顶层 `wegoux/SKILL.md`：
 
 - 组件数量变化
 - 已发布组件清单变化
@@ -80,13 +80,13 @@
 
 ## 5. 什么时候同步消费契约
 
-同步 `.design_library/wegoux/library-consumption.json`：
+同步 `wegoux/library-consumption.json`：
 
 - 新增组件
 - 组件读取顺序、复制边界、嵌入关系变化
 - 图标消费方式变化
 
-同步 `.design_library/wegoux/uikit-plan.json`：
+同步 `wegoux/uikit-plan.json`：
 
 - 新增组件进入允许清单
 - 组件槽位、优先级、页面蓝图变化
@@ -94,7 +94,7 @@
 
 ## 6. 什么时候跑提取脚本
 
-执行 `node .design_library/wegoux/scripts/extract-components-css.mjs .design_library/wegoux` 的条件：
+执行 `node wegoux/scripts/extract-components-css.mjs wegoux` 的条件：
 
 - 组件核心 CSS 变了
 - 新增了带 preview 的组件
@@ -104,21 +104,21 @@
 
 ## 7. 什么时候校验 css.json
 
-执行 `python3 -c "import json; json.load(open('.design_library/wegoux/css.json'))"` 的条件：
+执行 `python3 -c "import json; json.load(open('wegoux/css.json'))"` 的条件：
 
-- 改了 `.design_library/wegoux/colors_and_type.css`
-- 改了 `.design_library/wegoux/css.json`
-- 新增或调整了组件依赖的语义 Token，并同步更新了 `.design_library/wegoux/css.json`
+- 改了 `wegoux/colors_and_type.css`
+- 改了 `wegoux/css.json`
+- 新增或调整了组件依赖的语义 Token，并同步更新了 `wegoux/css.json`
 
-如果这次只是组件 preview 样式调整，且没有触发 Token 层变更，不需要为了形式去改或校验 `.design_library/wegoux/css.json`。
+如果这次只是组件 preview 样式调整，且没有触发 Token 层变更，不需要为了形式去改或校验 `wegoux/css.json`。
 
 ## 8. 常见拦截
 
-### 用户要求直接修改 `.design_library/wegoux/components.css`
+### 用户要求直接修改 `wegoux/components.css`
 
 必须拦截，改为：
 
-1. 找到对应 `.design_library/wegoux/preview/component-{slug}.html`
+1. 找到对应 `wegoux/preview/component-{slug}.html`
 2. 修改标记区内的组件样式
 3. 执行提取脚本重新生成
 
@@ -140,4 +140,4 @@
 ### 用户改颜色但没提 Token
 
 先判断是局部样式微调，还是公共语义 Token 应调整。
-如果已经涉及公共语义层，就必须补读 `.design_library/wegoux/colors_and_type.css` 和 `.design_library/wegoux/css.json`，不要停留在组件局部硬编码。
+如果已经涉及公共语义层，就必须补读 `wegoux/colors_and_type.css` 和 `wegoux/css.json`，不要停留在组件局部硬编码。

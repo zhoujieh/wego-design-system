@@ -17,33 +17,33 @@
 
 ## 2. 读取顺序
 
-1. `.design_library/wegoux/README.md`
-2. `.design_library/wegoux/library-consumption.json`
-3. `.design_library/wegoux/uikit-plan.json`
-4. `.design_library/wegoux/components/index.json`
-5. `.design_library/wegoux/components/button.json`
-6. `.design_library/wegoux/preview/component-button.html`
+1. `wegoux/README.md`
+2. `wegoux/library-consumption.json`
+3. `wegoux/uikit-plan.json`
+4. `wegoux/components/index.json`
+5. `wegoux/components/button.json`
+6. `wegoux/preview/component-button.html`
 
 ## 3. 本轮落点
 
 button 这轮真实落点是：
 
-- `.design_library/wegoux/components/button.json`
-- `.design_library/wegoux/preview/component-button.html`
-- `.design_library/wegoux/components.css`
-- `.design_library/wegoux/metadata.json`
+- `wegoux/components/button.json`
+- `wegoux/preview/component-button.html`
+- `wegoux/components.css`
+- `wegoux/metadata.json`
 
 这说明它属于典型的“组件契约 + preview 样式 + 聚合样式重生成 + 版本递增”流程。
 
 ## 4. 标准执行链路
 
 1. 判断 button 是否已注册
-2. 先看 `.design_library/wegoux/components/button.json`，确认变体维度、结构、行为和使用边界
-3. 再看 `.design_library/wegoux/preview/component-button.html`，确认样式是否只在标记区修改
+2. 先看 `wegoux/components/button.json`，确认变体维度、结构、行为和使用边界
+3. 再看 `wegoux/preview/component-button.html`，确认样式是否只在标记区修改
 4. 更新 button 契约
 5. 更新 preview 标记区内的组件样式和示例
-6. 执行 `node .design_library/wegoux/scripts/extract-components-css.mjs .design_library/wegoux`
-7. 递增 `.design_library/wegoux/metadata.json.version`
+6. 执行 `node wegoux/scripts/extract-components-css.mjs wegoux`
+7. 递增 `wegoux/metadata.json.version`
 8. 汇报改动、验证和风险
 
 ## 5. button 特有边界
@@ -61,14 +61,14 @@ button 这轮真实落点是：
 处理方式：
 
 - 拦截
-- 改去 `.design_library/wegoux/preview/component-button.html` 的标记区
-- 重新生成 `.design_library/wegoux/components.css`
+- 改去 `wegoux/preview/component-button.html` 的标记区
+- 重新生成 `wegoux/components.css`
 
 ### 情况 B：用户只改按钮示例文案
 
 处理方式：
 
-- 如果只影响展示，不强制改 `.design_library/wegoux/components/button.json`
+- 如果只影响展示，不强制改 `wegoux/components/button.json`
 - 如果文案变化反映了按钮使用边界变化，例如图标模式不再限于新建场景，就必须同步契约
 
 ### 情况 C：用户要调按钮颜色
@@ -76,13 +76,13 @@ button 这轮真实落点是：
 处理方式：
 
 - 先判断是 button 局部态色修正，还是公共品牌/状态 Token 变化
-- 如果进入公共 Token 层，必须同步 `.design_library/wegoux/colors_and_type.css` 与 `.design_library/wegoux/css.json`
+- 如果进入公共 Token 层，必须同步 `wegoux/colors_and_type.css` 与 `wegoux/css.json`
 
 ## 7. 完成信号
 
 完成后至少应满足：
 
 - 契约和 preview 语义一致
-- `.design_library/wegoux/components.css` 来自提取脚本，不是手改
+- `wegoux/components.css` 来自提取脚本，不是手改
 - 版本号已递增
 - 回复里明确说明改了什么、验证了什么、剩余风险

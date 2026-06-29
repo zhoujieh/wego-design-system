@@ -30,23 +30,23 @@
 
 先读：
 
-1. `.design_library/wegoux/SKILL.md`
-2. `.design_library/wegoux/README.md`
-3. `.design_library/wegoux/library-consumption.json`
-4. `.design_library/wegoux/uikit-plan.json`
+1. `wegoux/SKILL.md`
+2. `wegoux/README.md`
+3. `wegoux/library-consumption.json`
+4. `wegoux/uikit-plan.json`
 
 按任务继续读：
 
-- 改 Token：读 `.design_library/wegoux/colors_and_type.css` 和 `.design_library/wegoux/css.json`。
-- 改组件：读 `.design_library/wegoux/components/index.json`、对应 `components/{slug}.json`、对应 `preview/component-{slug}.html`。
-- 改 UI Kit：读 `.design_library/wegoux/ui_kits/app/index.html` 和 `quality-report.json`。
-- 改图标：读 `.design_library/wegoux/iconfont.css`、`assets/fonts/`、`assets/icons/`。
-- 改规范或文案：读 `.design_library/wegoux/specs/*/*.md` 中对应文件。
+- 改 Token：读 `wegoux/colors_and_type.css` 和 `wegoux/css.json`。
+- 改组件：读 `wegoux/components/index.json`、对应 `components/{slug}.json`、对应 `preview/component-{slug}.html`。
+- 改 UI Kit：读 `wegoux/ui_kits/app/index.html` 和 `quality-report.json`。
+- 改图标：读 `wegoux/iconfont.css`、`assets/fonts/`、`assets/icons/`。
+- 改规范或文案：读 `wegoux/specs/*/*.md` 中对应文件。
 - 对照 TRAE：只读 `参考trae/` 和审查报告中的结构建议，不复制其视觉方向。
 
 ## 组件发布规则
 
-- 已发布组件只以 `.design_library/wegoux/components/index.json` 为准。
+- 已发布组件只以 `wegoux/components/index.json` 为准。
 - 当前稳定组件为 18 个：`button`、`card`、`avatar`、`tag`、`bottom-nav`、`input`、`counter`、`badge`、`cell`、`checkbox`、`form`、`image`、`link`、`radio`、`stack`、`switch`、`navbar`、`navbar-action-button`。
 - `navbar-action-button` 是 `navbar` 内嵌组件，没有独立预览页时不要强行当独立页面组件使用。
 - UI Kit 中的 `biz-*`、`.phone-*`、`.uikit-shell`、`.phone-frame`、`.phone-screen` 都是 Showcase 演示外壳或业务样式，不是通用组件。
@@ -125,7 +125,7 @@
 
 每次正式迭代：
 
-- 递增 `.design_library/wegoux/metadata.json` 的 `version`。
+- 递增 `wegoux/metadata.json` 的 `version`。
 - 只有仓库管理类变更可以不递增版本，例如只改根目录 `AGENTS.md`、`.gitignore` 或 Git 配置。
 
 ## 设计质量门禁

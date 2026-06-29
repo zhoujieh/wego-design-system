@@ -72,7 +72,7 @@
 
 #### 3.3 创建 `scaffold.css`
 
-新建 `.design_library/wegoux/scaffold.css`：
+新建 `wegoux/scaffold.css`：
 - 提供 `pv-header`、`pv-section`、`pv-section__title`、`pv-section__sub`、`.row`、`.label`、`.page`、`.preview-phone` 等
 - 使用 `var()` 引用 Token，不 `@import` colors_and_type.css
 - 不含组件样式

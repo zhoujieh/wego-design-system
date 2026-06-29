@@ -52,7 +52,7 @@ avatar、bottom-nav、button、card、chip、counter、input、link、navbar、r
 
 ### 变更 1：component-badge.html — 新增 Badge 组件 CSS + 标记
 
-**文件**：`.design_library/wegoux/preview/component-badge.html`
+**文件**：`wegoux/preview/component-badge.html`
 
 **依据**：`components/badge.json` 设计契约 + HTML body 已使用的 class 名
 
@@ -78,7 +78,7 @@ avatar、bottom-nav、button、card、chip、counter、input、link、navbar、r
 
 ### 变更 2：component-cell.html — 新增 Cell 组件 CSS + 标记
 
-**文件**：`.design_library/wegoux/preview/component-cell.html`
+**文件**：`wegoux/preview/component-cell.html`
 
 **依据**：`components/cell.json` 设计契约 + HTML body 已使用的 class 名
 
@@ -112,7 +112,7 @@ avatar、bottom-nav、button、card、chip、counter、input、link、navbar、r
 
 ### 变更 3：component-checkbox.html — 新增 Checkbox 组件 CSS + 标记
 
-**文件**：`.design_library/wegoux/preview/component-checkbox.html`
+**文件**：`wegoux/preview/component-checkbox.html`
 
 **依据**：`components/checkbox.json` 设计契约
 
@@ -133,7 +133,7 @@ avatar、bottom-nav、button、card、chip、counter、input、link、navbar、r
 
 ### 变更 4：component-switch.html — 新增 Switch 组件 CSS + 标记
 
-**文件**：`.design_library/wegoux/preview/component-switch.html`
+**文件**：`wegoux/preview/component-switch.html`
 
 **依据**：`components/switch.json` 设计契约
 
@@ -149,7 +149,7 @@ avatar、bottom-nav、button、card、chip、counter、input、link、navbar、r
 
 ### 变更 5：component-stack.html — 新增 Stack 组件 CSS + 标记
 
-**文件**：`.design_library/wegoux/preview/component-stack.html`
+**文件**：`wegoux/preview/component-stack.html`
 
 **依据**：`components/stack.json` 设计契约
 
@@ -165,7 +165,7 @@ avatar、bottom-nav、button、card、chip、counter、input、link、navbar、r
 
 ### 变更 6：component-form.html — 添加标记（CSS 已有，仅加标记）
 
-**文件**：`.design_library/wegoux/preview/component-form.html`
+**文件**：`wegoux/preview/component-form.html`
 
 **操作**：
 - Scaffold（`.page`、`.section-title`、`.section-group`、`.section-gap`）保留在标记外
@@ -175,7 +175,7 @@ avatar、bottom-nav、button、card、chip、counter、input、link、navbar、r
 
 ### 变更 7：component-image.html — 添加标记（CSS 已有，仅加标记）
 
-**文件**：`.design_library/wegoux/preview/component-image.html`
+**文件**：`wegoux/preview/component-image.html`
 
 **操作**：
 - Scaffold（`.section`、`.section-title`、`.demo-img-1~5`、`.demo-img-checker` 等）保留在标记外
@@ -184,7 +184,7 @@ avatar、bottom-nav、button、card、chip、counter、input、link、navbar、r
 
 ### 变更 8：重新生成 components.css
 
-**命令**：`node .design_library/wegoux/scripts/extract-components-css.mjs .design_library/wegoux`
+**命令**：`node wegoux/scripts/extract-components-css.mjs wegoux`
 
 **预期效果**：
 1. Badge/Cell/Checkbox/Stack/Switch 的组件 CSS 被精确提取（首次有真实内容）
@@ -195,7 +195,7 @@ avatar、bottom-nav、button、card、chip、counter、input、link、navbar、r
 
 ### 变更 9：更新 SKILL.md
 
-**文件**：`.design_library/wegoux/SKILL.md`
+**文件**：`wegoux/SKILL.md`
 
 **操作**：
 - 「组件 CSS 生成规则」中：
