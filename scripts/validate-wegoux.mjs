@@ -27,7 +27,7 @@ const strict = args.has('--strict');
 const jsonOutput = args.has('--json');
 const repoRoot = process.cwd();
 const rootArg = rawArgs.find(arg => arg.startsWith('--root='));
-const libraryRoot = path.resolve(repoRoot, rootArg ? rootArg.slice('--root='.length) : 'wegoux');
+const libraryRoot = path.resolve(repoRoot, rootArg ? rootArg.slice('--root='.length) : '.design_library/wegoux');
 const rootRel = path.relative(repoRoot, libraryRoot) || '.';
 const scopeArg = rawArgs.find(arg => arg.startsWith('--scope='));
 const requestedScope = args.has('--full')
@@ -131,6 +131,7 @@ const REQUIRED_COMPONENT_CONTRACT_FIELDS = [
 
 const ALLOWED_OPTIONAL_CONTRACT_FIELDS = [
   'cssCustomProperties',
+  'fixedTabs',
 ];
 
 const REQUIRED_PROVENANCE_FIELDS = [
@@ -707,7 +708,7 @@ function checkComponentsCss(options = {}) {
     }
     const generated = fs.readFileSync(path.join(tmpRoot, 'components.css'), 'utf8');
     if (generated !== css) {
-      add('error', 'components_css.stale', 'components.css 与预览页重新生成结果不一致，请运行 wegoux/scripts/extract-components-css.mjs');
+      add('error', 'components_css.stale', 'components.css 与预览页重新生成结果不一致，请运行 .design_library/wegoux/scripts/extract-components-css.mjs');
     }
   } finally {
     fs.rmSync(tmpParent, { recursive: true, force: true });

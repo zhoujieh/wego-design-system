@@ -279,7 +279,7 @@ wegoux 当前定位清楚：移动端、微信生态、电商/工具、中文、
 | --- | --- |
 | 文档提到 `icons/`，实际资产在 `assets/icons/`。 | 下游读取路径可能错误。 |
 | `README.md`/`SKILL.md` 已提到 `biz-settings`，但 `library-consumption.json` 的 `uiKits` 仍只有 `app`。 | 消费契约和实际 UI Kit 不同步。 |
-| README 文件清单中根路径写成 `.design_library/微购设计系统/`。 | 与实际 `wegoux/` 不一致。 |
+| README 文件清单中根路径写成 `wegoux/`。 | 与实际 `.design_library/wegoux/` 不一致。 |
 | 方向约束主要在文档层，还没有系统进入每个组件契约。 | 后续 AI 修改单组件时容易只看局部文件。 |
 
 ### 3.3 `colors_and_type.css`
@@ -500,7 +500,7 @@ wegoux 当前定位清楚：移动端、微信生态、电商/工具、中文、
 
 > **完成记录**（commit `312b3ac`，metadata version 118；当前仓库 metadata version 152）：
 >
-> 1. ✅ README.md 文件清单根路径从 `.design_library/微购设计系统/` 统一为 `wegoux/`。
+> 1. ✅ README.md 文件清单根路径从 `wegoux/` 统一为 `.design_library/wegoux/`。
 > 2. ✅ 所有文档中 `icons/*.svg` 修正为 `assets/icons/*.svg`（README.md、SKILL.md、library-consumption.json 共 6 处）。
 > 3. ✅ `biz-settings` UI Kit 同步到 library-consumption.json（uiKits 数组 + uikit layer files）、components/index.json（uiKits 入口列表）、uikit-plan.json（uiKits 入口列表）、README.md（文件清单树 + 下游消费指南表格）、SKILL.md（文件清单树）。
 > 4. ✅ `navbar-action-button` 在 components/index.json 中标记 `embedded: true` + `hostComponent: "navbar"`。
@@ -512,7 +512,7 @@ wegoux 当前定位清楚：移动端、微信生态、电商/工具、中文、
 
 要做：
 
-1. 统一文档中的根路径为 `wegoux/`。
+1. 统一文档中的根路径为 `.design_library/wegoux/`。
 2. 把 `icons/*.svg` 修为实际的 `assets/icons/*.svg`。
 3. 在 `library-consumption.json`、`uikit-plan.json`、README、SKILL 中同步 `app` 和 `biz-settings` 两个 UI Kit。
 4. 明确 `navbar-action-button` 是 embedded component，并在注册表中机器可读。
@@ -532,7 +532,7 @@ wegoux 当前定位清楚：移动端、微信生态、电商/工具、中文、
 > 2. ✅ Token 结构收敛为 `reference/primitives` + `public semantic` 两层，并在文件头写明 AI 修改规则；组件后续只应直接消费 `--color-*`、`--font-*`、`--space-*`、`--radius-*`、`--size-*`、`--duration-*`、`--ease-*`。
 > 3. ✅ 补齐了本阶段缺失的可复用语义 Token：控件未选中背景、控件默认边框、控件禁用强边框、promotion 强提示文本/边框、accent-yellow 展示语义、switch thumb shadow 等。
 > 4. ✅ 组件核心 CSS 的 raw hex / 裸 `rgba(...)` 已在本阶段目标范围内清理为 0；涉及文件包含 `switch`、`checkbox`、`radio`、`stack`、`input`、`avatar`、`badge`、`bottom-nav`、`tag`、`form`、`image` 的 `@component-css` 标记块。
-> 5. ✅ `components.css` 已通过 `node wegoux/scripts/extract-components-css.mjs wegoux` 重新生成，输出无 warning。
+> 5. ✅ `components.css` 已通过 `node .design_library/wegoux/scripts/extract-components-css.mjs .design_library/wegoux` 重新生成，输出无 warning。
 > 6. ✅ `css.json` 已按新 Token 结构同步，并切到 TRAE 官方支持的扁平桶格式：`color` / `font` / `shadow` / `radius` / `spacing` / `size`（另含本库补充桶）。
 >
 > **范围说明**：

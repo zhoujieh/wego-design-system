@@ -126,8 +126,7 @@ body.uikit-page {
 }
 .phone-frame {
   width: 390px;
-  height: min(780px, calc(100vh - var(--spacer-32)));
-  height: min(780px, calc(100dvh - var(--spacer-32)));
+  height: 780px;
   border: 8px solid var(--bg-inverse);
   border-radius: 40px;
   overflow: hidden;
@@ -186,8 +185,9 @@ body.uikit-page {
   }
   .phone-frame {
     width: 100%;
-    height: calc(100vh - var(--spacer-16));
-    height: calc(100dvh - var(--spacer-16));
+    height: 100vh;
+    height: 100dvh;
+    max-height: 900px;
     border: none;
     border-radius: 0;
     box-shadow: none;

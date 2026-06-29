@@ -159,7 +159,7 @@ name: "微购设计系统"
 ## 文件清单
 
 ```
-wegoux/
+.design_library/wegoux/
 ├── README.md                          # 本文档：品牌背景、视觉基础、组件概览
 ├── SKILL.md                           # Skill 运行时控制入口
 ├── colors_and_type.css                # 纯 Token 权威源（reference/primitives + public semantic + dark overrides）
