@@ -5,16 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>输入框 - 微购设计系统</title>
 <link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../scaffold.css">
+<link rel="stylesheet" href="../iconfont.css">
 <style>
-/* Page scaffold — NOT extracted */
-body { margin: 0; padding: 32px !important; background: var(--color-bg-page); font-family: var(--font-family-text); color: var(--color-text-primary); }
 .specimen { display: flex; flex-direction: column; gap: var(--space-0); }
 .stage { display: flex; flex-direction: column; gap: var(--space-0); }
 .story { display: flex; flex-direction: column; gap: var(--space-8); margin-bottom: var(--space-12); }
 .story:last-child { margin-bottom: var(--space-0); }
 .story-label { width: 92px; flex-shrink: 0; font-size: var(--font-size-12); font-weight: var(--font-weight-medium); color: var(--color-text-secondary); line-height: var(--font-lineheight-12); }
 .rail { display: flex; gap: var(--space-16); align-items: flex-start; flex-wrap: wrap; }
-.divider { border: none; border-top: 1px solid var(--color-divider-default); margin: var(--space-0) var(--space-0) var(--space-12); }
 
 /* @component-css-start */
 .input-group { display: flex; flex-direction: column; gap: var(--space-8); width: 100%; max-width: 320px; flex-shrink: 0; }
@@ -44,6 +43,7 @@ body { margin: 0; padding: 32px !important; background: var(--color-bg-page); fo
 </style>
 </head>
 <body>
+<div class="pv-header"><h1>输入框</h1><p>独立输入框，支持 text/textarea、聚焦、错误、禁用状态。</p></div>
 <div class="specimen">
 <div class="stage">
 <!-- Text Input -->
@@ -68,7 +68,6 @@ body { margin: 0; padding: 32px !important; background: var(--color-bg-page); fo
 </div>
 </div>
 </div>
-<hr class="divider">
 <!-- Textarea -->
 <div class="story">
 <span class="story-label">多行文本输入</span>
@@ -83,7 +82,6 @@ body { margin: 0; padding: 32px !important; background: var(--color-bg-page); fo
 </div>
 </div>
 </div>
-<hr class="divider">
 <!-- Number Input -->
 <div class="story">
 <span class="story-label">数字输入框</span>
@@ -110,7 +108,6 @@ body { margin: 0; padding: 32px !important; background: var(--color-bg-page); fo
 </div>
 </div>
 </div>
-<hr class="divider">
 </div>
 </div>
 <script>

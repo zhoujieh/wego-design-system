@@ -5,12 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>头像 - 微购设计系统</title>
 <link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../scaffold.css">
+<link rel="stylesheet" href="../iconfont.css">
 <style>
-/* Page scaffold -- NOT extracted */
-body { margin: 0; padding: 32px !important; background: var(--color-bg-page); font-family: var(--font-family-text); color: var(--color-text-primary); }
-.row { display: flex; gap: 20px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
-.label { font-size: var(--font-size-12); color: var(--color-text-tertiary); min-width: 92px; flex-shrink: 0; }
-.divider { border: none; border-top: var(--stroke-width-hairline) var(--stroke-style-solid) var(--color-divider-default); margin: 8px 0 12px; }
 
 /* @component-css-start */
 .avatar { border-radius: var(--radius-full); overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; box-sizing: border-box; border: 0.5px solid var(--color-border-default); position: relative; }
@@ -28,6 +25,7 @@ body { margin: 0; padding: 32px !important; background: var(--color-bg-page); fo
 </style>
 </head>
 <body>
+<div class="pv-header"><h1>头像</h1><p>图片头像和文字头像，支持 24 / 40 / 56px。</p></div>
 
 <!-- Row 1: Default avatar (placeholder image) -->
 <div class="row">
@@ -37,7 +35,6 @@ body { margin: 0; padding: 32px !important; background: var(--color-bg-page); fo
   <div class="avatar avatar--56 avatar--image"><img src="http://localhost:3845/assets/65374637c9ef72970e810198a41540824752d176.png" alt=""></div>
 </div>
 
-<hr class="divider">
 
 <!-- Row 2: Text avatar (initials) -->
 <div class="row">
@@ -47,7 +44,6 @@ body { margin: 0; padding: 32px !important; background: var(--color-bg-page); fo
   <div class="avatar avatar--56 avatar--initials">首</div>
 </div>
 
-<hr class="divider">
 
 <!-- Row 3: Real image avatar -->
 <div class="row">

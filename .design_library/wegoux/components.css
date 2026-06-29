@@ -140,7 +140,7 @@
 
 /* ── Bottom Nav ────────────────────────────────────────────── */
 /* @anatomy
-   <div class="label">默认态 — 动态选中</div>
+   <div class="pv-header"><h1>底部导航</h1><p>移动端主 Tab，默认 5 个 Tab，支持选中态和角标。</p></div>
 */
 /* ── Bottom Nav ──────────────────────────────────────────────── */
 /* @anatomy
@@ -261,7 +261,7 @@
 
 /* ── Cell ──────────────────────────────────────────────────── */
 /* @anatomy
-   <div class="page"> <!-- ═══════════════════════════════════════════ --> <!-- 右侧操作区 - JUMP_TO --> <!-- ═══════════════════════════════════════════ --> <div class="section-title">右侧 - 跳转 (JUMP_TO) — 分割线贴边</div>
+   <div class="pv-header"><h1>单元格</h1><p>列表行，支持标题、内容、箭头、图标、徽标和副操作。</p></div>
 */
 .cell{position:relative;display:flex;align-items:center;width:100%;box-sizing:border-box;background:var(--color-bg-surface);color:var(--color-text-primary);overflow:hidden}
 .cell--single{min-height:56px}
@@ -322,65 +322,6 @@
 .checkbox--sm .checkbox__minus svg{width:6px;height:2px}
 .checkbox--disabled{opacity:0.4;pointer-events:none;cursor:not-allowed}
 
-/* ── Chip ──────────────────────────────────────────────────── */
-/* @anatomy
-   <span class="label">灰色底</span> <div class="tag tag--20 tag--gray"><span class="tag__label">标签文字</span>
-*/
-.tag { display:inline-flex; align-items:center; justify-content:center; gap:var(--space-4); font-family:var(--font-family-text); font-weight:var(--font-weight-regular); white-space:nowrap; flex-shrink:0; font-feature-settings:"zero"; }
-
-.tag--20 { height:20px; min-height:20px; min-width:36px; font-size:var(--font-size-12); border-radius:var(--radius-xs); padding:0 6px; }
-.tag--20.tag--gray { background:var(--color-bg-subtle); color:var(--color-text-secondary); }
-.tag--20.tag--white { background:var(--color-bg-surface); color:var(--color-text-secondary); border:0.5px solid var(--color-border-default); }
-.tag--20.tag--brand-stroke { background:var(--color-bg-surface); color:var(--color-brand); border:0.5px solid var(--color-brand); }
-
-.tag--24 { height:var(--size-24); min-height:var(--size-24); min-width:var(--size-40); font-size:var(--font-size-12); border-radius:var(--radius-xl); padding:0 var(--space-12); }
-.tag--24.tag--gray.tag--normal { background:var(--color-bg-subtle); color:var(--color-text-secondary); }
-.tag--24.tag--white.tag--normal { background:var(--color-bg-surface); color:var(--color-text-secondary); border:0.5px solid var(--color-border-default); }
-.tag--24.tag--gray.tag--pressed { background:var(--color-state-selected); color:var(--color-text-secondary); }
-.tag--24.tag--white.tag--pressed { background:var(--color-state-hover); color:var(--color-text-secondary); border:0.5px solid var(--color-border-default); }
-
-.tag--28 { height:var(--size-28); min-height:var(--size-28); min-width:var(--size-48); font-size:var(--font-size-12); border-radius:var(--radius-xl); padding:0 var(--space-12); }
-.tag--28.tag--gray.tag--normal { background:var(--color-bg-subtle); color:var(--color-text-secondary); }
-.tag--28.tag--white.tag--normal { background:var(--color-bg-surface); color:var(--color-text-secondary); border:0.5px solid var(--color-border-default); }
-.tag--28.tag--gray.tag--pressed { background:var(--color-state-selected); color:var(--color-text-secondary); }
-.tag--28.tag--white.tag--pressed { background:var(--color-state-hover); color:var(--color-text-secondary); border:0.5px solid var(--color-border-default); }
-.tag--28.tag--gray.tag--disabled { background:var(--color-bg-subtle); color:var(--color-text-disabled); }
-.tag--28.tag--white.tag--disabled { background:var(--color-bg-surface); color:var(--color-text-disabled); border:0.5px solid var(--color-border-default); }
-.tag--28.tag--brand.tag--selected { background:var(--color-brand-bg); color:var(--color-brand); font-weight:var(--font-weight-medium); }
-.tag--28.tag--brand.tag--selected-pressed { background:var(--color-brand-bg-strong); color:var(--color-brand); font-weight:var(--font-weight-medium); }
-.tag--28.tag--closable { padding:0 var(--space-8) 0 var(--space-12); }
-.tag--28.tag--brand.tag--selected.tag--closable .tag__close svg,
-.tag--28.tag--brand.tag--selected-pressed.tag--closable .tag__close svg { stroke:var(--color-brand); }
-
-.tag--32 { height:var(--size-32); min-height:var(--size-32); min-width:52px; font-size:var(--font-size-14); border-radius:var(--radius-xl); padding:0 var(--space-12); }
-.tag--32.tag--gray.tag--normal { background:var(--color-bg-subtle); color:var(--color-text-secondary); }
-.tag--32.tag--white.tag--normal { background:var(--color-bg-surface); color:var(--color-text-secondary); border:0.5px solid var(--color-border-default); }
-.tag--32.tag--gray.tag--pressed { background:var(--color-state-selected); color:var(--color-text-secondary); }
-.tag--32.tag--white.tag--pressed { background:var(--color-state-hover); color:var(--color-text-secondary); border:0.5px solid var(--color-border-default); }
-.tag--32.tag--gray.tag--disabled { background:var(--color-bg-subtle); color:var(--color-text-disabled); }
-.tag--32.tag--white.tag--disabled { background:var(--color-bg-surface); color:var(--color-text-disabled); border:0.5px solid var(--color-border-default); }
-.tag--32.tag--brand.tag--selected { background:var(--color-brand-bg); color:var(--color-brand); font-weight:var(--font-weight-medium); }
-.tag--32.tag--brand.tag--selected-pressed { background:var(--color-brand-bg-strong); color:var(--color-brand); font-weight:var(--font-weight-medium); }
-.tag--32.tag--closable { padding:0 var(--space-8) 0 var(--space-12); }
-.tag--32.tag--brand.tag--selected.tag--closable .tag__close svg,
-.tag--32.tag--brand.tag--selected-pressed.tag--closable .tag__close svg { stroke:var(--color-brand); }
-
-.tag--32-add { height:var(--size-32); min-height:var(--size-32); min-width:52px; font-size:var(--font-size-14); border-radius:var(--radius-xl); padding:0 var(--space-12) 0 var(--space-8); }
-.tag--32-add.tag--gray.tag--normal { background:var(--color-bg-subtle); color:var(--color-text-secondary); }
-.tag--32-add.tag--white.tag--normal { background:var(--color-bg-surface); color:var(--color-text-secondary); border:0.5px solid var(--color-border-default); }
-.tag--32-add.tag--gray.tag--pressed { background:var(--color-state-selected); color:var(--color-text-secondary); }
-.tag--32-add.tag--white.tag--pressed { background:var(--color-state-hover); color:var(--color-text-secondary); border:0.5px solid var(--color-border-default); }
-.tag--32-add.tag--gray.tag--disabled { background:var(--color-bg-subtle); color:var(--color-text-disabled); }
-.tag--32-add.tag--white.tag--disabled { background:var(--color-bg-surface); color:var(--color-text-disabled); border:0.5px solid var(--color-border-default); }
-
-.tag__label { flex:1 1 0; min-width:0; overflow:hidden; text-overflow:ellipsis; text-align:center; }
-.tag__close { display:flex; align-items:center; justify-content:center; width:var(--size-16); height:var(--size-16); flex-shrink:0; cursor:pointer; color:var(--color-text-secondary); }
-.tag__close svg { width:var(--size-16); height:var(--size-16); }
-.tag__icon-left { display:flex; align-items:center; justify-content:center; width:var(--size-16); height:var(--size-16); flex-shrink:0; }
-.tag__icon-left svg { width:100%; height:100%; }
-
-.tag--coupon { height:16px; min-width:28px; border-radius:2px; padding:0 4px; background:var(--color-bg-inverse-subtle); border:0.5px solid var(--color-border-promotion-strong); color:var(--color-text-promotion-strong); font-size:var(--font-size-10); line-height:normal; overflow:hidden; display:inline-flex; align-items:center; justify-content:center; font-family:var(--font-family-text); white-space:nowrap; font-feature-settings:"zero"; }
-
 /* ── Counter ───────────────────────────────────────────────── */
 /* @anatomy
    <div class="counter counter--sm" data-counter data-counter-min="1"> <div class="counter__body"> <button class="counter__btn counter__btn--minus" type="button" aria-label="减少"> <i class="counter__icon icon-jian16"></i> </button> <input class="counter__value" type="text" inputmode="numeric" value="1" maxlength="7"> <button class="counter__btn counter__btn--plus" type="button" aria-label="增加"> <i ...
@@ -408,7 +349,7 @@
 
 /* ── Form ──────────────────────────────────────────────────── */
 /* @anatomy
-   <div class="page"> <!-- ═══════════════════════════════════════════ --> <!-- 1. Text 输入 - 水平布局 --> <!-- ═══════════════════════════════════════════ --> <div class="section-title">FormActionConfig.Text — 纯文本输入</div>
+   <div class="pv-header"><h1>表单容器</h1><p>表单字段容器，支持水平/垂直布局、多输入类型、错误和计数。</p></div>
 */
 /* ── Form (表单容器) ───────────────────────────────── */
 /* @anatomy
@@ -618,7 +559,7 @@
 
 /* ── Navbar ────────────────────────────────────────────────── */
 /* @anatomy
-   <div class="preview-phone"> <div class="label">标准 — 返回 + 标题</div>
+   <div class="pv-header"><h1>导航栏</h1><p>顶部导航，支持返回/关闭、居中/左对齐标题、右侧操作区。</p></div>
 */
 /* ── NavBar (导航栏) ── */
 
@@ -722,3 +663,62 @@
 .switch--on .switch__thumb{left:22px}
 .switch--off .switch__thumb{left:2px}
 .switch--disabled{opacity:0.4;pointer-events:none;cursor:not-allowed}
+
+/* ── Tag ───────────────────────────────────────────────────── */
+/* @anatomy
+   <span class="label">灰色底</span> <div class="tag tag--20 tag--gray"><span class="tag__label">标签文字</span>
+*/
+.tag { display:inline-flex; align-items:center; justify-content:center; gap:var(--space-4); font-family:var(--font-family-text); font-weight:var(--font-weight-regular); white-space:nowrap; flex-shrink:0; font-feature-settings:"zero"; }
+
+.tag--20 { height:20px; min-height:20px; min-width:36px; font-size:var(--font-size-12); border-radius:var(--radius-xs); padding:0 6px; }
+.tag--20.tag--gray { background:var(--color-bg-subtle); color:var(--color-text-secondary); }
+.tag--20.tag--white { background:var(--color-bg-surface); color:var(--color-text-secondary); border:0.5px solid var(--color-border-default); }
+.tag--20.tag--brand-stroke { background:var(--color-bg-surface); color:var(--color-brand); border:0.5px solid var(--color-brand); }
+
+.tag--24 { height:var(--size-24); min-height:var(--size-24); min-width:var(--size-40); font-size:var(--font-size-12); border-radius:var(--radius-xl); padding:0 var(--space-12); }
+.tag--24.tag--gray.tag--normal { background:var(--color-bg-subtle); color:var(--color-text-secondary); }
+.tag--24.tag--white.tag--normal { background:var(--color-bg-surface); color:var(--color-text-secondary); border:0.5px solid var(--color-border-default); }
+.tag--24.tag--gray.tag--pressed { background:var(--color-state-selected); color:var(--color-text-secondary); }
+.tag--24.tag--white.tag--pressed { background:var(--color-state-hover); color:var(--color-text-secondary); border:0.5px solid var(--color-border-default); }
+
+.tag--28 { height:var(--size-28); min-height:var(--size-28); min-width:var(--size-48); font-size:var(--font-size-12); border-radius:var(--radius-xl); padding:0 var(--space-12); }
+.tag--28.tag--gray.tag--normal { background:var(--color-bg-subtle); color:var(--color-text-secondary); }
+.tag--28.tag--white.tag--normal { background:var(--color-bg-surface); color:var(--color-text-secondary); border:0.5px solid var(--color-border-default); }
+.tag--28.tag--gray.tag--pressed { background:var(--color-state-selected); color:var(--color-text-secondary); }
+.tag--28.tag--white.tag--pressed { background:var(--color-state-hover); color:var(--color-text-secondary); border:0.5px solid var(--color-border-default); }
+.tag--28.tag--gray.tag--disabled { background:var(--color-bg-subtle); color:var(--color-text-disabled); }
+.tag--28.tag--white.tag--disabled { background:var(--color-bg-surface); color:var(--color-text-disabled); border:0.5px solid var(--color-border-default); }
+.tag--28.tag--brand.tag--selected { background:var(--color-brand-bg); color:var(--color-brand); font-weight:var(--font-weight-medium); }
+.tag--28.tag--brand.tag--selected-pressed { background:var(--color-brand-bg-strong); color:var(--color-brand); font-weight:var(--font-weight-medium); }
+.tag--28.tag--closable { padding:0 var(--space-8) 0 var(--space-12); }
+.tag--28.tag--brand.tag--selected.tag--closable .tag__close svg,
+.tag--28.tag--brand.tag--selected-pressed.tag--closable .tag__close svg { stroke:var(--color-brand); }
+
+.tag--32 { height:var(--size-32); min-height:var(--size-32); min-width:52px; font-size:var(--font-size-14); border-radius:var(--radius-xl); padding:0 var(--space-12); }
+.tag--32.tag--gray.tag--normal { background:var(--color-bg-subtle); color:var(--color-text-secondary); }
+.tag--32.tag--white.tag--normal { background:var(--color-bg-surface); color:var(--color-text-secondary); border:0.5px solid var(--color-border-default); }
+.tag--32.tag--gray.tag--pressed { background:var(--color-state-selected); color:var(--color-text-secondary); }
+.tag--32.tag--white.tag--pressed { background:var(--color-state-hover); color:var(--color-text-secondary); border:0.5px solid var(--color-border-default); }
+.tag--32.tag--gray.tag--disabled { background:var(--color-bg-subtle); color:var(--color-text-disabled); }
+.tag--32.tag--white.tag--disabled { background:var(--color-bg-surface); color:var(--color-text-disabled); border:0.5px solid var(--color-border-default); }
+.tag--32.tag--brand.tag--selected { background:var(--color-brand-bg); color:var(--color-brand); font-weight:var(--font-weight-medium); }
+.tag--32.tag--brand.tag--selected-pressed { background:var(--color-brand-bg-strong); color:var(--color-brand); font-weight:var(--font-weight-medium); }
+.tag--32.tag--closable { padding:0 var(--space-8) 0 var(--space-12); }
+.tag--32.tag--brand.tag--selected.tag--closable .tag__close svg,
+.tag--32.tag--brand.tag--selected-pressed.tag--closable .tag__close svg { stroke:var(--color-brand); }
+
+.tag--32-add { height:var(--size-32); min-height:var(--size-32); min-width:52px; font-size:var(--font-size-14); border-radius:var(--radius-xl); padding:0 var(--space-12) 0 var(--space-8); }
+.tag--32-add.tag--gray.tag--normal { background:var(--color-bg-subtle); color:var(--color-text-secondary); }
+.tag--32-add.tag--white.tag--normal { background:var(--color-bg-surface); color:var(--color-text-secondary); border:0.5px solid var(--color-border-default); }
+.tag--32-add.tag--gray.tag--pressed { background:var(--color-state-selected); color:var(--color-text-secondary); }
+.tag--32-add.tag--white.tag--pressed { background:var(--color-state-hover); color:var(--color-text-secondary); border:0.5px solid var(--color-border-default); }
+.tag--32-add.tag--gray.tag--disabled { background:var(--color-bg-subtle); color:var(--color-text-disabled); }
+.tag--32-add.tag--white.tag--disabled { background:var(--color-bg-surface); color:var(--color-text-disabled); border:0.5px solid var(--color-border-default); }
+
+.tag__label { flex:1 1 0; min-width:0; overflow:hidden; text-overflow:ellipsis; text-align:center; }
+.tag__close { display:flex; align-items:center; justify-content:center; width:var(--size-16); height:var(--size-16); flex-shrink:0; cursor:pointer; color:var(--color-text-secondary); }
+.tag__close svg { width:var(--size-16); height:var(--size-16); }
+.tag__icon-left { display:flex; align-items:center; justify-content:center; width:var(--size-16); height:var(--size-16); flex-shrink:0; }
+.tag__icon-left svg { width:100%; height:100%; }
+
+.tag--coupon { height:16px; min-width:28px; border-radius:2px; padding:0 4px; background:var(--color-bg-inverse-subtle); border:0.5px solid var(--color-border-promotion-strong); color:var(--color-text-promotion-strong); font-size:var(--font-size-10); line-height:normal; overflow:hidden; display:inline-flex; align-items:center; justify-content:center; font-family:var(--font-family-text); white-space:nowrap; font-feature-settings:"zero"; }

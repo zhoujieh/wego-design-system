@@ -5,13 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>图片 — 微购设计系统</title>
   <link rel="stylesheet" href="../colors_and_type.css">
-  <style>
-    body { margin: 0; padding: 32px !important; background: var(--wg-color-bg-page); font-family: var(--wg-font-family-text); color: var(--wg-color-text-primary); }
-    .section { margin-bottom: 32px; }
-    .section-title { font-size: var(--wg-font-size-f14); font-weight: var(--wg-font-weight-medium); color: var(--wg-color-text-primary); margin: 0 0 12px 0; }
-    .section-desc { font-size: var(--wg-font-size-f10); color: var(--wg-color-text-tertiary); margin: 0 0 12px 0; }
-    .row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
-    .label { font-size: var(--wg-font-size-f10); color: var(--wg-color-text-tertiary); min-width: 72px; flex-shrink: 0; }
+<link rel="stylesheet" href="../scaffold.css">
+<link rel="stylesheet" href="../iconfont.css">
+<style>
+    
+    
+    
+    
+    
+    
     .demo-img-1 { background: linear-gradient(135deg, #03C160, #00C777); }
     .demo-img-2 { background: linear-gradient(135deg, #FA9D3B, #FFC300); }
     .demo-img-3 { background: linear-gradient(135deg, #208BF1, #6367F0); }
@@ -47,53 +49,54 @@
   </style>
 </head>
 <body>
-  <div class="section">
-    <div class="section-title">尺寸</div>
-    <div class="section-desc">预设正方形尺寸：xs=16px, sm=32px, md=64px, lg=104px, xl=72px。也支持自定义宽高。</div>
+<div class="pv-header"><h1>图片</h1><p>预设尺寸、自定义矩形/宽幅、cover/contain、加载和错误态。</p></div>
+  <div class="pv-section">
+    <div class="pv-section__title">尺寸</div>
+    <div class="pv-section__sub">预设正方形尺寸：xs=16px, sm=32px, md=64px, lg=104px, xl=72px。也支持自定义宽高。</div>
     <div class="row"><span class="label">xs</span><div class="wg-image wg-image--xs demo-img-1"><div class="wg-image__src is-loaded"></div></div><div class="wg-image wg-image--xs demo-img-2"><div class="wg-image__src is-loaded"></div></div></div>
     <div class="row"><span class="label">sm</span><div class="wg-image wg-image--sm demo-img-1"><div class="wg-image__src is-loaded"></div></div><div class="wg-image wg-image--sm demo-img-4"><div class="wg-image__src is-loaded"></div></div></div>
     <div class="row"><span class="label">md</span><div class="wg-image wg-image--md demo-img-1"><div class="wg-image__src is-loaded"></div></div><div class="wg-image wg-image--md demo-img-2"><div class="wg-image__src is-loaded"></div></div></div>
     <div class="row"><span class="label">lg</span><div class="wg-image wg-image--lg demo-img-1"><div class="wg-image__src is-loaded"></div></div><div class="wg-image wg-image--lg demo-img-4"><div class="wg-image__src is-loaded"></div></div></div>
     <div class="row"><span class="label">自定义矩形</span><div class="wg-image wg-image--custom-rect demo-img-3"><div class="wg-image__src is-loaded"></div></div><div class="wg-image wg-image--custom-rect demo-img-5"><div class="wg-image__src is-loaded"></div></div></div>
   </div>
-  <div class="section">
-    <div class="section-title">形状</div>
-    <div class="section-desc">方形、圆角(sm/md/lg)、圆形。</div>
+  <div class="pv-section">
+    <div class="pv-section__title">形状</div>
+    <div class="pv-section__sub">方形、圆角(sm/md/lg)、圆形。</div>
     <div class="row"><span class="label">方形</span><div class="wg-image wg-image--sm demo-img-1"><div class="wg-image__src is-loaded"></div></div></div>
     <div class="row"><span class="label">圆角 sm</span><div class="wg-image wg-image--md wg-image--rounded-sm demo-img-2"><div class="wg-image__src is-loaded"></div></div></div>
     <div class="row"><span class="label">圆角 md</span><div class="wg-image wg-image--md wg-image--rounded-md demo-img-3"><div class="wg-image__src is-loaded"></div></div></div>
     <div class="row"><span class="label">圆形</span><div class="wg-image wg-image--sm wg-image--circle demo-img-1"><div class="wg-image__src is-loaded"></div></div><div class="wg-image wg-image--md wg-image--circle demo-img-5"><div class="wg-image__src is-loaded"></div></div><div class="wg-image wg-image--lg wg-image--circle demo-img-3"><div class="wg-image__src is-loaded"></div></div></div>
   </div>
-  <div class="section">
-    <div class="section-title">填充模式</div>
-    <div class="section-desc">cover（默认）裁剪填满；contain 完整显示。</div>
+  <div class="pv-section">
+    <div class="pv-section__title">填充模式</div>
+    <div class="pv-section__sub">cover（默认）裁剪填满；contain 完整显示。</div>
     <div class="row"><span class="label">cover</span><div class="wg-image wg-image--md demo-img-1"><div class="wg-image__src is-loaded"></div></div></div>
     <div class="row"><span class="label">contain</span><div class="wg-image wg-image--md wg-image--contain demo-img-checker"><div class="wg-image__src is-loaded"></div></div></div>
   </div>
-  <div class="section">
-    <div class="section-title">初始背景色</div>
-    <div class="section-desc">加载前背景色，默认浅灰或透明。</div>
+  <div class="pv-section">
+    <div class="pv-section__title">初始背景色</div>
+    <div class="pv-section__sub">加载前背景色，默认浅灰或透明。</div>
     <div class="row"><span class="label">默认背景</span><div class="wg-image wg-image--md"><div class="wg-image__src"></div></div></div>
     <div class="row"><span class="label">透明背景</span><div class="wg-image wg-image--md wg-image--transparent demo-img-checker"><div class="wg-image__src"></div></div></div>
   </div>
-  <div class="section">
-    <div class="section-title">淡入动画</div>
-    <div class="section-desc">加载完成后 opacity 0→1 过渡。</div>
+  <div class="pv-section">
+    <div class="pv-section__title">淡入动画</div>
+    <div class="pv-section__sub">加载完成后 opacity 0→1 过渡。</div>
     <div class="row"><span class="label">加载中</span><div class="wg-image wg-image--md wg-image--loading"><div class="wg-image__src"></div></div><div class="wg-image wg-image--md wg-image--loading"><div class="wg-image__src"></div></div></div>
     <div class="row"><span class="label">已加载</span><div class="wg-image wg-image--md demo-img-1"><div class="wg-image__src is-loaded"></div></div><div class="wg-image wg-image--md demo-img-4"><div class="wg-image__src is-loaded"></div></div></div>
   </div>
-  <div class="section">
-    <div class="section-title">加载失败</div>
-    <div class="section-desc">失败时显示占位图，最多重试1次。</div>
+  <div class="pv-section">
+    <div class="pv-section__title">加载失败</div>
+    <div class="pv-section__sub">失败时显示占位图，最多重试1次。</div>
     <div class="row"><span class="label">错误状态</span><div class="wg-image wg-image--sm wg-image--error"><div class="wg-image__src"></div><div class="wg-image__placeholder"></div></div><div class="wg-image wg-image--md wg-image--error"><div class="wg-image__src"></div><div class="wg-image__placeholder"></div></div><div class="wg-image wg-image--lg wg-image--error"><div class="wg-image__src"></div><div class="wg-image__placeholder"></div></div></div>
   </div>
-  <div class="section">
-    <div class="section-title">点击态</div>
-    <div class="section-desc">clickable 时按下显示半透明蒙层。</div>
+  <div class="pv-section">
+    <div class="pv-section__title">点击态</div>
+    <div class="pv-section__sub">clickable 时按下显示半透明蒙层。</div>
     <div class="row"><span class="label">可点击</span><div class="wg-image wg-image--md wg-image--rounded-md wg-image--clickable demo-img-1"><div class="wg-image__src is-loaded"></div><div class="wg-image__overlay"></div></div><div class="wg-image wg-image--md wg-image--circle wg-image--clickable demo-img-5"><div class="wg-image__src is-loaded"></div><div class="wg-image__overlay"></div></div></div>
   </div>
-  <div class="section">
-    <div class="section-title">组合示例</div>
+  <div class="pv-section">
+    <div class="pv-section__title">组合示例</div>
     <div class="row"><span class="label">商品卡片</span><div style="width:120px; background:var(--wg-color-base-static-white); border-radius:var(--wg-radius-md); overflow:hidden;"><div class="wg-image wg-image--custom-rect demo-img-4" style="border-radius:var(--wg-radius-md) var(--wg-radius-md) 0 0;"><div class="wg-image__src is-loaded"></div></div><div style="padding:8px;"><div style="font-size:var(--wg-font-size-f12); color:var(--wg-color-text-primary);">商品名称</div><div style="font-size:var(--wg-font-number-nf16); color:var(--wg-color-base-danger-500); font-weight:var(--wg-font-weight-medium);">¥99.00</div></div></div></div>
     <div class="row"><span class="label">用户头像</span><div style="display:flex; align-items:center; gap:8px; background:var(--wg-color-base-static-white); border-radius:var(--wg-radius-sm); padding:8px 12px;"><div class="wg-image wg-image--sm wg-image--circle demo-img-2"><div class="wg-image__src is-loaded"></div></div><div><div style="font-size:var(--wg-font-size-f14); font-weight:var(--wg-font-weight-medium);">用户名</div><div style="font-size:var(--wg-font-size-f10); color:var(--wg-color-text-tertiary);">个性签名</div></div></div></div>
   </div>

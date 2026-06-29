@@ -1,7 +1,7 @@
 {
   "kitType": "app",
   "screensGenerated": 4,
-  "coreComponentsUsed": ["bottom-nav", "button", "card", "chip", "badge", "avatar", "input", "navbar", "cell", "checkbox", "switch", "link"],
+  "coreComponentsUsed": ["bottom-nav", "button", "card", "tag", "badge", "avatar", "input", "navbar", "cell", "checkbox", "switch", "link"],
   "supportComponentsUsed": [],
   "previewClassReuseRate": 0.52,
   "reuseAssessment": "业务设置页已用注册组件重写（cell/checkbox/switch）。主 UI Kit 展示微购完整 App 结构：首页→详情→我的→业务设置。pagePatterns 见 uikit-plan.json。",

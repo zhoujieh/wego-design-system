@@ -9,7 +9,7 @@
     { "slug": "button", "name": "按钮", "category": "action", "status": "stable", "preview": "preview/component-button.html" },
     { "slug": "card", "name": "卡片", "category": "display", "status": "stable", "preview": "preview/component-card.html" },
     { "slug": "avatar", "name": "头像", "category": "display", "status": "stable", "preview": "preview/component-avatar.html" },
-    { "slug": "chip", "name": "标签", "category": "display", "status": "stable", "preview": "preview/component-chip.html" },
+    { "slug": "tag", "name": "标签", "category": "display", "status": "stable", "preview": "preview/component-tag.html" },
     { "slug": "bottom-nav", "name": "底部导航", "category": "navigation", "status": "stable", "preview": "preview/component-bottom-nav.html" },
     { "slug": "input", "name": "输入框", "category": "form", "status": "stable", "preview": "preview/component-input.html" },
     { "slug": "counter", "name": "计数器", "category": "form", "status": "stable", "preview": "preview/component-counter.html" },

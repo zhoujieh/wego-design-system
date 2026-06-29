@@ -5,28 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Stack (选项卡) - 微购设计系统</title>
 <link rel="stylesheet" href="../colors_and_type.css">
-<link rel="stylesheet" href="../components.css">
+<link rel="stylesheet" href="../scaffold.css">
 <link rel="stylesheet" href="../iconfont.css">
 <style>
-/* Page scaffold */
-body { margin:0; padding:32px !important; background:var(--color-bg-page); font-family:var(--font-family-text); color:var(--color-text-primary); }
-.row { display:flex; gap:var(--space-8); align-items:center; margin-bottom:var(--space-8); flex-wrap:wrap; }
-.label { font-size:var(--font-size-12); color:var(--color-text-tertiary); width:92px; flex-shrink:0; white-space:nowrap; }
-.section-title { font-size:var(--font-size-14); font-weight:var(--font-weight-semibold); margin:var(--space-16) 0 var(--space-8); color:var(--color-text-primary); }
-hr.divider { border:none; border-top:1px solid var(--color-divider-default); margin:4px 0 var(--space-8); }
 .sub-label { font-size:var(--font-size-12); color:var(--color-text-tertiary); margin:var(--space-8) 0 var(--space-4); }
-
-/* Dark mode preview strip */
-.dark-strip { background:#1C1C1E; border-radius:var(--radius-sm); padding:var(--space-16); margin:0 0 var(--space-8); }
-.dark-strip .label { color:rgba(255,255,255,0.6); }
-
-/* Interactive demo */
-.demo-hint { font-size:var(--font-size-12); color:var(--color-brand); margin:var(--space-8) 0 var(--space-4); font-weight:var(--font-weight-medium); }
-.interactive-row { display:flex; align-items:center; gap:var(--space-12); padding:var(--space-8) 0; border-bottom:0.5px solid var(--color-divider-default); cursor:pointer; max-width:560px; }
-.interactive-row:last-child { border-bottom:none; }
 .interactive-row .stack { cursor:pointer; }
-.interactive-row:hover .interactive-text { color:var(--color-text-primary); }
-.interactive-text { font-size:var(--font-size-14); color:var(--color-text-secondary); transition:color var(--duration-fast) var(--ease-standard); }
 
 /* @component-css-start */
 .stack{display:inline-flex;flex-direction:column;align-items:center;gap:4px;box-sizing:border-box;cursor:pointer;-webkit-tap-highlight-color:transparent}
@@ -40,8 +23,9 @@ hr.divider { border:none; border-top:1px solid var(--color-divider-default); mar
 </style>
 </head>
 <body>
+<div class="pv-header"><h1>选项卡</h1><p>方块式选项，多项选择场景，支持未选和已选态。</p></div>
 
-<div class="section-title">默认状态</div>
+<div class="pv-section__title">默认状态</div>
 <div class="row">
   <span class="label">未选中</span>
   <div class="stack">
@@ -59,9 +43,8 @@ hr.divider { border:none; border-top:1px solid var(--color-divider-default); mar
   </div>
 </div>
 
-<hr class="divider">
 
-<div class="section-title">暗色模式</div>
+<div class="pv-section__title">暗色模式</div>
 <div class="dark-strip">
   <div class="row">
     <span class="label">暗色未选中</span>
@@ -81,9 +64,8 @@ hr.divider { border:none; border-top:1px solid var(--color-divider-default); mar
   </div>
 </div>
 
-<hr class="divider">
 
-<div class="section-title">交互演示</div>
+<div class="pv-section__title">交互演示</div>
 <p class="demo-hint">点击选项卡切换选中/未选中状态</p>
 
 <div class="interactive-row">

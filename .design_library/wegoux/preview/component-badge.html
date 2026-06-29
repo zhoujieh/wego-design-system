@@ -5,18 +5,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>角标 — 微购设计系统</title>
   <link rel="stylesheet" href="../colors_and_type.css">
-  <link rel="stylesheet" href="../components.css">
+  <link rel="stylesheet" href="../scaffold.css">
   <link rel="stylesheet" href="../iconfont.css">
-  <style>
-    /* Page scaffold — 与其他组件预览页统一 */
-    body { margin:0; padding:32px !important; background:var(--wg-color-bg-page); font-family:var(--wg-font-family-text); color:var(--wg-color-text-primary); }
-    .section { margin-bottom:32px; }
-    .section-title { font-size:var(--wg-font-size-f14); font-weight:var(--wg-font-weight-medium); color:var(--wg-color-text-primary); margin:0 0 12px 0; }
-    .section-desc { font-size:var(--wg-font-size-f10); color:var(--wg-color-text-tertiary); margin:0 0 12px 0; }
-    .row { display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
-    .label { font-size:var(--wg-font-size-f10); color:var(--wg-color-text-tertiary); min-width:72px; flex-shrink:0; }
-    .divider { border:none; border-top:1px solid var(--wg-color-divider-default); margin:16px 0; }
-
+<style>
     /* Demo helpers */
     .demo-cell {
       position: relative;
@@ -161,11 +152,12 @@
   </style>
 </head>
 <body>
+<div class="pv-header"><h1>角标</h1><p>红点、数字、黄色/绿色/气泡文字角标和删除角标。</p></div>
 
   <!-- ===== Section 1: 行内显示 ===== -->
-  <div class="section">
-    <div class="section-title">行内显示</div>
-    <div class="section-desc">Badge 行内显示，数字默认居中对齐。文字类 badge 支持左/中/右对齐。</div>
+  <div class="pv-section">
+    <div class="pv-section__title">行内显示</div>
+    <div class="pv-section__sub">Badge 行内显示，数字默认居中对齐。文字类 badge 支持左/中/右对齐。</div>
 
     <div class="row">
       <span class="label">默认</span>
@@ -186,9 +178,8 @@
       <span class="badge badge--round" style="background:var(--wg-color-base-danger-500); color:var(--wg-color-base-static-white); height:16px; padding:0 4px; font-size:var(--wg-font-size-f10);">新品首发特惠</span>
     </div>
 
-    <hr class="divider">
-
-    <div class="section-desc" style="margin-top:0;">对齐方式：数字类 badge 始终居中，不受对齐配置影响。文字类 badge 在行内模式下可通过 badge--align-left / badge--align-center / badge--align-right 控制交叉轴对齐。</div>
+    
+    <div class="pv-section__sub" style="margin-top:0;">对齐方式：数字类 badge 始终居中，不受对齐配置影响。文字类 badge 在行内模式下可通过 badge--align-left / badge--align-center / badge--align-right 控制交叉轴对齐。</div>
 
     <div class="row">
       <span class="label">数字(始终居中)</span>
@@ -213,9 +204,9 @@
   </div>
 
   <!-- ===== Section 2: 右上角显示 ===== -->
-  <div class="section">
-    <div class="section-title">右上角显示</div>
-    <div class="section-desc">Badge 绝对定位于父元素右上角。父元素需设置 position: relative; overflow: visible。</div>
+  <div class="pv-section">
+    <div class="pv-section__title">右上角显示</div>
+    <div class="pv-section__sub">Badge 绝对定位于父元素右上角。父元素需设置 position: relative; overflow: visible。</div>
 
     <div class="row">
       <span class="label">小红点</span>
@@ -285,9 +276,8 @@
       </div>
     </div>
 
-    <hr class="divider">
-
-    <div class="section-desc" style="margin-top:0;">展开方向：角标始终固定于右上角，通过 badge--corner-expand-left / badge--corner-expand-right / badge--corner-expand-center 控制内容延展方向。</div>
+    
+    <div class="pv-section__sub" style="margin-top:0;">展开方向：角标始终固定于右上角，通过 badge--corner-expand-left / badge--corner-expand-right / badge--corner-expand-center 控制内容延展方向。</div>
 
     <div class="row">
       <span class="label">expand-left(默认)</span>
@@ -325,9 +315,9 @@
   </div>
 
   <!-- ===== Section 3: 可滚动 ===== -->
-  <div class="section">
-    <div class="section-title">可滚动</div>
-    <div class="section-desc">独立配置，可与任意类型组合。限制最大宽度 28px，内容超出时溢出隐藏，配合滚动交互使用。默认左对齐，显示首个文字。</div>
+  <div class="pv-section">
+    <div class="pv-section__title">可滚动</div>
+    <div class="pv-section__sub">独立配置，可与任意类型组合。限制最大宽度 28px，内容超出时溢出隐藏，配合滚动交互使用。默认左对齐，显示首个文字。</div>
 
     <div class="row">
       <span class="label">行内可滚动</span>

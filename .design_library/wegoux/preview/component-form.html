@@ -5,37 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Form - 表单</title>
 <link rel="stylesheet" href="../colors_and_type.css">
-<link rel="stylesheet" href="../components.css">
+<link rel="stylesheet" href="../scaffold.css">
 <link rel="stylesheet" href="../iconfont.css">
+<link rel="stylesheet" href="../components.css">
 <style>
-body{margin:0;padding:0;background:var(--color-bg-page);font-family:var(--font-family-text);color:var(--color-text-primary)}
 .page{max-width:420px;margin:0 auto}
 .section-title{font-size:var(--font-size-12);font-weight:var(--font-weight-medium);color:var(--color-text-tertiary);padding:24px 16px 8px}
 .section-group{background:var(--color-bg-surface);width:100%}
 .section-gap{height:8px;background:var(--color-bg-page)}
-
-/* ── WGButton (按钮组件) ── */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--space-4);border:none;cursor:pointer;font-family:var(--font-family-text);font-weight:var(--font-weight-medium);white-space:nowrap;transition:background var(--duration-fast) var(--ease-standard);flex-shrink:0}
-.btn__icon{font-family:"wego-iconfont-s" !important;font-style:normal;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;line-height:1;flex-shrink:0}
-.btn--sm .btn__icon{font-size:16px}
-.btn--md .btn__icon,.btn--lg .btn__icon{font-size:20px}
-.btn--icon-only{padding:0 !important;width:var(--size-40);min-width:unset;max-width:unset}
-.btn--sm.btn--icon-only{width:var(--size-32)}
-.btn--strong{background:var(--color-brand);color:var(--color-text-inverse)}
-.btn--strong:hover{background:var(--color-brand-hover)}
-.btn--strong:active{background:var(--color-brand-disabled)}
-.btn--strong.btn--disabled{background:var(--color-neutral-alpha-03);color:var(--color-text-disabled);pointer-events:none;cursor:not-allowed}
-.btn--medium{background:var(--color-neutral-alpha-03);color:var(--color-brand)}
-.btn--medium:hover{background:var(--color-neutral-alpha-06)}
-.btn--medium:active{background:var(--color-neutral-alpha-10)}
-.btn--medium.btn--disabled{background:var(--color-neutral-alpha-03);color:var(--color-text-disabled);pointer-events:none;cursor:not-allowed}
-.btn--weak{background:var(--color-neutral-alpha-03);color:var(--color-text-primary)}
-.btn--weak:hover{background:var(--color-neutral-alpha-06)}
-.btn--weak:active{background:var(--color-neutral-alpha-10)}
-.btn--weak.btn--disabled{background:var(--color-neutral-alpha-03);color:var(--color-text-disabled);pointer-events:none;cursor:not-allowed}
-.btn--lg{height:var(--size-48);min-width:144px;max-width:180px;padding:0 14px;font-size:var(--font-size-f18);border-radius:var(--radius-md)}
-.btn--md{height:var(--size-40);min-width:var(--size-40);padding:0 14px;font-size:var(--font-size-f16);border-radius:var(--radius-md)}
-.btn--sm{height:var(--size-32);min-width:var(--size-32);max-width:120px;padding:0 12px;font-size:var(--font-size-f14);border-radius:var(--radius-sm)}
 
 /* @component-css-start */
 /* ── Form (表单容器) ───────────────────────────────── */
@@ -174,6 +151,7 @@ body{margin:0;padding:0;background:var(--color-bg-page);font-family:var(--font-f
 </style>
 </head>
 <body>
+<div class="pv-header"><h1>表单容器</h1><p>表单字段容器，支持水平/垂直布局、多输入类型、错误和计数。</p></div>
 <div class="page">
 
 <!-- ═══════════════════════════════════════════ -->

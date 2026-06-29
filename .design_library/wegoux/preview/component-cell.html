@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cell - 列表单元格</title>
 <link rel="stylesheet" href="../colors_and_type.css">
-<link rel="stylesheet" href="../components.css">
+<link rel="stylesheet" href="../scaffold.css">
 <link rel="stylesheet" href="../iconfont.css">
+<link rel="stylesheet" href="../components.css">
 <style>
-body{margin:0;padding:0;background:var(--color-bg-page);font-family:var(--font-family-text);color:var(--color-text-primary)}
 .page{max-width:420px;margin:0 auto}
 .section-title{font-size:var(--font-size-12);font-weight:var(--font-weight-medium);color:var(--color-text-tertiary);padding:24px 16px 8px}
 .section-group{background:var(--color-bg-surface);width:100%}
@@ -54,6 +54,7 @@ body{margin:0;padding:0;background:var(--color-bg-page);font-family:var(--font-f
 </style>
 </head>
 <body>
+<div class="pv-header"><h1>单元格</h1><p>列表行，支持标题、内容、箭头、图标、徽标和副操作。</p></div>
 <div class="page">
 
 <!-- ═══════════════════════════════════════════ -->
@@ -414,7 +415,7 @@ body{margin:0;padding:0;background:var(--color-bg-page);font-family:var(--font-f
     </div>
   </div>
   <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
-    <div class="cell__select"><div class="radio radio--checked"><div class="radio__inner"></div><div class="radio__dot"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6" cy="6" r="6" fill="#03C160"/></svg></div></div></div>
+    <div class="cell__select"><div class="radio radio--checked"><div class="radio__inner"></div><div class="radio__dot"></div></div></div>
     <div class="cell__body">
       <div class="cell__content"><div class="cell__title-row"><span class="cell__title">单选 B（已选）</span></div></div>
       <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>

@@ -4,19 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../scaffold.css">
 <link rel="stylesheet" href="../iconfont.css">
 <style>
-/* Page scaffold */
-body { margin:0; padding:32px !important; background:var(--color-bg-page); font-family:var(--font-family-text); color:var(--color-text-primary); }
-.row { display:flex; gap:var(--space-8); align-items:center; margin-bottom:var(--space-8); flex-wrap:wrap; }
-.label { font-size:var(--font-size-12); color:var(--color-text-tertiary); width:92px; flex-shrink:0; white-space:nowrap; }
-.section-title { font-size:var(--font-size-14); font-weight:var(--font-weight-semibold); margin:var(--space-16) 0 var(--space-8); color:var(--color-text-primary); }
-hr.divider { border:none; border-top:1px solid var(--color-divider-default); margin:4px 0 var(--space-8); }
 
-/* Dark mode preview strip — simulate .dark token values */
-.dark-strip { background:#1C1C1E; border-radius:var(--radius-sm); padding:var(--space-16); margin:0 0 var(--space-8); }
-.dark-strip .label { color:rgba(255,255,255,0.6); }
-.dark-mode .radio .radio__inner { border-color:rgba(255,255,255,0.2); }
+/* Dark mode simulation overrides */
 .dark-mode .radio--disabled:not(.radio--checked) .radio__inner { border-color:rgba(255,255,255,0.06); background:rgba(255,255,255,0.03); }
 .dark-mode .radio--checked.radio--disabled .radio__inner { border-color:rgba(255,255,255,0.12); background:rgba(255,255,255,0.03); }
 .dark-mode .radio--checked.radio--disabled .radio__dot { background:rgba(255,255,255,0.12); }
@@ -51,7 +43,8 @@ hr.divider { border:none; border-top:1px solid var(--color-divider-default); mar
 </style>
 </head>
 <body>
-<div class="section-title">交互演示 — 24px（互斥单选，不可取消选择）</div>
+<div class="pv-header"><h1>单选</h1><p>24 / 20px，品牌绿圆点选中态。</p></div>
+<div class="pv-section__title">交互演示 — 24px（互斥单选，不可取消选择）</div>
 <div class="row">
   <span class="label">选项</span>
   <div class="radio radio--checked" onclick="selectRadio(this)" data-group="demo1">
@@ -68,9 +61,8 @@ hr.divider { border:none; border-top:1px solid var(--color-divider-default); mar
   <span style="font-size:var(--font-size-14)">选项C</span>
 </div>
 
-<hr class="divider">
 
-<div class="section-title">默认状态 — 24px</div>
+<div class="pv-section__title">默认状态 — 24px</div>
 <div class="row">
   <span class="label">未选中</span>
   <div class="radio radio--static" data-sample="default-unchecked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
@@ -78,7 +70,7 @@ hr.divider { border:none; border-top:1px solid var(--color-divider-default); mar
   <div class="radio radio--checked radio--static" data-sample="default-checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
 </div>
 
-<div class="section-title">默认状态 — 20px</div>
+<div class="pv-section__title">默认状态 — 20px</div>
 <div class="row">
   <span class="label">未选中</span>
   <div class="radio radio--sm radio--static" data-sample="sm-unchecked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
@@ -86,9 +78,8 @@ hr.divider { border:none; border-top:1px solid var(--color-divider-default); mar
   <div class="radio radio--sm radio--checked radio--static" data-sample="sm-checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
 </div>
 
-<hr class="divider">
 
-<div class="section-title">禁用状态 — 24px</div>
+<div class="pv-section__title">禁用状态 — 24px</div>
 <div class="row">
   <span class="label">禁用未选中</span>
   <div class="radio radio--disabled radio--static" data-sample="disabled-unchecked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
@@ -96,7 +87,7 @@ hr.divider { border:none; border-top:1px solid var(--color-divider-default); mar
   <div class="radio radio--checked radio--disabled radio--static" data-sample="disabled-checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
 </div>
 
-<div class="section-title">禁用状态 — 20px</div>
+<div class="pv-section__title">禁用状态 — 20px</div>
 <div class="row">
   <span class="label">禁用未选中</span>
   <div class="radio radio--sm radio--disabled radio--static" data-sample="sm-disabled-unchecked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
@@ -104,9 +95,8 @@ hr.divider { border:none; border-top:1px solid var(--color-divider-default); mar
   <div class="radio radio--sm radio--checked radio--disabled radio--static" data-sample="sm-disabled-checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
 </div>
 
-<hr class="divider">
 
-<div class="section-title">暗色模式 — 24px</div>
+<div class="pv-section__title">暗色模式 — 24px</div>
 <div class="dark-strip dark-mode">
   <div class="row">
     <span class="label">暗色未选中</span>
@@ -120,7 +110,7 @@ hr.divider { border:none; border-top:1px solid var(--color-divider-default); mar
   </div>
 </div>
 
-<div class="section-title">暗色模式 — 20px</div>
+<div class="pv-section__title">暗色模式 — 20px</div>
 <div class="dark-strip dark-mode">
   <div class="row">
     <span class="label">暗色未选中</span>

@@ -4,23 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="../colors_and_type.css">
-<link rel="stylesheet" href="../components.css">
+<link rel="stylesheet" href="../scaffold.css">
 <link rel="stylesheet" href="../iconfont.css">
 <style>
-/* Page scaffold */
-body { margin:0; padding:32px !important; background:var(--color-bg-page); font-family:var(--font-family-text); color:var(--color-text-primary); }
-.row { display:flex; gap:var(--space-8); align-items:center; margin-bottom:var(--space-8); flex-wrap:wrap; }
-.label { font-size:var(--font-size-12); color:var(--color-text-tertiary); width:92px; flex-shrink:0; white-space:nowrap; }
-.section-title { font-size:var(--font-size-14); font-weight:var(--font-weight-semibold); margin:var(--space-16) 0 var(--space-8); color:var(--color-text-primary); }
-hr.divider { border:none; border-top:1px solid var(--color-divider-default); margin:4px 0 var(--space-8); }
 .sub-label { font-size:var(--font-size-12); color:var(--color-text-tertiary); margin:var(--space-8) 0 var(--space-4); }
 
-/* Dark mode preview strip */
-.dark-strip { background:#1C1C1E; border-radius:var(--radius-sm); padding:var(--space-16); margin:0 0 var(--space-8); }
-.dark-strip .label { color:rgba(255,255,255,0.6); }
-
-/* Interactive demo */
-.demo-hint { font-size:var(--font-size-12); color:var(--color-brand); margin:var(--space-8) 0 var(--space-4); font-weight:var(--font-weight-medium); }
+/* Switch demo: setting row simulation */
 .setting-row { display:flex; align-items:center; justify-content:space-between; padding:var(--space-12) 0; border-bottom:0.5px solid var(--color-divider-default); max-width:560px; }
 .setting-row:last-child { border-bottom:none; }
 .setting-info { display:flex; flex-direction:column; gap:2px; }
@@ -43,7 +32,8 @@ hr.divider { border:none; border-top:1px solid var(--color-divider-default); mar
 </style>
 </head>
 <body>
-<div class="section-title">默认状态</div>
+<div class="pv-header"><h1>开关</h1><p>52x32px 布尔切换，品牌绿开启态，支持禁用。</p></div>
+<div class="pv-section__title">默认状态</div>
 <div class="row">
   <span class="label">开启 (On)</span>
   <div class="switch switch--on"><div class="switch__thumb"></div></div>
@@ -55,9 +45,8 @@ hr.divider { border:none; border-top:1px solid var(--color-divider-default); mar
   <div class="switch switch--off switch--disabled"><div class="switch__thumb"></div></div>
 </div>
 
-<hr class="divider">
 
-<div class="section-title">暗色模式</div>
+<div class="pv-section__title">暗色模式</div>
 <div class="dark-strip dark-mode">
   <div class="row">
     <span class="label">暗色开启</span>
@@ -71,9 +60,8 @@ hr.divider { border:none; border-top:1px solid var(--color-divider-default); mar
   </div>
 </div>
 
-<hr class="divider">
 
-<div class="section-title">交互演示</div>
+<div class="pv-section__title">交互演示</div>
 <p class="demo-hint">点击开关试试</p>
 <div class="setting-row">
   <div class="setting-info">

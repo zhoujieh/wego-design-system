@@ -59,7 +59,7 @@
   "supportEvidenceComponents": [
     { "slug": "input", "reason": "独立输入和资料编辑场景。", "evidenceFile": "components/input.json", "previewFile": "preview/component-input.html", "priority": 7, "slot": "input" },
     { "slug": "counter", "reason": "商品详情和购物车数量增减。", "evidenceFile": "components/counter.json", "previewFile": "preview/component-counter.html", "priority": 8, "slot": "quantity-stepper" },
-    { "slug": "chip", "reason": "筛选、状态和业务标签。", "evidenceFile": "components/chip.json", "previewFile": "preview/component-chip.html", "priority": 9, "slot": "tag-filter" },
+    { "slug": "tag", "reason": "筛选、状态和业务标签。", "evidenceFile": "components/tag.json", "previewFile": "preview/component-tag.html", "priority": 9, "slot": "tag-filter" },
     { "slug": "badge", "reason": "未读、促销、提醒和角标。", "evidenceFile": "components/badge.json", "previewFile": "preview/component-badge.html", "priority": 10, "slot": "badge" },
     { "slug": "avatar", "reason": "用户资料和成员信息。", "evidenceFile": "components/avatar.json", "previewFile": "preview/component-avatar.html", "priority": 11, "slot": "identity" },
     { "slug": "image", "reason": "商品图、头像图和加载失败状态。", "evidenceFile": "components/image.json", "previewFile": "preview/component-image.html", "priority": 12, "slot": "media" },
@@ -74,7 +74,7 @@
     "button",
     "card",
     "avatar",
-    "chip",
+    "tag",
     "bottom-nav",
     "input",
     "counter",
@@ -93,17 +93,17 @@
   "screenBlueprints": [
     {
       "name": "首页/商品流",
-      "componentSlugs": ["bottom-nav", "chip", "card", "badge", "button", "image"],
+      "componentSlugs": ["bottom-nav", "tag", "card", "badge", "button", "image"],
       "role": "primary"
     },
     {
       "name": "商品详情",
-      "componentSlugs": ["navbar", "image", "card", "chip", "counter", "button", "badge"],
+      "componentSlugs": ["navbar", "image", "card", "tag", "counter", "button", "badge"],
       "role": "primary"
     },
     {
       "name": "我的/资料编辑",
-      "componentSlugs": ["navbar", "avatar", "chip", "cell", "input", "button"],
+      "componentSlugs": ["navbar", "avatar", "tag", "cell", "input", "button"],
       "role": "secondary"
     },
     {
@@ -152,7 +152,7 @@
       "dismissAction": "cancel-button",
       "overlayLevel": "overlay",
       "preserveTabBar": true,
-      "componentSlugs": ["navbar", "cell", "checkbox", "switch", "avatar", "chip", "link"],
+      "componentSlugs": ["navbar", "cell", "checkbox", "switch", "avatar", "tag", "link"],
       "uikitFile": "ui_kits/biz-settings/index.html",
       "specRef": "specs/交互设计原则.md#页面模式与转场",
       "templates": ["岗位权限设置", "业务配置", "商品筛选", "详情操作面板"]

@@ -4,12 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../scaffold.css">
+<link rel="stylesheet" href="../iconfont.css">
 <style>
-/* Page scaffold — NOT extracted */
-body { margin:0; padding:32px !important; background:var(--color-bg-page); font-family:var(--font-family-text); color:var(--color-text-primary); }
-.row { display:flex; gap:var(--space-8); align-items:flex-start; margin-bottom:var(--space-8); }
-.label { font-size:var(--font-size-10); color:var(--color-text-tertiary); text-transform:uppercase; letter-spacing:.5px; flex-shrink:0; width:92px; padding-top:4px; white-space:nowrap; }
-.divider { border:none; border-top:1px solid var(--color-divider-default); margin:var(--space-8) 0; }
 
 /* @component-css-start */
 .card { display:flex; flex-direction:column; gap:var(--space-12); font-family:var(--font-family-text); color:var(--color-text-primary); flex:1; min-width:0; }
@@ -26,6 +23,7 @@ body { margin:0; padding:32px !important; background:var(--color-bg-page); font-
 </style>
 </head>
 <body>
+<div class="pv-header"><h1>卡片</h1><p>浮起、线框、填充三种样式，可承载商品、订单、余额等内容。</p></div>
 <div class="row">
   <span class="label">浮起</span>
   <div class="card card--elevated" data-evidence-sample="elevated-default">
@@ -38,7 +36,6 @@ body { margin:0; padding:32px !important; background:var(--color-bg-page); font-
     </div>
   </div>
 </div>
-<hr class="divider">
 <div class="row">
   <span class="label">线框</span>
   <div class="card card--outlined" data-evidence-sample="outlined-default">

@@ -47,7 +47,7 @@
 ## 组件发布规则
 
 - 已发布组件只以 `.design_library/wegoux/components/index.json` 为准。
-- 当前稳定组件为 18 个：`button`、`card`、`avatar`、`chip`、`bottom-nav`、`input`、`counter`、`badge`、`cell`、`checkbox`、`form`、`image`、`link`、`radio`、`stack`、`switch`、`navbar`、`navbar-action-button`。
+- 当前稳定组件为 18 个：`button`、`card`、`avatar`、`tag`、`bottom-nav`、`input`、`counter`、`badge`、`cell`、`checkbox`、`form`、`image`、`link`、`radio`、`stack`、`switch`、`navbar`、`navbar-action-button`。
 - `navbar-action-button` 是 `navbar` 内嵌组件，没有独立预览页时不要强行当独立页面组件使用。
 - UI Kit 中的 `biz-*`、`.phone-*`、`.uikit-shell`、`.phone-frame`、`.phone-screen` 都是 Showcase 演示外壳或业务样式，不是通用组件。
 
@@ -69,6 +69,13 @@
 - 必须同步 `css.json`，避免机器可读 Token 落后。
 - 如果新增语义 Token、暗色 Token、状态色分层、品牌色阶、排版别名或数字工具类，需要同步 `README.md`、`SKILL.md` 和受影响组件契约。
 - 不随意硬编码色值、字号、间距、圆角、阴影和动效；优先使用 CSS 变量。
+- **`css.json` shadow 格式必须使用 TRAE 官方对象格式**（基于内置 minimalist 库反推），不能用 CSS 字符串。
+  - 单层阴影：`{ "xOffset", "yOffset", "blur", "spread", "color": { "hex", "opacity" } }`
+  - 多层阴影：`{ "layers": [{ "xOffset", "yOffset", "blur", "spread", "color": { "hex", "opacity" } }] }`
+  - `shadow-none` 不能用字符串 `"none"`，用 `{ "xOffset": "0px", "yOffset": "0px", "blur": "0px", "spread": "0px", "color": { "hex": "transparent", "opacity": "0" } }`
+  - 渲染器用 `'layers' in value` 判断多层/单层，传入字符串会触发 `TypeError: Cannot use 'in' operator to search for 'layers' in none`。
+- **`css.json` 其他 Token 的 `public`/`reference`/`compatibility` 三层结构是 wegoux 内部约定**，TRAE 渲染器能兼容，保持不变。
+- 每次修改 `css.json` 后，必须用 `python3 -c "import json; json.load(open('css.json'))"` 验证 JSON 合法性。
 
 改组件样式：
 
@@ -85,6 +92,12 @@
 - `/* @component-css-end */` — 在最后一个组件 CSS 规则后。
 
 两标记之间只允许包含该组件的核心 CSS 规则，scaffold 样式（`body`、`.row`、`.label`、`.demo-hint` 等）必须在标记之外。
+
+改脚手架：
+
+- 修改 `scaffold.css` 后，需确认所有 `preview/component-*.html` 和 `ui_kits/*.html` 正常引用。
+- 脚手架样式只用于预览页和 UI Kit，不得出现在生产组件样式中。
+- 详见 `specs/预览页脚手架规范.md`。
 
 改 UI Kit：
 

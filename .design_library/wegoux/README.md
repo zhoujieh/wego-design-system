@@ -146,7 +146,7 @@ name: "微购设计系统"
 |------|------|------|------|
 | 卡片 | `card` | stable | 内容容器，支持标题、描述、图片等多种内容组合 |
 | 头像 | `avatar` | stable | 用户头像展示，支持图片、文字首字母等类型 |
-| 标签 | `chip` | stable | 信息标签/标记，用于状态标识或筛选 |
+| 标签 | `tag` | stable | 信息标签/标记，用于状态标识或筛选 |
 | 角标 | `badge` | stable | 未读数量、红点提醒、促销标签等标记 |
 | 列表单元格 | `cell` | stable | 移动端信息列表项，支持左右插槽、分割线和点击态 |
 | 图片 | `image` | stable | 图片展示组件，支持尺寸、填充、圆角、加载和错误态 |
@@ -182,6 +182,7 @@ name: "微购设计系统"
 ├── colors_and_type.css                # 纯 Token 权威源（reference/primitives + public semantic + dark overrides）
 ├── css.json                           # Token 结构化数据（机器可读）
 ├── typography.css                     # 排版辅助类（已从 Token 权威源迁出）
+├── scaffold.css                       # 预览页脚手架样式（仅用于 preview/ 和 ui_kits/）
 ├── components.css                     # 组件样式集合
 ├── iconfont.css                       # wego-iconfont 图标字体 class
 ├── library-consumption.json           # 下游/AI 消费读取顺序和复制规则
@@ -195,7 +196,7 @@ name: "微购设计系统"
 │   ├── card.json                      # 卡片组件契约
 │   ├── cell.json                      # 列表单元格组件契约
 │   ├── checkbox.json                  # 复选框组件契约
-│   ├── chip.json                      # 标签组件契约
+│   ├── tag.json                       # 标签组件契约
 │   ├── counter.json                   # 计数器组件契约
 │   ├── form.json                      # 表单容器组件契约
 │   ├── image.json                     # 图片组件契约
@@ -212,7 +213,7 @@ name: "微购设计系统"
 │   ├── component-bottom-nav.html      # 底部导航组件预览页
 │   ├── component-input.html           # 输入框组件预览页
 │   ├── component-avatar.html          # 头像组件预览页
-│   ├── component-chip.html            # 标签组件预览页
+│   ├── component-tag.html             # 标签组件预览页
 │   ├── component-counter.html         # 计数器组件预览页
 │   ├── component-navbar.html          # 导航栏组件预览页
 │   ├── component-badge.html           # 角标组件预览页
@@ -231,7 +232,7 @@ name: "微购设计系统"
 │   └── biz-settings/
 │       ├── index.html                 # 业务设置底部面板模式 UI Kit
 │       └── quality-report.json        # 业务设置质量报告
-└── specs/                             # 品牌、布局、交互、动效、图标、文案规范
+├── specs/                             # 品牌、布局、交互、动效、图标、文案、脚手架规范
 ```
 
 ## 预览页工程规范
@@ -247,6 +248,7 @@ name: "微购设计系统"
 ### 文件路径
 
 - 外部 CSS：`<link rel="stylesheet" href="../colors_and_type.css">`
+- 脚手架 CSS：`<link rel="stylesheet" href="../scaffold.css">`（强制，预览页必须引入）
 - 图标 CSS：`<link rel="stylesheet" href="../iconfont.css">`（强制，预览页必须引入）
 - 外部组件 CSS：`<link rel="stylesheet" href="../components.css">`（可选，预览页也可内联组件样式）
 - 字体资源：保存在 `assets/fonts/` 子目录
