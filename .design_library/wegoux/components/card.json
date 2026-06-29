@@ -1,57 +1,157 @@
 {
+  "schemaVersion": 3,
   "slug": "card",
   "name": "卡片",
+  "category": "display",
+  "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "移动端内容容器组件，支持浮起、线框、填充三种样式。可组合媒体区、标题、正文、价格、标签等子元素。适用于商品展示、订单通知、余额展示等场景。",
-  "variants": [
+  "description": "移动端内容卡片容器，用于商品、订单、账户等分组内容承载。",
+  "semanticTypeCandidates": [
+    "content-card",
+    "product-card",
+    "summary-card"
+  ],
+  "variantDimensions": {
+    "surface": [
+      "elevated",
+      "outlined",
+      "filled"
+    ],
+    "media": [
+      "none",
+      "top-media"
+    ],
+    "footer": [
+      "none",
+      "meta-footer"
+    ]
+  },
+  "representativeVariants": [
     {
-      "name": "浮起卡片 (Elevated)",
-      "style": "elevated",
-      "background": "#FFFFFF",
-      "borderRadius": "12px",
-      "shadow": "0px 2px 8px rgba(30,32,40,0.06)",
-      "padding": "16px"
+      "surface": "elevated",
+      "media": "top-media",
+      "footer": "meta-footer"
     },
     {
-      "name": "线框卡片 (Outlined)",
-      "style": "outlined",
-      "background": "#FFFFFF",
-      "border": "1px solid rgba(32,47,100,0.08)",
-      "borderRadius": "8px",
-      "padding": "16px"
+      "surface": "outlined",
+      "media": "none",
+      "footer": "meta-footer"
     },
     {
-      "name": "填充卡片 (Filled)",
-      "style": "filled",
-      "background": "#F8F9FA",
-      "borderRadius": "8px",
-      "padding": "12px"
+      "surface": "filled",
+      "media": "none",
+      "footer": "none"
     }
   ],
-  "slots": [
-    { "name": "media", "description": "媒体区，通常放置商品图片", "optional": true },
-    { "name": "header", "description": "标题区，卡片主标题", "optional": true },
-    { "name": "body", "description": "内容区，辅助描述文字" },
-    { "name": "footer", "description": "底部区，放置价格、标签、时间等", "optional": true }
+  "anatomy": [
+    {
+      "name": "root",
+      "selector": ".card",
+      "role": "卡片容器"
+    },
+    {
+      "name": "media",
+      "selector": ".card__media",
+      "role": "媒体区"
+    },
+    {
+      "name": "header",
+      "selector": ".card__header",
+      "role": "标题区"
+    },
+    {
+      "name": "body",
+      "selector": ".card__body",
+      "role": "正文区"
+    },
+    {
+      "name": "footer",
+      "selector": ".card__footer",
+      "role": "底部信息区"
+    }
   ],
-  "subElements": [
-    { "name": "card__price", "description": "价格展示，字号18px Semibold" },
-    { "name": "card__tag", "description": "标签，字号10px，灰底圆角" }
+  "structurePatterns": [
+    "卡片内部按媒体、标题、正文、底部的垂直顺序组织。",
+    "价格、标签等信息放在 footer，不挤占标题层级。",
+    "卡片可作为列表项容器，但不替代页面外层布局壳。"
+  ],
+  "behavior": {},
+  "accessibility": {},
+  "usageHints": [
+    "elevated 适合首页商品流或可点击内容块。",
+    "outlined 适合设置、通知、说明类信息块。",
+    "filled 适合弱强调的摘要或提示容器。"
+  ],
+  "doNotInvent": [
+    "不要扩展为营销大促海报卡、复杂统计面板或多层悬浮卡。",
+    "不要在卡片内叠加重阴影和大面积品牌色背景。"
+  ],
+  "tokensConsumed": [
+    "--color-bg-muted",
+    "--color-bg-subtle",
+    "--color-bg-surface",
+    "--color-border-default",
+    "--color-text-primary",
+    "--color-text-secondary",
+    "--color-text-tertiary",
+    "--font-family-text",
+    "--font-lineheight-14",
+    "--font-lineheight-16",
+    "--font-size-10",
+    "--font-size-12",
+    "--font-size-14",
+    "--font-size-16",
+    "--font-size-18",
+    "--font-weight-semibold",
+    "--radius-lg",
+    "--radius-md",
+    "--radius-sm",
+    "--radius-xs",
+    "--shadow-sm",
+    "--space-12",
+    "--space-16",
+    "--space-2",
+    "--space-4",
+    "--space-8"
   ],
   "designTokens": {
-    "gap": "12px",
-    "mediaMinHeight": "150px",
-    "headerFontSize": "16px",
-    "headerFontWeight": 600,
-    "bodyFontSize": "14px",
-    "bodyColor": "#6E7382",
-    "footerFontSize": "12px",
-    "priceFontSize": "18px",
-    "priceFontWeight": 600,
-    "tagFontSize": "10px",
-    "tagBorderRadius": "4px",
-    "mediaBorderRadius": "6px"
+    "spacing": "var(--space-12) 到 var(--space-16)",
+    "radius": {
+      "elevated": "var(--radius-lg)",
+      "outlined": "var(--radius-md)",
+      "filled": "var(--radius-md)"
+    },
+    "titleFont": "var(--font-size-16) / var(--font-weight-semibold)",
+    "bodyFont": "var(--font-size-14)",
+    "footerFont": "var(--font-size-12)",
+    "priceFont": "var(--font-size-18) / var(--font-weight-semibold)",
+    "shadow": "var(--shadow-sm)"
+  },
+  "specRefs": [
+    "specs/设计风格与品牌原则.md",
+    "specs/布局与间距规范.md"
+  ],
+  "domAnatomy": {
+    "root": ".card",
+    "optionalChildren": [
+      ".card__media",
+      ".card__header",
+      ".card__footer"
+    ],
+    "requiredChildren": [
+      ".card__body"
+    ],
+    "subElements": [
+      ".card__price",
+      ".card__tag"
+    ]
+  },
+  "provenance": {
+    "preview": "preview/component-card.html",
+    "cssSource": "preview/component-card.html",
+    "embedded": false,
+    "hostComponent": null
   },
   "unknowns": []
 }

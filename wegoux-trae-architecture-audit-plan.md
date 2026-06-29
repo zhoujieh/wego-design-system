@@ -273,7 +273,7 @@ wegoux 当前定位清楚：移动端、微信生态、电商/工具、中文、
 - 写清 `navbar-action-button` 是嵌入组件。
 - 已经强调 UI Kit 是 Showcase，不可复制外壳。
 
-发现的问题：
+历史问题（已回归复核）：
 
 | 问题 | 影响 |
 | --- | --- |
@@ -372,7 +372,7 @@ wegoux 当前定位清楚：移动端、微信生态、电商/工具、中文、
 | --- | --- |
 | 预览页脚手架重复：`body`、`.row`、`.label`、`.section-title` 到处复制。 | 风格和布局容易漂移，维护成本高。 |
 | CSS 引入不统一：有的引 `components.css`，有的不引；有图标时引 `iconfont.css`，但不是所有页面一致。 | 预览环境不够稳定。 |
-| 组件核心 CSS 里仍有少量 raw hex，例如 switch off、radio 边框、chip 促销色。 | Token 管控不完整。 |
+| 组件核心 CSS 曾有少量 raw hex，例如 switch off、radio 边框、tag 促销色。 | 已在阶段 2 收敛；当前重点转为持续校验而不是再次清理。 |
 | 部分预览页使用 inline SVG 或硬编码 fill。 | 与“优先 iconfont / 随库资产”的规则不完全一致。 |
 | 有 demo JS 的组件，契约却不一定写 behavior。 | 规则在 HTML demo 中，机器消费 JSON 时看不到。 |
 
@@ -386,11 +386,11 @@ wegoux 当前定位清楚：移动端、微信生态、电商/工具、中文、
 - 从预览页聚合，符合项目发布规则。
 - 当前脚本还会插入 `@anatomy` 注释，帮助观察代表 DOM。
 
-发现的问题：
+历史问题（已回归复核）：
 
 | 问题 | 影响 |
 | --- | --- |
-| `components.css` 中仍有少量 raw hex。 | 来源是预览页核心 CSS，需要回到 preview 修。 |
+| `components.css` 曾出现 raw hex。 | 已在阶段 2 / 阶段 4 随 preview 回收；当前重点是每轮变更后重新生成并校验。 |
 | `@anatomy` 是生成注释，但文档没有明确说明。 | 消费者可能误解为手写内容或规则来源。 |
 | 脚本会抽 DOM anatomy，但组件 JSON 没同步 `domAnatomy`。 | 聚合 CSS 和契约信息没有互通。 |
 
@@ -405,13 +405,13 @@ wegoux 当前定位清楚：移动端、微信生态、电商/工具、中文、
 - 有 `screenBlueprints` 和 `pagePatterns`，比 TRAE 更贴合产品。
 - 明确禁止 `desktop-sidebar`、`marketing-hero`、`large-gradient-hero`、`decorative-orb-background`。
 
-发现的问题：
+当前回归结果：
 
 | 问题 | 影响 |
 | --- | --- |
-| `selectedFrameNames` 包含 `ui_kits/biz-settings/index.html`，但 `uiKits` 只列 `app`。 | 计划文件内部不同步。 |
-| 只在 plan 层写了 forbidden invented components，组件契约层没写。 | 单组件迭代仍可能漂移。 |
-| `supportEvidenceComponents` 覆盖完整，但没有统一 `specRef` 到每个组件。 | 组件与 specs 的关系弱。 |
+| `uiKits`、`selectedFrameNames`、fixed slots 与现有目录已对齐。 | 本轮无需继续修路径。 |
+| 组件契约与计划文件此前缺少统一 schema 版本标识。 | 本轮已补到 `schemaVersion: 3` 与 `componentContractSchemaVersion: 3`。 |
+| UI Kit 复用率问题不属于 plan 结构层。 | 继续留在阶段 6 处理，不在本轮混入。 |
 
 ### 3.10 `library-consumption.json`
 
@@ -421,13 +421,12 @@ wegoux 当前定位清楚：移动端、微信生态、电商/工具、中文、
 - 明确 UI Kit 不能复制外壳，真实页面要重写外层结构。
 - 写清图标优先 iconfont。
 
-发现的问题：
+当前回归结果：
 
 | 问题 | 影响 |
 | --- | --- |
-| `icons/*.svg` 与实际 `assets/icons/*.svg` 不一致。 | 下游复制资产可能找不到文件。 |
-| `uiKits` 只列 `app`，没有 `biz-settings`。 | 实际已有 Kit 没进入消费契约。 |
-| 推荐读取顺序没有把 `SKILL.md` 放入首位。 | 与 AGENTS 当前读取顺序不完全一致。 |
+| 资产路径、`uiKits` 列表、推荐读取顺序已与仓库现状同步。 | 本轮无需继续修消费入口路径。 |
+| 组件契约读取规则此前没有明确 schema 版本边界。 | 本轮已补充 `componentContractSchemaVersion: 3` 和读取说明。 |
 
 ### 3.11 `ui_kits/app` 与 `ui_kits/biz-settings`
 
@@ -471,13 +470,13 @@ wegoux 当前定位清楚：移动端、微信生态、电商/工具、中文、
 > | 阶段 | 状态 | 说明 |
 > | --- | --- | --- |
 > | 阶段 0：冻结方向和审查基线 | **已完成** | AGENTS.md、README.md、SKILL.md 中已明确方向约束，无需额外改动 |
-> | 阶段 1：同步文件路径和消费入口 | **已完成** | 9 项修复已提交（commit `312b3ac`），metadata version 118 |
-> | 阶段 2：整理 Token 权威层 | **已完成** | metadata version 121，Token 收敛 + raw hex 清零 + css.json 同步 |
-> | 阶段 3：升级组件契约 schema | 未开始 | — |
+> | 阶段 1：同步文件路径和消费入口 | **已完成** | 9 项修复已提交（commit `312b3ac`），历史完成版本 118；当前仓库 metadata version 152 |
+> | 阶段 2：整理 Token 权威层 | **已完成** | 历史完成版本 121；`css.json` 已切到扁平桶格式并与当前仓库保持同步 |
+> | 阶段 3：升级组件契约 schema | **已完成** | 先用 4 组件试点锁定 schema，再全量同步 18 个组件到 schemaVersion 3 |
 > | 阶段 4：规范预览页 | **已完成** | scaffold.css + 17 页统一 + chip→tag 重命名 + SVG 替换 + 迭代护栏 |
-> | 阶段 5：重新生成 `components.css` | 未开始 | — |
-> | 阶段 6：修复 UI Kit | 未开始 | — |
-> | 阶段 7：同步文档和消费契约 | 未开始 | — |
+> | 阶段 5：重新生成并校验 `components.css` | 持续复核 | 阶段 2 和阶段 4 已执行；后续每批 preview 或契约相关迭代后继续复核 |
+> | 阶段 6：修复 UI Kit | 待后续迭代 | Lucide、inline SVG、UI Kit 复用率和残留旧 class 漂移继续在该阶段处理 |
+> | 阶段 7：同步文档和消费契约 | 待后续迭代 | README / SKILL / 质量报告与 schemaVersion 3 的全量文档对齐留在该阶段 |
 
 ### 阶段 0：冻结方向和审查基线 ✅ 已完成
 
@@ -499,7 +498,7 @@ wegoux 当前定位清楚：移动端、微信生态、电商/工具、中文、
 
 目标：先让人和 AI 读对文件。
 
-> **完成记录**（commit `312b3ac`，metadata version 118）：
+> **完成记录**（commit `312b3ac`，metadata version 118；当前仓库 metadata version 152）：
 >
 > 1. ✅ README.md 文件清单根路径从 `.design_library/微购设计系统/` 统一为 `.design_library/wegoux/`。
 > 2. ✅ 所有文档中 `icons/*.svg` 修正为 `assets/icons/*.svg`（README.md、SKILL.md、library-consumption.json 共 6 处）。
@@ -527,14 +526,14 @@ wegoux 当前定位清楚：移动端、微信生态、电商/工具、中文、
 
 目标：让所有组件只从 Token 取值。
 
-> **完成记录**（metadata version 121）：
+> **完成记录**（metadata version 121；当前仓库 metadata version 152）：
 >
 > 1. ✅ `colors_and_type.css` 已重构为纯 Token 权威源，只保留 `:root` 和 `.dark` 两个 token 作用域；原 `.type-*`、`.num-*` 排版工具类已迁出到新增的 `typography.css`。
 > 2. ✅ Token 结构收敛为 `reference/primitives` + `public semantic` 两层，并在文件头写明 AI 修改规则；组件后续只应直接消费 `--color-*`、`--font-*`、`--space-*`、`--radius-*`、`--size-*`、`--duration-*`、`--ease-*`。
 > 3. ✅ 补齐了本阶段缺失的可复用语义 Token：控件未选中背景、控件默认边框、控件禁用强边框、promotion 强提示文本/边框、accent-yellow 展示语义、switch thumb shadow 等。
-> 4. ✅ 组件核心 CSS 的 raw hex / 裸 `rgba(...)` 已在本阶段目标范围内清理为 0；涉及文件包含 `switch`、`checkbox`、`radio`、`stack`、`input`、`avatar`、`badge`、`bottom-nav`、`chip`、`form`、`image` 的 `@component-css` 标记块。
+> 4. ✅ 组件核心 CSS 的 raw hex / 裸 `rgba(...)` 已在本阶段目标范围内清理为 0；涉及文件包含 `switch`、`checkbox`、`radio`、`stack`、`input`、`avatar`、`badge`、`bottom-nav`、`tag`、`form`、`image` 的 `@component-css` 标记块。
 > 5. ✅ `components.css` 已通过 `node .design_library/wegoux/scripts/extract-components-css.mjs .design_library/wegoux` 重新生成，输出无 warning。
-> 6. ✅ `css.json` 已按新 Token 结构同步，`metadata.json` version 已递增到 121。
+> 6. ✅ `css.json` 已按新 Token 结构同步，并切到 TRAE 官方支持的扁平桶格式：`color` / `font` / `shadow` / `radius` / `spacing` / `size`（另含本库补充桶）。
 >
 > **范围说明**：
 >
@@ -560,15 +559,24 @@ wegoux 当前定位清楚：移动端、微信生态、电商/工具、中文、
 - `colors_and_type.css` 与 `css.json` 无明显不同步。
 - 组件核心 CSS 中 raw hex 降到 0；必要例外必须在契约中说明。
 
-### 阶段 3：升级组件契约 schema
+### 阶段 3：升级组件契约 schema ✅ 已完成
 
 目标：把组件使用规则写进组件文件，而不是只写在 README 或预览页。
 
-建议所有组件统一字段：
+> **完成记录**（metadata version 152）：
+>
+> 1. ✅ 先用 `button`、`cell`、`form`、`input` 4 个组件试点锁定 schema 命名和字段边界，再同步全量 18 个组件。
+> 2. ✅ 18 个 `components/*.json` 已统一升级到 `schemaVersion: 3`，顶层字段顺序一致，不再混用 `variants/sizes/states/modifiers/...` 等旧字段。
+> 3. ✅ 全部组件已补齐 `category`、`status`、`usageHints`、`doNotInvent`、`tokensConsumed`、`specRefs`、`domAnatomy`、`provenance`。
+> 4. ✅ 可交互组件 `button/link/cell/input/form/navbar/navbar-action-button/bottom-nav/stack/switch/checkbox/radio/counter` 已补齐非空 `behavior` 与 `accessibility`。
+> 5. ✅ `components/index.json`、`library-consumption.json`、`uikit-plan.json` 已同步到 `schemaVersion: 3`，并补充 `componentContractSchemaVersion: 3`。
+> 6. ✅ `scripts/validate-wegoux.mjs` 已从“建议补齐”升级为“缺字段即失败”，会阻止旧 schema 回流。
+
+统一字段如下：
 
 ```json
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "slug": "...",
   "name": "...",
   "category": "...",
@@ -594,14 +602,6 @@ wegoux 当前定位清楚：移动端、微信生态、电商/工具、中文、
 }
 ```
 
-优先级：
-
-1. `button`、`cell`、`form`、`input`
-2. `navbar`、`navbar-action-button`、`bottom-nav`
-3. `switch`、`checkbox`、`radio`、`counter`
-4. `card`、`image`、`avatar`
-5. `chip`、`badge`、`link`、`stack`
-
 验收：
 
 - 每个组件都有 `usageHints` 和 `doNotInvent`。
@@ -612,7 +612,7 @@ wegoux 当前定位清楚：移动端、微信生态、电商/工具、中文、
 
 目标：预览页既能展示，又能作为 CSS 权威来源。
 
-> **完成记录**（metadata version 145）：
+> **完成记录**（metadata version 145；当前仓库 metadata version 152）：
 >
 > 1. ✅ 创建 `scaffold.css`：移动端浅色预览脚手架，包含 `pv-header`/`pv-section` 布局结构、`.row`/`.label` 布局辅助、`.dark-strip`/`.demo-hint`/`.interactive-row` 展示辅助、`.page`/`.section-group` 列表页模拟。所有样式使用 `var()` 引用 Token，不引入暗色 IDE 视觉。
 > 2. ✅ 全部 17 个预览页统一引入 `colors_and_type.css` + `scaffold.css` + `iconfont.css`；cell/form/bottom-nav 额外引入 `components.css`。
@@ -645,9 +645,15 @@ wegoux 当前定位清楚：移动端、微信生态、电商/工具、中文、
 - 标记块内无 page scaffold、无 demo-only 样式、无未解释 raw hex。
 - 组件契约能解释预览页中的所有状态和交互。
 
-### 阶段 5：重新生成 `components.css`
+### 阶段 5：重新生成并校验 `components.css`
 
-目标：让聚合样式只由预览页生成。
+目标：让聚合样式只由预览页生成，并在每轮相关迭代后持续复核。
+
+> **当前状态**：
+>
+> 1. ✅ 阶段 2 已在 Token 收敛后重新生成一次。
+> 2. ✅ 阶段 4 已在预览页规范化后重新生成一次。
+> 3. ✅ 后续每批 preview、提取脚本或组件公开边界相关迭代后，都继续执行“重新生成 + diff 校验”，不再把本阶段视为一次性动作。
 
 要做：
 
@@ -672,8 +678,9 @@ wegoux 当前定位清楚：移动端、微信生态、电商/工具、中文、
 3. 用 `cell` 替代 `menu-item`。
 4. 用 `bottom-nav` 的已注册结构替代 Lucide Tab 图标。
 5. 移除 Lucide CDN；图标改用 iconfont 或 `assets/icons/` 固定资产。
-6. 保留 `.uikit-shell`、`.phone-frame`、`.phone-screen` 作为 Showcase 外壳，但继续标注不可复制。
-7. 同步 `quality-report.json`。
+6. 继续降低 `phone-*`、`menu-item` 等 Showcase / 业务壳层在主 `app` 中的占比。
+7. 保留 `.uikit-shell`、`.phone-frame`、`.phone-screen` 作为 Showcase 外壳，但继续标注不可复制。
+8. 同步 `quality-report.json`。
 
 验收：
 

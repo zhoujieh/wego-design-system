@@ -1,89 +1,148 @@
 {
+  "schemaVersion": 3,
   "slug": "badge",
   "name": "角标",
+  "category": "display",
+  "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "角标组件，用于标识未读数量、红点提醒、促销标签等。支持数字角标、红点、黄色/绿色/气泡文字角标、删除角标，以及右上角绝对定位模式。",
-  "variants": [
+  "description": "未读、提醒、促销等轻量角标组件，支持点状、数字和短文案标记。",
+  "semanticTypeCandidates": [
+    "badge",
+    "notification-dot",
+    "count-badge",
+    "promo-badge"
+  ],
+  "variantDimensions": {
+    "type": [
+      "dot",
+      "number",
+      "number-multi",
+      "yellow",
+      "green",
+      "bubble",
+      "delete"
+    ],
+    "placement": [
+      "inline",
+      "corner",
+      "corner-expand-left",
+      "corner-expand-right",
+      "corner-expand-center"
+    ],
+    "shape": [
+      "round",
+      "sharp"
+    ]
+  },
+  "representativeVariants": [
     {
-      "name": "红点 (Dot)",
       "type": "dot",
-      "width": "8px",
-      "height": "8px",
-      "background": "#FA5051",
-      "borderRadius": "999px"
+      "placement": "corner",
+      "shape": "round"
     },
     {
-      "name": "数字角标 (Number)",
       "type": "number",
-      "minWidth": "16px",
-      "height": "16px",
-      "background": "#FA5051",
-      "color": "#FFFFFF",
-      "fontSize": "10px",
-      "borderRadius": "999px",
-      "subTypes": [
-        { "name": "单数字", "description": "1-9" },
-        { "name": "多数字", "slug": "number-multi", "minWidth": "28px", "description": "99+" }
-      ]
+      "placement": "corner-expand-left",
+      "shape": "round"
     },
     {
-      "name": "黄色标签 (Yellow)",
       "type": "yellow",
-      "height": "16px",
-      "background": "rgba(255,195,0,0.1)",
-      "color": "#FFC300",
-      "fontSize": "10px",
-      "borderRadius": "4px"
+      "placement": "inline",
+      "shape": "sharp"
     },
     {
-      "name": "绿色标签 (Green)",
-      "type": "green",
-      "height": "16px",
-      "background": "rgba(3,193,96,0.1)",
-      "color": "#03C160",
-      "fontSize": "10px",
-      "borderRadius": "4px"
-    },
-    {
-      "name": "气泡标签 (Bubble)",
       "type": "bubble",
-      "height": "16px",
-      "background": "#FF6045",
-      "color": "#FFFFFF",
-      "fontSize": "10px",
-      "borderRadius": "4px"
-    },
-    {
-      "name": "删除 (Delete)",
-      "type": "delete",
-      "width": "16px",
-      "height": "16px",
-      "background": "#B7BEC5",
-      "icon": "X 形交叉线",
-      "borderRadius": "999px"
+      "placement": "inline",
+      "shape": "sharp"
     }
   ],
-  "modifiers": [
-    { "name": "右上角定位", "slug": "corner", "description": "absolute 定位在父元素右上角" },
-    { "name": "右上角向左展开", "slug": "corner-expand-left", "description": "角标右侧固定在父元素右上角，内容向左延展" },
-    { "name": "右上角向右展开", "slug": "corner-expand-right", "description": "角标左侧从父元素右上角向右延展" },
-    { "name": "右上角居中展开", "slug": "corner-expand-center", "description": "角标以父元素右上角为中心延展" },
-    { "name": "可滚动", "slug": "scrollable", "description": "限制最大宽度 28px，超出内容隐藏，适合滚动或轮播文案场景" },
-    { "name": "圆角无边", "slug": "round" },
-    { "name": "直角", "slug": "sharp" },
-    { "name": "左对齐", "slug": "align-left" },
-    { "name": "居中", "slug": "align-center" },
-    { "name": "右对齐", "slug": "align-right" }
+  "anatomy": [
+    {
+      "name": "root",
+      "selector": ".badge",
+      "role": "角标容器"
+    },
+    {
+      "name": "label",
+      "selector": "text node",
+      "role": "数字或短文案"
+    },
+    {
+      "name": "deleteIcon",
+      "selector": ".badge--delete",
+      "role": "删除标记视觉"
+    }
+  ],
+  "structurePatterns": [
+    "数字角标默认单行展示，超过单数字范围切到更宽的多数字样式。",
+    "角标可附着在图标、头像或导航项上，但不改宿主组件结构。",
+    "delete 类型仅表达可清除标记，不独立承担操作按钮角色。"
+  ],
+  "behavior": {},
+  "accessibility": {},
+  "usageHints": [
+    "dot 用于轻提醒，number 用于未读数，bubble 用于短促销文案。",
+    "黄色和绿色标签适合业务状态点缀，不抢主操作层级。"
+  ],
+  "doNotInvent": [
+    "不要把 badge 扩成长句横幅、统计面板或多行提示气泡。",
+    "不要用 badge 代替真正的按钮或 tab。"
+  ],
+  "tokensConsumed": [
+    "--color-accent-yellow",
+    "--color-bg-accent-yellow",
+    "--color-brand",
+    "--color-brand-bg",
+    "--color-danger",
+    "--color-text-disabled",
+    "--color-text-inverse",
+    "--color-text-promotion",
+    "--font-family-number",
+    "--font-family-text",
+    "--font-size-10",
+    "--font-weight-medium",
+    "--font-weight-regular",
+    "--radius-full",
+    "--radius-none",
+    "--radius-xs"
   ],
   "designTokens": {
-    "fontFamily": "PingFang SC",
-    "fontWeight": 400,
     "dotSize": "8px",
-    "numberMinWidth": "16px",
-    "numberMultiMinWidth": "28px",
+    "minWidth": {
+      "number": "16px",
+      "numberMulti": "28px"
+    },
     "labelHeight": "16px",
-    "deleteSize": "16px"
+    "deleteSize": "16px",
+    "radius": {
+      "round": "var(--radius-full)",
+      "sharp": "var(--radius-xs)"
+    }
+  },
+  "specRefs": [
+    "specs/交互设计原则.md",
+    "specs/设计风格与品牌原则.md"
+  ],
+  "domAnatomy": {
+    "root": ".badge",
+    "modifiers": [
+      ".badge--dot",
+      ".badge--number",
+      ".badge--number-multi",
+      ".badge--corner"
+    ],
+    "optionalStates": [
+      ".badge--scrollable",
+      ".badge--round",
+      ".badge--sharp"
+    ]
+  },
+  "provenance": {
+    "preview": "preview/component-badge.html",
+    "cssSource": "preview/component-badge.html",
+    "embedded": false,
+    "hostComponent": null
   },
   "unknowns": []
 }

@@ -1,90 +1,166 @@
 {
+  "schemaVersion": 3,
   "slug": "navbar",
   "name": "导航栏",
+  "category": "navigation",
+  "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "页面顶部导航栏组件，承载状态栏、标题、返回/关闭按钮以及右侧操作区。支持标准模式、无按钮模式和搜索模式三种布局。高度44px，配合状态栏使用。",
-  "variants": [
+  "description": "移动端页面顶部导航栏，承载状态栏、返回区、标题区与右侧操作区。",
+  "semanticTypeCandidates": [
+    "navbar",
+    "page-header",
+    "top-navigation"
+  ],
+  "variantDimensions": {
+    "leftControl": [
+      "back-icon",
+      "close-icon",
+      "text-cancel",
+      "none"
+    ],
+    "titleAlignment": [
+      "center",
+      "left-wide"
+    ],
+    "actions": [
+      "none",
+      "icon",
+      "text",
+      "button",
+      "mixed"
+    ],
+    "spacing": [
+      "default",
+      "spaced"
+    ]
+  },
+  "representativeVariants": [
     {
-      "name": "标准模式 — 返回 + 标题",
-      "layout": "standard",
-      "leftButtonType": "BACK",
-      "title": "页面标题",
-      "hasActions": false
+      "leftControl": "back-icon",
+      "titleAlignment": "center",
+      "actions": "none",
+      "spacing": "default"
     },
     {
-      "name": "标准模式 — 返回 + 标题 + 图标操作",
-      "layout": "standard",
-      "leftButtonType": "BACK",
-      "title": "主题区",
-      "actions": [
-        { "type": "ICON", "icon": "yuanjia", "label": "圆加" },
-        { "type": "ICON", "icon": "yuanjia", "label": "圆加" }
-      ]
+      "leftControl": "back-icon",
+      "titleAlignment": "center",
+      "actions": "icon",
+      "spacing": "default"
     },
     {
-      "name": "标准模式 — 返回 + 标题 + 文本操作",
-      "layout": "standard",
-      "leftButtonType": "BACK",
-      "title": "主题区",
-      "actions": [
-        { "type": "TEXT", "text": "操作区" },
-        { "type": "TEXT", "text": "操作区" }
-      ]
+      "leftControl": "text-cancel",
+      "titleAlignment": "center",
+      "actions": "button",
+      "spacing": "spaced"
     },
     {
-      "name": "标准模式 — 取消 + 标题 + 按钮",
-      "layout": "standard",
-      "leftButtonText": "取消",
-      "title": "主题区",
-      "actions": [
-        { "type": "BUTTON", "text": "保存" }
-      ]
-    },
-    {
-      "name": "无按钮模式 — 仅标题居中",
-      "layout": "no-button",
-      "title": "页面标题",
-      "isCenter": true
-    },
-    {
-      "name": "无按钮模式 — 标题左对齐 + 图标操作",
-      "layout": "no-button",
-      "title": "页面标题",
-      "isCenter": false,
-      "actions": [
-        { "type": "ICON", "icon": "yuanjia", "label": "圆加" }
-      ]
-    },
-    {
-      "name": "标准模式 — 三个图标按钮",
-      "layout": "standard",
-      "leftButtonType": "CLOSE",
-      "title": "主题区",
-      "actions": [
-        { "type": "ICON", "icon": "sandian16", "label": "更多" },
-        { "type": "ICON", "icon": "yuanjia", "label": "圆加" },
-        { "type": "ICON", "icon": "fangkejilu", "label": "记录" }
-      ]
+      "leftControl": "none",
+      "titleAlignment": "left-wide",
+      "actions": "icon",
+      "spacing": "default"
     }
   ],
+  "anatomy": [
+    {
+      "name": "statusBar",
+      "selector": ".navbar__status-bar",
+      "role": "状态栏占位区"
+    },
+    {
+      "name": "body",
+      "selector": ".navbar__body",
+      "role": "导航主栅格"
+    },
+    {
+      "name": "left",
+      "selector": ".navbar__left",
+      "role": "返回或关闭区"
+    },
+    {
+      "name": "center",
+      "selector": ".navbar__center",
+      "role": "标题区"
+    },
+    {
+      "name": "right",
+      "selector": ".navbar__right",
+      "role": "操作区"
+    }
+  ],
+  "structurePatterns": [
+    "body 固定为三栏网格，不拆成桌面工具栏模式。",
+    "右侧操作统一复用 navbar-action-button 语义。",
+    "无按钮模式只影响 left 与 center 布局，不改变整体高度。"
+  ],
+  "behavior": {
+    "leftAction": "返回、关闭或取消属于左侧主导航操作，不与右侧按钮混用。",
+    "title": "标题区允许居中或左对齐宽版，但保持单行省略。",
+    "actionPress": "右侧操作以轻压暗或按钮背景变化反馈。"
+  },
+  "accessibility": {
+    "landmark": "作为页面顶部导航语义区域使用。",
+    "titleRule": "标题保持单行可感知，不依赖图标传达页面语义。",
+    "actionNames": "右侧图标操作必须具备中文可感知名称。"
+  },
+  "usageHints": [
+    "适合标准页面顶部导航、详情页返回和设置页保存动作。",
+    "多个右侧动作应保持克制，优先一到两个高频操作。"
+  ],
+  "doNotInvent": [
+    "不要把 navbar 扩成桌面多行标题栏、营销大顶栏或搜索综合头部。",
+    "不要把状态栏、标题栏和筛选条硬拼成单一组件。"
+  ],
+  "tokensConsumed": [
+    "--color-bg-muted",
+    "--color-bg-surface",
+    "--color-brand",
+    "--color-brand-disabled",
+    "--color-text-inverse",
+    "--color-text-primary",
+    "--color-text-tertiary",
+    "--font-family-text",
+    "--font-size-10",
+    "--font-size-14",
+    "--font-size-16",
+    "--font-size-18",
+    "--font-weight-medium",
+    "--radius-sm"
+  ],
   "designTokens": {
-    "height": "44px",
-    "width": "375px",
     "statusBarHeight": "44px",
+    "bodyHeight": "44px",
     "totalHeight": "88px",
-    "gridColumns": 10,
-    "leftSpan": "col 1-3",
-    "centerSpan": "col 4-7",
-    "rightSpan": "col 8-10",
-    "titleFontSize": "18px",
-    "titleFontWeight": 500,
-    "titleColor": "#1E2028",
-    "actionTextFontSize": "16px",
-    "actionIconSize": "24px",
-    "backgroundColor": "#FFFFFF",
-    "leftPadding": "8px",
-    "rightPadding": "4px"
+    "gridColumns": "10",
+    "titleFont": "var(--font-size-18) / var(--font-weight-medium)",
+    "actionButtonHeight": "32px"
+  },
+  "specRefs": [
+    "specs/交互设计原则.md",
+    "specs/布局与间距规范.md"
+  ],
+  "domAnatomy": {
+    "root": ".navbar",
+    "requiredChildren": [
+      ".navbar__status-bar",
+      ".navbar__body"
+    ],
+    "bodyChildren": [
+      ".navbar__left",
+      ".navbar__center",
+      ".navbar__right"
+    ],
+    "optionalActionClasses": [
+      ".navbar__body--spaced",
+      ".navbar__center--wide",
+      ".navbar__right--wide"
+    ]
+  },
+  "provenance": {
+    "preview": "preview/component-navbar.html",
+    "cssSource": "preview/component-navbar.html",
+    "embedded": false,
+    "hostComponent": null
   },
   "unknowns": []
 }

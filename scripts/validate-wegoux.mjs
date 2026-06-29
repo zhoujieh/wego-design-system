@@ -102,6 +102,45 @@ const INTERACTIVE_COMPONENTS = new Set([
   'stack',
 ]);
 
+const REQUIRED_COMPONENT_CONTRACT_FIELDS = [
+  'schemaVersion',
+  'slug',
+  'name',
+  'category',
+  'status',
+  'sourceKind',
+  'confidence',
+  'description',
+  'semanticTypeCandidates',
+  'variantDimensions',
+  'representativeVariants',
+  'anatomy',
+  'structurePatterns',
+  'behavior',
+  'accessibility',
+  'usageHints',
+  'doNotInvent',
+  'tokensConsumed',
+  'designTokens',
+  'specRefs',
+  'domAnatomy',
+  'provenance',
+  'unknowns',
+];
+
+const REQUIRED_PROVENANCE_FIELDS = [
+  'preview',
+  'cssSource',
+  'embedded',
+  'hostComponent',
+];
+
+const DOM_REQUIRED_COMPONENTS = new Set([
+  'cell',
+  'form',
+  'navbar',
+]);
+
 const EMBEDDED_PREVIEWS = {
   'navbar-action-button': 'component-navbar.html',
 };
@@ -239,6 +278,10 @@ function splitLines(text) {
 function relToLibrary(file) {
   if (file === rootRel) return '';
   return file.startsWith(rootRel + '/') ? file.slice(rootRel.length + 1) : null;
+}
+
+function stripFragment(ref) {
+  return typeof ref === 'string' ? ref.split('#')[0] : ref;
 }
 
 function componentSlugsFromLibraryPath(rel) {
@@ -476,6 +519,16 @@ function checkComponentFiles(options = {}) {
     return [];
   }
 
+  if (index.schemaVersion !== 3) {
+    add('error', 'components.index.schema_version', `components/index.json schemaVersion 必须为 3，当前为 ${index.schemaVersion}`, path.join(libraryRoot, 'components/index.json'));
+  }
+  if (index.componentContractSchemaVersion !== 3) {
+    add('error', 'components.index.contract_schema_version', `components/index.json componentContractSchemaVersion 必须为 3，当前为 ${index.componentContractSchemaVersion}`, path.join(libraryRoot, 'components/index.json'));
+  }
+  if (index.library !== 'wegoux') {
+    add('error', 'components.index.library', `components/index.json library 必须为 wegoux，当前为 ${index.library}`, path.join(libraryRoot, 'components/index.json'));
+  }
+
   const seen = new Set();
   const slugs = [];
   for (const component of index.components) {
@@ -695,37 +748,102 @@ function checkComponentContracts(slugs) {
     const contract = readJson(rel);
     if (!contract) continue;
 
-    for (const field of ['slug', 'name', 'sourceKind', 'confidence', 'description']) {
+    for (const field of REQUIRED_COMPONENT_CONTRACT_FIELDS) {
       if (!(field in contract)) {
         add('error', 'contract.required_field_missing', `组件契约缺少基础字段：${field}`, file);
       }
     }
+
+    const actualKeys = Object.keys(contract);
+    const missingFields = REQUIRED_COMPONENT_CONTRACT_FIELDS.filter(field => !(field in contract));
+    const extraFields = actualKeys.filter(field => !REQUIRED_COMPONENT_CONTRACT_FIELDS.includes(field));
+    if (missingFields.length > 0) {
+      add('error', 'contract.schema_missing_fields', `组件契约缺少 schemaVersion 3 规定字段：${missingFields.join(', ')}`, file);
+    }
+    if (extraFields.length > 0) {
+      add('error', 'contract.schema_extra_fields', `组件契约仍含旧字段或未登记字段：${extraFields.join(', ')}`, file);
+    }
+    if (contract.schemaVersion !== 3) {
+      add('error', 'contract.schema_version', `组件契约 schemaVersion 必须为 3，当前为 ${contract.schemaVersion}`, file);
+    }
     if (contract.slug !== slug) {
       add('error', 'contract.slug_mismatch', `组件契约 slug 与文件名不一致：${contract.slug} !== ${slug}`, file);
     }
-    if (!contract.designTokens && !contract.tokensConsumed) {
-      add('error', 'contract.tokens_missing', '组件契约必须声明 designTokens 或 tokensConsumed', file);
+    if (!Array.isArray(contract.tokensConsumed) || contract.tokensConsumed.length === 0) {
+      add('error', 'contract.tokens_missing', '组件契约必须声明非空 tokensConsumed', file);
+    }
+    for (const field of ['usageHints', 'doNotInvent', 'specRefs']) {
+      if (!Array.isArray(contract[field]) || contract[field].length === 0) {
+        add('error', 'contract.array_missing', `组件契约字段必须为非空数组：${field}`, file);
+      }
+    }
+    if (!Array.isArray(contract.unknowns)) {
+      add('error', 'contract.unknowns_invalid', '组件契约 unknowns 必须为数组', file);
+    }
+    if (!contract.designTokens || typeof contract.designTokens !== 'object' || Array.isArray(contract.designTokens)) {
+      add('error', 'contract.design_tokens_invalid', '组件契约 designTokens 必须为对象', file);
+    }
+    if (!contract.variantDimensions || typeof contract.variantDimensions !== 'object' || Array.isArray(contract.variantDimensions)) {
+      add('error', 'contract.variant_dimensions_invalid', '组件契约 variantDimensions 必须为对象', file);
+    }
+    if (!Array.isArray(contract.representativeVariants)) {
+      add('error', 'contract.representative_variants_invalid', '组件契约 representativeVariants 必须为数组', file);
+    }
+    if (!Array.isArray(contract.anatomy) || contract.anatomy.length === 0) {
+      add('error', 'contract.anatomy_invalid', '组件契约 anatomy 必须为非空数组', file);
+    }
+    if (!Array.isArray(contract.structurePatterns) || contract.structurePatterns.length === 0) {
+      add('error', 'contract.structure_patterns_invalid', '组件契约 structurePatterns 必须为非空数组', file);
+    }
+    if (!contract.domAnatomy || typeof contract.domAnatomy !== 'object' || Array.isArray(contract.domAnatomy)) {
+      add('error', 'contract.dom_anatomy_invalid', '组件契约 domAnatomy 必须为对象', file);
     }
 
-    for (const field of ['usageHints', 'doNotInvent', 'provenance']) {
-      if (!(field in contract)) {
-        add('debt', 'contract.future_field_missing', `组件契约建议补齐字段：${field}`, file);
+    if (!contract.provenance || typeof contract.provenance !== 'object' || Array.isArray(contract.provenance)) {
+      add('error', 'contract.provenance_invalid', '组件契约 provenance 必须为对象', file);
+    } else {
+      for (const field of REQUIRED_PROVENANCE_FIELDS) {
+        if (!(field in contract.provenance)) {
+          add('error', 'contract.provenance_missing_field', `组件契约 provenance 缺少字段：${field}`, file);
+        }
+      }
+      if (typeof contract.provenance.preview !== 'string' || !contract.provenance.preview) {
+        add('error', 'contract.provenance_preview_invalid', '组件契约 provenance.preview 必须为非空字符串', file);
+      } else if (!exists(stripFragment(contract.provenance.preview))) {
+        add('error', 'contract.provenance_preview_missing', `组件契约 provenance.preview 路径不存在：${contract.provenance.preview}`, file);
+      }
+      if (typeof contract.provenance.cssSource !== 'string' || !contract.provenance.cssSource) {
+        add('error', 'contract.provenance_css_source_invalid', '组件契约 provenance.cssSource 必须为非空字符串', file);
+      } else if (!exists(stripFragment(contract.provenance.cssSource))) {
+        add('error', 'contract.provenance_css_source_missing', `组件契约 provenance.cssSource 路径不存在：${contract.provenance.cssSource}`, file);
+      }
+      if (typeof contract.provenance.embedded !== 'boolean') {
+        add('error', 'contract.provenance_embedded_invalid', '组件契约 provenance.embedded 必须为布尔值', file);
+      }
+      if (contract.provenance.embedded && typeof contract.provenance.hostComponent !== 'string') {
+        add('error', 'contract.provenance_host_required', '嵌入式组件必须声明字符串类型的 provenance.hostComponent', file);
+      }
+      if (!contract.provenance.embedded && contract.provenance.hostComponent !== null) {
+        add('error', 'contract.provenance_host_null', '非嵌入式组件 provenance.hostComponent 必须为 null', file);
       }
     }
 
     if (INTERACTIVE_COMPONENTS.has(slug)) {
-      if (!contract.behavior) {
-        add('debt', 'contract.behavior_missing', `可交互组件缺少 behavior 字段：${slug}`, file);
+      if (!contract.behavior || typeof contract.behavior !== 'object' || Array.isArray(contract.behavior) || Object.keys(contract.behavior).length === 0) {
+        add('error', 'contract.behavior_missing', `可交互组件缺少非空 behavior 字段：${slug}`, file);
       }
-      if (!contract.accessibility) {
-        add('debt', 'contract.accessibility_missing', `可交互组件建议补齐 accessibility 字段：${slug}`, file);
+      if (!contract.accessibility || typeof contract.accessibility !== 'object' || Array.isArray(contract.accessibility) || Object.keys(contract.accessibility).length === 0) {
+        add('error', 'contract.accessibility_missing', `可交互组件缺少非空 accessibility 字段：${slug}`, file);
       }
+    }
+    if (DOM_REQUIRED_COMPONENTS.has(slug) && Object.keys(contract.domAnatomy || {}).length === 0) {
+      add('error', 'contract.dom_anatomy_required', `组合组件必须补齐 domAnatomy：${slug}`, file);
     }
 
     const serialized = JSON.stringify(contract);
     const hardcodedColors = serialized.match(/#[0-9a-fA-F]{3,8}|rgba?\([^)]+\)/g) || [];
     if (hardcodedColors.length > 0) {
-      add('debt', 'contract.raw_color', `组件契约中含硬编码颜色，建议改为 Token：${firstLines([...new Set(hardcodedColors)])}`, file);
+      add('error', 'contract.raw_color', `组件契约中含硬编码颜色，应改为 Token：${firstLines([...new Set(hardcodedColors)])}`, file);
     }
 
     checkComponentMotion(slug, contract, file);
@@ -764,6 +882,19 @@ function checkConsumptionContracts() {
   const consumption = readJson('library-consumption.json');
   const plan = readJson('uikit-plan.json');
   if (!consumption || !plan) return;
+
+  if (consumption.schemaVersion !== 3) {
+    add('error', 'consumption.schema_version', `library-consumption.json schemaVersion 必须为 3，当前为 ${consumption.schemaVersion}`, path.join(libraryRoot, 'library-consumption.json'));
+  }
+  if (consumption.componentContractSchemaVersion !== 3) {
+    add('error', 'consumption.contract_schema_version', `library-consumption.json componentContractSchemaVersion 必须为 3，当前为 ${consumption.componentContractSchemaVersion}`, path.join(libraryRoot, 'library-consumption.json'));
+  }
+  if (plan.schemaVersion !== 3) {
+    add('error', 'uikit_plan.schema_version', `uikit-plan.json schemaVersion 必须为 3，当前为 ${plan.schemaVersion}`, path.join(libraryRoot, 'uikit-plan.json'));
+  }
+  if (plan.componentContractSchemaVersion !== 3) {
+    add('error', 'uikit_plan.contract_schema_version', `uikit-plan.json componentContractSchemaVersion 必须为 3，当前为 ${plan.componentContractSchemaVersion}`, path.join(libraryRoot, 'uikit-plan.json'));
+  }
 
   const pathRefs = [];
   const collect = value => {

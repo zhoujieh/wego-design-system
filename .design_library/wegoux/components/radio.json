@@ -1,94 +1,140 @@
 {
+  "schemaVersion": 3,
   "slug": "radio",
   "name": "单选",
+  "category": "form",
+  "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "单选按钮组件，用于互斥选项选择，始终成组出现（≥2个）。外容器 24px/20px，内部两层：radio__inner 为边框圆环层（外容器内缩 2px），radio__dot 为选中时填充圆（11px/9px，CSS 实现）。同一 data-group 内只能选中一项，不可取消选择。",
-  "structure": {
-    "outer": ".radio (24px / 20px flex center container, position:relative, cursor:pointer)",
-    "ring": ".radio__inner (20px / 16.5px border circle, 1.5px border, 2px inset from outer)",
-    "dot": ".radio__dot (11px / 9px filled circle, absolute centered, hidden by default)"
+  "description": "单选控件，成组使用并在同组内保持互斥选择。",
+  "semanticTypeCandidates": [
+    "radio",
+    "single-select-control",
+    "option-radio"
+  ],
+  "variantDimensions": {
+    "size": [
+      "default",
+      "sm"
+    ],
+    "state": [
+      "unchecked",
+      "checked",
+      "disabled"
+    ],
+    "theme": [
+      "light",
+      "dark-preview"
+    ]
   },
+  "representativeVariants": [
+    {
+      "size": "default",
+      "state": "unchecked",
+      "theme": "light"
+    },
+    {
+      "size": "default",
+      "state": "checked",
+      "theme": "light"
+    },
+    {
+      "size": "sm",
+      "state": "disabled",
+      "theme": "light"
+    },
+    {
+      "size": "default",
+      "state": "checked",
+      "theme": "dark-preview"
+    }
+  ],
+  "anatomy": [
+    {
+      "name": "root",
+      "selector": ".radio",
+      "role": "单选容器"
+    },
+    {
+      "name": "inner",
+      "selector": ".radio__inner",
+      "role": "圆环层"
+    },
+    {
+      "name": "dot",
+      "selector": ".radio__dot",
+      "role": "选中圆点层"
+    }
+  ],
+  "structurePatterns": [
+    "root、inner、dot 三层结构固定，不新增额外视觉壳。",
+    "同组通过 data-group 归类，始终成组出现。"
+  ],
   "behavior": {
-    "group": "同一 data-group 内的 radio 互斥；始终成组使用（≥2个）",
-    "select": "selectRadio(el): 清除同组其他选项的 radio--checked，为自己添加 radio--checked",
-    "cannotDeselect": "点击已选中项不取消选中（radio--checked 不可通过再次点击移除）",
-    "disabled": "radio--disabled 时不响应点击"
+    "group": "同一 data-group 内互斥，点击新项时清空同组其他选中态。",
+    "cannotDeselect": "点击已选中项不取消当前选择。",
+    "disabled": "禁用态忽略点击。"
   },
-  "variants": [
-    {
-      "name": "未选中 (Unchecked)",
-      "type": "unchecked",
-      "description": "radio__inner 显示 1.5px 灰色边框 rgba(0,0,0,0.15)，透明背景；radio__dot 隐藏"
-    },
-    {
-      "name": "已选中 (Checked)",
-      "type": "checked",
-      "description": "radio__inner 边框变为品牌绿 --color-brand（无额外背景）；radio__dot 显示品牌绿实心圆点"
-    }
+  "accessibility": {
+    "role": "radio",
+    "groupRole": "外层应提供 radiogroup 语义或等价分组说明。",
+    "labelRule": "单选项必须配合可读标签文案。"
+  },
+  "usageHints": [
+    "适合互斥选项、单一方案选择和设置单选场景。",
+    "小尺寸用于高密度列表，但外层行高仍要保证可点。"
   ],
-  "sizes": [
-    {
-      "name": "默认 (Default)",
-      "slug": "default",
-      "width": "24px",
-      "height": "24px",
-      "innerSize": "20px",
-      "dotSize": "11px",
-      "borderWidth": "1.5px",
-      "innerGap": "2px"
-    },
-    {
-      "name": "小尺寸 (Small)",
-      "slug": "sm",
-      "width": "20px",
-      "height": "20px",
-      "innerSize": "16.5px",
-      "dotSize": "9px",
-      "borderWidth": "1.5px",
-      "innerGap": "1.75px (5/6 of 2px)"
-    }
+  "doNotInvent": [
+    "不要把 radio 扩成多选、评分星级或多段开关。",
+    "不要允许再次点击已选中项回退为空。"
   ],
-  "states": [
-    {
-      "name": "禁用 (Disabled)",
-      "type": "disabled",
-      "description": "禁用未选中：radio__inner 边框变 --color-border-disabled，背景变 --color-state-disabled-surface（#202F64 3%）。禁用选中：radio__inner 边框+背景同前，radio__dot 颜色与边框一致（--color-border-disabled）。暗色模式下 Token 自动切换。"
-    }
+  "tokensConsumed": [
+    "--color-border-control-default",
+    "--color-border-control-disabled-strong",
+    "--color-border-disabled",
+    "--color-brand",
+    "--color-state-disabled-surface",
+    "--duration-fast",
+    "--ease-standard"
   ],
   "designTokens": {
-    "width": "24px",
-    "height": "24px",
-    "smallWidth": "20px",
-    "smallHeight": "20px",
-    "borderRadius": "50%",
+    "sizes": {
+      "default": "24px",
+      "sm": "20px"
+    },
+    "innerSizes": {
+      "default": "20px",
+      "sm": "16.5px"
+    },
+    "dotSizes": {
+      "default": "11px",
+      "sm": "9px"
+    },
     "borderWidth": "1.5px",
-    "innerSize": "20px",
-    "smallInnerSize": "16.5px",
-    "dotSize": "11px",
-    "smallDotSize": "9px",
-    "innerGap": "2px",
-    "smallInnerGap": "1.75px",
-    "defaultBorderColor": "rgba(0,0,0,0.15)",
-    "defaultBackground": "transparent",
-    "checkedBorderColor": "var(--color-brand)",
-    "checkedBackground": "transparent",
-    "dotColor": "var(--color-brand)",
-    "disabledBorderColor": "var(--color-border-disabled)",
-    "disabledBackground": "var(--color-state-disabled-surface)",
-    "disabledDotColor": "var(--color-border-disabled)",
-    "transitionDuration": "var(--duration-fast)",
-    "transitionEasing": "var(--ease-standard)",
-    "darkDefaultBorderColor": "rgba(255,255,255,0.2)",
-    "darkDisabledBorderColor": "rgba(255,255,255,0.06)",
-    "darkDisabledBackground": "rgba(255,255,255,0.03)",
-    "darkDisabledDotColor": "rgba(255,255,255,0.12)"
+    "transition": "var(--duration-fast) / var(--ease-standard)"
   },
-  "unknowns": [],
-  "darkMode": {
-    "unchecked": "radio__inner 边框 rgba(255,255,255,0.2)，背景透明",
-    "checked": "radio__inner 边框 --color-brand，背景透明；radio__dot --color-brand",
-    "disabledUnchecked": "radio__inner 边框 rgba(255,255,255,0.06)，背景 rgba(255,255,255,0.03)",
-    "disabledChecked": "radio__inner 边框 rgba(255,255,255,0.12)，背景 rgba(255,255,255,0.03)；radio__dot rgba(255,255,255,0.12)"
-  }
+  "specRefs": [
+    "specs/交互设计原则.md",
+    "specs/布局与间距规范.md"
+  ],
+  "domAnatomy": {
+    "root": ".radio",
+    "requiredChildren": [
+      ".radio__inner",
+      ".radio__dot"
+    ],
+    "stateClasses": [
+      ".radio--checked",
+      ".radio--disabled",
+      ".radio--sm"
+    ],
+    "groupAttr": "data-group"
+  },
+  "provenance": {
+    "preview": "preview/component-radio.html",
+    "cssSource": "preview/component-radio.html",
+    "embedded": false,
+    "hostComponent": null
+  },
+  "unknowns": []
 }

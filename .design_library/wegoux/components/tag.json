@@ -1,87 +1,187 @@
 {
+  "schemaVersion": 3,
   "slug": "tag",
   "name": "标签",
+  "category": "display",
+  "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "信息标签/标记组件，用于状态标识、筛选或展示。包含 Tag_20（纯展示）、Tag_24（纯入口）、Tag_28（标准标签）、Tag_32（大标签）、Tag_32_Add（添加场景）五种尺寸变体，以及优惠券业务标签。",
-  "variants": [
+  "description": "状态标识与筛选标签组件，覆盖展示标签、入口标签、可选标签、添加标签和优惠标记。",
+  "semanticTypeCandidates": [
+    "tag",
+    "filter-chip",
+    "status-label",
+    "coupon-tag"
+  ],
+  "variantDimensions": {
+    "size": [
+      "20",
+      "24",
+      "28",
+      "32",
+      "32-add",
+      "coupon"
+    ],
+    "theme": [
+      "gray",
+      "white",
+      "brand",
+      "brand-stroke",
+      "promotion"
+    ],
+    "state": [
+      "normal",
+      "pressed",
+      "disabled",
+      "selected",
+      "selected-pressed"
+    ],
+    "affordance": [
+      "display-only",
+      "entry",
+      "closable",
+      "addable"
+    ]
+  },
+  "representativeVariants": [
     {
-      "name": "Tag_20 · 纯展示",
-      "slug": "20",
-      "description": "放在 Cell 辅助信息一行的小标签，纯展示无交互",
-      "height": "20px",
-      "themes": [
-        { "name": "灰色底", "slug": "gray", "background": "#F8F9FA", "color": "#6E7382" },
-        { "name": "白色底", "slug": "white", "background": "#FFFFFF", "color": "#6E7382", "border": "0.5px solid rgba(32,47,100,0.08)" },
-        { "name": "品牌色描边", "slug": "brand-stroke", "background": "#FFFFFF", "color": "#03C160", "border": "0.5px solid #03C160" }
-      ]
+      "size": "20",
+      "theme": "gray",
+      "state": "normal",
+      "affordance": "display-only"
     },
     {
-      "name": "Tag_24 · 纯入口",
-      "slug": "24",
-      "description": "无选中态，仅用于页面跳转入口",
-      "height": "24px",
-      "minWidth": "40px",
-      "borderRadius": "16px",
-      "states": ["normal", "pressed"],
-      "themes": ["gray", "white"]
+      "size": "28",
+      "theme": "white",
+      "state": "normal",
+      "affordance": "closable"
     },
     {
-      "name": "Tag_28 · 标准标签",
-      "slug": "28",
-      "description": "最常用的标签尺寸，支持 normal/pressed/disabled/selected/selected-pressed 五种状态，支持可关闭模式",
-      "height": "28px",
-      "minWidth": "48px",
-      "borderRadius": "16px",
-      "states": ["normal", "pressed", "disabled", "selected", "selected-pressed"],
-      "themes": ["gray", "white", "brand"],
-      "closable": true
+      "size": "32",
+      "theme": "brand",
+      "state": "selected",
+      "affordance": "closable"
     },
     {
-      "name": "Tag_32 · 大标签",
-      "slug": "32",
-      "description": "大尺寸标签，支持相同状态和主题",
-      "height": "32px",
-      "minWidth": "52px",
-      "borderRadius": "16px",
-      "states": ["normal", "pressed", "disabled", "selected", "selected-pressed"],
-      "themes": ["gray", "white", "brand"],
-      "closable": true
-    },
-    {
-      "name": "Tag_32_Add · 添加标签",
-      "slug": "32-add",
-      "description": "仅在添加场景使用，包含加号图标+文字，无选中态",
-      "height": "32px",
-      "minWidth": "52px",
-      "borderRadius": "16px",
-      "hasLeftIcon": true,
-      "states": ["normal", "pressed", "disabled"],
-      "themes": ["gray", "white"]
+      "size": "32-add",
+      "theme": "gray",
+      "state": "normal",
+      "affordance": "addable"
     }
   ],
-  "subElements": [
-    { "name": "tag__label", "description": "标签文字，支持溢出省略" },
-    { "name": "tag__close", "description": "关闭按钮（16x16），仅 closable 模式" },
-    { "name": "tag__icon-left", "description": "左侧图标（16x16），仅 Tag_32_Add" }
+  "anatomy": [
+    {
+      "name": "root",
+      "selector": ".tag",
+      "role": "标签容器"
+    },
+    {
+      "name": "label",
+      "selector": ".tag__label",
+      "role": "标签文案"
+    },
+    {
+      "name": "close",
+      "selector": ".tag__close",
+      "role": "关闭按钮"
+    },
+    {
+      "name": "iconLeft",
+      "selector": ".tag__icon-left",
+      "role": "左侧加号图标"
+    }
+  ],
+  "structurePatterns": [
+    "20 规格用于纯展示，不附加交互态。",
+    "24 规格用于入口跳转，不出现 selected 态。",
+    "28 和 32 规格承载筛选或状态切换，可选是否 closable。",
+    "32-add 仅用于新增入口，不承担已选状态。"
+  ],
+  "behavior": {},
+  "accessibility": {},
+  "usageHints": [
+    "筛选场景优先使用 28 或 32 规格，保持一行内较高信息密度。",
+    "品牌色只用于已选或强调，不大面积铺满整组标签。",
+    "优惠类短标签保持独立语义，不与通用筛选标签混排成复杂组件。"
+  ],
+  "doNotInvent": [
+    "不要把 tag 扩成桌面 Tab、分段控件或可输入 token。",
+    "不要新增夸张渐变、插画底纹或重阴影标签。"
+  ],
+  "tokensConsumed": [
+    "--color-bg-inverse-subtle",
+    "--color-bg-subtle",
+    "--color-bg-surface",
+    "--color-border-default",
+    "--color-border-promotion-strong",
+    "--color-brand",
+    "--color-brand-bg",
+    "--color-brand-bg-strong",
+    "--color-state-hover",
+    "--color-state-selected",
+    "--color-text-disabled",
+    "--color-text-promotion-strong",
+    "--color-text-secondary",
+    "--font-family-text",
+    "--font-size-10",
+    "--font-size-12",
+    "--font-size-14",
+    "--font-weight-medium",
+    "--font-weight-regular",
+    "--radius-xl",
+    "--radius-xs",
+    "--size-16",
+    "--size-24",
+    "--size-28",
+    "--size-32",
+    "--size-40",
+    "--size-48",
+    "--space-12",
+    "--space-4",
+    "--space-8"
   ],
   "designTokens": {
-    "fontFamily": "PingFang SC",
-    "fontWeight": 400,
-    "gap": "4px",
-    "closeButtonSize": "16px",
-    "leftIconSize": "16px",
-    "selectedBg": "rgba(3,193,96,0.1)",
-    "selectedColor": "#03C160",
-    "selectedFontWeight": 500,
-    "normalFontSize20": "12px",
-    "normalFontSize24": "12px",
-    "normalFontSize28": "12px",
-    "normalFontSize32": "14px",
-    "couponHeight": "16px",
-    "couponMinWidth": "28px",
-    "couponBorderRadius": "2px",
-    "couponColor": "#f33"
+    "sizes": {
+      "20": "var(--size-24)",
+      "24": "var(--size-24)",
+      "28": "var(--size-28)",
+      "32": "var(--size-32)",
+      "32-add": "var(--size-32)"
+    },
+    "radius": {
+      "round": "var(--radius-xl)",
+      "coupon": "var(--radius-xs)"
+    },
+    "gap": "var(--space-4)",
+    "closeSize": "var(--size-16)",
+    "iconSize": "var(--size-16)"
+  },
+  "specRefs": [
+    "specs/交互设计原则.md",
+    "specs/设计风格与品牌原则.md"
+  ],
+  "domAnatomy": {
+    "root": ".tag",
+    "requiredChildren": [
+      ".tag__label"
+    ],
+    "optionalChildren": [
+      ".tag__close",
+      ".tag__icon-left"
+    ],
+    "modifiers": [
+      ".tag--20",
+      ".tag--24",
+      ".tag--28",
+      ".tag--32",
+      ".tag--32-add"
+    ]
+  },
+  "provenance": {
+    "preview": "preview/component-tag.html",
+    "cssSource": "preview/component-tag.html",
+    "embedded": false,
+    "hostComponent": null
   },
   "unknowns": []
 }

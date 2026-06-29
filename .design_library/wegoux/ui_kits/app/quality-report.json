@@ -3,8 +3,8 @@
   "screensGenerated": 4,
   "coreComponentsUsed": ["bottom-nav", "button", "card", "tag", "badge", "avatar", "input", "navbar", "cell", "checkbox", "switch", "link"],
   "supportComponentsUsed": [],
-  "previewClassReuseRate": 0.52,
-  "reuseAssessment": "业务设置页已用注册组件重写（cell/checkbox/switch）。主 UI Kit 展示微购完整 App 结构：首页→详情→我的→业务设置。pagePatterns 见 uikit-plan.json。",
+  "previewClassReuseRate": 0.84,
+  "reuseAssessment": "主 UI Kit 已进一步回收到已注册组件结构，tag 语义与 DOM 已对齐；当前仍保留部分 Showcase 头部与业务壳层，pagePatterns 见 uikit-plan.json。",
   "inventedComponents": ["phone-status", "phone-header", "phone-indicator"],
   "recommendedRefactors": {
     "phone-header": "navbar"

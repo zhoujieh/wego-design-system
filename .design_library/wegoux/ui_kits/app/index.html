@@ -387,12 +387,12 @@ function HomeScreen({ onProductClick }) {
     <div className="section-gap">
       {/* Category Chips */}
       <div className="chip-row">
-        <span data-component="tag" className="chip chip--md chip--brand chip--filled uikit-nowrap">全部</span>
-        <span data-component="tag" className="chip chip--md chip--default chip--filled uikit-nowrap">数码</span>
-        <span data-component="tag" className="chip chip--md chip--info chip--outlined uikit-nowrap">服饰</span>
-        <span data-component="tag" className="chip chip--md chip--success chip--filled uikit-nowrap">美妆</span>
-        <span data-component="tag" className="chip chip--md chip--warning chip--filled uikit-nowrap">食品</span>
-        <span data-component="chip" className="chip chip--md chip--default chip--outlined uikit-nowrap">家居</span>
+        <div data-component="tag" className="tag tag--32 tag--brand tag--selected uikit-nowrap"><span className="tag__label">全部</span></div>
+        <div data-component="tag" className="tag tag--32 tag--gray tag--normal uikit-nowrap"><span className="tag__label">数码</span></div>
+        <div data-component="tag" className="tag tag--32 tag--white tag--normal uikit-nowrap"><span className="tag__label">服饰</span></div>
+        <div data-component="tag" className="tag tag--32 tag--gray tag--normal uikit-nowrap"><span className="tag__label">美妆</span></div>
+        <div data-component="tag" className="tag tag--32 tag--white tag--normal uikit-nowrap"><span className="tag__label">食品</span></div>
+        <div data-component="tag" className="tag tag--32 tag--white tag--normal uikit-nowrap"><span className="tag__label">家居</span></div>
       </div>
 
       {/* Product Cards */}
@@ -408,7 +408,7 @@ function HomeScreen({ onProductClick }) {
               <div className="card__header">Apple AirPods Pro</div>
               <div className="card__body">第二代 主动降噪 无线蓝牙耳机</div>
             </div>
-            <span data-component="chip" className="chip chip--sm chip--brand chip--filled uikit-nowrap">新品</span>
+            <div data-component="tag" className="tag tag--20 tag--brand-stroke uikit-nowrap"><span className="tag__label">新品</span></div>
           </div>
           <div className="card__footer">
             <span className="card__price">¥1,899</span>
@@ -425,7 +425,7 @@ function HomeScreen({ onProductClick }) {
               <div className="card__header">小米14 Ultra</div>
               <div className="card__body">徕卡光学 骁龙8Gen3 澎湃OS</div>
             </div>
-            <span data-component="chip" className="chip chip--sm chip--danger chip--filled uikit-nowrap">热销</span>
+            <div data-component="tag" className="tag tag--20 tag--white uikit-nowrap"><span className="tag__label">热销</span></div>
           </div>
           <div className="card__footer">
             <span className="card__price">¥5,999</span>
@@ -442,7 +442,7 @@ function HomeScreen({ onProductClick }) {
               <div className="card__header">戴森V12吸尘器</div>
               <div className="card__body">轻量无线 激光探测 整机HEPA过滤</div>
             </div>
-            <span data-component="chip" className="chip chip--sm chip--success chip--filled uikit-nowrap">推荐</span>
+            <div data-component="tag" className="tag tag--20 tag--gray uikit-nowrap"><span className="tag__label">推荐</span></div>
           </div>
           <div className="card__footer">
             <span className="card__price">¥3,499</span>
@@ -485,9 +485,9 @@ function DetailScreen() {
             </div>
           </div>
           <div style={{display:'flex',gap:'var(--space-8)',marginTop:'var(--space-8)',flexWrap:'wrap'}}>
-            <span data-component="chip" className="chip chip--sm chip--brand chip--filled uikit-nowrap">新品</span>
-            <span data-component="chip" className="chip chip--sm chip--default chip--filled uikit-nowrap">官方正品</span>
-            <span data-component="chip" className="chip chip--sm chip--success chip--filled uikit-nowrap">2年保修</span>
+            <div data-component="tag" className="tag tag--20 tag--brand-stroke uikit-nowrap"><span className="tag__label">新品</span></div>
+            <div data-component="tag" className="tag tag--20 tag--white uikit-nowrap"><span className="tag__label">官方正品</span></div>
+            <div data-component="tag" className="tag tag--20 tag--gray uikit-nowrap"><span className="tag__label">2年保修</span></div>
           </div>
           <div className="card__footer" style={{marginTop:'var(--space-8)'}}>
             <span className="card__price">¥1,899.00</span>
@@ -501,8 +501,8 @@ function DetailScreen() {
           <span className="color-select-label">颜色选择</span>
         </div>
         <div style={{display:'flex',gap:'var(--space-8)'}}>
-          <span data-component="chip" className="chip chip--md chip--brand chip--filled uikit-nowrap">白色</span>
-          <span data-component="chip" className="chip chip--md chip--default chip--outlined uikit-nowrap">黑色</span>
+          <div data-component="tag" className="tag tag--32 tag--brand tag--selected uikit-nowrap"><span className="tag__label">白色</span></div>
+          <div data-component="tag" className="tag tag--32 tag--white tag--normal uikit-nowrap"><span className="tag__label">黑色</span></div>
         </div>
       </div>
 
@@ -549,7 +549,7 @@ function ProfileScreen({ onBizSettings }) {
           <div style={{minWidth:0,flex:1}}>
             <div className="uikit-truncate" style={{fontSize:'var(--font-size-18)',fontWeight:'var(--font-weight-semibold)',color:'var(--color-text-primary)'}}>张小明</div>
             <div style={{display:'flex',alignItems:'center',gap:'var(--space-4)',marginTop:'var(--space-4)'}}>
-              <span data-component="chip" className="chip chip--sm chip--warning chip--filled uikit-nowrap">金牌会员</span>
+              <div data-component="tag" className="tag tag--20 tag--brand-stroke uikit-nowrap"><span className="tag__label">金牌会员</span></div>
             </div>
           </div>
           <i data-lucide="chevron-right" style={{width:20,height:20,color:'var(--color-text-tertiary)',flexShrink:0}}></i>
@@ -639,7 +639,7 @@ function BizSettingsScreen({ onBack }) {
         <div style={{display:'flex',alignItems:'center',gap:'var(--space-4)',flex:1,minWidth:0}}>
           <div className="avatar avatar--24 avatar--initials">车</div>
           <span style={{fontSize:'var(--font-size-16)',fontWeight:'var(--font-weight-medium)',color:'var(--color-text-primary)'}}>车车</span>
-          <span className="chip chip--sm chip--success chip--filled">管理员</span>
+          <div data-component="tag" className="tag tag--20 tag--brand-stroke uikit-nowrap"><span className="tag__label">管理员</span></div>
         </div>
         <a className="link link--inline" style={{fontSize:'var(--font-size-14)',flexShrink:0}}>切换岗位</a>
       </div>

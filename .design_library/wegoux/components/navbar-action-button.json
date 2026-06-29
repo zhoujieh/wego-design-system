@@ -1,68 +1,149 @@
 {
+  "schemaVersion": 3,
   "slug": "navbar-action-button",
   "name": "导航栏操作按钮",
+  "category": "navigation",
+  "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "导航栏右侧操作区按钮组件，配合 NavBar 的 actionComponent1/2/3 使用。支持纯文字、图标、图标+文字、按钮样式和完全自定义五种类型。一个 NavBar 最多可放置 3 个。",
-  "variants": [
+  "description": "导航栏右侧操作子组件，作为 navbar 内嵌 action 单元使用。",
+  "semanticTypeCandidates": [
+    "navbar-action",
+    "header-action",
+    "topbar-action"
+  ],
+  "variantDimensions": {
+    "actionType": [
+      "text",
+      "icon",
+      "icon-text",
+      "button",
+      "picture"
+    ],
+    "emphasis": [
+      "neutral",
+      "brand-button"
+    ],
+    "state": [
+      "default",
+      "active",
+      "disabled"
+    ]
+  },
+  "representativeVariants": [
     {
-      "name": "纯文字按钮 (TEXT)",
-      "actionType": "TEXT",
-      "text": "操作区",
-      "fontSize": "16px",
-      "maxChars": 4
+      "actionType": "text",
+      "emphasis": "neutral",
+      "state": "default"
     },
     {
-      "name": "图标按钮 (ICON)",
-      "actionType": "ICON",
-      "iconSize": "24px",
-      "iconHorizontalPadding": "8px"
+      "actionType": "icon",
+      "emphasis": "neutral",
+      "state": "default"
     },
     {
-      "name": "图标+文字 (ICON_TEXT)",
-      "actionType": "ICON_TEXT",
-      "iconSize": "20px",
-      "textSize": "10px",
-      "iconHorizontalPadding": "4px",
-      "layout": "vertical"
+      "actionType": "icon-text",
+      "emphasis": "neutral",
+      "state": "default"
     },
     {
-      "name": "按钮样式 (BUTTON)",
-      "actionType": "BUTTON",
-      "text": "确认收货",
-      "buttonHeight": "32px",
-      "buttonRadius": "6px",
-      "buttonBg": "#03C160",
-      "textSize": "14px",
-      "textColor": "#FFFFFF",
-      "minWidth": "32px",
-      "maxWidth": "120px"
-    },
-    {
-      "name": "图片按钮 (PICTURE)",
-      "actionType": "PICTURE",
-      "iconSize": "24px",
-      "rendersVia": "WGImage"
+      "actionType": "button",
+      "emphasis": "brand-button",
+      "state": "active"
     }
   ],
+  "anatomy": [
+    {
+      "name": "root",
+      "selector": ".navbar__action",
+      "role": "操作项容器"
+    },
+    {
+      "name": "icon",
+      "selector": ".navbar__action-icon",
+      "role": "图标层"
+    },
+    {
+      "name": "label",
+      "selector": ".navbar__action-label",
+      "role": "操作文案"
+    },
+    {
+      "name": "button",
+      "selector": ".navbar__action-btn",
+      "role": "按钮式操作"
+    }
+  ],
+  "structurePatterns": [
+    "该组件只存在于 navbar 右侧区域，不独立作为页面主体按钮。",
+    "text、icon、icon-text、button 共用统一根容器宽高节奏。",
+    "picture 类型仍遵循同一 action 占位尺寸。"
+  ],
+  "behavior": {
+    "press": "普通项按压使用透明度反馈，button 类型按压切换按钮背景。",
+    "count": "单个 navbar 最多放置三个 action 单元。",
+    "truncation": "文字项保持短文案，超长文本不在导航栏中展开。"
+  },
+  "accessibility": {
+    "role": "button",
+    "iconName": "图标型 action 必须提供可感知名称。",
+    "touchTarget": "默认 action 宽高遵循 44px 导航触控区。"
+  },
+  "usageHints": [
+    "适合分享、更多、保存、完成等顶部轻操作。",
+    "button 类型只在导航栏确实需要明确确认动作时使用。"
+  ],
+  "doNotInvent": [
+    "不要把 navbar-action-button 当独立页面按钮或卡片操作条复用。",
+    "不要在导航栏内塞入长文案、双行按钮或复杂状态胶囊。"
+  ],
+  "tokensConsumed": [
+    "--color-brand",
+    "--color-brand-disabled",
+    "--color-text-inverse",
+    "--color-text-primary",
+    "--font-family-text",
+    "--font-size-10",
+    "--font-size-14",
+    "--font-size-16",
+    "--font-weight-medium",
+    "--radius-sm"
+  ],
   "designTokens": {
-    "defaultIconSize": "24px",
-    "defaultIconTextIconSize": "20px",
-    "defaultTextFontSize": "16px",
-    "defaultIconTextFontSize": "10px",
-    "defaultHorizontalPadding": "8px",
-    "iconTextHorizontalPadding": "4px",
-    "buttonMinHeight": "32px",
-    "buttonMaxHeight": "32px",
-    "buttonMinWidth": "32px",
-    "buttonMaxWidth": "120px",
-    "buttonRadius": "6px",
-    "buttonBgColor": "#03C160",
-    "buttonTextColor": "#FFFFFF",
-    "buttonTextSize": "14px",
-    "maxTextChars": 4,
-    "activeOpacity": 0.6,
-    "actionItemWidth": "44px"
+    "actionWidth": "44px",
+    "iconSize": {
+      "default": "24px",
+      "compact": "20px"
+    },
+    "labelFont": {
+      "text": "var(--font-size-16)",
+      "iconText": "var(--font-size-10)",
+      "button": "var(--font-size-14)"
+    },
+    "buttonHeight": "32px",
+    "buttonRadius": "var(--radius-sm)"
+  },
+  "specRefs": [
+    "specs/交互设计原则.md",
+    "specs/布局与间距规范.md"
+  ],
+  "domAnatomy": {
+    "root": ".navbar__action",
+    "optionalChildren": [
+      ".navbar__action-icon",
+      ".navbar__action-label",
+      ".navbar__action-btn"
+    ],
+    "modifierClasses": [
+      ".navbar__action--text",
+      ".navbar__action--button"
+    ]
+  },
+  "provenance": {
+    "preview": "preview/component-navbar.html",
+    "cssSource": "preview/component-navbar.html#navbar-action-section",
+    "embedded": true,
+    "hostComponent": "navbar"
   },
   "unknowns": []
 }

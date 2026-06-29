@@ -1,69 +1,115 @@
 {
+  "schemaVersion": 3,
   "slug": "link",
   "name": "链接",
+  "category": "action",
+  "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "链接组件，用于文字跳转操作。支持 standalone（20px 高）/ inline（自适应高度）两种模式，链接色 #285B9A，14px Medium 字体，active 态灰色背景按压，disabled 态 20% 透明度。",
-  "variants": [
+  "description": "文字跳转操作组件，支持独立链接和正文内联链接。",
+  "semanticTypeCandidates": [
+    "text-link",
+    "inline-action",
+    "secondary-action"
+  ],
+  "variantDimensions": {
+    "mode": [
+      "standalone",
+      "inline"
+    ],
+    "state": [
+      "default",
+      "active",
+      "disabled"
+    ]
+  },
+  "representativeVariants": [
     {
-      "name": "独立链接 (Standalone)",
-      "type": "standalone",
-      "className": "link",
-      "description": "独立的链接块，高度 20px，左右有 4px 水平内边距作为点击热区，块级 flex 布局",
-      "tokens": {
-        "height": "20px",
-        "display": "inline-flex",
-        "paddingHorizontal": "4px",
-        "gap": "4px"
-      }
+      "mode": "standalone",
+      "state": "default"
     },
     {
-      "name": "内联链接 (Inline)",
-      "type": "inline",
-      "className": "link--inline",
-      "description": "内联在文本中的链接，高度自适应（auto），无内边距，随文字流排列",
-      "tokens": {
-        "height": "auto",
-        "padding": "0"
-      }
+      "mode": "standalone",
+      "state": "disabled"
+    },
+    {
+      "mode": "inline",
+      "state": "default"
+    },
+    {
+      "mode": "inline",
+      "state": "active"
     }
   ],
-  "states": [
+  "anatomy": [
     {
-      "name": "默认 (Default)",
-      "type": "default",
-      "description": "蓝色文字 #285B9A，正常可点击状态"
+      "name": "root",
+      "selector": ".link",
+      "role": "链接容器"
     },
     {
-      "name": "按压 (Active)",
-      "type": "active",
-      "description": "背景变为灰色（--color-neutral-alpha-06），文字颜色保持不变"
-    },
-    {
-      "name": "禁用 (Disabled)",
-      "type": "disabled",
-      "className": "link--disabled",
-      "description": "整体透明度 20%，pointer-events none，cursor not-allowed，active 态背景不受影响"
+      "name": "label",
+      "selector": "text node",
+      "role": "链接文案"
     }
+  ],
+  "structurePatterns": [
+    "standalone 保留最小水平内边距作为热区。",
+    "inline 直接跟随文字流，不额外插入块级壳。"
+  ],
+  "behavior": {
+    "active": "按压态用轻背景反馈，不改变链接语义颜色。",
+    "disabled": "禁用态禁止点击并整体弱化透明度。",
+    "inline": "内联模式不打断正文行高节奏。"
+  },
+  "accessibility": {
+    "role": "link 或 button",
+    "focusName": "链接文案应可独立感知，不依赖上下文猜测。",
+    "disabledState": "禁用态需要同时阻止交互而非只降低透明度。"
+  },
+  "usageHints": [
+    "适合辅助跳转、查看详情、协议入口等轻操作。",
+    "页面主操作仍优先使用 button，不用 link 代替强动作。"
+  ],
+  "doNotInvent": [
+    "不要把 link 扩成胶囊按钮、菜单项或桌面超链接列表。",
+    "不要给 link 新增多彩下划线或营销态动画。"
+  ],
+  "tokensConsumed": [
+    "--color-neutral-alpha-06",
+    "--color-text-link",
+    "--duration-fast",
+    "--ease-standard",
+    "--font-lineheight-14",
+    "--font-size-14",
+    "--font-weight-medium",
+    "--space-4"
   ],
   "designTokens": {
-    "color": "#285B9A",
-    "fontSize": "14px",
-    "fontWeight": 500,
-    "fontFamily": "PingFang SC",
-    "lineHeight": "14px",
     "standaloneHeight": "20px",
-    "standalonePaddingHorizontal": "4px",
-    "gap": "4px",
-    "activeBackground": "var(--color-neutral-alpha-06)",
-    "disabledOpacity": 0.2,
-    "borderRadius": "0",
-    "cursor": "pointer",
-    "textDecoration": "none",
-    "userSelect": "none",
-    "tapHighlightColor": "transparent",
-    "transitionDuration": "var(--duration-fast)",
-    "transitionEasing": "var(--ease-standard)"
+    "paddingHorizontal": "var(--space-4)",
+    "font": "var(--font-size-14) / var(--font-weight-medium)",
+    "transition": "background var(--duration-fast) var(--ease-standard)"
+  },
+  "specRefs": [
+    "specs/交互设计原则.md",
+    "specs/文案与数据规范.md"
+  ],
+  "domAnatomy": {
+    "root": ".link",
+    "modifiers": [
+      ".link--inline",
+      ".link--disabled"
+    ],
+    "optionalChildren": [
+      "text"
+    ]
+  },
+  "provenance": {
+    "preview": "preview/component-link.html",
+    "cssSource": "preview/component-link.html",
+    "embedded": false,
+    "hostComponent": null
   },
   "unknowns": []
 }

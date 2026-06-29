@@ -1,47 +1,131 @@
 {
+  "schemaVersion": 3,
   "slug": "bottom-nav",
   "name": "底部导航",
+  "category": "navigation",
+  "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "移动端底部导航栏组件，用于应用主 Tab 切换。支持5个Tab（动态/工作台/好友/消息/我的），56px高度，品牌绿选中态，支持数字角标和红点提醒，底部适配 safe-area-inset-bottom。",
-  "variants": [
+  "description": "移动端应用主 Tab 导航，默认承载五个一层入口并兼容角标提醒。",
+  "semanticTypeCandidates": [
+    "tab-bar",
+    "bottom-navigation",
+    "app-navigation"
+  ],
+  "variantDimensions": {
+    "state": [
+      "default",
+      "active"
+    ],
+    "badge": [
+      "none",
+      "dot",
+      "number",
+      "number-multi"
+    ],
+    "layout": [
+      "five-tab"
+    ]
+  },
+  "representativeVariants": [
     {
-      "name": "默认态",
-      "type": "default",
-      "description": "Tab 未选中状态，图标和文字均为中性灰色（--wg-color-base-neutral-900）"
+      "state": "default",
+      "badge": "none",
+      "layout": "five-tab"
     },
     {
-      "name": "选中态 (Active)",
-      "type": "active",
-      "description": "当前 Tab 选中，图标和文字变为品牌绿色（--wg-color-base-brand-500）",
-      "tokens": {
-        "color": "var(--wg-color-base-brand-500)"
-      }
+      "state": "active",
+      "badge": "none",
+      "layout": "five-tab"
+    },
+    {
+      "state": "default",
+      "badge": "number",
+      "layout": "five-tab"
     }
   ],
-  "slots": [
-    { "name": "bottom-nav__item", "description": "单个 Tab 项容器，flex 列布局，图标在上文字在下" },
-    { "name": "bottom-nav__icon", "description": "图标区域，32x32px，可嵌入 SVG/IMG，支持角标嵌套" },
-    { "name": "bottom-nav__label", "description": "文字标签，10px Regular，PingFang SC" }
+  "anatomy": [
+    {
+      "name": "root",
+      "selector": ".bottom-nav",
+      "role": "底部导航容器"
+    },
+    {
+      "name": "item",
+      "selector": ".bottom-nav__item",
+      "role": "单个导航项"
+    },
+    {
+      "name": "icon",
+      "selector": ".bottom-nav__icon",
+      "role": "图标与角标承载区"
+    },
+    {
+      "name": "label",
+      "selector": ".bottom-nav__label",
+      "role": "导航文案"
+    }
   ],
-  "modifiers": [
-    { "name": "数字角标", "slug": "badge-number", "description": "在 bottom-nav__icon 内嵌套 badge--corner badge--number" },
-    { "name": "红点角标", "slug": "badge-dot", "description": "在 bottom-nav__icon 内嵌套 badge--corner badge--dot" },
-    { "name": "多数字角标", "slug": "badge-number-multi", "description": "数字 99+ 时使用 badge--number-multi" }
+  "structurePatterns": [
+    "默认固定五项布局，图标在上、文字在下。",
+    "角标嵌套在 icon 区，不额外发明导航项结构。",
+    "safe-area 底部补偿由组件自身承担。"
+  ],
+  "behavior": {
+    "selection": "同一时刻只允许一个激活项。",
+    "badge": "角标只作为状态附着，不改变导航项主布局。",
+    "pageMode": "主导航切换场景使用，不承载二级筛选或工具操作。"
+  },
+  "accessibility": {
+    "role": "tablist 或 navigation",
+    "activeState": "激活项需要可感知的选中状态标识。",
+    "labelRule": "图标必须配套中文文案，不使用仅图标导航。"
+  },
+  "usageHints": [
+    "用于 App 级主框架，不用于弹层、表单或单页局部切换。",
+    "优先保持四到五个一层入口，避免塞入过多业务动作。"
+  ],
+  "doNotInvent": [
+    "不要把 bottom-nav 扩成营销浮动工具条、桌面侧边栏或多行导航。",
+    "不要引入 Lucide 或外部图标体系替代库内资产。"
+  ],
+  "tokensConsumed": [
+    "--color-bg-surface",
+    "--color-border-default",
+    "--color-brand",
+    "--color-text-primary",
+    "--font-family-text",
+    "--font-size-10",
+    "--font-weight-regular",
+    "--size-32",
+    "--size-56",
+    "--space-16"
   ],
   "designTokens": {
-    "height": "56px",
-    "iconSize": "32px",
-    "labelFontSize": "10px",
-    "labelFontWeight": 400,
-    "fontFamily": "PingFang SC",
-    "paddingHorizontal": "16px",
-    "safeAreaBottom": "env(safe-area-inset-bottom, 0px)",
-    "borderTop": "0.5px solid var(--wg-color-base-neutral-alpha-08)",
-    "activeColor": "var(--wg-color-base-brand-500)",
-    "defaultColor": "var(--wg-color-base-neutral-900)",
-    "tabCount": 5,
-    "tabs": ["动态", "工作台", "好友", "消息", "我的"]
+    "height": "var(--size-56)",
+    "iconSize": "var(--size-32)",
+    "labelFont": "var(--font-size-10) / var(--font-weight-regular)",
+    "paddingHorizontal": "var(--space-16)",
+    "safeAreaBottom": "env(safe-area-inset-bottom, 0px)"
+  },
+  "specRefs": [
+    "specs/交互设计原则.md",
+    "specs/布局与间距规范.md"
+  ],
+  "domAnatomy": {
+    "root": ".bottom-nav",
+    "repeatingChild": ".bottom-nav__item",
+    "itemChildren": [
+      ".bottom-nav__icon",
+      ".bottom-nav__label"
+    ],
+    "optionalNestedComponent": "badge"
+  },
+  "provenance": {
+    "preview": "preview/component-bottom-nav.html",
+    "cssSource": "preview/component-bottom-nav.html",
+    "embedded": false,
+    "hostComponent": null
   },
   "unknowns": []
 }

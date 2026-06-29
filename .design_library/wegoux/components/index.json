@@ -1,28 +1,147 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "library": "wegoux",
   "uiKits": [
-    { "slug": "app", "entry": "ui_kits/app/index.html", "qualityReport": "ui_kits/app/quality-report.json" },
-    { "slug": "biz-settings", "entry": "ui_kits/biz-settings/index.html", "qualityReport": "ui_kits/biz-settings/quality-report.json" }
+    {
+      "slug": "app",
+      "entry": "ui_kits/app/index.html",
+      "qualityReport": "ui_kits/app/quality-report.json"
+    },
+    {
+      "slug": "biz-settings",
+      "entry": "ui_kits/biz-settings/index.html",
+      "qualityReport": "ui_kits/biz-settings/quality-report.json"
+    }
   ],
   "components": [
-    { "slug": "button", "name": "按钮", "category": "action", "status": "stable", "preview": "preview/component-button.html" },
-    { "slug": "card", "name": "卡片", "category": "display", "status": "stable", "preview": "preview/component-card.html" },
-    { "slug": "avatar", "name": "头像", "category": "display", "status": "stable", "preview": "preview/component-avatar.html" },
-    { "slug": "tag", "name": "标签", "category": "display", "status": "stable", "preview": "preview/component-tag.html" },
-    { "slug": "bottom-nav", "name": "底部导航", "category": "navigation", "status": "stable", "preview": "preview/component-bottom-nav.html" },
-    { "slug": "input", "name": "输入框", "category": "form", "status": "stable", "preview": "preview/component-input.html" },
-    { "slug": "counter", "name": "计数器", "category": "form", "status": "stable", "preview": "preview/component-counter.html" },
-    { "slug": "badge", "name": "角标", "category": "display", "status": "stable", "preview": "preview/component-badge.html" },
-    { "slug": "cell", "name": "列表单元格", "category": "display", "status": "stable", "preview": "preview/component-cell.html" },
-    { "slug": "checkbox", "name": "复选框", "category": "form", "status": "stable", "preview": "preview/component-checkbox.html" },
-    { "slug": "form", "name": "表单容器", "category": "form", "status": "stable", "preview": "preview/component-form.html" },
-    { "slug": "image", "name": "图片", "category": "display", "status": "stable", "preview": "preview/component-image.html" },
-    { "slug": "link", "name": "链接", "category": "action", "status": "stable", "preview": "preview/component-link.html" },
-    { "slug": "radio", "name": "单选", "category": "form", "status": "stable", "preview": "preview/component-radio.html" },
-    { "slug": "stack", "name": "选项卡", "category": "navigation", "status": "stable", "preview": "preview/component-stack.html" },
-    { "slug": "switch", "name": "开关", "category": "form", "status": "stable", "preview": "preview/component-switch.html" },
-    { "slug": "navbar", "name": "导航栏", "category": "navigation", "status": "stable", "preview": "preview/component-navbar.html" },
-    { "slug": "navbar-action-button", "name": "导航栏操作按钮", "category": "navigation", "status": "stable", "embedded": true, "hostComponent": "navbar", "preview": "preview/component-navbar.html" }
-  ]
+    {
+      "slug": "button",
+      "name": "按钮",
+      "category": "action",
+      "status": "stable",
+      "preview": "preview/component-button.html"
+    },
+    {
+      "slug": "card",
+      "name": "卡片",
+      "category": "display",
+      "status": "stable",
+      "preview": "preview/component-card.html"
+    },
+    {
+      "slug": "avatar",
+      "name": "头像",
+      "category": "display",
+      "status": "stable",
+      "preview": "preview/component-avatar.html"
+    },
+    {
+      "slug": "tag",
+      "name": "标签",
+      "category": "display",
+      "status": "stable",
+      "preview": "preview/component-tag.html"
+    },
+    {
+      "slug": "bottom-nav",
+      "name": "底部导航",
+      "category": "navigation",
+      "status": "stable",
+      "preview": "preview/component-bottom-nav.html"
+    },
+    {
+      "slug": "input",
+      "name": "输入框",
+      "category": "form",
+      "status": "stable",
+      "preview": "preview/component-input.html"
+    },
+    {
+      "slug": "counter",
+      "name": "计数器",
+      "category": "form",
+      "status": "stable",
+      "preview": "preview/component-counter.html"
+    },
+    {
+      "slug": "badge",
+      "name": "角标",
+      "category": "display",
+      "status": "stable",
+      "preview": "preview/component-badge.html"
+    },
+    {
+      "slug": "cell",
+      "name": "列表单元格",
+      "category": "display",
+      "status": "stable",
+      "preview": "preview/component-cell.html"
+    },
+    {
+      "slug": "checkbox",
+      "name": "复选框",
+      "category": "form",
+      "status": "stable",
+      "preview": "preview/component-checkbox.html"
+    },
+    {
+      "slug": "form",
+      "name": "表单容器",
+      "category": "form",
+      "status": "stable",
+      "preview": "preview/component-form.html"
+    },
+    {
+      "slug": "image",
+      "name": "图片",
+      "category": "display",
+      "status": "stable",
+      "preview": "preview/component-image.html"
+    },
+    {
+      "slug": "link",
+      "name": "链接",
+      "category": "action",
+      "status": "stable",
+      "preview": "preview/component-link.html"
+    },
+    {
+      "slug": "radio",
+      "name": "单选",
+      "category": "form",
+      "status": "stable",
+      "preview": "preview/component-radio.html"
+    },
+    {
+      "slug": "stack",
+      "name": "选项卡",
+      "category": "navigation",
+      "status": "stable",
+      "preview": "preview/component-stack.html"
+    },
+    {
+      "slug": "switch",
+      "name": "开关",
+      "category": "form",
+      "status": "stable",
+      "preview": "preview/component-switch.html"
+    },
+    {
+      "slug": "navbar",
+      "name": "导航栏",
+      "category": "navigation",
+      "status": "stable",
+      "preview": "preview/component-navbar.html"
+    },
+    {
+      "slug": "navbar-action-button",
+      "name": "导航栏操作按钮",
+      "category": "navigation",
+      "status": "stable",
+      "embedded": true,
+      "hostComponent": "navbar",
+      "preview": "preview/component-navbar.html"
+    }
+  ],
+  "componentContractSchemaVersion": 3
 }

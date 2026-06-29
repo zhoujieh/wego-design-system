@@ -1,33 +1,114 @@
 {
+  "schemaVersion": 3,
   "slug": "avatar",
   "name": "头像",
+  "category": "display",
+  "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "用户头像展示组件，支持图片头像和文字首字母头像两种类型。提供 24px / 40px / 56px 三种尺寸，均为圆形。",
-  "variants": [
+  "description": "用户头像展示组件，支持图片头像和文字头像，尺寸覆盖列表到个人页场景。",
+  "semanticTypeCandidates": [
+    "avatar",
+    "profile-image",
+    "identity-chip"
+  ],
+  "variantDimensions": {
+    "type": [
+      "image",
+      "initials"
+    ],
+    "size": [
+      "24",
+      "40",
+      "56"
+    ]
+  },
+  "representativeVariants": [
     {
-      "name": "图片头像",
       "type": "image",
-      "description": "使用 <img> 标签显示用户头像图片"
+      "size": "24"
     },
     {
-      "name": "文字头像",
+      "type": "image",
+      "size": "40"
+    },
+    {
       "type": "initials",
-      "description": "显示用户名称首字母，背景为中性灰色"
+      "size": "56"
     }
   ],
-  "sizes": [
-    { "name": "小", "slug": "24", "width": "24px", "height": "24px", "initialsFontSize": "12px" },
-    { "name": "中", "slug": "40", "width": "40px", "height": "40px", "initialsFontSize": "20px" },
-    { "name": "大", "slug": "56", "width": "56px", "height": "56px", "initialsFontSize": "28px" }
+  "anatomy": [
+    {
+      "name": "root",
+      "selector": ".avatar",
+      "role": "头像容器"
+    },
+    {
+      "name": "image",
+      "selector": ".avatar__img",
+      "role": "图片头像"
+    },
+    {
+      "name": "initials",
+      "selector": ".avatar--initials",
+      "role": "文字头像"
+    }
+  ],
+  "structurePatterns": [
+    "头像始终为单个圆形容器，不拆分为多层装饰。",
+    "文字头像使用单字或极短标识，不承载完整姓名。"
+  ],
+  "behavior": {},
+  "accessibility": {},
+  "usageHints": [
+    "24 用于 cell 左侧或评论流紧凑身份信息。",
+    "40 用于设置页、会话列表等常规身份位。",
+    "56 用于我的页或资料头部。"
+  ],
+  "doNotInvent": [
+    "不要扩展为带徽章、在线状态光环或营销贴纸的复合头像。",
+    "不要引入非圆形默认外观。"
+  ],
+  "tokensConsumed": [
+    "--color-bg-fill-strong",
+    "--color-border-default",
+    "--color-text-inverse",
+    "--font-family-text",
+    "--font-weight-medium",
+    "--radius-full"
   ],
   "designTokens": {
-    "borderRadius": "100px",
-    "border": "0.5px solid rgba(32,47,100,0.08)",
-    "initialsBg": "#B7BEC5",
-    "initialsColor": "#FFFFFF",
-    "initialsFontWeight": 500,
-    "imageObjectFit": "cover"
+    "radius": "var(--radius-full)",
+    "border": "0.5px solid var(--color-border-default)",
+    "initialsFontWeight": "var(--font-weight-medium)",
+    "sizes": {
+      "24": "24px",
+      "40": "40px",
+      "56": "56px"
+    }
+  },
+  "specRefs": [
+    "specs/设计风格与品牌原则.md",
+    "specs/布局与间距规范.md"
+  ],
+  "domAnatomy": {
+    "root": ".avatar",
+    "optionalChildren": [
+      "img",
+      "text"
+    ],
+    "modifiers": [
+      ".avatar--24",
+      ".avatar--40",
+      ".avatar--56",
+      ".avatar--initials"
+    ]
+  },
+  "provenance": {
+    "preview": "preview/component-avatar.html",
+    "cssSource": "preview/component-avatar.html",
+    "embedded": false,
+    "hostComponent": null
   },
   "unknowns": []
 }

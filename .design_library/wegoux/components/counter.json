@@ -1,111 +1,172 @@
 {
+  "schemaVersion": 3,
   "slug": "counter",
   "name": "计数器",
+  "category": "form",
+  "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "数字计数器组件，用于商品数量、库存数量等数值增减操作。包含减号按钮、数值输入区、加号按钮三部分。视觉高度保持 32px，按钮视觉尺寸保持 28x28px；触控热区通过按钮伪元素扩展到至少 40x40px，不改变组件布局。",
-  "variants": [
+  "description": "商品数量与库存等数值步进组件，保持紧凑视觉并用伪元素补齐热区。",
+  "semanticTypeCandidates": [
+    "stepper",
+    "quantity-input",
+    "counter"
+  ],
+  "variantDimensions": {
+    "size": [
+      "default",
+      "sm",
+      "lg"
+    ],
+    "state": [
+      "default",
+      "hint",
+      "error",
+      "disabled"
+    ]
+  },
+  "representativeVariants": [
     {
-      "name": "默认 (Default)",
-      "type": "default",
-      "width": "96px",
-      "description": "标准宽度 96px，32px 高度，减号/数值/加号水平排列"
+      "size": "default",
+      "state": "default"
     },
     {
-      "name": "小尺寸 (Small)",
-      "type": "sm",
-      "className": "counter--sm",
-      "width": "80px",
-      "description": "紧凑型，宽度 80px，其余视觉规格与默认一致"
+      "size": "sm",
+      "state": "hint"
     },
     {
-      "name": "大尺寸 (Large)",
-      "type": "lg",
-      "className": "counter--lg",
-      "width": "120px",
-      "description": "宽型，宽度 120px，其余视觉规格与默认一致"
+      "size": "lg",
+      "state": "error"
+    },
+    {
+      "size": "default",
+      "state": "disabled"
     }
   ],
-  "states": [
+  "anatomy": [
     {
-      "name": "提示 (Hint)",
-      "type": "hint",
-      "className": "is-hint",
-      "description": "显示提示消息（counter__hint），文字颜色 --color-text-disabled，绝对定位在组件下方"
+      "name": "root",
+      "selector": ".counter",
+      "role": "组件容器"
     },
     {
-      "name": "错误 (Error)",
-      "type": "error",
-      "className": "is-error",
-      "description": "显示错误消息（counter__error），文字颜色 --color-danger，绝对定位在组件下方"
+      "name": "body",
+      "selector": ".counter__body",
+      "role": "按钮与输入主区"
     },
     {
-      "name": "禁用 (Disabled)",
-      "type": "disabled",
-      "className": "is-disabled",
-      "description": "整体透明度 50%，pointer-events none，禁止交互"
+      "name": "button",
+      "selector": ".counter__btn",
+      "role": "加减按钮"
+    },
+    {
+      "name": "value",
+      "selector": ".counter__value",
+      "role": "数值输入区"
+    },
+    {
+      "name": "message",
+      "selector": ".counter__message",
+      "role": "提示或错误信息"
     }
   ],
-  "slots": [
-    {
-      "name": "counter__body",
-      "description": "主容器，flex 水平布局，gap 4px，高度 32px，2px 内边距，圆角 sm，背景 --color-neutral-alpha-03"
-    },
-    {
-      "name": "counter__btn",
-      "description": "加减按钮，视觉尺寸 28x28px，圆角 xs，白色背景，0.5px Token 描边；通过 ::before 扩展热区，不占布局空间"
-    },
-    {
-      "name": "counter__icon",
-      "description": "按钮图标，使用 wego-iconfont-s：减号 icon-jian16，加号 icon-jia16"
-    },
-    {
-      "name": "counter__value",
-      "description": "数值输入区，flex 1 自适应宽度，无边框透明背景，text-align center，WegoKeyboard N9 数字字体，14px Medium（--font-number-nf14）"
-    },
-    {
-      "name": "counter__hint",
-      "description": "提示文字，绝对定位在 body 下方，居中，10px 字号，--color-text-disabled，默认 hidden"
-    },
-    {
-      "name": "counter__error",
-      "description": "错误文字，绝对定位在 body 下方，居中，10px 字号，--color-danger，默认 hidden"
-    }
+  "structurePatterns": [
+    "主区始终由减号按钮、数值输入、加号按钮组成。",
+    "提示和错误信息位于组件下方，不挤占主操作区高度。",
+    "热区依赖按钮伪元素扩展，不通过增高组件本体实现。"
   ],
-  "designTokens": {
-    "defaultWidth": "96px",
-    "smallWidth": "80px",
-    "largeWidth": "120px",
-    "height": "32px",
-    "btnVisualSize": "28px",
-    "btnTouchTarget": "40px",
-    "btnTouchMethod": "counter__btn::before",
-    "btnTouchInsetY": "-6px",
-    "btnTouchInsetMinus": "left -8px / right -4px",
-    "btnTouchInsetPlus": "left -4px / right -8px",
-    "btnBackground": "var(--color-bg-surface)",
-    "btnBorder": "var(--stroke-width-hairline) solid var(--color-border-default)",
-    "btnBorderRadius": "var(--radius-xs)",
-    "bodyBackground": "var(--color-neutral-alpha-03)",
-    "bodyBorderRadius": "var(--radius-sm)",
-    "bodyPadding": "var(--space-2)",
-    "bodyGap": "var(--space-4)",
-    "fontFamilyNumber": "var(--font-family-number)",
-    "valueFontSize": "var(--font-number-nf14)",
-    "valueFontWeight": 500,
-    "iconSize": "var(--size-16)",
-    "minusIcon": "icon-jian16",
-    "plusIcon": "icon-jia16",
-    "messageFontSize": "var(--font-size-10)",
-    "hintColor": "var(--color-text-disabled)",
-    "errorColor": "var(--color-danger)",
-    "disabledOpacity": 0.5,
-    "textOverflow": "ellipsis"
+  "behavior": {
+    "step": "点击减号或加号按最小步长增减，尊重 data-counter-min 与 data-counter-max。",
+    "input": "输入框只接受数值字符，失焦后触发提示或错误状态校验。",
+    "disabled": "禁用态禁止按钮和输入交互。"
   },
   "accessibility": {
-    "buttonLabels": ["减少", "增加"],
+    "buttonLabels": [
+      "减少",
+      "增加"
+    ],
     "inputMode": "numeric",
-    "touchRule": "视觉尺寸不为热区让位；按钮使用伪元素扩展到至少 40x40px，避免改变 32px 组件高度和水平排版。"
+    "touchRule": "视觉尺寸保持 32px，高频场景靠伪元素扩展到至少 40px 热区。"
+  },
+  "usageHints": [
+    "用于商品详情、购物车和库存配置等需要连续增减的场景。",
+    "提示文案适合说明库存、起购量等轻反馈；错误文案只在越界或非法输入时出现。"
+  ],
+  "doNotInvent": [
+    "不要把 counter 扩成日期步进器、滑杆或复杂金额编辑器。",
+    "不要牺牲紧凑视觉去强行放大本体尺寸。"
+  ],
+  "tokensConsumed": [
+    "--color-bg-surface",
+    "--color-border-default",
+    "--color-danger",
+    "--color-neutral-alpha-03",
+    "--color-neutral-alpha-06",
+    "--color-text-disabled",
+    "--color-text-placeholder",
+    "--color-text-primary",
+    "--duration-fast",
+    "--ease-standard",
+    "--font-family-number",
+    "--font-family-text",
+    "--font-number-nf14",
+    "--font-size-10",
+    "--font-weight-medium",
+    "--font-weight-regular",
+    "--radius-sm",
+    "--radius-xs",
+    "--size-16",
+    "--size-28",
+    "--size-32",
+    "--space-2",
+    "--space-4",
+    "--stroke-width-hairline"
+  ],
+  "designTokens": {
+    "widths": {
+      "default": "96px",
+      "sm": "80px",
+      "lg": "120px"
+    },
+    "height": "32px",
+    "buttonSize": "28px",
+    "touchTarget": "40px",
+    "gap": "var(--space-4)",
+    "radius": {
+      "body": "var(--radius-sm)",
+      "button": "var(--radius-xs)"
+    },
+    "messageFont": "var(--font-size-10)"
+  },
+  "specRefs": [
+    "specs/布局与间距规范.md",
+    "specs/交互设计原则.md"
+  ],
+  "domAnatomy": {
+    "root": ".counter",
+    "requiredChildren": [
+      ".counter__body",
+      ".counter__hint",
+      ".counter__error"
+    ],
+    "bodyChildren": [
+      ".counter__btn--minus",
+      ".counter__value",
+      ".counter__btn--plus"
+    ],
+    "stateClasses": [
+      ".is-hint",
+      ".is-error",
+      ".is-disabled",
+      ".counter--sm",
+      ".counter--lg"
+    ]
+  },
+  "provenance": {
+    "preview": "preview/component-counter.html",
+    "cssSource": "preview/component-counter.html",
+    "embedded": false,
+    "hostComponent": null
   },
   "unknowns": []
 }

@@ -1,81 +1,141 @@
 {
+  "schemaVersion": 3,
   "slug": "input",
   "name": "输入框",
+  "category": "form",
+  "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "独立输入框组件（非 Form 内嵌），采用 Label + Input 上下垂直布局。最大宽度 320px，支持 text/textarea 两种类型，包含 default/focus/error/disabled 四种状态。",
-  "variants": [
+  "description": "独立输入框组件，采用标签在上、输入区在下的竖向结构。",
+  "semanticTypeCandidates": [
+    "text-input",
+    "textarea",
+    "field-group"
+  ],
+  "variantDimensions": {
+    "fieldType": [
+      "text",
+      "textarea"
+    ],
+    "state": [
+      "default",
+      "focus",
+      "error",
+      "disabled"
+    ]
+  },
+  "representativeVariants": [
     {
-      "name": "默认 (Default)",
-      "type": "default",
-      "description": "正常输入状态，边框色 --color-border-default，背景 --color-bg-surface",
-      "tokens": {
-        "borderColor": "var(--color-border-default)",
-        "background": "var(--color-bg-surface)"
-      }
+      "fieldType": "text",
+      "state": "default"
     },
     {
-      "name": "聚焦 (Focus)",
-      "type": "focus",
-      "description": "输入框获得焦点，边框变为品牌绿色",
-      "tokens": {
-        "borderColor": "var(--color-brand)"
-      }
+      "fieldType": "text",
+      "state": "focus"
     },
     {
-      "name": "错误 (Error)",
-      "type": "error",
-      "description": "输入内容校验失败，边框变为红色，文字颜色也变为红色",
-      "className": "is-error",
-      "tokens": {
-        "borderColor": "var(--color-danger)",
-        "color": "var(--color-danger)"
-      }
+      "fieldType": "textarea",
+      "state": "error"
     },
     {
-      "name": "禁用 (Disabled)",
-      "type": "disabled",
-      "description": "输入框不可用，背景变灰，文字变 disabled 色，cursor not-allowed，Label 颜色也变淡",
-      "className": "is-disabled",
-      "tokens": {
-        "background": "var(--color-bg-muted)",
-        "color": "var(--color-text-disabled)"
-      }
+      "fieldType": "text",
+      "state": "disabled"
     }
   ],
-  "subTypes": [
+  "anatomy": [
     {
-      "name": "文本输入 (Text)",
-      "type": "text",
-      "description": "单行文本输入，高度 36px，padding 0 12px"
+      "name": "root",
+      "selector": ".input-group",
+      "role": "字段分组容器"
     },
     {
-      "name": "多行文本 (Textarea)",
-      "type": "textarea",
-      "description": "多行文本输入，最小高度 96px，支持垂直 resize，padding 8px"
+      "name": "label",
+      "selector": ".field-label",
+      "role": "字段标签"
+    },
+    {
+      "name": "control",
+      "selector": "input | textarea",
+      "role": "输入控件"
     }
+  ],
+  "structurePatterns": [
+    "标签始终置于输入区上方，组内使用固定纵向间距。",
+    "text 和 textarea 共享边框与状态体系，不分裂成不同组件。",
+    "错误和禁用通过根节点状态类驱动。"
+  ],
+  "behavior": {
+    "focus": "聚焦时边框切到品牌色。",
+    "error": "错误态同时作用于边框和输入文字。",
+    "disabled": "禁用态弱化标签与输入区，并阻止交互。"
+  },
+  "accessibility": {
+    "labelAssociation": "标签需通过 for/id 或包裹关系关联具体输入控件。",
+    "errorFeedback": "错误信息应与字段关联，避免只靠颜色表达。",
+    "keyboard": "textarea 保留原生输入与换行行为。"
+  },
+  "usageHints": [
+    "适合单字段独立陈列，不替代表单容器型 form。",
+    "需要多字段对齐、上传、选择等复合场景时优先使用 form。"
+  ],
+  "doNotInvent": [
+    "不要扩展为桌面搜索框、富文本编辑器或带复杂前后缀的超级输入框。",
+    "不要为单页业务新增临时字段皮肤。"
+  ],
+  "tokensConsumed": [
+    "--color-bg-muted",
+    "--color-bg-subtle",
+    "--color-bg-surface",
+    "--color-border-default",
+    "--color-brand",
+    "--color-danger",
+    "--color-status-danger-border",
+    "--color-status-danger-surface-l1",
+    "--color-text-disabled",
+    "--color-text-placeholder",
+    "--color-text-primary",
+    "--color-text-secondary",
+    "--duration-fast",
+    "--ease-standard",
+    "--font-family-number",
+    "--font-family-text",
+    "--font-lineheight-14",
+    "--font-size-14",
+    "--font-size-16",
+    "--font-weight-medium",
+    "--font-weight-regular",
+    "--radius-sm",
+    "--size-32",
+    "--space-8"
   ],
   "designTokens": {
     "maxWidth": "320px",
     "inputHeight": "36px",
     "textareaMinHeight": "96px",
-    "fontSize": "14px",
-    "fontFamily": "PingFang SC",
-    "lineHeight": "14px",
-    "paddingHorizontal": "12px",
-    "textareaPadding": "8px",
-    "borderRadius": "var(--radius-sm)",
-    "borderWidth": "1px",
-    "defaultBorderColor": "var(--color-border-default)",
-    "focusBorderColor": "var(--color-brand)",
-    "errorBorderColor": "var(--color-danger)",
-    "placeholderColor": "var(--color-text-placeholder)",
-    "disabledBackground": "var(--color-bg-muted)",
-    "disabledColor": "var(--color-text-disabled)",
-    "labelFontSize": "14px",
-    "labelFontWeight": 500,
-    "labelColor": "var(--color-text-primary)",
-    "gap": "8px"
+    "gap": "var(--space-8)",
+    "radius": "var(--radius-sm)",
+    "transition": "border-color var(--duration-fast) var(--ease-standard)"
+  },
+  "specRefs": [
+    "specs/交互设计原则.md",
+    "specs/文案与数据规范.md"
+  ],
+  "domAnatomy": {
+    "root": ".input-group",
+    "requiredChildren": [
+      ".field-label",
+      "input | textarea"
+    ],
+    "stateClasses": [
+      ".is-error",
+      ".is-disabled"
+    ]
+  },
+  "provenance": {
+    "preview": "preview/component-input.html",
+    "cssSource": "preview/component-input.html",
+    "embedded": false,
+    "hostComponent": null
   },
   "unknowns": []
 }

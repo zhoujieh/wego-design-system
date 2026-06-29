@@ -1,74 +1,149 @@
 {
+  "schemaVersion": 3,
   "slug": "checkbox",
   "name": "复选框",
+  "category": "form",
+  "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "复选选择框组件，支持 24px/20px 两种尺寸。包含 unchecked / checked / indeterminate / count / disabled 五种状态，品牌绿填充，圆角 4px。",
-  "variants": [
+  "description": "多选勾选组件，支持默认、小尺寸、半选、计数和禁用状态。",
+  "semanticTypeCandidates": [
+    "checkbox",
+    "multi-select-control",
+    "count-checkbox"
+  ],
+  "variantDimensions": {
+    "size": [
+      "default",
+      "sm"
+    ],
+    "state": [
+      "unchecked",
+      "checked",
+      "indeterminate",
+      "count",
+      "disabled"
+    ],
+    "mode": [
+      "standalone",
+      "group-parent",
+      "group-child"
+    ]
+  },
+  "representativeVariants": [
     {
-      "name": "未选中 (Unchecked)",
-      "type": "unchecked",
-      "description": "默认状态，白色背景，1.5px 边框 rgba(0,0,0,0.15)，24x24px"
+      "size": "default",
+      "state": "unchecked",
+      "mode": "standalone"
     },
     {
-      "name": "已选中 (Checked)",
-      "type": "checked",
-      "description": "品牌绿色填充背景和边框，内部显示白色勾选图标（13x10px SVG）"
+      "size": "default",
+      "state": "checked",
+      "mode": "group-child"
     },
     {
-      "name": "半选 (Indeterminate)",
-      "type": "indeterminate",
-      "description": "品牌绿色填充，内部显示白色减号横线（8x2px SVG），用于部分选中场景"
+      "size": "sm",
+      "state": "indeterminate",
+      "mode": "group-parent"
     },
     {
-      "name": "计数 (Count)",
-      "type": "count",
-      "description": "品牌绿色填充，内部显示白色数字（WegoKeyboard N9 数字字体，10px Medium），用于多选计数场景"
+      "size": "default",
+      "state": "disabled",
+      "mode": "standalone"
     }
   ],
-  "sizes": [
+  "anatomy": [
     {
-      "name": "默认 (Default)",
-      "slug": "default",
-      "width": "24px",
-      "height": "24px",
-      "checkIcon": "13x10px",
-      "minusIcon": "8x2px"
+      "name": "root",
+      "selector": ".checkbox",
+      "role": "复选框容器"
     },
     {
-      "name": "小尺寸 (Small)",
-      "slug": "sm",
-      "width": "20px",
-      "height": "20px",
-      "checkIcon": "11x8px",
-      "minusIcon": "6x2px"
+      "name": "inner",
+      "selector": ".checkbox__inner",
+      "role": "背景与边框层"
+    },
+    {
+      "name": "icon",
+      "selector": ".checkbox__icon",
+      "role": "勾选图标层"
+    },
+    {
+      "name": "minus",
+      "selector": ".checkbox__minus",
+      "role": "半选图标层"
     }
   ],
-  "states": [
-    {
-      "name": "禁用 (Disabled)",
-      "type": "disabled",
-      "description": "opacity 0.4，pointer-events none，cursor not-allowed"
-    }
+  "structurePatterns": [
+    "checked、indeterminate、count 共用同一主容器与边框体系。",
+    "计数态仅在明确存在多选数量语义时使用。",
+    "分组父级允许根据子项状态呈现半选。"
+  ],
+  "behavior": {
+    "toggle": "单个项点击在未选与已选之间切换。",
+    "group": "父级根据子项自动计算全选、半选或未选。",
+    "disabled": "禁用态忽略点击与分组联动。"
+  },
+  "accessibility": {
+    "role": "checkbox",
+    "mixedState": "半选场景需要暴露 mixed 语义。",
+    "labelRule": "复选框应与可读标签文案配对。"
+  },
+  "usageHints": [
+    "适合权限、多选筛选和设置项组合。",
+    "小尺寸用于高密度列表，但仍需由外层行高保证触控可用。"
+  ],
+  "doNotInvent": [
+    "不要把 checkbox 扩成开关、单选或树控件。",
+    "不要新增发光、描边动画等强视觉反馈。"
+  ],
+  "tokensConsumed": [
+    "--color-bg-surface",
+    "--color-border-control-default",
+    "--color-brand",
+    "--color-text-inverse",
+    "--duration-fast",
+    "--ease-standard",
+    "--font-family-number",
+    "--font-size-10",
+    "--font-weight-medium",
+    "--radius-xs"
   ],
   "designTokens": {
-    "width": "24px",
-    "height": "24px",
-    "smallWidth": "20px",
-    "smallHeight": "20px",
-    "borderRadius": "4px",
+    "sizes": {
+      "default": "24px",
+      "sm": "20px"
+    },
+    "radius": "var(--radius-xs)",
     "borderWidth": "1.5px",
-    "defaultBorderColor": "rgba(0,0,0,0.15)",
-    "defaultBackground": "var(--color-bg-surface)",
-    "checkedBackground": "var(--color-brand)",
-    "checkedBorderColor": "var(--color-brand)",
-    "checkColor": "#FFFFFF",
-    "fontFamily": "WegoKeyboard N9 (count 模式)",
-    "countFontSize": "10px",
-    "countFontWeight": 500,
-    "disabledOpacity": 0.4,
-    "transitionDuration": "var(--duration-fast)",
-    "transitionEasing": "var(--ease-standard)"
+    "countFont": "var(--font-size-10) / var(--font-weight-medium)",
+    "transition": "background var(--duration-fast) var(--ease-standard)"
+  },
+  "specRefs": [
+    "specs/交互设计原则.md",
+    "specs/布局与间距规范.md"
+  ],
+  "domAnatomy": {
+    "root": ".checkbox",
+    "requiredChildren": [
+      ".checkbox__inner"
+    ],
+    "optionalChildren": [
+      ".checkbox__icon",
+      ".checkbox__minus"
+    ],
+    "stateClasses": [
+      ".checkbox--checked",
+      ".checkbox--indeterminate",
+      ".checkbox--disabled",
+      ".checkbox--sm"
+    ]
+  },
+  "provenance": {
+    "preview": "preview/component-checkbox.html",
+    "cssSource": "preview/component-checkbox.html",
+    "embedded": false,
+    "hostComponent": null
   },
   "unknowns": []
 }

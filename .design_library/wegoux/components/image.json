@@ -1,83 +1,184 @@
 {
+  "schemaVersion": 3,
   "slug": "image",
   "name": "图片",
+  "category": "display",
+  "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "图片组件（WGImage），用于展示图片内容。支持 xs/sm/md/lg/xl 五种预设尺寸 + 自定义矩形/宽幅尺寸，cover/contain 两种填充模式，rounded-sm/rounded-md/rounded-lg/circle 四种圆角变体，loading/loaded/error 三种加载状态，clickable 叠加层交互。",
-  "variants": [
+  "description": "图片展示组件，覆盖预设尺寸、自定义比例、加载失败和可点击覆盖层。",
+  "semanticTypeCandidates": [
+    "image",
+    "media",
+    "thumbnail",
+    "product-image"
+  ],
+  "variantDimensions": {
+    "fit": [
+      "cover",
+      "contain"
+    ],
+    "size": [
+      "xs",
+      "sm",
+      "md",
+      "lg",
+      "xl",
+      "custom-rect",
+      "custom-wide"
+    ],
+    "radius": [
+      "none",
+      "rounded-sm",
+      "rounded-md",
+      "rounded-lg",
+      "circle"
+    ],
+    "state": [
+      "loading",
+      "loaded",
+      "error"
+    ],
+    "interaction": [
+      "static",
+      "clickable",
+      "transparent"
+    ]
+  },
+  "representativeVariants": [
     {
-      "name": "覆盖模式 (Cover)",
-      "type": "cover",
-      "description": "默认模式，object-fit: cover，图片裁剪填充"
+      "fit": "cover",
+      "size": "md",
+      "radius": "none",
+      "state": "loaded",
+      "interaction": "static"
     },
     {
-      "name": "包含模式 (Contain)",
-      "type": "contain",
-      "description": "object-fit: contain，图片完整显示不裁剪"
+      "fit": "contain",
+      "size": "md",
+      "radius": "rounded-md",
+      "state": "loaded",
+      "interaction": "static"
+    },
+    {
+      "fit": "cover",
+      "size": "custom-rect",
+      "radius": "rounded-lg",
+      "state": "error",
+      "interaction": "static"
+    },
+    {
+      "fit": "cover",
+      "size": "md",
+      "radius": "circle",
+      "state": "loaded",
+      "interaction": "clickable"
     }
   ],
-  "presetSizes": [
-    { "name": "极小", "slug": "xs", "width": "16px", "height": "16px" },
-    { "name": "小", "slug": "sm", "width": "32px", "height": "32px" },
-    { "name": "中", "slug": "md", "width": "64px", "height": "64px" },
-    { "name": "大", "slug": "lg", "width": "104px", "height": "104px" },
-    { "name": "超大", "slug": "xl", "width": "72px", "height": "72px" }
-  ],
-  "customSizes": [
-    { "name": "矩形", "slug": "custom-rect", "width": "180px", "height": "120px" },
-    { "name": "宽幅", "slug": "custom-wide", "width": "260px", "height": "160px" }
-  ],
-  "roundedVariants": [
-    { "name": "小圆角", "slug": "rounded-sm", "borderRadius": "var(--wg-radius-sm)" },
-    { "name": "中圆角", "slug": "rounded-md", "borderRadius": "var(--wg-radius-md)" },
-    { "name": "大圆角", "slug": "rounded-lg", "borderRadius": "var(--wg-radius-lg)" },
-    { "name": "圆形", "slug": "circle", "borderRadius": "var(--wg-radius-full)" }
-  ],
-  "states": [
+  "anatomy": [
     {
-      "name": "加载中 (Loading)",
-      "type": "loading",
-      "className": "wg-image--loading",
-      "description": "图片加载中，背景为 --wg-color-base-neutral-100，图片 opacity 0"
+      "name": "root",
+      "selector": ".wg-image",
+      "role": "图片容器"
     },
     {
-      "name": "已加载 (Loaded)",
-      "type": "loaded",
-      "className": "is-loaded",
-      "description": "图片加载完成，opacity 1，过渡动画透明"
+      "name": "src",
+      "selector": ".wg-image__src",
+      "role": "图片内容层"
     },
     {
-      "name": "加载失败 (Error)",
-      "type": "error",
-      "className": "wg-image--error",
-      "description": "图片加载失败，显示占位符（24x24px 空心矩形框），图片隐藏"
+      "name": "placeholder",
+      "selector": ".wg-image__placeholder",
+      "role": "错误或空态占位层"
+    },
+    {
+      "name": "overlay",
+      "selector": ".wg-image__overlay",
+      "role": "按压覆盖层"
     }
   ],
-  "modifiers": [
-    {
-      "name": "可点击",
-      "slug": "clickable",
-      "description": "cursor pointer，点击时显示半透明深色叠加层（rgba 30% neutral）"
-    },
-    {
-      "name": "透明背景",
-      "slug": "transparent",
-      "description": "图片背景设为透明（默认有 --wg-color-base-neutral-100 背景）"
-    }
+  "structurePatterns": [
+    "尺寸、圆角、填充模式全部由修饰类叠加在同一根节点上。",
+    "error 与 loading 不引入新的宿主结构，只切换占位和透明度。",
+    "clickable 仅补按压覆盖层，不扩展成轮播或缩放组件。"
+  ],
+  "behavior": {},
+  "accessibility": {},
+  "usageHints": [
+    "商品图优先使用矩形或宽幅规格，头像类场景使用 circle。",
+    "contain 适合完整展示 logo、海报缩略或比例敏感资产。",
+    "error 占位只做兜底提示，不替代正式空状态组件。"
+  ],
+  "doNotInvent": [
+    "不要把 image 扩成轮播、视频播放器或带复杂编辑能力的媒体组件。",
+    "不要新增重毛玻璃、渐变遮罩或夸张 loading 动画。"
+  ],
+  "tokensConsumed": [
+    "--color-bg-placeholder",
+    "--color-overlay-press",
+    "--color-text-disabled",
+    "--duration-normal",
+    "--ease-standard",
+    "--font-size-10",
+    "--font-weight-regular",
+    "--radius-full",
+    "--radius-lg",
+    "--radius-md",
+    "--radius-sm",
+    "--size-104",
+    "--size-16",
+    "--size-32",
+    "--size-64",
+    "--size-72"
   ],
   "designTokens": {
-    "defaultBackground": "var(--wg-color-base-neutral-100)",
-    "defaultFit": "cover",
-    "loadingBackground": "var(--wg-color-base-neutral-100)",
-    "errorPlaceholderSize": "24px",
-    "errorPlaceholderBorder": "2px solid var(--wg-color-text-disabled)",
-    "overlayBackground": "var(--wg-color-base-neutral-alpha-30)",
-    "transitionDuration": "var(--wg-motion-duration-normal)",
-    "transitionEasing": "var(--wg-motion-ease-standard)",
-    "fontFamily": "PingFang SC",
-    "placeholderFontSize": "10px",
-    "placeholderFontWeight": 400,
-    "placeholderColor": "var(--wg-color-text-disabled)"
+    "sizes": {
+      "xs": "16px",
+      "sm": "32px",
+      "md": "64px",
+      "lg": "104px",
+      "xl": "72px",
+      "rect": "180px × 120px",
+      "wide": "260px × 160px"
+    },
+    "radius": {
+      "sm": "var(--radius-sm)",
+      "md": "var(--radius-md)",
+      "lg": "var(--radius-lg)",
+      "circle": "var(--radius-full)"
+    },
+    "placeholderSize": "24px",
+    "transition": "opacity var(--duration-normal) var(--ease-standard)"
+  },
+  "specRefs": [
+    "specs/动效与视觉效果.md",
+    "specs/布局与间距规范.md"
+  ],
+  "domAnatomy": {
+    "root": ".wg-image",
+    "requiredChildren": [
+      ".wg-image__src"
+    ],
+    "optionalChildren": [
+      ".wg-image__placeholder",
+      ".wg-image__overlay"
+    ],
+    "modifiers": [
+      ".wg-image--contain",
+      ".wg-image--rounded-sm",
+      ".wg-image--rounded-md",
+      ".wg-image--rounded-lg",
+      ".wg-image--circle",
+      ".wg-image--error",
+      ".wg-image--loading",
+      ".wg-image--clickable"
+    ]
+  },
+  "provenance": {
+    "preview": "preview/component-image.html",
+    "cssSource": "preview/component-image.html",
+    "embedded": false,
+    "hostComponent": null
   },
   "unknowns": []
 }

@@ -1,47 +1,120 @@
 {
+  "schemaVersion": 3,
   "slug": "stack",
   "name": "选项卡",
+  "category": "navigation",
+  "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "选项卡组件，用于多项选择的方块式选项。24x24px 选项块，纵向图标上文字下布局。支持未选/已选两种状态，品牌绿填充 + 白色勾标记，borderRadius 4px。",
-  "variants": [
+  "description": "方块式选项卡组件，用于多项可视化选择和勾选式选项。",
+  "semanticTypeCandidates": [
+    "stack-option",
+    "tile-selector",
+    "choice-tile"
+  ],
+  "variantDimensions": {
+    "state": [
+      "unselected",
+      "selected"
+    ],
+    "layout": [
+      "icon-above-label"
+    ]
+  },
+  "representativeVariants": [
     {
-      "name": "未选中 (Unselected)",
-      "type": "unselected",
-      "description": "默认状态，白色背景（--color-bg-surface），1px 灰色边框 rgba(0,0,0,0.12)，无勾标记"
+      "state": "unselected",
+      "layout": "icon-above-label"
     },
     {
-      "name": "已选中 (Selected)",
-      "type": "selected",
-      "className": "stack--selected",
-      "description": "品牌绿色填充背景和边框（--color-brand），选项块内部显示白色勾标记（16x16px SVG 图标）",
-      "tokens": {
-        "background": "var(--color-brand)",
-        "borderColor": "var(--color-brand)"
-      }
+      "state": "selected",
+      "layout": "icon-above-label"
     }
   ],
-  "slots": [
-    { "name": "stack__bg", "description": "24x24px 选项块，边框圆角 4px，flex 居中，transition 过渡动画" },
-    { "name": "stack__check-badge", "description": "白色勾选标记，16x16px，默认隐藏，选中时 flex 显示" },
-    { "name": "stack__label", "description": "选项文字标签，14px Regular，--color-text-primary，text-align center" }
+  "anatomy": [
+    {
+      "name": "root",
+      "selector": ".stack",
+      "role": "选项容器"
+    },
+    {
+      "name": "bg",
+      "selector": ".stack__bg",
+      "role": "方块底板"
+    },
+    {
+      "name": "check",
+      "selector": ".stack__check-badge",
+      "role": "勾选标记"
+    },
+    {
+      "name": "label",
+      "selector": ".stack__label",
+      "role": "选项文案"
+    }
+  ],
+  "structurePatterns": [
+    "固定为图标块在上、文案在下的竖向结构。",
+    "选中态通过底板与勾标记表达，不再叠加额外徽章。"
+  ],
+  "behavior": {
+    "selection": "点击切换当前项选中状态，是否互斥由宿主业务决定。",
+    "feedback": "选中态和未选态通过统一过渡切换。"
+  },
+  "accessibility": {
+    "role": "button 或 option",
+    "selectedState": "宿主需暴露当前选中状态。",
+    "labelRule": "文案保持简短，避免两行挤压布局。"
+  },
+  "usageHints": [
+    "适合规格选择、权限格子选择、业务模式开关等视觉化选项。",
+    "当选项需要长文案或多级说明时，应改用 cell 或 form。"
+  ],
+  "doNotInvent": [
+    "不要把 stack 扩成复杂 tab bar、卡片宫格或营销入口块。",
+    "不要在同一组件里混入数字角标、倒计时等额外状态。"
+  ],
+  "tokensConsumed": [
+    "--color-bg-surface",
+    "--color-border-control-disabled-strong",
+    "--color-brand",
+    "--color-text-primary",
+    "--duration-fast",
+    "--ease-standard",
+    "--font-family-text",
+    "--font-lineheight-14",
+    "--font-size-14",
+    "--font-weight-regular",
+    "--radius-xs"
   ],
   "designTokens": {
     "blockSize": "24px",
-    "borderRadius": "4px",
-    "borderWidth": "1px",
-    "defaultBorderColor": "rgba(0,0,0,0.12)",
-    "defaultBackground": "var(--color-bg-surface)",
-    "selectedBackground": "var(--color-brand)",
-    "selectedBorderColor": "var(--color-brand)",
-    "checkSize": "16px",
-    "labelFontSize": "14px",
-    "labelFontWeight": 400,
-    "fontFamily": "PingFang SC",
-    "gap": "4px",
-    "transitionDuration": "var(--duration-fast)",
-    "transitionEasing": "var(--ease-standard)",
-    "cursor": "pointer"
+    "radius": "var(--radius-xs)",
+    "labelFont": "var(--font-size-14) / var(--font-weight-regular)",
+    "transition": "var(--duration-fast) / var(--ease-standard)"
+  },
+  "specRefs": [
+    "specs/交互设计原则.md",
+    "specs/布局与间距规范.md"
+  ],
+  "domAnatomy": {
+    "root": ".stack",
+    "requiredChildren": [
+      ".stack__bg",
+      ".stack__label"
+    ],
+    "optionalChildren": [
+      ".stack__check-badge"
+    ],
+    "stateClasses": [
+      ".stack--selected"
+    ]
+  },
+  "provenance": {
+    "preview": "preview/component-stack.html",
+    "cssSource": "preview/component-stack.html",
+    "embedded": false,
+    "hostComponent": null
   },
   "unknowns": []
 }
