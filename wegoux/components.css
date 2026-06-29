@@ -1,0 +1,748 @@
+/* ═══════════════════════════════════════════════════════════════
+   components.css — Design System Component Definitions
+   Auto-extracted from preview/component-*.html
+   DO NOT EDIT MANUALLY — regenerate via extract-components-css.mjs
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Avatar ────────────────────────────────────────────────── */
+/* @anatomy
+   <span class="label">默认头像</span> <div class="avatar avatar--24 avatar--image"><img src="http://localhost:3845/assets/65374637c9ef72970e810198a41540824752d176.png" alt="">
+*/
+.avatar { border-radius: var(--radius-full); overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; box-sizing: border-box; border: 0.5px solid var(--border-neutral-l2); position: relative; }
+.avatar--24 { width: 24px; height: 24px; }
+.avatar--40 { width: 40px; height: 40px; }
+.avatar--56 { width: 56px; height: 56px; }
+/* Image avatar */
+.avatar--image img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: var(--radius-full); position: absolute; inset: 0; pointer-events: none; }
+/* Initials avatar */
+.avatar--initials { background: var(--bg-fill-strong); color: var(--text-inverse); font-family: var(--body-md-font-family); font-weight: var(--font-weight-medium); user-select: none; white-space: nowrap; line-height: normal; font-feature-settings: "zero"; }
+.avatar--24.avatar--initials { font-size: 12px; }
+.avatar--40.avatar--initials { font-size: 20px; }
+.avatar--56.avatar--initials { font-size: 28px; }
+
+/* ── Badge ─────────────────────────────────────────────────── */
+/* @anatomy
+   <span class="label">图标宿主</span> <div class="demo-host-row"> <div class="demo-host demo-host--icon"> <i class="wego-iconfont-s icon-xiaoxi"></i> <span class="badge badge--corner badge--dot"></span>
+*/
+.badge {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      flex-shrink: 0;
+      min-width: 16px;
+      height: 16px;
+      padding: 0 4px;
+      border: 0.5px solid var(--palette-neutral-100);
+      border-radius: var(--radius-full);
+      background: var(--status-danger-default);
+      color: var(--text-inverse);
+      font-family: var(--body-md-font-family);
+      font-size: var(--body-xs-font-size);
+      font-weight: var(--font-weight-medium);
+      line-height: 1;
+      white-space: nowrap;
+      vertical-align: middle;
+      overflow: hidden;
+    }
+    .badge--inline {
+      position: relative;
+      inset: auto;
+      transform: none;
+    }
+    .badge--corner {
+      position: absolute;
+      top: 0;
+      right: 0;
+      transform: translate(50%, -50%);
+      z-index: 1;
+    }
+    .badge--corner.badge--dot {
+      transform: translate(18%, -18%);
+    }
+    .badge--dot {
+      width: 8px;
+      min-width: 8px;
+      height: 8px;
+      padding: 0;
+      border-radius: var(--radius-full);
+    }
+    .badge--number {
+      min-width: 16px;
+      padding: 0 4px;
+      font-family: var(--number-md-font-family);
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .badge--number-multi {
+      min-width: 22px;
+      padding: 0 5px;
+    }
+    .badge--text {
+      --badge-text-bg: var(--accent-green);
+      --badge-text-color: var(--text-inverse);
+      min-width: 0;
+      background: var(--badge-text-bg);
+      color: var(--badge-text-color);
+    }
+    .badge--text.badge--inline {
+      padding: 0 4px;
+      border-radius: var(--radius-full);
+    }
+    .badge--text.badge--corner {
+      padding: 0 4px;
+      border-radius: 8px 8px 8px 1px;
+    }
+    .badge--remove {
+      width: 16px;
+      min-width: 16px;
+      padding: 0;
+      border-radius: var(--radius-full);
+      background: var(--status-danger-default);
+      color: var(--text-inverse);
+    }
+    .badge__remove-line {
+      width: 6px;
+      height: 1px;
+      border-radius: var(--radius-full);
+      background: currentColor;
+    }
+    .badge--scrollable {
+      --badge-scroll-width: var(--size-96);
+      width: var(--badge-scroll-width);
+      justify-content: flex-start;
+      overflow: hidden;
+    }
+    .badge__text {
+      display: inline-block;
+      flex-shrink: 0;
+    }
+    .badge__marquee {
+      display: inline-flex;
+      align-items: center;
+      min-width: max-content;
+      animation: badge-marquee 4s linear infinite;
+      will-change: transform;
+    }
+    .badge__marquee-group {
+      display: inline-flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .badge__marquee-group .badge__text {
+      padding-right: 16px;
+    }
+    .badge__marquee-group .badge__text:last-child {
+      padding-right: 0;
+    }
+    @keyframes badge-marquee {
+      0% {
+        transform: translateX(0);
+      }
+      100% {
+        transform: translateX(-50%);
+      }
+    }
+
+/* ── Bottom Nav ────────────────────────────────────────────── */
+/* @anatomy
+   <div class="pv-header"><h1>底部导航</h1><p>移动端主 Tab，默认 5 个 Tab，支持选中态和角标。</p></div>
+*/
+/* ── Bottom Nav ──────────────────────────────────────────────── */
+/* @anatomy
+   <nav class="bottom-nav">
+     <div class="bottom-nav__item [active]" data-tab="tab-key">
+       <div class="bottom-nav__icon">
+         [inline svg or img]
+         [<span class="badge badge--corner badge--number [badge--number-multi]">6</span>]
+         [<span class="badge badge--corner badge--dot"></span>]
+       </div>
+       <span class="bottom-nav__label">Tab</span>
+     </div>
+   </nav>
+*/
+.bottom-nav {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: space-around;
+  width: 100%;
+  background: var(--bg-surface);
+  border-top: 0.5px solid var(--border-neutral-l2);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  flex-shrink: 0;
+}
+
+.bottom-nav__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  flex: 1 0 0;
+  min-width: 0;
+  cursor: pointer;
+  height: var(--size-56);
+  padding: 0 var(--spacer-16);
+  color: var(--text-default);
+  position: relative;
+}
+
+.bottom-nav__item.active { color: var(--text-brand); }
+
+.bottom-nav__icon {
+  width: var(--size-32);
+  height: var(--size-32);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.bottom-nav__icon svg,
+.bottom-nav__icon img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.bottom-nav__label {
+  font-family: var(--body-md-font-family);
+  font-size: var(--body-xs-font-size);
+  font-weight: var(--font-weight-regular);
+  line-height: normal;
+  white-space: nowrap;
+  font-feature-settings: "zero";
+}
+
+/* ── Badge 复用说明 ─────────────────────────────────────── */
+/* 直接复用 Badge 组件 class（已通过 components.css 引入）:
+   数字角标: <span class="badge badge--corner badge--number [badge--number-multi]">6</span>
+   红点:     <span class="badge badge--corner badge--dot"></span> */
+
+/* ── Button ────────────────────────────────────────────────── */
+/* @anatomy
+   <span class="label">强 / Strong</span> <button class="btn btn--strong btn--md">主要操作</button>
+*/
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:var(--spacer-4); border:none; cursor:pointer; font-family:var(--body-md-font-family); font-weight:var(--font-weight-medium); white-space:nowrap; transition:background var(--duration-fast) var(--ease-standard); flex-shrink:0; }
+.btn[aria-disabled="true"] { pointer-events:none; cursor:not-allowed; }
+
+/* ── Icon (iconfont，仅用于新建场景) ── */
+.btn__icon { font-family:"wego-iconfont-s" !important; font-style:normal; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; line-height:1; flex-shrink:0; }
+.btn--sm .btn__icon { font-size:16px; }
+.btn--md .btn__icon, .btn--lg .btn__icon { font-size:20px; }
+.btn--icon-only { padding:0 !important; width:var(--size-40); min-width:unset; max-width:unset; }
+.btn--sm.btn--icon-only { width:var(--size-32); }
+
+/* ── Emphasis ── */
+.btn--strong { background:var(--bg-brand); color:var(--text-inverse); }
+.btn--strong:hover { background:var(--bg-brand-hover); }
+.btn--strong:active { background:var(--bg-brand-disabled); }
+.btn--strong.btn--disabled, .btn--strong:disabled, .btn--strong[aria-disabled="true"] { background:var(--bg-overlay-l1); color:var(--text-disabled); }
+.btn--medium { background:var(--bg-overlay-l1); color:var(--text-brand); }
+.btn--medium:hover { background:var(--bg-overlay-l2); }
+.btn--medium:active { background:var(--bg-state-selected); }
+.btn--medium.btn--disabled, .btn--medium:disabled, .btn--medium[aria-disabled="true"] { background:var(--bg-overlay-l1); color:var(--text-disabled); }
+.btn--weak { background:var(--bg-overlay-l1); color:var(--text-default); }
+.btn--weak:hover { background:var(--bg-overlay-l2); }
+.btn--weak:active { background:var(--bg-state-selected); }
+.btn--weak.btn--disabled, .btn--weak:disabled, .btn--weak[aria-disabled="true"] { background:var(--bg-overlay-l1); color:var(--text-disabled); }
+.btn--danger { background:var(--bg-overlay-l1); color:var(--status-danger-default); }
+.btn--danger:hover { background:var(--status-danger-surface-l1); }
+.btn--danger:active { background:var(--status-danger-surface-l2); }
+.btn--danger.btn--disabled, .btn--danger:disabled, .btn--danger[aria-disabled="true"] { background:var(--bg-overlay-l1); color:var(--text-disabled); }
+
+/* ── Size ── */
+.btn--lg { height:var(--size-48); min-width:calc(var(--size-48) * 3); max-width:calc(var(--size-36) * 5); padding:0 var(--spacer-14); font-size:var(--heading-sm-font-size); border-radius:var(--radius-8); }
+.btn--md { height:var(--size-40); min-width:var(--size-40); padding:0 var(--spacer-14); font-size:var(--body-lg-font-size); border-radius:var(--radius-8); }
+.btn--sm { height:var(--size-32); min-width:var(--size-32); max-width:calc(var(--size-24) * 5); padding:0 var(--spacer-12); font-size:var(--body-md-font-size); border-radius:var(--radius-6); }
+
+/* ── Card ──────────────────────────────────────────────────── */
+/* @anatomy
+   <span class="label">浮起</span> <div class="card card--elevated" data-evidence-sample="elevated-default"> <div class="card__media">商品图片
+*/
+.card { display:flex; flex-direction:column; gap:var(--spacer-12); font-family:var(--body-md-font-family); color:var(--text-default); flex:1; min-width:0; }
+.card--elevated { background:var(--bg-surface); border-radius:var(--radius-12); box-shadow:var(--shadow-sm); padding:var(--spacer-16); }
+.card--outlined { background:var(--bg-surface); border:1px solid var(--border-neutral-l2); border-radius:var(--radius-8); padding:var(--spacer-16); }
+.card--filled { background:var(--bg-subtle); border-radius:var(--radius-8); padding:var(--spacer-12); }
+.card__media { width:100%; height:150px; background:var(--bg-muted); border-radius:var(--radius-6); display:flex; align-items:center; justify-content:center; font-size:var(--body-sm-font-size); color:var(--text-tertiary); flex-shrink:0; }
+.card__header { font-size:var(--body-lg-font-size); font-weight:var(--font-weight-semibold); line-height:var(--body-lg-line-height); }
+.card__body { font-size:var(--body-md-font-size); color:var(--text-secondary); line-height:var(--body-md-line-height); }
+.card__footer { font-size:var(--body-sm-font-size); color:var(--text-tertiary); display:flex; gap:var(--spacer-8); align-items:center; }
+.card__price { font-size:var(--heading-sm-font-size); font-weight:var(--font-weight-semibold); color:var(--text-default); }
+.card__tag { display:inline-block; background:var(--bg-muted); border-radius:var(--radius-4); padding:var(--spacer-2) var(--spacer-4); font-size:var(--body-xs-font-size); color:var(--text-secondary); white-space:nowrap; }
+
+/* ── Cell ──────────────────────────────────────────────────── */
+/* @anatomy
+   <div class="pv-header"><h1>单元格</h1><p>列表行，支持标题、内容、箭头、图标、徽标和副操作。</p></div>
+*/
+.cell{position:relative;display:flex;align-items:center;width:100%;box-sizing:border-box;background:var(--bg-surface);color:var(--text-default);overflow:hidden}
+.cell--single{min-height:56px}
+.cell--double{min-height:76px}
+.cell--bg-white{background:var(--bg-surface)}
+.cell--bg-grey{background:var(--bg-subtle)}
+.cell--clickable{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.cell--clickable:active{background:var(--bg-state-pressed)}
+.cell__body{display:flex;align-items:center;gap:12px;width:100%;min-width:0;padding:0 16px;box-sizing:border-box}
+.cell__select ~ .cell__body,
+.cell__avatar ~ .cell__body,
+.cell__backspace ~ .cell__body{padding-left:0}
+.cell--indent .cell__body{padding-left:32px}
+.cell__content{flex:1;min-width:0;overflow:hidden}
+.cell__title-row{display:flex;align-items:center;gap:4px;min-width:0}
+.cell__title{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--body-lg-font-size);font-weight:var(--font-weight-regular);line-height:var(--body-lg-line-height);color:var(--text-default);font-feature-settings:"zero"}
+.cell__title-icon{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;flex-shrink:0;font-size:16px;color:var(--text-secondary)}
+.cell__subtitle{display:block;margin-top:2px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:var(--body-sm-font-size);font-weight:var(--font-weight-regular);line-height:var(--body-sm-line-height);color:var(--text-tertiary);font-feature-settings:"zero"}
+.cell__action{display:flex;align-items:center;justify-content:flex-end;gap:4px;min-width:0;flex-shrink:0;margin-left:auto}
+.cell__action-text{display:block;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--body-md-font-size);font-weight:var(--font-weight-regular);line-height:var(--body-md-line-height);color:var(--text-secondary);font-feature-settings:"zero"}
+.cell__action-badge{display:flex;align-items:center;gap:4px;min-width:0}
+.cell__arrow{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;flex-shrink:0;font-size:16px;color:var(--text-tertiary)}
+.cell__select,
+.cell__avatar,
+.cell__backspace{display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cell__select{min-width:28px;margin-left:12px;padding-left:4px;box-sizing:border-box}
+.cell__avatar{margin-left:16px;margin-right:12px}
+.cell__select + .cell__avatar{margin-left:8px}
+.cell__backspace{width:24px;min-width:24px;min-height:24px;margin-left:16px;color:var(--text-tertiary)}
+.cell__backspace + .cell__select{margin-left:8px}
+.cell__backspace-icon,
+.cell__backspace-icon svg{width:24px;height:24px;display:block}
+.cell--divider-right-edge::after,
+.cell--divider-center::after{content:"";position:absolute;bottom:0;border-bottom:0.5px solid var(--border-neutral-l2);pointer-events:none}
+.cell--divider-right-edge::after{left:16px;right:0}
+.cell--divider-center::after{left:16px;right:16px}
+
+/* ── Checkbox ──────────────────────────────────────────────── */
+/* @anatomy
+   <span class="label">未选中</span> <div class="checkbox"><div class="checkbox__inner">
+*/
+.checkbox{position:relative;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;flex:0 0 24px;box-sizing:border-box;border-radius:var(--radius-4);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.checkbox__inner{position:absolute;inset:0;box-sizing:border-box;border:1.5px solid var(--border-control);border-radius:var(--radius-4);background:var(--bg-surface);transition:background var(--duration-fast) var(--ease-standard),border-color var(--duration-fast) var(--ease-standard)}
+.checkbox__icon,
+.checkbox__minus,
+.checkbox__count{position:relative;z-index:1;display:none;align-items:center;justify-content:center;color:var(--text-inverse)}
+.checkbox--checked,
+.checkbox--indeterminate,
+.checkbox--count{background:var(--bg-brand)}
+.checkbox--checked .checkbox__inner,
+.checkbox--indeterminate .checkbox__inner,
+.checkbox--count .checkbox__inner{background:var(--bg-brand);border-color:var(--text-brand)}
+.checkbox--checked .checkbox__icon{display:flex}
+.checkbox--indeterminate .checkbox__minus{display:flex}
+.checkbox--count .checkbox__count{display:flex;width:100%;height:100%;font-family:var(--number-md-font-family);font-size:var(--body-xs-font-size);font-weight:var(--font-weight-medium);line-height:1;color:var(--text-inverse);font-feature-settings:"zero"}
+.checkbox--sm{width:20px;height:20px;flex-basis:20px}
+.checkbox--sm .checkbox__icon svg{width:11px;height:8px}
+.checkbox--sm .checkbox__minus svg{width:6px;height:2px}
+.checkbox--disabled{opacity:0.4;pointer-events:none;cursor:not-allowed}
+
+/* ── Counter ───────────────────────────────────────────────── */
+/* @anatomy
+   <div class="counter counter--sm" data-counter data-counter-min="1"> <div class="counter__body"> <button class="counter__btn counter__btn--minus" type="button" aria-label="减少"> <i class="counter__icon icon-jian16"></i> </button> <input class="counter__value" type="text" inputmode="numeric" value="1" maxlength="7"> <button class="counter__btn counter__btn--plus" type="button" aria-label="增加"> <i ...
+*/
+.counter { position: relative; display: inline-flex; flex-direction: column; gap: var(--spacer-2); flex-shrink: 0; width: 96px; }
+.counter--sm { width: 80px; }
+.counter--lg { width: 120px; }
+.counter__body { display: flex; align-items: center; gap: var(--spacer-4); width: 100%; height: var(--size-32); padding: var(--spacer-2); background: var(--bg-overlay-l1); border-radius: var(--radius-6); box-sizing: border-box; }
+.counter__btn { position: relative; display: flex; align-items: center; justify-content: center; width: var(--size-28); height: var(--size-28); border: var(--stroke-hairline) solid var(--border-neutral-l2); border-radius: var(--radius-4); background: var(--bg-surface); cursor: pointer; flex-shrink: 0; color: var(--text-default); transition: background var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard); }
+.counter__btn::before { content: ""; position: absolute; top: -6px; bottom: -6px; }
+.counter__btn--minus::before { left: -8px; right: -4px; }
+.counter__btn--plus::before { left: -4px; right: -8px; }
+.counter__btn:hover { background: var(--bg-overlay-l1); }
+.counter__btn:active { background: var(--bg-overlay-l2); }
+.counter__icon { font-family: "wego-iconfont-s" !important; font-style: normal; font-size: var(--size-16); line-height: 1; pointer-events: none; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+.counter__value { flex: 1 1 0; min-width: 0; height: 100%; border: none; outline: none; background: transparent; text-align: center; font-family: var(--number-md-font-family); font-size: var(--number-md-font-size); font-weight: var(--font-weight-medium); color: var(--text-default); padding: 0; font-feature-settings: "zero"; line-height: normal; }
+.counter__value::placeholder { color: var(--text-placeholder); }
+.counter__value:focus { color: var(--text-default); }
+.counter__message { position: absolute; top: calc(var(--size-32) + var(--spacer-2)); left: 0; width: 100%; overflow: hidden; text-align: center; font-size: var(--body-xs-font-size); font-family: var(--body-md-font-family); font-weight: var(--font-weight-regular); white-space: nowrap; text-overflow: ellipsis; font-feature-settings: "zero"; line-height: normal; pointer-events: none; }
+.counter__hint { color: var(--text-disabled); display: none; }
+.counter__error { color: var(--status-danger-default); display: none; }
+.counter.is-hint .counter__hint { display: block; }
+.counter.is-error .counter__error { display: block; }
+.counter.is-disabled .counter__body { opacity: 0.5; pointer-events: none; }
+
+/* ── Form ──────────────────────────────────────────────────── */
+/* @anatomy
+   <div class="pv-header"><h1>表单容器</h1><p>表单字段容器，支持水平/垂直布局、多输入类型、错误和计数。</p></div>
+*/
+/* ── Form (表单容器) ───────────────────────────────── */
+/* @anatomy
+   <div class="form [form--no-divider]">
+     <div class="form-body [form-body--vertical|form-body--error|form-body--fixed-height]" [data-form-body]>
+       <div class="form-body__label">Label</div>
+       <div class="form-body__action">
+         <input / textarea / select / custom>
+       </div>
+       [<div class="form-body__right-btn">
+         <a class="link">Link</a> |
+         <button class="btn">Button</button> |
+         <div class="icon-text-btn">...</div>
+       </div>]
+       [<div class="form-body__counter">35/50</div>]
+       [<div class="form-body__error">Error message</div>]
+     </div>
+   </div>
+*/
+
+/* Form container */
+.form{width:100%;background:var(--bg-surface)}
+.form--no-divider .form-body::after{display:none}
+
+/* FormBody — horizontal layout (default) */
+.form-body{display:flex;flex-direction:row;align-items:center;width:100%;min-height:56px;padding:12px 16px;box-sizing:border-box;position:relative;gap:24px}
+/* Divider between cells */
+.form-body::after{content:"";position:absolute;bottom:0;left:16px;right:0;border-bottom:0.5px solid var(--border-neutral-l2);pointer-events:none}
+.form--no-divider .form-body::after,
+.form > .form-body:last-child::after{display:none}
+
+/* Label */
+.form-body__label{width:96px;flex-shrink:0;font-size:var(--body-lg-font-size);font-weight:var(--font-weight-regular);color:var(--text-default);line-height:var(--body-lg-line-height);box-sizing:border-box;-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden;font-feature-settings:"zero"}
+.form-body--error .form-body__label{color:var(--text-default)}
+
+/* Action area */
+.form-body__action{flex:1;min-width:0;position:relative}
+
+/* ── Input (single-line, no border style for Form) ── */
+.form-body__action input,
+.form-body__action textarea{width:100%;border:none;outline:none;background:transparent;color:var(--text-default);font-size:var(--body-lg-font-size);font-family:var(--body-md-font-family);font-weight:var(--font-weight-regular);line-height:var(--body-lg-line-height);padding:0;box-sizing:border-box;font-feature-settings:"zero"}
+.form-body__action input::placeholder,
+.form-body__action textarea::placeholder{color:var(--text-placeholder);font-weight:var(--font-weight-regular)}
+
+/* ── Textarea ── */
+.form-body__action textarea{resize:none;min-height:20px;overflow:hidden;line-height:var(--body-lg-line-height)}
+
+/* ── Phone input layout ── */
+.form-body__phone{display:flex;align-items:center;gap:0;width:100%}
+.form-body__phone-code{width:49px;flex-shrink:0;font-size:var(--body-lg-font-size);font-weight:var(--font-weight-regular);color:var(--text-default);line-height:var(--body-lg-line-height);text-align:left;border:none;outline:none;background:transparent;font-family:var(--body-md-font-family);padding:0;font-feature-settings:"zero"}
+.form-body__phone-code::placeholder{color:var(--text-placeholder);font-weight:var(--font-weight-regular)}
+.form-body__phone-divider{width:0.5px;height:14px;background:var(--border-neutral-l2);flex-shrink:0;margin:0 8px}
+.form-body__phone-input{flex:1;min-width:0;font-size:var(--body-lg-font-size);font-weight:var(--font-weight-regular);color:var(--text-default);line-height:var(--body-lg-line-height);border:none;outline:none;background:transparent;font-family:var(--body-md-font-family);padding:0;font-feature-settings:"zero"}
+.form-body__phone-input::placeholder{color:var(--text-placeholder);font-weight:var(--font-weight-regular)}
+
+/* ── Money input ── */
+.form-body__money{display:flex;align-items:center;width:100%}
+.form-body__money-symbol{font-size:var(--body-lg-font-size);font-weight:var(--font-weight-regular);color:var(--text-placeholder);line-height:var(--body-lg-line-height);flex-shrink:0;font-feature-settings:"zero"}
+.form-body__money-symbol.has-value{color:var(--text-default)}
+.form-body__money-input{flex:1;min-width:0;font-size:var(--body-lg-font-size);font-weight:var(--font-weight-regular);color:var(--text-default);line-height:var(--body-lg-line-height);border:none;outline:none;background:transparent;font-family:var(--number-md-font-family);padding:0;font-feature-settings:"zero"}
+.form-body__money-input::placeholder{color:var(--text-placeholder);font-weight:var(--font-weight-regular);font-family:var(--body-md-font-family)}
+
+/* ── Select action ── */
+.form-body__select{display:flex;align-items:center;justify-content:space-between;width:100%;cursor:pointer;-webkit-tap-highlight-color:transparent}
+/* Clickable form-body (Select right-arrow mode): full-row pressed state, same as cell */
+.form-body--clickable{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.form-body--clickable:active{background:var(--bg-state-pressed)}
+.form-body__select-text{font-size:var(--body-lg-font-size);font-weight:var(--font-weight-regular);color:var(--text-placeholder);line-height:var(--body-lg-line-height);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-feature-settings:"zero"}
+.form-body__select-text.has-value{color:var(--text-default)}
+.form-body__select-arrow{width:16px;height:16px;flex-shrink:0;color:var(--text-tertiary);font-size:16px;display:flex;align-items:center;justify-content:center;margin-left:8px}
+
+/* ── Right button area ── */
+.form-body__right-btn{display:flex;align-items:center;flex-shrink:0;margin-left:24px;height:100%;box-sizing:border-box}
+
+/* ── Counter / Error messages ── */
+.form-body__counter,.form-body__error{position:absolute;top:calc(100% + 2px);left:0;font-size:var(--body-xs-font-size);font-weight:var(--font-weight-regular);line-height:normal;white-space:nowrap;pointer-events:none;font-feature-settings:"zero"}
+.form-body__counter{color:var(--text-disabled)}
+.form-body__error{color:var(--status-danger-default);display:none}
+
+/* Error state: show error, hide counter */
+.form-body--error .form-body__error{display:block}
+.form-body--error .form-body__counter{display:none}
+
+/* ── Vertical layout ── */
+.form-body--vertical{flex-direction:column;align-items:stretch;gap:0;padding:16px}
+.form-body--vertical .form-body__label{width:100%;padding-bottom:4px}
+.form-body--vertical .form-body__counter,
+.form-body--vertical .form-body__error{left:0}
+/* Vertical + fixed height textarea */
+.form-body--vertical.form-body--fixed-height .form-body__action textarea{height:calc(100% - var(--body-lg-line-height) - 4px - 8px);min-height:unset}
+.form-body--fixed-height{height:120px}
+
+/* ── Custom label width ── */
+.form-body--label-w80 .form-body__label{width:80px}
+.form-body--label-w120 .form-body__label{width:120px}
+
+/* ── IconText right button (上图标下文字) ── */
+.icon-text-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:4px 8px}
+.icon-text-btn__icon{font-size:20px;color:var(--text-default);line-height:1;display:flex;align-items:center;justify-content:center}
+.icon-text-btn__text{font-size:10px;font-weight:var(--font-weight-regular);color:var(--text-default);line-height:normal;font-feature-settings:"zero"}
+
+/* Upload placeholder */
+.form-body__upload{width:64px;height:64px;border:1px dashed var(--border-neutral-l2);border-radius:var(--radius-8);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;-webkit-tap-highlight-color:transparent;flex-shrink:0}
+.form-body__upload:active{background:var(--bg-state-pressed)}
+.form-body__upload-icon{font-size:20px;color:var(--text-tertiary);display:flex;align-items:center;justify-content:center}
+.form-body__upload-text{font-size:var(--body-xs-font-size);color:var(--text-tertiary);font-weight:var(--font-weight-regular);line-height:normal;font-feature-settings:"zero"}
+
+/* Icon actions (horizontal) */
+.form-body__icon-actions{display:flex;align-items:center;gap:16px;flex-shrink:0}
+.form-body__icon-action{display:flex;align-items:center;justify-content:center;width:var(--size-32);height:var(--size-32);cursor:pointer;-webkit-tap-highlight-color:transparent;border-radius:var(--radius-6)}
+.form-body__icon-action:active{background:var(--bg-state-pressed)}
+.form-body__icon-action i{font-size:20px;color:var(--text-default);display:flex;align-items:center;justify-content:center}
+
+/* Radio horizontal group in form */
+.form-body__radio-group{display:flex;align-items:center;gap:24px}
+.form-body__radio-item{display:flex;align-items:center;gap:8px;cursor:pointer}
+.form-body__radio-item span{font-size:var(--body-lg-font-size);font-weight:var(--font-weight-regular);color:var(--text-default);line-height:var(--body-lg-line-height);font-feature-settings:"zero"}
+
+/* Tag horizontal group in form */
+.form-body__tag-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
+/* Dropdown expanded area */
+.form-dropdown{background:var(--bg-surface);padding:8px 16px 12px;border-top:none}
+.form-dropdown__item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;cursor:pointer;border-radius:var(--radius-6)}
+.form-dropdown__item:active{background:var(--bg-state-pressed)}
+.form-dropdown__item-text{font-size:var(--body-lg-font-size);font-weight:var(--font-weight-regular);color:var(--text-default);line-height:var(--body-lg-line-height);font-feature-settings:"zero"}
+.form-dropdown__item-check{width:16px;height:16px;color:var(--text-brand);display:flex;align-items:center;justify-content:center}
+
+/* Switch in form */
+.form-body__switch-wrap{display:flex;align-items:center;justify-content:flex-end}
+
+/* Expand content area */
+.form-body__expand-content{font-size:var(--body-md-font-size);font-weight:var(--font-weight-regular);color:var(--text-secondary);line-height:var(--body-md-line-height);padding:0 0 4px;font-feature-settings:"zero"}
+
+/* ── Image ─────────────────────────────────────────────────── */
+/* @anatomy
+   <span class="label">xs</span><div class="wg-image wg-image--xs demo-img-1"><div class="wg-image__src is-loaded">
+*/
+.wg-image { position:relative; display:block; overflow:hidden; flex-shrink:0; background:var(--bg-placeholder); box-sizing:border-box; }
+    .wg-image--xs { width:var(--size-16); height:var(--size-16); }
+    .wg-image--sm { width:var(--size-32); height:var(--size-32); }
+    .wg-image--md { width:var(--size-64); height:var(--size-64); }
+    .wg-image--lg { width:var(--size-104); height:var(--size-104); }
+    .wg-image--xl { width:var(--size-72); height:var(--size-72); }
+    .wg-image__src { display:block; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity var(--duration-normal) var(--ease-standard); }
+    .wg-image__src.is-loaded { opacity:1; }
+    .wg-image--contain .wg-image__src { object-fit:contain; }
+    .wg-image--rounded-sm { border-radius:var(--radius-6); }
+    .wg-image--rounded-md { border-radius:var(--radius-8); }
+    .wg-image--rounded-lg { border-radius:var(--radius-12); }
+    .wg-image--circle { border-radius:var(--radius-full); }
+    .wg-image--transparent { background:transparent; }
+    .wg-image__placeholder { position:absolute; inset:0; display:none; align-items:center; justify-content:center; color:var(--text-disabled); font-size:var(--body-xs-font-size); font-weight:var(--font-weight-regular); }
+    .wg-image--error .wg-image__placeholder { display:flex; }
+    .wg-image--error .wg-image__src { opacity:0; }
+    .wg-image__overlay { position:absolute; inset:0; background:var(--bg-mask-press); display:none; pointer-events:none; }
+    .wg-image--clickable { cursor:pointer; }
+    .wg-image--clickable:active .wg-image__overlay { display:block; }
+    .wg-image--loading { background:var(--bg-placeholder); }
+    .wg-image--custom-rect { width: 180px; height: 120px; }
+    .wg-image--custom-wide { width: 260px; height: 160px; }
+    .wg-image__placeholder::before { content: ""; width: 24px; height: 24px; border: 2px solid var(--text-disabled); border-radius: var(--radius-6); opacity: 0.5; }
+
+/* ── Input ─────────────────────────────────────────────────── */
+/* @anatomy
+   <div class="input-group"> <span class="field-label">手机号</span> <div class="input-wrapper"> <input type="text" placeholder="请输入手机号码"> <button type="button" class="input-clear"><i class="icon-yuancha-mian"></i></button>
+*/
+.input-group { display: flex; flex-direction: column; gap: var(--spacer-8); width: 100%; max-width: 320px; flex-shrink: 0; position: relative; }
+.input-group .field-label { font-size: var(--body-md-font-size); font-weight: var(--font-weight-medium); color: var(--text-default); line-height: var(--body-md-line-height); white-space: nowrap; }
+.input-group input, .input-group textarea { width: 100%; box-sizing: border-box; border: 1px solid var(--border-neutral-l2); border-radius: var(--radius-6); background: var(--bg-surface); color: var(--text-default); font-size: 14px; font-family: var(--body-md-font-family); line-height: 14px; padding: 0 12px; outline: none; transition: border-color var(--duration-fast) var(--ease-standard); }
+.input-group input { height: 36px; }
+.input-group textarea { min-height: 96px; resize: vertical; padding: 8px; }
+.input-group input::placeholder, .input-group textarea::placeholder { color: var(--text-placeholder); }
+.input-group input:focus, .input-group textarea:focus { border-color: var(--text-brand); }
+.input-group.is-error input, .input-group.is-error textarea { border-color: var(--status-danger-default); color: var(--status-danger-default); }
+.input-group.is-disabled input, .input-group.is-disabled textarea { background: var(--bg-muted); color: var(--text-disabled); cursor: not-allowed; }
+.input-group.is-disabled .field-label { color: var(--text-disabled); }
+
+/* ── Input Wrapper & Clear Button ─────────────────────────── */
+.input-wrapper { position: relative; }
+.input-wrapper input { padding-right: 36px; }
+.input-clear { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); display: none; background: none; border: none; cursor: pointer; padding: 4px; line-height: 1; }
+.input-clear i { font-family: "wego-iconfont-s"; font-size: 16px; font-style: normal; color: var(--text-placeholder); }
+.input-group.is-error .input-clear i { color: var(--status-danger-default); }
+.input-group.is-disabled .input-clear { display: none !important; }
+
+/* ── Field Error ───────────────────────────────────────────── */
+.field-error { position: absolute; top: 100%; left: 0; margin-top: 0; white-space: nowrap; display: none; font-size: var(--body-xs-font-size); color: var(--status-danger-default); }
+.input-group.is-error .field-error { display: block; }
+
+/* ── Number Input (数字输入框) ──────────────────────────────── */
+.number-input { display: flex; align-items: center; gap: var(--spacer-8); width: 120px; min-width: 80px; max-width: 128px; height: var(--size-32); padding: 6px var(--spacer-8); background: var(--bg-subtle); border: 0.5px solid var(--border-neutral-l2); border-radius: var(--radius-6); box-sizing: border-box; transition: border-color var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard); }
+.number-input__field { flex: 1 1 0; min-width: 0; border: none; outline: none; background: transparent; text-align: center; font-family: var(--number-md-font-family); font-size: var(--body-lg-font-size); font-weight: var(--font-weight-medium); color: var(--text-default); line-height: 20px; padding: 0; font-feature-settings: "zero"; }
+.number-input__field::placeholder { color: var(--text-disabled); font-size: var(--body-md-font-size); font-weight: var(--font-weight-regular); }
+.number-input__suffix { flex-shrink: 0; font-size: var(--body-md-font-size); font-weight: var(--font-weight-regular); color: var(--text-secondary); text-align: right; white-space: nowrap; font-feature-settings: "zero"; }
+/* Focus */
+.number-input.is-focus { border-color: var(--text-default); }
+/* Error */
+.number-input.is-error { background: var(--status-danger-surface-l1); border-color: var(--border-danger); }
+.number-input.is-error .number-input__field { color: var(--status-danger-default); }
+/* Disabled */
+.number-input.is-disabled { opacity: 0.5; pointer-events: none; }
+
+/* ── Link ──────────────────────────────────────────────────── */
+/* @anatomy
+   <span class="label">纯文本</span> <a class="link" href="javascript:void(0)">View details</a>
+*/
+/* ── Link (Standalone) ── */
+.link { display:inline-flex; align-items:center; height:20px; gap:var(--spacer-4); color:var(--text-link); font-size:var(--body-md-font-size); font-weight:var(--font-weight-medium); line-height:var(--body-md-line-height); cursor:pointer; text-decoration:none; transition:background var(--duration-fast) var(--ease-standard), opacity var(--duration-fast) var(--ease-standard); border-radius:0; padding:0 var(--spacer-4); user-select:none; -webkit-tap-highlight-color:transparent; }
+/* Pressed state — 无圆角 */
+.link:active { background:var(--bg-overlay-l2); }
+/* Disabled state */
+.link--disabled { opacity:0.2; pointer-events:none; cursor:not-allowed; }
+.link--disabled:active { background:transparent; }
+
+/* ── LinkSpan (Inline) ── */
+.link--inline { height:auto; padding:0; }
+.link--inline:active { background:var(--bg-overlay-l2); }
+
+/* ── Navbar ────────────────────────────────────────────────── */
+/* @anatomy
+   <div class="pv-header"><h1>导航栏</h1><p>顶部导航，支持返回/关闭、居中/左对齐标题、右侧操作区。</p></div>
+*/
+/* ── NavBar (导航栏) ── */
+
+/* @anatomy
+   <div class="navbar">
+     <div class="navbar__status-bar"><span>状态栏</span></div>
+     <div class="navbar__body [navbar__body--spaced]">
+       <div class="navbar__left">...</div>
+       <div class="navbar__center">...</div>
+       <div class="navbar__right">...</div>
+     </div>
+   </div>
+*/
+.navbar { width: 375px; background: var(--bg-surface); flex-shrink: 0; }
+/* Status Bar — 44px placeholder */
+.navbar__status-bar { height: 44px; display: flex; align-items: center; justify-content: center; background: var(--bg-muted); }
+.navbar__status-bar-text { font-size: var(--body-xs-font-size); color: var(--text-tertiary); }
+/* Body — 44px grid */
+.navbar__body { height: 44px; display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); align-items: center; }
+/* Left area — col 1-3 */
+.navbar__left { grid-column: 1 / 4; display: flex; align-items: center; padding-left: 8px; gap: 4px; height: 100%; }
+.navbar__left-btn { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; cursor: pointer; flex-shrink: 0; }
+.navbar__left-btn:active { opacity: 0.6; }
+.navbar__left-btn .wego-iconfont-s { font-size: 24px; color: var(--text-default); }
+.navbar__left-text { font-size: var(--body-lg-font-size); color: var(--text-default); cursor: pointer; padding: 0 4px; }
+.navbar__left-text:active { opacity: 0.6; }
+/* Center area — col 4-7 (standard) */
+.navbar__center { grid-column: 4 / 8; display: flex; align-items: center; justify-content: center; gap: 4px; min-width: 120px; overflow: hidden; padding: 0 8px; }
+.navbar__center--wide { grid-column: 1 / 6; justify-content: flex-start; padding-left: 16px; }
+.navbar__title { font-size: var(--heading-sm-font-size); font-weight: var(--font-weight-medium); color: var(--text-default); line-height: 1.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Right area — col 8-10 (standard) */
+.navbar__right { grid-column: 8 / 11; display: flex; align-items: center; justify-content: flex-end; gap: 0; padding-right: 4px; height: 100%; }
+.navbar__right--wide { grid-column: 6 / 11; padding-right: 8px; }
+/* Spaced variant: 16px left/right padding */
+.navbar__body--spaced .navbar__left { padding-left: 16px; }
+.navbar__body--spaced .navbar__right { padding-right: 16px; }
+/* Action button items */
+.navbar__action { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 44px; height: 44px; cursor: pointer; position: relative; flex-shrink: 0; }
+.navbar__action:active { opacity: 0.6; }
+.navbar__action-icon { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
+.navbar__action-icon .wego-iconfont-s { font-size: 20px; color: var(--text-default); }
+.navbar__action-label { font-size: var(--body-xs-font-size); color: var(--text-default); line-height: 1; white-space: nowrap; }
+/* Text action */
+.navbar__action--text { width: auto; padding: 0 8px; }
+.navbar__action--text .navbar__action-label { font-size: var(--body-lg-font-size); }
+/* Button action */
+.navbar__action--button { width: auto; padding: 0; }
+.navbar__action-btn { height: 32px; min-width: 32px; max-width: 120px; padding: 0 8px; border-radius: var(--radius-6); background: var(--bg-brand); color: var(--text-inverse); font-size: var(--body-md-font-size); font-weight: var(--font-weight-medium); font-family: var(--body-md-font-family); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; white-space: nowrap; }
+.navbar__action-btn:active { background: var(--bg-brand-disabled); }
+
+/* ── Radio ─────────────────────────────────────────────────── */
+/* @anatomy
+   <span class="label">选项</span> <div class="radio radio--checked" onclick="selectRadio(this)" data-group="demo1"> <div class="radio__inner">
+*/
+.radio { width:24px; height:24px; display:flex; align-items:center; justify-content:center; flex-shrink:0; position:relative; cursor:pointer; }
+.radio__inner { width:20px; height:20px; border-radius:50%; border:1.5px solid var(--border-control); background:transparent; box-sizing:border-box; transition:border-color var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard); }
+.radio__dot { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:11px; height:11px; border-radius:50%; background:var(--bg-brand); display:none; }
+
+.radio--checked .radio__inner { border-color:var(--text-brand); }
+.radio--checked .radio__dot { display:block; }
+
+/* 20px = 24px * 5/6; inner: ~16.5px; dot: 11*(5/6)≈9px */
+.radio--sm { width:20px; height:20px; }
+.radio--sm .radio__inner { width:16.5px; height:16.5px; }
+.radio--sm .radio__dot { width:9px; height:9px; }
+
+/* Disabled — unchecked: subtle border + disabled surface */
+.radio--disabled:not(.radio--checked) { pointer-events:none; cursor:not-allowed; }
+.radio--disabled:not(.radio--checked) .radio__inner { border-color:var(--border-disabled); background:var(--bg-control-disabled); }
+/* Disabled — checked: subtle border + bg; dot matches border */
+.radio--checked.radio--disabled { pointer-events:none; cursor:not-allowed; }
+.radio--checked.radio--disabled .radio__inner { border-color:var(--border-disabled); background:var(--bg-control-disabled); }
+.radio--checked.radio--disabled .radio__dot { background:var(--border-disabled); }
+
+/* Dark mode overrides for .dark context */
+.dark .radio .radio__inner { border-color:var(--border-control); }
+.dark .radio--disabled:not(.radio--checked) .radio__inner { border-color:var(--border-disabled); background:var(--bg-control-disabled); }
+.dark .radio--checked.radio--disabled .radio__inner { border-color:var(--border-control-disabled); background:var(--bg-control-disabled); }
+.dark .radio--checked.radio--disabled .radio__dot { background:var(--border-control-disabled); }
+
+/* ── Stack ─────────────────────────────────────────────────── */
+/* @anatomy
+   <span class="label">未选中</span> <div class="stack"> <div class="stack__bg">
+*/
+.stack{display:inline-flex;flex-direction:column;align-items:center;gap:4px;box-sizing:border-box;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.stack__bg{display:flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border:1px solid var(--border-control-disabled);border-radius:var(--radius-4);background:var(--bg-surface);transition:background var(--duration-fast) var(--ease-standard),border-color var(--duration-fast) var(--ease-standard)}
+.stack--selected .stack__bg{background:var(--bg-brand);border-color:var(--text-brand)}
+.stack__check-badge{display:none;align-items:center;justify-content:center;width:16px;height:16px}
+.stack--selected .stack__check-badge{display:flex}
+.stack__check-badge img{display:block;width:16px;height:16px}
+.stack__label{font-family:var(--body-md-font-family);font-size:var(--body-md-font-size);font-weight:var(--font-weight-regular);line-height:var(--body-md-line-height);color:var(--text-default);text-align:center;font-feature-settings:"zero"}
+
+/* ── Switch ────────────────────────────────────────────────── */
+/* @anatomy
+   <span class="label">开启 (On)</span> <div class="switch switch--on"><div class="switch__thumb">
+*/
+.switch{position:relative;display:inline-flex;align-items:center;width:52px;height:32px;box-sizing:border-box;border-radius:100px;background:var(--bg-control-off);cursor:pointer;flex-shrink:0;transition:background var(--duration-fast) var(--ease-standard);-webkit-tap-highlight-color:transparent}
+.switch--on{background:var(--bg-brand)}
+.switch--off{background:var(--bg-control-off)}
+.switch__thumb{position:absolute;top:2px;left:2px;width:28px;height:28px;border-radius:50%;background:var(--text-inverse);box-shadow:var(--shadow-control-thumb);transition:left var(--duration-fast) var(--ease-standard)}
+.switch--on .switch__thumb{left:22px}
+.switch--off .switch__thumb{left:2px}
+.switch--disabled{opacity:0.4;pointer-events:none;cursor:not-allowed}
+
+/* ── Tag ───────────────────────────────────────────────────── */
+/* @anatomy
+   <span class="label">灰色底</span> <div class="tag tag--20 tag--gray"><span class="tag__label">标签文字</span>
+*/
+.tag { display:inline-flex; align-items:center; justify-content:center; gap:var(--spacer-4); font-family:var(--body-md-font-family); font-weight:var(--font-weight-regular); white-space:nowrap; flex-shrink:0; font-feature-settings:"zero"; }
+
+.tag--20 { height:20px; min-height:20px; min-width:36px; font-size:var(--body-sm-font-size); border-radius:var(--radius-4); padding:0 6px; }
+.tag--20.tag--gray { background:var(--bg-subtle); color:var(--text-secondary); }
+.tag--20.tag--white { background:var(--bg-surface); color:var(--text-secondary); border:0.5px solid var(--border-neutral-l2); }
+.tag--20.tag--brand-stroke { background:var(--bg-surface); color:var(--text-brand); border:0.5px solid var(--border-brand); }
+
+.tag--24 { height:var(--size-24); min-height:var(--size-24); min-width:var(--size-40); font-size:var(--body-sm-font-size); border-radius:var(--radius-16); padding:0 var(--spacer-12); }
+.tag--24.tag--gray.tag--normal { background:var(--bg-subtle); color:var(--text-secondary); }
+.tag--24.tag--white.tag--normal { background:var(--bg-surface); color:var(--text-secondary); border:0.5px solid var(--border-neutral-l2); }
+.tag--24.tag--gray.tag--pressed { background:var(--bg-state-selected); color:var(--text-secondary); }
+.tag--24.tag--white.tag--pressed { background:var(--bg-state-hover); color:var(--text-secondary); border:0.5px solid var(--border-neutral-l2); }
+
+.tag--28 { height:var(--size-28); min-height:var(--size-28); min-width:var(--size-48); font-size:var(--body-sm-font-size); border-radius:var(--radius-16); padding:0 var(--spacer-12); }
+.tag--28.tag--gray.tag--normal { background:var(--bg-subtle); color:var(--text-secondary); }
+.tag--28.tag--white.tag--normal { background:var(--bg-surface); color:var(--text-secondary); border:0.5px solid var(--border-neutral-l2); }
+.tag--28.tag--gray.tag--pressed { background:var(--bg-state-selected); color:var(--text-secondary); }
+.tag--28.tag--white.tag--pressed { background:var(--bg-state-hover); color:var(--text-secondary); border:0.5px solid var(--border-neutral-l2); }
+.tag--28.tag--gray.tag--disabled { background:var(--bg-subtle); color:var(--text-disabled); }
+.tag--28.tag--white.tag--disabled { background:var(--bg-surface); color:var(--text-disabled); border:0.5px solid var(--border-neutral-l2); }
+.tag--28.tag--brand.tag--selected { background:var(--bg-brand-surface-l1); color:var(--text-brand); font-weight:var(--font-weight-medium); }
+.tag--28.tag--brand.tag--selected-pressed { background:var(--bg-brand-surface-l2); color:var(--text-brand); font-weight:var(--font-weight-medium); }
+.tag--28.tag--closable { padding:0 var(--spacer-8) 0 var(--spacer-12); }
+.tag--28.tag--brand.tag--selected.tag--closable .tag__close svg,
+.tag--28.tag--brand.tag--selected-pressed.tag--closable .tag__close svg { stroke:var(--text-brand); }
+
+.tag--32 { height:var(--size-32); min-height:var(--size-32); min-width:52px; font-size:var(--body-md-font-size); border-radius:var(--radius-16); padding:0 var(--spacer-12); }
+.tag--32.tag--gray.tag--normal { background:var(--bg-subtle); color:var(--text-secondary); }
+.tag--32.tag--white.tag--normal { background:var(--bg-surface); color:var(--text-secondary); border:0.5px solid var(--border-neutral-l2); }
+.tag--32.tag--gray.tag--pressed { background:var(--bg-state-selected); color:var(--text-secondary); }
+.tag--32.tag--white.tag--pressed { background:var(--bg-state-hover); color:var(--text-secondary); border:0.5px solid var(--border-neutral-l2); }
+.tag--32.tag--gray.tag--disabled { background:var(--bg-subtle); color:var(--text-disabled); }
+.tag--32.tag--white.tag--disabled { background:var(--bg-surface); color:var(--text-disabled); border:0.5px solid var(--border-neutral-l2); }
+.tag--32.tag--brand.tag--selected { background:var(--bg-brand-surface-l1); color:var(--text-brand); font-weight:var(--font-weight-medium); }
+.tag--32.tag--brand.tag--selected-pressed { background:var(--bg-brand-surface-l2); color:var(--text-brand); font-weight:var(--font-weight-medium); }
+.tag--32.tag--closable { padding:0 var(--spacer-8) 0 var(--spacer-12); }
+.tag--32.tag--brand.tag--selected.tag--closable .tag__close svg,
+.tag--32.tag--brand.tag--selected-pressed.tag--closable .tag__close svg { stroke:var(--text-brand); }
+
+.tag--32-add { height:var(--size-32); min-height:var(--size-32); min-width:52px; font-size:var(--body-md-font-size); border-radius:var(--radius-16); padding:0 var(--spacer-12) 0 var(--spacer-8); }
+.tag--32-add.tag--gray.tag--normal { background:var(--bg-subtle); color:var(--text-secondary); }
+.tag--32-add.tag--white.tag--normal { background:var(--bg-surface); color:var(--text-secondary); border:0.5px solid var(--border-neutral-l2); }
+.tag--32-add.tag--gray.tag--pressed { background:var(--bg-state-selected); color:var(--text-secondary); }
+.tag--32-add.tag--white.tag--pressed { background:var(--bg-state-hover); color:var(--text-secondary); border:0.5px solid var(--border-neutral-l2); }
+.tag--32-add.tag--gray.tag--disabled { background:var(--bg-subtle); color:var(--text-disabled); }
+.tag--32-add.tag--white.tag--disabled { background:var(--bg-surface); color:var(--text-disabled); border:0.5px solid var(--border-neutral-l2); }
+
+.tag__label { flex:1 1 0; min-width:0; overflow:hidden; text-overflow:ellipsis; text-align:center; }
+.tag__close { display:flex; align-items:center; justify-content:center; width:var(--size-16); height:var(--size-16); flex-shrink:0; cursor:pointer; color:var(--text-secondary); }
+.tag__close svg { width:var(--size-16); height:var(--size-16); }
+.tag__icon-left { display:flex; align-items:center; justify-content:center; width:var(--size-16); height:var(--size-16); flex-shrink:0; }
+.tag__icon-left svg { width:100%; height:100%; }
+
+.tag--coupon { height:16px; min-width:28px; border-radius:2px; padding:0 4px; background:var(--bg-inverse-surface-l1); border:0.5px solid var(--border-promotion-strong); color:var(--text-promotion-strong); font-size:var(--body-xs-font-size); line-height:normal; overflow:hidden; display:inline-flex; align-items:center; justify-content:center; font-family:var(--body-md-font-family); white-space:nowrap; font-feature-settings:"zero"; }

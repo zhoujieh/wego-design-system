@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>角标 — 微购设计系统</title>
+  <link rel="stylesheet" href="../colors_and_type.css">
+  <link rel="stylesheet" href="../scaffold.css">
+  <link rel="stylesheet" href="../iconfont.css">
+  <style>
+    /* Demo helpers */
+    .demo-host-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+    }
+    .demo-host {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      overflow: visible;
+      flex-shrink: 0;
+    }
+    .demo-host--icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-12);
+      background: var(--bg-surface);
+      border: 0.5px solid var(--border-neutral-l2);
+      color: var(--text-default);
+      font-size: 22px;
+    }
+    .demo-host--avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-full);
+      background: var(--bg-brand-surface-l1);
+      color: var(--text-brand);
+      font-size: var(--body-md-font-size);
+      font-weight: var(--font-weight-medium);
+    }
+    .demo-host--card {
+      width: 96px;
+      height: 72px;
+      border-radius: var(--radius-8);
+      background: linear-gradient(135deg, var(--bg-overlay-l2), var(--bg-state-selected));
+      border: 0.5px solid var(--border-neutral-l2);
+    }
+    .demo-host--nav {
+      width: 72px;
+      height: 60px;
+      padding-top: 8px;
+      border-radius: var(--radius-8);
+      background: var(--bg-surface);
+      border: 0.5px solid var(--border-neutral-l2);
+      flex-direction: column;
+      gap: 4px;
+      color: var(--text-default);
+      font-size: var(--body-xs-font-size);
+    }
+    .demo-host--nav i {
+      font-size: 20px;
+      line-height: 1;
+    }
+    .demo-inline-copy {
+      font-size: var(--body-md-font-size);
+      color: var(--text-default);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .demo-inline-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 88px;
+      height: 32px;
+      padding: 0 12px;
+      border-radius: var(--radius-full);
+      background: var(--bg-brand-surface-l1);
+      color: var(--text-brand);
+      font-size: var(--body-md-font-size);
+      font-weight: var(--font-weight-medium);
+    }
+    .demo-inline-cell {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 16px;
+      height: 48px;
+      background: var(--bg-surface);
+      border: 0.5px solid var(--border-neutral-l2);
+      border-radius: var(--radius-8);
+    }
+    .demo-inline-cell__text {
+      font-size: var(--body-md-font-size);
+      color: var(--text-default);
+    }
+    .demo-inline-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+    .demo-badge-orange {
+      --badge-text-bg: #FA9D3B;
+      --badge-text-color: var(--text-inverse);
+    }
+    .demo-badge-green {
+      --badge-text-bg: var(--accent-green);
+      --badge-text-color: var(--text-inverse);
+    }
+    .demo-badge-red {
+      --badge-text-bg: var(--status-danger-default);
+      --badge-text-color: var(--text-inverse);
+    }
+    .demo-badge-wide {
+      --badge-scroll-width: 128px;
+    }
+
+    /* @component-css-start */
+    .badge {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      flex-shrink: 0;
+      min-width: 16px;
+      height: 16px;
+      padding: 0 4px;
+      border: 0.5px solid var(--palette-neutral-100);
+      border-radius: var(--radius-full);
+      background: var(--status-danger-default);
+      color: var(--text-inverse);
+      font-family: var(--body-md-font-family);
+      font-size: var(--body-xs-font-size);
+      font-weight: var(--font-weight-medium);
+      line-height: 1;
+      white-space: nowrap;
+      vertical-align: middle;
+      overflow: hidden;
+    }
+    .badge--inline {
+      position: relative;
+      inset: auto;
+      transform: none;
+    }
+    .badge--corner {
+      position: absolute;
+      top: 0;
+      right: 0;
+      transform: translate(50%, -50%);
+      z-index: 1;
+    }
+    .badge--corner.badge--dot {
+      transform: translate(18%, -18%);
+    }
+    .badge--dot {
+      width: 8px;
+      min-width: 8px;
+      height: 8px;
+      padding: 0;
+      border-radius: var(--radius-full);
+    }
+    .badge--number {
+      min-width: 16px;
+      padding: 0 4px;
+      font-family: var(--number-md-font-family);
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .badge--number-multi {
+      min-width: 22px;
+      padding: 0 5px;
+    }
+    .badge--text {
+      --badge-text-bg: var(--accent-green);
+      --badge-text-color: var(--text-inverse);
+      min-width: 0;
+      background: var(--badge-text-bg);
+      color: var(--badge-text-color);
+    }
+    .badge--text.badge--inline {
+      padding: 0 4px;
+      border-radius: var(--radius-full);
+    }
+    .badge--text.badge--corner {
+      padding: 0 4px;
+      border-radius: 8px 8px 8px 1px;
+    }
+    .badge--remove {
+      width: 16px;
+      min-width: 16px;
+      padding: 0;
+      border-radius: var(--radius-full);
+      background: var(--status-danger-default);
+      color: var(--text-inverse);
+    }
+    .badge__remove-line {
+      width: 6px;
+      height: 1px;
+      border-radius: var(--radius-full);
+      background: currentColor;
+    }
+    .badge--scrollable {
+      --badge-scroll-width: var(--size-96);
+      width: var(--badge-scroll-width);
+      justify-content: flex-start;
+      overflow: hidden;
+    }
+    .badge__text {
+      display: inline-block;
+      flex-shrink: 0;
+    }
+    .badge__marquee {
+      display: inline-flex;
+      align-items: center;
+      min-width: max-content;
+      animation: badge-marquee 4s linear infinite;
+      will-change: transform;
+    }
+    .badge__marquee-group {
+      display: inline-flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .badge__marquee-group .badge__text {
+      padding-right: 16px;
+    }
+    .badge__marquee-group .badge__text:last-child {
+      padding-right: 0;
+    }
+    @keyframes badge-marquee {
+      0% {
+        transform: translateX(0);
+      }
+      100% {
+        transform: translateX(-50%);
+      }
+    }
+    /* @component-css-end */
+  </style>
+</head>
+<body>
+  <div class="pv-header">
+    <h1>角标</h1>
+    <p>文字角标默认使用绿色，可通过 CSS 变量自定义颜色；滚动宽度默认 96px，也支持覆盖。</p>
+  </div>
+
+  <div class="pv-section">
+    <div class="pv-section__title">默认挂载：右上角角标</div>
+    <div class="pv-section__sub">业务未额外指定时，Badge 默认附着在宿主右上角。红点会比其它类型更贴边，和宿主形成 1-2px 的轻微重叠。</div>
+
+    <div class="row">
+      <span class="label">图标宿主</span>
+      <div class="demo-host-row">
+        <div class="demo-host demo-host--icon">
+          <i class="wego-iconfont-s icon-xiaoxi"></i>
+          <span class="badge badge--corner badge--dot"></span>
+        </div>
+        <div class="demo-host demo-host--icon">
+          <i class="wego-iconfont-s icon-gouwuche"></i>
+          <span class="badge badge--corner badge--number">8</span>
+        </div>
+        <div class="demo-host demo-host--icon">
+          <i class="wego-iconfont-s icon-lingdang"></i>
+          <span class="badge badge--corner badge--text"><span class="badge__text">文字</span></span>
+        </div>
+        <div class="demo-host demo-host--icon">
+          <i class="wego-iconfont-s icon-shoucang"></i>
+          <span class="badge badge--corner badge--remove"><span class="badge__remove-line"></span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <span class="label">头像宿主</span>
+      <div class="demo-host-row">
+        <div class="demo-host demo-host--avatar">
+          张
+          <span class="badge badge--corner badge--dot"></span>
+        </div>
+        <div class="demo-host demo-host--avatar">
+          李
+          <span class="badge badge--corner badge--number badge--number-multi">99+</span>
+        </div>
+        <div class="demo-host demo-host--avatar">
+          王
+          <span class="badge badge--corner badge--text"><span class="badge__text">文字</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <span class="label">图片卡片</span>
+      <div class="demo-host-row">
+        <div class="demo-host demo-host--card">
+          <span class="badge badge--corner badge--text demo-badge-orange"><span class="badge__text">文字</span></span>
+        </div>
+        <div class="demo-host demo-host--card">
+          <span class="badge badge--corner badge--text demo-badge-red"><span class="badge__text">文字</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <span class="label">导航项</span>
+      <div class="demo-host-row">
+        <div class="demo-host demo-host--nav">
+          <i class="wego-iconfont-s icon-shouye"></i>
+          <span>首页</span>
+          <span class="badge badge--corner badge--dot"></span>
+        </div>
+        <div class="demo-host demo-host--nav">
+          <i class="wego-iconfont-s icon-gouwuche"></i>
+          <span>购物车</span>
+          <span class="badge badge--corner badge--number badge--number-multi">99+</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pv-section">
+    <div class="pv-section__title">行内挂载：参与正常文档流</div>
+    <div class="pv-section__sub">行内模式不使用绝对定位。默认文字角标为绿色，也可以通过 CSS 变量覆盖成其它业务色。</div>
+
+    <div class="row">
+      <span class="label">文本旁</span>
+      <span class="demo-inline-copy">
+        待处理消息
+        <span class="badge badge--inline badge--dot"></span>
+        <span class="badge badge--inline badge--number">3</span>
+        <span class="badge badge--inline badge--text"><span class="badge__text">文字</span></span>
+        <span class="badge badge--inline badge--remove"><span class="badge__remove-line"></span></span>
+      </span>
+    </div>
+
+    <div class="row">
+      <span class="label">按钮旁</span>
+      <div class="demo-inline-actions">
+        <span class="demo-inline-button">立即领取</span>
+        <span class="badge badge--inline badge--text demo-badge-orange"><span class="badge__text">文字</span></span>
+      </div>
+    </div>
+
+    <div class="row">
+      <span class="label">列表内容</span>
+      <div class="demo-inline-cell">
+        <span class="demo-inline-cell__text">优惠活动</span>
+        <span class="demo-inline-actions">
+          <span class="badge badge--inline badge--text demo-badge-red"><span class="badge__text">文字</span></span>
+          <span class="badge badge--inline badge--number">5</span>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="pv-section">
+    <div class="pv-section__title">文字循环轮播</div>
+    <div class="pv-section__sub">仅文字类支持循环轮播。默认宽度 96px，可通过 `--badge-scroll-width` 自定义更宽的展示窗口。</div>
+
+    <div class="row">
+      <span class="label">行内默认宽</span>
+      <span class="badge badge--inline badge--text badge--scrollable">
+        <span class="badge__marquee">
+          <span class="badge__marquee-group">
+            <span class="badge__text">新品首发限时补贴</span>
+          </span>
+          <span class="badge__marquee-group" aria-hidden="true">
+            <span class="badge__text">新品首发限时补贴</span>
+          </span>
+        </span>
+      </span>
+      <span class="badge badge--inline badge--text badge--scrollable demo-badge-orange demo-badge-wide">
+        <span class="badge__marquee">
+          <span class="badge__marquee-group">
+            <span class="badge__text">门店联动返券进行中</span>
+          </span>
+          <span class="badge__marquee-group" aria-hidden="true">
+            <span class="badge__text">门店联动返券进行中</span>
+          </span>
+        </span>
+      </span>
+    </div>
+
+    <div class="row">
+      <span class="label">角标默认宽</span>
+      <div class="demo-host-row">
+        <div class="demo-host demo-host--card">
+          <span class="badge badge--corner badge--text badge--scrollable">
+            <span class="badge__marquee">
+              <span class="badge__marquee-group">
+                <span class="badge__text">新品首发限时补贴</span>
+              </span>
+              <span class="badge__marquee-group" aria-hidden="true">
+                <span class="badge__text">新品首发限时补贴</span>
+              </span>
+            </span>
+          </span>
+        </div>
+        <div class="demo-host demo-host--card">
+          <span class="badge badge--corner badge--text badge--scrollable demo-badge-orange demo-badge-wide">
+            <span class="badge__marquee">
+              <span class="badge__marquee-group">
+                <span class="badge__text">门店联动返券进行中</span>
+              </span>
+              <span class="badge__marquee-group" aria-hidden="true">
+                <span class="badge__text">门店联动返券进行中</span>
+              </span>
+            </span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

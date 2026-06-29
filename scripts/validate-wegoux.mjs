@@ -27,7 +27,7 @@ const strict = args.has('--strict');
 const jsonOutput = args.has('--json');
 const repoRoot = process.cwd();
 const rootArg = rawArgs.find(arg => arg.startsWith('--root='));
-const libraryRoot = path.resolve(repoRoot, rootArg ? rootArg.slice('--root='.length) : '.design_library/wegoux');
+const libraryRoot = path.resolve(repoRoot, rootArg ? rootArg.slice('--root='.length) : 'wegoux');
 const rootRel = path.relative(repoRoot, libraryRoot) || '.';
 const scopeArg = rawArgs.find(arg => arg.startsWith('--scope='));
 const requestedScope = args.has('--full')
@@ -127,6 +127,10 @@ const REQUIRED_COMPONENT_CONTRACT_FIELDS = [
   'domAnatomy',
   'provenance',
   'unknowns',
+];
+
+const ALLOWED_OPTIONAL_CONTRACT_FIELDS = [
+  'cssCustomProperties',
 ];
 
 const REQUIRED_PROVENANCE_FIELDS = [
@@ -606,6 +610,10 @@ function checkPreviewPages(slugs, declaredVars, options = {}) {
       continue;
     }
 
+    // 将组件 CSS 块内的局部 --xxx: 声明加入允许集
+    const localVars = extractCssVars(block);
+    for (const localVar of localVars) declaredVars.add(localVar);
+
     const usedVars = extractUsedVars(block);
     for (const used of usedVars) {
       if (!declaredVars.has(used)) {
@@ -699,7 +707,7 @@ function checkComponentsCss(options = {}) {
     }
     const generated = fs.readFileSync(path.join(tmpRoot, 'components.css'), 'utf8');
     if (generated !== css) {
-      add('error', 'components_css.stale', 'components.css 与预览页重新生成结果不一致，请运行 .design_library/wegoux/scripts/extract-components-css.mjs');
+      add('error', 'components_css.stale', 'components.css 与预览页重新生成结果不一致，请运行 wegoux/scripts/extract-components-css.mjs');
     }
   } finally {
     fs.rmSync(tmpParent, { recursive: true, force: true });
@@ -757,7 +765,7 @@ function checkComponentContracts(slugs) {
 
     const actualKeys = Object.keys(contract);
     const missingFields = REQUIRED_COMPONENT_CONTRACT_FIELDS.filter(field => !(field in contract));
-    const extraFields = actualKeys.filter(field => !REQUIRED_COMPONENT_CONTRACT_FIELDS.includes(field));
+    const extraFields = actualKeys.filter(field => !REQUIRED_COMPONENT_CONTRACT_FIELDS.includes(field) && !ALLOWED_OPTIONAL_CONTRACT_FIELDS.includes(field));
     if (missingFields.length > 0) {
       add('error', 'contract.schema_missing_fields', `组件契约缺少 schemaVersion 3 规定字段：${missingFields.join(', ')}`, file);
     }
@@ -1046,7 +1054,7 @@ function checkMetadataVersionGate(context) {
   if (designChanges.length === 0) return;
   const metadataPath = `${rootRel}/metadata.json`;
   if (!designChanges.includes(metadataPath)) {
-    add('error', 'metadata.version_required', `.design_library/wegoux 有变更但 metadata.json 未变更；正式迭代需要递增 version`);
+    add('error', 'metadata.version_required', `wegoux 有变更但 metadata.json 未变更；正式迭代需要递增 version`);
   }
 }
 
