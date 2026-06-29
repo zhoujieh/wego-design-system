@@ -173,6 +173,16 @@ function extractDeclaredVars(cssFilePath) {
   return vars;
 }
 
+function extractDeclaredVarsFromCss(css) {
+  const vars = new Set();
+  const regex = /--([\w\u4e00-\u9fff\u3400-\u4dbf-]+)\s*:/g;
+  let match;
+  while ((match = regex.exec(css)) !== null) {
+    vars.add('--' + match[1]);
+  }
+  return vars;
+}
+
 function findUsedVars(css) {
   const used = new Set();
   // 与 extractDeclaredVars 对齐：变量名支持 CJK 字符（--碧涛青-1）
@@ -268,8 +278,9 @@ function main() {
 
     // Validate var() references
     const usedVars = findUsedVars(componentCSS);
+    const locallyDeclaredVars = extractDeclaredVarsFromCss(componentCSS);
     for (const v of usedVars) {
-      if (declaredVars.size > 0 && !declaredVars.has(v)) {
+      if (declaredVars.size > 0 && !declaredVars.has(v) && !locallyDeclaredVars.has(v)) {
         warnings.push({ file, reason: `Undefined CSS variable: ${v}` });
       }
     }

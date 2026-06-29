@@ -6,55 +6,46 @@
   "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "未读、提醒、促销等轻量角标组件，支持点状、数字和短文案标记。",
+  "description": "轻量状态角标，收敛为红点、数字、文字、移除四类；默认附着在宿主右上角，文字类默认绿色并支持用 CSS 变量自定义颜色。",
   "semanticTypeCandidates": [
     "badge",
     "notification-dot",
     "count-badge",
-    "promo-badge"
+    "text-badge"
   ],
   "variantDimensions": {
     "type": [
       "dot",
       "number",
-      "number-multi",
-      "yellow",
-      "green",
-      "bubble",
-      "delete"
+      "text",
+      "remove"
     ],
     "placement": [
-      "inline",
       "corner",
-      "corner-expand-left",
-      "corner-expand-right",
-      "corner-expand-center"
+      "inline"
     ],
-    "shape": [
-      "round",
-      "sharp"
+    "overflow": [
+      "default",
+      "scrollable"
     ]
   },
   "representativeVariants": [
     {
       "type": "dot",
-      "placement": "corner",
-      "shape": "round"
+      "placement": "corner"
     },
     {
       "type": "number",
-      "placement": "corner-expand-left",
-      "shape": "round"
+      "placement": "corner"
     },
     {
-      "type": "yellow",
-      "placement": "inline",
-      "shape": "sharp"
+      "type": "text",
+      "placement": "corner"
     },
     {
-      "type": "bubble",
+      "type": "text",
       "placement": "inline",
-      "shape": "sharp"
+      "overflow": "scrollable"
     }
   ],
   "anatomy": [
@@ -64,72 +55,87 @@
       "role": "角标容器"
     },
     {
-      "name": "label",
-      "selector": "text node",
-      "role": "数字或短文案"
+      "name": "textLabel",
+      "selector": ".badge__text",
+      "role": "文字内容"
     },
     {
-      "name": "deleteIcon",
-      "selector": ".badge--delete",
-      "role": "删除标记视觉"
+      "name": "removeLine",
+      "selector": ".badge__remove-line",
+      "role": "移除态横线图标"
+    },
+    {
+      "name": "marqueeTrack",
+      "selector": ".badge__marquee",
+      "role": "滚动文字轨道"
     }
   ],
   "structurePatterns": [
-    "数字角标默认单行展示，超过单数字范围切到更宽的多数字样式。",
-    "角标可附着在图标、头像或导航项上，但不改宿主组件结构。",
-    "delete 类型仅表达可清除标记，不独立承担操作按钮角色。"
+    "默认业务挂载使用 corner，Badge 绝对定位在宿主右上角，宿主需提供 position: relative。",
+    "dot 在 corner 下使用更贴边的偏移规则，与宿主形成约 1-2px 的轻微重叠。",
+    "文字类在 corner 下直接使用左上、右上、右下 8px 与左下 1px 的圆角轮廓，在 inline 下固定为跑道圆胶囊形。"
   ],
-  "behavior": {},
-  "accessibility": {},
+  "behavior": {
+    "defaultPlacement": "未显式指定时按 corner 语义处理，默认显示在宿主右上角。",
+    "inlineRule": "inline 模式不使用绝对定位，只与文字、按钮或列表内容并排展示。",
+    "textColorModel": "文字类默认背景色为 var(--accent-green)，可通过 --badge-text-bg 和 --badge-text-color 覆盖任意颜色。",
+    "scrollable": "仅文字类支持 scrollable，默认宽度 96px，可通过 --badge-scroll-width 覆盖；交互为双轨道拼接的持续向左无缝循环轮播。"
+  },
+  "accessibility": {
+    "hostRule": "corner 模式依附宿主元素展示，不单独承担可点击主操作语义。",
+    "contentRule": "数字类优先用于未读数和数量提醒，文字类保持短词短句，自定义颜色时需保证文本对比度。"
+  },
   "usageHints": [
-    "dot 用于轻提醒，number 用于未读数，bubble 用于短促销文案。",
-    "黄色和绿色标签适合业务状态点缀，不抢主操作层级。"
+    "dot 用于轻提醒，number 用于未读或数量，text 用于新品、热卖、补贴等短标签，remove 用于可移除标记。",
+    "在导航、头像、图片卡片上优先使用 corner；在文本旁、按钮旁、列表操作区优先使用 inline。"
   ],
   "doNotInvent": [
     "不要把 badge 扩成长句横幅、统计面板或多行提示气泡。",
-    "不要用 badge 代替真正的按钮或 tab。"
+    "不要在 inline 模式叠加角标定位类，也不要用 remove 替代真正的关闭按钮。"
   ],
   "tokensConsumed": [
     "--accent-green",
-    "--accent-yellow",
-    "--bg-accent-yellow",
-    "--bg-brand-surface-l1",
-    "--bg-overlay-l2",
-    "--bg-state-selected",
     "--body-md-font-family",
-    "--body-md-font-size",
     "--body-xs-font-size",
-    "--border-neutral-l2",
     "--font-weight-medium",
-    "--font-weight-regular",
     "--number-md-font-family",
     "--palette-neutral-100",
-    "--radius-0",
-    "--radius-4",
-    "--radius-6",
     "--radius-full",
     "--status-danger-default",
-    "--text-brand",
-    "--text-disabled",
-    "--text-inverse",
-    "--text-promotion"
+    "--text-inverse"
   ],
   "designTokens": {
     "dotSize": "8px",
-    "minWidth": {
-      "number": "16px",
-      "numberMulti": "28px"
-    },
-    "labelHeight": "16px",
-    "deleteSize": "16px",
-    "radius": {
-      "round": "var(--radius-full)",
-      "sharp": "var(--radius-4)"
-    }
+    "numberMinWidth": "16px",
+    "numberMultiMinWidth": "22px",
+    "textHeight": "16px",
+    "removeSize": "16px",
+    "stroke": "0.5px solid var(--palette-neutral-100)",
+    "numberFont": "12px / 500 / var(--number-md-font-family)",
+    "textDefaultBg": "var(--accent-green)",
+    "scrollWidthDefault": "96px"
   },
+  "cssCustomProperties": [
+    {
+      "name": "--badge-text-bg",
+      "default": "var(--accent-green)",
+      "appliesTo": "文字类背景色"
+    },
+    {
+      "name": "--badge-text-color",
+      "default": "var(--text-inverse)",
+      "appliesTo": "文字类前景色"
+    },
+    {
+      "name": "--badge-scroll-width",
+      "default": "96px",
+      "appliesTo": "scrollable 文字类宽度"
+    }
+  ],
   "specRefs": [
     "specs/交互设计原则.md",
-    "specs/设计风格与品牌原则.md"
+    "specs/设计风格与品牌原则.md",
+    "specs/动效与视觉效果.md"
   ],
   "domAnatomy": {
     "root": ".badge",
@@ -137,12 +143,17 @@
       ".badge--dot",
       ".badge--number",
       ".badge--number-multi",
-      ".badge--corner"
+      ".badge--text",
+      ".badge--remove",
+      ".badge--corner",
+      ".badge--inline",
+      ".badge--scrollable"
     ],
-    "optionalStates": [
-      ".badge--scrollable",
-      ".badge--round",
-      ".badge--sharp"
+    "optionalChildren": [
+      ".badge__text",
+      ".badge__remove-line",
+      ".badge__marquee",
+      ".badge__marquee-group"
     ]
   },
   "provenance": {

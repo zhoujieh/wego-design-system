@@ -22,120 +22,127 @@
 
 /* ── Badge ─────────────────────────────────────────────────── */
 /* @anatomy
-   <span class="label">默认</span> <span class="badge badge--dot"></span> <span class="badge badge--number">3</span> <span class="badge badge--number badge--number-multi">99+</span> <span class="badge badge--yellow">HOT</span> <span class="badge badge--green">新品首发特惠</span> <span class="badge badge--bubble">限时折扣推荐</span> <span class="badge badge--delete"></span>
+   <span class="label">图标宿主</span> <div class="demo-host-row"> <div class="demo-host demo-host--icon"> <i class="wego-iconfont-s icon-xiaoxi"></i> <span class="badge badge--corner badge--dot"></span>
 */
 .badge {
+      position: relative;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       box-sizing: border-box;
-      max-width: 100%;
       flex-shrink: 0;
+      min-width: 16px;
+      height: 16px;
+      padding: 0 4px;
+      border: 0.5px solid var(--palette-neutral-100);
+      border-radius: var(--radius-full);
+      background: var(--status-danger-default);
+      color: var(--text-inverse);
       font-family: var(--body-md-font-family);
-      font-weight: var(--font-weight-regular);
+      font-size: var(--body-xs-font-size);
+      font-weight: var(--font-weight-medium);
       line-height: 1;
       white-space: nowrap;
       vertical-align: middle;
-      font-feature-settings: "zero";
+      overflow: hidden;
     }
-    .badge--dot {
-      width: 8px;
-      height: 8px;
-      min-width: 8px;
-      padding: 0;
-      background: var(--status-danger-default);
-      border-radius: var(--radius-full);
-    }
-    .badge--number {
-      min-width: 16px;
-      height: 16px;
-      padding: 0 4px;
-      background: var(--status-danger-default);
-      color: var(--text-inverse);
-      font-family: var(--number-md-font-family);
-      font-size: var(--body-xs-font-size);
-      font-weight: var(--font-weight-medium);
-      border-radius: var(--radius-full);
-    }
-    .badge--number-multi { min-width: 28px; }
-    .badge--yellow {
-      height: 16px;
-      padding: 0 4px;
-      background: var(--bg-accent-yellow);
-      color: var(--accent-yellow);
-      font-size: var(--body-xs-font-size);
-      border-radius: var(--radius-4);
-    }
-    .badge--green {
-      height: 16px;
-      padding: 0 4px;
-      background: var(--bg-brand-surface-l1);
-      color: var(--text-brand);
-      font-size: var(--body-xs-font-size);
-      border-radius: var(--radius-4);
-    }
-    .badge--bubble {
-      height: 16px;
-      padding: 0 4px;
-      background: var(--text-promotion);
-      color: var(--text-inverse);
-      font-size: var(--body-xs-font-size);
-      border-radius: var(--radius-4);
-    }
-    .badge--delete {
+    .badge--inline {
       position: relative;
-      width: 16px;
-      height: 16px;
-      min-width: 16px;
-      padding: 0;
-      background: var(--text-disabled);
-      border-radius: var(--radius-full);
+      inset: auto;
+      transform: none;
     }
-    .badge--delete::before,
-    .badge--delete::after {
-      content: "";
-      position: absolute;
-      left: 4px;
-      right: 4px;
-      top: 7px;
-      height: 1.5px;
-      background: var(--text-inverse);
-      border-radius: var(--radius-full);
-    }
-    .badge--delete::before { transform: rotate(45deg); }
-    .badge--delete::after { transform: rotate(-45deg); }
     .badge--corner {
       position: absolute;
       top: 0;
       right: 0;
+      transform: translate(50%, -50%);
       z-index: 1;
-      transform: translate(50%, -50%);
     }
-    .badge--round { border-radius: var(--radius-full); }
-    .badge--sharp { border-radius: var(--radius-0); }
-    .badge--align-left { justify-content: flex-start; text-align: left; }
-    .badge--align-center { justify-content: center; text-align: center; }
-    .badge--align-right { justify-content: flex-end; text-align: right; }
+    .badge--corner.badge--dot {
+      transform: translate(18%, -18%);
+    }
+    .badge--dot {
+      width: 8px;
+      min-width: 8px;
+      height: 8px;
+      padding: 0;
+      border-radius: var(--radius-full);
+    }
+    .badge--number {
+      min-width: 16px;
+      padding: 0 4px;
+      font-family: var(--number-md-font-family);
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .badge--number-multi {
+      min-width: 22px;
+      padding: 0 5px;
+    }
+    .badge--text {
+      --badge-text-bg: var(--accent-green);
+      --badge-text-color: var(--text-inverse);
+      min-width: 0;
+      background: var(--badge-text-bg);
+      color: var(--badge-text-color);
+    }
+    .badge--text.badge--inline {
+      padding: 0 4px;
+      border-radius: var(--radius-full);
+    }
+    .badge--text.badge--corner {
+      padding: 0 4px;
+      border-radius: 8px 8px 8px 1px;
+    }
+    .badge--remove {
+      width: 16px;
+      min-width: 16px;
+      padding: 0;
+      border-radius: var(--radius-full);
+      background: var(--status-danger-default);
+      color: var(--text-inverse);
+    }
+    .badge__remove-line {
+      width: 6px;
+      height: 1px;
+      border-radius: var(--radius-full);
+      background: currentColor;
+    }
     .badge--scrollable {
-      max-width: 28px;
-      overflow: hidden;
+      --badge-scroll-width: 96px;
+      width: var(--badge-scroll-width);
       justify-content: flex-start;
-      text-overflow: clip;
+      overflow: hidden;
     }
-    .badge--corner-expand-left {
-      right: 0;
-      transform: translate(0, -50%);
-      transform-origin: right center;
+    .badge__text {
+      display: inline-block;
+      flex-shrink: 0;
     }
-    .badge--corner-expand-right {
-      right: 0;
-      transform: translate(100%, -50%);
-      transform-origin: left center;
+    .badge__marquee {
+      display: inline-flex;
+      align-items: center;
+      min-width: max-content;
+      animation: badge-marquee 4s linear infinite;
+      will-change: transform;
     }
-    .badge--corner-expand-center {
-      right: 0;
-      transform: translate(50%, -50%);
-      transform-origin: center center;
+    .badge__marquee-group {
+      display: inline-flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .badge__marquee-group .badge__text {
+      padding-right: 16px;
+    }
+    .badge__marquee-group .badge__text:last-child {
+      padding-right: 0;
+    }
+    @keyframes badge-marquee {
+      0% {
+        transform: translateX(0);
+      }
+      100% {
+        transform: translateX(-50%);
+      }
     }
 
 /* ── Bottom Nav ────────────────────────────────────────────── */
