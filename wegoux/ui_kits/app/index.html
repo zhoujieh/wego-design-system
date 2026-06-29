@@ -5,37 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="../../colors_and_type.css">
+<link rel="stylesheet" href="../../scaffold.css">
 <link rel="stylesheet" href="../../iconfont.css">
 <link rel="stylesheet" href="../../components.css">
 <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <style>
-/* ═══ Page Layer: UIKit Shell & Phone Frame ═══ */
-html, body {
-  margin: 0;
-  padding: 0;
-  background: var(--bg-page);
-  font-family: var(--body-md-font-family);
-  -webkit-font-smoothing: antialiased;
-}
-
-.uikit-shell {
-  width: 100%;
-  max-width: 1184px;
-  margin: 0 auto;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  padding: var(--spacer-16);
-}
-
 .uikit-sidebar, .uikit-main, .uikit-toolbar { min-width: 0; }
 .uikit-sidebar { overflow: hidden; max-width: 100%; }
 
-[data-component] { min-width: 0; max-width: 100%; overflow: hidden; }
+[data-component] { min-width: 0; max-width: 100%; }
+[data-component]:not([data-component="bottom-nav"]) { overflow: hidden; }
+[data-component="bottom-nav"] { overflow: visible; }
 
 .uikit-responsive-grid {
   display: grid;
@@ -78,29 +60,6 @@ html, body {
   white-space: nowrap;
 }
 
-/* ═══ Phone Frame ═══ */
-.phone-frame {
-  width: 390px;
-  height: 780px;
-  border-radius: 40px;
-  border: 8px solid var(--bg-inverse);
-  overflow: hidden;
-  position: relative;
-  box-shadow: var(--shadow-xl);
-  background: var(--bg-page);
-  flex-shrink: 0;
-}
-
-.phone-screen {
-  width: 100%;
-  height: 100%;
-  border-radius: inherit;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  background: var(--bg-page);
-}
-
 /* ═══ Phone Internal: NavBar, Body, Bottom Nav, Home Indicator ═══ */
 .navbar.uikit-navbar {
   width: 100%;
@@ -125,32 +84,6 @@ html, body {
 
 .navbar.uikit-navbar .navbar__left-btn {
   border-radius: var(--radius-6);
-}
-
-.phone-body {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-}
-
-.phone-body::-webkit-scrollbar { display: none; }
-
-.phone-indicator {
-  height: 34px;
-  background: var(--bg-surface);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.phone-indicator-bar {
-  width: 134px;
-  height: 5px;
-  background: var(--bg-inverse);
-  border-radius: var(--radius-full);
-  opacity: 0.2;
 }
 
 /* ═══ Screen-specific Layout Helpers ═══ */
@@ -265,25 +198,9 @@ html, body {
   font-size: 13px;
   line-height: 1;
 }
-
-/* ═══ Responsive ═══ */
-@media (max-width: 640px) {
-  .uikit-shell {
-    padding: var(--spacer-8);
-    align-items: flex-start;
-  }
-  .phone-frame {
-    width: 100%;
-    height: auto;
-    min-height: 100vh;
-    border-radius: 0;
-    border: none;
-    box-shadow: none;
-  }
-}
 </style>
 </head>
-<body>
+<body class="uikit-page">
 <div class="uikit-shell" data-layout-guard="uikit-v1">
   <div class="phone-frame">
     <div id="root"></div>
@@ -328,44 +245,46 @@ function HomeIndicator() {
 
 /* ═══ Bottom Navigation ═══ */
 function BottomNav({ current, onNavigate }) {
-  const tabs = [
-    { id: 'home', label: '首页', icon: 'dongtai' },
-    { id: 'discover', label: '发现', icon: 'haoyou' },
-    { id: 'cart', label: '购物车', icon: 'gongzuotai' },
-    { id: 'profile', label: '我的', icon: 'wode' }
-  ];
-
-  const handleNav = (id) => {
-    if (id === 'home') {
-      onNavigate(id);
-    }
-    if (id === 'profile') {
-      onNavigate(id);
-    }
-  };
+  const activeTab = current === 'profile' || current === 'bizSettings' ? 'wode' : 'dongtai';
+  const iconSrc = (tab) => `../../assets/icons/tab-${activeTab === tab ? 'active-' : ''}${tab}.svg`;
 
   return (
-    <div data-component="bottom-nav" className="bottom-nav">
-      {tabs.map(tab => (
-        <div
-          key={tab.id}
-          className={`bottom-nav__item${current === tab.id ? ' active' : ''}`}
-          onClick={() => handleNav(tab.id)}
-        >
-          <div className="bottom-nav__icon">
-            <img
-              src={`../../assets/icons/tab-${current === tab.id ? 'active-' : ''}${tab.icon}.svg`}
-              width="32"
-              height="32"
-              alt=""
-            />
-            {tab.id === 'home' && <span className="badge badge--corner badge--dot"></span>}
-            {tab.id === 'cart' && <span className="badge badge--corner badge--number badge--number-multi">99+</span>}
-          </div>
-          <span className="bottom-nav__label">{tab.label}</span>
+    <nav data-component="bottom-nav" className="bottom-nav">
+      <div className={`bottom-nav__item${activeTab === 'dongtai' ? ' active' : ''}`} data-tab="dongtai" onClick={() => onNavigate('home')}>
+        <div className="bottom-nav__icon">
+          <img src={iconSrc('dongtai')} width="32" height="32" alt="" />
         </div>
-      ))}
-    </div>
+        <span className="bottom-nav__label">动态</span>
+      </div>
+      <div className={`bottom-nav__item${activeTab === 'haoyou' ? ' active' : ''}`} data-tab="haoyou">
+        <div className="bottom-nav__icon">
+          <img src={iconSrc('haoyou')} width="32" height="32" alt="" />
+          <span className="badge badge--corner badge--number">6</span>
+        </div>
+        <span className="bottom-nav__label">好友</span>
+      </div>
+      <div className={`bottom-nav__item${activeTab === 'gongzuotai' ? ' active' : ''}`} data-tab="gongzuotai">
+        <div className="bottom-nav__icon">
+          <img src={iconSrc('gongzuotai')} width="32" height="32" alt="" />
+          <span className="badge badge--corner badge--number badge--number-multi">18</span>
+        </div>
+        <span className="bottom-nav__label">工作台</span>
+      </div>
+      <div className={`bottom-nav__item${activeTab === 'xiaoxi' ? ' active' : ''}`} data-tab="xiaoxi">
+        <div className="bottom-nav__icon">
+          <img src={iconSrc('xiaoxi')} width="32" height="32" alt="" />
+          <span className="badge badge--corner badge--number badge--number-multi">45</span>
+        </div>
+        <span className="bottom-nav__label">消息</span>
+      </div>
+      <div className={`bottom-nav__item${activeTab === 'wode' ? ' active' : ''}`} data-tab="wode" onClick={() => onNavigate('profile')}>
+        <div className="bottom-nav__icon">
+          <img src={iconSrc('wode')} width="32" height="32" alt="" />
+          <span className="badge badge--corner badge--dot"></span>
+        </div>
+        <span className="bottom-nav__label">我的</span>
+      </div>
+    </nav>
   );
 }
 
@@ -755,7 +674,7 @@ function App() {
         {screen === 'profile' && <ProfileScreen onBizSettings={() => setScreen('bizSettings')} />}
         {screen === 'bizSettings' && <BizSettingsScreen onBack={() => setScreen('profile')} />}
       </div>
-      <BottomNav current={screen === 'bizSettings' ? 'profile' : screen} onNavigate={setScreen} />
+      <BottomNav current={screen} onNavigate={setScreen} />
       <HomeIndicator />
     </div>
   );

@@ -6,7 +6,7 @@
   "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "移动端应用主 Tab 导航，默认承载五个一层入口并兼容角标提醒。",
+  "description": "移动端应用主 Tab 导航，固定承载“动态、好友、工作台、消息、我的”五个一层入口，并兼容角标提醒。",
   "semanticTypeCandidates": [
     "tab-bar",
     "bottom-navigation",
@@ -24,24 +24,24 @@
       "number-multi"
     ],
     "layout": [
-      "five-tab"
+      "fixed-five-tab"
     ]
   },
   "representativeVariants": [
     {
       "state": "default",
       "badge": "none",
-      "layout": "five-tab"
+      "layout": "fixed-five-tab"
     },
     {
       "state": "active",
       "badge": "none",
-      "layout": "five-tab"
+      "layout": "fixed-five-tab"
     },
     {
       "state": "default",
       "badge": "number",
-      "layout": "five-tab"
+      "layout": "fixed-five-tab"
     }
   ],
   "anatomy": [
@@ -58,7 +58,7 @@
     {
       "name": "icon",
       "selector": ".bottom-nav__icon",
-      "role": "图标与角标承载区"
+      "role": "固定图标与角标承载区"
     },
     {
       "name": "label",
@@ -67,9 +67,11 @@
     }
   ],
   "structurePatterns": [
-    "默认固定五项布局，图标在上、文字在下。",
+    "默认固定五项布局，图标在上、文字在下，顺序为：动态、好友、工作台、消息、我的。",
+    "文案和图标资产是组件固定内容，使用时直接复制 preview 中对应 markup，不通过业务运行时传入动态配置。",
     "角标嵌套在 icon 区，不额外发明导航项结构。",
-    "safe-area 底部补偿由组件自身承担。"
+    "safe-area 底部补偿由组件自身承担。",
+    "root、item 和 icon 承载区保持 overflow: visible，避免角标被组件容器裁剪。"
   ],
   "behavior": {
     "selection": "同一时刻只允许一个激活项。",
@@ -79,14 +81,16 @@
   "accessibility": {
     "role": "tablist 或 navigation",
     "activeState": "激活项需要可感知的选中状态标识。",
-    "labelRule": "图标必须配套中文文案，不使用仅图标导航。"
+    "labelRule": "图标必须配套固定中文文案，不使用仅图标导航。"
   },
   "usageHints": [
     "用于 App 级主框架，不用于弹层、表单或单页局部切换。",
-    "优先保持四到五个一层入口，避免塞入过多业务动作。"
+    "保持固定五个一层入口，避免改成四项、六项或业务动作工具条。",
+    "如果业务页面只需要某几个入口，也不要删除导航项；未接入的入口可暂不绑定跳转。"
   ],
   "doNotInvent": [
     "不要把 bottom-nav 扩成营销浮动工具条、桌面侧边栏或多行导航。",
+    "不要把文案、图标、入口数量做成运行时动态配置。",
     "不要引入 Lucide 或外部图标体系替代库内资产。"
   ],
   "tokensConsumed": [
@@ -106,8 +110,41 @@
     "iconSize": "var(--size-32)",
     "labelFont": "var(--body-xs-font-size) / var(--font-weight-regular)",
     "paddingHorizontal": "var(--spacer-16)",
-    "safeAreaBottom": "env(safe-area-inset-bottom, 0px)"
+    "safeAreaBottom": "env(safe-area-inset-bottom, 0px)",
+    "overflow": "visible"
   },
+  "fixedTabs": [
+    {
+      "key": "dongtai",
+      "label": "动态",
+      "icon": "assets/icons/tab-dongtai.svg",
+      "activeIcon": "assets/icons/tab-active-dongtai.svg"
+    },
+    {
+      "key": "haoyou",
+      "label": "好友",
+      "icon": "assets/icons/tab-haoyou.svg",
+      "activeIcon": "assets/icons/tab-active-haoyou.svg"
+    },
+    {
+      "key": "gongzuotai",
+      "label": "工作台",
+      "icon": "assets/icons/tab-gongzuotai.svg",
+      "activeIcon": "assets/icons/tab-active-gongzuotai.svg"
+    },
+    {
+      "key": "xiaoxi",
+      "label": "消息",
+      "icon": "assets/icons/tab-xiaoxi.svg",
+      "activeIcon": "assets/icons/tab-active-xiaoxi.svg"
+    },
+    {
+      "key": "wode",
+      "label": "我的",
+      "icon": "assets/icons/tab-wode.svg",
+      "activeIcon": "assets/icons/tab-active-wode.svg"
+    }
+  ],
   "specRefs": [
     "specs/交互设计原则.md",
     "specs/布局与间距规范.md"

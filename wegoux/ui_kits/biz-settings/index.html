@@ -5,56 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>业务设置 - 岗位权限</title>
 <link rel="stylesheet" href="../../colors_and_type.css">
-<link rel="stylesheet" href="../../components.css">
+<link rel="stylesheet" href="../../scaffold.css">
 <link rel="stylesheet" href="../../iconfont.css">
+<link rel="stylesheet" href="../../components.css">
 <style>
-/* ═══ Page Layer: UIKit Shell & Phone Frame ═══ */
-html, body {
-  margin: 0;
-  padding: 0;
-  background: var(--bg-page);
-  font-family: var(--body-md-font-family);
-  -webkit-font-smoothing: antialiased;
-}
-
-.uikit-shell {
-  width: 100%;
-  max-width: 1184px;
-  margin: 0 auto;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  padding: var(--spacer-16);
-}
-
-/* ═══ Phone Frame ═══ */
-.phone-frame {
-  width: 390px;
-  height: 780px;
-  border-radius: 40px;
-  border: 8px solid var(--bg-inverse);
-  overflow: hidden;
-  position: relative;
-  box-shadow: var(--shadow-xl);
-  background: var(--bg-page);
-  flex-shrink: 0;
-}
-
-.phone-screen {
-  width: 100%;
-  height: 100%;
-  border-radius: inherit;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  background: var(--bg-page);
-}
-
-/* navbar width fix — component sets width:375px, override for phone-frame */
-.phone-screen .navbar { width: 100%; }
-
 /* ═══ Phone Internal Elements ═══ */
 .phone-status {
   height: 44px;
@@ -67,32 +21,6 @@ html, body {
   font-weight: var(--font-weight-semibold);
   color: var(--text-default);
   flex-shrink: 0;
-}
-
-.phone-body {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-}
-
-.phone-body::-webkit-scrollbar { display: none; }
-
-.phone-indicator {
-  height: 34px;
-  background: var(--bg-surface);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.phone-indicator-bar {
-  width: 134px;
-  height: 5px;
-  background: var(--bg-inverse);
-  border-radius: var(--radius-full);
-  opacity: 0.2;
 }
 
 /* ═══ Layout Helpers ═══ */
@@ -110,25 +38,9 @@ html, body {
 .section-gap {
   height: var(--spacer-8);
 }
-
-/* ═══ Responsive ═══ */
-@media (max-width: 640px) {
-  .uikit-shell {
-    padding: var(--spacer-8);
-    align-items: flex-start;
-  }
-  .phone-frame {
-    width: 100%;
-    height: auto;
-    min-height: 100vh;
-    border-radius: 0;
-    border: none;
-    box-shadow: none;
-  }
-}
 </style>
 </head>
-<body>
+<body class="uikit-page">
 <div class="uikit-shell">
   <div class="phone-frame">
     <div class="phone-screen" id="root"></div>

@@ -6,7 +6,7 @@
   "coreComponentsUsed": ["navbar", "cell", "checkbox", "switch", "avatar", "tag", "link"],
   "supportComponentsUsed": [],
   "previewClassReuseRate": 0.96,
-  "reuseAssessment": "主体内容全部使用已注册组件组合；业务信息头部也已统一回到 avatar + tag + link 语义，当前仅保留 Showcase 外壳类。",
+  "reuseAssessment": "主体内容全部使用已注册组件组合；业务信息头部也已统一回到 avatar + tag + link 语义，Showcase 外壳已统一收敛到 scaffold.css。",
   "inventedComponents": ["phone-status", "phone-indicator"],
   "recommendedRefactors": {},
   "interactiveStatesRendered": ["active", "disabled", "selected", "on", "off"],
@@ -20,7 +20,7 @@
   },
   "warnings": [
     "本 UI Kit 展示业务设置/权限设置的典型页面模式。",
-    "phone-status 和 phone-indicator 为 Showcase 外壳，非通用组件。",
+    "phone-status 为当前页面状态栏展示样式；phone-indicator 等通用 Showcase 外壳由 scaffold.css 提供，非通用组件。",
     "真实项目中使用时应通过底部面板（bottom-sheet）方式从底部滑入。",
     "iconfont 图标用于下拉指示器（icon-xiajiantou16、icon-youjiantou16）。"
   ]

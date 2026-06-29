@@ -1,7 +1,7 @@
 {
   "schemaVersion": 3,
   "library": "wegoux",
-  "headBoilerplate": "<link rel=\"stylesheet\" href=\"../../colors_and_type.css\"><link rel=\"stylesheet\" href=\"../../iconfont.css\"><link rel=\"stylesheet\" href=\"../../components.css\">",
+  "headBoilerplate": "<link rel=\"stylesheet\" href=\"../../colors_and_type.css\"><link rel=\"stylesheet\" href=\"../../scaffold.css\"><link rel=\"stylesheet\" href=\"../../iconfont.css\"><link rel=\"stylesheet\" href=\"../../components.css\">",
   "uiKits": [
     {
       "slug": "app",
@@ -25,7 +25,7 @@
     },
     {
       "slug": "bottom-nav",
-      "reason": "移动端应用主 Tab 固定 slot；适合微信生态 App 主框架。",
+      "reason": "移动端应用主 Tab 固定 slot；固定五项为动态、好友、工作台、消息、我的，适合微信生态 App 主框架。",
       "evidenceFile": "components/bottom-nav.json",
       "previewFile": "preview/component-bottom-nav.html",
       "priority": 2,
@@ -266,7 +266,7 @@
     {
       "slot": "primary-tabbar",
       "slug": "bottom-nav",
-      "reason": "App 主导航固定需求"
+      "reason": "App 主导航固定需求，使用 bottom-nav 固定五项结构"
     },
     {
       "slot": "primary-action",

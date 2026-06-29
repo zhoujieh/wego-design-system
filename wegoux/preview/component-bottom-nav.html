@@ -14,13 +14,13 @@
 /* ── Bottom Nav ──────────────────────────────────────────────── */
 /* @anatomy
    <nav class="bottom-nav">
-     <div class="bottom-nav__item [active]" data-tab="tab-key">
+     <div class="bottom-nav__item [active]" data-tab="dongtai">
        <div class="bottom-nav__icon">
-         [inline svg or img]
+         <img src="../assets/icons/tab-dongtai.svg" width="32" height="32" alt="">
          [<span class="badge badge--corner badge--number [badge--number-multi]">6</span>]
          [<span class="badge badge--corner badge--dot"></span>]
        </div>
-       <span class="bottom-nav__label">Tab</span>
+       <span class="bottom-nav__label">动态</span>
      </div>
    </nav>
 */
@@ -34,6 +34,7 @@
   border-top: 0.5px solid var(--border-neutral-l2);
   padding-bottom: env(safe-area-inset-bottom, 0px);
   flex-shrink: 0;
+  overflow: visible;
 }
 
 .bottom-nav__item {
@@ -49,6 +50,7 @@
   padding: 0 var(--spacer-16);
   color: var(--text-default);
   position: relative;
+  overflow: visible;
 }
 
 .bottom-nav__item.active { color: var(--text-brand); }
@@ -58,6 +60,7 @@
   height: var(--size-32);
   flex-shrink: 0;
   position: relative;
+  overflow: visible;
 }
 
 .bottom-nav__icon svg,
@@ -80,6 +83,10 @@
 /* 直接复用 Badge 组件 class（已通过 components.css 引入）:
    数字角标: <span class="badge badge--corner badge--number [badge--number-multi]">6</span>
    红点:     <span class="badge badge--corner badge--dot"></span> */
+
+/* ── 固定五项说明 ───────────────────────────────────────── */
+/* bottom-nav 是固定主 Tab 组件，文案和图标不作为运行时配置项开放。
+   默认顺序：动态、好友、工作台、消息、我的；使用时直接复制对应 markup 到页面。 */
 
 /* @component-css-end */
 </style>
