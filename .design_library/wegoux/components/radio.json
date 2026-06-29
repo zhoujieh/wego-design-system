@@ -89,13 +89,15 @@
     "不要允许再次点击已选中项回退为空。"
   ],
   "tokensConsumed": [
-    "--color-border-control-default",
-    "--color-border-control-disabled-strong",
-    "--color-border-disabled",
-    "--color-brand",
-    "--color-state-disabled-surface",
+    "--bg-brand",
+    "--bg-control-disabled",
+    "--body-md-font-size",
+    "--border-control",
+    "--border-control-disabled",
+    "--border-disabled",
     "--duration-fast",
-    "--ease-standard"
+    "--ease-standard",
+    "--text-brand"
   ],
   "designTokens": {
     "sizes": {

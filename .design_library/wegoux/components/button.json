@@ -106,28 +106,29 @@
     "不要为单个业务场景新增临时颜色按钮。"
   ],
   "tokensConsumed": [
-    "--color-brand",
-    "--color-brand-disabled",
-    "--color-brand-hover",
-    "--color-neutral-alpha-03",
-    "--color-neutral-alpha-06",
-    "--color-neutral-alpha-10",
-    "--color-text-disabled",
-    "--color-text-inverse",
-    "--color-text-primary",
+    "--bg-brand",
+    "--bg-brand-disabled",
+    "--bg-brand-hover",
+    "--bg-overlay-l1",
+    "--bg-overlay-l2",
+    "--bg-state-selected",
+    "--body-lg-font-size",
+    "--body-md-font-family",
+    "--body-md-font-size",
     "--duration-fast",
     "--ease-standard",
-    "--font-family-text",
-    "--font-size-f14",
-    "--font-size-f16",
-    "--font-size-f18",
     "--font-weight-medium",
-    "--radius-md",
-    "--radius-sm",
+    "--heading-sm-font-size",
+    "--radius-6",
+    "--radius-8",
     "--size-32",
     "--size-40",
     "--size-48",
-    "--space-4"
+    "--spacer-4",
+    "--text-brand",
+    "--text-default",
+    "--text-disabled",
+    "--text-inverse"
   ],
   "designTokens": {
     "sizes": {
@@ -145,14 +146,14 @@
       "sm": "120px"
     },
     "fontSize": {
-      "lg": "var(--font-size-f18)",
-      "md": "var(--font-size-f16)",
-      "sm": "var(--font-size-f14)"
+      "lg": "var(--heading-sm-font-size)",
+      "md": "var(--body-lg-font-size)",
+      "sm": "var(--body-md-font-size)"
     },
     "radius": {
-      "lg": "var(--radius-md)",
-      "md": "var(--radius-md)",
-      "sm": "var(--radius-sm)"
+      "lg": "var(--radius-8)",
+      "md": "var(--radius-8)",
+      "sm": "var(--radius-6)"
     },
     "iconOnlyWidth": {
       "md": "var(--size-40)",

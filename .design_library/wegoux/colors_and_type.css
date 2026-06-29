@@ -1,380 +1,382 @@
 /**
- * Wego design system tokens.
+ * Wego design system tokens v2.
  * Source of truth for mobile, WeChat-ecosystem, ecommerce/tool UI.
  *
  * Architecture:
- * - reference/primitives: foundational scales and raw design values.
- * - public semantic: the only token layer components and AI may consume directly.
- * - dark overrides: optional .dark overrides for existing tokens only.
- *
- * AI write rules:
- * - Only edit tokens here; never add component, page, or utility class styles.
- * - New values must land in either reference/primitives or public semantic.
- * - Components should consume only public tokens: --color-*, --font-*, --space-*,
- *   --radius-*, --size-*, --duration-*, --ease-*.
- * - Do not create single-component, single-page, or single-preview-only tokens.
- * - Keep Wegoux light mobile-first; .dark is optional override, not the default direction.
- * - Sync css.json and metadata version whenever public tokens or values change.
+ * - palette-* exposes complete 10-step base color scales.
+ * - bg/text/icon/border/status tokens are the public component API.
+ * - body/heading/number tokens describe typography roles directly.
+ * - No legacy compatibility layer is retained.
  */
 
 :root {
-  /* reference/primitives — color scales */
-  --wg-color-base-neutral-900: #1e2028;
-  --wg-color-base-neutral-800: #3f434c;
-  --wg-color-base-neutral-700: #6e7382;
-  --wg-color-base-neutral-600: #9097a3;
-  --wg-color-base-neutral-500: #b7bec5;
-  --wg-color-base-neutral-300: #ededed;
-  --wg-color-base-neutral-200: #e9eaef;
-  --wg-color-base-neutral-100: #f2f3f6;
-  --wg-color-base-neutral-50: #f8f9fa;
-  --wg-color-base-neutral-alpha-03: rgba(32, 47, 100, 0.03);
-  --wg-color-base-neutral-alpha-06: rgba(32, 47, 100, 0.06);
-  --wg-color-base-neutral-alpha-08: rgba(32, 47, 100, 0.08);
-  --wg-color-base-neutral-alpha-10: rgba(32, 47, 100, 0.10);
-  --wg-color-base-neutral-alpha-12: rgba(32, 47, 100, 0.12);
-  --wg-color-base-neutral-alpha-15: rgba(0, 0, 0, 0.15);
-  --wg-color-base-neutral-alpha-30: rgba(30, 32, 40, 0.30);
-  --wg-color-base-neutral-alpha-60: rgba(30, 32, 40, 0.60);
-  --wg-color-base-neutral-alpha-80: rgba(30, 32, 40, 0.80);
-  --wg-color-base-brand-100: #e5fff2;
-  --wg-color-base-brand-300: #66e0a0;
-  --wg-color-base-brand-500: #03c160;
-  --wg-color-base-brand-700: #02994d;
-  --wg-color-base-brand-900: #016b36;
-  --Brand-color-brand: #03c160;
-  --wg-color-base-brand-alpha-10: rgba(3, 193, 96, 0.10);
-  --wg-color-base-brand-alpha-20: rgba(3, 193, 96, 0.20);
-  --wg-color-base-brand-alpha-60: rgba(3, 193, 96, 0.60);
-  --wg-color-base-brand-alpha-80: rgba(3, 193, 96, 0.80);
-  --wg-color-base-danger-500: #fa5051;
-  --wg-color-base-danger-alpha-10: rgba(250, 80, 81, 0.10);
-  --wg-color-base-danger-alpha-20: rgba(250, 80, 81, 0.20);
-  --wg-color-base-danger-alpha-60: rgba(250, 80, 81, 0.60);
-  --wg-color-base-danger-alpha-80: rgba(250, 80, 81, 0.80);
-  --wg-color-base-success-500: #03c160;
-  --wg-color-base-success-alpha-10: rgba(3, 193, 96, 0.10);
-  --wg-color-base-success-alpha-20: rgba(3, 193, 96, 0.20);
-  --wg-color-base-success-alpha-60: rgba(3, 193, 96, 0.60);
-  --wg-color-base-success-alpha-80: rgba(3, 193, 96, 0.80);
-  --wg-color-base-warning-500: #fa9d3b;
-  --wg-color-base-warning-alpha-10: rgba(250, 157, 59, 0.10);
-  --wg-color-base-warning-alpha-20: rgba(250, 157, 59, 0.20);
-  --wg-color-base-warning-alpha-60: rgba(250, 157, 59, 0.60);
-  --wg-color-base-warning-alpha-80: rgba(250, 157, 59, 0.80);
-  --wg-color-base-info-500: #208bf1;
-  --wg-color-base-info-alpha-10: rgba(32, 139, 241, 0.10);
-  --wg-color-base-info-alpha-20: rgba(32, 139, 241, 0.20);
-  --wg-color-base-info-alpha-60: rgba(32, 139, 241, 0.60);
-  --wg-color-base-info-alpha-80: rgba(32, 139, 241, 0.80);
-  --wg-color-base-promotion-500: #ff6045;
-  --wg-color-base-promotion-strong: #ff3333;
-  --wg-color-base-promotion-alpha-10: rgba(255, 96, 69, 0.10);
-  --wg-color-base-promotion-alpha-20: rgba(255, 96, 69, 0.20);
-  --wg-color-base-promotion-alpha-60: rgba(255, 96, 69, 0.60);
-  --wg-color-base-promotion-alpha-80: rgba(255, 96, 69, 0.80);
-  --wg-color-base-link-500: #285b9a;
-  --wg-color-base-link-hover: #285b9a;
-  --wg-color-base-link-pressed: #285b9a;
-  --wg-color-base-link-alpha-20: rgba(40, 91, 154, 0.20);
-  --wg-color-base-accent-yellow-500: #ffc300;
-  --wg-color-base-accent-yellow-alpha-10: rgba(255, 195, 0, 0.10);
-  --wg-color-base-accent-yellow-alpha-20: rgba(255, 195, 0, 0.20);
-  --wg-color-base-accent-yellow-alpha-60: rgba(255, 195, 0, 0.60);
-  --wg-color-base-accent-yellow-alpha-80: rgba(255, 195, 0, 0.80);
-  --wg-color-base-accent-green-500: #00c777;
-  --wg-color-base-accent-purple-500: #6367f0;
-  --wg-color-base-accent-gold-500: #c79a56;
-  --wg-color-base-static-white: #ffffff;
-  --wg-color-base-static-black: #000000;
+  /* palette-green */
+  --palette-green-100: #e5fff2;
+  --palette-green-200: #c8f7df;
+  --palette-green-300: #9bedc4;
+  --palette-green-400: #5cdaa0;
+  --palette-green-500: #03c160;
+  --palette-green-600: #00a854;
+  --palette-green-700: #02994d;
+  --palette-green-800: #027a3e;
+  --palette-green-900: #016b36;
+  --palette-green-1000: #004d26;
 
-  /* reference/primitives — typography */
-  --wg-font-family-system: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
-  --wg-font-family-text: "PingFang SC", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
-  --wg-font-family-number: "WegoKeyboard N9", "DIN Alternate", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
-  --wg-font-family-number-fallback: "DIN Alternate", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
-  --wg-font-family-icon: "wego-iconfont-s", sans-serif;
-  --wg-font-size-f10: 10px;
-  --wg-font-size-f12: 12px;
-  --wg-font-size-f14: 14px;
-  --wg-font-size-f16: 16px;
-  --wg-font-size-f18: 18px;
-  --wg-font-size-f22: 22px;
-  --wg-font-lineheight-10: 14px;
-  --wg-font-lineheight-12: 18px;
-  --wg-font-lineheight-14: 22px;
-  --wg-font-lineheight-16: 24px;
-  --wg-font-lineheight-18: 28px;
-  --wg-font-lineheight-22: 32px;
-  --wg-font-number-nf12: 12px;
-  --wg-font-number-nf14: 14px;
-  --wg-font-number-nf16: 16px;
-  --wg-font-number-nf20: 20px;
-  --wg-font-number-nf24: 24px;
-  --wg-font-number-nf32: 32px;
-  --wg-font-weight-regular: 400;
-  --wg-font-weight-medium: 500;
-  --wg-font-weight-semibold: 600;
+  /* palette-neutral */
+  --palette-neutral-100: #ffffff;
+  --palette-neutral-200: #f8f9fa;
+  --palette-neutral-300: #f2f3f6;
+  --palette-neutral-400: #e9eaef;
+  --palette-neutral-500: #ededed;
+  --palette-neutral-600: #b7bec5;
+  --palette-neutral-700: #9097a3;
+  --palette-neutral-800: #6e7382;
+  --palette-neutral-900: #3f434c;
+  --palette-neutral-1000: #1e2028;
 
-  /* reference/primitives — radius / space / size */
-  --wg-radius-none: 0px;
-  --wg-radius-xs: 4px;
-  --wg-radius-sm: 6px;
-  --wg-radius-md: 8px;
-  --wg-radius-lg: 12px;
-  --wg-radius-xl: 16px;
-  --wg-radius-full: 999px;
-  --wg-spacing-0: 0px;
-  --wg-spacing-2: 2px;
-  --wg-spacing-4: 4px;
-  --wg-spacing-8: 8px;
-  --wg-spacing-12: 12px;
-  --wg-spacing-16: 16px;
-  --wg-spacing-24: 24px;
-  --wg-spacing-32: 32px;
-  --wg-spacing-40: 40px;
-  --wg-spacing-48: 48px;
-  --wg-spacing-72: 72px;
-  --wg-size-10: 10px;
-  --wg-size-12: 12px;
-  --wg-size-16: 16px;
-  --wg-size-20: 20px;
-  --wg-size-24: 24px;
-  --wg-size-28: 28px;
-  --wg-size-32: 32px;
-  --wg-size-40: 40px;
-  --wg-size-48: 48px;
-  --wg-size-56: 56px;
-  --wg-size-64: 64px;
-  --wg-size-72: 72px;
-  --wg-size-76: 76px;
-  --wg-size-104: 104px;
+  /* palette-red */
+  --palette-red-100: #fff0f0;
+  --palette-red-200: #ffd9d9;
+  --palette-red-300: #ffb8b8;
+  --palette-red-400: #ff8586;
+  --palette-red-500: #fa5051;
+  --palette-red-600: #e83b3c;
+  --palette-red-700: #c92c2d;
+  --palette-red-800: #a32122;
+  --palette-red-900: #7a1718;
+  --palette-red-1000: #4d0b0c;
 
-  /* public semantic — color */
-  --color-brand: var(--wg-color-base-brand-500);
-  --color-brand-hover: var(--wg-color-base-brand-alpha-80);
-  --color-brand-disabled: var(--wg-color-base-brand-alpha-60);
-  --color-brand-bg: var(--wg-color-base-brand-alpha-10);
-  --color-brand-bg-strong: var(--wg-color-base-brand-alpha-20);
-  --color-brand-100: var(--wg-color-base-brand-100);
-  --color-brand-300: var(--wg-color-base-brand-300);
-  --color-brand-500: var(--wg-color-base-brand-500);
-  --color-brand-700: var(--wg-color-base-brand-700);
-  --color-brand-900: var(--wg-color-base-brand-900);
+  /* palette-orange */
+  --palette-orange-100: #fff4e8;
+  --palette-orange-200: #ffe4c2;
+  --palette-orange-300: #ffc98a;
+  --palette-orange-400: #ffb05c;
+  --palette-orange-500: #fa9d3b;
+  --palette-orange-600: #e88721;
+  --palette-orange-700: #c96e13;
+  --palette-orange-800: #a6560d;
+  --palette-orange-900: #7a3d08;
+  --palette-orange-1000: #4d2303;
 
-  --color-text-primary: var(--wg-color-base-neutral-900);
-  --color-text-secondary: var(--wg-color-base-neutral-700);
-  --color-text-tertiary: var(--wg-color-base-neutral-600);
-  --color-text-disabled: var(--wg-color-base-neutral-500);
-  --color-text-placeholder: var(--wg-color-base-neutral-500);
-  --color-text-inverse: var(--wg-color-base-static-white);
-  --color-text-inverse-secondary: rgba(255, 255, 255, 0.70);
-  --color-text-inverse-weak: rgba(255, 255, 255, 0.50);
-  --color-text-link: var(--wg-color-base-link-500);
-  --color-text-danger: var(--wg-color-base-danger-500);
-  --color-text-info: var(--wg-color-base-info-500);
-  --color-text-success: var(--wg-color-base-success-500);
-  --color-text-warning: var(--wg-color-base-warning-500);
-  --color-text-promotion: var(--wg-color-base-promotion-500);
-  --color-text-promotion-strong: var(--wg-color-base-promotion-strong);
-  --color-danger: var(--color-text-danger);
-  --color-info: var(--color-text-info);
-  --color-success: var(--color-text-success);
-  --color-warning: var(--color-text-warning);
+  /* palette-blue */
+  --palette-blue-100: #eaf4ff;
+  --palette-blue-200: #cfe7ff;
+  --palette-blue-300: #9fd0ff;
+  --palette-blue-400: #64b2ff;
+  --palette-blue-500: #208bf1;
+  --palette-blue-600: #1478d4;
+  --palette-blue-700: #0b62b3;
+  --palette-blue-800: #084d8f;
+  --palette-blue-900: #063a6b;
+  --palette-blue-1000: #032542;
 
-  --color-neutral-alpha-03: var(--wg-color-base-neutral-alpha-03);
-  --color-neutral-alpha-06: var(--wg-color-base-neutral-alpha-06);
-  --color-neutral-alpha-08: var(--wg-color-base-neutral-alpha-08);
-  --color-neutral-alpha-10: var(--wg-color-base-neutral-alpha-10);
-  --color-neutral-alpha-30: var(--wg-color-base-neutral-alpha-30);
-  --color-neutral-alpha-60: var(--wg-color-base-neutral-alpha-60);
-  --color-neutral-alpha-80: var(--wg-color-base-neutral-alpha-80);
+  /* palette-yellow */
+  --palette-yellow-100: #fff9e5;
+  --palette-yellow-200: #fff0b8;
+  --palette-yellow-300: #ffe480;
+  --palette-yellow-400: #ffd84d;
+  --palette-yellow-500: #ffc300;
+  --palette-yellow-600: #e6ad00;
+  --palette-yellow-700: #bf8f00;
+  --palette-yellow-800: #997000;
+  --palette-yellow-900: #705000;
+  --palette-yellow-1000: #473100;
 
-  --color-bg-page: var(--wg-color-base-neutral-300);
-  --color-bg-surface: var(--wg-color-base-static-white);
-  --color-bg-muted: var(--wg-color-base-neutral-100);
-  --color-bg-secondary: var(--wg-color-base-neutral-100);
-  --color-bg-subtle: var(--wg-color-base-neutral-50);
-  --color-bg-active: var(--wg-color-base-neutral-200);
-  --color-bg-inverse: var(--wg-color-base-neutral-900);
-  --color-bg-inverse-subtle: rgba(255, 255, 255, 0.10);
-  --color-bg-fill-strong: var(--wg-color-base-neutral-500);
-  --color-bg-placeholder: var(--wg-color-base-neutral-100);
-  --color-bg-control-off: #e5e5ea;
-  --color-bg-control-disabled: var(--color-state-disabled-surface);
-  --color-bg-danger: var(--wg-color-base-danger-alpha-10);
-  --color-bg-info: var(--wg-color-base-info-alpha-10);
-  --color-bg-success: var(--wg-color-base-success-alpha-10);
-  --color-bg-warning: var(--wg-color-base-warning-alpha-10);
-  --color-bg-promotion: var(--wg-color-base-promotion-alpha-10);
-  --color-bg-toast: rgba(63, 67, 71, 0.96);
-  --color-bg-skeleton: var(--wg-color-base-neutral-100);
-  --color-bg-accent-yellow: var(--wg-color-base-accent-yellow-alpha-10);
+  /* palette-purple */
+  --palette-purple-100: #f0f0ff;
+  --palette-purple-200: #dedfff;
+  --palette-purple-300: #c4c6ff;
+  --palette-purple-400: #9699ff;
+  --palette-purple-500: #6367f0;
+  --palette-purple-600: #5054d8;
+  --palette-purple-700: #3e42b8;
+  --palette-purple-800: #303394;
+  --palette-purple-900: #24266f;
+  --palette-purple-1000: #17184a;
 
-  --color-border-default: var(--wg-color-base-neutral-alpha-08);
-  --color-border-strong: var(--wg-color-base-neutral-alpha-10);
-  --color-border-subtle: var(--wg-color-base-neutral-alpha-03);
-  --color-border-info: var(--wg-color-base-info-alpha-20);
-  --color-border-danger: var(--wg-color-base-danger-alpha-20);
-  --color-border-success: var(--wg-color-base-success-alpha-20);
-  --color-border-warning: var(--wg-color-base-warning-alpha-20);
-  --color-border-promotion: var(--wg-color-base-promotion-alpha-20);
-  --color-border-promotion-strong: rgba(250, 80, 81, 0.60);
-  --color-border-focus: var(--wg-color-base-brand-500);
-  --color-border-loading-track: var(--wg-color-base-neutral-alpha-08);
-  --color-border-loading-indicator: var(--wg-color-base-brand-500);
-  --color-border-disabled: var(--wg-color-base-neutral-alpha-06);
-  --color-border-control-default: var(--wg-color-base-neutral-alpha-15);
-  --color-border-control-disabled-strong: rgba(0, 0, 0, 0.12);
-  --color-divider-default: var(--wg-color-base-neutral-alpha-08);
-  --color-divider-strong: var(--wg-color-base-neutral-alpha-10);
-  --color-divider-subtle: var(--wg-color-base-neutral-alpha-03);
+  /* palette-gold */
+  --palette-gold-100: #fff7ed;
+  --palette-gold-200: #f8e7ca;
+  --palette-gold-300: #ecd19e;
+  --palette-gold-400: #dbb872;
+  --palette-gold-500: #c79a56;
+  --palette-gold-600: #ad7f3c;
+  --palette-gold-700: #8f642c;
+  --palette-gold-800: #724b20;
+  --palette-gold-900: #553616;
+  --palette-gold-1000: #38220d;
 
-  --color-state-hover: var(--wg-color-base-neutral-alpha-03);
-  --color-state-pressed: var(--wg-color-base-neutral-alpha-06);
-  --color-state-selected: var(--wg-color-base-neutral-alpha-10);
-  --color-state-focus: var(--wg-color-base-brand-500);
-  --color-state-disabled-bg: var(--wg-color-base-neutral-100);
-  --color-state-disabled-text: var(--wg-color-base-neutral-500);
-  --color-state-disabled-surface: var(--wg-color-base-neutral-alpha-03);
+  /* bg */
+  --bg-page: var(--palette-neutral-500);
+  --bg-surface: var(--palette-neutral-100);
+  --bg-muted: var(--palette-neutral-300);
+  --bg-subtle: var(--palette-neutral-200);
+  --bg-active: var(--palette-neutral-400);
+  --bg-inverse: var(--palette-neutral-1000);
+  --bg-inverse-surface-l1: rgba(255, 255, 255, 0.10);
+  --bg-fill-strong: var(--palette-neutral-600);
+  --bg-placeholder: var(--palette-neutral-300);
+  --bg-skeleton: var(--palette-neutral-300);
+  --bg-toast: rgba(63, 67, 71, 0.96);
+  --bg-accent-yellow: rgba(255, 195, 0, 0.10);
 
-  --color-status-danger-bg: var(--wg-color-base-danger-alpha-10);
-  --color-status-danger-text: var(--wg-color-base-danger-500);
-  --color-status-danger-border: var(--wg-color-base-danger-alpha-20);
-  --color-status-danger-hover: var(--wg-color-base-danger-alpha-80);
-  --color-status-danger-active: var(--wg-color-base-danger-alpha-60);
-  --color-status-danger-surface-l1: var(--wg-color-base-danger-alpha-10);
-  --color-status-danger-surface-l2: var(--wg-color-base-danger-alpha-20);
-  --color-status-info-bg: var(--wg-color-base-info-alpha-10);
-  --color-status-info-text: var(--wg-color-base-info-500);
-  --color-status-info-border: var(--wg-color-base-info-alpha-20);
-  --color-status-info-hover: var(--wg-color-base-info-alpha-80);
-  --color-status-info-active: var(--wg-color-base-info-alpha-60);
-  --color-status-info-surface-l1: var(--wg-color-base-info-alpha-10);
-  --color-status-info-surface-l2: var(--wg-color-base-info-alpha-20);
-  --color-status-success-bg: var(--wg-color-base-success-alpha-10);
-  --color-status-success-text: var(--wg-color-base-success-500);
-  --color-status-success-border: var(--wg-color-base-success-alpha-20);
-  --color-status-success-hover: var(--wg-color-base-success-alpha-80);
-  --color-status-success-active: var(--wg-color-base-success-alpha-60);
-  --color-status-success-surface-l1: var(--wg-color-base-success-alpha-10);
-  --color-status-success-surface-l2: var(--wg-color-base-success-alpha-20);
-  --color-status-warning-bg: var(--wg-color-base-warning-alpha-10);
-  --color-status-warning-text: var(--wg-color-base-warning-500);
-  --color-status-warning-border: var(--wg-color-base-warning-alpha-20);
-  --color-status-warning-hover: var(--wg-color-base-warning-alpha-80);
-  --color-status-warning-active: var(--wg-color-base-warning-alpha-60);
-  --color-status-warning-surface-l1: var(--wg-color-base-warning-alpha-10);
-  --color-status-warning-surface-l2: var(--wg-color-base-warning-alpha-20);
-  --color-status-promotion-bg: var(--wg-color-base-promotion-alpha-10);
-  --color-status-promotion-text: var(--wg-color-base-promotion-500);
-  --color-status-promotion-border: var(--wg-color-base-promotion-alpha-20);
-  --color-status-promotion-hover: var(--wg-color-base-promotion-alpha-80);
-  --color-status-promotion-active: var(--wg-color-base-promotion-alpha-60);
-  --color-status-promotion-surface-l1: var(--wg-color-base-promotion-alpha-10);
-  --color-status-promotion-surface-l2: var(--wg-color-base-promotion-alpha-20);
+  /* bg-brand */
+  --bg-brand: var(--palette-green-500);
+  --bg-brand-hover: rgba(3, 193, 96, 0.80);
+  --bg-brand-disabled: rgba(3, 193, 96, 0.60);
+  --bg-brand-surface-l1: rgba(3, 193, 96, 0.10);
+  --bg-brand-surface-l2: rgba(3, 193, 96, 0.20);
 
-  --color-accent-yellow: var(--wg-color-base-accent-yellow-500);
-  --color-accent-green: var(--wg-color-base-accent-green-500);
-  --color-accent-purple: var(--wg-color-base-accent-purple-500);
-  --color-accent-gold: var(--wg-color-base-accent-gold-500);
-  --color-transparent: transparent;
+  /* bg-control */
+  --bg-control-off: #e5e5ea;
+  --bg-control-disabled: rgba(32, 47, 100, 0.03);
 
-  --color-overlay-light: var(--wg-color-base-neutral-alpha-30);
-  --color-overlay-modal: var(--wg-color-base-neutral-alpha-60);
-  --color-overlay-strong: var(--wg-color-base-neutral-alpha-80);
-  --color-overlay-press: var(--wg-color-base-neutral-alpha-30);
+  /* bg-state */
+  --bg-state-hover: rgba(32, 47, 100, 0.03);
+  --bg-state-pressed: rgba(32, 47, 100, 0.06);
+  --bg-state-selected: rgba(32, 47, 100, 0.10);
+  --bg-state-disabled: var(--palette-neutral-300);
 
-  /* public semantic — typography / spacing / motion */
-  --font-family-text: var(--wg-font-family-text);
-  --font-family-number: var(--wg-font-family-number);
-  --font-family-number-fallback: var(--wg-font-family-number-fallback);
-  --font-family-system: var(--wg-font-family-system);
-  --font-family-icon: var(--wg-font-family-icon);
-  --font-size-10: var(--wg-font-size-f10);
-  --font-size-12: var(--wg-font-size-f12);
-  --font-size-14: var(--wg-font-size-f14);
-  --font-size-16: var(--wg-font-size-f16);
-  --font-size-18: var(--wg-font-size-f18);
-  --font-size-22: var(--wg-font-size-f22);
-  --font-size-f10: var(--wg-font-size-f10);
-  --font-size-f12: var(--wg-font-size-f12);
-  --font-size-f14: var(--wg-font-size-f14);
-  --font-size-f16: var(--wg-font-size-f16);
-  --font-size-f18: var(--wg-font-size-f18);
-  --font-size-f22: var(--wg-font-size-f22);
-  --font-lineheight-10: var(--wg-font-lineheight-10);
-  --font-lineheight-12: var(--wg-font-lineheight-12);
-  --font-lineheight-14: var(--wg-font-lineheight-14);
-  --font-lineheight-16: var(--wg-font-lineheight-16);
-  --font-lineheight-18: var(--wg-font-lineheight-18);
-  --font-lineheight-22: var(--wg-font-lineheight-22);
-  --font-number-nf12: var(--wg-font-number-nf12);
-  --font-number-nf14: var(--wg-font-number-nf14);
-  --font-number-nf16: var(--wg-font-number-nf16);
-  --font-number-nf20: var(--wg-font-number-nf20);
-  --font-number-nf24: var(--wg-font-number-nf24);
-  --font-number-nf32: var(--wg-font-number-nf32);
-  --font-weight-regular: var(--wg-font-weight-regular);
-  --font-weight-medium: var(--wg-font-weight-medium);
-  --font-weight-semibold: var(--wg-font-weight-semibold);
+  /* bg-overlay */
+  --bg-overlay-l1: rgba(32, 47, 100, 0.03);
+  --bg-overlay-l2: rgba(32, 47, 100, 0.06);
+  --bg-overlay-l3: rgba(32, 47, 100, 0.10);
 
-  --radius-none: var(--wg-radius-none);
-  --radius-xs: var(--wg-radius-xs);
-  --radius-sm: var(--wg-radius-sm);
-  --radius-md: var(--wg-radius-md);
-  --radius-lg: var(--wg-radius-lg);
-  --radius-xl: var(--wg-radius-xl);
-  --radius-full: var(--wg-radius-full);
+  /* bg-mask */
+  --bg-mask-light: rgba(30, 32, 40, 0.30);
+  --bg-mask-modal: rgba(30, 32, 40, 0.60);
+  --bg-mask-strong: rgba(30, 32, 40, 0.80);
+  --bg-mask-press: rgba(30, 32, 40, 0.30);
 
-  --space-0: 0;
-  --space-2: var(--wg-spacing-2);
-  --space-4: 4;
-  --space-6: 6px;
-  --space-8: 8;
-  --space-10: 10px;
-  --space-12: 12;
-  --space-14: 14px;
-  --space-16: 16;
-  --space-24: 24;
-  --space-32: 32;
-  --space-40: 40;
-  --space-48: 48;
-  --space-72: 72;
+  /* text */
+  --text-default: var(--palette-neutral-1000);
+  --text-secondary: var(--palette-neutral-800);
+  --text-tertiary: var(--palette-neutral-700);
+  --text-disabled: var(--palette-neutral-600);
+  --text-placeholder: var(--palette-neutral-600);
+  --text-inverse: var(--palette-neutral-100);
+  --text-inverse-secondary: rgba(255, 255, 255, 0.70);
+  --text-inverse-weak: rgba(255, 255, 255, 0.50);
+  --text-brand: var(--palette-green-500);
+  --text-link: #285b9a;
+  --text-promotion: var(--palette-red-500);
+  --text-promotion-strong: #ff3333;
 
-  --size-10: var(--wg-size-10);
-  --size-12: var(--wg-size-12);
-  --size-16: var(--wg-size-16);
-  --size-20: var(--wg-size-20);
-  --size-24: var(--wg-size-24);
-  --size-28: 28;
-  --size-32: 32;
+  /* icon */
+  --icon-default: var(--text-default);
+  --icon-secondary: var(--text-secondary);
+  --icon-tertiary: var(--text-tertiary);
+  --icon-disabled: var(--text-disabled);
+  --icon-brand: var(--text-brand);
+  --icon-inverse: var(--text-inverse);
+
+  /* border */
+  --border-neutral-l1: rgba(32, 47, 100, 0.03);
+  --border-neutral-l2: rgba(32, 47, 100, 0.08);
+  --border-neutral-l3: rgba(32, 47, 100, 0.10);
+  --border-brand: var(--palette-green-500);
+  --border-danger: rgba(250, 80, 81, 0.20);
+  --border-info: rgba(32, 139, 241, 0.20);
+  --border-success: rgba(3, 193, 96, 0.20);
+  --border-warning: rgba(250, 157, 59, 0.20);
+  --border-promotion: rgba(255, 96, 69, 0.20);
+  --border-promotion-strong: rgba(250, 80, 81, 0.60);
+  --border-control: rgba(0, 0, 0, 0.15);
+  --border-control-disabled: rgba(0, 0, 0, 0.12);
+  --border-disabled: rgba(32, 47, 100, 0.06);
+  --border-inverse: rgba(255, 255, 255, 0.70);
+
+  /* status-success */
+  --status-success-default: #03c160;
+  --status-success-hover: rgba(3, 193, 96, 0.80);
+  --status-success-active: rgba(3, 193, 96, 0.60);
+  --status-success-surface-l1: rgba(3, 193, 96, 0.10);
+  --status-success-surface-l2: rgba(3, 193, 96, 0.20);
+  --status-success-surface-l3: rgba(3, 193, 96, 0.28);
+
+  /* status-warning */
+  --status-warning-default: #fa9d3b;
+  --status-warning-hover: rgba(250, 157, 59, 0.80);
+  --status-warning-active: rgba(250, 157, 59, 0.60);
+  --status-warning-surface-l1: rgba(250, 157, 59, 0.10);
+  --status-warning-surface-l2: rgba(250, 157, 59, 0.20);
+  --status-warning-surface-l3: rgba(250, 157, 59, 0.28);
+
+  /* status-danger */
+  --status-danger-default: #fa5051;
+  --status-danger-hover: rgba(250, 80, 81, 0.80);
+  --status-danger-active: rgba(250, 80, 81, 0.60);
+  --status-danger-surface-l1: rgba(250, 80, 81, 0.10);
+  --status-danger-surface-l2: rgba(250, 80, 81, 0.20);
+  --status-danger-surface-l3: rgba(250, 80, 81, 0.28);
+
+  /* status-info */
+  --status-info-default: #208bf1;
+  --status-info-hover: rgba(32, 139, 241, 0.80);
+  --status-info-active: rgba(32, 139, 241, 0.60);
+  --status-info-surface-l1: rgba(32, 139, 241, 0.10);
+  --status-info-surface-l2: rgba(32, 139, 241, 0.20);
+  --status-info-surface-l3: rgba(32, 139, 241, 0.28);
+
+  /* status-promotion */
+  --status-promotion-default: #ff6045;
+  --status-promotion-hover: rgba(255, 96, 69, 0.80);
+  --status-promotion-active: rgba(255, 96, 69, 0.60);
+  --status-promotion-surface-l1: rgba(255, 96, 69, 0.10);
+  --status-promotion-surface-l2: rgba(255, 96, 69, 0.20);
+  --status-promotion-surface-l3: rgba(255, 96, 69, 0.28);
+
+  /* accent */
+  --accent-yellow: var(--palette-yellow-500);
+  --accent-green: #00c777;
+  --accent-purple: var(--palette-purple-500);
+  --accent-gold: var(--palette-gold-500);
+
+  /* special */
+  --transparent: transparent;
+
+  /* font-family */
+  --font-family-system: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+  --font-family-icon: "wego-iconfont-s", sans-serif;
+
+  /* font-weight */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  /* body */
+  --body-xs-font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --body-xs-font-size: 10px;
+  --body-xs-font-weight: 400;
+  --body-xs-line-height: 14px;
+  --body-xs-strong-font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --body-xs-strong-font-size: 10px;
+  --body-xs-strong-font-weight: 500;
+  --body-xs-strong-line-height: 14px;
+  --body-sm-font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --body-sm-font-size: 12px;
+  --body-sm-font-weight: 400;
+  --body-sm-line-height: 18px;
+  --body-sm-strong-font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --body-sm-strong-font-size: 12px;
+  --body-sm-strong-font-weight: 500;
+  --body-sm-strong-line-height: 18px;
+  --body-md-font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --body-md-font-size: 14px;
+  --body-md-font-weight: 400;
+  --body-md-line-height: 22px;
+  --body-md-strong-font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --body-md-strong-font-size: 14px;
+  --body-md-strong-font-weight: 500;
+  --body-md-strong-line-height: 22px;
+  --body-lg-font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --body-lg-font-size: 16px;
+  --body-lg-font-weight: 400;
+  --body-lg-line-height: 24px;
+  --body-lg-strong-font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --body-lg-strong-font-size: 16px;
+  --body-lg-strong-font-weight: 500;
+  --body-lg-strong-line-height: 24px;
+
+  /* heading */
+  --heading-xs-font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --heading-xs-font-size: 16px;
+  --heading-xs-font-weight: 600;
+  --heading-xs-line-height: 24px;
+  --heading-sm-font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --heading-sm-font-size: 18px;
+  --heading-sm-font-weight: 600;
+  --heading-sm-line-height: 28px;
+  --heading-md-font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --heading-md-font-size: 22px;
+  --heading-md-font-weight: 600;
+  --heading-md-line-height: 32px;
+  --heading-lg-font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --heading-lg-font-size: 24px;
+  --heading-lg-font-weight: 600;
+  --heading-lg-line-height: 34px;
+
+  /* number */
+  --number-sm-font-family: "WegoKeyboard N9", "DIN Alternate", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+  --number-sm-font-size: 12px;
+  --number-sm-font-weight: 500;
+  --number-sm-line-height: 16px;
+  --number-md-font-family: "WegoKeyboard N9", "DIN Alternate", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+  --number-md-font-size: 14px;
+  --number-md-font-weight: 500;
+  --number-md-line-height: 18px;
+  --number-lg-font-family: "WegoKeyboard N9", "DIN Alternate", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+  --number-lg-font-size: 16px;
+  --number-lg-font-weight: 500;
+  --number-lg-line-height: 20px;
+  --number-xl-font-family: "WegoKeyboard N9", "DIN Alternate", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+  --number-xl-font-size: 20px;
+  --number-xl-font-weight: 500;
+  --number-xl-line-height: 24px;
+  --number-xxl-font-family: "WegoKeyboard N9", "DIN Alternate", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+  --number-xxl-font-size: 24px;
+  --number-xxl-font-weight: 500;
+  --number-xxl-line-height: 30px;
+  --number-display-font-family: "WegoKeyboard N9", "DIN Alternate", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+  --number-display-font-size: 32px;
+  --number-display-font-weight: 500;
+  --number-display-line-height: 38px;
+  --number-fallback-font-family: "DIN Alternate", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* radius */
+  --radius-0: 0px;
+  --radius-4: 4px;
+  --radius-6: 6px;
+  --radius-8: 8px;
+  --radius-12: 12px;
+  --radius-16: 16px;
+  --radius-full: 999px;
+
+  /* spacing */
+  --spacer-0: 0px;
+  --spacer-2: 2px;
+  --spacer-4: 4px;
+  --spacer-6: 6px;
+  --spacer-8: 8px;
+  --spacer-10: 10px;
+  --spacer-12: 12px;
+  --spacer-14: 14px;
+  --spacer-16: 16px;
+  --spacer-24: 24px;
+  --spacer-32: 32px;
+  --spacer-40: 40px;
+  --spacer-48: 48px;
+  --spacer-72: 72px;
+
+  /* size */
+  --size-10: 10px;
+  --size-12: 12px;
+  --size-16: 16px;
+  --size-20: 20px;
+  --size-24: 24px;
+  --size-28: 28px;
+  --size-32: 32px;
   --size-36: 36px;
-  --size-40: 40;
-  --size-48: 48;
-  --size-56: var(--wg-size-56);
-  --size-64: 64;
-  --size-72: 72;
-  --size-76: 76;
-  --size-104: 104;
+  --size-40: 40px;
+  --size-48: 48px;
+  --size-56: 56px;
+  --size-64: 64px;
+  --size-72: 72px;
+  --size-76: 76px;
+  --size-104: 104px;
 
-  --stroke-width-default: 1px;
-  --stroke-width-hairline: 0.5px;
-  --stroke-width-strong: 1.5px;
-  --stroke-width-icon: 1.5px;
-  --stroke-width-icon-strong: 2.25px;
-  --stroke-width-none: 0px;
+  /* stroke */
+  --stroke-0: 0px;
+  --stroke-hairline: 0.5px;
+  --stroke-1: 1px;
+  --stroke-strong: 1.5px;
+  --stroke-icon: 1.5px;
+  --stroke-icon-strong: 2.25px;
   --stroke-style-solid: solid;
   --stroke-style-dashed: dashed;
   --stroke-style-none: none;
-  --stroke-color-default: var(--color-border-default);
-  --stroke-color-strong: var(--color-border-strong);
-  --stroke-color-subtle: var(--color-border-subtle);
-  --stroke-color-danger: var(--color-text-danger);
-  --stroke-color-focus: var(--color-border-focus);
-  --stroke-color-success: var(--color-text-success);
-  --stroke-color-warning: var(--color-text-warning);
 
+  /* shadow */
   --shadow-none: none;
   --shadow-xs: 0px 1px 4px 0px rgba(30, 32, 40, 0.04);
   --shadow-sm: 0px 2px 8px 0px rgba(30, 32, 40, 0.06);
@@ -383,6 +385,7 @@
   --shadow-xl: 0px 12px 48px 0px rgba(30, 32, 40, 0.16);
   --shadow-control-thumb: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 0 0.5px rgba(0, 0, 0, 0.04);
 
+  /* motion */
   --duration-instant: 0ms;
   --duration-fast: 150ms;
   --duration-normal: 250ms;
@@ -393,21 +396,34 @@
   --ease-exit: cubic-bezier(0.4, 0, 1, 1);
   --ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
   --ease-linear: linear;
-  --wg-motion-duration-instant: var(--duration-instant);
-  --wg-motion-duration-fast: var(--duration-fast);
-  --wg-motion-duration-normal: var(--duration-normal);
-  --wg-motion-duration-slow: var(--duration-slow);
-  --wg-motion-duration-xslow: var(--duration-xslow);
-  --wg-motion-ease-standard: var(--ease-standard);
-  --wg-motion-ease-enter: var(--ease-enter);
-  --wg-motion-ease-exit: var(--ease-exit);
-  --wg-motion-ease-emphasized: var(--ease-emphasized);
-  --wg-motion-ease-linear: var(--ease-linear);
 
+  /* touch */
   --touch-min: 40px;
   --touch-default: 44px;
   --touch-comfortable: 48px;
 
+  /* zIndex */
+  --z-base: 0;
+  --z-raised: 10;
+  --z-sticky: 100;
+  --z-dropdown: 200;
+  --z-popover: 300;
+  --z-toast: 400;
+  --z-overlay: 500;
+  --z-modal: 600;
+  --z-critical: 900;
+
+  /* blur */
+  --blur-none: 0px;
+  --blur-xs: 4px;
+  --blur-sm: 8px;
+  --blur-md: 16px;
+  --blur-frosted: 20px;
+  --blur-lg: 24px;
+  --blur-xl: 32px;
+  --blur-frosted-live: 40px;
+
+  /* layout */
   --layout-page-margin-none: 0px;
   --layout-page-margin-sm: 16px;
   --layout-page-margin-lg: 32px;
@@ -428,143 +444,7 @@
   --layout-hit-icon-btn-height: 32px;
   --layout-hit-combo-width-padding: 16px;
 
-  --blur-none: 0px;
-  --blur-xs: 4px;
-  --blur-sm: 8px;
-  --blur-md: 16px;
-  --blur-frosted: 20px;
-  --blur-lg: 24px;
-  --blur-xl: 32px;
-  --blur-frosted-live: 40px;
-
-  --z-index-base: 0;
-  --z-index-raised: 10;
-  --z-index-sticky: 100;
-  --z-index-dropdown: 200;
-  --z-index-popover: 300;
-  --z-index-toast: 400;
-  --z-index-overlay: 500;
-  --z-index-modal: 600;
-  --z-index-critical: 900;
-
+  /* icon-token */
   --icon-yuancha-mian: "\e69c";
 
-  /* compatibility aliases — preview/scaffold only, do not use for new component work */
-  --wg-color-text-primary: var(--color-text-primary);
-  --wg-color-text-secondary: var(--color-text-secondary);
-  --wg-color-text-tertiary: var(--color-text-tertiary);
-  --wg-color-text-disabled: var(--color-text-disabled);
-  --wg-color-text-placeholder: var(--color-text-placeholder);
-  --wg-color-text-inverse: var(--color-text-inverse);
-  --wg-color-text-inverse-secondary: var(--color-text-inverse-secondary);
-  --wg-color-text-inverse-weak: var(--color-text-inverse-weak);
-  --wg-color-text-link: var(--color-text-link);
-  --wg-color-text-danger: var(--color-text-danger);
-  --wg-color-text-info: var(--color-text-info);
-  --wg-color-text-success: var(--color-text-success);
-  --wg-color-text-warning: var(--color-text-warning);
-  --wg-color-text-promotion: var(--color-text-promotion);
-  --wg-color-bg-page: var(--color-bg-page);
-  --wg-color-bg-surface: var(--color-bg-surface);
-  --wg-color-bg-muted: var(--color-bg-muted);
-  --wg-color-bg-secondary: var(--color-bg-secondary);
-  --wg-color-bg-subtle: var(--color-bg-subtle);
-  --wg-color-bg-active: var(--color-bg-active);
-  --wg-color-bg-inverse: var(--color-bg-inverse);
-  --wg-color-bg-inverse-subtle: var(--color-bg-inverse-subtle);
-  --wg-color-divider-default: var(--color-divider-default);
-  --wg-color-divider-strong: var(--color-divider-strong);
-  --wg-color-divider-subtle: var(--color-divider-subtle);
-}
-
-/* dark overrides — optional only; Wegoux remains light mobile-first */
-.dark {
-  /* reference/primitives */
-  --wg-color-base-neutral-900: #e8e9ed;
-  --wg-color-base-neutral-800: #c8cad3;
-  --wg-color-base-neutral-700: #9097a3;
-  --wg-color-base-neutral-600: #6e7382;
-  --wg-color-base-neutral-500: #4e5460;
-  --wg-color-base-neutral-300: #2a2d31;
-  --wg-color-base-neutral-200: #222529;
-  --wg-color-base-neutral-100: #1c1e24;
-  --wg-color-base-neutral-50: #16171c;
-  --wg-color-base-neutral-alpha-03: rgba(255, 255, 255, 0.03);
-  --wg-color-base-neutral-alpha-06: rgba(255, 255, 255, 0.06);
-  --wg-color-base-neutral-alpha-08: rgba(255, 255, 255, 0.08);
-  --wg-color-base-neutral-alpha-10: rgba(255, 255, 255, 0.10);
-  --wg-color-base-neutral-alpha-12: rgba(255, 255, 255, 0.12);
-  --wg-color-base-neutral-alpha-15: rgba(255, 255, 255, 0.20);
-  --wg-color-base-neutral-alpha-30: rgba(0, 0, 0, 0.30);
-  --wg-color-base-neutral-alpha-60: rgba(0, 0, 0, 0.60);
-  --wg-color-base-neutral-alpha-80: rgba(0, 0, 0, 0.80);
-  --wg-color-base-brand-alpha-10: rgba(3, 193, 96, 0.12);
-  --wg-color-base-brand-alpha-20: rgba(3, 193, 96, 0.22);
-  --wg-color-base-brand-alpha-60: rgba(3, 193, 96, 0.65);
-  --wg-color-base-brand-alpha-80: rgba(3, 193, 96, 0.85);
-
-  /* public semantic */
-  --color-text-inverse: #1e2028;
-  --color-text-inverse-secondary: rgba(30, 32, 40, 0.70);
-  --color-text-inverse-weak: rgba(30, 32, 40, 0.50);
-  --color-text-link: #3b7fd4;
-  --color-bg-surface: #252730;
-  --color-bg-muted: #1c1e24;
-  --color-bg-secondary: #1c1e24;
-  --color-bg-subtle: #16171c;
-  --color-bg-active: #2a2d31;
-  --color-bg-inverse: #ffffff;
-  --color-bg-control-off: #39393d;
-  --color-bg-toast: rgba(28, 30, 36, 0.92);
-  --color-border-default: rgba(255, 255, 255, 0.06);
-  --color-border-strong: rgba(255, 255, 255, 0.10);
-  --color-border-subtle: rgba(255, 255, 255, 0.03);
-  --color-border-disabled: rgba(255, 255, 255, 0.06);
-  --color-border-control-default: rgba(255, 255, 255, 0.20);
-  --color-border-control-disabled-strong: rgba(255, 255, 255, 0.12);
-  --color-divider-default: rgba(255, 255, 255, 0.06);
-  --color-divider-strong: rgba(255, 255, 255, 0.10);
-  --color-divider-subtle: rgba(255, 255, 255, 0.03);
-  --color-state-hover: rgba(255, 255, 255, 0.04);
-  --color-state-pressed: rgba(255, 255, 255, 0.08);
-  --color-state-selected: rgba(255, 255, 255, 0.12);
-  --color-state-disabled-bg: #1c1e24;
-  --color-state-disabled-text: #4e5460;
-  --color-state-disabled-surface: rgba(255, 255, 255, 0.03);
-  --color-status-info-bg: rgba(56, 160, 255, 0.15);
-  --color-status-info-border: rgba(56, 160, 255, 0.25);
-  --color-status-info-hover: rgba(56, 160, 255, 0.75);
-  --color-status-info-active: rgba(56, 160, 255, 0.55);
-  --color-status-info-surface-l1: rgba(56, 160, 255, 0.15);
-  --color-status-info-surface-l2: rgba(56, 160, 255, 0.22);
-  --color-status-danger-bg: rgba(255, 90, 90, 0.15);
-  --color-status-danger-border: rgba(255, 90, 90, 0.25);
-  --color-status-danger-hover: rgba(255, 90, 90, 0.75);
-  --color-status-danger-active: rgba(255, 90, 90, 0.55);
-  --color-status-danger-surface-l1: rgba(255, 90, 90, 0.15);
-  --color-status-danger-surface-l2: rgba(255, 90, 90, 0.22);
-  --color-status-success-border: rgba(3, 193, 96, 0.25);
-  --color-status-success-hover: rgba(3, 205, 105, 0.75);
-  --color-status-success-active: rgba(3, 205, 105, 0.55);
-  --color-status-success-surface-l1: rgba(3, 205, 105, 0.15);
-  --color-status-success-surface-l2: rgba(3, 205, 105, 0.22);
-  --color-status-warning-border: rgba(250, 157, 59, 0.25);
-  --color-status-warning-hover: rgba(250, 170, 70, 0.75);
-  --color-status-warning-active: rgba(250, 170, 70, 0.55);
-  --color-status-warning-surface-l1: rgba(250, 170, 70, 0.15);
-  --color-status-warning-surface-l2: rgba(250, 170, 70, 0.22);
-  --color-status-promotion-bg: rgba(255, 110, 80, 0.15);
-  --color-status-promotion-hover: rgba(255, 110, 80, 0.75);
-  --color-status-promotion-active: rgba(255, 110, 80, 0.55);
-  --color-status-promotion-surface-l1: rgba(255, 110, 80, 0.15);
-  --color-status-promotion-surface-l2: rgba(255, 110, 80, 0.22);
-  --color-overlay-light: rgba(0, 0, 0, 0.40);
-  --color-overlay-modal: rgba(0, 0, 0, 0.65);
-  --color-overlay-strong: rgba(0, 0, 0, 0.85);
-  --color-overlay-press: rgba(0, 0, 0, 0.40);
-  --shadow-xs: 0px 1px 4px 0px rgba(0, 0, 0, 0.24);
-  --shadow-sm: 0px 2px 8px 0px rgba(0, 0, 0, 0.32);
-  --shadow-md: 0px 4px 16px 0px rgba(0, 0, 0, 0.40);
-  --shadow-lg: 0px 8px 32px 0px rgba(0, 0, 0, 0.48);
-  --shadow-xl: 0px 12px 48px 0px rgba(0, 0, 0, 0.56);
 }

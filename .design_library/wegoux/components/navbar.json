@@ -112,27 +112,27 @@
     "不要把状态栏、标题栏和筛选条硬拼成单一组件。"
   ],
   "tokensConsumed": [
-    "--color-bg-muted",
-    "--color-bg-surface",
-    "--color-brand",
-    "--color-brand-disabled",
-    "--color-text-inverse",
-    "--color-text-primary",
-    "--color-text-tertiary",
-    "--font-family-text",
-    "--font-size-10",
-    "--font-size-14",
-    "--font-size-16",
-    "--font-size-18",
+    "--bg-brand",
+    "--bg-brand-disabled",
+    "--bg-muted",
+    "--bg-surface",
+    "--body-lg-font-size",
+    "--body-md-font-family",
+    "--body-md-font-size",
+    "--body-xs-font-size",
     "--font-weight-medium",
-    "--radius-sm"
+    "--heading-sm-font-size",
+    "--radius-6",
+    "--text-default",
+    "--text-inverse",
+    "--text-tertiary"
   ],
   "designTokens": {
     "statusBarHeight": "44px",
     "bodyHeight": "44px",
     "totalHeight": "88px",
     "gridColumns": "10",
-    "titleFont": "var(--font-size-18) / var(--font-weight-medium)",
+    "titleFont": "var(--heading-sm-font-size) / var(--font-weight-medium)",
     "actionButtonHeight": "32px"
   },
   "specRefs": [

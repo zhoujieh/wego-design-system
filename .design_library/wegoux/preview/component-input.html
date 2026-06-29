@@ -8,47 +8,47 @@
 <link rel="stylesheet" href="../scaffold.css">
 <link rel="stylesheet" href="../iconfont.css">
 <style>
-.specimen { display: flex; flex-direction: column; gap: var(--space-0); }
-.stage { display: flex; flex-direction: column; gap: var(--space-0); }
-.story { display: flex; flex-direction: column; gap: var(--space-8); margin-bottom: var(--space-12); }
-.story:last-child { margin-bottom: var(--space-0); }
-.story-label { width: 92px; flex-shrink: 0; font-size: var(--font-size-12); font-weight: var(--font-weight-medium); color: var(--color-text-secondary); line-height: var(--font-lineheight-12); }
-.rail { display: flex; gap: var(--space-16); align-items: flex-start; flex-wrap: wrap; }
+.specimen { display: flex; flex-direction: column; gap: var(--spacer-0); }
+.stage { display: flex; flex-direction: column; gap: var(--spacer-0); }
+.story { display: flex; flex-direction: column; gap: var(--spacer-8); margin-bottom: var(--spacer-12); }
+.story:last-child { margin-bottom: var(--spacer-0); }
+.story-label { width: 92px; flex-shrink: 0; font-size: var(--body-sm-font-size); font-weight: var(--font-weight-medium); color: var(--text-secondary); line-height: var(--body-sm-line-height); }
+.rail { display: flex; gap: var(--spacer-16); align-items: flex-start; flex-wrap: wrap; }
 
 /* @component-css-start */
-.input-group { display: flex; flex-direction: column; gap: var(--space-8); width: 100%; max-width: 320px; flex-shrink: 0; position: relative; }
-.input-group .field-label { font-size: var(--font-size-14); font-weight: var(--font-weight-medium); color: var(--color-text-primary); line-height: var(--font-lineheight-14); white-space: nowrap; }
-.input-group input, .input-group textarea { width: 100%; box-sizing: border-box; border: 1px solid var(--color-border-default); border-radius: var(--radius-sm); background: var(--color-bg-surface); color: var(--color-text-primary); font-size: 14px; font-family: var(--font-family-text); line-height: 14px; padding: 0 12px; outline: none; transition: border-color var(--duration-fast) var(--ease-standard); }
+.input-group { display: flex; flex-direction: column; gap: var(--spacer-8); width: 100%; max-width: 320px; flex-shrink: 0; position: relative; }
+.input-group .field-label { font-size: var(--body-md-font-size); font-weight: var(--font-weight-medium); color: var(--text-default); line-height: var(--body-md-line-height); white-space: nowrap; }
+.input-group input, .input-group textarea { width: 100%; box-sizing: border-box; border: 1px solid var(--border-neutral-l2); border-radius: var(--radius-6); background: var(--bg-surface); color: var(--text-default); font-size: 14px; font-family: var(--body-md-font-family); line-height: 14px; padding: 0 12px; outline: none; transition: border-color var(--duration-fast) var(--ease-standard); }
 .input-group input { height: 36px; }
 .input-group textarea { min-height: 96px; resize: vertical; padding: 8px; }
-.input-group input::placeholder, .input-group textarea::placeholder { color: var(--color-text-placeholder); }
-.input-group input:focus, .input-group textarea:focus { border-color: var(--color-brand); }
-.input-group.is-error input, .input-group.is-error textarea { border-color: var(--color-danger); color: var(--color-danger); }
-.input-group.is-disabled input, .input-group.is-disabled textarea { background: var(--color-bg-muted); color: var(--color-text-disabled); cursor: not-allowed; }
-.input-group.is-disabled .field-label { color: var(--color-text-disabled); }
+.input-group input::placeholder, .input-group textarea::placeholder { color: var(--text-placeholder); }
+.input-group input:focus, .input-group textarea:focus { border-color: var(--text-brand); }
+.input-group.is-error input, .input-group.is-error textarea { border-color: var(--status-danger-default); color: var(--status-danger-default); }
+.input-group.is-disabled input, .input-group.is-disabled textarea { background: var(--bg-muted); color: var(--text-disabled); cursor: not-allowed; }
+.input-group.is-disabled .field-label { color: var(--text-disabled); }
 
 /* ── Input Wrapper & Clear Button ─────────────────────────── */
 .input-wrapper { position: relative; }
 .input-wrapper input { padding-right: 36px; }
 .input-clear { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); display: none; background: none; border: none; cursor: pointer; padding: 4px; line-height: 1; }
-.input-clear i { font-family: "wego-iconfont-s"; font-size: 16px; font-style: normal; color: var(--color-text-placeholder); }
-.input-group.is-error .input-clear i { color: var(--color-danger); }
+.input-clear i { font-family: "wego-iconfont-s"; font-size: 16px; font-style: normal; color: var(--text-placeholder); }
+.input-group.is-error .input-clear i { color: var(--status-danger-default); }
 .input-group.is-disabled .input-clear { display: none !important; }
 
 /* ── Field Error ───────────────────────────────────────────── */
-.field-error { position: absolute; top: 100%; left: 0; margin-top: 0; white-space: nowrap; display: none; font-size: var(--font-size-10); color: var(--color-danger); }
+.field-error { position: absolute; top: 100%; left: 0; margin-top: 0; white-space: nowrap; display: none; font-size: var(--body-xs-font-size); color: var(--status-danger-default); }
 .input-group.is-error .field-error { display: block; }
 
 /* ── Number Input (数字输入框) ──────────────────────────────── */
-.number-input { display: flex; align-items: center; gap: var(--space-8); width: 120px; min-width: 80px; max-width: 128px; height: var(--size-32); padding: 6px var(--space-8); background: var(--color-bg-subtle); border: 0.5px solid var(--color-border-default); border-radius: var(--radius-sm); box-sizing: border-box; transition: border-color var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard); }
-.number-input__field { flex: 1 1 0; min-width: 0; border: none; outline: none; background: transparent; text-align: center; font-family: var(--font-family-number); font-size: var(--font-size-16); font-weight: var(--font-weight-medium); color: var(--color-text-primary); line-height: 20px; padding: 0; font-feature-settings: "zero"; }
-.number-input__field::placeholder { color: var(--color-text-disabled); font-size: var(--font-size-14); font-weight: var(--font-weight-regular); }
-.number-input__suffix { flex-shrink: 0; font-size: var(--font-size-14); font-weight: var(--font-weight-regular); color: var(--color-text-secondary); text-align: right; white-space: nowrap; font-feature-settings: "zero"; }
+.number-input { display: flex; align-items: center; gap: var(--spacer-8); width: 120px; min-width: 80px; max-width: 128px; height: var(--size-32); padding: 6px var(--spacer-8); background: var(--bg-subtle); border: 0.5px solid var(--border-neutral-l2); border-radius: var(--radius-6); box-sizing: border-box; transition: border-color var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard); }
+.number-input__field { flex: 1 1 0; min-width: 0; border: none; outline: none; background: transparent; text-align: center; font-family: var(--number-md-font-family); font-size: var(--body-lg-font-size); font-weight: var(--font-weight-medium); color: var(--text-default); line-height: 20px; padding: 0; font-feature-settings: "zero"; }
+.number-input__field::placeholder { color: var(--text-disabled); font-size: var(--body-md-font-size); font-weight: var(--font-weight-regular); }
+.number-input__suffix { flex-shrink: 0; font-size: var(--body-md-font-size); font-weight: var(--font-weight-regular); color: var(--text-secondary); text-align: right; white-space: nowrap; font-feature-settings: "zero"; }
 /* Focus */
-.number-input.is-focus { border-color: var(--color-text-primary); }
+.number-input.is-focus { border-color: var(--text-default); }
 /* Error */
-.number-input.is-error { background: var(--color-status-danger-surface-l1); border-color: var(--color-status-danger-border); }
-.number-input.is-error .number-input__field { color: var(--color-danger); }
+.number-input.is-error { background: var(--status-danger-surface-l1); border-color: var(--border-danger); }
+.number-input.is-error .number-input__field { color: var(--status-danger-default); }
 /* Disabled */
 .number-input.is-disabled { opacity: 0.5; pointer-events: none; }
 /* @component-css-end */

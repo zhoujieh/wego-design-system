@@ -22,23 +22,23 @@
      </div>
    </div>
 */
-.navbar { width: 375px; background: var(--color-bg-surface); flex-shrink: 0; }
+.navbar { width: 375px; background: var(--bg-surface); flex-shrink: 0; }
 /* Status Bar — 44px placeholder */
-.navbar__status-bar { height: 44px; display: flex; align-items: center; justify-content: center; background: var(--color-bg-muted); }
-.navbar__status-bar-text { font-size: var(--font-size-10); color: var(--color-text-tertiary); }
+.navbar__status-bar { height: 44px; display: flex; align-items: center; justify-content: center; background: var(--bg-muted); }
+.navbar__status-bar-text { font-size: var(--body-xs-font-size); color: var(--text-tertiary); }
 /* Body — 44px grid */
 .navbar__body { height: 44px; display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); align-items: center; }
 /* Left area — col 1-3 */
 .navbar__left { grid-column: 1 / 4; display: flex; align-items: center; padding-left: 8px; gap: 4px; height: 100%; }
 .navbar__left-btn { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; cursor: pointer; flex-shrink: 0; }
 .navbar__left-btn:active { opacity: 0.6; }
-.navbar__left-btn .wego-iconfont-s { font-size: 24px; color: var(--color-text-primary); }
-.navbar__left-text { font-size: var(--font-size-16); color: var(--color-text-primary); cursor: pointer; padding: 0 4px; }
+.navbar__left-btn .wego-iconfont-s { font-size: 24px; color: var(--text-default); }
+.navbar__left-text { font-size: var(--body-lg-font-size); color: var(--text-default); cursor: pointer; padding: 0 4px; }
 .navbar__left-text:active { opacity: 0.6; }
 /* Center area — col 4-7 (standard) */
 .navbar__center { grid-column: 4 / 8; display: flex; align-items: center; justify-content: center; gap: 4px; min-width: 120px; overflow: hidden; padding: 0 8px; }
 .navbar__center--wide { grid-column: 1 / 6; justify-content: flex-start; padding-left: 16px; }
-.navbar__title { font-size: var(--font-size-18); font-weight: var(--font-weight-medium); color: var(--color-text-primary); line-height: 1.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.navbar__title { font-size: var(--heading-sm-font-size); font-weight: var(--font-weight-medium); color: var(--text-default); line-height: 1.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* Right area — col 8-10 (standard) */
 .navbar__right { grid-column: 8 / 11; display: flex; align-items: center; justify-content: flex-end; gap: 0; padding-right: 4px; height: 100%; }
 .navbar__right--wide { grid-column: 6 / 11; padding-right: 8px; }
@@ -49,15 +49,15 @@
 .navbar__action { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 44px; height: 44px; cursor: pointer; position: relative; flex-shrink: 0; }
 .navbar__action:active { opacity: 0.6; }
 .navbar__action-icon { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
-.navbar__action-icon .wego-iconfont-s { font-size: 20px; color: var(--color-text-primary); }
-.navbar__action-label { font-size: var(--font-size-10); color: var(--color-text-primary); line-height: 1; white-space: nowrap; }
+.navbar__action-icon .wego-iconfont-s { font-size: 20px; color: var(--text-default); }
+.navbar__action-label { font-size: var(--body-xs-font-size); color: var(--text-default); line-height: 1; white-space: nowrap; }
 /* Text action */
 .navbar__action--text { width: auto; padding: 0 8px; }
-.navbar__action--text .navbar__action-label { font-size: var(--font-size-16); }
+.navbar__action--text .navbar__action-label { font-size: var(--body-lg-font-size); }
 /* Button action */
 .navbar__action--button { width: auto; padding: 0; }
-.navbar__action-btn { height: 32px; min-width: 32px; max-width: 120px; padding: 0 8px; border-radius: var(--radius-sm); background: var(--color-brand); color: var(--color-text-inverse); font-size: var(--font-size-14); font-weight: var(--font-weight-medium); font-family: var(--font-family-text); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; white-space: nowrap; }
-.navbar__action-btn:active { background: var(--color-brand-disabled); }
+.navbar__action-btn { height: 32px; min-width: 32px; max-width: 120px; padding: 0 8px; border-radius: var(--radius-6); background: var(--bg-brand); color: var(--text-inverse); font-size: var(--body-md-font-size); font-weight: var(--font-weight-medium); font-family: var(--body-md-font-family); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; white-space: nowrap; }
+.navbar__action-btn:active { background: var(--bg-brand-disabled); }
 /* @component-css-end */
 </style>
 </head>

@@ -110,20 +110,24 @@
     "不要在 cell 内同时放多个同级主操作按钮。"
   ],
   "tokensConsumed": [
-    "--color-bg-subtle",
-    "--color-bg-surface",
-    "--color-divider-default",
-    "--color-state-pressed",
-    "--color-text-primary",
-    "--color-text-secondary",
-    "--color-text-tertiary",
-    "--font-lineheight-12",
-    "--font-lineheight-14",
-    "--font-lineheight-16",
-    "--font-size-12",
-    "--font-size-14",
-    "--font-size-16",
-    "--font-weight-regular"
+    "--accent-green",
+    "--bg-page",
+    "--bg-state-pressed",
+    "--bg-subtle",
+    "--bg-surface",
+    "--body-lg-font-size",
+    "--body-lg-line-height",
+    "--body-md-font-size",
+    "--body-md-line-height",
+    "--body-sm-font-size",
+    "--body-sm-line-height",
+    "--border-neutral-l2",
+    "--font-weight-medium",
+    "--font-weight-regular",
+    "--text-default",
+    "--text-link",
+    "--text-secondary",
+    "--text-tertiary"
   ],
   "designTokens": {
     "height": {
@@ -132,10 +136,10 @@
     },
     "paddingHorizontal": "16px",
     "gap": "12px",
-    "titleFont": "var(--font-size-16)",
-    "subtitleFont": "var(--font-size-12)",
-    "actionFont": "var(--font-size-14)",
-    "divider": "0.5px solid var(--color-divider-default)"
+    "titleFont": "var(--body-lg-font-size)",
+    "subtitleFont": "var(--body-sm-font-size)",
+    "actionFont": "var(--body-md-font-size)",
+    "divider": "0.5px solid var(--border-neutral-l2)"
   },
   "specRefs": [
     "specs/布局与间距规范.md",

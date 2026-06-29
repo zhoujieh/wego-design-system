@@ -12,8 +12,8 @@
 html, body {
   margin: 0;
   padding: 0;
-  background: var(--color-bg-page);
-  font-family: var(--font-family-text);
+  background: var(--bg-page);
+  font-family: var(--body-md-font-family);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -26,7 +26,7 @@ html, body {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  padding: var(--space-16);
+  padding: var(--spacer-16);
 }
 
 /* ═══ Phone Frame ═══ */
@@ -34,11 +34,11 @@ html, body {
   width: 390px;
   height: 780px;
   border-radius: 40px;
-  border: 8px solid var(--color-bg-inverse);
+  border: 8px solid var(--bg-inverse);
   overflow: hidden;
   position: relative;
   box-shadow: var(--shadow-xl);
-  background: var(--color-bg-page);
+  background: var(--bg-page);
   flex-shrink: 0;
 }
 
@@ -49,7 +49,7 @@ html, body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: var(--color-bg-page);
+  background: var(--bg-page);
 }
 
 /* navbar width fix — component sets width:375px, override for phone-frame */
@@ -61,11 +61,11 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 var(--space-16);
-  background: var(--color-bg-surface);
-  font-size: var(--font-size-12);
+  padding: 0 var(--spacer-16);
+  background: var(--bg-surface);
+  font-size: var(--body-sm-font-size);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
+  color: var(--text-default);
   flex-shrink: 0;
 }
 
@@ -80,7 +80,7 @@ html, body {
 
 .phone-indicator {
   height: 34px;
-  background: var(--color-bg-surface);
+  background: var(--bg-surface);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -90,31 +90,31 @@ html, body {
 .phone-indicator-bar {
   width: 134px;
   height: 5px;
-  background: var(--color-text-primary);
+  background: var(--bg-inverse);
   border-radius: var(--radius-full);
   opacity: 0.2;
 }
 
 /* ═══ Layout Helpers ═══ */
 .section-title {
-  font-size: var(--font-size-12);
-  color: var(--color-text-tertiary);
-  padding: var(--space-16) var(--space-16) var(--space-8);
+  font-size: var(--body-sm-font-size);
+  color: var(--text-tertiary);
+  padding: var(--spacer-16) var(--spacer-16) var(--spacer-8);
 }
 
 .section-group {
-  background: var(--color-bg-surface);
+  background: var(--bg-surface);
   width: 100%;
 }
 
 .section-gap {
-  height: var(--space-8);
+  height: var(--spacer-8);
 }
 
 /* ═══ Responsive ═══ */
 @media (max-width: 640px) {
   .uikit-shell {
-    padding: var(--space-8);
+    padding: var(--spacer-8);
     align-items: flex-start;
   }
   .phone-frame {
@@ -193,13 +193,13 @@ function BizSettingsScreen() {
   return (
     <div>
       {/* ═════════ 业务信息 ═════════ */}
-      <div style={{display:'flex',alignItems:'center',gap:'var(--space-8)',padding:'var(--space-16)',background:'var(--color-bg-surface)'}}>
-        <div style={{display:'flex',alignItems:'center',gap:'var(--space-4)',flex:1,minWidth:0}}>
+      <div style={{display:'flex',alignItems:'center',gap:'var(--spacer-8)',padding:'var(--spacer-16)',background:'var(--bg-surface)'}}>
+        <div style={{display:'flex',alignItems:'center',gap:'var(--spacer-4)',flex:1,minWidth:0}}>
           <div className="avatar avatar--24 avatar--initials">车</div>
-          <span style={{fontSize:'var(--font-size-16)',fontWeight:'var(--font-weight-medium)',color:'var(--color-text-primary)'}}>车车</span>
+          <span style={{fontSize:'var(--body-lg-font-size)',fontWeight:'var(--font-weight-medium)',color:'var(--text-default)'}}>车车</span>
           <div data-component="tag" className="tag tag--20 tag--brand-stroke uikit-nowrap"><span className="tag__label">管理员</span></div>
         </div>
-        <a className="link link--inline" style={{fontSize:'var(--font-size-14)',flexShrink:0}}>切换岗位</a>
+        <a className="link link--inline" style={{fontSize:'var(--body-md-font-size)',flexShrink:0}}>切换岗位</a>
       </div>
 
       {/* ═════════ 业绩归属 ═════════ */}
@@ -500,8 +500,8 @@ function BizSettingsScreen() {
               <div className="cell__title-row"><span className="cell__title">可管理的仓库</span></div>
             </div>
             <div className="cell__action">
-              <span className="cell__action-text" style={{color:'var(--color-text-tertiary)'}}>未分配</span>
-              <i className="wego-iconfont-s icon-youjiantou16 cell__arrow" style={{color:'var(--color-text-tertiary)'}}></i>
+              <span className="cell__action-text" style={{color:'var(--text-tertiary)'}}>未分配</span>
+              <i className="wego-iconfont-s icon-youjiantou16 cell__arrow" style={{color:'var(--text-tertiary)'}}></i>
             </div>
           </div>
         </div>

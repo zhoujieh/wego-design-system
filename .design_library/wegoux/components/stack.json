@@ -75,22 +75,27 @@
     "不要在同一组件里混入数字角标、倒计时等额外状态。"
   ],
   "tokensConsumed": [
-    "--color-bg-surface",
-    "--color-border-control-disabled-strong",
-    "--color-brand",
-    "--color-text-primary",
+    "--bg-brand",
+    "--bg-surface",
+    "--body-md-font-family",
+    "--body-md-font-size",
+    "--body-md-line-height",
+    "--body-sm-font-size",
+    "--border-control-disabled",
     "--duration-fast",
     "--ease-standard",
-    "--font-family-text",
-    "--font-lineheight-14",
-    "--font-size-14",
     "--font-weight-regular",
-    "--radius-xs"
+    "--radius-4",
+    "--spacer-4",
+    "--spacer-8",
+    "--text-brand",
+    "--text-default",
+    "--text-tertiary"
   ],
   "designTokens": {
     "blockSize": "24px",
-    "radius": "var(--radius-xs)",
-    "labelFont": "var(--font-size-14) / var(--font-weight-regular)",
+    "radius": "var(--radius-4)",
+    "labelFont": "var(--body-md-font-size) / var(--font-weight-regular)",
     "transition": "var(--duration-fast) / var(--ease-standard)"
   },
   "specRefs": [

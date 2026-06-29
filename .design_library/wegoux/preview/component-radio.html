@@ -15,10 +15,10 @@
 
 /* @component-css-start */
 .radio { width:24px; height:24px; display:flex; align-items:center; justify-content:center; flex-shrink:0; position:relative; cursor:pointer; }
-.radio__inner { width:20px; height:20px; border-radius:50%; border:1.5px solid var(--color-border-control-default); background:transparent; box-sizing:border-box; transition:border-color var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard); }
-.radio__dot { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:11px; height:11px; border-radius:50%; background:var(--color-brand); display:none; }
+.radio__inner { width:20px; height:20px; border-radius:50%; border:1.5px solid var(--border-control); background:transparent; box-sizing:border-box; transition:border-color var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard); }
+.radio__dot { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:11px; height:11px; border-radius:50%; background:var(--bg-brand); display:none; }
 
-.radio--checked .radio__inner { border-color:var(--color-brand); }
+.radio--checked .radio__inner { border-color:var(--text-brand); }
 .radio--checked .radio__dot { display:block; }
 
 /* 20px = 24px * 5/6; inner: ~16.5px; dot: 11*(5/6)≈9px */
@@ -28,17 +28,17 @@
 
 /* Disabled — unchecked: subtle border + disabled surface */
 .radio--disabled:not(.radio--checked) { pointer-events:none; cursor:not-allowed; }
-.radio--disabled:not(.radio--checked) .radio__inner { border-color:var(--color-border-disabled); background:var(--color-state-disabled-surface); }
+.radio--disabled:not(.radio--checked) .radio__inner { border-color:var(--border-disabled); background:var(--bg-control-disabled); }
 /* Disabled — checked: subtle border + bg; dot matches border */
 .radio--checked.radio--disabled { pointer-events:none; cursor:not-allowed; }
-.radio--checked.radio--disabled .radio__inner { border-color:var(--color-border-disabled); background:var(--color-state-disabled-surface); }
-.radio--checked.radio--disabled .radio__dot { background:var(--color-border-disabled); }
+.radio--checked.radio--disabled .radio__inner { border-color:var(--border-disabled); background:var(--bg-control-disabled); }
+.radio--checked.radio--disabled .radio__dot { background:var(--border-disabled); }
 
 /* Dark mode overrides for .dark context */
-.dark .radio .radio__inner { border-color:var(--color-border-control-default); }
-.dark .radio--disabled:not(.radio--checked) .radio__inner { border-color:var(--color-border-disabled); background:var(--color-state-disabled-surface); }
-.dark .radio--checked.radio--disabled .radio__inner { border-color:var(--color-border-control-disabled-strong); background:var(--color-state-disabled-surface); }
-.dark .radio--checked.radio--disabled .radio__dot { background:var(--color-border-control-disabled-strong); }
+.dark .radio .radio__inner { border-color:var(--border-control); }
+.dark .radio--disabled:not(.radio--checked) .radio__inner { border-color:var(--border-disabled); background:var(--bg-control-disabled); }
+.dark .radio--checked.radio--disabled .radio__inner { border-color:var(--border-control-disabled); background:var(--bg-control-disabled); }
+.dark .radio--checked.radio--disabled .radio__dot { background:var(--border-control-disabled); }
 /* @component-css-end */
 </style>
 </head>
@@ -50,15 +50,15 @@
   <div class="radio radio--checked" onclick="selectRadio(this)" data-group="demo1">
     <div class="radio__inner"></div><div class="radio__dot"></div>
   </div>
-  <span style="font-size:var(--font-size-14)">选项A</span>
+  <span style="font-size:var(--body-md-font-size)">选项A</span>
   <div class="radio" onclick="selectRadio(this)" data-group="demo1">
     <div class="radio__inner"></div><div class="radio__dot"></div>
   </div>
-  <span style="font-size:var(--font-size-14)">选项B</span>
+  <span style="font-size:var(--body-md-font-size)">选项B</span>
   <div class="radio" onclick="selectRadio(this)" data-group="demo1">
     <div class="radio__inner"></div><div class="radio__dot"></div>
   </div>
-  <span style="font-size:var(--font-size-14)">选项C</span>
+  <span style="font-size:var(--body-md-font-size)">选项C</span>
 </div>
 
 

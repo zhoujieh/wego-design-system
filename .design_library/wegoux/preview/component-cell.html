@@ -10,18 +10,18 @@
 <link rel="stylesheet" href="../components.css">
 <style>
 .page{max-width:420px;margin:0 auto}
-.section-title{font-size:var(--font-size-12);font-weight:var(--font-weight-medium);color:var(--color-text-tertiary);padding:24px 16px 8px}
-.section-group{background:var(--color-bg-surface);width:100%}
-.section-gap{height:8px;background:var(--color-bg-page)}
+.section-title{font-size:var(--body-sm-font-size);font-weight:var(--font-weight-medium);color:var(--text-tertiary);padding:24px 16px 8px}
+.section-group{background:var(--bg-surface);width:100%}
+.section-gap{height:8px;background:var(--bg-page)}
 
 /* @component-css-start */
-.cell{position:relative;display:flex;align-items:center;width:100%;box-sizing:border-box;background:var(--color-bg-surface);color:var(--color-text-primary);overflow:hidden}
+.cell{position:relative;display:flex;align-items:center;width:100%;box-sizing:border-box;background:var(--bg-surface);color:var(--text-default);overflow:hidden}
 .cell--single{min-height:56px}
 .cell--double{min-height:76px}
-.cell--bg-white{background:var(--color-bg-surface)}
-.cell--bg-grey{background:var(--color-bg-subtle)}
+.cell--bg-white{background:var(--bg-surface)}
+.cell--bg-grey{background:var(--bg-subtle)}
 .cell--clickable{cursor:pointer;-webkit-tap-highlight-color:transparent}
-.cell--clickable:active{background:var(--color-state-pressed)}
+.cell--clickable:active{background:var(--bg-state-pressed)}
 .cell__body{display:flex;align-items:center;gap:12px;width:100%;min-width:0;padding:0 16px;box-sizing:border-box}
 .cell__select ~ .cell__body,
 .cell__avatar ~ .cell__body,
@@ -29,25 +29,25 @@
 .cell--indent .cell__body{padding-left:32px}
 .cell__content{flex:1;min-width:0;overflow:hidden}
 .cell__title-row{display:flex;align-items:center;gap:4px;min-width:0}
-.cell__title{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--font-size-16);font-weight:var(--font-weight-regular);line-height:var(--font-lineheight-16);color:var(--color-text-primary);font-feature-settings:"zero"}
-.cell__title-icon{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;flex-shrink:0;font-size:16px;color:var(--color-text-secondary)}
-.cell__subtitle{display:block;margin-top:2px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:var(--font-size-12);font-weight:var(--font-weight-regular);line-height:var(--font-lineheight-12);color:var(--color-text-tertiary);font-feature-settings:"zero"}
+.cell__title{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--body-lg-font-size);font-weight:var(--font-weight-regular);line-height:var(--body-lg-line-height);color:var(--text-default);font-feature-settings:"zero"}
+.cell__title-icon{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;flex-shrink:0;font-size:16px;color:var(--text-secondary)}
+.cell__subtitle{display:block;margin-top:2px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:var(--body-sm-font-size);font-weight:var(--font-weight-regular);line-height:var(--body-sm-line-height);color:var(--text-tertiary);font-feature-settings:"zero"}
 .cell__action{display:flex;align-items:center;justify-content:flex-end;gap:4px;min-width:0;flex-shrink:0;margin-left:auto}
-.cell__action-text{display:block;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--font-size-14);font-weight:var(--font-weight-regular);line-height:var(--font-lineheight-14);color:var(--color-text-secondary);font-feature-settings:"zero"}
+.cell__action-text{display:block;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--body-md-font-size);font-weight:var(--font-weight-regular);line-height:var(--body-md-line-height);color:var(--text-secondary);font-feature-settings:"zero"}
 .cell__action-badge{display:flex;align-items:center;gap:4px;min-width:0}
-.cell__arrow{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;flex-shrink:0;font-size:16px;color:var(--color-text-tertiary)}
+.cell__arrow{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;flex-shrink:0;font-size:16px;color:var(--text-tertiary)}
 .cell__select,
 .cell__avatar,
 .cell__backspace{display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .cell__select{min-width:28px;margin-left:12px;padding-left:4px;box-sizing:border-box}
 .cell__avatar{margin-left:16px;margin-right:12px}
 .cell__select + .cell__avatar{margin-left:8px}
-.cell__backspace{width:24px;min-width:24px;min-height:24px;margin-left:16px;color:var(--color-text-tertiary)}
+.cell__backspace{width:24px;min-width:24px;min-height:24px;margin-left:16px;color:var(--text-tertiary)}
 .cell__backspace + .cell__select{margin-left:8px}
 .cell__backspace-icon,
 .cell__backspace-icon svg{width:24px;height:24px;display:block}
 .cell--divider-right-edge::after,
-.cell--divider-center::after{content:"";position:absolute;bottom:0;border-bottom:0.5px solid var(--color-divider-default);pointer-events:none}
+.cell--divider-center::after{content:"";position:absolute;bottom:0;border-bottom:0.5px solid var(--border-neutral-l2);pointer-events:none}
 .cell--divider-right-edge::after{left:16px;right:0}
 .cell--divider-center::after{left:16px;right:16px}
 /* @component-css-end */
@@ -238,7 +238,7 @@
   <div class="cell cell--single cell--divider-right-edge cell--bg-white">
     <div class="cell__body">
       <div class="cell__content"><div class="cell__title-row"><span class="cell__title">自定义操作区</span></div></div>
-      <div class="cell__action" style="padding-right:16px"><a class="link link--inline" href="javascript:void(0)" style="font-size:var(--font-size-14)">更多</a></div>
+      <div class="cell__action" style="padding-right:16px"><a class="link link--inline" href="javascript:void(0)" style="font-size:var(--body-md-font-size)">更多</a></div>
     </div>
   </div>
   <div class="cell cell--double cell--divider-right-edge cell--bg-white">
@@ -247,7 +247,7 @@
         <div class="cell__title-row"><span class="cell__title">帮助与反馈</span></div>
         <div class="cell__subtitle">常见问题与在线客服</div>
       </div>
-      <div class="cell__action" style="padding-right:16px"><a class="link link--inline" href="javascript:void(0)" style="font-size:var(--font-size-14)">查看</a></div>
+      <div class="cell__action" style="padding-right:16px"><a class="link link--inline" href="javascript:void(0)" style="font-size:var(--body-md-font-size)">查看</a></div>
     </div>
   </div>
 </div>
@@ -325,7 +325,7 @@
       <div class="cell__content">
         <div class="cell__title-row">
           <span class="cell__title">自定义标签</span>
-          <span style="display:inline-flex;align-items:center;justify-content:center;height:16px;padding:0 4px;border-radius:4px;background:var(--wg-color-base-accent-green-500);color:#fff;font-size:10px;font-weight:var(--font-weight-medium);flex-shrink:0">HOT</span>
+          <span style="display:inline-flex;align-items:center;justify-content:center;height:16px;padding:0 4px;border-radius:4px;background:var(--accent-green);color:#fff;font-size:10px;font-weight:var(--font-weight-medium);flex-shrink:0">HOT</span>
         </div>
       </div>
       <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
@@ -438,21 +438,21 @@
 <div class="section-title">左侧 - 选择区 (图标)</div>
 <div class="section-group">
   <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
-    <div class="cell__select"><i class="wego-iconfont-s icon-chengchangzhongxin" style="font-size:24px;color:var(--color-text-primary)"></i></div>
+    <div class="cell__select"><i class="wego-iconfont-s icon-chengchangzhongxin" style="font-size:24px;color:var(--text-default)"></i></div>
     <div class="cell__body">
       <div class="cell__content"><div class="cell__title-row"><span class="cell__title">带图标选择区</span></div></div>
       <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
     </div>
   </div>
   <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
-    <div class="cell__select"><i class="wego-iconfont-s icon-yuanjia" style="font-size:24px;color:var(--color-text-link)"></i></div>
+    <div class="cell__select"><i class="wego-iconfont-s icon-yuanjia" style="font-size:24px;color:var(--text-link)"></i></div>
     <div class="cell__body">
       <div class="cell__content"><div class="cell__title-row"><span class="cell__title">添加图标选择区</span></div></div>
       <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
     </div>
   </div>
   <div class="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable">
-    <div class="cell__select"><i class="wego-iconfont-s icon-chengchangzhongxin" style="font-size:24px;color:var(--color-text-primary)"></i></div>
+    <div class="cell__select"><i class="wego-iconfont-s icon-chengchangzhongxin" style="font-size:24px;color:var(--text-default)"></i></div>
     <div class="cell__body">
       <div class="cell__content">
         <div class="cell__title-row"><span class="cell__title">成长中心</span></div>

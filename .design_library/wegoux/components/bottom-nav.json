@@ -90,22 +90,22 @@
     "不要引入 Lucide 或外部图标体系替代库内资产。"
   ],
   "tokensConsumed": [
-    "--color-bg-surface",
-    "--color-border-default",
-    "--color-brand",
-    "--color-text-primary",
-    "--font-family-text",
-    "--font-size-10",
+    "--bg-surface",
+    "--body-md-font-family",
+    "--body-xs-font-size",
+    "--border-neutral-l2",
     "--font-weight-regular",
     "--size-32",
     "--size-56",
-    "--space-16"
+    "--spacer-16",
+    "--text-brand",
+    "--text-default"
   ],
   "designTokens": {
     "height": "var(--size-56)",
     "iconSize": "var(--size-32)",
-    "labelFont": "var(--font-size-10) / var(--font-weight-regular)",
-    "paddingHorizontal": "var(--space-16)",
+    "labelFont": "var(--body-xs-font-size) / var(--font-weight-regular)",
+    "paddingHorizontal": "var(--spacer-16)",
     "safeAreaBottom": "env(safe-area-inset-bottom, 0px)"
   },
   "specRefs": [

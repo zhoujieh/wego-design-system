@@ -101,33 +101,16 @@ name: "微购设计系统"
 
 ## 命名规则
 
-### 源 Token（`wg.*` 前缀）
+### Token v2 命名
 
-底层设计 Token，完整覆盖色彩、字体、间距、圆角、阴影、动效、层级、尺寸、文案等全部属性，是便携别名的数据源。命名遵循 `<wg>-<类别>-<属性>-<等级>` 结构，例如：
+`colors_and_type.css` 是 v2 权威源，采用类似 TRAE 的“源命名即公共 API”方式。组件直接消费这些 Token，不再保留旧命名兼容层。
 
-- `--wg-color-base-brand-500`：品牌色 500 等级
-- `--wg-font-size-f14`：正文字号 14px
-- `--wg-spacing-16`：间距 16px
-- `--wg-radius-lg`：大圆角 12px
-- `--wg-shadow-md`：中等阴影
-- `--wg-motion-duration-normal`：标准动效时长 250ms
-
-### 便携别名
-
-为方便日常开发使用，提供语义化的快捷别名，均通过 `var(--wg-*)` 引用源 Token：
-
-- `--color-*`：色彩系列（如 `--color-brand`、`--color-text-primary`、`--color-bg-surface`、`--color-border-default` 等）
-- `--radius-*`：圆角系列（如 `--radius-xs`、`--radius-md`、`--radius-full`）
-- `--space-*`：间距系列（如 `--space-8`、`--space-16`、`--space-24`）
-- `--font-*`：字体系列（如 `--font-family-text`、`--font-size-14`、`--font-weight-medium`）
-- `--shadow-*`：阴影系列（如 `--shadow-sm`、`--shadow-lg`）
-- `--duration-*` / `--ease-*`：动效系列（如 `--duration-fast`、`--ease-standard`）
-- `--size-*`：尺寸系列（如 `--size-24`、`--size-48`）
-- `--touch-*`：触控系列（如 `--touch-min`、`--touch-default`）
-- `--blur-*`：模糊系列（如 `--blur-md`、`--blur-frosted`）
-- `--z-*`：层级系列（如 `--z-sticky`、`--z-modal`）
-- `--stroke-*`：描边系列（如 `--stroke-color-default`、`--stroke-width-default`）
-- `--layout-*`：布局系列（如 `--layout-page-max-width`、`--layout-group-g1-outside`）
+- `--palette-*`：完整 10 档基础色阶，例如 `--palette-green-500`、`--palette-neutral-1000`。
+- `--bg-*` / `--text-*` / `--icon-*` / `--border-*`：表面、内容、图标和描边语义。
+- `--status-{success|warning|danger|info|promotion}-*`：状态色，包含 `default`、`hover`、`active` 和 `surface-l1..l3`。
+- `--body-*` / `--heading-*` / `--number-*`：正文、标题和数字/金额排版角色。
+- `--spacer-*` / `--radius-*` / `--shadow-*`：间距、圆角、阴影。
+- `--duration-*` / `--ease-*` / `--size-*` / `--touch-*` / `--z-*`：动效、尺寸、触控热区和层级。
 
 ## 组件清单
 

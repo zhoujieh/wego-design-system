@@ -1,173 +1,173 @@
 {
-  "schemaVersion": 3,
-  "tokenSource": "css.json",
-  "uikitPlan": "uikit-plan.json",
-  "componentsIndex": "components/index.json",
-  "componentContractDir": "components",
-  "componentsCss": "components.css",
-  "tokenCss": "colors_and_type.css",
-  "iconFontCss": "iconfont.css",
-  "previewDir": "preview",
-  "uiKitsDir": "ui_kits",
-  "specsDir": "specs",
-  "consumptionLayers": {
-    "tokens": {
-      "files": [
+    "schemaVersion": 3,
+    "tokenSource": "css.json",
+    "uikitPlan": "uikit-plan.json",
+    "componentsIndex": "components/index.json",
+    "componentContractDir": "components",
+    "componentsCss": "components.css",
+    "tokenCss": "colors_and_type.css",
+    "iconFontCss": "iconfont.css",
+    "previewDir": "preview",
+    "uiKitsDir": "ui_kits",
+    "specsDir": "specs",
+    "consumptionLayers": {
+        "tokens": {
+            "files": [
+                "colors_and_type.css",
+                "css.json"
+            ],
+            "copyable": true,
+            "purpose": "微购视觉语言源头，包含完整 palette 色阶、bg/text/icon/border/status 公共语义、排版角色、间距、圆角、阴影、动效和尺寸 Token"
+        },
+        "components": {
+            "files": [
+                "components.css",
+                "components/index.json",
+                "components/{slug}.json",
+                "preview/component-{slug}.html"
+            ],
+            "copyable": true,
+            "purpose": "组件级结构、class、状态、尺寸和使用边界",
+            "downstreamRule": "优先读取 components/index.json 确认可用组件，再读取对应契约和预览页；复制组件 markup 时同时链接 colors_and_type.css、iconfont.css 和 components.css。"
+        },
+        "icons": {
+            "files": [
+                "iconfont.css",
+                "assets/fonts/wego-iconfont.woff2",
+                "assets/fonts/wego-iconfont.woff",
+                "assets/fonts/wego-iconfont.ttf",
+                "assets/icons/*.svg"
+            ],
+            "copyable": true,
+            "purpose": "微购图标字体和少量 SVG 资产",
+            "downstreamRule": "组件和预览页优先使用 <i class=\"wego-iconfont-s icon-{name}\"></i>；不要为了常规图标引入 Lucide/CDN 或临时内联 SVG。assets/icons/*.svg 仅用于已有 Tab、标签、选择态等资产参考。"
+        },
+        "specs": {
+            "files": [
+                "specs/*.md"
+            ],
+            "copyable": false,
+            "purpose": "品牌、布局、交互、动效、图标、文案和数据格式的细则",
+            "downstreamRule": "遇到页面布局、日期金额、状态反馈、图标尺寸、点击热区等问题时读取对应规范。"
+        },
+        "uikit": {
+            "files": [
+                "ui_kits/app/index.html",
+                "ui_kits/app/quality-report.json",
+                "ui_kits/biz-settings/index.html",
+                "ui_kits/biz-settings/quality-report.json"
+            ],
+            "copyable": false,
+            "purpose": "移动端应用和业务设置组合 Showcase，用来理解页面结构和组件搭配",
+            "downstreamRule": "只参考页面结构和组件组合，不要直接复制 .uikit-shell、.phone-frame 或业务演示里的自定义 biz-* 样式作为通用组件。"
+        }
+    },
+    "iconUsage": {
+        "fontClassMode": {
+            "syntax": "<i class=\"wego-iconfont-s icon-{name}\"></i>",
+            "requires": [
+                "iconfont.css",
+                "assets/fonts/wego-iconfont.*"
+            ],
+            "recolorable": true,
+            "colorRule": "通过父元素或图标自身的 CSS color 使用 Token，例如 color: var(--text-default)。"
+        },
+        "svgAssetMode": {
+            "syntax": "<img src=\"assets/icons/{name}.svg\" alt=\"\" />",
+            "recolorable": false,
+            "useFor": "底部 Tab、选择态、标签等已经沉淀为 SVG 的固定资产。"
+        },
+        "iconCountFromIconfontCss": 435,
+        "rule": "优先使用已随库交付的 iconfont；缺图时先找语义接近的已有图标，再考虑联系设计团队更新字体包。"
+    },
+    "downstreamScenarios": {
+        "useTokensOnly": {
+            "read": [
+                "colors_and_type.css"
+            ],
+            "consume": "通过 <link> 或 CSS @import 引入 Token。"
+        },
+        "buildSingleComponent": {
+            "read": [
+                "components/index.json",
+                "components/{slug}.json",
+                "preview/component-{slug}.html",
+                "components.css"
+            ],
+            "consume": "复制预览页中的组件 markup，链接 colors_and_type.css、iconfont.css 和 components.css。"
+        },
+        "buildMobileAppPage": {
+            "read": [
+                "ui_kits/app/index.html",
+                "components/index.json",
+                "preview/component-{slug}.html",
+                "specs/布局与间距规范.md"
+            ],
+            "consume": "参考 UI Kit 的页面结构，使用组件预览页中的稳定 class，在真实移动端画布中重新组织页面。"
+        },
+        "writeChineseCopyOrData": {
+            "read": [
+                "specs/文案与数据规范.md"
+            ],
+            "consume": "金额、日期、时间、空数据、省略和中文标点按规范输出。"
+        }
+    },
+    "uikitConstraints": {
+        "kitType": "app",
+        "showcaseOnly": true,
+        "outerShells": [
+            ".uikit-shell",
+            ".phone-frame",
+            ".phone-screen"
+        ],
+        "warningForDownstream": "UI Kit 是展示样品，不是真实页面模板；真实项目应保留组件层 class，重写外层页面结构。"
+    },
+    "recommendedReadOrder": [
+        "SKILL.md",
+        "README.md",
+        "library-consumption.json",
+        "uikit-plan.json",
         "colors_and_type.css",
-        "css.json"
-      ],
-      "copyable": true,
-      "purpose": "微购视觉语言源头，包含颜色、字体、字号、间距、圆角、阴影、动效和语义别名"
-    },
-    "components": {
-      "files": [
-        "components.css",
-        "components/index.json",
-        "components/{slug}.json",
-        "preview/component-{slug}.html"
-      ],
-      "copyable": true,
-      "purpose": "组件级结构、class、状态、尺寸和使用边界",
-      "downstreamRule": "优先读取 components/index.json 确认可用组件，再读取对应契约和预览页；复制组件 markup 时同时链接 colors_and_type.css、iconfont.css 和 components.css。"
-    },
-    "icons": {
-      "files": [
-        "iconfont.css",
-        "assets/fonts/wego-iconfont.woff2",
-        "assets/fonts/wego-iconfont.woff",
-        "assets/fonts/wego-iconfont.ttf",
-        "assets/icons/*.svg"
-      ],
-      "copyable": true,
-      "purpose": "微购图标字体和少量 SVG 资产",
-      "downstreamRule": "组件和预览页优先使用 <i class=\"wego-iconfont-s icon-{name}\"></i>；不要为了常规图标引入 Lucide/CDN 或临时内联 SVG。assets/icons/*.svg 仅用于已有 Tab、标签、选择态等资产参考。"
-    },
-    "specs": {
-      "files": [
-        "specs/*.md"
-      ],
-      "copyable": false,
-      "purpose": "品牌、布局、交互、动效、图标、文案和数据格式的细则",
-      "downstreamRule": "遇到页面布局、日期金额、状态反馈、图标尺寸、点击热区等问题时读取对应规范。"
-    },
-    "uikit": {
-      "files": [
-        "ui_kits/app/index.html",
-        "ui_kits/app/quality-report.json",
-        "ui_kits/biz-settings/index.html",
-        "ui_kits/biz-settings/quality-report.json"
-      ],
-      "copyable": false,
-      "purpose": "移动端应用和业务设置组合 Showcase，用来理解页面结构和组件搭配",
-      "downstreamRule": "只参考页面结构和组件组合，不要直接复制 .uikit-shell、.phone-frame 或业务演示里的自定义 biz-* 样式作为通用组件。"
-    }
-  },
-  "iconUsage": {
-    "fontClassMode": {
-      "syntax": "<i class=\"wego-iconfont-s icon-{name}\"></i>",
-      "requires": [
-        "iconfont.css",
-        "assets/fonts/wego-iconfont.*"
-      ],
-      "recolorable": true,
-      "colorRule": "通过父元素或图标自身的 CSS color 使用 Token，例如 color: var(--color-text-primary)。"
-    },
-    "svgAssetMode": {
-      "syntax": "<img src=\"assets/icons/{name}.svg\" alt=\"\" />",
-      "recolorable": false,
-      "useFor": "底部 Tab、选择态、标签等已经沉淀为 SVG 的固定资产。"
-    },
-    "iconCountFromIconfontCss": 435,
-    "rule": "优先使用已随库交付的 iconfont；缺图时先找语义接近的已有图标，再考虑联系设计团队更新字体包。"
-  },
-  "downstreamScenarios": {
-    "useTokensOnly": {
-      "read": [
-        "colors_and_type.css"
-      ],
-      "consume": "通过 <link> 或 CSS @import 引入 Token。"
-    },
-    "buildSingleComponent": {
-      "read": [
+        "css.json",
         "components/index.json",
         "components/{slug}.json",
         "preview/component-{slug}.html",
-        "components.css"
-      ],
-      "consume": "复制预览页中的组件 markup，链接 colors_and_type.css、iconfont.css 和 components.css。"
-    },
-    "buildMobileAppPage": {
-      "read": [
-        "ui_kits/app/index.html",
-        "components/index.json",
-        "preview/component-{slug}.html",
-        "specs/布局与间距规范.md"
-      ],
-      "consume": "参考 UI Kit 的页面结构，使用组件预览页中的稳定 class，在真实移动端画布中重新组织页面。"
-    },
-    "writeChineseCopyOrData": {
-      "read": [
-        "specs/文案与数据规范.md"
-      ],
-      "consume": "金额、日期、时间、空数据、省略和中文标点按规范输出。"
-    }
-  },
-  "uikitConstraints": {
-    "kitType": "app",
-    "showcaseOnly": true,
-    "outerShells": [
-      ".uikit-shell",
-      ".phone-frame",
-      ".phone-screen"
+        "specs/*.md",
+        "ui_kits/app/index.html"
     ],
-    "warningForDownstream": "UI Kit 是展示样品，不是真实页面模板；真实项目应保留组件层 class，重写外层页面结构。"
-  },
-  "recommendedReadOrder": [
-    "SKILL.md",
-    "README.md",
-    "library-consumption.json",
-    "uikit-plan.json",
-    "colors_and_type.css",
-    "css.json",
-    "components/index.json",
-    "components/{slug}.json",
-    "preview/component-{slug}.html",
-    "specs/*.md",
-    "ui_kits/app/index.html"
-  ],
-  "coreComponents": [
-    "navbar",
-    "bottom-nav",
-    "button",
-    "cell",
-    "form",
-    "input",
-    "card"
-  ],
-  "supportComponents": [
-    "avatar",
-    "badge",
-    "checkbox",
-    "tag",
-    "counter",
-    "image",
-    "link",
-    "radio",
-    "stack",
-    "switch",
-    "navbar-action-button"
-  ],
-  "embeddedComponents": [
-    {
-      "slug": "navbar-action-button",
-      "reason": "已注册为 NavBar 右侧操作区子组件，但没有独立 preview；示例位于 preview/component-navbar.html。"
-    }
-  ],
-  "unpublishedContracts": [],
-  "uiKits": [
-    "app",
-    "biz-settings"
-  ],
-  "componentContractSchemaVersion": 3,
-  "componentContractReadRule": "components/{slug}.json 统一使用 schemaVersion 3；读取时依次关注 semanticTypeCandidates、variantDimensions、usageHints、doNotInvent、tokensConsumed、provenance。"
+    "coreComponents": [
+        "navbar",
+        "bottom-nav",
+        "button",
+        "cell",
+        "form",
+        "input",
+        "card"
+    ],
+    "supportComponents": [
+        "avatar",
+        "badge",
+        "checkbox",
+        "tag",
+        "counter",
+        "image",
+        "link",
+        "radio",
+        "stack",
+        "switch",
+        "navbar-action-button"
+    ],
+    "embeddedComponents": [
+        {
+            "slug": "navbar-action-button",
+            "reason": "已注册为 NavBar 右侧操作区子组件，但没有独立 preview；示例位于 preview/component-navbar.html。"
+        }
+    ],
+    "unpublishedContracts": [],
+    "uiKits": [
+        "app",
+        "biz-settings"
+    ],
+    "componentContractSchemaVersion": 3,
+    "componentContractReadRule": "components/{slug}.json 统一使用 schemaVersion 3；读取时依次关注 semanticTypeCandidates、variantDimensions、usageHints、doNotInvent、tokensConsumed、provenance。"
 }

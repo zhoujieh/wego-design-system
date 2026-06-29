@@ -114,22 +114,30 @@
     "不要新增重毛玻璃、渐变遮罩或夸张 loading 动画。"
   ],
   "tokensConsumed": [
-    "--color-bg-placeholder",
-    "--color-overlay-press",
-    "--color-text-disabled",
+    "--bg-mask-press",
+    "--bg-placeholder",
+    "--body-md-font-size",
+    "--body-sm-font-size",
+    "--body-xs-font-size",
     "--duration-normal",
     "--ease-standard",
-    "--font-size-10",
+    "--font-weight-medium",
     "--font-weight-regular",
+    "--number-lg-font-size",
+    "--palette-neutral-100",
+    "--radius-12",
+    "--radius-6",
+    "--radius-8",
     "--radius-full",
-    "--radius-lg",
-    "--radius-md",
-    "--radius-sm",
     "--size-104",
     "--size-16",
     "--size-32",
     "--size-64",
-    "--size-72"
+    "--size-72",
+    "--status-danger-default",
+    "--text-default",
+    "--text-disabled",
+    "--text-tertiary"
   ],
   "designTokens": {
     "sizes": {
@@ -142,9 +150,9 @@
       "wide": "260px × 160px"
     },
     "radius": {
-      "sm": "var(--radius-sm)",
-      "md": "var(--radius-md)",
-      "lg": "var(--radius-lg)",
+      "sm": "var(--radius-6)",
+      "md": "var(--radius-8)",
+      "lg": "var(--radius-12)",
       "circle": "var(--radius-full)"
     },
     "placeholderSize": "24px",

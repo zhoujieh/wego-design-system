@@ -7,24 +7,24 @@
 <link rel="stylesheet" href="../scaffold.css">
 <link rel="stylesheet" href="../iconfont.css">
 <style>
-.sub-label { font-size:var(--font-size-12); color:var(--color-text-tertiary); margin:var(--space-8) 0 var(--space-4); }
+.sub-label { font-size:var(--body-sm-font-size); color:var(--text-tertiary); margin:var(--spacer-8) 0 var(--spacer-4); }
 .interactive-row .checkbox { cursor:pointer; }
 
 /* @component-css-start */
-.checkbox{position:relative;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;flex:0 0 24px;box-sizing:border-box;border-radius:var(--radius-xs);cursor:pointer;-webkit-tap-highlight-color:transparent}
-.checkbox__inner{position:absolute;inset:0;box-sizing:border-box;border:1.5px solid var(--color-border-control-default);border-radius:var(--radius-xs);background:var(--color-bg-surface);transition:background var(--duration-fast) var(--ease-standard),border-color var(--duration-fast) var(--ease-standard)}
+.checkbox{position:relative;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;flex:0 0 24px;box-sizing:border-box;border-radius:var(--radius-4);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.checkbox__inner{position:absolute;inset:0;box-sizing:border-box;border:1.5px solid var(--border-control);border-radius:var(--radius-4);background:var(--bg-surface);transition:background var(--duration-fast) var(--ease-standard),border-color var(--duration-fast) var(--ease-standard)}
 .checkbox__icon,
 .checkbox__minus,
-.checkbox__count{position:relative;z-index:1;display:none;align-items:center;justify-content:center;color:var(--color-text-inverse)}
+.checkbox__count{position:relative;z-index:1;display:none;align-items:center;justify-content:center;color:var(--text-inverse)}
 .checkbox--checked,
 .checkbox--indeterminate,
-.checkbox--count{background:var(--color-brand)}
+.checkbox--count{background:var(--bg-brand)}
 .checkbox--checked .checkbox__inner,
 .checkbox--indeterminate .checkbox__inner,
-.checkbox--count .checkbox__inner{background:var(--color-brand);border-color:var(--color-brand)}
+.checkbox--count .checkbox__inner{background:var(--bg-brand);border-color:var(--text-brand)}
 .checkbox--checked .checkbox__icon{display:flex}
 .checkbox--indeterminate .checkbox__minus{display:flex}
-.checkbox--count .checkbox__count{display:flex;width:100%;height:100%;font-family:var(--font-family-number);font-size:var(--font-size-10);font-weight:var(--font-weight-medium);line-height:1;color:var(--color-text-inverse);font-feature-settings:"zero"}
+.checkbox--count .checkbox__count{display:flex;width:100%;height:100%;font-family:var(--number-md-font-family);font-size:var(--body-xs-font-size);font-weight:var(--font-weight-medium);line-height:1;color:var(--text-inverse);font-feature-settings:"zero"}
 .checkbox--sm{width:20px;height:20px;flex-basis:20px}
 .checkbox--sm .checkbox__icon svg{width:11px;height:8px}
 .checkbox--sm .checkbox__minus svg{width:6px;height:2px}
@@ -223,7 +223,7 @@
 <div class="sub-label">父子联动（部分选中的实际场景）</div>
 <div class="interactive-row" data-mode="parent" data-children="child-group-1" data-size="24">
   <div class="checkbox"><div class="checkbox__inner"></div></div>
-  <span class="interactive-text" style="font-weight:var(--font-weight-medium);color:var(--color-text-primary)">全选</span>
+  <span class="interactive-text" style="font-weight:var(--font-weight-medium);color:var(--text-default)">全选</span>
 </div>
 <div id="child-group-1" style="padding-left:36px;">
   <div class="interactive-row" data-mode="child" data-size="20">

@@ -90,22 +90,29 @@
     "不要用 badge 代替真正的按钮或 tab。"
   ],
   "tokensConsumed": [
-    "--color-accent-yellow",
-    "--color-bg-accent-yellow",
-    "--color-brand",
-    "--color-brand-bg",
-    "--color-danger",
-    "--color-text-disabled",
-    "--color-text-inverse",
-    "--color-text-promotion",
-    "--font-family-number",
-    "--font-family-text",
-    "--font-size-10",
+    "--accent-green",
+    "--accent-yellow",
+    "--bg-accent-yellow",
+    "--bg-brand-surface-l1",
+    "--bg-overlay-l2",
+    "--bg-state-selected",
+    "--body-md-font-family",
+    "--body-md-font-size",
+    "--body-xs-font-size",
+    "--border-neutral-l2",
     "--font-weight-medium",
     "--font-weight-regular",
+    "--number-md-font-family",
+    "--palette-neutral-100",
+    "--radius-0",
+    "--radius-4",
+    "--radius-6",
     "--radius-full",
-    "--radius-none",
-    "--radius-xs"
+    "--status-danger-default",
+    "--text-brand",
+    "--text-disabled",
+    "--text-inverse",
+    "--text-promotion"
   ],
   "designTokens": {
     "dotSize": "8px",
@@ -117,7 +124,7 @@
     "deleteSize": "16px",
     "radius": {
       "round": "var(--radius-full)",
-      "sharp": "var(--radius-xs)"
+      "sharp": "var(--radius-4)"
     }
   },
   "specRefs": [

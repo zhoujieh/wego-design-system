@@ -98,25 +98,31 @@
     "不要新增发光、描边动画等强视觉反馈。"
   ],
   "tokensConsumed": [
-    "--color-bg-surface",
-    "--color-border-control-default",
-    "--color-brand",
-    "--color-text-inverse",
+    "--bg-brand",
+    "--bg-surface",
+    "--body-sm-font-size",
+    "--body-xs-font-size",
+    "--border-control",
     "--duration-fast",
     "--ease-standard",
-    "--font-family-number",
-    "--font-size-10",
     "--font-weight-medium",
-    "--radius-xs"
+    "--number-md-font-family",
+    "--radius-4",
+    "--spacer-4",
+    "--spacer-8",
+    "--text-brand",
+    "--text-default",
+    "--text-inverse",
+    "--text-tertiary"
   ],
   "designTokens": {
     "sizes": {
       "default": "24px",
       "sm": "20px"
     },
-    "radius": "var(--radius-xs)",
+    "radius": "var(--radius-4)",
     "borderWidth": "1.5px",
-    "countFont": "var(--font-size-10) / var(--font-weight-medium)",
+    "countFont": "var(--body-xs-font-size) / var(--font-weight-medium)",
     "transition": "background var(--duration-fast) var(--ease-standard)"
   },
   "specRefs": [

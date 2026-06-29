@@ -15,7 +15,7 @@ description: "用于生成符合微购设计系统的移动端中文界面。包
 {WEGOUX_ROOT}/
 ├── SKILL.md                    # Skill 入口说明
 ├── README.md                   # 品牌背景、视觉基础、命名规则、组件概览
-├── colors_and_type.css         # 权威 CSS Token 源：纯 Token（reference/primitives + public semantic + dark overrides）
+├── colors_and_type.css         # 权威 CSS Token 源：v2 公共 Token（palette + bg/text/icon/border/status + type/size）
 ├── css.json                    # 机器可读 Token 投影
 ├── typography.css              # 预览/脚手架排版辅助类（不属于 Token 权威层）
 ├── scaffold.css                # 预览页脚手架样式（仅用于 preview/ 和 ui_kits/）
@@ -69,13 +69,16 @@ description: "用于生成符合微购设计系统的移动端中文界面。包
 
 `colors_and_type.css` 是权威来源。不要随意新增色值或重命名 Token。
 
-- `--wg-*`：源 Token，例如 `--wg-color-base-brand-500`、`--wg-font-size-f14`、`--wg-spacing-16`。
-- `--color-*`：语义色别名，例如 `--color-brand`、`--color-text-primary`、`--color-bg-surface`。
-- `--font-*`：字体、字号、字重、行高别名。
-- `--space-*` / `--radius-*` / `--shadow-*`：间距、圆角、阴影别名。
+- `--palette-*`：完整 10 档基础色阶，例如 `--palette-green-500`、`--palette-neutral-1000`。
+- `--bg-*` / `--text-*` / `--icon-*` / `--border-*`：组件直接消费的表面、内容、图标和描边 Token。
+- `--status-{success|warning|danger|info|promotion}-*`：状态色，包含 `default`、`hover`、`active` 和 `surface-l1..l3`。
+- `--body-*` / `--heading-*` / `--number-*`：正文、标题和数字/金额排版角色。
+- `--spacer-*` / `--radius-*` / `--shadow-*`：间距、圆角、阴影别名。
 - `--duration-*` / `--ease-*`：动效时长和缓动别名。
 - `--size-*` / `--touch-*` / `--z-*`：尺寸、触控热区和层级别名。
 - `--stroke-*` / `--layout-*`：描边和布局别名。
+
+v2 不保留旧命名兼容层；新组件和业务页面不得继续使用旧的 `wg` 前缀或旧色彩别名。
 
 ## 组件（注册表 18 个）
 

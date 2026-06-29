@@ -71,12 +71,21 @@
     "不要增加复杂弹跳和发光效果。"
   ],
   "tokensConsumed": [
-    "--color-bg-control-off",
-    "--color-brand",
-    "--color-text-inverse",
+    "--bg-brand",
+    "--bg-control-off",
+    "--body-md-font-size",
+    "--body-sm-font-size",
+    "--border-neutral-l2",
     "--duration-fast",
     "--ease-standard",
-    "--shadow-control-thumb"
+    "--font-weight-medium",
+    "--shadow-control-thumb",
+    "--spacer-12",
+    "--spacer-4",
+    "--spacer-8",
+    "--text-default",
+    "--text-inverse",
+    "--text-tertiary"
   ],
   "designTokens": {
     "size": "52px × 32px",

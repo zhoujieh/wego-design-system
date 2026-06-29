@@ -55,21 +55,22 @@ const REQUIRED_ROOT_FILES = [
 ];
 
 const REQUIRED_TOKEN_VARS = [
-  '--color-brand',
-  '--color-bg-page',
-  '--color-bg-surface',
-  '--color-text-primary',
-  '--color-text-secondary',
-  '--font-family-text',
-  '--font-family-number',
-  '--font-size-14',
-  '--space-16',
-  '--radius-md',
+  '--palette-green-500',
+  '--bg-brand',
+  '--bg-page',
+  '--bg-surface',
+  '--text-default',
+  '--text-secondary',
+  '--body-md-font-family',
+  '--number-md-font-family',
+  '--body-md-font-size',
+  '--spacer-16',
+  '--radius-8',
   '--duration-fast',
   '--ease-standard',
   '--touch-min',
   '--touch-default',
-  '--z-index-modal',
+  '--z-modal',
 ];
 
 const REQUIRED_CSS_JSON_BUCKETS = [
@@ -717,7 +718,7 @@ function checkTokens(options = {}) {
     }
   }
 
-  if (!/--Brand-color-brand:\s*#03c160/i.test(css) && !/--color-brand:\s*var\(--Brand-color-brand\)/.test(css)) {
+  if (!/--palette-green-500:\s*#03c160/i.test(css) || !/--bg-brand:\s*var\(--palette-green-500\)/i.test(css)) {
     add('error', 'token.brand.invalid', '品牌绿 Token 未保持为 #03C160 体系', path.join(libraryRoot, 'colors_and_type.css'));
   }
 

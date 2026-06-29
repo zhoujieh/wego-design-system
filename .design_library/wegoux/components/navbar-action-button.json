@@ -98,16 +98,20 @@
     "不要在导航栏内塞入长文案、双行按钮或复杂状态胶囊。"
   ],
   "tokensConsumed": [
-    "--color-brand",
-    "--color-brand-disabled",
-    "--color-text-inverse",
-    "--color-text-primary",
-    "--font-family-text",
-    "--font-size-10",
-    "--font-size-14",
-    "--font-size-16",
+    "--bg-brand",
+    "--bg-brand-disabled",
+    "--bg-muted",
+    "--bg-surface",
+    "--body-lg-font-size",
+    "--body-md-font-family",
+    "--body-md-font-size",
+    "--body-xs-font-size",
     "--font-weight-medium",
-    "--radius-sm"
+    "--heading-sm-font-size",
+    "--radius-6",
+    "--text-default",
+    "--text-inverse",
+    "--text-tertiary"
   ],
   "designTokens": {
     "actionWidth": "44px",
@@ -116,12 +120,12 @@
       "compact": "20px"
     },
     "labelFont": {
-      "text": "var(--font-size-16)",
-      "iconText": "var(--font-size-10)",
-      "button": "var(--font-size-14)"
+      "text": "var(--body-lg-font-size)",
+      "iconText": "var(--body-xs-font-size)",
+      "button": "var(--body-md-font-size)"
     },
     "buttonHeight": "32px",
-    "buttonRadius": "var(--radius-sm)"
+    "buttonRadius": "var(--radius-6)"
   },
   "specRefs": [
     "specs/交互设计原则.md",

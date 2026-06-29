@@ -76,19 +76,25 @@
     "不要给 link 新增多彩下划线或营销态动画。"
   ],
   "tokensConsumed": [
-    "--color-neutral-alpha-06",
-    "--color-text-link",
+    "--bg-overlay-l2",
+    "--body-lg-font-size",
+    "--body-lg-line-height",
+    "--body-md-font-size",
+    "--body-md-line-height",
+    "--body-sm-font-size",
     "--duration-fast",
     "--ease-standard",
-    "--font-lineheight-14",
-    "--font-size-14",
     "--font-weight-medium",
-    "--space-4"
+    "--spacer-16",
+    "--spacer-4",
+    "--text-link",
+    "--text-secondary",
+    "--text-tertiary"
   ],
   "designTokens": {
     "standaloneHeight": "20px",
-    "paddingHorizontal": "var(--space-4)",
-    "font": "var(--font-size-14) / var(--font-weight-medium)",
+    "paddingHorizontal": "var(--spacer-4)",
+    "font": "var(--body-md-font-size) / var(--font-weight-medium)",
     "transition": "background var(--duration-fast) var(--ease-standard)"
   },
   "specRefs": [
