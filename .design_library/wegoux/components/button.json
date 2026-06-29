@@ -6,7 +6,7 @@
   "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "移动端主操作按钮，覆盖强中弱强调、三档尺寸、带图标和纯图标模式。",
+  "description": "移动端操作按钮，覆盖 strong / medium / weak / danger 四种强调、三档尺寸，以及仅用于新建场景的带图标和纯图标模式。",
   "semanticTypeCandidates": [
     "primary-action",
     "secondary-action",
@@ -17,7 +17,8 @@
     "emphasis": [
       "strong",
       "medium",
-      "weak"
+      "weak",
+      "danger"
     ],
     "size": [
       "lg",
@@ -44,15 +45,15 @@
       "state": "default"
     },
     {
-      "emphasis": "medium",
+      "emphasis": "danger",
       "size": "md",
-      "iconMode": "leading-icon",
+      "iconMode": "text-only",
       "state": "default"
     },
     {
-      "emphasis": "weak",
-      "size": "sm",
-      "iconMode": "icon-only",
+      "emphasis": "medium",
+      "size": "md",
+      "iconMode": "leading-icon",
       "state": "default"
     },
     {
@@ -82,28 +83,31 @@
   "structurePatterns": [
     "根节点始终使用 .btn，并叠加强调级别、尺寸和状态类。",
     "带图标模式使用前置 .btn__icon，纯图标模式仍保留 .btn 根节点但不放文字。",
-    "纯图标按钮只用于单一高频动作，不承载长文案。"
+    "纯图标和带图标按钮只用于新建场景，其它场景默认使用纯文字按钮。"
   ],
   "behavior": {
     "interaction": "按下态通过背景色过渡表达，disabled 时禁用 hover 和 active 响应。",
-    "iconOnly": "纯图标模式沿用相同状态机，不新增独立视觉体系。",
-    "primaryRule": "同一视图保持单一 strong 主操作，其余操作降级为 medium 或 weak。"
+    "iconOnly": "纯图标模式沿用相同状态机，不新增独立视觉体系，仅作为新建入口使用。",
+    "primaryRule": "strong 只用于当前页面最核心的操作，同一页面只允许出现 1 个 strong 按钮。"
   },
   "accessibility": {
     "role": "button",
     "disabledState": "禁用态同时设置 disabled 或 aria-disabled，避免只靠视觉置灰。",
     "labelRule": "纯图标模式必须提供可感知名称，例如 aria-label。",
-    "touchTarget": "中大尺寸可直接满足移动触控，小尺寸只用于次级密集场景。"
+    "touchTarget": "热区扩展以不破坏布局为前提，仅对点击目标小于 32px 的元素进行伪元素补偿。"
   },
   "usageHints": [
-    "strong 用于提交、购买、保存等页面主动作。",
-    "medium 适合灰底绿字的辅助动作，弱化但仍可点击。",
-    "weak 适合列表或表单区内的次级操作。"
+    "strong 用于当前页面最核心的操作，同页仅保留 1 个。",
+    "medium 适合主操作旁边的重要次级动作。",
+    "weak 适合列表、表单区或局部区域内的次级操作。",
+    "danger 用于删除、清空、停用等明确危险动作。",
+    "按钮文案由业务侧按文案规范自行书写，组件不预设固定业务文案。"
   ],
   "doNotInvent": [
     "不要扩展为营销横幅按钮、胶囊筛选标签或桌面工具栏按钮。",
     "不要在单页放置多个 strong 主按钮并列竞争注意力。",
-    "不要为单个业务场景新增临时颜色按钮。"
+    "不要为单个业务场景新增临时颜色按钮。",
+    "不要在非新建场景使用纯图标或带图标按钮。"
   ],
   "tokensConsumed": [
     "--bg-brand",
@@ -112,6 +116,9 @@
     "--bg-overlay-l1",
     "--bg-overlay-l2",
     "--bg-state-selected",
+    "--status-danger-active",
+    "--status-danger-default",
+    "--status-danger-hover",
     "--body-lg-font-size",
     "--body-md-font-family",
     "--body-md-font-size",
@@ -175,6 +182,7 @@
       ".btn--strong",
       ".btn--medium",
       ".btn--weak",
+      ".btn--danger",
       ".btn--disabled"
     ],
     "sizeClasses": [

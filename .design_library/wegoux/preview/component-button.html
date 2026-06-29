@@ -11,7 +11,7 @@
 /* @component-css-start */
 .btn { display:inline-flex; align-items:center; justify-content:center; gap:var(--spacer-4); border:none; cursor:pointer; font-family:var(--body-md-font-family); font-weight:var(--font-weight-medium); white-space:nowrap; transition:background var(--duration-fast) var(--ease-standard); flex-shrink:0; }
 
-/* ── Icon (iconfont，仅支持加号图标，用于新建场景) ── */
+/* ── Icon (iconfont，仅用于新建场景) ── */
 .btn__icon { font-family:"wego-iconfont-s" !important; font-style:normal; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; line-height:1; flex-shrink:0; }
 .btn--sm .btn__icon { font-size:16px; }
 .btn--md .btn__icon, .btn--lg .btn__icon { font-size:20px; }
@@ -31,6 +31,10 @@
 .btn--weak:hover { background:var(--bg-overlay-l2); }
 .btn--weak:active { background:var(--bg-state-selected); }
 .btn--weak.btn--disabled { background:var(--bg-overlay-l1); color:var(--text-disabled); pointer-events:none; cursor:not-allowed; }
+.btn--danger { background:var(--status-danger-default); color:var(--text-inverse); }
+.btn--danger:hover { background:var(--status-danger-hover); }
+.btn--danger:active { background:var(--status-danger-active); }
+.btn--danger.btn--disabled { background:var(--bg-overlay-l1); color:var(--text-disabled); pointer-events:none; cursor:not-allowed; }
 
 /* ── Size ── */
 .btn--lg { height:var(--size-48); min-width:144px; max-width:180px; padding:0 14px; font-size:var(--heading-sm-font-size); border-radius:var(--radius-8); }
@@ -43,7 +47,7 @@
 
 <div class="pv-header">
   <h1>按钮 Button</h1>
-  <p>强/中/弱三种强调级别，大/中/小三种尺寸，支持图标和纯图标模式。</p>
+  <p>strong / medium / weak / danger 四种强调级别，大/中/小三种尺寸；图标按钮仅用于新建场景。</p>
 </div>
 
 <div class="pv-section">
@@ -54,11 +58,15 @@
   </div>
   <div class="row">
     <span class="label">中 / Medium</span>
-    <button class="btn btn--medium btn--md">灰底绿字</button>
+    <button class="btn btn--medium btn--md">辅助操作</button>
   </div>
   <div class="row">
     <span class="label">弱 / Weak</span>
-    <button class="btn btn--weak btn--md">灰底深字</button>
+    <button class="btn btn--weak btn--md">次级操作</button>
+  </div>
+  <div class="row">
+    <span class="label">危险 / Danger</span>
+    <button class="btn btn--danger btn--md">删除内容</button>
   </div>
 </div>
 
@@ -79,18 +87,18 @@
 </div>
 
 <div class="pv-section">
-  <div class="pv-section__title">带图标 (icon-jia16)</div>
+  <div class="pv-section__title">新建场景图标按钮 (icon-jia16)</div>
   <div class="row">
     <span class="label">文字 + 图标</span>
     <button class="btn btn--strong btn--md"><i class="btn__icon icon-jia16"></i>新建商品</button>
-    <button class="btn btn--medium btn--md"><i class="btn__icon icon-jia16"></i>添加</button>
+    <button class="btn btn--medium btn--md"><i class="btn__icon icon-jia16"></i>新建分组</button>
     <button class="btn btn--weak btn--md"><i class="btn__icon icon-jia16"></i>新建</button>
   </div>
   <div class="row">
     <span class="label">仅图标</span>
-    <button class="btn btn--strong btn--md btn--icon-only"><i class="btn__icon icon-jia16"></i></button>
-    <button class="btn btn--medium btn--md btn--icon-only"><i class="btn__icon icon-jia16"></i></button>
-    <button class="btn btn--weak btn--sm btn--icon-only"><i class="btn__icon icon-jia16"></i></button>
+    <button class="btn btn--strong btn--md btn--icon-only" aria-label="新建商品"><i class="btn__icon icon-jia16"></i></button>
+    <button class="btn btn--medium btn--md btn--icon-only" aria-label="新建分组"><i class="btn__icon icon-jia16"></i></button>
+    <button class="btn btn--weak btn--sm btn--icon-only" aria-label="新建标签"><i class="btn__icon icon-jia16"></i></button>
   </div>
 </div>
 
@@ -101,12 +109,14 @@
     <button class="btn btn--strong btn--md">Strong</button>
     <button class="btn btn--medium btn--md">Medium</button>
     <button class="btn btn--weak btn--md">Weak</button>
+    <button class="btn btn--danger btn--md">Danger</button>
   </div>
   <div class="row">
     <span class="label">禁用</span>
     <button class="btn btn--strong btn--md btn--disabled" disabled>Strong</button>
     <button class="btn btn--medium btn--md btn--disabled" disabled>Medium</button>
     <button class="btn btn--weak btn--md btn--disabled" disabled>Weak</button>
+    <button class="btn btn--danger btn--md btn--disabled" disabled>Danger</button>
   </div>
 </div>
 

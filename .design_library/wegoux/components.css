@@ -218,7 +218,7 @@
 */
 .btn { display:inline-flex; align-items:center; justify-content:center; gap:var(--spacer-4); border:none; cursor:pointer; font-family:var(--body-md-font-family); font-weight:var(--font-weight-medium); white-space:nowrap; transition:background var(--duration-fast) var(--ease-standard); flex-shrink:0; }
 
-/* ── Icon (iconfont，仅支持加号图标，用于新建场景) ── */
+/* ── Icon (iconfont，仅用于新建场景) ── */
 .btn__icon { font-family:"wego-iconfont-s" !important; font-style:normal; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; line-height:1; flex-shrink:0; }
 .btn--sm .btn__icon { font-size:16px; }
 .btn--md .btn__icon, .btn--lg .btn__icon { font-size:20px; }
@@ -238,6 +238,10 @@
 .btn--weak:hover { background:var(--bg-overlay-l2); }
 .btn--weak:active { background:var(--bg-state-selected); }
 .btn--weak.btn--disabled { background:var(--bg-overlay-l1); color:var(--text-disabled); pointer-events:none; cursor:not-allowed; }
+.btn--danger { background:var(--status-danger-default); color:var(--text-inverse); }
+.btn--danger:hover { background:var(--status-danger-hover); }
+.btn--danger:active { background:var(--status-danger-active); }
+.btn--danger.btn--disabled { background:var(--bg-overlay-l1); color:var(--text-disabled); pointer-events:none; cursor:not-allowed; }
 
 /* ── Size ── */
 .btn--lg { height:var(--size-48); min-width:144px; max-width:180px; padding:0 14px; font-size:var(--heading-sm-font-size); border-radius:var(--radius-8); }

@@ -120,7 +120,7 @@ name: "微购设计系统"
 
 | 组件 | Slug | 状态 | 说明 |
 |------|------|------|------|
-| 按钮 | `button` | stable | 主要操作按钮，支持 primary、secondary、danger 等变体 |
+| 按钮 | `button` | stable | 移动端操作按钮，支持 strong、medium、weak、danger 变体；图标按钮仅用于新建场景 |
 | 链接 | `link` | stable | 文字跳转操作，支持独立链接和内联链接 |
 
 ### 展示类（display）
@@ -154,7 +154,7 @@ name: "微购设计系统"
 | 开关 | `switch` | stable | 布尔切换控件，适合设置项开启/关闭 |
 | 表单容器 | `form` | stable | 表单字段容器，支持水平/垂直布局和多种输入类型 |
 
-> `counter` 保持 32px 视觉高度和 28px 按钮视觉尺寸；为满足移动端触控要求，通过 `counter__btn::before` 扩展按钮热区，不改变组件布局。
+> `counter` 保持 32px 视觉高度和 28px 按钮视觉尺寸；因为点击目标小于 32px，通过 `counter__btn::before` 补偿热区，不改变组件布局。
 
 ## 文件清单
 
