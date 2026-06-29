@@ -466,9 +466,24 @@ wegoux 当前定位清楚：移动端、微信生态、电商/工具、中文、
 
 ## 4. 推荐优化顺序
 
-### 阶段 0：冻结方向和审查基线
+> **进度总览**
+>
+> | 阶段 | 状态 | 说明 |
+> | --- | --- | --- |
+> | 阶段 0：冻结方向和审查基线 | **已完成** | AGENTS.md、README.md、SKILL.md 中已明确方向约束，无需额外改动 |
+> | 阶段 1：同步文件路径和消费入口 | **已完成** | 9 项修复已提交（commit `312b3ac`），metadata version 118 |
+> | 阶段 2：整理 Token 权威层 | 未开始 | — |
+> | 阶段 3：升级组件契约 schema | 未开始 | — |
+> | 阶段 4：规范预览页 | 未开始 | — |
+> | 阶段 5：重新生成 `components.css` | 未开始 | — |
+> | 阶段 6：修复 UI Kit | 未开始 | — |
+> | 阶段 7：同步文档和消费契约 | 未开始 | — |
+
+### 阶段 0：冻结方向和审查基线 ✅ 已完成
 
 目标：先防漂移，再改文件。
+
+> **完成记录**：AGENTS.md 已写死"TRAE 只作为结构完整性参考，不能迁移视觉风格和产品定位"；README.md 和 SKILL.md 已明确移动端/微信生态/电商工具定位。确认无需额外改动。
 
 要做：
 
@@ -480,9 +495,21 @@ wegoux 当前定位清楚：移动端、微信生态、电商/工具、中文、
 
 - README/SKILL/计划文档都能说清楚“参考 TRAE 的结构，不参考 TRAE 的风格”。
 
-### 阶段 1：同步文件路径和消费入口
+### 阶段 1：同步文件路径和消费入口 ✅ 已完成
 
 目标：先让人和 AI 读对文件。
+
+> **完成记录**（commit `312b3ac`，metadata version 118）：
+>
+> 1. ✅ README.md 文件清单根路径从 `.design_library/微购设计系统/` 统一为 `.design_library/wegoux/`。
+> 2. ✅ 所有文档中 `icons/*.svg` 修正为 `assets/icons/*.svg`（README.md、SKILL.md、library-consumption.json 共 6 处）。
+> 3. ✅ `biz-settings` UI Kit 同步到 library-consumption.json（uiKits 数组 + uikit layer files）、components/index.json（uiKits 入口列表）、uikit-plan.json（uiKits 入口列表）、README.md（文件清单树 + 下游消费指南表格）、SKILL.md（文件清单树）。
+> 4. ✅ `navbar-action-button` 在 components/index.json 中标记 `embedded: true` + `hostComponent: "navbar"`。
+> 5. ✅ components/index.json、library-consumption.json、uikit-plan.json 三个核心 JSON schemaVersion 统一升级到 2，补充 `library: "wegoux"`。
+> 6. ✅ 所有 18 个组件在 index.json 中补充 `preview` 路径。
+> 7. ✅ library-consumption.json `recommendedReadOrder` 首位加入 `SKILL.md`。
+>
+> **验收结果**：全文档路径 grep 无遗留旧路径；biz-settings 在 5 个文件中同步到位；JSON schemaVersion 一致。
 
 要做：
 
