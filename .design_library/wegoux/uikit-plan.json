@@ -1,6 +1,11 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
+  "library": "wegoux",
   "headBoilerplate": "<link rel=\"stylesheet\" href=\"../../colors_and_type.css\"><link rel=\"stylesheet\" href=\"../../iconfont.css\"><link rel=\"stylesheet\" href=\"../../components.css\">",
+  "uiKits": [
+    { "slug": "app", "entry": "ui_kits/app/index.html", "qualityReport": "ui_kits/app/quality-report.json" },
+    { "slug": "biz-settings", "entry": "ui_kits/biz-settings/index.html", "qualityReport": "ui_kits/biz-settings/quality-report.json" }
+  ],
   "corePreviewComponents": [
     {
       "slug": "navbar",

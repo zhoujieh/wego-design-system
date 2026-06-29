@@ -176,7 +176,7 @@ name: "微购设计系统"
 ## 文件清单
 
 ```
-.design_library/微购设计系统/
+.design_library/wegoux/
 ├── README.md                          # 本文档：品牌背景、视觉基础、组件概览
 ├── SKILL.md                           # Skill 运行时控制入口
 ├── colors_and_type.css                # 完整 CSS Token 定义（源 Token + 便携别名 + 排版工具类）
@@ -224,12 +224,12 @@ name: "微购设计系统"
 │   ├── component-stack.html           # 选项卡预览页
 │   └── component-switch.html          # 开关组件预览页
 ├── ui_kits/
-│   └── app/
-│       ├── index.html                 # 移动端应用 UI Kit 示例（完整 4 屏结构）
-│       └── quality-report.json        # UI Kit 质量报告
+│   ├── app/
+│   │   ├── index.html                 # 移动端应用 UI Kit 示例（完整 4 屏结构）
+│   │   └── quality-report.json        # UI Kit 质量报告
 │   └── biz-settings/
 │       ├── index.html                 # 业务设置底部面板模式 UI Kit
-│       └── quality-report.json
+│       └── quality-report.json        # 业务设置质量报告
 └── specs/                             # 品牌、布局、交互、动效、图标、文案规范
 ```
 
@@ -258,9 +258,9 @@ name: "微购设计系统"
 |----|------|------|----------------|
 | Token | `colors_and_type.css` + `css.json` | 颜色、字体、字号、间距、圆角、阴影、动效 | 是 |
 | Component | `components.css` + `components/*.json` + `preview/component-*.html` | 单组件结构、class、状态和尺寸 | 是 |
-| Icon | `iconfont.css` + `assets/fonts/` + `icons/` | 图标字体和固定 SVG 资产 | 是 |
+| Icon | `iconfont.css` + `assets/fonts/` + `assets/icons/` | 图标字体和固定 SVG 资产 | 是 |
 | Spec | `specs/*.md` | 品牌、布局、交互、动效、文案细则 | 作为规则参考 |
-| UI Kit | `ui_kits/app/index.html` + `quality-report.json` | 页面级 Showcase | 不要直接复制外壳 |
+| UI Kit | `ui_kits/app/index.html` + `ui_kits/biz-settings/index.html` + `quality-report.json` | 页面级 Showcase | 不要直接复制外壳 |
 
 推荐读取顺序：`README.md` → `library-consumption.json` → `uikit-plan.json` → `colors_and_type.css` → `components/index.json` → 对应组件契约和预览页。
 
