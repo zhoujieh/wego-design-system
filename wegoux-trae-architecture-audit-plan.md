@@ -523,9 +523,29 @@ wegoux 当前定位清楚：移动端、微信生态、电商/工具、中文、
 - 所有文档提到的路径都能在仓库中找到。
 - 消费契约列出的 UI Kit 与实际目录一致。
 
-### 阶段 2：整理 Token 权威层
+### 阶段 2：整理 Token 权威层 ✅ 已完成
 
 目标：让所有组件只从 Token 取值。
+
+> **完成记录**（metadata version 121）：
+>
+> 1. ✅ `colors_and_type.css` 已重构为纯 Token 权威源，只保留 `:root` 和 `.dark` 两个 token 作用域；原 `.type-*`、`.num-*` 排版工具类已迁出到新增的 `typography.css`。
+> 2. ✅ Token 结构收敛为 `reference/primitives` + `public semantic` 两层，并在文件头写明 AI 修改规则；组件后续只应直接消费 `--color-*`、`--font-*`、`--space-*`、`--radius-*`、`--size-*`、`--duration-*`、`--ease-*`。
+> 3. ✅ 补齐了本阶段缺失的可复用语义 Token：控件未选中背景、控件默认边框、控件禁用强边框、promotion 强提示文本/边框、accent-yellow 展示语义、switch thumb shadow 等。
+> 4. ✅ 组件核心 CSS 的 raw hex / 裸 `rgba(...)` 已在本阶段目标范围内清理为 0；涉及文件包含 `switch`、`checkbox`、`radio`、`stack`、`input`、`avatar`、`badge`、`bottom-nav`、`chip`、`form`、`image` 的 `@component-css` 标记块。
+> 5. ✅ `components.css` 已通过 `node .design_library/wegoux/scripts/extract-components-css.mjs .design_library/wegoux` 重新生成，输出无 warning。
+> 6. ✅ `css.json` 已按新 Token 结构同步，`metadata.json` version 已递增到 121。
+>
+> **范围说明**：
+>
+> - 本阶段只清理 Token 权威层和组件核心 CSS 标记块。
+> - preview 展示壳层、UI Kit 演示 shell、文档示例中的历史 `--wg-*` 用法不作为本阶段阻塞项，但已不再是组件公开消费方向。
+>
+> **验收结果**：
+>
+> - `colors_and_type.css` 不再包含 class selector。
+> - `components.css` 已与 preview 重新生成结果对齐。
+> - 组件核心 CSS 直接消费统一收敛到公开层。
 
 要做：
 

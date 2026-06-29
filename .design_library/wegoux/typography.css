@@ -1,0 +1,82 @@
+/**
+ * Typography utility classes extracted from colors_and_type.css.
+ * Preview/scaffold-only helper file; not part of the token authority layer.
+ */
+
+.type-10 {
+  font-size: var(--font-size-10);
+  font-family: var(--font-family-text);
+}
+
+.type-12 {
+  font-size: var(--font-size-12);
+  font-family: var(--font-family-text);
+}
+
+.type-14 {
+  font-size: var(--font-size-14);
+  font-family: var(--font-family-text);
+}
+
+.type-16 {
+  font-size: var(--font-size-16);
+  font-family: var(--font-family-text);
+}
+
+.type-18 {
+  font-size: var(--font-size-18);
+  font-family: var(--font-family-text);
+}
+
+.type-22 {
+  font-size: var(--font-size-22);
+  font-family: var(--font-family-text);
+}
+
+.num-12 {
+  font-size: var(--font-number-nf12);
+  font-family: var(--font-family-number);
+  font-weight: var(--font-weight-medium);
+  font-feature-settings: "zero";
+  line-height: normal;
+}
+
+.num-14 {
+  font-size: var(--font-number-nf14);
+  font-family: var(--font-family-number);
+  font-weight: var(--font-weight-medium);
+  font-feature-settings: "zero";
+  line-height: normal;
+}
+
+.num-16 {
+  font-size: var(--font-number-nf16);
+  font-family: var(--font-family-number);
+  font-weight: var(--font-weight-medium);
+  font-feature-settings: "zero";
+  line-height: normal;
+}
+
+.num-20 {
+  font-size: var(--font-number-nf20);
+  font-family: var(--font-family-number);
+  font-weight: var(--font-weight-medium);
+  font-feature-settings: "zero";
+  line-height: normal;
+}
+
+.num-24 {
+  font-size: var(--font-number-nf24);
+  font-family: var(--font-family-number);
+  font-weight: var(--font-weight-medium);
+  font-feature-settings: "zero";
+  line-height: normal;
+}
+
+.num-32 {
+  font-size: var(--font-number-nf32);
+  font-family: var(--font-family-number);
+  font-weight: var(--font-weight-medium);
+  font-feature-settings: "zero";
+  line-height: normal;
+}

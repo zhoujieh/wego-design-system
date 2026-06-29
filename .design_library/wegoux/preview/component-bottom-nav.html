@@ -35,7 +35,7 @@ body { margin: 0; padding: 32px !important; background: var(--color-bg-page); fo
   justify-content: space-around;
   width: 100%;
   background: var(--color-bg-surface);
-  border-top: 0.5px solid var(--wg-color-base-neutral-alpha-08);
+  border-top: 0.5px solid var(--color-border-default);
   padding-bottom: env(safe-area-inset-bottom, 0px);
   flex-shrink: 0;
 }
@@ -50,14 +50,12 @@ body { margin: 0; padding: 32px !important; background: var(--color-bg-page); fo
   min-width: 0;
   cursor: pointer;
   height: var(--size-56);
-  padding: 0 var(--wg-spacing-16);
-  color: var(--wg-color-base-neutral-900);
+  padding: 0 var(--space-16);
+  color: var(--color-text-primary);
   position: relative;
 }
 
-.bottom-nav__item.active {
-  color: var(--wg-color-base-brand-500);
-}
+.bottom-nav__item.active { color: var(--color-brand); }
 
 .bottom-nav__icon {
   width: var(--size-32);
@@ -74,9 +72,9 @@ body { margin: 0; padding: 32px !important; background: var(--color-bg-page); fo
 }
 
 .bottom-nav__label {
-  font-family: var(--wg-font-family-text);
-  font-size: var(--wg-font-size-f10);
-  font-weight: var(--wg-font-weight-regular);
+  font-family: var(--font-family-text);
+  font-size: var(--font-size-10);
+  font-weight: var(--font-weight-regular);
   line-height: normal;
   white-space: nowrap;
   font-feature-settings: "zero";

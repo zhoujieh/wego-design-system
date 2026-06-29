@@ -179,8 +179,9 @@ name: "微购设计系统"
 .design_library/wegoux/
 ├── README.md                          # 本文档：品牌背景、视觉基础、组件概览
 ├── SKILL.md                           # Skill 运行时控制入口
-├── colors_and_type.css                # 完整 CSS Token 定义（源 Token + 便携别名 + 排版工具类）
+├── colors_and_type.css                # 纯 Token 权威源（reference/primitives + public semantic + dark overrides）
 ├── css.json                           # Token 结构化数据（机器可读）
+├── typography.css                     # 排版辅助类（已从 Token 权威源迁出）
 ├── components.css                     # 组件样式集合
 ├── iconfont.css                       # wego-iconfont 图标字体 class
 ├── library-consumption.json           # 下游/AI 消费读取顺序和复制规则

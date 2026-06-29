@@ -29,14 +29,14 @@ body { margin: 0; padding: 32px !important; background: var(--color-bg-page); fo
 .input-group.is-disabled .field-label { color: var(--color-text-disabled); }
 
 /* ── Number Input (数字输入框) ──────────────────────────────── */
-.number-input { display: flex; align-items: center; gap: var(--space-8); width: 120px; min-width: 80px; max-width: 128px; height: var(--size-32); padding: 6px var(--space-8); background: #f8f9fa; border: 0.5px solid rgba(32, 47, 100, 0.08); border-radius: var(--radius-sm); box-sizing: border-box; transition: border-color var(--duration-fast) var(--ease-standard); }
+.number-input { display: flex; align-items: center; gap: var(--space-8); width: 120px; min-width: 80px; max-width: 128px; height: var(--size-32); padding: 6px var(--space-8); background: var(--color-bg-subtle); border: 0.5px solid var(--color-border-default); border-radius: var(--radius-sm); box-sizing: border-box; transition: border-color var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard); }
 .number-input__field { flex: 1 1 0; min-width: 0; border: none; outline: none; background: transparent; text-align: center; font-family: var(--font-family-number); font-size: var(--font-size-16); font-weight: var(--font-weight-medium); color: var(--color-text-primary); line-height: 20px; padding: 0; font-feature-settings: "zero"; }
 .number-input__field::placeholder { color: var(--color-text-disabled); font-size: var(--font-size-14); font-weight: var(--font-weight-regular); }
 .number-input__suffix { flex-shrink: 0; font-size: var(--font-size-14); font-weight: var(--font-weight-regular); color: var(--color-text-secondary); text-align: right; white-space: nowrap; font-feature-settings: "zero"; }
 /* Focus */
 .number-input.is-focus { border-color: var(--color-text-primary); }
 /* Error */
-.number-input.is-error { background: rgba(255, 51, 51, 0.1); border-color: #f33; }
+.number-input.is-error { background: var(--color-status-danger-surface-l1); border-color: var(--color-status-danger-border); }
 .number-input.is-error .number-input__field { color: var(--color-danger); }
 /* Disabled */
 .number-input.is-disabled { opacity: 0.5; pointer-events: none; }

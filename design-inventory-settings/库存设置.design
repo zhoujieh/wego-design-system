@@ -6,14 +6,14 @@
       "type": "page",
       "version": 1,
       "createdAt": 1782662700000,
-      "devMetadata": {
-        "htmlSrc": "pages/inventory-settings.html",
-        "interactions": []
-      },
       "canvasData": {
         "x": 0,
         "y": 0,
         "group": 0
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/inventory-settings.html",
+        "interactions": []
       }
     }
   ],

@@ -15,8 +15,9 @@ description: "用于生成符合微购设计系统的移动端中文界面。包
 {WEGOUX_ROOT}/
 ├── SKILL.md                    # Skill 入口说明
 ├── README.md                   # 品牌背景、视觉基础、命名规则、组件概览
-├── colors_and_type.css         # 权威 CSS Token 源：源 Token + 便携别名 + 字体定义
+├── colors_and_type.css         # 权威 CSS Token 源：纯 Token（reference/primitives + public semantic + dark overrides）
 ├── css.json                    # 机器可读 Token 投影
+├── typography.css              # 预览/脚手架排版辅助类（不属于 Token 权威层）
 ├── components.css              # 聚合组件样式（自动生成，禁止手动编辑）
 ├── iconfont.css                # wego-iconfont 图标字体 class
 ├── library-consumption.json    # AI / 下游消费推荐读取顺序和复制规则

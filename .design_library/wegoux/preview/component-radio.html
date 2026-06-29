@@ -23,7 +23,7 @@ hr.divider { border:none; border-top:1px solid var(--color-divider-default); mar
 
 /* @component-css-start */
 .radio { width:24px; height:24px; display:flex; align-items:center; justify-content:center; flex-shrink:0; position:relative; cursor:pointer; }
-.radio__inner { width:20px; height:20px; border-radius:50%; border:1.5px solid rgba(0,0,0,0.15); background:transparent; box-sizing:border-box; transition:border-color var(--duration-fast) var(--ease-standard); }
+.radio__inner { width:20px; height:20px; border-radius:50%; border:1.5px solid var(--color-border-control-default); background:transparent; box-sizing:border-box; transition:border-color var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard); }
 .radio__dot { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:11px; height:11px; border-radius:50%; background:var(--color-brand); display:none; }
 
 .radio--checked .radio__inner { border-color:var(--color-brand); }
@@ -34,7 +34,7 @@ hr.divider { border:none; border-top:1px solid var(--color-divider-default); mar
 .radio--sm .radio__inner { width:16.5px; height:16.5px; }
 .radio--sm .radio__dot { width:9px; height:9px; }
 
-/* Disabled — unchecked: subtle border + 3% #202F64 bg */
+/* Disabled — unchecked: subtle border + disabled surface */
 .radio--disabled:not(.radio--checked) { pointer-events:none; cursor:not-allowed; }
 .radio--disabled:not(.radio--checked) .radio__inner { border-color:var(--color-border-disabled); background:var(--color-state-disabled-surface); }
 /* Disabled — checked: subtle border + bg; dot matches border */
@@ -43,10 +43,10 @@ hr.divider { border:none; border-top:1px solid var(--color-divider-default); mar
 .radio--checked.radio--disabled .radio__dot { background:var(--color-border-disabled); }
 
 /* Dark mode overrides for .dark context */
-.dark .radio .radio__inner { border-color:rgba(255,255,255,0.2); }
+.dark .radio .radio__inner { border-color:var(--color-border-control-default); }
 .dark .radio--disabled:not(.radio--checked) .radio__inner { border-color:var(--color-border-disabled); background:var(--color-state-disabled-surface); }
-.dark .radio--checked.radio--disabled .radio__inner { border-color:rgba(255,255,255,0.12); background:var(--color-state-disabled-surface); }
-.dark .radio--checked.radio--disabled .radio__dot { background:rgba(255,255,255,0.12); }
+.dark .radio--checked.radio--disabled .radio__inner { border-color:var(--color-border-control-disabled-strong); background:var(--color-state-disabled-surface); }
+.dark .radio--checked.radio--disabled .radio__dot { background:var(--color-border-control-disabled-strong); }
 /* @component-css-end */
 </style>
 </head>
