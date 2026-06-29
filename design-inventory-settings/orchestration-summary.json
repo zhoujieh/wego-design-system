@@ -1,0 +1,127 @@
+{
+  "project": {
+    "name": "库存设置",
+    "path": "/Users/baobei/CODE/wego-design-system/design-inventory-settings",
+    "operation": "create",
+    "deviceType": "mobile",
+    "language": "zh-CN",
+    "dashboardMode": false,
+    "replicationMode": null,
+    "sourceUrl": null,
+    "visualSpecExcerpt": null,
+    "styleDefinitionBrief": null,
+    "designRead": "移动端电商库存设置页 / 商家运营人员 / 简洁克制实用 / 高信息密度 / 避免大面积绿色装饰",
+    "designDials": {
+      "layoutVariance": 1,
+      "motionIntensity": 1,
+      "visualDensity": 4
+    },
+    "styleContinuityAnchors": null,
+    "specsConstraints": "微购设计系统规范：品牌绿#03C160克制使用仅用于主操作和选中态；4N间距节奏；移动端高信息密度；优先用底色和描边建立层级而非阴影；正文PingFang SC，数字/金额WegoKeyboard N9；金额强制两位小数；触控热区紧凑40px/默认44px/舒适48px",
+    "sharedProjectShellContract": null,
+    "generationTree": {
+      "root": {
+        "nodeId": "gen-inventory-settings",
+        "kind": "page-leaf",
+        "pageIds": ["page-inventory-settings"],
+        "output": "pages/inventory-settings.html",
+        "sharedRegions": [],
+        "privateRegions": ["full page body"],
+        "mutableSlots": [],
+        "status": "planned",
+        "children": []
+      }
+    }
+  },
+  "designSource": {
+    "operatingMode": "library-bound",
+    "libraryIdentity": {
+      "name": "wegoux",
+      "id": "O0AA1DR-DGOQCS",
+      "version": 116,
+      "scope": "workspace",
+      "path": "/Users/baobei/.trae-cn/design_libraries/wegoux",
+      "versionSource": "metadata.json"
+    },
+    "libraryPath": "/Users/baobei/.trae-cn/design_libraries/wegoux",
+    "cssFilePath": "/Users/baobei/.trae-cn/design_libraries/wegoux/colors_and_type.css",
+    "brandPrefix": "wg",
+    "themeMode": "light",
+    "designDecisionSummary": "微购移动端库存设置页。品牌绿#03C160用于主按钮、开关开启态和选中标记，克制不铺满。使用navbar/cell/switch/input/counter/button等已注册组件。页面背景#EDEDED，卡片/列表白色。",
+    "componentContractKind": "compact-json",
+    "forbiddenInventedComponents": ["desktop-sidebar", "marketing-hero", "large-gradient-hero", "decorative-orb-background"],
+    "allowedComponents": ["button", "card", "avatar", "chip", "bottom-nav", "input", "counter", "badge", "cell", "checkbox", "form", "image", "link", "radio", "stack", "switch", "navbar", "navbar-action-button"],
+    "styleConstraints": {
+      "radiusMax": 16,
+      "spacingBase": 4,
+      "fontSizeBody": 14,
+      "fontSizeMin": 10,
+      "controlHeightDefault": 44,
+      "controlHeightLarge": 48
+    },
+    "productContext": {
+      "kitType": "app",
+      "productType": "移动端电商/微信生态工具"
+    },
+    "actualTokenNameReference": [
+      { "semanticPurpose": "品牌主色", "tokenName": "--color-brand" },
+      { "semanticPurpose": "一级文字", "tokenName": "--color-text-primary" },
+      { "semanticPurpose": "二级文字", "tokenName": "--color-text-secondary" },
+      { "semanticPurpose": "三级文字", "tokenName": "--color-text-tertiary" },
+      { "semanticPurpose": "页面背景", "tokenName": "--color-bg-page" },
+      { "semanticPurpose": "卡片/列表背景", "tokenName": "--color-bg-surface" },
+      { "semanticPurpose": "分割线", "tokenName": "--color-divider-default" },
+      { "semanticPurpose": "危险色", "tokenName": "--color-text-danger" },
+      { "semanticPurpose": "正文字体", "tokenName": "--font-family-text" },
+      { "semanticPurpose": "数字字体", "tokenName": "--font-family-number" },
+      { "semanticPurpose": "标准间距16px", "tokenName": "--space-16" },
+      { "semanticPurpose": "大间距24px", "tokenName": "--space-24" },
+      { "semanticPurpose": "小间距8px", "tokenName": "--space-8" },
+      { "semanticPurpose": "默认圆角8px", "tokenName": "--radius-md" },
+      { "semanticPurpose": "默认触控热区", "tokenName": "--touch-default" }
+    ]
+  },
+  "pages": [
+    {
+      "nodeId": "page-inventory-settings",
+      "slug": "inventory-settings",
+      "title": "库存设置",
+      "htmlSrc": "pages/inventory-settings.html",
+      "pageIndex": 1,
+      "stateGroupId": null,
+      "stateRole": null,
+      "baseStatePageId": null,
+      "sharedShellContract": [],
+      "mutableRegions": [],
+      "derivedFromHtmlSrc": null,
+      "derivationType": "original",
+      "sourcePageId": null,
+      "sourceHtmlSrc": null,
+      "pageType": "task-driven",
+      "businessScenario": "商家对商品库存进行预警阈值、自动补货、显示偏好和出库规则等配置",
+      "visualNorthStar": "一个克制、清晰、高效的移动端设置页，使用白色卡片分组承载配置项，品牌绿仅用于开关开启态和底部保存按钮",
+      "compositionPattern": "移动端表单设置列表 — navbar + 分组 cell 列表 + 底部固定按钮",
+      "continuityAnchors": ["白色分组卡片布局", "品牌绿色仅用于操作和选中态", "16px页面边距", "cell+switch组合模式"],
+      "libraryRestraintMode": true,
+      "uiKitPath": "/Users/baobei/.trae-cn/design_libraries/wegoux/ui_kits/biz-settings/index.html",
+      "componentPlan": [
+        { "slug": "navbar", "contractKind": "compact-json", "previewFile": "/Users/baobei/.trae-cn/design_libraries/wegoux/preview/component-navbar.html", "contractFile": "/Users/baobei/.trae-cn/design_libraries/wegoux/components/navbar.json" },
+        { "slug": "cell", "contractKind": "compact-json", "previewFile": "/Users/baobei/.trae-cn/design_libraries/wegoux/preview/component-cell.html", "contractFile": "/Users/baobei/.trae-cn/design_libraries/wegoux/components/cell.json" },
+        { "slug": "switch", "contractKind": "compact-json", "previewFile": "/Users/baobei/.trae-cn/design_libraries/wegoux/preview/component-switch.html", "contractFile": "/Users/baobei/.trae-cn/design_libraries/wegoux/components/switch.json" },
+        { "slug": "input", "contractKind": "compact-json", "previewFile": "/Users/baobei/.trae-cn/design_libraries/wegoux/preview/component-input.html", "contractFile": "/Users/baobei/.trae-cn/design_libraries/wegoux/components/input.json" },
+        { "slug": "counter", "contractKind": "compact-json", "previewFile": "/Users/baobei/.trae-cn/design_libraries/wegoux/preview/component-counter.html", "contractFile": "/Users/baobei/.trae-cn/design_libraries/wegoux/components/counter.json" },
+        { "slug": "button", "contractKind": "compact-json", "previewFile": "/Users/baobei/.trae-cn/design_libraries/wegoux/preview/component-button.html", "contractFile": "/Users/baobei/.trae-cn/design_libraries/wegoux/components/button.json" },
+        { "slug": "chip", "contractKind": "compact-json", "previewFile": "/Users/baobei/.trae-cn/design_libraries/wegoux/preview/component-chip.html", "contractFile": "/Users/baobei/.trae-cn/design_libraries/wegoux/components/chip.json" },
+        { "slug": "form", "contractKind": "compact-json", "previewFile": "/Users/baobei/.trae-cn/design_libraries/wegoux/preview/component-form.html", "contractFile": "/Users/baobei/.trae-cn/design_libraries/wegoux/components/form.json" },
+        { "slug": "radio", "contractKind": "compact-json", "previewFile": "/Users/baobei/.trae-cn/design_libraries/wegoux/preview/component-radio.html", "contractFile": "/Users/baobei/.trae-cn/design_libraries/wegoux/components/radio.json" }
+      ],
+      "imagePlan": [],
+      "chartsRequired": false,
+      "miniProgramStyle": false,
+      "qualityRisks": []
+    }
+  ],
+  "assets": [],
+  "wiringPlan": [],
+  "hiddenInteractionPlan": []
+}

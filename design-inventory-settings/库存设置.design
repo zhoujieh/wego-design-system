@@ -1,0 +1,33 @@
+{
+  "data": [
+    {
+      "id": "page-inventory-settings",
+      "title": "库存设置",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1782662700000,
+      "devMetadata": {
+        "htmlSrc": "pages/inventory-settings.html",
+        "interactions": []
+      },
+      "canvasData": {
+        "x": 0,
+        "y": 0,
+        "group": 0
+      }
+    }
+  ],
+  "config": {
+    "autoLayout": true,
+    "deviceType": "mobile",
+    "projectName": "库存设置",
+    "designLibrary": {
+      "name": "wegoux",
+      "id": "O0AA1DR-DGOQCS",
+      "version": 116,
+      "scope": "workspace",
+      "path": "/Users/baobei/.trae-cn/design_libraries/wegoux",
+      "versionSource": "metadata.json"
+    }
+  }
+}
