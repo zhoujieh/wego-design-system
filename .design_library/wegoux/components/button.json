@@ -92,7 +92,7 @@
   },
   "accessibility": {
     "role": "button",
-    "disabledState": "禁用态同时设置 disabled 或 aria-disabled，避免只靠视觉置灰。",
+    "disabledState": "原生按钮优先使用 disabled；非原生场景使用 aria-disabled。btn--disabled 仅作为显式状态类补充，不应替代语义属性。",
     "labelRule": "纯图标模式必须提供可感知名称，例如 aria-label。",
     "touchTarget": "热区扩展以不破坏布局为前提，仅对点击目标小于 32px 的元素进行伪元素补偿。"
   },
@@ -100,7 +100,7 @@
     "strong 用于当前页面最核心的操作，同页仅保留 1 个。",
     "medium 适合主操作旁边的重要次级动作。",
     "weak 适合列表、表单区或局部区域内的次级操作。",
-    "danger 用于删除、清空、停用等明确危险动作。",
+    "danger 用于删除、清空、停用等明确危险动作，默认以灰底红字呈现。",
     "按钮文案由业务侧按文案规范自行书写，组件不预设固定业务文案。"
   ],
   "doNotInvent": [
@@ -116,9 +116,9 @@
     "--bg-overlay-l1",
     "--bg-overlay-l2",
     "--bg-state-selected",
-    "--status-danger-active",
     "--status-danger-default",
-    "--status-danger-hover",
+    "--status-danger-surface-l1",
+    "--status-danger-surface-l2",
     "--body-lg-font-size",
     "--body-md-font-family",
     "--body-md-font-size",
@@ -128,10 +128,14 @@
     "--heading-sm-font-size",
     "--radius-6",
     "--radius-8",
+    "--size-24",
     "--size-32",
+    "--size-36",
     "--size-40",
     "--size-48",
     "--spacer-4",
+    "--spacer-12",
+    "--spacer-14",
     "--text-brand",
     "--text-default",
     "--text-disabled",
@@ -144,13 +148,18 @@
       "sm": "32px"
     },
     "minWidth": {
-      "lg": "144px",
-      "md": "40px",
-      "sm": "32px"
+      "lg": "calc(var(--size-48) * 3)",
+      "md": "var(--size-40)",
+      "sm": "var(--size-32)"
     },
     "maxWidth": {
-      "lg": "180px",
-      "sm": "120px"
+      "lg": "calc(var(--size-36) * 5)",
+      "sm": "calc(var(--size-24) * 5)"
+    },
+    "paddingInline": {
+      "lg": "var(--spacer-14)",
+      "md": "var(--spacer-14)",
+      "sm": "var(--spacer-12)"
     },
     "fontSize": {
       "lg": "var(--heading-sm-font-size)",
