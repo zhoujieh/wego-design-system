@@ -74,7 +74,12 @@
   - 多层阴影：`{ "layers": [{ "xOffset", "yOffset", "blur", "spread", "color": { "hex", "opacity" } }] }`
   - `shadow-none` 不能用字符串 `"none"`，用 `{ "xOffset": "0px", "yOffset": "0px", "blur": "0px", "spread": "0px", "color": { "hex": "transparent", "opacity": "0" } }`
   - 渲染器用 `'layers' in value` 判断多层/单层，传入字符串会触发 `TypeError: Cannot use 'in' operator to search for 'layers' in none`。
-- **`css.json` 其他 Token 的 `public`/`reference`/`compatibility` 三层结构是 wegoux 内部约定**，TRAE 渲染器能兼容，保持不变。
+- **`css.json` 整体必须使用 TRAE 官方扁平格式**（参考内置 minimalist 库），不能使用 `public`/`reference`/`compatibility` 三层结构。
+  - `color`：按语义分组（brand、text、background、border、status 等），每个 token 值为 `{ "hex": "#xxx", "opacity": "1" }`。禁止使用 `var(--wg-*)` 字符串。
+  - `font`：分为 `{ family, size, weight, lineHeight }` 四个子分组，值为已解析的字符串（如 `"PingFang SC, ..."`, `"14px"`, `"500"`）。禁止使用 `var()` 引用。
+  - `radius`、`spacing`、`size`：扁平键值对，值为已解析的字符串（如 `"8px"`）。禁止使用 `var()` 引用。
+  - 三层 Token 管理体系（public/reference/compatibility）只保留在 `colors_and_type.css` 中，`css.json` 是纯粹的 TRAE 渲染数据，不承载内部架构。
+  - 每次改 `colors_and_type.css` 新增/修改 Token 后，必须同步解析并更新 `css.json` 中的对应值。
 - 每次修改 `css.json` 后，必须用 `python3 -c "import json; json.load(open('css.json'))"` 验证 JSON 合法性。
 
 改组件样式：
