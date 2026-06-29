@@ -3,12 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:,">
 <link rel="stylesheet" href="../../colors_and_type.css">
+<link rel="stylesheet" href="../../iconfont.css">
 <link rel="stylesheet" href="../../components.css">
 <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
 <style>
 /* ═══ Page Layer: UIKit Shell & Phone Frame ═══ */
 html, body {
@@ -100,56 +101,30 @@ html, body {
   background: var(--bg-page);
 }
 
-/* ═══ Phone Internal: Status Bar, Header, Body, Bottom Nav, Home Indicator ═══ */
-.phone-status {
-  height: 44px;
-  display: flex;
-  align-items: center;
+/* ═══ Phone Internal: NavBar, Body, Bottom Nav, Home Indicator ═══ */
+.navbar.uikit-navbar {
+  width: 100%;
+}
+
+.navbar.uikit-navbar .navbar__status-bar {
   justify-content: space-between;
   padding: 0 var(--spacer-16);
   background: var(--bg-surface);
+  box-sizing: border-box;
+}
+
+.navbar.uikit-navbar .navbar__status-bar-text {
   font-size: var(--body-sm-font-size);
   font-weight: var(--font-weight-semibold);
   color: var(--text-default);
-  flex-shrink: 0;
 }
 
-.phone-header {
-  height: 44px;
-  display: flex;
-  align-items: center;
-  padding: 0 var(--spacer-16);
-  background: var(--bg-surface);
-  font-size: var(--heading-sm-font-size);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-default);
-  flex-shrink: 0;
-  gap: var(--spacer-8);
+.navbar.uikit-navbar .navbar__center--wide {
+  grid-column: 1 / 8;
 }
 
-.phone-header-back {
-  width: var(--size-32);
-  height: var(--size-32);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
+.navbar.uikit-navbar .navbar__left-btn {
   border-radius: var(--radius-6);
-  flex-shrink: 0;
-}
-
-.phone-header-back:hover {
-  background: var(--bg-state-hover);
-}
-
-.phone-header-title {
-  font-size: var(--heading-sm-font-size);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-default);
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .phone-body {
@@ -214,50 +189,6 @@ html, body {
   gap: var(--spacer-12);
 }
 
-.menu-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--spacer-12) var(--spacer-16);
-  background: var(--bg-surface);
-  cursor: pointer;
-  min-width: 0;
-}
-
-.menu-item:hover {
-  background: var(--bg-state-hover);
-}
-
-.menu-item:first-of-type {
-  border-radius: var(--radius-12) var(--radius-12) 0 0;
-}
-
-.menu-item:last-of-type {
-  border-radius: 0 0 var(--radius-12) var(--radius-12);
-}
-
-.menu-item:only-of-type {
-  border-radius: var(--radius-12);
-}
-
-.menu-item + .menu-item {
-  border-top: 1px solid var(--border-neutral-l1);
-}
-
-.menu-label {
-  font-size: var(--body-lg-font-size);
-  color: var(--text-default);
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.menu-arrow {
-  color: var(--text-tertiary);
-  flex-shrink: 0;
-}
-
 .form-block {
   background: var(--bg-surface);
   border-radius: var(--radius-12);
@@ -296,8 +227,43 @@ html, body {
   width: 100%;
 }
 
-.section-gap {
+.section-separator {
   height: var(--spacer-8);
+}
+
+.uikit-product-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  font-size: 28px;
+}
+
+.uikit-product-image--audio {
+  background: var(--bg-brand-surface-l1);
+}
+
+.uikit-product-image--phone {
+  background: var(--status-info-surface-l1);
+}
+
+.uikit-product-image--home {
+  background: var(--status-warning-surface-l1);
+}
+
+.uikit-hero-image {
+  width: 100%;
+  height: 200px;
+  border-radius: 0;
+}
+
+.uikit-hero-image .uikit-product-image {
+  font-size: 64px;
+}
+
+.uikit-check-icon {
+  font-size: 13px;
+  line-height: 1;
 }
 
 /* ═══ Responsive ═══ */
@@ -320,18 +286,33 @@ html, body {
 <body>
 <div class="uikit-shell" data-layout-guard="uikit-v1">
   <div class="phone-frame">
-    <div class="phone-screen" id="root"></div>
+    <div id="root"></div>
   </div>
 </div>
 <script type="text/babel">
-const { useState, useEffect } = React;
+const { useState } = React;
 
-/* ═══ Status Bar ═══ */
-function StatusBar() {
+/* ═══ App NavBar ═══ */
+function AppNavbar({ title, onBack }) {
   return (
-    <div className="phone-status">
-      <span>9:41</span>
-      <span>5G</span>
+    <div data-component="navbar" className="navbar uikit-navbar">
+      <div className="navbar__status-bar">
+        <span className="navbar__status-bar-text">9:41</span>
+        <span className="navbar__status-bar-text">5G</span>
+      </div>
+      <div className="navbar__body">
+        <div className="navbar__left">
+          {onBack && (
+            <div className="navbar__left-btn" onClick={onBack} aria-label="返回">
+              <i className="wego-iconfont-s icon-fanhui"></i>
+            </div>
+          )}
+        </div>
+        <div className={`navbar__center${onBack ? '' : ' navbar__center--wide'}`}>
+          <span className="navbar__title">{title}</span>
+        </div>
+        <div className="navbar__right"></div>
+      </div>
     </div>
   );
 }
@@ -348,10 +329,10 @@ function HomeIndicator() {
 /* ═══ Bottom Navigation ═══ */
 function BottomNav({ current, onNavigate }) {
   const tabs = [
-    { id: 'home', label: '首页', icon: 'home' },
-    { id: 'discover', label: '发现', icon: 'compass' },
-    { id: 'cart', label: '购物车', icon: 'shopping-cart' },
-    { id: 'profile', label: '我的', icon: 'user' }
+    { id: 'home', label: '首页', icon: 'dongtai' },
+    { id: 'discover', label: '发现', icon: 'haoyou' },
+    { id: 'cart', label: '购物车', icon: 'gongzuotai' },
+    { id: 'profile', label: '我的', icon: 'wode' }
   ];
 
   const handleNav = (id) => {
@@ -371,10 +352,17 @@ function BottomNav({ current, onNavigate }) {
           className={`bottom-nav__item${current === tab.id ? ' active' : ''}`}
           onClick={() => handleNav(tab.id)}
         >
-          <i data-lucide={tab.icon} className="bottom-nav__icon" style={{width:24,height:24}}></i>
+          <div className="bottom-nav__icon">
+            <img
+              src={`../../assets/icons/tab-${current === tab.id ? 'active-' : ''}${tab.icon}.svg`}
+              width="32"
+              height="32"
+              alt=""
+            />
+            {tab.id === 'home' && <span className="badge badge--corner badge--dot"></span>}
+            {tab.id === 'cart' && <span className="badge badge--corner badge--number badge--number-multi">99+</span>}
+          </div>
           <span className="bottom-nav__label">{tab.label}</span>
-          {tab.id === 'home' && <span className="badge badge--corner badge--dot"></span>}
-          {tab.id === 'cart' && <span className="badge badge--corner badge--number badge--number-multi">99+</span>}
         </div>
       ))}
     </div>
@@ -400,7 +388,11 @@ function HomeScreen({ onProductClick }) {
         {/* Card 1 */}
         <div data-component="card" className="card card--elevated" onClick={onProductClick} style={{cursor:'pointer'}}>
           <div className="card__media" style={{position:'relative', overflow:'visible'}}>
-            <i data-lucide="headphones" style={{width:36,height:36,color:'var(--text-tertiary)'}}></i>
+            <div data-component="image" className="wg-image wg-image--md wg-image--rounded-md">
+              <div className="wg-image__src is-loaded uikit-product-image uikit-product-image--audio">
+                <i className="wego-iconfont-s icon-shangpin"></i>
+              </div>
+            </div>
             <span
               className="badge badge--corner badge--text"
               style={{ '--badge-text-bg': 'var(--accent-green)', '--badge-text-color': 'var(--text-inverse)' }}
@@ -421,7 +413,11 @@ function HomeScreen({ onProductClick }) {
         {/* Card 2 */}
         <div data-component="card" className="card card--elevated">
           <div className="card__media">
-            <i data-lucide="smartphone" style={{width:36,height:36,color:'var(--text-tertiary)'}}></i>
+            <div data-component="image" className="wg-image wg-image--md wg-image--rounded-md">
+              <div className="wg-image__src is-loaded uikit-product-image uikit-product-image--phone">
+                <i className="wego-iconfont-s icon-shouji"></i>
+              </div>
+            </div>
           </div>
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',minWidth:0}}>
             <div className="uikit-truncate" style={{flex:1}}>
@@ -438,7 +434,11 @@ function HomeScreen({ onProductClick }) {
         {/* Card 3 */}
         <div data-component="card" className="card card--elevated">
           <div className="card__media">
-            <i data-lucide="toy-brick" style={{width:36,height:36,color:'var(--text-tertiary)'}}></i>
+            <div data-component="image" className="wg-image wg-image--md wg-image--rounded-md">
+              <div className="wg-image__src is-loaded uikit-product-image uikit-product-image--home">
+                <i className="wego-iconfont-s icon-tupian"></i>
+              </div>
+            </div>
           </div>
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',minWidth:0}}>
             <div className="uikit-truncate" style={{flex:1}}>
@@ -460,7 +460,7 @@ function HomeScreen({ onProductClick }) {
             <div style={{fontSize:'var(--body-md-font-size)',color:'var(--text-secondary)'}}>限时特惠</div>
             <div style={{fontSize:'var(--body-lg-font-size)',fontWeight:'var(--font-weight-semibold)',color:'var(--text-default)',marginTop:4}}>爆款直降 低至5折</div>
           </div>
-          <button data-component="button" className="btn btn--strong uikit-nowrap">立即抢购</button>
+          <button data-component="button" className="btn btn--strong btn--md uikit-nowrap">立即抢购</button>
         </div>
       </div>
     </div>
@@ -474,8 +474,10 @@ function DetailScreen() {
   return (
     <div className="section-gap">
       {/* Product Image */}
-      <div style={{width:'100%',height:200,background:'var(--bg-muted)',display:'flex',alignItems:'center',justifyContent:'center'}}>
-        <i data-lucide="headphones" style={{width:64,height:64,color:'var(--text-tertiary)'}}></i>
+      <div data-component="image" className="wg-image uikit-hero-image">
+        <div className="wg-image__src is-loaded uikit-product-image uikit-product-image--audio">
+          <i className="wego-iconfont-s icon-shangpin"></i>
+        </div>
       </div>
 
       {/* Product Info Card */}
@@ -512,18 +514,28 @@ function DetailScreen() {
       {/* Quantity Selector */}
       <div className="section-pad">
         <div className="color-select-label" style={{marginBottom:'var(--spacer-8)'}}>数量</div>
-        <div style={{display:'flex',alignItems:'center',gap:'var(--spacer-8)'}}>
+        <div data-component="counter" className="counter" data-counter data-counter-min="1">
+          <div className="counter__body">
           <button
-            className="btn btn--medium btn--sm"
+            className="counter__btn counter__btn--minus"
+            type="button"
+            aria-label="减少"
             onClick={() => setQty(Math.max(1, qty - 1))}
-            style={{minWidth:36,padding:'0 var(--spacer-8)'}}
-          >-</button>
-          <span style={{fontSize:'var(--body-lg-font-size)',fontWeight:'var(--font-weight-medium)',minWidth:32,textAlign:'center'}}>{qty}</span>
+          >
+            <i className="counter__icon icon-jian16"></i>
+          </button>
+          <input className="counter__value" type="text" inputMode="numeric" value={qty} readOnly />
           <button
-            className="btn btn--medium btn--sm"
+            className="counter__btn counter__btn--plus"
+            type="button"
+            aria-label="增加"
             onClick={() => setQty(qty + 1)}
-            style={{minWidth:36,padding:'0 var(--spacer-8)'}}
-          >+</button>
+          >
+            <i className="counter__icon icon-jia16"></i>
+          </button>
+          </div>
+          <div className="counter__message counter__hint"></div>
+          <div className="counter__message counter__error"></div>
         </div>
       </div>
 
@@ -532,9 +544,9 @@ function DetailScreen() {
         <button data-component="button" className="btn btn--strong btn--lg uikit-nowrap" style={{flex:1}}>加入购物车</button>
       </div>
       <div className="section-pad" style={{paddingTop:0,display:'flex',gap:'var(--spacer-8)'}}>
-        <button data-component="button" className="btn btn--medium uikit-nowrap" style={{flex:1}}>立即购买</button>
-        <button data-component="button" className="btn btn--weak uikit-nowrap" style={{flex:1}}>
-          <i data-lucide="heart" style={{width:20,height:20}}></i>收藏
+        <button data-component="button" className="btn btn--medium btn--lg uikit-nowrap" style={{flex:1}}>立即购买</button>
+        <button data-component="button" className="btn btn--weak btn--lg uikit-nowrap" style={{flex:1}}>
+          <i className="btn__icon icon-shoucang"></i>收藏
         </button>
       </div>
     </div>
@@ -555,33 +567,47 @@ function ProfileScreen({ onBizSettings }) {
               <div data-component="tag" className="tag tag--20 tag--brand-stroke uikit-nowrap"><span className="tag__label">金牌会员</span></div>
             </div>
           </div>
-          <i data-lucide="chevron-right" style={{width:20,height:20,color:'var(--text-tertiary)',flexShrink:0}}></i>
+          <i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
         </div>
       </div>
 
       {/* Menu List */}
       <div className="section-pad" style={{paddingTop:0}}>
-        <div className="menu-item" style={{position:'relative', overflow:'visible'}}>
-          <span className="menu-label">我的订单</span>
-          <i data-lucide="chevron-right" className="menu-arrow" style={{width:20,height:20}}></i>
-          <span className="badge badge--corner badge--number">2</span>
+        <div data-component="cell" className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+          <div className="cell__body">
+            <div className="cell__content"><div className="cell__title-row"><span className="cell__title">我的订单</span></div></div>
+            <div className="cell__action">
+              <div className="cell__action-badge"><span className="badge badge--inline badge--number">2</span></div>
+              <i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
+            </div>
+          </div>
         </div>
-        <div className="menu-item" onClick={onBizSettings} style={{cursor:'pointer'}}>
-          <span className="menu-label">业务设置</span>
-          <i data-lucide="chevron-right" className="menu-arrow" style={{width:20,height:20}}></i>
+        <div data-component="cell" className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" onClick={onBizSettings}>
+          <div className="cell__body">
+            <div className="cell__content"><div className="cell__title-row"><span className="cell__title">业务设置</span></div></div>
+            <div className="cell__action"><i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+          </div>
         </div>
-        <div className="menu-item">
-          <span className="menu-label">收货地址</span>
-          <i data-lucide="chevron-right" className="menu-arrow" style={{width:20,height:20}}></i>
+        <div data-component="cell" className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+          <div className="cell__body">
+            <div className="cell__content"><div className="cell__title-row"><span className="cell__title">收货地址</span></div></div>
+            <div className="cell__action"><i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+          </div>
         </div>
-        <div className="menu-item" style={{position:'relative', overflow:'visible'}}>
-          <span className="menu-label">我的优惠券</span>
-          <i data-lucide="chevron-right" className="menu-arrow" style={{width:20,height:20}}></i>
-          <span className="badge badge--corner badge--number">5</span>
+        <div data-component="cell" className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+          <div className="cell__body">
+            <div className="cell__content"><div className="cell__title-row"><span className="cell__title">我的优惠券</span></div></div>
+            <div className="cell__action">
+              <div className="cell__action-badge"><span className="badge badge--inline badge--number">5</span></div>
+              <i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
+            </div>
+          </div>
         </div>
-        <div className="menu-item">
-          <span className="menu-label">设置</span>
-          <i data-lucide="chevron-right" className="menu-arrow" style={{width:20,height:20}}></i>
+        <div data-component="cell" className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+          <div className="cell__body">
+            <div className="cell__content"><div className="cell__title-row"><span className="cell__title">设置</span></div></div>
+            <div className="cell__action"><i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+          </div>
         </div>
       </div>
 
@@ -597,8 +623,8 @@ function ProfileScreen({ onBizSettings }) {
             <input type="text" placeholder="请输入手机号" defaultValue="138****8888" disabled />
           </div>
           <div className="form-actions">
-            <button data-component="button" className="btn btn--strong uikit-nowrap" style={{flex:1}}>保存</button>
-            <button data-component="button" className="btn btn--medium btn--disabled uikit-nowrap" style={{flex:1}}>退出登录</button>
+            <button data-component="button" className="btn btn--strong btn--md uikit-nowrap" style={{flex:1}}>保存</button>
+            <button data-component="button" className="btn btn--medium btn--md btn--disabled uikit-nowrap" style={{flex:1}}>退出登录</button>
           </div>
         </div>
       </div>
@@ -606,12 +632,10 @@ function ProfileScreen({ onBizSettings }) {
   );
 }
 
-/* ═══ Checkmark SVG (from component-checkbox.html) ═══ */
-const CHECK_SVG = (
-  <svg width="13" height="10" viewBox="0 0 13 10" fill="none">
-    <path fillRule="evenodd" clipRule="evenodd" d="M4.41406 6.5L1.41406 3.5L0 4.91406L4.41406 9.32812L12.3281 1.41406L10.9141 0L4.41406 6.5Z" fill="white"/>
-  </svg>
-);
+/* ═══ Checkbox iconfont helper ═══ */
+function CheckIcon() {
+  return <i className="wego-iconfont-s icon-gou16 uikit-check-icon"></i>;
+}
 
 /* ═══ Screen 4: 业务设置 (岗位权限设置) ═══ */
 function BizSettingsScreen({ onBack }) {
@@ -656,24 +680,24 @@ function BizSettingsScreen({ onBack }) {
         </div>
         <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" onClick={() => togglePermission('contactInfo')}>
           <div className="cell__select">
-            <div className={`checkbox${permissions.contactInfo?' checkbox--checked':''}`}><div className="checkbox__inner"></div>{permissions.contactInfo && <div className="checkbox__icon">{CHECK_SVG}</div>}</div>
+            <div className={`checkbox${permissions.contactInfo?' checkbox--checked':''}`}><div className="checkbox__inner"></div>{permissions.contactInfo && <div className="checkbox__icon"><CheckIcon /></div>}</div>
           </div>
           <div className="cell__body"><div className="cell__content"><div className="cell__title-row"><span className="cell__title">允许查看上家的联系方式</span></div></div></div>
         </div>
         <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" onClick={() => togglePermission('publishEdit')}>
           <div className="cell__select">
-            <div className={`checkbox${permissions.publishEdit?' checkbox--checked':''}`}><div className="checkbox__inner"></div>{permissions.publishEdit && <div className="checkbox__icon">{CHECK_SVG}</div>}</div>
+            <div className={`checkbox${permissions.publishEdit?' checkbox--checked':''}`}><div className="checkbox__inner"></div>{permissions.publishEdit && <div className="checkbox__icon"><CheckIcon /></div>}</div>
           </div>
           <div className="cell__body"><div className="cell__content"><div className="cell__title-row"><span className="cell__title">允许发布、编辑、上下架商品</span></div></div></div>
         </div>
         <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" onClick={() => togglePermission('inventory')}>
           <div className="cell__select">
-            <div className={`checkbox${permissions.inventory?' checkbox--checked':''}`}><div className="checkbox__inner"></div>{permissions.inventory && <div className="checkbox__icon">{CHECK_SVG}</div>}</div>
+            <div className={`checkbox${permissions.inventory?' checkbox--checked':''}`}><div className="checkbox__inner"></div>{permissions.inventory && <div className="checkbox__icon"><CheckIcon /></div>}</div>
           </div>
           <div className="cell__body"><div className="cell__content"><div className="cell__title-row"><span className="cell__title">允许查看和编辑库存</span></div></div></div>
         </div>
       </div>
-      <div className="section-gap"></div>
+      <div className="section-separator"></div>
       <div className="section-title">订单</div>
       <div className="section-group">
         <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" onClick={() => toggleSwitch('order')}>
@@ -684,18 +708,18 @@ function BizSettingsScreen({ onBack }) {
         </div>
         <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" onClick={() => togglePermission('viewOrders')}>
           <div className="cell__select">
-            <div className={`checkbox${permissions.viewOrders?' checkbox--checked':''}`}><div className="checkbox__inner"></div>{permissions.viewOrders && <div className="checkbox__icon">{CHECK_SVG}</div>}</div>
+            <div className={`checkbox${permissions.viewOrders?' checkbox--checked':''}`}><div className="checkbox__inner"></div>{permissions.viewOrders && <div className="checkbox__icon"><CheckIcon /></div>}</div>
           </div>
           <div className="cell__body"><div className="cell__content"><div className="cell__title-row"><span className="cell__title">允许查看订单</span></div></div></div>
         </div>
         <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" onClick={() => togglePermission('modifyOrder')}>
           <div className="cell__select">
-            <div className={`checkbox${permissions.modifyOrder?' checkbox--checked':''}`}><div className="checkbox__inner"></div>{permissions.modifyOrder && <div className="checkbox__icon">{CHECK_SVG}</div>}</div>
+            <div className={`checkbox${permissions.modifyOrder?' checkbox--checked':''}`}><div className="checkbox__inner"></div>{permissions.modifyOrder && <div className="checkbox__icon"><CheckIcon /></div>}</div>
           </div>
           <div className="cell__body"><div className="cell__content"><div className="cell__title-row"><span className="cell__title">允许修改订单(包括改单、改价等)</span></div></div></div>
         </div>
       </div>
-      <div className="section-gap"></div>
+      <div className="section-separator"></div>
       <div className="section-title">运营</div>
       <div className="section-group">
         <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" onClick={() => toggleSwitch('ops')}>
@@ -706,7 +730,7 @@ function BizSettingsScreen({ onBack }) {
         </div>
         <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" onClick={() => togglePermission('createManageTask')}>
           <div className="cell__select">
-            <div className={`checkbox${permissions.createManageTask?' checkbox--checked':''}`}><div className="checkbox__inner"></div>{permissions.createManageTask && <div className="checkbox__icon">{CHECK_SVG}</div>}</div>
+            <div className={`checkbox${permissions.createManageTask?' checkbox--checked':''}`}><div className="checkbox__inner"></div>{permissions.createManageTask && <div className="checkbox__icon"><CheckIcon /></div>}</div>
           </div>
           <div className="cell__body"><div className="cell__content"><div className="cell__title-row"><span className="cell__title">允许创建并管理任务</span></div></div></div>
         </div>
@@ -719,39 +743,12 @@ function BizSettingsScreen({ onBack }) {
 function App() {
   const [screen, setScreen] = useState('home');
 
-  useEffect(() => {
-    lucide.createIcons();
-  }, [screen]);
-
   return (
     <div className="phone-screen">
-      <StatusBar />
-      {screen === 'home' && (
-        <div className="phone-header">
-          <span className="phone-header-title">微购精选</span>
-        </div>
-      )}
-      {screen === 'detail' && (
-        <div className="phone-header">
-          <div className="phone-header-back" onClick={() => setScreen('home')}>
-            <i data-lucide="chevron-left" style={{width:24,height:24}}></i>
-          </div>
-          <span className="phone-header-title">商品详情</span>
-        </div>
-      )}
-      {screen === 'profile' && (
-        <div className="phone-header">
-          <span className="phone-header-title">我的</span>
-        </div>
-      )}
-      {screen === 'bizSettings' && (
-        <div className="phone-header">
-          <div className="phone-header-back" onClick={() => setScreen('profile')}>
-            <i data-lucide="chevron-left" style={{width:24,height:24}}></i>
-          </div>
-          <span className="phone-header-title">岗位权限设置</span>
-        </div>
-      )}
+      {screen === 'home' && <AppNavbar title="微购精选" />}
+      {screen === 'detail' && <AppNavbar title="商品详情" onBack={() => setScreen('home')} />}
+      {screen === 'profile' && <AppNavbar title="我的" />}
+      {screen === 'bizSettings' && <AppNavbar title="岗位权限设置" onBack={() => setScreen('profile')} />}
       <div className="phone-body">
         {screen === 'home' && <HomeScreen onProductClick={() => setScreen('detail')} />}
         {screen === 'detail' && <DetailScreen />}
@@ -766,6 +763,5 @@ function App() {
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App />);
 </script>
-<script>lucide.createIcons();</script>
 </body>
 </html>

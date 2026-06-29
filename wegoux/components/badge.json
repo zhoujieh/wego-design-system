@@ -79,7 +79,7 @@
     "defaultPlacement": "未显式指定时按 corner 语义处理，默认显示在宿主右上角。",
     "inlineRule": "inline 模式不使用绝对定位，只与文字、按钮或列表内容并排展示。",
     "textColorModel": "文字类默认背景色为 var(--accent-green)，可通过 --badge-text-bg 和 --badge-text-color 覆盖任意颜色。",
-    "scrollable": "仅文字类支持 scrollable，默认宽度 96px，可通过 --badge-scroll-width 覆盖；交互为双轨道拼接的持续向左无缝循环轮播。"
+    "scrollable": "仅文字类支持 scrollable，默认宽度 32px，可通过 --badge-scroll-width 覆盖；交互为双轨道拼接的持续向左无缝循环轮播。"
   },
   "accessibility": {
     "hostRule": "corner 模式依附宿主元素展示，不单独承担可点击主操作语义。",
@@ -97,6 +97,8 @@
     "--accent-green",
     "--body-md-font-family",
     "--body-xs-font-size",
+    "--duration-xslow",
+    "--ease-linear",
     "--font-weight-medium",
     "--number-md-font-family",
     "--palette-neutral-100",
@@ -113,7 +115,9 @@
     "stroke": "0.5px solid var(--palette-neutral-100)",
     "numberFont": "12px / 500 / var(--number-md-font-family)",
     "textDefaultBg": "var(--accent-green)",
-    "scrollWidthDefault": "32px"
+    "scrollWidthDefault": "32px",
+    "marqueeDuration": "calc(var(--duration-xslow) * 8)",
+    "marqueeEasing": "var(--ease-linear)"
   },
   "cssCustomProperties": [
     {

@@ -1,14 +1,12 @@
 {
   "kitType": "app",
   "screensGenerated": 4,
-  "coreComponentsUsed": ["bottom-nav", "button", "card", "tag", "badge", "avatar", "input", "navbar", "cell", "checkbox", "switch", "link"],
+  "coreComponentsUsed": ["navbar", "bottom-nav", "button", "card", "tag", "badge", "image", "counter", "avatar", "input", "cell", "checkbox", "switch", "link"],
   "supportComponentsUsed": [],
   "previewClassReuseRate": 0.84,
-  "reuseAssessment": "主 UI Kit 已进一步回收到已注册组件结构，tag 与 badge 调用已对齐当前组件公开契约；当前仍保留部分 Showcase 头部与业务壳层，pagePatterns 见 uikit-plan.json。",
-  "inventedComponents": ["phone-status", "phone-header", "phone-indicator"],
-  "recommendedRefactors": {
-    "phone-header": "navbar"
-  },
+  "reuseAssessment": "主 UI Kit 已将顶部栏、底部导航、列表行、数量步进、商品图占位和勾选图标回收到已注册组件结构；当前仅保留 Showcase 外壳用于手机框展示，pagePatterns 见 uikit-plan.json。",
+  "inventedComponents": ["uikit-shell", "phone-frame", "phone-screen", "phone-indicator"],
+  "recommendedRefactors": {},
   "interactiveStatesRendered": ["active", "disabled", "selected"],
   "primaryActionPerScreen": true,
   "mockDataDensity": {
@@ -19,6 +17,6 @@
   },
   "warnings": [
     "UI Kit 是移动端应用 Showcase，不是可直接复制的页面模板。",
-    "部分演示图标来自 Lucide CDN；基础组件完善后将统一替换为 iconfont。"
+    "Showcase 外壳类仅用于预览手机框，不应沉淀为通用组件。"
   ]
 }

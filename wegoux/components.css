@@ -122,7 +122,7 @@
       display: inline-flex;
       align-items: center;
       min-width: max-content;
-      animation: badge-marquee 4s linear infinite;
+      animation: badge-marquee calc(var(--duration-xslow) * 8) var(--ease-linear) infinite;
       will-change: transform;
     }
     .badge__marquee-group {
