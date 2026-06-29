@@ -113,7 +113,7 @@
     "stroke": "0.5px solid var(--palette-neutral-100)",
     "numberFont": "12px / 500 / var(--number-md-font-family)",
     "textDefaultBg": "var(--accent-green)",
-    "scrollWidthDefault": "96px"
+    "scrollWidthDefault": "32px"
   },
   "cssCustomProperties": [
     {
@@ -128,7 +128,7 @@
     },
     {
       "name": "--badge-scroll-width",
-      "default": "96px",
+      "default": "32px",
       "appliesTo": "scrollable 文字类宽度"
     }
   ],

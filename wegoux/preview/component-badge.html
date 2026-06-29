@@ -106,22 +106,6 @@
       gap: 8px;
       min-width: 0;
     }
-    .demo-badge-orange {
-      --badge-text-bg: #FA9D3B;
-      --badge-text-color: var(--text-inverse);
-    }
-    .demo-badge-green {
-      --badge-text-bg: var(--accent-green);
-      --badge-text-color: var(--text-inverse);
-    }
-    .demo-badge-red {
-      --badge-text-bg: var(--status-danger-default);
-      --badge-text-color: var(--text-inverse);
-    }
-    .demo-badge-wide {
-      --badge-scroll-width: 128px;
-    }
-
     /* @component-css-start */
     .badge {
       position: relative;
@@ -208,7 +192,7 @@
       background: currentColor;
     }
     .badge--scrollable {
-      --badge-scroll-width: var(--size-96);
+      --badge-scroll-width: var(--size-32);
       width: var(--badge-scroll-width);
       justify-content: flex-start;
       overflow: hidden;
@@ -244,12 +228,29 @@
       }
     }
     /* @component-css-end */
+
+    /* Demo 覆盖类 —— 必须在组件 CSS 之后，确保级联优先级正确 */
+    .demo-badge-orange {
+      --badge-text-bg: #FA9D3B;
+      --badge-text-color: var(--text-inverse);
+    }
+    .demo-badge-green {
+      --badge-text-bg: var(--accent-green);
+      --badge-text-color: var(--text-inverse);
+    }
+    .demo-badge-red {
+      --badge-text-bg: var(--status-danger-default);
+      --badge-text-color: var(--text-inverse);
+    }
+    .demo-badge-wide {
+      --badge-scroll-width: 128px;
+    }
   </style>
 </head>
 <body>
   <div class="pv-header">
     <h1>角标</h1>
-    <p>文字角标默认使用绿色，可通过 CSS 变量自定义颜色；滚动宽度默认 96px，也支持覆盖。</p>
+    <p>文字角标默认使用绿色，可通过 CSS 变量自定义颜色；滚动宽度默认 32px，也支持覆盖。</p>
   </div>
 
   <div class="pv-section">
@@ -362,7 +363,7 @@
 
   <div class="pv-section">
     <div class="pv-section__title">文字循环轮播</div>
-    <div class="pv-section__sub">仅文字类支持循环轮播。默认宽度 96px，可通过 `--badge-scroll-width` 自定义更宽的展示窗口。</div>
+    <div class="pv-section__sub">仅文字类支持循环轮播。默认宽度 32px，可通过 `--badge-scroll-width` 自定义更宽的展示窗口。</div>
 
     <div class="row">
       <span class="label">行内默认宽</span>

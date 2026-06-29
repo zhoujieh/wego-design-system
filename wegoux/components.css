@@ -109,7 +109,7 @@
       background: currentColor;
     }
     .badge--scrollable {
-      --badge-scroll-width: var(--size-96);
+      --badge-scroll-width: var(--size-32);
       width: var(--badge-scroll-width);
       justify-content: flex-start;
       overflow: hidden;
