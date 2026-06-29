@@ -9,8 +9,6 @@ html, body {
   background: var(--color-bg-page);
   color: var(--color-text-primary);
   font-family: var(--font-family-text);
-  font-size: var(--font-size-16);
-  line-height: var(--font-lineheight-16);
   min-height: 100%;
   overflow-x: hidden;
   max-width: 100%;

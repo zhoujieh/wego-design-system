@@ -54,20 +54,39 @@
       "role": "字段标签"
     },
     {
+      "name": "wrapper",
+      "selector": ".input-wrapper",
+      "role": "输入区包裹容器（用于定位清除按钮）"
+    },
+    {
       "name": "control",
       "selector": "input | textarea",
       "role": "输入控件"
+    },
+    {
+      "name": "clear",
+      "selector": ".input-clear",
+      "role": "清除按钮，点击清空并聚焦（仅标准文本输入框显示，禁用态隐藏）"
+    },
+    {
+      "name": "error",
+      "selector": ".field-error",
+      "role": "错误提示文本，绝对定位在输入框下方"
     }
   ],
   "structurePatterns": [
     "标签始终置于输入区上方，组内使用固定纵向间距。",
     "text 和 textarea 共享边框与状态体系，不分裂成不同组件。",
-    "错误和禁用通过根节点状态类驱动。"
+    "错误和禁用通过根节点状态类驱动。",
+    "标准文本输入框（input[type=text]）支持清除按钮，通过 .input-wrapper 包裹 input 和 .input-clear 实现。",
+    "清除按钮仅标准文本输入框显示，数字输入框和多行文本输入框不显示清除按钮。",
+    "禁用态不显示清除按钮，错误态清除图标变为红色。"
   ],
   "behavior": {
     "focus": "聚焦时边框切到品牌色。",
-    "error": "错误态同时作用于边框和输入文字。",
-    "disabled": "禁用态弱化标签与输入区，并阻止交互。"
+    "error": "错误态同时作用于边框、输入文字和清除图标颜色，并在输入框下方显示错误提示文本。",
+    "disabled": "禁用态弱化标签与输入区，阻止交互，隐藏清除按钮。",
+    "clear": "标准文本输入框有内容时显示清除按钮（icon-yuancha-mian，16px，默认占位文字色），点击后清空内容并聚焦。数字输入框和 textarea 不显示清除按钮。"
   },
   "accessibility": {
     "labelAssociation": "标签需通过 for/id 或包裹关系关联具体输入控件。",
@@ -100,6 +119,7 @@
     "--font-family-number",
     "--font-family-text",
     "--font-lineheight-14",
+    "--font-size-10",
     "--font-size-14",
     "--font-size-16",
     "--font-weight-medium",

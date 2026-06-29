@@ -559,10 +559,10 @@
     "lineHeight": {
       "font-lineheight-10": "14px",
       "font-lineheight-12": "18px",
-      "font-lineheight-14": "20px",
+      "font-lineheight-14": "22px",
       "font-lineheight-16": "24px",
-      "font-lineheight-18": "26px",
-      "font-lineheight-22": "30px"
+      "font-lineheight-18": "28px",
+      "font-lineheight-22": "32px"
     }
   },
   "shadow": {
@@ -661,37 +661,37 @@
     "radius-full": "var(--wg-radius-full)"
   },
   "spacing": {
-    "space-0": "var(--wg-spacing-0)",
-    "space-2": "var(--wg-spacing-2)",
-    "space-4": "var(--wg-spacing-4)",
+    "space-0": "0",
+    "space-2": "2",
+    "space-4": "4",
     "space-6": "6px",
-    "space-8": "var(--wg-spacing-8)",
+    "space-8": "8",
     "space-10": "10px",
-    "space-12": "var(--wg-spacing-12)",
+    "space-12": "12",
     "space-14": "14px",
-    "space-16": "var(--wg-spacing-16)",
-    "space-24": "var(--wg-spacing-24)",
-    "space-32": "var(--wg-spacing-32)",
-    "space-40": "var(--wg-spacing-40)",
-    "space-48": "var(--wg-spacing-48)",
-    "space-72": "var(--wg-spacing-72)"
+    "space-16": "16",
+    "space-24": "24",
+    "space-32": "32",
+    "space-40": "40",
+    "space-48": "48",
+    "space-72": "72"
   },
   "size": {
-    "size-10": "var(--wg-size-10)",
-    "size-12": "var(--wg-size-12)",
-    "size-16": "var(--wg-size-16)",
-    "size-20": "var(--wg-size-20)",
-    "size-24": "var(--wg-size-24)",
-    "size-28": "var(--wg-size-28)",
-    "size-32": "var(--wg-size-32)",
+    "size-10": "10",
+    "size-12": "12",
+    "size-16": "16",
+    "size-20": "20",
+    "size-24": "24",
+    "size-28": "28",
+    "size-32": "32",
     "size-36": "36px",
-    "size-40": "var(--wg-size-40)",
-    "size-48": "var(--wg-size-48)",
-    "size-56": "var(--wg-size-56)",
-    "size-64": "var(--wg-size-64)",
-    "size-72": "var(--wg-size-72)",
-    "size-76": "var(--wg-size-76)",
-    "size-104": "var(--wg-size-104)"
+    "size-40": "40",
+    "size-48": "48",
+    "size-56": "56",
+    "size-64": "64",
+    "size-72": "72",
+    "size-76": "76",
+    "size-104": "104"
   },
   "layout": {
     "layout-page-margin-none": "0px",
