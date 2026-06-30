@@ -45,7 +45,7 @@
     },
     {
       "name": "image",
-      "selector": ".avatar__img",
+      "selector": ".avatar--image img",
       "role": "图片头像"
     },
     {
@@ -94,8 +94,8 @@
   "domAnatomy": {
     "root": ".avatar",
     "optionalChildren": [
-      "img",
-      "text"
+      ".avatar--image img",
+      ".avatar--initials"
     ],
     "modifiers": [
       ".avatar--24",
