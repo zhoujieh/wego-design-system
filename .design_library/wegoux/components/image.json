@@ -6,7 +6,7 @@
   "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "图片展示组件，覆盖预设尺寸、自定义比例、加载失败和可点击覆盖层。",
+  "description": "图片展示组件，默认使用 #EBEBED 灰底骨架加载，图片到位后 0.2s 渐显，失败时显示默认占位图。",
   "semanticTypeCandidates": [
     "image",
     "media",
@@ -99,31 +99,30 @@
   ],
   "structurePatterns": [
     "尺寸、圆角、填充模式全部由修饰类叠加在同一根节点上。",
-    "error 与 loading 不引入新的宿主结构，只切换占位和透明度。",
+    "loading 使用根节点骨架动画，不额外发明新的宿主层级。",
+    "error 通过占位层承载 default-diagram.svg，logo 按容器宽度约 40% 等比缩放，最大不超过 40px。",
     "clickable 仅补按压覆盖层，不扩展成轮播或缩放组件。"
   ],
-  "behavior": {},
+  "behavior": {
+    "loading": "默认加载态使用 .wg-image--loading，在根节点显示浅灰骨架动画。",
+    "loaded": "图片元素添加 .is-loaded 后以 0.2s 渐显。",
+    "error": "失败态使用 .wg-image--error，并在 .wg-image__placeholder 内放置 default-diagram.svg。"
+  },
   "accessibility": {},
   "usageHints": [
     "商品图优先使用矩形或宽幅规格，头像类场景使用 circle。",
     "contain 适合完整展示 logo、海报缩略或比例敏感资产。",
+    "错误占位图使用 assets/icons/default-diagram.svg，图形按容器宽度约 40% 等比缩放，最大尺寸限制为 40px。",
     "error 占位只做兜底提示，不替代正式空状态组件。"
   ],
   "doNotInvent": [
     "不要把 image 扩成轮播、视频播放器或带复杂编辑能力的媒体组件。",
-    "不要新增重毛玻璃、渐变遮罩或夸张 loading 动画。"
+    "不要新增重毛玻璃、渐变遮罩或夸张 loading 动画。",
+    "不要让失败占位 logo 随容器无限放大。"
   ],
   "tokensConsumed": [
     "--bg-mask-press",
-    "--bg-placeholder",
-    "--body-md-font-size",
-    "--body-sm-font-size",
-    "--body-xs-font-size",
-    "--duration-normal",
     "--ease-standard",
-    "--font-weight-medium",
-    "--font-weight-regular",
-    "--number-lg-font-size",
     "--palette-neutral-100",
     "--radius-12",
     "--radius-6",
@@ -134,10 +133,7 @@
     "--size-32",
     "--size-64",
     "--size-72",
-    "--status-danger-default",
-    "--text-default",
-    "--text-disabled",
-    "--text-tertiary"
+    "--text-disabled"
   ],
   "designTokens": {
     "sizes": {
@@ -155,8 +151,13 @@
       "lg": "var(--radius-12)",
       "circle": "var(--radius-full)"
     },
-    "placeholderSize": "24px",
-    "transition": "opacity var(--duration-normal) var(--ease-standard)"
+    "placeholderBackground": "#EBEBED",
+    "placeholderAsset": "assets/icons/default-diagram.svg",
+    "placeholderInset": "clamp(6px, 10%, 12px)",
+    "placeholderScale": "40% of inner container width",
+    "placeholderMaxSize": "40px",
+    "transition": "opacity 0.2s var(--ease-standard)",
+    "skeleton": "linear-gradient(90deg, #EBEBED 0%, var(--palette-neutral-100) 50%, #EBEBED 100%)"
   },
   "specRefs": [
     "specs/动效与视觉效果.md",
@@ -179,7 +180,8 @@
       ".wg-image--circle",
       ".wg-image--error",
       ".wg-image--loading",
-      ".wg-image--clickable"
+      ".wg-image--clickable",
+      ".wg-image--transparent"
     ]
   },
   "provenance": {

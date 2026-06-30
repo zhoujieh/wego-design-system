@@ -8,12 +8,6 @@
 <link rel="stylesheet" href="../scaffold.css">
 <link rel="stylesheet" href="../iconfont.css">
 <style>
-    
-    
-    
-    
-    
-    
     .demo-img-1 { background: linear-gradient(135deg, #03C160, #00C777); }
     .demo-img-2 { background: linear-gradient(135deg, #FA9D3B, #FFC300); }
     .demo-img-3 { background: linear-gradient(135deg, #208BF1, #6367F0); }
@@ -21,13 +15,13 @@
     .demo-img-5 { background: linear-gradient(135deg, #C79A56, #FA9D3B); }
     .demo-img-checker { background: repeating-conic-gradient(#ccc 0% 25%, #fff 0% 50%) 50% / 12px 12px; }
     /* @component-css-start */
-    .wg-image { position:relative; display:block; overflow:hidden; flex-shrink:0; background:var(--bg-placeholder); box-sizing:border-box; }
+    .wg-image { --wg-image-placeholder-bg:#EBEBED; position:relative; display:block; overflow:hidden; flex-shrink:0; background:var(--wg-image-placeholder-bg); box-sizing:border-box; isolation:isolate; }
     .wg-image--xs { width:var(--size-16); height:var(--size-16); }
     .wg-image--sm { width:var(--size-32); height:var(--size-32); }
     .wg-image--md { width:var(--size-64); height:var(--size-64); }
     .wg-image--lg { width:var(--size-104); height:var(--size-104); }
     .wg-image--xl { width:var(--size-72); height:var(--size-72); }
-    .wg-image__src { display:block; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity var(--duration-normal) var(--ease-standard); }
+    .wg-image__src { position:relative; z-index:1; display:block; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity 0.2s var(--ease-standard); }
     .wg-image__src.is-loaded { opacity:1; }
     .wg-image--contain .wg-image__src { object-fit:contain; }
     .wg-image--rounded-sm { border-radius:var(--radius-6); }
@@ -35,70 +29,56 @@
     .wg-image--rounded-lg { border-radius:var(--radius-12); }
     .wg-image--circle { border-radius:var(--radius-full); }
     .wg-image--transparent { background:transparent; }
-    .wg-image__placeholder { position:absolute; inset:0; display:none; align-items:center; justify-content:center; color:var(--text-disabled); font-size:var(--body-xs-font-size); font-weight:var(--font-weight-regular); }
+    .wg-image--loading::before { content:""; position:absolute; inset:0; background:linear-gradient(90deg, var(--wg-image-placeholder-bg) 0%, var(--palette-neutral-100) 50%, var(--wg-image-placeholder-bg) 100%); background-size:200% 100%; animation:wg-image-skeleton 1.2s ease-in-out infinite; z-index:0; }
+    .wg-image__placeholder { position:absolute; inset:0; z-index:1; display:none; align-items:center; justify-content:center; padding:clamp(var(--spacer-6), 10%, var(--spacer-12)); background:var(--wg-image-placeholder-bg); }
     .wg-image--error .wg-image__placeholder { display:flex; }
     .wg-image--error .wg-image__src { opacity:0; }
-    .wg-image__overlay { position:absolute; inset:0; background:var(--bg-mask-press); display:none; pointer-events:none; }
+    .wg-image--error::before,
+    .wg-image__src.is-loaded + .wg-image__placeholder,
+    .wg-image--error .wg-image__overlay,
+    .wg-image__src.is-loaded ~ .wg-image__overlay { display:none; }
+    .wg-image__placeholder-icon { width:var(--size-40); max-width:40%; max-height:var(--size-40); height:auto; object-fit:contain; opacity:0.58; }
+    .wg-image__overlay { position:absolute; inset:0; z-index:2; background:var(--bg-mask-press); display:none; pointer-events:none; }
     .wg-image--clickable { cursor:pointer; }
     .wg-image--clickable:active .wg-image__overlay { display:block; }
-    .wg-image--loading { background:var(--bg-placeholder); }
+    .wg-image--loading { background:var(--wg-image-placeholder-bg); }
     .wg-image--custom-rect { width: 180px; height: 120px; }
     .wg-image--custom-wide { width: 260px; height: 160px; }
-    .wg-image__placeholder::before { content: ""; width: 24px; height: 24px; border: 2px solid var(--text-disabled); border-radius: var(--radius-6); opacity: 0.5; }
+    @keyframes wg-image-skeleton {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
     /* @component-css-end */
+    .pv-section { background:var(--bg-surface); border-radius:var(--radius-12); padding:var(--spacer-16); box-shadow:var(--shadow-xs); }
+    .pv-section__sub:last-of-type { margin-bottom:var(--spacer-16); }
+    .row { padding:var(--spacer-4) 0; }
   </style>
 </head>
 <body>
-<div class="pv-header"><h1>图片</h1><p>预设尺寸、自定义矩形/宽幅、cover/contain、加载和错误态。</p></div>
+<div class="pv-header"><h1>图片</h1><p>默认使用 #EBEBED 灰底骨架加载，图片加载后 0.2s 渐显，失败时显示默认占位图。</p></div>
   <div class="pv-section">
-    <div class="pv-section__title">尺寸</div>
-    <div class="pv-section__sub">预设正方形尺寸：xs=16px, sm=32px, md=64px, lg=104px, xl=72px。也支持自定义宽高。</div>
-    <div class="row"><span class="label">xs</span><div class="wg-image wg-image--xs demo-img-1"><div class="wg-image__src is-loaded"></div></div><div class="wg-image wg-image--xs demo-img-2"><div class="wg-image__src is-loaded"></div></div></div>
-    <div class="row"><span class="label">sm</span><div class="wg-image wg-image--sm demo-img-1"><div class="wg-image__src is-loaded"></div></div><div class="wg-image wg-image--sm demo-img-4"><div class="wg-image__src is-loaded"></div></div></div>
-    <div class="row"><span class="label">md</span><div class="wg-image wg-image--md demo-img-1"><div class="wg-image__src is-loaded"></div></div><div class="wg-image wg-image--md demo-img-2"><div class="wg-image__src is-loaded"></div></div></div>
-    <div class="row"><span class="label">lg</span><div class="wg-image wg-image--lg demo-img-1"><div class="wg-image__src is-loaded"></div></div><div class="wg-image wg-image--lg demo-img-4"><div class="wg-image__src is-loaded"></div></div></div>
-    <div class="row"><span class="label">自定义矩形</span><div class="wg-image wg-image--custom-rect demo-img-3"><div class="wg-image__src is-loaded"></div></div><div class="wg-image wg-image--custom-rect demo-img-5"><div class="wg-image__src is-loaded"></div></div></div>
+    <div class="pv-section__title">基础规格</div>
+    <div class="pv-section__sub">保留常用正方形和业务矩形示例，避免预览页堆太多重复场景。</div>
+    <div class="row"><span class="label">常用尺寸</span><div class="wg-image wg-image--sm demo-img-1"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt=""></div><div class="wg-image wg-image--md demo-img-2"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt=""></div><div class="wg-image wg-image--lg demo-img-4"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt=""></div></div>
+    <div class="row"><span class="label">业务矩形</span><div class="wg-image wg-image--custom-rect wg-image--rounded-md demo-img-3"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt=""></div><div class="wg-image wg-image--custom-wide wg-image--rounded-md demo-img-5"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt=""></div></div>
   </div>
   <div class="pv-section">
-    <div class="pv-section__title">形状</div>
-    <div class="pv-section__sub">方形、圆角(sm/md/lg)、圆形。</div>
-    <div class="row"><span class="label">方形</span><div class="wg-image wg-image--sm demo-img-1"><div class="wg-image__src is-loaded"></div></div></div>
-    <div class="row"><span class="label">圆角 sm</span><div class="wg-image wg-image--md wg-image--rounded-sm demo-img-2"><div class="wg-image__src is-loaded"></div></div></div>
-    <div class="row"><span class="label">圆角 md</span><div class="wg-image wg-image--md wg-image--rounded-md demo-img-3"><div class="wg-image__src is-loaded"></div></div></div>
-    <div class="row"><span class="label">圆形</span><div class="wg-image wg-image--sm wg-image--circle demo-img-1"><div class="wg-image__src is-loaded"></div></div><div class="wg-image wg-image--md wg-image--circle demo-img-5"><div class="wg-image__src is-loaded"></div></div><div class="wg-image wg-image--lg wg-image--circle demo-img-3"><div class="wg-image__src is-loaded"></div></div></div>
+    <div class="pv-section__title">形状与填充</div>
+    <div class="pv-section__sub">保留圆角、圆形和 contain 两类最常用差异。</div>
+    <div class="row"><span class="label">圆角 / 圆形</span><div class="wg-image wg-image--md wg-image--rounded-sm demo-img-2"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt=""></div><div class="wg-image wg-image--md wg-image--circle demo-img-3"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt=""></div></div>
+    <div class="row"><span class="label">contain</span><div class="wg-image wg-image--md wg-image--rounded-md wg-image--contain demo-img-checker"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt=""></div></div>
   </div>
   <div class="pv-section">
-    <div class="pv-section__title">填充模式</div>
-    <div class="pv-section__sub">cover（默认）裁剪填满；contain 完整显示。</div>
-    <div class="row"><span class="label">cover</span><div class="wg-image wg-image--md demo-img-1"><div class="wg-image__src is-loaded"></div></div></div>
-    <div class="row"><span class="label">contain</span><div class="wg-image wg-image--md wg-image--contain demo-img-checker"><div class="wg-image__src is-loaded"></div></div></div>
-  </div>
-  <div class="pv-section">
-    <div class="pv-section__title">初始背景色</div>
-    <div class="pv-section__sub">加载前背景色，默认浅灰或透明。</div>
-    <div class="row"><span class="label">默认背景</span><div class="wg-image wg-image--md"><div class="wg-image__src"></div></div></div>
-    <div class="row"><span class="label">透明背景</span><div class="wg-image wg-image--md wg-image--transparent demo-img-checker"><div class="wg-image__src"></div></div></div>
-  </div>
-  <div class="pv-section">
-    <div class="pv-section__title">淡入动画</div>
-    <div class="pv-section__sub">加载完成后 opacity 0→1 过渡。</div>
-    <div class="row"><span class="label">加载中</span><div class="wg-image wg-image--md wg-image--loading"><div class="wg-image__src"></div></div><div class="wg-image wg-image--md wg-image--loading"><div class="wg-image__src"></div></div></div>
-    <div class="row"><span class="label">已加载</span><div class="wg-image wg-image--md demo-img-1"><div class="wg-image__src is-loaded"></div></div><div class="wg-image wg-image--md demo-img-4"><div class="wg-image__src is-loaded"></div></div></div>
+    <div class="pv-section__title">加载与结果</div>
+    <div class="pv-section__sub">默认是浅灰骨架动画，图片到位后 0.2s 渐显。</div>
+    <div class="row"><span class="label">加载中</span><div class="wg-image wg-image--md wg-image--rounded-md wg-image--loading"><div class="wg-image__src"></div></div><div class="wg-image wg-image--custom-rect wg-image--rounded-md wg-image--loading"><div class="wg-image__src"></div></div></div>
+    <div class="row"><span class="label">已加载</span><div class="wg-image wg-image--md wg-image--rounded-md demo-img-1"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt=""></div><div class="wg-image wg-image--custom-rect wg-image--rounded-md demo-img-4"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt=""></div></div>
   </div>
   <div class="pv-section">
     <div class="pv-section__title">加载失败</div>
-    <div class="pv-section__sub">失败时显示占位图，最多重试1次。</div>
-    <div class="row"><span class="label">错误状态</span><div class="wg-image wg-image--sm wg-image--error"><div class="wg-image__src"></div><div class="wg-image__placeholder"></div></div><div class="wg-image wg-image--md wg-image--error"><div class="wg-image__src"></div><div class="wg-image__placeholder"></div></div><div class="wg-image wg-image--lg wg-image--error"><div class="wg-image__src"></div><div class="wg-image__placeholder"></div></div></div>
-  </div>
-  <div class="pv-section">
-    <div class="pv-section__title">点击态</div>
-    <div class="pv-section__sub">clickable 时按下显示半透明蒙层。</div>
-    <div class="row"><span class="label">可点击</span><div class="wg-image wg-image--md wg-image--rounded-md wg-image--clickable demo-img-1"><div class="wg-image__src is-loaded"></div><div class="wg-image__overlay"></div></div><div class="wg-image wg-image--md wg-image--circle wg-image--clickable demo-img-5"><div class="wg-image__src is-loaded"></div><div class="wg-image__overlay"></div></div></div>
-  </div>
-  <div class="pv-section">
-    <div class="pv-section__title">组合示例</div>
-    <div class="row"><span class="label">商品卡片</span><div style="width:120px; background:var(--palette-neutral-100); border-radius:var(--radius-8); overflow:hidden;"><div class="wg-image wg-image--custom-rect demo-img-4" style="border-radius:var(--radius-8) var(--radius-8) 0 0;"><div class="wg-image__src is-loaded"></div></div><div style="padding:8px;"><div style="font-size:var(--body-sm-font-size); color:var(--text-default);">商品名称</div><div style="font-size:var(--number-lg-font-size); color:var(--status-danger-default); font-weight:var(--font-weight-medium);">¥99.00</div></div></div></div>
-    <div class="row"><span class="label">用户头像</span><div style="display:flex; align-items:center; gap:8px; background:var(--palette-neutral-100); border-radius:var(--radius-6); padding:8px 12px;"><div class="wg-image wg-image--sm wg-image--circle demo-img-2"><div class="wg-image__src is-loaded"></div></div><div><div style="font-size:var(--body-md-font-size); font-weight:var(--font-weight-medium);">用户名</div><div style="font-size:var(--body-xs-font-size); color:var(--text-tertiary);">个性签名</div></div></div></div>
+    <div class="pv-section__sub">失败时显示默认 `default-diagram.svg`，logo 按容器宽度约 40% 等比缩放，最大不超过 40px。</div>
+    <div class="row"><span class="label">错误状态</span><div class="wg-image wg-image--sm wg-image--error"><div class="wg-image__src"></div><div class="wg-image__placeholder"><img class="wg-image__placeholder-icon" src="../assets/icons/default-diagram.svg" alt=""></div></div><div class="wg-image wg-image--md wg-image--rounded-md wg-image--error"><div class="wg-image__src"></div><div class="wg-image__placeholder"><img class="wg-image__placeholder-icon" src="../assets/icons/default-diagram.svg" alt=""></div></div><div class="wg-image wg-image--custom-rect wg-image--rounded-md wg-image--error"><div class="wg-image__src"></div><div class="wg-image__placeholder"><img class="wg-image__placeholder-icon" src="../assets/icons/default-diagram.svg" alt=""></div></div></div>
+    <div class="row"><span class="label">可点击</span><div class="wg-image wg-image--md wg-image--rounded-md wg-image--clickable demo-img-1"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt=""><div class="wg-image__overlay"></div></div></div>
   </div>
 </body>
 </html>

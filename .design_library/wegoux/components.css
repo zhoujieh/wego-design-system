@@ -516,15 +516,15 @@
 
 /* ── Image ─────────────────────────────────────────────────── */
 /* @anatomy
-   <span class="label">xs</span><div class="wg-image wg-image--xs demo-img-1"><div class="wg-image__src is-loaded">
+   <span class="label">常用尺寸</span><div class="wg-image wg-image--sm demo-img-1"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt="">
 */
-.wg-image { position:relative; display:block; overflow:hidden; flex-shrink:0; background:var(--bg-placeholder); box-sizing:border-box; }
+.wg-image { --wg-image-placeholder-bg:#EBEBED; position:relative; display:block; overflow:hidden; flex-shrink:0; background:var(--wg-image-placeholder-bg); box-sizing:border-box; isolation:isolate; }
     .wg-image--xs { width:var(--size-16); height:var(--size-16); }
     .wg-image--sm { width:var(--size-32); height:var(--size-32); }
     .wg-image--md { width:var(--size-64); height:var(--size-64); }
     .wg-image--lg { width:var(--size-104); height:var(--size-104); }
     .wg-image--xl { width:var(--size-72); height:var(--size-72); }
-    .wg-image__src { display:block; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity var(--duration-normal) var(--ease-standard); }
+    .wg-image__src { position:relative; z-index:1; display:block; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity 0.2s var(--ease-standard); }
     .wg-image__src.is-loaded { opacity:1; }
     .wg-image--contain .wg-image__src { object-fit:contain; }
     .wg-image--rounded-sm { border-radius:var(--radius-6); }
@@ -532,16 +532,25 @@
     .wg-image--rounded-lg { border-radius:var(--radius-12); }
     .wg-image--circle { border-radius:var(--radius-full); }
     .wg-image--transparent { background:transparent; }
-    .wg-image__placeholder { position:absolute; inset:0; display:none; align-items:center; justify-content:center; color:var(--text-disabled); font-size:var(--body-xs-font-size); font-weight:var(--font-weight-regular); }
+    .wg-image--loading::before { content:""; position:absolute; inset:0; background:linear-gradient(90deg, var(--wg-image-placeholder-bg) 0%, var(--palette-neutral-100) 50%, var(--wg-image-placeholder-bg) 100%); background-size:200% 100%; animation:wg-image-skeleton 1.2s ease-in-out infinite; z-index:0; }
+    .wg-image__placeholder { position:absolute; inset:0; z-index:1; display:none; align-items:center; justify-content:center; padding:clamp(var(--spacer-6), 10%, var(--spacer-12)); background:var(--wg-image-placeholder-bg); }
     .wg-image--error .wg-image__placeholder { display:flex; }
     .wg-image--error .wg-image__src { opacity:0; }
-    .wg-image__overlay { position:absolute; inset:0; background:var(--bg-mask-press); display:none; pointer-events:none; }
+    .wg-image--error::before,
+    .wg-image__src.is-loaded + .wg-image__placeholder,
+    .wg-image--error .wg-image__overlay,
+    .wg-image__src.is-loaded ~ .wg-image__overlay { display:none; }
+    .wg-image__placeholder-icon { width:var(--size-40); max-width:40%; max-height:var(--size-40); height:auto; object-fit:contain; opacity:0.58; }
+    .wg-image__overlay { position:absolute; inset:0; z-index:2; background:var(--bg-mask-press); display:none; pointer-events:none; }
     .wg-image--clickable { cursor:pointer; }
     .wg-image--clickable:active .wg-image__overlay { display:block; }
-    .wg-image--loading { background:var(--bg-placeholder); }
+    .wg-image--loading { background:var(--wg-image-placeholder-bg); }
     .wg-image--custom-rect { width: 180px; height: 120px; }
     .wg-image--custom-wide { width: 260px; height: 160px; }
-    .wg-image__placeholder::before { content: ""; width: 24px; height: 24px; border: 2px solid var(--text-disabled); border-radius: var(--radius-6); opacity: 0.5; }
+    @keyframes wg-image-skeleton {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
 
 /* ── Input ─────────────────────────────────────────────────── */
 /* @anatomy
