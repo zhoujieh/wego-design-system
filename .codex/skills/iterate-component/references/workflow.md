@@ -26,6 +26,9 @@
    - 是否存在 preview 靠 inline style 才成立的组件语义
    - 是否需要先收敛公开类型、挂载方式或宿主边界
    - 是否属于圆角、偏移、滚动、描边这类必须看真实渲染结果的视觉改动
+   - 是否涉及特殊资产例外，例如组件选择态必须使用 `assets/icons/*.svg` 而不是 iconfont
+   - 是否存在成组示例尺寸混用，例如父子联动、radio group、嵌套 cell 中同一场景内尺寸不一致
+   - 如果涉及暗色模式，当前问题是在 preview 展示层，还是已经触及组件本体；是否有同类稳定组件可作为暗色策略参照
 5. 修改 `wegoux/components/{slug}.json`
 6. 修改 `wegoux/preview/component-{slug}.html`
    - 组件 CSS 只改 `/* @component-css-start */` 与 `/* @component-css-end */` 之间
@@ -39,6 +42,10 @@
 
 - 如果改动主要是视觉细节，不要只依赖静态阅读 CSS，至少核对一次 preview 的真实渲染结果
 - 如果组件决定对外开放 CSS 变量，自定义变量名、默认值、适用范围要先写进契约，再决定是否在 preview / UI Kit 用 inline style 演示覆盖
+- 如果浏览器或插件安全策略阻止本地文件核对，不要绕策略；改用顺序生成、静态扫描、JSON 校验、资源引用检查，并在最终风险中说明未做真实视觉核对
+- 如果暗色模式问题已经影响边框、底色、禁用态、选中态等组件本体可见性，优先把修复收回 `.dark` 上下文或正式 Token 映射；preview 专用 `dark-mode` 覆盖只用于展示壳，不应用来长期承担组件语义
+- 如果暗色修复里出现多个组件重复的 rgba 值，要把它视为 Token 候选，在最终风险里说明“暂未沉淀到 `colors_and_type.css` / `css.json`”
+- 如果重跑提取脚本后 `components.css` 带出目标组件之外的 diff，先定位是哪些 preview 造成的；不要默认这些差异都属于当前任务
 
 ## 2.1 收敛现有组件能力
 
@@ -47,13 +54,17 @@
 - preview 里有多处 inline style 在承担组件类型、颜色、形态或定位语义
 - 契约里的公开类型比真实可维护范围更散
 - 宿主挂载方式、默认定位、嵌套边界没有写清楚
+- 用户反馈把某个“独立场景”并回已有场景，例如图片上未选态并入暗色模式
+- 特殊资产、状态 class 或示例文案在多处产生了不一致表达
+- 暗色模式目前只在 preview 靠临时 class 覆盖成立，组件正式 `.dark` 规则或 Token 消费没有跟上
 
 处理顺序：
 
 1. 先确认最小稳定公开类型
 2. 再确认辅助维度，例如 tone、placement、overflow
 3. 把 inline style 里的组件语义收回 class 或契约
-4. 最后再补齐 preview 全场景示例
+4. 如果要取消公开能力，反向删除 preview 示例、状态 class、契约字段、README/SKILL 文案和消费说明
+5. 最后再补齐 preview 全场景示例
 
 ## 3. 新增组件发布标准步骤
 
@@ -102,6 +113,13 @@
 
 不要在只改 JSON 契约、只改说明文案且不影响组件 CSS 时强行重跑。
 
+提取后检查：
+
+- 顺序执行提取脚本后再扫描 `wegoux/components.css`，不要并行读取旧输出
+- 如果刚删除某个 class 或场景，必须扫 preview、契约、README/SKILL、`library-consumption.json` 和 `components.css` 是否仍残留旧词
+- 对特殊 SVG 资产，额外扫是否还有 iconfont、内联 SVG 或旧脚本常量承担同一语义
+- 如果 `components.css` 出现无关组件差异，继续回查对应 `preview/component-*.html` 和工作区 diff，确认是本轮连带修改、既有漂移还是他人脏改动，再决定是否拆任务处理
+
 ## 7. 什么时候校验 css.json
 
 执行 `python3 -c "import json; json.load(open('wegoux/css.json'))"` 的条件：
@@ -137,7 +155,33 @@
 - 属于组件颜色、形态、定位、滚动或状态：必须收回正式 class，并同步契约
 - 如果 inline style 只是消费组件已经公开的 CSS 变量，可保留为演示用法，但要确认契约已记录这些变量
 
+### 特殊 SVG 资产例外
+
+当组件明确要求使用随库 SVG（例如 checkbox 对勾/半选）：
+
+- 先读 `assets/icons/` 中的对应文件，确认路径和尺寸
+- preview、UI Kit、嵌套调用方都引用同一资产，不使用 iconfont 或内联 SVG 代替
+- 契约里补 `assetUsage` 或等价说明
+- 如影响下游复制规则，同步 `library-consumption.json`、README 和顶层 SKILL 的图标规则
+
+### 设计反馈取消独立场景
+
+当用户说明“这个场景其实就是另一个场景，不用单独说明”：
+
+- 删除独立标题和示例 markup
+- 删除对应 class、variant/state、usageHints、doNotInvent 中的边界描述
+- 重新生成 `components.css`
+- 顺序扫描旧 class/旧文案，确认聚合样式没有残留
+
 ### 用户改颜色但没提 Token
 
 先判断是局部样式微调，还是公共语义 Token 应调整。
 如果已经涉及公共语义层，就必须补读 `wegoux/colors_and_type.css` 和 `wegoux/css.json`，不要停留在组件局部硬编码。
+
+### 用户说“暗色模式看不见”
+
+先判断问题发生在哪一层：
+
+- 如果只是暗色示例容器没挂 `.dark`，修正 preview 容器 class，并做真实浏览器核对
+- 如果组件在暗色里边框、底色、禁用态不可见，优先修改组件 `.dark` 规则或正式 Token 消费，再同步契约里的 theme / tokensConsumed / designTokens 说明
+- 如果修复过程明显复用了多个相同暗色 rgba，记录为 Token 候选，后续进入 `colors_and_type.css` / `css.json`

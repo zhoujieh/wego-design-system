@@ -24,7 +24,7 @@
     ],
     "theme": [
       "light",
-      "dark-preview"
+      "dark"
     ]
   },
   "representativeVariants": [
@@ -46,7 +46,7 @@
     {
       "size": "default",
       "state": "checked",
-      "theme": "dark-preview"
+      "theme": "dark"
     }
   ],
   "anatomy": [
@@ -90,11 +90,13 @@
   ],
   "tokensConsumed": [
     "--bg-brand",
+    "--bg-inverse-surface-l1",
     "--bg-control-disabled",
     "--body-md-font-size",
     "--border-control",
     "--border-control-disabled",
     "--border-disabled",
+    "--border-inverse",
     "--duration-fast",
     "--ease-standard",
     "--text-brand"
@@ -113,7 +115,8 @@
       "sm": "9px"
     },
     "borderWidth": "1.5px",
-    "transition": "var(--duration-fast) / var(--ease-standard)"
+    "transition": "var(--duration-fast) / var(--ease-standard)",
+    "darkMode": "暗色上下文通过 .dark 切换到 inverse 边框与弱表面底色，保证未选和禁用态在暗卡片中仍可见"
   },
   "specRefs": [
     "specs/交互设计原则.md",

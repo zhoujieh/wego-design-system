@@ -322,8 +322,8 @@
 /* @anatomy
    <div class="pv-header"><h1>复选框</h1><p>24 / 20px，支持未选、已选、半选、计数和禁用。</p></div>
 */
-.checkbox{position:relative;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;flex:0 0 24px;box-sizing:border-box;border-radius:var(--radius-full);cursor:pointer;-webkit-tap-highlight-color:transparent}
-.checkbox__inner{position:absolute;inset:2px;box-sizing:border-box;border:1.5px solid var(--border-control);border-radius:var(--radius-full);background:transparent;transition:background var(--duration-fast) var(--ease-standard),border-color var(--duration-fast) var(--ease-standard),opacity var(--duration-fast) var(--ease-standard)}
+.checkbox{--checkbox-surface:transparent;--checkbox-border:var(--border-control);--checkbox-disabled-surface:var(--bg-control-disabled);--checkbox-disabled-border:var(--border-disabled);position:relative;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;flex:0 0 24px;box-sizing:border-box;border-radius:var(--radius-full);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.checkbox__inner{position:absolute;inset:2px;box-sizing:border-box;border:1.5px solid var(--checkbox-border);border-radius:var(--radius-full);background:var(--checkbox-surface);transition:background var(--duration-fast) var(--ease-standard),border-color var(--duration-fast) var(--ease-standard),opacity var(--duration-fast) var(--ease-standard)}
 .checkbox__icon,
 .checkbox__minus,
 .checkbox__count{position:relative;z-index:1;display:none;align-items:center;justify-content:center;color:var(--text-inverse);pointer-events:none}
@@ -342,20 +342,15 @@
 .checkbox--sm .checkbox__minus::before{width:8px;height:1.5px}
 .checkbox--sm.checkbox--count .checkbox__count{width:16px;height:16px;font-size:12px}
 .checkbox--disabled{pointer-events:none;cursor:not-allowed}
-.checkbox--disabled:not(.checkbox--checked):not(.checkbox--indeterminate):not(.checkbox--count) .checkbox__inner{border-color:var(--border-disabled);background:var(--bg-control-disabled)}
+.checkbox--disabled:not(.checkbox--checked):not(.checkbox--indeterminate):not(.checkbox--count) .checkbox__inner{border-color:var(--checkbox-disabled-border);background:var(--checkbox-disabled-surface)}
 .checkbox--checked.checkbox--disabled .checkbox__inner,
 .checkbox--indeterminate.checkbox--disabled .checkbox__inner,
 .checkbox--count.checkbox--disabled .checkbox__inner,
-.checkbox--count.checkbox--disabled .checkbox__count{border-color:transparent;background:var(--bg-control-disabled)}
+.checkbox--count.checkbox--disabled .checkbox__count{border-color:transparent;background:var(--checkbox-disabled-surface)}
 .checkbox--checked.checkbox--disabled .checkbox__icon,
 .checkbox--indeterminate.checkbox--disabled .checkbox__minus,
 .checkbox--count.checkbox--disabled .checkbox__count{opacity:.45}
-.dark .checkbox:not(.checkbox--checked):not(.checkbox--indeterminate):not(.checkbox--count) .checkbox__inner{border-color:var(--border-inverse);background:var(--bg-inverse-surface-l1)}
-.dark .checkbox--disabled:not(.checkbox--checked):not(.checkbox--indeterminate):not(.checkbox--count) .checkbox__inner{border-color:var(--border-control-disabled);background:var(--bg-control-disabled)}
-.dark .checkbox--checked.checkbox--disabled .checkbox__inner,
-.dark .checkbox--indeterminate.checkbox--disabled .checkbox__inner,
-.dark .checkbox--count.checkbox--disabled .checkbox__inner,
-.dark .checkbox--count.checkbox--disabled .checkbox__count{border-color:transparent;background:var(--bg-control-disabled)}
+.dark .checkbox{--checkbox-surface:var(--bg-inverse-surface-l1);--checkbox-border:var(--border-inverse);--checkbox-disabled-surface:rgba(255,255,255,.03);--checkbox-disabled-border:rgba(255,255,255,.12)}
 
 /* ── Counter ───────────────────────────────────────────────── */
 /* @anatomy
@@ -678,8 +673,8 @@
 /* @anatomy
    <div class="pv-header"><h1>单选</h1><p>24 / 20px，品牌绿圆点选中态。</p></div>
 */
-.radio { width:24px; height:24px; display:flex; align-items:center; justify-content:center; flex-shrink:0; position:relative; cursor:pointer; }
-.radio__inner { width:20px; height:20px; border-radius:50%; border:1.5px solid var(--border-control); background:transparent; box-sizing:border-box; transition:border-color var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard); }
+.radio { --radio-surface:transparent; --radio-border:var(--border-control); --radio-disabled-surface:var(--bg-control-disabled); --radio-disabled-border:var(--border-disabled); --radio-disabled-dot:var(--border-disabled); width:24px; height:24px; display:flex; align-items:center; justify-content:center; flex-shrink:0; position:relative; cursor:pointer; }
+.radio__inner { width:20px; height:20px; border-radius:50%; border:1.5px solid var(--radio-border); background:var(--radio-surface); box-sizing:border-box; transition:border-color var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard); }
 .radio__dot { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:11px; height:11px; border-radius:50%; background:var(--bg-brand); display:none; }
 
 .radio--checked .radio__inner { border-color:var(--text-brand); }
@@ -692,17 +687,14 @@
 
 /* Disabled — unchecked: subtle border + disabled surface */
 .radio--disabled:not(.radio--checked) { pointer-events:none; cursor:not-allowed; }
-.radio--disabled:not(.radio--checked) .radio__inner { border-color:var(--border-disabled); background:var(--bg-control-disabled); }
+.radio--disabled:not(.radio--checked) .radio__inner { border-color:var(--radio-disabled-border); background:var(--radio-disabled-surface); }
 /* Disabled — checked: subtle border + bg; dot matches border */
 .radio--checked.radio--disabled { pointer-events:none; cursor:not-allowed; }
-.radio--checked.radio--disabled .radio__inner { border-color:var(--border-disabled); background:var(--bg-control-disabled); }
-.radio--checked.radio--disabled .radio__dot { background:var(--border-disabled); }
+.radio--checked.radio--disabled .radio__inner { border-color:var(--radio-disabled-border); background:var(--radio-disabled-surface); }
+.radio--checked.radio--disabled .radio__dot { background:var(--radio-disabled-dot); }
 
 /* Dark mode overrides for .dark context */
-.dark .radio .radio__inner { border-color:var(--border-control); }
-.dark .radio--disabled:not(.radio--checked) .radio__inner { border-color:var(--border-disabled); background:var(--bg-control-disabled); }
-.dark .radio--checked.radio--disabled .radio__inner { border-color:var(--border-control-disabled); background:var(--bg-control-disabled); }
-.dark .radio--checked.radio--disabled .radio__dot { background:var(--border-control-disabled); }
+.dark .radio { --radio-surface:var(--bg-inverse-surface-l1); --radio-border:var(--border-inverse); --radio-disabled-surface:rgba(255,255,255,.03); --radio-disabled-border:rgba(255,255,255,.12); --radio-disabled-dot:rgba(255,255,255,.18); }
 
 /* ── Stack ─────────────────────────────────────────────────── */
 /* @anatomy
@@ -718,15 +710,22 @@
 
 /* ── Switch ────────────────────────────────────────────────── */
 /* @anatomy
-   <span class="label">开启 (On)</span> <div class="switch switch--on"><div class="switch__thumb">
+   <div class="pv-header"><h1>开关</h1><p>44x24px 布尔切换，品牌绿开启态，支持禁用。</p></div>
 */
-.switch{position:relative;display:inline-flex;align-items:center;width:52px;height:32px;box-sizing:border-box;border-radius:100px;background:var(--bg-control-off);cursor:pointer;flex-shrink:0;transition:background var(--duration-fast) var(--ease-standard);-webkit-tap-highlight-color:transparent}
+.switch{position:relative;display:inline-flex;align-items:center;width:44px;height:24px;box-sizing:border-box;border-radius:12px;background:var(--bg-overlay-l2);cursor:pointer;flex-shrink:0;transition:background var(--duration-fast) var(--ease-standard);-webkit-tap-highlight-color:transparent}
+.switch::before{content:"";position:absolute;inset:-8px 0}
 .switch--on{background:var(--bg-brand)}
-.switch--off{background:var(--bg-control-off)}
-.switch__thumb{position:absolute;top:2px;left:2px;width:28px;height:28px;border-radius:50%;background:var(--text-inverse);box-shadow:var(--shadow-control-thumb);transition:left var(--duration-fast) var(--ease-standard)}
+.switch--off{background:var(--bg-overlay-l2)}
+.switch__thumb{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:var(--text-inverse);transition:left var(--duration-fast) var(--ease-standard),opacity var(--duration-fast) var(--ease-standard)}
 .switch--on .switch__thumb{left:22px}
 .switch--off .switch__thumb{left:2px}
-.switch--disabled{opacity:0.4;pointer-events:none;cursor:not-allowed}
+.switch--disabled{pointer-events:none;cursor:not-allowed}
+.switch--on.switch--disabled{background:var(--bg-brand-surface-l2)}
+.switch--on.switch--disabled .switch__thumb{opacity:.9}
+.switch--off.switch--disabled .switch__thumb{opacity:.6}
+.dark .switch--off{background:rgba(255,255,255,.16)}
+.dark .switch--on.switch--disabled{background:rgba(3,193,96,.28)}
+.dark .switch--off.switch--disabled{background:rgba(255,255,255,.08)}
 
 /* ── Tag ───────────────────────────────────────────────────── */
 /* @anatomy

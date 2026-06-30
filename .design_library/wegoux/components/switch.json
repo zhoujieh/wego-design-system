@@ -19,7 +19,8 @@
       "disabled"
     ],
     "theme": [
-      "light"
+      "light",
+      "dark"
     ]
   },
   "representativeVariants": [
@@ -34,6 +35,14 @@
     {
       "state": "disabled",
       "theme": "light"
+    },
+    {
+      "state": "off",
+      "theme": "dark"
+    },
+    {
+      "state": "disabled",
+      "theme": "dark"
     }
   ],
   "anatomy": [
@@ -50,7 +59,7 @@
   ],
   "structurePatterns": [
     "轨道与滑块组成固定两层结构。",
-    "开启与关闭共用同一尺寸体系，仅切换背景和滑块位置。"
+    "开启与关闭共用 44x24px 视觉尺寸，仅切换背景和滑块位置。"
   ],
   "behavior": {
     "toggle": "点击在 on 与 off 之间切换。",
@@ -60,7 +69,7 @@
   "accessibility": {
     "role": "switch",
     "checkedState": "需要暴露当前开关值。",
-    "touchTarget": "组件本体已满足常规触控尺寸。"
+    "touchTarget": "视觉尺寸为 44x24px，低于最小触控高度时通过伪元素向上下补偿热区，不改变布局尺寸。"
   },
   "usageHints": [
     "适合业务设置、通知开关、权限启用等布尔场景。",
@@ -72,14 +81,14 @@
   ],
   "tokensConsumed": [
     "--bg-brand",
-    "--bg-control-off",
+    "--bg-brand-surface-l2",
+    "--bg-overlay-l2",
     "--body-md-font-size",
     "--body-sm-font-size",
     "--border-neutral-l2",
     "--duration-fast",
     "--ease-standard",
     "--font-weight-medium",
-    "--shadow-control-thumb",
     "--spacer-12",
     "--spacer-4",
     "--spacer-8",
@@ -88,11 +97,13 @@
     "--text-tertiary"
   ],
   "designTokens": {
-    "size": "52px × 32px",
-    "radius": "100px",
-    "thumbSize": "28px",
-    "thumbShadow": "var(--shadow-control-thumb)",
-    "transition": "background var(--duration-fast) var(--ease-standard)"
+    "size": "44px × 24px",
+    "radius": "12px",
+    "thumbSize": "20px",
+    "thumbInset": "2px",
+    "darkMode": "暗色上下文使用 .dark 选择器提升关闭态与禁用态轨道可见度",
+    "touchCompensation": "switch::before 上下各扩展 8px，视觉尺寸不变",
+    "transition": "background var(--duration-fast) var(--ease-standard), thumb left/opacity var(--duration-fast) var(--ease-standard)"
   },
   "specRefs": [
     "specs/交互设计原则.md",

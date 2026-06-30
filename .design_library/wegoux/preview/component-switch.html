@@ -3,14 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:,">
 <link rel="stylesheet" href="../colors_and_type.css">
 <link rel="stylesheet" href="../scaffold.css">
 <link rel="stylesheet" href="../iconfont.css">
 <style>
-.sub-label { font-size:var(--body-sm-font-size); color:var(--text-tertiary); margin:var(--spacer-8) 0 var(--spacer-4); }
+.preview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:var(--spacer-8);width:100%;max-width:560px;margin-bottom:var(--spacer-16);box-sizing:border-box}
+.preview-item{display:flex;align-items:center;justify-content:space-between;gap:var(--spacer-12);min-width:0;min-height:52px;padding:var(--spacer-12);border:1px solid var(--border-neutral-l2);border-radius:var(--radius-8);background:var(--bg-surface);box-sizing:border-box}
+.preview-item .label{width:auto;min-width:0;color:var(--text-secondary)}
+.dark-strip{overflow:hidden}
+.dark-strip .preview-grid{max-width:none;margin-bottom:0}
+.dark-strip .preview-item{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12)}
+.dark-strip .preview-item .label{color:rgba(255,255,255,.7)}
 
 /* Switch demo: setting row simulation */
-.setting-row { display:flex; align-items:center; justify-content:space-between; padding:var(--spacer-12) 0; border-bottom:0.5px solid var(--border-neutral-l2); max-width:560px; }
+.setting-row { display:flex; align-items:center; justify-content:space-between; gap:var(--spacer-16); min-height:56px; padding:var(--spacer-12); border:1px solid var(--border-neutral-l2); border-radius:var(--radius-8); background:var(--bg-surface); max-width:420px; box-sizing:border-box; cursor:pointer; }
+.setting-row + .setting-row { margin-top:var(--spacer-8); }
 .setting-row:last-child { border-bottom:none; }
 .setting-info { display:flex; flex-direction:column; gap:2px; }
 .setting-name { font-size:var(--body-md-font-size); font-weight:var(--font-weight-medium); color:var(--text-default); }
@@ -21,77 +29,96 @@
 .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
 /* @component-css-start */
-.switch{position:relative;display:inline-flex;align-items:center;width:52px;height:32px;box-sizing:border-box;border-radius:100px;background:var(--bg-control-off);cursor:pointer;flex-shrink:0;transition:background var(--duration-fast) var(--ease-standard);-webkit-tap-highlight-color:transparent}
+.switch{position:relative;display:inline-flex;align-items:center;width:44px;height:24px;box-sizing:border-box;border-radius:12px;background:var(--bg-overlay-l2);cursor:pointer;flex-shrink:0;transition:background var(--duration-fast) var(--ease-standard);-webkit-tap-highlight-color:transparent}
+.switch::before{content:"";position:absolute;inset:-8px 0}
 .switch--on{background:var(--bg-brand)}
-.switch--off{background:var(--bg-control-off)}
-.switch__thumb{position:absolute;top:2px;left:2px;width:28px;height:28px;border-radius:50%;background:var(--text-inverse);box-shadow:var(--shadow-control-thumb);transition:left var(--duration-fast) var(--ease-standard)}
+.switch--off{background:var(--bg-overlay-l2)}
+.switch__thumb{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:var(--text-inverse);transition:left var(--duration-fast) var(--ease-standard),opacity var(--duration-fast) var(--ease-standard)}
 .switch--on .switch__thumb{left:22px}
 .switch--off .switch__thumb{left:2px}
-.switch--disabled{opacity:0.4;pointer-events:none;cursor:not-allowed}
+.switch--disabled{pointer-events:none;cursor:not-allowed}
+.switch--on.switch--disabled{background:var(--bg-brand-surface-l2)}
+.switch--on.switch--disabled .switch__thumb{opacity:.9}
+.switch--off.switch--disabled .switch__thumb{opacity:.6}
+.dark .switch--off{background:rgba(255,255,255,.16)}
+.dark .switch--on.switch--disabled{background:rgba(3,193,96,.28)}
+.dark .switch--off.switch--disabled{background:rgba(255,255,255,.08)}
 /* @component-css-end */
 </style>
 </head>
 <body>
-<div class="pv-header"><h1>开关</h1><p>52x32px 布尔切换，品牌绿开启态，支持禁用。</p></div>
+<div class="pv-header"><h1>开关</h1><p>44x24px 布尔切换，品牌绿开启态，支持禁用。</p></div>
 <div class="pv-section__title">默认状态</div>
-<div class="row">
-  <span class="label">开启 (On)</span>
+<div class="preview-grid">
+  <div class="preview-item"><span class="label">开启</span>
   <div class="switch switch--on"><div class="switch__thumb"></div></div>
-  <span class="label">关闭 (Off)</span>
+  </div>
+  <div class="preview-item"><span class="label">关闭</span>
   <div class="switch switch--off"><div class="switch__thumb"></div></div>
-  <span class="label">开启+禁用</span>
+  </div>
+</div>
+
+<div class="pv-section__title">禁用状态</div>
+<div class="preview-grid">
+  <div class="preview-item"><span class="label">禁用开启</span>
   <div class="switch switch--on switch--disabled"><div class="switch__thumb"></div></div>
-  <span class="label">关闭+禁用</span>
+  </div>
+  <div class="preview-item"><span class="label">禁用关闭</span>
   <div class="switch switch--off switch--disabled"><div class="switch__thumb"></div></div>
+  </div>
 </div>
 
 
 <div class="pv-section__title">暗色模式</div>
-<div class="dark-strip dark-mode">
-  <div class="row">
-    <span class="label">暗色开启</span>
+<div class="dark-strip dark-mode dark">
+  <div class="preview-grid">
+    <div class="preview-item"><span class="label">暗色开启</span>
     <div class="switch switch--on"><div class="switch__thumb"></div></div>
-    <span class="label">暗色关闭</span>
+    </div>
+    <div class="preview-item"><span class="label">暗色关闭</span>
     <div class="switch switch--off"><div class="switch__thumb"></div></div>
-    <span class="label">暗色开启+禁用</span>
+    </div>
+    <div class="preview-item"><span class="label">暗色禁用开启</span>
     <div class="switch switch--on switch--disabled"><div class="switch__thumb"></div></div>
-    <span class="label">暗色关闭+禁用</span>
+    </div>
+    <div class="preview-item"><span class="label">暗色禁用关闭</span>
     <div class="switch switch--off switch--disabled"><div class="switch__thumb"></div></div>
+    </div>
   </div>
 </div>
 
 
 <div class="pv-section__title">交互演示</div>
 <p class="demo-hint">点击开关试试</p>
-<div class="setting-row">
+<div class="setting-row" data-toggle-row>
   <div class="setting-info">
     <span class="setting-name">消息通知</span>
     <span class="setting-desc">接收新消息推送提醒</span>
   </div>
   <div class="switch switch--on" data-toggle="notifications"><div class="switch__thumb"></div></div>
 </div>
-<div class="setting-row">
+<div class="setting-row" data-toggle-row>
   <div class="setting-info">
     <span class="setting-name">深色模式</span>
     <span class="setting-desc">切换页面为深色主题</span>
   </div>
   <div class="switch switch--off" data-toggle="darkmode"><div class="switch__thumb"></div></div>
 </div>
-<div class="setting-row">
+<div class="setting-row" data-toggle-row>
   <div class="setting-info">
     <span class="setting-name">自动播放</span>
     <span class="setting-desc">在 Wi-Fi 环境下自动播放视频</span>
   </div>
   <div class="switch switch--on" data-toggle="autoplay"><div class="switch__thumb"></div></div>
 </div>
-<div class="setting-row">
+<div class="setting-row" data-toggle-row>
   <div class="setting-info">
     <span class="setting-name">定位服务</span>
     <span class="setting-desc">允许应用获取地理位置信息</span>
   </div>
   <div class="switch switch--off" data-toggle="location"><div class="switch__thumb"></div></div>
 </div>
-<div class="setting-row">
+<div class="setting-row" data-toggle-row>
   <div class="setting-info">
     <span class="setting-name">免打扰模式</span>
     <span class="setting-desc">已禁用，无法手动更改</span>
@@ -103,8 +130,10 @@
 
 <script>
 (function() {
-  document.querySelectorAll('.switch[data-toggle]').forEach(function(sw) {
-    sw.addEventListener('click', function() {
+  document.querySelectorAll('[data-toggle-row]').forEach(function(row) {
+    row.addEventListener('click', function() {
+      var sw = row.querySelector('.switch[data-toggle]');
+      if (!sw) return;
       if (sw.classList.contains('switch--disabled')) return;
       var isOn = sw.classList.contains('switch--on');
       var name = sw.getAttribute('data-toggle');
