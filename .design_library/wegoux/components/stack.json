@@ -6,7 +6,7 @@
   "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "方块式选项卡组件，用于多项可视化选择和勾选式选项。",
+  "description": "横向方块式选项组件，用于多项可视化选择和勾选式选项。",
   "semanticTypeCandidates": [
     "stack-option",
     "tile-selector",
@@ -18,17 +18,17 @@
       "selected"
     ],
     "layout": [
-      "icon-above-label"
+      "label-inside-tile"
     ]
   },
   "representativeVariants": [
     {
       "state": "unselected",
-      "layout": "icon-above-label"
+      "layout": "label-inside-tile"
     },
     {
       "state": "selected",
-      "layout": "icon-above-label"
+      "layout": "label-inside-tile"
     }
   ],
   "anatomy": [
@@ -40,12 +40,17 @@
     {
       "name": "bg",
       "selector": ".stack__bg",
-      "role": "方块底板"
+      "role": "选项底板"
     },
     {
-      "name": "check",
-      "selector": ".stack__check-badge",
-      "role": "勾选标记"
+      "name": "check-corner",
+      "selector": ".stack__check-corner",
+      "role": "右上角勾选角标"
+    },
+    {
+      "name": "check-icon",
+      "selector": ".stack__check-icon",
+      "role": "勾选图标"
     },
     {
       "name": "label",
@@ -54,8 +59,8 @@
     }
   ],
   "structurePatterns": [
-    "固定为图标块在上、文案在下的竖向结构。",
-    "选中态通过底板与勾标记表达，不再叠加额外徽章。"
+    "固定为 56x32 的横向选项块，文案居中放在底板内部。",
+    "选中态通过右上角切角勾标和品牌绿描边表达，不再叠加额外徽章。"
   ],
   "behavior": {
     "selection": "点击切换当前项选中状态，是否互斥由宿主业务决定。",
@@ -76,26 +81,25 @@
   ],
   "tokensConsumed": [
     "--bg-brand",
+    "--bg-brand-surface-l2",
+    "--bg-subtle",
     "--bg-surface",
     "--body-md-font-family",
     "--body-md-font-size",
     "--body-md-line-height",
-    "--body-sm-font-size",
-    "--border-control-disabled",
     "--duration-fast",
     "--ease-standard",
+    "--font-weight-medium",
     "--font-weight-regular",
-    "--radius-4",
-    "--spacer-4",
-    "--spacer-8",
+    "--radius-6",
     "--text-brand",
-    "--text-default",
-    "--text-tertiary"
+    "--text-secondary"
   ],
   "designTokens": {
-    "blockSize": "24px",
-    "radius": "var(--radius-4)",
+    "blockSize": "56px x 32px",
+    "radius": "var(--radius-6)",
     "labelFont": "var(--body-md-font-size) / var(--font-weight-regular)",
+    "selectedLabelFontWeight": "var(--font-weight-medium)",
     "transition": "var(--duration-fast) / var(--ease-standard)"
   },
   "specRefs": [
@@ -106,11 +110,11 @@
     "root": ".stack",
     "requiredChildren": [
       ".stack__bg",
-      ".stack__label"
+      ".stack__bg .stack__label",
+      ".stack__bg .stack__check-corner",
+      ".stack__bg .stack__check-corner .stack__check-icon"
     ],
-    "optionalChildren": [
-      ".stack__check-badge"
-    ],
+    "optionalChildren": [],
     "stateClasses": [
       ".stack--selected"
     ]

@@ -40,7 +40,7 @@
             ],
             "copyable": true,
             "purpose": "微购图标字体和少量 SVG 固定资产",
-            "downstreamRule": "组件和预览页常规图标优先使用 <i class=\"wego-iconfont-s icon-{name}\"></i>；不要为了常规图标引入 Lucide/CDN 或临时内联 SVG。assets/icons/*.svg 用于已有 Tab、标签、选择态等固定资产，其中 checkbox 对勾必须引用 checkbox-check.svg，半选标记由 .checkbox__minus::before 绘制。"
+            "downstreamRule": "组件和预览页常规图标优先使用 <i class=\"wego-iconfont-s icon-{name}\"></i>；不要为了常规图标引入 Lucide/CDN 或临时内联 SVG。assets/icons/*.svg 用于已有 Tab、标签、checkbox 对勾等固定资产，其中 checkbox 对勾必须引用 checkbox-check.svg，半选标记由 .checkbox__minus::before 绘制。"
         },
         "specs": {
             "files": [
@@ -75,7 +75,7 @@
         "svgAssetMode": {
             "syntax": "<img src=\"assets/icons/{name}.svg\" alt=\"\" />",
             "recolorable": false,
-            "useFor": "底部 Tab、标签、stack 选中标记、checkbox 对勾等已经沉淀为 SVG 的固定资产；checkbox 半选标记使用 CSS 横线。"
+            "useFor": "底部 Tab、标签、checkbox 对勾等已经沉淀为 SVG 的固定资产；checkbox 半选标记使用 CSS 横线。"
         },
         "iconCountFromIconfontCss": 435,
         "rule": "优先使用已随库交付的 iconfont；缺图时先找语义接近的已有图标，再考虑联系设计团队更新字体包。"

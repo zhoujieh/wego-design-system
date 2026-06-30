@@ -698,15 +698,16 @@
 
 /* ── Stack ─────────────────────────────────────────────────── */
 /* @anatomy
-   <span class="label">未选中</span> <div class="stack"> <div class="stack__bg">
+   <span class="label">未选中</span> <div class="stack"> <div class="stack__bg"> <span class="stack__label">选项</span> <span class="stack__check-corner" aria-hidden="true"> <i class="wego-iconfont-s icon-gou16 stack__check-icon"></i> </span>
 */
-.stack{display:inline-flex;flex-direction:column;align-items:center;gap:4px;box-sizing:border-box;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.stack__bg{display:flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border:1px solid var(--border-control-disabled);border-radius:var(--radius-4);background:var(--bg-surface);transition:background var(--duration-fast) var(--ease-standard),border-color var(--duration-fast) var(--ease-standard)}
-.stack--selected .stack__bg{background:var(--bg-brand);border-color:var(--text-brand)}
-.stack__check-badge{display:none;align-items:center;justify-content:center;width:16px;height:16px}
-.stack--selected .stack__check-badge{display:flex}
-.stack__check-badge img{display:block;width:16px;height:16px}
-.stack__label{font-family:var(--body-md-font-family);font-size:var(--body-md-font-size);font-weight:var(--font-weight-regular);line-height:var(--body-md-line-height);color:var(--text-default);text-align:center;font-feature-settings:"zero"}
+.stack{display:inline-flex;box-sizing:border-box;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.stack__bg{position:relative;display:inline-flex;align-items:center;justify-content:center;width:56px;height:32px;box-sizing:border-box;border-radius:var(--radius-6);background:var(--bg-subtle);transition:background var(--duration-fast) var(--ease-standard),border-color var(--duration-fast) var(--ease-standard),color var(--duration-fast) var(--ease-standard)}
+.stack--selected .stack__bg{background:var(--bg-brand-surface-l2);box-shadow:inset 0 0 0 1px var(--bg-brand)}
+.stack__check-corner{position:absolute;top:0;right:0;display:none;align-items:center;justify-content:center;width:12px;height:12px;border-top-right-radius:var(--radius-6);border-bottom-left-radius:8px;background:var(--bg-brand);color:var(--bg-surface)}
+.stack--selected .stack__check-corner{display:inline-flex}
+.stack__check-icon{font-size:10px;line-height:1}
+.stack__label{font-family:var(--body-md-font-family);font-size:var(--body-md-font-size);font-weight:var(--font-weight-regular);line-height:var(--body-md-line-height);color:var(--text-secondary);text-align:center;font-feature-settings:"zero";transition:color var(--duration-fast) var(--ease-standard)}
+.stack--selected .stack__label{font-weight:var(--font-weight-medium);color:var(--text-brand)}
 
 /* ── Switch ────────────────────────────────────────────────── */
 /* @anatomy

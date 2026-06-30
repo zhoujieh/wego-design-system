@@ -1,0 +1,46 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - heading "选项卡" [level=1] [ref=e3]
+    - paragraph [ref=e4]: 方块式选项，多项选择场景，支持未选和已选态。
+  - generic [ref=e5]: 默认状态
+  - generic [ref=e6]:
+    - generic [ref=e7]: 未选中
+    - generic [ref=e9] [cursor=pointer]:
+      - generic [ref=e10]: 选项
+      - text: 
+    - generic [ref=e11]: 选中
+    - generic [ref=e13] [cursor=pointer]:
+      - generic [ref=e14]: 选项
+      - generic [ref=e16]: 
+  - generic [ref=e17]: 暗色模式
+  - generic [ref=e19]:
+    - generic [ref=e20]: 暗色未选中
+    - generic [ref=e22] [cursor=pointer]:
+      - generic [ref=e23]: 选项
+      - text: 
+    - generic [ref=e24]: 暗色选中
+    - generic [ref=e26] [cursor=pointer]:
+      - generic [ref=e27]: 选项
+      - generic [ref=e29]: 
+  - generic [ref=e30]: 交互演示
+  - paragraph [ref=e31]: 点击选项卡切换选中/未选中状态
+  - generic [ref=e32] [cursor=pointer]:
+    - generic [ref=e34]:
+      - generic [ref=e35]: 全部
+      - text: 
+    - generic [ref=e36]: 全部商品
+  - generic [ref=e37] [cursor=pointer]:
+    - generic [ref=e39]:
+      - generic [ref=e40]: 数码
+      - generic [ref=e42]: 
+    - generic [ref=e43]: 数码产品
+  - generic [ref=e44] [cursor=pointer]:
+    - generic [ref=e46]:
+      - generic [ref=e47]: 食品
+      - text: 
+    - generic [ref=e48]: 食品饮料
+  - generic [ref=e49] [cursor=pointer]:
+    - generic [ref=e51]:
+      - generic [ref=e52]: 服饰
+      - text: 
+    - generic [ref=e53]: 服饰鞋包
