@@ -60,6 +60,10 @@
   ],
   "behavior": {},
   "accessibility": {},
+  "assets": {
+    "defaultAvatar": "assets/image/avatar-defult.png",
+    "note": "默认头像占位图，图片头像在无业务数据时可使用此资产。"
+  },
   "usageHints": [
     "24 用于 cell 左侧或评论流紧凑身份信息。",
     "40 用于设置页、会话列表等常规身份位。",

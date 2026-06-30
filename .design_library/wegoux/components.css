@@ -6,7 +6,7 @@
 
 /* ── Avatar ────────────────────────────────────────────────── */
 /* @anatomy
-   <span class="label">默认头像</span> <div class="avatar avatar--24 avatar--image"><img src="http://localhost:3845/assets/65374637c9ef72970e810198a41540824752d176.png" alt="">
+   <span class="label">图片头像</span> <div class="avatar avatar--24 avatar--image"><img src="../assets/image/avatar-defult.png" alt="默认头像">
 */
 .avatar { border-radius: var(--radius-full); overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; box-sizing: border-box; border: 0.5px solid var(--border-neutral-l2); position: relative; }
 .avatar--24 { width: 24px; height: 24px; }
