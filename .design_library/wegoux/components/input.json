@@ -6,16 +6,18 @@
   "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "独立输入框组件，采用标签在上、输入区在下的竖向结构。",
+  "description": "独立输入框组件，采用标签在上、输入区在下的竖向结构，覆盖文本、多行文本和金额类数字输入。",
   "semanticTypeCandidates": [
     "text-input",
     "textarea",
+    "number-input",
     "field-group"
   ],
   "variantDimensions": {
     "fieldType": [
       "text",
-      "textarea"
+      "textarea",
+      "number"
     ],
     "state": [
       "default",
@@ -36,6 +38,10 @@
     {
       "fieldType": "textarea",
       "state": "error"
+    },
+    {
+      "fieldType": "number",
+      "state": "focus"
     },
     {
       "fieldType": "text",
@@ -66,35 +72,55 @@
     {
       "name": "clear",
       "selector": ".input-clear",
-      "role": "清除按钮，点击清空并聚焦（仅标准文本输入框显示，禁用态隐藏）"
+      "role": "清除按钮，点击清空并聚焦（仅标准文本输入框显示，禁用态隐藏；16px 图标，热区通过伪元素扩到 32px）"
     },
     {
       "name": "error",
       "selector": ".field-error",
-      "role": "错误提示文本，绝对定位在输入框下方"
+      "role": "错误提示文本，跟随输入区后方正常排布显示"
+    },
+    {
+      "name": "numberRoot",
+      "selector": ".number-input",
+      "role": "金额/数量类紧凑数字输入容器"
+    },
+    {
+      "name": "numberField",
+      "selector": ".number-input__field",
+      "role": "数字输入框本体，推荐 decimal 或 numeric 键盘"
+    },
+    {
+      "name": "numberSuffix",
+      "selector": ".number-input__suffix",
+      "role": "金额或单位后缀，如 元、件、kg"
     }
   ],
   "structurePatterns": [
     "标签始终置于输入区上方，组内使用固定纵向间距。",
     "text 和 textarea 共享边框与状态体系，不分裂成不同组件。",
+    "text、textarea 和 number 三类输入都复用同一套 default/focus/error/disabled 状态命名。",
     "错误和禁用通过根节点状态类驱动。",
     "标准文本输入框（input[type=text]）支持清除按钮，通过 .input-wrapper 包裹 input 和 .input-clear 实现。",
     "清除按钮仅标准文本输入框显示，数字输入框和多行文本输入框不显示清除按钮。",
-    "禁用态不显示清除按钮，错误态清除图标变为红色。"
+    "禁用态不显示清除按钮，错误态清除图标变为红色。",
+    "错误提示文本占据正常文档流，不依赖绝对定位压在下一个字段上方。",
+    "数字输入使用 .number-input 作为根节点，内部保持输入值居中、后缀右侧固定。"
   ],
   "behavior": {
-    "focus": "聚焦时边框切到品牌色。",
-    "error": "错误态同时作用于边框、输入文字和清除图标颜色，并在输入框下方显示错误提示文本。",
-    "disabled": "禁用态弱化标签与输入区，阻止交互，隐藏清除按钮。",
-    "clear": "标准文本输入框有内容时显示清除按钮（icon-yuancha-mian，16px，默认占位文字色），点击后清空内容并聚焦。数字输入框和 textarea 不显示清除按钮。"
+    "focus": "聚焦时边框切到品牌描边色；数字输入同步切换为白底，保持可编辑态清晰。",
+    "error": "错误态同时作用于边框、输入文字、后缀和清除图标颜色，并在输入框下方显示错误提示文本。",
+    "disabled": "禁用态弱化标签与输入区，阻止交互，隐藏清除按钮；数字输入不使用整体透明度，而是单独弱化底色、描边和文字。",
+    "clear": "标准文本输入框有内容时显示清除按钮（icon-yuancha-mian，16px，默认占位文字色），点击后清空内容并聚焦。数字输入框和 textarea 不显示清除按钮。",
+    "numberSanitizing": "数字输入示例脚本仅保留数字和单个小数点，避免预览页示例把非法字符当成有效值。"
   },
   "accessibility": {
-    "labelAssociation": "标签需通过 for/id 或包裹关系关联具体输入控件。",
+    "labelAssociation": "标签需通过 for/id 或包裹关系关联具体输入控件；数字输入至少补 aria-label。",
     "errorFeedback": "错误信息应与字段关联，避免只靠颜色表达。",
     "keyboard": "textarea 保留原生输入与换行行为。"
   },
   "usageHints": [
     "适合单字段独立陈列，不替代表单容器型 form。",
+    "金额、价格、库存这类短数字录入可优先使用 .number-input + .number-input__suffix。",
     "需要多字段对齐、上传、选择等复合场景时优先使用 form。"
   ],
   "doNotInvent": [
@@ -106,18 +132,22 @@
     "--bg-subtle",
     "--bg-surface",
     "--body-lg-font-size",
+    "--body-xs-line-height",
     "--body-md-font-family",
     "--body-md-font-size",
     "--body-md-line-height",
     "--body-sm-font-size",
     "--body-sm-line-height",
     "--body-xs-font-size",
+    "--border-brand",
+    "--border-disabled",
     "--border-danger",
     "--border-neutral-l2",
     "--duration-fast",
     "--ease-standard",
     "--font-weight-medium",
     "--font-weight-regular",
+    "--icon-disabled",
     "--number-md-font-family",
     "--radius-6",
     "--size-32",
@@ -137,6 +167,9 @@
     "maxWidth": "320px",
     "inputHeight": "36px",
     "textareaMinHeight": "96px",
+    "numberInputWidth": "120px",
+    "numberInputMinHeight": "32px",
+    "clearHitTarget": "32px",
     "gap": "var(--spacer-8)",
     "radius": "var(--radius-6)",
     "transition": "border-color var(--duration-fast) var(--ease-standard)"
@@ -146,14 +179,16 @@
     "specs/文案与数据规范.md"
   ],
   "domAnatomy": {
-    "root": ".input-group",
+    "root": ".input-group | .number-input",
     "requiredChildren": [
-      ".field-label",
-      "input | textarea"
+      ".field-label + (.input-wrapper > input | textarea) | (.field-label + textarea)",
+      ".number-input__field",
+      ".number-input__suffix"
     ],
     "stateClasses": [
       ".is-error",
-      ".is-disabled"
+      ".is-disabled",
+      ".is-focus"
     ]
   },
   "provenance": {

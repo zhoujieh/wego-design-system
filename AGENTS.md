@@ -57,7 +57,7 @@
 - `navbar` 右侧操作区是组件内部样式场景，使用 `.navbar__action` 与 `.navbar__right--icon` / `.navbar__right--text` / `.navbar__right--button` 组合，不再注册独立组件。
 - UI Kit 中的 `biz-*`、`.phone-*`、`.uikit-shell`、`.phone-frame`、`.phone-screen` 都是 Showcase 演示外壳或业务样式，不是通用组件。
 - 组件正式迭代时，不在这里重复展开细流程，直接按 `.codex/skills/iterate-component/SKILL.md` 执行。
-- 新增或发布组件时，必须同步组件契约、预览页、注册表、聚合样式、消费契约和文档；具体顺序与守门细节以组件迭代技能为准。
+- 新增或发布组件时，必须同步组件契约、预览页、预览聚合页 `preview/index.html`、注册表、聚合样式、消费契约和文档；具体顺序与守门细节以组件迭代技能为准。
 
 ## 变更同步矩阵
 
@@ -136,7 +136,7 @@
 提交前必须确认：
 
 - `colors_and_type.css` 与 `css.json` 没有明显不同步。
-- 组件注册表、组件契约、预览页、聚合样式没有漏改。
+- 组件注册表、组件契约、预览页、预览聚合页、聚合样式没有漏改。
 - **`components.css` 通过 `scripts/extract-components-css.mjs` 重新生成过**，不是手动编辑的。
 - 如果做过预览核对，优先记录 `http://127.0.0.1:<port>` 本地静态服务验证结果，不把 `file://` 拦截当成组件缺陷。
 - `uikit-plan.json` 和 `library-consumption.json` 与当前组件状态一致。

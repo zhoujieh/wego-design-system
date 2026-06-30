@@ -17,6 +17,10 @@
       "standalone",
       "inline"
     ],
+    "size": [
+      "14",
+      "12"
+    ],
     "state": [
       "default",
       "active",
@@ -26,10 +30,17 @@
   "representativeVariants": [
     {
       "mode": "standalone",
+      "size": "14",
       "state": "default"
     },
     {
       "mode": "standalone",
+      "size": "12",
+      "state": "default"
+    },
+    {
+      "mode": "standalone",
+      "size": "14",
       "state": "disabled"
     },
     {
@@ -54,13 +65,16 @@
     }
   ],
   "structurePatterns": [
-    "standalone 保留最小水平内边距作为热区。",
-    "inline 直接跟随文字流，不额外插入块级壳。"
+    "standalone 保留轻量水平内边距，可单独挂在 cell 右侧或资料头部作为轻操作。",
+    "standalone 默认使用 14px，可切到 12px 紧凑尺寸。",
+    "inline 直接跟随文字流，不额外插入块级壳，字号和行高继承当前整行文本，也不向外扩展热区。",
+    "inline 场景应把字号和行高挂在整行宿主容器上，不要只写在相邻文本节点上。"
   ],
   "behavior": {
     "active": "按压态用轻背景反馈，不改变链接语义颜色。",
-    "disabled": "禁用态禁止点击并整体弱化透明度。",
-    "inline": "内联模式不打断正文行高节奏。"
+    "disabled": "禁用态切到 text-disabled，并阻止交互。",
+    "inline": "内联模式不打断正文行高节奏，也不额外补热区；需要跟随字号时由宿主行统一定义排版。",
+    "standalone": "独立模式在视觉尺寸小于 32px 时，用伪元素补足 40px 紧凑热区，不放大布局占用。"
   },
   "accessibility": {
     "role": "link 或 button",
@@ -69,6 +83,7 @@
   },
   "usageHints": [
     "适合辅助跳转、查看详情、协议入口等轻操作。",
+    "列表右侧、资料头部这类独立文字操作优先用 standalone，不用 inline 冒充按钮位。",
     "页面主操作仍优先使用 button，不用 link 代替强动作。"
   ],
   "doNotInvent": [
@@ -77,24 +92,27 @@
   ],
   "tokensConsumed": [
     "--bg-overlay-l2",
-    "--body-lg-font-size",
-    "--body-lg-line-height",
     "--body-md-font-size",
     "--body-md-line-height",
     "--body-sm-font-size",
+    "--body-sm-line-height",
     "--duration-fast",
     "--ease-standard",
     "--font-weight-medium",
     "--spacer-16",
     "--spacer-4",
+    "--text-disabled",
     "--text-link",
     "--text-secondary",
-    "--text-tertiary"
+    "--text-tertiary",
+    "--touch-min"
   ],
   "designTokens": {
     "standaloneHeight": "20px",
     "paddingHorizontal": "var(--spacer-4)",
-    "font": "var(--body-md-font-size) / var(--font-weight-medium)",
+    "font14": "var(--body-md-font-size) / var(--font-weight-medium)",
+    "font12": "var(--body-sm-font-size) / var(--font-weight-medium)",
+    "compactHotzone": "var(--touch-min)",
     "transition": "background var(--duration-fast) var(--ease-standard)"
   },
   "specRefs": [
@@ -105,6 +123,7 @@
     "root": ".link",
     "modifiers": [
       ".link--inline",
+      ".link--12",
       ".link--disabled"
     ],
     "optionalChildren": [

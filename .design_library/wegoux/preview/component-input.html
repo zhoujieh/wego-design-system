@@ -16,41 +16,46 @@
 .rail { display: flex; gap: var(--spacer-16); align-items: flex-start; flex-wrap: wrap; }
 
 /* @component-css-start */
-.input-group { display: flex; flex-direction: column; gap: var(--spacer-8); width: 100%; max-width: 320px; flex-shrink: 0; position: relative; }
-.input-group .field-label { font-size: var(--body-md-font-size); font-weight: var(--font-weight-medium); color: var(--text-default); line-height: var(--body-md-line-height); white-space: nowrap; }
-.input-group input, .input-group textarea { width: 100%; box-sizing: border-box; border: 1px solid var(--border-neutral-l2); border-radius: var(--radius-6); background: var(--bg-surface); color: var(--text-default); font-size: 14px; font-family: var(--body-md-font-family); line-height: 14px; padding: 0 12px; outline: none; transition: border-color var(--duration-fast) var(--ease-standard); }
+.input-group { display: flex; flex-direction: column; gap: var(--spacer-8); width: 100%; max-width: 320px; flex-shrink: 0; }
+.input-group .field-label { display: block; font-size: var(--body-md-font-size); font-weight: var(--font-weight-medium); color: var(--text-default); line-height: var(--body-md-line-height); white-space: nowrap; }
+.input-group input, .input-group textarea { width: 100%; box-sizing: border-box; border: 1px solid var(--border-neutral-l2); border-radius: var(--radius-6); background: var(--bg-surface); color: var(--text-default); font-size: var(--body-md-font-size); font-family: var(--body-md-font-family); line-height: var(--body-md-line-height); padding: 0 12px; outline: none; transition: border-color var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard); font-feature-settings: "zero"; }
 .input-group input { height: 36px; }
-.input-group textarea { min-height: 96px; resize: vertical; padding: 8px; }
+.input-group textarea { min-height: 96px; resize: vertical; padding: 8px 12px; }
 .input-group input::placeholder, .input-group textarea::placeholder { color: var(--text-placeholder); }
-.input-group input:focus, .input-group textarea:focus { border-color: var(--text-brand); }
+.input-group input:focus, .input-group textarea:focus { border-color: var(--border-brand); }
 .input-group.is-error input, .input-group.is-error textarea { border-color: var(--status-danger-default); color: var(--status-danger-default); }
-.input-group.is-disabled input, .input-group.is-disabled textarea { background: var(--bg-muted); color: var(--text-disabled); cursor: not-allowed; }
+.input-group.is-disabled input, .input-group.is-disabled textarea { background: var(--bg-muted); border-color: var(--border-disabled); color: var(--text-disabled); cursor: not-allowed; }
+.input-group.is-disabled input::placeholder, .input-group.is-disabled textarea::placeholder { color: var(--text-disabled); }
 .input-group.is-disabled .field-label { color: var(--text-disabled); }
 
 /* ── Input Wrapper & Clear Button ─────────────────────────── */
-.input-wrapper { position: relative; }
+.input-wrapper { position: relative; display: flex; align-items: center; }
 .input-wrapper input { padding-right: 36px; }
-.input-clear { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); display: none; background: none; border: none; cursor: pointer; padding: 4px; line-height: 1; }
-.input-clear i { font-family: "wego-iconfont-s"; font-size: 16px; font-style: normal; color: var(--text-placeholder); }
+.input-clear { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); display: none; width: 16px; height: 16px; background: none; border: none; cursor: pointer; padding: 0; line-height: 1; color: var(--icon-disabled); }
+.input-clear::before { content: ""; position: absolute; top: -8px; right: -8px; bottom: -8px; left: -8px; }
+.input-clear i { font-family: "wego-iconfont-s"; font-size: 16px; font-style: normal; color: currentColor; }
 .input-group.is-error .input-clear i { color: var(--status-danger-default); }
 .input-group.is-disabled .input-clear { display: none !important; }
 
 /* ── Field Error ───────────────────────────────────────────── */
-.field-error { position: absolute; top: 100%; left: 0; margin-top: 0; white-space: nowrap; display: none; font-size: var(--body-xs-font-size); color: var(--status-danger-default); }
+.field-error { display: none; margin-top: var(--spacer-4); font-size: var(--body-xs-font-size); line-height: var(--body-xs-line-height); color: var(--status-danger-default); }
 .input-group.is-error .field-error { display: block; }
 
 /* ── Number Input (数字输入框) ──────────────────────────────── */
-.number-input { display: flex; align-items: center; gap: var(--spacer-8); width: 120px; min-width: 80px; max-width: 128px; height: var(--size-32); padding: 6px var(--spacer-8); background: var(--bg-subtle); border: 0.5px solid var(--border-neutral-l2); border-radius: var(--radius-6); box-sizing: border-box; transition: border-color var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard); }
+.number-input { display: flex; align-items: center; gap: var(--spacer-8); width: 120px; min-width: 96px; max-width: 128px; min-height: var(--size-32); padding: 6px var(--spacer-8); background: var(--bg-subtle); border: 1px solid var(--border-neutral-l2); border-radius: var(--radius-6); box-sizing: border-box; transition: border-color var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard); }
 .number-input__field { flex: 1 1 0; min-width: 0; border: none; outline: none; background: transparent; text-align: center; font-family: var(--number-md-font-family); font-size: var(--body-lg-font-size); font-weight: var(--font-weight-medium); color: var(--text-default); line-height: 20px; padding: 0; font-feature-settings: "zero"; }
 .number-input__field::placeholder { color: var(--text-disabled); font-size: var(--body-md-font-size); font-weight: var(--font-weight-regular); }
 .number-input__suffix { flex-shrink: 0; font-size: var(--body-md-font-size); font-weight: var(--font-weight-regular); color: var(--text-secondary); text-align: right; white-space: nowrap; font-feature-settings: "zero"; }
 /* Focus */
-.number-input.is-focus { border-color: var(--text-default); }
+.number-input.is-focus { border-color: var(--border-brand); background: var(--bg-surface); }
 /* Error */
 .number-input.is-error { background: var(--status-danger-surface-l1); border-color: var(--border-danger); }
-.number-input.is-error .number-input__field { color: var(--status-danger-default); }
+.number-input.is-error .number-input__field,
+.number-input.is-error .number-input__suffix { color: var(--status-danger-default); }
 /* Disabled */
-.number-input.is-disabled { opacity: 0.5; pointer-events: none; }
+.number-input.is-disabled { background: var(--bg-muted); border-color: var(--border-disabled); pointer-events: none; }
+.number-input.is-disabled .number-input__field,
+.number-input.is-disabled .number-input__suffix { color: var(--text-disabled); }
 /* @component-css-end */
 </style>
 </head>
@@ -63,32 +68,32 @@
 <span class="story-label">标准文本输入</span>
 <div class="rail">
 <div class="input-group">
-<span class="field-label">手机号</span>
+<label class="field-label" for="input-phone-empty">手机号</label>
 <div class="input-wrapper">
-<input type="text" placeholder="请输入手机号码">
-<button type="button" class="input-clear"><i class="icon-yuancha-mian"></i></button>
+<input id="input-phone-empty" type="text" placeholder="请输入手机号码">
+<button type="button" class="input-clear" aria-label="清空手机号"><i class="icon-yuancha-mian" aria-hidden="true"></i></button>
 </div>
 </div>
 <div class="input-group">
-<span class="field-label">手机号</span>
+<label class="field-label" for="input-phone-filled">手机号</label>
 <div class="input-wrapper">
-<input type="text" value="13800138000">
-<button type="button" class="input-clear"><i class="icon-yuancha-mian"></i></button>
+<input id="input-phone-filled" type="text" value="13800138000">
+<button type="button" class="input-clear" aria-label="清空手机号"><i class="icon-yuancha-mian" aria-hidden="true"></i></button>
 </div>
 </div>
 <div class="input-group is-error">
-<span class="field-label">手机号</span>
+<label class="field-label" for="input-phone-error">手机号</label>
 <div class="input-wrapper">
-<input type="text" value="15011102223">
-<button type="button" class="input-clear"><i class="icon-yuancha-mian"></i></button>
+<input id="input-phone-error" type="text" value="15011102223" aria-invalid="true" aria-describedby="input-phone-error-message">
+<button type="button" class="input-clear" aria-label="清空手机号"><i class="icon-yuancha-mian" aria-hidden="true"></i></button>
 </div>
-<span class="field-error">请输入正确的手机号码</span>
+<span id="input-phone-error-message" class="field-error">请输入正确的手机号码</span>
 </div>
 <div class="input-group is-disabled">
-<span class="field-label">手机号</span>
+<label class="field-label" for="input-phone-disabled">手机号</label>
 <div class="input-wrapper">
-<input type="text" value="13800138000" disabled>
-<button type="button" class="input-clear"><i class="icon-yuancha-mian"></i></button>
+<input id="input-phone-disabled" type="text" value="13800138000" disabled>
+<button type="button" class="input-clear" aria-label="清空手机号"><i class="icon-yuancha-mian" aria-hidden="true"></i></button>
 </div>
 </div>
 </div>
@@ -98,12 +103,12 @@
 <span class="story-label">多行文本输入</span>
 <div class="rail">
 <div class="input-group">
-<span class="field-label">备注</span>
-<textarea placeholder="请输入备注信息（最多200字）"></textarea>
+<label class="field-label" for="input-note-empty">备注</label>
+<textarea id="input-note-empty" placeholder="请输入备注信息（最多200字）"></textarea>
 </div>
 <div class="input-group">
-<span class="field-label">备注</span>
-<textarea>商品已收到，包装完好，物流很快。</textarea>
+<label class="field-label" for="input-note-filled">备注</label>
+<textarea id="input-note-filled">商品已收到，包装完好，物流很快。</textarea>
 </div>
 </div>
 </div>
@@ -112,23 +117,23 @@
 <span class="story-label">数字输入框</span>
 <div class="rail">
 <div class="number-input" data-number-input>
-<input class="number-input__field" type="text" inputmode="decimal" placeholder="请输入">
+<input class="number-input__field" type="text" inputmode="decimal" placeholder="请输入" aria-label="金额输入">
 <span class="number-input__suffix">元</span>
 </div>
 <div class="number-input" data-number-input>
-<input class="number-input__field" type="text" inputmode="decimal" value="888">
+<input class="number-input__field" type="text" inputmode="decimal" value="888" aria-label="金额输入">
 <span class="number-input__suffix">元</span>
 </div>
 <div class="number-input is-error" data-number-input>
-<input class="number-input__field" type="text" inputmode="decimal" value="888">
+<input class="number-input__field" type="text" inputmode="decimal" value="888" aria-label="金额输入">
 <span class="number-input__suffix">元</span>
 </div>
 <div class="number-input is-error" data-number-input>
-<input class="number-input__field" type="text" inputmode="decimal" placeholder="请输入">
+<input class="number-input__field" type="text" inputmode="decimal" placeholder="请输入" aria-label="金额输入">
 <span class="number-input__suffix">元</span>
 </div>
 <div class="number-input is-disabled">
-<input class="number-input__field" type="text" inputmode="decimal" value="888" disabled>
+<input class="number-input__field" type="text" inputmode="decimal" value="888" disabled aria-label="金额输入">
 <span class="number-input__suffix">元</span>
 </div>
 </div>
@@ -141,6 +146,14 @@ document.querySelectorAll('[data-number-input]').forEach(wrapper => {
   const field = wrapper.querySelector('.number-input__field');
   field.addEventListener('focus', () => wrapper.classList.add('is-focus'));
   field.addEventListener('blur', () => wrapper.classList.remove('is-focus'));
+  field.addEventListener('input', () => {
+    const sanitized = field.value
+      .replace(/[^\d.]/g, '')
+      .replace(/(\..*?)\..*/g, '$1');
+    if (sanitized !== field.value) {
+      field.value = sanitized;
+    }
+  });
 });
 
 // ── Text Input: clear button visibility ──

@@ -148,7 +148,7 @@ name: "微购设计系统"
 
 | 组件 | Slug | 状态 | 说明 |
 |------|------|------|------|
-| 输入框 | `input` | stable | 文本输入控件，支持占位符、前后缀、清除按钮等 |
+| 输入框 | `input` | stable | 独立输入控件，覆盖 text / textarea / 紧凑数字输入，支持清除按钮、后缀和错误提示 |
 | 计数器 | `counter` | stable | 数字增减控件，用于商品数量和库存数量；视觉紧凑，热区通过伪元素扩展 |
 | 复选框 | `checkbox` | stable | 多选控件，支持未选、已选、半选、计数、禁用和暗色未选态；勾选标记使用随库 SVG 资产，半选标记由 CSS 横线绘制 |
 | 单选 | `radio` | stable | 互斥选择控件，支持 24px / 20px 两种尺寸 |
@@ -191,6 +191,7 @@ name: "微购设计系统"
 │   ├── stack.json                     # 选项卡组件契约
 │   └── switch.json                    # 开关组件契约
 ├── preview/
+│   ├── index.html                     # 人工验收用组件聚合预览入口
 │   ├── component-button.html          # 按钮组件预览页
 │   ├── component-card.html            # 卡片组件预览页
 │   ├── component-bottom-nav.html      # 底部导航组件预览页
@@ -236,6 +237,7 @@ name: "微购设计系统"
 - 图标 CSS：`<link rel="stylesheet" href="../iconfont.css">`（强制，预览页必须引入）
 - 外部组件 CSS：`<link rel="stylesheet" href="../components.css">`（可选，预览页也可内联组件样式）
 - 字体资源：保存在 `assets/fonts/` 子目录
+- `preview/index.html` 仅供人工验收查看，内嵌现有单组件预览页，不作为组件契约或 AI / 下游默认读取入口
 
 ## 下游消费指南
 
@@ -250,6 +252,8 @@ name: "微购设计系统"
 | UI Kit | `ui_kits/app/index.html` + `ui_kits/biz-settings/index.html` + `quality-report.json` | 页面级 Showcase | 不要直接复制外壳 |
 
 推荐读取顺序：`README.md` → `library-consumption.json` → `uikit-plan.json` → `colors_and_type.css` → `components/index.json` → 对应组件契约和预览页。
+
+`preview/index.html` 是人工验收聚合页，只用于集中查看已注册组件，不加入默认消费主链路。
 
 ### UI Kit 使用边界
 

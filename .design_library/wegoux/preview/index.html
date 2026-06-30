@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wegoux 组件预览总览</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../scaffold.css">
+<link rel="stylesheet" href="../iconfont.css">
+<style>
+html,
+body {
+  height: 100vh;
+  margin: 0;
+  overflow: hidden;
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 16px 16px;
+  box-sizing: border-box;
+}
+
+.pv-header {
+  flex-shrink: 0;
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.pv-header__intro {
+  margin-top: 12px;
+  padding: 16px;
+  border: 1px solid var(--border-neutral-l2);
+  border-radius: var(--radius-12);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-size: var(--body-md-font-size);
+  line-height: var(--body-md-line-height);
+}
+
+.pv-header__intro strong {
+  color: var(--text-default);
+}
+
+.overview-layout {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 272px minmax(0, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.overview-sidebar,
+.overview-viewer {
+  min-width: 0;
+  border: 1px solid var(--border-neutral-l2);
+  border-radius: var(--radius-12);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-xs);
+}
+
+.overview-sidebar {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px 0;
+  scrollbar-width: none;
+}
+
+.overview-sidebar::-webkit-scrollbar {
+  display: none;
+}
+
+.overview-sidebar__header {
+  padding: 0 16px 16px;
+}
+
+.overview-sidebar__title {
+  margin: 0;
+  color: var(--text-default);
+  font-size: var(--heading-sm-font-size);
+  line-height: var(--heading-sm-line-height);
+}
+
+.overview-sidebar__sub {
+  margin-top: 4px;
+  color: var(--text-tertiary);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+}
+
+.overview-nav-group + .overview-nav-group {
+  margin-top: 16px;
+}
+
+.overview-nav-group__title {
+  margin: 0 16px 8px;
+  color: var(--text-tertiary);
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+}
+
+.overview-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.overview-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: calc(100% - 16px);
+  margin: 0 8px;
+  padding: 12px;
+  border: 0;
+  border-radius: var(--radius-8);
+  background: transparent;
+  color: var(--text-default);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-standard);
+}
+
+.overview-nav-item:hover {
+  background: var(--bg-overlay-l1);
+}
+
+.overview-nav-item.is-active {
+  background: var(--status-success-surface-l1);
+}
+
+.overview-nav-item__main {
+  min-width: 0;
+  flex: 1;
+}
+
+.overview-nav-item__name {
+  display: block;
+  color: var(--text-default);
+  font-size: var(--body-md-font-size);
+  line-height: var(--body-md-line-height);
+}
+
+.overview-nav-item__slug {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-tertiary);
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+}
+
+.overview-nav-item__status {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--bg-overlay-l1);
+  color: var(--text-secondary);
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+}
+
+.overview-nav-item.is-active .overview-nav-item__status {
+  background: var(--bg-surface);
+  color: var(--status-success-default);
+}
+
+.overview-viewer {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  scrollbar-width: none;
+}
+
+.overview-viewer::-webkit-scrollbar {
+  display: none;
+}
+
+.overview-viewer__frame-wrap {
+  flex: 1;
+  min-height: 0;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.overview-viewer iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 1px solid var(--border-neutral-l2);
+  border-radius: var(--radius-8);
+  background: var(--bg-page);
+  scrollbar-width: none;
+}
+
+.overview-viewer iframe::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 991px) {
+  .overview-layout {
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-columns: 1fr;
+  }
+
+  .overview-sidebar {
+    max-height: 240px;
+    flex-shrink: 0;
+  }
+
+  .overview-nav-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 8px;
+    padding: 0 8px;
+  }
+
+  .overview-nav-item {
+    width: 100%;
+    margin: 0;
+  }
+}
+
+@media (max-width: 767px) {
+  body {
+    padding: 16px 12px 12px;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="pv-header">
+  <h1>组件预览总览</h1>
+  <p>仅供人工验收查看的聚合入口。这里不复制组件内容，只关联现有单组件预览页，并在右侧按需切换显示。</p>
+  <div class="pv-header__intro">
+    <strong>维护规则：</strong> 每次新增已注册组件时，除了补 `components/{slug}.json`、`preview/component-{slug}.html`、注册表和聚合样式，也必须把新组件补到这个页面。
+  </div>
+</div>
+
+<div class="overview-layout">
+  <aside class="overview-sidebar">
+    <div class="overview-sidebar__header">
+      <h2 class="overview-sidebar__title">组件导航</h2>
+      <div class="overview-sidebar__sub">左侧选组件，右侧查看对应单页预览。</div>
+    </div>
+
+    <section class="overview-nav-group">
+      <h3 class="overview-nav-group__title">操作类 Action</h3>
+      <div class="overview-nav-list">
+        <button class="overview-nav-item" type="button" data-name="按钮" data-slug="button" data-status="stable" data-src="./component-button.html">
+          <span class="overview-nav-item__main">
+            <span class="overview-nav-item__name">按钮</span>
+            <span class="overview-nav-item__slug">button</span>
+          </span>
+          <span class="overview-nav-item__status">stable</span>
+        </button>
+        <button class="overview-nav-item" type="button" data-name="链接" data-slug="link" data-status="stable" data-src="./component-link.html">
+          <span class="overview-nav-item__main">
+            <span class="overview-nav-item__name">链接</span>
+            <span class="overview-nav-item__slug">link</span>
+          </span>
+          <span class="overview-nav-item__status">stable</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="overview-nav-group">
+      <h3 class="overview-nav-group__title">展示类 Display</h3>
+      <div class="overview-nav-list">
+        <button class="overview-nav-item" type="button" data-name="卡片" data-slug="card" data-status="stable" data-src="./component-card.html">
+          <span class="overview-nav-item__main">
+            <span class="overview-nav-item__name">卡片</span>
+            <span class="overview-nav-item__slug">card</span>
+          </span>
+          <span class="overview-nav-item__status">stable</span>
+        </button>
+        <button class="overview-nav-item" type="button" data-name="头像" data-slug="avatar" data-status="stable" data-src="./component-avatar.html">
+          <span class="overview-nav-item__main">
+            <span class="overview-nav-item__name">头像</span>
+            <span class="overview-nav-item__slug">avatar</span>
+          </span>
+          <span class="overview-nav-item__status">stable</span>
+        </button>
+        <button class="overview-nav-item" type="button" data-name="标签" data-slug="tag" data-status="stable" data-src="./component-tag.html">
+          <span class="overview-nav-item__main">
+            <span class="overview-nav-item__name">标签</span>
+            <span class="overview-nav-item__slug">tag</span>
+          </span>
+          <span class="overview-nav-item__status">stable</span>
+        </button>
+        <button class="overview-nav-item" type="button" data-name="角标" data-slug="badge" data-status="stable" data-src="./component-badge.html">
+          <span class="overview-nav-item__main">
+            <span class="overview-nav-item__name">角标</span>
+            <span class="overview-nav-item__slug">badge</span>
+          </span>
+          <span class="overview-nav-item__status">stable</span>
+        </button>
+        <button class="overview-nav-item" type="button" data-name="列表单元格" data-slug="cell" data-status="stable" data-src="./component-cell.html">
+          <span class="overview-nav-item__main">
+            <span class="overview-nav-item__name">列表单元格</span>
+            <span class="overview-nav-item__slug">cell</span>
+          </span>
+          <span class="overview-nav-item__status">stable</span>
+        </button>
+        <button class="overview-nav-item" type="button" data-name="图片" data-slug="image" data-status="stable" data-src="./component-image.html">
+          <span class="overview-nav-item__main">
+            <span class="overview-nav-item__name">图片</span>
+            <span class="overview-nav-item__slug">image</span>
+          </span>
+          <span class="overview-nav-item__status">stable</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="overview-nav-group">
+      <h3 class="overview-nav-group__title">导航类 Navigation</h3>
+      <div class="overview-nav-list">
+        <button class="overview-nav-item" type="button" data-name="底部导航" data-slug="bottom-nav" data-status="stable" data-src="./component-bottom-nav.html">
+          <span class="overview-nav-item__main">
+            <span class="overview-nav-item__name">底部导航</span>
+            <span class="overview-nav-item__slug">bottom-nav</span>
+          </span>
+          <span class="overview-nav-item__status">stable</span>
+        </button>
+        <button class="overview-nav-item" type="button" data-name="导航栏" data-slug="navbar" data-status="stable" data-src="./component-navbar.html">
+          <span class="overview-nav-item__main">
+            <span class="overview-nav-item__name">导航栏</span>
+            <span class="overview-nav-item__slug">navbar</span>
+          </span>
+          <span class="overview-nav-item__status">stable</span>
+        </button>
+        <button class="overview-nav-item" type="button" data-name="选项卡" data-slug="stack" data-status="stable" data-src="./component-stack.html">
+          <span class="overview-nav-item__main">
+            <span class="overview-nav-item__name">选项卡</span>
+            <span class="overview-nav-item__slug">stack</span>
+          </span>
+          <span class="overview-nav-item__status">stable</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="overview-nav-group">
+      <h3 class="overview-nav-group__title">表单类 Form</h3>
+      <div class="overview-nav-list">
+        <button class="overview-nav-item" type="button" data-name="输入框" data-slug="input" data-status="stable" data-src="./component-input.html">
+          <span class="overview-nav-item__main">
+            <span class="overview-nav-item__name">输入框</span>
+            <span class="overview-nav-item__slug">input</span>
+          </span>
+          <span class="overview-nav-item__status">stable</span>
+        </button>
+        <button class="overview-nav-item" type="button" data-name="计数器" data-slug="counter" data-status="stable" data-src="./component-counter.html">
+          <span class="overview-nav-item__main">
+            <span class="overview-nav-item__name">计数器</span>
+            <span class="overview-nav-item__slug">counter</span>
+          </span>
+          <span class="overview-nav-item__status">stable</span>
+        </button>
+        <button class="overview-nav-item" type="button" data-name="复选框" data-slug="checkbox" data-status="stable" data-src="./component-checkbox.html">
+          <span class="overview-nav-item__main">
+            <span class="overview-nav-item__name">复选框</span>
+            <span class="overview-nav-item__slug">checkbox</span>
+          </span>
+          <span class="overview-nav-item__status">stable</span>
+        </button>
+        <button class="overview-nav-item" type="button" data-name="表单容器" data-slug="form" data-status="stable" data-src="./component-form.html">
+          <span class="overview-nav-item__main">
+            <span class="overview-nav-item__name">表单容器</span>
+            <span class="overview-nav-item__slug">form</span>
+          </span>
+          <span class="overview-nav-item__status">stable</span>
+        </button>
+        <button class="overview-nav-item" type="button" data-name="单选" data-slug="radio" data-status="stable" data-src="./component-radio.html">
+          <span class="overview-nav-item__main">
+            <span class="overview-nav-item__name">单选</span>
+            <span class="overview-nav-item__slug">radio</span>
+          </span>
+          <span class="overview-nav-item__status">stable</span>
+        </button>
+        <button class="overview-nav-item" type="button" data-name="开关" data-slug="switch" data-status="stable" data-src="./component-switch.html">
+          <span class="overview-nav-item__main">
+            <span class="overview-nav-item__name">开关</span>
+            <span class="overview-nav-item__slug">switch</span>
+          </span>
+          <span class="overview-nav-item__status">stable</span>
+        </button>
+      </div>
+    </section>
+  </aside>
+
+  <section class="overview-viewer">
+    <div class="overview-viewer__frame-wrap">
+      <iframe id="viewer-frame" src="./component-button.html" title="组件预览查看器"></iframe>
+    </div>
+  </section>
+</div>
+
+<script>
+const navItems = Array.from(document.querySelectorAll(".overview-nav-item"));
+const viewerFrame = document.getElementById("viewer-frame");
+
+function syncViewerBySlug(slug) {
+  const currentItem = navItems.find((item) => item.dataset.slug === slug) || navItems[0];
+  if (!currentItem) return;
+
+  navItems.forEach((item) => {
+    item.classList.toggle("is-active", item === currentItem);
+  });
+
+  const { src } = currentItem.dataset;
+  viewerFrame.src = src;
+
+  const nextHash = `#${currentItem.dataset.slug}`;
+  if (window.location.hash !== nextHash) {
+    history.replaceState(null, "", nextHash);
+  }
+}
+
+navItems.forEach((item) => {
+  item.addEventListener("click", () => {
+    syncViewerBySlug(item.dataset.slug);
+  });
+});
+
+window.addEventListener("hashchange", () => {
+  syncViewerBySlug(window.location.hash.replace("#", ""));
+});
+
+syncViewerBySlug(window.location.hash.replace("#", ""));
+
+viewerFrame.addEventListener("load", () => {
+  try {
+    const doc = viewerFrame.contentDocument;
+    if (doc && doc.documentElement) {
+      doc.documentElement.style.scrollbarWidth = "none";
+    }
+    if (doc && doc.body) {
+      doc.body.style.scrollbarWidth = "none";
+    }
+  } catch (e) {}
+});
+</script>
+
+</body>
+</html>
