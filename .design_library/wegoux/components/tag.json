@@ -6,7 +6,7 @@
   "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "状态标识与筛选标签组件，覆盖展示标签、入口标签、可选标签、添加标签和优惠标记。",
+  "description": "状态标识与筛选标签组件，覆盖轻展示、入口跳转、筛选选择、添加入口和优惠券业务标签。",
   "semanticTypeCandidates": [
     "tag",
     "filter-chip",
@@ -94,14 +94,16 @@
   "structurePatterns": [
     "20 规格用于纯展示，不附加交互态。",
     "24 规格用于入口跳转，不出现 selected 态。",
-    "28 和 32 规格承载筛选或状态切换，可选是否 closable。",
-    "32-add 仅用于新增入口，不承担已选状态。"
+    "28 和 32 规格承载筛选或状态切换，可选是否 closable，同一状态下建议把可关闭与不可关闭示例并排展示。",
+    "32-add 仅用于新增入口，不承担已选状态。",
+    "coupon 使用 `.tag.tag--coupon` 根节点，仅表达固定业务语义，不与通用筛选标签混排成复杂组件。"
   ],
   "behavior": {},
   "accessibility": {},
   "usageHints": [
     "筛选场景优先使用 28 或 32 规格，保持一行内较高信息密度。",
     "品牌色只用于已选或强调，不大面积铺满整组标签。",
+    "关闭图标和加号图标跟随标签文字色继承，避免额外写状态色覆盖。",
     "优惠类短标签保持独立语义，不与通用筛选标签混排成复杂组件。"
   ],
   "doNotInvent": [
@@ -174,11 +176,13 @@
       ".tag__icon-left"
     ],
     "modifiers": [
+      ".tag--coupon",
       ".tag--20",
       ".tag--24",
       ".tag--28",
       ".tag--32",
-      ".tag--32-add"
+      ".tag--32-add",
+      ".tag--closable"
     ]
   },
   "provenance": {
