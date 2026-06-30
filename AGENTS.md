@@ -44,22 +44,20 @@
 - 改规范或文案：读 `.design_library/wegoux/specs/*.md` 中对应文件。
 - 对照 TRAE：只读 `参考trae/` 和审查报告中的结构建议，不复制其视觉方向。
 
+## 技能分工
+
+- 已注册组件迭代、新增组件发布、组件契约/预览页/聚合样式同步，优先使用 `.codex/skills/iterate-component/SKILL.md`。
+- `AGENTS.md` 只保留仓库级总则和硬约束；组件级操作步骤、经验守门、预检清单和输出格式以组件迭代技能为准。
+- 如果组件迭代技能与旧经验写法冲突，以技能里的最新流程为准，并在需要时同步回仓库文档。
+
 ## 组件发布规则
 
 - 已发布组件只以 `.design_library/wegoux/components/index.json` 为准。
 - 当前稳定组件为 17 个：`button`、`card`、`avatar`、`tag`、`bottom-nav`、`input`、`counter`、`badge`、`cell`、`checkbox`、`form`、`image`、`link`、`radio`、`stack`、`switch`、`navbar`。
 - `navbar` 右侧操作区是组件内部样式场景，使用 `.navbar__action` 与 `.navbar__right--icon` / `.navbar__right--text` / `.navbar__right--button` 组合，不再注册独立组件。
 - UI Kit 中的 `biz-*`、`.phone-*`、`.uikit-shell`、`.phone-frame`、`.phone-screen` 都是 Showcase 演示外壳或业务样式，不是通用组件。
-
-新增或发布组件必须同时完成：
-
-1. 新增或更新 `components/{slug}.json`。
-2. 新增或更新 `preview/component-{slug}.html`（组件 CSS 内联并用 `/* @component-css-start */` / `/* @component-css-end */` 标记包裹）。
-3. 运行 `node scripts/extract-components-css.mjs .` 重新生成 `components.css`（禁止手动编辑此文件）。
-4. 注册到 `components/index.json`。
-5. 同步 `uikit-plan.json`。
-6. 同步 `library-consumption.json`。
-7. 同步 `README.md` 和 `SKILL.md` 中的组件清单、发布状态和使用边界。
+- 组件正式迭代时，不在这里重复展开细流程，直接按 `.codex/skills/iterate-component/SKILL.md` 执行。
+- 新增或发布组件时，必须同步组件契约、预览页、注册表、聚合样式、消费契约和文档；具体顺序与守门细节以组件迭代技能为准。
 
 ## 变更同步矩阵
 
@@ -84,19 +82,10 @@
 
 改组件样式：
 
-- 优先改对应 `preview/component-*.html` 的组件样式块（在 `/* @component-css-start */` / `/* @component-css-end */` 标记之内）。
-- 同步对应 `components/{slug}.json` 的结构、状态、变体和 Token 消费记录。
-- 再运行 `node scripts/extract-components-css.mjs .` 重新生成 `components.css`。
+- 具体步骤、经验守门和预检清单以 `.codex/skills/iterate-component/SKILL.md` 为准。
+- 优先改对应 `preview/component-*.html` 的组件样式块，再同步 `components/{slug}.json`，最后运行 `node scripts/extract-components-css.mjs .` 重新生成 `components.css`。
 - **严禁直接手动编辑 `components.css`**——它是自动聚合输出，文件头部已标注 `DO NOT EDIT MANUALLY`。任何直接修改都会在下一次重新生成时丢失。
-
-### CSS 提取标记强制规则
-
-每个 `preview/component-*.html` 的 `<style>` 块中必须包含：
-
-- `/* @component-css-start */` — 在第一个组件 CSS 规则前。
-- `/* @component-css-end */` — 在最后一个组件 CSS 规则后。
-
-两标记之间只允许包含该组件的核心 CSS 规则，scaffold 样式（`body`、`.row`、`.label`、`.demo-hint` 等）必须在标记之外。
+- 需要真实浏览器核对时，优先在 `.design_library/wegoux/` 根目录启动本地静态服务，再访问 `http://127.0.0.1:<port>/preview/...` 或 `http://127.0.0.1:<port>/ui_kits/...`；不要把应用内浏览器对 `file://` 的安全拦截误判成组件样式失效。
 
 改脚手架：
 
@@ -149,6 +138,7 @@
 - `colors_and_type.css` 与 `css.json` 没有明显不同步。
 - 组件注册表、组件契约、预览页、聚合样式没有漏改。
 - **`components.css` 通过 `scripts/extract-components-css.mjs` 重新生成过**，不是手动编辑的。
+- 如果做过预览核对，优先记录 `http://127.0.0.1:<port>` 本地静态服务验证结果，不把 `file://` 拦截当成组件缺陷。
 - `uikit-plan.json` 和 `library-consumption.json` 与当前组件状态一致。
 - `README.md` 和 `SKILL.md` 没有过期组件数量、状态或读取路径。
 - `quality-report.json` 与 UI Kit 当前状态一致。
