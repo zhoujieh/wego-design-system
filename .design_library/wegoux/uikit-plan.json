@@ -152,14 +152,6 @@
       "previewFile": "preview/component-stack.html",
       "priority": 17,
       "slot": "option-stack"
-    },
-    {
-      "slug": "navbar-action-button",
-      "reason": "NavBar 右侧操作子组件，嵌入 navbar 预览使用。",
-      "evidenceFile": "components/navbar-action-button.json",
-      "previewFile": "preview/component-navbar.html",
-      "priority": 18,
-      "slot": "navbar-action"
     }
   ],
   "allowedComponents": [
@@ -179,8 +171,7 @@
     "radio",
     "stack",
     "switch",
-    "navbar",
-    "navbar-action-button"
+    "navbar"
   ],
   "screenBlueprints": [
     {
@@ -286,13 +277,7 @@
   ],
   "missingFixedSlots": [],
   "fallbackComponents": [],
-  "embeddedComponents": [
-    {
-      "slug": "navbar-action-button",
-      "hostComponent": "navbar",
-      "reason": "右侧操作区属于 NavBar 内部组合，不单独出预览页。"
-    }
-  ],
+  "embeddedComponents": [],
   "unpublishedContracts": [],
   "forbiddenInventedComponents": [
     "desktop-sidebar",

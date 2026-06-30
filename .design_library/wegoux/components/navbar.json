@@ -32,8 +32,16 @@
     ],
     "spacing": [
       "default",
-      "spaced",
-      "right-gap"
+      "spaced"
+    ],
+    "rightActionType": [
+      "icon",
+      "text",
+      "button"
+    ],
+    "pageTransition": [
+      "push",
+      "present"
     ]
   },
   "representativeVariants": [
@@ -41,25 +49,48 @@
       "leftControl": "back-icon",
       "titleAlignment": "center",
       "actions": "none",
-      "spacing": "default"
+      "spacing": "default",
+      "pageTransition": "push"
     },
     {
       "leftControl": "back-icon",
       "titleAlignment": "center",
       "actions": "icon",
-      "spacing": "default"
+      "rightActionType": "icon",
+      "spacing": "default",
+      "pageTransition": "push"
+    },
+    {
+      "leftControl": "back-icon",
+      "titleAlignment": "center",
+      "actions": "text",
+      "rightActionType": "text",
+      "spacing": "spaced",
+      "pageTransition": "push"
+    },
+    {
+      "leftControl": "close-icon",
+      "titleAlignment": "center",
+      "actions": "icon",
+      "rightActionType": "icon",
+      "spacing": "default",
+      "pageTransition": "present"
     },
     {
       "leftControl": "text-cancel",
       "titleAlignment": "center",
       "actions": "button",
-      "spacing": "spaced"
+      "rightActionType": "button",
+      "spacing": "spaced",
+      "pageTransition": "present"
     },
     {
       "leftControl": "none",
       "titleAlignment": "left-wide",
       "actions": "icon",
-      "spacing": "right-gap"
+      "rightActionType": "icon",
+      "spacing": "default",
+      "pageTransition": "push"
     }
   ],
   "anatomy": [
@@ -86,14 +117,15 @@
   ],
   "structurePatterns": [
     "body 固定为三栏网格，不拆成桌面工具栏模式。",
-    "右侧操作按文本、图标、图文、按钮等场景罗列，不把右侧区域扩展成独立页面组件。",
+    "右侧操作按文本、图标、图文、按钮等场景罗列，直接作为 navbar 内部样式场景维护，不再注册为独立组件。",
     "按钮式右侧操作复用已注册 button 组件的小尺寸按钮。",
     "无按钮模式只影响 left 与 center 布局，不改变 56px 导航栏高度。"
   ],
   "behavior": {
     "leftAction": "返回、关闭或取消属于左侧主导航操作，不与右侧按钮混用。",
     "title": "标题区允许居中或左对齐宽版，但保持单行省略。",
-    "actionPress": "右侧操作以轻压暗或按钮背景变化反馈。"
+    "actionPress": "右侧操作以轻压暗或按钮背景变化反馈。",
+    "pageTransitionRule": "左侧为返回图标 (back-icon) 对应 push 转场（右侧滑入，普通二级页）；左侧为关闭/叉 (close-icon) 或取消文本 (text-cancel) 对应 present 转场（底部滑入，弹出式页面）。"
   },
   "accessibility": {
     "landmark": "作为页面顶部导航语义区域使用。",
@@ -102,7 +134,10 @@
   },
   "usageHints": [
     "适合标准页面顶部导航、详情页返回和设置页保存动作。",
-    "多个右侧动作应保持克制，优先一到两个高频操作。"
+    "多个右侧动作应保持克制，优先一到两个高频操作。",
+    "页面打开模式由左侧控件决定：返回图标 → 右侧滑入 (push)；关闭/叉/取消 → 底部滑入 (present / bottom-sheet)。",
+    "所有左侧可交互内容点击热区通过伪元素扩大至 48px，不改变布局尺寸。",
+    "右侧操作使用 navbar 内部 .navbar__action 结构；不要把它当独立组件消费。"
   ],
   "doNotInvent": [
     "不要把 navbar 扩成桌面多行标题栏、营销大顶栏或搜索综合头部。",
@@ -121,7 +156,17 @@
     "totalHeight": "56px",
     "gridColumns": "10",
     "titleFont": "var(--heading-sm-font-size) / var(--font-weight-medium)",
-    "actionButtonHeight": "32px"
+    "actionButtonHeight": "32px",
+    "leftPadding": "16px",
+    "rightPadding": {
+      "icon": "4px",
+      "text": "16px",
+      "button": "16px"
+    },
+    "spacedLeftPadding": "16px",
+    "spacedRightPadding": "16px",
+    "touchTargetSize": "48px",
+    "iconActionGap": "0"
   },
   "specRefs": [
     "specs/交互设计原则.md",
@@ -141,6 +186,9 @@
       ".navbar__body--spaced",
       ".navbar__center--wide",
       ".navbar__right--wide",
+      ".navbar__right--icon",
+      ".navbar__right--text",
+      ".navbar__right--button",
       ".navbar__right--gap"
     ]
   },

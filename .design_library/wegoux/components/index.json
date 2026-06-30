@@ -132,15 +132,6 @@
       "category": "navigation",
       "status": "stable",
       "preview": "preview/component-navbar.html"
-    },
-    {
-      "slug": "navbar-action-button",
-      "name": "导航栏操作按钮",
-      "category": "navigation",
-      "status": "stable",
-      "embedded": true,
-      "hostComponent": "navbar",
-      "preview": "preview/component-navbar.html"
     }
   ],
   "componentContractSchemaVersion": 3

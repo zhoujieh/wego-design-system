@@ -154,15 +154,9 @@
         "link",
         "radio",
         "stack",
-        "switch",
-        "navbar-action-button"
+        "switch"
     ],
-    "embeddedComponents": [
-        {
-            "slug": "navbar-action-button",
-            "reason": "已注册为 NavBar 右侧操作区子组件，但没有独立 preview；示例位于 preview/component-navbar.html。"
-        }
-    ],
+    "embeddedComponents": [],
     "unpublishedContracts": [],
     "uiKits": [
         "app",

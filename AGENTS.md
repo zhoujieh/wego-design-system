@@ -47,8 +47,8 @@
 ## 组件发布规则
 
 - 已发布组件只以 `.design_library/wegoux/components/index.json` 为准。
-- 当前稳定组件为 18 个：`button`、`card`、`avatar`、`tag`、`bottom-nav`、`input`、`counter`、`badge`、`cell`、`checkbox`、`form`、`image`、`link`、`radio`、`stack`、`switch`、`navbar`、`navbar-action-button`。
-- `navbar-action-button` 是 `navbar` 内嵌组件，没有独立预览页时不要强行当独立页面组件使用。
+- 当前稳定组件为 17 个：`button`、`card`、`avatar`、`tag`、`bottom-nav`、`input`、`counter`、`badge`、`cell`、`checkbox`、`form`、`image`、`link`、`radio`、`stack`、`switch`、`navbar`。
+- `navbar` 右侧操作区是组件内部样式场景，使用 `.navbar__action` 与 `.navbar__right--icon` / `.navbar__right--text` / `.navbar__right--button` 组合，不再注册独立组件。
 - UI Kit 中的 `biz-*`、`.phone-*`、`.uikit-shell`、`.phone-frame`、`.phone-screen` 都是 Showcase 演示外壳或业务样式，不是通用组件。
 
 新增或发布组件必须同时完成：

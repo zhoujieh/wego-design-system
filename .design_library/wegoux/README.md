@@ -114,7 +114,7 @@ name: "微购设计系统"
 
 ## 组件清单
 
-本设计系统包含 **18** 个组件，覆盖操作、展示、导航、表单四大类别。
+本设计系统包含 **17** 个组件，覆盖操作、展示、导航、表单四大类别。
 
 ### 操作类（action）
 
@@ -140,8 +140,9 @@ name: "微购设计系统"
 |------|------|------|------|
 | 底部导航 | `bottom-nav` | stable | 移动端底部导航栏，固定五项为动态、好友、工作台、消息、我的，支持图标+文字和角标 |
 | 导航栏 | `navbar` | stable | 页面顶部导航栏，支持返回/关闭按钮、居中/左对齐标题、右侧操作区 |
-| 导航栏操作按钮 | `navbar-action-button` | stable | NavBar 右侧操作区按钮，支持纯文字、图标、图标+文字、按钮样式 |
 | 选项卡 | `stack` | stable | 选项卡切换控件，支持选中态和复选标记 |
+
+> NavBar 右侧操作区是 `navbar` 的内部样式场景，使用 `.navbar__action`、`.navbar__right--icon`、`.navbar__right--text` 和 `.navbar__right--button` 组合，不再作为独立组件注册。
 
 ### 表单类（form）
 
@@ -186,7 +187,6 @@ name: "微购设计系统"
 │   ├── input.json                     # 输入框组件契约
 │   ├── link.json                      # 链接组件契约
 │   ├── navbar.json                    # 导航栏组件契约
-│   ├── navbar-action-button.json      # 导航栏操作按钮组件契约
 │   ├── radio.json                     # 单选组件契约
 │   ├── stack.json                     # 选项卡组件契约
 │   └── switch.json                    # 开关组件契约
