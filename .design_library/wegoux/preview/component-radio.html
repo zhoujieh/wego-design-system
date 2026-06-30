@@ -3,10 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:,">
 <link rel="stylesheet" href="../colors_and_type.css">
 <link rel="stylesheet" href="../scaffold.css">
 <link rel="stylesheet" href="../iconfont.css">
 <style>
+.preview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:var(--spacer-8);max-width:560px;margin-bottom:var(--spacer-16)}
+.preview-item{display:flex;align-items:center;justify-content:space-between;gap:var(--spacer-12);min-height:52px;padding:var(--spacer-12);border:1px solid var(--border-neutral-l2);border-radius:var(--radius-8);background:var(--bg-surface)}
+.preview-item .label{width:auto;color:var(--text-secondary)}
+.dark-strip .preview-grid{margin-bottom:0}
+.dark-strip .preview-item{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12)}
+.dark-strip .preview-item .label{color:rgba(255,255,255,.7)}
+.interaction-panel{max-width:420px;margin-bottom:var(--spacer-16);padding:var(--spacer-12);border:1px solid var(--border-neutral-l2);border-radius:var(--radius-8);background:var(--bg-surface)}
+.interactive-row{display:flex;align-items:center;gap:var(--spacer-8);min-height:32px;cursor:pointer}
+.interactive-row + .interactive-row{margin-top:var(--spacer-8)}
+.interactive-row .radio{cursor:pointer}
+.interaction-label{font-size:var(--body-md-font-size);color:var(--text-default)}
 
 /* Dark mode simulation overrides */
 .dark-mode .radio--disabled:not(.radio--checked) .radio__inner { border-color:rgba(255,255,255,0.06); background:rgba(255,255,255,0.03); }
@@ -44,83 +56,103 @@
 </head>
 <body>
 <div class="pv-header"><h1>单选</h1><p>24 / 20px，品牌绿圆点选中态。</p></div>
-<div class="pv-section__title">交互演示 — 24px（互斥单选，不可取消选择）</div>
-<div class="row">
-  <span class="label">选项</span>
-  <div class="radio radio--checked" onclick="selectRadio(this)" data-group="demo1">
-    <div class="radio__inner"></div><div class="radio__dot"></div>
-  </div>
-  <span style="font-size:var(--body-md-font-size)">选项A</span>
-  <div class="radio" onclick="selectRadio(this)" data-group="demo1">
-    <div class="radio__inner"></div><div class="radio__dot"></div>
-  </div>
-  <span style="font-size:var(--body-md-font-size)">选项B</span>
-  <div class="radio" onclick="selectRadio(this)" data-group="demo1">
-    <div class="radio__inner"></div><div class="radio__dot"></div>
-  </div>
-  <span style="font-size:var(--body-md-font-size)">选项C</span>
-</div>
-
-
 <div class="pv-section__title">默认状态 — 24px</div>
-<div class="row">
-  <span class="label">未选中</span>
+<div class="preview-grid">
+  <div class="preview-item"><span class="label">未选中</span>
   <div class="radio radio--static" data-sample="default-unchecked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
-  <span class="label">选中</span>
+  </div>
+  <div class="preview-item"><span class="label">选中</span>
   <div class="radio radio--checked radio--static" data-sample="default-checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
+  </div>
 </div>
 
 <div class="pv-section__title">默认状态 — 20px</div>
-<div class="row">
-  <span class="label">未选中</span>
+<div class="preview-grid">
+  <div class="preview-item"><span class="label">未选中</span>
   <div class="radio radio--sm radio--static" data-sample="sm-unchecked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
-  <span class="label">选中</span>
+  </div>
+  <div class="preview-item"><span class="label">选中</span>
   <div class="radio radio--sm radio--checked radio--static" data-sample="sm-checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
+  </div>
 </div>
 
 
 <div class="pv-section__title">禁用状态 — 24px</div>
-<div class="row">
-  <span class="label">禁用未选中</span>
+<div class="preview-grid">
+  <div class="preview-item"><span class="label">禁用未选中</span>
   <div class="radio radio--disabled radio--static" data-sample="disabled-unchecked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
-  <span class="label">禁用选中</span>
+  </div>
+  <div class="preview-item"><span class="label">禁用选中</span>
   <div class="radio radio--checked radio--disabled radio--static" data-sample="disabled-checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
+  </div>
 </div>
 
 <div class="pv-section__title">禁用状态 — 20px</div>
-<div class="row">
-  <span class="label">禁用未选中</span>
+<div class="preview-grid">
+  <div class="preview-item"><span class="label">禁用未选中</span>
   <div class="radio radio--sm radio--disabled radio--static" data-sample="sm-disabled-unchecked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
-  <span class="label">禁用选中</span>
+  </div>
+  <div class="preview-item"><span class="label">禁用选中</span>
   <div class="radio radio--sm radio--checked radio--disabled radio--static" data-sample="sm-disabled-checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
+  </div>
 </div>
 
 
 <div class="pv-section__title">暗色模式 — 24px</div>
 <div class="dark-strip dark-mode">
-  <div class="row">
-    <span class="label">暗色未选中</span>
+  <div class="preview-grid">
+    <div class="preview-item"><span class="label">暗色未选中</span>
     <div class="radio radio--static" data-sample="dark-unchecked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
-    <span class="label">暗色选中</span>
+    </div>
+    <div class="preview-item"><span class="label">暗色选中</span>
     <div class="radio radio--checked radio--static" data-sample="dark-checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
-    <span class="label">暗色禁用未选中</span>
+    </div>
+    <div class="preview-item"><span class="label">暗色禁用未选中</span>
     <div class="radio radio--disabled radio--static" data-sample="dark-disabled-unchecked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
-    <span class="label">暗色禁用选中</span>
+    </div>
+    <div class="preview-item"><span class="label">暗色禁用选中</span>
     <div class="radio radio--checked radio--disabled radio--static" data-sample="dark-disabled-checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
+    </div>
   </div>
 </div>
 
 <div class="pv-section__title">暗色模式 — 20px</div>
 <div class="dark-strip dark-mode">
-  <div class="row">
-    <span class="label">暗色未选中</span>
+  <div class="preview-grid">
+    <div class="preview-item"><span class="label">暗色未选中</span>
     <div class="radio radio--sm radio--static" data-sample="dark-sm-unchecked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
-    <span class="label">暗色选中</span>
+    </div>
+    <div class="preview-item"><span class="label">暗色选中</span>
     <div class="radio radio--sm radio--checked radio--static" data-sample="dark-sm-checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
-    <span class="label">暗色禁用未选中</span>
+    </div>
+    <div class="preview-item"><span class="label">暗色禁用未选中</span>
     <div class="radio radio--sm radio--disabled radio--static" data-sample="dark-sm-disabled-unchecked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
-    <span class="label">暗色禁用选中</span>
+    </div>
+    <div class="preview-item"><span class="label">暗色禁用选中</span>
     <div class="radio radio--sm radio--checked radio--disabled radio--static" data-sample="dark-sm-disabled-checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="pv-section__title">交互演示 — 24px（互斥单选，不可取消选择）</div>
+<div class="interaction-panel">
+  <div class="interactive-row" onclick="selectRadio(this)">
+    <div class="radio radio--checked" data-group="demo1">
+      <div class="radio__inner"></div><div class="radio__dot"></div>
+    </div>
+    <span class="interaction-label">选项 A</span>
+  </div>
+  <div class="interactive-row" onclick="selectRadio(this)">
+    <div class="radio" data-group="demo1">
+      <div class="radio__inner"></div><div class="radio__dot"></div>
+    </div>
+    <span class="interaction-label">选项 B</span>
+  </div>
+  <div class="interactive-row" onclick="selectRadio(this)">
+    <div class="radio" data-group="demo1">
+      <div class="radio__inner"></div><div class="radio__dot"></div>
+    </div>
+    <span class="interaction-label">选项 C</span>
   </div>
 </div>
 
@@ -133,17 +165,18 @@
  * Disabled radios are ignored.
  */
 function selectRadio(el) {
-  if (el.classList.contains('radio--disabled')) return;
-  if (el.classList.contains('radio--checked')) return; // 不可取消
+  var target = el.classList.contains('radio') ? el : el.querySelector('.radio');
+  if (!target || target.classList.contains('radio--disabled')) return;
+  if (target.classList.contains('radio--checked')) return; // 不可取消
 
-  var group = el.getAttribute('data-group');
+  var group = target.getAttribute('data-group');
   if (group) {
-    var siblings = document.querySelectorAll('[data-group="' + group + '"]');
+    var siblings = document.querySelectorAll('.radio[data-group="' + group + '"]');
     for (var i = 0; i < siblings.length; i++) {
       siblings[i].classList.remove('radio--checked');
     }
   }
-  el.classList.add('radio--checked');
+  target.classList.add('radio--checked');
 }
 </script>
 </body>

@@ -150,7 +150,7 @@ name: "微购设计系统"
 |------|------|------|------|
 | 输入框 | `input` | stable | 文本输入控件，支持占位符、前后缀、清除按钮等 |
 | 计数器 | `counter` | stable | 数字增减控件，用于商品数量和库存数量；视觉紧凑，热区通过伪元素扩展 |
-| 复选框 | `checkbox` | stable | 多选控件，支持未选、已选、半选、计数和禁用 |
+| 复选框 | `checkbox` | stable | 多选控件，支持未选、已选、半选、计数、禁用和暗色未选态；勾选标记使用随库 SVG 资产，半选标记由 CSS 横线绘制 |
 | 单选 | `radio` | stable | 互斥选择控件，支持 24px / 20px 两种尺寸 |
 | 开关 | `switch` | stable | 布尔切换控件，适合设置项开启/关闭 |
 | 表单容器 | `form` | stable | 表单字段容器，支持水平/垂直布局和多种输入类型 |
@@ -224,9 +224,10 @@ name: "微购设计系统"
 
 ### 图标引用规则（强制）
 
-1. **所有图标必须使用 wego-iconfont** — 预览页中的所有图标（包括导航栏返回/关闭按钮、操作区图标等）必须通过 `<i class="wego-iconfont-s icon-{name}"></i>` 方式引用，严禁使用内联 `<svg>` 替代。
+1. **常规图标必须使用 wego-iconfont** — 预览页中的常规图标（包括导航栏返回/关闭按钮、操作区图标等）必须通过 `<i class="wego-iconfont-s icon-{name}"></i>` 方式引用，严禁使用内联 `<svg>` 替代。
 2. **iconfont 字体文件**已托管在 `assets/fonts/` 下，CSS 通过 `iconfont.css` 引入（`<link rel="stylesheet" href="../iconfont.css">`）。
-3. 如需新增图标，应联系设计团队更新 iconfont 字体包，不得在预览页中自行创建 SVG 替代。
+3. **固定选择标记例外**：`checkbox` 的对勾必须引用 `assets/icons/checkbox-check.svg`；半选标记由 `.checkbox__minus::before` 绘制居中横线，不改用 iconfont、内联 SVG 或临时图片。
+4. 如需新增图标，应联系设计团队更新 iconfont 字体包，不得在预览页中自行创建 SVG 替代。
 
 ### 文件路径
 

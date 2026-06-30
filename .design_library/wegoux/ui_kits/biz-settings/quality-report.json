@@ -6,7 +6,7 @@
   "coreComponentsUsed": ["navbar", "cell", "checkbox", "switch", "avatar", "tag", "link"],
   "supportComponentsUsed": [],
   "previewClassReuseRate": 0.96,
-  "reuseAssessment": "主体内容全部使用已注册组件组合；业务信息头部也已统一回到 avatar + tag + link 语义，Showcase 外壳已统一收敛到 scaffold.css。",
+  "reuseAssessment": "主体内容全部使用已注册组件组合；checkbox 勾选态已统一引用随库 SVG 资产；业务信息头部也已统一回到 avatar + tag + link 语义，Showcase 外壳已统一收敛到 scaffold.css。",
   "inventedComponents": ["phone-status", "phone-indicator"],
   "recommendedRefactors": {},
   "interactiveStatesRendered": ["active", "disabled", "selected", "on", "off"],

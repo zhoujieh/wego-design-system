@@ -6,7 +6,7 @@
   "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "多选勾选组件，支持默认、小尺寸、半选、计数和禁用状态。",
+  "description": "多选勾选组件，支持默认、小尺寸、半选、计数、禁用和暗色未选态。",
   "semanticTypeCandidates": [
     "checkbox",
     "multi-select-control",
@@ -42,7 +42,7 @@
       "mode": "group-child"
     },
     {
-      "size": "sm",
+      "size": "default",
       "state": "indeterminate",
       "mode": "group-parent"
     },
@@ -66,18 +66,25 @@
     {
       "name": "icon",
       "selector": ".checkbox__icon",
-      "role": "勾选图标层"
+      "role": "勾选 SVG 资产层"
     },
     {
       "name": "minus",
       "selector": ".checkbox__minus",
-      "role": "半选图标层"
+      "role": "半选 CSS 横线层"
+    },
+    {
+      "name": "asset",
+      "selector": ".checkbox__asset",
+      "role": "选择态固定 SVG 资产"
     }
   ],
   "structurePatterns": [
     "checked、indeterminate、count 共用同一主容器与边框体系。",
     "计数态仅在明确存在多选数量语义时使用。",
-    "分组父级允许根据子项状态呈现半选。"
+    "分组父级允许根据子项状态呈现半选。",
+    "勾选标记必须引用 assets/icons/checkbox-check.svg；半选标记由 .checkbox__minus::before 直接绘制居中横线，不使用 iconfont 或内联 SVG。",
+    "暗色模式按 radio 的预览处理方式提升未选态边框可见性，不作为独立新场景。"
   ],
   "behavior": {
     "toggle": "单个项点击在未选与已选之间切换。",
@@ -99,15 +106,20 @@
   ],
   "tokensConsumed": [
     "--bg-brand",
+    "--bg-control-disabled",
+    "--bg-inverse-surface-l1",
     "--bg-surface",
     "--body-sm-font-size",
     "--body-xs-font-size",
     "--border-control",
+    "--border-control-disabled",
+    "--border-disabled",
+    "--border-inverse",
     "--duration-fast",
     "--ease-standard",
     "--font-weight-medium",
     "--number-md-font-family",
-    "--radius-4",
+    "--radius-full",
     "--spacer-4",
     "--spacer-8",
     "--text-brand",
@@ -120,10 +132,23 @@
       "default": "24px",
       "sm": "20px"
     },
-    "radius": "var(--radius-4)",
+    "visualSizes": {
+      "default": "20px inner circle, 19.5px count circle",
+      "sm": "16px inner circle"
+    },
+    "radius": "var(--radius-full)",
     "borderWidth": "1.5px",
-    "countFont": "var(--body-xs-font-size) / var(--font-weight-medium)",
+    "assetSizes": {
+      "check": "13px x 10px, selected layer translated 0.5px to the right",
+      "minus": "8px x 1.5px CSS centered line"
+    },
+    "countFont": "12px / var(--font-weight-medium)",
     "transition": "background var(--duration-fast) var(--ease-standard)"
+  },
+  "assetUsage": {
+    "check": "assets/icons/checkbox-check.svg",
+    "minus": ".checkbox__minus::before",
+    "rule": "勾选标记使用随库 SVG 资产；半选标记用 CSS 横线居中绘制，不同目录的调用方只需确保 .checkbox__minus 存在。"
   },
   "specRefs": [
     "specs/交互设计原则.md",
@@ -136,12 +161,14 @@
     ],
     "optionalChildren": [
       ".checkbox__icon",
-      ".checkbox__minus"
+      ".checkbox__minus",
+      ".checkbox__count"
     ],
     "stateClasses": [
       ".checkbox--checked",
       ".checkbox--indeterminate",
       ".checkbox--disabled",
+      ".checkbox--count",
       ".checkbox--sm"
     ]
   },

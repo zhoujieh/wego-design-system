@@ -1,3 +1,464 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>批发设置 - 微购设计系统</title>
+    <style id="theme-vars">
+/**
+ * Wego design system tokens v2.
+ * Source of truth for mobile, WeChat-ecosystem, ecommerce/tool UI.
+ *
+ * Architecture:
+ * - palette-* exposes complete 10-step base color scales.
+ * - bg/text/icon/border/status tokens are the public component API.
+ * - body/heading/number tokens describe typography roles directly.
+ * - No legacy compatibility layer is retained.
+ */
+
+:root {
+  /* palette-green */
+  --palette-green-100: #e5fff2;
+  --palette-green-200: #c8f7df;
+  --palette-green-300: #9bedc4;
+  --palette-green-400: #5cdaa0;
+  --palette-green-500: #03c160;
+  --palette-green-600: #00a854;
+  --palette-green-700: #02994d;
+  --palette-green-800: #027a3e;
+  --palette-green-900: #016b36;
+  --palette-green-1000: #004d26;
+
+  /* palette-neutral */
+  --palette-neutral-100: #ffffff;
+  --palette-neutral-200: #f8f9fa;
+  --palette-neutral-300: #f2f3f6;
+  --palette-neutral-400: #e9eaef;
+  --palette-neutral-500: #ededed;
+  --palette-neutral-600: #b7bec5;
+  --palette-neutral-700: #9097a3;
+  --palette-neutral-800: #6e7382;
+  --palette-neutral-900: #3f434c;
+  --palette-neutral-1000: #1e2028;
+
+  /* palette-red */
+  --palette-red-100: #fff0f0;
+  --palette-red-200: #ffd9d9;
+  --palette-red-300: #ffb8b8;
+  --palette-red-400: #ff8586;
+  --palette-red-500: #fa5051;
+  --palette-red-600: #e83b3c;
+  --palette-red-700: #c92c2d;
+  --palette-red-800: #a32122;
+  --palette-red-900: #7a1718;
+  --palette-red-1000: #4d0b0c;
+
+  /* palette-orange */
+  --palette-orange-100: #fff4e8;
+  --palette-orange-200: #ffe4c2;
+  --palette-orange-300: #ffc98a;
+  --palette-orange-400: #ffb05c;
+  --palette-orange-500: #fa9d3b;
+  --palette-orange-600: #e88721;
+  --palette-orange-700: #c96e13;
+  --palette-orange-800: #a6560d;
+  --palette-orange-900: #7a3d08;
+  --palette-orange-1000: #4d2303;
+
+  /* palette-blue */
+  --palette-blue-100: #eaf4ff;
+  --palette-blue-200: #cfe7ff;
+  --palette-blue-300: #9fd0ff;
+  --palette-blue-400: #64b2ff;
+  --palette-blue-500: #208bf1;
+  --palette-blue-600: #1478d4;
+  --palette-blue-700: #0b62b3;
+  --palette-blue-800: #084d8f;
+  --palette-blue-900: #063a6b;
+  --palette-blue-1000: #032542;
+
+  /* palette-yellow */
+  --palette-yellow-100: #fff9e5;
+  --palette-yellow-200: #fff0b8;
+  --palette-yellow-300: #ffe480;
+  --palette-yellow-400: #ffd84d;
+  --palette-yellow-500: #ffc300;
+  --palette-yellow-600: #e6ad00;
+  --palette-yellow-700: #bf8f00;
+  --palette-yellow-800: #997000;
+  --palette-yellow-900: #705000;
+  --palette-yellow-1000: #473100;
+
+  /* palette-purple */
+  --palette-purple-100: #f0f0ff;
+  --palette-purple-200: #dedfff;
+  --palette-purple-300: #c4c6ff;
+  --palette-purple-400: #9699ff;
+  --palette-purple-500: #6367f0;
+  --palette-purple-600: #5054d8;
+  --palette-purple-700: #3e42b8;
+  --palette-purple-800: #303394;
+  --palette-purple-900: #24266f;
+  --palette-purple-1000: #17184a;
+
+  /* palette-gold */
+  --palette-gold-100: #fff7ed;
+  --palette-gold-200: #f8e7ca;
+  --palette-gold-300: #ecd19e;
+  --palette-gold-400: #dbb872;
+  --palette-gold-500: #c79a56;
+  --palette-gold-600: #ad7f3c;
+  --palette-gold-700: #8f642c;
+  --palette-gold-800: #724b20;
+  --palette-gold-900: #553616;
+  --palette-gold-1000: #38220d;
+
+  /* bg */
+  --bg-page: var(--palette-neutral-500);
+  --bg-surface: var(--palette-neutral-100);
+  --bg-muted: var(--palette-neutral-300);
+  --bg-subtle: var(--palette-neutral-200);
+  --bg-active: var(--palette-neutral-400);
+  --bg-inverse: var(--palette-neutral-1000);
+  --bg-inverse-surface-l1: rgba(255, 255, 255, 0.10);
+  --bg-fill-strong: var(--palette-neutral-600);
+  --bg-placeholder: var(--palette-neutral-300);
+  --bg-skeleton: var(--palette-neutral-300);
+  --bg-toast: rgba(63, 67, 71, 0.96);
+  --bg-accent-yellow: rgba(255, 195, 0, 0.10);
+
+  /* bg-brand */
+  --bg-brand: var(--palette-green-500);
+  --bg-brand-hover: rgba(3, 193, 96, 0.80);
+  --bg-brand-disabled: rgba(3, 193, 96, 0.60);
+  --bg-brand-surface-l1: rgba(3, 193, 96, 0.10);
+  --bg-brand-surface-l2: rgba(3, 193, 96, 0.20);
+
+  /* bg-control */
+  --bg-control-off: #e5e5ea;
+  --bg-control-disabled: rgba(32, 47, 100, 0.03);
+
+  /* bg-state */
+  --bg-state-hover: rgba(32, 47, 100, 0.03);
+  --bg-state-pressed: rgba(32, 47, 100, 0.06);
+  --bg-state-selected: rgba(32, 47, 100, 0.10);
+  --bg-state-disabled: var(--palette-neutral-300);
+
+  /* bg-overlay */
+  --bg-overlay-l1: rgba(32, 47, 100, 0.03);
+  --bg-overlay-l2: rgba(32, 47, 100, 0.06);
+  --bg-overlay-l3: rgba(32, 47, 100, 0.10);
+
+  /* bg-mask */
+  --bg-mask-light: rgba(30, 32, 40, 0.30);
+  --bg-mask-modal: rgba(30, 32, 40, 0.60);
+  --bg-mask-strong: rgba(30, 32, 40, 0.80);
+  --bg-mask-press: rgba(30, 32, 40, 0.30);
+
+  /* text */
+  --text-default: var(--palette-neutral-1000);
+  --text-secondary: var(--palette-neutral-800);
+  --text-tertiary: var(--palette-neutral-700);
+  --text-disabled: var(--palette-neutral-600);
+  --text-placeholder: var(--palette-neutral-600);
+  --text-inverse: var(--palette-neutral-100);
+  --text-inverse-secondary: rgba(255, 255, 255, 0.70);
+  --text-inverse-weak: rgba(255, 255, 255, 0.50);
+  --text-brand: var(--palette-green-500);
+  --text-link: #285b9a;
+  --text-promotion: var(--palette-red-500);
+  --text-promotion-strong: #ff3333;
+
+  /* icon */
+  --icon-default: var(--text-default);
+  --icon-secondary: var(--text-secondary);
+  --icon-tertiary: var(--text-tertiary);
+  --icon-disabled: var(--text-disabled);
+  --icon-brand: var(--text-brand);
+  --icon-inverse: var(--text-inverse);
+
+  /* border */
+  --border-neutral-l1: rgba(32, 47, 100, 0.03);
+  --border-neutral-l2: rgba(32, 47, 100, 0.08);
+  --border-neutral-l3: rgba(32, 47, 100, 0.10);
+  --border-brand: var(--palette-green-500);
+  --border-danger: rgba(250, 80, 81, 0.20);
+  --border-info: rgba(32, 139, 241, 0.20);
+  --border-success: rgba(3, 193, 96, 0.20);
+  --border-warning: rgba(250, 157, 59, 0.20);
+  --border-promotion: rgba(255, 96, 69, 0.20);
+  --border-promotion-strong: rgba(250, 80, 81, 0.60);
+  --border-control: rgba(0, 0, 0, 0.15);
+  --border-control-disabled: rgba(0, 0, 0, 0.12);
+  --border-disabled: rgba(32, 47, 100, 0.06);
+  --border-inverse: rgba(255, 255, 255, 0.70);
+
+  /* status-success */
+  --status-success-default: #03c160;
+  --status-success-hover: rgba(3, 193, 96, 0.80);
+  --status-success-active: rgba(3, 193, 96, 0.60);
+  --status-success-surface-l1: rgba(3, 193, 96, 0.10);
+  --status-success-surface-l2: rgba(3, 193, 96, 0.20);
+  --status-success-surface-l3: rgba(3, 193, 96, 0.28);
+
+  /* status-warning */
+  --status-warning-default: #fa9d3b;
+  --status-warning-hover: rgba(250, 157, 59, 0.80);
+  --status-warning-active: rgba(250, 157, 59, 0.60);
+  --status-warning-surface-l1: rgba(250, 157, 59, 0.10);
+  --status-warning-surface-l2: rgba(250, 157, 59, 0.20);
+  --status-warning-surface-l3: rgba(250, 157, 59, 0.28);
+
+  /* status-danger */
+  --status-danger-default: #fa5051;
+  --status-danger-hover: rgba(250, 80, 81, 0.80);
+  --status-danger-active: rgba(250, 80, 81, 0.60);
+  --status-danger-surface-l1: rgba(250, 80, 81, 0.10);
+  --status-danger-surface-l2: rgba(250, 80, 81, 0.20);
+  --status-danger-surface-l3: rgba(250, 80, 81, 0.28);
+
+  /* status-info */
+  --status-info-default: #208bf1;
+  --status-info-hover: rgba(32, 139, 241, 0.80);
+  --status-info-active: rgba(32, 139, 241, 0.60);
+  --status-info-surface-l1: rgba(32, 139, 241, 0.10);
+  --status-info-surface-l2: rgba(32, 139, 241, 0.20);
+  --status-info-surface-l3: rgba(32, 139, 241, 0.28);
+
+  /* status-promotion */
+  --status-promotion-default: #ff6045;
+  --status-promotion-hover: rgba(255, 96, 69, 0.80);
+  --status-promotion-active: rgba(255, 96, 69, 0.60);
+  --status-promotion-surface-l1: rgba(255, 96, 69, 0.10);
+  --status-promotion-surface-l2: rgba(255, 96, 69, 0.20);
+  --status-promotion-surface-l3: rgba(255, 96, 69, 0.28);
+
+  /* accent */
+  --accent-yellow: var(--palette-yellow-500);
+  --accent-green: #00c777;
+  --accent-purple: var(--palette-purple-500);
+  --accent-gold: var(--palette-gold-500);
+
+  /* special */
+  --transparent: transparent;
+
+  /* font-family */
+  --font-family-system: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+  --font-family-icon: "wego-iconfont-s", sans-serif;
+
+  /* font-weight */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  /* body */
+  --body-xs-font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --body-xs-font-size: 10px;
+  --body-xs-font-weight: 400;
+  --body-xs-line-height: 14px;
+  --body-xs-strong-font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --body-xs-strong-font-size: 10px;
+  --body-xs-strong-font-weight: 500;
+  --body-xs-strong-line-height: 14px;
+  --body-sm-font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --body-sm-font-size: 12px;
+  --body-sm-font-weight: 400;
+  --body-sm-line-height: 18px;
+  --body-sm-strong-font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --body-sm-strong-font-size: 12px;
+  --body-sm-strong-font-weight: 500;
+  --body-sm-strong-line-height: 18px;
+  --body-md-font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --body-md-font-size: 14px;
+  --body-md-font-weight: 400;
+  --body-md-line-height: 22px;
+  --body-md-strong-font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --body-md-strong-font-size: 14px;
+  --body-md-strong-font-weight: 500;
+  --body-md-strong-line-height: 22px;
+  --body-lg-font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --body-lg-font-size: 16px;
+  --body-lg-font-weight: 400;
+  --body-lg-line-height: 24px;
+  --body-lg-strong-font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --body-lg-strong-font-size: 16px;
+  --body-lg-strong-font-weight: 500;
+  --body-lg-strong-line-height: 24px;
+
+  /* heading */
+  --heading-xs-font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --heading-xs-font-size: 16px;
+  --heading-xs-font-weight: 600;
+  --heading-xs-line-height: 24px;
+  --heading-sm-font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --heading-sm-font-size: 18px;
+  --heading-sm-font-weight: 600;
+  --heading-sm-line-height: 28px;
+  --heading-md-font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --heading-md-font-size: 22px;
+  --heading-md-font-weight: 600;
+  --heading-md-line-height: 32px;
+  --heading-lg-font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --heading-lg-font-size: 24px;
+  --heading-lg-font-weight: 600;
+  --heading-lg-line-height: 34px;
+
+  /* number */
+  --number-sm-font-family: "WegoKeyboard N9", "DIN Alternate", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+  --number-sm-font-size: 12px;
+  --number-sm-font-weight: 500;
+  --number-sm-line-height: 16px;
+  --number-md-font-family: "WegoKeyboard N9", "DIN Alternate", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+  --number-md-font-size: 14px;
+  --number-md-font-weight: 500;
+  --number-md-line-height: 18px;
+  --number-lg-font-family: "WegoKeyboard N9", "DIN Alternate", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+  --number-lg-font-size: 16px;
+  --number-lg-font-weight: 500;
+  --number-lg-line-height: 20px;
+  --number-xl-font-family: "WegoKeyboard N9", "DIN Alternate", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+  --number-xl-font-size: 20px;
+  --number-xl-font-weight: 500;
+  --number-xl-line-height: 24px;
+  --number-xxl-font-family: "WegoKeyboard N9", "DIN Alternate", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+  --number-xxl-font-size: 24px;
+  --number-xxl-font-weight: 500;
+  --number-xxl-line-height: 30px;
+  --number-display-font-family: "WegoKeyboard N9", "DIN Alternate", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+  --number-display-font-size: 32px;
+  --number-display-font-weight: 500;
+  --number-display-line-height: 38px;
+  --number-fallback-font-family: "DIN Alternate", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* radius */
+  --radius-0: 0px;
+  --radius-4: 4px;
+  --radius-6: 6px;
+  --radius-8: 8px;
+  --radius-12: 12px;
+  --radius-16: 16px;
+  --radius-full: 999px;
+
+  /* spacing */
+  --spacer-0: 0px;
+  --spacer-2: 2px;
+  --spacer-4: 4px;
+  --spacer-6: 6px;
+  --spacer-8: 8px;
+  --spacer-10: 10px;
+  --spacer-12: 12px;
+  --spacer-14: 14px;
+  --spacer-16: 16px;
+  --spacer-24: 24px;
+  --spacer-32: 32px;
+  --spacer-40: 40px;
+  --spacer-48: 48px;
+  --spacer-72: 72px;
+
+  /* size */
+  --size-10: 10px;
+  --size-12: 12px;
+  --size-16: 16px;
+  --size-20: 20px;
+  --size-24: 24px;
+  --size-28: 28px;
+  --size-32: 32px;
+  --size-36: 36px;
+  --size-40: 40px;
+  --size-48: 48px;
+  --size-56: 56px;
+  --size-64: 64px;
+  --size-72: 72px;
+  --size-76: 76px;
+  --size-96: 96px;
+  --size-104: 104px;
+
+  /* stroke */
+  --stroke-0: 0px;
+  --stroke-hairline: 0.5px;
+  --stroke-1: 1px;
+  --stroke-strong: 1.5px;
+  --stroke-icon: 1.5px;
+  --stroke-icon-strong: 2.25px;
+  --stroke-style-solid: solid;
+  --stroke-style-dashed: dashed;
+  --stroke-style-none: none;
+
+  /* shadow */
+  --shadow-none: none;
+  --shadow-xs: 0px 1px 4px 0px rgba(30, 32, 40, 0.04);
+  --shadow-sm: 0px 2px 8px 0px rgba(30, 32, 40, 0.06);
+  --shadow-md: 0px 4px 16px 0px rgba(30, 32, 40, 0.08);
+  --shadow-lg: 0px 8px 32px 0px rgba(30, 32, 40, 0.12);
+  --shadow-xl: 0px 12px 48px 0px rgba(30, 32, 40, 0.16);
+  --shadow-control-thumb: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 0 0.5px rgba(0, 0, 0, 0.04);
+
+  /* motion */
+  --duration-instant: 0ms;
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 350ms;
+  --duration-xslow: 500ms;
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-enter: cubic-bezier(0, 0, 0.2, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --ease-linear: linear;
+
+  /* touch */
+  --touch-min: 40px;
+  --touch-default: 44px;
+  --touch-comfortable: 48px;
+
+  /* zIndex */
+  --z-base: 0;
+  --z-raised: 10;
+  --z-sticky: 100;
+  --z-dropdown: 200;
+  --z-popover: 300;
+  --z-toast: 400;
+  --z-overlay: 500;
+  --z-modal: 600;
+  --z-critical: 900;
+
+  /* blur */
+  --blur-none: 0px;
+  --blur-xs: 4px;
+  --blur-sm: 8px;
+  --blur-md: 16px;
+  --blur-frosted: 20px;
+  --blur-lg: 24px;
+  --blur-xl: 32px;
+  --blur-frosted-live: 40px;
+
+  /* layout */
+  --layout-page-margin-none: 0px;
+  --layout-page-margin-sm: 16px;
+  --layout-page-margin-lg: 32px;
+  --layout-group-g1-inside: 0px;
+  --layout-group-g1-outside: 16px;
+  --layout-group-g2-inside: 8px;
+  --layout-group-g2-outside: 32px;
+  --layout-list-padding: 16px;
+  --layout-list-info-gap: 24px;
+  --layout-card-padding-sm: 16px;
+  --layout-card-padding-lg: 32px;
+  --layout-info-unit-it-gap: 4px;
+  --layout-info-unit-tt-gap: 4px;
+  --layout-info-unit-tp-gap: 8px;
+  --layout-info-unit-bt-gap: 8px;
+  --layout-hit-min: 40px;
+  --layout-hit-icon-btn-width-padding: 8px;
+  --layout-hit-icon-btn-height: 32px;
+  --layout-hit-combo-width-padding: 16px;
+
+  /* icon-token */
+  --icon-yuancha-mian: "\e69c";
+
+}
+
+    </style>
+    <style id="component-vars">
 /* ═══════════════════════════════════════════════════════════════
    components.css — Design System Component Definitions
    Auto-extracted from preview/component-*.html
@@ -6,7 +467,7 @@
 
 /* ── Avatar ────────────────────────────────────────────────── */
 /* @anatomy
-   <span class="label">默认头像</span> <div class="avatar avatar--24 avatar--image"><img src="http://localhost:3845/assets/65374637c9ef72970e810198a41540824752d176.png" alt="">
+   <span class="label">默认头像</span> <div class="avatar avatar--24 avatar--image"><img src="" alt="">
 */
 .avatar { border-radius: var(--radius-full); overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; box-sizing: border-box; border: 0.5px solid var(--border-neutral-l2); position: relative; }
 .avatar--24 { width: 24px; height: 24px; }
@@ -320,42 +781,26 @@
 
 /* ── Checkbox ──────────────────────────────────────────────── */
 /* @anatomy
-   <div class="pv-header"><h1>复选框</h1><p>24 / 20px，支持未选、已选、半选、计数和禁用。</p></div>
+   <span class="label">未选中</span> <div class="checkbox"><div class="checkbox__inner">
 */
-.checkbox{position:relative;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;flex:0 0 24px;box-sizing:border-box;border-radius:var(--radius-full);cursor:pointer;-webkit-tap-highlight-color:transparent}
-.checkbox__inner{position:absolute;inset:2px;box-sizing:border-box;border:1.5px solid var(--border-control);border-radius:var(--radius-full);background:transparent;transition:background var(--duration-fast) var(--ease-standard),border-color var(--duration-fast) var(--ease-standard),opacity var(--duration-fast) var(--ease-standard)}
+.checkbox{position:relative;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;flex:0 0 24px;box-sizing:border-box;border-radius:var(--radius-4);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.checkbox__inner{position:absolute;inset:0;box-sizing:border-box;border:1.5px solid var(--border-control);border-radius:var(--radius-4);background:var(--bg-surface);transition:background var(--duration-fast) var(--ease-standard),border-color var(--duration-fast) var(--ease-standard)}
 .checkbox__icon,
 .checkbox__minus,
-.checkbox__count{position:relative;z-index:1;display:none;align-items:center;justify-content:center;color:var(--text-inverse);pointer-events:none}
-.checkbox__asset{display:block;width:13px;height:10px}
-.checkbox__minus::before{content:"";display:block;width:8px;height:1.5px;border-radius:var(--radius-full);background:currentColor}
-.checkbox__minus .checkbox__asset{display:none}
+.checkbox__count{position:relative;z-index:1;display:none;align-items:center;justify-content:center;color:var(--text-inverse)}
+.checkbox--checked,
+.checkbox--indeterminate,
+.checkbox--count{background:var(--bg-brand)}
 .checkbox--checked .checkbox__inner,
 .checkbox--indeterminate .checkbox__inner,
 .checkbox--count .checkbox__inner{background:var(--bg-brand);border-color:var(--text-brand)}
-.checkbox--checked .checkbox__icon{display:flex;transform:translateX(.5px)}
+.checkbox--checked .checkbox__icon{display:flex}
 .checkbox--indeterminate .checkbox__minus{display:flex}
-.checkbox--count .checkbox__count{display:flex;width:19.5px;height:19.5px;border-radius:var(--radius-full);background:var(--bg-brand);font-family:var(--number-md-font-family);font-size:12px;font-weight:var(--font-weight-medium);line-height:1;color:var(--text-inverse);font-feature-settings:"zero"}
+.checkbox--count .checkbox__count{display:flex;width:100%;height:100%;font-family:var(--number-md-font-family);font-size:var(--body-xs-font-size);font-weight:var(--font-weight-medium);line-height:1;color:var(--text-inverse);font-feature-settings:"zero"}
 .checkbox--sm{width:20px;height:20px;flex-basis:20px}
-.checkbox--sm .checkbox__inner{inset:2px}
-.checkbox--sm .checkbox__asset{width:11px;height:8px}
-.checkbox--sm .checkbox__minus::before{width:8px;height:1.5px}
-.checkbox--sm.checkbox--count .checkbox__count{width:16px;height:16px;font-size:12px}
-.checkbox--disabled{pointer-events:none;cursor:not-allowed}
-.checkbox--disabled:not(.checkbox--checked):not(.checkbox--indeterminate):not(.checkbox--count) .checkbox__inner{border-color:var(--border-disabled);background:var(--bg-control-disabled)}
-.checkbox--checked.checkbox--disabled .checkbox__inner,
-.checkbox--indeterminate.checkbox--disabled .checkbox__inner,
-.checkbox--count.checkbox--disabled .checkbox__inner,
-.checkbox--count.checkbox--disabled .checkbox__count{border-color:transparent;background:var(--bg-control-disabled)}
-.checkbox--checked.checkbox--disabled .checkbox__icon,
-.checkbox--indeterminate.checkbox--disabled .checkbox__minus,
-.checkbox--count.checkbox--disabled .checkbox__count{opacity:.45}
-.dark .checkbox:not(.checkbox--checked):not(.checkbox--indeterminate):not(.checkbox--count) .checkbox__inner{border-color:var(--border-inverse);background:var(--bg-inverse-surface-l1)}
-.dark .checkbox--disabled:not(.checkbox--checked):not(.checkbox--indeterminate):not(.checkbox--count) .checkbox__inner{border-color:var(--border-control-disabled);background:var(--bg-control-disabled)}
-.dark .checkbox--checked.checkbox--disabled .checkbox__inner,
-.dark .checkbox--indeterminate.checkbox--disabled .checkbox__inner,
-.dark .checkbox--count.checkbox--disabled .checkbox__inner,
-.dark .checkbox--count.checkbox--disabled .checkbox__count{border-color:transparent;background:var(--bg-control-disabled)}
+.checkbox--sm .checkbox__icon svg{width:11px;height:8px}
+.checkbox--sm .checkbox__minus svg{width:6px;height:2px}
+.checkbox--disabled{opacity:0.4;pointer-events:none;cursor:not-allowed}
 
 /* ── Counter ───────────────────────────────────────────────── */
 /* @anatomy
@@ -676,7 +1121,7 @@
 
 /* ── Radio ─────────────────────────────────────────────────── */
 /* @anatomy
-   <div class="pv-header"><h1>单选</h1><p>24 / 20px，品牌绿圆点选中态。</p></div>
+   <span class="label">选项</span> <div class="radio radio--checked" onclick="selectRadio(this)" data-group="demo1"> <div class="radio__inner">
 */
 .radio { width:24px; height:24px; display:flex; align-items:center; justify-content:center; flex-shrink:0; position:relative; cursor:pointer; }
 .radio__inner { width:20px; height:20px; border-radius:50%; border:1.5px solid var(--border-control); background:transparent; box-sizing:border-box; transition:border-color var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard); }
@@ -786,3 +1231,370 @@
 .tag__icon-left svg { width:100%; height:100%; }
 
 .tag--coupon { height:16px; min-width:28px; border-radius:2px; padding:0 4px; background:var(--bg-inverse-surface-l1); border:0.5px solid var(--border-promotion-strong); color:var(--text-promotion-strong); font-size:var(--body-xs-font-size); line-height:normal; overflow:hidden; display:inline-flex; align-items:center; justify-content:center; font-family:var(--body-md-font-family); white-space:nowrap; font-feature-settings:"zero"; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-muted: var(--bg-muted);
+  }
+  @layer base {
+    body { background: var(--bg-surface); color: var(--bg-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<div class="navbar-wholesale">
+  <span class="navbar-wholesale__back iconfont" data-dom-id="nav-back">&#xe6a0;</span>
+  <span class="navbar-wholesale__title">批发设置</span>
+</div>
+
+<!-- ═══ 基本设置 ═══ -->
+<div class="section-title">基本设置</div>
+<div class="section-group">
+  <!-- 批发功能 -->
+  <div class="cell cell--single cell--divider-right-edge cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row"><span class="cell__title">批发功能</span></div>
+      </div>
+      <div class="cell__action">
+        <div class="switch switch--on" id="switch-wholesale" onclick="toggleSwitch(this)">
+          <div class="switch__thumb"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 起批数量 -->
+  <div class="cell cell--single cell--divider-right-edge">
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row"><span class="cell__title">起批数量</span></div>
+      </div>
+      <div class="cell__number">
+        <div class="number-input" data-number-input>
+          <input class="number-input__field" type="text" inputmode="decimal" value="5">
+          <span class="number-input__suffix">件</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 混批设置 -->
+<div class="section-group">
+  <div class="cell cell--single cell--divider-right-edge cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row"><span class="cell__title">混批设置</span></div>
+      </div>
+      <div class="cell__action">
+        <div class="switch switch--on" onclick="toggleSwitch(this)">
+          <div class="switch__thumb"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 最小混批金额 -->
+  <div class="cell cell--single cell--divider-right-edge">
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row"><span class="cell__title">最小混批金额</span></div>
+      </div>
+      <div class="cell__number">
+        <div class="number-input" data-number-input>
+          <input class="number-input__field" type="text" inputmode="decimal" placeholder="请输入">
+          <span class="number-input__suffix">元</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="section-gap"></div>
+
+<!-- ═══ 价格设置 ═══ -->
+<div class="section-title">价格设置</div>
+<div class="section-group">
+  <!-- 阶梯价格 -->
+  <div class="cell cell--single cell--divider-right-edge cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row"><span class="cell__title">阶梯价格</span></div>
+      </div>
+      <div class="cell__action">
+        <span class="cell__action-text">已设置3个阶梯</span>
+        <i class="cell__arrow iconfont">&#xe69b;</i>
+      </div>
+    </div>
+  </div>
+  <!-- 等级折扣 -->
+  <div class="cell cell--single cell--divider-right-edge cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row"><span class="cell__title">等级折扣</span></div>
+      </div>
+      <div class="cell__action">
+        <span class="cell__action-text">未设置</span>
+        <i class="cell__arrow iconfont">&#xe69b;</i>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="section-gap"></div>
+
+<!-- ═══ 买家限购 ═══ -->
+<div class="section-title">买家限购</div>
+<div class="section-group">
+  <!-- 单次限购 -->
+  <div class="cell cell--single cell--divider-right-edge cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row"><span class="cell__title">单次限购</span></div>
+      </div>
+      <div class="cell__action">
+        <div class="switch switch--off" id="switch-purchase-limit" onclick="toggleSwitch(this)">
+          <div class="switch__thumb"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 限购上限（跟随限购开关状态） -->
+  <div class="cell cell--single cell--divider-right-edge">
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row"><span class="cell__title">限购上限</span></div>
+      </div>
+      <div class="cell__number">
+        <div class="number-input is-disabled" id="input-max-limit" data-number-input>
+          <input class="number-input__field" type="text" inputmode="decimal" placeholder="不限" disabled>
+          <span class="number-input__suffix">件</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="section-gap"></div>
+
+<!-- ═══ 其他设置 ═══ -->
+<div class="section-title">其他设置</div>
+<div class="section-group">
+  <!-- 自动审核批发订单 -->
+  <div class="cell cell--single cell--divider-right-edge cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row"><span class="cell__title">自动审核批发订单</span></div>
+      </div>
+      <div class="cell__action">
+        <div class="switch switch--on" onclick="toggleSwitch(this)">
+          <div class="switch__thumb"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 批发订单通知 -->
+  <div class="cell cell--double cell--divider-right-edge cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row"><span class="cell__title">批发订单通知</span></div>
+        <div class="cell__subtitle">有新批发订单时推送消息提醒</div>
+      </div>
+      <div class="cell__action">
+        <div class="switch switch--on" onclick="toggleSwitch(this)">
+          <div class="switch__thumb"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 发货时效 -->
+  <div class="cell cell--single cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row"><span class="cell__title">发货时效</span></div>
+      </div>
+      <div class="cell__action">
+        <span class="cell__action-text">48小时内</span>
+        <i class="cell__arrow iconfont">&#xe69b;</i>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 底部保存按钮 ═══ -->
+<div class="page-footer">
+  <button class="btn btn--strong btn--lg btn--block">保存设置</button>
+</div>
+
+<script>
+// ── Switch Toggle ──
+function toggleSwitch(el) {
+  if (el.classList.contains('switch--on')) {
+    el.classList.remove('switch--on');
+    el.classList.add('switch--off');
+  } else {
+    el.classList.remove('switch--off');
+    el.classList.add('switch--on');
+  }
+  // 单次限购联动限购上限输入
+  updatePurchaseLimitState();
+}
+
+function updatePurchaseLimitState() {
+  var purchaseSwitch = document.getElementById('switch-purchase-limit');
+  var maxLimit = document.getElementById('input-max-limit');
+  var maxInput = maxLimit.querySelector('.number-input__field');
+  if (purchaseSwitch && maxLimit) {
+    if (purchaseSwitch.classList.contains('switch--on')) {
+      maxLimit.classList.remove('is-disabled');
+      maxInput.disabled = false;
+      maxInput.placeholder = '请输入';
+    } else {
+      maxLimit.classList.add('is-disabled');
+      maxInput.disabled = true;
+      maxInput.placeholder = '不限';
+      maxInput.value = '';
+    }
+  }
+}
+
+// ── Number Input Focus ──
+document.querySelectorAll('[data-number-input]').forEach(function(wrapper) {
+  var field = wrapper.querySelector('.number-input__field');
+  if (!field) return;
+  field.addEventListener('focus', function() {
+    if (!wrapper.classList.contains('is-disabled')) {
+      wrapper.classList.add('is-focus');
+    }
+  });
+  field.addEventListener('blur', function() {
+    wrapper.classList.remove('is-focus');
+  });
+});
+
+// ── 保存 Toast ──
+var saveBtns = document.querySelectorAll('.btn--block');
+saveBtns.forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    showToast('设置已保存');
+  });
+});
+
+var toastTimer = null;
+function showToast(msg) {
+  var existing = document.getElementById('toast');
+  if (existing) existing.remove();
+  var toast = document.createElement('div');
+  toast.id = 'toast';
+  toast.textContent = msg;
+  toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg-toast);color:var(--text-inverse);font-size:14px;padding:10px 24px;border-radius:20px;z-index:999;opacity:0;transition:opacity .25s ease,transform .25s ease;pointer-events:none;white-space:nowrap;';
+  document.body.appendChild(toast);
+  requestAnimationFrame(function() {
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateX(-50%) translateY(0)';
+  });
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function() {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(-50%) translateY(20px)';
+    setTimeout(function() { if (toast.parentNode) toast.remove(); }, 300);
+  }, 1500);
+}
+</script>
+
+
+    <style>
+/* ── Reset & Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-family-system);
+  font-size: var(--body-md-font-size);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--body-md-line-height);
+  color: var(--text-default);
+  background: var(--bg-page);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  max-width: 420px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+/* ── Navbar (project-specific 44px single-row) ── */
+.navbar-wholesale {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  height: var(--size-44);
+  padding: 0 var(--spacer-16);
+  background: var(--bg-surface);
+  border-bottom: 0.5px solid var(--border-neutral-l2);
+}
+.navbar-wholesale__back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-24);
+  height: var(--size-24);
+  flex-shrink: 0;
+  color: var(--text-default);
+  font-size: 20px;
+  cursor: pointer;
+}
+.navbar-wholesale__title {
+  flex: 1;
+  text-align: center;
+  font-size: var(--heading-sm-font-size);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-default);
+  line-height: var(--size-44);
+}
+
+/* ── Section ── */
+.section-title {
+  font-size: var(--body-sm-font-size);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-tertiary);
+  padding: var(--spacer-24) var(--spacer-16) var(--spacer-8);
+  line-height: var(--body-sm-line-height);
+}
+.section-group { background: var(--bg-surface); }
+.section-gap { height: var(--spacer-8); background: var(--bg-page); }
+
+/* ── Cell Number Slot ── */
+.cell__number {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* ── Footer ── */
+.page-footer { padding: var(--spacer-24) var(--spacer-16) var(--spacer-40); }
+.btn--block { width: 100%; }
+
+/* ── Iconfont helper ── */
+.iconfont { font-family: "wego-iconfont-s" !important; font-style: normal; }
+</style>
+</body>
+</html>

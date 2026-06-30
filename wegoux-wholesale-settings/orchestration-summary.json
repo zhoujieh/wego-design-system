@@ -1,0 +1,65 @@
+{
+  "project": {
+    "name": "批发设置",
+    "operation": "create",
+    "deviceType": "mobile",
+    "pageType": "task-driven",
+    "generationTree": {
+      "root": {
+        "nodeId": "gen-page-wholesale-settings",
+        "kind": "page-leaf",
+        "pageIds": ["page-wholesale-settings"],
+        "output": "pages/wholesale-settings.html",
+        "sharedRegions": [],
+        "privateRegions": ["whole page"],
+        "mutableSlots": [],
+        "status": "generated",
+        "children": []
+      }
+    }
+  },
+  "designSource": {
+    "operatingMode": "library-bound",
+    "libraryIdentity": {
+      "name": "wegoux",
+      "id": "O0AA1DR-DGOQCS",
+      "version": "195",
+      "scope": "workspace",
+      "path": "/Users/dk/Documents/code/wego-design-system/.design_library/wegoux",
+      "versionSource": "metadata.json"
+    },
+    "tokenSource": "css.json",
+    "brandPrefix": "wg",
+    "designDecisionSummary": "微信绿 #03C160 主色，PingFang SC 字体，移动端高信息密度，简洁干净淡雅克制风格。设置页采用 cell + switch + number-input 组合模式。",
+    "forbiddenInventedComponents": ["desktop-sidebar", "marketing-hero", "large-gradient-hero", "decorative-orb-background"],
+    "allowedComponents": ["button", "card", "avatar", "tag", "bottom-nav", "input", "counter", "badge", "cell", "checkbox", "form", "image", "link", "radio", "stack", "switch", "navbar"],
+    "productContext": {
+      "kitType": "app",
+      "productType": "移动端电商/微信生态工具"
+    },
+    "themeMode": "light"
+  },
+  "pages": [
+    {
+      "nodeId": "page-wholesale-settings",
+      "pageIndex": 1,
+      "title": "批发设置",
+      "htmlSrc": "pages/wholesale-settings.html",
+      "pageType": "task-driven",
+      "visualNorthStar": "移动端批发业务设置页，使用 wegoux cell+switch+number-input 组合，底部固定保存按钮，简洁清晰的操作流",
+      "componentPlan": [
+        { "slug": "navbar", "contractKind": "legacy-json", "contractFile": "components/navbar.json", "previewFile": "preview/component-navbar.html" },
+        { "slug": "cell", "contractKind": "legacy-json", "contractFile": "components/cell.json", "previewFile": "preview/component-cell.html" },
+        { "slug": "switch", "contractKind": "legacy-json", "contractFile": "components/switch.json", "previewFile": "preview/component-switch.html" },
+        { "slug": "input", "contractKind": "legacy-json", "contractFile": "components/input.json", "previewFile": "preview/component-input.html" },
+        { "slug": "button", "contractKind": "legacy-json", "contractFile": "components/button.json", "previewFile": "preview/component-button.html" }
+      ],
+      "imagePlan": [],
+      "chartsRequired": false,
+      "miniProgramStyle": false
+    }
+  ],
+  "assets": [],
+  "wiringPlan": [],
+  "hiddenInteractionPlan": []
+}

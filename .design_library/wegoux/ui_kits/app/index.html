@@ -199,8 +199,9 @@ html, body { min-height: auto; }
 }
 
 .uikit-check-icon {
-  font-size: 13px;
-  line-height: 1;
+  width: 13px;
+  height: 10px;
+  display: block;
 }
 </style>
 </head>
@@ -557,9 +558,9 @@ function ProfileScreen({ onBizSettings }) {
   );
 }
 
-/* ═══ Checkbox iconfont helper ═══ */
+/* ═══ Checkbox SVG asset helper ═══ */
 function CheckIcon() {
-  return <i className="wego-iconfont-s icon-gou16 uikit-check-icon"></i>;
+  return <img className="checkbox__asset uikit-check-icon" src="../../assets/icons/checkbox-check.svg" alt="" />;
 }
 
 /* ═══ Screen 4: 业务设置 (岗位权限设置) ═══ */

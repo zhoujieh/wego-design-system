@@ -3,187 +3,229 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:,">
 <link rel="stylesheet" href="../colors_and_type.css">
 <link rel="stylesheet" href="../scaffold.css">
 <link rel="stylesheet" href="../iconfont.css">
 <style>
-.sub-label { font-size:var(--body-sm-font-size); color:var(--text-tertiary); margin:var(--spacer-8) 0 var(--spacer-4); }
+.sub-label { font-size:var(--body-sm-font-size); color:var(--text-tertiary); margin:var(--spacer-16) 0 var(--spacer-8); }
 .interactive-row .checkbox { cursor:pointer; }
+.preview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:var(--spacer-8);max-width:560px;margin-bottom:var(--spacer-16)}
+.preview-item{display:flex;align-items:center;justify-content:space-between;gap:var(--spacer-12);min-height:52px;padding:var(--spacer-12);border:1px solid var(--border-neutral-l2);border-radius:var(--radius-8);background:var(--bg-surface)}
+.preview-item .label{width:auto;color:var(--text-secondary)}
+.dark-strip .preview-grid{margin-bottom:0}
+.dark-strip .preview-item{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12)}
+.dark-strip .preview-item .label{color:rgba(255,255,255,.7)}
+.interaction-panel{max-width:420px;margin-bottom:var(--spacer-16);padding:var(--spacer-12);border:1px solid var(--border-neutral-l2);border-radius:var(--radius-8);background:var(--bg-surface)}
+.interaction-children{padding-left:36px}
+.dark-mode .checkbox:not(.checkbox--checked):not(.checkbox--indeterminate):not(.checkbox--count) .checkbox__inner{border-color:rgba(255,255,255,.7);background:rgba(255,255,255,.08)}
+.dark-mode .checkbox--disabled:not(.checkbox--checked):not(.checkbox--indeterminate):not(.checkbox--count) .checkbox__inner{border-color:rgba(255,255,255,.12);background:rgba(255,255,255,.03)}
+.dark-mode .checkbox--checked.checkbox--disabled .checkbox__inner,
+.dark-mode .checkbox--indeterminate.checkbox--disabled .checkbox__inner,
+.dark-mode .checkbox--count.checkbox--disabled .checkbox__inner,
+.dark-mode .checkbox--count.checkbox--disabled .checkbox__count{border-color:transparent;background:rgba(255,255,255,.03)}
+.dark-mode .checkbox--checked.checkbox--disabled .checkbox__icon,
+.dark-mode .checkbox--indeterminate.checkbox--disabled .checkbox__minus,
+.dark-mode .checkbox--count.checkbox--disabled .checkbox__count{opacity:.45}
 
 /* @component-css-start */
-.checkbox{position:relative;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;flex:0 0 24px;box-sizing:border-box;border-radius:var(--radius-4);cursor:pointer;-webkit-tap-highlight-color:transparent}
-.checkbox__inner{position:absolute;inset:0;box-sizing:border-box;border:1.5px solid var(--border-control);border-radius:var(--radius-4);background:var(--bg-surface);transition:background var(--duration-fast) var(--ease-standard),border-color var(--duration-fast) var(--ease-standard)}
+.checkbox{position:relative;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;flex:0 0 24px;box-sizing:border-box;border-radius:var(--radius-full);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.checkbox__inner{position:absolute;inset:2px;box-sizing:border-box;border:1.5px solid var(--border-control);border-radius:var(--radius-full);background:transparent;transition:background var(--duration-fast) var(--ease-standard),border-color var(--duration-fast) var(--ease-standard),opacity var(--duration-fast) var(--ease-standard)}
 .checkbox__icon,
 .checkbox__minus,
-.checkbox__count{position:relative;z-index:1;display:none;align-items:center;justify-content:center;color:var(--text-inverse)}
-.checkbox--checked,
-.checkbox--indeterminate,
-.checkbox--count{background:var(--bg-brand)}
+.checkbox__count{position:relative;z-index:1;display:none;align-items:center;justify-content:center;color:var(--text-inverse);pointer-events:none}
+.checkbox__asset{display:block;width:13px;height:10px}
+.checkbox__minus::before{content:"";display:block;width:8px;height:1.5px;border-radius:var(--radius-full);background:currentColor}
+.checkbox__minus .checkbox__asset{display:none}
 .checkbox--checked .checkbox__inner,
 .checkbox--indeterminate .checkbox__inner,
 .checkbox--count .checkbox__inner{background:var(--bg-brand);border-color:var(--text-brand)}
-.checkbox--checked .checkbox__icon{display:flex}
+.checkbox--checked .checkbox__icon{display:flex;transform:translateX(.5px)}
 .checkbox--indeterminate .checkbox__minus{display:flex}
-.checkbox--count .checkbox__count{display:flex;width:100%;height:100%;font-family:var(--number-md-font-family);font-size:var(--body-xs-font-size);font-weight:var(--font-weight-medium);line-height:1;color:var(--text-inverse);font-feature-settings:"zero"}
+.checkbox--count .checkbox__count{display:flex;width:19.5px;height:19.5px;border-radius:var(--radius-full);background:var(--bg-brand);font-family:var(--number-md-font-family);font-size:12px;font-weight:var(--font-weight-medium);line-height:1;color:var(--text-inverse);font-feature-settings:"zero"}
 .checkbox--sm{width:20px;height:20px;flex-basis:20px}
-.checkbox--sm .checkbox__icon svg{width:11px;height:8px}
-.checkbox--sm .checkbox__minus svg{width:6px;height:2px}
-.checkbox--disabled{opacity:0.4;pointer-events:none;cursor:not-allowed}
+.checkbox--sm .checkbox__inner{inset:2px}
+.checkbox--sm .checkbox__asset{width:11px;height:8px}
+.checkbox--sm .checkbox__minus::before{width:8px;height:1.5px}
+.checkbox--sm.checkbox--count .checkbox__count{width:16px;height:16px;font-size:12px}
+.checkbox--disabled{pointer-events:none;cursor:not-allowed}
+.checkbox--disabled:not(.checkbox--checked):not(.checkbox--indeterminate):not(.checkbox--count) .checkbox__inner{border-color:var(--border-disabled);background:var(--bg-control-disabled)}
+.checkbox--checked.checkbox--disabled .checkbox__inner,
+.checkbox--indeterminate.checkbox--disabled .checkbox__inner,
+.checkbox--count.checkbox--disabled .checkbox__inner,
+.checkbox--count.checkbox--disabled .checkbox__count{border-color:transparent;background:var(--bg-control-disabled)}
+.checkbox--checked.checkbox--disabled .checkbox__icon,
+.checkbox--indeterminate.checkbox--disabled .checkbox__minus,
+.checkbox--count.checkbox--disabled .checkbox__count{opacity:.45}
+.dark .checkbox:not(.checkbox--checked):not(.checkbox--indeterminate):not(.checkbox--count) .checkbox__inner{border-color:var(--border-inverse);background:var(--bg-inverse-surface-l1)}
+.dark .checkbox--disabled:not(.checkbox--checked):not(.checkbox--indeterminate):not(.checkbox--count) .checkbox__inner{border-color:var(--border-control-disabled);background:var(--bg-control-disabled)}
+.dark .checkbox--checked.checkbox--disabled .checkbox__inner,
+.dark .checkbox--indeterminate.checkbox--disabled .checkbox__inner,
+.dark .checkbox--count.checkbox--disabled .checkbox__inner,
+.dark .checkbox--count.checkbox--disabled .checkbox__count{border-color:transparent;background:var(--bg-control-disabled)}
 /* @component-css-end */
 </style>
 </head>
 <body>
 <div class="pv-header"><h1>复选框</h1><p>24 / 20px，支持未选、已选、半选、计数和禁用。</p></div>
 <div class="pv-section__title">默认状态 — 24px</div>
-<div class="row">
-  <span class="label">未选中</span>
+<div class="preview-grid">
+  <div class="preview-item"><span class="label">未选中</span>
   <div class="checkbox"><div class="checkbox__inner"></div></div>
-  <span class="label">选中</span>
+  </div>
+  <div class="preview-item"><span class="label">选中</span>
   <div class="checkbox checkbox--checked">
     <div class="checkbox__inner"></div>
     <div class="checkbox__icon">
-      <i class="wego-iconfont-s icon-gou16" style="font-size:13px"></i>
+      <img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt="">
     </div>
   </div>
-  <span class="label">部分选中</span>
+  </div>
+  <div class="preview-item"><span class="label">部分选中</span>
   <div class="checkbox checkbox--indeterminate">
     <div class="checkbox__inner"></div>
-    <div class="checkbox__minus">
-      <i class="wego-iconfont-s icon-jian16" style="font-size:13px"></i>
-    </div>
+    <div class="checkbox__minus"></div>
   </div>
-  <span class="label">标记数量</span>
+  </div>
+  <div class="preview-item"><span class="label">标记数量</span>
   <div class="checkbox checkbox--count">
     <div class="checkbox__count"><span>2</span></div>
   </div>
-  <span class="label">超量 (99+)</span>
+  </div>
+  <div class="preview-item"><span class="label">超量 (99+)</span>
   <div class="checkbox checkbox--count">
     <div class="checkbox__count"><span>999</span></div>
+  </div>
   </div>
 </div>
 
 <div class="pv-section__title">默认状态 — 20px</div>
-<div class="row">
-  <span class="label">未选中</span>
+<div class="preview-grid">
+  <div class="preview-item"><span class="label">未选中</span>
   <div class="checkbox checkbox--sm"><div class="checkbox__inner"></div></div>
-  <span class="label">选中</span>
+  </div>
+  <div class="preview-item"><span class="label">选中</span>
   <div class="checkbox checkbox--checked checkbox--sm">
     <div class="checkbox__inner"></div>
     <div class="checkbox__icon">
-      <i class="wego-iconfont-s icon-gou16" style="font-size:13px"></i>
+      <img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt="">
     </div>
   </div>
-  <span class="label">部分选中</span>
+  </div>
+  <div class="preview-item"><span class="label">部分选中</span>
   <div class="checkbox checkbox--indeterminate checkbox--sm">
     <div class="checkbox__inner"></div>
-    <div class="checkbox__minus">
-      <i class="wego-iconfont-s icon-jian16" style="font-size:13px"></i>
-    </div>
+    <div class="checkbox__minus"></div>
   </div>
-  <span class="label">标记数量</span>
+  </div>
+  <div class="preview-item"><span class="label">标记数量</span>
   <div class="checkbox checkbox--count checkbox--sm">
     <div class="checkbox__count"><span>2</span></div>
   </div>
-  <span class="label">超量 (99+)</span>
+  </div>
+  <div class="preview-item"><span class="label">超量 (99+)</span>
   <div class="checkbox checkbox--count checkbox--sm">
     <div class="checkbox__count"><span>999</span></div>
+  </div>
   </div>
 </div>
 
 
 <div class="pv-section__title">禁用状态 — 24px</div>
-<div class="row">
-  <span class="label">禁用未选中</span>
+<div class="preview-grid">
+  <div class="preview-item"><span class="label">禁用未选中</span>
   <div class="checkbox checkbox--disabled"><div class="checkbox__inner"></div></div>
-  <span class="label">禁用选中</span>
+  </div>
+  <div class="preview-item"><span class="label">禁用选中</span>
   <div class="checkbox checkbox--checked checkbox--disabled">
     <div class="checkbox__inner"></div>
     <div class="checkbox__icon">
-      <i class="wego-iconfont-s icon-gou16" style="font-size:13px"></i>
+      <img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt="">
     </div>
   </div>
-  <span class="label">禁用部分选中</span>
+  </div>
+  <div class="preview-item"><span class="label">禁用部分选中</span>
   <div class="checkbox checkbox--indeterminate checkbox--disabled">
     <div class="checkbox__inner"></div>
-    <div class="checkbox__minus">
-      <i class="wego-iconfont-s icon-jian16" style="font-size:13px"></i>
-    </div>
+    <div class="checkbox__minus"></div>
+  </div>
   </div>
 </div>
 
 <div class="pv-section__title">禁用状态 — 20px</div>
-<div class="row">
-  <span class="label">禁用未选中</span>
+<div class="preview-grid">
+  <div class="preview-item"><span class="label">禁用未选中</span>
   <div class="checkbox checkbox--disabled checkbox--sm"><div class="checkbox__inner"></div></div>
-  <span class="label">禁用选中</span>
+  </div>
+  <div class="preview-item"><span class="label">禁用选中</span>
   <div class="checkbox checkbox--checked checkbox--disabled checkbox--sm">
     <div class="checkbox__inner"></div>
     <div class="checkbox__icon">
-      <i class="wego-iconfont-s icon-gou16" style="font-size:13px"></i>
+      <img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt="">
     </div>
   </div>
-  <span class="label">禁用部分选中</span>
+  </div>
+  <div class="preview-item"><span class="label">禁用部分选中</span>
   <div class="checkbox checkbox--indeterminate checkbox--disabled checkbox--sm">
     <div class="checkbox__inner"></div>
-    <div class="checkbox__minus">
-      <i class="wego-iconfont-s icon-jian16" style="font-size:13px"></i>
-    </div>
+    <div class="checkbox__minus"></div>
+  </div>
   </div>
 </div>
 
 
 <div class="pv-section__title">暗色模式 — 24px</div>
 <div class="dark-strip dark-mode">
-  <div class="row">
-    <span class="label">暗色未选中</span>
+  <div class="preview-grid">
+    <div class="preview-item"><span class="label">暗色未选中</span>
     <div class="checkbox"><div class="checkbox__inner"></div></div>
-    <span class="label">暗色选中</span>
+    </div>
+    <div class="preview-item"><span class="label">暗色选中</span>
     <div class="checkbox checkbox--checked">
       <div class="checkbox__inner"></div>
       <div class="checkbox__icon">
-        <svg width="13" height="10" viewBox="0 0 13 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path fill-rule="evenodd" clip-rule="evenodd" d="M4.41406 6.5L1.41406 3.5L0 4.91406L4.41406 9.32812L12.3281 1.41406L10.9141 0L4.41406 6.5Z" fill="white"/>
-        </svg>
+        <img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt="">
       </div>
     </div>
-    <span class="label">暗色禁用未选中</span>
+    </div>
+    <div class="preview-item"><span class="label">暗色禁用未选中</span>
     <div class="checkbox checkbox--disabled"><div class="checkbox__inner"></div></div>
-    <span class="label">暗色禁用选中</span>
+    </div>
+    <div class="preview-item"><span class="label">暗色禁用选中</span>
     <div class="checkbox checkbox--checked checkbox--disabled">
       <div class="checkbox__inner"></div>
       <div class="checkbox__icon">
-        <svg width="13" height="10" viewBox="0 0 13 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path fill-rule="evenodd" clip-rule="evenodd" d="M4.41406 6.5L1.41406 3.5L0 4.91406L4.41406 9.32812L12.3281 1.41406L10.9141 0L4.41406 6.5Z" fill="white"/>
-        </svg>
+        <img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt="">
       </div>
+    </div>
     </div>
   </div>
 </div>
 
 <div class="pv-section__title">暗色模式 — 20px</div>
 <div class="dark-strip dark-mode">
-  <div class="row">
-    <span class="label">暗色未选中</span>
+  <div class="preview-grid">
+    <div class="preview-item"><span class="label">暗色未选中</span>
     <div class="checkbox checkbox--sm"><div class="checkbox__inner"></div></div>
-    <span class="label">暗色选中</span>
+    </div>
+    <div class="preview-item"><span class="label">暗色选中</span>
     <div class="checkbox checkbox--checked checkbox--sm">
       <div class="checkbox__inner"></div>
       <div class="checkbox__icon">
-        <svg width="13" height="10" viewBox="0 0 13 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path fill-rule="evenodd" clip-rule="evenodd" d="M4.41406 6.5L1.41406 3.5L0 4.91406L4.41406 9.32812L12.3281 1.41406L10.9141 0L4.41406 6.5Z" fill="white"/>
-        </svg>
+        <img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt="">
       </div>
     </div>
-    <span class="label">暗色禁用未选中</span>
+    </div>
+    <div class="preview-item"><span class="label">暗色禁用未选中</span>
     <div class="checkbox checkbox--disabled checkbox--sm"><div class="checkbox__inner"></div></div>
-    <span class="label">暗色禁用选中</span>
+    </div>
+    <div class="preview-item"><span class="label">暗色禁用选中</span>
     <div class="checkbox checkbox--checked checkbox--disabled checkbox--sm">
       <div class="checkbox__inner"></div>
       <div class="checkbox__icon">
-        <svg width="13" height="10" viewBox="0 0 13 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path fill-rule="evenodd" clip-rule="evenodd" d="M4.41406 6.5L1.41406 3.5L0 4.91406L4.41406 9.32812L12.3281 1.41406L10.9141 0L4.41406 6.5Z" fill="white"/>
-        </svg>
+        <img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt="">
       </div>
+    </div>
     </div>
   </div>
 </div>
@@ -193,6 +235,7 @@
 <p class="demo-hint">复选框点击切换选中/未选中；父级根据子级状态自动计算（全选/部分选/全不选）</p>
 
 <div class="sub-label">基础交互 — 24px</div>
+<div class="interaction-panel">
 <div class="interactive-row" data-mode="toggle" data-size="24">
   <div class="checkbox"><div class="checkbox__inner"></div></div>
   <span class="interactive-text">选项 A</span>
@@ -205,8 +248,10 @@
   <div class="checkbox"><div class="checkbox__inner"></div></div>
   <span class="interactive-text">选项 C</span>
 </div>
+</div>
 
 <div class="sub-label">基础交互 — 20px</div>
+<div class="interaction-panel">
 <div class="interactive-row" data-mode="toggle" data-size="20">
   <div class="checkbox checkbox--sm"><div class="checkbox__inner"></div></div>
   <span class="interactive-text">选项 X</span>
@@ -219,38 +264,40 @@
   <div class="checkbox checkbox--sm"><div class="checkbox__inner"></div></div>
   <span class="interactive-text">选项 Z</span>
 </div>
+</div>
 
-<div class="sub-label">父子联动（部分选中的实际场景）</div>
+<div class="sub-label">父子联动 — 24px</div>
+<div class="interaction-panel">
 <div class="interactive-row" data-mode="parent" data-children="child-group-1" data-size="24">
   <div class="checkbox"><div class="checkbox__inner"></div></div>
   <span class="interactive-text" style="font-weight:var(--font-weight-medium);color:var(--text-default)">全选</span>
 </div>
-<div id="child-group-1" style="padding-left:36px;">
-  <div class="interactive-row" data-mode="child" data-size="20">
-    <div class="checkbox checkbox--sm"><div class="checkbox__inner"></div></div>
+<div id="child-group-1" class="interaction-children">
+  <div class="interactive-row" data-mode="child" data-size="24">
+    <div class="checkbox"><div class="checkbox__inner"></div></div>
     <span class="interactive-text">子项 1</span>
   </div>
-  <div class="interactive-row" data-mode="child" data-size="20">
-    <div class="checkbox checkbox--sm"><div class="checkbox__inner"></div></div>
+  <div class="interactive-row" data-mode="child" data-size="24">
+    <div class="checkbox"><div class="checkbox__inner"></div></div>
     <span class="interactive-text">子项 2</span>
   </div>
-  <div class="interactive-row" data-mode="child" data-size="20">
-    <div class="checkbox checkbox--sm"><div class="checkbox__inner"></div></div>
+  <div class="interactive-row" data-mode="child" data-size="24">
+    <div class="checkbox"><div class="checkbox__inner"></div></div>
     <span class="interactive-text">子项 3</span>
   </div>
+</div>
 </div>
 
 <script>
 (function() {
-  var CHECK_SVG = '<svg width="13" height="10" viewBox="0 0 13 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M4.41406 6.5L1.41406 3.5L0 4.91406L4.41406 9.32812L12.3281 1.41406L10.9141 0L4.41406 6.5Z" fill="white"/></svg>';
-  var MINUS_SVG = '<svg width="8" height="2" viewBox="0 0 8 2" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6.75 1.5C7.16421 1.5 7.5 1.16421 7.5 0.75C7.5 0.335787 7.16421 0 6.75 0H0.75C0.335786 0 0 0.335787 0 0.75C0 1.16421 0.335786 1.5 0.75 1.5H6.75Z" fill="white"/></svg>';
+  var CHECK_ASSET = '<img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt="">';
 
   function setChecked(cb, size) {
     cb.classList.remove('checkbox--indeterminate');
     cb.classList.add('checkbox--checked');
     var old = cb.querySelector('.checkbox__icon'); if (old) old.remove();
     old = cb.querySelector('.checkbox__minus'); if (old) old.remove();
-    var icon = document.createElement('div'); icon.className = 'checkbox__icon'; icon.innerHTML = CHECK_SVG; cb.appendChild(icon);
+    var icon = document.createElement('div'); icon.className = 'checkbox__icon'; icon.innerHTML = CHECK_ASSET; cb.appendChild(icon);
   }
   function setUnchecked(cb) {
     cb.classList.remove('checkbox--checked', 'checkbox--indeterminate');
@@ -262,7 +309,7 @@
     cb.classList.add('checkbox--indeterminate');
     var old = cb.querySelector('.checkbox__icon'); if (old) old.remove();
     old = cb.querySelector('.checkbox__minus'); if (old) old.remove();
-    var minus = document.createElement('div'); minus.className = 'checkbox__minus'; minus.innerHTML = MINUS_SVG; cb.appendChild(minus);
+    var minus = document.createElement('div'); minus.className = 'checkbox__minus'; cb.appendChild(minus);
   }
   function isChecked(cb) { return cb.classList.contains('checkbox--checked'); }
 
