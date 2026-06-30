@@ -6,7 +6,7 @@
   "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "移动端页面顶部导航栏，承载状态栏、返回区、标题区与右侧操作区。",
+  "description": "移动端页面顶部导航栏，承载返回区、标题区与右侧操作区；安全区或系统状态栏由页面外壳单独处理。",
   "semanticTypeCandidates": [
     "navbar",
     "page-header",
@@ -32,7 +32,8 @@
     ],
     "spacing": [
       "default",
-      "spaced"
+      "spaced",
+      "right-gap"
     ]
   },
   "representativeVariants": [
@@ -58,15 +59,10 @@
       "leftControl": "none",
       "titleAlignment": "left-wide",
       "actions": "icon",
-      "spacing": "default"
+      "spacing": "right-gap"
     }
   ],
   "anatomy": [
-    {
-      "name": "statusBar",
-      "selector": ".navbar__status-bar",
-      "role": "状态栏占位区"
-    },
     {
       "name": "body",
       "selector": ".navbar__body",
@@ -90,8 +86,9 @@
   ],
   "structurePatterns": [
     "body 固定为三栏网格，不拆成桌面工具栏模式。",
-    "右侧操作统一复用 navbar-action-button 语义。",
-    "无按钮模式只影响 left 与 center 布局，不改变整体高度。"
+    "右侧操作按文本、图标、图文、按钮等场景罗列，不把右侧区域扩展成独立页面组件。",
+    "按钮式右侧操作复用已注册 button 组件的小尺寸按钮。",
+    "无按钮模式只影响 left 与 center 布局，不改变 56px 导航栏高度。"
   ],
   "behavior": {
     "leftAction": "返回、关闭或取消属于左侧主导航操作，不与右侧按钮混用。",
@@ -112,25 +109,16 @@
     "不要把状态栏、标题栏和筛选条硬拼成单一组件。"
   ],
   "tokensConsumed": [
-    "--bg-brand",
-    "--bg-brand-disabled",
-    "--bg-muted",
     "--bg-surface",
     "--body-lg-font-size",
-    "--body-md-font-family",
-    "--body-md-font-size",
     "--body-xs-font-size",
     "--font-weight-medium",
     "--heading-sm-font-size",
-    "--radius-6",
-    "--text-default",
-    "--text-inverse",
-    "--text-tertiary"
+    "--text-default"
   ],
   "designTokens": {
-    "statusBarHeight": "44px",
-    "bodyHeight": "44px",
-    "totalHeight": "88px",
+    "bodyHeight": "56px",
+    "totalHeight": "56px",
     "gridColumns": "10",
     "titleFont": "var(--heading-sm-font-size) / var(--font-weight-medium)",
     "actionButtonHeight": "32px"
@@ -142,7 +130,6 @@
   "domAnatomy": {
     "root": ".navbar",
     "requiredChildren": [
-      ".navbar__status-bar",
       ".navbar__body"
     ],
     "bodyChildren": [
@@ -153,7 +140,8 @@
     "optionalActionClasses": [
       ".navbar__body--spaced",
       ".navbar__center--wide",
-      ".navbar__right--wide"
+      ".navbar__right--wide",
+      ".navbar__right--gap"
     ]
   },
   "provenance": {

@@ -68,17 +68,18 @@ html, body { min-height: auto; }
   width: 100%;
 }
 
-.navbar.uikit-navbar .navbar__status-bar {
+.phone-status {
+  height: 44px;
+  display: flex;
+  align-items: center;
   justify-content: space-between;
   padding: 0 var(--spacer-16);
   background: var(--bg-surface);
   box-sizing: border-box;
-}
-
-.navbar.uikit-navbar .navbar__status-bar-text {
   font-size: var(--body-sm-font-size);
   font-weight: var(--font-weight-semibold);
   color: var(--text-default);
+  flex-shrink: 0;
 }
 
 .navbar.uikit-navbar .navbar__center--wide {
@@ -215,25 +216,27 @@ const { useState } = React;
 /* ═══ App NavBar ═══ */
 function AppNavbar({ title, onBack }) {
   return (
-    <div data-component="navbar" className="navbar uikit-navbar">
-      <div className="navbar__status-bar">
-        <span className="navbar__status-bar-text">9:41</span>
-        <span className="navbar__status-bar-text">5G</span>
+    <>
+      <div className="phone-status">
+        <span>9:41</span>
+        <span>5G</span>
       </div>
-      <div className="navbar__body">
-        <div className="navbar__left">
-          {onBack && (
-            <div className="navbar__left-btn" onClick={onBack} aria-label="返回">
-              <i className="wego-iconfont-s icon-fanhui"></i>
-            </div>
-          )}
+      <div data-component="navbar" className="navbar uikit-navbar">
+        <div className="navbar__body">
+          <div className="navbar__left">
+            {onBack && (
+              <div className="navbar__left-btn" onClick={onBack} aria-label="返回">
+                <i className="wego-iconfont-s icon-fanhui"></i>
+              </div>
+            )}
+          </div>
+          <div className={`navbar__center${onBack ? '' : ' navbar__center--wide'}`}>
+            <span className="navbar__title">{title}</span>
+          </div>
+          <div className="navbar__right"></div>
         </div>
-        <div className={`navbar__center${onBack ? '' : ' navbar__center--wide'}`}>
-          <span className="navbar__title">{title}</span>
-        </div>
-        <div className="navbar__right"></div>
       </div>
-    </div>
+    </>
   );
 }
 
