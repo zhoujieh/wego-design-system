@@ -147,7 +147,7 @@ document.querySelectorAll('[data-counter]').forEach(counter => {
   const hintText = counter.dataset.counterHinttext || '';
 
   function getValue() {
-    const raw = valueEl.value.replace(/[^\d-]/g, '');
+    const raw = valueEl.value.replace(/\D/g, '');
     return raw === '' ? 0 : Number.parseInt(raw, 10);
   }
 
@@ -157,7 +157,7 @@ document.querySelectorAll('[data-counter]').forEach(counter => {
 
   function validate() {
     const value = getValue();
-    if (errorText && value >= max) {
+    if (errorText && value > max) {
       counter.classList.add('is-error');
       counter.classList.remove('is-hint');
       errorEl.textContent = errorText;
@@ -172,8 +172,7 @@ document.querySelectorAll('[data-counter]').forEach(counter => {
   }
 
   valueEl.addEventListener('input', () => {
-    let raw = valueEl.value.replace(/[^\d-]/g, '');
-    if (raw.indexOf('-') > 0) raw = raw.replace(/-/g, '');
+    let raw = valueEl.value.replace(/\D/g, '');
     if (raw.length > 7) raw = raw.slice(0, 7);
     valueEl.value = raw;
   });

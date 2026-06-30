@@ -77,7 +77,7 @@
   ],
   "behavior": {
     "step": "点击减号或加号按最小步长增减，尊重 data-counter-min 与 data-counter-max。",
-    "input": "输入框只接受数值字符，失焦后触发提示或错误状态校验。",
+    "input": "输入框只接受 0-9 数字字符；等于最大值时保持合法，只有超过最大值或低于最小值时才进入错误校验。",
     "disabled": "禁用态禁止按钮和输入交互。"
   },
   "accessibility": {
@@ -153,8 +153,8 @@
     "root": ".counter",
     "requiredChildren": [
       ".counter__body",
-      ".counter__hint",
-      ".counter__error"
+      ".counter__message.counter__hint",
+      ".counter__message.counter__error"
     ],
     "bodyChildren": [
       ".counter__btn--minus",
