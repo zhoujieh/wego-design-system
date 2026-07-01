@@ -11,18 +11,19 @@
 .specimen { display: flex; flex-direction: column; gap: var(--spacer-0); }
 .stage { display: flex; flex-direction: column; gap: var(--spacer-0); }
 .story { display: flex; flex-direction: column; gap: var(--spacer-8); margin-bottom: var(--spacer-12); }
+.story--with-floating-error .rail { padding-bottom: var(--spacer-24); }
 .story:last-child { margin-bottom: var(--spacer-0); }
 .story-label { width: 92px; flex-shrink: 0; font-size: var(--body-sm-font-size); font-weight: var(--font-weight-medium); color: var(--text-secondary); line-height: var(--body-sm-line-height); }
 .rail { display: flex; gap: var(--spacer-16); align-items: flex-start; flex-wrap: wrap; }
 
 /* @component-css-start */
-.input-group { display: flex; flex-direction: column; gap: var(--spacer-8); width: 100%; max-width: 320px; flex-shrink: 0; }
+.input-group { position: relative; display: flex; flex-direction: column; gap: var(--spacer-8); width: 100%; max-width: 320px; flex-shrink: 0; }
 .input-group .field-label { display: block; font-size: var(--body-md-font-size); font-weight: var(--font-weight-medium); color: var(--text-default); line-height: var(--body-md-line-height); white-space: nowrap; }
 .input-group input, .input-group textarea { width: 100%; box-sizing: border-box; border: 1px solid var(--border-neutral-l2); border-radius: var(--radius-6); background: var(--bg-surface); color: var(--text-default); font-size: var(--body-md-font-size); font-family: var(--body-md-font-family); line-height: var(--body-md-line-height); padding: 0 12px; outline: none; transition: border-color var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard); font-feature-settings: "zero"; }
 .input-group input { height: 36px; }
 .input-group textarea { min-height: 96px; resize: vertical; padding: 8px 12px; }
 .input-group input::placeholder, .input-group textarea::placeholder { color: var(--text-placeholder); }
-.input-group input:focus, .input-group textarea:focus { border-color: var(--border-brand); }
+.input-group input:focus, .input-group textarea:focus { border-color: var(--border-neutral-l2); }
 .input-group.is-error input, .input-group.is-error textarea { border-color: var(--status-danger-default); color: var(--status-danger-default); }
 .input-group.is-disabled input, .input-group.is-disabled textarea { background: var(--bg-muted); border-color: var(--border-disabled); color: var(--text-disabled); cursor: not-allowed; }
 .input-group.is-disabled input::placeholder, .input-group.is-disabled textarea::placeholder { color: var(--text-disabled); }
@@ -38,7 +39,7 @@
 .input-group.is-disabled .input-clear { display: none !important; }
 
 /* ── Field Error ───────────────────────────────────────────── */
-.field-error { display: none; margin-top: var(--spacer-4); font-size: var(--body-xs-font-size); line-height: var(--body-xs-line-height); color: var(--status-danger-default); }
+.field-error { position: absolute; top: calc(100% + var(--spacer-4)); left: 0; display: none; max-width: 100%; font-size: var(--body-xs-font-size); line-height: var(--body-xs-line-height); color: var(--status-danger-default); white-space: normal; overflow-wrap: anywhere; pointer-events: none; }
 .input-group.is-error .field-error { display: block; }
 
 /* ── Number Input (数字输入框) ──────────────────────────────── */
@@ -47,7 +48,7 @@
 .number-input__field::placeholder { color: var(--text-disabled); font-size: var(--body-md-font-size); font-weight: var(--font-weight-regular); }
 .number-input__suffix { flex-shrink: 0; font-size: var(--body-md-font-size); font-weight: var(--font-weight-regular); color: var(--text-secondary); text-align: right; white-space: nowrap; font-feature-settings: "zero"; }
 /* Focus */
-.number-input.is-focus { border-color: var(--border-brand); background: var(--bg-surface); }
+.number-input.is-focus { border-color: var(--border-neutral-l2); background: var(--bg-subtle); }
 /* Error */
 .number-input.is-error { background: var(--status-danger-surface-l1); border-color: var(--border-danger); }
 .number-input.is-error .number-input__field,
@@ -64,7 +65,7 @@
 <div class="specimen">
 <div class="stage">
 <!-- Text Input -->
-<div class="story">
+<div class="story story--with-floating-error">
 <span class="story-label">标准文本输入</span>
 <div class="rail">
 <div class="input-group">
@@ -81,10 +82,10 @@
 <button type="button" class="input-clear" aria-label="清空手机号"><i class="icon-yuancha-mian" aria-hidden="true"></i></button>
 </div>
 </div>
-<div class="input-group is-error">
+<div class="input-group is-error" data-validate="phone">
 <label class="field-label" for="input-phone-error">手机号</label>
 <div class="input-wrapper">
-<input id="input-phone-error" type="text" value="15011102223" aria-invalid="true" aria-describedby="input-phone-error-message">
+<input id="input-phone-error" type="text" value="1501110222" aria-invalid="true" aria-describedby="input-phone-error-message">
 <button type="button" class="input-clear" aria-label="清空手机号"><i class="icon-yuancha-mian" aria-hidden="true"></i></button>
 </div>
 <span id="input-phone-error-message" class="field-error">请输入正确的手机号码</span>
@@ -159,7 +160,30 @@ document.querySelectorAll('[data-number-input]').forEach(wrapper => {
 // ── Text Input: clear button visibility ──
 document.querySelectorAll('.input-group input[type="text"]').forEach(input => {
   const clearBtn = input.parentElement.querySelector('.input-clear');
+  const group = input.closest('.input-group');
+  const errorMessage = group ? group.querySelector('.field-error') : null;
   if (!clearBtn) return;
+
+  function isPhoneValid(value) {
+    return /^1\d{10}$/.test(value.trim());
+  }
+
+  function updateErrorState() {
+    if (!group || group.dataset.validate !== 'phone') return;
+    if (input.value && isPhoneValid(input.value)) {
+      group.classList.remove('is-error');
+      input.removeAttribute('aria-invalid');
+      if (errorMessage) {
+        input.removeAttribute('aria-describedby');
+      }
+      return;
+    }
+    group.classList.add('is-error');
+    input.setAttribute('aria-invalid', 'true');
+    if (errorMessage?.id) {
+      input.setAttribute('aria-describedby', errorMessage.id);
+    }
+  }
 
   function updateClear() {
     if (input.disabled) {
@@ -169,9 +193,15 @@ document.querySelectorAll('.input-group input[type="text"]').forEach(input => {
     }
   }
 
-  input.addEventListener('input', updateClear);
+  input.addEventListener('input', () => {
+    updateClear();
+    updateErrorState();
+  });
   input.addEventListener('focus', updateClear);
-  input.addEventListener('blur', updateClear);
+  input.addEventListener('blur', () => {
+    updateClear();
+    updateErrorState();
+  });
 
   clearBtn.addEventListener('click', (e) => {
     e.preventDefault();
@@ -181,6 +211,7 @@ document.querySelectorAll('.input-group input[type="text"]').forEach(input => {
   });
 
   updateClear();
+  updateErrorState();
 });
 </script>
 </body>

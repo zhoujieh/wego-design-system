@@ -203,6 +203,125 @@ html, body { min-height: auto; }
   height: 10px;
   display: block;
 }
+
+.uikit-section-title {
+  font-size: var(--body-sm-font-size);
+  color: var(--text-tertiary);
+  padding: var(--spacer-16) var(--spacer-16) var(--spacer-8);
+}
+
+.uikit-section-group {
+  background: var(--bg-surface);
+  width: 100%;
+}
+
+.uikit-section-gap {
+  height: var(--spacer-8);
+}
+
+.biz-summary {
+  background: var(--bg-surface);
+  padding: var(--spacer-16);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacer-12);
+}
+
+.biz-summary__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.biz-summary__title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-8);
+  min-width: 0;
+}
+
+.biz-summary__title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--heading-sm-font-size);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-default);
+}
+
+.biz-summary__desc {
+  margin-top: var(--spacer-4);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+  color: var(--text-secondary);
+}
+
+.biz-summary__meta {
+  margin-top: var(--spacer-8);
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-12);
+}
+
+.biz-summary__meta span {
+  font-size: var(--body-sm-font-size);
+  color: var(--text-tertiary);
+}
+
+.uikit-helper-text {
+  padding: var(--spacer-12) var(--spacer-16) var(--spacer-20);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+  color: var(--text-tertiary);
+}
+
+.uikit-modal-screen {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-overlay);
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-page);
+  transform: translateY(100%);
+  transition: transform var(--duration-normal) var(--ease-enter);
+  will-change: transform;
+}
+
+.uikit-modal-screen.is-open {
+  transform: translateY(0);
+}
+
+.uikit-modal-screen .navbar {
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.uikit-modal-screen .navbar__left-text,
+.uikit-modal-screen .navbar__action-label {
+  font-size: var(--body-lg-font-size);
+}
+
+.uikit-toast {
+  position: absolute;
+  left: 50%;
+  bottom: 120px;
+  transform: translate(-50%, 16px);
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  background: rgba(30, 32, 40, 0.82);
+  color: var(--text-inverse);
+  font-size: var(--body-sm-font-size);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-fast) var(--ease-standard), transform var(--duration-fast) var(--ease-standard);
+  z-index: var(--z-toast);
+  white-space: nowrap;
+}
+
+.uikit-toast.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
 </style>
 </head>
 <body class="uikit-page">
@@ -212,7 +331,7 @@ html, body { min-height: auto; }
   </div>
 </div>
 <script type="text/babel">
-const { useState } = React;
+const { useEffect, useState } = React;
 
 /* ═══ App NavBar ═══ */
 function AppNavbar({ title, onBack }) {
@@ -571,104 +690,215 @@ function CheckIcon() {
   return <img className="checkbox__asset uikit-check-icon" src="../../assets/icons/checkbox-check.svg" alt="" />;
 }
 
-/* ═══ Screen 4: 业务设置 (岗位权限设置) ═══ */
-function BizSettingsScreen({ onBack }) {
-  const [attributionChecked, setAttributionChecked] = useState(true);
+/* ═══ Screen 4: 业务设置（全屏模态） ═══ */
+function BizSettingsContent() {
+  const [planName, setPlanName] = useState('会员运营设置');
+  const [reportCycle, setReportCycle] = useState('all');
   const [switches, setSwitches] = useState({
-    selection: true, fans: true, order: true, purchase: true,
-    delivery: true, finance: true, ops: true, warehouse: true
+    autoSync: true,
+    stockAlert: true,
+    smsNotify: false
   });
-  const toggleSwitch = (key) => setSwitches(prev => ({ ...prev, [key]: !prev[key] }));
   const [permissions, setPermissions] = useState({
-    contactInfo: true, pinnedStatus: true, moments: true, followToggle: true,
-    publishEdit: true, inventory: true, price: false,
-    viewFans: true, approveFans: true, deleteFans: true, changeFansBinding: true,
-    viewVisitors: true, createCustomer: true,
-    viewOrders: true, createOrder: true, viewPhone: true,
-    modifyOrder: true, modifySender: true, modifyPayment: true,
-    purchaseOrder: true, viewSupplier: true, manageSupplier: true,
-    buyFromUp: true, managePurchase: true, manageBackup: true,
-    deliveryGoods: true, setShipping: true,
-    walletOp: true, viewTransaction: true,
-    privateDomain: true, createManageTask: true, shopDeco: true, marketingGames: true
+    exportData: true,
+    editPrice: false,
+    notifyMembers: true
   });
-  const togglePermission = (key) => setPermissions(prev => ({ ...prev, [key]: !prev[key] }));
+
+  const toggleSwitch = (key) => setSwitches((prev) => ({ ...prev, [key]: !prev[key] }));
+  const togglePermission = (key) => setPermissions((prev) => ({ ...prev, [key]: !prev[key] }));
 
   return (
     <div>
-      <div style={{display:'flex',alignItems:'center',gap:'var(--spacer-8)',padding:'var(--spacer-16)',background:'var(--bg-surface)'}}>
-        <div style={{display:'flex',alignItems:'center',gap:'var(--spacer-4)',flex:1,minWidth:0}}>
-          <div className="avatar avatar--24 avatar--initials">车</div>
-          <span style={{fontSize:'var(--body-lg-font-size)',fontWeight:'var(--font-weight-medium)',color:'var(--text-default)'}}>车车</span>
-          <div data-component="tag" className="tag tag--20 tag--brand-stroke uikit-nowrap"><span className="tag__label">管理员</span></div>
+      <div className="biz-summary">
+        <div className="biz-summary__main">
+          <div className="biz-summary__title-row">
+            <div className="biz-summary__title">{planName || '未命名方案'}</div>
+            <div data-component="tag" className="tag tag--20 tag--brand-stroke uikit-nowrap"><span className="tag__label">启用中</span></div>
+          </div>
+          <div className="biz-summary__desc">适用于业务数据管理、成员协作和提醒策略统一配置。</div>
+          <div className="biz-summary__meta">
+            <span>最近保存：今天 09:20</span>
+            <a data-component="link" className="link">查看说明</a>
+          </div>
         </div>
-        <a className="link" style={{flexShrink:0}}>切换岗位</a>
       </div>
-      <div className="section-title">选款与上架</div>
-      <div className="section-group">
-        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" onClick={() => toggleSwitch('selection')}>
+
+      <div className="uikit-section-title">基础信息</div>
+      <div className="uikit-section-group">
+        <div className="form">
+          <div className="form-body">
+            <div className="form-body__label">方案名称</div>
+            <div className="form-body__action">
+              <input
+                type="text"
+                value={planName}
+                onChange={(event) => setPlanName(event.target.value)}
+                placeholder="请输入方案名称"
+              />
+            </div>
+          </div>
+          <div className="form-body form-body--clickable">
+            <div className="form-body__label">负责人</div>
+            <div className="form-body__action">
+              <div className="form-body__select">
+                <span className="form-body__select-text has-value">商品运营组</span>
+                <i className="form-body__select-arrow wego-iconfont-s icon-youjiantou16"></i>
+              </div>
+            </div>
+          </div>
+          <div className="form-body form-body--clickable">
+            <div className="form-body__label">同步频率</div>
+            <div className="form-body__action">
+              <div className="form-body__select">
+                <span className="form-body__select-text has-value">每30分钟</span>
+                <i className="form-body__select-arrow wego-iconfont-s icon-youjiantou16"></i>
+              </div>
+            </div>
+          </div>
+          <div className="form-body">
+            <div className="form-body__label">统计口径</div>
+            <div className="form-body__action">
+              <div className="form-body__radio-group">
+                <div className="form-body__radio-item" onClick={() => setReportCycle('all')}>
+                  <div className={`radio radio--sm${reportCycle === 'all' ? ' radio--checked' : ''}`}>
+                    <div className="radio__inner"></div>
+                    <div className="radio__dot"></div>
+                  </div>
+                  <span>全店汇总</span>
+                </div>
+                <div className="form-body__radio-item" onClick={() => setReportCycle('shop')}>
+                  <div className={`radio radio--sm${reportCycle === 'shop' ? ' radio--checked' : ''}`}>
+                    <div className="radio__inner"></div>
+                    <div className="radio__dot"></div>
+                  </div>
+                  <span>按门店</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="uikit-section-gap"></div>
+      <div className="uikit-section-title">规则与提醒</div>
+      <div className="uikit-section-group">
+        <div className="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable" onClick={() => toggleSwitch('autoSync')}>
           <div className="cell__body">
-            <div className="cell__content"><div className="cell__title-row"><span className="cell__title">选款与上架</span></div></div>
-            <div className="cell__action"><div className={`switch${switches.selection?' switch--on':' switch--off'}`}><div className="switch__thumb"></div></div></div>
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">自动同步业务数据</span></div>
+              <div className="cell__subtitle">保存后按同步频率自动刷新库存、价格和成员归属。</div>
+            </div>
+            <div className="cell__action">
+              <div className={`switch${switches.autoSync ? ' switch--on' : ' switch--off'}`}><div className="switch__thumb"></div></div>
+            </div>
           </div>
         </div>
-        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" onClick={() => togglePermission('contactInfo')}>
-          <div className="cell__select">
-            <div className={`checkbox${permissions.contactInfo?' checkbox--checked':''}`}><div className="checkbox__inner"></div>{permissions.contactInfo && <div className="checkbox__icon"><CheckIcon /></div>}</div>
-          </div>
-          <div className="cell__body"><div className="cell__content"><div className="cell__title-row"><span className="cell__title">允许查看上家的联系方式</span></div></div></div>
-        </div>
-        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" onClick={() => togglePermission('publishEdit')}>
-          <div className="cell__select">
-            <div className={`checkbox${permissions.publishEdit?' checkbox--checked':''}`}><div className="checkbox__inner"></div>{permissions.publishEdit && <div className="checkbox__icon"><CheckIcon /></div>}</div>
-          </div>
-          <div className="cell__body"><div className="cell__content"><div className="cell__title-row"><span className="cell__title">允许发布、编辑、上下架商品</span></div></div></div>
-        </div>
-        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" onClick={() => togglePermission('inventory')}>
-          <div className="cell__select">
-            <div className={`checkbox${permissions.inventory?' checkbox--checked':''}`}><div className="checkbox__inner"></div>{permissions.inventory && <div className="checkbox__icon"><CheckIcon /></div>}</div>
-          </div>
-          <div className="cell__body"><div className="cell__content"><div className="cell__title-row"><span className="cell__title">允许查看和编辑库存</span></div></div></div>
-        </div>
-      </div>
-      <div className="section-separator"></div>
-      <div className="section-title">订单</div>
-      <div className="section-group">
-        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" onClick={() => toggleSwitch('order')}>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" onClick={() => toggleSwitch('stockAlert')}>
           <div className="cell__body">
-            <div className="cell__content"><div className="cell__title-row"><span className="cell__title">订单</span></div></div>
-            <div className="cell__action"><div className={`switch${switches.order?' switch--on':' switch--off'}`}><div className="switch__thumb"></div></div></div>
+            <div className="cell__content"><div className="cell__title-row"><span className="cell__title">库存异常预警</span></div></div>
+            <div className="cell__action">
+              <div className={`switch${switches.stockAlert ? ' switch--on' : ' switch--off'}`}><div className="switch__thumb"></div></div>
+            </div>
           </div>
         </div>
-        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" onClick={() => togglePermission('viewOrders')}>
-          <div className="cell__select">
-            <div className={`checkbox${permissions.viewOrders?' checkbox--checked':''}`}><div className="checkbox__inner"></div>{permissions.viewOrders && <div className="checkbox__icon"><CheckIcon /></div>}</div>
-          </div>
-          <div className="cell__body"><div className="cell__content"><div className="cell__title-row"><span className="cell__title">允许查看订单</span></div></div></div>
-        </div>
-        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" onClick={() => togglePermission('modifyOrder')}>
-          <div className="cell__select">
-            <div className={`checkbox${permissions.modifyOrder?' checkbox--checked':''}`}><div className="checkbox__inner"></div>{permissions.modifyOrder && <div className="checkbox__icon"><CheckIcon /></div>}</div>
-          </div>
-          <div className="cell__body"><div className="cell__content"><div className="cell__title-row"><span className="cell__title">允许修改订单(包括改单、改价等)</span></div></div></div>
-        </div>
-      </div>
-      <div className="section-separator"></div>
-      <div className="section-title">运营</div>
-      <div className="section-group">
-        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" onClick={() => toggleSwitch('ops')}>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" onClick={() => toggleSwitch('smsNotify')}>
           <div className="cell__body">
-            <div className="cell__content"><div className="cell__title-row"><span className="cell__title">运营</span></div></div>
-            <div className="cell__action"><div className={`switch${switches.ops?' switch--on':' switch--off'}`}><div className="switch__thumb"></div></div></div>
+            <div className="cell__content"><div className="cell__title-row"><span className="cell__title">短信提醒负责人</span></div></div>
+            <div className="cell__action">
+              <div className={`switch${switches.smsNotify ? ' switch--on' : ' switch--off'}`}><div className="switch__thumb"></div></div>
+            </div>
           </div>
-        </div>
-        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" onClick={() => togglePermission('createManageTask')}>
-          <div className="cell__select">
-            <div className={`checkbox${permissions.createManageTask?' checkbox--checked':''}`}><div className="checkbox__inner"></div>{permissions.createManageTask && <div className="checkbox__icon"><CheckIcon /></div>}</div>
-          </div>
-          <div className="cell__body"><div className="cell__content"><div className="cell__title-row"><span className="cell__title">允许创建并管理任务</span></div></div></div>
         </div>
       </div>
+
+      <div className="uikit-section-gap"></div>
+      <div className="uikit-section-title">适用范围</div>
+      <div className="uikit-section-group">
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+          <div className="cell__body">
+            <div className="cell__content"><div className="cell__title-row"><span className="cell__title">可见范围</span></div></div>
+            <div className="cell__action">
+              <span className="cell__action-text">全部导购</span>
+              <i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+          <div className="cell__body">
+            <div className="cell__content"><div className="cell__title-row"><span className="cell__title">默认处理人</span></div></div>
+            <div className="cell__action">
+              <span className="cell__action-text">当前负责人</span>
+              <i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
+            </div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" onClick={() => togglePermission('exportData')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.exportData ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.exportData && <div className="checkbox__icon"><CheckIcon /></div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content"><div className="cell__title-row"><span className="cell__title">允许成员导出数据</span></div></div>
+          </div>
+        </div>
+        <div className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" onClick={() => togglePermission('editPrice')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.editPrice ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.editPrice && <div className="checkbox__icon"><CheckIcon /></div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content"><div className="cell__title-row"><span className="cell__title">允许修改售价</span></div></div>
+          </div>
+        </div>
+        <div className="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable" onClick={() => togglePermission('notifyMembers')}>
+          <div className="cell__select">
+            <div className={`checkbox${permissions.notifyMembers ? ' checkbox--checked' : ''}`}>
+              <div className="checkbox__inner"></div>
+              {permissions.notifyMembers && <div className="checkbox__icon"><CheckIcon /></div>}
+            </div>
+          </div>
+          <div className="cell__body">
+            <div className="cell__content">
+              <div className="cell__title-row"><span className="cell__title">保存后通知相关成员</span></div>
+              <div className="cell__subtitle">保存生效后，通过站内消息通知受影响成员。</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="uikit-helper-text">主操作仅放在顶部导航栏，内容区和底部不重复放保存按钮。</div>
+    </div>
+  );
+}
+
+function BizSettingsModal({ isOpen, onCancel, onSave }) {
+  return (
+    <div className={`uikit-modal-screen${isOpen ? ' is-open' : ''}`}>
+      <StatusBar />
+      <div data-component="navbar" className="navbar">
+        <div className="navbar__body navbar__body--spaced">
+          <div className="navbar__left">
+            <span className="navbar__left-text" onClick={onCancel}>取消</span>
+          </div>
+          <div className="navbar__center">
+            <span className="navbar__title">业务设置</span>
+          </div>
+          <div className="navbar__right navbar__right--text">
+            <div className="navbar__action navbar__action--text" onClick={onSave}>
+              <span className="navbar__action-label">保存</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="phone-body">
+        <BizSettingsContent />
+      </div>
+      <HomeIndicator />
     </div>
   );
 }
@@ -676,21 +906,46 @@ function BizSettingsScreen({ onBack }) {
 /* ═══ App Root ═══ */
 function App() {
   const [screen, setScreen] = useState('home');
+  const [bizSettingsMounted, setBizSettingsMounted] = useState(false);
+  const [bizSettingsOpen, setBizSettingsOpen] = useState(false);
+  const [toast, setToast] = useState('');
+
+  useEffect(() => {
+    if (!toast) return undefined;
+    const timer = window.setTimeout(() => setToast(''), 1500);
+    return () => window.clearTimeout(timer);
+  }, [toast]);
+
+  const openBizSettings = () => {
+    setScreen('profile');
+    setBizSettingsMounted(true);
+    window.setTimeout(() => setBizSettingsOpen(true), 16);
+  };
+
+  const closeBizSettings = () => {
+    setBizSettingsOpen(false);
+    window.setTimeout(() => setBizSettingsMounted(false), 260);
+  };
+
+  const saveBizSettings = () => {
+    setToast('已保存业务设置');
+    closeBizSettings();
+  };
 
   return (
     <div className="phone-screen">
       {screen === 'home' && <AppNavbar title="微购精选" />}
       {screen === 'detail' && <AppNavbar title="商品详情" onBack={() => setScreen('home')} />}
       {screen === 'profile' && <AppNavbar title="我的" />}
-      {screen === 'bizSettings' && <AppNavbar title="岗位权限设置" onBack={() => setScreen('profile')} />}
       <div className="phone-body">
         {screen === 'home' && <HomeScreen onProductClick={() => setScreen('detail')} />}
         {screen === 'detail' && <DetailScreen />}
-        {screen === 'profile' && <ProfileScreen onBizSettings={() => setScreen('bizSettings')} />}
-        {screen === 'bizSettings' && <BizSettingsScreen onBack={() => setScreen('profile')} />}
+        {screen === 'profile' && <ProfileScreen onBizSettings={openBizSettings} />}
       </div>
       <BottomNav current={screen} onNavigate={setScreen} />
       <HomeIndicator />
+      {bizSettingsMounted ? <BizSettingsModal isOpen={bizSettingsOpen} onCancel={closeBizSettings} onSave={saveBizSettings} /> : null}
+      <div className={`uikit-toast${toast ? ' is-visible' : ''}`}>{toast}</div>
     </div>
   );
 }

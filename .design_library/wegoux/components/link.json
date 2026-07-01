@@ -65,10 +65,10 @@
     }
   ],
   "structurePatterns": [
-    "standalone 保留轻量水平内边距，可单独挂在 cell 右侧或资料头部作为轻操作。",
+    "standalone 保持纯文字宽度，不额外增加左右内边距，可单独挂在 cell 右侧或资料头部作为轻操作。",
     "standalone 默认使用 14px，可切到 12px 紧凑尺寸。",
     "inline 直接跟随文字流，不额外插入块级壳，字号和行高继承当前整行文本，也不向外扩展热区。",
-    "inline 场景应把字号和行高挂在整行宿主容器上，不要只写在相邻文本节点上。"
+    "inline 场景应把字号和行高挂在整行宿主容器上，不要只写在相邻文本节点上；与相邻文案建议保持 4px 间距。"
   ],
   "behavior": {
     "active": "按压态用轻背景反馈，不改变链接语义颜色。",
@@ -99,7 +99,6 @@
     "--duration-fast",
     "--ease-standard",
     "--font-weight-medium",
-    "--spacer-16",
     "--spacer-4",
     "--text-disabled",
     "--text-link",
@@ -109,7 +108,8 @@
   ],
   "designTokens": {
     "standaloneHeight": "20px",
-    "paddingHorizontal": "var(--spacer-4)",
+    "paddingHorizontal": "0",
+    "inlineHostGap": "var(--spacer-4)",
     "font14": "var(--body-md-font-size) / var(--font-weight-medium)",
     "font12": "var(--body-sm-font-size) / var(--font-weight-medium)",
     "compactHotzone": "var(--touch-min)",

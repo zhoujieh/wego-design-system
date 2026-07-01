@@ -1,27 +1,30 @@
 {
   "kitType": "biz-settings",
-  "presentation": "bottom-sheet",
-  "transition": "slide-up",
+  "presentation": "full-screen-modal",
+  "enterTransition": "slide-up",
+  "exitTransition": "slide-down",
+  "coversTabBar": true,
   "screensGenerated": 1,
-  "coreComponentsUsed": ["navbar", "cell", "checkbox", "switch", "avatar", "tag", "link"],
+  "coreComponentsUsed": ["navbar", "cell", "checkbox", "switch", "link", "form", "radio", "tag"],
   "supportComponentsUsed": [],
-  "previewClassReuseRate": 0.96,
-  "reuseAssessment": "主体内容全部使用已注册组件组合；checkbox 勾选态已统一引用随库 SVG 资产；业务信息头部也已统一回到 avatar + tag + link 语义，Showcase 外壳已统一收敛到 scaffold.css。",
+  "previewClassReuseRate": 0.97,
+  "reuseAssessment": "主体内容已收敛为一个通用业务设置母版，基础信息、规则开关和范围权限都复用已注册组件结构；保存动作仅保留在 navbar 右侧，避免页面底部重复主操作。",
   "inventedComponents": ["phone-status", "phone-indicator"],
   "recommendedRefactors": {},
-  "interactiveStatesRendered": ["active", "disabled", "selected", "on", "off"],
+  "interactiveStatesRendered": ["active", "editing", "selected", "on", "off"],
   "primaryActionPerScreen": true,
   "mockDataDensity": {
-    "settingSections": 8,
-    "switchRows": 8,
-    "checkboxRows": 35,
+    "settingSections": 3,
+    "formRows": 4,
+    "switchRows": 3,
+    "checkboxRows": 3,
     "selectRows": 4,
-    "attributionRow": 1
+    "attributionRow": 0
   },
   "warnings": [
-    "本 UI Kit 展示业务设置/权限设置的典型页面模式。",
+    "本 UI Kit 展示的是从底部进入、落稳后全屏覆盖的业务设置模态页。",
     "phone-status 为当前页面状态栏展示样式；phone-indicator 等通用 Showcase 外壳由 scaffold.css 提供，非通用组件。",
-    "真实项目中使用时应通过底部面板（bottom-sheet）方式从底部滑入。",
-    "iconfont 图标用于下拉指示器（icon-xiajiantou16、icon-youjiantou16）。"
+    "真实项目中应使用 navbar 的取消/保存结构，不在页面内容区或底部重复放保存按钮。",
+    "iconfont 图标用于跳转指示器（icon-youjiantou16）。"
   ]
 }

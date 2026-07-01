@@ -46,6 +46,8 @@
 - 如果暗色模式问题已经影响边框、底色、禁用态、选中态等组件本体可见性，优先把修复收回 `.dark` 上下文或正式 Token 映射；preview 专用 `dark-mode` 覆盖只用于展示壳，不应用来长期承担组件语义
 - 如果暗色修复里出现多个组件重复的 rgba 值，要把它视为 Token 候选，在最终风险里说明“暂未沉淀到 `colors_and_type.css` / `css.json`”
 - 如果重跑提取脚本后 `components.css` 带出目标组件之外的 diff，先定位是哪些 preview 造成的；不要默认这些差异都属于当前任务
+- 如果把错误提示、浮层提示、计数说明改成绝对定位，至少补一条长中文文案做移动端宽度检查；没有这一步时，不要把“单条短文案看起来正常”当成通过
+- 如果某个状态仍出现在契约的 `variantDimensions`、`representativeVariants` 或 `stateClasses` 中，就必须确认 preview 里仍有对应 class、伪类或脚本分支能真实触发它；否则应同步删掉契约承诺
 
 ## 2.1 收敛现有组件能力
 
@@ -182,6 +184,6 @@
 
 先判断问题发生在哪一层：
 
-- 如果只是暗色示例容器没挂 `.dark`，修正 preview 容器 class，并做真实浏览器核对
+- 如果只是暗色示例容器没挂 `.dark`，修正 preview 容器 class，并按统一浏览器验证规则做真实核对
 - 如果组件在暗色里边框、底色、禁用态不可见，优先修改组件 `.dark` 规则或正式 Token 消费，再同步契约里的 theme / tokensConsumed / designTokens 说明
 - 如果修复过程明显复用了多个相同暗色 rgba，记录为 Token 候选，后续进入 `colors_and_type.css` / `css.json`

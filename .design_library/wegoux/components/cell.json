@@ -100,13 +100,14 @@
   ],
   "structurePatterns": [
     "左侧插槽默认保持单一前导语义；编辑态允许退格占位、选择控件和头像做紧凑组合。",
+    "前导槽位组与正文内容之间默认保持 12px 间距，避免 checkbox、radio、图标或头像贴近标题。",
     "中间内容区固定标题优先、副标题次级，不扩成多列表格。",
     "右侧操作区最多承担一种主反馈类型，例如文字、角标、按钮、开关或箭头。",
-    "自定义链接类操作沿用 .cell__action 宿主，不靠 inline style 单独补间距。"
+    "自定义链接类操作沿用 .cell__action 宿主，本体不额外补右侧间距，保证内容距屏幕右侧保持 16px。"
   ],
   "behavior": {
     "click": "clickable 时整行响应按压态，局部操作仍保持清晰热区。",
-    "divider": "分割线样式由修饰类控制，不单独生成新结构。",
+    "divider": "分割线样式由修饰类控制，但左侧起点始终跟随正文文本左边缘对齐，不因前导插槽场景漂移。",
     "slots": "右侧角标和箭头属于 trailing slot，不在标题区新增重复操作。"
   },
   "accessibility": {
@@ -150,9 +151,10 @@
     },
     "paddingHorizontal": "16px",
     "gap": "12px",
+    "leadingToContentGap": "12px",
     "titleFont": "var(--body-lg-font-size)",
     "subtitleFont": "var(--body-sm-font-size)",
-    "actionFont": "var(--body-md-font-size)",
+    "actionFont": "var(--body-lg-font-size)",
     "divider": "0.5px solid var(--border-neutral-l2)"
   },
   "specRefs": [

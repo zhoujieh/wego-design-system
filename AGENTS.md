@@ -85,7 +85,7 @@
 - 具体步骤、经验守门和预检清单以 `.codex/skills/iterate-component/SKILL.md` 为准。
 - 优先改对应 `preview/component-*.html` 的组件样式块，再同步 `components/{slug}.json`，最后运行 `node scripts/extract-components-css.mjs .` 重新生成 `components.css`。
 - **严禁直接手动编辑 `components.css`**——它是自动聚合输出，文件头部已标注 `DO NOT EDIT MANUALLY`。任何直接修改都会在下一次重新生成时丢失。
-- 需要真实浏览器核对时，优先在 `.design_library/wegoux/` 根目录启动本地静态服务，再访问 `http://127.0.0.1:<port>/preview/...` 或 `http://127.0.0.1:<port>/ui_kits/...`；不要把应用内浏览器对 `file://` 的安全拦截误判成组件样式失效。
+- 需要真实浏览器核对时，先在 `.design_library/wegoux/` 根目录启动本地静态服务并用 `curl -I http://127.0.0.1:<port>/...` 确认页面可访问，再优先用当前 agent 自带内置浏览器；若当前 agent 不支持或出现 attach / webview 失败，再切换到 Playwright。
 
 改脚手架：
 

@@ -110,6 +110,7 @@
     "dotSize": "8px",
     "numberMinWidth": "16px",
     "numberMultiMinWidth": "22px",
+    "numberPaddingInline": "4px",
     "textHeight": "16px",
     "removeSize": "16px",
     "stroke": "0.5px solid var(--palette-neutral-100)",

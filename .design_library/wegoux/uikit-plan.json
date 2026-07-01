@@ -289,27 +289,28 @@
     {
       "name": "业务设置",
       "slug": "biz-settings",
-      "presentation": "bottom-sheet",
-      "transition": "slide-up",
-      "dismissAction": "cancel-button",
+      "presentation": "full-screen-modal",
+      "transition": "slide-up-enter, slide-down-exit",
+      "dismissAction": "navbar-cancel-save",
       "overlayLevel": "overlay",
-      "preserveTabBar": true,
+      "coversTabBar": true,
       "componentSlugs": [
         "navbar",
+        "form",
         "cell",
         "checkbox",
         "switch",
-        "avatar",
+        "radio",
         "tag",
         "link"
       ],
       "uikitFile": "ui_kits/biz-settings/index.html",
       "specRef": "specs/交互设计原则.md#页面模式与转场",
       "templates": [
-        "岗位权限设置",
         "业务配置",
-        "商品筛选",
-        "详情操作面板"
+        "价格规则设置",
+        "成员权限设置",
+        "库存预警设置"
       ]
     }
   ],
