@@ -33,6 +33,7 @@
 .cell__title-icon{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;flex-shrink:0;font-size:16px;color:var(--text-secondary)}
 .cell__subtitle{display:block;margin-top:2px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:var(--body-sm-font-size);font-weight:var(--font-weight-regular);line-height:var(--body-sm-line-height);color:var(--text-tertiary);font-feature-settings:"zero"}
 .cell__action{display:flex;align-items:center;justify-content:flex-end;gap:4px;min-width:0;flex-shrink:0;margin-left:auto}
+.cell__action--link{padding-right:16px}
 .cell__action-text{display:block;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--body-md-font-size);font-weight:var(--font-weight-regular);line-height:var(--body-md-line-height);color:var(--text-secondary);font-feature-settings:"zero"}
 .cell__action-badge{display:flex;align-items:center;gap:4px;min-width:0}
 .cell__arrow{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;flex-shrink:0;font-size:16px;color:var(--text-tertiary)}
@@ -40,12 +41,13 @@
 .cell__avatar,
 .cell__backspace{display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .cell__select{min-width:28px;margin-left:12px;padding-left:4px;box-sizing:border-box}
+.cell__select-icon{font-size:24px;color:var(--text-default)}
+.cell__select-icon--brand{color:var(--text-link)}
 .cell__avatar{margin-left:16px;margin-right:12px}
 .cell__select + .cell__avatar{margin-left:8px}
 .cell__backspace{width:24px;min-width:24px;min-height:24px;margin-left:16px;color:var(--text-tertiary)}
 .cell__backspace + .cell__select{margin-left:8px}
-.cell__backspace-icon,
-.cell__backspace-icon svg{width:24px;height:24px;display:block}
+.cell__backspace-icon{display:flex;align-items:center;justify-content:center;width:24px;height:24px;font-size:24px;color:var(--border-neutral-l2)}
 .cell--divider-right-edge::after,
 .cell--divider-center::after{content:"";position:absolute;bottom:0;border-bottom:0.5px solid var(--border-neutral-l2);pointer-events:none}
 .cell--divider-right-edge::after{left:16px;right:0}
@@ -238,7 +240,7 @@
   <div class="cell cell--single cell--divider-right-edge cell--bg-white">
     <div class="cell__body">
       <div class="cell__content"><div class="cell__title-row"><span class="cell__title">自定义操作区</span></div></div>
-      <div class="cell__action" style="padding-right:16px"><a class="link" href="javascript:void(0)">更多</a></div>
+      <div class="cell__action cell__action--link"><a class="link" href="javascript:void(0)">更多</a></div>
     </div>
   </div>
   <div class="cell cell--double cell--divider-right-edge cell--bg-white">
@@ -247,7 +249,7 @@
         <div class="cell__title-row"><span class="cell__title">帮助与反馈</span></div>
         <div class="cell__subtitle">常见问题与在线客服</div>
       </div>
-      <div class="cell__action" style="padding-right:16px"><a class="link" href="javascript:void(0)">查看</a></div>
+      <div class="cell__action cell__action--link"><a class="link" href="javascript:void(0)">查看</a></div>
     </div>
   </div>
 </div>
@@ -285,7 +287,7 @@
       <div class="cell__content">
         <div class="cell__title-row">
           <span class="cell__title">标题文字角标</span>
-          <span class="badge badge--inline badge--text" style="--badge-text-bg: var(--accent-green); --badge-text-color: var(--text-inverse);"><span class="badge__text">NEW</span></span>
+          <span class="badge badge--inline badge--text"><span class="badge__text">NEW</span></span>
         </div>
       </div>
       <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
@@ -307,7 +309,7 @@
       <div class="cell__content">
         <div class="cell__title-row">
           <span class="cell__title">消息列表</span>
-          <span class="badge badge--inline badge--text" style="--badge-text-bg: var(--accent-green); --badge-text-color: var(--text-inverse);"><span class="badge__text">NEW</span></span>
+          <span class="badge badge--inline badge--text"><span class="badge__text">NEW</span></span>
         </div>
         <div class="cell__subtitle">3 条未读消息</div>
       </div>
@@ -325,7 +327,7 @@
       <div class="cell__content">
         <div class="cell__title-row">
           <span class="cell__title">自定义标签</span>
-          <span class="badge badge--inline badge--text" style="--badge-text-bg: var(--accent-green); --badge-text-color: var(--text-inverse);"><span class="badge__text">HOT</span></span>
+          <span class="badge badge--inline badge--text"><span class="badge__text">HOT</span></span>
         </div>
       </div>
       <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
@@ -438,21 +440,21 @@
 <div class="section-title">左侧 - 选择区 (图标)</div>
 <div class="section-group">
   <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
-    <div class="cell__select"><i class="wego-iconfont-s icon-chengchangzhongxin" style="font-size:24px;color:var(--text-default)"></i></div>
+    <div class="cell__select"><i class="cell__select-icon wego-iconfont-s icon-chengchangzhongxin"></i></div>
     <div class="cell__body">
       <div class="cell__content"><div class="cell__title-row"><span class="cell__title">带图标选择区</span></div></div>
       <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
     </div>
   </div>
   <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
-    <div class="cell__select"><i class="wego-iconfont-s icon-yuanjia" style="font-size:24px;color:var(--text-link)"></i></div>
+    <div class="cell__select"><i class="cell__select-icon cell__select-icon--brand wego-iconfont-s icon-yuanjia"></i></div>
     <div class="cell__body">
       <div class="cell__content"><div class="cell__title-row"><span class="cell__title">添加图标选择区</span></div></div>
       <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
     </div>
   </div>
   <div class="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable">
-    <div class="cell__select"><i class="wego-iconfont-s icon-chengchangzhongxin" style="font-size:24px;color:var(--text-default)"></i></div>
+    <div class="cell__select"><i class="cell__select-icon wego-iconfont-s icon-chengchangzhongxin"></i></div>
     <div class="cell__body">
       <div class="cell__content">
         <div class="cell__title-row"><span class="cell__title">成长中心</span></div>
@@ -509,7 +511,7 @@
 <div class="section-title">左侧 - 退格区</div>
 <div class="section-group">
   <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
-    <div class="cell__backspace"><span class="cell__backspace-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M3.75 12C3.75 11.5858 4.08579 11.25 4.5 11.25H19.5C19.9142 11.25 20.25 11.5858 20.25 12C20.25 12.4142 19.9142 12.75 19.5 12.75H4.5C4.08579 12.75 3.75 12.4142 3.75 12Z" fill="#202F64" fill-opacity="0.08"/></svg></span></div>
+    <div class="cell__backspace"><i class="cell__backspace-icon wego-iconfont-s icon-jian16"></i></div>
     <div class="cell__select"><div class="checkbox" onclick="this.classList.toggle('checkbox--checked')"><div class="checkbox__inner"></div><div class="checkbox__icon"><img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt=""></div></div></div>
     <div class="cell__avatar"><div class="avatar avatar--40 avatar--initials">头</div></div>
     <div class="cell__body">

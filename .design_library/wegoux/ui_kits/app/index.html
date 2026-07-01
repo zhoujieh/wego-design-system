@@ -312,7 +312,7 @@ function HomeScreen({ onProductClick }) {
       {/* Product Cards */}
       <div className="section-pad card-grid">
         {/* Card 1 */}
-        <div data-component="card" className="card card--elevated" onClick={onProductClick} style={{cursor:'pointer'}}>
+        <div data-component="card" className="card card--surface" onClick={onProductClick} style={{cursor:'pointer'}}>
           <div className="card__media" style={{position:'relative', overflow:'visible'}}>
             <div data-component="image" className="wg-image wg-image--md wg-image--rounded-md">
               <div className="wg-image__src is-loaded uikit-product-image uikit-product-image--audio">
@@ -324,20 +324,22 @@ function HomeScreen({ onProductClick }) {
               style={{ '--badge-text-bg': 'var(--accent-green)', '--badge-text-color': 'var(--text-inverse)' }}
             ><span className="badge__text">NEW</span></span>
           </div>
-          <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',minWidth:0}}>
-            <div className="uikit-truncate" style={{flex:1}}>
-              <div className="card__header">Apple AirPods Pro</div>
-              <div className="card__body">第二代 主动降噪 无线蓝牙耳机</div>
+          <div className="card__content">
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',minWidth:0}}>
+              <div className="uikit-truncate" style={{flex:1}}>
+                <div className="card__header">Apple AirPods Pro</div>
+                <div className="card__body">第二代 主动降噪 无线蓝牙耳机</div>
+              </div>
+              <div data-component="tag" className="tag tag--20 tag--brand-stroke uikit-nowrap"><span className="tag__label">新品</span></div>
             </div>
-            <div data-component="tag" className="tag tag--20 tag--brand-stroke uikit-nowrap"><span className="tag__label">新品</span></div>
-          </div>
-          <div className="card__footer">
-            <span className="card__price">¥1,899</span>
+            <div className="card__footer">
+              <span className="card__price">¥1,899</span>
+            </div>
           </div>
         </div>
 
         {/* Card 2 */}
-        <div data-component="card" className="card card--elevated">
+        <div data-component="card" className="card card--surface">
           <div className="card__media">
             <div data-component="image" className="wg-image wg-image--md wg-image--rounded-md">
               <div className="wg-image__src is-loaded uikit-product-image uikit-product-image--phone">
@@ -345,20 +347,22 @@ function HomeScreen({ onProductClick }) {
               </div>
             </div>
           </div>
-          <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',minWidth:0}}>
-            <div className="uikit-truncate" style={{flex:1}}>
-              <div className="card__header">小米14 Ultra</div>
-              <div className="card__body">徕卡光学 骁龙8Gen3 澎湃OS</div>
+          <div className="card__content">
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',minWidth:0}}>
+              <div className="uikit-truncate" style={{flex:1}}>
+                <div className="card__header">小米14 Ultra</div>
+                <div className="card__body">徕卡光学 骁龙8Gen3 澎湃OS</div>
+              </div>
+              <div data-component="tag" className="tag tag--20 tag--white uikit-nowrap"><span className="tag__label">热销</span></div>
             </div>
-            <div data-component="tag" className="tag tag--20 tag--white uikit-nowrap"><span className="tag__label">热销</span></div>
-          </div>
-          <div className="card__footer">
-            <span className="card__price">¥5,999</span>
+            <div className="card__footer">
+              <span className="card__price">¥5,999</span>
+            </div>
           </div>
         </div>
 
         {/* Card 3 */}
-        <div data-component="card" className="card card--elevated">
+        <div data-component="card" className="card card--surface">
           <div className="card__media">
             <div data-component="image" className="wg-image wg-image--md wg-image--rounded-md">
               <div className="wg-image__src is-loaded uikit-product-image uikit-product-image--home">
@@ -366,15 +370,17 @@ function HomeScreen({ onProductClick }) {
               </div>
             </div>
           </div>
-          <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',minWidth:0}}>
-            <div className="uikit-truncate" style={{flex:1}}>
-              <div className="card__header">戴森V12吸尘器</div>
-              <div className="card__body">轻量无线 激光探测 整机HEPA过滤</div>
+          <div className="card__content">
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',minWidth:0}}>
+              <div className="uikit-truncate" style={{flex:1}}>
+                <div className="card__header">戴森V12吸尘器</div>
+                <div className="card__body">轻量无线 激光探测 整机HEPA过滤</div>
+              </div>
+              <div data-component="tag" className="tag tag--20 tag--gray uikit-nowrap"><span className="tag__label">推荐</span></div>
             </div>
-            <div data-component="tag" className="tag tag--20 tag--gray uikit-nowrap"><span className="tag__label">推荐</span></div>
-          </div>
-          <div className="card__footer">
-            <span className="card__price">¥3,499</span>
+            <div className="card__footer">
+              <span className="card__price">¥3,499</span>
+            </div>
           </div>
         </div>
       </div>
@@ -408,20 +414,22 @@ function DetailScreen() {
 
       {/* Product Info Card */}
       <div className="section-pad">
-        <div data-component="card" className="card card--elevated">
-          <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',minWidth:0}}>
-            <div className="uikit-truncate" style={{flex:1}}>
-              <div className="card__header">Apple AirPods Pro (第二代)</div>
-              <div className="card__body" style={{marginTop:4}}>主动降噪 自适应音频 通透模式</div>
+        <div data-component="card" className="card card--surface">
+          <div className="card__content">
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',minWidth:0}}>
+              <div className="uikit-truncate" style={{flex:1}}>
+                <div className="card__header">Apple AirPods Pro (第二代)</div>
+                <div className="card__body" style={{marginTop:4}}>主动降噪 自适应音频 通透模式</div>
+              </div>
             </div>
-          </div>
-          <div style={{display:'flex',gap:'var(--spacer-8)',marginTop:'var(--spacer-8)',flexWrap:'wrap'}}>
-            <div data-component="tag" className="tag tag--20 tag--brand-stroke uikit-nowrap"><span className="tag__label">新品</span></div>
-            <div data-component="tag" className="tag tag--20 tag--white uikit-nowrap"><span className="tag__label">官方正品</span></div>
-            <div data-component="tag" className="tag tag--20 tag--gray uikit-nowrap"><span className="tag__label">2年保修</span></div>
-          </div>
-          <div className="card__footer" style={{marginTop:'var(--spacer-8)'}}>
-            <span className="card__price">¥1,899.00</span>
+            <div style={{display:'flex',gap:'var(--spacer-8)',marginTop:'var(--spacer-8)',flexWrap:'wrap'}}>
+              <div data-component="tag" className="tag tag--20 tag--brand-stroke uikit-nowrap"><span className="tag__label">新品</span></div>
+              <div data-component="tag" className="tag tag--20 tag--white uikit-nowrap"><span className="tag__label">官方正品</span></div>
+              <div data-component="tag" className="tag tag--20 tag--gray uikit-nowrap"><span className="tag__label">2年保修</span></div>
+            </div>
+            <div className="card__footer" style={{marginTop:'var(--spacer-8)'}}>
+              <span className="card__price">¥1,899.00</span>
+            </div>
           </div>
         </div>
       </div>

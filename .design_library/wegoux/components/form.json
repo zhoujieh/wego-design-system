@@ -17,12 +17,29 @@
       "horizontal",
       "vertical"
     ],
+    "alignment": [
+      "default",
+      "right-align"
+    ],
     "inputType": [
       "text",
+      "number",
       "phone",
       "money",
       "textarea",
-      "select"
+      "select",
+      "custom"
+    ],
+    "rightAction": [
+      "none",
+      "link",
+      "button",
+      "icon-text",
+      "icon-actions",
+      "upload",
+      "tag-group",
+      "radio-group",
+      "switch"
     ],
     "state": [
       "default",
@@ -40,30 +57,51 @@
   "representativeVariants": [
     {
       "layout": "horizontal",
+      "alignment": "default",
       "inputType": "text",
       "state": "default",
-      "modifier": "default"
+      "modifier": "default",
+      "rightAction": "none"
     },
     {
       "layout": "horizontal",
+      "alignment": "default",
       "inputType": "phone",
       "state": "default",
-      "modifier": "label-w80"
+      "modifier": "label-w80",
+      "rightAction": "none"
     },
     {
       "layout": "vertical",
+      "alignment": "default",
       "inputType": "textarea",
       "state": "error",
-      "modifier": "fixed-height"
+      "modifier": "fixed-height",
+      "rightAction": "none"
     },
     {
       "layout": "horizontal",
+      "alignment": "default",
       "inputType": "select",
       "state": "default",
-      "modifier": "clickable"
+      "modifier": "clickable",
+      "rightAction": "none"
+    },
+    {
+      "layout": "horizontal",
+      "alignment": "right-align",
+      "inputType": "money",
+      "state": "default",
+      "modifier": "default",
+      "rightAction": "link"
     }
   ],
   "anatomy": [
+    {
+      "name": "container",
+      "selector": ".form",
+      "role": "字段分组容器"
+    },
     {
       "name": "root",
       "selector": ".form-body",
@@ -75,9 +113,14 @@
       "role": "字段标题"
     },
     {
-      "name": "control",
-      "selector": ".form-body__control",
+      "name": "action",
+      "selector": ".form-body__action",
       "role": "输入或选择区"
+    },
+    {
+      "name": "rightAction",
+      "selector": ".form-body__right-btn",
+      "role": "右侧辅助操作区"
     },
     {
       "name": "message",
@@ -85,20 +128,26 @@
       "role": "反馈文案"
     },
     {
-      "name": "expand",
-      "selector": ".form-body__expand",
-      "role": "展开内容区"
+      "name": "value",
+      "selector": ".form-body__value",
+      "role": "只读文本值"
+    },
+    {
+      "name": "dropdown",
+      "selector": ".form-dropdown",
+      "role": "展开选项面板"
     }
   ],
   "structurePatterns": [
     "横向布局用于常规设置和资料编辑，纵向布局用于较长输入或说明内容。",
     "select、upload、icon actions 等增强能力都挂在同一字段容器体系内。",
-    "错误文案与计数字段占用消息槽位，不新增第二套反馈结构。"
+    "错误文案与计数字段占用消息槽位，不新增第二套反馈结构。",
+    "右侧辅助操作统一挂在 .form-body__right-btn，不靠 inline style 单独补尺寸和颜色。"
   ],
   "behavior": {
     "click": "select 或 clickable 行通过整行按压态反馈点击。",
     "validation": "错误态优先显示错误文案并覆盖计数提示。",
-    "layout": "label 宽度修饰类只改变字段对齐，不改变组件语义。"
+    "layout": "label 宽度修饰类和 right-align 容器只改变字段对齐，不改变组件语义。"
   },
   "accessibility": {
     "labelAssociation": "label 与具体输入控件需建立清晰关联。",
@@ -107,7 +156,8 @@
   },
   "usageHints": [
     "适合资料编辑、业务设置、权限配置等高密度表单页。",
-    "手机号和金额类型沿用统一字段骨架，不单独发明业务组件。"
+    "手机号和金额类型沿用统一字段骨架，不单独发明业务组件。",
+    "需要链接、按钮、图标动作、上传位或快捷选项时，优先放入统一右侧辅助操作区。"
   ],
   "doNotInvent": [
     "不要把 form 扩成桌面属性面板、富文本表单或多列表格表单。",
@@ -164,17 +214,21 @@
     "root": ".form-body",
     "requiredChildren": [
       ".form-body__label",
-      ".form-body__control"
+      ".form-body__action"
     ],
     "optionalChildren": [
       ".form-body__error",
       ".form-body__counter",
-      ".form-body__expand",
-      ".form-body__dropdown"
+      ".form-body__right-btn",
+      ".form-body__value",
+      ".form-dropdown"
+    ],
+    "containerModifiers": [
+      ".form--no-divider",
+      ".form--right-align"
     ],
     "modifierClasses": [
       ".form-body--vertical",
-      ".form-body--no-divider",
       ".form-body--label-w80",
       ".form-body--label-w120",
       ".form-body--fixed-height",

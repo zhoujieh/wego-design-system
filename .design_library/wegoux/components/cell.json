@@ -34,13 +34,18 @@
       "none",
       "select",
       "avatar",
-      "backspace"
+      "backspace",
+      "icon",
+      "composite-edit"
     ],
     "trailingSlot": [
       "none",
       "text",
       "badge",
-      "arrow"
+      "arrow",
+      "switch",
+      "button",
+      "custom-link"
     ]
   },
   "representativeVariants": [
@@ -62,6 +67,13 @@
       "interaction": "static",
       "leadingSlot": "avatar",
       "trailingSlot": "text"
+    },
+    {
+      "density": "single",
+      "surface": "bg-white",
+      "interaction": "clickable",
+      "leadingSlot": "select",
+      "trailingSlot": "switch"
     }
   ],
   "anatomy": [
@@ -87,9 +99,10 @@
     }
   ],
   "structurePatterns": [
-    "左侧插槽只放选择控件、头像或返回类元素，保持单一前导语义。",
+    "左侧插槽默认保持单一前导语义；编辑态允许退格占位、选择控件和头像做紧凑组合。",
     "中间内容区固定标题优先、副标题次级，不扩成多列表格。",
-    "右侧操作区最多承担一种主反馈类型，例如文字、角标或箭头。"
+    "右侧操作区最多承担一种主反馈类型，例如文字、角标、按钮、开关或箭头。",
+    "自定义链接类操作沿用 .cell__action 宿主，不靠 inline style 单独补间距。"
   ],
   "behavior": {
     "click": "clickable 时整行响应按压态，局部操作仍保持清晰热区。",
@@ -103,7 +116,8 @@
   },
   "usageHints": [
     "适合设置页、资料页、订单信息摘要等移动端高密度列表。",
-    "双行模式用于副标题需要解释信息时，避免在单行强塞长文案。"
+    "双行模式用于副标题需要解释信息时，避免在单行强塞长文案。",
+    "右侧是链接、按钮或开关时，仍应保持单一主反馈，不在同一行叠加多种主操作。"
   ],
   "doNotInvent": [
     "不要把 cell 扩成桌面表格行、树形列表或多列数据面板。",
@@ -156,7 +170,22 @@
       ".cell__avatar",
       ".cell__backspace",
       ".cell__action",
-      ".cell__arrow"
+      ".cell__arrow",
+      ".cell__title-icon",
+      ".cell__action-text",
+      ".cell__action-badge",
+      ".cell__select-icon",
+      ".cell__backspace-icon"
+    ],
+    "modifierClasses": [
+      ".cell--single",
+      ".cell--double",
+      ".cell--bg-white",
+      ".cell--bg-grey",
+      ".cell--clickable",
+      ".cell--divider-right-edge",
+      ".cell--divider-center",
+      ".cell--indent"
     ],
     "contentChildren": [
       ".cell__title-row",

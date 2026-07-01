@@ -199,6 +199,42 @@ function countCSSRules(css) {
   return matches ? matches.length : 0;
 }
 
+function stripKeyframesForSelectorScan(css) {
+  let result = '';
+  let index = 0;
+  const keyframesRegex = /@(?:-\w+-)?keyframes\b/g;
+
+  while (index < css.length) {
+    keyframesRegex.lastIndex = index;
+    const keyframesMatch = keyframesRegex.exec(css);
+    if (!keyframesMatch || keyframesMatch.index === undefined) {
+      result += css.slice(index);
+      break;
+    }
+
+    const start = keyframesMatch.index;
+    result += css.slice(index, start);
+
+    const blockStart = css.indexOf('{', start);
+    if (blockStart === -1) {
+      break;
+    }
+
+    let depth = 1;
+    let cursor = blockStart + 1;
+    while (cursor < css.length && depth > 0) {
+      const ch = css[cursor];
+      if (ch === '{') depth++;
+      if (ch === '}') depth--;
+      cursor++;
+    }
+
+    index = cursor;
+  }
+
+  return result;
+}
+
 // ─── Main ───────────────────────────────────────────────────────────────────
 
 function main() {
@@ -285,10 +321,11 @@ function main() {
       }
     }
 
-    // Check for duplicate selectors
+    // Check for duplicate selectors, but ignore keyframe steps like 0% / 100%
+    const cssForSelectorScan = stripKeyframesForSelectorScan(componentCSS);
     const selectorRegex = /^([^{@/\n][^{]*)\{/gm;
     let selMatch;
-    while ((selMatch = selectorRegex.exec(componentCSS)) !== null) {
+    while ((selMatch = selectorRegex.exec(cssForSelectorScan)) !== null) {
       const selector = selMatch[1].trim();
       if (allSelectors.has(selector) && allSelectors.get(selector) !== slug) {
         warnings.push({

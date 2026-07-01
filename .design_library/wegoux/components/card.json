@@ -14,7 +14,7 @@
   ],
   "variantDimensions": {
     "surface": [
-      "elevated",
+      "surface",
       "outlined",
       "filled"
     ],
@@ -29,7 +29,7 @@
   },
   "representativeVariants": [
     {
-      "surface": "elevated",
+      "surface": "surface",
       "media": "top-media",
       "footer": "meta-footer"
     },
@@ -56,6 +56,11 @@
       "role": "媒体区"
     },
     {
+      "name": "content",
+      "selector": ".card__content",
+      "role": "内容分区，负责卡片内留白与垂直节奏"
+    },
+    {
       "name": "header",
       "selector": ".card__header",
       "role": "标题区"
@@ -72,20 +77,23 @@
     }
   ],
   "structurePatterns": [
-    "卡片内部按媒体、标题、正文、底部的垂直顺序组织。",
+    "卡片根节点只负责表面与裁切，默认不提供内边距。",
+    "正文内容优先放进 .card__content，由内容区自己控制留白和垂直节奏。",
+    "卡片内部按媒体、内容分区、标题、正文、底部的垂直顺序组织。",
     "价格、标签等信息放在 footer，不挤占标题层级。",
     "卡片可作为列表项容器，但不替代页面外层布局壳。"
   ],
   "behavior": {},
   "accessibility": {},
   "usageHints": [
-    "elevated 适合首页商品流或可点击内容块。",
+    "surface 适合首页商品流或可点击内容块，保持白底但不依赖阴影。",
     "outlined 适合设置、通知、说明类信息块。",
-    "filled 适合弱强调的摘要或提示容器。"
+    "filled 适合弱强调的摘要或提示容器。",
+    "默认不要把内边距写在 .card 根节点，留白交给 .card__content 或业务内容区处理。"
   ],
   "doNotInvent": [
     "不要扩展为营销大促海报卡、复杂统计面板或多层悬浮卡。",
-    "不要在卡片内叠加重阴影和大面积品牌色背景。"
+    "不要新增带阴影的公开卡片场景，也不要在卡片内叠加大面积品牌色背景。"
   ],
   "tokensConsumed": [
     "--bg-muted",
@@ -103,9 +111,7 @@
     "--heading-sm-font-size",
     "--radius-12",
     "--radius-4",
-    "--radius-6",
     "--radius-8",
-    "--shadow-sm",
     "--spacer-12",
     "--spacer-16",
     "--spacer-2",
@@ -116,17 +122,16 @@
     "--text-tertiary"
   ],
   "designTokens": {
-    "spacing": "var(--spacer-12) 到 var(--spacer-16)",
+    "spacing": "card 根节点默认 0；内容区常用 var(--spacer-12) 到 var(--spacer-16)",
     "radius": {
-      "elevated": "var(--radius-12)",
+      "surface": "var(--radius-12)",
       "outlined": "var(--radius-8)",
       "filled": "var(--radius-8)"
     },
     "titleFont": "var(--body-lg-font-size) / var(--font-weight-semibold)",
     "bodyFont": "var(--body-md-font-size)",
     "footerFont": "var(--body-sm-font-size)",
-    "priceFont": "var(--heading-sm-font-size) / var(--font-weight-semibold)",
-    "shadow": "var(--shadow-sm)"
+    "priceFont": "var(--heading-sm-font-size) / var(--font-weight-semibold)"
   },
   "specRefs": [
     "specs/设计风格与品牌原则.md",
@@ -135,14 +140,16 @@
   "domAnatomy": {
     "root": ".card",
     "optionalChildren": [
-      ".card__media",
-      ".card__header",
-      ".card__footer"
+      ".card__media"
     ],
     "requiredChildren": [
-      ".card__body"
+      ".card__content"
     ],
     "subElements": [
+      ".card__content--compact",
+      ".card__header",
+      ".card__body",
+      ".card__footer",
       ".card__price",
       ".card__tag"
     ]
