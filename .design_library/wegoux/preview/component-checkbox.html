@@ -8,22 +8,27 @@
 <link rel="stylesheet" href="../scaffold.css">
 <link rel="stylesheet" href="../iconfont.css">
 <style>
-.sub-label { font-size:var(--body-sm-font-size); color:var(--text-tertiary); margin:var(--spacer-16) 0 var(--spacer-8); }
-.interactive-row .checkbox { cursor:pointer; }
-.preview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,132px),1fr));gap:var(--spacer-8);width:100%;max-width:560px;box-sizing:border-box;margin-bottom:var(--spacer-16)}
+.preview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,132px),1fr));gap:var(--spacer-8);width:100%;box-sizing:border-box;margin-bottom:var(--spacer-16)}
 .preview-item{display:flex;align-items:center;justify-content:space-between;gap:var(--spacer-12);min-width:0;min-height:52px;padding:var(--spacer-12);box-sizing:border-box;border:1px solid var(--border-neutral-l2);border-radius:var(--radius-8);background:var(--bg-surface)}
 .preview-item .label{width:auto;min-width:0;overflow-wrap:anywhere;color:var(--text-secondary)}
+.preview-item--with-text{justify-content:flex-start}
+.preview-item--interactive{cursor:pointer}
 .dark-strip .preview-grid{margin-bottom:0}
 .dark-strip .preview-item{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12)}
 .dark-strip .preview-item .label{color:rgba(255,255,255,.7)}
-.interaction-panel{width:100%;max-width:420px;box-sizing:border-box;margin-bottom:var(--spacer-16);padding:var(--spacer-12);border:1px solid var(--border-neutral-l2);border-radius:var(--radius-8);background:var(--bg-surface)}
-.interaction-children{min-width:0;padding-left:clamp(var(--spacer-16),8vw,36px)}
+.selection-note{margin:-4px 0 var(--spacer-12);font-size:var(--body-sm-font-size);line-height:var(--body-sm-line-height);color:var(--text-tertiary)}
+.selection-stack{display:flex;flex-direction:column;gap:var(--spacer-8);align-items:flex-start;min-width:0}
+.selection-children{display:flex;flex-direction:column;gap:var(--spacer-8);min-width:0;padding-left:clamp(var(--spacer-16),8vw,36px)}
 @media (max-width: 420px){
   .preview-item{align-items:flex-start;flex-direction:column}
 }
 
 /* @component-css-start */
-.checkbox{--checkbox-surface:transparent;--checkbox-border:var(--border-control);--checkbox-disabled-surface:var(--bg-control-disabled);--checkbox-disabled-border:var(--border-disabled);position:relative;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;flex:0 0 24px;box-sizing:border-box;border-radius:var(--radius-full);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.checkbox{--checkbox-size:24px;--checkbox-surface:transparent;--checkbox-border:var(--border-control);--checkbox-disabled-surface:var(--bg-control-disabled);--checkbox-disabled-border:var(--border-disabled);position:relative;display:inline-flex;align-items:center;justify-content:center;width:var(--checkbox-size);height:var(--checkbox-size);flex:0 0 var(--checkbox-size);box-sizing:border-box;border-radius:var(--radius-full);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.checkbox::before{content:"";position:absolute;top:calc((var(--checkbox-size) - var(--touch-min)) / 2);right:calc((var(--checkbox-size) - var(--touch-min)) / 2);bottom:calc((var(--checkbox-size) - var(--touch-min)) / 2);left:calc((var(--checkbox-size) - var(--touch-min)) / 2)}
+.checkbox-field-group{display:inline-flex;align-items:center;flex-wrap:wrap;gap:var(--spacer-12);min-width:0}
+.checkbox-field{display:inline-flex;align-items:center;gap:var(--spacer-2);min-width:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.checkbox-field__text{min-width:0;font-size:var(--body-md-font-size);line-height:var(--body-md-line-height);color:var(--text-default);overflow-wrap:anywhere}
 .checkbox__inner{position:absolute;inset:2px;box-sizing:border-box;border:1.5px solid var(--checkbox-border);border-radius:var(--radius-full);background:var(--checkbox-surface);transition:background var(--duration-fast) var(--ease-standard),border-color var(--duration-fast) var(--ease-standard),opacity var(--duration-fast) var(--ease-standard)}
 .checkbox__icon,
 .checkbox__minus,
@@ -36,12 +41,12 @@
 .checkbox--count .checkbox__inner{background:var(--bg-brand);border-color:var(--text-brand)}
 .checkbox--checked .checkbox__icon{display:flex;transform:translateX(.5px)}
 .checkbox--indeterminate .checkbox__minus{display:flex}
-.checkbox--count .checkbox__count{display:flex;width:19.5px;height:19.5px;border-radius:var(--radius-full);background:var(--bg-brand);font-family:var(--number-md-font-family);font-size:12px;font-weight:var(--font-weight-medium);line-height:1;color:var(--text-inverse);font-feature-settings:"zero"}
-.checkbox--sm{width:20px;height:20px;flex-basis:20px}
+.checkbox--count .checkbox__count{display:flex;width:19.5px;height:19.5px;border-radius:var(--radius-full);background:var(--bg-brand);font-family:var(--number-md-font-family);font-size:var(--body-sm-font-size);font-weight:var(--font-weight-medium);line-height:1;color:var(--text-inverse);font-feature-settings:"zero"}
+.checkbox--sm{--checkbox-size:20px}
 .checkbox--sm .checkbox__inner{inset:2px}
 .checkbox--sm .checkbox__asset{width:11px;height:8px}
 .checkbox--sm .checkbox__minus::before{width:8px;height:1.5px}
-.checkbox--sm.checkbox--count .checkbox__count{width:16px;height:16px;font-size:12px}
+.checkbox--sm.checkbox--count .checkbox__count{width:16px;height:16px;font-size:var(--body-sm-font-size)}
 .checkbox--disabled{pointer-events:none;cursor:not-allowed}
 .checkbox--disabled:not(.checkbox--checked):not(.checkbox--indeterminate):not(.checkbox--count) .checkbox__inner{border-color:var(--checkbox-disabled-border);background:var(--checkbox-disabled-surface)}
 .checkbox--checked.checkbox--disabled .checkbox__inner,
@@ -116,6 +121,93 @@
   <div class="checkbox checkbox--count checkbox--sm">
     <div class="checkbox__count"><span>999</span></div>
   </div>
+  </div>
+</div>
+
+<div class="pv-section__title">带文字场景 — 默认 20px</div>
+<p class="selection-note">直接在原场景里验证点击切换，避免另起独立交互演示模块。</p>
+<div class="preview-grid">
+  <div class="preview-item preview-item--with-text">
+    <div class="checkbox-field preview-item--interactive" data-checkbox-toggle tabindex="0" role="checkbox" aria-checked="false">
+      <div class="checkbox checkbox--sm"><div class="checkbox__inner"></div></div>
+      <span class="checkbox-field__text">到店自提</span>
+    </div>
+  </div>
+  <div class="preview-item preview-item--with-text">
+    <div class="checkbox-field preview-item--interactive" data-checkbox-toggle tabindex="0" role="checkbox" aria-checked="true">
+      <div class="checkbox checkbox--checked checkbox--sm">
+        <div class="checkbox__inner"></div>
+        <div class="checkbox__icon">
+          <img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt="">
+        </div>
+      </div>
+      <span class="checkbox-field__text">同意协议</span>
+    </div>
+  </div>
+  <div class="preview-item preview-item--with-text">
+    <div class="checkbox-field">
+      <div class="checkbox checkbox--indeterminate checkbox--sm">
+        <div class="checkbox__inner"></div>
+        <div class="checkbox__minus"></div>
+      </div>
+      <span class="checkbox-field__text">部分选择</span>
+    </div>
+  </div>
+</div>
+
+<div class="pv-section__title">带文字成组 — 组内间距 12px</div>
+<p class="selection-note">组内多选与父子联动都并回原组件示例区，规则直接跟随分组结构阅读。</p>
+<div class="preview-grid">
+  <div class="preview-item preview-item--with-text">
+    <div class="checkbox-field-group" role="group" aria-label="附加服务">
+      <div class="checkbox-field preview-item--interactive" data-checkbox-toggle tabindex="0" role="checkbox" aria-checked="true">
+        <div class="checkbox checkbox--checked checkbox--sm">
+          <div class="checkbox__inner"></div>
+          <div class="checkbox__icon">
+            <img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt="">
+          </div>
+        </div>
+        <span class="checkbox-field__text">到店自提</span>
+      </div>
+      <div class="checkbox-field preview-item--interactive" data-checkbox-toggle tabindex="0" role="checkbox" aria-checked="false">
+        <div class="checkbox checkbox--sm"><div class="checkbox__inner"></div></div>
+        <span class="checkbox-field__text">电子发票</span>
+      </div>
+      <div class="checkbox-field preview-item--interactive" data-checkbox-toggle tabindex="0" role="checkbox" aria-checked="false">
+        <div class="checkbox checkbox--sm"><div class="checkbox__inner"></div></div>
+        <span class="checkbox-field__text">联系配送</span>
+      </div>
+    </div>
+  </div>
+  <div class="preview-item preview-item--with-text">
+    <div class="selection-stack" role="group" aria-label="成员权限">
+      <div class="checkbox-field checkbox-field--parent preview-item--interactive" data-checkbox-parent="permission-group" tabindex="0" role="checkbox" aria-checked="mixed">
+        <div class="checkbox checkbox--indeterminate checkbox--sm">
+          <div class="checkbox__inner"></div>
+          <div class="checkbox__minus"></div>
+        </div>
+        <span class="checkbox-field__text">全选权限</span>
+      </div>
+      <div class="selection-children">
+        <div class="checkbox-field checkbox-field--child preview-item--interactive" data-checkbox-child="permission-group" tabindex="0" role="checkbox" aria-checked="true">
+          <div class="checkbox checkbox--checked checkbox--sm">
+            <div class="checkbox__inner"></div>
+            <div class="checkbox__icon">
+              <img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt="">
+            </div>
+          </div>
+          <span class="checkbox-field__text">查看订单</span>
+        </div>
+        <div class="checkbox-field checkbox-field--child preview-item--interactive" data-checkbox-child="permission-group" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="checkbox checkbox--sm"><div class="checkbox__inner"></div></div>
+          <span class="checkbox-field__text">编辑价格</span>
+        </div>
+        <div class="checkbox-field checkbox-field--child preview-item--interactive" data-checkbox-child="permission-group" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="checkbox checkbox--sm"><div class="checkbox__inner"></div></div>
+          <span class="checkbox-field__text">导出报表</span>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -220,68 +312,15 @@
 </div>
 
 
-<div class="pv-section__title">交互演示</div>
-<p class="demo-hint">复选框点击切换选中/未选中；父级根据子级状态自动计算（全选/部分选/全不选）</p>
-
-<div class="sub-label">基础交互 — 24px</div>
-<div class="interaction-panel">
-<div class="interactive-row" data-mode="toggle" data-size="24">
-  <div class="checkbox"><div class="checkbox__inner"></div></div>
-  <span class="interactive-text">选项 A</span>
-</div>
-<div class="interactive-row" data-mode="toggle" data-size="24">
-  <div class="checkbox"><div class="checkbox__inner"></div></div>
-  <span class="interactive-text">选项 B</span>
-</div>
-<div class="interactive-row" data-mode="toggle" data-size="24">
-  <div class="checkbox"><div class="checkbox__inner"></div></div>
-  <span class="interactive-text">选项 C</span>
-</div>
-</div>
-
-<div class="sub-label">基础交互 — 20px</div>
-<div class="interaction-panel">
-<div class="interactive-row" data-mode="toggle" data-size="20">
-  <div class="checkbox checkbox--sm"><div class="checkbox__inner"></div></div>
-  <span class="interactive-text">选项 X</span>
-</div>
-<div class="interactive-row" data-mode="toggle" data-size="20">
-  <div class="checkbox checkbox--sm"><div class="checkbox__inner"></div></div>
-  <span class="interactive-text">选项 Y</span>
-</div>
-<div class="interactive-row" data-mode="toggle" data-size="20">
-  <div class="checkbox checkbox--sm"><div class="checkbox__inner"></div></div>
-  <span class="interactive-text">选项 Z</span>
-</div>
-</div>
-
-<div class="sub-label">父子联动 — 24px</div>
-<div class="interaction-panel">
-<div class="interactive-row" data-mode="parent" data-children="child-group-1" data-size="24">
-  <div class="checkbox"><div class="checkbox__inner"></div></div>
-  <span class="interactive-text" style="font-weight:var(--font-weight-medium);color:var(--text-default)">全选</span>
-</div>
-<div id="child-group-1" class="interaction-children">
-  <div class="interactive-row" data-mode="child" data-size="24">
-    <div class="checkbox"><div class="checkbox__inner"></div></div>
-    <span class="interactive-text">子项 1</span>
-  </div>
-  <div class="interactive-row" data-mode="child" data-size="24">
-    <div class="checkbox"><div class="checkbox__inner"></div></div>
-    <span class="interactive-text">子项 2</span>
-  </div>
-  <div class="interactive-row" data-mode="child" data-size="24">
-    <div class="checkbox"><div class="checkbox__inner"></div></div>
-    <span class="interactive-text">子项 3</span>
-  </div>
-</div>
-</div>
-
 <script>
 (function() {
   var CHECK_ASSET = '<img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt="">';
 
-  function setChecked(cb, size) {
+  function syncFieldState(field, state) {
+    field.setAttribute('aria-checked', state);
+  }
+
+  function setChecked(cb) {
     cb.classList.remove('checkbox--indeterminate');
     cb.classList.add('checkbox--checked');
     var old = cb.querySelector('.checkbox__icon'); if (old) old.remove();
@@ -301,61 +340,85 @@
     var minus = document.createElement('div'); minus.className = 'checkbox__minus'; cb.appendChild(minus);
   }
   function isChecked(cb) { return cb.classList.contains('checkbox--checked'); }
-
-  // Toggle mode: simple checked/unchecked
-  document.querySelectorAll('.interactive-row[data-mode="toggle"]').forEach(function(row) {
-    row.addEventListener('click', function() {
-      var cb = row.querySelector('.checkbox');
-      if (isChecked(cb)) { setUnchecked(cb); }
-      else { setChecked(cb); }
-    });
-  });
-
-  // Parent-child mode
-  function updateParent(parentRow) {
-    var groupId = parentRow.getAttribute('data-children');
-    var group = document.getElementById(groupId);
-    if (!group) return;
-    var children = group.querySelectorAll('.interactive-row[data-mode="child"] .checkbox');
-    var checkedCount = 0;
-    children.forEach(function(c) { if (isChecked(c)) checkedCount++; });
-    var parentCb = parentRow.querySelector('.checkbox');
-    if (checkedCount === children.length) { setChecked(parentCb); }
-    else if (checkedCount === 0) { setUnchecked(parentCb); }
-    else { setIndeterminate(parentCb); }
+  function isIndeterminate(cb) { return cb.classList.contains('checkbox--indeterminate'); }
+  function toggleCheckbox(field) {
+    var cb = field.querySelector('.checkbox');
+    if (!cb || cb.classList.contains('checkbox--disabled')) return;
+    if (isChecked(cb)) {
+      setUnchecked(cb);
+      syncFieldState(field, 'false');
+      return;
+    }
+    setChecked(cb);
+    syncFieldState(field, 'true');
   }
-
-  // Child click
-  document.querySelectorAll('.interactive-row[data-mode="child"]').forEach(function(row) {
-    row.addEventListener('click', function() {
-      var cb = row.querySelector('.checkbox');
-      if (isChecked(cb)) { setUnchecked(cb); }
-      else { setChecked(cb); }
-      // Find parent and update
-      var group = row.closest('[id^="child-group"]');
-      if (group) {
-        var parentRow = document.querySelector('.interactive-row[data-children="' + group.id + '"]');
-        if (parentRow) updateParent(parentRow);
+  function bindPress(node, handler) {
+    node.addEventListener('click', handler);
+    node.addEventListener('keydown', function(event) {
+      if (event.key === ' ' || event.key === 'Enter') {
+        event.preventDefault();
+        handler();
       }
     });
+  }
+
+  document.querySelectorAll('[data-checkbox-toggle]').forEach(function(field) {
+    bindPress(field, function() {
+      toggleCheckbox(field);
+    });
   });
 
-  // Parent click: toggle all children
-  document.querySelectorAll('.interactive-row[data-mode="parent"]').forEach(function(row) {
-    row.addEventListener('click', function() {
-      var groupId = row.getAttribute('data-children');
-      var group = document.getElementById(groupId);
-      if (!group) return;
-      var parentCb = row.querySelector('.checkbox');
-      var allChecked = true;
-      var children = group.querySelectorAll('.interactive-row[data-mode="child"] .checkbox');
-      children.forEach(function(c) { if (!isChecked(c)) allChecked = false; });
-      children.forEach(function(c) {
-        if (allChecked) { setUnchecked(c); }
-        else { setChecked(c); }
-      });
-      updateParent(row);
+  function updateParent(groupName) {
+    var parentField = document.querySelector('[data-checkbox-parent="' + groupName + '"]');
+    var childFields = document.querySelectorAll('[data-checkbox-child="' + groupName + '"]');
+    if (!parentField || !childFields.length) return;
+    var parentCb = parentField.querySelector('.checkbox');
+    var checkedCount = 0;
+    childFields.forEach(function(field) {
+      var cb = field.querySelector('.checkbox');
+      if (cb && isChecked(cb)) checkedCount++;
     });
+    if (checkedCount === childFields.length) {
+      setChecked(parentCb);
+      syncFieldState(parentField, 'true');
+      return;
+    }
+    if (checkedCount === 0) {
+      setUnchecked(parentCb);
+      syncFieldState(parentField, 'false');
+      return;
+    }
+    setIndeterminate(parentCb);
+    syncFieldState(parentField, 'mixed');
+  }
+
+  document.querySelectorAll('[data-checkbox-child]').forEach(function(field) {
+    bindPress(field, function() {
+      toggleCheckbox(field);
+      updateParent(field.getAttribute('data-checkbox-child'));
+    });
+  });
+
+  document.querySelectorAll('[data-checkbox-parent]').forEach(function(field) {
+    bindPress(field, function() {
+      var groupName = field.getAttribute('data-checkbox-parent');
+      var childFields = document.querySelectorAll('[data-checkbox-child="' + groupName + '"]');
+      if (!childFields.length) return;
+      var shouldCheckAll = !isChecked(field.querySelector('.checkbox')) || isIndeterminate(field.querySelector('.checkbox'));
+      childFields.forEach(function(childField) {
+        var cb = childField.querySelector('.checkbox');
+        if (!cb || cb.classList.contains('checkbox--disabled')) return;
+        if (shouldCheckAll) {
+          setChecked(cb);
+          syncFieldState(childField, 'true');
+        } else {
+          setUnchecked(cb);
+          syncFieldState(childField, 'false');
+        }
+      });
+      updateParent(groupName);
+    });
+    updateParent(field.getAttribute('data-checkbox-parent'));
   });
 })();
 </script>

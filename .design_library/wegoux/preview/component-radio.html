@@ -8,33 +8,34 @@
 <link rel="stylesheet" href="../scaffold.css">
 <link rel="stylesheet" href="../iconfont.css">
 <style>
-.preview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,132px),1fr));gap:var(--spacer-8);width:100%;max-width:560px;box-sizing:border-box;margin-bottom:var(--spacer-16)}
+.preview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,132px),1fr));gap:var(--spacer-8);width:100%;box-sizing:border-box;margin-bottom:var(--spacer-16)}
 .preview-item{display:flex;align-items:center;justify-content:space-between;gap:var(--spacer-12);min-width:0;min-height:52px;padding:var(--spacer-12);box-sizing:border-box;border:1px solid var(--border-neutral-l2);border-radius:var(--radius-8);background:var(--bg-surface)}
 .preview-item .label{width:auto;min-width:0;overflow-wrap:anywhere;color:var(--text-secondary)}
+.preview-item--with-text{justify-content:flex-start}
+.preview-item--interactive{cursor:pointer}
 .dark-strip .preview-grid{margin-bottom:0}
 .dark-strip .preview-item{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12)}
 .dark-strip .preview-item .label{color:rgba(255,255,255,.7)}
-.interaction-panel{width:100%;max-width:420px;box-sizing:border-box;margin-bottom:var(--spacer-16);padding:var(--spacer-12);border:1px solid var(--border-neutral-l2);border-radius:var(--radius-8);background:var(--bg-surface)}
-.interactive-row{display:flex;align-items:center;gap:var(--spacer-8);min-height:32px;cursor:pointer}
-.interactive-row + .interactive-row{margin-top:var(--spacer-8)}
-.interactive-row .radio{cursor:pointer}
-.interaction-label{font-size:var(--body-md-font-size);color:var(--text-default)}
+.selection-note{margin:-4px 0 var(--spacer-12);font-size:var(--body-sm-font-size);line-height:var(--body-sm-line-height);color:var(--text-tertiary)}
 @media (max-width: 420px){
   .preview-item{align-items:flex-start;flex-direction:column}
 }
 
 /* @component-css-start */
-.radio { --radio-surface:transparent; --radio-border:var(--border-control); --radio-disabled-surface:var(--bg-control-disabled); --radio-disabled-border:var(--border-disabled); --radio-disabled-dot:var(--border-disabled); width:24px; height:24px; display:flex; align-items:center; justify-content:center; flex-shrink:0; position:relative; cursor:pointer; }
+.radio { --radio-size:24px; --radio-surface:transparent; --radio-border:var(--border-control); --radio-disabled-surface:var(--bg-control-disabled); --radio-disabled-border:var(--border-disabled); --radio-disabled-dot:var(--border-disabled); width:var(--radio-size); height:var(--radio-size); display:flex; align-items:center; justify-content:center; flex:0 0 var(--radio-size); box-sizing:border-box; position:relative; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.radio::before{content:"";position:absolute;top:calc((var(--radio-size) - var(--touch-min)) / 2);right:calc((var(--radio-size) - var(--touch-min)) / 2);bottom:calc((var(--radio-size) - var(--touch-min)) / 2);left:calc((var(--radio-size) - var(--touch-min)) / 2)}
+.radio-field-group{display:inline-flex;align-items:center;flex-wrap:wrap;gap:var(--spacer-12);min-width:0}
+.radio-field{display:inline-flex;align-items:center;gap:var(--spacer-2);min-width:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.radio-field__text{min-width:0;font-size:var(--body-md-font-size);line-height:var(--body-md-line-height);color:var(--text-default);overflow-wrap:anywhere}
 .radio__inner { width:20px; height:20px; border-radius:50%; border:1.5px solid var(--radio-border); background:var(--radio-surface); box-sizing:border-box; transition:border-color var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard); }
 .radio__dot { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:11px; height:11px; border-radius:50%; background:var(--bg-brand); display:none; }
 
 .radio--checked .radio__inner { border-color:var(--text-brand); }
 .radio--checked .radio__dot { display:block; }
 
-/* 20px = 24px * 5/6; inner: ~16.5px; dot: 11*(5/6)≈9px */
-.radio--sm { width:20px; height:20px; }
-.radio--sm .radio__inner { width:16.5px; height:16.5px; }
-.radio--sm .radio__dot { width:9px; height:9px; }
+.radio--sm { --radio-size:20px; }
+.radio--sm .radio__inner { width:16px; height:16px; }
+.radio--sm .radio__dot { width:8px; height:8px; }
 
 /* Disabled — unchecked: subtle border + disabled surface */
 .radio--disabled:not(.radio--checked) { pointer-events:none; cursor:not-allowed; }
@@ -68,6 +69,61 @@
   </div>
   <div class="preview-item"><span class="label">选中</span>
   <div class="radio radio--sm radio--checked radio--static" data-sample="sm-checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
+  </div>
+</div>
+
+<div class="pv-section__title">带文字场景 — 默认 20px</div>
+<div class="preview-grid">
+  <div class="preview-item preview-item--with-text">
+    <div class="radio-field">
+      <div class="radio radio--sm radio--checked" data-sample="with-text-checked">
+        <div class="radio__inner"></div><div class="radio__dot"></div>
+      </div>
+      <span class="radio-field__text">到店</span>
+    </div>
+  </div>
+  <div class="preview-item preview-item--with-text">
+    <div class="radio-field">
+      <div class="radio radio--sm" data-sample="with-text-unchecked">
+        <div class="radio__inner"></div><div class="radio__dot"></div>
+      </div>
+      <span class="radio-field__text">快递</span>
+    </div>
+  </div>
+  <div class="preview-item preview-item--with-text">
+    <div class="radio-field">
+      <div class="radio radio--sm radio--disabled" data-sample="with-text-disabled">
+        <div class="radio__inner"></div><div class="radio__dot"></div>
+      </div>
+      <span class="radio-field__text">暂不支持</span>
+    </div>
+  </div>
+</div>
+
+<div class="pv-section__title">带文字成组 — 组内间距 12px</div>
+<p class="selection-note">互斥选择直接附着在原成组示例里，点击已选项不会回退为空。</p>
+<div class="preview-grid">
+  <div class="preview-item preview-item--with-text">
+    <div class="radio-field-group" role="radiogroup" aria-label="配送方式" data-radio-group="delivery">
+      <div class="radio-field preview-item--interactive" tabindex="0" role="radio" aria-checked="true">
+        <div class="radio radio--sm radio--checked" data-group="delivery" data-sample="group-with-text-checked">
+          <div class="radio__inner"></div><div class="radio__dot"></div>
+        </div>
+        <span class="radio-field__text">到店</span>
+      </div>
+      <div class="radio-field preview-item--interactive" tabindex="0" role="radio" aria-checked="false">
+        <div class="radio radio--sm" data-group="delivery" data-sample="group-with-text-unchecked">
+          <div class="radio__inner"></div><div class="radio__dot"></div>
+        </div>
+        <span class="radio-field__text">快递</span>
+      </div>
+      <div class="radio-field preview-item--interactive" tabindex="0" role="radio" aria-checked="false">
+        <div class="radio radio--sm" data-group="delivery">
+          <div class="radio__inner"></div><div class="radio__dot"></div>
+        </div>
+        <span class="radio-field__text">同城</span>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -129,50 +185,50 @@
   </div>
 </div>
 
-<div class="pv-section__title">交互演示 — 24px（互斥单选，不可取消选择）</div>
-<div class="interaction-panel">
-  <div class="interactive-row" onclick="selectRadio(this)">
-    <div class="radio radio--checked" data-group="demo1">
-      <div class="radio__inner"></div><div class="radio__dot"></div>
-    </div>
-    <span class="interaction-label">选项 A</span>
-  </div>
-  <div class="interactive-row" onclick="selectRadio(this)">
-    <div class="radio" data-group="demo1">
-      <div class="radio__inner"></div><div class="radio__dot"></div>
-    </div>
-    <span class="interaction-label">选项 B</span>
-  </div>
-  <div class="interactive-row" onclick="selectRadio(this)">
-    <div class="radio" data-group="demo1">
-      <div class="radio__inner"></div><div class="radio__dot"></div>
-    </div>
-    <span class="interaction-label">选项 C</span>
-  </div>
-</div>
-
 <script>
-/*
- * Radio group — mutually exclusive, cannot deselect.
- * All radios in a group share the same data-group attribute.
- * Clicking another radio deselects the current one and selects the target.
- * Clicking the already-selected radio does nothing.
- * Disabled radios are ignored.
- */
-function selectRadio(el) {
-  var target = el.classList.contains('radio') ? el : el.querySelector('.radio');
-  if (!target || target.classList.contains('radio--disabled')) return;
-  if (target.classList.contains('radio--checked')) return; // 不可取消
+(function() {
+  function bindPress(node, handler) {
+    node.addEventListener('click', handler);
+    node.addEventListener('keydown', function(event) {
+      if (event.key === ' ' || event.key === 'Enter') {
+        event.preventDefault();
+        handler();
+      }
+    });
+  }
 
-  var group = target.getAttribute('data-group');
-  if (group) {
-    var siblings = document.querySelectorAll('.radio[data-group="' + group + '"]');
-    for (var i = 0; i < siblings.length; i++) {
-      siblings[i].classList.remove('radio--checked');
+  function syncGroup(groupName) {
+    var fields = document.querySelectorAll('[data-radio-group="' + groupName + '"] .radio-field');
+    fields.forEach(function(field) {
+      var radio = field.querySelector('.radio');
+      field.setAttribute('aria-checked', radio.classList.contains('radio--checked') ? 'true' : 'false');
+    });
+  }
+
+  function selectRadio(target) {
+    if (!target || target.classList.contains('radio--disabled')) return;
+    if (target.classList.contains('radio--checked')) return;
+    var group = target.getAttribute('data-group');
+    if (group) {
+      var siblings = document.querySelectorAll('.radio[data-group="' + group + '"]');
+      for (var i = 0; i < siblings.length; i++) {
+        siblings[i].classList.remove('radio--checked');
+      }
+      target.classList.add('radio--checked');
+      syncGroup(group);
     }
   }
-  target.classList.add('radio--checked');
-}
+
+  document.querySelectorAll('[data-radio-group] .radio-field').forEach(function(field) {
+    bindPress(field, function() {
+      selectRadio(field.querySelector('.radio'));
+    });
+  });
+
+  document.querySelectorAll('[data-radio-group]').forEach(function(group) {
+    syncGroup(group.getAttribute('data-radio-group'));
+  });
+})();
 </script>
 </body>
 </html>

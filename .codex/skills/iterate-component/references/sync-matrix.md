@@ -201,6 +201,7 @@
 - 是否误手改 `wegoux/components.css`
 - 是否需要递增 `wegoux/metadata.json.version`
 - 是否把 inline style 中承载的组件语义收回正式 class
+- 如果组件本身带交互，交互是否已经并回原场景示例，而不是新增独立“交互演示”模块
 - 如果保留了 inline style，是否只是演示已公开的 CSS 变量覆盖
 - 是否补齐了契约已经承诺的关键宿主场景
 - 是否对圆角、偏移、滚动这类视觉细节做过真实渲染核对

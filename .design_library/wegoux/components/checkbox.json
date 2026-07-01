@@ -6,7 +6,7 @@
   "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "多选勾选组件，支持默认、小尺寸、半选、计数、禁用和暗色未选态。",
+  "description": "多选勾选组件，支持默认、小尺寸、带文字、带文字成组、半选、计数、禁用和暗色未选态。",
   "semanticTypeCandidates": [
     "checkbox",
     "multi-select-control",
@@ -23,6 +23,11 @@
       "indeterminate",
       "count",
       "disabled"
+    ],
+    "presentation": [
+      "standalone",
+      "with-text",
+      "with-text-group"
     ],
     "mode": [
       "standalone",
@@ -49,6 +54,19 @@
     {
       "size": "default",
       "state": "disabled",
+      "presentation": "standalone",
+      "mode": "standalone"
+    },
+    {
+      "size": "sm",
+      "state": "checked",
+      "presentation": "with-text",
+      "mode": "standalone"
+    },
+    {
+      "size": "sm",
+      "state": "checked",
+      "presentation": "with-text-group",
       "mode": "standalone"
     }
   ],
@@ -77,12 +95,24 @@
       "name": "asset",
       "selector": ".checkbox__asset",
       "role": "选择态固定 SVG 资产"
+    },
+    {
+      "name": "text",
+      "selector": ".checkbox-field__text",
+      "role": "带文字场景的标签文案"
+    },
+    {
+      "name": "group",
+      "selector": ".checkbox-field-group",
+      "role": "带文字成组场景的横向容器"
     }
   ],
   "structurePatterns": [
     "checked、indeterminate、count 共用同一主容器与边框体系。",
     "计数态仅在明确存在多选数量语义时使用。",
     "分组父级允许根据子项状态呈现半选。",
+    "带文字场景使用 .checkbox-field 包裹 checkbox 与 .checkbox-field__text，默认采用 20px 小尺寸控件，并优先把点击宿主落在 .checkbox-field。",
+    "多个带文字选项并排时使用 .checkbox-field-group 组织，组内间距保持 12px。",
     "勾选标记必须引用 assets/icons/checkbox-check.svg；半选标记由 .checkbox__minus::before 直接绘制居中横线，不使用 iconfont 或内联 SVG。",
     "暗色模式按 radio 的预览处理方式提升未选态边框可见性，不作为独立新场景。"
   ],
@@ -98,6 +128,8 @@
   },
   "usageHints": [
     "适合权限、多选筛选和设置项组合。",
+    "带文字时优先使用 20px 小尺寸控件，图文间距保持 2px，文案字号使用 14px。",
+    "带文字成组时使用 .checkbox-field-group，组内项间距保持 12px。",
     "小尺寸用于高密度列表，但仍需由外层行高保证触控可用。"
   ],
   "doNotInvent": [
@@ -108,11 +140,10 @@
     "--bg-brand",
     "--bg-control-disabled",
     "--bg-inverse-surface-l1",
-    "--bg-surface",
+    "--body-md-font-size",
+    "--body-md-line-height",
     "--body-sm-font-size",
-    "--body-xs-font-size",
     "--border-control",
-    "--border-control-disabled",
     "--border-disabled",
     "--border-inverse",
     "--duration-fast",
@@ -120,12 +151,12 @@
     "--font-weight-medium",
     "--number-md-font-family",
     "--radius-full",
-    "--spacer-4",
-    "--spacer-8",
+    "--spacer-2",
+    "--spacer-12",
     "--text-brand",
     "--text-default",
     "--text-inverse",
-    "--text-tertiary"
+    "--touch-min"
   ],
   "designTokens": {
     "sizes": {
@@ -136,6 +167,13 @@
       "default": "20px inner circle, 19.5px count circle",
       "sm": "16px inner circle"
     },
+    "withText": {
+      "controlSize": "20px",
+      "gap": "2px",
+      "fontSize": "14px",
+      "groupGap": "12px",
+      "groupFontSize": "14px"
+    },
     "radius": "var(--radius-full)",
     "borderWidth": "1.5px",
     "assetSizes": {
@@ -144,6 +182,7 @@
     },
     "countFont": "12px / var(--font-weight-medium)",
     "transition": "background var(--duration-fast) var(--ease-standard)",
+    "touchTarget": "通过 .checkbox::before 将 24px / 20px 视觉尺寸补到 40px 热区，不改变布局占用",
     "darkMode": "暗色上下文通过 .dark 切换到 inverse 边框与弱表面底色，未选和禁用态不再依赖 preview 专用覆盖"
   },
   "assetUsage": {
@@ -164,6 +203,10 @@
       ".checkbox__icon",
       ".checkbox__minus",
       ".checkbox__count"
+    ],
+    "hostPatterns": [
+      ".checkbox-field > .checkbox + .checkbox-field__text",
+      ".checkbox-field-group > .checkbox-field"
     ],
     "stateClasses": [
       ".checkbox--checked",

@@ -39,7 +39,7 @@
 .input-group.is-disabled .input-clear { display: none !important; }
 
 /* ── Field Error ───────────────────────────────────────────── */
-.field-error { position: absolute; top: calc(100% + var(--spacer-4)); left: 0; display: none; max-width: 100%; font-size: var(--body-xs-font-size); line-height: var(--body-xs-line-height); color: var(--status-danger-default); white-space: normal; overflow-wrap: anywhere; pointer-events: none; }
+.field-error { position: absolute; top: calc(100% + var(--spacer-4)); left: 0; display: none; max-width: 100%; overflow: hidden; text-overflow: ellipsis; font-size: var(--body-xs-font-size); line-height: var(--body-xs-line-height); color: var(--status-danger-default); white-space: nowrap; pointer-events: none; }
 .input-group.is-error .field-error { display: block; }
 
 /* ── Number Input (数字输入框) ──────────────────────────────── */
@@ -147,6 +147,9 @@ document.querySelectorAll('[data-number-input]').forEach(wrapper => {
   const field = wrapper.querySelector('.number-input__field');
   field.addEventListener('focus', () => wrapper.classList.add('is-focus'));
   field.addEventListener('blur', () => wrapper.classList.remove('is-focus'));
+  function updateNumberErrorState() {
+    wrapper.classList.toggle('is-error', field.value.trim().length === 0);
+  }
   field.addEventListener('input', () => {
     const sanitized = field.value
       .replace(/[^\d.]/g, '')
@@ -154,7 +157,9 @@ document.querySelectorAll('[data-number-input]').forEach(wrapper => {
     if (sanitized !== field.value) {
       field.value = sanitized;
     }
+    updateNumberErrorState();
   });
+  field.addEventListener('blur', updateNumberErrorState);
 });
 
 // ── Text Input: clear button visibility ──

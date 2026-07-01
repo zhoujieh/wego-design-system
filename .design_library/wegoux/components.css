@@ -330,7 +330,11 @@
 /* @anatomy
    <div class="pv-header"><h1>复选框</h1><p>24 / 20px，支持未选、已选、半选、计数和禁用。</p></div>
 */
-.checkbox{--checkbox-surface:transparent;--checkbox-border:var(--border-control);--checkbox-disabled-surface:var(--bg-control-disabled);--checkbox-disabled-border:var(--border-disabled);position:relative;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;flex:0 0 24px;box-sizing:border-box;border-radius:var(--radius-full);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.checkbox{--checkbox-size:24px;--checkbox-surface:transparent;--checkbox-border:var(--border-control);--checkbox-disabled-surface:var(--bg-control-disabled);--checkbox-disabled-border:var(--border-disabled);position:relative;display:inline-flex;align-items:center;justify-content:center;width:var(--checkbox-size);height:var(--checkbox-size);flex:0 0 var(--checkbox-size);box-sizing:border-box;border-radius:var(--radius-full);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.checkbox::before{content:"";position:absolute;top:calc((var(--checkbox-size) - var(--touch-min)) / 2);right:calc((var(--checkbox-size) - var(--touch-min)) / 2);bottom:calc((var(--checkbox-size) - var(--touch-min)) / 2);left:calc((var(--checkbox-size) - var(--touch-min)) / 2)}
+.checkbox-field-group{display:inline-flex;align-items:center;flex-wrap:wrap;gap:var(--spacer-12);min-width:0}
+.checkbox-field{display:inline-flex;align-items:center;gap:var(--spacer-2);min-width:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.checkbox-field__text{min-width:0;font-size:var(--body-md-font-size);line-height:var(--body-md-line-height);color:var(--text-default);overflow-wrap:anywhere}
 .checkbox__inner{position:absolute;inset:2px;box-sizing:border-box;border:1.5px solid var(--checkbox-border);border-radius:var(--radius-full);background:var(--checkbox-surface);transition:background var(--duration-fast) var(--ease-standard),border-color var(--duration-fast) var(--ease-standard),opacity var(--duration-fast) var(--ease-standard)}
 .checkbox__icon,
 .checkbox__minus,
@@ -343,12 +347,12 @@
 .checkbox--count .checkbox__inner{background:var(--bg-brand);border-color:var(--text-brand)}
 .checkbox--checked .checkbox__icon{display:flex;transform:translateX(.5px)}
 .checkbox--indeterminate .checkbox__minus{display:flex}
-.checkbox--count .checkbox__count{display:flex;width:19.5px;height:19.5px;border-radius:var(--radius-full);background:var(--bg-brand);font-family:var(--number-md-font-family);font-size:12px;font-weight:var(--font-weight-medium);line-height:1;color:var(--text-inverse);font-feature-settings:"zero"}
-.checkbox--sm{width:20px;height:20px;flex-basis:20px}
+.checkbox--count .checkbox__count{display:flex;width:19.5px;height:19.5px;border-radius:var(--radius-full);background:var(--bg-brand);font-family:var(--number-md-font-family);font-size:var(--body-sm-font-size);font-weight:var(--font-weight-medium);line-height:1;color:var(--text-inverse);font-feature-settings:"zero"}
+.checkbox--sm{--checkbox-size:20px}
 .checkbox--sm .checkbox__inner{inset:2px}
 .checkbox--sm .checkbox__asset{width:11px;height:8px}
 .checkbox--sm .checkbox__minus::before{width:8px;height:1.5px}
-.checkbox--sm.checkbox--count .checkbox__count{width:16px;height:16px;font-size:12px}
+.checkbox--sm.checkbox--count .checkbox__count{width:16px;height:16px;font-size:var(--body-sm-font-size)}
 .checkbox--disabled{pointer-events:none;cursor:not-allowed}
 .checkbox--disabled:not(.checkbox--checked):not(.checkbox--indeterminate):not(.checkbox--count) .checkbox__inner{border-color:var(--checkbox-disabled-border);background:var(--checkbox-disabled-surface)}
 .checkbox--checked.checkbox--disabled .checkbox__inner,
@@ -387,158 +391,135 @@
 
 /* ── Form ──────────────────────────────────────────────────── */
 /* @anatomy
-   <div class="pv-header"><h1>表单容器</h1><p>表单字段容器，支持水平/垂直布局、多输入类型、错误和计数。</p></div>
+   <div class="scene-card__title">左对齐</div> <div class="form"> <div class="form-body" data-validate="text-required"> <div class="form-body__label">姓名</div> <div class="form-body__action"> <input type="text" placeholder="请输入姓名"> <span class="form-body__error">姓名不能为空</span> </div> </div> <div class="form-body" data-validate="number-required"> <div class="form-body__label">数量</div> <div class="form-b...
 */
-/* ── Form (表单容器) ───────────────────────────────── */
-/* @anatomy
-   <div class="form [form--no-divider]">
-     <div class="form-body [form-body--vertical|form-body--error|form-body--fixed-height]" [data-form-body]>
-       <div class="form-body__label">Label</div>
-       <div class="form-body__action">
-         <input / textarea / select / custom>
-       </div>
-       [<div class="form-body__right-btn">
-         <a class="link">Link</a> |
-         <button class="btn">Button</button> |
-         <div class="icon-text-btn">...</div>
-       </div>]
-       [<div class="form-body__counter">35/50</div>]
-       [<div class="form-body__error">Error message</div>]
-     </div>
-   </div>
-*/
-
-/* Form container */
 .form{width:100%;background:var(--bg-surface)}
 .form--no-divider .form-body::after{display:none}
-.form--right-align .form-body__action input,
-.form--right-align .form-body__action textarea,
-.form--right-align .form-body__phone-code,
-.form--right-align .form-body__phone-input,
-.form--right-align .form-body__money-input,
-.form--right-align .form-body__select-text,
-.form--right-align .form-body__value{text-align:right}
+.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__action{display:flex;align-items:center;justify-content:flex-end}
+.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__action > input:not(.form-body__phone-input):not(.form-body__money-input),
+.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__expand-content,
+.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__money,
+.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__select,
+.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__value{flex:0 1 auto;width:auto;max-width:100%;min-width:0;margin-left:auto}
+.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__action > input:not(.form-body__phone-input):not(.form-body__money-input),
+.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__expand-content{text-align:right;field-sizing:content}
+.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__money,
+.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__select{justify-content:flex-end}
+.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__money{gap:4px}
+.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__money-input,
+.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__select-text{flex:0 1 auto;width:auto;max-width:100%;min-width:0;field-sizing:content}
+.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__money-input,
+.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__select-text{text-align:right}
+.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__money-input::placeholder{text-align:right}
+.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__select{gap:8px}
+.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__select-arrow{margin-left:0}
+.form--right-align .form-body:not(.form-body--vertical) .form-body__counter,
+.form--right-align .form-body:not(.form-body--vertical) .form-body__error{text-align:right}
+.form--right-align .form-body.form-body--preserve-content-align .form-body__counter,
+.form--right-align .form-body.form-body--preserve-content-align .form-body__error{text-align:left}
 
-/* FormBody — horizontal layout (default) */
 .form-body{display:flex;flex-direction:row;align-items:center;width:100%;min-height:56px;padding:12px 16px;box-sizing:border-box;position:relative;gap:24px}
-/* Divider between cells */
 .form-body::after{content:"";position:absolute;bottom:0;left:16px;right:0;border-bottom:0.5px solid var(--border-neutral-l2);pointer-events:none}
 .form--no-divider .form-body::after,
 .form > .form-body:last-child::after{display:none}
 
-/* Label */
 .form-body__label{width:96px;flex-shrink:0;font-size:var(--body-lg-font-size);font-weight:var(--font-weight-regular);color:var(--text-default);line-height:var(--body-lg-line-height);box-sizing:border-box;-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden;font-feature-settings:"zero"}
+.form-body__label--required{display:flex;align-items:center;gap:4px;-webkit-box-orient:initial;-webkit-line-clamp:unset}
+.form-body__label-text{display:block;min-width:0}
+.form-body__required{flex-shrink:0;margin-top:0;font-size:var(--body-sm-font-size);font-weight:var(--font-weight-regular);line-height:1;color:var(--text-disabled);font-feature-settings:"zero"}
 .form-body--error .form-body__label{color:var(--text-default)}
-
-/* Action area */
 .form-body__action{flex:1;min-width:0;position:relative}
 
-/* ── Input (single-line, no border style for Form) ── */
 .form-body__action input,
 .form-body__action textarea{width:100%;border:none;outline:none;background:transparent;color:var(--text-default);font-size:var(--body-lg-font-size);font-family:var(--body-md-font-family);font-weight:var(--font-weight-regular);line-height:var(--body-lg-line-height);padding:0;box-sizing:border-box;font-feature-settings:"zero"}
 .form-body__action input::placeholder,
 .form-body__action textarea::placeholder{color:var(--text-placeholder);font-weight:var(--font-weight-regular)}
-
-/* ── Textarea ── */
 .form-body__action textarea{resize:none;min-height:20px;overflow:hidden;line-height:var(--body-lg-line-height)}
 
-/* ── Phone input layout ── */
 .form-body__phone{display:flex;align-items:center;gap:0;width:100%}
-.form-body__phone-code{width:49px;flex-shrink:0;font-size:var(--body-lg-font-size);font-weight:var(--font-weight-regular);color:var(--text-default);line-height:var(--body-lg-line-height);text-align:left;border:none;outline:none;background:transparent;font-family:var(--body-md-font-family);padding:0;font-feature-settings:"zero"}
-.form-body__phone-code::placeholder{color:var(--text-placeholder);font-weight:var(--font-weight-regular)}
+.form-body__phone-prefix{width:44px;flex-shrink:0;font-size:var(--body-lg-font-size);font-weight:var(--font-weight-regular);color:var(--text-disabled);line-height:var(--body-lg-line-height);text-align:left;font-family:var(--body-md-font-family);font-feature-settings:"zero"}
 .form-body__phone-divider{width:0.5px;height:14px;background:var(--border-neutral-l2);flex-shrink:0;margin:0 8px}
 .form-body__phone-input{flex:1;min-width:0;font-size:var(--body-lg-font-size);font-weight:var(--font-weight-regular);color:var(--text-default);line-height:var(--body-lg-line-height);border:none;outline:none;background:transparent;font-family:var(--body-md-font-family);padding:0;font-feature-settings:"zero"}
 .form-body__phone-input::placeholder{color:var(--text-placeholder);font-weight:var(--font-weight-regular)}
 
-/* ── Money input ── */
 .form-body__money{display:flex;align-items:center;width:100%}
 .form-body__money-symbol{font-size:var(--body-lg-font-size);font-weight:var(--font-weight-regular);color:var(--text-placeholder);line-height:var(--body-lg-line-height);flex-shrink:0;font-feature-settings:"zero"}
 .form-body__money-symbol.has-value{color:var(--text-default)}
 .form-body__money-input{flex:1;min-width:0;font-size:var(--body-lg-font-size);font-weight:var(--font-weight-regular);color:var(--text-default);line-height:var(--body-lg-line-height);border:none;outline:none;background:transparent;font-family:var(--number-md-font-family);padding:0;font-feature-settings:"zero"}
 .form-body__money-input::placeholder{color:var(--text-placeholder);font-weight:var(--font-weight-regular);font-family:var(--body-md-font-family)}
 
-/* ── Select action ── */
 .form-body__select{display:flex;align-items:center;justify-content:space-between;width:100%;cursor:pointer;-webkit-tap-highlight-color:transparent}
-/* Clickable form-body (Select right-arrow mode): full-row pressed state, same as cell */
 .form-body--clickable{cursor:pointer;-webkit-tap-highlight-color:transparent}
-.form-body--clickable:active{background:var(--bg-state-pressed)}
+.form-body--clickable:active{opacity:.6}
 .form-body__select-text{font-size:var(--body-lg-font-size);font-weight:var(--font-weight-regular);color:var(--text-placeholder);line-height:var(--body-lg-line-height);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-feature-settings:"zero"}
 .form-body__select-text.has-value{color:var(--text-default)}
 .form-body__select-arrow{width:16px;height:16px;flex-shrink:0;color:var(--text-tertiary);font-size:16px;display:flex;align-items:center;justify-content:center;margin-left:8px}
 
-/* ── Right button area ── */
 .form-body__right-btn{display:flex;align-items:center;flex-shrink:0;margin-left:24px;height:100%;box-sizing:border-box}
+.form-body--icon-text-actions{padding-right:4px}
+.form-body--icon-text-actions::after{right:4px}
+.form-body__right-btn--icon-text{margin-left:12px;gap:0}
+.form-body__right-btn--icon-text .icon-text-btn + .icon-text-btn{margin-left:0}
 
-/* ── Counter / Error messages ── */
-.form-body__counter,.form-body__error{position:absolute;top:calc(100% + 2px);left:0;font-size:var(--body-xs-font-size);font-weight:var(--font-weight-regular);line-height:normal;white-space:nowrap;pointer-events:none;font-feature-settings:"zero"}
+.form-body__counter,
+.form-body__error{position:absolute;top:calc(100%);left:0;right:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--body-xs-font-size);font-weight:var(--font-weight-regular);line-height:normal;pointer-events:none;font-feature-settings:"zero"}
 .form-body__counter{color:var(--text-disabled)}
 .form-body__error{color:var(--status-danger-default);display:none}
 
-/* Error state: show error, hide counter */
 .form-body--error .form-body__error{display:block}
 .form-body--error .form-body__counter{display:none}
 .form-body--error .form-body__action input,
 .form-body--error .form-body__action textarea,
 .form-body--error .form-body__money-symbol,
-.form-body--error .form-body__phone-code,
+.form-body--error .form-body__phone-prefix,
 .form-body--error .form-body__phone-input{color:var(--status-danger-default)}
 .form-body--error .form-body__phone-divider{background:var(--status-danger-default)}
 
-/* ── Vertical layout ── */
 .form-body--vertical{flex-direction:column;align-items:stretch;gap:0;padding:16px}
 .form-body--vertical .form-body__label{width:100%;padding-bottom:4px}
 .form-body--vertical .form-body__counter,
-.form-body--vertical .form-body__error{left:0}
-/* Vertical + fixed height textarea */
+.form-body--vertical .form-body__error{left:0;right:0}
 .form-body--vertical.form-body--fixed-height .form-body__action textarea{height:calc(100% - var(--body-lg-line-height) - 4px - 8px);min-height:unset}
 .form-body--fixed-height{height:120px}
 
-/* ── Custom label width ── */
 .form-body--label-w80 .form-body__label{width:80px}
 .form-body--label-w120 .form-body__label{width:120px}
+.form-body--preserve-content-align .form-body__action{justify-content:flex-start}
 
-/* ── IconText right button (上图标下文字) ── */
-.icon-text-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:4px 8px}
+.icon-text-btn{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:44px;min-width:44px;height:44px;padding:0;border:none;border-radius:var(--radius-6);background:transparent;cursor:pointer;-webkit-tap-highlight-color:transparent;opacity:1;transition:opacity var(--duration-fast) var(--ease-standard)}
+.icon-text-btn:active{opacity:.6}
 .icon-text-btn__icon{font-size:20px;color:var(--text-default);line-height:1;display:flex;align-items:center;justify-content:center}
 .icon-text-btn__text{font-size:10px;font-weight:var(--font-weight-regular);color:var(--text-default);line-height:normal;font-feature-settings:"zero"}
 
-/* Upload placeholder */
-.form-body__upload{width:64px;height:64px;border:1px dashed var(--border-neutral-l2);border-radius:var(--radius-8);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;-webkit-tap-highlight-color:transparent;flex-shrink:0}
-.form-body__upload:active{background:var(--bg-state-pressed)}
+.form-body__upload{width:64px;height:64px;border:1px dashed var(--border-neutral-l2);border-radius:var(--radius-8);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;-webkit-tap-highlight-color:transparent;flex-shrink:0;opacity:1;transition:opacity var(--duration-fast) var(--ease-standard)}
+.form-body__upload:active{opacity:.6}
 .form-body__upload-icon{font-size:20px;color:var(--text-tertiary);display:flex;align-items:center;justify-content:center}
 .form-body__upload-text{font-size:var(--body-xs-font-size);color:var(--text-tertiary);font-weight:var(--font-weight-regular);line-height:normal;font-feature-settings:"zero"}
 
-/* Icon actions (horizontal) */
 .form-body__icon-actions{display:flex;align-items:center;gap:16px;flex-shrink:0}
-.form-body__icon-action{display:flex;align-items:center;justify-content:center;width:var(--size-32);height:var(--size-32);cursor:pointer;-webkit-tap-highlight-color:transparent;border-radius:var(--radius-6)}
-.form-body__icon-action:active{background:var(--bg-state-pressed)}
-.form-body__icon-action i{font-size:20px;color:var(--text-default);display:flex;align-items:center;justify-content:center}
-.form-body__icon-action--filled{width:var(--size-28);height:var(--size-28);border-radius:var(--radius-full);background:var(--bg-overlay-l1)}
-.form-body__icon-action--filled i{font-size:16px;color:var(--text-brand)}
+.form-body__icon-action{display:flex;align-items:center;justify-content:center;width:24px;height:24px;cursor:pointer;-webkit-tap-highlight-color:transparent;opacity:1;transition:opacity var(--duration-fast) var(--ease-standard)}
+.form-body__icon-action:active{opacity:.6}
+.form-body__icon-action i{font-size:24px;color:var(--text-default);display:flex;align-items:center;justify-content:center}
+.form-body__right-btn .radio-field-group,
+.form-body__right-btn .checkbox-field-group{flex-wrap:nowrap;justify-content:flex-end}
+.form-body__right-btn .radio-field,
+.form-body__right-btn .checkbox-field{cursor:pointer}
+.form-body__right-btn .radio-field__text,
+.form-body__right-btn .checkbox-field__text{white-space:nowrap}
+.form-body__stack-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 
-/* Radio horizontal group in form */
-.form-body__radio-group{display:flex;align-items:center;gap:24px}
-.form-body__radio-item{display:flex;align-items:center;gap:8px;cursor:pointer}
-.form-body__radio-item span{font-size:var(--body-lg-font-size);font-weight:var(--font-weight-regular);color:var(--text-default);line-height:var(--body-lg-line-height);font-feature-settings:"zero"}
-
-/* Tag horizontal group in form */
-.form-body__tag-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-
-/* Dropdown expanded area */
 .form-dropdown{background:var(--bg-surface);padding:8px 16px 12px;border-top:none}
-.form-dropdown__item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;cursor:pointer;border-radius:var(--radius-6)}
-.form-dropdown__item:active{background:var(--bg-state-pressed)}
+.form-dropdown__item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;cursor:pointer;border-radius:var(--radius-6);opacity:1;transition:opacity var(--duration-fast) var(--ease-standard)}
+.form-dropdown__item:active{opacity:.6}
 .form-dropdown__item-text{font-size:var(--body-lg-font-size);font-weight:var(--font-weight-regular);color:var(--text-default);line-height:var(--body-lg-line-height);font-feature-settings:"zero"}
 .form-dropdown__item-check{width:16px;height:16px;color:var(--text-brand);display:flex;align-items:center;justify-content:center}
 
-/* Switch in form */
 .form-body__switch-wrap{display:flex;align-items:center;justify-content:flex-end}
-
-/* Expand content area */
 .form-body__expand-content{font-size:var(--body-md-font-size);font-weight:var(--font-weight-regular);color:var(--text-secondary);line-height:var(--body-md-line-height);padding:0 0 4px;font-feature-settings:"zero"}
 .form-body__value{display:block;font-size:var(--body-lg-font-size);font-weight:var(--font-weight-regular);color:var(--text-default);line-height:var(--body-lg-line-height);font-feature-settings:"zero"}
 .form-body__value--placeholder{color:var(--text-placeholder)}
 .form-body__value--secondary{color:var(--text-tertiary)}
+.form-body__action .counter .counter__message{display:none !important}
 .form-dropdown__item--selected{color:var(--text-brand)}
 
 /* ── Image ─────────────────────────────────────────────────── */
@@ -605,7 +586,7 @@
 .input-group.is-disabled .input-clear { display: none !important; }
 
 /* ── Field Error ───────────────────────────────────────────── */
-.field-error { position: absolute; top: calc(100% + var(--spacer-4)); left: 0; display: none; max-width: 100%; font-size: var(--body-xs-font-size); line-height: var(--body-xs-line-height); color: var(--status-danger-default); white-space: normal; overflow-wrap: anywhere; pointer-events: none; }
+.field-error { position: absolute; top: calc(100% + var(--spacer-4)); left: 0; display: none; max-width: 100%; overflow: hidden; text-overflow: ellipsis; font-size: var(--body-xs-font-size); line-height: var(--body-xs-line-height); color: var(--status-danger-default); white-space: nowrap; pointer-events: none; }
 .input-group.is-error .field-error { display: block; }
 
 /* ── Number Input (数字输入框) ──────────────────────────────── */
@@ -717,17 +698,20 @@
 /* @anatomy
    <div class="pv-header"><h1>单选</h1><p>24 / 20px，品牌绿圆点选中态。</p></div>
 */
-.radio { --radio-surface:transparent; --radio-border:var(--border-control); --radio-disabled-surface:var(--bg-control-disabled); --radio-disabled-border:var(--border-disabled); --radio-disabled-dot:var(--border-disabled); width:24px; height:24px; display:flex; align-items:center; justify-content:center; flex-shrink:0; position:relative; cursor:pointer; }
+.radio { --radio-size:24px; --radio-surface:transparent; --radio-border:var(--border-control); --radio-disabled-surface:var(--bg-control-disabled); --radio-disabled-border:var(--border-disabled); --radio-disabled-dot:var(--border-disabled); width:var(--radio-size); height:var(--radio-size); display:flex; align-items:center; justify-content:center; flex:0 0 var(--radio-size); box-sizing:border-box; position:relative; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.radio::before{content:"";position:absolute;top:calc((var(--radio-size) - var(--touch-min)) / 2);right:calc((var(--radio-size) - var(--touch-min)) / 2);bottom:calc((var(--radio-size) - var(--touch-min)) / 2);left:calc((var(--radio-size) - var(--touch-min)) / 2)}
+.radio-field-group{display:inline-flex;align-items:center;flex-wrap:wrap;gap:var(--spacer-12);min-width:0}
+.radio-field{display:inline-flex;align-items:center;gap:var(--spacer-2);min-width:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.radio-field__text{min-width:0;font-size:var(--body-md-font-size);line-height:var(--body-md-line-height);color:var(--text-default);overflow-wrap:anywhere}
 .radio__inner { width:20px; height:20px; border-radius:50%; border:1.5px solid var(--radio-border); background:var(--radio-surface); box-sizing:border-box; transition:border-color var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard); }
 .radio__dot { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:11px; height:11px; border-radius:50%; background:var(--bg-brand); display:none; }
 
 .radio--checked .radio__inner { border-color:var(--text-brand); }
 .radio--checked .radio__dot { display:block; }
 
-/* 20px = 24px * 5/6; inner: ~16.5px; dot: 11*(5/6)≈9px */
-.radio--sm { width:20px; height:20px; }
-.radio--sm .radio__inner { width:16.5px; height:16.5px; }
-.radio--sm .radio__dot { width:9px; height:9px; }
+.radio--sm { --radio-size:20px; }
+.radio--sm .radio__inner { width:16px; height:16px; }
+.radio--sm .radio__dot { width:8px; height:8px; }
 
 /* Disabled — unchecked: subtle border + disabled surface */
 .radio--disabled:not(.radio--checked) { pointer-events:none; cursor:not-allowed; }

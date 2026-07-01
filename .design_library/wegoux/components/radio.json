@@ -6,7 +6,7 @@
   "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "单选控件，成组使用并在同组内保持互斥选择。",
+  "description": "单选控件，支持独立图标、带文字和带文字成组场景，成组使用并在同组内保持互斥选择。",
   "semanticTypeCandidates": [
     "radio",
     "single-select-control",
@@ -21,6 +21,11 @@
       "unchecked",
       "checked",
       "disabled"
+    ],
+    "presentation": [
+      "standalone",
+      "with-text",
+      "with-text-group"
     ],
     "theme": [
       "light",
@@ -47,6 +52,18 @@
       "size": "default",
       "state": "checked",
       "theme": "dark"
+    },
+    {
+      "size": "sm",
+      "state": "checked",
+      "presentation": "with-text",
+      "theme": "light"
+    },
+    {
+      "size": "sm",
+      "state": "checked",
+      "presentation": "with-text-group",
+      "theme": "light"
     }
   ],
   "anatomy": [
@@ -64,10 +81,22 @@
       "name": "dot",
       "selector": ".radio__dot",
       "role": "选中圆点层"
+    },
+    {
+      "name": "text",
+      "selector": ".radio-field__text",
+      "role": "带文字场景的标签文案"
+    },
+    {
+      "name": "group",
+      "selector": ".radio-field-group",
+      "role": "带文字成组场景的横向容器"
     }
   ],
   "structurePatterns": [
     "root、inner、dot 三层结构固定，不新增额外视觉壳。",
+    "带文字场景使用 .radio-field 包裹 radio 与 .radio-field__text，默认采用 20px 小尺寸控件，并优先把点击宿主落在 .radio-field。",
+    "多个带文字选项并排时使用 .radio-field-group 组织，组内间距保持 12px。",
     "同组通过 data-group 归类，始终成组出现。"
   ],
   "behavior": {
@@ -82,6 +111,8 @@
   },
   "usageHints": [
     "适合互斥选项、单一方案选择和设置单选场景。",
+    "带文字时优先使用 20px 小尺寸控件，图文间距保持 2px，文案字号使用 14px。",
+    "带文字成组时使用 .radio-field-group，组内项间距保持 12px。",
     "小尺寸用于高密度列表，但外层行高仍要保证可点。"
   ],
   "doNotInvent": [
@@ -90,16 +121,20 @@
   ],
   "tokensConsumed": [
     "--bg-brand",
-    "--bg-inverse-surface-l1",
     "--bg-control-disabled",
+    "--bg-inverse-surface-l1",
     "--body-md-font-size",
+    "--body-md-line-height",
     "--border-control",
-    "--border-control-disabled",
     "--border-disabled",
     "--border-inverse",
     "--duration-fast",
     "--ease-standard",
-    "--text-brand"
+    "--spacer-2",
+    "--spacer-12",
+    "--text-brand",
+    "--text-default",
+    "--touch-min"
   ],
   "designTokens": {
     "sizes": {
@@ -108,14 +143,22 @@
     },
     "innerSizes": {
       "default": "20px",
-      "sm": "16.5px"
+      "sm": "16px"
     },
     "dotSizes": {
       "default": "11px",
-      "sm": "9px"
+      "sm": "8px"
+    },
+    "withText": {
+      "controlSize": "20px",
+      "gap": "2px",
+      "fontSize": "14px",
+      "groupGap": "12px",
+      "groupFontSize": "14px"
     },
     "borderWidth": "1.5px",
     "transition": "var(--duration-fast) / var(--ease-standard)",
+    "touchTarget": "通过 .radio::before 将 24px / 20px 视觉尺寸补到 40px 热区，不改变布局占用",
     "darkMode": "暗色上下文通过 .dark 切换到 inverse 边框与弱表面底色，保证未选和禁用态在暗卡片中仍可见"
   },
   "specRefs": [
@@ -127,6 +170,10 @@
     "requiredChildren": [
       ".radio__inner",
       ".radio__dot"
+    ],
+    "hostPatterns": [
+      ".radio-field > .radio + .radio-field__text",
+      ".radio-field-group > .radio-field"
     ],
     "stateClasses": [
       ".radio--checked",
