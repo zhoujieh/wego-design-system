@@ -149,6 +149,7 @@ body.uikit-page {
   flex-direction: column;
   overflow: hidden;
   background: var(--bg-page);
+  position: relative;
 }
 .phone-screen .navbar {
   width: 100%;
@@ -163,12 +164,17 @@ body.uikit-page {
 }
 .phone-body::-webkit-scrollbar { display: none; }
 .phone-indicator {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
   height: 34px;
-  background: var(--bg-surface);
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  pointer-events: none;
+  z-index: var(--z-sticky);
 }
 .phone-indicator-bar {
   width: 134px;

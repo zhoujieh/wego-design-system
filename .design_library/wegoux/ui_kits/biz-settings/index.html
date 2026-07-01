@@ -12,17 +12,22 @@
 html, body { min-height: auto; }
 
 .phone-status {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   height: 44px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 var(--spacer-16);
-  background: var(--bg-surface);
+  background: transparent;
   box-sizing: border-box;
   font-size: var(--body-sm-font-size);
   font-weight: var(--font-weight-semibold);
   color: var(--text-default);
-  flex-shrink: 0;
+  z-index: var(--z-sticky);
+  pointer-events: none;
 }
 
 .uikit-host-screen {
@@ -30,6 +35,16 @@ html, body { min-height: auto; }
   display: flex;
   flex-direction: column;
   background: var(--bg-page);
+  position: relative;
+  padding-top: var(--safe-area-top);
+}
+
+.phone-body {
+  padding-bottom: var(--safe-area-bottom-content);
+}
+
+.bottom-nav {
+  padding-bottom: var(--safe-area-bottom);
 }
 
 .uikit-base-card {
@@ -139,6 +154,7 @@ html, body { min-height: auto; }
   transform: translateY(100%);
   transition: transform var(--duration-normal) var(--ease-enter);
   will-change: transform;
+  padding-top: var(--safe-area-top);
 }
 
 .uikit-modal-screen.is-open {
@@ -442,9 +458,9 @@ function BizSettingsModal({ isOpen, onCancel, onSave }) {
           <div className="navbar__center">
             <span className="navbar__title">业务设置</span>
           </div>
-          <div className="navbar__right navbar__right--text">
-            <div className="navbar__action navbar__action--text" onClick={onSave}>
-              <span className="navbar__action-label">保存</span>
+          <div className="navbar__right navbar__right--button">
+            <div className="navbar__action navbar__action--button" onClick={onSave}>
+              <button className="btn btn--strong btn--sm">保存</button>
             </div>
           </div>
         </div>

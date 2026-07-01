@@ -995,6 +995,11 @@
         "layout-hit-icon-btn-height": "32px",
         "layout-hit-combo-width-padding": "16px"
     },
+    "safeArea": {
+        "safe-area-top": "44px",
+        "safe-area-bottom": "34px",
+        "safe-area-bottom-content": "74px"
+    },
     "motion": {
         "duration-instant": "0ms",
         "duration-fast": "150ms",

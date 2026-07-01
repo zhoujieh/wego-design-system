@@ -643,13 +643,21 @@
    - 左侧为返回图标 (back-icon)：普通二级页面，从右侧滑入 (push)
    - 左侧为关闭/叉 (close-icon) 或取消文本 (text-cancel)：底部弹出式页面，从底部滑入 (present / bottom-sheet)
 
+   全屏模态固定模式（不要自由组合，直接调用对应模式）：
+   - 模式 A：左侧取消文本 + 右侧实心按钮 → 表单/设置类底部弹出页
+   - 模式 B：左侧关闭叉图标 + 右侧图标操作 → 浏览/选择类底部弹出页
+
    右侧操作区规则：
    - 图标操作（icon/图文）场景：使用 .navbar__right--icon，右侧间距 4px，按钮间 gap 0
    - 文本操作场景：使用 .navbar__right--text，右侧间距 16px，最多1个按钮
    - 按钮操作场景：使用 .navbar__right--button，右侧间距 16px
    - 文本操作多个按钮时请改用图标样式
+
+   背景色规则：
+   - 导航栏背景透明，透出父容器/页面背景色，自动跟随页面背景联动
+   - 页面背景为灰色（bg-page）则导航栏灰色，页面背景为白色（bg-surface）则导航栏白色
 */
-.navbar { width: 375px; background: var(--bg-surface); flex-shrink: 0; }
+.navbar { width: 375px; background: transparent; flex-shrink: 0; }
 /* Body — 56px grid */
 .navbar__body { height: 56px; display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); align-items: center; }
 /* Left area — col 1-3，统一左侧间距 16px */

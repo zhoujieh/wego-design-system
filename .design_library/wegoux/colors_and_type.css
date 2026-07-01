@@ -445,6 +445,11 @@
   --layout-hit-icon-btn-height: 32px;
   --layout-hit-combo-width-padding: 16px;
 
+  /* safe-area */
+  --safe-area-top: env(safe-area-inset-top, 44px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 34px);
+  --safe-area-bottom-content: calc(40px + var(--safe-area-bottom));
+
   /* icon-token */
   --icon-yuancha-mian: "\e69c";
 
