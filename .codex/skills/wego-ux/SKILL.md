@@ -80,7 +80,7 @@ task-folder/
 - [ ] 已删除 `.uikit-shell` / `.phone-frame` / `.phone-screen` / `.phone-status` / `.phone-body` / `.phone-indicator` 类与 DOM
 - [ ] `page.css` 不引用 `--safe-area-top` 或 `--safe-area-bottom-content`
 - [ ] 模态层使用 `position: fixed; inset: 0`，不使用 `position: absolute`
-- [ ] 容器使用 `max-width` + `margin-inline: auto` 约束（默认业务页 670px）
+- [ ] 容器使用 `max-width` + `margin-inline: auto` 约束（默认业务页 768px）
 
 ## 生成规则
 

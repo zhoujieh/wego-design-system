@@ -7,11 +7,11 @@
   - 禁止复制 .uikit-shell / .phone-frame / .phone-screen / .phone-status / .phone-body / .phone-indicator
   - 禁止在 page.css 中引用 --safe-area-top 或 --safe-area-bottom-content(真机由宿主补齐)
   - 模态层必须使用 position: fixed; inset: 0,不要用 position: absolute
-  - 容器宽度由 body 上的 max-width 约束(默认 670px,沉浸页可去掉)
+  - 容器宽度由 body 上的 max-width 约束(默认 768px,沉浸页可去掉)
   - 复制本模板后,按 design_consumption_plan 替换 navbar 变体、page-body 内容、modal 触发逻辑
 
   navbar 安全区说明:
-  - navbar 自带 transparent 背景,不需要额外 padding-top
+  - navbar 已有显式背景色(跟随 data-bg),不需要额外 padding-top
   - 真机 WebView 场景由宿主补齐状态栏空间,原型项目不处理
 -->
 <html lang="zh-CN">

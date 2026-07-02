@@ -26,9 +26,9 @@ body {
 }
 
 /* ============ 页面容器宽度约束 ============ */
-/* 默认业务页最大宽度 670px,沉浸页可改为 none */
+/* 默认业务页最大宽度 768px,沉浸页可改为 none */
 body {
-  max-width: 670px;
+  max-width: 768px;
   margin-inline: auto;
 }
 
