@@ -26,7 +26,7 @@
     if (!modalOverlay) return;
     modalOverlay.classList.add('modal-overlay--active');
     // 重置滚动位置
-    const body = modalOverlay.querySelector('.phone-body');
+    const body = modalOverlay.querySelector('.modal-body');
     if (body) body.scrollTop = 0;
   }
 

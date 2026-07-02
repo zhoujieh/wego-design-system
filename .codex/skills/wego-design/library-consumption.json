@@ -180,7 +180,6 @@
     },
     "recommendedReadOrder": [
         "SKILL.md",
-        "README.md",
         "library-consumption.json",
         "uikit-plan.json",
         "colors_and_type.css",

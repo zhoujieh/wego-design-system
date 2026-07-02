@@ -1,0 +1,61 @@
+/* wego-ux 页面级样式模板
+ *
+ * 规则:
+ * - 禁止引用 --safe-area-top / --safe-area-bottom-content(真机由宿主补齐,PC 浏览器 fallback 会留白)
+ * - 禁止使用 .uikit-shell / .phone-frame / .phone-screen / .phone-status / .phone-body / .phone-indicator
+ * - 模态层使用 position: fixed; inset: 0,不要用 position: absolute
+ * - 颜色/间距/字号全部使用 Token,不硬编码 hex/rem
+ * - 业务样式用业务前缀作用域限定,如 .{biz}-page__section
+ */
+
+/* ============ 全局重置 ============ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg-page);
+  font-family: var(--font-family-system);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============ 页面容器宽度约束 ============ */
+/* 默认业务页最大宽度 670px,沉浸页可改为 none */
+body {
+  max-width: 670px;
+  margin-inline: auto;
+}
+
+/* ============ 页面主体 ============ */
+.page-body {
+  min-height: 100vh;
+  padding-bottom: var(--spacer-40, 40px);
+}
+
+/* ============ 全屏模态层(full-screen-modal 范式) ============ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay, 500);
+  background: var(--bg-page);
+  transform: translateY(100%);
+  transition: transform var(--duration-normal) var(--ease-enter, var(--ease-standard));
+  overflow-y: auto;
+}
+
+.modal-overlay--active {
+  transform: translateY(0);
+}
+
+.modal-overlay[hidden] {
+  display: none;
+}
+
+/* ============ 业务样式区(用业务前缀作用域限定) ============ */
+/* 例:.delivery-rule-page__section { ... } */

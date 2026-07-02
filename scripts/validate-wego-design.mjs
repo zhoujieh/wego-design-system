@@ -207,6 +207,40 @@ const ALLOWED_UIKIT_SHELL_CLASSES = new Set([
   'phone-indicator-bar',
 ]);
 
+// 任务文件夹原型项目禁止使用的 UI Kit Showcase 外壳类
+const FORBIDDEN_PROTOTYPE_SHELL_CLASSES = new Set([
+  'uikit-shell',
+  'phone-frame',
+  'phone-screen',
+  'phone-status',
+  'phone-header',
+  'phone-header-back',
+  'phone-header-title',
+  'phone-body',
+  'phone-indicator',
+  'phone-indicator-bar',
+]);
+
+// 原型项目 page.css 禁止引用的 safe-area Token（真机由宿主补齐，PC 浏览器 fallback 会留白）
+const FORBIDDEN_PROTOTYPE_SAFE_AREA_TOKENS = new Set([
+  '--safe-area-top',
+  '--safe-area-bottom',
+  '--safe-area-bottom-content',
+]);
+
+// 仓库根目录下不属于任务文件夹的目录（扫描任务文件夹时排除）
+const NON_TASK_ROOT_DIRS = new Set([
+  'scripts',
+  'docs',
+  'node_modules',
+  'assets',
+  'public',
+  'dist',
+  'build',
+  'tests',
+  'test',
+]);
+
 const report = {
   root: rootRel,
   mode: strict ? 'strict' : 'baseline',
@@ -500,6 +534,11 @@ function classesFromCss(css) {
     classes.add(match[1]);
   }
   return classes;
+}
+
+function stripCssComments(css) {
+  // 移除 /* ... */ 注释，避免注释中提到的类名/变量被误判为实际使用
+  return css.replace(/\/\*[\s\S]*?\*\//g, '');
 }
 
 function firstLines(items, limit = 8) {
@@ -1052,6 +1091,94 @@ function checkTrackedJunk() {
   }
 }
 
+function getTaskFoldersFromChangedFiles(changedFiles) {
+  const folders = new Set();
+  for (const file of changedFiles) {
+    const slashIndex = file.indexOf('/');
+    if (slashIndex === -1) continue;
+    const root = file.slice(0, slashIndex);
+    if (root.startsWith('.')) continue;
+    if (NON_TASK_ROOT_DIRS.has(root)) continue;
+    folders.add(root);
+  }
+  return [...folders].sort();
+}
+
+function getAllTaskFolders() {
+  if (!fs.existsSync(repoRoot)) return [];
+  const entries = fs.readdirSync(repoRoot, { withFileTypes: true });
+  return entries
+    .filter(entry => entry.isDirectory() && !entry.name.startsWith('.') && !NON_TASK_ROOT_DIRS.has(entry.name))
+    .map(entry => entry.name)
+    .sort();
+}
+
+function listTaskFolderHtmlCss(taskFolder) {
+  const abs = path.join(repoRoot, taskFolder);
+  if (!fs.existsSync(abs)) return [];
+  const out = [];
+  const walk = current => {
+    for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+      if (entry.name === 'node_modules' || entry.name.startsWith('.')) continue;
+      // 跳过设计系统副本目录（lib/ 下的 CSS 是源头副本，不算原型项目违规引用）
+      if (entry.isDirectory() && entry.name === 'lib') continue;
+      const full = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        walk(full);
+      } else if (/\.(html|css)$/.test(entry.name)) {
+        out.push(full);
+      }
+    }
+  };
+  walk(abs);
+  return out.sort();
+}
+
+function checkPrototypeShellLeakage(context) {
+  // 只扫描变更涉及的任务文件夹；full scope 时扫描所有任务文件夹
+  const taskFolders = context.effectiveScope === 'full'
+    ? getAllTaskFolders()
+    : getTaskFoldersFromChangedFiles(context.changedFiles);
+  if (taskFolders.length === 0) return;
+
+  let scannedFiles = 0;
+  for (const folder of taskFolders) {
+    const files = listTaskFolderHtmlCss(folder);
+    for (const file of files) {
+      scannedFiles++;
+      const ext = path.extname(file);
+      const content = fs.readFileSync(file, 'utf8');
+
+      let classes = new Set();
+      let cssText = '';
+      if (ext === '.html') {
+        classes = classNamesFromHtml(content);
+        cssText = stripCssComments(extractStyleBlocks(content));
+      } else {
+        classes = classesFromCss(stripCssComments(content));
+        cssText = stripCssComments(content);
+      }
+
+      const shellHits = [...classes].filter(name => FORBIDDEN_PROTOTYPE_SHELL_CLASSES.has(name));
+      if (shellHits.length > 0) {
+        add('error', 'prototype.shell_leakage',
+          `任务文件夹原型误用 UI Kit Showcase 外壳类：${shellHits.join(', ')}。请改用 .codex/skills/wego-ux/templates/page-shell.html 标准外壳`,
+          file);
+      }
+
+      const usedVars = extractUsedVars(cssText);
+      const tokenHits = [...usedVars].filter(v => FORBIDDEN_PROTOTYPE_SAFE_AREA_TOKENS.has(v));
+      if (tokenHits.length > 0) {
+        add('error', 'prototype.safe_area_token_misuse',
+          `任务文件夹原型引用了禁止的 safe-area Token：${tokenHits.join(', ')}。原型项目不处理安全区，真机由宿主补齐`,
+          file);
+      }
+    }
+  }
+  report.metrics.prototypeScannedFiles = scannedFiles;
+  report.metrics.prototypeTaskFolders = taskFolders.length;
+}
+
 function checkMetadataVersionGate(context) {
   const designChanges = context.changedFiles.filter(file => file.startsWith(rootRel + '/'));
   if (designChanges.length === 0) return;
@@ -1119,6 +1246,7 @@ function main() {
 
   checkDirectionDrift({ full, changedLibraryFiles: context.libraryChangedFiles });
   checkTrackedJunk();
+  checkPrototypeShellLeakage(context);
   checkMetadataVersionGate(context);
 
   finish();

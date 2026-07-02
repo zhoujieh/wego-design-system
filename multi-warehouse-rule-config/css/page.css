@@ -1,16 +1,20 @@
-/* 多仓配货规则 - 页面级样式 */
+/* 多仓配货规则 - 页面级样式
+ *
+ * 已剥离 UI Kit Showcase 外壳,改为真实页面骨架。
+ * 不使用 .uikit-shell / .phone-frame / .phone-screen / .phone-status / .phone-body / .phone-indicator。
+ * 不引用 --safe-area-top / --safe-area-bottom / --safe-area-bottom-content(真机由宿主补齐)。
+ * 模态层使用 position: fixed; inset: 0。
+ */
 
-/* ============ 安全区 Token 覆盖(PC 预览 fallback) ============ */
-/* lib/colors_and_type.css 中 safe-area 默认 fallback 为 0px,PC 浏览器无 env() 时无法预留状态栏空间。
-   此处覆盖为移动端常见安全区尺寸,真机访问时 env() 仍优先生效。 */
-:root {
-  --safe-area-top: env(safe-area-inset-top, 44px);
-  --safe-area-bottom: env(safe-area-inset-bottom, 34px);
-  --safe-area-bottom-content: calc(40px + var(--safe-area-bottom));
+/* ============ 全局重置 ============ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
-/* ============ 全局容器 ============ */
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   background: var(--bg-page);
@@ -19,111 +23,16 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-.uikit-shell {
+/* ============ 页面容器宽度约束 ============ */
+body {
+  max-width: 670px;
+  margin-inline: auto;
+}
+
+/* ============ 页面主体 ============ */
+.page-body {
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #f5f5f7 0%, #e8e9ed 100%);
-  padding: var(--spacer-16);
-  box-sizing: border-box;
-}
-
-.phone-frame {
-  width: 390px;
-  height: 780px;
-  border: 8px solid var(--bg-inverse);
-  border-radius: 40px;
-  overflow: hidden;
-  position: relative;
-  box-shadow: var(--shadow-xl);
-  background: var(--bg-page);
-  flex-shrink: 0;
-}
-
-.phone-screen {
-  width: 100%;
-  height: 100%;
-  min-height: 0;
-  border-radius: inherit;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  background: var(--bg-page);
-  position: relative;
-}
-
-@media (max-width: 640px) {
-  .uikit-shell {
-    padding: 0;
-    align-items: stretch;
-  }
-  .phone-frame {
-    width: 100%;
-    height: 100vh;
-    height: 100dvh;
-    max-height: none;
-    border: none;
-    border-radius: 0;
-  }
-}
-
-/* ============ 状态栏与 Home Indicator ============ */
-.phone-status {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 var(--spacer-16);
-  background: transparent;
-  box-sizing: border-box;
-  font-size: var(--body-sm-font-size);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-default);
-  z-index: var(--z-sticky);
-  pointer-events: none;
-}
-
-.phone-screen .navbar,
-.modal-screen .navbar {
-  padding-top: var(--safe-area-top);
-}
-
-.phone-body {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: calc(var(--spacer-40) + var(--safe-area-bottom));
-}
-
-.phone-body::-webkit-scrollbar { display: none; }
-
-.phone-indicator {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 34px;
-  background: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  z-index: var(--z-sticky);
-}
-
-.phone-indicator-bar {
-  width: 134px;
-  height: 5px;
-  background: var(--bg-inverse);
-  border-radius: var(--radius-full);
-  opacity: 0.2;
+  padding-bottom: var(--spacer-40, 40px);
 }
 
 /* ============ 通用页面元素 ============ */
@@ -169,7 +78,7 @@ html, body {
 
 /* ============ 全屏模态层(入口页用) ============ */
 .modal-overlay {
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: var(--z-overlay);
   background: var(--bg-page);
@@ -178,6 +87,7 @@ html, body {
   will-change: transform;
   visibility: hidden;
   pointer-events: none;
+  overflow-y: auto;
 }
 
 .modal-overlay--active {
@@ -187,13 +97,10 @@ html, body {
 }
 
 .modal-screen {
-  width: 100%;
-  height: 100%;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
   background: var(--bg-page);
-  position: relative;
-  overflow: hidden;
 }
 
 .modal-screen .navbar {
@@ -207,6 +114,12 @@ html, body {
 .modal-screen .navbar__left-text,
 .modal-screen .navbar__action-label {
   font-size: var(--body-lg-font-size);
+}
+
+.modal-screen .modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding-bottom: var(--spacer-40, 40px);
 }
 
 /* ============ 业务:子级条件区域 ============ */
@@ -228,7 +141,7 @@ html, body {
 
 /* ============ Toast 提示 ============ */
 .toast {
-  position: absolute;
+  position: fixed;
   left: 50%;
   bottom: 120px;
   transform: translate(-50%, 16px);

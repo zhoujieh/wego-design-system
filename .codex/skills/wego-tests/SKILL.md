@@ -11,8 +11,8 @@ description: 验收产品原型项目并输出 acceptance_report 的技能。用
 
 开始前必须已经有：
 
-- `page_spec`
-- `design_consumption_plan`
+- `page_spec`，且已落盘到 `{task-folder}/_spec/page_spec.json`
+- `design_consumption_plan`，且已落盘到 `{task-folder}/_spec/design_consumption_plan.json`
 - 最终原型项目文件夹
 
 ## 输出要求
@@ -31,6 +31,13 @@ description: 验收产品原型项目并输出 acceptance_report 的技能。用
   "layout_check": {},
   "prototype_folder_check": {},
   "deployment_readiness_check": {},
+  "automated_checks": {
+    "script": "node scripts/validate-wego-design.mjs --scope=full",
+    "exit_code": 0,
+    "errors": [],
+    "warnings_count": 0,
+    "key_findings": []
+  },
   "risk_log": [],
   "manual_verify_items": [],
   "final_status": "pass | pass-with-risk | fail"
@@ -48,14 +55,38 @@ description: 验收产品原型项目并输出 acceptance_report 的技能。用
 - 原型是否位于任务级文件夹
 - 同一任务是否复用了原文件夹
 - 项目是否具备基本构建和部署条件
+- 必须运行守门脚本，把脚本输出写入 `automated_checks`，不能仅靠自述结论
+
+## 守门脚本引用规则
+
+验收前必须先运行守门脚本：
+
+```bash
+node scripts/validate-wego-design.mjs --scope=full
+```
+
+把脚本输出归档到 `automated_checks`：
+
+- `script`：实际执行的命令
+- `exit_code`：脚本退出码（0 为通过）
+- `errors`：脚本报出的 error 清单（code + message + file）
+- `warnings_count`：脚本报出的 warning 数量
+- `key_findings`：摘要关键发现（如外壳泄漏、safe-area Token 违规、组件契约缺失等）
+
+`final_status` 判定规则：
+
+- `automated_checks.errors.length > 0` 时，`final_status` 不能为 `pass`
+- `automated_checks.errors.length === 0` 且 `warnings_count` 可接受时，可为 `pass` 或 `pass-with-risk`
+- 任何 error 必须在 `risk_log` 中记录对应修复建议
 
 ## 验收顺序
 
-1. 先对照 `page_spec`
-2. 再对照 `design_consumption_plan`
-3. 再检查原型项目结构
-4. 再检查规范引用执行结果
-5. 最后给出 `final_status`
+1. 运行守门脚本，归档输出到 `automated_checks`
+2. 先对照 `page_spec`
+3. 再对照 `design_consumption_plan`
+4. 再检查原型项目结构
+5. 再检查规范引用执行结果
+6. 最后给出 `final_status`（受 `automated_checks.errors` 约束）
 
 ## 结果归因
 

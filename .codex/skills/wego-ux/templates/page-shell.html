@@ -1,0 +1,55 @@
+<!doctype html>
+<!--
+  wego-ux 页面外壳标准模板
+
+  使用规则:
+  - 这是真实生产页面骨架,不是 UI Kit Showcase 外壳
+  - 禁止复制 .uikit-shell / .phone-frame / .phone-screen / .phone-status / .phone-body / .phone-indicator
+  - 禁止在 page.css 中引用 --safe-area-top 或 --safe-area-bottom-content(真机由宿主补齐)
+  - 模态层必须使用 position: fixed; inset: 0,不要用 position: absolute
+  - 容器宽度由 body 上的 max-width 约束(默认 670px,沉浸页可去掉)
+  - 复制本模板后,按 design_consumption_plan 替换 navbar 变体、page-body 内容、modal 触发逻辑
+
+  navbar 安全区说明:
+  - navbar 自带 transparent 背景,不需要额外 padding-top
+  - 真机 WebView 场景由宿主补齐状态栏空间,原型项目不处理
+-->
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>页面标题</title>
+  <link rel="stylesheet" href="./lib/colors_and_type.css" />
+  <link rel="stylesheet" href="./lib/components.css" />
+  <link rel="stylesheet" href="./lib/iconfont.css" />
+  <link rel="stylesheet" href="./css/page.css" />
+</head>
+<body data-bg="page">
+  <!-- 顶部导航栏:按 design_consumption_plan.navigation_pattern 选择 navbar 变体 -->
+  <header data-component="navbar" class="navbar">
+    <div class="navbar__body navbar__body--spaced">
+      <div class="navbar__left">
+        <div class="navbar__left-btn" data-position="left">
+          <i class="wego-iconfont-s icon-fanhui"></i>
+        </div>
+      </div>
+      <div class="navbar__center">
+        <span class="navbar__title">页面标题</span>
+      </div>
+      <div class="navbar__right navbar__right--text">
+        <button type="button" class="navbar__action navbar__action--text">
+          <span class="navbar__action-label">保存</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 页面主体:容器宽度约束 + 居中 -->
+  <main class="page-body">
+    <!-- 按 design_consumption_plan.component_mapping 组织 section -->
+  </main>
+
+  <!-- 全屏模态层容器(full-screen-modal 范式时预置;push 范式可删除) -->
+  <div id="modal-overlay" class="modal-overlay" hidden></div>
+</body>
+</html>
