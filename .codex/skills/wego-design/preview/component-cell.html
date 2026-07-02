@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cell - 列表单元格</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../scaffold.css">
+<link rel="stylesheet" href="../iconfont.css">
+<link rel="stylesheet" href="../components.css">
+<style>
+.page{max-width:420px;margin:0 auto}
+.section-title{font-size:var(--body-sm-font-size);font-weight:var(--font-weight-medium);color:var(--text-tertiary);padding:24px 16px 8px}
+.section-group{background:var(--bg-surface);width:100%}
+.section-gap{height:8px;background:var(--bg-page)}
+
+/* @component-css-start */
+.cell{position:relative;display:flex;align-items:center;width:100%;box-sizing:border-box;background:var(--bg-surface);color:var(--text-default);overflow:hidden}
+.cell--single{min-height:56px}
+.cell--double{min-height:76px}
+.cell--bg-white{background:var(--bg-surface)}
+.cell--bg-grey{background:var(--bg-subtle)}
+.cell--clickable{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.cell--clickable:active{background:var(--bg-state-pressed)}
+.cell__body{position:relative;display:flex;align-items:center;align-self:stretch;gap:12px;width:100%;min-width:0;padding:12px 16px;box-sizing:border-box}
+.cell__select ~ .cell__body,
+.cell__avatar ~ .cell__body,
+.cell__backspace ~ .cell__body{padding-left:12px}
+.cell--indent .cell__body{padding-left:32px}
+.cell__content{flex:1;min-width:0;overflow:hidden}
+.cell__title-row{display:flex;align-items:center;gap:4px;min-width:0}
+.cell__title{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--body-lg-font-size);font-weight:var(--font-weight-regular);line-height:var(--body-lg-line-height);color:var(--text-default);font-feature-settings:"zero"}
+.cell__title-icon{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;flex-shrink:0;font-size:16px;color:var(--text-secondary)}
+.cell__subtitle{display:block;margin-top:2px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:var(--body-sm-font-size);font-weight:var(--font-weight-regular);line-height:var(--body-sm-line-height);color:var(--text-tertiary);font-feature-settings:"zero"}
+.cell__action{display:flex;align-items:center;justify-content:flex-end;gap:4px;min-width:0;flex-shrink:0;margin-left:auto}
+.cell__action--link{gap:0}
+.cell__action-text{display:block;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--body-lg-font-size);font-weight:var(--font-weight-regular);line-height:var(--body-lg-line-height);color:var(--text-secondary);font-feature-settings:"zero"}
+.cell__action-badge{display:flex;align-items:center;gap:4px;min-width:0}
+.cell__arrow{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;flex-shrink:0;font-size:16px;color:var(--text-tertiary)}
+.cell__select,
+.cell__avatar,
+.cell__backspace{display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cell__select{min-width:28px;margin-left:12px;padding-left:4px;box-sizing:border-box}
+.cell__select-icon{font-size:24px;color:var(--text-default)}
+.cell__select-icon--brand{color:var(--text-link)}
+.cell__avatar{margin-left:16px}
+.cell__select + .cell__avatar{margin-left:8px}
+.cell__backspace{width:24px;min-width:24px;min-height:24px;margin-left:16px;color:var(--text-tertiary)}
+.cell__backspace + .cell__select{margin-left:8px}
+.cell__backspace-icon{display:flex;align-items:center;justify-content:center;width:24px;height:24px;font-size:24px;color:var(--border-neutral-l2)}
+.cell--divider-right-edge .cell__body::after,
+.cell--divider-center .cell__body::after{content:"";position:absolute;bottom:0;left:var(--cell-divider-left, 16px);border-bottom:0.5px solid var(--border-neutral-l2);pointer-events:none}
+.cell--divider-right-edge .cell__body::after{right:0}
+.cell--divider-center .cell__body::after{right:16px}
+.cell__select ~ .cell__body,
+.cell__avatar ~ .cell__body,
+.cell__backspace ~ .cell__body{--cell-divider-left:12px}
+.cell--indent .cell__body{--cell-divider-left:32px}
+/* @component-css-end */
+</style>
+</head>
+<body>
+<div class="pv-header"><h1>单元格</h1><p>列表行，支持标题、内容、箭头、图标、徽标和副操作。</p></div>
+<div class="page">
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 右侧操作区 - JUMP_TO -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section-title">右侧 - 跳转 (JUMP_TO) — 分割线贴边</div>
+<div class="section-group">
+  <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">跳转页面</span></div></div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+  <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">消息中心</span></div></div>
+      <div class="cell__action"><span class="cell__action-text">查看详情</span><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+  <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">通知</span></div></div>
+      <div class="cell__action"><span class="cell__action-text">新消息</span><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+  <div class="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row"><span class="cell__title">最近订单</span></div>
+        <div class="cell__subtitle">2024-01-15 订单已签收</div>
+      </div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+</div>
+<div class="section-gap"></div>
+
+<!-- 跳转 + 操作区徽章 -->
+<div class="section-title">右侧 - 跳转 + 操作区徽章</div>
+<div class="section-group">
+  <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">消息中心</span></div></div>
+      <div class="cell__action">
+        <div class="cell__action-badge"><span class="cell__action-text">查看详情</span><span class="badge badge--dot"></span></div>
+        <i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
+      </div>
+    </div>
+  </div>
+  <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">通知</span></div></div>
+      <div class="cell__action">
+        <div class="cell__action-badge"><span class="cell__action-text">99</span><span class="badge badge--number badge--number-multi">99+</span></div>
+        <i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
+      </div>
+    </div>
+  </div>
+  <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">好友请求</span></div></div>
+      <div class="cell__action">
+        <div class="cell__action-badge"><span class="cell__action-text">3</span><span class="badge badge--number">3</span></div>
+        <i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
+      </div>
+    </div>
+  </div>
+  <div class="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row"><span class="cell__title">系统消息</span></div>
+        <div class="cell__subtitle">您的账户有新的安全提醒</div>
+      </div>
+      <div class="cell__action">
+        <div class="cell__action-badge"><span class="cell__action-text">12</span><span class="badge badge--number badge--number-multi">12</span></div>
+        <i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="section-gap"></div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 右侧操作区 - TEXT（纯文本） -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section-title">右侧 - 纯文本 (TEXT)</div>
+<div class="section-group">
+  <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">文本操作区</span></div></div>
+      <div class="cell__action"><span class="cell__action-text">上次选择</span></div>
+    </div>
+  </div>
+  <div class="cell cell--single cell--divider-right-edge cell--bg-white">
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">订单号</span></div></div>
+      <div class="cell__action"><span class="cell__action-text">2024010112345</span></div>
+    </div>
+  </div>
+  <div class="cell cell--double cell--divider-right-edge cell--bg-white">
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row"><span class="cell__title">收货地址</span></div>
+        <div class="cell__subtitle">广东省深圳市南山区科技园</div>
+      </div>
+      <div class="cell__action"><span class="cell__action-text">默认</span></div>
+    </div>
+  </div>
+</div>
+<div class="section-gap"></div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 右侧操作区 - SWITCH -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section-title">右侧 - 开关 (SWITCH)</div>
+<div class="section-group">
+  <div class="cell cell--single cell--divider-right-edge cell--bg-white">
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">推送通知</span></div></div>
+      <div class="cell__action"><div class="switch switch--off" onclick="if(this.classList.contains('switch--on')){this.classList.remove('switch--on');this.classList.add('switch--off')}else{this.classList.remove('switch--off');this.classList.add('switch--on')}"><div class="switch__thumb"></div></div></div>
+    </div>
+  </div>
+  <div class="cell cell--double cell--divider-right-edge cell--bg-white">
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row"><span class="cell__title">接收消息</span></div>
+        <div class="cell__subtitle">开启后将接收推送通知</div>
+      </div>
+      <div class="cell__action"><div class="switch switch--on" onclick="if(this.classList.contains('switch--on')){this.classList.remove('switch--on');this.classList.add('switch--off')}else{this.classList.remove('switch--off');this.classList.add('switch--on')}"><div class="switch__thumb"></div></div></div>
+    </div>
+  </div>
+  <div class="cell cell--single cell--divider-right-edge cell--bg-white">
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">夜间模式</span></div></div>
+      <div class="cell__action"><div class="switch switch--on switch--disabled"><div class="switch__thumb"></div></div></div>
+    </div>
+  </div>
+</div>
+<div class="section-gap"></div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 右侧操作区 - BUTTON -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section-title">右侧 - 按钮 (BUTTON)</div>
+<div class="section-group">
+  <div class="cell cell--single cell--divider-right-edge cell--bg-white">
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">操作按钮</span></div></div>
+      <div class="cell__action"><button class="btn btn--medium btn--sm">编辑</button></div>
+    </div>
+  </div>
+  <div class="cell cell--single cell--divider-right-edge cell--bg-white">
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">主要操作</span></div></div>
+      <div class="cell__action"><button class="btn btn--strong btn--sm">确定</button></div>
+    </div>
+  </div>
+  <div class="cell cell--single cell--divider-right-edge cell--bg-white">
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">查看</span></div></div>
+      <div class="cell__action"><button class="btn btn--medium btn--sm">详情</button></div>
+    </div>
+  </div>
+  <div class="cell cell--double cell--divider-right-edge cell--bg-white">
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row"><span class="cell__title">商品管理</span></div>
+        <div class="cell__subtitle">共 128 件商品，3 件待审核</div>
+      </div>
+      <div class="cell__action"><button class="btn btn--medium btn--sm">管理</button></div>
+    </div>
+  </div>
+</div>
+<div class="section-gap"></div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 右侧操作区 - CUSTOM（自定义） -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section-title">右侧 - 自定义 (CUSTOM)</div>
+<div class="section-group">
+  <div class="cell cell--single cell--divider-right-edge cell--bg-white">
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">自定义操作区</span></div></div>
+      <div class="cell__action cell__action--link"><a class="link" href="javascript:void(0)">更多</a></div>
+    </div>
+  </div>
+  <div class="cell cell--double cell--divider-right-edge cell--bg-white">
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row"><span class="cell__title">帮助与反馈</span></div>
+        <div class="cell__subtitle">常见问题与在线客服</div>
+      </div>
+      <div class="cell__action cell__action--link"><a class="link" href="javascript:void(0)">查看</a></div>
+    </div>
+  </div>
+</div>
+<div class="section-gap"></div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 标题区 - 图标 / Badge -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section-title">标题区 - 图标 & 徽章</div>
+<div class="section-group">
+  <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row">
+          <span class="cell__title">带图标的标题</span>
+          <span class="cell__title-icon wego-iconfont-s icon-tishi"></span>
+        </div>
+      </div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+  <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row">
+          <span class="cell__title">标题红点</span>
+          <span class="badge badge--dot"></span>
+        </div>
+      </div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+  <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row">
+          <span class="cell__title">标题文字角标</span>
+          <span class="badge badge--inline badge--text"><span class="badge__text">NEW</span></span>
+        </div>
+      </div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+  <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row">
+          <span class="cell__title">标题数字徽章</span>
+          <span class="badge badge--number">5</span>
+        </div>
+      </div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+  <div class="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row">
+          <span class="cell__title">消息列表</span>
+          <span class="badge badge--inline badge--text"><span class="badge__text">NEW</span></span>
+        </div>
+        <div class="cell__subtitle">3 条未读消息</div>
+      </div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+</div>
+<div class="section-gap"></div>
+
+<!-- 标题区 - 自定义内容 -->
+<div class="section-title">标题区 - 自定义内容</div>
+<div class="section-group">
+  <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row">
+          <span class="cell__title">自定义标签</span>
+          <span class="badge badge--inline badge--text"><span class="badge__text">HOT</span></span>
+        </div>
+      </div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+  <div class="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row">
+          <span class="cell__title">限时活动</span>
+          <span class="badge badge--inline badge--text"><span class="badge__text">HOT</span></span>
+        </div>
+        <div class="cell__subtitle">活动截止至 2024-12-31</div>
+      </div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+</div>
+<div class="section-gap"></div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 双行 - 标题 + 副标题 -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section-title">双行 - 标题 + 副标题</div>
+<div class="section-group">
+  <div class="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row"><span class="cell__title">带副标题</span></div>
+        <div class="cell__subtitle">这是一段副标题描述文字，可以换行显示更多内容</div>
+      </div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+  <div class="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row"><span class="cell__title">富文本副标题</span></div>
+        <div class="cell__subtitle">辅助文本1 辅助文本2 <a class="link link--inline" href="javascript:void(0)">链接文字</a></div>
+      </div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+</div>
+<div class="section-gap"></div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 左侧 - 选择区 (Checkbox) -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section-title">左侧 - 选择区 (Checkbox)</div>
+<div class="section-group">
+  <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__select"><div class="checkbox" onclick="this.classList.toggle('checkbox--checked')"><div class="checkbox__inner"></div><div class="checkbox__icon"><img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt=""></div></div></div>
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">带复选框</span></div></div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+  <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__select"><div class="checkbox checkbox--checked" onclick="this.classList.toggle('checkbox--checked')"><div class="checkbox__inner"></div><div class="checkbox__icon"><img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt=""></div></div></div>
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">已选中</span></div></div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+  <div class="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__select"><div class="checkbox" onclick="this.classList.toggle('checkbox--checked')"><div class="checkbox__inner"></div><div class="checkbox__icon"><img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt=""></div></div></div>
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row"><span class="cell__title">批量选择</span></div>
+        <div class="cell__subtitle">已选择 2 项</div>
+      </div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+</div>
+<div class="section-gap"></div>
+
+<!-- 左侧 - 选择区 (Radio) -->
+<div class="section-title">左侧 - 选择区 (Radio)</div>
+<div class="section-group">
+  <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__select"><div class="radio"><div class="radio__inner"></div></div></div>
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">单选 A</span></div></div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+  <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__select"><div class="radio radio--checked"><div class="radio__inner"></div><div class="radio__dot"></div></div></div>
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">单选 B（已选）</span></div></div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+  <div class="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__select"><div class="radio"><div class="radio__inner"></div></div></div>
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row"><span class="cell__title">配送方式</span></div>
+        <div class="cell__subtitle">普通快递，预计 3-5 天送达</div>
+      </div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+</div>
+<div class="section-gap"></div>
+
+<!-- 左侧 - 选择区 (图标) -->
+<div class="section-title">左侧 - 选择区 (图标)</div>
+<div class="section-group">
+  <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__select"><i class="cell__select-icon wego-iconfont-s icon-chengchangzhongxin"></i></div>
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">带图标选择区</span></div></div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+  <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__select"><i class="cell__select-icon cell__select-icon--brand wego-iconfont-s icon-yuanjia"></i></div>
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">添加图标选择区</span></div></div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+  <div class="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__select"><i class="cell__select-icon wego-iconfont-s icon-chengchangzhongxin"></i></div>
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row"><span class="cell__title">成长中心</span></div>
+        <div class="cell__subtitle">查看您的成长等级与积分</div>
+      </div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+</div>
+<div class="section-gap"></div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 左侧 - 头像区 -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section-title">左侧 - 头像区</div>
+<div class="section-group">
+  <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__avatar"><div class="avatar avatar--40 avatar--initials">头</div></div>
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">带头像 (40px)</span></div></div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+  <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__avatar"><div class="avatar avatar--24 avatar--initials">头</div></div>
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">带头像 (24px)</span></div></div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+  <div class="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__avatar"><div class="avatar avatar--40 avatar--initials">头</div></div>
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row"><span class="cell__title">带头像 + 副标题</span></div>
+        <div class="cell__subtitle">Avatar 区域自动添加 12px 右侧间距</div>
+      </div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+  <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__avatar"><div class="avatar avatar--40 avatar--initials">头</div></div>
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">带头像 + 图标</span><span class="cell__title-icon wego-iconfont-s icon-tishi"></span></div></div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+</div>
+<div class="section-gap"></div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 左侧 - 子级缩进 -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section-title">左侧 - 子级缩进</div>
+<div class="section-group">
+  <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__backspace"><i class="cell__backspace-icon wego-iconfont-s icon-jian16"></i></div>
+    <div class="cell__select"><div class="checkbox" onclick="this.classList.toggle('checkbox--checked')"><div class="checkbox__inner"></div><div class="checkbox__icon"><img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt=""></div></div></div>
+    <div class="cell__avatar"><div class="avatar avatar--40 avatar--initials">头</div></div>
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">子级缩进 + 复选框 + 头像</span></div></div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+  <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__backspace"></div>
+    <div class="cell__select"><div class="checkbox checkbox--checked" onclick="this.classList.toggle('checkbox--checked')"><div class="checkbox__inner"></div><div class="checkbox__icon"><img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt=""></div></div></div>
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">子级缩进(空白占位) + 复选框</span></div></div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+  <div class="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__backspace"></div>
+    <div class="cell__select"><div class="checkbox" onclick="this.classList.toggle('checkbox--checked')"><div class="checkbox__inner"></div><div class="checkbox__icon"><img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt=""></div></div></div>
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row"><span class="cell__title">编辑列表</span></div>
+        <div class="cell__subtitle">支持子级缩进与多选操作</div>
+      </div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+</div>
+<div class="section-gap"></div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 分割线居中 -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section-title">分割线 - 居中 (null)</div>
+<div class="section-group">
+  <div class="cell cell--single cell--divider-center cell--bg-white cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">账号与安全</span></div></div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+  <div class="cell cell--single cell--divider-center cell--bg-white cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">隐私设置</span></div></div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+  <div class="cell cell--single cell--divider-center cell--bg-white cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">通用</span></div></div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+  <div class="cell cell--double cell--divider-center cell--bg-white cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row"><span class="cell__title">辅助功能</span></div>
+        <div class="cell__subtitle">无障碍与辅助工具设置</div>
+      </div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+</div>
+<div class="section-gap"></div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 二级缩进 -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section-title">二级缩进 (设置子选项)</div>
+<div class="section-group">
+  <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">通知设置</span></div></div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+</div>
+<div class="section-group">
+  <div class="cell cell--single cell--divider-center cell--bg-white cell--indent cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">推送通知</span></div></div>
+      <div class="cell__action"><div class="switch switch--on" onclick="if(this.classList.contains('switch--on')){this.classList.remove('switch--on');this.classList.add('switch--off')}else{this.classList.remove('switch--off');this.classList.add('switch--on')}"><div class="switch__thumb"></div></div></div>
+    </div>
+  </div>
+  <div class="cell cell--single cell--divider-center cell--bg-white cell--indent cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">私信通知</span></div></div>
+      <div class="cell__action"><div class="switch switch--off" onclick="if(this.classList.contains('switch--on')){this.classList.remove('switch--on');this.classList.add('switch--off')}else{this.classList.remove('switch--off');this.classList.add('switch--on')}"><div class="switch__thumb"></div></div></div>
+    </div>
+  </div>
+  <div class="cell cell--single cell--divider-center cell--bg-white cell--indent cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">系统通知</span></div></div>
+      <div class="cell__action"><div class="switch switch--on switch--disabled"><div class="switch__thumb"></div></div></div>
+    </div>
+  </div>
+  <div class="cell cell--double cell--divider-center cell--bg-white cell--indent cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row"><span class="cell__title">消息免打扰</span></div>
+        <div class="cell__subtitle">开启后将不接收推送通知提醒</div>
+      </div>
+      <div class="cell__action"><div class="switch switch--off" onclick="if(this.classList.contains('switch--on')){this.classList.remove('switch--on');this.classList.add('switch--off')}else{this.classList.remove('switch--off');this.classList.add('switch--on')}"><div class="switch__thumb"></div></div></div>
+    </div>
+  </div>
+</div>
+<div class="section-gap"></div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 背景色 -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section-title">背景色 - GREY</div>
+<div class="section-group">
+  <div class="cell cell--single cell--divider-right-edge cell--bg-grey cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">灰色背景</span></div></div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+  <div class="cell cell--double cell--divider-right-edge cell--bg-grey cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row"><span class="cell__title">灰色背景 + 副标题</span></div>
+        <div class="cell__subtitle">cellColor = CellColor.GREY</div>
+      </div>
+      <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+    </div>
+  </div>
+  <div class="cell cell--single cell--divider-right-edge cell--bg-grey">
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">灰色背景 + 开关</span></div></div>
+      <div class="cell__action"><div class="switch switch--off" onclick="if(this.classList.contains('switch--on')){this.classList.remove('switch--on');this.classList.add('switch--off')}else{this.classList.remove('switch--off');this.classList.add('switch--on')}"><div class="switch__thumb"></div></div></div>
+    </div>
+  </div>
+</div>
+<div class="section-gap"></div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 无操作区 -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section-title">无操作区 (CUSTOM 默认不显示)</div>
+<div class="section-group">
+  <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content"><div class="cell__title-row"><span class="cell__title">仅标题</span></div></div>
+    </div>
+  </div>
+  <div class="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable">
+    <div class="cell__body">
+      <div class="cell__content">
+        <div class="cell__title-row"><span class="cell__title">仅标题 + 副标题</span></div>
+        <div class="cell__subtitle">没有右侧操作区</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="height:48px"></div>
+</div>
+</body>
+</html>

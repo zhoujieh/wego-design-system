@@ -1,0 +1,4 @@
+interface:
+  display_name: "Wego Product"
+  short_description: "理解业务需求、判断页面场景并输出 page_spec 规格"
+  default_prompt: "Use $wego-product to classify the task, understand the business requirement, determine the page scene, and produce a page_spec before any design-system consumption."

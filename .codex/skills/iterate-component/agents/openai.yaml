@@ -1,7 +1,7 @@
 interface:
-  display_name: "Wegoux 组件迭代"
-  short_description: "按 wegoux 守门流程迭代或发布组件"
-  default_prompt: "Use $iterate-component to read the wegoux library docs in order, iterate the component contract and preview safely, sync docs and extraction outputs when needed, bump metadata version for formal iterations, and always report changed items, verification, and remaining risks."
+  display_name: "Wego Design 组件迭代"
+  short_description: "按 wego-design 守门流程迭代组件与契约"
+  default_prompt: "Use $iterate-component to read the wego-design library docs in order, iterate the component contract and preview safely, sync docs and extraction outputs when needed, bump metadata version for formal iterations, and always report changed items, verification, and remaining risks."
 
 policy:
   allow_implicit_invocation: true

@@ -1,0 +1,214 @@
+{
+  "schemaVersion": 3,
+  "slug": "cell",
+  "name": "列表单元格",
+  "category": "display",
+  "status": "stable",
+  "sourceKind": "inferred",
+  "confidence": "high",
+  "description": "移动端列表单元格，承载信息展示、跳转、选择和轻操作插槽。",
+  "semanticTypeCandidates": [
+    "list-row",
+    "setting-row",
+    "info-cell"
+  ],
+  "variantDimensions": {
+    "density": [
+      "single",
+      "double"
+    ],
+    "surface": [
+      "bg-white",
+      "bg-grey"
+    ],
+    "interaction": [
+      "static",
+      "clickable"
+    ],
+    "divider": [
+      "none",
+      "divider-right-edge",
+      "divider-center"
+    ],
+    "leadingSlot": [
+      "none",
+      "select",
+      "avatar",
+      "backspace",
+      "icon",
+      "composite-edit"
+    ],
+    "trailingSlot": [
+      "none",
+      "text",
+      "badge",
+      "arrow",
+      "switch",
+      "button",
+      "custom-link"
+    ]
+  },
+  "representativeVariants": [
+    {
+      "density": "single",
+      "surface": "bg-white",
+      "interaction": "static",
+      "trailingSlot": "none"
+    },
+    {
+      "density": "single",
+      "surface": "bg-white",
+      "interaction": "clickable",
+      "trailingSlot": "arrow"
+    },
+    {
+      "density": "double",
+      "surface": "bg-grey",
+      "interaction": "static",
+      "leadingSlot": "avatar",
+      "trailingSlot": "text"
+    },
+    {
+      "density": "single",
+      "surface": "bg-white",
+      "interaction": "clickable",
+      "leadingSlot": "select",
+      "trailingSlot": "switch"
+    }
+  ],
+  "anatomy": [
+    {
+      "name": "root",
+      "selector": ".cell",
+      "role": "列表项容器"
+    },
+    {
+      "name": "body",
+      "selector": ".cell__body",
+      "role": "内容主区"
+    },
+    {
+      "name": "content",
+      "selector": ".cell__content",
+      "role": "标题与副标题区"
+    },
+    {
+      "name": "action",
+      "selector": ".cell__action",
+      "role": "右侧操作区"
+    }
+  ],
+  "structurePatterns": [
+    "左侧插槽默认保持单一前导语义；编辑态允许缩进占位、选择控件和头像做紧凑组合。",
+    "前导槽位组与正文内容之间默认保持 12px 间距，避免 checkbox、radio、图标或头像贴近标题。",
+    "中间内容区固定标题优先、副标题次级，不扩成多列表格。",
+    "右侧操作区最多承担一种主反馈类型，例如文字、角标、按钮、开关或箭头。",
+    "自定义链接类操作沿用 .cell__action 宿主，本体不额外补右侧间距，保证内容距屏幕右侧保持 16px。",
+    "同一分组内的连续 cell 通过分割线建立行间视觉节奏；最后一行不加分割线，避免与分组底部留白重叠。",
+    "cell__body 带上下 12px padding，cell 使用 min-height 而非固定高度，内容自然撑高。标题使用 nowrap 截断，副标题使用 2 行截断，设计内容时仍需遵循截断规则。",
+    "子级缩进使用 .cell__backspace（空占位 24px） > .cell__select（内嵌 switch/radio/checkbox） > .cell__body 结构。cell__backspace 提供左侧缩进宽度，视觉上建立层级从属关系。"
+  ],
+  "behavior": {
+    "click": "clickable 时整行响应按压态，局部操作仍保持清晰热区。",
+    "divider": "分割线样式由修饰类控制，但左侧起点始终跟随正文文本左边缘对齐，不因前导插槽场景漂移。",
+    "slots": "右侧角标和箭头属于 trailing slot，不在标题区新增重复操作。"
+  },
+  "accessibility": {
+    "rowRole": "点击整行时需提供一致的可聚焦或可点击语义。",
+    "textOverflow": "标题与副标题允许省略，避免压缩右侧操作区。",
+    "nestedControl": "嵌套 checkbox 或 radio 时不要让整行点击与控件状态冲突。"
+  },
+  "usageHints": [
+    "适合设置页、资料页、订单信息摘要等移动端高密度列表。",
+    "双行模式用于副标题需要解释信息时，避免在单行强塞长文案。",
+    "右侧是链接、按钮或开关时，仍应保持单一主反馈，不在同一行叠加多种主操作。",
+    "cell__select 内嵌 radio/checkbox 时，cell 的 title/subtitle 直接作为选项文案和说明，不需要在 cell 外加 .radio-field__text 或 .checkbox-field__text。",
+    "同一 section-group 内存在多个连续 cell 时，除最后一行外均应添加分割线修饰类（.cell--divider-right-edge 或 .cell--divider-center），孤立单行 cell 不加分割线。",
+    "radio 单选列表的选中态仅通过 radio--checked 表达，不加 cell--indent，避免破坏同组内横向对齐基线。",
+    "cell__body 内置上下 12px padding，结合 min-height（cell--single: 56px, cell--double: 76px），副标题换行时 cell 可自然撑高。标题仍由 nowrap 截断。如需自定义 cell 内间距，优先通过调整 body padding 而非覆盖 min-height。",
+    "子级条件区域的层级缩进必须使用 cell__backspace 空占位模式，禁止手写 border-left / margin-left 等自定义样式实现缩进。"
+  ],
+  "doNotInvent": [
+    "不要把 cell 扩成桌面表格行、树形列表或多列数据面板。",
+    "不要在 cell 内同时放多个同级主操作按钮。"
+  ],
+  "tokensConsumed": [
+    "--accent-green",
+    "--bg-page",
+    "--bg-state-pressed",
+    "--bg-subtle",
+    "--bg-surface",
+    "--body-lg-font-size",
+    "--body-lg-line-height",
+    "--body-md-font-size",
+    "--body-md-line-height",
+    "--body-sm-font-size",
+    "--body-sm-line-height",
+    "--border-neutral-l2",
+    "--font-weight-medium",
+    "--font-weight-regular",
+    "--text-default",
+    "--text-link",
+    "--text-secondary",
+    "--text-tertiary"
+  ],
+  "designTokens": {
+    "height": {
+      "single": "56px",
+      "double": "76px"
+    },
+    "paddingHorizontal": "16px",
+    "gap": "12px",
+    "leadingToContentGap": "12px",
+    "titleFont": "var(--body-lg-font-size)",
+    "subtitleFont": "var(--body-sm-font-size)",
+    "actionFont": "var(--body-lg-font-size)",
+    "divider": "0.5px solid var(--border-neutral-l2)",
+    "paddingVertical": "12px"
+  },
+  "specRefs": [
+    "specs/布局与间距规范.md",
+    "specs/交互设计原则.md"
+  ],
+  "domAnatomy": {
+    "root": ".cell",
+    "requiredChildren": [
+      ".cell__body",
+      ".cell__content"
+    ],
+    "optionalChildren": [
+      ".cell__select",
+      ".cell__avatar",
+      ".cell__backspace",
+      ".cell__action",
+      ".cell__arrow",
+      ".cell__title-icon",
+      ".cell__action-text",
+      ".cell__action-badge",
+      ".cell__select-icon",
+      ".cell__backspace-icon"
+    ],
+    "modifierClasses": [
+      ".cell--single",
+      ".cell--double",
+      ".cell--bg-white",
+      ".cell--bg-grey",
+      ".cell--clickable",
+      ".cell--divider-right-edge",
+      ".cell--divider-center",
+      ".cell--indent"
+    ],
+    "contentChildren": [
+      ".cell__title-row",
+      ".cell__title",
+      ".cell__subtitle"
+    ]
+  },
+  "provenance": {
+    "preview": "preview/component-cell.html",
+    "cssSource": "preview/component-cell.html",
+    "embedded": false,
+    "hostComponent": null
+  },
+  "unknowns": []
+}

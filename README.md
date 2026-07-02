@@ -1,68 +1,82 @@
 # wego-design-system
 
-> 微购（wegoux）设计系统的源仓库。面向移动应用、微信生态、电商与工具场景的中文界面设计系统。
+> 微购中文产品原型与设计系统仓库。当前以 Codex 本地技能驱动，面向移动端、微信生态、电商与工具场景。
 
-## 它解决什么问题
+## 技能闭环
 
-当前阶段，这套系统主要服务于**产品团队**：让产出的产品原型统一符合微购设计规范，避免颜色随手写、组件各画各的、风格被桌面后台或营销页带偏、规范散在口口相传里这些老问题。通过一份结构化、机器可读的契约库，配合 AI 生成界面，让原型从源头就贴近设计规范。
+仓库统一采用 4 个本地技能闭环，全部位于 `.codex/skills/`：
 
-后续会演进到**开发侧**，把契约接入真实的组件库，赋能开发效率，打通从设计到研发的链路。
+1. `wego-product`
+   负责理解原始需求并输出 `page_spec`
+2. `wego-design`
+   负责消费设计系统并输出 `design_consumption_plan`
+3. `wego-ux`
+   负责正式输出产品原型项目
+4. `wego-tests`
+   负责验收原型并输出 `acceptance_report`
 
-核心价值：
+这 4 段职责分开，避免一个技能同时承担需求理解、设计消费、原型生成和验收。
 
-- **一致**：颜色、字号、间距、圆角、阴影、动效全部走 Token，组件直接消费，避免硬编码漂移。
-- **克制**：风格固定为简洁、干净、淡雅、克制；优先级是 清晰 > 一致 > 效率 > 美观 > 创新。
-- **可消费**：Token、组件、图标、规范都按层契约化，AI 与下游项目可按场景读取复制。
-- **可演进**：先以契约形式落地产品原型，后续可对接真实组件库，从设计规范自然延伸到研发效率。
+## 当前设计系统位置
 
-## 架构设计
+设计系统本体位于：
 
-整套系统是**五层契约**的分层结构，每一层都有权威源和同步规则。设计库位于 `.design_library/wegoux/`，根目录的 [AGENTS.md](file:///Users/dk/Documents/code/wego-design-system/AGENTS.md) 是仓库级总则。
+- [.codex/skills/wego-design/SKILL.md](/Users/dk/Documents/code/wego-design-system/.codex/skills/wego-design/SKILL.md)
+- [.codex/skills/wego-design/README.md](/Users/dk/Documents/code/wego-design-system/.codex/skills/wego-design/README.md)
+- [.codex/skills/wego-design/library-consumption.json](/Users/dk/Documents/code/wego-design-system/.codex/skills/wego-design/library-consumption.json)
+- [.codex/skills/wego-design/uikit-plan.json](/Users/dk/Documents/code/wego-design-system/.codex/skills/wego-design/uikit-plan.json)
 
-| 层 | 内容 | 权威源 |
-|----|------|--------|
-| Token（视觉语言） | 色阶、语义色、排版、间距、圆角、阴影、动效等原子级视觉值 | [colors_and_type.css](file:///Users/dk/Documents/code/wego-design-system/.design_library/wegoux/colors_and_type.css) 是人读权威源，[css.json](file:///Users/dk/Documents/code/wego-design-system/.design_library/wegoux/css.json) 是机器可读投影，两者必须同步 |
-| 组件 | 按钮、卡片、输入框、导航栏等 17 个稳定组件，每个都有契约和预览页 | [components/index.json](file:///Users/dk/Documents/code/wego-design-system/.design_library/wegoux/components/index.json) 是注册表，[components/{slug}.json](file:///Users/dk/Documents/code/wego-design-system/.design_library/wegoux/components) 是单组件契约，[preview/component-{slug}.html](file:///Users/dk/Documents/code/wego-design-system/.design_library/wegoux/preview) 是预览页 |
-| 图标 | 常规图标统一走 iconfont 字体，少数固定资产用 SVG | [iconfont.css](file:///Users/dk/Documents/code/wego-design-system/.design_library/wegoux/iconfont.css) + [assets/fonts/](file:///Users/dk/Documents/code/wego-design-system/.design_library/wegoux/assets/fonts) + [assets/icons/](file:///Users/dk/Documents/code/wego-design-system/.design_library/wegoux/assets/icons) |
-| 规范 | 品牌、布局、交互、动效、图标、文案与数据格式细则 | [specs/*.md](file:///Users/dk/Documents/code/wego-design-system/.design_library/wegoux/specs)，作为规则参考 |
-| UI Kit | 页面级组合示例，展示组件如何搭配使用 | [ui_kits/*/index.html](file:///Users/dk/Documents/code/wego-design-system/.design_library/wegoux/ui_kits) + `quality-report.json` |
+旧目录已退出当前执行链路，不再作为权威路径。
 
-几个关键约束贯穿全架构：
+## 核心目录
 
-- **预览页是组件样式的真实来源**：`preview/component-*.html` 内用 `/* @component-css-start */` / `/* @component-css-end */` 标记包裹的样式块，由 `scripts/extract-components-css.mjs` 聚合生成 `components.css`。**严禁手动编辑 `components.css`**。
-- **Token 改动双向同步**：改 `colors_and_type.css` 后必须同步 `css.json`，且 `css.json` 使用 TRAE 官方嵌套分组与对象阴影格式，不能用 CSS 字符串或 `var()` 引用。
-- **方向不漂移**：不把 wegoux 改成桌面 IDE、营销大屏或暗色优先系统；TRAE 仅作结构完整性参考，不迁移视觉风格。
+- `.codex/skills/wego-product/`：产品需求理解技能
+- `.codex/skills/wego-design/`：设计系统本体与消费技能
+- `.codex/skills/wego-ux/`：原型项目输出技能
+- `.codex/skills/wego-tests/`：验收技能
+- `.codex/skills/iterate-component/`：组件迭代守门技能
+- `docs/`：计划文档、历史审查文档、参考资料
+- `scripts/validate-wego-design.mjs`：当前设计系统守门脚本
 
-## AI 如何调用
+## 原型输出规则
 
-本设计系统本身就是为 AI 消费设计的。AI 通过读取结构化的契约文件来理解和使用这套系统，而不是靠猜测或自由发挥。
+- 正式输出产品原型的环节固定为 `wego-ux`
+- 原型必须是任务级项目文件夹，不能把文件直接丢在仓库根目录
+- 同一任务的迭代必须复用原有任务文件夹
+- 默认原型骨架为静态 HTML/CSS/JS 多页面项目
+- 默认目标是浏览器直接打开即可预览,可在手机浏览器中独立查看,无需构建、无需依赖
 
-### 标准读取顺序
+## 设计系统方向
 
-1. 先读 [library-consumption.json](file:///Users/dk/Documents/code/wego-design-system/.design_library/wegoux/library-consumption.json)，确认当前任务对应哪一层消费、能复制哪些文件、边界在哪。
-2. 需要页面组合时，读 [uikit-plan.json](file:///Users/dk/Documents/code/wego-design-system/.design_library/wegoux/uikit-plan.json)，确认允许使用的组件、核心槽位和页面蓝图。
-3. 需要 Token 时，优先读 [colors_and_type.css](file:///Users/dk/Documents/code/wego-design-system/.design_library/wegoux/colors_and_type.css)；需要结构化处理时再读 [css.json](file:///Users/dk/Documents/code/wego-design-system/.design_library/wegoux/css.json)。
-4. 需要组件时，先读 [components/index.json](file:///Users/dk/Documents/code/wego-design-system/.design_library/wegoux/components/index.json) 确认可用组件，再读对应 `components/{slug}.json` 契约和 `preview/component-{slug}.html` 拿 markup。
-5. 需要布局、文案、日期、金额等细则时，读取 [specs/](file:///Users/dk/Documents/code/wego-design-system/.design_library/wegoux/specs) 下对应规范。
+- 风格：简洁、干净、淡雅、克制
+- 优先级：清晰 > 一致 > 效率 > 美观 > 创新
+- 主色：微信绿 `#03C160`
+- 默认场景：移动端、微信生态、电商、工具、社交
+- 默认密度：移动端高信息密度
 
-### 按场景调用
+禁止方向漂移：
 
-- **只使用 Token** → 读取 `colors_and_type.css`，在页面中 `<link>` 或 `@import`，所有视觉值引用 `var(--*)`，不硬编码。
-- **生成单个组件** → 读注册表确认存在，再读对应契约和预览页拿结构和 class，同时链接 `colors_and_type.css`、`iconfont.css` 和 `components.css`。
-- **生成完整移动端页面** → 用 UI Kit 看结构和组合方式，用单组件预览页拿 markup，用真实页面尺寸重写外层布局，不复制 `.uikit-shell` / `.phone-frame` / `.phone-screen` 演示外壳。
-- **处理中文文案和数据** → 读取 `specs/文案与数据规范.md`，金额、日期、时间、空数据、省略规则以它为准。
-- **迭代已有组件** → 使用 `.codex/skills/iterate-component/SKILL.md` 定义的标准流程，走组件迭代 Skill。
+- 不把系统改成桌面 IDE、后台工作台或营销大屏
+- 不把 Showcase 外壳当作生产页面模板
 
-### 调用边界
+## 常用入口
 
-- 不擅自发布未在 `components/index.json` 注册的组件。
-- 不为了临时需求接入 Lucide、第三方 CDN 图标或内联 SVG，常规图标统一用 `wego-iconfont`。
-- 不把 UI Kit 的手机壳、Showcase 外壳或 `biz-*` 演示样式当成通用组件复制。
-- 不直接手动编辑 `components.css`，改组件样式必须走"改预览页标记内样式 → 改组件契约 → 运行生成脚本"流程。
+- 根规则：[AGENTS.md](/Users/dk/Documents/code/wego-design-system/AGENTS.md)
+- 设计系统技能：[.codex/skills/wego-design/SKILL.md](/Users/dk/Documents/code/wego-design-system/.codex/skills/wego-design/SKILL.md)
+- 组件迭代技能：[.codex/skills/iterate-component/SKILL.md](/Users/dk/Documents/code/wego-design-system/.codex/skills/iterate-component/SKILL.md)
+- 闭环计划：[docs/wego-local-skills-closed-loop-plan.md](/Users/dk/Documents/code/wego-design-system/docs/wego-local-skills-closed-loop-plan.md)
 
-## 进一步阅读
+## 验证
 
-- [.design_library/wegoux/README.md](file:///Users/dk/Documents/code/wego-design-system/.design_library/wegoux/README.md) — 品牌背景、视觉基础、命名规则、组件概览
-- [.design_library/wegoux/SKILL.md](file:///Users/dk/Documents/code/wego-design-system/.design_library/wegoux/SKILL.md) — Skill 运行时控制入口和读取顺序
-- [AGENTS.md](file:///Users/dk/Documents/code/wego-design-system/AGENTS.md) — 仓库级总则、硬约束、变更同步矩阵和已知技术债
-- [.codex/skills/iterate-component/SKILL.md](file:///Users/dk/Documents/code/.codex/skills/iterate-component/SKILL.md) — 组件迭代的标准流程和守门清单
+当前设计系统守门脚本：
+
+```bash
+node scripts/validate-wego-design.mjs
+node scripts/validate-wego-design.mjs --scope=full --strict
+```
+
+组件样式聚合脚本：
+
+```bash
+node .codex/skills/wego-design/scripts/extract-components-css.mjs .codex/skills/wego-design
+```

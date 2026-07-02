@@ -1,0 +1,4 @@
+interface:
+  display_name: "Wego Design"
+  short_description: "消费微购设计系统，输出页面设计实现约束与消费决策方案"
+  default_prompt: "Use $wego-design to consume the local design system, match the best page pattern and UI Kit, and produce a design_consumption_plan from an existing page_spec."

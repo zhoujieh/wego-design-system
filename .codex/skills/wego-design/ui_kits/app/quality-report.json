@@ -1,0 +1,24 @@
+{
+  "kitType": "app",
+  "screensGenerated": 4,
+  "coreComponentsUsed": ["navbar", "bottom-nav", "button", "card", "tag", "badge", "image", "counter", "avatar", "input", "cell", "checkbox", "switch", "link", "form", "radio"],
+  "supportComponentsUsed": [],
+  "previewClassReuseRate": 0.88,
+  "reuseAssessment": "主 UI Kit 已将顶部栏、固定五项底部导航、列表行、数量步进、商品图占位，以及业务规则配置全屏模态中的 form/radio/checkbox/switch 统一收回到已注册组件结构；Showcase 外壳继续由 scaffold.css 提供。",
+  "inventedComponents": [],
+  "recommendedRefactors": {},
+  "interactiveStatesRendered": ["active", "disabled", "selected", "editing", "on", "off"],
+  "primaryActionPerScreen": true,
+  "mockDataDensity": {
+    "productCards": 3,
+    "settingRows": 12,
+    "tableRows": 0,
+    "chartPoints": 0
+  },
+  "warnings": [
+    "UI Kit 是移动端应用 Showcase，不是可直接复制的页面模板。",
+    "Showcase 外壳类由 scaffold.css 统一提供，仅用于预览手机框，不应沉淀为通用组件。",
+    "底部导航已按 bottom-nav 组件固定五项同步；示例只绑定“动态”和“我的”跳转，其余入口用于展示固定结构和角标挂载。",
+    "业务规则配置页现在以从底部进入、全屏覆盖的模态方式打开，并盖住底部导航；示例中的页面级主操作统一收口，不在内容区和底部重复堆叠。"
+  ]
+}

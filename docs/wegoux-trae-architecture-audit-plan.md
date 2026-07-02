@@ -1,5 +1,7 @@
 # wegoux 与 TRAE 设计系统架构审查比对及优化计划
 
+> 历史审查文档说明：本文保留当时的 `wegoux` 命名和比对语境，便于追溯背景；当前实际执行路径已经迁到 `.codex/skills/wego-design/`，请不要再把文中的旧路径当作现行权威路径。
+
 > 本文档是审查与优化计划，不包含代码改动方案的实际落地。本次目标是借 TRAE/Nimbus Core 的结构完整性，反向校准 wegoux 的文件职责、组件契约、预览页规则、消费契约和未来迭代顺序，避免 wegoux 方向漂移。
 
 ## 1. 审查结论
@@ -278,8 +280,8 @@ wegoux 当前定位清楚：移动端、微信生态、电商/工具、中文、
 | 问题 | 影响 |
 | --- | --- |
 | 文档提到 `icons/`，实际资产在 `assets/icons/`。 | 下游读取路径可能错误。 |
-| `README.md`/`SKILL.md` 已提到 `biz-settings`，但 `library-consumption.json` 的 `uiKits` 仍只有 `app`。 | 消费契约和实际 UI Kit 不同步。 |
-| README 文件清单中根路径写成 `wegoux/`。 | 与实际 `.design_library/wegoux/` 不一致。 |
+| `README.md`/`SKILL.md` 已提到 `biz-rule-config`，但 `library-consumption.json` 的 `uiKits` 仍只有 `app`。 | 消费契约和实际 UI Kit 不同步。 |
+| README 文件清单中根路径写成 `wegoux/`。 | 与实际 `.codex/skills/wego-design/` 不一致。 |
 | 方向约束主要在文档层，还没有系统进入每个组件契约。 | 后续 AI 修改单组件时容易只看局部文件。 |
 
 ### 3.3 `colors_and_type.css`
@@ -428,13 +430,13 @@ wegoux 当前定位清楚：移动端、微信生态、电商/工具、中文、
 | 资产路径、`uiKits` 列表、推荐读取顺序已与仓库现状同步。 | 本轮无需继续修消费入口路径。 |
 | 组件契约读取规则此前没有明确 schema 版本边界。 | 本轮已补充 `componentContractSchemaVersion: 3` 和读取说明。 |
 
-### 3.11 `ui_kits/app` 与 `ui_kits/biz-settings`
+### 3.11 `ui_kits/app` 与 `ui_kits/biz-rule-config`
 
 现状优点：
 
 - `app` 覆盖首页、详情、我的、业务设置，业务语境完整。
-- `biz-settings` 已经大量复用注册组件，质量报告复用率为 1。
-- `biz-settings` 的页面模式、转场、slot 与 specs/uikit-plan 对齐度较高。
+- `biz-rule-config` 已经大量复用注册组件，质量报告复用率为 1。
+- `biz-rule-config` 的页面模式、转场、slot 与 specs/uikit-plan 对齐度较高。
 
 发现的问题：
 
@@ -442,10 +444,10 @@ wegoux 当前定位清楚：移动端、微信生态、电商/工具、中文、
 | --- | --- |
 | `ui_kits/app/index.html` | 质量报告复用率 0.52，仍有 Lucide CDN、`phone-header`、`phone-status`、`phone-indicator`、`menu-item` 等演示/业务样式。 |
 | `ui_kits/app/quality-report.json` | 已记录 Lucide 和发明组件问题，但尚未修复。 |
-| `ui_kits/biz-settings/index.html` | 复用率高，但仍有 inline `CHECKMARK_SVG`，应优先回到 checkbox/iconfont/随库资产。 |
+| `ui_kits/biz-rule-config/index.html` | 复用率高，但仍有 inline `CHECKMARK_SVG`，应优先回到 checkbox/iconfont/随库资产。 |
 | 两个 Kit | 都有 `.uikit-shell`、`.phone-frame`、`.phone-screen` 外壳，需要继续强调 Showcase 边界。 |
 
-建议：后续先以 `biz-settings` 为样板修 `app`，目标是主 `app` 复用率至少提升到 0.8，所有 Lucide/CDN 图标替换为 iconfont 或随库资产。
+建议：后续先以 `biz-rule-config` 为样板修 `app`，目标是主 `app` 复用率至少提升到 0.8，所有 Lucide/CDN 图标替换为 iconfont 或随库资产。
 
 ### 3.12 图标与资产
 
@@ -500,21 +502,21 @@ wegoux 当前定位清楚：移动端、微信生态、电商/工具、中文、
 
 > **完成记录**（commit `312b3ac`，metadata version 118；当前仓库 metadata version 152）：
 >
-> 1. ✅ README.md 文件清单根路径从 `wegoux/` 统一为 `.design_library/wegoux/`。
+> 1. ✅ README.md 文件清单根路径从 `wegoux/` 统一为 `.codex/skills/wego-design/`。
 > 2. ✅ 所有文档中 `icons/*.svg` 修正为 `assets/icons/*.svg`（README.md、SKILL.md、library-consumption.json 共 6 处）。
-> 3. ✅ `biz-settings` UI Kit 同步到 library-consumption.json（uiKits 数组 + uikit layer files）、components/index.json（uiKits 入口列表）、uikit-plan.json（uiKits 入口列表）、README.md（文件清单树 + 下游消费指南表格）、SKILL.md（文件清单树）。
+> 3. ✅ `biz-rule-config` UI Kit 同步到 library-consumption.json（uiKits 数组 + uikit layer files）、components/index.json（uiKits 入口列表）、uikit-plan.json（uiKits 入口列表）、README.md（文件清单树 + 下游消费指南表格）、SKILL.md（文件清单树）。
 > 4. ✅ `navbar-action-button` 在 components/index.json 中标记 `embedded: true` + `hostComponent: "navbar"`。
 > 5. ✅ components/index.json、library-consumption.json、uikit-plan.json 三个核心 JSON schemaVersion 统一升级到 2，补充 `library: "wegoux"`。
 > 6. ✅ 所有 18 个组件在 index.json 中补充 `preview` 路径。
 > 7. ✅ library-consumption.json `recommendedReadOrder` 首位加入 `SKILL.md`。
 >
-> **验收结果**：全文档路径 grep 无遗留旧路径；biz-settings 在 5 个文件中同步到位；JSON schemaVersion 一致。
+> **验收结果**：全文档路径 grep 无遗留旧路径；biz-rule-config 在 5 个文件中同步到位；JSON schemaVersion 一致。
 
 要做：
 
-1. 统一文档中的根路径为 `.design_library/wegoux/`。
+1. 统一文档中的根路径为 `.codex/skills/wego-design/`。
 2. 把 `icons/*.svg` 修为实际的 `assets/icons/*.svg`。
-3. 在 `library-consumption.json`、`uikit-plan.json`、README、SKILL 中同步 `app` 和 `biz-settings` 两个 UI Kit。
+3. 在 `library-consumption.json`、`uikit-plan.json`、README、SKILL 中同步 `app` 和 `biz-rule-config` 两个 UI Kit。
 4. 明确 `navbar-action-button` 是 embedded component，并在注册表中机器可读。
 
 验收：
@@ -532,7 +534,7 @@ wegoux 当前定位清楚：移动端、微信生态、电商/工具、中文、
 > 2. ✅ Token 结构收敛为 `reference/primitives` + `public semantic` 两层，并在文件头写明 AI 修改规则；组件后续只应直接消费 `--color-*`、`--font-*`、`--space-*`、`--radius-*`、`--size-*`、`--duration-*`、`--ease-*`。
 > 3. ✅ 补齐了本阶段缺失的可复用语义 Token：控件未选中背景、控件默认边框、控件禁用强边框、promotion 强提示文本/边框、accent-yellow 展示语义、switch thumb shadow 等。
 > 4. ✅ 组件核心 CSS 的 raw hex / 裸 `rgba(...)` 已在本阶段目标范围内清理为 0；涉及文件包含 `switch`、`checkbox`、`radio`、`stack`、`input`、`avatar`、`badge`、`bottom-nav`、`tag`、`form`、`image` 的 `@component-css` 标记块。
-> 5. ✅ `components.css` 已通过 `node .design_library/wegoux/scripts/extract-components-css.mjs .design_library/wegoux` 重新生成，输出无 warning。
+> 5. ✅ `components.css` 已通过 `node .codex/skills/wego-design/scripts/extract-components-css.mjs .codex/skills/wego-design` 重新生成，输出无 warning。
 > 6. ✅ `css.json` 已按新 Token 结构同步，并切到 TRAE 官方支持的扁平桶格式：`color` / `font` / `shadow` / `radius` / `spacing` / `size`（另含本库补充桶）。
 >
 > **范围说明**：
@@ -690,7 +692,7 @@ wegoux 当前定位清楚：移动端、微信生态、电商/工具、中文、
 
 要做：
 
-1. 以 `biz-settings` 为样板重构 `app`。
+1. 以 `biz-rule-config` 为样板重构 `app`。
 2. 用 `navbar` 替代 `phone-header`。
 3. 用 `cell` 替代 `menu-item`。
 4. 用 `bottom-nav` 的已注册结构替代 Lucide Tab 图标。

@@ -1,0 +1,246 @@
+/*
+ * scaffold.css - 预览页脚手架样式
+ * 只用于 preview/component-*.html 和 ui_kits/*.html，不用于生产组件。
+ * 不包含真实组件样式，不引入暗色 IDE 视觉。
+ * 使用 var() 引用 Token，假设 colors_and_type.css 已通过 <link> 加载。
+ */
+
+/* Phone-frame Showcase 下模拟安全区：仅 .phone-screen 内生效，不影响真机或其他场景 */
+.phone-screen {
+  --safe-area-top: 44px;
+  --safe-area-bottom: 34px;
+  --safe-area-bottom-content: 74px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: var(--bg-page);
+  color: var(--text-default);
+  font-family: var(--body-md-font-family);
+  min-height: 100%;
+  overflow-x: hidden;
+  max-width: 100%;
+}
+body { padding: 32px; }
+img, svg, video, canvas { max-width: 100%; }
+a { color: var(--text-default); text-decoration: none; }
+
+/* ── 页面头部 ── */
+.pv-header {
+  margin-bottom: 32px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-neutral-l2);
+}
+.pv-header h1 {
+  font-size: var(--heading-sm-font-size);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--heading-sm-line-height);
+  margin-bottom: 4px;
+  color: var(--text-default);
+}
+.pv-header p {
+  font-size: var(--body-md-font-size);
+  color: var(--text-secondary);
+  line-height: var(--body-md-line-height);
+}
+
+/* ── 分区容器 ── */
+.pv-section {
+  margin-bottom: 32px;
+}
+.pv-section__title {
+  font-size: var(--body-md-font-size);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: 12px;
+  color: var(--text-default);
+}
+.pv-section__sub {
+  font-size: var(--body-sm-font-size);
+  color: var(--text-tertiary);
+  margin-bottom: 12px;
+}
+
+/* ── 布局辅助 ── */
+.row {
+  display: flex;
+  gap: var(--spacer-8);
+  align-items: center;
+  margin-bottom: var(--spacer-8);
+  flex-wrap: wrap;
+}
+.stack-8 { display: flex; flex-direction: column; gap: var(--spacer-8); }
+.stack-12 { display: flex; flex-direction: column; gap: var(--spacer-12); }
+.stack-16 { display: flex; flex-direction: column; gap: var(--spacer-16); }
+.stack-24 { display: flex; flex-direction: column; gap: var(--spacer-24); }
+
+/* ── 标签 ── */
+.label {
+  font-size: var(--body-sm-font-size);
+  color: var(--text-tertiary);
+  width: 92px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* ── 手机列表页模拟 ── */
+.page {
+  max-width: 420px;
+  margin: 0 auto;
+}
+.section-group {
+  background: var(--bg-surface);
+  width: 100%;
+}
+.section-gap {
+  height: 8px;
+  background: var(--bg-page);
+}
+
+/* ── 手机预览外壳 ── */
+.preview-phone {
+  width: 375px;
+  margin: 0 auto var(--spacer-32);
+  border-radius: var(--radius-8);
+  box-shadow: var(--shadow-sm);
+  background: var(--bg-surface);
+  overflow: hidden;
+}
+.preview-phone__content {
+  padding: 0;
+}
+.preview-phone .label {
+  font-size: var(--body-sm-font-size);
+  color: var(--text-secondary);
+  text-align: center;
+  margin-bottom: var(--spacer-12);
+}
+
+/* ── UI Kit 手机 Showcase 外壳 ── */
+body.uikit-page {
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+.uikit-shell {
+  width: 100%;
+  max-width: 1184px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: var(--spacer-16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.phone-frame {
+  width: 390px;
+  height: 780px;
+  border: 8px solid var(--bg-inverse);
+  border-radius: 40px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: var(--shadow-xl);
+  background: var(--bg-page);
+  flex-shrink: 0;
+}
+.phone-frame > #root {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+.phone-screen {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border-radius: inherit;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-page);
+  position: relative;
+}
+.phone-screen .navbar {
+  width: 100%;
+  flex-shrink: 0;
+}
+.phone-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+.phone-body::-webkit-scrollbar { display: none; }
+.phone-indicator {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 34px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: var(--z-sticky);
+}
+.phone-indicator-bar {
+  width: 134px;
+  height: 5px;
+  background: var(--bg-inverse);
+  border-radius: var(--radius-full);
+  opacity: 0.2;
+}
+
+@media (max-width: 640px) {
+  .uikit-shell {
+    padding: var(--spacer-8);
+    align-items: stretch;
+  }
+  .phone-frame {
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 900px;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+/* ── 暗色展示条 ── */
+.dark-strip {
+  background: var(--bg-inverse);
+  border-radius: var(--radius-8);
+  padding: 16px;
+  margin-bottom: var(--spacer-8);
+}
+.dark-strip .label {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* ── Demo 提示 ── */
+.demo-hint {
+  font-size: var(--body-sm-font-size);
+  color: var(--text-brand);
+  margin: var(--spacer-8) 0 var(--spacer-4);
+  font-weight: var(--font-weight-medium);
+}
+
+/* ── Demo 交互行 ── */
+.interactive-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-12);
+  padding: var(--spacer-8) 0;
+  border-bottom: 0.5px solid var(--border-neutral-l2);
+  cursor: pointer;
+  max-width: 560px;
+}
+.interactive-row:last-child { border-bottom: none; }
+.interactive-text {
+  font-size: var(--body-md-font-size);
+  color: var(--text-secondary);
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+.interactive-row:hover .interactive-text { color: var(--text-default); }
