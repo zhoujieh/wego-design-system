@@ -1,6 +1,6 @@
 ---
 name: wego-tests
-description: 验收产品原型项目并输出 acceptance_report 的技能。用于原型已经由 $wego-ux 产出后，检查需求承接、场景判断、设计系统消费、任务文件夹约束、构建部署可用性，以及文案/布局/交互是否符合 wego-design 规范。
+description: 验收产品原型项目并输出 acceptance_report 的技能。用于原型已经由 wego-ux 技能产出后，检查需求承接、场景判断、设计系统消费、任务文件夹约束、构建部署可用性，以及文案/布局/交互是否符合 wego-design 规范。
 ---
 
 # Wego Tests

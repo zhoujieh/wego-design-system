@@ -106,7 +106,7 @@
 
 必做：
 
-- 执行 `python3 -c "import json; json.load(open('.codex/skills/wego-design/css.json'))"`
+- 执行 `node -e "JSON.parse(require('fs').readFileSync('.codex/skills/wego-design/css.json','utf8'))"`
 - 如组件核心 CSS 同时变化，再执行 `node .codex/skills/wego-design/scripts/extract-components-css.mjs .codex/skills/wego-design`
 
 补充判断：

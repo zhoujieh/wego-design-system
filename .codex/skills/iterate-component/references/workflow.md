@@ -203,7 +203,7 @@
 
 ## 7. 什么时候校验 css.json
 
-执行 `python3 -c "import json; json.load(open('.codex/skills/wego-design/css.json'))"` 的条件：
+执行 `node -e "JSON.parse(require('fs').readFileSync('.codex/skills/wego-design/css.json','utf8'))"` 的条件：
 
 - 改了 `.codex/skills/wego-design/colors_and_type.css`
 - 改了 `.codex/skills/wego-design/css.json`

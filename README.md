@@ -1,6 +1,6 @@
 # wego-design-system
 
-> 微购中文产品原型与设计系统仓库。当前以 Codex 本地技能驱动，面向移动端、微信生态、电商与工具场景。
+> 微购中文产品原型与设计系统仓库。以本地技能驱动，不依赖特定 agent 运行时，面向移动端、微信生态、电商与工具场景。
 
 ## 技能闭环
 
@@ -21,10 +21,10 @@
 
 设计系统本体位于：
 
-- [.codex/skills/wego-design/SKILL.md](/Users/dk/Documents/code/wego-design-system/.codex/skills/wego-design/SKILL.md)
-- [.codex/skills/wego-design/README.md](/Users/dk/Documents/code/wego-design-system/.codex/skills/wego-design/README.md)
-- [.codex/skills/wego-design/library-consumption.json](/Users/dk/Documents/code/wego-design-system/.codex/skills/wego-design/library-consumption.json)
-- [.codex/skills/wego-design/uikit-plan.json](/Users/dk/Documents/code/wego-design-system/.codex/skills/wego-design/uikit-plan.json)
+- [.codex/skills/wego-design/SKILL.md](.codex/skills/wego-design/SKILL.md)
+- [.codex/skills/wego-design/README.md](.codex/skills/wego-design/README.md)
+- [.codex/skills/wego-design/library-consumption.json](.codex/skills/wego-design/library-consumption.json)
+- [.codex/skills/wego-design/uikit-plan.json](.codex/skills/wego-design/uikit-plan.json)
 
 旧目录已退出当前执行链路，不再作为权威路径。
 
@@ -61,10 +61,10 @@
 
 ## 常用入口
 
-- 根规则：[AGENTS.md](/Users/dk/Documents/code/wego-design-system/AGENTS.md)
-- 设计系统技能：[.codex/skills/wego-design/SKILL.md](/Users/dk/Documents/code/wego-design-system/.codex/skills/wego-design/SKILL.md)
-- 组件迭代技能：[.codex/skills/iterate-component/SKILL.md](/Users/dk/Documents/code/wego-design-system/.codex/skills/iterate-component/SKILL.md)
-- 闭环计划：[docs/wego-local-skills-closed-loop-plan.md](/Users/dk/Documents/code/wego-design-system/docs/wego-local-skills-closed-loop-plan.md)
+- 根规则：[AGENTS.md](AGENTS.md)
+- 设计系统技能：[.codex/skills/wego-design/SKILL.md](.codex/skills/wego-design/SKILL.md)
+- 组件迭代技能：[.codex/skills/iterate-component/SKILL.md](.codex/skills/iterate-component/SKILL.md)
+- 闭环计划：[docs/wego-local-skills-closed-loop-plan.md](docs/wego-local-skills-closed-loop-plan.md)
 
 ## 验证
 

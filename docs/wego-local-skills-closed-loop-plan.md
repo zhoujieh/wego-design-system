@@ -1,8 +1,10 @@
-# wego 本地技能闭环与旧路径清理计划
+# wego本地技能闭环与旧路径清理计划
+
+> 历史归档文档（已停止维护）：本计划记录了把四段技能迁到 `.codex/skills/` 并清理旧路径的过程，相关迁移已完成，当前以 AGENTS.md 与各 SKILL.md 为权威来源。
 
 ## Summary
 
-仓库统一采用 4 个 Codex 本地技能闭环，全部位于 `.codex/skills/`：
+仓库统一采用 4 个本地技能闭环，全部位于 `.codex/skills/`：
 
 1. `wego-product`
    负责需求理解、任务分类、页面规格定义
@@ -156,7 +158,7 @@
 
 ## Assumptions
 
-- 四段技能全部作为 Codex 本地技能管理，统一放在 `.codex/skills/` 下
+- 四段技能全部作为本地技能管理，统一放在 `.codex/skills/` 下
 - 输出结构定义直接写在各自技能的 `SKILL.md` 中，不额外拆独立 contract 文件
 - `wego-ux` 默认采用 Next.js App Router 作为标准化前端项目骨架
 - 原型项目默认以项目根目录下的任务文件夹方式管理；同一任务的后续迭代复用原文件夹
