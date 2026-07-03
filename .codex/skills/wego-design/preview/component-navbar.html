@@ -43,7 +43,7 @@
    - 深色场景可使用 transparent，由宿主另行处理
    - 宽度默认 100%，由外层容器约束最大宽度
 */
-.navbar { width: 100%; background: var(--bg-page); flex-shrink: 0; }
+.navbar { width: 100%; background: var(--bg-page); flex-shrink: 0; position: sticky; top: 0; z-index: var(--z-sticky, 10); }
 [data-bg="surface"] .navbar { background: var(--bg-surface); }
 /* Body — 56px grid */
 .navbar__body { height: 56px; display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); align-items: center; }
@@ -88,6 +88,13 @@
 /* Button action */
 .navbar__action--button { width: auto; padding: 0; }
 .navbar__action--button .btn { max-width: 120px; }
+
+/* fixed 透明反白模式(深色/图片背景场景) */
+.navbar--fixed-transparent { position: fixed; top: 0; left: 0; right: 0; max-width: 768px; margin-inline: auto; background: transparent; }
+.navbar--fixed-transparent .navbar__title,
+.navbar--fixed-transparent .navbar__left-text,
+.navbar--fixed-transparent .navbar__action-label,
+.navbar--fixed-transparent .wego-iconfont-s { color: var(--text-inverse); }
 /* @component-css-end */
 
 .navbar-preview-grid {
@@ -108,6 +115,43 @@
   text-align: left;
   background: var(--bg-surface);
   border-bottom: 1px solid var(--border-neutral-l2);
+}
+
+/* sticky 演示容器:可滚动,navbar 在容器内吸顶 */
+.navbar-demo-sticky-scroll {
+  height: 200px;
+  overflow-y: auto;
+  background: var(--bg-surface);
+  position: relative;
+}
+.navbar-demo-sticky-scroll .scroll-content {
+  padding: var(--spacer-16);
+  font-size: var(--body-md-font-size);
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.navbar-demo-sticky-scroll .scroll-content p {
+  margin: 0 0 var(--spacer-12);
+}
+
+/* fixed-transparent 演示容器:深色背景 + 相对定位容器,navbar fixed 到容器顶部需要容器作为参考 */
+.navbar-demo-dark-bg {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+  background: #1a1a1a;
+  background-image: linear-gradient(135deg, #2c3e50 0%, #4a6741 50%, #1a1a1a 100%);
+}
+.navbar-demo-dark-bg .demo-content {
+  padding: var(--spacer-16);
+  padding-top: 72px; /* 为 fixed navbar 让位 */
+  color: rgba(255, 255, 255, 0.85);
+  font-size: var(--body-md-font-size);
+  line-height: 1.6;
+}
+/* 演示用:把 fixed 改成 absolute 锚定到容器内,实际生产为 fixed */
+.navbar-demo-dark-bg .navbar--fixed-transparent {
+  position: absolute;
 }
 </style>
 </head>
@@ -228,6 +272,54 @@
             <span class="navbar__action-label">记录</span>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="preview-phone navbar-demo">
+    <div class="label">sticky 吸顶（默认）— 滚动下方内容查看 navbar 粘在容器顶部</div>
+    <div class="navbar-demo-sticky-scroll">
+      <div class="navbar">
+        <div class="navbar__body">
+          <div class="navbar__left">
+            <div class="navbar__left-btn"><i class="wego-iconfont-s icon-fanhui"></i></div>
+          </div>
+          <div class="navbar__center"><span class="navbar__title">设置</span></div>
+          <div class="navbar__right navbar__right--text">
+            <div class="navbar__action navbar__action--text"><span class="navbar__action-label">保存</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="scroll-content">
+        <p>第 1 段：navbar 默认 sticky 吸顶，无需宿主额外配置（components.css 已配置 position: sticky; top: 0; z-index: var(--z-sticky)）。</p>
+        <p>第 2 段：滚动此容器，navbar 会粘在容器顶部，不会随内容滚走。</p>
+        <p>第 3 段：适用于普通业务页、全屏模态页等大多数场景，保留文档流，不会因 fixed 脱离流而让 page-body 顶部叠加 padding。</p>
+        <p>第 4 段：与历史方案（navbar 组件本身不处理 sticky，宿主手动加）的区别：现在统一由设计系统提供，避免各项目重复实现差异。</p>
+        <p>第 5 段：底部留白，确保可以滚动到 navbar 吸顶状态。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="preview-phone navbar-demo">
+    <div class="label">fixed 透明反白（深色/图片背景场景）— navbar 透明 + 文字图标反白，透过 navbar 可见背景</div>
+    <div class="navbar-demo-dark-bg">
+      <div class="navbar navbar--fixed-transparent">
+        <div class="navbar__body navbar__body--spaced">
+          <div class="navbar__left">
+            <div class="navbar__left-btn"><i class="wego-iconfont-s icon-fanhui"></i></div>
+          </div>
+          <div class="navbar__center"><span class="navbar__title">商品详情</span></div>
+          <div class="navbar__right navbar__right--icon">
+            <div class="navbar__action">
+              <div class="navbar__action-icon"><i class="wego-iconfont-s icon-fangkejilu"></i></div>
+              <span class="navbar__action-label">分享</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="demo-content">
+        <p>navbar 透明背景 + 文字/图标用 --text-inverse 反白，透过导航栏可以看到深色或图片背景。</p>
+        <p>注意：fixed-transparent 模式下 navbar 脱离文档流，page-body 需加 padding-top: 56px 为 navbar 让位（此演示容器已用 padding-top: 72px）。</p>
       </div>
     </div>
   </div>

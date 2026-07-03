@@ -455,3 +455,80 @@
   --icon-yuancha-mian: "\e69c";
 
 }
+
+/* ============ 全局元素重置(统一入口,不在各组件分散写) ============ */
+/* 放在 :root Token 之后,所有项目通过 library-consumption.json 的 buildMobileAppPage.copyFiles
+   自动复制此文件,获得统一重置,不再依赖 scaffold.css(仅用于预览页)或各组件内部重置类。 */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg-page);
+  font-family: var(--font-family-system);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button {
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  margin: 0;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+}
+
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+/* 全局隐藏滚动条(模拟移动端原生体验,保留滚动功能)
+   - scrollbar-width: none 适用于 Firefox
+   - ::-webkit-scrollbar { display: none } 适用于 webkit/iOS Safari/Chrome/Edge
+   - 不影响键盘导航、触控滑动和滚轮,仅移除可见滚动条 */
+* {
+  scrollbar-width: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+}

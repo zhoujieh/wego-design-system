@@ -5,13 +5,15 @@
   使用规则:
   - 这是真实生产页面骨架,不是 UI Kit Showcase 外壳
   - 禁止复制 .uikit-shell / .phone-frame / .phone-screen / .phone-status / .phone-body / .phone-indicator
+  - 全局元素重置已统一收口到 colors_and_type.css(*、html/body、button、a、img/svg、h1-h6/p、ul/ol、input/textarea/select、滚动条隐藏),page.css 不再重复
   - 禁止在 page.css 中引用 --safe-area-top 或 --safe-area-bottom-content(真机由宿主补齐)
   - 模态层必须使用 position: fixed; inset: 0,不要用 position: absolute
   - 容器宽度由 body 上的 max-width 约束(默认 768px,沉浸页可去掉)
   - 复制本模板后,按 design_consumption_plan 替换 navbar 变体、page-body 内容、modal 触发逻辑
 
-  navbar 安全区说明:
-  - navbar 已有显式背景色(跟随 data-bg),不需要额外 padding-top
+  navbar 定位说明:
+  - navbar 默认 sticky 吸顶(components.css 已配置 position: sticky; top: 0; z-index: var(--z-sticky)),宿主无需额外处理
+  - 深色/图片背景场景加 .navbar--fixed-transparent 修饰类,切换为 fixed 透明反白模式,此时 page-body 需加 padding-top: 56px 为 navbar 让位
   - 真机 WebView 场景由宿主补齐状态栏空间,原型项目不处理
 -->
 <html lang="zh-CN">

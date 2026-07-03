@@ -57,6 +57,14 @@ description: 验收产品原型项目并输出 acceptance_report 的技能。用
 - 项目是否具备基本构建和部署条件
 - 必须运行守门脚本，把脚本输出写入 `automated_checks`，不能仅靠自述结论
 
+### navbar 与布局回归检查(必查)
+
+- navbar 是否使用 sticky 定位(默认,禁止在普通业务页用 fixed/absolute 脱离文档流;由 components.css 自动提供,page.css 不重复)
+- 深色/图片背景场景是否使用 `.navbar--fixed-transparent` 修饰类(透明背景 + 文字反白 --text-inverse + page-body 加 padding-top: 56px 让位)
+- 短内容页面是否避免强制滚动条(检查 `.page-body` 是否误用 `min-height: 100vh` 与 navbar 高度叠加;内容应自然撑高,不写 min-height)
+- modal-overlay 是否有 max-width 约束(与 body max-width:768px 一致,宽屏居中;检查是否漏写 `width:100%; max-width:768px; margin-inline:auto`)
+- navbar 中 `<button>` 元素是否被正确重置(无原生 border/background/padding 泄漏;依赖 colors_and_type.css 的全局 button 重置,不再需要 biz-plain-button 等内部重置类)
+
 ## 守门脚本引用规则
 
 验收前必须先运行守门脚本：

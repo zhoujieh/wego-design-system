@@ -660,7 +660,7 @@
    - 深色场景可使用 transparent，由宿主另行处理
    - 宽度默认 100%，由外层容器约束最大宽度
 */
-.navbar { width: 100%; background: var(--bg-page); flex-shrink: 0; }
+.navbar { width: 100%; background: var(--bg-page); flex-shrink: 0; position: sticky; top: 0; z-index: var(--z-sticky, 10); }
 [data-bg="surface"] .navbar { background: var(--bg-surface); }
 /* Body — 56px grid */
 .navbar__body { height: 56px; display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); align-items: center; }
@@ -705,6 +705,13 @@
 /* Button action */
 .navbar__action--button { width: auto; padding: 0; }
 .navbar__action--button .btn { max-width: 120px; }
+
+/* fixed 透明反白模式(深色/图片背景场景) */
+.navbar--fixed-transparent { position: fixed; top: 0; left: 0; right: 0; max-width: 768px; margin-inline: auto; background: transparent; }
+.navbar--fixed-transparent .navbar__title,
+.navbar--fixed-transparent .navbar__left-text,
+.navbar--fixed-transparent .navbar__action-label,
+.navbar--fixed-transparent .wego-iconfont-s { color: var(--text-inverse); }
 
 /* ── Radio ─────────────────────────────────────────────────── */
 /* @anatomy

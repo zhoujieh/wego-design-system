@@ -42,6 +42,10 @@
     "pageTransition": [
       "push",
       "present"
+    ],
+    "position": [
+      "sticky",
+      "fixed-transparent"
     ]
   },
   "representativeVariants": [
@@ -50,7 +54,8 @@
       "titleAlignment": "center",
       "actions": "none",
       "spacing": "default",
-      "pageTransition": "push"
+      "pageTransition": "push",
+      "position": "sticky"
     },
     {
       "leftControl": "back-icon",
@@ -58,7 +63,8 @@
       "actions": "icon",
       "rightActionType": "icon",
       "spacing": "default",
-      "pageTransition": "push"
+      "pageTransition": "push",
+      "position": "sticky"
     },
     {
       "leftControl": "back-icon",
@@ -66,7 +72,8 @@
       "actions": "text",
       "rightActionType": "text",
       "spacing": "spaced",
-      "pageTransition": "push"
+      "pageTransition": "push",
+      "position": "sticky"
     },
     {
       "leftControl": "close-icon",
@@ -74,7 +81,8 @@
       "actions": "icon",
       "rightActionType": "icon",
       "spacing": "default",
-      "pageTransition": "present"
+      "pageTransition": "present",
+      "position": "sticky"
     },
     {
       "leftControl": "text-cancel",
@@ -82,7 +90,8 @@
       "actions": "button",
       "rightActionType": "button",
       "spacing": "spaced",
-      "pageTransition": "present"
+      "pageTransition": "present",
+      "position": "sticky"
     },
     {
       "leftControl": "none",
@@ -90,7 +99,17 @@
       "actions": "icon",
       "rightActionType": "icon",
       "spacing": "default",
-      "pageTransition": "push"
+      "pageTransition": "push",
+      "position": "sticky"
+    },
+    {
+      "leftControl": "back-icon",
+      "titleAlignment": "center",
+      "actions": "icon",
+      "rightActionType": "icon",
+      "spacing": "default",
+      "pageTransition": "push",
+      "position": "fixed-transparent"
     }
   ],
   "anatomy": [
@@ -127,7 +146,8 @@
     "actionPress": "右侧操作以轻压暗或按钮背景变化反馈。",
     "pageTransitionRule": "左侧为返回图标 (back-icon) 对应 push 转场（右侧滑入，普通二级页）；左侧为关闭/叉 (close-icon) 或取消文本 (text-cancel) 对应 present 转场（底部滑入，弹出式页面）。",
     "fullscreenModalPatterns": "全屏模态页面有且仅有两种固定导航模式，不要自由组合：模式 A（取消文本 + 实心按钮）用于表单/设置类底部弹出页；模式 B（关闭叉图标 + 图标操作）用于浏览/选择类底部弹出页。",
-    "backgroundRule": "导航栏必须显式设置背景色，与页面 data-bg 声明的背景色保持一致；默认 var(--bg-page)（灰色），data-bg=\"surface\" 时为 var(--bg-surface)（白色）；深色场景可使用 transparent，由宿主另行处理。"
+    "backgroundRule": "导航栏必须显式设置背景色，与页面 data-bg 声明的背景色保持一致；默认 var(--bg-page)（灰色），data-bg=\"surface\" 时为 var(--bg-surface)（白色）；深色或图片背景场景使用 fixed-transparent 模式，navbar background: transparent，文字/图标用 --text-inverse 反白，确保透过导航栏看到背景内容。",
+    "positionRule": "navbar 默认 sticky 吸顶（components.css 已配置 position: sticky; top: 0; z-index: var(--z-sticky)），保留文档流，宿主无需额外处理；深色或图片背景场景使用 fixed-transparent 模式，navbar position: fixed 透明背景、文字/图标反白，此时 page-body 需加 padding-top: 56px 为 navbar 让位。"
   },
   "accessibility": {
     "landmark": "作为页面顶部导航语义区域使用。",
@@ -141,9 +161,9 @@
     "所有左侧可交互内容点击热区通过伪元素扩大至 48px，不改变布局尺寸。",
     "右侧操作使用 navbar 内部 .navbar__action 结构；不要把它当独立组件消费。",
     "全屏模态页面直接调用固定模式，不要自由组合：模式 A（取消+按钮）用于表单/设置类；模式 B（叉+图标）用于浏览/选择类。",
-    "导航栏必须显式设置背景色，与页面 data-bg 声明的背景色一致；不要使用 transparent（深色场景除外）。",
+    "导航栏必须显式设置背景色，与页面 data-bg 声明的背景色一致；不要使用 transparent（深色/图片背景场景除外，此时用 fixed-transparent 模式）。",
     "navbar 宽度默认 100%，由页面外层容器约束最大宽度（768px）；不需要在项目中覆盖宽度。",
-    "navbar 组件本身不处理 sticky 定位。在全屏模态页中，宿主页面的布局容器需为 navbar 添加 position: sticky; top: 0; z-index: var(--z-sticky)，确保导航栏始终固定在视口顶部。"
+    "navbar 默认 sticky 吸顶，宿主无需额外配置（components.css 已配置 position: sticky; top: 0; z-index: var(--z-sticky)）；深色/图片背景场景加 .navbar--fixed-transparent 修饰类，切换为 fixed 透明反白模式，此时 page-body 需加 padding-top: 56px 为 navbar 让位。"
   ],
   "doNotInvent": [
     "不要把 navbar 扩成桌面多行标题栏、营销大顶栏或搜索综合头部。",
@@ -156,6 +176,7 @@
     "--font-weight-medium",
     "--heading-sm-font-size",
     "--text-default",
+    "--text-inverse",
     "--bg-page",
     "--bg-surface"
   ],
@@ -197,7 +218,8 @@
       ".navbar__right--icon",
       ".navbar__right--text",
       ".navbar__right--button",
-      ".navbar__right--gap"
+      ".navbar__right--gap",
+      ".navbar--fixed-transparent"
     ]
   },
   "provenance": {
