@@ -49,64 +49,52 @@
           <span>9:41</span>
           <span>5G</span>
         </div>
-        <main class="host-shell-page">
+        <main class="host-shell-page" data-host-content>
+    <section class="host-shell-page__panel host-shell-page__panel--blank" data-host-tab="dongtai" hidden aria-label="动态"></section>
+    <section class="host-shell-page__panel host-shell-page__panel--blank" data-host-tab="haoyou" hidden aria-label="好友"></section>
+    <section class="host-shell-page__panel host-shell-page__panel--blank" data-host-tab="workspace" hidden aria-label="工作台"></section>
+    <section class="host-shell-page__panel host-shell-page__panel--blank" data-host-tab="xiaoxi" hidden aria-label="消息"></section>
     <section class="host-shell-page__panel" data-host-tab="my" hidden>
-      <section class="host-shell-profile">
+      <section class="card card--surface host-shell-profile-card">
+        <div class="card__content host-shell-profile">
         <div class="host-shell-profile__main">
-          <img src="./lib/image/avatar-defult.png" alt="" class="avatar avatar--lg" />
+          <div class="avatar avatar--56 avatar--image">
+            <img src="./lib/image/avatar-defult.png" alt="默认头像" />
+          </div>
           <div class="host-shell-profile__meta">
             <div class="host-shell-profile__title-row">
               <h1 class="host-shell-profile__title">微购相册·店主</h1>
-              <span class="host-shell-badge">SVIP</span>
+              <span class="badge badge--inline badge--text host-shell-profile__badge"><span class="badge__text">SVIP</span></span>
             </div>
-            <div class="host-shell-profile__tags">
-              <span class="host-shell-tag host-shell-tag--success">超级管理员</span>
-            </div>
+            <p class="host-shell-profile__subtitle">超级管理员</p>
           </div>
         </div>
         <div class="host-shell-profile__actions">
           <button type="button" class="button button--secondary button--sm">+ 员工</button>
           <button type="button" class="button button--secondary button--sm">员工管理</button>
         </div>
+        </div>
       </section>
 
-      <section class="host-shell-membership">
-        <div class="host-shell-membership__header">
-          <span class="host-shell-membership__label">SVIP 年度超级会员</span>
-          <button type="button" class="button button--primary button--sm">去续费</button>
-        </div>
-        <div class="host-shell-membership__body">
-          <div class="host-shell-membership__usage">
-            <strong>90.33G</strong>
-            <span>/360G</span>
+      <section class="card card--filled host-shell-membership-card">
+        <div class="card__content host-shell-membership">
+          <div class="host-shell-membership__header">
+            <span class="card__header host-shell-membership__label">SVIP 年度超级会员</span>
+            <button type="button" class="button button--primary button--sm">去续费</button>
           </div>
-          <a href="./pages/space-management.html" class="link link--default">空间管理</a>
+          <div class="host-shell-membership__body">
+            <div class="card__body host-shell-membership__usage">
+              <strong>90.33G</strong>
+              <span>/360G</span>
+            </div>
+            <button type="button" class="link link--default host-shell-link-button" data-route-id="my-space-management" data-entry-label="空间管理" data-screen-src="./pages/space-management.html">空间管理</button>
+          </div>
         </div>
       </section>
 
-      <section class="host-shell-card">
-        <div class="host-shell-grid" data-entry-group="my-quick-actions">
-          <button type="button" class="host-shell-grid-entry" data-route-id="my-fans" data-entry-label="粉丝">
-            <img src="./lib/icons/app-center/粉丝会员卡.svg" alt="" class="host-shell-grid-entry__icon" />
-            <span class="host-shell-grid-entry__label">粉丝 107</span>
-          </button>
-          <button type="button" class="host-shell-grid-entry" data-route-id="my-homepage" data-entry-label="我的主页">
-            <img src="./lib/icons/app-center/我的小店.svg" alt="" class="host-shell-grid-entry__icon" />
-            <span class="host-shell-grid-entry__label">我的主页</span>
-          </button>
-          <button type="button" class="host-shell-grid-entry" data-route-id="my-qrcode" data-entry-label="二维码">
-            <img src="./lib/icons/app-center/收款码.svg" alt="" class="host-shell-grid-entry__icon" />
-            <span class="host-shell-grid-entry__label">二维码</span>
-          </button>
-          <button type="button" class="host-shell-grid-entry" data-route-id="my-mini-program" data-entry-label="小程序码">
-            <img src="./lib/icons/app-center/专享小程序.svg" alt="" class="host-shell-grid-entry__icon" />
-            <span class="host-shell-grid-entry__label">小程序码</span>
-          </button>
-        </div>
-      </section>
-
-      <section class="host-shell-card">
-        <div class="host-shell-grid" data-entry-group="my-app-center">
+      <section class="card card--surface host-shell-app-card">
+        <div class="card__content host-shell-app-card__content">
+          <div class="host-shell-grid" data-entry-group="my-app-center">
           <button type="button" class="host-shell-grid-entry" data-route-id="my-start-group" data-entry-label="一键开团">
             <img src="./lib/icons/app-center/一键开团.svg" alt="" class="host-shell-grid-entry__icon" />
             <span class="host-shell-grid-entry__label">一键开团</span>
@@ -131,60 +119,63 @@
             <img src="./lib/icons/app-center/私域键盘.svg" alt="" class="host-shell-grid-entry__icon" />
             <span class="host-shell-grid-entry__label">私域键盘</span>
           </button>
+          </div>
         </div>
       </section>
 
-      <section class="host-shell-card">
-        <div class="host-shell-list" data-entry-group="my-settings">
-          <a class="cell" href="./pages/settings.html" data-route-id="my-settings" data-entry-label="设置">
+      <section class="card card--surface host-shell-list-card">
+        <div class="card__content host-shell-list-card__content">
+          <div class="host-shell-list" data-entry-group="my-settings">
+          <button type="button" class="cell cell--single cell--bg-white cell--clickable cell--divider-center" data-route-id="my-settings" data-entry-label="设置" data-screen-src="./pages/settings.html">
             <div class="cell__body">
-              <div class="cell__title-group">
-                <span class="cell__title">设置</span>
+              <div class="cell__content">
+                <div class="cell__title-row"><span class="cell__title">设置</span></div>
+              </div>
+              <div class="cell__action">
+                <i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
               </div>
             </div>
-            <div class="cell__value">
-              <i class="wego-iconfont-s icon-youjiantou"></i>
-            </div>
-          </a>
-          <a class="cell" href="./pages/wallet.html" data-route-id="my-wallet" data-entry-label="我的钱包">
+          </button>
+          <button type="button" class="cell cell--single cell--bg-white cell--clickable cell--divider-center" data-route-id="my-wallet" data-entry-label="我的钱包" data-screen-src="./pages/wallet.html">
             <div class="cell__body">
-              <div class="cell__title-group">
-                <span class="cell__title">我的钱包</span>
+              <div class="cell__content">
+                <div class="cell__title-row"><span class="cell__title">我的钱包</span></div>
+              </div>
+              <div class="cell__action">
+                <span class="cell__action-text">￥0.02</span>
+                <i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
               </div>
             </div>
-            <div class="cell__value">
-              <span class="cell__desc">¥ 0.02</span>
-              <i class="wego-iconfont-s icon-youjiantou"></i>
-            </div>
-          </a>
-          <a class="cell" href="./pages/favorites.html" data-route-id="my-favorites" data-entry-label="我的收藏">
+          </button>
+          <button type="button" class="cell cell--single cell--bg-white cell--clickable cell--divider-center" data-route-id="my-favorites" data-entry-label="我的收藏" data-screen-src="./pages/favorites.html">
             <div class="cell__body">
-              <div class="cell__title-group">
-                <span class="cell__title">我的收藏</span>
+              <div class="cell__content">
+                <div class="cell__title-row"><span class="cell__title">我的收藏</span></div>
+              </div>
+              <div class="cell__action">
+                <i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
               </div>
             </div>
-            <div class="cell__value">
-              <i class="wego-iconfont-s icon-youjiantou"></i>
-            </div>
-          </a>
-          <a class="cell cell--last" href="./pages/coupons.html" data-route-id="my-coupons" data-entry-label="我的卡券">
+          </button>
+          <button type="button" class="cell cell--single cell--bg-white cell--clickable" data-route-id="my-coupons" data-entry-label="我的卡券" data-screen-src="./pages/coupons.html">
             <div class="cell__body">
-              <div class="cell__title-group">
-                <span class="cell__title">我的卡券</span>
+              <div class="cell__content">
+                <div class="cell__title-row"><span class="cell__title">我的卡券</span></div>
+              </div>
+              <div class="cell__action">
+                <i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
               </div>
             </div>
-            <div class="cell__value">
-              <i class="wego-iconfont-s icon-youjiantou"></i>
-            </div>
-          </a>
+          </button>
+          </div>
         </div>
       </section>
     </section>
   </main>
 
   <nav class="bottom-nav">
-    <button type="button" class="bottom-nav__item active" data-host-tab-trigger="dongtai">
-      <span class="bottom-nav__icon"><img src="./lib/icons/tab-active-dongtai.svg" alt="" data-tab-icon="dongtai" /></span>
+    <button type="button" class="bottom-nav__item" data-host-tab-trigger="dongtai">
+      <span class="bottom-nav__icon"><img src="./lib/icons/tab-dongtai.svg" alt="" data-tab-icon="dongtai" /></span>
       <span class="bottom-nav__label">动态</span>
     </button>
     <button type="button" class="bottom-nav__item" data-host-tab-trigger="haoyou">
@@ -199,8 +190,8 @@
       <span class="bottom-nav__icon"><img src="./lib/icons/tab-xiaoxi.svg" alt="" data-tab-icon="xiaoxi" /></span>
       <span class="bottom-nav__label">消息</span>
     </button>
-    <button type="button" class="bottom-nav__item" data-host-tab-trigger="my">
-      <span class="bottom-nav__icon"><img src="./lib/icons/tab-wode.svg" alt="" data-tab-icon="wode" /></span>
+    <button type="button" class="bottom-nav__item active" data-host-tab-trigger="my">
+      <span class="bottom-nav__icon"><img src="./lib/icons/tab-active-wode.svg" alt="" data-tab-icon="wode" /></span>
       <span class="bottom-nav__label">我的</span>
     </button>
   </nav>
@@ -212,17 +203,17 @@
   </div>
 
   <script>
-    (function rewriteTemplatePreviewAssets() {
+    (function prepareHostShellPreview() {
       var isTemplatePreview = /\/wego-ux\/templates\/host-shell\.html$/.test(window.location.pathname);
-      if (!isTemplatePreview) return;
-      document.querySelectorAll('img[src^="./lib/"]').forEach(function (img) {
-        img.src = img.getAttribute('src').replace('./lib/', '../../wego-design/assets/');
-      });
+      if (isTemplatePreview) {
+        document.querySelectorAll('img[src^="./lib/"]').forEach(function (img) {
+          img.src = img.getAttribute('src').replace('./lib/', '../../wego-design/assets/');
+        });
+      }
       var script = document.createElement('script');
-      script.src = './host-shell.js';
+      script.src = isTemplatePreview ? './host-shell.js' : './js/host-shell.js';
       document.body.appendChild(script);
     })();
   </script>
-  <script src="./js/host-shell.js"></script>
 </body>
 </html>

@@ -6,42 +6,35 @@
   "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "移动端内容卡片容器，用于商品、订单、账户等分组内容承载。",
+  "description": "移动端基础卡片容器。默认只承担内容分组与表面承载，不自带内边距、固定宽高、媒体比例或业务字段。",
   "semanticTypeCandidates": [
     "content-card",
-    "product-card",
-    "summary-card"
+    "surface-container",
+    "section-card"
   ],
   "variantDimensions": {
+    "base": [
+      "auto"
+    ],
     "surface": [
+      "none",
       "surface",
       "outlined",
       "filled"
-    ],
-    "media": [
-      "none",
-      "top-media"
-    ],
-    "footer": [
-      "none",
-      "meta-footer"
     ]
   },
   "representativeVariants": [
     {
-      "surface": "surface",
-      "media": "top-media",
-      "footer": "meta-footer"
+      "base": "auto",
+      "surface": "none"
     },
     {
-      "surface": "outlined",
-      "media": "none",
-      "footer": "meta-footer"
+      "base": "auto",
+      "surface": "surface"
     },
     {
-      "surface": "filled",
-      "media": "none",
-      "footer": "none"
+      "base": "auto",
+      "surface": "outlined"
     }
   ],
   "anatomy": [
@@ -51,14 +44,9 @@
       "role": "卡片容器"
     },
     {
-      "name": "media",
-      "selector": ".card__media",
-      "role": "媒体区"
-    },
-    {
       "name": "content",
       "selector": ".card__content",
-      "role": "内容分区，负责卡片内留白与垂直节奏"
+      "role": "内容分区；默认不加内边距和间距，只提供垂直排列语义"
     },
     {
       "name": "header",
@@ -77,26 +65,28 @@
     }
   ],
   "structurePatterns": [
-    "卡片根节点只负责表面与裁切，默认不提供内边距。",
-    "正文内容优先放进 .card__content，由内容区自己控制留白和垂直节奏。",
-    "卡片内部按媒体、内容分区、标题、正文、底部的垂直顺序组织。",
-    "价格、标签等信息放在 footer，不挤占标题层级。",
-    "卡片可作为列表项容器，但不替代页面外层布局壳。"
+    "默认 .card 只负责内容分组语义，宽度、高度、内边距、外边距均随内容和宿主布局自适应。",
+    ".card 根节点不得写 flex:1、固定 height、固定 width 或默认 padding，避免在列表、栅格、宿主页中被意外拉伸。",
+    ".card__content 只提供垂直排列语义，默认 padding:0、gap:0；页面级留白应由业务作用域样式或未来业务场景卡片承担。",
+    "surface、outlined、filled 仅是表面修饰，不代表商品卡、笔记卡、账户卡等业务场景。",
+    "商品图片、笔记封面、价格、标签、统计块等业务结构不属于基础 card；后续应以业务场景卡片扩展。"
   ],
   "behavior": {},
   "accessibility": {},
   "usageHints": [
-    "surface 适合首页商品流或可点击内容块，保持白底但不依赖阴影。",
-    "outlined 适合设置、通知、说明类信息块。",
-    "filled 适合弱强调的摘要或提示容器。",
-    "默认不要把内边距写在 .card 根节点，留白交给 .card__content 或业务内容区处理。"
+    "默认 card 适合作为轻量内容容器，直接包裹任意内容时不改变内容原有尺寸。",
+    "surface 只提供白色表面和圆角，适合页面中已有业务内容需要白底承载的场景。",
+    "outlined 只提供白底、描边和圆角，适合说明类或弱分组。",
+    "filled 只提供弱底色和圆角，适合低强调容器。",
+    "需要卡片内 12px/16px 留白时，在业务作用域样式中写 padding，不要依赖基础 card 默认值。",
+    "需要固定图片比例、价格、标签或双列排布时，不要临时扩展基础 card；应沉淀商品卡片、笔记卡片等业务场景卡片。"
   ],
   "doNotInvent": [
-    "不要扩展为营销大促海报卡、复杂统计面板或多层悬浮卡。",
-    "不要新增带阴影的公开卡片场景，也不要在卡片内叠加大面积品牌色背景。"
+    "不要在基础 card 中新增 .card__media、.card__price、.card__tag 等业务子元素。",
+    "不要把基础 card 扩成商品卡、笔记卡、营销海报卡、复杂统计面板或多层悬浮卡。",
+    "不要给基础 card 增加默认阴影、固定高度、固定宽度或默认内边距。"
   ],
   "tokensConsumed": [
-    "--bg-muted",
     "--bg-subtle",
     "--bg-surface",
     "--body-lg-font-size",
@@ -108,30 +98,32 @@
     "--body-xs-font-size",
     "--border-neutral-l2",
     "--font-weight-semibold",
-    "--heading-sm-font-size",
-    "--radius-12",
-    "--radius-4",
     "--radius-8",
-    "--spacer-12",
-    "--spacer-16",
-    "--spacer-2",
-    "--spacer-4",
-    "--spacer-8",
     "--text-default",
     "--text-secondary",
     "--text-tertiary"
   ],
   "designTokens": {
-    "spacing": "card 根节点默认 0；内容区常用 var(--spacer-12) 到 var(--spacer-16)",
+    "root": {
+      "width": "auto",
+      "height": "auto",
+      "padding": "0",
+      "margin": "0",
+      "radius": "var(--radius-8)"
+    },
+    "content": {
+      "padding": "0",
+      "gap": "0"
+    },
     "radius": {
-      "surface": "var(--radius-12)",
+      "default": "var(--radius-8)",
+      "surface": "var(--radius-8)",
       "outlined": "var(--radius-8)",
       "filled": "var(--radius-8)"
     },
     "titleFont": "var(--body-lg-font-size) / var(--font-weight-semibold)",
     "bodyFont": "var(--body-md-font-size)",
-    "footerFont": "var(--body-sm-font-size)",
-    "priceFont": "var(--heading-sm-font-size) / var(--font-weight-semibold)"
+    "footerFont": "var(--body-sm-font-size)"
   },
   "specRefs": [
     "specs/设计风格与品牌原则.md",
@@ -140,18 +132,15 @@
   "domAnatomy": {
     "root": ".card",
     "optionalChildren": [
-      ".card__media"
-    ],
-    "requiredChildren": [
-      ".card__content"
-    ],
-    "subElements": [
-      ".card__content--compact",
       ".card__header",
       ".card__body",
       ".card__footer",
-      ".card__price",
-      ".card__tag"
+      ".card__content"
+    ],
+    "modifierClasses": [
+      ".card--surface",
+      ".card--outlined",
+      ".card--filled"
     ]
   },
   "provenance": {

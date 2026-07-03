@@ -9,53 +9,54 @@
 <style>
 
 /* @component-css-start */
-.card { display:flex; flex-direction:column; font-family:var(--body-md-font-family); color:var(--text-default); flex:1; min-width:0; overflow:hidden; }
-.card--surface { background:var(--bg-surface); border-radius:var(--radius-12); }
-.card--outlined { background:var(--bg-surface); border:1px solid var(--border-neutral-l2); border-radius:var(--radius-8); }
-.card--filled { background:var(--bg-subtle); border-radius:var(--radius-8); }
-.card__content { display:flex; flex-direction:column; gap:var(--spacer-12); padding:var(--spacer-16); min-width:0; }
-.card__content--compact { gap:var(--spacer-8); padding:var(--spacer-12); }
-.card__media { width:100%; height:150px; background:var(--bg-muted); display:flex; align-items:center; justify-content:center; font-size:var(--body-sm-font-size); color:var(--text-tertiary); flex-shrink:0; }
+.card { display:flex; flex-direction:column; box-sizing:border-box; width:auto; height:auto; min-width:0; padding:0; margin:0; border-radius:var(--radius-8); font-family:var(--body-md-font-family); color:var(--text-default); background:transparent; }
+.card--surface { background:var(--bg-surface); overflow:hidden; }
+.card--outlined { background:var(--bg-surface); border:1px solid var(--border-neutral-l2); overflow:hidden; }
+.card--filled { background:var(--bg-subtle); overflow:hidden; }
+.card__content { display:flex; flex-direction:column; box-sizing:border-box; min-width:0; padding:0; gap:0; }
 .card__header { font-size:var(--body-lg-font-size); font-weight:var(--font-weight-semibold); line-height:var(--body-lg-line-height); }
 .card__body { font-size:var(--body-md-font-size); color:var(--text-secondary); line-height:var(--body-md-line-height); }
-.card__footer { font-size:var(--body-sm-font-size); color:var(--text-tertiary); display:flex; gap:var(--spacer-8); align-items:center; }
-.card__price { font-size:var(--heading-sm-font-size); font-weight:var(--font-weight-semibold); color:var(--text-default); }
-.card__tag { display:inline-block; background:var(--bg-muted); border-radius:var(--radius-4); padding:var(--spacer-2) var(--spacer-4); font-size:var(--body-xs-font-size); color:var(--text-secondary); white-space:nowrap; }
+.card__footer { font-size:var(--body-sm-font-size); color:var(--text-tertiary); display:flex; align-items:center; }
 /* @component-css-end */
+
+.demo-card-content { display:flex; flex-direction:column; gap:var(--spacer-8); padding:var(--spacer-16); }
+.demo-card-content--compact { gap:var(--spacer-4); padding:var(--spacer-12); }
 </style>
 </head>
 <body>
-<div class="pv-header"><h1>卡片</h1><p>白底、线框、填充三种样式，默认无阴影、无内边距，由内容区自己控制留白。</p></div>
+<div class="pv-header"><h1>卡片</h1><p>默认卡片只做自适应容器，不带固定宽高、内边距和业务字段；表面修饰只负责背景、描边和圆角。</p></div>
 <div class="row">
-  <span class="label">白底</span>
-  <div class="card card--surface" data-evidence-sample="surface-default">
-    <div class="card__media">商品图片</div>
-    <div class="card__content">
-      <div class="card__header">经典款帆布鞋</div>
-      <div class="card__body">舒适透气，简约百搭，适合日常休闲穿着</div>
-      <div class="card__footer">
-        <span class="card__price">¥299</span>
-        <span class="card__tag">热卖</span>
-      </div>
+  <span class="label">默认</span>
+  <div class="card" data-evidence-sample="default-auto">
+    <span>内容多高，卡片就多高</span>
+  </div>
+</div>
+<div class="row">
+  <span class="label">表面</span>
+  <div class="card card--surface" data-evidence-sample="surface-auto">
+    <div class="card__content demo-card-content">
+      <div class="card__header">基础分组</div>
+      <div class="card__body">这里的留白来自预览辅助样式，不是 card 默认内边距。</div>
+      <div class="card__footer">自适应内容高度</div>
     </div>
   </div>
 </div>
 <div class="row">
   <span class="label">线框</span>
-  <div class="card card--outlined" data-evidence-sample="outlined-default">
-    <div class="card__content">
+  <div class="card card--outlined" data-evidence-sample="outlined-auto">
+    <div class="card__content demo-card-content">
       <div class="card__header">订单通知</div>
-      <div class="card__body">您的订单已发货，预计3-5个工作日送达</div>
-      <div class="card__footer">2025-06-27 14:30</div>
+      <div class="card__body">您的订单已发货，预计 3-5 个工作日送达。</div>
+      <div class="card__footer">2026/07/03 14:30</div>
     </div>
   </div>
 </div>
 <div class="row">
   <span class="label">填充</span>
-  <div class="card card--filled" data-evidence-sample="filled-compact">
-    <div class="card__content card__content--compact">
-      <div class="card__body">账户余额 <span class="card__price">¥1,280.00</span></div>
-      <div class="card__footer">最近更新：今日 10:00</div>
+  <div class="card card--filled" data-evidence-sample="filled-auto">
+    <div class="card__content demo-card-content demo-card-content--compact">
+      <div class="card__body">弱强调内容容器</div>
+      <div class="card__footer">后续业务卡片另行扩展</div>
     </div>
   </div>
 </div>
