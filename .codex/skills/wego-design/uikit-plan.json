@@ -247,8 +247,29 @@
       "ui_kits/biz-rule-config/index.html"
     ]
   },
+  "hostShell": {
+    "managedBy": "wego-ux",
+    "templateFiles": [
+      "../wego-ux/templates/host-shell.html",
+      "../wego-ux/templates/host-shell.css",
+      "../wego-ux/templates/host-shell.js"
+    ],
+    "rule": "固定宿主模板属于 wego-ux 首次生成能力，不作为 wego-design 的 pagePattern。若 page_spec 声明 host_container + route_id，只为 host-entry 产出入口/回填所需 surface 依据。",
+    "fixedTabs": [
+      { "id": "dongtai", "label": "动态" },
+      { "id": "haoyou", "label": "好友" },
+      { "id": "workspace", "label": "工作台" },
+      { "id": "xiaoxi", "label": "消息" },
+      { "id": "my", "label": "我的" }
+    ],
+    "routeBinding": {
+      "requiredPageSpecFields": ["host_container", "route_id"],
+      "iterationRule": "同一任务目录后续迭代按 route_id 定位入口与页面，不重复套壳、不重复插入入口",
+      "entryTypes": ["cell", "grid-entry"]
+    }
+  },
   "selectionPolicy": "mobile-app-fixed-slots-first",
-  "pagePatternSelectionRule": "先判断页面属于哪种既有页面范式，再选择最贴近的 UI Kit 蓝本；禁止因为不复制 Showcase 外壳而回避其页面模式、section 组织、摘要结构和信息密度。",
+  "pagePatternSelectionRule": "先检查 page_spec 是否声明 host_container + route_id；若是固定宿主模板任务，由 wego-ux 首次套壳。随后只判断业务页属于哪种既有页面范式，再选择最贴近的 UI Kit 蓝本；禁止因为不复制 Showcase 外壳而回避其页面模式、section 组织、摘要结构和信息密度。",
   "deliveryMode": "static-multi-page",
   "deliveryRule": "页面蓝图用于指导项目中的真实 HTML 页面实现；默认交付可浏览器直接打开、不依赖框架的静态多页面项目。",
   "slotAssignments": [
@@ -323,7 +344,8 @@
         "使用编辑型二级页导航，页面级主操作统一收口",
         "页面顶部可放置摘要区（方案名称、状态、说明等），但摘要区不是必需结构——是否包含摘要区由原始业务需求决定；UI Kit 中的 biz-summary 是演示参考，不是页面范式的强制元素。",
         "整体保持高信息密度和连续设置节奏，避免做成松散营销页",
-        "子级条件区域（left-guide）：子级 cell 缩进结构以 cell.json 的 structurePatterns 为权威来源，使用 cell__backspace 占位模式。父级 radio/checkbox 所在 cell 和子级 cell 应在同一 section-group 内连续排列，最后一行不加分割线。"
+        "子级条件区域（left-guide）：子级 cell 缩进结构以 cell.json 的 structurePatterns 为权威来源，使用 cell__backspace 占位模式。父级 radio/checkbox 所在 cell 和子级 cell 应在同一 section-group 内连续排列，最后一行不加分割线。",
+        "页面背景一旦确定，navbar 背景默认跟随 data-bg 的公共 CSS 约定：page=灰底，surface=白底。普通业务页不要在任务级 page.css 单独覆盖 navbar 背景，透明反白仅走已注册的 .navbar--fixed-transparent 例外。"
       ],
       "templates": [
         "业务配置",
@@ -343,6 +365,27 @@
           "avoid": "form-body--preserve-content-align + radio-field-group",
           "reason": "form 右侧 radio-group 在移动端窄屏存在适配风险：label 固定 96px 后右侧空间仅约 255px，3 项以上或长文案容易溢出。cell 竖排不受此限制。",
           "allowWhen": "2 选项短文案（单条 ≤4 字）时 form 仍可用，如 UI Kit 中「统计口径」示例"
+        },
+        {
+          "trigger": "主互斥配置项命中已注册稳定场景，且内嵌选择控件、标题/副标题和间距已由该场景承接",
+          "use": "完整消费命中的稳定场景，不再拆出内嵌选择控件做二次规格判断",
+          "avoid": "在 wego-ux 阶段单独改小 radio/checkbox、重写偏移或追加局部说明去补结构",
+          "reason": "组件稳定场景已经定义了内嵌控件规格、对齐和信息节奏；继续拆开判断会造成尺寸漂移和关系失真。",
+          "allowWhen": "只有设计系统明确开放新的可变维度，并已回流权威契约后，才允许偏离原场景"
+        },
+        {
+          "trigger": "父项选中后才出现补充字段、跳转入口、筛选范围或排除条件",
+          "use": "把补充内容视为父场景延展，和父项保持同组连续结构",
+          "avoid": "拆成独立平级 section，或依赖 helper 文案解释父子关联",
+          "reason": "这类信息的核心是从属关系，必须由结构直接表达；平级 section 和冗余 helper 会削弱选中态与条件区之间的可感知关联。",
+          "allowWhen": "仅当补充内容已经升级为独立任务块、与父项不再存在显式从属关系时，才允许脱离原场景单独成组"
+        },
+        {
+          "trigger": "helper 文案仅重复摘要、选中态、禁用条件、跳转语义或结构已表达的信息",
+          "use": "删除冗余 helper，优先用标题、副标题、摘要、禁用态和同组结构表达",
+          "avoid": "把 helper 当成默认兜底说明层",
+          "reason": "规则配置页需要高信息密度和连续设置节奏，冗余 helper 会掩盖结构主次并放大场景拆解问题。",
+          "allowWhen": "只有结构无法承载且业务必须提醒风险、时效或不可逆后果时，才保留 helper"
         }
       ]
     }
@@ -495,6 +538,7 @@
   "lowConfidence": false,
   "warnings": [
     "ui_kits/app/index.html 是 Showcase，含演示用手机壳和部分业务样式，不应整体复制为通用页面模板。",
+    "固定宿主模板由 wego-ux/templates/host-shell.* 维护，不由 app UI Kit 直接下发。",
     "不要把“不能复制 .uikit-shell/.phone-frame/.phone-screen”误读成“不能贴近最佳页面范式”；页面模式、section 节奏和摘要结构可以继承。",
     "凡是设置、权限、规则、配置类页面，默认优先匹配 biz-rule-config 范式，再决定是否需要补充业务差异。",
     "页面蓝图不等于最终交付形态；最终应落成真实项目工程，而不是单个静态页面文件。",

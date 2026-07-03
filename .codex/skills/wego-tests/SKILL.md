@@ -66,10 +66,18 @@ description: 验收产品原型项目并输出 acceptance_report 的技能。用
 ### navbar 与布局回归检查(必查)
 
 - navbar 是否使用 sticky 定位(默认,禁止在普通业务页用 fixed/absolute 脱离文档流;由 components.css 自动提供,page.css 不重复)
+- `data-bg="page"` 时 navbar 是否保持灰底、`data-bg="surface"` 时 navbar 是否保持白底；若任务级样式额外覆盖导致不一致，直接判实现问题
 - 深色/图片背景场景是否使用 `.navbar--fixed-transparent` 修饰类(透明背景 + 文字反白 --text-inverse + page-body 加 padding-top: 56px 让位)
 - 短内容页面是否避免强制滚动条(检查 `.page-body` 是否误用 `min-height: 100vh` 与 navbar 高度叠加;内容应自然撑高,不写 min-height)
 - modal-overlay 是否有 max-width 约束(与 body max-width:768px 一致,宽屏居中;检查是否漏写 `width:100%; max-width:768px; margin-inline:auto`)
 - navbar 中 `<button>` 元素是否被正确重置(无原生 border/background/padding 泄漏;依赖 colors_and_type.css 的全局 button 重置,不再需要 biz-plain-button 等内部重置类)
+
+### 稳定场景回归检查(必查)
+
+- 是否对已命中的稳定场景做了二次拆解，例如把宿主场景重新拆成“行结构 + 局部控件 + 说明文字”分别实现
+- 是否擅自改写稳定场景内部关联控件的尺寸、对齐或间距
+- 父项选中后才出现的补充内容，是否被错误拆成独立平级 section，而不是作为父场景延展
+- helper 是否仅重复结构、摘要、选中态、禁用条件或跳转语义已表达的信息；若是，判为冗余实现
 
 ## 守门脚本引用规则
 
@@ -128,6 +136,7 @@ node scripts/validate-wego-design.mjs --scope=full
 验收时，必须按 `library-consumption.json` 的 `scenarioTypeRegistry` 中的场景类型逐类验证：
 
 - **组件消费决策类**：检查 component_mapping 是否标注了场景类型和判断条件；检查修饰类/尺寸/状态是否符合契约
+- **组件消费决策类**：若 design 已命中稳定场景，检查实现是否整体复用该场景，而不是继续拆出内嵌关联控件、父子结构或 helper 做二次实现
 - **无 UI Kit 页面构成类**：检查 `fallback` surface 是否引用并遵守 `fallbackPageBlueprints`；检查 `gap` 是否阻止交付
 - **UI Kit 到生产转换类**：检查生产页面是否残留演示外壳类；检查 section 是否语义化封装
 - **原型交付标准类**：检查状态持久化是否实现；检查保存后回填和反馈闭环

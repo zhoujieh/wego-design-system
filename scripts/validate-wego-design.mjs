@@ -229,6 +229,8 @@ const FORBIDDEN_PROTOTYPE_SAFE_AREA_TOKENS = new Set([
 ]);
 
 const SURFACE_MATCH_STATUSES = new Set(['exact', 'near', 'fallback', 'gap']);
+const HOST_CONTAINER_TABS = new Set(['my', 'workspace', 'dongtai', 'xiaoxi', 'haoyou']);
+const HOST_ENTRY_TYPES = new Set(['cell', 'grid-entry']);
 
 const INTERNAL_PROTOTYPE_COPY_PATTERNS = [
   /工作流验证任务/,
@@ -1001,6 +1003,10 @@ function checkConsumptionContracts() {
       add('debt', 'asset.path_legacy_icons', `文档仍引用 icons/，实际资产目录是 assets/icons/`, path.join(libraryRoot, rel));
     }
   }
+
+  if (!pathRefs.some(ref => ref === 'assets/icons/app-center/*.svg')) {
+    add('error', 'asset.app_center_icons_missing', 'library-consumption.json 必须显式登记 assets/icons/app-center/*.svg', path.join(libraryRoot, 'library-consumption.json'));
+  }
 }
 
 function checkUiKits(componentClassSet, options = {}) {
@@ -1261,7 +1267,7 @@ function checkPrototypeSurfaceDesigns(context) {
     if (fs.existsSync(pageSpecPath)) {
       const pageSpec = readJsonFile(pageSpecPath);
       const pageSurfaces = Array.isArray(pageSpec?.page_surfaces) ? pageSpec.page_surfaces : [];
-      if (pageSurfaces.length === 0) {
+    if (pageSurfaces.length === 0) {
         add('error', 'prototype.page_surfaces_missing',
           'page_spec.json 必须包含 page_surfaces[]，供 design_consumption_plan.surface_designs[] 覆盖',
           pageSpecPath);
@@ -1273,6 +1279,63 @@ function checkPrototypeSurfaceDesigns(context) {
             `page_spec.page_surfaces[] 中的 ${id} 未被 design_consumption_plan.surface_designs[] 覆盖`,
             planPath);
         }
+      }
+
+      const hostContainer = pageSpec?.host_container;
+      const routeId = pageSpec?.route_id;
+      if ((hostContainer && !routeId) || (!hostContainer && routeId)) {
+        add('error', 'prototype.host_route_pair_required',
+          'page_spec.json 中 host_container 和 route_id 必须成对出现',
+          pageSpecPath);
+      }
+      if (hostContainer) {
+        if (typeof hostContainer !== 'object' || Array.isArray(hostContainer)) {
+          add('error', 'prototype.host_container_invalid', 'page_spec.host_container 必须为对象', pageSpecPath);
+        } else {
+          if (!HOST_CONTAINER_TABS.has(hostContainer.tab)) {
+            add('error', 'prototype.host_container_tab_invalid',
+              'page_spec.host_container.tab 必须是 my/workspace/dongtai/xiaoxi/haoyou 之一',
+              pageSpecPath);
+          }
+          if (typeof hostContainer.entry_label !== 'string' || !hostContainer.entry_label.trim()) {
+            add('error', 'prototype.host_container_entry_missing',
+              'page_spec.host_container.entry_label 必须为非空字符串',
+              pageSpecPath);
+          }
+          if (typeof hostContainer.subentry_label !== 'string') {
+            add('error', 'prototype.host_container_subentry_invalid',
+              'page_spec.host_container.subentry_label 必须为字符串，可为空',
+              pageSpecPath);
+          }
+          if (![1, 2, 3].includes(hostContainer.leaf_level)) {
+            add('error', 'prototype.host_container_leaf_level_invalid',
+              'page_spec.host_container.leaf_level 必须为 1/2/3',
+              pageSpecPath);
+          }
+          if (!HOST_ENTRY_TYPES.has(hostContainer.entry_type)) {
+            add('error', 'prototype.host_container_entry_type_invalid',
+              'page_spec.host_container.entry_type 必须为 cell 或 grid-entry',
+              pageSpecPath);
+          }
+          if (typeof hostContainer.needs_host_entry_surface !== 'boolean') {
+            add('error', 'prototype.host_container_host_entry_flag_invalid',
+              'page_spec.host_container.needs_host_entry_surface 必须为布尔值',
+              pageSpecPath);
+          }
+          if (hostContainer.needs_host_entry_surface) {
+            const hasHostEntry = pageSurfaces.some(surface => surface?.role === 'host-entry' || surface?.id === 'host-entry');
+            if (!hasHostEntry) {
+              add('error', 'prototype.host_container_host_entry_missing',
+                '声明 host_container.needs_host_entry_surface=true 时，page_surfaces[] 必须包含 host-entry',
+                pageSpecPath);
+            }
+          }
+        }
+      }
+      if (routeId && (typeof routeId !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(routeId))) {
+        add('error', 'prototype.route_id_invalid',
+          'page_spec.route_id 必须为 kebab-case 稳定键，例如 my-settings-price-rule',
+          pageSpecPath);
       }
     }
   }
@@ -1359,6 +1422,28 @@ function checkPrototypeShellLeakage(context) {
   report.metrics.prototypeTaskFolders = taskFolders.length;
 }
 
+function checkPrototypeHostShellUniqueness(context) {
+  const taskFolders = context.effectiveScope === 'full'
+    ? getAllTaskFolders()
+    : getTaskFoldersFromChangedFiles(context.changedFiles);
+  if (taskFolders.length === 0) return;
+
+  for (const folder of taskFolders) {
+    const htmlFiles = listTaskFolderFiles(folder, new Set(['.html']));
+    const hostShellFiles = htmlFiles.filter(file => fs.readFileSync(file, 'utf8').includes('data-host-shell="true"'));
+    if (hostShellFiles.length > 1) {
+      add('error', 'prototype.host_shell.duplicate',
+        `同一任务文件夹只能存在一套宿主壳，当前检测到 ${hostShellFiles.length} 个 data-host-shell="true" 页面`,
+        folder);
+    }
+    if (hostShellFiles.length === 1 && path.basename(hostShellFiles[0]) !== 'index.html') {
+      add('error', 'prototype.host_shell.entry_invalid',
+        '宿主壳页面必须使用任务目录下的 index.html 作为入口',
+        hostShellFiles[0]);
+    }
+  }
+}
+
 function checkMetadataVersionGate(context) {
   const designChanges = context.changedFiles.filter(file => file.startsWith(rootRel + '/'));
   if (designChanges.length === 0) return;
@@ -1429,6 +1514,7 @@ function main() {
   checkPrototypeSurfaceDesigns(context);
   checkPrototypeJunkAndInternalCopy(context);
   checkPrototypeShellLeakage(context);
+  checkPrototypeHostShellUniqueness(context);
   checkMetadataVersionGate(context);
 
   finish();

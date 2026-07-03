@@ -1,4 +1,4 @@
 interface:
   display_name: "Wego UX"
   short_description: "按标准项目结构输出可部署、可预览、可迭代的产品原型工程"
-  default_prompt: "Use $wego-ux to turn page_spec and design_consumption_plan into a task-folder prototype project with the standard static multi-page HTML/CSS/JS structure for browser and mobile preview."
+  default_prompt: "Use $wego-ux to turn page_spec and design_consumption_plan into a task-folder prototype project with the standard static multi-page HTML/CSS/JS structure for browser and mobile preview. If page_spec declares host_container and route_id, initialize the fixed host shell only on the first generation and reuse it on later iterations."
