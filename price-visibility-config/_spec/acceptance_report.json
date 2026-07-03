@@ -1,0 +1,136 @@
+{
+  "requirement_coverage": [
+    {
+      "item": "主页面提供公开、私密、部分可见、不给谁看四种单选模式",
+      "status": "covered",
+      "workflow_stage": "wego-ux"
+    },
+    {
+      "item": "私密模式支持设置自动公开时间",
+      "status": "covered",
+      "workflow_stage": "wego-ux"
+    },
+    {
+      "item": "部分可见与不给谁看均有二级页面按粉丝分组多选",
+      "status": "covered",
+      "workflow_stage": "wego-ux"
+    },
+    {
+      "item": "二级页面支持新增粉丝分组并回填当前规则",
+      "status": "covered",
+      "workflow_stage": "wego-ux"
+    },
+    {
+      "item": "本次任务用于验证微购四段工作流完整性",
+      "status": "covered",
+      "workflow_stage": "wego-product/wego-design/wego-ux/wego-tests"
+    }
+  ],
+  "scene_judgement_check": {
+    "status": "pass",
+    "expected_scene": "biz-rule-config",
+    "actual_scene": "biz-rule-config",
+    "reason": "价格权限属于业务规则配置与权限管理场景，采用统一保存、条件子页和全屏模态编辑范式。"
+  },
+  "uikit_consumption_check": {
+    "status": "pass",
+    "matched_uikit": "biz-rule-config",
+    "evidence": [
+      "使用全屏模态导航模式 A（左侧取消/返回，右侧保存按钮）",
+      "主页面以高密度 section-group + cell 组织单选规则",
+      "二级页延续统一保存与条件回填节奏"
+    ]
+  },
+  "component_discipline_check": {
+    "status": "pass",
+    "evidence": [
+      "主规则采用 cell + radio 单选组合，符合 biz-rule-config compositionConstraints[0]",
+      "子级条件行使用 cell__backspace 缩进占位，不手写 guide 线",
+      "分组选择使用 checkbox，多选摘要使用 tag，新增分组使用 input + tag + button",
+      "未复制 .uikit-shell / .phone-frame / .phone-screen 等演示外壳"
+    ]
+  },
+  "spec_ref_check": {
+    "status": "pass",
+    "evidence": [
+      "文案中的时间格式使用 YYYY/MM/DD HH:MM",
+      "页面背景为灰色 page 背景，内容区使用白色承载面",
+      "主操作统一收口在 navbar，不在内容区重复放强主按钮"
+    ]
+  },
+  "copy_check": {
+    "status": "pass",
+    "notes": [
+      "模式名称与辅助说明采用简洁中文表达",
+      "自动公开时间与最近保存时间遵循中文数字时间表达"
+    ]
+  },
+  "interaction_check": {
+    "status": "pass",
+    "evidence": [
+      "localStorage 持久化已实现，刷新后宿主页摘要可回填",
+      "保存主页面后会关闭模态并显示 toast",
+      "新增粉丝分组后会回到原二级页，并默认加入当前规则"
+    ],
+    "extra_browser_check": {
+      "tool": "Playwright + system Chrome",
+      "result": "pass",
+      "covered_flow": "入口打开 -> 私密时间设置 -> 部分可见分组选择 -> 新增分组 -> 不给谁看分组选择 -> 切回部分可见 -> 保存回填"
+    }
+  },
+  "layout_check": {
+    "status": "pass",
+    "evidence": [
+      "body 使用 max-width: 768px + margin-inline: auto",
+      "modal-overlay 使用 position: fixed; inset: 0; width: 100%; max-width: 768px",
+      "navbar 保持 sticky 基线，未在普通业务页误用 fixed/absolute"
+    ]
+  },
+  "prototype_folder_check": {
+    "status": "pass",
+    "task_folder": "price-visibility-config",
+    "notes": [
+      "原型位于仓库根目录下的任务级文件夹中",
+      "规格文件与验收文件均已落盘到 _spec/"
+    ]
+  },
+  "deployment_readiness_check": {
+    "status": "pass",
+    "notes": [
+      "静态 HTML/CSS/JS 结构完整，无需构建",
+      "通过本地静态服务直接访问 index.html 可预览"
+    ]
+  },
+  "automated_checks": {
+    "script": "node scripts/validate-wego-design.mjs --scope=full",
+    "exit_code": 0,
+    "errors": [],
+    "warnings_count": 4,
+    "key_findings": [
+      "wego-design 守门验证通过，prototypeTaskFolders=1，prototypeScannedFiles=7",
+      "告警均位于设计系统既有 preview 文件，不在本次价格权限任务目录内",
+      "额外通过 Playwright 走通完整业务交互链，宿主页摘要回填结果为“部分可见 / 高净值会员、新人首单粉、高意向批发客户”"
+    ]
+  },
+  "risk_log": [
+    {
+      "level": "low",
+      "owner_stage": "wego-design",
+      "issue": "守门脚本仍提示 preview 原文件存在 raw_color 与 inline_svg 告警。",
+      "impact": "不影响本次任务原型交付，但会让全仓守门维持 pass-with-risk 状态。",
+      "suggestion": "后续由 wego-uxsystem-iterate 或设计系统维护任务集中清理 preview 历史告警。"
+    },
+    {
+      "level": "low",
+      "owner_stage": "wego-ux",
+      "issue": "自动公开时间使用文本输入模拟，未接入真实日期时间选择器。",
+      "impact": "足以验证工作流闭环，但不代表最终生产交互形态。",
+      "suggestion": "若后续要提升拟真度，可在不突破组件边界的前提下补一个日期时间选择子流程。"
+    }
+  ],
+  "manual_verify_items": [
+    "真机 WebView 中再检查一次滑入动效、键盘弹起和安全区表现。",
+    "确认未来若接入真实粉丝分组数据接口，新增分组命名规则是否仍满足业务约束。"
+  ],
+  "final_status": "pass-with-risk"
+}
