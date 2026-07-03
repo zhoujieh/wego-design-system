@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>微购相册</title>
+  <link rel="stylesheet" href="./lib/colors_and_type.css" />
+  <link rel="stylesheet" href="./lib/components.css" />
+  <link rel="stylesheet" href="./lib/iconfont.css" />
+  <link rel="stylesheet" href="./css/page.css" />
+  <link rel="stylesheet" href="./css/host-shell.css" />
+</head>
+<body data-bg="page" data-host-shell="true">
+  <main class="host-shell-page">
+    <section class="host-shell-page__panel" data-host-tab="dongtai" hidden>
+      <header class="host-shell-page__header">
+        <h1 class="host-shell-page__title">相册动态</h1>
+      </header>
+      <section class="host-shell-card">
+        <div class="host-shell-card__body">
+          <p class="host-shell-empty">动态 Tab 占位。</p>
+        </div>
+      </section>
+    </section>
+
+    <section class="host-shell-page__panel" data-host-tab="haoyou" hidden>
+      <header class="host-shell-page__header">
+        <h1 class="host-shell-page__title">好友</h1>
+      </header>
+      <section class="host-shell-card">
+        <div class="host-shell-card__body">
+          <p class="host-shell-empty">好友 Tab 占位。</p>
+        </div>
+      </section>
+    </section>
+
+    <section class="host-shell-page__panel" data-host-tab="workspace" hidden>
+      <header class="host-shell-page__header">
+        <h1 class="host-shell-page__title">工作台</h1>
+        <p class="host-shell-page__subtitle">仓库管理、价格规则、配货配置等任务优先挂在这里。</p>
+      </header>
+      <section class="host-shell-card">
+        <div class="host-shell-grid" data-entry-group="workspace-primary">
+          <a class="host-shell-grid-entry" href="./pages/price-permission.html" data-route-id="workspace-price-rule" data-entry-label="价格管理">
+            <img src="./lib/icons/app-center/价格管理.svg" alt="" class="host-shell-grid-entry__icon" />
+            <span class="host-shell-grid-entry__label">价格管理</span>
+          </a>
+          <button type="button" class="host-shell-grid-entry" data-route-id="workspace-data-center" data-entry-label="数据中心">
+            <img src="./lib/icons/app-center/数据中心.svg" alt="" class="host-shell-grid-entry__icon" />
+            <span class="host-shell-grid-entry__label">数据中心</span>
+          </button>
+          <button type="button" class="host-shell-grid-entry" data-route-id="workspace-shop-decoration" data-entry-label="店铺装修">
+            <img src="./lib/icons/app-center/店铺装修.svg" alt="" class="host-shell-grid-entry__icon" />
+            <span class="host-shell-grid-entry__label">店铺装修</span>
+          </button>
+          <button type="button" class="host-shell-grid-entry" data-route-id="workspace-team-management" data-entry-label="团队管理">
+            <img src="./lib/icons/app-center/团队管理.svg" alt="" class="host-shell-grid-entry__icon" />
+            <span class="host-shell-grid-entry__label">团队管理</span>
+          </button>
+        </div>
+      </section>
+    </section>
+
+    <section class="host-shell-page__panel" data-host-tab="xiaoxi" hidden>
+      <header class="host-shell-page__header">
+        <h1 class="host-shell-page__title">消息</h1>
+      </header>
+      <section class="host-shell-card">
+        <div class="host-shell-card__body">
+          <p class="host-shell-empty">消息 Tab 占位。</p>
+        </div>
+      </section>
+    </section>
+
+    <section class="host-shell-page__panel host-shell-page__panel--active" data-host-tab="my">
+      <section class="host-shell-profile">
+        <div class="host-shell-profile__main">
+          <img src="./lib/image/avatar-defult.png" alt="" class="avatar avatar--lg" />
+          <div class="host-shell-profile__meta">
+            <div class="host-shell-profile__title-row">
+              <h1 class="host-shell-profile__title">微购相册·店主</h1>
+              <span class="host-shell-badge">SVIP</span>
+            </div>
+            <div class="host-shell-profile__tags">
+              <span class="host-shell-tag host-shell-tag--success">超级管理员</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="host-shell-card">
+        <div class="host-shell-list" data-entry-group="my-settings">
+          <a class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" href="./pages/settings.html" data-route-id="my-settings" data-entry-label="设置">
+            <div class="cell__body">
+              <div class="cell__content"><div class="cell__title-row"><span class="cell__title">设置</span></div></div>
+              <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+            </div>
+          </a>
+          <a class="cell cell--single cell--bg-white cell--clickable" href="./pages/wallet.html" data-route-id="my-wallet" data-entry-label="我的钱包">
+            <div class="cell__body">
+              <div class="cell__content"><div class="cell__title-row"><span class="cell__title">我的钱包</span></div></div>
+              <div class="cell__action"><span class="cell__action-text">¥ 0.02</span><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+            </div>
+          </a>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <button type="button" class="bottom-nav__item" data-host-tab-trigger="dongtai">
+      <span class="bottom-nav__icon"><img src="./lib/icons/tab-dongtai.svg" alt="" /></span>
+      <span class="bottom-nav__label">动态</span>
+    </button>
+    <button type="button" class="bottom-nav__item" data-host-tab-trigger="haoyou">
+      <span class="bottom-nav__icon"><img src="./lib/icons/tab-haoyou.svg" alt="" /></span>
+      <span class="bottom-nav__label">好友</span>
+    </button>
+    <button type="button" class="bottom-nav__item" data-host-tab-trigger="workspace">
+      <span class="bottom-nav__icon"><img src="./lib/icons/tab-gongzuotai.svg" alt="" /></span>
+      <span class="bottom-nav__label">工作台</span>
+    </button>
+    <button type="button" class="bottom-nav__item" data-host-tab-trigger="xiaoxi">
+      <span class="bottom-nav__icon"><img src="./lib/icons/tab-xiaoxi.svg" alt="" /></span>
+      <span class="bottom-nav__label">消息</span>
+    </button>
+    <button type="button" class="bottom-nav__item active" data-host-tab-trigger="my">
+      <span class="bottom-nav__icon"><img src="./lib/icons/tab-active-wode.svg" alt="" /></span>
+      <span class="bottom-nav__label">我的</span>
+    </button>
+  </nav>
+
+  <div id="modal-overlay" class="modal-overlay" hidden></div>
+
+  <script src="./js/host-shell.js"></script>
+  <script src="./js/app.js"></script>
+</body>
+</html>

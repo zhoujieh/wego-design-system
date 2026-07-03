@@ -1,0 +1,187 @@
+{
+  "matched_uikit": "biz-rule-config",
+  "scene_fit_reason": "page_spec.business_goal 是价格权限配置(权限管理场景),命中 uikit-plan.json.pagePatterns[biz-rule-config].applicableScenarios 中的『权限管理』和『业务规则配置』;主页面属于编辑后统一保存的设置类页面,主操作收口在导航栏,与 biz-rule-config 的 interactionPattern 完全一致",
+  "navigation_pattern": "全屏模态页 navbar 模式 A(左侧取消文本 + 右侧实心按钮保存),二级选择页 navbar push 模式(左侧返回图标 + 右侧完成文字)",
+  "layout_pattern": "主页面:section-group + cell 竖排,父级 radio cell 与子级条件 cell 同组连续排列,子级用 cell__backspace 空占位缩进;二级页:section-group + cell 竖排多选列表 + 新建分组入口",
+  "interaction_pattern": "edit-then-save(主页面统一保存收口);select(二级页多选确认后回填主页面入口摘要)",
+  "surface_designs": [
+    {
+      "surface_id": "host-entry",
+      "role": "host-entry",
+      "match_status": "fallback",
+      "matched_uikit": null,
+      "matched_page_pattern": null,
+      "matched_blueprint": "mobile-host-entry",
+      "scene_fit_reason": "宿主入口页只承接打开价格权限设置页面并回填当前模式摘要,没有精确命中的 pagePattern,但可由移动端基础组件(cell + tag)安全组成;固定宿主模板由 wego-ux/templates/host-shell.* 套壳,本 surface 只产出入口/回填所需依据",
+      "component_mapping": [
+        {
+          "block": "权限模式选择摘要回填",
+          "selected": "cell(cell--single, cell--clickable, cell--divider-right-edge) + cell__content/cell__title + cell__action(cell__action-text 当前模式) + cell__arrow",
+          "constraint_ref": {},
+          "reason": "宿主页只展示当前已保存的权限模式名称和跳转入口,无组合约束,按 cell 契约 domAnatomy 自由组合;摘要文案使用 --text-secondary"
+        }
+      ],
+      "allowed_page_styles": [
+        "页面外层容器最大宽度约束",
+        "入口区垂直间距"
+      ],
+      "design_gap": ""
+    },
+    {
+      "surface_id": "price-permission-main",
+      "role": "primary-task-page",
+      "match_status": "exact",
+      "matched_uikit": "biz-rule-config",
+      "matched_page_pattern": "biz-rule-config",
+      "scene_fit_reason": "权限模式四选一(单选≥3 选项)直接命中 compositionConstraints[0];私密/部分可见/不给谁看选中后出现的自动公开时间、分组选择入口属于父项选中后才出现的补充字段,命中 compositionConstraints[2];主页面编辑后统一保存,navbar 使用模式 A 收口,完全符合 biz-rule-config 范式",
+      "component_mapping": [
+        {
+          "block": "权限模式选择(公开/私密/部分可见/不给谁看,单选)",
+          "selected": "cell(cell--double, cell--bg-white, cell--clickable, cell--divider-right-edge) + cell__select(radio radio--sm) + cell__body/cell__content(cell__title + cell__subtitle 说明文案)",
+          "constraint_ref": {
+            "pagePattern": "biz-rule-config",
+            "rule_id": "compositionConstraints[0]",
+            "trigger": "多选项互斥单选(选项≥3 或单条文案>4字)"
+          },
+          "reason": "4 个权限模式属于互斥单选且单条文案>4字(公开/私密/部分可见/不给谁看),命中 compositionConstraints[0];cell 竖排不受窄屏限制,radio 嵌入 cell__select 后文案和说明由 cell__title/cell__subtitle 承载,不再引入 .radio-field。组内 4 行连续排列,前 3 行加 cell--divider-right-edge,最后一行(不给谁看)若展开子级则不加分割线由子级区域承接"
+        },
+        {
+          "block": "自动公开时间设置(仅私密模式时显示,可选开启,设置具体公开时间)",
+          "selected": "父级 radio cell(私密)下方延展:cell(cell--single, cell--bg-white, cell--clickable, cell--divider-right-edge) + cell__backspace(空占位 24px) + cell__body(cell__title『自动公开』) + cell__action(switch);switch 开启后再延展一行:cell(cell--single, cell--clickable) + cell__backspace + cell__body(cell__title『公开时间』) + cell__action(cell__action-text 时间值) + cell__arrow",
+          "constraint_ref": {
+            "pagePattern": "biz-rule-config",
+            "rule_id": "compositionConstraints[2]",
+            "trigger": "父项选中后才出现补充字段、跳转入口、筛选范围或排除条件"
+          },
+          "reason": "自动公开时间是从属于私密模式的补充字段,与父项保持同组连续结构,使用 cell__backspace 空占位实现 24px 缩进表达从属关系;不拆成独立平级 section,不加 helper 解释父子关联;switch 和时间选择 cell 复用稳定场景,内嵌控件规格由契约承接"
+        },
+        {
+          "block": "可见粉丝分组选择入口(部分可见模式时显示,显示已选分组摘要并下钻)",
+          "selected": "父级 radio cell(部分可见)下方延展:cell(cell--single, cell--bg-white, cell--clickable, cell--divider-right-edge) + cell__backspace(空占位) + cell__body(cell__title『选择可见分组』) + cell__action(cell__action-text 摘要如『已选 2 个分组』或『未选择』) + cell__arrow(下钻二级页)",
+          "constraint_ref": {
+            "pagePattern": "biz-rule-config",
+            "rule_id": "compositionConstraints[2]",
+            "trigger": "父项选中后才出现补充字段、跳转入口、筛选范围或排除条件"
+          },
+          "reason": "分组选择入口是从属于部分可见模式的跳转入口,与父项同组连续;摘要由 cell__action-text 承载(使用 --text-secondary),右箭头表达下钻语义,无需额外 helper"
+        },
+        {
+          "block": "屏蔽粉丝分组选择入口(不给谁看模式时显示,显示已选分组摘要并下钻)",
+          "selected": "父级 radio cell(不给谁看)下方延展:cell(cell--single, cell--bg-white, cell--clickable) + cell__backspace(空占位) + cell__body(cell__title『选择屏蔽分组』) + cell__action(cell__action-text 摘要) + cell__arrow(下钻二级页)",
+          "constraint_ref": {
+            "pagePattern": "biz-rule-config",
+            "rule_id": "compositionConstraints[2]",
+            "trigger": "父项选中后才出现补充字段、跳转入口、筛选范围或排除条件"
+          },
+          "reason": "屏蔽分组入口与可见分组入口结构对称,只是文案差异;同组连续结构 + cell__backspace 缩进表达从属;最后一行不带分割线"
+        }
+      ],
+      "allowed_page_styles": [
+        "页面外层容器最大宽度约束(768px)",
+        "section-group 之间 8px 灰底间距",
+        "子级条件区显示/隐藏的切换由 JS 控制 cell 的 display,不发明新组件类"
+      ],
+      "design_gap": ""
+    },
+    {
+      "surface_id": "fan-group-select",
+      "role": "secondary-task-page",
+      "match_status": "fallback",
+      "matched_uikit": null,
+      "matched_page_pattern": null,
+      "matched_blueprint": "selection-list-page",
+      "scene_fit_reason": "二级页面角色为 secondary-task-page,核心任务是粉丝分组多选 + 新建后回填,没有独立 UI Kit,但可由 cell + checkbox + button 承接;命中 selection-list-page blueprint 的 appliesWhen(页面角色为 secondary-task-page、核心任务是多选、创建后回填或列表选择)",
+      "component_mapping": [
+        {
+          "block": "粉丝分组多选列表(二级页面,带分组名与人数,支持勾选)",
+          "selected": "cell(cell--double, cell--bg-white, cell--clickable, cell--divider-right-edge) + cell__select(checkbox checkbox--sm) + cell__body/cell__content(cell__title 分组名 + cell__subtitle 人数如『128 人』)",
+          "constraint_ref": {},
+          "reason": "二级选择列表页 blueprint 允许 cell + checkbox 组合,无 compositionConstraints;checkbox 嵌入 cell__select 后文案和人数由 cell__title/cell__subtitle 承载,组内连续排列,最后一行不加分割线"
+        },
+        {
+          "block": "新增粉丝分组入口(二级页面,创建新分组)",
+          "selected": "顶部或列表末尾固定入口:cell(cell--single, cell--bg-white, cell--clickable) + cell__body(cell__title『新建分组』+ cell__title-icon icon-tianjia) + cell__arrow;点击后弹出输入弹层(input + button 确认)",
+          "constraint_ref": {},
+          "reason": "selection-list-page blueprint 允许创建动作使用 button/link/cell,不把选择项做成自定义卡片;新建入口用 cell 承载保持列表节奏一致,icon-tianjia 表达新增语义;输入弹层复用 input + button 组件"
+        }
+      ],
+      "allowed_page_styles": [
+        "列表分组间距",
+        "已选摘要区域(可选,navbar 右侧完成按钮承担确认语义)",
+        "新建分组弹层覆盖样式"
+      ],
+      "design_gap": ""
+    }
+  ],
+  "component_mapping": [
+    {
+      "block": "权限模式选择(公开/私密/部分可见/不给谁看,单选)",
+      "selected": "cell(cell--double) + cell__select(radio radio--sm) + cell__body/cell__content(cell__title + cell__subtitle)",
+      "constraint_ref": {
+        "pagePattern": "biz-rule-config",
+        "rule_id": "compositionConstraints[0]",
+        "trigger": "多选项互斥单选(选项≥3 或单条文案>4字)"
+      },
+      "reason": "4 个权限模式互斥单选,命中 compositionConstraints[0];radio 嵌入 cell__select,文案和说明由 cell 承载"
+    },
+    {
+      "block": "自动公开时间设置(私密条件区)",
+      "selected": "cell(cell--single) + cell__backspace + cell__body + cell__action(switch);展开时间行:cell + cell__backspace + cell__body + cell__action(cell__action-text) + cell__arrow",
+      "constraint_ref": {
+        "pagePattern": "biz-rule-config",
+        "rule_id": "compositionConstraints[2]",
+        "trigger": "父项选中后才出现补充字段、跳转入口、筛选范围或排除条件"
+      },
+      "reason": "从属于私密模式的条件区,同组连续 + cell__backspace 缩进"
+    },
+    {
+      "block": "可见/屏蔽粉丝分组选择入口(部分可见/不给谁看条件区)",
+      "selected": "cell(cell--single, cell--clickable) + cell__backspace + cell__body + cell__action(cell__action-text 摘要) + cell__arrow",
+      "constraint_ref": {
+        "pagePattern": "biz-rule-config",
+        "rule_id": "compositionConstraints[2]",
+        "trigger": "父项选中后才出现补充字段、跳转入口、筛选范围或排除条件"
+      },
+      "reason": "从属于父级 radio 的下钻入口,同组连续 + cell__backspace 缩进 + 右箭头表达下钻"
+    },
+    {
+      "block": "粉丝分组多选列表(二级页)",
+      "selected": "cell(cell--double) + cell__select(checkbox checkbox--sm) + cell__body/cell__content(cell__title + cell__subtitle 人数)",
+      "constraint_ref": {},
+      "reason": "无 compositionConstraints,按 selection-list-page blueprint + cell/checkbox 契约 domAnatomy 自由组合"
+    },
+    {
+      "block": "新增粉丝分组入口(二级页)",
+      "selected": "cell(cell--single, cell--clickable) + cell__body(cell__title + cell__title-icon icon-tianjia) + cell__arrow;弹层:input + button",
+      "constraint_ref": {},
+      "reason": "selection-list-page blueprint 允许创建动作使用 cell/button,保持列表节奏"
+    }
+  ],
+  "spec_refs_used": {
+    "copy": "specs/文案与数据规范.md(人数、时间格式)",
+    "layout": "specs/布局与间距规范.md(页面背景 data-bg=page、4N 间距、section-group 8px 间距、cell__backspace 24px 缩进)",
+    "interaction": "specs/交互设计原则.md(全屏模态页模式 A、push 转场、主操作收口右侧、父项选中后子级条件区从属结构)",
+    "visual": "specs/设计风格与品牌原则.md(灰底白卡、高信息密度)",
+    "motion": "specs/动效与视觉效果.md(slide-up-enter/slide-down-exit 模态转场)"
+  },
+  "implementation_constraints": [
+    "主页面 navbar 使用模式 A(左 text-cancel + 右 button 保存),全屏模态页 presentation=full-screen-modal,从底部 slide-up-enter 进入,保存或取消后 slide-down-exit 退出",
+    "主页面 data-bg=page(灰底),navbar 背景跟随 data-bg,不写 transparent",
+    "权限模式 4 行 cell 使用 cell--double(带副标题说明),radio 嵌入 cell__select 使用 radio--sm,不引入 .radio-field",
+    "子级条件区(自动公开时间、分组选择入口)使用 cell__backspace 空占位实现 24px 缩进,禁止 border-left/margin-left 自定义缩进",
+    "子级条件区显示/隐藏由 JS 根据 radio--checked 状态切换 cell 的 display,不发明新组件类",
+    "分组选择入口摘要由 cell__action-text 承载,空状态显示『未选择』,已选显示『已选 N 个分组』",
+    "二级页 navbar 使用 push 模式(左 back-icon + 右 text『完成』),从主页面下钻打开",
+    "二级页 checkbox 嵌入 cell__select 使用 checkbox--sm,人数信息由 cell__subtitle 承载",
+    "新建分组弹层复用 input + button 组件,不发明自定义弹层组件",
+    "禁止 inline style 控制颜色/间距,禁止硬编码 hex/rem,全部使用 Token",
+    "禁止发明 .price-permission-section、.fan-group-card 等业务组件类,业务样式只用 .price-permission-page__xxx 作用域"
+  ],
+  "page_presentation": {
+    "type": "full-screen-modal",
+    "transition": "slide-up-enter, slide-down-exit",
+    "dismiss_action": "page-level-save",
+    "overlay_level": "overlay",
+    "covers_tab_bar": true
+  }
+}

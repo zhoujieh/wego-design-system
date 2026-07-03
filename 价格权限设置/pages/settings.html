@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>设置</title>
+  <link rel="stylesheet" href="../lib/colors_and_type.css" />
+  <link rel="stylesheet" href="../lib/components.css" />
+  <link rel="stylesheet" href="../lib/iconfont.css" />
+  <link rel="stylesheet" href="../css/page.css" />
+</head>
+<body data-bg="page">
+  <header data-component="navbar" class="navbar">
+    <div class="navbar__body navbar__body--spaced">
+      <div class="navbar__left">
+        <a class="navbar__left-btn" href="../index.html" data-position="left">
+          <i class="wego-iconfont-s icon-fanhui"></i>
+        </a>
+      </div>
+      <div class="navbar__center">
+        <span class="navbar__title">设置</span>
+      </div>
+      <div class="navbar__right"></div>
+    </div>
+  </header>
+
+  <main class="page-body">
+    <div class="section-title">权限与隐私</div>
+    <section class="section-group">
+      <a class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" href="javascript:void(0)" data-open-modal="./pages/price-permission.html" data-route-id="my-settings-price-permission" data-entry-label="价格权限">
+        <div class="cell__body">
+          <div class="cell__content">
+            <div class="cell__title-row"><span class="cell__title">价格权限</span></div>
+          </div>
+          <div class="cell__action">
+            <span class="cell__action-text" data-fill="price-permission-summary">公开</span>
+            <i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
+          </div>
+        </div>
+      </a>
+      <a class="cell cell--single cell--bg-white cell--clickable" href="javascript:void(0)">
+        <div class="cell__body">
+          <div class="cell__content">
+            <div class="cell__title-row"><span class="cell__title">商品可见范围</span></div>
+          </div>
+          <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+        </div>
+      </a>
+    </section>
+
+    <div class="section-title">通用</div>
+    <section class="section-group">
+      <a class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" href="javascript:void(0)">
+        <div class="cell__body">
+          <div class="cell__content">
+            <div class="cell__title-row"><span class="cell__title">消息通知</span></div>
+          </div>
+          <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+        </div>
+      </a>
+      <a class="cell cell--single cell--bg-white cell--clickable" href="javascript:void(0)">
+        <div class="cell__body">
+          <div class="cell__content">
+            <div class="cell__title-row"><span class="cell__title">清除缓存</span></div>
+          </div>
+          <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+        </div>
+      </a>
+    </section>
+  </main>
+
+  <div id="modal-overlay" class="modal-overlay" hidden></div>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

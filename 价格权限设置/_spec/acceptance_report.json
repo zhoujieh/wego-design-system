@@ -1,0 +1,165 @@
+{
+  "requirement_coverage": [
+    {
+      "requirement": "四种权限模式单选(公开/私密/部分可见/不给谁看)",
+      "covered": true,
+      "evidence": "price-permission.html data-mode-group 包含 4 个 radio cell,app.js setMode 实现互斥单选",
+      "surface": "price-permission-main"
+    },
+    {
+      "requirement": "私密模式可设置自动公开时间",
+      "covered": true,
+      "evidence": "price-permission.html data-conditional='private' 条件区含 switch + 时间选择 cell,app.js 实现开关联动与 datetime-local 弹层",
+      "surface": "price-permission-main"
+    },
+    {
+      "requirement": "部分可见与不给谁看有二级页面按粉丝分组选择",
+      "covered": true,
+      "evidence": "fan-group-select.html 提供 checkbox 多选列表,通过 URL query 区分 partial/exclude 模式,标题动态切换",
+      "surface": "fan-group-select"
+    },
+    {
+      "requirement": "支持新增粉丝分组",
+      "covered": true,
+      "evidence": "fan-group-select.html 顶部『新建分组』入口 + 对话框(input + 确认),新建后追加到列表并写入 localStorage",
+      "surface": "fan-group-select"
+    },
+    {
+      "requirement": "单选逻辑(互斥)",
+      "covered": true,
+      "evidence": "app.js setMode 切换 radio--checked,同时清空其他 radio 的 dot,只允许单选",
+      "surface": "price-permission-main"
+    }
+  ],
+  "scene_judgement_check": {
+    "page_spec_scene": "biz-rule-config",
+    "design_plan_uikit": "biz-rule-config",
+    "consistent": true,
+    "reason": "page_spec 判定为权限管理/业务规则配置场景,design_consumption_plan 命中 uikit-plan.json.pagePatterns[biz-rule-config].applicableScenarios 中的『权限管理』和『业务规则配置』"
+  },
+  "surface_design_check": {
+    "total_surfaces": 3,
+    "covered_surfaces": 3,
+    "details": [
+      {
+        "surface_id": "host-entry",
+        "match_status": "fallback",
+        "matched_blueprint": "mobile-host-entry",
+        "implemented": true,
+        "evidence": "index.html 提供『我的』tab 设置入口,settings.html 承接价格权限入口与摘要回填(data-fill='price-permission-summary')",
+        "rule_compliance": "未复制 .uikit-shell/.phone-frame;入口使用 cell 标准 domAnatomy"
+      },
+      {
+        "surface_id": "price-permission-main",
+        "match_status": "exact",
+        "matched_uikit": "biz-rule-config",
+        "matched_page_pattern": "biz-rule-config",
+        "implemented": true,
+        "evidence": "price-permission.html 使用 navbar 模式 A(取消+保存)+ 4 个 radio cell + 3 个条件区(均用 cell__backspace 缩进)",
+        "rule_compliance": "命中 compositionConstraints[0](cell+cell__select+radio)和 compositionConstraints[2](父项延展同组结构)"
+      },
+      {
+        "surface_id": "fan-group-select",
+        "match_status": "fallback",
+        "matched_blueprint": "selection-list-page",
+        "implemented": true,
+        "evidence": "fan-group-select.html 使用 navbar push 模式 + cell+checkbox 多选列表 + 新建分组入口(input+button 弹层)",
+        "rule_compliance": "遵守 selection-list-page blueprint 的 allowedComponents 和 layoutRules"
+      }
+    ]
+  },
+  "uikit_consumption_check": {
+    "shell_leakage": false,
+    "invented_component_classes": [],
+    "evidence": "grep 确认无 uikit-shell/phone-frame/phone-screen/phone-status/phone-body/phone-indicator;业务样式统一用 .price-permission-page__ 作用域",
+    "composition_constraints_compliance": "权限模式 4 选 1 命中 compositionConstraints[0] 用 cell+radio 而非 form+radio-field-group;条件区命中 compositionConstraints[2] 用 cell__backspace 缩进而非独立 section"
+  },
+  "component_discipline_check": {
+    "stable_scene_split": false,
+    "invented_modifiers": [],
+    "evidence": "radio 嵌入 cell__select 使用 radio--sm/radio--checked,未引入 .radio-field;checkbox 嵌入 cell__select 使用 checkbox--sm/checkbox--checked;switch 使用 switch--on/switch--off;navbar 使用 navbar__body--spaced/navbar__right--button/navbar__action--button",
+    "cell_anatomy_compliance": "全部 cell 使用 preview/component-cell.html 的标准结构(.cell > .cell__body > .cell__content > .cell__title-row + .cell__title),修正了 host-shell 模板中过时的 cell__title-group/cell__value"
+  },
+  "spec_ref_check": {
+    "copy": "遵守文案规范,人数用阿拉伯数字+『人』,时间用 datetime-local",
+    "layout": "data-bg=page 灰底白卡;section-group 8px 间距;cell__backspace 24px 缩进;容器 max-width 768px",
+    "interaction": "navbar 模式 A(取消+保存)用于全屏模态;push 模式(返回+完成)用于二级页;主操作收口右侧",
+    "visual": "灰底白卡高信息密度,无营销 hero",
+    "motion": "modal-overlay translateY(100%)→0 + transition duration-normal/ease-enter"
+  },
+  "copy_check": {
+    "user_visible_only": true,
+    "no_workflow_copy": true,
+    "evidence": "页面文案均为用户可见业务文案(公开/私密/部分可见/不给谁看/自动公开/选择可见分组等),无『验证任务』『工作流闭环』等内部说明"
+  },
+  "interaction_check": {
+    "state_persistence": true,
+    "open_restore": true,
+    "save_feedback": true,
+    "host_sync": true,
+    "evidence": "localStorage(wego-price-permission/wego-fan-groups)持久化;打开 price-permission.html 时回填 mode/autoPublic/autoPublicTime/分组摘要;保存后 toast『已保存』+关闭模态+回填 settings.html 入口摘要;fan-group-select 完成后跳回 settings.html?open=price-permission 自动重开模态显示最新摘要",
+    "validation": "保存前校验:私密+自动公开需选时间;部分可见需选分组;不给谁看需选分组"
+  },
+  "layout_check": {
+    "navbar_sticky": true,
+    "navbar_bg_matches_data_bg": true,
+    "no_min_height_100vh": true,
+    "modal_overlay_max_width": true,
+    "button_reset": true,
+    "evidence": "navbar 由 components.css 提供 position:sticky;data-bg=page 时 navbar 灰底;page-body 未写 min-height:100vh;modal-overlay 有 width:100%+max-width:768px+margin-inline:auto;navbar 内 button 依赖 colors_and_type.css 全局重置",
+    "page_css_safe_area": "page.css 未引用 --safe-area-top/--safe-area-bottom-content(仅注释说明禁止)"
+  },
+  "prototype_folder_check": {
+    "folder_name": "价格权限设置",
+    "chinese_semantic": true,
+    "in_root": true,
+    "structure_complete": true,
+    "evidence": "任务文件夹『价格权限设置』位于仓库根目录,中文语义命名;含 index.html/pages/css/js/lib/_spec 完整结构;lib 复制了 library-consumption.json.buildMobileAppPage.copyFiles 清单(colors_and_type.css/components.css/iconfont.css/fonts/icons/image)"
+  },
+  "deployment_readiness_check": {
+    "static_multi_page": true,
+    "no_framework": true,
+    "relative_paths": true,
+    "openable_directly": true,
+    "evidence": "纯静态 HTML/CSS/JS,无 npm 依赖;页面间用 <a> 与 fetch 跳转;资源路径均为相对路径;浏览器直接打开 index.html 可预览,python3 -m http.server 8100 已验证可托管"
+  },
+  "automated_checks": {
+    "script": "node scripts/validate-wego-design.mjs --scope=full",
+    "exit_code": 0,
+    "errors": [],
+    "warnings_count": 4,
+    "key_findings": [
+      "守门脚本通过,0 错误",
+      "4 个警告均为设计系统本体预览页问题(component-checkbox/radio/switch 的硬编码颜色、component-tag 的 inline SVG),与本次任务产物无关",
+      "指标:prototypeTaskFolders=1,prototypeScannedFiles=6,prototypeSurfacePlans=1",
+      "registeredComponents=17,componentCssClassCount=256,uikit:biz-rule-config:measuredReuseRate=0.863"
+    ]
+  },
+  "risk_log": [
+    {
+      "level": "low",
+      "item": "host-entry 与 fan-group-select 使用 fallback blueprint(mobile-host-entry / selection-list-page)",
+      "reason": "这两个页面角色无精确命中的 pagePattern,但已按 uikit-plan.json.fallbackPageBlueprints 规则生成",
+      "attribution": "wego-design"
+    },
+    {
+      "level": "low",
+      "item": "fan-group-select 完成后通过 location.href 跳回 settings.html?open=price-permission 自动重开模态",
+      "reason": "因 full-screen-modal 内无法直接 push 二级页,采用独立 push 页 + 返回重开模态的折中方案,体验可接受但非最优",
+      "attribution": "wego-ux"
+    },
+    {
+      "level": "low",
+      "item": "时间选择使用原生 datetime-local input",
+      "reason": "原型阶段简化实现,未自造滚轮选择器;生产可替换为业务时间选择组件",
+      "attribution": "wego-ux"
+    }
+  ],
+  "manual_verify_items": [
+    "浏览器实测:点击『我的→设置→价格权限』,模态从底部滑入;切换四种模式,条件区联动显隐正确",
+    "浏览器实测:私密模式开启自动公开,选择时间后保存,settings.html 入口回填『私密』",
+    "浏览器实测:部分可见/不给谁看下钻分组选择页,勾选分组+新建分组,完成后返回模态摘要更新",
+    "浏览器实测:保存校验(未选分组时 toast 提示)"
+  ],
+  "final_status": "pass"
+}

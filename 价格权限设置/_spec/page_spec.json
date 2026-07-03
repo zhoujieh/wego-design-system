@@ -1,0 +1,71 @@
+{
+  "task_type": "design-system-consumption",
+  "scene_category": "biz-rule-config",
+  "business_goal": "为商家配置商品价格的可见范围,在公开/私密/部分可见/不给谁看四种模式中单选,私密可设自动公开时间,部分可见与不给谁看可下钻到粉丝分组选择页并支持新增分组",
+  "interaction_mode": "edit-then-save",
+  "information_blocks": [
+    "权限模式选择(公开/私密/部分可见/不给谁看,单选)",
+    "自动公开时间设置(仅私密模式时显示,可选开启,设置具体公开时间)",
+    "可见粉丝分组选择入口(部分可见模式时显示,显示已选分组摘要并下钻)",
+    "屏蔽粉丝分组选择入口(不给谁看模式时显示,显示已选分组摘要并下钻)",
+    "粉丝分组多选列表(二级页面,带分组名与人数,支持勾选)",
+    "新增粉丝分组入口(二级页面,创建新分组)"
+  ],
+  "page_surfaces": [
+    {
+      "id": "host-entry",
+      "role": "host-entry",
+      "information_blocks": [
+        "权限模式选择(公开/私密/部分可见/不给谁看,单选)"
+      ],
+      "interaction_mode": "view-only",
+      "purpose": "宿主我的-设置入口,承接打开价格权限设置页面并回填当前模式摘要"
+    },
+    {
+      "id": "price-permission-main",
+      "role": "primary-task-page",
+      "information_blocks": [
+        "权限模式选择(公开/私密/部分可见/不给谁看,单选)",
+        "自动公开时间设置(仅私密模式时显示,可选开启,设置具体公开时间)",
+        "可见粉丝分组选择入口(部分可见模式时显示,显示已选分组摘要并下钻)",
+        "屏蔽粉丝分组选择入口(不给谁看模式时显示,显示已选分组摘要并下钻)"
+      ],
+      "interaction_mode": "edit-then-save",
+      "purpose": "价格权限主配置页,单选四种权限模式,根据模式联动展示自动公开时间或分组选择入口,统一保存后生效"
+    },
+    {
+      "id": "fan-group-select",
+      "role": "secondary-task-page",
+      "information_blocks": [
+        "粉丝分组多选列表(二级页面,带分组名与人数,支持勾选)",
+        "新增粉丝分组入口(二级页面,创建新分组)"
+      ],
+      "interaction_mode": "select",
+      "purpose": "粉丝分组多选页,从主页面下钻打开,展示全部分组供勾选,支持新建分组,确认后回填到主页面入口摘要"
+    }
+  ],
+  "host_container": {
+    "tab": "my",
+    "entry_label": "设置",
+    "subentry_label": "价格权限",
+    "leaf_level": 2,
+    "entry_type": "cell",
+    "needs_host_entry_surface": true
+  },
+  "route_id": "my-settings-price-permission",
+  "component_intent": [
+    "权限模式选择 → radio 单选组件,四选一,选中后联动显示对应条件信息块",
+    "自动公开时间设置 → switch 开关 + 时间选择 cell(开启后展示具体时间)",
+    "可见/屏蔽粉丝分组选择入口 → cell + 状态摘要回填 + 右箭头下钻",
+    "粉丝分组多选列表 → cell + checkbox 多选,带分组名与人数",
+    "新增粉丝分组入口 → cell + 弹窗输入分组名或新建页"
+  ],
+  "spec_refs": {
+    "copy": ".codex/skills/wego-design/specs/文案与数据规范.md",
+    "layout": ".codex/skills/wego-design/specs/布局与间距规范.md",
+    "interaction": ".codex/skills/wego-design/specs/交互设计原则.md",
+    "visual": ".codex/skills/wego-design/specs/设计风格与品牌原则.md",
+    "motion": ".codex/skills/wego-design/specs/动效与视觉效果.md"
+  },
+  "delivery_hint": "next-step"
+}
