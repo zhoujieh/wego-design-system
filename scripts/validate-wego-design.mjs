@@ -228,6 +228,15 @@ const FORBIDDEN_PROTOTYPE_SAFE_AREA_TOKENS = new Set([
   '--safe-area-bottom-content',
 ]);
 
+const SURFACE_MATCH_STATUSES = new Set(['exact', 'near', 'fallback', 'gap']);
+
+const INTERNAL_PROTOTYPE_COPY_PATTERNS = [
+  /工作流验证任务/,
+  /按\s*[`'"“”]?[\w-]+[`'"“”]?\s*范式/,
+  /验证微购.*工作流/,
+  /验证.*保存回填.*本地持久化/,
+];
+
 // 仓库根目录下不属于任务文件夹的目录（扫描任务文件夹时排除）
 const NON_TASK_ROOT_DIRS = new Set([
   'scripts',
@@ -1134,6 +1143,177 @@ function listTaskFolderHtmlCss(taskFolder) {
   return out.sort();
 }
 
+function listTaskFolderFiles(taskFolder, extensions = null) {
+  const abs = path.join(repoRoot, taskFolder);
+  if (!fs.existsSync(abs)) return [];
+  const out = [];
+  const walk = current => {
+    for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+      if (entry.name === 'node_modules') continue;
+      if (entry.isDirectory() && entry.name === 'lib') continue;
+      const full = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        walk(full);
+      } else if (!extensions || extensions.has(path.extname(entry.name))) {
+        out.push(full);
+      }
+    }
+  };
+  walk(abs);
+  return out.sort();
+}
+
+function readJsonFile(file) {
+  try {
+    return JSON.parse(fs.readFileSync(file, 'utf8'));
+  } catch {
+    add('error', 'json.invalid', 'JSON 文件无法解析', file);
+    return null;
+  }
+}
+
+function checkPrototypeSurfaceDesigns(context) {
+  const taskFolders = context.effectiveScope === 'full'
+    ? getAllTaskFolders()
+    : getTaskFoldersFromChangedFiles(context.changedFiles);
+  if (taskFolders.length === 0) return;
+
+  const uikitPlan = readJson('uikit-plan.json') || {};
+  const pagePatternIds = new Set((uikitPlan.pagePatterns || []).map(item => item.slug).filter(Boolean));
+  const fallbackBlueprintIds = new Set((uikitPlan.fallbackPageBlueprints || []).map(item => item.id).filter(Boolean));
+  let checkedPlans = 0;
+  for (const folder of taskFolders) {
+    const specDir = path.join(repoRoot, folder, '_spec');
+    const planPath = path.join(specDir, 'design_consumption_plan.json');
+    if (!fs.existsSync(planPath)) continue;
+
+    checkedPlans++;
+    const plan = readJsonFile(planPath);
+    if (!plan) continue;
+    const surfaces = Array.isArray(plan.surface_designs) ? plan.surface_designs : null;
+    if (!surfaces || surfaces.length === 0) {
+      add('error', 'prototype.surface_designs_missing',
+        'design_consumption_plan.json 必须包含 surface_designs[]，逐页面声明 exact/near/fallback/gap 设计依据',
+        planPath);
+      continue;
+    }
+
+    const seen = new Set();
+    for (const surface of surfaces) {
+      const id = surface?.surface_id;
+      if (!id || typeof id !== 'string') {
+        add('error', 'prototype.surface_id_missing', 'surface_designs[] 每项必须包含 surface_id', planPath);
+        continue;
+      }
+      if (seen.has(id)) {
+        add('error', 'prototype.surface_id_duplicate', `surface_id 重复：${id}`, planPath);
+      }
+      seen.add(id);
+
+      if (!SURFACE_MATCH_STATUSES.has(surface.match_status)) {
+        add('error', 'prototype.surface_match_status_invalid',
+          `surface ${id} 的 match_status 必须是 exact/near/fallback/gap`,
+          planPath);
+      }
+      if ((surface.match_status === 'exact' || surface.match_status === 'near') && !surface.matched_page_pattern) {
+        add('error', 'prototype.surface_page_pattern_missing',
+          `surface ${id} 为 ${surface.match_status} 时必须声明 matched_page_pattern`,
+          planPath);
+      }
+      if ((surface.match_status === 'exact' || surface.match_status === 'near') && surface.matched_page_pattern && !pagePatternIds.has(surface.matched_page_pattern)) {
+        add('error', 'prototype.surface_page_pattern_unknown',
+          `surface ${id} 引用了不存在的 pagePattern：${surface.matched_page_pattern}`,
+          planPath);
+      }
+      if (surface.match_status === 'fallback' && !surface.matched_blueprint) {
+        add('error', 'prototype.surface_blueprint_missing',
+          `surface ${id} 为 fallback 时必须声明 matched_blueprint`,
+          planPath);
+      }
+      if (surface.match_status === 'fallback' && surface.matched_blueprint && !fallbackBlueprintIds.has(surface.matched_blueprint)) {
+        add('error', 'prototype.surface_blueprint_unknown',
+          `surface ${id} 引用了不存在的 fallback blueprint：${surface.matched_blueprint}`,
+          planPath);
+      }
+      if (surface.match_status === 'gap' && !surface.design_gap) {
+        add('error', 'prototype.surface_gap_reason_missing',
+          `surface ${id} 为 gap 时必须声明 design_gap`,
+          planPath);
+      }
+      if (surface.match_status === 'gap') {
+        add('error', 'prototype.surface_gap_present',
+          `surface ${id} 仍是 gap，不能进入原型交付；请先补齐 blueprint/UI Kit/组件契约`,
+          planPath);
+      }
+      if (!Array.isArray(surface.component_mapping)) {
+        add('error', 'prototype.surface_component_mapping_missing',
+          `surface ${id} 必须包含 component_mapping[]`,
+          planPath);
+      }
+      if (!Array.isArray(surface.allowed_page_styles)) {
+        add('error', 'prototype.surface_allowed_styles_missing',
+          `surface ${id} 必须包含 allowed_page_styles[]`,
+          planPath);
+      }
+    }
+
+    const pageSpecPath = path.join(specDir, 'page_spec.json');
+    if (fs.existsSync(pageSpecPath)) {
+      const pageSpec = readJsonFile(pageSpecPath);
+      const pageSurfaces = Array.isArray(pageSpec?.page_surfaces) ? pageSpec.page_surfaces : [];
+      if (pageSurfaces.length === 0) {
+        add('error', 'prototype.page_surfaces_missing',
+          'page_spec.json 必须包含 page_surfaces[]，供 design_consumption_plan.surface_designs[] 覆盖',
+          pageSpecPath);
+      }
+      for (const pageSurface of pageSurfaces) {
+        const id = pageSurface?.id;
+        if (id && !seen.has(id)) {
+          add('error', 'prototype.surface_not_covered',
+            `page_spec.page_surfaces[] 中的 ${id} 未被 design_consumption_plan.surface_designs[] 覆盖`,
+            planPath);
+        }
+      }
+    }
+  }
+
+  report.metrics.prototypeSurfacePlans = checkedPlans;
+}
+
+function checkPrototypeJunkAndInternalCopy(context) {
+  const taskFolders = context.effectiveScope === 'full'
+    ? getAllTaskFolders()
+    : getTaskFoldersFromChangedFiles(context.changedFiles);
+  if (taskFolders.length === 0) return;
+
+  let scannedTextFiles = 0;
+  for (const folder of taskFolders) {
+    const allFiles = listTaskFolderFiles(folder);
+    for (const file of allFiles) {
+      if (path.basename(file) === '.DS_Store') {
+        add('error', 'prototype.junk_file', '任务文件夹禁止包含 .DS_Store', file);
+      }
+    }
+
+    const textFiles = listTaskFolderFiles(folder, new Set(['.html', '.js']));
+    for (const file of textFiles) {
+      scannedTextFiles++;
+      const text = fs.readFileSync(file, 'utf8');
+      for (const pattern of INTERNAL_PROTOTYPE_COPY_PATTERNS) {
+        const match = text.match(pattern);
+        if (match) {
+          add('error', 'prototype.internal_copy',
+            `原型用户可见文案疑似包含内部工作流说明：${match[0]}`,
+            file);
+          break;
+        }
+      }
+    }
+  }
+
+  report.metrics.prototypeTextFilesScanned = scannedTextFiles;
+}
+
 function checkPrototypeShellLeakage(context) {
   // 只扫描变更涉及的任务文件夹；full scope 时扫描所有任务文件夹
   const taskFolders = context.effectiveScope === 'full'
@@ -1246,6 +1426,8 @@ function main() {
 
   checkDirectionDrift({ full, changedLibraryFiles: context.libraryChangedFiles });
   checkTrackedJunk();
+  checkPrototypeSurfaceDesigns(context);
+  checkPrototypeJunkAndInternalCopy(context);
   checkPrototypeShellLeakage(context);
   checkMetadataVersionGate(context);
 

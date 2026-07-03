@@ -240,6 +240,17 @@
                 "verificationStandard": "把规则里的具体组件名替换成'组件A/组件B'后，逻辑是否仍然成立"
             },
             {
+                "id": "no-uikit-page-composition",
+                "name": "无 UI Kit 页面构成",
+                "primaryWorkflowStage": "wego-design",
+                "secondaryWorkflowStages": ["wego-ux", "wego-tests"],
+                "covers": ["未命中 pagePattern 的页面", "宿主页入口", "通用任务页", "二级选择页", "设计缺口拦截"],
+                "judgmentLogic": "当 page_spec.page_surfaces[] 中的页面角色或结构无法精确命中现有 pagePattern/UI Kit，但仍能由已注册组件和 specs 安全组成时，输出 match_status=fallback 并引用 uikit-plan.json.fallbackPageBlueprints；若 fallback blueprint 也无法覆盖，输出 match_status=gap 并阻止进入 wego-ux",
+                "landingPriority": ["uikit-plan.json 的 fallbackPageBlueprints", "wego-design/SKILL.md 的 surface_designs 输出规则"],
+                "secondaryLanding": ["wego-ux/SKILL.md 的 surface_designs 执行规则", "wego-tests/SKILL.md 的 surface_designs 验收规则"],
+                "verificationStandard": "把具体页面名称替换成'页面A'后，是否仍能按页面角色、结构特征和宿主特征判断 exact/near/fallback/gap？"
+            },
+            {
                 "id": "uikit-to-production-transform",
                 "name": "UI Kit 到生产转换",
                 "primaryWorkflowStage": "wego-ux",
@@ -255,11 +266,11 @@
                 "name": "原型交付标准",
                 "primaryWorkflowStage": "wego-ux",
                 "secondaryWorkflowStages": ["wego-tests"],
-                "covers": ["状态持久化", "状态回填", "宿主页与模态页状态同步", "保存反馈闭环", "真实数据转化"],
-                "judgmentLogic": "交互原型不是一次性展示，必须实现 localStorage 状态持久化；打开时回填已保存值；保存后有明确视觉反馈(toast+状态更新+关闭)；宿主页状态跟随模态保存结果",
+                "covers": ["任务文件夹命名", "项目结构", "状态持久化", "状态回填", "宿主页与模态页状态同步", "保存反馈闭环", "真实数据转化"],
+                "judgmentLogic": "新任务文件夹使用中文业务语义命名，已有历史目录继续复用；交互原型不是一次性展示，必须实现 localStorage 状态持久化；打开时回填已保存值；保存后有明确视觉反馈(toast+状态更新+关闭)；宿主页状态跟随模态保存结果",
                 "landingPriority": ["wego-ux/SKILL.md 的生成规则"],
-                "secondaryLanding": ["wego-tests/SKILL.md 的验收项", "acceptance_report 的 interaction_check"],
-                "verificationStandard": "保存后关闭模态，再次打开是否显示已保存的值？刷新页面后状态是否保留？"
+                "secondaryLanding": ["wego-product/SKILL.md 的落盘规则", "wego-tests/SKILL.md 的验收项", "acceptance_report 的 interaction_check", "acceptance_report 的 prototype_folder_check"],
+                "verificationStandard": "新任务是否使用中文业务语义文件夹？已有历史目录是否复用而非重命名？保存后关闭模态，再次打开是否显示已保存的值？刷新页面后状态是否保留？"
             }
         ],
         "workflowStageDefinitions": {

@@ -347,6 +347,151 @@
       ]
     }
   ],
+  "fallbackPageBlueprints": [
+    {
+      "id": "mobile-host-entry",
+      "name": "移动端宿主页入口",
+      "primaryWorkflowStage": "wego-design",
+      "secondaryWorkflowStages": [
+        "wego-ux",
+        "wego-tests"
+      ],
+      "appliesWhen": [
+        "页面角色为 host-entry",
+        "页面只承接打开入口、当前状态摘要、保存回填或结果概览",
+        "没有精确命中的 pagePattern，但可用移动端基础组件安全组成"
+      ],
+      "layoutRules": [
+        "使用真实 page-shell，不复制 UI Kit Showcase 外壳",
+        "页面背景按内容密度选择 data-bg=surface 或 data-bg=page，导航栏与页面背景保持一致",
+        "主体优先由状态摘要 section、入口 cell/button、必要的业务说明组成",
+        "禁止使用营销 hero、工作流说明文案或大面积装饰背景"
+      ],
+      "allowedComponents": [
+        "navbar",
+        "cell",
+        "button",
+        "tag",
+        "card",
+        "link"
+      ],
+      "allowedPageStyles": [
+        "页面外层间距",
+        "摘要区栅格或行布局",
+        "入口区垂直间距",
+        "业务作用域状态回填样式"
+      ],
+      "forbidden": [
+        ".uikit-shell",
+        ".phone-frame",
+        ".phone-screen",
+        "未注册组件类",
+        "面向 AI/工作流的说明文案"
+      ],
+      "specRefs": [
+        "specs/布局与间距规范.md",
+        "specs/文案与数据规范.md",
+        "specs/设计风格与品牌原则.md"
+      ]
+    },
+    {
+      "id": "generic-mobile-task-page",
+      "name": "通用移动任务页",
+      "primaryWorkflowStage": "wego-design",
+      "secondaryWorkflowStages": [
+        "wego-ux",
+        "wego-tests"
+      ],
+      "appliesWhen": [
+        "页面角色为 primary-task-page",
+        "现有 UI Kit/pagePattern 无精确范式",
+        "任务可由已注册组件、section 分组和规范约束完成"
+      ],
+      "layoutRules": [
+        "使用 navbar + page-body + 语义化 section",
+        "内容按 information_blocks 顺序分组，组间距遵守布局规范",
+        "主操作保持单一收口，不在多个区域重复堆叠",
+        "页面级样式只做布局胶水，组件结构从 preview/component-{slug}.html 复制"
+      ],
+      "allowedComponents": [
+        "navbar",
+        "form",
+        "cell",
+        "input",
+        "button",
+        "tag",
+        "link",
+        "switch",
+        "radio",
+        "checkbox"
+      ],
+      "allowedPageStyles": [
+        "页面外层间距",
+        "section 标题和分组间距",
+        "辅助说明文字",
+        "底部或导航操作承载区"
+      ],
+      "forbidden": [
+        "新增页面范式名但不登记",
+        "未注册组件类",
+        "未定义修饰类",
+        "硬编码颜色或间距"
+      ],
+      "specRefs": [
+        "specs/布局与间距规范.md",
+        "specs/交互设计原则.md",
+        "specs/文案与数据规范.md",
+        "specs/设计风格与品牌原则.md"
+      ]
+    },
+    {
+      "id": "selection-list-page",
+      "name": "二级选择列表页",
+      "primaryWorkflowStage": "wego-design",
+      "secondaryWorkflowStages": [
+        "wego-ux",
+        "wego-tests"
+      ],
+      "appliesWhen": [
+        "页面角色为 secondary-task-page",
+        "核心任务是单选、多选、创建后回填或列表选择",
+        "没有独立 UI Kit，但可由 cell + radio/checkbox/tag 承接"
+      ],
+      "layoutRules": [
+        "使用 navbar 承接返回和保存/完成动作",
+        "选择项使用 section-group + cell 组织",
+        "单选使用 radio，多选使用 checkbox，已选摘要可用 tag",
+        "创建或补充动作使用 button/link，不把选择项做成自定义卡片"
+      ],
+      "allowedComponents": [
+        "navbar",
+        "cell",
+        "radio",
+        "checkbox",
+        "tag",
+        "button",
+        "link",
+        "input"
+      ],
+      "allowedPageStyles": [
+        "列表分组间距",
+        "已选摘要区域",
+        "空状态文字",
+        "创建入口布局"
+      ],
+      "forbidden": [
+        "自定义 checkbox/radio DOM",
+        "自定义列表项组件类",
+        "未登记的选择页范式",
+        "面向 AI/工作流的说明文案"
+      ],
+      "specRefs": [
+        "specs/布局与间距规范.md",
+        "specs/交互设计原则.md",
+        "specs/文案与数据规范.md"
+      ]
+    }
+  ],
   "lowConfidence": false,
   "warnings": [
     "ui_kits/app/index.html 是 Showcase，含演示用手机壳和部分业务样式，不应整体复制为通用页面模板。",

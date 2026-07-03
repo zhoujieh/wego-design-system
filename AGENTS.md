@@ -46,7 +46,6 @@
 - 原型产物必须是项目根目录下的任务级文件夹,不能散落在仓库根目录;同一任务迭代复用原文件夹(详见 `wego-ux/SKILL.md`)
 - 设计系统本体迭代必须递增 `.codex/skills/wego-design/metadata.json` 的 `version`;纯仓库管理类变更可不递增(详见 `wego-uxsystem-iterate/SKILL.md`)
 - 不提交 `.DS_Store`、`.uploads/`
-- 默认不做浏览器自动化验证;只有用户明确提出时,才允许进入该附加核对环节
 - AGENTS.md 只承载顶层仓库关键信息与仓库偏好规则;不承载工作流迭代方法论、组件迭代步骤、单个组件规则;后者一律落到对应技能的 references/ 或权威数据文件
 
 ## 经验沉淀与工作流迭代
@@ -67,7 +66,6 @@
 - 运行 `node scripts/validate-wego-design.mjs` 通过守门(JSON 格式、Token 同步、组件三向对齐、components.css 完整性、UI Kit 成对、过期路径、禁止文件、metadata version)
 - 确认 `metadata.json` version 已按本轮变更递增
 - 确认原型产物落在任务级文件夹
-- 确认未提交 `.DS_Store`、`.uploads/`
 
 ## 设计系统方向与边界
 

@@ -23,6 +23,7 @@ description: 验收产品原型项目并输出 acceptance_report 的技能。用
 {
   "requirement_coverage": [],
   "scene_judgement_check": {},
+  "surface_design_check": {},
   "uikit_consumption_check": {},
   "component_discipline_check": {},
   "spec_ref_check": {},
@@ -50,12 +51,14 @@ description: 验收产品原型项目并输出 acceptance_report 的技能。用
 
 - 需求是否被页面完整承接
 - 是否正确命中 `biz-rule-config` 或其他目标场景
+- 是否逐 `surface_designs[]` 验证每个页面/页面片段都有设计依据
 - 是否按 `design_consumption_plan` 消费了 UI Kit 和组件
 - 是否误复制 Showcase 外壳
 - 是否发明了不该发明的组件类或修饰类
 - 是否按 `spec_refs` 执行了文案、布局、交互、视觉规则
 - 原型是否位于任务级文件夹
 - 同一任务是否复用了原文件夹
+- 新任务文件夹是否使用中文业务语义命名；已有英文或其他命名的历史目录复用不判失败
 - 项目是否具备基本构建和部署条件
 - 必须运行守门脚本，把脚本输出写入 `automated_checks`，不能仅靠自述结论
 - 未执行浏览器验证不构成失败项，除非用户当次明确要求做这一步
@@ -90,6 +93,15 @@ node scripts/validate-wego-design.mjs --scope=full
 - `automated_checks.errors.length === 0` 且 `warnings_count` 可接受时，可为 `pass` 或 `pass-with-risk`
 - 任何 error 必须在 `risk_log` 中记录对应修复建议
 
+### surface_designs 验收规则（必查）
+
+- `design_consumption_plan.surface_designs[]` 必须覆盖 `page_spec.page_surfaces[]` 中的全部 `id`
+- 每个 HTML 页面或动态页面片段必须能归属到一个 surface；不能只用总的 `matched_uikit` 代替逐页依据
+- `match_status = exact | near`：检查是否按对应 pagePattern/UI Kit 约束生成
+- `match_status = fallback`：检查是否按 `matched_blueprint` 生成，并在 `risk_log` 记录“使用兜底蓝图”作为低风险项
+- `match_status = gap`：验收必须失败，归因到 `wego-design`
+- `allowed_page_styles` 之外的大量业务 class、内部说明文案、或自造页面结构，归因到 `wego-ux`
+
 ## 验收顺序
 
 1. 运行守门脚本，归档输出到 `automated_checks`
@@ -116,6 +128,7 @@ node scripts/validate-wego-design.mjs --scope=full
 验收时，必须按 `library-consumption.json` 的 `scenarioTypeRegistry` 中的场景类型逐类验证：
 
 - **组件消费决策类**：检查 component_mapping 是否标注了场景类型和判断条件；检查修饰类/尺寸/状态是否符合契约
+- **无 UI Kit 页面构成类**：检查 `fallback` surface 是否引用并遵守 `fallbackPageBlueprints`；检查 `gap` 是否阻止交付
 - **UI Kit 到生产转换类**：检查生产页面是否残留演示外壳类；检查 section 是否语义化封装
 - **原型交付标准类**：检查状态持久化是否实现；检查保存后回填和反馈闭环
 
