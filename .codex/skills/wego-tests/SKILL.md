@@ -72,6 +72,16 @@ description: 验收产品原型项目并输出 acceptance_report 的技能。用
 - modal-overlay 是否有 max-width 约束(与 body max-width:768px 一致,宽屏居中;检查是否漏写 `width:100%; max-width:768px; margin-inline:auto`)
 - navbar 中 `<button>` 元素是否被正确重置(无原生 border/background/padding 泄漏;依赖 colors_and_type.css 的全局 button 重置,不再需要 biz-plain-button 等内部重置类)
 
+### 页面打开方式验收(必查)
+
+- `design_consumption_plan.page_presentation` 缺失时，若已有 surface 命中带 `presentation` 的 pagePattern，归因到 `wego-design`
+- `page_presentation.type = push` 时，检查入口是否为普通页面跳转或等价 `location.href`，不要求 overlay
+- `page_presentation.type = full-screen-modal` 时，必须检查入口页存在 `#modal-overlay.modal-overlay[hidden]`
+- `page_presentation.type = full-screen-modal` 时，入口触发必须使用 `data-open-modal` 或等价 JS modal trigger；若主业务页只通过普通 `<a href>` push 打开，归因到 `wego-ux`
+- `page_presentation.type = full-screen-modal` 时，CSS 必须包含 `position: fixed`、`inset: 0`、`transform: translateY(100%)`、打开态 `translateY(0)` 或等价规则
+- `page_presentation.covers_tab_bar = true` 时，overlay z-index 必须高于 bottom-nav；若层级不足导致 Tab 仍可见或可点，归因到 `wego-ux`
+- `interaction_check` 必须记录 page presentation 验收结论；不一致时 `final_status` 不能为 `pass`
+
 ### 稳定场景回归检查(必查)
 
 - 是否对已命中的稳定场景做了二次拆解，例如把宿主场景重新拆成“行结构 + 局部控件 + 说明文字”分别实现
@@ -139,6 +149,7 @@ node scripts/validate-wego-design.mjs --scope=full
 - **组件消费决策类**：若 design 已命中稳定场景，检查实现是否整体复用该场景，而不是继续拆出内嵌关联控件、父子结构或 helper 做二次实现
 - **无 UI Kit 页面构成类**：检查 `fallback` surface 是否引用并遵守 `fallbackPageBlueprints`；检查 `gap` 是否阻止交付
 - **UI Kit 到生产转换类**：检查生产页面是否残留演示外壳类；检查 section 是否语义化封装
+- **页面打开方式绑定类**：检查 `page_presentation.type` 与入口触发、overlay DOM、CSS 动画和覆盖层级是否一致
 - **原型交付标准类**：检查状态持久化是否实现；检查保存后回填和反馈闭环
 
 结果归因时，必须标注工作流环节归属：

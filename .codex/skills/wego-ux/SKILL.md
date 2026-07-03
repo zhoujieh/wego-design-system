@@ -85,6 +85,7 @@ task-folder/
 - [ ] `page.css` 不引用 `--safe-area-top` 或 `--safe-area-bottom-content`
 - [ ] 模态层使用 `position: fixed; inset: 0`，不使用 `position: absolute`
 - [ ] 容器使用 `max-width` + `margin-inline: auto` 约束（默认业务页 768px）
+- [ ] 已读取 `design_consumption_plan.page_presentation`，并按 `type` 选择 `push` 或 `full-screen-modal` 打开方式
 
 ## 生成规则
 
@@ -95,14 +96,17 @@ task-folder/
    - 新任务首次生成：先复制固定宿主模板到任务目录，再按 `host_container + route_id` 插入入口、目标页、跳转关系
    - 同任务后续迭代：先检测任务目录是否已有宿主壳；已存在时按 `route_id` 定位旧入口并增量更新，不重复套壳、不重复插入入口
 5. 根据 `design_consumption_plan` 落页面骨架、导航、内容布局、组件组合
-6. 读取 `design_consumption_plan.surface_designs[]`，逐 surface 执行：
+6. 读取 `design_consumption_plan.page_presentation`，先确定页面打开方式：
+   - `push`：入口可使用普通 `<a href>` 或 `location.href`
+   - `full-screen-modal`：入口必须使用 modal trigger 打开 overlay，不得只输出普通 `href` 跳转到主业务页
+7. 读取 `design_consumption_plan.surface_designs[]`，逐 surface 执行：
    - `exact` / `near`：按命中的 pagePattern、UI Kit 节奏和组件映射生成
    - `fallback`：只能按 `matched_blueprint` 指向的 `uikit-plan.json.fallbackPageBlueprints[]` 生成
    - `gap`：停止生成，回到 `wego-design` 补齐 blueprint/UI Kit/组件契约
-7. 从组件预览页复制组件 markup，直接粘贴到 HTML 中（不做转换、不改 class 名）。组件组合约束以 `uikit-plan.json` 对应 pagePattern 的 `compositionConstraints` 或 fallback blueprint 的规则为权威来源。
-8. 读取 `library-consumption.json` 中 `buildMobileAppPage.copyFiles`，按清单复制设计系统文件到 `lib/` 目录；不在清单内的文件（如 scaffold.css、typography.css、css.json、specs/*.md、ui_kits/*、metadata.json）一律不复制
-9. 每个 HTML 页面通过 `<link>` 标签引用 `lib/` 下的 CSS 文件
-10. 页面交互用内联 `<script>` 或 `js/app.js` 实现，直接操作 DOM
+8. 从组件预览页复制组件 markup，直接粘贴到 HTML 中（不做转换、不改 class 名）。组件组合约束以 `uikit-plan.json` 对应 pagePattern 的 `compositionConstraints` 或 fallback blueprint 的规则为权威来源。
+9. 读取 `library-consumption.json` 中 `buildMobileAppPage.copyFiles`，按清单复制设计系统文件到 `lib/` 目录；不在清单内的文件（如 scaffold.css、typography.css、css.json、specs/*.md、ui_kits/*、metadata.json）一律不复制
+10. 每个 HTML 页面通过 `<link>` 标签引用 `lib/` 下的 CSS 文件
+11. 页面交互用内联 `<script>` 或 `js/app.js` 实现，直接操作 DOM
 
 ### 固定宿主模板（必读）
 
@@ -140,6 +144,7 @@ task-folder/
 - **组件消费决策类**（次要环节）：按 `design_consumption_plan.component_mapping` 中标注的场景类型执行，不临时判断修饰类/尺寸/状态
 - **无 UI Kit 页面构成类**（次要环节）：按 `surface_designs[].matched_blueprint` 执行 fallback 页面构成，不临时发明页面范式
 - **UI Kit 到生产转换类**（主要环节）：演示外壳不复制，生产结构语义化封装为 `<section>`，可借鉴节奏/组合/收口方式
+- **页面打开方式绑定类**（主要环节）：按 `design_consumption_plan.page_presentation.type` 分派 `push` 或 `full-screen-modal`，不得自行把命中 pagePattern 的打开方式改成另一种
 - **原型交付标准类**（主要环节）：实现 localStorage 状态持久化、打开时回填、保存后反馈闭环、宿主页状态同步
 - **宿主模板路径绑定类**（主要环节）：按 `host_container + route_id` 绑定宿主入口、业务页路径和迭代复用
 
@@ -197,11 +202,12 @@ task-folder/
 ### full-screen-modal 实现要点
 
 1. 入口页 `index.html` 和所有主流程页面预置 overlay 容器：`<div id="modal-overlay" class="modal-overlay" hidden></div>`（`display: none` → `display: flex` 由 JS 控制）
-2. 触发打开时：`fetch()` 业务页 HTML → `DOMParser` 提取页面内容区 → 插入 `#modal-overlay` → 移除 `hidden` → `requestAnimationFrame(() => { overlay.classList.add('modal-overlay--active') })`，两段式触发确保浏览器先绘制初始 `translateY(100%)` 再过渡
-3. overlay 样式（写入 `page.css` 或内联 `<style>`）：
+2. 入口触发必须使用 `data-open-modal` 或等价 JS modal trigger；不能只用普通 `<a href="...">` 把主业务页作为 push 页面打开
+3. 触发打开时：`fetch()` 业务页 HTML → `DOMParser` 提取页面内容区 → 插入 `#modal-overlay` → 移除 `hidden` → `requestAnimationFrame(() => { overlay.classList.add('modal-overlay--active') })`，两段式触发确保浏览器先绘制初始 `translateY(100%)` 再过渡
+4. overlay 样式（写入 `page.css` 或内联 `<style>`）：
    - `position: fixed; inset: 0; z-index: var(--z-overlay); background: var(--bg-page);`
    - `transform: translateY(100%); transition: transform var(--duration-normal) var(--ease-enter);`
    - 打开态加 `.modal-overlay--active { transform: translateY(0); }`
-4. 关闭时：移除 `.modal-overlay--active` → 等待 transition 结束（`transitionend` 事件）→ 清空内容 → 加回 `hidden`
-5. `covers_tab_bar: true` 时 overlay 的 z-index 需高于 bottom-nav（`--z-overlay` 已是 500）
-6. 业务页本身保留完整 HTML（含 `<html>`/`<head>`/`<body>`），可独立打开调试；作为 modal 时只使用其 `<body>` 内容
+5. 关闭时：移除 `.modal-overlay--active` → 等待 transition 结束（`transitionend` 事件）→ 清空内容 → 加回 `hidden`
+6. `covers_tab_bar: true` 时 overlay 的 z-index 需高于 bottom-nav（`--z-overlay` 已是 500）
+7. 业务页本身保留完整 HTML（含 `<html>`/`<head>`/`<body>`），可独立打开调试；作为 modal 时只使用其 `<body>` 内容
