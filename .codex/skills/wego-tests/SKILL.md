@@ -44,6 +44,8 @@ description: 验收产品原型项目并输出 acceptance_report 的技能。用
 }
 ```
 
+默认验收不要求真实浏览器验证。验收依据以 `page_spec`、`design_consumption_plan`、任务级文件夹结构、静态资源检查和守门脚本结果为准；只有用户当次明确要求时，才把浏览器验证作为附加核对项记录到 `manual_verify_items`。
+
 ## 必查项
 
 - 需求是否被页面完整承接
@@ -56,6 +58,7 @@ description: 验收产品原型项目并输出 acceptance_report 的技能。用
 - 同一任务是否复用了原文件夹
 - 项目是否具备基本构建和部署条件
 - 必须运行守门脚本，把脚本输出写入 `automated_checks`，不能仅靠自述结论
+- 未执行浏览器验证不构成失败项，除非用户当次明确要求做这一步
 
 ### navbar 与布局回归检查(必查)
 
@@ -95,6 +98,8 @@ node scripts/validate-wego-design.mjs --scope=full
 4. 再检查原型项目结构
 5. 再检查规范引用执行结果
 6. 最后给出 `final_status`（受 `automated_checks.errors` 约束）
+
+不要把“缺少浏览器能力”本身记为风险；只有用户明确要求浏览器验证且该要求未完成时，才在 `manual_verify_items` 或 `risk_log` 中如实记录。
 
 ## 结果归因
 
