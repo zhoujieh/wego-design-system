@@ -42,6 +42,13 @@
 - `wego-tests` 类问题 → 回流到 wego-tests/SKILL.md 或 acceptance_report 字段定义
 - 跨环节问题标注 primaryWorkflowStage(主)+ secondaryWorkflowStages(次)，规则主体落主要环节，次要环节只放执行引用
 
+### 2.2.1 全局预览外壳与宿主模板归属
+
+- App 宿主模板归属 `wego-ux`：现成宿主 App 基地只维护在 `wego-ux/templates/host-shell.*`，不注册为 UI Kit
+- UI Kit 只负责业务页面 Showcase；不能把 `app` 放回 `wego-design/ui_kits/` 作为下游复制源
+- 手机外壳归属全局预览能力：所有 UI Kit 和后续生成任务都应支持同链接响应式预览，电脑端显示手机壳，移动端隐藏外壳视觉
+- 业务内容不得依赖 `.uikit-shell`、`.phone-frame`、`.phone-screen` 等外壳类；它们只服务预览
+
 ### 2.3 通用化验证标准
 
 每条新规则沉淀后，必须通过以下验证：

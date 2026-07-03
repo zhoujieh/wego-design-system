@@ -221,6 +221,29 @@ html, body { min-height: auto; }
   opacity: 1;
   transform: translate(-50%, 0);
 }
+
+@media (max-width: 767px) {
+  .uikit-shell {
+    min-height: 100vh;
+    min-height: 100dvh;
+    align-items: stretch;
+    padding: var(--spacer-8);
+  }
+
+  .phone-frame {
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 900px;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .phone-screen {
+    border-radius: 0;
+  }
+}
 </style>
 </head>
 <body class="uikit-page">

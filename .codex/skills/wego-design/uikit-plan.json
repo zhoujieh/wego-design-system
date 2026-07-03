@@ -4,11 +4,6 @@
   "headBoilerplate": "<link rel=\"stylesheet\" href=\"../../colors_and_type.css\"><link rel=\"stylesheet\" href=\"../../scaffold.css\"><link rel=\"stylesheet\" href=\"../../iconfont.css\"><link rel=\"stylesheet\" href=\"../../components.css\">",
   "uiKits": [
     {
-      "slug": "app",
-      "entry": "ui_kits/app/index.html",
-      "qualityReport": "ui_kits/app/quality-report.json"
-    },
-    {
       "slug": "biz-rule-config",
       "entry": "ui_kits/biz-rule-config/index.html",
       "qualityReport": "ui_kits/biz-rule-config/quality-report.json"
@@ -225,7 +220,7 @@
     }
   ],
   "productContext": {
-    "kitType": "app",
+    "kitType": "mobile-commerce-tool",
     "productType": "移动端电商/微信生态工具",
     "dominantCopy": [
       "首页",
@@ -243,7 +238,6 @@
       "业务规则配置"
     ],
     "selectedFrameNames": [
-      "ui_kits/app/index.html",
       "ui_kits/biz-rule-config/index.html"
     ]
   },
@@ -254,22 +248,54 @@
       "../wego-ux/templates/host-shell.css",
       "../wego-ux/templates/host-shell.js"
     ],
-    "rule": "固定宿主模板属于 wego-ux 首次生成能力，不作为 wego-design 的 pagePattern。若 page_spec 声明 host_container + route_id，只为 host-entry 产出入口/回填所需 surface 依据。",
+    "rule": "固定宿主模板属于 wego-ux 首次生成能力，不属于 wego-design 的 UI Kit 或 pagePattern。若 page_spec 声明 host_container + route_id，wego-design 只为 host-entry 产出入口/回填所需 surface 依据；wego-ux 必须直接复制 host-shell.* 作为任务基地，只按 route_id 增量插入入口、业务页链接和状态回填。",
     "fixedTabs": [
-      { "id": "dongtai", "label": "动态" },
-      { "id": "haoyou", "label": "好友" },
-      { "id": "workspace", "label": "工作台" },
-      { "id": "xiaoxi", "label": "消息" },
-      { "id": "my", "label": "我的" }
+      {
+        "id": "dongtai",
+        "label": "动态"
+      },
+      {
+        "id": "haoyou",
+        "label": "好友"
+      },
+      {
+        "id": "workspace",
+        "label": "工作台"
+      },
+      {
+        "id": "xiaoxi",
+        "label": "消息"
+      },
+      {
+        "id": "my",
+        "label": "我的"
+      }
     ],
     "routeBinding": {
-      "requiredPageSpecFields": ["host_container", "route_id"],
+      "requiredPageSpecFields": [
+        "host_container",
+        "route_id"
+      ],
       "iterationRule": "同一任务目录后续迭代按 route_id 定位入口与页面，不重复套壳、不重复插入入口",
-      "entryTypes": ["cell", "grid-entry"]
+      "entryTypes": [
+        "cell",
+        "grid-entry"
+      ]
+    },
+    "previewShellPolicy": {
+      "appliesTo": [
+        "../wego-ux/templates/host-shell.*",
+        "../wego-ux/templates/page-shell.html",
+        "ui_kits/*/index.html",
+        "后续生成的任务级原型"
+      ],
+      "desktop": "显示手机预览外壳，便于电脑端验收移动端页面",
+      "mobile": "同一个链接在窄屏/手机端隐藏外壳视觉，内容铺满真实 viewport",
+      "boundary": "预览外壳只服务验收，不参与业务布局；业务页面不得依赖 .uikit-shell/.phone-frame/.phone-screen 实现内容结构"
     }
   },
   "selectionPolicy": "mobile-app-fixed-slots-first",
-  "pagePatternSelectionRule": "先检查 page_spec 是否声明 host_container + route_id；若是固定宿主模板任务，由 wego-ux 首次套壳。随后只判断业务页属于哪种既有页面范式，再选择最贴近的 UI Kit 蓝本；禁止因为不复制 Showcase 外壳而回避其页面模式、section 组织、摘要结构和信息密度。",
+  "pagePatternSelectionRule": "先检查 page_spec 是否声明 host_container + route_id；若是固定宿主模板任务，由 wego-ux 首次直接复制 host-shell.* 套壳，不从 UI Kit 参考后重画。随后只判断业务页属于哪种既有页面范式，再选择最贴近的 UI Kit 蓝本；禁止因为宿主模板已迁出 UI Kit 而回避其业务页面模式、section 组织、摘要结构和信息密度。",
   "deliveryMode": "static-multi-page",
   "deliveryRule": "页面蓝图用于指导项目中的真实 HTML 页面实现；默认交付可浏览器直接打开、不依赖框架的静态多页面项目。",
   "slotAssignments": [
@@ -537,8 +563,9 @@
   ],
   "lowConfidence": false,
   "warnings": [
-    "ui_kits/app/index.html 是 Showcase，含演示用手机壳和部分业务样式，不应整体复制为通用页面模板。",
-    "固定宿主模板由 wego-ux/templates/host-shell.* 维护，不由 app UI Kit 直接下发。",
+    "app 宿主页不再属于 UI Kit；固定宿主 App 基地唯一来源是 wego-ux/templates/host-shell.*。",
+    "带 host_container + route_id 的任务首次生成时必须直接复制完整 host-shell.*，只增量插入 route_id 对应入口、业务页链接和状态回填，不重画宿主 Tab、工作台、我的页等现成内容。",
+    "手机预览外壳是全局预览能力：电脑端显示，移动端同链接隐藏；外壳类不得成为业务布局依赖。",
     "不要把“不能复制 .uikit-shell/.phone-frame/.phone-screen”误读成“不能贴近最佳页面范式”；页面模式、section 节奏和摘要结构可以继承。",
     "凡是设置、权限、规则、配置类页面，默认优先匹配 biz-rule-config 范式，再决定是否需要补充业务差异。",
     "页面蓝图不等于最终交付形态；最终应落成真实项目工程，而不是单个静态页面文件。",

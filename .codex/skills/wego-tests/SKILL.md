@@ -54,6 +54,8 @@ description: 验收产品原型项目并输出 acceptance_report 的技能。用
 - 是否逐 `surface_designs[]` 验证每个页面/页面片段都有设计依据
 - 是否按 `design_consumption_plan` 消费了 UI Kit 和组件
 - 是否误复制 Showcase 外壳
+- 是否遵守单一预览外壳规则：只有 `index.html` 显示手机壳，后续内容都在同一个 `.phone-screen` 内展示
+- 带 `host_container + route_id` 的任务是否直接复制固定 App 宿主模板，而不是重画宿主 App
 - 是否发明了不该发明的组件类或修饰类
 - 是否按 `spec_refs` 执行了文案、布局、交互、视觉规则
 - 原型是否位于任务级文件夹
@@ -69,16 +71,29 @@ description: 验收产品原型项目并输出 acceptance_report 的技能。用
 - `data-bg="page"` 时 navbar 是否保持灰底、`data-bg="surface"` 时 navbar 是否保持白底；若任务级样式额外覆盖导致不一致，直接判实现问题
 - 深色/图片背景场景是否使用 `.navbar--fixed-transparent` 修饰类(透明背景 + 文字反白 --text-inverse + page-body 加 padding-top: 56px 让位)
 - 短内容页面是否避免强制滚动条(检查 `.page-body` 是否误用 `min-height: 100vh` 与 navbar 高度叠加;内容应自然撑高,不写 min-height)
-- modal-overlay 是否有 max-width 约束(与 body max-width:768px 一致,宽屏居中;检查是否漏写 `width:100%; max-width:768px; margin-inline:auto`)
+- modal-overlay 是否挂载并限制在 `.phone-screen` 内，不能覆盖整个浏览器 viewport
 - navbar 中 `<button>` 元素是否被正确重置(无原生 border/background/padding 泄漏;依赖 colors_and_type.css 的全局 button 重置,不再需要 biz-plain-button 等内部重置类)
+
+### 单一预览外壳验收(必查)
+
+- 每个任务文件夹只能有一套 `.preview-shell` / `.phone-frame` / `.phone-screen`，且只能位于任务入口 `index.html`
+- `pages/*.html` 若存在，只能作为 fragment/source；不得包含 `.preview-shell` / `.phone-frame` / `.phone-screen`，也不得作为顶层浏览器跳转目标直接打开
+- `index.html` 指向 `pages/*.html` 的入口必须使用壳内加载标记（如 `data-route`、`data-screen-src`、`data-open-modal`）和 JS 处理；普通 `<a href="./pages/xxx.html">` 判失败
+- CSS 必须包含移动端 media query，使 `index.html` 同一个链接在手机端隐藏外壳视觉，内容铺满真实 viewport
+- 业务页面内容不得依赖外壳类表达布局、分组、状态或交互；外壳类只服务桌面预览
+- `.phone-status` 和 `.phone-indicator` 只允许作为最外层预览安全区；`.uikit-shell`、`.phone-body` 等 Showcase 内部内容容器不得进入任务产物
+- 若 `page_spec` 声明 `host_container + route_id`，`index.html` 必须来自固定 App 宿主模板，保留宿主 Tab、工作台、我的页、默认入口、UI 和基础交互；只允许按 `route_id` 增量更新目标入口、业务页链接和状态回填
+- 若宿主 App 被大面积删减、重画或替换成 AI 自创内容，归因到 `wego-ux`，`final_status` 不能为 `pass`
+- 若点击设置页、业务页、二级选择页后顶层浏览器离开 `index.html` 或出现铺满浏览器的新页面，归因到 `wego-ux`，`final_status` 不能为 `pass`
 
 ### 页面打开方式验收(必查)
 
 - `design_consumption_plan.page_presentation` 缺失时，若已有 surface 命中带 `presentation` 的 pagePattern，归因到 `wego-design`
-- `page_presentation.type = push` 时，检查入口是否为普通页面跳转或等价 `location.href`，不要求 overlay
-- `page_presentation.type = full-screen-modal` 时，必须检查入口页存在 `#modal-overlay.modal-overlay[hidden]`
+- `page_presentation.type = push` 时，检查入口是否为壳内 push：更新 `.phone-screen` 内 screen，可配合 `history.pushState`，但不能普通跳转到 `pages/*.html`
+- `page_presentation.type = full-screen-modal` 时，必须检查 `index.html` 的 `.phone-screen` 内存在 `#modal-overlay.modal-overlay[hidden]`
 - `page_presentation.type = full-screen-modal` 时，入口触发必须使用 `data-open-modal` 或等价 JS modal trigger；若主业务页只通过普通 `<a href>` push 打开，归因到 `wego-ux`
-- `page_presentation.type = full-screen-modal` 时，CSS 必须包含 `position: fixed`、`inset: 0`、`transform: translateY(100%)`、打开态 `translateY(0)` 或等价规则
+- `page_presentation.type = full-screen-modal` 时，CSS 必须体现壳内 overlay：`.phone-screen` 提供定位上下文，`.modal-overlay` 使用 `position: absolute; inset: 0` 或等价方式覆盖手机屏；若使用浏览器级 `position: fixed; inset: 0` 直接铺满 viewport，判失败
+- `page_presentation.type = full-screen-modal` 时，CSS 必须包含 `transform: translateY(100%)`、打开态 `translateY(0)` 或等价规则
 - `page_presentation.covers_tab_bar = true` 时，overlay z-index 必须高于 bottom-nav；若层级不足导致 Tab 仍可见或可点，归因到 `wego-ux`
 - `interaction_check` 必须记录 page presentation 验收结论；不一致时 `final_status` 不能为 `pass`
 
@@ -148,9 +163,10 @@ node scripts/validate-wego-design.mjs --scope=full
 - **组件消费决策类**：检查 component_mapping 是否标注了场景类型和判断条件；检查修饰类/尺寸/状态是否符合契约
 - **组件消费决策类**：若 design 已命中稳定场景，检查实现是否整体复用该场景，而不是继续拆出内嵌关联控件、父子结构或 helper 做二次实现
 - **无 UI Kit 页面构成类**：检查 `fallback` surface 是否引用并遵守 `fallbackPageBlueprints`；检查 `gap` 是否阻止交付
-- **UI Kit 到生产转换类**：检查生产页面是否残留演示外壳类；检查 section 是否语义化封装
+- **UI Kit 到生产转换类**：检查生产页面是否残留演示外壳类；检查 section 是否语义化封装；检查任务是否只有 `index.html` 保留单一预览外壳，后续内容是否都在 `.phone-screen` 内展示
 - **页面打开方式绑定类**：检查 `page_presentation.type` 与入口触发、overlay DOM、CSS 动画和覆盖层级是否一致
 - **原型交付标准类**：检查状态持久化是否实现；检查保存后回填和反馈闭环
+- **宿主模板路径绑定类**：检查带 `host_container + route_id` 的任务是否直接复制固定 App 宿主模板，并只按 `route_id` 增量更新入口、业务页链接和状态回填
 
 结果归因时，必须标注工作流环节归属：
 - 归因到 `wego-product` 时，问题在需求理解或场景判断

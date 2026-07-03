@@ -196,6 +196,7 @@ const ALLOWED_UIKIT_SHELL_CLASSES = new Set([
   'uikit-nowrap',
   'uikit-action-cell',
   'uikit-action',
+  'preview-shell',
   'phone-frame',
   'phone-screen',
   'phone-status',
@@ -210,16 +211,29 @@ const ALLOWED_UIKIT_SHELL_CLASSES = new Set([
 // 任务文件夹原型项目禁止使用的 UI Kit Showcase 外壳类
 const FORBIDDEN_PROTOTYPE_SHELL_CLASSES = new Set([
   'uikit-shell',
-  'phone-frame',
-  'phone-screen',
-  'phone-status',
   'phone-header',
   'phone-header-back',
   'phone-header-title',
   'phone-body',
+]);
+
+const PREVIEW_SHELL_CLASSES = new Set([
+  'preview-shell',
+  'phone-frame',
+  'phone-screen',
+  'phone-status',
   'phone-indicator',
   'phone-indicator-bar',
 ]);
+
+function hasResponsivePreviewShellRule(text) {
+  const startsResponsiveRule = /@media\s*\([^)]*max-width\s*:\s*(?:640|767)px[^)]*\)/i.test(text);
+  if (!startsResponsiveRule) return false;
+  return /@media[\s\S]*\.phone-frame[\s\S]*border\s*:\s*none/i.test(text)
+    && /@media[\s\S]*\.phone-frame[\s\S]*border-radius\s*:\s*0/i.test(text)
+    && /@media[\s\S]*\.phone-frame[\s\S]*box-shadow\s*:\s*none/i.test(text)
+    && /@media[\s\S]*\.phone-screen[\s\S]*border-radius\s*:\s*0/i.test(text);
+}
 
 // 原型项目 page.css 禁止引用的 safe-area Token（真机由宿主补齐，PC 浏览器 fallback 会留白）
 const FORBIDDEN_PROTOTYPE_SAFE_AREA_TOKENS = new Set([
@@ -535,6 +549,27 @@ function classNamesFromHtml(html) {
     }
   }
   return classes;
+}
+
+function parseHtmlAttrs(rawAttrs) {
+  const attrs = {};
+  const regex = /([:@a-zA-Z0-9_-]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+)))?/g;
+  let match;
+  while ((match = regex.exec(rawAttrs)) !== null) {
+    const name = match[1];
+    attrs[name] = match[2] ?? match[3] ?? match[4] ?? '';
+  }
+  return attrs;
+}
+
+function htmlStartTags(html, tagName) {
+  const tags = [];
+  const regex = new RegExp(`<${tagName}\\b([^>]*)>`, 'gi');
+  let match;
+  while ((match = regex.exec(html)) !== null) {
+    tags.push({ raw: match[0], attrs: parseHtmlAttrs(match[1] || '') });
+  }
+  return tags;
 }
 
 function classesFromCss(css) {
@@ -1041,6 +1076,12 @@ function checkUiKits(componentClassSet, options = {}) {
     if (/<svg[\s>]/i.test(html)) {
       add('debt', 'uikit.inline_svg', 'UI Kit 存在 inline SVG，后续应回到组件或随库资产', indexPath);
     }
+    const hasPreviewShell = /\b(?:uikit-shell|preview-shell|phone-frame|phone-screen)\b/.test(html);
+    if (hasPreviewShell && !hasResponsivePreviewShellRule(html)) {
+      add('error', 'uikit.preview_shell_responsive_missing',
+        'UI Kit 使用手机预览外壳时，必须包含移动端隐藏外壳视觉的 media query',
+        indexPath);
+    }
 
     const classes = classNamesFromHtml(html);
     const relevant = [...classes].filter(name => {
@@ -1387,6 +1428,8 @@ function checkPrototypeShellLeakage(context) {
   let scannedFiles = 0;
   for (const folder of taskFolders) {
     const files = listTaskFolderHtmlCss(folder);
+    let usesPreviewShell = false;
+    let hasResponsivePreviewCss = false;
     for (const file of files) {
       scannedFiles++;
       const ext = path.extname(file);
@@ -1405,21 +1448,112 @@ function checkPrototypeShellLeakage(context) {
       const shellHits = [...classes].filter(name => FORBIDDEN_PROTOTYPE_SHELL_CLASSES.has(name));
       if (shellHits.length > 0) {
         add('error', 'prototype.shell_leakage',
-          `任务文件夹原型误用 UI Kit Showcase 外壳类：${shellHits.join(', ')}。请改用 .codex/skills/wego-ux/templates/page-shell.html 标准外壳`,
+          `任务文件夹原型误用 UI Kit Showcase 内部模拟类：${shellHits.join(', ')}。仅允许 preview-shell/phone-frame/phone-screen 作为最外层预览外壳`,
+          file);
+      }
+      if ([...classes].some(name => PREVIEW_SHELL_CLASSES.has(name))) {
+        usesPreviewShell = true;
+      }
+      if (hasResponsivePreviewShellRule(content)) {
+        hasResponsivePreviewCss = true;
+      }
+
+      if (ext === '.css' && /\.modal-overlay\b[\s\S]*?\{[\s\S]*?position\s*:\s*fixed\s*;[\s\S]*?inset\s*:\s*0\s*;/.test(cssText)) {
+        add('error', 'prototype.modal_overlay.viewport_fixed',
+          '单一手机壳架构下，modal-overlay 必须限制在 .phone-screen 内；不要使用浏览器级 position: fixed; inset: 0',
           file);
       }
 
       const usedVars = extractUsedVars(cssText);
-      const tokenHits = [...usedVars].filter(v => FORBIDDEN_PROTOTYPE_SAFE_AREA_TOKENS.has(v));
+      const allowPreviewSafeArea = path.basename(file) === 'host-shell.css';
+      const tokenHits = allowPreviewSafeArea
+        ? []
+        : [...usedVars].filter(v => FORBIDDEN_PROTOTYPE_SAFE_AREA_TOKENS.has(v));
       if (tokenHits.length > 0) {
         add('error', 'prototype.safe_area_token_misuse',
           `任务文件夹原型引用了禁止的 safe-area Token：${tokenHits.join(', ')}。原型项目不处理安全区，真机由宿主补齐`,
           file);
       }
     }
+    if (usesPreviewShell && !hasResponsivePreviewCss) {
+      add('error', 'prototype.preview_shell_responsive_missing',
+        '任务文件夹使用手机预览外壳时，必须包含移动端隐藏外壳视觉的 media query',
+        folder);
+    }
   }
   report.metrics.prototypeScannedFiles = scannedFiles;
   report.metrics.prototypeTaskFolders = taskFolders.length;
+}
+
+function checkPrototypeSinglePreviewShellRouting(context) {
+  const taskFolders = context.effectiveScope === 'full'
+    ? getAllTaskFolders()
+    : getTaskFoldersFromChangedFiles(context.changedFiles);
+  if (taskFolders.length === 0) return;
+
+  for (const folder of taskFolders) {
+    const htmlFiles = listTaskFolderFiles(folder, new Set(['.html']));
+    const folderPath = path.join(repoRoot, folder);
+    const indexPath = path.join(folderPath, 'index.html');
+    const indexExists = fs.existsSync(indexPath);
+    const htmlWithPreviewShell = [];
+
+    for (const file of htmlFiles) {
+      const html = fs.readFileSync(file, 'utf8');
+      const classes = classNamesFromHtml(html);
+      const previewHits = [...classes].filter(name => PREVIEW_SHELL_CLASSES.has(name));
+      if (previewHits.length > 0) {
+        htmlWithPreviewShell.push(file);
+      }
+
+      if (file !== indexPath && previewHits.length > 0) {
+        add('error', 'prototype.preview_shell.non_index',
+          `单一手机壳架构下，只有 index.html 可以包含预览外壳类；当前页面包含：${previewHits.join(', ')}`,
+          file);
+      }
+    }
+
+    if (!indexExists) continue;
+
+    const indexHtml = fs.readFileSync(indexPath, 'utf8');
+    const indexClasses = classNamesFromHtml(indexHtml);
+    for (const requiredClass of ['preview-shell', 'phone-frame', 'phone-screen']) {
+      if (!indexClasses.has(requiredClass)) {
+        add('error', 'prototype.preview_shell.index_missing',
+          `index.html 必须包含唯一手机壳容器 .${requiredClass}`,
+          indexPath);
+      }
+    }
+
+    const nonIndexShellFiles = htmlWithPreviewShell.filter(file => file !== indexPath);
+    if (nonIndexShellFiles.length > 0) {
+      add('error', 'prototype.preview_shell.multiple',
+        `同一任务文件夹只能有 index.html 一套手机壳，其他含外壳页面：${nonIndexShellFiles.map(file => path.relative(folderPath, file)).join(', ')}`,
+        folder);
+    }
+
+    for (const tag of htmlStartTags(indexHtml, 'a')) {
+      const href = tag.attrs.href || '';
+      if (!href || href.startsWith('#') || href.startsWith('javascript:') || /^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(href)) {
+        continue;
+      }
+
+      const resolved = path.normalize(path.resolve(path.dirname(indexPath), href.split(/[?#]/)[0]));
+      const pointsToTaskPages = resolved.startsWith(path.join(folderPath, 'pages') + path.sep) && path.extname(resolved) === '.html';
+      if (!pointsToTaskPages) continue;
+
+      const hasShellRouteMarker = Boolean(
+        tag.attrs['data-route'] !== undefined ||
+        tag.attrs['data-screen-src'] !== undefined ||
+        tag.attrs['data-open-modal'] !== undefined
+      );
+      if (!hasShellRouteMarker) {
+        add('error', 'prototype.route.top_level_pages_link',
+          `index.html 指向 pages/*.html 的入口必须使用壳内加载标记(data-route/data-screen-src/data-open-modal)，不能普通跳转离开手机壳：${href}`,
+          indexPath);
+      }
+    }
+  }
 }
 
 function checkPrototypeHostShellUniqueness(context) {
@@ -1514,6 +1648,7 @@ function main() {
   checkPrototypeSurfaceDesigns(context);
   checkPrototypeJunkAndInternalCopy(context);
   checkPrototypeShellLeakage(context);
+  checkPrototypeSinglePreviewShellRouting(context);
   checkPrototypeHostShellUniqueness(context);
   checkMetadataVersionGate(context);
 

@@ -3,24 +3,64 @@
  * 规则:
  * - 全局元素重置已统一收口到 colors_and_type.css(*、html/body、button、a、img/svg、h1-h6/p、ul/ol、input/textarea/select、滚动条隐藏),此处不再重复
  * - 禁止引用 --safe-area-top / --safe-area-bottom-content(真机由宿主补齐,PC 浏览器 fallback 会留白)
- * - 禁止使用 .uikit-shell / .phone-frame / .phone-screen / .phone-status / .phone-body / .phone-indicator
+ * - preview-shell / phone-frame / phone-screen 是全局预览外壳:电脑端显示,移动端同链接隐藏
+ * - 禁止使用 .uikit-shell / .phone-status / .phone-body / .phone-indicator
  * - 模态层使用 position: fixed; inset: 0,不要用 position: absolute
  * - 颜色/间距/字号全部使用 Token,不硬编码 hex/rem
  * - 业务样式用业务前缀作用域限定,如 .{biz}-page__section
  * - navbar 默认 sticky 吸顶(已由 components.css 配置),此处不重复
  */
 
-/* ============ 页面容器宽度约束 ============ */
-/* 默认业务页最大宽度 768px,沉浸页可改为 none */
+/* ============ 全局预览外壳 ============ */
 body {
-  max-width: 768px;
-  margin-inline: auto;
+  background: var(--bg-page);
+}
+
+.preview-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  max-width: 1184px;
+  margin: 0 auto;
+  padding: var(--spacer-16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--bg-page);
+}
+
+.phone-frame {
+  width: 390px;
+  height: 780px;
+  border: 8px solid var(--bg-inverse);
+  border-radius: 40px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: var(--shadow-xl);
+  background: var(--bg-page);
+  flex-shrink: 0;
+}
+
+.phone-screen {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  border-radius: inherit;
+  background: var(--bg-page);
+  position: relative;
 }
 
 /* ============ 页面主体 ============ */
 /* 不写 min-height,让内容自然撑高,保障可以滚动显示即可;
    避免 navbar 高度 + min-height:100vh 叠加导致短内容页强制出现滚动条 */
 .page-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
   padding-bottom: var(--spacer-40, 40px);
 }
 
@@ -29,13 +69,41 @@ body {
   position: fixed;
   inset: 0;
   width: 100%;
-  max-width: 768px; /* 与 body max-width 一致,宽屏居中 */
+  max-width: 390px;
   margin-inline: auto;
   z-index: var(--z-overlay, 500);
   background: var(--bg-page);
   transform: translateY(100%);
   transition: transform var(--duration-normal) var(--ease-enter, var(--ease-standard));
   overflow-y: auto;
+}
+
+@media (max-width: 767px) {
+  .preview-shell {
+    min-height: 100vh;
+    min-height: 100dvh;
+    align-items: stretch;
+    padding: 0;
+    background: var(--bg-page);
+  }
+
+  .phone-frame {
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 900px;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .phone-screen {
+    border-radius: 0;
+  }
+
+  .modal-overlay {
+    max-width: none;
+  }
 }
 
 .modal-overlay--active {

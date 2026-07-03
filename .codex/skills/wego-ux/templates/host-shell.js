@@ -14,6 +14,13 @@
   const STORAGE_KEY = 'wego-host-shell-state';
   const panels = Array.from(document.querySelectorAll('[data-host-tab]'));
   const triggers = Array.from(document.querySelectorAll('[data-host-tab-trigger]'));
+  const triggerIconNames = {
+    dongtai: 'dongtai',
+    haoyou: 'haoyou',
+    workspace: 'gongzuotai',
+    xiaoxi: 'xiaoxi',
+    my: 'wode'
+  };
 
   function readState() {
     try {
@@ -28,6 +35,12 @@
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
   }
 
+  function iconSrcFor(img, iconName, active) {
+    const current = img.getAttribute('src') || './lib/icons/tab-dongtai.svg';
+    const prefix = current.slice(0, current.lastIndexOf('/') + 1);
+    return `${prefix}tab-${active ? 'active-' : ''}${iconName}.svg`;
+  }
+
   function setActiveTab(tab) {
     panels.forEach(panel => {
       const active = panel.dataset.hostTab === tab;
@@ -37,6 +50,11 @@
     triggers.forEach(trigger => {
       const active = trigger.dataset.hostTabTrigger === tab;
       trigger.classList.toggle('active', active);
+      const img = trigger.querySelector('[data-tab-icon]');
+      const iconName = img?.dataset.tabIcon || triggerIconNames[trigger.dataset.hostTabTrigger];
+      if (img && iconName) {
+        img.src = iconSrcFor(img, iconName, active);
+      }
     });
     const next = readState();
     next.activeTab = tab;

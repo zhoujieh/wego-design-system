@@ -53,14 +53,12 @@
         },
         "uikit": {
             "files": [
-                "ui_kits/app/index.html",
-                "ui_kits/app/quality-report.json",
                 "ui_kits/biz-rule-config/index.html",
                 "ui_kits/biz-rule-config/quality-report.json"
             ],
             "copyable": false,
-            "purpose": "移动端应用和业务规则配置组合 Showcase，用来理解页面结构和组件搭配",
-            "downstreamRule": "只参考页面结构和组件组合，不要直接复制 .uikit-shell、.phone-frame 或业务演示里的自定义 biz-* 样式作为通用组件。固定宿主模板由 `wego-ux/templates/host-shell.*` 维护，不由 UI Kit 直接下发。命中页面范式后，检查 `uikit-plan.json` 中对应 `pagePatterns[].compositionConstraints` 获取组件组合约束（如 radio 的 cell vs form 取舍）。"
+            "purpose": "业务规则配置等页面组合 Showcase，用来理解页面结构和组件搭配；App 宿主页已迁入 wego-ux/templates/host-shell.*，不是 UI Kit",
+            "downstreamRule": "只参考页面结构和组件组合，不要直接复制 .uikit-shell、.phone-frame 或业务演示里的自定义 biz-* 样式作为通用组件。固定宿主 App 模板由 `wego-ux/templates/host-shell.*` 维护并在首次生成任务时直接复制，不由 UI Kit 下发。命中页面范式后，检查 `uikit-plan.json` 中对应 `pagePatterns[].compositionConstraints` 获取组件组合约束（如 radio 的 cell vs form 取舍）。"
         }
     },
     "iconUsage": {
@@ -128,8 +126,8 @@
                 "components/{slug}.json",
                 "preview/component-{slug}.html",
                 "uikit-plan.json",
-                "ui_kits/*.html",
-                "specs/布局与间距规范.md"
+                "specs/布局与间距规范.md",
+                "ui_kits/biz-rule-config/index.html"
             ],
             "copyFiles": [
                 "colors_and_type.css",
@@ -138,7 +136,7 @@
                 "assets/fonts/",
                 "assets/icons/"
             ],
-            "consume": "UI Kit 只作结构参考（看组件如何组合），不复制外壳；固定宿主模板由 wego-ux 在新任务首次生成时套壳，设计系统消费阶段不再把 app 视为宿主页面范式。先在 uikit-plan.json 中判断业务页所属范式，再选最贴近的 UI Kit 蓝本；设置、权限、规则、配置类页面优先参考 ui_kits/biz-rule-config/index.html；可以继承其页面模式、section 节奏、摘要结构和页面级主操作收口方式，但仍要用真实页面尺寸重写外层布局；从预览页复制组件 markup，使用契约中的 domAnatomy 结构；先把页面骨架和信息密度对齐到蓝本，再补功能行为。禁止事项：不复制 .uikit-shell/.phone-frame/.phone-screen 作为页面外壳；不发明组件类（如 .profile-header）；不发明组件子元素类（如 .profile-header__name）；不发明组件修饰类（如 .cell__action-text--accent）；不使用 inline style 控制颜色/间距；不硬编码 hex/rem 值。",
+            "consume": "UI Kit 只作业务页面结构参考（看组件如何组合），不复制外壳；App 宿主页不是 UI Kit，固定宿主模板由 wego-ux 在新任务首次生成时直接复制 host-shell.*，所有宿主内容 UI 和交互以模板为准。先检查 page_spec 是否声明 host_container + route_id：若有，wego-design 只输出宿主入口/回填依据，wego-ux 只增量插入 route_id 对应入口、业务页链接和状态回填，不重画宿主 Tab、工作台、我的页等现成内容。随后在 uikit-plan.json 中判断业务页所属范式；设置、权限、规则、配置类页面优先参考 ui_kits/biz-rule-config/index.html。所有 UI Kit 和生成任务都使用同链接预览外壳规则：电脑端显示手机壳，移动端隐藏外壳视觉；业务页面不得依赖外壳类实现内容结构。禁止事项：不把 app 当 UI Kit；不重画固定宿主模板；不把 .uikit-shell/.phone-frame/.phone-screen 当业务结构；不发明组件类（如 .profile-header）；不发明组件子元素类（如 .profile-header__name）；不发明组件修饰类（如 .cell__action-text--accent）；不使用 inline style 控制颜色/间距；不硬编码 hex/rem 值。",
             "forbidden": [
                 "复制 UI Kit 外壳作为页面容器",
                 "发明未在 components/index.json 注册的组件类",
@@ -154,12 +152,13 @@
                 "基础重置样式（box-sizing: border-box; margin: 0; padding: 0）"
             ],
             "recommendedWorkflow": [
-                "先检查 page_spec 是否声明 host_container + route_id；若有，由 wego-ux 首次套固定宿主模板",
+                "先检查 page_spec 是否声明 host_container + route_id；若有，由 wego-ux 首次直接复制 host-shell.* 作为任务基地",
+                "宿主任务只按 route_id 增量插入入口、目标页链接、状态回填和必要交互，不重画宿主 App 内容",
                 "再匹配业务页面范式，确定最优 UI Kit 蓝本",
                 "先对齐导航、摘要、section 分组、主操作位置和信息密度",
                 "再补字段、状态、弹层、排序、保存校验等功能逻辑",
-                "把页面落进真实项目结构，而不是停留在单页产物",
-                "复核是否误把“不要复制外壳”理解成“不要贴近最佳范式”"
+                "把页面落进真实项目结构，并保留电脑端显示、移动端隐藏的预览外壳",
+                "复核是否误把“外壳只用于预览”理解成“删除外壳”或“依赖外壳做业务布局”"
             ],
             "compositionConstraintsRule": "命中 pagePattern 后检查对应 `compositionConstraints` 字段，遵守其中的 trigger/use/avoid/allowWhen 约束。当前已定义的约束见 `uikit-plan.json` 中 biz-rule-config 的 compositionConstraints。"
         },
@@ -171,14 +170,25 @@
         }
     },
     "uikitConstraints": {
-        "kitType": "app",
-        "showcaseOnly": true,
+        "kitType": "business-page-showcase",
+        "appHostTemplateSource": "../wego-ux/templates/host-shell.*",
+        "previewShellPolicy": {
+            "appliesTo": [
+                "ui_kits/*/index.html",
+                "../wego-ux/templates/*.html",
+                "后续生成的任务级原型"
+            ],
+            "desktop": "显示手机预览外壳",
+            "mobile": "同链接隐藏手机外壳视觉并铺满真实 viewport",
+            "boundary": "外壳类只服务预览，不作为业务页面结构或组件契约"
+        },
         "outerShells": [
             ".uikit-shell",
+            ".preview-shell",
             ".phone-frame",
             ".phone-screen"
         ],
-        "warningForDownstream": "UI Kit 是展示样品，不是真实页面模板；真实项目应保留组件层 class，重写外层页面结构。"
+        "warningForDownstream": "UI Kit 是展示样品，不是真实宿主模板；App 宿主模板直接从 wego-ux/templates/host-shell.* 复制。"
     },
     "recommendedReadOrder": [
         "SKILL.md",
@@ -189,8 +199,7 @@
         "components/index.json",
         "components/{slug}.json",
         "preview/component-{slug}.html",
-        "specs/*.md",
-        "ui_kits/app/index.html"
+        "specs/*.md"
     ],
     "defaultDeliveryMode": "static-multi-page",
     "deliveryGuardrails": [
@@ -222,7 +231,6 @@
     "embeddedComponents": [],
     "unpublishedContracts": [],
     "uiKits": [
-        "app",
         "biz-rule-config"
     ],
     "componentContractSchemaVersion": 3,
@@ -234,67 +242,156 @@
                 "id": "component-consumption-decision",
                 "name": "组件消费决策",
                 "primaryWorkflowStage": "wego-design",
-                "secondaryWorkflowStages": ["wego-ux"],
-                "covers": ["选哪个组件", "用哪个修饰类", "什么尺寸", "什么状态", "组件职责边界"],
+                "secondaryWorkflowStages": [
+                    "wego-ux"
+                ],
+                "covers": [
+                    "选哪个组件",
+                    "用哪个修饰类",
+                    "什么尺寸",
+                    "什么状态",
+                    "组件职责边界"
+                ],
                 "judgmentLogic": "决策必须引用组件契约的 variantDimensions + 宿主场景说明，不能凭默认或惯例；当两个组件的 category 不同时，职责互斥，不互相嵌套。若组件契约已经提供稳定场景，消费单位优先是该场景，不再把宿主组件与内嵌关联组件拆成多个局部判断；场景一旦命中，内嵌关联控件的尺寸、对齐、层级、补充结构与冗余说明默认随场景完整消费。若业务需求确实要偏离场景内部定义，必须回到设计系统迭代，不允许在任务实现中临时改写。",
-                "landingPriority": ["components/{slug}.json 的 variantDimensions/usageHints", "library-consumption.json 的边界字段", "uikit-plan.json 的 compositionConstraints"],
-                "secondaryLanding": ["wego-ux/SKILL.md 的生成规则引用"],
+                "landingPriority": [
+                    "components/{slug}.json 的 variantDimensions/usageHints",
+                    "library-consumption.json 的边界字段",
+                    "uikit-plan.json 的 compositionConstraints"
+                ],
+                "secondaryLanding": [
+                    "wego-ux/SKILL.md 的生成规则引用"
+                ],
                 "verificationStandard": "把规则里的具体组件名替换成'组件A/组件B'后，逻辑是否仍然成立"
             },
             {
                 "id": "no-uikit-page-composition",
                 "name": "无 UI Kit 页面构成",
                 "primaryWorkflowStage": "wego-design",
-                "secondaryWorkflowStages": ["wego-ux", "wego-tests"],
-                "covers": ["未命中 pagePattern 的页面", "宿主页入口", "通用任务页", "二级选择页", "设计缺口拦截"],
+                "secondaryWorkflowStages": [
+                    "wego-ux",
+                    "wego-tests"
+                ],
+                "covers": [
+                    "未命中 pagePattern 的页面",
+                    "宿主页入口",
+                    "通用任务页",
+                    "二级选择页",
+                    "设计缺口拦截"
+                ],
                 "judgmentLogic": "当 page_spec.page_surfaces[] 中的页面角色或结构无法精确命中现有 pagePattern/UI Kit，但仍能由已注册组件和 specs 安全组成时，输出 match_status=fallback 并引用 uikit-plan.json.fallbackPageBlueprints；若 fallback blueprint 也无法覆盖，输出 match_status=gap 并阻止进入 wego-ux",
-                "landingPriority": ["uikit-plan.json 的 fallbackPageBlueprints", "wego-design/SKILL.md 的 surface_designs 输出规则"],
-                "secondaryLanding": ["wego-ux/SKILL.md 的 surface_designs 执行规则", "wego-tests/SKILL.md 的 surface_designs 验收规则"],
+                "landingPriority": [
+                    "uikit-plan.json 的 fallbackPageBlueprints",
+                    "wego-design/SKILL.md 的 surface_designs 输出规则"
+                ],
+                "secondaryLanding": [
+                    "wego-ux/SKILL.md 的 surface_designs 执行规则",
+                    "wego-tests/SKILL.md 的 surface_designs 验收规则"
+                ],
                 "verificationStandard": "把具体页面名称替换成'页面A'后，是否仍能按页面角色、结构特征和宿主特征判断 exact/near/fallback/gap？"
             },
             {
                 "id": "uikit-to-production-transform",
                 "name": "UI Kit 到生产转换",
                 "primaryWorkflowStage": "wego-ux",
-                "secondaryWorkflowStages": ["wego-design"],
-                "covers": ["演示外壳不复制", "节奏/组合/收口可借鉴", "生产结构语义化封装", "演示样式不当通用组件"],
-                "judgmentLogic": "UI Kit 的 .uikit-shell/.phone-frame/.phone-screen/biz-*/uikit-section-* 是 Showcase 演示层；生产页面必须语义化封装为 <section>；可借鉴的是页面范式、组合节奏、收口方式",
-                "landingPriority": ["wego-ux/SKILL.md 的生成规则", "wego-design/SKILL.md 的消费规则"],
-                "secondaryLanding": ["uikit-plan.json 的 pagePatterns 说明"],
-                "verificationStandard": "生产页面是否仍残留演示外壳类？是否用语义化标签封装了分组？"
+                "secondaryWorkflowStages": [
+                    "wego-design"
+                ],
+                "covers": [
+                    "预览外壳仅用于桌面验收",
+                    "移动端同链接隐藏外壳",
+                    "节奏/组合/收口可借鉴",
+                    "生产结构语义化封装",
+                    "演示样式不当通用组件"
+                ],
+                "judgmentLogic": "UI Kit 的 .uikit-shell/.phone-frame/.phone-screen/biz-*/uikit-section-* 是预览或 Showcase 演示层；电脑端可显示手机外壳，移动端必须隐藏外壳视觉并铺满真实 viewport；业务页面不得依赖外壳类实现内容结构，生产内容必须语义化封装为 <section>；可借鉴的是页面范式、组合节奏、收口方式。",
+                "landingPriority": [
+                    "wego-ux/SKILL.md 的生成规则",
+                    "wego-design/SKILL.md 的消费规则"
+                ],
+                "secondaryLanding": [
+                    "uikit-plan.json 的 pagePatterns 说明"
+                ],
+                "verificationStandard": "同一个链接在电脑端是否显示手机外壳、移动端是否隐藏外壳？业务内容是否仍能脱离外壳类成立？"
             },
             {
                 "id": "page-presentation-binding",
                 "name": "页面打开方式绑定",
                 "primaryWorkflowStage": "wego-ux",
-                "secondaryWorkflowStages": ["wego-design", "wego-tests"],
-                "covers": ["pagePattern.presentation", "page_presentation", "push/full-screen-modal 分派", "入口触发方式", "覆盖 Tab"],
+                "secondaryWorkflowStages": [
+                    "wego-design",
+                    "wego-tests"
+                ],
+                "covers": [
+                    "pagePattern.presentation",
+                    "page_presentation",
+                    "push/full-screen-modal 分派",
+                    "入口触发方式",
+                    "覆盖 Tab"
+                ],
                 "judgmentLogic": "只要 surface 命中带 presentation 的 pagePattern，wego-design 必须把 presentation、transition、dismissAction、overlayLevel、coversTabBar 映射为可追溯的 page_presentation；wego-ux 必须按 page_presentation.type 分派页面打开方式，不得把 full-screen-modal 退化为普通 push；wego-tests 必须检查实现与 page_presentation.type 一致。",
-                "landingPriority": ["wego-ux/SKILL.md 的页面打开方式规则", "wego-design/SKILL.md 的 page_presentation 输出规则"],
-                "secondaryLanding": ["wego-tests/SKILL.md 的 interaction_check 验收规则", "uikit-plan.json 的 pagePatterns.presentation 字段"],
+                "landingPriority": [
+                    "wego-ux/SKILL.md 的页面打开方式规则",
+                    "wego-design/SKILL.md 的 page_presentation 输出规则"
+                ],
+                "secondaryLanding": [
+                    "wego-tests/SKILL.md 的 interaction_check 验收规则",
+                    "uikit-plan.json 的 pagePatterns.presentation 字段"
+                ],
                 "verificationStandard": "把具体页面名称替换成'页面A'后，是否仍能按命中的 pagePattern.presentation 判断应使用 push 还是 full-screen-modal，并在实现中看到对应入口触发、DOM 容器、动画和覆盖层级？"
             },
             {
                 "id": "prototype-fidelity-standard",
                 "name": "原型交付标准",
                 "primaryWorkflowStage": "wego-ux",
-                "secondaryWorkflowStages": ["wego-tests"],
-                "covers": ["任务文件夹命名", "项目结构", "状态持久化", "状态回填", "宿主页与模态页状态同步", "保存反馈闭环", "真实数据转化"],
+                "secondaryWorkflowStages": [
+                    "wego-tests"
+                ],
+                "covers": [
+                    "任务文件夹命名",
+                    "项目结构",
+                    "状态持久化",
+                    "状态回填",
+                    "宿主页与模态页状态同步",
+                    "保存反馈闭环",
+                    "真实数据转化"
+                ],
                 "judgmentLogic": "新任务文件夹使用中文业务语义命名，已有历史目录继续复用；交互原型不是一次性展示，必须实现 localStorage 状态持久化；打开时回填已保存值；保存后有明确视觉反馈(toast+状态更新+关闭)；宿主页状态跟随模态保存结果",
-                "landingPriority": ["wego-ux/SKILL.md 的生成规则"],
-                "secondaryLanding": ["wego-product/SKILL.md 的落盘规则", "wego-tests/SKILL.md 的验收项", "acceptance_report 的 interaction_check", "acceptance_report 的 prototype_folder_check"],
+                "landingPriority": [
+                    "wego-ux/SKILL.md 的生成规则"
+                ],
+                "secondaryLanding": [
+                    "wego-product/SKILL.md 的落盘规则",
+                    "wego-tests/SKILL.md 的验收项",
+                    "acceptance_report 的 interaction_check",
+                    "acceptance_report 的 prototype_folder_check"
+                ],
                 "verificationStandard": "新任务是否使用中文业务语义文件夹？已有历史目录是否复用而非重命名？保存后关闭模态，再次打开是否显示已保存的值？刷新页面后状态是否保留？"
             },
             {
                 "id": "host-shell-route-binding",
                 "name": "宿主模板路径绑定",
                 "primaryWorkflowStage": "wego-ux",
-                "secondaryWorkflowStages": ["wego-product", "wego-tests"],
-                "covers": ["固定宿主模板首次套壳", "host_container 路径表达", "route_id 稳定复用", "同任务迭代不重复套壳"],
-                "judgmentLogic": "当 page_spec 声明 host_container + route_id 时，任务属于固定宿主模板挂载场景。wego-product 负责输出结构化路径和稳定 route_id，wego-ux 只在新任务首次创建宿主壳，后续迭代按 route_id 定位旧入口增量更新，不重复初始化宿主模板。",
-                "landingPriority": ["wego-product/SKILL.md 的 page_spec 字段定义", "wego-ux/SKILL.md 的固定宿主模板规则", "wego-ux/templates/host-shell.*"],
-                "secondaryLanding": ["wego-tests/SKILL.md 的宿主路径验收规则"],
-                "verificationStandard": "同一路径任务二次迭代时，是否仍复用同一个宿主页和入口，而不是新增第二套宿主壳或重复插入入口？"
+                "secondaryWorkflowStages": [
+                    "wego-product",
+                    "wego-tests"
+                ],
+                "covers": [
+                    "固定宿主模板首次复制",
+                    "host_container 路径表达",
+                    "route_id 稳定复用",
+                    "同任务迭代不重复套壳",
+                    "禁止重画宿主 App"
+                ],
+                "judgmentLogic": "当 page_spec 声明 host_container + route_id 时，任务属于固定宿主模板挂载场景。wego-product 负责输出结构化路径和稳定 route_id；wego-design 只输出宿主入口/回填依据；wego-ux 在新任务首次生成时必须直接复制 wego-ux/templates/host-shell.* 作为完整 App 基地，保留模板现成 UI 与交互，只按 route_id 增量插入入口、业务页链接、状态回填和必要交互；后续迭代按 route_id 定位旧入口增量更新，不重复初始化宿主模板，不重画宿主 Tab、工作台、我的页等现成内容。",
+                "landingPriority": [
+                    "wego-ux/SKILL.md 的固定宿主模板规则",
+                    "wego-ux/templates/host-shell.*",
+                    "wego-product/SKILL.md 的 page_spec 字段定义"
+                ],
+                "secondaryLanding": [
+                    "wego-tests/SKILL.md 的宿主路径验收规则"
+                ],
+                "verificationStandard": "新任务首次生成时 index.html 是否来自 host-shell.*，并保留宿主 App 现成 UI/交互？同一路径任务二次迭代时是否只更新 route_id 对应入口和业务页，而不是新增第二套宿主壳或重画宿主内容？"
             }
         ],
         "workflowStageDefinitions": {

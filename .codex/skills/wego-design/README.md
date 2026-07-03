@@ -40,8 +40,6 @@
   消费读取顺序与复制边界
 - `uikit-plan.json`
   UI Kit、页面范式、固定槽位与蓝图
-- `ui_kits/app/`
-  应用级 Showcase
 - `ui_kits/biz-rule-config/`
   业务规则配置页 Showcase
 - `specs/*.md`
@@ -71,8 +69,6 @@
 
 ## 当前 UI Kit
 
-- `app`
-  用于观察移动端应用中的导航、内容和组件组合；不再承担固定宿主模板职责
 - `biz-rule-config`
   用于观察业务规则配置 / 业务数据编辑页的页面范式
 
@@ -92,7 +88,8 @@
 - 再按命中的组件去读 `components/*.json` 和 `preview/*.html`
 - 文案、布局、交互、视觉规则只引用 `specs/*.md`
 - UI Kit 只看结构和节奏，不复制 Showcase 外壳
-- 固定宿主模板属于 `wego-ux` 生成能力，不属于 `wego-design` 页面范式
+- 固定宿主 App 模板属于 `wego-ux/templates/host-shell.*`，不属于 `wego-design` UI Kit 或页面范式
+- 手机外壳是全局预览能力：电脑端显示，移动端同链接隐藏；业务内容不能依赖外壳类
 
 ## 原型交接
 

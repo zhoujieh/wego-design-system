@@ -4,7 +4,8 @@
 
   使用规则:
   - 这是真实生产页面骨架,不是 UI Kit Showcase 外壳
-  - 禁止复制 .uikit-shell / .phone-frame / .phone-screen / .phone-status / .phone-body / .phone-indicator
+  - preview-shell / phone-frame / phone-screen 是全局预览外壳:电脑端显示,移动端同链接隐藏
+  - 禁止复制 .uikit-shell / .phone-status / .phone-body / .phone-indicator
   - 全局元素重置已统一收口到 colors_and_type.css(*、html/body、button、a、img/svg、h1-h6/p、ul/ol、input/textarea/select、滚动条隐藏),page.css 不再重复
   - 禁止在 page.css 中引用 --safe-area-top 或 --safe-area-bottom-content(真机由宿主补齐)
   - 模态层必须使用 position: fixed; inset: 0,不要用 position: absolute
@@ -27,6 +28,9 @@
   <link rel="stylesheet" href="./css/page.css" />
 </head>
 <body data-bg="page">
+  <div class="preview-shell">
+    <div class="phone-frame">
+      <div class="phone-screen">
   <!-- 顶部导航栏:按 design_consumption_plan.navigation_pattern 选择 navbar 变体 -->
   <header data-component="navbar" class="navbar">
     <div class="navbar__body navbar__body--spaced">
@@ -53,5 +57,8 @@
 
   <!-- 全屏模态层容器(full-screen-modal 范式时预置;push 范式可删除) -->
   <div id="modal-overlay" class="modal-overlay" hidden></div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

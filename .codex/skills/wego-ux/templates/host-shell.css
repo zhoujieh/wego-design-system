@@ -10,7 +10,66 @@ body[data-host-shell="true"] {
   background: var(--bg-page);
 }
 
+.preview-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  max-width: 1184px;
+  margin: 0 auto;
+  padding: var(--spacer-16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--bg-page);
+}
+
+.phone-frame {
+  width: 390px;
+  height: 780px;
+  border: 8px solid var(--bg-inverse);
+  border-radius: 40px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: var(--shadow-xl);
+  background: var(--bg-page);
+  flex-shrink: 0;
+}
+
+.phone-screen {
+  --safe-area-top: 44px;
+  --safe-area-bottom: 34px;
+  --safe-area-bottom-content: 74px;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  border-radius: inherit;
+  background: var(--bg-page);
+  position: relative;
+}
+
+.phone-status {
+  flex-shrink: 0;
+  height: var(--safe-area-top);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spacer-16);
+  background: transparent;
+  box-sizing: border-box;
+  font-size: var(--body-sm-font-size);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-default);
+  pointer-events: none;
+}
+
 .host-shell-page {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
   padding: var(--spacer-16) var(--spacer-16) calc(var(--spacer-40) + 88px);
   display: flex;
   flex-direction: column;
@@ -173,11 +232,64 @@ body[data-host-shell="true"] {
 }
 
 .bottom-nav {
-  position: sticky;
-  bottom: 0;
+  flex-shrink: 0;
+  padding-bottom: var(--safe-area-bottom);
+  z-index: var(--z-sticky);
+}
+
+.phone-indicator {
+  position: absolute;
   left: 0;
   right: 0;
+  bottom: 0;
+  height: var(--safe-area-bottom);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
   z-index: var(--z-sticky);
+}
+
+.phone-indicator-bar {
+  width: 134px;
+  height: 5px;
+  background: var(--bg-inverse);
+  border-radius: var(--radius-full);
+  opacity: 0.2;
+}
+
+@media (max-width: 767px) {
+  .preview-shell {
+    min-height: 100vh;
+    min-height: 100dvh;
+    align-items: stretch;
+    padding: 0;
+    background: var(--bg-page);
+  }
+
+  .phone-frame {
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 900px;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .phone-screen {
+    border-radius: 0;
+  }
+
+  .phone-status,
+  .phone-indicator {
+    display: none;
+  }
+
+  .bottom-nav {
+    padding-bottom: 0;
+  }
 }
 
 @media (max-width: 375px) {
