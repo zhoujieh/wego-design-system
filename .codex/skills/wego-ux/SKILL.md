@@ -93,6 +93,20 @@ task-folder/
 7. 每个 HTML 页面通过 `<link>` 标签引用 `lib/` 下的 CSS 文件
 8. 页面交互用内联 `<script>` 或 `js/app.js` 实现，直接操作 DOM
 
+### 场景类型执行（必读）
+
+生成原型时，必须读取 `library-consumption.json` 的 `scenarioTypeRegistry`，按场景类型执行对应规则。本技能是以下场景类型的主要环节（primaryWorkflowStage=wego-ux）：
+
+- **组件消费决策类**（次要环节）：按 `design_consumption_plan.component_mapping` 中标注的场景类型执行，不临时判断修饰类/尺寸/状态
+- **UI Kit 到生产转换类**（主要环节）：演示外壳不复制，生产结构语义化封装为 `<section>`，可借鉴节奏/组合/收口方式
+- **原型交付标准类**（主要环节）：实现 localStorage 状态持久化、打开时回填、保存后反馈闭环、宿主页状态同步
+
+禁止：
+- 不读取 scenarioTypeRegistry 直接生成
+- 复制 UI Kit 演示外壳类到生产页面
+- 交互原型不实现状态持久化
+- 把 ux 类规则回流到 wego-design/SKILL.md（应回流到 wego-ux/SKILL.md 或 templates/）
+
 ## 输出要求
 
 最终输出的是"产品原型项目"，不是说明文档。

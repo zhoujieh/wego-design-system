@@ -224,5 +224,50 @@
         "biz-rule-config"
     ],
     "componentContractSchemaVersion": 3,
-    "componentContractReadRule": "components/{slug}.json 统一使用 schemaVersion 3；读取时依次关注 semanticTypeCandidates、variantDimensions、usageHints、doNotInvent、tokensConsumed、provenance。"
+    "componentContractReadRule": "components/{slug}.json 统一使用 schemaVersion 3；读取时依次关注 semanticTypeCandidates、variantDimensions、usageHints、doNotInvent、tokensConsumed、provenance。",
+    "scenarioTypeRegistry": {
+        "description": "通用场景类型注册表。所有经验沉淀必须先归入一个场景类型并标注工作流环节，再按四段式落地。新类型需经通用化验证。",
+        "types": [
+            {
+                "id": "component-consumption-decision",
+                "name": "组件消费决策",
+                "primaryWorkflowStage": "wego-design",
+                "secondaryWorkflowStages": ["wego-ux"],
+                "covers": ["选哪个组件", "用哪个修饰类", "什么尺寸", "什么状态", "组件职责边界"],
+                "judgmentLogic": "决策必须引用组件契约的 variantDimensions + 宿主场景说明，不能凭默认或惯例；当两个组件的 category 不同时，职责互斥，不互相嵌套",
+                "landingPriority": ["components/{slug}.json 的 variantDimensions/usageHints", "library-consumption.json 的边界字段", "uikit-plan.json 的 compositionConstraints"],
+                "secondaryLanding": ["wego-ux/SKILL.md 的生成规则引用"],
+                "verificationStandard": "把规则里的具体组件名替换成'组件A/组件B'后，逻辑是否仍然成立"
+            },
+            {
+                "id": "uikit-to-production-transform",
+                "name": "UI Kit 到生产转换",
+                "primaryWorkflowStage": "wego-ux",
+                "secondaryWorkflowStages": ["wego-design"],
+                "covers": ["演示外壳不复制", "节奏/组合/收口可借鉴", "生产结构语义化封装", "演示样式不当通用组件"],
+                "judgmentLogic": "UI Kit 的 .uikit-shell/.phone-frame/.phone-screen/biz-*/uikit-section-* 是 Showcase 演示层；生产页面必须语义化封装为 <section>；可借鉴的是页面范式、组合节奏、收口方式",
+                "landingPriority": ["wego-ux/SKILL.md 的生成规则", "wego-design/SKILL.md 的消费规则"],
+                "secondaryLanding": ["uikit-plan.json 的 pagePatterns 说明"],
+                "verificationStandard": "生产页面是否仍残留演示外壳类？是否用语义化标签封装了分组？"
+            },
+            {
+                "id": "prototype-fidelity-standard",
+                "name": "原型交付标准",
+                "primaryWorkflowStage": "wego-ux",
+                "secondaryWorkflowStages": ["wego-tests"],
+                "covers": ["状态持久化", "状态回填", "宿主页与模态页状态同步", "保存反馈闭环", "真实数据转化"],
+                "judgmentLogic": "交互原型不是一次性展示，必须实现 localStorage 状态持久化；打开时回填已保存值；保存后有明确视觉反馈(toast+状态更新+关闭)；宿主页状态跟随模态保存结果",
+                "landingPriority": ["wego-ux/SKILL.md 的生成规则"],
+                "secondaryLanding": ["wego-tests/SKILL.md 的验收项", "acceptance_report 的 interaction_check"],
+                "verificationStandard": "保存后关闭模态，再次打开是否显示已保存的值？刷新页面后状态是否保留？"
+            }
+        ],
+        "workflowStageDefinitions": {
+            "wego-product": "需求理解、任务分类、场景判断、信息块拆解；经验回流到 wego-product 技能文档或 page_spec 字段定义",
+            "wego-design": "设计系统消费、组件映射、组合约束决策；经验回流到 wego-design 技能文档、消费契约和组合约束文件",
+            "wego-ux": "原型生成、结构封装、交互实现、状态持久化；经验回流到 wego-ux 技能文档或模板目录",
+            "wego-tests": "验收项定义、归因规则、风险记录；经验回流到 wego-tests 技能文档或验收报告字段定义"
+        },
+        "rule": "新增经验沉淀时，必须先标注工作流环节归属(primaryWorkflowStage)，再匹配 scenarioTypeRegistry 中的类型；若无匹配类型，先新增类型再沉淀规则。已沉淀规则必须通过 `.codex/skills/wego-uxsystem-iterate/references/workflow-iteration.md` 中的通用化验证清单。"
+    }
 }

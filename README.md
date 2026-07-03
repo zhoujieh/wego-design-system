@@ -34,7 +34,7 @@
 - `.codex/skills/wego-design/`：设计系统本体与消费技能
 - `.codex/skills/wego-ux/`：原型项目输出技能
 - `.codex/skills/wego-tests/`：验收技能
-- `.codex/skills/iterate-component/`：组件迭代守门技能
+- `.codex/skills/wego-uxsystem-iterate/`：项目级别迭代技能
 - `docs/`：计划文档、历史审查文档、参考资料
 - `scripts/validate-wego-design.mjs`：当前设计系统守门脚本
 
@@ -63,7 +63,7 @@
 
 - 根规则：[AGENTS.md](AGENTS.md)
 - 设计系统技能：[.codex/skills/wego-design/SKILL.md](.codex/skills/wego-design/SKILL.md)
-- 组件迭代技能：[.codex/skills/iterate-component/SKILL.md](.codex/skills/iterate-component/SKILL.md)
+- 项目级别迭代技能：[.codex/skills/wego-uxsystem-iterate/SKILL.md](.codex/skills/wego-uxsystem-iterate/SKILL.md)
 - 闭环计划：[docs/wego-local-skills-closed-loop-plan.md](docs/wego-local-skills-closed-loop-plan.md)
 
 ## 验证

@@ -259,3 +259,60 @@
 - 是否清理了已取消场景的旧文案、旧 class、旧契约字段和旧消费说明
 - 回复里是否明确写出“改了什么、验证了什么、剩余风险”
 - 如果没有真实剩余风险，是否明确写“无明显剩余风险”，而不是编造模板化风险
+
+## 工作流迭代（经验沉淀/规则补充/流程优化）
+
+适用于 wego-uxsystem-iterate 的“工作流迭代模式”。完整规则见 `workflow-iteration.md`。
+
+### 经验沉淀（新增规则）
+
+必看：
+- `.codex/skills/wego-uxsystem-iterate/references/workflow-iteration.md`（经验沉淀通用化原则）
+- `.codex/skills/wego-design/library-consumption.json` 的 `scenarioTypeRegistry`
+
+必改（按环节归属）：
+- product 类 → `.codex/skills/wego-product/SKILL.md`
+- design 类 → `.codex/skills/wego-design/SKILL.md` 或 `library-consumption.json` 或 `uikit-plan.json` 或 `components/{slug}.json`
+- ux 类 → `.codex/skills/wego-ux/SKILL.md`
+- tests 类 → `.codex/skills/wego-tests/SKILL.md`
+
+按需改：
+- `AGENTS.md`（仅当规则升级为仓库级硬约束时，回流到“仓库级约束”章节）
+
+必做：
+- 通过 workflow-iteration.md 的通用化验证清单
+- 若涉及设计系统本体（library-consumption.json / uikit-plan.json / components/*.json），递增 `metadata.json.version`
+
+### 场景类型注册（新增类型）
+
+必看：
+- `.codex/skills/wego-uxsystem-iterate/references/workflow-iteration.md`（经验沉淀通用化原则）
+- `.codex/skills/wego-design/library-consumption.json` 的 `scenarioTypeRegistry`
+
+必改：
+- `.codex/skills/wego-design/library-consumption.json`（新增类型到 `scenarioTypeRegistry.types[]`）
+
+按需改：
+- 对应工作流环节的 SKILL.md（补执行引用）
+
+必做：
+- 新类型必须标注 primaryWorkflowStage
+- 新类型必须通过通用化验证清单
+- 递增 `metadata.json.version`
+
+### 工作流环节规则调整（改 SKILL.md）
+
+必看：
+- 目标环节的 SKILL.md
+- `AGENTS.md`（确认是否与仓库级硬约束冲突）
+
+必改：
+- 目标环节的 SKILL.md
+
+按需改：
+- `AGENTS.md`（仅当规则升级为仓库级硬约束时）
+- 下游环节的 SKILL.md（若规则跨环节）
+
+必做：
+- 确认规则不与已有契约/计划文件重复
+- 若涉及设计系统本体，递增 `metadata.json.version`

@@ -15,7 +15,7 @@
 3. `.codex/skills/wego-ux/` → 输出原型项目(静态 HTML 任务级文件夹,浏览器直接打开)
 4. `.codex/skills/wego-tests/` → 输出 `acceptance_report`(验收)
 
-组件迭代、新增组件、组件契约与 preview 同步走第 5 个技能 `.codex/skills/iterate-component/`。
+组件迭代、新增组件、组件契约与 preview 同步走第 5 个技能 `.codex/skills/wego-uxsystem-iterate/`。
 
 硬性交接规则:
 
@@ -37,15 +37,22 @@
 - `wego-design/` — 设计系统消费、场景判断、UI Kit 与组件映射 `design_consumption_plan`
 - `wego-ux/` — 正式输出产品原型项目
 - `wego-tests/` — 最终验收,输出 `acceptance_report`
-- `iterate-component/` — 已注册组件的迭代、新增、契约与 preview 同步和守门
+- `wego-uxsystem-iterate/` — 项目级别迭代(组件迭代/UI Kit 迭代/工作流迭代)
 
 ## 仓库级约束
 
 以下约束跨技能通用,技能内不再重复:
 
 - 原型产物必须是项目根目录下的任务级文件夹,不能散落在仓库根目录;同一任务迭代复用原文件夹(详见 `wego-ux/SKILL.md`)
-- 设计系统本体迭代必须递增 `.codex/skills/wego-design/metadata.json` 的 `version`;纯仓库管理类变更可不递增(详见 `iterate-component/SKILL.md`)
+- 设计系统本体迭代必须递增 `.codex/skills/wego-design/metadata.json` 的 `version`;纯仓库管理类变更可不递增(详见 `wego-uxsystem-iterate/SKILL.md`)
 - 不提交 `.DS_Store`、`.uploads/`
+- AGENTS.md 只承载顶层仓库关键信息与仓库偏好规则;不承载工作流迭代方法论、组件迭代步骤、单个组件规则;后者一律落到对应技能的 references/ 或权威数据文件
+
+## 经验沉淀与工作流迭代
+
+工作流迭代(经验沉淀、规则补充、流程优化、场景类型注册)遵循 `.codex/skills/wego-uxsystem-iterate/references/workflow-iteration.md` 的经验沉淀通用化原则。AGENTS.md 不重复具体规则。
+
+新增规则时,仓库级硬约束(影响所有技能的)仍回流到 AGENTS.md 的"仓库级约束"章节;只影响单个工作流环节的规则回流到对应技能文档。
 
 ## Git 与发布
 
