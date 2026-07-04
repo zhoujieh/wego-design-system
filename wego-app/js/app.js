@@ -1,27 +1,27 @@
 (function initWegoApp() {
-  const shell = document.querySelector('[data-host-shell="true"]');
+  var shell = document.querySelector('[data-host-shell="true"]');
   if (!shell) return;
 
-  const panels = Array.from(document.querySelectorAll('[data-host-tab]'));
-  const tabTriggers = Array.from(document.querySelectorAll('[data-host-tab-trigger]'));
-  const sceneLayer = document.querySelector('[data-scene-layer]');
-  const overlayLayer = document.querySelector('[data-overlay-layer]');
-  const toastEl = document.querySelector('[data-toast]');
-  const bottomNav = document.querySelector('[data-bottom-nav]');
-  const validTabs = new Set(panels.map(panel => panel.dataset.hostTab));
-  const routes = Array.isArray(window.WEGO_APP_ROUTES) ? window.WEGO_APP_ROUTES : [];
-  const routeConfigs = new Map(routes.map(route => [route.routeId, route]));
-  const scenes = new Map();
-  const loadingScripts = new Map();
-  const loadedStyles = new Set();
-  const appState = {
+  var panels = Array.from(document.querySelectorAll('[data-host-tab]'));
+  var tabTriggers = Array.from(document.querySelectorAll('[data-host-tab-trigger]'));
+  var sceneLayer = document.querySelector('[data-scene-layer]');
+  var overlayLayer = document.querySelector('[data-overlay-layer]');
+  var toastEl = document.querySelector('[data-toast]');
+  var bottomNav = document.querySelector('[data-bottom-nav]');
+  var validTabs = new Set(panels.map(function (panel) { return panel.dataset.hostTab; }));
+  var routes = Array.isArray(window.WEGO_APP_ROUTES) ? window.WEGO_APP_ROUTES : [];
+  var routeConfigs = new Map(routes.map(function (route) { return [route.routeId, route]; }));
+  var scenes = new Map();
+  var loadingScripts = new Map();
+  var loadedStyles = new Set();
+  var appState = {
     activeTab: 'my',
     currentRouteId: '',
     sceneState: Object.create(null)
   };
-  let toastTimer = 0;
+  var toastTimer = 0;
 
-  const tabIconNames = {
+  var tabIconNames = {
     dongtai: 'dongtai',
     haoyou: 'haoyou',
     workspace: 'gongzuotai',
@@ -30,55 +30,56 @@
   };
 
   function iconSrcFor(img, iconName, active) {
-    const current = img.getAttribute('src') || './lib/icons/tab-dongtai.svg';
-    const prefix = current.slice(0, current.lastIndexOf('/') + 1);
-    return `${prefix}tab-${active ? 'active-' : ''}${iconName}.svg`;
+    var current = img.getAttribute('src') || './lib/icons/tab-dongtai.svg';
+    var prefix = current.slice(0, current.lastIndexOf('/') + 1);
+    return prefix + 'tab-' + (active ? 'active-' : '') + iconName + '.svg';
   }
 
   function setActiveTab(tab) {
-    const nextTab = validTabs.has(tab) ? tab : 'my';
+    var nextTab = validTabs.has(tab) ? tab : 'my';
     appState.activeTab = nextTab;
-    panels.forEach(panel => {
-      const active = panel.dataset.hostTab === nextTab;
+    panels.forEach(function (panel) {
+      var active = panel.dataset.hostTab === nextTab;
       panel.hidden = !active;
       panel.classList.toggle('host-shell-page__panel--active', active);
     });
-    tabTriggers.forEach(trigger => {
-      const active = trigger.dataset.hostTabTrigger === nextTab;
+    tabTriggers.forEach(function (trigger) {
+      var active = trigger.dataset.hostTabTrigger === nextTab;
       trigger.classList.toggle('active', active);
       trigger.setAttribute('aria-selected', active ? 'true' : 'false');
-      const img = trigger.querySelector('[data-tab-icon]');
-      const iconName = img?.dataset.tabIcon || tabIconNames[trigger.dataset.hostTabTrigger];
+      var img = trigger.querySelector('[data-tab-icon]');
+      var iconName = (img && img.dataset.tabIcon) || tabIconNames[trigger.dataset.hostTabTrigger];
       if (img && iconName) img.src = iconSrcFor(img, iconName, active);
     });
   }
 
   function routeFromHash() {
-    const raw = window.location.hash || '';
-    const match = raw.match(/^#\/([^/?#]+)/);
+    var raw = window.location.hash || '';
+    var match = raw.match(/^#\/([^/?#]+)/);
     return match ? decodeURIComponent(match[1]) : '';
   }
 
   function navigate(routeId) {
     if (!routeId) return;
-    if (window.location.hash === `#/${routeId}`) {
+    if (window.location.hash === '#/' + routeId) {
       openRoute(routeId);
       return;
     }
-    window.location.hash = `#/${routeId}`;
+    window.location.hash = '#/' + routeId;
   }
 
   function normalizePresentation(scene) {
+    var pres = (scene && scene.presentation) || {};
     return {
-      type: scene?.presentation?.type || 'push',
-      transition: scene?.presentation?.transition || 'none',
-      coversTabBar: Boolean(scene?.presentation?.coversTabBar)
+      type: pres.type || 'push',
+      transition: pres.transition || 'none',
+      coversTabBar: Boolean(pres.coversTabBar)
     };
   }
 
   function ensureStyle(href) {
     if (!href || loadedStyles.has(href)) return;
-    const link = document.createElement('link');
+    var link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = href;
     link.dataset.sceneStyle = href;
@@ -89,12 +90,12 @@
   function ensureScript(routeId, src) {
     if (!src || scenes.has(routeId)) return Promise.resolve();
     if (loadingScripts.has(src)) return loadingScripts.get(src);
-    const promise = new Promise((resolve, reject) => {
-      const script = document.createElement('script');
+    var promise = new Promise(function (resolve, reject) {
+      var script = document.createElement('script');
       script.src = src;
       script.defer = true;
       script.onload = resolve;
-      script.onerror = () => reject(new Error(`scene script load failed: ${src}`));
+      script.onerror = function () { reject(new Error('scene script load failed: ' + src)); };
       document.body.appendChild(script);
     });
     loadingScripts.set(src, promise);
@@ -117,58 +118,53 @@
   }
 
   function sceneContext(scene, host) {
-    const routeId = scene.routeId;
+    var routeId = scene.routeId;
     if (!appState.sceneState[routeId]) appState.sceneState[routeId] = Object.create(null);
     return {
-      routeId,
+      routeId: routeId,
       root: host,
       state: appState.sceneState[routeId],
-      appState,
-      navigate,
-      back() {
-        closeTopLayer();
-      },
-      openModal(template, options = {}) {
-        openOverlay('modal', template, options);
-      },
-      openSheet(template, options = {}) {
-        openOverlay('sheet', template, options);
-      },
-      openFullScreenModal(template, options = {}) {
-        openOverlay('full-screen-modal', template, options);
-      },
-      closeOverlay,
-      toast,
-      updateEntrySummary
+      appState: appState,
+      navigate: navigate,
+      back: function () { closeTopLayer(); },
+      openModal: function (template, options) { openOverlay('modal', template, options || {}); },
+      openSheet: function (template, options) { openOverlay('sheet', template, options || {}); },
+      openFullScreenModal: function (template, options) { openOverlay('full-screen-modal', template, options || {}); },
+      closeOverlay: closeOverlay,
+      toast: toast,
+      updateEntrySummary: updateEntrySummary
     };
   }
 
   function openPushScene(scene) {
-    const presentation = normalizePresentation(scene);
+    var presentation = normalizePresentation(scene);
     sceneLayer.hidden = false;
     sceneLayer.className = 'app-scene-layer app-scene-layer--enter';
     sceneLayer.classList.toggle('app-scene-layer--cover-tab', presentation.coversTabBar);
     renderTemplate(sceneLayer, scene.template);
     appState.currentRouteId = scene.routeId;
-    scene.init?.(sceneContext(scene, sceneLayer));
+    if (typeof scene.init === 'function') scene.init(sceneContext(scene, sceneLayer));
   }
 
-  function openOverlay(type, template, options = {}) {
+  function openOverlay(type, template, options) {
+    options = options || {};
     overlayLayer.hidden = false;
-    overlayLayer.className = `app-overlay-layer app-overlay-layer--${type}`;
-    const panel = document.createElement('div');
+    overlayLayer.className = 'app-overlay-layer app-overlay-layer--' + type;
+    var panel = document.createElement('div');
     panel.className = 'app-overlay-panel';
     panel.setAttribute('role', type === 'modal' ? 'dialog' : 'region');
     if (options.label) panel.setAttribute('aria-label', options.label);
     renderTemplate(panel, template);
     overlayLayer.replaceChildren(panel);
-    options.init?.({
-      root: panel,
-      close: closeOverlay,
-      toast,
-      updateEntrySummary,
-      navigate
-    });
+    if (typeof options.init === 'function') {
+      options.init({
+        root: panel,
+        close: closeOverlay,
+        toast: toast,
+        updateEntrySummary: updateEntrySummary,
+        navigate: navigate
+      });
+    }
   }
 
   function closeOverlay() {
@@ -191,20 +187,21 @@
     clearTimeout(toastTimer);
     toastEl.textContent = message;
     toastEl.hidden = false;
-    toastTimer = window.setTimeout(() => {
+    toastTimer = window.setTimeout(function () {
       toastEl.hidden = true;
       toastEl.textContent = '';
     }, 1800);
   }
 
   function updateEntrySummary(routeId, summary) {
-    document.querySelectorAll(`[data-route-id="${CSS.escape(routeId)}"]`).forEach(entry => {
-      let summaryEl = entry.querySelector('[data-entry-summary]');
+    var entries = document.querySelectorAll('[data-route-id="' + CSS.escape(routeId) + '"]');
+    entries.forEach(function (entry) {
+      var summaryEl = entry.querySelector('[data-entry-summary]');
       if (!summaryEl) {
         summaryEl = document.createElement('span');
         summaryEl.className = 'cell__action-text';
         summaryEl.dataset.entrySummary = '';
-        const action = entry.querySelector('.cell__action');
+        var action = entry.querySelector('.cell__action');
         if (action) action.prepend(summaryEl);
       }
       summaryEl.textContent = summary || '';
@@ -212,30 +209,36 @@
   }
 
   function openScene(scene) {
-    const presentation = normalizePresentation(scene);
+    var presentation = normalizePresentation(scene);
     if (presentation.type === 'push') {
       closeOverlay();
       openPushScene(scene);
       return;
     }
-    const template = scene.template || '';
-    const init = ctx => scene.init?.(sceneContext(scene, ctx.root));
-    openOverlay(presentation.type, template, { label: scene.title, init });
+    var template = scene.template || '';
+    var init = function (ctx) {
+      if (typeof scene.init === 'function') scene.init(sceneContext(scene, ctx.root));
+    };
+    openOverlay(presentation.type, template, { label: scene.title, init: init });
   }
 
-  async function openRoute(routeId) {
+  function openRoute(routeId) {
     if (!routeId) return;
-    const config = routeConfigs.get(routeId);
+    var config = routeConfigs.get(routeId);
     if (config) {
       ensureStyle(config.style);
-      try {
-        await ensureScript(routeId, config.script);
-      } catch {
+      ensureScript(routeId, config.script).then(function () {
+        runScene(routeId);
+      }).catch(function () {
         toast('场景脚本加载失败');
-        return;
-      }
+      });
+      return;
     }
-    const scene = scenes.get(routeId);
+    runScene(routeId);
+  }
+
+  function runScene(routeId) {
+    var scene = scenes.get(routeId);
     if (!scene) {
       toast('该入口尚未接入原型');
       return;
@@ -244,90 +247,92 @@
   }
 
   function cellEntryMarkup(route) {
-    const label = route.entry?.label || route.scene || route.routeId;
-    const parent = route.entry?.parentEntry || '';
-    const indent = parent ? ' cell--indent' : '';
-    return `
-      <button type="button" class="cell cell--single cell--bg-white cell--clickable cell--divider-center${indent}" data-route-id="${route.routeId}" data-entry-label="${label}"${parent ? ` data-parent-entry="${parent}"` : ''}>
-        <div class="cell__body">
-          <div class="cell__content">
-            <div class="cell__title-row"><span class="cell__title">${label}</span></div>
-          </div>
-          <div class="cell__action">
-            <i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
-          </div>
-        </div>
-      </button>
-    `;
+    var entry = route.entry || {};
+    var label = entry.label || route.scene || route.routeId;
+    var parent = entry.parentEntry || '';
+    var indent = parent ? ' cell--indent' : '';
+    var parentAttr = parent ? ' data-parent-entry="' + parent + '"' : '';
+    return ''
+      + '<button type="button" class="cell cell--single cell--bg-white cell--clickable cell--divider-center' + indent + '" data-route-id="' + route.routeId + '" data-entry-label="' + label + '"' + parentAttr + '>'
+      +   '<div class="cell__body">'
+      +     '<div class="cell__content">'
+      +       '<div class="cell__title-row"><span class="cell__title">' + label + '</span></div>'
+      +     '</div>'
+      +     '<div class="cell__action">'
+      +       '<i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i>'
+      +     '</div>'
+      +   '</div>'
+      + '</button>';
   }
 
   function gridEntryMarkup(route) {
-    const label = route.entry?.label || route.scene || route.routeId;
-    const icon = route.entry?.icon || './lib/icons/app-center/标签管理.svg';
-    return `
-      <button type="button" class="host-shell-grid-entry" data-route-id="${route.routeId}" data-entry-label="${label}">
-        <img src="${icon}" alt="" class="host-shell-grid-entry__icon" />
-        <span class="host-shell-grid-entry__label">${label}</span>
-      </button>
-    `;
+    var entry = route.entry || {};
+    var label = entry.label || route.scene || route.routeId;
+    var icon = entry.icon || './lib/icons/app-center/标签管理.svg';
+    return ''
+      + '<button type="button" class="host-shell-grid-entry" data-route-id="' + route.routeId + '" data-entry-label="' + label + '">'
+      +   '<img src="' + icon + '" alt="" class="host-shell-grid-entry__icon" />'
+      +   '<span class="host-shell-grid-entry__label">' + label + '</span>'
+      + '</button>';
   }
 
   function mountRouteEntries() {
-    routes.forEach(route => {
-      if (!route?.routeId || document.querySelector(`[data-route-id="${CSS.escape(route.routeId)}"]`)) return;
-      const entry = route.entry || {};
-      const groupName = entry.group || (entry.tab === 'workspace' ? 'workspace-tools' : 'my-settings');
-      const group = document.querySelector(`[data-entry-group="${CSS.escape(groupName)}"]`);
+    routes.forEach(function (route) {
+      if (!route || !route.routeId) return;
+      if (document.querySelector('[data-route-id="' + CSS.escape(route.routeId) + '"]')) return;
+      var entry = route.entry || {};
+      var groupName = entry.group || (entry.tab === 'workspace' ? 'workspace-tools' : 'my-settings');
+      var group = document.querySelector('[data-entry-group="' + CSS.escape(groupName) + '"]');
       if (!group) return;
       group.insertAdjacentHTML('beforeend', entry.type === 'grid-entry' ? gridEntryMarkup(route) : cellEntryMarkup(route));
     });
   }
 
-  function bindRouteEntries(root = document) {
-    root.querySelectorAll('[data-route-id]').forEach(entry => {
+  function bindRouteEntries(root) {
+    root = root || document;
+    var entries = root.querySelectorAll('[data-route-id]');
+    entries.forEach(function (entry) {
       if (entry.dataset.routeBound === 'true') return;
       entry.dataset.routeBound = 'true';
-      entry.addEventListener('click', event => {
+      entry.addEventListener('click', function (event) {
         event.preventDefault();
-        const routeId = entry.dataset.routeId;
+        var routeId = entry.dataset.routeId;
         if (!routeId) return;
-        const config = routeConfigs.get(routeId);
-        if (config?.entry?.tab) setActiveTab(config.entry.tab);
+        var config = routeConfigs.get(routeId);
+        if (config && config.entry && config.entry.tab) setActiveTab(config.entry.tab);
         navigate(routeId);
       });
     });
   }
 
-  tabTriggers.forEach(trigger => {
-    trigger.addEventListener('click', () => {
+  tabTriggers.forEach(function (trigger) {
+    trigger.addEventListener('click', function () {
       closeOverlay();
       clearSceneLayer();
       setActiveTab(trigger.dataset.hostTabTrigger);
     });
   });
 
-  window.addEventListener('hashchange', () => openRoute(routeFromHash()));
+  window.addEventListener('hashchange', function () { openRoute(routeFromHash()); });
 
   window.WegoApp = {
-    registerScene(scene) {
-      if (!scene?.routeId) return;
+    registerScene: function (scene) {
+      if (!scene || !scene.routeId) return;
       scenes.set(scene.routeId, scene);
     },
-    navigate,
-    openRoute,
-    closeTopLayer,
-    closeOverlay,
-    toast,
-    updateEntrySummary,
-    setActiveTab,
-    getState() {
-      return appState;
-    }
+    navigate: navigate,
+    openRoute: openRoute,
+    closeTopLayer: closeTopLayer,
+    closeOverlay: closeOverlay,
+    toast: toast,
+    updateEntrySummary: updateEntrySummary,
+    setActiveTab: setActiveTab,
+    getState: function () { return appState; }
   };
 
   mountRouteEntries();
   bindRouteEntries();
   setActiveTab('my');
-  const initialRoute = routeFromHash();
+  var initialRoute = routeFromHash();
   if (initialRoute) openRoute(initialRoute);
 })();

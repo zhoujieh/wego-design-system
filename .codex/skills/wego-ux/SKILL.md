@@ -126,9 +126,9 @@ window.WegoApp.registerScene({
 
 | type | 含义 | DOM 与层级 | 典型场景 |
 | --- | --- | --- | --- |
-| `push` | App 内二级页面跳转 | 在 `.phone-screen` 内打开 push screen，可按 `covers_tab_bar` 决定是否覆盖 Tab | 列表详情、二级选择页、商品管理列表 |
-| `modal` | 当前页面居中弹窗 | 在当前场景上方打开轻量 dialog，不离开当前页面 | 确认删除、提示、短表单 |
-| `sheet` | 底部弹层 | 从底部滑入，可半屏或内容自适应 | 筛选、选择器、批量操作 |
+| `push` | App 内二级页面跳转 | 在 `.phone-screen` 内打开 push screen，场景级打开必须 `coversTabBar: true` | 列表详情、二级选择页、商品管理列表 |
+| `modal` | 当前页面居中弹窗 | 在当前场景上方打开轻量 dialog，场景级打开必须 `coversTabBar: true` | 确认删除、提示、短表单 |
+| `sheet` | 底部弹层 | 从底部滑入，可半屏或内容自适应，场景级打开必须 `coversTabBar: true` | 筛选、选择器、批量操作 |
 | `full-screen-modal` | 全屏模态页 | 从底部滑入并覆盖整个手机屏，通常覆盖 Tab | 权限设置、规则配置、复杂编辑 |
 
 转场：
@@ -139,6 +139,8 @@ window.WegoApp.registerScene({
 - `none`：允许无动画，但层级和关闭方式仍要清晰
 
 所有打开方式都必须限制在 `.phone-screen` 上下文中，不能让浏览器顶层跳转到独立 HTML 页面。
+
+**硬约束**：`registerScene` 的 `presentation.coversTabBar` 必须与 `design_consumption_plan.page_presentation.covers_tab_bar` 一致；`wego-app/scenes/` 下场景的 `coversTabBar` 必须为 `true`（`host-entry` surface 除外）。5 个主 tab 走 host-shell 内嵌面板，不经过 `page_presentation`。
 
 ## 真实业务交互
 
@@ -161,11 +163,26 @@ window.WegoApp.registerScene({
 
 组件规则：
 
-- 从组件预览页复制组件 markup，保留已注册 class 名
 - 不发明未注册组件类、子元素类或修饰类
 - 连续 cell/form 必须使用已注册分组容器，如 `.cell-group` / `.form-group`
 - 页面级业务 class 只能做布局胶水和业务作用域，不替代组件 class
 - 不输出面向 AI/工作流的内部说明文案
+
+### component_mapping 消费分派
+
+消费 `component_mapping` 时，按 `consumption_mode` 分派规格消费行为：
+
+- **stable-variant**：反查 `components/{slug}.json` 的 `representativeVariants` 找到维度值组合对应的变体，按 `domAnatomy` + `preview/component-{slug}.html` 实例复制 markup；不得替换变体（如把 `back-icon` 换成 `navbar__left-text`）、不得跨变体组合、不得仿照同 plan 内其他 surface 的 `selected` 自行替换变体。规格消费完成后，wego-ux 仍负责工程实现（场景注册、状态绑定、交互逻辑）。
+- **composition-constraint**：直接按 `selected` 的 DOM 路径实现；内嵌控件规格（尺寸/间距/层级/状态修饰类/图标资产）不得二次决定；不得省略 `selected` 中已声明的修饰类或资产路径。规格消费完成后，wego-ux 仍负责工程实现。
+- **free-composition**：按 `selected` 的 DOM 路径实现；允许在组件契约 `domAnatomy` 边界内调整业务作用域样式。规格消费完成后，wego-ux 仍负责工程实现。
+
+### navbar leftControl 绑定关系（命中 stable-variant 时必查）
+
+`navbar leftControl` 与 `presentation.type` 的绑定：
+
+- `push` → `back-icon` → DOM: `navbar__left > .navbar__left-btn > i.wego-iconfont-s.icon-fanhui`
+- `full-screen-modal` 模式 A → `text-cancel` → DOM: `navbar__left > .navbar__left-text`（文案固定「取消」，不得为「返回」）
+- `full-screen-modal` 模式 B → `close-icon` → DOM: `navbar__left > .navbar__left-btn > i.wego-iconfont-s.icon-cha`
 
 ## 资源同步
 

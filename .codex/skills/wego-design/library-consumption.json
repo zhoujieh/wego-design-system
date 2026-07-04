@@ -258,7 +258,7 @@
           "什么状态",
           "组件职责边界"
         ],
-        "judgmentLogic": "决策必须引用组件契约的 variantDimensions + 宿主场景说明，不能凭默认或惯例；当两个组件的 category 不同时，职责互斥，不互相嵌套。若组件契约已经提供稳定场景，消费单位优先是该场景，不再把宿主组件与内嵌关联组件拆成多个局部判断；场景一旦命中，内嵌关联控件的尺寸、对齐、层级、补充结构与冗余说明默认随场景完整消费。若业务需求确实要偏离场景内部定义，必须回到设计系统迭代，不允许在任务实现中临时改写。",
+        "judgmentLogic": "决策必须引用组件契约的 variantDimensions + 宿主场景说明，不能凭默认或惯例；当两个组件的 category 不同时，职责互斥，不互相嵌套。若组件契约已经提供稳定场景，消费单位优先是该场景，不再把宿主组件与内嵌关联组件拆成多个局部判断；场景一旦命中，内嵌关联控件的尺寸、对齐、层级、补充结构与冗余说明默认随场景完整消费。若业务需求确实要偏离场景内部定义，必须回到设计系统迭代，不允许在任务实现中临时改写。该场景类型在 component_mapping 中必须标注 `consumption_mode` 字段（取值 `stable-variant` / `composition-constraint` / `free-composition`），用于 wego-ux 分派规格消费行为；`consumption_mode` 取值由 wego-design 根据命中来源决定：命中组件契约 representativeVariants 或 behavior 稳定场景 → `stable-variant`；命中 uikit-plan.json compositionConstraints → `composition-constraint`；两者均未命中 → `free-composition`。",
         "landingPriority": [
           "components/{slug}.json 的 variantDimensions/usageHints",
           "library-consumption.json 的边界字段",
