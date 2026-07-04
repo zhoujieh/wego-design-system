@@ -189,6 +189,23 @@
     if (typeof scene.init === 'function') scene.init(sceneContext(scene, panel));
   }
 
+  // overlay 打开时 push 一条 history state（不改变 hash），使侧滑返回先关模态再返回上一页
+  function pushOverlayHistoryState(type) {
+    if (type !== 'sheet' && type !== 'full-screen-modal') return;
+    var state = { wegoOverlay: type };
+    try {
+      history.pushState(state, document.title, window.location.href);
+    } catch (e) {}
+  }
+
+  // 侧滑/返回键触发 popstate 时，如果 state 中有 wegoOverlay 标记，关闭模态并消费掉这条 state
+  window.addEventListener('popstate', function (e) {
+    var state = e.state || {};
+    if (state.wegoOverlay && !overlayLayer.hidden) {
+      closeOverlay(true);
+    }
+  });
+
   function openOverlay(type, template, options) {
     options = options || {};
     overlayLayer.hidden = false;
@@ -199,6 +216,7 @@
     if (options.label) panel.setAttribute('aria-label', options.label);
     renderTemplate(panel, template);
     overlayLayer.replaceChildren(panel);
+    pushOverlayHistoryState(type);
     if (typeof options.init === 'function') {
       options.init({
         root: panel,
@@ -210,11 +228,16 @@
     }
   }
 
-  function closeOverlay() {
+  // skipHistory 参数为 true 时，表示由 popstate 触发关闭，不再操作 history（state 已被消费）
+  function closeOverlay(skipHistory) {
     var panel = overlayLayer.querySelector('.app-overlay-panel');
     var isSheet = overlayLayer.classList.contains('app-overlay-layer--sheet');
     var isFullScreenModal = overlayLayer.classList.contains('app-overlay-layer--full-screen-modal');
     if (panel && (isSheet || isFullScreenModal)) {
+      if (!skipHistory) {
+        // 用户主动点击关闭按钮：需要回退掉 push 的那条 history state
+        try { history.back(); } catch (e) {}
+      }
       panel.classList.add('app-overlay-panel--exit');
       var onTransitionEnd = function () {
         panel.removeEventListener('transitionend', onTransitionEnd);
