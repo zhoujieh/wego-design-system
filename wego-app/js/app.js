@@ -374,7 +374,45 @@
     });
   });
 
-  window.addEventListener('hashchange', function () { openRoute(routeFromHash()); });
+  // 判断 routeId 是否已在 push 栈中（用于区分侧滑返回与前进导航）
+  function isRouteInStack(routeId) {
+    return sceneStack.some(function (entry) { return entry.routeId === routeId; });
+  }
+
+  // hashchange 处理：区分前进（navigate 触发）与后退（侧滑 / history.back 触发）
+  // - 前进：routeId 不在栈中 → openRoute 打开新场景
+  // - 后退到宿主：hash 变空 → 关闭顶层（overlay 或 push 场景）
+  // - 后退到中间层级：routeId 在栈中但非栈顶 → popSceneLayer 弹一层，下层自然显露
+  // - 栈顶已匹配：无操作（避免重复打开）
+  window.addEventListener('hashchange', function () {
+    var routeId = routeFromHash();
+
+    // hash 变空：返回到宿主（iOS 侧滑 / history.back 最常见场景）
+    if (!routeId) {
+      if (!overlayLayer.hidden) {
+        closeOverlay();
+      } else if (sceneStack.length > 0) {
+        popSceneLayer();
+      }
+      return;
+    }
+
+    if (sceneStack.length > 0) {
+      var topEntry = sceneStack[sceneStack.length - 1];
+      if (topEntry.routeId === routeId) {
+        // 栈顶已匹配，无需重复打开
+        return;
+      }
+      if (isRouteInStack(routeId)) {
+        // routeId 在栈中但非栈顶：侧滑返回到中间层级，弹一层
+        popSceneLayer();
+        return;
+      }
+    }
+
+    // 前进或栈空时的初始路由：打开新场景
+    openRoute(routeId);
+  });
 
   window.WegoApp = {
     registerScene: function (scene) {
