@@ -7,6 +7,11 @@
       "slug": "biz-rule-config",
       "entry": "ui_kits/biz-rule-config/index.html",
       "qualityReport": "ui_kits/biz-rule-config/quality-report.json"
+    },
+    {
+      "slug": "system-settings",
+      "entry": "ui_kits/system-settings/index.html",
+      "qualityReport": "ui_kits/system-settings/quality-report.json"
     }
   ],
   "corePreviewComponents": [
@@ -450,6 +455,70 @@
         }
       ],
       "presentationDescription": "默认作为 full-screen-modal 打开；若需求语义明确属于二级页面、当前页轻弹窗或底部选择器，必须由对应 pagePattern/fallback blueprint 明确支持 push、modal 或 sheet 后才能改用其他 type。"
+    },
+    {
+      "name": "系统设置",
+      "slug": "system-settings",
+      "applicableScenarios": [
+        "系统设置",
+        "应用设置",
+        "账号设置",
+        "通用设置",
+        "App 设置"
+      ],
+      "interactionPattern": "层级导航,从右侧 push 进入,返回按钮收口;设置项按账号/业务/系统三组分类,整行点击进入下一层",
+      "priority": "highest-for-system-settings-pages",
+      "presentation": "push",
+      "transition": "slide-left-enter, slide-right-exit",
+      "dismissAction": "back-button",
+      "overlayLevel": "inline",
+      "coversTabBar": true,
+      "componentSlugs": [
+        "navbar",
+        "cell"
+      ],
+      "uikitFile": "ui_kits/system-settings/index.html",
+      "specRef": "specs/交互设计原则.md#页面模式与转场",
+      "structureHighlights": [
+        "使用层级导航(push),从右侧 slide-left 进入,返回按钮收口;不使用模态或底部弹层",
+        "设置项按账号/业务/系统三组 cell-group 分类,每组使用 cell-group__title + cell-group__content 正式结构",
+        "通栏模式 M1:phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰;cell 横向边距由 cell__body 自带 16px padding 承担",
+        "cell 变体:cell--double(带副标题) / cell--single(单行) + trailing 变体(text-arrow / dot-arrow / arrow)",
+        "整行点击只保留给带箭头、会进入下一层的入口行;右侧是 switch、radio-group、checkbox-group 等独立控件时由控件自身承担交互",
+        "不包含退出登录按钮和客服入口;这两项属于业务场景级功能,不属于系统设置 UI Kit 范式",
+        "navbar 通过 padding-top: var(--safe-area-top, 0px) + sticky top: 0 避让状态栏;页面背景一旦确定,navbar 背景默认跟随 data-bg 的公共 CSS 约定",
+        "UI Kit 必须演示双层结构(HostScreen + SystemSettingsScreen),让 AI 能学到 push 类页面的打开方式和 slide-left 动画定义"
+      ],
+      "templates": [
+        "系统设置",
+        "应用设置",
+        "通用设置",
+        "账号设置"
+      ],
+      "compositionConstraints": [
+        {
+          "trigger": "section 由连续 cell 组成,且标题与内容属于同一业务分组(账号/业务/系统)",
+          "use": "使用 .cell-group 的正式标题节点(cell-group__title) + 内容容器(cell-group__content);通栏模式 M1(cell-group__content 不开 --card 修饰)",
+          "avoid": "复用 .uikit-section-title、手写 section 间距,或额外包一层只为白底圆角存在的容器",
+          "reason": "分组标题、内容区表面和卡片圆角已经收敛为组件正式能力;通栏模式下 cell 横向边距由 cell__body padding 承担,继续放在页面层拼接会造成节奏、圆角和复制边界漂移。",
+          "allowWhen": "仅当 surface 角色为 host-entry(宿主入口列表)时,才改为卡片模式 M2(开 --card 修饰 + phone-body 16px 横向 padding)"
+        },
+        {
+          "trigger": "设置项需要展示副标题或补充说明",
+          "use": "cell--double + cell__subtitle 承接副标题",
+          "avoid": "在 cell 外部补 helper 文案或自定义说明栏",
+          "reason": "cell--double 的 subtitle 已经是组件正式能力,不需要额外发明说明层。",
+          "allowWhen": "只有结构无法承载且业务必须提醒风险、时效或不可逆后果时,才保留 helper"
+        },
+        {
+          "trigger": "设置项需要展示状态或操作入口",
+          "use": "trailing 变体:text-arrow(状态文字+箭头)、dot-arrow(红点+箭头)、arrow(纯箭头)",
+          "avoid": "发明自定义 trailing 样式或未定义修饰类",
+          "reason": "trailing 变体已经收敛为 cell 组件正式能力,直接消费已注册变体即可。",
+          "allowWhen": "只有当业务需要新的 trailing 类型且已回流组件契约后,才允许扩展"
+        }
+      ],
+      "presentationDescription": "默认作为 push 页面从右侧 slide-left 进入;若需求语义明确属于模态编辑或底部选择器,必须由对应 pagePattern/fallback blueprint 明确支持 full-screen-modal、modal 或 sheet 后才能改用其他 type。"
     }
   ],
   "fallbackPageBlueprints": [

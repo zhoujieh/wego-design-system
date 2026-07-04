@@ -170,6 +170,7 @@ body.uikit-page {
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+  padding-top: var(--spacer-8);
 }
 .phone-body::-webkit-scrollbar { display: none; }
 .phone-indicator {

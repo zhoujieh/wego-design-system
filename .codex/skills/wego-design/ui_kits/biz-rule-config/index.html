@@ -46,38 +46,12 @@ html, body { min-height: auto; }
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
+  padding-top: var(--spacer-8);
   padding-bottom: var(--safe-area-bottom-content);
 }
 
 .bottom-nav {
   padding-bottom: var(--safe-area-bottom);
-}
-
-.uikit-base-card {
-  background: var(--bg-surface);
-  border-radius: var(--radius-12);
-  margin: var(--spacer-12);
-  padding: var(--spacer-16);
-  display: flex;
-  align-items: center;
-  gap: var(--spacer-12);
-}
-
-.uikit-base-copy {
-  flex: 1;
-  min-width: 0;
-}
-
-.uikit-base-title {
-  font-size: var(--heading-sm-font-size);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-default);
-}
-
-.uikit-base-desc {
-  margin-top: var(--spacer-4);
-  font-size: var(--body-sm-font-size);
-  color: var(--text-secondary);
 }
 
 .radio-field:focus-visible,
@@ -96,12 +70,13 @@ html, body { min-height: auto; }
   flex-direction: column;
   background: var(--bg-page);
   transform: translateY(100%);
-  transition: transform var(--duration-normal) var(--ease-enter);
+  transition: transform var(--duration-normal) var(--ease-exit);
   will-change: transform;
 }
 
 .uikit-modal-screen.is-open {
   transform: translateY(0);
+  transition: transform var(--duration-normal) var(--ease-enter);
 }
 
 .uikit-modal-screen.is-hidden {
@@ -537,16 +512,9 @@ function BaseScreen({ onOpen }) {
         </div>
       </div>
       <div className="phone-body">
-        <div className="uikit-base-card">
-          <div data-component="avatar" className="avatar avatar--56 avatar--initials">微</div>
-        <div className="uikit-base-copy">
-          <div className="uikit-base-title">门店业务规则配置</div>
-          <div className="uikit-base-desc">从底部打开，全屏覆盖，适合管理复杂设置任务。</div>
-        </div>
-        </div>
         <div className="cell-group">
           <div className="cell-group__title">设置入口</div>
-          <div className="cell-group__content cell-group__content--card">
+          <div className="cell-group__content">
           <div
             data-component="cell"
             className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
@@ -558,12 +526,6 @@ function BaseScreen({ onOpen }) {
             <div className="cell__body">
               <div className="cell__content"><div className="cell__title-row"><span className="cell__title">业务规则配置</span></div></div>
               <div className="cell__action"><i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
-            </div>
-          </div>
-          <div data-component="cell" className="cell cell--single cell--divider-right-edge cell--bg-white">
-            <div className="cell__body">
-              <div className="cell__content"><div className="cell__title-row"><span className="cell__title">消息通知</span></div></div>
-              <div className="cell__action"><span className="cell__action-text">已开启</span></div>
             </div>
           </div>
           </div>

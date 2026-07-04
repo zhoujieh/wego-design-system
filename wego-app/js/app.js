@@ -103,10 +103,15 @@
   }
 
   function clearSceneLayer() {
-    sceneLayer.hidden = true;
-    sceneLayer.className = 'app-scene-layer';
-    sceneLayer.replaceChildren();
-    appState.currentRouteId = '';
+    sceneLayer.classList.add('app-scene-layer--exit');
+    var onTransitionEnd = function () {
+      sceneLayer.removeEventListener('transitionend', onTransitionEnd);
+      sceneLayer.hidden = true;
+      sceneLayer.className = 'app-scene-layer';
+      sceneLayer.replaceChildren();
+      appState.currentRouteId = '';
+    };
+    sceneLayer.addEventListener('transitionend', onTransitionEnd);
   }
 
   function renderTemplate(target, template) {
@@ -168,6 +173,20 @@
   }
 
   function closeOverlay() {
+    var panel = overlayLayer.querySelector('.app-overlay-panel');
+    var isSheet = overlayLayer.classList.contains('app-overlay-layer--sheet');
+    var isFullScreenModal = overlayLayer.classList.contains('app-overlay-layer--full-screen-modal');
+    if (panel && (isSheet || isFullScreenModal)) {
+      panel.classList.add('app-overlay-panel--exit');
+      var onTransitionEnd = function () {
+        panel.removeEventListener('transitionend', onTransitionEnd);
+        overlayLayer.hidden = true;
+        overlayLayer.className = 'app-overlay-layer';
+        overlayLayer.replaceChildren();
+      };
+      panel.addEventListener('transitionend', onTransitionEnd);
+      return;
+    }
     overlayLayer.hidden = true;
     overlayLayer.className = 'app-overlay-layer';
     overlayLayer.replaceChildren();

@@ -27,5 +27,17 @@ window.WEGO_APP_ROUTES = [
       type: 'grid-entry',
       icon: './lib/icons/app-center/价格管理.svg'
     }
+  },
+  {
+    routeId: 'my-system-settings',
+    scene: '系统设置',
+    script: './scenes/系统设置/scene.js',
+    style: './scenes/系统设置/scene.css',
+    entry: {
+      tab: 'my',
+      group: 'my-settings',
+      label: '设置',
+      type: 'cell'
+    }
   }
 ];

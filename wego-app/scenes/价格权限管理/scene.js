@@ -65,9 +65,9 @@
       .replace(/'/g, '&#39;');
   }
 
-  // 列表页：价格类型行 markup
-  function priceTypeRowMarkup(priceType, perm) {
-    var divider = ' cell--divider-right-edge';
+  // 列表页：价格类型行 markup（最后一行不加分割线修饰类）
+  function priceTypeRowMarkup(priceType, perm, isLast) {
+    var divider = isLast ? '' : ' cell--divider-right-edge';
     return ''
       + '<button type="button" class="cell cell--single cell--bg-white cell--clickable' + divider + '" data-price-type="' + esc(priceType.id) + '" role="button">'
       +   '<div class="cell__body">'
@@ -84,15 +84,16 @@
 
   // 列表页 template
   function listPageTemplate(state) {
-    var rows = DEFAULT_PRICE_TYPES.map(function (pt) {
-      return priceTypeRowMarkup(pt, state[pt.id]);
+    var total = DEFAULT_PRICE_TYPES.length;
+    var rows = DEFAULT_PRICE_TYPES.map(function (pt, idx) {
+      return priceTypeRowMarkup(pt, state[pt.id], idx === total - 1);
     }).join('');
     return ''
       + '<section class="price-list-page" data-bg="page">'
       +   '<div class="navbar">'
       +     '<div class="navbar__body">'
       +       '<div class="navbar__left">'
-      +         '<button type="button" class="navbar__left-text" data-action="back">返回</button>'
+      +         '<div class="navbar__left-btn" data-action="back" role="button" aria-label="返回"><i class="wego-iconfont-s icon-fanhui"></i></div>'
       +       '</div>'
       +       '<div class="navbar__center">'
       +         '<span class="navbar__title">价格管理</span>'
@@ -103,7 +104,7 @@
       +   '<div class="phone-body price-list-body">'
       +     '<div class="cell-group">'
       +       '<div class="cell-group__title">默认价格类型</div>'
-      +       '<div class="cell-group__content cell-group__content--card">'
+      +       '<div class="cell-group__content">'
       +         rows
       +       '</div>'
       +     '</div>'
@@ -111,12 +112,13 @@
       + '</section>';
   }
 
-  // 权限设置页：单选项行
-  function permOptionRowMarkup(option, checked) {
+  // 权限设置页：单选项行（最后一行不加分割线修饰类）
+  function permOptionRowMarkup(option, checked, isLast) {
     var radioClass = 'radio radio--sm' + (checked ? ' radio--checked' : '');
     var dot = checked ? '<div class="radio__dot"></div>' : '';
+    var divider = isLast ? '' : ' cell--divider-right-edge';
     return ''
-      + '<div class="cell cell--single cell--bg-white cell--clickable cell--divider-right-edge" role="radio" aria-checked="' + (checked ? 'true' : 'false') + '" data-perm-option="' + esc(option.value) + '" tabindex="0">'
+      + '<div class="cell cell--single cell--bg-white cell--clickable' + divider + '" role="radio" aria-checked="' + (checked ? 'true' : 'false') + '" data-perm-option="' + esc(option.value) + '" tabindex="0">'
       +   '<div class="cell__select">'
       +     '<div class="' + radioClass + '">'
       +       '<div class="radio__inner"></div>'
@@ -132,12 +134,13 @@
       + '</div>';
   }
 
-  // 权限设置页：粉丝分组子项行
-  function fanGroupChildRowMarkup(group, checked) {
+  // 权限设置页：粉丝分组子项行（最后一行不加分割线修饰类）
+  function fanGroupChildRowMarkup(group, checked, isLast) {
     var checkboxClass = 'checkbox' + (checked ? ' checkbox--checked' : '');
     var icon = checked ? '<div class="checkbox__icon"><img class="checkbox__asset" src="./lib/icons/checkbox-check.svg" alt=""></div>' : '';
+    var divider = isLast ? '' : ' cell--divider-center';
     return ''
-      + '<div class="cell cell--single cell--bg-white cell--indent cell--divider-center" role="checkbox" aria-checked="' + (checked ? 'true' : 'false') + '" data-fan-group="' + esc(group.id) + '" tabindex="0">'
+      + '<div class="cell cell--single cell--bg-white cell--indent' + divider + '" role="checkbox" aria-checked="' + (checked ? 'true' : 'false') + '" data-fan-group="' + esc(group.id) + '" tabindex="0">'
       +   '<div class="cell__select">'
       +     '<div class="' + checkboxClass + '">'
       +       '<div class="checkbox__inner"></div>'
@@ -154,14 +157,19 @@
 
   // 权限设置页 template
   function editPageTemplate(priceType, working) {
-    var optionRows = PERM_OPTIONS.map(function (opt) {
-      return permOptionRowMarkup(opt, working.type === opt.value);
+    var permTotal = PERM_OPTIONS.length;
+    var optionRows = PERM_OPTIONS.map(function (opt, idx) {
+      return permOptionRowMarkup(opt, working.type === opt.value, idx === permTotal - 1);
     }).join('');
 
     var needGroups = working.type === PERM_PARTIAL || working.type === PERM_EXCLUDE;
-    var groupRows = needGroups ? FAN_GROUPS.map(function (g) {
-      return fanGroupChildRowMarkup(g, working.groups.indexOf(g.id) > -1);
-    }).join('') : '';
+    var groupRows = '';
+    if (needGroups) {
+      var groupTotal = FAN_GROUPS.length;
+      groupRows = FAN_GROUPS.map(function (g, idx) {
+        return fanGroupChildRowMarkup(g, working.groups.indexOf(g.id) > -1, idx === groupTotal - 1);
+      }).join('');
+    }
 
     var groupTitle = working.type === PERM_PARTIAL ? '可见粉丝分组' : (working.type === PERM_EXCLUDE ? '不可见粉丝分组' : '');
 
@@ -170,7 +178,7 @@
       groupBlockMarkup = ''
         + '<div class="cell-group price-perm-groups" data-fan-group-block>'
         +   '<div class="cell-group__title">' + esc(groupTitle) + '</div>'
-        +   '<div class="cell-group__content cell-group__content--card" data-fan-groups>'
+        +   '<div class="cell-group__content" data-fan-groups>'
         +     groupRows
         +   '</div>'
         + '</div>';
@@ -196,7 +204,7 @@
       +   '<div class="phone-body price-perm-body">'
       +     '<div class="cell-group">'
       +       '<div class="cell-group__title">权限类型</div>'
-      +       '<div class="cell-group__content cell-group__content--card" data-perm-options>'
+      +       '<div class="cell-group__content" data-perm-options>'
       +         optionRows
       +       '</div>'
       +     '</div>'
@@ -212,7 +220,7 @@
     presentation: {
       type: 'push',
       transition: 'slide-left',
-      coversTabBar: false
+      coversTabBar: true
     },
     template: '',
     init: function (ctx) {

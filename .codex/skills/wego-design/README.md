@@ -73,15 +73,30 @@
 
 - `biz-rule-config`
   用于观察业务规则配置 / 业务数据编辑页的页面范式
+- `system-settings`
+  用于观察系统设置 / 应用设置页的页面范式
 
 `biz-rule-config` 的重点是：
 
-- 编辑型二级页导航
+- 编辑型二级页导航（从底部打开的全屏模态）
 - 通栏内容布局
-- 规则块分组
 - 页面级主操作统一收口
 
-它不是泛“系统设置页”。
+它不是泛"系统设置页"。
+
+`system-settings` 的重点是：
+
+- 入口型二级页导航（从右侧打开的二级页面）
+- 通栏内容布局
+- 返回按钮收口
+
+UI Kit Showcase 通用范式（见 `library-consumption.json` 的 `uikitConstraints.showcaseStructureRule`）：
+
+- 包含 pagePattern 的 UI Kit 必须演示双层结构（HostScreen + SettingsScreen）
+- HostScreen 是宿主入口页，演示入口 cell 触发打开
+- SettingsScreen 是业务页面，演示打开/关闭动画
+- 打开动画通过 `transform` + `transition` 实现（push 用 translateX，modal 用 translateY）
+- 目的是让 AI 从 Showcase 学到页面打开方式和动画定义
 
 ## 消费原则
 

@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>系统设置 - Push 进入</title>
+<link rel="stylesheet" href="../../colors_and_type.css">
+<link rel="stylesheet" href="../../scaffold.css">
+<link rel="stylesheet" href="../../iconfont.css">
+<link rel="stylesheet" href="../../components.css">
+<style>
+html, body { min-height: auto; }
+
+.phone-status {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spacer-16);
+  background: transparent;
+  box-sizing: border-box;
+  font-size: var(--body-sm-font-size);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-default);
+  z-index: var(--z-critical);
+  pointer-events: none;
+}
+
+.uikit-host-screen {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-page);
+  position: relative;
+}
+
+.phone-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-8);
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-top: var(--spacer-8);
+  padding-bottom: var(--safe-area-bottom-content);
+}
+
+.bottom-nav {
+  padding-bottom: var(--safe-area-bottom);
+}
+
+.cell[role="button"]:focus-visible {
+  outline: 2px solid var(--bg-brand);
+  outline-offset: -2px;
+}
+
+.uikit-settings-screen {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-overlay);
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-page);
+  transform: translateX(100%);
+  transition: transform var(--duration-normal) var(--ease-exit);
+  will-change: transform;
+}
+
+.uikit-settings-screen.is-open {
+  transform: translateX(0);
+  transition: transform var(--duration-normal) var(--ease-enter);
+}
+
+.uikit-settings-screen.is-hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.uikit-settings-screen .navbar {
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.uikit-settings-screen .phone-body {
+  padding-top: var(--spacer-8);
+  padding-bottom: var(--safe-area-bottom-content);
+}
+
+.system-settings__dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--status-danger-default);
+  margin-right: var(--spacer-8);
+  flex-shrink: 0;
+}
+
+.uikit-toast {
+  position: absolute;
+  left: 50%;
+  bottom: 120px;
+  transform: translate(-50%, 16px);
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  background: rgba(30, 32, 40, 0.82);
+  color: var(--text-inverse);
+  font-size: var(--body-sm-font-size);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-fast) var(--ease-standard), transform var(--duration-fast) var(--ease-standard);
+  z-index: var(--z-toast);
+  white-space: nowrap;
+}
+
+.uikit-toast.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+@media (max-width: 767px) {
+  .uikit-shell {
+    min-height: 100vh;
+    min-height: 100dvh;
+    align-items: stretch;
+    padding: 0;
+  }
+
+  .phone-frame {
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 900px;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .phone-screen {
+    border-radius: 0;
+  }
+
+  .phone-status,
+  .phone-indicator {
+    display: none;
+  }
+}
+</style>
+</head>
+<body class="uikit-page">
+<div class="uikit-shell">
+  <div class="phone-frame">
+    <div class="phone-screen" id="root"></div>
+  </div>
+</div>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script type="text/babel">
+const { useEffect, useState } = React;
+
+function handleActionKeyDown(event, action) {
+  if (event.key !== 'Enter' && event.key !== ' ') return;
+  event.preventDefault();
+  action();
+}
+
+function StatusBar() {
+  return (
+    <div className="phone-status">
+      <span>9:41</span>
+      <span>5G</span>
+    </div>
+  );
+}
+
+function HomeIndicator() {
+  return (
+    <div className="phone-indicator">
+      <div className="phone-indicator-bar"></div>
+    </div>
+  );
+}
+
+function BottomNav() {
+  const iconSrc = (tab) => `../../assets/icons/tab-${tab === 'wode' ? 'active-' : ''}${tab}.svg`;
+
+  return (
+    <nav data-component="bottom-nav" className="bottom-nav">
+      <div className="bottom-nav__item" data-tab="dongtai">
+        <div className="bottom-nav__icon"><img src={iconSrc('dongtai')} width="32" height="32" alt="" /></div>
+        <span className="bottom-nav__label">动态</span>
+      </div>
+      <div className="bottom-nav__item" data-tab="haoyou">
+        <div className="bottom-nav__icon"><img src={iconSrc('haoyou')} width="32" height="32" alt="" /></div>
+        <span className="bottom-nav__label">好友</span>
+      </div>
+      <div className="bottom-nav__item" data-tab="gongzuotai">
+        <div className="bottom-nav__icon"><img src={iconSrc('gongzuotai')} width="32" height="32" alt="" /></div>
+        <span className="bottom-nav__label">工作台</span>
+      </div>
+      <div className="bottom-nav__item" data-tab="xiaoxi">
+        <div className="bottom-nav__icon"><img src={iconSrc('xiaoxi')} width="32" height="32" alt="" /></div>
+        <span className="bottom-nav__label">消息</span>
+      </div>
+      <div className="bottom-nav__item active" data-tab="wode">
+        <div className="bottom-nav__icon"><img src={iconSrc('wode')} width="32" height="32" alt="" /></div>
+        <span className="bottom-nav__label">我的</span>
+      </div>
+    </nav>
+  );
+}
+
+function SystemSettingsContent({ onPreviewAction }) {
+  return (
+    <>
+      <div className="cell-group">
+        <div className="cell-group__title">账号</div>
+        <div className="cell-group__content">
+          <div
+            data-component="cell"
+            className="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable"
+            role="button"
+            tabIndex={0}
+            onClick={() => onPreviewAction('手机号登录设置待接入')}
+            onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('手机号登录设置待接入'))}
+          >
+            <div className="cell__body">
+              <div className="cell__content">
+                <div className="cell__title-row"><span className="cell__title">手机号登录</span></div>
+                <div className="cell__subtitle">通过手机号和密码实现多人同时登录</div>
+              </div>
+              <div className="cell__action">
+                <span className="cell__action-text">去设置</span>
+                <i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="cell-group">
+        <div className="cell-group__title">业务</div>
+        <div className="cell-group__content">
+          <div
+            data-component="cell"
+            className="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable"
+            role="button"
+            tabIndex={0}
+            onClick={() => onPreviewAction('产品与笔记待接入')}
+            onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('产品与笔记待接入'))}
+          >
+            <div className="cell__body">
+              <div className="cell__content">
+                <div className="cell__title-row"><span className="cell__title">产品与笔记</span></div>
+                <div className="cell__subtitle">标签管理、批量上下架、产品清理等</div>
+              </div>
+              <div className="cell__action">
+                <span className="system-settings__dot" aria-hidden="true"></span>
+                <i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
+              </div>
+            </div>
+          </div>
+          <div
+            data-component="cell"
+            className="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable"
+            role="button"
+            tabIndex={0}
+            onClick={() => onPreviewAction('搜索与分享待接入')}
+            onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('搜索与分享待接入'))}
+          >
+            <div className="cell__body">
+              <div className="cell__content">
+                <div className="cell__title-row"><span className="cell__title">搜索与分享</span></div>
+                <div className="cell__subtitle">分享设置、以图搜图、开启搜索码等</div>
+              </div>
+              <div className="cell__action">
+                <i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
+              </div>
+            </div>
+          </div>
+          <div
+            data-component="cell"
+            className="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable"
+            role="button"
+            tabIndex={0}
+            onClick={() => onPreviewAction('粉丝设置待接入')}
+            onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('粉丝设置待接入'))}
+          >
+            <div className="cell__body">
+              <div className="cell__content">
+                <div className="cell__title-row"><span className="cell__title">粉丝设置</span></div>
+                <div className="cell__subtitle">设置粉丝资料、生命周期、标签等</div>
+              </div>
+              <div className="cell__action">
+                <i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
+              </div>
+            </div>
+          </div>
+          <div
+            data-component="cell"
+            className="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable"
+            role="button"
+            tabIndex={0}
+            onClick={() => onPreviewAction('团队与员工待接入')}
+            onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('团队与员工待接入'))}
+          >
+            <div className="cell__body">
+              <div className="cell__content">
+                <div className="cell__title-row"><span className="cell__title">团队与员工</span></div>
+                <div className="cell__subtitle">员工业绩归属模式</div>
+              </div>
+              <div className="cell__action">
+                <i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
+              </div>
+            </div>
+          </div>
+          <div
+            data-component="cell"
+            className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+            role="button"
+            tabIndex={0}
+            onClick={() => onPreviewAction('交易设置待接入')}
+            onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('交易设置待接入'))}
+          >
+            <div className="cell__body">
+              <div className="cell__content"><div className="cell__title-row"><span className="cell__title">交易设置</span></div></div>
+              <div className="cell__action"><i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+            </div>
+          </div>
+          <div
+            data-component="cell"
+            className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+            role="button"
+            tabIndex={0}
+            onClick={() => onPreviewAction('聊天与通知待接入')}
+            onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('聊天与通知待接入'))}
+          >
+            <div className="cell__body">
+              <div className="cell__content"><div className="cell__title-row"><span className="cell__title">聊天与通知</span></div></div>
+              <div className="cell__action"><i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="cell-group">
+        <div className="cell-group__title">系统</div>
+        <div className="cell-group__content">
+          <div
+            data-component="cell"
+            className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+            role="button"
+            tabIndex={0}
+            onClick={() => onPreviewAction('安全中心待接入')}
+            onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('安全中心待接入'))}
+          >
+            <div className="cell__body">
+              <div className="cell__content"><div className="cell__title-row"><span className="cell__title">安全中心</span></div></div>
+              <div className="cell__action"><i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+            </div>
+          </div>
+          <div
+            data-component="cell"
+            className="cell cell--single cell--bg-white cell--clickable"
+            role="button"
+            tabIndex={0}
+            onClick={() => onPreviewAction('关于待接入')}
+            onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('关于待接入'))}
+          >
+            <div className="cell__body">
+              <div className="cell__content"><div className="cell__title-row"><span className="cell__title">关于</span></div></div>
+              <div className="cell__action"><i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function SystemSettingsScreen({ isOpen, onClose, onPreviewAction }) {
+  return (
+    <div className={`uikit-settings-screen${isOpen ? ' is-open' : ''}`} aria-hidden={!isOpen}>
+      <StatusBar />
+      <div data-component="navbar" className="navbar">
+        <div className="navbar__body">
+          <div className="navbar__left">
+            <div
+              className="navbar__left-btn"
+              role="button"
+              aria-label="返回"
+              tabIndex={0}
+              onClick={onClose}
+              onKeyDown={(event) => handleActionKeyDown(event, onClose)}
+            >
+              <i className="wego-iconfont-s icon-fanhui"></i>
+            </div>
+          </div>
+          <div className="navbar__center">
+            <span className="navbar__title">设置</span>
+          </div>
+          <div className="navbar__right"></div>
+        </div>
+      </div>
+      <div className="phone-body">
+        <SystemSettingsContent onPreviewAction={onPreviewAction} />
+      </div>
+      <HomeIndicator />
+    </div>
+  );
+}
+
+function HostScreen({ onOpen }) {
+  return (
+    <div className="uikit-host-screen">
+      <StatusBar />
+      <div data-component="navbar" className="navbar">
+        <div className="navbar__body">
+          <div className="navbar__left"></div>
+          <div className="navbar__center navbar__center--wide">
+            <span className="navbar__title">我的</span>
+          </div>
+          <div className="navbar__right"></div>
+        </div>
+      </div>
+      <div className="phone-body">
+        <div className="cell-group">
+          <div className="cell-group__title">设置入口</div>
+          <div className="cell-group__content">
+            <div
+              data-component="cell"
+              className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+              role="button"
+              tabIndex={0}
+              onClick={onOpen}
+              onKeyDown={(event) => handleActionKeyDown(event, onOpen)}
+            >
+              <div className="cell__body">
+                <div className="cell__content"><div className="cell__title-row"><span className="cell__title">系统设置</span></div></div>
+                <div className="cell__action"><i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <BottomNav />
+      <HomeIndicator />
+    </div>
+  );
+}
+
+function App() {
+  const [screenMounted, setScreenMounted] = useState(true);
+  const [screenOpen, setScreenOpen] = useState(true);
+  const [toast, setToast] = useState('');
+
+  useEffect(() => {
+    if (!toast) return undefined;
+    const timer = window.setTimeout(() => setToast(''), 1500);
+    return () => window.clearTimeout(timer);
+  }, [toast]);
+
+  const openScreen = () => {
+    setScreenMounted(true);
+    window.setTimeout(() => setScreenOpen(true), 16);
+  };
+
+  const closeScreen = () => {
+    setScreenOpen(false);
+    window.setTimeout(() => setScreenMounted(false), 260);
+  };
+
+  return (
+    <>
+      <HostScreen onOpen={openScreen} />
+      {screenMounted ? <SystemSettingsScreen isOpen={screenOpen} onClose={closeScreen} onPreviewAction={setToast} /> : null}
+      <div className={`uikit-toast${toast ? ' is-visible' : ''}`}>{toast}</div>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

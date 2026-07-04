@@ -1,18 +1,15 @@
 /* 价格权限管理场景样式
  * 仅页面级布局胶水与业务作用域状态，不替代已注册组件 class
+ * 命中 biz-rule-config pagePattern，surface 角色不是 host-entry，使用通栏模式 M1：
+ * phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰
  */
 
-/* 列表页与权限设置页共享的 phone-body 布局 */
+/* 列表页与权限设置页共享的 phone-body 布局（通栏 M1） */
 .price-list-page,
 .price-perm-page {
   display: flex;
   flex-direction: column;
   min-height: 100%;
-  background: var(--bg-page);
-}
-
-.price-list-page .navbar,
-.price-perm-page .navbar {
   background: var(--bg-page);
 }
 
@@ -25,42 +22,11 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacer-8);
-  padding: var(--spacer-12) var(--spacer-12) calc(var(--spacer-40) + var(--safe-area-bottom, 0px));
-}
-
-/* 列表页：最后一行不加分割线（cell 契约要求） */
-.price-list-body .cell-group__content .cell:last-child {
-  --cell-divider-left: 16px;
-}
-.price-list-body .cell-group__content .cell:last-child .cell__body::after {
-  border-bottom: none;
-}
-
-/* 权限设置页：权限选项最后一行去掉分割线 */
-.price-perm-body .cell-group__content .cell:last-child .cell__body::after {
-  border-bottom: none;
+  /* 通栏 M1：横向 padding 0px，cell 横向边距由 cell__body 自带 16px padding 承担 */
+  padding: var(--spacer-8) 0 calc(var(--spacer-40) + var(--safe-area-bottom, 0px));
 }
 
 /* 权限设置页：粉丝分组展开区作为父项条件延展，与权限类型组保持连续节奏 */
 .price-perm-groups {
   margin-top: 0;
-}
-
-/* 权限设置页：navbar 标题省略 */
-.price-perm-page .navbar__title {
-  display: block;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* navbar 内部 button 样式对齐（复用 .btn，无新组件类） */
-.price-perm-page .navbar__action--button .btn {
-  white-space: nowrap;
-}
-
-/* 列表页 navbar 左侧返回文本热区 */
-.price-list-page .navbar__left-text {
-  cursor: pointer;
 }

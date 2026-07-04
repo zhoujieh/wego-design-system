@@ -1,0 +1,84 @@
+{
+  "task_type": "design-system-consumption",
+  "scene_category": "system-setting",
+  "business_goal": "展示系统设置入口列表，用户点击各入口进入对应设置项；本页仅承载入口导航，不做编辑操作",
+  "interaction_mode": "select",
+  "app_target": {
+    "mode": "wego-app-scene",
+    "app_root": "wego-app",
+    "scene_folder": "wego-app/scenes/系统设置",
+    "runtime_entry": "scene.js",
+    "route_mode": "hash"
+  },
+  "information_blocks": [
+    "入口：『我的』Tab → 设置 → 系统设置（二级入口，缩进展示）",
+    "导航栏：返回图标 + 标题『设置』",
+    "第1组：手机号登录（副标题『通过手机号和密码实现多人同时登录』，右侧『去设置』文字 + 箭头）",
+    "第2组：产品与笔记（副标题『标签管理、批量上下架、产品清理等』，右侧红点 + 箭头）",
+    "第2组：搜索与分享（副标题『分享设置、以图搜图、开启搜索码等』，右侧箭头）",
+    "第2组：粉丝设置（副标题『设置粉丝资料、生命周期、标签等』，右侧箭头）",
+    "第2组：团队与员工（副标题『员工业绩归属模式』，右侧箭头）",
+    "第2组：交易设置（右侧箭头）",
+    "第2组：聊天与通知（右侧箭头）",
+    "第3组：安全中心（右侧箭头）",
+    "第3组：关于（右侧箭头）",
+    "退出登录按钮（白底圆角、居中黑色文字）",
+    "客服教我（蓝色文字链接，居中）"
+  ],
+  "page_surfaces": [
+    {
+      "id": "host-entry",
+      "role": "host-entry",
+      "information_blocks": [
+        "入口：『我的』Tab → 设置 → 系统设置（二级入口，缩进展示）"
+      ],
+      "interaction_mode": "select",
+      "purpose": "本入口是『设置』一级入口下的二级入口，需要在宿主页中视觉从属展示（缩进）；点击 push 进入系统设置列表页"
+    },
+    {
+      "id": "system-setting-list",
+      "role": "primary-task-page",
+      "information_blocks": [
+        "导航栏：返回图标 + 标题『设置』",
+        "第1组：手机号登录（副标题『通过手机号和密码实现多人同时登录』，右侧『去设置』文字 + 箭头）",
+        "第2组：产品与笔记（副标题『标签管理、批量上下架、产品清理等』，右侧红点 + 箭头）",
+        "第2组：搜索与分享（副标题『分享设置、以图搜图、开启搜索码等』，右侧箭头）",
+        "第2组：粉丝设置（副标题『设置粉丝资料、生命周期、标签等』，右侧箭头）",
+        "第2组：团队与员工（副标题『员工业绩归属模式』，右侧箭头）",
+        "第2组：交易设置（右侧箭头）",
+        "第2组：聊天与通知（右侧箭头）",
+        "第3组：安全中心（右侧箭头）",
+        "第3组：关于（右侧箭头）",
+        "退出登录按钮（白底圆角、居中黑色文字）",
+        "客服教我（蓝色文字链接，居中）"
+      ],
+      "interaction_mode": "select",
+      "purpose": "系统设置列表主页面，按分组展示全部设置入口；点击各入口给出『该功能尚未接入』提示，不实现下钻交互"
+    }
+  ],
+  "host_container": {
+    "tab": "my",
+    "entry_label": "设置",
+    "subentry_label": "系统设置",
+    "leaf_level": 2,
+    "entry_type": "cell",
+    "needs_host_entry_surface": true
+  },
+  "route_id": "my-system-settings",
+  "component_intent": [
+    "宿主二级入口使用 cell--indent 缩进展示，承接父子层级关系",
+    "导航栏使用 navbar（push 模式，leftControl=back-icon，title=设置）",
+    "设置入口行使用 cell-group + cell，有副标题的行用 cell--double 双行密度，右侧箭头表示可进入下一层",
+    "红点提示使用 badge 或业务作用域小点，表达未读/新功能状态",
+    "退出登录使用 button，整行宽度，白底黑字",
+    "客服教我使用 link，居中蓝色文字"
+  ],
+  "spec_refs": {
+    "copy": ".codex/skills/wego-design/specs/文案与数据规范.md",
+    "layout": ".codex/skills/wego-design/specs/布局与间距规范.md",
+    "interaction": ".codex/skills/wego-design/specs/交互设计原则.md",
+    "visual": ".codex/skills/wego-design/specs/设计风格与品牌原则.md",
+    "motion": ".codex/skills/wego-design/specs/动效与视觉效果.md"
+  },
+  "delivery_hint": "next-step"
+}

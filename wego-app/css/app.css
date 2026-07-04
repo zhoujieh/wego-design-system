@@ -287,6 +287,11 @@ body[data-host-shell="true"] {
   animation: wego-scene-enter var(--duration-normal, 250ms) var(--ease-enter, ease-out);
 }
 
+.app-scene-layer--exit {
+  transition: transform var(--duration-normal, 250ms) var(--ease-exit, ease-in);
+  transform: translateX(100%);
+}
+
 .app-overlay-layer {
   background: rgb(0 0 0 / 32%);
   justify-content: center;
@@ -300,7 +305,7 @@ body[data-host-shell="true"] {
 }
 
 .app-overlay-layer--full-screen-modal {
-  background: var(--bg-page);
+  background: transparent;
 }
 
 .app-overlay-panel {
@@ -318,6 +323,12 @@ body[data-host-shell="true"] {
   animation: wego-sheet-enter var(--duration-normal, 250ms) var(--ease-enter, ease-out);
 }
 
+.app-overlay-layer--sheet .app-overlay-panel.app-overlay-panel--exit {
+  animation: none;
+  transition: transform var(--duration-normal, 250ms) var(--ease-exit, ease-in);
+  transform: translateY(100%);
+}
+
 .app-overlay-layer--full-screen-modal .app-overlay-panel {
   height: 100%;
   max-height: 100%;
@@ -325,6 +336,12 @@ body[data-host-shell="true"] {
   box-shadow: none;
   background: var(--bg-page);
   animation: wego-sheet-enter var(--duration-normal, 250ms) var(--ease-enter, ease-out);
+}
+
+.app-overlay-layer--full-screen-modal .app-overlay-panel.app-overlay-panel--exit {
+  animation: none;
+  transition: transform var(--duration-normal, 250ms) var(--ease-exit, ease-in);
+  transform: translateY(100%);
 }
 
 .app-toast {
@@ -348,12 +365,10 @@ body[data-host-shell="true"] {
 
 @keyframes wego-scene-enter {
   from {
-    transform: translateX(16px);
-    opacity: 0;
+    transform: translateX(100%);
   }
   to {
     transform: translateX(0);
-    opacity: 1;
   }
 }
 
@@ -395,6 +410,14 @@ body[data-host-shell="true"] {
   .phone-status,
   .phone-indicator {
     display: none;
+  }
+
+  /* 移动端显式 padding 护栏：避免 3 值 padding 简写在 CSS 变量级联场景下整条声明失效；同时用 env() 替代被 .phone-screen 覆盖为 0 的 --safe-area-* 变量，支持真机安全区（需配合 viewport-fit=cover） */
+  .host-shell-page {
+    padding-top: calc(var(--spacer-16) + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(var(--spacer-40) + 56px + env(safe-area-inset-bottom, 0px));
+    padding-left: calc(var(--spacer-16) + env(safe-area-inset-left, 0px));
+    padding-right: calc(var(--spacer-16) + env(safe-area-inset-right, 0px));
   }
 }
 

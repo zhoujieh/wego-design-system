@@ -1,0 +1,73 @@
+{
+  "kitType": "system-settings",
+  "presentation": "push",
+  "enterTransition": "slide-left",
+  "exitTransition": "slide-right",
+  "coversTabBar": true,
+  "screensGenerated": 1,
+  "coreComponentsUsed": ["navbar", "cell"],
+  "supportComponentsUsed": [],
+  "previewClassReuseRate": 0.865,
+  "reuseAssessment": "主体内容收敛为系统设置母版,账号/业务/系统三组 cell-group 全部复用已注册 cell 组件结构与稳定变体(double/single + text-arrow/dot-arrow/arrow);主骨架使用 navbar、cell;整行点击只保留给进入下一层的入口行;section 标题与分组内容都回收为 cell-group 正式 group 能力;UI Kit 演示双层结构(HostScreen + SystemSettingsScreen),让 AI 能学到 push 类页面的打开方式和 slide-left 动画定义。",
+  "a11yFixes": [
+    "可点击 cell 补齐 role、tabIndex 与键盘触发",
+    "navbar 返回按钮补齐 role、aria-label 与键盘触发"
+  ],
+  "inventedComponents": [],
+  "recommendedRefactors": {},
+  "interactiveStatesRendered": ["active", "focus", "open", "closed"],
+  "primaryActionPerScreen": true,
+  "mockDataDensity": {
+    "settingGroups": 3,
+    "cellRows": 9,
+    "doubleRows": 5,
+    "singleRows": 4,
+    "textArrowRows": 1,
+    "dotArrowRows": 1,
+    "arrowRows": 7
+  },
+  "qualityGates": {
+    "componentDOMCompliance": {
+      "description": "核心组件的 DOM 结构必须与组件契约一致,不得自行发明 cell 专属包装层",
+      "checked": true,
+      "violations": []
+    },
+    "spacingCompliance": {
+      "description": "页面纵向节奏由 phone-body 的 8px 组间距、group 标题和 cell 分组自身承担;HostScreen 与 SystemSettingsScreen 均用通栏模式 M1(phone-body 0px 横向 padding + cell-group__content 无 --card)。",
+      "checked": true,
+      "checklist": [
+        "phone-body 的组间距、group 标题和列表分组之间是否已形成稳定纵向节奏",
+        "HostScreen 用通栏模式 M1(phone-body 0px 横向 padding + cell-group__content 无 --card)",
+        "SystemSettingsScreen 用通栏模式 M1(phone-body 0px 横向 padding + cell-group__content 无 --card)",
+        "整行点击只保留给带箭头、会进入下一层的入口行",
+        "页面级主操作统一收口到 navbar 返回按钮"
+      ],
+      "violations": []
+    },
+    "showcaseStructureCompliance": {
+      "description": "UI Kit 必须演示双层结构(HostScreen + SettingsScreen),让 AI 能学到页面打开方式和动画定义",
+      "checked": true,
+      "checklist": [
+        "HostScreen 包含 navbar + phone-body + 入口 cell-group + BottomNav",
+        "SystemSettingsScreen 包含 navbar + phone-body + 内容 + 打开/关闭动画",
+        "打开动画通过 transform + transition 实现(push 用 translateX)",
+        "通过 React 状态控制挂载与打开/关闭状态切换",
+        "默认展示打开后的稳定态,避免自动入场动画让截图停在半开中间态"
+      ],
+      "violations": []
+    }
+  },
+  "warnings": [
+    "本 UI Kit 展示的是从右侧 push 进入、覆盖当前页的系统设置层级导航页。",
+    "phone-status 为当前页面状态栏展示样式;phone-indicator 等通用 Showcase 外壳由 scaffold.css 提供,非通用组件。",
+    "navbar 通过组件自身的 padding-top: var(--safe-area-top, 0px) + sticky top: 0 避让状态栏,UI Kit 演示层不要再额外给页面容器补顶部 safe-area。",
+    "页面纵向节奏应由 phone-body 的 8px 组间距和各组自身的 group 结构承担,不再插入纯占位元素。",
+    "连续 cell 分组应优先使用 cell-group 的 title + content 正式结构;HostScreen 与 SystemSettingsScreen 均用通栏模式 M1。",
+    "整行点击只保留给带箭头、会进入下一层的入口行;右侧是 switch、radio-group、checkbox-group 等独立控件时由控件自身承担交互。",
+    "根节点 #root 已经是 .phone-screen,React 内容层不要再嵌套第二层 .phone-screen。",
+    "phone-status / phone-indicator 默认绝对定位悬浮且不占文档流,并保持预览层级最高;桌面手机壳写死模拟 44px / 34px,移动端同链接隐藏。",
+    "push 页首屏展示以稳定落点为准:默认直接展示打开后的最终态,避免自动入场动画让截图停在半开中间态。",
+    "真实项目中应保持单一页面级主操作(返回),不在页面内容区或底部重复放操作按钮。",
+    "iconfont 图标用于跳转指示器(icon-youjiantou16)和返回按钮(icon-fanhui)。"
+  ]
+}

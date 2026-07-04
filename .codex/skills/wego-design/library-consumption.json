@@ -54,7 +54,9 @@
     "uikit": {
       "files": [
         "ui_kits/biz-rule-config/index.html",
-        "ui_kits/biz-rule-config/quality-report.json"
+        "ui_kits/biz-rule-config/quality-report.json",
+        "ui_kits/system-settings/index.html",
+        "ui_kits/system-settings/quality-report.json"
       ],
       "copyable": false,
       "purpose": "业务规则配置等页面组合 Showcase，用来理解页面结构和组件搭配；App 宿主页正式维护在 wego-app/，不是 UI Kit",
@@ -128,7 +130,8 @@
         "preview/component-{slug}.html",
         "uikit-plan.json",
         "specs/布局与间距规范.md",
-        "ui_kits/biz-rule-config/index.html"
+        "ui_kits/biz-rule-config/index.html",
+        "ui_kits/system-settings/index.html"
       ],
       "copyFiles": [
         "colors_and_type.css",
@@ -190,7 +193,27 @@
       ".phone-frame",
       ".phone-screen"
     ],
-    "warningForDownstream": "UI Kit 是展示样品，不是真实宿主模板；App 宿主模板直接从 wego-ux/templates/host-shell.* 复制。"
+    "warningForDownstream": "UI Kit 是展示样品，不是真实宿主模板；App 宿主模板直接从 wego-ux/templates/host-shell.* 复制。",
+    "showcaseStructureRule": {
+      "applicableTo": "包含 pagePattern 的 UI Kit（即有 presentation 定义的 UI Kit）",
+      "structureRequirement": {
+        "description": "UI Kit 必须演示双层结构：宿主入口页（HostScreen） + 业务页面（SettingsScreen），让 AI 能从 Showcase 学到页面的打开方式和动画定义",
+        "hostScreen": "包含 navbar + phone-body + 摘要卡 + 入口 cell-group（触发打开）+ BottomNav + HomeIndicator",
+        "settingsScreen": "包含 navbar + phone-body + 内容 + 打开动画 + 关闭动画"
+      },
+      "animationRequirement": {
+        "description": "打开/关闭动画通过 transform + transition 实现，通过 React 状态控制挂载与打开/关闭状态切换",
+        "push": "translateX(100%) → translateX(0)（slide-left 进入），关闭时反向",
+        "modal": "translateY(100%) → translateY(0)（slide-up 进入），关闭时反向",
+        "fullScreenModal": "translateY(100%) → translateY(0)（slide-up 进入），关闭时反向",
+        "defaultState": "首屏展示以稳定落点为准，默认直接展示打开后的最终态，避免自动入场动画让截图停在半开中间态"
+      },
+      "referenceInstances": [
+        "biz-rule-config（BaseScreen + BizSettingsModal，full-screen-modal + slide-up）",
+        "system-settings（HostScreen + SystemSettingsScreen，push + slide-left）"
+      ],
+      "purpose": "让 AI 从规则文档直接学到 UI Kit 必须演示双层结构 + 打开方式 + 动画定义，不依赖隐性实践推断"
+    }
   },
   "recommendedReadOrder": [
     "SKILL.md",
@@ -237,7 +260,8 @@
   "embeddedComponents": [],
   "unpublishedContracts": [],
   "uiKits": [
-    "biz-rule-config"
+    "biz-rule-config",
+    "system-settings"
   ],
   "componentContractSchemaVersion": 3,
   "componentContractReadRule": "components/{slug}.json 统一使用 schemaVersion 3；读取时依次关注 semanticTypeCandidates、variantDimensions、usageHints、doNotInvent、tokensConsumed、provenance。",
