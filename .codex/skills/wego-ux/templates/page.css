@@ -2,13 +2,13 @@
  *
  * 规则:
  * - 全局元素重置已统一收口到 colors_and_type.css(*、html/body、button、a、img/svg、h1-h6/p、ul/ol、input/textarea/select、滚动条隐藏),此处不再重复
- * - 禁止引用 --safe-area-top / --safe-area-bottom-content(真机由宿主补齐,PC 浏览器 fallback 会留白)
+ * - --safe-area-top / --safe-area-bottom 在 .phone-screen 内定义模拟值(44px/34px),与 host-shell 一致;phone-status/phone-indicator absolute 悬浮透明背景不占位;内容区通过自身 padding 避让安全区;导航主体高度通过 --navbar-body-height 控制,桌面手机壳为 44px,无状态栏时回到 56px
  * - preview-shell / phone-frame / phone-screen 是全局预览外壳:电脑端显示,移动端同链接隐藏
- * - 禁止使用 .uikit-shell / .phone-status / .phone-body / .phone-indicator
+ * - 禁止使用 .uikit-shell / .phone-body;.phone-status / .phone-indicator 作为预览安全区,与 host-shell 一致
  * - 模态层使用 position: fixed; inset: 0,不要用 position: absolute
  * - 颜色/间距/字号全部使用 Token,不硬编码 hex/rem
  * - 业务样式用业务前缀作用域限定,如 .{biz}-page__section
- * - navbar 默认 sticky 吸顶(已由 components.css 配置),此处不重复
+ * - navbar 默认 sticky 吸顶(已由 components.css 配置 top: 0),并在组件内部通过 padding-top: var(--safe-area-top, 0px) 处理顶部安全区,此处不重复
  */
 
 /* ============ 全局预览外壳 ============ */
@@ -43,6 +43,9 @@ body {
 }
 
 .phone-screen {
+  --safe-area-top: 44px;
+  --safe-area-bottom: 34px;
+  --navbar-body-height: 44px;
   width: 100%;
   height: 100%;
   min-height: 0;
@@ -54,6 +57,47 @@ body {
   position: relative;
 }
 
+.phone-status {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--safe-area-top);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spacer-16);
+  background: transparent;
+  box-sizing: border-box;
+  font-size: var(--body-sm-font-size);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-default);
+  pointer-events: none;
+  z-index: var(--z-sticky, 10);
+}
+
+.phone-indicator {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--safe-area-bottom);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: var(--z-sticky, 10);
+}
+
+.phone-indicator-bar {
+  width: 134px;
+  height: 5px;
+  background: var(--bg-inverse);
+  border-radius: var(--radius-full);
+  opacity: 0.2;
+}
+
 /* ============ 页面主体 ============ */
 /* 不写 min-height,让内容自然撑高,保障可以滚动显示即可;
    避免 navbar 高度 + min-height:100vh 叠加导致短内容页强制出现滚动条 */
@@ -61,7 +105,7 @@ body {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-  padding-bottom: var(--spacer-40, 40px);
+  padding-bottom: calc(var(--spacer-40) + var(--safe-area-bottom));
 }
 
 /* ============ 全屏模态层(full-screen-modal 范式) ============ */
@@ -98,7 +142,15 @@ body {
   }
 
   .phone-screen {
+    --safe-area-top: 0;
+    --safe-area-bottom: 0;
+    --navbar-body-height: 56px;
     border-radius: 0;
+  }
+
+  .phone-status,
+  .phone-indicator {
+    display: none;
   }
 
   .modal-overlay {

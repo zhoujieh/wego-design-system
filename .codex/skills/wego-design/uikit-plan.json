@@ -291,7 +291,8 @@
       ],
       "desktop": "显示手机预览外壳，便于电脑端验收移动端页面",
       "mobile": "同一个链接在窄屏/手机端隐藏外壳视觉，内容铺满真实 viewport",
-      "boundary": "预览外壳只服务验收，不参与业务布局；业务页面不得依赖 .uikit-shell/.phone-frame/.phone-screen 实现内容结构"
+      "boundary": "预览外壳只服务验收，不参与业务布局；业务页面不得依赖 .uikit-shell/.phone-frame/.phone-screen 实现内容结构",
+      "statusBarRule": "phone-status / phone-indicator 仅属于预览外壳，默认 absolute 悬浮、不占文档流，并保持预览层级最高（z-index 使用 var(--z-critical)）；桌面手机壳用固定模拟值，移动端隐藏并回落到真实 safe-area。"
     }
   },
   "selectionPolicy": "mobile-app-fixed-slots-first",
@@ -370,7 +371,9 @@
         "使用编辑型二级页导航，页面级主操作统一收口",
         "页面顶部可放置摘要区（方案名称、状态、说明等），但摘要区不是必需结构——是否包含摘要区由原始业务需求决定；UI Kit 中的 biz-summary 是演示参考，不是页面范式的强制元素。",
         "整体保持高信息密度和连续设置节奏，避免做成松散营销页",
-        "子级条件区域（left-guide）：子级 cell 缩进结构以 cell.json 的 structurePatterns 为权威来源，使用 cell__backspace 占位模式。父级 radio/checkbox 所在 cell 和子级 cell 应在同一 section-group 内连续排列，最后一行不加分割线。",
+        "section 标题优先使用 cell/form 分组自带的 title 节点；标题独立一行，连续内容放进 group 自带 content 容器，不再复制 UI Kit 私有标题类。",
+        "页面内容区左右存在内边距时，连续 cell/form 分组视为卡片式分组：在 group content 容器上开启卡片修饰类，让 8px 圆角只作用于内容区，不额外再包一层白底圆角壳。",
+        "子级条件区域（left-guide）：子级 cell 缩进结构以 cell.json 的 structurePatterns 为权威来源，使用 cell__backspace 占位模式。父级 radio/checkbox 所在 cell 和子级 cell 应在同一 .cell-group 内连续排列，最后一行不加分割线。",
         "页面背景一旦确定，navbar 背景默认跟随 data-bg 的公共 CSS 约定：page=灰底，surface=白底。普通业务页不要在任务级 page.css 单独覆盖 navbar 背景，透明反白仅走已注册的 .navbar--fixed-transparent 例外。"
       ],
       "templates": [
@@ -412,6 +415,13 @@
           "avoid": "把 helper 当成默认兜底说明层",
           "reason": "规则配置页需要高信息密度和连续设置节奏，冗余 helper 会掩盖结构主次并放大场景拆解问题。",
           "allowWhen": "只有结构无法承载且业务必须提醒风险、时效或不可逆后果时，才保留 helper"
+        },
+        {
+          "trigger": "section 由连续 cell 或连续 form-body 组成，且标题与内容属于同一业务分组",
+          "use": "使用 `.cell-group` / `.form-group` 的正式标题节点 + 内容容器结构；卡片页时仅在 content 容器上开启卡片修饰类",
+          "avoid": "复用 `.uikit-section-title`、手写 section 间距，或额外包一层只为白底圆角存在的容器",
+          "reason": "分组标题、内容区表面和卡片圆角已经收敛为组件正式能力，继续放在页面层拼接会造成节奏、圆角和复制边界漂移。",
+          "allowWhen": "只有目标内容不是连续 cell / form-body 分组，或标题不属于该组时，才回到页面级普通标题布局"
         }
       ]
     }
@@ -528,7 +538,7 @@
       ],
       "layoutRules": [
         "使用 navbar 承接返回和保存/完成动作",
-        "选择项使用 section-group + cell 组织",
+        "选择项使用 .cell-group + cell 组织",
         "单选使用 radio，多选使用 checkbox，已选摘要可用 tag",
         "创建或补充动作使用 button/link，不把选择项做成自定义卡片"
       ],

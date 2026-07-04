@@ -73,6 +73,7 @@ description: 验收产品原型项目并输出 acceptance_report 的技能。用
 - 短内容页面是否避免强制滚动条(检查 `.page-body` 是否误用 `min-height: 100vh` 与 navbar 高度叠加;内容应自然撑高,不写 min-height)
 - modal-overlay 是否挂载并限制在 `.phone-screen` 内，不能覆盖整个浏览器 viewport
 - navbar 中 `<button>` 元素是否被正确重置(无原生 border/background/padding 泄漏;依赖 colors_and_type.css 的全局 button 重置,不再需要 biz-plain-button 等内部重置类)
+- 模态页（`.modal-overlay`）和 push 页（`.push-screen`）是否避让顶部电池栏：避让由 `host-shell.css` 模板统一提供 `padding-top: var(--safe-area-top, 0px)`；任务级 `page.css` 不得引用 `--safe-area-top` Token（守门脚本会拦截）；若 navbar 被电池栏视觉覆盖或任务级 `page.css` 引用了 `--safe-area-top`，判实现问题，归因到 `wego-ux`，`final_status` 不能为 `pass`
 
 ### 单一预览外壳验收(必查)
 
@@ -85,6 +86,9 @@ description: 验收产品原型项目并输出 acceptance_report 的技能。用
 - 若 `page_spec` 声明 `host_container + route_id`，`index.html` 必须来自固定 App 宿主模板，保留宿主 Tab、工作台、我的页、默认入口、UI 和基础交互；只允许按 `route_id` 增量更新目标入口、业务页链接和状态回填
 - 若宿主 App 被大面积删减、重画或替换成 AI 自创内容，归因到 `wego-ux`，`final_status` 不能为 `pass`
 - 若点击设置页、业务页、二级选择页后顶层浏览器离开 `index.html` 或出现铺满浏览器的新页面，归因到 `wego-ux`，`final_status` 不能为 `pass`
+- `index.html` 内的 `.phone-status` 和 `.phone-indicator` 必须按 absolute 悬浮方案实现（`position: absolute` + 透明背景 + 不占布局空间），内容区通过自身 padding 避让安全区；若给父屏幕容器加 padding-top/padding-bottom 导致绝对定位错乱，判实现问题，归因到 `wego-ux`
+- `page.css` / `host-shell.css` 必须在 `.phone-screen` 内定义 `--safe-area-top: 44px` 和 `--safe-area-bottom: 34px` 模拟值，并在移动端 @media 内重置 Token 为 0 联动隐藏安全区；若逐个重置 phone-status / phone-indicator / 固定元素样式而不通过 Token 重置联动，判实现问题，归因到 `wego-ux`
+- 页面底部固定元素（bottom-nav、固定操作栏、固定按钮栏）必须预留 `--safe-area-bottom` 间距（已注册组件由 components.css 统一提供；任务级自创操作栏由 page.css 业务样式声明）；若固定元素底部未预留安全区导致内容被 phone-indicator 遮挡，判实现问题，归因到 `wego-ux`
 
 ### 页面打开方式验收(必查)
 
@@ -103,6 +107,7 @@ description: 验收产品原型项目并输出 acceptance_report 的技能。用
 - 是否擅自改写稳定场景内部关联控件的尺寸、对齐或间距
 - 父项选中后才出现的补充内容，是否被错误拆成独立平级 section，而不是作为父场景延展
 - helper 是否仅重复结构、摘要、选中态、禁用条件或跳转语义已表达的信息；若是，判为冗余实现
+- 连续行式组件（如 cell）是否用已注册分组容器类（`.cell-group`）包裹，是否发明任务级 `xxx-page__group` 自定义类替代；若发现任务级自定义类替代已注册分组容器，判实现问题，归因到 `wego-ux`，`final_status` 不能为 `pass`
 
 ## 守门脚本引用规则
 

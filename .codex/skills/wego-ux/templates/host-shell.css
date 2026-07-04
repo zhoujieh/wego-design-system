@@ -39,6 +39,7 @@ body[data-host-shell="true"] {
 .phone-screen {
   --safe-area-top: 44px;
   --safe-area-bottom: 34px;
+  --navbar-body-height: 44px;
   width: 100%;
   height: 100%;
   min-height: 0;
@@ -51,7 +52,10 @@ body[data-host-shell="true"] {
 }
 
 .phone-status {
-  flex-shrink: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   height: var(--safe-area-top);
   display: flex;
   align-items: center;
@@ -63,13 +67,14 @@ body[data-host-shell="true"] {
   font-weight: var(--font-weight-semibold);
   color: var(--text-default);
   pointer-events: none;
+  z-index: calc(var(--z-overlay, 500) + 3);
 }
 
 .host-shell-page {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-  padding: var(--spacer-16) var(--spacer-16) calc(var(--spacer-40) + var(--safe-area-bottom) + 56px);
+  padding: calc(var(--spacer-16) + var(--safe-area-top)) var(--spacer-16) calc(var(--spacer-40) + var(--safe-area-bottom) + 56px);
   display: flex;
   flex-direction: column;
   gap: var(--spacer-12);
@@ -253,7 +258,6 @@ body[data-host-shell="true"] {
 
 .bottom-nav {
   flex-shrink: 0;
-  padding-bottom: var(--safe-area-bottom);
   z-index: var(--z-sticky);
 }
 
@@ -299,16 +303,15 @@ body[data-host-shell="true"] {
   }
 
   .phone-screen {
+    --safe-area-top: 0;
+    --safe-area-bottom: 0;
+    --navbar-body-height: 56px;
     border-radius: 0;
   }
 
   .phone-status,
   .phone-indicator {
     display: none;
-  }
-
-  .bottom-nav {
-    padding-bottom: 0;
   }
 }
 

@@ -10,11 +10,14 @@
 <link rel="stylesheet" href="../components.css">
 <style>
 .page{max-width:420px;margin:0 auto}
-.section-title{font-size:var(--body-sm-font-size);font-weight:var(--font-weight-medium);color:var(--text-tertiary);padding:24px 16px 8px}
 .section-group{background:var(--bg-surface);width:100%}
 .section-gap{height:8px;background:var(--bg-page)}
 
 /* @component-css-start */
+.cell-group{display:flex;flex-direction:column;width:100%}
+.cell-group__title{padding:16px 16px 8px;font-size:var(--body-sm-font-size);font-weight:var(--font-weight-medium);line-height:var(--body-sm-line-height);color:var(--text-tertiary);font-feature-settings:"zero"}
+.cell-group__content{width:100%;background:var(--bg-surface)}
+.cell-group__content--card{border-radius:var(--radius-8);overflow:hidden}
 .cell{position:relative;display:flex;align-items:center;width:100%;box-sizing:border-box;background:var(--bg-surface);color:var(--text-default);overflow:hidden}
 .cell--single{min-height:56px}
 .cell--double{min-height:76px}
@@ -63,11 +66,54 @@
 <div class="pv-header"><h1>单元格</h1><p>列表行，支持标题、内容、箭头、图标、徽标和副操作。</p></div>
 <div class="page">
 
+<div class="cell-group">
+  <div class="cell-group__content">
+    <div class="cell cell--single cell--divider-right-edge cell--bg-white">
+      <div class="cell__body">
+        <div class="cell__content"><div class="cell__title-row"><span class="cell__title">通栏分组</span></div></div>
+        <div class="cell__action"><span class="cell__action-text">无圆角</span></div>
+      </div>
+    </div>
+    <div class="cell cell--double cell--bg-white">
+      <div class="cell__body">
+        <div class="cell__content">
+          <div class="cell__title-row"><span class="cell__title">连续内容区</span></div>
+          <div class="cell__subtitle">白底和分割线都由 .cell-group__content 承接。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="section-gap"></div>
+
+<div class="cell-group">
+  <div class="cell-group__title">标题独立一行</div>
+  <div class="cell-group__content cell-group__content--card">
+    <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
+      <div class="cell__body">
+        <div class="cell__content"><div class="cell__title-row"><span class="cell__title">卡片式分组</span></div></div>
+        <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+      </div>
+    </div>
+    <div class="cell cell--double cell--bg-white cell--clickable">
+      <div class="cell__body">
+        <div class="cell__content">
+          <div class="cell__title-row"><span class="cell__title">标题不进入圆角白底</span></div>
+          <div class="cell__subtitle">卡片页只给内容区加 8px 圆角，不额外包任务级白底壳。</div>
+        </div>
+        <div class="cell__action"><span class="cell__action-text">8px</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="section-gap"></div>
+
 <!-- ═══════════════════════════════════════════ -->
 <!-- 右侧操作区 - JUMP_TO -->
 <!-- ═══════════════════════════════════════════ -->
-<div class="section-title">右侧 - 跳转 (JUMP_TO) — 分割线贴边</div>
-<div class="section-group">
+<div class="cell-group">
+  <div class="cell-group__title">右侧 - 跳转 (JUMP_TO) — 分割线贴边</div>
+  <div class="cell-group__content cell-group__content--card">
   <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
     <div class="cell__body">
       <div class="cell__content"><div class="cell__title-row"><span class="cell__title">跳转页面</span></div></div>
@@ -95,12 +141,14 @@
       <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
     </div>
   </div>
+  </div>
 </div>
 <div class="section-gap"></div>
 
 <!-- 跳转 + 操作区徽章 -->
-<div class="section-title">右侧 - 跳转 + 操作区徽章</div>
-<div class="section-group">
+<div class="cell-group">
+  <div class="cell-group__title">右侧 - 跳转 + 操作区徽章</div>
+  <div class="cell-group__content cell-group__content--card">
   <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
     <div class="cell__body">
       <div class="cell__content"><div class="cell__title-row"><span class="cell__title">消息中心</span></div></div>
@@ -140,14 +188,16 @@
       </div>
     </div>
   </div>
+  </div>
 </div>
 <div class="section-gap"></div>
 
 <!-- ═══════════════════════════════════════════ -->
 <!-- 右侧操作区 - TEXT（纯文本） -->
 <!-- ═══════════════════════════════════════════ -->
-<div class="section-title">右侧 - 纯文本 (TEXT)</div>
-<div class="section-group">
+<div class="cell-group">
+  <div class="cell-group__title">右侧 - 纯文本 (TEXT)</div>
+  <div class="cell-group__content cell-group__content--card">
   <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
     <div class="cell__body">
       <div class="cell__content"><div class="cell__title-row"><span class="cell__title">文本操作区</span></div></div>
@@ -169,14 +219,16 @@
       <div class="cell__action"><span class="cell__action-text">默认</span></div>
     </div>
   </div>
+  </div>
 </div>
 <div class="section-gap"></div>
 
 <!-- ═══════════════════════════════════════════ -->
 <!-- 右侧操作区 - SWITCH -->
 <!-- ═══════════════════════════════════════════ -->
-<div class="section-title">右侧 - 开关 (SWITCH)</div>
-<div class="section-group">
+<div class="cell-group">
+  <div class="cell-group__title">右侧 - 开关 (SWITCH)</div>
+  <div class="cell-group__content cell-group__content--card">
   <div class="cell cell--single cell--divider-right-edge cell--bg-white">
     <div class="cell__body">
       <div class="cell__content"><div class="cell__title-row"><span class="cell__title">推送通知</span></div></div>
@@ -198,14 +250,16 @@
       <div class="cell__action"><div class="switch switch--on switch--disabled"><div class="switch__thumb"></div></div></div>
     </div>
   </div>
+  </div>
 </div>
 <div class="section-gap"></div>
 
 <!-- ═══════════════════════════════════════════ -->
 <!-- 右侧操作区 - BUTTON -->
 <!-- ═══════════════════════════════════════════ -->
-<div class="section-title">右侧 - 按钮 (BUTTON)</div>
-<div class="section-group">
+<div class="cell-group">
+  <div class="cell-group__title">右侧 - 按钮 (BUTTON)</div>
+  <div class="cell-group__content cell-group__content--card">
   <div class="cell cell--single cell--divider-right-edge cell--bg-white">
     <div class="cell__body">
       <div class="cell__content"><div class="cell__title-row"><span class="cell__title">操作按钮</span></div></div>
@@ -233,14 +287,16 @@
       <div class="cell__action"><button class="btn btn--medium btn--sm">管理</button></div>
     </div>
   </div>
+  </div>
 </div>
 <div class="section-gap"></div>
 
 <!-- ═══════════════════════════════════════════ -->
 <!-- 右侧操作区 - CUSTOM（自定义） -->
 <!-- ═══════════════════════════════════════════ -->
-<div class="section-title">右侧 - 自定义 (CUSTOM)</div>
-<div class="section-group">
+<div class="cell-group">
+  <div class="cell-group__title">右侧 - 自定义 (CUSTOM)</div>
+  <div class="cell-group__content cell-group__content--card">
   <div class="cell cell--single cell--divider-right-edge cell--bg-white">
     <div class="cell__body">
       <div class="cell__content"><div class="cell__title-row"><span class="cell__title">自定义操作区</span></div></div>
@@ -256,14 +312,16 @@
       <div class="cell__action cell__action--link"><a class="link" href="javascript:void(0)">查看</a></div>
     </div>
   </div>
+  </div>
 </div>
 <div class="section-gap"></div>
 
 <!-- ═══════════════════════════════════════════ -->
 <!-- 标题区 - 图标 / Badge -->
 <!-- ═══════════════════════════════════════════ -->
-<div class="section-title">标题区 - 图标 & 徽章</div>
-<div class="section-group">
+<div class="cell-group">
+  <div class="cell-group__title">标题区 - 图标 & 徽章</div>
+  <div class="cell-group__content cell-group__content--card">
   <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
     <div class="cell__body">
       <div class="cell__content">
@@ -320,12 +378,14 @@
       <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
     </div>
   </div>
+  </div>
 </div>
 <div class="section-gap"></div>
 
 <!-- 标题区 - 自定义内容 -->
-<div class="section-title">标题区 - 自定义内容</div>
-<div class="section-group">
+<div class="cell-group">
+  <div class="cell-group__title">标题区 - 自定义内容</div>
+  <div class="cell-group__content cell-group__content--card">
   <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
     <div class="cell__body">
       <div class="cell__content">
@@ -349,14 +409,16 @@
       <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
     </div>
   </div>
+  </div>
 </div>
 <div class="section-gap"></div>
 
 <!-- ═══════════════════════════════════════════ -->
 <!-- 双行 - 标题 + 副标题 -->
 <!-- ═══════════════════════════════════════════ -->
-<div class="section-title">双行 - 标题 + 副标题</div>
-<div class="section-group">
+<div class="cell-group">
+  <div class="cell-group__title">双行 - 标题 + 副标题</div>
+  <div class="cell-group__content cell-group__content--card">
   <div class="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable">
     <div class="cell__body">
       <div class="cell__content">
@@ -375,14 +437,16 @@
       <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
     </div>
   </div>
+  </div>
 </div>
 <div class="section-gap"></div>
 
 <!-- ═══════════════════════════════════════════ -->
 <!-- 左侧 - 选择区 (Checkbox) -->
 <!-- ═══════════════════════════════════════════ -->
-<div class="section-title">左侧 - 选择区 (Checkbox)</div>
-<div class="section-group">
+<div class="cell-group">
+  <div class="cell-group__title">左侧 - 选择区 (Checkbox)</div>
+  <div class="cell-group__content cell-group__content--card">
   <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
     <div class="cell__select"><div class="checkbox" onclick="this.classList.toggle('checkbox--checked')"><div class="checkbox__inner"></div><div class="checkbox__icon"><img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt=""></div></div></div>
     <div class="cell__body">
@@ -407,12 +471,14 @@
       <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
     </div>
   </div>
+  </div>
 </div>
 <div class="section-gap"></div>
 
 <!-- 左侧 - 选择区 (Radio) -->
-<div class="section-title">左侧 - 选择区 (Radio)</div>
-<div class="section-group">
+<div class="cell-group">
+  <div class="cell-group__title">左侧 - 选择区 (Radio)</div>
+  <div class="cell-group__content cell-group__content--card">
   <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
     <div class="cell__select"><div class="radio"><div class="radio__inner"></div></div></div>
     <div class="cell__body">
@@ -437,12 +503,14 @@
       <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
     </div>
   </div>
+  </div>
 </div>
 <div class="section-gap"></div>
 
 <!-- 左侧 - 选择区 (图标) -->
-<div class="section-title">左侧 - 选择区 (图标)</div>
-<div class="section-group">
+<div class="cell-group">
+  <div class="cell-group__title">左侧 - 选择区 (图标)</div>
+  <div class="cell-group__content cell-group__content--card">
   <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
     <div class="cell__select"><i class="cell__select-icon wego-iconfont-s icon-chengchangzhongxin"></i></div>
     <div class="cell__body">
@@ -467,14 +535,16 @@
       <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
     </div>
   </div>
+  </div>
 </div>
 <div class="section-gap"></div>
 
 <!-- ═══════════════════════════════════════════ -->
 <!-- 左侧 - 头像区 -->
 <!-- ═══════════════════════════════════════════ -->
-<div class="section-title">左侧 - 头像区</div>
-<div class="section-group">
+<div class="cell-group">
+  <div class="cell-group__title">左侧 - 头像区</div>
+  <div class="cell-group__content cell-group__content--card">
   <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
     <div class="cell__avatar"><div class="avatar avatar--40 avatar--initials">头</div></div>
     <div class="cell__body">
@@ -506,14 +576,16 @@
       <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
     </div>
   </div>
+  </div>
 </div>
 <div class="section-gap"></div>
 
 <!-- ═══════════════════════════════════════════ -->
 <!-- 左侧 - 子级缩进 -->
 <!-- ═══════════════════════════════════════════ -->
-<div class="section-title">左侧 - 子级缩进</div>
-<div class="section-group">
+<div class="cell-group">
+  <div class="cell-group__title">左侧 - 子级缩进</div>
+  <div class="cell-group__content cell-group__content--card">
   <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
     <div class="cell__backspace"><i class="cell__backspace-icon wego-iconfont-s icon-jian16"></i></div>
     <div class="cell__select"><div class="checkbox" onclick="this.classList.toggle('checkbox--checked')"><div class="checkbox__inner"></div><div class="checkbox__icon"><img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt=""></div></div></div>
@@ -542,14 +614,16 @@
       <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
     </div>
   </div>
+  </div>
 </div>
 <div class="section-gap"></div>
 
 <!-- ═══════════════════════════════════════════ -->
 <!-- 分割线居中 -->
 <!-- ═══════════════════════════════════════════ -->
-<div class="section-title">分割线 - 居中 (null)</div>
-<div class="section-group">
+<div class="cell-group">
+  <div class="cell-group__title">分割线 - 居中 (null)</div>
+  <div class="cell-group__content cell-group__content--card">
   <div class="cell cell--single cell--divider-center cell--bg-white cell--clickable">
     <div class="cell__body">
       <div class="cell__content"><div class="cell__title-row"><span class="cell__title">账号与安全</span></div></div>
@@ -577,22 +651,26 @@
       <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
     </div>
   </div>
+  </div>
 </div>
 <div class="section-gap"></div>
 
 <!-- ═══════════════════════════════════════════ -->
 <!-- 二级缩进 -->
 <!-- ═══════════════════════════════════════════ -->
-<div class="section-title">二级缩进 (设置子选项)</div>
-<div class="section-group">
+<div class="cell-group">
+  <div class="cell-group__title">二级缩进 (设置子选项)</div>
+  <div class="cell-group__content cell-group__content--card">
   <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
     <div class="cell__body">
       <div class="cell__content"><div class="cell__title-row"><span class="cell__title">通知设置</span></div></div>
       <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
     </div>
   </div>
+  </div>
 </div>
-<div class="section-group">
+<div class="cell-group">
+  <div class="cell-group__content cell-group__content--card">
   <div class="cell cell--single cell--divider-center cell--bg-white cell--indent cell--clickable">
     <div class="cell__body">
       <div class="cell__content"><div class="cell__title-row"><span class="cell__title">推送通知</span></div></div>
@@ -620,14 +698,16 @@
       <div class="cell__action"><div class="switch switch--off" onclick="if(this.classList.contains('switch--on')){this.classList.remove('switch--on');this.classList.add('switch--off')}else{this.classList.remove('switch--off');this.classList.add('switch--on')}"><div class="switch__thumb"></div></div></div>
     </div>
   </div>
+  </div>
 </div>
 <div class="section-gap"></div>
 
 <!-- ═══════════════════════════════════════════ -->
 <!-- 背景色 -->
 <!-- ═══════════════════════════════════════════ -->
-<div class="section-title">背景色 - GREY</div>
-<div class="section-group">
+<div class="cell-group">
+  <div class="cell-group__title">背景色 - GREY</div>
+  <div class="cell-group__content cell-group__content--card">
   <div class="cell cell--single cell--divider-right-edge cell--bg-grey cell--clickable">
     <div class="cell__body">
       <div class="cell__content"><div class="cell__title-row"><span class="cell__title">灰色背景</span></div></div>
@@ -649,14 +729,16 @@
       <div class="cell__action"><div class="switch switch--off" onclick="if(this.classList.contains('switch--on')){this.classList.remove('switch--on');this.classList.add('switch--off')}else{this.classList.remove('switch--off');this.classList.add('switch--on')}"><div class="switch__thumb"></div></div></div>
     </div>
   </div>
+  </div>
 </div>
 <div class="section-gap"></div>
 
 <!-- ═══════════════════════════════════════════ -->
 <!-- 无操作区 -->
 <!-- ═══════════════════════════════════════════ -->
-<div class="section-title">无操作区 (CUSTOM 默认不显示)</div>
-<div class="section-group">
+<div class="cell-group">
+  <div class="cell-group__title">无操作区 (CUSTOM 默认不显示)</div>
+  <div class="cell-group__content cell-group__content--card">
   <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable">
     <div class="cell__body">
       <div class="cell__content"><div class="cell__title-row"><span class="cell__title">仅标题</span></div></div>
@@ -669,6 +751,7 @@
         <div class="cell__subtitle">没有右侧操作区</div>
       </div>
     </div>
+  </div>
   </div>
 </div>
 

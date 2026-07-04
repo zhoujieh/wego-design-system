@@ -78,6 +78,21 @@
   ],
   "anatomy": [
     {
+      "name": "container",
+      "selector": ".cell-group",
+      "role": "列表分组最外层容器，承接组标题、内容容器和同组节奏"
+    },
+    {
+      "name": "groupTitle",
+      "selector": ".cell-group__title",
+      "role": "组标题，独立于白底内容区，承接 section 标题样式"
+    },
+    {
+      "name": "groupContent",
+      "selector": ".cell-group__content",
+      "role": "分组内容容器，承接连续 cell 的白底表面、分割线节奏和卡片圆角修饰"
+    },
+    {
       "name": "root",
       "selector": ".cell",
       "role": "列表项容器"
@@ -106,7 +121,12 @@
     "自定义链接类操作沿用 .cell__action 宿主，本体不额外补右侧间距，保证内容距屏幕右侧保持 16px。",
     "同一分组内的连续 cell 通过分割线建立行间视觉节奏；最后一行不加分割线，避免与分组底部留白重叠。",
     "cell__body 带上下 12px padding，cell 使用 min-height 而非固定高度，内容自然撑高。标题使用 nowrap 截断，副标题使用 2 行截断，设计内容时仍需遵循截断规则。",
-    "子级缩进使用 .cell__backspace（空占位 24px） > .cell__select（内嵌 switch/radio/checkbox） > .cell__body 结构。cell__backspace 提供左侧缩进宽度，视觉上建立层级从属关系。"
+    "子级缩进使用 .cell__backspace（空占位 24px） > .cell__select（内嵌 switch/radio/checkbox） > .cell__body 结构。cell__backspace 提供左侧缩进宽度，视觉上建立层级从属关系。",
+    "成组出现的 cell 必须用 .cell-group 包裹，不发明任务级 xxx-page__group 自定义类。",
+    "需要组标题时，标题使用 .cell-group__title 单独成行，不能把标题塞进白底圆角内容区里。",
+    "连续 cell 默认放进 .cell-group__content；如果页面是左右留白的卡片式布局，在 .cell-group__content 上开启卡片修饰类，让圆角只作用于内容区。",
+    ".cell-group__content 内连续 cell 除最后一行外均加分割线修饰类；孤立单行 cell 不加分割线。",
+    "历史结构允许 .cell-group 直接包连续 cell 以兼容旧任务，但新任务和 UI Kit 一律优先使用标题 + 内容容器的正式结构。"
   ],
   "behavior": {
     "click": "clickable 时整行响应按压态，局部操作仍保持清晰热区。",
@@ -123,10 +143,12 @@
     "双行模式用于副标题需要解释信息时，避免在单行强塞长文案。",
     "右侧是链接、按钮或开关时，仍应保持单一主反馈，不在同一行叠加多种主操作。",
     "cell__select 内嵌 radio/checkbox 时，cell 的 title/subtitle 直接作为选项文案和说明，不需要在 cell 外加 .radio-field__text 或 .checkbox-field__text。",
-    "同一 section-group 内存在多个连续 cell 时，除最后一行外均应添加分割线修饰类（.cell--divider-right-edge 或 .cell--divider-center），孤立单行 cell 不加分割线。",
+    "同一 cell-group 内存在多个连续 cell 时，除最后一行外均应添加分割线修饰类（.cell--divider-right-edge 或 .cell--divider-center），孤立单行 cell 不加分割线。",
     "radio 单选列表的选中态仅通过 radio--checked 表达，不加 cell--indent，避免破坏同组内横向对齐基线。",
     "cell__body 内置上下 12px padding，结合 min-height（cell--single: 56px, cell--double: 76px），副标题换行时 cell 可自然撑高。标题仍由 nowrap 截断。如需自定义 cell 内间距，优先通过调整 body padding 而非覆盖 min-height。",
-    "子级条件区域的层级缩进必须使用 cell__backspace 空占位模式，禁止手写 border-left / margin-left 等自定义样式实现缩进。"
+    "子级条件区域的层级缩进必须使用 cell__backspace 空占位模式，禁止手写 border-left / margin-left 等自定义样式实现缩进。",
+    "页面需要 section 标题时，直接使用 .cell-group__title，不再复制 UI Kit 私有的 .uikit-section-title 或手写额外标题样式。",
+    "页面内容区左右有内边距时，把该组视为卡片式分组，在 .cell-group__content 上使用卡片修饰类；不要额外再包一层只为白底和圆角存在的容器。"
   ],
   "doNotInvent": [
     "不要把 cell 扩成桌面表格行、树形列表或多列数据面板。",
@@ -164,7 +186,10 @@
     "subtitleFont": "var(--body-sm-font-size)",
     "actionFont": "var(--body-lg-font-size)",
     "divider": "0.5px solid var(--border-neutral-l2)",
-    "paddingVertical": "12px"
+    "paddingVertical": "12px",
+    "groupGap": "8px",
+    "groupTitlePadding": "16px 16px 8px",
+    "groupRadius": "8px"
   },
   "specRefs": [
     "specs/布局与间距规范.md",
@@ -172,6 +197,14 @@
   ],
   "domAnatomy": {
     "root": ".cell",
+    "containerSelector": ".cell-group",
+    "containerModifiers": [
+      ".cell-group__content--card"
+    ],
+    "containerChildren": [
+      ".cell-group__title",
+      ".cell-group__content"
+    ],
     "requiredChildren": [
       ".cell__body",
       ".cell__content"

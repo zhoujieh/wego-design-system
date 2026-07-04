@@ -450,6 +450,7 @@
   --safe-area-top: env(safe-area-inset-top, 0px);
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
   --safe-area-bottom-content: calc(40px + var(--safe-area-bottom));
+  --navbar-body-height: 56px;
 
   /* icon-token */
   --icon-yuancha-mian: "\e69c";

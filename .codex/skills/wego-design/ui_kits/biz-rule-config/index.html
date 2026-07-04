@@ -26,7 +26,7 @@ html, body { min-height: auto; }
   font-size: var(--body-sm-font-size);
   font-weight: var(--font-weight-semibold);
   color: var(--text-default);
-  z-index: var(--z-sticky);
+  z-index: var(--z-critical);
   pointer-events: none;
 }
 
@@ -38,12 +38,11 @@ html, body { min-height: auto; }
   position: relative;
 }
 
-.uikit-host-screen .navbar,
-.uikit-modal-screen .navbar {
-  padding-top: var(--safe-area-top);
-}
-
 .phone-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding-bottom: var(--safe-area-bottom-content);
 }
 
@@ -78,18 +77,9 @@ html, body { min-height: auto; }
   color: var(--text-secondary);
 }
 
-.uikit-section-title {
-  font-size: var(--body-sm-font-size);
-  color: var(--text-tertiary);
-  padding: var(--spacer-16) var(--spacer-16) var(--spacer-8);
-}
-
-.uikit-section-group {
-  background: var(--bg-surface);
-}
-
-.uikit-section-gap {
-  height: var(--spacer-8);
+.uikit-content-section {
+  display: flex;
+  flex-direction: column;
 }
 
 .biz-summary {
@@ -161,14 +151,6 @@ html, body { min-height: auto; }
   outline-offset: -2px;
 }
 
-.uikit-helper-text {
-  margin-top: var(--spacer-12);
-  padding: var(--spacer-12) var(--spacer-16) var(--spacer-20);
-  font-size: var(--body-sm-font-size);
-  line-height: var(--body-sm-line-height);
-  color: var(--text-tertiary);
-}
-
 .uikit-modal-screen {
   position: absolute;
   inset: 0;
@@ -227,7 +209,7 @@ html, body { min-height: auto; }
     min-height: 100vh;
     min-height: 100dvh;
     align-items: stretch;
-    padding: var(--spacer-8);
+    padding: 0;
   }
 
   .phone-frame {
@@ -242,6 +224,11 @@ html, body { min-height: auto; }
 
   .phone-screen {
     border-radius: 0;
+  }
+
+  .phone-status,
+  .phone-indicator {
+    display: none;
   }
 }
 </style>
@@ -332,7 +319,7 @@ function BizSettingsContent({ onPreviewAction }) {
   const togglePermission = (key) => setPermissions((prev) => ({ ...prev, [key]: !prev[key] }));
 
   return (
-    <div>
+    <>
       <div className="biz-summary">
         <div className="biz-summary__main">
           <div className="biz-summary__title-row">
@@ -342,87 +329,88 @@ function BizSettingsContent({ onPreviewAction }) {
           <div className="biz-summary__desc">适用于业务数据管理、成员协作和提醒策略统一配置。</div>
           <div className="biz-summary__meta">
             <span>最近保存：今天 09:20</span>
-            <a data-component="link" className="link" href="#biz-rule-config-helper">查看说明</a>
           </div>
         </div>
       </div>
 
-      <div className="uikit-section-title">基础信息</div>
-      <div className="uikit-section-group">
-        <div className="form">
-          <div className="form-body">
-            <div className="form-body__label">方案名称</div>
-            <div className="form-body__action">
-              <input
-                type="text"
-                value={planName}
-                onChange={(event) => setPlanName(event.target.value)}
-                placeholder="请输入方案名称"
-              />
-            </div>
-          </div>
-          <div
-            className="form-body form-body--clickable"
-            role="button"
-            tabIndex={0}
-            onClick={() => onPreviewAction('负责人选择面板待接入')}
-            onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('负责人选择面板待接入'))}
-          >
-            <div className="form-body__label">负责人</div>
-            <div className="form-body__action">
-              <div className="form-body__select">
-                <span className="form-body__select-text has-value">商品运营组</span>
-                <i className="form-body__select-arrow wego-iconfont-s icon-youjiantou16"></i>
+      <div className="uikit-content-section">
+        <div className="form-group">
+          <div className="form-group__title">基础信息</div>
+          <div className="form-group__content form-group__content--card">
+            <div className="form-body">
+              <div className="form-body__label">方案名称</div>
+              <div className="form-body__action">
+                <input
+                  type="text"
+                  value={planName}
+                  onChange={(event) => setPlanName(event.target.value)}
+                  placeholder="请输入方案名称"
+                />
               </div>
             </div>
-          </div>
-          <div
-            className="form-body form-body--clickable"
-            role="button"
-            tabIndex={0}
-            onClick={() => onPreviewAction('同步频率选择面板待接入')}
-            onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('同步频率选择面板待接入'))}
-          >
-            <div className="form-body__label">同步频率</div>
-            <div className="form-body__action">
-              <div className="form-body__select">
-                <span className="form-body__select-text has-value">每30分钟</span>
-                <i className="form-body__select-arrow wego-iconfont-s icon-youjiantou16"></i>
-              </div>
-            </div>
-          </div>
-          <div className="form-body form-body--preserve-content-align">
-            <div className="form-body__label">统计口径</div>
-            <div className="form-body__action" aria-hidden="true"></div>
-            <div className="form-body__right-btn">
-              <div className="radio-field-group" role="radiogroup" aria-label="统计口径">
-                <div
-                  className="radio-field"
-                  role="radio"
-                  aria-checked={reportCycle === 'all'}
-                  tabIndex={0}
-                  onClick={() => setReportCycle('all')}
-                  onKeyDown={(event) => handleActionKeyDown(event, () => setReportCycle('all'))}
-                >
-                  <div className={`radio radio--sm${reportCycle === 'all' ? ' radio--checked' : ''}`}>
-                    <div className="radio__inner"></div>
-                    <div className="radio__dot"></div>
-                  </div>
-                  <span className="radio-field__text">全店汇总</span>
+            <div
+              className="form-body form-body--clickable"
+              role="button"
+              tabIndex={0}
+              onClick={() => onPreviewAction('负责人选择面板待接入')}
+              onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('负责人选择面板待接入'))}
+            >
+              <div className="form-body__label">负责人</div>
+              <div className="form-body__action">
+                <div className="form-body__select">
+                  <span className="form-body__select-text has-value">商品运营组</span>
+                  <i className="form-body__select-arrow wego-iconfont-s icon-youjiantou16"></i>
                 </div>
-                <div
-                  className="radio-field"
-                  role="radio"
-                  aria-checked={reportCycle === 'shop'}
-                  tabIndex={0}
-                  onClick={() => setReportCycle('shop')}
-                  onKeyDown={(event) => handleActionKeyDown(event, () => setReportCycle('shop'))}
-                >
-                  <div className={`radio radio--sm${reportCycle === 'shop' ? ' radio--checked' : ''}`}>
-                    <div className="radio__inner"></div>
-                    <div className="radio__dot"></div>
+              </div>
+            </div>
+            <div
+              className="form-body form-body--clickable"
+              role="button"
+              tabIndex={0}
+              onClick={() => onPreviewAction('同步频率选择面板待接入')}
+              onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('同步频率选择面板待接入'))}
+            >
+              <div className="form-body__label">同步频率</div>
+              <div className="form-body__action">
+                <div className="form-body__select">
+                  <span className="form-body__select-text has-value">每30分钟</span>
+                  <i className="form-body__select-arrow wego-iconfont-s icon-youjiantou16"></i>
+                </div>
+              </div>
+            </div>
+            <div className="form-body form-body--preserve-content-align">
+              <div className="form-body__label">统计口径</div>
+              <div className="form-body__action" aria-hidden="true"></div>
+              <div className="form-body__right-btn">
+                <div className="radio-field-group" role="radiogroup" aria-label="统计口径">
+                  <div
+                    className="radio-field"
+                    role="radio"
+                    aria-checked={reportCycle === 'all'}
+                    tabIndex={0}
+                    onClick={() => setReportCycle('all')}
+                    onKeyDown={(event) => handleActionKeyDown(event, () => setReportCycle('all'))}
+                  >
+                    <div className={`radio radio--sm${reportCycle === 'all' ? ' radio--checked' : ''}`}>
+                      <div className="radio__inner"></div>
+                      <div className="radio__dot"></div>
+                    </div>
+                    <span className="radio-field__text">全店汇总</span>
                   </div>
-                  <span className="radio-field__text">按门店</span>
+                  <div
+                    className="radio-field"
+                    role="radio"
+                    aria-checked={reportCycle === 'shop'}
+                    tabIndex={0}
+                    onClick={() => setReportCycle('shop')}
+                    onKeyDown={(event) => handleActionKeyDown(event, () => setReportCycle('shop'))}
+                  >
+                    <div className={`radio radio--sm${reportCycle === 'shop' ? ' radio--checked' : ''}`}>
+                      <div className="radio__inner"></div>
+                      <div className="radio__dot"></div>
+                    </div>
+                    <span className="radio-field__text">按门店</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -430,9 +418,10 @@ function BizSettingsContent({ onPreviewAction }) {
         </div>
       </div>
 
-      <div className="uikit-section-gap"></div>
-      <div className="uikit-section-title">规则与提醒</div>
-      <div className="uikit-section-group">
+      <div className="uikit-content-section">
+      <div className="cell-group">
+      <div className="cell-group__title">规则与提醒</div>
+      <div className="cell-group__content cell-group__content--card">
         <div
           className="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable"
           role="switch"
@@ -482,10 +471,13 @@ function BizSettingsContent({ onPreviewAction }) {
           </div>
         </div>
       </div>
+      </div>
+      </div>
 
-      <div className="uikit-section-gap"></div>
-      <div className="uikit-section-title">适用范围</div>
-      <div className="uikit-section-group">
+      <div className="uikit-content-section">
+      <div className="cell-group">
+      <div className="cell-group__title">适用范围</div>
+      <div className="cell-group__content cell-group__content--card">
         <div
           className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
           role="button"
@@ -574,9 +566,10 @@ function BizSettingsContent({ onPreviewAction }) {
           </div>
         </div>
       </div>
+      </div>
+      </div>
 
-      <div className="uikit-helper-text" id="biz-rule-config-helper">示例将页面级主操作统一收口到导航操作区，内容区不重复放保存按钮；真实项目可按业务调整操作文案，但仍保持单一页面级主操作。</div>
-    </div>
+    </>
   );
 }
 
@@ -623,13 +616,14 @@ function BaseScreen({ onOpen }) {
       <div className="phone-body">
         <div className="uikit-base-card">
           <div data-component="avatar" className="avatar avatar--56 avatar--initials">微</div>
-          <div className="uikit-base-copy">
-            <div className="uikit-base-title">门店业务规则配置</div>
-            <div className="uikit-base-desc">从底部打开，全屏覆盖，适合管理复杂设置任务。</div>
-          </div>
+        <div className="uikit-base-copy">
+          <div className="uikit-base-title">门店业务规则配置</div>
+          <div className="uikit-base-desc">从底部打开，全屏覆盖，适合管理复杂设置任务。</div>
         </div>
-        <div className="uikit-section-title">设置入口</div>
-        <div className="uikit-section-group">
+        </div>
+        <div className="cell-group">
+          <div className="cell-group__title">设置入口</div>
+          <div className="cell-group__content cell-group__content--card">
           <div
             data-component="cell"
             className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
@@ -649,6 +643,7 @@ function BaseScreen({ onOpen }) {
               <div className="cell__action"><span className="cell__action-text">已开启</span></div>
             </div>
           </div>
+          </div>
         </div>
       </div>
       <BottomNav />
@@ -659,13 +654,8 @@ function BaseScreen({ onOpen }) {
 
 function App() {
   const [modalMounted, setModalMounted] = useState(true);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(true);
   const [toast, setToast] = useState('');
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => setModalOpen(true), 32);
-    return () => window.clearTimeout(timer);
-  }, []);
 
   useEffect(() => {
     if (!toast) return undefined;
@@ -689,11 +679,11 @@ function App() {
   };
 
   return (
-    <div className="phone-screen">
+    <>
       <BaseScreen onOpen={openModal} />
       {modalMounted ? <BizSettingsModal isOpen={modalOpen} onCancel={closeModal} onSave={handleSave} onPreviewAction={setToast} /> : null}
       <div className={`uikit-toast${toast ? ' is-visible' : ''}`}>{toast}</div>
-    </div>
+    </>
   );
 }
 

@@ -96,7 +96,7 @@ task-folder/
 - [ ] `pages/*.html` 是片段或内容源，不含 `<html>` / `<body>` / `.preview-shell` / `.phone-frame` / `.phone-screen`
 - [ ] 所有入口点击都在 `.phone-screen` 内切换内容或打开 overlay，不让顶层浏览器跳到 `pages/*.html`
 - [ ] 已删除 `.uikit-shell` / `.phone-body` 类与 DOM；`.phone-status` / `.phone-indicator` 仅作为最外层预览安全区存在
-- [ ] `page.css` 不引用 `--safe-area-top` 或 `--safe-area-bottom-content`
+- [ ] `page.css` 在 `.phone-screen` 内定义 `--safe-area-top: 44px` 和 `--safe-area-bottom: 34px` 模拟值（与 host-shell.css 一致），移动端 @media 重置为 0 联动隐藏 phone-status / phone-indicator；不在 `.phone-screen` 之外引用 Token
 - [ ] 模态层挂载在 `.phone-screen` 内并覆盖手机屏，不覆盖整个浏览器 viewport
 - [ ] 容器使用 `max-width` + `margin-inline: auto` 约束（默认业务页 768px）
 - [ ] 已读取 `design_consumption_plan.page_presentation`，并按 `type` 选择 `push` 或 `full-screen-modal` 打开方式
@@ -172,6 +172,29 @@ task-folder/
 - 父项选中后才出现的补充字段、跳转入口、筛选范围或排除条件，必须按父场景延展实现；不得转译成“列表项 + 独立平级 section”
 - 不得用新增 helper 文案去补结构语义缺口；helper 只保留给结构无法承载且业务必须提醒的信息
 - navbar 背景统一依赖公共 CSS 与 `data-bg` 的对应关系：`page`=灰底、`surface`=白底；普通业务页不要在任务级 `page.css` 单独覆盖 navbar 背景，透明反白场景仅走 `.navbar--fixed-transparent`
+
+### 安全区让位规则（顶部电池栏 + 底部固定元素）
+
+#### 顶部电池栏避让（必读）
+
+电脑端显示手机壳时，`.phone-status`（电池栏）悬浮在 `.phone-screen` 顶部，高度 `--safe-area-top`（44px）。所有页面内容区必须避让电池栏，navbar 顶部不得与电池栏重叠：
+
+- 宿主页（`.host-shell-page`）的 `padding-top` 已由 `host-shell.css` 模板提供 `calc(var(--spacer-16) + var(--safe-area-top))` 避让，复制模板后保留即可，不重复覆盖
+- 顶部安全区由 navbar 组件内部统一通过 `padding-top: var(--safe-area-top, 0px)` + `sticky top: 0` 处理；**任务级 `page.css` 不得额外给页面容器补一层 `--safe-area-top` padding**（守门脚本会拦截）
+- `.phone-status` 的 `z-index` 由模板统一设为高于 `.modal-overlay`，确保电池栏文字始终浮在模态页之上；任务级 `page.css` 不覆盖
+- 移动端 @media 通过在 `.phone-screen` 重置 `--safe-area-top: 0` 联动归零，模态/push 页 padding-top 自动归零
+- navbar 本身的顶部安全区与 sticky 规则由 `components.css` 提供，任务级 `page.css` 不重复覆盖
+- 禁止把 `.phone-status` 改成流内占位；顶部安全区统一使用“绝对定位悬浮 + 内容层避让”方案
+
+#### 底部固定元素让位
+
+页面底部固定元素（bottom-nav、固定操作栏、固定按钮栏等）必须预留底部安全高度间距：
+
+- 已注册组件（如 bottom-nav）的 safe-area padding 由 `components.css` 统一提供，任务级 `page.css` 不重复覆盖
+- 任务级自创固定操作栏（如底部保存按钮栏、底部结算栏）必须在 `page.css` 业务样式中显式声明 `padding-bottom: var(--safe-area-bottom, env(safe-area-inset-bottom, 0px))`
+- 可滚动内容（page-body / host-shell-page）底部 padding 使用 `calc(var(--spacer-40) + var(--safe-area-bottom))` 避开安全区
+- 移动端 @media 通过在 `.phone-screen` 重置 `--safe-area-bottom: 0` 联动归零，不逐个重置固定元素 padding
+- 若页面底部没有固定操作栏，也不得省略这段底部避让；仍然由可滚动内容容器承担 `40px + 动态安全高度`
 
 禁止：
 - 不读取 scenarioTypeRegistry 直接生成

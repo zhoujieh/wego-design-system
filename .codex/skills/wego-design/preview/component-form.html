@@ -11,42 +11,47 @@
 <link rel="stylesheet" href="../components.css">
 <style>
 .page{max-width:960px;margin:0 auto}
-.scene-title{font-size:var(--body-sm-font-size);font-weight:var(--font-weight-medium);color:var(--text-tertiary);padding:24px 16px 8px}
 .scene-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.scene-card{min-width:0;border-radius:var(--radius-8);overflow:hidden;background:var(--bg-surface)}
-.scene-card__title{padding:12px 16px;font-size:var(--body-sm-font-size);font-weight:var(--font-weight-medium);color:var(--text-secondary);background:var(--bg-page)}
+.scene-card{min-width:0}
 .scene-gap{height:8px;background:var(--bg-page)}
 
 /* @component-css-start */
-.form{width:100%;background:var(--bg-surface)}
-.form--no-divider .form-body::after{display:none}
-.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__action{display:flex;align-items:center;justify-content:flex-end}
-.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__action > input:not(.form-body__phone-input):not(.form-body__money-input),
-.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__expand-content,
-.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__money,
-.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__select,
-.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__value{flex:0 1 auto;width:auto;max-width:100%;min-width:0;margin-left:auto}
-.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__action > input:not(.form-body__phone-input):not(.form-body__money-input),
-.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__expand-content{text-align:right;field-sizing:content}
-.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__money,
-.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__select{justify-content:flex-end}
-.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__money{gap:4px}
-.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__money-input,
-.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__select-text{flex:0 1 auto;width:auto;max-width:100%;min-width:0;field-sizing:content}
-.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__money-input,
-.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__select-text{text-align:right}
-.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__money-input::placeholder{text-align:right}
-.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__select{gap:8px}
-.form--right-align .form-body:not(.form-body--preserve-content-align) .form-body__select-arrow{margin-left:0}
-.form--right-align .form-body:not(.form-body--vertical) .form-body__counter,
-.form--right-align .form-body:not(.form-body--vertical) .form-body__error{text-align:right}
-.form--right-align .form-body.form-body--preserve-content-align .form-body__counter,
-.form--right-align .form-body.form-body--preserve-content-align .form-body__error{text-align:left}
+:is(.form,.form-group,.form-group__content){width:100%}
+.form-group{display:flex;flex-direction:column}
+.form-group__title{padding:16px 16px 8px;font-size:var(--body-sm-font-size);font-weight:var(--font-weight-medium);line-height:var(--body-sm-line-height);color:var(--text-tertiary);font-feature-settings:"zero"}
+.form-group__content,
+.form{background:var(--bg-surface)}
+.form-group__content--card{border-radius:var(--radius-8);overflow:hidden}
+:is(.form--no-divider,.form-group--no-divider) .form-body::after{display:none}
+:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__action{display:flex;align-items:center;justify-content:flex-end}
+:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__action > input:not(.form-body__phone-input):not(.form-body__money-input),
+:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__expand-content,
+:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__money,
+:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__select,
+:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__value{flex:0 1 auto;width:auto;max-width:100%;min-width:0;margin-left:auto}
+:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__action > input:not(.form-body__phone-input):not(.form-body__money-input),
+:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__expand-content{text-align:right;field-sizing:content}
+:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__money,
+:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__select{justify-content:flex-end}
+:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__money{gap:4px}
+:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__money-input,
+:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__select-text{flex:0 1 auto;width:auto;max-width:100%;min-width:0;field-sizing:content}
+:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__money-input,
+:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__select-text{text-align:right}
+:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__money-input::placeholder{text-align:right}
+:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__select{gap:8px}
+:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__select-arrow{margin-left:0}
+:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--vertical) .form-body__counter,
+:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--vertical) .form-body__error{text-align:right}
+:is(.form--right-align,.form-group--right-align) .form-body.form-body--preserve-content-align .form-body__counter,
+:is(.form--right-align,.form-group--right-align) .form-body.form-body--preserve-content-align .form-body__error{text-align:left}
 
 .form-body{display:flex;flex-direction:row;align-items:center;width:100%;min-height:56px;padding:12px 16px;box-sizing:border-box;position:relative;gap:24px}
 .form-body::after{content:"";position:absolute;bottom:0;left:16px;right:0;border-bottom:0.5px solid var(--border-neutral-l2);pointer-events:none}
-.form--no-divider .form-body::after,
-.form > .form-body:last-child::after{display:none}
+:is(.form--no-divider,.form-group--no-divider) .form-body::after,
+.form > .form-body:last-child::after,
+.form-group > .form-body:last-child::after,
+.form-group__content > .form-body:last-child::after{display:none}
 
 .form-body__label{width:96px;flex-shrink:0;font-size:var(--body-lg-font-size);font-weight:var(--font-weight-regular);color:var(--text-default);line-height:var(--body-lg-line-height);box-sizing:border-box;-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden;font-feature-settings:"zero"}
 .form-body__label--required{display:flex;align-items:center;gap:4px;-webkit-box-orient:initial;-webkit-line-clamp:unset}
@@ -158,11 +163,47 @@
 <div class="pv-header"><h1>表单容器</h1><p>表单字段容器，支持水平/垂直布局、多输入类型、错误与计数共用消息槽位，并在输入恢复合法后自动回到默认态。</p></div>
 <div class="page">
 
-<div class="scene-title">基础输入对照</div>
 <div class="scene-grid">
   <section class="scene-card">
-    <div class="scene-card__title">左对齐</div>
-    <div class="form">
+    <div class="form-group">
+      <div class="form-group__title">通栏分组</div>
+      <div class="form-group__content">
+        <div class="form-body">
+          <div class="form-body__label">字段名称</div>
+          <div class="form-body__action"><input type="text" placeholder="沿用通栏白底"></div>
+        </div>
+        <div class="form-body">
+          <div class="form-body__label">说明</div>
+          <div class="form-body__action"><span class="form-body__value form-body__value--secondary">无圆角</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene-card">
+    <div class="form-group">
+      <div class="form-group__title">标题 + 卡片内容</div>
+      <div class="form-group__content form-group__content--card">
+        <div class="form-body">
+          <div class="form-body__label">方案名称</div>
+          <div class="form-body__action"><input type="text" value="门店盘点规则"></div>
+        </div>
+        <div class="form-body">
+          <div class="form-body__label">组样式</div>
+          <div class="form-body__action"><span class="form-body__value">标题独立，圆角只作用于内容区</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="scene-gap"></div>
+
+<div class="scene-grid">
+  <section class="scene-card">
+    <div class="form-group">
+      <div class="form-group__title">基础输入对照 / 左对齐</div>
+      <div class="form-group__content form-group__content--card">
       <div class="form-body" data-validate="text-required">
         <div class="form-body__label">姓名</div>
         <div class="form-body__action">
@@ -186,12 +227,14 @@
           </div>
         </div>
       </div>
+      </div>
     </div>
   </section>
 
   <section class="scene-card">
-    <div class="scene-card__title">右对齐</div>
-    <div class="form form--right-align">
+    <div class="form-group form-group--right-align">
+      <div class="form-group__title">基础输入对照 / 右对齐</div>
+      <div class="form-group__content form-group__content--card">
       <div class="form-body" data-validate="text-required">
         <div class="form-body__label">姓名</div>
         <div class="form-body__action">
@@ -215,17 +258,18 @@
           </div>
         </div>
       </div>
+      </div>
     </div>
   </section>
 </div>
 
 <div class="scene-gap"></div>
 
-<div class="scene-title">前缀字段与整组左对齐</div>
 <div class="scene-grid">
   <section class="scene-card">
-    <div class="scene-card__title">占位态</div>
-    <div class="form">
+    <div class="form-group">
+      <div class="form-group__title">前缀字段与整组左对齐 / 占位态</div>
+      <div class="form-group__content form-group__content--card">
       <div class="form-body form-body--preserve-content-align" data-validate="money-range">
         <div class="form-body__label">金额</div>
         <div class="form-body__action">
@@ -263,12 +307,14 @@
           </div>
         </div>
       </div>
+      </div>
     </div>
   </section>
 
   <section class="scene-card">
-    <div class="scene-card__title">带值态</div>
-    <div class="form">
+    <div class="form-group">
+      <div class="form-group__title">前缀字段与整组左对齐 / 带值态</div>
+      <div class="form-group__content form-group__content--card">
       <div class="form-body form-body--preserve-content-align" data-validate="money-range">
         <div class="form-body__label">金额</div>
         <div class="form-body__action">
@@ -306,17 +352,18 @@
           </div>
         </div>
       </div>
+      </div>
     </div>
   </section>
 </div>
 
 <div class="scene-gap"></div>
 
-<div class="scene-title">多行文本与计数</div>
 <div class="scene-grid">
   <section class="scene-card">
-    <div class="scene-card__title">左对齐</div>
-    <div class="form">
+    <div class="form-group">
+      <div class="form-group__title">多行文本与计数 / 左对齐</div>
+      <div class="form-group__content form-group__content--card">
       <div class="form-body form-body--vertical" data-validate="textarea-counter">
         <div class="form-body__label">备注</div>
         <div class="form-body__action">
@@ -333,12 +380,14 @@
           <span class="form-body__error">商品描述不能为空，且不能超过 200 个字</span>
         </div>
       </div>
+      </div>
     </div>
   </section>
 
   <section class="scene-card">
-    <div class="scene-card__title">右侧列保持同样表现</div>
-    <div class="form">
+    <div class="form-group">
+      <div class="form-group__title">多行文本与计数 / 右侧列保持同样表现</div>
+      <div class="form-group__content form-group__content--card">
       <div class="form-body form-body--vertical" data-validate="textarea-counter">
         <div class="form-body__label">备注</div>
         <div class="form-body__action">
@@ -355,17 +404,18 @@
           <span class="form-body__error">详细描述不能为空，且不能超过 200 个字</span>
         </div>
       </div>
+      </div>
     </div>
   </section>
 </div>
 
 <div class="scene-gap"></div>
 
-<div class="scene-title">右侧控件默认场景</div>
 <div class="scene-grid">
   <section class="scene-card">
-    <div class="scene-card__title">默认展示</div>
-    <div class="form">
+    <div class="form-group">
+      <div class="form-group__title">右侧控件默认场景 / 默认展示</div>
+      <div class="form-group__content form-group__content--card">
       <div class="form-body form-body--preserve-content-align">
         <div class="form-body__label">金额</div>
         <div class="form-body__action">
@@ -506,12 +556,14 @@
           <div class="form-body__switch-wrap"><div class="switch switch--on"><div class="switch__thumb"></div></div></div>
         </div>
       </div>
+      </div>
     </div>
   </section>
 
   <section class="scene-card">
-    <div class="scene-card__title">带值态</div>
-    <div class="form">
+    <div class="form-group">
+      <div class="form-group__title">右侧控件默认场景 / 带值态</div>
+      <div class="form-group__content form-group__content--card">
       <div class="form-body form-body--preserve-content-align">
         <div class="form-body__label">金额</div>
         <div class="form-body__action">
@@ -652,17 +704,18 @@
           <div class="form-body__switch-wrap"><div class="switch switch--on"><div class="switch__thumb"></div></div></div>
         </div>
       </div>
+      </div>
     </div>
   </section>
 </div>
 
 <div class="scene-gap"></div>
 
-<div class="scene-title">自定义组合与展开场景</div>
 <div class="scene-grid">
   <section class="scene-card">
-    <div class="scene-card__title">左对齐</div>
-    <div class="form">
+    <div class="form-group">
+      <div class="form-group__title">自定义组合与展开场景 / 左对齐</div>
+      <div class="form-group__content form-group__content--card">
       <div class="form-body">
         <div class="form-body__label">采购数量</div>
         <div class="form-body__action">
@@ -712,12 +765,14 @@
         <div class="form-dropdown__item"><span class="form-dropdown__item-text">选项1</span></div>
         <div class="form-dropdown__item form-dropdown__item--selected"><span class="form-dropdown__item-text">选项2</span><div class="form-dropdown__item-check"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
       </div>
+      </div>
     </div>
   </section>
 
   <section class="scene-card">
-    <div class="scene-card__title">右对齐</div>
-    <div class="form form--right-align">
+    <div class="form-group form-group--right-align">
+      <div class="form-group__title">自定义组合与展开场景 / 右对齐</div>
+      <div class="form-group__content form-group__content--card">
       <div class="form-body">
         <div class="form-body__label">采购数量</div>
         <div class="form-body__action">
@@ -767,17 +822,18 @@
         <div class="form-dropdown__item"><span class="form-dropdown__item-text">选项1</span></div>
         <div class="form-dropdown__item form-dropdown__item--selected"><span class="form-dropdown__item-text">选项2</span><div class="form-dropdown__item-check"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
       </div>
+      </div>
     </div>
   </section>
 </div>
 
 <div class="scene-gap"></div>
 
-<div class="scene-title">完整业务表单</div>
 <div class="scene-grid">
   <section class="scene-card">
-    <div class="scene-card__title">转账场景（含三段式，整组左对齐）</div>
-    <div class="form" data-demo-form="transfer-left">
+    <div class="form-group" data-demo-form="transfer-left">
+      <div class="form-group__title">完整业务表单 / 转账场景（含三段式，整组左对齐）</div>
+      <div class="form-group__content form-group__content--card">
       <div class="form-body" data-validate="text-required">
         <div class="form-body__label">收款人</div>
         <div class="form-body__action">
@@ -838,6 +894,7 @@
           <span class="form-body__error">备注不能为空，且不能超过 50 个字</span>
         </div>
       </div>
+      </div>
     </div>
     <div style="padding:16px">
       <button class="btn btn--strong btn--lg" style="width:100%;min-width:100%;max-width:100%" data-submit-form="transfer-left">提交</button>
@@ -845,8 +902,9 @@
   </section>
 
   <section class="scene-card">
-    <div class="scene-card__title">收款场景（纯右对齐）</div>
-    <div class="form form--right-align" data-demo-form="transfer-right">
+    <div class="form-group form-group--right-align" data-demo-form="transfer-right">
+      <div class="form-group__title">完整业务表单 / 收款场景（纯右对齐）</div>
+      <div class="form-group__content form-group__content--card">
       <div class="form-body" data-validate="text-required">
         <div class="form-body__label">收款人</div>
         <div class="form-body__action">
@@ -888,6 +946,7 @@
           <span class="form-body__counter">10/50</span>
           <span class="form-body__error">备注不能为空，且不能超过 50 个字</span>
         </div>
+      </div>
       </div>
     </div>
     <div style="padding:16px">

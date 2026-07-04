@@ -6,7 +6,7 @@
   "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "移动端页面顶部导航栏，承载返回区、标题区与右侧操作区；安全区或系统状态栏由页面外壳单独处理。",
+  "description": "移动端页面顶部导航栏，承载返回区、标题区与右侧操作区；navbar 在组件内部通过 padding-top: var(--safe-area-top, 0px) 处理顶部安全区，并以 sticky top: 0 吸顶。",
   "semanticTypeCandidates": [
     "navbar",
     "page-header",
@@ -138,7 +138,7 @@
     "body 固定为三栏网格，不拆成桌面工具栏模式。",
     "右侧操作按文本、图标、图文、按钮等场景罗列，直接作为 navbar 内部样式场景维护，不再注册为独立组件。",
     "按钮式右侧操作复用已注册 button 组件的小尺寸按钮。",
-    "无按钮模式只影响 left 与 center 布局，不改变 56px 导航栏高度。"
+    "无按钮模式只影响 left 与 center 布局；默认导航主体高度为 56px，桌面手机壳显示 phone-status 时可覆盖为 44px。"
   ],
   "behavior": {
     "leftAction": "返回、关闭或取消属于左侧主导航操作，不与右侧按钮混用。",
@@ -147,7 +147,7 @@
     "pageTransitionRule": "左侧为返回图标 (back-icon) 对应 push 转场（右侧滑入，普通二级页）；左侧为关闭/叉 (close-icon) 或取消文本 (text-cancel) 对应 present 转场（底部滑入，弹出式页面）。",
     "fullscreenModalPatterns": "全屏模态页面有且仅有两种固定导航模式，不要自由组合：模式 A（取消文本 + 实心按钮）用于表单/设置类底部弹出页；模式 B（关闭叉图标 + 图标操作）用于浏览/选择类底部弹出页。",
     "backgroundRule": "导航栏必须显式设置背景色，与页面 data-bg 声明的背景色保持一致；默认 var(--bg-page)（灰色），data-bg=\"surface\" 时为 var(--bg-surface)（白色）；深色或图片背景场景使用 fixed-transparent 模式，navbar background: transparent，文字/图标用 --text-inverse 反白，确保透过导航栏看到背景内容。",
-    "positionRule": "navbar 默认 sticky 吸顶（components.css 已配置 position: sticky; top: 0; z-index: var(--z-sticky)），保留文档流，宿主无需额外处理；深色或图片背景场景使用 fixed-transparent 模式，navbar position: fixed 透明背景、文字/图标反白，此时 page-body 需加 padding-top: 56px 为 navbar 让位。"
+    "positionRule": "navbar 默认 sticky 吸顶（components.css 已配置 position: sticky; top: 0; z-index: var(--z-sticky)），保留文档流，宿主无需额外处理；顶部安全区由 navbar 组件内部通过 padding-top: var(--safe-area-top, 0px) 处理：.phone-screen 内定义 44px 模拟值时，导航主体会自动落在安全区下方，未定义时 fallback 为 0px，移动端 @media 重置 Token 为 0 后导航顶到最上方；导航主体高度由 --navbar-body-height 控制，默认 56px，桌面手机壳显示 phone-status 时可覆盖为 44px；深色或图片背景场景使用 fixed-transparent 模式，navbar position: fixed 透明背景、文字/图标反白，此时 page-body 需加 padding-top: calc(var(--navbar-body-height, 56px) + var(--safe-area-top, 0px)) 为 navbar 与顶部安全区让位。"
   },
   "accessibility": {
     "landmark": "作为页面顶部导航语义区域使用。",
@@ -163,7 +163,7 @@
     "全屏模态页面直接调用固定模式，不要自由组合：模式 A（取消+按钮）用于表单/设置类；模式 B（叉+图标）用于浏览/选择类。",
     "导航栏必须显式设置背景色，与页面 data-bg 声明的背景色一致；不要使用 transparent（深色/图片背景场景除外，此时用 fixed-transparent 模式）。",
     "navbar 宽度默认 100%，由页面外层容器约束最大宽度（768px）；不需要在项目中覆盖宽度。",
-    "navbar 默认 sticky 吸顶，宿主无需额外配置（components.css 已配置 position: sticky; top: 0; z-index: var(--z-sticky)）；深色/图片背景场景加 .navbar--fixed-transparent 修饰类，切换为 fixed 透明反白模式，此时 page-body 需加 padding-top: 56px 为 navbar 让位。"
+    "navbar 默认 sticky 吸顶，宿主无需额外配置（components.css 已配置 position: sticky; top: 0; z-index: var(--z-sticky)）；顶部安全区由组件内部通过 padding-top: var(--safe-area-top, 0px) 处理；导航主体高度默认 56px，桌面手机壳显示 phone-status 时可把 --navbar-body-height 覆盖为 44px；深色/图片背景场景加 .navbar--fixed-transparent 修饰类，切换为 fixed 透明反白模式，此时 page-body 需加 padding-top: calc(var(--navbar-body-height, 56px) + var(--safe-area-top, 0px)) 为 navbar 与顶部安全区让位。"
   ],
   "doNotInvent": [
     "不要把 navbar 扩成桌面多行标题栏、营销大顶栏或搜索综合头部。",
@@ -178,11 +178,13 @@
     "--text-default",
     "--text-inverse",
     "--bg-page",
-    "--bg-surface"
+    "--bg-surface",
+    "--safe-area-top",
+    "--navbar-body-height"
   ],
   "designTokens": {
-    "bodyHeight": "56px",
-    "totalHeight": "56px",
+    "bodyHeight": "var(--navbar-body-height, 56px)",
+    "totalHeight": "calc(var(--navbar-body-height, 56px) + var(--safe-area-top, 0px))",
     "gridColumns": "10",
     "titleFont": "var(--heading-sm-font-size) / var(--font-weight-medium)",
     "actionButtonHeight": "32px",
@@ -195,7 +197,10 @@
     "spacedLeftPadding": "16px",
     "spacedRightPadding": "16px",
     "touchTargetSize": "48px",
-    "iconActionGap": "0"
+    "iconActionGap": "0",
+    "safeAreaTop": "var(--safe-area-top, 0px)",
+    "bodyHeightVariable": "var(--navbar-body-height, 56px)",
+    "totalHeightWithSafeArea": "calc(var(--navbar-body-height, 56px) + var(--safe-area-top, 0px))"
   },
   "specRefs": [
     "specs/交互设计原则.md",

@@ -1,0 +1,326 @@
+/* 固定宿主模板专用样式
+ *
+ * 规则:
+ * - 仅服务 host-shell.html,不得下沉为通用组件样式
+ * - 入口新增/替换时优先复用 data-route-id,避免靠文案匹配
+ * - 业务入口图标优先使用 lib/icons/app-center/*.svg
+ */
+
+body[data-host-shell="true"] {
+  background: var(--bg-page);
+}
+
+.preview-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  max-width: 1184px;
+  margin: 0 auto;
+  padding: var(--spacer-16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--bg-page);
+}
+
+.phone-frame {
+  width: 390px;
+  height: 780px;
+  border: 8px solid var(--bg-inverse);
+  border-radius: 40px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: var(--shadow-xl);
+  background: var(--bg-page);
+  flex-shrink: 0;
+}
+
+.phone-screen {
+  --safe-area-top: 44px;
+  --safe-area-bottom: 34px;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  border-radius: inherit;
+  background: var(--bg-page);
+  position: relative;
+}
+
+.phone-status {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--safe-area-top);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spacer-16);
+  background: transparent;
+  box-sizing: border-box;
+  font-size: var(--body-sm-font-size);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-default);
+  pointer-events: none;
+  z-index: calc(var(--z-overlay, 500) + 3);
+}
+
+/* 模态页/push 页顶部电池栏避让：由宿主模板统一提供，任务级 page.css 不引用 --safe-area-top */
+.modal-overlay,
+.push-screen {
+  padding-top: var(--safe-area-top, 0px);
+}
+
+.host-shell-page {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: calc(var(--spacer-16) + var(--safe-area-top)) var(--spacer-16) calc(var(--spacer-40) + var(--safe-area-bottom) + 56px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-12);
+}
+
+.host-shell-page__panel[hidden] {
+  display: none;
+}
+
+.host-shell-page__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-12);
+}
+
+.host-shell-page__panel--blank {
+  flex: 1 1 auto;
+}
+
+.host-shell-page__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-4);
+}
+
+.host-shell-page__title,
+.host-shell-profile__title {
+  margin: 0;
+  color: var(--text-default);
+  font: var(--heading-sm-font-weight, 600) var(--heading-sm-font-size, 20px) / 1.4 var(--body-md-font-family);
+}
+
+.host-shell-page__subtitle {
+  margin: 0;
+  color: var(--text-secondary);
+  font: var(--body-sm-font-weight, 400) var(--body-sm-font-size, 13px) / 1.5 var(--body-sm-font-family, var(--body-md-font-family));
+}
+
+.host-shell-profile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-12);
+  padding: var(--spacer-16);
+}
+
+.host-shell-profile__main,
+.host-shell-membership__header,
+.host-shell-membership__body,
+.host-shell-profile__title-row,
+.host-shell-profile__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-8);
+}
+
+.host-shell-profile__main {
+  align-items: flex-start;
+}
+
+.host-shell-profile__meta {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-4);
+}
+
+.host-shell-profile__title-row {
+  min-width: 0;
+}
+
+.host-shell-profile__title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.host-shell-profile__subtitle {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+}
+
+.host-shell-profile__badge {
+  --badge-text-bg: var(--status-warning-default);
+  --badge-text-color: var(--text-inverse);
+  flex-shrink: 0;
+}
+
+.host-shell-membership {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-8);
+  padding: var(--spacer-12);
+}
+
+.host-shell-membership-card {
+  background: linear-gradient(180deg, var(--status-warning-surface-l1) 0%, var(--bg-surface) 100%);
+}
+
+.host-shell-membership__header,
+.host-shell-membership__body {
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.host-shell-membership__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.host-shell-membership__usage {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacer-4);
+  color: var(--text-default);
+}
+
+.host-shell-membership__usage strong {
+  font-size: var(--title-sm-font-size, 24px);
+}
+
+.host-shell-link-button {
+  flex-shrink: 0;
+}
+
+.host-shell-app-card__content,
+.host-shell-list-card__content {
+  padding: 0;
+}
+
+.host-shell-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--spacer-12);
+  padding: var(--spacer-16);
+}
+
+.host-shell-grid-entry {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacer-8);
+  min-height: 56px;
+  color: var(--text-default);
+  text-decoration: none;
+}
+
+.host-shell-grid-entry__icon {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+.host-shell-grid-entry__label {
+  text-align: center;
+  font-size: var(--body-sm-font-size, 13px);
+  line-height: 1.4;
+}
+
+.host-shell-list {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.host-shell-empty {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--body-sm-font-size, 13px);
+}
+
+.bottom-nav {
+  flex-shrink: 0;
+  z-index: var(--z-sticky);
+}
+
+.phone-indicator {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--safe-area-bottom);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: var(--z-sticky);
+}
+
+.phone-indicator-bar {
+  width: 134px;
+  height: 5px;
+  background: var(--bg-inverse);
+  border-radius: var(--radius-full);
+  opacity: 0.2;
+}
+
+@media (max-width: 767px) {
+  .preview-shell {
+    min-height: 100vh;
+    min-height: 100dvh;
+    align-items: stretch;
+    padding: 0;
+    background: var(--bg-page);
+  }
+
+  .phone-frame {
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 900px;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .phone-screen {
+    --safe-area-top: 0;
+    --safe-area-bottom: 0;
+    border-radius: 0;
+  }
+
+  .phone-status,
+  .phone-indicator {
+    display: none;
+  }
+}
+
+@media (max-width: 375px) {
+  .host-shell-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

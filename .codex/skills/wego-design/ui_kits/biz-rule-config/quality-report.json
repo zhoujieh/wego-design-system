@@ -6,12 +6,12 @@
   "coversTabBar": true,
   "screensGenerated": 1,
   "coreComponentsUsed": ["navbar", "cell", "form"],
-  "supportComponentsUsed": ["checkbox", "switch", "link", "radio", "tag"],
+  "supportComponentsUsed": ["checkbox", "switch", "radio", "tag"],
   "previewClassReuseRate": 0.97,
-  "reuseAssessment": "主体内容已收敛为一个通用业务规则配置母版，基础信息、规则开关和范围权限都复用已注册组件结构；主骨架使用 navbar、cell、form，辅助选择与提示能力由 checkbox、switch、link、radio、tag 承载；示例中的页面级主操作统一收口到导航操作区，避免页面底部重复主操作。",
+  "reuseAssessment": "主体内容已收敛为一个通用业务规则配置母版，基础信息、规则开关和范围权限都复用已注册组件结构；主骨架使用 navbar、cell、form，辅助选择能力由 checkbox、switch、radio、tag 承载；section 标题与卡片式分组已回收为 cell/form 正式 group 能力，示例中的页面级主操作统一收口到导航操作区，避免页面底部重复主操作。",
   "a11yFixes": [
     "可点击 cell、radio 选项和导航操作补齐 role、aria-checked 与键盘触发",
-    "查看说明补为可跳转锚点链接，避免出现无行为的死链接"
+    "去掉默认 helper 跳转说明，避免出现无必要的说明入口和误导性结构"
   ],
   "inventedComponents": [],
   "recommendedRefactors": {},
@@ -32,13 +32,12 @@
       "violations": []
     },
     "spacingCompliance": {
-      "description": "辅助说明文字的间距必须四方向完整：纵向用 margin-top 与上方内容分隔，横向用 padding-left/right 与列表内容对齐，不能只补单一方向",
+      "description": "页面纵向节奏由摘要区、group 标题和列表/表单分组自身承担，不额外插入默认 helper 说明栏充当布局收口。",
       "checked": true,
       "checklist": [
-        "margin-top 是否存在（与上方列表组的纵向间距）",
-        "padding-left 是否为 16px（与列表内容左对齐）",
-        "padding-right 是否为 16px（长文本右侧不贴边）",
-        "文字左缘是否与上方列表/表单文字左缘对齐"
+        "摘要区、group 标题和列表分组之间是否已形成稳定纵向节奏",
+        "是否删除默认 helper 说明栏，避免 AI 误把说明文案当页面必需内容",
+        "页面级主操作是否仍只在导航操作区收口"
       ],
       "violations": []
     }
@@ -46,7 +45,13 @@
   "warnings": [
     "本 UI Kit 展示的是从底部进入、落稳后全屏覆盖的业务规则配置模态页。",
     "phone-status 为当前页面状态栏展示样式；phone-indicator 等通用 Showcase 外壳由 scaffold.css 提供，非通用组件。",
-    "真实项目中应保持单一页面级主操作，不在页面内容区或底部重复放保存按钮。",
+    "navbar 通过组件自身的 padding-top: var(--safe-area-top, 0px) + sticky top: 0 避让状态栏，UI Kit 演示层不要再额外给页面容器补顶部 safe-area。",
+    "页面纵向节奏应由内容容器自身的 stack / group 结构承担，不再插入 .uikit-section-gap 这类纯占位元素。",
+    "连续 cell / form-body 分组应优先使用各自 group 的 title + content 正式结构；卡片式页面只在 content 容器上开启圆角修饰。",
+    "根节点 #root 已经是 .phone-screen，React 内容层不要再嵌套第二层 .phone-screen，否则容易叠加 overflow / height 外壳行为导致顶部内容裁切。",
+    "phone-status / phone-indicator 默认绝对定位悬浮且不占文档流，并保持预览层级最高；桌面手机壳写死模拟 44px / 34px，移动端同链接隐藏，由内容层和固定栏自行预留安全高度。",
+    "模态页首屏展示以稳定落点为准：默认直接展示打开后的最终态，避免自动入场动画让截图停在半开中间态。",
+    "真实项目中应保持单一页面级主操作，不在页面内容区或底部重复放保存按钮，也不要默认补一栏 helper 说明文案。",
     "iconfont 图标用于跳转指示器（icon-youjiantou16）。",
     "form-body 中嵌入 radio-group 时必须使用 .form-body--preserve-content-align + .form-body__right-btn + .radio-field-group 结构，不得发明 .form-body__radio-item 等自定义包装层。"
   ]

@@ -10,6 +10,7 @@
   --safe-area-top: 44px;
   --safe-area-bottom: 34px;
   --safe-area-bottom-content: 74px;
+  --navbar-body-height: 44px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -182,7 +183,7 @@ body.uikit-page {
   align-items: center;
   justify-content: center;
   pointer-events: none;
-  z-index: var(--z-sticky);
+  z-index: var(--z-critical);
 }
 .phone-indicator-bar {
   width: 134px;
@@ -193,8 +194,14 @@ body.uikit-page {
 }
 
 @media (max-width: 640px) {
+  .phone-screen {
+    --safe-area-top: 0;
+    --safe-area-bottom: 0;
+    --safe-area-bottom-content: 40px;
+    --navbar-body-height: 56px;
+  }
   .uikit-shell {
-    padding: var(--spacer-8);
+    padding: 0;
     align-items: stretch;
   }
   .phone-frame {

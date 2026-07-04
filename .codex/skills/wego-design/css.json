@@ -999,7 +999,8 @@
     "safeArea": {
         "safe-area-top": "0px",
         "safe-area-bottom": "0px",
-        "safe-area-bottom-content": "40px"
+        "safe-area-bottom-content": "40px",
+        "navbar-body-height": "56px"
     },
     "motion": {
         "duration-instant": "0ms",

@@ -134,8 +134,19 @@
   "anatomy": [
     {
       "name": "container",
-      "selector": ".form",
-      "role": "字段分组容器"
+      "selector": ".form-group",
+      "fallbackSelector": ".form",
+      "role": "字段分组最外层容器，承接组标题、内容容器和同组节奏；成组出现的 form 必须用 .form-group 包裹，不发明任务级 xxx-page__group"
+    },
+    {
+      "name": "groupTitle",
+      "selector": ".form-group__title",
+      "role": "组标题，独立于白底内容区，承接 section 标题样式"
+    },
+    {
+      "name": "groupContent",
+      "selector": ".form-group__content",
+      "role": "分组内容容器，承接连续 form-body 的白底表面、分割线节奏和卡片圆角修饰"
     },
     {
       "name": "root",
@@ -207,7 +218,11 @@
     "纯图标入口不使用圆形底按钮，维持 24px 图标视觉尺寸，默认使用一级文本色；若需要更强操作感，改用文字链、上下图标文案或按钮，不单靠换品牌色强化。",
     "form 只负责字段容器布局、左右对齐和右侧操作区定位；嵌入 counter 等子组件时，不改写其 .counter__* 子节点尺寸语义。",
     "counter 嵌入 form 时默认隐藏自身底部消息位，避免和 form 的行高、反馈槽位叠加出第二行说明。",
-    "radio / checkbox 成组场景直接复用各自组件契约里的 .radio-field-group / .checkbox-field-group 与 .radio-field / .checkbox-field 结构，不额外发明 form 专属包装层。"
+    "radio / checkbox 成组场景直接复用各自组件契约里的 .radio-field-group / .checkbox-field-group 与 .radio-field / .checkbox-field 结构，不额外发明 form 专属包装层。",
+    "成组出现的 form 必须用 .form-group 包裹，不发明任务级 xxx-page__group 自定义类。",
+    "需要组标题时，标题使用 .form-group__title 单独成行，不能把标题塞进白底圆角内容区里。",
+    "连续 form-body 默认放进 .form-group__content；如果页面是左右留白的卡片式布局，在 .form-group__content 上开启卡片修饰类，让圆角只作用于内容区。",
+    "历史结构允许 .form 直接包连续 form-body 以兼容旧任务，但新任务和 UI Kit 一律优先使用标题 + 内容容器的正式结构。"
   ],
   "behavior": {
     "click": "select、icon-text、upload、dropdown 等功能入口若未单独指定点击态样式，统一使用内容不透明度变为 0.6 的按压反馈。",
@@ -234,7 +249,10 @@
     "右侧选项切换场景使用 stack 组件表达子级内容切换，不使用 tag 组件冒充筛选状态；默认按左右两段呈现，中段保留空占位但不显示说明。",
     "custom 与 counter 的组合只表示容器嵌套，不代表 form 接管 counter 内部图标、按钮、输入字号；默认同时隐藏 counter 自带底部消息位，如需范围反馈改由宿主自己的消息槽位承接。",
     "radio 组合场景沿用 radio 组件固定的 root + inner + dot 三层结构，不额外嵌套 svg 或其他视觉节点。",
-    "checkbox 组合场景沿用 checkbox 组件固定的 inner / icon / minus 结构，勾选态继续使用随库 SVG 资产。"
+    "checkbox 组合场景沿用 checkbox 组件固定的 inner / icon / minus 结构，勾选态继续使用随库 SVG 资产。",
+    "成组 form 优先用 .form-group；.form 仅为兼容历史任务产物，新任务不再使用。",
+    "页面需要 section 标题时，直接使用 .form-group__title，不再复制 UI Kit 私有的 .uikit-section-title 或手写额外标题样式。",
+    "页面内容区左右有内边距时，把该组视为卡片式分组，在 .form-group__content 上使用卡片修饰类；不要额外再包一层只为白底和圆角存在的容器。"
   ],
   "doNotInvent": [
     "不要把 form 扩成桌面属性面板、富文本表单或多列表格表单。",
@@ -279,7 +297,9 @@
     "fixedHeight": "120px",
     "messageFont": "var(--body-xs-font-size)",
     "uploadSize": "64px",
-    "iconActionSize": "24px"
+    "iconActionSize": "24px",
+    "groupTitlePadding": "16px 16px 8px",
+    "groupRadius": "8px"
   },
   "specRefs": [
     "specs/交互设计原则.md",
@@ -301,8 +321,15 @@
       ".form-dropdown"
     ],
     "containerModifiers": [
+      ".form-group__content--card",
+      ".form-group--no-divider",
+      ".form-group--right-align",
       ".form--no-divider",
       ".form--right-align"
+    ],
+    "containerChildren": [
+      ".form-group__title",
+      ".form-group__content"
     ],
     "modifierClasses": [
       ".form-body--vertical",

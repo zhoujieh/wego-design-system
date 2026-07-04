@@ -88,8 +88,9 @@
 - 再按命中的组件去读 `components/*.json` 和 `preview/*.html`
 - 文案、布局、交互、视觉规则只引用 `specs/*.md`
 - UI Kit 只看结构和节奏，不复制 Showcase 外壳
+- `cell` / `form` 分组标题与卡片圆角已内建到组件正式结构；不要再自造 `uikit-section-title`、额外白底壳或圆角包裹层
 - 固定宿主 App 模板属于 `wego-ux/templates/host-shell.*`，不属于 `wego-design` UI Kit 或页面范式
-- 手机外壳是全局预览能力：电脑端显示，移动端同链接隐藏；业务内容不能依赖外壳类
+- 手机外壳是全局预览能力：电脑端显示，移动端同链接隐藏并铺满 viewport；`phone-status` / `phone-indicator` 默认 absolute 悬浮不占位，桌面写死模拟、真机动态获取，业务内容不能依赖外壳类
 
 ## 原型交接
 

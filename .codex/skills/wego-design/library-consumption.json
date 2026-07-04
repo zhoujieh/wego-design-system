@@ -28,7 +28,7 @@
             ],
             "copyable": true,
             "purpose": "组件级结构、class、状态、尺寸和使用边界",
-            "downstreamRule": "优先读取 components/index.json 确认可用组件，再读取对应契约和预览页；复制组件 markup 时同时链接 colors_and_type.css、iconfont.css 和 components.css。"
+            "downstreamRule": "优先读取 components/index.json 确认可用组件，再读取对应契约和预览页；复制组件 markup 时同时链接 colors_and_type.css、iconfont.css 和 components.css。命中连续列表/表单分组时，优先消费 `.cell-group` / `.form-group` 的正式结构：标题使用 group 自带 title 节点，连续内容放进 group 自带 content 容器；页面左右有内容内边距时，在 content 容器上开启卡片修饰类，不额外发明 section title、白底壳或圆角包裹层。"
         },
         "icons": {
             "files": [
@@ -58,7 +58,7 @@
             ],
             "copyable": false,
             "purpose": "业务规则配置等页面组合 Showcase，用来理解页面结构和组件搭配；App 宿主页已迁入 wego-ux/templates/host-shell.*，不是 UI Kit",
-            "downstreamRule": "只参考页面结构和组件组合，不要直接复制 .uikit-shell、.phone-frame 或业务演示里的自定义 biz-* 样式作为通用组件。固定宿主 App 模板由 `wego-ux/templates/host-shell.*` 维护并在首次生成任务时直接复制，不由 UI Kit 下发。命中页面范式后，检查 `uikit-plan.json` 中对应 `pagePatterns[].compositionConstraints` 获取组件组合约束（如 radio 的 cell vs form 取舍）。"
+            "downstreamRule": "只参考页面结构和组件组合，不要直接复制 .uikit-shell、.phone-frame 或业务演示里的自定义 biz-* 样式作为通用组件。固定宿主 App 模板由 `wego-ux/templates/host-shell.*` 维护并在首次生成任务时直接复制，不由 UI Kit 下发。命中页面范式后，检查 `uikit-plan.json` 中对应 `pagePatterns[].compositionConstraints` 获取组件组合约束（如 radio 的 cell vs form 取舍）。UI Kit 中出现的 section 标题现在应回收为组件正式节点（如 `.cell-group__title`、`.form-group__title`），不再把 `.uikit-section-title` 当下游可复制规则。"
         }
     },
     "iconUsage": {
@@ -179,8 +179,9 @@
                 "后续生成的任务级原型"
             ],
             "desktop": "显示手机预览外壳",
-            "mobile": "同链接隐藏手机外壳视觉并铺满真实 viewport",
-            "boundary": "外壳类只服务预览，不作为业务页面结构或组件契约"
+            "mobile": "同链接隐藏手机外壳视觉并铺满真实 viewport，不保留额外外层 padding",
+            "boundary": "外壳类只服务预览，不作为业务页面结构或组件契约",
+            "statusBarRule": "phone-status / phone-indicator 是全局预览外壳安全区：默认 absolute 悬浮、不占文档流，并保持预览层级最高（z-index 使用 var(--z-critical)）。桌面手机壳预览在 .phone-screen 内写死模拟值 --safe-area-top: 44px / --safe-area-bottom: 34px；移动端同链接隐藏 phone-status / phone-indicator，并由 env(safe-area-inset-*) 返回真实安全区。navbar 必须在组件内部通过 padding-top: var(--safe-area-top, 0px) + sticky top: 0 处理顶部避让，页面容器不得再额外补一层顶部 safe-area padding；页面底部若有固定操作栏，该固定栏自身必须声明 padding-bottom: var(--safe-area-bottom, env(safe-area-inset-bottom, 0px))；若页面底部没有固定操作栏，则可滚动内容容器底部必须补 calc(40px + var(--safe-area-bottom)) 避开安全区。禁止把 phone-status 改成流内占位特例。"
         },
         "outerShells": [
             ".uikit-shell",
