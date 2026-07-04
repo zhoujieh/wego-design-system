@@ -162,6 +162,15 @@
     "closeSize": "var(--size-16)",
     "iconSize": "var(--size-16)"
   },
+  "assetUsage": {
+    "businessBadges": [
+      "assets/icons/tag-seckill-14.svg",
+      "assets/icons/tag-group-14.svg",
+      "assets/icons/tag-seckill-16.svg",
+      "assets/icons/tag-group-16.svg"
+    ],
+    "rule": "业务促销标签使用随库 SVG 资产引用，不在预览或下游实现中内联 SVG。"
+  },
   "specRefs": [
     "specs/交互设计原则.md",
     "specs/设计风格与品牌原则.md"

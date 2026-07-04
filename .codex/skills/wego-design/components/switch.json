@@ -82,6 +82,8 @@
   "tokensConsumed": [
     "--bg-brand",
     "--bg-brand-surface-l2",
+    "--bg-inverse-control",
+    "--bg-inverse-control-disabled",
     "--bg-overlay-l2",
     "--body-md-font-size",
     "--body-sm-font-size",
@@ -92,6 +94,7 @@
     "--spacer-12",
     "--spacer-4",
     "--spacer-8",
+    "--status-success-surface-l3",
     "--text-default",
     "--text-inverse",
     "--text-tertiary"
@@ -101,7 +104,7 @@
     "radius": "12px",
     "thumbSize": "20px",
     "thumbInset": "2px",
-    "darkMode": "暗色上下文使用 .dark 选择器提升关闭态与禁用态轨道可见度",
+    "darkMode": "暗色上下文使用 .dark 选择器消费 inverse control 与 success surface Token，提升关闭态与禁用态轨道可见度",
     "touchCompensation": "switch::before 上下各扩展 8px，视觉尺寸不变",
     "transition": "background var(--duration-fast) var(--ease-standard), thumb left/opacity var(--duration-fast) var(--ease-standard)"
   },

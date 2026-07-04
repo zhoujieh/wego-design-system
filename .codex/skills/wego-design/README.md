@@ -40,6 +40,8 @@
   消费读取顺序与复制边界
 - `uikit-plan.json`
   UI Kit、页面范式、固定槽位与蓝图
+- `metadata.json`
+  设计系统版本与已发布 UI Kit 索引
 - `ui_kits/biz-rule-config/`
   业务规则配置页 Showcase
 - `specs/*.md`
@@ -89,12 +91,12 @@
 - 文案、布局、交互、视觉规则只引用 `specs/*.md`
 - UI Kit 只看结构和节奏，不复制 Showcase 外壳
 - `cell` / `form` 分组标题与卡片圆角已内建到组件正式结构；不要再自造 `uikit-section-title`、额外白底壳或圆角包裹层
-- 固定宿主 App 模板属于 `wego-ux/templates/host-shell.*`，不属于 `wego-design` UI Kit 或页面范式
-- 手机外壳是全局预览能力：电脑端显示，移动端同链接隐藏并铺满 viewport；`phone-status` / `phone-indicator` 默认 absolute 悬浮不占位，桌面写死模拟、真机动态获取，业务内容不能依赖外壳类
+- 固定宿主 App 正式维护在 `wego-app/`，`wego-ux/templates/host-shell.*` 只作为宿主基线来源；它不属于 `wego-design` UI Kit 或页面范式
+- 手机外壳是 `wego-app/index.html` 的全局预览能力：电脑端显示，移动端同链接隐藏并铺满 viewport；`phone-status` / `phone-indicator` 默认 absolute 悬浮不占位，业务场景不能依赖外壳类
 
 ## 原型交接
 
 - 需求理解交给 `wego-product`
 - 设计系统消费交给 `wego-design`
-- 原型项目输出交给 `wego-ux`
-- 结果验收交给 `wego-tests`
+- `wego-app` 场景原型输出交给 `wego-ux`
+- 当前任务范围验收交给 `wego-tests`

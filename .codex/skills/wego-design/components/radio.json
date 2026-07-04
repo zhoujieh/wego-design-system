@@ -126,13 +126,16 @@
     "--bg-brand",
     "--bg-control-disabled",
     "--bg-inverse-surface-l1",
+    "--bg-inverse-surface-disabled",
     "--body-md-font-size",
     "--body-md-line-height",
     "--border-control",
     "--border-disabled",
     "--border-inverse",
+    "--border-inverse-weak",
     "--duration-fast",
     "--ease-standard",
+    "--icon-inverse-disabled",
     "--spacer-2",
     "--spacer-12",
     "--text-brand",
@@ -162,7 +165,7 @@
     "borderWidth": "1.5px",
     "transition": "var(--duration-fast) / var(--ease-standard)",
     "touchTarget": "通过 .radio::before 将 24px / 20px 视觉尺寸补到 40px 热区，不改变布局占用",
-    "darkMode": "暗色上下文通过 .dark 切换到 inverse 边框与弱表面底色，保证未选和禁用态在暗卡片中仍可见"
+    "darkMode": "暗色上下文通过 .dark 切换到 inverse 边框、inverse 弱表面、inverse 弱边框和禁用图标 Token，保证未选和禁用态在暗卡片中仍可见"
   },
   "specRefs": [
     "specs/交互设计原则.md",

@@ -29,6 +29,9 @@ const repoRoot = process.cwd();
 const rootArg = rawArgs.find(arg => arg.startsWith('--root='));
 const libraryRoot = path.resolve(repoRoot, rootArg ? rootArg.slice('--root='.length) : '.codex/skills/wego-design');
 const rootRel = path.relative(repoRoot, libraryRoot) || '.';
+const APP_ROOT_REL = 'wego-app';
+const APP_ROOT = path.join(repoRoot, APP_ROOT_REL);
+const SCENES_ROOT = path.join(APP_ROOT, 'scenes');
 const scopeArg = rawArgs.find(arg => arg.startsWith('--scope='));
 const requestedScope = args.has('--full')
   ? 'full'
@@ -208,7 +211,7 @@ const ALLOWED_UIKIT_SHELL_CLASSES = new Set([
   'phone-indicator-bar',
 ]);
 
-// 任务文件夹原型项目禁止使用的 UI Kit Showcase 外壳类
+// wego-app 场景模块禁止使用的 UI Kit Showcase 外壳类
 const FORBIDDEN_PROTOTYPE_SHELL_CLASSES = new Set([
   'uikit-shell',
   'phone-header',
@@ -235,14 +238,8 @@ function hasResponsivePreviewShellRule(text) {
     && /@media[\s\S]*\.phone-screen[\s\S]*border-radius\s*:\s*0/i.test(text);
 }
 
-// 原型项目 page.css 禁止引用的 safe-area Token（真机由宿主补齐，PC 浏览器 fallback 会留白）
-const FORBIDDEN_PROTOTYPE_SAFE_AREA_TOKENS = new Set([
-  '--safe-area-top',
-  '--safe-area-bottom',
-  '--safe-area-bottom-content',
-]);
-
 const SURFACE_MATCH_STATUSES = new Set(['exact', 'near', 'fallback', 'gap']);
+const PRESENTATION_TYPES = new Set(['push', 'modal', 'sheet', 'full-screen-modal']);
 const HOST_CONTAINER_TABS = new Set(['my', 'workspace', 'dongtai', 'xiaoxi', 'haoyou']);
 const HOST_ENTRY_TYPES = new Set(['cell', 'grid-entry']);
 
@@ -252,19 +249,6 @@ const INTERNAL_PROTOTYPE_COPY_PATTERNS = [
   /验证微购.*工作流/,
   /验证.*保存回填.*本地持久化/,
 ];
-
-// 仓库根目录下不属于任务文件夹的目录（扫描任务文件夹时排除）
-const NON_TASK_ROOT_DIRS = new Set([
-  'scripts',
-  'docs',
-  'node_modules',
-  'assets',
-  'public',
-  'dist',
-  'build',
-  'tests',
-  'test',
-]);
 
 const report = {
   root: rootRel,
@@ -979,7 +963,8 @@ function checkConsumptionContracts() {
   const consumption = readJson('library-consumption.json');
   const plan = readJson('uikit-plan.json');
   const componentIndex = readJson('components/index.json');
-  if (!consumption || !plan) return;
+  const metadata = readJson('metadata.json');
+  if (!consumption || !plan || !metadata) return;
 
   if (consumption.schemaVersion !== 3) {
     add('error', 'consumption.schema_version', `library-consumption.json schemaVersion 必须为 3，当前为 ${consumption.schemaVersion}`, path.join(libraryRoot, 'library-consumption.json'));
@@ -1009,7 +994,9 @@ function checkConsumptionContracts() {
 
   for (const ref of pathRefs) {
     if (ref.includes('{slug}') || ref.includes('*') || ref.includes('#')) continue;
-    if (!fs.existsSync(path.join(libraryRoot, ref))) {
+    if (/\s/.test(ref)) continue;
+    const base = ref.startsWith(`${APP_ROOT_REL}/`) ? repoRoot : libraryRoot;
+    if (!fs.existsSync(path.join(base, ref))) {
       add('debt', 'contract.path_missing', `消费契约或 UI Kit 计划引用了不存在的路径：${ref}`);
     }
   }
@@ -1021,7 +1008,12 @@ function checkConsumptionContracts() {
   const consumptionKits = new Set(consumption.uiKits || []);
   const planKits = new Set((plan.uiKits || []).map(kit => kit?.slug).filter(Boolean));
   const componentIndexKits = new Set((componentIndex?.uiKits || []).map(kit => kit?.slug).filter(Boolean));
+  if (!Array.isArray(metadata.uiKits)) {
+    add('error', 'metadata.uikits_missing', 'metadata.json 必须包含 uiKits 数组，供 UI Kit 迭代确认全集', path.join(libraryRoot, 'metadata.json'));
+  }
+  const metadataKits = new Set((metadata.uiKits || []).map(kit => kit?.slug).filter(Boolean));
   const registrySources = [
+    ['metadata.json', metadataKits],
     ['library-consumption.json', consumptionKits],
     ['uikit-plan.json', planKits],
     ['components/index.json', componentIndexKits],
@@ -1045,13 +1037,30 @@ function checkConsumptionContracts() {
   if (!sameSet(consumptionKits, planKits) || !sameSet(consumptionKits, componentIndexKits)) {
     add('error', 'uikit.registry_mismatch', 'library-consumption.json、uikit-plan.json、components/index.json 的 UI Kit 清单必须保持一致', path.join(libraryRoot, 'library-consumption.json'));
   }
+  if (!sameSet(consumptionKits, metadataKits)) {
+    add('error', 'uikit.metadata_registry_mismatch', 'metadata.json、library-consumption.json、uikit-plan.json、components/index.json 的 UI Kit 清单必须保持一致', path.join(libraryRoot, 'metadata.json'));
+  }
+
+  for (const kit of metadata.uiKits || []) {
+    if (!kit?.slug || typeof kit.slug !== 'string') {
+      add('error', 'metadata.uikit_slug_missing', 'metadata.json uiKits[] 每项必须包含 slug', path.join(libraryRoot, 'metadata.json'));
+      continue;
+    }
+    for (const field of ['entry', 'qualityReport']) {
+      if (typeof kit[field] !== 'string' || !kit[field]) {
+        add('error', 'metadata.uikit_ref_missing', `metadata.json 中 ${kit.slug} 缺少 ${field}`, path.join(libraryRoot, 'metadata.json'));
+      } else if (!fs.existsSync(path.join(libraryRoot, kit[field]))) {
+        add('error', 'metadata.uikit_ref_path_missing', `metadata.json 中 ${kit.slug}.${field} 路径不存在：${kit[field]}`, path.join(libraryRoot, 'metadata.json'));
+      }
+    }
+  }
 
   const deliveryGuardrails = Array.isArray(consumption.deliveryGuardrails) ? consumption.deliveryGuardrails : [];
   const hasPositiveTopLevelLinkRule = deliveryGuardrails.some(line =>
     /页面间通过\s*<a>|<a>\s*标签跳转/i.test(line) && !/禁止|不得|不能/.test(line)
   );
   if (hasPositiveTopLevelLinkRule) {
-    add('error', 'delivery.guardrail_top_level_link', 'deliveryGuardrails 不能要求通过普通 <a> 跳转 pages/*.html；单预览壳多页面交互项目必须使用壳内路由或 modal trigger', path.join(libraryRoot, 'library-consumption.json'));
+    add('error', 'delivery.guardrail_top_level_link', 'deliveryGuardrails 不能要求通过普通 <a> 跳转 scenes/*.html；wego-app 必须使用 hash route、scene.js 注册或 overlay trigger', path.join(libraryRoot, 'library-consumption.json'));
   }
 
   const selectedFrames = plan.productContext?.selectedFrameNames || [];
@@ -1234,58 +1243,39 @@ function checkTrackedJunk() {
   }
 }
 
-function getTaskFoldersFromChangedFiles(changedFiles) {
-  const folders = new Set();
+function getSceneFoldersFromChangedFiles(changedFiles) {
+  const scenes = new Set();
   for (const file of changedFiles) {
-    const slashIndex = file.indexOf('/');
-    if (slashIndex === -1) continue;
-    const root = file.slice(0, slashIndex);
-    if (root.startsWith('.')) continue;
-    if (NON_TASK_ROOT_DIRS.has(root)) continue;
-    folders.add(root);
+    const parts = file.split('/');
+    if (parts[0] === APP_ROOT_REL && parts[1] === 'scenes' && parts[2]) {
+      const scenePath = path.join(SCENES_ROOT, parts[2]);
+      if (fs.existsSync(scenePath) && fs.statSync(scenePath).isDirectory()) {
+        scenes.add(parts[2]);
+      }
+    }
   }
-  return [...folders].sort();
+  return [...scenes].sort();
 }
 
-function getAllTaskFolders() {
-  if (!fs.existsSync(repoRoot)) return [];
-  const entries = fs.readdirSync(repoRoot, { withFileTypes: true });
-  return entries
-    .filter(entry => entry.isDirectory() && !entry.name.startsWith('.') && !NON_TASK_ROOT_DIRS.has(entry.name))
+function getAllSceneFolders() {
+  if (!fs.existsSync(SCENES_ROOT)) return [];
+  return fs.readdirSync(SCENES_ROOT, { withFileTypes: true })
+    .filter(entry => entry.isDirectory() && !entry.name.startsWith('.'))
     .map(entry => entry.name)
     .sort();
 }
 
-function listTaskFolderHtmlCss(taskFolder) {
-  const abs = path.join(repoRoot, taskFolder);
+function listFilesInDir(abs, extensions = null, options = {}) {
   if (!fs.existsSync(abs)) return [];
+  const { skipLib = false, skipScenes = false } = options;
   const out = [];
   const walk = current => {
     for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
       if (entry.name === 'node_modules' || entry.name.startsWith('.')) continue;
-      // 跳过设计系统副本目录（lib/ 下的 CSS 是源头副本，不算原型项目违规引用）
-      if (entry.isDirectory() && entry.name === 'lib') continue;
       const full = path.join(current, entry.name);
-      if (entry.isDirectory()) {
-        walk(full);
-      } else if (/\.(html|css)$/.test(entry.name)) {
-        out.push(full);
-      }
-    }
-  };
-  walk(abs);
-  return out.sort();
-}
-
-function listTaskFolderFiles(taskFolder, extensions = null) {
-  const abs = path.join(repoRoot, taskFolder);
-  if (!fs.existsSync(abs)) return [];
-  const out = [];
-  const walk = current => {
-    for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
-      if (entry.name === 'node_modules') continue;
-      if (entry.isDirectory() && entry.name === 'lib') continue;
-      const full = path.join(current, entry.name);
+      const rel = path.relative(abs, full);
+      if (entry.isDirectory() && skipLib && rel === 'lib') continue;
+      if (entry.isDirectory() && skipScenes && rel === 'scenes') continue;
       if (entry.isDirectory()) {
         walk(full);
       } else if (!extensions || extensions.has(path.extname(entry.name))) {
@@ -1295,6 +1285,14 @@ function listTaskFolderFiles(taskFolder, extensions = null) {
   };
   walk(abs);
   return out.sort();
+}
+
+function listSceneFiles(scene, extensions = null) {
+  return listFilesInDir(path.join(SCENES_ROOT, scene), extensions, { skipLib: true });
+}
+
+function listAppShellFiles(extensions = null) {
+  return listFilesInDir(APP_ROOT, extensions, { skipLib: true, skipScenes: true });
 }
 
 function readJsonFile(file) {
@@ -1307,23 +1305,85 @@ function readJsonFile(file) {
 }
 
 function checkPrototypeSurfaceDesigns(context) {
-  const taskFolders = context.effectiveScope === 'full'
-    ? getAllTaskFolders()
-    : getTaskFoldersFromChangedFiles(context.changedFiles);
-  if (taskFolders.length === 0) return;
+  const scenes = context.effectiveScope === 'full'
+    ? getAllSceneFolders()
+    : getSceneFoldersFromChangedFiles(context.changedFiles);
+  if (scenes.length === 0) return;
 
   const uikitPlan = readJson('uikit-plan.json') || {};
   const pagePatternIds = new Set((uikitPlan.pagePatterns || []).map(item => item.slug).filter(Boolean));
   const fallbackBlueprintIds = new Set((uikitPlan.fallbackPageBlueprints || []).map(item => item.id).filter(Boolean));
+  const routesPath = path.join(APP_ROOT, 'js/routes.js');
+  const registeredRoutes = fs.existsSync(routesPath) ? fs.readFileSync(routesPath, 'utf8') : '';
   let checkedPlans = 0;
-  for (const folder of taskFolders) {
-    const specDir = path.join(repoRoot, folder, '_spec');
+  for (const scene of scenes) {
+    const scenePath = path.join(SCENES_ROOT, scene);
+    const specDir = path.join(scenePath, '_spec');
+    const pageSpecPath = path.join(specDir, 'page_spec.json');
     const planPath = path.join(specDir, 'design_consumption_plan.json');
-    if (!fs.existsSync(planPath)) continue;
+    if (!fs.existsSync(pageSpecPath) || !fs.existsSync(planPath)) {
+      add('error', 'app_scene.spec_missing',
+        'App 场景必须包含 _spec/page_spec.json 和 _spec/design_consumption_plan.json',
+        scenePath);
+      continue;
+    }
+
+    const pageSpec = readJsonFile(pageSpecPath);
+    const routeId = pageSpec?.route_id;
+    const appTarget = pageSpec?.app_target;
+    if (!appTarget || appTarget.mode !== 'wego-app-scene') {
+      add('error', 'app_scene.target_missing',
+        'page_spec.app_target.mode 必须为 wego-app-scene',
+        pageSpecPath);
+    }
+    if (appTarget?.app_root && appTarget.app_root !== APP_ROOT_REL) {
+      add('error', 'app_scene.app_root_invalid',
+        `page_spec.app_target.app_root 必须为 ${APP_ROOT_REL}`,
+        pageSpecPath);
+    }
+    if (appTarget?.scene_folder && path.normalize(appTarget.scene_folder) !== path.normalize(`${APP_ROOT_REL}/scenes/${scene}`)) {
+      add('error', 'app_scene.folder_mismatch',
+        `page_spec.app_target.scene_folder 必须指向当前场景目录：${APP_ROOT_REL}/scenes/${scene}`,
+        pageSpecPath);
+    }
+    if (appTarget?.route_mode && appTarget.route_mode !== 'hash') {
+      add('error', 'app_scene.route_mode_invalid',
+        'page_spec.app_target.route_mode 必须为 hash',
+        pageSpecPath);
+    }
+    if (routeId && !registeredRoutes.includes(routeId)) {
+      add('error', 'app_scene.route_not_registered',
+        `route_id 未在 wego-app/js/routes.js 注册：${routeId}`,
+        routesPath);
+    }
+
+    const sceneJsPath = path.join(scenePath, 'scene.js');
+    if (!fs.existsSync(sceneJsPath)) {
+      add('error', 'app_scene.scene_js_missing', 'App 场景必须包含 scene.js', sceneJsPath);
+    } else {
+      const sceneJs = fs.readFileSync(sceneJsPath, 'utf8');
+      if (!/WegoApp\.registerScene\s*\(/.test(sceneJs)) {
+        add('error', 'app_scene.register_missing', 'scene.js 必须调用 window.WegoApp.registerScene()', sceneJsPath);
+      }
+      if (routeId && !sceneJs.includes(routeId)) {
+        add('error', 'app_scene.route_id_missing_in_scene', `scene.js 必须包含当前 route_id：${routeId}`, sceneJsPath);
+      }
+    }
 
     checkedPlans++;
     const plan = readJsonFile(planPath);
     if (!plan) continue;
+    if (plan.app_target?.route_id && routeId && plan.app_target.route_id !== routeId) {
+      add('error', 'app_scene.plan_route_mismatch',
+        `design_consumption_plan.app_target.route_id 与 page_spec.route_id 不一致：${plan.app_target.route_id} !== ${routeId}`,
+        planPath);
+    }
+    const presentationType = plan.page_presentation?.type;
+    if (presentationType && !PRESENTATION_TYPES.has(presentationType)) {
+      add('error', 'prototype.presentation_type_invalid',
+        `page_presentation.type 必须是 push/modal/sheet/full-screen-modal，当前为 ${presentationType}`,
+        planPath);
+    }
     const surfaces = Array.isArray(plan.surface_designs) ? plan.surface_designs : null;
     if (!surfaces || surfaces.length === 0) {
       add('error', 'prototype.surface_designs_missing',
@@ -1391,9 +1451,7 @@ function checkPrototypeSurfaceDesigns(context) {
       }
     }
 
-    const pageSpecPath = path.join(specDir, 'page_spec.json');
-    if (fs.existsSync(pageSpecPath)) {
-      const pageSpec = readJsonFile(pageSpecPath);
+    if (pageSpec) {
       const pageSurfaces = Array.isArray(pageSpec?.page_surfaces) ? pageSpec.page_surfaces : [];
     if (pageSurfaces.length === 0) {
         add('error', 'prototype.page_surfaces_missing',
@@ -1472,24 +1530,32 @@ function checkPrototypeSurfaceDesigns(context) {
 }
 
 function checkPrototypeJunkAndInternalCopy(context) {
-  const taskFolders = context.effectiveScope === 'full'
-    ? getAllTaskFolders()
-    : getTaskFoldersFromChangedFiles(context.changedFiles);
-  if (taskFolders.length === 0) return;
+  const scenes = context.effectiveScope === 'full'
+    ? getAllSceneFolders()
+    : getSceneFoldersFromChangedFiles(context.changedFiles);
+  const scanRoots = scenes.map(scene => path.join(SCENES_ROOT, scene));
+  if (context.effectiveScope === 'full' || context.changedFiles.some(file => file.startsWith(`${APP_ROOT_REL}/`) && !file.startsWith(`${APP_ROOT_REL}/lib/`))) {
+    scanRoots.push(APP_ROOT);
+  }
 
   let scannedTextFiles = 0;
-  for (const folder of taskFolders) {
-    const allFiles = listTaskFolderFiles(folder);
+  for (const root of scanRoots) {
+    const allFiles = listFilesInDir(root, null, { skipLib: true });
     for (const file of allFiles) {
       if (path.basename(file) === '.DS_Store') {
-        add('error', 'prototype.junk_file', '任务文件夹禁止包含 .DS_Store', file);
+        add('error', 'prototype.junk_file', 'wego-app 场景禁止包含 .DS_Store', file);
       }
     }
 
-    const textFiles = listTaskFolderFiles(folder, new Set(['.html', '.js']));
+    const textFiles = listFilesInDir(root, new Set(['.html', '.js']), { skipLib: true });
     for (const file of textFiles) {
       scannedTextFiles++;
       const text = fs.readFileSync(file, 'utf8');
+      if (/\bfetch\s*\(|XMLHttpRequest\b/.test(text)) {
+        add('error', 'app_scene.fetch_forbidden',
+          'wego-app 运行时禁止依赖 fetch()/XHR 读取本地 HTML 片段；请通过 scene.js 注册 template',
+          file);
+      }
       for (const pattern of INTERNAL_PROTOTYPE_COPY_PATTERNS) {
         const match = text.match(pattern);
         if (match) {
@@ -1506,161 +1572,125 @@ function checkPrototypeJunkAndInternalCopy(context) {
 }
 
 function checkPrototypeShellLeakage(context) {
-  // 只扫描变更涉及的任务文件夹；full scope 时扫描所有任务文件夹
-  const taskFolders = context.effectiveScope === 'full'
-    ? getAllTaskFolders()
-    : getTaskFoldersFromChangedFiles(context.changedFiles);
-  if (taskFolders.length === 0) return;
+  const scenes = context.effectiveScope === 'full'
+    ? getAllSceneFolders()
+    : getSceneFoldersFromChangedFiles(context.changedFiles);
 
   let scannedFiles = 0;
-  for (const folder of taskFolders) {
-    const files = listTaskFolderHtmlCss(folder);
-    let usesPreviewShell = false;
-    let hasResponsivePreviewCss = false;
-    for (const file of files) {
+  let hasResponsivePreviewCss = false;
+  for (const file of listAppShellFiles(new Set(['.css']))) {
+    if (hasResponsivePreviewShellRule(fs.readFileSync(file, 'utf8'))) hasResponsivePreviewCss = true;
+  }
+  for (const scene of scenes) {
+    for (const file of listSceneFiles(scene, new Set(['.html', '.css', '.js']))) {
       scannedFiles++;
       const ext = path.extname(file);
       const content = fs.readFileSync(file, 'utf8');
-
       let classes = new Set();
       let cssText = '';
       if (ext === '.html') {
         classes = classNamesFromHtml(content);
         cssText = stripCssComments(extractStyleBlocks(content));
-      } else {
+      } else if (ext === '.css') {
         classes = classesFromCss(stripCssComments(content));
         cssText = stripCssComments(content);
+      } else {
+        classes = classNamesFromHtml(content);
       }
-
-      const shellHits = [...classes].filter(name => FORBIDDEN_PROTOTYPE_SHELL_CLASSES.has(name));
+      const shellHits = [...classes].filter(name => FORBIDDEN_PROTOTYPE_SHELL_CLASSES.has(name) || PREVIEW_SHELL_CLASSES.has(name));
       if (shellHits.length > 0) {
-        add('error', 'prototype.shell_leakage',
-          `任务文件夹原型误用 UI Kit Showcase 内部模拟类：${shellHits.join(', ')}。仅允许 preview-shell/phone-frame/phone-screen 作为最外层预览外壳`,
+        add('error', 'app_scene.shell_leakage',
+          `业务场景不得包含预览外壳或 UI Kit Showcase 内部模拟类：${shellHits.join(', ')}`,
           file);
       }
-      if ([...classes].some(name => PREVIEW_SHELL_CLASSES.has(name))) {
-        usesPreviewShell = true;
-      }
-      if (hasResponsivePreviewShellRule(content)) {
-        hasResponsivePreviewCss = true;
-      }
-
       if (ext === '.css' && /\.modal-overlay\b[\s\S]*?\{[\s\S]*?position\s*:\s*fixed\s*;[\s\S]*?inset\s*:\s*0\s*;/.test(cssText)) {
         add('error', 'prototype.modal_overlay.viewport_fixed',
-          '单一手机壳架构下，modal-overlay 必须限制在 .phone-screen 内；不要使用浏览器级 position: fixed; inset: 0',
+          'App 场景中的 modal-overlay 必须限制在 .phone-screen 内；不要使用浏览器级 position: fixed; inset: 0',
           file);
       }
-
-      const usedVars = extractUsedVars(cssText);
-      const allowPreviewSafeArea = path.basename(file) === 'host-shell.css';
-      const tokenHits = allowPreviewSafeArea
-        ? []
-        : [...usedVars].filter(v => FORBIDDEN_PROTOTYPE_SAFE_AREA_TOKENS.has(v));
-      if (tokenHits.length > 0) {
-        add('error', 'prototype.safe_area_token_misuse',
-          `任务文件夹原型引用了禁止的 safe-area Token：${tokenHits.join(', ')}。原型项目不处理安全区，真机由宿主补齐`,
-          file);
-      }
-    }
-    if (usesPreviewShell && !hasResponsivePreviewCss) {
-      add('error', 'prototype.preview_shell_responsive_missing',
-        '任务文件夹使用手机预览外壳时，必须包含移动端隐藏外壳视觉的 media query',
-        folder);
     }
   }
+  if (fs.existsSync(APP_ROOT) && !hasResponsivePreviewCss) {
+    add('error', 'prototype.preview_shell_responsive_missing',
+      'wego-app 使用手机预览外壳时，必须包含移动端隐藏外壳视觉的 media query',
+      path.join(APP_ROOT, 'css/app.css'));
+  }
   report.metrics.prototypeScannedFiles = scannedFiles;
-  report.metrics.prototypeTaskFolders = taskFolders.length;
+  report.metrics.prototypeScenes = scenes.length;
 }
 
 function checkPrototypeSinglePreviewShellRouting(context) {
-  const taskFolders = context.effectiveScope === 'full'
-    ? getAllTaskFolders()
-    : getTaskFoldersFromChangedFiles(context.changedFiles);
-  if (taskFolders.length === 0) return;
+  const indexPath = path.join(APP_ROOT, 'index.html');
+  if (!fs.existsSync(indexPath)) {
+    add('error', 'app.index_missing', '缺少 wego-app/index.html 唯一宿主入口', indexPath);
+    return;
+  }
 
-  for (const folder of taskFolders) {
-    const htmlFiles = listTaskFolderFiles(folder, new Set(['.html']));
-    const folderPath = path.join(repoRoot, folder);
-    const indexPath = path.join(folderPath, 'index.html');
-    const indexExists = fs.existsSync(indexPath);
-    const htmlWithPreviewShell = [];
-
-    for (const file of htmlFiles) {
-      const html = fs.readFileSync(file, 'utf8');
-      const classes = classNamesFromHtml(html);
-      const previewHits = [...classes].filter(name => PREVIEW_SHELL_CLASSES.has(name));
-      if (previewHits.length > 0) {
-        htmlWithPreviewShell.push(file);
-      }
-
-      if (file !== indexPath && previewHits.length > 0) {
-        add('error', 'prototype.preview_shell.non_index',
-          `单一手机壳架构下，只有 index.html 可以包含预览外壳类；当前页面包含：${previewHits.join(', ')}`,
-          file);
-      }
+  const indexHtml = fs.readFileSync(indexPath, 'utf8');
+  const indexClasses = classNamesFromHtml(indexHtml);
+  for (const requiredClass of ['preview-shell', 'phone-frame', 'phone-screen']) {
+    if (!indexClasses.has(requiredClass)) {
+      add('error', 'prototype.preview_shell.index_missing',
+        `wego-app/index.html 必须包含唯一手机壳容器 .${requiredClass}`,
+        indexPath);
     }
+  }
 
-    if (!indexExists) continue;
+  const appHtmlFiles = listFilesInDir(APP_ROOT, new Set(['.html']), { skipLib: true });
+  const nonIndexShellFiles = appHtmlFiles.filter(file => file !== indexPath)
+    .filter(file => [...classNamesFromHtml(fs.readFileSync(file, 'utf8'))].some(name => PREVIEW_SHELL_CLASSES.has(name)));
+  if (nonIndexShellFiles.length > 0) {
+    add('error', 'prototype.preview_shell.multiple',
+      `wego-app 只能有 index.html 一套手机壳，其他含外壳页面：${nonIndexShellFiles.map(file => path.relative(APP_ROOT, file)).join(', ')}`,
+      APP_ROOT);
+  }
 
-    const indexHtml = fs.readFileSync(indexPath, 'utf8');
-    const indexClasses = classNamesFromHtml(indexHtml);
-    for (const requiredClass of ['preview-shell', 'phone-frame', 'phone-screen']) {
-      if (!indexClasses.has(requiredClass)) {
-        add('error', 'prototype.preview_shell.index_missing',
-          `index.html 必须包含唯一手机壳容器 .${requiredClass}`,
-          indexPath);
-      }
+  for (const tag of htmlStartTags(indexHtml, 'a')) {
+    const href = tag.attrs.href || '';
+    if (!href || href.startsWith('#') || href.startsWith('javascript:') || /^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(href)) {
+      continue;
     }
-
-    const nonIndexShellFiles = htmlWithPreviewShell.filter(file => file !== indexPath);
-    if (nonIndexShellFiles.length > 0) {
-      add('error', 'prototype.preview_shell.multiple',
-        `同一任务文件夹只能有 index.html 一套手机壳，其他含外壳页面：${nonIndexShellFiles.map(file => path.relative(folderPath, file)).join(', ')}`,
-        folder);
-    }
-
-    for (const tag of htmlStartTags(indexHtml, 'a')) {
-      const href = tag.attrs.href || '';
-      if (!href || href.startsWith('#') || href.startsWith('javascript:') || /^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(href)) {
-        continue;
-      }
-
-      const resolved = path.normalize(path.resolve(path.dirname(indexPath), href.split(/[?#]/)[0]));
-      const pointsToTaskPages = resolved.startsWith(path.join(folderPath, 'pages') + path.sep) && path.extname(resolved) === '.html';
-      if (!pointsToTaskPages) continue;
-
-      const hasShellRouteMarker = Boolean(
-        tag.attrs['data-route'] !== undefined ||
-        tag.attrs['data-screen-src'] !== undefined ||
-        tag.attrs['data-open-modal'] !== undefined
-      );
-      if (!hasShellRouteMarker) {
-        add('error', 'prototype.route.top_level_pages_link',
-          `index.html 指向 pages/*.html 的入口必须使用壳内加载标记(data-route/data-screen-src/data-open-modal)，不能普通跳转离开手机壳：${href}`,
-          indexPath);
-      }
+    const resolved = path.normalize(path.resolve(path.dirname(indexPath), href.split(/[?#]/)[0]));
+    const pointsToSceneHtml = resolved.startsWith(SCENES_ROOT + path.sep) && path.extname(resolved) === '.html';
+    if (pointsToSceneHtml) {
+      add('error', 'prototype.route.top_level_scene_link',
+        `wego-app/index.html 禁止普通链接跳到 scenes/*.html；应使用 hash route + scene.js 注册：${href}`,
+        indexPath);
     }
   }
 }
 
 function checkPrototypeHostShellUniqueness(context) {
-  const taskFolders = context.effectiveScope === 'full'
-    ? getAllTaskFolders()
-    : getTaskFoldersFromChangedFiles(context.changedFiles);
-  if (taskFolders.length === 0) return;
+  if (!fs.existsSync(APP_ROOT)) return;
+  const htmlFiles = listFilesInDir(APP_ROOT, new Set(['.html']), { skipLib: true });
+  const hostShellFiles = htmlFiles.filter(file => fs.readFileSync(file, 'utf8').includes('data-host-shell="true"'));
+  const indexPath = path.join(APP_ROOT, 'index.html');
+  if (hostShellFiles.length !== 1 || hostShellFiles[0] !== indexPath) {
+    add('error', 'prototype.host_shell.invalid',
+      'wego-app 只能在 index.html 存在一套 data-host-shell=\"true\" 宿主壳',
+      APP_ROOT);
+  }
+}
 
-  for (const folder of taskFolders) {
-    const htmlFiles = listTaskFolderFiles(folder, new Set(['.html']));
-    const hostShellFiles = htmlFiles.filter(file => fs.readFileSync(file, 'utf8').includes('data-host-shell="true"'));
-    if (hostShellFiles.length > 1) {
-      add('error', 'prototype.host_shell.duplicate',
-        `同一任务文件夹只能存在一套宿主壳，当前检测到 ${hostShellFiles.length} 个 data-host-shell="true" 页面`,
-        folder);
-    }
-    if (hostShellFiles.length === 1 && path.basename(hostShellFiles[0]) !== 'index.html') {
-      add('error', 'prototype.host_shell.entry_invalid',
-        '宿主壳页面必须使用任务目录下的 index.html 作为入口',
-        hostShellFiles[0]);
+function checkWegoAppStructure(context) {
+  const appTouched = context.effectiveScope === 'full' || context.changedFiles.some(file => file.startsWith(`${APP_ROOT_REL}/`));
+  if (!appTouched && !fs.existsSync(APP_ROOT)) return;
+  const required = [
+    'index.html',
+    'css/app.css',
+    'js/app.js',
+    'js/routes.js',
+    'lib/colors_and_type.css',
+    'lib/components.css',
+    'lib/iconfont.css',
+    'lib/fonts',
+    'lib/icons',
+    'lib/image',
+  ];
+  for (const rel of required) {
+    const target = path.join(APP_ROOT, rel);
+    if (!fs.existsSync(target)) {
+      add('error', 'app.required_missing', `wego-app 缺少必需路径：${rel}`, target);
     }
   }
 }
@@ -1719,7 +1749,7 @@ function main() {
     checkComponentContracts(full ? slugs : scopedSlugs);
   }
 
-  if (full || context.consumptionChanged || context.registryChanged || context.tokenChanged || context.changedKits.size > 0) {
+  if (full || context.consumptionChanged || context.registryChanged || context.tokenChanged || context.changedKits.size > 0 || context.metadataChanged) {
     checkConsumptionContracts();
   }
 
@@ -1733,6 +1763,7 @@ function main() {
   checkDirectionDrift({ full, changedLibraryFiles: context.libraryChangedFiles });
   checkSingleShellRuleConflicts(context);
   checkTrackedJunk();
+  checkWegoAppStructure(context);
   checkPrototypeSurfaceDesigns(context);
   checkPrototypeJunkAndInternalCopy(context);
   checkPrototypeShellLeakage(context);

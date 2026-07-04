@@ -3,15 +3,15 @@
   wego-ux 固定宿主模板
 
   使用规则:
-  - 仅在新任务首次落原型时直接复制一次;同任务后续迭代复用,不重复套壳
-  - 这是现成 App 宿主基地,保留模板中的 Tab、工作台、我的页、默认入口、UI 和基础交互
-  - AI 只按 route_id 增量插入目标入口、业务页链接、状态回填和必要交互,不得重画宿主 App
+  - 本模板只作为 wego-app/index.html 的宿主基线来源,不再为每个业务任务复制一套宿主壳
+  - 正式产物维护在 wego-app/,保留 Tab、工作台、我的页、默认入口、UI 和基础交互
+  - AI 只按 route_id 增量更新 routes.js、目标入口、业务场景、结果回填和必要交互,不得重画宿主 App
   - preview-shell / phone-frame / phone-screen 是全局预览外壳:电脑端显示,移动端同链接隐藏
-  - 宿主路径由 page_spec.host_container + route_id 驱动
+  - 宿主路径由 page_spec.app_target + host_container + route_id 驱动
   - 一级/二级入口请在 data-route-id、data-entry-label、data-parent-entry 中补齐真实值
-  - 业务详情页仍按 design_consumption_plan 生成到 pages/;宿主只负责入口、跳转和回填
+  - 业务场景按 design_consumption_plan 生成到 wego-app/scenes/{中文业务场景}/,通过 scene.js 注册
   - 图标优先使用 lib/icons/app-center/*.svg 作为业务入口图标资产
-  - 直接打开本模板预览时,下方 fallback 资源会从 wego-design / wego-ux/templates 读取;复制到任务目录后仍使用 ./lib / ./css / ./js
+  - 直接打开本模板预览时,下方 fallback 资源会从 wego-design / wego-ux/templates 读取;落到 wego-app 后使用 ./lib / ./css / ./js
 -->
 <html lang="zh-CN">
 <head>
@@ -87,7 +87,7 @@
               <strong>90.33G</strong>
               <span>/360G</span>
             </div>
-            <button type="button" class="link link--default host-shell-link-button" data-route-id="my-space-management" data-entry-label="空间管理" data-screen-src="./pages/space-management.html">空间管理</button>
+            <button type="button" class="link link--default host-shell-link-button" data-route-id="my-space-management" data-entry-label="空间管理">空间管理</button>
           </div>
         </div>
       </section>
@@ -126,7 +126,7 @@
       <section class="card card--surface host-shell-list-card">
         <div class="card__content host-shell-list-card__content">
           <div class="host-shell-list" data-entry-group="my-settings">
-          <button type="button" class="cell cell--single cell--bg-white cell--clickable cell--divider-center" data-route-id="my-settings" data-entry-label="设置" data-screen-src="./pages/settings.html">
+          <button type="button" class="cell cell--single cell--bg-white cell--clickable cell--divider-center" data-route-id="my-settings" data-entry-label="设置">
             <div class="cell__body">
               <div class="cell__content">
                 <div class="cell__title-row"><span class="cell__title">设置</span></div>
@@ -136,7 +136,7 @@
               </div>
             </div>
           </button>
-          <button type="button" class="cell cell--single cell--bg-white cell--clickable cell--divider-center" data-route-id="my-wallet" data-entry-label="我的钱包" data-screen-src="./pages/wallet.html">
+          <button type="button" class="cell cell--single cell--bg-white cell--clickable cell--divider-center" data-route-id="my-wallet" data-entry-label="我的钱包">
             <div class="cell__body">
               <div class="cell__content">
                 <div class="cell__title-row"><span class="cell__title">我的钱包</span></div>
@@ -147,7 +147,7 @@
               </div>
             </div>
           </button>
-          <button type="button" class="cell cell--single cell--bg-white cell--clickable cell--divider-center" data-route-id="my-favorites" data-entry-label="我的收藏" data-screen-src="./pages/favorites.html">
+          <button type="button" class="cell cell--single cell--bg-white cell--clickable cell--divider-center" data-route-id="my-favorites" data-entry-label="我的收藏">
             <div class="cell__body">
               <div class="cell__content">
                 <div class="cell__title-row"><span class="cell__title">我的收藏</span></div>
@@ -157,7 +157,7 @@
               </div>
             </div>
           </button>
-          <button type="button" class="cell cell--single cell--bg-white cell--clickable" data-route-id="my-coupons" data-entry-label="我的卡券" data-screen-src="./pages/coupons.html">
+          <button type="button" class="cell cell--single cell--bg-white cell--clickable" data-route-id="my-coupons" data-entry-label="我的卡券">
             <div class="cell__body">
               <div class="cell__content">
                 <div class="cell__title-row"><span class="cell__title">我的卡券</span></div>

@@ -129,7 +129,7 @@
     "同一分组内的连续 cell 通过分割线建立行间视觉节奏；最后一行不加分割线，避免与分组底部留白重叠。",
     "cell__body 带上下 12px padding，cell 使用 min-height 而非固定高度，内容自然撑高。标题使用 nowrap 截断，副标题使用 2 行截断，设计内容时仍需遵循截断规则。",
     "子级缩进场景中，父项行和子项行必须在同一个 .cell-group 内连续排列。子项左侧没有其他前导内容时，使用 .cell__backspace > .cell__backspace-icon > .cell__body，并由 backspace-icon 作为子级标识；缩进前导区与正文内容之间继续保持 12px 间距，不额外扩大 body 左内边距。子项左侧已有图标、checkbox、radio、switch 等前导语义时，不再补 cell__backspace，直接沿用现有前导节点。",
-    "成组出现的 cell 必须用 .cell-group 包裹，不发明任务级 xxx-page__group 自定义类。",
+    "成组出现的 cell 必须用 .cell-group 包裹，不发明场景级 xxx-page__group 自定义类。",
     "需要组标题时，标题使用 .cell-group__title 单独成行，不能把标题塞进白底圆角内容区里。",
     "连续 cell 默认放进 .cell-group__content；当承接该组的宿主内容层提供横向留白时，在 .cell-group__content 上开启卡片修饰类；当分组内容直接通栏贴边排列时，不开启卡片修饰类。",
     ".cell-group__content 内连续 cell 除最后一行外均加分割线修饰类；孤立单行 cell 不加分割线。",

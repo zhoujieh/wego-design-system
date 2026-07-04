@@ -361,9 +361,21 @@
                 "hex": "#1e2028",
                 "opacity": "1"
             },
+            "bg-inverse-surface-disabled": {
+                "hex": "#ffffff",
+                "opacity": "0.03"
+            },
             "bg-inverse-surface-l1": {
                 "hex": "#ffffff",
                 "opacity": "0.10"
+            },
+            "bg-inverse-control": {
+                "hex": "#ffffff",
+                "opacity": "0.16"
+            },
+            "bg-inverse-control-disabled": {
+                "hex": "#ffffff",
+                "opacity": "0.08"
             },
             "bg-fill-strong": {
                 "hex": "#b7bec5",
@@ -542,6 +554,10 @@
             "icon-inverse": {
                 "hex": "#ffffff",
                 "opacity": "1"
+            },
+            "icon-inverse-disabled": {
+                "hex": "#ffffff",
+                "opacity": "0.18"
             }
         },
         "border": {
@@ -600,6 +616,10 @@
             "border-inverse": {
                 "hex": "#ffffff",
                 "opacity": "0.70"
+            },
+            "border-inverse-weak": {
+                "hex": "#ffffff",
+                "opacity": "0.12"
             }
         },
         "status-success": {

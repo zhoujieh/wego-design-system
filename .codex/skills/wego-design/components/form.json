@@ -136,7 +136,7 @@
       "name": "container",
       "selector": ".form-group",
       "fallbackSelector": ".form",
-      "role": "字段分组最外层容器，承接组标题、内容容器和同组节奏；成组出现的 form 必须用 .form-group 包裹，不发明任务级 xxx-page__group"
+      "role": "字段分组最外层容器，承接组标题、内容容器和同组节奏；成组出现的 form 必须用 .form-group 包裹，不发明场景级 xxx-page__group"
     },
     {
       "name": "groupTitle",
@@ -219,7 +219,7 @@
     "form 只负责字段容器布局、左右对齐和右侧操作区定位；嵌入 counter 等子组件时，不改写其 .counter__* 子节点尺寸语义。",
     "counter 嵌入 form 时默认隐藏自身底部消息位，避免和 form 的行高、反馈槽位叠加出第二行说明。",
     "radio / checkbox 成组场景直接复用各自组件契约里的 .radio-field-group / .checkbox-field-group 与 .radio-field / .checkbox-field 结构，不额外发明 form 专属包装层。",
-    "成组出现的 form 必须用 .form-group 包裹，不发明任务级 xxx-page__group 自定义类。",
+    "成组出现的 form 必须用 .form-group 包裹，不发明场景级 xxx-page__group 自定义类。",
     "需要组标题时，标题使用 .form-group__title 单独成行，不能把标题塞进白底圆角内容区里。",
     "连续 form-body 默认放进 .form-group__content；当承接该组的宿主内容层提供横向留白时，在 .form-group__content 上开启卡片修饰类；当分组内容直接通栏贴边排列时，不开启卡片修饰类。",
     "历史结构允许 .form 直接包连续 form-body 以兼容旧任务，但新任务和 UI Kit 一律优先使用标题 + 内容容器的正式结构。"

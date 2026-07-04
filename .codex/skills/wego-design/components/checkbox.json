@@ -140,12 +140,14 @@
     "--bg-brand",
     "--bg-control-disabled",
     "--bg-inverse-surface-l1",
+    "--bg-inverse-surface-disabled",
     "--body-md-font-size",
     "--body-md-line-height",
     "--body-sm-font-size",
     "--border-control",
     "--border-disabled",
     "--border-inverse",
+    "--border-inverse-weak",
     "--duration-fast",
     "--ease-standard",
     "--font-weight-medium",
@@ -183,7 +185,7 @@
     "countFont": "12px / var(--font-weight-medium)",
     "transition": "background var(--duration-fast) var(--ease-standard)",
     "touchTarget": "通过 .checkbox::before 将 24px / 20px 视觉尺寸补到 40px 热区，不改变布局占用",
-    "darkMode": "暗色上下文通过 .dark 切换到 inverse 边框与弱表面底色，未选和禁用态不再依赖 preview 专用覆盖"
+    "darkMode": "暗色上下文通过 .dark 切换到 inverse 边框、inverse 弱表面和 inverse 弱边框 Token，未选和禁用态不再依赖 preview 专用覆盖"
   },
   "assetUsage": {
     "check": "assets/icons/checkbox-check.svg",

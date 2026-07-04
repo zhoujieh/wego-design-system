@@ -1,10 +1,20 @@
-# wego 设计系统
+# wego 静态 App 原型与设计系统
 
 ## 这个仓库是什么
 
-微购(WeGo)中文产品原型与设计系统仓库。复制即可用——给 AI 发送业务需求,按 4 段流水线即可输出可在浏览器直接预览的移动端产品原型(静态 HTML/CSS/JS,无需构建、无需依赖)。
+微购(WeGo)中文静态 App 原型与设计系统仓库。复制即可用——用户只需要输出业务需求,AI 负责生成符合微购设计语言的移动端静态交互原型。
 
 默认面向移动端、微信生态、电商/工具场景;不依赖特定 agent 运行时,任意 AI agent 读取本文件与对应 `SKILL.md` 即可上手。
+
+主 App 固定在 `wego-app/`:
+
+- `wego-app/index.html` 是唯一 App 入口和预览宿主
+- 电脑端在手机壳中预览,移动端同链接铺满真实 viewport
+- 预览以 Vercel 固定链接为主,同时必须支持本地直接打开 `wego-app/index.html`
+- 业务场景全部进入 `wego-app/scenes/{中文业务场景}/`
+- 页面路由使用 hash route,如 `#/my-permission-management`
+- `wego-app/lib/` 是部署用设计系统资源副本
+- 旧的“每个任务生成一个独立原型文件夹”模式废弃
 
 ## 如何开始(标准流水线)
 
@@ -12,8 +22,8 @@
 
 1. `.codex/skills/wego-product/` → 输出 `page_spec`(需求理解、任务分类、场景判断)
 2. `.codex/skills/wego-design/` → 输出 `design_consumption_plan`(设计系统消费、UI Kit 映射)
-3. `.codex/skills/wego-ux/` → 输出原型项目(静态 HTML 任务级文件夹,浏览器直接打开)
-4. `.codex/skills/wego-tests/` → 输出 `acceptance_report`(验收)
+3. `.codex/skills/wego-ux/` → 更新 `wego-app` 静态 App 与对应 `scenes/` 场景模块
+4. `.codex/skills/wego-tests/` → 输出当前任务范围的 `acceptance_report`(验收)
 
 组件迭代、新增组件、组件契约与 preview 同步走第 5 个技能 `.codex/skills/wego-uxsystem-iterate/`。
 
@@ -21,7 +31,7 @@
 
 - 没有 `page_spec` 时不直接进入设计消费
 - 没有 `design_consumption_plan` 时不直接生成原型
-- 原型未落成任务级文件夹时不验收
+- 当前业务场景未落成 `wego-app/scenes/{中文业务场景}/` 时不验收
 
 ## 沟通要求
 
@@ -43,7 +53,10 @@
 
 以下约束跨技能通用,技能内不再重复:
 
-- 原型产物必须是项目根目录下的任务级文件夹,不能散落在仓库根目录;同一任务迭代复用原文件夹(详见 `wego-ux/SKILL.md`)
+- 原型产物必须落在 `wego-app/` 静态 App 中;业务场景必须落在 `wego-app/scenes/{中文业务场景}/`,不能散落在仓库根目录;同一业务场景迭代复用原场景目录(详见 `wego-ux/SKILL.md`)
+- `wego-app/index.html` 是唯一宿主 App 入口;不为每个业务场景复制第二套宿主壳
+- 业务页面不得运行时依赖 `fetch()`/`XHR` 读取本地 HTML 片段;场景通过 `scene.js` 注册 template 与交互,确保 Vercel 和本地直接打开都可用
+- 原型交互必须体现真实业务流程和数据状态变化,但不默认强制 localStorage 持久化;只有需求明确要求刷新后保留时才做持久化
 - 设计系统本体迭代必须递增 `.codex/skills/wego-design/metadata.json` 的 `version`;纯仓库管理类变更可不递增(详见 `wego-uxsystem-iterate/SKILL.md`)
 - 不提交 `.DS_Store`、`.uploads/`
 - AGENTS.md 只承载顶层仓库关键信息与仓库偏好规则;不承载工作流迭代方法论、组件迭代步骤、单个组件规则;后者一律落到对应技能的 references/ 或权威数据文件
@@ -65,7 +78,7 @@
 
 - 运行 `node scripts/validate-wego-design.mjs` 通过守门(JSON 格式、Token 同步、组件三向对齐、components.css 完整性、UI Kit 成对、过期路径、禁止文件、metadata version)
 - 确认 `metadata.json` version 已按本轮变更递增
-- 确认原型产物落在任务级文件夹
+- 确认原型产物落在 `wego-app/` 和对应 `wego-app/scenes/` 场景目录
 
 ## 设计系统方向与边界
 
