@@ -3,12 +3,6 @@
   "library": "wego-design",
   "uiKits": [
     {
-      "slug": "app",
-      "entry": "ui_kits/app/index.html",
-      "qualityReport": "ui_kits/app/quality-report.json",
-      "note": "移动端应用 Showcase；固定宿主模板由 wego-ux/templates/host-shell.* 维护"
-    },
-    {
       "slug": "biz-rule-config",
       "entry": "ui_kits/biz-rule-config/index.html",
       "qualityReport": "ui_kits/biz-rule-config/quality-report.json"

@@ -8,7 +8,7 @@
   - 禁止复制 .uikit-shell / .phone-body;.phone-status / .phone-indicator 作为预览安全区,与 host-shell 一致,absolute 悬浮透明背景不占位,PC 端显示、移动端隐藏
   - 全局元素重置已统一收口到 colors_and_type.css(*、html/body、button、a、img/svg、h1-h6/p、ul/ol、input/textarea/select、滚动条隐藏),page.css 不再重复
   - page.css 在 .phone-screen 内定义 --safe-area-top / --safe-area-bottom 模拟值(44px/34px),与 host-shell 一致;内容区通过自身 padding 避让安全区
-  - 模态层必须使用 position: fixed; inset: 0,不要用 position: absolute
+  - 模态层必须挂载在 .phone-screen 内,使用 position: absolute; inset: 0 覆盖手机屏,不要使用浏览器级 fixed
   - 容器宽度由 body 上的 max-width 约束(默认 768px,沉浸页可去掉)
   - 复制本模板后,按 design_consumption_plan 替换 navbar 变体、page-body 内容、modal 触发逻辑
 

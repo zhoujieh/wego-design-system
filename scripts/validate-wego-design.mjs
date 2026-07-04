@@ -978,6 +978,7 @@ function checkComponentMotion(slug, contract, file) {
 function checkConsumptionContracts() {
   const consumption = readJson('library-consumption.json');
   const plan = readJson('uikit-plan.json');
+  const componentIndex = readJson('components/index.json');
   if (!consumption || !plan) return;
 
   if (consumption.schemaVersion !== 3) {
@@ -1016,11 +1017,41 @@ function checkConsumptionContracts() {
   const actualKitDirs = fs.existsSync(path.join(libraryRoot, 'ui_kits'))
     ? fs.readdirSync(path.join(libraryRoot, 'ui_kits'), { withFileTypes: true }).filter(entry => entry.isDirectory()).map(entry => entry.name).sort()
     : [];
-  const listedKits = new Set(consumption.uiKits || []);
-  for (const kit of actualKitDirs) {
-    if (!listedKits.has(kit)) {
-      add('debt', 'consumption.uikit_missing', `library-consumption.json 未列出现有 UI Kit：${kit}`, path.join(libraryRoot, 'library-consumption.json'));
+  const actualKitSet = new Set(actualKitDirs);
+  const consumptionKits = new Set(consumption.uiKits || []);
+  const planKits = new Set((plan.uiKits || []).map(kit => kit?.slug).filter(Boolean));
+  const componentIndexKits = new Set((componentIndex?.uiKits || []).map(kit => kit?.slug).filter(Boolean));
+  const registrySources = [
+    ['library-consumption.json', consumptionKits],
+    ['uikit-plan.json', planKits],
+    ['components/index.json', componentIndexKits],
+  ];
+
+  const sameSet = (a, b) => a.size === b.size && [...a].every(item => b.has(item));
+
+  for (const [source, listedKits] of registrySources) {
+    for (const kit of actualKitDirs) {
+      if (!listedKits.has(kit)) {
+        add('error', 'uikit.registry_missing', `${source} 未列出现有 UI Kit：${kit}`, path.join(libraryRoot, source));
+      }
     }
+    for (const kit of listedKits) {
+      if (!actualKitSet.has(kit)) {
+        add('error', 'uikit.registry_stale', `${source} 登记了不存在的 UI Kit：${kit}`, path.join(libraryRoot, source));
+      }
+    }
+  }
+
+  if (!sameSet(consumptionKits, planKits) || !sameSet(consumptionKits, componentIndexKits)) {
+    add('error', 'uikit.registry_mismatch', 'library-consumption.json、uikit-plan.json、components/index.json 的 UI Kit 清单必须保持一致', path.join(libraryRoot, 'library-consumption.json'));
+  }
+
+  const deliveryGuardrails = Array.isArray(consumption.deliveryGuardrails) ? consumption.deliveryGuardrails : [];
+  const hasPositiveTopLevelLinkRule = deliveryGuardrails.some(line =>
+    /页面间通过\s*<a>|<a>\s*标签跳转/i.test(line) && !/禁止|不得|不能/.test(line)
+  );
+  if (hasPositiveTopLevelLinkRule) {
+    add('error', 'delivery.guardrail_top_level_link', 'deliveryGuardrails 不能要求通过普通 <a> 跳转 pages/*.html；单预览壳多页面交互项目必须使用壳内路由或 modal trigger', path.join(libraryRoot, 'library-consumption.json'));
   }
 
   const selectedFrames = plan.productContext?.selectedFrameNames || [];
@@ -1138,12 +1169,68 @@ function checkDirectionDrift(options = {}) {
   }
 }
 
+function checkSingleShellRuleConflicts(context) {
+  const ruleFiles = [
+    path.join(libraryRoot, 'library-consumption.json'),
+    path.join(libraryRoot, 'uikit-plan.json'),
+    path.join(libraryRoot, 'specs/交互设计原则.md'),
+    path.join(libraryRoot, '..', 'wego-ux', 'SKILL.md'),
+    path.join(libraryRoot, '..', 'wego-ux', 'templates/page-shell.html'),
+    path.join(libraryRoot, '..', 'wego-ux', 'templates/page.css'),
+    path.join(libraryRoot, '..', 'wego-tests', 'SKILL.md'),
+  ].map(file => path.resolve(file));
+  const changedAbs = new Set(context.changedFiles.map(file => path.resolve(repoRoot, file)));
+  const full = context.effectiveScope === 'full';
+  const isNegated = line => /禁止|不得|不能|不允许|避免|不要/.test(line);
+
+  for (const file of ruleFiles) {
+    if (!fs.existsSync(file)) continue;
+    if (!full && !changedAbs.has(file)) continue;
+    const text = fs.readFileSync(file, 'utf8');
+    const rel = path.relative(repoRoot, file);
+    const lines = text.split('\n');
+
+    lines.forEach((line, index) => {
+      if (/页面间通过\s*<a>|<a>\s*标签跳转|<a>`?\s*标签或\s*`?location\.href|目标页为独立 HTML 文档|浏览器原生导航/.test(line) && !isNegated(line)) {
+        add('error', 'single_shell.top_level_navigation_rule', `单预览壳规则禁止把页面切换定义为浏览器顶层跳转：${line.trim()}`, file, { line: index + 1, file: rel });
+      }
+      if (/壳内 overlay \+ fetch|fetch 内容片段|JS 动态加载业务片段|通过 JS 动态加载到 overlay/.test(line) && !isNegated(line)) {
+        add('error', 'single_shell.fetch_fragment_rule', `file:// 兼容规则禁止把 modal 依赖 fetch/XHR 加载本地片段：${line.trim()}`, file, { line: index + 1, file: rel });
+      }
+    });
+
+    if (/模态层[^。\n]*position:\s*fixed[^。\n]*不要用 position:\s*absolute/.test(text)
+      || /overlay 样式[^。\n`]*`position:\s*fixed;\s*inset:\s*0/.test(text)
+      || /\.modal-overlay\s*\{[\s\S]{0,160}position:\s*fixed/.test(text)) {
+      add('error', 'single_shell.fixed_modal_rule', 'modal-overlay 必须限制在 .phone-screen 内，不能使用浏览器级 position: fixed; inset: 0', file);
+    }
+  }
+}
+
 function checkTrackedJunk() {
   const tracked = git(['ls-files']);
   if (tracked === null) return;
   const junk = tracked.split('\n').filter(file => /(^|\/)\.DS_Store$|^\.uploads\//.test(file));
   if (junk.length > 0) {
     add('error', 'git.tracked_junk', `禁止提交 .DS_Store 或 .uploads：${junk.join(', ')}`);
+  }
+
+  const physicalJunk = [];
+  const walk = current => {
+    for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+      if (entry.name === '.git') continue;
+      const full = path.join(current, entry.name);
+      const rel = path.relative(repoRoot, full);
+      if (entry.isDirectory()) {
+        walk(full);
+      } else if (/(^|\/)\.DS_Store$|^\.uploads\//.test(rel)) {
+        physicalJunk.push(rel);
+      }
+    }
+  };
+  walk(repoRoot);
+  if (physicalJunk.length > 0) {
+    add('error', 'repo.junk_file', `工作区禁止保留 .DS_Store 或 .uploads 文件：${firstLines(physicalJunk)}`);
   }
 }
 
@@ -1644,6 +1731,7 @@ function main() {
   }
 
   checkDirectionDrift({ full, changedLibraryFiles: context.libraryChangedFiles });
+  checkSingleShellRuleConflicts(context);
   checkTrackedJunk();
   checkPrototypeSurfaceDesigns(context);
   checkPrototypeJunkAndInternalCopy(context);

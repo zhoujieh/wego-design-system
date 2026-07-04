@@ -280,7 +280,13 @@
       "entryTypes": [
         "cell",
         "grid-entry"
-      ]
+      ],
+      "entryHierarchy": {
+        "rule": "当 page_spec.host_container.leaf_level > 1 且 page_surfaces[host-entry] 已声明父子入口层级时，wego-ux 必须按声明生成视觉从属，不得与一级入口 DOM 平级只靠 data-parent-entry 数据标记",
+        "visualExpression": "二级入口 cell 使用 .cell--indent 修饰类表达缩进；或嵌套在父入口下方的子列表容器内（如 .host-shell-list__sub）；缩进宽度 24px，与 cell.json 的 leftGuidePattern.indentWidth 对齐",
+        "domPattern": "父项 .cell + 子项 .cell.cell--indent；父子必须在同一 .cell-group/.host-shell-list 内连续排列",
+        "forbidden": "只用 data-parent-entry 数据标记而无视觉从属；二级入口与一级入口完全平级"
+      }
     },
     "previewShellPolicy": {
       "appliesTo": [
@@ -297,8 +303,8 @@
   },
   "selectionPolicy": "mobile-app-fixed-slots-first",
   "pagePatternSelectionRule": "先检查 page_spec 是否声明 host_container + route_id；若是固定宿主模板任务，由 wego-ux 首次直接复制 host-shell.* 套壳，不从 UI Kit 参考后重画。随后只判断业务页属于哪种既有页面范式，再选择最贴近的 UI Kit 蓝本；禁止因为宿主模板已迁出 UI Kit 而回避其业务页面模式、section 组织、摘要结构和信息密度。",
-  "deliveryMode": "static-multi-page",
-  "deliveryRule": "页面蓝图用于指导项目中的真实 HTML 页面实现；默认交付可浏览器直接打开、不依赖框架的静态多页面项目。",
+  "deliveryMode": "static-single-preview-shell-flow",
+  "deliveryRule": "页面蓝图用于指导项目中的真实 HTML 页面实现；默认交付可浏览器直接打开、不依赖框架的静态单预览壳多页面交互项目；index.html 是唯一预览外壳和启动入口，不是唯一业务页面，完整流程必须拆成多个 screen/modal/fragment；pages/*.html 若存在只能作为片段或迁移内容源。",
   "slotAssignments": [
     {
       "slot": "top-navigation",
@@ -452,7 +458,8 @@
         "使用真实 page-shell，不复制 UI Kit Showcase 外壳",
         "页面背景按内容密度选择 data-bg=surface 或 data-bg=page，导航栏与页面背景保持一致",
         "主体优先由状态摘要 section、入口 cell/button、必要的业务说明组成",
-        "禁止使用营销 hero、工作流说明文案或大面积装饰背景"
+        "禁止使用营销 hero、工作流说明文案或大面积装饰背景",
+        "当 host_container.leaf_level > 1 且 page_surfaces[host-entry] 已声明父子入口层级时，二级入口 cell 必须使用 .cell--indent 修饰类或嵌套子列表容器表达视觉从属，不得与一级入口 DOM 平级只靠 data-parent-entry 标记"
       ],
       "allowedComponents": [
         "navbar",

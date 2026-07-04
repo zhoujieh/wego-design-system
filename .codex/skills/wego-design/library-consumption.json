@@ -89,7 +89,7 @@
                 "preview/component-{slug}.html",
                 "specs/*.md"
             ],
-            "consume": "默认输出静态多页面 HTML 项目，不依赖前端框架；浏览器直接打开 index.html 即可预览，也可被任意静态服务器（Vercel/Netlify/nginx）托管，无需安装与构建。",
+            "consume": "默认输出静态单预览壳多页面交互 HTML 项目，不依赖前端框架；浏览器直接打开 index.html 即可预览，也可被任意静态服务器（Vercel/Netlify/nginx）托管，无需安装与构建；完整流程必须拆成多个 screen、modal 或 fragment，不能把所有内容聚合成一个长页面；pages/*.html 若存在只能作为片段或迁移内容源，入口交互不得顶层跳出 index.html。",
             "deliverables": [
                 "项目源码目录",
                 "页面路由入口（index.html）",
@@ -133,10 +133,9 @@
                 "colors_and_type.css",
                 "components.css",
                 "iconfont.css",
-                "assets/fonts/",
-                "assets/icons/"
+                "assets/"
             ],
-            "consume": "UI Kit 只作业务页面结构参考（看组件如何组合），不复制外壳；App 宿主页不是 UI Kit，固定宿主模板由 wego-ux 在新任务首次生成时直接复制 host-shell.*，所有宿主内容 UI 和交互以模板为准。先检查 page_spec 是否声明 host_container + route_id：若有，wego-design 只输出宿主入口/回填依据，wego-ux 只增量插入 route_id 对应入口、业务页链接和状态回填，不重画宿主 Tab、工作台、我的页等现成内容。随后在 uikit-plan.json 中判断业务页所属范式；设置、权限、规则、配置类页面优先参考 ui_kits/biz-rule-config/index.html。所有 UI Kit 和生成任务都使用同链接预览外壳规则：电脑端显示手机壳，移动端隐藏外壳视觉；业务页面不得依赖外壳类实现内容结构。禁止事项：不把 app 当 UI Kit；不重画固定宿主模板；不把 .uikit-shell/.phone-frame/.phone-screen 当业务结构；不发明组件类（如 .profile-header）；不发明组件子元素类（如 .profile-header__name）；不发明组件修饰类（如 .cell__action-text--accent）；不使用 inline style 控制颜色/间距；不硬编码 hex/rem 值。",
+            "consume": "UI Kit 只作业务页面结构参考（看组件如何组合），不复制外壳；App 宿主页不是 UI Kit，固定宿主模板由 wego-ux 在新任务首次生成时直接复制 host-shell.*，所有宿主内容 UI 和交互以模板为准。先检查 page_spec 是否声明 host_container + route_id：若有，wego-design 只输出宿主入口/回填依据，wego-ux 只增量插入 route_id 对应入口、业务页链接和状态回填，不重画宿主 Tab、工作台、我的页等现成内容。随后在 uikit-plan.json 中判断业务页所属范式；设置、权限、规则、配置类页面优先参考 ui_kits/biz-rule-config/index.html。所有 UI Kit 和生成任务都使用同链接预览外壳规则：电脑端显示手机壳，移动端隐藏外壳视觉；业务页面不得依赖外壳类实现内容结构。禁止事项：不把 app 当 UI Kit；不重画固定宿主模板；不把 .uikit-shell/.phone-frame/.phone-screen 当业务结构；不发明组件类（如 .profile-header）；不发明组件子元素类（如 .profile-header__name）；不发明组件修饰类（如 .cell__action-text--accent）；不使用 inline style 控制颜色/间距；不硬编码 hex/rem 值。复制 `assets/` 时必须整体复制到 `lib/`，不做任何子目录筛选或文件判断，确保 `assets/fonts/`、`assets/icons/`、`assets/icons/app-center/`、`assets/image/` 等所有资产子目录完整可用，避免后续新增资产子目录时漏复制。",
             "forbidden": [
                 "复制 UI Kit 外壳作为页面容器",
                 "发明未在 components/index.json 注册的组件类",
@@ -202,11 +201,12 @@
         "preview/component-{slug}.html",
         "specs/*.md"
     ],
-    "defaultDeliveryMode": "static-multi-page",
+    "defaultDeliveryMode": "static-single-preview-shell-flow",
     "deliveryGuardrails": [
-        "默认输出静态多页面 HTML 项目，不引入前端框架依赖",
-        "不要只输出一个页面文件；多页面项目至少包含 index.html + 一个业务页面",
-        "页面间通过 <a> 标签跳转，交互使用原生 DOM 操作"
+        "默认输出静态单预览壳多页面交互 HTML 项目，不引入前端框架依赖",
+        "index.html 是唯一预览外壳和启动入口，不是唯一业务页面；完整流程必须拆成多个 screen/modal/fragment，不允许聚合成一个长页面",
+        "pages/*.html 若存在只能作为 fragment/source，不作为顶层浏览器跳转目标；页面间切换必须使用壳内 data-route、data-open-modal 或等价原生 DOM 逻辑",
+        "禁止普通 <a href=\"./pages/*.html\"> 或 location.href 让浏览器离开手机壳"
     ],
     "coreComponents": [
         "navbar",
@@ -302,7 +302,8 @@
                     "移动端同链接隐藏外壳",
                     "节奏/组合/收口可借鉴",
                     "生产结构语义化封装",
-                    "演示样式不当通用组件"
+                    "演示样式不当通用组件",
+                    "任务级 CSS 作用域隔离"
                 ],
                 "judgmentLogic": "UI Kit 的 .uikit-shell/.phone-frame/.phone-screen/biz-*/uikit-section-* 是预览或 Showcase 演示层；电脑端可显示手机外壳，移动端必须隐藏外壳视觉并铺满真实 viewport；业务页面不得依赖外壳类实现内容结构，生产内容必须语义化封装为 <section>；可借鉴的是页面范式、组合节奏、收口方式。",
                 "landingPriority": [
@@ -354,9 +355,10 @@
                     "状态回填",
                     "宿主页与模态页状态同步",
                     "保存反馈闭环",
-                    "真实数据转化"
+                    "真实数据转化",
+                    "file:// 协议双击预览兼容性"
                 ],
-                "judgmentLogic": "新任务文件夹使用中文业务语义命名，已有历史目录继续复用；交互原型不是一次性展示，必须实现 localStorage 状态持久化；打开时回填已保存值；保存后有明确视觉反馈(toast+状态更新+关闭)；宿主页状态跟随模态保存结果",
+                "judgmentLogic": "新任务文件夹使用中文业务语义命名，已有历史目录继续复用；交互原型不是一次性展示，必须实现 localStorage 状态持久化；打开时回填已保存值；保存后有明确视觉反馈(toast+状态更新+关闭)；宿主页状态跟随模态保存结果；index.html 必须支持 file:// 双击预览，壳内 push/modal 交互不得依赖 fetch()/XHR 读取本地片段",
                 "landingPriority": [
                     "wego-ux/SKILL.md 的生成规则"
                 ],
@@ -381,7 +383,9 @@
                     "host_container 路径表达",
                     "route_id 稳定复用",
                     "同任务迭代不重复套壳",
-                    "禁止重画宿主 App"
+                    "禁止重画宿主 App",
+                    "宿主模板资产复制完整性",
+                    "二级入口页面层级定义"
                 ],
                 "judgmentLogic": "当 page_spec 声明 host_container + route_id 时，任务属于固定宿主模板挂载场景。wego-product 负责输出结构化路径和稳定 route_id；wego-design 只输出宿主入口/回填依据；wego-ux 在新任务首次生成时必须直接复制 wego-ux/templates/host-shell.* 作为完整 App 基地，保留模板现成 UI 与交互，只按 route_id 增量插入入口、业务页链接、状态回填和必要交互；后续迭代按 route_id 定位旧入口增量更新，不重复初始化宿主模板，不重画宿主 Tab、工作台、我的页等现成内容。",
                 "landingPriority": [
