@@ -1,4 +1,4 @@
 interface:
   display_name: "Wego Tests"
   short_description: "验收 wego-app 当前场景、路由、交互和部署准备状态"
-  default_prompt: "Use $wego-tests to validate the current wego-app scene against page_spec, design_consumption_plan, design rules, route registration, interaction behavior, responsive host shell, and deployment readiness, then produce an acceptance_report for the requested scope."
+  default_prompt: "Use $wego-tests to validate the current wego-app scene against page_spec, design_consumption_plan, design rules, route registration, interaction behavior, responsive host shell, project binding, deployment result, and deployment readiness, then produce an acceptance_report for the requested scope."

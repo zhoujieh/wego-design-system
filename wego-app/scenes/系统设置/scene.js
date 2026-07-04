@@ -189,6 +189,11 @@
 
         root.querySelectorAll('[data-entry-id]').forEach(function (row) {
           row.addEventListener('click', function () {
+            var id = row.dataset.entryId;
+            if (id === 'product-note') {
+              ctx.navigate('my-product-note');
+              return;
+            }
             ctx.toast('该功能尚未接入原型');
           });
         });

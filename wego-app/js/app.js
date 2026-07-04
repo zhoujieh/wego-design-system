@@ -14,6 +14,10 @@
   var scenes = new Map();
   var loadingScripts = new Map();
   var loadedStyles = new Set();
+  // push 场景栈：bottom-to-top 顺序，每个 entry = { routeId, host, scene }
+  // host 为承载该场景内容的 DOM 元素（.app-scene-layer__panel）
+  // 顶层 entry 始终是当前可见的 push 场景；空数组表示回到宿主
+  var sceneStack = [];
   var appState = {
     activeTab: 'my',
     currentRouteId: '',
@@ -102,16 +106,42 @@
     return promise;
   }
 
-  function clearSceneLayer() {
-    sceneLayer.classList.add('app-scene-layer--exit');
+  // 弹出 push 栈顶场景（带退场动画）。
+  // - afterCallback: 可选，退场动画结束后执行（用于清空 hash 等）
+  // - 如果栈内还有下层场景，下层场景会自然显露（DOM 未销毁），其 init 不重新调用
+  // - 如果栈空，隐藏 sceneLayer，回到宿主
+  function popSceneLayer(afterCallback) {
+    var top = sceneStack[sceneStack.length - 1];
+    if (!top) {
+      if (typeof afterCallback === 'function') afterCallback();
+      return;
+    }
+    top.host.classList.add('app-scene-layer__panel--exit');
     var onTransitionEnd = function () {
-      sceneLayer.removeEventListener('transitionend', onTransitionEnd);
-      sceneLayer.hidden = true;
-      sceneLayer.className = 'app-scene-layer';
-      sceneLayer.replaceChildren();
-      appState.currentRouteId = '';
+      top.host.removeEventListener('transitionend', onTransitionEnd);
+      top.host.remove();
+      sceneStack.pop();
+      if (sceneStack.length === 0) {
+        sceneLayer.hidden = true;
+        sceneLayer.className = 'app-scene-layer';
+        appState.currentRouteId = '';
+      } else {
+        var newTop = sceneStack[sceneStack.length - 1];
+        appState.currentRouteId = newTop.routeId;
+      }
+      if (typeof afterCallback === 'function') afterCallback();
     };
-    sceneLayer.addEventListener('transitionend', onTransitionEnd);
+    top.host.addEventListener('transitionend', onTransitionEnd);
+  }
+
+  // 清空整个 push 栈（无动画），用于切 Tab、打开 overlay 场景前重置
+  function clearSceneLayer() {
+    sceneStack.forEach(function (entry) { entry.host.remove(); });
+    sceneStack = [];
+    sceneLayer.hidden = true;
+    sceneLayer.className = 'app-scene-layer';
+    sceneLayer.replaceChildren();
+    appState.currentRouteId = '';
   }
 
   function renderTemplate(target, template) {
@@ -144,11 +174,19 @@
   function openPushScene(scene) {
     var presentation = normalizePresentation(scene);
     sceneLayer.hidden = false;
-    sceneLayer.className = 'app-scene-layer app-scene-layer--enter';
+    sceneLayer.className = 'app-scene-layer';
     sceneLayer.classList.toggle('app-scene-layer--cover-tab', presentation.coversTabBar);
-    renderTemplate(sceneLayer, scene.template);
+
+    // 为新场景创建独立的栈层 panel
+    var panel = document.createElement('div');
+    panel.className = 'app-scene-layer__panel app-scene-layer__panel--enter';
+    if (presentation.coversTabBar) panel.classList.add('app-scene-layer__panel--cover-tab');
+    renderTemplate(panel, scene.template);
+    sceneLayer.appendChild(panel);
+
+    sceneStack.push({ routeId: scene.routeId, host: panel, scene: scene });
     appState.currentRouteId = scene.routeId;
-    if (typeof scene.init === 'function') scene.init(sceneContext(scene, sceneLayer));
+    if (typeof scene.init === 'function') scene.init(sceneContext(scene, panel));
   }
 
   function openOverlay(type, template, options) {
@@ -197,8 +235,12 @@
       closeOverlay();
       return;
     }
-    clearSceneLayer();
-    if (window.location.hash) history.pushState('', document.title, window.location.pathname + window.location.search);
+    // push 场景栈式返回：只弹顶层，下层自然显露
+    popSceneLayer(function () {
+      if (sceneStack.length === 0 && window.location.hash) {
+        history.pushState('', document.title, window.location.pathname + window.location.search);
+      }
+    });
   }
 
   function toast(message) {

@@ -268,10 +268,18 @@ body[data-host-shell="true"] {
   position: absolute;
   inset: 0;
   z-index: var(--z-overlay, 500);
-  background: var(--bg-page);
   display: flex;
   flex-direction: column;
   transform: translateX(0);
+}
+
+/* sceneLayer 容器本身透明：栈式 push 时新 panel slide-in 需要透出底层宿主页/上级场景 */
+.app-scene-layer {
+  background: transparent;
+}
+
+.app-overlay-layer {
+  background: rgb(0 0 0 / 32%);
 }
 
 .app-scene-layer[hidden],
@@ -279,15 +287,26 @@ body[data-host-shell="true"] {
   display: none;
 }
 
+/* 不盖住 bottom-nav 的 push 场景层：底部留出 Tab 高度 */
 .app-scene-layer:not(.app-scene-layer--cover-tab) {
   bottom: calc(56px + var(--safe-area-bottom));
 }
 
-.app-scene-layer--enter {
+/* 栈层 panel：每个 push 场景独立 panel，绝对定位层叠在 sceneLayer 内 */
+.app-scene-layer__panel {
+  position: absolute;
+  inset: 0;
+  background: var(--bg-page);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(0);
+}
+
+.app-scene-layer__panel--enter {
   animation: wego-scene-enter var(--duration-normal, 250ms) var(--ease-enter, ease-out);
 }
 
-.app-scene-layer--exit {
+.app-scene-layer__panel--exit {
   transition: transform var(--duration-normal, 250ms) var(--ease-exit, ease-in);
   transform: translateX(100%);
 }

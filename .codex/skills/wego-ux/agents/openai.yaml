@@ -1,4 +1,4 @@
 interface:
   display_name: "Wego UX"
   short_description: "更新 wego-app 静态 App 原型与当前业务场景"
-  default_prompt: "Use $wego-ux to turn page_spec and design_consumption_plan into a wego-app scene module. Maintain wego-app/index.html as the only host shell, register the route in wego-app/js/routes.js, generate or update wego-app/scenes/{scene}/scene.js and scene.css, and keep both Vercel preview and local direct-open working."
+  default_prompt: "Use $wego-ux to turn page_spec and design_consumption_plan into a wego-app scene module. Maintain wego-app/index.html as the only host shell, register the route in wego-app/js/routes.js, generate or update wego-app/scenes/{scene}/scene.js and scene.css, keep both Vercel preview and local direct-open working, create or reuse the shared Vercel project binding before deployment, then deploy and return the main entry URL plus the local fallback entry."
