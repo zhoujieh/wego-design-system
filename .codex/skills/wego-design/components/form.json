@@ -213,7 +213,7 @@
     "右侧辅助操作统一挂在 .form-body__right-btn，不靠 inline style 单独补尺寸和颜色。",
     "right-align 只用于纯文本、纯数字、选择值这类可整体贴右的简单字段；只要同一 form 中出现前缀字段、右侧图文操作、上传位、成组选项等三段式场景，整组 form 就回到左对齐容器。",
     "prefix field、icon-text、upload、stack-group、radio-group、checkbox-group、switch 都归入 .form-body--preserve-content-align，保持中段内容原始顺序和左对齐基线；其中手机号区号和金额货币符号都属于前缀字段。",
-    "当右侧是 stack-group、radio-group、checkbox-group 或 switch 时，默认示例直接收敛为左右两段：左侧标题，右侧控件；中段不展示输入、值文案或占位说明，但仍保留空的 .form-body__action 作为对齐占位。",
+    "当右侧是 stack-group、radio-group、checkbox-group 或 switch 时，默认示例直接收敛为左右两段：左侧标题，右侧控件；中段不展示输入、值文案或占位说明，但仍保留空的 .form-body__action 作为对齐占位，且不使用整行点击态。",
     "icon-text 右侧入口使用 44px 固定宽度，多个入口并排时间距为 0，并针对该场景单独收敛右侧边距，不影响其他右侧操作场景。",
     "纯图标入口不使用圆形底按钮，维持 24px 图标视觉尺寸，默认使用一级文本色；若需要更强操作感，改用文字链、上下图标文案或按钮，不单靠换品牌色强化。",
     "form 只负责字段容器布局、左右对齐和右侧操作区定位；嵌入 counter 等子组件时，不改写其 .counter__* 子节点尺寸语义。",
@@ -221,11 +221,11 @@
     "radio / checkbox 成组场景直接复用各自组件契约里的 .radio-field-group / .checkbox-field-group 与 .radio-field / .checkbox-field 结构，不额外发明 form 专属包装层。",
     "成组出现的 form 必须用 .form-group 包裹，不发明任务级 xxx-page__group 自定义类。",
     "需要组标题时，标题使用 .form-group__title 单独成行，不能把标题塞进白底圆角内容区里。",
-    "连续 form-body 默认放进 .form-group__content；如果页面是左右留白的卡片式布局，在 .form-group__content 上开启卡片修饰类，让圆角只作用于内容区。",
+    "连续 form-body 默认放进 .form-group__content；当承接该组的宿主内容层提供横向留白时，在 .form-group__content 上开启卡片修饰类；当分组内容直接通栏贴边排列时，不开启卡片修饰类。",
     "历史结构允许 .form 直接包连续 form-body 以兼容旧任务，但新任务和 UI Kit 一律优先使用标题 + 内容容器的正式结构。"
   ],
   "behavior": {
-    "click": "select、icon-text、upload、dropdown 等功能入口若未单独指定点击态样式，统一使用内容不透明度变为 0.6 的按压反馈。",
+    "click": ".form-body--clickable 只用于 select / dropdown 这类会打开选择面板或展开内容的字段行；其按压态使用与 cell 一致的 pressed 背景色。右侧是 switch、radio-group、checkbox-group、upload、button、icon actions 时，不提供整行按压反馈，交互由具体控件承担。",
     "validation": "错误态优先显示错误文案并覆盖计数提示；当输入值重新满足当前字段校验条件时，自动移除错误态并恢复默认显示。",
     "inputSanitizing": "数字输入仅保留 0-9，手机号仅保留数字并受长度限制，金额仅保留数字和单个小数点；手机号区号前缀为只读文本，不参与输入清洗。",
     "layout": "label 宽度修饰类和 right-align 容器只改变简单字段内容块在 action 区中的摆放位置：纯文本/数字输入在 right-align 下使用末尾对齐；前缀字段和所有需要保留中段内容顺序的场景统一使用 preserve-content-align，并放在左对齐 form 容器内，保持中段内容原始顺序和左对齐基线；金额的货币符号与手机号区号一样，都跟随内容组一起处理，不再归入纯右对齐字段；带箭头的选择内容若需要和右侧操作共存，也归入 preserve-content-align；右侧为选项组或开关时，默认直接使用左右两段结构，中段仅保留空的 action 占位来维持统一列对齐。",
@@ -234,7 +234,7 @@
   "accessibility": {
     "labelAssociation": "label 与具体输入控件需建立清晰关联。",
     "helperText": "错误和计数字段应与对应输入区可感知关联。",
-    "clickTarget": "整行可点击时仍要保证内部控件焦点顺序清晰。"
+    "clickTarget": "只有选择/展开类字段才使用整行可点击语义；承载独立控件的字段行应让焦点和键盘操作直接落在控件本体。"
   },
   "usageHints": [
     "适合资料编辑、业务设置、权限配置等高密度表单页。",
@@ -244,7 +244,10 @@
     "手机号区号前缀行和金额货币前缀行都使用 .form-body--preserve-content-align，让前缀左缘成为同组字段的稳定起点。",
     "如果金额字段前面出现 `¥`、币种缩写或其他前缀，不再把它放进纯右对齐 form 示例，而是和前缀字段一起归到三段式整组左对齐。",
     "同一组里若已经有默认 96px label 宽度，就不要再单独把前缀字段切到 label-w80，否则会破坏整组基线。",
+    "只有 select / dropdown 这类进入下一层选择或展开面板的字段，才使用 .form-body--clickable。",
+    "整行可跳转字段的按压态与 cell 保持一致，使用背景色变化而不是整行透明度变化。",
     "需要链接、按钮、图标动作、上传位或快捷选项时，优先放入统一右侧辅助操作区。",
+    "右侧是 switch、radio-group、checkbox-group、上传位、按钮或图标动作时，不给整行点击态，交互只落在右侧控件。",
     "右侧纯图标默认只作为一级文本语义入口；需要更强强调时，优先改成 link、icon-text 或 button，而不是单独把图标染成品牌色。",
     "右侧选项切换场景使用 stack 组件表达子级内容切换，不使用 tag 组件冒充筛选状态；默认按左右两段呈现，中段保留空占位但不显示说明。",
     "custom 与 counter 的组合只表示容器嵌套，不代表 form 接管 counter 内部图标、按钮、输入字号；默认同时隐藏 counter 自带底部消息位，如需范围反馈改由宿主自己的消息槽位承接。",
@@ -252,13 +255,14 @@
     "checkbox 组合场景沿用 checkbox 组件固定的 inner / icon / minus 结构，勾选态继续使用随库 SVG 资产。",
     "成组 form 优先用 .form-group；.form 仅为兼容历史任务产物，新任务不再使用。",
     "页面需要 section 标题时，直接使用 .form-group__title，不再复制 UI Kit 私有的 .uikit-section-title 或手写额外标题样式。",
-    "页面内容区左右有内边距时，把该组视为卡片式分组，在 .form-group__content 上使用卡片修饰类；不要额外再包一层只为白底和圆角存在的容器。"
+    "当 phone-body 或等价宿主内容层承担左右内边距时，把该组视为卡片式分组，在 .form-group__content 上使用卡片修饰类；宿主层不提供横向留白时保持通栏白底，不要额外再包一层只为白底和圆角存在的容器。"
   ],
   "doNotInvent": [
     "不要把 form 扩成桌面属性面板、富文本表单或多列表格表单。",
     "不要为单业务在 form 内新增独占型字段皮肤。"
   ],
   "tokensConsumed": [
+    "--bg-state-pressed",
     "--bg-overlay-l1",
     "--bg-page",
     "--bg-surface",

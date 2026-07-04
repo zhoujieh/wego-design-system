@@ -28,7 +28,7 @@
             ],
             "copyable": true,
             "purpose": "组件级结构、class、状态、尺寸和使用边界",
-            "downstreamRule": "优先读取 components/index.json 确认可用组件，再读取对应契约和预览页；复制组件 markup 时同时链接 colors_and_type.css、iconfont.css 和 components.css。命中连续列表/表单分组时，优先消费 `.cell-group` / `.form-group` 的正式结构：标题使用 group 自带 title 节点，连续内容放进 group 自带 content 容器；页面左右有内容内边距时，在 content 容器上开启卡片修饰类，不额外发明 section title、白底壳或圆角包裹层。"
+            "downstreamRule": "优先读取 components/index.json 确认可用组件，再读取对应契约和预览页；复制组件 markup 时同时链接 colors_and_type.css、iconfont.css 和 components.css。命中连续列表/表单分组时，优先消费 `.cell-group` / `.form-group` 的正式结构：标题使用 group 自带 title 节点，连续内容放进 group 自带 content 容器；当 phone-body 或等价宿主内容层承担横向留白时，在 content 容器上开启卡片修饰类；当分组内容直接通栏贴边排列时，不开启卡片修饰类；整行点击只保留给带箭头、会进入下一层或展开选择面板的行式场景，右侧为 switch、radio-group、checkbox-group、button 等独立控件时由控件自身承担交互；不额外发明 section title、白底壳或圆角包裹层。"
         },
         "icons": {
             "files": [

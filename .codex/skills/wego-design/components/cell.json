@@ -18,8 +18,7 @@
       "double"
     ],
     "surface": [
-      "bg-white",
-      "bg-grey"
+      "bg-white"
     ],
     "interaction": [
       "static",
@@ -63,7 +62,7 @@
     },
     {
       "density": "double",
-      "surface": "bg-grey",
+      "surface": "bg-white",
       "interaction": "static",
       "leadingSlot": "avatar",
       "trailingSlot": "text"
@@ -71,9 +70,16 @@
     {
       "density": "single",
       "surface": "bg-white",
-      "interaction": "clickable",
+      "interaction": "static",
       "leadingSlot": "select",
       "trailingSlot": "switch"
+    },
+    {
+      "density": "single",
+      "surface": "bg-white",
+      "interaction": "clickable",
+      "leadingSlot": "select",
+      "trailingSlot": "arrow"
     }
   ],
   "anatomy": [
@@ -114,41 +120,46 @@
     }
   ],
   "structurePatterns": [
-    "左侧插槽默认保持单一前导语义；编辑态允许缩进占位、选择控件和头像做紧凑组合。",
+    "左侧插槽默认保持单一前导语义；当前行作为父项子级内容时，才引入 cell__backspace 作为层级标识，不把它当作通用左侧占位。",
     "前导槽位组与正文内容之间默认保持 12px 间距，避免 checkbox、radio、图标或头像贴近标题。",
+    "头像尺寸与行密度绑定：单行 cell 默认使用 24px 头像（avatar--24），双行 cell 才使用 40px 头像（avatar--40）；不要在单行场景使用 40px 头像，避免撑破 min-height 56px 的行高节奏。",
     "中间内容区固定标题优先、副标题次级，不扩成多列表格。",
     "右侧操作区最多承担一种主反馈类型，例如文字、角标、按钮、开关或箭头。",
     "自定义链接类操作沿用 .cell__action 宿主，本体不额外补右侧间距，保证内容距屏幕右侧保持 16px。",
     "同一分组内的连续 cell 通过分割线建立行间视觉节奏；最后一行不加分割线，避免与分组底部留白重叠。",
     "cell__body 带上下 12px padding，cell 使用 min-height 而非固定高度，内容自然撑高。标题使用 nowrap 截断，副标题使用 2 行截断，设计内容时仍需遵循截断规则。",
-    "子级缩进使用 .cell__backspace（空占位 24px） > .cell__select（内嵌 switch/radio/checkbox） > .cell__body 结构。cell__backspace 提供左侧缩进宽度，视觉上建立层级从属关系。",
+    "子级缩进场景中，父项行和子项行必须在同一个 .cell-group 内连续排列。子项左侧没有其他前导内容时，使用 .cell__backspace > .cell__backspace-icon > .cell__body，并由 backspace-icon 作为子级标识；缩进前导区与正文内容之间继续保持 12px 间距，不额外扩大 body 左内边距。子项左侧已有图标、checkbox、radio、switch 等前导语义时，不再补 cell__backspace，直接沿用现有前导节点。",
     "成组出现的 cell 必须用 .cell-group 包裹，不发明任务级 xxx-page__group 自定义类。",
     "需要组标题时，标题使用 .cell-group__title 单独成行，不能把标题塞进白底圆角内容区里。",
-    "连续 cell 默认放进 .cell-group__content；如果页面是左右留白的卡片式布局，在 .cell-group__content 上开启卡片修饰类，让圆角只作用于内容区。",
+    "连续 cell 默认放进 .cell-group__content；当承接该组的宿主内容层提供横向留白时，在 .cell-group__content 上开启卡片修饰类；当分组内容直接通栏贴边排列时，不开启卡片修饰类。",
     ".cell-group__content 内连续 cell 除最后一行外均加分割线修饰类；孤立单行 cell 不加分割线。",
     "历史结构允许 .cell-group 直接包连续 cell 以兼容旧任务，但新任务和 UI Kit 一律优先使用标题 + 内容容器的正式结构。"
   ],
   "behavior": {
-    "click": "clickable 时整行响应按压态，局部操作仍保持清晰热区。",
+    "click": "clickable 仅用于带箭头、会进入下一层或展开下一步的行式场景；右侧为 switch、button 等独立控件时整行保持静态，由控件自身承担热区和状态切换。",
     "divider": "分割线样式由修饰类控制，但左侧起点始终跟随正文文本左边缘对齐，不因前导插槽场景漂移。",
     "slots": "右侧角标和箭头属于 trailing slot，不在标题区新增重复操作。"
   },
   "accessibility": {
     "rowRole": "点击整行时需提供一致的可聚焦或可点击语义。",
     "textOverflow": "标题与副标题允许省略，避免压缩右侧操作区。",
-    "nestedControl": "嵌套 checkbox 或 radio 时不要让整行点击与控件状态冲突。"
+    "nestedControl": "嵌套 checkbox、radio 或 switch 时，只有明确进入下一层配置的场景才允许整行点击；否则交互只落在控件本体，避免状态切换冲突。"
   },
   "usageHints": [
     "适合设置页、资料页、订单信息摘要等移动端高密度列表。",
     "双行模式用于副标题需要解释信息时，避免在单行强塞长文案。",
-    "右侧是链接、按钮或开关时，仍应保持单一主反馈，不在同一行叠加多种主操作。",
+    "头像尺寸与行密度绑定：单行 cell 用 avatar--24，双行 cell 用 avatar--40；不要在单行场景使用 40px 头像。",
+    "只有带箭头、语义明确为进入下一层或展开下一步的行，才使用 .cell--clickable 和整行点击态。",
+    "右侧是开关、按钮或当前行内直接勾选/单选控件时，整行保持静态，不再叠加按压反馈。",
     "cell__select 内嵌 radio/checkbox 时，cell 的 title/subtitle 直接作为选项文案和说明，不需要在 cell 外加 .radio-field__text 或 .checkbox-field__text。",
+    "cell__backspace 的职责是标识“当前行是父项的子级内容”，不是通用缩进占位；只有子项左侧没有其他前导语义时才显示它，且通过 backspace-icon 表达子级身份，并保持与正文 12px 间距。",
+    "子项左侧已经有图标、checkbox、radio、switch 等前导内容时，不再叠加 cell__backspace，避免两个前导语义并存。",
     "同一 cell-group 内存在多个连续 cell 时，除最后一行外均应添加分割线修饰类（.cell--divider-right-edge 或 .cell--divider-center），孤立单行 cell 不加分割线。",
     "radio 单选列表的选中态仅通过 radio--checked 表达，不加 cell--indent，避免破坏同组内横向对齐基线。",
     "cell__body 内置上下 12px padding，结合 min-height（cell--single: 56px, cell--double: 76px），副标题换行时 cell 可自然撑高。标题仍由 nowrap 截断。如需自定义 cell 内间距，优先通过调整 body padding 而非覆盖 min-height。",
-    "子级条件区域的层级缩进必须使用 cell__backspace 空占位模式，禁止手写 border-left / margin-left 等自定义样式实现缩进。",
+    "子级条件区域的层级缩进必须复用 cell 组件正式结构：无前导内容的子项用 cell__backspace + backspace-icon 表达子级身份；已有前导内容的子项通过同组连续排列和既有前导节点表达层级，禁止手写 border-left / margin-left 等自定义样式实现缩进。",
     "页面需要 section 标题时，直接使用 .cell-group__title，不再复制 UI Kit 私有的 .uikit-section-title 或手写额外标题样式。",
-    "页面内容区左右有内边距时，把该组视为卡片式分组，在 .cell-group__content 上使用卡片修饰类；不要额外再包一层只为白底和圆角存在的容器。"
+    "当 phone-body 或等价宿主内容层承担左右内边距时，把该组视为卡片式分组，在 .cell-group__content 上使用卡片修饰类；宿主层不提供横向留白时保持通栏白底，不要额外再包一层只为白底和圆角存在的容器。"
   ],
   "doNotInvent": [
     "不要把 cell 扩成桌面表格行、树形列表或多列数据面板。",
@@ -158,7 +169,6 @@
     "--accent-green",
     "--bg-page",
     "--bg-state-pressed",
-    "--bg-subtle",
     "--bg-surface",
     "--body-lg-font-size",
     "--body-lg-line-height",
@@ -225,7 +235,6 @@
       ".cell--single",
       ".cell--double",
       ".cell--bg-white",
-      ".cell--bg-grey",
       ".cell--clickable",
       ".cell--divider-right-edge",
       ".cell--divider-center",

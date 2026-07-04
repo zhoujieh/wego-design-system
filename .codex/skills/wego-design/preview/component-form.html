@@ -80,7 +80,7 @@
 
 .form-body__select{display:flex;align-items:center;justify-content:space-between;width:100%;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .form-body--clickable{cursor:pointer;-webkit-tap-highlight-color:transparent}
-.form-body--clickable:active{opacity:.6}
+.form-body--clickable:active{background:var(--bg-state-pressed)}
 .form-body__select-text{font-size:var(--body-lg-font-size);font-weight:var(--font-weight-regular);color:var(--text-placeholder);line-height:var(--body-lg-line-height);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-feature-settings:"zero"}
 .form-body__select-text.has-value{color:var(--text-default)}
 .form-body__select-arrow{width:16px;height:16px;flex-shrink:0;color:var(--text-tertiary);font-size:16px;display:flex;align-items:center;justify-content:center;margin-left:8px}
@@ -174,7 +174,7 @@
         </div>
         <div class="form-body">
           <div class="form-body__label">说明</div>
-          <div class="form-body__action"><span class="form-body__value form-body__value--secondary">无圆角</span></div>
+          <div class="form-body__action"><span class="form-body__value form-body__value--secondary">宿主层无横向留白</span></div>
         </div>
       </div>
     </div>
@@ -190,7 +190,7 @@
         </div>
         <div class="form-body">
           <div class="form-body__label">组样式</div>
-          <div class="form-body__action"><span class="form-body__value">标题独立，圆角只作用于内容区</span></div>
+          <div class="form-body__action"><span class="form-body__value">宿主层有横向留白，圆角只作用于内容区</span></div>
         </div>
       </div>
     </div>
