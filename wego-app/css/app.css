@@ -20,30 +20,33 @@ button, [role="button"], [role="radio"], [role="checkbox"],
 }
 
 /* 触控设备上 :active 伪类可能在 touchend 后残留（移动端 Safari 已知行为），
-   导致页面切换后入口仍显示按压态。此处将 :active 的按压效果覆盖回各组件默认值，
-   完全由 JS 的 .is-pressed 类控制触控按压态。桌面端（hover: hover）不受影响。 */
+   导致页面切换后入口仍显示按压态。此处将 :active（不带 .is-pressed 时）的
+   按压效果覆盖回各组件默认值；触摸按压态完全由 JS 的 .is-pressed 类控制。
+   使用 :not(.is-pressed) 确保触摸时 .is-pressed 存在则覆盖不生效，
+   按压态正常显示；touchend 后 .is-pressed 移除，若 :active 残留则恢复默认。
+   桌面端（hover: hover）不受影响。 */
 @media (hover: none) {
-  .cell--clickable:active { background: var(--bg-surface); }
-  .form-body--clickable:active,
-  .form-body__select:active { background: var(--bg-surface); }
-  .btn--strong:active { background: var(--bg-brand); }
-  .btn--medium:active,
-  .btn--weak:active,
-  .btn--danger:active { background: var(--bg-overlay-l1); }
-  .counter__btn:active { background: var(--bg-surface); }
-  .link:active,
-  .link--inline:active { background: transparent; }
-  .link--disabled:active { background: transparent; }
-  .navbar__left-btn:active,
-  .navbar__left-text:active,
-  .navbar__action:active,
-  .bottom-nav__item:active,
-  .form-body__upload:active,
-  .form-body__icon-action:active,
-  .icon-text-btn:active,
-  .form-dropdown__item:active,
-  .host-shell-grid-entry:active,
-  .host-shell-link-button:active { opacity: 1; }
+  .cell--clickable:active:not(.is-pressed) { background: var(--bg-surface); }
+  .form-body--clickable:active:not(.is-pressed),
+  .form-body__select:active:not(.is-pressed) { background: var(--bg-surface); }
+  .btn--strong:active:not(.is-pressed) { background: var(--bg-brand); }
+  .btn--medium:active:not(.is-pressed),
+  .btn--weak:active:not(.is-pressed),
+  .btn--danger:active:not(.is-pressed) { background: var(--bg-overlay-l1); }
+  .counter__btn:active:not(.is-pressed) { background: var(--bg-surface); }
+  .link:active:not(.is-pressed),
+  .link--inline:active:not(.is-pressed) { background: transparent; }
+  .link--disabled:active:not(.is-pressed) { background: transparent; }
+  .navbar__left-btn:active:not(.is-pressed),
+  .navbar__left-text:active:not(.is-pressed),
+  .navbar__action:active:not(.is-pressed),
+  .bottom-nav__item:active:not(.is-pressed),
+  .form-body__upload:active:not(.is-pressed),
+  .form-body__icon-action:active:not(.is-pressed),
+  .icon-text-btn:active:not(.is-pressed),
+  .form-dropdown__item:active:not(.is-pressed),
+  .host-shell-grid-entry:active:not(.is-pressed),
+  .host-shell-link-button:active:not(.is-pressed) { opacity: 1; }
 }
 
 .preview-shell {

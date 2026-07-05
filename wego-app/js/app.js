@@ -233,10 +233,11 @@
   }
 
   // 侧滑/返回键触发 popstate 时，如果当前 overlay 占了一条 history，就关闭它
+  // 传 animated=false：iOS 侧滑返回时系统已完成页面过渡，JS 不再叠加 CSS 退场动画
   window.addEventListener('popstate', function () {
     if (overlayHistoryActive && !overlayLayer.hidden) {
       overlayHistoryActive = false;
-      closeOverlay(true);
+      closeOverlay(true, false);
     }
   });
 
@@ -275,7 +276,9 @@
   }
 
   // skipHistory：由 popstate 触发关闭时传 true，不再回退 history（state 已被消费）
-  function closeOverlay(skipHistory) {
+  // animated：可选，默认 true 带退场动画；popstate/侧滑返回传 false 无动画
+  //   （iOS 系统侧滑返回已有系统级动画，JS 再叠加 CSS 退场会导致 panel "先重新出现再滑出"闪烁）
+  function closeOverlay(skipHistory, animated) {
     clearAllPressStates();
     if (overlayClosing) return;
     var panel = overlayLayer.querySelector('.app-overlay-panel');
@@ -286,6 +289,14 @@
         // 用户主动关闭：先清 flag 再 history.back()，避免 popstate 再次触发
         overlayHistoryActive = false;
         try { history.back(); } catch (e) {}
+      }
+      if (animated === false) {
+        // 无动画：直接清除（用于 popstate/侧滑返回，系统动画已完成）
+        overlayLayer.hidden = true;
+        overlayLayer.className = 'app-overlay-layer';
+        overlayLayer.replaceChildren();
+        overlayClosing = false;
+        return;
       }
       overlayClosing = true;
       panel.classList.add('app-overlay-panel--exit');
