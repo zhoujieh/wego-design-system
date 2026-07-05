@@ -73,10 +73,12 @@
   },
   "usageHints": [
     "适合业务设置、通知开关、权限启用等布尔场景。",
+    "切换时必须保留组件契约里的轨道背景与滑块位置过渡；实现层应更新 switch--on / switch--off 状态类和 aria-checked，不要用整组重渲染吃掉滑块动画。",
     "需要三态或互斥关系时不要用 switch，改用 checkbox 或 radio。"
   ],
   "doNotInvent": [
     "不要把 switch 扩成多档位 toggle、滑动开关或带图标表情开关。",
+    "不要在业务 scene 中覆盖或移除 .switch / .switch__thumb 的 transition。",
     "不要增加复杂弹跳和发光效果。"
   ],
   "tokensConsumed": [

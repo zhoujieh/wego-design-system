@@ -332,6 +332,37 @@
         "verificationStandard": "把具体页面名称替换成'页面A'后，是否仍能按页面角色、结构特征和宿主特征判断 exact/near/fallback/gap？"
       },
       {
+        "id": "object-management-list-composition",
+        "name": "对象管理列表构成",
+        "primaryWorkflowStage": "wego-design",
+        "secondaryWorkflowStages": [
+          "wego-product",
+          "wego-ux",
+          "wego-tests"
+        ],
+        "covers": [
+          "仓库/商品/员工/客户/门店等对象列表",
+          "列表信息取舍",
+          "列表项横向/纵向排布判断",
+          "列表操作暴露或收纳",
+          "对象缩略图或真实图片选择",
+          "新增入口承载方式"
+        ],
+        "judgmentLogic": "当页面主任务是管理一组可新增、编辑、删除或启停的业务对象，且列表项包含对象识别物、名称、关键状态、摘要和操作时，命中对象管理列表构成。列表页目标是扫读和行动，不是完整资料展示；设计消费必须先划分列表必显字段、列表摘要字段、详情/编辑字段和操作字段，再决定卡片横向或纵向布局、操作外露或收纳、图片/图标/占位资产来源。",
+        "landingPriority": [
+          "uikit-plan.json 的 fallbackPageBlueprints[object-management-list-page]",
+          "components/image.json 的 usageHints / doNotInvent",
+          "components/button.json 与 components/navbar.json 的新增入口规则",
+          "components/form.json 的分组对齐规则"
+        ],
+        "secondaryLanding": [
+          "wego-product/SKILL.md 的 information_blocks 字段优先级",
+          "wego-ux/SKILL.md 的状态动画和操作收纳实现规则",
+          "wego-tests/SKILL.md 的对象管理列表验收项"
+        ],
+        "verificationStandard": "把具体业务对象替换成商品、员工、客户或门店后，是否仍能判断列表只展示识别与行动所需信息、完整资料进入详情/编辑页、操作数量决定外露或收纳，并能生成一致的导航新增入口和表单对齐？"
+      },
+      {
         "id": "uikit-to-production-transform",
         "name": "UI Kit 到生产转换",
         "primaryWorkflowStage": "wego-ux",

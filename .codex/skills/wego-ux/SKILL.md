@@ -199,6 +199,7 @@ window.WegoApp.registerScene({
 - 空态、禁用态、错误态、成功态按业务必要性实现
 - 默认使用内存状态即可，不强制 `localStorage` 持久化
 - 只有需求明确要求“刷新后保留”或“跨会话保留”时，才实现 localStorage
+- 带组件状态动画的控件（如 switch、计数器、分段控件）切换时，优先更新状态类、`aria-*` 和业务值，让组件 CSS transition 生效；不要用整组 DOM 重渲染吃掉滑块、轨道或数值变化动画
 
 ## 设计系统消费
 
@@ -214,6 +215,8 @@ window.WegoApp.registerScene({
 - 连续 cell/form 必须使用已注册分组容器，如 `.cell-group` / `.form-group`
 - 页面级业务 class 只能做布局胶水和业务作用域，不替代组件 class
 - 不输出面向 AI/工作流的内部说明文案
+- 命中 `object-management-list-page` 时，按 `design_consumption_plan` 的字段分级生成：列表只放必显字段、1-2 条摘要和列表操作，详情/编辑字段进入下钻页、弹层或表单页
+- 对象管理列表的操作可保留在列表内；1-2 个高频安全操作可外露，3 个及以上或包含危险/低频操作时优先使用已注册的更多操作/菜单/sheet/详情页承接。当前设计系统没有已注册气泡或菜单组件时，不临时发明 popover 类
 
 ### component_mapping 消费分派
 
