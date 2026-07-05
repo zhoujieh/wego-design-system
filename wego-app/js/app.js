@@ -544,7 +544,11 @@
 
     function clearPress() {
       if (pressedEl) {
-        pressedEl.classList.remove('is-pressed');
+        var el = pressedEl;
+        el.classList.remove('is-pressed');
+        // 强制同步样式重新计算，确保 :active 覆盖立即生效
+        // 否则 touchend → click 之间无 paint 机会，按压态视觉上会持续到页面切换
+        getComputedStyle(el).backgroundColor;
         pressedEl = null;
       }
     }
