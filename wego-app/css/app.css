@@ -7,6 +7,18 @@ body[data-host-shell="true"] {
   box-sizing: border-box;
 }
 
+/* 全局禁用可交互元素的长按文本选择与拖杆控件；新增交互类应同步加到此列表 */
+button, [role="button"], [role="radio"], [role="checkbox"],
+.btn, .cell--clickable, .navbar__left-btn, .navbar__left-text, .navbar__action,
+.bottom-nav__item, .form-body--clickable, .form-body__select,
+.form-body__upload, .form-body__icon-action, .form-dropdown__item,
+.counter__btn, .icon-text-btn, .wg-image--clickable, .link,
+.switch, .radio, .radio-field, .checkbox, .checkbox-field, .stack,
+.host-shell-grid-entry, .host-shell-link-button, [data-route-id] {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 .preview-shell {
   min-height: 100vh;
   min-height: 100dvh;

@@ -24,6 +24,8 @@
     sceneState: Object.create(null)
   };
   var toastTimer = 0;
+  // 由 initTouchPressState 注入，用于页面切换时兜底清理按压态
+  var clearAllPressStates = function () {};
 
   var tabIconNames = {
     dongtai: 'dongtai',
@@ -40,6 +42,7 @@
   }
 
   function setActiveTab(tab) {
+    clearAllPressStates();
     var nextTab = validTabs.has(tab) ? tab : 'my';
     appState.activeTab = nextTab;
     panels.forEach(function (panel) {
@@ -116,6 +119,11 @@
       if (typeof afterCallback === 'function') afterCallback();
       return;
     }
+    // 防止系统侧滑与代码返回重复触发退场
+    if (!top.host.parentNode || top.host.classList.contains('app-scene-layer__panel--exit')) {
+      return;
+    }
+    clearAllPressStates();
     top.host.classList.add('app-scene-layer__panel--exit');
     var onTransitionEnd = function () {
       top.host.removeEventListener('transitionend', onTransitionEnd);
@@ -136,6 +144,7 @@
 
   // 清空整个 push 栈（无动画），用于切 Tab、打开 overlay 场景前重置
   function clearSceneLayer() {
+    clearAllPressStates();
     sceneStack.forEach(function (entry) { entry.host.remove(); });
     sceneStack = [];
     sceneLayer.hidden = true;
@@ -172,6 +181,7 @@
   }
 
   function openPushScene(scene) {
+    clearAllPressStates();
     var presentation = normalizePresentation(scene);
     sceneLayer.hidden = false;
     sceneLayer.className = 'app-scene-layer';
@@ -212,6 +222,7 @@
   });
 
   function openOverlay(type, template, options) {
+    clearAllPressStates();
     options = options || {};
     // 打开新 overlay 前先清掉旧的（含历史记录）
     if (!overlayLayer.hidden) {
@@ -246,6 +257,7 @@
 
   // skipHistory：由 popstate 触发关闭时传 true，不再回退 history（state 已被消费）
   function closeOverlay(skipHistory) {
+    clearAllPressStates();
     if (overlayClosing) return;
     var panel = overlayLayer.querySelector('.app-overlay-panel');
     var isSheet = overlayLayer.classList.contains('app-overlay-layer--sheet');
@@ -489,6 +501,8 @@
     var startX = 0;
     var startY = 0;
     var moveThreshold = 10;
+    var activeTouch = null;
+    var suppressNextClick = false;
 
     function isDisabled(el) {
       if (el.disabled) return true;
@@ -503,6 +517,16 @@
       }
     }
 
+    // 兜底清理所有按压态，注入外部变量供页面切换调用
+    clearAllPressStates = function () {
+      document.querySelectorAll('.is-pressed').forEach(function (el) {
+        el.classList.remove('is-pressed');
+      });
+      clearPress();
+      activeTouch = null;
+      suppressNextClick = false;
+    };
+
     function findPressTarget(el) {
       if (!(el && el.closest)) return null;
       var target = el.closest(pressSelector);
@@ -513,6 +537,10 @@
     document.addEventListener('touchstart', function (event) {
       var touch = event.touches && event.touches[0];
       if (!touch) return;
+
+      activeTouch = { x: touch.clientX, y: touch.clientY, moved: false };
+      suppressNextClick = false;
+
       var target = findPressTarget(event.target);
       if (!target) return;
       clearPress();
@@ -523,16 +551,44 @@
     }, { passive: true, capture: true });
 
     document.addEventListener('touchmove', function (event) {
-      if (!pressedEl) return;
       var touch = event.touches && event.touches[0];
-      if (!touch) return;
-      if (Math.abs(touch.clientX - startX) > moveThreshold || Math.abs(touch.clientY - startY) > moveThreshold) {
+      if (!touch || !activeTouch) return;
+
+      if (!activeTouch.moved &&
+          (Math.abs(touch.clientX - activeTouch.x) > moveThreshold ||
+           Math.abs(touch.clientY - activeTouch.y) > moveThreshold)) {
+        activeTouch.moved = true;
         clearPress();
       }
     }, { passive: true, capture: true });
 
-    document.addEventListener('touchend', clearPress, { passive: true, capture: true });
-    document.addEventListener('touchcancel', clearPress, { passive: true, capture: true });
+    document.addEventListener('touchend', function () {
+      clearPress();
+      if (activeTouch && activeTouch.moved) {
+        suppressNextClick = true;
+      }
+      activeTouch = null;
+    }, { passive: true, capture: true });
+
+    document.addEventListener('touchcancel', function () {
+      clearPress();
+      activeTouch = null;
+      suppressNextClick = false;
+    }, { passive: true, capture: true });
+
+    // 抑制由滑动/侧滑返回产生的幽灵 click，避免误触设置入口等可点击元素
+    document.addEventListener('click', function (event) {
+      if (suppressNextClick) {
+        suppressNextClick = false;
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }, { capture: true });
+
+    // 页面隐藏时兜底清理，防止切回后残留按压态
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) clearAllPressStates();
+    });
   })();
 
   mountRouteEntries();
