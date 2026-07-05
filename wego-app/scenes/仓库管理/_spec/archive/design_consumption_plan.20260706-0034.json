@@ -1,8 +1,8 @@
 {
   "matched_uikit": null,
   "scene_fit_reason": "本任务是『宿主入口 + 仓库列表 + 全屏仓库编辑页』的组合型场景。仓库列表页没有现成精确 UI Kit，适合走 generic-mobile-task-page；新增/编辑仓库页属于典型的业务资料编辑和规则配置，适合命中 biz-rule-config。",
-  "navigation_pattern": "宿主宫格入口打开 push 列表页；列表页导航栏右侧『新增』文字入口和卡片内编辑入口都打开 full-screen-modal 形式的仓库编辑页",
-  "layout_pattern": "host-entry surface 使用宿主宫格入口；warehouse-list surface 使用卡片模式 M2（phone-body 16px 横向 padding + 横向对象卡片列表）；warehouse-editor surface 使用通栏模式 M1（phone-body 0px 横向 padding + form-group / cell-group 内容不加 --card 修饰）",
+  "navigation_pattern": "宿主宫格入口打开 push 列表页；列表页导航栏右侧文字入口和卡片内编辑入口都打开 full-screen-modal 形式的仓库编辑页",
+  "layout_pattern": "host-entry surface 使用宿主宫格入口；warehouse-list surface 使用卡片模式 M2（phone-body 16px 横向 padding + 业务卡片列表）；warehouse-editor surface 使用通栏模式 M1（phone-body 0px 横向 padding + form-group / cell-group 内容不加 --card 修饰）",
   "interaction_pattern": "仓库列表查看 + 新增/编辑统一保存回填 + 删除二次确认",
   "app_target": {
     "mode": "wego-app-scene",
@@ -52,10 +52,10 @@
       "matched_page_pattern": null,
       "matched_blueprint": "generic-mobile-task-page",
       "presentation_ref": "push；transition=slide-left；coversTabBar=true（主场景从宿主宫格打开）",
-      "scene_fit_reason": "仓库列表页以快速识别仓库、判断状态并进入编辑为主，属于对象管理列表。当前 UI Kit 没有专门范式，按 generic-mobile-task-page 兜底，但列表项采用横向扫读结构：左侧识别图，右侧只展示名称、关键状态和 1 条履约摘要；完整地址、联系人、备注和删除动作进入编辑页。",
+      "scene_fit_reason": "仓库列表页以查看仓库资料和触发新增/编辑为主，属于通用移动任务页；当前 UI Kit 没有专门的仓库列表范式，但可由 navbar + 业务卡片列表 + dialog 安全组成。",
       "component_mapping": [
         {
-          "block": "仓库列表页导航栏：返回图标 + 标题『仓库管理』 + 右侧『新增』入口",
+          "block": "仓库列表页导航栏：返回图标 + 标题『仓库管理』 + 右侧『新增仓库』入口",
           "consumption_mode": "stable-variant",
           "selected": "navbar + navbar__body--spaced（leftControl=back-icon、titleAlignment=center、actions=text、rightActionType=text、pageTransition=push、position=sticky）",
           "constraint_ref": {
@@ -70,24 +70,24 @@
           "decision_basis": "components/navbar.json.representativeVariants[2]"
         },
         {
-          "block": "仓库列表：每条优先横向展示仓库图片、仓库名称、关键状态和 1 条履约摘要；列表内仅保留编辑入口，完整地址、联系人和删除动作收进编辑页",
+          "block": "仓库列表：每条包含仓库图片、仓库名称、仓库地址，并支持编辑、删除仓库",
           "consumption_mode": "free-composition",
-          "selected": ".warehouse-list（页面级业务列表） > .card.card--surface > .card__content.warehouse-card（横向结构：左侧 .wg-image.wg-image--rounded-md 作为识别图；右侧 title/status/summary；右上角 .link『编辑』；删除动作不在列表卡片暴露，进入编辑页后触发 dialog 二次确认）",
+          "selected": ".warehouse-list（页面级业务列表） > .card.card--surface > .card__content.warehouse-card（内部使用 .wg-image.wg-image--rounded-md + 仓库名称/地址文本 + .btn.btn--weak.btn--sm『编辑』+ .btn.btn--danger.btn--sm『删除』）",
           "constraint_ref": {
             "pagePattern": "",
             "rule_id": "",
             "trigger": ""
           },
-          "reason": "仓库属于可管理业务对象，列表页目标是扫读和行动，不是阅读完整资料；因此采用左图右文横向对象卡片，只保留识别对象和判断状态所需信息，地址、联系人、备注等完整资料收进编辑页。",
+          "reason": "仓库行需要同时承接图片、名称、地址和两枚操作按钮，信息密度超过标准 cell 的单侧操作槽位，适合用 card 根结构配合页面级业务卡片样式承接。",
           "workflow_stage": "wego-design（主）, wego-ux（次）",
           "scenario_type": "no-uikit-page-composition",
-          "judgment_condition": "列表项需要图片缩略图、对象名称、关键状态和轻操作；完整资料可在编辑页承接，不应在列表中纵向堆叠",
+          "judgment_condition": "列表项需要图片缩略图和双操作按钮，不属于现有单行 cell 稳定场景",
           "decision_basis": "generic-mobile-task-page fallback blueprint.allowedComponents[card,image,button] + components/card.json.usageHints"
         }
       ],
       "allowed_page_styles": [
-        "卡片模式 M2：phone-body 16px 横向 padding，卡片列表组间距使用 8px",
-        "仓库对象卡片默认横向排布：左侧固定识别图，右侧标题/状态/一条摘要/编辑入口；地址、联系人、备注、删除等低频或高风险信息不在列表中展开",
+        "卡片模式 M2：phone-body 16px 横向 padding，卡片列表组间距使用 12px",
+        "仓库卡片允许页面级两列布局、图片缩略图、状态标签和按钮区，不新增设计系统组件类",
         "列表页底部补安全区 padding，避免内容被底部指示器遮挡"
       ],
       "design_gap": ""
@@ -196,11 +196,11 @@
   },
   "implementation_constraints": [
     "新增宿主入口时只按 route_id=my-warehouse-management 增量更新 wego-app/js/routes.js 和 my-app-center 宫格，不重画宿主壳",
-    "warehouse-list surface 使用卡片模式 M2，不把仓库列表硬塞进 cell-group；列表项按对象管理列表处理，默认横向扫读，不纵向摊开完整资料",
+    "warehouse-list surface 使用卡片模式 M2，不把仓库列表硬塞进 cell-group",
     "warehouse-editor surface 使用 biz-rule-config 的通栏模式 M1，不允许再套 form-group__content--card 或 cell-group__content--card",
     "新增/编辑仓库页必须通过 full-screen-modal 打开，且使用『取消 + 保存』导航模式；不得改成 push 或 sheet",
     "列表页新增入口放在 navbar 右侧文字操作位，不再额外放第二个页面级 strong 按钮",
-    "删除仓库从编辑页触发，必须走 dialog 二次确认，确认后再更新列表",
+    "删除仓库必须走 dialog 二次确认，确认后再更新列表",
     "保存后必须回填仓库列表并给出 toast 反馈，默认使用内存状态，不实现 localStorage 持久化",
     "运行时禁止 fetch()/XHR，本场景全部模板由 scene.js 注册"
   ],

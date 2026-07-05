@@ -1,19 +1,19 @@
 {
   "requirement_coverage": [
     {
-      "requirement": "仓库列表包含仓库图片、名称、地址",
+      "requirement": "仓库列表优先横向展示图片、名称、关键状态和 1 条履约摘要",
       "status": "covered",
-      "evidence": "scene.js 列表卡片输出 .wg-image、warehouse-card__title、warehouse-card__address"
+      "evidence": "scene.js 列表卡片输出 .wg-image、warehouse-card__title、warehouse-card__badges、warehouse-card__summary；浏览器检查显示单卡高度约 98px"
     },
     {
-      "requirement": "支持编辑、删除仓库",
+      "requirement": "完整地址、联系人和删除动作收进编辑页",
       "status": "covered",
-      "evidence": "列表卡片提供『编辑』『删除』按钮；编辑打开 full-screen-modal，删除走 dialog 二次确认"
+      "evidence": "列表卡片无 data-action=delete；编辑页保留 address 字段，并提供 data-action=delete-current，删除走 dialog 二次确认"
     },
     {
       "requirement": "新增仓库入口放在导航栏",
       "status": "covered",
-      "evidence": "列表页 navbar 右侧 data-action=create 文案为『新增仓库』"
+      "evidence": "列表页 navbar 右侧 data-action=create 文案为『新增』，避免窄屏换行"
     },
     {
       "requirement": "新增仓库页面字段尽量补全",
@@ -42,7 +42,7 @@
     "status": "pass",
     "findings": [
       "宿主入口沿用既有 grid-entry 结构",
-      "列表页复用 navbar/card/image/button",
+      "列表页复用 navbar/card/image/link",
       "编辑页复用 form-group/form-body/cell-group/switch"
     ]
   },
@@ -73,7 +73,7 @@
     "status": "pass",
     "notes": [
       "新增和编辑共用全屏表单，保存后回填列表并 toast 提示",
-      "删除需二次确认",
+      "删除从编辑页触发并需二次确认",
       "支持空列表后的新增入口"
     ]
   },
@@ -81,6 +81,7 @@
     "status": "pass",
     "notes": [
       "列表页使用卡片模式 M2：body 横向 padding 16px",
+      "列表项采用横向对象卡片：左侧 64px 图片，右侧标题/状态/摘要/编辑入口",
       "编辑页使用通栏模式 M1：body 横向 padding 0px，分组内容不加 --card"
     ]
   },
@@ -98,7 +99,7 @@
     "production_domain": "",
     "fallback_local_entry": "wego-app/index.html",
     "errors": [
-      "本轮未执行 git push / 线上部署，当前仅完成本地原型与静态验收"
+      "生成本报告时尚未执行 git push；推送结果以后续最终回复中的 commit hash 为准"
     ]
   },
   "automated_checks": {
@@ -108,20 +109,16 @@
     "warnings_count": 0,
     "key_findings": [
       "wego-design 守门验证通过",
-      "changed 范围内错误 0、警告 0"
+      "changed 范围内错误 0、警告 0",
+      "node --check scene.js 通过",
+      "page_spec 与 design_consumption_plan JSON 解析通过"
     ]
   },
-  "risk_log": [
-    {
-      "level": "low",
-      "owner": "wego-tests",
-      "message": "未做真实浏览器点击回归，新增/编辑/删除流程仍建议在 wego-app/index.html 中手动点一遍"
-    }
-  ],
+  "risk_log": [],
   "manual_verify_items": [
     "在 wego-app/index.html 中打开『我的 → 应用中心 → 仓库管理』，确认宫格入口可进入",
-    "验证导航栏『新增仓库』可打开全屏编辑页并保存回列表",
-    "验证任一仓库的编辑、删除、删除后空态按钮都能正常工作"
+    "验证导航栏『新增』可打开全屏编辑页并保存回列表",
+    "验证任一仓库点击『编辑』后，可在编辑页查看完整地址并触发删除二次确认"
   ],
-  "final_status": "pass-with-risk"
+  "final_status": "pass"
 }

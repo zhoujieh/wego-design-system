@@ -160,16 +160,8 @@
     return options[(index + 1 + options.length) % options.length];
   }
 
-  function formatWarehouseMeta(item) {
-    return [item.manager, item.phone].filter(Boolean).join(' · ');
-  }
-
-  function getCapabilitySummary(item) {
-    var parts = [item.type, item.serviceScope];
-    if (item.supportSameCity) parts.push('同城配送');
-    if (item.supportPickup) parts.push('门店自提');
-    if (item.supportLive) parts.push('直播备货');
-    return parts.join(' · ');
+  function getListSummary(item) {
+    return [item.serviceScope, item.shippingAging].filter(Boolean).join(' · ');
   }
 
   function warehouseCardMarkup(item, index) {
@@ -184,25 +176,16 @@
     return ''
       + '<article class="card card--surface warehouse-list__card" data-warehouse-id="' + esc(item.id) + '">'
       +   '<div class="card__content warehouse-card">'
-      +     '<div class="warehouse-card__media">'
-      +       '<div class="wg-image wg-image--rounded-md warehouse-card__image">'
-      +         '<img class="wg-image__src" src="' + esc(cover) + '" alt="' + esc(item.name) + '图片" />'
-      +       '</div>'
+      +     '<div class="wg-image wg-image--rounded-md warehouse-card__image">'
+      +       '<img class="wg-image__src is-loaded" src="' + esc(cover) + '" alt="' + esc(item.name) + '图片" />'
       +     '</div>'
-      +     '<div class="warehouse-card__content">'
-      +       '<div class="warehouse-card__header">'
-      +         '<div class="warehouse-card__title-wrap">'
-      +           '<h3 class="warehouse-card__title">' + esc(item.name) + '</h3>'
-      +           '<div class="warehouse-card__badges">' + badges + '</div>'
-      +         '</div>'
+      +     '<div class="warehouse-card__main">'
+      +       '<div class="warehouse-card__top">'
+      +         '<h3 class="warehouse-card__title">' + esc(item.name) + '</h3>'
+      +         '<button type="button" class="link warehouse-card__edit" data-action="edit" data-warehouse-id="' + esc(item.id) + '">编辑</button>'
       +       '</div>'
-      +       '<p class="warehouse-card__address">' + esc(item.address || '未填写仓库地址') + '</p>'
-      +       '<p class="warehouse-card__meta">' + esc(formatWarehouseMeta(item)) + '</p>'
-      +       '<p class="warehouse-card__meta warehouse-card__meta--secondary">' + esc(getCapabilitySummary(item)) + '</p>'
-      +       '<div class="warehouse-card__footer">'
-      +         '<button type="button" class="btn btn--weak btn--sm" data-action="edit" data-warehouse-id="' + esc(item.id) + '">编辑</button>'
-      +         '<button type="button" class="btn btn--danger btn--sm" data-action="delete" data-warehouse-id="' + esc(item.id) + '">删除</button>'
-      +       '</div>'
+      +       '<div class="warehouse-card__badges">' + badges + '</div>'
+      +       '<p class="warehouse-card__summary">' + esc(getListSummary(item)) + '</p>'
       +     '</div>'
       +   '</div>'
       + '</article>';
@@ -230,14 +213,14 @@
       +       '</div>'
       +       '<div class="navbar__center"><span class="navbar__title">仓库管理</span></div>'
       +       '<div class="navbar__right navbar__right--text">'
-      +         '<button type="button" class="navbar__action" data-action="create">新增仓库</button>'
+      +         '<button type="button" class="navbar__action" data-action="create">新增</button>'
       +       '</div>'
       +     '</div>'
       +   '</div>'
       +   '<div class="warehouse-page__body">'
       +     '<section class="warehouse-page__summary">'
       +       '<div class="warehouse-page__summary-title">已接入仓库 ' + esc(STATE.warehouses.length) + ' 个</div>'
-      +       '<div class="warehouse-page__summary-text">列表支持编辑、删除；新增入口放在导航栏，保存后会直接回到当前列表。</div>'
+      +       '<div class="warehouse-page__summary-text">启用中 ' + esc(STATE.warehouses.filter(function (item) { return item.enabled; }).length) + ' 个，默认发货仓 ' + esc(STATE.warehouses.filter(function (item) { return item.isDefault; }).length) + ' 个</div>'
       +     '</section>'
       +     '<div class="warehouse-list">'
       +       (STATE.warehouses.length ? cards : empty)
@@ -362,7 +345,7 @@
       +           '<div class="form-body__action">'
       +             '<div class="warehouse-editor__cover-field">'
       +               '<div class="wg-image wg-image--rounded-lg warehouse-editor__cover">'
-      +                 '<img class="wg-image__src" src="' + esc(cover) + '" alt="' + esc(title) + '预览图" />'
+      +                 '<img class="wg-image__src is-loaded" src="' + esc(cover) + '" alt="' + esc(title) + '预览图" />'
       +               '</div>'
       +               '<input type="text" value="' + esc(draft.imageUrl) + '" placeholder="可粘贴图片链接，留空将使用示意图" data-field="imageUrl">'
       +               '<div class="warehouse-editor__cover-tip">留空时自动用示意图补位，列表里也会正常显示仓库图片。</div>'
@@ -437,6 +420,7 @@
       +         '</div>'
       +       '</div>'
       +     '</div>'
+      +     (mode === 'edit' ? '<div class="warehouse-editor__danger-zone"><button type="button" class="btn btn--danger btn--md" data-action="delete-current">删除仓库</button></div>' : '')
       +   '</div>'
       + '</section>';
   }
@@ -580,6 +564,14 @@
             });
           }
 
+          var deleteBtn = root.querySelector('[data-action="delete-current"]');
+          if (deleteBtn) {
+            deleteBtn.addEventListener('click', function () {
+              overlayCtx.close();
+              confirmDelete(ctx, draft.id);
+            });
+          }
+
           root.querySelectorAll('[data-cycle-key]').forEach(function (node) {
             node.addEventListener('click', function () {
               handleCycle(node.dataset.cycleKey);
@@ -650,11 +642,6 @@
       });
     });
 
-    root.querySelectorAll('[data-action="delete"]').forEach(function (node) {
-      node.addEventListener('click', function () {
-        confirmDelete(ctx, node.dataset.warehouseId);
-      });
-    });
   }
 
   function renderWarehousePage() {
