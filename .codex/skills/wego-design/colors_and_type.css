@@ -190,6 +190,7 @@
   --border-disabled: rgba(32, 47, 100, 0.06);
   --border-inverse: rgba(255, 255, 255, 0.70);
   --border-inverse-weak: rgba(255, 255, 255, 0.12);
+  --border-toast: rgba(255, 255, 255, 0.4);
 
   /* status-success */
   --status-success-default: #03c160;

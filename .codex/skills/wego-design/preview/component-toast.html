@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../scaffold.css">
+<link rel="stylesheet" href="../iconfont.css">
+<style>
+.demo-stage {
+  position: relative;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-neutral-l2);
+  border-radius: var(--radius-8);
+  padding: var(--spacer-24) var(--spacer-12);
+  margin-bottom: var(--spacer-16);
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: var(--spacer-12);
+  box-sizing: border-box;
+}
+.demo-stage .toast {
+  position: relative;
+  left: auto;
+  bottom: auto;
+  transform: none;
+  opacity: 1;
+  visibility: visible;
+}
+.demo-stage .toast.is-floating { position: relative; }
+.demo-trigger-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacer-8);
+  margin-bottom: var(--spacer-12);
+  align-items: center;
+}
+.demo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 var(--spacer-12);
+  border: 1px solid var(--border-brand);
+  border-radius: var(--radius-8);
+  background: var(--bg-brand-surface-l1);
+  color: var(--text-brand);
+  font-size: var(--body-sm-font-size);
+  font-family: var(--body-md-font-family);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.demo-btn:active { background: var(--bg-brand-surface-l2); }
+.demo-hint { color: var(--text-tertiary); font-size: var(--body-sm-font-size); margin: var(--spacer-8) 0; }
+.demo-stage-label {
+  font-size: var(--body-xs-font-size);
+  color: var(--text-tertiary);
+  margin-bottom: var(--spacer-4);
+}
+
+/* @component-css-start */
+.toast{
+  --toast-bottom: 106px;
+  --toast-default-max-width: 268px;
+  --toast-guide-max-width: 400px;
+  --toast-edge-gap: 16px;
+  --toast-action-gap: var(--spacer-24);
+  --toast-action-height: 24px;
+  --toast-action-arrow-size: 14px;
+  --toast-enter-offset-y: 8px;
+  box-sizing:border-box;
+  display:inline-flex;
+  align-items:center;
+  background:var(--bg-toast);
+  border:0.5px solid var(--border-toast);
+  border-radius:var(--radius-8);
+  color:var(--text-inverse);
+  font-family:var(--body-md-font-family);
+  font-size:var(--body-md-font-size);
+  line-height:var(--body-md-line-height);
+  padding:12px var(--spacer-16);
+  z-index:var(--z-toast);
+  box-shadow:var(--shadow-sm);
+}
+
+.toast--default{
+  justify-content:center;
+  max-width:var(--toast-default-max-width);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.toast--guide{
+  justify-content:flex-start;
+  gap:0;
+  width:calc(100vw - 2 * var(--toast-edge-gap));
+  max-width:var(--toast-guide-max-width);
+  padding:12px var(--spacer-12);
+  cursor:pointer;
+}
+
+.toast__icon{
+  font-family:var(--font-family-icon);
+  font-size:18px;
+  line-height:1;
+  color:var(--text-inverse);
+  flex-shrink:0;
+  margin-right:var(--spacer-8);
+}
+
+.toast__text{
+  flex:1 1 auto;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  text-align:left;
+}
+
+.toast--default .toast__text{
+  -webkit-line-clamp:1;
+  text-align:center;
+}
+
+.toast__action{
+  flex-shrink:0;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:0;
+  margin-left:var(--toast-action-gap);
+  min-height:var(--toast-action-height);
+  padding:0;
+  font-family:var(--body-md-font-family);
+  font-size:var(--body-md-font-size);
+  line-height:var(--body-md-line-height);
+  font-weight:var(--font-weight-medium);
+  background:transparent;
+  border:none;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+
+.toast__action-arrow{
+  font-family:var(--font-family-icon);
+  font-size:var(--toast-action-arrow-size);
+  line-height:1;
+}
+
+.toast__action--weak{ color:var(--text-tertiary); }
+.toast__action--strong{ color:var(--text-brand); }
+
+.toast.is-floating{
+  position:fixed;
+  left:50%;
+  bottom:var(--toast-bottom);
+  transform:translate(-50%, var(--toast-enter-offset-y));
+  opacity:0;
+  visibility:hidden;
+  transition:opacity var(--duration-normal) var(--ease-enter),
+             transform var(--duration-normal) var(--ease-enter),
+             visibility 0s linear var(--duration-normal);
+}
+
+.toast.is-floating.is-visible{
+  transform:translate(-50%, 0);
+  opacity:1;
+  visibility:visible;
+  transition:opacity var(--duration-normal) var(--ease-enter),
+             transform var(--duration-normal) var(--ease-enter),
+             visibility 0s;
+}
+
+.toast.is-floating.is-leaving{
+  opacity:0;
+  transform:translate(-50%, var(--toast-enter-offset-y));
+  transition:opacity var(--duration-fast) var(--ease-exit),
+             transform var(--duration-fast) var(--ease-exit),
+             visibility 0s linear var(--duration-fast);
+}
+/* @component-css-end */
+</style>
+</head>
+<body>
+<div class="pv-header"><h1>提示 Toast</h1><p>瞬时浮层提示：默认（居中纯文本）与引导（可选图标 + 必选文案 + 可选操作）两种变体。同屏互斥，单次展示一个。</p></div>
+
+<div class="pv-section__title">默认 Toast</div>
+<div class="demo-stage">
+  <div class="demo-stage-label">默认 · 纯文本居中</div>
+  <div class="toast toast--default">
+    <span class="toast__text">已成功加入购物车</span>
+  </div>
+</div>
+
+<div class="pv-section__title">引导 Toast · 文案 + 操作</div>
+<div class="demo-stage">
+  <div class="demo-stage-label">引导 · 无图标 · WEAK 操作（带右箭头）</div>
+  <div class="toast toast--guide">
+    <span class="toast__text">新客专享优惠券已到账</span>
+    <button type="button" class="toast__action toast__action--weak">
+      <span class="toast__action-text">查看</span>
+      <span class="toast__action-arrow icon-youjiantou16"></span>
+    </button>
+  </div>
+  <div class="demo-stage-label">引导 · 无图标 · STRONG 操作</div>
+  <div class="toast toast--guide">
+    <span class="toast__text">订单 15 分钟内未支付将取消</span>
+    <button type="button" class="toast__action toast__action--strong">去支付</button>
+  </div>
+</div>
+
+<div class="pv-section__title">引导 Toast · 图标 + 文案 + 操作</div>
+<div class="demo-stage">
+  <div class="demo-stage-label">引导 · 购物图标 · STRONG 操作</div>
+  <div class="toast toast--guide">
+    <span class="toast__icon icon-goutoast"></span>
+    <span class="toast__text">购物车 3 件商品待结算</span>
+    <button type="button" class="toast__action toast__action--strong">去结算</button>
+  </div>
+  <div class="demo-stage-label">引导 · 查询图标 · WEAK 操作（带右箭头）</div>
+  <div class="toast toast--guide">
+    <span class="toast__icon icon-chatoast"></span>
+    <span class="toast__text">为您找到 12 个相关商品</span>
+    <button type="button" class="toast__action toast__action--weak">
+      <span class="toast__action-text">查看</span>
+      <span class="toast__action-arrow icon-youjiantou16"></span>
+    </button>
+  </div>
+  <div class="demo-stage-label">引导 · 感叹图标 · 无操作</div>
+  <div class="toast toast--guide">
+    <span class="toast__icon icon-tanhao"></span>
+    <span class="toast__text">当前网络不稳定，请稍后重试</span>
+  </div>
+  <div class="demo-stage-label">引导 · 时间图标 · STRONG 操作</div>
+  <div class="toast toast--guide">
+    <span class="toast__icon icon-shijian"></span>
+    <span class="toast__text">您的会员权益将在 3 天后过期</span>
+    <button type="button" class="toast__action toast__action--strong">续费</button>
+  </div>
+</div>
+
+<div class="pv-section__title">交互演示</div>
+<p class="demo-hint">点击按钮触发浮层 toast（同屏互斥，新 toast 替换旧 toast）</p>
+<div class="demo-trigger-row">
+  <button type="button" class="demo-btn" data-trigger="default">默认 toast</button>
+  <button type="button" class="demo-btn" data-trigger="guide-weak">引导 · WEAK</button>
+  <button type="button" class="demo-btn" data-trigger="guide-strong">引导 · STRONG</button>
+  <button type="button" class="demo-btn" data-trigger="guide-icon-shopping">引导 · 购物图标</button>
+  <button type="button" class="demo-btn" data-trigger="guide-icon-time">引导 · 时间图标</button>
+  <button type="button" class="demo-btn" data-trigger="long-text">长文案演示</button>
+</div>
+<p class="demo-hint">默认 4000ms 自动关闭，引导 4500ms 自动关闭。点击引导 toast 任意位置触发操作或隐藏。</p>
+
+<div id="toast-host" aria-live="polite" role="status"></div>
+
+<script>
+(function() {
+  var host = document.getElementById('toast-host');
+  var leaveTimer = null;
+  var removeTimer = null;
+  var currentToast = null;
+
+  var presets = {
+    'default': { variant:'default', icon:null, text:'已保存', action:null, duration:4000 },
+    'guide-weak': { variant:'guide', icon:null, text:'新客优惠券已到账', action:{label:'查看',mode:'weak'}, duration:4500 },
+    'guide-strong': { variant:'guide', icon:null, text:'订单 15 分钟内未支付将取消', action:{label:'去支付',mode:'strong'}, duration:4500 },
+    'guide-icon-shopping': { variant:'guide', icon:'icon-goutoast', text:'购物车 3 件商品待结算', action:{label:'去结算',mode:'strong'}, duration:4500 },
+    'guide-icon-time': { variant:'guide', icon:'icon-shijian', text:'您的会员权益将在 3 天后过期', action:{label:'续费',mode:'strong'}, duration:4500 },
+    'long-text': { variant:'guide', icon:'icon-tanhao', text:'当前网络不稳定，请检查网络连接后重试。如问题持续请联系客服处理。', action:{label:'重试',mode:'strong'}, duration:4500 }
+  };
+
+  function clearTimers() {
+    if (leaveTimer) { clearTimeout(leaveTimer); leaveTimer = null; }
+    if (removeTimer) { clearTimeout(removeTimer); removeTimer = null; }
+  }
+
+  function removeCurrent() {
+    if (!currentToast) return;
+    var old = currentToast;
+    currentToast = null;
+    old.classList.remove('is-visible');
+    old.classList.add('is-leaving');
+    var ref = old;
+    removeTimer = setTimeout(function() {
+      if (ref.parentNode) ref.parentNode.removeChild(ref);
+    }, 200);
+  }
+
+  function triggerAction(toast) {
+    // 引导 toast 整体热区：点击任意位置都触发 action 的点击行为；无 action 直接隐藏
+    var btn = toast.querySelector('.toast__action');
+    if (btn) {
+      btn.click();
+    } else {
+      removeCurrent();
+    }
+  }
+
+  function showToast(preset) {
+    clearTimers();
+    removeCurrent();
+    var toast = document.createElement('div');
+    toast.className = 'toast is-floating toast--' + preset.variant;
+    if (preset.icon) {
+      var icon = document.createElement('span');
+      icon.className = 'toast__icon ' + preset.icon;
+      toast.appendChild(icon);
+    }
+    var text = document.createElement('span');
+    text.className = 'toast__text';
+    text.textContent = preset.text;
+    toast.appendChild(text);
+    if (preset.action) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'toast__action toast__action--' + preset.action.mode;
+      var btnText = document.createElement('span');
+      btnText.className = 'toast__action-text';
+      btnText.textContent = preset.action.label;
+      btn.appendChild(btnText);
+      // weak 操作固定追加 icon-youjiantou16 箭头
+      if (preset.action.mode === 'weak') {
+        var arrow = document.createElement('span');
+        arrow.className = 'toast__action-arrow icon-youjiantou16';
+        btn.appendChild(arrow);
+      }
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        removeCurrent();
+      });
+      toast.appendChild(btn);
+    }
+    // 引导 toast 整体热区：点击 toast 任意位置都触发 action
+    if (preset.variant === 'guide') {
+      toast.addEventListener('click', function() { triggerAction(toast); });
+    }
+    host.appendChild(toast);
+    currentToast = toast;
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        toast.classList.add('is-visible');
+      });
+    });
+    leaveTimer = setTimeout(function() { removeCurrent(); }, preset.duration);
+  }
+
+  document.querySelectorAll('[data-trigger]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var key = btn.getAttribute('data-trigger');
+      var preset = presets[key];
+      if (preset) showToast(preset);
+    });
+  });
+
+  // 触发其他元素时立即隐藏（演示"操作页面其他功能"隐藏规则）
+  document.addEventListener('click', function(e) {
+    var t = e.target;
+    if (t.closest('[data-trigger]')) return;
+    if (t.closest('.toast')) return;
+    if (currentToast) removeCurrent();
+  }, true);
+})();
+</script>
+</body>
+</html>

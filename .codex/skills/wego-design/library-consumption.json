@@ -255,7 +255,8 @@
     "link",
     "radio",
     "stack",
-    "switch"
+    "switch",
+    "toast"
   ],
   "embeddedComponents": [],
   "unpublishedContracts": [],

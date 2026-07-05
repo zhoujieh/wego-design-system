@@ -132,6 +132,13 @@
       "category": "navigation",
       "status": "stable",
       "preview": "preview/component-navbar.html"
+    },
+    {
+      "slug": "toast",
+      "name": "提示",
+      "category": "feedback",
+      "status": "stable",
+      "preview": "preview/component-toast.html"
     }
   ],
   "componentContractSchemaVersion": 3

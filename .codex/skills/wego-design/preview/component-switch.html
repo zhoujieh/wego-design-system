@@ -25,8 +25,8 @@
 .setting-desc { font-size:var(--body-sm-font-size); color:var(--text-tertiary); }
 
 /* Toast feedback */
-.toast { position:fixed; bottom:40px; left:50%; transform:translateX(-50%) translateY(20px); background:rgba(0,0,0,0.75); color:#fff; font-size:var(--body-sm-font-size); padding:8px 20px; border-radius:20px; opacity:0; transition:opacity .25s ease, transform .25s ease; pointer-events:none; z-index:100; white-space:nowrap; }
-.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+.demo-toast { position:fixed; bottom:40px; left:50%; transform:translateX(-50%) translateY(20px); background:rgba(0,0,0,0.75); color:#fff; font-size:var(--body-sm-font-size); padding:8px 20px; border-radius:20px; opacity:0; transition:opacity .25s ease, transform .25s ease; pointer-events:none; z-index:100; white-space:nowrap; }
+.demo-toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
 /* @component-css-start */
 .switch{position:relative;display:inline-flex;align-items:center;width:44px;height:24px;box-sizing:border-box;border-radius:12px;background:var(--bg-overlay-l2);cursor:pointer;flex-shrink:0;transition:background var(--duration-fast) var(--ease-standard);-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
@@ -126,7 +126,7 @@
   <div class="switch switch--off switch--disabled" data-toggle="dnd"><div class="switch__thumb"></div></div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="demo-toast" id="toast"></div>
 
 <script>
 (function() {

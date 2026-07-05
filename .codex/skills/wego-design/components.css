@@ -853,3 +853,130 @@
 .tag__icon-left .wego-iconfont-s { font-size:var(--size-16); line-height:1; color:inherit; }
 
 .tag--coupon { height:16px; min-width:28px; border-radius:2px; padding:0 4px; background:var(--bg-inverse-surface-l1); border:0.5px solid var(--border-promotion-strong); color:var(--text-promotion-strong); font-size:var(--body-xs-font-size); line-height:normal; overflow:hidden; display:inline-flex; align-items:center; justify-content:center; font-family:var(--body-md-font-family); white-space:nowrap; font-feature-settings:"zero"; }
+
+/* ── Toast ─────────────────────────────────────────────────── */
+/* @anatomy
+   <div class="pv-header"><h1>提示 Toast</h1><p>瞬时浮层提示：默认（居中纯文本）与引导（可选图标 + 必选文案 + 可选操作）两种变体。同屏互斥，单次展示一个。</p></div>
+*/
+.toast{
+  --toast-bottom: 106px;
+  --toast-default-max-width: 268px;
+  --toast-guide-max-width: 400px;
+  --toast-edge-gap: 16px;
+  --toast-action-gap: var(--spacer-24);
+  --toast-action-height: 24px;
+  --toast-action-arrow-size: 14px;
+  --toast-enter-offset-y: 8px;
+  box-sizing:border-box;
+  display:inline-flex;
+  align-items:center;
+  background:var(--bg-toast);
+  border:0.5px solid var(--border-toast);
+  border-radius:var(--radius-8);
+  color:var(--text-inverse);
+  font-family:var(--body-md-font-family);
+  font-size:var(--body-md-font-size);
+  line-height:var(--body-md-line-height);
+  padding:12px var(--spacer-16);
+  z-index:var(--z-toast);
+  box-shadow:var(--shadow-sm);
+}
+
+.toast--default{
+  justify-content:center;
+  max-width:var(--toast-default-max-width);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.toast--guide{
+  justify-content:flex-start;
+  gap:0;
+  width:calc(100vw - 2 * var(--toast-edge-gap));
+  max-width:var(--toast-guide-max-width);
+  padding:12px var(--spacer-12);
+  cursor:pointer;
+}
+
+.toast__icon{
+  font-family:var(--font-family-icon);
+  font-size:18px;
+  line-height:1;
+  color:var(--text-inverse);
+  flex-shrink:0;
+  margin-right:var(--spacer-8);
+}
+
+.toast__text{
+  flex:1 1 auto;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  text-align:left;
+}
+
+.toast--default .toast__text{
+  -webkit-line-clamp:1;
+  text-align:center;
+}
+
+.toast__action{
+  flex-shrink:0;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:0;
+  margin-left:var(--toast-action-gap);
+  min-height:var(--toast-action-height);
+  padding:0;
+  font-family:var(--body-md-font-family);
+  font-size:var(--body-md-font-size);
+  line-height:var(--body-md-line-height);
+  font-weight:var(--font-weight-medium);
+  background:transparent;
+  border:none;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+
+.toast__action-arrow{
+  font-family:var(--font-family-icon);
+  font-size:var(--toast-action-arrow-size);
+  line-height:1;
+}
+
+.toast__action--weak{ color:var(--text-tertiary); }
+.toast__action--strong{ color:var(--text-brand); }
+
+.toast.is-floating{
+  position:fixed;
+  left:50%;
+  bottom:var(--toast-bottom);
+  transform:translate(-50%, var(--toast-enter-offset-y));
+  opacity:0;
+  visibility:hidden;
+  transition:opacity var(--duration-normal) var(--ease-enter),
+             transform var(--duration-normal) var(--ease-enter),
+             visibility 0s linear var(--duration-normal);
+}
+
+.toast.is-floating.is-visible{
+  transform:translate(-50%, 0);
+  opacity:1;
+  visibility:visible;
+  transition:opacity var(--duration-normal) var(--ease-enter),
+             transform var(--duration-normal) var(--ease-enter),
+             visibility 0s;
+}
+
+.toast.is-floating.is-leaving{
+  opacity:0;
+  transform:translate(-50%, var(--toast-enter-offset-y));
+  transition:opacity var(--duration-fast) var(--ease-exit),
+             transform var(--duration-fast) var(--ease-exit),
+             visibility 0s linear var(--duration-fast);
+}

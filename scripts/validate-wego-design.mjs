@@ -164,7 +164,6 @@ const PREVIEW_SCAFFOLD_SELECTORS = [
   '.section-title',
   '.sub-label',
   '.demo-',
-  '.toast',
   '.setting-row',
   '.dark-strip',
 ];

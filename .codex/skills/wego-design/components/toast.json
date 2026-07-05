@@ -1,0 +1,245 @@
+{
+  "schemaVersion": 3,
+  "slug": "toast",
+  "name": "提示",
+  "category": "feedback",
+  "status": "stable",
+  "sourceKind": "inferred",
+  "confidence": "high",
+  "description": "瞬时浮层提示，用于告知用户当前发生的事件或引导下一步操作。仅两种变体：默认 toast（居中纯文本告知）和引导 toast（左侧可选图标 + 必选文案 + 右侧可选操作）。同屏互斥，单次展示一个，触发页面跳转或操作其他功能时立即隐藏。",
+  "semanticTypeCandidates": [
+    "toast",
+    "notification-toast",
+    "guide-toast"
+  ],
+  "variantDimensions": {
+    "variant": [
+      "default",
+      "guide"
+    ],
+    "iconMode": [
+      "none",
+      "shopping",
+      "query",
+      "exclamation",
+      "time"
+    ],
+    "actionMode": [
+      "none",
+      "weak",
+      "strong"
+    ],
+    "state": [
+      "entering",
+      "visible",
+      "leaving"
+    ]
+  },
+  "representativeVariants": [
+    {
+      "variant": "default",
+      "iconMode": "none",
+      "actionMode": "none"
+    },
+    {
+      "variant": "guide",
+      "iconMode": "none",
+      "actionMode": "weak"
+    },
+    {
+      "variant": "guide",
+      "iconMode": "shopping",
+      "actionMode": "strong"
+    },
+    {
+      "variant": "guide",
+      "iconMode": "exclamation",
+      "actionMode": "none"
+    }
+  ],
+  "anatomy": [
+    {
+      "name": "root",
+      "selector": ".toast",
+      "role": "浮层容器，承载定位、动画与背景"
+    },
+    {
+      "name": "icon",
+      "selector": ".toast__icon",
+      "role": "左侧图标，仅引导 toast 可选，限定 4 种 iconfont"
+    },
+    {
+      "name": "text",
+      "selector": ".toast__text",
+      "role": "主文案，必选，承担核心信息"
+    },
+    {
+      "name": "action",
+      "selector": ".toast__action",
+      "role": "右侧操作按钮，仅引导 toast 可选，区分 weak / strong"
+    },
+    {
+      "name": "actionArrow",
+      "selector": ".toast__action-arrow",
+      "role": "weak 操作按钮内的右箭头图标 icon-youjiantou16，强引导不展示"
+    }
+  ],
+  "structurePatterns": [
+    "默认 toast 仅含 .toast__text，居中显示，1 行文本，最大宽度 268px。",
+    "引导 toast 至少包含 .toast__text，可选挂载 .toast__icon 与 .toast__action；图标在左、文案居中、操作在右形成横向布局。",
+    "图标严格限定为 icon-goutoast（购物）、icon-chatoast（查询）、icon-tanhao（感叹）、icon-shijian（时间）四类，不允许自定义图标。",
+    "右侧操作按钮强弱由业务重要性决定：weak 用于次要引导并固定追加 icon-youjiantou16 箭头图标，strong 用于关键转化引导、不带箭头。",
+    "右侧操作文案字号为 14px（var(--body-md-font-size)），与正文一致；按钮无左右内边距，文字与箭头图标间距为 0。",
+    "左侧内容（图标/文案）与右侧操作按钮之间间距固定为 24px（var(--spacer-24)）。",
+    "引导 toast 宽度默认拉伸至屏幕宽度减去左右各 16px 边距，最大不超过 400px；高度根据内容自适应。"
+  ],
+  "behavior": {
+    "autoClose": "默认 toast 自动关闭时长 4000ms，引导 toast 因含操作引导延长至 4500ms。",
+    "conflicting": "同屏仅展示一个 toast，新 toast 出现时立即替换旧 toast，默认开启互斥。",
+    "hideTriggers": "页面跳转、操作页面其他功能、点击引导 toast 的右侧操作按钮均立即隐藏当前 toast。",
+    "guideHitArea": "引导 toast 的点击热区为整个 toast 内容区域，点击任意位置都触发右侧 action 的点击行为；无 action 时点击任意位置直接隐藏。",
+    "position": "距底部 106px 居中悬浮，z-index 使用 var(--z-toast)。",
+    "animation": "入场自底部向上偏移 8px 淡入，时长 var(--duration-normal)，缓动 var(--ease-enter)；出场反向淡出，时长 var(--duration-fast)，缓动 var(--ease-exit)。"
+  },
+  "accessibility": {
+    "role": "toast 容器使用 role=\"status\" aria-live=\"polite\"，保证辅助技术能正确播报。",
+    "textRule": "文案保持短句，默认 toast ≤ 1 行，引导 toast ≤ 2 行；超出时自动截断并以省略号收尾。",
+    "actionRule": "右侧操作文案必须为动词短语，不超过 4 个汉字，保证可点击目标高度 ≥ 24px。"
+  },
+  "usageHints": [
+    "默认 toast 用于纯告知：保存成功、复制成功、网络异常等无后续操作的瞬时反馈。",
+    "引导 toast 用于需要后续动作：领券提醒、订单未支付、权益即将过期等场景。",
+    "图标选择：shopping 用于购物/下单引导，query 用于查询/搜索引导，exclamation 用于警告/重要提醒，time 用于时效提醒。"
+  ],
+  "doNotInvent": [
+    "不要新增第三种 toast 变体（如失败 toast、loading toast），失败场景使用默认 toast 纯文本告知即可。",
+    "不要自定义图标，仅允许 icon-goutoast / icon-chatoast / icon-tanhao / icon-shijian 四种。",
+    "不要在 toast 内放置输入框、多按钮、链接列表等复杂交互组件。",
+    "不要让 toast 持续显示超过 5000ms 或叠加多个并存。",
+    "不要持久化 toast 状态到 localStorage；toast 是瞬时浮层。"
+  ],
+  "tokensConsumed": [
+    "--bg-toast",
+    "--border-toast",
+    "--text-inverse",
+    "--text-tertiary",
+    "--text-brand",
+    "--spacer-12",
+    "--spacer-16",
+    "--radius-8",
+    "--body-md-font-family",
+    "--body-md-font-size",
+    "--body-md-line-height",
+    "--body-sm-font-size",
+    "--body-sm-line-height",
+    "--font-weight-medium",
+    "--duration-normal",
+    "--duration-fast",
+    "--ease-enter",
+    "--ease-exit",
+    "--z-toast",
+    "--stroke-hairline"
+  ],
+  "designTokens": {
+    "bg": "var(--bg-toast)",
+    "border": "0.5px solid var(--border-toast)",
+    "textColor": "var(--text-inverse)",
+    "iconColor": "var(--text-inverse)",
+    "actionWeakColor": "var(--text-tertiary)",
+    "actionStrongColor": "var(--text-brand)",
+    "bottomOffset": "var(--toast-bottom)",
+    "defaultMaxWidth": "var(--toast-default-max-width)",
+    "guideMaxWidth": "var(--toast-guide-max-width)",
+    "guideEdgeGap": "var(--toast-edge-gap)",
+    "actionGap": "var(--spacer-24)",
+    "actionIconGap": "0px",
+    "actionHeight": "var(--toast-action-height)",
+    "actionArrowSize": "var(--toast-action-arrow-size)",
+    "enterOffsetY": "var(--toast-enter-offset-y)",
+    "radius": "var(--radius-8)",
+    "paddingDefault": "12px var(--spacer-16)",
+    "paddingGuide": "12px var(--spacer-12)",
+    "fontBody": "var(--body-md-font-size) / var(--body-md-line-height) / var(--body-md-font-family)",
+    "fontAction": "var(--body-md-font-size) / var(--body-md-line-height) / var(--font-weight-medium)",
+    "enterDuration": "var(--duration-normal)",
+    "enterEase": "var(--ease-enter)",
+    "leaveDuration": "var(--duration-fast)",
+    "leaveEase": "var(--ease-exit)"
+  },
+  "cssCustomProperties": [
+    {
+      "name": "--toast-duration",
+      "default": "4000ms",
+      "appliesTo": "默认 toast 自动关闭时长，引导 toast 自动 +500ms"
+    },
+    {
+      "name": "--toast-bottom",
+      "default": "106px",
+      "appliesTo": "距底部偏移，业务可按 tabbar 高度覆盖"
+    },
+    {
+      "name": "--toast-default-max-width",
+      "default": "268px",
+      "appliesTo": "默认 toast 最大宽度"
+    },
+    {
+      "name": "--toast-guide-max-width",
+      "default": "400px",
+      "appliesTo": "引导 toast 最大宽度上限"
+    },
+    {
+      "name": "--toast-edge-gap",
+      "default": "16px",
+      "appliesTo": "引导 toast 距屏幕左右边缘的安全间距"
+    },
+    {
+      "name": "--toast-action-gap",
+      "default": "var(--spacer-24)",
+      "appliesTo": "左侧内容与右侧操作按钮的间距"
+    },
+    {
+      "name": "--toast-action-height",
+      "default": "24px",
+      "appliesTo": "右侧操作按钮最小高度"
+    },
+    {
+      "name": "--toast-action-arrow-size",
+      "default": "14px",
+      "appliesTo": "weak 操作按钮内右箭头图标尺寸"
+    },
+    {
+      "name": "--toast-enter-offset-y",
+      "default": "8px",
+      "appliesTo": "入场动画纵向偏移"
+    }
+  ],
+  "specRefs": [
+    "specs/交互设计原则.md",
+    "specs/动效与视觉效果.md"
+  ],
+  "domAnatomy": {
+    "root": ".toast",
+    "modifiers": [
+      ".toast--default",
+      ".toast--guide",
+      ".toast.is-floating",
+      ".toast.is-entering",
+      ".toast.is-leaving"
+    ],
+    "optionalChildren": [
+      ".toast__icon",
+      ".toast__text",
+      ".toast__action",
+      ".toast__action--weak",
+      ".toast__action--strong",
+      ".toast__action-arrow"
+    ]
+  },
+  "provenance": {
+    "preview": "preview/component-toast.html",
+    "cssSource": "preview/component-toast.html",
+    "embedded": false,
+    "hostComponent": null
+  },
+  "unknowns": []
+}

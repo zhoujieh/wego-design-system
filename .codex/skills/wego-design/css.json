@@ -620,6 +620,10 @@
             "border-inverse-weak": {
                 "hex": "#ffffff",
                 "opacity": "0.12"
+            },
+            "border-toast": {
+                "hex": "#ffffff",
+                "opacity": "0.4"
             }
         },
         "status-success": {
