@@ -49,7 +49,7 @@
 
 ## 当前组件
 
-稳定组件共 18 个：
+稳定组件共 19 个：
 
 - `button`
 - `card`
@@ -69,6 +69,7 @@
 - `switch`
 - `navbar`
 - `toast`
+- `dialog`
 
 ## 当前 UI Kit
 

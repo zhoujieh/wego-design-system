@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../scaffold.css">
+<link rel="stylesheet" href="../iconfont.css">
+<link rel="stylesheet" href="../components.css">
+<style>
+.demo-stage .dialog {
+  position: relative;
+  inset: auto;
+  background: transparent;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  z-index: auto;
+}
+.demo-stage .dialog__card {
+  transform: none;
+}
+.demo-trigger-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacer-8);
+  margin-bottom: var(--spacer-12);
+  align-items: center;
+}
+.demo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 var(--spacer-12);
+  border: 1px solid var(--border-brand);
+  border-radius: var(--radius-8);
+  background: var(--bg-brand-surface-l1);
+  color: var(--text-brand);
+  font-size: var(--body-sm-font-size);
+  font-family: var(--body-md-font-family);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.demo-btn:active { background: var(--bg-brand-surface-l2); }
+.demo-hint { color: var(--text-tertiary); font-size: var(--body-sm-font-size); margin: var(--spacer-8) 0; }
+.demo-stage-label {
+  font-size: var(--body-xs-font-size);
+  color: var(--text-tertiary);
+  margin-bottom: var(--spacer-4);
+  position: absolute;
+  top: var(--spacer-8);
+  left: var(--spacer-12);
+}
+
+/* @component-css-start */
+.dialog{
+  --dialog-width: 300px;
+  --dialog-enter-scale: 0.9;
+  box-sizing:border-box;
+  position:fixed;
+  inset:0;
+  z-index:var(--z-modal);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--bg-mask-light);
+  font-family:var(--font-family-system);
+  pointer-events:auto;
+  opacity:1;
+  transition:opacity var(--duration-normal) var(--ease-standard);
+}
+
+.dialog[data-state="closed"]{
+  opacity:0;
+  pointer-events:none;
+}
+
+.dialog[data-state="closed"] .dialog__card{
+  transform:scale(var(--dialog-enter-scale));
+}
+
+.dialog__card{
+  position:relative;
+  z-index:2;
+  width:var(--dialog-width);
+  background:var(--bg-surface);
+  border-radius:var(--radius-12);
+  box-shadow:var(--shadow-xl);
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  overflow:hidden;
+  transform:scale(1);
+  transition:transform var(--duration-normal) var(--ease-enter);
+}
+
+.dialog__body{
+  width:100%;
+  box-sizing:border-box;
+  padding:var(--spacer-24) var(--spacer-20);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:var(--spacer-12);
+}
+
+.dialog--title .dialog__body{
+  padding:var(--spacer-32) var(--spacer-20);
+}
+
+.dialog__body > .dialog__header,
+.dialog__body > .dialog__content,
+.dialog__body > .dialog__input,
+.dialog__body > .dialog__custom,
+.dialog__body > .dialog__check{
+  width:100%;
+  margin-bottom:0;
+}
+
+.dialog__header{
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  gap:var(--spacer-8);
+}
+
+.dialog--status .dialog__header{
+  justify-content:center;
+}
+
+.dialog__icon{
+  font-family:var(--font-family-icon);
+  font-size:var(--size-24);
+  line-height:1;
+  flex-shrink:0;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.dialog__icon--success{ color:var(--status-success-default); }
+.dialog__icon--warning{ color:var(--status-warning-default); }
+.dialog__icon--danger{ color:var(--status-danger-default); }
+
+.dialog__title{
+  font-size:var(--heading-sm-font-size);
+  font-weight:var(--font-weight-medium);
+  color:var(--text-default);
+  text-align:center;
+  margin:0;
+  line-height:1.4;
+}
+
+.dialog__content{
+  width:100%;
+  font-size:var(--body-lg-font-size);
+  color:var(--text-default);
+  text-align:center;
+  line-height:1.5;
+}
+
+.dialog__content .link--inline{
+  margin:0 var(--spacer-4);
+}
+
+.dialog__input{
+  width:100%;
+}
+
+.dialog__input .input-group{
+  max-width:none;
+}
+
+.dialog__input .field-label{
+  display:none;
+}
+
+.dialog__custom{
+  width:100%;
+}
+
+.dialog__check{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.dialog__actions{
+  width:100%;
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  justify-content:center;
+  box-shadow:inset 0 0.5px 0 0 var(--border-neutral-l2);
+}
+
+.dialog__buttons{
+  width:100%;
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  justify-content:center;
+}
+
+.dialog__buttons--dual{
+  width:100%;
+}
+
+.dialog__buttons--dual > .dialog__btn{
+  flex:1 1 0;
+  min-width:0;
+}
+
+.dialog__buttons--dual > .dialog__divider,
+.dialog__buttons--triple > .dialog__divider{
+  flex-shrink:0;
+}
+
+.dialog__buttons--dual > .dialog__divider{
+  height:48px;
+}
+
+.dialog__buttons--triple{
+  flex-direction:column;
+}
+
+.dialog__buttons--triple > .dialog__btn,
+.dialog__buttons--triple > .dialog__divider{
+  width:100%;
+}
+
+.dialog__buttons--triple > .dialog__divider{
+  height:0.5px;
+}
+
+.dialog__btn{
+  height:48px;
+  border:none;
+  background:transparent;
+  font-family:var(--font-family-system);
+  font-size:var(--body-lg-font-size);
+  font-weight:var(--font-weight-medium);
+  text-align:center;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  padding:0;
+  transition:background-color var(--duration-fast) var(--ease-standard);
+}
+
+.dialog__buttons:not(.dialog__buttons--dual):not(.dialog__buttons--triple) > .dialog__btn{
+  width:100%;
+}
+
+.dialog__btn:hover{ background:var(--bg-state-hover); }
+.dialog__btn:active{ background:var(--bg-state-pressed); }
+
+.dialog__btn--default{ color:var(--text-default); }
+.dialog__btn--dismiss{ color:var(--text-default); }
+.dialog__btn--confirm{ color:var(--text-link); }
+.dialog__btn--danger{ color:var(--status-danger-default); }
+.dialog__btn--weak{ color:var(--text-tertiary); }
+
+.dialog__btn:focus-visible{
+  outline:var(--stroke-strong) solid var(--border-brand);
+  outline-offset:calc(-1 * var(--spacer-2));
+}
+
+.dialog__divider{
+  width:0.5px;
+  height:48px;
+  background:var(--border-neutral-l2);
+  flex-shrink:0;
+}
+/* @component-css-end */
+</style>
+</head>
+<body>
+<div class="pv-header"><h1>对话框 Dialog</h1><p>居中模态确认弹窗：text（标题+正文+按钮）、status（状态图标+标题+正文+按钮）、title（仅标题+按钮）、input（标题+输入框+按钮）四种变体。阻断式常驻，用户必须操作后才消失。蒙层默认 30%。input 变体必须使用已注册的 input 组件，勾选项必须使用已注册的 checkbox 组件。</p></div>
+
+<div class="pv-section__title">文本对话框 Dialog_Text</div>
+<div class="demo-stage">
+  <div class="demo-stage-label">text · 2 按钮 · default（标准确认）</div>
+  <div class="dialog dialog--text" role="dialog" aria-modal="true" aria-labelledby="d1-title" data-state="open">
+    <div class="dialog__card">
+      <div class="dialog__body">
+        <div class="dialog__header">
+          <h3 class="dialog__title" id="d1-title">确认提交订单？</h3>
+        </div>
+        <div class="dialog__content">提交后将进入待支付状态，请尽快完成支付。</div>
+      </div>
+      <div class="dialog__actions">
+        <div class="dialog__buttons dialog__buttons--dual">
+          <button type="button" class="dialog__btn dialog__btn--dismiss">取消</button>
+          <span class="dialog__divider"></span>
+          <button type="button" class="dialog__btn dialog__btn--confirm">确认</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="demo-stage">
+  <div class="demo-stage-label">text · 2 按钮 · danger（危险确认）</div>
+  <div class="dialog dialog--text" role="dialog" aria-modal="true" aria-labelledby="d2-title" data-state="open">
+    <div class="dialog__card">
+      <div class="dialog__body">
+        <div class="dialog__header">
+          <h3 class="dialog__title" id="d2-title">确认删除该商品？</h3>
+        </div>
+        <div class="dialog__content">删除后无法恢复，相关数据将被清空。</div>
+      </div>
+      <div class="dialog__actions">
+        <div class="dialog__buttons dialog__buttons--dual">
+          <button type="button" class="dialog__btn dialog__btn--dismiss">取消</button>
+          <span class="dialog__divider"></span>
+          <button type="button" class="dialog__btn dialog__btn--danger">删除</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="demo-stage">
+  <div class="demo-stage-label">text · 1 按钮 · default（单按钮告知）</div>
+  <div class="dialog dialog--text" role="dialog" aria-modal="true" aria-labelledby="d3-title" data-state="open">
+    <div class="dialog__card">
+      <div class="dialog__body">
+        <div class="dialog__header">
+          <h3 class="dialog__title" id="d3-title">提交成功</h3>
+        </div>
+        <div class="dialog__content">我们会在 1-3 个工作日内审核完毕。</div>
+      </div>
+      <div class="dialog__actions">
+        <div class="dialog__buttons">
+          <button type="button" class="dialog__btn dialog__btn--default">我知道了</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="demo-stage">
+  <div class="demo-stage-label">text · 3 按钮 · default（尽量避免）</div>
+  <div class="dialog dialog--text" role="dialog" aria-modal="true" aria-labelledby="d4-title" data-state="open">
+    <div class="dialog__card">
+      <div class="dialog__body">
+        <div class="dialog__header">
+          <h3 class="dialog__title" id="d4-title">未保存的修改</h3>
+        </div>
+        <div class="dialog__content">是否保存当前内容？</div>
+      </div>
+      <div class="dialog__actions">
+        <div class="dialog__buttons dialog__buttons--triple">
+          <button type="button" class="dialog__btn dialog__btn--confirm">保存</button>
+          <span class="dialog__divider"></span>
+          <button type="button" class="dialog__btn dialog__btn--weak">不保存</button>
+          <span class="dialog__divider"></span>
+          <button type="button" class="dialog__btn dialog__btn--dismiss">取消</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pv-section__title">状态对话框 Dialog_Status（图标在标题前方同行）</div>
+<div class="demo-stage">
+  <div class="demo-stage-label">status · success 图标 · 2 按钮 · default</div>
+  <div class="dialog dialog--status" role="dialog" aria-modal="true" aria-labelledby="d5-title" data-state="open">
+    <div class="dialog__card">
+      <div class="dialog__body">
+        <div class="dialog__header">
+          <span class="dialog__icon dialog__icon--success icon-gou" aria-hidden="true"></span>
+          <h3 class="dialog__title" id="d5-title">实名认证成功</h3>
+        </div>
+        <div class="dialog__content">您现在可以使用全部支付与提现功能。</div>
+      </div>
+      <div class="dialog__actions">
+        <div class="dialog__buttons dialog__buttons--dual">
+          <button type="button" class="dialog__btn dialog__btn--dismiss">关闭</button>
+          <span class="dialog__divider"></span>
+          <button type="button" class="dialog__btn dialog__btn--confirm">去体验</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="demo-stage">
+  <div class="demo-stage-label">status · danger 图标 · 2 按钮 · failure（失败反馈）</div>
+  <div class="dialog dialog--status" role="dialog" aria-modal="true" aria-labelledby="d5b-title" data-state="open">
+    <div class="dialog__card">
+      <div class="dialog__body">
+        <div class="dialog__header">
+          <span class="dialog__icon dialog__icon--danger icon-cha-cu" aria-hidden="true"></span>
+          <h3 class="dialog__title" id="d5b-title">实名认证失败</h3>
+        </div>
+        <div class="dialog__content">证件信息校验未通过，请核对姓名与身份证号后重试。</div>
+      </div>
+      <div class="dialog__actions">
+        <div class="dialog__buttons dialog__buttons--dual">
+          <button type="button" class="dialog__btn dialog__btn--dismiss">关闭</button>
+          <span class="dialog__divider"></span>
+          <button type="button" class="dialog__btn dialog__btn--confirm">重新认证</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="demo-stage">
+  <div class="demo-stage-label">status · warning 图标 · 1 按钮 · default（带状态告知）</div>
+  <div class="dialog dialog--status" role="dialog" aria-modal="true" aria-labelledby="d6-title" data-state="open">
+    <div class="dialog__card">
+      <div class="dialog__body">
+        <div class="dialog__header">
+          <span class="dialog__icon dialog__icon--warning icon-tanhao" aria-hidden="true"></span>
+          <h3 class="dialog__title" id="d6-title">余额不足</h3>
+        </div>
+        <div class="dialog__content">当前账户余额无法完成本次支付，请先充值。</div>
+      </div>
+      <div class="dialog__actions">
+        <div class="dialog__buttons">
+          <button type="button" class="dialog__btn dialog__btn--default">我知道了</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="demo-stage">
+  <div class="demo-stage-label">status · danger 图标 · 2 按钮 · danger（危险确认）</div>
+  <div class="dialog dialog--status" role="dialog" aria-modal="true" aria-labelledby="d7-title" data-state="open">
+    <div class="dialog__card">
+      <div class="dialog__body">
+        <div class="dialog__header">
+          <span class="dialog__icon dialog__icon--danger icon-tanhao" aria-hidden="true"></span>
+          <h3 class="dialog__title" id="d7-title">确认清空购物车？</h3>
+        </div>
+        <div class="dialog__content">将移除全部 3 件商品，操作不可撤销。</div>
+      </div>
+      <div class="dialog__actions">
+        <div class="dialog__buttons dialog__buttons--dual">
+          <button type="button" class="dialog__btn dialog__btn--dismiss">取消</button>
+          <span class="dialog__divider"></span>
+          <button type="button" class="dialog__btn dialog__btn--danger">清空</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pv-section__title">仅标题对话框 Dialog_Title</div>
+<div class="demo-stage">
+  <div class="demo-stage-label">title · 2 按钮 · default（仅标题确认）</div>
+  <div class="dialog dialog--title" role="dialog" aria-modal="true" aria-labelledby="d8-title" data-state="open">
+    <div class="dialog__card">
+      <div class="dialog__body">
+        <div class="dialog__header">
+          <h3 class="dialog__title" id="d8-title">退出登录？</h3>
+        </div>
+      </div>
+      <div class="dialog__actions">
+        <div class="dialog__buttons dialog__buttons--dual">
+          <button type="button" class="dialog__btn dialog__btn--dismiss">取消</button>
+          <span class="dialog__divider"></span>
+          <button type="button" class="dialog__btn dialog__btn--confirm">退出</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="demo-stage">
+  <div class="demo-stage-label">title · 1 按钮 · default</div>
+  <div class="dialog dialog--title" role="dialog" aria-modal="true" aria-labelledby="d9-title" data-state="open">
+    <div class="dialog__card">
+      <div class="dialog__body">
+        <div class="dialog__header">
+          <h3 class="dialog__title" id="d9-title">暂无权限访问</h3>
+        </div>
+      </div>
+      <div class="dialog__actions">
+        <div class="dialog__buttons">
+          <button type="button" class="dialog__btn dialog__btn--default">我知道了</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pv-section__title">输入对话框 Dialog_Input（通用单字段录入，使用已注册的 input 组件）</div>
+<div class="demo-stage">
+  <div class="demo-stage-label">input · 通用样式</div>
+  <div class="dialog dialog--input" role="dialog" aria-modal="true" aria-labelledby="d10-title" data-state="open">
+    <div class="dialog__card">
+      <div class="dialog__body">
+        <div class="dialog__header">
+          <h3 class="dialog__title" id="d10-title">输入内容</h3>
+        </div>
+        <div class="dialog__input">
+          <div class="input-group">
+            <div class="input-wrapper">
+              <input type="text" placeholder="请输入内容" aria-label="输入内容">
+              <button type="button" class="input-clear" aria-label="清空"><i class="icon-yuancha-mian" aria-hidden="true"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="dialog__actions">
+        <div class="dialog__buttons dialog__buttons--dual">
+          <button type="button" class="dialog__btn dialog__btn--dismiss">取消</button>
+          <span class="dialog__divider"></span>
+          <button type="button" class="dialog__btn dialog__btn--confirm">确定</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pv-section__title">扩展结构</div>
+<div class="demo-stage">
+  <div class="demo-stage-label">text · 带链接正文（双链接，复用 link 组件）</div>
+  <div class="dialog dialog--text" role="dialog" aria-modal="true" aria-labelledby="d12-title" data-state="open">
+    <div class="dialog__card">
+      <div class="dialog__body">
+        <div class="dialog__header">
+          <h3 class="dialog__title" id="d12-title">服务协议</h3>
+        </div>
+        <div class="dialog__content">继续使用即视为同意 <a href="javascript:void(0)" class="link link--inline" data-link>服务协议</a> 与 <a href="javascript:void(0)" class="link link--inline" data-link>隐私政策</a>。</div>
+      </div>
+      <div class="dialog__actions">
+        <div class="dialog__buttons dialog__buttons--dual">
+          <button type="button" class="dialog__btn dialog__btn--dismiss">不同意</button>
+          <span class="dialog__divider"></span>
+          <button type="button" class="dialog__btn dialog__btn--confirm">同意</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="demo-stage">
+  <div class="demo-stage-label">text · 带勾选项（"不再提示"，使用已注册的 checkbox 组件）</div>
+  <div class="dialog dialog--text" role="dialog" aria-modal="true" aria-labelledby="d13-title" data-state="open">
+    <div class="dialog__card">
+      <div class="dialog__body">
+        <div class="dialog__header">
+          <h3 class="dialog__title" id="d13-title">开启消息通知</h3>
+        </div>
+        <div class="dialog__content">开启后可及时接收订单与活动消息。</div>
+        <div class="dialog__check" data-check-toggle>
+          <label class="checkbox-field">
+            <span class="checkbox checkbox--sm checkbox--checked">
+              <span class="checkbox__inner"></span>
+              <span class="checkbox__icon">
+                <img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt="">
+              </span>
+            </span>
+            <span class="checkbox-field__text">不再提示</span>
+          </label>
+        </div>
+      </div>
+      <div class="dialog__actions">
+        <div class="dialog__buttons dialog__buttons--dual">
+          <button type="button" class="dialog__btn dialog__btn--dismiss">取消</button>
+          <span class="dialog__divider"></span>
+          <button type="button" class="dialog__btn dialog__btn--confirm">开启</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pv-section__title">交互演示</div>
+<p class="demo-hint">点击按钮触发真实浮层 dialog（同屏互斥，新 dialog 替换旧 dialog）。dialog 阻断式常驻，默认只能通过按钮关闭，不会自动消失。</p>
+<div class="demo-trigger-row">
+  <button type="button" class="demo-btn" data-trigger="confirm">标准确认</button>
+  <button type="button" class="demo-btn" data-trigger="danger">危险确认</button>
+  <button type="button" class="demo-btn" data-trigger="status-success">状态·成功</button>
+  <button type="button" class="demo-btn" data-trigger="status-danger">状态·危险</button>
+  <button type="button" class="demo-btn" data-trigger="title-only">仅标题</button>
+  <button type="button" class="demo-btn" data-trigger="input-create">输入·通用样式</button>
+  <button type="button" class="demo-btn" data-trigger="link-content">带链接正文</button>
+</div>
+<p class="demo-hint">点击按钮关闭；点击遮罩默认不关闭；点击链接默认不关闭；input 变体自动聚焦，回车触发主按钮。</p>
+
+<div id="dialog-host" role="region" aria-label="对话框浮层"></div>
+
+<script>
+(function() {
+  var host = document.getElementById('dialog-host');
+  var removeTimer = null;
+  var currentDialog = null;
+  var lastFocus = null;
+
+  var presets = {
+    'confirm': {
+      variant: 'text',
+      title: '确认提交订单？',
+      content: '提交后将进入待支付状态，请尽快完成支付。',
+      buttons: [
+        { label: '取消', tone: 'dismiss' },
+        { label: '确认', tone: 'confirm' }
+      ]
+    },
+    'danger': {
+      variant: 'text',
+      title: '确认删除该商品？',
+      content: '删除后无法恢复，相关数据将被清空。',
+      buttons: [
+        { label: '取消', tone: 'dismiss' },
+        { label: '删除', tone: 'danger' }
+      ]
+    },
+    'status-success': {
+      variant: 'status',
+      icon: 'success',
+      title: '实名认证成功',
+      content: '您现在可以使用全部支付与提现功能。',
+      buttons: [
+        { label: '关闭', tone: 'dismiss' },
+        { label: '去体验', tone: 'confirm' }
+      ]
+    },
+    'status-danger': {
+      variant: 'status',
+      icon: 'danger',
+      title: '实名认证失败',
+      content: '证件信息校验未通过，请核对姓名与身份证号后重试。',
+      buttons: [
+        { label: '关闭', tone: 'dismiss' },
+        { label: '重新认证', tone: 'confirm' }
+      ]
+    },
+    'title-only': {
+      variant: 'title',
+      title: '退出登录？',
+      content: null,
+      buttons: [
+        { label: '取消', tone: 'dismiss' },
+        { label: '退出', tone: 'confirm' }
+      ]
+    },
+    'input-create': {
+      variant: 'input',
+      title: '输入内容',
+      content: null,
+      inputPlaceholder: '请输入内容',
+      buttons: [
+        { label: '取消', tone: 'dismiss' },
+        { label: '确定', tone: 'confirm' }
+      ]
+    },
+    'link-content': {
+      variant: 'text',
+      title: '服务协议',
+      content: '继续使用即视为同意 <a href="javascript:void(0)" class="link link--inline" data-link>服务协议</a> 与 <a href="javascript:void(0)" class="link link--inline" data-link>隐私政策</a>。',
+      buttons: [
+        { label: '不同意', tone: 'dismiss' },
+        { label: '同意', tone: 'confirm' }
+      ]
+    }
+  };
+
+  function clearTimers() {
+    if (removeTimer) { clearTimeout(removeTimer); removeTimer = null; }
+  }
+
+  function removeCurrent() {
+    if (!currentDialog) return;
+    var old = currentDialog;
+    currentDialog = null;
+    old.setAttribute('data-state', 'closed');
+    var ref = old;
+    removeTimer = setTimeout(function() {
+      if (ref.parentNode) ref.parentNode.removeChild(ref);
+      if (lastFocus) { try { lastFocus.focus(); } catch(e){} lastFocus = null; }
+    }, 250);
+  }
+
+  function getIconClass(mode) {
+    if (mode === 'success') return 'icon-gou';
+    if (mode === 'warning') return 'icon-tanhao';
+    if (mode === 'danger') return 'icon-cha-cu';
+    return '';
+  }
+
+  function bindInputClear(wrapper) {
+    var input = wrapper.querySelector('input');
+    var clearBtn = wrapper.querySelector('.input-clear');
+    if (!input || !clearBtn) return;
+    function update() {
+      clearBtn.style.display = input.value ? 'inline-flex' : 'none';
+    }
+    input.addEventListener('input', update);
+    input.addEventListener('focus', update);
+    clearBtn.addEventListener('click', function() {
+      input.value = '';
+      input.focus();
+      update();
+    });
+    update();
+  }
+
+  function showDialog(preset) {
+    clearTimers();
+    removeCurrent();
+    lastFocus = document.activeElement;
+    var dialog = document.createElement('div');
+    dialog.className = 'dialog dialog--' + preset.variant;
+    dialog.setAttribute('role', 'dialog');
+    dialog.setAttribute('aria-modal', 'true');
+    dialog.setAttribute('data-state', 'closed');
+
+    var card = document.createElement('div');
+    card.className = 'dialog__card';
+
+    var body = document.createElement('div');
+    body.className = 'dialog__body';
+
+    var header = document.createElement('div');
+    header.className = 'dialog__header';
+    if (preset.variant === 'status' && preset.icon) {
+      var icon = document.createElement('span');
+      icon.className = 'dialog__icon dialog__icon--' + preset.icon + ' ' + getIconClass(preset.icon);
+      icon.setAttribute('aria-hidden', 'true');
+      header.appendChild(icon);
+    }
+    var title = document.createElement('h3');
+    title.className = 'dialog__title';
+    title.textContent = preset.title;
+    header.appendChild(title);
+    body.appendChild(header);
+
+    if (preset.content) {
+      var content = document.createElement('div');
+      content.className = 'dialog__content';
+      if (preset.content.indexOf('<') >= 0) {
+        content.innerHTML = preset.content;
+      } else {
+        content.textContent = preset.content;
+      }
+      body.appendChild(content);
+    }
+
+    if (preset.variant === 'input') {
+      var inputWrap = document.createElement('div');
+      inputWrap.className = 'dialog__input';
+      var group = document.createElement('div');
+      group.className = 'input-group';
+      var wrapper = document.createElement('div');
+      wrapper.className = 'input-wrapper';
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.placeholder = preset.inputPlaceholder || '';
+      input.setAttribute('aria-label', preset.title);
+      wrapper.appendChild(input);
+      var clearBtn = document.createElement('button');
+      clearBtn.type = 'button';
+      clearBtn.className = 'input-clear';
+      clearBtn.setAttribute('aria-label', '清空');
+      clearBtn.style.display = 'none';
+      var clearIcon = document.createElement('i');
+      clearIcon.className = 'icon-yuancha-mian';
+      clearIcon.setAttribute('aria-hidden', 'true');
+      clearBtn.appendChild(clearIcon);
+      wrapper.appendChild(clearBtn);
+      group.appendChild(wrapper);
+      inputWrap.appendChild(group);
+      body.appendChild(inputWrap);
+      bindInputClear(wrapper);
+    }
+
+    card.appendChild(body);
+
+    var actions = document.createElement('div');
+    actions.className = 'dialog__actions';
+    var buttonsWrap = document.createElement('div');
+    var buttonCount = preset.buttons.length;
+    var buttonsClass = 'dialog__buttons';
+    if (buttonCount === 2) buttonsClass += ' dialog__buttons--dual';
+    else if (buttonCount === 3) buttonsClass += ' dialog__buttons--triple';
+    buttonsWrap.className = buttonsClass;
+
+    preset.buttons.forEach(function(b, idx) {
+      if (idx > 0) {
+        var divider = document.createElement('span');
+        divider.className = 'dialog__divider';
+        buttonsWrap.appendChild(divider);
+      }
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      var toneClass = 'dialog__btn';
+      if (b.tone === 'danger') toneClass += ' dialog__btn--danger';
+      else if (b.tone === 'weak') toneClass += ' dialog__btn--weak';
+      else if (b.tone === 'dismiss') toneClass += ' dialog__btn--dismiss';
+      else if (b.tone === 'default' || (!b.tone && buttonCount === 1)) toneClass += ' dialog__btn--default';
+      else toneClass += ' dialog__btn--confirm';
+      btn.className = toneClass;
+      btn.textContent = b.label;
+      btn.addEventListener('click', function() { removeCurrent(); });
+      buttonsWrap.appendChild(btn);
+    });
+    actions.appendChild(buttonsWrap);
+    card.appendChild(actions);
+
+    dialog.appendChild(card);
+
+    dialog.addEventListener('click', function(e) {
+      // 链接默认不关闭
+      if (e.target.closest('[data-link]')) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    });
+
+    host.appendChild(dialog);
+    currentDialog = dialog;
+
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        dialog.setAttribute('data-state', 'open');
+        if (preset.variant === 'input') {
+          var inp = dialog.querySelector('input');
+          if (inp) { setTimeout(function(){ inp.focus(); }, 50); }
+          // 回车触发主按钮（第一个 confirm 或 danger 按钮）
+          inp.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              var btns = dialog.querySelectorAll('.dialog__btn');
+              for (var i = 0; i < btns.length; i++) {
+                if (btns[i].classList.contains('dialog__btn--confirm') || btns[i].classList.contains('dialog__btn--danger')) {
+                  btns[i].click();
+                  return;
+                }
+              }
+              if (btns.length > 0) btns[0].click();
+            }
+          });
+        }
+      });
+    });
+  }
+
+  document.querySelectorAll('[data-trigger]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var key = btn.getAttribute('data-trigger');
+      var preset = presets[key];
+      if (preset) showDialog(preset);
+    });
+  });
+
+  // 勾选项演示：点击切换 checkbox 选中态
+  document.querySelectorAll('[data-check-toggle]').forEach(function(check) {
+    check.addEventListener('click', function() {
+      var cb = check.querySelector('.checkbox');
+      if (cb) {
+        cb.classList.toggle('checkbox--checked');
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -116,6 +116,25 @@ a { color: var(--text-default); text-decoration: none; }
   margin-bottom: var(--spacer-12);
 }
 
+/* ── 演示舞台（统一白底） ── */
+.demo-stage {
+  position: relative;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-neutral-l2);
+  border-radius: var(--radius-8);
+  padding: var(--spacer-24) var(--spacer-12);
+  margin-bottom: var(--spacer-16);
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+.demo-stage--col {
+  flex-direction: column;
+  gap: var(--spacer-12);
+}
+
 /* ── UI Kit 手机 Showcase 外壳 ── */
 body.uikit-page {
   padding: 0;

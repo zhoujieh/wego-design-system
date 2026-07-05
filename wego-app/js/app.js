@@ -7,6 +7,7 @@
   var sceneLayer = document.querySelector('[data-scene-layer]');
   var overlayLayer = document.querySelector('[data-overlay-layer]');
   var toastHost = document.querySelector('[data-toast-host]');
+  var dialogHost = document.querySelector('[data-dialog-host]');
   var bottomNav = document.querySelector('[data-bottom-nav]');
   var validTabs = new Set(panels.map(function (panel) { return panel.dataset.hostTab; }));
   var routes = Array.isArray(window.WEGO_APP_ROUTES) ? window.WEGO_APP_ROUTES : [];
@@ -200,6 +201,7 @@
       openFullScreenModal: function (template, options) { openOverlay('full-screen-modal', template, options || {}); },
       closeOverlay: closeOverlay,
       toast: toast,
+      dialog: dialog,
       updateEntrySummary: updateEntrySummary
     };
   }
@@ -283,6 +285,7 @@
         root: panel,
         close: closeOverlay,
         toast: toast,
+        dialog: dialog,
         updateEntrySummary: updateEntrySummary,
         navigate: navigate
       });
@@ -471,6 +474,220 @@
     var duration = typeof opts.duration === 'number' ? opts.duration
       : (isGuide ? TOAST_GUIDE_DURATION : TOAST_DEFAULT_DURATION);
     toastLeaveTimer = setTimeout(function () { removeCurrentToast(); }, duration);
+  }
+
+  // ── Dialog API ──
+  // 入参形态：
+  //   dialog({ variant, title, content, icon, inputPlaceholder, buttons, onClose })
+  //     - variant: 'text' | 'status' | 'title' | 'input'，默认 'text'
+  //     - title:   必选，标题文案
+  //     - content: 可选，正文文案（可含 HTML，如 <a class="link link--inline">）
+  //     - icon:    仅 status 生效，'success' | 'warning' | 'danger'
+  //     - inputPlaceholder: 仅 input 生效
+  //     - buttons: [{ label, tone:'default'|'danger'|'weak', onClick? }]，1-3 个
+  //     - onClose: 关闭后回调，可选
+  var DIALOG_REMOVE_DELAY = 250;
+  var currentDialog = null;
+  var dialogRemoveTimer = 0;
+  var dialogLastFocus = null;
+
+  function clearDialogTimer() {
+    if (dialogRemoveTimer) { clearTimeout(dialogRemoveTimer); dialogRemoveTimer = 0; }
+  }
+
+  function removeCurrentDialog() {
+    if (!currentDialog) return;
+    var old = currentDialog;
+    currentDialog = null;
+    old.setAttribute('data-state', 'closed');
+    var ref = old;
+    var onClose = ref._onClose;
+    dialogRemoveTimer = setTimeout(function () {
+      if (ref.parentNode) ref.parentNode.removeChild(ref);
+      if (dialogLastFocus) { try { dialogLastFocus.focus(); } catch (e) {} dialogLastFocus = null; }
+      if (typeof onClose === 'function') { try { onClose(); } catch (e) {} }
+    }, DIALOG_REMOVE_DELAY);
+  }
+
+  function getDialogIconClass(mode) {
+    if (mode === 'success') return 'icon-gou';
+    if (mode === 'warning' || mode === 'danger') return 'icon-tanhao';
+    return '';
+  }
+
+  function bindDialogInputClear(wrapper) {
+    var input = wrapper.querySelector('input');
+    var clearBtn = wrapper.querySelector('.input-clear');
+    if (!input || !clearBtn) return;
+    function update() {
+      clearBtn.style.display = input.value ? 'inline-flex' : 'none';
+    }
+    input.addEventListener('input', update);
+    input.addEventListener('focus', update);
+    clearBtn.addEventListener('click', function () {
+      input.value = '';
+      input.focus();
+      update();
+    });
+    update();
+  }
+
+  function dialog(options) {
+    if (!options || !options.title || !dialogHost) return;
+    var variant = options.variant === 'status' || options.variant === 'title' || options.variant === 'input'
+      ? options.variant : 'text';
+    var buttons = Array.isArray(options.buttons) ? options.buttons.slice(0, 3) : [];
+    if (buttons.length === 0) buttons = [{ label: '知道了', tone: 'default' }];
+
+    // 同屏互斥：新 dialog 出现前同步移除当前与离场中的旧 dialog
+    clearDialogTimer();
+    if (currentDialog) {
+      currentDialog.remove();
+      currentDialog = null;
+    }
+
+    dialogLastFocus = document.activeElement;
+
+    var dlg = document.createElement('div');
+    dlg.className = 'dialog dialog--' + variant;
+    dlg.setAttribute('role', 'dialog');
+    dlg.setAttribute('aria-modal', 'true');
+    dlg.setAttribute('data-state', 'closed');
+    dlg._onClose = options.onClose;
+
+    var card = document.createElement('div');
+    card.className = 'dialog__card';
+
+    // body：信息区包装层
+    var body = document.createElement('div');
+    body.className = 'dialog__body';
+
+    // header
+    var header = document.createElement('div');
+    header.className = 'dialog__header';
+    if (variant === 'status' && options.icon) {
+      var icon = document.createElement('span');
+      icon.className = 'dialog__icon dialog__icon--' + options.icon + ' ' + getDialogIconClass(options.icon);
+      icon.setAttribute('aria-hidden', 'true');
+      header.appendChild(icon);
+    }
+    var title = document.createElement('h3');
+    title.className = 'dialog__title';
+    title.textContent = options.title;
+    header.appendChild(title);
+    body.appendChild(header);
+
+    // content（可选，支持 HTML）
+    if (options.content) {
+      var content = document.createElement('div');
+      content.className = 'dialog__content';
+      if (typeof options.content === 'string' && options.content.indexOf('<') >= 0) {
+        content.innerHTML = options.content;
+      } else {
+        content.textContent = options.content;
+      }
+      body.appendChild(content);
+    }
+
+    // input 变体
+    if (variant === 'input') {
+      var inputWrap = document.createElement('div');
+      inputWrap.className = 'dialog__input';
+      var wrapper = document.createElement('div');
+      wrapper.className = 'input-wrapper';
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.placeholder = options.inputPlaceholder || '';
+      input.setAttribute('aria-label', options.title);
+      wrapper.appendChild(input);
+      var clearBtn = document.createElement('button');
+      clearBtn.type = 'button';
+      clearBtn.className = 'input-clear';
+      clearBtn.setAttribute('aria-label', '清空');
+      clearBtn.style.display = 'none';
+      var clearIcon = document.createElement('i');
+      clearIcon.className = 'icon-yuancha-mian';
+      clearIcon.setAttribute('aria-hidden', 'true');
+      clearBtn.appendChild(clearIcon);
+      wrapper.appendChild(clearBtn);
+      inputWrap.appendChild(wrapper);
+      body.appendChild(inputWrap);
+      bindDialogInputClear(wrapper);
+    }
+
+    card.appendChild(body);
+
+    // actions
+    var actions = document.createElement('div');
+    actions.className = 'dialog__actions';
+    var buttonsWrap = document.createElement('div');
+    var buttonCount = buttons.length;
+    var buttonsClass = 'dialog__buttons';
+    if (buttonCount === 2) buttonsClass += ' dialog__buttons--dual';
+    else if (buttonCount === 3) buttonsClass += ' dialog__buttons--triple';
+    buttonsWrap.className = buttonsClass;
+
+    buttons.forEach(function (b, idx) {
+      if (idx > 0) {
+        var divider = document.createElement('span');
+        divider.className = 'dialog__divider';
+        buttonsWrap.appendChild(divider);
+      }
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      var toneClass = 'dialog__btn';
+      if (b.tone === 'danger') toneClass += ' dialog__btn--danger';
+      else if (b.tone === 'weak') toneClass += ' dialog__btn--weak';
+      else toneClass += ' dialog__btn--confirm';
+      btn.className = toneClass;
+      btn.textContent = b.label;
+      btn.addEventListener('click', function () {
+        if (typeof b.onClick === 'function') {
+          try { b.onClick({ close: removeCurrentDialog }); } catch (e) {}
+        }
+        removeCurrentDialog();
+      });
+      buttonsWrap.appendChild(btn);
+    });
+    actions.appendChild(buttonsWrap);
+    card.appendChild(actions);
+
+    dlg.appendChild(card);
+
+    // 点击 overlay 空白处关闭（e.target === dlg 表示点中遮罩区域）
+    dlg.addEventListener('click', function (e) {
+      if (e.target === dlg) {
+        removeCurrentDialog();
+        return;
+      }
+      // 链接默认不关闭
+      if (e.target.closest && e.target.closest('[data-link]')) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    });
+
+    dialogHost.appendChild(dlg);
+    currentDialog = dlg;
+
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        dlg.setAttribute('data-state', 'open');
+        if (variant === 'input') {
+          var inp = dlg.querySelector('input');
+          if (inp) {
+            setTimeout(function () { inp.focus(); }, 50);
+            inp.addEventListener('keydown', function (e) {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                var btns = dlg.querySelectorAll('.dialog__btn');
+                if (btns.length > 0) btns[btns.length - 1].click();
+              }
+            });
+          }
+        }
+      });
+    });
   }
 
   function updateEntrySummary(routeId, summary) {

@@ -139,6 +139,13 @@
       "category": "feedback",
       "status": "stable",
       "preview": "preview/component-toast.html"
+    },
+    {
+      "slug": "dialog",
+      "name": "对话框",
+      "category": "feedback",
+      "status": "stable",
+      "preview": "preview/component-dialog.html"
     }
   ],
   "componentContractSchemaVersion": 3

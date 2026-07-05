@@ -398,6 +398,233 @@
 .counter.is-error .counter__error { display: block; }
 .counter.is-disabled .counter__body { opacity: 0.5; pointer-events: none; }
 
+/* ── Dialog ────────────────────────────────────────────────── */
+/* @anatomy
+   <div class="pv-header"><h1>对话框 Dialog</h1><p>居中模态确认弹窗：text（标题+正文+按钮）、status（状态图标+标题+正文+按钮）、title（仅标题+按钮）、input（标题+输入框+按钮）四种变体。阻断式常驻，用户必须操作后才消失。蒙层默认 30%。input 变体必须使用已注册的 input 组件，勾选项必须使用已注册的 checkbox 组件。</p></div>
+*/
+.dialog{
+  --dialog-width: 300px;
+  --dialog-enter-scale: 0.9;
+  box-sizing:border-box;
+  position:fixed;
+  inset:0;
+  z-index:var(--z-modal);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--bg-mask-light);
+  font-family:var(--font-family-system);
+  pointer-events:auto;
+  opacity:1;
+  transition:opacity var(--duration-normal) var(--ease-standard);
+}
+
+.dialog[data-state="closed"]{
+  opacity:0;
+  pointer-events:none;
+}
+
+.dialog[data-state="closed"] .dialog__card{
+  transform:scale(var(--dialog-enter-scale));
+}
+
+.dialog__card{
+  position:relative;
+  z-index:2;
+  width:var(--dialog-width);
+  background:var(--bg-surface);
+  border-radius:var(--radius-12);
+  box-shadow:var(--shadow-xl);
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  overflow:hidden;
+  transform:scale(1);
+  transition:transform var(--duration-normal) var(--ease-enter);
+}
+
+.dialog__body{
+  width:100%;
+  box-sizing:border-box;
+  padding:var(--spacer-24) var(--spacer-20);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:var(--spacer-12);
+}
+
+.dialog--title .dialog__body{
+  padding:var(--spacer-32) var(--spacer-20);
+}
+
+.dialog__body > .dialog__header,
+.dialog__body > .dialog__content,
+.dialog__body > .dialog__input,
+.dialog__body > .dialog__custom,
+.dialog__body > .dialog__check{
+  width:100%;
+  margin-bottom:0;
+}
+
+.dialog__header{
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  gap:var(--spacer-8);
+}
+
+.dialog--status .dialog__header{
+  justify-content:center;
+}
+
+.dialog__icon{
+  font-family:var(--font-family-icon);
+  font-size:var(--size-24);
+  line-height:1;
+  flex-shrink:0;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.dialog__icon--success{ color:var(--status-success-default); }
+.dialog__icon--warning{ color:var(--status-warning-default); }
+.dialog__icon--danger{ color:var(--status-danger-default); }
+
+.dialog__title{
+  font-size:var(--heading-sm-font-size);
+  font-weight:var(--font-weight-medium);
+  color:var(--text-default);
+  text-align:center;
+  margin:0;
+  line-height:1.4;
+}
+
+.dialog__content{
+  width:100%;
+  font-size:var(--body-lg-font-size);
+  color:var(--text-default);
+  text-align:center;
+  line-height:1.5;
+}
+
+.dialog__content .link--inline{
+  margin:0 var(--spacer-4);
+}
+
+.dialog__input{
+  width:100%;
+}
+
+.dialog__input .input-group{
+  max-width:none;
+}
+
+.dialog__input .field-label{
+  display:none;
+}
+
+.dialog__custom{
+  width:100%;
+}
+
+.dialog__check{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.dialog__actions{
+  width:100%;
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  justify-content:center;
+  box-shadow:inset 0 0.5px 0 0 var(--border-neutral-l2);
+}
+
+.dialog__buttons{
+  width:100%;
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  justify-content:center;
+}
+
+.dialog__buttons--dual{
+  width:100%;
+}
+
+.dialog__buttons--dual > .dialog__btn{
+  flex:1 1 0;
+  min-width:0;
+}
+
+.dialog__buttons--dual > .dialog__divider,
+.dialog__buttons--triple > .dialog__divider{
+  flex-shrink:0;
+}
+
+.dialog__buttons--dual > .dialog__divider{
+  height:48px;
+}
+
+.dialog__buttons--triple{
+  flex-direction:column;
+}
+
+.dialog__buttons--triple > .dialog__btn,
+.dialog__buttons--triple > .dialog__divider{
+  width:100%;
+}
+
+.dialog__buttons--triple > .dialog__divider{
+  height:0.5px;
+}
+
+.dialog__btn{
+  height:48px;
+  border:none;
+  background:transparent;
+  font-family:var(--font-family-system);
+  font-size:var(--body-lg-font-size);
+  font-weight:var(--font-weight-medium);
+  text-align:center;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  padding:0;
+  transition:background-color var(--duration-fast) var(--ease-standard);
+}
+
+.dialog__buttons:not(.dialog__buttons--dual):not(.dialog__buttons--triple) > .dialog__btn{
+  width:100%;
+}
+
+.dialog__btn:hover{ background:var(--bg-state-hover); }
+.dialog__btn:active{ background:var(--bg-state-pressed); }
+
+.dialog__btn--default{ color:var(--text-default); }
+.dialog__btn--dismiss{ color:var(--text-default); }
+.dialog__btn--confirm{ color:var(--text-link); }
+.dialog__btn--danger{ color:var(--status-danger-default); }
+.dialog__btn--weak{ color:var(--text-tertiary); }
+
+.dialog__btn:focus-visible{
+  outline:var(--stroke-strong) solid var(--border-brand);
+  outline-offset:calc(-1 * var(--spacer-2));
+}
+
+.dialog__divider{
+  width:0.5px;
+  height:48px;
+  background:var(--border-neutral-l2);
+  flex-shrink:0;
+}
+
 /* ── Form ──────────────────────────────────────────────────── */
 /* @anatomy
    <div class="form-group"> <div class="form-group__title">通栏分组</div> <div class="form-group__content"> <div class="form-body"> <div class="form-body__label">字段名称</div> <div class="form-body__action"><input type="text" placeholder="沿用通栏白底"></div> </div> <div class="form-body"> <div class="form-body__label">说明</div> <div class="form-body__action"><span class="form-body__value form-body__value--seco...
@@ -584,11 +811,13 @@
 */
 .input-group { position: relative; display: flex; flex-direction: column; gap: var(--spacer-8); width: 100%; max-width: 320px; flex-shrink: 0; }
 .input-group .field-label { display: block; font-size: var(--body-md-font-size); font-weight: var(--font-weight-medium); color: var(--text-default); line-height: var(--body-md-line-height); white-space: nowrap; }
-.input-group input, .input-group textarea { width: 100%; box-sizing: border-box; border: 1px solid var(--border-neutral-l2); border-radius: var(--radius-6); background: var(--bg-surface); color: var(--text-default); font-size: var(--body-md-font-size); font-family: var(--body-md-font-family); line-height: var(--body-md-line-height); padding: 0 12px; outline: none; transition: border-color var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard); font-feature-settings: "zero"; }
+.input-group input, .input-group textarea { width: 100%; box-sizing: border-box; border: 0.5px solid var(--border-neutral-l2); border-radius: var(--radius-6); background: var(--bg-subtle); color: var(--text-default); font-size: var(--body-md-font-size); font-family: var(--body-md-font-family); line-height: var(--body-md-line-height); padding: 0 12px; outline: none; transition: border-color var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard); font-feature-settings: "zero"; }
 .input-group input { height: 36px; }
 .input-group textarea { min-height: 96px; resize: vertical; padding: 8px 12px; }
 .input-group input::placeholder, .input-group textarea::placeholder { color: var(--text-placeholder); }
 .input-group input:focus, .input-group textarea:focus { border-color: var(--border-neutral-l2); }
+.input-group--surface-white input,
+.input-group--surface-white textarea { background: var(--bg-surface); }
 .input-group.is-error input, .input-group.is-error textarea { border-color: var(--status-danger-default); color: var(--status-danger-default); }
 .input-group.is-disabled input, .input-group.is-disabled textarea { background: var(--bg-muted); border-color: var(--border-disabled); color: var(--text-disabled); cursor: not-allowed; }
 .input-group.is-disabled input::placeholder, .input-group.is-disabled textarea::placeholder { color: var(--text-disabled); }
@@ -608,12 +837,14 @@
 .input-group.is-error .field-error { display: block; }
 
 /* ── Number Input (数字输入框) ──────────────────────────────── */
-.number-input { display: flex; align-items: center; gap: var(--spacer-8); width: 120px; min-width: 96px; max-width: 128px; min-height: var(--size-32); padding: 6px var(--spacer-8); background: var(--bg-subtle); border: 1px solid var(--border-neutral-l2); border-radius: var(--radius-6); box-sizing: border-box; transition: border-color var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard); }
+.number-input { display: flex; align-items: center; gap: var(--spacer-8); width: 120px; min-width: 96px; max-width: 128px; min-height: var(--size-32); padding: 6px var(--spacer-8); background: var(--bg-subtle); border: 0.5px solid var(--border-neutral-l2); border-radius: var(--radius-6); box-sizing: border-box; transition: border-color var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard); }
+.number-input--surface-white { background: var(--bg-surface); }
 .number-input__field { flex: 1 1 0; min-width: 0; border: none; outline: none; background: transparent; text-align: center; font-family: var(--number-md-font-family); font-size: var(--body-lg-font-size); font-weight: var(--font-weight-medium); color: var(--text-default); line-height: 20px; padding: 0; font-feature-settings: "zero"; }
 .number-input__field::placeholder { color: var(--text-disabled); font-size: var(--body-md-font-size); font-weight: var(--font-weight-regular); }
 .number-input__suffix { flex-shrink: 0; font-size: var(--body-md-font-size); font-weight: var(--font-weight-regular); color: var(--text-secondary); text-align: right; white-space: nowrap; font-feature-settings: "zero"; }
 /* Focus */
 .number-input.is-focus { border-color: var(--border-neutral-l2); background: var(--bg-subtle); }
+.number-input--surface-white.is-focus { background: var(--bg-surface); }
 /* Error */
 .number-input.is-error { background: var(--status-danger-surface-l1); border-color: var(--border-danger); }
 .number-input.is-error .number-input__field,

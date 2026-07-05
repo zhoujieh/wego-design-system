@@ -458,6 +458,19 @@ button, [role="button"], [role="radio"], [role="checkbox"],
   position: absolute;
 }
 
+.app-dialog-host {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: var(--z-modal);
+}
+
+/* phone-frame 预览中 dialog 相对宿主定位而非视口 */
+.app-dialog-host .dialog {
+  position: absolute;
+  pointer-events: auto;
+}
+
 @keyframes wego-scene-enter {
   from {
     transform: translateX(100%);

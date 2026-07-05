@@ -8,21 +8,6 @@
 <link rel="stylesheet" href="../scaffold.css">
 <link rel="stylesheet" href="../iconfont.css">
 <style>
-.demo-stage {
-  position: relative;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-neutral-l2);
-  border-radius: var(--radius-8);
-  padding: var(--spacer-24) var(--spacer-12);
-  margin-bottom: var(--spacer-16);
-  min-height: 80px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: var(--spacer-12);
-  box-sizing: border-box;
-}
 .demo-stage .toast {
   position: relative;
   left: auto;
@@ -193,7 +178,7 @@
 <div class="pv-header"><h1>提示 Toast</h1><p>瞬时浮层提示：默认（居中纯文本）与引导（可选图标 + 必选文案 + 可选操作）两种变体。同屏互斥，单次展示一个。</p></div>
 
 <div class="pv-section__title">默认 Toast</div>
-<div class="demo-stage">
+<div class="demo-stage demo-stage--col">
   <div class="demo-stage-label">默认 · 纯文本居中</div>
   <div class="toast toast--default">
     <span class="toast__text">已成功加入购物车</span>
@@ -201,7 +186,7 @@
 </div>
 
 <div class="pv-section__title">引导 Toast · 文案 + 操作</div>
-<div class="demo-stage">
+<div class="demo-stage demo-stage--col">
   <div class="demo-stage-label">引导 · 无图标 · WEAK 操作（带右箭头）</div>
   <div class="toast toast--guide">
     <span class="toast__text">新客专享优惠券已到账</span>
@@ -218,7 +203,7 @@
 </div>
 
 <div class="pv-section__title">引导 Toast · 图标 + 文案 + 操作</div>
-<div class="demo-stage">
+<div class="demo-stage demo-stage--col">
   <div class="demo-stage-label">引导 · 购物图标 · STRONG 操作</div>
   <div class="toast toast--guide">
     <span class="toast__icon icon-goutoast"></span>

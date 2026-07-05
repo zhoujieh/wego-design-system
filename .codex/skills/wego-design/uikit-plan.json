@@ -152,6 +152,14 @@
       "previewFile": "preview/component-stack.html",
       "priority": 17,
       "slot": "option-stack"
+    },
+    {
+      "slug": "dialog",
+      "reason": "居中模态确认弹窗，用于确认操作、风险提示、重要信息告知和快速单行输入新建。",
+      "evidenceFile": "components/dialog.json",
+      "previewFile": "preview/component-dialog.html",
+      "priority": 18,
+      "slot": "confirmation-overlay"
     }
   ],
   "allowedComponents": [
@@ -172,7 +180,8 @@
     "stack",
     "switch",
     "navbar",
-    "toast"
+    "toast",
+    "dialog"
   ],
   "screenBlueprints": [
     {

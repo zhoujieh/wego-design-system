@@ -19,6 +19,10 @@
       "textarea",
       "number"
     ],
+    "surface": [
+      "default",
+      "white"
+    ],
     "state": [
       "default",
       "focus",
@@ -29,23 +33,33 @@
   "representativeVariants": [
     {
       "fieldType": "text",
+      "surface": "default",
       "state": "default"
     },
     {
       "fieldType": "text",
+      "surface": "default",
       "state": "focus"
     },
     {
       "fieldType": "textarea",
+      "surface": "default",
       "state": "error"
     },
     {
       "fieldType": "number",
+      "surface": "default",
       "state": "focus"
     },
     {
       "fieldType": "text",
+      "surface": "default",
       "state": "disabled"
+    },
+    {
+      "fieldType": "text",
+      "surface": "white",
+      "state": "default"
     }
   ],
   "anatomy": [
@@ -67,7 +81,7 @@
     {
       "name": "control",
       "selector": "input | textarea",
-      "role": "输入控件"
+      "role": "输入控件，默认浅灰底 var(--bg-subtle)，使用 0.5px 边框 var(--border-neutral-l2)；可通过根节点白底修饰类切到 var(--bg-surface)"
     },
     {
       "name": "clear",
@@ -82,7 +96,7 @@
     {
       "name": "numberRoot",
       "selector": ".number-input",
-      "role": "金额/数量类紧凑数字输入容器"
+      "role": "金额/数量类紧凑数字输入容器，默认浅灰底 var(--bg-subtle)，使用 0.5px 边框 var(--border-neutral-l2)；可通过白底修饰类切到 var(--bg-surface)"
     },
     {
       "name": "numberField",
@@ -100,6 +114,8 @@
     "text 和 textarea 共享边框与状态体系，不分裂成不同组件。",
     "text、textarea 和 number 三类输入都复用同一套 default/focus/error/disabled 状态命名。",
     "错误和禁用通过根节点状态类驱动。",
+    "默认表面使用浅灰底 var(--bg-subtle)；需要贴白色表面时，通过 .input-group--surface-white 或 .number-input--surface-white 切换到底白 var(--bg-surface)。",
+    "文本输入、多行输入和数字输入统一使用 0.5px 边框，颜色为 var(--border-neutral-l2)。",
     "标准文本输入框（input[type=text]）支持清除按钮，通过 .input-wrapper 包裹 input 和 .input-clear 实现。",
     "清除按钮仅标准文本输入框显示，数字输入框和多行文本输入框不显示清除按钮。",
     "禁用态不显示清除按钮，错误态清除图标变为红色。",
@@ -107,7 +123,7 @@
     "数字输入使用 .number-input 作为根节点，内部保持输入值居中、后缀右侧固定。"
   ],
   "behavior": {
-    "focus": "聚焦时保持默认灰色边框，不额外使用品牌绿高亮；数字输入也保持默认描边与底色。",
+    "focus": "聚焦时保持默认灰色边框，不额外使用品牌绿高亮；数字输入也保持当前表面底色（默认灰底，白底变体保持白底）。",
     "error": "错误态同时作用于边框、输入文字、后缀和清除图标颜色，并在输入框下方显示绝对定位的单一消息槽位；长文案单行省略，输入值重新满足校验条件后自动移除错误态并恢复默认显示。",
     "disabled": "禁用态弱化标签与输入区，阻止交互，隐藏清除按钮；数字输入不使用整体透明度，而是单独弱化底色、描边和文字。",
     "clear": "标准文本输入框有内容时显示清除按钮（icon-yuancha-mian，16px，默认占位文字色），点击后清空内容并聚焦。数字输入框和 textarea 不显示清除按钮。",
@@ -120,6 +136,7 @@
   },
   "usageHints": [
     "适合单字段独立陈列，不替代表单容器型 form。",
+    "默认优先使用灰底输入表面；只有当宿主本身已经是浅灰/卡片内嵌层、需要把输入区抬成独立白块时，才使用白底修饰类。",
     "金额、价格、库存这类短数字录入可优先使用 .number-input + .number-input__suffix。",
     "需要多字段对齐、上传、选择等复合场景时优先使用 form。"
   ],
@@ -167,9 +184,12 @@
     "textareaMinHeight": "96px",
     "numberInputWidth": "120px",
     "numberInputMinHeight": "32px",
+    "defaultSurface": "var(--bg-subtle)",
+    "whiteSurface": "var(--bg-surface)",
     "clearHitTarget": "32px",
     "gap": "var(--spacer-8)",
     "radius": "var(--radius-6)",
+    "borderWidth": "0.5px",
     "transition": "border-color var(--duration-fast) var(--ease-standard)",
     "errorOffset": "var(--spacer-4)"
   },
@@ -188,6 +208,10 @@
       ".is-error",
       ".is-disabled",
       ".is-focus"
+    ],
+    "modifiers": [
+      ".input-group--surface-white",
+      ".number-input--surface-white"
     ]
   },
   "provenance": {

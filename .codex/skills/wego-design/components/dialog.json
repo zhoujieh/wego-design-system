@@ -1,0 +1,363 @@
+{
+  "schemaVersion": 3,
+  "slug": "dialog",
+  "name": "对话框",
+  "category": "feedback",
+  "status": "stable",
+  "sourceKind": "inferred",
+  "confidence": "high",
+  "description": "居中模态确认弹窗，用于确认关键操作、提示重要信息、展示带链接的说明文本或快速单行输入新建。模态阻塞式常驻，用户必须通过按钮操作后才会消失，不自动关闭；与 toast（瞬时非阻塞）互补。",
+  "semanticTypeCandidates": [
+    "confirm-dialog",
+    "status-dialog",
+    "alert-dialog",
+    "prompt-dialog"
+  ],
+  "variantDimensions": {
+    "variant": [
+      "text",
+      "status",
+      "title",
+      "input"
+    ],
+    "buttonCount": [
+      "1",
+      "2",
+      "3"
+    ],
+    "buttonTone": [
+      "default",
+      "dismiss",
+      "confirm",
+      "danger",
+      "weak"
+    ],
+    "maskDepth": [
+      "30",
+      "60",
+      "80"
+    ],
+    "state": [
+      "open",
+      "closed"
+    ]
+  },
+  "representativeVariants": [
+    {
+      "variant": "text",
+      "buttonCount": "2",
+      "buttonTone": "confirm"
+    },
+    {
+      "variant": "text",
+      "buttonCount": "2",
+      "buttonTone": "danger"
+    },
+    {
+      "variant": "text",
+      "buttonCount": "1",
+      "buttonTone": "default"
+    },
+    {
+      "variant": "status",
+      "buttonCount": "2",
+      "buttonTone": "confirm"
+    },
+    {
+      "variant": "status",
+      "buttonCount": "1",
+      "buttonTone": "default"
+    },
+    {
+      "variant": "status",
+      "buttonCount": "2",
+      "buttonTone": "danger"
+    },
+    {
+      "variant": "title",
+      "buttonCount": "2",
+      "buttonTone": "confirm"
+    },
+    {
+      "variant": "text",
+      "buttonCount": "3",
+      "buttonTone": "weak"
+    },
+    {
+      "variant": "input",
+      "buttonCount": "2",
+      "buttonTone": "confirm"
+    },
+    {
+      "variant": "input",
+      "buttonCount": "1",
+      "buttonTone": "default"
+    }
+  ],
+  "anatomy": [
+    {
+      "name": "root",
+      "selector": ".dialog",
+      "role": "浮层容器，自身承担半透明遮罩（var(--bg-mask-light)），承载居中卡、定位与动画"
+    },
+    {
+      "name": "card",
+      "selector": ".dialog__card",
+      "role": "居中卡片容器，宽度 300px，圆角 12px，溢出隐藏，承载所有可见内容"
+    },
+    {
+      "name": "body",
+      "selector": ".dialog__body",
+      "role": "信息区包装层，承载 header/content/input/custom/check，控制 24px 20px 内边距与 12px 垂直间距"
+    },
+    {
+      "name": "header",
+      "selector": ".dialog__header",
+      "role": "头部区，横向布局，含状态图标（可选）+ 标题"
+    },
+    {
+      "name": "icon",
+      "selector": ".dialog__icon",
+      "role": "状态图标（仅 status 变体），位于标题前方同行，success/warning/danger 三色"
+    },
+    {
+      "name": "title",
+      "selector": ".dialog__title",
+      "role": "标题文本，18px / Medium(500)，颜色 text-default，居中"
+    },
+    {
+      "name": "content",
+      "selector": ".dialog__content",
+      "role": "正文区（可选），16px / Regular(400)，颜色 text-default，line-height 1.5，居中，支持富文本与内联链接"
+    },
+    {
+      "name": "link",
+      "selector": ".link.link--inline",
+      "role": "正文内可点击链接，复用 link 组件 inline 变体，至多 2 处，蓝色文字；与相邻正文保持 4px 间距"
+    },
+    {
+      "name": "input",
+      "selector": ".dialog__input",
+      "role": "单行输入框（仅 input 变体），必须使用已注册的 input 组件完整根结构（.input-group > .input-wrapper > input + .input-clear），默认沿用 input 组件灰底表面；需要白底时显式添加白底修饰类"
+    },
+    {
+      "name": "custom",
+      "selector": ".dialog__custom",
+      "role": "自定义区域（可选 slot），位于正文下方，保持开放，不定义占位样式"
+    },
+    {
+      "name": "check",
+      "selector": ".dialog__check",
+      "role": "勾选项（可选，'不再提示'场景），必须使用已注册的 checkbox 组件 .checkbox--sm（20px，带文本场景标准用法）"
+    },
+    {
+      "name": "actions",
+      "selector": ".dialog__actions",
+      "role": "操作区外层，承载 .dialog__buttons，顶部有 0.5px 分隔线"
+    },
+    {
+      "name": "buttons",
+      "selector": ".dialog__buttons",
+      "role": "按钮容器，通过 --dual/--triple 控制横向双按钮或纵向三按钮布局"
+    },
+    {
+      "name": "btn",
+      "selector": ".dialog__btn",
+      "role": "单个按钮，高度 48px，16px / Medium，文字默认居中对齐；文字颜色由语义修饰类控制：--default（text-default，单按钮通用默认态）、--dismiss（text-default）、--confirm（text-link 蓝色）、--danger（红色）、--weak（text-tertiary）。同一 dialog 只能有一个主按钮（confirm 或 danger），其余按钮须使用 default、dismiss 或 weak。"
+    },
+    {
+      "name": "divider",
+      "selector": ".dialog__divider",
+      "role": "按钮间分隔线，0.5px，颜色 border-neutral-l2；在 --dual 容器下为竖线，在 --triple 容器下为横线；分隔线仅作为视觉元素，不占用按钮的 flex 空间"
+    }
+  ],
+  "structurePatterns": [
+    "根节点 .dialog 是 overlay 定位容器，自身承担半透明遮罩背景 var(--bg-mask-light)，position:fixed; inset:0；不再使用独立 .dialog__mask 子节点。",
+    ".dialog__card 内部从上到下：.dialog__body（含 header + content + input + custom + check）→ .dialog__actions（含 .dialog__buttons）。",
+    ".dialog__body 使用 flex column gap 12px 控制信息区内部间距，不再依赖各子元素 margin-bottom；内边距为 24px 20px。",
+    ".dialog__actions 与信息区之间通过 box-shadow: inset 0 0.5px 0 0 var(--border-neutral-l2) 形成顶部分隔线。",
+    ".dialog__actions 内部必须包含 .dialog__buttons；按钮和分隔线放在该容器内。",
+    "单按钮时 .dialog__buttons 不带修饰类，按钮通栏居中；双按钮用 .dialog__buttons--dual 横向等分，分隔线仅作为视觉元素不占用 flex 空间，竖向分隔线高度固定 48px，与按钮等高；三按钮用 .dialog__buttons--triple 纵向通栏。",
+    "同一 dialog 只能有一个主按钮（confirm 或 danger），其余按钮须使用 default、dismiss 或 weak；禁止同时出现两个 confirm 或两个 danger 按钮。",
+    "按钮文字默认居中对齐。",
+    "title 变体（仅标题）的 .dialog__body 上下内边距为 32px（左右保持 20px），以强化标题的呼吸感。",
+    "input 变体的 .dialog__input 复用 input 组件的 .input-group > .input-wrapper > input[type=text] + .input-clear 完整结构，不再在 dialog 内部重写 input 样式；dialog 只通过 .dialog__input 控制宽度，并隐藏 .field-label。",    
+    ".dialog__header 采用横向布局（flex-direction: row），状态图标 .dialog__icon 与标题 .dialog__title 在同一行水平排列，图标在标题前方；无图标时标题独占一行居中。",
+    "状态图标尺寸 24px，与标题文字垂直居中对齐，图标与标题间距 8px。",
+    "状态机通过 data-state='open'/'closed' 属性切换，不再使用 is-visible/is-leaving 类。",
+    "正文链接通过 .link.link--inline 标记（复用 link 组件 inline 变体），至多 2 处，蓝色文字；链接与相邻正文之间保持 4px 间距。",
+    "input 变体的 .dialog__input 必须使用已注册的 input 组件完整结构：.input-group > .input-wrapper > input[type=text]，支持清除按钮；input 不带 .field-label 标签（标题已是上下文），placeholder 承担输入提示。",
+    "自定义区域 .dialog__custom 是开放 slot，可放置卡片、说明、预览等内容；不在组件 CSS 中定义占位样式。",
+    "勾选项 .dialog__check 位于信息区内、按钮区上方，必须使用已注册的 checkbox 组件 .checkbox--sm（带文本场景的标准用法，20px）。",
+    "语义修饰类使用规则：--default 用于单按钮纯告知（text-default）；--dismiss 用于取消/关闭/否定（text-default）；--confirm 用于确定/提交/肯定（text-link 蓝色）；--danger 用于危险操作；--weak 用于弱化操作。"
+  ],
+  "behavior": {
+    "closeByMask": "默认 false，点击 .dialog overlay 空白区域（e.target === dialog）不关闭；仅通过按钮关闭。若业务明确允许点击遮罩关闭，必须额外显式声明并由宿主自行接管。",
+    "closeByButton": "默认 true，点击任意按钮后自动关闭。",
+    "closeByLink": "默认 false，点击链接默认不关闭（与 kuikly 一致）。",
+    "persistence": "阻断式常驻，不自动关闭，用户必须通过按钮操作后才会消失；不设置自动关闭时长（与 toast 的 4s 自动消失形成对比）。",
+    "conflicting": "同屏仅展示一个 dialog，新 dialog 出现时立即替换旧 dialog，默认开启互斥。",
+    "position": "居中悬浮，垂直水平双向居中。",
+    "animation": "overlay opacity 0→1 + card scale 0.9→1，时长 var(--duration-normal)，缓动 var(--ease-enter)/var(--ease-standard)；出场反向，data-state='closed' 触发 opacity→0 与 scale→0.9。",
+    "zIndex": "var(--z-modal)=600，高于 overlay(500)，低于 toast(700) 和 critical(900)。",
+    "inputFocus": "input 变体打开时自动聚焦输入框，回车键触发主按钮（第一个 confirm 或 danger 按钮）点击。"
+  },
+  "accessibility": {
+    "role": "dialog 容器使用 role=\"dialog\" aria-modal=\"true\"。",
+    "labelRule": "标题作为 dialog 的可访问名称，正文作为可访问描述。",
+    "focusTrap": "打开时焦点锁定在 dialog 内，关闭后焦点返回触发元素。",
+    "textRule": "标题和正文默认不限制显示行数，但文案应精简表达（参见 specs/文案与数据规范.md#文案精简原则）；dialog 不对文本做截断处理，由业务侧保证文案质量。"
+  },
+  "usageHints": [
+    "用于确认关键操作（删除、清空、提交、扣费）或展示必须阅读的重要信息。",
+    "危险操作（删除/清空/停用）使用 buttonTone: danger 红色按钮。",
+    "状态图标选择：success 用于成功告知，warning 用于注意/中性提示，danger 用于警告/危险。",
+    "单按钮用于纯告知（'我知道了''好的'），默认使用 default 常规文字颜色；双按钮用于确认/取消，三按钮尽量避免（如需三按钮考虑用 ActionSheet）；必须使用三按钮时，顺序优先为主操作、次操作、取消。",
+    "input 变体用于单条轻量文本录入；多字段表单或复杂编辑场景使用 full-screen-modal 而非 dialog。",
+    "与 toast 的区别：dialog 阻塞用户必须选择，toast 瞬时自动消失；需要用户决策用 dialog，只需告知用 toast。",
+    "与 sheet 的区别：sheet 是底部弹层用于筛选/选择器，dialog 是居中弹窗用于确认。",
+    "与 full-screen-modal 的区别：full-screen-modal 用于复杂编辑流程，dialog 用于轻量确认和快速输入。"
+  ],
+  "doNotInvent": [
+    "不要在 dialog 内放置多字段表单、多选列表、上传等复杂交互组件（那是 modal/sheet/full-screen-modal 的职责）；单行 input 仅用于轻量单字段文本录入。",
+    "不要超过 3 个按钮；3 个按钮尽量避免，优先用 ActionSheet。",
+    "不要自定义按钮颜色，仅允许 default/dismiss/confirm/danger/weak 五种语义预设；同一 dialog 只能有一个主按钮（confirm 或 danger），禁止两个蓝色或两个红色按钮同时出现。",
+    "不要持久化 dialog 状态到 localStorage。",
+    "不要给 dialog 设置自动关闭时长（dialog 是阻断式常驻，必须由用户操作触发关闭）。"
+  ],
+  "tokensConsumed": [
+    "--bg-mask-light",
+    "--bg-surface",
+    "--bg-state-hover",
+    "--bg-state-pressed",
+    "--text-default",
+    "--text-tertiary",
+    "--text-placeholder",
+    "--text-link",
+    "--text-brand",
+    "--status-success-default",
+    "--status-warning-default",
+    "--status-danger-default",
+    "--font-family-icon",
+    "--font-family-system",
+    "--heading-sm-font-size",
+    "--body-lg-font-size",
+    "--body-md-font-size",
+    "--font-weight-semibold",
+    "--font-weight-medium",
+    "--spacer-2",
+    "--spacer-8",
+    "--spacer-12",
+    "--spacer-16",
+    "--spacer-20",
+    "--spacer-24",
+    "--spacer-32",
+    "--radius-6",
+    "--radius-8",
+    "--radius-12",
+    "--stroke-hairline",
+    "--stroke-strong",
+    "--border-neutral-l2",
+    "--border-brand",
+    "--shadow-xl",
+    "--duration-fast",
+    "--duration-normal",
+    "--ease-enter",
+    "--ease-standard",
+    "--z-modal",
+    "--size-24"
+  ],
+  "designTokens": {
+    "cardWidth": "300px",
+    "cardRadius": "var(--radius-12)",
+    "cardBg": "var(--bg-surface)",
+    "cardShadow": "var(--shadow-xl)",
+    "bodyPadding": "var(--spacer-24) var(--spacer-20)",
+    "titleBodyPadding": "var(--spacer-32) var(--spacer-20)",
+    "bodyGap": "var(--spacer-12)",
+    "maskBg": "var(--bg-mask-light)",
+    "titleFont": "var(--heading-sm-font-size) / var(--font-weight-medium) / var(--font-family-system)",
+    "titleColor": "var(--text-default)",
+    "contentFont": "var(--body-lg-font-size) / var(--font-family-system)",
+    "contentColor": "var(--text-default)",
+    "linkColor": "var(--text-link)",
+    "iconSize": "var(--size-24)",
+    "iconTitleGap": "var(--spacer-8)",
+    "iconColorSuccess": "var(--status-success-default)",
+    "iconColorWarning": "var(--status-warning-default)",
+    "iconColorDanger": "var(--status-danger-default)",
+    "btnColorDismiss": "var(--text-default)",
+    "btnColorConfirm": "var(--text-link)",
+    "btnColorDanger": "var(--status-danger-default)",
+    "btnColorWeak": "var(--text-tertiary)",
+    "btnFont": "var(--body-lg-font-size) / var(--font-weight-medium)",
+    "btnHeight": "48px",
+    "dividerColor": "var(--border-neutral-l2)",
+    "actionsDividerShadow": "inset 0 0.5px 0 0 var(--border-neutral-l2)",
+    "enterScale": "0.9",
+    "leaveScale": "0.9",
+    "enterDuration": "var(--duration-normal)",
+    "leaveDuration": "var(--duration-fast)",
+    "enterEase": "var(--ease-standard)",
+    "leaveEase": "var(--ease-standard)"
+  },
+  "cssCustomProperties": [
+    {
+      "name": "--dialog-width",
+      "default": "300px",
+      "appliesTo": "卡片宽度，业务可覆盖"
+    },
+    {
+      "name": "--dialog-enter-scale",
+      "default": "0.9",
+      "appliesTo": "入场缩放起点"
+    }
+  ],
+  "specRefs": [
+    "specs/交互设计原则.md",
+    "specs/文案与数据规范.md"
+  ],
+  "domAnatomy": {
+    "root": ".dialog",
+    "modifiers": [
+      ".dialog--text",
+      ".dialog--status",
+      ".dialog--title",
+      ".dialog--input",
+      "[data-state=\"open\"]",
+      "[data-state=\"closed\"]"
+    ],
+    "optionalChildren": [
+      ".dialog__card",
+      ".dialog__body",
+      ".dialog__header",
+      ".dialog__icon",
+      ".dialog__icon--success",
+      ".dialog__icon--warning",
+      ".dialog__icon--danger",
+      ".dialog__title",
+      ".dialog__content",
+      ".dialog__input",
+      ".dialog__custom",
+      ".dialog__check",
+      ".dialog__actions",
+      ".dialog__buttons",
+      ".dialog__buttons--dual",
+      ".dialog__buttons--triple",
+      ".dialog__btn",
+      ".dialog__btn--default",
+      ".dialog__btn--dismiss",
+      ".dialog__btn--confirm",
+      ".dialog__btn--danger",
+      ".dialog__btn--weak",
+      ".dialog__divider"
+    ]
+  },
+  "provenance": {
+    "preview": "preview/component-dialog.html",
+    "cssSource": "preview/component-dialog.html",
+    "embedded": false,
+    "hostComponent": null
+  },
+  "unknowns": []
+}

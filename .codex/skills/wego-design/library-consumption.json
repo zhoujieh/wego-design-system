@@ -258,7 +258,8 @@
     "radio",
     "stack",
     "switch",
-    "toast"
+    "toast",
+    "dialog"
   ],
   "embeddedComponents": [],
   "unpublishedContracts": [],

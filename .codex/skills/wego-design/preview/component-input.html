@@ -19,11 +19,13 @@
 /* @component-css-start */
 .input-group { position: relative; display: flex; flex-direction: column; gap: var(--spacer-8); width: 100%; max-width: 320px; flex-shrink: 0; }
 .input-group .field-label { display: block; font-size: var(--body-md-font-size); font-weight: var(--font-weight-medium); color: var(--text-default); line-height: var(--body-md-line-height); white-space: nowrap; }
-.input-group input, .input-group textarea { width: 100%; box-sizing: border-box; border: 1px solid var(--border-neutral-l2); border-radius: var(--radius-6); background: var(--bg-surface); color: var(--text-default); font-size: var(--body-md-font-size); font-family: var(--body-md-font-family); line-height: var(--body-md-line-height); padding: 0 12px; outline: none; transition: border-color var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard); font-feature-settings: "zero"; }
+.input-group input, .input-group textarea { width: 100%; box-sizing: border-box; border: 0.5px solid var(--border-neutral-l2); border-radius: var(--radius-6); background: var(--bg-subtle); color: var(--text-default); font-size: var(--body-md-font-size); font-family: var(--body-md-font-family); line-height: var(--body-md-line-height); padding: 0 12px; outline: none; transition: border-color var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard); font-feature-settings: "zero"; }
 .input-group input { height: 36px; }
 .input-group textarea { min-height: 96px; resize: vertical; padding: 8px 12px; }
 .input-group input::placeholder, .input-group textarea::placeholder { color: var(--text-placeholder); }
 .input-group input:focus, .input-group textarea:focus { border-color: var(--border-neutral-l2); }
+.input-group--surface-white input,
+.input-group--surface-white textarea { background: var(--bg-surface); }
 .input-group.is-error input, .input-group.is-error textarea { border-color: var(--status-danger-default); color: var(--status-danger-default); }
 .input-group.is-disabled input, .input-group.is-disabled textarea { background: var(--bg-muted); border-color: var(--border-disabled); color: var(--text-disabled); cursor: not-allowed; }
 .input-group.is-disabled input::placeholder, .input-group.is-disabled textarea::placeholder { color: var(--text-disabled); }
@@ -43,12 +45,14 @@
 .input-group.is-error .field-error { display: block; }
 
 /* ── Number Input (数字输入框) ──────────────────────────────── */
-.number-input { display: flex; align-items: center; gap: var(--spacer-8); width: 120px; min-width: 96px; max-width: 128px; min-height: var(--size-32); padding: 6px var(--spacer-8); background: var(--bg-subtle); border: 1px solid var(--border-neutral-l2); border-radius: var(--radius-6); box-sizing: border-box; transition: border-color var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard); }
+.number-input { display: flex; align-items: center; gap: var(--spacer-8); width: 120px; min-width: 96px; max-width: 128px; min-height: var(--size-32); padding: 6px var(--spacer-8); background: var(--bg-subtle); border: 0.5px solid var(--border-neutral-l2); border-radius: var(--radius-6); box-sizing: border-box; transition: border-color var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard); }
+.number-input--surface-white { background: var(--bg-surface); }
 .number-input__field { flex: 1 1 0; min-width: 0; border: none; outline: none; background: transparent; text-align: center; font-family: var(--number-md-font-family); font-size: var(--body-lg-font-size); font-weight: var(--font-weight-medium); color: var(--text-default); line-height: 20px; padding: 0; font-feature-settings: "zero"; }
 .number-input__field::placeholder { color: var(--text-disabled); font-size: var(--body-md-font-size); font-weight: var(--font-weight-regular); }
 .number-input__suffix { flex-shrink: 0; font-size: var(--body-md-font-size); font-weight: var(--font-weight-regular); color: var(--text-secondary); text-align: right; white-space: nowrap; font-feature-settings: "zero"; }
 /* Focus */
 .number-input.is-focus { border-color: var(--border-neutral-l2); background: var(--bg-subtle); }
+.number-input--surface-white.is-focus { background: var(--bg-surface); }
 /* Error */
 .number-input.is-error { background: var(--status-danger-surface-l1); border-color: var(--border-danger); }
 .number-input.is-error .number-input__field,
@@ -61,7 +65,7 @@
 </style>
 </head>
 <body>
-<div class="pv-header"><h1>输入框</h1><p>独立输入框，支持 text/textarea、聚焦、错误、禁用状态。</p></div>
+<div class="pv-header"><h1>输入框</h1><p>独立输入框，默认浅灰底，支持通过白底修饰类切换到白色表面；覆盖 text/textarea、聚焦、错误、禁用状态。</p></div>
 <div class="specimen">
 <div class="stage">
 <!-- Text Input -->
@@ -96,6 +100,22 @@
 <input id="input-phone-disabled" type="text" value="13800138000" disabled>
 <button type="button" class="input-clear" aria-label="清空手机号"><i class="icon-yuancha-mian" aria-hidden="true"></i></button>
 </div>
+</div>
+</div>
+</div>
+<div class="story">
+<span class="story-label">白底表面</span>
+<div class="rail">
+<div class="input-group input-group--surface-white">
+<label class="field-label" for="input-name-white">来源名称</label>
+<div class="input-wrapper">
+<input id="input-name-white" type="text" value="直播间投放">
+<button type="button" class="input-clear" aria-label="清空来源名称"><i class="icon-yuancha-mian" aria-hidden="true"></i></button>
+</div>
+</div>
+<div class="input-group input-group--surface-white">
+<label class="field-label" for="input-note-white">补充说明</label>
+<textarea id="input-note-white" placeholder="请输入补充说明"></textarea>
 </div>
 </div>
 </div>
@@ -135,6 +155,10 @@
 </div>
 <div class="number-input is-disabled">
 <input class="number-input__field" type="text" inputmode="decimal" value="888" disabled aria-label="金额输入">
+<span class="number-input__suffix">元</span>
+</div>
+<div class="number-input number-input--surface-white" data-number-input>
+<input class="number-input__field" type="text" inputmode="decimal" value="1280" aria-label="金额输入（白底）">
 <span class="number-input__suffix">元</span>
 </div>
 </div>
