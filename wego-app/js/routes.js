@@ -56,5 +56,18 @@ window.WEGO_APP_ROUTES = [
       label: '产品与笔记',
       type: 'cell'
     }
+  },
+  {
+    routeId: 'my-inventory-management',
+    scene: '库存管理',
+    script: './scenes/库存管理/scene.js',
+    style: './scenes/库存管理/scene.css',
+    entry: {
+      tab: 'my',
+      group: 'my-app-center',
+      label: '库存管理',
+      type: 'grid-entry',
+      icon: './lib/icons/app-center/库存管理.svg'
+    }
   }
 ];

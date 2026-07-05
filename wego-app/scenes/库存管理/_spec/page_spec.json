@@ -1,0 +1,84 @@
+{
+  "task_type": "design-system-consumption",
+  "scene_category": "list",
+  "business_goal": "让店主管理当前库存清单，并通过库存预警设置页统一配置低库存提醒规则",
+  "interaction_mode": "edit-then-save",
+  "app_target": {
+    "mode": "wego-app-scene",
+    "app_root": "wego-app",
+    "scene_folder": "wego-app/scenes/库存管理",
+    "runtime_entry": "scene.js",
+    "route_mode": "hash"
+  },
+  "information_blocks": [
+    "入口：『我的』Tab → 应用中心 → 库存管理（宫格入口）",
+    "库存列表页导航栏：返回图标 + 标题『库存管理』",
+    "库存概览：总 SKU 数、预警商品数、今日待补货数",
+    "库存预警设置入口：右侧显示当前规则摘要（如『低于20件预警』）",
+    "库存列表：按商品展示 SKU 名称、仓库、可售库存、预占库存、近7天销量、当前状态",
+    "库存预警设置页导航栏：左侧『取消』、中间标题『库存预警设置』、右侧『保存』按钮",
+    "基础规则：启用库存预警、预警阈值、监控范围、是否合并预占库存",
+    "通知方式：App 内提醒、每日汇总提醒、提醒时间",
+    "处理策略：自动加入补货清单、重点商品名单"
+  ],
+  "page_surfaces": [
+    {
+      "id": "host-entry",
+      "role": "host-entry",
+      "information_blocks": [
+        "入口：『我的』Tab → 应用中心 → 库存管理（宫格入口）"
+      ],
+      "interaction_mode": "select",
+      "purpose": "作为『我的』Tab 应用中心中的一级宫格入口，点击 push 打开库存管理列表页"
+    },
+    {
+      "id": "inventory-list",
+      "role": "primary-task-page",
+      "information_blocks": [
+        "库存列表页导航栏：返回图标 + 标题『库存管理』",
+        "库存概览：总 SKU 数、预警商品数、今日待补货数",
+        "库存预警设置入口：右侧显示当前规则摘要（如『低于20件预警』）",
+        "库存列表：按商品展示 SKU 名称、仓库、可售库存、预占库存、近7天销量、当前状态"
+      ],
+      "interaction_mode": "select",
+      "purpose": "库存管理主页面，简洁展示库存概览和库存清单，并提供进入预警设置页的唯一入口"
+    },
+    {
+      "id": "inventory-alert-settings",
+      "role": "secondary-task-page",
+      "information_blocks": [
+        "库存预警设置页导航栏：左侧『取消』、中间标题『库存预警设置』、右侧『保存』按钮",
+        "基础规则：启用库存预警、预警阈值、监控范围、是否合并预占库存",
+        "通知方式：App 内提醒、每日汇总提醒、提醒时间",
+        "处理策略：自动加入补货清单、重点商品名单"
+      ],
+      "interaction_mode": "edit-then-save",
+      "purpose": "重要的库存预警设置页，以统一保存方式维护提醒阈值、通知方式和处理策略，保存后回填库存列表页摘要"
+    }
+  ],
+  "host_container": {
+    "tab": "my",
+    "entry_label": "库存管理",
+    "subentry_label": "",
+    "leaf_level": 1,
+    "entry_type": "grid-entry",
+    "needs_host_entry_surface": true
+  },
+  "route_id": "my-inventory-management",
+  "component_intent": [
+    "宿主入口使用应用中心宫格入口，复用库存管理 SVG 图标",
+    "库存列表页使用 navbar + 摘要卡片 + cell-group 卡片列表，保持页面简洁",
+    "库存预警设置入口使用带摘要文字和箭头的 cell，整行点击打开设置页",
+    "库存清单行使用双行 cell 展示商品名与库存摘要，右侧用状态文字表达库存风险",
+    "库存预警设置页命中编辑型业务规则配置范式，使用 full-screen-modal + navbar 统一保存",
+    "设置页中的布尔项使用 switch，枚举项使用带状态文字和箭头的 cell"
+  ],
+  "spec_refs": {
+    "copy": ".codex/skills/wego-design/specs/文案与数据规范.md",
+    "layout": ".codex/skills/wego-design/specs/布局与间距规范.md",
+    "interaction": ".codex/skills/wego-design/specs/交互设计原则.md",
+    "visual": ".codex/skills/wego-design/specs/设计风格与品牌原则.md",
+    "motion": ".codex/skills/wego-design/specs/动效与视觉效果.md"
+  },
+  "delivery_hint": "next-step"
+}

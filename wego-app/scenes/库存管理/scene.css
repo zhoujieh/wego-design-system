@@ -1,0 +1,115 @@
+.inventory-page,
+.inventory-alert-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  background: var(--bg-page);
+}
+
+.inventory-page__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-12);
+  padding: var(--spacer-12) 16px calc(var(--spacer-40) + var(--safe-area-bottom, 0px));
+}
+
+.inventory-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--spacer-8);
+}
+
+.inventory-summary__metric {
+  border-radius: var(--radius-8);
+  padding: 14px 12px;
+  background: var(--bg-surface);
+}
+
+.inventory-summary__metric.is-warning {
+  background: var(--status-warning-surface-l1, var(--bg-surface));
+}
+
+.inventory-summary__metric.is-danger {
+  background: var(--status-danger-surface-l1);
+}
+
+.inventory-summary__label {
+  color: var(--text-secondary);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+}
+
+.inventory-summary__value {
+  margin-top: var(--spacer-8);
+  color: var(--text-default);
+  font-size: var(--heading-md-font-size, 24px);
+  line-height: 1.2;
+  font-weight: var(--font-weight-medium);
+}
+
+.inventory-stock-status.is-normal {
+  color: var(--text-secondary);
+}
+
+.inventory-stock-status.is-warning {
+  color: var(--status-warning-default, var(--text-link));
+}
+
+.inventory-stock-status.is-danger {
+  color: var(--status-danger-default);
+}
+
+.inventory-alert-page__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-8);
+  padding: var(--spacer-8) 0 calc(var(--spacer-40) + var(--safe-area-bottom, 0px));
+}
+
+.inventory-alert-summary {
+  margin: 0 16px;
+  border-radius: var(--radius-8);
+  padding: 16px;
+  background: var(--bg-surface);
+}
+
+.inventory-alert-summary__title {
+  color: var(--text-secondary);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+}
+
+.inventory-alert-summary__text {
+  margin-top: var(--spacer-8);
+  color: var(--text-default);
+  font-size: var(--body-lg-font-size);
+  line-height: var(--body-lg-line-height);
+  font-weight: var(--font-weight-medium);
+}
+
+.inventory-alert-summary__subtext {
+  margin-top: var(--spacer-4);
+  color: var(--text-secondary);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+}
+
+.inventory-alert-groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-8);
+}
+
+.inventory-cell--disabled .cell__title,
+.inventory-cell--disabled .cell__subtitle,
+.inventory-cell--disabled .cell__action-text {
+  color: var(--text-tertiary);
+}
