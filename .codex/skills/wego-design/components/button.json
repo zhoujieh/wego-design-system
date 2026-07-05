@@ -86,7 +86,7 @@
     "纯图标和带图标按钮只用于新建场景，其它场景默认使用纯文字按钮。"
   ],
   "behavior": {
-    "pressFeedback": "移动端按压态由 :active 与 .is-pressed 共同承载。宿主 App 通过 wego-app/js/app.js 在触控设备上自动为 button、.btn 等可点击元素添加/移除 .is-pressed；桌面端继续由 :active 兜底。",
+    "pressFeedback": "移动端按压态由 :active 与 .is-pressed 共同承载。宿主 App 通过 wego-app/js/app.js 在触控设备上自动为 button、.btn 等可点击元素添加/移除 .is-pressed；桌面端继续由 :active 兜底。同时设置 -webkit-user-select: none / user-select: none 以禁用长按文本选择和拖杆控件。",
     "interaction": "按下态通过背景色过渡表达，disabled 时禁用 hover 和 active 响应。",
     "iconOnly": "纯图标模式沿用相同状态机，不新增独立视觉体系，仅作为新建入口使用。",
     "primaryRule": "strong 只用于当前页面最核心的操作，同一页面只允许出现 1 个 strong 按钮。"

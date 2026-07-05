@@ -22,10 +22,10 @@
 }
 
 /* @component-css-start */
-.radio { --radio-size:24px; --radio-surface:transparent; --radio-border:var(--border-control); --radio-disabled-surface:var(--bg-control-disabled); --radio-disabled-border:var(--border-disabled); --radio-disabled-dot:var(--border-disabled); width:var(--radio-size); height:var(--radio-size); display:flex; align-items:center; justify-content:center; flex:0 0 var(--radio-size); box-sizing:border-box; position:relative; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.radio { --radio-size:24px; --radio-surface:transparent; --radio-border:var(--border-control); --radio-disabled-surface:var(--bg-control-disabled); --radio-disabled-border:var(--border-disabled); --radio-disabled-dot:var(--border-disabled); width:var(--radio-size); height:var(--radio-size); display:flex; align-items:center; justify-content:center; flex:0 0 var(--radio-size); box-sizing:border-box; position:relative; cursor:pointer; -webkit-tap-highlight-color:transparent; -webkit-user-select:none; user-select:none; }
 .radio::before{content:"";position:absolute;top:calc((var(--radio-size) - var(--touch-min)) / 2);right:calc((var(--radio-size) - var(--touch-min)) / 2);bottom:calc((var(--radio-size) - var(--touch-min)) / 2);left:calc((var(--radio-size) - var(--touch-min)) / 2)}
 .radio-field-group{display:inline-flex;align-items:center;flex-wrap:wrap;gap:var(--spacer-12);min-width:0}
-.radio-field{display:inline-flex;align-items:center;gap:var(--spacer-2);min-width:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.radio-field{display:inline-flex;align-items:center;gap:var(--spacer-2);min-width:0;cursor:pointer;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
 .radio-field__text{min-width:0;font-size:var(--body-md-font-size);line-height:var(--body-md-line-height);color:var(--text-default);overflow-wrap:anywhere}
 .radio__inner { width:20px; height:20px; border-radius:50%; border:1.5px solid var(--radio-border); background:var(--radio-surface); box-sizing:border-box; transition:border-color var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard); }
 .radio__dot { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:11px; height:11px; border-radius:50%; background:var(--bg-brand); display:none; }

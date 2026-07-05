@@ -104,7 +104,7 @@
     "clickable 仅补按压覆盖层，不扩展成轮播或缩放组件。"
   ],
   "behavior": {
-    "pressFeedback": "移动端按压态由 :active 与 .is-pressed 共同承载。宿主 App 通过 wego-app/js/app.js 在触控设备上自动为 .wg-image--clickable 等可点击元素添加/移除 .is-pressed；桌面端继续由 :active 兜底。",
+    "pressFeedback": "移动端按压态由 :active 与 .is-pressed 共同承载。宿主 App 通过 wego-app/js/app.js 在触控设备上自动为 .wg-image--clickable 等可点击元素添加/移除 .is-pressed；桌面端继续由 :active 兜底。同时设置 -webkit-user-select: none / user-select: none 以禁用长按文本选择和拖杆控件。",
     "loading": "默认加载态使用 .wg-image--loading，在根节点显示浅灰骨架动画。",
     "loaded": "图片元素添加 .is-loaded 后以 0.2s 渐显。",
     "error": "失败态使用 .wg-image--error，并在 .wg-image__placeholder 内放置 default-diagram.svg。"

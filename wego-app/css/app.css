@@ -185,6 +185,8 @@ body[data-host-shell="true"] {
   flex-shrink: 0;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
 }
 .host-shell-link-button:active,
 .host-shell-link-button.is-pressed {
@@ -218,6 +220,8 @@ body[data-host-shell="true"] {
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
   transition: opacity var(--duration-fast) var(--ease-standard);
 }
 .host-shell-grid-entry:active,

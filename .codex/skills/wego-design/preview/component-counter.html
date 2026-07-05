@@ -19,7 +19,7 @@
 .counter--sm { width: 80px; }
 .counter--lg { width: 120px; }
 .counter__body { display: flex; align-items: center; gap: var(--spacer-4); width: 100%; height: var(--size-32); padding: var(--spacer-2); background: var(--bg-overlay-l1); border-radius: var(--radius-6); box-sizing: border-box; }
-.counter__btn { position: relative; display: flex; align-items: center; justify-content: center; width: var(--size-28); height: var(--size-28); border: var(--stroke-hairline) solid var(--border-neutral-l2); border-radius: var(--radius-4); background: var(--bg-surface); cursor: pointer; flex-shrink: 0; color: var(--text-default); -webkit-tap-highlight-color: transparent; touch-action: manipulation; transition: background var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard); }
+.counter__btn { position: relative; display: flex; align-items: center; justify-content: center; width: var(--size-28); height: var(--size-28); border: var(--stroke-hairline) solid var(--border-neutral-l2); border-radius: var(--radius-4); background: var(--bg-surface); cursor: pointer; flex-shrink: 0; color: var(--text-default); -webkit-tap-highlight-color: transparent; touch-action: manipulation; -webkit-user-select: none; user-select: none; transition: background var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard); }
 .counter__btn::before { content: ""; position: absolute; top: -6px; bottom: -6px; }
 .counter__btn--minus::before { left: -8px; right: -4px; }
 .counter__btn--plus::before { left: -4px; right: -8px; }
