@@ -108,11 +108,11 @@
 
 ## 3.1 改 UI Kit 标准步骤
 
-适用于对已注册 UI Kit 的页面范式、组件组合、section 节奏、信息密度、摘要结构或主操作收口方式做调整。先从 `.codex/skills/wego-design/metadata.json` 的 `uiKits` 列表确认全部 UI Kit，再定位本轮目标 `slug`，不要默认只处理 `app`。
+适用于对已注册 UI Kit 的页面范式、组件组合、section 节奏、信息密度、摘要结构或主操作收口方式做调整。先从 `.codex/skills/wego-design/uikit-plan.json` 的 `uiKits` 列表确认全部 UI Kit，再定位本轮目标 `slug`，不要默认只处理 `app`。
 
-1. 读取 `.codex/skills/wego-design/metadata.json`，确认 `uiKits` 全集与本次目标 `slug`
+1. 读取 `.codex/skills/wego-design/uikit-plan.json`，确认 `uiKits` 全集与本次目标 `slug`
 2. 读取目标 `.codex/skills/wego-design/ui_kits/{slug}/index.html` 与对应 `quality-report.json`
-3. 读取 `.codex/skills/wego-design/uikit-plan.json`，确认该 UI Kit 对应的 `pagePatterns`、`screenBlueprints`、`productContext.selectedFrameNames`
+3. 结合 `.codex/skills/wego-design/uikit-plan.json`，确认该 UI Kit 对应的 `pagePatterns`、`screenBlueprints`、`productContext.selectedFrameNames`
 4. 判断这次变化落在哪些面：
    - **页面范式**：`pagePatterns` 中 `applicableScenarios`、`interactionPattern`、`presentation`、`transition`、`dismissAction` 是否需要同步
    - **组合约束**：`compositionConstraints` 是否仍然成立，是否需要新增/收敛
@@ -139,19 +139,18 @@
 - 若只是同一套页面范式换了业务外壳（如另一类规则配置页），优先扩展现有 UI Kit 的示例区，而不是新增
 - 若页面范式、组件组合节奏、固定槽位与现有 UI Kit 明显不同，才走新增流程
 
-1. 读取 `.codex/skills/wego-design/metadata.json`、`uikit-plan.json`、`library-consumption.json`、`README.md`、顶层 `SKILL.md`，确认现有 UI Kit 全集与新 `slug` 不冲突
+1. 读取 `.codex/skills/wego-design/uikit-plan.json`、`library-consumption.json`、`README.md`、顶层 `SKILL.md`，确认现有 UI Kit 全集与新 `slug` 不冲突
 2. 新增 `.codex/skills/wego-design/ui_kits/{slug}/index.html`，复用已注册组件契约，不发明组件类、子元素类或修饰类
 3. 新增 `.codex/skills/wego-design/ui_kits/{slug}/quality-report.json`
-4. 在 `.codex/skills/wego-design/metadata.json` 的 `uiKits` 数组中追加 `{ slug, entry, qualityReport }`
-5. 在 `.codex/skills/wego-design/uikit-plan.json` 中登记：
+4. 在 `.codex/skills/wego-design/uikit-plan.json` 中登记：
    - `uiKits` 数组追加新 `slug`
    - `productContext.selectedFrameNames` 追加 `ui_kits/{slug}/index.html`
    - 按需补 `pagePatterns` / `screenBlueprints` / `compositionConstraints`
-6. 在 `.codex/skills/wego-design/library-consumption.json` 的 `consumptionLayers.uikit.files` 中登记新 UI Kit 入口与 quality-report；若新 UI Kit 是某下游场景的主蓝本，更新 `downstreamScenarios.buildMobileAppPage.read`
-7. 同步 `.codex/skills/wego-design/README.md` 与顶层 `.codex/skills/wego-design/SKILL.md` 中的 UI Kit 清单、定位与根目录结构
-8. 在仓库根运行 `node scripts/validate-wego-design.mjs` 做文件完整性守门
-9. 递增 `.codex/skills/wego-design/metadata.json.version`
-10. 验证新 UI Kit 是否符合移动端、微信生态、电商/工具场景，且保持 `.uikit-shell`、`.phone-frame`、`.phone-screen` 演示外壳
+5. 在 `.codex/skills/wego-design/library-consumption.json` 的 `consumptionLayers.uikit.files` 中登记新 UI Kit 入口与 quality-report；若新 UI Kit 是某下游场景的主蓝本，更新 `downstreamScenarios.buildMobileAppPage.read`
+6. 同步 `.codex/skills/wego-design/README.md` 与顶层 `.codex/skills/wego-design/SKILL.md` 中的 UI Kit 清单、定位与根目录结构
+7. 在仓库根运行 `node scripts/validate-wego-design.mjs` 做文件完整性守门
+8. 递增 `.codex/skills/wego-design/metadata.json.version`
+9. 验证新 UI Kit 是否符合移动端、微信生态、电商/工具场景，且保持 `.uikit-shell`、`.phone-frame`、`.phone-screen` 演示外壳
 
 补充：
 

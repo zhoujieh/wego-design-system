@@ -1015,12 +1015,7 @@ function checkConsumptionContracts() {
   const consumptionKits = new Set(consumption.uiKits || []);
   const planKits = new Set((plan.uiKits || []).map(kit => kit?.slug).filter(Boolean));
   const componentIndexKits = new Set((componentIndex?.uiKits || []).map(kit => kit?.slug).filter(Boolean));
-  if (!Array.isArray(metadata.uiKits)) {
-    add('error', 'metadata.uikits_missing', 'metadata.json 必须包含 uiKits 数组，供 UI Kit 迭代确认全集', path.join(libraryRoot, 'metadata.json'));
-  }
-  const metadataKits = new Set((metadata.uiKits || []).map(kit => kit?.slug).filter(Boolean));
   const registrySources = [
-    ['metadata.json', metadataKits],
     ['library-consumption.json', consumptionKits],
     ['uikit-plan.json', planKits],
     ['components/index.json', componentIndexKits],
@@ -1043,23 +1038,6 @@ function checkConsumptionContracts() {
 
   if (!sameSet(consumptionKits, planKits) || !sameSet(consumptionKits, componentIndexKits)) {
     add('error', 'uikit.registry_mismatch', 'library-consumption.json、uikit-plan.json、components/index.json 的 UI Kit 清单必须保持一致', path.join(libraryRoot, 'library-consumption.json'));
-  }
-  if (!sameSet(consumptionKits, metadataKits)) {
-    add('error', 'uikit.metadata_registry_mismatch', 'metadata.json、library-consumption.json、uikit-plan.json、components/index.json 的 UI Kit 清单必须保持一致', path.join(libraryRoot, 'metadata.json'));
-  }
-
-  for (const kit of metadata.uiKits || []) {
-    if (!kit?.slug || typeof kit.slug !== 'string') {
-      add('error', 'metadata.uikit_slug_missing', 'metadata.json uiKits[] 每项必须包含 slug', path.join(libraryRoot, 'metadata.json'));
-      continue;
-    }
-    for (const field of ['entry', 'qualityReport']) {
-      if (typeof kit[field] !== 'string' || !kit[field]) {
-        add('error', 'metadata.uikit_ref_missing', `metadata.json 中 ${kit.slug} 缺少 ${field}`, path.join(libraryRoot, 'metadata.json'));
-      } else if (!fs.existsSync(path.join(libraryRoot, kit[field]))) {
-        add('error', 'metadata.uikit_ref_path_missing', `metadata.json 中 ${kit.slug}.${field} 路径不存在：${kit[field]}`, path.join(libraryRoot, 'metadata.json'));
-      }
-    }
   }
 
   const deliveryGuardrails = Array.isArray(consumption.deliveryGuardrails) ? consumption.deliveryGuardrails : [];

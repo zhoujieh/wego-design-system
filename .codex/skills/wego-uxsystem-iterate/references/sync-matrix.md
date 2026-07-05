@@ -143,11 +143,11 @@
 
 ## 改 UI Kit
 
-先从 `.codex/skills/wego-design/metadata.json` 的 `uiKits` 列表确认全部已注册 UI Kit，再定位本轮要改的 `ui_kits/{slug}/`。不要默认只处理 `app`。
+先从 `.codex/skills/wego-design/uikit-plan.json` 的 `uiKits` 列表确认全部已注册 UI Kit，再定位本轮要改的 `ui_kits/{slug}/`。不要默认只处理 `app`。
 
 必看：
 
-- `.codex/skills/wego-design/metadata.json`：确认 `uiKits` 全集与本次目标 `slug`
+- `.codex/skills/wego-design/uikit-plan.json`：确认 `uiKits` 全集与本次目标 `slug`
 - 目标 `ui_kits/{slug}/index.html`
 - 对应 `ui_kits/{slug}/quality-report.json`
 - `.codex/skills/wego-design/uikit-plan.json`：确认该 UI Kit 对应的 `pagePatterns`、`screenBlueprints`、`productContext.selectedFrameNames`
@@ -193,7 +193,6 @@
 
 - 新增 `.codex/skills/wego-design/ui_kits/{slug}/index.html`
 - 新增 `.codex/skills/wego-design/ui_kits/{slug}/quality-report.json`
-- `.codex/skills/wego-design/metadata.json`：在 `uiKits` 数组中追加 `{ slug, entry, qualityReport }`
 - `.codex/skills/wego-design/uikit-plan.json`：在 `uiKits`、`productContext.selectedFrameNames` 中登记，并按需补 `pagePatterns` / `screenBlueprints` / `compositionConstraints`
 - `.codex/skills/wego-design/library-consumption.json`：在 `consumptionLayers.uikit.files` 中登记新 UI Kit 入口与 quality-report，必要时更新 `downstreamScenarios.buildMobileAppPage.read`
 - `.codex/skills/wego-design/README.md` 与顶层 `.codex/skills/wego-design/SKILL.md`：同步 UI Kit 清单、定位与根目录结构

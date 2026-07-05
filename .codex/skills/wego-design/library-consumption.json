@@ -217,6 +217,14 @@
       "purpose": "让 AI 从规则文档直接学到 UI Kit 必须演示双层结构 + 打开方式 + 动画定义，不依赖隐性实践推断"
     }
   },
+  "globalConsumptionRules": {
+    "uikitReferenceBoundary": "UI Kit 只作业务页面结构和组件组合参考，禁止复制 Showcase 外壳与内容，也不承担 App 宿主模板职责。",
+    "appHostBoundary": "`app` 不属于 UI Kit；固定宿主 App 的唯一运行落点是 wego-app/index.html，宿主模板基线由 wego-ux/templates/host-shell.* 维护。",
+    "contractFirst": "组件必须优先复用已注册契约；若命中组件契约已定义的稳定场景，页面层不得再重定义其内嵌关联控件规格、父子联动结构或冗余 helper。若发现组件契约问题，任务完成后必须作为风险性告知用户。",
+    "specAuthority": "文案、布局、交互、视觉规则只通过 specs/*.md 引用，不在消费说明里重复规范正文。",
+    "demoStyleBoundary": "不把 biz-* 演示样式当通用组件，也不把示例中的主操作位置误写成唯一强制规则。",
+    "groupStructureFirst": "命中连续列表或表单分组时，优先消费 .cell-group / .form-group 的正式结构：标题使用 group 自带 title 节点，连续内容放进 group 自带 content 容器；卡片修饰只开在内容容器上。"
+  },
   "recommendedReadOrder": [
     "SKILL.md",
     "library-consumption.json",

@@ -1,18 +1,6 @@
 {
   "id": "O0AA1DR-DGOQCS",
   "name": "wego-design",
-  "version": 335,
-  "icon_lib": "",
-  "uiKits": [
-    {
-      "slug": "biz-rule-config",
-      "entry": "ui_kits/biz-rule-config/index.html",
-      "qualityReport": "ui_kits/biz-rule-config/quality-report.json"
-    },
-    {
-      "slug": "system-settings",
-      "entry": "ui_kits/system-settings/index.html",
-      "qualityReport": "ui_kits/system-settings/quality-report.json"
-    }
-  ]
+  "version": 337,
+  "icon_lib": ""
 }

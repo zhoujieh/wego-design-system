@@ -41,7 +41,7 @@
 - `uikit-plan.json`
   UI Kit、页面范式、固定槽位与蓝图
 - `metadata.json`
-  设计系统版本与已发布 UI Kit 索引
+  设计系统版本信息
 - `ui_kits/biz-rule-config/`
   业务规则配置页 Showcase
 - `specs/*.md`

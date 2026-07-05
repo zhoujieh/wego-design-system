@@ -361,6 +361,17 @@
     "large-gradient-hero",
     "decorative-orb-background"
   ],
+  "surfaceDecisionRules": {
+    "surfaceMatching": "必须先按 page_spec.page_surfaces[] 逐个 surface 判断命中状态；不能只给整个任务一个 matched_uikit 后跳过宿主页、二级页或结果页。",
+    "hostEntryBoundary": "当 page_spec 包含 host_container + route_id 时，host-entry 只负责输出宿主页入口、结果回填和状态摘要所需的 surface 依据；不要把固定宿主 App 本身当作新的 pagePattern，也不要让下游参考后重画宿主 App。",
+    "fallbackAndGap": "未命中 UI Kit/pagePattern 但能安全输出时，必须引用 fallbackPageBlueprints；不能临时发明页面范式。任何 surface 为 gap 时，不输出可执行原型计划，只输出设计缺口与建议补充的 blueprint、UI Kit 或组件契约。"
+  },
+  "pagePresentationBindingRules": {
+    "fieldMapping": "匹配 pagePattern 后，必须将 presentation、transition、dismissAction、overlayLevel、coversTabBar 五个字段映射为 design_consumption_plan.page_presentation 输出（presentation→type，dismissAction→dismiss_action，overlayLevel→overlay_level，coversTabBar→covers_tab_bar）；若 pagePattern 未声明 presentation，默认 type=push、overlay_level=inline、covers_tab_bar=true。",
+    "traceability": "page_presentation 必须能从业务主 surface 的 matched_page_pattern 和 presentation_ref 反查来源，不能只给顶层字段而不说明命中的页面范式。",
+    "coversTabBarConstraint": "wego-app/scenes/ 下业务场景的 page_presentation.covers_tab_bar 必须为 true；不得输出 false，除非 surface 角色为 host-entry inline grid 入口。",
+    "compositionTraceability": "命中 pagePattern 的 compositionConstraints 时，component_mapping 必须标注所选组合、对应规则 ID 和 trigger，形成可追溯链路。"
+  },
   "pagePatterns": [
     {
       "name": "业务规则配置",

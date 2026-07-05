@@ -2,7 +2,7 @@
 
 ## 这个仓库是什么
 
-微购(WeGo)中文静态 App 原型与设计系统仓库。复制即可用——用户只需要输出业务需求,AI 负责生成符合微购设计语言的移动端静态交互原型。
+微购(wego)中文静态 App 原型与设计系统仓库。复制即可用——用户只需要输出业务需求,AI 负责生成符合微购设计语言的移动端静态交互原型。
 
 默认面向移动端、微信生态、电商/工具场景;不依赖特定 agent 运行时,任意 AI agent 读取本文件与对应 `SKILL.md` 即可上手。
 
@@ -13,26 +13,32 @@
 - 预览以 Vercel 固定链接为主,同时必须支持本地直接打开 `wego-app/index.html`
 - 业务场景全部进入 `wego-app/scenes/{中文业务场景}/`
 - 页面路由使用 hash route,如 `#/my-permission-management`
-- `wego-app/lib/` 是部署用设计系统资源副本
-- 旧的“每个任务生成一个独立原型文件夹”模式废弃
+- `wego-app/lib/` 是部署用设计系统资源副本，通过脚本自动同步的，禁止手动更改
+
+## 沟通要求
+
+- 始终用简洁、通俗易懂的中文沟通
+- 先理解当前微购设计的完整工作流，不要用户说改什么就只改什么
+- 每次回复禁止写一堆技术名词的表达，禁止堆积各种技术实现说明过程
+- 每次回复都要用通俗易懂的中文说明本轮改了什么、验证了什么、还有什么风险
 
 ## 技能触发矩阵
 
-对 Codex、Trae 等会读取仓库文档的 agent，同样按这套分流执行；不要只看文件名猜测技能。
+对 Codex、Trae 等会读取仓库文档的 agent，同样按这套分流执行；不要只看文件名猜测技能。Trae 的技能默认使用当前仓库符号链接的方式进行关联读取。
 
-| 用户意图 / 请求特征 | 必须先触发的技能 | 前置条件 | 下一步交接 |
-| --- | --- | --- | --- |
-| 业务开发、做页面、做原型、做场景、接业务需求、做新业务编辑任务 | `wego-product` | 无 | `page_spec` 完成后交给 `wego-design`，再进入 `wego-ux`、`wego-tests` |
-| 已有 `page_spec`，要出页面范式、UI Kit、组件映射、打开方式、`design_consumption_plan` | `wego-design` | 已有 `page_spec` | `design_consumption_plan` 完成后交给 `wego-ux` |
-| 已有 `page_spec` + `design_consumption_plan`，要正式生成或更新 `wego-app` 场景 | `wego-ux` | 已落盘的 `page_spec` + `design_consumption_plan` | 原型完成后交给 `wego-tests` |
-| 验收、检查、回归、review 当前场景是否符合规格 | `wego-tests` | 当前场景已生成，且 `route_id` 已注册 | 输出 `acceptance_report`，必要时把问题归因回前置技能 |
-| 改组件、补 preview、改契约、改 UI Kit、改 metadata、补守门 | `wego-uxsystem-iterate` 的`迭代模式` | 当前目标属于设计系统本体或 UI Kit | 按 `references/workflow.md` / `sync-matrix.md` 同步 |
-| 补规则、沉淀经验、优化流程、修技能链路、修触发机制 | `wego-uxsystem-iterate` 的`工作流迭代模式` | 当前目标属于经验回流或工作流分流 | 按 `references/workflow-iteration.md` 回流到对应环节 |
-| 只要求检查组件是否合理、是否漂移、是否该收敛规则 | `wego-uxsystem-iterate` 的`审查模式` | 当前目标属于设计系统审查 | 先出 findings，再决定是否转迭代模式 |
+| 用户意图 / 请求特征                                                       | 必须先触发的技能                           | 前置条件                                         | 下一步交接                                                      |
+| ----------------------------------------------------------------- | ---------------------------------- | -------------------------------------------- | ---------------------------------------------------------- |
+| 业务开发、做页面、做原型、做场景、接业务需求、做新业务编辑任务                                   | `wego-product`                     | 无                                            | `page_spec` 完成后交给 `wego-design`，再进入 `wego-ux`、`wego-tests` |
+| 已有 `page_spec`，要出页面范式、UI Kit、组件映射、打开方式、`design_consumption_plan`  | `wego-design`                      | 已有 `page_spec`                               | `design_consumption_plan` 完成后交给 `wego-ux`                  |
+| 已有 `page_spec` + `design_consumption_plan`，要正式生成或更新 `wego-app` 场景 | `wego-ux`                          | 已落盘的 `page_spec` + `design_consumption_plan` | 原型完成后交给 `wego-tests`                                       |
+| 验收、检查、回归、review 当前场景是否符合规格                                        | `wego-tests`                       | 当前场景已生成，且 `route_id` 已注册                     | 输出 `acceptance_report`，必要时把问题归因回前置技能                       |
+| 改组件、补 preview、改契约、改 UI Kit、改 metadata、补守门                         | `wego-uxsystem-iterate` 的`迭代模式`    | 当前目标属于设计系统本体或 UI Kit                         | 按 `references/workflow.md` / `sync-matrix.md` 同步           |
+| 补规则、沉淀经验、优化流程、修技能链路、修触发机制                                         | `wego-uxsystem-iterate` 的`工作流迭代模式` | 当前目标属于经验回流或工作流分流                             | 按 `references/workflow-iteration.md` 回流到对应环节               |
+| 只要求检查组件是否合理、是否漂移、是否该收敛规则                                          | `wego-uxsystem-iterate` 的`审查模式`    | 当前目标属于设计系统审查                                 | 先出 findings，再决定是否转迭代模式                                     |
 
 补充硬规则:
 
-- 用户只说“帮我做这个业务页面”这类模糊请求时，默认按业务开发处理，先走 `wego-product`，不允许直接跳过
+- 用户只说“帮我做这个业务页面”这类模糊请求时，默认按业务开发处理，先走 `wego-product`，不允许直接跳过，需求不清晰时停下来询问用户具体的需求细节，直到用户说“确认”后再进入下一个环节，禁止随意修改用户明确的产品需求
 - 没有 `page_spec` 时，不直接触发 `wego-design`
 - 没有 `design_consumption_plan` 时，不直接触发 `wego-ux`
 - 组件/UI Kit/工作流问题，不要误走业务开发链路；优先判断是否应进入 `wego-uxsystem-iterate`
@@ -54,12 +60,6 @@
 - 没有 `page_spec` 时不直接进入设计消费
 - 没有 `design_consumption_plan` 时不直接生成原型
 - 当前业务场景未落成 `wego-app/scenes/{中文业务场景}/` 时不验收
-
-## 沟通要求
-
-- 始终用简洁、通俗易懂的中文沟通。
-- 先理解当前技能链路和 `wego-design` 设计系统,再修改文件;不要只改一个文件就结束。
-- 每次回复都要说明本轮改了什么、验证了什么、还有什么风险。
 
 ## 技能入口
 
