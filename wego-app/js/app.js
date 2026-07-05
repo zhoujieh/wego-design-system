@@ -26,6 +26,8 @@
   var toastTimer = 0;
   // 由 initTouchPressState 注入，用于页面切换时兜底清理按压态
   var clearAllPressStates = function () {};
+  // 由 initTouchPressState 维护，当前按压态元素（openPushScene 读取以做 forward 预防）
+  var pressedEl = null;
 
   var tabIconNames = {
     dongtai: 'dongtai',
@@ -139,6 +141,9 @@
       } else {
         appState.currentRouteId = sceneStack[sceneStack.length - 1].routeId;
       }
+      // 侧滑返回后，host 页面重新可见，强制重绘入口
+      // 清除 iOS Safari 可能残留的 :active 合成层缓存，避免按压态视觉残留
+      forceHostEntriesRepaint();
       if (typeof afterCallback === 'function') afterCallback();
       return;
     }
@@ -200,6 +205,8 @@
   }
 
   function openPushScene(scene) {
+    // 保存 pressedEl 引用，clearAllPressStates 会清空它
+    var entryEl = pressedEl;
     clearAllPressStates();
     var presentation = normalizePresentation(scene);
     sceneLayer.hidden = false;
@@ -212,6 +219,13 @@
     if (presentation.coversTabBar) panel.classList.add('app-scene-layer__panel--cover-tab');
     renderTemplate(panel, scene.template);
     sceneLayer.appendChild(panel);
+
+    // scene panel 已覆盖 host，此时 host 不可见，对原入口强制重绘
+    // 预防 iOS Safari :active 卡住导致的侧滑返回按压态残留
+    // 此时 reflow 安全无闪烁（host 被 scene panel 遮挡）
+    if (entryEl) {
+      forceHostEntriesRepaint(entryEl);
+    }
 
     sceneStack.push({ routeId: scene.routeId, host: panel, scene: scene });
     appState.currentRouteId = scene.routeId;
@@ -516,6 +530,10 @@
     getState: function () { return appState; }
   };
 
+  // 由 initTouchPressState 注入，用于侧滑返回后 / forward 导航时强制重绘 host 入口
+  // 清除 iOS Safari 可能残留的 :active 合成层缓存
+  var forceHostEntriesRepaint = function () {};
+
   // ── Global touch press state for mobile active feedback ──
   (function initTouchPressState() {
     if (!('ontouchstart' in window)) return;
@@ -529,7 +547,6 @@
       '.host-shell-grid-entry', '.host-shell-link-button', '[data-route-id]'
     ].join(', ');
 
-    var pressedEl = null;
     var startX = 0;
     var startY = 0;
     var moveThreshold = 10;
@@ -561,6 +578,24 @@
       clearPress();
       activeTouch = null;
       suppressNextClick = false;
+    };
+
+    // 强制重绘 host 页面入口，清除 iOS Safari 可能残留的 :active 合成层缓存
+    // 用于侧滑返回后 / forward 导航时，触发合成层重建，丢弃旧按压帧
+    forceHostEntriesRepaint = function (targetEl) {
+      if (targetEl) {
+        // 精准重绘单个元素（forward 导航时 pressedEl 已知）
+        try { targetEl.blur(); } catch (e) {}
+        void targetEl.offsetWidth;  // 强制 layout，触发合成层重建
+        return;
+      }
+      // 兜底：重绘所有 host 入口（侧滑返回时 pressedEl 已清空）
+      var entries = document.querySelectorAll('[data-entry-group] [data-route-id]');
+      for (var i = 0; i < entries.length; i++) {
+        var el = entries[i];
+        try { el.blur(); } catch (e) {}
+        void el.offsetWidth;
+      }
     };
 
     function findPressTarget(el) {
