@@ -109,11 +109,13 @@
     return promise;
   }
 
-  // 弹出 push 栈顶场景（带退场动画）。
-  // - afterCallback: 可选，退场动画结束后执行（用于清空 hash 等）
+  // 弹出 push 栈顶场景。
+  // - afterCallback: 可选，退场结束后执行（用于清空 hash 等）
+  // - animated: 可选，默认 true 带退场动画；hashchange/侧滑返回传 false 无动画
+  //   （iOS 系统侧滑返回已有系统级动画，JS 再叠加 CSS 退场会导致 panel "先重现再退出"闪烁）
   // - 如果栈内还有下层场景，下层场景会自然显露（DOM 未销毁），其 init 不重新调用
   // - 如果栈空，隐藏 sceneLayer，回到宿主
-  function popSceneLayer(afterCallback) {
+  function popSceneLayer(afterCallback, animated) {
     var top = sceneStack[sceneStack.length - 1];
     if (!top) {
       if (typeof afterCallback === 'function') afterCallback();
@@ -121,9 +123,26 @@
     }
     // 防止系统侧滑与代码返回重复触发退场
     if (!top.host.parentNode || top.host.classList.contains('app-scene-layer__panel--exit')) {
+      if (typeof afterCallback === 'function') afterCallback();
       return;
     }
     clearAllPressStates();
+
+    if (animated === false) {
+      // 无动画：直接移除 panel（用于 hashchange/侧滑返回，系统动画已完成）
+      top.host.remove();
+      sceneStack.pop();
+      if (sceneStack.length === 0) {
+        sceneLayer.hidden = true;
+        sceneLayer.className = 'app-scene-layer';
+        appState.currentRouteId = '';
+      } else {
+        appState.currentRouteId = sceneStack[sceneStack.length - 1].routeId;
+      }
+      if (typeof afterCallback === 'function') afterCallback();
+      return;
+    }
+
     top.host.classList.add('app-scene-layer__panel--exit');
     var onTransitionEnd = function () {
       top.host.removeEventListener('transitionend', onTransitionEnd);
@@ -447,7 +466,9 @@
       if (!overlayLayer.hidden) {
         closeOverlay();
       } else if (sceneStack.length > 0) {
-        popSceneLayer();
+        // hashchange 触发的返回无动画：iOS 侧滑返回时系统已完成页面过渡动画，
+        // JS 再叠加 CSS 退场会导致 panel "先重现再退出"闪烁
+        popSceneLayer(null, false);
       }
       return;
     }
@@ -459,8 +480,8 @@
         return;
       }
       if (isRouteInStack(routeId)) {
-        // routeId 在栈中但非栈顶：侧滑返回到中间层级，弹一层
-        popSceneLayer();
+        // routeId 在栈中但非栈顶：侧滑返回到中间层级，弹一层（无动画）
+        popSceneLayer(null, false);
         return;
       }
     }

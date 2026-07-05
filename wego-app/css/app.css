@@ -19,6 +19,33 @@ button, [role="button"], [role="radio"], [role="checkbox"],
   user-select: none;
 }
 
+/* 触控设备上 :active 伪类可能在 touchend 后残留（移动端 Safari 已知行为），
+   导致页面切换后入口仍显示按压态。此处将 :active 的按压效果覆盖回各组件默认值，
+   完全由 JS 的 .is-pressed 类控制触控按压态。桌面端（hover: hover）不受影响。 */
+@media (hover: none) {
+  .cell--clickable:active { background: var(--bg-surface); }
+  .form-body--clickable:active,
+  .form-body__select:active { background: var(--bg-surface); }
+  .btn--strong:active { background: var(--bg-brand); }
+  .btn--medium:active,
+  .btn--weak:active,
+  .btn--danger:active { background: var(--bg-overlay-l1); }
+  .counter__btn:active { background: var(--bg-surface); }
+  .link:active,
+  .link--inline:active { background: transparent; }
+  .link--disabled:active { background: transparent; }
+  .navbar__left-btn:active,
+  .navbar__left-text:active,
+  .navbar__action:active,
+  .bottom-nav__item:active,
+  .form-body__upload:active,
+  .form-body__icon-action:active,
+  .icon-text-btn:active,
+  .form-dropdown__item:active,
+  .host-shell-grid-entry:active,
+  .host-shell-link-button:active { opacity: 1; }
+}
+
 .preview-shell {
   min-height: 100vh;
   min-height: 100dvh;
