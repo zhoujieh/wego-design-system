@@ -69,6 +69,7 @@
 
   function navigate(routeId) {
     if (!routeId) return;
+    dismissToasts({ immediate: true });
     if (window.location.hash === '#/' + routeId) {
       openRoute(routeId);
       return;
@@ -356,16 +357,38 @@
     if (toastRemoveTimer) { clearTimeout(toastRemoveTimer); toastRemoveTimer = 0; }
   }
 
-  function removeCurrentToast() {
-    if (!currentToast) return;
-    var old = currentToast;
+  function getToastNodes() {
+    return toastHost ? Array.from(toastHost.querySelectorAll('.toast')) : [];
+  }
+
+  function dismissToasts(options) {
+    options = options || {};
+    clearToastTimers();
+    var toastNodes = getToastNodes();
+    if (!currentToast && toastNodes.length === 0) return;
     currentToast = null;
-    old.classList.remove('is-visible');
-    old.classList.add('is-leaving');
-    var ref = old;
+
+    if (options.immediate) {
+      toastNodes.forEach(function (node) { node.remove(); });
+      return;
+    }
+
+    toastNodes.forEach(function (node) {
+      node.classList.remove('is-visible');
+      node.classList.add('is-leaving');
+    });
     toastRemoveTimer = setTimeout(function () {
-      if (ref.parentNode) ref.parentNode.removeChild(ref);
+      toastNodes.forEach(function (node) { node.remove(); });
     }, TOAST_LEAVE_DURATION);
+  }
+
+  function removeCurrentToast() {
+    dismissToasts();
+  }
+
+  function dismissToastForPageAction(event) {
+    if (event && event.target && event.target.closest && event.target.closest('.toast')) return;
+    dismissToasts({ immediate: true });
   }
 
   // 入参形态：
@@ -383,11 +406,8 @@
     var variant = opts.variant === 'guide' ? 'guide' : 'default';
     var isGuide = variant === 'guide';
 
-    clearToastTimers();
-    // 清理残留的淡出中 toast（避免 onAction 链式调用 ctx.toast 时旧 toast DOM 残留）
-    var leavingToasts = toastHost.querySelectorAll('.toast.is-leaving');
-    leavingToasts.forEach(function (t) { t.remove(); });
-    removeCurrentToast();
+    // 同屏互斥：新 toast 出现前同步移除当前与离场中的旧 toast，避免短时并存。
+    dismissToasts({ immediate: true });
 
     var el = document.createElement('div');
     el.className = 'toast toast--' + variant + ' is-floating';
@@ -421,10 +441,10 @@
       }
       btn.addEventListener('click', function (e) {
         e.stopPropagation();
+        dismissToasts({ immediate: true });
         if (typeof opts.onAction === 'function') {
           try { opts.onAction(); } catch (err) {}
         }
-        removeCurrentToast();
       });
       el.appendChild(btn);
     }
@@ -436,7 +456,7 @@
         if (actionBtn) {
           actionBtn.click();
         } else {
-          removeCurrentToast();
+          dismissToasts({ immediate: true });
         }
       });
     }
@@ -484,6 +504,7 @@
 
   function openRoute(routeId) {
     if (!routeId) return;
+    dismissToasts({ immediate: true });
     var config = routeConfigs.get(routeId);
     if (config) {
       ensureStyle(config.style);
@@ -567,14 +588,14 @@
 
   tabTriggers.forEach(function (trigger) {
     trigger.addEventListener('click', function () {
+      dismissToasts({ immediate: true });
       closeOverlay();
       clearSceneLayer();
-      // Tab 切换意味着用户离开当前功能模块，toast 不跨 Tab 保持
-      clearToastTimers();
-      removeCurrentToast();
       setActiveTab(trigger.dataset.hostTabTrigger);
     });
   });
+
+  document.addEventListener('click', dismissToastForPageAction, { capture: true });
 
   // 判断 routeId 是否已在 push 栈中（用于区分侧滑返回与前进导航）
   function isRouteInStack(routeId) {
@@ -588,6 +609,7 @@
   // - 栈顶已匹配：无操作（避免重复打开）
   window.addEventListener('hashchange', function () {
     var routeId = routeFromHash();
+    dismissToasts({ immediate: true });
 
     // hash 变空：返回到宿主（iOS 侧滑 / history.back 最常见场景）
     if (!routeId) {
