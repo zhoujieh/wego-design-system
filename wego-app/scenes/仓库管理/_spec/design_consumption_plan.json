@@ -1,0 +1,218 @@
+{
+  "matched_uikit": null,
+  "scene_fit_reason": "本任务是『宿主入口 + 仓库列表 + 全屏仓库编辑页』的组合型场景。仓库列表页没有现成精确 UI Kit，适合走 generic-mobile-task-page；新增/编辑仓库页属于典型的业务资料编辑和规则配置，适合命中 biz-rule-config。",
+  "navigation_pattern": "宿主宫格入口打开 push 列表页；列表页导航栏右侧文字入口和卡片内编辑入口都打开 full-screen-modal 形式的仓库编辑页",
+  "layout_pattern": "host-entry surface 使用宿主宫格入口；warehouse-list surface 使用卡片模式 M2（phone-body 16px 横向 padding + 业务卡片列表）；warehouse-editor surface 使用通栏模式 M1（phone-body 0px 横向 padding + form-group / cell-group 内容不加 --card 修饰）",
+  "interaction_pattern": "仓库列表查看 + 新增/编辑统一保存回填 + 删除二次确认",
+  "app_target": {
+    "mode": "wego-app-scene",
+    "app_root": "wego-app",
+    "scene_folder": "wego-app/scenes/仓库管理",
+    "route_id": "my-warehouse-management",
+    "route_mode": "hash",
+    "runtime_entry": "scene.js"
+  },
+  "surface_designs": [
+    {
+      "surface_id": "host-entry",
+      "role": "host-entry",
+      "match_status": "fallback",
+      "matched_uikit": null,
+      "matched_page_pattern": null,
+      "matched_blueprint": "mobile-host-entry",
+      "presentation_ref": "",
+      "scene_fit_reason": "宿主入口只承接『我的』Tab 应用中心中的一级宫格入口，按固定宿主 App 的 grid-entry 规则挂载，不重画宿主页面。",
+      "component_mapping": [
+        {
+          "block": "入口：『我的』Tab → 应用中心 → 仓库管理（宫格入口）",
+          "consumption_mode": "free-composition",
+          "selected": "宿主 my-app-center 分组中追加 .host-shell-grid-entry（img.host-shell-grid-entry__icon 引用 ./lib/icons/app-center/配货管理.svg + span.host-shell-grid-entry__label『仓库管理』），route_id=my-warehouse-management",
+          "constraint_ref": {
+            "pagePattern": "",
+            "rule_id": "",
+            "trigger": ""
+          },
+          "reason": "命中 host_container.entry_type=grid-entry 与 mobile-host-entry blueprint 的入口挂载规则；仓库管理属于应用中心业务工具入口。",
+          "workflow_stage": "wego-design（主）, wego-ux（次）",
+          "scenario_type": "host-shell-route-binding",
+          "judgment_condition": "页面角色为 host-entry，宿主特征为『我的』Tab 应用中心宫格入口，leaf_level=1",
+          "decision_basis": "uikit-plan.json.fallbackPageBlueprints[mobile-host-entry] + library-consumption.json.hostShell.routeBinding.entryTypes"
+        }
+      ],
+      "allowed_page_styles": [
+        "宿主入口沿用现有 host-shell-grid 样式，不在场景 CSS 中重复定义"
+      ],
+      "design_gap": ""
+    },
+    {
+      "surface_id": "warehouse-list",
+      "role": "primary-task-page",
+      "match_status": "fallback",
+      "matched_uikit": null,
+      "matched_page_pattern": null,
+      "matched_blueprint": "generic-mobile-task-page",
+      "presentation_ref": "push；transition=slide-left；coversTabBar=true（主场景从宿主宫格打开）",
+      "scene_fit_reason": "仓库列表页以查看仓库资料和触发新增/编辑为主，属于通用移动任务页；当前 UI Kit 没有专门的仓库列表范式，但可由 navbar + 业务卡片列表 + dialog 安全组成。",
+      "component_mapping": [
+        {
+          "block": "仓库列表页导航栏：返回图标 + 标题『仓库管理』 + 右侧『新增仓库』入口",
+          "consumption_mode": "stable-variant",
+          "selected": "navbar + navbar__body--spaced（leftControl=back-icon、titleAlignment=center、actions=text、rightActionType=text、pageTransition=push、position=sticky）",
+          "constraint_ref": {
+            "pagePattern": "",
+            "rule_id": "",
+            "trigger": ""
+          },
+          "reason": "列表页从宿主进入，命中 push 导航稳定变体；右侧需要轻量新增入口，适合使用文字操作而非第二个主按钮。",
+          "workflow_stage": "wego-design（主）, wego-ux（次）",
+          "scenario_type": "component-consumption-decision",
+          "judgment_condition": "顶部导航容器，转场语义为宿主进入二级列表页，且当前页需要右侧文字操作",
+          "decision_basis": "components/navbar.json.representativeVariants[2]"
+        },
+        {
+          "block": "仓库列表：每条包含仓库图片、仓库名称、仓库地址，并支持编辑、删除仓库",
+          "consumption_mode": "free-composition",
+          "selected": ".warehouse-list（页面级业务列表） > .card.card--surface > .card__content.warehouse-card（内部使用 .wg-image.wg-image--rounded-md + 仓库名称/地址文本 + .btn.btn--weak.btn--sm『编辑』+ .btn.btn--danger.btn--sm『删除』）",
+          "constraint_ref": {
+            "pagePattern": "",
+            "rule_id": "",
+            "trigger": ""
+          },
+          "reason": "仓库行需要同时承接图片、名称、地址和两枚操作按钮，信息密度超过标准 cell 的单侧操作槽位，适合用 card 根结构配合页面级业务卡片样式承接。",
+          "workflow_stage": "wego-design（主）, wego-ux（次）",
+          "scenario_type": "no-uikit-page-composition",
+          "judgment_condition": "列表项需要图片缩略图和双操作按钮，不属于现有单行 cell 稳定场景",
+          "decision_basis": "generic-mobile-task-page fallback blueprint.allowedComponents[card,image,button] + components/card.json.usageHints"
+        }
+      ],
+      "allowed_page_styles": [
+        "卡片模式 M2：phone-body 16px 横向 padding，卡片列表组间距使用 12px",
+        "仓库卡片允许页面级两列布局、图片缩略图、状态标签和按钮区，不新增设计系统组件类",
+        "列表页底部补安全区 padding，避免内容被底部指示器遮挡"
+      ],
+      "design_gap": ""
+    },
+    {
+      "surface_id": "warehouse-editor",
+      "role": "secondary-task-page",
+      "match_status": "exact",
+      "matched_uikit": "biz-rule-config",
+      "matched_page_pattern": "biz-rule-config",
+      "matched_blueprint": null,
+      "presentation_ref": "uikit-plan.json.pagePatterns[biz-rule-config].presentation：full-screen-modal / slide-up-enter, slide-down-exit / dismissAction=page-level-save / coversTabBar=true",
+      "scene_fit_reason": "新增/编辑仓库页属于典型的业务资料编辑与规则配置页面，包含输入、选择、开关和统一保存动作，与 biz-rule-config 完全匹配。",
+      "component_mapping": [
+        {
+          "block": "新增/编辑仓库页导航栏：左侧『取消』、中间标题（新增仓库/编辑仓库）、右侧『保存』按钮",
+          "consumption_mode": "stable-variant",
+          "selected": "navbar + navbar__body--spaced(leftControl=text-cancel, titleAlignment=center, actions=button, rightActionType=button, pageTransition=present, position=sticky)",
+          "constraint_ref": {
+            "pagePattern": "biz-rule-config",
+            "rule_id": "compositionConstraints[1]",
+            "trigger": "主互斥配置项命中已注册稳定场景，且内嵌选择控件、标题/副标题和间距已由该场景承接"
+          },
+          "reason": "编辑页需要统一保存动作，命中 biz-rule-config 全屏模态固定导航模式。",
+          "workflow_stage": "wego-design（主）, wego-ux（次）",
+          "scenario_type": "component-consumption-decision",
+          "judgment_condition": "编辑型全屏模态页，需要统一保存而不是直接返回",
+          "decision_basis": "components/navbar.json.representativeVariants[4] + uikit-plan.json.pagePatterns[biz-rule-config].presentation"
+        },
+        {
+          "block": "基础信息字段：仓库名称、仓库编码、仓库联系人、联系电话、仓库地址、定位备注、门头图链接",
+          "consumption_mode": "free-composition",
+          "selected": ".form-group > .form-group__title『基础信息』 + .form-group__content（通栏 M1） > text/phone/textarea 使用 .form-body + .form-body__action；门头图使用 .form-body.form-body--vertical 承接 .wg-image 预览 + 输入说明",
+          "constraint_ref": {
+            "pagePattern": "biz-rule-config",
+            "rule_id": "compositionConstraints[4]",
+            "trigger": "section 由连续 cell 或连续 form-body 组成，且标题与内容属于同一业务分组"
+          },
+          "reason": "该组以资料录入为主，适合用连续 form-body 承接；图片字段保留在同组的纵向字段中，仍保持业务分组连续性。",
+          "workflow_stage": "wego-design（主）, wego-ux（次）",
+          "scenario_type": "component-consumption-decision",
+          "judgment_condition": "同一分组内存在文本、电话、多行地址和图片链接录入",
+          "decision_basis": "uikit-plan.json.pagePatterns[biz-rule-config].compositionConstraints[4] + components/form.json + components/input.json + components/image.json"
+        },
+        {
+          "block": "履约能力字段：仓库类型、服务范围、支持同城配送、支持门店自提、支持直播备货、默认发货仓",
+          "consumption_mode": "free-composition",
+          "selected": ".cell-group > .cell-group__title『履约能力』 + .cell-group__content（通栏 M1） > 枚举行使用 .cell.cell--single.cell--bg-white.cell--clickable（.cell__action > span.cell__action-text + i.cell__arrow）；布尔项使用 .cell.cell--single.cell--bg-white（.cell__action > .switch）",
+          "constraint_ref": {
+            "pagePattern": "biz-rule-config",
+            "rule_id": "compositionConstraints[5]",
+            "trigger": "右侧为 switch、radio-group、checkbox-group、button 等独立控件时，整行保持静态，由控件自身承担交互"
+          },
+          "reason": "该组同时存在枚举选择和布尔开关；选择项保留整行 clickable，开关项由 switch 自身承担交互热区。",
+          "workflow_stage": "wego-design（主）, wego-ux（次）",
+          "scenario_type": "component-consumption-decision",
+          "judgment_condition": "同组配置项混合了选择行与开关行",
+          "decision_basis": "uikit-plan.json.pagePatterns[biz-rule-config].compositionConstraints[5,6] + components/cell.json.behavior.click + components/switch.json"
+        },
+        {
+          "block": "库存与发货字段：安全库存、单日处理上限、发货时效、温层要求、锁定预占库存、支持跨区域调拨",
+          "consumption_mode": "free-composition",
+          "selected": ".form-group > .form-group__title『库存与发货』 + .form-group__content（通栏 M1） > 数字字段使用 .form-body + .number-input；枚举字段使用 .form-body.form-body--clickable + .form-body__select；开关字段使用 .form-body + .form-body__right-btn > .switch",
+          "constraint_ref": {
+            "pagePattern": "biz-rule-config",
+            "rule_id": "compositionConstraints[4]",
+            "trigger": "section 由连续 cell 或连续 form-body 组成，且标题与内容属于同一业务分组"
+          },
+          "reason": "本组既有数字录入，也有发货规则选择和布尔开关，统一用 form-body 体系能保持字段对齐和录入节奏。",
+          "workflow_stage": "wego-design（主）, wego-ux（次）",
+          "scenario_type": "component-consumption-decision",
+          "judgment_condition": "连续字段编辑，需要稳定的标签列和输入列对齐",
+          "decision_basis": "components/form.json.representativeVariants + components/input.json.number input"
+        },
+        {
+          "block": "补充信息字段：仓库备注、启用状态",
+          "consumption_mode": "free-composition",
+          "selected": ".form-group > .form-group__title『补充信息』 + .form-group__content（通栏 M1） > 备注使用 .form-body.form-body--vertical + textarea；启用状态使用 .form-body + .form-body__right-btn > .switch",
+          "constraint_ref": {
+            "pagePattern": "biz-rule-config",
+            "rule_id": "compositionConstraints[3]",
+            "trigger": "helper 文案仅重复摘要、选中态、禁用条件、跳转语义或结构已表达的信息"
+          },
+          "reason": "补充信息以备注和启停开关为主，通过字段结构直接表达，不额外叠加重复 helper。",
+          "workflow_stage": "wego-design（主）, wego-ux（次）",
+          "scenario_type": "component-consumption-decision",
+          "judgment_condition": "同组字段包含长文本和单一开关，结构已足够表达业务语义",
+          "decision_basis": "uikit-plan.json.pagePatterns[biz-rule-config].compositionConstraints[3] + components/form.json"
+        }
+      ],
+      "allowed_page_styles": [
+        "通栏模式 M1：phone-body 0px 横向 padding，分组内容不加 --card 修饰",
+        "组间距使用 8px，图片预览和提示文案只允许业务作用域样式，不新增组件类",
+        "底部滚动区域补 calc(var(--spacer-40) + var(--safe-area-bottom, 0px))"
+      ],
+      "design_gap": ""
+    }
+  ],
+  "component_mapping": [],
+  "spec_refs_used": {
+    "layout": ".codex/skills/wego-design/specs/布局与间距规范.md",
+    "interaction": ".codex/skills/wego-design/specs/交互设计原则.md",
+    "copy": ".codex/skills/wego-design/specs/文案与数据规范.md",
+    "visual": ".codex/skills/wego-design/specs/设计风格与品牌原则.md",
+    "motion": ".codex/skills/wego-design/specs/动效与视觉效果.md"
+  },
+  "implementation_constraints": [
+    "新增宿主入口时只按 route_id=my-warehouse-management 增量更新 wego-app/js/routes.js 和 my-app-center 宫格，不重画宿主壳",
+    "warehouse-list surface 使用卡片模式 M2，不把仓库列表硬塞进 cell-group",
+    "warehouse-editor surface 使用 biz-rule-config 的通栏模式 M1，不允许再套 form-group__content--card 或 cell-group__content--card",
+    "新增/编辑仓库页必须通过 full-screen-modal 打开，且使用『取消 + 保存』导航模式；不得改成 push 或 sheet",
+    "列表页新增入口放在 navbar 右侧文字操作位，不再额外放第二个页面级 strong 按钮",
+    "删除仓库必须走 dialog 二次确认，确认后再更新列表",
+    "保存后必须回填仓库列表并给出 toast 反馈，默认使用内存状态，不实现 localStorage 持久化",
+    "运行时禁止 fetch()/XHR，本场景全部模板由 scene.js 注册"
+  ],
+  "page_presentation": {
+    "type": "push",
+    "transition": "slide-left",
+    "dismiss_action": "back-button",
+    "overlay_level": "scene-layer",
+    "covers_tab_bar": true,
+    "source_surface": "warehouse-list",
+    "source_page_pattern": null,
+    "note": "主场景从宿主宫格进入采用 push；warehouse-editor surface 另行绑定 biz-rule-config 的 full-screen-modal 打开方式，由列表页中的新增/编辑入口触发"
+  },
+  "delivery_hint": "next-step"
+}

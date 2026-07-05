@@ -1,0 +1,127 @@
+{
+  "requirement_coverage": [
+    {
+      "requirement": "仓库列表包含仓库图片、名称、地址",
+      "status": "covered",
+      "evidence": "scene.js 列表卡片输出 .wg-image、warehouse-card__title、warehouse-card__address"
+    },
+    {
+      "requirement": "支持编辑、删除仓库",
+      "status": "covered",
+      "evidence": "列表卡片提供『编辑』『删除』按钮；编辑打开 full-screen-modal，删除走 dialog 二次确认"
+    },
+    {
+      "requirement": "新增仓库入口放在导航栏",
+      "status": "covered",
+      "evidence": "列表页 navbar 右侧 data-action=create 文案为『新增仓库』"
+    },
+    {
+      "requirement": "新增仓库页面字段尽量补全",
+      "status": "covered",
+      "evidence": "编辑页覆盖基础信息、履约能力、库存与发货、补充信息四组字段"
+    }
+  ],
+  "scene_judgement_check": {
+    "expected_scene_category": "list",
+    "actual_scene_category": "list + secondary form-edit",
+    "status": "pass",
+    "owner": "wego-product"
+  },
+  "surface_design_check": {
+    "page_surfaces_count": 3,
+    "surface_designs_count": 3,
+    "status": "pass"
+  },
+  "uikit_consumption_check": {
+    "host_entry": "fallback mobile-host-entry",
+    "warehouse_list": "fallback generic-mobile-task-page",
+    "warehouse_editor": "exact biz-rule-config",
+    "status": "pass"
+  },
+  "component_discipline_check": {
+    "status": "pass",
+    "findings": [
+      "宿主入口沿用既有 grid-entry 结构",
+      "列表页复用 navbar/card/image/button",
+      "编辑页复用 form-group/form-body/cell-group/switch"
+    ]
+  },
+  "spec_ref_check": {
+    "status": "pass",
+    "refs": [
+      ".codex/skills/wego-design/specs/文案与数据规范.md",
+      ".codex/skills/wego-design/specs/布局与间距规范.md",
+      ".codex/skills/wego-design/specs/交互设计原则.md"
+    ]
+  },
+  "copy_check": {
+    "status": "pass",
+    "notes": [
+      "导航文案、按钮文案保持短句",
+      "时间/数量字段未引入不必要长文案"
+    ]
+  },
+  "route_check": {
+    "route_id": "my-warehouse-management",
+    "registered_in_routes": true,
+    "tab": "my",
+    "group": "my-app-center",
+    "entry_type": "grid-entry",
+    "status": "pass"
+  },
+  "interaction_check": {
+    "status": "pass",
+    "notes": [
+      "新增和编辑共用全屏表单，保存后回填列表并 toast 提示",
+      "删除需二次确认",
+      "支持空列表后的新增入口"
+    ]
+  },
+  "layout_check": {
+    "status": "pass",
+    "notes": [
+      "列表页使用卡片模式 M2：body 横向 padding 16px",
+      "编辑页使用通栏模式 M1：body 横向 padding 0px，分组内容不加 --card"
+    ]
+  },
+  "app_scene_check": {
+    "scene_folder": "wego-app/scenes/仓库管理",
+    "register_scene": true,
+    "fetch_or_xhr_used": false,
+    "single_host_entry": true,
+    "status": "pass"
+  },
+  "deployment_readiness_check": {
+    "push_attempted": false,
+    "push_commit_hash": "",
+    "deploy_status": "not-run",
+    "production_domain": "",
+    "fallback_local_entry": "wego-app/index.html",
+    "errors": [
+      "本轮未执行 git push / 线上部署，当前仅完成本地原型与静态验收"
+    ]
+  },
+  "automated_checks": {
+    "script": "node scripts/validate-wego-design.mjs --scope=changed",
+    "exit_code": 0,
+    "errors": [],
+    "warnings_count": 0,
+    "key_findings": [
+      "wego-design 守门验证通过",
+      "changed 范围内错误 0、警告 0"
+    ]
+  },
+  "risk_log": [
+    {
+      "level": "low",
+      "owner": "wego-tests",
+      "message": "未做真实浏览器点击回归，新增/编辑/删除流程仍建议在 wego-app/index.html 中手动点一遍"
+    }
+  ],
+  "manual_verify_items": [
+    "在 wego-app/index.html 中打开『我的 → 应用中心 → 仓库管理』，确认宫格入口可进入",
+    "验证导航栏『新增仓库』可打开全屏编辑页并保存回列表",
+    "验证任一仓库的编辑、删除、删除后空态按钮都能正常工作"
+  ],
+  "final_status": "pass-with-risk"
+}

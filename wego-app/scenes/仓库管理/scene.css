@@ -1,0 +1,236 @@
+.warehouse-page,
+.warehouse-editor {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  background: var(--bg-page);
+}
+
+.warehouse-page__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-12);
+  padding: var(--spacer-12) 16px calc(var(--spacer-40) + var(--safe-area-bottom, 0px));
+}
+
+.warehouse-page__summary {
+  border-radius: var(--radius-8);
+  padding: 16px;
+  background: var(--bg-surface);
+}
+
+.warehouse-page__summary-title {
+  color: var(--text-default);
+  font-size: var(--body-lg-font-size);
+  line-height: var(--body-lg-line-height);
+  font-weight: var(--font-weight-medium);
+}
+
+.warehouse-page__summary-text {
+  margin-top: var(--spacer-4);
+  color: var(--text-secondary);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+}
+
+.warehouse-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-12);
+}
+
+.warehouse-list__card .card__content {
+  padding: 16px;
+}
+
+.warehouse-card {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.warehouse-card__media {
+  flex-shrink: 0;
+}
+
+.warehouse-card__image {
+  width: 88px;
+  height: 88px;
+  overflow: hidden;
+  background: var(--bg-subtle);
+}
+
+.warehouse-card__image .wg-image__src {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.warehouse-card__content {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.warehouse-card__title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.warehouse-card__title {
+  margin: 0;
+  color: var(--text-default);
+  font-size: var(--body-lg-font-size);
+  line-height: var(--body-lg-line-height);
+  font-weight: var(--font-weight-medium);
+}
+
+.warehouse-card__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.warehouse-card__badge {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: var(--bg-subtle);
+  color: var(--text-secondary);
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+}
+
+.warehouse-card__badge.is-highlight {
+  background: var(--bg-brand-surface-l1);
+  color: var(--text-brand);
+}
+
+.warehouse-card__badge.is-enabled {
+  background: var(--status-success-surface-l1);
+  color: var(--status-success-default);
+}
+
+.warehouse-card__badge.is-disabled {
+  background: var(--bg-subtle);
+  color: var(--text-tertiary);
+}
+
+.warehouse-card__address,
+.warehouse-card__meta {
+  margin: 8px 0 0;
+  color: var(--text-secondary);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+}
+
+.warehouse-card__meta--secondary {
+  color: var(--text-tertiary);
+}
+
+.warehouse-card__footer {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.warehouse-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 40px 20px;
+  border-radius: var(--radius-8);
+  background: var(--bg-surface);
+  text-align: center;
+}
+
+.warehouse-empty__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--bg-brand-surface-l1);
+  color: var(--text-brand);
+  font-size: 24px;
+}
+
+.warehouse-empty__title {
+  color: var(--text-default);
+  font-size: var(--body-lg-font-size);
+  line-height: var(--body-lg-line-height);
+  font-weight: var(--font-weight-medium);
+}
+
+.warehouse-empty__desc {
+  color: var(--text-secondary);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+}
+
+.warehouse-editor__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-8);
+  padding: var(--spacer-8) 0 calc(var(--spacer-40) + var(--safe-area-bottom, 0px));
+}
+
+.warehouse-editor__cover-field {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.warehouse-editor__cover {
+  width: 100%;
+  height: 168px;
+  overflow: hidden;
+  background: var(--bg-subtle);
+}
+
+.warehouse-editor__cover .wg-image__src {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.warehouse-editor__cover-field input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text-default);
+  font-size: var(--body-lg-font-size);
+  line-height: var(--body-lg-line-height);
+  font-family: var(--body-md-font-family);
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.warehouse-editor__cover-field input::placeholder {
+  color: var(--text-placeholder);
+}
+
+.warehouse-editor__cover-tip {
+  color: var(--text-tertiary);
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+}
+
+.warehouse-number-input {
+  margin-left: auto;
+}
