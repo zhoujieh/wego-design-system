@@ -91,7 +91,7 @@
         "preview/component-{slug}.html",
         "specs/*.md"
       ],
-      "consume": "默认输出 wego-app 静态 App 原型项目，不依赖前端框架；预览以 Vercel 固定链接为主，同时支持本地直接打开 wego-app/index.html；完整流程必须拆成 App 宿主、hash route、scene.js 注册场景、modal/sheet/push 等交互层，不能把所有内容聚合成一个长页面；运行时不得依赖 fetch()/XHR 读取本地 HTML 片段。",
+      "consume": "默认输出 wego-app 静态 App 原型项目，不依赖前端框架；预览以 Vercel 固定链接为主，同时支持本地直接打开 wego-app/index.html；完整流程必须拆成 App 宿主、hash route、scene.js 注册场景、modal/sheet/push 等交互层，不能把所有内容聚合成一个长页面；运行时不得依赖 fetch()/XHR 读取本地 HTML 片段。wego-app/lib/ 是由 .codex/skills/wego-design/ 源资源同步出来的部署副本，不作为修改源；样式、Token、iconfont 或资产变更必须先改源文件，再运行 node scripts/sync-wego-app-lib.mjs。",
       "deliverables": [
         "wego-app/ 静态 App 项目",
         "wego-app/index.html 唯一宿主入口",
@@ -104,7 +104,8 @@
         "Vercel 可直接托管 wego-app/ 静态目录",
         "样式、脚本和资源路径为相对路径",
         "业务场景运行时不依赖 fetch()/XHR 读取本地 HTML",
-        "同一链接电脑端手机壳预览、移动端全屏展示"
+        "同一链接电脑端手机壳预览、移动端全屏展示",
+        "wego-app/lib/ 与 .codex/skills/wego-design/ 源资源保持同步，禁止只改部署副本"
       ]
     },
     "useTokensOnly": {
@@ -139,6 +140,7 @@
         "iconfont.css",
         "assets/"
       ],
+      "copyRule": "copyFiles 只描述部署副本需要包含的资源；不得直接编辑 wego-app/lib/ 内文件。需要改 Token、组件聚合 CSS、iconfont 或 assets 时，先修改 .codex/skills/wego-design/ 源文件，再运行 node scripts/sync-wego-app-lib.mjs 生成副本。",
       "consume": "UI Kit 只作业务页面结构参考（看组件如何组合），不复制外壳；App 宿主页不是 UI Kit，固定宿主 App 正式维护在 wego-app/index.html，不再为每个任务复制 host-shell.*。先检查 page_spec.app_target + host_container + route_id：wego-design 只输出宿主入口/结果回填和页面打开方式依据，wego-ux 只增量更新 wego-app/js/routes.js、对应 scene.js/scene.css、入口和状态反馈，不重画宿主 Tab、工作台、我的页等现成内容。随后在 uikit-plan.json 中判断业务页所属范式；设置、权限、规则、配置类页面优先参考 ui_kits/biz-rule-config/index.html。所有场景使用同链接预览外壳规则：电脑端显示手机壳，移动端隐藏外壳视觉；业务场景不得依赖外壳类实现内容结构。禁止事项：不把 app 当 UI Kit；不重画固定宿主 App；不把 .uikit-shell/.phone-frame/.phone-screen 当业务结构；不发明组件类（如 .profile-header）；不发明组件子元素类（如 .profile-header__name）；不发明组件修饰类（如 .cell__action-text--accent）；不使用 inline style 控制颜色/间距；不硬编码 hex/rem 值。同步 assets/ 时必须整体复制到 wego-app/lib/，不做任何子目录筛选或文件判断。",
       "forbidden": [
         "复制 UI Kit 外壳作为页面容器",
@@ -161,7 +163,7 @@
         "生成或更新 scene.js/scene.css，通过 window.WegoApp.registerScene 注册 template、presentation 和真实交互",
         "根据 page_presentation 分派 push、modal、sheet 或 full-screen-modal",
         "实现真实业务状态变化、反馈和必要回填，但不默认强制 localStorage 持久化",
-        "同步设计系统运行资源到 wego-app/lib/",
+        "修改 .codex/skills/wego-design/ 源资源后运行 node scripts/sync-wego-app-lib.mjs，同步设计系统运行资源到 wego-app/lib/",
         "复核电脑端手机壳、移动端全屏、Vercel 部署和本地直接打开都成立"
       ],
       "compositionConstraintsRule": "命中 pagePattern 后检查对应 `compositionConstraints` 字段，遵守其中的 trigger/use/avoid/allowWhen 约束。当前已定义的约束见 `uikit-plan.json` 中 biz-rule-config 的 compositionConstraints。"
@@ -398,9 +400,9 @@
         ],
         "verificationStandard": "新场景是否使用中文业务语义目录并落在 wego-app/scenes/？点击入口后是否在 App 内打开并完成真实业务状态变化？是否只在需求明确时才做持久化？Vercel 与本地直开是否走同一套静态资源路径？"
       },
-      {
-        "id": "host-shell-route-binding",
-        "name": "App 宿主路径绑定",
+    {
+      "id": "host-shell-route-binding",
+      "name": "App 宿主路径绑定",
         "primaryWorkflowStage": "wego-ux",
         "secondaryWorkflowStages": [
           "wego-product",
@@ -423,12 +425,40 @@
         ],
         "secondaryLanding": [
           "wego-tests/SKILL.md 的 App 宿主路径验收规则"
-        ],
-        "verificationStandard": "wego-app/index.html 是否作为唯一宿主保留现成 UI/交互？同一路径任务二次迭代时是否只更新 route_id 对应入口、routes.js 和 scene，而不是新增第二套宿主壳或重画宿主内容？"
-      },
-      {
-        "id": "wego-app-scene-delivery",
-        "name": "wego-app 场景交付",
+      ],
+      "verificationStandard": "wego-app/index.html 是否作为唯一宿主保留现成 UI/交互？同一路径任务二次迭代时是否只更新 route_id 对应入口、routes.js 和 scene，而不是新增第二套宿主壳或重画宿主内容？"
+    },
+    {
+      "id": "design-resource-sync-boundary",
+      "name": "设计系统资源副本边界",
+      "primaryWorkflowStage": "wego-ux",
+      "secondaryWorkflowStages": [
+        "wego-design",
+        "wego-tests"
+      ],
+      "covers": [
+        "wego-app/lib 部署副本",
+        "设计系统源资源",
+        "Token 同步",
+        "组件聚合 CSS 同步",
+        "iconfont 和 assets 同步",
+        "禁止直接改副本"
+      ],
+      "judgmentLogic": "当任务涉及 App 运行资源、Token、组件样式、iconfont 或设计系统 assets 时，.codex/skills/wego-design/ 是源文件，wego-app/lib/ 只是部署副本。wego-ux 必须先修改源文件并运行 node scripts/sync-wego-app-lib.mjs 生成副本；不得直接编辑 wego-app/lib/ 来修样式或资源。wego-tests 必须检查副本与源资源一致，validate-wego-design.mjs 的 app.lib.out_of_sync 错误阻止通过。",
+      "landingPriority": [
+        "wego-ux/SKILL.md 的资源同步规则",
+        "library-consumption.json 的 copyRule / downstreamScenarios",
+        "scripts/validate-wego-design.mjs 的 app.lib.out_of_sync 守门"
+      ],
+      "secondaryLanding": [
+        "wego-tests/SKILL.md 的设计系统资源副本验收",
+        "AGENTS.md 的仓库级约束"
+      ],
+      "verificationStandard": "把具体资源名替换成'资源A'后，是否仍能判断源文件在 .codex/skills/wego-design/、部署副本在 wego-app/lib/，且只能通过同步脚本生成副本？"
+    },
+    {
+      "id": "wego-app-scene-delivery",
+      "name": "wego-app 场景交付",
         "primaryWorkflowStage": "wego-ux",
         "secondaryWorkflowStages": [
           "wego-product",

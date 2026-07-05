@@ -190,6 +190,7 @@
   --border-disabled: rgba(32, 47, 100, 0.06);
   --border-inverse: rgba(255, 255, 255, 0.70);
   --border-inverse-weak: rgba(255, 255, 255, 0.12);
+  --border-toast: rgba(255, 255, 255, 0.4);
 
   /* status-success */
   --status-success-default: #03c160;
@@ -415,7 +416,7 @@
   --z-sticky: 100;
   --z-dropdown: 200;
   --z-popover: 300;
-  --z-toast: 400;
+  --z-toast: 700;
   --z-overlay: 500;
   --z-modal: 600;
   --z-critical: 900;

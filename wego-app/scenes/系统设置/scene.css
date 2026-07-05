@@ -16,16 +16,6 @@
   padding: var(--spacer-8) 0 calc(var(--spacer-40) + var(--safe-area-bottom, 0px));
 }
 
-.system-settings__dot {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--status-danger-default);
-  margin-right: var(--spacer-8);
-  flex-shrink: 0;
-}
-
 .system-settings-logout {
   padding: var(--spacer-24) var(--spacer-16) 0;
 }

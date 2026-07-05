@@ -6,7 +6,7 @@
   "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "瞬时浮层提示，用于告知用户当前发生的事件或引导下一步操作。仅两种变体：默认 toast（居中纯文本告知）和引导 toast（左侧可选图标 + 必选文案 + 右侧可选操作）。同屏互斥，单次展示一个，触发页面跳转或操作其他功能时立即隐藏。",
+  "description": "瞬时浮层提示，用于告知用户当前发生的事件或引导下一步操作。仅两种变体：默认 toast（居中纯文本告知）和引导 toast（左侧可选图标 + 必选文案 + 右侧可选操作）。同屏互斥，单次展示一个。toast 挂载在宿主层，push/pop 场景切换与 overlay 关闭时保持显示（便于「保存 → 退出 → 反馈仍可见」流程），切 Tab 切换主功能模块时立即隐藏。",
   "semanticTypeCandidates": [
     "toast",
     "notification-toast",
@@ -30,7 +30,7 @@
       "strong"
     ],
     "state": [
-      "entering",
+      "initial",
       "visible",
       "leaving"
     ]
@@ -91,14 +91,14 @@
     "右侧操作按钮强弱由业务重要性决定：weak 用于次要引导并固定追加 icon-youjiantou16 箭头图标，strong 用于关键转化引导、不带箭头。",
     "右侧操作文案字号为 14px（var(--body-md-font-size)），与正文一致；按钮无左右内边距，文字与箭头图标间距为 0。",
     "左侧内容（图标/文案）与右侧操作按钮之间间距固定为 24px（var(--spacer-24)）。",
-    "引导 toast 宽度默认拉伸至屏幕宽度减去左右各 16px 边距，最大不超过 400px；高度根据内容自适应。"
+    "引导 toast 宽度默认拉伸至宿主容器宽度减去左右各 16px 边距，最大不超过 400px；高度根据内容自适应。"
   ],
   "behavior": {
     "autoClose": "默认 toast 自动关闭时长 4000ms，引导 toast 因含操作引导延长至 4500ms。",
     "conflicting": "同屏仅展示一个 toast，新 toast 出现时立即替换旧 toast，默认开启互斥。",
-    "hideTriggers": "页面跳转、操作页面其他功能、点击引导 toast 的右侧操作按钮均立即隐藏当前 toast。",
+    "hideTriggers": "切 Tab 切换主功能模块、点击引导 toast 的右侧操作按钮均立即隐藏当前 toast。push/pop 场景切换（进入/返回业务设置页）与 overlay 关闭（关闭模态/抽屉/全屏模态）时不隐藏，以便「保存 → 退出 → toast 反馈仍可见」。",
     "guideHitArea": "引导 toast 的点击热区为整个 toast 内容区域，点击任意位置都触发右侧 action 的点击行为；无 action 时点击任意位置直接隐藏。",
-    "position": "距底部 106px 居中悬浮，z-index 使用 var(--z-toast)。",
+    "position": "距底部 106px 居中悬浮，toast 宿主层 z-index 使用 var(--z-toast)=700，高于 overlay(500) 与 modal(600)，低于 critical(900)，确保浮于所有场景/模态/抽屉之上。",
     "animation": "入场自底部向上偏移 8px 淡入，时长 var(--duration-normal)，缓动 var(--ease-enter)；出场反向淡出，时长 var(--duration-fast)，缓动 var(--ease-exit)。"
   },
   "accessibility": {
@@ -124,25 +124,27 @@
     "--text-inverse",
     "--text-tertiary",
     "--text-brand",
+    "--font-family-icon",
     "--spacer-12",
     "--spacer-16",
+    "--spacer-8",
+    "--spacer-24",
     "--radius-8",
     "--body-md-font-family",
     "--body-md-font-size",
     "--body-md-line-height",
-    "--body-sm-font-size",
-    "--body-sm-line-height",
     "--font-weight-medium",
     "--duration-normal",
     "--duration-fast",
     "--ease-enter",
     "--ease-exit",
     "--z-toast",
-    "--stroke-hairline"
+    "--stroke-hairline",
+    "--shadow-sm"
   ],
   "designTokens": {
     "bg": "var(--bg-toast)",
-    "border": "0.5px solid var(--border-toast)",
+    "border": "var(--stroke-hairline) solid var(--border-toast)",
     "textColor": "var(--text-inverse)",
     "iconColor": "var(--text-inverse)",
     "actionWeakColor": "var(--text-tertiary)",
@@ -167,11 +169,6 @@
     "leaveEase": "var(--ease-exit)"
   },
   "cssCustomProperties": [
-    {
-      "name": "--toast-duration",
-      "default": "4000ms",
-      "appliesTo": "默认 toast 自动关闭时长，引导 toast 自动 +500ms"
-    },
     {
       "name": "--toast-bottom",
       "default": "106px",
@@ -223,7 +220,7 @@
       ".toast--default",
       ".toast--guide",
       ".toast.is-floating",
-      ".toast.is-entering",
+      ".toast.is-visible",
       ".toast.is-leaving"
     ],
     "optionalChildren": [

@@ -16,16 +16,38 @@
 - `wego-app/lib/` 是部署用设计系统资源副本
 - 旧的“每个任务生成一个独立原型文件夹”模式废弃
 
+## 技能触发矩阵
+
+对 Codex、Trae 等会读取仓库文档的 agent，同样按这套分流执行；不要只看文件名猜测技能。
+
+| 用户意图 / 请求特征 | 必须先触发的技能 | 前置条件 | 下一步交接 |
+| --- | --- | --- | --- |
+| 业务开发、做页面、做原型、做场景、接业务需求、做新业务编辑任务 | `wego-product` | 无 | `page_spec` 完成后交给 `wego-design`，再进入 `wego-ux`、`wego-tests` |
+| 已有 `page_spec`，要出页面范式、UI Kit、组件映射、打开方式、`design_consumption_plan` | `wego-design` | 已有 `page_spec` | `design_consumption_plan` 完成后交给 `wego-ux` |
+| 已有 `page_spec` + `design_consumption_plan`，要正式生成或更新 `wego-app` 场景 | `wego-ux` | 已落盘的 `page_spec` + `design_consumption_plan` | 原型完成后交给 `wego-tests` |
+| 验收、检查、回归、review 当前场景是否符合规格 | `wego-tests` | 当前场景已生成，且 `route_id` 已注册 | 输出 `acceptance_report`，必要时把问题归因回前置技能 |
+| 改组件、补 preview、改契约、改 UI Kit、改 metadata、补守门 | `wego-uxsystem-iterate` 的`迭代模式` | 当前目标属于设计系统本体或 UI Kit | 按 `references/workflow.md` / `sync-matrix.md` 同步 |
+| 补规则、沉淀经验、优化流程、修技能链路、修触发机制 | `wego-uxsystem-iterate` 的`工作流迭代模式` | 当前目标属于经验回流或工作流分流 | 按 `references/workflow-iteration.md` 回流到对应环节 |
+| 只要求检查组件是否合理、是否漂移、是否该收敛规则 | `wego-uxsystem-iterate` 的`审查模式` | 当前目标属于设计系统审查 | 先出 findings，再决定是否转迭代模式 |
+
+补充硬规则:
+
+- 用户只说“帮我做这个业务页面”这类模糊请求时，默认按业务开发处理，先走 `wego-product`，不允许直接跳过
+- 没有 `page_spec` 时，不直接触发 `wego-design`
+- 没有 `design_consumption_plan` 时，不直接触发 `wego-ux`
+- 组件/UI Kit/工作流问题，不要误走业务开发链路；优先判断是否应进入 `wego-uxsystem-iterate`
+- 技能总路由入口见 `.codex/skills/README.md`
+
 ## 如何开始(标准流水线)
 
-收到业务需求后,按顺序走 4 段,每段入口是对应 `SKILL.md`:
+收到业务需求后,按顺序走 4 段主链路,每段入口是对应 `SKILL.md`:
 
 1. `.codex/skills/wego-product/` → 输出 `page_spec`(需求理解、任务分类、场景判断)
 2. `.codex/skills/wego-design/` → 输出 `design_consumption_plan`(设计系统消费、UI Kit 映射)
 3. `.codex/skills/wego-ux/` → 更新 `wego-app` 静态 App 与对应 `scenes/` 场景模块
 4. `.codex/skills/wego-tests/` → 输出当前任务范围的 `acceptance_report`(验收)
 
-组件迭代、新增组件、组件契约与 preview 同步走第 5 个技能 `.codex/skills/wego-uxsystem-iterate/`。
+组件迭代、新增组件、组件契约与 preview 同步,以及工作流规则沉淀,都走第 5 个技能 `.codex/skills/wego-uxsystem-iterate/`。
 
 硬性交接规则:
 
@@ -49,6 +71,8 @@
 - `wego-tests/` — 最终验收,输出 `acceptance_report`
 - `wego-uxsystem-iterate/` — 项目级别迭代(组件迭代/UI Kit 迭代/工作流迭代)
 
+统一路由说明见 `.codex/skills/README.md`; agent 先判断用户意图,再决定命中哪个技能,不要直接按文件路径盲改。
+
 ## 仓库级约束
 
 以下约束跨技能通用,技能内不再重复:
@@ -56,6 +80,7 @@
 - 原型产物必须落在 `wego-app/` 静态 App 中;业务场景必须落在 `wego-app/scenes/{中文业务场景}/`,不能散落在仓库根目录;同一业务场景迭代复用原场景目录(详见 `wego-ux/SKILL.md`)
 - `wego-app/index.html` 是唯一宿主 App 入口;不为每个业务场景复制第二套宿主壳
 - 业务页面不得运行时依赖 `fetch()`/`XHR` 读取本地 HTML 片段;场景通过 `scene.js` 注册 template 与交互,确保 Vercel 和本地直接打开都可用
+- `wego-app/lib/` 是设计系统部署副本,禁止直接编辑其中的 CSS、字体、图标或图片;必须先修改 `.codex/skills/wego-design/` 源文件,再运行 `node scripts/sync-wego-app-lib.mjs` 同步
 - 原型交互必须体现真实业务流程和数据状态变化,但不默认强制 localStorage 持久化;只有需求明确要求刷新后保留时才做持久化
 - 设计系统本体迭代必须递增 `.codex/skills/wego-design/metadata.json` 的 `version`;纯仓库管理类变更可不递增(详见 `wego-uxsystem-iterate/SKILL.md`)
 - 不提交 `.DS_Store`、`.uploads/`

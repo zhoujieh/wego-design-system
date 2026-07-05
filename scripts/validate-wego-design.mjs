@@ -32,6 +32,14 @@ const rootRel = path.relative(repoRoot, libraryRoot) || '.';
 const APP_ROOT_REL = 'wego-app';
 const APP_ROOT = path.join(repoRoot, APP_ROOT_REL);
 const SCENES_ROOT = path.join(APP_ROOT, 'scenes');
+const APP_LIB_SYNC_MAP = [
+  { src: 'colors_and_type.css', dest: 'lib/colors_and_type.css', type: 'file' },
+  { src: 'components.css', dest: 'lib/components.css', type: 'file' },
+  { src: 'iconfont.css', dest: 'lib/iconfont.css', type: 'file' },
+  { src: 'assets/fonts', dest: 'lib/fonts', type: 'dir' },
+  { src: 'assets/icons', dest: 'lib/icons', type: 'dir' },
+  { src: 'assets/image', dest: 'lib/image', type: 'dir' },
+];
 const scopeArg = rawArgs.find(arg => arg.startsWith('--scope='));
 const requestedScope = args.has('--full')
   ? 'full'
@@ -1694,6 +1702,68 @@ function checkWegoAppStructure(context) {
   }
 }
 
+function listRelativeFiles(root) {
+  const out = [];
+  const walk = (dir, base = '') => {
+    if (!fs.existsSync(dir)) return;
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const rel = base ? `${base}/${entry.name}` : entry.name;
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        walk(full, rel);
+      } else {
+        out.push(rel);
+      }
+    }
+  };
+  walk(root);
+  return out.sort();
+}
+
+function filesEqualBinary(a, b) {
+  if (!fs.existsSync(a) || !fs.existsSync(b)) return false;
+  const sa = fs.statSync(a);
+  const sb = fs.statSync(b);
+  if (sa.size !== sb.size) return false;
+  return fs.readFileSync(a).equals(fs.readFileSync(b));
+}
+
+function dirsEqualBinary(a, b) {
+  if (!fs.existsSync(a) || !fs.existsSync(b)) return false;
+  const af = listRelativeFiles(a);
+  const bf = listRelativeFiles(b);
+  if (af.length !== bf.length) return false;
+  for (let i = 0; i < af.length; i += 1) {
+    if (af[i] !== bf[i]) return false;
+    if (!filesEqualBinary(path.join(a, af[i]), path.join(b, bf[i]))) return false;
+  }
+  return true;
+}
+
+function checkWegoAppLibSync(context) {
+  const syncRelevant = context.effectiveScope === 'full'
+    || context.changedFiles.some(file =>
+      file.startsWith(`${APP_ROOT_REL}/lib/`)
+      || file === 'scripts/sync-wego-app-lib.mjs'
+      || file === `${rootRel}/colors_and_type.css`
+      || file === `${rootRel}/components.css`
+      || file === `${rootRel}/iconfont.css`
+      || file.startsWith(`${rootRel}/assets/`)
+    );
+  if (!syncRelevant || !fs.existsSync(APP_ROOT)) return;
+
+  for (const item of APP_LIB_SYNC_MAP) {
+    const src = path.join(libraryRoot, item.src);
+    const dest = path.join(APP_ROOT, item.dest);
+    const equal = item.type === 'dir' ? dirsEqualBinary(src, dest) : filesEqualBinary(src, dest);
+    if (!equal) {
+      add('error', 'app.lib.out_of_sync',
+        `wego-app/${item.dest} 与设计系统源 ${rootRel}/${item.src} 不一致；不要直接修改 wego-app/lib/ 副本，请改源文件后运行 node scripts/sync-wego-app-lib.mjs`,
+        dest);
+    }
+  }
+}
+
 function checkMetadataVersionGate(context) {
   const designChanges = context.changedFiles.filter(file => file.startsWith(rootRel + '/'));
   if (designChanges.length === 0) return;
@@ -1763,6 +1833,7 @@ function main() {
   checkSingleShellRuleConflicts(context);
   checkTrackedJunk();
   checkWegoAppStructure(context);
+  checkWegoAppLibSync(context);
   checkPrototypeSurfaceDesigns(context);
   checkPrototypeJunkAndInternalCopy(context);
   checkPrototypeShellLeakage(context);

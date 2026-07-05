@@ -76,7 +76,7 @@
   display:inline-flex;
   align-items:center;
   background:var(--bg-toast);
-  border:0.5px solid var(--border-toast);
+  border:var(--stroke-hairline) solid var(--border-toast);
   border-radius:var(--radius-8);
   color:var(--text-inverse);
   font-family:var(--body-md-font-family);
@@ -85,6 +85,7 @@
   padding:12px var(--spacer-16);
   z-index:var(--z-toast);
   box-shadow:var(--shadow-sm);
+  pointer-events:auto;
 }
 
 .toast--default{
@@ -98,7 +99,7 @@
 .toast--guide{
   justify-content:flex-start;
   gap:0;
-  width:calc(100vw - 2 * var(--toast-edge-gap));
+  width:calc(100% - var(--toast-edge-gap) - var(--toast-edge-gap));
   max-width:var(--toast-guide-max-width);
   padding:12px var(--spacer-12);
   cursor:pointer;
@@ -359,7 +360,7 @@
     });
   });
 
-  // 触发其他元素时立即隐藏（演示"操作页面其他功能"隐藏规则）
+  // 演示层手动收起：真实宿主只在切 Tab 或点击引导操作时隐藏 toast
   document.addEventListener('click', function(e) {
     var t = e.target;
     if (t.closest('[data-trigger]')) return;

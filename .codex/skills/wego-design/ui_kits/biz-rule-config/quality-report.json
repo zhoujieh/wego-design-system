@@ -6,16 +6,16 @@
   "coversTabBar": true,
   "screensGenerated": 1,
   "coreComponentsUsed": ["navbar", "cell", "form"],
-  "supportComponentsUsed": ["checkbox", "switch", "radio"],
+  "supportComponentsUsed": ["checkbox", "switch", "radio", "toast"],
   "previewClassReuseRate": 0.933,
-  "reuseAssessment": "主体内容已收敛为一个通用业务规则配置母版，基础信息、规则开关和范围权限都复用已注册组件结构；主骨架使用 navbar、cell、form，辅助选择能力由 checkbox、switch、radio 承载；整行点击只保留给进入下一层的字段/列表行，规则开关改由 switch 本体承担交互；section 标题与分组内容都回收为 cell/form 正式 group 能力，示例中的页面级主操作统一收口到导航操作区，避免页面底部重复主操作。",
+  "reuseAssessment": "主体内容已收敛为一个通用业务规则配置母版，基础信息、规则开关和范围权限都复用已注册组件结构；主骨架使用 navbar、cell、form，辅助选择能力由 checkbox、switch、radio 承载，保存反馈复用正式 toast 宿主层；整行点击只保留给进入下一层的字段/列表行，规则开关改由 switch 本体承担交互；section 标题与分组内容都回收为 cell/form 正式 group 能力，示例中的页面级主操作统一收口到导航操作区，避免页面底部重复主操作。",
   "a11yFixes": [
     "可点击 cell、radio 选项、switch 本体和导航操作补齐 role、aria-checked 与键盘触发",
     "去掉默认 helper 跳转说明，避免出现无必要的说明入口和误导性结构"
   ],
   "inventedComponents": [],
   "recommendedRefactors": {},
-  "interactiveStatesRendered": ["active", "editing", "selected", "on", "off"],
+  "interactiveStatesRendered": ["active", "editing", "selected", "on", "off", "toast-visible", "toast-leaving"],
   "primaryActionPerScreen": true,
   "mockDataDensity": {
     "settingSections": 3,
@@ -56,6 +56,7 @@
     "模态页首屏展示以稳定落点为准：默认直接展示打开后的最终态，避免自动入场动画让截图停在半开中间态。",
     "真实项目中应保持单一页面级主操作，不在页面内容区或底部重复放保存按钮，也不要默认补一栏 helper 说明文案。",
     "iconfont 图标用于跳转指示器（icon-youjiantou16）。",
-    "form-body 中嵌入 radio-group 时必须使用 .form-body--preserve-content-align + .form-body__right-btn + .radio-field-group 结构，不得发明 .form-body__radio-item 等自定义包装层。"
+    "form-body 中嵌入 radio-group 时必须使用 .form-body--preserve-content-align + .form-body__right-btn + .radio-field-group 结构，不得发明 .form-body__radio-item 等自定义包装层。",
+    "保存后关闭全屏模态时，反馈使用正式 toast 组件挂在 Showcase 宿主层，不回退为 .uikit-toast 自定义气泡。"
   ]
 }

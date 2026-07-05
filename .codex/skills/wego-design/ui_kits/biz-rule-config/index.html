@@ -94,26 +94,16 @@ html, body { min-height: auto; }
   font-size: var(--body-lg-font-size);
 }
 
-.uikit-toast {
+.uikit-toast-host {
   position: absolute;
-  left: 50%;
-  bottom: 120px;
-  transform: translate(-50%, 16px);
-  padding: 8px 16px;
-  border-radius: var(--radius-full);
-  background: rgba(30, 32, 40, 0.82);
-  color: var(--text-inverse);
-  font-size: var(--body-sm-font-size);
-  opacity: 0;
+  inset: 0;
   pointer-events: none;
-  transition: opacity var(--duration-fast) var(--ease-standard), transform var(--duration-fast) var(--ease-standard);
   z-index: var(--z-toast);
-  white-space: nowrap;
 }
 
-.uikit-toast.is-visible {
-  opacity: 1;
-  transform: translate(-50%, 0);
+/* phone-frame 预览中 toast 相对宿主定位而非视口 */
+.uikit-toast-host .toast.is-floating {
+  position: absolute;
 }
 
 @media (max-width: 767px) {
@@ -540,13 +530,38 @@ function BaseScreen({ onOpen }) {
 function App() {
   const [modalMounted, setModalMounted] = useState(true);
   const [modalOpen, setModalOpen] = useState(true);
-  const [toast, setToast] = useState('');
+  // toast 状态机：idle → entering → visible → leaving → idle
+  // 必须分两步挂 is-visible，浏览器才有机会先布局初始态再触发过渡，否则入场动画不生效；
+  // 出场先加 is-leaving 触发淡出过渡，过渡结束后再卸载 DOM。
+  const [toastMsg, setToastMsg] = useState('');
+  const [toastPhase, setToastPhase] = useState('idle');
+
+  const showToast = (msg) => {
+    if (!msg) return;
+    setToastMsg(msg);
+    setToastPhase('entering');
+  };
 
   useEffect(() => {
-    if (!toast) return undefined;
-    const timer = window.setTimeout(() => setToast(''), 1500);
-    return () => window.clearTimeout(timer);
-  }, [toast]);
+    if (toastPhase !== 'entering') return undefined;
+    const rafId = requestAnimationFrame(() => requestAnimationFrame(() => setToastPhase('visible')));
+    return () => cancelAnimationFrame(rafId);
+  }, [toastPhase]);
+
+  useEffect(() => {
+    if (toastPhase !== 'visible') return undefined;
+    const leaveTimer = window.setTimeout(() => setToastPhase('leaving'), 4000);
+    return () => window.clearTimeout(leaveTimer);
+  }, [toastPhase]);
+
+  useEffect(() => {
+    if (toastPhase !== 'leaving') return undefined;
+    const removeTimer = window.setTimeout(() => {
+      setToastMsg('');
+      setToastPhase('idle');
+    }, 200);
+    return () => window.clearTimeout(removeTimer);
+  }, [toastPhase]);
 
   const openModal = () => {
     setModalMounted(true);
@@ -558,16 +573,22 @@ function App() {
     window.setTimeout(() => setModalMounted(false), 260);
   };
 
-      const handleSave = () => {
-    setToast('已保存业务规则配置');
+  const handleSave = () => {
+    showToast('已保存业务规则配置');
     closeModal();
   };
 
   return (
     <>
       <BaseScreen onOpen={openModal} />
-      {modalMounted ? <BizSettingsModal isOpen={modalOpen} onCancel={closeModal} onSave={handleSave} onPreviewAction={setToast} /> : null}
-      <div className={`uikit-toast${toast ? ' is-visible' : ''}`}>{toast}</div>
+      {modalMounted ? <BizSettingsModal isOpen={modalOpen} onCancel={closeModal} onSave={handleSave} onPreviewAction={showToast} /> : null}
+      <div className="uikit-toast-host" aria-live="polite" role="status">
+        {toastMsg ? (
+          <div className={`toast toast--default is-floating${toastPhase === 'visible' ? ' is-visible' : ''}${toastPhase === 'leaving' ? ' is-leaving' : ''}`}>
+            <span className="toast__text">{toastMsg}</span>
+          </div>
+        ) : null}
+      </div>
     </>
   );
 }

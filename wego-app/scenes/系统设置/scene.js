@@ -96,7 +96,7 @@
     }
     if (item.trailing === 'dot-arrow') {
       return ''
-        + '<span class="system-settings__dot" aria-hidden="true"></span>'
+        + '<span class="badge badge--inline badge--dot" aria-hidden="true"></span>'
         + '<i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i>';
     }
     return '<i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i>';
@@ -150,7 +150,7 @@
       +       '<div class="navbar__right"></div>'
       +     '</div>'
       +   '</div>'
-      +   '<div class="phone-body system-settings-body">'
+      +   '<div class="system-settings-body">'
       +     groups
       +     '<div class="system-settings-logout">'
       +       '<button type="button" class="btn btn--medium btn--md system-settings-logout__btn" data-action="logout">退出登录</button>'
@@ -208,7 +208,16 @@
         var serviceBtn = root.querySelector('[data-action="service"]');
         if (serviceBtn) {
           serviceBtn.addEventListener('click', function () {
-            ctx.toast('客服教我');
+            // 引导 toast 示例：带查询图标 + weak 操作按钮（自动追加右箭头）
+            ctx.toast({
+              variant: 'guide',
+              icon: 'icon-chatoast',
+              text: '正在为您接通客服，是否继续？',
+              action: { label: '继续', mode: 'weak' },
+              onAction: function () {
+                ctx.toast('已为您接入客服，请稍候');
+              }
+            });
           });
         }
       }

@@ -7,6 +7,18 @@ description: 将 page_spec 和 design_consumption_plan 落成 wego-app 静态 Ap
 
 这是唯一正式产出产品原型的环节。目标不是生成孤立 demo，而是持续开发一个完整的 `wego-app` 静态 App 原型。
 
+## 何时必须触发本技能
+
+- 已有 `page_spec` + `design_consumption_plan`，要正式生成或更新 `wego-app` 场景
+- 用户明确要求把规格落成 `scene.js`、`scene.css`、`routes.js` 和宿主入口挂载
+- 当前目标是业务场景原型实现，而不是设计系统本体迭代
+
+不要误用场景:
+
+- 缺少 `page_spec` 或 `design_consumption_plan`，先回到上游技能补齐
+- 当前目标是组件 / UI Kit / 工作流规则迭代，转入 `wego-uxsystem-iterate`
+- 当前目标只是验收或回归，转入 `wego-tests`
+
 ## 输入前提
 
 开始前必须已经有：
@@ -52,7 +64,7 @@ wego-app/
 - 业务场景全部进入 `wego-app/scenes/{中文业务场景}/`
 - 业务场景目录使用中文业务语义命名；同一场景迭代复用原目录
 - hash route 使用 `route_id`，例如 `#/my-permission-management`
-- `wego-app/lib/` 是部署用设计系统资源副本，由 `.codex/skills/wego-design/` 同步而来
+- `wego-app/lib/` 是部署用设计系统资源副本，由 `.codex/skills/wego-design/` 同步而来；禁止直接编辑副本内容，必须先改设计系统源文件，再运行 `node scripts/sync-wego-app-lib.mjs`
 
 ## 固定宿主 App
 
@@ -219,6 +231,24 @@ window.WegoApp.registerScene({
 - `full-screen-modal` 模式 B → `close-icon` → DOM: `navbar__left > .navbar__left-btn > i.wego-iconfont-s.icon-cha`
 
 ## 资源同步
+
+`wego-app/lib/` 是部署副本，不是源文件。AI 不得直接修改 `wego-app/lib/*` 来修样式、Token、iconfont 或资产；所有变更必须先落在 `.codex/skills/wego-design/` 的源文件：
+
+- Token：改 `.codex/skills/wego-design/colors_and_type.css`，同步 `.codex/skills/wego-design/css.json`
+- 组件样式：改 `.codex/skills/wego-design/preview/component-{slug}.html` 标记区，再运行组件 CSS 提取脚本
+- 图标字体 / SVG / 图片资产：改 `.codex/skills/wego-design/iconfont.css` 或 `.codex/skills/wego-design/assets/`
+
+源文件更新后，统一运行：
+
+```bash
+node scripts/sync-wego-app-lib.mjs
+```
+
+提交或验收前可用下面命令确认副本未漂移：
+
+```bash
+node scripts/sync-wego-app-lib.mjs --check
+```
 
 新增或更新 `wego-app` 时，必须确保 `wego-app/lib/` 包含：
 

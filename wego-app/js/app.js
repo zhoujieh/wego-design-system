@@ -6,7 +6,7 @@
   var tabTriggers = Array.from(document.querySelectorAll('[data-host-tab-trigger]'));
   var sceneLayer = document.querySelector('[data-scene-layer]');
   var overlayLayer = document.querySelector('[data-overlay-layer]');
-  var toastEl = document.querySelector('[data-toast]');
+  var toastHost = document.querySelector('[data-toast-host]');
   var bottomNav = document.querySelector('[data-bottom-nav]');
   var validTabs = new Set(panels.map(function (panel) { return panel.dataset.hostTab; }));
   var routes = Array.isArray(window.WEGO_APP_ROUTES) ? window.WEGO_APP_ROUTES : [];
@@ -23,7 +23,6 @@
     currentRouteId: '',
     sceneState: Object.create(null)
   };
-  var toastTimer = 0;
   // 由 initTouchPressState 注入，用于页面切换时兜底清理按压态
   var clearAllPressStates = function () {};
   // 由 initTouchPressState 维护，当前按压态元素（openPushScene 读取以做 forward 预防）
@@ -342,15 +341,116 @@
     });
   }
 
+  // toast 自动关闭时长，与 toast 组件规范一致
+  var TOAST_DEFAULT_DURATION = 4000;
+  var TOAST_GUIDE_DURATION = 4500;
+  var TOAST_LEAVE_DURATION = 200;
+  // 引导 toast 允许的 4 种图标（与 toast.json 契约一致，禁止自定义）
+  var TOAST_GUIDE_ICONS = ['icon-goutoast', 'icon-chatoast', 'icon-tanhao', 'icon-shijian'];
+  var currentToast = null;
+  var toastLeaveTimer = 0;
+  var toastRemoveTimer = 0;
+
+  function clearToastTimers() {
+    if (toastLeaveTimer) { clearTimeout(toastLeaveTimer); toastLeaveTimer = 0; }
+    if (toastRemoveTimer) { clearTimeout(toastRemoveTimer); toastRemoveTimer = 0; }
+  }
+
+  function removeCurrentToast() {
+    if (!currentToast) return;
+    var old = currentToast;
+    currentToast = null;
+    old.classList.remove('is-visible');
+    old.classList.add('is-leaving');
+    var ref = old;
+    toastRemoveTimer = setTimeout(function () {
+      if (ref.parentNode) ref.parentNode.removeChild(ref);
+    }, TOAST_LEAVE_DURATION);
+  }
+
+  // 入参形态：
+  //   toast('文本')                                   → 默认变体，纯文本居中
+  //   toast({ variant:'guide', icon, text, action, onAction, duration })
+  //     - variant: 'default' | 'guide'，默认 'default'
+  //     - icon:    仅 guide 生效，限定 TOAST_GUIDE_ICONS 四种
+  //     - text:    必选，主文案
+  //     - action:  { label, mode:'weak'|'strong' }，可选
+  //     - onAction: 点击 action 时的回调，可选；执行后立即隐藏 toast
   function toast(message) {
     if (!message) return;
-    clearTimeout(toastTimer);
-    toastEl.textContent = message;
-    toastEl.hidden = false;
-    toastTimer = window.setTimeout(function () {
-      toastEl.hidden = true;
-      toastEl.textContent = '';
-    }, 1800);
+    var opts = (typeof message === 'string') ? { variant: 'default', text: message } : message;
+    if (!opts || !opts.text) return;
+    var variant = opts.variant === 'guide' ? 'guide' : 'default';
+    var isGuide = variant === 'guide';
+
+    clearToastTimers();
+    // 清理残留的淡出中 toast（避免 onAction 链式调用 ctx.toast 时旧 toast DOM 残留）
+    var leavingToasts = toastHost.querySelectorAll('.toast.is-leaving');
+    leavingToasts.forEach(function (t) { t.remove(); });
+    removeCurrentToast();
+
+    var el = document.createElement('div');
+    el.className = 'toast toast--' + variant + ' is-floating';
+
+    // 引导 toast 可选图标（限定 4 种）
+    if (isGuide && opts.icon && TOAST_GUIDE_ICONS.indexOf(opts.icon) !== -1) {
+      var icon = document.createElement('span');
+      icon.className = 'toast__icon ' + opts.icon;
+      el.appendChild(icon);
+    }
+
+    var text = document.createElement('span');
+    text.className = 'toast__text';
+    text.textContent = opts.text;
+    el.appendChild(text);
+
+    // 引导 toast 可选操作按钮（weak 带右箭头，strong 不带）
+    if (isGuide && opts.action && opts.action.label) {
+      var mode = opts.action.mode === 'strong' ? 'strong' : 'weak';
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'toast__action toast__action--' + mode;
+      var btnText = document.createElement('span');
+      btnText.className = 'toast__action-text';
+      btnText.textContent = opts.action.label;
+      btn.appendChild(btnText);
+      if (mode === 'weak') {
+        var arrow = document.createElement('span');
+        arrow.className = 'toast__action-arrow icon-youjiantou16';
+        btn.appendChild(arrow);
+      }
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (typeof opts.onAction === 'function') {
+          try { opts.onAction(); } catch (err) {}
+        }
+        removeCurrentToast();
+      });
+      el.appendChild(btn);
+    }
+
+    // 引导 toast 整体热区：点击任意位置触发 action 的点击行为；无 action 直接隐藏
+    if (isGuide) {
+      el.addEventListener('click', function () {
+        var actionBtn = el.querySelector('.toast__action');
+        if (actionBtn) {
+          actionBtn.click();
+        } else {
+          removeCurrentToast();
+        }
+      });
+    }
+
+    toastHost.appendChild(el);
+    currentToast = el;
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        el.classList.add('is-visible');
+      });
+    });
+    var duration = typeof opts.duration === 'number' ? opts.duration
+      : (isGuide ? TOAST_GUIDE_DURATION : TOAST_DEFAULT_DURATION);
+    toastLeaveTimer = setTimeout(function () { removeCurrentToast(); }, duration);
   }
 
   function updateEntrySummary(routeId, summary) {
@@ -469,6 +569,9 @@
     trigger.addEventListener('click', function () {
       closeOverlay();
       clearSceneLayer();
+      // Tab 切换意味着用户离开当前功能模块，toast 不跨 Tab 保持
+      clearToastTimers();
+      removeCurrentToast();
       setActiveTab(trigger.dataset.hostTabTrigger);
     });
   });

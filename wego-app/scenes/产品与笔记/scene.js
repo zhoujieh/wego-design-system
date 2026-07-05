@@ -161,7 +161,7 @@
       +       '<div class="navbar__right"></div>'
       +     '</div>'
       +   '</div>'
-      +   '<div class="phone-body product-note-body">'
+      +   '<div class="product-note-body">'
       +     groups
       +   '</div>'
       + '</section>';

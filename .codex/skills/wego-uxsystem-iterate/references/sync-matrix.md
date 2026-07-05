@@ -254,6 +254,8 @@
 - 如果涉及暗色模式，是否确认修复落在组件 `.dark` 或正式 Token，而不是只靠 preview 专用 class
 - 是否对照过同类稳定组件的暗色策略，避免同类控件各写各的
 - 是否顺序运行提取脚本后再扫描 `components.css`，避免读到旧聚合输出
+- 是否没有直接编辑 `wego-app/lib/` 部署副本；若设计系统运行资源变化，必须先改 `.codex/skills/wego-design/` 源文件，再运行 `node scripts/sync-wego-app-lib.mjs`
+- 是否用 `node scripts/sync-wego-app-lib.mjs --check` 或 `node scripts/validate-wego-design.mjs` 确认 `wego-app/lib/` 与源资源一致
 - 如果提取脚本带出无关组件 diff，是否已经定位来源并明确说明为什么保留或为什么不纳入本轮
 - 若未执行浏览器验证，是否已按统一规则完成静态扫描、脚本校验、资源检查，并明确这不视为流程缺失
 - 是否清理了已取消场景的旧文案、旧 class、旧契约字段和旧消费说明

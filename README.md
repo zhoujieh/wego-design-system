@@ -16,7 +16,7 @@
 
 ## 技能闭环
 
-仓库统一采用 4 个本地技能闭环，全部位于 `.codex/skills/`：
+仓库当前采用 5 个本地技能协作：
 
 1. `wego-product`
    负责理解原始需求并输出 `page_spec`
@@ -26,8 +26,32 @@
    负责更新 `wego-app` 和对应业务场景
 4. `wego-tests`
    负责按当前任务范围验收并输出 `acceptance_report`
+5. `wego-uxsystem-iterate`
+   负责组件迭代、UI Kit 迭代、工作流迭代和审查
 
-这 4 段职责分开，避免一个技能同时承担需求理解、设计消费、原型生成和验收。
+其中前 4 个是业务开发主链路，第 5 个负责设计系统与工作流本体迭代。
+
+## 技能触发矩阵
+
+对 Codex、Trae 等会读取仓库文档的 agent，同样按这套分流执行：
+
+| 用户意图 / 请求特征 | 必须先触发的技能 | 前置条件 | 下一步交接 |
+| --- | --- | --- | --- |
+| 业务开发、做页面、做原型、做场景、接业务需求 | `wego-product` | 无 | 输出 `page_spec` 后交给 `wego-design` → `wego-ux` → `wego-tests` |
+| 已有 `page_spec`，要出页面范式、UI Kit、组件映射、打开方式 | `wego-design` | 已有 `page_spec` | 输出 `design_consumption_plan` 后交给 `wego-ux` |
+| 已有 `page_spec` + `design_consumption_plan`，要正式生成或更新 `wego-app` 场景 | `wego-ux` | 两份规格文件都已落盘 | 原型完成后交给 `wego-tests` |
+| 验收、检查、回归、review 当前场景是否符合规格 | `wego-tests` | 当前场景已生成 | 输出 `acceptance_report` |
+| 改组件、补 preview、改契约、改 UI Kit、改 metadata、补守门 | `wego-uxsystem-iterate` 的`迭代模式` | 目标属于设计系统本体 | 按同步矩阵执行 |
+| 补规则、沉淀经验、优化流程、修技能链路、修触发机制 | `wego-uxsystem-iterate` 的`工作流迭代模式` | 目标属于工作流回流 | 回流到对应技能或权威数据文件 |
+| 审查组件 / UI Kit / 工作流是否合理 | `wego-uxsystem-iterate` 的`审查模式` | 目标属于设计系统审查 | 先出 findings，再决定是否转修复 |
+
+补充硬规则：
+
+- 用户只说“帮我做这个业务页面”这类模糊请求时，默认按业务开发处理，先走 `wego-product`
+- 没有 `page_spec` 时，不直接触发 `wego-design`
+- 没有 `design_consumption_plan` 时，不直接触发 `wego-ux`
+- 组件 / UI Kit / 工作流问题，不要误走普通业务开发链路
+- 统一技能路由入口见 `.codex/skills/README.md`
 
 ## 当前设计系统位置
 
@@ -48,6 +72,7 @@
 - `.codex/skills/wego-ux/`：原型项目输出技能
 - `.codex/skills/wego-tests/`：验收技能
 - `.codex/skills/wego-uxsystem-iterate/`：项目级别迭代技能
+- `.codex/skills/README.md`：技能总路由入口
 - `docs/`：计划文档、历史审查文档、参考资料
 - `scripts/validate-wego-design.mjs`：当前设计系统守门脚本
 
@@ -78,6 +103,7 @@
 ## 常用入口
 
 - 根规则：[AGENTS.md](AGENTS.md)
+- 技能路由入口：[.codex/skills/README.md](.codex/skills/README.md)
 - 设计系统技能：[.codex/skills/wego-design/SKILL.md](.codex/skills/wego-design/SKILL.md)
 - 项目级别迭代技能：[.codex/skills/wego-uxsystem-iterate/SKILL.md](.codex/skills/wego-uxsystem-iterate/SKILL.md)
 - 闭环计划：[docs/wego-local-skills-closed-loop-plan.md](docs/wego-local-skills-closed-loop-plan.md)
