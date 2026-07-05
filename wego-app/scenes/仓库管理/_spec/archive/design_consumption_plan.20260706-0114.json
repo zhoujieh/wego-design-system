@@ -1,9 +1,9 @@
 {
   "matched_uikit": null,
-  "scene_fit_reason": "本任务是『宿主入口 + 仓库列表 + 全屏仓库编辑页』的组合型场景。仓库列表页是可新增、编辑、删除和启停的对象管理列表，适合走 object-management-list-page fallback；新增/编辑仓库页属于典型的业务资料编辑和规则配置，适合命中 biz-rule-config。",
-  "navigation_pattern": "宿主宫格入口打开 push 列表页；列表页导航栏右侧使用加号图标+『新建』入口打开 full-screen-modal；列表卡片右侧更多气泡菜单承接编辑和删除，删除后接 dialog 二次确认",
+  "scene_fit_reason": "本任务是『宿主入口 + 仓库列表 + 全屏仓库编辑页』的组合型场景。仓库列表页没有现成精确 UI Kit，适合走 generic-mobile-task-page；新增/编辑仓库页属于典型的业务资料编辑和规则配置，适合命中 biz-rule-config。",
+  "navigation_pattern": "宿主宫格入口打开 push 列表页；列表页导航栏右侧『新增』文字入口和卡片内编辑入口都打开 full-screen-modal 形式的仓库编辑页",
   "layout_pattern": "host-entry surface 使用宿主宫格入口；warehouse-list surface 使用卡片模式 M2（phone-body 16px 横向 padding + 横向对象卡片列表）；warehouse-editor surface 使用通栏模式 M1（phone-body 0px 横向 padding + form-group / cell-group 内容不加 --card 修饰）",
-  "interaction_pattern": "仓库列表查看 + 新建/编辑统一保存回填 + 列表菜单删除二次确认 + 表单脏数据取消挽留",
+  "interaction_pattern": "仓库列表查看 + 新增/编辑统一保存回填 + 删除二次确认",
   "app_target": {
     "mode": "wego-app-scene",
     "app_root": "wego-app",
@@ -50,45 +50,44 @@
       "match_status": "fallback",
       "matched_uikit": null,
       "matched_page_pattern": null,
-      "matched_blueprint": "object-management-list-page",
+      "matched_blueprint": "generic-mobile-task-page",
       "presentation_ref": "push；transition=slide-left；coversTabBar=true（主场景从宿主宫格打开）",
-      "scene_fit_reason": "仓库列表页以快速识别仓库、判断状态并执行列表操作为主，属于对象管理列表。当前 UI Kit 没有精确业务 UI Kit，按 object-management-list-page 兜底：列表项采用横向扫读结构，左侧识别图，右侧展示名称、关键状态和 1 条履约摘要；完整地址、联系人、备注和配置明细进入编辑页；编辑和删除收进列表右侧更多气泡菜单，删除仍走 dialog 二次确认。",
+      "scene_fit_reason": "仓库列表页以快速识别仓库、判断状态并进入编辑为主，属于对象管理列表。当前 UI Kit 没有专门范式，按 generic-mobile-task-page 兜底，但列表项采用横向扫读结构：左侧识别图，右侧只展示名称、关键状态和 1 条履约摘要；完整地址、联系人、备注和删除动作进入编辑页。",
       "component_mapping": [
         {
-          "block": "仓库列表页导航栏：返回图标 + 标题『仓库管理』 + 右侧加号图标和『新建』入口",
+          "block": "仓库列表页导航栏：返回图标 + 标题『仓库管理』 + 右侧『新增』入口",
           "consumption_mode": "stable-variant",
-          "selected": "navbar + navbar__body--spaced（leftControl=back-icon、titleAlignment=center、actions=icon、rightActionType=icon、pageTransition=push、position=sticky）；DOM：.navbar__right.navbar__right--icon > button.navbar__action[data-action=create] > .navbar__action-icon i.wego-iconfont-s.icon-jia16 + .navbar__action-label『新建』",
+          "selected": "navbar + navbar__body--spaced（leftControl=back-icon、titleAlignment=center、actions=text、rightActionType=text、pageTransition=push、position=sticky）",
           "constraint_ref": {
             "pagePattern": "",
             "rule_id": "",
             "trigger": ""
           },
-          "reason": "列表页从宿主进入，命中 push 导航稳定变体；对象管理列表的新建入口按 navbar 和 button 契约默认使用加号图标+文字，不再降级为纯文字。",
+          "reason": "列表页从宿主进入，命中 push 导航稳定变体；右侧需要轻量新增入口，适合使用文字操作而非第二个主按钮。",
           "workflow_stage": "wego-design（主）, wego-ux（次）",
-          "scenario_type": "object-management-list-composition",
-          "judgment_condition": "顶部导航容器，转场语义为宿主进入二级列表页，且当前页主任务是对象管理列表的新建操作",
-          "decision_basis": "components/navbar.json.representativeVariants[1] + components/navbar.json.usageHints + components/button.json.usageHints"
+          "scenario_type": "component-consumption-decision",
+          "judgment_condition": "顶部导航容器，转场语义为宿主进入二级列表页，且当前页需要右侧文字操作",
+          "decision_basis": "components/navbar.json.representativeVariants[2]"
         },
         {
-          "block": "仓库列表：每条优先横向展示仓库图片、仓库名称、关键状态和 1 条履约摘要；列表右侧提供更多气泡菜单，菜单内可编辑或删除，删除需二次确认",
+          "block": "仓库列表：每条优先横向展示仓库图片、仓库名称、关键状态和 1 条履约摘要；列表内仅保留编辑入口，完整地址、联系人和删除动作收进编辑页",
           "consumption_mode": "free-composition",
-          "selected": ".warehouse-list（页面级业务列表） > .card.card--surface > .card__content.warehouse-card（横向结构：左侧 .wg-image.wg-image--rounded-md 作为识别图；右侧 title/status/summary；右上角 button.warehouse-card__more 触发场景级 .warehouse-action-menu；菜单项『编辑』『删除』，删除后打开 dialog 二次确认）",
+          "selected": ".warehouse-list（页面级业务列表） > .card.card--surface > .card__content.warehouse-card（横向结构：左侧 .wg-image.wg-image--rounded-md 作为识别图；右侧 title/status/summary；右上角 .link『编辑』；删除动作不在列表卡片暴露，进入编辑页后触发 dialog 二次确认）",
           "constraint_ref": {
             "pagePattern": "",
             "rule_id": "",
             "trigger": ""
           },
-          "reason": "仓库属于可管理业务对象，列表页目标是扫读和行动，不是阅读完整资料；因此采用左图右文横向对象卡片，只保留识别对象和判断状态所需信息，地址、联系人、备注等完整资料收进编辑页。编辑和删除都属于对象行操作，本轮按用户要求用场景级气泡菜单先承接，危险删除必须二次确认。",
+          "reason": "仓库属于可管理业务对象，列表页目标是扫读和行动，不是阅读完整资料；因此采用左图右文横向对象卡片，只保留识别对象和判断状态所需信息，地址、联系人、备注等完整资料收进编辑页。",
           "workflow_stage": "wego-design（主）, wego-ux（次）",
-          "scenario_type": "object-management-list-composition",
-          "judgment_condition": "列表项需要图片缩略图、对象名称、关键状态、轻操作和危险操作收纳；完整资料可在编辑页承接，不应在列表中纵向堆叠",
-          "decision_basis": "uikit-plan.json.fallbackPageBlueprints[object-management-list-page] + components/card.json.usageHints + components/dialog.json.usageHints"
+          "scenario_type": "no-uikit-page-composition",
+          "judgment_condition": "列表项需要图片缩略图、对象名称、关键状态和轻操作；完整资料可在编辑页承接，不应在列表中纵向堆叠",
+          "decision_basis": "generic-mobile-task-page fallback blueprint.allowedComponents[card,image,button] + components/card.json.usageHints"
         }
       ],
       "allowed_page_styles": [
         "卡片模式 M2：phone-body 16px 横向 padding，卡片列表组间距使用 8px",
-        "仓库对象卡片默认横向排布：左侧固定识别图，右侧标题/状态/一条摘要/更多操作入口；地址、联系人、备注等详情字段不在列表中展开",
-        "列表右上角气泡菜单只作为当前业务作用域样式承接编辑和删除，不注册为通用组件；危险删除必须继续进入 dialog 二次确认",
+        "仓库对象卡片默认横向排布：左侧固定识别图，右侧标题/状态/一条摘要/编辑入口；地址、联系人、备注、删除等低频或高风险信息不在列表中展开",
         "列表页底部补安全区 padding，避免内容被底部指示器遮挡"
       ],
       "design_gap": ""
@@ -104,7 +103,7 @@
       "scene_fit_reason": "新增/编辑仓库页属于典型的业务资料编辑与规则配置页面，包含输入、选择、开关和统一保存动作，与 biz-rule-config 完全匹配。",
       "component_mapping": [
         {
-          "block": "新增/编辑仓库页导航栏：左侧『取消』、中间标题（新增仓库/编辑仓库）、右侧『保存』按钮；表单被编辑后点击取消需二次挽留",
+          "block": "新增/编辑仓库页导航栏：左侧『取消』、中间标题（新增仓库/编辑仓库）、右侧『保存』按钮",
           "consumption_mode": "stable-variant",
           "selected": "navbar + navbar__body--spaced(leftControl=text-cancel, titleAlignment=center, actions=button, rightActionType=button, pageTransition=present, position=sticky)",
           "constraint_ref": {
@@ -112,26 +111,11 @@
             "rule_id": "compositionConstraints[1]",
             "trigger": "主互斥配置项命中已注册稳定场景，且内嵌选择控件、标题/副标题和间距已由该场景承接"
           },
-          "reason": "编辑页需要统一保存动作，命中 biz-rule-config 全屏模态固定导航模式；左侧取消在未编辑时直接关闭，表单已有改动时先打开 dialog 挽留，避免误丢内容。",
+          "reason": "编辑页需要统一保存动作，命中 biz-rule-config 全屏模态固定导航模式。",
           "workflow_stage": "wego-design（主）, wego-ux（次）",
           "scenario_type": "component-consumption-decision",
-          "judgment_condition": "编辑型全屏模态页，需要统一保存而不是直接返回；取消动作可能丢弃未保存修改",
-          "decision_basis": "components/navbar.json.representativeVariants[4] + uikit-plan.json.pagePatterns[biz-rule-config].presentation + components/dialog.json.usageHints"
-        },
-        {
-          "block": "仓库状态字段：启用仓库、默认发货仓，作为进入表单后最优先可操作项",
-          "consumption_mode": "free-composition",
-          "selected": ".form-group > .form-group__title『仓库状态』 + .form-group__content（通栏 M1） > .form-body.form-body--preserve-content-align（.form-body__label + 空 .form-body__action + .form-body__right-btn > .switch.switch--on/off）",
-          "constraint_ref": {
-            "pagePattern": "biz-rule-config",
-            "rule_id": "compositionConstraints[5]",
-            "trigger": "右侧为 switch、radio-group、checkbox-group、button 等独立控件时，整行保持静态，由控件自身承担交互"
-          },
-          "reason": "启用仓库直接影响该对象是否参与后续业务，优先级高于资料补充字段；放在编辑页首组，用户进入后可立即操作。默认发货仓与启用状态强关联，同组展示并用 switch 自身承接交互。",
-          "workflow_stage": "wego-design（主）, wego-ux（次）",
-          "scenario_type": "object-management-list-composition",
-          "judgment_condition": "编辑对象包含影响是否参与业务流程的启停状态，以及与启停相关的默认状态",
-          "decision_basis": "page_spec.operation_fields + uikit-plan.json.pagePatterns[biz-rule-config].compositionConstraints[5] + components/switch.json"
+          "judgment_condition": "编辑型全屏模态页，需要统一保存而不是直接返回",
+          "decision_basis": "components/navbar.json.representativeVariants[4] + uikit-plan.json.pagePatterns[biz-rule-config].presentation"
         },
         {
           "block": "基础信息字段：仓库名称、仓库编码、仓库联系人、联系电话、仓库地址、定位备注、门头图链接",
@@ -149,7 +133,7 @@
           "decision_basis": "uikit-plan.json.pagePatterns[biz-rule-config].compositionConstraints[4] + components/form.json + components/input.json + components/image.json"
         },
         {
-          "block": "履约能力字段：仓库类型、服务范围、支持同城配送、支持门店自提、支持直播备货",
+          "block": "履约能力字段：仓库类型、服务范围、支持同城配送、支持门店自提、支持直播备货、默认发货仓",
           "consumption_mode": "free-composition",
           "selected": ".cell-group > .cell-group__title『履约能力』 + .cell-group__content（通栏 M1） > 枚举行使用 .cell.cell--single.cell--bg-white.cell--clickable（.cell__action > span.cell__action-text + i.cell__arrow）；布尔项使用 .cell.cell--single.cell--bg-white（.cell__action > .switch）",
           "constraint_ref": {
@@ -157,7 +141,7 @@
             "rule_id": "compositionConstraints[5]",
             "trigger": "右侧为 switch、radio-group、checkbox-group、button 等独立控件时，整行保持静态，由控件自身承担交互"
           },
-          "reason": "该组同时存在枚举选择和布尔开关；选择项保留整行 clickable，开关项由 switch 自身承担交互热区。默认发货仓已提升到仓库状态首组，不在履约能力里重复展示。",
+          "reason": "该组同时存在枚举选择和布尔开关；选择项保留整行 clickable，开关项由 switch 自身承担交互热区。",
           "workflow_stage": "wego-design（主）, wego-ux（次）",
           "scenario_type": "component-consumption-decision",
           "judgment_condition": "同组配置项混合了选择行与开关行",
@@ -179,18 +163,18 @@
           "decision_basis": "components/form.json.representativeVariants + components/input.json.number input"
         },
         {
-          "block": "补充信息字段：仓库备注",
+          "block": "补充信息字段：仓库备注、启用状态",
           "consumption_mode": "free-composition",
-          "selected": ".form-group > .form-group__title『补充信息』 + .form-group__content（通栏 M1） > 备注使用 .form-body.form-body--vertical + textarea",
+          "selected": ".form-group > .form-group__title『补充信息』 + .form-group__content（通栏 M1） > 备注使用 .form-body.form-body--vertical + textarea；启用状态使用 .form-body + .form-body__right-btn > .switch",
           "constraint_ref": {
             "pagePattern": "biz-rule-config",
             "rule_id": "compositionConstraints[3]",
             "trigger": "helper 文案仅重复摘要、选中态、禁用条件、跳转语义或结构已表达的信息"
           },
-          "reason": "补充信息只保留低优先级长文本备注；启用仓库已提升到首组，避免用户进入表单后需要滚动到底部才能操作关键状态。",
+          "reason": "补充信息以备注和启停开关为主，通过字段结构直接表达，不额外叠加重复 helper。",
           "workflow_stage": "wego-design（主）, wego-ux（次）",
           "scenario_type": "component-consumption-decision",
-          "judgment_condition": "同组字段只包含低频长文本备注，结构已足够表达业务语义",
+          "judgment_condition": "同组字段包含长文本和单一开关，结构已足够表达业务语义",
           "decision_basis": "uikit-plan.json.pagePatterns[biz-rule-config].compositionConstraints[3] + components/form.json"
         }
       ],
@@ -215,11 +199,8 @@
     "warehouse-list surface 使用卡片模式 M2，不把仓库列表硬塞进 cell-group；列表项按对象管理列表处理，默认横向扫读，不纵向摊开完整资料",
     "warehouse-editor surface 使用 biz-rule-config 的通栏模式 M1，不允许再套 form-group__content--card 或 cell-group__content--card",
     "新增/编辑仓库页必须通过 full-screen-modal 打开，且使用『取消 + 保存』导航模式；不得改成 push 或 sheet",
-    "列表页新建入口放在 navbar 右侧加号图标+『新建』操作位，不再使用纯文字『新增』，也不额外放第二个页面级 strong 按钮",
-    "列表项右侧更多气泡菜单承接编辑和删除；气泡菜单仅作为当前场景级业务样式，不注册成通用组件",
-    "删除仓库从列表更多菜单触发，必须走 dialog 二次确认，确认后再更新列表",
-    "新增/编辑表单首组必须是『仓库状态』，启用仓库和默认发货仓进入页面后即可直接操作",
-    "表单被编辑后点击取消必须先显示 dialog 挽留；未编辑时可直接关闭",
+    "列表页新增入口放在 navbar 右侧文字操作位，不再额外放第二个页面级 strong 按钮",
+    "删除仓库从编辑页触发，必须走 dialog 二次确认，确认后再更新列表",
     "保存后必须回填仓库列表并给出 toast 反馈，默认使用内存状态，不实现 localStorage 持久化",
     "运行时禁止 fetch()/XHR，本场景全部模板由 scene.js 注册"
   ],

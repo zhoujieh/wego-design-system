@@ -6,6 +6,7 @@
   var COVER_TONES = ['green', 'blue', 'orange', 'purple'];
 
   var STATE = {
+    openMenuId: '',
     warehouses: [
       {
         id: 'wh-001',
@@ -168,10 +169,18 @@
     var cover = getWarehouseCover(item, index);
     var statusLabel = item.enabled ? '启用中' : '已停用';
     var statusClass = item.enabled ? 'is-enabled' : 'is-disabled';
+    var menuOpen = STATE.openMenuId === item.id;
     var badges = [
       item.isDefault ? '<span class="warehouse-card__badge is-highlight">默认发货仓</span>' : '',
       '<span class="warehouse-card__badge ' + statusClass + '">' + esc(statusLabel) + '</span>'
     ].join('');
+    var menu = menuOpen
+      ? ''
+        + '<div class="warehouse-action-menu" role="menu" aria-label="' + esc(item.name) + '操作">'
+        +   '<button type="button" class="warehouse-action-menu__item" data-action="menu-edit" data-warehouse-id="' + esc(item.id) + '" role="menuitem">编辑</button>'
+        +   '<button type="button" class="warehouse-action-menu__item warehouse-action-menu__item--danger" data-action="menu-delete" data-warehouse-id="' + esc(item.id) + '" role="menuitem">删除</button>'
+        + '</div>'
+      : '';
 
     return ''
       + '<article class="card card--surface warehouse-list__card" data-warehouse-id="' + esc(item.id) + '">'
@@ -182,7 +191,10 @@
       +     '<div class="warehouse-card__main">'
       +       '<div class="warehouse-card__top">'
       +         '<h3 class="warehouse-card__title">' + esc(item.name) + '</h3>'
-      +         '<button type="button" class="link warehouse-card__edit" data-action="edit" data-warehouse-id="' + esc(item.id) + '">编辑</button>'
+      +         '<div class="warehouse-card__actions">'
+      +           '<button type="button" class="warehouse-card__more" data-action="toggle-menu" data-warehouse-id="' + esc(item.id) + '" aria-label="' + esc(item.name) + '更多操作" aria-expanded="' + (menuOpen ? 'true' : 'false') + '"><i class="wego-iconfont-s icon-sandian16"></i></button>'
+      +           menu
+      +         '</div>'
       +       '</div>'
       +       '<div class="warehouse-card__badges">' + badges + '</div>'
       +       '<p class="warehouse-card__summary">' + esc(getListSummary(item)) + '</p>'
@@ -212,8 +224,11 @@
       +         '<div class="navbar__left-btn" data-action="back" role="button" aria-label="返回"><i class="wego-iconfont-s icon-fanhui"></i></div>'
       +       '</div>'
       +       '<div class="navbar__center"><span class="navbar__title">仓库管理</span></div>'
-      +       '<div class="navbar__right navbar__right--text">'
-      +         '<button type="button" class="navbar__action" data-action="create">新增</button>'
+      +       '<div class="navbar__right navbar__right--icon">'
+      +         '<button type="button" class="navbar__action" data-action="create" aria-label="新建仓库">'
+      +           '<div class="navbar__action-icon"><i class="wego-iconfont-s icon-jia16"></i></div>'
+      +           '<span class="navbar__action-label">新建</span>'
+      +         '</button>'
       +       '</div>'
       +     '</div>'
       +   '</div>'
@@ -272,7 +287,7 @@
       + '<div class="form-body' + (isLast ? '' : '') + '">'
       +   '<div class="form-body__label">' + esc(label) + '</div>'
       +   '<div class="form-body__action">'
-      +     '<div class="number-input number-input--surface-white warehouse-number-input">'
+      +     '<div class="number-input number-input--surface-white">'
       +       '<input class="number-input__field" type="text" inputmode="numeric" value="' + esc(value) + '" placeholder="请输入" data-number-field="' + esc(key) + '">'
       +       '<span class="number-input__suffix">' + esc(suffix) + '</span>'
       +     '</div>'
@@ -311,6 +326,19 @@
       + '</div>';
   }
 
+  function buildFormSwitchRow(label, key, value) {
+    return ''
+      + '<div class="form-body form-body--preserve-content-align">'
+      +   '<div class="form-body__label">' + esc(label) + '</div>'
+      +   '<div class="form-body__action" aria-hidden="true"></div>'
+      +   '<div class="form-body__right-btn">'
+      +     '<div class="switch ' + (value ? 'switch--on' : 'switch--off') + '" data-switch-key="' + esc(key) + '" role="switch" aria-checked="' + (value ? 'true' : 'false') + '" tabindex="0">'
+      +       '<div class="switch__thumb"></div>'
+      +     '</div>'
+      +   '</div>'
+      + '</div>';
+  }
+
   function editorTemplate(draft, mode) {
     var title = mode === 'edit' ? '编辑仓库' : '新增仓库';
     var cover = draft.imageUrl && draft.imageUrl.trim()
@@ -331,6 +359,13 @@
       +     '</div>'
       +   '</div>'
       +   '<div class="warehouse-editor__body">'
+      +     '<div class="form-group">'
+      +       '<div class="form-group__title">仓库状态</div>'
+      +       '<div class="form-group__content">'
+      +         buildFormSwitchRow('启用仓库', 'enabled', draft.enabled)
+      +         buildFormSwitchRow('默认发货仓', 'isDefault', draft.isDefault)
+      +       '</div>'
+      +     '</div>'
       +     '<div class="form-group">'
       +       '<div class="form-group__title">基础信息</div>'
       +       '<div class="form-group__content">'
@@ -361,8 +396,7 @@
       +         buildSelectRow('服务范围', 'serviceScope', draft.serviceScope, false)
       +         buildSwitchRow('支持同城配送', 'supportSameCity', draft.supportSameCity, false)
       +         buildSwitchRow('支持门店自提', 'supportPickup', draft.supportPickup, false)
-      +         buildSwitchRow('支持直播备货', 'supportLive', draft.supportLive, false)
-      +         buildSwitchRow('默认发货仓', 'isDefault', draft.isDefault, true)
+      +         buildSwitchRow('支持直播备货', 'supportLive', draft.supportLive, true)
       +       '</div>'
       +     '</div>'
       +     '<div class="form-group">'
@@ -410,17 +444,8 @@
       +       '<div class="form-group__title">补充信息</div>'
       +       '<div class="form-group__content">'
       +         buildTextarea('仓库备注', 'remark', draft.remark, '补充说明仓库适用场景、拣货提示或客服同步口径')
-      +         '<div class="form-body">'
-      +           '<div class="form-body__label">启用状态</div>'
-      +           '<div class="form-body__right-btn">'
-      +             '<div class="switch ' + (draft.enabled ? 'switch--on' : 'switch--off') + '" data-switch-key="enabled" role="switch" aria-checked="' + (draft.enabled ? 'true' : 'false') + '" tabindex="0">'
-      +               '<div class="switch__thumb"></div>'
-      +             '</div>'
-      +           '</div>'
-      +         '</div>'
       +       '</div>'
       +     '</div>'
-      +     (mode === 'edit' ? '<div class="warehouse-editor__danger-zone"><button type="button" class="btn btn--danger btn--md" data-action="delete-current">删除仓库</button></div>' : '')
       +   '</div>'
       + '</section>';
   }
@@ -514,6 +539,7 @@
   function openWarehouseEditor(ctx, mode, warehouseId) {
     var current = warehouseId ? findWarehouse(warehouseId) : null;
     var draft = createDraft(current);
+    var originalSnapshot = JSON.stringify(draft);
 
     ctx.openFullScreenModal('', {
       label: mode === 'edit' ? '编辑仓库' : '新增仓库',
@@ -536,11 +562,42 @@
 
           bindDraftInputs(root, draft);
 
+          function isDirty() {
+            return JSON.stringify(draft) !== originalSnapshot;
+          }
+
+          function updateSwitchNode(node, value) {
+            if (!node) return;
+            node.classList.toggle('switch--on', Boolean(value));
+            node.classList.toggle('switch--off', !value);
+            node.setAttribute('aria-checked', value ? 'true' : 'false');
+          }
+
+          function requestCancel() {
+            if (!isDirty()) {
+              overlayCtx.close();
+              return;
+            }
+            overlayCtx.dialog({
+              variant: 'text',
+              title: '放弃未保存内容？',
+              content: '当前修改还没有保存，放弃后不会保留。',
+              buttons: [
+                { label: '继续编辑', tone: 'weak' },
+                {
+                  label: '放弃',
+                  tone: 'danger',
+                  onClick: function () {
+                    overlayCtx.close();
+                  }
+                }
+              ]
+            });
+          }
+
           var cancelBtn = root.querySelector('[data-action="cancel"]');
           if (cancelBtn) {
-            cancelBtn.addEventListener('click', function () {
-              overlayCtx.close();
-            });
+            cancelBtn.addEventListener('click', requestCancel);
           }
 
           var saveBtn = root.querySelector('[data-action="save"]');
@@ -564,14 +621,6 @@
             });
           }
 
-          var deleteBtn = root.querySelector('[data-action="delete-current"]');
-          if (deleteBtn) {
-            deleteBtn.addEventListener('click', function () {
-              overlayCtx.close();
-              confirmDelete(ctx, draft.id);
-            });
-          }
-
           root.querySelectorAll('[data-cycle-key]').forEach(function (node) {
             node.addEventListener('click', function () {
               handleCycle(node.dataset.cycleKey);
@@ -579,13 +628,25 @@
           });
 
           root.querySelectorAll('[data-switch-key]').forEach(function (node) {
-            node.addEventListener('click', function () {
+            var toggle = function () {
               var key = node.dataset.switchKey;
               draft[key] = !draft[key];
               if (key === 'isDefault' && draft.isDefault) {
                 draft.enabled = true;
               }
-              renderEditor();
+              if (key === 'enabled' && !draft.enabled) {
+                draft.isDefault = false;
+              }
+              updateSwitchNode(node, draft[key]);
+              if (key !== 'enabled') updateSwitchNode(root.querySelector('[data-switch-key="enabled"]'), draft.enabled);
+              if (key !== 'isDefault') updateSwitchNode(root.querySelector('[data-switch-key="isDefault"]'), draft.isDefault);
+            };
+            node.addEventListener('click', toggle);
+            node.addEventListener('keydown', function (event) {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                toggle();
+              }
             });
           });
         }
@@ -622,26 +683,52 @@
 
   function bindWarehousePage(ctx) {
     var root = ctx.root;
+    if (root.dataset.warehouseBound === 'true') return;
+    root.dataset.warehouseBound = 'true';
+    root.addEventListener('click', function (event) {
+      var node = event.target.closest('[data-action]');
+      if (!node) {
+        if (STATE.openMenuId) {
+          STATE.openMenuId = '';
+          renderWarehousePage();
+        }
+        return;
+      }
 
-    var backBtn = root.querySelector('[data-action="back"]');
-    if (backBtn) {
-      backBtn.addEventListener('click', function () {
+      var action = node.dataset.action;
+      var warehouseId = node.dataset.warehouseId;
+
+      if (action === 'back') {
+        STATE.openMenuId = '';
         ctx.back();
-      });
-    }
+        return;
+      }
 
-    root.querySelectorAll('[data-action="create"], [data-action="create-first"]').forEach(function (node) {
-      node.addEventListener('click', function () {
+      if (action === 'create' || action === 'create-first') {
+        STATE.openMenuId = '';
         openWarehouseEditor(ctx, 'create');
-      });
-    });
+        return;
+      }
 
-    root.querySelectorAll('[data-action="edit"]').forEach(function (node) {
-      node.addEventListener('click', function () {
-        openWarehouseEditor(ctx, 'edit', node.dataset.warehouseId);
-      });
-    });
+      if (action === 'toggle-menu') {
+        STATE.openMenuId = STATE.openMenuId === warehouseId ? '' : warehouseId;
+        renderWarehousePage();
+        return;
+      }
 
+      if (action === 'menu-edit') {
+        STATE.openMenuId = '';
+        renderWarehousePage();
+        openWarehouseEditor(ctx, 'edit', warehouseId);
+        return;
+      }
+
+      if (action === 'menu-delete') {
+        STATE.openMenuId = '';
+        renderWarehousePage();
+        confirmDelete(ctx, warehouseId);
+      }
+    });
   }
 
   function renderWarehousePage() {

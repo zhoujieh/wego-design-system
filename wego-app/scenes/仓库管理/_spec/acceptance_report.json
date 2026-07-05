@@ -1,24 +1,34 @@
 {
   "requirement_coverage": [
     {
-      "requirement": "仓库列表优先横向展示图片、名称、关键状态和 1 条履约摘要",
+      "requirement": "删除操作需在列表可直接操作，可先用气泡菜单承接",
       "status": "covered",
-      "evidence": "scene.js 列表卡片输出 .wg-image、warehouse-card__title、warehouse-card__badges、warehouse-card__summary；浏览器检查显示单卡高度约 98px"
+      "evidence": "scene.js 中每张仓库卡片右侧提供 data-action=toggle-menu，菜单内包含 data-action=menu-delete；浏览器验证菜单显示『编辑删除』，点击删除后出现『确认删除仓库？』dialog，确认后列表 3 条变 2 条并出现『仓库已删除』toast"
     },
     {
-      "requirement": "完整地址、联系人和删除动作收进编辑页",
+      "requirement": "导航栏新建入口符合规范",
       "status": "covered",
-      "evidence": "列表卡片无 data-action=delete；编辑页保留 address 字段，并提供 data-action=delete-current，删除走 dialog 二次确认"
+      "evidence": "列表页 navbar 右侧为 .navbar__right--icon > button.navbar__action，包含 .icon-jia16 和『新建』文案；浏览器验证 createHasPlusIcon=true、createText=『新建』"
     },
     {
-      "requirement": "新增仓库入口放在导航栏",
+      "requirement": "新建表达内容的对齐方式符合规范",
       "status": "covered",
-      "evidence": "列表页 navbar 右侧 data-action=create 文案为『新增』，避免窄屏换行"
+      "evidence": "编辑页使用 form-group/form-body 默认左对齐策略，数字输入不再用场景级 margin-left:auto 硬右贴；同页多组标题顺序和字段起点保持一致"
     },
     {
-      "requirement": "新增仓库页面字段尽量补全",
+      "requirement": "表单内容按重要层级优化，启用仓库优先可操作",
       "status": "covered",
-      "evidence": "编辑页覆盖基础信息、履约能力、库存与发货、补充信息四组字段"
+      "evidence": "编辑页首组为『仓库状态』，包含『启用仓库』『默认发货仓』开关；浏览器验证首组标题为『仓库状态』，开关点击后 switch--on/off 和 aria-checked 同步更新"
+    },
+    {
+      "requirement": "表单被编辑后点击取消需要二次挽留弹窗",
+      "status": "covered",
+      "evidence": "openWarehouseEditor 使用 originalSnapshot 判断脏数据；浏览器验证填写『测试仓库』后点击取消出现『放弃未保存内容？』，点『继续编辑』仍留在表单，点『放弃』关闭 overlay"
+    },
+    {
+      "requirement": "只沉淀必要经验",
+      "status": "covered",
+      "evidence": "仅沉淀对象管理列表的场景级临时气泡菜单边界；已同步 uikit-plan、wego-ux 和 wego-tests，metadata version 从 338 提到 339"
     }
   ],
   "scene_judgement_check": {
@@ -34,7 +44,7 @@
   },
   "uikit_consumption_check": {
     "host_entry": "fallback mobile-host-entry",
-    "warehouse_list": "fallback generic-mobile-task-page",
+    "warehouse_list": "fallback object-management-list-page",
     "warehouse_editor": "exact biz-rule-config",
     "status": "pass"
   },
@@ -42,8 +52,8 @@
     "status": "pass",
     "findings": [
       "宿主入口沿用既有 grid-entry 结构",
-      "列表页复用 navbar/card/image/link",
-      "编辑页复用 form-group/form-body/cell-group/switch"
+      "列表页复用 navbar/card/image/dialog/toast，气泡菜单限定为当前场景级业务样式",
+      "编辑页复用 form-group/form-body/cell-group/switch，未新增通用组件类"
     ]
   },
   "spec_ref_check": {
@@ -51,14 +61,17 @@
     "refs": [
       ".codex/skills/wego-design/specs/文案与数据规范.md",
       ".codex/skills/wego-design/specs/布局与间距规范.md",
-      ".codex/skills/wego-design/specs/交互设计原则.md"
+      ".codex/skills/wego-design/specs/交互设计原则.md",
+      ".codex/skills/wego-design/specs/设计风格与品牌原则.md",
+      ".codex/skills/wego-design/specs/动效与视觉效果.md"
     ]
   },
   "copy_check": {
     "status": "pass",
     "notes": [
-      "导航文案、按钮文案保持短句",
-      "时间/数量字段未引入不必要长文案"
+      "导航入口使用短文案『新建』",
+      "危险操作 dialog 使用短标题和 2 个动作按钮",
+      "取消挽留文案只保留决策必要信息"
     ]
   },
   "route_check": {
@@ -72,17 +85,19 @@
   "interaction_check": {
     "status": "pass",
     "notes": [
-      "新增和编辑共用全屏表单，保存后回填列表并 toast 提示",
-      "删除从编辑页触发并需二次确认",
-      "支持空列表后的新增入口"
+      "列表更多菜单可打开，并显示编辑和删除",
+      "删除需二次确认，确认后列表数据和 toast 均更新",
+      "新建/编辑表单保存后回填列表",
+      "表单被编辑后取消会先弹出挽留 dialog"
     ]
   },
   "layout_check": {
     "status": "pass",
     "notes": [
       "列表页使用卡片模式 M2：body 横向 padding 16px",
-      "列表项采用横向对象卡片：左侧 64px 图片，右侧标题/状态/摘要/编辑入口",
-      "编辑页使用通栏模式 M1：body 横向 padding 0px，分组内容不加 --card"
+      "编辑页使用通栏模式 M1：body 横向 padding 0px，分组内容不加 --card",
+      "手机 390px 宽度下菜单位于 viewport 内，卡片标题不与更多按钮重叠",
+      "表单首组为仓库状态，避免关键开关被放到页面底部"
     ]
   },
   "app_scene_check": {
@@ -99,26 +114,25 @@
     "production_domain": "",
     "fallback_local_entry": "wego-app/index.html",
     "errors": [
-      "生成本报告时尚未执行 git push；推送结果以后续最终回复中的 commit hash 为准"
+      "本报告生成于提交推送前；最终推送 commit hash 以本轮最终回复为准"
     ]
   },
   "automated_checks": {
-    "script": "node scripts/validate-wego-design.mjs --scope=changed",
+    "script": "node --check wego-app/scenes/仓库管理/scene.js && node scripts/sync-wego-app-lib.mjs --check && node scripts/validate-wego-design.mjs --scope=changed",
     "exit_code": 0,
     "errors": [],
     "warnings_count": 0,
     "key_findings": [
-      "wego-design 守门验证通过",
-      "changed 范围内错误 0、警告 0",
-      "node --check scene.js 通过",
-      "page_spec 与 design_consumption_plan JSON 解析通过"
+      "scene.js 语法检查通过",
+      "wego-app/lib 副本与源一致",
+      "wego-design 守门验证通过：错误 0、警告 0",
+      "浏览器验证通过：菜单、删除确认、表单首组、开关、取消挽留均正常，控制台 error 0"
     ]
   },
   "risk_log": [],
   "manual_verify_items": [
-    "在 wego-app/index.html 中打开『我的 → 应用中心 → 仓库管理』，确认宫格入口可进入",
-    "验证导航栏『新增』可打开全屏编辑页并保存回列表",
-    "验证任一仓库点击『编辑』后，可在编辑页查看完整地址并触发删除二次确认"
+    "线上部署完成后打开固定 Production Domain，进入『我的 → 应用中心 → 仓库管理』复查",
+    "在真实手机宽度下复查列表气泡菜单是否符合视觉预期"
   ],
   "final_status": "pass"
 }
