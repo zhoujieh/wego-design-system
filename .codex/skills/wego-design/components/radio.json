@@ -115,8 +115,8 @@
     "带文字成组时使用 .radio-field-group，组内项间距保持 12px。",
     "小尺寸用于高密度列表，但外层行高仍要保证可点。",
     "独立使用 radio 时，通过 .radio-field > .radio + .radio-field__text 承载文案，控件使用 radio--sm(20px)，图文间距 2px，文案字号使用 14px。",
-    "radio 嵌入 cell 时，放入 .cell__select 内，不套用 .radio-field 宿主结构；文案和说明由 cell 的 .cell__title/.cell__subtitle 承载，间距由 cell 的 layout token 控制。",
-    "radio 嵌入 cell 时只使用 .radio 及其状态修饰类(.radio--sm/.radio--checked/.radio--disabled)，不额外引入 .radio-field 或 .radio-field-group。"
+    "radio 嵌入 cell 左侧选择器（.cell__select）时不套用 .radio-field 宿主结构；文案和说明由 cell 的 .cell__title/.cell__subtitle 承载，间距由 cell 的 layout token 控制。",
+    "radio 嵌入 cell 左侧选择器（.cell__select）时只使用 .radio 及其状态修饰类（.radio--checked/.radio--disabled），不额外引入 .radio-field 或 .radio-field-group；此时 radio 本身不带文字，使用 default 尺寸（24px），不追加 .radio--sm（对照本组件 structurePatterns『带文字场景才用 20px 小尺寸控件』）。仅当选项为 2 项短文案（单条 ≤4 字）需要放在 cell 右侧或 form-body 内成组横排时，才使用 .radio-field-group > .radio-field > .radio.radio--sm + .radio-field__text，此时带文字，使用 sm 尺寸（20px）。"
   ],
   "doNotInvent": [
     "不要把 radio 扩成多选、评分星级或多段开关。",
@@ -183,8 +183,7 @@
     ],
     "stateClasses": [
       ".radio--checked",
-      ".radio--disabled",
-      ".radio--sm"
+      ".radio--disabled"
     ],
     "groupAttr": "data-group"
   },

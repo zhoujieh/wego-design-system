@@ -121,13 +121,13 @@
         {
           "block": "权限类型单选：公开、私密、部分可见、不给谁看",
           "consumption_mode": "composition-constraint",
-          "selected": ".cell-group > .cell-group__title + .cell-group__content（不开 --card 修饰，通栏模式 M1） > .cell.cell--single.cell--bg-white.cell--clickable.cell--divider-right-edge[最后一行除外][role=radio][aria-checked]（.cell__select > .radio.radio--sm[+.radio--checked + .radio__inner + .radio__dot[选中时]] + .cell__body > .cell__content > .cell__title-row > .cell__title + .cell__subtitle）",
+          "selected": ".cell-group > .cell-group__title + .cell-group__content（不开 --card 修饰，通栏模式 M1） > .cell.cell--single.cell--bg-white.cell--clickable.cell--divider-right-edge[最后一行除外][role=radio][aria-checked]（.cell__select > .radio[+.radio--checked + .radio__inner + .radio__dot[选中时]] + .cell__body > .cell__content > .cell__title-row > .cell__title + .cell__subtitle）",
           "constraint_ref": {
             "pagePattern": "biz-rule-config",
             "rule_id": "compositionConstraints[0]",
             "trigger": "多选项互斥单选（选项≥3 或单条文案>4字）"
           },
-          "reason": "4 个权限类型属于互斥单选且文案>4字（『部分可见』『不给谁看』），精确命中 compositionConstraints[0]：使用 cell + cell__select + radio 竖排，避免 form 右侧 radio-field-group 在窄屏溢出；radio 嵌入 cell 时只使用 .radio 及状态修饰类，不套 .radio-field；选中态仅通过 radio--checked 表达，不加 cell--indent（避免破坏同组横向对齐基线）；整行 cell--clickable + role=radio 承担热区，命中 cell 契约『cell__select 内嵌 radio 时文案由 cell__title 承载』稳定场景；通栏 M1 由 compositionConstraints[6] 强制",
+          "reason": "4 个权限类型属于互斥单选且文案>4字（『部分可见』『不给谁看』），精确命中 compositionConstraints[0]：使用 cell + cell__select + radio 竖排，避免 form 右侧 radio-field-group 在窄屏溢出；radio 嵌入 cell 左侧选择器时不带文字，使用 default 尺寸（24px），不追加 .radio--sm（对照本组件 structurePatterns『带文字场景才用 20px 小尺寸』，与同文件 checkbox 多选行 139/154 写法一致）；选中态仅通过 radio--checked 表达，不加 cell--indent（避免破坏同组横向对齐基线）；整行 cell--clickable + role=radio 承担热区，命中 cell 契约『cell__select 内嵌 radio 时文案由 cell__title 承载』稳定场景；通栏 M1 由 compositionConstraints[6] 强制",
           "workflow_stage": "wego-design（主）, wego-ux（次）",
           "scenario_type": "component-consumption-decision",
           "judgment_condition": "结构特征为≥3 项互斥单选且单条文案>4字，语义特征为权限类型选择，命中 biz-rule-config pagePattern 且 surface 角色不是 host-entry",
@@ -187,7 +187,7 @@
     "分组容器类强制使用 .cell-group（含 .cell-group__title + .cell-group__content），禁止发明 scene 级 xxx-page__group 自定义类替代；标题使用 .cell-group__title 单独成行，不塞进白底圆角内容区",
     "price-type-list 与 price-permission-edit surface 命中 biz-rule-config 且角色不是 host-entry，必须使用通栏模式 M1：phone-body 0px 横向 padding + .cell-group__content 不开 --card 修饰；cell 横向边距由 .cell__body 自带 16px padding 承担；禁止给 phone-body 加 12px/16px 横向 padding 后再开 cell-group__content--card（双重 padding 浪费空间且违反 M1 规范）",
     "host-entry surface 使用卡片模式 M2：phone-body 16px 横向 padding + .cell-group__content--card 修饰（仅 host-entry 适用，由 wego-app/css/app.css 承担，不在本场景 scene.css 中重复）",
-    "radio 嵌入 cell 时只使用 .radio 及状态修饰类（.radio--sm/.radio--checked），不套 .radio-field 或 .radio-field-group；选项文案由 .cell__title 承载",
+    "radio 嵌入 cell 左侧选择器（.cell__select）时不带文字，使用 default 尺寸（24px），只追加状态修饰类（.radio--checked）；不套 .radio-field 或 .radio-field-group；选项文案由 .cell__title 承载；不追加 .radio--sm（带文字场景才用 sm 20px，对照本组件 structurePatterns）",
     "checkbox 嵌入 cell 时只使用 .checkbox 及状态修饰类（.checkbox--checked），勾选标记必须引用 assets/icons/checkbox-check.svg（.checkbox__icon > img.checkbox__asset）；不套 .checkbox-field",
     "权限类型 4 选项单选必须竖排（cell + cell__select + radio），禁止使用 form-body + radio-field-group 横排（命中 compositionConstraints[0] 适配风险）",
     "『部分可见』『不给谁看』展开的粉丝分组子项必须与父项在同一 .cell-group__content 内连续排列，使用 .cell--indent 表达从属；子项左侧已有 checkbox 前导时不再补 .cell__backspace；禁止拆成独立平级 section 或用 helper 文案解释父子关联",

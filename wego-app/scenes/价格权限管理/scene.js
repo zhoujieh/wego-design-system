@@ -114,7 +114,7 @@
 
   // 权限设置页：单选项行（最后一行不加分割线修饰类）
   function permOptionRowMarkup(option, checked, isLast) {
-    var radioClass = 'radio radio--sm' + (checked ? ' radio--checked' : '');
+    var radioClass = 'radio' + (checked ? ' radio--checked' : '');
     var dot = checked ? '<div class="radio__dot"></div>' : '';
     var divider = isLast ? '' : ' cell--divider-right-edge';
     return ''

@@ -41,6 +41,7 @@
    - 是否影响 UI Kit 复用
    - 预览示例文案是否需要同步
    - 是否存在成组示例尺寸混用，例如父子联动、radio group、嵌套 cell 中同一场景内尺寸不一致
+   - 是否存在组件契约 usageHints 中宿主场景嵌入规则与已有尺寸规则自相矛盾（把尺寸修饰类当状态修饰类列举、把 sm 列为不带文字场景的合法修饰类）；兄弟组件若无等价 hint，则该 hint 是独有偏差，应按已有规则修正
    - 是否存在组件使用规则散落在下游技能文档中，属于组件契约的 structurePatterns / usageHints 但没有收回
 5. 修改 `.codex/skills/wego-design/components/{slug}.json`
 6. 修改 `.codex/skills/wego-design/preview/component-{slug}.html`

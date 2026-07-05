@@ -214,8 +214,7 @@
       ".checkbox--checked",
       ".checkbox--indeterminate",
       ".checkbox--disabled",
-      ".checkbox--count",
-      ".checkbox--sm"
+      ".checkbox--count"
     ]
   },
   "provenance": {
