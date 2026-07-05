@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="../iconfont.css">
 <style>
 /* @component-css-start */
-.btn { display:inline-flex; align-items:center; justify-content:center; gap:var(--spacer-4); border:none; cursor:pointer; font-family:var(--body-md-font-family); font-weight:var(--font-weight-medium); white-space:nowrap; transition:background var(--duration-fast) var(--ease-standard); flex-shrink:0; }
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:var(--spacer-4); border:none; cursor:pointer; font-family:var(--body-md-font-family); font-weight:var(--font-weight-medium); white-space:nowrap; transition:background var(--duration-fast) var(--ease-standard); flex-shrink:0; -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
 .btn[aria-disabled="true"] { pointer-events:none; cursor:not-allowed; }
 
 /* ── Icon (iconfont，仅用于新建场景) ── */
@@ -21,20 +21,24 @@
 
 /* ── Emphasis ── */
 .btn--strong { background:var(--bg-brand); color:var(--text-inverse); }
-.btn--strong:hover { background:var(--bg-brand-hover); }
-.btn--strong:active { background:var(--bg-brand-disabled); }
+@media (hover:hover) { .btn--strong:hover { background:var(--bg-brand-hover); } }
+.btn--strong:active,
+.btn--strong.is-pressed { background:var(--bg-brand-disabled); }
 .btn--strong.btn--disabled, .btn--strong:disabled, .btn--strong[aria-disabled="true"] { background:var(--bg-overlay-l1); color:var(--text-disabled); }
 .btn--medium { background:var(--bg-overlay-l1); color:var(--text-brand); }
-.btn--medium:hover { background:var(--bg-overlay-l2); }
-.btn--medium:active { background:var(--bg-state-selected); }
+@media (hover:hover) { .btn--medium:hover { background:var(--bg-overlay-l2); } }
+.btn--medium:active,
+.btn--medium.is-pressed { background:var(--bg-state-selected); }
 .btn--medium.btn--disabled, .btn--medium:disabled, .btn--medium[aria-disabled="true"] { background:var(--bg-overlay-l1); color:var(--text-disabled); }
 .btn--weak { background:var(--bg-overlay-l1); color:var(--text-default); }
-.btn--weak:hover { background:var(--bg-overlay-l2); }
-.btn--weak:active { background:var(--bg-state-selected); }
+@media (hover:hover) { .btn--weak:hover { background:var(--bg-overlay-l2); } }
+.btn--weak:active,
+.btn--weak.is-pressed { background:var(--bg-state-selected); }
 .btn--weak.btn--disabled, .btn--weak:disabled, .btn--weak[aria-disabled="true"] { background:var(--bg-overlay-l1); color:var(--text-disabled); }
 .btn--danger { background:var(--bg-overlay-l1); color:var(--status-danger-default); }
-.btn--danger:hover { background:var(--status-danger-surface-l1); }
-.btn--danger:active { background:var(--status-danger-surface-l2); }
+@media (hover:hover) { .btn--danger:hover { background:var(--status-danger-surface-l1); } }
+.btn--danger:active,
+.btn--danger.is-pressed { background:var(--status-danger-surface-l2); }
 .btn--danger.btn--disabled, .btn--danger:disabled, .btn--danger[aria-disabled="true"] { background:var(--bg-overlay-l1); color:var(--text-disabled); }
 
 /* ── Size ── */

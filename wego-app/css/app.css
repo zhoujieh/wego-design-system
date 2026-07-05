@@ -183,6 +183,12 @@ body[data-host-shell="true"] {
 
 .host-shell-link-button {
   flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.host-shell-link-button:active,
+.host-shell-link-button.is-pressed {
+  opacity: 0.6;
 }
 
 .host-shell-app-card__content,
@@ -209,6 +215,14 @@ body[data-host-shell="true"] {
   min-height: 56px;
   color: var(--text-default);
   text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+.host-shell-grid-entry:active,
+.host-shell-grid-entry.is-pressed {
+  opacity: 0.6;
 }
 
 .host-shell-grid-entry__icon {

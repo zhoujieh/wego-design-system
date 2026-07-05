@@ -51,9 +51,14 @@
   color: var(--text-default);
   position: relative;
   overflow: visible;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: opacity var(--duration-fast) var(--ease-standard);
 }
 
 .bottom-nav__item.active { color: var(--text-brand); }
+.bottom-nav__item:active,
+.bottom-nav__item.is-pressed { opacity: 0.6; }
 
 .bottom-nav__icon {
   width: var(--size-32);

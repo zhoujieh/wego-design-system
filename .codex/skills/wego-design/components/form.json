@@ -225,6 +225,7 @@
     "历史结构允许 .form 直接包连续 form-body 以兼容旧任务，但新任务和 UI Kit 一律优先使用标题 + 内容容器的正式结构。"
   ],
   "behavior": {
+    "pressFeedback": "移动端按压态由 :active 与 .is-pressed 共同承载。宿主 App 通过 wego-app/js/app.js 在触控设备上自动为 .form-body--clickable、.form-body__select、.form-body__upload、.form-body__icon-action 等可点击元素添加/移除 .is-pressed；桌面端继续由 :active 兜底。",
     "click": ".form-body--clickable 只用于 select / dropdown 这类会打开选择面板或展开内容的字段行；其按压态使用与 cell 一致的 pressed 背景色。右侧是 switch、radio-group、checkbox-group、upload、button、icon actions 时，不提供整行按压反馈，交互由具体控件承担。",
     "validation": "错误态优先显示错误文案并覆盖计数提示；当输入值重新满足当前字段校验条件时，自动移除错误态并恢复默认显示。",
     "inputSanitizing": "数字输入仅保留 0-9，手机号仅保留数字并受长度限制，金额仅保留数字和单个小数点；手机号区号前缀为只读文本，不参与输入清洗。",

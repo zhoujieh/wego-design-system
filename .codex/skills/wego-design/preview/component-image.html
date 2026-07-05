@@ -39,8 +39,9 @@
     .wg-image__src.is-loaded ~ .wg-image__overlay { display:none; }
     .wg-image__placeholder-icon { width:var(--size-40); max-width:40%; max-height:var(--size-40); height:auto; object-fit:contain; opacity:0.58; }
     .wg-image__overlay { position:absolute; inset:0; z-index:2; background:var(--bg-mask-press); display:none; pointer-events:none; }
-    .wg-image--clickable { cursor:pointer; }
-    .wg-image--clickable:active .wg-image__overlay { display:block; }
+    .wg-image--clickable { cursor:pointer; -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
+.wg-image--clickable:active .wg-image__overlay,
+.wg-image--clickable.is-pressed .wg-image__overlay { display:block; }
     .wg-image--loading { background:var(--wg-image-placeholder-bg); }
     .wg-image--custom-rect { width: 180px; height: 120px; }
     .wg-image--custom-wide { width: 260px; height: 160px; }

@@ -141,6 +141,7 @@
     "无按钮模式只影响 left 与 center 布局；默认导航主体高度为 56px，桌面手机壳显示 phone-status 时可覆盖为 44px。"
   ],
   "behavior": {
+    "pressFeedback": "移动端按压态由 :active 与 .is-pressed 共同承载。宿主 App 通过 wego-app/js/app.js 在触控设备上自动为 .navbar__left-btn、.navbar__action 等可点击元素添加/移除 .is-pressed；桌面端继续由 :active 兜底。",
     "leftAction": "返回、关闭或取消属于左侧主导航操作，不与右侧按钮混用。",
     "title": "标题区允许居中或左对齐宽版，但保持单行省略。",
     "actionPress": "右侧操作以轻压暗或按钮背景变化反馈。",

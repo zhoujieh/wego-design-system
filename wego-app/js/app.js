@@ -472,6 +472,69 @@
     getState: function () { return appState; }
   };
 
+  // ── Global touch press state for mobile active feedback ──
+  (function initTouchPressState() {
+    if (!('ontouchstart' in window)) return;
+
+    var pressSelector = [
+      'button', '[role="button"]', '[role="radio"]', '[role="checkbox"]',
+      '.btn', '.cell--clickable', '.navbar__left-btn', '.navbar__left-text',
+      '.navbar__action', '.bottom-nav__item', '.form-body--clickable',
+      '.form-body__select', '.form-body__upload', '.form-body__icon-action',
+      '.counter__btn', '.icon-text-btn', '.wg-image--clickable', '.link',
+      '.host-shell-grid-entry', '.host-shell-link-button', '[data-route-id]'
+    ].join(', ');
+
+    var pressedEl = null;
+    var startX = 0;
+    var startY = 0;
+    var moveThreshold = 10;
+
+    function isDisabled(el) {
+      if (el.disabled) return true;
+      var closestDisabled = el.closest('[disabled], [aria-disabled="true"], [data-no-press]');
+      return !!closestDisabled;
+    }
+
+    function clearPress() {
+      if (pressedEl) {
+        pressedEl.classList.remove('is-pressed');
+        pressedEl = null;
+      }
+    }
+
+    function findPressTarget(el) {
+      if (!(el && el.closest)) return null;
+      var target = el.closest(pressSelector);
+      if (!target) return null;
+      return isDisabled(target) ? null : target;
+    }
+
+    document.addEventListener('touchstart', function (event) {
+      var touch = event.touches && event.touches[0];
+      if (!touch) return;
+      var target = findPressTarget(event.target);
+      if (!target) return;
+      clearPress();
+      target.classList.add('is-pressed');
+      pressedEl = target;
+      startX = touch.clientX;
+      startY = touch.clientY;
+    }, { passive: true, capture: true });
+
+    document.addEventListener('touchmove', function (event) {
+      if (!pressedEl) return;
+      var touch = event.touches && event.touches[0];
+      if (!touch) return;
+      if (Math.abs(touch.clientX - startX) > moveThreshold || Math.abs(touch.clientY - startY) > moveThreshold) {
+        clearPress();
+      }
+    }, { passive: true, capture: true });
+
+    document.addEventListener('touchend', clearPress, { passive: true, capture: true });
+    document.addEventListener('touchcancel', clearPress, { passive: true, capture: true });
+  })();
+
   mountRouteEntries();
   bindRouteEntries();
   setActiveTab('my');

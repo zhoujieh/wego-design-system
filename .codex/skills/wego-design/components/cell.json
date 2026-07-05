@@ -136,6 +136,7 @@
     "历史结构允许 .cell-group 直接包连续 cell 以兼容旧任务，但新任务和 UI Kit 一律优先使用标题 + 内容容器的正式结构。"
   ],
   "behavior": {
+    "pressFeedback": "移动端按压态由 :active 与 .is-pressed 共同承载。宿主 App 通过 wego-app/js/app.js 在触控设备上自动为 .cell--clickable 等可点击元素添加/移除 .is-pressed；桌面端继续由 :active 兜底。",
     "click": "clickable 仅用于带箭头、会进入下一层或展开下一步的行式场景；右侧为 switch、button 等独立控件时整行保持静态，由控件自身承担热区和状态切换。",
     "divider": "分割线样式由修饰类控制，但左侧起点始终跟随正文文本左边缘对齐，不因前导插槽场景漂移。",
     "slots": "右侧角标和箭头属于 trailing slot，不在标题区新增重复操作。"

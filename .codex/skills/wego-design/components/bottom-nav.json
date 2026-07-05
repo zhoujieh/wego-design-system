@@ -74,6 +74,7 @@
     "root、item 和 icon 承载区保持 overflow: visible，避免角标被组件容器裁剪。"
   ],
   "behavior": {
+    "pressFeedback": "移动端按压态由 :active 与 .is-pressed 共同承载。宿主 App 通过 wego-app/js/app.js 在触控设备上自动为 .bottom-nav__item 等可点击元素添加/移除 .is-pressed；桌面端继续由 :active 兜底。",
     "selection": "同一时刻只允许一个激活项。",
     "badge": "角标只作为状态附着，不改变导航项主布局。",
     "pageMode": "主导航切换场景使用，不承载二级筛选或工具操作。"
