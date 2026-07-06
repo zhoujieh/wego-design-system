@@ -1,10 +1,5 @@
 /* 快捷发布产品场景样式 */
 
-/* 全屏模态面板作为绝对定位的定位参考，确保 .quick-publish-page 能填满整个面板区域（包括电池栏后方） */
-.app-overlay-layer--full-screen-modal .app-overlay-panel {
-  position: relative;
-}
-
 .quick-publish-page {
   position: absolute;
   inset: 0;

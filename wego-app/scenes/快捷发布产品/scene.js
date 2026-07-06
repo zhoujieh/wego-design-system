@@ -256,7 +256,8 @@
     routeId: 'quick-publish-product',
     title: '快捷发布产品',
     presentation: {
-      type: 'full-screen-modal'
+      type: 'full-screen-modal',
+      transition: 'slide-up'
     },
     template: '',
     init: function (ctx) {

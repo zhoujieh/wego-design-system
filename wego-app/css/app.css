@@ -490,7 +490,7 @@ button, [role="button"], [role="radio"], [role="checkbox"],
   max-height: 100%;
   border-radius: 0;
   box-shadow: none;
-  background: var(--bg-page);
+  background: var(--bg-surface);
   animation: wego-sheet-enter var(--duration-normal, 250ms) var(--ease-enter, ease-out);
 }
 

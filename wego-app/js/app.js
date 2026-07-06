@@ -327,6 +327,9 @@
             history.back();
           }
         }
+        // 与 popSceneLayer 对称：侧滑返回后强制重绘 host 入口，
+        // 清除 iOS Safari 可能残留的 :active 合成层缓存
+        forceHostEntriesRepaint();
         return;
       }
       overlayClosing = true;
@@ -848,7 +851,13 @@
     // hash 变空：返回到宿主（iOS 侧滑 / history.back 最常见场景）
     if (!routeId) {
       if (!overlayLayer.hidden) {
-        closeOverlay();
+        // hashchange 触发的关闭：iOS 侧滑返回时系统已完成页面过渡动画，
+        // JS 不再叠加 CSS 退场动画，也不回退 history（state 已被消费）
+        // 与 popstate 路径保持一致，避免 overlay 退场动画期间与 host 同时可见
+        if (overlayHistoryActive) {
+          overlayHistoryActive = false;
+        }
+        closeOverlay(true, false);
       } else if (sceneStack.length > 0) {
         // hashchange 触发的返回无动画：iOS 侧滑返回时系统已完成页面过渡动画，
         // JS 再叠加 CSS 退场会导致 panel "先重现再退出"闪烁
