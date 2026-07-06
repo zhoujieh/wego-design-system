@@ -76,7 +76,28 @@
     sel.addRange(range);
   }
 
-  function renderInlineTags(editorEl) {
+  function cleanDupes(editorEl) {
+    var existingTags = [];
+    Array.from(editorEl.querySelectorAll('.tag')).forEach(function (tag) {
+      var t = (tag.textContent || '').trim();
+      if (t) existingTags.push(t);
+    });
+    var rawText = (editorEl.textContent || '').trim();
+    var rawParts = rawText.split(/\s+/).filter(function (p) { return p; });
+    var hasDupes = false;
+    rawParts.forEach(function (p) {
+      if (existingTags.indexOf(p) !== -1) {
+        hasDupes = true;
+      }
+    });
+    if (hasDupes) {
+      editorEl.textContent = existingTags.join(' ') + ' ';
+      return true;
+    }
+    return false;
+  }
+
+  function renderInlineTags(ctx, editorEl, skipFocus) {
     var text = editorEl.textContent || '';
 
     if (!text.trim()) {
@@ -98,6 +119,7 @@
     var parts = text.split(/(\s+)/);
     var html = '';
     var seen = {};
+    var remainingExisting = existingTags.slice();
 
     for (var i = 0; i < parts.length; i++) {
       var part = parts[i];
@@ -109,25 +131,47 @@
       var next = parts[i + 1];
       var followedBySpace = next && /^\s+$/.test(next);
       if (followedBySpace) {
-        if (!seen[part]) {
+        var existingIdx = remainingExisting.indexOf(part);
+        if (existingIdx !== -1) {
+          remainingExisting.splice(existingIdx, 1);
+          html += '<span class="tag tag--20 tag--gray">' + esc(part) + '</span> ';
+        } else if (!seen[part]) {
           seen[part] = true;
-          var isNew = existingTags.indexOf(part) === -1;
-          if (!isNew) {
+          if (existingTags.indexOf(part) !== -1) {
             ctx.toast('已选择「' + esc(part) + '」请重新输入');
+            html += esc(part) + ' ';
+          } else {
+            html += '<span class="tag tag--20 tag--gray quick-publish__tag--flash">' + esc(part) + '</span> ';
           }
-          var cls = 'tag tag--20 tag--gray' + (isNew ? ' quick-publish__tag--flash' : '');
-          html += '<span class="' + cls + '">' + esc(part) + '</span> ';
         } else {
+          ctx.toast('已选择「' + esc(part) + '」请重新输入');
           html += esc(part) + ' ';
         }
-        i++; // 跳过紧跟的空格
+        i++;
       } else {
         html += esc(part);
       }
     }
 
     editorEl.innerHTML = html;
-    placeCaretAtEnd(editorEl);
+    if (!skipFocus) {
+      placeCaretAtEnd(editorEl);
+    }
+  }
+
+  function isNumberKeyAllowed(e, fieldType, currentText) {
+    var key = e.key;
+    if (key === 'Backspace' || key === 'Delete' ||
+        key === 'ArrowLeft' || key === 'ArrowRight' ||
+        key === 'ArrowUp' || key === 'ArrowDown' ||
+        key === 'Home' || key === 'End' ||
+        key === 'Tab' || key === 'Escape') {
+      return true;
+    }
+    if (e.ctrlKey || e.metaKey) return true;
+    if (key >= '0' && key <= '9') return true;
+    if (fieldType === 'price' && key === '.' && currentText.indexOf('.') === -1) return true;
+    return false;
   }
 
   function sanitizeNumber(text, allowDecimal) {
@@ -155,13 +199,8 @@
 
   function editorRowMarkup(field, idx) {
     var editableCls = 'quick-publish__editor-field' + (field.smart ? ' quick-publish__editor-field--smart' : '');
-    var inputmodeAttr = '';
-    if (field.type === 'price') {
+    if (field.type === 'price' || field.type === 'number') {
       editableCls += ' quick-publish__editor-field--number';
-      inputmodeAttr = ' inputmode="decimal"';
-    } else if (field.type === 'number') {
-      editableCls += ' quick-publish__editor-field--number';
-      inputmodeAttr = ' inputmode="numeric"';
     }
     var inputwrapCls = 'quick-publish__input-wrap';
     if (field.type === 'price') {
@@ -173,7 +212,7 @@
       +   '<label class="quick-publish__label" for="qp-' + esc(field.id) + '">' + esc(field.label) + '</label>'
       +   '<div class="' + inputwrapCls + '">'
       +     currencyPrefix
-      +     '<div class="' + editableCls + '" id="qp-' + esc(field.id) + '" contenteditable="true" data-index="' + idx + '" data-placeholder="' + esc(field.placeholder) + '" data-type="' + esc(field.type || '') + '" role="textbox" aria-multiline="true"' + inputmodeAttr + '></div>'
+      +     '<div class="' + editableCls + '" id="qp-' + esc(field.id) + '" contenteditable="true" data-index="' + idx + '" data-placeholder="' + esc(field.placeholder) + '" data-type="' + esc(field.type || '') + '" role="textbox" aria-multiline="true"></div>'
       +   '</div>'
       + '</div>';
   }
@@ -239,7 +278,46 @@
               e.preventDefault();
               var fieldDef = FIELDS[idx];
               if (fieldDef && fieldDef.smart) {
-                renderInlineTags(editor);
+                var currentText = editor.textContent || '';
+                var endsWithSpace = /\s$/.test(currentText);
+
+                if (endsWithSpace) {
+                  var cleaned = cleanDupes(editor);
+                  if (cleaned) {
+                    if ((editor.textContent || '').trim()) {
+                      renderInlineTags(ctx, editor, true);
+                    } else {
+                      editor.innerHTML = '';
+                    }
+                  }
+                } else {
+                  var lastSpaceIdx = currentText.lastIndexOf(' ');
+                  var lastWord = lastSpaceIdx >= 0
+                    ? currentText.slice(lastSpaceIdx + 1).trim()
+                    : currentText.trim();
+
+                  if (lastWord) {
+                    var existingTags = [];
+                    Array.from(editor.querySelectorAll('.tag')).forEach(function (tag) {
+                      var t = (tag.textContent || '').trim();
+                      if (t) existingTags.push(t);
+                    });
+
+                    if (existingTags.indexOf(lastWord) !== -1) {
+                      if (lastSpaceIdx >= 0) {
+                        editor.textContent = currentText.slice(0, lastSpaceIdx + 1).trim() + ' ';
+                      } else {
+                        editor.innerHTML = '';
+                      }
+                      if ((editor.textContent || '').trim()) {
+                        renderInlineTags(ctx, editor, true);
+                      }
+                    } else {
+                      editor.textContent = currentText.trim() + ' ';
+                      renderInlineTags(ctx, editor, true);
+                    }
+                  }
+                }
               }
               var next = editors[idx + 1];
               if (next) next.focus();
@@ -254,6 +332,14 @@
                 placeCaretAtEnd(prev);
               }
               return;
+            }
+
+            var fieldDef = FIELDS[idx];
+            if (fieldDef && (fieldDef.type === 'price' || fieldDef.type === 'number')) {
+              if (!isNumberKeyAllowed(e, fieldDef.type, editor.textContent || '')) {
+                e.preventDefault();
+                return;
+              }
             }
 
             // 阻止 contenteditable 富文本格式快捷键
@@ -283,46 +369,37 @@
 
           editor.addEventListener('compositionend', function () {
             isComposing = false;
-            if (field.smart) {
-              renderInlineTags(editor);
-            }
             ensurePlaceholder(editor);
           });
 
+          editor.addEventListener('focus', function () {
+            isComposing = false;
+          });
+
           editor.addEventListener('input', function () {
-            if (isComposing) return;
             if (field.type === 'price' || field.type === 'number') {
               handleNumberInput(editor, field);
-            } else if (field.smart) {
-              renderInlineTags(editor);
+            } else if (field.smart && !isComposing) {
+              var text = editor.textContent || '';
+              if (/\s$/.test(text)) {
+                renderInlineTags(ctx, editor);
+              }
             }
             ensurePlaceholder(editor);
           });
 
           if (field.smart) {
             editor.addEventListener('blur', function () {
-              renderInlineTags(editor);
-              var existingTags = [];
-              Array.from(editor.querySelectorAll('.tag')).forEach(function (tag) {
-                var t = (tag.textContent || '').trim();
-                if (t) existingTags.push(t);
-              });
-              var rawText = (editor.textContent || '').trim();
-              var rawParts = rawText.split(/\s+/).filter(function (p) { return p; });
-              var hasDupes = false;
-              rawParts.forEach(function (p) {
-                if (existingTags.indexOf(p) !== -1) {
-                  hasDupes = true;
+              renderInlineTags(ctx, editor, true);
+              var cleaned = cleanDupes(editor);
+              if (cleaned) {
+                if ((editor.textContent || '').trim()) {
+                  renderInlineTags(ctx, editor, true);
+                } else {
+                  editor.innerHTML = '';
                 }
-              });
-              if (hasDupes) {
-                var tagText = existingTags.join(' ');
-                editor.textContent = tagText;
-                if (tagText) {
-                  renderInlineTags(editor);
-                }
-                ensurePlaceholder(editor);
               }
+              ensurePlaceholder(editor);
             });
           }
         });
@@ -344,7 +421,7 @@
           textEl.addEventListener('keydown', function (e) {
             if (e.key === 'Enter') {
               e.preventDefault();
-              renderInlineTags(textEl);
+              renderInlineTags(ctx, textEl);
               textEl.blur();
               return;
             }
@@ -366,13 +443,13 @@
 
           textEl.addEventListener('compositionend', function () {
             textEl._composing = false;
-            renderInlineTags(textEl);
+            renderInlineTags(ctx, textEl);
             ensurePlaceholder(textEl);
           });
 
           textEl.addEventListener('input', function () {
             if (textEl._composing) return;
-            renderInlineTags(textEl);
+            renderInlineTags(ctx, textEl);
             ensurePlaceholder(textEl);
           });
 
@@ -387,26 +464,13 @@
           textEl.addEventListener('blur', function () {
             btn.classList.remove('is-editing');
             btn.classList.remove('is-editing-content');
-            // 清除重复内容
-            renderInlineTags(textEl);
-            var existingTags = [];
-            Array.from(textEl.querySelectorAll('.tag')).forEach(function (tag) {
-              var t = (tag.textContent || '').trim();
-              if (t) existingTags.push(t);
-            });
-            var rawText = (textEl.textContent || '').trim();
-            var rawParts = rawText.split(/\s+/).filter(function (p) { return p; });
-            var hasDupes = false;
-            rawParts.forEach(function (p) {
-              if (existingTags.indexOf(p) !== -1) {
-                hasDupes = true;
-              }
-            });
-            if (hasDupes) {
-              var tagText = existingTags.join(' ');
-              textEl.textContent = tagText;
-              if (tagText) {
-                renderInlineTags(textEl);
+            renderInlineTags(ctx, textEl, true);
+            var cleaned = cleanDupes(textEl);
+            if (cleaned) {
+              if ((textEl.textContent || '').trim()) {
+                renderInlineTags(ctx, textEl, true);
+              } else {
+                textEl.innerHTML = '';
               }
             }
             var value = (textEl.textContent || '').trim();
@@ -414,7 +478,6 @@
               textEl.textContent = '';
               btn.classList.remove('has-value');
             } else {
-              // 识别后统一展示为纯文本，避免内联标签在按钮里换行撑开
               textEl.textContent = value.replace(/\s+/g, ' ').trim();
               btn.classList.add('has-value');
             }
