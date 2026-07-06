@@ -90,7 +90,7 @@
     }
 
     var existingTags = [];
-    Array.from(editorEl.querySelectorAll('.quick-publish__tag')).forEach(function (tag) {
+    Array.from(editorEl.querySelectorAll('.tag')).forEach(function (tag) {
       var t = (tag.textContent || '').trim();
       if (t) existingTags.push(t);
     });
@@ -112,7 +112,10 @@
         if (!seen[part]) {
           seen[part] = true;
           var isNew = existingTags.indexOf(part) === -1;
-          var cls = 'quick-publish__tag' + (isNew ? ' quick-publish__tag--flash' : '');
+          if (!isNew) {
+            ctx.toast('已选择「' + esc(part) + '」请重新输入');
+          }
+          var cls = 'tag tag--20 tag--gray' + (isNew ? ' quick-publish__tag--flash' : '');
           html += '<span class="' + cls + '">' + esc(part) + '</span> ';
         } else {
           html += esc(part) + ' ';
@@ -152,14 +155,25 @@
 
   function editorRowMarkup(field, idx) {
     var editableCls = 'quick-publish__editor-field' + (field.smart ? ' quick-publish__editor-field--smart' : '');
-    if (field.type === 'price' || field.type === 'number') {
+    var inputmodeAttr = '';
+    if (field.type === 'price') {
       editableCls += ' quick-publish__editor-field--number';
+      inputmodeAttr = ' inputmode="decimal"';
+    } else if (field.type === 'number') {
+      editableCls += ' quick-publish__editor-field--number';
+      inputmodeAttr = ' inputmode="numeric"';
     }
+    var inputwrapCls = 'quick-publish__input-wrap';
+    if (field.type === 'price') {
+      inputwrapCls += ' quick-publish__input-wrap--price';
+    }
+    var currencyPrefix = field.type === 'price' ? '<span class="quick-publish__currency">¥</span>' : '';
     return ''
       + '<div class="quick-publish__row" data-field="' + esc(field.id) + '">'
       +   '<label class="quick-publish__label" for="qp-' + esc(field.id) + '">' + esc(field.label) + '</label>'
-      +   '<div class="quick-publish__input-wrap">'
-      +     '<div class="' + editableCls + '" id="qp-' + esc(field.id) + '" contenteditable="true" data-index="' + idx + '" data-placeholder="' + esc(field.placeholder) + '" data-type="' + esc(field.type || '') + '" role="textbox" aria-multiline="true"></div>'
+      +   '<div class="' + inputwrapCls + '">'
+      +     currencyPrefix
+      +     '<div class="' + editableCls + '" id="qp-' + esc(field.id) + '" contenteditable="true" data-index="' + idx + '" data-placeholder="' + esc(field.placeholder) + '" data-type="' + esc(field.type || '') + '" role="textbox" aria-multiline="true"' + inputmodeAttr + '></div>'
       +   '</div>'
       + '</div>';
   }
@@ -223,6 +237,10 @@
 
             if (e.key === 'Enter') {
               e.preventDefault();
+              var fieldDef = FIELDS[idx];
+              if (fieldDef && fieldDef.smart) {
+                renderInlineTags(editor);
+              }
               var next = editors[idx + 1];
               if (next) next.focus();
               return;
@@ -257,7 +275,22 @@
           var editor = root.querySelector('#qp-' + field.id);
           if (!editor) return;
 
+          var isComposing = false;
+
+          editor.addEventListener('compositionstart', function () {
+            isComposing = true;
+          });
+
+          editor.addEventListener('compositionend', function () {
+            isComposing = false;
+            if (field.smart) {
+              renderInlineTags(editor);
+            }
+            ensurePlaceholder(editor);
+          });
+
           editor.addEventListener('input', function () {
+            if (isComposing) return;
             if (field.type === 'price' || field.type === 'number') {
               handleNumberInput(editor, field);
             } else if (field.smart) {
@@ -265,6 +298,33 @@
             }
             ensurePlaceholder(editor);
           });
+
+          if (field.smart) {
+            editor.addEventListener('blur', function () {
+              renderInlineTags(editor);
+              var existingTags = [];
+              Array.from(editor.querySelectorAll('.tag')).forEach(function (tag) {
+                var t = (tag.textContent || '').trim();
+                if (t) existingTags.push(t);
+              });
+              var rawText = (editor.textContent || '').trim();
+              var rawParts = rawText.split(/\s+/).filter(function (p) { return p; });
+              var hasDupes = false;
+              rawParts.forEach(function (p) {
+                if (existingTags.indexOf(p) !== -1) {
+                  hasDupes = true;
+                }
+              });
+              if (hasDupes) {
+                var tagText = existingTags.join(' ');
+                editor.textContent = tagText;
+                if (tagText) {
+                  renderInlineTags(editor);
+                }
+                ensurePlaceholder(editor);
+              }
+            });
+          }
         });
 
         // 可编辑操作按钮（标签、来源）
@@ -284,6 +344,7 @@
           textEl.addEventListener('keydown', function (e) {
             if (e.key === 'Enter') {
               e.preventDefault();
+              renderInlineTags(textEl);
               textEl.blur();
               return;
             }
@@ -299,20 +360,58 @@
             document.execCommand('insertText', false, text);
           });
 
+          textEl.addEventListener('compositionstart', function () {
+            textEl._composing = true;
+          });
+
+          textEl.addEventListener('compositionend', function () {
+            textEl._composing = false;
+            renderInlineTags(textEl);
+            ensurePlaceholder(textEl);
+          });
+
           textEl.addEventListener('input', function () {
+            if (textEl._composing) return;
             renderInlineTags(textEl);
             ensurePlaceholder(textEl);
           });
 
           textEl.addEventListener('focus', function () {
             btn.classList.add('is-editing');
+            if (textEl.textContent === textEl.dataset.default) {
+              textEl.textContent = '';
+            }
+            btn.classList.add('is-editing-content');
           });
 
           textEl.addEventListener('blur', function () {
             btn.classList.remove('is-editing');
+            btn.classList.remove('is-editing-content');
+            // 清除重复内容
+            renderInlineTags(textEl);
+            var existingTags = [];
+            Array.from(textEl.querySelectorAll('.tag')).forEach(function (tag) {
+              var t = (tag.textContent || '').trim();
+              if (t) existingTags.push(t);
+            });
+            var rawText = (textEl.textContent || '').trim();
+            var rawParts = rawText.split(/\s+/).filter(function (p) { return p; });
+            var hasDupes = false;
+            rawParts.forEach(function (p) {
+              if (existingTags.indexOf(p) !== -1) {
+                hasDupes = true;
+              }
+            });
+            if (hasDupes) {
+              var tagText = existingTags.join(' ');
+              textEl.textContent = tagText;
+              if (tagText) {
+                renderInlineTags(textEl);
+              }
+            }
             var value = (textEl.textContent || '').trim();
             if (!value) {
-              textEl.textContent = textEl.dataset.default || '';
+              textEl.textContent = '';
               btn.classList.remove('has-value');
             } else {
               // 识别后统一展示为纯文本，避免内联标签在按钮里换行撑开
@@ -386,6 +485,13 @@
         }
 
         editor.dataset.lastValid = sanitized;
+
+        if (field.type === 'price') {
+          var wrap = editor.parentElement;
+          if (wrap) {
+            wrap.classList.toggle('has-content', (editor.textContent || '').trim() !== '');
+          }
+        }
       }
 
       function ensurePlaceholder(el) {

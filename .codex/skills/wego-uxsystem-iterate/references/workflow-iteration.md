@@ -216,3 +216,28 @@
 1. 拦截，提示“AGENTS.md 只承载顶层仓库关键信息与仓库偏好规则”
 2. 工作流迭代规则回流到 workflow-iteration.md 或对应环节的 SKILL.md
 3. AGENTS.md 只在“仓库级约束”承接影响所有技能的硬约束
+
+## 6. 经验沉淀案例
+
+### 案例：已有场景迭代一致性（existing-scene-iteration-governance）
+
+**问题复盘**：已有页面迭代开发时，agent 默认直接改 scene.js/scene.css，不触发 wego-ux 技能，也不做偏差判定。3 轮近期内存会话（6a4b6d76/6a4b7836/6a4b7c36）显示 agent 全部直接改文件，无一触发技能。同时，归档机制执行率低（仅 33%），Token 硬编码和组件类发明无守门拦截。
+
+**业务名词剥离**：不绑定“仓库管理”或“快捷发布产品”等具体业务，抽象为“已有场景迭代偏差判定与技能触发强制化”。
+
+**范式命名**：`existing-scene-iteration-governance`（已有场景迭代治理）
+
+**反例验证**：任意已有业务场景（如仓库管理、系统设置、库存管理）的迭代需求，都应先经过偏差判定；换场景后判定逻辑不变。
+
+**归并判断**：这个范式的核心规则是：已有场景迭代必须先调 wego-ux 技能做偏差判定，再决定改产物或回工作流。与现有 `host-shell-route-binding`（后续迭代按 route_id 更新）互补但不冲突。
+
+**四段式定义**：
+
+1. **工作流环节归属**：primaryWorkflowStage = `wego-ux`（技能触发 + 偏差判定）；secondaryWorkflowStages = `wego-product`、`wego-design`、`wego-tests`（有偏差时回退）
+
+2. **场景类型识别**：类型 = `existing-scene-iteration`（已有场景迭代）
+
+3. **判断条件定义**：
+   - 偏差判定三步：①内容是否在 page_surfaces[] 范围内 → 否=内容偏差；②组件变化是否在 component_mapping 范围内 → 否=组件偏差；③展示方式是否与 page_presentation 一致 → 否=展示偏差
+   - 无偏差 → 直接改产物
+   - 有偏差 → 

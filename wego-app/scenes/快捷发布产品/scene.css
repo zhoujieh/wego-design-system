@@ -29,6 +29,11 @@
   gap: var(--spacer-12);
 }
 
+.quick-publish__row[data-field="spec"],
+.quick-publish__row[data-field="color"] {
+  min-height: 32px;
+}
+
 .quick-publish__label {
   flex-shrink: 0;
   width: 48px;
@@ -46,6 +51,25 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
+}
+
+.quick-publish__input-wrap--price {
+  flex-direction: row;
+  align-items: center;
+}
+
+.quick-publish__currency {
+  flex-shrink: 0;
+  font-size: var(--body-lg-font-size);
+  line-height: 24px;
+  color: var(--text-placeholder);
+  margin-right: 1px;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.quick-publish__input-wrap--price.has-content .quick-publish__currency {
+  color: var(--text-default);
 }
 
 .quick-publish__editor-field {
@@ -73,30 +97,14 @@
   color: var(--text-placeholder);
 }
 
-/* 智能识别标签（内联显示在 contenteditable 中） */
-.quick-publish__tag {
-  display: inline-flex;
-  align-items: center;
-  height: 22px;
-  padding: 0 var(--spacer-6);
-  margin-right: 4px;
-  border-radius: var(--radius-4);
-  background: var(--bg-overlay-l1);
-  color: var(--text-brand);
-  font-size: var(--body-md-font-size);
-  line-height: 1;
-  vertical-align: middle;
-  -webkit-user-select: none;
-  user-select: none;
-}
-
+/* 智能识别标签（内联显示在 contenteditable 中，复用 tag 组件） */
 .quick-publish__tag--flash {
   animation: quick-publish-tag-flash 0.4s ease-in-out 2;
 }
 
 @keyframes quick-publish-tag-flash {
   0%, 100% {
-    background: var(--bg-overlay-l1);
+    background: var(--bg-subtle);
   }
   50% {
     background: var(--bg-brand-surface-l1);
@@ -156,7 +164,12 @@
 }
 
 .quick-publish__action-btn.is-editing {
-  background: var(--bg-overlay-l1);
+  background: transparent;
+}
+
+.quick-publish__action-btn.is-editing-content .wego-iconfont-s,
+.quick-publish__action-btn.has-value .wego-iconfont-s {
+  display: none;
 }
 
 .quick-publish__action-btn--editable {
@@ -180,10 +193,9 @@
   pointer-events: none;
 }
 
-.quick-publish__action-text .quick-publish__tag {
-  height: 20px;
-  font-size: var(--body-sm-font-size);
+.quick-publish__action-text .tag.tag--20 {
   vertical-align: baseline;
+  margin-right: 4px;
 }
 
 .quick-publish__action-btn .wego-iconfont-s {

@@ -1604,6 +1604,262 @@ function checkPrototypeShellLeakage(context) {
   report.metrics.prototypeScenes = scenes.length;
 }
 
+// P1：归档强制检查
+// 拦截多次迭代但未归档的问题
+function checkPrototypeSpecArchive(context) {
+  const scenes = context.effectiveScope === 'full'
+    ? getAllSceneFolders()
+    : getSceneFoldersFromChangedFiles(context.changedFiles);
+  if (scenes.length === 0) return;
+
+  let checkedScenes = 0;
+  for (const scene of scenes) {
+    const specDir = path.join(SCENES_ROOT, scene, '_spec');
+    const pageSpecPath = path.join(specDir, 'page_spec.json');
+    const planPath = path.join(specDir, 'design_consumption_plan.json');
+    const archiveDir = path.join(specDir, 'archive');
+    if (!fs.existsSync(pageSpecPath) || !fs.existsSync(planPath)) continue;
+
+    // 检查 _spec 在 git 历史中有过修改
+    const specFiles = [pageSpecPath, planPath];
+    let totalCommits = 0;
+    for (const specFile of specFiles) {
+      const relPath = path.relative(repoRoot, specFile);
+      const result = git(['log', '--oneline', '--', relPath]);
+      if (result) {
+        const lines = result.split('\n').filter(Boolean);
+        totalCommits += lines.length;
+      }
+    }
+
+    // 首次创建场景不要求归档（_spec 只有 1 个 commit）
+    if (totalCommits <= 1) continue;
+
+    // _spec 有过迭代，必须存在 archive 目录且有归档文件
+    if (!fs.existsSync(archiveDir)) {
+      add('error', 'app_scene.spec_archive_missing',
+        `_spec 已迭代 ${totalCommits} 次但 _spec/archive/ 目录不存在；违反 wego-ux/SKILL.md "按版本归档"要求`,
+        specDir);
+      continue;
+    }
+    const archiveFiles = fs.readdirSync(archiveDir).filter(name => name.endsWith('.json'));
+    if (archiveFiles.length === 0) {
+      add('error', 'app_scene.spec_archive_empty',
+        `_spec 已迭代 ${totalCommits} 次但 _spec/archive/ 目录为空；必须归档上一版本`,
+        archiveDir);
+    }
+    checkedScenes++;
+  }
+  report.metrics.prototypeSpecArchive = checkedScenes;
+}
+
+// P1：Token 硬编码检测（扩展到场景文件）
+// 拦截 scene.js/scene.css 中硬编码 hex/rgb/hsl 颜色
+function checkPrototypeTokenHardcoding(context) {
+  const scenes = context.effectiveScope === 'full'
+    ? getAllSceneFolders()
+    : getSceneFoldersFromChangedFiles(context.changedFiles);
+  if (scenes.length === 0) return;
+
+  // 白名单：插画调色板、SVG 图形资源允许硬编码颜色
+  const ALLOWED_CONTEXTS = [
+    /palette\s*[:=]\s*\{[\s\S]*?(?:start|end|plate)\s*:/,
+    /stop-color\s*=\s*"/,
+    /<(?:rect|path|circle|ellipse|line|polygon|polyline|stop|text)\b[^>]*\bfill\s*=\s*"/,
+    /<(?:rect|path|circle|ellipse|line|polygon|polyline|stop|text)\b[^>]*\bstroke\s*=\s*"/,
+  ];
+
+  let scannedFiles = 0;
+  for (const scene of scenes) {
+    const scenePath = path.join(SCENES_ROOT, scene);
+    const filesToScan = [
+      path.join(scenePath, 'scene.css'),
+      path.join(scenePath, 'scene.js'),
+    ].filter(f => fs.existsSync(f));
+
+    for (const file of filesToScan) {
+      scannedFiles++;
+      const ext = path.extname(file);
+      let content = fs.readFileSync(file, 'utf8');
+      if (ext === '.css') {
+        content = stripCssComments(content);
+      } else if (ext === '.js') {
+        content = content.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+      }
+
+      const colors = rawColorMatches(content);
+      if (colors.length === 0) continue;
+
+      const uniqueColors = [...new Set(colors)];
+
+      // 预定位 SVG 块范围
+      const svgRanges = [];
+      const svgOpenRegex = /<svg\b/g;
+      const svgCloseRegex = /<\/svg>/g;
+      let svgMatch;
+      while ((svgMatch = svgOpenRegex.exec(content)) !== null) {
+        const openIdx = svgMatch.index;
+        svgCloseRegex.lastIndex = openIdx;
+        const closeMatch = svgCloseRegex.exec(content);
+        if (closeMatch) {
+          svgRanges.push([openIdx, closeMatch.index + closeMatch[0].length]);
+        }
+      }
+      const isInSvg = idx => svgRanges.some(([s, e]) => idx >= s && idx <= e);
+
+      // 预定位 palette 对象范围
+      const paletteRanges = [];
+      const paletteRegex = /palette\s*[:=]\s*\{/g;
+      let paletteMatch;
+      while ((paletteMatch = paletteRegex.exec(content)) !== null) {
+        const openIdx = paletteMatch.index;
+        let depth = 0;
+        let endIdx = openIdx;
+        for (let i = openIdx; i < content.length; i++) {
+          if (content[i] === '{') depth++;
+          else if (content[i] === '}') {
+            depth--;
+            if (depth === 0) { endIdx = i + 1; break; }
+          }
+        }
+        paletteRanges.push([openIdx, endIdx]);
+      }
+      const isInPalette = idx => paletteRanges.some(([s, e]) => idx >= s && idx <= e);
+
+      const violations = [];
+      for (const color of uniqueColors) {
+        const colorIndex = content.indexOf(color);
+        if (colorIndex === -1) continue;
+        if (isInSvg(colorIndex) || isInPalette(colorIndex)) continue;
+        const start = Math.max(0, colorIndex - 120);
+        const contextWindow = content.slice(start, colorIndex + color.length + 40);
+        const isAllowed = ALLOWED_CONTEXTS.some(regex => regex.test(contextWindow));
+        if (!isAllowed) {
+          violations.push(color);
+        }
+      }
+
+      if (violations.length > 0) {
+        add('error', 'app_scene.token_hardcoded',
+          `场景文件禁止硬编码颜色，应使用 Token：${firstLines(violations)}；参见 library-consumption.json:145-152`,
+          file);
+      }
+    }
+  }
+  report.metrics.prototypeTokenHardcoding = scannedFiles;
+}
+
+// P2：组件类发明检测
+// 拦截 scene.js/scene.css 中使用未在 components.css 注册的组件类
+function checkPrototypeComponentClassInvention(context) {
+  const scenes = context.effectiveScope === 'full'
+    ? getAllSceneFolders()
+    : getSceneFoldersFromChangedFiles(context.changedFiles);
+  if (scenes.length === 0) return;
+
+  const componentsCssPath = path.join(libraryRoot, 'components.css');
+  if (!fs.existsSync(componentsCssPath)) return;
+  const componentClassSet = classesFromCss(fs.readFileSync(componentsCssPath, 'utf8'));
+
+  // 组件根 slug 集合（用于放行 cell--indent、link--default 等修饰扩展）
+  const componentRootSlugs = new Set();
+  for (const cls of componentClassSet) {
+    const root = cls.split(/__[--]/)[0].split(/--/)[0];
+    if (root) componentRootSlugs.add(root);
+  }
+
+  // 宿主 App 通用工具类白名单
+  const HOST_UTILITY_CLASSES = new Set([
+    'phone-screen', 'phone-frame', 'preview-shell', 'phone-status', 'phone-indicator',
+    'phone-indicator-bar', 'phone-body', 'uikit-shell',
+    'host-shell', 'host-shell-page', 'host-shell-tab', 'host-shell-grid',
+    'host-shell-grid-entry', 'host-shell-grid-entry__icon', 'host-shell-grid-entry__label',
+    'bottom-nav', 'bottom-nav__item', 'bottom-nav__icon', 'bottom-nav__label',
+    'app-tabbar', 'app-tabbar__item',
+  ]);
+
+  // 场景目录名拼音映射（用于识别业务前缀类）
+  const SCENE_PREFIX_MAP = {
+    '仓库管理': ['warehouse', 'warehouse-page'],
+    '价格权限管理': ['price', 'price-rule', 'price-page'],
+    '产品与笔记': ['product', 'note', 'product-page', 'note-page'],
+    '库存管理': ['stock', 'inventory', 'stock-page'],
+    '快捷发布产品': ['quick-publish', 'publish', 'quick-publish-page'],
+    '系统设置': ['system', 'settings', 'system-page'],
+  };
+
+  function isBusinessPrefix(className, scene) {
+    if (!className) return false;
+    if (/-page__(?:[\w-]+)$/.test(className) || /-page--[\w-]+$/.test(className)) return true;
+    if (/^(?:host-shell|wego-app|app-)/.test(className)) return true;
+    const prefixes = SCENE_PREFIX_MAP[scene] || [];
+    for (const prefix of prefixes) {
+      if (className === prefix) return true;
+      if (className.startsWith(prefix + '-') || className.startsWith(prefix + '__') || className.startsWith(prefix + '--')) return true;
+    }
+    return false;
+  }
+
+  // 过滤 JS 变量名误提取
+  function filterRealCssClasses(classNames) {
+    const filtered = [];
+    const COMMON_JS_VARS = new Set([
+      'cls', 'density', 'divider', 'tone', 'state', 'on', 'off',
+      'icon', 'class', 'className', 'style', 'id', 'key', 'value',
+      'label', 'title', 'text', 'content', 'children', 'props',
+    ]);
+    for (const name of classNames) {
+      if (/^icon-[\w-]+$/.test(name)) continue;
+      if (/^[a-z][a-zA-Z0-9]*$/.test(name) && /[a-z][A-Z]/.test(name)) continue;
+      if (COMMON_JS_VARS.has(name)) continue;
+      filtered.push(name);
+    }
+    return filtered;
+  }
+
+  const STYLE_UTILITY_PATTERNS = /^(?:is-|has-|js-|no-|with-|without-)/;
+  const COMMON_HTML_CLASSES = new Set([
+    'active', 'disabled', 'hidden', 'visible', 'open', 'closed', 'selected',
+    'current', 'loading', 'error', 'success', 'warning', 'default',
+  ]);
+
+  let checkedScenes = 0;
+  for (const scene of scenes) {
+    const scenePath = path.join(SCENES_ROOT, scene);
+    const sceneJsPath = path.join(scenePath, 'scene.js');
+    const sceneCssPath = path.join(scenePath, 'scene.css');
+    if (!fs.existsSync(sceneJsPath)) continue;
+
+    const sceneJsContent = fs.readFileSync(sceneJsPath, 'utf8');
+    const sceneCssContent = fs.existsSync(sceneCssPath) ? fs.readFileSync(sceneCssPath, 'utf8') : '';
+    const sceneJsClasses = new Set(filterRealCssClasses([...classNamesFromHtml(sceneJsContent)]));
+    const sceneCssClasses = classesFromCss(stripCssComments(sceneCssContent));
+    const allSceneClasses = new Set([...sceneJsClasses, ...sceneCssClasses]);
+
+    const inventedClasses = [];
+    for (const name of allSceneClasses) {
+      if (componentClassSet.has(name)) continue;
+      if (HOST_UTILITY_CLASSES.has(name)) continue;
+      if (FORBIDDEN_PROTOTYPE_SHELL_CLASSES.has(name) || PREVIEW_SHELL_CLASSES.has(name)) continue;
+      if (isBusinessPrefix(name, scene)) continue;
+      if (STYLE_UTILITY_PATTERNS.test(name)) continue;
+      if (COMMON_HTML_CLASSES.has(name)) continue;
+      // 放行对已注册组件的修饰扩展（如 cell--indent、link--default）
+      const nameRoot = name.split(/--/)[0].split(/__/)[0];
+      if (componentRootSlugs.has(nameRoot)) continue;
+      inventedClasses.push(name);
+    }
+
+    if (inventedClasses.length > 0) {
+      add('error', 'app_scene.component_class_invented',
+        `场景文件发明了未注册组件类：${firstLines([...new Set(inventedClasses)])}；应使用已注册组件类（参见 wego-app/lib/components.css）或声明为业务前缀类`,
+        sceneJsPath);
+    }
+    checkedScenes++;
+  }
+  report.metrics.prototypeComponentClassInvention = checkedScenes;
+}
+
 function checkPrototypeSinglePreviewShellRouting(context) {
   const indexPath = path.join(APP_ROOT, 'index.html');
   if (!fs.existsSync(indexPath)) {
@@ -1815,6 +2071,9 @@ function main() {
   checkPrototypeSurfaceDesigns(context);
   checkPrototypeJunkAndInternalCopy(context);
   checkPrototypeShellLeakage(context);
+  checkPrototypeSpecArchive(context);
+  checkPrototypeTokenHardcoding(context);
+  checkPrototypeComponentClassInvention(context);
   checkPrototypeSinglePreviewShellRouting(context);
   checkPrototypeHostShellUniqueness(context);
   checkMetadataVersionGate(context);

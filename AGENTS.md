@@ -31,6 +31,7 @@
 | 业务开发、做页面、做原型、做场景、接业务需求、做新业务编辑任务                                   | `wego-product`                     | 无                                            | `page_spec` 完成后交给 `wego-design`，再进入 `wego-ux`、`wego-tests` |
 | 已有 `page_spec`，要出页面范式、UI Kit、组件映射、打开方式、`design_consumption_plan`  | `wego-design`                      | 已有 `page_spec`                               | `design_consumption_plan` 完成后交给 `wego-ux`                  |
 | 已有 `page_spec` + `design_consumption_plan`，要正式生成或更新 `wego-app` 场景 | `wego-ux`                          | 已落盘的 `page_spec` + `design_consumption_plan` | 原型完成后交给 `wego-tests`                                       |
+| ⚠️ 已有场景迭代，需修改 `wego-app/scenes/{场景}/` 下的文件 | `wego-ux`                          | 该场景 _spec 已落盘                               | 先进入 `wego-ux` 做偏差判定，再决定改产物或回工作流                        |
 | 验收、检查、回归、review 当前场景是否符合规格                                        | `wego-tests`                       | 当前场景已生成，且 `route_id` 已注册                     | 输出 `acceptance_report`，必要时把问题归因回前置技能                       |
 | 改组件、补 preview、改契约、改 UI Kit、改 metadata、补守门                         | `wego-uxsystem-iterate` 的`迭代模式`    | 当前目标属于设计系统本体或 UI Kit                         | 按 `references/workflow.md` / `sync-matrix.md` 同步           |
 | 补规则、沉淀经验、优化流程、修技能链路、修触发机制                                         | `wego-uxsystem-iterate` 的`工作流迭代模式` | 当前目标属于经验回流或工作流分流                             | 按 `references/workflow-iteration.md` 回流到对应环节               |
@@ -82,6 +83,7 @@
 - 业务页面不得运行时依赖 `fetch()`/`XHR` 读取本地 HTML 片段;场景通过 `scene.js` 注册 template 与交互,确保 Vercel 和本地直接打开都可用
 - `wego-app/lib/` 是设计系统部署副本,禁止直接编辑其中的 CSS、字体、图标或图片;必须先修改 `.codex/skills/wego-design/` 源文件,再运行 `node scripts/sync-wego-app-lib.mjs` 同步
 - 原型交互必须体现真实业务流程和数据状态变化,但不默认强制 localStorage 持久化;只有需求明确要求刷新后保留时才做持久化
+- 对 `wego-app/scenes/{场景}/` 下 scene.js、scene.css 的修改，必须先触发 wego-ux 技能进行"偏差判定"；禁止在未触发对应技能的情况下直接编辑 scene 文件；即使是工程实现层微调（改间距、文案、Token），也必须先进入 wego-ux 技能完成偏差判定
 - 设计系统本体迭代必须递增 `.codex/skills/wego-design/metadata.json` 的 `version`;纯仓库管理类变更可不递增(详见 `wego-uxsystem-iterate/SKILL.md`)
 - 不提交 `.DS_Store`、`.uploads/`
 - AGENTS.md 只承载顶层仓库关键信息与仓库偏好规则;不承载工作流迭代方法论、组件迭代步骤、单个组件规则;后者一律落到对应技能的 references/ 或权威数据文件

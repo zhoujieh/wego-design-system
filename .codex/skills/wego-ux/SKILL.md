@@ -7,6 +7,13 @@ description: 将 page_spec 和 design_consumption_plan 落成 wego-app 静态 Ap
 
 这是唯一正式产出产品原型的环节。目标不是生成孤立 demo，而是持续开发一个完整的 `wego-app` 静态 App 原型。
 
+## 强制门禁
+
+⚠️ 在触发本技能之前，禁止直接修改 `wego-app/scenes/{场景}/` 下的 scene.js 或 scene.css。
+
+所有对已有场景的迭代开发，无论改动大小，必须先进入本技能进行"偏差判定"（见下文）。
+偏差判定确认无偏差后，才允许在本技能范围内改产物。
+
 ## 何时必须触发本技能
 
 - 已有 `page_spec` + `design_consumption_plan`，要正式生成或更新 `wego-app` 场景
@@ -27,6 +34,51 @@ description: 将 page_spec 和 design_consumption_plan 落成 wego-app 静态 Ap
 - `design_consumption_plan`，且已落盘到 `wego-app/scenes/{中文业务场景}/_spec/design_consumption_plan.json`
 
 找不到这两份文件时不进入原型生成，先回到 `wego-product` / `wego-design` 补齐。同一业务场景迭代时复用原 `_spec/` 目录，按版本归档。
+
+## 已有场景迭代的偏差判定
+
+已有场景的 _spec 已落盘时，前置条件天然满足，但并非所有迭代都适合直接改产物。
+进入 wego-ux 改产物前，agent 必须做一轮"偏差判定"：
+
+### 偏差判定步骤
+
+1. 读 `_spec/page_spec.json` 和 `_spec/design_consumption_plan.json`
+2. 问三个问题：
+
+   a) 这次要改的内容，在 _spec 的 page_surfaces[] 里有对应 surface 吗？
+      → 没有 → 有"内容偏差"
+
+   b) 这次要改的内容，如果是组件层面的变化，在对应 surface 的
+      component_mapping[].selected 声明范围内吗？
+      → 不在 → 有"组件偏差"
+
+   c) 这次要改的内容，涉及展示方式/打开方式的变化，和
+      _spec 的 page_presentation 一致吗？
+      → 不一致 → 有"展示偏差"
+
+3. 以上都不涉及 → 无偏差，直接改产物（改完后跑守门脚本通过）
+
+### 有偏差后的工作流回退
+
+有偏差时，必须先同步 _spec，再改产物：
+
+| 偏差类型 | 需更新的 _spec 文件 | 回退到哪个技能 |
+|----------|---------------------|----------------|
+| 内容偏差 | page_spec + design_consumption_plan | wego-product → wego-design → 回到 wego-ux → wego-tests |
+| 组件偏差 | design_consumption_plan | wego-design → 回到 wego-ux → wego-tests |
+| 展示偏差 | page_spec + design_consumption_plan | wego-product → wego-design → 回到 wego-ux → wego-tests |
+
+更新 _spec 时必须归档旧版本到 `_spec/archive/`。
+
+### 什么是"无偏差"
+
+以下情况属于无偏差（直接改产物即可）：
+- 调整文案、间距、圆角大小等工程细节
+- 颜色 Token 替换（必须是已注册 Token）
+- 安全区适配、响应式调整
+- 修复交互 BUG 但不改变交互模式
+- 性能优化、代码结构重组
+- 组件内已有变体之间的切换（前提是在 component_mapping 范围内）
 
 ## 产物目标
 
