@@ -4,7 +4,7 @@
 
 ## 当前产物目标
 
-仓库固定输出一个完整静态 App 原型：
+仓库固定输出一个完整静态 App 原型，查看交互演示'https://wego-app-two.vercel.app/index.html'
 
 - App 项目位于 `wego-app/`
 - 入口为 `wego-app/index.html`

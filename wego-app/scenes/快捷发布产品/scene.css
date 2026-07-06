@@ -1,0 +1,152 @@
+/* 快捷发布产品场景样式 */
+
+.quick-publish-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  background: var(--bg-surface);
+}
+
+.quick-publish__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: var(--spacer-16);
+  padding-bottom: calc(var(--spacer-40) + var(--safe-area-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-16);
+}
+
+/* 编辑器 */
+.quick-publish__editor {
+  display: flex;
+  flex-direction: column;
+}
+
+.quick-publish__row {
+  display: flex;
+  align-items: flex-start;
+  min-height: 48px;
+  padding: var(--spacer-12) 0;
+  gap: var(--spacer-12);
+}
+
+.quick-publish__label {
+  flex-shrink: 0;
+  width: 56px;
+  text-align: right;
+  font-size: var(--body-lg-font-size);
+  line-height: 24px;
+  color: var(--text-default);
+  padding-top: 0;
+}
+
+.quick-publish__input-wrap {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-8);
+}
+
+.quick-publish__input {
+  width: 100%;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-size: var(--body-lg-font-size);
+  line-height: 24px;
+  color: var(--text-default);
+  outline: none;
+}
+
+.quick-publish__input::placeholder {
+  color: var(--text-placeholder);
+}
+
+/* 智能识别标签 */
+.quick-publish__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacer-8);
+}
+
+.quick-publish__tag {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 var(--spacer-8);
+  border-radius: var(--radius-4);
+  background: var(--bg-overlay-l1);
+  color: var(--text-brand);
+  font-size: var(--body-sm-font-size);
+  line-height: 1;
+}
+
+/* 辅助入口 */
+.quick-publish__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-12);
+}
+
+.quick-publish__action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacer-4);
+  height: 32px;
+  padding: 0 var(--spacer-12);
+  border: none;
+  border-radius: var(--radius-6);
+  background: var(--bg-subtle);
+  color: var(--text-default);
+  font-size: var(--body-md-font-size);
+  line-height: 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.quick-publish__action-btn:active,
+.quick-publish__action-btn.is-pressed {
+  opacity: 0.7;
+}
+
+.quick-publish__action-btn .wego-iconfont-s {
+  font-size: 16px;
+  color: var(--text-secondary);
+}
+
+/* 图片上传占位 */
+.quick-publish__upload {
+  display: flex;
+}
+
+.quick-publish__upload-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  border: 1px dashed var(--border-neutral-l2);
+  border-radius: var(--radius-8);
+  background: var(--bg-subtle);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.quick-publish__upload-btn:active,
+.quick-publish__upload-btn.is-pressed {
+  opacity: 0.7;
+}
+
+.quick-publish__upload-btn .wego-iconfont-s {
+  font-size: 24px;
+  color: var(--text-secondary);
+}

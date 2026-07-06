@@ -215,6 +215,7 @@
     "单按钮用于纯告知（'我知道了''好的'），默认使用 default 常规文字颜色；双按钮用于确认/取消，三按钮尽量避免（如需三按钮考虑用 ActionSheet）；必须使用三按钮时，顺序优先为主操作、次操作、取消。",
     "input 变体用于单条轻量文本录入；多字段表单或复杂编辑场景使用 full-screen-modal 而非 dialog。",
     "与 toast 的区别：dialog 阻塞用户必须选择，toast 瞬时自动消失；需要用户决策用 dialog，只需告知用 toast。",
+    "与 actionsheet 的区别：dialog 是居中模态弹窗用于 2-3 按钮轻量确认；actionsheet 是底部弹层用于 3+ 并列操作或单选切换场景。当操作选项超过 3 个或需要单选切换时，优先使用 actionsheet。",
     "与 sheet 的区别：sheet 是底部弹层用于筛选/选择器，dialog 是居中弹窗用于确认。",
     "与 full-screen-modal 的区别：full-screen-modal 用于复杂编辑流程，dialog 用于轻量确认和快速输入。"
   ],

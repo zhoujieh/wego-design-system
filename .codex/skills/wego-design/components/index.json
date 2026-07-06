@@ -146,6 +146,13 @@
       "category": "feedback",
       "status": "stable",
       "preview": "preview/component-dialog.html"
+    },
+    {
+      "slug": "actionsheet",
+      "name": "底部操作表单",
+      "category": "feedback",
+      "status": "stable",
+      "preview": "preview/component-actionsheet.html"
     }
   ],
   "componentContractSchemaVersion": 3

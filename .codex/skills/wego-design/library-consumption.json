@@ -267,7 +267,8 @@
     "stack",
     "switch",
     "toast",
-    "dialog"
+    "dialog",
+    "actionsheet"
   ],
   "embeddedComponents": [],
   "unpublishedContracts": [],

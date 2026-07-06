@@ -1,4 +1,16 @@
 window.WEGO_APP_ROUTES = [
+  {
+    routeId: 'quick-publish-product',
+    scene: '快捷发布产品',
+    script: './scenes/快捷发布产品/scene.js',
+    style: './scenes/快捷发布产品/scene.css',
+    entry: {
+      tab: 'dongtai',
+      group: 'dongtai-navbar-publish',
+      label: '快捷发布',
+      type: 'custom'
+    }
+  },
   /*
    * AI 生成新业务场景时按 route_id upsert:
    * {

@@ -4,6 +4,301 @@
    DO NOT EDIT MANUALLY — regenerate via extract-components-css.mjs
    ═══════════════════════════════════════════════════════════════ */
 
+/* ── Actionsheet ───────────────────────────────────────────── */
+/* @anatomy
+   <div class="pv-header"> <h1>底部操作表单 ActionSheet</h1> <p>底部弹层操作表单，用于 3+ 并列操作或单选切换。与 dialog 的区别：dialog 是居中模态确认弹窗用于 2-3 按钮轻量确认；actionsheet 是底部弹层用于 3+ 并列操作或单选切换场景。</p> </div>
+*/
+.actionsheet {
+  --actionsheet-panel-width: 100%;
+  --actionsheet-item-divider-color: var(--border-neutral-l2);
+  --actionsheet-item-font-weight: var(--font-weight-regular);
+  --actionsheet-cancel-letter-spacing: 0.1em;
+  box-sizing: border-box;
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: var(--bg-mask-light);
+  z-index: var(--z-modal);
+  pointer-events: auto;
+  visibility: visible;
+  opacity: 1;
+  transition: opacity var(--duration-normal) var(--ease-enter);
+}
+.actionsheet[data-state="closed"] {
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease-exit), visibility 0s linear var(--duration-normal);
+  pointer-events: none;
+}
+.actionsheet__panel {
+  box-sizing: border-box;
+  width: var(--actionsheet-panel-width);
+  max-width: 670px;
+  margin-inline: auto;
+  background: var(--bg-surface);
+  border-radius: var(--radius-16) var(--radius-16) 0 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(0);
+  transition: transform var(--duration-normal) var(--ease-enter);
+}
+.actionsheet[data-state="closed"] .actionsheet__panel {
+  transform: translateY(100%);
+  transition: transform var(--duration-normal) var(--ease-exit);
+}
+.actionsheet__header {
+  box-sizing: border-box;
+  height: 64px;
+  padding: var(--spacer-16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacer-8);
+  position: relative;
+  background: var(--bg-surface);
+}
+.actionsheet__header::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 -0.5px 0 0 var(--border-neutral-l2);
+  border-radius: inherit;
+}
+.actionsheet__header--text-link {
+  justify-content: space-between;
+  gap: var(--spacer-24);
+}
+.actionsheet__header-text {
+  font-family: var(--font-family-system);
+  font-size: var(--body-md-font-size);
+  color: var(--text-secondary);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.actionsheet__header--text .actionsheet__header-text { text-align: center; flex: none; }
+.actionsheet__header--text-link .actionsheet__header-text { text-align: left; }
+.actionsheet__header-link {
+  flex-shrink: 0;
+}
+.actionsheet__list {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+/* 分组容器：多个 group 之间 8px gap 灰色间隔 */
+.actionsheet__group {
+  display: flex;
+  flex-direction: column;
+}
+.actionsheet__group + .actionsheet__group {
+  background: var(--bg-state-hover);
+  padding-top: 8px;
+  padding-bottom: 0;
+}
+.actionsheet__item {
+  box-sizing: border-box;
+  height: 56px;
+  padding: var(--spacer-16);
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-12);
+  position: relative;
+  background: var(--bg-surface);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.actionsheet--select .actionsheet__item {
+  padding: 0 0 0 var(--spacer-16);
+}
+.actionsheet__item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 -0.5px 0 0 var(--actionsheet-item-divider-color);
+}
+.actionsheet__item:last-child::after { box-shadow: none; }
+.actionsheet__item:active { background: var(--bg-state-pressed); }
+.actionsheet__item--disabled {
+  color: var(--text-tertiary);
+  cursor: not-allowed;
+}
+.actionsheet__item--disabled:active { background: var(--bg-surface); }
+/* 选择模式专用"划线区" */
+.actionsheet__item-row {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-24);
+  min-width: 0;
+}
+.actionsheet__item-icon {
+  width: var(--size-20);
+  height: var(--size-20);
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--size-20);
+  line-height: 1;
+  overflow: hidden;
+}
+.actionsheet__item-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-8);
+  min-width: 0;
+}
+.actionsheet--select .actionsheet__item-main {
+  gap: var(--spacer-2);
+  justify-content: flex-start;
+}
+.actionsheet__item-title {
+  font-family: var(--font-family-system);
+  font-size: var(--body-lg-font-size);
+  color: var(--text-default);
+  font-weight: var(--actionsheet-item-font-weight);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* 操作模式：无图标时 main 内容居中 */
+.actionsheet--action .actionsheet__item-main { justify-content: center; }
+/* 操作模式：有图标时 main 内容左对齐 */
+.actionsheet--action .actionsheet__item-icon + .actionsheet__item-main { justify-content: flex-start; }
+/* 选择模式标题左对齐 */
+.actionsheet--select .actionsheet__item-main { justify-content: flex-start; }
+/* 选中项标题加粗 */
+.actionsheet--select .actionsheet__item--selected .actionsheet__item-title {
+  font-weight: var(--font-weight-medium);
+}
+.actionsheet__item--disabled .actionsheet__item-title { color: var(--text-tertiary); }
+.actionsheet__item-subtitle {
+  font-family: var(--font-family-system);
+  font-size: var(--body-sm-font-size);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.actionsheet__item-recommend {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  margin-left: var(--spacer-4);
+  transform: translateY(-50%);
+  font-family: var(--font-family-system);
+  font-size: var(--body-xs-font-size);
+  color: var(--status-success-default);
+  background: var(--status-success-surface-l1);
+  padding: 2px var(--spacer-8);
+  border-radius: var(--radius-4);
+  white-space: nowrap;
+}
+/* 当 main 内有徽标时，main 收缩到标题宽度，让徽标相对标题定位 */
+.actionsheet__item-main:has(.actionsheet__item-recommend) {
+  flex: 0 0 auto;
+  position: relative;
+}
+/* 操作模式无图标有徽标：item 居中 main */
+.actionsheet--action .actionsheet__item:has(.actionsheet__item-recommend):not(:has(.actionsheet__item-icon)) {
+  justify-content: center;
+}
+/* === 双行布局（副标题）=== */
+/* 操作模式无图标双行：item 改为 column 居中堆叠 */
+.actionsheet--action .actionsheet__item:has(.actionsheet__item-subtitle):not(:has(.actionsheet__item-icon)) {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  height: auto;
+  min-height: 56px;
+}
+/* 操作模式有图标双行：grid 布局，icon 相对 title 居中，subtitle 与 title 左对齐 */
+.actionsheet--action .actionsheet__item:has(.actionsheet__item-icon):has(.actionsheet__item-subtitle) {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  gap: 2px var(--spacer-12);
+  align-items: center;
+  height: auto;
+  min-height: 56px;
+}
+.actionsheet--action .actionsheet__item:has(.actionsheet__item-icon):has(.actionsheet__item-subtitle) .actionsheet__item-icon {
+  grid-row: 1;
+  grid-column: 1;
+}
+.actionsheet--action .actionsheet__item:has(.actionsheet__item-icon):has(.actionsheet__item-subtitle) .actionsheet__item-main {
+  grid-row: 1;
+  grid-column: 2;
+}
+.actionsheet--action .actionsheet__item:has(.actionsheet__item-icon):has(.actionsheet__item-subtitle) .actionsheet__item-subtitle {
+  grid-row: 2;
+  grid-column: 2;
+}
+/* 选择模式双行：item 最小高 76px，main 改为 column */
+.actionsheet--select .actionsheet__item:has(.actionsheet__item-subtitle) {
+  min-height: 76px;
+  height: auto;
+}
+.actionsheet--select .actionsheet__item:has(.actionsheet__item-subtitle) .actionsheet__item-main {
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+}
+/* 选择模式专用右侧槽位（始终保留 56px 宽，避免选中切换时文本跳动） */
+.actionsheet__item-check-slot {
+  width: 56px;
+  flex-shrink: 0;
+  padding-right: var(--spacer-16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* .actionsheet__item-check 是 <i class="wego-iconfont-s icon-gou-jiacu actionsheet__item-check"> 元素
+   iconfont 字符由 .icon-gou-jiacu:before 自动注入，这里只承担尺寸/颜色/display */
+.actionsheet__item-check {
+  width: var(--size-24);
+  height: var(--size-24);
+  flex-shrink: 0;
+  color: var(--status-success-default);
+  font-size: var(--size-24);
+  line-height: 1;
+  display: none;
+}
+.actionsheet--select .actionsheet__item--selected .actionsheet__item-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.actionsheet__cancel-gap {
+  height: var(--spacer-8);
+  background: var(--bg-state-hover);
+  width: 100%;
+}
+.actionsheet__cancel {
+  box-sizing: border-box;
+  padding: var(--spacer-16);
+  padding-bottom: calc(var(--spacer-16) + var(--safe-area-bottom));
+  text-align: center;
+  font-family: var(--font-family-system);
+  font-size: var(--body-lg-font-size);
+  color: var(--text-default);
+  letter-spacing: var(--actionsheet-cancel-letter-spacing);
+  background: var(--bg-surface);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.actionsheet__cancel:active { background: var(--bg-state-pressed); }
+
 /* ── Avatar ────────────────────────────────────────────────── */
 /* @anatomy
    <span class="label">图片头像</span> <div class="avatar avatar--24 avatar--image"><img src="../assets/image/avatar-defult.png" alt="默认头像">

@@ -22,7 +22,26 @@
         </div>
 
         <main class="host-shell-page" data-host-content>
-          <section class="host-shell-page__panel host-shell-page__panel--blank" data-host-tab="dongtai" hidden aria-label="动态"></section>
+          <section class="host-shell-page__panel" data-host-tab="dongtai" hidden aria-label="动态">
+            <div class="navbar host-dongtai-navbar" data-bg="page">
+              <div class="navbar__body">
+                <div class="navbar__left">
+                  <button type="button" class="host-dongtai-navbar__vip" data-vip-level="vip" aria-label="VIP">
+                    <img src="./lib/icons/icon-dongtai-vip.svg" alt="" />
+                  </button>
+                </div>
+                <div class="navbar__center"></div>
+                <div class="navbar__right navbar__right--button">
+                  <div class="navbar__action navbar__action--button">
+                    <button type="button" class="btn btn--strong btn--sm" onclick="WegoApp.navigate('quick-publish-product')">发布</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="host-dongtai-body">
+              <p class="host-shell-empty">动态内容占位</p>
+            </div>
+          </section>
           <section class="host-shell-page__panel host-shell-page__panel--blank" data-host-tab="haoyou" hidden aria-label="好友"></section>
           <section class="host-shell-page__panel host-shell-page__panel--blank" data-host-tab="workspace" hidden aria-label="工作台">
             <section class="card card--surface host-shell-list-card">

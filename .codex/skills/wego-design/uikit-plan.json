@@ -160,6 +160,14 @@
       "previewFile": "preview/component-dialog.html",
       "priority": 18,
       "slot": "confirmation-overlay"
+    },
+    {
+      "slug": "actionsheet",
+      "reason": "底部弹层操作表单，用于 3+ 并列操作或单选切换场景。",
+      "evidenceFile": "components/actionsheet.json",
+      "previewFile": "preview/component-actionsheet.html",
+      "priority": 19,
+      "slot": "bottom-action-sheet"
     }
   ],
   "allowedComponents": [
@@ -181,7 +189,8 @@
     "switch",
     "navbar",
     "toast",
-    "dialog"
+    "dialog",
+    "actionsheet"
   ],
   "screenBlueprints": [
     {

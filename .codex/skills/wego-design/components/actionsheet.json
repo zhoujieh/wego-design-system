@@ -1,0 +1,403 @@
+{
+  "schemaVersion": 3,
+  "slug": "actionsheet",
+  "name": "底部操作表单",
+  "category": "feedback",
+  "status": "stable",
+  "sourceKind": "inferred",
+  "confidence": "high",
+  "description": "底部弹层操作表单，用于列出一组操作或单选项。底部带固定'取消'按钮。与 dialog 的区别：dialog 是居中模态确认弹窗用于 2-3 按钮轻量确认；actionsheet 是底部弹层用于 3+ 并列操作或单选切换场景。",
+  "semanticTypeCandidates": [
+    "action-sheet",
+    "bottom-sheet",
+    "selection-sheet",
+    "picker-sheet"
+  ],
+  "variantDimensions": {
+    "mode": [
+      "action",
+      "select"
+    ],
+    "header": [
+      "none",
+      "text",
+      "text-link"
+    ],
+    "item": [
+      "text",
+      "icon",
+      "subtitle",
+      "recommend",
+      "disabled"
+    ],
+    "state": [
+      "open",
+      "closed"
+    ]
+  },
+  "representativeVariants": [
+    {
+      "mode": "action",
+      "header": "none",
+      "item": "text"
+    },
+    {
+      "mode": "action",
+      "header": "text",
+      "item": "text"
+    },
+    {
+      "mode": "action",
+      "header": "text-link",
+      "item": "text"
+    },
+    {
+      "mode": "action",
+      "header": "text-link",
+      "item": "icon"
+    },
+    {
+      "mode": "action",
+      "header": "none",
+      "item": "recommend"
+    },
+    {
+      "mode": "action",
+      "header": "none",
+      "item": "disabled"
+    },
+    {
+      "mode": "select",
+      "header": "none",
+      "item": "text"
+    },
+    {
+      "mode": "select",
+      "header": "text",
+      "item": "text"
+    },
+    {
+      "mode": "select",
+      "header": "none",
+      "item": "subtitle"
+    },
+    {
+      "mode": "select",
+      "header": "none",
+      "item": "icon"
+    }
+  ],
+  "anatomy": [
+    {
+      "name": "root",
+      "selector": ".actionsheet",
+      "role": "浮层容器，自身承担半透明遮罩（var(--bg-mask-light)），承载面板、定位与动画"
+    },
+    {
+      "name": "panel",
+      "selector": ".actionsheet__panel",
+      "role": "底部面板容器，圆角 16px 顶部，白底，承载 list + cancel"
+    },
+    {
+      "name": "header",
+      "selector": ".actionsheet__header",
+      "role": "顶部说明区，高 64px，padding 16px，底 0.5px 分割线"
+    },
+    {
+      "name": "headerText",
+      "selector": ".actionsheet__header-text",
+      "role": "头部说明文本，14px secondary"
+    },
+    {
+      "name": "headerLink",
+      "selector": ".actionsheet__header-link",
+      "role": "头部右侧链接，14px text-link，复用 link 组件语义"
+    },
+    {
+      "name": "list",
+      "selector": ".actionsheet__list",
+      "role": "选项列表容器，支持多组"
+    },
+    {
+      "name": "group",
+      "selector": ".actionsheet__group",
+      "role": "选项分组容器，可选；多个 group 之间 8px gap 灰色间隔"
+    },
+    {
+      "name": "item",
+      "selector": ".actionsheet__item",
+      "role": "单个选项，高 56px，操作模式 padding 16px / 选择模式 padding-left 16px，带图标时图标与内容间距 12px，底 0.5px 分割线"
+    },
+    {
+      "name": "itemRow",
+      "selector": ".actionsheet__item-row",
+      "role": "选择模式专用'划线区'，flex 1，gap 24px，横向布局标题与右侧槽位"
+    },
+    {
+      "name": "itemIcon",
+      "selector": ".actionsheet__item-icon",
+      "role": "选项左侧图标，20×20，overflow clip；操作模式和选择模式带图标时使用"
+    },
+    {
+      "name": "itemMain",
+      "selector": ".actionsheet__item-main",
+      "role": "选项主文本区，含 title + subtitle + recommend；操作模式 flex 1 / 选择模式 flex 1 + gap 4px"
+    },
+    {
+      "name": "itemTitle",
+      "selector": ".actionsheet__item-title",
+      "role": "选项标题，16px default；选中态加粗 Medium 500"
+    },
+    {
+      "name": "itemSubtitle",
+      "selector": ".actionsheet__item-subtitle",
+      "role": "选项副标题，12px secondary；操作模式作为 .actionsheet__item 直接子元素(放在 main 之后)，选择模式放在 .actionsheet__item-main 内(与 title 同级)"
+    },
+    {
+      "name": "itemRecommend",
+      "selector": ".actionsheet__item-recommend",
+      "role": "选项右侧自定义徽标槽位，行内显示，默认渲染'推荐'绿色气泡，业务可放任意徽标组件；无内容时不渲染、不占位、不保留空间；相对主文本垂直居中对齐"
+    },
+    {
+      "name": "itemCheckSlot",
+      "selector": ".actionsheet__item-check-slot",
+      "role": "选择模式专用右侧功能区，固定宽 56px，padding-right 16px，选中/未选中均保留避免文本跳动"
+    },
+    {
+      "name": "itemCheck",
+      "selector": ".actionsheet__item-check",
+      "role": "选择模式选中指示，24×24 iconfont .icon-gou-jiacu，颜色 --status-success-default，display: none；选中时 display: inline-flex"
+    },
+    {
+      "name": "cancelGap",
+      "selector": ".actionsheet__cancel-gap",
+      "role": "取消区上方 8px 灰色间隔条"
+    },
+    {
+      "name": "cancel",
+      "selector": ".actionsheet__cancel",
+      "role": "取消按钮区，padding 16px，文本居中"
+    },
+    {
+      "name": "safeArea",
+      "selector": ".actionsheet__safe-area",
+      "role": "底部 iOS 安全区，高 safe-area-bottom"
+    }
+  ],
+  "structurePatterns": [
+    "根节点 .actionsheet 是 overlay 定位容器，自身承担半透明遮罩 var(--bg-mask-light)，position:fixed; inset:0",
+    "面板 .actionsheet__panel 内部从上到下：.actionsheet__header（可选）→ .actionsheet__list → .actionsheet__cancel-gap → .actionsheet__cancel → .actionsheet__safe-area",
+    "分组规则：.actionsheet__list 内部可包含多个 .actionsheet__group，每个 group 之间 8px gap 灰色间隔（var(--bg-state-hover)），与取消按钮上方 .actionsheet__cancel-gap 视觉效果一致；若不使用分组，.actionsheet__list 直接包含 .actionsheet__item",
+    "头部 2 种布局规则：header--text 纯文本居中；header--text-link 左文本、右链接两端对齐",
+    "操作模式选项结构：.actionsheet__item（padding 16px，gap 12px）→ 可选 .actionsheet__item-icon（20×20）+ .actionsheet__item-main（flex 1）→ .actionsheet__item-title / .actionsheet__item-subtitle / .actionsheet__item-recommend；无图标时标题居中对齐，有图标时标题左对齐",
+    "选择模式选项结构：.actionsheet__item（padding-left 16px，padding-right/top/bottom 0，带图标时 gap 12px）→ 可选 .actionsheet__item-icon（20×20）+ .actionsheet__item-row（flex 1，gap 24px，'划线区'）→ .actionsheet__item-main（flex 1，gap 4px，文本左对齐）+ .actionsheet__item-check-slot（固定宽 56px，padding-right 16px，shrink 0）→ .actionsheet__item-check（24×24，选中时显示）",
+    "选择模式下，选项始终保留 56px 宽右侧槽位 .actionsheet__item-check-slot，即使未选中，避免切换选中态时标题文本位置跳动",
+    "选择模式下，选中项标题加粗 var(--font-weight-medium)（Medium 500），未选中项 var(--font-weight-regular)（Regular 400）",
+    "选择模式下，选中指示 .actionsheet__item-check 使用 iconfont .icon-gou-jiacu（勾加粗），24×24，颜色 var(--status-success-default)；display: none 默认，.actionsheet__item--selected .actionsheet__item-check 时 display: inline-flex",
+    "选项高度固定 56px；操作模式 padding 16px，选择模式 padding-left 16px（右侧通过 .actionsheet__item-check-slot 的 padding-right 16px 控制）",
+    "选项底部分隔线通过 box-shadow: inset 0 -0.5px 0 0 var(--border-neutral-l2)，最后一项不显示分隔线",
+    "顶部说明区高 64px，文本 14px secondary，底 0.5px 分割线 var(--border-neutral-l2)",
+    "取消按钮区上方有 8px 灰色间隔条（var(--bg-state-hover)），取消按钮文案固定'取消'，16px default，letter-spacing: 0.1em 模拟 Figma '取 消' 视觉间距",
+    "状态机通过 data-state='open'/'closed' 属性切换，与 dialog 一致",
+    "安全区高度 = var(--safe-area-bottom)，actionsheet 不渲染 Home Indicator（那是宿主层职责）",
+    "推荐标签(自定义徽标槽位)：默认渲染绿色'推荐'气泡(12px 字号，padding 2px 8px，圆角 4px，文字色 --status-success-default，背景 --status-success-surface-l1)，业务可替换为任意徽标组件；行内显示布局(与 title 同级，放在 .actionsheet__item-main 内)；绝对定位(position:absolute, top:50%, left:100%, transform:translateY(-50%))，不占位、不保留空间；徽标相对主文本垂直居中对齐；当 .actionsheet__item-main 内有徽标时，main 收缩到标题宽度(flex:0 0 auto)，操作模式无图标时由 item 的 justify-content:center 居中 main",
+    "双行布局(副标题)优先级低于单行：优先用主文本描述功能，只有在主文本描述不清楚或有特定说明时才用双行；同一 actionsheet 内禁止每个 item 都带描述文本，双行只用于需要额外说明的个别 item",
+    "操作模式双行布局(无图标)：.actionsheet__item 改为 flex-direction:column + align-items:center + justify-content:center + gap:2px，高度自适应(min-height:56px)；.actionsheet__item-subtitle 作为 item 的直接子元素(放在 .actionsheet__item-main 之后)，与标题一起垂直居中堆叠",
+    "操作模式双行布局(有图标)：.actionsheet__item 改为 display:grid + grid-template-columns:auto 1fr + grid-template-rows:auto auto + gap:2px 12px；.actionsheet__item-icon 在 grid-row:1/grid-column:1，.actionsheet__item-main 在 grid-row:1/grid-column:2，.actionsheet__item-subtitle 在 grid-row:2/grid-column:2(与标题左对齐)；图标相对主文本(标题)垂直居中对齐；所有 item 必须都带图标，不允许部分带部分不带",
+    "选择模式双行布局：.actionsheet__item-subtitle 放在 .actionsheet__item-main 内(与标题同级)，main 改为 flex-direction:column + gap:2px + align-items:flex-start；item 最小高度 76px(覆盖默认 56px)",
+    "副标题样式：12px secondary，与标题垂直间距 2px",
+    "禁用项：文本变 var(--text-tertiary)，不响应点击/按压态/回调"
+  ],
+  "behavior": {
+    "closeByMask": "默认 true（与 dialog 不同，actionsheet 点击遮罩可关闭，符合底部弹层交互习惯）",
+    "closeByCancel": "默认 true",
+    "closeAfterClick": "默认 true（操作模式点击选项即关闭）；选择模式也默认关闭，业务可通过 closeAfterClick=false 覆盖",
+    "persistence": "阻断式常驻，不自动关闭",
+    "conflicting": "同屏仅展示一个 actionsheet，新 actionsheet 出现时立即替换旧",
+    "position": "底部贴底悬浮，面板从屏幕底部边缘上移到完整显示",
+    "animation": "入场面板 translateY(100%)→0 从屏幕底部边缘上移到完整显示，无 opacity 变化；出场反向 translateY(0)→100%；时长 var(--duration-normal)（250ms），缓动 var(--ease-enter)/var(--ease-exit)；遮罩无 opacity 过渡，closed 状态通过 visibility 延迟 var(--duration-normal) 隐藏以等面板退出动画播放完",
+    "zIndex": "var(--z-modal)=600，与 dialog 同层，低于 toast(700)",
+    "scrollable": "选项列表超过屏幕高度时，.actionsheet__list 内部纵向滚动，头部和取消按钮固定"
+  },
+  "accessibility": {
+    "role": "role=\"dialog\" aria-modal=\"true\"",
+    "labelRule": "头部说明作为可访问名称，选项作为可访问描述",
+    "focusTrap": "打开时焦点锁定，关闭后返回触发元素",
+    "textRule": "选项标题单行不截断，副标题单行省略号；取消按钮固定'取消'"
+  },
+  "usageHints": [
+    "用于 3 个以上并列操作（分享/复制/删除/收藏）或单选切换（筛选/排序）",
+    "操作模式适合'分享/复制/删除'等并列操作；选择模式适合'全部/已处理/未处理'等单选场景",
+    "头部说明可选，1 行以内，超出省略号",
+    "头部两种布局：无链接纯文本居中；有链接左文本右链接两端对齐",
+    "选择模式下无论是否设置居中，文本强制左对齐以给绿色对勾留位置",
+    "推荐标签是自定义徽标槽位，默认渲染'推荐'绿色气泡，业务可放任意徽标组件；行内显示，无徽标时不占位、不保留空间；徽标相对主文本垂直居中对齐",
+    "双行展示(主文本+副文本)优先级低于单行：优先用主文本描述功能，只有在主文本描述不清楚或有特定说明时才用双行；同一 actionsheet 内禁止每个 item 都带描述文本，双行只用于需要额外说明的个别 item",
+    "启用图标模式时，所有 item 必须都带图标，不允许部分 item 带图标部分不带；无图标时使用纯文本模式",
+    "禁用项不响应点击、按压态和回调，文本变浅",
+    "与 dialog 的区别：dialog 是居中模态确认弹窗用于 2-3 按钮轻量确认；actionsheet 是底部弹层用于 3+ 并列操作或单选切换",
+    "与 toast 的区别：toast 瞬时非阻塞自动消失；actionsheet 阻塞式常驻需用户操作",
+    "与 uikit-plan presentationPrimitives.sheet 的对应：actionsheet 是 sheet primitive 的具体组件实现"
+  ],
+  "doNotInvent": [
+    "不要在 actionsheet 内放置输入框、多字段表单、上传等复杂交互组件（那是 modal/sheet/full-screen_modal 的职责）",
+    "不要超过 8 个选项，超过时考虑用专门的选择列表页（presentationPrimitives.push）",
+    "不要自定义选项颜色，仅允许 default/disabled 两种状态",
+    "不要持久化 actionsheet 状态到 localStorage",
+    "不要给 actionsheet 设置自动关闭时长（阻断式常驻）",
+    "不要给每个 item 都带描述文本（副标题），双行只用于主文本描述不清或有特定说明的个别 item",
+    "不要在图标模式下混用带图标和不带图标的 item，要么所有 item 都带图标，要么都不带"
+  ],
+  "tokensConsumed": [
+    "--bg-mask-light",
+    "--bg-surface",
+    "--bg-state-hover",
+    "--bg-state-pressed",
+    "--text-default",
+    "--text-secondary",
+    "--text-tertiary",
+    "--text-link",
+    "--status-success-default",
+    "--status-success-surface-l1",
+    "--font-family-system",
+    "--font-family-icon",
+    "--body-md-font-size",
+    "--body-lg-font-size",
+    "--body-sm-font-size",
+    "--body-xs-font-size",
+    "--font-weight-medium",
+    "--font-weight-regular",
+    "--spacer-2",
+    "--spacer-4",
+    "--spacer-8",
+    "--spacer-12",
+    "--spacer-16",
+    "--spacer-24",
+    "--radius-16",
+    "--radius-8",
+    "--radius-4",
+    "--stroke-hairline",
+    "--border-neutral-l2",
+    "--duration-normal",
+    "--duration-fast",
+    "--ease-enter",
+    "--ease-exit",
+    "--z-modal",
+    "--safe-area-bottom",
+    "--size-20",
+    "--size-24"
+  ],
+  "designTokens": {
+    "panelWidth": "100% (max 670px)",
+    "panelRadius": "var(--radius-16)",
+    "panelBg": "var(--bg-surface)",
+    "maskBg": "var(--bg-mask-light)",
+    "headerHeight": "64px",
+    "headerPadding": "var(--spacer-16)",
+    "headerFont": "var(--body-md-font-size) / var(--font-family-system)",
+    "headerColor": "var(--text-secondary)",
+    "headerLinkColor": "var(--text-link)",
+    "headerGap": "var(--spacer-24)",
+    "itemHeight": "56px",
+    "itemPaddingAction": "var(--spacer-16)",
+    "itemPaddingSelect": "0 0 0 var(--spacer-16)",
+    "itemGap": "var(--spacer-12)",
+    "itemRowGap": "var(--spacer-24)",
+    "itemIconSize": "var(--size-20)",
+    "itemCheckSlotWidth": "56px",
+    "itemCheckSize": "var(--size-24)",
+    "itemCheckIcon": "icon-gou-jiacu",
+    "itemTitleFont": "var(--body-lg-font-size) / var(--font-weight-regular)",
+    "itemTitleFontSelected": "var(--body-lg-font-size) / var(--font-weight-medium)",
+    "itemTitleColor": "var(--text-default)",
+    "itemSubtitleFont": "var(--body-sm-font-size)",
+    "itemSubtitleColor": "var(--text-secondary)",
+    "itemDisabledColor": "var(--text-tertiary)",
+    "itemDividerShadow": "inset 0 -0.5px 0 0 var(--border-neutral-l2)",
+    "cancelGapHeight": "var(--spacer-8)",
+    "cancelGapBg": "var(--bg-state-hover)",
+    "groupGapHeight": "var(--spacer-8)",
+    "groupGapBg": "var(--bg-state-hover)",
+    "cancelPadding": "var(--spacer-16)",
+    "cancelFont": "var(--body-lg-font-size) / var(--font-weight-regular)",
+    "cancelColor": "var(--text-default)",
+    "cancelLetterSpacing": "0.1em",
+    "safeAreaHeight": "var(--safe-area-bottom)",
+    "checkColor": "var(--status-success-default)",
+    "recommendFont": "var(--body-xs-font-size)",
+    "recommendColor": "var(--status-success-default)",
+    "recommendBg": "var(--status-success-surface-l1)",
+    "enterOffsetY": "100%",
+    "enterDuration": "var(--duration-normal)",
+    "leaveDuration": "var(--duration-normal)",
+    "enterEase": "var(--ease-enter)",
+    "leaveEase": "var(--ease-exit)",
+    "zIndex": "var(--z-modal)"
+  },
+  "cssCustomProperties": [
+    {
+      "name": "--actionsheet-panel-width",
+      "default": "100%",
+      "appliesTo": "面板宽度，业务可覆盖"
+    },
+    {
+      "name": "--actionsheet-item-divider-color",
+      "default": "var(--border-neutral-l2)",
+      "appliesTo": "选项底部分隔线颜色，对应 Kuikly borderBottomColor"
+    },
+    {
+      "name": "--actionsheet-item-font-weight",
+      "default": "var(--font-weight-regular)",
+      "appliesTo": "选项标题字重，业务强调选项可覆盖为 var(--font-weight-medium)"
+    },
+    {
+      "name": "--actionsheet-cancel-letter-spacing",
+      "default": "0.1em",
+      "appliesTo": "取消按钮字间距，业务可覆盖"
+    }
+  ],
+  "specRefs": [
+    "specs/交互设计原则.md",
+    "specs/文案与数据规范.md"
+  ],
+  "domAnatomy": {
+    "root": ".actionsheet",
+    "modifiers": [
+      ".actionsheet--action",
+      ".actionsheet--select",
+      "[data-state=\"open\"]",
+      "[data-state=\"closed\"]"
+    ],
+    "optionalChildren": [
+      ".actionsheet__panel",
+      ".actionsheet__header",
+      ".actionsheet__header--text",
+      ".actionsheet__header--text-link",
+      ".actionsheet__header-text",
+      ".actionsheet__header-link",
+      ".actionsheet__list",
+      ".actionsheet__group",
+      ".actionsheet__item",
+      ".actionsheet__item--selected",
+      ".actionsheet__item--disabled",
+      ".actionsheet__item-row",
+      ".actionsheet__item-icon",
+      ".actionsheet__item-main",
+      ".actionsheet__item-title",
+      ".actionsheet__item-subtitle",
+      ".actionsheet__item-recommend",
+      ".actionsheet__item-check-slot",
+      ".actionsheet__item-check",
+      ".actionsheet__cancel-gap",
+      ".actionsheet__cancel",
+      ".actionsheet__safe-area"
+    ]
+  },
+  "provenance": {
+    "preview": "preview/component-actionsheet.html",
+    "cssSource": "preview/component-actionsheet.html",
+    "embedded": false,
+    "hostComponent": null
+  },
+  "unknowns": []
+}

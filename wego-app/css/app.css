@@ -319,6 +319,58 @@ button, [role="button"], [role="radio"], [role="checkbox"],
   font-size: var(--body-sm-font-size, 13px);
 }
 
+/* 动态 Tab 导航栏 */
+.host-dongtai-navbar {
+  background: var(--bg-page);
+}
+
+.host-dongtai-navbar__vip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.host-dongtai-navbar__vip::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 48px;
+  height: 48px;
+  transform: translate(-50%, -50%);
+}
+
+.host-dongtai-navbar__vip:active,
+.host-dongtai-navbar__vip.is-pressed {
+  opacity: 0.6;
+}
+
+.host-dongtai-navbar__vip img {
+  width: 28px;
+  height: 28px;
+  display: block;
+}
+
+.host-dongtai-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacer-16);
+}
+
 .bottom-nav {
   flex-shrink: 0;
   z-index: var(--z-sticky);
