@@ -319,8 +319,13 @@
         overlayLayer.className = 'app-overlay-layer';
         overlayLayer.replaceChildren();
         overlayClosing = false;
-        if (!skipHistory && sceneStack.length === 0 && window.location.hash) {
-          history.replaceState(null, document.title, window.location.pathname + window.location.search);
+        if (sceneStack.length === 0 && window.location.hash) {
+          if (skipHistory) {
+            history.replaceState(null, document.title, window.location.pathname + window.location.search);
+            setTimeout(function () { history.back(); }, 0);
+          } else {
+            history.back();
+          }
         }
         return;
       }
@@ -333,7 +338,7 @@
         overlayLayer.replaceChildren();
         overlayClosing = false;
         if (!skipHistory && sceneStack.length === 0 && window.location.hash) {
-          history.replaceState(null, document.title, window.location.pathname + window.location.search);
+          history.back();
         }
       };
       panel.addEventListener('transitionend', onTransitionEnd);

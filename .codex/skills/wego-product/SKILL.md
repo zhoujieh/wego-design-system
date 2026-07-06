@@ -1,5 +1,5 @@
 ---
-name: wego-product
+name: "wego-product"
 description: 将原始中文业务需求转换为页面规格 page_spec 的产品理解技能。用于开始任何页面、原型、规则配置或业务编辑任务时，先判断 task_type、scene_category、interaction_mode、information_blocks、宿主入口和 App 场景落点，再决定是否进入 wego-design 技能的设计系统消费流程。
 ---
 

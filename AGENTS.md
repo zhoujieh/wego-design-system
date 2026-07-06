@@ -17,8 +17,9 @@
 
 ## 沟通要求
 
-- 始终用简洁、通俗易懂的中文沟通
+- 禁止忽略本文档，每次会话都要读
 - 先理解当前微购设计的完整工作流，不要用户说改什么就只改什么
+- 始终用简洁、通俗易懂的中文沟通
 - 每次回复禁止写一堆技术名词的表达，禁止堆积各种技术实现说明过程
 - 每次回复都要用通俗易懂的中文说明本轮改了什么、验证了什么、还有什么风险
 
@@ -31,7 +32,7 @@
 | 业务开发、做页面、做原型、做场景、接业务需求、做新业务编辑任务                                   | `wego-product`                     | 无                                            | `page_spec` 完成后交给 `wego-design`，再进入 `wego-ux`、`wego-tests` |
 | 已有 `page_spec`，要出页面范式、UI Kit、组件映射、打开方式、`design_consumption_plan`  | `wego-design`                      | 已有 `page_spec`                               | `design_consumption_plan` 完成后交给 `wego-ux`                  |
 | 已有 `page_spec` + `design_consumption_plan`，要正式生成或更新 `wego-app` 场景 | `wego-ux`                          | 已落盘的 `page_spec` + `design_consumption_plan` | 原型完成后交给 `wego-tests`                                       |
-| ⚠️ 已有场景迭代，需修改 `wego-app/scenes/{场景}/` 下的文件 | `wego-ux`                          | 该场景 _spec 已落盘                               | 先进入 `wego-ux` 做偏差判定，再决定改产物或回工作流                        |
+| ⚠️ 已有场景迭代，需修改 `wego-app/scenes/{场景}/` 下的文件                        | `wego-ux`                          | 该场景 \_spec 已落盘                               | 先进入 `wego-ux` 做偏差判定，再决定改产物或回工作流                            |
 | 验收、检查、回归、review 当前场景是否符合规格                                        | `wego-tests`                       | 当前场景已生成，且 `route_id` 已注册                     | 输出 `acceptance_report`，必要时把问题归因回前置技能                       |
 | 改组件、补 preview、改契约、改 UI Kit、改 metadata、补守门                         | `wego-uxsystem-iterate` 的`迭代模式`    | 当前目标属于设计系统本体或 UI Kit                         | 按 `references/workflow.md` / `sync-matrix.md` 同步           |
 | 补规则、沉淀经验、优化流程、修技能链路、修触发机制                                         | `wego-uxsystem-iterate` 的`工作流迭代模式` | 当前目标属于经验回流或工作流分流                             | 按 `references/workflow-iteration.md` 回流到对应环节               |

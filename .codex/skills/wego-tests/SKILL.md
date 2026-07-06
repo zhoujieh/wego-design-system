@@ -1,5 +1,5 @@
 ---
-name: wego-tests
+name: "wego-tests"
 description: 验收 wego-app 静态 App 原型中的当前业务场景，并输出 acceptance_report。用于检查需求承接、场景判断、设计系统消费、App 路由注册、交互流程、适配和部署可用性；默认只验当前任务与用户指定范围。
 ---
 
