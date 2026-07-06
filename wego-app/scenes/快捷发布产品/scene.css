@@ -161,21 +161,24 @@
 }
 
 .quick-publish__action-btn.has-value {
-  color: var(--text-brand);
-  background: var(--bg-brand-surface-l1);
+  color: var(--text-default);
+  background: var(--bg-subtle);
 }
 
 .quick-publish__action-btn.has-value:active,
 .quick-publish__action-btn.has-value.is-pressed {
-  background: var(--bg-brand-surface-l2);
+  background: var(--bg-overlay-l1);
 }
 
 .quick-publish__action-btn.is-editing {
-  background: transparent;
+  background: var(--bg-subtle);
 }
 
-.quick-publish__action-btn.is-editing-content .wego-iconfont-s,
-.quick-publish__action-btn.has-value .wego-iconfont-s {
+.quick-publish__action-btn.is-editing .wego-iconfont-s {
+  display: none;
+}
+
+.quick-publish__action-btn.is-editing-content .wego-iconfont-s {
   display: none;
 }
 

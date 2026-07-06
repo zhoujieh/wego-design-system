@@ -243,7 +243,7 @@
       +     '<div class="quick-publish__actions">'
       +       '<div class="quick-publish__action-btn quick-publish__action-btn--editable" data-action="tag" role="button" tabindex="0" data-default="标签"><i class="wego-iconfont-s icon-jia"></i><span class="quick-publish__action-text" contenteditable="true" data-placeholder="标签" data-default="标签">标签</span></div>'
       +       '<div class="quick-publish__action-btn quick-publish__action-btn--editable" data-action="source" role="button" tabindex="0" data-default="来源"><i class="wego-iconfont-s icon-jia"></i><span class="quick-publish__action-text" contenteditable="true" data-placeholder="来源" data-default="来源">来源</span></div>'
-      +       '<button type="button" class="quick-publish__action-btn" data-action="visibility"><i class="wego-iconfont-s icon-fensi"></i><span>所有粉丝可见</span></button>'
+      +       '<button type="button" class="quick-publish__action-btn" data-action="visibility" data-visibility="public"><i class="wego-iconfont-s icon-suo"></i><span>所有粉丝可见</span></button>'
       +     '</div>'
       +     '<div class="quick-publish__upload">'
       +       '<button type="button" class="quick-publish__upload-btn" data-action="upload" aria-label="上传图片"><i class="wego-iconfont-s icon-jia"></i></button>'
@@ -412,7 +412,8 @@
           if (!textEl) return;
 
           btn.addEventListener('click', function (e) {
-            if (e.target !== textEl && !textEl.contains(e.target)) {
+            // 点击按钮时聚焦到输入框
+            if (!btn.contains(document.activeElement) || document.activeElement !== textEl) {
               e.preventDefault();
               textEl.focus();
               placeCaretAtEnd(textEl);
@@ -450,7 +451,10 @@
 
           textEl.addEventListener('input', function () {
             if (textEl._composing) return;
-            renderInlineTags(ctx, textEl);
+            var text = textEl.textContent || '';
+            if (/\s$/.test(text)) {
+              renderInlineTags(ctx, textEl);
+            }
             ensurePlaceholder(textEl);
           });
 
@@ -459,12 +463,10 @@
             if (textEl.textContent === textEl.dataset.default) {
               textEl.textContent = '';
             }
-            btn.classList.add('is-editing-content');
           });
 
           textEl.addEventListener('blur', function () {
             btn.classList.remove('is-editing');
-            btn.classList.remove('is-editing-content');
             renderInlineTags(ctx, textEl, true);
             var cleaned = cleanDupes(textEl);
             if (cleaned) {
@@ -523,7 +525,28 @@
             return;
           }
 
-          if (['visibility', 'upload'].indexOf(action) !== -1) {
+          if (action === 'visibility') {
+            e.preventDefault();
+            var visibilityBtn = actionEl;
+            var currentVisibility = visibilityBtn.dataset.visibility;
+            var iconEl = visibilityBtn.querySelector('i');
+            var textEl = visibilityBtn.querySelector('span');
+            
+            if (currentVisibility === 'public') {
+              // 切换到仅自己可见
+              visibilityBtn.dataset.visibility = 'private';
+              iconEl.className = 'wego-iconfont-s icon-suo-mian';
+              textEl.textContent = '仅自己可见';
+            } else {
+              // 切换回所有粉丝可见
+              visibilityBtn.dataset.visibility = 'public';
+              iconEl.className = 'wego-iconfont-s icon-suo';
+              textEl.textContent = '所有粉丝可见';
+            }
+            return;
+          }
+
+          if (action === 'upload') {
             e.preventDefault();
             setTimeout(function () { ctx.toast('该功能尚未接入原型'); }, 50);
           }
