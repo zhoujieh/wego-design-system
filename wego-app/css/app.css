@@ -465,6 +465,7 @@ button, [role="button"], [role="radio"], [role="checkbox"],
 }
 
 .app-overlay-panel {
+  position: relative;
   width: 100%;
   max-height: calc(100% - var(--safe-area-top));
   overflow: auto;

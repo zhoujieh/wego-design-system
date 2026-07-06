@@ -5,7 +5,6 @@
   inset: 0;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
   background: var(--bg-surface);
 }
 
@@ -16,6 +15,12 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacer-16);
+  overflow-y: auto;
+}
+
+/* 导航栏不需要 sticky，因为 body 自己滚动 */
+.quick-publish-page .navbar {
+  position: relative;
 }
 
 /* 编辑器 */
