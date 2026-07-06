@@ -319,6 +319,9 @@
         overlayLayer.className = 'app-overlay-layer';
         overlayLayer.replaceChildren();
         overlayClosing = false;
+        if (!skipHistory && sceneStack.length === 0 && window.location.hash) {
+          history.replaceState(null, document.title, window.location.pathname + window.location.search);
+        }
         return;
       }
       overlayClosing = true;
@@ -329,6 +332,9 @@
         overlayLayer.className = 'app-overlay-layer';
         overlayLayer.replaceChildren();
         overlayClosing = false;
+        if (!skipHistory && sceneStack.length === 0 && window.location.hash) {
+          history.replaceState(null, document.title, window.location.pathname + window.location.search);
+        }
       };
       panel.addEventListener('transitionend', onTransitionEnd);
       return;
