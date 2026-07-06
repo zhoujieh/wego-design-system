@@ -3,8 +3,8 @@
   "scene": "快捷发布产品",
   "route_id": "quick-publish-product",
   "page_presentation": {
-    "type": "push",
-    "transition": "slide-left",
+    "type": "full-screen-modal",
+    "transition": "slide-up",
     "coversTabBar": true
   },
   "component_mapping": [
@@ -73,10 +73,13 @@
   "composition_notes": [
     "页面背景声明为 data-bg=surface（白色），导航栏自动继承白底",
     "编辑器区域与辅助入口、图片上传按纵向 16px 间距排列",
-    "底部预留 safe-area + 40px 内容间距"
+    "底部预留 safe-area + 40px 内容间距",
+    "规格/颜色行使用自定义标签识别逻辑：按空格分词、去重、新词播放浅绿色闪烁动画"
   ],
   "risks": [
-    "输入区域为自定义结构，未命中 input 组件标准标签在上布局；已保持字号、颜色使用 Token",
-    "动态导航栏设计稿未能通过 MCP 读取，当前按左侧 VIP/SVIP 图标 + 右侧发布按钮实现，具体尺寸待确认"
-  ]
+    "输入区域为自定义 contenteditable 结构，未命中 input 组件标准标签在上布局；已保持字号、颜色使用 Token",
+      "动态导航栏设计稿未能通过 MCP 读取，当前按左侧 VIP/SVIP 图标 + 右侧发布按钮实现，具体尺寸待确认",
+      "标签闪烁动画使用自定义 keyframes，非 design-system 标准动效",
+      "标签以内联方式嵌入 contenteditable，通过 JS 按空格分词、去重、新词添加闪烁动画"
+    ]
 }

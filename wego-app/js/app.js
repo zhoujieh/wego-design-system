@@ -9,6 +9,7 @@
   var toastHost = document.querySelector('[data-toast-host]');
   var dialogHost = document.querySelector('[data-dialog-host]');
   var bottomNav = document.querySelector('[data-bottom-nav]');
+  var hostContent = document.querySelector('[data-host-content]');
   var validTabs = new Set(panels.map(function (panel) { return panel.dataset.hostTab; }));
   var routes = Array.isArray(window.WEGO_APP_ROUTES) ? window.WEGO_APP_ROUTES : [];
   var routeConfigs = new Map(routes.map(function (route) { return [route.routeId, route]; }));
@@ -52,6 +53,11 @@
       panel.hidden = !active;
       panel.classList.toggle('host-shell-page__panel--active', active);
     });
+    // 动态页有自己的 navbar 与 body 容器，需要让 host-shell-page 取消默认 padding，
+    // 否则动态页 navbar 会被外层 padding 限制无法撑满宽度与顶到顶部安全区。
+    if (hostContent) {
+      hostContent.classList.toggle('host-shell-page--flush', nextTab === 'dongtai');
+    }
     tabTriggers.forEach(function (trigger) {
       var active = trigger.dataset.hostTabTrigger === nextTab;
       trigger.classList.toggle('active', active);
@@ -1006,7 +1012,7 @@
 
   mountRouteEntries();
   bindRouteEntries();
-  setActiveTab('my');
+  setActiveTab('dongtai');
   var initialRoute = routeFromHash();
   if (initialRoute) openRoute(initialRoute);
 })();

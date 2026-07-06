@@ -26,15 +26,16 @@
 .quick-publish__row {
   display: flex;
   align-items: flex-start;
-  min-height: 48px;
-  padding: var(--spacer-12) 0;
+  padding: 4px 0;
   gap: var(--spacer-12);
 }
 
 .quick-publish__label {
   flex-shrink: 0;
   width: 56px;
-  text-align: right;
+  text-align: justify;
+  text-align-last: justify;
+  text-justify: inter-ideograph;
   font-size: var(--body-lg-font-size);
   line-height: 24px;
   color: var(--text-default);
@@ -46,12 +47,11 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--spacer-8);
 }
 
-.quick-publish__input {
+.quick-publish__editor-field {
   width: 100%;
-  height: 24px;
+  min-height: 24px;
   padding: 0;
   border: none;
   background: transparent;
@@ -59,29 +59,49 @@
   line-height: 24px;
   color: var(--text-default);
   outline: none;
+  white-space: pre-wrap;
+  word-break: break-word;
+  -webkit-user-modify: read-write-plaintext-only;
 }
 
-.quick-publish__input::placeholder {
+.quick-publish__editor-field:empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-placeholder);
+  pointer-events: none;
+}
+
+.quick-publish__editor-field:focus:empty::before {
   color: var(--text-placeholder);
 }
 
-/* 智能识别标签 */
-.quick-publish__tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacer-8);
-}
-
+/* 智能识别标签（内联显示在 contenteditable 中） */
 .quick-publish__tag {
   display: inline-flex;
   align-items: center;
-  height: 24px;
-  padding: 0 var(--spacer-8);
+  height: 22px;
+  padding: 0 var(--spacer-6);
+  margin-right: 4px;
   border-radius: var(--radius-4);
   background: var(--bg-overlay-l1);
   color: var(--text-brand);
-  font-size: var(--body-sm-font-size);
+  font-size: var(--body-md-font-size);
   line-height: 1;
+  vertical-align: middle;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.quick-publish__tag--flash {
+  animation: quick-publish-tag-flash 0.4s ease-in-out 2;
+}
+
+@keyframes quick-publish-tag-flash {
+  0%, 100% {
+    background: var(--bg-overlay-l1);
+  }
+  50% {
+    background: var(--bg-brand-surface-l1);
+  }
 }
 
 /* 辅助入口 */
