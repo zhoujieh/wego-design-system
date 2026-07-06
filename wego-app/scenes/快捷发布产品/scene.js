@@ -1,12 +1,12 @@
 (function () {
   var FIELDS = [
     { id: 'productName', label: '产品名', placeholder: '选填', smart: false },
-    { id: 'price', label: '售价', placeholder: '选填', smart: false },
+    { id: 'price', label: '售价', placeholder: '选填', smart: false, type: 'price' },
     { id: 'sku', label: '货号', placeholder: '选填', smart: false },
     { id: 'spec', label: '规格', placeholder: '默认', smart: true },
     { id: 'color', label: '颜色', placeholder: '默认', smart: true },
-    { id: 'weight', label: '重量', placeholder: '选填', smart: false },
-    { id: 'stock', label: '库存', placeholder: '默认不限库存', smart: false }
+    { id: 'weight', label: '重量', placeholder: '选填', smart: false, type: 'number' },
+    { id: 'stock', label: '库存', placeholder: '默认不限库存', smart: false, type: 'number' }
   ];
 
   var SIZE_ORDER = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '均码'];
@@ -54,8 +54,35 @@
     sel.addRange(range);
   }
 
+  function getCaretOffset(el) {
+    var sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return 0;
+    var range = sel.getRangeAt(0);
+    var pre = range.cloneRange();
+    pre.selectNodeContents(el);
+    pre.setEnd(range.endContainer, range.endOffset);
+    return pre.toString().length;
+  }
+
+  function setCaretOffset(el, offset) {
+    if (!el) return;
+    var range = document.createRange();
+    var sel = window.getSelection();
+    var node = el.firstChild || el;
+    var max = node.length || 0;
+    range.setStart(node, Math.min(offset, max));
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
   function renderInlineTags(editorEl) {
     var text = editorEl.textContent || '';
+
+    if (!text.trim()) {
+      editorEl.innerHTML = '';
+      return;
+    }
 
     var expanded = expandSizeRange(text);
     if (expanded !== null && expanded !== text) {
@@ -100,13 +127,39 @@
     placeCaretAtEnd(editorEl);
   }
 
+  function sanitizeNumber(text, allowDecimal) {
+    if (allowDecimal) {
+      var hasDot = false;
+      var result = '';
+      for (var i = 0; i < text.length; i++) {
+        var c = text[i];
+        if (c >= '0' && c <= '9') {
+          result += c;
+        } else if (c === '.' && !hasDot) {
+          hasDot = true;
+          result += c;
+        }
+      }
+      return result;
+    }
+    return text.replace(/[^0-9]/g, '');
+  }
+
+  function isPriceValid(text) {
+    if (!text) return true;
+    return /^\d{0,7}(\.\d{0,2})?$/.test(text) && !/^0\d+/.test(text);
+  }
+
   function editorRowMarkup(field, idx) {
     var editableCls = 'quick-publish__editor-field' + (field.smart ? ' quick-publish__editor-field--smart' : '');
+    if (field.type === 'price' || field.type === 'number') {
+      editableCls += ' quick-publish__editor-field--number';
+    }
     return ''
       + '<div class="quick-publish__row" data-field="' + esc(field.id) + '">'
       +   '<label class="quick-publish__label" for="qp-' + esc(field.id) + '">' + esc(field.label) + '</label>'
       +   '<div class="quick-publish__input-wrap">'
-      +     '<div class="' + editableCls + '" id="qp-' + esc(field.id) + '" contenteditable="true" data-index="' + idx + '" data-placeholder="' + esc(field.placeholder) + '" role="textbox" aria-multiline="true"></div>'
+      +     '<div class="' + editableCls + '" id="qp-' + esc(field.id) + '" contenteditable="true" data-index="' + idx + '" data-placeholder="' + esc(field.placeholder) + '" data-type="' + esc(field.type || '') + '" role="textbox" aria-multiline="true"></div>'
       +   '</div>'
       + '</div>';
   }
@@ -135,8 +188,8 @@
       +       rows
       +     '</div>'
       +     '<div class="quick-publish__actions">'
-      +       '<button type="button" class="quick-publish__action-btn" data-action="tag"><i class="wego-iconfont-s icon-jia"></i><span>标签</span></button>'
-      +       '<button type="button" class="quick-publish__action-btn" data-action="source"><i class="wego-iconfont-s icon-jia"></i><span>来源</span></button>'
+      +       '<div class="quick-publish__action-btn quick-publish__action-btn--editable" data-action="tag" role="button" tabindex="0" data-default="标签"><i class="wego-iconfont-s icon-jia"></i><span class="quick-publish__action-text" contenteditable="true" data-placeholder="标签" data-default="标签">标签</span></div>'
+      +       '<div class="quick-publish__action-btn quick-publish__action-btn--editable" data-action="source" role="button" tabindex="0" data-default="来源"><i class="wego-iconfont-s icon-jia"></i><span class="quick-publish__action-text" contenteditable="true" data-placeholder="来源" data-default="来源">来源</span></div>'
       +       '<button type="button" class="quick-publish__action-btn" data-action="visibility"><i class="wego-iconfont-s icon-fensi"></i><span>所有粉丝可见</span></button>'
       +     '</div>'
       +     '<div class="quick-publish__upload">'
@@ -199,14 +252,73 @@
           });
         });
 
-        // 智能识别：空格触发内联标签
+        // 智能识别与数字输入过滤
         FIELDS.forEach(function (field) {
-          if (!field.smart) return;
           var editor = root.querySelector('#qp-' + field.id);
           if (!editor) return;
 
           editor.addEventListener('input', function () {
-            renderInlineTags(editor);
+            if (field.type === 'price' || field.type === 'number') {
+              handleNumberInput(editor, field);
+            } else if (field.smart) {
+              renderInlineTags(editor);
+            }
+            ensurePlaceholder(editor);
+          });
+        });
+
+        // 可编辑操作按钮（标签、来源）
+        var editableActions = Array.from(root.querySelectorAll('.quick-publish__action-btn--editable'));
+        editableActions.forEach(function (btn) {
+          var textEl = btn.querySelector('.quick-publish__action-text');
+          if (!textEl) return;
+
+          btn.addEventListener('click', function (e) {
+            if (e.target !== textEl && !textEl.contains(e.target)) {
+              e.preventDefault();
+              textEl.focus();
+              placeCaretAtEnd(textEl);
+            }
+          });
+
+          textEl.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              textEl.blur();
+              return;
+            }
+            // 阻止富文本格式快捷键
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'b' || e.key === 'i' || e.key === 'u')) {
+              e.preventDefault();
+            }
+          });
+
+          textEl.addEventListener('paste', function (e) {
+            e.preventDefault();
+            var text = (e.clipboardData || window.clipboardData).getData('text/plain');
+            document.execCommand('insertText', false, text);
+          });
+
+          textEl.addEventListener('input', function () {
+            renderInlineTags(textEl);
+            ensurePlaceholder(textEl);
+          });
+
+          textEl.addEventListener('focus', function () {
+            btn.classList.add('is-editing');
+          });
+
+          textEl.addEventListener('blur', function () {
+            btn.classList.remove('is-editing');
+            var value = (textEl.textContent || '').trim();
+            if (!value) {
+              textEl.textContent = textEl.dataset.default || '';
+              btn.classList.remove('has-value');
+            } else {
+              // 识别后统一展示为纯文本，避免内联标签在按钮里换行撑开
+              textEl.textContent = value.replace(/\s+/g, ' ').trim();
+              btn.classList.add('has-value');
+            }
           });
         });
 
@@ -232,6 +344,12 @@
               result[field.id] = value;
               titleLines.push(field.label + ' ' + (value || field.placeholder));
             });
+            // 收集标签/来源
+            var tagText = root.querySelector('[data-action="tag"] .quick-publish__action-text');
+            var sourceText = root.querySelector('[data-action="source"] .quick-publish__action-text');
+            result.tag = tagText && tagText.textContent !== tagText.dataset.default ? tagText.textContent.trim() : '';
+            result.source = sourceText && sourceText.textContent !== sourceText.dataset.default ? sourceText.textContent.trim() : '';
+
             var title = titleLines.join('\n');
             // eslint-disable-next-line no-console
             console.log('快捷发布产品结果:', result);
@@ -242,11 +360,38 @@
             return;
           }
 
-          if (['tag', 'source', 'visibility', 'upload'].indexOf(action) !== -1) {
+          if (['visibility', 'upload'].indexOf(action) !== -1) {
             e.preventDefault();
             setTimeout(function () { ctx.toast('该功能尚未接入原型'); }, 50);
           }
         });
+      }
+
+      function handleNumberInput(editor, field) {
+        var raw = editor.textContent || '';
+        var caret = getCaretOffset(editor);
+        var lastValid = editor.dataset.lastValid || '';
+        var sanitized = field.type === 'price' ? sanitizeNumber(raw, true) : sanitizeNumber(raw, false);
+
+        if (field.type === 'price' && !isPriceValid(sanitized)) {
+          editor.textContent = lastValid;
+          setCaretOffset(editor, lastValid.length);
+          ctx.toast('售价最多输入 7 位整数和 2 位小数');
+          return;
+        }
+
+        if (editor.textContent !== sanitized) {
+          editor.textContent = sanitized;
+          setCaretOffset(editor, Math.min(caret, sanitized.length));
+        }
+
+        editor.dataset.lastValid = sanitized;
+      }
+
+      function ensurePlaceholder(el) {
+        if ((el.textContent || '').trim() === '') {
+          el.innerHTML = '';
+        }
       }
 
       render();

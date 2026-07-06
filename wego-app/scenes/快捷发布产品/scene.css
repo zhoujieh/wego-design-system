@@ -10,8 +10,7 @@
 .quick-publish__body {
   flex: 1 1 auto;
   min-height: 0;
-  padding: var(--spacer-16);
-  padding-bottom: calc(var(--spacer-40) + var(--safe-area-bottom));
+  padding: 8px var(--spacer-16) calc(8px + var(--safe-area-bottom));
   display: flex;
   flex-direction: column;
   gap: var(--spacer-16);
@@ -32,7 +31,7 @@
 
 .quick-publish__label {
   flex-shrink: 0;
-  width: 56px;
+  width: 48px;
   text-align: justify;
   text-align-last: justify;
   text-justify: inter-ideograph;
@@ -109,6 +108,16 @@
   display: flex;
   align-items: center;
   gap: var(--spacer-12);
+  margin: 0 calc(-1 * var(--spacer-16));
+  padding: 0 var(--spacer-16);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.quick-publish__actions::-webkit-scrollbar {
+  display: none;
 }
 
 .quick-publish__action-btn {
@@ -128,16 +137,59 @@
   touch-action: manipulation;
   -webkit-user-select: none;
   user-select: none;
+  flex-shrink: 0;
 }
 
 .quick-publish__action-btn:active,
 .quick-publish__action-btn.is-pressed {
-  opacity: 0.7;
+  background: var(--bg-overlay-l1);
+}
+
+.quick-publish__action-btn.has-value {
+  color: var(--text-brand);
+  background: var(--bg-brand-surface-l1);
+}
+
+.quick-publish__action-btn.has-value:active,
+.quick-publish__action-btn.has-value.is-pressed {
+  background: var(--bg-brand-surface-l2);
+}
+
+.quick-publish__action-btn.is-editing {
+  background: var(--bg-overlay-l1);
+}
+
+.quick-publish__action-btn--editable {
+  padding-right: var(--spacer-8);
+}
+
+.quick-publish__action-text {
+  min-width: 24px;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  outline: none;
+  -webkit-user-modify: read-write-plaintext-only;
+  cursor: text;
+}
+
+.quick-publish__action-text:empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-placeholder);
+  pointer-events: none;
+}
+
+.quick-publish__action-text .quick-publish__tag {
+  height: 20px;
+  font-size: var(--body-sm-font-size);
+  vertical-align: baseline;
 }
 
 .quick-publish__action-btn .wego-iconfont-s {
   font-size: 16px;
   color: var(--text-secondary);
+  flex-shrink: 0;
 }
 
 /* 图片上传占位 */
@@ -151,7 +203,7 @@
   justify-content: center;
   width: 80px;
   height: 80px;
-  border: 1px dashed var(--border-neutral-l2);
+  border: none;
   border-radius: var(--radius-8);
   background: var(--bg-subtle);
   cursor: pointer;
@@ -163,7 +215,7 @@
 
 .quick-publish__upload-btn:active,
 .quick-publish__upload-btn.is-pressed {
-  opacity: 0.7;
+  background: var(--bg-overlay-l1);
 }
 
 .quick-publish__upload-btn .wego-iconfont-s {

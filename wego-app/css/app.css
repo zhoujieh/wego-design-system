@@ -141,6 +141,12 @@ button, [role="button"], [role="radio"], [role="checkbox"],
   gap: var(--spacer-12);
 }
 
+/* 动态页有自己的 navbar 与 body 容器，激活时由 app.js 切换此修饰类取消外层 padding，
+   让 navbar 撑满宽度并顶到顶部安全区，body 自行处理内边距。 */
+.host-shell-page--flush {
+  padding: 0;
+}
+
 .host-shell-page__panel[hidden] {
   display: none;
 }
@@ -328,8 +334,6 @@ button, [role="button"], [role="radio"], [role="checkbox"],
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
   padding: 0;
   border: none;
   background: transparent;
@@ -357,8 +361,6 @@ button, [role="button"], [role="radio"], [role="checkbox"],
 }
 
 .host-dongtai-navbar__vip img {
-  width: 28px;
-  height: 28px;
   display: block;
 }
 
@@ -578,6 +580,10 @@ button, [role="button"], [role="radio"], [role="checkbox"],
     padding-bottom: calc(var(--spacer-40) + 56px + env(safe-area-inset-bottom, 0px));
     padding-left: calc(var(--spacer-16) + env(safe-area-inset-left, 0px));
     padding-right: calc(var(--spacer-16) + env(safe-area-inset-right, 0px));
+  }
+
+  .host-shell-page--flush {
+    padding: 0;
   }
 }
 
