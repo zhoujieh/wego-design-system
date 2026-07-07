@@ -135,7 +135,9 @@ input, textarea,
   overflow: hidden;
   border-radius: inherit;
   background: var(--bg-page);
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
 }
 
 .phone-status {
