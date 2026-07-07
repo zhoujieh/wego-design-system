@@ -1,0 +1,68 @@
+/* iOS 桌面书签 / standalone 安全区策略
+ * - 顶部安全区仅由 navbar 承担
+ * - 底部安全区仅由 bottom-nav 或明确的底部操作栏承担
+ * - 页面正文与滚动区不重复计算安全区
+ * - Dialog 在移动端覆盖完整屏幕（含状态栏与底部安全区）
+ */
+@media (max-width: 767px) {
+  .navbar {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  .bottom-nav {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* 宿主页正文只保留内容间距；安全区由上下栏自身处理。 */
+  .host-shell-page {
+    padding-top: var(--spacer-16) !important;
+    padding-right: var(--spacer-16) !important;
+    padding-bottom: calc(var(--spacer-40) + 56px) !important;
+    padding-left: var(--spacer-16) !important;
+  }
+
+  .host-shell-page--flush {
+    padding: 0 !important;
+  }
+
+  /* 业务页面正文不再重复占用底部安全区。 */
+  .quick-publish__body {
+    padding-bottom: 8px !important;
+  }
+
+  .price-list-body,
+  .price-perm-body,
+  .inventory-alert-page__body,
+  .system-settings-body,
+  .product-note-body {
+    padding-bottom: var(--spacer-40) !important;
+  }
+
+  .inventory-page__body,
+  .warehouse-page__body {
+    padding-bottom: var(--spacer-40) !important;
+  }
+
+  .warehouse-editor__body {
+    padding-bottom: var(--spacer-40) !important;
+  }
+
+  /* Dialog 不继承页面的安全区留白，直接覆盖完整画布。 */
+  .app-dialog-host {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    pointer-events: none;
+    z-index: var(--z-critical, 900) !important;
+  }
+
+  .app-dialog-host .dialog {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    padding: 0 !important;
+    pointer-events: auto;
+  }
+}
