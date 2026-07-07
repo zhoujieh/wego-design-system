@@ -157,6 +157,53 @@
     </div>
   </div>
 
+  <script>
+    (function lockStableMobileViewport() {
+      var mobileQuery = window.matchMedia('(max-width: 767px)');
+      var root = document.documentElement;
+      var stableHeight = 0;
+      var orientationTimer = 0;
+
+      function hasFocusedEditor() {
+        var active = document.activeElement;
+        if (!active) return false;
+        return active.matches('input, textarea, select, [contenteditable="true"], [contenteditable=""]');
+      }
+
+      function measureStableHeight() {
+        if (!mobileQuery.matches || hasFocusedEditor()) return;
+        var nextHeight = Math.round(window.innerHeight || root.clientHeight || 0);
+        if (nextHeight <= 0) return;
+        stableHeight = nextHeight;
+        root.style.setProperty('--wego-stable-viewport-height', stableHeight + 'px');
+      }
+
+      function restoreStableHeight() {
+        if (!mobileQuery.matches || stableHeight <= 0) return;
+        root.style.setProperty('--wego-stable-viewport-height', stableHeight + 'px');
+      }
+
+      measureStableHeight();
+
+      document.addEventListener('focusin', function (event) {
+        if (!event.target.matches('input, textarea, select, [contenteditable="true"], [contenteditable=""]')) return;
+        restoreStableHeight();
+      }, true);
+
+      document.addEventListener('focusout', function () {
+        window.setTimeout(restoreStableHeight, 350);
+      }, true);
+
+      window.addEventListener('orientationchange', function () {
+        window.clearTimeout(orientationTimer);
+        orientationTimer = window.setTimeout(measureStableHeight, 450);
+      });
+
+      window.addEventListener('pageshow', function () {
+        window.setTimeout(measureStableHeight, 0);
+      });
+    })();
+  </script>
   <script src="./js/routes.js"></script>
   <script src="./js/app.js"></script>
 </body>
