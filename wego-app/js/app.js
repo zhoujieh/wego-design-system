@@ -1036,6 +1036,23 @@
     document.addEventListener('visibilitychange', function () {
       if (document.hidden) clearAllPressStates();
     });
+
+    // 修复 iOS 键盘收起后底部安全区域占位残留
+    // 原因：100dvh 在键盘收起时可能未及时更新，导致内部布局计算错误
+    // 方案：使用 visualViewport API 监听视口变化，动态设置 phone-frame 高度
+    if (window.visualViewport) {
+      function updatePhoneFrameHeight() {
+        var phoneFrame = document.querySelector('.phone-frame');
+        if (phoneFrame) {
+          // visualViewport.height 反映实际可见视口高度（包含安全区域）
+          phoneFrame.style.height = window.visualViewport.height + 'px';
+        }
+      }
+      // 初始化时设置一次
+      updatePhoneFrameHeight();
+      // 监听 visualViewport 的 resize 事件（键盘弹出/收起时触发）
+      window.visualViewport.addEventListener('resize', updatePhoneFrameHeight);
+    }
   })();
 
   mountRouteEntries();
