@@ -4,12 +4,20 @@
  * 场景 body 0px 横向 padding + cell-group__content 不开 --card 修饰
  */
 
-/* 列表页与权限设置页共享的场景 body 布局（通栏 M1） */
-.price-list-page,
-.price-perm-page {
+/* 列表页场景 body 布局（通栏 M1） */
+.price-list-page {
   display: flex;
   flex-direction: column;
   min-height: 100%;
+  background: var(--bg-page);
+}
+
+/* 权限设置页（full-screen-modal）：绝对定位完全覆盖容器 */
+.price-perm-page {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
   background: var(--bg-page);
 }
 

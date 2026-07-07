@@ -1,8 +1,15 @@
-.warehouse-page,
-.warehouse-editor {
+.warehouse-page {
   display: flex;
   flex-direction: column;
   min-height: 100%;
+  background: var(--bg-page);
+}
+
+.warehouse-editor {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
   background: var(--bg-page);
 }
 
