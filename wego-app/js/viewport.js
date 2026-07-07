@@ -2,11 +2,19 @@
   var root = document.documentElement;
   var viewport = window.visualViewport;
   var mobileQuery = window.matchMedia && window.matchMedia('(max-width: 767px)');
+  var editableSelector = 'input, textarea, select, [contenteditable="true"], [contenteditable=""]';
   var rafId = 0;
   var retryTimers = [];
+  var stableHeight = 0;
+  var keyboardOpen = false;
 
   function isMobile() {
     return !mobileQuery || mobileQuery.matches;
+  }
+
+  function isEditableFocused() {
+    var active = document.activeElement;
+    return !!(active && active.matches && active.matches(editableSelector));
   }
 
   function clearRetryTimers() {
@@ -14,37 +22,62 @@
     retryTimers = [];
   }
 
-  function clearViewportVariables() {
-    root.style.removeProperty('--wego-visual-viewport-width');
-    root.style.removeProperty('--wego-visual-viewport-height');
-    root.style.removeProperty('--wego-visual-viewport-top');
-    root.style.removeProperty('--wego-visual-viewport-left');
+  function getViewportHeight() {
+    return viewport ? viewport.height : window.innerHeight;
   }
 
-  function px(value) {
-    var rounded = Math.round(Number(value || 0) * 100) / 100;
-    return rounded + 'px';
+  function getLayoutHeight() {
+    return Math.max(
+      window.innerHeight || 0,
+      document.documentElement.clientHeight || 0,
+      viewport ? viewport.height + viewport.offsetTop : 0
+    );
+  }
+
+  function closeKeyboardViewport() {
+    keyboardOpen = false;
+    root.classList.remove('wego-keyboard-open');
+    root.style.removeProperty('--wego-keyboard-viewport-height');
   }
 
   function updateViewport() {
     rafId = 0;
 
     if (!isMobile()) {
-      clearViewportVariables();
+      stableHeight = 0;
+      closeKeyboardViewport();
       return;
     }
 
-    var width = viewport ? viewport.width : window.innerWidth;
-    var height = viewport ? viewport.height : window.innerHeight;
-    var top = viewport ? viewport.offsetTop : 0;
-    var left = viewport ? viewport.offsetLeft : 0;
+    var visualHeight = getViewportHeight();
+    var layoutHeight = getLayoutHeight();
+    var focused = isEditableFocused();
 
-    if (!width || !height) return;
+    if (!visualHeight || !layoutHeight) return;
 
-    root.style.setProperty('--wego-visual-viewport-width', px(width));
-    root.style.setProperty('--wego-visual-viewport-height', px(height));
-    root.style.setProperty('--wego-visual-viewport-top', px(top));
-    root.style.setProperty('--wego-visual-viewport-left', px(left));
+    /* 只在非键盘状态更新基准高度，避免键盘弹起后的缩小值污染基准。 */
+    if (!focused || !keyboardOpen) {
+      stableHeight = Math.max(stableHeight, layoutHeight, visualHeight);
+    }
+
+    var heightLoss = stableHeight - visualHeight;
+
+    /* 使用不同的开启/关闭阈值形成滞回，避免键盘动画过程中反复切换造成抖动。 */
+    if (!keyboardOpen) {
+      if (focused && heightLoss > 140) {
+        keyboardOpen = true;
+      }
+    } else if (!focused || heightLoss < 80) {
+      closeKeyboardViewport();
+      return;
+    }
+
+    if (keyboardOpen) {
+      root.classList.add('wego-keyboard-open');
+      root.style.setProperty('--wego-keyboard-viewport-height', Math.round(visualHeight) + 'px');
+    } else {
+      closeKeyboardViewport();
+    }
   }
 
   function scheduleUpdate() {
@@ -61,32 +94,38 @@
 
   if (viewport) {
     viewport.addEventListener('resize', scheduleUpdate);
-    viewport.addEventListener('scroll', scheduleUpdate);
   }
 
   window.addEventListener('resize', scheduleUpdate);
-  window.addEventListener('pageshow', scheduleUpdate);
+  window.addEventListener('pageshow', function () {
+    stableHeight = 0;
+    scheduleSettledUpdates([0, 100]);
+  });
   window.addEventListener('orientationchange', function () {
-    scheduleSettledUpdates([0, 100, 300]);
+    stableHeight = 0;
+    closeKeyboardViewport();
+    scheduleSettledUpdates([100, 300]);
   });
 
   document.addEventListener('focusin', function (event) {
     var target = event.target;
-    if (!(target && target.matches && target.matches('input, textarea, select, [contenteditable="true"], [contenteditable=""]'))) {
-      return;
-    }
-    scheduleSettledUpdates([0, 100, 300]);
+    if (!(target && target.matches && target.matches(editableSelector))) return;
+    scheduleSettledUpdates([80, 240]);
   });
 
   document.addEventListener('focusout', function () {
-    scheduleSettledUpdates([0, 100, 300, 500]);
+    scheduleSettledUpdates([80, 280]);
   });
 
   if (mobileQuery) {
+    var onMediaChange = function () {
+      stableHeight = 0;
+      scheduleUpdate();
+    };
     if (typeof mobileQuery.addEventListener === 'function') {
-      mobileQuery.addEventListener('change', scheduleUpdate);
+      mobileQuery.addEventListener('change', onMediaChange);
     } else if (typeof mobileQuery.addListener === 'function') {
-      mobileQuery.addListener(scheduleUpdate);
+      mobileQuery.addListener(onMediaChange);
     }
   }
 
