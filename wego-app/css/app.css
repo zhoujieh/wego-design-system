@@ -128,16 +128,14 @@ input, textarea,
   --safe-area-bottom: 34px;
   --navbar-body-height: 44px;
   width: 100%;
-  height: 100dvh;
+  height: 100%;
   min-height: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   border-radius: inherit;
   background: var(--bg-page);
-  position: fixed;
-  top: 0;
-  left: 0;
+  position: relative;
 }
 
 .phone-status {
@@ -162,7 +160,7 @@ input, textarea,
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-  padding: calc(var(--spacer-16) + var(--safe-area-top)) var(--spacer-16) calc(var(--spacer-40) + 56px);
+  padding: calc(var(--spacer-16) + var(--safe-area-top)) var(--spacer-16) calc(var(--spacer-40) + var(--safe-area-bottom) + 56px);
   display: flex;
   flex-direction: column;
   gap: var(--spacer-12);
@@ -460,7 +458,7 @@ input, textarea,
 .app-scene-layer__panel {
   position: absolute;
   inset: 0;
-  background: transparent;
+  background: var(--bg-page);
   display: flex;
   flex-direction: column;
   transform: translateX(0);
@@ -518,7 +516,7 @@ input, textarea,
   max-height: 100%;
   border-radius: 0;
   box-shadow: none;
-  background: transparent;
+  background: var(--bg-surface);
   animation: wego-sheet-enter var(--duration-normal, 250ms) var(--ease-enter, ease-out);
 }
 
@@ -582,6 +580,7 @@ input, textarea,
 
   .phone-frame {
     width: 100%;
+    height: 100vh;
     height: 100dvh;
     max-height: none;
     border: none;
@@ -601,10 +600,10 @@ input, textarea,
     display: none;
   }
 
-  /* 移动端显式 padding 护栏：避免 3 值 padding 简写在 CSS 变量级联场景下整条声明失效；同时用 env() 替代被 .phone-screen 覆盖为 0 的 --safe-area-* 变量，支持真机安全区（需配合 viewport-fit=cover）。底部不再包含 safe-area-bottom，由 .bottom-nav 自行处理 */
+  /* 移动端显式 padding 护栏：避免 3 值 padding 简写在 CSS 变量级联场景下整条声明失效；同时用 env() 替代被 .phone-screen 覆盖为 0 的 --safe-area-* 变量，支持真机安全区（需配合 viewport-fit=cover） */
   .host-shell-page {
     padding-top: calc(var(--spacer-16) + env(safe-area-inset-top, 0px));
-    padding-bottom: calc(var(--spacer-40) + 56px);
+    padding-bottom: calc(var(--spacer-40) + 56px + env(safe-area-inset-bottom, 0px));
     padding-left: calc(var(--spacer-16) + env(safe-area-inset-left, 0px));
     padding-right: calc(var(--spacer-16) + env(safe-area-inset-right, 0px));
   }
