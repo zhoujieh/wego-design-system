@@ -8,22 +8,22 @@
   background: var(--bg-surface);
 }
 
+.quick-publish-page .navbar {
+  position: relative;
+  flex: 0 0 auto;
+}
+
 .quick-publish__body {
   flex: 1 1 auto;
   min-height: 0;
-  padding: 8px var(--spacer-16) calc(8px + var(--safe-area-bottom));
+  padding: var(--spacer-8) var(--spacer-16) calc(var(--spacer-8) + var(--safe-area-bottom));
   display: flex;
   flex-direction: column;
   gap: var(--spacer-16);
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
-/* 导航栏不需要 sticky，因为 body 自己滚动 */
-.quick-publish-page .navbar {
-  position: relative;
-}
-
-/* 编辑器 */
 .quick-publish__editor {
   display: flex;
   flex-direction: column;
@@ -32,7 +32,7 @@
 .quick-publish__row {
   display: flex;
   align-items: flex-start;
-  padding: 4px 0;
+  padding: var(--spacer-4) 0;
   gap: var(--spacer-12);
 }
 
@@ -44,13 +44,13 @@
 .quick-publish__label {
   flex-shrink: 0;
   width: 48px;
+  padding-top: 0;
+  color: var(--text-default);
+  font-size: var(--body-lg-font-size);
+  line-height: 24px;
   text-align: justify;
   text-align-last: justify;
   text-justify: inter-ideograph;
-  font-size: var(--body-lg-font-size);
-  line-height: 24px;
-  color: var(--text-default);
-  padding-top: 0;
 }
 
 .quick-publish__input-wrap {
@@ -67,11 +67,10 @@
 
 .quick-publish__currency {
   flex-shrink: 0;
+  margin-right: 1px;
+  color: var(--text-placeholder);
   font-size: var(--body-lg-font-size);
   line-height: 24px;
-  color: var(--text-placeholder);
-  margin-right: 1px;
-  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -83,42 +82,47 @@
   width: 100%;
   min-height: 24px;
   padding: 0;
-  border: none;
+  border: 0;
+  outline: 0;
   background: transparent;
+  color: var(--text-default);
   font-size: var(--body-lg-font-size);
   line-height: 24px;
-  color: var(--text-default);
-  outline: none;
   white-space: pre-wrap;
   word-break: break-word;
   -webkit-user-modify: read-write-plaintext-only;
 }
 
-.quick-publish__editor-field:empty::before {
+.quick-publish__editor-field:empty::before,
+.quick-publish__action-text:empty::before {
   content: attr(data-placeholder);
   color: var(--text-placeholder);
   pointer-events: none;
 }
 
-.quick-publish__editor-field:focus:empty::before {
-  color: var(--text-placeholder);
-}
-
-/* 智能识别标签（内联显示在 contenteditable 中，复用 tag 组件） */
 .quick-publish__tag--flash {
-  animation: quick-publish-tag-flash 0.4s ease-in-out 2;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  animation: quick-publish-recognition-flash 720ms ease-out;
 }
 
-@keyframes quick-publish-tag-flash {
-  0%, 100% {
-    background: var(--bg-subtle);
+@keyframes quick-publish-recognition-flash {
+  0%,
+  44%,
+  100% {
+    background-color: transparent;
   }
-  50% {
-    background: var(--bg-brand-surface-l1);
+
+  18%,
+  70% {
+    background-color: var(--bg-brand-surface-l1);
   }
 }
 
-/* 辅助入口 */
 .quick-publish__actions {
   display: flex;
   align-items: center;
@@ -127,7 +131,6 @@
   padding: 0 var(--spacer-16);
   overflow-x: auto;
   scrollbar-width: none;
-  -ms-overflow-style: none;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -136,23 +139,23 @@
 }
 
 .quick-publish__action-btn {
+  flex-shrink: 0;
+  min-width: 0;
+  height: 32px;
+  padding: 0 var(--spacer-12);
+  border: 0;
+  border-radius: var(--radius-6);
   display: inline-flex;
   align-items: center;
   gap: var(--spacer-4);
-  height: 32px;
-  padding: 0 var(--spacer-12);
-  border: none;
-  border-radius: var(--radius-6);
   background: var(--bg-subtle);
   color: var(--text-default);
   font-size: var(--body-md-font-size);
   line-height: 1;
   cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
-  -webkit-user-select: none;
   user-select: none;
-  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .quick-publish__action-btn:active,
@@ -160,79 +163,56 @@
   background: var(--bg-overlay-l1);
 }
 
-.quick-publish__action-btn.has-value {
-  color: var(--text-default);
-  background: var(--bg-subtle);
-}
-
-.quick-publish__action-btn.has-value:active,
-.quick-publish__action-btn.has-value.is-pressed {
-  background: var(--bg-overlay-l1);
-}
-
-.quick-publish__action-btn.is-editing {
-  background: var(--bg-subtle);
-}
-
-.quick-publish__action-btn.is-editing .wego-iconfont-s {
-  display: none;
-}
-
-.quick-publish__action-btn.is-editing-content .wego-iconfont-s {
-  display: none;
-}
-
 .quick-publish__action-btn--editable {
+  max-width: 168px;
   padding-right: var(--spacer-8);
 }
 
+.quick-publish__action-btn.is-editing .wego-iconfont-s,
+.quick-publish__action-btn.has-value .wego-iconfont-s {
+  display: none;
+}
+
 .quick-publish__action-text {
-  min-width: 24px;
-  max-width: 80px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  outline: none;
-  -webkit-user-modify: read-write-plaintext-only;
+  min-width: 32px;
+  max-width: 140px;
+  overflow-x: auto;
+  outline: 0;
+  color: var(--text-default);
+  line-height: 24px;
+  white-space: pre;
   cursor: text;
+  scrollbar-width: none;
+  -webkit-user-modify: read-write-plaintext-only;
 }
 
-.quick-publish__action-text:empty::before {
-  content: attr(data-placeholder);
-  color: var(--text-placeholder);
-  pointer-events: none;
-}
-
-.quick-publish__action-text .tag.tag--20 {
-  vertical-align: baseline;
-  margin-right: 4px;
+.quick-publish__action-text::-webkit-scrollbar {
+  display: none;
 }
 
 .quick-publish__action-btn .wego-iconfont-s {
-  font-size: 16px;
-  color: var(--text-secondary);
   flex-shrink: 0;
+  color: var(--text-secondary);
+  font-size: 16px;
 }
 
-/* 图片上传占位 */
 .quick-publish__upload {
   display: flex;
 }
 
 .quick-publish__upload-btn {
+  width: 80px;
+  height: 80px;
+  border: 0;
+  border-radius: var(--radius-8);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 80px;
-  height: 80px;
-  border: none;
-  border-radius: var(--radius-8);
   background: var(--bg-subtle);
   cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
-  -webkit-user-select: none;
   user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .quick-publish__upload-btn:active,
@@ -241,6 +221,6 @@
 }
 
 .quick-publish__upload-btn .wego-iconfont-s {
-  font-size: 24px;
   color: var(--text-secondary);
+  font-size: 24px;
 }

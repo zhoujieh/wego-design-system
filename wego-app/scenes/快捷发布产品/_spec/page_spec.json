@@ -1,8 +1,8 @@
 {
-  "task_type": "business-feature",
-  "scene_category": "product-publish",
-  "business_goal": "为店主提供快捷发布产品的入口，通过结构化多行编辑器快速录入产品字段，支持规格/颜色智能识别，保存后生成带格式的产品标题并回填产品属性",
-  "interaction_mode": "form-submit",
+  "task_type": "design-system-consumption",
+  "scene_category": "form-edit",
+  "business_goal": "让店主以连续文本输入方式快速录入并识别产品字段，保存文本与结构化识别结果，发布后在动态页即时展示，并支持从动态页再次进入编辑继续增量识别和修改。",
+  "interaction_mode": "edit-then-save",
   "app_target": {
     "mode": "wego-app-scene",
     "app_root": "wego-app",
@@ -12,19 +12,21 @@
   },
   "information_blocks": [
     "入口：动态 Tab 导航栏右上角发布按钮",
-    "导航栏：取消 + 快捷发布产品 + 发布按钮",
+    "导航栏：取消、快捷发布产品、唯一主操作发布",
     "编辑器区域：产品名、售价、货号、规格、颜色、重量、库存共 7 行",
-    "每行左侧 label 两端对齐，右侧为多行 contenteditable 编辑器",
-    "占位文案：产品名/售价/货号/重量为选填，规格/颜色为默认，库存为默认不限库存",
-    "回车聚焦下一行编辑器；当前编辑器为空时 Backspace 回退到上一行",
-    "所有编辑器支持多行文本输入",
-    "规格/颜色行支持 S~XXL 自动展开为 S M L XL XXL",
-    "规格/颜色行支持任意词 + 空格自动识别为内联标签，连续输入可连续识别",
-    "重复标签不重复新建",
-    "新识别标签展示浅绿色闪烁两次的交互动画",
-    "下方入口：+ 标签、+ 来源、所有粉丝可见（占位）",
-    "图片上传占位区域",
-    "发布按钮：收集 7 个字段内容并拼接为带换行的产品标题，toast 反馈发布成功"
+    "产品名为普通文本字段，不执行识别和识别闪烁；Enter 只切换到下一输入框",
+    "规格、颜色、标签、来源为多项识别字段：空格识别当前词，Enter 在光标任意位置识别当前词并切换到下一输入框",
+    "售价、货号、重量、库存为单项识别字段：空格只作为正常输入边界或继续遵循数字格式限制，Enter 识别整个输入框并切换到下一输入框",
+    "识别结果保持普通文本输入样式，不转换成 Tag；只对本次识别或更新的文字片段播放短暂背景色闪烁",
+    "识别过程中保持当前光标和选区位置，不额外插入空格，不把光标强制移动到文本末尾",
+    "编辑已识别内容时，在原位置更新对应结构化记录；删除文本时同步删除结构化记录",
+    "保留已有去重与提示逻辑：重复内容不新增结构化记录并显示提示，数字格式错误继续显示原提示",
+    "标签、来源使用与规格、颜色相同的多项识别逻辑",
+    "辅助操作：可见性切换和图片上传占位",
+    "保存时同时持久化原始文本、结构化识别项、识别项唯一标识、文本区间、标准值和识别状态",
+    "再次编辑产品时恢复上次原始文本与结构化识别结果，未修改内容不重复识别或闪烁",
+    "发布成功后自动回到动态页，在列表顶部即时展示当前新增产品，不需要手动刷新",
+    "动态产品卡片展示产品识别信息的必要摘要，未填写字段不占位；点击卡片进入原产品编辑，不重复创建产品"
   ],
   "page_surfaces": [
     {
@@ -32,38 +34,55 @@
       "role": "host-entry",
       "information_blocks": [
         "动态 Tab 导航栏右上角发布按钮",
-        "点击后从底部弹出全屏模态进入快捷发布产品页面"
+        "动态页产品列表与空态"
       ],
       "interaction_mode": "navigate",
-      "purpose": "快捷发布产品的全局入口，放在动态页面导航栏右侧，便于店主随时发布"
+      "purpose": "承接快捷发布入口，并在宿主动态页展示已发布产品列表。"
     },
     {
       "id": "quick-publish-form",
       "role": "primary-task-page",
       "information_blocks": [
-        "导航栏：取消 + 快捷发布产品 + 发布",
-        "7 行结构化编辑器",
-        "下方辅助入口与图片上传占位",
-        "发布成功后 toast 提示"
+        "导航栏：取消、快捷发布产品、发布",
+        "7 行连续文本编辑器",
+        "规格、颜色、标签、来源多项识别",
+        "售价、货号、重量、库存单项识别",
+        "光标保持、原位置更新、去重提示和局部闪烁",
+        "可见性与图片上传占位",
+        "原始文本和结构化识别结果持久化"
       ],
-      "interaction_mode": "form-submit",
-      "purpose": "核心发布页面，负责采集产品字段、智能识别和标题生成"
+      "interaction_mode": "edit-then-save",
+      "purpose": "采集产品字段，在不中断连续输入的前提下完成识别、修改、去重和保存。"
+    },
+    {
+      "id": "published-product-summary",
+      "role": "result-summary",
+      "information_blocks": [
+        "发布成功后回到动态页",
+        "当前新增产品显示在动态列表顶部",
+        "产品卡片展示产品名、价格、规格、颜色、标签、来源、可见性和发布时间中的有效信息",
+        "点击卡片再次进入同一产品编辑"
+      ],
+      "interaction_mode": "view-only",
+      "purpose": "提供发布结果回填和产品再次编辑入口，保证新增、展示、编辑形成完整闭环。"
     }
   ],
   "host_container": {
     "tab": "dongtai",
     "entry_label": "发布",
+    "subentry_label": "",
     "leaf_level": 2,
     "entry_type": "navbar-action",
     "needs_host_entry_surface": true
   },
   "route_id": "quick-publish-product",
   "component_intent": [
-    "导航栏使用 navbar（leftControl=text-cancel, actions=button, spacing=spaced, pageTransition=present）",
-    "编辑器每行使用自定义 flex 行结构，左侧 label 右对齐，右侧 input 透明无边框",
-    "发布按钮使用 button 组件 .btn.btn--strong.btn--sm",
-    "辅助入口按钮使用自定义轻量按钮样式，基于 button token 组合",
-    "智能识别标签使用自定义 chip 样式，背景使用 --bg-overlay-l1，文字使用 --text-brand"
+    "导航栏使用 navbar 的全屏编辑模式，左侧取消、右侧唯一发布按钮",
+    "发布按钮使用 button strong/sm 稳定变体",
+    "连续编辑区域使用页面级业务作用域的 contenteditable 文本结构，不把识别内容转换为 tag 组件",
+    "识别反馈仅使用不改变排版的文本背景闪烁，不增加内边距、圆角或胶囊外观",
+    "动态页产品结果使用 card surface 容器和横向对象摘要结构，左侧低干扰商品识别图，右侧标题、价格和 1-2 行摘要",
+    "动态卡片点击进入同一产品编辑，更新原产品而不是新增重复动态"
   ],
   "spec_refs": {
     "copy": ".codex/skills/wego-design/specs/文案与数据规范.md",
