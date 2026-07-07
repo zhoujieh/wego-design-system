@@ -11,7 +11,7 @@
     { id: 'source', label: '来源', placeholder: '来源', mode: 'multi', action: true }
   ];
   var SIZE_ORDER = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '均码'];
-  var flashTimer = 0;
+  var flashTimers = new WeakMap();
 
   function esc(value) {
     return String(value == null ? '' : value)
@@ -19,17 +19,9 @@
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
-  function clone(value) {
-    return JSON.parse(JSON.stringify(value));
-  }
-
-  function text(value) {
-    return String(value == null ? '' : value).replace(/\u00a0/g, ' ');
-  }
-
-  function key(value) {
-    return text(value).trim().replace(/\s+/g, ' ').toLocaleLowerCase();
-  }
+  function clone(value) { return JSON.parse(JSON.stringify(value)); }
+  function text(value) { return String(value == null ? '' : value).replace(/\u00a0/g, ' '); }
+  function key(value) { return text(value).trim().replace(/\s+/g, ' ').toLocaleLowerCase(); }
 
   function normalized(value) {
     var valueText = text(value).trim().replace(/\s+/g, ' ');
@@ -37,18 +29,14 @@
     return SIZE_ORDER.indexOf(upper) >= 0 ? upper : valueText;
   }
 
-  function id(prefix) {
-    return prefix + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7);
-  }
+  function id(prefix) { return prefix + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7); }
 
   function tokens(value) {
     var result = [];
     var source = text(value);
     var matcher = /[^\s]+/g;
     var match;
-    while ((match = matcher.exec(source))) {
-      result.push({ value: match[0], start: match.index, end: match.index + match[0].length });
-    }
+    while ((match = matcher.exec(source))) result.push({ value: match[0], start: match.index, end: match.index + match[0].length });
     return result;
   }
 
@@ -60,15 +48,11 @@
       if (caret > list[i].start && caret <= list[i].end) return list[i];
       if (caret === list[i].start && i > 0) return list[i - 1];
     }
-    for (i = list.length - 1; i >= 0; i--) {
-      if (list[i].end <= caret) return list[i];
-    }
+    for (i = list.length - 1; i >= 0; i--) if (list[i].end <= caret) return list[i];
     return list[0] || null;
   }
 
-  function emptyField() {
-    return { rawText: '', items: [] };
-  }
+  function emptyField() { return { rawText: '', items: [] }; }
 
   function emptyForm() {
     var fields = {};
@@ -82,10 +66,7 @@
     FIELDS.forEach(function (field) {
       var stored = product.fields && product.fields[field.id];
       if (!stored) return;
-      form.fields[field.id] = {
-        rawText: text(stored.rawText || ''),
-        items: Array.isArray(stored.items) ? clone(stored.items) : []
-      };
+      form.fields[field.id] = { rawText: text(stored.rawText || ''), items: Array.isArray(stored.items) ? clone(stored.items) : [] };
     });
     form.visibility = product.visibility === 'private' ? 'private' : 'public';
     form.editingProductId = product.id || '';
@@ -95,9 +76,7 @@
   function selection(el) {
     var selected = window.getSelection();
     var length = text(el.textContent).length;
-    if (!selected || !selected.rangeCount || !el.contains(selected.anchorNode)) {
-      return { start: length, end: length };
-    }
+    if (!selected || !selected.rangeCount || !el.contains(selected.anchorNode)) return { start: length, end: length };
     var range = selected.getRangeAt(0);
     var before = range.cloneRange();
     before.selectNodeContents(el);
@@ -118,10 +97,7 @@
       if (remaining <= node.nodeValue.length) return { node: node, offset: remaining };
       remaining -= node.nodeValue.length;
     }
-    if (!last) {
-      last = document.createTextNode('');
-      root.appendChild(last);
-    }
+    if (!last) { last = document.createTextNode(''); root.appendChild(last); }
     return { node: last, offset: last.nodeValue.length };
   }
 
@@ -136,44 +112,43 @@
     range.setEnd(to.node, to.offset);
     var selected = window.getSelection();
     if (!selected) return;
-    if (focus) el.focus();
+    if (focus) {
+      try { el.focus({ preventScroll: true }); } catch (error) { el.focus(); }
+    }
     selected.removeAllRanges();
     selected.addRange(range);
   }
 
-  function caretEnd(el) {
-    var length = text(el.textContent).length;
-    setSelection(el, length, length, true);
-  }
+  function caretEnd(el) { var length = text(el.textContent).length; setSelection(el, length, length, true); }
 
   function unwrapFlashes(el) {
-    var current = selection(el);
     var focused = document.activeElement === el;
+    var current = focused ? selection(el) : null;
     el.querySelectorAll('[data-recognition-flash]').forEach(function (node) {
       node.replaceWith(document.createTextNode(node.textContent || ''));
     });
     el.normalize();
-    setSelection(el, current.start, current.end, focused);
+    if (focused && current) setSelection(el, current.start, current.end, false);
   }
 
   function flash(el, start, end) {
-    window.clearTimeout(flashTimer);
+    var timer = flashTimers.get(el);
+    if (timer) window.clearTimeout(timer);
     unwrapFlashes(el);
     var source = text(el.textContent);
     if (start < 0 || end <= start || end > source.length) return;
-    var current = selection(el);
     var focused = document.activeElement === el;
+    var current = focused ? selection(el) : null;
     var mark = document.createElement('span');
     mark.dataset.recognitionFlash = 'true';
     mark.className = 'quick-publish__tag--flash';
     mark.textContent = source.slice(start, end);
-    el.replaceChildren(
-      document.createTextNode(source.slice(0, start)),
-      mark,
-      document.createTextNode(source.slice(end))
-    );
-    setSelection(el, current.start, current.end, focused);
-    flashTimer = window.setTimeout(function () { unwrapFlashes(el); }, 820);
+    el.replaceChildren(document.createTextNode(source.slice(0, start)), mark, document.createTextNode(source.slice(end)));
+    if (focused && current) setSelection(el, current.start, current.end, false);
+    flashTimers.set(el, window.setTimeout(function () {
+      unwrapFlashes(el);
+      flashTimers.delete(el);
+    }, 820));
   }
 
   function reconcileMulti(state, raw) {
@@ -188,12 +163,10 @@
         var distance = Math.abs((item.start || 0) - token.start);
         if (distance < best) { best = distance; matchIndex = oldIndex; }
       });
-      if (matchIndex < 0) {
-        old.forEach(function (item, oldIndex) {
-          if (used[oldIndex] || matchIndex >= 0) return;
-          if (token.start < item.end && token.end > item.start) matchIndex = oldIndex;
-        });
-      }
+      if (matchIndex < 0) old.forEach(function (item, oldIndex) {
+        if (used[oldIndex] || matchIndex >= 0) return;
+        if (token.start < item.end && token.end > item.start) matchIndex = oldIndex;
+      });
       if (matchIndex < 0 && old[index] && !used[index]) matchIndex = index;
       var previous = matchIndex >= 0 ? old[matchIndex] : null;
       if (matchIndex >= 0) used[matchIndex] = true;
@@ -217,11 +190,8 @@
     var previous = state.items && state.items[0];
     state.rawText = value;
     state.items = trimmed ? [{
-      id: previous && previous.id ? previous.id : id('recognized'),
-      value: trimmed,
-      normalizedValue: normalized(trimmed),
-      start: value.indexOf(trimmed),
-      end: value.indexOf(trimmed) + trimmed.length,
+      id: previous && previous.id ? previous.id : id('recognized'), value: trimmed,
+      normalizedValue: normalized(trimmed), start: value.indexOf(trimmed), end: value.indexOf(trimmed) + trimmed.length,
       status: previous && key(previous.value) === key(trimmed) && previous.status === 'recognized' ? 'recognized' : 'pending'
     }] : [];
   }
@@ -251,27 +221,20 @@
     var rows = FIELDS.filter(function (field) { return !field.action; }).map(function (field, index) {
       var wrap = 'quick-publish__input-wrap' + (field.type === 'price' ? ' quick-publish__input-wrap--price' : '');
       var editorClass = 'quick-publish__editor-field' + (field.mode === 'multi' ? ' quick-publish__editor-field--smart' : '');
-      return '<div class="quick-publish__row" data-field="' + field.id + '">'
-        + '<label class="quick-publish__label" for="qp-' + field.id + '">' + field.label + '</label>'
-        + '<div class="' + wrap + '">'
+      return '<div class="quick-publish__row" data-field="' + field.id + '"><label class="quick-publish__label" for="qp-' + field.id + '">' + field.label + '</label><div class="' + wrap + '">'
         + (field.type === 'price' ? '<span class="quick-publish__currency">¥</span>' : '')
-        + '<div id="qp-' + field.id + '" class="' + editorClass + '" contenteditable="true" role="textbox" aria-multiline="true" data-field-id="' + field.id + '" data-index="' + index + '" data-placeholder="' + esc(field.placeholder) + '"></div>'
-        + '</div></div>';
+        + '<div id="qp-' + field.id + '" class="' + editorClass + '" contenteditable="true" role="textbox" aria-multiline="false" data-field-id="' + field.id + '" data-index="' + index + '" data-placeholder="' + esc(field.placeholder) + '"></div></div></div>';
     }).join('');
     var actionOffset = FIELDS.filter(function (field) { return !field.action; }).length;
-    return '<section class="quick-publish-page" data-bg="surface">'
-      + '<div class="navbar"><div class="navbar__body navbar__body--spaced">'
+    return '<section class="quick-publish-page" data-bg="surface"><div class="navbar"><div class="navbar__body navbar__body--spaced">'
       + '<div class="navbar__left"><span class="navbar__left-text" data-action="cancel" role="button">取消</span></div>'
       + '<div class="navbar__center"><span class="navbar__title">' + (editing ? '编辑产品' : '快捷发布产品') + '</span></div>'
-      + '<div class="navbar__right navbar__right--button"><div class="navbar__action navbar__action--button" data-action="publish"><button type="button" class="btn btn--strong btn--sm">发布</button></div></div>'
-      + '</div></div>'
-      + '<div class="quick-publish__body"><div class="quick-publish__editor">' + rows + '</div>'
-      + '<div class="quick-publish__actions">'
-      + '<div class="quick-publish__action-btn quick-publish__action-btn--editable" role="button"><i class="wego-iconfont-s icon-jia"></i><span class="quick-publish__action-text" contenteditable="true" role="textbox" data-field-id="tag" data-index="' + actionOffset + '" data-placeholder="标签"></span></div>'
-      + '<div class="quick-publish__action-btn quick-publish__action-btn--editable" role="button"><i class="wego-iconfont-s icon-jia"></i><span class="quick-publish__action-text" contenteditable="true" role="textbox" data-field-id="source" data-index="' + (actionOffset + 1) + '" data-placeholder="来源"></span></div>'
-      + '<button type="button" class="quick-publish__action-btn" data-action="visibility" data-visibility="public"><i class="wego-iconfont-s icon-suo"></i><span>所有粉丝可见</span></button>'
-      + '</div><div class="quick-publish__upload"><button type="button" class="quick-publish__upload-btn" data-action="upload" aria-label="上传图片"><i class="wego-iconfont-s icon-jia"></i></button></div>'
-      + '</div></section>';
+      + '<div class="navbar__right navbar__right--button"><div class="navbar__action navbar__action--button" data-action="publish"><button type="button" class="btn btn--strong btn--sm">发布</button></div></div></div></div>'
+      + '<div class="quick-publish__body"><div class="quick-publish__editor">' + rows + '</div><div class="quick-publish__actions">'
+      + '<div class="quick-publish__action-btn quick-publish__action-btn--editable" role="button"><i class="wego-iconfont-s icon-jia"></i><span class="quick-publish__action-text" contenteditable="true" role="textbox" aria-multiline="false" data-field-id="tag" data-index="' + actionOffset + '" data-placeholder="标签"></span></div>'
+      + '<div class="quick-publish__action-btn quick-publish__action-btn--editable" role="button"><i class="wego-iconfont-s icon-jia"></i><span class="quick-publish__action-text" contenteditable="true" role="textbox" aria-multiline="false" data-field-id="source" data-index="' + (actionOffset + 1) + '" data-placeholder="来源"></span></div>'
+      + '<button type="button" class="quick-publish__action-btn" data-action="visibility" data-visibility="public"><i class="wego-iconfont-s icon-suo"></i><span>所有粉丝可见</span></button></div>'
+      + '<div class="quick-publish__upload"><button type="button" class="quick-publish__upload-btn" data-action="upload" aria-label="上传图片"><i class="wego-iconfont-s icon-jia"></i></button></div></div></section>';
   }
 
   window.WegoApp.registerScene({
@@ -280,18 +243,11 @@
     presentation: { type: 'full-screen-modal', transition: 'slide-up', coversTabBar: true },
     template: '',
     init: function (ctx) {
-      var product = ctx.state.editingProductId && window.WegoProducts
-        ? window.WegoProducts.getProduct(ctx.state.editingProductId) : null;
+      var product = ctx.state.editingProductId && window.WegoProducts ? window.WegoProducts.getProduct(ctx.state.editingProductId) : null;
       var form = restoreForm(product);
 
-      function definition(fieldId) {
-        return FIELDS.find(function (field) { return field.id === fieldId; });
-      }
-
-      function state(fieldId) {
-        if (!form.fields[fieldId]) form.fields[fieldId] = emptyField();
-        return form.fields[fieldId];
-      }
+      function definition(fieldId) { return FIELDS.find(function (field) { return field.id === fieldId; }); }
+      function state(fieldId) { if (!form.fields[fieldId]) form.fields[fieldId] = emptyField(); return form.fields[fieldId]; }
 
       function sync(el, field) {
         unwrapFlashes(el);
@@ -311,9 +267,7 @@
         var nextCaret = caret + replacement.length - token.value.length;
         setSelection(el, nextCaret, nextCaret, true);
         reconcileMulti(state(field.id), text(el.textContent));
-        var affected = state(field.id).items.filter(function (item) {
-          return item.start >= token.start && item.end <= token.start + replacement.length;
-        });
+        var affected = state(field.id).items.filter(function (item) { return item.start >= token.start && item.end <= token.start + replacement.length; });
         affected.forEach(function (item) { item.status = 'recognized'; });
         flash(el, token.start, token.start + replacement.length);
         return affected[affected.length - 1] || null;
@@ -327,13 +281,9 @@
         var expanded = expandRange(el, field, currentToken, caret);
         if (expanded) return true;
         var items = reconcileMulti(state(field.id), raw);
-        var item = items.find(function (candidate) {
-          return candidate.start === currentToken.start && candidate.end === currentToken.end;
-        });
+        var item = items.find(function (candidate) { return candidate.start === currentToken.start && candidate.end === currentToken.end; });
         if (!item) return false;
-        var duplicate = items.find(function (candidate) {
-          return candidate.id !== item.id && key(candidate.value) === key(item.value);
-        });
+        var duplicate = items.find(function (candidate) { return candidate.id !== item.id && key(candidate.value) === key(item.value); });
         if (duplicate) { removeDuplicate(el, state(field.id), item, ctx); return false; }
         item.normalizedValue = normalized(item.value);
         item.status = 'recognized';
@@ -377,9 +327,7 @@
       function sanitizeNumber(el, field) {
         var current = text(el.textContent);
         var caret = selection(el).start;
-        var cleaned = field.type === 'price'
-          ? current.replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1')
-          : current.replace(/\D/g, '');
+        var cleaned = field.type === 'price' ? current.replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1') : current.replace(/\D/g, '');
         if (field.type === 'price' && (!/^\d{0,7}(\.\d{0,2})?$/.test(cleaned) || /^0\d+/.test(cleaned))) {
           cleaned = el.dataset.lastValid || '';
           ctx.toast('售价最多输入 7 位整数和 2 位小数');
@@ -398,6 +346,13 @@
         if (button) button.classList.toggle('has-value', Boolean(text(el.textContent).trim()));
       }
 
+      function focusEditor(editors, index) {
+        var target = editors[index];
+        if (!target) return false;
+        window.requestAnimationFrame(function () { if (target.isConnected) caretEnd(target); });
+        return true;
+      }
+
       function bindEditor(el, field, editors) {
         var composing = false;
         var scheduled = false;
@@ -406,7 +361,7 @@
           scheduled = true;
           window.setTimeout(function () {
             scheduled = false;
-            if (el.isConnected) recognizeMulti(el, field, selection(el).start, true);
+            if (el.isConnected && document.activeElement === el) recognizeMulti(el, field, selection(el).start, true);
           }, 0);
         }
         el.addEventListener('compositionstart', function () { composing = true; });
@@ -419,14 +374,17 @@
           var index = Number(el.dataset.index);
           if (event.key === 'Enter') {
             event.preventDefault();
+            event.stopPropagation();
+            if (composing) return;
             if (field.mode === 'multi') recognizeMulti(el, field, selection(el).start, true);
             else if (field.mode === 'single') recognizeSingle(el, field, true);
             else sync(el, field);
-            if (editors[index + 1]) caretEnd(editors[index + 1]); else el.blur();
+            updateAction(el);
+            if (!focusEditor(editors, index + 1)) el.blur();
             return;
           }
           if (event.key === 'Backspace' && !text(el.textContent).trim() && editors[index - 1]) {
-            event.preventDefault(); caretEnd(editors[index - 1]); return;
+            event.preventDefault(); focusEditor(editors, index - 1); return;
           }
           if ((field.type === 'price' || field.type === 'number') && !allowedNumberKey(event, field, text(el.textContent))) {
             event.preventDefault(); return;
@@ -435,8 +393,7 @@
           if ((event.ctrlKey || event.metaKey) && ['b', 'i', 'u'].indexOf(event.key) >= 0) event.preventDefault();
         });
         el.addEventListener('input', function (event) {
-          if (field.type === 'price' || field.type === 'number') sanitizeNumber(el, field);
-          else sync(el, field);
+          if (field.type === 'price' || field.type === 'number') sanitizeNumber(el, field); else sync(el, field);
           updateAction(el);
           var caret = selection(el).start;
           if (!composing && field.mode === 'multi' && ((event.data && /\s/.test(event.data)) || (caret && /\s/.test(text(el.textContent).charAt(caret - 1))))) schedule();
@@ -477,15 +434,11 @@
 
       ctx.root.innerHTML = pageTemplate(Boolean(product));
       hydrate(ctx.root);
-      var editors = Array.from(ctx.root.querySelectorAll('[data-field-id]')).sort(function (a, b) {
-        return Number(a.dataset.index) - Number(b.dataset.index);
-      });
+      var editors = Array.from(ctx.root.querySelectorAll('[data-field-id]')).sort(function (a, b) { return Number(a.dataset.index) - Number(b.dataset.index); });
       editors.forEach(function (el) { bindEditor(el, definition(el.dataset.fieldId), editors); });
       ctx.root.querySelectorAll('.quick-publish__action-btn--editable').forEach(function (button) {
         var el = button.querySelector('[contenteditable]');
-        button.addEventListener('click', function (event) {
-          if (event.target !== el) { event.preventDefault(); caretEnd(el); }
-        });
+        button.addEventListener('click', function (event) { if (event.target !== el) { event.preventDefault(); caretEnd(el); } });
         el.addEventListener('focus', function () { button.classList.add('is-editing'); });
         el.addEventListener('blur', function () { button.classList.remove('is-editing'); });
       });
