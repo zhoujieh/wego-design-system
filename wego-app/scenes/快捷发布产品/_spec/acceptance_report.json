@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "scene": "快捷发布产品",
   "route_id": "quick-publish-product",
-  "executed_at": "2026-07-07",
+  "executed_at": "2026-07-08",
   "workflow_chain": [
     "wego-product",
     "wego-design",
@@ -23,7 +23,15 @@
       "status": "pass"
     },
     {
-      "requirement": "只闪烁当前识别片段并保持光标位置",
+      "requirement": "每个输入框可独立编辑，识别动画不抢占其他字段焦点",
+      "status": "implementation-pass-manual-browser-check"
+    },
+    {
+      "requirement": "任意字段按 Enter 完成当前识别并自动进入下一个输入框",
+      "status": "implementation-pass-manual-browser-check"
+    },
+    {
+      "requirement": "只闪烁当前识别片段并保持当前输入光标位置",
       "status": "implementation-pass-manual-browser-check"
     },
     {
@@ -39,29 +47,41 @@
       "status": "pass"
     },
     {
+      "requirement": "动态列表及产品卡片默认占满可用宽度，空内容不收缩",
+      "status": "pass"
+    },
+    {
+      "requirement": "动态产品卡片按数据对象列表规范优先从左到右组织信息",
+      "status": "pass"
+    },
+    {
       "requirement": "发布后回动态页显示新产品，点击继续编辑同一产品",
       "status": "pass"
     }
   ],
   "automated_checks": [
-    ["javascript_syntax_scene", "pass"],
-    ["javascript_syntax_products", "pass"],
-    ["javascript_syntax_routes", "pass"],
+    ["javascript_syntax_scene", "implementation-reviewed"],
+    ["javascript_syntax_products", "implementation-reviewed"],
     ["spec_json_parse", "pass"],
-    ["normal_text_no_tag_component", "pass"],
+    ["per_editor_flash_timer", "pass"],
+    ["inactive_editor_selection_guard", "pass"],
+    ["enter_focus_next_frame", "pass"],
     ["multi_field_partition", "pass"],
     ["product_name_no_recognition", "pass"],
-    ["caret_selection_restore", "pass"],
     ["dedup_prompt_preserved", "pass"],
     ["structured_items", "pass"],
+    ["dynamic_list_width_100", "pass"],
+    ["dynamic_card_width_100", "pass"],
+    ["object_list_horizontal_flow", "pass"],
+    ["empty_product_card_stable_size", "pass"],
     ["same_product_update", "pass"],
-    ["dynamic_publish_close_loop", "pass"],
-    ["module_loaded_by_routes", "pass"]
+    ["dynamic_publish_close_loop", "pass"]
   ],
   "interaction_check": {
     "field_mode_partition": "pass",
     "space_trigger_scope": "pass",
-    "enter_navigation": "pass",
+    "cross_field_editing": "manual-browser-check-required",
+    "enter_navigation": "manual-browser-check-required",
     "dedup": "pass",
     "caret_and_ime": "manual-browser-check-required",
     "persistence": "pass",
@@ -71,6 +91,7 @@
     "permanent_tag_component_removed": true,
     "navbar_and_primary_button_preserved": true,
     "dynamic_summary_uses_card_surface": true,
+    "dynamic_card_uses_object_list_information_order": true,
     "new_shared_component_invented": false
   },
   "route_check": {
@@ -79,15 +100,18 @@
     "new_module_load": "pass"
   },
   "risk_log": [
-    "需要在 iOS Safari 与 Android Chrome 实机验证中文输入法组合输入和任意位置光标恢复。",
+    "需要在 iOS Safari 与 Android Chrome 实机验证中文输入法组合输入、Enter 换字段及键盘持续激活表现。",
     "图片上传仍是原型占位，动态卡片暂用低干扰文字识别图。",
     "跨会话持久化依赖浏览器允许 localStorage；受限环境降级为当前会话内存。"
   ],
   "manual_verify_items": [
+    "依次点击并编辑多个输入框，确认每个字段都能正常输入，前一个字段的闪烁动画不会把焦点抢回。",
+    "从产品名开始连续按 Enter，确认依次进入售价、货号、规格、颜色、重量、库存、标签、来源。",
+    "在规格或颜色字段任意光标位置按 Enter，确认识别当前词后进入下一输入框。",
     "输入“大码 空格 小码 空格”，确认仅当前词闪烁且光标始终在输入空格后。",
-    "把前面的“大码”改为“均码”并空格确认，检查原位置更新且没有双空格。",
-    "在每个字段开头、中间、末尾按 Enter，确认识别当前项并进入下一个输入框。",
-    "发布后确认动态页首条显示新产品；点击后恢复原文本与结构化项并更新同一产品。"
+    "发布空内容或极少内容的产品，确认动态卡片仍占满列表宽度且保持稳定高度。",
+    "发布包含标题、价格、规格、颜色、来源和标签的产品，确认卡片信息按左到右顺序展示并自然换行。",
+    "点击动态卡片后确认恢复原文本与结构化项，并更新同一产品。"
   ],
   "final_status": "implementation-pass-manual-browser-check-required"
 }
