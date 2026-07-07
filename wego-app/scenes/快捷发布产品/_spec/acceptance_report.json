@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "scene": "快捷发布产品",
+  "route_id": "quick-publish-product",
+  "executed_at": "2026-07-07",
+  "workflow_chain": [
+    "wego-product",
+    "wego-design",
+    "wego-ux",
+    "wego-tests"
+  ],
+  "requirement_coverage": [
+    {
+      "requirement": "规格、颜色、标签、来源为多项识别；空格和 Enter 触发",
+      "status": "pass"
+    },
+    {
+      "requirement": "其他识别字段为单项识别；空格不触发；产品名不识别",
+      "status": "pass"
+    },
+    {
+      "requirement": "识别内容保持普通文本，不转换 Tag",
+      "status": "pass"
+    },
+    {
+      "requirement": "只闪烁当前识别片段并保持光标位置",
+      "status": "implementation-pass-manual-browser-check"
+    },
+    {
+      "requirement": "编辑原词时更新原结构化记录，不新增空格",
+      "status": "implementation-pass-manual-browser-check"
+    },
+    {
+      "requirement": "去重与提示逻辑保留",
+      "status": "pass"
+    },
+    {
+      "requirement": "保存原始文本和结构化识别数据，重新编辑恢复",
+      "status": "pass"
+    },
+    {
+      "requirement": "发布后回动态页显示新产品，点击继续编辑同一产品",
+      "status": "pass"
+    }
+  ],
+  "automated_checks": [
+    ["javascript_syntax_scene", "pass"],
+    ["javascript_syntax_products", "pass"],
+    ["javascript_syntax_routes", "pass"],
+    ["spec_json_parse", "pass"],
+    ["normal_text_no_tag_component", "pass"],
+    ["multi_field_partition", "pass"],
+    ["product_name_no_recognition", "pass"],
+    ["caret_selection_restore", "pass"],
+    ["dedup_prompt_preserved", "pass"],
+    ["structured_items", "pass"],
+    ["same_product_update", "pass"],
+    ["dynamic_publish_close_loop", "pass"],
+    ["module_loaded_by_routes", "pass"]
+  ],
+  "interaction_check": {
+    "field_mode_partition": "pass",
+    "space_trigger_scope": "pass",
+    "enter_navigation": "pass",
+    "dedup": "pass",
+    "caret_and_ime": "manual-browser-check-required",
+    "persistence": "pass",
+    "dynamic_result": "pass"
+  },
+  "component_discipline_check": {
+    "permanent_tag_component_removed": true,
+    "navbar_and_primary_button_preserved": true,
+    "dynamic_summary_uses_card_surface": true,
+    "new_shared_component_invented": false
+  },
+  "route_check": {
+    "route_id_unique": "pass",
+    "host_entry_preserved": "pass",
+    "new_module_load": "pass"
+  },
+  "risk_log": [
+    "需要在 iOS Safari 与 Android Chrome 实机验证中文输入法组合输入和任意位置光标恢复。",
+    "图片上传仍是原型占位，动态卡片暂用低干扰文字识别图。",
+    "跨会话持久化依赖浏览器允许 localStorage；受限环境降级为当前会话内存。"
+  ],
+  "manual_verify_items": [
+    "输入“大码 空格 小码 空格”，确认仅当前词闪烁且光标始终在输入空格后。",
+    "把前面的“大码”改为“均码”并空格确认，检查原位置更新且没有双空格。",
+    "在每个字段开头、中间、末尾按 Enter，确认识别当前项并进入下一个输入框。",
+    "发布后确认动态页首条显示新产品；点击后恢复原文本与结构化项并更新同一产品。"
+  ],
+  "final_status": "implementation-pass-manual-browser-check-required"
+}

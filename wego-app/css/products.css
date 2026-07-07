@@ -1,0 +1,12 @@
+/* 动态页产品列表 */
+.host-dongtai-body { padding: var(--spacer-12) var(--spacer-16) calc(var(--spacer-16) + var(--safe-area-bottom)); overflow-y: auto; }
+.dynamic-product-list { display: flex; flex-direction: column; gap: var(--spacer-12); }
+.dynamic-product-card__content { padding: var(--spacer-12); display: flex; gap: var(--spacer-12); }
+.dynamic-product-card__media { width: 80px; height: 80px; border-radius: var(--radius-8); display: flex; align-items: center; justify-content: center; background: var(--bg-subtle); color: var(--text-tertiary); }
+.dynamic-product-card__main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--spacer-4); }
+.dynamic-product-card__heading { display: flex; gap: var(--spacer-8); }
+.dynamic-product-card__title { flex: 1; margin: 0; color: var(--text-default); font-size: var(--body-lg-font-size); font-weight: var(--font-weight-semibold); }
+.dynamic-product-card__time { color: var(--text-tertiary); font-size: var(--body-xs-font-size); }
+.dynamic-product-card__price, .dynamic-product-card__summary, .dynamic-product-card__secondary { margin: 0; }
+.dynamic-product-card__summary { color: var(--text-secondary); font-size: var(--body-sm-font-size); }
+.dynamic-product-card__secondary { color: var(--text-tertiary); font-size: var(--body-sm-font-size); }

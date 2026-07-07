@@ -96,3 +96,14 @@ window.WEGO_APP_ROUTES = [
     }
   }
 ];
+
+(function loadProductFeed() {
+  var style = document.createElement('link');
+  style.rel = 'stylesheet';
+  style.href = './css/products.css';
+  document.head.appendChild(style);
+
+  var script = document.createElement('script');
+  script.src = './js/products.js';
+  document.body.appendChild(script);
+})();
