@@ -3,20 +3,45 @@ body[data-host-shell="true"] {
   background: var(--bg-page);
 }
 
-* {
-  box-sizing: border-box;
+/* ── 移动预览全局交互约束 ──
+   禁用浏览器默认交互：外层滚动、长按选词/呼出菜单、双击放大、
+   点击高亮、橡皮筋、横屏字号放大。仅 input/textarea/contenteditable
+   保留文本选择能力。桌面端手机壳预览不受影响（桌面无 touch 行为）。 */
+html, body {
+  margin: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
-/* 全局禁用可交互元素的长按文本选择与拖杆控件；新增交互类应同步加到此列表 */
-button, [role="button"], [role="radio"], [role="checkbox"],
-.btn, .cell--clickable, .navbar__left-btn, .navbar__left-text, .navbar__action,
-.bottom-nav__item, .form-body--clickable, .form-body__select,
-.form-body__upload, .form-body__icon-action, .form-dropdown__item,
-.counter__btn, .icon-text-btn, .wg-image--clickable, .link,
-.switch, .radio, .radio-field, .checkbox, .checkbox-field, .stack,
-.host-shell-grid-entry, .host-shell-link-button, [data-route-id] {
+body {
   -webkit-user-select: none;
   user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 输入类元素恢复文本选择与系统菜单（聚焦输入需要选词/复制） */
+input, textarea,
+[contenteditable="true"], [contenteditable=""] {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+  touch-action: text;
+}
+
+/* 内部滚动容器：阻止滚动链到 document，防止触顶/触底带动外层 */
+.host-shell-page,
+.app-scene-layer__panel,
+.app-overlay-panel,
+.quick-publish__body {
+  overscroll-behavior: contain;
 }
 
 /* 触控设备上 :active 伪类可能在 touchend 后残留（移动端 Safari 已知行为），
