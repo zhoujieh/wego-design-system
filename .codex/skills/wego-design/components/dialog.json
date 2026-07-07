@@ -29,8 +29,7 @@
       "default",
       "dismiss",
       "confirm",
-      "danger",
-      "weak"
+      "danger"
     ],
     "maskDepth": [
       "30",
@@ -77,11 +76,6 @@
       "variant": "title",
       "buttonCount": "2",
       "buttonTone": "confirm"
-    },
-    {
-      "variant": "text",
-      "buttonCount": "3",
-      "buttonTone": "weak"
     },
     {
       "variant": "input",
@@ -163,7 +157,7 @@
     {
       "name": "btn",
       "selector": ".dialog__btn",
-      "role": "单个按钮，高度 48px，16px / Medium，文字默认居中对齐；文字颜色由语义修饰类控制：--default（text-default，单按钮通用默认态）、--dismiss（text-default）、--confirm（text-link 蓝色）、--danger（红色）、--weak（text-tertiary）。同一 dialog 只能有一个主按钮（confirm 或 danger），其余按钮须使用 default、dismiss 或 weak。"
+      "role": "单个按钮，高度 48px，16px / Medium，文字默认居中对齐；按钮本身默认 color 为 text-default（一级文本），即使不写修饰类也必须显示为一级文本颜色，不得呈现禁用态灰色；语义修饰类用于切换特定语义：--default（text-default，单按钮通用默认态，显式声明时与默认值一致）、--dismiss（text-default）、--confirm（text-link 蓝色）、--danger（红色）。同一 dialog 只能有一个主按钮（confirm 或 danger），其余按钮须使用 default 或 dismiss。"
     },
     {
       "name": "divider",
@@ -178,7 +172,7 @@
     ".dialog__actions 与信息区之间通过 box-shadow: inset 0 0.5px 0 0 var(--border-neutral-l2) 形成顶部分隔线。",
     ".dialog__actions 内部必须包含 .dialog__buttons；按钮和分隔线放在该容器内。",
     "单按钮时 .dialog__buttons 不带修饰类，按钮通栏居中；双按钮用 .dialog__buttons--dual 横向等分，分隔线仅作为视觉元素不占用 flex 空间，竖向分隔线高度固定 48px，与按钮等高；三按钮用 .dialog__buttons--triple 纵向通栏。",
-    "同一 dialog 只能有一个主按钮（confirm 或 danger），其余按钮须使用 default、dismiss 或 weak；禁止同时出现两个 confirm 或两个 danger 按钮。",
+    "同一 dialog 只能有一个主按钮（confirm 或 danger），其余按钮须使用 default 或 dismiss；禁止同时出现两个 confirm 或两个 danger 按钮。",
     "按钮文字默认居中对齐。",
     "title 变体（仅标题）的 .dialog__body 上下内边距为 32px（左右保持 20px），以强化标题的呼吸感。",
     "input 变体的 .dialog__input 复用 input 组件的 .input-group > .input-wrapper > input[type=text] + .input-clear 完整结构，不再在 dialog 内部重写 input 样式；dialog 只通过 .dialog__input 控制宽度，并隐藏 .field-label。",    
@@ -189,12 +183,13 @@
     "input 变体的 .dialog__input 必须使用已注册的 input 组件完整结构：.input-group > .input-wrapper > input[type=text]，支持清除按钮；input 不带 .field-label 标签（标题已是上下文），placeholder 承担输入提示。",
     "自定义区域 .dialog__custom 是开放 slot，可放置卡片、说明、预览等内容；不在组件 CSS 中定义占位样式。",
     "勾选项 .dialog__check 位于信息区内、按钮区上方，必须使用已注册的 checkbox 组件 .checkbox--sm（带文本场景的标准用法，20px）。",
-    "语义修饰类使用规则：--default 用于单按钮纯告知（text-default）；--dismiss 用于取消/关闭/否定（text-default）；--confirm 用于确定/提交/肯定（text-link 蓝色）；--danger 用于危险操作；--weak 用于弱化操作。"
+    "语义修饰类使用规则：--default 用于单按钮纯告知（text-default）；--dismiss 用于取消/关闭/否定（text-default）；--confirm 用于确定/提交/肯定（text-link 蓝色）；--danger 用于危险操作。.dialog__btn 本身已默认 color: var(--text-default)，即使不写任何修饰类也必须呈现一级文本颜色，不得呈现禁用灰色。"
   ],
   "behavior": {
-    "closeByMask": "默认 false，点击 .dialog overlay 空白区域（e.target === dialog）不关闭；仅通过按钮关闭。若业务明确允许点击遮罩关闭，必须额外显式声明并由宿主自行接管。",
+    "closeByMask": "默认 false 且必须保持 false，AI 生成业务场景时禁止默认给 dialog 添加点击遮罩关闭逻辑；点击 .dialog overlay 空白区域（e.target === dialog）不关闭，仅通过按钮关闭。只有当用户在业务需求中明确要求'点击蒙层关闭'时，才允许显式开启，且必须由宿主自行在 scene.js 里接管 click 事件并显式判断 e.target === dialog 后关闭，不在组件 CSS / 默认交互里实现。",
     "closeByButton": "默认 true，点击任意按钮后自动关闭。",
     "closeByLink": "默认 false，点击链接默认不关闭（与 kuikly 一致）。",
+    "disabled": "dialog 不存在禁用态。所有按钮、输入框、勾选项必须可正常操作，禁止给 .dialog__btn 或其子元素添加 disabled 属性、is-disabled 类或任何阻止点击的样式；按钮不可置灰，输入框不可禁用，勾选项不可锁死。",
     "persistence": "阻断式常驻，不自动关闭，用户必须通过按钮操作后才会消失；不设置自动关闭时长（与 toast 的 4s 自动消失形成对比）。",
     "conflicting": "同屏仅展示一个 dialog，新 dialog 出现时立即替换旧 dialog，默认开启互斥。",
     "position": "居中悬浮，垂直水平双向居中。",
@@ -222,9 +217,11 @@
   "doNotInvent": [
     "不要在 dialog 内放置多字段表单、多选列表、上传等复杂交互组件（那是 modal/sheet/full-screen-modal 的职责）；单行 input 仅用于轻量单字段文本录入。",
     "不要超过 3 个按钮；3 个按钮尽量避免，优先用 ActionSheet。",
-    "不要自定义按钮颜色，仅允许 default/dismiss/confirm/danger/weak 五种语义预设；同一 dialog 只能有一个主按钮（confirm 或 danger），禁止两个蓝色或两个红色按钮同时出现。",
+    "不要自定义按钮颜色，仅允许 default/dismiss/confirm/danger 四种语义预设；同一 dialog 只能有一个主按钮（confirm 或 danger），禁止两个蓝色或两个红色按钮同时出现。",
     "不要持久化 dialog 状态到 localStorage。",
-    "不要给 dialog 设置自动关闭时长（dialog 是阻断式常驻，必须由用户操作触发关闭）。"
+    "不要给 dialog 设置自动关闭时长（dialog 是阻断式常驻，必须由用户操作触发关闭）。",
+    "不要默认给 dialog 添加点击蒙层关闭逻辑；closeByMask 默认且必须保持 false。只有用户在业务需求里明确要求'点击蒙层关闭'时才允许开启，且必须由宿主在 scene.js 里自行接管 click 事件并显式判断 e.target === dialog 后关闭，不在组件 CSS 或默认交互里实现。",
+    "不要给 dialog 或 dialog 按钮添加任何禁用态：禁止 disabled 属性、is-disabled 类、disabled-style 修饰类、pointer-events:none 或任何置灰样式；dialog 里所有按钮、输入框、勾选项必须可正常操作。"
   ],
   "tokensConsumed": [
     "--bg-mask-light",
@@ -287,10 +284,10 @@
     "iconColorSuccess": "var(--status-success-default)",
     "iconColorWarning": "var(--status-warning-default)",
     "iconColorDanger": "var(--status-danger-default)",
+    "btnColorDefault": "var(--text-default)",
     "btnColorDismiss": "var(--text-default)",
     "btnColorConfirm": "var(--text-link)",
     "btnColorDanger": "var(--status-danger-default)",
-    "btnColorWeak": "var(--text-tertiary)",
     "btnFont": "var(--body-lg-font-size) / var(--font-weight-medium)",
     "btnHeight": "48px",
     "dividerColor": "var(--border-neutral-l2)",
@@ -350,7 +347,6 @@
       ".dialog__btn--dismiss",
       ".dialog__btn--confirm",
       ".dialog__btn--danger",
-      ".dialog__btn--weak",
       ".dialog__divider"
     ]
   },

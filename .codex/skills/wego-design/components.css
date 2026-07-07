@@ -695,7 +695,7 @@
 
 /* ── Dialog ────────────────────────────────────────────────── */
 /* @anatomy
-   <div class="pv-header"><h1>对话框 Dialog</h1><p>居中模态确认弹窗：text（标题+正文+按钮）、status（状态图标+标题+正文+按钮）、title（仅标题+按钮）、input（标题+输入框+按钮）四种变体。阻断式常驻，用户必须操作后才消失。蒙层默认 30%。input 变体必须使用已注册的 input 组件，勾选项必须使用已注册的 checkbox 组件。</p></div>
+   <div class="pv-header"><h1>对话框 Dialog</h1><p>居中模态确认弹窗：text（标题+正文+按钮）、status（状态图标+标题+正文+按钮）、title（仅标题+按钮）、input（标题+输入框+按钮）四种变体。阻断式常驻，用户必须操作后才消失。蒙层默认 30%。input 变体必须使用已注册的 input 组件，勾选项必须使用已注册的 checkbox 组件。<strong>默认禁用点击蒙层关闭</strong>（必须保持默认 false，只有业务明确要求时才由宿主 scene.js 接管）；<strong>无禁用态</strong>（所有按钮必须可正常点击，禁止 disabled / is-disabled / 置灰样式）；<strong>按钮默认文字颜色为一级文本 text-default</strong>（即使不写修饰类也必须显示为一级...
 */
 .dialog{
   --dialog-width: 300px;
@@ -885,6 +885,7 @@
   height:48px;
   border:none;
   background:transparent;
+  color:var(--text-default);
   font-family:var(--font-family-system);
   font-size:var(--body-lg-font-size);
   font-weight:var(--font-weight-medium);
@@ -906,7 +907,6 @@
 .dialog__btn--dismiss{ color:var(--text-default); }
 .dialog__btn--confirm{ color:var(--text-link); }
 .dialog__btn--danger{ color:var(--status-danger-default); }
-.dialog__btn--weak{ color:var(--text-tertiary); }
 
 .dialog__btn:focus-visible{
   outline:var(--stroke-strong) solid var(--border-brand);

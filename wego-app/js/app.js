@@ -498,14 +498,18 @@
 
   // ── Dialog API ──
   // 入参形态：
-  //   dialog({ variant, title, content, icon, inputPlaceholder, buttons, onClose })
+  //   dialog({ variant, title, content, icon, inputPlaceholder, buttons, onClose, closeByMask })
   //     - variant: 'text' | 'status' | 'title' | 'input'，默认 'text'
   //     - title:   必选，标题文案
   //     - content: 可选，正文文案（可含 HTML，如 <a class="link link--inline">）
   //     - icon:    仅 status 生效，'success' | 'warning' | 'danger'
   //     - inputPlaceholder: 仅 input 生效
-  //     - buttons: [{ label, tone:'default'|'danger'|'weak', onClick? }]，1-3 个
+  //     - buttons: [{ label, tone:'default'|'dismiss'|'confirm'|'danger'|'weak', onClick? }]，1-3 个
+  //                未传 tone 时按 'default' 处理（一级文本 text-default）。
+  //                同一 dialog 只能有一个主按钮（confirm 或 danger），其余按钮须使用 default/dismiss/weak。
   //     - onClose: 关闭后回调，可选
+  //     - closeByMask: 默认 false（不点击遮罩关闭）。只有业务明确要求时才传 true，
+  //                    由宿主在 scene.js 调用时显式声明，不在组件默认行为里开启。
   var DIALOG_REMOVE_DELAY = 250;
   var currentDialog = null;
   var dialogRemoveTimer = 0;
@@ -656,9 +660,12 @@
       var btn = document.createElement('button');
       btn.type = 'button';
       var toneClass = 'dialog__btn';
+      // 按 dialog 契约 5 种语义 tone 显式映射；未传 tone 时按 --default 处理（一级文本 text-default）
       if (b.tone === 'danger') toneClass += ' dialog__btn--danger';
       else if (b.tone === 'weak') toneClass += ' dialog__btn--weak';
-      else toneClass += ' dialog__btn--confirm';
+      else if (b.tone === 'confirm') toneClass += ' dialog__btn--confirm';
+      else if (b.tone === 'dismiss') toneClass += ' dialog__btn--dismiss';
+      else toneClass += ' dialog__btn--default';
       btn.className = toneClass;
       btn.textContent = b.label;
       btn.addEventListener('click', function () {
@@ -674,9 +681,10 @@
 
     dlg.appendChild(card);
 
-    // 点击 overlay 空白处关闭（e.target === dlg 表示点中遮罩区域）
+    // closeByMask 默认 false：点击 overlay 空白处不关闭（与 dialog 契约一致）
+    // 只有业务在 options 显式传 closeByMask: true 时才允许点击遮罩关闭
     dlg.addEventListener('click', function (e) {
-      if (e.target === dlg) {
+      if (options.closeByMask === true && e.target === dlg) {
         removeCurrentDialog();
         return;
       }

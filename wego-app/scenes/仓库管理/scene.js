@@ -583,7 +583,7 @@
               title: '放弃未保存内容？',
               content: '当前修改还没有保存，放弃后不会保留。',
               buttons: [
-                { label: '继续编辑', tone: 'weak' },
+                { label: '继续编辑', tone: 'dismiss' },
                 {
                   label: '放弃',
                   tone: 'danger',
@@ -665,7 +665,7 @@
       title: '确认删除仓库？',
       content: '删除“' + esc(current.name) + '”后，后续新建单据将无法再选到它。',
       buttons: [
-        { label: '取消', tone: 'weak' },
+        { label: '取消', tone: 'dismiss' },
         {
           label: '删除',
           tone: 'danger',

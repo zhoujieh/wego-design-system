@@ -243,6 +243,7 @@
   height:48px;
   border:none;
   background:transparent;
+  color:var(--text-default);
   font-family:var(--font-family-system);
   font-size:var(--body-lg-font-size);
   font-weight:var(--font-weight-medium);
@@ -264,7 +265,6 @@
 .dialog__btn--dismiss{ color:var(--text-default); }
 .dialog__btn--confirm{ color:var(--text-link); }
 .dialog__btn--danger{ color:var(--status-danger-default); }
-.dialog__btn--weak{ color:var(--text-tertiary); }
 
 .dialog__btn:focus-visible{
   outline:var(--stroke-strong) solid var(--border-brand);
@@ -281,7 +281,7 @@
 </style>
 </head>
 <body>
-<div class="pv-header"><h1>对话框 Dialog</h1><p>居中模态确认弹窗：text（标题+正文+按钮）、status（状态图标+标题+正文+按钮）、title（仅标题+按钮）、input（标题+输入框+按钮）四种变体。阻断式常驻，用户必须操作后才消失。蒙层默认 30%。input 变体必须使用已注册的 input 组件，勾选项必须使用已注册的 checkbox 组件。</p></div>
+<div class="pv-header"><h1>对话框 Dialog</h1><p>居中模态确认弹窗：text（标题+正文+按钮）、status（状态图标+标题+正文+按钮）、title（仅标题+按钮）、input（标题+输入框+按钮）四种变体。阻断式常驻，用户必须操作后才消失。蒙层默认 30%。input 变体必须使用已注册的 input 组件，勾选项必须使用已注册的 checkbox 组件。<strong>默认禁用点击蒙层关闭</strong>（必须保持默认 false，只有业务明确要求时才由宿主 scene.js 接管）；<strong>无禁用态</strong>（所有按钮必须可正常点击，禁止 disabled / is-disabled / 置灰样式）；<strong>按钮默认文字颜色为一级文本 text-default</strong>（即使不写修饰类也必须显示为一级文本，不得呈现禁用灰色）。</p></div>
 
 <div class="pv-section__title">文本对话框 Dialog_Text</div>
 <div class="demo-stage">
@@ -359,7 +359,7 @@
         <div class="dialog__buttons dialog__buttons--triple">
           <button type="button" class="dialog__btn dialog__btn--confirm">保存</button>
           <span class="dialog__divider"></span>
-          <button type="button" class="dialog__btn dialog__btn--weak">不保存</button>
+          <button type="button" class="dialog__btn dialog__btn--dismiss">不保存</button>
           <span class="dialog__divider"></span>
           <button type="button" class="dialog__btn dialog__btn--dismiss">取消</button>
         </div>
@@ -588,7 +588,7 @@
   <button type="button" class="demo-btn" data-trigger="input-create">输入·通用样式</button>
   <button type="button" class="demo-btn" data-trigger="link-content">带链接正文</button>
 </div>
-<p class="demo-hint">点击按钮关闭；点击遮罩默认不关闭；点击链接默认不关闭；input 变体自动聚焦，回车触发主按钮。</p>
+<p class="demo-hint">点击按钮关闭；点击遮罩默认不关闭（业务未明确要求时禁止开启）；点击链接默认不关闭；input 变体自动聚焦，回车触发主按钮。dialog 不存在禁用态，所有按钮必须可正常点击，禁止 disabled / 置灰样式。</p>
 
 <div id="dialog-host" role="region" aria-label="对话框浮层"></div>
 
@@ -798,7 +798,6 @@
       btn.type = 'button';
       var toneClass = 'dialog__btn';
       if (b.tone === 'danger') toneClass += ' dialog__btn--danger';
-      else if (b.tone === 'weak') toneClass += ' dialog__btn--weak';
       else if (b.tone === 'dismiss') toneClass += ' dialog__btn--dismiss';
       else if (b.tone === 'default' || (!b.tone && buttonCount === 1)) toneClass += ' dialog__btn--default';
       else toneClass += ' dialog__btn--confirm';
