@@ -1,6 +1,6 @@
 ---
 name: "wego-ux"
-description: 将 page_spec 和 design_consumption_plan 落成 wego-app 静态 App 原型。输出可部署到 Vercel、也可本地直接打开的 HTML/CSS/JS 交互原型；业务场景全部挂到 wego-app/scenes/，遵守 wego-design 的组件与规范边界。
+description: 将 page_spec 和 design_consumption_plan 落成 wego-app 静态 App 原型，或对已有场景进行迭代（修改 scene.js、scene.css、routes.js 等文件）。输出可部署到 Vercel、也可本地直接打开的 HTML/CSS/JS 交互原型；业务场景全部挂到 wego-app/scenes/，遵守 wego-design 的组件与规范边界。
 ---
 
 # Wego UX
@@ -18,6 +18,7 @@ description: 将 page_spec 和 design_consumption_plan 落成 wego-app 静态 Ap
 
 - 已有 `page_spec` + `design_consumption_plan`，要正式生成或更新 `wego-app` 场景
 - 用户明确要求把规格落成 `scene.js`、`scene.css`、`routes.js` 和宿主入口挂载
+- **任何对 `wego-app/scenes/{场景}/` 下已有场景的修改（包括 scene.js、scene.css），无论改动大小**
 - 当前目标是业务场景原型实现，而不是设计系统本体迭代
 
 不要误用场景:
