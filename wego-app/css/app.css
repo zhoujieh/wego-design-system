@@ -128,7 +128,7 @@ input, textarea,
   --safe-area-bottom: 34px;
   --navbar-body-height: 44px;
   width: 100%;
-  height: 100%;
+  height: 100dvh;
   min-height: 0;
   display: flex;
   flex-direction: column;
