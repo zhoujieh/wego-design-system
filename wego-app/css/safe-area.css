@@ -5,6 +5,37 @@
  * - Dialog 在移动端覆盖完整屏幕（含状态栏与底部安全区）
  */
 @media (max-width: 767px) {
+  /*
+   * iOS 键盘会改变动态视口高度，100dvh 会随之缩短，导致整个 App 重排并在
+   * 键盘关闭后留下额外底部空间。移动端统一使用启动时记录的稳定视口高度，
+   * 输入聚焦期间只允许页面内部滚动区滚动，不改变 App 外壳高度。
+   */
+  html,
+  body {
+    width: 100%;
+    height: var(--wego-stable-viewport-height, 100%);
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .preview-shell {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: auto;
+    left: 0;
+    width: 100%;
+    height: var(--wego-stable-viewport-height, 100vh);
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .phone-frame,
+  .phone-screen {
+    height: 100%;
+    min-height: 0;
+  }
+
   .navbar {
     padding-top: env(safe-area-inset-top, 0px);
   }
