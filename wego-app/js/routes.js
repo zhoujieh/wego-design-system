@@ -1,3 +1,29 @@
+(function bootstrapWegoViewportSupport() {
+  var viewportMeta = document.querySelector('meta[name="viewport"]');
+  if (viewportMeta) {
+    var viewportContent = viewportMeta.getAttribute('content') || '';
+    if (viewportContent.indexOf('interactive-widget=') === -1) {
+      viewportMeta.setAttribute('content', viewportContent + ', interactive-widget=resizes-content');
+    }
+  }
+
+  if (!document.querySelector('link[data-wego-viewport-style]')) {
+    var viewportStyle = document.createElement('link');
+    viewportStyle.rel = 'stylesheet';
+    viewportStyle.href = './css/viewport.css';
+    viewportStyle.dataset.wegoViewportStyle = 'true';
+    document.head.appendChild(viewportStyle);
+  }
+
+  if (!document.querySelector('script[data-wego-viewport-script]')) {
+    var viewportScript = document.createElement('script');
+    viewportScript.src = './js/viewport.js';
+    viewportScript.async = false;
+    viewportScript.dataset.wegoViewportScript = 'true';
+    document.head.appendChild(viewportScript);
+  }
+})();
+
 window.WEGO_APP_ROUTES = [
   {
     routeId: 'quick-publish-product',
