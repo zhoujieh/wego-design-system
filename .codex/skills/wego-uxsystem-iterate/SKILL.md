@@ -1,78 +1,91 @@
 ---
 name: "wego-uxsystem-iterate"
-description: "用于 wego-design 设计系统的项目级别迭代。包括组件迭代(契约/preview/样式/守门)、UI Kit 迭代、工作流迭代(经验沉淀/规则补充/流程优化)。"
+description: 用于 wego-design 设计系统与工作流本体的正式迭代，包括组件、Token、Preview、UI Kit、守门、经验候选、规则沉淀和工作流优化。
 ---
 
 # 项目级别迭代 Skill
 
-用于 `wego-design` 设计系统和工作流的正式迭代。最核心的目标是：
+目标是让 AI 稳定、正确地输出符合微购设计规范的交互原型，同时保持规则来源唯一、经验可控、验证链路完整。
 
-1. 让AI可以稳定且正确的输出符合微购设计规范的交互原型，这是最顶层的原则，所有的迭代都必须要满足这个目标
-2. 不要只改一个文件就结束
-3. 不要把技能写成无限膨胀的经验仓库
+## 何时触发
 
-本技能保留少数稳定规则，具体步骤按场景交给 `references/`。
+- 改组件、Token、Preview、UI Kit、metadata 或设计系统守门。
+- 审查组件、UI Kit 或工作流是否合理。
+- 用户明确要求审查并沉淀经验、补充规则、复盘形成经验或优化工作流。
 
-## 何时必须触发本技能
+普通业务页面仍走 `wego-product → wego-design → wego-ux → wego-tests`。
 
-- 用户要改组件、补 preview、改契约、改 UI Kit、改 metadata、补守门
-- 用户要补规则、沉淀经验、优化流程、修技能链路、修触发机制
-- 用户要 review 组件 / UI Kit / 工作流是否合理，或要求“先审查再修”
+## 三种模式
 
-高频分流提醒:
+### 迭代模式
 
-- “改组件 / 改 preview / 改 UI Kit” → 优先走本技能的`迭代模式`
-- “补规则 / 沉淀经验 / 优化流程 / 修触发机制” → 优先走本技能的`工作流迭代模式`
-- “先 review 再决定改不改” → 先走本技能的`审查模式`
-- 不要把这三类请求误判成普通业务开发；只有做业务场景原型时才回到 `wego-product` → `wego-design` → `wego-ux`
+用于修改设计系统本体。读取：
 
-## 工作模式（3 种）
+1. `references/workflow.md`
+2. `references/sync-matrix.md`
+3. `references/judgment-principles.md`
 
-先判断当前请求属于哪一种：
+### 审查模式
 
-- `迭代模式` — 改样式、补场景、修契约、同步 preview、发布组件/UI Kit
-- `审查模式` — review、评估、判断是否合理、契约是否漂移
-- `工作流迭代模式` — 经验沉淀、规则补充、流程优化、场景类型注册
+用于只检查、不直接沉淀规则。先输出 findings；用户未明确要求沉淀时，不得更新经验池。
 
-默认规则：
+### 工作流迭代模式
 
-- 用户要求修改文件 → 迭代模式
-- 用户只要求检查或评估 → 审查模式
-- 用户要求沉淀经验、补规则、优化流程 → 工作流迭代模式
-- “先审查再修” → 先出 findings，再进入对应迭代模式
-- 审查发现问题需要沉淀规则 → 先出 findings，再转入工作流迭代模式
+仅在用户明确要求以下任一意图时进入：
 
-## 任务分流（按模式读取对应规则）
+- 审查并沉淀经验
+- 补充规则
+- 复盘并形成经验
+- 优化工作流
 
-- 迭代模式 / 审查模式 → 读 `references/workflow.md`（步骤 + 组件迭代读取顺序 + 验证约束）、`references/sync-matrix.md`（同步范围，不含工作流迭代场景）、`references/judgment-principles.md`（组件级判断原则 + 组件级守门）
-- 工作流迭代模式 → 读 `references/workflow-iteration.md`（完整规则 + 工作流迭代读取顺序 + 经验沉淀通用化原则）、`references/sync-matrix.md`（同步范围，工作流迭代场景）
+读取顺序：
 
-技能本体只负责分流和跨模式守门，不重复展开所有步骤。
+1. `references/workflow-iteration.md`
+2. `experience/README.md`
+3. `experience/candidates.json`
+4. 按问题归属读取对应技能和权威来源
+5. `references/sync-matrix.md`
 
-## 跨模式顶层守门
+## 经验候选硬门禁
 
-只保留真正跨模式的硬约束：
+- 用户普通反馈、AI 自查、验收失败或实现偏差不能自动进入经验池。
+- 每轮最多选择一条最重要、最可复用的经验。
+- 入池前必须确认问题最早产生的环节、主要归属、次要归属、权威落点、运行时消费方和验收方式。
+- 归属不明确时不得入池。
+- 同类经验复用已有候选，只增加 `occurrence_count` 和场景证据，不重复新增。
+- 第三次出现时将状态置为 `awaiting-confirmation`，并提示用户：
 
-- 正式迭代必须递增 `.codex/skills/wego-design/metadata.json.version`
-- 工作流迭代必须遵循 `references/workflow-iteration.md` 的经验沉淀通用化原则
-- AGENTS.md 只承载顶层仓库关键信息与仓库偏好规则；工作流迭代规则不写到 AGENTS.md（除非升级为仓库级硬约束）
+> 该经验已累计出现 3 次，达到正式沉淀阈值，是否现在将其升级为正式规则？
 
-组件级守门（禁止手改 components.css / 只改 preview 标记区 / 契约同步 / 重跑提取脚本 / Token 同步 css.json）见 `references/judgment-principles.md`。
+- 用户未明确确认前，不得修改正式规则或 `scenarioTypeRegistry`。
+- 正式沉淀前必须拆分适用场景、不适用场景、例外、回退条件，并检查是否可并入已有规则。
+- `scenarioTypeRegistry` 只保存成熟、经过验证且会被运行时消费的正式类型，不保存经验候选。
+
+## 自动生成规则文档
+
+`.codex/skills/wego-design/specs/*.md` 由 `scripts/specs.mjs` 自动生成，只用于人工检查。
+
+- 不直接修改生成文档。
+- 运行时技能不得读取生成文档。
+- 修改权威来源后运行 `node scripts/specs.mjs generate`。
+- 提交前运行 `node scripts/specs.mjs check`。
+- `scripts/validate-wego-design.mjs` 会先执行一致性检查，再运行原有设计系统守门。
+
+## 跨模式守门
+
+- 涉及设计系统本体时递增 `.codex/skills/wego-design/metadata.json.version`。
+- 不只修改一个表面文件；按同步矩阵检查契约、Preview、UI Kit、消费规则和验证影响。
+- AGENTS.md 只保存跨技能硬约束。
+- 组件规则回到组件契约，页面范式回到 `uikit-plan.json`，消费边界回到 `library-consumption.json`，流程规则回到对应 `SKILL.md` 或 references。
+- 正式规则必须增加对应回归验证。
+- 生成文档只反映权威来源，不反向成为权威来源。
 
 ## 输出约定
 
-无论哪种模式，回复都保持这 3 句：
+无论哪种模式，最终回复保持：
 
 - 改了什么：
 - 验证了什么：
 - 剩余风险：
 
-审查模式先给 findings，再补这 3 句；没有真实风险时写“无明显剩余风险”。
-
-## 特别提醒
-
-- `.codex/skills/wego-design/components/index.json` 是已发布组件权威来源
-- `.codex/skills/wego-design/preview/index.html` 是人工聚合验收页——AI 不读取、只在新增组件后补齐当前组件的预览
-- `.codex/skills/wego-design/library-consumption.json` 的 `scenarioTypeRegistry` 是工作流迭代的经验沉淀索引
-- `button` 的参考案例见 `references/button-example.md`
-- 提交前可运行 `node scripts/validate-wego-design.mjs` 做文件完整性守门
+没有真实风险时写“无明显剩余风险”。
