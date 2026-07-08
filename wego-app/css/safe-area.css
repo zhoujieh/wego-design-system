@@ -1,15 +1,10 @@
 /* iOS 桌面书签 / standalone 安全区策略
- * - 顶部安全区仅由 navbar 承担
+ * - 顶部安全区由 navbar 或宿主非导航页承担
  * - 底部安全区仅由 bottom-nav 或明确的底部操作栏承担
  * - 页面正文与滚动区不重复计算安全区
  * - Dialog 在移动端覆盖完整屏幕（含状态栏与底部安全区）
  */
 @media (max-width: 767px) {
-  /*
-   * iOS 键盘会改变动态视口高度，100dvh 会随之缩短，导致整个 App 重排并在
-   * 键盘关闭后留下额外底部空间。移动端统一使用启动时记录的稳定视口高度，
-   * 输入聚焦期间只允许页面内部滚动区滚动，不改变 App 外壳高度。
-   */
   html,
   body {
     width: 100%;
@@ -44,19 +39,19 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
-  /* 宿主页正文只保留内容间距；安全区由上下栏自身处理。 */
+  /* 好友、工作台、消息、我的等无独立 navbar 的宿主页，由 host-shell-page 预留顶部状态栏安全区。 */
   .host-shell-page {
-    padding-top: var(--spacer-16) !important;
+    padding-top: calc(var(--spacer-16) + env(safe-area-inset-top, 0px)) !important;
     padding-right: var(--spacer-16) !important;
     padding-bottom: calc(var(--spacer-40) + 56px) !important;
     padding-left: var(--spacer-16) !important;
   }
 
+  /* 动态页拥有独立 navbar，外层保持 0，顶部安全区由 navbar 承担。 */
   .host-shell-page--flush {
     padding: 0 !important;
   }
 
-  /* 业务页面正文不再重复占用底部安全区。 */
   .quick-publish__body {
     padding-bottom: 8px !important;
   }
@@ -78,7 +73,6 @@
     padding-bottom: var(--spacer-40) !important;
   }
 
-  /* Dialog 不继承页面的安全区留白，直接覆盖完整画布。 */
   .app-dialog-host {
     position: fixed !important;
     inset: 0 !important;
