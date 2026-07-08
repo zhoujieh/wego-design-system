@@ -1,3 +1,5 @@
+# Updated wego-design skill with Stage 3 additions
+
 ---
 name: "wego-design"
 description: 消费微购设计系统并输出 design_plan。用于已有 interaction_spec 时选择页面范式、UI Kit、组件映射、布局和打开方式；不负责原始需求理解或最终原型实现。
@@ -280,3 +282,58 @@ navbar 稳定变体绑定：
 - 复制 UI Kit Showcase 外壳或演示业务内容。
 - 发明未注册组件、变体、Token、页面范式或打开方式。
 - 用生成文档、个人审美或同类页面惯例覆盖正式规则来源。
+
+## 第三阶段：设计越界收缩
+
+为配合《interaction-prototype-workflow-refactor-conclusion.md》第三阶段要求，`design_plan` 在保持向下游兼容的同时，缩减过度依赖 DOM 和 CSS 的内容，并增加复杂度标识和结构拆分：
+
+1. **删除完整 DOM 路径**：`component_mapping.selected` 不再填写完整 DOM 路径；只能使用代表稳定变体的维度值组合或命中的组合约束标识。如果需要标明区域组合，应在新增的 `region_compositions[]` 中描述，而非直接拼接 class。
+2. **删除 CSS 类拼装**：计划中不应拼装或发明业务 class、修饰 class 或 Token 类；区域的布局胶水应通过 `layout_pattern` 与受控容器达成，不再出现在 `selected` 中。
+3. **拆分组件模式和区域组合**：新增 `component_patterns[]` 用于描述页面命中的 pagePattern 或 fallback blueprint；新增 `region_compositions[]` 用于描述由多个组件组合而成的业务区域，并记录组合约束来源。
+4. **增加页面复杂度分级**：新字段 `complexity_level` 用于标识页面整体复杂度，建议值：`simple`（单页面或列表+详情）、`moderate`（多节点流、包含对话层或表单组合）、`complex`（跨场景、多流程或可配置结构）。此级别有助于指导 `wego-ux` 在实现和验收时的重点关注。
+5. **保留正式规则来源追溯**：虽然删除了 DOM 路径和 class，但所有设计判断仍须保留 `rule_sources_used`，并能定位到真实文件和字段。
+
+### 示例扩展设计计划
+
+在原有 `design_plan` 示例基础上，加入第三阶段字段：
+
+```json
+{
+  "matched_uikit": "...",
+  "scene_fit_reason": "...",
+  "navigation_pattern": "...",
+  "layout_pattern": "...",
+  "interaction_pattern": "...",
+  "complexity_level": "moderate",
+  "component_patterns": [
+    {
+      "pattern_id": "biz-rule-config",
+      "reason": "命中权限管理页面模式",
+      "rule_sources": ["uikit-plan.json.pagePatterns[biz-rule-config]"]
+    }
+  ],
+  "region_compositions": [
+    {
+      "id": "permission-form-area",
+      "components": ["input", "select", "button"],
+      "composition_constraint": "form-with-summary",
+      "rule_sources": ["uikit-plan.json.compositionConstraints[form-with-summary]"]
+    }
+  ],
+  "surface_designs": [...],
+  "component_mapping": [
+    {
+      "block": "...",
+      "scenario_type": "...",
+      "consumption_mode": "stable-variant | composition-constraint | free-composition",
+      "selected": ["type=primary", "size=large"],
+      "constraint_ref": "...",
+      "reason": "...",
+      "rule_sources": [...]
+    }
+  ],
+  "rule_sources_used": [...]
+}
+```
+
+实施第三阶段后，任何引用完整 DOM 路径或拼装 CSS 类的设计计划都视为越界。必须使用注册的组件契约提供的变体 ID 或组合约束 ID 代替。
