@@ -19,7 +19,7 @@ body[data-host-shell="true"],
   flex-direction: column;
 }
 
-.dynamic-feed-item {
+.dynamic-product-card {
   width: 100%;
   margin: 0;
   border: 0;
@@ -28,7 +28,7 @@ body[data-host-shell="true"],
   background: var(--bg-surface);
 }
 
-.dynamic-feed-item + .dynamic-feed-item {
+.dynamic-product-card + .dynamic-product-card {
   border-top: 8px solid var(--bg-page);
 }
 
@@ -41,16 +41,18 @@ body[data-host-shell="true"],
   padding: var(--spacer-16);
 }
 
-.dynamic-feed-item__avatar {
+.dynamic-product-card__media {
   width: 40px;
   height: 40px;
   border-radius: var(--radius-4);
-}
-
-.dynamic-feed-item__avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--bg-subtle);
+  border: 0.5px solid var(--border-neutral-l2);
+  color: var(--text-tertiary);
+  font-size: var(--body-sm-font-size, 13px);
 }
 
 .dynamic-product-card__main {
@@ -61,34 +63,12 @@ body[data-host-shell="true"],
   gap: var(--spacer-8);
 }
 
-.dynamic-feed-item__header {
-  min-width: 0;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--spacer-8);
-}
-
-.dynamic-feed-item__identity {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacer-2);
-}
-
-.dynamic-feed-item__name {
+.dynamic-product-card__main::before {
+  content: "微购相册 · 用户体验设计师";
   color: var(--text-link, #576b95);
   font-size: var(--body-md-font-size, 16px);
   line-height: 1.4;
   font-weight: var(--font-weight-medium, 500);
-}
-
-.dynamic-feed-item__source,
-.dynamic-product-card__summary,
-.dynamic-product-card__time {
-  color: var(--text-secondary);
-  font-size: var(--body-sm-font-size, 13px);
-  line-height: var(--body-sm-line-height, 1.5);
 }
 
 .dynamic-product-card__primary {
@@ -108,96 +88,66 @@ body[data-host-shell="true"],
   overflow-wrap: anywhere;
 }
 
-.dynamic-feed-gallery {
-  width: 100%;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--spacer-4);
-}
-
-.dynamic-feed-gallery__item {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* 图片上传仍是占位数据时，也按朋友圈 3×3 九宫格展示布局骨架。 */
+.dynamic-product-card__primary::after {
+  content: "";
+  display: block;
   width: 100%;
   aspect-ratio: 1;
-  overflow: hidden;
   border-radius: var(--radius-4);
-  object-fit: cover;
-  background: var(--bg-subtle);
+  background:
+    linear-gradient(to right, transparent calc(33.333% - 2px), var(--bg-surface) calc(33.333% - 2px), var(--bg-surface) calc(33.333% + 2px), transparent calc(33.333% + 2px), transparent calc(66.666% - 2px), var(--bg-surface) calc(66.666% - 2px), var(--bg-surface) calc(66.666% + 2px), transparent calc(66.666% + 2px)),
+    linear-gradient(to bottom, transparent calc(33.333% - 2px), var(--bg-surface) calc(33.333% - 2px), var(--bg-surface) calc(33.333% + 2px), transparent calc(33.333% + 2px), transparent calc(66.666% - 2px), var(--bg-surface) calc(66.666% - 2px), var(--bg-surface) calc(66.666% + 2px), transparent calc(66.666% + 2px)),
+    var(--bg-subtle);
 }
 
-.dynamic-feed-gallery__placeholder {
-  color: var(--text-tertiary);
-}
-
-.dynamic-feed-gallery__placeholder .wego-iconfont-s {
-  font-size: 20px;
-}
-
-.dynamic-product-summary {
+/* 产品摘要继续复用外层 card/card__content 组件，只做业务级排版。 */
+.dynamic-product-card__price {
   width: 100%;
+  min-height: 64px;
   margin: 0;
+  padding: var(--spacer-8) var(--spacer-12) var(--spacer-8) 68px;
+  display: flex;
+  align-items: center;
+  position: relative;
   border-radius: var(--radius-4);
   background: var(--bg-overlay-l1);
-  box-shadow: none;
+  color: var(--status-danger-default, #fa5151);
+  font-size: var(--body-lg-font-size, 17px);
+  font-weight: var(--font-weight-medium, 500);
 }
 
-.dynamic-product-summary__content {
-  min-height: 64px;
-  padding: var(--spacer-8);
-  display: grid;
-  grid-template-columns: 48px minmax(0, 1fr);
-  gap: var(--spacer-12);
-  align-items: center;
-}
-
-.dynamic-product-summary__media {
+.dynamic-product-card__price::before {
+  content: "商品";
+  position: absolute;
+  left: var(--spacer-8);
+  top: var(--spacer-8);
   width: 48px;
   height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
   border-radius: var(--radius-4);
   background: var(--bg-surface);
   color: var(--text-tertiary);
   font-size: var(--body-sm-font-size, 13px);
+  font-weight: var(--font-weight-regular, 400);
 }
 
-.dynamic-product-summary__body {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacer-4);
-}
-
-.dynamic-product-summary__title {
-  margin: 0;
-  display: -webkit-box;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  color: var(--text-default);
-  font-size: var(--body-sm-font-size, 13px);
-  line-height: var(--body-sm-line-height, 1.5);
-}
-
-.dynamic-product-summary__price {
-  margin: 0;
-  color: var(--status-danger-default, #fa5151);
-  font-size: var(--body-lg-font-size, 17px);
-  line-height: 1.2;
-  font-weight: var(--font-weight-medium, 500);
-}
-
-.dynamic-feed-item__footer {
+.dynamic-product-card__meta {
   width: 100%;
   min-width: 0;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--spacer-4) var(--spacer-8);
+}
+
+.dynamic-product-card__summary,
+.dynamic-product-card__time {
+  color: var(--text-secondary);
+  font-size: var(--body-sm-font-size, 13px);
+  line-height: var(--body-sm-line-height, 1.5);
 }
 
 .dynamic-product-card__summary + .dynamic-product-card__summary::before {
@@ -227,7 +177,7 @@ body[data-host-shell="true"],
     padding-inline: var(--spacer-12);
   }
 
-  .dynamic-feed-item__avatar {
+  .dynamic-product-card__media {
     width: 36px;
     height: 36px;
   }
