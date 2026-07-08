@@ -194,6 +194,10 @@
               ctx.navigate('my-product-note');
               return;
             }
+            if (id === 'trade-setting') {
+              ctx.navigate('my-trade-settings');
+              return;
+            }
             ctx.toast('该功能尚未接入原型');
           });
         });
