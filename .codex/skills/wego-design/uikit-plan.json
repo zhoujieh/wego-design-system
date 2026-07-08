@@ -381,6 +381,31 @@
     "coversTabBarConstraint": "wego-app/scenes/ 下业务场景的 page_presentation.covers_tab_bar 必须为 true；不得输出 false，除非 surface 角色为 host-entry inline grid 入口。",
     "compositionTraceability": "命中 pagePattern 的 compositionConstraints 时，component_mapping 必须标注所选组合、对应规则 ID 和 trigger，形成可追溯链路。"
   },
+  "paradigmSelectionPriority": {
+    "rule": "设置类页面的 pagePattern 选择以交互模式为第一判断维度，不以页面名称或内容主题为判断依据。biz-rule-config 与 system-settings 的核心差异是交互模型和打开方式，而非内容主题（业务 vs 系统）。",
+    "decisionTree": [
+      {
+        "question": "页面是否有页面级保存按钮（或需要统一提交后生效）？",
+        "yes": "选择 biz-rule-config（编辑后统一保存，full-screen-modal 打开）",
+        "no": "继续判断"
+      },
+      {
+        "question": "页面主要内容是导航入口（箭头跳转）还是编辑控件（表单、单选、多选等）？",
+        "navigation-majority": "选择 system-settings（层级导航，push 打开）",
+        "edit-majority": "选择 biz-rule-config（规则配置，full-screen-modal 打开）"
+      },
+      {
+        "question": "导航入口和编辑控件混合且占比相近时？",
+        "no-save-button": "选择 system-settings（无保存按钮意味着即时生效或层级导航为主）",
+        "has-save-button": "选择 biz-rule-config（有保存按钮意味着需要统一提交）"
+      }
+    ],
+    "quickReference": {
+      "system-settings": "层级导航列表页，push 打开，无保存按钮，以箭头入口为主，允许包含即时生效的开关",
+      "biz-rule-config": "规则配置编辑页，full-screen-modal 打开，有保存按钮，以表单/选择控件为主"
+    },
+    "exception": "当页面名称或主题与交互模式冲突时，以交互模式为准。例如：'库存预警设置'虽然叫'设置'，但如果是表单编辑页（有保存按钮），应选择 biz-rule-config；'交易设置'虽然叫'设置'，但如果是层级导航列表（无保存按钮），应选择 system-settings。"
+  },
   "pagePatterns": [
     {
       "name": "业务规则配置",

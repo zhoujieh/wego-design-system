@@ -43,6 +43,54 @@
       },
       "created_at": "2026-07-08T00:00:00.000Z",
       "updated_at": "2026-07-08T00:00:00.000Z"
+    },
+    {
+      "id": "exp-setting-page-paradigm-by-interaction",
+      "normalized_key": "setting-page-paradigm-judged-by-interaction-mode-not-topic",
+      "title": "设置类页面范式选择以交互模式而非内容主题为第一判断维度",
+      "status": "promoted",
+      "occurrence_count": 1,
+      "threshold": 3,
+      "primary_owner": "wego-design",
+      "secondary_owners": ["wego-product"],
+      "ownership_reason": "问题最早产生在 wego-design 阶段的 pagePattern 匹配判断。范式选择是设计消费的核心决策，第一判断依据应该是页面主要交互模式（编辑保存 vs 层级导航），而不是内容是不是『设置』。biz-rule-config 和 system-settings 两个范式的本质差异不在于内容主题（业务vs系统），而在于交互模型和打开方式。",
+      "problem_pattern": "选择设置类页面的 pagePattern 时，依据页面名称或内容主题（『XX设置』）来匹配 biz-rule-config 或 system-settings，而不是根据页面实际的交互模式和打开方式。导致范式选错、presentation 判断偏差，wego-ux 实现时不得不做隐性修正。",
+      "scene_evidence": [
+        {
+          "date": "2026-07-08",
+          "scene": "交易设置页面",
+          "summary": "交易设置包含17个导航入口+5个即时开关，无保存按钮，交互模式是层级导航+即时生效。设计计划匹配了 biz-rule-config（near）并手动把 presentation 从 full-screen-modal 改为 push，但内容结构和交互模式更符合 system-settings 范式（层级导航、push、以导航入口为主）。wego-ux 实现时隐式按列表页方式实现，未触发偏差。",
+          "source": "复盘：设计计划范式选择错误但实现正确"
+        }
+      ],
+      "applies_when_candidates": [
+        "页面名称或语义包含『设置』『配置』『规则』等字样",
+        "需要在 biz-rule-config 和 system-settings 两个范式之间做选择",
+        "页面主要由 cell 列表组成，可能同时包含导航入口和开关/选择控件"
+      ],
+      "avoid_when_candidates": [
+        "页面明确是纯表单编辑（有保存/取消按钮、大量输入控件）",
+        "页面明确是纯导航列表（全部是箭头入口，无任何可编辑控件）",
+        "只有一个范式能匹配（另一个完全不适用）"
+      ],
+      "expected_rule_target": {
+        "file": ".codex/skills/wego-design/uikit-plan.json",
+        "field": "pagePatterns[].interactionPattern / paradigmSelectionPriority 或 wego-design/SKILL.md 范式选择章节"
+      },
+      "runtime_reachability": {
+        "consumer_skill": "wego-design",
+        "output_field": "surface_designs[].matched_page_pattern + match_status + page_presentation.type",
+        "downstream_consumer": "wego-ux（按匹配的范式、布局和 presentation 实现页面）",
+        "acceptance_check": "wego-tests 检查范式选择是否与交互模式一致，重点验证 presentation.type 和 dismiss_action 是否与页面实际交互模型匹配"
+      },
+      "formal_rule": {
+        "confirmed_at": "2026-07-08T00:00:00.000Z",
+        "file": ".codex/skills/wego-design/uikit-plan.json",
+        "field": "paradigmSelectionPriority",
+        "rule_id": "paradigm-selection-by-interaction-mode"
+      },
+      "created_at": "2026-07-08T00:00:00.000Z",
+      "updated_at": "2026-07-08T00:00:00.000Z"
     }
   ]
 }

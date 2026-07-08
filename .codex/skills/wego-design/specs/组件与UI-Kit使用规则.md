@@ -24,4 +24,4 @@
 组件已在注册表中存在，结构与状态符合契约，页面示例只用于结构参考，设计系统源文件与部署副本保持一致。
 
 <!-- generated-by: scripts/specs.mjs@4 -->
-<!-- source-fingerprint: f38590e39dc686a6a3f34daae574b7eab97b270500d58576e647e94fc31332cb -->
+<!-- source-fingerprint: ad16a2e99c23c182f5ea4eed861007ec0eac3732f36a7ccc5db2cf1c0660cdec -->
