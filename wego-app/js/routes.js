@@ -106,4 +106,8 @@ window.WEGO_APP_ROUTES = [
   var script = document.createElement('script');
   script.src = './js/products.js';
   document.body.appendChild(script);
+
+  var feedScript = document.createElement('script');
+  feedScript.src = './js/dynamic-feed.js';
+  document.body.appendChild(feedScript);
 })();
