@@ -26,8 +26,13 @@ description: 验收 wego-app 当前业务场景并输出 acceptance_report，检
 - `_spec/interaction_spec.json`
 - `_spec/design_plan.json`
 - `scene.js` 和 `scene.css`
-- 当前 `route_id` 的路由注册和宿主入口
+- 当前 `prototype_target.routes[]`（或旧 `route_id`）的路由注册和宿主入口
 - `design_plan.rule_sources_used` 指向的正式来源
+
+新任务还必须存在：
+
+- `interaction_spec.flows`、`flow_nodes`、`surfaces`、`content_blocks`、`transitions`、`data_handoffs`、`prototype_boundaries`、`readiness`
+- `design_plan.complexity_level`、`flow_to_surface_decisions`、`page_strategy`、`region_composition`（structured/complex 必填）、`component_patterns`
 
 任一前提缺失时，直接判定前置条件失败并归因到对应上游；不得用截图、自然语言说明或自动生成文档代替。
 
@@ -86,6 +91,14 @@ description: 验收 wego-app 当前业务场景并输出 acceptance_report，检
   "viewport_keyboard_check": {},
   "app_scene_check": {},
   "resource_sync_check": {},
+  "flow_coverage": {},
+  "transition_check": {},
+  "state_handoff_check": {},
+  "back_restore_check": {},
+  "prototype_boundary_check": {},
+  "end_to_end_paths": [],
+  "design_contraction_check": {},
+  "compatibility_check": {},
   "deployment_readiness_check": {
     "push_attempted": false,
     "push_commit_hash": "",
@@ -119,9 +132,10 @@ description: 验收 wego-app 当前业务场景并输出 acceptance_report，检
 
 ### 需求和 surface
 
-- 用户目标、范围、信息块、状态和异常流程是否完整承接。
-- `surface_designs[]` 是否覆盖全部 `page_surfaces[]`。
-- 每个 surface 的 role、信息块、交互模式和实现页面一致。
+- 用户目标、范围、信息块（或 `content_blocks`）、状态和异常流程是否完整承接。
+- `surface_designs[]` 是否覆盖全部 `interaction_spec.surfaces[]`（或旧 `page_surfaces[]`）。
+- 每个 surface 的 role、内容引用（`content_refs` 或旧 `information_blocks`）、交互模式和实现页面一致。
+- `flow_nodes[].surface_ref` 能映射到 `surface_designs[]`。
 - 实现是否私自增加需求、字段、入口或页面层级。
 
 ### 规则来源
@@ -135,14 +149,15 @@ description: 验收 wego-app 当前业务场景并输出 acceptance_report，检
 ### UI Kit、布局和组件
 
 - `match_status` 与实际命中依据一致；`gap` 不得进入实现。
-- `layout_pattern` 明确为通栏 M1 或卡片 M2，不使用条件性或模糊描述。
+- `layout_pattern`（或新 `page_strategy.layout_pattern`）明确为通栏 M1 或卡片 M2，不使用条件性或模糊描述。
 - M1 实现为页面内容层 0 横向 padding，M2 实现为 16px 横向 padding 和正式卡片容器。
 - 主内容区域在空内容、短内容和未填写状态下仍占满计划规定的可用宽度。
 - 所有间距、颜色、字号、圆角和尺寸使用正式 Token。
 - 不存在未注册组件类、子元素类或修饰类。
 - 连续 cell/form 使用正式分组容器，页面业务 class 只做布局胶水。
 - `consumption_mode` 与 `selected` 写法一致。
-- `stable-variant` 的 DOM 和维度值一致；其他模式给出完整 DOM 路径。
+- `stable-variant` 的 DOM 和维度值一致；旧写法其他模式给出完整 DOM 路径，新任务 `selected` 只写变体维度值组合、组合约束 ID 或组合说明。
+- 新任务 `component_patterns` 和 `region_composition` 已分离，未混入 `component_mapping`；`complexity_level` 与实际页面复杂度相符。
 - 不存在“结构同构”“类似某结构”等省略写法。
 
 ### 对象管理列表
@@ -162,8 +177,9 @@ description: 验收 wego-app 当前业务场景并输出 acceptance_report，检
 
 - `wego-app/index.html` 是唯一宿主入口。
 - 当前场景位于 `wego-app/scenes/{中文业务场景}/`。
-- `route_id` 唯一、稳定、kebab-case，并与两份规格一致。
-- `scene.js` 调用 `window.WegoApp.registerScene()`。
+- `prototype_target.routes[]`（或旧 `route_id`）中每个 route 唯一、稳定、kebab-case，并与两份规格一致。
+- 每个 route 的 `surface_ref` 对应已实现 surface。
+- `scene.js` 调用 `window.WegoApp.registerScene()`，多路由场景按 route 分别注册。
 - 入口挂在 `host_container` 指定的 Tab、分组和父子层级。
 - 点击入口在 `.phone-screen` 内打开，不离开 App。
 - scene 不包含或依赖 `.preview-shell`、`.phone-frame`、`.phone-screen`、`.phone-status`、`.phone-indicator`、`.uikit-shell`。
@@ -207,6 +223,103 @@ description: 验收 wego-app 当前业务场景并输出 acceptance_report，检
 - `assets/`、字体、图标、Token 和 components.css 完整。
 - `wego-app/index.html` 可通过相对路径本地直接打开，不依赖构建框架或运行时请求本地文件。
 - 电脑端显示手机壳，移动端同链接全屏，业务内容边距语义一致。
+
+## Stage 2/3：完整交互路径与设计收缩检查
+
+为配合《interaction-prototype-workflow-refactor-conclusion.md》第二、三阶段，`acceptance_report` 在原有页面、组件和路由检查之外增加以下检查项。新任务必须输出对应字段；旧场景在未迁移时按兼容性检查处理。
+
+### 流程与节点覆盖检查（flow_coverage）
+
+验证 `interaction_spec.flows`、`flow_nodes`、`surfaces`、`transitions`、`data_handoffs`、`prototype_boundaries` 的完整性：
+
+- `flows` 覆盖主流程、分支流程、异常流程和中断/恢复流程（按需求必要性）。
+- 每个 `flow_nodes[].surface_ref` 能映射到已实现的 surface。
+- 每个 `functional` 节点都有对应 surface 承接，且在实现中可走通。
+- `stub` 节点有入口和明确反馈；`excluded` 节点未出现在路由、入口或 DOM 中。
+- `blocked` 节点未进入实现。
+- 用户可从真实入口进入并完成主流程。
+
+### 转移检查（transition_check）
+
+- 每个 `transitions.from/to/return_to` 引用的 `node_id` 存在。
+- 转移触发条件在实现中可被用户操作或业务事件触发。
+- `return_to` 的回流路径在实现中可走通。
+- 承载方式（push/sheet/modal/dialog/inline）与 `design_plan.flow_to_surface_decisions` 一致。
+
+### 跨界面数据交接检查（state_handoff_check）
+
+- `data_handoffs` 覆盖所有需要回填的转移。
+- 子页面返回时按 `payload_content_refs[]` 携带数据并回填到父 surface 的对应 `content_id`。
+- `reset_policy` 在实现中按规格执行：`keep` 保留状态、`reset` 重置、`clear-on-success` 成功后清空。
+- 回填后父 surface 的 content_block 状态和展示正确更新。
+
+### 返回恢复检查（back_restore_check）
+
+- 多层 push 返回时逐层弹栈，每层状态独立保留。
+- 切换 Tab 或清空场景层时才清空整个栈。
+- 取消、失败、中断后下层页面和状态恢复正确。
+- 重复操作不产生重复监听或脏状态。
+
+### 原型边界检查（prototype_boundary_check）
+
+- `functional` 节点完整实现交互、状态变化和反馈。
+- `simulated` 节点使用本地模拟数据走完整流程。
+- `stub` 节点保留 `data-node-id` 和入口，反馈明确。
+- `excluded` 节点没有任何实现痕迹。
+
+### 端到端路径检查（end_to_end_paths）
+
+至少覆盖：
+
+- 正常路径：从入口到结果完整走通。
+- 异常路径：失败、空数据、禁用、权限不足等按规格出现。
+- 中断/恢复路径：中断后能恢复或正确重置。
+- 重复操作路径：不产生重复入口、重复监听或脏状态。
+- 子页面选择后正确回填；返回后下层状态恢复；成功后宿主状态更新。
+
+页面单独通过不代表完整交互原型通过。
+
+### 内容块与假设检查
+
+- 所有 `content_blocks` 都被设计方案和实现覆盖。
+- `assumptions` 中的假设在实现中得到落实或保留记录。
+- `open_questions` 中影响核心流程的问题未进入实现；影响局部的问题按 `stub` 或 `excluded` 处理。
+- `readiness` 与实际实现范围一致：`ready` 全量实现；`ready-with-assumptions` 假设已记录；`partially-ready` 只实现已确认节点。
+
+### 多路由与 overlay 检查
+
+- `prototype_target.routes[]` 正确映射到 `wego-app/js/routes.js` 中的多个 route。
+- 每个 route 的 `surface_ref` 对应已实现 surface。
+- Sheet、Modal、Dialog、内联区域未注册独立 route，由父场景触发。
+- `host_container.leaf_level >= 3` 的下钻页面使用独立 push route。
+- 场景层级和覆盖层级实现正确：push 在 sceneLayer 栈中，overlay 按设计计划层级叠加。
+
+### 设计收缩检查（design_contraction_check）
+
+- `design_plan` 不存在完整 DOM 路径或 CSS 类拼装（新任务）。
+- `component_patterns` 和 `region_composition` 合理分离，未混入 `component_mapping`。
+- `component_mapping.selected` 只写变体维度值组合、组合约束 ID 或组合说明（新任务）。
+- `complexity_level` 已声明，且与实际页面复杂度相符：
+  - `simple`：单页面或简单表单，可省略 `region_composition`。
+  - `structured`：多分组或管理列表，必须有 `region_composition`。
+  - `complex`：多模块页面，必须有 `page_strategy` 的首屏目标、区域优先级、内容密度、滚动节奏等字段。
+- `flow_to_surface_decisions` 覆盖所有 `prototype_boundaries.depth != excluded` 的节点。
+- 所有设计决策可追溯到正式组件契约、蓝图或页面模式。
+
+### 兼容性检查（compatibility_check）
+
+- 旧场景未迁移时，`page_surfaces`、`information_blocks`、`component_mapping.selected`（含完整 DOM 路径）等旧字段可作为兼容读取来源。
+- 旧字段与新字段不得在同一场景中同时维护语义不同的两份规格。
+- 迁移中的场景已归档旧规格，新字段完整且通过上述检查。
+- 鼓励使用新结构，但不得在过渡期拒绝旧场景通过验收。
+
+### 稳定节点标识检查
+
+- 实现中保留 `data-surface-id`、`data-content-id` 稳定标识。
+- `data-surface-id` 与 `interaction_spec.surfaces[].surface_id` 一致。
+- `data-content-id` 与 `interaction_spec.content_blocks[].content_id` 一致。
+- `stub` 节点保留 `data-node-id`。
+- 路由和场景状态使用稳定 `route_id`。
 
 ## 自动化守门
 
@@ -257,9 +370,9 @@ node scripts/sync-wego-app-lib.mjs --check
 
 按问题最早产生位置归因：
 
-- `wego-product`：目标、范围、信息块、状态、异常流程、宿主路径、route 或 scene 目录错误。
-- `wego-design`：pagePattern、布局、组件映射、presentation、fallback 或规则来源错误。
-- `wego-ux`：规格正确但 DOM、CSS、路由、交互、资源、视口或宿主实现偏离。
+- `wego-product`：目标、范围、`flows`、`flow_nodes`、`surfaces`、`content_blocks`、`transitions`、`data_handoffs`、`prototype_boundaries`、`readiness`、信息块、状态、异常流程、宿主路径、`prototype_target.routes[]` 或 scene 目录错误。
+- `wego-design`：`complexity_level`、`flow_to_surface_decisions`、`page_strategy`、`region_composition`、`component_patterns`、pagePattern、布局、组件映射、presentation、fallback 或规则来源错误。
+- `wego-ux`：规格正确但 DOM、CSS、路由、交互、`data-surface-id`/`data-content-id` 标识、数据回填、返回恢复、资源、视口或宿主实现偏离。
 - `wego-tests`：验收范围、判定标准或归因本身错误。
 - `wego-uxsystem-iterate`：正式组件、Token、UI Kit、消费边界、守门或跨技能规则错误。
 

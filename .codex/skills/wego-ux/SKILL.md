@@ -24,11 +24,13 @@ description: 将已落盘的 interaction_spec 和 design_plan 实现为 wego-app
 开始前必须读取：
 
 1. `AGENTS.md`。
-2. 当前场景 `_spec/interaction_spec.json`。
-3. 当前场景 `_spec/design_plan.json`。
+2. 当前场景 `_spec/interaction_spec.json`，优先读取 `flows`、`flow_nodes`、`surfaces`、`content_blocks`、`transitions`、`data_handoffs`、`prototype_boundaries`、`prototype_target`、`readiness` 等新字段；缺失时回退 `page_surfaces`、`information_blocks`、`route_id` 等旧字段。
+3. 当前场景 `_spec/design_plan.json`，优先读取 `complexity_level`、`flow_to_surface_decisions`、`page_strategy`、`region_composition`、`component_patterns`、`page_presentation` 等新字段；缺失时回退 `layout_pattern`、`navigation_pattern`、`interaction_pattern` 等旧字段。
 4. `design_plan.rule_sources_used` 指向的正式来源。
 5. 实际命中的组件契约、Preview、Token、pagePattern 和 fallback blueprint。
 6. 现有 `wego-app` 宿主、路由和目标场景文件。
+
+`interaction_spec.readiness = blocked` 时停止实现；`partially-ready` 时只实现已确认节点，未确认节点按 `prototype_boundaries` 的 `stub` 或 `excluded` 处理。
 
 `.codex/skills/wego-design/specs/*.md` 只用于人工检查，不得作为实现依据。发现规格、来源或实现约束缺失时，必须回到最早产生问题的上游技能修正，不得在实现阶段补造规则。
 
@@ -44,17 +46,19 @@ description: 将已落盘的 interaction_spec 和 design_plan 实现为 wego-app
 
 修改已有场景前依次检查：
 
-1. 本次变化是否被 `interaction_spec.page_surfaces[]`、`information_blocks`、`states` 或 `edge_cases` 覆盖。
-2. 组件变化是否在对应 `component_mapping[].selected`、`consumption_mode` 和契约范围内。
-3. 页面布局、打开方式、覆盖层级和返回方式是否与 `layout_pattern`、`page_presentation` 一致。
-4. 本次使用的 Token、组件类和行为是否能在 `rule_sources_used` 中追溯。
+1. 本次变化是否被 `interaction_spec` 的新字段（`flows`、`flow_nodes`、`surfaces`、`content_blocks`、`transitions`、`data_handoffs`、`prototype_boundaries`）或旧字段（`page_surfaces`、`information_blocks`、`states`、`edge_cases`）覆盖。优先读新字段，缺失时回退旧字段。
+2. 组件变化是否在对应 `component_mapping[].selected`、`consumption_mode` 和契约范围内；新任务还需检查 `component_patterns` 和 `region_composition` 是否覆盖。
+3. 页面布局、打开方式、覆盖层级和返回方式是否与 `page_strategy`、`page_presentation`（或旧 `layout_pattern`、`page_presentation`）一致。
+4. 承载方式是否与 `flow_to_surface_decisions` 一致：节点是否合并、是否使用 Sheet/Modal/Dialog/inline。
+5. 本次使用的 Token、组件类和行为是否能在 `rule_sources_used` 中追溯。
 
 偏差处理：
 
 | 偏差 | 必须更新 | 回退链路 |
 | --- | --- | --- |
-| 内容、状态、范围或宿主路径偏差 | `interaction_spec`、`design_plan` | `wego-product → wego-design → wego-ux` |
-| 组件、布局或组合偏差 | `design_plan` | `wego-design → wego-ux` |
+| 内容、状态、范围、流程节点或宿主路径偏差 | `interaction_spec`、`design_plan` | `wego-product → wego-design → wego-ux` |
+| 组件、布局、区域组合或 component_patterns 偏差 | `design_plan` | `wego-design → wego-ux` |
+| 承载方式（push/sheet/modal/dialog/inline）偏差 | `design_plan.flow_to_surface_decisions`、`page_presentation` | `wego-design → wego-ux` |
 | 展示、打开方式或层级偏差 | 视原因更新两份规格 | `wego-product/wego-design → wego-ux` |
 | 权威来源缺失或冲突 | 正确的规则源和设计计划 | `wego-uxsystem-iterate/wego-design → wego-ux` |
 
@@ -194,8 +198,10 @@ window.WegoApp.registerScene({
 按 `consumption_mode` 分派：
 
 - `stable-variant`：在组件契约中找到对应变体，按 `domAnatomy` 和 Preview 复制正式 markup，不替换维度、不跨变体混搭。
-- `composition-constraint`：完整执行 `selected` DOM 路径，不省略容器、修饰类、状态类或资产路径。
+- `composition-constraint`：完整执行 `selected` DOM 路径，不省略容器、修饰类、状态类或资产路径（旧写法）。
 - `free-composition`：在契约 `domAnatomy` 范围内实现，可增加业务作用域布局胶水，但不得发明组件结构。
+
+> 第三阶段规则：新任务 `design_plan.component_mapping.selected` 不再含完整 DOM 路径或 CSS 类拼装。`composition-constraint` 按 `constraint_ref` 命中的组合约束 ID 还原 DOM；`free-composition` 按 `region_composition` 的区域角色和 `component_patterns` 的设计模式组装。连续 cell/form 分组容器通过 `region_composition` 表达，不再从 `selected` 中读取。
 
 硬约束：
 
@@ -210,6 +216,69 @@ navbar 绑定：
 - `back-icon` → `.navbar__left-btn > i.wego-iconfont-s.icon-fanhui`
 - `text-cancel` → `.navbar__left-text`，文案固定“取消”
 - `close-icon` → `.navbar__left-btn > i.wego-iconfont-s.icon-cha`
+
+## Stage 2/3：完整交互原型实现
+
+为配合《interaction-prototype-workflow-refactor-conclusion.md》第二、三阶段，`wego-ux` 在按 `surface_designs` 和 `component_mapping` 实现的基础上，还需消费 `interaction_spec` 的流程节点和 `design_plan` 的设计模式/区域组合。
+
+### 多路由与多 overlay 实现
+
+- 优先读取 `interaction_spec.prototype_target.routes[]`；不存在时回退到顶层 `route_id`，按单路由实现。
+- 每个 `routes[]` 条目必须在 `wego-app/js/routes.js` 中 upsert，`routeId` 与 `routes[].id` 一致。
+- `routes[].surface_ref` 必须对应一个已实现的 surface；surface 的承载方式由 `design_plan.flow_to_surface_decisions` 决定。
+- Sheet、Modal、Dialog、内联区域不注册独立 route，由父场景通过 `ctx.openSheet()`、`ctx.openModal()`、`ctx.openDialog()` 或内联展开触发。
+- `host_container.leaf_level >= 3` 的下钻页面必须作为独立 push route，由父场景 `ctx.navigate(routeId)` 打开，子场景用 `ctx.back()` 返回。
+
+### 稳定节点标识保留
+
+实现中必须保留上游稳定 ID，便于验收：
+
+```html
+<section data-surface-id="publish-main">
+  <div data-content-id="product-title"></div>
+  <div data-content-id="product-category"></div>
+</section>
+```
+
+- 每个 surface 的根元素必须标注 `data-surface-id`，值与 `interaction_spec.surfaces[].surface_id` 一致。
+- 每个 content_block 的承载元素必须标注 `data-content-id`，值与 `interaction_spec.content_blocks[].content_id` 一致。
+- `flow_nodes` 的关键状态变化可通过 `data-node-id` 标注当前激活节点（按需）。
+- 路由和场景状态使用稳定 `route_id`。
+- 不需要再生成一份新的映射规格；ID 直接写在 DOM 上供 `wego-tests` 校验。
+
+### 按 component_patterns 与 region_composition 组装页面
+
+新任务不再依赖完整 DOM 路径或 CSS 类组合还原界面，改为按以下顺序组装：
+
+1. 读取 `design_plan.page_strategy` 确定页面范式、布局模式和滚动方向。
+2. 读取 `design_plan.region_composition[]` 确定区域角色、优先级、顺序和布局；按 `region_id` 依次创建区域容器。
+3. 读取 `design_plan.component_patterns[]` 确定每个区域或 surface 的设计模式，按 `applies_to` 引用的 `content_id` 或 `surface_id` 装配组件。
+4. 读取 `design_plan.component_mapping[]` 确定具体变体或组合约束，按 `consumption_mode` 还原 DOM。
+5. 读取 `design_plan.flow_to_surface_decisions[]` 确定哪些节点合并、哪些使用 Sheet/Modal/Dialog/inline。
+
+`complexity_level = simple` 时可省略 `region_composition`，直接按 `component_patterns` 和 `component_mapping` 组装。`structured` 和 `complex` 必须先按 `region_composition` 编排区域，再在每个区域内装配组件。
+
+### 跨页面数据回填与返回恢复
+
+按 `interaction_spec.data_handoffs[]` 实现：
+
+- 子页面返回时按 `payload_content_refs[]` 携带数据，回填到父 surface 的对应 `content_id`。
+- `reset_policy = keep` 时返回后保留子页面状态，再次进入复用旧状态。
+- `reset_policy = reset` 时返回后重置子页面状态。
+- `reset_policy = clear-on-success` 时成功后清空，取消时保留草稿。
+- 返回后父 surface 必须更新对应 content_block 的状态和展示。
+- 多层 push 返回时逐层弹栈，每层状态独立保留；切换 Tab 或清空场景层时才清空整个栈。
+
+### 原型边界实现
+
+按 `interaction_spec.prototype_boundaries[]` 控制实现深度：
+
+- `functional`：完整实现交互、状态变化和反馈。
+- `simulated`：使用本地模拟数据走完整流程，状态变化可见。
+- `stub`：只提供入口和明确反馈（例如 toast“功能开发中”），不实现完整交互。
+- `excluded`：本次不实现，不得出现在路由、入口或 DOM 中。
+
+`stub` 节点必须保留 `data-node-id` 和入口，便于验收确认其边界；`excluded` 节点不得有任何实现痕迹。
 
 ## 对象管理列表实现
 
@@ -308,8 +377,11 @@ node scripts/validate-wego-design.mjs --scope=full --strict
 
 随后交给 `wego-tests`，并提供：
 
-- App 入口、场景目录和 route。
+- App 入口、场景目录和 `prototype_target.routes[]`（或旧 `route_id`）。
 - 宿主入口位置和页面打开方式。
+- 已实现的 surface、content_block 稳定 ID 清单（`data-surface-id`、`data-content-id`）。
+- 已实现的流程节点、转移和数据回填路径。
+- `prototype_boundaries` 中各节点的实现深度。
 - 已实现的状态变化与反馈。
 - 实际执行的验证命令及结果。
 - commit、推送和部署状态；未执行或未确认的事项明确标注。

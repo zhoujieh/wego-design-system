@@ -1,5 +1,3 @@
-# Updated wego-design skill with Stage 3 additions
-
 ---
 name: "wego-design"
 description: 消费微购设计系统并输出 design_plan。用于已有 interaction_spec 时选择页面范式、UI Kit、组件映射、布局和打开方式；不负责原始需求理解或最终原型实现。
@@ -27,8 +25,10 @@ description: 消费微购设计系统并输出 design_plan。用于已有 intera
 
 - `wego-app/scenes/{中文业务场景}/_spec/interaction_spec.json` 存在且结构完整。
 - `interaction_spec.open_questions` 中不存在会改变页面范围、核心流程或宿主路径的未决问题。
+- `interaction_spec.readiness` 不为 `blocked`；`partially-ready` 时只处理已确认节点。
 - `task_type = design-system-consumption`。其他类型按 `wego-product` 的交接规则转走。
-- `interaction_spec.app_target`、`host_container`、`route_id` 和 `page_surfaces` 能互相对应。
+- 新任务必须存在 `flows`、`flow_nodes`、`surfaces`、`content_blocks`、`transitions`、`data_handoffs`、`prototype_boundaries`、`prototype_target`；旧场景可仅有 `app_target`、`host_container`、`route_id` 和 `page_surfaces`。
+- `prototype_target.routes[]`（或旧 `route_id`）与 `host_container`、`surfaces[]`（或旧 `page_surfaces[]`）能互相对应。
 
 任何前提不满足时停止设计消费，回到 `wego-product` 修正；不得在本技能中重新理解或补造需求。
 
@@ -68,7 +68,7 @@ description: 消费微购设计系统并输出 design_plan。用于已有 intera
 
 ## surface 命中规则
 
-`surface_designs` 必须覆盖 `interaction_spec.page_surfaces[]` 的每个 `id`：
+`surface_designs` 必须覆盖 `interaction_spec.surfaces[]`（新字段）或 `interaction_spec.page_surfaces[]`（旧字段）的每个 ID：
 
 - `exact`：明确命中 `uikit-plan.json.pagePatterns[]`；填写 `matched_uikit`、`matched_page_pattern` 和依据。
 - `near`：接近既有 pagePattern，但存在小差异；说明差异、可复用部分和受限范围，仍以命中范式的约束为主。
@@ -78,9 +78,11 @@ description: 消费微购设计系统并输出 design_plan。用于已有 intera
 规则：
 
 - `host-entry` 只承接宿主入口、摘要和结果回填，不得误当成主业务页面范式。
-- 每个 surface 的信息块必须来自对应 `interaction_spec.page_surfaces[].information_blocks`。
+- 每个 surface 的内容必须来自对应 `interaction_spec.surfaces[].content_refs`（或旧 `page_surfaces[].information_blocks`）。
+- `interaction_spec.flow_nodes[].surface_ref` 必须能映射到 `surface_designs[]` 中某条；`functional` 节点必须被覆盖。
 - 命中带 `presentation` 的 pagePattern 时，必须记录 `presentation_ref`，`wego-ux` 不再重新判断。
 - `allowed_page_styles` 只允许页面级布局胶水、业务作用域和 Token 消费；不能授权新组件类、未定义修饰类或 Showcase 外壳类。
+- `flow_to_surface_decisions` 必须覆盖所有 `prototype_boundaries.depth != excluded` 的节点，并说明承载方式。
 
 ## 页面布局规则
 
@@ -101,10 +103,10 @@ description: 消费微购设计系统并输出 design_plan。用于已有 intera
 
 `component_mapping` 必须是对象数组，每条至少包含：
 
-- `block`：对应 `interaction_spec.information_blocks` 的标识。
+- `block`：对应 `interaction_spec.content_blocks[].content_id`（新字段）或 `interaction_spec.information_blocks` 的标识（旧字段）。
 - `scenario_type`：来自 `library-consumption.json.scenarioTypeRegistry.types[].id`。
 - `consumption_mode`：`stable-variant | composition-constraint | free-composition`。
-- `selected`：稳定变体组合或完整 DOM 路径。
+- `selected`：稳定变体组合或完整 DOM 路径（旧写法）。
 - `constraint_ref`：命中组合约束时的 pagePattern、规则位置和触发条件。
 - `reason`：结合业务信息说明为什么命中。
 - `rule_sources`：该映射实际读取的契约、字段和 Preview。
@@ -112,8 +114,10 @@ description: 消费微购设计系统并输出 design_plan。用于已有 intera
 ### consumption_mode
 
 - `stable-variant`：命中组件契约 `representativeVariants` 或稳定 `behavior` 场景。`selected` 使用维度值组合，不写自然语言或完整 DOM。
-- `composition-constraint`：命中 `uikit-plan.json` 的 `compositionConstraints`。`selected` 写完整 DOM 路径，包含分组容器、修饰类、控件状态和资产路径。
-- `free-composition`：未命中稳定变体和组合约束，但可在组件契约 `domAnatomy` 范围内安全组合。`selected` 仍写完整 DOM 路径。
+- `composition-constraint`：命中 `uikit-plan.json` 的 `compositionConstraints`。`selected` 写完整 DOM 路径，包含分组容器、修饰类、控件状态和资产路径（旧写法）。
+- `free-composition`：未命中稳定变体和组合约束，但可在组件契约 `domAnatomy` 范围内安全组合。`selected` 仍写完整 DOM 路径（旧写法）。
+
+> 第三阶段规则：新任务 `selected` 不得再写完整 DOM 路径或拼装 CSS 类，必须按“第三阶段 → 删除多义实现字段”的写法输出。`composition-constraint` 写命中的组合约束 ID；`free-composition` 写在契约 `domAnatomy` 范围内的组合说明。连续 cell/form 的分组容器通过 `region_composition` 表达，不再进入 `selected`。
 
 禁止：
 
@@ -124,7 +128,7 @@ description: 消费微购设计系统并输出 design_plan。用于已有 intera
 - 连续 cell/form 不声明已注册分组容器。
 - 把额外 helper 文案当成默认兜底；只有业务必须且结构无法承载时才保留。
 
-连续行式组件必须在 `selected` 中包含 `.cell-group`、`.form-group` 等正式容器，并在 `implementation_constraints` 中声明不可替换为场景自定义 group 类。
+连续行式组件必须在 `selected` 中包含 `.cell-group`、`.form-group` 等正式容器（旧写法），并在 `implementation_constraints` 中声明不可替换为场景自定义 group 类。新任务改为在 `region_composition` 中声明分组容器，并在 `implementation_constraints` 中保留不可替换约束。
 
 ## 对象管理列表
 
@@ -262,6 +266,11 @@ navbar 稳定变体绑定：
 - 所有业务信息均来自 `interaction_spec`，没有自行新增字段或流程。
 - 每个 surface 有明确 match_status、布局、组件映射和 presentation。
 - 每条组件映射写法与 `consumption_mode` 一致。
+- 新任务 `component_mapping.selected` 不含完整 DOM 路径或 CSS 类拼装；连续 cell/form 分组容器进入 `region_composition`。
+- `complexity_level` 已声明，且按分级要求输出 `region_composition`、`flow_to_surface_decisions`、`page_strategy` 必填字段。
+- `flow_to_surface_decisions` 覆盖所有 `prototype_boundaries.depth != excluded` 的节点。
+- `surface_designs` 覆盖 `interaction_spec.surfaces[]`（或旧 `page_surfaces[]`）的全部 ID。
+- `component_patterns.applies_to` 和 `region_composition.component_refs` 引用的 ID 均存在。
 - 每个关键决定可追溯到真实权威文件与字段。
 - 没有读取或引用生成文档，没有 `spec_refs_used`。
 - 没有把未决问题、gap 或实现选择留给 `wego-ux`。
@@ -271,7 +280,9 @@ navbar 稳定变体绑定：
 通过自检后交给 `wego-ux`。以下情况不得交接：
 
 - `interaction_spec` 缺失、未确认或与 App 目标不一致。
+- `interaction_spec.readiness = blocked`。
 - 任一 surface 为 `gap`。
+- `functional` 节点未被 surface_designs 或 flow_to_surface_decisions 覆盖。
 - 组件类、子元素类、修饰类或 Token 无正式来源。
 - 打开方式、布局模式或组件组合无法追溯。
 
@@ -285,55 +296,223 @@ navbar 稳定变体绑定：
 
 ## 第三阶段：设计越界收缩
 
-为配合《interaction-prototype-workflow-refactor-conclusion.md》第三阶段要求，`design_plan` 在保持向下游兼容的同时，缩减过度依赖 DOM 和 CSS 的内容，并增加复杂度标识和结构拆分：
+为配合《interaction-prototype-workflow-refactor-conclusion.md》第三阶段要求，`design_plan` 在保持向下游兼容的同时，缩减过度依赖 DOM 和 CSS 的内容，并增加复杂度标识和结构拆分。
 
-1. **删除完整 DOM 路径**：`component_mapping.selected` 不再填写完整 DOM 路径；只能使用代表稳定变体的维度值组合或命中的组合约束标识。如果需要标明区域组合，应在新增的 `region_compositions[]` 中描述，而非直接拼接 class。
+### 推荐整体结构
+
+新版 `design_plan` 推荐以下结构层次：
+
+```text
+design_plan
+├── complexity_level
+├── flow_to_surface_decisions
+├── page_strategy
+├── region_composition
+├── component_patterns
+├── page_presentation
+├── surface_designs
+├── component_mapping
+├── design_gaps
+├── rule_sources_used
+└── implementation_constraints
+```
+
+旧字段 `matched_uikit`、`navigation_pattern`、`layout_pattern`、`interaction_pattern`、`app_target` 仍可保留，用于兼容旧场景读取。新任务必须同时输出 `complexity_level`、`flow_to_surface_decisions`、`page_strategy`、`region_composition`、`component_patterns`、`page_presentation`、`surface_designs`、`component_mapping`、`design_gaps`、`rule_sources_used`。
+
+### 关键改动
+
+1. **删除完整 DOM 路径**：`component_mapping.selected` 不再填写完整 DOM 路径；只能使用代表稳定变体的维度值组合或命中的组合约束标识。如果需要标明区域组合，应在 `region_composition[]` 中描述，而非直接拼接 class。
 2. **删除 CSS 类拼装**：计划中不应拼装或发明业务 class、修饰 class 或 Token 类；区域的布局胶水应通过 `layout_pattern` 与受控容器达成，不再出现在 `selected` 中。
-3. **拆分组件模式和区域组合**：新增 `component_patterns[]` 用于描述页面命中的 pagePattern 或 fallback blueprint；新增 `region_compositions[]` 用于描述由多个组件组合而成的业务区域，并记录组合约束来源。
-4. **增加页面复杂度分级**：新字段 `complexity_level` 用于标识页面整体复杂度，建议值：`simple`（单页面或列表+详情）、`moderate`（多节点流、包含对话层或表单组合）、`complex`（跨场景、多流程或可配置结构）。此级别有助于指导 `wego-ux` 在实现和验收时的重点关注。
-5. **保留正式规则来源追溯**：虽然删除了 DOM 路径和 class，但所有设计判断仍须保留 `rule_sources_used`，并能定位到真实文件和字段。
+3. **拆分组件模式和区域组合**：`component_patterns[]` 只描述页面命中的 pagePattern 或 fallback blueprint 以及对应的设计模式；`region_composition[]` 只描述由多个组件组合而成的业务区域、组合约束来源和区域角色。两者不得互相替代，也不得再混入 `component_mapping`。
+4. **增加页面复杂度分级**：新字段 `complexity_level` 标识页面整体复杂度，取值见下节。该级别指导 `wego-ux` 实现重点和 `wego-tests` 验收粒度。
+5. **保留正式规则来源追溯**：删除 DOM 路径和 class 后，所有设计判断仍须保留 `rule_sources_used`，并能定位到真实文件和字段；`rule_sources` 必须更新以配合新字段。
+
+### 页面复杂度分级
+
+`complexity_level` 必须取以下三值之一：
+
+#### `simple`
+
+适用于：简单设置页、单一表单、基础详情页。
+
+必须字段：
+
+- `complexity_level`、`component_patterns`、`page_strategy`、`page_presentation`、`surface_designs`、`component_mapping`、`rule_sources_used`。
+
+可省略：`region_composition`、`flow_to_surface_decisions`（单节点单页面时）。
+
+#### `structured`
+
+适用于：多分组设置页、管理列表、多区块工作台。
+
+在 `simple` 基础上必须增加：
+
+- `region_composition`：表达分组结构、区域组合和信息优先级。
+- `flow_to_surface_decisions`：当涉及多 surface 编排时必须输出。
+
+#### `complex`
+
+适用于：首页、内容流、营销页、类似淘宝首页的多模块页面。
+
+在 `structured` 基础上必须增加：
+
+- `page_strategy.first_screen_goal`：首屏目标。
+- `page_strategy.region_priority`：区域优先级。
+- `page_strategy.content_density`：内容密度策略。
+- `page_strategy.scroll_rhythm`：滚动节奏。
+- `page_strategy.fixed_vs_scroll`：固定区、吸顶区与连续内容关系。
+- `page_strategy.visual_competition`：视觉竞争控制。
+
+### flow_to_surface_decisions
+
+负责定义：
+
+- 哪些 `flow_nodes` 合并到同一 surface。
+- 哪些节点使用独立页面、Sheet、Modal、Dialog 或内联交互。
+- 返回和完成反馈如何表达。
+
+每条决策使用稳定 `decision_id`，声明 `node_refs[]`、`surface_ref`、`carrier_decision`（`merge-into-surface | standalone-page | sheet | modal | dialog | inline`）、`reason` 和 `rule_sources`。
+
+### page_strategy
+
+定义页面级设计策略：
+
+- `page_goal`：页面目标。
+- `page_pattern`：命中的 pagePattern 或 fallback blueprint。
+- `layout_pattern`：`通栏模式 M1 | 卡片模式 M2`。
+- `main_scroll_direction`：主滚动方向。
+- `content_density`：内容密度。
+- `first_screen_priority`：首屏优先级（complex 必填）。
+- `fixed_vs_scroll`：固定区与滚动区关系。
+- `region_priority`：区域优先级（complex 必填）。
+- `scroll_rhythm`：滚动节奏（complex 必填）。
+- `visual_competition`：视觉竞争控制（complex 必填）。
+
+### region_composition
+
+负责复杂页面的区域编排，例如：搜索区、核心入口区、运营区、推荐流、吸顶区、底部操作区。
+
+每个区域使用稳定 `region_id`，声明：
+
+- `role`：区域角色，例如 `search | core-entry | operation | recommend | sticky-top | bottom-action`。
+- `priority`：优先级。
+- `order`：顺序。
+- `layout`：布局模式。
+- `width`：宽度策略。
+- `scroll_behavior`：滚动行为。
+- `component_refs[]`：引用 `component_patterns[].pattern_id` 或 `component_mapping[].block`。
+- `relation`：与其他 `region_id` 的关系。
+- `rule_sources`：组合约束来源。
+
+`region_composition` 只在 `structured` 和 `complex` 页面中强制使用；`simple` 页面可省略。
+
+### component_patterns
+
+设计方案不再复制业务文案，也不写完整 DOM。`component_patterns[]` 描述页面命中的 pagePattern 或 fallback blueprint，以及对应的组件设计模式。
+
+每条使用稳定 `pattern_id`，声明：
+
+- `applies_to[]`：引用 `interaction_spec.content_blocks[].content_id` 或 `surfaces[].surface_id`。
+- `component_pattern`：设计模式名称，例如 `single-arrow-entry | form-with-summary | list-with-actions`。
+- `matched_page_pattern` 或 `matched_blueprint`。
+- `constraint_ref`：命中的组合约束标识。
+- `reason`：结合业务说明为什么命中。
+- `rule_sources`：实际读取的契约、字段和 Preview。
+
+允许多个业务内容共享同一个设计模式，但必须保留完整 ID 引用。
+
+### 删除多义实现字段
+
+不再使用一个字段同时承载：
+
+- 变体值；
+- DOM 路径；
+- CSS 类；
+- 状态类；
+- 组合关系。
+
+`component_mapping.selected` 只能写：
+
+- `stable-variant`：变体维度值组合，例如 `["size=large", "type=primary"]`。
+- `composition-constraint`：命中的组合约束 ID。
+- `free-composition`：在契约 `domAnatomy` 范围内的组合说明，不出现完整 DOM 或 class。
 
 ### 示例扩展设计计划
 
-在原有 `design_plan` 示例基础上，加入第三阶段字段：
-
 ```json
 {
-  "matched_uikit": "...",
-  "scene_fit_reason": "...",
-  "navigation_pattern": "...",
-  "layout_pattern": "...",
-  "interaction_pattern": "...",
-  "complexity_level": "moderate",
+  "complexity_level": "structured",
+  "flow_to_surface_decisions": [
+    {
+      "decision_id": "merge-permission-nodes",
+      "node_refs": ["edit-permission", "save-permission"],
+      "surface_ref": "permission-main",
+      "carrier_decision": "merge-into-surface",
+      "reason": "权限编辑和保存在同一表单页面完成",
+      "rule_sources": ["uikit-plan.json.pagePatterns[biz-rule-config]"]
+    }
+  ],
+  "page_strategy": {
+    "page_goal": "权限配置",
+    "page_pattern": "biz-rule-config",
+    "layout_pattern": "通栏模式 M1",
+    "main_scroll_direction": "vertical",
+    "content_density": "comfortable"
+  },
+  "region_composition": [
+    {
+      "region_id": "permission-form-area",
+      "role": "core-entry",
+      "priority": 1,
+      "order": 1,
+      "layout": "vertical-stack",
+      "width": "full",
+      "scroll_behavior": "scroll",
+      "component_refs": ["form-with-summary"],
+      "relation": {},
+      "rule_sources": ["uikit-plan.json.compositionConstraints[form-with-summary]"]
+    }
+  ],
   "component_patterns": [
     {
       "pattern_id": "biz-rule-config",
+      "applies_to": ["permission-main"],
+      "component_pattern": "form-with-summary",
+      "matched_page_pattern": "biz-rule-config",
+      "constraint_ref": "form-with-summary",
       "reason": "命中权限管理页面模式",
       "rule_sources": ["uikit-plan.json.pagePatterns[biz-rule-config]"]
     }
   ],
-  "region_compositions": [
-    {
-      "id": "permission-form-area",
-      "components": ["input", "select", "button"],
-      "composition_constraint": "form-with-summary",
-      "rule_sources": ["uikit-plan.json.compositionConstraints[form-with-summary]"]
-    }
-  ],
-  "surface_designs": [...],
+  "surface_designs": [],
   "component_mapping": [
     {
-      "block": "...",
-      "scenario_type": "...",
-      "consumption_mode": "stable-variant | composition-constraint | free-composition",
+      "block": "inventory-deduction-order",
+      "scenario_type": "string",
+      "consumption_mode": "stable-variant",
       "selected": ["type=primary", "size=large"],
-      "constraint_ref": "...",
-      "reason": "...",
-      "rule_sources": [...]
+      "constraint_ref": {},
+      "reason": "",
+      "rule_sources": []
     }
   ],
-  "rule_sources_used": [...]
+  "design_gaps": [],
+  "rule_sources_used": [
+    {
+      "file": ".codex/skills/wego-design/uikit-plan.json",
+      "field": "pagePatterns[...].compositionConstraints[...]",
+      "supports": ["具体设计决策"]
+    }
+  ],
+  "implementation_constraints": []
 }
 ```
 
 实施第三阶段后，任何引用完整 DOM 路径或拼装 CSS 类的设计计划都视为越界。必须使用注册的组件契约提供的变体 ID 或组合约束 ID 代替。
+
+### 兼容读取与迁移
+
+- 新任务只输出 `complexity_level`、`flow_to_surface_decisions`、`page_strategy`、`region_composition`、`component_patterns` 等新字段。
+- 旧场景仍可保留 `matched_uikit`、`navigation_pattern`、`layout_pattern`、`interaction_pattern` 等字段；`wego-ux` 和 `wego-tests` 优先读新字段，缺失时回退旧字段。
+- 禁止同一场景同时维护新旧两份语义不同的设计计划；旧字段只作为迁移来源，不再继续编辑。
+- `surface_designs` 必须覆盖 `interaction_spec.surfaces[]`（新字段）或 `interaction_spec.page_surfaces[]`（旧字段）的全部 ID。

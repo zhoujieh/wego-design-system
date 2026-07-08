@@ -288,7 +288,7 @@ function render() {
     { match: /页面信息、状态、异常流程和宿主路径只能来自/, output: '页面信息、状态、异常流程和宿主路径必须来自用户需求与真实业务事实，不能凭模板或惯例发明。' },
     { match: /关键歧义.*用户确认/, output: '会改变页面范围、核心流程、数据含义或宿主层级的关键歧义，必须在进入设计前确认。' },
     { match: /使用 `rule_sources`/, output: '需求规格只记录真实判断依据，不引用自动生成文档。' },
-    { match: /必须先落盘 `page_spec`/, output: '需求确认后先保存需求规格，再交给页面设计。' },
+    { match: /必须先落盘\s`interaction_spec`/, output: '需求确认后先保存需求规格，再交给页面设计。' },
   ]);
   const designRules = mappedRules('.codex/skills/wego-design/SKILL.md', '核心规则', [
     { match: /设计判断只能来自/, output: '设计判断只使用已确认需求、正式页面范式、设计令牌、组件契约和真实示例。' },
