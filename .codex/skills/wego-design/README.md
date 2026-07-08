@@ -1,208 +1,77 @@
 # 微购设计系统
 
-## 定位与职责
+## 定位
 
-`wego-design` 是面向移动端、微信生态、电商 / 工具场景的中文设计系统，也是 `wego-design` 技能做设计消费时使用的根目录。
+`wego-design` 是面向移动端、微信生态、电商、工具与社交场景的中文设计系统。它在已有 `page_spec` 的前提下，负责选择页面范式、UI Kit、组件组合、布局方式和页面打开方式，并输出 `design_consumption_plan`。
 
-它只负责一件事：基于已经明确的 `page_spec`，选择合适的页面范式、UI Kit、组件组合和规范引用，并产出 `design_consumption_plan`。
+它不负责重新理解原始需求，也不直接生成最终原型。
 
-它不负责：
+设计方向固定为：简洁、干净、淡雅、克制。判断优先级固定为：清晰 > 一致 > 效率 > 美观 > 创新。
 
-- 重新理解原始业务需求
-- 跳过 `page_spec` 直接做场景判断
-- 直接生成最终 `wego-app` 原型
+## 四层资产
 
-设计方向固定为：
+| 层级 | 权威来源 | 用途 |
+| --- | --- | --- |
+| Token | `colors_and_type.css`、`css.json` | 颜色、字号、间距、圆角、阴影、动效和尺寸 |
+| 组件 | `components/index.json`、`components/{slug}.json`、`preview/component-{slug}.html` | 稳定组件、真实 DOM、变体、状态和使用边界 |
+| 页面范式 | `uikit-plan.json`、`ui_kits/*` | 页面骨架、固定槽位、组合约束、fallback 和打开方式 |
+| 消费规则 | `library-consumption.json`、`SKILL.md` | 读取顺序、复制边界、输出字段和运行时门禁 |
 
-- 简洁
-- 干净
-- 淡雅
-- 克制
-
-设计优先级固定为：
-
-- 清晰 > 一致 > 效率 > 美观 > 创新
-
-## 什么时候该看这个文档
-
-当你已经有 `page_spec`，准备进入设计系统消费阶段时，就该看这份 README。
-
-典型场景包括：
-
-- 判断当前业务页面命中哪个 UI Kit / 页面范式
-- 给 `page_spec` 选择组件映射、导航方式、布局模式
-- 准备产出 `design_consumption_plan`
-
-如果还没有 `page_spec`，先回到 `wego-product`，不要在这里直接开始做设计消费。
-
-## 设计库包含什么
-
-以下路径都相对于当前设计库根目录 `{WEGO_DESIGN_ROOT}`：
-
-```text
-{WEGO_DESIGN_ROOT}/
-├── colors_and_type.css
-├── css.json
-├── scaffold.css
-├── components.css
-├── iconfont.css
-├── library-consumption.json
-├── uikit-plan.json
-├── metadata.json
-├── assets/
-├── components/
-├── preview/
-├── ui_kits/
-├── specs/
-└── SKILL.md
-```
-
-可以把这里的资产理解成 4 层：
-
-| 层 | 主要文件 | 用途 | 是否直接复制 |
-|---|---|---|---|
-| Token 层 | `colors_and_type.css`、`css.json` | 颜色、字号、圆角、间距等设计语言 | 可以引用 |
-| 组件层 | `components/{slug}.json`、`preview/component-{slug}.html`、`components/index.json` | 看组件契约、真实结构和稳定组合方式 | 可以按契约消费 |
-| 页面范式层 | `uikit-plan.json`、`ui_kits/*` | 看页面骨架、固定槽位、命中的 page pattern | 只看结构，不整页照搬 |
-| 规则层 | `library-consumption.json`、`specs/*.md`、`SKILL.md` | 看读取顺序、边界、规范正文、输出硬约束 | 必须遵守 |
-
-补充说明：
-
-- `colors_and_type.css` 是权威 Token 源
-- `css.json` 是 Token 的机器可读投影
-- `components/index.json` 是已发布组件注册表
-- `components/{slug}.json` 是单组件契约
-- `preview/component-{slug}.html` 是组件预览和真实 HTML 结构
-- `uikit-plan.json` 是页面范式、蓝图、固定槽位和约束来源
-- `library-consumption.json` 是消费读取顺序和复制边界来源
-- `specs/*.md` 是文案、布局、交互、视觉规则的正文来源
-- `SKILL.md` 负责 `design_consumption_plan` 的输出结构和硬约束
+`specs/*.md` 不属于运行时资产。它们由脚本从上述权威来源生成，只用于人工检查规则是否完整、清晰、重复或冲突。
 
 ## 正确消费顺序
 
-不要凭感觉直接挑组件，建议按这个顺序往下读：
+1. 读取 `SKILL.md`，确认职责与本轮覆盖规则。
+2. 读取 `SKILL.runtime.md`，执行完整流程。
+3. 读取 `library-consumption.json`，确认全局消费边界。
+4. 读取 `uikit-plan.json`，判断 pagePattern、fallback 和打开方式。
+5. 读取 `colors_and_type.css` 与 `css.json`，确认 Token。
+6. 读取 `components/index.json`，确认可用组件。
+7. 读取命中的组件契约与 Preview。
+8. 输出 `design_consumption_plan`，用 `rule_sources_used` 记录真实决策来源。
 
-1. 先看 `library-consumption.json`  
-明确全局消费边界、读取顺序、哪些层可以复制、哪些层只能参考。
+禁止读取 `specs/*.md` 辅助运行时决策。
 
-2. 再看 `uikit-plan.json`  
-判断当前业务页面命中的 UI Kit、页面范式、固定槽位、fallback 蓝图和页面打开方式来源。
+## 组件与 UI Kit 边界
 
-3. 再看命中的组件契约  
-按需读取 `components/index.json`、`components/{slug}.json`，确认有哪些稳定组件、变体和组合约束可用。
+- Token 可以引用，不得随意改名或发明新数值。
+- 组件必须按契约和 Preview 消费，不凭视觉感觉发明结构、子元素类或修饰类。
+- UI Kit 只用于理解页面骨架、组合节奏和固定槽位，不能整页复制。
+- `.uikit-shell`、`.phone-frame`、`.phone-screen` 等展示外壳不得进入业务页面结构。
+- 固定宿主 App 正式维护在 `wego-app/`，不属于 UI Kit。
+- 未命中现有 pagePattern 时，优先使用 `uikit-plan.json` 的 fallback blueprint；仍无法覆盖时标记 `gap`，不得交给实现阶段临时决定。
 
-4. 再看对应 preview  
-去 `preview/component-{slug}.html` 看真实结构、DOM 关系和已注册 class 的落法。
+## 当前稳定组件
 
-5. 最后回到规范正文和 `SKILL.md`  
-`specs/*.md` 负责解释文案、布局、交互、视觉规则；`SKILL.md` 负责约束 `design_consumption_plan` 最终该怎么写、怎么落盘。
+组件清单以 `components/index.json` 为唯一注册表。当前包括：
 
-一句话记忆：先定页面范式，再定组件组合，最后把判断写进 `design_consumption_plan`。
-
-## 三层消费边界
-
-这套设计系统不是让你“整包照搬”的，要按层消费。
-
-| 你现在要做什么 | 应该看什么 | 不该怎么做 |
-|---|---|---|
-| 用设计语言 | `colors_and_type.css`、`css.json` | 不自己发明新 Token 名或新数值 |
-| 选组件和结构 | `components/*.json`、`preview/component-*.html` | 不跳过契约，只凭视觉感觉拼结构 |
-| 判断页面范式 | `uikit-plan.json`、`ui_kits/*` | 不把 UI Kit 当最终页面模板整页照搬 |
-
-重点提醒：
-
-- Token 层是设计语言来源，可以引用，但不要改名、不要随意扩写
-- 组件层是结构和组合来源，应该按契约和 preview 消费
-- UI Kit 层是页面级 Showcase，只负责给你看结构、节奏和槽位，不是业务页面母版
-
-## 正确消费方式示例
-
-如果你要做一个“业务规则配置”类页面，正确方式是：
-
-1. 先看 `uikit-plan.json`，判断它是不是命中 `biz-rule-config` 或其他 page pattern
-2. 再看命中的 `components/{slug}.json`，确认该信息块应该落到哪个稳定组件或组合约束
-3. 再去 `preview/component-{slug}.html` 看真实结构和 class 组成
-4. 最后把这些判断写进 `design_consumption_plan`
-
-错误方式通常有这几种：
-
-- 直接打开 `ui_kits/*`，把整个 Showcase 外壳当成业务页面模板复制
-- 把 `.uikit-shell`、`.phone-frame`、`.phone-screen` 这种预览外壳当成业务结构
-- 不看 `uikit-plan.json`，直接凭感觉选几个组件让 `wego-ux` 再次判断
-
-要点可以记成一句话：
-
-看 UI Kit，是为了理解页面骨架；看组件契约和 preview，才是为了落真实页面结构。
-
-## 硬边界
-
-下面这些边界是必须守住的：
-
-- 固定宿主 App 正式维护在 `wego-app/`
-- `wego-ux/templates/host-shell.*` 只是宿主基线来源，不属于 `wego-design` 的 UI Kit 或页面范式
-- `.uikit-shell`、`.phone-frame`、`.phone-screen` 这类展示壳层，不能当业务页面结构
-- 设计消费只决定页面结构、组件映射、打开方式，不负责产出最终原型
-- `design_consumption_plan` 的详细输出格式、字段要求、落盘规则，以 `SKILL.md` 为准
-
-## 当前组件
-
-稳定组件共 20 个：
-
-- `button`
-- `card`
-- `avatar`
-- `tag`
-- `bottom-nav`
-- `input`
-- `counter`
-- `badge`
-- `cell`
-- `checkbox`
-- `form`
-- `image`
-- `link`
-- `radio`
-- `stack`
-- `switch`
-- `navbar`
-- `toast`
-- `dialog`
-- `actionsheet`
+`button`、`card`、`avatar`、`tag`、`bottom-nav`、`input`、`counter`、`badge`、`cell`、`checkbox`、`form`、`image`、`link`、`radio`、`stack`、`switch`、`navbar`、`toast`、`dialog`、`actionsheet`。
 
 ## 当前 UI Kit
 
-- `biz-rule-config`
-  用于观察业务规则配置 / 业务数据编辑页的页面范式
-- `system-settings`
-  用于观察系统设置 / 应用设置页的页面范式
+- `biz-rule-config`：业务规则配置与业务数据编辑页面范式。
+- `system-settings`：系统设置与应用设置页面范式。
 
-## README 和 SKILL 的分工
+实际清单以 `uikit-plan.json` 为准。
 
-这份 README 只负责：
+## 自动生成规则文档
 
-- 总定位
-- 消费顺序
-- 资产层级
-- 使用边界
-- 常见误用提醒
+生成文档位于 `specs/`，用于人工审查，不作为 AI 的运行时规则来源。
 
-`SKILL.md` 继续负责：
+```bash
+node scripts/specs.mjs generate
+node scripts/specs.mjs check
+```
 
-- 何时触发本技能
-- `design_consumption_plan` 的完整输出结构
-- 字段级硬约束
-- 落盘规则
-- 禁止事项
+- 不直接修改生成文档。
+- 修改权威来源后重新生成。
+- 提交前必须通过一致性检查。
+- 生成文档与权威来源冲突时，以权威来源为准。
 
-如果你已经进入实际产出阶段，不要只看 README，必须继续看 `SKILL.md`。
+## 交接关系
 
-## 原型交接关系
-
-这套链路的分工固定如下：
-
-- 原始需求理解交给 `wego-product`
-- 设计系统消费交给 `wego-design`
-- `wego-app` 场景原型输出交给 `wego-ux`
-- 当前任务范围验收交给 `wego-tests`
-
-所以 `wego-design` 的任务不是把页面直接做完，而是把“该怎么消费设计系统”这件事判断清楚，并稳定交给下一环。
+- 原始需求理解：`wego-product`
+- 设计系统消费：`wego-design`
+- 原型实现：`wego-ux`
+- 验收与回归：`wego-tests`
+- 组件、UI Kit 和工作流本体迭代：`wego-uxsystem-iterate`
