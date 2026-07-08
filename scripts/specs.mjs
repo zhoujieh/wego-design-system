@@ -3,7 +3,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const VERSION = '4';
+const VERSION = '5';
 const ROOT = path.resolve(process.env.WEGO_REPO_ROOT || process.cwd());
 const OUT = path.join(ROOT, '.codex/skills/wego-design/specs');
 const CMD = process.argv[2];
@@ -79,7 +79,175 @@ function fingerprint() {
 
 const bullets = items => items.map(item => `- ${item}`).join('\n');
 const section = (title, body) => `## ${title}\n\n${body}\n`;
+const subSection = (title, body) => `### ${title}\n\n${body}\n`;
 const doc = (title, body, fp) => `# ${title}\n\n${NOTICE}\n\n${body.trim()}\n\n<!-- generated-by: scripts/specs.mjs@${VERSION} -->\n<!-- source-fingerprint: ${fp} -->\n`;
+
+function extractUiKitDecisionTree(uikitPlan) {
+  const priority = uikitPlan.paradigmSelectionPriority;
+  if (!priority) return '';
+  const lines = [];
+  (priority.decisionTree || []).forEach((node, i) => {
+    const q = node.question;
+    lines.push(`${i + 1}. **${q}**`);
+    const keys = Object.keys(node).filter(k => k !== 'question');
+    keys.forEach(key => {
+      lines.push(`   - ${key}：${node[key]}`);
+    });
+  });
+  if (priority.quickReference) {
+    lines.push('');
+    lines.push('**快速对照：**');
+    Object.entries(priority.quickReference).forEach(([k, v]) => {
+      lines.push(`- ${k}：${v}`);
+    });
+  }
+  if (priority.exception) {
+    lines.push('');
+    lines.push(`**例外：**${priority.exception}`);
+  }
+  return lines.join('\n');
+}
+
+function extractPagePatternScenarios(uikitPlan) {
+  const patterns = uikitPlan.pagePatterns || [];
+  return patterns.map(p => {
+    const scenarios = (p.applicableScenarios || []).join('、');
+    const components = (p.componentSlugs || []).join('、');
+    return [
+      `#### ${p.name}（${p.slug}）`,
+      '',
+      `- **适用场景：**${scenarios || '暂无'}`,
+      `- **交互模式：**${p.interactionPattern || '暂无'}`,
+      `- **默认打开方式：**${p.presentation || '暂无'}`,
+      `- **主要组件：**${components || '暂无'}`,
+    ].join('\n');
+  }).join('\n\n');
+}
+
+function extractFallbackBlueprints(uikitPlan) {
+  const blueprints = uikitPlan.fallbackPageBlueprints || [];
+  return blueprints.map(bp => {
+    const applies = (bp.appliesWhen || []).map(s => `- ${s}`).join('\n');
+    const components = (bp.allowedComponents || []).join('、');
+    return [
+      `#### ${bp.name}（${bp.id}）`,
+      '',
+      `**适用条件：**`,
+      applies,
+      '',
+      `- **允许组件：**${components || '暂无'}`,
+    ].join('\n');
+  }).join('\n\n');
+}
+
+function extractCompositionConstraints(uikitPlan) {
+  const patterns = uikitPlan.pagePatterns || [];
+  const sections = [];
+  patterns.forEach(p => {
+    const constraints = p.compositionConstraints || [];
+    if (constraints.length === 0) return;
+    const items = constraints.map((c, i) => {
+      const allowWhen = c.allowWhen ? `\n   - 例外：${c.allowWhen}` : '';
+      return [
+        `${i + 1}. **触发条件：**${c.trigger}`,
+        `   - 推荐：${c.use}`,
+        `   - 避免：${c.avoid}`,
+        `   - 原因：${c.reason}${allowWhen}`,
+      ].join('\n');
+    }).join('\n\n');
+    sections.push(`#### ${p.name} 组合约束\n\n${items}`);
+  });
+  return sections.join('\n\n');
+}
+
+function extractLayoutModeRules(uikitPlan) {
+  const patterns = uikitPlan.pagePatterns || [];
+  const rules = [];
+  patterns.forEach(p => {
+    (p.structureHighlights || []).forEach(h => {
+      if (h.includes('通栏模式') || h.includes('卡片模式') || h.includes('M1') || h.includes('M2')) {
+        rules.push(`- ${h}`);
+      }
+    });
+  });
+  if (rules.length === 0) {
+    rules.push('- 通栏模式 M1：页面内容层横向 padding 为 0；分组内容使用通栏结构，不开启卡片修饰类。');
+    rules.push('- 卡片模式 M2：页面内容层横向 padding 为 16px；分组内容使用已注册卡片修饰类。');
+  }
+  return rules.join('\n');
+}
+
+function extractSurfaceMatchRules(designSkill) {
+  const marker = '## surface 命中规则';
+  const start = designSkill.indexOf(marker);
+  if (start < 0) return '';
+  const rest = designSkill.slice(start + marker.length).replace(/^\s+/, '');
+  const next = rest.search(/^## /m);
+  return (next >= 0 ? rest.slice(0, next) : rest).trim();
+}
+
+function extractComponentMappingRules(designSkill) {
+  const marker = '## 组件映射';
+  const start = designSkill.indexOf(marker);
+  if (start < 0) return '';
+  const rest = designSkill.slice(start + marker.length).replace(/^\s+/, '');
+  const next = rest.search(/^## /m);
+  return (next >= 0 ? rest.slice(0, next) : rest).trim();
+}
+
+function extractObjectManagementRules(designSkill) {
+  const marker = '## 对象管理列表';
+  const start = designSkill.indexOf(marker);
+  if (start < 0) return '';
+  const rest = designSkill.slice(start + marker.length).replace(/^\s+/, '');
+  const next = rest.search(/^## /m);
+  return (next >= 0 ? rest.slice(0, next) : rest).trim();
+}
+
+function extractPagePresentationRules(designSkill) {
+  const marker = '## 页面打开方式';
+  const start = designSkill.indexOf(marker);
+  if (start < 0) return '';
+  const rest = designSkill.slice(start + marker.length).replace(/^\s+/, '');
+  const next = rest.search(/^## /m);
+  return (next >= 0 ? rest.slice(0, next) : rest).trim();
+}
+
+function extractPageRoleRules(productSkill) {
+  const marker = '## 页面角色拆分';
+  const start = productSkill.indexOf(marker);
+  if (start < 0) return '';
+  const rest = productSkill.slice(start + marker.length).replace(/^\s+/, '');
+  const next = rest.search(/^## /m);
+  return (next >= 0 ? rest.slice(0, next) : rest).trim();
+}
+
+function extractFieldGradingRules(productSkill) {
+  const marker = '### 对象管理列表字段分级';
+  const start = productSkill.indexOf(marker);
+  if (start < 0) return '';
+  const rest = productSkill.slice(start + marker.length).replace(/^\s+/, '');
+  const next = rest.search(/^## |^### /m);
+  return (next >= 0 ? rest.slice(0, next) : rest).trim();
+}
+
+function extractUxPresentationRules(uxSkill) {
+  const marker = '## 页面打开方式';
+  const start = uxSkill.indexOf(marker);
+  if (start < 0) return '';
+  const rest = uxSkill.slice(start + marker.length).replace(/^\s+/, '');
+  const next = rest.search(/^## /m);
+  return (next >= 0 ? rest.slice(0, next) : rest).trim();
+}
+
+function extractUxComponentConsumption(uxSkill) {
+  const marker = '## 组件与设计计划消费';
+  const start = uxSkill.indexOf(marker);
+  if (start < 0) return '';
+  const rest = uxSkill.slice(start + marker.length).replace(/^\s+/, '');
+  const next = rest.search(/^## /m);
+  return (next >= 0 ? rest.slice(0, next) : rest).trim();
+}
 
 function sourceSection(rel, heading) {
   const value = text(rel);
@@ -155,6 +323,25 @@ function render() {
     { match: /只保存成熟/, output: '正式场景注册表只保存成熟、经过验证且会被实际消费的规则类型。' },
   ]);
 
+  const uikitPlan = json('.codex/skills/wego-design/uikit-plan.json');
+  const designSkill = text('.codex/skills/wego-design/SKILL.md');
+  const productSkill = text('.codex/skills/wego-product/SKILL.md');
+  const uxSkill = text('.codex/skills/wego-ux/SKILL.md');
+
+  const uiKitDecisionTree = extractUiKitDecisionTree(uikitPlan);
+  const pagePatternScenarios = extractPagePatternScenarios(uikitPlan);
+  const fallbackBlueprints = extractFallbackBlueprints(uikitPlan);
+  const compositionConstraints = extractCompositionConstraints(uikitPlan);
+  const layoutModeRules = extractLayoutModeRules(uikitPlan);
+  const surfaceMatchRules = extractSurfaceMatchRules(designSkill);
+  const componentMappingRules = extractComponentMappingRules(designSkill);
+  const objectManagementRules = extractObjectManagementRules(designSkill);
+  const pagePresentationRules = extractPagePresentationRules(designSkill);
+  const pageRoleRules = extractPageRoleRules(productSkill);
+  const fieldGradingRules = extractFieldGradingRules(productSkill);
+  const uxPresentationRules = extractUxPresentationRules(uxSkill);
+  const uxComponentConsumption = extractUxComponentConsumption(uxSkill);
+
   const docs = {};
   docs[FILES[0]] = doc('工作流总览与优先级', [
     section('什么时候使用', '任何新页面、新场景或业务修改，都先判断任务属于需求理解、页面设计、原型实现、验收，还是设计系统迭代。'),
@@ -164,25 +351,46 @@ function render() {
   ].join('\n'), fp);
   docs[FILES[1]] = doc('需求理解规则', [
     section('什么时候使用', '收到新的业务页面、原型、场景或流程调整需求时使用。'),
-    section('应该怎么做', bullets(productRules)),
+    section('应该怎么做', [
+      subSection('核心原则', bullets(productRules)),
+      subSection('页面角色拆分', pageRoleRules),
+      subSection('对象管理列表字段分级', fieldGradingRules),
+    ].join('\n')),
     section('不能怎么做', bullets(['不能提前选择组件或布局代替需求判断。','不能从历史示例、页面模板或自动生成文档中发明字段、状态和流程。'])),
     section('完成后如何检查', '用户目标、页面范围、信息块、状态、异常流程和宿主路径都已明确，关键歧义已经确认，需求规格已经保存。'),
   ].join('\n'), fp);
   docs[FILES[2]] = doc('页面设计规则', [
     section('什么时候使用', '需求规格已经确认，需要决定页面结构、布局、组件组合和打开方式时使用。'),
-    section('应该怎么做', bullets(designRules)),
+    section('应该怎么做', [
+      subSection('核心原则', bullets(designRules)),
+      subSection('Surface 命中判断', surfaceMatchRules),
+      subSection('组件映射决策', componentMappingRules),
+      subSection('对象管理列表判断', objectManagementRules),
+      subSection('页面打开方式选择', pagePresentationRules),
+    ].join('\n')),
     section('不能怎么做', bullets(['不能只凭视觉感觉拼组件。','不能临时发明页面范式、组件类或打开方式。','不能让内容多少改变主要区域的整体宽度和对齐。'])),
     section('完成后如何检查', '检查每个页面都能说明使用了什么结构、为什么这样组合、如何打开，以及依据来自哪个正式文件和字段。'),
   ].join('\n'), fp);
   docs[FILES[3]] = doc('组件与 UI Kit 使用规则', [
     section('什么时候使用', '页面结构已经确定，需要选择稳定组件、组合方式或页面示例时使用。'),
-    section('应该怎么做', bullets([`当前稳定组件包括：${componentNames}。`,`当前页面示例包括：${kitNames}。`,'先看组件契约和真实示例，再决定结构、状态和组合。','页面示例只用于理解骨架、节奏和固定位置，业务内容必须按当前需求重新组织。'])),
+    section('应该怎么做', [
+      subSection('组件与 UI Kit 总览', bullets([`当前稳定组件包括：${componentNames}。`,`当前页面示例包括：${kitNames}。`,'先看组件契约和真实示例，再决定结构、状态和组合。','页面示例只用于理解骨架、节奏和固定位置，业务内容必须按当前需求重新组织。'])),
+      subSection('UI Kit 选择决策树', uiKitDecisionTree),
+      subSection('各页面范式适用场景速查', pagePatternScenarios),
+      subSection('兜底蓝图适用场景', fallbackBlueprints),
+      subSection('组件组合约束', compositionConstraints),
+      subSection('布局模式判断（通栏 M1 / 卡片 M2）', layoutModeRules),
+    ].join('\n')),
     section('不能怎么做', bullets(['不能复制手机壳、展示外框或演示业务内容作为正式页面。','不能发明未登记的组件、子结构或修饰方式。','不能直接修改 App 中的设计系统副本。'])),
     section('完成后如何检查', '组件已在注册表中存在，结构与状态符合契约，页面示例只用于结构参考，设计系统源文件与部署副本保持一致。'),
   ].join('\n'), fp);
   docs[FILES[4]] = doc('原型实现规则', [
     section('什么时候使用', '需求规格和设计计划都已保存且没有设计缺口，需要生成或更新真实 App 场景时使用。'),
-    section('应该怎么做', bullets(uxRules)),
+    section('应该怎么做', [
+      subSection('核心原则', bullets(uxRules)),
+      subSection('页面打开方式实现', uxPresentationRules),
+      subSection('组件消费模式实现', uxComponentConsumption),
+    ].join('\n')),
     section('不能怎么做', bullets(['不能复制第二套 App 宿主。','不能跳出 App 打开独立页面。','不能依赖运行时读取本地页面片段。','不能因为内容为空或较少让主要区域缩成小块。'])),
     section('完成后如何检查', '入口、路由、页面打开方式、保存回填、取消删除、键盘焦点、滚动和空内容等状态都形成完整闭环；电脑端和移动端使用同一链接。'),
   ].join('\n'), fp);
@@ -315,6 +523,23 @@ function tests() {
     const body = value.replace(/<!--[^]*?-->/g, '');
     expect(!body.includes('.codex/skills/') && !body.includes('SKILL.runtime.md') && !body.includes('spec_refs'), `${name} 仍堆叠运行时文件名或旧字段`);
   }
+  const componentKitDoc = rendered[FILES[3]];
+  expect(componentKitDoc.includes('UI Kit 选择决策树'), '组件与 UI Kit 使用规则应包含 UI Kit 选择决策树');
+  expect(componentKitDoc.includes('各页面范式适用场景速查'), '组件与 UI Kit 使用规则应包含页面范式适用场景');
+  expect(componentKitDoc.includes('兜底蓝图适用场景'), '组件与 UI Kit 使用规则应包含兜底蓝图适用场景');
+  expect(componentKitDoc.includes('组件组合约束'), '组件与 UI Kit 使用规则应包含组件组合约束');
+  expect(componentKitDoc.includes('布局模式判断'), '组件与 UI Kit 使用规则应包含布局模式判断');
+  const pageDesignDoc = rendered[FILES[2]];
+  expect(pageDesignDoc.includes('Surface 命中判断'), '页面设计规则应包含 Surface 命中判断');
+  expect(pageDesignDoc.includes('组件映射决策'), '页面设计规则应包含组件映射决策');
+  expect(pageDesignDoc.includes('对象管理列表判断'), '页面设计规则应包含对象管理列表判断');
+  expect(pageDesignDoc.includes('页面打开方式选择'), '页面设计规则应包含页面打开方式选择');
+  const productDoc = rendered[FILES[1]];
+  expect(productDoc.includes('页面角色拆分'), '需求理解规则应包含页面角色拆分');
+  expect(productDoc.includes('对象管理列表字段分级'), '需求理解规则应包含字段分级');
+  const uxDoc = rendered[FILES[4]];
+  expect(uxDoc.includes('页面打开方式实现'), '原型实现规则应包含页面打开方式实现');
+  expect(uxDoc.includes('组件消费模式实现'), '原型实现规则应包含组件消费模式实现');
   return failures;
 }
 
