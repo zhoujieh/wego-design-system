@@ -26,8 +26,8 @@
 
 | 用户意图 | 必须先触发 | 前置条件 | 下一步 |
 | --- | --- | --- | --- |
-| 原始业务需求、做页面、做原型、做新场景 | `wego-product` | 无 | 输出并落盘 `page_spec` |
-| 基于已有 `page_spec` 选择页面范式、UI Kit、组件和打开方式 | `wego-design` | 已有 `page_spec` | 输出并落盘 `design_consumption_plan` |
+| 原始业务需求、做页面、做原型、做新场景 | `wego-product` | 无 | 输出并落盘 `interaction_spec` |
+| 基于已有 `interaction_spec` 选择页面范式、UI Kit、组件和打开方式 | `wego-design` | 已有 `interaction_spec` | 输出并落盘 `design_plan` |
 | 正式生成或更新 `wego-app` 场景 | `wego-ux` | 两份规格均已落盘 | 完成后交给 `wego-tests` |
 | 验收、回归、检查当前业务场景 | `wego-tests` | 场景已生成并注册路由 | 输出 `acceptance_report` |
 | 改组件、Token、Preview、UI Kit 或设计系统守门 | `wego-uxsystem-iterate` 的迭代模式 | 目标属于设计系统本体 | 按组件/UI Kit 同步矩阵执行 |
@@ -39,8 +39,8 @@
 ## 主链路硬门禁
 
 - 模糊的业务页面请求默认先走 `wego-product`；关键需求未确认前不得进入下一环节，且不得擅自修改用户明确的产品要求。
-- 没有 `page_spec`，不得直接进入 `wego-design`。
-- 没有 `design_consumption_plan`，不得直接进入 `wego-ux`。
+- 没有 `interaction_spec`，不得直接进入 `wego-design`。
+- 没有 `design_plan`，不得直接进入 `wego-ux`。
 - 已有场景的任何修改都必须先进入 `wego-ux` 做偏差判定；即使只是间距、文案、Token 或工程实现微调也不能绕过。
 - 当前场景未生成且未注册 `route_id`，不得进入 `wego-tests`。
 - 组件、UI Kit、工作流问题不得误走普通业务开发链路。
