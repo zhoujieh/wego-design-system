@@ -244,6 +244,12 @@
       + '</section>';
   }
 
+  function buildLabel(label, required) {
+    return required
+      ? '<div class="form-body__label form-body__label--required"><span class="form-body__label-text">' + esc(label) + '</span><span class="form-body__required">(必填)</span></div>'
+      : '<div class="form-body__label">' + esc(label) + '</div>';
+  }
+
   function buildFormInput(label, key, value, placeholder, options) {
     options = options || {};
     var type = options.type || 'text';
@@ -251,17 +257,17 @@
     var maxLength = options.maxLength ? ' maxlength="' + esc(options.maxLength) + '"' : '';
     return ''
       + '<div class="form-body">'
-      +   '<div class="form-body__label">' + esc(label) + '</div>'
+      +   buildLabel(label, options.required)
       +   '<div class="form-body__action">'
       +     '<input type="' + esc(type) + '" value="' + esc(value) + '" placeholder="' + esc(placeholder) + '" data-field="' + esc(key) + '"' + extraAttrs + maxLength + '>'
       +   '</div>'
       + '</div>';
   }
 
-  function buildPhoneInput(label, key, value) {
+  function buildPhoneInput(label, key, value, required) {
     return ''
       + '<div class="form-body form-body--preserve-content-align">'
-      +   '<div class="form-body__label">' + esc(label) + '</div>'
+      +   buildLabel(label, required)
       +   '<div class="form-body__action">'
       +     '<div class="form-body__phone">'
       +       '<span class="form-body__phone-prefix">+86</span>'
@@ -272,10 +278,10 @@
       + '</div>';
   }
 
-  function buildTextarea(label, key, value, placeholder, rowsClass) {
+  function buildTextarea(label, key, value, placeholder, rowsClass, required) {
     return ''
       + '<div class="form-body form-body--vertical' + (rowsClass ? ' ' + rowsClass : '') + '">'
-      +   '<div class="form-body__label">' + esc(label) + '</div>'
+      +   buildLabel(label, required)
       +   '<div class="form-body__action">'
       +     '<textarea data-field="' + esc(key) + '" placeholder="' + esc(placeholder) + '">' + esc(value) + '</textarea>'
       +   '</div>'
@@ -330,8 +336,7 @@
     return ''
       + '<div class="form-body form-body--preserve-content-align">'
       +   '<div class="form-body__label">' + esc(label) + '</div>'
-      +   '<div class="form-body__action" aria-hidden="true"></div>'
-      +   '<div class="form-body__right-btn">'
+      +   '<div class="form-body__action">'
       +     '<div class="switch ' + (value ? 'switch--on' : 'switch--off') + '" data-switch-key="' + esc(key) + '" role="switch" aria-checked="' + (value ? 'true' : 'false') + '" tabindex="0">'
       +       '<div class="switch__thumb"></div>'
       +     '</div>'
@@ -369,11 +374,11 @@
       +     '<div class="form-group">'
       +       '<div class="form-group__title">基础信息</div>'
       +       '<div class="form-group__content">'
-      +         buildFormInput('仓库名称', 'name', draft.name, '例如：杭州主仓')
+      +         buildFormInput('仓库名称', 'name', draft.name, '例如：杭州主仓', { required: true })
       +         buildFormInput('仓库编码', 'code', draft.code, '例如：HZ-MAIN-01')
-      +         buildFormInput('仓库联系人', 'manager', draft.manager, '请输入联系人')
-      +         buildPhoneInput('联系电话', 'phone', draft.phone)
-      +         buildTextarea('仓库地址', 'address', draft.address, '请输入详细地址')
+      +         buildFormInput('仓库联系人', 'manager', draft.manager, '请输入联系人', { required: true })
+      +         buildPhoneInput('联系电话', 'phone', draft.phone, true)
+      +         buildTextarea('仓库地址', 'address', draft.address, '请输入详细地址', '', true)
       +         buildFormInput('定位备注', 'locationNote', draft.locationNote, '例如：靠近西门，方便提货')
       +         '<div class="form-body form-body--vertical">'
       +           '<div class="form-body__label">门头图链接</div>'
@@ -422,22 +427,8 @@
       +             '</div>'
       +           '</div>'
       +         '</div>'
-      +         '<div class="form-body">'
-      +           '<div class="form-body__label">锁定预占库存</div>'
-      +           '<div class="form-body__right-btn">'
-      +             '<div class="switch ' + (draft.lockReservedStock ? 'switch--on' : 'switch--off') + '" data-switch-key="lockReservedStock" role="switch" aria-checked="' + (draft.lockReservedStock ? 'true' : 'false') + '" tabindex="0">'
-      +               '<div class="switch__thumb"></div>'
-      +             '</div>'
-      +           '</div>'
-      +         '</div>'
-      +         '<div class="form-body">'
-      +           '<div class="form-body__label">跨区域调拨</div>'
-      +           '<div class="form-body__right-btn">'
-      +             '<div class="switch ' + (draft.allowTransfer ? 'switch--on' : 'switch--off') + '" data-switch-key="allowTransfer" role="switch" aria-checked="' + (draft.allowTransfer ? 'true' : 'false') + '" tabindex="0">'
-      +               '<div class="switch__thumb"></div>'
-      +             '</div>'
-      +           '</div>'
-      +         '</div>'
+      +         buildFormSwitchRow('锁定预占库存', 'lockReservedStock', draft.lockReservedStock)
+      +         buildFormSwitchRow('跨区域调拨', 'allowTransfer', draft.allowTransfer)
       +       '</div>'
       +     '</div>'
       +     '<div class="form-group">'
