@@ -121,7 +121,7 @@
         {
           "block": "仓库状态字段：启用仓库、默认发货仓，作为进入表单后最优先可操作项",
           "consumption_mode": "free-composition",
-          "selected": ".form-group > .form-group__title『仓库状态』 + .form-group__content（通栏 M1） > .form-body.form-body--preserve-content-align（.form-body__label + .form-body__action > .switch.switch--on/off）；switch 归入 action 左对齐，不放入 right-btn",
+          "selected": ".form-group > .form-group__title『仓库状态』 + .form-group__content（通栏 M1） > .form-body.form-body--preserve-content-align（.form-body__label + 空 .form-body__action + .form-body__right-btn > .switch.switch--on/off）",
           "constraint_ref": {
             "pagePattern": "biz-rule-config",
             "rule_id": "compositionConstraints[5]",
@@ -166,7 +166,7 @@
         {
           "block": "库存与发货字段：安全库存、单日处理上限、发货时效、温层要求、锁定预占库存、支持跨区域调拨",
           "consumption_mode": "free-composition",
-          "selected": ".form-group > .form-group__title『库存与发货』 + .form-group__content（通栏 M1） > 数字字段使用 .form-body + .number-input；枚举字段使用 .form-body.form-body--clickable + .form-body__select；开关字段使用 .form-body.form-body--preserve-content-align + .form-body__action > .switch",
+          "selected": ".form-group > .form-group__title『库存与发货』 + .form-group__content（通栏 M1） > 数字字段使用 .form-body + .number-input；枚举字段使用 .form-body.form-body--clickable + .form-body__select；开关字段使用 .form-body + .form-body__right-btn > .switch",
           "constraint_ref": {
             "pagePattern": "biz-rule-config",
             "rule_id": "compositionConstraints[4]",
@@ -221,9 +221,7 @@
     "新增/编辑表单首组必须是『仓库状态』，启用仓库和默认发货仓进入页面后即可直接操作",
     "表单被编辑后点击取消必须先显示 dialog 挽留；未编辑时可直接关闭",
     "保存后必须回填仓库列表并给出 toast 反馈，默认使用内存状态，不实现 localStorage 持久化",
-    "运行时禁止 fetch()/XHR，本场景全部模板由 scene.js 注册",
-    "switch 等选项类控件统一放在 .form-body__action 中左对齐，不放入 .form-body__right-btn；right-btn 只承接链接、按钮、图标动作、上传位等操作型入口（来源：components/form.json.anatomy.rightAction + structurePatterns）",
-    "必填字段使用 .form-body__label--required + .form-body__label-text + .form-body__required 组合，文案固定为 (必填)，不使用红色星号；本场景必填字段为仓库名称、仓库联系人、联系电话、仓库地址（来源：components/form.json.structurePatterns + anatomy.requiredLabel/requiredText）"
+    "运行时禁止 fetch()/XHR，本场景全部模板由 scene.js 注册"
   ],
   "page_presentation": {
     "type": "push",
