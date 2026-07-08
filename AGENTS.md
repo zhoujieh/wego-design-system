@@ -4,15 +4,16 @@
 
 微购中文静态 App 原型与设计系统仓库。用户提供业务需求，AI 按固定技能链路生成符合微购设计语言的移动端交互原型。
 
-默认面向移动端、微信生态、电商、工具和社交场景。设计方向固定为简洁、干净、淡雅、克制，判断优先级固定为：清晰 > 一致 > 效率 > 美观 > 创新。
+默认面向移动端、微信生态、电商、工具和社交场景，不依赖特定 agent 运行时。设计方向固定为简洁、干净、淡雅、克制，判断优先级固定为：清晰 > 一致 > 效率 > 美观 > 创新。
 
 ## 固定产物
 
 - `wego-app/index.html` 是唯一 App 入口和预览宿主。
 - 业务场景统一进入 `wego-app/scenes/{中文业务场景}/`。
-- 路由使用稳定的 hash `route_id`。
+- 路由使用稳定的 hash `route_id`，例如 `#/my-permission-management`。
 - 电脑端显示手机预览外壳，移动端同链接铺满真实 viewport。
-- `wego-app/lib/` 是设计系统部署副本，禁止直接编辑；必须先改 `.codex/skills/wego-design/` 源文件，再运行同步脚本。
+- 预览以 Vercel 固定链接为主，同时必须支持本地直接打开 `wego-app/index.html`。
+- `wego-app/lib/` 是设计系统部署副本，禁止直接编辑；必须先改 `.codex/skills/wego-design/` 源文件，再运行 `node scripts/sync-wego-app-lib.mjs`。
 
 ## 沟通要求
 
@@ -37,10 +38,10 @@
 
 ## 主链路硬门禁
 
-- 模糊的业务页面请求默认先走 `wego-product`。
+- 模糊的业务页面请求默认先走 `wego-product`；关键需求未确认前不得进入下一环节，且不得擅自修改用户明确的产品要求。
 - 没有 `page_spec`，不得直接进入 `wego-design`。
 - 没有 `design_consumption_plan`，不得直接进入 `wego-ux`。
-- 已有场景的任何修改都必须先进入 `wego-ux` 做偏差判定。
+- 已有场景的任何修改都必须先进入 `wego-ux` 做偏差判定；即使只是间距、文案、Token 或工程实现微调也不能绕过。
 - 当前场景未生成且未注册 `route_id`，不得进入 `wego-tests`。
 - 组件、UI Kit、工作流问题不得误走普通业务开发链路。
 
@@ -51,7 +52,7 @@
 - 业务场景不得依赖 `fetch()` 或 `XHR` 读取本地 HTML 片段。
 - 场景通过 `scene.js` 注册模板、打开方式和交互。
 - 原型必须体现真实业务状态和流程反馈；只有需求明确要求刷新后保留时才使用持久化。
-- 设计系统本体正式迭代必须递增 `.codex/skills/wego-design/metadata.json.version`。
+- 设计系统本体正式迭代必须递增 `.codex/skills/wego-design/metadata.json.version`；纯仓库管理类变更可不递增。
 - 不提交 `.DS_Store`、`.uploads/`。
 - AGENTS.md 只承载跨技能硬约束；具体组件规则、工作流方法和经验候选分别落到对应权威文件。
 
@@ -85,4 +86,5 @@
 - 提交前运行：
   - `node scripts/specs.mjs check`
   - `node scripts/validate-wego-design.mjs`
+  - 正式合并前按需运行 `node scripts/validate-wego-design.mjs --scope=full --strict`
 - 若涉及设计系统源资源，再检查 `wego-app/lib/` 同步状态。
