@@ -68,14 +68,15 @@
 .quick-publish__currency {
   flex-shrink: 0;
   margin-right: 1px;
-  color: var(--text-placeholder);
+  color: var(--text-default);
   font-size: var(--body-lg-font-size);
   line-height: 24px;
   user-select: none;
+  display: none;
 }
 
-.quick-publish__input-wrap--price.has-content .quick-publish__currency {
-  color: var(--text-default);
+.quick-publish__input-wrap--price.has-recognized .quick-publish__currency {
+  display: inline;
 }
 
 .quick-publish__editor-field {

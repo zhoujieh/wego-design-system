@@ -1,5 +1,48 @@
 {
   "schemaVersion": 1,
   "threshold": 3,
-  "candidates": []
+  "candidates": [
+    {
+      "id": "exp-plan-mode-skills-gating",
+      "normalized_key": "plan-mode-must-not-bypass-skill-routing",
+      "title": "Plan Mode 不得绕过技能路由门禁",
+      "status": "observing",
+      "occurrence_count": 1,
+      "threshold": 3,
+      "primary_owner": "wego-ux",
+      "secondary_owners": ["wego-ux", "wego-product", "wego-design", "wego-tests"],
+      "ownership_reason": "问题最早产生在任务入口处的技能路由判断环节。Plan Mode 是执行流程框架，不应替代或跳过技能路由决策；所有涉及已有场景修改、页面生成、设计消费的任务，必须先触发对应技能做偏差判定或规格对齐，再进入 Plan Mode 的计划-执行流程。",
+      "problem_pattern": "用户通过 /plan 或其他方式触发 Plan Mode 后，agent 直接在 Plan Mode 框架内分析代码、生成计划并执行修改，跳过了技能路由判断，导致 wego-ux 偏差判定、wego-design 设计消费、wego-product 需求理解等上游门禁被绕过。",
+      "scene_evidence": [
+        {
+          "date": "2026-07-08",
+          "scene": "快捷发布产品场景交互优化",
+          "summary": "用户用 /plan 进入 Plan Mode，要求优化快捷发布的三个交互细节（失焦触发识别、价格符号显示、空格删除）。agent 直接在 Plan Mode 内修改了 scene.js 和 scene.css，未先触发 wego-ux 技能做已有场景偏差判定。",
+          "source": "用户复盘：为什么没有触发任何技能"
+        }
+      ],
+      "applies_when_candidates": [
+        "任务涉及修改 wego-app/scenes/ 下已有业务场景的代码",
+        "任务涉及页面生成、设计消费、验收回归等明确属于某技能职责范围的工作",
+        "用户使用 /plan 或其他 Plan Mode 入口发起任务"
+      ],
+      "avoid_when_candidates": [
+        "纯文档编写、纯配置修改、纯脚本工具开发，不涉及业务场景或设计系统",
+        "用户明确要求不走技能链路（但仍需确认是否合规）",
+        "确认为设计系统本体迭代且应走 wego-uxsystem-iterate 的任务"
+      ],
+      "expected_rule_target": {
+        "file": "AGENTS.md",
+        "field": "主链路硬门禁 / Plan Mode 与技能路由的关系"
+      },
+      "runtime_reachability": {
+        "consumer_skill": "所有技能入口处的 agent 决策逻辑",
+        "output_field": "任务入口处的技能路由判断",
+        "downstream_consumer": "被触发的对应技能（wego-product / wego-design / wego-ux / wego-tests / wego-uxsystem-iterate）",
+        "acceptance_check": "通过工作流审查或回查，确认涉及已有场景修改的任务是否先触发了对应技能"
+      },
+      "created_at": "2026-07-08T00:00:00.000Z",
+      "updated_at": "2026-07-08T00:00:00.000Z"
+    }
+  ]
 }

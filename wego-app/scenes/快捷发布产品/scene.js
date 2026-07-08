@@ -249,9 +249,22 @@
       function definition(fieldId) { return FIELDS.find(function (field) { return field.id === fieldId; }); }
       function state(fieldId) { if (!form.fields[fieldId]) form.fields[fieldId] = emptyField(); return form.fields[fieldId]; }
 
+      function normalizeWhitespace(el) {
+        var raw = el.textContent;
+        if (!raw) return '';
+        var cleaned = raw.replace(/\u00a0/g, ' ');
+        if (cleaned !== raw) {
+          var focused = document.activeElement === el;
+          var current = focused ? selection(el) : null;
+          el.textContent = cleaned;
+          if (focused && current) setSelection(el, current.start, current.end, false);
+        }
+        return text(cleaned);
+      }
+
       function sync(el, field) {
         unwrapFlashes(el);
-        var raw = text(el.textContent);
+        var raw = normalizeWhitespace(el);
         if (field.mode === 'multi') reconcileMulti(state(field.id), raw);
         else if (field.mode === 'single') reconcileSingle(state(field.id), raw);
         else { state(field.id).rawText = raw; state(field.id).items = []; }
@@ -275,7 +288,7 @@
 
       function recognizeMulti(el, field, caret, animate) {
         unwrapFlashes(el);
-        var raw = text(el.textContent);
+        var raw = normalizeWhitespace(el);
         var currentToken = tokenAt(raw, caret);
         if (!currentToken) { reconcileMulti(state(field.id), raw); return false; }
         var expanded = expandRange(el, field, currentToken, caret);
@@ -293,7 +306,7 @@
 
       function recognizeAll(el, field) {
         unwrapFlashes(el);
-        var raw = text(el.textContent);
+        var raw = normalizeWhitespace(el);
         var items = reconcileMulti(state(field.id), raw);
         var seen = {};
         var duplicate = null;
@@ -309,12 +322,16 @@
 
       function recognizeSingle(el, field, animate) {
         unwrapFlashes(el);
-        reconcileSingle(state(field.id), text(el.textContent));
+        var raw = normalizeWhitespace(el);
+        var previous = state(field.id).items[0];
+        reconcileSingle(state(field.id), raw);
         var item = state(field.id).items[0];
         if (!item) return;
+        var wasRecognized = previous && previous.status === 'recognized' && key(previous.value) === key(item.value);
         item.status = 'recognized';
         item.normalizedValue = normalized(item.value);
-        if (animate !== false) flash(el, item.start, item.end);
+        if (field.type === 'price') el.parentElement.classList.add('has-recognized');
+        if (animate !== false && !wasRecognized) flash(el, item.start, item.end);
       }
 
       function allowedNumberKey(event, field, current) {
@@ -338,7 +355,7 @@
         }
         el.dataset.lastValid = cleaned;
         reconcileSingle(state(field.id), cleaned);
-        if (field.type === 'price') el.parentElement.classList.toggle('has-content', Boolean(cleaned));
+        if (field.type === 'price' && !cleaned) el.parentElement.classList.remove('has-recognized');
       }
 
       function updateAction(el) {
@@ -380,6 +397,7 @@
             else if (field.mode === 'single') recognizeSingle(el, field, true);
             else sync(el, field);
             updateAction(el);
+            el.dataset.skipNextBlur = 'true';
             if (!focusEditor(editors, index + 1)) el.blur();
             return;
           }
@@ -402,7 +420,15 @@
           event.preventDefault();
           document.execCommand('insertText', false, (event.clipboardData || window.clipboardData).getData('text/plain'));
         });
-        el.addEventListener('blur', function () { sync(el, field); updateAction(el); });
+        el.addEventListener('blur', function () {
+          if (el.dataset.skipNextBlur) {
+            delete el.dataset.skipNextBlur;
+            return;
+          }
+          if (field.mode === 'single' && text(el.textContent).trim()) recognizeSingle(el, field, true);
+          else sync(el, field);
+          updateAction(el);
+        });
       }
 
       function hydrate(root) {
@@ -412,7 +438,9 @@
           el.textContent = fieldState.rawText || '';
           el.dataset.lastValid = fieldState.rawText || '';
           updateAction(el);
-          if (field.type === 'price') el.parentElement.classList.toggle('has-content', Boolean(fieldState.rawText));
+          if (field.type === 'price' && fieldState.items && fieldState.items[0] && fieldState.items[0].status === 'recognized') {
+            el.parentElement.classList.add('has-recognized');
+          }
         });
         var visibility = root.querySelector('[data-action="visibility"]');
         if (form.visibility === 'private') {
