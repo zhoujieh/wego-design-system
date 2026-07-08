@@ -1,6 +1,6 @@
 ---
 name: "wego-ux"
-description: 将已落盘的 page_spec 和 design_consumption_plan 实现为 wego-app 静态 App 场景，或按规格迭代已有场景；负责路由、DOM、CSS、交互、状态、资源同步和交付验证。
+description: 将已落盘的 interaction_spec 和 design_plan 实现为 wego-app 静态 App 场景，或按规格迭代已有场景；负责路由、DOM、CSS、交互、状态、资源同步和交付验证。
 ---
 
 # Wego UX
@@ -9,7 +9,7 @@ description: 将已落盘的 page_spec 和 design_consumption_plan 实现为 weg
 
 ## 何时触发
 
-- 已有 `page_spec` 和 `design_consumption_plan`，需要生成或更新 `wego-app` 场景。
+- 已有 `interaction_spec` 和 `design_plan`，需要生成或更新 `wego-app` 场景。
 - 用户要求实现 `scene.js`、`scene.css`、`routes.js`、宿主入口或真实交互。
 - 任何对 `wego-app/scenes/{场景}/` 已有业务场景的修改，无论大小，都先进入本技能做偏差判定。
 
@@ -24,9 +24,9 @@ description: 将已落盘的 page_spec 和 design_consumption_plan 实现为 weg
 开始前必须读取：
 
 1. `AGENTS.md`。
-2. 当前场景 `_spec/page_spec.json`。
-3. 当前场景 `_spec/design_consumption_plan.json`。
-4. `design_consumption_plan.rule_sources_used` 指向的正式来源。
+2. 当前场景 `_spec/interaction_spec.json`。
+3. 当前场景 `_spec/design_plan.json`。
+4. `design_plan.rule_sources_used` 指向的正式来源。
 5. 实际命中的组件契约、Preview、Token、pagePattern 和 fallback blueprint。
 6. 现有 `wego-app` 宿主、路由和目标场景文件。
 
@@ -34,7 +34,7 @@ description: 将已落盘的 page_spec 和 design_consumption_plan 实现为 weg
 
 ## 核心规则
 
-- 实现只能执行已确认的 `page_spec`、`design_consumption_plan` 和其中记录的真实规则来源，自动生成文档不得参与实现判断。
+- 实现只能执行已确认的 `interaction_spec`、`design_plan` 和其中记录的真实规则来源，自动生成文档不得参与实现判断。
 - 修改已有场景前必须先做偏差判定；禁止绕过规格直接修改 `scene.js`、`scene.css` 或路由。
 - 组件结构、变体、状态、Token、页面布局和打开方式必须严格执行设计计划，不得二次设计。
 - 发现内容、组件、展示或规则来源偏差时必须回退上游并更新、归档 `_spec`，不能在实现层自行消化。
@@ -44,7 +44,7 @@ description: 将已落盘的 page_spec 和 design_consumption_plan 实现为 weg
 
 修改已有场景前依次检查：
 
-1. 本次变化是否被 `page_spec.page_surfaces[]`、`information_blocks`、`states` 或 `edge_cases` 覆盖。
+1. 本次变化是否被 `interaction_spec.page_surfaces[]`、`information_blocks`、`states` 或 `edge_cases` 覆盖。
 2. 组件变化是否在对应 `component_mapping[].selected`、`consumption_mode` 和契约范围内。
 3. 页面布局、打开方式、覆盖层级和返回方式是否与 `layout_pattern`、`page_presentation` 一致。
 4. 本次使用的 Token、组件类和行为是否能在 `rule_sources_used` 中追溯。
@@ -53,8 +53,8 @@ description: 将已落盘的 page_spec 和 design_consumption_plan 实现为 weg
 
 | 偏差 | 必须更新 | 回退链路 |
 | --- | --- | --- |
-| 内容、状态、范围或宿主路径偏差 | `page_spec`、`design_consumption_plan` | `wego-product → wego-design → wego-ux` |
-| 组件、布局或组合偏差 | `design_consumption_plan` | `wego-design → wego-ux` |
+| 内容、状态、范围或宿主路径偏差 | `interaction_spec`、`design_plan` | `wego-product → wego-design → wego-ux` |
+| 组件、布局或组合偏差 | `design_plan` | `wego-design → wego-ux` |
 | 展示、打开方式或层级偏差 | 视原因更新两份规格 | `wego-product/wego-design → wego-ux` |
 | 权威来源缺失或冲突 | 正确的规则源和设计计划 | `wego-uxsystem-iterate/wego-design → wego-ux` |
 
@@ -82,8 +82,8 @@ wego-app/
 ├── js/routes.js
 ├── lib/
 └── scenes/{中文业务场景}/
-    ├── _spec/page_spec.json
-    ├── _spec/design_consumption_plan.json
+    ├── _spec/interaction_spec.json
+    ├── _spec/design_plan.json
     ├── scene.js
     └── scene.css
 ```
@@ -160,7 +160,7 @@ window.WegoApp.registerScene({
 
 ## 页面打开方式
 
-只执行 `design_consumption_plan.page_presentation`：
+只执行 `design_plan.page_presentation`：
 
 | type | 实现语义 | navbar 左侧 |
 | --- | --- | --- |
@@ -229,7 +229,7 @@ navbar 绑定：
 - 选择、开关、输入、筛选、批量操作、保存、取消、删除和创建按需求可操作。
 - 保存或完成后有明确反馈，例如 toast、摘要更新、返回或关闭。
 - toast 由宿主 `ctx.toast()` 统一管理，scene 不自建 toast 容器；跨 route、Tab、overlay/push 返回和下一次操作时清理旧 toast，同一时刻只保留一个。
-- 空态、禁用态、错误态和成功态按 `page_spec` 实现。
+- 空态、禁用态、错误态和成功态按 `interaction_spec` 实现。
 - 默认使用内存状态；只有需求明确要求刷新或跨会话保留时使用持久化。
 - switch、计数器等有状态动画的组件优先更新状态 class、`aria-*` 和业务值，不整组重渲染导致动画丢失。
 
