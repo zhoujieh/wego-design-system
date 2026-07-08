@@ -6,8 +6,8 @@
 
 | 用户意图 | 应触发技能 | 前置条件 | 下一步 |
 | --- | --- | --- | --- |
-| 原始业务需求、做页面、做原型、做新场景 | `wego-product` | 无 | 确认并落盘 `page_spec` |
-| 基于已有 `page_spec` 选择页面范式、UI Kit、组件和打开方式 | `wego-design` | 已有且已确认的 `page_spec` | 落盘 `design_consumption_plan` |
+| 原始业务需求、做页面、做原型、做新场景 | `wego-product` | 无 | 确认并落盘 `interaction_spec` |
+| 基于已有 `interaction_spec` 选择页面范式、UI Kit、组件和打开方式 | `wego-design` | 已有且已确认的 `interaction_spec` | 落盘 `design_plan` |
 | 正式生成或更新 `wego-app` 场景 | `wego-ux` | 两份规格已落盘且无 gap | 完成后交给 `wego-tests` |
 | 验收、回归、检查当前业务场景 | `wego-tests` | 场景已生成并注册路由 | 输出 `acceptance_report` |
 | 改组件、Token、Preview、UI Kit、metadata 或守门 | `wego-uxsystem-iterate` 的迭代模式 | 目标属于设计系统本体 | 按同步矩阵执行 |
@@ -17,8 +17,8 @@
 ## 统一硬规则
 
 - 模糊业务页面请求默认先走 `wego-product`。
-- 没有已确认并落盘的 `page_spec` 不进入 `wego-design`。
-- 没有已落盘且无 `gap` 的 `design_consumption_plan` 不进入 `wego-ux`。
+- 没有已确认并落盘的 `interaction_spec` 不进入 `wego-design`。
+- 没有已落盘且无 `gap` 的 `design_plan` 不进入 `wego-ux`。
 - 已有场景的任何修改先进入 `wego-ux` 做偏差判定。
 - 组件、UI Kit、工作流问题不得误走普通业务开发链路。
 - 普通反馈、AI 自查和验收失败不会自动进入经验池。
