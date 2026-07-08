@@ -21,7 +21,7 @@
 
 ## 完成后如何检查
 
-组件已在注册表中存在，结构与状态符合契约，页面示例只被用于结构参考，设计系统源文件与部署副本保持一致。
+组件已在注册表中存在，结构与状态符合契约，页面示例只用于结构参考，设计系统源文件与部署副本保持一致。
 
-<!-- generated-by: scripts/specs.mjs@3 -->
-<!-- source-fingerprint: 5346c166c9b38892d9ddd057eefcd64431073276ed688595b169323d885ee073 -->
+<!-- generated-by: scripts/specs.mjs@4 -->
+<!-- source-fingerprint: f38590e39dc686a6a3f34daae574b7eab97b270500d58576e647e94fc31332cb -->

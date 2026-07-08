@@ -1,8 +1,8 @@
 # 变更同步矩阵
 
-组件、Token、Preview、UI Kit、图标和普通设计系统迭代的原有同步矩阵保留在 `sync-matrix.runtime.md`。执行这些场景时先读取该文件。
+组件、Token、Preview、UI Kit、图标和普通设计系统迭代的基础同步矩阵保留在 `sync-matrix.runtime.md`，它是本 reference 的基础清单，不是技能入口。执行这些场景时先读取该文件，再执行本文件的工作流与单一入口补充规则。
 
-本文件补充工作流迭代、经验候选和自动生成规则文档的同步范围；与 `workflow-iteration.md` 冲突时，以 `workflow-iteration.md` 的门禁为准。
+本文件补充工作流迭代、经验候选、技能单一入口和自动生成规则文档的同步范围；与 `workflow-iteration.md` 冲突时，以 `workflow-iteration.md` 的经验门禁为准；与技能职责冲突时，以对应唯一 `SKILL.md` 为准。
 
 ## 经验候选新增或累计
 
@@ -54,7 +54,7 @@
 - `components/{slug}.json`：单组件结构、状态、变体和行为。
 - `uikit-plan.json`：页面范式、fallback 和多组件组合。
 - `library-consumption.json`：设计系统消费和全局限制。
-- 对应 `SKILL.md` 或 references：技能职责、输入输出和门禁。
+- 对应唯一 `SKILL.md` 或 references：技能职责、输入输出和门禁。
 - `AGENTS.md`：仅跨技能仓库硬约束。
 - `scenarioTypeRegistry`：仅当形成成熟、可复用且会被运行时消费的正式场景类型。
 
@@ -63,6 +63,7 @@
 - 涉及设计系统本体时递增 `metadata.json.version`。
 - 运行 `node scripts/specs.mjs generate`。
 - 运行 `node scripts/specs.mjs check`。
+- 运行 `node scripts/specs.mjs test`。
 - 运行 `node scripts/validate-wego-design.mjs`。
 - 人工检查生成文档是否准确表达正式规则。
 
@@ -70,17 +71,43 @@
 
 必看：
 
-- 目标技能 `SKILL.md`
-- 对应 `SKILL.runtime.md` 或 references
-- `AGENTS.md`
-- `references/workflow-iteration.md`
+- 目标技能唯一的 `SKILL.md`。
+- 目标技能明确引用的 `references/`。
+- `AGENTS.md`。
+- `references/workflow-iteration.md`。
+- `scripts/specs.mjs` 和相关守门。
 
 必做：
 
 - 确认规则没有与结构化权威来源重复。
 - 明确由哪个技能读取、影响哪个输出、如何交接和验收。
-- 运行规则文档生成与检查。
-- 若 `.codex/skills/wego-design/` 内文件发生变化，递增 `metadata.json.version`。
+- 确认技能目录不存在 `SKILL.runtime.md` 或其他并列入口。
+- 全仓清理已删除入口、旧字段和旧规则路径引用。
+- 更新生成脚本 source manifest、README 和同步矩阵。
+- 运行规则文档生成、检查和测试。
+- 若 `.codex/skills/wego-design/` 内正式设计系统文件发生变化，递增 `metadata.json.version`。
+
+## 合并或删除历史 Skill 入口
+
+前提：
+
+- 已对比唯一 `SKILL.md`、历史入口和相关 references。
+- 已区分仍有效规则、被新规则替代的内容和已经废弃的路径。
+
+必改：
+
+- 把有效规则整理进唯一 `SKILL.md`，消除冲突和重复。
+- 删除 `SKILL.runtime.md`、`SKILL.override.md` 等历史入口。
+- 更新 `.codex/skills/README.md`、技能 README、生成脚本 source manifest 和所有运行时引用。
+- 增加结构守门，禁止历史入口重新出现。
+
+必查：
+
+- 上游输出字段与下游消费字段仍一致。
+- 示例、默认值和硬规则没有互相矛盾。
+- 删除文件后不存在断链引用。
+- 自动生成规则文档已重新生成。
+- 全量严格验证通过，或明确记录无法执行的真实限制。
 
 ## 自动生成规则文档
 
@@ -89,15 +116,21 @@
 1. 运行 `node scripts/specs.mjs generate`。
 2. 检查 `.codex/skills/wego-design/specs/` 下 7 份自动生成文档。
 3. 运行 `node scripts/specs.mjs check`。
-4. 运行 `node scripts/validate-wego-design.mjs`。
+4. 运行 `node scripts/specs.mjs test`。
+5. 运行 `node scripts/validate-wego-design.mjs`。
 
 禁止：
 
-- 直接编辑生成文档。
+- 直接编辑生成文档正文。
 - 把生成文档加入运行时读取顺序。
 - 只更新生成文档而不更新权威来源。
 - 在 `specs/` 顶层保留未登记的手工文档；历史资料只能放在归档子目录。
+- 把已删除的历史 Skill 入口保留在 source manifest 中。
 
 ## 每次正式迭代共同项
 
-除本文件外，继续执行 `sync-matrix.runtime.md` 中“每次正式迭代共同项”的全部检查。
+除本文件外，继续执行 `sync-matrix.runtime.md` 中“每次正式迭代共同项”的全部检查，并额外确认：
+
+- 五个主技能都只有一个 `SKILL.md` 入口。
+- 运行时技能没有读取自动生成文档。
+- 规则来源、运行时消费、下游传播和验收链路完整。
