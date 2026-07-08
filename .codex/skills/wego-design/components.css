@@ -922,7 +922,7 @@
 
 /* ── Form ──────────────────────────────────────────────────── */
 /* @anatomy
-   <div class="form-group"> <div class="form-group__title">通栏分组</div> <div class="form-group__content"> <div class="form-body"> <div class="form-body__label">字段名称</div> <div class="form-body__action"><input type="text" placeholder="沿用通栏白底"></div> </div> <div class="form-body"> <div class="form-body__label">说明</div> <div class="form-body__action"><span class="form-body__value form-body__value--seco...
+   <div class="pv-header"><h1>表单容器</h1><p>表单字段容器，支持水平/垂直布局、多输入类型、错误与计数共用消息槽位，并在输入恢复合法后自动回到默认态。</p></div>
 */
 :is(.form,.form-group,.form-group__content){width:100%}
 .form-group{display:flex;flex-direction:column}
@@ -931,28 +931,6 @@
 .form{background:var(--bg-surface)}
 .form-group__content--card{border-radius:var(--radius-8);overflow:hidden}
 :is(.form--no-divider,.form-group--no-divider) .form-body::after{display:none}
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__action{display:flex;align-items:center;justify-content:flex-end}
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__action > input:not(.form-body__phone-input):not(.form-body__money-input),
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__expand-content,
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__money,
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__select,
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__value{flex:0 1 auto;width:auto;max-width:100%;min-width:0;margin-left:auto}
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__action > input:not(.form-body__phone-input):not(.form-body__money-input),
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__expand-content{text-align:right;field-sizing:content}
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__money,
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__select{justify-content:flex-end}
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__money{gap:4px}
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__money-input,
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__select-text{flex:0 1 auto;width:auto;max-width:100%;min-width:0;field-sizing:content}
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__money-input,
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__select-text{text-align:right}
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__money-input::placeholder{text-align:right}
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__select{gap:8px}
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__select-arrow{margin-left:0}
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--vertical) .form-body__counter,
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--vertical) .form-body__error{text-align:right}
-:is(.form--right-align,.form-group--right-align) .form-body.form-body--preserve-content-align .form-body__counter,
-:is(.form--right-align,.form-group--right-align) .form-body.form-body--preserve-content-align .form-body__error{text-align:left}
 
 .form-body{display:flex;flex-direction:row;align-items:center;width:100%;min-height:56px;padding:12px 16px;box-sizing:border-box;position:relative;gap:24px}
 .form-body::after{content:"";position:absolute;bottom:0;left:16px;right:0;border-bottom:0.5px solid var(--border-neutral-l2);pointer-events:none}
@@ -987,7 +965,6 @@
 .form-body__money-input::placeholder{color:var(--text-placeholder);font-weight:var(--font-weight-regular);font-family:var(--body-md-font-family)}
 
 .form-body__select{display:flex;align-items:center;justify-content:space-between;width:100%;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;-webkit-user-select:none;user-select:none}
-.form-body__select:active,.form-body__select.is-pressed{background:var(--bg-state-pressed)}
 .form-body--clickable{cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;-webkit-user-select:none;user-select:none}
 .form-body--clickable:active,.form-body--clickable.is-pressed{background:var(--bg-state-pressed)}
 .form-body__select-text{font-size:var(--body-lg-font-size);font-weight:var(--font-weight-regular);color:var(--text-placeholder);line-height:var(--body-lg-line-height);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-feature-settings:"zero"}
@@ -1039,8 +1016,6 @@
 .form-body__icon-action{display:flex;align-items:center;justify-content:center;width:24px;height:24px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;-webkit-user-select:none;user-select:none;opacity:1;transition:opacity var(--duration-fast) var(--ease-standard)}
 .form-body__icon-action:active,.form-body__icon-action.is-pressed{opacity:.6}
 .form-body__icon-action i{font-size:24px;color:var(--text-default);display:flex;align-items:center;justify-content:center}
-.form-body__right-btn .radio-field-group,
-.form-body__right-btn .checkbox-field-group{flex-wrap:nowrap;justify-content:flex-end}
 .form-body__right-btn .radio-field,
 .form-body__right-btn .checkbox-field{cursor:pointer}
 .form-body__right-btn .radio-field__text,
@@ -1053,7 +1028,6 @@
 .form-dropdown__item-text{font-size:var(--body-lg-font-size);font-weight:var(--font-weight-regular);color:var(--text-default);line-height:var(--body-lg-line-height);font-feature-settings:"zero"}
 .form-dropdown__item-check{width:16px;height:16px;color:var(--text-brand);display:flex;align-items:center;justify-content:center}
 
-.form-body__switch-wrap{display:flex;align-items:center;justify-content:flex-end}
 .form-body__expand-content{font-size:var(--body-md-font-size);font-weight:var(--font-weight-regular);color:var(--text-secondary);line-height:var(--body-md-line-height);padding:0 0 4px;font-feature-settings:"zero"}
 .form-body__value{display:block;font-size:var(--body-lg-font-size);font-weight:var(--font-weight-regular);color:var(--text-default);line-height:var(--body-lg-line-height);font-feature-settings:"zero"}
 .form-body__value--placeholder{color:var(--text-placeholder)}

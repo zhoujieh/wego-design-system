@@ -10,10 +10,9 @@
 <link rel="stylesheet" href="../iconfont.css">
 <link rel="stylesheet" href="../components.css">
 <style>
-.page{max-width:960px;margin:0 auto}
-.scene-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.scene-card{min-width:0}
-.scene-gap{height:8px;background:var(--bg-page)}
+.page{max-width:420px;margin:0 auto}
+.section-group{background:var(--bg-surface);width:100%}
+.section-gap{height:8px;background:var(--bg-page)}
 
 /* @component-css-start */
 :is(.form,.form-group,.form-group__content){width:100%}
@@ -23,28 +22,6 @@
 .form{background:var(--bg-surface)}
 .form-group__content--card{border-radius:var(--radius-8);overflow:hidden}
 :is(.form--no-divider,.form-group--no-divider) .form-body::after{display:none}
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__action{display:flex;align-items:center;justify-content:flex-end}
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__action > input:not(.form-body__phone-input):not(.form-body__money-input),
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__expand-content,
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__money,
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__select,
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__value{flex:0 1 auto;width:auto;max-width:100%;min-width:0;margin-left:auto}
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__action > input:not(.form-body__phone-input):not(.form-body__money-input),
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__expand-content{text-align:right;field-sizing:content}
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__money,
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__select{justify-content:flex-end}
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__money{gap:4px}
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__money-input,
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__select-text{flex:0 1 auto;width:auto;max-width:100%;min-width:0;field-sizing:content}
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__money-input,
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__select-text{text-align:right}
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__money-input::placeholder{text-align:right}
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__select{gap:8px}
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--preserve-content-align) .form-body__select-arrow{margin-left:0}
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--vertical) .form-body__counter,
-:is(.form--right-align,.form-group--right-align) .form-body:not(.form-body--vertical) .form-body__error{text-align:right}
-:is(.form--right-align,.form-group--right-align) .form-body.form-body--preserve-content-align .form-body__counter,
-:is(.form--right-align,.form-group--right-align) .form-body.form-body--preserve-content-align .form-body__error{text-align:left}
 
 .form-body{display:flex;flex-direction:row;align-items:center;width:100%;min-height:56px;padding:12px 16px;box-sizing:border-box;position:relative;gap:24px}
 .form-body::after{content:"";position:absolute;bottom:0;left:16px;right:0;border-bottom:0.5px solid var(--border-neutral-l2);pointer-events:none}
@@ -79,7 +56,6 @@
 .form-body__money-input::placeholder{color:var(--text-placeholder);font-weight:var(--font-weight-regular);font-family:var(--body-md-font-family)}
 
 .form-body__select{display:flex;align-items:center;justify-content:space-between;width:100%;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;-webkit-user-select:none;user-select:none}
-.form-body__select:active,.form-body__select.is-pressed{background:var(--bg-state-pressed)}
 .form-body--clickable{cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;-webkit-user-select:none;user-select:none}
 .form-body--clickable:active,.form-body--clickable.is-pressed{background:var(--bg-state-pressed)}
 .form-body__select-text{font-size:var(--body-lg-font-size);font-weight:var(--font-weight-regular);color:var(--text-placeholder);line-height:var(--body-lg-line-height);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-feature-settings:"zero"}
@@ -131,8 +107,6 @@
 .form-body__icon-action{display:flex;align-items:center;justify-content:center;width:24px;height:24px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;-webkit-user-select:none;user-select:none;opacity:1;transition:opacity var(--duration-fast) var(--ease-standard)}
 .form-body__icon-action:active,.form-body__icon-action.is-pressed{opacity:.6}
 .form-body__icon-action i{font-size:24px;color:var(--text-default);display:flex;align-items:center;justify-content:center}
-.form-body__right-btn .radio-field-group,
-.form-body__right-btn .checkbox-field-group{flex-wrap:nowrap;justify-content:flex-end}
 .form-body__right-btn .radio-field,
 .form-body__right-btn .checkbox-field{cursor:pointer}
 .form-body__right-btn .radio-field__text,
@@ -145,7 +119,6 @@
 .form-dropdown__item-text{font-size:var(--body-lg-font-size);font-weight:var(--font-weight-regular);color:var(--text-default);line-height:var(--body-lg-line-height);font-feature-settings:"zero"}
 .form-dropdown__item-check{width:16px;height:16px;color:var(--text-brand);display:flex;align-items:center;justify-content:center}
 
-.form-body__switch-wrap{display:flex;align-items:center;justify-content:flex-end}
 .form-body__expand-content{font-size:var(--body-md-font-size);font-weight:var(--font-weight-regular);color:var(--text-secondary);line-height:var(--body-md-line-height);padding:0 0 4px;font-feature-settings:"zero"}
 .form-body__value{display:block;font-size:var(--body-lg-font-size);font-weight:var(--font-weight-regular);color:var(--text-default);line-height:var(--body-lg-line-height);font-feature-settings:"zero"}
 .form-body__value--placeholder{color:var(--text-placeholder)}
@@ -164,796 +137,400 @@
 <div class="pv-header"><h1>表单容器</h1><p>表单字段容器，支持水平/垂直布局、多输入类型、错误与计数共用消息槽位，并在输入恢复合法后自动回到默认态。</p></div>
 <div class="page">
 
-<div class="scene-grid">
-  <section class="scene-card">
-    <div class="form-group">
-      <div class="form-group__title">通栏分组</div>
-      <div class="form-group__content">
-        <div class="form-body">
-          <div class="form-body__label">字段名称</div>
-          <div class="form-body__action"><input type="text" placeholder="沿用通栏白底"></div>
-        </div>
-        <div class="form-body">
-          <div class="form-body__label">说明</div>
-          <div class="form-body__action"><span class="form-body__value form-body__value--secondary">宿主层无横向留白</span></div>
-        </div>
-      </div>
+<div class="form-group">
+  <div class="form-group__title">通栏分组</div>
+  <div class="form-group__content">
+    <div class="form-body">
+      <div class="form-body__label">字段名称</div>
+      <div class="form-body__action"><input type="text" placeholder="沿用通栏白底"></div>
     </div>
-  </section>
+    <div class="form-body">
+      <div class="form-body__label">说明</div>
+      <div class="form-body__action"><span class="form-body__value form-body__value--secondary">宿主层无横向留白</span></div>
+    </div>
+  </div>
+</div>
+<div class="section-gap"></div>
 
-  <section class="scene-card">
-    <div class="form-group">
-      <div class="form-group__title">标题 + 卡片内容</div>
-      <div class="form-group__content form-group__content--card">
-        <div class="form-body">
-          <div class="form-body__label">方案名称</div>
-          <div class="form-body__action"><input type="text" value="门店盘点规则"></div>
-        </div>
-        <div class="form-body">
-          <div class="form-body__label">组样式</div>
-          <div class="form-body__action"><span class="form-body__value">宿主层有横向留白，圆角只作用于内容区</span></div>
-        </div>
+<div class="form-group">
+  <div class="form-group__title">标题 + 卡片内容</div>
+  <div class="form-group__content form-group__content--card">
+    <div class="form-body">
+      <div class="form-body__label">方案名称</div>
+      <div class="form-body__action"><input type="text" value="门店盘点规则"></div>
+    </div>
+    <div class="form-body">
+      <div class="form-body__label">组样式</div>
+      <div class="form-body__action"><span class="form-body__value">宿主层有横向留白，圆角只作用于内容区</span></div>
+    </div>
+  </div>
+</div>
+<div class="section-gap"></div>
+
+<div class="form-group">
+  <div class="form-group__title">基础输入对照 / 左对齐</div>
+  <div class="form-group__content form-group__content--card">
+  <div class="form-body" data-validate="text-required">
+    <div class="form-body__label">姓名</div>
+    <div class="form-body__action">
+      <input type="text" placeholder="请输入姓名">
+      <span class="form-body__error">姓名不能为空</span>
+    </div>
+  </div>
+  <div class="form-body" data-validate="number-required">
+    <div class="form-body__label">数量</div>
+    <div class="form-body__action">
+      <input type="text" inputmode="numeric" data-sanitize="digits" placeholder="0">
+      <span class="form-body__error">数量不能为空</span>
+    </div>
+  </div>
+  <div class="form-body form-body--clickable">
+    <div class="form-body__label">支付方式</div>
+    <div class="form-body__action">
+      <div class="form-body__select">
+        <span class="form-body__select-text has-value">即时到账</span>
+        <i class="form-body__select-arrow wego-iconfont-s icon-youjiantou16"></i>
       </div>
     </div>
-  </section>
+  </div>
+  </div>
+</div>
+<div class="section-gap"></div>
+
+<div class="form-group">
+  <div class="form-group__title">前缀字段与整组左对齐</div>
+  <div class="form-group__content form-group__content--card">
+  <div class="form-body form-body--preserve-content-align" data-validate="money-range">
+    <div class="form-body__label">金额</div>
+    <div class="form-body__action">
+      <div class="form-body__money">
+        <span class="form-body__money-symbol has-value">¥</span>
+        <input class="form-body__money-input" type="text" inputmode="decimal" data-sanitize="money" value="888.00">
+      </div>
+      <span class="form-body__error">请输入有效金额，单笔最多 50,000 元</span>
+    </div>
+  </div>
+  <div class="form-body" data-validate="text-required">
+    <div class="form-body__label form-body__label--required"><span class="form-body__label-text">联系人</span><span class="form-body__required">(必填)</span></div>
+    <div class="form-body__action">
+      <input type="text" value="王小满">
+      <span class="form-body__error">联系人不能为空</span>
+    </div>
+  </div>
+  <div class="form-body form-body--preserve-content-align" data-validate="phone">
+    <div class="form-body__label form-body__label--required"><span class="form-body__label-text">手机号</span><span class="form-body__required">(必填)</span></div>
+    <div class="form-body__action">
+      <div class="form-body__phone">
+        <span class="form-body__phone-prefix">+86</span>
+        <div class="form-body__phone-divider"></div>
+        <input class="form-body__phone-input" type="text" inputmode="numeric" data-sanitize="phone" value="17799097490" maxlength="11">
+      </div>
+      <span class="form-body__error">请输入 11 位手机号</span>
+    </div>
+  </div>
+  <div class="form-body form-body--clickable">
+    <div class="form-body__label">通知方式</div>
+    <div class="form-body__action">
+      <div class="form-body__select">
+        <span class="form-body__select-text has-value">短信通知</span>
+        <i class="form-body__select-arrow wego-iconfont-s icon-youjiantou16"></i>
+      </div>
+    </div>
+  </div>
+  </div>
+</div>
+<div class="section-gap"></div>
+
+<div class="form-group">
+  <div class="form-group__title">多行文本与计数</div>
+  <div class="form-group__content form-group__content--card">
+  <div class="form-body form-body--vertical" data-validate="textarea-counter">
+    <div class="form-body__label">备注</div>
+    <div class="form-body__action">
+      <textarea rows="2" maxlength="50" placeholder="请输入备注">这是一个比较长的备注内容</textarea>
+      <span class="form-body__counter">11/50</span>
+      <span class="form-body__error">备注不能为空，且不能超过 50 个字</span>
+    </div>
+  </div>
+  <div class="form-body form-body--vertical form-body--fixed-height" data-validate="textarea-counter">
+    <div class="form-body__label">商品描述</div>
+    <div class="form-body__action">
+      <textarea rows="3" maxlength="200" placeholder="请输入"></textarea>
+      <span class="form-body__counter">0/200</span>
+      <span class="form-body__error">商品描述不能为空，且不能超过 200 个字</span>
+    </div>
+  </div>
+  </div>
 </div>
 
-<div class="scene-gap"></div>
+<div class="section-gap"></div>
 
-<div class="scene-grid">
-  <section class="scene-card">
-    <div class="form-group">
-      <div class="form-group__title">基础输入对照 / 左对齐</div>
-      <div class="form-group__content form-group__content--card">
-      <div class="form-body" data-validate="text-required">
-        <div class="form-body__label">姓名</div>
-        <div class="form-body__action">
-          <input type="text" placeholder="请输入姓名">
-          <span class="form-body__error">姓名不能为空</span>
-        </div>
+<div class="form-group">
+  <div class="form-group__title">右侧控件场景</div>
+  <div class="form-group__content form-group__content--card">
+  <div class="form-body form-body--preserve-content-align">
+    <div class="form-body__label">金额</div>
+    <div class="form-body__action">
+      <div class="form-body__money">
+        <span class="form-body__money-symbol has-value">¥</span>
+        <input class="form-body__money-input" type="text" inputmode="decimal" data-sanitize="money" value="50000.00">
       </div>
-      <div class="form-body" data-validate="number-required">
-        <div class="form-body__label">数量</div>
-        <div class="form-body__action">
-          <input type="text" inputmode="numeric" data-sanitize="digits" placeholder="0">
-          <span class="form-body__error">数量不能为空</span>
-        </div>
+    </div>
+    <div class="form-body__right-btn">
+      <a class="link" href="javascript:void(0)" data-fill-all>全部</a>
+    </div>
+  </div>
+  <div class="form-body form-body--preserve-content-align">
+    <div class="form-body__label">库存数量</div>
+    <div class="form-body__action">
+      <input type="text" inputmode="numeric" data-sanitize="digits" value="128">
+    </div>
+    <div class="form-body__right-btn">
+      <button class="btn btn--medium btn--sm">校验</button>
+    </div>
+  </div>
+  <div class="form-body form-body--icon-text-actions form-body--preserve-content-align">
+    <div class="form-body__label">付款码</div>
+    <div class="form-body__action">
+      <input type="text" value="请扫码录入">
+    </div>
+    <div class="form-body__right-btn form-body__right-btn--icon-text">
+      <button type="button" class="icon-text-btn">
+        <i class="icon-text-btn__icon wego-iconfont-s icon-saoyisao"></i>
+        <span class="icon-text-btn__text">扫码</span>
+      </button>
+    </div>
+  </div>
+  <div class="form-body form-body--icon-text-actions form-body--preserve-content-align">
+    <div class="form-body__label">收款信息</div>
+    <div class="form-body__action">
+      <input type="text" value="可追加更多入口">
+    </div>
+    <div class="form-body__right-btn form-body__right-btn--icon-text">
+      <button type="button" class="icon-text-btn">
+        <i class="icon-text-btn__icon wego-iconfont-s icon-saoyisao"></i>
+        <span class="icon-text-btn__text">扫码</span>
+      </button>
+      <button type="button" class="icon-text-btn">
+        <i class="icon-text-btn__icon wego-iconfont-s icon-tupian"></i>
+        <span class="icon-text-btn__text">相册</span>
+      </button>
+    </div>
+  </div>
+  <div class="form-body form-body--preserve-content-align">
+    <div class="form-body__label">上传图片</div>
+    <div class="form-body__action">
+      <span class="form-body__value">已上传 2 张</span>
+    </div>
+    <div class="form-body__right-btn">
+      <div class="form-body__upload">
+        <div class="form-body__upload-icon"><i class="wego-iconfont-s icon-xiangji"></i></div>
       </div>
-      <div class="form-body form-body--clickable">
-        <div class="form-body__label">支付方式</div>
-        <div class="form-body__action">
-          <div class="form-body__select">
-            <span class="form-body__select-text has-value">即时到账</span>
-            <i class="form-body__select-arrow wego-iconfont-s icon-youjiantou16"></i>
+    </div>
+  </div>
+  <div class="form-body form-body--preserve-content-align">
+    <div class="form-body__label">导入导出</div>
+    <div class="form-body__action">
+      <span class="form-body__value">菜单</span>
+    </div>
+    <div class="form-body__right-btn">
+      <div class="form-body__icon-actions">
+        <div class="form-body__icon-action"><i class="wego-iconfont-s icon-shangchuan"></i></div>
+        <div class="form-body__icon-action"><i class="wego-iconfont-s icon-daochu"></i></div>
+      </div>
+    </div>
+  </div>
+  <div class="form-body form-body--preserve-content-align">
+    <div class="form-body__label">商品类型</div>
+    <div class="form-body__action">
+      <div class="form-body__stack-group">
+        <div class="stack stack--selected">
+          <div class="stack__bg">
+            <span class="stack__label">选项1</span>
+            <span class="stack__check-corner" aria-hidden="true">
+              <i class="wego-iconfont-s icon-gou16 stack__check-icon"></i>
+            </span>
+          </div>
+        </div>
+        <div class="stack">
+          <div class="stack__bg">
+            <span class="stack__label">选项2</span>
+            <span class="stack__check-corner" aria-hidden="true">
+              <i class="wego-iconfont-s icon-gou16 stack__check-icon"></i>
+            </span>
           </div>
         </div>
       </div>
+    </div>
+  </div>
+  <div class="form-body form-body--preserve-content-align">
+    <div class="form-body__label">配送方式</div>
+    <div class="form-body__action">
+      <div class="radio-field-group" role="radiogroup" aria-label="配送方式">
+        <div class="radio-field">
+          <div class="radio radio--sm radio--checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
+          <span class="radio-field__text">到店</span>
+        </div>
+        <div class="radio-field">
+          <div class="radio radio--sm"><div class="radio__inner"></div><div class="radio__dot"></div></div>
+          <span class="radio-field__text">快递</span>
+        </div>
       </div>
     </div>
-  </section>
-
-  <section class="scene-card">
-    <div class="form-group form-group--right-align">
-      <div class="form-group__title">基础输入对照 / 右对齐</div>
-      <div class="form-group__content form-group__content--card">
-      <div class="form-body" data-validate="text-required">
-        <div class="form-body__label">姓名</div>
-        <div class="form-body__action">
-          <input type="text" placeholder="请输入姓名">
-          <span class="form-body__error">姓名不能为空</span>
-        </div>
-      </div>
-      <div class="form-body" data-validate="number-required">
-        <div class="form-body__label">数量</div>
-        <div class="form-body__action">
-          <input type="text" inputmode="numeric" data-sanitize="digits" value="128">
-          <span class="form-body__error">数量不能为空</span>
-        </div>
-      </div>
-      <div class="form-body form-body--clickable">
-        <div class="form-body__label">支付方式</div>
-        <div class="form-body__action">
-          <div class="form-body__select">
-            <span class="form-body__select-text has-value">即时到账</span>
-            <i class="form-body__select-arrow wego-iconfont-s icon-youjiantou16"></i>
+  </div>
+  <div class="form-body form-body--preserve-content-align">
+    <div class="form-body__label">附加服务</div>
+    <div class="form-body__action">
+      <div class="checkbox-field-group" role="group" aria-label="附加服务">
+        <div class="checkbox-field">
+          <div class="checkbox checkbox--checked checkbox--sm">
+            <div class="checkbox__inner"></div>
+            <div class="checkbox__icon">
+              <img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt="">
+            </div>
           </div>
+          <span class="checkbox-field__text">电子发票</span>
+        </div>
+        <div class="checkbox-field">
+          <div class="checkbox checkbox--sm"><div class="checkbox__inner"></div></div>
+          <span class="checkbox-field__text">联系配送</span>
         </div>
       </div>
-      </div>
     </div>
-  </section>
+  </div>
+  <div class="form-body form-body--preserve-content-align">
+    <div class="form-body__label">推送通知</div>
+    <div class="form-body__action">
+      <div class="switch switch--on"><div class="switch__thumb"></div></div>
+    </div>
+  </div>
+  </div>
 </div>
+<div class="section-gap"></div>
 
-<div class="scene-gap"></div>
-
-<div class="scene-grid">
-  <section class="scene-card">
-    <div class="form-group">
-      <div class="form-group__title">前缀字段与整组左对齐 / 占位态</div>
-      <div class="form-group__content form-group__content--card">
-      <div class="form-body form-body--preserve-content-align" data-validate="money-range">
-        <div class="form-body__label">金额</div>
-        <div class="form-body__action">
-          <div class="form-body__money">
-            <span class="form-body__money-symbol">¥</span>
-            <input class="form-body__money-input" type="text" inputmode="decimal" data-sanitize="money" placeholder="0.00">
-          </div>
-          <span class="form-body__error">请输入有效金额，单笔最多 50,000 元</span>
+<div class="form-group">
+  <div class="form-group__title">自定义组合与展开</div>
+  <div class="form-group__content form-group__content--card">
+  <div class="form-body">
+    <div class="form-body__label">采购数量</div>
+    <div class="form-body__action">
+      <div class="counter" data-counter data-counter-min="1" data-counter-max="99">
+        <div class="counter__body">
+          <button class="counter__btn counter__btn--minus" type="button" aria-label="减少"><i class="counter__icon icon-jian16"></i></button>
+          <input class="counter__value" type="text" inputmode="numeric" value="1" maxlength="7">
+          <button class="counter__btn counter__btn--plus" type="button" aria-label="增加"><i class="counter__icon icon-jia16"></i></button>
         </div>
-      </div>
-      <div class="form-body" data-validate="text-required">
-        <div class="form-body__label form-body__label--required"><span class="form-body__label-text">联系人</span><span class="form-body__required">(必填)</span></div>
-        <div class="form-body__action">
-          <input type="text" placeholder="请输入联系人姓名">
-          <span class="form-body__error">联系人不能为空</span>
-        </div>
-      </div>
-      <div class="form-body form-body--preserve-content-align" data-validate="phone">
-        <div class="form-body__label form-body__label--required"><span class="form-body__label-text">手机号</span><span class="form-body__required">(必填)</span></div>
-        <div class="form-body__action">
-          <div class="form-body__phone">
-            <span class="form-body__phone-prefix">+86</span>
-            <div class="form-body__phone-divider"></div>
-            <input class="form-body__phone-input" type="text" inputmode="numeric" data-sanitize="phone" placeholder="请输入手机号" maxlength="11">
-          </div>
-          <span class="form-body__error">请输入 11 位手机号</span>
-        </div>
-      </div>
-      <div class="form-body form-body--clickable">
-        <div class="form-body__label">通知方式</div>
-        <div class="form-body__action">
-          <div class="form-body__select">
-            <span class="form-body__select-text has-value">短信通知</span>
-            <i class="form-body__select-arrow wego-iconfont-s icon-youjiantou16"></i>
-          </div>
-        </div>
-      </div>
       </div>
     </div>
-  </section>
-
-  <section class="scene-card">
-    <div class="form-group">
-      <div class="form-group__title">前缀字段与整组左对齐 / 带值态</div>
-      <div class="form-group__content form-group__content--card">
-      <div class="form-body form-body--preserve-content-align" data-validate="money-range">
-        <div class="form-body__label">金额</div>
-        <div class="form-body__action">
-          <div class="form-body__money">
-            <span class="form-body__money-symbol has-value">¥</span>
-            <input class="form-body__money-input" type="text" inputmode="decimal" data-sanitize="money" value="888.00">
-          </div>
-          <span class="form-body__error">请输入有效金额，单笔最多 50,000 元</span>
-        </div>
-      </div>
-      <div class="form-body" data-validate="text-required">
-        <div class="form-body__label form-body__label--required"><span class="form-body__label-text">联系人</span><span class="form-body__required">(必填)</span></div>
-        <div class="form-body__action">
-          <input type="text" value="王小满">
-          <span class="form-body__error">联系人不能为空</span>
-        </div>
-      </div>
-      <div class="form-body form-body--preserve-content-align" data-validate="phone">
-        <div class="form-body__label form-body__label--required"><span class="form-body__label-text">手机号</span><span class="form-body__required">(必填)</span></div>
-        <div class="form-body__action">
-          <div class="form-body__phone">
-            <span class="form-body__phone-prefix">+86</span>
-            <div class="form-body__phone-divider"></div>
-            <input class="form-body__phone-input" type="text" inputmode="numeric" data-sanitize="phone" value="17799097490" maxlength="11">
-          </div>
-          <span class="form-body__error">请输入 11 位手机号</span>
-        </div>
-      </div>
-      <div class="form-body form-body--clickable">
-        <div class="form-body__label">通知方式</div>
-        <div class="form-body__action">
-          <div class="form-body__select">
-            <span class="form-body__select-text has-value">短信通知</span>
-            <i class="form-body__select-arrow wego-iconfont-s icon-youjiantou16"></i>
-          </div>
-        </div>
-      </div>
+  </div>
+  <div class="form-body">
+    <div class="form-body__label">单价</div>
+    <div class="form-body__action">
+      <div class="number-input">
+        <input class="number-input__field" type="text" inputmode="numeric" value="888">
+        <span class="number-input__suffix">元</span>
       </div>
     </div>
-  </section>
+  </div>
+  <div class="form-body form-body--clickable">
+    <div class="form-body__label">关键信息</div>
+    <div class="form-body__action">
+      <div class="form-body__select">
+        <span class="form-body__select-text has-value form-body__value--secondary">点击展开</span>
+        <i class="form-body__select-arrow wego-iconfont-s icon-xiajiantou16"></i>
+      </div>
+    </div>
+  </div>
+  <div class="form-body">
+    <div class="form-body__label"></div>
+    <div class="form-body__action">
+      <div class="form-body__expand-content">这里是展开后的详细内容</div>
+    </div>
+  </div>
+  <div class="form-body form-body--clickable">
+    <div class="form-body__label">规格</div>
+    <div class="form-body__action">
+      <div class="form-body__select">
+        <span class="form-body__select-text has-value">选项 2</span>
+        <i class="form-body__select-arrow wego-iconfont-s icon-shangxiajiantou16"></i>
+      </div>
+    </div>
+  </div>
+  <div class="form-dropdown">
+    <div class="form-dropdown__item"><span class="form-dropdown__item-text">选项1</span></div>
+    <div class="form-dropdown__item form-dropdown__item--selected"><span class="form-dropdown__item-text">选项2</span><div class="form-dropdown__item-check"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+  </div>
+  </div>
 </div>
+<div class="section-gap"></div>
 
-<div class="scene-gap"></div>
-
-<div class="scene-grid">
-  <section class="scene-card">
-    <div class="form-group">
-      <div class="form-group__title">多行文本与计数 / 左对齐</div>
-      <div class="form-group__content form-group__content--card">
-      <div class="form-body form-body--vertical" data-validate="textarea-counter">
-        <div class="form-body__label">备注</div>
-        <div class="form-body__action">
-          <textarea rows="2" maxlength="50" placeholder="请输入备注">这是一个比较长的备注内容</textarea>
-          <span class="form-body__counter">11/50</span>
-          <span class="form-body__error">备注不能为空，且不能超过 50 个字</span>
-        </div>
+<div class="form-group" data-demo-form="transfer-left">
+  <div class="form-group__title">完整业务表单 / 转账场景</div>
+  <div class="form-group__content form-group__content--card">
+  <div class="form-body" data-validate="text-required">
+    <div class="form-body__label">收款人</div>
+    <div class="form-body__action">
+      <input type="text" placeholder="请输入收款人姓名">
+      <span class="form-body__error">收款人不能为空</span>
+    </div>
+  </div>
+  <div class="form-body form-body--preserve-content-align" data-validate="phone">
+    <div class="form-body__label">手机号</div>
+    <div class="form-body__action">
+      <div class="form-body__phone">
+        <span class="form-body__phone-prefix">+86</span>
+        <div class="form-body__phone-divider"></div>
+        <input class="form-body__phone-input" type="text" inputmode="numeric" data-sanitize="phone" placeholder="请输入手机号" maxlength="11">
       </div>
-      <div class="form-body form-body--vertical form-body--fixed-height" data-validate="textarea-counter">
-        <div class="form-body__label">商品描述</div>
-        <div class="form-body__action">
-          <textarea rows="3" maxlength="200" placeholder="请输入"></textarea>
-          <span class="form-body__counter">0/200</span>
-          <span class="form-body__error">商品描述不能为空，且不能超过 200 个字</span>
-        </div>
+      <span class="form-body__error">请输入 11 位手机号</span>
+    </div>
+  </div>
+  <div class="form-body form-body--preserve-content-align" data-validate="money-range">
+    <div class="form-body__label">金额</div>
+    <div class="form-body__action">
+      <div class="form-body__money">
+        <span class="form-body__money-symbol">¥</span>
+        <input class="form-body__money-input" type="text" inputmode="decimal" data-sanitize="money" placeholder="0.00">
       </div>
+      <span class="form-body__error">请输入有效金额，单笔最多 50,000 元</span>
+    </div>
+    <div class="form-body__right-btn">
+      <a class="link" href="javascript:void(0)" data-fill-all>全部</a>
+    </div>
+  </div>
+  <div class="form-body">
+    <div class="form-body__label">商品数量</div>
+    <div class="form-body__action">
+      <div class="counter" data-counter data-counter-min="1" data-counter-max="99">
+        <div class="counter__body">
+          <button class="counter__btn counter__btn--minus" type="button" aria-label="减少"><i class="counter__icon icon-jian16"></i></button>
+          <input class="counter__value" type="text" inputmode="numeric" value="2" maxlength="7">
+          <button class="counter__btn counter__btn--plus" type="button" aria-label="增加"><i class="counter__icon icon-jia16"></i></button>
+        </div>
       </div>
     </div>
-  </section>
-
-  <section class="scene-card">
-    <div class="form-group">
-      <div class="form-group__title">多行文本与计数 / 右侧列保持同样表现</div>
-      <div class="form-group__content form-group__content--card">
-      <div class="form-body form-body--vertical" data-validate="textarea-counter">
-        <div class="form-body__label">备注</div>
-        <div class="form-body__action">
-          <textarea rows="2" maxlength="50" placeholder="请输入备注">选填，最多 50 字</textarea>
-          <span class="form-body__counter">10/50</span>
-          <span class="form-body__error">备注不能为空，且不能超过 50 个字</span>
-        </div>
-      </div>
-      <div class="form-body form-body--vertical form-body--fixed-height" data-validate="textarea-counter">
-        <div class="form-body__label">详细描述</div>
-        <div class="form-body__action">
-          <textarea rows="3" maxlength="200" placeholder="请输入详细描述"></textarea>
-          <span class="form-body__counter">0/200</span>
-          <span class="form-body__error">详细描述不能为空，且不能超过 200 个字</span>
-        </div>
-      </div>
+  </div>
+  <div class="form-body form-body--clickable">
+    <div class="form-body__label">类型</div>
+    <div class="form-body__action">
+      <div class="form-body__select" data-transfer-type-select>
+        <span class="form-body__select-text">请选择</span>
+        <i class="form-body__select-arrow wego-iconfont-s icon-youjiantou16"></i>
       </div>
     </div>
-  </section>
+  </div>
+  <div class="form-body form-body--vertical" data-validate="textarea-counter">
+    <div class="form-body__label">备注</div>
+    <div class="form-body__action">
+      <textarea rows="2" maxlength="50">选填，最多 50 字</textarea>
+      <span class="form-body__counter">10/50</span>
+      <span class="form-body__error">备注不能为空，且不能超过 50 个字</span>
+    </div>
+  </div>
+  </div>
 </div>
-
-<div class="scene-gap"></div>
-
-<div class="scene-grid">
-  <section class="scene-card">
-    <div class="form-group">
-      <div class="form-group__title">右侧控件默认场景 / 默认展示</div>
-      <div class="form-group__content form-group__content--card">
-      <div class="form-body form-body--preserve-content-align">
-        <div class="form-body__label">金额</div>
-        <div class="form-body__action">
-          <div class="form-body__money">
-            <span class="form-body__money-symbol">¥</span>
-            <input class="form-body__money-input" type="text" inputmode="decimal" data-sanitize="money" placeholder="0.00">
-          </div>
-        </div>
-        <div class="form-body__right-btn">
-          <a class="link" href="javascript:void(0)">全部</a>
-        </div>
-      </div>
-      <div class="form-body form-body--preserve-content-align">
-        <div class="form-body__label">库存数量</div>
-        <div class="form-body__action">
-          <input type="text" inputmode="numeric" data-sanitize="digits" placeholder="请输入">
-        </div>
-        <div class="form-body__right-btn">
-          <button class="btn btn--medium btn--sm">校验</button>
-        </div>
-      </div>
-      <div class="form-body form-body--icon-text-actions form-body--preserve-content-align">
-        <div class="form-body__label">付款码</div>
-        <div class="form-body__action">
-          <input type="text" placeholder="请输入或扫码">
-        </div>
-        <div class="form-body__right-btn form-body__right-btn--icon-text">
-          <button type="button" class="icon-text-btn">
-            <i class="icon-text-btn__icon wego-iconfont-s icon-saoyisao"></i>
-            <span class="icon-text-btn__text">扫码</span>
-          </button>
-        </div>
-      </div>
-      <div class="form-body form-body--icon-text-actions form-body--preserve-content-align">
-        <div class="form-body__label">收款信息</div>
-        <div class="form-body__action">
-          <input type="text" placeholder="支持扫码或相册导入">
-        </div>
-        <div class="form-body__right-btn form-body__right-btn--icon-text">
-          <button type="button" class="icon-text-btn">
-            <i class="icon-text-btn__icon wego-iconfont-s icon-saoyisao"></i>
-            <span class="icon-text-btn__text">扫码</span>
-          </button>
-          <button type="button" class="icon-text-btn">
-            <i class="icon-text-btn__icon wego-iconfont-s icon-tupian"></i>
-            <span class="icon-text-btn__text">相册</span>
-          </button>
-        </div>
-      </div>
-      <div class="form-body form-body--preserve-content-align">
-        <div class="form-body__label">上传图片</div>
-        <div class="form-body__action">
-          <span class="form-body__value form-body__value--placeholder">未上传</span>
-        </div>
-        <div class="form-body__right-btn">
-          <div class="form-body__upload">
-            <div class="form-body__upload-icon"><i class="wego-iconfont-s icon-xiangji"></i></div>
-          </div>
-        </div>
-      </div>
-      <div class="form-body form-body--preserve-content-align">
-        <div class="form-body__label">导入导出</div>
-        <div class="form-body__action">
-          <span class="form-body__value">菜单</span>
-        </div>
-        <div class="form-body__right-btn">
-          <div class="form-body__icon-actions">
-            <div class="form-body__icon-action"><i class="wego-iconfont-s icon-shangchuan"></i></div>
-            <div class="form-body__icon-action"><i class="wego-iconfont-s icon-daochu"></i></div>
-          </div>
-        </div>
-      </div>
-      <div class="form-body form-body--preserve-content-align">
-        <div class="form-body__label">商品类型</div>
-        <div class="form-body__action" aria-hidden="true"></div>
-        <div class="form-body__right-btn">
-          <div class="form-body__stack-group">
-            <div class="stack stack--selected">
-              <div class="stack__bg">
-                <span class="stack__label">选项1</span>
-                <span class="stack__check-corner" aria-hidden="true">
-                  <i class="wego-iconfont-s icon-gou16 stack__check-icon"></i>
-                </span>
-              </div>
-            </div>
-            <div class="stack">
-              <div class="stack__bg">
-                <span class="stack__label">选项2</span>
-                <span class="stack__check-corner" aria-hidden="true">
-                  <i class="wego-iconfont-s icon-gou16 stack__check-icon"></i>
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="form-body form-body--preserve-content-align">
-        <div class="form-body__label">配送方式</div>
-        <div class="form-body__action" aria-hidden="true"></div>
-        <div class="form-body__right-btn">
-          <div class="radio-field-group" role="radiogroup" aria-label="配送方式">
-            <div class="radio-field">
-              <div class="radio radio--sm radio--checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
-              <span class="radio-field__text">到店</span>
-            </div>
-            <div class="radio-field">
-              <div class="radio radio--sm"><div class="radio__inner"></div><div class="radio__dot"></div></div>
-              <span class="radio-field__text">快递</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="form-body form-body--preserve-content-align">
-        <div class="form-body__label">附加服务</div>
-        <div class="form-body__action" aria-hidden="true"></div>
-        <div class="form-body__right-btn">
-          <div class="checkbox-field-group" role="group" aria-label="附加服务">
-            <div class="checkbox-field">
-              <div class="checkbox checkbox--checked checkbox--sm">
-                <div class="checkbox__inner"></div>
-                <div class="checkbox__icon">
-                  <img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt="">
-                </div>
-              </div>
-              <span class="checkbox-field__text">电子发票</span>
-            </div>
-            <div class="checkbox-field">
-              <div class="checkbox checkbox--sm"><div class="checkbox__inner"></div></div>
-              <span class="checkbox-field__text">联系配送</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="form-body form-body--preserve-content-align">
-        <div class="form-body__label">推送通知</div>
-        <div class="form-body__action" aria-hidden="true"></div>
-        <div class="form-body__right-btn">
-          <div class="form-body__switch-wrap"><div class="switch switch--on"><div class="switch__thumb"></div></div></div>
-        </div>
-      </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="scene-card">
-    <div class="form-group">
-      <div class="form-group__title">右侧控件默认场景 / 带值态</div>
-      <div class="form-group__content form-group__content--card">
-      <div class="form-body form-body--preserve-content-align">
-        <div class="form-body__label">金额</div>
-        <div class="form-body__action">
-          <div class="form-body__money">
-            <span class="form-body__money-symbol has-value">¥</span>
-            <input class="form-body__money-input" type="text" inputmode="decimal" data-sanitize="money" value="50000.00">
-          </div>
-        </div>
-        <div class="form-body__right-btn">
-          <a class="link" href="javascript:void(0)">全部</a>
-        </div>
-      </div>
-      <div class="form-body form-body--preserve-content-align">
-        <div class="form-body__label">库存数量</div>
-        <div class="form-body__action">
-          <input type="text" inputmode="numeric" data-sanitize="digits" value="128">
-        </div>
-        <div class="form-body__right-btn">
-          <button class="btn btn--medium btn--sm">校验</button>
-        </div>
-      </div>
-      <div class="form-body form-body--icon-text-actions form-body--preserve-content-align">
-        <div class="form-body__label">付款码</div>
-        <div class="form-body__action">
-          <input type="text" value="请扫码录入">
-        </div>
-        <div class="form-body__right-btn form-body__right-btn--icon-text">
-          <button type="button" class="icon-text-btn">
-            <i class="icon-text-btn__icon wego-iconfont-s icon-saoyisao"></i>
-            <span class="icon-text-btn__text">扫码</span>
-          </button>
-        </div>
-      </div>
-      <div class="form-body form-body--icon-text-actions form-body--preserve-content-align">
-        <div class="form-body__label">收款信息</div>
-        <div class="form-body__action">
-          <input type="text" value="可追加更多入口">
-        </div>
-        <div class="form-body__right-btn form-body__right-btn--icon-text">
-          <button type="button" class="icon-text-btn">
-            <i class="icon-text-btn__icon wego-iconfont-s icon-saoyisao"></i>
-            <span class="icon-text-btn__text">扫码</span>
-          </button>
-          <button type="button" class="icon-text-btn">
-            <i class="icon-text-btn__icon wego-iconfont-s icon-tupian"></i>
-            <span class="icon-text-btn__text">相册</span>
-          </button>
-        </div>
-      </div>
-      <div class="form-body form-body--preserve-content-align">
-        <div class="form-body__label">上传图片</div>
-        <div class="form-body__action">
-          <span class="form-body__value">已上传 2 张</span>
-        </div>
-        <div class="form-body__right-btn">
-          <div class="form-body__upload">
-            <div class="form-body__upload-icon"><i class="wego-iconfont-s icon-xiangji"></i></div>
-          </div>
-        </div>
-      </div>
-      <div class="form-body form-body--preserve-content-align">
-        <div class="form-body__label">导入导出</div>
-        <div class="form-body__action">
-          <span class="form-body__value">菜单</span>
-        </div>
-        <div class="form-body__right-btn">
-          <div class="form-body__icon-actions">
-            <div class="form-body__icon-action"><i class="wego-iconfont-s icon-shangchuan"></i></div>
-            <div class="form-body__icon-action"><i class="wego-iconfont-s icon-daochu"></i></div>
-          </div>
-        </div>
-      </div>
-      <div class="form-body form-body--preserve-content-align">
-        <div class="form-body__label">商品类型</div>
-        <div class="form-body__action" aria-hidden="true"></div>
-        <div class="form-body__right-btn">
-          <div class="form-body__stack-group">
-            <div class="stack stack--selected">
-              <div class="stack__bg">
-                <span class="stack__label">选项1</span>
-                <span class="stack__check-corner" aria-hidden="true">
-                  <i class="wego-iconfont-s icon-gou16 stack__check-icon"></i>
-                </span>
-              </div>
-            </div>
-            <div class="stack">
-              <div class="stack__bg">
-                <span class="stack__label">选项2</span>
-                <span class="stack__check-corner" aria-hidden="true">
-                  <i class="wego-iconfont-s icon-gou16 stack__check-icon"></i>
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="form-body form-body--preserve-content-align">
-        <div class="form-body__label">配送方式</div>
-        <div class="form-body__action" aria-hidden="true"></div>
-        <div class="form-body__right-btn">
-          <div class="radio-field-group" role="radiogroup" aria-label="配送方式">
-            <div class="radio-field">
-              <div class="radio radio--sm radio--checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
-              <span class="radio-field__text">到店</span>
-            </div>
-            <div class="radio-field">
-              <div class="radio radio--sm"><div class="radio__inner"></div><div class="radio__dot"></div></div>
-              <span class="radio-field__text">快递</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="form-body form-body--preserve-content-align">
-        <div class="form-body__label">附加服务</div>
-        <div class="form-body__action" aria-hidden="true"></div>
-        <div class="form-body__right-btn">
-          <div class="checkbox-field-group" role="group" aria-label="附加服务">
-            <div class="checkbox-field">
-              <div class="checkbox checkbox--checked checkbox--sm">
-                <div class="checkbox__inner"></div>
-                <div class="checkbox__icon">
-                  <img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt="">
-                </div>
-              </div>
-              <span class="checkbox-field__text">电子发票</span>
-            </div>
-            <div class="checkbox-field">
-              <div class="checkbox checkbox--sm"><div class="checkbox__inner"></div></div>
-              <span class="checkbox-field__text">联系配送</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="form-body form-body--preserve-content-align">
-        <div class="form-body__label">推送通知</div>
-        <div class="form-body__action" aria-hidden="true"></div>
-        <div class="form-body__right-btn">
-          <div class="form-body__switch-wrap"><div class="switch switch--on"><div class="switch__thumb"></div></div></div>
-        </div>
-      </div>
-      </div>
-    </div>
-  </section>
-</div>
-
-<div class="scene-gap"></div>
-
-<div class="scene-grid">
-  <section class="scene-card">
-    <div class="form-group">
-      <div class="form-group__title">自定义组合与展开场景 / 左对齐</div>
-      <div class="form-group__content form-group__content--card">
-      <div class="form-body">
-        <div class="form-body__label">采购数量</div>
-        <div class="form-body__action">
-          <div class="counter" data-counter data-counter-min="1" data-counter-max="99">
-            <div class="counter__body">
-              <button class="counter__btn counter__btn--minus" type="button" aria-label="减少"><i class="counter__icon icon-jian16"></i></button>
-              <input class="counter__value" type="text" inputmode="numeric" value="1" maxlength="7">
-              <button class="counter__btn counter__btn--plus" type="button" aria-label="增加"><i class="counter__icon icon-jia16"></i></button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="form-body">
-        <div class="form-body__label">单价</div>
-        <div class="form-body__action">
-          <div class="number-input">
-            <input class="number-input__field" type="text" inputmode="numeric" value="888">
-            <span class="number-input__suffix">元</span>
-          </div>
-        </div>
-      </div>
-      <div class="form-body form-body--clickable">
-        <div class="form-body__label">关键信息</div>
-        <div class="form-body__action">
-          <div class="form-body__select">
-            <span class="form-body__select-text has-value form-body__value--secondary">点击展开</span>
-            <i class="form-body__select-arrow wego-iconfont-s icon-xiajiantou16"></i>
-          </div>
-        </div>
-      </div>
-      <div class="form-body">
-        <div class="form-body__label"></div>
-        <div class="form-body__action">
-          <div class="form-body__expand-content">这里是展开后的详细内容</div>
-        </div>
-      </div>
-      <div class="form-body form-body--clickable">
-        <div class="form-body__label">规格</div>
-        <div class="form-body__action">
-          <div class="form-body__select">
-            <span class="form-body__select-text has-value">选项 2</span>
-            <i class="form-body__select-arrow wego-iconfont-s icon-shangxiajiantou16"></i>
-          </div>
-        </div>
-      </div>
-      <div class="form-dropdown">
-        <div class="form-dropdown__item"><span class="form-dropdown__item-text">选项1</span></div>
-        <div class="form-dropdown__item form-dropdown__item--selected"><span class="form-dropdown__item-text">选项2</span><div class="form-dropdown__item-check"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
-      </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="scene-card">
-    <div class="form-group form-group--right-align">
-      <div class="form-group__title">自定义组合与展开场景 / 右对齐</div>
-      <div class="form-group__content form-group__content--card">
-      <div class="form-body">
-        <div class="form-body__label">采购数量</div>
-        <div class="form-body__action">
-          <div class="counter" data-counter data-counter-min="1" data-counter-max="99">
-            <div class="counter__body">
-              <button class="counter__btn counter__btn--minus" type="button" aria-label="减少"><i class="counter__icon icon-jian16"></i></button>
-              <input class="counter__value" type="text" inputmode="numeric" value="12" maxlength="7">
-              <button class="counter__btn counter__btn--plus" type="button" aria-label="增加"><i class="counter__icon icon-jia16"></i></button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="form-body">
-        <div class="form-body__label">单价</div>
-        <div class="form-body__action">
-          <div class="number-input">
-            <input class="number-input__field" type="text" inputmode="numeric" value="888">
-            <span class="number-input__suffix">元</span>
-          </div>
-        </div>
-      </div>
-      <div class="form-body form-body--clickable">
-        <div class="form-body__label">关键信息</div>
-        <div class="form-body__action">
-          <div class="form-body__select">
-            <span class="form-body__select-text has-value form-body__value--secondary">点击展开</span>
-            <i class="form-body__select-arrow wego-iconfont-s icon-xiajiantou16"></i>
-          </div>
-        </div>
-      </div>
-      <div class="form-body">
-        <div class="form-body__label"></div>
-        <div class="form-body__action">
-          <div class="form-body__expand-content">这里是展开后的详细内容</div>
-        </div>
-      </div>
-      <div class="form-body form-body--clickable">
-        <div class="form-body__label">规格</div>
-        <div class="form-body__action">
-          <div class="form-body__select">
-            <span class="form-body__select-text has-value">选项 2</span>
-            <i class="form-body__select-arrow wego-iconfont-s icon-shangxiajiantou16"></i>
-          </div>
-        </div>
-      </div>
-      <div class="form-dropdown">
-        <div class="form-dropdown__item"><span class="form-dropdown__item-text">选项1</span></div>
-        <div class="form-dropdown__item form-dropdown__item--selected"><span class="form-dropdown__item-text">选项2</span><div class="form-dropdown__item-check"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
-      </div>
-      </div>
-    </div>
-  </section>
-</div>
-
-<div class="scene-gap"></div>
-
-<div class="scene-grid">
-  <section class="scene-card">
-    <div class="form-group" data-demo-form="transfer-left">
-      <div class="form-group__title">完整业务表单 / 转账场景（含三段式，整组左对齐）</div>
-      <div class="form-group__content form-group__content--card">
-      <div class="form-body" data-validate="text-required">
-        <div class="form-body__label">收款人</div>
-        <div class="form-body__action">
-          <input type="text" placeholder="请输入收款人姓名">
-          <span class="form-body__error">收款人不能为空</span>
-        </div>
-      </div>
-      <div class="form-body form-body--preserve-content-align" data-validate="phone">
-        <div class="form-body__label">手机号</div>
-        <div class="form-body__action">
-          <div class="form-body__phone">
-            <span class="form-body__phone-prefix">+86</span>
-            <div class="form-body__phone-divider"></div>
-            <input class="form-body__phone-input" type="text" inputmode="numeric" data-sanitize="phone" placeholder="请输入手机号" maxlength="11">
-          </div>
-          <span class="form-body__error">请输入 11 位手机号</span>
-        </div>
-      </div>
-      <div class="form-body form-body--preserve-content-align" data-validate="money-range">
-        <div class="form-body__label">金额</div>
-        <div class="form-body__action">
-          <div class="form-body__money">
-            <span class="form-body__money-symbol">¥</span>
-            <input class="form-body__money-input" type="text" inputmode="decimal" data-sanitize="money" placeholder="0.00">
-          </div>
-          <span class="form-body__error">请输入有效金额，单笔最多 50,000 元</span>
-        </div>
-        <div class="form-body__right-btn">
-          <a class="link" href="javascript:void(0)" data-fill-all>全部</a>
-        </div>
-      </div>
-      <div class="form-body">
-        <div class="form-body__label">商品数量</div>
-        <div class="form-body__action">
-          <div class="counter" data-counter data-counter-min="1" data-counter-max="99">
-            <div class="counter__body">
-              <button class="counter__btn counter__btn--minus" type="button" aria-label="减少"><i class="counter__icon icon-jian16"></i></button>
-              <input class="counter__value" type="text" inputmode="numeric" value="2" maxlength="7">
-              <button class="counter__btn counter__btn--plus" type="button" aria-label="增加"><i class="counter__icon icon-jia16"></i></button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="form-body form-body--clickable">
-        <div class="form-body__label">类型</div>
-        <div class="form-body__action">
-          <div class="form-body__select" data-transfer-type-select>
-            <span class="form-body__select-text">请选择</span>
-            <i class="form-body__select-arrow wego-iconfont-s icon-youjiantou16"></i>
-          </div>
-        </div>
-      </div>
-      <div class="form-body form-body--vertical" data-validate="textarea-counter">
-        <div class="form-body__label">备注</div>
-        <div class="form-body__action">
-          <textarea rows="2" maxlength="50">选填，最多 50 字</textarea>
-          <span class="form-body__counter">10/50</span>
-          <span class="form-body__error">备注不能为空，且不能超过 50 个字</span>
-        </div>
-      </div>
-      </div>
-    </div>
-    <div style="padding:16px">
-      <button class="btn btn--strong btn--lg" style="width:100%;min-width:100%;max-width:100%" data-submit-form="transfer-left">提交</button>
-    </div>
-  </section>
-
-  <section class="scene-card">
-    <div class="form-group form-group--right-align" data-demo-form="transfer-right">
-      <div class="form-group__title">完整业务表单 / 收款场景（纯右对齐）</div>
-      <div class="form-group__content form-group__content--card">
-      <div class="form-body" data-validate="text-required">
-        <div class="form-body__label">收款人</div>
-        <div class="form-body__action">
-          <input type="text" value="王小满">
-          <span class="form-body__error">收款人不能为空</span>
-        </div>
-      </div>
-      <div class="form-body">
-        <div class="form-body__label">订单编号</div>
-        <div class="form-body__action">
-          <input type="text" value="202507010018">
-        </div>
-      </div>
-      <div class="form-body">
-        <div class="form-body__label">商品数量</div>
-        <div class="form-body__action">
-          <div class="counter" data-counter data-counter-min="1" data-counter-max="99">
-            <div class="counter__body">
-              <button class="counter__btn counter__btn--minus" type="button" aria-label="减少"><i class="counter__icon icon-jian16"></i></button>
-              <input class="counter__value" type="text" inputmode="numeric" value="5" maxlength="7">
-              <button class="counter__btn counter__btn--plus" type="button" aria-label="增加"><i class="counter__icon icon-jia16"></i></button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="form-body form-body--clickable">
-        <div class="form-body__label">类型</div>
-        <div class="form-body__action">
-          <div class="form-body__select" data-transfer-type-select>
-            <span class="form-body__select-text has-value">即时到账</span>
-            <i class="form-body__select-arrow wego-iconfont-s icon-youjiantou16"></i>
-          </div>
-        </div>
-      </div>
-      <div class="form-body form-body--vertical" data-validate="textarea-counter">
-        <div class="form-body__label">备注</div>
-        <div class="form-body__action">
-          <textarea rows="2" maxlength="50">选填，最多 50 字</textarea>
-          <span class="form-body__counter">10/50</span>
-          <span class="form-body__error">备注不能为空，且不能超过 50 个字</span>
-        </div>
-      </div>
-      </div>
-    </div>
-    <div style="padding:16px">
-      <button class="btn btn--strong btn--lg" style="width:100%;min-width:100%;max-width:100%" data-submit-form="transfer-right">提交</button>
-    </div>
-  </section>
+<div style="padding:16px">
+  <button class="btn btn--strong btn--lg" style="width:100%;min-width:100%;max-width:100%" data-submit-form="transfer-left">提交</button>
 </div>
 
 <div style="height:48px"></div>

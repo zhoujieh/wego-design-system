@@ -55,6 +55,7 @@
 - 设计系统本体正式迭代必须递增 `.codex/skills/wego-design/metadata.json.version`；纯仓库管理类变更可不递增。
 - 不提交 `.DS_Store`、`.uploads/`。
 - AGENTS.md 只承载跨技能硬约束；具体组件规则、工作流方法和经验候选分别落到对应权威文件。
+- `.trae/skills` 文件夹下的内容是符号链接的副本，禁止直接修改。应该修改 `.codex/skills`下的原始文件。
 
 ## 经验沉淀硬规则
 
