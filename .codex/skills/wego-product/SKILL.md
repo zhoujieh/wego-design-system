@@ -330,6 +330,7 @@ interaction_spec
   - `stub`：只提供入口和明确反馈。
   - `excluded`：本次不包含。
 - `reason`：选择该深度的依据。
+- `feedback`：`depth=stub` 时必填，描述用户可见的明确反馈内容（如 toast 文案、占位提示）；其他 depth 可选。
 
 该字段用于控制原型范围，避免过度实现或过度简化。`blocked` 节点不得进入实现；`stub` 节点必须有明确反馈；`excluded` 节点不得被实现。
 

@@ -1289,6 +1289,66 @@ function readJsonFile(file) {
   }
 }
 
+// 兼容读取：优先 interaction_spec.json，回退 page_spec.json；优先 design_plan.json，回退 design_consumption_plan.json
+function resolveSceneSpecFiles(scene) {
+  const scenePath = path.join(SCENES_ROOT, scene);
+  const specDir = path.join(scenePath, '_spec');
+  const interactionSpecPath = path.join(specDir, 'interaction_spec.json');
+  const pageSpecPath = path.join(specDir, 'page_spec.json');
+  const designPlanPath = path.join(specDir, 'design_plan.json');
+  const consumptionPlanPath = path.join(specDir, 'design_consumption_plan.json');
+  const hasNewSpec = fs.existsSync(interactionSpecPath);
+  const hasLegacySpec = fs.existsSync(pageSpecPath);
+  const hasNewPlan = fs.existsSync(designPlanPath);
+  const hasLegacyPlan = fs.existsSync(consumptionPlanPath);
+  const specPath = hasNewSpec ? interactionSpecPath : (hasLegacySpec ? pageSpecPath : null);
+  const planPath = hasNewPlan ? designPlanPath : (hasLegacyPlan ? consumptionPlanPath : null);
+  const specFormat = hasNewSpec ? 'new' : (hasLegacySpec ? 'legacy' : null);
+  const planFormat = hasNewPlan ? 'new' : (hasLegacyPlan ? 'legacy' : null);
+  return {
+    scenePath, specDir,
+    specPath, planPath,
+    specFormat, planFormat,
+    hasNewSpec, hasLegacySpec, hasNewPlan, hasLegacyPlan,
+    interactionSpecPath, pageSpecPath, designPlanPath, consumptionPlanPath,
+  };
+}
+
+// 从 spec 中提取 route_id：新格式读 prototype_target.routes[0].id，旧格式读 route_id
+function extractRouteIdFromSpec(spec, format) {
+  if (!spec) return null;
+  if (format === 'new') {
+    const routes = spec?.prototype_target?.routes || [];
+    return routes[0]?.id || null;
+  }
+  return spec?.route_id || null;
+}
+
+// 从 spec 中提取 app_target：新格式从 prototype_target 推导，旧格式直接读 app_target
+function extractAppTargetFromSpec(spec, format) {
+  if (!spec) return null;
+  if (format === 'new') {
+    const pt = spec?.prototype_target;
+    if (!pt) return null;
+    return {
+      mode: 'wego-app-scene',
+      app_root: pt.app_root,
+      scene_folder: pt.scenario_folder,
+      route_mode: pt.route_mode || 'hash',
+    };
+  }
+  return spec?.app_target || null;
+}
+
+// 从 spec 中提取 surfaces 列表（统一为 {id, role} 结构）：新格式读 surfaces[]，旧格式读 page_surfaces[]
+function extractSurfacesFromSpec(spec, format) {
+  if (!spec) return [];
+  if (format === 'new') {
+    return (spec?.surfaces || []).map(s => ({ id: s?.surface_id, role: null }));
+  }
+  return (spec?.page_surfaces || []).map(s => ({ id: s?.id, role: s?.role }));
+}
+
 function checkPrototypeSurfaceDesigns(context) {
   const scenes = context.effectiveScope === 'full'
     ? getAllSceneFolders()
@@ -1302,39 +1362,37 @@ function checkPrototypeSurfaceDesigns(context) {
   const registeredRoutes = fs.existsSync(routesPath) ? fs.readFileSync(routesPath, 'utf8') : '';
   let checkedPlans = 0;
   for (const scene of scenes) {
-    const scenePath = path.join(SCENES_ROOT, scene);
-    const specDir = path.join(scenePath, '_spec');
-    const pageSpecPath = path.join(specDir, 'page_spec.json');
-    const planPath = path.join(specDir, 'design_consumption_plan.json');
-    if (!fs.existsSync(pageSpecPath) || !fs.existsSync(planPath)) {
+    const resolved = resolveSceneSpecFiles(scene);
+    const { scenePath, specDir, specPath, planPath, specFormat, planFormat } = resolved;
+    if (!specPath || !planPath) {
       add('error', 'app_scene.spec_missing',
-        'App 场景必须包含 _spec/page_spec.json 和 _spec/design_consumption_plan.json',
+        'App 场景必须包含 _spec/interaction_spec.json（或 page_spec.json）和 _spec/design_plan.json（或 design_consumption_plan.json）',
         scenePath);
       continue;
     }
 
-    const pageSpec = readJsonFile(pageSpecPath);
-    const routeId = pageSpec?.route_id;
-    const appTarget = pageSpec?.app_target;
+    const pageSpec = readJsonFile(specPath);
+    const routeId = extractRouteIdFromSpec(pageSpec, specFormat);
+    const appTarget = extractAppTargetFromSpec(pageSpec, specFormat);
     if (!appTarget || appTarget.mode !== 'wego-app-scene') {
       add('error', 'app_scene.target_missing',
-        'page_spec.app_target.mode 必须为 wego-app-scene',
-        pageSpecPath);
+        'spec 的 app_target.mode（或 prototype_target）必须为 wego-app-scene',
+        specPath);
     }
     if (appTarget?.app_root && appTarget.app_root !== APP_ROOT_REL) {
       add('error', 'app_scene.app_root_invalid',
-        `page_spec.app_target.app_root 必须为 ${APP_ROOT_REL}`,
-        pageSpecPath);
+        `spec 的 app_target.app_root 必须为 ${APP_ROOT_REL}`,
+        specPath);
     }
     if (appTarget?.scene_folder && path.normalize(appTarget.scene_folder) !== path.normalize(`${APP_ROOT_REL}/scenes/${scene}`)) {
       add('error', 'app_scene.folder_mismatch',
-        `page_spec.app_target.scene_folder 必须指向当前场景目录：${APP_ROOT_REL}/scenes/${scene}`,
-        pageSpecPath);
+        `spec 的 app_target.scene_folder 必须指向当前场景目录：${APP_ROOT_REL}/scenes/${scene}`,
+        specPath);
     }
     if (appTarget?.route_mode && appTarget.route_mode !== 'hash') {
       add('error', 'app_scene.route_mode_invalid',
-        'page_spec.app_target.route_mode 必须为 hash',
-        pageSpecPath);
+        'spec 的 app_target.route_mode 必须为 hash',
+        specPath);
     }
     if (routeId && !registeredRoutes.includes(routeId)) {
       add('error', 'app_scene.route_not_registered',
@@ -1358,9 +1416,9 @@ function checkPrototypeSurfaceDesigns(context) {
     checkedPlans++;
     const plan = readJsonFile(planPath);
     if (!plan) continue;
-    if (plan.app_target?.route_id && routeId && plan.app_target.route_id !== routeId) {
+    if (planFormat === 'legacy' && plan.app_target?.route_id && routeId && plan.app_target.route_id !== routeId) {
       add('error', 'app_scene.plan_route_mismatch',
-        `design_consumption_plan.app_target.route_id 与 page_spec.route_id 不一致：${plan.app_target.route_id} !== ${routeId}`,
+        `design_consumption_plan.app_target.route_id 与 spec.route_id 不一致：${plan.app_target.route_id} !== ${routeId}`,
         planPath);
     }
     const presentationType = plan.page_presentation?.type;
@@ -1372,7 +1430,7 @@ function checkPrototypeSurfaceDesigns(context) {
     const surfaces = Array.isArray(plan.surface_designs) ? plan.surface_designs : null;
     if (!surfaces || surfaces.length === 0) {
       add('error', 'prototype.surface_designs_missing',
-        'design_consumption_plan.json 必须包含 surface_designs[]，逐页面声明 exact/near/fallback/gap 设计依据',
+        'design_plan.json 必须包含 surface_designs[]，逐页面声明 exact/near/fallback/gap 设计依据',
         planPath);
       continue;
     }
@@ -1437,76 +1495,82 @@ function checkPrototypeSurfaceDesigns(context) {
     }
 
     if (pageSpec) {
-      const pageSurfaces = Array.isArray(pageSpec?.page_surfaces) ? pageSpec.page_surfaces : [];
-    if (pageSurfaces.length === 0) {
+      const specSurfaces = extractSurfacesFromSpec(pageSpec, specFormat);
+      if (specSurfaces.length === 0) {
         add('error', 'prototype.page_surfaces_missing',
-          'page_spec.json 必须包含 page_surfaces[]，供 design_consumption_plan.surface_designs[] 覆盖',
-          pageSpecPath);
+          'spec 必须包含 surfaces[]（或 page_surfaces[]），供 surface_designs[] 覆盖',
+          specPath);
       }
-      for (const pageSurface of pageSurfaces) {
-        const id = pageSurface?.id;
+      for (const specSurface of specSurfaces) {
+        const id = specSurface?.id;
         if (id && !seen.has(id)) {
           add('error', 'prototype.surface_not_covered',
-            `page_spec.page_surfaces[] 中的 ${id} 未被 design_consumption_plan.surface_designs[] 覆盖`,
+            `spec 中的 ${id} 未被 surface_designs[] 覆盖`,
             planPath);
         }
       }
 
       const hostContainer = pageSpec?.host_container;
-      const routeId = pageSpec?.route_id;
-      if ((hostContainer && !routeId) || (!hostContainer && routeId)) {
+      const hostRouteId = extractRouteIdFromSpec(pageSpec, specFormat);
+      if ((hostContainer && !hostRouteId) || (!hostContainer && hostRouteId)) {
         add('error', 'prototype.host_route_pair_required',
-          'page_spec.json 中 host_container 和 route_id 必须成对出现',
-          pageSpecPath);
+          'spec 中 host_container 和 route_id 必须成对出现',
+          specPath);
       }
       if (hostContainer) {
         if (typeof hostContainer !== 'object' || Array.isArray(hostContainer)) {
-          add('error', 'prototype.host_container_invalid', 'page_spec.host_container 必须为对象', pageSpecPath);
+          add('error', 'prototype.host_container_invalid', 'spec 的 host_container 必须为对象', specPath);
         } else {
           if (!HOST_CONTAINER_TABS.has(hostContainer.tab)) {
             add('error', 'prototype.host_container_tab_invalid',
-              'page_spec.host_container.tab 必须是 my/workspace/dongtai/xiaoxi/haoyou 之一',
-              pageSpecPath);
+              'host_container.tab 必须是 my/workspace/dongtai/xiaoxi/haoyou 之一',
+              specPath);
           }
           if (typeof hostContainer.entry_label !== 'string' || !hostContainer.entry_label.trim()) {
             add('error', 'prototype.host_container_entry_missing',
-              'page_spec.host_container.entry_label 必须为非空字符串',
-              pageSpecPath);
+              'host_container.entry_label 必须为非空字符串',
+              specPath);
           }
           if (typeof hostContainer.subentry_label !== 'string') {
             add('error', 'prototype.host_container_subentry_invalid',
-              'page_spec.host_container.subentry_label 必须为字符串，可为空',
-              pageSpecPath);
+              'host_container.subentry_label 必须为字符串，可为空',
+              specPath);
           }
           if (![1, 2, 3].includes(hostContainer.leaf_level)) {
             add('error', 'prototype.host_container_leaf_level_invalid',
-              'page_spec.host_container.leaf_level 必须为 1/2/3',
-              pageSpecPath);
+              'host_container.leaf_level 必须为 1/2/3',
+              specPath);
           }
           if (!HOST_ENTRY_TYPES.has(hostContainer.entry_type)) {
             add('error', 'prototype.host_container_entry_type_invalid',
-              'page_spec.host_container.entry_type 必须为 cell 或 grid-entry',
-              pageSpecPath);
+              'host_container.entry_type 必须为 cell 或 grid-entry',
+              specPath);
           }
           if (typeof hostContainer.needs_host_entry_surface !== 'boolean') {
             add('error', 'prototype.host_container_host_entry_flag_invalid',
-              'page_spec.host_container.needs_host_entry_surface 必须为布尔值',
-              pageSpecPath);
+              'host_container.needs_host_entry_surface 必须为布尔值',
+              specPath);
           }
+          // host-entry surface 检查：旧格式查 page_surfaces[].role==='host-entry'；新格式查 prototype_target.routes[] 非空
           if (hostContainer.needs_host_entry_surface) {
-            const hasHostEntry = pageSurfaces.some(surface => surface?.role === 'host-entry' || surface?.id === 'host-entry');
+            let hasHostEntry = false;
+            if (specFormat === 'legacy') {
+              hasHostEntry = specSurfaces.some(surface => surface?.role === 'host-entry' || surface?.id === 'host-entry');
+            } else {
+              hasHostEntry = (pageSpec?.prototype_target?.routes || []).length > 0;
+            }
             if (!hasHostEntry) {
               add('error', 'prototype.host_container_host_entry_missing',
-                '声明 host_container.needs_host_entry_surface=true 时，page_surfaces[] 必须包含 host-entry',
-                pageSpecPath);
+                '声明 needs_host_entry_surface=true 时，spec 必须包含 host-entry surface（或 prototype_target.routes[]）',
+                specPath);
             }
           }
         }
       }
-      if (routeId && (typeof routeId !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(routeId))) {
+      if (hostRouteId && (typeof hostRouteId !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(hostRouteId))) {
         add('error', 'prototype.route_id_invalid',
-          'page_spec.route_id 必须为 kebab-case 稳定键，例如 my-settings-price-rule',
-          pageSpecPath);
+          'route_id 必须为 kebab-case 稳定键，例如 my-settings-price-rule',
+          specPath);
       }
     }
   }
@@ -1614,14 +1678,14 @@ function checkPrototypeSpecArchive(context) {
 
   let checkedScenes = 0;
   for (const scene of scenes) {
-    const specDir = path.join(SCENES_ROOT, scene, '_spec');
-    const pageSpecPath = path.join(specDir, 'page_spec.json');
-    const planPath = path.join(specDir, 'design_consumption_plan.json');
+    const resolved = resolveSceneSpecFiles(scene);
+    const { specDir, specPath, planPath } = resolved;
     const archiveDir = path.join(specDir, 'archive');
-    if (!fs.existsSync(pageSpecPath) || !fs.existsSync(planPath)) continue;
+    if (!specPath || !planPath) continue;
 
-    // 检查 _spec 在 git 历史中有过修改
-    const specFiles = [pageSpecPath, planPath];
+    // 检查 _spec 在 git 历史中有过修改（新旧格式文件都计入）
+    const specFiles = [resolved.interactionSpecPath, resolved.pageSpecPath, resolved.designPlanPath, resolved.consumptionPlanPath]
+      .filter(f => fs.existsSync(f));
     let totalCommits = 0;
     for (const specFile of specFiles) {
       const relPath = path.relative(repoRoot, specFile);
@@ -2007,6 +2071,362 @@ function checkMetadataVersionGate(context) {
   }
 }
 
+// 第四阶段：新格式（interaction_spec / design_plan）跨文件 ID 引用校验
+// 仅在场景存在 interaction_spec.json 时执行；旧格式场景不受影响。
+function checkInteractionSpecAndDesignPlanReferences(context) {
+  const scenes = context.effectiveScope === 'full'
+    ? getAllSceneFolders()
+    : getSceneFoldersFromChangedFiles(context.changedFiles);
+  if (scenes.length === 0) return;
+
+  let checkedNewFormat = 0;
+  for (const scene of scenes) {
+    const specDir = path.join(SCENES_ROOT, scene, '_spec');
+    const interactionSpecPath = path.join(specDir, 'interaction_spec.json');
+    if (!fs.existsSync(interactionSpecPath)) continue;
+
+    checkedNewFormat++;
+    const spec = readJsonFile(interactionSpecPath);
+    if (!spec) continue;
+
+    // 禁止新旧格式同时维护
+    const oldSpecPath = path.join(specDir, 'page_spec.json');
+    if (fs.existsSync(oldSpecPath)) {
+      add('error', 'spec.dual_format_forbidden',
+        '禁止同一场景同时维护 interaction_spec.json 和 page_spec.json；旧文件只作为迁移来源，应归档到 _spec/archive/',
+        specDir);
+    }
+
+    // 收集各类 ID 并检查唯一性
+    const flowIds = new Set();
+    const nodeIds = new Set();
+    const surfaceIds = new Set();
+    const contentIds = new Set();
+    const transitionIds = new Set();
+    const handoffIds = new Set();
+
+    const checkUnique = (items, idField, set, code) => {
+      for (const item of (items || [])) {
+        const id = item?.[idField];
+        if (!id || typeof id !== 'string') {
+          add('error', `spec.${code}_missing`, `${idField} 缺失`, interactionSpecPath);
+          continue;
+        }
+        if (set.has(id)) {
+          add('error', `spec.${code}_duplicate`, `${idField} 重复：${id}`, interactionSpecPath);
+        }
+        set.add(id);
+      }
+    };
+
+    checkUnique(spec.flows, 'flow_id', flowIds, 'flow_id');
+    checkUnique(spec.flow_nodes, 'node_id', nodeIds, 'node_id');
+    checkUnique(spec.surfaces, 'surface_id', surfaceIds, 'surface_id');
+    checkUnique(spec.content_blocks, 'content_id', contentIds, 'content_id');
+    checkUnique(spec.transitions, 'transition_id', transitionIds, 'transition_id');
+    checkUnique(spec.data_handoffs, 'handoff_id', handoffIds, 'handoff_id');
+
+    // 2. Flow 引用的 Node 存在
+    for (const flow of (spec.flows || [])) {
+      if (flow?.entry_node && !nodeIds.has(flow.entry_node)) {
+        add('error', 'spec.flow_entry_node_ref_missing',
+          `flow ${flow.flow_id} 的 entry_node 引用了不存在的 node_id：${flow.entry_node}`,
+          interactionSpecPath);
+      }
+      for (const step of (flow?.steps || [])) {
+        if (step && !nodeIds.has(step)) {
+          add('error', 'spec.flow_step_ref_missing',
+            `flow ${flow.flow_id} 的 steps 引用了不存在的 node_id：${step}`,
+            interactionSpecPath);
+        }
+      }
+    }
+
+    // 3. Node 引用的 Surface 存在
+    for (const node of (spec.flow_nodes || [])) {
+      if (node?.surface_ref && !surfaceIds.has(node.surface_ref)) {
+        add('error', 'spec.node_surface_ref_missing',
+          `flow_node ${node.node_id} 的 surface_ref 引用了不存在的 surface_id：${node.surface_ref}`,
+          interactionSpecPath);
+      }
+    }
+
+    // 4. Surface 引用的 Content 和 Node 存在
+    for (const surface of (spec.surfaces || [])) {
+      for (const ref of (surface?.content_refs || [])) {
+        if (ref && !contentIds.has(ref)) {
+          add('error', 'spec.surface_content_ref_missing',
+            `surface ${surface.surface_id} 的 content_refs 引用了不存在的 content_id：${ref}`,
+            interactionSpecPath);
+        }
+      }
+      for (const ref of (surface?.node_refs || [])) {
+        if (ref && !nodeIds.has(ref)) {
+          add('error', 'spec.surface_node_ref_missing',
+            `surface ${surface.surface_id} 的 node_refs 引用了不存在的 node_id：${ref}`,
+            interactionSpecPath);
+        }
+      }
+    }
+
+    // 5. Transition 的 from/to/return_to 存在
+    for (const trans of (spec.transitions || [])) {
+      if (trans?.from && !nodeIds.has(trans.from)) {
+        add('error', 'spec.transition_from_missing',
+          `transition ${trans.transition_id} 的 from 引用了不存在的 node_id：${trans.from}`,
+          interactionSpecPath);
+      }
+      if (trans?.to && !nodeIds.has(trans.to)) {
+        add('error', 'spec.transition_to_missing',
+          `transition ${trans.transition_id} 的 to 引用了不存在的 node_id：${trans.to}`,
+          interactionSpecPath);
+      }
+      if (trans?.return_to && !nodeIds.has(trans.return_to)) {
+        add('error', 'spec.transition_return_to_missing',
+          `transition ${trans.transition_id} 的 return_to 引用了不存在的 node_id：${trans.return_to}`,
+          interactionSpecPath);
+      }
+    }
+
+    // data_handoffs 引用校验
+    for (const handoff of (spec.data_handoffs || [])) {
+      if (handoff?.transition_id && !transitionIds.has(handoff.transition_id)) {
+        add('error', 'spec.handoff_transition_ref_missing',
+          `data_handoff ${handoff.handoff_id} 的 transition_id 引用了不存在的 transition：${handoff.transition_id}`,
+          interactionSpecPath);
+      }
+      if (handoff?.source_node && !nodeIds.has(handoff.source_node)) {
+        add('error', 'spec.handoff_source_node_ref_missing',
+          `data_handoff ${handoff.handoff_id} 的 source_node 引用了不存在的 node_id：${handoff.source_node}`,
+          interactionSpecPath);
+      }
+      if (handoff?.target_node && !nodeIds.has(handoff.target_node)) {
+        add('error', 'spec.handoff_target_node_ref_missing',
+          `data_handoff ${handoff.handoff_id} 的 target_node 引用了不存在的 node_id：${handoff.target_node}`,
+          interactionSpecPath);
+      }
+      for (const ref of (handoff?.payload_content_refs || [])) {
+        if (ref && !contentIds.has(ref)) {
+          add('error', 'spec.handoff_payload_ref_missing',
+            `data_handoff ${handoff.handoff_id} 的 payload_content_refs 引用了不存在的 content_id：${ref}`,
+            interactionSpecPath);
+        }
+      }
+    }
+
+    // prototype_target.routes[].surface_ref 存在
+    const routes = spec?.prototype_target?.routes || [];
+    for (const route of routes) {
+      if (route?.surface_ref && !surfaceIds.has(route.surface_ref)) {
+        add('error', 'spec.route_surface_ref_missing',
+          `prototype_target.routes[] 的 surface_ref 引用了不存在的 surface_id：${route.surface_ref}`,
+          interactionSpecPath);
+      }
+    }
+
+    // 7-9. prototype_boundaries 校验
+    const boundaries = new Map();
+    for (const b of (spec.prototype_boundaries || [])) {
+      const nodeId = b?.node_id;
+      if (!nodeId) {
+        add('error', 'spec.boundary_node_id_missing', 'prototype_boundaries[] 每项必须包含 node_id', interactionSpecPath);
+        continue;
+      }
+      if (!nodeIds.has(nodeId)) {
+        add('error', 'spec.boundary_node_ref_missing',
+          `prototype_boundaries 引用了不存在的 node_id：${nodeId}`,
+          interactionSpecPath);
+      }
+      const depth = b?.depth;
+      if (!['functional', 'simulated', 'stub', 'excluded'].includes(depth)) {
+        add('error', 'spec.boundary_depth_invalid',
+          `prototype_boundaries node ${nodeId} 的 depth 必须为 functional/simulated/stub/excluded`,
+          interactionSpecPath);
+      }
+      // 规则 8：stub 节点必须有明确反馈
+      if (depth === 'stub') {
+        if (!b.feedback || typeof b.feedback !== 'string' || !b.feedback.trim()) {
+          add('error', 'spec.stub_feedback_missing',
+            `stub 节点 ${nodeId} 必须包含 feedback 字段描述用户可见反馈`,
+            interactionSpecPath);
+        }
+      }
+      boundaries.set(nodeId, depth);
+    }
+
+    // functional 节点必须有 surface 承接
+    for (const node of (spec.flow_nodes || [])) {
+      const depth = boundaries.get(node.node_id);
+      if (depth === 'functional' && !node.surface_ref) {
+        add('error', 'spec.functional_node_no_surface',
+          `functional 节点 ${node.node_id} 必须有 surface_ref`,
+          interactionSpecPath);
+      }
+    }
+
+    // excluded 节点不得出现在 flows 主路径中
+    for (const flow of (spec.flows || [])) {
+      if (flow?.entry_node && boundaries.get(flow.entry_node) === 'excluded') {
+        add('error', 'spec.excluded_in_flow_entry',
+          `flow ${flow.flow_id} 的 entry_node ${flow.entry_node} 是 excluded，不得出现在 flows 主路径中`,
+          interactionSpecPath);
+      }
+      for (const step of (flow?.steps || [])) {
+        if (step && boundaries.get(step) === 'excluded') {
+          add('error', 'spec.excluded_in_flow_steps',
+            `flow ${flow.flow_id} 的 steps 包含 excluded 节点 ${step}`,
+            interactionSpecPath);
+        }
+      }
+    }
+
+    // readiness 校验
+    const readiness = spec?.readiness;
+    if (!readiness) {
+      add('error', 'spec.readiness_missing',
+        'interaction_spec 必须包含 readiness 字段',
+        interactionSpecPath);
+    } else if (!['ready', 'ready-with-assumptions', 'partially-ready', 'blocked'].includes(readiness)) {
+      add('error', 'spec.readiness_invalid',
+        `readiness 必须为 ready/ready-with-assumptions/partially-ready/blocked`,
+        interactionSpecPath);
+    }
+
+    // 校验 design_plan.json 与 interaction_spec 的一致性
+    const designPlanPath = path.join(specDir, 'design_plan.json');
+    if (!fs.existsSync(designPlanPath)) continue;
+    const plan = readJsonFile(designPlanPath);
+    if (!plan) continue;
+
+    // 禁止新旧设计计划同时维护
+    const oldPlanPath = path.join(specDir, 'design_consumption_plan.json');
+    if (fs.existsSync(oldPlanPath)) {
+      add('error', 'plan.dual_format_forbidden',
+        '禁止同一场景同时维护 design_plan.json 和 design_consumption_plan.json；旧文件只作为迁移来源，应归档到 _spec/archive/',
+        specDir);
+    }
+
+    // 6. design_plan 只能引用 interaction_spec 中存在的对象
+    const planSurfaceIds = new Set();
+    for (const sd of (plan.surface_designs || [])) {
+      const id = sd?.surface_id;
+      if (!id || typeof id !== 'string') {
+        add('error', 'plan.surface_id_missing', 'surface_designs[] 每项必须包含 surface_id', designPlanPath);
+        continue;
+      }
+      if (planSurfaceIds.has(id)) {
+        add('error', 'plan.surface_id_duplicate', `surface_designs 的 surface_id 重复：${id}`, designPlanPath);
+      }
+      planSurfaceIds.add(id);
+      if (!surfaceIds.has(id)) {
+        add('error', 'plan.surface_ref_unknown',
+          `surface_designs 引用了 interaction_spec 中不存在的 surface_id：${id}`,
+          designPlanPath);
+      }
+    }
+
+    // 所有 interaction_spec surfaces 必须被 design_plan 覆盖
+    for (const sid of surfaceIds) {
+      if (!planSurfaceIds.has(sid)) {
+        add('error', 'plan.surface_not_covered',
+          `interaction_spec 的 surface ${sid} 未被 design_plan.surface_designs 覆盖`,
+          designPlanPath);
+      }
+    }
+
+    // flow_to_surface_decisions 引用校验
+    const decisions = plan.flow_to_surface_decisions || [];
+    const coveredNodeIds = new Set();
+    for (const decision of decisions) {
+      for (const ref of (decision?.node_refs || [])) {
+        coveredNodeIds.add(ref);
+        if (ref && !nodeIds.has(ref)) {
+          add('error', 'plan.decision_node_ref_unknown',
+            `flow_to_surface_decisions 引用了不存在的 node_id：${ref}`,
+            designPlanPath);
+        }
+      }
+      if (decision?.surface_ref && !surfaceIds.has(decision.surface_ref)) {
+        add('error', 'plan.decision_surface_ref_unknown',
+          `flow_to_surface_decisions 引用了不存在的 surface_id：${decision.surface_ref}`,
+          designPlanPath);
+      }
+    }
+
+    // 7. functional/simulated 节点必须被 flow_to_surface_decisions 覆盖（structured/complex）
+    const complexity = plan.complexity_level;
+    if (complexity && complexity !== 'simple') {
+      for (const node of (spec.flow_nodes || [])) {
+        const depth = boundaries.get(node.node_id);
+        if ((depth === 'functional' || depth === 'simulated') && !coveredNodeIds.has(node.node_id)) {
+          add('error', 'plan.node_not_covered_by_decision',
+            `节点 ${node.node_id}（${depth}）未被 flow_to_surface_decisions 覆盖`,
+            designPlanPath);
+        }
+      }
+    }
+
+    // component_patterns.applies_to 引用校验
+    for (const pattern of (plan.component_patterns || [])) {
+      for (const ref of (pattern?.applies_to || [])) {
+        if (ref && !contentIds.has(ref) && !surfaceIds.has(ref)) {
+          add('error', 'plan.pattern_ref_unknown',
+            `component_patterns ${pattern.pattern_id} 的 applies_to 引用了不存在的 ID：${ref}`,
+            designPlanPath);
+        }
+      }
+    }
+
+    // 12. 复杂页面必须存在区域编排
+    if (complexity === 'structured' || complexity === 'complex') {
+      if (!Array.isArray(plan.region_composition) || plan.region_composition.length === 0) {
+        add('error', 'plan.region_composition_missing',
+          `complexity_level=${complexity} 的页面必须有 region_composition`,
+          designPlanPath);
+      } else {
+        const patternIds = new Set((plan.component_patterns || []).map(p => p?.pattern_id).filter(Boolean));
+        const mappingBlocks = new Set((plan.component_mapping || []).map(m => m?.block).filter(Boolean));
+        for (const region of plan.region_composition) {
+          for (const ref of (region?.component_refs || [])) {
+            if (ref && !patternIds.has(ref) && !mappingBlocks.has(ref)) {
+              add('error', 'plan.region_ref_unknown',
+                `region_composition ${region.region_id} 的 component_refs 引用了不存在的 ID：${ref}`,
+                designPlanPath);
+            }
+          }
+        }
+      }
+    }
+
+    // complex 页面必须有 page_strategy 扩展字段
+    if (complexity === 'complex') {
+      const ps = plan.page_strategy || {};
+      if (!ps.first_screen_priority && !ps.first_screen_goal) {
+        add('error', 'plan.complex_first_screen_missing',
+          `complex 页面必须有 page_strategy.first_screen_priority 或 first_screen_goal`,
+          designPlanPath);
+      }
+      if (!ps.region_priority) {
+        add('error', 'plan.complex_region_priority_missing',
+          `complex 页面必须有 page_strategy.region_priority`,
+          designPlanPath);
+      }
+    }
+
+    // 10. design_plan 不得新增业务流程和业务内容
+    // component_mapping.block 必须引用已存在的 content_id
+    for (const mapping of (plan.component_mapping || [])) {
+      const block = mapping?.block;
+      if (block && !contentIds.has(block)) {
+        add('error', 'plan.mapping_block_unknown',
+          `component_mapping.block 引用了不存在的 content_id：${block}；设计计划不得新增业务内容`,
+          designPlanPath);
+      }
+    }
+  }
+  report.metrics.interactionSpecChecked = checkedNewFormat;
+}
+
 function main() {
   if (!['changed', 'full'].includes(requestedScope)) {
     add('error', 'args.scope_invalid', `--scope 只能是 changed 或 full，当前为：${requestedScope}`);
@@ -2076,6 +2496,7 @@ function main() {
   checkPrototypeComponentClassInvention(context);
   checkPrototypeSinglePreviewShellRouting(context);
   checkPrototypeHostShellUniqueness(context);
+  checkInteractionSpecAndDesignPlanReferences(context);
   checkMetadataVersionGate(context);
 
   finish();
