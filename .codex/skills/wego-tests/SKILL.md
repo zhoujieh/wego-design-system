@@ -23,11 +23,11 @@ description: 验收 wego-app 当前业务场景并输出 acceptance_report，检
 
 开始前必须存在：
 
-- `_spec/page_spec.json`
-- `_spec/design_consumption_plan.json`
+- `_spec/interaction_spec.json`
+- `_spec/design_plan.json`
 - `scene.js` 和 `scene.css`
 - 当前 `route_id` 的路由注册和宿主入口
-- `design_consumption_plan.rule_sources_used` 指向的正式来源
+- `design_plan.rule_sources_used` 指向的正式来源
 
 任一前提缺失时，直接判定前置条件失败并归因到对应上游；不得用截图、自然语言说明或自动生成文档代替。
 
@@ -35,8 +35,8 @@ description: 验收 wego-app 当前业务场景并输出 acceptance_report，检
 
 按以下来源比较：
 
-1. 用户已确认并落盘的 `page_spec`。
-2. 已落盘的 `design_consumption_plan`。
+1. 用户已确认并落盘的 `interaction_spec`。
+2. 已落盘的 `design_plan`。
 3. `rule_sources_used` 指向的组件契约、pagePattern、fallback、Token 和 Preview。
 4. 当前 scene、路由、宿主入口、资源和真实状态变化。
 5. 自动化守门和本轮实际执行记录。
@@ -71,7 +71,7 @@ description: 验收 wego-app 当前业务场景并输出 acceptance_report，检
 
 必须输出：
 
-```json
+```
 {
   "requirement_coverage": [],
   "scene_judgement_check": {},
@@ -126,8 +126,8 @@ description: 验收 wego-app 当前业务场景并输出 acceptance_report，检
 
 ### 规则来源
 
-- `page_spec` 使用 `rule_sources`，不存在 `spec_refs`。
-- `design_consumption_plan` 使用 `rule_sources_used`，不存在 `spec_refs_used`。
+- `interaction_spec` 使用 `rule_sources`，不存在 `spec_refs`。
+- `design_plan` 使用 `rule_sources_used`，不存在 `spec_refs_used`。
 - 每个 pagePattern、blueprint、布局、presentation 和组件映射能定位真实文件与字段。
 - `rule_sources_used` 不包含 `specs/*.md`、不存在的路径或未实际命中的来源。
 - 发现来源缺失时归因到 `wego-product` 或 `wego-design`，不能让 `wego-ux` 自行补判。
@@ -148,7 +148,6 @@ description: 验收 wego-app 当前业务场景并输出 acceptance_report，检
 ### 对象管理列表
 
 命中 `object-management-list-composition` 或 `object-management-list-page` 时：
-
 - 列表只展示对象识别、关键状态、1–2 条摘要和必要操作。
 - 详情字段没有摊满列表。
 - 默认横向主结构；纵向结构有明确设计依据。
@@ -183,7 +182,7 @@ description: 验收 wego-app 当前业务场景并输出 acceptance_report，检
 ### 真实交互
 
 - 选择、输入、开关、筛选、保存、取消、删除、创建等状态有可见变化。
-- 成功、失败、删除确认、空态、禁用和中断流程按 `page_spec` 出现。
+- 成功、失败、删除确认、空态、禁用和中断流程按 `interaction_spec` 出现。
 - 保存或完成后有 toast、摘要回填、返回或关闭等明确结果。
 - toast 由宿主管理，同一时刻一个，跨 route、Tab、返回和下一次操作正确清理。
 - 默认不持久化；只有需求明确要求时才使用 localStorage。
