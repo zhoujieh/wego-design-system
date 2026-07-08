@@ -3,15 +3,27 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const VERSION = '3';
+const VERSION = '4';
 const ROOT = path.resolve(process.env.WEGO_REPO_ROOT || process.cwd());
 const OUT = path.join(ROOT, '.codex/skills/wego-design/specs');
 const CMD = process.argv[2];
 const JSON_OUT = process.argv.includes('--json');
 const NOTICE = '本文档由系统规则自动生成，用于人工检查。请勿直接修改；如需调整规则，应修改对应权威来源后重新生成。';
 const FILES = [
-  '工作流总览与优先级.md', '需求理解规则.md', '页面设计规则.md', '组件与UI-Kit使用规则.md',
-  '原型实现规则.md', '验收与回归规则.md', '工作流迭代与经验沉淀规则.md',
+  '工作流总览与优先级.md',
+  '需求理解规则.md',
+  '页面设计规则.md',
+  '组件与UI-Kit使用规则.md',
+  '原型实现规则.md',
+  '验收与回归规则.md',
+  '工作流迭代与经验沉淀规则.md',
+];
+const SKILL_DIRS = [
+  '.codex/skills/wego-product',
+  '.codex/skills/wego-design',
+  '.codex/skills/wego-ux',
+  '.codex/skills/wego-tests',
+  '.codex/skills/wego-uxsystem-iterate',
 ];
 
 const text = rel => {
@@ -32,13 +44,18 @@ function sources() {
   const index = json('.codex/skills/wego-design/components/index.json');
   const components = (index.components || []).map(({ slug }) => `.codex/skills/wego-design/components/${slug}.json`);
   return [
-    'AGENTS.md', 'README.md', '.codex/skills/README.md',
-    '.codex/skills/wego-product/SKILL.md', '.codex/skills/wego-product/SKILL.runtime.md',
-    '.codex/skills/wego-design/SKILL.md', '.codex/skills/wego-design/SKILL.runtime.md',
-    '.codex/skills/wego-design/README.md', '.codex/skills/wego-design/library-consumption.json',
-    '.codex/skills/wego-design/uikit-plan.json', '.codex/skills/wego-design/components/index.json', ...components,
-    '.codex/skills/wego-ux/SKILL.md', '.codex/skills/wego-ux/SKILL.runtime.md',
-    '.codex/skills/wego-tests/SKILL.md', '.codex/skills/wego-tests/SKILL.runtime.md',
+    'AGENTS.md',
+    'README.md',
+    '.codex/skills/README.md',
+    '.codex/skills/wego-product/SKILL.md',
+    '.codex/skills/wego-design/SKILL.md',
+    '.codex/skills/wego-design/README.md',
+    '.codex/skills/wego-design/library-consumption.json',
+    '.codex/skills/wego-design/uikit-plan.json',
+    '.codex/skills/wego-design/components/index.json',
+    ...components,
+    '.codex/skills/wego-ux/SKILL.md',
+    '.codex/skills/wego-tests/SKILL.md',
     '.codex/skills/wego-uxsystem-iterate/SKILL.md',
     '.codex/skills/wego-uxsystem-iterate/references/workflow.md',
     '.codex/skills/wego-uxsystem-iterate/references/judgment-principles.md',
@@ -46,7 +63,8 @@ function sources() {
     '.codex/skills/wego-uxsystem-iterate/references/sync-matrix.md',
     '.codex/skills/wego-uxsystem-iterate/references/sync-matrix.runtime.md',
     '.codex/skills/wego-uxsystem-iterate/experience/README.md',
-    'scripts/validate-wego-design.mjs', 'scripts/validate-wego-design-core.mjs',
+    'scripts/validate-wego-design.mjs',
+    'scripts/validate-wego-design-core.mjs',
   ].sort();
 }
 
@@ -67,7 +85,7 @@ function sourceSection(rel, heading) {
   const value = text(rel);
   const marker = `## ${heading}`;
   const start = value.indexOf(marker);
-  if (start < 0) return '';
+  if (start < 0) throw new Error(`${rel} 缺少“${heading}”章节`);
   const rest = value.slice(start + marker.length).replace(/^\s+/, '');
   const next = rest.search(/^## /m);
   return (next >= 0 ? rest.slice(0, next) : rest).trim();
@@ -90,43 +108,40 @@ function mappedRules(rel, heading, mappings) {
 
 function render() {
   const index = json('.codex/skills/wego-design/components/index.json');
-  const plan = json('.codex/skills/wego-design/uikit-plan.json');
-  const consumption = json('.codex/skills/wego-design/library-consumption.json');
   const { value: fp, count } = fingerprint();
   const componentNames = (index.components || []).map(item => item.name).join('、') || '暂无';
-  const kitNames = (plan.uiKits || []).map(item => ({
+  const kitNames = (index.uiKits || []).map(item => ({
     'biz-rule-config': '业务规则配置',
     'system-settings': '系统设置',
   }[item.slug] || item.slug)).join('、') || '暂无';
-  const typeNames = (consumption.scenarioTypeRegistry?.types || []).map(item => item.name).join('、') || '暂无';
 
-  const productRules = mappedRules('.codex/skills/wego-product/SKILL.md', '本轮覆盖规则', [
-    { match: /自动生成.*不是运行时规则来源/, output: '只根据用户需求和正式工作流规则理解任务，自动生成的检查文档不能补充或改变需求。' },
-    { match: /忽略.*旧说明/, output: '历史兼容规则与当前入口冲突时，以当前入口为准。' },
-    { match: /不再输出.*spec_refs/, output: '需求规格只记录真实判断依据，不引用自动生成文档。' },
-    { match: /information_blocks.*只能来自/, output: '页面信息、状态、异常流程和宿主路径必须来自用户需求与结构化判断，不能凭惯例发明。' },
-    { match: /需求未确认前/, output: '关键需求未确认前不进入页面设计；确认后先落盘需求规格再交接。' },
+  const productRules = mappedRules('.codex/skills/wego-product/SKILL.md', '核心规则', [
+    { match: /自动生成.*不得作为运行时规则来源/, output: '只根据用户需求和正式工作流规则理解任务，自动生成的检查文档不能补充或改变需求。' },
+    { match: /页面信息、状态、异常流程和宿主路径只能来自/, output: '页面信息、状态、异常流程和宿主路径必须来自用户需求与真实业务事实，不能凭模板或惯例发明。' },
+    { match: /关键歧义.*用户确认/, output: '会改变页面范围、核心流程、数据含义或宿主层级的关键歧义，必须在进入设计前确认。' },
+    { match: /使用 `rule_sources`/, output: '需求规格只记录真实判断依据，不引用自动生成文档。' },
+    { match: /必须先落盘 `page_spec`/, output: '需求确认后先保存需求规格，再交给页面设计。' },
   ]);
-  const designRules = mappedRules('.codex/skills/wego-design/SKILL.md', '本轮覆盖规则', [
-    { match: /不得在运行时读取/, output: '设计判断只使用已确认需求、正式页面范式、设计令牌、组件契约和真实示例。' },
-    { match: /忽略.*旧规范/, output: '历史规则与当前入口冲突时，以当前入口为准。' },
-    { match: /设计决策只能来自/, output: '先确认页面职责和结构，再选择现有页面范式、组件与组合方式。' },
-    { match: /rule_sources_used/, output: '每个关键设计决定都要记录真实依据，方便实现和验收追溯。' },
-    { match: /无法追溯时标记为.*gap/, output: '找不到可靠依据时必须标记设计缺口，不能把判断甩给实现阶段。' },
+  const designRules = mappedRules('.codex/skills/wego-design/SKILL.md', '核心规则', [
+    { match: /设计判断只能来自/, output: '设计判断只使用已确认需求、正式页面范式、设计令牌、组件契约和真实示例。' },
+    { match: /必须记录到 `rule_sources_used`/, output: '每个关键设计决定都要记录真实依据，方便实现和验收追溯。' },
+    { match: /不得重新发明需求/, output: '页面设计不能重新发明字段、状态或流程，发现需求缺口要回到需求理解环节。' },
+    { match: /必须标记 `gap`/, output: '找不到可靠页面范式、兜底结构或组件依据时必须标记设计缺口，不能把判断甩给实现阶段。' },
+    { match: /必须落盘后才能交给/, output: '设计计划保存并通过完整性检查后，才能进入原型实现。' },
   ]);
-  const uxRules = mappedRules('.codex/skills/wego-ux/SKILL.md', '本轮覆盖规则', [
-    { match: /只用于人工检查/, output: '实现只执行已确认的需求规格和设计计划，不从自动生成文档重新做设计判断。' },
-    { match: /忽略.*旧说明/, output: '历史兼容规则与当前入口冲突时，以当前入口为准。' },
-    { match: /实现依据固定为/, output: '实现前必须确认需求规格、设计计划和实际规则依据都已齐全。' },
-    { match: /不得因为生成文档/, output: '不能用通俗摘要覆盖组件契约、页面范式或设计计划中的明确决定。' },
-    { match: /必须回退到对应上游技能/, output: '发现规格缺失、冲突或无法追溯时，回到产生问题的上游环节修正，不能在实现阶段自行补规则。' },
+  const uxRules = mappedRules('.codex/skills/wego-ux/SKILL.md', '核心规则', [
+    { match: /实现只能执行已确认的/, output: '实现只执行已确认的需求规格、设计计划和正式规则依据，不从自动生成文档重新做设计判断。' },
+    { match: /修改已有场景前必须先做偏差判定/, output: '修改已有场景前先核对需求、组件、布局和打开方式是否仍在规格范围内。' },
+    { match: /必须严格执行设计计划/, output: '组件结构、状态、页面布局和打开方式必须严格执行设计计划，不得二次设计。' },
+    { match: /必须回退上游/, output: '发现内容、组件、展示或规则来源偏差时，回到最早产生问题的环节修正。' },
+    { match: /必须经过 `wego-tests`/, output: '场景完成后必须验收，提交、推送和部署状态只按真实执行结果报告。' },
   ]);
-  const testRules = mappedRules('.codex/skills/wego-tests/SKILL.md', '本轮覆盖规则', [
-    { match: /不得作为验收依据/, output: '验收只比较已确认需求、设计计划、正式规则依据和当前实现。' },
-    { match: /忽略.*旧规范路径/, output: '历史验收规则与当前入口冲突时，以当前入口为准。' },
-    { match: /验收依据固定为/, output: '需求、设计、路由、交互状态和自动化守门必须一起检查，不能只看其中一层。' },
-    { match: /rule_source_check/, output: '每个关键设计和实现决定都要能追溯到正式规则来源。' },
-    { match: /最早产生错误的工作流环节/, output: '问题必须归因到最早做错决定的环节，不能只看最后改了哪个文件。' },
+  const testRules = mappedRules('.codex/skills/wego-tests/SKILL.md', '核心规则', [
+    { match: /必须同时比较需求、设计计划/, output: '验收必须一起检查需求、设计计划、正式规则依据和当前实现，不能只看截图或脚本结果。' },
+    { match: /使用 `rule_source_check`/, output: '每个关键设计和实现决定都要能追溯到正式规则来源。' },
+    { match: /最早产生错误决定的工作流环节/, output: '问题必须归因到最早做错决定的环节，不能只看最后改了哪个文件。' },
+    { match: /正常路径、空内容、长内容/, output: '除正常路径外，还要按需求检查空内容、长内容、重复操作、中断、失败、键盘焦点和返回恢复。' },
+    { match: /只有真实执行过的/, output: '只记录真实执行过的脚本、浏览器检查、提交、推送和部署结果。' },
   ]);
   const experienceRules = mappedRules('.codex/skills/wego-uxsystem-iterate/SKILL.md', '经验候选硬门禁', [
     { match: /不能自动进入经验池/, output: '普通反馈、自查和验收失败只用于修复当前任务，不会自动沉淀经验。' },
@@ -143,50 +158,44 @@ function render() {
   const docs = {};
   docs[FILES[0]] = doc('工作流总览与优先级', [
     section('什么时候使用', '任何新页面、新场景或业务修改，都先判断任务属于需求理解、页面设计、原型实现、验收，还是设计系统迭代。'),
-    section('应该怎么做', bullets(['新需求先形成需求规格。','需求规格确认后形成设计计划。','设计计划确认后实现或更新 App 场景。','场景完成并注册路由后再验收。','组件、页面范式和工作流本体进入项目级迭代。'])),
-    section('不能怎么做', bullets(['不能跳过上游规格直接写页面。','不能把组件或工作流问题当普通业务开发处理。','不能用自动生成文档代替正式规则来源。'])),
-    section('完成后如何检查', '确认每一阶段都有明确输入、输出和下一步交接，且判断优先级始终是：清晰 > 一致 > 效率 > 美观 > 创新。'),
+    section('应该怎么做', bullets(['新需求先形成并确认需求规格。','需求规格确认后形成设计计划。','设计计划无缺口后实现或更新 App 场景。','场景完成并注册路由后再验收。','组件、页面范式和工作流本体进入项目级迭代。'])),
+    section('不能怎么做', bullets(['不能跳过上游规格直接写页面。','不能把组件或工作流问题当普通业务开发处理。','不能用自动生成文档代替正式规则来源。','每个技能只能有一个运行时入口。'])),
+    section('完成后如何检查', '确认每一阶段都有唯一入口、明确输入、输出、真实规则来源和下一步交接，且判断优先级始终是：清晰 > 一致 > 效率 > 美观 > 创新。'),
   ].join('\n'), fp);
-
   docs[FILES[1]] = doc('需求理解规则', [
     section('什么时候使用', '收到新的业务页面、原型、场景或流程调整需求时使用。'),
     section('应该怎么做', bullets(productRules)),
     section('不能怎么做', bullets(['不能提前选择组件或布局代替需求判断。','不能从历史示例、页面模板或自动生成文档中发明字段、状态和流程。'])),
-    section('完成后如何检查', '用户目标、页面范围、信息块、状态、异常流程和宿主路径都已明确，并且关键歧义已经确认。'),
+    section('完成后如何检查', '用户目标、页面范围、信息块、状态、异常流程和宿主路径都已明确，关键歧义已经确认，需求规格已经保存。'),
   ].join('\n'), fp);
-
   docs[FILES[2]] = doc('页面设计规则', [
     section('什么时候使用', '需求规格已经确认，需要决定页面结构、布局、组件组合和打开方式时使用。'),
     section('应该怎么做', bullets(designRules)),
     section('不能怎么做', bullets(['不能只凭视觉感觉拼组件。','不能临时发明页面范式、组件类或打开方式。','不能让内容多少改变主要区域的整体宽度和对齐。'])),
-    section('完成后如何检查', `当前正式沉淀的场景类型包括：${typeNames}。检查每个页面都能说明使用了什么结构、为什么这样组合、如何打开，以及依据来自哪里。`),
+    section('完成后如何检查', '检查每个页面都能说明使用了什么结构、为什么这样组合、如何打开，以及依据来自哪个正式文件和字段。'),
   ].join('\n'), fp);
-
   docs[FILES[3]] = doc('组件与 UI Kit 使用规则', [
     section('什么时候使用', '页面结构已经确定，需要选择稳定组件、组合方式或页面示例时使用。'),
-    section('应该怎么做', bullets([`当前稳定组件包括：${componentNames}。`,`当前页面示例包括：${kitNames}。`,`先看组件契约和真实示例，再决定结构、状态和组合。`,`页面示例只用于理解骨架、节奏和固定位置，业务内容必须按当前需求重新组织。`])),
+    section('应该怎么做', bullets([`当前稳定组件包括：${componentNames}。`,`当前页面示例包括：${kitNames}。`,'先看组件契约和真实示例，再决定结构、状态和组合。','页面示例只用于理解骨架、节奏和固定位置，业务内容必须按当前需求重新组织。'])),
     section('不能怎么做', bullets(['不能复制手机壳、展示外框或演示业务内容作为正式页面。','不能发明未登记的组件、子结构或修饰方式。','不能直接修改 App 中的设计系统副本。'])),
-    section('完成后如何检查', '组件已在注册表中存在，结构与状态符合契约，页面示例只被用于结构参考，设计系统源文件与部署副本保持一致。'),
+    section('完成后如何检查', '组件已在注册表中存在，结构与状态符合契约，页面示例只用于结构参考，设计系统源文件与部署副本保持一致。'),
   ].join('\n'), fp);
-
   docs[FILES[4]] = doc('原型实现规则', [
-    section('什么时候使用', '需求规格和设计计划都已落盘，需要生成或更新真实 App 场景时使用。'),
+    section('什么时候使用', '需求规格和设计计划都已保存且没有设计缺口，需要生成或更新真实 App 场景时使用。'),
     section('应该怎么做', bullets(uxRules)),
     section('不能怎么做', bullets(['不能复制第二套 App 宿主。','不能跳出 App 打开独立页面。','不能依赖运行时读取本地页面片段。','不能因为内容为空或较少让主要区域缩成小块。'])),
-    section('完成后如何检查', '入口、路由、页面打开方式、保存回填、取消删除、键盘焦点、滚动和空内容等状态都能形成完整闭环；电脑端和移动端使用同一链接。'),
+    section('完成后如何检查', '入口、路由、页面打开方式、保存回填、取消删除、键盘焦点、滚动和空内容等状态都形成完整闭环；电脑端和移动端使用同一链接。'),
   ].join('\n'), fp);
-
   docs[FILES[5]] = doc('验收与回归规则', [
     section('什么时候使用', '场景已经实现并注册路由，需要判断是否正确承接需求和设计时使用。'),
     section('应该怎么做', bullets(testRules)),
-    section('不能怎么做', bullets(['不能只看自动化通过就认定体验正确。','不能只验证正常路径，忽略空内容、长内容、重复操作和中断操作。','不能把实现偏差误归因到组件或最后修改的文件。'])),
-    section('完成后如何检查', '页面、信息、状态、异常流程、组件结构、打开方式、路由、反馈和资源同步都已覆盖；发现的问题有明确归属和复现依据。'),
+    section('不能怎么做', bullets(['不能只看自动化通过就认定体验正确。','不能只验证正常路径，忽略需求明确的边界和中断操作。','不能把实现偏差误归因到组件或最后修改的文件。'])),
+    section('完成后如何检查', '页面、信息、状态、异常流程、组件结构、打开方式、路由、反馈、键盘视口和资源同步都已覆盖；发现的问题有明确归属和复现依据。'),
   ].join('\n'), fp);
-
   docs[FILES[6]] = doc('工作流迭代与经验沉淀规则', [
     section('什么时候使用', '只有用户明确要求沉淀经验、补充规则、复盘形成经验或优化工作流时使用。'),
     section('应该怎么做', bullets(experienceRules)),
-    section('不能怎么做', bullets(['不能一次批量记录多条经验。','不能因为业务名称不同重复创建同类候选。','不能在第 3 次出现时自动升级正式规则。','不能把候选内容写进正式场景注册表。'])),
+    section('不能怎么做', bullets(['不能一次批量记录多条经验。','不能因为业务名称不同重复创建同类候选。','不能在第 3 次出现时自动升级正式规则。','不能把候选内容写进正式场景注册表。','不能为技能创建并列运行时入口。'])),
     section('完成后如何检查', '候选次数、场景证据、主要归属、未来规则落点、实际消费方和验收方式都完整；正式升级还必须有用户确认、场景边界和回归验证。'),
   ].join('\n'), fp);
   return { docs, fp, count };
@@ -234,15 +243,36 @@ function candidateErrors(pool) {
 
 function structuralErrors() {
   const errors = candidateErrors(json('.codex/skills/wego-uxsystem-iterate/experience/candidates.json'));
+  const manifest = sources();
+  if (manifest.some(rel => /\/SKILL\.(?!md$)/.test(rel))) errors.push('规则来源清单不得包含历史 Skill 入口');
+
+  for (const dir of SKILL_DIRS) {
+    const root = path.join(ROOT, dir);
+    if (!fs.existsSync(path.join(root, 'SKILL.md'))) errors.push(`${dir} 缺少唯一 SKILL.md`);
+    if (fs.existsSync(root)) {
+      const legacy = fs.readdirSync(root).filter(name => /^SKILL\..+\.md$/.test(name) && name !== 'SKILL.md');
+      for (const name of legacy) errors.push(`${dir}/${name} 是禁止保留的并列 Skill 入口`);
+    }
+  }
+
   const consumption = json('.codex/skills/wego-design/library-consumption.json');
   for (const [i, item] of (consumption.scenarioTypeRegistry?.types || []).entries()) {
     for (const key of ['occurrence_count','scene_evidence','threshold','status','normalized_key'])
       if (Object.hasOwn(item, key)) errors.push(`scenarioTypeRegistry.types[${i}] 含候选字段 ${key}`);
-    const encoded = JSON.stringify(item);
-    if (/observing|awaiting-confirmation/.test(encoded)) errors.push(`scenarioTypeRegistry.types[${i}] 含候选状态，不得进入正式注册表`);
+    if (/observing|awaiting-confirmation/.test(JSON.stringify(item))) errors.push(`scenarioTypeRegistry.types[${i}] 含候选状态，不得进入正式注册表`);
   }
-  for (const rel of ['AGENTS.md','.codex/skills/README.md','.codex/skills/wego-product/SKILL.md','.codex/skills/wego-design/SKILL.md','.codex/skills/wego-ux/SKILL.md','.codex/skills/wego-tests/SKILL.md'])
-    for (const name of FILES) if (text(rel).includes(name)) errors.push(`${rel} 不得引用自动生成文档 ${name}`);
+
+  const runtimeFiles = [
+    'AGENTS.md', '.codex/skills/README.md',
+    '.codex/skills/wego-product/SKILL.md', '.codex/skills/wego-design/SKILL.md',
+    '.codex/skills/wego-ux/SKILL.md', '.codex/skills/wego-tests/SKILL.md',
+    '.codex/skills/wego-uxsystem-iterate/SKILL.md', '.codex/skills/wego-design/README.md',
+  ];
+  for (const rel of runtimeFiles) {
+    const value = text(rel);
+    if (/先读取\s*`?SKILL\.runtime\.md/.test(value)) errors.push(`${rel} 仍要求读取历史 Skill 入口`);
+    for (const name of FILES) if (value.includes(name)) errors.push(`${rel} 不得引用自动生成文档 ${name}`);
+  }
   return errors;
 }
 
@@ -271,12 +301,12 @@ function tests() {
   const expect = (value, message) => { if (!value) failures.push(message); };
   expect(candidateErrors({schemaVersion:1,threshold:3,candidates:[base]}).length === 0, '合法候选应通过');
   expect(candidateErrors({schemaVersion:1,threshold:3,candidates:[base,{...base,id:'b'}]}).some(e=>e.includes('normalized_key 重复')), '同类候选必须去重');
-  expect(candidateErrors({schemaVersion:1,threshold:3,candidates:[{...base,occurrence_count:3}]}).some(e=>e.includes('达到阈值')), '第三次必须等待确认');
+  expect(candidateErrors({schemaVersion:1,threshold:3,candidates:[{...base,status:'awaiting-confirmation',occurrence_count:2}]}).some(e=>e.includes('未达到 3 次')), '未达阈值不能等待确认');
   expect(candidateErrors({schemaVersion:1,threshold:3,candidates:[{...base,status:'promoted',occurrence_count:3}]}).some(e=>e.includes('formal_rule')), '未确认不能升级');
   expect(candidateErrors({schemaVersion:1,threshold:3,candidates:[{...base,primary_owner:''}]}).some(e=>e.includes('primary_owner')), '归属不明不得入池');
   expect(manifestFingerprint(['a:1']) !== manifestFingerprint(['a:2']), '规则源变化应改变指纹');
-  expect(candidateErrors({schemaVersion:1,threshold:3,candidates:[{...base,secondary_owners:['unknown']}]}).some(e=>e.includes('secondary_owners')), '次要归属必须合法');
-  expect(candidateErrors({schemaVersion:1,threshold:3,candidates:[{...base,scene_evidence:[{date:'bad',scene:'s',summary:'x',source:'y'}]}]}).some(e=>e.includes('可解析日期')), '场景证据时间必须合法');
+  expect(!sources().some(rel => rel.endsWith('/SKILL.runtime.md')), 'source manifest 不得包含历史 Skill 入口');
+  for (const dir of SKILL_DIRS) expect(!fs.existsSync(path.join(ROOT, dir, 'SKILL.runtime.md')), `${dir} 不得存在 SKILL.runtime.md`);
   const workflow = text('.codex/skills/wego-uxsystem-iterate/references/workflow-iteration.md');
   expect(workflow.includes('每轮只记录一条经验') && workflow.includes('是否现在将其升级为正式规则') && workflow.includes('运行时可达性'), '工作流门禁不完整');
   const rendered = render().docs;
