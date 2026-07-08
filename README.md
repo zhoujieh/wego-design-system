@@ -14,8 +14,8 @@
 
 ## 技能闭环
 
-1. `wego-product`：理解原始需求，输出 `page_spec`。
-2. `wego-design`：消费设计系统，输出 `design_consumption_plan`。
+1. `wego-product`：理解原始需求，输出 `interaction_spec`。
+2. `wego-design`：消费设计系统，输出 `design_plan`。
 3. `wego-ux`：更新 `wego-app` 和对应场景。
 4. `wego-tests`：验收当前任务，输出 `acceptance_report`。
 5. `wego-uxsystem-iterate`：负责组件、UI Kit、工作流迭代和审查。
