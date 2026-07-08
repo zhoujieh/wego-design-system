@@ -2,22 +2,26 @@
 
 本文档由系统规则自动生成，用于人工检查。请勿直接修改；如需调整规则，应修改对应权威来源后重新生成。
 
-## 当前组件
+## 什么时候使用
 
-按钮（button）、卡片（card）、头像（avatar）、标签（tag）、底部导航（bottom-nav）、输入框（input）、计数器（counter）、角标（badge）、列表单元格（cell）、复选框（checkbox）、表单容器（form）、图片（image）、链接（link）、单选（radio）、选项卡（stack）、开关（switch）、导航栏（navbar）、提示（toast）、对话框（dialog）、底部操作表单（actionsheet）
+页面结构已经确定，需要选择稳定组件、组合方式或页面示例时使用。
 
-## 组件与 UI Kit 边界
+## 应该怎么做
 
-- Token 可以引用，不得随意改名或发明新数值。
-- 组件必须按契约和 Preview 消费，不凭视觉感觉发明结构、子元素类或修饰类。
-- UI Kit 只用于理解页面骨架、组合节奏和固定槽位，不能整页复制。
-- `.uikit-shell`、`.phone-frame`、`.phone-screen` 等展示外壳不得进入业务页面结构。
-- 固定宿主 App 正式维护在 `wego-app/`，不属于 UI Kit。
-- 未命中现有 pagePattern 时，优先使用 `uikit-plan.json` 的 fallback blueprint；仍无法覆盖时标记 `gap`，不得交给实现阶段临时决定。
+- 当前稳定组件包括：按钮、卡片、头像、标签、底部导航、输入框、计数器、角标、列表单元格、复选框、表单容器、图片、链接、单选、选项卡、开关、导航栏、提示、对话框、底部操作表单。
+- 当前页面示例包括：业务规则配置、系统设置。
+- 先看组件契约和真实示例，再决定结构、状态和组合。
+- 页面示例只用于理解骨架、节奏和固定位置，业务内容必须按当前需求重新组织。
 
-## 当前 UI Kit
+## 不能怎么做
 
-当前登记：biz-rule-config、system-settings。实际清单以 uikit-plan.json 为准。
+- 不能复制手机壳、展示外框或演示业务内容作为正式页面。
+- 不能发明未登记的组件、子结构或修饰方式。
+- 不能直接修改 App 中的设计系统副本。
 
-<!-- generated-by: scripts/specs.mjs@2 -->
-<!-- source-fingerprint: c13d81515184cb81bc392d333dac64147fa4b53388d3cfc071154501e8f32eaa -->
+## 完成后如何检查
+
+组件已在注册表中存在，结构与状态符合契约，页面示例只被用于结构参考，设计系统源文件与部署副本保持一致。
+
+<!-- generated-by: scripts/specs.mjs@3 -->
+<!-- source-fingerprint: 6f817b99a6079b2fe7b5dbe2aa576a02476aa04dd18208ee791b8a399099dc77 -->
