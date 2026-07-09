@@ -178,6 +178,50 @@
       },
       "created_at": "2026-07-09T00:00:00.000Z",
       "updated_at": "2026-07-09T00:00:00.000Z"
+    },
+    {
+      "id": "exp-global-overlay-lifecycle-route-change",
+      "normalized_key": "global-overlay-lifecycle-must-not-be-cleared-by-route-change-handler",
+      "title": "全局浮层生命周期不应被路由变化处理器强制清理",
+      "status": "observing",
+      "occurrence_count": 1,
+      "threshold": 3,
+      "primary_owner": "wego-ux",
+      "secondary_owners": ["wego-tests"],
+      "ownership_reason": "问题最早产生在 wego-ux 实现阶段。toast / 全局 loading / 全局 dialog 等全局浮层由宿主统一管理生命周期，其清理时机应由自身机制（互斥、自动关闭、下一次操作清理）决定。当宿主在路由变化处理器（hashchange / popstate）中调用 dismissToasts({ immediate: true }) 时，会与退出动画产生的二次路由变化形成竞态：closeOverlay 退出动画 transitionend（约 250ms 后）触发 history.back()，再次触发 hashchange，把刚弹出的 toast 在 53-75ms 内移除，违反『toast 全局显示不跟随页面』契约。wego-ux 在实现宿主路由处理器和全局浮层生命周期管理时，应保证全局浮层不被路由变化强制清理。",
+      "problem_pattern": "宿主路由变化处理器（hashchange / popstate）中调用 dismissToasts 或类似的强制清理全局浮层的逻辑，与退出动画产生的二次路由变化形成竞态，导致刚弹出的全局浮层（toast / loading / dialog）被立即移除，违反『全局浮层不跟随页面』契约。典型表现：操作反馈 toast 弹出后 53-75ms 内被移除，预期存活 4s。",
+      "scene_evidence": [
+        {
+          "date": "2026-07-09",
+          "scene": "快捷发布产品发布成功 toast",
+          "summary": "点击发布按钮后 ctx.toast('发布成功') 弹出，同时通过 setTimeout 120ms 后调用 showDynamic 退出页面。closeOverlay 退出动画 transitionend（约 250ms 后）触发 history.back()，再次触发 hashchange → dismissToasts({immediate: true})，把 toast 在 53-75ms 内移除（MutationObserver 实测存活 53-75ms，预期 4s）。修复：移除 hashchange 处理器中的 dismissToasts 调用，toast 存活 4.2s（4s 显示 + 200ms 离场动画）后正常消失，与契约一致。问题根源：wego-ux/SKILL.md 第 300 行描述『跨 route、Tab、overlay/push 返回和下一次操作时清理旧 toast』与『toast 全局显示不跟随页面』契约存在张力。",
+          "source": "用户报告：toast 在页面退出后也跟着消失，预期保持 4s"
+        }
+      ],
+      "applies_when_candidates": [
+        "全局浮层（toast / 全局 loading / 全局 dialog）与路由变化（hashchange / popstate）处理器共存",
+        "业务场景需要在操作反馈（toast）的同时退出页面（push back / overlay close / tab switch）",
+        "退出过程涉及 transitionend 回调或二次路由变化（如 closeOverlay 退出动画后 history.back()）",
+        "路由变化处理器中调用了 dismissToasts 或类似的强制清理逻辑"
+      ],
+      "avoid_when_candidates": [
+        "仅修改文案、间距、纯样式等不影响路由和 toast 生命周期的改动",
+        "toast 本身的 4s 自动关闭机制已正常工作，无需额外清理",
+        "用户主动点击 toast 上的操作按钮触发新 toast（互斥逻辑由 toast 函数内部处理）",
+        "场景级 toast（非全局浮层，已违反契约不应存在）"
+      ],
+      "expected_rule_target": {
+        "file": ".codex/skills/wego-ux/SKILL.md",
+        "field": "真实业务交互章节 / toast 全局生命周期管理（修正『跨 route、Tab、overlay/push 返回和下一次操作时清理旧 toast』与全局性的张力）"
+      },
+      "runtime_reachability": {
+        "consumer_skill": "wego-ux（实现宿主路由处理器、toast 全局生命周期时）",
+        "output_field": "宿主 app.js 中 hashchange / popstate 处理器的清理逻辑",
+        "downstream_consumer": "wego-tests（浏览器验证 toast 在路由变化后的存活行为）",
+        "acceptance_check": "wego-tests 用 agent-browser MutationObserver 监听 toast 创建/移除事件，验证 toast 在路由变化后存活 TOAST_DEFAULT_DURATION（4s）+ TOAST_LEAVE_DURATION（200ms）"
+      },
+      "created_at": "2026-07-09T00:00:00.000Z",
+      "updated_at": "2026-07-09T00:00:00.000Z"
     }
   ]
 }
