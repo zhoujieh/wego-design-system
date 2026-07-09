@@ -1,0 +1,60 @@
+{
+  "complexity_level": "structured",
+  "matched_uikit": null,
+  "scene_fit_reason": "库存管理是宿主入口、库存列表和预警设置 overlay 组成的组合型管理任务；库存列表走管理列表范式，预警设置走业务规则配置范式。",
+  "navigation_pattern": "我的 Tab 应用中心 grid-entry → push 库存列表 → full-screen-modal 库存预警设置 → 保存回填列表",
+  "layout_pattern": "库存列表使用卡片模式 M2；预警设置使用通栏表单/设置列表，底部固定主操作。",
+  "interaction_pattern": "列表查看 + 预警设置编辑保存回填",
+  "app_target": {
+    "mode": "wego-app-scene",
+    "app_root": "wego-app",
+    "scene_folder": "wego-app/scenes/库存管理",
+    "route_id": "my-inventory-management",
+    "route_mode": "hash",
+    "runtime_entry": "scene.js"
+  },
+  "flow_to_surface_decisions": [
+    { "flow_ref": "manage-inventory", "node_refs": ["enter-inventory"], "surface_ref": "host-entry", "decision": "宿主应用中心入口只负责打开库存管理，不重画宿主。" },
+    { "flow_ref": "manage-inventory", "node_refs": ["view-inventory-list"], "surface_ref": "inventory-list", "decision": "库存概览和库存清单合并在一个 push 页面。" },
+    { "flow_ref": "manage-inventory", "node_refs": ["open-inventory-alert-settings", "edit-inventory-alert-settings", "save-inventory-alert-settings"], "surface_ref": "inventory-alert-settings", "decision": "预警规则编辑作为 full-screen-modal，保存后回填列表摘要。" }
+  ],
+  "page_strategy": {
+    "page_goal": "让店主快速查看库存状态，并进入预警规则配置。",
+    "page_pattern": "inventory-management-list",
+    "primary_scroll": "vertical",
+    "density": "medium-high",
+    "first_screen_priority": ["导航栏", "库存概览", "预警设置入口", "库存列表"],
+    "fixed_regions": ["inventory-alert-settings.actions"]
+  },
+  "region_composition": [
+    { "surface_ref": "inventory-list", "regions": [
+      { "id": "navbar", "role": "navigation", "priority": 1, "sticky": true },
+      { "id": "summary", "role": "status-summary", "priority": 2 },
+      { "id": "alert-entry", "role": "settings-entry", "priority": 3 },
+      { "id": "inventory-items", "role": "object-list", "priority": 4 }
+    ] },
+    { "surface_ref": "inventory-alert-settings", "regions": [
+      { "id": "modal-navbar", "role": "navigation", "priority": 1 },
+      { "id": "alert-form", "role": "form-content", "priority": 2 },
+      { "id": "actions", "role": "submit-action", "priority": 3, "fixed": true }
+    ] }
+  ],
+  "component_patterns": [
+    { "applies_to": ["host-entry"], "component_pattern": "host-grid-entry" },
+    { "applies_to": ["inventory-summary"], "component_pattern": "summary card" },
+    { "applies_to": ["inventory-items"], "component_pattern": "object list card" },
+    { "applies_to": ["inventory-alert-entry"], "component_pattern": "cell clickable with arrow" },
+    { "applies_to": ["alert-enabled", "alert-threshold", "alert-notify-method"], "component_pattern": "modal form/cell fields" },
+    { "applies_to": ["save-alert-settings"], "component_pattern": "fixed strong action" }
+  ],
+  "page_presentation": [
+    { "surface_ref": "host-entry", "type": "host-grid-entry", "route_binding": "my-inventory-management" },
+    { "surface_ref": "inventory-list", "type": "push", "transition": "slide-left", "covers_tab_bar": true },
+    { "surface_ref": "inventory-alert-settings", "type": "full-screen-modal", "transition": "slide-up", "covers_tab_bar": true }
+  ],
+  "design_gaps": [],
+  "rule_sources": [
+    { "file": "docs/interaction-prototype-workflow-refactor-conclusion.md", "supports": ["多页面和多路由支持", "design_plan 新结构", "数据回填"] },
+    { "file": "wego-app/scenes/库存管理/_spec/interaction_spec.json", "supports": ["库存列表、预警设置、保存回填和原型边界"] }
+  ]
+}
