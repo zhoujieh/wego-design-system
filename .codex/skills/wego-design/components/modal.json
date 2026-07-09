@@ -1,0 +1,329 @@
+{
+  "schemaVersion": 3,
+  "slug": "modal",
+  "name": "底部模态框",
+  "category": "feedback",
+  "status": "stable",
+  "sourceKind": "inferred",
+  "confidence": "high",
+  "description": "底部模态框，分为 title（info 大标题+辅助说明 / default NavBar 风格）、body（无默认间距的自定义内容区）、action（双按钮/单按钮横向/单按钮竖向+链接/取消栏/无操作区）三段式结构。支持 frame（自适应高度）、frame-x（70vh 可拖拽）、fullscreen（全屏）三种变体，以及二级嵌套 push 模式（最多 3 层）。覆盖 Figma ModalFrame、ModalFrameX 和全屏模态场景。",
+  "semanticTypeCandidates": [
+    "bottom-modal",
+    "modal-frame",
+    "bottom-sheet",
+    "confirm-panel"
+  ],
+  "variantDimensions": {
+    "variant": [
+      "frame",
+      "frame-x",
+      "fullscreen"
+    ],
+    "title": [
+      "info",
+      "default"
+    ],
+    "action": [
+      "double-h",
+      "single-h",
+      "single-v",
+      "single-v-links",
+      "cancel",
+      "none"
+    ],
+    "align": [
+      "center",
+      "left"
+    ],
+    "state": [
+      "open",
+      "closed"
+    ]
+  },
+  "representativeVariants": [
+    { "variant": "frame", "title": "info", "action": "double-h", "align": "center" },
+    { "variant": "frame", "title": "info", "action": "double-h", "align": "left" },
+    { "variant": "frame", "title": "info", "action": "cancel", "align": "center" },
+    { "variant": "frame", "title": "info", "action": "double-h", "align": "center" },
+    { "variant": "frame", "title": "info", "action": "double-h", "align": "center" },
+    { "variant": "frame", "title": "info", "action": "none", "align": "center" },
+    { "variant": "frame-x", "title": "default", "action": "none", "align": "center" },
+    { "variant": "frame-x", "title": "default", "action": "double-h", "align": "center" },
+    { "variant": "frame", "title": "info", "action": "single-h", "align": "center" },
+    { "variant": "frame", "title": "info", "action": "single-v", "align": "center" },
+    { "variant": "frame", "title": "info", "action": "single-v-links", "align": "center" },
+    { "variant": "fullscreen", "title": "default", "action": "none", "align": "center" }
+  ],
+  "anatomy": [
+    {
+      "name": "root",
+      "selector": ".modal",
+      "role": "浮层容器，自身承担半透明遮罩（frame/frame-x 为 var(--bg-mask-light)，fullscreen 为 transparent），承载面板、定位与动画"
+    },
+    {
+      "name": "panel",
+      "selector": ".modal__panel",
+      "role": "面板容器，背景色 var(--modal-panel-bg, var(--bg-surface))，frame 变体 max-height: calc(100vh-40px) + 圆角 16px，frame-x 固定 70vh + 圆角 16px，fullscreen 全屏 + 无圆角"
+    },
+    {
+      "name": "titleContainer",
+      "selector": ".modal__title",
+      "role": "标题区容器，flex-shrink:0，背景色继承 panel"
+    },
+    {
+      "name": "titleInfo",
+      "selector": ".modal__title--info",
+      "role": "info 标题：大标题（18px Medium）+ 可选辅助说明（14px Regular secondary），间距 8px，padding 32px 32px 0；通过 .modal--align-left 左对齐"
+    },
+    {
+      "name": "titleText",
+      "selector": ".modal__title-text",
+      "role": "标题文本，18px / Medium(500)，text-default"
+    },
+    {
+      "name": "subtitle",
+      "selector": ".modal__subtitle",
+      "role": "辅助说明文本，14px / Regular(400)，text-secondary，line-height 1.5"
+    },
+    {
+      "name": "titleDefault",
+      "selector": ".modal__title--default",
+      "role": "default 标题：NavBar 风格标题栏，复用 navbar 组件；5 种子模式（无操作/下箭头/关闭叉/取消+按钮/二级modal）；leftControl 使用圆形按钮 .navbar__left-btn--circle 或文字 .navbar__left-text"
+    },
+    {
+      "name": "body",
+      "selector": ".modal__body",
+      "role": "自定义内容区，无默认内边距；flex:1 1 auto + overflow-y:auto（内容长时滚动）；有 action 时 padding-bottom: spacer-40（防遮盖）"
+    },
+    {
+      "name": "bodySafeBottom",
+      "selector": ".modal__body--safe-bottom",
+      "role": "无 action 时 body 末尾安全区：padding-bottom: 40px + safe-area-bottom"
+    },
+    {
+      "name": "actions",
+      "selector": ".modal__actions",
+      "role": "操作区外层，flex-shrink:0 固定底部"
+    },
+    {
+      "name": "actionGradient",
+      "selector": ".modal__action-gradient",
+      "role": "40px 渐变过渡蒙层（body→action），linear-gradient(transparent, panel-bg)"
+    },
+    {
+      "name": "buttons",
+      "selector": ".modal__buttons",
+      "role": "横向双按钮容器，padding 16px + safe-area，gap 12px；内放 .btn--lg 按钮，flex:1 等分"
+    },
+    {
+      "name": "button",
+      "selector": ".btn.btn--lg",
+      "role": "单个按钮，复用 button 组件；确认主操作用 --strong（品牌绿），取消次操作用 --weak（灰底），危险操作用 --danger；同面板仅 1 个 strong/danger 主按钮"
+    },
+    {
+      "name": "actionSingleH",
+      "selector": ".modal__action--single-h",
+      "role": "单个水平按钮（居中），padding 16px 32px + safe-area；btn max-width: 180px"
+    },
+    {
+      "name": "actionSingleV",
+      "selector": ".modal__action--single-v",
+      "role": "单个竖向按钮（居中），padding 0 32px 16px；btn max-width: 180px"
+    },
+    {
+      "name": "actionLink",
+      "selector": ".modal__action--link",
+      "role": "链接按钮容器（竖向按钮下方居中），padding 0 16px 12px + safe-area；内放 .link 组件"
+    },
+    {
+      "name": "links",
+      "selector": ".modal__links",
+      "role": "链接容器（双按钮下方），至多 2 个 .link standalone（14px）"
+    },
+    {
+      "name": "link",
+      "selector": ".link",
+      "role": "链接按钮，复用 link 组件 standalone 模式（14px）；正文内联用 .link--inline"
+    },
+    {
+      "name": "cancel",
+      "selector": ".modal__cancel",
+      "role": "取消栏，padding 16px + safe-area，16px default 文本居中，letter-spacing 0.1em"
+    }
+  ],
+  "structurePatterns": [
+    "根节点 .modal 是 overlay 定位容器（fixed; inset:0; flex-end），frame/frame-x 遮罩 var(--bg-mask-light)，fullscreen 遮罩 transparent。",
+    "面板 .modal__panel 三段式结构：title → body → actions。",
+    "frame 变体：面板 max-height: calc(100vh-40px)，宽度 var(--modal-panel-width)（max 670px），圆角 16px 16px 0 0。",
+    "frame-x 变体：面板固定高度 70vh，可拖拽至全屏（手势由宿主实现）。",
+    "fullscreen 变体：面板 100dvh / 100%，无圆角，无遮罩，宽度 100%，max-width none。",
+    "title 区：info 模式为大标题+可选辅助说明（padding 32px 32px 0，gap 8px）；default 模式为完整 navbar 组件，5 种左右组合模式。",
+    "title 背景色跟随 panel（--modal-panel-bg），默认 bg-surface，业务可覆盖为 bg-page（灰色）。",
+    "body 区：无默认 padding，flex:1 1 auto + min-height:0 + overflow-y:auto；有 action 时 padding-bottom: spacer-40（防渐变遮盖）；无 action 时需加 .modal__body--safe-bottom（40+safe-area）。",
+    "action 区：flex-shrink:0 固定底部；上方有 40px 渐变蒙层（linear-gradient transparent → panel-bg）；支持 6 种布局：double-h/single-h/single-v/single-v-links/cancel/none。",
+    "操作区按钮必须使用已注册 button 组件 .btn--lg；链接必须使用已注册 link 组件。禁止发明按钮/链接/标题栏类。",
+    "fullscreen 变体只允许两种 NavBar 组合：text-cancel+button（模式 A，表单类）或 close-icon（模式 B，浏览类）。",
+    "全屏 fullscreen 变体的遮罩为透明，手机状态栏通过高 z-index 穿透透明层显示；NavBar 正常避让 safe-area-top。",
+    "嵌套 push 模式：modal 内可 push 多层面板（最多 3 层），新面板从右侧滑入（translateX），返回时逐层退出；所有层级共享同一遮罩；蒙层点击从最顶层开始逐层关闭。",
+    "状态机通过 data-state='open'/'closed' 切换；嵌套 push 动画通过 data-push 属性控制。"
+  ],
+  "behavior": {
+    "closeByMask": "默认 true，点击 .modal overlay 空白区域可关闭；嵌套模式时逐层关闭（最顶层优先）",
+    "closeByCancel": "默认 true",
+    "closeAfterClick": "默认 true（按钮点击后自动关闭；多步骤场景可由宿主设 false）",
+    "persistence": "阻断式常驻，不自动关闭",
+    "conflicting": "同屏仅展示一个 modal，新 modal 出现时替换旧 modal",
+    "position": "底部贴底悬浮（frame/frame-x），全屏覆盖（fullscreen）",
+    "animation": "面板 translateY(100%)→0（底部弹层进出）；嵌套 push 使用 translateX（右侧滑入/滑出）",
+    "zIndex": "var(--z-modal)=600",
+    "maxNestingDepth": 3,
+    "frameX.enableDrag": "默认 true（向上拖扩展至全屏，H5 不生效；手势由宿主实现）",
+    "frameX.fullscreen.statusBar": "拖拽至全屏时恢复 --safe-area-top，显示手机状态栏"
+  },
+  "accessibility": {
+    "role": "role=\"dialog\" aria-modal=\"true\"",
+    "labelRule": "标题作为 modal 的可访问名称",
+    "focusTrap": "打开时焦点锁定在 modal 内，关闭后焦点返回触发元素",
+    "textRule": "标题和辅助说明默认不限制显示行数，文案应精简表达"
+  },
+  "usageHints": [
+    "用于底部弹层确认、表单、选择等场景；全屏变体用于编辑/设置等复杂流程。",
+    "与 dialog 区别：dialog 居中轻量确认（2-3 文本按钮，300px），modal 底部带标题正文+填充按钮组件。",
+    "与 actionsheet 区别：actionsheet 是操作列表+取消栏，modal 是标题正文+按钮或自定义内容。",
+    "info 标题用于简单确认/告知场景；default 标题用于需要 NavBar 的复杂模态（frame-x、fullscreen）。",
+    "action 区按钮复用 button 组件 .btn--lg，强调级别 strong/weak/danger；同面板仅 1 个 strong/danger 主按钮。",
+    "链接按钮复用 link 组件 .link（standalone），放在 .modal__links 或 .modal__action--link 内。",
+    "fullscreen 变体 NavBar 仅限两种固定模式：text-cancel+button 或 close-icon。",
+    "嵌套 push 通过 data-layer 和 data-push 属性管理，宿主 JS 负责层间切换和动画触发。"
+  ],
+  "doNotInvent": [
+    "不要在 modal 内放置 actionsheet 的操作列表（那是 actionsheet 职责）。",
+    "不要使用 dialog 的文本按钮（.dialog__btn），modal 操作区必须使用 button 组件 .btn。",
+    "不要发明链接类，modal 链接按钮必须使用 link 组件 .link。",
+    "不要发明标题栏类，default 标题必须使用 navbar 组件完整 .navbar 结构。",
+    "不要在 modal CSS 内重写 .modal__body 内业务放入的已注册组件样式。",
+    "不要超过 2 个主按钮（1 主操作 + 1 次操作）。",
+    "不要持久化 modal 状态到 localStorage。",
+    "不要给 modal 设置自动关闭时长（阻断式常驻）。",
+    "fullscreen 变体 NavBar 禁止自由组合 leftControl 和 rightControl，只允许两种固定模式。",
+    "嵌套深度超过 3 层时禁止继续 push。"
+  ],
+  "tokensConsumed": [
+    "--bg-mask-light",
+    "--bg-surface",
+    "--bg-page",
+    "--bg-placeholder",
+    "--bg-state-hover",
+    "--bg-state-pressed",
+    "--text-default",
+    "--text-secondary",
+    "--text-link",
+    "--text-brand",
+    "--font-family-system",
+    "--heading-sm-font-size",
+    "--body-lg-font-size",
+    "--body-md-font-size",
+    "--font-weight-medium",
+    "--font-weight-regular",
+    "--spacer-4",
+    "--spacer-8",
+    "--spacer-12",
+    "--spacer-16",
+    "--spacer-20",
+    "--spacer-24",
+    "--spacer-32",
+    "--spacer-40",
+    "--radius-12",
+    "--radius-16",
+    "--stroke-hairline",
+    "--border-neutral-l2",
+    "--duration-normal",
+    "--ease-enter",
+    "--ease-exit",
+    "--z-modal",
+    "--safe-area-bottom",
+    "--safe-area-top"
+  ],
+  "designTokens": {
+    "panelBg": "var(--modal-panel-bg, var(--bg-surface))",
+    "maskBg": "var(--bg-mask-light)（frame/frame-x）；transparent（fullscreen）",
+    "frameMaxHeight": "calc(100vh - 40px)",
+    "frameXHeight": "70vh（var(--modal-frame-x-height)）",
+    "fullscreenHeight": "100dvh / 100%",
+    "panelRadius": "var(--radius-16)（frame/frame-x）；0（fullscreen）",
+    "infoTitlePadding": "var(--spacer-32) var(--spacer-32) 0",
+    "infoTitleGap": "var(--spacer-8)",
+    "titleFont": "var(--heading-sm-font-size) / var(--font-weight-medium) / var(--font-family-system)",
+    "subtitleFont": "var(--body-md-font-size) / var(--font-weight-regular) / var(--font-family-system)",
+    "subtitleColor": "var(--text-secondary)",
+    "actionGradientHeight": "var(--spacer-40)",
+    "buttonsPadding": "var(--spacer-16)",
+    "buttonsGap": "var(--spacer-12)",
+    "singleHMaxWidth": "180px",
+    "singleVMaxWidth": "180px",
+    "cancelLetterSpacing": "0.1em",
+    "safeAreaBottom": "var(--safe-area-bottom)",
+    "zIndex": "var(--z-modal)",
+    "maxNestingDepth": 3
+  },
+  "cssCustomProperties": [
+    {
+      "name": "--modal-panel-width",
+      "default": "100%",
+      "appliesTo": "面板宽度"
+    },
+    {
+      "name": "--modal-frame-x-height",
+      "default": "70vh",
+      "appliesTo": "frame-x 面板高度"
+    },
+    {
+      "name": "--modal-panel-bg",
+      "default": "var(--bg-surface)",
+      "appliesTo": "面板和标题背景色，业务可覆盖为 var(--bg-page) 实现灰色主题"
+    }
+  ],
+  "domAnatomy": {
+    "root": ".modal",
+    "modifiers": [
+      ".modal--frame",
+      ".modal--frame-x",
+      ".modal--fullscreen",
+      ".modal--align-left",
+      ".modal--has-actions",
+      "[data-state=\"open\"]",
+      "[data-state=\"closed\"]",
+      "[data-push]",
+      "[data-layer]"
+    ],
+    "optionalChildren": [
+      ".modal__panel",
+      ".modal__title",
+      ".modal__title--info",
+      ".modal__title--default",
+      ".modal__title-text",
+      ".modal__subtitle",
+      ".modal__body",
+      ".modal__body--safe-bottom",
+      ".modal__actions",
+      ".modal__action-gradient",
+      ".modal__buttons",
+      ".modal__links",
+      ".modal__cancel",
+      ".modal__action--single-h",
+      ".modal__action--single-v",
+      ".modal__action--link"
+    ]
+  },
+  "provenance": {
+    "preview": "preview/component-modal.html",
+    "cssSource": "preview/component-modal.html",
+    "embedded": false,
+    "hostComponent": null
+  },
+  "specRefs": [
+    "specs/交互设计原则.md",
+    "specs/文案与数据规范.md"
+  ],
+  "unknowns": []
+}

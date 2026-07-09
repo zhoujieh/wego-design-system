@@ -268,7 +268,8 @@
     "switch",
     "toast",
     "dialog",
-    "actionsheet"
+    "actionsheet",
+    "modal"
   ],
   "embeddedComponents": [],
   "unpublishedContracts": [],

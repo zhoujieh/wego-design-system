@@ -153,6 +153,13 @@
       "category": "feedback",
       "status": "stable",
       "preview": "preview/component-actionsheet.html"
+    },
+    {
+      "slug": "modal",
+      "name": "底部模态框",
+      "category": "feedback",
+      "status": "stable",
+      "preview": "preview/component-modal.html"
     }
   ],
   "componentContractSchemaVersion": 3

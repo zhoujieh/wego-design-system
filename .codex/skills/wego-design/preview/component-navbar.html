@@ -54,6 +54,11 @@
 .navbar__left-btn:active,
 .navbar__left-btn.is-pressed { opacity: 0.6; }
 .navbar__left-btn .wego-iconfont-s { font-size: 24px; color: var(--text-default); }
+/* 圆形背景按钮变体（用于 modal 等场景） */
+.navbar__left-btn--circle { width: 24px; height: 24px; border-radius: var(--radius-12); background: var(--bg-placeholder); }
+.navbar__left-btn--circle .wego-iconfont-s { font-size: 16px; color: var(--text-secondary); }
+.navbar__left-btn--circle:active,
+.navbar__left-btn--circle.is-pressed { background: var(--bg-state-pressed); }
 .navbar__left-text { font-size: var(--body-lg-font-size); color: var(--text-default); cursor: pointer; position: relative; padding: 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
 .navbar__left-text::before { content: ""; position: absolute; top: 50%; left: 50%; width: 48px; height: 48px; transform: translate(-50%, -50%); }
 .navbar__left-text:active,
@@ -275,6 +280,45 @@
             <span class="navbar__action-label">记录</span>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="preview-phone navbar-demo">
+    <div class="label">圆形按钮 — 返回（左箭头）</div>
+    <div class="navbar">
+      <div class="navbar__body">
+        <div class="navbar__left">
+          <div class="navbar__left-btn navbar__left-btn--circle"><i class="wego-iconfont-s icon-zuojiantou16"></i></div>
+        </div>
+        <div class="navbar__center"><span class="navbar__title">返回</span></div>
+        <div class="navbar__right"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="preview-phone navbar-demo">
+    <div class="label">圆形按钮 — 下箭头</div>
+    <div class="navbar">
+      <div class="navbar__body">
+        <div class="navbar__left">
+          <div class="navbar__left-btn navbar__left-btn--circle"><i class="wego-iconfont-s icon-xiajiantou16"></i></div>
+        </div>
+        <div class="navbar__center"><span class="navbar__title">下箭头</span></div>
+        <div class="navbar__right"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="preview-phone navbar-demo">
+    <div class="label">圆形按钮 — 关闭（叉）</div>
+    <div class="navbar">
+      <div class="navbar__body">
+        <div class="navbar__left">
+          <div class="navbar__left-btn navbar__left-btn--circle"><i class="wego-iconfont-s icon-cha16"></i></div>
+        </div>
+        <div class="navbar__center"><span class="navbar__title">关闭</span></div>
+        <div class="navbar__right"></div>
       </div>
     </div>
   </div>

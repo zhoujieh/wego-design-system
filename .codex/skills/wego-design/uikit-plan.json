@@ -168,6 +168,14 @@
       "previewFile": "preview/component-actionsheet.html",
       "priority": 19,
       "slot": "bottom-action-sheet"
+    },
+    {
+      "slug": "modal",
+      "reason": "底部模态框，三段式结构（title/body/action），title 分 info（大标题+辅助说明）和 default（NavBar 风格），action 支持双按钮/单按钮/竖向按钮+链接/取消栏/无操作区，支持 frame（自适应）、frame-x（70vh 可拖拽）、fullscreen（全屏）三种变体，以及二级嵌套 push（最多 3 层）。",
+      "evidenceFile": "components/modal.json",
+      "previewFile": "preview/component-modal.html",
+      "priority": 20,
+      "slot": "bottom-modal-frame"
     }
   ],
   "allowedComponents": [
@@ -190,7 +198,8 @@
     "navbar",
     "toast",
     "dialog",
-    "actionsheet"
+    "actionsheet",
+    "modal"
   ],
   "screenBlueprints": [
     {
@@ -800,7 +809,7 @@
     },
     {
       "type": "modal",
-      "description": "当前页面上的轻量弹窗，用于确认、短提示或短表单。wego-app/scenes/ 下业务场景必须盖住 bottom-nav（5 个主 tab 走 host-shell 内嵌面板，不走 primitive）。",
+      "description": "底部弹层容器，三段式结构（title/body/action），支持 frame/frame-x/fullscreen 三种变体及二级嵌套 push。wego-app/scenes/ 下业务场景必须盖住 bottom-nav。",
       "coversTabBarDefault": true
     },
     {
