@@ -1,4 +1,17 @@
 (function enhanceDynamicFeed() {
+  function createStackTab(label, filter, isSelected, badgeText) {
+    return ''
+      + '<span class="dynamic-feed-tab-item" role="presentation">'
+      +   '<button type="button" class="stack dynamic-feed-tab' + (isSelected ? ' stack--selected' : '') + '" role="tab" aria-selected="' + (isSelected ? 'true' : 'false') + '" data-feed-filter="' + filter + '">'
+      +     '<span class="stack__bg">'
+      +       '<span class="stack__label">' + label + '</span>'
+      +       '<span class="stack__check-corner" aria-hidden="true"><i class="wego-iconfont-s icon-gou16 stack__check-icon"></i></span>'
+      +     '</span>'
+      +   '</button>'
+      +   (badgeText ? '<span class="badge badge--dot dynamic-feed-tab__badge">' + badgeText + '</span>' : '')
+      + '</span>';
+  }
+
   function createToolbar() {
     var panel = document.querySelector('[data-host-tab="dongtai"]');
     var navbar = panel && panel.querySelector('.host-dongtai-navbar');
@@ -14,18 +27,30 @@
 
     navbar.dataset.feedToolbar = 'true';
     navbar.innerHTML = ''
-      + '<div class="dynamic-feed-toolbar">'
-      +   '<button type="button" class="dynamic-feed-search" aria-label="搜索产品" data-content-id="search-entry">'
-      +     '<i class="wego-iconfont-s icon-sousuo" aria-hidden="true"></i>'
-      +     '<span>标题/搜索码/货号</span>'
-      +     '<i class="wego-iconfont-s icon-tupian" aria-hidden="true"></i>'
-      +   '</button>'
-      +   '<button type="button" class="btn btn--strong dynamic-feed-publish" aria-label="发布产品" data-content-id="publish-entry">+</button>'
+      + '<div class="navbar__body dynamic-feed-navbar__body">'
+      +   '<div class="navbar__left dynamic-feed-navbar__left">'
+      +     '<button type="button" class="host-dongtai-navbar__vip dynamic-feed-vip" data-vip-level="vip" aria-label="VIP" data-content-id="vip-entry">'
+      +       '<img src="./lib/icons/icon-dongtai-vip.svg" alt="" />'
+      +     '</button>'
+      +   '</div>'
+      +   '<div class="navbar__center dynamic-feed-navbar__center"></div>'
+      +   '<div class="navbar__right navbar__right--icon dynamic-feed-navbar__right">'
+      +     '<div class="navbar__action dynamic-feed-publish-action">'
+      +       '<button type="button" class="btn btn--strong btn--sm btn--icon-only dynamic-feed-publish" aria-label="发布产品" data-content-id="publish-entry"><span aria-hidden="true">+</span></button>'
+      +     '</div>'
+      +   '</div>'
       + '</div>'
       + '<div class="dynamic-feed-tabs" role="tablist" aria-label="动态筛选" data-content-id="filter-tabs">'
-      +   '<button type="button" class="dynamic-feed-tab is-active" role="tab" aria-selected="true">全部</button>'
-      +   '<button type="button" class="dynamic-feed-tab" role="tab" aria-selected="false">上新<span class="badge badge--dot dynamic-feed-tab__badge">1</span></button>'
+      +   createStackTab('全部', 'all', true, '')
+      +   createStackTab('上新', 'new', false, '1')
       + '</div>';
+
+    var vip = navbar.querySelector('.dynamic-feed-vip');
+    if (vip) vip.addEventListener('click', function () {
+      if (window.WegoApp && typeof window.WegoApp.toast === 'function') {
+        window.WegoApp.toast('会员功能开发中');
+      }
+    });
 
     var publish = navbar.querySelector('.dynamic-feed-publish');
     if (publish) publish.addEventListener('click', function () {
@@ -38,6 +63,16 @@
       } else if (window.WegoApp && typeof window.WegoApp.navigate === 'function') {
         window.WegoApp.navigate('quick-publish-product');
       }
+    });
+
+    navbar.querySelectorAll('.dynamic-feed-tab').forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        navbar.querySelectorAll('.dynamic-feed-tab').forEach(function (item) {
+          var active = item === tab;
+          item.classList.toggle('stack--selected', active);
+          item.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+      });
     });
   }
 
