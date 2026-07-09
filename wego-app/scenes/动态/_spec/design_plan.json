@@ -143,7 +143,7 @@
       "block": "search-entry",
       "scenario_type": "component-consumption-decision",
       "consumption_mode": "free-composition",
-      "selected": "button 组件 domAnatomy 范围内的组合说明：使用 .btn 与 .btn--weak 组合，或页面级业务样式承载搜索胶囊；内嵌 icon-sousuo + 占位文案 + icon-tupian",
+      "selected": "button 组件弱强调能力承载搜索触发入口；搜索胶囊的视觉外观由页面级业务样式组织，内容由搜索图标、占位文案和图片入口图标组成",
       "constraint_ref": {},
       "reason": "搜索入口是触发型操作，用 button 承载；胶囊样式属于页面级业务样式",
       "rule_sources": ["components/button.json", "library-consumption.json.iconUsage.fontClassMode"]
@@ -154,14 +154,14 @@
       "consumption_mode": "stable-variant",
       "selected": ["variant=strong", "size=48px-circle"],
       "constraint_ref": {},
-      "reason": "发布是主操作，用 button--strong 圆形 48px 承载",
+      "reason": "发布是主操作，用 button 强强调圆形 48px 承载",
       "rule_sources": ["components/button.json.variantDimensions"]
     },
     {
       "block": "filter-tabs",
       "scenario_type": "component-consumption-decision",
       "consumption_mode": "free-composition",
-      "selected": "页面级业务样式承载筛选 Tab 横排；内嵌 badge--dot 承载上新未读计数",
+      "selected": "页面级业务样式承载筛选 Tab 横排；上新未读计数由 badge 组件点状提示能力承载",
       "constraint_ref": {},
       "reason": "筛选 Tab 是页面级业务样式，未读计数用已注册 badge 组件",
       "rule_sources": ["components/badge.json.variantDimensions"]
@@ -197,7 +197,7 @@
       "block": "feed-item-summary",
       "scenario_type": "component-consumption-decision",
       "consumption_mode": "free-composition",
-      "selected": "card 组件 domAnatomy 范围内组合：card--filled 承载摘要卡，内嵌 media + body + action",
+      "selected": "card 组件填充型卡片能力承载摘要卡；内部媒体、正文和操作区域由页面级业务样式组织",
       "constraint_ref": {},
       "reason": "产品摘要用 card 承载，内部分栏由页面级业务样式定义",
       "rule_sources": ["components/card.json.domAnatomy"]
@@ -206,7 +206,7 @@
       "block": "feed-item-info",
       "scenario_type": "component-consumption-decision",
       "consumption_mode": "free-composition",
-      "selected": "card 组件 domAnatomy 范围内组合：card--filled 承载信息行",
+      "selected": "card 组件填充型卡片能力承载信息行；内部分行由页面级业务样式组织",
       "constraint_ref": {},
       "reason": "产品信息行用 card 承载，内部分行由页面级业务样式定义",
       "rule_sources": ["components/card.json.domAnatomy"]
@@ -229,18 +229,18 @@
     { "file": ".codex/skills/wego-design/components/avatar.json", "field": "variantDimensions", "supports": ["feed-item-identity 用 avatar image 40"] },
     { "file": ".codex/skills/wego-design/components/image.json", "field": "variantDimensions + behavior.loading", "supports": ["feed-item-gallery 用 image cover+rounded-md+loading"] },
     { "file": ".codex/skills/wego-design/components/link.json", "field": "variantDimensions + structurePatterns", "supports": ["feed-item-actions 用 link standalone 12px"] },
-    { "file": ".codex/skills/wego-design/components/card.json", "field": "domAnatomy", "supports": ["feed-item-summary 和 feed-item-info 用 card--filled 承载"] },
-    { "file": ".codex/skills/wego-design/components/badge.json", "field": "variantDimensions", "supports": ["filter-tabs 上新未读用 badge--dot"] },
-    { "file": ".codex/skills/wego-design/components/button.json", "field": "variantDimensions", "supports": ["publish-entry 用 button--strong，search-entry 用 button 承载"] },
+    { "file": ".codex/skills/wego-design/components/card.json", "field": "domAnatomy", "supports": ["feed-item-summary 和 feed-item-info 用 card 填充型卡片能力承载"] },
+    { "file": ".codex/skills/wego-design/components/badge.json", "field": "variantDimensions", "supports": ["filter-tabs 上新未读用 badge 点状提示能力"] },
+    { "file": ".codex/skills/wego-design/components/button.json", "field": "variantDimensions", "supports": ["publish-entry 用 button 强强调变体，search-entry 用 button 弱强调能力承载"] },
     { "file": "wego-app/scenes/动态/_spec/interaction_spec.json", "field": "surfaces[dynamic-feed-main].carrier=host-fixed-tab", "supports": ["page_presentation.type=host-fixed-tab，不注册 push 路由"] }
   ],
   "implementation_constraints": [
     "动态页是宿主固定 Tab，运行时由 app.js setActiveTab 切换，不注册 hash push 路由，不迁移到 scene.js 结构；内容继续由 wego-app/js/dynamic-feed.js + wego-app/css/dynamic-feed.css 承载",
     "头像与内容必须左右布局：grid 48px + 1fr 两列，gap 12px；375px 断点改 40px + 1fr，gap 8px",
     "动态卡片之间的分割线为 0.5px，左侧对齐右侧内容起始处（左 padding 16px + 头像 48px + gap 12px），右侧贴屏幕边缘；375px 断点 left 改为 12px+40px+8px",
-    "操作按钮使用 link 组件 standalone + 12px 变体（.link.link--12），不得使用未注册的 .link--default 或自定义 min-height 覆盖 link 热区",
-    "九宫格单格必须使用 image 组件（.wg-image.wg-image--rounded-md），不得用 span + iconfont 占位；image 组件的骨架动画和圆角由组件自身承担，页面层不重复定义",
-    "gallery 网格容器（3 列等分，gap 4px，单格 aspect-ratio 1）属于页面级业务样式，允许保留 .dynamic-feed-gallery 业务类",
+    "操作按钮使用 link 组件 standalone + 12px 变体，不得使用未登记的默认 link 变体或自定义 min-height 覆盖 link 热区",
+    "九宫格单格必须使用 image 组件圆角变体，不得用 span + iconfont 占位；image 组件的骨架动画和圆角由组件自身承担，页面层不重复定义",
+    "gallery 网格容器（3 列等分，gap 4px，单格 aspect-ratio 1）属于页面级业务样式",
     "禁止使用 inline style 控制颜色/间距，必须用 Token",
     "禁止发明未注册组件类或修饰类"
   ]
