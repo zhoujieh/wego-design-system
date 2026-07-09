@@ -3,6 +3,48 @@
   "threshold": 3,
   "candidates": [
     {
+      "id": "exp-nested-component-bg-css-variable-chain",
+      "normalized_key": "nested-component-background-must-use-css-variable-chain-not-hardcoded",
+      "title": "嵌套组件背景色必须通过 CSS 变量链路继承，禁止各自硬编码",
+      "status": "observing",
+      "occurrence_count": 1,
+      "threshold": 3,
+      "primary_owner": "wego-design",
+      "secondary_owners": ["wego-ux"],
+      "ownership_reason": "问题最早产生在 wego-design 的组件 CSS 设计阶段。当组件 A 嵌入组件 B（如 navbar 嵌入 modal），且 B 的背景需要动态切换（白色/灰色）时，A 的 CSS 不应硬编码 background 值，而应通过 B 暴露的 CSS 变量（如 --modal-panel-bg）间接继承。否则修改 B 的背景变量后 A 仍然显示旧色，视觉脱耦。同理，B 的子元素（actions、action-gradient、cancel 等）也应统一走变量链路，形成「一个变量改，全家跟着变」的单点控制。",
+      "problem_pattern": "嵌入组件（navbar）在自己的 CSS 中硬编码了 background: var(--bg-page)，即使父组件（modal__panel）通过 --modal-panel-bg 切换为白色（bg-surface），嵌入组件仍然显示灰色。同时父组件的其他子元素（actions、cancel）各自硬编码 background: var(--bg-surface)，没有统一走父级 CSS 变量。导致「修改容器背景变量」与「所有子元素跟随变色」之间断链。",
+      "scene_evidence": [
+        {
+          "date": "2026-07-09",
+          "scene": "modal 组件 css 布局优化",
+          "summary": "用户要求 modal 容器用白色背景，但 modal__title--default 内嵌的 navbar 因硬编码 background: var(--bg-page) 仍然灰色。用户指出『title 的背景和 body 的背景色保持 navbar 的规则，如果 body 是灰色 title 就是灰色，body 是白色 title 就是白色』，但 navbar 自己的硬编码后台背景打破了继承链。修复：(1) navbar 在 modal 内时通过 .modal__title--default .navbar { background: var(--modal-panel-bg, var(--bg-surface)); } 继承；(2) modal__actions 和 modal__cancel 的 background 统一改为 var(--modal-panel-bg, var(--bg-surface))；(3) modal__action-gradient 的线性渐变终点色也使用 var(--modal-panel-bg, var(--bg-surface))。",
+          "source": "用户直接指出标题背景与 panel 背景不同步"
+        }
+      ],
+      "applies_when_candidates": [
+        "一个已注册组件（如 navbar）被嵌入另一个组件（如 modal）的 slot 中",
+        "宿主组件有多个背景色变体（白/灰），且子组件背景应跟随宿主",
+        "宿主组件的 actions、gradient、cancel 等子元素需要共享同一背景色"
+      ],
+      "avoid_when_candidates": [
+        "嵌入组件自身就是独立变体且明确设计为固定背景（如 toast 固定黑底）",
+        "宿主组件的子元素需要与宿主不同的背景色（如卡片内嵌白色区域）",
+        "组件完全不涉及背景色变化的场景"
+      ],
+      "expected_rule_target": {
+        "file": ".codex/skills/wego-design/components/modal.json",
+        "field": "structurePatterns / cssCustomProperties（明确 --modal-panel-bg 的继承链路和所有子元素的消费方式）"
+      },
+      "runtime_reachability": {
+        "consumer_skill": "wego-design（组件 CSS 设计阶段定义变量链路）和 wego-ux（实现时消费变量）",
+        "output_field": "组件 Preview HTML 中的 @component-css 块和组件契约中的 cssCustomProperties",
+        "downstream_consumer": "wego-ux 在实现业务场景时通过覆盖 --modal-panel-bg 变量完成主题切换，不需要逐个子元素覆写",
+        "acceptance_check": "守门脚本检查组件 CSS 中是否所有同类子元素使用了统一的 CSS 变量，而非各自硬编码；设计审查时用 agent-browser 切换变量值验证全组件视觉同步"
+      },
+      "created_at": "2026-07-09T00:00:00.000Z",
+      "updated_at": "2026-07-09T00:00:00.000Z"
+    },
+    {
       "id": "exp-plan-mode-skills-gating",
       "normalized_key": "plan-mode-must-not-bypass-skill-routing",
       "title": "Plan Mode 不得绕过技能路由门禁",
