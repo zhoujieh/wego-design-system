@@ -7,14 +7,14 @@
     navbar.dataset.feedToolbar = 'true';
     navbar.innerHTML = ''
       + '<div class="dynamic-feed-toolbar">'
-      +   '<button type="button" class="dynamic-feed-search" aria-label="搜索产品">'
+      +   '<button type="button" class="dynamic-feed-search" aria-label="搜索产品" data-content-id="search-entry">'
       +     '<i class="wego-iconfont-s icon-sousuo" aria-hidden="true"></i>'
       +     '<span>标题/搜索码/货号</span>'
       +     '<i class="wego-iconfont-s icon-tupian" aria-hidden="true"></i>'
       +   '</button>'
-      +   '<button type="button" class="btn btn--strong dynamic-feed-publish" aria-label="发布产品">+</button>'
+      +   '<button type="button" class="btn btn--strong dynamic-feed-publish" aria-label="发布产品" data-content-id="publish-entry">+</button>'
       + '</div>'
-      + '<div class="dynamic-feed-tabs" role="tablist" aria-label="动态筛选">'
+      + '<div class="dynamic-feed-tabs" role="tablist" aria-label="动态筛选" data-content-id="filter-tabs">'
       +   '<button type="button" class="dynamic-feed-tab is-active" role="tab" aria-selected="true">全部</button>'
       +   '<button type="button" class="dynamic-feed-tab" role="tab" aria-selected="false">上新<span class="badge badge--dot dynamic-feed-tab__badge">1</span></button>'
       + '</div>';
@@ -28,9 +28,9 @@
     gallery.className = 'dynamic-feed-gallery dynamic-feed-gallery--9';
     gallery.setAttribute('aria-label', '产品图片九宫格');
     for (var i = 0; i < 9; i++) {
-      var item = document.createElement('span');
-      item.className = 'dynamic-feed-gallery__item dynamic-feed-gallery__placeholder';
-      item.innerHTML = '<i class="wego-iconfont-s icon-tupian" aria-hidden="true"></i>';
+      var item = document.createElement('div');
+      item.className = 'dynamic-feed-gallery__item';
+      item.innerHTML = '<div class="wg-image wg-image--rounded-md wg-image--loading"><div class="wg-image__src"></div></div>';
       gallery.appendChild(item);
     }
     return gallery;
@@ -70,6 +70,7 @@
     content.appendChild(body);
     content.appendChild(action);
     summary.appendChild(content);
+    summary.setAttribute('data-content-id', 'feed-item-summary');
     return summary;
   }
 
@@ -99,18 +100,25 @@
     }
 
     info.appendChild(content);
+    info.setAttribute('data-content-id', 'feed-item-info');
     return info;
   }
 
   function createActions() {
     var actions = document.createElement('div');
     actions.className = 'dynamic-feed-actions';
+    actions.setAttribute('data-content-id', 'feed-item-actions');
     ['删除', '下架', '刷新', '置顶', '编辑'].forEach(function (label) {
       var button = document.createElement('button');
       button.type = 'button';
-      button.className = 'link link--default dynamic-feed-actions__item';
+      button.className = 'link link--12 dynamic-feed-actions__item';
       button.textContent = label;
-      button.addEventListener('click', function (event) { event.stopPropagation(); });
+      button.addEventListener('click', function (event) {
+        event.stopPropagation();
+        if (window.WegoApp && typeof window.WegoApp.toast === 'function') {
+          window.WegoApp.toast('功能开发中');
+        }
+      });
       actions.appendChild(button);
     });
     return actions;
@@ -129,8 +137,10 @@
 
     card.dataset.feedEnhanced = 'true';
     card.classList.add('dynamic-feed-item');
+    card.setAttribute('data-surface-id', 'dynamic-feed-main');
 
     media.className = 'avatar avatar--40 avatar--image dynamic-feed-item__avatar';
+    media.setAttribute('data-content-id', 'feed-item-identity');
     media.innerHTML = '<img src="./lib/image/avatar-defult.png" alt="">';
 
     var header = document.createElement('div');
@@ -142,7 +152,15 @@
       + '</div>';
     main.insertBefore(header, primary);
 
-    primary.appendChild(createGallery());
+    var titleNode = document.createElement('div');
+    titleNode.className = 'dynamic-feed-item__title-wrap';
+    titleNode.setAttribute('data-content-id', 'feed-item-title');
+    titleNode.appendChild(title);
+    primary.insertBefore(titleNode, primary.firstChild);
+
+    var gallery = createGallery();
+    gallery.setAttribute('data-content-id', 'feed-item-gallery');
+    primary.appendChild(gallery);
     main.insertBefore(createSummary(title, price), meta || null);
 
     var info = createInfo(meta);

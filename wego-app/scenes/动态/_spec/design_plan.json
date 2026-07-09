@@ -1,0 +1,247 @@
+{
+  "complexity_level": "complex",
+  "matched_uikit": null,
+  "scene_fit_reason": "动态页是内容流型主 Tab，管理一组可操作的产品动态卡片；现有 pagePattern 只有 biz-rule-config 和 system-settings 两类设置型范式，无法精确命中；按 uikit-plan.json.screenBlueprints[首页/商品流] + fallbackPageBlueprints[object-management-list-page] 安全承接，由 avatar+image+card+link+button 等已注册组件和页面级业务样式组成",
+  "navigation_pattern": "bottom-nav 固定 Tab 切换 + 页内筛选",
+  "layout_pattern": "通栏模式 M1",
+  "interaction_pattern": "流式列表浏览 + 页内筛选 + 单条卡片操作",
+  "app_target": {
+    "mode": "wego-app-scene",
+    "app_root": "wego-app",
+    "scene_folder": "wego-app/scenes/动态",
+    "route_id": "",
+    "route_mode": "hash",
+    "runtime_entry": "scene.js"
+  },
+  "flow_to_surface_decisions": [
+    {
+      "decision_id": "merge-feed-nodes-to-host-tab",
+      "node_refs": ["enter-feed", "browse-list", "filter-feed", "operate-item"],
+      "surface_ref": "dynamic-feed-main",
+      "carrier_decision": "merge-into-surface",
+      "reason": "动态页作为宿主固定 Tab，所有流程节点（进入、浏览、筛选、操作）均在同一 host-fixed-tab surface 内完成，不拆分为独立 push/sheet/modal",
+      "rule_sources": ["interaction_spec.surfaces[dynamic-feed-main].carrier=host-fixed-tab", "uikit-plan.json.hostShell.fixedTabs[dongtai]"]
+    }
+  ],
+  "page_strategy": {
+    "page_goal": "浏览和操作产品动态流",
+    "page_pattern": "object-management-list-page",
+    "layout_pattern": "通栏模式 M1",
+    "main_scroll_direction": "vertical",
+    "content_density": "comfortable",
+    "first_screen_goal": "快速看到最新动态并触达发布/搜索入口",
+    "first_screen_priority": "工具栏（搜索+发布） > 筛选 Tab > 动态卡片流",
+    "region_priority": ["toolbar", "filter-tabs", "feed-list"],
+    "content_density_strategy": "每屏约 1-2 张动态卡片，卡片内信息分组清晰，避免拥挤",
+    "scroll_rhythm": "卡片之间用 0.5px 分割线分隔，卡片内部分组用 12px 间距保持节奏",
+    "fixed_vs_scroll": "工具栏与筛选 Tab 跟随页面顶部不吸顶；动态卡片流为连续滚动内容",
+    "visual_competition": "九宫格图片区视觉权重最高，摘要卡和信息行用低饱和背景抑制；操作按钮用 12px link 保持低干扰"
+  },
+  "region_composition": [
+    {
+      "region_id": "toolbar",
+      "role": "core-entry",
+      "priority": 1,
+      "order": 1,
+      "layout": "grid-2-col",
+      "width": "full",
+      "scroll_behavior": "static",
+      "component_refs": ["search-entry", "publish-entry"],
+      "relation": { "below": "filter-tabs" },
+      "rule_sources": ["fallbackPageBlueprints[object-management-list-page].layoutRules"]
+    },
+    {
+      "region_id": "filter-tabs",
+      "role": "operation",
+      "priority": 2,
+      "order": 2,
+      "layout": "horizontal-row",
+      "width": "full",
+      "scroll_behavior": "static",
+      "component_refs": ["filter-tabs"],
+      "relation": { "above": "toolbar", "below": "feed-list" },
+      "rule_sources": ["fallbackPageBlueprints[object-management-list-page].layoutRules"]
+    },
+    {
+      "region_id": "feed-list",
+      "role": "recommend",
+      "priority": 3,
+      "order": 3,
+      "layout": "vertical-stack",
+      "width": "full",
+      "scroll_behavior": "scroll",
+      "component_refs": ["feed-item-identity", "feed-item-title", "feed-item-gallery", "feed-item-summary", "feed-item-info", "feed-item-actions"],
+      "relation": { "above": "filter-tabs" },
+      "rule_sources": ["fallbackPageBlueprints[object-management-list-page].layoutRules"]
+    }
+  ],
+  "component_patterns": [
+    {
+      "pattern_id": "feed-card",
+      "applies_to": ["feed-item-identity", "feed-item-title", "feed-item-gallery", "feed-item-summary", "feed-item-info", "feed-item-actions"],
+      "component_pattern": "list-with-actions",
+      "matched_page_pattern": null,
+      "matched_blueprint": "object-management-list-page",
+      "constraint_ref": null,
+      "reason": "动态卡片是对象管理列表项：左侧头像识别 + 右侧内容（标题/九宫格/摘要/信息/操作），符合横向主结构",
+      "rule_sources": ["uikit-plan.json.fallbackPageBlueprints[object-management-list-page].layoutRules"]
+    },
+    {
+      "pattern_id": "toolbar-entry",
+      "applies_to": ["search-entry", "publish-entry"],
+      "component_pattern": "dual-entry-toolbar",
+      "matched_page_pattern": null,
+      "matched_blueprint": "object-management-list-page",
+      "constraint_ref": null,
+      "reason": "搜索入口 + 发布入口并列，符合对象管理列表的新增入口规则",
+      "rule_sources": ["uikit-plan.json.fallbackPageBlueprints[object-management-list-page].layoutRules"]
+    }
+  ],
+  "page_presentation": {
+    "type": "host-fixed-tab",
+    "transition": "none",
+    "dismiss_action": "tab-switch",
+    "overlay_level": "inline",
+    "covers_tab_bar": false,
+    "source": "interaction_spec.surfaces[dynamic-feed-main].carrier=host-fixed-tab; 非独立 push/sheet/modal，由 app.js setActiveTab 切换"
+  },
+  "surface_designs": [
+    {
+      "surface_id": "dynamic-feed-main",
+      "role": "primary-task-page",
+      "match_status": "fallback",
+      "matched_uikit": null,
+      "matched_page_pattern": null,
+      "matched_blueprint": "object-management-list-page",
+      "presentation_ref": "host-fixed-tab",
+      "scene_fit_reason": "内容流型主 Tab，管理可操作的产品动态列表；无精确 pagePattern，由 object-management-list-page fallback blueprint 安全承接",
+      "component_mapping": [
+        "search-entry",
+        "publish-entry",
+        "filter-tabs",
+        "feed-item-identity",
+        "feed-item-title",
+        "feed-item-gallery",
+        "feed-item-summary",
+        "feed-item-info",
+        "feed-item-actions"
+      ],
+      "allowed_page_styles": [
+        "通栏模式 M1：动态卡片横向 padding 由卡片内容自带 16px 承担，页面层不加额外横向 padding",
+        "动态卡片项之间的 0.5px 分割线：left 对齐右侧内容起始处（头像宽 48px + 间距 12px + 左 padding 16px），right 贴屏幕边缘；375px 断点 left 改为 40px+8px+12px",
+        "动态卡片内 grid 布局：头像 48px + 1fr 左右两列，gap 12px",
+        "九宫格图片网格：3 列等分，gap 4px，单格 aspect-ratio 1",
+        "操作按钮区：flex 横排，gap 20px",
+        "摘要卡和信息卡的卡片修饰与圆角",
+        "工具栏 grid：1fr + 48px 两列"
+      ],
+      "design_gap": ""
+    }
+  ],
+  "component_mapping": [
+    {
+      "block": "search-entry",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "free-composition",
+      "selected": "button 组件 domAnatomy 范围内的组合说明：使用 .btn 与 .btn--weak 组合，或页面级业务样式承载搜索胶囊；内嵌 icon-sousuo + 占位文案 + icon-tupian",
+      "constraint_ref": {},
+      "reason": "搜索入口是触发型操作，用 button 承载；胶囊样式属于页面级业务样式",
+      "rule_sources": ["components/button.json", "library-consumption.json.iconUsage.fontClassMode"]
+    },
+    {
+      "block": "publish-entry",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": ["variant=strong", "size=48px-circle"],
+      "constraint_ref": {},
+      "reason": "发布是主操作，用 button--strong 圆形 48px 承载",
+      "rule_sources": ["components/button.json.variantDimensions"]
+    },
+    {
+      "block": "filter-tabs",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "free-composition",
+      "selected": "页面级业务样式承载筛选 Tab 横排；内嵌 badge--dot 承载上新未读计数",
+      "constraint_ref": {},
+      "reason": "筛选 Tab 是页面级业务样式，未读计数用已注册 badge 组件",
+      "rule_sources": ["components/badge.json.variantDimensions"]
+    },
+    {
+      "block": "feed-item-identity",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": ["type=image", "size=40"],
+      "constraint_ref": {},
+      "reason": "发布者身份用 avatar 组件，image 类型 40 尺寸",
+      "rule_sources": ["components/avatar.json.variantDimensions"]
+    },
+    {
+      "block": "feed-item-title",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "free-composition",
+      "selected": "页面级业务样式承载标题文案",
+      "constraint_ref": {},
+      "reason": "动态标题是纯文本展示，无对应稳定变体，由页面级样式承载",
+      "rule_sources": ["fallbackPageBlueprints[object-management-list-page].allowedPageStyles"]
+    },
+    {
+      "block": "feed-item-gallery",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": ["fit=cover", "radius=rounded-md", "state=loading"],
+      "constraint_ref": {},
+      "reason": "九宫格单格用 image 组件 cover + rounded-md，初始 loading 态由骨架动画承载",
+      "rule_sources": ["components/image.json.variantDimensions", "components/image.json.behavior.loading"]
+    },
+    {
+      "block": "feed-item-summary",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "free-composition",
+      "selected": "card 组件 domAnatomy 范围内组合：card--filled 承载摘要卡，内嵌 media + body + action",
+      "constraint_ref": {},
+      "reason": "产品摘要用 card 承载，内部分栏由页面级业务样式定义",
+      "rule_sources": ["components/card.json.domAnatomy"]
+    },
+    {
+      "block": "feed-item-info",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "free-composition",
+      "selected": "card 组件 domAnatomy 范围内组合：card--filled 承载信息行",
+      "constraint_ref": {},
+      "reason": "产品信息行用 card 承载，内部分行由页面级业务样式定义",
+      "rule_sources": ["components/card.json.domAnatomy"]
+    },
+    {
+      "block": "feed-item-actions",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": ["mode=standalone", "size=12"],
+      "constraint_ref": {},
+      "reason": "单条动态操作用 link 组件 standalone + 12px 紧凑尺寸",
+      "rule_sources": ["components/link.json.variantDimensions", "components/link.json.structurePatterns[12px 紧凑尺寸]"]
+    }
+  ],
+  "design_gaps": [],
+  "rule_sources_used": [
+    { "file": ".codex/skills/wego-design/uikit-plan.json", "field": "fallbackPageBlueprints[object-management-list-page]", "supports": ["动态页命中对象管理列表 fallback", "横向主结构、操作外露规则"] },
+    { "file": ".codex/skills/wego-design/uikit-plan.json", "field": "screenBlueprints[首页/商品流]", "supports": ["内容流型页面使用 bottom-nav+card+image+button 组件组合"] },
+    { "file": ".codex/skills/wego-design/uikit-plan.json", "field": "hostShell.fixedTabs[dongtai]", "supports": ["动态为宿主固定 Tab，不走 push 路由"] },
+    { "file": ".codex/skills/wego-design/components/avatar.json", "field": "variantDimensions", "supports": ["feed-item-identity 用 avatar image 40"] },
+    { "file": ".codex/skills/wego-design/components/image.json", "field": "variantDimensions + behavior.loading", "supports": ["feed-item-gallery 用 image cover+rounded-md+loading"] },
+    { "file": ".codex/skills/wego-design/components/link.json", "field": "variantDimensions + structurePatterns", "supports": ["feed-item-actions 用 link standalone 12px"] },
+    { "file": ".codex/skills/wego-design/components/card.json", "field": "domAnatomy", "supports": ["feed-item-summary 和 feed-item-info 用 card--filled 承载"] },
+    { "file": ".codex/skills/wego-design/components/badge.json", "field": "variantDimensions", "supports": ["filter-tabs 上新未读用 badge--dot"] },
+    { "file": ".codex/skills/wego-design/components/button.json", "field": "variantDimensions", "supports": ["publish-entry 用 button--strong，search-entry 用 button 承载"] },
+    { "file": "wego-app/scenes/动态/_spec/interaction_spec.json", "field": "surfaces[dynamic-feed-main].carrier=host-fixed-tab", "supports": ["page_presentation.type=host-fixed-tab，不注册 push 路由"] }
+  ],
+  "implementation_constraints": [
+    "动态页是宿主固定 Tab，运行时由 app.js setActiveTab 切换，不注册 hash push 路由，不迁移到 scene.js 结构；内容继续由 wego-app/js/dynamic-feed.js + wego-app/css/dynamic-feed.css 承载",
+    "头像与内容必须左右布局：grid 48px + 1fr 两列，gap 12px；375px 断点改 40px + 1fr，gap 8px",
+    "动态卡片之间的分割线为 0.5px，左侧对齐右侧内容起始处（左 padding 16px + 头像 48px + gap 12px），右侧贴屏幕边缘；375px 断点 left 改为 12px+40px+8px",
+    "操作按钮使用 link 组件 standalone + 12px 变体（.link.link--12），不得使用未注册的 .link--default 或自定义 min-height 覆盖 link 热区",
+    "九宫格单格必须使用 image 组件（.wg-image.wg-image--rounded-md），不得用 span + iconfont 占位；image 组件的骨架动画和圆角由组件自身承担，页面层不重复定义",
+    "gallery 网格容器（3 列等分，gap 4px，单格 aspect-ratio 1）属于页面级业务样式，允许保留 .dynamic-feed-gallery 业务类",
+    "禁止使用 inline style 控制颜色/间距，必须用 Token",
+    "禁止发明未注册组件类或修饰类"
+  ]
+}
