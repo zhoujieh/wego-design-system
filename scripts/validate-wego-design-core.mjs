@@ -2280,13 +2280,14 @@ function checkInteractionSpecAndDesignPlanReferences(context) {
       }
     }
 
-    // readiness 校验
-    const readiness = spec?.readiness;
-    if (!readiness) {
+    // readiness 校验（支持字符串和对象两种格式）
+    const readinessRaw = spec?.readiness;
+    const readinessValue = typeof readinessRaw === 'object' && readinessRaw !== null ? readinessRaw.status : readinessRaw;
+    if (!readinessRaw) {
       add('error', 'spec.readiness_missing',
         'interaction_spec 必须包含 readiness 字段',
         interactionSpecPath);
-    } else if (!['ready', 'ready-with-assumptions', 'partially-ready', 'blocked'].includes(readiness)) {
+    } else if (!['ready', 'ready-with-assumptions', 'partially-ready', 'blocked'].includes(readinessValue)) {
       add('error', 'spec.readiness_invalid',
         `readiness 必须为 ready/ready-with-assumptions/partially-ready/blocked`,
         interactionSpecPath);

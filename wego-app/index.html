@@ -54,10 +54,10 @@
           </section>
           <section class="host-shell-page__panel host-shell-page__panel--blank" data-host-tab="xiaoxi" hidden aria-label="消息"></section>
 
-          <section class="host-shell-page__panel" data-host-tab="my" hidden>
+          <section class="host-shell-page__panel" data-host-tab="my" data-surface-id="my-home-main" hidden>
             <section class="card card--surface host-shell-profile-card">
               <div class="card__content host-shell-profile">
-                <div class="host-shell-profile__main">
+                <div class="host-shell-profile__main" data-content-id="profile-identity">
                   <div class="avatar avatar--56 avatar--image">
                     <img src="./lib/image/avatar-defult.png" alt="默认头像" />
                   </div>
@@ -69,32 +69,32 @@
                     <p class="host-shell-profile__subtitle">超级管理员</p>
                   </div>
                 </div>
-                <div class="host-shell-profile__actions">
-                  <button type="button" class="button button--secondary button--sm">+ 员工</button>
-                  <button type="button" class="button button--secondary button--sm">员工管理</button>
+                <div class="host-shell-profile__actions" data-content-id="profile-actions">
+                  <button type="button" class="btn btn--weak btn--sm" data-route-id="my-add-staff" data-entry-label="添加员工">+ 员工</button>
+                  <button type="button" class="btn btn--weak btn--sm" data-route-id="my-staff-management" data-entry-label="员工管理">员工管理</button>
                 </div>
               </div>
             </section>
 
             <section class="card card--filled host-shell-membership-card">
-              <div class="card__content host-shell-membership">
+              <div class="card__content host-shell-membership" data-content-id="membership-info">
                 <div class="host-shell-membership__header">
                   <span class="card__header host-shell-membership__label">SVIP 年度超级会员</span>
-                  <button type="button" class="button button--primary button--sm">去续费</button>
+                  <button type="button" class="btn btn--strong btn--sm" data-route-id="my-renew-membership" data-entry-label="去续费">去续费</button>
                 </div>
                 <div class="host-shell-membership__body">
                   <div class="card__body host-shell-membership__usage">
                     <strong>90.33G</strong>
                     <span>/360G</span>
                   </div>
-                  <button type="button" class="link link--default host-shell-link-button" data-route-id="my-space-management" data-entry-label="空间管理">空间管理</button>
+                  <button type="button" class="link host-shell-link-button" data-route-id="my-space-management" data-entry-label="空间管理">空间管理</button>
                 </div>
               </div>
             </section>
 
             <section class="card card--surface host-shell-app-card">
               <div class="card__content host-shell-app-card__content">
-                <div class="host-shell-grid" data-entry-group="my-app-center">
+                <div class="host-shell-grid" data-entry-group="my-app-center" data-content-id="app-center-entries">
                   <button type="button" class="host-shell-grid-entry" data-route-id="my-start-group" data-entry-label="一键开团">
                     <img src="./lib/icons/app-center/一键开团.svg" alt="" class="host-shell-grid-entry__icon" />
                     <span class="host-shell-grid-entry__label">一键开团</span>
@@ -117,7 +117,7 @@
 
             <section class="card card--surface host-shell-list-card">
               <div class="card__content host-shell-list-card__content">
-                <div class="host-shell-list" data-entry-group="my-settings"></div>
+                <div class="host-shell-list" data-entry-group="my-settings" data-content-id="settings-entries"></div>
               </div>
             </section>
           </section>

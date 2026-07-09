@@ -1,0 +1,465 @@
+{
+  "task_type": "design-system-consumption",
+  "scene_category": "form-edit",
+  "goal": "让店主以连续文本输入方式快速录入并识别产品字段，保存文本与结构化识别结果，发布后在动态页即时展示，并支持从动态页再次进入编辑继续增量识别和修改",
+  "scope": {
+    "included": [
+      "动态 Tab 导航栏右上角发布入口",
+      "快捷发布产品全屏编辑页：产品名、售价、货号、规格、颜色、重量、库存、标签、来源共 9 行连续文本编辑器",
+      "空格/Enter 增量识别、局部闪烁反馈、去重提示、光标保持",
+      "可见性切换、图片上传占位",
+      "原始文本与结构化识别结果持久化（localStorage，降级会话内存）",
+      "发布成功后回到动态页，列表顶部即时展示新增产品",
+      "动态产品卡片展示必要摘要，点击卡片再次进入同一产品编辑"
+    ],
+    "excluded": [
+      "图片上传真实业务实现（仅占位）",
+      "动态页完整筛选、搜索、九宫格等能力（属动态场景）",
+      "产品详情页",
+      "分类选择、运费模板等下钻子流程"
+    ]
+  },
+  "actors": [
+    { "id": "shop-owner", "role": "店主", "purpose": "快速录入并发布产品，后续可再次编辑" }
+  ],
+  "entry_points": [
+    {
+      "id": "dongtai-publish-btn",
+      "carrier": "navbar-action",
+      "description": "动态 Tab 导航栏右上角发布按钮，点击打开全屏编辑模态"
+    }
+  ],
+  "interaction_mode": "edit-then-save",
+  "app_target": {
+    "mode": "wego-app-scene",
+    "app_root": "wego-app",
+    "scene_folder": "wego-app/scenes/快捷发布产品",
+    "runtime_entry": "scene.js",
+    "route_mode": "hash"
+  },
+  "host_container": {
+    "tab": "dongtai",
+    "entry_label": "发布",
+    "subentry_label": "",
+    "leaf_level": 2,
+    "entry_type": "cell",
+    "needs_host_entry_surface": true
+  },
+  "prototype_target": {
+    "app_root": "wego-app",
+    "scenario_folder": "wego-app/scenes/快捷发布产品",
+    "routes": [
+      { "id": "quick-publish-product", "surface_ref": "quick-publish-form" }
+    ]
+  },
+  "flows": [
+    {
+      "flow_id": "publish-product",
+      "flow_type": "main",
+      "entry_node": "enter-publish-entry",
+      "steps": ["enter-publish-entry", "edit-product-fields", "recognize-fields", "submit-publish", "view-published-summary"],
+      "exit_condition": "发布成功并回到动态页展示新产品"
+    },
+    {
+      "flow_id": "re-edit-product",
+      "flow_type": "branch",
+      "entry_node": "view-published-summary",
+      "steps": ["view-published-summary", "re-edit-product", "submit-publish", "view-published-summary"],
+      "exit_condition": "编辑保存后回到动态页，原产品更新"
+    },
+    {
+      "flow_id": "cancel-edit",
+      "flow_type": "interrupt-resume",
+      "entry_node": "edit-product-fields",
+      "steps": ["edit-product-fields", "cancel-edit"],
+      "exit_condition": "取消编辑并回到动态页，不产生新产品"
+    }
+  ],
+  "flow_nodes": [
+    {
+      "node_id": "enter-publish-entry",
+      "purpose": "从动态 Tab 导航栏右上角发布按钮进入编辑页",
+      "surface_ref": "dongtai-navbar-entry",
+      "inputs": [],
+      "outputs": ["编辑页打开"],
+      "key_states": ["动态页已加载", "编辑页打开"]
+    },
+    {
+      "node_id": "edit-product-fields",
+      "purpose": "在连续文本编辑器中录入产品名、售价、货号、规格、颜色、重量、库存、标签、来源",
+      "surface_ref": "quick-publish-form",
+      "inputs": ["可选 productId（再次编辑时）"],
+      "outputs": ["rawText", "结构化 items"],
+      "key_states": ["空表单", "部分填写", "再次编辑恢复原文本与结构化项"]
+    },
+    {
+      "node_id": "recognize-fields",
+      "purpose": "空格或 Enter 触发当前词识别，保持光标位置，局部闪烁反馈，去重提示",
+      "surface_ref": "quick-publish-form",
+      "inputs": ["rawText", "光标位置"],
+      "outputs": ["更新后的 items", "闪烁动画", "去重提示"],
+      "key_states": ["识别中", "识别完成", "重复提示"]
+    },
+    {
+      "node_id": "submit-publish",
+      "purpose": "点击发布按钮，统一保存 rawText 与结构化 items，持久化并触发动态页回填",
+      "surface_ref": "quick-publish-form",
+      "inputs": ["rawText", "items", "visibility"],
+      "outputs": ["saved product id"],
+      "key_states": ["提交中（按钮禁用）", "保存成功", "保存失败重试"]
+    },
+    {
+      "node_id": "view-published-summary",
+      "purpose": "发布成功后回到动态页，新产品显示在列表顶部，点击卡片可再次编辑",
+      "surface_ref": "published-product-summary",
+      "inputs": ["saved product id"],
+      "outputs": ["动态列表更新", "产品卡片摘要"],
+      "key_states": ["列表有数据", "空态"]
+    },
+    {
+      "node_id": "re-edit-product",
+      "purpose": "点击动态卡片进入同一产品编辑，恢复原文本与结构化项，保存更新原产品而非新增",
+      "surface_ref": "quick-publish-form",
+      "inputs": ["productId"],
+      "outputs": ["更新后的 product"],
+      "key_states": ["恢复原数据", "编辑中", "保存更新"]
+    },
+    {
+      "node_id": "cancel-edit",
+      "purpose": "点击取消按钮放弃当前编辑，回到动态页，不产生新产品",
+      "surface_ref": "quick-publish-form",
+      "inputs": [],
+      "outputs": ["回到动态页"],
+      "key_states": ["取消确认", "已返回"]
+    },
+    {
+      "node_id": "upload-image",
+      "purpose": "图片上传占位入口，仅提供反馈不真实上传",
+      "surface_ref": "quick-publish-form",
+      "inputs": [],
+      "outputs": ["toast 反馈"],
+      "key_states": ["占位"]
+    }
+  ],
+  "surfaces": [
+    {
+      "surface_id": "dongtai-navbar-entry",
+      "role": "host-entry",
+      "carrier": "host-section",
+      "node_refs": ["enter-publish-entry"],
+      "content_refs": ["publish-entry-trigger", "dynamic-empty-state"],
+      "interaction_mode": "instant-apply",
+      "purpose": "承接快捷发布入口，并在宿主动态页展示已发布产品列表与空态",
+      "states": ["动态页已加载", "空态"]
+    },
+    {
+      "surface_id": "quick-publish-form",
+      "role": "primary-task-page",
+      "carrier": "standalone-page",
+      "node_refs": ["edit-product-fields", "recognize-fields", "submit-publish", "re-edit-product", "cancel-edit", "upload-image"],
+      "content_refs": ["navbar-cancel", "navbar-publish-action", "field-product-name", "field-price", "field-sku", "field-spec", "field-color", "field-weight", "field-stock", "field-tag", "field-source", "visibility-toggle", "image-upload-placeholder"],
+      "interaction_mode": "edit-then-save",
+      "purpose": "采集产品字段，在不中断连续输入的前提下完成识别、修改、去重和保存",
+      "states": ["空表单", "部分填写", "再次编辑恢复", "提交中", "重复提示"]
+    },
+    {
+      "surface_id": "published-product-summary",
+      "role": "result-summary",
+      "carrier": "host-section",
+      "node_refs": ["view-published-summary"],
+      "content_refs": ["dynamic-product-card"],
+      "interaction_mode": "view-only",
+      "purpose": "提供发布结果回填和产品再次编辑入口，保证新增、展示、编辑形成完整闭环",
+      "states": ["列表有数据", "空态"]
+    }
+  ],
+  "content_blocks": [
+    {
+      "content_id": "publish-entry-trigger",
+      "content": "动态 Tab 导航栏右上角发布按钮",
+      "group": "入口",
+      "interaction": "action",
+      "editable": false,
+      "key_states": ["默认"]
+    },
+    {
+      "content_id": "dynamic-empty-state",
+      "content": "动态页无产品时的空态展示",
+      "group": "入口",
+      "interaction": "view",
+      "editable": false,
+      "key_states": ["空态"]
+    },
+    {
+      "content_id": "navbar-cancel",
+      "content": "导航栏左侧取消操作，放弃当前编辑回到动态页",
+      "group": "导航栏",
+      "interaction": "action",
+      "editable": false,
+      "key_states": ["默认"]
+    },
+    {
+      "content_id": "navbar-publish-action",
+      "content": "导航栏右侧唯一发布主操作，提交期间禁用避免重复创建产品",
+      "group": "导航栏",
+      "interaction": "action",
+      "editable": false,
+      "key_states": ["可提交", "提交中禁用"]
+    },
+    {
+      "content_id": "field-product-name",
+      "content": "产品名，普通文本字段，不执行识别和闪烁，Enter 只切换到下一输入框",
+      "group": "编辑器",
+      "interaction": "input",
+      "editable": true,
+      "key_states": ["空", "已填写"]
+    },
+    {
+      "content_id": "field-price",
+      "content": "售价，单项识别字段，数字格式限制（最多7位整数2位小数），Enter 识别整个输入框并切换下一字段",
+      "group": "编辑器",
+      "interaction": "input",
+      "editable": true,
+      "key_states": ["空", "输入中", "已识别", "格式错误提示"]
+    },
+    {
+      "content_id": "field-sku",
+      "content": "货号，单项识别字段，Enter 识别整个输入框并切换下一字段",
+      "group": "编辑器",
+      "interaction": "input",
+      "editable": true,
+      "key_states": ["空", "已识别"]
+    },
+    {
+      "content_id": "field-spec",
+      "content": "规格，多项识别字段，空格识别当前词，Enter 在光标任意位置识别当前词并切换下一字段；支持尺码区间展开（如 S~XL）",
+      "group": "编辑器",
+      "interaction": "input",
+      "editable": true,
+      "key_states": ["空", "部分识别", "区间展开", "重复提示"]
+    },
+    {
+      "content_id": "field-color",
+      "content": "颜色，多项识别字段，与规格相同识别逻辑",
+      "group": "编辑器",
+      "interaction": "input",
+      "editable": true,
+      "key_states": ["空", "部分识别", "重复提示"]
+    },
+    {
+      "content_id": "field-weight",
+      "content": "重量，单项识别字段，数字格式限制，Enter 识别整个输入框并切换下一字段",
+      "group": "编辑器",
+      "interaction": "input",
+      "editable": true,
+      "key_states": ["空", "已识别", "格式错误提示"]
+    },
+    {
+      "content_id": "field-stock",
+      "content": "库存，单项识别字段，数字格式限制，默认不限库存，Enter 识别整个输入框并切换下一字段",
+      "group": "编辑器",
+      "interaction": "input",
+      "editable": true,
+      "key_states": ["空", "已识别", "格式错误提示"]
+    },
+    {
+      "content_id": "field-tag",
+      "content": "标签，多项识别字段，与规格、颜色相同识别逻辑，辅助输入入口",
+      "group": "编辑器",
+      "interaction": "input",
+      "editable": true,
+      "key_states": ["空", "部分识别", "重复提示"]
+    },
+    {
+      "content_id": "field-source",
+      "content": "来源，多项识别字段，与标签相同识别逻辑，辅助输入入口",
+      "group": "编辑器",
+      "interaction": "input",
+      "editable": true,
+      "key_states": ["空", "部分识别", "重复提示"]
+    },
+    {
+      "content_id": "visibility-toggle",
+      "content": "可见性切换，在所有粉丝可见与仅自己可见之间切换",
+      "group": "辅助操作",
+      "interaction": "toggle",
+      "editable": false,
+      "default_state": "public",
+      "key_states": ["public", "private"]
+    },
+    {
+      "content_id": "image-upload-placeholder",
+      "content": "图片上传占位入口，仅提供反馈不真实上传",
+      "group": "辅助操作",
+      "interaction": "action",
+      "editable": false,
+      "key_states": ["占位"]
+    },
+    {
+      "content_id": "dynamic-product-card",
+      "content": "动态产品卡片，展示产品名、价格、规格、颜色、标签、来源、可见性和发布时间中的有效信息，未填写字段不占位；点击卡片再次进入同一产品编辑",
+      "group": "动态结果",
+      "interaction": "action",
+      "editable": false,
+      "key_states": ["新增产品", "已更新产品", "空字段不占位"]
+    }
+  ],
+  "transitions": [
+    {
+      "transition_id": "t-open-editor",
+      "from": "enter-publish-entry",
+      "trigger": "点击动态导航栏发布按钮",
+      "to": "edit-product-fields",
+      "data_in": [],
+      "result_out": ["编辑页打开"],
+      "return_to": null
+    },
+    {
+      "transition_id": "t-recognize",
+      "from": "edit-product-fields",
+      "trigger": "空格或 Enter 触发当前词识别",
+      "to": "recognize-fields",
+      "data_in": ["rawText", "光标位置"],
+      "result_out": ["更新后的 items", "闪烁动画"],
+      "return_to": "edit-product-fields"
+    },
+    {
+      "transition_id": "t-submit-publish",
+      "from": "recognize-fields",
+      "trigger": "点击导航栏发布按钮",
+      "to": "submit-publish",
+      "data_in": ["rawText", "items", "visibility"],
+      "result_out": ["saved product id"],
+      "return_to": null
+    },
+    {
+      "transition_id": "t-publish-success",
+      "from": "submit-publish",
+      "trigger": "保存成功",
+      "to": "view-published-summary",
+      "data_in": ["saved product id"],
+      "result_out": ["动态列表顶部新增产品", "切回 dongtai Tab", "关闭全屏场景"],
+      "return_to": "view-published-summary"
+    },
+    {
+      "transition_id": "t-re-edit",
+      "from": "view-published-summary",
+      "trigger": "点击动态卡片",
+      "to": "re-edit-product",
+      "data_in": ["productId"],
+      "result_out": ["恢复原文本与结构化项"],
+      "return_to": "view-published-summary"
+    },
+    {
+      "transition_id": "t-cancel-edit",
+      "from": "edit-product-fields",
+      "trigger": "点击导航栏取消",
+      "to": "cancel-edit",
+      "data_in": [],
+      "result_out": ["回到动态页"],
+      "return_to": null
+    }
+  ],
+  "data_handoffs": [
+    {
+      "handoff_id": "handoff-publish-result",
+      "transition_id": "t-publish-success",
+      "source_node": "submit-publish",
+      "target_node": "view-published-summary",
+      "payload_content_refs": ["dynamic-product-card"],
+      "reset_policy": "clear-on-success",
+      "description": "发布成功后 productId 与字段传递到动态页，列表顶部新增产品卡片，编辑页状态清空"
+    },
+    {
+      "handoff_id": "handoff-re-edit-product",
+      "transition_id": "t-re-edit",
+      "source_node": "view-published-summary",
+      "target_node": "re-edit-product",
+      "payload_content_refs": ["dynamic-product-card"],
+      "reset_policy": "keep",
+      "description": "点击卡片携带 productId 进入编辑页，恢复原 rawText 与 items，保存更新原产品而非新增"
+    }
+  ],
+  "prototype_boundaries": [
+    {
+      "node_id": "enter-publish-entry",
+      "depth": "simulated",
+      "reason": "使用本地导航栏按钮触发，不依赖真实后端"
+    },
+    {
+      "node_id": "edit-product-fields",
+      "depth": "functional",
+      "reason": "连续文本录入、光标保持、原位置更新、删除同步均为真实可操作"
+    },
+    {
+      "node_id": "recognize-fields",
+      "depth": "functional",
+      "reason": "空格/Enter 增量识别、局部闪烁、去重提示、尺码区间展开均为真实逻辑"
+    },
+    {
+      "node_id": "submit-publish",
+      "depth": "functional",
+      "reason": "统一保存 rawText 与 items，持久化到 localStorage（降级会话内存），触发动态页回填",
+      "feedback": "保存成功后 toast 提示「发布成功」"
+    },
+    {
+      "node_id": "view-published-summary",
+      "depth": "functional",
+      "reason": "动态列表真实更新，卡片展示有效字段，点击进入再编辑"
+    },
+    {
+      "node_id": "re-edit-product",
+      "depth": "functional",
+      "reason": "恢复原文本与结构化项，保存更新原产品 id，不新增重复动态"
+    },
+    {
+      "node_id": "cancel-edit",
+      "depth": "functional",
+      "reason": "取消真实关闭场景并回动态页，不产生新产品"
+    },
+    {
+      "node_id": "upload-image",
+      "depth": "stub",
+      "reason": "图片上传仅为占位入口，不接入真实上传能力",
+      "feedback": "toast 提示「该功能尚未接入原型」"
+    }
+  ],
+  "states": [
+    { "id": "empty-form", "description": "编辑页初始空表单" },
+    { "id": "partial-filled", "description": "部分字段已填写" },
+    { "id": "submitting", "description": "发布提交中，按钮禁用" },
+    { "id": "publish-success", "description": "发布成功，回动态页展示新产品" },
+    { "id": "re-editing", "description": "再次编辑原产品，恢复原数据" },
+    { "id": "duplicate-prompt", "description": "重复内容提示" },
+    { "id": "format-error", "description": "数字格式错误提示" }
+  ],
+  "assumptions": [
+    {
+      "assumption": "需求明确要求跨会话继续编辑，使用 localStorage 持久化 rawText 与 items；不可用时降级为当前会话内存状态",
+      "impact_level": "low",
+      "reversible": true
+    },
+    {
+      "assumption": "局部闪烁优先使用 CSS Custom Highlight API，不支持时使用临时无样式 span 兜底，并在移除前后恢复选区",
+      "impact_level": "low",
+      "reversible": true
+    },
+    {
+      "assumption": "图片上传为占位交互，动态卡片在没有图片时使用低干扰文字识别图",
+      "impact_level": "low",
+      "reversible": true
+    }
+  ],
+  "open_questions": [],
+  "readiness": {
+    "status": "ready-with-assumptions",
+    "reason": "业务目标、流程、状态、宿主路径和数据回填均明确；仅有低风险可逆假设（持久化降级、闪烁兜底、图片占位）"
+  },
+  "rule_sources": [
+    { "source": "existing-implementation", "supports": ["scene.js 实际实现：FIELDS 9 行、识别逻辑、持久化、动态回填、再编辑", "scene.css 实际样式：连续编辑器、闪烁动画、辅助操作"] },
+    { "source": "existing-interaction-spec", "supports": ["归档 page_spec.20260709-1930.json 的 business_goal、information_blocks、page_surfaces、host_container、route_id"] },
+    { "source": "AGENTS.md", "supports": ["wego-app 唯一宿主、hash route_id、场景目录复用、不依赖 fetch/XHR"] },
+    { "source": "wego-product/SKILL.md", "supports": ["interaction_spec Stage 2 结构：flows/flow_nodes/surfaces/content_blocks/transitions/data_handoffs/prototype_boundaries/readiness", "host_container.entry_type 必须为 cell|grid-entry", "prototype_target.routes[] 替代单一 route_id"] }
+  ],
+  "delivery_hint": "next-step"
+}

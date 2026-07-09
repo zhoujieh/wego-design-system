@@ -766,7 +766,7 @@
   function runScene(routeId) {
     var scene = scenes.get(routeId);
     if (!scene) {
-      toast('该入口尚未接入原型');
+      toast('功能开发中');
       return;
     }
     openScene(scene);
@@ -854,7 +854,9 @@
   // - 栈顶已匹配：无操作（避免重复打开）
   window.addEventListener('hashchange', function () {
     var routeId = routeFromHash();
-    dismissToasts({ immediate: true });
+    // toast 由宿主全局管理，不跟随路由变化清理；保留给 toast 自身的 4s 自动关闭、
+    // 互斥逻辑（toast 函数内部 dismissToasts）和下一次操作（dismissToastForPageAction）处理。
+    // 前进导航（navigate）和切换 Tab（tabTriggers）仍会主动清理 toast。
 
     // hash 变空：返回到宿主（iOS 侧滑 / history.back 最常见场景）
     if (!routeId) {

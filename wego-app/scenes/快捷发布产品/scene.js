@@ -219,22 +219,22 @@
 
   function pageTemplate(editing) {
     var rows = FIELDS.filter(function (field) { return !field.action; }).map(function (field, index) {
-      var wrap = 'quick-publish__input-wrap' + (field.type === 'price' ? ' quick-publish__input-wrap--price' : '');
+      var wrapClass = 'quick-publish__input-wrap' + (field.type === 'price' ? ' quick-publish__input-wrap--price' : '');
       var editorClass = 'quick-publish__editor-field' + (field.mode === 'multi' ? ' quick-publish__editor-field--smart' : '');
-      return '<div class="quick-publish__row" data-field="' + field.id + '"><label class="quick-publish__label" for="qp-' + field.id + '">' + field.label + '</label><div class="' + wrap + '">'
+      return '<div class="quick-publish__row" data-field="' + field.id + '" data-content-id="field-' + field.id + '"><label class="quick-publish__label" for="qp-' + field.id + '">' + field.label + '</label><div class="' + wrapClass + '">'
         + (field.type === 'price' ? '<span class="quick-publish__currency">¥</span>' : '')
         + '<div id="qp-' + field.id + '" class="' + editorClass + '" contenteditable="true" role="textbox" aria-multiline="false" data-field-id="' + field.id + '" data-index="' + index + '" data-placeholder="' + esc(field.placeholder) + '"></div></div></div>';
     }).join('');
     var actionOffset = FIELDS.filter(function (field) { return !field.action; }).length;
-    return '<section class="quick-publish-page" data-bg="surface"><div class="navbar"><div class="navbar__body navbar__body--spaced">'
-      + '<div class="navbar__left"><span class="navbar__left-text" data-action="cancel" role="button">取消</span></div>'
+    return '<section class="quick-publish-page" data-bg="surface" data-surface-id="quick-publish-form"><div class="navbar"><div class="navbar__body navbar__body--spaced">'
+      + '<div class="navbar__left"><span class="navbar__left-text" data-action="cancel" data-content-id="navbar-cancel" role="button">取消</span></div>'
       + '<div class="navbar__center"><span class="navbar__title">' + (editing ? '编辑产品' : '快捷发布产品') + '</span></div>'
-      + '<div class="navbar__right navbar__right--button"><div class="navbar__action navbar__action--button" data-action="publish"><button type="button" class="btn btn--strong btn--sm">发布</button></div></div></div></div>'
+      + '<div class="navbar__right navbar__right--button"><div class="navbar__action navbar__action--button" data-action="publish" data-content-id="navbar-publish-action"><button type="button" class="btn btn--strong btn--sm">发布</button></div></div></div></div>'
       + '<div class="quick-publish__body"><div class="quick-publish__editor">' + rows + '</div><div class="quick-publish__actions">'
-      + '<div class="quick-publish__action-btn quick-publish__action-btn--editable" role="button"><i class="wego-iconfont-s icon-jia"></i><span class="quick-publish__action-text" contenteditable="true" role="textbox" aria-multiline="false" data-field-id="tag" data-index="' + actionOffset + '" data-placeholder="标签"></span></div>'
-      + '<div class="quick-publish__action-btn quick-publish__action-btn--editable" role="button"><i class="wego-iconfont-s icon-jia"></i><span class="quick-publish__action-text" contenteditable="true" role="textbox" aria-multiline="false" data-field-id="source" data-index="' + (actionOffset + 1) + '" data-placeholder="来源"></span></div>'
-      + '<button type="button" class="quick-publish__action-btn" data-action="visibility" data-visibility="public"><i class="wego-iconfont-s icon-suo"></i><span>所有粉丝可见</span></button></div>'
-      + '<div class="quick-publish__upload"><button type="button" class="quick-publish__upload-btn" data-action="upload" aria-label="上传图片"><i class="wego-iconfont-s icon-jia"></i></button></div></div></section>';
+      + '<div class="quick-publish__action-btn quick-publish__action-btn--editable" data-content-id="field-tag" role="button"><i class="wego-iconfont-s icon-jia"></i><span class="quick-publish__action-text" contenteditable="true" role="textbox" aria-multiline="false" data-field-id="tag" data-index="' + actionOffset + '" data-placeholder="标签"></span></div>'
+      + '<div class="quick-publish__action-btn quick-publish__action-btn--editable" data-content-id="field-source" role="button"><i class="wego-iconfont-s icon-jia"></i><span class="quick-publish__action-text" contenteditable="true" role="textbox" aria-multiline="false" data-field-id="source" data-index="' + (actionOffset + 1) + '" data-placeholder="来源"></span></div>'
+      + '<button type="button" class="quick-publish__action-btn" data-action="visibility" data-content-id="visibility-toggle" data-visibility="public"><i class="wego-iconfont-s icon-suo"></i><span>所有粉丝可见</span></button></div>'
+      + '<div class="quick-publish__upload"><button type="button" class="quick-publish__upload-btn" data-action="upload" data-content-id="image-upload-placeholder" aria-label="上传图片"><i class="wego-iconfont-s icon-jia"></i></button></div></div></section>';
   }
 
   window.WegoApp.registerScene({
@@ -492,6 +492,7 @@
           if (!window.WegoProducts) { button.disabled = false; ctx.toast('产品数据模块加载中，请重试'); return; }
           var saved = window.WegoProducts.saveProduct(data);
           ctx.state.editingProductId = '';
+          // toast 先弹出，再切回动态页；toast 由宿主全局管理，不跟随页面退出消失。
           ctx.toast('发布成功');
           window.setTimeout(function () { window.WegoProducts.showDynamic(saved.id); }, 120);
         }

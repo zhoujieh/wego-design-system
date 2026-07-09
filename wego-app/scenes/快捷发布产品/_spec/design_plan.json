@@ -1,0 +1,435 @@
+{
+  "complexity_level": "structured",
+  "matched_uikit": "biz-rule-config",
+  "scene_fit_reason": "快捷发布产品是规则配置编辑页：full-screen-modal 打开、有页面级统一发布主操作、以连续文本编辑器和辅助控件为主，命中 biz-rule-config pagePattern 的 interactionPattern「编辑后统一保存，页面级主操作收口」",
+  "navigation_pattern": "full-screen-modal 模式 A（左 text-cancel + 右 solid button），无底部 Tab 覆盖",
+  "layout_pattern": "通栏模式 M1",
+  "interaction_pattern": "edit-then-save，连续文本输入 + 增量识别 + 局部闪烁 + 去重提示，统一发布主操作收口在导航栏右侧",
+  "app_target": {
+    "mode": "wego-app-scene",
+    "app_root": "wego-app",
+    "scene_folder": "wego-app/scenes/快捷发布产品",
+    "route_id": "quick-publish-product",
+    "route_mode": "hash",
+    "runtime_entry": "scene.js"
+  },
+  "flow_to_surface_decisions": [
+    {
+      "decision_id": "merge-edit-nodes-into-form",
+      "node_refs": ["edit-product-fields", "recognize-fields", "submit-publish", "re-edit-product", "cancel-edit", "upload-image"],
+      "surface_ref": "quick-publish-form",
+      "carrier_decision": "standalone-page",
+      "reason": "编辑、识别、提交、再编辑、取消和图片占位都由同一个全屏编辑页承接，节点之间靠编辑器内部状态切换而非页面跳转",
+      "rule_sources": ["uikit-plan.json.pagePatterns[biz-rule-config].presentation=full-screen-modal"]
+    },
+    {
+      "decision_id": "merge-entry-into-host",
+      "node_refs": ["enter-publish-entry"],
+      "surface_ref": "dongtai-navbar-entry",
+      "carrier_decision": "merge-into-surface",
+      "reason": "发布入口由宿主动态页导航栏右上角按钮承接，结果也在动态页回填，不开独立页面",
+      "rule_sources": ["uikit-plan.json.fallbackPageBlueprints[mobile-host-entry]"]
+    },
+    {
+      "decision_id": "merge-summary-into-host",
+      "node_refs": ["view-published-summary"],
+      "surface_ref": "published-product-summary",
+      "carrier_decision": "merge-into-surface",
+      "reason": "发布成功后回到动态页顶部展示新产品卡片，复用宿主动态页结果区，不单独开页",
+      "rule_sources": ["uikit-plan.json.fallbackPageBlueprints[object-management-list-page]"]
+    }
+  ],
+  "page_strategy": {
+    "page_goal": "连续文本录入、增量识别、统一发布、动态回填、再次编辑闭环",
+    "page_pattern": "biz-rule-config",
+    "layout_pattern": "通栏模式 M1",
+    "main_scroll_direction": "vertical",
+    "content_density": "comfortable",
+    "fixed_vs_scroll": "navbar 固定吸顶，编辑器和辅助操作区滚动"
+  },
+  "region_composition": [
+    {
+      "region_id": "navbar-action-bar",
+      "role": "sticky-top",
+      "priority": 1,
+      "order": 1,
+      "layout": "horizontal-3-slot",
+      "width": "full",
+      "scroll_behavior": "fixed",
+      "component_refs": ["navbar-fullscreen-modal-mode-a"],
+      "relation": { "below": "editor-area" },
+      "rule_sources": ["uikit-plan.json.pagePatterns[biz-rule-config].presentation=full-screen-modal", "components/navbar.json.variantDimensions.leftControl=text-cancel"]
+    },
+    {
+      "region_id": "editor-area",
+      "role": "core-entry",
+      "priority": 2,
+      "order": 2,
+      "layout": "vertical-stack",
+      "width": "full",
+      "scroll_behavior": "scroll",
+      "component_refs": ["continuous-text-editor", "action-row-group"],
+      "relation": { "above": "navbar-action-bar", "below": "auxiliary-area" },
+      "rule_sources": ["uikit-plan.json.pagePatterns[biz-rule-config].compositionConstraints[section 由连续 cell/form 组成]", "components/cell.json.anatomy.container=.cell-group"]
+    },
+    {
+      "region_id": "auxiliary-area",
+      "role": "operation",
+      "priority": 3,
+      "order": 3,
+      "layout": "vertical-stack",
+      "width": "full",
+      "scroll_behavior": "scroll",
+      "component_refs": ["visibility-toggle-row", "image-upload-placeholder"],
+      "relation": { "above": "editor-area" },
+      "rule_sources": ["uikit-plan.json.pagePatterns[biz-rule-config].structureHighlights[整行点击只保留给带箭头/进入下一层；独立控件行不整行热区]"]
+    }
+  ],
+  "component_patterns": [
+    {
+      "pattern_id": "navbar-fullscreen-modal-mode-a",
+      "applies_to": ["quick-publish-form"],
+      "component_pattern": "navbar-fullscreen-modal-mode-a",
+      "matched_page_pattern": "biz-rule-config",
+      "constraint_ref": "biz-rule-config.presentation=full-screen-modal",
+      "reason": "biz-rule-config 命中页面使用 full-screen-modal 打开；编辑页属于模式 A（form/settings 底部弹出的表单类），左 text-cancel + 右 solid button",
+      "rule_sources": ["uikit-plan.json.pagePatterns[biz-rule-config].presentation=full-screen-modal", "components/navbar.json.variantDimensions.leftControl=text-cancel + actions=button + rightActionType=button"]
+    },
+    {
+      "pattern_id": "continuous-text-editor",
+      "applies_to": ["field-product-name", "field-price", "field-sku", "field-spec", "field-color", "field-weight", "field-stock"],
+      "component_pattern": "continuous-text-editor",
+      "matched_page_pattern": "biz-rule-config",
+      "constraint_ref": "biz-rule-config.compositionConstraints[行内主语义不是进入下一层，右侧无箭头]",
+      "reason": "9 行字段均为连续文本编辑器：左侧 label 固定、右侧 contenteditable 文本输入框，增量识别在输入框内部完成，无 cell 箭头跳转；用 form 组件 label+input 模式承载，无需 cell 整行 clickable",
+      "rule_sources": ["components/form.json.variantDimensions.layout=horizontal + inputType=text/number", "components/cell.json.variantDimensions.trailingSlot=none + interaction=static"]
+    },
+    {
+      "pattern_id": "action-row-group",
+      "applies_to": ["field-tag", "field-source"],
+      "component_pattern": "action-input-row",
+      "matched_page_pattern": "biz-rule-config",
+      "constraint_ref": "biz-rule-config.compositionConstraints[行内含独立控件不整行热区]",
+      "reason": "标签和来源为带 leading-icon + contenteditable 的辅助输入行，与主编辑器连续排列，组成 action-row-group",
+      "rule_sources": ["components/form.json.variantDimensions.rightAction=icon-text + modifier=clickable"]
+    },
+    {
+      "pattern_id": "visibility-toggle-row",
+      "applies_to": ["visibility-toggle"],
+      "component_pattern": "switch-row",
+      "matched_page_pattern": "biz-rule-config",
+      "constraint_ref": "biz-rule-config.compositionConstraints[行内含 switch 独立控件不整行热区]",
+      "reason": "可见性切换为带说明文案 + switch 的行式控件，不整行热区",
+      "rule_sources": ["components/switch.json.variantDimensions.state=on/off + theme=light"]
+    },
+    {
+      "pattern_id": "image-upload-placeholder",
+      "applies_to": ["image-upload-placeholder"],
+      "component_pattern": "icon-action-placeholder",
+      "matched_page_pattern": "biz-rule-config",
+      "constraint_ref": "biz-rule-config.componentSlugs 含 button",
+      "reason": "图片上传为 stub 占位，使用 icon-button 触发并 toast 反馈，不真实上传",
+      "rule_sources": ["components/button.json.variantDimensions.iconMode=icon-only + emphasis=medium", "components/toast.json.variantDimensions.variant=default"]
+    },
+    {
+      "pattern_id": "dynamic-product-card",
+      "applies_to": ["dynamic-product-card"],
+      "component_pattern": "object-management-list-item",
+      "matched_blueprint": "object-management-list-page",
+      "constraint_ref": "object-management-list-page.layoutRules[列表项默认横向主结构]",
+      "reason": "动态产品卡片展示产品名、价格、规格、颜色、标签、来源、可见性和发布时间摘要，点击进入再编辑；横向主结构，未填字段不占位",
+      "rule_sources": ["uikit-plan.json.fallbackPageBlueprints[object-management-list-page]", "components/card.json.variantDimensions.surface=surface"]
+    }
+  ],
+  "page_presentation": {
+    "type": "full-screen-modal",
+    "transition": "slide-up-enter, slide-down-exit",
+    "dismiss_action": "cancel-or-save",
+    "overlay_level": "scene-overlay",
+    "covers_tab_bar": true,
+    "source": "uikit-plan.json.pagePatterns[biz-rule-config].presentation + transition + dismissAction + overlayLevel + coversTabBar"
+  },
+  "surface_designs": [
+    {
+      "surface_id": "dongtai-navbar-entry",
+      "role": "host-entry",
+      "match_status": "fallback",
+      "matched_uikit": null,
+      "matched_page_pattern": null,
+      "matched_blueprint": "mobile-host-entry",
+      "presentation_ref": "host-entry，无独立打开方式，由宿主动态页承接",
+      "scene_fit_reason": "发布入口和动态空态由宿主动态页承接，无精确 pagePattern，命中 fallback mobile-host-entry：page-shell + navbar + 入口 button + 状态摘要",
+      "component_mapping": ["publish-entry-trigger", "dynamic-empty-state"],
+      "allowed_page_styles": ["宿主入口区垂直间距", "空态布局"],
+      "design_gap": ""
+    },
+    {
+      "surface_id": "quick-publish-form",
+      "role": "primary-task-page",
+      "match_status": "exact",
+      "matched_uikit": "biz-rule-config",
+      "matched_page_pattern": "biz-rule-config",
+      "matched_blueprint": null,
+      "presentation_ref": "full-screen-modal，slide-up-enter/slide-down-exit，cancel-or-save，coversTabBar=true",
+      "scene_fit_reason": "编辑后统一保存、页面级主操作收口在导航栏右侧、full-screen-modal 打开、有发布按钮，完全命中 biz-rule-config",
+      "component_mapping": ["navbar-cancel", "navbar-publish-action", "field-product-name", "field-price", "field-sku", "field-spec", "field-color", "field-weight", "field-stock", "field-tag", "field-source", "visibility-toggle", "image-upload-placeholder"],
+      "allowed_page_styles": ["通栏 M1（phone-body 0px 横向 padding，cell-group__content 不开 --card）", "连续编辑器行垂直堆叠间距", "辅助操作区分组间距", "价格前缀 ¥ 布局", "闪烁高亮临时样式作用域（CSS Custom Highlight API 优先，降级临时 span）", "去重提示样式作用域"],
+      "design_gap": ""
+    },
+    {
+      "surface_id": "published-product-summary",
+      "role": "result-summary",
+      "match_status": "fallback",
+      "matched_uikit": null,
+      "matched_page_pattern": null,
+      "matched_blueprint": "object-management-list-page",
+      "presentation_ref": "result-summary，由宿主动态页列表承接，无独立打开方式",
+      "scene_fit_reason": "发布结果以对象管理列表项形式回填到动态页顶部，点击卡片再编辑，命中 fallback object-management-list-page",
+      "component_mapping": ["dynamic-product-card"],
+      "allowed_page_styles": ["卡片模式 M2（phone-body 16px 横向 padding）", "产品卡片横向布局", "未填字段不占位规则", "发布时间相对时间展示"],
+      "design_gap": ""
+    }
+  ],
+  "component_mapping": [
+    {
+      "block": "publish-entry-trigger",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": ["mode=standalone", "size=12", "state=default"],
+      "constraint_ref": {},
+      "reason": "宿主入口用 link 组件（独立文字链接，size=12），点击打开全屏编辑模态",
+      "rule_sources": ["components/link.json.variantDimensions.mode=standalone + size=12"]
+    },
+    {
+      "block": "dynamic-empty-state",
+      "scenario_type": "no-uikit-page-composition",
+      "consumption_mode": "free-composition",
+      "selected": "在宿主页面 section 内使用 page-shell + 居中文案 + 必要图标表达空态",
+      "constraint_ref": {},
+      "reason": "空态由 fallback mobile-host-entry 允许的页面级业务样式承载，不发明新组件",
+      "rule_sources": ["uikit-plan.json.fallbackPageBlueprints[mobile-host-entry].allowedPageStyles"]
+    },
+    {
+      "block": "navbar-cancel",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": ["leftControl=text-cancel", "titleAlignment=center", "actions=button", "spacing=default", "pageTransition=present", "position=sticky"],
+      "constraint_ref": {},
+      "reason": "full-screen-modal 模式 A 左侧 text-cancel 文案固定为「取消」",
+      "rule_sources": ["components/navbar.json.variantDimensions.leftControl=text-cancel", "components/navbar.json.representativeVariants"]
+    },
+    {
+      "block": "navbar-publish-action",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": ["emphasis=strong", "size=sm", "iconMode=text-only", "state=default"],
+      "constraint_ref": {},
+      "reason": "导航栏右侧唯一发布主操作使用 strong + sm + 纯文字按钮，提交期间 state=disabled",
+      "rule_sources": ["components/button.json.variantDimensions.emphasis=strong + size=sm + iconMode=text-only + state=disabled"]
+    },
+    {
+      "block": "field-product-name",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "free-composition",
+      "selected": "form 组件 horizontal layout + inputType=text，label 固定 + contenteditable 文本输入框；mode=none 不识别不闪烁",
+      "constraint_ref": {},
+      "reason": "产品名为普通文本字段，Enter 只切换下一字段，无识别无闪烁，用 form horizontal + 文本输入承载",
+      "rule_sources": ["components/form.json.variantDimensions.layout=horizontal + inputType=text + rightAction=none", "components/input.json.variantDimensions.fieldType=text"]
+    },
+    {
+      "block": "field-price",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "free-composition",
+      "selected": "form 组件 horizontal layout + inputType=money，label 固定 + ¥ 前缀 + contenteditable 数字输入框；mode=single，Enter 识别整个输入框",
+      "constraint_ref": {},
+      "reason": "售价为单项识别字段，数字格式限制（7 位整数 2 位小数），用 form horizontal + money inputType + ¥ 前缀承载",
+      "rule_sources": ["components/form.json.variantDimensions.inputType=money", "components/input.json.variantDimensions.fieldType=number"]
+    },
+    {
+      "block": "field-sku",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "free-composition",
+      "selected": "form 组件 horizontal layout + inputType=text，label 固定 + contenteditable 文本输入框；mode=single，Enter 识别整个输入框",
+      "constraint_ref": {},
+      "reason": "货号为单项识别字段，用 form horizontal + 文本输入承载",
+      "rule_sources": ["components/form.json.variantDimensions.layout=horizontal + inputType=text"]
+    },
+    {
+      "block": "field-spec",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "free-composition",
+      "selected": "form 组件 horizontal layout + inputType=text，label 固定 + contenteditable 文本输入框；mode=multi，空格识别当前词，Enter 识别并切换；支持尺码区间展开（S~XL）",
+      "constraint_ref": {},
+      "reason": "规格为多项识别字段，需支持尺码区间展开，用 form horizontal + 文本输入承载，识别逻辑在输入框内部完成",
+      "rule_sources": ["components/form.json.variantDimensions.layout=horizontal + inputType=text"]
+    },
+    {
+      "block": "field-color",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "free-composition",
+      "selected": "form 组件 horizontal layout + inputType=text，label 固定 + contenteditable 文本输入框；mode=multi，与规格相同识别逻辑",
+      "constraint_ref": {},
+      "reason": "颜色为多项识别字段，用 form horizontal + 文本输入承载",
+      "rule_sources": ["components/form.json.variantDimensions.layout=horizontal + inputType=text"]
+    },
+    {
+      "block": "field-weight",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "free-composition",
+      "selected": "form 组件 horizontal layout + inputType=number，label 固定 + contenteditable 数字输入框；mode=single，Enter 识别整个输入框",
+      "constraint_ref": {},
+      "reason": "重量为单项识别字段，数字格式限制，用 form horizontal + number inputType 承载",
+      "rule_sources": ["components/form.json.variantDimensions.inputType=number", "components/input.json.variantDimensions.fieldType=number"]
+    },
+    {
+      "block": "field-stock",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "free-composition",
+      "selected": "form 组件 horizontal layout + inputType=number，label 固定 + contenteditable 数字输入框；mode=single，默认不限库存，Enter 识别整个输入框",
+      "constraint_ref": {},
+      "reason": "库存为单项识别字段，数字格式限制，用 form horizontal + number inputType 承载",
+      "rule_sources": ["components/form.json.variantDimensions.inputType=number", "components/input.json.variantDimensions.fieldType=number"]
+    },
+    {
+      "block": "field-tag",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "free-composition",
+      "selected": "form 组件 horizontal layout + rightAction=icon-text，leading-icon + contenteditable 文本输入框；mode=multi，辅助输入入口",
+      "constraint_ref": {},
+      "reason": "标签为带 leading-icon 的辅助输入行，多项识别，用 form horizontal + icon-text rightAction 承载",
+      "rule_sources": ["components/form.json.variantDimensions.rightAction=icon-text + modifier=clickable"]
+    },
+    {
+      "block": "field-source",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "free-composition",
+      "selected": "form 组件 horizontal layout + rightAction=icon-text，leading-icon + contenteditable 文本输入框；mode=multi，辅助输入入口",
+      "constraint_ref": {},
+      "reason": "来源为带 leading-icon 的辅助输入行，多项识别，用 form horizontal + icon-text rightAction 承载",
+      "rule_sources": ["components/form.json.variantDimensions.rightAction=icon-text + modifier=clickable"]
+    },
+    {
+      "block": "visibility-toggle",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": ["state=on", "theme=light"],
+      "constraint_ref": {},
+      "reason": "可见性切换使用 switch 组件，state 在 on(public)/off(private) 之间切换，theme=light",
+      "rule_sources": ["components/switch.json.variantDimensions.state=on/off + theme=light"]
+    },
+    {
+      "block": "image-upload-placeholder",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": ["emphasis=medium", "size=sm", "iconMode=icon-only", "state=default"],
+      "constraint_ref": {},
+      "reason": "图片上传占位使用 icon-only button 触发，stub 节点点击后 toast 反馈「该功能尚未接入原型」",
+      "rule_sources": ["components/button.json.variantDimensions.iconMode=icon-only + emphasis=medium", "components/toast.json.variantDimensions.variant=default + iconMode=none + actionMode=none"]
+    },
+    {
+      "block": "dynamic-product-card",
+      "scenario_type": "object-management-list-composition",
+      "consumption_mode": "free-composition",
+      "selected": "card 组件 surface=surface，横向主结构：左侧文字识别区（产品名+价格）+ 右侧摘要（规格/颜色/标签/来源有效字段）+ 发布时间；未填字段不占位；点击卡片触发再编辑",
+      "constraint_ref": {},
+      "reason": "动态产品卡片遵循对象管理列表横向主结构，只展示识别与行动所需信息，点击进入再编辑",
+      "rule_sources": ["uikit-plan.json.fallbackPageBlueprints[object-management-list-page].layoutRules[列表项默认横向主结构]", "components/card.json.variantDimensions.surface=surface"]
+    }
+  ],
+  "design_gaps": [],
+  "rule_sources_used": [
+    {
+      "file": ".codex/skills/wego-design/uikit-plan.json",
+      "field": "pagePatterns[biz-rule-config].presentation/transition/dismissAction/overlayLevel/coversTabBar",
+      "supports": ["quick-publish-form 命中 biz-rule-config 使用 full-screen-modal", "page_presentation 字段映射"]
+    },
+    {
+      "file": ".codex/skills/wego-design/uikit-plan.json",
+      "field": "pagePatterns[biz-rule-config].interactionPattern",
+      "supports": ["编辑后统一保存，页面级主操作收口在导航栏右侧"]
+    },
+    {
+      "file": ".codex/skills/wego-design/uikit-plan.json",
+      "field": "pagePatterns[biz-rule-config].compositionConstraints[通栏 M1 + section 由连续 cell/form 组成]",
+      "supports": ["quick-publish-form 通栏模式 M1", "editor-area 与 auxiliary-area 使用 form-group 连续结构"]
+    },
+    {
+      "file": ".codex/skills/wego-design/uikit-plan.json",
+      "field": "pagePatterns[biz-rule-config].structureHighlights[整行点击只保留给带箭头；独立控件行不整行热区]",
+      "supports": ["visibility-toggle 和 image-upload-placeholder 不整行热区"]
+    },
+    {
+      "file": ".codex/skills/wego-design/uikit-plan.json",
+      "field": "fallbackPageBlueprints[mobile-host-entry]",
+      "supports": ["dongtai-navbar-entry 命中 fallback mobile-host-entry"]
+    },
+    {
+      "file": ".codex/skills/wego-design/uikit-plan.json",
+      "field": "fallbackPageBlueprints[object-management-list-page]",
+      "supports": ["published-product-summary 命中 fallback object-management-list-page", "dynamic-product-card 横向主结构"]
+    },
+    {
+      "file": ".codex/skills/wego-design/components/navbar.json",
+      "field": "variantDimensions.leftControl=text-cancel + actions=button + rightActionType=button",
+      "supports": ["navbar-fullscreen-modal-mode-a 稳定变体绑定"]
+    },
+    {
+      "file": ".codex/skills/wego-design/components/form.json",
+      "field": "variantDimensions.layout=horizontal + inputType=text/number/money + rightAction=icon-text",
+      "supports": ["9 行连续文本编辑器使用 form horizontal 承载", "标签/来源使用 icon-text rightAction"]
+    },
+    {
+      "file": ".codex/skills/wego-design/components/input.json",
+      "field": "variantDimensions.fieldType=text/number",
+      "supports": ["文本字段和数字字段使用 input 对应 fieldType"]
+    },
+    {
+      "file": ".codex/skills/wego-design/components/switch.json",
+      "field": "variantDimensions.state=on/off + theme=light",
+      "supports": ["visibility-toggle 使用 switch 稳定变体"]
+    },
+    {
+      "file": ".codex/skills/wego-design/components/button.json",
+      "field": "variantDimensions.emphasis=strong + size=sm + iconMode=text-only/icon-only",
+      "supports": ["navbar-publish-action 使用 strong+sm+text-only", "image-upload-placeholder 使用 medium+sm+icon-only"]
+    },
+    {
+      "file": ".codex/skills/wego-design/components/toast.json",
+      "field": "variantDimensions.variant=default + iconMode=none + actionMode=none",
+      "supports": ["发布成功 toast「发布成功」", "图片上传 stub toast「该功能尚未接入原型」"]
+    },
+    {
+      "file": ".codex/skills/wego-design/components/link.json",
+      "field": "variantDimensions.mode=standalone + size=12",
+      "supports": ["publish-entry-trigger 使用 link 稳定变体"]
+    },
+    {
+      "file": ".codex/skills/wego-design/components/card.json",
+      "field": "variantDimensions.surface=surface",
+      "supports": ["dynamic-product-card 使用 card surface 修饰"]
+    },
+    {
+      "file": ".codex/skills/wego-design/library-consumption.json",
+      "field": "scenarioTypeRegistry.types[].id",
+      "supports": ["component_mapping scenario_type 取值 component-consumption-decision / no-uikit-page-composition / object-management-list-composition"]
+    },
+    {
+      "file": "wego-app/scenes/快捷发布产品/_spec/interaction_spec.json",
+      "field": "flows/flow_nodes/surfaces/content_blocks/transitions/data_handoffs/prototype_boundaries",
+      "supports": ["所有业务信息、节点、surface 和内容块均来自已落盘 interaction_spec"]
+    }
+  ],
+  "implementation_constraints": [
+    "通栏模式 M1：phone-body 0px 横向 padding，cell-group__content 不开 --card 修饰；连续编辑器行的横向边距由 form/cell 自带 padding 承担",
+    "连续编辑器行使用 form-group 正式容器，不发明场景自定义 group 类替换",
+    "行内含 switch、button 等独立控件的行不整行热区；只有带箭头/进入下一层的行才整行 clickable（本场景无此类行）",
+    "navbar 背景默认跟随 data-bg 公共 CSS 约定：quick-publish-form 的 data-bg=surface 为白底，navbar 跟随白底，不在 scene.css 单独覆盖",
+    "局部闪烁优先使用 CSS Custom Highlight API，不支持时使用临时无样式 span 兜底，移除前后恢复选区；闪烁样式只做高亮背景，不发明新组件类",
+    "去重提示、格式错误提示、发布成功 toast 均使用 toast 组件 default 变体，不发明自定义浮层",
+    "图片上传为 stub 节点，点击只触发 toast「该功能尚未接入原型」，不接入真实上传",
+    "动态产品卡片未填字段不占位，不展示空 label 或空占位行",
+    "再次编辑通过 productId 恢复原 rawText 与结构化 items，保存更新原产品而非新增，避免动态页出现重复卡片",
+    "持久化使用 localStorage（key: quick-publish-products），不可用时降级为当前会话内存状态，不强制要求刷新后保留",
+    "page_presentation.type=full-screen-modal，wego-ux 必须按此分派 slide-up 进入和 slide-down 退出动画，不得改成 push 或 sheet"
+  ]
+}

@@ -134,6 +134,50 @@
       },
       "created_at": "2026-07-09T00:00:00.000Z",
       "updated_at": "2026-07-09T00:00:00.000Z"
+    },
+    {
+      "id": "exp-host-enhancement-async-script-race",
+      "normalized_key": "host-enhancement-must-not-introduce-load-order-dependent-runtime-coupling",
+      "title": "宿主增强脚本替换稳定入口时不得引入依赖异步加载顺序的运行时耦合",
+      "status": "observing",
+      "occurrence_count": 1,
+      "threshold": 3,
+      "primary_owner": "wego-ux",
+      "secondary_owners": ["wego-tests"],
+      "ownership_reason": "问题最早产生在 wego-ux 实现环节。宿主增强脚本（如 dynamic-feed.js）由 routes.js 通过 appendChild(script) 异步插入，加载顺序不确定。当增强脚本用 innerHTML='' 销毁 index.html 中同步加载的稳定入口（依赖 WegoApp，同步就绪），替换为依赖另一份异步加载脚本暴露的全局对象（如 window.WegoProducts）的新入口时，若被依赖脚本尚未加载，点击新入口会抛 TypeError 导致导航不执行，入口失效。wego-ux 在实现宿主接入和交互绑定时，应保证入口可用性不劣于原始稳定入口，或在跨脚本依赖未就绪时做防御回退。",
+      "problem_pattern": "异步加载的宿主增强脚本替换了同步加载的稳定入口，新入口点击逻辑依赖另一份异步加载脚本暴露的全局对象，且未做就绪检查或防御回退。当被依赖脚本加载较慢时，新入口点击抛 TypeError（Cannot read properties of undefined），导航/交互不执行，表现为『首次加载偶尔失效、刷新后偶尔恢复』的运行时竞态。",
+      "scene_evidence": [
+        {
+          "date": "2026-07-09",
+          "scene": "动态页右上角发布按钮点击失效",
+          "summary": "dynamic-feed.js（由 routes.js async 插入）的 createToolbar 用 innerHTML='' 销毁了原始 onclick=\"WegoApp.navigate('quick-publish-product')\" 发布按钮（WegoApp 同步加载，稳定），替换为绑定 window.WegoProducts.startCreate() 的+按钮。products.js 同样由 routes.js async 插入，加载顺序不确定。若 dynamic-feed.js 先执行且用户在 products.js 加载完成前点击+按钮，抛 TypeError: Cannot read properties of undefined (reading 'startCreate')，导航不执行，发布页打不开。浏览器实测：删除 WegoProducts 后点击+按钮，hash 不变、overlay 不开、控制台报该 TypeError。修复：+按钮点击加防御回退，WegoProducts 就绪用 startCreate，否则回退 WegoApp.navigate。",
+          "source": "用户报告：点击动态右上角发布不能打开发布页，刷新页面后偶尔可以正常点击进入"
+        }
+      ],
+      "applies_when_candidates": [
+        "宿主增强脚本由 routes.js 或其他途径通过 appendChild(script) 异步加载，加载顺序不确定",
+        "增强脚本用 innerHTML='' 或 replaceChildren() 等方式销毁/替换 index.html 中同步加载的稳定入口",
+        "新入口点击逻辑依赖另一份异步加载脚本暴露的全局对象（如 window.WegoProducts、window.WegoXxx）",
+        "多个运行时脚本通过 appendChild 动态插入且彼此存在隐式全局依赖"
+      ],
+      "avoid_when_candidates": [
+        "所有脚本在 index.html 中以 <script> 顺序同步加载，依赖关系由 DOM 顺序保证",
+        "增强脚本不替换原始入口，只追加事件监听，原入口仍可作为兜底",
+        "增强逻辑只依赖同步加载的全局对象（如 WegoApp），不依赖其他异步脚本",
+        "入口交互逻辑封装在单一 IIFE 内，无跨脚本全局依赖"
+      ],
+      "expected_rule_target": {
+        "file": ".codex/skills/wego-ux/SKILL.md",
+        "field": "宿主接入 / 交互绑定（入口替换与跨脚本依赖就绪检查）"
+      },
+      "runtime_reachability": {
+        "consumer_skill": "wego-ux（实现宿主增强脚本、替换入口、绑定交互时）",
+        "output_field": "宿主增强脚本的入口替换逻辑与点击回调绑定",
+        "downstream_consumer": "wego-tests（浏览器验证入口在首次加载、刷新、脚本加载顺序变化下的可用性）",
+        "acceptance_check": "wego-tests 用 agent-browser 在 WegoProducts 未就绪/已就绪两种状态下验证入口可点击打开目标场景，且无未捕获 TypeError"
+      },
+      "created_at": "2026-07-09T00:00:00.000Z",
+      "updated_at": "2026-07-09T00:00:00.000Z"
     }
   ]
 }

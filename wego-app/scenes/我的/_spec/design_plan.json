@@ -1,0 +1,289 @@
+{
+  "complexity_level": "structured",
+  "matched_uikit": null,
+  "scene_fit_reason": "「我的」Tab 是宿主固定 Tab 个人中心，由身份摘要、会员权益、应用中心入口聚合、设置入口四块组成；现有 pagePattern 只有 biz-rule-config 和 system-settings 两类设置型范式，无法精确命中；按 uikit-plan.json.screenBlueprints[我的/资料编辑] + fallbackPageBlueprints[mobile-host-entry] 安全承接，由 avatar+badge+card+button+link+cell 等已注册组件和页面级业务样式组成。参照动态 Tab 处理方式：固定 Tab 不注册 push 路由，carrier=host-fixed-tab，内容继续由 index.html + app.css 承载，不迁移到 scene.js 结构",
+  "navigation_pattern": "bottom-nav 固定 Tab 切换",
+  "layout_pattern": "卡片模式 M2",
+  "interaction_pattern": "摘要浏览 + 入口聚合下钻",
+  "app_target": {
+    "mode": "wego-app-scene",
+    "app_root": "wego-app",
+    "scene_folder": "wego-app/scenes/我的",
+    "route_id": "",
+    "route_mode": "hash",
+    "runtime_entry": "scene.js"
+  },
+  "flow_to_surface_decisions": [
+    {
+      "decision_id": "merge-my-nodes-to-host-tab",
+      "node_refs": ["enter-my", "view-profile", "view-membership", "view-app-center", "view-settings", "navigate-entry"],
+      "surface_ref": "my-home-main",
+      "carrier_decision": "merge-into-surface",
+      "reason": "「我的」Tab 作为宿主固定 Tab，所有流程节点（进入、查看身份、查看会员、浏览应用中心、查看设置、下钻入口）均在同一 host-fixed-tab surface 内完成，不拆分为独立 push/sheet/modal",
+      "rule_sources": ["interaction_spec.surfaces[my-home-main].carrier=host-fixed-tab", "uikit-plan.json.hostShell.fixedTabs[my]"]
+    }
+  ],
+  "page_strategy": {
+    "page_goal": "查看店主身份、会员权益与存储用量，并触达店铺管理、应用工具与系统设置入口",
+    "page_pattern": "mobile-host-entry",
+    "layout_pattern": "卡片模式 M2",
+    "main_scroll_direction": "vertical",
+    "content_density": "comfortable",
+    "first_screen_goal": "首屏看到店主身份与会员权益摘要，并触达高频应用入口",
+    "first_screen_priority": "身份卡 > 会员卡 > 应用中心 Grid > 设置列表",
+    "region_priority": ["profile-card", "membership-card", "app-center-grid", "settings-list"],
+    "content_density_strategy": "四块卡片纵向堆叠，卡片间 12px 间距保持节奏；卡片内信息分组清晰，避免拥挤",
+    "scroll_rhythm": "卡片之间用 12px 间距分隔，卡片内部用 8px/12px 间距保持节奏",
+    "fixed_vs_scroll": "全部内容为连续滚动，无吸顶或固定区",
+    "visual_competition": "会员卡用 filled 弱底色突出权益，其余卡片用 surface 白底保持克制；应用中心 Grid 图标统一 24px 避免视觉抢占"
+  },
+  "region_composition": [
+    {
+      "region_id": "profile-card",
+      "role": "core-entry",
+      "priority": 1,
+      "order": 1,
+      "layout": "horizontal-row",
+      "width": "full",
+      "scroll_behavior": "static",
+      "component_refs": ["profile-identity", "profile-actions"],
+      "relation": { "below": "membership-card" },
+      "rule_sources": ["fallbackPageBlueprints[mobile-host-entry].layoutRules", "screenBlueprints[我的/资料编辑]"]
+    },
+    {
+      "region_id": "membership-card",
+      "role": "recommend",
+      "priority": 2,
+      "order": 2,
+      "layout": "horizontal-row",
+      "width": "full",
+      "scroll_behavior": "static",
+      "component_refs": ["membership-info", "membership-actions"],
+      "relation": { "above": "profile-card", "below": "app-center-grid" },
+      "rule_sources": ["fallbackPageBlueprints[mobile-host-entry].layoutRules"]
+    },
+    {
+      "region_id": "app-center-grid",
+      "role": "core-entry",
+      "priority": 3,
+      "order": 3,
+      "layout": "grid-4-col",
+      "width": "full",
+      "scroll_behavior": "static",
+      "component_refs": ["app-center-entries"],
+      "relation": { "above": "membership-card", "below": "settings-list" },
+      "rule_sources": ["fallbackPageBlueprints[mobile-host-entry].layoutRules", "hostShell.routeBinding.entryTypes=grid-entry"]
+    },
+    {
+      "region_id": "settings-list",
+      "role": "operation",
+      "priority": 4,
+      "order": 4,
+      "layout": "vertical-stack",
+      "width": "full",
+      "scroll_behavior": "static",
+      "component_refs": ["settings-entries"],
+      "relation": { "above": "app-center-grid" },
+      "rule_sources": ["fallbackPageBlueprints[mobile-host-entry].layoutRules", "hostShell.routeBinding.entryTypes=cell"]
+    }
+  ],
+  "component_patterns": [
+    {
+      "pattern_id": "profile-summary-card",
+      "applies_to": ["profile-identity", "profile-actions"],
+      "component_pattern": "identity-summary-with-actions",
+      "matched_page_pattern": null,
+      "matched_blueprint": "mobile-host-entry",
+      "constraint_ref": null,
+      "reason": "身份卡左侧头像+名称+徽标+角色识别，右侧操作按钮；card surface 承载，内部主结构与操作区由页面级业务样式组织",
+      "rule_sources": ["uikit-plan.json.fallbackPageBlueprints[mobile-host-entry].layoutRules", "screenBlueprints[我的/资料编辑].componentSlugs"]
+    },
+    {
+      "pattern_id": "membership-summary-card",
+      "applies_to": ["membership-info", "membership-actions"],
+      "component_pattern": "benefit-summary-with-actions",
+      "matched_page_pattern": null,
+      "matched_blueprint": "mobile-host-entry",
+      "constraint_ref": null,
+      "reason": "会员卡用 card filled 弱底色承载权益标签、用量摘要与操作入口；内部用量行与操作区由页面级业务样式组织",
+      "rule_sources": ["uikit-plan.json.fallbackPageBlueprints[mobile-host-entry].layoutRules", "components/card.json.variantDimensions.surface=filled"]
+    },
+    {
+      "pattern_id": "app-center-grid",
+      "applies_to": ["app-center-entries"],
+      "component_pattern": "host-grid-entry-collection",
+      "matched_page_pattern": null,
+      "matched_blueprint": "mobile-host-entry",
+      "constraint_ref": null,
+      "reason": "应用中心 Grid 是宿主框架正式支持的 grid-entry 入口类型（hostShell.routeBinding.entryTypes 含 grid-entry），由 routes.js 动态注册 host-shell-grid + host-shell-grid-entry 承载，图标用 app-center 资产；非注册组件，属宿主框架能力",
+      "rule_sources": ["uikit-plan.json.hostShell.routeBinding.entryTypes=grid-entry", "library-consumption.json.icons.svgAssetMode"]
+    },
+    {
+      "pattern_id": "settings-cell-list",
+      "applies_to": ["settings-entries"],
+      "component_pattern": "single-arrow-entry",
+      "matched_page_pattern": null,
+      "matched_blueprint": "mobile-host-entry",
+      "constraint_ref": null,
+      "reason": "设置列表用 cell-group 承载带箭头入口行，由 routes.js 通过 cellEntryMarkup 动态注册，命中 cell 单行+箭头 trailing 稳定变体",
+      "rule_sources": ["components/cell.json.variantDimensions", "uikit-plan.json.hostShell.routeBinding.entryTypes=cell"]
+    }
+  ],
+  "page_presentation": {
+    "type": "host-fixed-tab",
+    "transition": "none",
+    "dismiss_action": "tab-switch",
+    "overlay_level": "inline",
+    "covers_tab_bar": false,
+    "source": "interaction_spec.surfaces[my-home-main].carrier=host-fixed-tab; 非独立 push/sheet/modal，由 app.js setActiveTab 切换，参照动态 Tab 处理方式"
+  },
+  "surface_designs": [
+    {
+      "surface_id": "my-home-main",
+      "role": "primary-task-page",
+      "match_status": "fallback",
+      "matched_uikit": null,
+      "matched_page_pattern": null,
+      "matched_blueprint": "mobile-host-entry",
+      "presentation_ref": "host-fixed-tab",
+      "scene_fit_reason": "「我的」Tab 是宿主固定 Tab 个人中心，由身份摘要、会员权益、应用中心入口聚合、设置入口四块组成；无精确 pagePattern，由 mobile-host-entry fallback blueprint 安全承接入口聚合与摘要语义，同时引用 screenBlueprints[我的/资料编辑] 组件组合参考",
+      "component_mapping": [
+        "profile-identity",
+        "profile-actions",
+        "membership-info",
+        "membership-actions",
+        "app-center-entries",
+        "settings-entries"
+      ],
+      "allowed_page_styles": [
+        "卡片模式 M2：宿主内容层 16px 横向 padding，四块分组用 card 修饰类承载",
+        "身份卡：头像 56px + 名称/徽标/角色识别区 + 操作按钮区横向布局，卡片内 padding 16px",
+        "会员卡：card--filled 弱底色，会员标签与用量摘要横向布局，操作入口右侧对齐",
+        "应用中心 Grid：4 列等分（375px 断点降为 3 列），图标 24px，gap 12px，卡片内 padding 16px",
+        "设置列表：cell-group 承载连续 cell 入口，cell 横向边距由 cell__body 16px padding 承担",
+        "卡片之间 12px 间距保持节奏"
+      ],
+      "design_gap": ""
+    }
+  ],
+  "component_mapping": [
+    {
+      "block": "profile-identity",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": ["type=image", "size=56"],
+      "constraint_ref": {},
+      "reason": "店主身份头像用 avatar image 56 尺寸（契约 usageHints 明确 56 用于我的页或资料头部）",
+      "rule_sources": ["components/avatar.json.variantDimensions", "components/avatar.json.usageHints"]
+    },
+    {
+      "block": "profile-identity",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": ["type=text", "placement=inline"],
+      "constraint_ref": {},
+      "reason": "SVIP 徽标用 badge text inline，文字类默认绿色，通过 --badge-text-bg 覆盖为 warning 色表达会员等级",
+      "rule_sources": ["components/badge.json.variantDimensions", "components/badge.json.behavior.textColorModel"]
+    },
+    {
+      "block": "profile-identity",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "free-composition",
+      "selected": "页面级业务样式承载店主名称（heading-sm）与角色副标题（body-sm secondary）文案；与 avatar、badge 并排组合在身份卡内",
+      "constraint_ref": {},
+      "reason": "店主名称与角色是纯文本展示，无对应稳定变体，由页面级业务样式承载",
+      "rule_sources": ["fallbackPageBlueprints[mobile-host-entry].allowedPageStyles"]
+    },
+    {
+      "block": "profile-actions",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": ["emphasis=weak", "size=sm", "iconMode=text-only"],
+      "constraint_ref": {},
+      "reason": "+员工、员工管理是身份卡内次级操作，用 button weak sm；当前实现误用非契约的 button--secondary，须修正为 btn--weak 契约变体",
+      "rule_sources": ["components/button.json.variantDimensions", "components/button.json.usageHints"]
+    },
+    {
+      "block": "membership-info",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": ["base=auto", "surface=filled"],
+      "constraint_ref": {},
+      "reason": "会员卡用 card filled 弱底色承载权益标签与用量摘要，filled 适合低强调容器",
+      "rule_sources": ["components/card.json.variantDimensions", "components/card.json.usageHints"]
+    },
+    {
+      "block": "membership-info",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "free-composition",
+      "selected": "页面级业务样式承载会员标签与用量摘要行（已用/总量，baseline 对齐）；在会员卡弱底色容器内组织，标签位于头部，用量位于主体",
+      "constraint_ref": {},
+      "reason": "会员标签与用量是纯文本摘要，由页面级业务样式组织在 card 内",
+      "rule_sources": ["components/card.json.domAnatomy", "fallbackPageBlueprints[mobile-host-entry].allowedPageStyles"]
+    },
+    {
+      "block": "membership-actions",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": ["emphasis=strong", "size=sm", "iconMode=text-only"],
+      "constraint_ref": {},
+      "reason": "去续费是会员区核心操作，用 button strong sm；契约 primaryRule 限制同页仅 1 个 strong，故去续费作唯一 strong 主操作",
+      "rule_sources": ["components/button.json.variantDimensions", "components/button.json.behavior.primaryRule"]
+    },
+    {
+      "block": "membership-actions",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": ["mode=standalone", "size=14", "state=default"],
+      "constraint_ref": {},
+      "reason": "空间管理是会员卡内轻操作，用 link standalone 14；当前实现误用非契约的 link--default 修饰类，须修正为 link 契约 standalone 默认变体（无需修饰类）",
+      "rule_sources": ["components/link.json.variantDimensions", "components/link.json.structurePatterns"]
+    },
+    {
+      "block": "app-center-entries",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "free-composition",
+      "selected": "宿主框架网格容器承载 7 个入口（4 列等分，375px 断点 3 列）；图标用 app-center 资产目录下的 SVG 资源；已实现入口（价格管理、库存管理、仓库管理）由路由配置动态注册真实 routeId，未实现入口（一键开团、店铺装修、收款码、我的小店）点击 toast 提示功能开发中",
+      "constraint_ref": {},
+      "reason": "应用中心 Grid 是宿主框架正式支持的 grid-entry 入口类型（hostShell.routeBinding.entryTypes 含 grid-entry），非注册组件；由 routes.js + app.js mountRouteEntries 动态注册，图标走 app-center SVG 资产",
+      "rule_sources": ["uikit-plan.json.hostShell.routeBinding.entryTypes=grid-entry", "library-consumption.json.icons.svgAssetMode", "interaction_spec.content_blocks[app-center-entries].key_states"]
+    },
+    {
+      "block": "settings-entries",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": ["density=single", "surface=bg-white", "interaction=clickable", "divider=divider-center", "trailingSlot=arrow"],
+      "constraint_ref": {},
+      "reason": "设置列表入口用 cell 单行+白底+可点击+居中分割线+箭头 trailing，由 routes.js cellEntryMarkup 动态注册；当前系统设置入口已实现真实下钻",
+      "rule_sources": ["components/cell.json.variantDimensions", "components/cell.json.representativeVariants"]
+    }
+  ],
+  "design_gaps": [],
+  "rule_sources_used": [
+    { "file": ".codex/skills/wego-design/uikit-plan.json", "field": "fallbackPageBlueprints[mobile-host-entry]", "supports": ["「我的」Tab 命中 mobile-host-entry fallback blueprint", "入口聚合、状态摘要、结果概览布局规则"] },
+    { "file": ".codex/skills/wego-design/uikit-plan.json", "field": "screenBlueprints[我的/资料编辑]", "supports": ["个人中心页面使用 navbar+avatar+tag+cell+input+button 组件组合参考"] },
+    { "file": ".codex/skills/wego-design/uikit-plan.json", "field": "hostShell.fixedTabs[my] + hostShell.routeBinding.entryTypes", "supports": ["「我的」为宿主固定 Tab，不走 push 路由", "grid-entry 与 cell 是宿主正式入口类型"] },
+    { "file": ".codex/skills/wego-design/components/avatar.json", "field": "variantDimensions + usageHints", "supports": ["profile-identity 用 avatar image 56"] },
+    { "file": ".codex/skills/wego-design/components/badge.json", "field": "variantDimensions + behavior.textColorModel", "supports": ["SVIP 徽标用 badge text inline，--badge-text-bg 覆盖为 warning"] },
+    { "file": ".codex/skills/wego-design/components/button.json", "field": "variantDimensions + behavior.primaryRule", "supports": ["profile-actions 用 button weak sm", "membership-actions 去续费用 button strong sm（同页唯一 strong）"] },
+    { "file": ".codex/skills/wego-design/components/card.json", "field": "variantDimensions.surface=filled + domAnatomy", "supports": ["membership-info 用 card filled 承载权益摘要"] },
+    { "file": ".codex/skills/wego-design/components/link.json", "field": "variantDimensions + structurePatterns", "supports": ["membership-actions 空间管理用 link standalone 14"] },
+    { "file": ".codex/skills/wego-design/components/cell.json", "field": "variantDimensions + representativeVariants", "supports": ["settings-entries 用 cell single+bg-white+clickable+divider-center+arrow"] },
+    { "file": ".codex/skills/wego-design/library-consumption.json", "field": "icons.svgAssetMode", "supports": ["应用中心 Grid 图标用 assets/icons/app-center/*.svg 资产"] },
+    { "file": "wego-app/scenes/我的/_spec/interaction_spec.json", "field": "surfaces[my-home-main].carrier=host-fixed-tab", "supports": ["page_presentation.type=host-fixed-tab，不注册 push 路由"] },
+    { "file": "wego-app/scenes/动态/_spec/design_plan.json", "field": "host-fixed-tab 处理模式", "supports": ["参照动态 Tab：固定 Tab 不注册 push 路由，内容由 index.html+app.css 承载不迁移 scene.js"] }
+  ],
+  "implementation_constraints": [
+    "「我的」Tab 是宿主固定 Tab，运行时由 app.js setActiveTab 切换，不注册 hash push 路由，不迁移到 scene.js 结构；内容继续由 wego-app/index.html + wego-app/css/app.css 承载",
+    "身份卡头像使用 avatar 组件 image 56 变体，SVIP 徽标使用 badge text inline 变体并通过 --badge-text-bg 覆盖为 warning 色；不得用非契约复合头像或自定义徽标",
+    "身份卡操作按钮（+员工、员工管理）必须使用 button 契约 weak sm 变体（.btn.btn--weak.btn--sm），当前 index.html 误用的 button button--secondary 是非契约类，须修正",
+    "会员卡去续费按钮使用 button 契约 strong sm 变体（.btn.btn--strong.btn--sm），同页仅此 1 个 strong 主操作；+员工、员工管理等其余按钮用 weak",
+    "空间管理入口使用 link 契约 standalone 14 变体（.link，无需修饰类），当前 index.html 误用的 link link--default 是非契约修饰类，须修正为纯 .link",
+    "会员卡使用 card filled 变体承载权益摘要；身份卡、应用中心卡、设置列表卡使用 card surface 变体；不得为业务内容发明新 card 子元素类",
+    "应用中心 Grid 使用宿主框架 host-shell-grid + host-shell-grid-entry 承载，4 列等分（375px 断点 3 列），图标 24px；grid-entry 是宿主正式入口类型，不得替换为自创组件",
+    "设置列表入口使用 cell 契单 single+bg-white+clickable+divider-center+arrow 变体，由 routes.js cellEntryMarkup 动态注册；连续 cell 须用 cell-group 承载",
+    "未实现入口（一键开团、店铺装修、收款码、我的小店、空间管理及 +员工、员工管理、去续费等操作）点击后 toast「功能开发中」，不实现下钻流程",
+    "禁止使用 inline style 控制颜色/间距，必须用 Token",
+    "禁止发明未注册组件类或修饰类（如 button--secondary、link--default 等历史遗留非契约类须在本次修正）"
+  ]
+}

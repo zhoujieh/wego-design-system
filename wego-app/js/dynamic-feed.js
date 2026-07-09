@@ -28,7 +28,17 @@
       + '</div>';
 
     var publish = navbar.querySelector('.dynamic-feed-publish');
-    if (publish) publish.addEventListener('click', function () { window.WegoProducts.startCreate(); });
+    if (publish) publish.addEventListener('click', function () {
+      // products.js 与 dynamic-feed.js 均由 routes.js 动态 async 插入，加载顺序不确定。
+      // WegoProducts 就绪时用 startCreate（保留重置 editingProductId 的“新建”语义）；
+      // 否则回退 WegoApp.navigate：此路径下 editingProductId 不可能被设过（仅 products.js
+      // 的 startEdit 会设，而 startEdit 同样依赖 products.js），故 state 必然干净，直接导航安全。
+      if (window.WegoProducts && typeof window.WegoProducts.startCreate === 'function') {
+        window.WegoProducts.startCreate();
+      } else if (window.WegoApp && typeof window.WegoApp.navigate === 'function') {
+        window.WegoApp.navigate('quick-publish-product');
+      }
+    });
   }
 
   function createGallery() {

@@ -1,0 +1,377 @@
+{
+  "task_type": "design-system-consumption",
+  "scene_category": "biz-rule-config",
+  "goal": "为店铺配置每个价格类型的可见权限：默认提供拿货价、售价、批发价、代发价、打包价五种价格类型，每个价格类型可设置为公开、私密、部分可见或不给谁看；部分可见与不给谁看均展开粉丝分组多选，页面级统一保存。",
+  "scope": {
+    "included": [
+      "『我的』App 中心 grid 中的『价格管理』一级入口",
+      "价格类型列表页：展示五种默认价格类型及当前权限摘要，点击进入权限设置",
+      "权限设置页：权限类型四选一、部分可见/不给谁看展开粉丝分组多选、页面级保存"
+    ],
+    "excluded": [
+      "新增或删除价格类型",
+      "新增或编辑粉丝分组",
+      "粉丝分组管理页",
+      "价格数值本身的编辑"
+    ]
+  },
+  "actors": [
+    { "id": "shop-owner", "role": "店主", "purpose": "为每个价格类型配置可见权限，控制不同粉丝分组看到的价格" }
+  ],
+  "entry_points": [
+    {
+      "id": "my-app-center-grid",
+      "carrier": "host-grid-entry",
+      "description": "『我的』App 中心 grid 中的『价格管理』一级入口，点击 push 进入价格类型列表页"
+    }
+  ],
+  "flows": [
+    {
+      "flow_id": "configure-permission",
+      "flow_type": "main",
+      "entry_node": "enter-price-list",
+      "steps": ["enter-price-list", "select-price-type", "edit-permission", "save-permission"],
+      "exit_condition": "返回『我的』App 中心或切换到其他 Tab"
+    },
+    {
+      "flow_id": "cancel-edit",
+      "flow_type": "branch",
+      "entry_node": "edit-permission",
+      "steps": ["edit-permission", "cancel-edit"],
+      "exit_condition": "返回价格类型列表页且不保留本次编辑"
+    },
+    {
+      "flow_id": "save-without-groups",
+      "flow_type": "exception",
+      "entry_node": "save-permission",
+      "steps": ["save-permission", "block-save"],
+      "exit_condition": "提示用户至少选择一个粉丝分组后停留在权限设置页"
+    }
+  ],
+  "flow_nodes": [
+    {
+      "node_id": "enter-price-list",
+      "purpose": "从『我的』App 中心 grid 进入价格管理列表页，展示全部价格类型及当前权限摘要",
+      "surface_ref": "price-type-list",
+      "inputs": [],
+      "outputs": ["价格类型列表及权限摘要"],
+      "key_states": ["已有配置态", "默认配置态"]
+    },
+    {
+      "node_id": "select-price-type",
+      "purpose": "选择某个价格类型进入其权限设置页",
+      "surface_ref": "price-type-list",
+      "inputs": ["目标价格类型"],
+      "outputs": ["进入权限设置页"],
+      "key_states": ["点击进入"]
+    },
+    {
+      "node_id": "edit-permission",
+      "purpose": "编辑单个价格类型的权限类型，并在部分可见/不给谁看时选择粉丝分组",
+      "surface_ref": "price-permission-edit",
+      "inputs": ["当前价格类型", "当前权限配置"],
+      "outputs": ["编辑中的权限配置"],
+      "key_states": ["编辑态", "部分可见已展开", "不给谁看已展开", "未选分组"]
+    },
+    {
+      "node_id": "save-permission",
+      "purpose": "保存当前价格类型的权限配置并返回列表页",
+      "surface_ref": "price-permission-edit",
+      "inputs": ["编辑中的权限配置"],
+      "outputs": ["保存后的权限配置", "列表页权限摘要回填"],
+      "key_states": ["保存成功", "保存被阻止"]
+    },
+    {
+      "node_id": "cancel-edit",
+      "purpose": "放弃本次编辑返回列表页",
+      "surface_ref": "price-permission-edit",
+      "inputs": [],
+      "outputs": [],
+      "key_states": ["取消返回"]
+    },
+    {
+      "node_id": "block-save",
+      "purpose": "部分可见/不给谁看未选分组时阻止保存并提示",
+      "surface_ref": "price-permission-edit",
+      "inputs": ["未选分组的编辑态"],
+      "outputs": ["提示信息"],
+      "key_states": ["阻止保存"]
+    }
+  ],
+  "surfaces": [
+    {
+      "surface_id": "host-entry",
+      "role": "host-entry",
+      "carrier": "host-grid-entry",
+      "node_refs": [],
+      "content_refs": ["price-entry"],
+      "interaction_mode": "select",
+      "purpose": "作为『我的』App 中心 grid 的一级入口承载打开动作；点击 push 进入价格类型列表页；保存后承接权限配置结果的状态回填",
+      "states": ["默认", "已配置摘要回填"]
+    },
+    {
+      "surface_id": "price-type-list",
+      "role": "primary-task-page",
+      "carrier": "standalone-page",
+      "node_refs": ["enter-price-list", "select-price-type"],
+      "content_refs": ["price-list-nav", "price-type-list-content"],
+      "interaction_mode": "select",
+      "purpose": "展示全部价格类型入口及当前权限摘要；点击进入对应价格类型的权限设置页；承接从权限设置页返回后的权限摘要回填",
+      "states": ["已有配置态", "默认配置态"]
+    },
+    {
+      "surface_id": "price-permission-edit",
+      "role": "primary-task-page",
+      "carrier": "full-screen-modal",
+      "node_refs": ["edit-permission", "save-permission", "cancel-edit", "block-save"],
+      "content_refs": ["price-edit-nav", "perm-type-options", "partial-fan-groups", "exclude-fan-groups"],
+      "interaction_mode": "edit-then-save",
+      "purpose": "承接单个价格类型的权限配置：四选一权限类型，部分可见/不给谁看展开粉丝分组多选，页面级保存收口",
+      "states": ["编辑态", "部分可见已展开", "不给谁看已展开", "未选分组阻止保存", "保存成功"]
+    }
+  ],
+  "content_blocks": [
+    {
+      "content_id": "price-entry",
+      "content": "『我的』App 中心 grid 中的『价格管理』入口",
+      "group": "宿主入口",
+      "interaction": "action",
+      "editable": false,
+      "key_states": ["默认", "已配置摘要回填"]
+    },
+    {
+      "content_id": "price-list-nav",
+      "content": "列表页导航：标题『价格管理』、返回",
+      "group": "列表页",
+      "interaction": "action",
+      "editable": false,
+      "key_states": ["默认"]
+    },
+    {
+      "content_id": "price-type-list-content",
+      "content": "默认价格类型列表（拿货价、售价、批发价、代发价、打包价），每行展示价格类型名称与当前权限摘要",
+      "group": "列表页",
+      "interaction": "select",
+      "editable": false,
+      "key_states": ["已有配置态", "默认配置态"]
+    },
+    {
+      "content_id": "price-edit-nav",
+      "content": "权限设置页导航：标题为当前价格类型名称（如『拿货价 · 权限设置』）、取消、保存",
+      "group": "权限设置页",
+      "interaction": "action",
+      "editable": false,
+      "key_states": ["默认"]
+    },
+    {
+      "content_id": "perm-type-options",
+      "content": "权限类型四选一：公开、私密、部分可见、不给谁看",
+      "group": "权限设置页",
+      "interaction": "select",
+      "editable": true,
+      "key_states": ["公开", "私密", "部分可见", "不给谁看"]
+    },
+    {
+      "content_id": "partial-fan-groups",
+      "content": "权限类型为『部分可见』时展开的粉丝分组多选",
+      "group": "权限设置页",
+      "interaction": "select",
+      "editable": true,
+      "key_states": ["展开", "未选分组", "已选若干分组"]
+    },
+    {
+      "content_id": "exclude-fan-groups",
+      "content": "权限类型为『不给谁看』时展开的粉丝分组多选",
+      "group": "权限设置页",
+      "interaction": "select",
+      "editable": true,
+      "key_states": ["展开", "未选分组", "已选若干分组"]
+    }
+  ],
+  "transitions": [
+    {
+      "transition_id": "enter-to-select",
+      "from": "enter-price-list",
+      "trigger": "点击某个价格类型行",
+      "to": "select-price-type",
+      "data_in": ["目标价格类型"],
+      "result_out": ["进入权限设置页"]
+    },
+    {
+      "transition_id": "select-to-edit",
+      "from": "select-price-type",
+      "trigger": "进入权限设置页",
+      "to": "edit-permission",
+      "data_in": ["当前价格类型", "当前权限配置"],
+      "result_out": ["编辑中的权限配置"]
+    },
+    {
+      "transition_id": "edit-to-save",
+      "from": "edit-permission",
+      "trigger": "点击保存",
+      "to": "save-permission",
+      "data_in": ["编辑中的权限配置"],
+      "result_out": ["保存后的权限配置"]
+    },
+    {
+      "transition_id": "save-to-list",
+      "from": "save-permission",
+      "trigger": "保存成功",
+      "to": "enter-price-list",
+      "data_in": ["保存后的权限配置"],
+      "result_out": ["列表页权限摘要回填"],
+      "return_to": "enter-price-list",
+      "return_payload": ["price-type-list-content 权限摘要更新"]
+    },
+    {
+      "transition_id": "edit-to-cancel",
+      "from": "edit-permission",
+      "trigger": "点击取消",
+      "to": "cancel-edit",
+      "data_in": [],
+      "result_out": []
+    },
+    {
+      "transition_id": "cancel-to-list",
+      "from": "cancel-edit",
+      "trigger": "放弃本次编辑",
+      "to": "enter-price-list",
+      "data_in": [],
+      "result_out": [],
+      "return_to": "enter-price-list"
+    },
+    {
+      "transition_id": "save-to-block",
+      "from": "save-permission",
+      "trigger": "部分可见/不给谁看未选分组",
+      "to": "block-save",
+      "data_in": ["未选分组的编辑态"],
+      "result_out": ["提示信息"],
+      "return_to": "edit-permission"
+    }
+  ],
+  "data_handoffs": [
+    {
+      "handoff_id": "edit-result-to-list",
+      "transition_id": "save-to-list",
+      "source_node": "save-permission",
+      "target_node": "enter-price-list",
+      "payload_content_refs": ["price-type-list-content"],
+      "reset_policy": "clear-on-success"
+    },
+    {
+      "handoff_id": "edit-cancel-to-list",
+      "transition_id": "cancel-to-list",
+      "source_node": "cancel-edit",
+      "target_node": "enter-price-list",
+      "payload_content_refs": [],
+      "reset_policy": "reset"
+    },
+    {
+      "handoff_id": "edit-to-block-and-back",
+      "transition_id": "save-to-block",
+      "source_node": "block-save",
+      "target_node": "edit-permission",
+      "payload_content_refs": ["partial-fan-groups", "exclude-fan-groups"],
+      "reset_policy": "keep"
+    }
+  ],
+  "prototype_boundaries": [
+    {
+      "node_id": "enter-price-list",
+      "depth": "functional",
+      "reason": "列表页展示价格类型与权限摘要，可点击进入权限设置页"
+    },
+    {
+      "node_id": "select-price-type",
+      "depth": "functional",
+      "reason": "点击价格类型行真实打开权限设置页"
+    },
+    {
+      "node_id": "edit-permission",
+      "depth": "functional",
+      "reason": "权限类型单选与粉丝分组多选可真实操作，部分可见/不给谁看切换时展开/收起粉丝分组"
+    },
+    {
+      "node_id": "save-permission",
+      "depth": "functional",
+      "reason": "保存后真实更新权限状态并回填列表摘要"
+    },
+    {
+      "node_id": "cancel-edit",
+      "depth": "functional",
+      "reason": "取消返回列表且不保留本次编辑"
+    },
+    {
+      "node_id": "block-save",
+      "depth": "functional",
+      "reason": "未选分组时阻止保存并提示，停留权限设置页"
+    }
+  ],
+  "states": [
+    { "id": "has-config", "description": "价格类型已有权限配置，列表展示权限摘要" },
+    { "id": "default-config", "description": "价格类型使用默认权限配置" },
+    { "id": "partial-without-groups", "description": "部分可见/不给谁看未选分组，保存被阻止" },
+    { "id": "saved", "description": "权限配置保存成功，列表摘要回填" }
+  ],
+  "interaction_mode": "edit-then-save",
+  "app_target": {
+    "mode": "wego-app-scene",
+    "app_root": "wego-app",
+    "scene_folder": "wego-app/scenes/价格权限管理",
+    "runtime_entry": "scene.js",
+    "route_mode": "hash"
+  },
+  "host_container": {
+    "tab": "my",
+    "entry_label": "价格管理",
+    "subentry_label": "",
+    "leaf_level": 1,
+    "entry_type": "grid-entry",
+    "needs_host_entry_surface": true
+  },
+  "prototype_target": {
+    "app_root": "wego-app",
+    "scenario_folder": "wego-app/scenes/价格权限管理",
+    "routes": [
+      { "id": "my-price-management", "surface_ref": "price-type-list" }
+    ]
+  },
+  "component_intent": [
+    "互斥单选（权限类型四选一，文案>4字）",
+    "父项选中后展开的多选子项（部分可见/不给谁看展开粉丝分组多选）",
+    "页面级统一保存收口",
+    "列表行带权限摘要与下一步指示",
+    "grid 形式的一级入口与结果摘要回填"
+  ],
+  "assumptions": [
+    {
+      "assumption": "迁移保留原 route_id=my-price-management 与原 surface_id（host-entry、price-type-list、price-permission-edit），以保持与已实现 scene.js 和未来 design_plan 的兼容，避免因迁移改名导致实现偏差",
+      "impact_level": "low",
+      "reversible": true
+    },
+    {
+      "assumption": "host-entry 作为 wego-app/index.html 的 my-app-center grid 入口，不注册独立 push 路由；price-permission-edit 作为 full-screen-modal overlay，也不注册独立路由；prototype_target.routes 只声明主路由 my-price-management 绑定到 price-type-list",
+      "impact_level": "low",
+      "reversible": true
+    },
+    {
+      "assumption": "迁移只改规格字段结构，不改变业务内容、交互模式、保存方式与宿主层级；粉丝分组多选数据使用内存静态状态，不强制持久化",
+      "impact_level": "low",
+      "reversible": true
+    }
+  ],
+  "open_questions": [],
+  "readiness": {
+    "status": "ready",
+    "reason": "业务内容、流程、状态和结果均已确认且已实现，本次为规格字段迁移，无未决问题"
+  },
+  "rule_sources": [
+    { "source": "user-requirement", "supports": ["为每个价格类型配置可见权限：公开/私密/部分可见/不给谁看", "默认五种价格类型：拿货价、售价、批发价、代发价、打包价", "部分可见/不给谁看展开粉丝分组多选", "页面级统一保存"] },
+    { "source": "existing-interaction-spec", "supports": ["原 page_spec.json 的页面范围、信息块、状态和宿主路径"] },
+    { "source": "existing-implementation", "supports": ["scene.js 已实现的列表页 select 与权限设置页 edit-then-save 流程、未选分组阻止保存、保存后摘要回填"] },
+    { "source": "AGENTS.md", "supports": ["interaction_spec 落盘规则", "迁移已有场景先归档旧规格再补全新字段"] },
+    { "source": "wego-product/SKILL.md", "supports": ["Stage 2 新规范字段结构", "ready 流转规则", "稳定 ID 命名规则"] }
+  ],
+  "delivery_hint": "next-step"
+}
