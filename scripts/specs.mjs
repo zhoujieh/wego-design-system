@@ -25,6 +25,7 @@ const SKILL_DIRS = [
   '.codex/skills/wego-tests',
   '.codex/skills/wego-uxsystem-iterate',
 ];
+const SCENES_ROOT = 'wego-app/scenes';
 
 const text = rel => {
   const file = path.join(ROOT, rel);
@@ -35,6 +36,14 @@ const json = rel => {
   try { return JSON.parse(text(rel)); }
   catch (error) { throw new Error(`${rel} JSON 解析失败：${error.message}`); }
 };
+const maybeJson = rel => {
+  const file = path.join(ROOT, rel);
+  if (!fs.existsSync(file)) return null;
+  try { return JSON.parse(fs.readFileSync(file, 'utf8')); }
+  catch (error) { return { __parseError: error.message }; }
+};
+const exists = rel => fs.existsSync(path.join(ROOT, rel));
+const readMaybe = rel => exists(rel) ? fs.readFileSync(path.join(ROOT, rel), 'utf8') : '';
 const blobSha = value => {
   const body = Buffer.from(value);
   return crypto.createHash('sha1').update(Buffer.from(`blob ${body.length}\0`)).update(body).digest('hex');
@@ -90,16 +99,12 @@ function extractUiKitDecisionTree(uikitPlan) {
     const q = node.question;
     lines.push(`${i + 1}. **${q}**`);
     const keys = Object.keys(node).filter(k => k !== 'question');
-    keys.forEach(key => {
-      lines.push(`   - ${key}：${node[key]}`);
-    });
+    keys.forEach(key => lines.push(`   - ${key}：${node[key]}`));
   });
   if (priority.quickReference) {
     lines.push('');
     lines.push('**快速对照：**');
-    Object.entries(priority.quickReference).forEach(([k, v]) => {
-      lines.push(`- ${k}：${v}`);
-    });
+    Object.entries(priority.quickReference).forEach(([k, v]) => lines.push(`- ${k}：${v}`));
   }
   if (priority.exception) {
     lines.push('');
@@ -165,9 +170,7 @@ function extractLayoutModeRules(uikitPlan) {
   const rules = [];
   patterns.forEach(p => {
     (p.structureHighlights || []).forEach(h => {
-      if (h.includes('通栏模式') || h.includes('卡片模式') || h.includes('M1') || h.includes('M2')) {
-        rules.push(`- ${h}`);
-      }
+      if (h.includes('通栏模式') || h.includes('卡片模式') || h.includes('M1') || h.includes('M2')) rules.push(`- ${h}`);
     });
   });
   if (rules.length === 0) {
@@ -177,75 +180,26 @@ function extractLayoutModeRules(uikitPlan) {
   return rules.join('\n');
 }
 
-function extractSurfaceMatchRules(designSkill) {
-  const marker = '## surface 命中规则';
-  const start = designSkill.indexOf(marker);
+function extractSectionByMarker(value, marker) {
+  const start = value.indexOf(marker);
   if (start < 0) return '';
-  const rest = designSkill.slice(start + marker.length).replace(/^\s+/, '');
+  const rest = value.slice(start + marker.length).replace(/^\s+/, '');
   const next = rest.search(/^## /m);
   return (next >= 0 ? rest.slice(0, next) : rest).trim();
 }
-
-function extractComponentMappingRules(designSkill) {
-  const marker = '## 组件映射';
-  const start = designSkill.indexOf(marker);
-  if (start < 0) return '';
-  const rest = designSkill.slice(start + marker.length).replace(/^\s+/, '');
-  const next = rest.search(/^## /m);
-  return (next >= 0 ? rest.slice(0, next) : rest).trim();
-}
-
-function extractObjectManagementRules(designSkill) {
-  const marker = '## 对象管理列表';
-  const start = designSkill.indexOf(marker);
-  if (start < 0) return '';
-  const rest = designSkill.slice(start + marker.length).replace(/^\s+/, '');
-  const next = rest.search(/^## /m);
-  return (next >= 0 ? rest.slice(0, next) : rest).trim();
-}
-
-function extractPagePresentationRules(designSkill) {
-  const marker = '## 页面打开方式';
-  const start = designSkill.indexOf(marker);
-  if (start < 0) return '';
-  const rest = designSkill.slice(start + marker.length).replace(/^\s+/, '');
-  const next = rest.search(/^## /m);
-  return (next >= 0 ? rest.slice(0, next) : rest).trim();
-}
-
-function extractPageRoleRules(productSkill) {
-  const marker = '## 页面角色拆分';
-  const start = productSkill.indexOf(marker);
-  if (start < 0) return '';
-  const rest = productSkill.slice(start + marker.length).replace(/^\s+/, '');
-  const next = rest.search(/^## /m);
-  return (next >= 0 ? rest.slice(0, next) : rest).trim();
-}
-
+const extractSurfaceMatchRules = designSkill => extractSectionByMarker(designSkill, '## surface 命中规则');
+const extractComponentMappingRules = designSkill => extractSectionByMarker(designSkill, '## 组件映射');
+const extractObjectManagementRules = designSkill => extractSectionByMarker(designSkill, '## 对象管理列表');
+const extractPagePresentationRules = designSkill => extractSectionByMarker(designSkill, '## 页面打开方式');
+const extractPageRoleRules = productSkill => extractSectionByMarker(productSkill, '## 页面角色拆分');
+const extractUxPresentationRules = uxSkill => extractSectionByMarker(uxSkill, '## 页面打开方式');
+const extractUxComponentConsumption = uxSkill => extractSectionByMarker(uxSkill, '## 组件与设计计划消费');
 function extractFieldGradingRules(productSkill) {
   const marker = '### 对象管理列表字段分级';
   const start = productSkill.indexOf(marker);
   if (start < 0) return '';
   const rest = productSkill.slice(start + marker.length).replace(/^\s+/, '');
   const next = rest.search(/^## |^### /m);
-  return (next >= 0 ? rest.slice(0, next) : rest).trim();
-}
-
-function extractUxPresentationRules(uxSkill) {
-  const marker = '## 页面打开方式';
-  const start = uxSkill.indexOf(marker);
-  if (start < 0) return '';
-  const rest = uxSkill.slice(start + marker.length).replace(/^\s+/, '');
-  const next = rest.search(/^## /m);
-  return (next >= 0 ? rest.slice(0, next) : rest).trim();
-}
-
-function extractUxComponentConsumption(uxSkill) {
-  const marker = '## 组件与设计计划消费';
-  const start = uxSkill.indexOf(marker);
-  if (start < 0) return '';
-  const rest = uxSkill.slice(start + marker.length).replace(/^\s+/, '');
-  const next = rest.search(/^## /m);
   return (next >= 0 ? rest.slice(0, next) : rest).trim();
 }
 
@@ -260,9 +214,7 @@ function sourceSection(rel, heading) {
 }
 
 function mappedRules(rel, heading, mappings) {
-  const lines = sourceSection(rel, heading).split('\n')
-    .filter(line => line.startsWith('- '))
-    .map(line => line.slice(2).trim());
+  const lines = sourceSection(rel, heading).split('\n').filter(line => line.startsWith('- ')).map(line => line.slice(2).trim());
   const outputs = [];
   const unmatched = [];
   for (const line of lines) {
@@ -278,10 +230,7 @@ function render() {
   const index = json('.codex/skills/wego-design/components/index.json');
   const { value: fp, count } = fingerprint();
   const componentNames = (index.components || []).map(item => item.name).join('、') || '暂无';
-  const kitNames = (index.uiKits || []).map(item => ({
-    'biz-rule-config': '业务规则配置',
-    'system-settings': '系统设置',
-  }[item.slug] || item.slug)).join('、') || '暂无';
+  const kitNames = (index.uiKits || []).map(item => ({ 'biz-rule-config': '业务规则配置', 'system-settings': '系统设置' }[item.slug] || item.slug)).join('、') || '暂无';
 
   const productRules = mappedRules('.codex/skills/wego-product/SKILL.md', '核心规则', [
     { match: /自动生成.*不得作为运行时规则来源/, output: '只根据用户需求和正式工作流规则理解任务，自动生成的检查文档不能补充或改变需求。' },
@@ -328,20 +277,6 @@ function render() {
   const productSkill = text('.codex/skills/wego-product/SKILL.md');
   const uxSkill = text('.codex/skills/wego-ux/SKILL.md');
 
-  const uiKitDecisionTree = extractUiKitDecisionTree(uikitPlan);
-  const pagePatternScenarios = extractPagePatternScenarios(uikitPlan);
-  const fallbackBlueprints = extractFallbackBlueprints(uikitPlan);
-  const compositionConstraints = extractCompositionConstraints(uikitPlan);
-  const layoutModeRules = extractLayoutModeRules(uikitPlan);
-  const surfaceMatchRules = extractSurfaceMatchRules(designSkill);
-  const componentMappingRules = extractComponentMappingRules(designSkill);
-  const objectManagementRules = extractObjectManagementRules(designSkill);
-  const pagePresentationRules = extractPagePresentationRules(designSkill);
-  const pageRoleRules = extractPageRoleRules(productSkill);
-  const fieldGradingRules = extractFieldGradingRules(productSkill);
-  const uxPresentationRules = extractUxPresentationRules(uxSkill);
-  const uxComponentConsumption = extractUxComponentConsumption(uxSkill);
-
   const docs = {};
   docs[FILES[0]] = doc('工作流总览与优先级', [
     section('什么时候使用', '任何新页面、新场景或业务修改，都先判断任务属于需求理解、页面设计、原型实现、验收，还是设计系统迭代。'),
@@ -351,23 +286,13 @@ function render() {
   ].join('\n'), fp);
   docs[FILES[1]] = doc('需求理解规则', [
     section('什么时候使用', '收到新的业务页面、原型、场景或流程调整需求时使用。'),
-    section('应该怎么做', [
-      subSection('核心原则', bullets(productRules)),
-      subSection('页面角色拆分', pageRoleRules),
-      subSection('对象管理列表字段分级', fieldGradingRules),
-    ].join('\n')),
+    section('应该怎么做', [subSection('核心原则', bullets(productRules)), subSection('页面角色拆分', extractPageRoleRules(productSkill)), subSection('对象管理列表字段分级', extractFieldGradingRules(productSkill))].join('\n')),
     section('不能怎么做', bullets(['不能提前选择组件或布局代替需求判断。','不能从历史示例、页面模板或自动生成文档中发明字段、状态和流程。'])),
     section('完成后如何检查', '用户目标、页面范围、信息块、状态、异常流程和宿主路径都已明确，关键歧义已经确认，需求规格已经保存。'),
   ].join('\n'), fp);
   docs[FILES[2]] = doc('页面设计规则', [
     section('什么时候使用', '需求规格已经确认，需要决定页面结构、布局、组件组合和打开方式时使用。'),
-    section('应该怎么做', [
-      subSection('核心原则', bullets(designRules)),
-      subSection('Surface 命中判断', surfaceMatchRules),
-      subSection('组件映射决策', componentMappingRules),
-      subSection('对象管理列表判断', objectManagementRules),
-      subSection('页面打开方式选择', pagePresentationRules),
-    ].join('\n')),
+    section('应该怎么做', [subSection('核心原则', bullets(designRules)), subSection('Surface 命中判断', extractSurfaceMatchRules(designSkill)), subSection('组件映射决策', extractComponentMappingRules(designSkill)), subSection('对象管理列表判断', extractObjectManagementRules(designSkill)), subSection('页面打开方式选择', extractPagePresentationRules(designSkill))].join('\n')),
     section('不能怎么做', bullets(['不能只凭视觉感觉拼组件。','不能临时发明页面范式、组件类或打开方式。','不能让内容多少改变主要区域的整体宽度和对齐。'])),
     section('完成后如何检查', '检查每个页面都能说明使用了什么结构、为什么这样组合、如何打开，以及依据来自哪个正式文件和字段。'),
   ].join('\n'), fp);
@@ -375,22 +300,18 @@ function render() {
     section('什么时候使用', '页面结构已经确定，需要选择稳定组件、组合方式或页面示例时使用。'),
     section('应该怎么做', [
       subSection('组件与 UI Kit 总览', bullets([`当前稳定组件包括：${componentNames}。`,`当前页面示例包括：${kitNames}。`,'先看组件契约和真实示例，再决定结构、状态和组合。','页面示例只用于理解骨架、节奏和固定位置，业务内容必须按当前需求重新组织。'])),
-      subSection('UI Kit 选择决策树', uiKitDecisionTree),
-      subSection('各页面范式适用场景速查', pagePatternScenarios),
-      subSection('兜底蓝图适用场景', fallbackBlueprints),
-      subSection('组件组合约束', compositionConstraints),
-      subSection('布局模式判断（通栏 M1 / 卡片 M2）', layoutModeRules),
+      subSection('UI Kit 选择决策树', extractUiKitDecisionTree(uikitPlan)),
+      subSection('各页面范式适用场景速查', extractPagePatternScenarios(uikitPlan)),
+      subSection('兜底蓝图适用场景', extractFallbackBlueprints(uikitPlan)),
+      subSection('组件组合约束', extractCompositionConstraints(uikitPlan)),
+      subSection('布局模式判断（通栏 M1 / 卡片 M2）', extractLayoutModeRules(uikitPlan)),
     ].join('\n')),
     section('不能怎么做', bullets(['不能复制手机壳、展示外框或演示业务内容作为正式页面。','不能发明未登记的组件、子结构或修饰方式。','不能直接修改 App 中的设计系统副本。'])),
     section('完成后如何检查', '组件已在注册表中存在，结构与状态符合契约，页面示例只用于结构参考，设计系统源文件与部署副本保持一致。'),
   ].join('\n'), fp);
   docs[FILES[4]] = doc('原型实现规则', [
     section('什么时候使用', '需求规格和设计计划都已保存且没有设计缺口，需要生成或更新真实 App 场景时使用。'),
-    section('应该怎么做', [
-      subSection('核心原则', bullets(uxRules)),
-      subSection('页面打开方式实现', uxPresentationRules),
-      subSection('组件消费模式实现', uxComponentConsumption),
-    ].join('\n')),
+    section('应该怎么做', [subSection('核心原则', bullets(uxRules)), subSection('页面打开方式实现', extractUxPresentationRules(uxSkill)), subSection('组件消费模式实现', extractUxComponentConsumption(uxSkill))].join('\n')),
     section('不能怎么做', bullets(['不能复制第二套 App 宿主。','不能跳出 App 打开独立页面。','不能依赖运行时读取本地页面片段。','不能因为内容为空或较少让主要区域缩成小块。'])),
     section('完成后如何检查', '入口、路由、页面打开方式、保存回填、取消删除、键盘焦点、滚动和空内容等状态都形成完整闭环；电脑端和移动端使用同一链接。'),
   ].join('\n'), fp);
@@ -420,23 +341,18 @@ function candidateErrors(pool) {
   const ids = new Set(), keys = new Set();
   pool.candidates.forEach((item, i) => {
     const p = `candidates[${i}]`;
-    for (const field of ['id','normalized_key','title','status','primary_owner','ownership_reason','problem_pattern','created_at','updated_at'])
-      if (typeof item?.[field] !== 'string' || !item[field].trim()) errors.push(`${p}.${field} 必须为非空字符串`);
-    for (const field of ['secondary_owners','scene_evidence','applies_when_candidates','avoid_when_candidates'])
-      if (!Array.isArray(item?.[field])) errors.push(`${p}.${field} 必须是数组`);
+    for (const field of ['id','normalized_key','title','status','primary_owner','ownership_reason','problem_pattern','created_at','updated_at']) if (typeof item?.[field] !== 'string' || !item[field].trim()) errors.push(`${p}.${field} 必须为非空字符串`);
+    for (const field of ['secondary_owners','scene_evidence','applies_when_candidates','avoid_when_candidates']) if (!Array.isArray(item?.[field])) errors.push(`${p}.${field} 必须是数组`);
     if (ids.has(item?.id)) errors.push(`${p}.id 重复：${item.id}`); ids.add(item?.id);
     if (keys.has(item?.normalized_key)) errors.push(`${p}.normalized_key 重复：${item.normalized_key}`); keys.add(item?.normalized_key);
     if (!statuses.has(item?.status)) errors.push(`${p}.status 非法`);
     if (!owners.has(item?.primary_owner)) errors.push(`${p}.primary_owner 非法`);
-    for (const [j, owner] of (item?.secondary_owners || []).entries())
-      if (!owners.has(owner)) errors.push(`${p}.secondary_owners[${j}] 非法`);
+    for (const [j, owner] of (item?.secondary_owners || []).entries()) if (!owners.has(owner)) errors.push(`${p}.secondary_owners[${j}] 非法`);
     if (!Number.isInteger(item?.occurrence_count) || item.occurrence_count < 1) errors.push(`${p}.occurrence_count 必须为正整数`);
     if (item?.threshold !== 3) errors.push(`${p}.threshold 必须为 3`);
-    for (const field of ['created_at','updated_at'])
-      if (typeof item?.[field] === 'string' && Number.isNaN(Date.parse(item[field]))) errors.push(`${p}.${field} 必须为 ISO 8601 时间`);
+    for (const field of ['created_at','updated_at']) if (typeof item?.[field] === 'string' && Number.isNaN(Date.parse(item[field]))) errors.push(`${p}.${field} 必须为 ISO 8601 时间`);
     for (const [j, evidence] of (item?.scene_evidence || []).entries()) {
-      for (const field of ['date','scene','summary','source'])
-        if (typeof evidence?.[field] !== 'string' || !evidence[field].trim()) errors.push(`${p}.scene_evidence[${j}].${field} 必须为非空字符串`);
+      for (const field of ['date','scene','summary','source']) if (typeof evidence?.[field] !== 'string' || !evidence[field].trim()) errors.push(`${p}.scene_evidence[${j}].${field} 必须为非空字符串`);
       if (typeof evidence?.date === 'string' && Number.isNaN(Date.parse(evidence.date))) errors.push(`${p}.scene_evidence[${j}].date 必须为可解析日期`);
     }
     if (item?.status === 'observing' && item.occurrence_count >= 3) errors.push(`${p} 已达到阈值，必须等待确认或已处理`);
@@ -444,8 +360,73 @@ function candidateErrors(pool) {
     if (!item?.expected_rule_target?.file || !item?.expected_rule_target?.field) errors.push(`${p}.expected_rule_target 不完整`);
     const reach = item?.runtime_reachability;
     if (!reach || ['consumer_skill','output_field','downstream_consumer','acceptance_check'].some(k => !reach[k])) errors.push(`${p}.runtime_reachability 不完整`);
-    if (item?.status === 'promoted' && (!item.formal_rule || ['confirmed_at','file','field','rule_id'].some(k => !item.formal_rule[k]))) errors.push(`${p}.formal_rule 不完整`);
+    if (item?.status === 'promoted') {
+      if (!item.formal_rule || ['confirmed_at','file','field','rule_id'].some(k => !item.formal_rule[k])) errors.push(`${p}.formal_rule 不完整`);
+      const exception = typeof item?.formal_rule?.migration_exception_reason === 'string' && item.formal_rule.migration_exception_reason.trim();
+      if (item.occurrence_count < item.threshold && !exception) errors.push(`${p} 已 promoted 但 occurrence_count 未达到 threshold；必须补齐三次真实证据，或降级为 observing/awaiting-confirmation。历史迁移例外需写明 formal_rule.migration_exception_reason`);
+    }
   });
+  return errors;
+}
+
+const idsOf = (arr, key) => new Set((Array.isArray(arr) ? arr : []).map(item => item?.[key]).filter(Boolean));
+const addRefs = (errors, file, label, refs, set) => (refs || []).filter(Boolean).forEach(ref => { if (!set.has(ref)) errors.push(`${file}：${label} 引用了不存在的 ID：${ref}`); });
+const isObject = value => value && typeof value === 'object' && !Array.isArray(value);
+const hasDuplicate = values => values.length !== new Set(values).size;
+const selectedLooksLikeDom = value => (Array.isArray(value) ? value : [value]).some(item => typeof item === 'string' && (/<[a-z][\s>]/i.test(item) || /class\s*=/.test(item) || /\.[a-zA-Z][\w-]+/.test(item) || /\b[a-zA-Z][\w-]+__(?:[\w-]+)/.test(item) || /\b[a-zA-Z][\w-]+--(?:[\w-]+)/.test(item)));
+
+function stage23Errors() {
+  const errors = [];
+  const root = path.join(ROOT, SCENES_ROOT);
+  if (!fs.existsSync(root)) return errors;
+  for (const entry of fs.readdirSync(root, { withFileTypes: true }).filter(item => item.isDirectory() && !item.name.startsWith('.'))) {
+    const scene = entry.name;
+    const specFile = `${SCENES_ROOT}/${scene}/_spec/interaction_spec.json`;
+    const planFile = `${SCENES_ROOT}/${scene}/_spec/design_plan.json`;
+    if (!exists(specFile) || !exists(planFile)) continue;
+    const spec = maybeJson(specFile), plan = maybeJson(planFile);
+    if (spec?.__parseError) { errors.push(`${specFile} JSON 解析失败：${spec.__parseError}`); continue; }
+    if (plan?.__parseError) { errors.push(`${planFile} JSON 解析失败：${plan.__parseError}`); continue; }
+    const newSpec = Array.isArray(spec?.flows) || Array.isArray(spec?.flow_nodes) || Array.isArray(spec?.surfaces) || Array.isArray(spec?.content_blocks);
+    const newPlan = typeof plan?.complexity_level === 'string' || Array.isArray(plan?.component_patterns) || Array.isArray(plan?.flow_to_surface_decisions);
+    if (!newSpec && !newPlan) continue;
+
+    const flowIds = idsOf(spec?.flows, 'flow_id');
+    const nodeIds = idsOf(spec?.flow_nodes, 'node_id');
+    const surfaceIds = idsOf(spec?.surfaces, 'surface_id');
+    const contentIds = idsOf(spec?.content_blocks, 'content_id');
+    const transitionIds = idsOf(spec?.transitions, 'transition_id');
+
+    if (newSpec) {
+      for (const field of ['flows','flow_nodes','surfaces','content_blocks','transitions','data_handoffs','prototype_boundaries']) if (!Array.isArray(spec[field])) errors.push(`${specFile}：新格式 interaction_spec 必须包含数组字段 ${field}`);
+      if (!isObject(spec.readiness)) errors.push(`${specFile}：新格式 interaction_spec 必须包含 readiness 对象`);
+      if (!Array.isArray(spec?.prototype_target?.routes)) errors.push(`${specFile}：新格式 interaction_spec 必须包含 prototype_target.routes[]`);
+      for (const [field, values] of Object.entries({ flows:[...flowIds], flow_nodes:[...nodeIds], surfaces:[...surfaceIds], content_blocks:[...contentIds], transitions:[...transitionIds] })) if (hasDuplicate(values)) errors.push(`${specFile}：${field} 存在重复 ID`);
+      for (const flow of spec.flows || []) addRefs(errors, specFile, `flows.${flow?.flow_id}.steps[]`, flow?.steps || [], nodeIds);
+      for (const node of spec.flow_nodes || []) addRefs(errors, specFile, `flow_nodes.${node?.node_id}.surface_ref`, [node?.surface_ref], surfaceIds);
+      for (const surface of spec.surfaces || []) { addRefs(errors, specFile, `surfaces.${surface?.surface_id}.node_refs[]`, surface?.node_refs || [], nodeIds); addRefs(errors, specFile, `surfaces.${surface?.surface_id}.content_refs[]`, surface?.content_refs || [], contentIds); }
+      for (const tr of spec.transitions || []) addRefs(errors, specFile, `transitions.${tr?.transition_id}.from/to/return_to`, [tr?.from, tr?.to, tr?.return_to], nodeIds);
+      for (const h of spec.data_handoffs || []) { addRefs(errors, specFile, `data_handoffs.${h?.handoff_id}.transition_id`, [h?.transition_id], transitionIds); addRefs(errors, specFile, `data_handoffs.${h?.handoff_id}.source_node/target_node`, [h?.source_node, h?.target_node], nodeIds); addRefs(errors, specFile, `data_handoffs.${h?.handoff_id}.payload_content_refs[]`, h?.payload_content_refs || [], contentIds); }
+      for (const b of spec.prototype_boundaries || []) { addRefs(errors, specFile, `prototype_boundaries.${b?.node_id}.node_id`, [b?.node_id], nodeIds); if (!['functional','simulated','stub','excluded'].includes(b?.depth)) errors.push(`${specFile}：prototype_boundaries.${b?.node_id || '?'} depth 非法`); if (b?.depth === 'stub' && !b?.feedback) errors.push(`${specFile}：stub 节点 ${b?.node_id || '?'} 必须声明 feedback`); }
+      const routeIds = (spec?.prototype_target?.routes || []).map(r => r?.id).filter(Boolean); if (hasDuplicate(routeIds)) errors.push(`${specFile}：prototype_target.routes[].id 存在重复`);
+      for (const route of spec?.prototype_target?.routes || []) addRefs(errors, specFile, `prototype_target.routes.${route?.id}.surface_ref`, [route?.surface_ref], surfaceIds);
+    }
+
+    if (newPlan) {
+      if (!['simple','structured','complex'].includes(plan?.complexity_level)) errors.push(`${planFile}：complexity_level 必须是 simple/structured/complex`);
+      for (const field of ['flow_to_surface_decisions','component_patterns','surface_designs','component_mapping','design_gaps','rule_sources_used']) if (!Array.isArray(plan?.[field])) errors.push(`${planFile}：新格式 design_plan 必须包含数组字段 ${field}`);
+      for (const field of ['page_strategy','page_presentation']) if (!isObject(plan?.[field])) errors.push(`${planFile}：新格式 design_plan 必须包含对象字段 ${field}`);
+      if (['structured','complex'].includes(plan?.complexity_level) && !Array.isArray(plan?.region_composition)) errors.push(`${planFile}：structured/complex 页面必须包含 region_composition[]`);
+      if (plan?.complexity_level === 'complex') for (const field of ['first_screen_goal','region_priority','content_density','scroll_rhythm','fixed_vs_scroll','visual_competition']) if (!plan?.page_strategy?.[field]) errors.push(`${planFile}：complex 页面 page_strategy 缺少 ${field}`);
+      const patternIds = idsOf(plan?.component_patterns, 'pattern_id');
+      const mappingBlocks = idsOf(plan?.component_mapping, 'block');
+      const patternOrBlock = new Set([...patternIds, ...mappingBlocks]);
+      for (const d of plan?.flow_to_surface_decisions || []) { addRefs(errors, planFile, `flow_to_surface_decisions.${d?.decision_id}.node_refs[]`, d?.node_refs || [], nodeIds); addRefs(errors, planFile, `flow_to_surface_decisions.${d?.decision_id}.surface_ref`, [d?.surface_ref], surfaceIds); }
+      for (const cp of plan?.component_patterns || []) addRefs(errors, planFile, `component_patterns.${cp?.pattern_id}.applies_to[]`, cp?.applies_to || [], new Set([...surfaceIds, ...contentIds]));
+      for (const r of plan?.region_composition || []) addRefs(errors, planFile, `region_composition.${r?.region_id}.component_refs[]`, r?.component_refs || [], patternOrBlock);
+      for (const m of plan?.component_mapping || []) if (selectedLooksLikeDom(m?.selected)) errors.push(`${planFile}：新任务 component_mapping.selected 不得包含完整 DOM 路径或 CSS 类拼装：${m?.block || '?'}`);
+    }
+  }
   return errors;
 }
 
@@ -453,34 +434,23 @@ function structuralErrors() {
   const errors = candidateErrors(json('.codex/skills/wego-uxsystem-iterate/experience/candidates.json'));
   const manifest = sources();
   if (manifest.some(rel => /\/SKILL\.(?!md$)/.test(rel))) errors.push('规则来源清单不得包含历史 Skill 入口');
-
   for (const dir of SKILL_DIRS) {
     const root = path.join(ROOT, dir);
     if (!fs.existsSync(path.join(root, 'SKILL.md'))) errors.push(`${dir} 缺少唯一 SKILL.md`);
-    if (fs.existsSync(root)) {
-      const legacy = fs.readdirSync(root).filter(name => /^SKILL\..+\.md$/.test(name) && name !== 'SKILL.md');
-      for (const name of legacy) errors.push(`${dir}/${name} 是禁止保留的并列 Skill 入口`);
-    }
+    if (fs.existsSync(root)) for (const name of fs.readdirSync(root).filter(name => /^SKILL\..+\.md$/.test(name) && name !== 'SKILL.md')) errors.push(`${dir}/${name} 是禁止保留的并列 Skill 入口`);
   }
-
   const consumption = json('.codex/skills/wego-design/library-consumption.json');
   for (const [i, item] of (consumption.scenarioTypeRegistry?.types || []).entries()) {
-    for (const key of ['occurrence_count','scene_evidence','threshold','status','normalized_key'])
-      if (Object.hasOwn(item, key)) errors.push(`scenarioTypeRegistry.types[${i}] 含候选字段 ${key}`);
+    for (const key of ['occurrence_count','scene_evidence','threshold','status','normalized_key']) if (Object.hasOwn(item, key)) errors.push(`scenarioTypeRegistry.types[${i}] 含候选字段 ${key}`);
     if (/observing|awaiting-confirmation/.test(JSON.stringify(item))) errors.push(`scenarioTypeRegistry.types[${i}] 含候选状态，不得进入正式注册表`);
   }
-
-  const runtimeFiles = [
-    'AGENTS.md', '.codex/skills/README.md',
-    '.codex/skills/wego-product/SKILL.md', '.codex/skills/wego-design/SKILL.md',
-    '.codex/skills/wego-ux/SKILL.md', '.codex/skills/wego-tests/SKILL.md',
-    '.codex/skills/wego-uxsystem-iterate/SKILL.md', '.codex/skills/wego-design/README.md',
-  ];
+  const runtimeFiles = ['AGENTS.md','.codex/skills/README.md','.codex/skills/wego-product/SKILL.md','.codex/skills/wego-design/SKILL.md','.codex/skills/wego-ux/SKILL.md','.codex/skills/wego-tests/SKILL.md','.codex/skills/wego-uxsystem-iterate/SKILL.md','.codex/skills/wego-design/README.md'];
   for (const rel of runtimeFiles) {
     const value = text(rel);
     if (/先读取\s*`?SKILL\.runtime\.md/.test(value)) errors.push(`${rel} 仍要求读取历史 Skill 入口`);
     for (const name of FILES) if (value.includes(name)) errors.push(`${rel} 不得引用自动生成文档 ${name}`);
   }
+  errors.push(...stage23Errors());
   return errors;
 }
 
@@ -491,8 +461,7 @@ function checkFiles(docs) {
     if (!fs.existsSync(file)) errors.push(`缺少自动生成文档：${name}`);
     else if (fs.readFileSync(file, 'utf8') !== expected) errors.push(`自动生成文档已过期或被手工修改：${name}`);
   }
-  if (fs.existsSync(OUT)) for (const entry of fs.readdirSync(OUT, { withFileTypes: true }))
-    if (entry.isFile() && entry.name.endsWith('.md') && !FILES.includes(entry.name)) errors.push(`specs 顶层存在未登记文档：${entry.name}`);
+  if (fs.existsSync(OUT)) for (const entry of fs.readdirSync(OUT, { withFileTypes: true })) if (entry.isFile() && entry.name.endsWith('.md') && !FILES.includes(entry.name)) errors.push(`specs 顶层存在未登记文档：${entry.name}`);
   return errors;
 }
 
@@ -511,6 +480,8 @@ function tests() {
   expect(candidateErrors({schemaVersion:1,threshold:3,candidates:[base,{...base,id:'b'}]}).some(e=>e.includes('normalized_key 重复')), '同类候选必须去重');
   expect(candidateErrors({schemaVersion:1,threshold:3,candidates:[{...base,status:'awaiting-confirmation',occurrence_count:2}]}).some(e=>e.includes('未达到 3 次')), '未达阈值不能等待确认');
   expect(candidateErrors({schemaVersion:1,threshold:3,candidates:[{...base,status:'promoted',occurrence_count:3}]}).some(e=>e.includes('formal_rule')), '未确认不能升级');
+  expect(candidateErrors({schemaVersion:1,threshold:3,candidates:[{...base,status:'promoted',occurrence_count:1,formal_rule:{confirmed_at:'2026-07-08T00:00:00Z',file:'f',field:'x',rule_id:'r'}}]}).some(e=>e.includes('未达到 threshold')), 'promoted 未达阈值必须失败');
+  expect(candidateErrors({schemaVersion:1,threshold:3,candidates:[{...base,status:'promoted',occurrence_count:1,formal_rule:{confirmed_at:'2026-07-08T00:00:00Z',file:'f',field:'x',rule_id:'r',migration_exception_reason:'legacy'}}]}).length === 0, '历史迁移例外应允许');
   expect(candidateErrors({schemaVersion:1,threshold:3,candidates:[{...base,primary_owner:''}]}).some(e=>e.includes('primary_owner')), '归属不明不得入池');
   expect(manifestFingerprint(['a:1']) !== manifestFingerprint(['a:2']), '规则源变化应改变指纹');
   expect(!sources().some(rel => rel.endsWith('/SKILL.runtime.md')), 'source manifest 不得包含历史 Skill 入口');
