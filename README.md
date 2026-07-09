@@ -31,7 +31,7 @@
 - 技能职责和交接：各技能 `SKILL.md` 与 references
 - 仓库级硬约束：`AGENTS.md`
 
-`.codex/skills/wego-design/specs/*.md` 由正式规则来源自动生成，只用于人工检查，不是运行时权威来源，也不得直接修改。
+`docs/specs/*.md` 由正式规则来源自动生成，只用于人工检查，不是运行时权威来源，也不得直接修改。
 
 ## 经验沉淀
 
