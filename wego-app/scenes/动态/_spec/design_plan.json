@@ -172,7 +172,7 @@
       "consumption_mode": "stable-variant",
       "selected": ["type=image", "size=40"],
       "constraint_ref": {},
-      "reason": "发布者身份用 avatar 组件，image 类型 40 尺寸",
+      "reason": "发布者身份用 avatar 组件，image 类型 40 尺寸（组件契约稳定变体）",
       "rule_sources": ["components/avatar.json.variantDimensions"]
     },
     {

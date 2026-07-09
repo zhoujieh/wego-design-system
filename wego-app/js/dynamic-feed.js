@@ -4,6 +4,14 @@
     var navbar = panel && panel.querySelector('.host-dongtai-navbar');
     if (!panel || !navbar || navbar.dataset.feedToolbar === 'true') return;
 
+    // 演示用:首次访问动态 Tab 且无产品时,注入 3 条模拟数据以呈现列表布局。
+    // 真实环境由发布流程写入;此分支不污染已有数据(内部判空)。
+    if (window.WegoProducts && typeof window.WegoProducts.seedDemoProducts === 'function') {
+      if (window.WegoProducts.seedDemoProducts() && typeof window.WegoProducts.render === 'function') {
+        window.WegoProducts.render();
+      }
+    }
+
     navbar.dataset.feedToolbar = 'true';
     navbar.innerHTML = ''
       + '<div class="dynamic-feed-toolbar">'

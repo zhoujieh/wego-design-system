@@ -126,7 +126,7 @@
   content: "";
   position: absolute;
   top: 0;
-  left: calc(var(--spacer-16) + 48px + var(--spacer-12));
+  left: calc(var(--spacer-16) + 40px + var(--spacer-12));
   right: 0;
   height: 0.5px;
   background: var(--border-neutral-l2);
@@ -135,15 +135,24 @@
 .dynamic-product-card__content {
   width: 100%;
   display: grid;
-  grid-template-columns: 48px minmax(0, 1fr);
+  grid-template-columns: 40px minmax(0, 1fr);
   gap: var(--spacer-12);
   align-items: start;
   padding: var(--spacer-16);
 }
 
+/* products.css 把 .dynamic-product-card__content 设为 display:flex,
+   用更高特异性的 .dynamic-feed-item . 前缀重置为 grid,保证左右布局生效。 */
+.dynamic-feed-item .dynamic-product-card__content {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  padding: var(--spacer-16);
+  min-height: 0;
+}
+
 .dynamic-feed-item__avatar {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   border-radius: var(--radius-full);
 }
 
@@ -333,10 +342,11 @@
     height: 44px;
   }
 
-  .dynamic-product-card__content {
+  .dynamic-product-card__content,
+  .dynamic-feed-item .dynamic-product-card__content {
     grid-template-columns: 40px minmax(0, 1fr);
     gap: var(--spacer-8);
-    padding-inline: var(--spacer-12);
+    padding: var(--spacer-12);
   }
 
   .dynamic-feed-item__avatar {

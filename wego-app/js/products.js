@@ -12,11 +12,15 @@
   function clone(value) { return JSON.parse(JSON.stringify(value)); }
 
   function readProducts() {
+    // 演示数据(本会话内存,见 seedDemoProducts)不写 localStorage,
+    // 避免污染用户真实发布数据;刷新后回到真实空态。
     try {
       var raw = window.localStorage.getItem(STORAGE_KEY);
       if (!raw) return memoryProducts.slice();
       var parsed = JSON.parse(raw);
       if (!Array.isArray(parsed)) return memoryProducts.slice();
+      // 有真实数据时,以真实数据为准(demo 仅用于无数据演示态)
+      if (parsed.length === 0) return memoryProducts.slice();
       memoryProducts = parsed;
       return parsed.slice();
     } catch (error) { return memoryProducts.slice(); }
@@ -207,6 +211,69 @@
 
   window.addEventListener('storage', function (event) { if (event.key === STORAGE_KEY) render(); });
 
+  function buildDemoProduct(seed) {
+    return {
+      id: 'demo-' + seed.id,
+      fields: {
+        productName: { rawText: seed.title, items: [] },
+        price: { rawText: seed.price, items: [] },
+        spec: { rawText: '', items: seed.specs.map(function (v) { return { value: v, normalizedValue: v, status: 'recognized' }; }) },
+        color: { rawText: '', items: seed.colors.map(function (v) { return { value: v, normalizedValue: v, status: 'recognized' }; }) },
+        source: { rawText: '', items: [{ value: seed.source, normalizedValue: seed.source, status: 'recognized' }] },
+        tag: { rawText: '', items: seed.tags.map(function (v) { return { value: v, normalizedValue: v, status: 'recognized' }; }) }
+      },
+      visibility: 'public',
+      createdAt: seed.createdAt,
+      updatedAt: seed.createdAt
+    };
+  }
+
+  function demoProducts() {
+    var now = Date.now();
+    return [
+      buildDemoProduct({
+        id: 'shirt',
+        title: '基础纯棉长袖衬衫',
+        price: '128.00',
+        specs: ['L', 'XL'],
+        colors: ['白色', '燕麦'],
+        source: '自营工厂',
+        tags: ['新品', '主推'],
+        createdAt: new Date(now - 1000 * 60 * 4).toISOString()
+      }),
+      buildDemoProduct({
+        id: 'jacket',
+        title: '轻量户外机能夹克',
+        price: '299.00',
+        specs: ['M', 'L', 'XL'],
+        colors: ['深灰', '军绿'],
+        source: '联合开发',
+        tags: ['上新'],
+        createdAt: new Date(now - 1000 * 60 * 60 * 2).toISOString()
+      }),
+      buildDemoProduct({
+        id: 'pants',
+        title: '高腰直筒休闲长裤',
+        price: '168.00',
+        specs: ['S', 'M', 'L'],
+        colors: ['黑色', '燕麦', '深咖'],
+        source: '自营工厂',
+        tags: ['主推'],
+        createdAt: new Date(now - 1000 * 60 * 60 * 26).toISOString()
+      })
+    ];
+  }
+
+  function seedDemoProducts() {
+    // 会话级 mock:仅当无任何已发布产品时,在内存里追加演示数据,
+    // 不写 localStorage(避免污染用户真实发布数据,刷新后回到真实空态)。
+    // 调用方(动态 Tab 增强脚本)需自行用 dataset 等机制确保本会话只调一次。
+    if (readProducts().length > 0) return false;
+    var demos = demoProducts();
+    for (var i = 0; i < demos.length; i++) memoryProducts.unshift(demos[i]);
+    return true;
+  }
+
   window.WegoProducts = {
     getProducts: getProducts,
     getProduct: getProduct,
@@ -214,7 +281,8 @@
     render: render,
     startCreate: startCreate,
     startEdit: startEdit,
-    showDynamic: showDynamic
+    showDynamic: showDynamic,
+    seedDemoProducts: seedDemoProducts
   };
 
   bindHostPublishButton();
