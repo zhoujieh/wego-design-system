@@ -1,0 +1,78 @@
+{
+  "complexity_level": "structured",
+  "matched_uikit": "biz-rule-config",
+  "scene_fit_reason": "价格权限管理是从我的 Tab 应用中心进入的业务配置任务，包含价格类型列表、权限编辑 full-screen-modal、粉丝分组多选与保存回填；适合按完整交互任务组织，而不是单一页面规格。",
+  "navigation_pattern": "宿主应用中心 grid-entry → push 进入价格类型列表 → full-screen-modal 编辑权限 → 保存后返回并回填列表状态",
+  "layout_pattern": "host-entry 使用宿主 grid-entry；price-type-list 使用通栏列表型管理页；price-permission-edit 使用 full-screen-modal 表单配置页，底部固定主操作。",
+  "interaction_pattern": "列表选择 + 权限编辑 + 保存回填 + 取消返回",
+  "app_target": {
+    "mode": "wego-app-scene",
+    "app_root": "wego-app",
+    "scene_folder": "wego-app/scenes/价格权限管理",
+    "route_id": "my-price-management",
+    "route_mode": "hash",
+    "runtime_entry": "scene.js"
+  },
+  "flow_to_surface_decisions": [
+    {
+      "flow_ref": "manage-price-permission",
+      "node_refs": ["enter-price-management"],
+      "surface_ref": "host-entry",
+      "decision": "作为我的 Tab 应用中心入口，不单独绘制业务页面。"
+    },
+    {
+      "flow_ref": "manage-price-permission",
+      "node_refs": ["view-price-types"],
+      "surface_ref": "price-type-list",
+      "decision": "价格类型与当前权限摘要合并在一个 push 列表页，减少层级。"
+    },
+    {
+      "flow_ref": "manage-price-permission",
+      "node_refs": ["edit-price-permission", "select-fan-groups", "save-price-permission"],
+      "surface_ref": "price-permission-edit",
+      "decision": "权限编辑、分组选择与保存反馈承载在 full-screen-modal 中，保存后回填列表。"
+    }
+  ],
+  "page_strategy": {
+    "page_goal": "让店主快速查看并配置不同价格类型的可见/可用权限。",
+    "page_pattern": "business-rule-management",
+    "primary_scroll": "vertical",
+    "density": "medium-high",
+    "first_screen_priority": ["价格类型列表", "权限状态摘要", "编辑入口"],
+    "fixed_regions": ["price-permission-edit.actions"]
+  },
+  "region_composition": [
+    {
+      "surface_ref": "price-type-list",
+      "regions": [
+        { "id": "navbar", "role": "navigation", "priority": 1 },
+        { "id": "price-type-cells", "role": "primary-content", "priority": 2 },
+        { "id": "help-copy", "role": "secondary-guidance", "priority": 3 }
+      ]
+    },
+    {
+      "surface_ref": "price-permission-edit",
+      "regions": [
+        { "id": "modal-navbar", "role": "navigation", "priority": 1 },
+        { "id": "permission-fields", "role": "form-content", "priority": 2 },
+        { "id": "modal-actions", "role": "submit-action", "priority": 3, "fixed": true }
+      ]
+    }
+  ],
+  "component_patterns": [
+    { "applies_to": ["host-entry"], "component_pattern": "host-grid-entry" },
+    { "applies_to": ["price-type-list"], "component_pattern": "navbar + cell-group + cell clickable" },
+    { "applies_to": ["price-permission-edit"], "component_pattern": "modal fullscreen + form/cell-group + fixed primary action" },
+    { "applies_to": ["fan-group-selector"], "component_pattern": "multi-select list with check state" }
+  ],
+  "page_presentation": [
+    { "surface_ref": "host-entry", "type": "host-grid-entry", "route_binding": "my-price-management" },
+    { "surface_ref": "price-type-list", "type": "push", "transition": "slide-left", "covers_tab_bar": true },
+    { "surface_ref": "price-permission-edit", "type": "full-screen-modal", "transition": "slide-up", "covers_tab_bar": true }
+  ],
+  "design_gaps": [],
+  "rule_sources": [
+    { "file": "docs/interaction-prototype-workflow-refactor-conclusion.md", "supports": ["design_plan 新结构", "完整交互任务", "flow_to_surface_decisions", "component_patterns"] },
+    { "file": "wego-app/scenes/价格权限管理/_spec/interaction_spec.json", "supports": ["流程、节点、surface、数据回填与 readiness"] }
+  ]
+}
