@@ -1,28 +1,37 @@
 {
   "task_type": "design-system-consumption",
   "scene_category": "list",
-  "goal": "让用户在动态 Tab 浏览产品动态流，快速查看、筛选和操作自己的产品动态",
+  "goal": "让用户在动态 Tab 浏览产品动态流，快速查看、筛选和操作自己的产品动态；并对产品发起帮卖（加价转卖），设置帮卖售价后生成帮卖商品并进入分享流程",
   "scope": {
     "included": [
       "动态流列表页：工具栏（搜索入口 + 发布入口）",
       "筛选 Tab（全部 / 上新）",
-      "动态卡片列表（发布者身份、动态标题、产品九宫格图、产品摘要、产品信息、操作按钮）"
+      "动态卡片列表（发布者身份、动态标题、产品九宫格图、产品摘要、产品信息、操作按钮、帮卖按钮）",
+      "加价卖半弹窗：标题+帮助入口、我的售价输入、实时收益、快捷加价、底部说明、帮卖并分享主按钮"
     ],
     "excluded": [
       "发布产品完整流程（已有独立场景）",
       "产品详情页",
       "搜索结果页",
-      "图片搜索识别流程"
+      "图片搜索识别流程",
+      "真实分享流程（本次 stub 提示）",
+      "加价卖说明详情页（外链跳转）",
+      "帮卖商品后续管理"
     ]
   },
   "actors": [
-    { "id": "shop-owner", "role": "店主", "purpose": "浏览和操作自己的产品动态" }
+    { "id": "shop-owner", "role": "店主", "purpose": "浏览和操作自己的产品动态，发起帮卖" }
   ],
   "entry_points": [
     {
       "id": "dongtai-tab",
       "carrier": "host-fixed-tab",
       "description": "宿主底部第一个固定 Tab，点击切换到动态页"
+    },
+    {
+      "id": "resale-entry",
+      "carrier": "inline-action",
+      "description": "动态卡片操作行最右侧的帮卖按钮，点击拉起加价卖半弹窗"
     }
   ],
   "flows": [
@@ -32,6 +41,13 @@
       "entry_node": "enter-feed",
       "steps": ["enter-feed", "browse-list", "filter-feed", "operate-item"],
       "exit_condition": "切换到其他 Tab"
+    },
+    {
+      "flow_id": "resale-product",
+      "flow_type": "main",
+      "entry_node": "trigger-resale",
+      "steps": ["trigger-resale", "configure-resale-price", "submit-resale"],
+      "exit_condition": "关闭弹窗或完成帮卖分享"
     }
   ],
   "flow_nodes": [
@@ -66,6 +82,30 @@
       "inputs": ["目标动态"],
       "outputs": ["操作结果"],
       "key_states": ["操作前", "操作反馈"]
+    },
+    {
+      "node_id": "trigger-resale",
+      "purpose": "点击动态卡片操作行的帮卖按钮，拉起加价卖半弹窗",
+      "surface_ref": "dynamic-feed-main",
+      "inputs": ["目标动态", "商品售价"],
+      "outputs": ["打开加价卖弹窗"],
+      "key_states": ["弹窗未打开", "弹窗打开"]
+    },
+    {
+      "node_id": "configure-resale-price",
+      "purpose": "在加价卖弹窗内设置我的售价，支持手动输入和快捷加价，实时计算收益",
+      "surface_ref": "resale-sheet",
+      "inputs": ["商品售价", "推荐加价比例"],
+      "outputs": ["我的售价", "收益"],
+      "key_states": ["初始态(默认推荐价)", "输入中(实时更新)", "非法输入(错误状态)"]
+    },
+    {
+      "node_id": "submit-resale",
+      "purpose": "点击帮卖并分享，保存帮卖售价、生成帮卖商品和分享内容并进入分享流程",
+      "surface_ref": "resale-sheet",
+      "inputs": ["我的售价"],
+      "outputs": ["帮卖商品", "分享内容"],
+      "key_states": ["提交前", "提交反馈"]
     }
   ],
   "surfaces": [
@@ -73,7 +113,7 @@
       "surface_id": "dynamic-feed-main",
       "role": "primary-task-page",
       "carrier": "host-fixed-tab",
-      "node_refs": ["enter-feed", "browse-list", "filter-feed", "operate-item"],
+      "node_refs": ["enter-feed", "browse-list", "filter-feed", "operate-item", "trigger-resale"],
       "content_refs": [
         "search-entry",
         "publish-entry",
@@ -83,11 +123,29 @@
         "feed-item-gallery",
         "feed-item-summary",
         "feed-item-info",
-        "feed-item-actions"
+        "feed-item-actions",
+        "feed-item-resale-action"
       ],
       "interaction_mode": "instant-apply",
-      "purpose": "动态 Tab 主页面，承载动态流浏览、筛选和单条操作",
+      "purpose": "动态 Tab 主页面，承载动态流浏览、筛选、单条操作和帮卖入口",
       "states": ["已有数据态", "空态", "加载态"]
+    },
+    {
+      "surface_id": "resale-sheet",
+      "role": "secondary-task-page",
+      "carrier": "sheet",
+      "node_refs": ["configure-resale-price", "submit-resale"],
+      "content_refs": [
+        "resale-sheet-header",
+        "resale-price-input",
+        "resale-earnings",
+        "resale-quick-markup",
+        "resale-bottom-note",
+        "resale-submit-action"
+      ],
+      "interaction_mode": "edit-then-save",
+      "purpose": "加价卖半弹窗，设置帮卖售价并实时查看收益，确认后生成帮卖商品并进入分享流程",
+      "states": ["初始态", "输入中", "非法输入", "关闭不保存"]
     }
   ],
   "content_blocks": [
@@ -162,6 +220,62 @@
       "interaction": "action",
       "editable": false,
       "key_states": ["默认", "操作反馈"]
+    },
+    {
+      "content_id": "feed-item-resale-action",
+      "content": "帮卖按钮，位于动态卡片操作行最右侧，点击拉起加价卖半弹窗",
+      "group": "动态卡片",
+      "interaction": "action",
+      "editable": false,
+      "key_states": ["默认", "弹窗打开"]
+    },
+    {
+      "content_id": "resale-sheet-header",
+      "content": "加价卖标题，右侧带帮助说明入口(?)，点击跳转加价卖说明外链",
+      "group": "加价卖弹窗",
+      "interaction": "action",
+      "editable": false,
+      "key_states": ["默认"]
+    },
+    {
+      "content_id": "resale-price-input",
+      "content": "我的售价金额输入框，自动带入商品售价+默认加价金额；仅允许输入整数，带¥符号，不允许为空或不小于商品售价，超出范围提示错误",
+      "group": "加价卖弹窗",
+      "interaction": "input",
+      "editable": true,
+      "key_states": ["默认填入推荐价", "输入中", "非法输入错误态"]
+    },
+    {
+      "content_id": "resale-earnings",
+      "content": "收益实时展示，收益=我的售价-商品售价，显示为'赚 ¥X'，随售价输入实时更新",
+      "group": "加价卖弹窗",
+      "interaction": "view",
+      "editable": false,
+      "key_states": ["实时更新"]
+    },
+    {
+      "content_id": "resale-quick-markup",
+      "content": "快捷加价区：推荐加价(可修改售价赚更多，右侧展示推荐比例如+30%)和快捷按钮(+20%，点击刷新售价和收益)；另含手动输入入口，点击进入自定义输入模式并聚焦价格输入框",
+      "group": "加价卖弹窗",
+      "interaction": "select",
+      "editable": false,
+      "key_states": ["推荐加价选中", "快捷按钮选中", "手动输入模式"]
+    },
+    {
+      "content_id": "resale-bottom-note",
+      "content": "底部说明文案：帮卖佣金仅自己可见，可放心分享",
+      "group": "加价卖弹窗",
+      "interaction": "view",
+      "editable": false,
+      "key_states": ["默认"]
+    },
+    {
+      "content_id": "resale-submit-action",
+      "content": "底部主按钮'帮卖并分享'，点击后保存帮卖售价、生成帮卖商品、生成分享内容并进入分享流程；非法输入时按钮不可点击",
+      "group": "加价卖弹窗",
+      "interaction": "action",
+      "editable": false,
+      "key_states": ["可点击", "禁用(非法输入)", "提交反馈"]
     }
   ],
   "transitions": [
@@ -188,9 +302,42 @@
       "to": "operate-item",
       "data_in": ["目标动态"],
       "result_out": ["操作结果"]
+    },
+    {
+      "transition_id": "browse-to-resale",
+      "from": "browse-list",
+      "trigger": "点击动态卡片操作行帮卖按钮",
+      "to": "trigger-resale",
+      "data_in": ["目标动态", "商品售价"],
+      "result_out": ["打开加价卖弹窗"]
+    },
+    {
+      "transition_id": "resale-to-configure",
+      "from": "trigger-resale",
+      "trigger": "弹窗打开",
+      "to": "configure-resale-price",
+      "data_in": ["商品售价", "推荐加价比例"],
+      "result_out": ["默认售价", "初始收益"]
+    },
+    {
+      "transition_id": "configure-to-submit",
+      "from": "configure-resale-price",
+      "trigger": "点击帮卖并分享",
+      "to": "submit-resale",
+      "data_in": ["我的售价"],
+      "result_out": ["帮卖商品", "分享内容"]
     }
   ],
-  "data_handoffs": [],
+  "data_handoffs": [
+    {
+      "handoff_id": "feed-to-resale-sheet",
+      "transition_ref": "browse-to-resale",
+      "source_node": "browse-list",
+      "target_node": "configure-resale-price",
+      "payload_content_refs": ["feed-item-summary"],
+      "reset_policy": "reset"
+    }
+  ],
   "prototype_boundaries": [
     {
       "node_id": "enter-feed",
@@ -212,12 +359,30 @@
       "depth": "stub",
       "reason": "操作按钮本次只提供入口和反馈，不实现完整业务操作",
       "feedback": "toast 提示操作已触发（如\"功能开发中\"）"
+    },
+    {
+      "node_id": "trigger-resale",
+      "depth": "functional",
+      "reason": "帮卖按钮可点击并拉起加价卖弹窗"
+    },
+    {
+      "node_id": "configure-resale-price",
+      "depth": "functional",
+      "reason": "售价输入、实时收益计算、快捷加价、手动输入均可真实交互"
+    },
+    {
+      "node_id": "submit-resale",
+      "depth": "stub",
+      "reason": "帮卖并分享本次只提供入口和反馈，不实现真实分享流程",
+      "feedback": "toast 提示'已生成帮卖，进入分享'并关闭弹窗"
     }
   ],
   "states": [
     { "id": "has-data", "description": "已有动态数据，正常展示列表" },
     { "id": "empty", "description": "无动态数据，展示空态" },
-    { "id": "loading", "description": "动态加载中" }
+    { "id": "loading", "description": "动态加载中" },
+    { "id": "resale-sheet-open", "description": "加价卖半弹窗已打开，覆盖在动态页之上" },
+    { "id": "resale-input-invalid", "description": "售价输入非法，输入框错误态且主按钮禁用" }
   ],
   "assumptions": [
     {
@@ -226,7 +391,27 @@
       "reversible": true
     },
     {
-      "assumption": "本次优化聚焦展示细节（头像与内容左右布局、0.5px 分割线左对齐右贴边、操作按钮 12px link、九宫格用 image 组件），业务内容不变，具体视觉决策由 design_plan 承载",
+      "assumption": "加价卖半弹窗作为 sheet 覆盖在动态页之上，不注册独立 hash 路由；半弹窗容器组件目前缺失，本次原型由场景级自写承载，并在 design_plan 中标注待替换为正式 modal 组件",
+      "impact_level": "low",
+      "reversible": true
+    },
+    {
+      "assumption": "推荐加价比例固定模拟为+30%（对应需求示例商品售价¥20→默认售价¥26），快捷按钮固定+20%；商品售价使用模拟数据(如¥20)",
+      "impact_level": "low",
+      "reversible": true
+    },
+    {
+      "assumption": "售价校验上限取商品售价×10，超出范围提示错误（需求未给出具体上限，取合理值）",
+      "impact_level": "low",
+      "reversible": true
+    },
+    {
+      "assumption": "加价卖说明'?'入口跳转外链 https://mp.weixin.qq.com/s/H05MjX1OTmng8nXVl3GXrQ，不在原型内实现说明详情页",
+      "impact_level": "low",
+      "reversible": true
+    },
+    {
+      "assumption": "关闭弹窗(X/下滑/遮罩)不保存未确认修改，再次进入重新填入默认推荐价",
       "impact_level": "low",
       "reversible": true
     }
@@ -234,7 +419,7 @@
   "open_questions": [],
   "readiness": {
     "status": "ready-with-assumptions",
-    "reason": "业务内容、流程和状态明确；路由方案已确定（固定 Tab 不注册 push 路由，规格层用 carrier:host-fixed-tab 表达），仅有低风险可逆假设"
+    "reason": "帮卖入口、加价卖弹窗的内容、流程、状态和原型深度均已明确；半弹窗容器由场景级自写承载并标注待替换为正式 modal 组件；仅存低风险可逆假设（模拟数据、校验上限、外链跳转）"
   },
   "app_target": {
     "mode": "wego-app-scene",
@@ -257,10 +442,10 @@
     "routes": []
   },
   "rule_sources": [
-    { "source": "user-requirement", "supports": ["动态页优化需求：头像内容左右布局、0.5px 分割线、操作按钮 12px、图片用组件", "宿主 5 个固定 Tab 各自需要规格文档"] },
-    { "source": "existing-implementation", "supports": ["动态页当前业务内容：工具栏、筛选、动态卡片、九宫格、摘要卡、操作按钮"] },
-    { "source": "AGENTS.md", "supports": ["宿主定义壳，5 个固定 Tab 各自需规格文档", "interaction_spec 落盘规则"] },
-    { "source": "wego-product/SKILL.md", "supports": ["interaction_spec 结构和字段", "ready-with-assumptions 流转规则"] }
+    { "source": "user-requirement", "supports": ["动态页优化需求：头像内容左右布局、0.5px 分割线、操作按钮 12px、图片用组件", "宿主 5 个固定 Tab 各自需要规格文档", "帮卖需求：动态卡片操作行最右侧加帮卖按钮，拉起加价卖半弹窗", "加价卖弹窗：标题+帮助入口、我的售价输入、实时收益、快捷加价、底部说明、帮卖并分享", "用户确认：帮卖按钮位于蓝色文字链操作行最右侧；半弹窗容器先自写后替换组件；分享流程 stub；加价数据固定模拟值"] },
+    { "source": "existing-implementation", "supports": ["动态页当前业务内容：工具栏、筛选、动态卡片、九宫格、摘要卡、操作按钮", "现有操作行使用 link link--12 承载"] },
+    { "source": "AGENTS.md", "supports": ["宿主定义壳，5 个固定 Tab 各自需规格文档", "interaction_spec 落盘规则", "原型必须体现真实业务状态和流程反馈"] },
+    { "source": "wego-product/SKILL.md", "supports": ["interaction_spec 结构和字段", "ready-with-assumptions 流转规则", "surface carrier=sheet 表达半弹窗意图"] }
   ],
   "delivery_hint": "next-step"
 }

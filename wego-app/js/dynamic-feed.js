@@ -157,7 +157,7 @@
     return info;
   }
 
-  function createActions() {
+  function createActions(card) {
     var actions = document.createElement('div');
     actions.className = 'dynamic-feed-actions';
     actions.setAttribute('data-content-id', 'feed-item-actions');
@@ -174,7 +174,261 @@
       });
       actions.appendChild(button);
     });
+
+    // 帮卖按钮：操作行最右侧，复用既有 link standalone 12px 变体，点击拉起加价卖 sheet
+    var resaleButton = document.createElement('button');
+    resaleButton.type = 'button';
+    resaleButton.className = 'link link--12 dynamic-feed-actions__item';
+    resaleButton.textContent = '帮卖';
+    resaleButton.setAttribute('data-content-id', 'feed-item-resale-action');
+    resaleButton.addEventListener('click', function (event) {
+      event.stopPropagation();
+      openResaleSheet(card);
+    });
+    actions.appendChild(resaleButton);
+
     return actions;
+  }
+
+  // 加价卖半弹窗：场景级自写容器，待 modal 组件上线后迁移
+  function openResaleSheet(card) {
+    var existing = document.querySelector('.dynamic-resale-sheet__overlay');
+    if (existing) existing.remove();
+
+    // 解析商品售价；读取失败时使用模拟默认值 ¥20
+    var productPrice = 20;
+    if (card) {
+      var priceEl = card.querySelector('.dynamic-product-card__price');
+      if (priceEl) {
+        var parsed = parseInt(priceEl.textContent.replace(/[^\d]/g, ''), 10);
+        if (!isNaN(parsed) && parsed > 0) productPrice = parsed;
+      }
+    }
+
+    var RECOMMEND_RATE = 0.30;
+    var QUICK_RATE = 0.20;
+    var recommendPrice = Math.round(productPrice * (1 + RECOMMEND_RATE));
+    var quickPrice = Math.round(productPrice * (1 + QUICK_RATE));
+    var maxPrice = productPrice * 10;
+
+    var overlay = document.createElement('div');
+    overlay.className = 'dynamic-resale-sheet__overlay';
+    overlay.setAttribute('data-surface-id', 'resale-sheet');
+
+    var panel = document.createElement('div');
+    panel.className = 'dynamic-resale-sheet__panel';
+
+    // sheet 头部：左关闭X + 标题 + 右帮助入口?
+    var header = document.createElement('div');
+    header.className = 'dynamic-resale-sheet__header';
+    header.setAttribute('data-content-id', 'resale-sheet-header');
+    var closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'dynamic-resale-sheet__close';
+    closeBtn.setAttribute('aria-label', '关闭');
+    closeBtn.innerHTML = '<i class="wego-iconfont-s icon-guanbi" aria-hidden="true"></i>';
+    var title = document.createElement('h2');
+    title.className = 'dynamic-resale-sheet__title';
+    title.textContent = '加价卖';
+    var helpEntry = document.createElement('a');
+    helpEntry.className = 'link dynamic-resale-sheet__help';
+    helpEntry.href = 'https://mp.weixin.qq.com/s/H05MjX1OTmng8nXVl3GXrQ';
+    helpEntry.target = '_blank';
+    helpEntry.rel = 'noopener noreferrer';
+    helpEntry.setAttribute('aria-label', '加价卖说明');
+    helpEntry.innerHTML = '<i class="wego-iconfont-s icon-wenhao" aria-hidden="true"></i>';
+    header.appendChild(closeBtn);
+    header.appendChild(title);
+    header.appendChild(helpEntry);
+
+    // 售价输入区 + 实时收益
+    var priceSection = document.createElement('div');
+    priceSection.className = 'dynamic-resale-sheet__price-section';
+    priceSection.setAttribute('data-content-id', 'resale-price-input');
+
+    var priceLabel = document.createElement('div');
+    priceLabel.className = 'dynamic-resale-sheet__label';
+    priceLabel.textContent = '我的售价';
+
+    var numberInput = document.createElement('div');
+    numberInput.className = 'number-input dynamic-resale-sheet__input';
+    var field = document.createElement('input');
+    field.type = 'text';
+    field.inputMode = 'numeric';
+    field.className = 'number-input__field';
+    field.value = String(recommendPrice);
+    field.setAttribute('aria-label', '我的售价');
+    var suffix = document.createElement('span');
+    suffix.className = 'number-input__suffix';
+    suffix.textContent = '¥';
+    numberInput.appendChild(field);
+    numberInput.appendChild(suffix);
+
+    var earnings = document.createElement('div');
+    earnings.className = 'dynamic-resale-sheet__earnings';
+    earnings.setAttribute('data-content-id', 'resale-earnings');
+
+    var fieldError = document.createElement('div');
+    fieldError.className = 'field-error dynamic-resale-sheet__field-error';
+
+    priceSection.appendChild(priceLabel);
+    priceSection.appendChild(numberInput);
+    priceSection.appendChild(earnings);
+    priceSection.appendChild(fieldError);
+
+    // 快捷加价区
+    var quickSection = document.createElement('div');
+    quickSection.className = 'dynamic-resale-sheet__quick-markup';
+    quickSection.setAttribute('data-content-id', 'resale-quick-markup');
+
+    var recommendCard = document.createElement('button');
+    recommendCard.type = 'button';
+    recommendCard.className = 'dynamic-resale-sheet__recommend is-selected';
+    recommendCard.innerHTML = ''
+      + '<span class="dynamic-resale-sheet__recommend-text">可修改你的售价，赚更多</span>'
+      + '<span class="dynamic-resale-sheet__recommend-rate">+' + (RECOMMEND_RATE * 100) + '%</span>';
+
+    var quickRow = document.createElement('div');
+    quickRow.className = 'dynamic-resale-sheet__quick-row';
+    var quickBtn = document.createElement('button');
+    quickBtn.type = 'button';
+    quickBtn.className = 'btn btn--weak btn--sm dynamic-resale-sheet__quick-btn';
+    quickBtn.textContent = '+' + (QUICK_RATE * 100) + '%';
+    var manualEntry = document.createElement('button');
+    manualEntry.type = 'button';
+    manualEntry.className = 'link dynamic-resale-sheet__manual';
+    manualEntry.textContent = '手动输入';
+    quickRow.appendChild(quickBtn);
+    quickRow.appendChild(manualEntry);
+
+    quickSection.appendChild(recommendCard);
+    quickSection.appendChild(quickRow);
+
+    // 底部说明
+    var bottomNote = document.createElement('div');
+    bottomNote.className = 'dynamic-resale-sheet__bottom-note';
+    bottomNote.setAttribute('data-content-id', 'resale-bottom-note');
+    bottomNote.textContent = '帮卖佣金仅自己可见，可放心分享';
+
+    // 主按钮
+    var submitAction = document.createElement('div');
+    submitAction.className = 'dynamic-resale-sheet__submit-action';
+    submitAction.setAttribute('data-content-id', 'resale-submit-action');
+    var submitBtn = document.createElement('button');
+    submitBtn.type = 'button';
+    submitBtn.className = 'btn btn--strong btn--lg dynamic-resale-sheet__submit-btn';
+    submitBtn.textContent = '帮卖并分享';
+    submitAction.appendChild(submitBtn);
+
+    // 可滚动内容区
+    var body = document.createElement('div');
+    body.className = 'dynamic-resale-sheet__body';
+    body.appendChild(priceSection);
+    body.appendChild(quickSection);
+    body.appendChild(bottomNote);
+
+    panel.appendChild(header);
+    panel.appendChild(body);
+    panel.appendChild(submitAction);
+    overlay.appendChild(panel);
+
+    var phoneScreen = document.querySelector('.phone-screen') || document.body;
+    phoneScreen.appendChild(overlay);
+
+    // 触发入场动画
+    requestAnimationFrame(function () {
+      overlay.classList.add('is-visible');
+    });
+
+    function validatePrice(value) {
+      if (!value) return { valid: false, msg: '请输入售价' };
+      if (!/^\d+$/.test(value)) return { valid: false, msg: '仅支持整数金额' };
+      var num = parseInt(value, 10);
+      if (num < productPrice) return { valid: false, msg: '不能低于商品售价 ¥' + productPrice };
+      if (num > maxPrice) return { valid: false, msg: '不能超过 ¥' + maxPrice };
+      return { valid: true, num: num };
+    }
+
+    function updateEarnings() {
+      var value = field.value.trim();
+      var result = validatePrice(value);
+      if (result.valid) {
+        numberInput.classList.remove('is-error');
+        fieldError.textContent = '';
+        earnings.textContent = '赚 ¥' + (result.num - productPrice);
+        earnings.classList.remove('is-hidden');
+        submitBtn.classList.remove('btn--disabled');
+        submitBtn.disabled = false;
+      } else {
+        numberInput.classList.add('is-error');
+        fieldError.textContent = result.msg;
+        earnings.classList.add('is-hidden');
+        submitBtn.classList.add('btn--disabled');
+        submitBtn.disabled = true;
+      }
+    }
+
+    function setPrice(num) {
+      field.value = String(num);
+      updateEarnings();
+    }
+
+    // 输入实时校验与收益更新
+    field.addEventListener('input', function () {
+      var cleaned = field.value.replace(/[^\d]/g, '');
+      if (cleaned !== field.value) field.value = cleaned;
+      recommendCard.classList.remove('is-selected');
+      quickBtn.classList.remove('is-selected');
+      updateEarnings();
+    });
+    field.addEventListener('focus', function () { numberInput.classList.add('is-focus'); });
+    field.addEventListener('blur', function () { numberInput.classList.remove('is-focus'); });
+
+    // 推荐加价卡
+    recommendCard.addEventListener('click', function () {
+      recommendCard.classList.add('is-selected');
+      quickBtn.classList.remove('is-selected');
+      setPrice(recommendPrice);
+    });
+
+    // 快捷按钮 +20%
+    quickBtn.addEventListener('click', function () {
+      quickBtn.classList.add('is-selected');
+      recommendCard.classList.remove('is-selected');
+      setPrice(quickPrice);
+    });
+
+    // 手动输入入口
+    manualEntry.addEventListener('click', function () {
+      recommendCard.classList.remove('is-selected');
+      quickBtn.classList.remove('is-selected');
+      field.focus();
+    });
+
+    // 关闭逻辑：左上角X + 点击遮罩；关闭后不保存未确认修改
+    function closeSheet() {
+      overlay.classList.add('is-closing');
+      overlay.classList.remove('is-visible');
+      setTimeout(function () {
+        if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      }, 250);
+    }
+    closeBtn.addEventListener('click', closeSheet);
+    overlay.addEventListener('click', function (event) {
+      if (event.target === overlay) closeSheet();
+    });
+
+    // 帮卖并分享：本次 stub 反馈，toast 后关闭
+    submitBtn.addEventListener('click', function () {
+      if (submitBtn.disabled) return;
+      closeSheet();
+      if (window.WegoApp && typeof window.WegoApp.toast === 'function') {
+        window.WegoApp.toast('已生成帮卖，进入分享');
+      }
+    });
+
+    // 初始化收益显示
+    updateEarnings();
   }
 
   function enhanceCard(card) {
@@ -220,7 +474,7 @@
     if (info) main.insertBefore(info, meta || null);
     if (meta) meta.remove();
 
-    main.appendChild(createActions());
+    main.appendChild(createActions(card));
   }
 
   function enhanceAll() {

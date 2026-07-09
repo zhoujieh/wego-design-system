@@ -48,7 +48,7 @@
     },
     "resale-sheet": {
       "page_goal": "设置帮卖售价并实时查看收益，确认后生成帮卖商品进入分享",
-      "page_pattern": "generic-mobile-task-page",
+      "page_pattern": "sheet-presentation-primitive",
       "layout_pattern": "sheet 内表单分组布局",
       "main_scroll_direction": "vertical（内容自适应，超高时面板内滚动）",
       "content_density": "comfortable",
@@ -193,10 +193,10 @@
       "applies_to": ["resale-sheet"],
       "component_pattern": "sheet-form-with-realtime-feedback",
       "matched_page_pattern": null,
-      "matched_blueprint": "generic-mobile-task-page",
+      "matched_blueprint": "sheet-presentation-primitive",
       "constraint_ref": null,
-      "reason": "加价卖半弹窗是 sheet presentation primitive 承载的二级表单：售价输入实时计算收益，快捷加价即时刷新输入框和收益，主操作底部收口；无精确 pagePattern，内容组织参考 generic-mobile-task-page 组件清单，展示方式由 sheet presentation primitive 约束，容器由场景级自写承载",
-      "rule_sources": ["uikit-plan.json.fallbackPageBlueprints[generic-mobile-task-page]", "uikit-plan.json.presentationPrimitives[sheet]", "interaction_spec.surfaces[resale-sheet].carrier=sheet"]
+      "reason": "加价卖半弹窗是 sheet primitive 承载的二级表单：售价输入实时计算收益，快捷加价即时刷新输入框和收益，主操作底部收口；无对应 pagePattern，由 sheet primitive + input/button/link 组件 + 场景级自写容器组合承接",
+      "rule_sources": ["uikit-plan.json.presentationPrimitives[sheet]", "interaction_spec.surfaces[resale-sheet].carrier=sheet"]
     }
   ],
   "page_presentation": {
@@ -256,9 +256,9 @@
       "match_status": "fallback",
       "matched_uikit": null,
       "matched_page_pattern": null,
-      "matched_blueprint": "generic-mobile-task-page",
+      "matched_blueprint": "sheet-presentation-primitive",
       "presentation_ref": "sheet",
-      "scene_fit_reason": "加价卖半弹窗是 sheet presentation primitive 承载的二级表单：包含金额输入、实时收益、快捷加价和底部主操作；现有 pagePattern 和 fallbackPageBlueprints 无 sheet 表单精确范式，内容组织参考 generic-mobile-task-page 的组件清单（input/button/link），展示方式由 sheet presentation primitive 约束，容器由场景级自写承载；modal 组件待补充，已记为 design_gap",
+      "scene_fit_reason": "加价卖半弹窗是 sheet primitive 承载的二级表单：包含金额输入、实时收益、快捷加价和底部主操作；现有 pagePattern（biz-rule-config/system-settings）和 fallbackPageBlueprints（mobile-host-entry/object-management-list-page/generic-mobile-task-page/selection-list-page）均不匹配表单型 sheet 表单场景，由 sheet primitive 约束 + input/button/link 组件 + 场景级自写容器组合承接；modal 组件待补充，已记为 design_gap",
       "component_mapping": [
         "resale-sheet-header",
         "resale-price-input",

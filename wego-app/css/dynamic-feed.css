@@ -372,3 +372,209 @@
     left: calc(var(--spacer-12) + 40px + var(--spacer-8));
   }
 }
+
+/* === 加价卖半弹窗：场景级自写容器，待 modal 组件上线后迁移 === */
+.dynamic-resale-sheet__overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-mask-light);
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease-enter);
+}
+
+.dynamic-resale-sheet__overlay.is-visible {
+  opacity: 1;
+}
+
+.dynamic-resale-sheet__overlay.is-closing {
+  transition: opacity var(--duration-normal) var(--ease-exit);
+}
+
+.dynamic-resale-sheet__panel {
+  width: 100%;
+  max-width: 670px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-16) var(--radius-16) 0 0;
+  transform: translateY(100%);
+  transition: transform var(--duration-normal) var(--ease-enter);
+  display: flex;
+  flex-direction: column;
+  max-height: 85vh;
+  overflow: hidden;
+}
+
+.dynamic-resale-sheet__overlay.is-visible .dynamic-resale-sheet__panel {
+  transform: translateY(0);
+}
+
+.dynamic-resale-sheet__overlay.is-closing .dynamic-resale-sheet__panel {
+  transition: transform var(--duration-normal) var(--ease-exit);
+}
+
+/* sheet 头部：左关闭X + 标题 + 右帮助入口? */
+.dynamic-resale-sheet__header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-8);
+  padding: var(--spacer-16) var(--spacer-16) var(--spacer-12);
+}
+
+.dynamic-resale-sheet__close {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dynamic-resale-sheet__title {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  color: var(--text-default);
+  font-size: var(--body-lg-font-size, 18px);
+  font-weight: var(--font-weight-medium, 500);
+  line-height: 1.4;
+}
+
+.dynamic-resale-sheet__help {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: 18px;
+}
+
+/* 可滚动内容区 */
+.dynamic-resale-sheet__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 var(--spacer-16) var(--spacer-16);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-16);
+}
+
+/* 售价输入区 */
+.dynamic-resale-sheet__price-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-8);
+}
+
+.dynamic-resale-sheet__label {
+  color: var(--text-secondary);
+  font-size: var(--body-sm-font-size, 14px);
+  line-height: 1.4;
+}
+
+.dynamic-resale-sheet__input {
+  width: 100%;
+}
+
+.dynamic-resale-sheet__earnings {
+  color: var(--text-brand);
+  font-size: var(--body-md-font-size, 16px);
+  font-weight: var(--font-weight-medium, 500);
+  line-height: 1.4;
+}
+
+.dynamic-resale-sheet__earnings.is-hidden {
+  display: none;
+}
+
+.dynamic-resale-sheet__field-error {
+  color: var(--status-danger-default);
+  font-size: var(--body-xs-font-size, 12px);
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 快捷加价区 */
+.dynamic-resale-sheet__quick-markup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-12);
+}
+
+.dynamic-resale-sheet__recommend {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacer-12);
+  padding: var(--spacer-12) var(--spacer-16);
+  border: 1px solid var(--border-neutral-l2);
+  border-radius: var(--radius-8);
+  background: var(--bg-surface);
+  text-align: left;
+}
+
+.dynamic-resale-sheet__recommend.is-selected {
+  border-color: var(--border-brand);
+}
+
+.dynamic-resale-sheet__recommend-text {
+  min-width: 0;
+  color: var(--text-default);
+  font-size: var(--body-md-font-size, 16px);
+  line-height: 1.4;
+}
+
+.dynamic-resale-sheet__recommend-rate {
+  flex: 0 0 auto;
+  color: var(--text-brand);
+  font-size: var(--body-md-font-size, 16px);
+  font-weight: var(--font-weight-medium, 500);
+}
+
+.dynamic-resale-sheet__quick-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-16);
+}
+
+.dynamic-resale-sheet__quick-btn.is-selected {
+  color: var(--text-brand);
+  border-color: var(--border-brand);
+}
+
+.dynamic-resale-sheet__manual {
+  flex: 0 0 auto;
+}
+
+/* 底部说明 */
+.dynamic-resale-sheet__bottom-note {
+  color: var(--text-secondary);
+  font-size: var(--body-xs-font-size, 12px);
+  line-height: 1.5;
+}
+
+/* 主按钮区：固定底部，含安全区 */
+.dynamic-resale-sheet__submit-action {
+  flex: 0 0 auto;
+  padding: var(--spacer-12) var(--spacer-16);
+  padding-bottom: calc(var(--spacer-12) + var(--safe-area-bottom));
+  border-top: 0.5px solid var(--border-neutral-l2);
+}
+
+.dynamic-resale-sheet__submit-btn {
+  width: 100%;
+}
