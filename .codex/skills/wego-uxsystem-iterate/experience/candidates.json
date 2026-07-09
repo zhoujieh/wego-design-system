@@ -87,10 +87,11 @@
         "confirmed_at": "2026-07-08T00:00:00.000Z",
         "file": ".codex/skills/wego-design/uikit-plan.json",
         "field": "paradigmSelectionPriority",
-        "rule_id": "paradigm-selection-by-interaction-mode"
+        "rule_id": "paradigm-selection-by-interaction-mode",
+        "migration_exception_reason": "该候选是在三次阈值守门校验强化前已经由用户确认并落地到正式权威来源的历史升级记录。保留 promoted 状态用于追踪已落地规则，但后续新候选不得使用该例外；新 promoted 候选必须 occurrence_count >= threshold。"
       },
       "created_at": "2026-07-08T00:00:00.000Z",
-      "updated_at": "2026-07-08T00:00:00.000Z"
+      "updated_at": "2026-07-09T00:00:00.000Z"
     },
     {
       "id": "exp-browser-layout-validation-required",
