@@ -91,6 +91,48 @@
       },
       "created_at": "2026-07-08T00:00:00.000Z",
       "updated_at": "2026-07-08T00:00:00.000Z"
+    },
+    {
+      "id": "exp-browser-layout-validation-required",
+      "normalized_key": "static-rule-check-cannot-replace-browser-layout-validation",
+      "title": "静态规则检查不能替代浏览器端真实布局验证",
+      "status": "observing",
+      "occurrence_count": 1,
+      "threshold": 3,
+      "primary_owner": "wego-ux",
+      "secondary_owners": ["wego-tests"],
+      "ownership_reason": "问题最早产生在 wego-ux 实现完成后的验证环节。validate-wego-design.mjs 和 specs.mjs check 只验证规则文档一致性、Token/组件注册和守门规则，完全不渲染 HTML/CSS。agent 在 wego-ux 阶段结束后，仅凭静态检查通过就判定实现完成并提交，导致布局错误、CSS 覆盖冲突、响应式断点失效和组件契约偏差全部遗漏。",
+      "problem_pattern": "代码修改后仅运行静态规则检查（validate-wego-design.mjs / specs.mjs check）就判定实现正确并提交，未用浏览器打开真实页面验证布局、间距、grid/flex 行为、响应式断点和组件实际渲染。静态检查 0 错误不代表页面正确。",
+      "scene_evidence": [
+        {
+          "date": "2026-07-09",
+          "scene": "动态页列表展示优化",
+          "summary": "第一轮提交时 validate-wego-design.mjs 0 错误 0 警告，但 agent-browser 真实渲染后发现 4 个严重漏洞：(1) 动态页默认空态，所有布局增强代码从未执行；(2) products.css 的 display:flex 覆盖了 dynamic-feed.css 的 display:grid，左右布局失效；(3) 375px 响应式断点因特异性不足被覆盖；(4) avatar 实际渲染 48px 与组件契约 avatar--40 不一致。",
+          "source": "用户指出：最基本的布局验证都没有测试到，有很大漏洞"
+        }
+      ],
+      "applies_when_candidates": [
+        "任何涉及 .css 文件修改、.js DOM 注入、组件类使用、响应式断点或布局结构的改动",
+        "wego-ux 实现完成后准备提交前",
+        "修改了 grid/flex 布局、padding/gap、position、z-index 等影响视觉排版的属性"
+      ],
+      "avoid_when_candidates": [
+        "纯文本/文案修改，不涉及任何样式或 DOM 结构",
+        "纯逻辑修改（如事件处理、状态切换），不涉及视觉渲染",
+        "已有自动化视觉回归测试覆盖且测试已通过的改动"
+      ],
+      "expected_rule_target": {
+        "file": "AGENTS.md",
+        "field": "提交前验证要求 / wego-ux 实现完成后的验收动作"
+      },
+      "runtime_reachability": {
+        "consumer_skill": "wego-ux（实现阶段判定是否完成）和 wego-tests（验收阶段检查）",
+        "output_field": "实现完成后的验证动作列表",
+        "downstream_consumer": "wego-ux 偏差判定结果 → wego-tests 验收报告",
+        "acceptance_check": "agent-browser 自动化布局验证（检查 grid/flex、分割线位置、组件渲染、响应式断点）或人工本地浏览器检查"
+      },
+      "created_at": "2026-07-09T00:00:00.000Z",
+      "updated_at": "2026-07-09T00:00:00.000Z"
     }
   ]
 }
