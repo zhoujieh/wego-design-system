@@ -303,7 +303,7 @@
       "../../../wego-app/css/app.css",
       "../../../wego-app/js/app.js"
     ],
-    "rule": "固定宿主 App 正式维护在 wego-app/，wego-ux/templates/host-shell.* 只作为宿主基线来源，不属于 wego-design 的 UI Kit 或 pagePattern。若 page_spec 声明 app_target + host_container + route_id，wego-design 只为 host-entry 产出入口/结果回填和打开方式依据；wego-ux 只按 route_id 增量更新 routes.js、入口、业务场景和必要交互。",
+    "rule": "固定宿主 App 正式维护在 wego-app/，wego-ux/templates/host-shell.* 只作为宿主基线来源，不属于 wego-design 的 UI Kit 或 pagePattern。若 page_spec 声明 app_target + host_container + route_id，wego-design 只为 host-entry 或 host-tab 产出入口/结果回填和打开方式依据；wego-ux 只按 route_id 增量更新 routes.js、入口、业务场景和必要交互。",
     "fixedTabs": [
       {
         "id": "dongtai",
@@ -335,7 +335,8 @@
       "iterationRule": "同一业务场景后续迭代按 route_id 定位入口、routes.js 和 scene.js，不重复套壳、不重复插入入口",
       "entryTypes": [
         "cell",
-        "grid-entry"
+        "grid-entry",
+        "host-tab"
       ],
       "entryHierarchy": {
         "rule": "当 page_spec.host_container.leaf_level > 1 且 page_surfaces[host-entry] 已声明父子入口层级时，wego-ux 必须按声明生成视觉从属，不得与一级入口 DOM 平级只靠 data-parent-entry 数据标记",
@@ -406,7 +407,7 @@
   "pagePresentationBindingRules": {
     "fieldMapping": "匹配 pagePattern 后，必须将 presentation、transition、dismissAction、overlayLevel、coversTabBar 五个字段映射为 design_consumption_plan.page_presentation 输出（presentation→type，dismissAction→dismiss_action，overlayLevel→overlay_level，coversTabBar→covers_tab_bar）；若 pagePattern 未声明 presentation，默认 type=push、overlay_level=inline、covers_tab_bar=true。",
     "traceability": "page_presentation 必须能从业务主 surface 的 matched_page_pattern 和 presentation_ref 反查来源，不能只给顶层字段而不说明命中的页面范式。",
-    "coversTabBarConstraint": "wego-app/scenes/ 下业务场景的 page_presentation.covers_tab_bar 必须为 true；不得输出 false，除非 surface 角色为 host-entry inline grid 入口。",
+    "coversTabBarConstraint": "wego-app/scenes/ 下业务场景的 page_presentation.covers_tab_bar 必须为 true；不得输出 false，除非 surface 角色为 host-entry inline grid 入口，或 host_container.entry_type 为 host-tab 且页面直接挂在固定宿主 Tab 面板内。",
     "compositionTraceability": "命中 pagePattern 的 compositionConstraints 时，component_mapping 必须标注所选组合、对应规则 ID 和 trigger，形成可追溯链路。"
   },
   "paradigmSelectionPriority": {

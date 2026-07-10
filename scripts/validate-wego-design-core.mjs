@@ -246,9 +246,9 @@ function hasResponsivePreviewShellRule(text) {
 }
 
 const SURFACE_MATCH_STATUSES = new Set(['exact', 'near', 'fallback', 'gap']);
-const PRESENTATION_TYPES = new Set(['push', 'modal', 'sheet', 'full-screen-modal']);
+const PRESENTATION_TYPES = new Set(['push', 'modal', 'sheet', 'full-screen-modal', 'host-tab', 'host-fixed-tab']);
 const HOST_CONTAINER_TABS = new Set(['my', 'workspace', 'dongtai', 'xiaoxi', 'haoyou']);
-const HOST_ENTRY_TYPES = new Set(['cell', 'grid-entry']);
+const HOST_ENTRY_TYPES = new Set(['cell', 'grid-entry', 'host-tab']);
 
 const INTERNAL_PROTOTYPE_COPY_PATTERNS = [
   /工作流验证任务/,
@@ -1444,7 +1444,7 @@ function checkPrototypeSurfaceDesigns(context) {
     const presentationType = plan.page_presentation?.type;
     if (presentationType && !PRESENTATION_TYPES.has(presentationType)) {
       add('error', 'prototype.presentation_type_invalid',
-        `page_presentation.type 必须是 push/modal/sheet/full-screen-modal，当前为 ${presentationType}`,
+        `page_presentation.type 必须是 push/modal/sheet/full-screen-modal/host-tab/host-fixed-tab，当前为 ${presentationType}`,
         planPath);
     }
     const surfaces = Array.isArray(plan.surface_designs) ? plan.surface_designs : null;
@@ -1563,7 +1563,7 @@ function checkPrototypeSurfaceDesigns(context) {
           }
           if (!HOST_ENTRY_TYPES.has(hostContainer.entry_type)) {
             add('error', 'prototype.host_container_entry_type_invalid',
-              'host_container.entry_type 必须为 cell 或 grid-entry',
+              'host_container.entry_type 必须为 cell、grid-entry 或 host-tab',
               specPath);
           }
           if (typeof hostContainer.needs_host_entry_surface !== 'boolean') {
@@ -2359,7 +2359,10 @@ function checkInteractionSpecAndDesignPlanReferences(context) {
     const decisions = plan.flow_to_surface_decisions || [];
     const coveredNodeIds = new Set();
     for (const decision of decisions) {
-      for (const ref of (decision?.node_refs || [])) {
+      const nodeRefs = Array.isArray(decision?.node_refs)
+        ? decision.node_refs
+        : (decision?.node_id ? [decision.node_id] : []);
+      for (const ref of nodeRefs) {
         coveredNodeIds.add(ref);
         if (ref && !nodeIds.has(ref)) {
           add('error', 'plan.decision_node_ref_unknown',
@@ -2367,9 +2370,10 @@ function checkInteractionSpecAndDesignPlanReferences(context) {
             designPlanPath);
         }
       }
-      if (decision?.surface_ref && !surfaceIds.has(decision.surface_ref)) {
+      const surfaceRef = decision?.surface_ref || decision?.surface_id;
+      if (surfaceRef && !surfaceIds.has(surfaceRef)) {
         add('error', 'plan.decision_surface_ref_unknown',
-          `flow_to_surface_decisions 引用了不存在的 surface_id：${decision.surface_ref}`,
+          `flow_to_surface_decisions 引用了不存在的 surface_id：${surfaceRef}`,
           designPlanPath);
       }
     }

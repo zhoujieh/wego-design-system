@@ -241,9 +241,7 @@
       + '<section class="merchant-workbench-page" data-bg="page" data-surface-id="merchant-workbench-main">'
       +   '<div class="navbar">'
       +     '<div class="navbar__body">'
-      +       '<div class="navbar__left">'
-      +         '<div class="navbar__left-btn" data-action="back" role="button" aria-label="返回"><i class="wego-iconfont-s icon-fanhui"></i></div>'
-      +       '</div>'
+      +       '<div class="navbar__left"></div>'
       +       '<div class="navbar__center"><span class="navbar__title">商家工作台</span></div>'
       +       '<div class="navbar__right">'
       +         '<button type="button" class="navbar__action" data-action="refresh" aria-label="刷新数据"><i class="wego-iconfont-s icon-shuaxin"></i></button>'
@@ -279,10 +277,6 @@
       if (!target) return;
       var action = target.dataset.action;
 
-      if (action === 'back') {
-        ctx.back();
-        return;
-      }
       if (action === 'refresh') {
         var label = root.querySelector('[data-refresh-label]');
         if (label) label.textContent = '刚刚更新';
@@ -311,9 +305,9 @@
     routeId: 'workspace-merchant-workbench',
     title: '商家工作台',
     presentation: {
-      type: 'push',
-      transition: 'slide-left',
-      coversTabBar: true
+      type: 'host-tab',
+      transition: 'none',
+      coversTabBar: false
     },
     template: template(),
     init: bind

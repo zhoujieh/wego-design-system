@@ -13,6 +13,12 @@
   var validTabs = new Set(panels.map(function (panel) { return panel.dataset.hostTab; }));
   var routes = Array.isArray(window.WEGO_APP_ROUTES) ? window.WEGO_APP_ROUTES : [];
   var routeConfigs = new Map(routes.map(function (route) { return [route.routeId, route]; }));
+  var hostTabSceneRoutes = new Map();
+  routes.forEach(function (route) {
+    if (route && route.routeId && route.entry && route.entry.type === 'host-tab' && route.entry.tab) {
+      hostTabSceneRoutes.set(route.entry.tab, route);
+    }
+  });
   var scenes = new Map();
   var loadingScripts = new Map();
   var loadedStyles = new Set();
@@ -66,6 +72,7 @@
       var iconName = (img && img.dataset.tabIcon) || tabIconNames[trigger.dataset.hostTabTrigger];
       if (img && iconName) img.src = iconSrcFor(img, iconName, active);
     });
+    mountHostTabScene(nextTab);
   }
 
   function routeFromHash() {
@@ -210,6 +217,29 @@
       dialog: dialog,
       updateEntrySummary: updateEntrySummary
     };
+  }
+
+  function mountHostTabScene(tab) {
+    var config = hostTabSceneRoutes.get(tab);
+    if (!config) return;
+    var panel = document.querySelector('[data-host-tab="' + CSS.escape(tab) + '"]');
+    if (!panel) return;
+    if (panel.dataset.hostSceneRouteId === config.routeId) return;
+    ensureStyle(config.style);
+    ensureScript(config.routeId, config.script).then(function () {
+      var scene = scenes.get(config.routeId);
+      if (!scene) {
+        toast('功能开发中');
+        return;
+      }
+      renderTemplate(panel, scene.template);
+      panel.classList.remove('host-shell-page__panel--blank');
+      panel.dataset.hostSceneRouteId = config.routeId;
+      if (typeof scene.init === 'function') scene.init(sceneContext(scene, panel));
+      bindRouteEntries(panel);
+    }).catch(function () {
+      toast('场景脚本加载失败');
+    });
   }
 
   function openPushScene(scene) {
@@ -735,6 +765,12 @@
 
   function openScene(scene) {
     var presentation = normalizePresentation(scene);
+    if (presentation.type === 'host-tab') {
+      var config = routeConfigs.get(scene.routeId);
+      var tab = config && config.entry && config.entry.tab;
+      if (tab) setActiveTab(tab);
+      return;
+    }
     if (presentation.type === 'push') {
       closeOverlay();
       openPushScene(scene);
@@ -805,6 +841,7 @@
   function mountRouteEntries() {
     routes.forEach(function (route) {
       if (!route || !route.routeId) return;
+      if (route.entry && route.entry.type === 'host-tab') return;
       if (document.querySelector('[data-route-id="' + CSS.escape(route.routeId) + '"]')) return;
       var entry = route.entry || {};
       var groupName = entry.group || (entry.tab === 'workspace' ? 'workspace-tools' : 'my-settings');

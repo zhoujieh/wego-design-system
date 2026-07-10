@@ -134,7 +134,7 @@ window.WegoApp.registerScene({
 ```
 
 - `routeId`、`presentation` 必须与设计计划一致。
-- 场景级页面默认 `coversTabBar: true`；只有宿主内嵌 `host-entry` 可为 `false`。
+- 场景级页面默认 `coversTabBar: true`；只有宿主内嵌 `host-entry` 或直接挂在固定 Tab 面板内的 `host-tab` 可为 `false`。
 - `scene.html` 只能作为源码参考，不得在运行时通过 `fetch()` 或 XHR 加载。
 - 业务模板放在 `scene.js` 字符串或宿主可直接加载的 `<template>` 中。
 
@@ -160,6 +160,7 @@ window.WegoApp.registerScene({
 
 - 同一 `route_id` 只能注册一次。
 - 入口层级必须与 `host_container` 和 `page_surfaces[host-entry]` 一致。
+- 当 `host_container.entry_type = host-tab` 时，该 route 不生成工作台/我的等宿主入口列表项；`routes.js` 的 `entry.type` 写为 `host-tab`，由宿主在切换对应固定 Tab 时直接加载场景内容。
 - 入口点击必须在 `.phone-screen` 内打开场景，禁止顶层浏览器离开 `wego-app/index.html`。
 
 ## 页面打开方式
@@ -169,6 +170,7 @@ window.WegoApp.registerScene({
 | type | 实现语义 | navbar 左侧 |
 | --- | --- | --- |
 | `push` | App 内栈式层级页面 | `back-icon` |
+| `host-tab` | 固定 Tab 面板内直接展示页面 | 无返回按钮 |
 | `modal` | 当前场景上的轻量对话层 | 按契约使用关闭或取消 |
 | `sheet` | 底部进入的选择或操作层 | 按契约使用关闭 |
 | `full-screen-modal` | 覆盖手机屏的复杂编辑流程 | `text-cancel` 或 `close-icon` |

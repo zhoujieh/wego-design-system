@@ -2,7 +2,7 @@
   "schemaVersion": 3,
   "matched_uikit": null,
   "scene_fit_reason": "商家工作台是综合经营首页，现有 UI Kit 没有精确看板范式；可由 generic-mobile-task-page fallback、已注册 navbar/card/cell/tag/badge/button/toast 和业务作用域布局安全承接。",
-  "navigation_pattern": "工作台 Tab 直挂页面，标题居中，右侧刷新",
+  "navigation_pattern": "push 页面，左侧返回，标题居中",
   "layout_pattern": "卡片模式 M2",
   "interaction_pattern": "单页经营概览 + 入口跳转或 toast 占位反馈",
   "complexity_level": "complex",
@@ -75,7 +75,7 @@
       "applies_to": [
         "merchant-workbench-main"
       ],
-      "component_pattern_ref": "navbar-host-tab"
+      "component_pattern_ref": "navbar-push"
     },
     {
       "region_id": "dashboard-region",
@@ -140,14 +140,14 @@
   ],
   "component_patterns": [
     {
-      "pattern_id": "navbar-host-tab",
+      "pattern_id": "navbar-push",
       "components": [
         "navbar"
       ],
       "applies_to": [
         "merchant-workbench-main"
       ],
-      "description": "工作台 Tab 内页面不显示返回按钮，标题为商家工作台，右侧刷新数据。"
+      "description": "push 页面使用 back-icon navbar，标题为商家工作台，右侧刷新数据。"
     },
     {
       "pattern_id": "card-metric-grid",
@@ -226,9 +226,9 @@
     {
       "node_id": "enter-workbench",
       "surface_id": "merchant-workbench-main",
-      "carrier": "host-tab-page",
-      "presentation": "host-tab",
-      "reason": "底部工作台 Tab 直接展示完整场景页"
+      "carrier": "standalone-page",
+      "presentation": "push",
+      "reason": "工作台入口打开完整场景页"
     },
     {
       "node_id": "scan-business-data",
@@ -368,12 +368,12 @@
     "应用入口图标尺寸"
   ],
   "page_presentation": {
-    "type": "host-tab",
-    "transition": "none",
-    "dismiss_action": "switch-tab",
-    "overlay_level": "host-tab-panel",
-    "covers_tab_bar": false,
-    "source": "用户反馈：工作台应直接挂在工作 Tab 下，而不是独立二级页面"
+    "type": "push",
+    "transition": "slide-left",
+    "dismiss_action": "back-button",
+    "overlay_level": "scene-stack",
+    "covers_tab_bar": true,
+    "source": ".codex/skills/wego-design/uikit-plan.json:fallbackPageBlueprints[generic-mobile-task-page] with default push scene behavior"
   },
   "rule_sources_used": [
     {
@@ -384,10 +384,10 @@
       ]
     },
     {
-      "file": ".codex/skills/wego-design/uikit-plan.json",
-      "field": "appHostBinding.entryTypes[host-tab], appHostBinding.coversTabBarConstraint",
+      "file": ".codex/skills/wego-design/components/navbar.json",
+      "field": "representativeVariants[leftControl=back-icon]",
       "supports": [
-        "工作台 Tab 页面直接挂在固定宿主 Tab 面板内，不覆盖底部导航"
+        "push 页面左侧返回导航"
       ]
     },
     {

@@ -41,10 +41,10 @@
   },
   "host_container": {
     "tab": "workspace",
-    "entry_label": "工作台",
+    "entry_label": "商家工作台",
     "subentry_label": "",
     "leaf_level": 1,
-    "entry_type": "host-tab",
+    "entry_type": "grid-entry",
     "needs_host_entry_surface": false
   },
   "prototype_target": {
@@ -62,7 +62,7 @@
     {
       "entry_id": "workspace-tab-entry",
       "tab": "workspace",
-      "label": "工作台",
+      "label": "商家工作台",
       "route_id": "workspace-merchant-workbench"
     }
   ],
@@ -92,7 +92,7 @@
   "flow_nodes": [
     {
       "node_id": "enter-workbench",
-      "purpose": "切换到工作台 Tab 后直接展示商家工作台首页",
+      "purpose": "从工作台 Tab 进入商家工作台首页",
       "surface_ref": "merchant-workbench-main",
       "inputs": [
         "workspace-tab-entry"
@@ -158,7 +158,7 @@
     {
       "surface_id": "merchant-workbench-main",
       "role": "primary-task-page",
-      "carrier": "host-tab-page",
+      "carrier": "standalone-page",
       "node_refs": [
         "enter-workbench",
         "scan-business-data",
@@ -282,7 +282,7 @@
     {
       "transition_id": "open-workbench-route",
       "from": "enter-workbench",
-      "trigger": "点击底部工作台 Tab 或访问 hash route",
+      "trigger": "点击工作台 Tab 下的商家工作台入口或访问 hash route",
       "to": "scan-business-data",
       "data_in": [
         "workspace-tab-entry"
@@ -354,7 +354,7 @@
     {
       "node_id": "enter-workbench",
       "depth": "functional",
-      "reason": "必须能从底部工作台 Tab 直接进入页面"
+      "reason": "必须能从宿主工作台入口打开页面"
     },
     {
       "node_id": "scan-business-data",

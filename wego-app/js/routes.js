@@ -34,10 +34,9 @@ window.WEGO_APP_ROUTES = [
     style: './scenes/商家工作台/scene.css',
     entry: {
       tab: 'workspace',
-      group: 'workspace-tools',
+      group: 'workspace-tab',
       label: '商家工作台',
-      type: 'grid-entry',
-      icon: './lib/icons/app-center/数据中心.svg'
+      type: 'host-tab'
     }
   },
   {
