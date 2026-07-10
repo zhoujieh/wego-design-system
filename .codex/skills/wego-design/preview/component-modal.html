@@ -113,6 +113,7 @@
   pointer-events: auto;
   visibility: visible;
   opacity: 1;
+  transition: opacity var(--duration-normal) var(--ease-enter);
 }
 .modal[data-state="closed"] {
   visibility: hidden;
@@ -490,6 +491,39 @@
     </div>
   </div>
 
+  <!-- Stage 5.5: frame · default · double-h -->
+  <div class="pv-section__title">frame · default 下箭头 · 双按钮</div>
+  <div class="demo-stage">
+    <div class="demo-stage-label">frame · default 下箭头 · double-h（默认模式）</div>
+    <div class="modal modal--frame" role="dialog" aria-modal="true" data-state="open">
+      <div class="modal__panel">
+        <div class="modal__title modal__title--default">
+          <div class="navbar">
+            <div class="navbar__body">
+              <div class="navbar__left">
+                <div class="navbar__left-btn navbar__left-btn--circle"><i class="wego-iconfont-s icon-xiajiantou16"></i></div>
+              </div>
+              <div class="navbar__center"><span class="navbar__title">编辑价格</span></div>
+              <div class="navbar__right"></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal__body">
+          <div class="demo-custom-row"><span>原价</span><span>¥128</span></div>
+          <div class="demo-custom-row"><span>售价</span><span>¥158</span></div>
+          <div class="demo-custom-row"><span>佣金</span><span>¥30</span></div>
+        </div>
+        <div class="modal__actions">
+          <div class="modal__action-gradient"></div>
+          <div class="modal__buttons">
+            <button class="btn btn--weak btn--lg">取消</button>
+            <button class="btn btn--strong btn--lg">确定</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Stage 6: frame · info · none · safe-bottom -->
   <div class="pv-section__title">frame · info · 自定义内容 · 无操作区</div>
   <div class="demo-stage">
@@ -655,6 +689,32 @@
         </div>
         <div class="modal__body">
           <div class="demo-custom-placeholder">全屏自定义内容区（可放置表单、列表、设置项等）</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stage 13: fullscreen · default mode-b -->
+  <div class="pv-section__title">fullscreen · default 关闭+图标</div>
+  <div class="demo-stage">
+    <div class="demo-stage-label">fullscreen · default close-icon + icon · 模式 B</div>
+    <div class="modal modal--fullscreen" role="dialog" aria-modal="true" data-state="open">
+      <div class="modal__panel">
+        <div class="modal__title modal__title--default">
+          <div class="navbar">
+            <div class="navbar__body">
+              <div class="navbar__left">
+                <div class="navbar__left-btn navbar__left-btn--circle"><i class="wego-iconfont-s icon-guanbi" aria-hidden="true"></i></div>
+              </div>
+              <div class="navbar__center"><span class="navbar__title">选择图片</span></div>
+              <div class="navbar__right navbar__right--icon">
+                <div class="navbar__action"><i class="wego-iconfont-s icon-xiaochengxulianjie" aria-hidden="true"></i></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal__body">
+          <div class="demo-custom-placeholder">全屏浏览/选择内容区（图片选择、地址选择等）</div>
         </div>
       </div>
     </div>

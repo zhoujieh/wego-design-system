@@ -234,8 +234,8 @@
       + '<div class="navbar">'
       +   '<div class="navbar__body">' // navbar 组件契约要求 body 包装层
       +     '<div class="navbar__left">'
-      +       '<button type="button" class="navbar__left-btn navbar__left-btn--circle" aria-label="关闭">'
-      +         '<i class="wego-iconfont-s icon-guanbi-mian" aria-hidden="true"></i>'
+      +       '<button type="button" class="navbar__left-btn navbar__left-btn--circle" aria-label="收起">'
+      +         '<i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i>'
       +       '</button>'
       +     '</div>'
       +     '<div class="navbar__center">'

@@ -6,7 +6,7 @@
   "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "底部模态框，分为 title（info 大标题+辅助说明 / default NavBar 风格）、body（无默认间距的自定义内容区）、action（双按钮/单按钮横向/单按钮竖向+链接/取消栏/无操作区）三段式结构。支持 frame（自适应高度）、frame-x（70vh 可拖拽）、fullscreen（全屏）三种变体，以及二级嵌套 push 模式（最多 3 层）。覆盖 Figma ModalFrame、ModalFrameX 和全屏模态场景。",
+  "description": "底部模态框，分为 title（info 大标题+辅助说明 / default NavBar 风格）、body（无默认间距的自定义内容区）、action（双按钮/单按钮横向/单按钮竖向+链接/取消栏/无操作区）三段式结构。支持 frame（自适应高度）、frame-x（70vh 可拖拽）、fullscreen（全屏）三种变体，以及二级嵌套 push 模式（最多 3 层）。frame 变体默认使用 default 标题+下箭头，info 标题仅用于引导性内容展示场景。覆盖 Figma ModalFrame、ModalFrameX 和全屏模态场景。",
   "semanticTypeCandidates": [
     "bottom-modal",
     "modal-frame",
@@ -88,7 +88,7 @@
     {
       "name": "titleDefault",
       "selector": ".modal__title--default",
-      "role": "default 标题：NavBar 风格标题栏，复用 navbar 组件；5 种子模式（无操作/下箭头/关闭叉/取消+按钮/二级modal）；leftControl 使用圆形按钮 .navbar__left-btn--circle 或文字 .navbar__left-text"
+      "role": "default 标题：NavBar 风格标题栏，复用 navbar 组件；5 种子模式（无操作/下箭头/关闭叉/取消+按钮/二级modal）；leftControl 使用圆形按钮 .navbar__left-btn--circle 或文字 .navbar__left-text；frame/frame-x 非全屏模态下强制 --safe-area-top: 0px（不预留顶部状态栏高度），fullscreen 全屏模态下恢复 safe-area-top"
     },
     {
       "name": "body",
@@ -157,7 +157,8 @@
     "frame 变体：面板 max-height: calc(100vh-40px)，宽度 var(--modal-panel-width)（max 670px），圆角 16px 16px 0 0。",
     "frame-x 变体：面板固定高度 70vh，可拖拽至全屏（手势由宿主实现）。",
     "fullscreen 变体：面板 100dvh / 100%，无圆角，无遮罩，宽度 100%，max-width none。",
-    "title 区：info 模式为大标题+可选辅助说明（padding 32px 32px 0，gap 8px）；default 模式为完整 navbar 组件，5 种左右组合模式。",
+    "title 区：info 模式为大标题+可选辅助说明（padding 32px 32px 0，gap 8px），仅用于引导性内容展示场景（通常搭配图片或说明性文字）；default 模式为完整 navbar 组件，是 frame/frame-x 的默认标题模式；frame/frame-x 非全屏模态下 default title 强制 --safe-area-top: 0px（不预留顶部状态栏高度），fullscreen 全屏模态下恢复 safe-area-top。",
+    "default title 左侧图标默认规则：frame/frame-x 变体默认使用下箭头（icon-xiajiantou16），关闭叉（icon-guanbi）仅在用户明确指定的场景使用；fullscreen 模式 A 用取消文本，模式 B 用关闭叉。",
     "title 背景色跟随 panel（--modal-panel-bg），默认 bg-surface，业务可覆盖为 bg-page（灰色）。",
     "body 区：无默认 padding，flex:1 1 auto + min-height:0 + overflow-y:auto；有 action 时 padding-bottom: spacer-40（防渐变遮盖）；无 action 时需加 .modal__body--safe-bottom（40+safe-area）。",
     "action 区：flex-shrink:0 固定底部；上方有 40px 渐变蒙层（linear-gradient transparent → panel-bg）；支持 6 种布局：double-h/single-h/single-v/single-v-links/cancel/none。",
@@ -165,7 +166,8 @@
     "fullscreen 变体只允许两种 NavBar 组合：text-cancel+button（模式 A，表单类）或 close-icon（模式 B，浏览类）。",
     "全屏 fullscreen 变体的遮罩为透明，手机状态栏通过高 z-index 穿透透明层显示；NavBar 正常避让 safe-area-top。",
     "嵌套 push 模式：modal 内可 push 多层面板（最多 3 层），新面板从右侧滑入（translateX），返回时逐层退出；所有层级共享同一遮罩；蒙层点击从最顶层开始逐层关闭。",
-    "状态机通过 data-state='open'/'closed' 切换；嵌套 push 动画通过 data-push 属性控制。"
+    "状态机通过 data-state='open'/'closed' 切换；嵌套 push 动画通过 data-push 属性控制。",
+    "动画约定：蒙层（.modal）必须有 opacity 淡入淡出动画（进入和退出都要有）；面板（.modal__panel）只能有 translateY 位移动画，不能有 opacity 透明度变化。"
   ],
   "behavior": {
     "closeByMask": "默认 true，点击 .modal overlay 空白区域可关闭；嵌套模式时逐层关闭（最顶层优先）",
@@ -174,7 +176,7 @@
     "persistence": "阻断式常驻，不自动关闭",
     "conflicting": "同屏仅展示一个 modal，新 modal 出现时替换旧 modal",
     "position": "底部贴底悬浮（frame/frame-x），全屏覆盖（fullscreen）",
-    "animation": "面板 translateY(100%)→0（底部弹层进出）；嵌套 push 使用 translateX（右侧滑入/滑出）",
+    "animation": "蒙层（.modal）opacity 淡入淡出（进入 ease-enter，退出 ease-exit）；面板（.modal__panel）仅 translateY 位移动画（从底部 100% 滑入滑出），面板无 opacity 变化；嵌套 push 使用 translateX（右侧滑入/滑出）",
     "zIndex": "var(--z-modal)=600",
     "maxNestingDepth": 3,
     "frameX.enableDrag": "默认 true（向上拖扩展至全屏，H5 不生效；手势由宿主实现）",
@@ -190,7 +192,9 @@
     "用于底部弹层确认、表单、选择等场景；全屏变体用于编辑/设置等复杂流程。",
     "与 dialog 区别：dialog 居中轻量确认（2-3 文本按钮，300px），modal 底部带标题正文+填充按钮组件。",
     "与 actionsheet 区别：actionsheet 是操作列表+取消栏，modal 是标题正文+按钮或自定义内容。",
-    "info 标题用于简单确认/告知场景；default 标题用于需要 NavBar 的复杂模态（frame-x、fullscreen）。",
+    "info 标题仅用于引导性内容展示场景（通常搭配图片或说明性文字），普通业务弹层默认使用 default 标题。",
+    "frame/frame-x 变体默认使用 default 标题 + 下箭头（icon-xiajiantou16），关闭叉仅在用户明确指定场景时使用。",
+    "frame/frame-x 非全屏模态的 default title 不预留顶部状态栏高度（--safe-area-top: 0px），弹窗顶部直接显示标题栏；fullscreen 全屏模态的 default title 恢复 safe-area-top，避让手机状态栏。",
     "action 区按钮复用 button 组件 .btn--lg，强调级别 strong/weak/danger；同面板仅 1 个 strong/danger 主按钮。",
     "链接按钮复用 link 组件 .link（standalone），放在 .modal__links 或 .modal__action--link 内。",
     "fullscreen 变体 NavBar 仅限两种固定模式：text-cancel+button 或 close-icon。",
@@ -201,6 +205,9 @@
     "不要使用 dialog 的文本按钮（.dialog__btn），modal 操作区必须使用 button 组件 .btn。",
     "不要发明链接类，modal 链接按钮必须使用 link 组件 .link。",
     "不要发明标题栏类，default 标题必须使用 navbar 组件完整 .navbar 结构。",
+    "frame/frame-x 变体默认左侧为下箭头（icon-xiajiantou16），不要擅自改成关闭叉（icon-guanbi），除非用户明确指定。",
+    "default title 左侧图标必须使用已注册图标类名（icon-xiajiantou16 / icon-guanbi），不得使用不存在的图标（如 icon-guanbi-mian）。",
+    "不要给 modal 面板（.modal__panel）加 opacity 动画，面板只能有 translateY 位移动画；淡入淡出只在蒙层（.modal）上。",
     "不要在 modal CSS 内重写 .modal__body 内业务放入的已注册组件样式。",
     "不要超过 2 个主按钮（1 主操作 + 1 次操作）。",
     "不要持久化 modal 状态到 localStorage。",

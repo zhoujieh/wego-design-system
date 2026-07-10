@@ -357,7 +357,7 @@
       "id": "exp-shared-interaction-helper-for-component-composition",
       "normalized_key": "component-composition-must-reuse-shared-interaction-helper-instead-of-copying-simplified-behavior",
       "title": "组件组合中的公共交互行为必须复用共享 helper，禁止复制简化算法",
-      "status": "awaiting-confirmation",
+      "status": "promoted",
       "occurrence_count": 1,
       "threshold": 1,
       "primary_owner": "wego-uxsystem-iterate",
@@ -395,7 +395,13 @@
         "acceptance_check": "组件迭代完成前扫描是否存在复制的简化交互算法；涉及浮层/定位/测量时用浏览器验证单组件 Preview 和组合 Preview 命中同一 helper，并覆盖边缘位置、空间不足和关闭状态测量"
       },
       "created_at": "2026-07-10T00:00:00.000Z",
-      "updated_at": "2026-07-10T00:00:00.000Z"
+      "updated_at": "2026-07-10T00:00:00.000Z",
+      "formal_rule": {
+        "confirmed_at": "2026-07-10T00:00:00.000Z",
+        "file": ".codex/skills/wego-uxsystem-iterate/references/workflow.md",
+        "field": "已注册组件迭代标准步骤 / 组件迭代特有补充规则",
+        "rule_id": "component-composition-shared-interaction-helper"
+      }
     },
     {
       "id": "exp-local-server-must-auto-exit",

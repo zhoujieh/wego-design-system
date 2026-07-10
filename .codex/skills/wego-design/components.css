@@ -1164,6 +1164,7 @@
   pointer-events: auto;
   visibility: visible;
   opacity: 1;
+  transition: opacity var(--duration-normal) var(--ease-enter);
 }
 .modal[data-state="closed"] {
   visibility: hidden;

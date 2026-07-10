@@ -503,6 +503,8 @@ function tests() {
   for (const dir of SKILL_DIRS) expect(!fs.existsSync(path.join(ROOT, dir, 'SKILL.runtime.md')), `${dir} 不得存在 SKILL.runtime.md`);
   const workflow = text('.codex/skills/wego-uxsystem-iterate/references/workflow-iteration.md');
   expect(workflow.includes('每轮只记录一条经验') && workflow.includes('是否现在将其升级为正式规则') && workflow.includes('运行时可达性') && workflow.includes('快速迭代阶段当前阈值为 1'), '工作流门禁不完整');
+  const componentWorkflow = text('.codex/skills/wego-uxsystem-iterate/references/workflow.md');
+  expect(componentWorkflow.includes('共享 helper') && componentWorkflow.includes('不得复制简化算法') && componentWorkflow.includes('单组件 Preview 和组合 Preview'), '组件组合公共交互 helper 复用规则不完整');
   const rendered = render().docs;
   for (const [name, value] of Object.entries(rendered)) {
     expect(value.includes('## 什么时候使用') && value.includes('## 应该怎么做') && value.includes('## 不能怎么做') && value.includes('## 完成后如何检查'), `${name} 缺少统一的人话结构`);
