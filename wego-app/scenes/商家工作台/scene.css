@@ -47,15 +47,6 @@
   font-weight: var(--font-weight-medium);
 }
 
-.merchant-workbench__text-action {
-  border: 0;
-  padding: 0;
-  color: var(--text-link);
-  background: transparent;
-  font-size: var(--body-md-font-size);
-  line-height: var(--body-md-line-height);
-}
-
 .merchant-workbench__eyebrow {
   color: var(--text-secondary);
   font-size: var(--body-sm-font-size);
@@ -290,6 +281,28 @@
   font-size: var(--body-lg-font-size);
   line-height: var(--body-lg-line-height);
   font-weight: var(--font-weight-medium);
+}
+
+.app-center-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  background: var(--bg-page);
+}
+
+.app-center-page__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-12);
+  padding: var(--spacer-12) 16px calc(var(--spacer-40) + var(--safe-area-bottom, 0px));
+}
+
+.app-center-page__body .cell-group + .cell-group {
+  margin-top: 0;
 }
 
 @media (max-width: 360px) {

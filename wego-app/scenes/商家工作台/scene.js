@@ -8,15 +8,15 @@
     { id: 'staff-performance', label: '员工业绩', value: '76%', compare: '目标完成', trend: '5人达标', tone: 'neutral' }
   ];
 
-  var CORE_ACTIONS = [
+  var COMMON_APPS = [
     { label: '发布商品', icon: '发布.svg', route: 'quick-publish-product' },
     { label: '采购入库', icon: '采购单.svg', route: 'my-warehouse-management' },
     { label: '销售开单', icon: '销售单.svg', toast: '销售开单功能入口已预留' },
     { label: '查库存', icon: '库存管理.svg', route: 'my-inventory-management' },
     { label: '去发货', icon: '查订单-查快递.svg', toast: '待发货处理入口已预留' },
     { label: '发起直播', icon: '私域直播.svg', toast: '直播能力接入中' },
-    { label: 'AI 批量入库', icon: '批量发布.svg', toast: 'AI 批量入库识别能力接入中' },
-    { label: '自定义操作', icon: '规则中心.svg', toast: '常用操作配置入口已预留' }
+    { label: '库存管理', icon: '库存管理.svg', route: 'my-inventory-management' },
+    { label: '全部应用', icon: '规则中心.svg', action: 'open-app-center' }
   ];
 
   var ORDER_STATUS = [
@@ -85,13 +85,13 @@
   }
 
   function sectionHeader(title, actionText, action) {
-    var button = actionText
-      ? '<button type="button" class="merchant-workbench__text-action" data-action="' + esc(action) + '">' + esc(actionText) + '</button>'
+    var link = actionText
+      ? '<a class="link link--standalone" href="javascript:void(0)" data-action="' + esc(action) + '">' + esc(actionText) + '</a>'
       : '';
     return ''
       + '<div class="merchant-workbench__section-head">'
       +   '<h2 class="merchant-workbench__section-title">' + esc(title) + '</h2>'
-      +   button
+      +   link
       + '</div>';
   }
 
@@ -116,18 +116,23 @@
       +         '<div class="merchant-workbench__eyebrow">今日经营</div>'
       +         '<div class="merchant-workbench__summary-title">数据更新中</div>'
       +       '</div>'
-      +       '<span class="tag tag--20 tag--brand-stroke"><span class="tag__label" data-refresh-label>09:42 更新</span></span>'
+      +       '<span class="tag tag--20 tag--brand-stroke"><span class="tag__label">09:42 更新</span></span>'
       +     '</div>'
       +     '<div class="merchant-workbench-metrics">' + cards + '</div>'
       +   '</div>'
       + '</section>';
   }
 
-  function actionGridMarkup() {
-    var items = CORE_ACTIONS.map(function (item) {
-      var attrs = item.route
-        ? ' data-route="' + esc(item.route) + '"'
-        : ' data-toast="' + esc(item.toast) + '"';
+  function commonAppsMarkup() {
+    var items = COMMON_APPS.map(function (item) {
+      var attrs = '';
+      if (item.route) {
+        attrs = ' data-route="' + esc(item.route) + '"';
+      } else if (item.action) {
+        attrs = ' data-app-action="' + esc(item.action) + '"';
+      } else {
+        attrs = ' data-toast="' + esc(item.toast) + '"';
+      }
       return ''
         + '<button type="button" class="merchant-workbench-action" data-action="entry"' + attrs + '>'
         +   '<span class="merchant-workbench-action__icon"><img src="' + esc(iconPath(item.icon)) + '" alt=""></span>'
@@ -136,9 +141,9 @@
     }).join('');
 
     return ''
-      + '<section class="card card--surface merchant-workbench-card" data-content-id="core-actions">'
+      + '<section class="card card--surface merchant-workbench-card" data-content-id="common-apps">'
       +   '<div class="card__content">'
-      +     sectionHeader('核心操作', '配置', 'custom-actions')
+      +     sectionHeader('常用应用')
       +     '<div class="merchant-workbench-actions">' + items + '</div>'
       +   '</div>'
       + '</section>';
@@ -183,7 +188,60 @@
       + '</section>';
   }
 
-  function appCenterMarkup() {
+  function trafficMarkup() {
+    var rows = TRAFFIC.map(function (item) {
+      return ''
+        + '<div class="merchant-workbench-traffic__row">'
+        +   '<div>'
+        +     '<div class="merchant-workbench-traffic__label">' + esc(item.label) + '</div>'
+        +     '<div class="merchant-workbench-traffic__compare">' + esc(item.compare) + '</div>'
+        +   '</div>'
+        +   '<div class="merchant-workbench-traffic__value">'
+        +     '<strong>' + esc(item.value) + '</strong>'
+        +     '<span class="merchant-workbench-trend ' + (item.down ? 'merchant-workbench-trend--down' : 'merchant-workbench-trend--up') + '">' + esc(item.trend) + '</span>'
+        +   '</div>'
+        + '</div>';
+    }).join('');
+
+    return ''
+      + '<section class="card card--surface merchant-workbench-card" data-content-id="traffic-analytics">'
+      +   '<div class="card__content">'
+      +     sectionHeader('流量与传播')
+      +     '<div class="merchant-workbench-traffic">' + rows + '</div>'
+      +   '</div>'
+      + '</section>';
+  }
+
+  function workbenchTemplate() {
+    return ''
+      + '<section class="merchant-workbench-page" data-bg="page" data-surface-id="merchant-workbench-main">'
+      +   '<div class="navbar">'
+      +     '<div class="navbar__body">'
+      +       '<div class="navbar__left"></div>'
+      +       '<div class="navbar__center navbar__center--wide"><span class="navbar__title">商家工作台</span></div>'
+      +       '<div class="navbar__right navbar__right--wide navbar__right--icon" data-content-id="navbar-actions">'
+      +         '<div class="navbar__action" data-action="navbar-action" data-navbar-action="payment-code" role="button" aria-label="收款码">'
+      +           '<div class="navbar__action-icon"><i class="wego-iconfont-s icon-shoukuanma"></i></div>'
+      +           '<span class="navbar__action-label">收款码</span>'
+      +         '</div>'
+      +         '<div class="navbar__action" data-action="navbar-action" data-navbar-action="trade-settings" role="button" aria-label="交易设置">'
+      +           '<div class="navbar__action-icon"><i class="wego-iconfont-s icon-shezhi"></i></div>'
+      +           '<span class="navbar__action-label">交易设置</span>'
+      +         '</div>'
+      +       '</div>'
+      +     '</div>'
+      +   '</div>'
+      +   '<div class="merchant-workbench-page__body">'
+      +     dashboardMarkup()
+      +     commonAppsMarkup()
+      +     orderMarkup()
+      +     customerTodoMarkup()
+      +     trafficMarkup()
+      +   '</div>'
+      + '</section>';
+  }
+
+  function appCenterTemplate() {
     var groups = APP_GROUPS.map(function (group) {
       var rows = group.apps.map(function (app, index) {
         var divider = index === group.apps.length - 1 ? '' : ' cell--divider-right-edge';
@@ -209,57 +267,26 @@
         + '</div>';
     }).join('');
 
-    return '<section data-content-id="app-center">' + sectionHeader('应用中心') + groups + '</section>';
-  }
-
-  function trafficMarkup() {
-    var rows = TRAFFIC.map(function (item) {
-      return ''
-        + '<div class="merchant-workbench-traffic__row">'
-        +   '<div>'
-        +     '<div class="merchant-workbench-traffic__label">' + esc(item.label) + '</div>'
-        +     '<div class="merchant-workbench-traffic__compare">' + esc(item.compare) + '</div>'
-        +   '</div>'
-        +   '<div class="merchant-workbench-traffic__value">'
-        +     '<strong>' + esc(item.value) + '</strong>'
-        +     '<span class="merchant-workbench-trend ' + (item.down ? 'merchant-workbench-trend--down' : 'merchant-workbench-trend--up') + '">' + esc(item.trend) + '</span>'
-        +   '</div>'
-        + '</div>';
-    }).join('');
-
     return ''
-      + '<section class="card card--surface merchant-workbench-card" data-content-id="traffic-analytics">'
-      +   '<div class="card__content">'
-      +     sectionHeader('流量与传播')
-      +     '<div class="merchant-workbench-traffic">' + rows + '</div>'
-      +   '</div>'
-      + '</section>';
-  }
-
-  function template() {
-    return ''
-      + '<section class="merchant-workbench-page" data-bg="page" data-surface-id="merchant-workbench-main">'
+      + '<section class="app-center-page" data-bg="page" data-surface-id="app-center-page">'
       +   '<div class="navbar">'
       +     '<div class="navbar__body">'
-      +       '<div class="navbar__left"></div>'
-      +       '<div class="navbar__center"><span class="navbar__title">商家工作台</span></div>'
-      +       '<div class="navbar__right">'
-      +         '<button type="button" class="navbar__action" data-action="refresh" aria-label="刷新数据"><i class="wego-iconfont-s icon-shuaxin"></i></button>'
+      +       '<div class="navbar__left">'
+      +         '<button type="button" class="navbar__left-btn" data-action="back">'
+      +           '<i class="wego-iconfont-s icon-zuojiantou16"></i>'
+      +         '</button>'
       +       '</div>'
+      +       '<div class="navbar__center"><span class="navbar__title">全部应用</span></div>'
+      +       '<div class="navbar__right"></div>'
       +     '</div>'
       +   '</div>'
-      +   '<div class="merchant-workbench-page__body">'
-      +     dashboardMarkup()
-      +     actionGridMarkup()
-      +     orderMarkup()
-      +     customerTodoMarkup()
-      +     appCenterMarkup()
-      +     trafficMarkup()
+      +   '<div class="app-center-page__body">'
+      +     '<div data-content-id="app-center-full">' + groups + '</div>'
       +   '</div>'
       + '</section>';
   }
 
-  function bind(ctx) {
+  function bindWorkbench(ctx) {
     var root = ctx.root;
     var pageBody = root.querySelector('.merchant-workbench-page__body');
     if (pageBody) {
@@ -277,18 +304,46 @@
       if (!target) return;
       var action = target.dataset.action;
 
-      if (action === 'refresh') {
-        var label = root.querySelector('[data-refresh-label]');
-        if (label) label.textContent = '刚刚更新';
-        ctx.toast('今日经营数据已更新');
-        return;
-      }
-      if (action === 'custom-actions') {
-        ctx.toast('常用操作配置入口已预留');
+      if (action === 'navbar-action') {
+        var navbarAction = target.dataset.navbarAction;
+        if (navbarAction === 'payment-code') {
+          ctx.toast('功能开发中');
+          return;
+        }
+        if (navbarAction === 'trade-settings') {
+          ctx.navigate('my-trade-settings');
+          return;
+        }
         return;
       }
       if (action === 'all-orders') {
         ctx.toast('全部销售单入口已预留');
+        return;
+      }
+      if (action === 'entry') {
+        if (target.dataset.route) {
+          ctx.navigate(target.dataset.route);
+          return;
+        }
+        if (target.dataset.appAction === 'open-app-center') {
+          ctx.navigate('workspace-app-center');
+          return;
+        }
+        ctx.toast(target.dataset.toast || '功能入口已预留');
+      }
+    });
+  }
+
+  function bindAppCenter(ctx) {
+    var root = ctx.root;
+
+    root.addEventListener('click', function (event) {
+      var target = event.target.closest('[data-action]');
+      if (!target) return;
+      var action = target.dataset.action;
+
+      if (action === 'back') {
+        ctx.back();
         return;
       }
       if (action === 'entry') {
@@ -309,7 +364,19 @@
       transition: 'none',
       coversTabBar: false
     },
-    template: template(),
-    init: bind
+    template: workbenchTemplate(),
+    init: bindWorkbench
+  });
+
+  window.WegoApp.registerScene({
+    routeId: 'workspace-app-center',
+    title: '全部应用',
+    presentation: {
+      type: 'push',
+      transition: 'push',
+      coversTabBar: false
+    },
+    template: appCenterTemplate(),
+    init: bindAppCenter
   });
 })();

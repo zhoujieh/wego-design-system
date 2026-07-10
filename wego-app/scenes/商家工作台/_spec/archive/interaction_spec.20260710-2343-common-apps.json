@@ -8,10 +8,10 @@
     "included": [
       "单页工作台首页",
       "今日经营数据与昨日对比",
-      "常用应用入口（最多2排，末尾含全部应用入口）",
+      "核心操作入口",
       "销售订单状态计数",
       "客户流失预警待办",
-      "完整应用中心二级页面（按业务分组展示全部应用）",
+      "模块化应用中心入口",
       "流量与传播明细"
     ],
     "excluded": [
@@ -54,10 +54,6 @@
       {
         "id": "workspace-merchant-workbench",
         "surface_ref": "merchant-workbench-main"
-      },
-      {
-        "id": "workspace-app-center",
-        "surface_ref": "app-center-page"
       }
     ]
   },
@@ -83,25 +79,14 @@
       "exit_condition": "商户完成查看数据或触发一个业务入口"
     },
     {
-      "flow_id": "open-app-center",
-      "flow_type": "branch",
-      "entry_node": "use-workbench-entry",
-      "steps": [
-        "use-workbench-entry",
-        "enter-app-center",
-        "view-all-apps"
-      ],
-      "exit_condition": "商户查看全部应用列表或返回工作台"
-    },
-    {
-      "flow_id": "use-workbench-navbar-action",
+      "flow_id": "refresh-data-feedback",
       "flow_type": "branch",
       "entry_node": "scan-business-data",
       "steps": [
         "scan-business-data",
-        "use-navbar-action"
+        "refresh-business-data"
       ],
-      "exit_condition": "商户触发收款码反馈或进入交易设置场景"
+      "exit_condition": "页面给出准实时刷新反馈"
     }
   ],
   "flow_nodes": [
@@ -134,70 +119,38 @@
         "business-status-understood"
       ],
       "key_states": [
-        "有数据"
+        "有数据",
+        "准实时更新中"
       ]
     },
     {
       "node_id": "use-workbench-entry",
-      "purpose": "点击常用应用入口或全部应用入口",
+      "purpose": "点击核心操作或应用中心入口",
       "surface_ref": "merchant-workbench-main",
       "inputs": [
-        "common-apps"
-      ],
-      "outputs": [
-        "navigate-existing-route-or-stub-feedback",
-        "open-app-center-page"
-      ],
-      "key_states": [
-        "已有路由跳转",
-        "未展开子系统显示占位反馈",
-        "点击全部应用进入完整应用中心"
-      ]
-    },
-    {
-      "node_id": "enter-app-center",
-      "purpose": "从工作台常用应用区点击全部应用进入完整应用中心页面",
-      "surface_ref": "app-center-page",
-      "inputs": [
-        "app-center-full"
-      ],
-      "outputs": [
-        "app-center-visible"
-      ],
-      "key_states": [
-        "正常进入",
-        "可返回工作台"
-      ]
-    },
-    {
-      "node_id": "view-all-apps",
-      "purpose": "在完整应用中心页面按业务分组浏览全部应用入口",
-      "surface_ref": "app-center-page",
-      "inputs": [
-        "app-center-full"
+        "core-actions",
+        "app-center"
       ],
       "outputs": [
         "navigate-existing-route-or-stub-feedback"
       ],
       "key_states": [
         "已有路由跳转",
-        "未展开应用显示占位反馈"
+        "未展开子系统显示占位反馈"
       ]
     },
     {
-      "node_id": "use-navbar-action",
-      "purpose": "点击工作台导航栏右侧收款码或交易设置入口",
+      "node_id": "refresh-business-data",
+      "purpose": "触发今日经营数据刷新反馈",
       "surface_ref": "merchant-workbench-main",
       "inputs": [
-        "navbar-actions"
+        "business-dashboard"
       ],
       "outputs": [
-        "payment-code-stub-feedback",
-        "navigate-trade-settings"
+        "refresh-toast"
       ],
       "key_states": [
-        "收款码点击显示功能开发中反馈",
-        "交易设置点击跳转已有交易设置场景"
+        "刷新成功反馈"
       ]
     }
   ],
@@ -210,39 +163,22 @@
         "enter-workbench",
         "scan-business-data",
         "use-workbench-entry",
-        "use-navbar-action"
+        "refresh-business-data"
       ],
       "content_refs": [
-        "navbar-actions",
         "business-dashboard",
-        "common-apps",
+        "core-actions",
         "order-management",
         "customer-todo",
+        "app-center",
         "traffic-analytics"
       ],
       "interaction_mode": "view-only",
-      "purpose": "承载商户经营概览和常用应用入口集合，并在导航栏提供收款码与交易设置入口",
+      "purpose": "承载商户经营概览和业务入口集合",
       "states": [
         "有数据",
-        "入口占位反馈"
-      ]
-    },
-    {
-      "surface_id": "app-center-page",
-      "role": "secondary-task-page",
-      "carrier": "standalone-page",
-      "node_refs": [
-        "enter-app-center",
-        "view-all-apps"
-      ],
-      "content_refs": [
-        "app-center-full"
-      ],
-      "interaction_mode": "view-only",
-      "purpose": "承载完整应用中心，按业务分组展示全部应用入口",
-      "states": [
-        "正常展示",
-        "入口占位反馈"
+        "入口占位反馈",
+        "刷新反馈"
       ]
     }
   ],
@@ -256,22 +192,22 @@
       "default_state": "显示本地模拟今日数据",
       "key_states": [
         "显示昨日对比",
-        "访问人数显示百分比涨跌"
+        "访问人数显示百分比涨跌",
+        "刷新时显示准实时反馈"
       ]
     },
     {
-      "content_id": "common-apps",
-      "content": "常用应用入口网格，整合原核心操作与应用中心的高频入口，最多展示2排，末尾以全部应用入口收尾，点击进入完整应用中心页面。",
-      "group": "常用应用",
+      "content_id": "core-actions",
+      "content": "发布商品、采购入库、销售开单、查库存、去发货、发起直播、AI 批量入库、自定义操作。",
+      "group": "核心业务操作",
       "interaction": "action",
       "editable": false,
-      "default_state": "展示最多2排常用入口，最后一格为全部应用",
+      "default_state": "展示八个常用入口",
       "key_states": [
         "发布商品跳转已有发布路由",
         "查库存跳转已有库存路由",
         "采购入库可跳转仓库管理",
-        "未展开入口显示明确反馈",
-        "点击全部应用跳转完整应用中心页"
+        "未展开入口显示明确反馈"
       ]
     },
     {
@@ -299,12 +235,12 @@
       ]
     },
     {
-      "content_id": "app-center-full",
-      "content": "完整应用中心，按店铺管理、数据报表、进销存管理、营销中心、财务与客户等业务分组展示全部应用入口。",
-      "group": "完整应用中心",
+      "content_id": "app-center",
+      "content": "店铺管理、数据报表、进销存管理、营销中心、财务与客户等模块化应用入口。",
+      "group": "模块化应用中心",
       "interaction": "action",
       "editable": false,
-      "default_state": "按业务分组展示全部入口",
+      "default_state": "按业务分组展示入口",
       "key_states": [
         "已有路由可跳转",
         "未展开应用显示占位反馈"
@@ -321,18 +257,6 @@
         "显示昨日对比",
         "无真实数据接入时保持模拟状态"
       ]
-    },
-    {
-      "content_id": "navbar-actions",
-      "content": "工作台导航栏右侧操作集合，包含收款码与交易设置两个图标+文字入口。",
-      "group": "导航操作",
-      "interaction": "action",
-      "editable": false,
-      "default_state": "展示收款码与交易设置两个操作入口",
-      "key_states": [
-        "点击收款码显示功能开发中反馈",
-        "点击交易设置跳转已有交易设置场景 my-trade-settings"
-      ]
     }
   ],
   "states": [
@@ -343,13 +267,16 @@
     {
       "state_id": "stub-feedback",
       "description": "未实现子系统入口点击后展示 toast 反馈"
+    },
+    {
+      "state_id": "refresh-feedback",
+      "description": "刷新按钮点击后展示今日数据已更新反馈"
     }
   ],
   "edge_cases": [
     "重复点击未展开入口时只显示当前 toast，不产生重复页面",
     "已有路由跳转由宿主在 phone-screen 内打开",
-    "常用应用入口数量固定为最多2排，超出部分收纳到全部应用",
-    "全部应用页面支持返回工作台"
+    "自定义操作本轮不保存配置，只显示配置入口占位反馈"
   ],
   "transitions": [
     {
@@ -367,12 +294,15 @@
       "return_payload": []
     },
     {
-      "transition_id": "click-common-app",
+      "transition_id": "click-entry",
       "from": "scan-business-data",
-      "trigger": "点击常用应用入口",
+      "trigger": "点击核心操作、订单、待办或应用入口",
       "to": "use-workbench-entry",
       "data_in": [
-        "common-apps"
+        "core-actions",
+        "order-management",
+        "customer-todo",
+        "app-center"
       ],
       "result_out": [
         "navigate-existing-route-or-stub-feedback"
@@ -381,57 +311,15 @@
       "return_payload": []
     },
     {
-      "transition_id": "open-all-apps",
-      "from": "use-workbench-entry",
-      "trigger": "点击常用应用区的全部应用入口",
-      "to": "enter-app-center",
-      "data_in": [
-        "app-center-full"
-      ],
-      "result_out": [
-        "app-center-visible"
-      ],
-      "return_to": "use-workbench-entry",
-      "return_payload": []
-    },
-    {
-      "transition_id": "click-app-center-app",
-      "from": "enter-app-center",
-      "trigger": "点击完整应用中心内的应用入口",
-      "to": "view-all-apps",
-      "data_in": [
-        "app-center-full"
-      ],
-      "result_out": [
-        "navigate-existing-route-or-stub-feedback"
-      ],
-      "return_to": "enter-app-center",
-      "return_payload": []
-    },
-    {
-      "transition_id": "click-navbar-payment-code",
+      "transition_id": "refresh-dashboard",
       "from": "scan-business-data",
-      "trigger": "点击导航栏右侧收款码入口",
-      "to": "use-navbar-action",
+      "trigger": "点击刷新数据",
+      "to": "refresh-business-data",
       "data_in": [
-        "navbar-actions"
+        "business-dashboard"
       ],
       "result_out": [
-        "payment-code-stub-feedback"
-      ],
-      "return_to": "scan-business-data",
-      "return_payload": []
-    },
-    {
-      "transition_id": "click-navbar-trade-settings",
-      "from": "scan-business-data",
-      "trigger": "点击导航栏右侧交易设置入口",
-      "to": "use-navbar-action",
-      "data_in": [
-        "navbar-actions"
-      ],
-      "result_out": [
-        "navigate-trade-settings"
+        "refresh-toast"
       ],
       "return_to": "scan-business-data",
       "return_payload": []
@@ -439,32 +327,25 @@
   ],
   "data_handoffs": [
     {
-      "handoff_id": "common-app-feedback-handoff",
-      "transition_id": "click-common-app",
+      "handoff_id": "entry-feedback-handoff",
+      "transition_id": "click-entry",
       "source_node": "use-workbench-entry",
       "target_node": "scan-business-data",
       "payload_content_refs": [
-        "common-apps"
+        "core-actions",
+        "order-management",
+        "customer-todo",
+        "app-center"
       ],
       "reset_policy": "keep"
     },
     {
-      "handoff_id": "app-center-handoff",
-      "transition_id": "open-all-apps",
-      "source_node": "use-workbench-entry",
-      "target_node": "enter-app-center",
+      "handoff_id": "refresh-feedback-handoff",
+      "transition_id": "refresh-dashboard",
+      "source_node": "refresh-business-data",
+      "target_node": "scan-business-data",
       "payload_content_refs": [
-        "app-center-full"
-      ],
-      "reset_policy": "keep"
-    },
-    {
-      "handoff_id": "app-center-app-feedback-handoff",
-      "transition_id": "click-app-center-app",
-      "source_node": "view-all-apps",
-      "target_node": "enter-app-center",
-      "payload_content_refs": [
-        "app-center-full"
+        "business-dashboard"
       ],
       "reset_policy": "keep"
     }
@@ -483,40 +364,28 @@
     {
       "node_id": "use-workbench-entry",
       "depth": "simulated",
-      "reason": "已有路由可跳转，未展开子系统以明确 toast 反馈表示；全部应用可跳转至完整应用中心页",
+      "reason": "已有路由可跳转，未展开子系统以明确 toast 反馈表示",
       "feedback": "功能入口已预留、功能接入中或已跳转"
     },
     {
-      "node_id": "enter-app-center",
-      "depth": "functional",
-      "reason": "完整应用中心是独立二级页面，需要可进入和返回"
-    },
-    {
-      "node_id": "view-all-apps",
+      "node_id": "refresh-business-data",
       "depth": "simulated",
-      "reason": "已有路由可跳转，未展开应用以明确 toast 反馈表示",
-      "feedback": "功能入口已预留、功能接入中或已跳转"
-    },
-    {
-      "node_id": "use-navbar-action",
-      "depth": "simulated",
-      "reason": "收款码无独立场景，按 stub 反馈；交易设置跳转已有 my-trade-settings 场景",
-      "feedback": "收款码点击后 toast 提示功能开发中"
+      "reason": "静态原型用 toast 表达准实时刷新",
+      "feedback": "今日数据已更新"
     }
   ],
   "component_intent": [
     "经营数据卡片",
-    "入口网格（常用应用，最多2排，末尾全部应用）",
+    "入口网格",
     "订单状态计数",
     "待办提醒",
-    "应用分组列表（完整应用中心页）",
-    "导航栏右侧操作（收款码、交易设置）",
+    "应用分组列表",
     "toast 反馈",
     "已有路由跳转"
   ],
   "assumptions": [
     {
-      "content": "本轮只做工作台首页和完整应用中心页，不展开完整子系统页面。",
+      "content": "本轮只做单页工作台首页，不展开完整子系统页面。",
       "impact_level": "low",
       "reversible": true
     },
@@ -526,7 +395,7 @@
       "reversible": true
     },
     {
-      "content": "常用应用默认展示2排共8个入口，最后一格替换为全部应用。",
+      "content": "准实时通过更新时间文案和刷新 toast 表达。",
       "impact_level": "low",
       "reversible": true
     }
@@ -540,13 +409,7 @@
     {
       "source": "user-requirement",
       "supports": [
-        "工作台包含经营数据、常用应用入口、订单、客户待办、流量传播",
-        "核心操作更名为常用应用，与应用中心合并",
-        "常用应用最多2排，末尾有全部应用入口跳转完整应用中心页",
-        "去掉 navbar 刷新图标",
-        "工作台导航栏改为左侧标题、右侧操作模式，操作含收款码和交易设置",
-        "收款码无独立场景，点击后 toast 占位反馈",
-        "交易设置点击跳转已有 my-trade-settings 场景"
+        "工作台包含经营数据、核心操作、订单、客户待办、应用中心和流量传播"
       ]
     },
     {

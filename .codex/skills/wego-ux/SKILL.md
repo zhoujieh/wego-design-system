@@ -113,6 +113,8 @@ wego-app/
 
 宿主级改动必须同步检查真实宿主和 `templates/host-shell.*`，避免后续初始化回退到旧行为。
 
+- `host-shell-page` 自带 16px 横向 padding，scene body 若再设横向 padding 会形成双重 padding。有自带 navbar 的 `host-tab` 场景必须在 `app.js` 切换到该 Tab 时加 `host-shell-page--flush` 取消宿主 padding，由 scene 自管内边距；无 navbar 的简单 Tab 内容可由宿主 padding 承接。
+
 ## 场景注册
 
 `scene.js` 是业务场景运行时入口，必须调用：

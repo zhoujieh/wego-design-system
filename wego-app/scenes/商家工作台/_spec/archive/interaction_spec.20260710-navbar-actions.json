@@ -92,16 +92,6 @@
         "view-all-apps"
       ],
       "exit_condition": "商户查看全部应用列表或返回工作台"
-    },
-    {
-      "flow_id": "use-workbench-navbar-action",
-      "flow_type": "branch",
-      "entry_node": "scan-business-data",
-      "steps": [
-        "scan-business-data",
-        "use-navbar-action"
-      ],
-      "exit_condition": "商户触发收款码反馈或进入交易设置场景"
     }
   ],
   "flow_nodes": [
@@ -183,22 +173,6 @@
         "已有路由跳转",
         "未展开应用显示占位反馈"
       ]
-    },
-    {
-      "node_id": "use-navbar-action",
-      "purpose": "点击工作台导航栏右侧收款码或交易设置入口",
-      "surface_ref": "merchant-workbench-main",
-      "inputs": [
-        "navbar-actions"
-      ],
-      "outputs": [
-        "payment-code-stub-feedback",
-        "navigate-trade-settings"
-      ],
-      "key_states": [
-        "收款码点击显示功能开发中反馈",
-        "交易设置点击跳转已有交易设置场景"
-      ]
     }
   ],
   "surfaces": [
@@ -209,11 +183,9 @@
       "node_refs": [
         "enter-workbench",
         "scan-business-data",
-        "use-workbench-entry",
-        "use-navbar-action"
+        "use-workbench-entry"
       ],
       "content_refs": [
-        "navbar-actions",
         "business-dashboard",
         "common-apps",
         "order-management",
@@ -221,7 +193,7 @@
         "traffic-analytics"
       ],
       "interaction_mode": "view-only",
-      "purpose": "承载商户经营概览和常用应用入口集合，并在导航栏提供收款码与交易设置入口",
+      "purpose": "承载商户经营概览和常用应用入口集合",
       "states": [
         "有数据",
         "入口占位反馈"
@@ -321,18 +293,6 @@
         "显示昨日对比",
         "无真实数据接入时保持模拟状态"
       ]
-    },
-    {
-      "content_id": "navbar-actions",
-      "content": "工作台导航栏右侧操作集合，包含收款码与交易设置两个图标+文字入口。",
-      "group": "导航操作",
-      "interaction": "action",
-      "editable": false,
-      "default_state": "展示收款码与交易设置两个操作入口",
-      "key_states": [
-        "点击收款码显示功能开发中反馈",
-        "点击交易设置跳转已有交易设置场景 my-trade-settings"
-      ]
     }
   ],
   "states": [
@@ -407,34 +367,6 @@
       ],
       "return_to": "enter-app-center",
       "return_payload": []
-    },
-    {
-      "transition_id": "click-navbar-payment-code",
-      "from": "scan-business-data",
-      "trigger": "点击导航栏右侧收款码入口",
-      "to": "use-navbar-action",
-      "data_in": [
-        "navbar-actions"
-      ],
-      "result_out": [
-        "payment-code-stub-feedback"
-      ],
-      "return_to": "scan-business-data",
-      "return_payload": []
-    },
-    {
-      "transition_id": "click-navbar-trade-settings",
-      "from": "scan-business-data",
-      "trigger": "点击导航栏右侧交易设置入口",
-      "to": "use-navbar-action",
-      "data_in": [
-        "navbar-actions"
-      ],
-      "result_out": [
-        "navigate-trade-settings"
-      ],
-      "return_to": "scan-business-data",
-      "return_payload": []
     }
   ],
   "data_handoffs": [
@@ -496,12 +428,6 @@
       "depth": "simulated",
       "reason": "已有路由可跳转，未展开应用以明确 toast 反馈表示",
       "feedback": "功能入口已预留、功能接入中或已跳转"
-    },
-    {
-      "node_id": "use-navbar-action",
-      "depth": "simulated",
-      "reason": "收款码无独立场景，按 stub 反馈；交易设置跳转已有 my-trade-settings 场景",
-      "feedback": "收款码点击后 toast 提示功能开发中"
     }
   ],
   "component_intent": [
@@ -510,7 +436,6 @@
     "订单状态计数",
     "待办提醒",
     "应用分组列表（完整应用中心页）",
-    "导航栏右侧操作（收款码、交易设置）",
     "toast 反馈",
     "已有路由跳转"
   ],
@@ -543,10 +468,7 @@
         "工作台包含经营数据、常用应用入口、订单、客户待办、流量传播",
         "核心操作更名为常用应用，与应用中心合并",
         "常用应用最多2排，末尾有全部应用入口跳转完整应用中心页",
-        "去掉 navbar 刷新图标",
-        "工作台导航栏改为左侧标题、右侧操作模式，操作含收款码和交易设置",
-        "收款码无独立场景，点击后 toast 占位反馈",
-        "交易设置点击跳转已有 my-trade-settings 场景"
+        "去掉 navbar 刷新图标"
       ]
     },
     {

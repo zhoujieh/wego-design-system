@@ -39,6 +39,23 @@ window.WEGO_APP_ROUTES = [
       type: 'host-tab'
     }
   },
+  /*
+   * 内部入口：『全部应用』挂在商家工作台常用应用区内，不从宿主分组挂载。
+   * entry.group 指向不存在的容器名，app.js mountRouteEntries 的 if(!group) return 会优雅跳过宿主挂载，
+   * 避免与商家工作台内部入口重复；该 route 仅通过商家工作台 scene.js 中 ctx.navigate('workspace-app-center') 触发。
+   */
+  {
+    routeId: 'workspace-app-center',
+    scene: '全部应用',
+    script: './scenes/商家工作台/scene.js',
+    style: './scenes/商家工作台/scene.css',
+    entry: {
+      tab: 'workspace',
+      group: 'workspace-app-center-internal',
+      label: '全部应用',
+      type: 'cell'
+    }
+  },
   {
     routeId: 'my-price-management',
     scene: '价格权限管理',

@@ -171,4 +171,4 @@
 组件已在注册表中存在，结构与状态符合契约，页面示例只用于结构参考，设计系统源文件与部署副本保持一致。
 
 <!-- generated-by: scripts/specs.mjs@5 -->
-<!-- source-fingerprint: a9cbe497d1375b994f51b6c408962bc7e2c56f548a8e3381725841369bd38326 -->
+<!-- source-fingerprint: e56367102f864838468564a4940be9c6c5fc7f30dc1ef33675f23e440106dc2f -->

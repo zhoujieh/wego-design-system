@@ -159,6 +159,12 @@ description: 验收 wego-app 当前业务场景并输出 acceptance_report，检
 - `stable-variant` 的 DOM 和维度值一致；旧写法其他模式给出完整 DOM 路径，新任务 `selected` 只写变体维度值组合、组合约束 ID 或组合说明。
 - 新任务 `component_patterns` 和 `region_composition` 已分离，未混入 `component_mapping`；`complexity_level` 与实际页面复杂度相符。
 - 不存在“结构同构”“类似某结构”等省略写法。
+- `layout_check` 必须做多层级视觉布局实测，不能只查横向溢出。至少覆盖：
+  - **padding 链路核查**：用浏览器逐层测量宿主壳层（host-shell-page → panel → scene body）到内容元素的 padding，确认没有宿主通用 padding 与 scene body padding 叠加形成双重横向 padding；有自带 navbar 的 host-tab 场景必须确认已用 `host-shell-page--flush` 取消宿主 padding，由 scene 自管内边距。
+  - **对齐一致性**：同层级 section 标题、卡片内容的左右边距必须一致（像素级测量，不靠目视）。
+  - **间距达成 design_plan**：section 间距、卡片内间距与 `design_plan.page_strategy.scroll_rhythm`、`content_density` 声明一致；不一致即偏差。
+  - **截图人工审查**：必须实际截图并审查整体布局，不能只写"横向溢出数量为 0"。
+  - **回退条件**：单卡片简单页且无宿主嵌套时，可只做溢出检查。
 
 ### 对象管理列表
 

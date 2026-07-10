@@ -1,10 +1,10 @@
 {
   "schemaVersion": 3,
   "matched_uikit": null,
-  "scene_fit_reason": "商家工作台是综合经营首页，现有 UI Kit 没有精确看板范式；可由 generic-mobile-task-page fallback、已注册 navbar/card/cell/tag/badge/button/link/toast 和业务作用域布局安全承接。",
-  "navigation_pattern": "工作台 Tab 直挂页面，标题左对齐宽版，右侧收款码与交易设置两个图标+文字操作",
+  "scene_fit_reason": "商家工作台是综合经营首页，现有 UI Kit 没有精确看板范式；可由 generic-mobile-task-page fallback、已注册 navbar/card/cell/tag/badge/button/toast 和业务作用域布局安全承接。",
+  "navigation_pattern": "工作台 Tab 直挂页面，标题居中，右侧无操作",
   "layout_pattern": "卡片模式 M2",
-  "interaction_pattern": "单页经营概览 + 入口跳转或 toast 占位反馈 + 全部应用二级页",
+  "interaction_pattern": "单页经营概览 + 入口跳转或 toast 占位反馈",
   "complexity_level": "complex",
   "app_target": {
     "mode": "wego-app-scene",
@@ -22,18 +22,19 @@
     "scroll": "vertical",
     "main_scroll_direction": "vertical",
     "density": "business-dashboard",
-    "first_screen_goal": "首屏看到今日经营数据和常用应用入口，能立即判断经营情况并触发高频动作。",
-    "first_screen_priority": "经营数据看板 > 常用应用入口 > 订单待办 > 客户待办 > 流量传播",
+    "first_screen_goal": "首屏看到今日经营数据和核心操作入口，能立即判断经营情况并触发高频动作。",
+    "first_screen_priority": "经营数据看板 > 核心操作入口 > 订单待办 > 客户待办 > 应用中心 > 流量传播",
     "region_priority": [
       "dashboard-region",
-      "common-apps-region",
+      "core-actions-region",
       "order-region",
       "todo-region",
+      "app-center-region",
       "traffic-region"
     ],
     "content_density": "high-but-scannable",
-    "content_density_strategy": "首屏承载 6 个核心经营指标和常用应用入口（最多2排）；指标使用两列网格，应用使用四列网格，后续模块按卡片/分组列表纵向展开。",
-    "scroll_rhythm": "模块之间使用 12px 间距，卡片内使用 8px/12px 间距；完整应用中心页用 cell-group 形成连续列表节奏。",
+    "content_density_strategy": "首屏承载 6 个核心经营指标和 8 个操作入口；指标使用两列网格，操作使用四列网格，后续模块按卡片/分组列表纵向展开。",
+    "scroll_rhythm": "模块之间使用 12px 间距，卡片内使用 8px/12px 间距；应用中心用 cell-group 形成连续列表节奏。",
     "fixed_vs_scroll": "navbar sticky；全部业务内容在页面主体内连续滚动，无底部固定操作栏。",
     "visual_competition": "经营金额和订单数为首屏视觉重心；入口图标统一 24px，趋势和状态使用低饱和文字，避免多个模块同时强强调。"
   },
@@ -48,11 +49,11 @@
       "presentation_ref": ".codex/skills/wego-design/uikit-plan.json:fallbackPageBlueprints[generic-mobile-task-page]",
       "scene_fit_reason": "页面是单页任务页，内容可按 section 分组并用基础组件组合。",
       "component_mapping": [
-        "navbar-actions",
         "business-dashboard",
-        "common-apps",
+        "core-actions",
         "order-management",
         "customer-todo",
+        "app-center",
         "traffic-analytics"
       ],
       "allowed_page_styles": [
@@ -60,25 +61,6 @@
         "业务数据栅格",
         "入口网格",
         "业务作用域状态和趋势样式",
-        "滚动内容底部安全区留白"
-      ],
-      "design_gap": ""
-    },
-    {
-      "surface_id": "app-center-page",
-      "role": "secondary-task-page",
-      "match_status": "fallback",
-      "matched_uikit": null,
-      "matched_page_pattern": null,
-      "matched_blueprint": "generic-mobile-task-page",
-      "presentation_ref": ".codex/skills/wego-design/uikit-plan.json:fallbackPageBlueprints[generic-mobile-task-page]",
-      "scene_fit_reason": "完整应用中心是二级列表页，内容可按 cell-group 分组并用基础组件组合。",
-      "component_mapping": [
-        "app-center-full"
-      ],
-      "allowed_page_styles": [
-        "页面外层 16px 横向留白",
-        "cell-group 分组列表",
         "滚动内容底部安全区留白"
       ],
       "design_gap": ""
@@ -106,14 +88,14 @@
       "component_pattern_ref": "card-metric-grid"
     },
     {
-      "region_id": "common-apps-region",
+      "region_id": "core-actions-region",
       "surface_id": "merchant-workbench-main",
       "role": "quick-action-grid",
       "order": 3,
       "applies_to": [
-        "common-apps"
+        "core-actions"
       ],
-      "component_pattern_ref": "card-common-apps-grid"
+      "component_pattern_ref": "card-entry-grid"
     },
     {
       "region_id": "order-region",
@@ -136,34 +118,24 @@
       "component_pattern_ref": "card-alert"
     },
     {
+      "region_id": "app-center-region",
+      "surface_id": "merchant-workbench-main",
+      "role": "application-groups",
+      "order": 6,
+      "applies_to": [
+        "app-center"
+      ],
+      "component_pattern_ref": "cell-group-list"
+    },
+    {
       "region_id": "traffic-region",
       "surface_id": "merchant-workbench-main",
       "role": "traffic-metrics",
-      "order": 6,
+      "order": 7,
       "applies_to": [
         "traffic-analytics"
       ],
       "component_pattern_ref": "card-metric-list"
-    },
-    {
-      "region_id": "app-center-nav",
-      "surface_id": "app-center-page",
-      "role": "top-navigation",
-      "order": 1,
-      "applies_to": [
-        "app-center-page"
-      ],
-      "component_pattern_ref": "navbar-app-center"
-    },
-    {
-      "region_id": "app-center-list-region",
-      "surface_id": "app-center-page",
-      "role": "application-groups",
-      "order": 2,
-      "applies_to": [
-        "app-center-full"
-      ],
-      "component_pattern_ref": "cell-group-list-full"
     }
   ],
   "component_patterns": [
@@ -175,41 +147,31 @@
       "applies_to": [
         "merchant-workbench-main"
       ],
-      "description": "工作台 Tab 内页面不显示返回按钮，标题左对齐宽版（navbar__center--wide），右侧承载收款码与交易设置两个图标+文字操作；收款码点击 toast 占位反馈，交易设置点击跳转已有 my-trade-settings 场景。"
-    },
-    {
-      "pattern_id": "navbar-app-center",
-      "components": [
-        "navbar"
-      ],
-      "applies_to": [
-        "app-center-page"
-      ],
-      "description": "全部应用二级页面使用返回图标 + 居中标题，右侧无操作。"
+      "description": "工作台 Tab 内页面不显示返回按钮，标题为商家工作台，右侧无操作（刷新为低频页面内功能，不占 navbar 右侧操作位）。"
     },
     {
       "pattern_id": "card-metric-grid",
       "components": [
         "card",
         "tag",
-        "link"
+        "button"
       ],
       "applies_to": [
         "business-dashboard"
       ],
-      "description": "经营数据使用 card 表面和页面级栅格展示，趋势用 tag/业务状态文本表达；sectionHeader 文字操作用 link 组件。"
+      "description": "经营数据使用 card 表面和页面级栅格展示，趋势用 tag/业务状态文本表达。"
     },
     {
-      "pattern_id": "card-common-apps-grid",
+      "pattern_id": "card-entry-grid",
       "components": [
         "card",
         "button",
         "toast"
       ],
       "applies_to": [
-        "common-apps"
+        "core-actions"
       ],
-      "description": "常用应用使用图标入口网格，最多 2 排（4 列 × 2 排 = 8 格），最后一格为全部应用入口，点击跳转完整应用中心页；已有路由跳转，未展开入口 toast 反馈。"
+      "description": "核心操作使用图标入口网格；已有路由跳转，未展开入口 toast 反馈。"
     },
     {
       "pattern_id": "card-status-grid",
@@ -217,13 +179,12 @@
         "card",
         "badge",
         "button",
-        "link",
         "toast"
       ],
       "applies_to": [
         "order-management"
       ],
-      "description": "订单状态使用卡片内四项计数，附全部销售单和收益入口；sectionHeader 文字操作用 link 组件。"
+      "description": "订单状态使用卡片内四项计数，附全部销售单和收益入口。"
     },
     {
       "pattern_id": "card-alert",
@@ -231,36 +192,34 @@
         "card",
         "tag",
         "button",
-        "link",
         "toast"
       ],
       "applies_to": [
         "customer-todo"
       ],
-      "description": "客户流失预警用提醒卡片展示数量、建议和两个跟进动作；sectionHeader 文字操作用 link 组件。"
+      "description": "客户流失预警用提醒卡片展示数量、建议和两个跟进动作。"
     },
     {
-      "pattern_id": "cell-group-list-full",
+      "pattern_id": "cell-group-list",
       "components": [
         "cell",
         "toast"
       ],
       "applies_to": [
-        "app-center-full"
+        "app-center"
       ],
-      "description": "完整应用中心按业务分组使用正式 cell-group 和可点击 cell，覆盖全部应用入口。"
+      "description": "应用中心按业务分组使用正式 cell-group 和可点击 cell。"
     },
     {
       "pattern_id": "card-metric-list",
       "components": [
         "card",
-        "tag",
-        "link"
+        "tag"
       ],
       "applies_to": [
         "traffic-analytics"
       ],
-      "description": "传播数据使用卡片列表展示今日值与昨日对比；sectionHeader 文字操作用 link 组件。"
+      "description": "传播数据使用卡片列表展示今日值与昨日对比。"
     }
   ],
   "flow_to_surface_decisions": [
@@ -282,77 +241,42 @@
       "node_id": "use-workbench-entry",
       "surface_id": "merchant-workbench-main",
       "carrier": "inline-area",
-      "presentation": "toast-or-existing-route-or-app-center",
-      "reason": "常用应用入口：已有路由跳转、未展开子系统 toast 反馈、全部应用跳转到二级页"
-    },
-    {
-      "node_id": "enter-app-center",
-      "surface_id": "app-center-page",
-      "carrier": "standalone-page",
-      "presentation": "push",
-      "reason": "全部应用是独立二级页面，使用 push 方式进入，可返回工作台"
-    },
-    {
-      "node_id": "view-all-apps",
-      "surface_id": "app-center-page",
-      "carrier": "inline-area",
       "presentation": "toast-or-existing-route",
-      "reason": "完整应用中心内入口不展开完整子系统页面"
+      "reason": "子系统入口不展开完整页面"
     },
     {
-      "node_id": "use-navbar-action",
+      "node_id": "refresh-business-data",
       "surface_id": "merchant-workbench-main",
       "carrier": "inline-area",
-      "presentation": "toast-or-existing-route",
-      "reason": "收款码 toast 占位反馈，交易设置跳转已有 my-trade-settings 场景"
+      "presentation": "toast",
+      "reason": "静态原型用 toast 反馈准实时刷新"
     }
   ],
   "component_mapping": [
     {
-      "block": "navbar-actions",
-      "scenario_type": "navbar-right-actions",
-      "consumption_mode": "stable-variant",
-      "selected": {
-        "component": "navbar",
-        "variant": {
-          "leftControl": "none",
-          "titleAlignment": "left-wide",
-          "actions": "mixed",
-          "rightActionType": "icon+text"
-        }
-      },
-      "constraint_ref": {
-        "component": "navbar"
-      },
-      "reason": "工作台 host-tab 首页承载收款码与交易设置两个高频页面级业务动作，使用 navbar 左对齐宽版标题（navbar__center--wide）+ 右侧图标+文字操作组合；符合 navbar usageHints 关于 host-tab 首页高频页面级业务动作可放右侧图标+文字组合的约束。收款码点击 toast 占位反馈，交易设置点击跳转已有 my-trade-settings 场景。",
-      "rule_sources": [
-        ".codex/skills/wego-design/components/navbar.json"
-      ]
-    },
-    {
       "block": "business-dashboard",
       "scenario_type": "mobile-dashboard-summary",
       "consumption_mode": "free-composition",
-      "selected": "card 表面 + tag 状态 + link 文字操作；业务栅格由 merchant-workbench 作用域样式承接",
+      "selected": "card 表面 + tag 状态 + button 刷新；业务栅格由 merchant-workbench 作用域样式承接",
       "constraint_ref": {
         "blueprint": "generic-mobile-task-page"
       },
-      "reason": "经营数据看板是业务统计组合，基础 card 可承载，具体指标排布属于页面级业务样式；sectionHeader 文字操作使用 link standalone 模式。",
+      "reason": "经营数据看板是业务统计组合，基础 card 可承载，具体指标排布属于页面级业务样式。",
       "rule_sources": [
         ".codex/skills/wego-design/components/card.json",
         ".codex/skills/wego-design/components/tag.json",
-        ".codex/skills/wego-design/components/link.json"
+        ".codex/skills/wego-design/components/button.json"
       ]
     },
     {
-      "block": "common-apps",
+      "block": "core-actions",
       "scenario_type": "business-entry-grid",
       "consumption_mode": "free-composition",
-      "selected": "card 表面 + button/图标入口 + toast 反馈 + 全部应用入口跳转二级页",
+      "selected": "card 表面 + button/图标入口 + toast 反馈",
       "constraint_ref": {
         "blueprint": "generic-mobile-task-page"
       },
-      "reason": "常用应用是入口集合，使用已有 app-center svg 资产和宿主 toast；最多 2 排，末尾为全部应用入口。",
+      "reason": "核心操作是入口集合，使用已有 app-center svg 资产和宿主 toast。",
       "rule_sources": [
         ".codex/skills/wego-design/components/card.json",
         ".codex/skills/wego-design/components/button.json",
@@ -364,36 +288,34 @@
       "block": "order-management",
       "scenario_type": "status-counter-actions",
       "consumption_mode": "free-composition",
-      "selected": "card 表面 + badge/status 文本 + link 文字操作 + button 入口",
+      "selected": "card 表面 + badge/status 文本 + button 入口",
       "constraint_ref": {
         "blueprint": "generic-mobile-task-page"
       },
-      "reason": "订单生命周期计数适合卡片内状态网格和入口按钮；sectionHeader 文字操作使用 link standalone 模式。",
+      "reason": "订单生命周期计数适合卡片内状态网格和入口按钮。",
       "rule_sources": [
         ".codex/skills/wego-design/components/card.json",
         ".codex/skills/wego-design/components/badge.json",
-        ".codex/skills/wego-design/components/button.json",
-        ".codex/skills/wego-design/components/link.json"
+        ".codex/skills/wego-design/components/button.json"
       ]
     },
     {
       "block": "customer-todo",
       "scenario_type": "alert-task-card",
       "consumption_mode": "free-composition",
-      "selected": "card 表面 + tag 状态 + link 文字操作 + button 跟进入口",
+      "selected": "card 表面 + tag 状态 + button 跟进入口",
       "constraint_ref": {
         "blueprint": "generic-mobile-task-page"
       },
-      "reason": "客户待办需要突出数量、原因和下一步动作；sectionHeader 文字操作使用 link standalone 模式。",
+      "reason": "客户待办需要突出数量、原因和下一步动作。",
       "rule_sources": [
         ".codex/skills/wego-design/components/card.json",
         ".codex/skills/wego-design/components/tag.json",
-        ".codex/skills/wego-design/components/button.json",
-        ".codex/skills/wego-design/components/link.json"
+        ".codex/skills/wego-design/components/button.json"
       ]
     },
     {
-      "block": "app-center-full",
+      "block": "app-center",
       "scenario_type": "grouped-application-list",
       "consumption_mode": "stable-variant",
       "selected": {
@@ -408,7 +330,7 @@
       "constraint_ref": {
         "component": "cell"
       },
-      "reason": "完整应用中心为分组入口列表，cell-group 是正式连续行容器。",
+      "reason": "应用中心为分组入口列表，cell-group 是正式连续行容器。",
       "rule_sources": [
         ".codex/skills/wego-design/components/cell.json"
       ]
@@ -417,27 +339,21 @@
       "block": "traffic-analytics",
       "scenario_type": "metric-comparison-list",
       "consumption_mode": "free-composition",
-      "selected": "card 表面 + tag 趋势文本 + link 文字操作",
+      "selected": "card 表面 + tag 趋势文本",
       "constraint_ref": {
         "blueprint": "generic-mobile-task-page"
       },
-      "reason": "传播数据为小型统计列表，卡片承载即可；sectionHeader 文字操作使用 link standalone 模式。",
+      "reason": "传播数据为小型统计列表，卡片承载即可。",
       "rule_sources": [
         ".codex/skills/wego-design/components/card.json",
-        ".codex/skills/wego-design/components/tag.json",
-        ".codex/skills/wego-design/components/link.json"
+        ".codex/skills/wego-design/components/tag.json"
       ]
     }
   ],
   "implementation_constraints": [
-    "工作台首页根元素必须标注 data-surface-id=\"merchant-workbench-main\"。",
-    "全部应用页根元素必须标注 data-surface-id=\"app-center-page\"。",
+    "页面根元素必须标注 data-surface-id=\"merchant-workbench-main\"。",
     "每个 content_block 承载元素必须标注对应 data-content-id。",
-    "工作台 navbar 使用左对齐宽版标题（navbar__center--wide），左侧无控件；右侧收款码与交易设置使用图标+文字组合操作，不使用纯单图标。",
-    "收款码入口点击使用 ctx.toast 占位反馈；交易设置入口点击使用 ctx.navigate('my-trade-settings') 跳转已有场景。",
-    "常用应用入口最多 2 排（4 列 × 2 排 = 8 格），最后一格为全部应用入口。",
     "连续应用入口必须使用 .cell-group 与 .cell-group__content。",
-    "sectionHeader 文字操作使用 .link.link--standalone，不使用 button 文字样式。",
     "已有路由使用 ctx.navigate，不使用 location.href。",
     "未展开子系统入口使用 ctx.toast 明确反馈。",
     "不使用 fetch/XHR 读取本地片段。",
@@ -449,8 +365,7 @@
     "业务卡片内距和区块间距",
     "数据栅格和入口网格",
     "趋势/状态的业务作用域颜色",
-    "应用入口图标尺寸",
-    "app-center 页面滚动容器"
+    "应用入口图标尺寸"
   ],
   "page_presentation": {
     "type": "host-tab",
@@ -486,21 +401,14 @@
       "file": ".codex/skills/wego-design/components/cell.json",
       "field": "domAnatomy, representativeVariants",
       "supports": [
-        "完整应用中心分组入口使用 cell-group 和 clickable cell"
+        "应用中心分组入口使用 cell-group 和 clickable cell"
       ]
     },
     {
       "file": ".codex/skills/wego-design/components/button.json",
       "field": "representativeVariants",
       "supports": [
-        "跟进等操作使用按钮"
-      ]
-    },
-    {
-      "file": ".codex/skills/wego-design/components/link.json",
-      "field": "representativeVariants, usageHints",
-      "supports": [
-        "sectionHeader 文字操作使用 link standalone 模式，列表右侧、资料头部这类独立文字操作优先用 standalone"
+        "刷新和跟进等操作使用按钮"
       ]
     },
     {
@@ -508,16 +416,6 @@
       "field": "behavior",
       "supports": [
         "未展开入口使用 toast 反馈"
-      ]
-    },
-    {
-      "file": ".codex/skills/wego-design/components/navbar.json",
-      "field": "variantDimensions, representativeVariants, domAnatomy, usageHints",
-      "supports": [
-        "host-tab 首页承载高频页面级业务动作时，右侧使用图标+文字组合操作",
-        "navbar 右侧操作使用图标时必须搭配文字，不使用纯单图标",
-        "leftControl:none + titleAlignment:left-wide + 右侧图标+文字操作为正式变体",
-        "右侧操作使用 navbar 内部 .navbar__action 结构，不当独立组件消费"
       ]
     },
     {

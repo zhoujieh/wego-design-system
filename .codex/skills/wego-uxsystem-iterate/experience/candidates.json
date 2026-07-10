@@ -551,6 +551,97 @@
       },
       "created_at": "2026-07-10T21:10:00+08:00",
       "updated_at": "2026-07-10T21:10:00+08:00"
+    },
+    {
+      "id": "exp-tests-layout-check-multilevel-visual-validation",
+      "normalized_key": "tests-layout-check-must-do-multilevel-visual-validation-not-just-overflow",
+      "title": "wego-tests 的 layout_check 必须做多层级视觉布局实测，不能只查横向溢出",
+      "status": "promoted",
+      "occurrence_count": 1,
+      "threshold": 1,
+      "primary_owner": "wego-tests",
+      "secondary_owners": ["wego-ux"],
+      "ownership_reason": "问题最早产生在 wego-tests 验收环节的 layout_check。当前 layout_check 只检查横向溢出数量为 0，既不逐层往上核查宿主壳层到 scene 的 padding/间距链路，也不做截图与像素级对齐一致性检查。导致宿主通用 padding 与 scene body padding 叠加形成双重横向 padding、同层级 section 标题左右边距错位等明显布局问题全部漏过验收。layout_check 是验收环节判断布局是否达成 design_plan 间距规范的最后一道关，必须做多层级视觉布局实测。",
+      "problem_pattern": "验收 layout_check 只写『横向溢出数量为 0』就判定通过，既没有逐层往上量宿主壳层（host-shell-page → panel → scene body）的 padding 是否叠加，也没有截图审查或像素级测量同层级 section 标题、卡片内容的左右边距是否一致，更没有核对 section 间距、卡片内间距与 design_plan.page_strategy.scroll_rhythm 声明是否一致。导致双重 padding、标题错位、间距节奏不统一等明显布局问题在验收阶段漏过。",
+      "scene_evidence": [
+        {
+          "date": "2026-07-10",
+          "scene": "商家工作台 Tab 布局验收",
+          "summary": "商家工作台新增为工作台 Tab 内容后，host-shell-page 自带 16px 横向 padding，merchant-workbench-page__body 又叠加 16px 横向 padding，形成双重横向 padding=32px，卡片内容被压到 48px 留白；app-center 未用 card 包裹，标题凸出其他 section 16px。前一次 acceptance_report 的 layout_check 只写『横向溢出数量为 0』就判定 pass-with-risk，完全遗漏这些布局问题。修复：(1) app.js 切到 workspace Tab 时加 host-shell-page--flush 取消宿主 padding，由 scene 自管；(2) app-center 用 card 包裹统一标题对齐。浏览器实测验证卡片宽度从 311 恢复到 343，四个标题统一对齐在 32px。",
+          "source": "用户指出：工作台 tab 有很大的视觉间距问题，test 环节除了做点击流程验证还要看实际页面效果，找出明显的 UI 布局问题"
+        }
+      ],
+      "applies_when_candidates": [
+        "wego-tests 对任何场景做 layout_check 验收",
+        "host-tab / push / overlay 等涉及宿主壳层与 scene 嵌套的布局",
+        "包含多 section、多卡片的复杂页面",
+        "design_plan.page_strategy 声明了 scroll_rhythm、content_density 等间距规范的场景"
+      ],
+      "avoid_when_candidates": [
+        "纯交互流程验证（点击、跳转、回填），不涉及视觉布局",
+        "无视觉布局的数据层/API 验收",
+        "单卡片简单页且无宿主嵌套时可只做溢出检查"
+      ],
+      "expected_rule_target": {
+        "file": ".codex/skills/wego-tests/SKILL.md",
+        "field": "必查项 / UI Kit、布局和组件章节的 layout_check，以及移动端视口章节"
+      },
+      "runtime_reachability": {
+        "consumer_skill": "wego-tests 验收阶段执行 layout_check 时读取",
+        "output_field": "acceptance_report.layout_check 的检查内容和判定标准",
+        "downstream_consumer": "wego-tests 输出的 layout_check 必须包含：padding 链路核查、对齐一致性、间距与 design_plan 一致性、截图人工审查四项",
+        "acceptance_check": "layout_check 不能只写横向溢出数量；必须用 agent-browser 或同类工具逐层测量宿主壳层到 scene body 的 padding，截图审查并做像素级对齐一致性检查，核对间距与 design_plan.page_strategy.scroll_rhythm 声明一致"
+      },
+      "created_at": "2026-07-10T22:30:00+08:00",
+      "updated_at": "2026-07-10T23:00:00+08:00",
+      "formal_rule": {
+        "confirmed_at": "2026-07-10T23:00:00+08:00",
+        "file": ".codex/skills/wego-tests/SKILL.md",
+        "field": "必查项 / UI Kit、布局和组件章节的 layout_check",
+        "rule_id": "tests-layout-check-multilevel-visual-validation"
+      }
+    },
+    {
+      "id": "exp-text-action-must-consume-link-component",
+      "normalized_key": "standalone-text-jump-action-must-consume-link-component-not-custom-class",
+      "title": "独立文字跳转操作必须消费 link 组件，禁止用业务作用域自定义类模拟",
+      "status": "observing",
+      "occurrence_count": 1,
+      "threshold": 3,
+      "primary_owner": "wego-design",
+      "secondary_owners": ["wego-ux"],
+      "ownership_reason": "问题最早产生在 wego-design 的组件消费决策阶段。link 组件契约已经定义了 standalone 模式用于独立文字跳转操作（如卡片头部右侧的'全部'、'配置'、'查看详情'），但 library-consumption.json 的 componentConsumptionNotes 之前只约束了 search 组件消费，缺少'独立文字跳转操作必须消费 link 组件'的规则。导致 wego-design 在 component_mapping 时没有为文字操作选择 link 组件，wego-ux 实现时用业务作用域自定义类（如 __text-action）模拟 link 视觉（color: var(--text-link) + transparent 背景），丢失了 link standalone 的 40px 紧凑热区、按压态反馈和视觉一致性。规则已于本轮补充到 library-consumption.json componentConsumptionNotes，候选保留用于追踪未来是否再次出现自定义类模拟 link 的问题。",
+      "problem_pattern": "页面中的独立文字跳转操作（如卡片头部右侧的'全部'、'配置'、'查看详情'，列表项右侧的轻操作文字）没有消费 link 组件的 standalone 模式，而是用业务作用域自定义类（如 __text-action）模拟 link 视觉（color: var(--text-link) + transparent 背景）。自定义模拟丢失了 link standalone 的 40px 紧凑热区、按压态反馈和视觉一致性，且无法被组件消费守门检查。",
+      "scene_evidence": [
+        {
+          "date": "2026-07-10",
+          "scene": "商家工作台 sectionHeader 文字操作",
+          "summary": "工作台 scene.js 的 sectionHeader 函数为卡片头部右侧文字操作（'配置'、'全部'）使用了自定义 merchant-workbench__text-action 类（color: var(--text-link); background: transparent），视觉上模拟 link 组件但没有消费 .link DOM 结构。link 组件 standalone 模式已提供 14px/12px 尺寸、40px 紧凑热区和按压态反馈。规则补充：library-consumption.json componentConsumptionNotes 新增'独立文字跳转操作必须消费 link 组件 standalone 模式，不得用业务作用域自定义类模拟'规则。后续工作台场景实现修正需要走 wego-ux 偏差判定。",
+          "source": "用户指出：页面有很多蓝色文字链没有用 link 组件，是规则的缺失还是决策失误"
+        }
+      ],
+      "applies_when_candidates": [
+        "页面中有独立文字跳转操作（如卡片头部右侧的'全部'、'配置'、'查看详情'）",
+        "列表项右侧需要轻操作文字入口",
+        "文字操作视觉表现为蓝色文字链（color: var(--text-link)）"
+      ],
+      "avoid_when_candidates": [
+        "页面主操作应使用 button 组件，不用 link 代替强动作",
+        "正文内联链接使用 link 组件 inline 模式，不是 standalone",
+        "文字操作需要图标或更复杂的结构时，按实际语义选择组件"
+      ],
+      "expected_rule_target": {
+        "file": ".codex/skills/wego-design/library-consumption.json",
+        "field": "componentConsumptionNotes"
+      },
+      "runtime_reachability": {
+        "consumer_skill": "wego-design 读取 library-consumption.json componentConsumptionNotes 做组件消费决策；wego-ux 按 component_mapping 选择的 link 组件实现",
+        "output_field": "design_plan.component_mapping 中文字操作类 content_block 的 selected 组件",
+        "downstream_consumer": "wego-ux 实现时消费 .link 类和 DOM 结构，不用业务作用域自定义类模拟",
+        "acceptance_check": "wego-tests 检查页面中视觉表现为 text-link 颜色的独立文字操作是否使用了 .link 类；守门脚本可扩展检查业务 CSS 中是否存在模拟 link 视觉的自定义类"
+      },
+      "created_at": "2026-07-10T23:00:00+08:00",
+      "updated_at": "2026-07-10T23:00:00+08:00"
     }
   ]
 }
