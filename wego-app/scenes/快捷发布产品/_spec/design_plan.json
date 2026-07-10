@@ -3,7 +3,7 @@
   "matched_uikit": "biz-rule-config",
   "scene_fit_reason": "快捷发布产品是规则配置编辑页：full-screen-modal 打开、有页面级统一发布主操作、以连续文本编辑器和辅助控件为主，命中 biz-rule-config pagePattern 的 interactionPattern「编辑后统一保存，页面级主操作收口」",
   "navigation_pattern": "full-screen-modal 模式 A（左 text-cancel + 右 solid button），无底部 Tab 覆盖",
-  "layout_pattern": "通栏模式 M1",
+  "layout_pattern": "通栏模式 M0",
   "interaction_pattern": "edit-then-save，连续文本输入 + 增量识别 + 局部闪烁 + 去重提示，统一发布主操作收口在导航栏右侧",
   "app_target": {
     "mode": "wego-app-scene",
@@ -42,7 +42,7 @@
   "page_strategy": {
     "page_goal": "连续文本录入、增量识别、统一发布、动态回填、再次编辑闭环",
     "page_pattern": "biz-rule-config",
-    "layout_pattern": "通栏模式 M1",
+    "layout_pattern": "通栏模式 M0",
     "main_scroll_direction": "vertical",
     "content_density": "comfortable",
     "fixed_vs_scroll": "navbar 固定吸顶，编辑器和辅助操作区滚动"
@@ -173,7 +173,7 @@
       "presentation_ref": "full-screen-modal，slide-up-enter/slide-down-exit，cancel-or-save，coversTabBar=true",
       "scene_fit_reason": "编辑后统一保存、页面级主操作收口在导航栏右侧、full-screen-modal 打开、有发布按钮，完全命中 biz-rule-config",
       "component_mapping": ["navbar-cancel", "navbar-publish-action", "field-product-name", "field-price", "field-sku", "field-spec", "field-color", "field-weight", "field-stock", "field-tag", "field-source", "visibility-toggle", "image-upload-placeholder"],
-      "allowed_page_styles": ["通栏 M1（phone-body 0px 横向 padding，cell-group__content 不开 --card）", "连续编辑器行垂直堆叠间距", "辅助操作区分组间距", "价格前缀 ¥ 布局", "闪烁高亮临时样式作用域（CSS Custom Highlight API 优先，降级临时 span）", "去重提示样式作用域"],
+      "allowed_page_styles": ["通栏 M0（phone-body 0px 横向 padding，cell-group__content 不开 --card）", "连续编辑器行垂直堆叠间距", "辅助操作区分组间距", "价格前缀 ¥ 布局", "闪烁高亮临时样式作用域（CSS Custom Highlight API 优先，降级临时 span）", "去重提示样式作用域"],
       "design_gap": ""
     },
     {
@@ -186,7 +186,7 @@
       "presentation_ref": "result-summary，由宿主动态页列表承接，无独立打开方式",
       "scene_fit_reason": "发布结果以对象管理列表项形式回填到动态页顶部，点击卡片再编辑，命中 fallback object-management-list-page",
       "component_mapping": ["dynamic-product-card"],
-      "allowed_page_styles": ["卡片模式 M2（phone-body 16px 横向 padding）", "产品卡片横向布局", "未填字段不占位规则", "发布时间相对时间展示"],
+      "allowed_page_styles": ["卡片模式 M16（phone-body 16px 横向 padding）", "产品卡片横向布局", "未填字段不占位规则", "发布时间相对时间展示"],
       "design_gap": ""
     }
   ],
@@ -350,8 +350,8 @@
     },
     {
       "file": ".codex/skills/wego-design/uikit-plan.json",
-      "field": "pagePatterns[biz-rule-config].compositionConstraints[通栏 M1 + section 由连续 cell/form 组成]",
-      "supports": ["quick-publish-form 通栏模式 M1", "editor-area 与 auxiliary-area 使用 form-group 连续结构"]
+      "field": "pagePatterns[biz-rule-config].compositionConstraints[通栏 M0 + section 由连续 cell/form 组成]",
+      "supports": ["quick-publish-form 通栏模式 M0", "editor-area 与 auxiliary-area 使用 form-group 连续结构"]
     },
     {
       "file": ".codex/skills/wego-design/uikit-plan.json",
@@ -420,7 +420,7 @@
     }
   ],
   "implementation_constraints": [
-    "通栏模式 M1：phone-body 0px 横向 padding，cell-group__content 不开 --card 修饰；连续编辑器行的横向边距由 form/cell 自带 padding 承担",
+    "通栏模式 M0：phone-body 0px 横向 padding，cell-group__content 不开 --card 修饰；连续编辑器行的横向边距由 form/cell 自带 padding 承担",
     "连续编辑器行使用 form-group 正式容器，不发明场景自定义 group 类替换",
     "行内含 switch、button 等独立控件的行不整行热区；只有带箭头/进入下一层的行才整行 clickable（本场景无此类行）",
     "navbar 背景默认跟随 data-bg 公共 CSS 约定：quick-publish-form 的 data-bg=surface 为白底，navbar 跟随白底，不在 scene.css 单独覆盖",

@@ -3,7 +3,7 @@
   "matched_uikit": null,
   "scene_fit_reason": "商家工作台是综合经营首页，现有 UI Kit 没有精确看板范式；可由 generic-mobile-task-page fallback、已注册 navbar/card/cell/tag/badge/button/link/toast 和业务作用域布局安全承接。",
   "navigation_pattern": "工作台 Tab 直挂页面，标题左对齐宽版，右侧收款码与交易设置两个图标+文字操作",
-  "layout_pattern": "卡片模式 M16",
+  "layout_pattern": "卡片模式 M2",
   "interaction_pattern": "单页经营概览 + 入口跳转或 toast 占位反馈 + 全部应用二级页",
   "complexity_level": "complex",
   "app_target": {
@@ -17,7 +17,7 @@
   "page_strategy": {
     "page_goal": "让商户在一个移动端首页内快速看经营状态、处理订单待办并进入高频业务应用。",
     "page_pattern": "generic-mobile-task-page",
-    "layout_pattern": "卡片模式 M16",
+    "layout_pattern": "卡片模式 M2",
     "content_width": "full-width within 16px page padding",
     "scroll": "vertical",
     "main_scroll_direction": "vertical",
@@ -56,7 +56,7 @@
         "traffic-analytics"
       ],
       "allowed_page_styles": [
-        "卡片模式 M16 页面外层 16px 横向留白",
+        "卡片模式 M2 页面外层 16px 横向留白",
         "业务数据栅格",
         "入口网格",
         "业务作用域状态和趋势样式",
@@ -453,22 +453,12 @@
     "app-center 页面滚动容器"
   ],
   "page_presentation": {
-    "merchant-workbench-main": {
-      "type": "host-tab",
-      "transition": "none",
-      "dismiss_action": "switch-tab",
-      "overlay_level": "host-tab-panel",
-      "covers_tab_bar": false,
-      "source": "用户反馈：工作台应直接挂在工作 Tab 下，而不是独立二级页面"
-    },
-    "app-center-page": {
-      "type": "push",
-      "transition": "slide-left",
-      "dismiss_action": "back-button",
-      "overlay_level": "scene-overlay",
-      "covers_tab_bar": true,
-      "source": "flow_to_surface_decisions[enter-app-center].presentation=push；二级 push 页面必须覆盖底部 Tab 栏"
-    }
+    "type": "host-tab",
+    "transition": "none",
+    "dismiss_action": "switch-tab",
+    "overlay_level": "host-tab-panel",
+    "covers_tab_bar": false,
+    "source": "用户反馈：工作台应直接挂在工作 Tab 下，而不是独立二级页面"
   },
   "rule_sources_used": [
     {

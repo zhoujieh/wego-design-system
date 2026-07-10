@@ -3,7 +3,7 @@
   "matched_uikit": null,
   "scene_fit_reason": "仓库管理是对象管理列表 + 新增/编辑表单 + 删除确认组成的完整管理任务；列表页走 object-management-list-page，编辑页走业务资料表单，删除走 dialog 二次确认。",
   "navigation_pattern": "我的 Tab 应用中心 grid-entry → push 仓库列表 → full-screen-modal 新增/编辑仓库 → dialog 删除确认 → 保存/删除后回填列表",
-  "layout_pattern": "仓库列表使用卡片模式 M2；仓库编辑使用通栏表单布局；删除确认使用标准 dialog。",
+  "layout_pattern": "仓库列表使用卡片模式 M16；仓库编辑使用通栏表单布局；删除确认使用标准 dialog。",
   "interaction_pattern": "对象列表管理 + 表单保存回填 + 删除二次确认 + 脏数据取消挽留",
   "app_target": {
     "mode": "wego-app-scene",
@@ -286,7 +286,7 @@
       "scene_fit_reason": "仓库列表命中对象管理列表范式",
       "component_mapping": ["warehouse-list-items", "create-warehouse-entry", "warehouse-more-menu", "warehouse-status"],
       "allowed_page_styles": [
-        "卡片模式 M2：phone-body 16px 横向 padding",
+        "卡片模式 M16：phone-body 16px 横向 padding",
         "仓库卡片展示名称、状态和更多操作"
       ],
       "design_gap": ""
@@ -302,7 +302,7 @@
       "scene_fit_reason": "仓库编辑命中 biz-rule-config 表单范式",
       "component_mapping": ["warehouse-name", "warehouse-contact", "warehouse-phone", "warehouse-address", "save-warehouse-action"],
       "allowed_page_styles": [
-        "通栏模式 M1：phone-body 0px 横向 padding",
+        "通栏模式 M0：phone-body 0px 横向 padding",
         "表单字段垂直堆叠",
         "底部固定主操作"
       ],
@@ -432,8 +432,8 @@
     { "file": "wego-app/scenes/仓库管理/_spec/interaction_spec.json", "field": "surfaces/content_blocks/prototype_boundaries", "supports": ["仓库列表、编辑、删除确认和保存回填"] }
   ],
   "implementation_constraints": [
-    "仓库列表使用卡片模式 M2：phone-body 16px 横向 padding",
-    "仓库编辑使用通栏模式 M1：phone-body 0px 横向 padding",
+    "仓库列表使用卡片模式 M16：phone-body 16px 横向 padding",
+    "仓库编辑使用通栏模式 M0：phone-body 0px 横向 padding",
     "删除确认使用 dialog 组件，不发明自定义弹窗",
     "navbar 背景跟随 data-bg=surface 白底"
   ]

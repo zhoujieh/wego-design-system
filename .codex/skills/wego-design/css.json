@@ -1000,9 +1000,10 @@
         "size-104": "104px"
     },
     "layout": {
-        "layout-page-margin-none": "0px",
-        "layout-page-margin-sm": "16px",
-        "layout-page-margin-lg": "32px",
+        "layout-page-margin-m0": "0px",
+        "layout-page-margin-m8": "8px",
+        "layout-page-margin-m16": "16px",
+        "layout-page-margin-m32": "32px",
         "layout-group-g1-inside": "0px",
         "layout-group-g1-outside": "16px",
         "layout-group-g2-inside": "8px",

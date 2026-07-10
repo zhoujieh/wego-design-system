@@ -77,8 +77,8 @@
   "layout_check": {
     "result": "pass",
     "notes": [
-      "inventory-list 使用卡片模式 M2：列表页 body 16px 横向 padding + cell-group__content--card",
-      "inventory-alert-settings 使用通栏模式 M1：body 横向 0px，cell-group__content 不开 card"
+      "inventory-list 使用卡片模式 M16：列表页 body 16px 横向 padding + cell-group__content--card",
+      "inventory-alert-settings 使用通栏模式 M0：body 横向 0px，cell-group__content 不开 card"
     ]
   },
   "app_scene_check": {

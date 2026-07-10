@@ -642,6 +642,48 @@
       },
       "created_at": "2026-07-10T23:00:00+08:00",
       "updated_at": "2026-07-10T23:00:00+08:00"
+    },
+    {
+      "id": "exp-multi-route-page-presentation-indexed-by-surface",
+      "normalized_key": "multi-route-scene-page-presentation-must-be-indexed-by-surface-id-with-per-surface-covers-tab-bar",
+      "title": "多 route 场景的 page_presentation 必须按 surface_id 索引，为每个 surface 提供独立 covers_tab_bar 配置",
+      "status": "awaiting-confirmation",
+      "occurrence_count": 1,
+      "threshold": 1,
+      "primary_owner": "wego-design",
+      "secondary_owners": ["wego-ux", "wego-tests"],
+      "ownership_reason": "问题最早产生在 wego-design 产出 design_plan 阶段。多 route 场景包含多个 surface（如 host-tab 主页面 + push 二级页），但 page_presentation 采用单数结构只描述主页面，二级 push/sheet/full-screen-modal surface 缺少独立 presentation 配置。wego-ux 实现时因缺少明确约束，错误继承主页面的 covers_tab_bar:false，导致二级页未覆盖底部 Tab 栏。wego-design/SKILL.md 的 page_presentation 结构示例是单数结构，没有说明多 route 场景必须按 surface_id 索引，而实际动态场景已使用按 surface_id 索引的结构，规则与实例不一致。",
+      "problem_pattern": "多 route 场景的 design_plan.page_presentation 采用单数结构，只描述主 surface（通常是 host-tab/host-entry，covers_tab_bar:false），二级 push/sheet/full-screen-modal surface 缺少独立 presentation 配置。实现时二级页错误继承主页面 covers_tab_bar:false，导致二级页未覆盖底部 Tab 栏，底部导航在二级页仍可见可点击。",
+      "scene_evidence": [
+        {
+          "date": "2026-07-11",
+          "scene": "商家工作台全部应用二级页",
+          "summary": "工作台 host-tab 主页面 covers_tab_bar:false 正确，但 app-center-page 二级 push 页因 page_presentation 单数结构缺少独立配置，scene.js 实现时 coversTabBar 错误设为 false，底部 bottomNav 在二级页仍可见。修复：(1) design_plan.page_presentation 改为按 surface_id 索引，补充 app-center-page 的 push + covers_tab_bar:true；(2) scene.js coversTabBar:false → true。浏览器实测二级页 panel（top:0,bottom:844）完全覆盖底部 bottom-nav（top:787,bottom:844）。",
+          "source": "用户报告：工作台点击全部应用入口，进入二级页没有盖住底部的 bottomBar"
+        }
+      ],
+      "applies_when_candidates": [
+        "场景包含多个 route/surface，且存在二级 push/sheet/full-screen-modal 页面",
+        "主 surface 是 host-tab/host-entry（covers_tab_bar:false），同时存在需要覆盖 Tab 栏的二级 surface",
+        "design_plan 的 prototype_target.routes 包含多个 route"
+      ],
+      "avoid_when_candidates": [
+        "单 route 单 surface 场景，page_presentation 单数结构即可",
+        "所有 surface 都是 host-tab/host-entry 类型，都不需要覆盖 Tab 栏",
+        "场景只有一个 push 页面且无 host-tab 主页面"
+      ],
+      "expected_rule_target": {
+        "file": ".codex/skills/wego-design/SKILL.md",
+        "field": "页面打开方式 / page_presentation 结构规范（多 route 场景必须按 surface_id 索引）"
+      },
+      "runtime_reachability": {
+        "consumer_skill": "wego-design 产出多 route 场景 design_plan 时；wego-ux 实现时读取每个 surface 的 presentation；wego-tests 验收时检查",
+        "output_field": "design_plan.page_presentation 的结构（单数 vs 按 surface_id 索引）和每个 surface 的 covers_tab_bar",
+        "downstream_consumer": "wego-ux 按 page_presentation[surface_id].covers_tab_bar 设置 scene.js 的 coversTabBar；wego-tests 检查二级 push/sheet/full-screen-modal 页面是否覆盖底部 Tab 栏",
+        "acceptance_check": "wego-tests 用 agent-browser 进入二级 push/sheet/full-screen-modal 页面，验证 sceneLayer 和 panel 包含 cover-tab 类，且底部 bottom-nav 被 panel 完全覆盖（coveredByPanel=true）"
+      },
+      "created_at": "2026-07-11T00:00:00+08:00",
+      "updated_at": "2026-07-11T00:00:00+08:00"
     }
   ]
 }

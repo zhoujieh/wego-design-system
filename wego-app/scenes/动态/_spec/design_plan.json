@@ -3,7 +3,7 @@
   "matched_uikit": null,
   "scene_fit_reason": "动态页是内容流型主 Tab，由 object-management-list-page fallback 承接；帮卖按钮复用现有 link standalone 12px 变体，加价卖半弹窗作为 sheet primitive 承载的二级表单页，由正式 modal 组件 frame 变体承载容器，结合 cell/form/button/link/input 组件和页面级业务样式完成。",
   "navigation_pattern": "bottom-nav 固定 Tab 切换 + 页内筛选 + 操作行帮卖入口拉起底部 sheet",
-  "layout_pattern": "通栏模式 M1（宿主页）+ sheet 内表单分组（弹窗）",
+  "layout_pattern": "通栏模式 M0（宿主页）+ sheet 内表单分组（弹窗）",
   "interaction_pattern": "流式列表浏览 + 页内筛选 + 单条卡片操作 + 帮卖入口拉起 sheet 表单编辑后统一收口",
   "app_target": {
     "mode": "wego-app-scene",
@@ -35,7 +35,7 @@
     "dynamic-feed-main": {
       "page_goal": "浏览和操作产品动态流，触达帮卖入口",
       "page_pattern": "object-management-list-page",
-      "layout_pattern": "通栏模式 M1",
+      "layout_pattern": "通栏模式 M0",
       "main_scroll_direction": "vertical",
       "content_density": "comfortable",
       "first_screen_goal": "快速看到最新动态并触达发布/搜索/操作入口",
@@ -240,7 +240,7 @@
         "feed-item-resale-action"
       ],
       "allowed_page_styles": [
-        "通栏模式 M1：动态卡片横向 padding 由卡片内容自带 16px 承担，页面层不加额外横向 padding",
+        "通栏模式 M0：动态卡片横向 padding 由卡片内容自带 16px 承担，页面层不加额外横向 padding",
         "动态卡片项之间的 0.5px 分割线：left 对齐右侧内容起始处（头像宽 40px + 间距 12px + 左 padding 16px），right 贴屏幕边缘；375px 断点 left 改为 40px+8px+12px",
         "动态卡片内 grid 布局：头像 40px + 1fr 左右两列，gap 12px",
         "九宫格图片网格：3 列等分，gap 4px，单格 aspect-ratio 1",

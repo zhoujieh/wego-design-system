@@ -373,8 +373,8 @@
     title: '全部应用',
     presentation: {
       type: 'push',
-      transition: 'push',
-      coversTabBar: false
+      transition: 'slide-left',
+      coversTabBar: true
     },
     template: appCenterTemplate(),
     init: bindAppCenter

@@ -94,8 +94,8 @@
   "layout_check": {
     "status": "pass",
     "notes": [
-      "列表页使用卡片模式 M2：body 横向 padding 16px",
-      "编辑页使用通栏模式 M1：body 横向 padding 0px，分组内容不加 --card",
+      "列表页使用卡片模式 M16：body 横向 padding 16px",
+      "编辑页使用通栏模式 M0：body 横向 padding 0px，分组内容不加 --card",
       "手机 390px 宽度下菜单位于 viewport 内，卡片标题不与更多按钮重叠",
       "表单首组为仓库状态，避免关键开关被放到页面底部"
     ]

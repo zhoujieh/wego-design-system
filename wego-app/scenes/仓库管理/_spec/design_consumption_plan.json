@@ -2,7 +2,7 @@
   "matched_uikit": null,
   "scene_fit_reason": "本任务是『宿主入口 + 仓库列表 + 全屏仓库编辑页』的组合型场景。仓库列表页是可新增、编辑、删除和启停的对象管理列表，适合走 object-management-list-page fallback；新增/编辑仓库页属于典型的业务资料编辑和规则配置，适合命中 biz-rule-config。",
   "navigation_pattern": "宿主宫格入口打开 push 列表页；列表页导航栏右侧使用加号图标+『新建』入口打开 full-screen-modal；列表卡片右侧更多气泡菜单承接编辑和删除，删除后接 dialog 二次确认",
-  "layout_pattern": "host-entry surface 使用宿主宫格入口；warehouse-list surface 使用卡片模式 M2（phone-body 16px 横向 padding + 横向对象卡片列表）；warehouse-editor surface 使用通栏模式 M1（phone-body 0px 横向 padding + form-group / cell-group 内容不加 --card 修饰）",
+  "layout_pattern": "host-entry surface 使用宿主宫格入口；warehouse-list surface 使用卡片模式 M16（phone-body 16px 横向 padding + 横向对象卡片列表）；warehouse-editor surface 使用通栏模式 M0（phone-body 0px 横向 padding + form-group / cell-group 内容不加 --card 修饰）",
   "interaction_pattern": "仓库列表查看 + 新建/编辑统一保存回填 + 列表菜单删除二次确认 + 表单脏数据取消挽留",
   "app_target": {
     "mode": "wego-app-scene",
@@ -86,7 +86,7 @@
         }
       ],
       "allowed_page_styles": [
-        "卡片模式 M2：phone-body 16px 横向 padding，卡片列表组间距使用 8px",
+        "卡片模式 M16：phone-body 16px 横向 padding，卡片列表组间距使用 8px",
         "仓库对象卡片默认横向排布：左侧固定识别图，右侧标题/状态/一条摘要/更多操作入口；地址、联系人、备注等详情字段不在列表中展开",
         "列表右上角气泡菜单只作为当前业务作用域样式承接编辑和删除，不注册为通用组件；危险删除必须继续进入 dialog 二次确认",
         "列表页底部补安全区 padding，避免内容被底部指示器遮挡"
@@ -121,7 +121,7 @@
         {
           "block": "仓库状态字段：启用仓库、默认发货仓，作为进入表单后最优先可操作项",
           "consumption_mode": "free-composition",
-          "selected": ".form-group > .form-group__title『仓库状态』 + .form-group__content（通栏 M1） > .form-body.form-body--preserve-content-align（.form-body__label + .form-body__action > .switch.switch--on/off）；switch 归入 action 左对齐，不放入 right-btn",
+          "selected": ".form-group > .form-group__title『仓库状态』 + .form-group__content（通栏 M0） > .form-body.form-body--preserve-content-align（.form-body__label + .form-body__action > .switch.switch--on/off）；switch 归入 action 左对齐，不放入 right-btn",
           "constraint_ref": {
             "pagePattern": "biz-rule-config",
             "rule_id": "compositionConstraints[5]",
@@ -136,7 +136,7 @@
         {
           "block": "基础信息字段：仓库名称、仓库编码、仓库联系人、联系电话、仓库地址、定位备注、门头图链接",
           "consumption_mode": "free-composition",
-          "selected": ".form-group > .form-group__title『基础信息』 + .form-group__content（通栏 M1） > text/phone/textarea 使用 .form-body + .form-body__action；门头图使用 .form-body.form-body--vertical 承接 .wg-image 预览 + 输入说明",
+          "selected": ".form-group > .form-group__title『基础信息』 + .form-group__content（通栏 M0） > text/phone/textarea 使用 .form-body + .form-body__action；门头图使用 .form-body.form-body--vertical 承接 .wg-image 预览 + 输入说明",
           "constraint_ref": {
             "pagePattern": "biz-rule-config",
             "rule_id": "compositionConstraints[4]",
@@ -151,7 +151,7 @@
         {
           "block": "履约能力字段：仓库类型、服务范围、支持同城配送、支持门店自提、支持直播备货",
           "consumption_mode": "free-composition",
-          "selected": ".cell-group > .cell-group__title『履约能力』 + .cell-group__content（通栏 M1） > 枚举行使用 .cell.cell--single.cell--bg-white.cell--clickable（.cell__action > span.cell__action-text + i.cell__arrow）；布尔项使用 .cell.cell--single.cell--bg-white（.cell__action > .switch）",
+          "selected": ".cell-group > .cell-group__title『履约能力』 + .cell-group__content（通栏 M0） > 枚举行使用 .cell.cell--single.cell--bg-white.cell--clickable（.cell__action > span.cell__action-text + i.cell__arrow）；布尔项使用 .cell.cell--single.cell--bg-white（.cell__action > .switch）",
           "constraint_ref": {
             "pagePattern": "biz-rule-config",
             "rule_id": "compositionConstraints[5]",
@@ -166,7 +166,7 @@
         {
           "block": "库存与发货字段：安全库存、单日处理上限、发货时效、温层要求、锁定预占库存、支持跨区域调拨",
           "consumption_mode": "free-composition",
-          "selected": ".form-group > .form-group__title『库存与发货』 + .form-group__content（通栏 M1） > 数字字段使用 .form-body + .number-input；枚举字段使用 .form-body.form-body--clickable + .form-body__select；开关字段使用 .form-body.form-body--preserve-content-align + .form-body__action > .switch",
+          "selected": ".form-group > .form-group__title『库存与发货』 + .form-group__content（通栏 M0） > 数字字段使用 .form-body + .number-input；枚举字段使用 .form-body.form-body--clickable + .form-body__select；开关字段使用 .form-body.form-body--preserve-content-align + .form-body__action > .switch",
           "constraint_ref": {
             "pagePattern": "biz-rule-config",
             "rule_id": "compositionConstraints[4]",
@@ -181,7 +181,7 @@
         {
           "block": "补充信息字段：仓库备注",
           "consumption_mode": "free-composition",
-          "selected": ".form-group > .form-group__title『补充信息』 + .form-group__content（通栏 M1） > 备注使用 .form-body.form-body--vertical + textarea",
+          "selected": ".form-group > .form-group__title『补充信息』 + .form-group__content（通栏 M0） > 备注使用 .form-body.form-body--vertical + textarea",
           "constraint_ref": {
             "pagePattern": "biz-rule-config",
             "rule_id": "compositionConstraints[3]",
@@ -195,7 +195,7 @@
         }
       ],
       "allowed_page_styles": [
-        "通栏模式 M1：phone-body 0px 横向 padding，分组内容不加 --card 修饰",
+        "通栏模式 M0：phone-body 0px 横向 padding，分组内容不加 --card 修饰",
         "组间距使用 8px，图片预览和提示文案只允许业务作用域样式，不新增组件类",
         "底部滚动区域补 calc(var(--spacer-40) + var(--safe-area-bottom, 0px))"
       ],
@@ -212,8 +212,8 @@
   },
   "implementation_constraints": [
     "新增宿主入口时只按 route_id=my-warehouse-management 增量更新 wego-app/js/routes.js 和 my-app-center 宫格，不重画宿主壳",
-    "warehouse-list surface 使用卡片模式 M2，不把仓库列表硬塞进 cell-group；列表项按对象管理列表处理，默认横向扫读，不纵向摊开完整资料",
-    "warehouse-editor surface 使用 biz-rule-config 的通栏模式 M1，不允许再套 form-group__content--card 或 cell-group__content--card",
+    "warehouse-list surface 使用卡片模式 M16，不把仓库列表硬塞进 cell-group；列表项按对象管理列表处理，默认横向扫读，不纵向摊开完整资料",
+    "warehouse-editor surface 使用 biz-rule-config 的通栏模式 M0，不允许再套 form-group__content--card 或 cell-group__content--card",
     "新增/编辑仓库页必须通过 full-screen-modal 打开，且使用『取消 + 保存』导航模式；不得改成 push 或 sheet",
     "列表页新建入口放在 navbar 右侧加号图标+『新建』操作位，不再使用纯文字『新增』，也不额外放第二个页面级 strong 按钮",
     "列表项右侧更多气泡菜单承接编辑和删除；气泡菜单仅作为当前场景级业务样式，不注册成通用组件",

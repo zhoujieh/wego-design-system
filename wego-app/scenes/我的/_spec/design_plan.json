@@ -3,7 +3,7 @@
   "matched_uikit": null,
   "scene_fit_reason": "「我的」Tab 是宿主固定 Tab 个人中心，由身份摘要、会员权益、应用中心入口聚合、设置入口四块组成；现有 pagePattern 只有 biz-rule-config 和 system-settings 两类设置型范式，无法精确命中；按 uikit-plan.json.screenBlueprints[我的/资料编辑] + fallbackPageBlueprints[mobile-host-entry] 安全承接，由 avatar+badge+card+button+link+cell 等已注册组件和页面级业务样式组成。参照动态 Tab 处理方式：固定 Tab 不注册 push 路由，carrier=host-fixed-tab，内容继续由 index.html + app.css 承载，不迁移到 scene.js 结构",
   "navigation_pattern": "bottom-nav 固定 Tab 切换",
-  "layout_pattern": "卡片模式 M2",
+  "layout_pattern": "卡片模式 M16",
   "interaction_pattern": "摘要浏览 + 入口聚合下钻",
   "app_target": {
     "mode": "wego-app-scene",
@@ -26,7 +26,7 @@
   "page_strategy": {
     "page_goal": "查看店主身份、会员权益与存储用量，并触达店铺管理、应用工具与系统设置入口",
     "page_pattern": "mobile-host-entry",
-    "layout_pattern": "卡片模式 M2",
+    "layout_pattern": "卡片模式 M16",
     "main_scroll_direction": "vertical",
     "content_density": "comfortable",
     "first_screen_goal": "首屏看到店主身份与会员权益摘要，并触达高频应用入口",
@@ -156,7 +156,7 @@
         "settings-entries"
       ],
       "allowed_page_styles": [
-        "卡片模式 M2：宿主内容层 16px 横向 padding，四块分组用 card 修饰类承载",
+        "卡片模式 M16：宿主内容层 16px 横向 padding，四块分组用 card 修饰类承载",
         "身份卡：头像 56px + 名称/徽标/角色识别区 + 操作按钮区横向布局，卡片内 padding 16px",
         "会员卡：card--filled 弱底色，会员标签与用量摘要横向布局，操作入口右侧对齐",
         "应用中心 Grid：4 列等分（375px 断点降为 3 列），图标 24px，gap 12px，卡片内 padding 16px",

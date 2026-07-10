@@ -2,7 +2,7 @@
   "matched_uikit": "biz-rule-config",
   "scene_fit_reason": "任务核心是为每个价格类型配置可见权限（公开/私密/部分可见/不给谁看），属于业务规则配置；命中 uikit-plan.json.pagePatterns[biz-rule-config] 的 applicableScenarios『权限管理』与 templates『价格规则设置』；权限设置页直接消费该 pagePattern 的 full-screen-modal 形态、navbar fullscreenModalPatterns 模式 A（取消+保存）、cell-group + cell + radio/checkbox 组合与 compositionConstraints。",
   "navigation_pattern": "navbar（列表页命中 push 转场：leftControl=back-icon + 居中标题；权限设置页命中全屏模态模式 A：leftControl=text-cancel + rightActionType=button 保存）",
-  "layout_pattern": "phone-body 纵向流 + cell-group 分组（cell-group__title + cell-group__content）。host-entry surface 使用卡片模式 M2（phone-body 16px 横向 padding + cell-group__content--card）；price-type-list 与 price-permission-edit surface 命中 biz-rule-config 且 surface 角色不是 host-entry，使用通栏模式 M1（phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰），cell 横向边距由 cell__body 自带 16px padding 承担，避免双重 padding。",
+  "layout_pattern": "phone-body 纵向流 + cell-group 分组（cell-group__title + cell-group__content）。host-entry surface 使用卡片模式 M16（phone-body 16px 横向 padding + cell-group__content--card）；price-type-list 与 price-permission-edit surface 命中 biz-rule-config 且 surface 角色不是 host-entry，使用通栏模式 M0（phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰），cell 横向边距由 cell__body 自带 16px padding 承担，避免双重 padding。",
   "interaction_pattern": "列表页 select（点击 push 进入权限设置页，承接摘要回填）；权限设置页 edit-then-save（4 选项单选互斥 + 条件展开粉丝分组多选 + 页面级保存收口）",
   "app_target": {
     "mode": "wego-app-scene",
@@ -40,7 +40,7 @@
         }
       ],
       "allowed_page_styles": [
-        "卡片模式 M2：phone-body 16px 横向 padding + cell-group__content--card（仅 host-entry surface 适用，引用 specs/布局与间距规范.md#页面边距）",
+        "卡片模式 M16：phone-body 16px 横向 padding + cell-group__content--card（仅 host-entry surface 适用，引用 specs/布局与间距规范.md#页面边距）",
         "保存后状态摘要回填样式（业务作用域，限定在 host-entry 摘要节点）"
       ],
       "design_gap": ""
@@ -73,13 +73,13 @@
         {
           "block": "列表页内容：默认价格类型列表（拿货价、售价、批发价、代发价、打包价），每行展示价格类型名称、当前权限摘要、右侧箭头",
           "consumption_mode": "composition-constraint",
-          "selected": ".cell-group > .cell-group__title + .cell-group__content（不开 --card 修饰，通栏模式 M1） > .cell.cell--single.cell--bg-white.cell--clickable.cell--divider-right-edge[最后一行除外]（.cell__body > .cell__content > .cell__title-row > .cell__title + .cell__action > .cell__action-text + i.cell__arrow.wego-iconfont-s.icon-youjiantou16）",
+          "selected": ".cell-group > .cell-group__title + .cell-group__content（不开 --card 修饰，通栏模式 M0） > .cell.cell--single.cell--bg-white.cell--clickable.cell--divider-right-edge[最后一行除外]（.cell__body > .cell__content > .cell__title-row > .cell__title + .cell__action > .cell__action-text + i.cell__arrow.wego-iconfont-s.icon-youjiantou16）",
           "constraint_ref": {
             "pagePattern": "biz-rule-config",
             "rule_id": "compositionConstraints[5]",
             "trigger": "行内主语义是进入下一层选择/跳转/展开，且右侧存在箭头或等价的下一步指示"
           },
-          "reason": "5 个价格类型行带箭头进入下一层权限设置页，命中 compositionConstraints[5]『整行 clickable 仅服务于进入下一步』；权限摘要走 cell__action-text（如『部分可见 · 3 个分组』『公开』『私密』）；连续行放进 .cell-group__content（通栏 M1，不开 --card），最后一行不加分割线；分组容器强制使用 .cell-group，不发明 scene 级 xxx-page__group；命中 compositionConstraints[6]『surface 命中 biz-rule-config 且不是 host-entry → 通栏模式 M1』",
+          "reason": "5 个价格类型行带箭头进入下一层权限设置页，命中 compositionConstraints[5]『整行 clickable 仅服务于进入下一步』；权限摘要走 cell__action-text（如『部分可见 · 3 个分组』『公开』『私密』）；连续行放进 .cell-group__content（通栏 M0，不开 --card），最后一行不加分割线；分组容器强制使用 .cell-group，不发明 scene 级 xxx-page__group；命中 compositionConstraints[6]『surface 命中 biz-rule-config 且不是 host-entry → 通栏模式 M0』",
           "workflow_stage": "wego-design（主）, wego-ux（次）",
           "scenario_type": "component-consumption-decision",
           "judgment_condition": "结构特征为带箭头的连续跳转行列表，命中 biz-rule-config pagePattern 且 surface 角色不是 host-entry",
@@ -87,7 +87,7 @@
         }
       ],
       "allowed_page_styles": [
-        "通栏模式 M1：phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰；cell 横向边距由 cell__body 自带 16px padding 承担（引用 specs/布局与间距规范.md#页面边距 与 uikit-plan.json compositionConstraints[6]）",
+        "通栏模式 M0：phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰；cell 横向边距由 cell__body 自带 16px padding 承担（引用 specs/布局与间距规范.md#页面边距 与 uikit-plan.json compositionConstraints[6]）",
         "phone-body 纵向间距：gap: var(--spacer-8)；padding-bottom 安全区 calc(var(--spacer-40) + var(--safe-area-bottom, 0px))",
         "页面外层 min-height: 100% + display: flex + flex-direction: column（布局胶水）"
       ],
@@ -121,13 +121,13 @@
         {
           "block": "权限类型单选：公开、私密、部分可见、不给谁看",
           "consumption_mode": "composition-constraint",
-          "selected": ".cell-group > .cell-group__title + .cell-group__content（不开 --card 修饰，通栏模式 M1） > .cell.cell--single.cell--bg-white.cell--clickable.cell--divider-right-edge[最后一行除外][role=radio][aria-checked]（.cell__select > .radio[+.radio--checked + .radio__inner + .radio__dot[选中时]] + .cell__body > .cell__content > .cell__title-row > .cell__title + .cell__subtitle）",
+          "selected": ".cell-group > .cell-group__title + .cell-group__content（不开 --card 修饰，通栏模式 M0） > .cell.cell--single.cell--bg-white.cell--clickable.cell--divider-right-edge[最后一行除外][role=radio][aria-checked]（.cell__select > .radio[+.radio--checked + .radio__inner + .radio__dot[选中时]] + .cell__body > .cell__content > .cell__title-row > .cell__title + .cell__subtitle）",
           "constraint_ref": {
             "pagePattern": "biz-rule-config",
             "rule_id": "compositionConstraints[0]",
             "trigger": "多选项互斥单选（选项≥3 或单条文案>4字）"
           },
-          "reason": "4 个权限类型属于互斥单选且文案>4字（『部分可见』『不给谁看』），精确命中 compositionConstraints[0]：使用 cell + cell__select + radio 竖排，避免 form 右侧 radio-field-group 在窄屏溢出；radio 嵌入 cell 左侧选择器时不带文字，使用 default 尺寸（24px），不追加 .radio--sm（对照本组件 structurePatterns『带文字场景才用 20px 小尺寸』，与同文件 checkbox 多选行 139/154 写法一致）；选中态仅通过 radio--checked 表达，不加 cell--indent（避免破坏同组横向对齐基线）；整行 cell--clickable + role=radio 承担热区，命中 cell 契约『cell__select 内嵌 radio 时文案由 cell__title 承载』稳定场景；通栏 M1 由 compositionConstraints[6] 强制",
+          "reason": "4 个权限类型属于互斥单选且文案>4字（『部分可见』『不给谁看』），精确命中 compositionConstraints[0]：使用 cell + cell__select + radio 竖排，避免 form 右侧 radio-field-group 在窄屏溢出；radio 嵌入 cell 左侧选择器时不带文字，使用 default 尺寸（24px），不追加 .radio--sm（对照本组件 structurePatterns『带文字场景才用 20px 小尺寸』，与同文件 checkbox 多选行 139/154 写法一致）；选中态仅通过 radio--checked 表达，不加 cell--indent（避免破坏同组横向对齐基线）；整行 cell--clickable + role=radio 承担热区，命中 cell 契约『cell__select 内嵌 radio 时文案由 cell__title 承载』稳定场景；通栏 M0 由 compositionConstraints[6] 强制",
           "workflow_stage": "wego-design（主）, wego-ux（次）",
           "scenario_type": "component-consumption-decision",
           "judgment_condition": "结构特征为≥3 项互斥单选且单条文案>4字，语义特征为权限类型选择，命中 biz-rule-config pagePattern 且 surface 角色不是 host-entry",
@@ -136,13 +136,13 @@
         {
           "block": "权限类型为『部分可见』时展开的粉丝分组多选",
           "consumption_mode": "composition-constraint",
-          "selected": "父项『部分可见』.cell[role=radio] 选中后，在权限类型所在的同一 .cell-group__content 内连续追加子项 .cell.cell--single.cell--bg-white.cell--indent.cell--divider-center[最后一行除外][role=checkbox][aria-checked]（.cell__select > .checkbox[+.checkbox--checked + .checkbox__inner + .checkbox__icon > img.checkbox__asset.src=assets/icons/checkbox-check.svg] + .cell__body > .cell__content > .cell__title-row > .cell__title）；子项左侧已有 checkbox 前导，不再补 .cell__backspace；分组容器使用独立的 .cell-group 承载『可见粉丝分组』标题 + .cell-group__content（不开 --card 修饰，通栏模式 M1）",
+          "selected": "父项『部分可见』.cell[role=radio] 选中后，在权限类型所在的同一 .cell-group__content 内连续追加子项 .cell.cell--single.cell--bg-white.cell--indent.cell--divider-center[最后一行除外][role=checkbox][aria-checked]（.cell__select > .checkbox[+.checkbox--checked + .checkbox__inner + .checkbox__icon > img.checkbox__asset.src=assets/icons/checkbox-check.svg] + .cell__body > .cell__content > .cell__title-row > .cell__title）；子项左侧已有 checkbox 前导，不再补 .cell__backspace；分组容器使用独立的 .cell-group 承载『可见粉丝分组』标题 + .cell-group__content（不开 --card 修饰，通栏模式 M0）",
           "constraint_ref": {
             "pagePattern": "biz-rule-config",
             "rule_id": "compositionConstraints[2]",
             "trigger": "父项选中后才出现补充字段、跳转入口、筛选范围或排除条件"
           },
-          "reason": "『部分可见』选中后才出现粉丝分组多选，命中 compositionConstraints[2]『把补充内容视为父场景延展，和父项保持同组连续结构』；子项 cell--indent 表达从属，左侧已有 checkbox 不再叠加 cell__backspace（命中 cell 契约 structurePatterns『子项左侧已有前导内容时不再补 cell__backspace』）；分组容器强制使用 .cell-group；粉丝分组多选数据来自内存静态数据，不强制持久化；通栏 M1 由 compositionConstraints[6] 强制",
+          "reason": "『部分可见』选中后才出现粉丝分组多选，命中 compositionConstraints[2]『把补充内容视为父场景延展，和父项保持同组连续结构』；子项 cell--indent 表达从属，左侧已有 checkbox 不再叠加 cell__backspace（命中 cell 契约 structurePatterns『子项左侧已有前导内容时不再补 cell__backspace』）；分组容器强制使用 .cell-group；粉丝分组多选数据来自内存静态数据，不强制持久化；通栏 M0 由 compositionConstraints[6] 强制",
           "workflow_stage": "wego-design（主）, wego-ux（次）",
           "scenario_type": "component-consumption-decision",
           "judgment_condition": "结构特征为父项选中后展开的多选子项，语义特征为粉丝分组可见范围，命中 biz-rule-config pagePattern 且 surface 角色不是 host-entry",
@@ -151,13 +151,13 @@
         {
           "block": "权限类型为『不给谁看』时展开的粉丝分组多选",
           "consumption_mode": "composition-constraint",
-          "selected": "父项『不给谁看』.cell[role=radio] 选中后，在权限类型所在的同一 .cell-group__content 内连续追加子项 .cell.cell--single.cell--bg-white.cell--indent.cell--divider-center[最后一行除外][role=checkbox][aria-checked]（.cell__select > .checkbox[+.checkbox--checked + .checkbox__inner + .checkbox__icon > img.checkbox__asset.src=assets/icons/checkbox-check.svg] + .cell__body > .cell__content > .cell__title-row > .cell__title）；子项左侧已有 checkbox 前导，不再补 .cell__backspace；分组容器使用独立的 .cell-group 承载『不可见粉丝分组』标题 + .cell-group__content（不开 --card 修饰，通栏模式 M1）",
+          "selected": "父项『不给谁看』.cell[role=radio] 选中后，在权限类型所在的同一 .cell-group__content 内连续追加子项 .cell.cell--single.cell--bg-white.cell--indent.cell--divider-center[最后一行除外][role=checkbox][aria-checked]（.cell__select > .checkbox[+.checkbox--checked + .checkbox__inner + .checkbox__icon > img.checkbox__asset.src=assets/icons/checkbox-check.svg] + .cell__body > .cell__content > .cell__title-row > .cell__title）；子项左侧已有 checkbox 前导，不再补 .cell__backspace；分组容器使用独立的 .cell-group 承载『不可见粉丝分组』标题 + .cell-group__content（不开 --card 修饰，通栏模式 M0）",
           "constraint_ref": {
             "pagePattern": "biz-rule-config",
             "rule_id": "compositionConstraints[2]",
             "trigger": "父项选中后才出现补充字段、跳转入口、筛选范围或排除条件"
           },
-          "reason": "与『部分可见』共用同一组合约束与稳定场景；两者互斥，仅当前选中的展开，切换权限类型时上一组子项收起、新组子项展开；子项不再补 cell__backspace，由既有 checkbox 前导表达层级；分组容器强制使用 .cell-group；通栏 M1 由 compositionConstraints[6] 强制",
+          "reason": "与『部分可见』共用同一组合约束与稳定场景；两者互斥，仅当前选中的展开，切换权限类型时上一组子项收起、新组子项展开；子项不再补 cell__backspace，由既有 checkbox 前导表达层级；分组容器强制使用 .cell-group；通栏 M0 由 compositionConstraints[6] 强制",
           "workflow_stage": "wego-design（主）, wego-ux（次）",
           "scenario_type": "component-consumption-decision",
           "judgment_condition": "结构特征为父项选中后展开的多选子项，语义特征为粉丝分组排除范围，命中 biz-rule-config pagePattern 且 surface 角色不是 host-entry",
@@ -165,7 +165,7 @@
         }
       ],
       "allowed_page_styles": [
-        "通栏模式 M1：phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰；cell 横向边距由 cell__body 自带 16px padding 承担（引用 specs/布局与间距规范.md#页面边距 与 uikit-plan.json compositionConstraints[6]）",
+        "通栏模式 M0：phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰；cell 横向边距由 cell__body 自带 16px padding 承担（引用 specs/布局与间距规范.md#页面边距 与 uikit-plan.json compositionConstraints[6]）",
         "phone-body 纵向间距：gap: var(--spacer-8)；padding-bottom 安全区 calc(var(--spacer-40) + var(--safe-area-bottom, 0px))",
         "页面外层 min-height: 100% + display: flex + flex-direction: column（布局胶水）",
         "粉丝分组展开/收起的轻量显隐切换样式（业务作用域，限定在子项容器）",
@@ -177,7 +177,7 @@
   "component_mapping_summary_note": "component_mapping 已按 surface 拆分到 surface_designs[].component_mapping；本字段保留为空数组占位，避免重复",
   "component_mapping": [],
   "spec_refs_used": {
-    "layout": ".codex/skills/wego-design/specs/布局与间距规范.md（phone-body 间距、cell-group gap、safe-area、通栏 M1 / 卡片 M2 选择规则）",
+    "layout": ".codex/skills/wego-design/specs/布局与间距规范.md（phone-body 间距、cell-group gap、safe-area、通栏 M0 / 卡片 M16 选择规则）",
     "interaction": ".codex/skills/wego-design/specs/交互设计原则.md（页面模式与转场 push/full-screen-modal、原型数据交互、操作布局原则）",
     "copy": ".codex/skills/wego-design/specs/文案与数据规范.md（权限摘要文案省略与中文标点）",
     "visual": ".codex/skills/wego-design/specs/设计风格与品牌原则.md（data-bg 与 navbar 背景一致）",
@@ -185,8 +185,8 @@
   },
   "implementation_constraints": [
     "分组容器类强制使用 .cell-group（含 .cell-group__title + .cell-group__content），禁止发明 scene 级 xxx-page__group 自定义类替代；标题使用 .cell-group__title 单独成行，不塞进白底圆角内容区",
-    "price-type-list 与 price-permission-edit surface 命中 biz-rule-config 且角色不是 host-entry，必须使用通栏模式 M1：phone-body 0px 横向 padding + .cell-group__content 不开 --card 修饰；cell 横向边距由 .cell__body 自带 16px padding 承担；禁止给 phone-body 加 12px/16px 横向 padding 后再开 cell-group__content--card（双重 padding 浪费空间且违反 M1 规范）",
-    "host-entry surface 使用卡片模式 M2：phone-body 16px 横向 padding + .cell-group__content--card 修饰（仅 host-entry 适用，由 wego-app/css/app.css 承担，不在本场景 scene.css 中重复）",
+    "price-type-list 与 price-permission-edit surface 命中 biz-rule-config 且角色不是 host-entry，必须使用通栏模式 M0：phone-body 0px 横向 padding + .cell-group__content 不开 --card 修饰；cell 横向边距由 .cell__body 自带 16px padding 承担；禁止给 phone-body 加 12px/16px 横向 padding 后再开 cell-group__content--card（双重 padding 浪费空间且违反 M0 规范）",
+    "host-entry surface 使用卡片模式 M16：phone-body 16px 横向 padding + .cell-group__content--card 修饰（仅 host-entry 适用，由 wego-app/css/app.css 承担，不在本场景 scene.css 中重复）",
     "radio 嵌入 cell 左侧选择器（.cell__select）时不带文字，使用 default 尺寸（24px），只追加状态修饰类（.radio--checked）；不套 .radio-field 或 .radio-field-group；选项文案由 .cell__title 承载；不追加 .radio--sm（带文字场景才用 sm 20px，对照本组件 structurePatterns）",
     "checkbox 嵌入 cell 时只使用 .checkbox 及状态修饰类（.checkbox--checked），勾选标记必须引用 assets/icons/checkbox-check.svg（.checkbox__icon > img.checkbox__asset）；不套 .checkbox-field",
     "权限类型 4 选项单选必须竖排（cell + cell__select + radio），禁止使用 form-body + radio-field-group 横排（命中 compositionConstraints[0] 适配风险）",

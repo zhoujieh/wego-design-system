@@ -88,16 +88,20 @@ description: 消费微购设计系统并输出 design_plan。用于已有 intera
 
 `layout_pattern` 必须显式写明页面模式，不使用模糊或条件性记法：
 
-- `通栏模式 M1`：页面内容层横向 padding 为 0；分组内容使用通栏结构，不开启卡片修饰类。
-- `卡片模式 M2`：页面内容层横向 padding 为 16px；分组内容使用已注册卡片修饰类。
+- `通栏模式 M0`：页面内容层横向 padding 为 0px（Token `--layout-page-margin-m0`）；分组内容使用通栏结构，不开启卡片修饰类。
+- `长列表模式 M8`：页面内容层横向 padding 为 8px（Token `--layout-page-margin-m8`）；用于长列表数据较多的场景，分组内容开启卡片修饰类，cell 分割线使用 `.cell--divider-right-edge`。
+- `卡片模式 M16`：页面内容层横向 padding 为 16px（Token `--layout-page-margin-m16`）；分组内容使用已注册卡片修饰类。
+- `白底大留白模式 M32`：页面内容层横向 padding 为 32px（Token `--layout-page-margin-m32`）；页面背景使用 `--bg-surface`（白底），用于白色背景下极少内容场景；cell 分割线使用 `.cell--divider-center`（分割线与文本右缘对齐、不贴边）；cell-group__content 不开启卡片修饰类（白底页面无需圆角收边）；form 当前无 divider-center 能力，M32 下 form 暂用 `--no-divider`，待后续组件迭代补齐。
+
+`--card` 修饰类开关规则：开启 `.cell-group__content--card` 的充要条件是「页面内容层横向 padding > 0 且页面背景为灰色（`--bg-page`）」。灰底上白底内容需要圆角收边；白底页面（`--bg-surface`）圆角无意义；通栏 0px 无横向留白，圆角也无意义。四档对应：M0 不开（0px）、M8 开（灰底+8px）、M16 开（灰底+16px）、M32 不开（白底）。
 
 约束：
 
-- 命中 `biz-rule-config` 的业务 surface 默认使用通栏 M1；`host-entry` 默认使用卡片 M2，除非权威来源明确给出例外。
+- 命中 `biz-rule-config` 的业务 surface 默认使用通栏 M0；`host-entry` 默认使用卡片 M16，除非权威来源明确给出例外。
 - 移动端和桌面端的业务内容边距语义必须一致，不能因为手机壳边框消失而改变 scene 内容对齐。
 - 页面主结构默认占满可用宽度；空内容、短文本或字段未填写不得让主区域收缩。
 - 间距、尺寸、圆角、字号和颜色必须引用已注册 Token，不得在计划中发明新值。
-- `allowed_page_styles` 必须与 `layout_pattern` 一致，不能同时授权 M1 与 M2。
+- `allowed_page_styles` 必须与 `layout_pattern` 一致，不能同时授权互斥档位。
 
 ## 组件映射
 
@@ -191,7 +195,7 @@ navbar 稳定变体绑定：
   "matched_uikit": "biz-rule-config | system-settings | null",
   "scene_fit_reason": "总体匹配原因",
   "navigation_pattern": "导航类型",
-  "layout_pattern": "通栏模式 M1 | 卡片模式 M2",
+  "layout_pattern": "通栏模式 M0 | 长列表模式 M8 | 卡片模式 M16 | 白底大留白模式 M32",
   "interaction_pattern": "交互范式",
   "app_target": {
     "mode": "wego-app-scene",
@@ -379,7 +383,7 @@ design_plan
 
 - `page_goal`：页面目标。
 - `page_pattern`：命中的 pagePattern 或 fallback blueprint。
-- `layout_pattern`：`通栏模式 M1 | 卡片模式 M2`。
+- `layout_pattern`：`通栏模式 M0 | 长列表模式 M8 | 卡片模式 M16 | 白底大留白模式 M32`。
 - `main_scroll_direction`：主滚动方向。
 - `content_density`：内容密度。
 - `first_screen_priority`：首屏优先级（complex 必填）。
@@ -455,7 +459,7 @@ design_plan
   "page_strategy": {
     "page_goal": "权限配置",
     "page_pattern": "biz-rule-config",
-    "layout_pattern": "通栏模式 M1",
+    "layout_pattern": "通栏模式 M0",
     "main_scroll_direction": "vertical",
     "content_density": "comfortable"
   },

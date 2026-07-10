@@ -1,10 +1,10 @@
 /* 价格权限管理场景样式
  * 仅页面级布局胶水与业务作用域状态，不替代已注册组件 class
- * 命中 biz-rule-config pagePattern，surface 角色不是 host-entry，使用通栏模式 M1：
+ * 命中 biz-rule-config pagePattern，surface 角色不是 host-entry，使用通栏模式 M0：
  * 场景 body 0px 横向 padding + cell-group__content 不开 --card 修饰
  */
 
-/* 列表页与权限设置页共享的场景 body 布局（通栏 M1） */
+/* 列表页与权限设置页共享的场景 body 布局（通栏 M0） */
 .price-list-page,
 .price-perm-page {
   display: flex;
@@ -22,7 +22,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacer-8);
-  /* 通栏 M1：横向 padding 0px，cell 横向边距由 cell__body 自带 16px padding 承担 */
+  /* 通栏 M0：横向 padding 0px，cell 横向边距由 cell__body 自带 16px padding 承担 */
   padding: var(--spacer-8) 0 calc(var(--spacer-40) + var(--safe-area-bottom, 0px));
 }
 

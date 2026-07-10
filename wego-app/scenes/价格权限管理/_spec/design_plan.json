@@ -213,7 +213,7 @@
       "scene_fit_reason": "价格类型列表命中对象管理列表 fallback",
       "component_mapping": ["price-list-nav", "price-type-list-content"],
       "allowed_page_styles": [
-        "通栏模式 M1：phone-body 0px 横向 padding",
+        "通栏模式 M0：phone-body 0px 横向 padding",
         "价格类型 cell clickable 带权限摘要和 arrow"
       ],
       "design_gap": ""
@@ -229,7 +229,7 @@
       "scene_fit_reason": "权限编辑命中 biz-rule-config 表单范式",
       "component_mapping": ["price-edit-nav", "perm-type-options", "partial-fan-groups", "exclude-fan-groups"],
       "allowed_page_styles": [
-        "通栏模式 M1：phone-body 0px 横向 padding",
+        "通栏模式 M0：phone-body 0px 横向 padding",
         "权限类型四选一 radio",
         "粉丝分组多选 checklist",
         "底部固定保存主操作"
@@ -311,7 +311,7 @@
     { "file": "wego-app/scenes/价格权限管理/_spec/interaction_spec.json", "field": "surfaces/content_blocks/prototype_boundaries", "supports": ["价格类型列表、权限设置、保存回填和原型边界"] }
   ],
   "implementation_constraints": [
-    "通栏模式 M1：phone-body 0px 横向 padding",
+    "通栏模式 M0：phone-body 0px 横向 padding",
     "权限类型四选一使用 cell + radio trailing 组合",
     "粉丝分组多选使用 cell + check trailing 组合",
     "部分可见/不给谁看未选分组时保存按钮禁用，toast 提示至少选择一个分组",

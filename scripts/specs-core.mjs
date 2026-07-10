@@ -170,12 +170,14 @@ function extractLayoutModeRules(uikitPlan) {
   const rules = [];
   patterns.forEach(p => {
     (p.structureHighlights || []).forEach(h => {
-      if (h.includes('通栏模式') || h.includes('卡片模式') || h.includes('M1') || h.includes('M2')) rules.push(`- ${h}`);
+      if (h.includes('通栏模式') || h.includes('长列表模式') || h.includes('卡片模式') || h.includes('白底大留白模式') || h.includes('M0') || h.includes('M8') || h.includes('M16') || h.includes('M32')) rules.push(`- ${h}`);
     });
   });
   if (rules.length === 0) {
-    rules.push('- 通栏模式 M1：页面内容层横向 padding 为 0；分组内容使用通栏结构，不开启卡片修饰类。');
-    rules.push('- 卡片模式 M2：页面内容层横向 padding 为 16px；分组内容使用已注册卡片修饰类。');
+    rules.push('- 通栏模式 M0：页面内容层横向 padding 为 0；分组内容使用通栏结构，不开启卡片修饰类。');
+    rules.push('- 长列表模式 M8：页面内容层横向 padding 为 8px；分组内容开启卡片修饰类，cell 分割线使用 .cell--divider-right-edge。');
+    rules.push('- 卡片模式 M16：页面内容层横向 padding 为 16px；分组内容使用已注册卡片修饰类。');
+    rules.push('- 白底大留白模式 M32：页面内容层横向 padding 为 32px；页面背景使用 --bg-surface，cell 分割线使用 .cell--divider-center，不开卡片修饰类。');
   }
   return rules.join('\n');
 }

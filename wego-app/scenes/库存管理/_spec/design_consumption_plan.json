@@ -2,7 +2,7 @@
   "matched_uikit": null,
   "scene_fit_reason": "本任务是『宿主入口 + 库存列表 + 预警设置』的组合型场景。库存列表页没有现成精确 UI Kit，适合走 generic-mobile-task-page；库存预警设置页与 biz-rule-config 完全匹配，且『库存预警设置』已被 uikit-plan.json 明确列为模板之一。",
   "navigation_pattern": "宿主宫格入口打开 push 列表页；列表页内通过唯一入口打开 full-screen-modal 形式的库存预警设置页",
-  "layout_pattern": "host-entry surface 使用宿主宫格入口；inventory-list surface 使用卡片模式 M2（phone-body 16px 横向 padding + cell-group__content--card）；inventory-alert-settings surface 使用通栏模式 M1（phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰）",
+  "layout_pattern": "host-entry surface 使用宿主宫格入口；inventory-list surface 使用卡片模式 M16（phone-body 16px 横向 padding + cell-group__content--card）；inventory-alert-settings surface 使用通栏模式 M0（phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰）",
   "interaction_pattern": "库存列表查看 + 预警设置统一保存回填",
   "app_target": {
     "mode": "wego-app-scene",
@@ -116,7 +116,7 @@
         }
       ],
       "allowed_page_styles": [
-        "卡片模式 M2：phone-body 16px 横向 padding，列表分组使用 .cell-group__content--card",
+        "卡片模式 M16：phone-body 16px 横向 padding，列表分组使用 .cell-group__content--card",
         "摘要区允许使用页面级三列栅格、数字字体放大和轻量分隔线",
         "列表页底部补安全区 padding，避免内容被底部指示器遮挡"
       ],
@@ -150,7 +150,7 @@
         {
           "block": "基础规则：启用库存预警、预警阈值、监控范围、是否合并预占库存",
           "consumption_mode": "free-composition",
-          "selected": ".cell-group > .cell-group__title『基础规则』 + .cell-group__content（通栏 M1） > switch 行使用 .cell.cell--single.cell--bg-white（.cell__action > .switch.switch--on/off）；枚举行使用 .cell.cell--single.cell--bg-white.cell--clickable（.cell__action > span.cell__action-text + i.cell__arrow.wego-iconfont-s.icon-youjiantou16）",
+          "selected": ".cell-group > .cell-group__title『基础规则』 + .cell-group__content（通栏 M0） > switch 行使用 .cell.cell--single.cell--bg-white（.cell__action > .switch.switch--on/off）；枚举行使用 .cell.cell--single.cell--bg-white.cell--clickable（.cell__action > span.cell__action-text + i.cell__arrow.wego-iconfont-s.icon-youjiantou16）",
           "constraint_ref": {
             "pagePattern": "biz-rule-config",
             "rule_id": "compositionConstraints[4]",
@@ -165,7 +165,7 @@
         {
           "block": "通知方式：App 内提醒、每日汇总提醒、提醒时间",
           "consumption_mode": "free-composition",
-          "selected": ".cell-group > .cell-group__title『通知方式』 + .cell-group__content（通栏 M1） > switch 行与 text-arrow 行连续排列；提醒时间行在每日汇总关闭时保持 clickable 结构但展示禁用状态文案",
+          "selected": ".cell-group > .cell-group__title『通知方式』 + .cell-group__content（通栏 M0） > switch 行与 text-arrow 行连续排列；提醒时间行在每日汇总关闭时保持 clickable 结构但展示禁用状态文案",
           "constraint_ref": {
             "pagePattern": "biz-rule-config",
             "rule_id": "compositionConstraints[3]",
@@ -180,7 +180,7 @@
         {
           "block": "处理策略：自动加入补货清单、重点商品名单",
           "consumption_mode": "free-composition",
-          "selected": ".cell-group > .cell-group__title『处理策略』 + .cell-group__content（通栏 M1） > switch 行 + text-arrow 行",
+          "selected": ".cell-group > .cell-group__title『处理策略』 + .cell-group__content（通栏 M0） > switch 行 + text-arrow 行",
           "constraint_ref": {
             "pagePattern": "biz-rule-config",
             "rule_id": "compositionConstraints[2]",
@@ -194,7 +194,7 @@
         }
       ],
       "allowed_page_styles": [
-        "通栏模式 M1：phone-body 0px 横向 padding + .cell-group__content 不开 --card 修饰",
+        "通栏模式 M0：phone-body 0px 横向 padding + .cell-group__content 不开 --card 修饰",
         "组间距使用 8px，底部滚动区域补 calc(var(--spacer-40) + var(--safe-area-bottom, 0px))",
         "仅允许业务作用域的禁用态和摘要文案样式，不新增组件类"
       ],
@@ -211,8 +211,8 @@
   },
   "implementation_constraints": [
     "新增宿主入口时只按 route_id=my-inventory-management 增量更新 wego-app/js/routes.js 和 my-app-center 宫格，不重画宿主壳",
-    "inventory-list surface 使用卡片模式 M2，摘要区和列表分组都放在 16px 横向 padding 的 page body 中",
-    "inventory-alert-settings surface 使用 biz-rule-config 的通栏模式 M1，不允许再套 cell-group__content--card",
+    "inventory-list surface 使用卡片模式 M16，摘要区和列表分组都放在 16px 横向 padding 的 page body 中",
+    "inventory-alert-settings surface 使用 biz-rule-config 的通栏模式 M0，不允许再套 cell-group__content--card",
     "库存预警设置页必须通过 full-screen-modal 打开，且使用『取消 + 保存』导航模式；不得改成 push 或 sheet",
     "switch 行由 switch 自身承担热区，整行保持静态；text-arrow 行保留整行 clickable 和按压反馈",
     "列表页库存行不做详情下钻，避免额外扩展详情页",

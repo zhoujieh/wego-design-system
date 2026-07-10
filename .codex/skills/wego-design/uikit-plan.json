@@ -471,7 +471,7 @@
         "页面顶部可放置摘要区（方案名称、状态、说明等），但摘要区不是必需结构——是否包含摘要区由原始业务需求决定；UI Kit 中的 biz-summary 是演示参考，不是页面范式的强制元素。",
         "整体保持高信息密度和连续设置节奏，避免做成松散营销页",
         "section 标题优先使用 cell/form 分组自带的 title 节点；标题独立一行，连续内容放进 group 自带 content 容器，不再复制 UI Kit 私有标题类。",
-        "biz-rule-config 命中页面默认通栏模式 M1（phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰），cell 横向边距由 cell__body 自带 16px padding 承担，避免双重 padding。仅当 surface 角色为 host-entry（宿主入口列表）时才改为卡片模式 M2（phone-body 16px 横向 padding + cell-group__content--card 修饰）。判断依据是 surface 语义角色，不是组件名+修饰类名。",
+        "biz-rule-config 命中页面默认通栏模式 M0（phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰），cell 横向边距由 cell__body 自带 16px padding 承担，避免双重 padding。仅当 surface 角色为 host-entry（宿主入口列表）时才改为卡片模式 M16（phone-body 16px 横向 padding + cell-group__content--card 修饰）。判断依据是 surface 语义角色，不是组件名+修饰类名。",
         "整行点击只保留给带箭头、会进入下一层选择/跳转/展开的行；右侧是 switch、radio-group、checkbox-group 或按钮等独立控件时，不把整行当作主热区。",
         "子级条件区域（left-guide）：子级 cell 缩进结构以 cell.json 的 structurePatterns 为权威来源。父级 cell 和子级 cell 必须在同一 .cell-group 内连续排列；子项左侧没有其他前导语义时使用 cell__backspace + backspace-icon 显示子级标识，已有图标、checkbox、radio、switch 等前导内容时不再补 cell__backspace。",
         "页面背景一旦确定，navbar 背景默认跟随 data-bg 的公共 CSS 约定：page=灰底，surface=白底。普通业务页不要在场景级 page.css 单独覆盖 navbar 背景，透明反白仅走已注册的 .navbar--fixed-transparent 例外。"
@@ -518,10 +518,10 @@
         },
         {
           "trigger": "section 由连续 cell 或连续 form-body 组成，且标题与内容属于同一业务分组",
-          "use": "使用 `.cell-group` / `.form-group` 的正式标题节点 + 内容容器结构；biz-rule-config 命中页面默认通栏 M1（cell-group__content 不开 --card），仅当 surface 角色为 host-entry 时才开卡片修饰 M2",
+          "use": "使用 `.cell-group` / `.form-group` 的正式标题节点 + 内容容器结构；biz-rule-config 命中页面默认通栏 M0（cell-group__content 不开 --card），仅当 surface 角色为 host-entry 时才开卡片修饰 M16",
           "avoid": "复用 `.uikit-section-title`、手写 section 间距，或额外包一层只为白底圆角存在的容器",
           "reason": "分组标题、内容区表面和卡片圆角已经收敛为组件正式能力；是否开卡片修饰由宿主内容层是否承担横向留白决定，继续放在页面层拼接会造成节奏、圆角和复制边界漂移。",
-          "allowWhen": "仅当 surface 角色为 host-entry（宿主入口列表）时，才改为卡片模式 M2（开 --card 修饰 + phone-body 16px 横向 padding）；其他 biz-rule-config 命中页面一律通栏 M1"
+          "allowWhen": "仅当 surface 角色为 host-entry（宿主入口列表）时，才改为卡片模式 M16（开 --card 修饰 + phone-body 16px 横向 padding）；其他 biz-rule-config 命中页面一律通栏 M0"
         },
         {
           "trigger": "行内主语义是进入下一层选择/跳转/展开，且右侧存在箭头或等价的下一步指示",
@@ -532,10 +532,10 @@
         },
         {
           "trigger": "surface 命中 biz-rule-config pagePattern，且 surface 角色不是 host-entry",
-          "use": "通栏模式 M1：phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰；cell 横向边距由 cell__body 自带 16px padding 承担",
-          "avoid": "给 phone-body 加 12px/16px 横向 padding 后再开 cell-group__content--card（双重 padding 浪费空间，且违反 M1 规范）",
+          "use": "通栏模式 M0：phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰；cell 横向边距由 cell__body 自带 16px padding 承担",
+          "avoid": "给 phone-body 加 12px/16px 横向 padding 后再开 cell-group__content--card（双重 padding 浪费空间，且违反 M0 规范）",
           "reason": "biz-rule-config UI Kit 范式 BizSettingsContent 已明确示范通栏模式：phone-body 无横向 padding + cell-group__content 无 --card，cell 横向边距由 cell__body padding 承担。这是 biz-rule-config 范式的稳定结构，AI 不得自决策改为卡片模式。通栏模式下移动端与桌面端视觉一致（cell 内容都有 16px 横向边距），不会出现移动端边距变小问题。",
-          "allowWhen": "仅当 surface 角色为 host-entry（宿主入口列表）时，才改为卡片模式 M2"
+          "allowWhen": "仅当 surface 角色为 host-entry（宿主入口列表）时，才改为卡片模式 M16"
         }
       ],
       "presentationDescription": "默认作为 full-screen-modal 打开；若需求语义明确属于二级页面、当前页轻弹窗或底部选择器，必须由对应 pagePattern/fallback blueprint 明确支持 push、modal 或 sheet 后才能改用其他 type。"
@@ -566,7 +566,7 @@
       "structureHighlights": [
         "使用层级导航(push),从右侧 slide-left 进入,返回按钮收口;不使用模态或底部弹层",
         "设置项按账号/业务/系统三组 cell-group 分类,每组使用 cell-group__title + cell-group__content 正式结构",
-        "通栏模式 M1:phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰;cell 横向边距由 cell__body 自带 16px padding 承担",
+        "通栏模式 M0:phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰;cell 横向边距由 cell__body 自带 16px padding 承担",
         "cell 变体:cell--double(带副标题) / cell--single(单行) + trailing 变体(text-arrow / dot-arrow / arrow)",
         "整行点击只保留给带箭头、会进入下一层的入口行;右侧是 switch、radio-group、checkbox-group 等独立控件时由控件自身承担交互",
         "不包含退出登录按钮和客服入口;这两项属于业务场景级功能,不属于系统设置 UI Kit 范式",
@@ -582,10 +582,10 @@
       "compositionConstraints": [
         {
           "trigger": "section 由连续 cell 组成,且标题与内容属于同一业务分组(账号/业务/系统)",
-          "use": "使用 .cell-group 的正式标题节点(cell-group__title) + 内容容器(cell-group__content);通栏模式 M1(cell-group__content 不开 --card 修饰)",
+          "use": "使用 .cell-group 的正式标题节点(cell-group__title) + 内容容器(cell-group__content);通栏模式 M0(cell-group__content 不开 --card 修饰)",
           "avoid": "复用 .uikit-section-title、手写 section 间距,或额外包一层只为白底圆角存在的容器",
           "reason": "分组标题、内容区表面和卡片圆角已经收敛为组件正式能力;通栏模式下 cell 横向边距由 cell__body padding 承担,继续放在页面层拼接会造成节奏、圆角和复制边界漂移。",
-          "allowWhen": "仅当 surface 角色为 host-entry(宿主入口列表)时,才改为卡片模式 M2(开 --card 修饰 + phone-body 16px 横向 padding)"
+          "allowWhen": "仅当 surface 角色为 host-entry(宿主入口列表)时,才改为卡片模式 M16(开 --card 修饰 + phone-body 16px 横向 padding)"
         },
         {
           "trigger": "设置项需要展示副标题或补充说明",
@@ -690,7 +690,7 @@
         "toast"
       ],
       "allowedPageStyles": [
-        "卡片模式 M2 页面外层间距",
+        "卡片模式 M16 页面外层间距",
         "对象卡片横向布局",
         "识别图固定尺寸与裁切",
         "标题单行省略与摘要截断",

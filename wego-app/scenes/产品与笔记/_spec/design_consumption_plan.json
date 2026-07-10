@@ -2,7 +2,7 @@
   "matched_uikit": "system-settings",
   "scene_fit_reason": "产品与笔记设置页属于系统设置子页，承接平台层通用偏好与即时生效开关；uikit-plan.json 中 system-settings pagePattern 的 applicableScenarios 明确包含『系统设置、应用设置、通用设置、App 设置』，interactionPattern 为层级导航 push 进入 + 返回按钮收口，与本页 push 转场和 cell 为主的组合一致；switch 作为 cell 的 trailingSlot 嵌入，不破坏 system-settings componentSlugs（navbar + cell）的边界。",
   "navigation_pattern": "navbar（列表页命中 push 转场：leftControl=back-icon + 居中标题『产品与笔记』）",
-  "layout_pattern": "phone-body 纵向流 + cell-group 分组。product-note-list surface 角色为 primary-task-page，使用通栏模式 M1（phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰），cell 横向边距由 cell__body 自带 16px padding 承担，避免双重 padding。",
+  "layout_pattern": "phone-body 纵向流 + cell-group 分组。product-note-list surface 角色为 primary-task-page，使用通栏模式 M0（phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰），cell 横向边距由 cell__body 自带 16px padding 承担，避免双重 padding。",
   "interaction_pattern": "switch 行即时生效（点击 switch 切换 switch--on/switch--off，更新内存 state，不开 cell--clickable）；导航行 select（点击 toast『该功能尚未接入原型』，不实现下钻）；副标题内『详情』链接独立 click + stopPropagation + toast",
   "app_target": {
     "mode": "wego-app-scene",
@@ -309,7 +309,7 @@
         }
       ],
       "allowed_page_styles": [
-        "通栏模式 M1：phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰；cell 横向边距由 cell__body 自带 16px padding 承担",
+        "通栏模式 M0：phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰；cell 横向边距由 cell__body 自带 16px padding 承担",
         "phone-body 纵向间距：gap: var(--spacer-8)；padding-bottom 安全区 calc(var(--spacer-40) + var(--safe-area-bottom, 0px))",
         "页面外层 min-height: 100% + display: flex + flex-direction: column（布局胶水）",
         "副标题内详情链接业务作用域样式：.product-note__detail-link（color: var(--text-link)，margin-left: var(--spacer-4)，独立 click + stopPropagation）"
@@ -320,7 +320,7 @@
   "component_mapping_summary_note": "component_mapping 已按 surface 拆分到 surface_designs[].component_mapping；本字段保留为空数组占位，避免重复",
   "component_mapping": [],
   "spec_refs_used": {
-    "layout": ".codex/skills/wego-design/specs/布局与间距规范.md（phone-body 间距、cell-group gap、safe-area、通栏 M1 选择规则）",
+    "layout": ".codex/skills/wego-design/specs/布局与间距规范.md（phone-body 间距、cell-group gap、safe-area、通栏 M0 选择规则）",
     "interaction": ".codex/skills/wego-design/specs/交互设计原则.md（页面模式与转场 push、原型数据交互、操作布局原则）",
     "copy": ".codex/skills/wego-design/specs/文案与数据规范.md（设置项文案、副标题说明、数字与单位）",
     "visual": ".codex/skills/wego-design/specs/设计风格与品牌原则.md（data-bg 与 navbar 背景一致）",
@@ -328,7 +328,7 @@
   },
   "implementation_constraints": [
     "分组容器类强制使用 .cell-group（含可选 .cell-group__title + .cell-group__content），禁止发明 scene 级 xxx-page__group 自定义类替代；第1组无标题，直接用 cell-group__content 承载连续 cell",
-    "product-note-list surface 角色为 primary-task-page，使用通栏模式 M1：phone-body 0px 横向 padding + .cell-group__content 不开 --card 修饰；cell 横向边距由 .cell__body 自带 16px padding 承担",
+    "product-note-list surface 角色为 primary-task-page，使用通栏模式 M0：phone-body 0px 横向 padding + .cell-group__content 不开 --card 修饰；cell 横向边距由 .cell__body 自带 16px padding 承担",
     "switch 行整行静态，不开 .cell--clickable；由 .switch 自身承担热区与状态切换（components/cell.json.behavior.click）",
     "带箭头的入口行整行 clickable，命中 cell 组件 behavior.click 规则；右侧为状态文字 + 箭头组合时仍保持整行 clickable",
     "同一 cell-group 内最后一行 cell 不加分割线（divider=none），其余行加 .cell--divider-right-edge；孤立单行 cell 不加分割线",

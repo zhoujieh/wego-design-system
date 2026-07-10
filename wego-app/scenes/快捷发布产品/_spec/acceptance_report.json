@@ -42,7 +42,7 @@
     "matched_uikit": "biz-rule-config",
     "page_pattern_hit": "biz-rule-config",
     "fallback_blueprints_used": ["mobile-host-entry", "object-management-list-page"],
-    "layout_pattern": "通栏模式 M1",
+    "layout_pattern": "通栏模式 M0",
     "page_presentation": "full-screen-modal"
   },
   "component_discipline_check": {

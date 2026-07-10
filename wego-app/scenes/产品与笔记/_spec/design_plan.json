@@ -148,7 +148,7 @@
       "scene_fit_reason": "产品与笔记设置是规则配置列表，开关即时切换、下钻入口 stub 反馈，命中 biz-rule-config",
       "component_mapping": ["product-display", "note-display", "spec-color-recognition", "product-forward", "tag-management", "album-organize", "price-management-entry"],
       "allowed_page_styles": [
-        "通栏模式 M1：phone-body 0px 横向 padding，cell-group__content 不开 --card",
+        "通栏模式 M0：phone-body 0px 横向 padding，cell-group__content 不开 --card",
         "开关项 cell 右侧 switch trailing",
         "下钻项 cell 右侧 arrow trailing",
         "分组之间 16px 间距"
@@ -229,7 +229,7 @@
     { "file": "wego-app/scenes/产品与笔记/_spec/interaction_spec.json", "field": "surfaces/content_blocks/prototype_boundaries", "supports": ["产品与笔记内容块、开关状态和 stub 边界"] }
   ],
   "implementation_constraints": [
-    "通栏模式 M1：phone-body 0px 横向 padding，cell-group__content 不开 --card",
+    "通栏模式 M0：phone-body 0px 横向 padding，cell-group__content 不开 --card",
     "开关项 cell 不整行热区，只有 switch 控件本身可点击",
     "下钻项 stub 入口点击后 toast「该功能尚未接入原型」",
     "navbar 背景跟随 data-bg=surface 白底"

@@ -117,10 +117,10 @@
    - 例外：只有结构无法承载且业务必须提醒风险、时效或不可逆后果时，才保留 helper
 
 5. **触发条件：**section 由连续 cell 或连续 form-body 组成，且标题与内容属于同一业务分组
-   - 推荐：使用 `.cell-group` / `.form-group` 的正式标题节点 + 内容容器结构；biz-rule-config 命中页面默认通栏 M1（cell-group__content 不开 --card），仅当 surface 角色为 host-entry 时才开卡片修饰 M2
+   - 推荐：使用 `.cell-group` / `.form-group` 的正式标题节点 + 内容容器结构；biz-rule-config 命中页面默认通栏 M0（cell-group__content 不开 --card），仅当 surface 角色为 host-entry 时才开卡片修饰 M16
    - 避免：复用 `.uikit-section-title`、手写 section 间距，或额外包一层只为白底圆角存在的容器
    - 原因：分组标题、内容区表面和卡片圆角已经收敛为组件正式能力；是否开卡片修饰由宿主内容层是否承担横向留白决定，继续放在页面层拼接会造成节奏、圆角和复制边界漂移。
-   - 例外：仅当 surface 角色为 host-entry（宿主入口列表）时，才改为卡片模式 M2（开 --card 修饰 + phone-body 16px 横向 padding）；其他 biz-rule-config 命中页面一律通栏 M1
+   - 例外：仅当 surface 角色为 host-entry（宿主入口列表）时，才改为卡片模式 M16（开 --card 修饰 + phone-body 16px 横向 padding）；其他 biz-rule-config 命中页面一律通栏 M0
 
 6. **触发条件：**行内主语义是进入下一层选择/跳转/展开，且右侧存在箭头或等价的下一步指示
    - 推荐：给 cell / form-body 保留整行 clickable 标记和按压反馈
@@ -129,18 +129,18 @@
    - 例外：只有行内交互本身就是打开选择面板、进入下一级页面或展开补充内容时，才保留整行 clickable
 
 7. **触发条件：**surface 命中 biz-rule-config pagePattern，且 surface 角色不是 host-entry
-   - 推荐：通栏模式 M1：phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰；cell 横向边距由 cell__body 自带 16px padding 承担
-   - 避免：给 phone-body 加 12px/16px 横向 padding 后再开 cell-group__content--card（双重 padding 浪费空间，且违反 M1 规范）
+   - 推荐：通栏模式 M0：phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰；cell 横向边距由 cell__body 自带 16px padding 承担
+   - 避免：给 phone-body 加 12px/16px 横向 padding 后再开 cell-group__content--card（双重 padding 浪费空间，且违反 M0 规范）
    - 原因：biz-rule-config UI Kit 范式 BizSettingsContent 已明确示范通栏模式：phone-body 无横向 padding + cell-group__content 无 --card，cell 横向边距由 cell__body padding 承担。这是 biz-rule-config 范式的稳定结构，AI 不得自决策改为卡片模式。通栏模式下移动端与桌面端视觉一致（cell 内容都有 16px 横向边距），不会出现移动端边距变小问题。
-   - 例外：仅当 surface 角色为 host-entry（宿主入口列表）时，才改为卡片模式 M2
+   - 例外：仅当 surface 角色为 host-entry（宿主入口列表）时，才改为卡片模式 M16
 
 #### 系统设置 组合约束
 
 1. **触发条件：**section 由连续 cell 组成,且标题与内容属于同一业务分组(账号/业务/系统)
-   - 推荐：使用 .cell-group 的正式标题节点(cell-group__title) + 内容容器(cell-group__content);通栏模式 M1(cell-group__content 不开 --card 修饰)
+   - 推荐：使用 .cell-group 的正式标题节点(cell-group__title) + 内容容器(cell-group__content);通栏模式 M0(cell-group__content 不开 --card 修饰)
    - 避免：复用 .uikit-section-title、手写 section 间距,或额外包一层只为白底圆角存在的容器
    - 原因：分组标题、内容区表面和卡片圆角已经收敛为组件正式能力;通栏模式下 cell 横向边距由 cell__body padding 承担,继续放在页面层拼接会造成节奏、圆角和复制边界漂移。
-   - 例外：仅当 surface 角色为 host-entry(宿主入口列表)时,才改为卡片模式 M2(开 --card 修饰 + phone-body 16px 横向 padding)
+   - 例外：仅当 surface 角色为 host-entry(宿主入口列表)时,才改为卡片模式 M16(开 --card 修饰 + phone-body 16px 横向 padding)
 
 2. **触发条件：**设置项需要展示副标题或补充说明
    - 推荐：cell--double + cell__subtitle 承接副标题
@@ -156,8 +156,8 @@
 
 ### 布局模式判断（通栏 M1 / 卡片 M2）
 
-- biz-rule-config 命中页面默认通栏模式 M1（phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰），cell 横向边距由 cell__body 自带 16px padding 承担，避免双重 padding。仅当 surface 角色为 host-entry（宿主入口列表）时才改为卡片模式 M2（phone-body 16px 横向 padding + cell-group__content--card 修饰）。判断依据是 surface 语义角色，不是组件名+修饰类名。
-- 通栏模式 M1:phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰;cell 横向边距由 cell__body 自带 16px padding 承担
+- biz-rule-config 命中页面默认通栏模式 M0（phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰），cell 横向边距由 cell__body 自带 16px padding 承担，避免双重 padding。仅当 surface 角色为 host-entry（宿主入口列表）时才改为卡片模式 M16（phone-body 16px 横向 padding + cell-group__content--card 修饰）。判断依据是 surface 语义角色，不是组件名+修饰类名。
+- 通栏模式 M0:phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰;cell 横向边距由 cell__body 自带 16px padding 承担
 
 
 ## 不能怎么做
@@ -171,4 +171,4 @@
 组件已在注册表中存在，结构与状态符合契约，页面示例只用于结构参考，设计系统源文件与部署副本保持一致。
 
 <!-- generated-by: scripts/specs.mjs@5 -->
-<!-- source-fingerprint: e56367102f864838468564a4940be9c6c5fc7f30dc1ef33675f23e440106dc2f -->
+<!-- source-fingerprint: 7df1c7665d66ad5dd138183a79329133b7fb432f8b3ef9922511bb3c3c22e107 -->
