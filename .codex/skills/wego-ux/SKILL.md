@@ -177,6 +177,7 @@ window.WegoApp.registerScene({
 - `push` 使用 `slide-left`；`modal` 常用 `fade`；`sheet/full-screen-modal` 使用底部进入退出，具体以计划为准。
 - 所有层都挂在 `.phone-screen` 内。
 - 不得把 push 页面实现为 overlay，也不得把 overlay 实现为独立 route，除非设计计划明确如此。
+- `full-screen-modal` 的业务根节点必须显式声明 `data-bg="page"` 或 `data-bg="surface"`：灰底页面用 `page`，白底页面用 `surface`。宿主最底层 overlay panel 背景必须跟随该声明，不能出现白底宿主层 + 灰底内容层的多层背景；也不能把所有全屏模态一刀切改成灰底。
 
 ### 多层 push
 

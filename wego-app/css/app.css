@@ -520,6 +520,14 @@ input, textarea,
   animation: wego-sheet-enter var(--duration-normal, 250ms) var(--ease-enter, ease-out);
 }
 
+.app-overlay-layer--full-screen-modal .app-overlay-panel:has(> [data-bg="page"]) {
+  background: var(--bg-page);
+}
+
+.app-overlay-layer--full-screen-modal .app-overlay-panel:has(> [data-bg="surface"]) {
+  background: var(--bg-surface);
+}
+
 .app-overlay-layer--full-screen-modal .app-overlay-panel.app-overlay-panel--exit {
   animation: none;
   transition: transform var(--duration-normal, 250ms) var(--ease-exit, ease-in);

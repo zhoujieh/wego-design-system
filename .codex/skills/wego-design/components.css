@@ -1199,7 +1199,7 @@
   height: var(--modal-frame-x-height);
 }
 
-/* fullscreen 变体：全屏覆盖，无遮罩，白色背景 */
+/* fullscreen 变体：全屏覆盖，无遮罩；背景由 --modal-panel-bg 决定 */
 .modal--fullscreen {
   background: transparent;
 }
@@ -1210,7 +1210,6 @@
   border-radius: 0;
   --modal-panel-width: 100%;
   max-width: none;
-  --modal-panel-bg: var(--bg-surface);
 }
 /* fullscreen 标题区恢复 safe-area-top */
 .modal--fullscreen .modal__title--default {

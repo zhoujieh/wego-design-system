@@ -1,7 +1,7 @@
 {
   "complexity_level": "structured",
   "matched_uikit": null,
-  "scene_fit_reason": "动态页是内容流型主 Tab，由 object-management-list-page fallback 承接；帮卖按钮复用现有 link standalone 12px 变体，加价卖半弹窗作为 sheet primitive 承载的二级表单页，由正式 modal 组件 frame 变体承载容器，结合 cell/form/button/link/input 组件和页面级业务样式完成。",
+  "scene_fit_reason": "动态页是内容流型主 Tab，由 object-management-list-page fallback 承接；本次新增帮卖按钮复用现有 link standalone 12px 变体，加价卖半弹窗作为 sheet primitive 承载的二级表单页，由 input/button/link 组件和页面级业务样式在场景级自写容器中组合完成（modal 组件待补充，已记为 design_gap）",
   "navigation_pattern": "bottom-nav 固定 Tab 切换 + 页内筛选 + 操作行帮卖入口拉起底部 sheet",
   "layout_pattern": "通栏模式 M1（宿主页）+ sheet 内表单分组（弹窗）",
   "interaction_pattern": "流式列表浏览 + 页内筛选 + 单条卡片操作 + 帮卖入口拉起 sheet 表单编辑后统一收口",
@@ -258,7 +258,7 @@
       "matched_page_pattern": null,
       "matched_blueprint": "generic-mobile-task-page",
       "presentation_ref": "sheet",
-      "scene_fit_reason": "帮卖半弹窗是 sheet presentation primitive 承载的二级表单：包含供货价展示、加价比例输入、自动计算售价和佣金、快捷加价和底部主操作；支持自由定价（可编辑）和固定佣金（只读）两种模式；现有 pagePattern 和 fallbackPageBlueprints 无 sheet 表单精确范式，内容组织参考 generic-mobile-task-page 的组件清单，展示方式由 sheet presentation primitive 约束，容器消费正式 modal 组件 frame 变体。",
+      "scene_fit_reason": "帮卖半弹窗是 sheet presentation primitive 承载的二级表单：包含供货价展示、加价比例输入、自动计算售价和佣金、快捷加价和底部主操作；支持自由定价（可编辑）和固定佣金（只读）两种模式；现有 pagePattern 和 fallbackPageBlueprints 无 sheet 表单精确范式，内容组织参考 generic-mobile-task-page 的组件清单（input/button/link），展示方式由 sheet presentation primitive 约束，容器由场景级自写承载；modal 组件待补充，已记为 design_gap",
       "component_mapping": [
         "resale-sheet-header",
         "resale-supply-price",
@@ -270,10 +270,10 @@
         "resale-submit-action"
       ],
       "allowed_page_styles": [
-        "半弹窗业务类命名空间 .dynamic-resale-sheet__* 仅限本场景布局胶水使用，不注册为通用组件；容器结构必须消费正式 modal 组件 .modal.modal--frame + .modal__panel + .modal__title--default + .modal__body + .modal__actions。",
-        "容器：modal 根节点挂在 .phone-screen 内，遮罩使用 var(--bg-mask-light) 并允许蒙层 opacity 淡入淡出；面板 var(--modal-panel-bg, var(--bg-surface)) 白底 + var(--radius-16) 顶部圆角；z-index var(--z-modal)=600。",
-        "面板动画：.modal__panel 只能 translateY(100%)→0 入场、0→100% 出场；打开和关闭都不得给面板设置 opacity、opacity transition 或 opacity animation。",
-        "sheet 头部：消费 modal default title 内嵌 navbar 结构；frame/frame-x 非全屏标题栏强制 --safe-area-top: 0px，不预留状态栏高度；左侧默认下箭头 icon-xiajiantou16，中间标题，右侧帮助入口用 link standalone 14px + iconfont icon-bangzhu。",
+        "半弹窗容器类命名空间 .dynamic-resale-sheet__*（场景级业务样式，仅限本场景使用，不注册为通用组件，待 modal 组件上线后替换）",
+        "容器：position:fixed; inset:0; 背景 var(--bg-mask-light) 半透明遮罩；面板 var(--bg-surface) 白底 + var(--radius-16) 顶部圆角；z-index var(--z-modal)=600",
+        "面板动画：translateY(100%)→0 入场，0→100% 出场；时长 var(--duration-normal)，缓动 var(--ease-enter)/var(--ease-exit)",
+        "sheet 头部：横向布局，左侧关闭 X 用 iconfont icon-guanbi-mian + 页面级业务样式热区承载，中间标题文字（页面级样式，参考 dialog title 18px Medium var(--text-default)），右侧帮助入口 ? 用 link standalone 14px + iconfont icon-bangzhu",
         "供货价展示区：标签+金额，页面级样式 14px var(--text-secondary) 标签，16px var(--text-default) 金额",
         "加价比例输入区：纵向布局，标签文字（页面级样式 14px var(--text-secondary)）+ input 组件 number 变体（.number-input + .number-input__field + .number-input__suffix 显示 %）；state 切换 default/focus/error；固定佣金模式下隐藏",
         "我的售价展示区：标签+自动计算金额，页面级样式；自由定价和固定佣金模式均显示",
@@ -283,7 +283,7 @@
         "主按钮区：固定底部，padding 含 var(--safe-area-bottom)；button strong lg 通栏；自由定价模式下非法输入时 .btn--disabled，固定佣金模式下始终可点击",
         "sheet 内部分组间距 16px；输入区与计算结果间距 8px；快捷加价项之间间距 12px"
       ],
-      "design_gap": ""
+      "design_gap": "半弹窗/modal 组件尚未在设计系统中注册；本次按用户确认由场景级自写容器 .dynamic-resale-sheet__* 承载，参考 actionsheet 容器机制（fixed inset:0 + mask + translateY 入场）和 sheet presentationPrimitive 约束。modal 组件上线后应迁移到正式组件，移除场景级容器类。"
     }
   ],
   "component_mapping": [
@@ -454,10 +454,10 @@
     {
       "gap_id": "missing-modal-component",
       "surface_ref": "resale-sheet",
-      "description": "历史记录：设计系统曾缺少可承载表单型 sheet 的 modal 容器组件。",
-      "current_handling": "已迁移为正式 modal 组件 frame 变体承载：.modal.modal--frame + .modal__panel + .modal__title--default + .modal__body + .modal__actions；场景级 .dynamic-resale-sheet__* 仅保留业务布局胶水。",
-      "follow_up": "无待补充 modal 组件缺口；后续只需继续遵守 modal 契约。",
-      "rule_sources": ["components/modal.json.structurePatterns", "components/modal.json.behavior.animation", "uikit-plan.json.presentationPrimitives[sheet]"]
+      "description": "设计系统当前未注册 modal/sheet 容器组件（dialog 居中确认弹窗不支持表单输入；actionsheet 是底部操作列表不支持表单；sheet primitive 在 uikit-plan 中有语义定义但无组件实现）",
+      "current_handling": "按用户确认由场景级自写容器 .dynamic-resale-sheet__* 承载，参考 actionsheet 容器机制（fixed inset:0 + var(--bg-mask-light) 遮罩 + translateY(100%)→0 入场 + var(--z-modal) 层级）+ sheet presentationPrimitive 约束（coversTabBar=true, slide-up-enter/slide-down-exit）",
+      "follow_up": "用户已在开发 modal 组件；modal 组件上线后应迁移本场景到正式组件，移除 .dynamic-resale-sheet__* 场景级容器类，回归组件契约消费",
+      "rule_sources": ["uikit-plan.json.presentationPrimitives[sheet]", "components/dialog.json.doNotInvent[不要在 dialog 内放置多字段表单]", "components/actionsheet.json.doNotInvent[不要在 actionsheet 内放置输入框]", "interaction_spec.assumptions[半弹窗容器由场景级自写承载]"]
     }
   ],
   "rule_sources_used": [
@@ -471,9 +471,10 @@
     { "file": ".codex/skills/wego-design/components/image.json", "field": "variantDimensions + behavior.loading", "supports": ["feed-item-gallery 用 image cover+rounded-md+loading"] },
     { "file": ".codex/skills/wego-design/components/card.json", "field": "domAnatomy", "supports": ["feed-item-summary 和 feed-item-info 用 card 填充型卡片能力承载"] },
     { "file": ".codex/skills/wego-design/components/badge.json", "field": "variantDimensions", "supports": ["filter-tabs 上新未读用 badge 点状提示能力"] },
-    { "file": ".codex/skills/wego-design/components/modal.json", "field": "structurePatterns + behavior.animation + cssCustomProperties", "supports": ["resale-sheet 容器消费 modal frame 变体；frame/frame-x 非全屏 default title 不预留状态栏高度；蒙层可 opacity 淡入淡出，面板只允许 transform 位移动画"] },
+    { "file": ".codex/skills/wego-design/components/dialog.json", "field": "designTokens.titleFont + doNotInvent", "supports": ["resale-sheet-header 标题样式参考 dialog title 18px Medium；dialog 不支持表单输入印证需自写 sheet 容器"] },
+    { "file": ".codex/skills/wego-design/components/actionsheet.json", "field": "doNotInvent + behavior", "supports": ["actionsheet 不支持表单输入印证需自写 sheet 容器；参考 actionsheet 容器机制（fixed inset:0 + mask + translateY 入场 + var(--z-modal)）"] },
     { "file": ".codex/skills/wego-design/components/toast.json", "field": "behavior + semanticTypeCandidates", "supports": ["submit-resale stub 反馈用现有 WegoApp.toast API 承载，'已生成帮卖，进入分享'纯文本告知"] },
-    { "file": ".codex/skills/wego-design/library-consumption.json", "field": "iconUsage.fontClassMode + globalConsumptionRules.contractFirst", "supports": ["帮助入口使用 iconfont icon-bangzhu；容器优先消费正式 modal 组件契约"] },
+    { "file": ".codex/skills/wego-design/library-consumption.json", "field": "iconUsage.fontClassMode + globalConsumptionRules.contractFirst", "supports": ["帮助入口和关闭 X 用 iconfont icon-bangzhu/icon-guanbi-mian；组件契约优先复用，本场景无 modal 组件时由场景级自写容器承接"] },
     { "file": ".codex/skills/wego-design/colors_and_type.css", "field": "tokens", "supports": ["半弹窗遮罩 var(--bg-mask-light)、面板 var(--bg-surface)、顶部圆角 var(--radius-16)、动画 var(--duration-normal)/var(--ease-enter)/var(--ease-exit)、层级 var(--z-modal)=600、收益强调色 var(--text-brand)、底部安全区 var(--safe-area-bottom)"] },
     { "file": "wego-app/scenes/动态/_spec/interaction_spec.json", "field": "surfaces[dynamic-feed-main].carrier=host-fixed-tab + surfaces[resale-sheet].carrier=sheet + content_blocks[resale-*] + prototype_boundaries[submit-resale].feedback", "supports": ["page_presentation 双 surface 分别绑定 host-fixed-tab 和 sheet；resale-sheet 内容块与组件映射一一对应；submit-resale stub 反馈文案"] }
   ],
@@ -483,9 +484,9 @@
     "动态卡片之间的分割线为 0.5px，左侧对齐右侧内容起始处（左 padding 16px + 头像 40px + gap 12px），右侧贴屏幕边缘；375px 断点 left 改为 12px+40px+8px",
     "操作按钮区使用 link 组件 standalone + 12px 变体；帮卖按钮为操作行最后一项，与既有按钮同变体，不得使用未登记变体或自定义 min-height 覆盖 link 热区",
     "九宫格单格必须使用 image 组件圆角变体；gallery 网格容器（3 列等分，gap 4px，单格 aspect-ratio 1）属于页面级业务样式",
-    "帮卖半弹窗业务类命名空间 .dynamic-resale-sheet__* 仅限本场景布局胶水使用，不注册为通用组件；容器结构必须消费正式 modal 组件 frame 变体",
-    "半弹窗容器：.modal 根节点挂在 .phone-screen 内，遮罩 var(--bg-mask-light) 可 opacity 淡入淡出；.modal__panel 白底 + var(--radius-16) 顶部圆角；面板只允许 transform 位移动画，不得有 opacity 变化",
-    "关闭方式：左侧下箭头 icon-xiajiantou16 + 点击遮罩关闭（业务明确要求，由场景级 JS 在 modal overlay 上接管 click 并显式判断 e.target===overlay 后关闭）；关闭后不保存未确认修改，再次进入重新填入默认推荐价",
+    "帮卖半弹窗容器类命名空间 .dynamic-resale-sheet__* 仅限本场景使用，不注册为通用组件；modal 组件上线后必须迁移到正式组件并移除场景级容器类",
+    "半弹窗容器：position:fixed; inset:0; 背景 var(--bg-mask-light)；面板 var(--bg-surface) + var(--radius-16) 顶部圆角；z-index var(--z-modal)=600；动画 translateY(100%)→0 入场，反向出场，时长 var(--duration-normal)，缓动 var(--ease-enter)/var(--ease-exit)",
+    "关闭方式：左上角 X（iconfont icon-guanbi-mian + 页面级业务样式热区）+ 点击遮罩关闭（业务明确要求，由场景级 JS 在 sheet overlay 上接管 click 并显式判断 e.target===overlay 后关闭）；关闭后不保存未确认修改，再次进入重新填入默认推荐价",
     "加价比例输入框必须使用 input 组件 number 变体（.number-input + .number-input__field + .number-input__suffix），suffix 固定显示 %；仅允许数字，支持2位小数；非法输入（空/小于1%/大于300%）触发根节点 .is-error 状态，错误提示用 .field-error 单行省略；固定佣金模式下隐藏",
     "我的售价和佣金为自动计算展示：售价=供货价×(1+比例)，佣金=售价-供货价；自由定价和固定佣金模式均显示",
     "快捷加价区：推荐加价卡用页面级业务样式带选中态边框 var(--border-brand)；快捷按钮 +20% 用 button weak sm；手动输入入口用 link standalone 14px；点击后实时刷新比例和计算结果；固定佣金模式下隐藏",
@@ -493,6 +494,6 @@
     "帮助入口'?'点击跳转外链 https://mp.weixin.qq.com/s/H05MjX1OTmng8nXVl3GXrQ（用 window.open 或 location.href，不在原型内实现说明详情页）",
     "推荐加价比例固定模拟为 +30%，快捷按钮固定 +20%；供货价使用模拟数据（如 ¥100）；默认按供货价+30%计算我的售价",
     "禁止使用 inline style 控制颜色/间距，必须用 Token",
-    "禁止发明未注册组件类或修饰类；.dynamic-resale-sheet__* 只能做业务布局胶水，不得替代 modal、cell、form、button、link、input 等正式组件结构"
+    "禁止发明未注册组件类或修饰类（半弹窗容器类 .dynamic-resale-sheet__* 是场景级业务样式例外，已在 design_gap 标注待替换）"
   ]
 }
