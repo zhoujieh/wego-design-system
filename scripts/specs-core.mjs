@@ -307,7 +307,7 @@ function render() {
       subSection('各页面范式适用场景速查', extractPagePatternScenarios(uikitPlan)),
       subSection('兜底蓝图适用场景', extractFallbackBlueprints(uikitPlan)),
       subSection('组件组合约束', extractCompositionConstraints(uikitPlan)),
-      subSection('布局模式判断（通栏 M1 / 卡片 M2）', extractLayoutModeRules(uikitPlan)),
+      subSection('布局模式判断（通栏 M0 / 长列表 M8 / 卡片 M16 / 白底大留白 M32）', extractLayoutModeRules(uikitPlan)),
     ].join('\n')),
     section('不能怎么做', bullets(['不能复制手机壳、展示外框或演示业务内容作为正式页面。','不能发明未登记的组件、子结构或修饰方式。','不能直接修改 App 中的设计系统副本。'])),
     section('完成后如何检查', '组件已在注册表中存在，结构与状态符合契约，页面示例只用于结构参考，设计系统源文件与部署副本保持一致。'),

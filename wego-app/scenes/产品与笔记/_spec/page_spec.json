@@ -78,7 +78,7 @@
   "component_intent": [
     "宿主二级入口复用系统设置列表中的 cell 行（cell--double + clickable + dot-arrow），不从宿主 my-settings 分组挂载",
     "导航栏使用 navbar（push 模式，leftControl=back-icon，title=产品与笔记）",
-    "设置项分组使用 cell-group + cell-group__title（有标题组）+ cell-group__content（通栏 M1，不开 --card）",
+    "设置项分组使用 cell-group + cell-group__title（有标题组）+ cell-group__content（通栏 M0，不开 --card）",
     "switch 行使用 cell（static，不开 clickable）+ cell__action 内嵌 .switch.switch--on/off，整行静态由 switch 承担热区",
     "导航行使用 cell--clickable + cell__arrow，有副标题用 cell--double，无副标题用 cell--single",
     "带状态文字的导航行使用 cell__action-text + cell__arrow 组合 trailing slot",

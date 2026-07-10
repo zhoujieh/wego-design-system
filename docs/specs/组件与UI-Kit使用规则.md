@@ -154,7 +154,7 @@
    - 原因：trailing 变体已经收敛为 cell 组件正式能力,直接消费已注册变体即可。
    - 例外：只有当业务需要新的 trailing 类型且已回流组件契约后,才允许扩展
 
-### 布局模式判断（通栏 M1 / 卡片 M2）
+### 布局模式判断（通栏 M0 / 长列表 M8 / 卡片 M16 / 白底大留白 M32）
 
 - biz-rule-config 命中页面默认通栏模式 M0（phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰），cell 横向边距由 cell__body 自带 16px padding 承担，避免双重 padding。仅当 surface 角色为 host-entry（宿主入口列表）时才改为卡片模式 M16（phone-body 16px 横向 padding + cell-group__content--card 修饰）。判断依据是 surface 语义角色，不是组件名+修饰类名。
 - 通栏模式 M0:phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰;cell 横向边距由 cell__body 自带 16px padding 承担
@@ -171,4 +171,4 @@
 组件已在注册表中存在，结构与状态符合契约，页面示例只用于结构参考，设计系统源文件与部署副本保持一致。
 
 <!-- generated-by: scripts/specs.mjs@5 -->
-<!-- source-fingerprint: 7df1c7665d66ad5dd138183a79329133b7fb432f8b3ef9922511bb3c3c22e107 -->
+<!-- source-fingerprint: 8ee497b13a01ea5fb8cd921d749d61a4fd84fc0a364c06eec9753ed19cef133c -->

@@ -167,6 +167,8 @@ description: 消费微购设计系统并输出 design_plan。用于已有 intera
 
 `interaction_spec.host_container.leaf_level >= 3` 时，若使用 push，必须在说明中声明栈式导航需求。场景级页面默认 `covers_tab_bar = true`；只有明确属于宿主内嵌 `host-entry` 时可为 `false`。
 
+多 route 场景（`prototype_target.routes` 含多个 route，或包含多个 `surface_id`）的 `page_presentation` 必须按 `surface_id` 索引，为每个 surface 提供独立的 `type`、`transition`、`dismiss_action`、`overlay_level`、`covers_tab_bar` 和 `source`。单 route 单 surface 场景可使用单数结构。每个 surface 的 `covers_tab_bar` 独立判定：host-tab/host-entry 为 `false`，二级 push/sheet/full-screen-modal 为 `true`；不得因主 surface 为 `false` 而让二级 surface 继承该值。
+
 navbar 稳定变体绑定：
 
 - `push` → `leftControl=back-icon`
@@ -240,10 +242,10 @@ navbar 稳定变体绑定：
   ],
   "implementation_constraints": [],
   "page_presentation": {
-    "type": "push | modal | sheet | full-screen-modal",
+    "type": "push | modal | sheet | full-screen-modal | host-tab | host-fixed-tab",
     "transition": "none | slide-left | fade | slide-up-enter, slide-down-exit",
-    "dismiss_action": "back-button | cancel | close | overlay",
-    "overlay_level": "inline | scene-overlay | screen-overlay",
+    "dismiss_action": "back-button | cancel | close | overlay | switch-tab | tab-switch",
+    "overlay_level": "inline | scene-overlay | screen-overlay | host-tab-panel",
     "covers_tab_bar": true,
     "source": "真实文件与字段"
   }
@@ -251,6 +253,33 @@ navbar 稳定变体绑定：
 ```
 
 `rule_sources_used` 只记录实际参与本轮决策的来源，不为凑数量列出未读取文件；不得包含 `specs/*.md`。
+
+多 route 场景的 `page_presentation` 改为按 `surface_id` 索引：
+
+```json
+{
+  "page_presentation": {
+    "merchant-workbench-main": {
+      "type": "host-tab",
+      "transition": "none",
+      "dismiss_action": "switch-tab",
+      "overlay_level": "host-tab-panel",
+      "covers_tab_bar": false,
+      "source": "host-tab 直接挂在工作 Tab"
+    },
+    "app-center-page": {
+      "type": "push",
+      "transition": "slide-left",
+      "dismiss_action": "back-button",
+      "overlay_level": "scene-overlay",
+      "covers_tab_bar": true,
+      "source": "二级 push 页面必须覆盖底部 Tab 栏"
+    }
+  }
+}
+```
+
+单 route 单 surface 场景保留单数结构即可。
 
 ## 落盘与归档
 

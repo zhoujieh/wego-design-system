@@ -647,7 +647,7 @@
       "id": "exp-multi-route-page-presentation-indexed-by-surface",
       "normalized_key": "multi-route-scene-page-presentation-must-be-indexed-by-surface-id-with-per-surface-covers-tab-bar",
       "title": "多 route 场景的 page_presentation 必须按 surface_id 索引，为每个 surface 提供独立 covers_tab_bar 配置",
-      "status": "awaiting-confirmation",
+      "status": "promoted",
       "occurrence_count": 1,
       "threshold": 1,
       "primary_owner": "wego-design",
@@ -683,7 +683,13 @@
         "acceptance_check": "wego-tests 用 agent-browser 进入二级 push/sheet/full-screen-modal 页面，验证 sceneLayer 和 panel 包含 cover-tab 类，且底部 bottom-nav 被 panel 完全覆盖（coveredByPanel=true）"
       },
       "created_at": "2026-07-11T00:00:00+08:00",
-      "updated_at": "2026-07-11T00:00:00+08:00"
+      "updated_at": "2026-07-11T00:30:00+08:00",
+      "formal_rule": {
+        "confirmed_at": "2026-07-11T00:30:00+08:00",
+        "file": ".codex/skills/wego-design/SKILL.md",
+        "field": "页面打开方式 / page_presentation 结构规范（多 route 场景必须按 surface_id 索引）",
+        "rule_id": "multi-route-page-presentation-indexed-by-surface"
+      }
     }
   ]
 }

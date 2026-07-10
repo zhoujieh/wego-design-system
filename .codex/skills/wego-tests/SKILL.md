@@ -149,8 +149,8 @@ description: 验收 wego-app 当前业务场景并输出 acceptance_report，检
 ### UI Kit、布局和组件
 
 - `match_status` 与实际命中依据一致；`gap` 不得进入实现。
-- `layout_pattern`（或新 `page_strategy.layout_pattern`）明确为通栏 M1 或卡片 M2，不使用条件性或模糊描述。
-- M1 实现为页面内容层 0 横向 padding，M2 实现为 16px 横向 padding 和正式卡片容器。
+- `layout_pattern`（或新 `page_strategy.layout_pattern`）明确为通栏 M0、长列表 M8、卡片 M16 或白底大留白 M32 之一，不使用条件性或模糊描述。
+- M0 实现为页面内容层 0 横向 padding；M8 实现为 8px 横向 padding + 卡片修饰类；M16 实现为 16px 横向 padding + 正式卡片容器；M32 实现为 32px 横向 padding + 白底页面（--bg-surface）+ cell 分割线使用 `.cell--divider-center`。
 - 主内容区域在空内容、短内容和未填写状态下仍占满计划规定的可用宽度。
 - 所有间距、颜色、字号、圆角和尺寸使用正式 Token。
 - 不存在未注册组件类、子元素类或修饰类。
@@ -195,7 +195,7 @@ description: 验收 wego-app 当前业务场景并输出 acceptance_report，检
 ### 打开方式和导航
 
 - `presentation.type`、DOM 容器、动画、关闭方式和覆盖层级一致。
-- `coversTabBar` 等于 `covers_tab_bar`；场景级页面默认 true，宿主内嵌 `host-entry` 例外需有依据。
+- `coversTabBar` 等于 `covers_tab_bar`；场景级页面默认 true，宿主内嵌 `host-entry` 例外需有依据。多 route 场景必须按 `surface_id` 逐个核对，二级 push/sheet/full-screen-modal 页面的 `coversTabBar` 不得继承主 surface 的 `false`。
 - `push` 在 sceneLayer 栈中打开，back 逐层弹栈。
 - `leaf_level >= 3` 的页面使用独立 push route，不用 full-screen modal 冒充。
 - sceneLayer 容器透明、每个 panel 自带页面背景，转场期间不白屏遮住下层。

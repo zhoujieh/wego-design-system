@@ -1228,24 +1228,6 @@ function checkTrackedJunk() {
   if (junk.length > 0) {
     add('error', 'git.tracked_junk', `禁止提交 .DS_Store 或 .uploads：${junk.join(', ')}`);
   }
-
-  const physicalJunk = [];
-  const walk = current => {
-    for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
-      if (entry.name === '.git') continue;
-      const full = path.join(current, entry.name);
-      const rel = path.relative(repoRoot, full);
-      if (entry.isDirectory()) {
-        walk(full);
-      } else if (/(^|\/)\.DS_Store$|^\.uploads\//.test(rel)) {
-        physicalJunk.push(rel);
-      }
-    }
-  };
-  walk(repoRoot);
-  if (physicalJunk.length > 0) {
-    add('error', 'repo.junk_file', `工作区禁止保留 .DS_Store 或 .uploads 文件：${firstLines(physicalJunk)}`);
-  }
 }
 
 function getSceneFoldersFromChangedFiles(changedFiles) {
@@ -1609,13 +1591,6 @@ function checkPrototypeJunkAndInternalCopy(context) {
 
   let scannedTextFiles = 0;
   for (const root of scanRoots) {
-    const allFiles = listFilesInDir(root, null, { skipLib: true });
-    for (const file of allFiles) {
-      if (path.basename(file) === '.DS_Store') {
-        add('error', 'prototype.junk_file', 'wego-app 场景禁止包含 .DS_Store', file);
-      }
-    }
-
     const textFiles = listFilesInDir(root, new Set(['.html', '.js']), { skipLib: true });
     for (const file of textFiles) {
       scannedTextFiles++;

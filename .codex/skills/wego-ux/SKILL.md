@@ -177,7 +177,7 @@ window.WegoApp.registerScene({
 | `sheet` | 底部进入的选择或操作层 | 按契约使用关闭 |
 | `full-screen-modal` | 覆盖手机屏的复杂编辑流程 | `text-cancel` 或 `close-icon` |
 
-- `coversTabBar` 必须等于 `covers_tab_bar`。
+- `coversTabBar` 必须等于 `covers_tab_bar`。多 route 场景 `page_presentation` 按 `surface_id` 索引时，每个 surface 的 `presentation` 独立读取对应 `surface_id` 的配置，不得继承主 surface 的值。
 - `push` 使用 `slide-left`；`modal` 常用 `fade`；`sheet/full-screen-modal` 使用底部进入退出，具体以计划为准。
 - 所有层都挂在 `.phone-screen` 内。
 - 不得把 push 页面实现为 overlay，也不得把 overlay 实现为独立 route，除非设计计划明确如此。
