@@ -5,6 +5,54 @@
   "standard_threshold": 3,
   "candidates": [
     {
+      "id": "exp-modal-mask-opacity-must-not-live-on-overlay-root",
+      "normalized_key": "modal-mask-opacity-must-use-independent-mask-layer-not-overlay-root",
+      "title": "Modal 遮罩透明度动画必须使用独立遮罩层，禁止放在 overlay 根节点",
+      "status": "promoted",
+      "occurrence_count": 1,
+      "threshold": 1,
+      "primary_owner": "wego-design",
+      "secondary_owners": ["wego-tests", "wego-ux"],
+      "ownership_reason": "问题最早产生在 modal 组件 CSS 契约阶段。组件把遮罩和面板放在同一个 .modal 根节点下，又用根节点 opacity 做遮罩淡入淡出；CSS 父级 opacity 会影响整棵子树，导致 .modal__panel 即使自身 computed opacity 为 1，视觉上仍随父级一起半透明。正确的组件契约应把遮罩视觉层拆成 .modal::before 或兄弟遮罩层，让遮罩单独做 opacity，根节点和面板都不参与 opacity 动画。",
+      "problem_pattern": "浮层根节点同时包住遮罩和面板，并在根节点上设置 opacity/opacity transition 承担遮罩淡入淡出。验收时只检查面板自身 computed opacity，会误判为通过；真实视觉中面板仍被父级 opacity 带透明。",
+      "scene_evidence": [
+        {
+          "date": "2026-07-10",
+          "scene": "帮卖加价卖 modal 面板动画",
+          "summary": "用户反馈帮卖弹窗面板打开/关闭仍有不透明度变化。第一次验证只读取 .modal__panel computed opacity=1，遗漏了 .modal 根节点 opacity 动画会影响子树。修复：.modal 根节点不再设置 opacity；新增 .modal::before 独立遮罩层承接 var(--bg-mask-light) 和 opacity transition；.modal__panel 保持 opacity=1 且 transition-property=transform。浏览器复测 rootOpacity=1、maskOpacity 变化、panelOpacity=1、panelTransitionProperty=transform。",
+          "source": "用户截图与追问：帮卖弹窗面板还是有不透明度变化"
+        }
+      ],
+      "applies_when_candidates": [
+        "浮层组件同时包含遮罩和内容面板",
+        "遮罩需要淡入淡出，但内容面板只允许位移动画",
+        "Modal、Sheet、Dialog 或其他 overlay 使用同一根节点包住 mask 与 panel"
+      ],
+      "avoid_when_candidates": [
+        "内容和遮罩本身就是同一个视觉对象，不存在独立面板",
+        "业务明确要求整个浮层连同内容一起淡入淡出",
+        "遮罩和面板已经是兄弟层，且 opacity 只作用在遮罩层"
+      ],
+      "expected_rule_target": {
+        "file": ".codex/skills/wego-design/components/modal.json",
+        "field": "structurePatterns / behavior.animation / doNotInvent"
+      },
+      "runtime_reachability": {
+        "consumer_skill": "wego-design 读取 modal 契约；wego-ux 按契约实现业务浮层；wego-tests 按 root/mask/panel 三层验收",
+        "output_field": "组件 Preview 的 @component-css、modal 契约 behavior.animation、验收项 root opacity / mask opacity / panel opacity / panel transition",
+        "downstream_consumer": "业务场景中的 modal/sheet 结构复用 .modal::before 遮罩和 .modal__panel 位移动画，不在根节点或面板上设置 opacity",
+        "acceptance_check": "validate-wego-design-core.mjs 拦截 .modal 或 .modal__panel 上的 opacity，并要求 components.css 存在 .modal::before；浏览器验收同时读取 root opacity、mask opacity、panel opacity 和 panel transition"
+      },
+      "created_at": "2026-07-10T00:00:00.000Z",
+      "updated_at": "2026-07-10T00:00:00.000Z",
+      "formal_rule": {
+        "confirmed_at": "2026-07-10T00:00:00.000Z",
+        "file": ".codex/skills/wego-design/components/modal.json",
+        "field": "structurePatterns / behavior.animation / doNotInvent",
+        "rule_id": "modal-mask-opacity-independent-layer"
+      }
+    },
+    {
       "id": "exp-nested-component-bg-css-variable-chain",
       "normalized_key": "nested-component-background-must-use-css-variable-chain-not-hardcoded",
       "title": "嵌套组件背景色必须通过 CSS 变量链路继承，禁止各自硬编码",

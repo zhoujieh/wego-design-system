@@ -757,6 +757,25 @@ function checkComponentsCss(options = {}) {
     add('error', 'components_css.header.missing', 'components.css 缺少 DO NOT EDIT MANUALLY 自动生成声明', cssPath);
   }
 
+  const cssWithoutComments = stripCssComments(css);
+  if (/\.modal\s*\{[^}]*\bopacity\s*:/.test(cssWithoutComments)
+    || /\.modal\[data-state[^\]]+\]\s*\{[^}]*\bopacity\s*:/.test(cssWithoutComments)) {
+    add('error', 'components_css.modal_root_opacity',
+      'modal 根节点不得设置 opacity；遮罩淡入淡出必须放在 .modal::before，避免面板被父级 opacity 一起变透明',
+      cssPath);
+  }
+  if (/\.modal__panel(?:\[[^\]]+\])?\s*\{[^}]*\bopacity\s*:/.test(cssWithoutComments)
+    || /\.modal\[data-state[^\]]+\]\s+\.modal__panel\s*\{[^}]*\bopacity\s*:/.test(cssWithoutComments)) {
+    add('error', 'components_css.modal_panel_opacity',
+      'modal 面板不得设置 opacity；面板打开/关闭只能使用 transform 位移动画',
+      cssPath);
+  }
+  if (/\.modal\b/.test(cssWithoutComments) && !/\.modal::before\s*\{/.test(cssWithoutComments)) {
+    add('error', 'components_css.modal_mask_layer_missing',
+      'modal 必须用 .modal::before 作为独立遮罩视觉层，不能用根节点 opacity 承担遮罩淡入淡出',
+      cssPath);
+  }
+
   if (!shouldRegenerate) return;
 
   const tmpParent = fs.mkdtempSync(path.join(os.tmpdir(), 'wego-design-validate-'));

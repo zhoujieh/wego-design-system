@@ -194,6 +194,7 @@ description: 验收 wego-app 当前业务场景并输出 acceptance_report，检
 - `leaf_level >= 3` 的页面使用独立 push route，不用 full-screen modal 冒充。
 - sceneLayer 容器透明、每个 panel 自带页面背景，转场期间不白屏遮住下层。
 - `back-icon`、`text-cancel`、`close-icon` 的 DOM、图标和文案与稳定变体一致。
+- Modal/Sheet 类浮层的遮罩淡入淡出必须由独立遮罩层承担（如 `.modal::before`）；根 overlay 和面板不得用 `opacity` 动画，否则面板会被父级透明度一起带透明。验收时必须同时检查 root opacity、mask opacity、panel opacity 和 panel transition。
 
 ### 真实交互
 
