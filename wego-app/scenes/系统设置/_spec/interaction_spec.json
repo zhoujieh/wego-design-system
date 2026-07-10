@@ -1,84 +1,333 @@
 {
+  "task_type": "design-system-consumption",
+  "scene_category": "system-setting",
   "goal": "展示系统设置入口列表，用户从我的 Tab 的设置入口进入后，可继续进入产品与笔记、交易设置等二级业务设置；未接入入口给出明确 stub 反馈。",
   "scope": {
     "included": ["我的 Tab 设置入口", "系统设置列表", "产品与笔记入口", "交易设置入口", "未接入设置项 toast 反馈", "返回我的 Tab"],
     "excluded": ["手机号登录设置详情", "搜索与分享详情", "粉丝设置详情", "团队与员工详情", "聊天与通知详情", "安全中心详情", "关于详情", "退出登录真实账号状态"]
   },
-  "actors": ["店主", "超级管理员"],
-  "entry_points": [
-    {
-      "id": "my-settings-entry",
-      "label": "设置",
-      "location": "我的 Tab / my-settings",
-      "route_id": "my-system-settings",
-      "surface_ref": "host-entry"
-    }
+  "actors": [
+    { "id": "shop-owner", "role": "店主", "purpose": "进入系统级设置入口" }
   ],
+  "entry_points": [
+    { "id": "my-settings-entry", "carrier": "host-fixed-tab", "description": "我的 Tab 设置入口，点击 push 进入系统设置列表" }
+  ],
+  "interaction_mode": "instant-apply",
+  "app_target": {
+    "mode": "wego-app-scene",
+    "app_root": "wego-app",
+    "scene_folder": "wego-app/scenes/系统设置",
+    "runtime_entry": "scene.js",
+    "route_mode": "hash"
+  },
+  "host_container": {
+    "tab": "my",
+    "entry_label": "设置",
+    "subentry_label": "",
+    "leaf_level": 2,
+    "entry_type": "cell",
+    "needs_host_entry_surface": true
+  },
+  "prototype_target": {
+    "app_root": "wego-app",
+    "scenario_folder": "wego-app/scenes/系统设置",
+    "routes": [
+      { "id": "my-system-settings", "surface_ref": "system-setting-list" }
+    ]
+  },
   "flows": [
     {
-      "id": "open-system-settings",
-      "type": "main",
-      "goal": "进入系统设置并选择具体设置入口",
-      "nodes": ["enter-system-settings", "view-system-setting-list", "open-product-note", "open-trade-settings", "return-my-tab"]
+      "flow_id": "open-system-settings",
+      "flow_type": "main",
+      "entry_node": "enter-system-settings",
+      "steps": ["enter-system-settings", "view-system-setting-list", "open-product-note", "open-trade-settings", "return-my-tab"],
+      "exit_condition": "返回我的 Tab"
     },
     {
-      "id": "stub-system-entry",
-      "type": "branch",
-      "goal": "点击暂未接入入口时给出明确反馈",
-      "nodes": ["view-system-setting-list", "tap-stub-entry", "show-stub-toast"]
+      "flow_id": "stub-system-entry",
+      "flow_type": "branch",
+      "entry_node": "view-system-setting-list",
+      "steps": ["view-system-setting-list", "tap-stub-entry", "show-stub-toast"],
+      "exit_condition": "toast 展示后自动消失"
     }
   ],
   "flow_nodes": [
-    { "id": "enter-system-settings", "surface_ref": "host-entry", "purpose": "从我的 Tab 设置入口进入系统设置" },
-    { "id": "view-system-setting-list", "surface_ref": "system-setting-list", "purpose": "查看系统设置分组入口" },
-    { "id": "open-product-note", "surface_ref": "system-setting-list", "purpose": "进入产品与笔记设置" },
-    { "id": "open-trade-settings", "surface_ref": "system-setting-list", "purpose": "进入交易设置" },
-    { "id": "tap-stub-entry", "surface_ref": "system-setting-list", "purpose": "点击暂未接入的设置项" },
-    { "id": "show-stub-toast", "surface_ref": "system-setting-list", "purpose": "展示功能尚未接入反馈" },
-    { "id": "return-my-tab", "surface_ref": "host-entry", "purpose": "返回我的 Tab" }
+    {
+      "node_id": "enter-system-settings",
+      "purpose": "从我的 Tab 设置入口进入系统设置",
+      "surface_ref": "host-entry",
+      "inputs": [],
+      "outputs": [],
+      "key_states": ["我的 Tab 已加载"]
+    },
+    {
+      "node_id": "view-system-setting-list",
+      "purpose": "查看系统设置分组入口列表",
+      "surface_ref": "system-setting-list",
+      "inputs": [],
+      "outputs": [],
+      "key_states": ["默认态"]
+    },
+    {
+      "node_id": "open-product-note",
+      "purpose": "进入产品与笔记设置",
+      "surface_ref": "system-setting-list",
+      "inputs": [],
+      "outputs": [],
+      "key_states": ["导航跳转"]
+    },
+    {
+      "node_id": "open-trade-settings",
+      "purpose": "进入交易设置",
+      "surface_ref": "system-setting-list",
+      "inputs": [],
+      "outputs": [],
+      "key_states": ["导航跳转"]
+    },
+    {
+      "node_id": "tap-stub-entry",
+      "purpose": "点击暂未接入的设置项",
+      "surface_ref": "system-setting-list",
+      "inputs": [],
+      "outputs": [],
+      "key_states": ["点击"]
+    },
+    {
+      "node_id": "show-stub-toast",
+      "purpose": "展示功能尚未接入反馈",
+      "surface_ref": "system-setting-list",
+      "inputs": [],
+      "outputs": ["toast"],
+      "key_states": ["反馈中"]
+    },
+    {
+      "node_id": "return-my-tab",
+      "purpose": "返回我的 Tab",
+      "surface_ref": "host-entry",
+      "inputs": [],
+      "outputs": [],
+      "key_states": ["已返回"]
+    }
   ],
   "surfaces": [
-    { "id": "host-entry", "type": "host-entry", "carrier": "host-fixed-tab", "route_id": "my-system-settings", "role": "我的 Tab 设置入口" },
-    { "id": "system-setting-list", "type": "page", "carrier": "push-route", "route_id": "my-system-settings", "role": "系统设置列表主页面" }
+    {
+      "surface_id": "host-entry",
+      "role": "host-entry",
+      "carrier": "host-section",
+      "node_refs": ["enter-system-settings", "return-my-tab"],
+      "content_refs": [],
+      "interaction_mode": "instant-apply",
+      "purpose": "我的 Tab 设置入口与返回点",
+      "states": ["我的 Tab 已加载"]
+    },
+    {
+      "surface_id": "system-setting-list",
+      "role": "primary-task-page",
+      "carrier": "standalone-page",
+      "node_refs": ["view-system-setting-list", "open-product-note", "open-trade-settings", "tap-stub-entry", "show-stub-toast"],
+      "content_refs": ["phone-login", "product-note", "search-share", "fan-settings", "team-staff", "trade-settings", "chat-notice", "security-center", "about", "logout", "customer-help"],
+      "interaction_mode": "instant-apply",
+      "purpose": "系统设置列表页，展示分组入口和未接入项",
+      "states": ["默认态", "stub-feedback"]
+    }
   ],
   "content_blocks": [
-    { "id": "phone-login", "surface_ref": "system-setting-list", "content": "手机号登录", "description": "通过手机号和密码实现多人同时登录", "interaction": "stub" },
-    { "id": "product-note", "surface_ref": "system-setting-list", "content": "产品与笔记", "description": "标签管理、批量上下架、产品清理等", "interaction": "navigate", "target_route_id": "my-product-note" },
-    { "id": "search-share", "surface_ref": "system-setting-list", "content": "搜索与分享", "description": "分享设置、以图搜图、开启搜索码等", "interaction": "stub" },
-    { "id": "fan-settings", "surface_ref": "system-setting-list", "content": "粉丝设置", "description": "设置粉丝资料、生命周期、标签等", "interaction": "stub" },
-    { "id": "team-staff", "surface_ref": "system-setting-list", "content": "团队与员工", "description": "员工业绩归属模式", "interaction": "stub" },
-    { "id": "trade-settings", "surface_ref": "system-setting-list", "content": "交易设置", "interaction": "navigate", "target_route_id": "my-trade-settings" },
-    { "id": "chat-notice", "surface_ref": "system-setting-list", "content": "聊天与通知", "interaction": "stub" },
-    { "id": "security-center", "surface_ref": "system-setting-list", "content": "安全中心", "interaction": "stub" },
-    { "id": "about", "surface_ref": "system-setting-list", "content": "关于", "interaction": "stub" },
-    { "id": "logout", "surface_ref": "system-setting-list", "content": "退出登录", "interaction": "stub" },
-    { "id": "customer-help", "surface_ref": "system-setting-list", "content": "客服教我", "interaction": "stub" }
+    {
+      "content_id": "phone-login",
+      "content": "手机号登录，通过手机号和密码实现多人同时登录",
+      "group": "账号设置",
+      "interaction": "action",
+      "editable": false,
+      "key_states": ["默认"]
+    },
+    {
+      "content_id": "product-note",
+      "content": "产品与笔记，标签管理、批量上下架、产品清理等",
+      "group": "业务设置",
+      "interaction": "action",
+      "editable": false,
+      "key_states": ["默认"]
+    },
+    {
+      "content_id": "search-share",
+      "content": "搜索与分享，分享设置、以图搜图、开启搜索码等",
+      "group": "业务设置",
+      "interaction": "action",
+      "editable": false,
+      "key_states": ["默认"]
+    },
+    {
+      "content_id": "fan-settings",
+      "content": "粉丝设置，设置粉丝资料、生命周期、标签等",
+      "group": "业务设置",
+      "interaction": "action",
+      "editable": false,
+      "key_states": ["默认"]
+    },
+    {
+      "content_id": "team-staff",
+      "content": "团队与员工，员工业绩归属模式",
+      "group": "业务设置",
+      "interaction": "action",
+      "editable": false,
+      "key_states": ["默认"]
+    },
+    {
+      "content_id": "trade-settings",
+      "content": "交易设置",
+      "group": "业务设置",
+      "interaction": "action",
+      "editable": false,
+      "key_states": ["默认"]
+    },
+    {
+      "content_id": "chat-notice",
+      "content": "聊天与通知",
+      "group": "安全与其他",
+      "interaction": "action",
+      "editable": false,
+      "key_states": ["默认"]
+    },
+    {
+      "content_id": "security-center",
+      "content": "安全中心",
+      "group": "安全与其他",
+      "interaction": "action",
+      "editable": false,
+      "key_states": ["默认"]
+    },
+    {
+      "content_id": "about",
+      "content": "关于",
+      "group": "安全与其他",
+      "interaction": "action",
+      "editable": false,
+      "key_states": ["默认"]
+    },
+    {
+      "content_id": "logout",
+      "content": "退出登录",
+      "group": "次级操作",
+      "interaction": "action",
+      "editable": false,
+      "key_states": ["默认"]
+    },
+    {
+      "content_id": "customer-help",
+      "content": "客服教我",
+      "group": "次级操作",
+      "interaction": "action",
+      "editable": false,
+      "key_states": ["默认"]
+    }
   ],
   "states": [
     { "id": "default", "description": "默认展示全部系统设置入口" },
     { "id": "stub-feedback", "description": "未接入入口点击后展示 toast：该功能尚未接入原型" }
   ],
   "transitions": [
-    { "id": "open-system-settings", "from": "enter-system-settings", "trigger": "tap-my-settings-entry", "to": "view-system-setting-list", "route_id": "my-system-settings" },
-    { "id": "go-product-note", "from": "view-system-setting-list", "trigger": "tap-product-note", "to": "open-product-note", "route_id": "my-product-note" },
-    { "id": "go-trade-settings", "from": "view-system-setting-list", "trigger": "tap-trade-settings", "to": "open-trade-settings", "route_id": "my-trade-settings" },
-    { "id": "stub-entry-toast", "from": "view-system-setting-list", "trigger": "tap-stub-entry", "to": "show-stub-toast", "result_out": ["toast"] },
-    { "id": "back-to-my", "from": "view-system-setting-list", "trigger": "tap-back", "to": "return-my-tab" }
+    {
+      "transition_id": "open-system-settings",
+      "from": "enter-system-settings",
+      "trigger": "点击我的 Tab 设置入口",
+      "to": "view-system-setting-list",
+      "data_in": [],
+      "result_out": [],
+      "return_to": null
+    },
+    {
+      "transition_id": "go-product-note",
+      "from": "view-system-setting-list",
+      "trigger": "点击产品与笔记",
+      "to": "open-product-note",
+      "data_in": [],
+      "result_out": [],
+      "return_to": null
+    },
+    {
+      "transition_id": "go-trade-settings",
+      "from": "view-system-setting-list",
+      "trigger": "点击交易设置",
+      "to": "open-trade-settings",
+      "data_in": [],
+      "result_out": [],
+      "return_to": null
+    },
+    {
+      "transition_id": "stub-entry-toast",
+      "from": "view-system-setting-list",
+      "trigger": "点击未接入入口",
+      "to": "show-stub-toast",
+      "data_in": [],
+      "result_out": ["toast"],
+      "return_to": null
+    },
+    {
+      "transition_id": "back-to-my",
+      "from": "view-system-setting-list",
+      "trigger": "点击返回",
+      "to": "return-my-tab",
+      "data_in": [],
+      "result_out": [],
+      "return_to": null
+    }
   ],
   "data_handoffs": [],
-  "exit_results": ["用户进入下一级设置", "用户看到未接入反馈", "用户返回我的 Tab"],
-  "prototype_target": {
-    "app_root": "wego-app",
-    "scenario_folder": "wego-app/scenes/系统设置",
-    "routes": [{ "id": "my-system-settings", "surface_ref": "system-setting-list" }]
-  },
   "prototype_boundaries": [
-    { "node_id": "view-system-setting-list", "depth": "functional", "reason": "列表展示、返回、内部路由入口需要真实可用" },
-    { "node_id": "tap-stub-entry", "depth": "stub", "reason": "未接入设置项仅提供明确反馈" }
+    {
+      "node_id": "enter-system-settings",
+      "depth": "simulated",
+      "reason": "从我的 Tab 设置入口进入，不依赖真实路由"
+    },
+    {
+      "node_id": "view-system-setting-list",
+      "depth": "functional",
+      "reason": "列表展示、返回、内部路由入口需要真实可用"
+    },
+    {
+      "node_id": "open-product-note",
+      "depth": "functional",
+      "reason": "产品与笔记导航需要真实跳转"
+    },
+    {
+      "node_id": "open-trade-settings",
+      "depth": "functional",
+      "reason": "交易设置导航需要真实跳转"
+    },
+    {
+      "node_id": "tap-stub-entry",
+      "depth": "stub",
+      "reason": "未接入设置项仅提供明确反馈",
+      "feedback": "toast 提示「该功能尚未接入原型」"
+    },
+    {
+      "node_id": "show-stub-toast",
+      "depth": "stub",
+      "reason": "仅展示反馈",
+      "feedback": "toast 提示「该功能尚未接入原型」"
+    },
+    {
+      "node_id": "return-my-tab",
+      "depth": "functional",
+      "reason": "返回操作需要真实可用"
+    }
   ],
   "assumptions": [
-    { "id": "keep-existing-route", "description": "保留原 route_id=my-system-settings 与现有 scene.js 路由触发方式，避免破坏已实现入口。", "impact_level": "low", "reversible": true }
+    {
+      "assumption": "保留原 route_id=my-system-settings 与现有 scene.js 路由触发方式，避免破坏已实现入口",
+      "impact_level": "low",
+      "reversible": true
+    }
   ],
   "open_questions": [],
-  "readiness": { "status": "ready", "reason": "旧 page_spec 已覆盖入口、列表内容、状态与路由；本次迁移不新增业务范围。" }
+  "readiness": {
+    "status": "ready",
+    "reason": "旧 page_spec 已覆盖入口、列表内容、状态与路由；本次迁移不新增业务范围。"
+  },
+  "rule_sources": [
+    { "source": "existing-interaction-spec", "supports": ["系统设置入口、列表内容、状态与路由"] },
+    { "source": "AGENTS.md", "supports": ["wego-app 唯一宿主、hash route_id、场景目录复用"] },
+    { "source": "wego-product/SKILL.md", "supports": ["interaction_spec Stage 2 结构", "host_container.entry_type 必须为 cell|grid-entry", "prototype_target.routes[] 替代单一 route_id"] }
+  ],
+  "delivery_hint": "next-step"
 }

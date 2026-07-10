@@ -1,0 +1,56 @@
+{
+  "complexity_level": "structured",
+  "matched_uikit": null,
+  "scene_fit_reason": "系统设置页是入口聚合型设置列表，不是编辑型业务规则配置页；按完整交互任务承接我的 Tab 入口、列表分组、内部路由入口和未接入反馈。",
+  "navigation_pattern": "我的 Tab 设置入口 → push 系统设置列表 → 内部入口继续 push 到产品与笔记/交易设置 → 返回恢复系统设置列表",
+  "layout_pattern": "通栏 cell-group 设置列表，页面主滚动，底部无固定操作；退出登录与客服教我作为列表后的次级操作。",
+  "interaction_pattern": "设置入口导航 + 未接入 toast 反馈",
+  "app_target": {
+    "mode": "wego-app-scene",
+    "app_root": "wego-app",
+    "scene_folder": "wego-app/scenes/系统设置",
+    "route_id": "my-system-settings",
+    "route_mode": "hash",
+    "runtime_entry": "scene.js"
+  },
+  "flow_to_surface_decisions": [
+    { "flow_ref": "open-system-settings", "node_refs": ["enter-system-settings"], "surface_ref": "host-entry", "decision": "宿主入口由我的 Tab 设置 cell 承载，不重画宿主。" },
+    { "flow_ref": "open-system-settings", "node_refs": ["view-system-setting-list", "open-product-note", "open-trade-settings", "tap-stub-entry", "show-stub-toast"], "surface_ref": "system-setting-list", "decision": "全部系统设置入口合并在一个 push 列表页，真实接入项导航，未接入项 toast。" }
+  ],
+  "page_strategy": {
+    "page_goal": "让店主快速找到系统级设置入口，并明确哪些能力已接入原型。",
+    "page_pattern": "settings-entry-list",
+    "primary_scroll": "vertical",
+    "density": "high",
+    "first_screen_priority": ["导航栏", "手机号登录", "产品与笔记", "交易设置"],
+    "fixed_regions": []
+  },
+  "region_composition": [
+    {
+      "surface_ref": "system-setting-list",
+      "regions": [
+        { "id": "navbar", "role": "navigation", "priority": 1, "sticky": true },
+        { "id": "account-group", "role": "settings-group", "priority": 2 },
+        { "id": "business-group", "role": "settings-group", "priority": 3 },
+        { "id": "security-about-group", "role": "settings-group", "priority": 4 },
+        { "id": "secondary-actions", "role": "secondary-action", "priority": 5 }
+      ]
+    }
+  ],
+  "component_patterns": [
+    { "applies_to": ["host-entry"], "component_pattern": "host-cell-entry" },
+    { "applies_to": ["phone-login", "product-note", "search-share", "fan-settings", "team-staff"], "component_pattern": "cell double clickable with arrow" },
+    { "applies_to": ["trade-settings", "chat-notice", "security-center", "about"], "component_pattern": "cell single clickable with arrow" },
+    { "applies_to": ["logout"], "component_pattern": "secondary full-width button" },
+    { "applies_to": ["customer-help"], "component_pattern": "centered text link" }
+  ],
+  "page_presentation": [
+    { "surface_ref": "host-entry", "type": "host-cell-entry", "route_binding": "my-system-settings" },
+    { "surface_ref": "system-setting-list", "type": "push", "transition": "slide-left", "covers_tab_bar": true }
+  ],
+  "design_gaps": [],
+  "rule_sources": [
+    { "file": "docs/interaction-prototype-workflow-refactor-conclusion.md", "supports": ["design_plan 新结构", "完整交互任务", "组件映射和页面组合分离"] },
+    { "file": "wego-app/scenes/系统设置/_spec/interaction_spec.json", "supports": ["流程、节点、内容块、路由和原型边界"] }
+  ]
+}

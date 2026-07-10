@@ -15,22 +15,31 @@
   },
   "flow_to_surface_decisions": [
     {
-      "flow_ref": "manage-price-permission",
-      "node_refs": ["enter-price-management"],
+      "decision_id": "price-entry-to-host",
+      "flow_ref": "configure-permission",
+      "node_refs": [],
       "surface_ref": "host-entry",
-      "decision": "作为我的 Tab 应用中心入口，不单独绘制业务页面。"
+      "carrier_decision": "merge-into-surface",
+      "reason": "作为我的 Tab 应用中心入口，不单独绘制业务页面。",
+      "rule_sources": ["interaction_spec.surfaces[host-entry].carrier=host-grid-entry"]
     },
     {
-      "flow_ref": "manage-price-permission",
-      "node_refs": ["view-price-types"],
+      "decision_id": "price-list-nodes",
+      "flow_ref": "configure-permission",
+      "node_refs": ["enter-price-list", "select-price-type"],
       "surface_ref": "price-type-list",
-      "decision": "价格类型与当前权限摘要合并在一个 push 列表页，减少层级。"
+      "carrier_decision": "standalone-page",
+      "reason": "价格类型与当前权限摘要合并在一个 push 列表页，减少层级。",
+      "rule_sources": ["interaction_spec.surfaces[price-type-list].carrier=standalone-page"]
     },
     {
-      "flow_ref": "manage-price-permission",
-      "node_refs": ["edit-price-permission", "select-fan-groups", "save-price-permission"],
+      "decision_id": "price-edit-nodes",
+      "flow_ref": "configure-permission",
+      "node_refs": ["edit-permission", "save-permission", "cancel-edit", "block-save"],
       "surface_ref": "price-permission-edit",
-      "decision": "权限编辑、分组选择与保存反馈承载在 full-screen-modal 中，保存后回填列表。"
+      "carrier_decision": "full-screen-modal",
+      "reason": "权限编辑、分组选择与保存反馈承载在 full-screen-modal 中，保存后回填列表。",
+      "rule_sources": ["interaction_spec.surfaces[price-permission-edit].carrier=full-screen-modal"]
     }
   ],
   "page_strategy": {
@@ -39,40 +48,274 @@
     "primary_scroll": "vertical",
     "density": "medium-high",
     "first_screen_priority": ["价格类型列表", "权限状态摘要", "编辑入口"],
-    "fixed_regions": ["price-permission-edit.actions"]
+    "fixed_regions": []
   },
   "region_composition": [
     {
+      "region_id": "price-list-navbar",
       "surface_ref": "price-type-list",
-      "regions": [
-        { "id": "navbar", "role": "navigation", "priority": 1 },
-        { "id": "price-type-cells", "role": "primary-content", "priority": 2 },
-        { "id": "help-copy", "role": "secondary-guidance", "priority": 3 }
-      ]
+      "role": "navigation",
+      "priority": 1,
+      "order": 1,
+      "layout": "horizontal-3-slot",
+      "width": "full",
+      "scroll_behavior": "fixed",
+      "component_refs": ["price-list-nav"],
+      "relation": { "below": "price-type-cells" },
+      "rule_sources": ["uikit-plan.json.pagePatterns[biz-rule-config]"]
     },
     {
+      "region_id": "price-type-cells",
+      "surface_ref": "price-type-list",
+      "role": "primary-content",
+      "priority": 2,
+      "order": 2,
+      "layout": "vertical-stack",
+      "width": "full",
+      "scroll_behavior": "scroll",
+      "component_refs": ["price-type-list-content"],
+      "relation": { "above": "price-list-navbar", "below": "help-copy" },
+      "rule_sources": ["uikit-plan.json.fallbackPageBlueprints[object-management-list-page]"]
+    },
+    {
+      "region_id": "help-copy",
+      "surface_ref": "price-type-list",
+      "role": "secondary-guidance",
+      "priority": 3,
+      "order": 3,
+      "layout": "vertical-stack",
+      "width": "full",
+      "scroll_behavior": "scroll",
+      "component_refs": [],
+      "relation": { "above": "price-type-cells" },
+      "rule_sources": ["uikit-plan.json.fallbackPageBlueprints[object-management-list-page]"]
+    },
+    {
+      "region_id": "modal-navbar",
       "surface_ref": "price-permission-edit",
-      "regions": [
-        { "id": "modal-navbar", "role": "navigation", "priority": 1 },
-        { "id": "permission-fields", "role": "form-content", "priority": 2 },
-        { "id": "modal-actions", "role": "submit-action", "priority": 3, "fixed": true }
-      ]
+      "role": "navigation",
+      "priority": 1,
+      "order": 1,
+      "layout": "horizontal-3-slot",
+      "width": "full",
+      "scroll_behavior": "fixed",
+      "component_refs": ["price-edit-nav"],
+      "relation": { "below": "permission-fields" },
+      "rule_sources": ["uikit-plan.json.pagePatterns[biz-rule-config]"]
+    },
+    {
+      "region_id": "permission-fields",
+      "surface_ref": "price-permission-edit",
+      "role": "form-content",
+      "priority": 2,
+      "order": 2,
+      "layout": "vertical-stack",
+      "width": "full",
+      "scroll_behavior": "scroll",
+      "component_refs": ["perm-type-options", "partial-fan-groups", "exclude-fan-groups"],
+      "relation": { "above": "modal-navbar", "below": "modal-actions" },
+      "rule_sources": ["uikit-plan.json.pagePatterns[biz-rule-config]"]
+    },
+    {
+      "region_id": "modal-actions",
+      "surface_ref": "price-permission-edit",
+      "role": "submit-action",
+      "priority": 3,
+      "order": 3,
+      "layout": "horizontal-row",
+      "width": "full",
+      "scroll_behavior": "fixed",
+      "component_refs": [],
+      "relation": { "above": "permission-fields" },
+      "rule_sources": ["uikit-plan.json.pagePatterns[biz-rule-config]"]
     }
   ],
   "component_patterns": [
-    { "applies_to": ["host-entry"], "component_pattern": "host-grid-entry" },
-    { "applies_to": ["price-type-list"], "component_pattern": "navbar + cell-group + cell clickable" },
-    { "applies_to": ["price-permission-edit"], "component_pattern": "modal fullscreen + form/cell-group + fixed primary action" },
-    { "applies_to": ["fan-group-selector"], "component_pattern": "multi-select list with check state" }
+    {
+      "pattern_id": "host-grid-entry",
+      "applies_to": ["price-entry"],
+      "component_pattern": "host-grid-entry",
+      "matched_page_pattern": null,
+      "matched_blueprint": null,
+      "constraint_ref": null,
+      "reason": "应用中心 grid 入口",
+      "rule_sources": ["uikit-plan.json.fallbackPageBlueprints[mobile-host-entry]"]
+    },
+    {
+      "pattern_id": "price-type-cell",
+      "applies_to": ["price-type-list-content"],
+      "component_pattern": "navbar + cell-group + cell clickable",
+      "matched_page_pattern": null,
+      "matched_blueprint": "object-management-list-page",
+      "constraint_ref": null,
+      "reason": "价格类型列表使用 cell clickable 展示",
+      "rule_sources": ["uikit-plan.json.fallbackPageBlueprints[object-management-list-page]"]
+    },
+    {
+      "pattern_id": "permission-edit-form",
+      "applies_to": ["perm-type-options", "partial-fan-groups", "exclude-fan-groups"],
+      "component_pattern": "modal fullscreen + form/cell-group + fixed primary action",
+      "matched_page_pattern": "biz-rule-config",
+      "matched_blueprint": null,
+      "constraint_ref": null,
+      "reason": "权限编辑使用 full-screen-modal 表单配置页",
+      "rule_sources": ["uikit-plan.json.pagePatterns[biz-rule-config]"]
+    }
   ],
-  "page_presentation": [
-    { "surface_ref": "host-entry", "type": "host-grid-entry", "route_binding": "my-price-management" },
-    { "surface_ref": "price-type-list", "type": "push", "transition": "slide-left", "covers_tab_bar": true },
-    { "surface_ref": "price-permission-edit", "type": "full-screen-modal", "transition": "slide-up", "covers_tab_bar": true }
+  "page_presentation": {
+    "host-entry": {
+      "type": "host-grid-entry",
+      "transition": "none",
+      "dismiss_action": "none",
+      "overlay_level": "inline",
+      "covers_tab_bar": false,
+      "source": "宿主 grid 入口"
+    },
+    "price-type-list": {
+      "type": "push",
+      "transition": "slide-left",
+      "dismiss_action": "back-button",
+      "overlay_level": "scene-overlay",
+      "covers_tab_bar": true,
+      "source": "价格类型列表为 push 页面"
+    },
+    "price-permission-edit": {
+      "type": "full-screen-modal",
+      "transition": "slide-up-enter, slide-down-exit",
+      "dismiss_action": "cancel-or-save",
+      "overlay_level": "scene-overlay",
+      "covers_tab_bar": true,
+      "source": "权限设置为 full-screen-modal"
+    }
+  },
+  "surface_designs": [
+    {
+      "surface_id": "host-entry",
+      "role": "host-entry",
+      "match_status": "fallback",
+      "matched_uikit": null,
+      "matched_page_pattern": null,
+      "matched_blueprint": "mobile-host-entry",
+      "presentation_ref": "host-grid-entry",
+      "scene_fit_reason": "应用中心 grid 入口",
+      "component_mapping": ["price-entry"],
+      "allowed_page_styles": [],
+      "design_gap": ""
+    },
+    {
+      "surface_id": "price-type-list",
+      "role": "primary-task-page",
+      "match_status": "fallback",
+      "matched_uikit": null,
+      "matched_page_pattern": null,
+      "matched_blueprint": "object-management-list-page",
+      "presentation_ref": "push",
+      "scene_fit_reason": "价格类型列表命中对象管理列表 fallback",
+      "component_mapping": ["price-list-nav", "price-type-list-content"],
+      "allowed_page_styles": [
+        "通栏模式 M1：phone-body 0px 横向 padding",
+        "价格类型 cell clickable 带权限摘要和 arrow"
+      ],
+      "design_gap": ""
+    },
+    {
+      "surface_id": "price-permission-edit",
+      "role": "primary-task-page",
+      "match_status": "exact",
+      "matched_uikit": "biz-rule-config",
+      "matched_page_pattern": "biz-rule-config",
+      "matched_blueprint": null,
+      "presentation_ref": "full-screen-modal",
+      "scene_fit_reason": "权限编辑命中 biz-rule-config 表单范式",
+      "component_mapping": ["price-edit-nav", "perm-type-options", "partial-fan-groups", "exclude-fan-groups"],
+      "allowed_page_styles": [
+        "通栏模式 M1：phone-body 0px 横向 padding",
+        "权限类型四选一 radio",
+        "粉丝分组多选 checklist",
+        "底部固定保存主操作"
+      ],
+      "design_gap": ""
+    }
+  ],
+  "component_mapping": [
+    {
+      "block": "price-entry",
+      "scenario_type": "no-uikit-page-composition",
+      "consumption_mode": "free-composition",
+      "selected": "宿主 grid 入口",
+      "constraint_ref": {},
+      "reason": "应用中心 grid 入口由宿主页承载",
+      "rule_sources": ["uikit-plan.json.fallbackPageBlueprints[mobile-host-entry]"]
+    },
+    {
+      "block": "price-list-nav",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": ["leftControl=back", "titleAlignment=center"],
+      "constraint_ref": {},
+      "reason": "列表页导航栏",
+      "rule_sources": ["components/navbar.json.variantDimensions"]
+    },
+    {
+      "block": "price-type-list-content",
+      "scenario_type": "object-management-list-composition",
+      "consumption_mode": "free-composition",
+      "selected": "cell clickable 带权限摘要和 arrow trailing",
+      "constraint_ref": {},
+      "reason": "价格类型列表使用 cell 展示",
+      "rule_sources": ["components/cell.json.variantDimensions.trailingSlot=arrow"]
+    },
+    {
+      "block": "price-edit-nav",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": ["leftControl=text-cancel", "actions=button", "rightActionType=button"],
+      "constraint_ref": {},
+      "reason": "权限设置页导航栏使用 full-screen-modal 模式 A",
+      "rule_sources": ["components/navbar.json.variantDimensions.leftControl=text-cancel"]
+    },
+    {
+      "block": "perm-type-options",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": ["layout=single", "trailingSlot=radio", "interaction=clickable"],
+      "constraint_ref": {},
+      "reason": "权限类型四选一使用 cell + radio trailing",
+      "rule_sources": ["components/cell.json.variantDimensions.trailingSlot=radio"]
+    },
+    {
+      "block": "partial-fan-groups",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": ["layout=single", "trailingSlot=check", "interaction=clickable"],
+      "constraint_ref": {},
+      "reason": "粉丝分组多选使用 cell + check trailing",
+      "rule_sources": ["components/cell.json.variantDimensions.trailingSlot=check"]
+    },
+    {
+      "block": "exclude-fan-groups",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": ["layout=single", "trailingSlot=check", "interaction=clickable"],
+      "constraint_ref": {},
+      "reason": "粉丝分组多选使用 cell + check trailing",
+      "rule_sources": ["components/cell.json.variantDimensions.trailingSlot=check"]
+    }
   ],
   "design_gaps": [],
-  "rule_sources": [
-    { "file": "docs/interaction-prototype-workflow-refactor-conclusion.md", "supports": ["design_plan 新结构", "完整交互任务", "flow_to_surface_decisions", "component_patterns"] },
-    { "file": "wego-app/scenes/价格权限管理/_spec/interaction_spec.json", "supports": ["流程、节点、surface、数据回填与 readiness"] }
+  "rule_sources_used": [
+    { "file": ".codex/skills/wego-design/uikit-plan.json", "field": "pagePatterns[biz-rule-config]", "supports": ["权限设置页命中 biz-rule-config 表单范式"] },
+    { "file": ".codex/skills/wego-design/uikit-plan.json", "field": "fallbackPageBlueprints[object-management-list-page]", "supports": ["价格类型列表命中对象管理列表 fallback"] },
+    { "file": ".codex/skills/wego-design/components/cell.json", "field": "variantDimensions.trailingSlot", "supports": ["cell+arrow/cell+radio/cell+check 变体"] },
+    { "file": ".codex/skills/wego-design/components/navbar.json", "field": "variantDimensions.leftControl + actions", "supports": ["列表页导航栏和 full-screen-modal 模式 A"] },
+    { "file": "wego-app/scenes/价格权限管理/_spec/interaction_spec.json", "field": "surfaces/content_blocks/prototype_boundaries", "supports": ["价格类型列表、权限设置、保存回填和原型边界"] }
+  ],
+  "implementation_constraints": [
+    "通栏模式 M1：phone-body 0px 横向 padding",
+    "权限类型四选一使用 cell + radio trailing 组合",
+    "粉丝分组多选使用 cell + check trailing 组合",
+    "部分可见/不给谁看未选分组时保存按钮禁用，toast 提示至少选择一个分组",
+    "保存后关闭 modal，列表页权限摘要回填",
+    "navbar 背景跟随 data-bg=surface 白底"
   ]
 }

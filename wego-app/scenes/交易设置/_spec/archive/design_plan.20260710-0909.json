@@ -1,0 +1,52 @@
+{
+  "complexity_level": "structured",
+  "matched_uikit": "biz-rule-config",
+  "scene_fit_reason": "交易设置是系统设置内部的业务规则配置列表，包含多个分组、开关项和下钻配置入口；适合按 structured 设置页组织，并明确真实交易能力的原型边界。",
+  "navigation_pattern": "系统设置列表 → push 交易设置 → 返回系统设置",
+  "layout_pattern": "通栏 cell-group 分组；开关项使用 switch trailing；下钻项使用 arrow trailing；不设置底部固定主操作。",
+  "interaction_pattern": "即时开关 + 下钻入口 stub 反馈",
+  "app_target": {
+    "mode": "wego-app-scene",
+    "app_root": "wego-app",
+    "scene_folder": "wego-app/scenes/交易设置",
+    "route_id": "my-trade-settings",
+    "route_mode": "hash",
+    "runtime_entry": "scene.js"
+  },
+  "flow_to_surface_decisions": [
+    { "flow_ref": "configure-trade-settings", "node_refs": ["enter-trade-settings"], "surface_ref": "host-entry", "decision": "入口由系统设置列表承载，不在宿主页重复挂载。" },
+    { "flow_ref": "configure-trade-settings", "node_refs": ["view-trade-setting-list", "toggle-trade-setting", "tap-trade-stub", "show-stub-toast"], "surface_ref": "trade-setting-list", "decision": "交易设置合并为一个 push 列表页；高风险真实交易配置以 stub 表达。" }
+  ],
+  "page_strategy": {
+    "page_goal": "让店主集中查看和调整交易规则。",
+    "page_pattern": "business-rule-settings-list",
+    "primary_scroll": "vertical",
+    "density": "high",
+    "first_screen_priority": ["导航栏", "收款播报", "库存扣减", "下单模式", "在线收款"],
+    "fixed_regions": []
+  },
+  "region_composition": [
+    {
+      "surface_ref": "trade-setting-list",
+      "regions": [
+        { "id": "navbar", "role": "navigation", "priority": 1, "sticky": true },
+        { "id": "payment-inventory-group", "role": "rule-switch-group", "priority": 2 },
+        { "id": "order-payment-group", "role": "rule-entry-group", "priority": 3 },
+        { "id": "device-group", "role": "device-entry-group", "priority": 4 }
+      ]
+    }
+  ],
+  "component_patterns": [
+    { "applies_to": ["payment-broadcast", "inventory-deduction", "retail-accounting"], "component_pattern": "cell with switch trailing" },
+    { "applies_to": ["order-mode", "online-payment", "order-rules", "print-device"], "component_pattern": "cell clickable with arrow" }
+  ],
+  "page_presentation": [
+    { "surface_ref": "host-entry", "type": "internal-cell-entry", "parent_surface": "system-setting-list" },
+    { "surface_ref": "trade-setting-list", "type": "push", "transition": "slide-left", "covers_tab_bar": true }
+  ],
+  "design_gaps": [],
+  "rule_sources": [
+    { "file": "docs/interaction-prototype-workflow-refactor-conclusion.md", "supports": ["design_plan 新结构", "完整交互任务", "原型边界"] },
+    { "file": "wego-app/scenes/交易设置/_spec/interaction_spec.json", "supports": ["交易设置内容块、开关状态和 stub 边界"] }
+  ]
+}

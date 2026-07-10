@@ -14,8 +14,24 @@
     "runtime_entry": "scene.js"
   },
   "flow_to_surface_decisions": [
-    { "flow_ref": "configure-trade-settings", "node_refs": ["enter-trade-settings"], "surface_ref": "host-entry", "decision": "入口由系统设置列表承载，不在宿主页重复挂载。" },
-    { "flow_ref": "configure-trade-settings", "node_refs": ["view-trade-setting-list", "toggle-trade-setting", "tap-trade-stub", "show-stub-toast"], "surface_ref": "trade-setting-list", "decision": "交易设置合并为一个 push 列表页；高风险真实交易配置以 stub 表达。" }
+    {
+      "decision_id": "trade-entry-to-host",
+      "flow_ref": "configure-trade-settings",
+      "node_refs": ["enter-trade-settings", "return-system-settings"],
+      "surface_ref": "host-entry",
+      "carrier_decision": "merge-into-surface",
+      "reason": "入口由系统设置列表承载，不在宿主页重复挂载。",
+      "rule_sources": ["interaction_spec.surfaces[host-entry].carrier=host-section"]
+    },
+    {
+      "decision_id": "trade-nodes-to-list",
+      "flow_ref": "configure-trade-settings",
+      "node_refs": ["view-trade-setting-list", "toggle-trade-setting", "tap-trade-stub", "show-stub-toast"],
+      "surface_ref": "trade-setting-list",
+      "carrier_decision": "standalone-page",
+      "reason": "交易设置合并为一个 push 列表页；高风险真实交易配置以 stub 表达。",
+      "rule_sources": ["interaction_spec.surfaces[trade-setting-list].carrier=standalone-page"]
+    }
   ],
   "page_strategy": {
     "page_goal": "让店主集中查看和调整交易规则。",
@@ -27,26 +43,195 @@
   },
   "region_composition": [
     {
+      "region_id": "navbar",
       "surface_ref": "trade-setting-list",
-      "regions": [
-        { "id": "navbar", "role": "navigation", "priority": 1, "sticky": true },
-        { "id": "payment-inventory-group", "role": "rule-switch-group", "priority": 2 },
-        { "id": "order-payment-group", "role": "rule-entry-group", "priority": 3 },
-        { "id": "device-group", "role": "device-entry-group", "priority": 4 }
-      ]
+      "role": "navigation",
+      "priority": 1,
+      "order": 1,
+      "layout": "horizontal-3-slot",
+      "width": "full",
+      "scroll_behavior": "fixed",
+      "component_refs": [],
+      "relation": { "below": "payment-inventory-group" },
+      "rule_sources": ["uikit-plan.json.pagePatterns[biz-rule-config]"]
+    },
+    {
+      "region_id": "payment-inventory-group",
+      "surface_ref": "trade-setting-list",
+      "role": "rule-switch-group",
+      "priority": 2,
+      "order": 2,
+      "layout": "vertical-stack",
+      "width": "full",
+      "scroll_behavior": "scroll",
+      "component_refs": ["payment-broadcast", "inventory-deduction", "retail-accounting"],
+      "relation": { "above": "navbar", "below": "order-payment-group" },
+      "rule_sources": ["uikit-plan.json.pagePatterns[biz-rule-config]"]
+    },
+    {
+      "region_id": "order-payment-group",
+      "surface_ref": "trade-setting-list",
+      "role": "rule-entry-group",
+      "priority": 3,
+      "order": 3,
+      "layout": "vertical-stack",
+      "width": "full",
+      "scroll_behavior": "scroll",
+      "component_refs": ["order-mode", "online-payment", "order-rules"],
+      "relation": { "above": "payment-inventory-group", "below": "device-group" },
+      "rule_sources": ["uikit-plan.json.pagePatterns[biz-rule-config]"]
+    },
+    {
+      "region_id": "device-group",
+      "surface_ref": "trade-setting-list",
+      "role": "device-entry-group",
+      "priority": 4,
+      "order": 4,
+      "layout": "vertical-stack",
+      "width": "full",
+      "scroll_behavior": "scroll",
+      "component_refs": ["print-device"],
+      "relation": { "above": "order-payment-group" },
+      "rule_sources": ["uikit-plan.json.pagePatterns[biz-rule-config]"]
     }
   ],
   "component_patterns": [
-    { "applies_to": ["payment-broadcast", "inventory-deduction", "retail-accounting"], "component_pattern": "cell with switch trailing" },
-    { "applies_to": ["order-mode", "online-payment", "order-rules", "print-device"], "component_pattern": "cell clickable with arrow" }
+    {
+      "pattern_id": "switch-cell",
+      "applies_to": ["payment-broadcast", "inventory-deduction", "retail-accounting"],
+      "component_pattern": "cell with switch trailing",
+      "matched_page_pattern": "biz-rule-config",
+      "constraint_ref": null,
+      "reason": "开关项使用 cell + switch trailing 组合",
+      "rule_sources": ["uikit-plan.json.pagePatterns[biz-rule-config].componentSlugs"]
+    },
+    {
+      "pattern_id": "arrow-cell",
+      "applies_to": ["order-mode", "online-payment", "order-rules", "print-device"],
+      "component_pattern": "cell clickable with arrow",
+      "matched_page_pattern": "biz-rule-config",
+      "constraint_ref": null,
+      "reason": "下钻入口使用 cell + arrow trailing 组合",
+      "rule_sources": ["uikit-plan.json.pagePatterns[biz-rule-config].componentSlugs"]
+    }
   ],
-  "page_presentation": [
-    { "surface_ref": "host-entry", "type": "internal-cell-entry", "parent_surface": "system-setting-list" },
-    { "surface_ref": "trade-setting-list", "type": "push", "transition": "slide-left", "covers_tab_bar": true }
+  "page_presentation": {
+    "type": "push",
+    "transition": "slide-left",
+    "dismiss_action": "back-button",
+    "overlay_level": "scene-overlay",
+    "covers_tab_bar": true,
+    "source": "交易设置为系统设置下钻 push 页面"
+  },
+  "surface_designs": [
+    {
+      "surface_id": "host-entry",
+      "role": "host-entry",
+      "match_status": "fallback",
+      "matched_uikit": null,
+      "matched_page_pattern": null,
+      "matched_blueprint": "mobile-host-entry",
+      "presentation_ref": "host-entry，由系统设置列表承载",
+      "scene_fit_reason": "交易设置入口由系统设置列表承载，无独立打开方式",
+      "component_mapping": [],
+      "allowed_page_styles": [],
+      "design_gap": ""
+    },
+    {
+      "surface_id": "trade-setting-list",
+      "role": "primary-task-page",
+      "match_status": "exact",
+      "matched_uikit": "biz-rule-config",
+      "matched_page_pattern": "biz-rule-config",
+      "matched_blueprint": null,
+      "presentation_ref": "push，slide-left，back-button，coversTabBar=true",
+      "scene_fit_reason": "交易设置是规则配置列表，开关即时切换、下钻入口 stub 反馈，命中 biz-rule-config",
+      "component_mapping": ["payment-broadcast", "inventory-deduction", "order-mode", "retail-accounting", "online-payment", "order-rules", "print-device"],
+      "allowed_page_styles": [
+        "通栏模式 M1：phone-body 0px 横向 padding，cell-group__content 不开 --card",
+        "开关项 cell 右侧 switch trailing",
+        "下钻项 cell 右侧 arrow trailing",
+        "分组之间 16px 间距"
+      ],
+      "design_gap": ""
+    }
+  ],
+  "component_mapping": [
+    {
+      "block": "payment-broadcast",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": ["trailingSlot=switch", "interaction=static"],
+      "constraint_ref": {},
+      "reason": "收款播报开关使用 cell + switch trailing",
+      "rule_sources": ["components/cell.json.variantDimensions.trailingSlot=switch", "components/switch.json.variantDimensions.state=on/off"]
+    },
+    {
+      "block": "inventory-deduction",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": ["trailingSlot=switch", "interaction=static"],
+      "constraint_ref": {},
+      "reason": "库存扣减开关使用 cell + switch trailing",
+      "rule_sources": ["components/cell.json.variantDimensions.trailingSlot=switch"]
+    },
+    {
+      "block": "order-mode",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": ["trailingSlot=arrow", "interaction=clickable"],
+      "constraint_ref": {},
+      "reason": "下单模式下钻入口使用 cell + arrow trailing",
+      "rule_sources": ["components/cell.json.variantDimensions.trailingSlot=arrow", "components/cell.json.variantDimensions.interaction=clickable"]
+    },
+    {
+      "block": "retail-accounting",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": ["trailingSlot=switch", "interaction=static"],
+      "constraint_ref": {},
+      "reason": "零售记账开关使用 cell + switch trailing",
+      "rule_sources": ["components/cell.json.variantDimensions.trailingSlot=switch"]
+    },
+    {
+      "block": "online-payment",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": ["trailingSlot=arrow", "interaction=clickable"],
+      "constraint_ref": {},
+      "reason": "在线收款下钻入口使用 cell + arrow trailing",
+      "rule_sources": ["components/cell.json.variantDimensions.trailingSlot=arrow"]
+    },
+    {
+      "block": "order-rules",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": ["trailingSlot=arrow", "interaction=clickable"],
+      "constraint_ref": {},
+      "reason": "订单规则下钻入口使用 cell + arrow trailing",
+      "rule_sources": ["components/cell.json.variantDimensions.trailingSlot=arrow"]
+    },
+    {
+      "block": "print-device",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": ["trailingSlot=arrow", "interaction=clickable"],
+      "constraint_ref": {},
+      "reason": "打印设备下钻入口使用 cell + arrow trailing",
+      "rule_sources": ["components/cell.json.variantDimensions.trailingSlot=arrow"]
+    }
   ],
   "design_gaps": [],
-  "rule_sources": [
-    { "file": "docs/interaction-prototype-workflow-refactor-conclusion.md", "supports": ["design_plan 新结构", "完整交互任务", "原型边界"] },
-    { "file": "wego-app/scenes/交易设置/_spec/interaction_spec.json", "supports": ["交易设置内容块、开关状态和 stub 边界"] }
+  "rule_sources_used": [
+    { "file": ".codex/skills/wego-design/uikit-plan.json", "field": "pagePatterns[biz-rule-config]", "supports": ["交易设置命中 biz-rule-config 页面范式"] },
+    { "file": ".codex/skills/wego-design/components/cell.json", "field": "variantDimensions.trailingSlot + interaction", "supports": ["开关项用 cell+switch trailing，下钻项用 cell+arrow trailing"] },
+    { "file": ".codex/skills/wego-design/components/switch.json", "field": "variantDimensions.state", "supports": ["开关状态 on/off 切换"] },
+    { "file": "wego-app/scenes/交易设置/_spec/interaction_spec.json", "field": "surfaces/content_blocks/prototype_boundaries", "supports": ["交易设置内容块、开关状态和 stub 边界"] }
+  ],
+  "implementation_constraints": [
+    "通栏模式 M1：phone-body 0px 横向 padding，cell-group__content 不开 --card",
+    "开关项 cell 不整行热区，只有 switch 控件本身可点击",
+    "下钻项 stub 入口点击后 toast「该功能尚未接入原型」",
+    "navbar 背景跟随 data-bg=surface 白底"
   ]
 }

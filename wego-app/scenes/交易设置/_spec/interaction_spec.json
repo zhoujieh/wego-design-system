@@ -1,37 +1,188 @@
 {
+  "task_type": "design-system-consumption",
+  "scene_category": "biz-rule-config",
   "goal": "让店主管理交易相关配置，包括收款播报、库存、下单模式、零售记账、在线收款、订单规则和打印设备等能力；开关即时生效，下钻入口按原型边界处理。",
   "scope": {
     "included": ["从系统设置进入交易设置", "交易设置列表", "开关类配置即时切换", "下钻入口 stub 反馈", "返回系统设置"],
     "excluded": ["真实支付配置", "打印设备连接", "订单规则深层配置", "后端持久化"]
   },
-  "actors": ["店主", "超级管理员"],
-  "entry_points": [
-    { "id": "system-settings-trade-entry", "label": "交易设置", "location": "系统设置列表", "route_id": "my-trade-settings", "surface_ref": "host-entry" }
+  "actors": [
+    { "id": "shop-owner", "role": "店主", "purpose": "管理交易相关配置开关" }
   ],
+  "entry_points": [
+    { "id": "system-settings-trade-entry", "carrier": "inline-action", "description": "系统设置列表中的交易设置入口，点击 push 进入交易设置页" }
+  ],
+  "interaction_mode": "instant-apply",
+  "app_target": {
+    "mode": "wego-app-scene",
+    "app_root": "wego-app",
+    "scene_folder": "wego-app/scenes/交易设置",
+    "runtime_entry": "scene.js",
+    "route_mode": "hash"
+  },
+  "host_container": {
+    "tab": "my",
+    "entry_label": "设置",
+    "subentry_label": "交易设置",
+    "leaf_level": 3,
+    "entry_type": "cell",
+    "needs_host_entry_surface": true
+  },
+  "prototype_target": {
+    "app_root": "wego-app",
+    "scenario_folder": "wego-app/scenes/交易设置",
+    "routes": [
+      { "id": "my-trade-settings", "surface_ref": "trade-setting-list" }
+    ]
+  },
   "flows": [
-    { "id": "configure-trade-settings", "type": "main", "goal": "进入交易设置并调整交易规则", "nodes": ["enter-trade-settings", "view-trade-setting-list", "toggle-trade-setting", "return-system-settings"] },
-    { "id": "open-trade-stub-entry", "type": "branch", "goal": "点击未接入交易配置时给出反馈", "nodes": ["view-trade-setting-list", "tap-trade-stub", "show-stub-toast"] }
+    {
+      "flow_id": "configure-trade-settings",
+      "flow_type": "main",
+      "entry_node": "enter-trade-settings",
+      "steps": ["enter-trade-settings", "view-trade-setting-list", "toggle-trade-setting", "return-system-settings"],
+      "exit_condition": "返回系统设置"
+    },
+    {
+      "flow_id": "open-trade-stub-entry",
+      "flow_type": "branch",
+      "entry_node": "view-trade-setting-list",
+      "steps": ["view-trade-setting-list", "tap-trade-stub", "show-stub-toast"],
+      "exit_condition": "toast 展示后自动消失"
+    }
   ],
   "flow_nodes": [
-    { "id": "enter-trade-settings", "surface_ref": "host-entry", "purpose": "从系统设置进入交易设置" },
-    { "id": "view-trade-setting-list", "surface_ref": "trade-setting-list", "purpose": "查看交易设置分组" },
-    { "id": "toggle-trade-setting", "surface_ref": "trade-setting-list", "purpose": "切换交易开关并即时更新内存状态" },
-    { "id": "tap-trade-stub", "surface_ref": "trade-setting-list", "purpose": "点击暂未接入的交易配置入口" },
-    { "id": "show-stub-toast", "surface_ref": "trade-setting-list", "purpose": "展示功能尚未接入反馈" },
-    { "id": "return-system-settings", "surface_ref": "host-entry", "purpose": "返回系统设置" }
+    {
+      "node_id": "enter-trade-settings",
+      "purpose": "从系统设置进入交易设置",
+      "surface_ref": "host-entry",
+      "inputs": [],
+      "outputs": [],
+      "key_states": ["系统设置已加载"]
+    },
+    {
+      "node_id": "view-trade-setting-list",
+      "purpose": "查看交易设置分组列表",
+      "surface_ref": "trade-setting-list",
+      "inputs": [],
+      "outputs": [],
+      "key_states": ["默认态"]
+    },
+    {
+      "node_id": "toggle-trade-setting",
+      "purpose": "切换交易开关并即时更新内存状态",
+      "surface_ref": "trade-setting-list",
+      "inputs": ["开关当前状态"],
+      "outputs": ["switch-state"],
+      "key_states": ["on", "off"]
+    },
+    {
+      "node_id": "tap-trade-stub",
+      "purpose": "点击暂未接入的交易配置入口",
+      "surface_ref": "trade-setting-list",
+      "inputs": [],
+      "outputs": [],
+      "key_states": ["点击"]
+    },
+    {
+      "node_id": "show-stub-toast",
+      "purpose": "展示功能尚未接入反馈",
+      "surface_ref": "trade-setting-list",
+      "inputs": [],
+      "outputs": ["toast"],
+      "key_states": ["反馈中"]
+    },
+    {
+      "node_id": "return-system-settings",
+      "purpose": "返回系统设置",
+      "surface_ref": "host-entry",
+      "inputs": [],
+      "outputs": [],
+      "key_states": ["已返回"]
+    }
   ],
   "surfaces": [
-    { "id": "host-entry", "type": "internal-entry", "carrier": "system-settings-list", "route_id": "my-trade-settings", "role": "系统设置内的交易设置入口" },
-    { "id": "trade-setting-list", "type": "page", "carrier": "push-route", "route_id": "my-trade-settings", "role": "交易设置列表" }
+    {
+      "surface_id": "host-entry",
+      "role": "host-entry",
+      "carrier": "host-section",
+      "node_refs": ["enter-trade-settings", "return-system-settings"],
+      "content_refs": [],
+      "interaction_mode": "instant-apply",
+      "purpose": "系统设置内的交易设置入口与返回点",
+      "states": ["系统设置已加载"]
+    },
+    {
+      "surface_id": "trade-setting-list",
+      "role": "primary-task-page",
+      "carrier": "standalone-page",
+      "node_refs": ["view-trade-setting-list", "toggle-trade-setting", "tap-trade-stub", "show-stub-toast"],
+      "content_refs": ["payment-broadcast", "inventory-deduction", "order-mode", "retail-accounting", "online-payment", "order-rules", "print-device"],
+      "interaction_mode": "instant-apply",
+      "purpose": "交易设置列表页，展示开关和下钻入口",
+      "states": ["默认态", "setting-changed", "stub-feedback"]
+    }
   ],
   "content_blocks": [
-    { "id": "payment-broadcast", "surface_ref": "trade-setting-list", "content": "收款播报", "interaction": "toggle", "default_state": "on" },
-    { "id": "inventory-deduction", "surface_ref": "trade-setting-list", "content": "库存扣减", "interaction": "toggle", "default_state": "on" },
-    { "id": "order-mode", "surface_ref": "trade-setting-list", "content": "下单模式", "interaction": "stub" },
-    { "id": "retail-accounting", "surface_ref": "trade-setting-list", "content": "零售记账", "interaction": "toggle", "default_state": "on" },
-    { "id": "online-payment", "surface_ref": "trade-setting-list", "content": "在线收款", "interaction": "stub" },
-    { "id": "order-rules", "surface_ref": "trade-setting-list", "content": "订单规则", "interaction": "stub" },
-    { "id": "print-device", "surface_ref": "trade-setting-list", "content": "打印设备", "interaction": "stub" }
+    {
+      "content_id": "payment-broadcast",
+      "content": "收款播报开关",
+      "group": "交易开关",
+      "interaction": "toggle",
+      "editable": true,
+      "default_state": "on",
+      "key_states": ["on", "off"]
+    },
+    {
+      "content_id": "inventory-deduction",
+      "content": "库存扣减开关",
+      "group": "交易开关",
+      "interaction": "toggle",
+      "editable": true,
+      "default_state": "on",
+      "key_states": ["on", "off"]
+    },
+    {
+      "content_id": "order-mode",
+      "content": "下单模式下钻入口",
+      "group": "交易配置",
+      "interaction": "action",
+      "editable": false,
+      "key_states": ["默认"]
+    },
+    {
+      "content_id": "retail-accounting",
+      "content": "零售记账开关",
+      "group": "交易开关",
+      "interaction": "toggle",
+      "editable": true,
+      "default_state": "on",
+      "key_states": ["on", "off"]
+    },
+    {
+      "content_id": "online-payment",
+      "content": "在线收款下钻入口",
+      "group": "交易配置",
+      "interaction": "action",
+      "editable": false,
+      "key_states": ["默认"]
+    },
+    {
+      "content_id": "order-rules",
+      "content": "订单规则下钻入口",
+      "group": "交易配置",
+      "interaction": "action",
+      "editable": false,
+      "key_states": ["默认"]
+    },
+    {
+      "content_id": "print-device",
+      "content": "打印设备下钻入口",
+      "group": "设备配置",
+      "interaction": "action",
+      "editable": false,
+      "key_states": ["默认"]
+    }
   ],
   "states": [
     { "id": "default", "description": "展示交易设置默认状态" },
@@ -39,27 +190,104 @@
     { "id": "stub-feedback", "description": "暂未接入入口展示 toast" }
   ],
   "transitions": [
-    { "id": "open-trade-settings", "from": "enter-trade-settings", "trigger": "tap-trade-settings", "to": "view-trade-setting-list", "route_id": "my-trade-settings" },
-    { "id": "toggle-trade-setting", "from": "view-trade-setting-list", "trigger": "tap-switch", "to": "toggle-trade-setting", "result_out": ["switch-state"] },
-    { "id": "stub-trade-entry", "from": "view-trade-setting-list", "trigger": "tap-stub-entry", "to": "show-stub-toast", "result_out": ["toast"] },
-    { "id": "back-system-settings", "from": "view-trade-setting-list", "trigger": "tap-back", "to": "return-system-settings", "return_to": "my-system-settings" }
+    {
+      "transition_id": "open-trade-settings",
+      "from": "enter-trade-settings",
+      "trigger": "点击系统设置中的交易设置入口",
+      "to": "view-trade-setting-list",
+      "data_in": [],
+      "result_out": [],
+      "return_to": null
+    },
+    {
+      "transition_id": "toggle-trade-setting",
+      "from": "view-trade-setting-list",
+      "trigger": "点击开关",
+      "to": "toggle-trade-setting",
+      "data_in": ["开关当前状态"],
+      "result_out": ["switch-state"],
+      "return_to": null
+    },
+    {
+      "transition_id": "stub-trade-entry",
+      "from": "view-trade-setting-list",
+      "trigger": "点击下钻入口",
+      "to": "show-stub-toast",
+      "data_in": [],
+      "result_out": ["toast"],
+      "return_to": null
+    },
+    {
+      "transition_id": "back-system-settings",
+      "from": "view-trade-setting-list",
+      "trigger": "点击返回",
+      "to": "return-system-settings",
+      "data_in": [],
+      "result_out": [],
+      "return_to": null
+    }
   ],
   "data_handoffs": [
-    { "id": "trade-switch-state-memory", "from": "toggle-trade-setting", "to": "trade-setting-list", "data": ["switch-state"], "persistence": "memory-only" }
+    {
+      "handoff_id": "trade-switch-state-memory",
+      "transition_ref": "toggle-trade-setting",
+      "source_node": "toggle-trade-setting",
+      "target_node": "view-trade-setting-list",
+      "payload_content_refs": [],
+      "reset_policy": "keep",
+      "description": "开关切换后内存状态即时更新，返回再进入保持最新状态"
+    }
   ],
-  "exit_results": ["交易设置状态在原型内更新", "未接入入口有明确反馈", "可返回系统设置"],
-  "prototype_target": {
-    "app_root": "wego-app",
-    "scenario_folder": "wego-app/scenes/交易设置",
-    "routes": [{ "id": "my-trade-settings", "surface_ref": "trade-setting-list" }]
-  },
   "prototype_boundaries": [
-    { "node_id": "toggle-trade-setting", "depth": "functional", "reason": "开关类配置需要真实切换状态" },
-    { "node_id": "tap-trade-stub", "depth": "stub", "reason": "深层交易配置不在本次范围" }
+    {
+      "node_id": "enter-trade-settings",
+      "depth": "simulated",
+      "reason": "从系统设置列表进入，不依赖真实路由"
+    },
+    {
+      "node_id": "view-trade-setting-list",
+      "depth": "functional",
+      "reason": "列表展示需要真实可用"
+    },
+    {
+      "node_id": "toggle-trade-setting",
+      "depth": "functional",
+      "reason": "开关类配置需要真实切换状态"
+    },
+    {
+      "node_id": "tap-trade-stub",
+      "depth": "stub",
+      "reason": "深层交易配置不在本次范围",
+      "feedback": "toast 提示「该功能尚未接入原型」"
+    },
+    {
+      "node_id": "show-stub-toast",
+      "depth": "stub",
+      "reason": "仅展示反馈",
+      "feedback": "toast 提示「该功能尚未接入原型」"
+    },
+    {
+      "node_id": "return-system-settings",
+      "depth": "functional",
+      "reason": "返回操作需要真实可用"
+    }
   ],
   "assumptions": [
-    { "id": "memory-only", "description": "交易设置仅在原型内维护内存状态，不接真实支付、打印或订单服务。", "impact_level": "medium", "reversible": true }
+    {
+      "assumption": "交易设置仅在原型内维护内存状态，不接真实支付、打印或订单服务",
+      "impact_level": "medium",
+      "reversible": true
+    }
   ],
   "open_questions": [],
-  "readiness": { "status": "ready-with-assumptions", "reason": "旧规格已定义交易设置范围；高风险真实交易能力按 stub 边界处理。" }
+  "readiness": {
+    "status": "ready-with-assumptions",
+    "reason": "旧规格已定义交易设置范围；高风险真实交易能力按 stub 边界处理。"
+  },
+  "rule_sources": [
+    { "source": "existing-interaction-spec", "supports": ["交易设置内容块、开关状态和 stub 边界"] },
+    { "source": "AGENTS.md", "supports": ["wego-app 唯一宿主、hash route_id、场景目录复用"] },
+    { "source": "wego-product/SKILL.md", "supports": ["interaction_spec Stage 2 结构", "host_container.entry_type 必须为 cell|grid-entry", "prototype_target.routes[] 替代单一 route_id"] }
+  ],
+  "delivery_hint": "next-step"
 }

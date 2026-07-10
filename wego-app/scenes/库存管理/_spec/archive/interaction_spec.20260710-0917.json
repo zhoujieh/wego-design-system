@@ -1,0 +1,67 @@
+{
+  "goal": "让店主管理当前库存清单，并通过库存预警设置统一配置低库存提醒规则；设置保存后回填库存管理页。",
+  "scope": {
+    "included": ["我的 Tab 应用中心库存管理入口", "库存列表", "库存预警设置 full-screen-modal", "保存回填", "取消返回", "返回我的 Tab"],
+    "excluded": ["真实库存增删改接口", "扫码入库", "批量导入", "多仓库存同步"]
+  },
+  "actors": ["店主", "超级管理员"],
+  "entry_points": [
+    { "id": "my-inventory-entry", "label": "库存管理", "location": "我的 Tab / 应用中心", "route_id": "my-inventory-management", "surface_ref": "host-entry" }
+  ],
+  "flows": [
+    { "id": "manage-inventory", "type": "main", "goal": "查看库存并调整预警规则", "nodes": ["enter-inventory", "view-inventory-list", "open-inventory-alert-settings", "edit-inventory-alert-settings", "save-inventory-alert-settings", "return-inventory-list"] },
+    { "id": "cancel-inventory-alert", "type": "interrupt", "goal": "取消编辑并返回库存列表", "nodes": ["edit-inventory-alert-settings", "cancel-inventory-alert-settings", "return-inventory-list"] }
+  ],
+  "flow_nodes": [
+    { "id": "enter-inventory", "surface_ref": "host-entry", "purpose": "从我的 Tab 应用中心进入库存管理" },
+    { "id": "view-inventory-list", "surface_ref": "inventory-list", "purpose": "查看库存清单与预警入口" },
+    { "id": "open-inventory-alert-settings", "surface_ref": "inventory-alert-settings", "purpose": "打开库存预警设置" },
+    { "id": "edit-inventory-alert-settings", "surface_ref": "inventory-alert-settings", "purpose": "编辑低库存阈值和提醒规则" },
+    { "id": "save-inventory-alert-settings", "surface_ref": "inventory-alert-settings", "purpose": "保存预警设置并回填列表状态" },
+    { "id": "cancel-inventory-alert-settings", "surface_ref": "inventory-alert-settings", "purpose": "取消编辑" },
+    { "id": "return-inventory-list", "surface_ref": "inventory-list", "purpose": "返回库存列表" }
+  ],
+  "surfaces": [
+    { "id": "host-entry", "type": "host-entry", "carrier": "host-fixed-tab", "route_id": "my-inventory-management", "role": "我的 Tab 应用中心入口" },
+    { "id": "inventory-list", "type": "page", "carrier": "push-route", "route_id": "my-inventory-management", "role": "库存列表" },
+    { "id": "inventory-alert-settings", "type": "full-screen-modal", "carrier": "overlay", "role": "库存预警设置" }
+  ],
+  "content_blocks": [
+    { "id": "inventory-summary", "surface_ref": "inventory-list", "content": "库存概览", "interaction": "view" },
+    { "id": "inventory-items", "surface_ref": "inventory-list", "content": "库存商品列表", "interaction": "view" },
+    { "id": "inventory-alert-entry", "surface_ref": "inventory-list", "content": "库存预警设置", "interaction": "open-modal" },
+    { "id": "alert-enabled", "surface_ref": "inventory-alert-settings", "content": "启用低库存预警", "interaction": "toggle", "default_state": "on" },
+    { "id": "alert-threshold", "surface_ref": "inventory-alert-settings", "content": "低库存阈值", "interaction": "input", "default_value": "10" },
+    { "id": "alert-notify-method", "surface_ref": "inventory-alert-settings", "content": "提醒方式", "interaction": "select", "default_value": "站内提醒" },
+    { "id": "save-alert-settings", "surface_ref": "inventory-alert-settings", "content": "保存", "interaction": "submit" }
+  ],
+  "states": [
+    { "id": "default", "description": "展示库存列表和当前预警摘要" },
+    { "id": "editing-alert", "description": "预警设置编辑中" },
+    { "id": "saved", "description": "保存后关闭 modal，并在库存列表更新预警摘要" }
+  ],
+  "transitions": [
+    { "id": "open-inventory", "from": "enter-inventory", "trigger": "tap-inventory-entry", "to": "view-inventory-list", "route_id": "my-inventory-management" },
+    { "id": "open-alert-settings", "from": "view-inventory-list", "trigger": "tap-alert-entry", "to": "open-inventory-alert-settings" },
+    { "id": "save-alert", "from": "edit-inventory-alert-settings", "trigger": "tap-save", "to": "save-inventory-alert-settings", "result_out": ["alert-settings"], "return_to": "inventory-list" },
+    { "id": "cancel-alert", "from": "edit-inventory-alert-settings", "trigger": "tap-cancel-or-back", "to": "cancel-inventory-alert-settings", "return_to": "inventory-list" }
+  ],
+  "data_handoffs": [
+    { "id": "alert-settings-handoff", "from": "inventory-alert-settings", "to": "inventory-list", "data": ["alert-enabled", "alert-threshold", "alert-notify-method"], "on_save": "update-alert-summary", "on_cancel": "discard-draft" }
+  ],
+  "exit_results": ["库存列表可查看", "库存预警设置可保存回填", "取消编辑不污染列表状态"],
+  "prototype_target": {
+    "app_root": "wego-app",
+    "scenario_folder": "wego-app/scenes/库存管理",
+    "routes": [{ "id": "my-inventory-management", "surface_ref": "inventory-list" }]
+  },
+  "prototype_boundaries": [
+    { "node_id": "view-inventory-list", "depth": "simulated", "reason": "库存数据使用本地模拟数据展示" },
+    { "node_id": "save-inventory-alert-settings", "depth": "functional", "reason": "保存回填是本任务核心闭环" }
+  ],
+  "assumptions": [
+    { "id": "local-inventory-data", "description": "库存列表与预警配置使用本地模拟数据，不接真实库存服务。", "impact_level": "medium", "reversible": true }
+  ],
+  "open_questions": [],
+  "readiness": { "status": "ready-with-assumptions", "reason": "旧规格已定义库存列表和预警设置；数据使用本地模拟即可闭环。" }
+}
