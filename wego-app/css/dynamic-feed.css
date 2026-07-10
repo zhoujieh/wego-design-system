@@ -398,27 +398,48 @@
   min-height: var(--navbar-body-height, 44px);
 }
 
-/* 2. cell-group：在 modal body 内，body 已有 padding，cell-group 不需要额外 margin */
-.dynamic-resale-sheet__cell-group .cell-group__content {
-  border-radius: var(--radius-8);
-  overflow: hidden;
-}
-
-/* 佣金金额使用品牌色强调 */
-.dynamic-resale-sheet__commission-text {
-  color: var(--text-brand);
-  font-weight: var(--font-weight-medium, 500);
-}
-
-/* 3. form-group：在 modal body 内，body 已有 padding */
+/* 2. 输入编辑区：输入是视觉重心，供货价作为轻量计算基准并列展示 */
 .dynamic-resale-sheet__form-group {
   position: relative;
-  margin-top: var(--spacer-16);
 }
 
 .dynamic-resale-sheet__form-group .form-group__content {
-  border-radius: var(--radius-8);
-  overflow: hidden;
+  padding: var(--spacer-16);
+  border-radius: var(--radius-12);
+}
+
+.dynamic-resale-sheet__editor-heading,
+.dynamic-resale-sheet__editor-control {
+  display: flex;
+  align-items: center;
+}
+
+.dynamic-resale-sheet__editor-heading {
+  justify-content: space-between;
+  gap: var(--spacer-12);
+  margin-bottom: var(--spacer-12);
+}
+
+.dynamic-resale-sheet__editor-label {
+  color: var(--text-default);
+  font-size: var(--body-md-font-size);
+  font-weight: var(--font-weight-medium);
+}
+
+.dynamic-resale-sheet__supply {
+  color: var(--text-secondary);
+  font-size: var(--body-sm-font-size);
+}
+
+.dynamic-resale-sheet__editor-control .form-body__action,
+.dynamic-resale-sheet__editor-control .number-input {
+  width: 100%;
+}
+
+.dynamic-resale-sheet__editor-control .number-input__field {
+  text-align: left;
+  font-size: var(--heading-sm-font-size);
+  font-weight: var(--font-weight-medium);
 }
 
 /* 错误提示：覆盖 components.css 的默认隐藏 */
@@ -433,20 +454,79 @@
   display: block;
 }
 
-/* 4. 快捷加价选项：水平排列，无额外 padding（modal body 已有） */
+.dynamic-resale-sheet__form-group.is-error {
+  margin-bottom: var(--spacer-24);
+}
+
+/* 3. 快捷值属于输入的一部分，紧跟在编辑区后 */
 .dynamic-resale-sheet__quick-options {
   display: flex;
   align-items: center;
-  gap: var(--spacer-12);
-  margin-top: var(--spacer-16);
+  gap: var(--spacer-8);
+  margin-top: var(--spacer-12);
+}
+
+.dynamic-resale-sheet__quick-label {
+  margin-right: var(--spacer-4);
+  color: var(--text-secondary);
+  font-size: var(--body-sm-font-size);
+  white-space: nowrap;
 }
 
 .dynamic-resale-sheet__quick-options .btn.is-selected {
   border-color: var(--border-brand);
   color: var(--text-brand);
+  background: var(--bg-brand-surface-l1);
 }
 
-/* 5. 底部说明：无额外 padding（modal body 已有） */
+/* 4. 实时结果聚合为一张摘要卡，建立“输入 → 结果”的连续阅读路径 */
+.dynamic-resale-sheet__summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: var(--spacer-16);
+  padding: var(--spacer-16);
+  border-radius: var(--radius-12);
+  background: var(--bg-page);
+}
+
+.dynamic-resale-sheet__summary--triple {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.dynamic-resale-sheet__summary-item {
+  min-width: 0;
+}
+
+.dynamic-resale-sheet__summary-item + .dynamic-resale-sheet__summary-item {
+  padding-left: var(--spacer-16);
+  border-left: var(--stroke-hairline) solid var(--border-neutral-l2);
+}
+
+.dynamic-resale-sheet__summary-label,
+.dynamic-resale-sheet__summary-value {
+  display: block;
+}
+
+.dynamic-resale-sheet__summary-label {
+  margin-bottom: var(--spacer-4);
+  color: var(--text-secondary);
+  font-size: var(--body-sm-font-size);
+}
+
+.dynamic-resale-sheet__summary-value {
+  overflow: hidden;
+  color: var(--text-default);
+  font-size: var(--heading-sm-font-size);
+  font-weight: var(--font-weight-medium);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dynamic-resale-sheet__commission-text {
+  color: var(--text-brand);
+}
+
+/* 5. 隐私说明保持低权重，放在结果与主操作之间 */
 .dynamic-resale-sheet__note {
   font-size: var(--body-xs-font-size, 12px);
   color: var(--text-secondary);

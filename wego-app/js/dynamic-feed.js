@@ -253,33 +253,7 @@
     var body = document.createElement('div');
     body.className = 'modal__body';
 
-    // 1. 供货价/我的售价/佣金：cell-group
-    var cellGroup = document.createElement('div');
-    cellGroup.className = 'cell-group dynamic-resale-sheet__cell-group';
-    cellGroup.innerHTML = ''
-      + '<div class="cell-group__content">'
-      +   '<div class="cell cell--single cell--divider-right-edge" data-content-id="resale-supply-price">'
-      +     '<div class="cell__body">'
-      +       '<div class="cell__content"><div class="cell__title">供货价</div></div>'
-      +       '<div class="cell__action"><span class="cell__action-text dynamic-resale-sheet__supply-price">¥' + supplyPrice + '</span></div>'
-      +     '</div>'
-      +   '</div>'
-      +   '<div class="cell cell--single cell--divider-right-edge" data-content-id="resale-display-price">'
-      +     '<div class="cell__body">'
-      +       '<div class="cell__content"><div class="cell__title">我的售价</div></div>'
-      +       '<div class="cell__action"><span class="cell__action-text dynamic-resale-sheet__display-price">¥' + Math.round(supplyPrice * (1 + (isFreeMode ? RECOMMEND_RATE : fixedRate))) + '</span></div>'
-      +     '</div>'
-      +   '</div>'
-      +   '<div class="cell cell--single" data-content-id="resale-display-commission">'
-      +     '<div class="cell__body">'
-      +       '<div class="cell__content"><div class="cell__title">佣金</div></div>'
-      +       '<div class="cell__action"><span class="cell__action-text dynamic-resale-sheet__commission-text">¥' + Math.round(supplyPrice * (isFreeMode ? RECOMMEND_RATE : fixedRate)) + '</span></div>'
-      +     '</div>'
-      +   '</div>'
-      + '</div>';
-    body.appendChild(cellGroup);
-
-    // 2. 加价比例输入：form-group（仅自由定价模式）
+    // 1. 编辑区：先完成输入，再紧邻展示计算结果
     var numberInput, field, fieldError;
     if (isFreeMode) {
       var formGroup = document.createElement('div');
@@ -287,11 +261,14 @@
       formGroup.setAttribute('data-content-id', 'resale-price-input');
       formGroup.innerHTML = ''
         + '<div class="form-group__content">'
-        +   '<div class="form-body">'
-        +     '<div class="form-body__label">加价比例</div>'
+        +   '<div class="dynamic-resale-sheet__editor-heading">'
+        +     '<label class="dynamic-resale-sheet__editor-label" for="resale-markup-rate">加价比例</label>'
+        +     '<span class="dynamic-resale-sheet__supply" data-content-id="resale-supply-price">供货价 ¥' + supplyPrice + '</span>'
+        +   '</div>'
+        +   '<div class="dynamic-resale-sheet__editor-control">'
         +     '<div class="form-body__action">'
         +       '<div class="number-input">'
-        +         '<input type="text" inputmode="decimal" class="number-input__field" value="' + recommendRatePercent + '" aria-label="加价比例" />'
+        +         '<input id="resale-markup-rate" type="text" inputmode="decimal" enterkeyhint="done" class="number-input__field" value="' + recommendRatePercent + '" aria-describedby="resale-rate-error" />'
         +         '<span class="number-input__suffix">%</span>'
         +       '</div>'
         +     '</div>'
@@ -301,6 +278,8 @@
       // 错误提示（放入 form-group 内部，配合 .form-group.is-error 显示）
       fieldError = document.createElement('div');
       fieldError.className = 'field-error dynamic-resale-sheet__field-error';
+      fieldError.id = 'resale-rate-error';
+      fieldError.setAttribute('role', 'alert');
       formGroup.appendChild(fieldError);
 
       body.appendChild(formGroup);
@@ -309,20 +288,33 @@
       field = formGroup.querySelector('.number-input__field');
     }
 
-    // 3. 快捷加价选项（仅自由定价模式）
+    // 2. 快捷加价紧跟输入，作为同一编辑任务的预设值
     var recommendCard, quickBtn;
     if (isFreeMode) {
       var quickOptions = document.createElement('div');
       quickOptions.className = 'dynamic-resale-sheet__quick-options';
       quickOptions.setAttribute('data-content-id', 'resale-quick-markup');
       quickOptions.innerHTML = ''
-        + '<button type="button" class="btn btn--weak btn--sm is-selected dynamic-resale-sheet__recommend-btn">+' + recommendRatePercent + '%</button>'
-        + '<button type="button" class="btn btn--weak btn--sm dynamic-resale-sheet__quick-btn">+' + quickRatePercent + '%</button>';
+        + '<span class="dynamic-resale-sheet__quick-label">快捷选择</span>'
+        + '<button type="button" class="btn btn--weak btn--sm is-selected dynamic-resale-sheet__recommend-btn" aria-pressed="true">推荐 +' + recommendRatePercent + '%</button>'
+        + '<button type="button" class="btn btn--weak btn--sm dynamic-resale-sheet__quick-btn" aria-pressed="false">+' + quickRatePercent + '%</button>';
       body.appendChild(quickOptions);
 
       recommendCard = quickOptions.querySelector('.dynamic-resale-sheet__recommend-btn');
       quickBtn = quickOptions.querySelector('.dynamic-resale-sheet__quick-btn');
     }
+
+    // 3. 结果区：把因输入变化的输出聚合展示，减少三行信息的往返扫视
+    var priceSummary = document.createElement('div');
+    priceSummary.className = 'dynamic-resale-sheet__summary' + (isFreeMode ? '' : ' dynamic-resale-sheet__summary--triple');
+    priceSummary.setAttribute('aria-live', 'polite');
+    priceSummary.innerHTML = ''
+      + (!isFreeMode
+        ? '<div class="dynamic-resale-sheet__summary-item" data-content-id="resale-supply-price"><span class="dynamic-resale-sheet__summary-label">供货价</span><strong class="dynamic-resale-sheet__summary-value">¥' + supplyPrice + '</strong></div>'
+        : '')
+      + '<div class="dynamic-resale-sheet__summary-item" data-content-id="resale-display-price"><span class="dynamic-resale-sheet__summary-label">我的售价</span><strong class="dynamic-resale-sheet__summary-value dynamic-resale-sheet__display-price">¥' + Math.round(supplyPrice * (1 + (isFreeMode ? RECOMMEND_RATE : fixedRate))) + '</strong></div>'
+      + '<div class="dynamic-resale-sheet__summary-item dynamic-resale-sheet__summary-item--income" data-content-id="resale-display-commission"><span class="dynamic-resale-sheet__summary-label">预计佣金</span><strong class="dynamic-resale-sheet__summary-value dynamic-resale-sheet__commission-text">¥' + Math.round(supplyPrice * (isFreeMode ? RECOMMEND_RATE : fixedRate)) + '</strong></div>';
+    body.appendChild(priceSummary);
 
     // 4. 底部说明
     var bottomNote = document.createElement('div');
@@ -356,8 +348,8 @@
     });
 
     var submitBtn = actions.querySelector('.dynamic-resale-sheet__submit-btn');
-    var displayPriceEl = cellGroup.querySelector('.dynamic-resale-sheet__display-price');
-    var displayCommissionEl = cellGroup.querySelector('.dynamic-resale-sheet__commission-text');
+    var displayPriceEl = priceSummary.querySelector('.dynamic-resale-sheet__display-price');
+    var displayCommissionEl = priceSummary.querySelector('.dynamic-resale-sheet__commission-text');
 
     // 计算我的售价和佣金
     function calculateValues(ratePercent) {
@@ -393,6 +385,7 @@
       if (result.valid) {
         numberInput.classList.remove('is-error');
         formGroup.classList.remove('is-error');
+        field.setAttribute('aria-invalid', 'false');
         fieldError.textContent = '';
         updateDisplays(result.num);
         submitBtn.classList.remove('btn--disabled');
@@ -400,6 +393,7 @@
       } else {
         numberInput.classList.add('is-error');
         formGroup.classList.add('is-error');
+        field.setAttribute('aria-invalid', 'true');
         fieldError.textContent = result.msg;
         updateDisplays(value);
         submitBtn.classList.add('btn--disabled');
@@ -427,24 +421,37 @@
         if (parts.length === 2 && parts[1].length > 2) cleaned = parts[0] + '.' + parts[1].slice(0, 2);
         if (cleaned !== val) field.value = cleaned;
 
-        recommendCard && recommendCard.classList.remove('is-selected');
-        quickBtn && quickBtn.classList.remove('is-selected');
+        if (recommendCard) {
+          recommendCard.classList.remove('is-selected');
+          recommendCard.setAttribute('aria-pressed', 'false');
+        }
+        if (quickBtn) {
+          quickBtn.classList.remove('is-selected');
+          quickBtn.setAttribute('aria-pressed', 'false');
+        }
         updateFreeMode();
       });
       field.addEventListener('focus', function () { numberInput.classList.add('is-focus'); });
       field.addEventListener('blur', function () { numberInput.classList.remove('is-focus'); });
+      field.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') field.blur();
+      });
 
       // 推荐加价按钮
       recommendCard.addEventListener('click', function () {
         recommendCard.classList.add('is-selected');
+        recommendCard.setAttribute('aria-pressed', 'true');
         quickBtn.classList.remove('is-selected');
+        quickBtn.setAttribute('aria-pressed', 'false');
         setRate(recommendRatePercent);
       });
 
       // 快捷按钮 +20%
       quickBtn.addEventListener('click', function () {
         quickBtn.classList.add('is-selected');
+        quickBtn.setAttribute('aria-pressed', 'true');
         recommendCard.classList.remove('is-selected');
+        recommendCard.setAttribute('aria-pressed', 'false');
         setRate(quickRatePercent);
       });
 

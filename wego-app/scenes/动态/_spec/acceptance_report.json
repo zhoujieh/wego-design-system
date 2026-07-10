@@ -1,0 +1,141 @@
+{
+  "requirement_coverage": [
+    { "item": "帮卖弹窗内容布局优化", "status": "pass", "evidence": "DOM 顺序已收敛为输入编辑区→快捷值→实时结果摘要→隐私说明→主操作" },
+    { "item": "帮卖弹窗交互优化", "status": "pass", "evidence": "快捷预设与手动输入状态互斥；错误态、aria-invalid、提交禁用联动；结果区 aria-live 更新" },
+    { "item": "设计经验沉淀", "status": "awaiting-confirmation", "evidence": "经验候选 exp-derived-value-form-input-feedback-grouping 已达到快速迭代阈值 1，尚未升级正式规则" }
+  ],
+  "scene_judgement_check": {
+    "status": "pass-with-legacy-gap",
+    "detail": "仍为宿主固定动态 Tab + sheet overlay；未改变业务范围、surface 或流程"
+  },
+  "surface_design_check": {
+    "status": "pass",
+    "detail": "resale-sheet 继续由 sheet primitive + modal frame 承载，设计计划已归档并同步新版内容层级"
+  },
+  "uikit_consumption_check": {
+    "status": "pass",
+    "detail": "modal、navbar、input、button、link 继续消费正式契约，业务 class 仅用于场景布局"
+  },
+  "component_discipline_check": {
+    "status": "pass",
+    "detail": "未新增通用组件或未注册修饰类；使用既有 Token；modal 面板仅 transform 动画"
+  },
+  "rule_source_check": {
+    "status": "pass",
+    "detail": "新版 design_plan 已修正 frame 默认下箭头来源，并记录 modal/navbar Preview 与组件契约"
+  },
+  "copy_check": {
+    "status": "pass",
+    "detail": "业务文案范围未扩张；仅将‘佣金’标签明确为‘预计佣金’，并增加‘快捷选择’分组标签"
+  },
+  "route_check": {
+    "status": "fail-preexisting",
+    "detail": "动态为宿主固定 Tab，prototype_target.routes=[] 且无 route_id；全仓严格守门要求 host_container 与 route_id 成对，现有规格与门禁不兼容"
+  },
+  "interaction_check": {
+    "status": "pass-static",
+    "detail": "结构断言覆盖预设选择、手动输入、非法输入、实时结果与提交状态；浏览器因本地 file URL 策略未能执行真实点击回归"
+  },
+  "layout_check": {
+    "status": "pass-static-manual-visual-pending",
+    "detail": "源码和设计计划顺序一致，宽度、间距、圆角、颜色均使用 Token；需要人工打开本地入口复核视觉密度"
+  },
+  "viewport_keyboard_check": {
+    "status": "pass-static-manual-pending",
+    "detail": "input 使用 inputmode=decimal、enterkeyhint=done，回车收起焦点；未执行真实移动端键盘复测"
+  },
+  "app_scene_check": {
+    "status": "fail-preexisting",
+    "detail": "动态 Tab 仍由 wego-app/js/dynamic-feed.js 与 wego-app/css/dynamic-feed.css 承载，缺少 wego-tests 当前要求的 scenes/动态/scene.js 与 scene.css"
+  },
+  "resource_sync_check": {
+    "status": "pass",
+    "detail": "node scripts/sync-wego-app-lib.mjs --check 通过"
+  },
+  "flow_coverage": {
+    "status": "pass-static",
+    "detail": "trigger-resale、configure-resale-price、submit-resale 的 surface、稳定 content ID 与边界保持完整"
+  },
+  "transition_check": {
+    "status": "pass-static",
+    "detail": "帮卖入口打开 sheet，关闭不保存，提交关闭并 toast；未执行浏览器点击验证"
+  },
+  "state_handoff_check": {
+    "status": "pass-static",
+    "detail": "每次打开从卡片价格读取供货价并 reset；未新增跨 route 回填"
+  },
+  "back_restore_check": {
+    "status": "pass-static",
+    "detail": "下箭头和遮罩关闭后销毁 modal，再次打开重建默认状态"
+  },
+  "prototype_boundary_check": {
+    "status": "pass-static",
+    "detail": "配置价格保持 functional；保存分享保持 stub toast 反馈"
+  },
+  "end_to_end_paths": [
+    { "path": "帮卖→默认推荐值→实时结果→保存和分享", "status": "pass-static" },
+    { "path": "帮卖→手动非法输入→错误提示与禁用", "status": "pass-static" },
+    { "path": "帮卖→快捷 +20%→选择态与结果更新", "status": "pass-static" },
+    { "path": "帮卖→下箭头/遮罩关闭→再次打开重置", "status": "pass-static" }
+  ],
+  "design_contraction_check": {
+    "status": "pass",
+    "detail": "新版设计计划明确区域顺序、模式、映射和来源，没有把布局选择留给实现层"
+  },
+  "compatibility_check": {
+    "status": "fail-preexisting",
+    "detail": "宿主固定 Tab 的增强脚本方案与最新 scene.js/route_id 严格门禁存在兼容断层"
+  },
+  "deployment_readiness_check": {
+    "push_attempted": false,
+    "push_commit_hash": "",
+    "deploy_status": "not-run",
+    "production_domain": "",
+    "fallback_local_entry": "wego-app/index.html",
+    "errors": ["全仓 strict 验证未通过，且本轮未要求提交、推送或部署"]
+  },
+  "automated_checks": {
+    "commands": [
+      "node scripts/specs.mjs generate",
+      "node scripts/specs.mjs check",
+      "node scripts/specs.mjs test",
+      "node scripts/validate-wego-design.mjs",
+      "node scripts/validate-wego-design.mjs --scope=full --strict",
+      "node scripts/sync-wego-app-lib.mjs --check",
+      "node --check wego-app/js/dynamic-feed.js",
+      "git diff --check",
+      "Node 静态结构断言（10 项）"
+    ],
+    "exit_codes": [0, 0, 0, 0, 1, 0, 0, 0, 0],
+    "errors": [
+      "全仓 strict 共 19 个既有错误；当前动态场景相关 2 个：scene.js 缺失、host_container/route_id 未成对"
+    ],
+    "warnings_count": 0,
+    "key_findings": [
+      "changed 范围守门：0 错误、0 警告",
+      "规则文档与经验池测试通过",
+      "wego-app/lib 与源资源一致",
+      "输入、快捷值、结果、说明、主操作顺序断言通过",
+      "aria-pressed、aria-invalid、aria-live 与 modal transform 动画断言通过"
+    ]
+  },
+  "findings": [
+    {
+      "severity": "blocking-preexisting",
+      "owner": "wego-ux / wego-tests compatibility",
+      "finding": "动态固定 Tab 未迁移到 scene.js + route_id 模型，无法通过当前全仓 strict 门禁",
+      "scope": "动态场景整体架构，不属于本次帮卖弹窗布局优化"
+    }
+  ],
+  "risk_log": [
+    "浏览器本地 file URL 被访问策略拦截，未完成真实视觉、点击和移动端键盘复测",
+    "全仓另有 17 个与本轮无关的 strict 错误，未在本任务中修改"
+  ],
+  "manual_verify_items": [
+    "打开 wego-app/index.html，在动态卡片点击帮卖，复核 375px 下输入区与两列结果摘要的密度",
+    "输入空值、0、301、12.345，确认错误提示、结果和按钮状态",
+    "点击推荐 +30%、+20%，再手动输入，确认 aria/视觉选择态互斥",
+    "聚焦输入并按完成，确认键盘收起且弹窗标题与底部操作保持可见"
+  ],
+  "final_status": "fail"
+}

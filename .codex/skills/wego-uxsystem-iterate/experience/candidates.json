@@ -508,6 +508,49 @@
       },
       "created_at": "2026-07-10T00:00:00.000Z",
       "updated_at": "2026-07-10T00:00:00.000Z"
+    },
+    {
+      "id": "exp-derived-value-form-input-feedback-grouping",
+      "normalized_key": "derived-value-form-must-group-input-presets-and-live-feedback-by-causality",
+      "title": "实时计算型表单必须按输入因果关系组织编辑与结果反馈",
+      "status": "awaiting-confirmation",
+      "occurrence_count": 1,
+      "threshold": 1,
+      "primary_owner": "wego-design",
+      "secondary_owners": ["wego-ux", "wego-tests"],
+      "ownership_reason": "问题最早产生在 wego-design 对实时计算型表单的区域组合约束不足。设计计划虽然写了输入是视觉重心、结果要紧邻输入，但没有形成可复用的组合规则，导致实现仍把多个同权重结果行放在输入之前，并把直接改变输入值的快捷预设拆到结果之后。正确决策应在设计阶段识别输入、快捷预设与派生结果的因果关系，并把顺序和状态同步写入 region_composition、component_patterns 与验收要求。",
+      "problem_pattern": "表单中的一个输入会实时驱动多个派生结果，且存在直接改写该输入的快捷预设；页面却按字段类型或静态数据列表组织内容，把基准值、输入、快捷预设和结果拆成若干同权重行，造成用户在输入与结果之间往返扫视，快捷预设的选中态也容易与手动输入脱节。",
+      "scene_evidence": [
+        {
+          "date": "2026-07-10",
+          "scene": "动态页帮卖加价弹窗",
+          "summary": "现有实现先展示供货价、我的售价和佣金三行，再展示加价比例输入，最后放快捷加价，违背设计计划中『输入是视觉重心、收益反馈紧邻输入』的要求。优化为供货基准+比例输入组成编辑区，快捷值紧跟输入，我的售价与预计佣金聚合为实时结果摘要；快捷按钮同步 is-selected/aria-pressed，手动输入时清除预设选择，非法输入联动 aria-invalid 和提交禁用。反例校验：数量×单价→小计、折扣率→结算价同样成立；纯静态详情和多字段互不派生的普通表单不适用。",
+          "source": "用户明确要求优化帮卖弹窗内容布局和交互，并希望沉淀设计规范"
+        }
+      ],
+      "applies_when_candidates": [
+        "一个或少量输入会实时驱动售价、佣金、小计、折扣后金额、预计收益等派生结果",
+        "存在推荐值、快捷比例、步进器等会直接改写主输入的预设操作",
+        "用户需要在提交前同时理解计算基准、当前输入和关键结果"
+      ],
+      "avoid_when_candidates": [
+        "页面只是静态详情展示，不存在可编辑输入与实时派生关系",
+        "多个表单字段彼此独立，不产生需要即时确认的计算结果",
+        "结果必须经过服务端异步校验且无法即时计算，此时应使用加载、失败和上次有效结果状态",
+        "派生结果数量过多或需要解释明细，无法在紧凑摘要中清晰呈现时应进入独立明细 surface"
+      ],
+      "expected_rule_target": {
+        "file": ".codex/skills/wego-design/uikit-plan.json",
+        "field": "fallbackPageBlueprints[generic-mobile-task-page] / compositionConstraints[derived-value-edit-feedback]"
+      },
+      "runtime_reachability": {
+        "consumer_skill": "wego-design 在识别包含实时派生结果和快捷预设的表单 surface 时读取",
+        "output_field": "design_plan.region_composition、component_patterns、component_mapping 与 implementation_constraints",
+        "downstream_consumer": "wego-ux 按『计算基准与主输入 → 快捷预设 → 实时结果摘要 → 说明 → 主操作』实现，并同步选择态、错误态和可访问状态",
+        "acceptance_check": "wego-tests 检查 DOM/视觉顺序、快捷预设与手动输入的状态互斥、派生结果实时更新、非法输入的 aria-invalid/错误提示/提交禁用，以及结果过多时是否按回退条件进入独立明细"
+      },
+      "created_at": "2026-07-10T21:10:00+08:00",
+      "updated_at": "2026-07-10T21:10:00+08:00"
     }
   ]
 }

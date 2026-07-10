@@ -53,9 +53,9 @@
       "main_scroll_direction": "vertical（内容自适应，超高时面板内滚动）",
       "content_density": "comfortable",
       "first_screen_goal": "看到标题、商品售价、默认推荐售价和实时收益，理解可编辑关系",
-      "first_screen_priority": "sheet 头部（标题+帮助入口） > 输入编辑区（供货基准+加价比例+快捷值） > 实时结果摘要 > 底部说明 > 主按钮",
+      "first_screen_priority": "sheet 头部（标题+帮助入口） > 售价输入区 > 收益反馈 > 快捷加价区 > 底部说明 > 主按钮",
       "region_priority": ["sheet-header", "price-section", "quick-markup", "bottom-note", "submit-action"],
-      "content_density_strategy": "把供货价作为输入的计算基准并入编辑区，快捷值紧跟输入；我的售价与预计佣金聚合为同一结果摘要，保持输入→结果的因果关系可读",
+      "content_density_strategy": "表单分组用 16px 间距分隔，输入区与收益反馈紧邻保持因果关系可读",
       "scroll_rhythm": "sheet 内部分组用 12-16px 间距，主操作固定底部不随内容滚动",
       "fixed_vs_scroll": "sheet 头部与底部主按钮固定；中间表单区为可滚动内容",
       "visual_competition": "售价输入框为视觉重心，收益数字用品牌色强调；快捷加价区低饱和呈现，避免与输入框竞争"
@@ -123,9 +123,9 @@
       "layout": "vertical-stack",
       "width": "full",
       "scroll_behavior": "scroll",
-      "component_refs": ["resale-supply-price", "resale-price-input", "resale-display-price", "resale-display-commission"],
+      "component_refs": ["resale-price-input", "resale-display-price", "resale-display-commission"],
       "relation": { "above": "sheet-header", "below": "quick-markup" },
-      "rule_sources": ["interaction_spec.content_blocks[resale-supply-price,resale-price-input,resale-display-price,resale-display-commission]"]
+      "rule_sources": ["interaction_spec.content_blocks[resale-price-input,resale-display-price,resale-display-commission]"]
     },
     {
       "region_id": "quick-markup",
@@ -195,7 +195,7 @@
       "matched_page_pattern": null,
       "matched_blueprint": "generic-mobile-task-page",
       "constraint_ref": null,
-      "reason": "加价卖半弹窗是 sheet presentation primitive 承载的二级表单：供货基准、比例输入与快捷值组成连续编辑区，售价和佣金作为同一实时结果摘要紧邻反馈，主操作底部收口；无精确 pagePattern，内容组织参考 generic-mobile-task-page 组件清单，展示方式由 sheet presentation primitive 和正式 modal frame 变体约束",
+      "reason": "加价卖半弹窗是 sheet presentation primitive 承载的二级表单：售价输入实时计算收益，快捷加价即时刷新输入框和收益，主操作底部收口；无精确 pagePattern，内容组织参考 generic-mobile-task-page 组件清单，展示方式由 sheet presentation primitive 约束，容器由场景级自写承载",
       "rule_sources": ["uikit-plan.json.fallbackPageBlueprints[generic-mobile-task-page]", "uikit-plan.json.presentationPrimitives[sheet]", "interaction_spec.surfaces[resale-sheet].carrier=sheet"]
     }
   ],
@@ -211,10 +211,10 @@
     "resale-sheet": {
       "type": "sheet",
       "transition": "slide-up-enter, slide-down-exit",
-      "dismiss_action": "down-arrow-and-overlay",
+      "dismiss_action": "close-icon-and-overlay",
       "overlay_level": "scene-overlay",
       "covers_tab_bar": true,
-      "source": "interaction_spec.surfaces[resale-sheet].carrier=sheet; uikit-plan.json.presentationPrimitives[sheet].coversTabBarDefault=true; components/modal.json 默认 frame 标题左侧使用下箭头收起，并支持点击遮罩关闭"
+      "source": "interaction_spec.surfaces[resale-sheet].carrier=sheet; uikit-plan.json.presentationPrimitives[sheet].coversTabBarDefault=true; 用户需求明确支持左上角关闭(X)和点击遮罩关闭"
     }
   },
   "surface_designs": [
@@ -274,12 +274,14 @@
         "容器：modal 根节点挂在 .phone-screen 内，遮罩使用 var(--bg-mask-light) 并允许蒙层 opacity 淡入淡出；面板 var(--modal-panel-bg, var(--bg-surface)) 白底 + var(--radius-16) 顶部圆角；z-index var(--z-modal)=600。",
         "面板动画：.modal__panel 只能 translateY(100%)→0 入场、0→100% 出场；打开和关闭都不得给面板设置 opacity、opacity transition 或 opacity animation。",
         "sheet 头部：消费 modal default title 内嵌 navbar 结构；frame/frame-x 非全屏标题栏强制 --safe-area-top: 0px，不预留状态栏高度；左侧默认下箭头 icon-xiajiantou16，中间标题，右侧帮助入口用 link standalone 14px + iconfont icon-bangzhu。",
-        "输入编辑区：供货价作为计算基准与加价比例标签同一行；input 使用 number 变体并以 % 为 suffix；state 切换 default/focus/error；固定佣金模式下隐藏整块编辑区",
-        "快捷加价区：紧跟输入框，推荐 +30% 与 +20% 均使用 button weak sm；选中态同步 is-selected 和 aria-pressed，手动输入时清除预设选择；固定佣金模式下隐藏",
-        "实时结果摘要：我的售价与预计佣金并列，次级标签 + 18px Medium 金额，佣金用 var(--text-brand) 强调；通过 aria-live 更新；固定佣金模式额外在摘要内展示供货价",
+        "供货价展示区：标签+金额，页面级样式 14px var(--text-secondary) 标签，16px var(--text-default) 金额",
+        "加价比例输入区：纵向布局，标签文字（页面级样式 14px var(--text-secondary)）+ input 组件 number 变体（.number-input + .number-input__field + .number-input__suffix 显示 %）；state 切换 default/focus/error；固定佣金模式下隐藏",
+        "我的售价展示区：标签+自动计算金额，页面级样式；自由定价和固定佣金模式均显示",
+        "佣金展示区：标签+自动计算金额，用 var(--text-brand) 强调；自由定价和固定佣金模式均显示",
+        "快捷加价区：推荐加价卡用页面级业务样式（带选中态边框 var(--border-brand)）+ 右侧 +30% 文字；快捷按钮 +20% 用 button weak sm；手动输入入口用 link standalone 14px；固定佣金模式下隐藏",
         "底部说明：小字 12px var(--text-secondary) 居左",
         "主按钮区：固定底部，padding 含 var(--safe-area-bottom)；button strong lg 通栏；自由定价模式下非法输入时 .btn--disabled，固定佣金模式下始终可点击",
-        "sheet 内编辑区与快捷值间距 12px，结果摘要与编辑任务间距 16px；结果项之间使用 0.5px 分隔线"
+        "sheet 内部分组间距 16px；输入区与计算结果间距 8px；快捷加价项之间间距 12px"
       ],
       "design_gap": ""
     }
@@ -379,18 +381,18 @@
       "block": "resale-sheet-header",
       "scenario_type": "component-consumption-decision",
       "consumption_mode": "free-composition",
-      "selected": "modal frame 的 default 标题模式承载完整 navbar；左侧使用 frame 默认下箭头收起，中央标题按模式显示'加价卖'或'赚佣金'，右侧帮助入口用 link standalone + iconfont icon-bangzhu",
+      "selected": "标题文字由页面级业务样式承载（参考 dialog title 18px Medium var(--text-default)），自由定价模式显示'加价卖'，固定佣金模式显示'赚佣金'；右侧帮助入口'?'用 link standalone 14px + iconfont icon-bangzhu 图标；左侧关闭 X 由 iconfont icon-guanbi-mian + 页面级业务样式热区承载",
       "constraint_ref": {},
-      "reason": "正式 modal 契约已覆盖 frame/default 标题结构和默认收起图标；业务只在 navbar 右侧组合帮助链接，点击后按需求打开说明外链",
-      "rule_sources": ["components/modal.json.structurePatterns[title/default]", "preview/component-modal.html[frame default 下箭头]", "components/navbar.json.domAnatomy", "components/link.json.variantDimensions", "library-consumption.json.iconUsage.fontClassMode", "interaction_spec.assumptions[加价卖说明入口跳转外链]"]
+      "reason": "sheet 头部无对应稳定变体；标题根据模式切换、关闭和帮助入口由页面级业务样式组合，图标复用 iconfont；点击帮助入口跳转外链 https://mp.weixin.qq.com/s/H05MjX1OTmng8nXVl3GXrQ",
+      "rule_sources": ["components/dialog.json.designTokens.titleFont", "components/link.json.variantDimensions", "library-consumption.json.iconUsage.fontClassMode", "interaction_spec.assumptions[加价卖说明入口跳转外链]"]
     },
     {
       "block": "resale-supply-price",
       "scenario_type": "component-consumption-decision",
       "consumption_mode": "free-composition",
-      "selected": "自由定价模式把供货价作为轻量计算基准放在加价比例标签同一行；固定佣金模式则与售价、佣金一起进入只读结果摘要",
+      "selected": "页面级业务样式承载供货价展示行：标签'供货价'14px var(--text-secondary) + 金额'¥X' 16px var(--text-default)",
       "constraint_ref": {},
-      "reason": "供货价不是同权重结果，而是售价计算的输入基准；靠近比例输入可减少在多行数据间往返扫视，固定佣金模式无输入时回退到只读摘要",
+      "reason": "供货价是纯文本展示，无对应稳定变体；作为计算基准需要明确展示",
       "rule_sources": ["uikit-plan.json.fallbackPageBlueprints[object-management-list-page].allowedPageStyles", "interaction_spec.content_blocks[resale-supply-price]"]
     },
     {
@@ -406,27 +408,27 @@
       "block": "resale-display-price",
       "scenario_type": "component-consumption-decision",
       "consumption_mode": "free-composition",
-      "selected": "页面级结果摘要承载我的售价：次级标签 + 18px Medium 金额；与预计佣金并列并通过 aria-live 实时更新",
+      "selected": "页面级业务样式承载我的售价展示行：标签'我的售价'14px var(--text-secondary) + 自动计算金额'¥X' 16px var(--text-default)；实时随比例输入更新",
       "constraint_ref": {},
-      "reason": "我的售价是比例输入的直接输出，与预计佣金聚合后能形成单一结果反馈区；自由定价和固定佣金模式均显示",
+      "reason": "我的售价是根据比例自动计算的纯文本展示，无对应稳定变体；自由定价和固定佣金模式均显示",
       "rule_sources": ["uikit-plan.json.fallbackPageBlueprints[object-management-list-page].allowedPageStyles", "interaction_spec.content_blocks[resale-display-price]"]
     },
     {
       "block": "resale-display-commission",
       "scenario_type": "component-consumption-decision",
       "consumption_mode": "free-composition",
-      "selected": "页面级结果摘要承载预计佣金：次级标签 + 18px Medium 品牌色金额；与我的售价并列并通过 aria-live 实时更新",
+      "selected": "页面级业务样式承载佣金展示行：标签'佣金'14px var(--text-secondary) + 自动计算金额'¥X' 16px var(--text-brand) 强调色；实时随比例输入更新",
       "constraint_ref": {},
-      "reason": "预计佣金是用户最关心的派生结果，与售价同区但使用品牌色形成主次；自由定价和固定佣金模式均显示",
+      "reason": "佣金是根据比例自动计算的纯文本展示，无对应稳定变体；用品牌色突出可获得的收益；自由定价和固定佣金模式均显示",
       "rule_sources": ["uikit-plan.json.fallbackPageBlueprints[object-management-list-page].allowedPageStyles", "interaction_spec.content_blocks[resale-display-commission]"]
     },
     {
       "block": "resale-quick-markup",
       "scenario_type": "component-consumption-decision",
       "consumption_mode": "free-composition",
-      "selected": "快捷加价选项作为输入预设紧跟加价比例控件，使用 button weak sm 水平排列：推荐 +30% 和 +20%；用 is-selected + aria-pressed 同步选择态；手动输入时清除选择态，固定佣金模式隐藏",
+      "selected": "快捷加价选项使用 button weak sm 组件水平排列：推荐 +30% 和快捷 +20%；点击后刷新比例输入框和计算结果；固定佣金模式下隐藏；用户可直接在输入框内手动输入，无需额外入口",
       "constraint_ref": {},
-      "reason": "快捷加价直接改变比例输入，必须与输入形成同一编辑任务并显式同步选中状态；输入框已承载手动输入，无需额外入口",
+      "reason": "快捷加价区无对应稳定变体或组合约束；使用 button 组件承接快捷选项；输入框已承载手动输入交互，无需额外入口",
       "rule_sources": ["components/button.json.variantDimensions", "interaction_spec.content_blocks[resale-quick-markup]", "interaction_spec.assumptions[推荐加价比例固定模拟为+30%,快捷按钮固定+20%]"]
     },
     {
@@ -464,7 +466,7 @@
     { "file": ".codex/skills/wego-design/uikit-plan.json", "field": "hostShell.fixedTabs[dongtai]", "supports": ["动态为宿主固定 Tab，不走 push 路由"] },
     { "file": ".codex/skills/wego-design/components/link.json", "field": "variantDimensions + structurePatterns", "supports": ["feed-item-actions 和 feed-item-resale-action 用 link standalone 12px；resale-sheet-header 帮助入口用 link standalone 14px；resale-quick-markup 手动输入入口用 link standalone 14px"] },
     { "file": ".codex/skills/wego-design/components/button.json", "field": "variantDimensions + behavior.primaryRule + domAnatomy.stateClasses", "supports": ["publish-entry 用 button strong icon-only 48px；resale-quick-markup 快捷按钮用 button weak sm；resale-submit-action 用 button strong lg，非法输入切 disabled 状态"] },
-    { "file": ".codex/skills/wego-design/components/input.json", "field": "variantDimensions + domAnatomy + behavior.error", "supports": ["resale-price-input 用 input number 变体 + suffix 显示 %；is-error 状态由根节点驱动，错误信息与 aria-invalid 同步"] },
+    { "file": ".codex/skills/wego-design/components/input.json", "field": "variantDimensions + domAnatomy + behavior.error", "supports": ["resale-price-input 用 input number 变体 + suffix 显示 ¥；is-error 状态由根节点驱动，长文案单行省略"] },
     { "file": ".codex/skills/wego-design/components/avatar.json", "field": "variantDimensions", "supports": ["feed-item-identity 用 avatar image 40"] },
     { "file": ".codex/skills/wego-design/components/image.json", "field": "variantDimensions + behavior.loading", "supports": ["feed-item-gallery 用 image cover+rounded-md+loading"] },
     { "file": ".codex/skills/wego-design/components/card.json", "field": "domAnatomy", "supports": ["feed-item-summary 和 feed-item-info 用 card 填充型卡片能力承载"] },
@@ -485,8 +487,8 @@
     "半弹窗容器：.modal 根节点挂在 .phone-screen 内，遮罩 var(--bg-mask-light) 可 opacity 淡入淡出；.modal__panel 白底 + var(--radius-16) 顶部圆角；面板只允许 transform 位移动画，不得有 opacity 变化",
     "关闭方式：左侧下箭头 icon-xiajiantou16 + 点击遮罩关闭（业务明确要求，由场景级 JS 在 modal overlay 上接管 click 并显式判断 e.target===overlay 后关闭）；关闭后不保存未确认修改，再次进入重新填入默认推荐价",
     "加价比例输入框必须使用 input 组件 number 变体（.number-input + .number-input__field + .number-input__suffix），suffix 固定显示 %；仅允许数字，支持2位小数；非法输入（空/小于1%/大于300%）触发根节点 .is-error 状态，错误提示用 .field-error 单行省略；固定佣金模式下隐藏",
-    "输入编辑任务顺序固定为供货基准与比例输入 → 快捷预设 → 实时结果摘要；售价=供货价×(1+比例)，佣金=售价-供货价；自由定价和固定佣金模式均显示结果摘要",
-    "快捷加价区的推荐 +30% 和 +20% 都用 button weak sm；选中态必须同步 is-selected 与 aria-pressed，手动输入时清除预设选择；点击后实时刷新比例和结果；固定佣金模式下隐藏",
+    "我的售价和佣金为自动计算展示：售价=供货价×(1+比例)，佣金=售价-供货价；自由定价和固定佣金模式均显示",
+    "快捷加价区：推荐加价卡用页面级业务样式带选中态边框 var(--border-brand)；快捷按钮 +20% 用 button weak sm；手动输入入口用 link standalone 14px；点击后实时刷新比例和计算结果；固定佣金模式下隐藏",
     "底部主按钮'保存和分享'用 button strong lg 通栏；自由定价模式下非法输入时切 .btn--disabled 禁用提交，固定佣金模式下始终可点击；本次 stub 反馈：点击后调用 WegoApp.toast('已保存帮卖配置，进入分享') 并关闭 sheet",
     "帮助入口'?'点击跳转外链 https://mp.weixin.qq.com/s/H05MjX1OTmng8nXVl3GXrQ（用 window.open 或 location.href，不在原型内实现说明详情页）",
     "推荐加价比例固定模拟为 +30%，快捷按钮固定 +20%；供货价使用模拟数据（如 ¥100）；默认按供货价+30%计算我的售价",
