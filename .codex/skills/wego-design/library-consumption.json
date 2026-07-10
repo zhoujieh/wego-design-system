@@ -269,7 +269,8 @@
     "toast",
     "dialog",
     "actionsheet",
-    "modal"
+    "modal",
+    "popmenu"
   ],
   "embeddedComponents": [],
   "unpublishedContracts": [],

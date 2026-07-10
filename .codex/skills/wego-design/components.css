@@ -1517,6 +1517,145 @@
 .navbar--fixed-transparent .navbar__action-label,
 .navbar--fixed-transparent .wego-iconfont-s { color: var(--text-inverse); }
 
+/* ── Popmenu ───────────────────────────────────────────────── */
+/* @anatomy
+   <div class="pv-header"> <h1>气泡菜单 PopMenu</h1> <p>相对目标元素弹出的白色气泡菜单，用于快捷操作或单选切换。action 模式支持左侧图标，select 模式选中项显示绿色对勾。容器宽度根据最长 item 内容自适应，不写死宽度。</p> </div>
+*/
+.popmenu{
+  --popmenu-max-width: 240px;
+  --popmenu-min-width: 120px;
+  box-sizing: border-box;
+  position: absolute;
+  display: inline-flex;
+  flex-direction: column;
+  width: max-content;
+  max-width: var(--popmenu-max-width);
+  min-width: var(--popmenu-min-width);
+  background: var(--bg-surface);
+  border-radius: var(--radius-8);
+  box-shadow: 0 0 0 var(--stroke-hairline) var(--border-neutral-l2), var(--shadow-lg);
+  z-index: var(--z-popover);
+  overflow: hidden;
+  opacity: 1;
+  transform: scale(1);
+  visibility: visible;
+  transition: opacity var(--duration-normal) var(--ease-enter),
+              transform var(--duration-normal) var(--ease-enter);
+}
+.popmenu[data-state="closed"]{
+  opacity: 0;
+  transform: scale(0.96);
+  visibility: hidden;
+  transition: opacity var(--duration-fast) var(--ease-exit),
+              transform var(--duration-fast) var(--ease-exit),
+              visibility 0s linear var(--duration-fast);
+  pointer-events: none;
+}
+.popmenu__list{
+  display: flex;
+  flex-direction: column;
+}
+.popmenu__item{
+  display: flex;
+  align-items: center;
+  height: 48px;
+  box-sizing: border-box;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: inset 0 -0.5px 0 0 var(--border-neutral-l2);
+  transition: background var(--duration-fast) var(--ease-enter);
+}
+.popmenu__item:last-child{
+  box-shadow: none;
+}
+.popmenu__item:active{
+  background: var(--bg-state-hover);
+}
+/* action 模式（无图标）：文本左对齐 */
+.popmenu--action .popmenu__item{
+  padding: 0 var(--spacer-16);
+  justify-content: flex-start;
+}
+/* action 模式（带图标）：图标+文本左对齐 */
+.popmenu--action.popmenu--has-icon .popmenu__item{
+  padding: 0 var(--spacer-12);
+  gap: var(--spacer-8);
+  justify-content: flex-start;
+}
+/* select 模式：文本左对齐 + 右侧对勾槽位 */
+.popmenu--select .popmenu__item{
+  padding: 0 var(--spacer-12);
+  gap: var(--spacer-8);
+  justify-content: flex-start;
+}
+.popmenu__item-icon{
+  flex-shrink: 0;
+  width: var(--size-20);
+  height: var(--size-20);
+  font-size: var(--size-20);
+  line-height: 1;
+  color: var(--text-default);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.popmenu__item-text{
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: auto;
+  min-width: 0;
+  font-size: var(--body-md-font-size);
+  line-height: var(--body-md-line-height);
+  font-family: var(--body-md-font-family);
+  font-weight: var(--font-weight-regular);
+  color: var(--text-default);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.popmenu--action .popmenu__item-text,
+.popmenu--select .popmenu__item-text{
+  text-align: left;
+}
+.popmenu__item-check{
+  flex-shrink: 0;
+  width: var(--size-16);
+  height: var(--size-16);
+  font-size: var(--size-16);
+  line-height: 1;
+  color: var(--status-success-default);
+  visibility: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.popmenu__item--selected .popmenu__item-check{
+  visibility: visible;
+}
+.popmenu__item--selected .popmenu__item-text{
+  font-weight: var(--font-weight-medium);
+}
+.popmenu__arrow{
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-style: solid;
+}
+.popmenu__arrow--bottom{
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 0 5px 6px 5px;
+  border-color: transparent transparent var(--bg-surface) transparent;
+}
+.popmenu__arrow--top{
+  top: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px 5px 0 5px;
+  border-color: var(--bg-surface) transparent transparent transparent;
+}
+
 /* ── Radio ─────────────────────────────────────────────────── */
 /* @anatomy
    <div class="pv-header"><h1>单选</h1><p>24 / 20px，品牌绿圆点选中态。</p></div>

@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../scaffold.css">
+<link rel="stylesheet" href="../iconfont.css">
+<link rel="stylesheet" href="../components.css">
+<style>
+/* demo-stage 局部样式（预览外壳适配） */
+.demo-stage:has(.popmenu) {
+  background: var(--bg-page);
+  border-color: var(--border-neutral-l1);
+  padding: var(--spacer-24) var(--spacer-16);
+}
+.demo-stage:has(.popmenu) .demo-stage-label {
+  color: var(--text-secondary);
+}
+.demo-stage .popmenu {
+  position: relative;
+  inset: auto;
+  transform: scale(1);
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  z-index: auto;
+}
+.demo-stage .popmenu[data-state="closed"] {
+  display: none;
+}
+.demo-trigger-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacer-8);
+  margin-bottom: var(--spacer-12);
+  align-items: center;
+}
+.demo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 var(--spacer-12);
+  border: 1px solid var(--border-brand);
+  border-radius: var(--radius-8);
+  background: var(--bg-brand-surface-l1);
+  color: var(--text-brand);
+  font-size: var(--body-sm-font-size);
+  font-family: var(--body-md-font-family);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.demo-btn:active { background: var(--bg-brand-surface-l2); }
+.demo-hint { color: var(--text-tertiary); font-size: var(--body-sm-font-size); margin: var(--spacer-8) 0; }
+.demo-stage-label {
+  font-size: var(--body-xs-font-size);
+  color: var(--text-tertiary);
+  margin-bottom: var(--spacer-4);
+  position: absolute;
+  top: var(--spacer-8);
+  left: var(--spacer-12);
+}
+.demo-row {
+  display: flex;
+  gap: var(--spacer-24);
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.demo-annot {
+  font-size: var(--body-xs-font-size);
+  color: var(--text-tertiary);
+  text-align: center;
+  margin-top: var(--spacer-4);
+}
+
+/* @component-css-start */
+.popmenu{
+  --popmenu-max-width: 240px;
+  --popmenu-min-width: 120px;
+  box-sizing: border-box;
+  position: absolute;
+  display: inline-flex;
+  flex-direction: column;
+  width: max-content;
+  max-width: var(--popmenu-max-width);
+  min-width: var(--popmenu-min-width);
+  background: var(--bg-surface);
+  border-radius: var(--radius-8);
+  box-shadow: 0 0 0 var(--stroke-hairline) var(--border-neutral-l2), var(--shadow-lg);
+  z-index: var(--z-popover);
+  overflow: hidden;
+  opacity: 1;
+  transform: scale(1);
+  visibility: visible;
+  transition: opacity var(--duration-normal) var(--ease-enter),
+              transform var(--duration-normal) var(--ease-enter);
+}
+.popmenu[data-state="closed"]{
+  opacity: 0;
+  transform: scale(0.96);
+  visibility: hidden;
+  transition: opacity var(--duration-fast) var(--ease-exit),
+              transform var(--duration-fast) var(--ease-exit),
+              visibility 0s linear var(--duration-fast);
+  pointer-events: none;
+}
+.popmenu__list{
+  display: flex;
+  flex-direction: column;
+}
+.popmenu__item{
+  display: flex;
+  align-items: center;
+  height: 48px;
+  box-sizing: border-box;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: inset 0 -0.5px 0 0 var(--border-neutral-l2);
+  transition: background var(--duration-fast) var(--ease-enter);
+}
+.popmenu__item:last-child{
+  box-shadow: none;
+}
+.popmenu__item:active{
+  background: var(--bg-state-hover);
+}
+/* action 模式（无图标）：文本左对齐 */
+.popmenu--action .popmenu__item{
+  padding: 0 var(--spacer-16);
+  justify-content: flex-start;
+}
+/* action 模式（带图标）：图标+文本左对齐 */
+.popmenu--action.popmenu--has-icon .popmenu__item{
+  padding: 0 var(--spacer-12);
+  gap: var(--spacer-8);
+  justify-content: flex-start;
+}
+/* select 模式：文本左对齐 + 右侧对勾槽位 */
+.popmenu--select .popmenu__item{
+  padding: 0 var(--spacer-12);
+  gap: var(--spacer-8);
+  justify-content: flex-start;
+}
+.popmenu__item-icon{
+  flex-shrink: 0;
+  width: var(--size-20);
+  height: var(--size-20);
+  font-size: var(--size-20);
+  line-height: 1;
+  color: var(--text-default);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.popmenu__item-text{
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: auto;
+  min-width: 0;
+  font-size: var(--body-md-font-size);
+  line-height: var(--body-md-line-height);
+  font-family: var(--body-md-font-family);
+  font-weight: var(--font-weight-regular);
+  color: var(--text-default);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.popmenu--action .popmenu__item-text,
+.popmenu--select .popmenu__item-text{
+  text-align: left;
+}
+.popmenu__item-check{
+  flex-shrink: 0;
+  width: var(--size-16);
+  height: var(--size-16);
+  font-size: var(--size-16);
+  line-height: 1;
+  color: var(--status-success-default);
+  visibility: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.popmenu__item--selected .popmenu__item-check{
+  visibility: visible;
+}
+.popmenu__item--selected .popmenu__item-text{
+  font-weight: var(--font-weight-medium);
+}
+.popmenu__arrow{
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-style: solid;
+}
+.popmenu__arrow--bottom{
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 0 5px 6px 5px;
+  border-color: transparent transparent var(--bg-surface) transparent;
+}
+.popmenu__arrow--top{
+  top: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px 5px 0 5px;
+  border-color: var(--bg-surface) transparent transparent transparent;
+}
+/* @component-css-end */
+</style>
+</head>
+<body>
+<div class="pv-header">
+  <h1>气泡菜单 PopMenu</h1>
+  <p>相对目标元素弹出的白色气泡菜单，用于快捷操作或单选切换。action 模式支持左侧图标，select 模式选中项显示绿色对勾。容器宽度根据最长 item 内容自适应，不写死宽度。</p>
+</div>
+
+<!-- 选择模式 -->
+<div class="pv-section">
+  <div class="pv-section__title">选择模式 Select Mode</div>
+  <div class="pv-section__sub">选中项右侧绿色对勾 + 标题加粗，适合单选切换场景</div>
+
+  <div class="demo-stage">
+    <div class="demo-stage-label">mode=select · 3 项 · 第 1 项选中</div>
+    <div class="popmenu popmenu--select" role="listbox" data-state="open">
+      <div class="popmenu__list">
+        <div class="popmenu__item popmenu__item--selected">
+          <span class="popmenu__item-text">全部</span>
+          <i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check"></i>
+        </div>
+        <div class="popmenu__item">
+          <span class="popmenu__item-text">待处理</span>
+          <i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check"></i>
+        </div>
+        <div class="popmenu__item">
+          <span class="popmenu__item-text">已完成</span>
+          <i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-stage">
+    <div class="demo-stage-label">mode=select · 5 项 · 第 3 项选中</div>
+    <div class="popmenu popmenu--select" role="listbox" data-state="open">
+      <div class="popmenu__list">
+        <div class="popmenu__item">
+          <span class="popmenu__item-text">全部订单</span>
+          <i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check"></i>
+        </div>
+        <div class="popmenu__item">
+          <span class="popmenu__item-text">待付款</span>
+          <i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check"></i>
+        </div>
+        <div class="popmenu__item popmenu__item--selected">
+          <span class="popmenu__item-text">待发货</span>
+          <i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check"></i>
+        </div>
+        <div class="popmenu__item">
+          <span class="popmenu__item-text">已发货</span>
+          <i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check"></i>
+        </div>
+        <div class="popmenu__item">
+          <span class="popmenu__item-text">已完成</span>
+          <i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 操作模式 -->
+<div class="pv-section">
+  <div class="pv-section__title">操作模式 Action Mode</div>
+  <div class="pv-section__sub">无选中态，适合并列操作；支持可选左侧图标</div>
+
+  <div class="demo-stage">
+    <div class="demo-stage-label">mode=action · icon=none · 3 项</div>
+    <div class="popmenu popmenu--action" role="menu" data-state="open">
+      <div class="popmenu__list">
+        <div class="popmenu__item">
+          <span class="popmenu__item-text">复制</span>
+        </div>
+        <div class="popmenu__item">
+          <span class="popmenu__item-text">转发</span>
+        </div>
+        <div class="popmenu__item">
+          <span class="popmenu__item-text">删除</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-stage">
+    <div class="demo-stage-label">mode=action · icon=left · 3 项</div>
+    <div class="popmenu popmenu--action popmenu--has-icon" role="menu" data-state="open">
+      <div class="popmenu__list">
+        <div class="popmenu__item">
+          <i class="wego-iconfont-s icon-fenxiang popmenu__item-icon"></i>
+          <span class="popmenu__item-text">分享</span>
+        </div>
+        <div class="popmenu__item">
+          <i class="wego-iconfont-s icon-fuzhi popmenu__item-icon"></i>
+          <span class="popmenu__item-text">复制</span>
+        </div>
+        <div class="popmenu__item">
+          <i class="wego-iconfont-s icon-shanchu popmenu__item-icon"></i>
+          <span class="popmenu__item-text">删除</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-stage">
+    <div class="demo-stage-label">mode=action · icon=left · 5 项</div>
+    <div class="popmenu popmenu--action popmenu--has-icon" role="menu" data-state="open">
+      <div class="popmenu__list">
+        <div class="popmenu__item">
+          <i class="wego-iconfont-s icon-fenxiang popmenu__item-icon"></i>
+          <span class="popmenu__item-text">分享给好友</span>
+        </div>
+        <div class="popmenu__item">
+          <i class="wego-iconfont-s icon-fuzhi popmenu__item-icon"></i>
+          <span class="popmenu__item-text">复制链接</span>
+        </div>
+        <div class="popmenu__item">
+          <i class="wego-iconfont-s icon-shoucang popmenu__item-icon"></i>
+          <span class="popmenu__item-text">收藏</span>
+        </div>
+        <div class="popmenu__item">
+          <i class="wego-iconfont-s icon-bianji popmenu__item-icon"></i>
+          <span class="popmenu__item-text">编辑</span>
+        </div>
+        <div class="popmenu__item">
+          <i class="wego-iconfont-s icon-shanchu popmenu__item-icon"></i>
+          <span class="popmenu__item-text">删除</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 自适应宽度 -->
+<div class="pv-section">
+  <div class="pv-section__title">自适应宽度 Adaptive Width</div>
+  <div class="pv-section__sub">容器宽度由最长的 item 内容决定，不写死宽度；超过 max-width 时文本省略号截断</div>
+
+  <div class="demo-stage">
+    <div class="demo-stage-label">select 模式 · 短文本 vs 长文本（容器宽度跟随最长项）</div>
+    <div class="demo-row">
+      <div>
+        <div class="popmenu popmenu--select" role="listbox" data-state="open">
+          <div class="popmenu__list">
+            <div class="popmenu__item popmenu__item--selected">
+              <span class="popmenu__item-text">全部</span>
+              <i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check"></i>
+            </div>
+            <div class="popmenu__item">
+              <span class="popmenu__item-text">待处理</span>
+              <i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check"></i>
+            </div>
+          </div>
+        </div>
+        <div class="demo-annot">短文本：容器收窄</div>
+      </div>
+      <div>
+        <div class="popmenu popmenu--select" role="listbox" data-state="open">
+          <div class="popmenu__list">
+            <div class="popmenu__item popmenu__item--selected">
+              <span class="popmenu__item-text">全部商品</span>
+              <i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check"></i>
+            </div>
+            <div class="popmenu__item">
+              <span class="popmenu__item-text">待付款订单</span>
+              <i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check"></i>
+            </div>
+            <div class="popmenu__item">
+              <span class="popmenu__item-text">已发货待收货</span>
+              <i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check"></i>
+            </div>
+          </div>
+        </div>
+        <div class="demo-annot">长文本：容器自动变宽</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-stage">
+    <div class="demo-stage-label">action 模式 · 带图标 · 超长文本省略号截断（max-width=240px）</div>
+    <div class="popmenu popmenu--action popmenu--has-icon" role="menu" data-state="open" style="--popmenu-max-width: 200px;">
+      <div class="popmenu__list">
+        <div class="popmenu__item">
+          <i class="wego-iconfont-s icon-fenxiang popmenu__item-icon"></i>
+          <span class="popmenu__item-text">分享给微信好友和朋友圈</span>
+        </div>
+        <div class="popmenu__item">
+          <i class="wego-iconfont-s icon-fuzhi popmenu__item-icon"></i>
+          <span class="popmenu__item-text">复制商品链接</span>
+        </div>
+        <div class="popmenu__item">
+          <i class="wego-iconfont-s icon-shanchu popmenu__item-icon"></i>
+          <span class="popmenu__item-text">删除</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 带箭头示例 -->
+<div class="pv-section">
+  <div class="pv-section__title">带箭头示例 Arrow</div>
+  <div class="pv-section__sub">箭头指向目标元素，根据弹出方向定位</div>
+
+  <div class="demo-stage">
+    <div class="demo-stage-label">arrow=bottom · 气泡在目标上方，箭头朝下</div>
+    <div class="popmenu popmenu--action" role="menu" data-state="open">
+      <div class="popmenu__arrow popmenu__arrow--bottom"></div>
+      <div class="popmenu__list">
+        <div class="popmenu__item">
+          <span class="popmenu__item-text">复制</span>
+        </div>
+        <div class="popmenu__item">
+          <span class="popmenu__item-text">转发</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 交互演示 -->
+<div class="pv-section">
+  <div class="pv-section__title">交互演示 Interactive Demo</div>
+  <div class="pv-section__sub">点击按钮弹出气泡菜单，点击选项切换选中，点击外部关闭</div>
+
+  <div class="demo-stage demo-stage--col" style="min-height: 200px; align-items: flex-start;">
+    <div class="demo-trigger-row">
+      <button class="demo-btn" id="js-trigger-select">筛选（选择模式）</button>
+      <button class="demo-btn" id="js-trigger-action">更多操作（带图标）</button>
+    </div>
+    <div style="position: relative; width: 100%; min-height: 120px;">
+      <div class="popmenu popmenu--select" role="listbox" data-state="closed" id="js-popmenu-select" style="position: absolute; top: 0; left: 0;">
+        <div class="popmenu__list">
+          <div class="popmenu__item popmenu__item--selected" data-index="0">
+            <span class="popmenu__item-text">全部</span>
+            <i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check"></i>
+          </div>
+          <div class="popmenu__item" data-index="1">
+            <span class="popmenu__item-text">待处理</span>
+            <i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check"></i>
+          </div>
+          <div class="popmenu__item" data-index="2">
+            <span class="popmenu__item-text">已完成</span>
+            <i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check"></i>
+          </div>
+        </div>
+      </div>
+      <div class="popmenu popmenu--action popmenu--has-icon" role="menu" data-state="closed" id="js-popmenu-action" style="position: absolute; top: 0; left: 0;">
+        <div class="popmenu__list">
+          <div class="popmenu__item">
+            <i class="wego-iconfont-s icon-fenxiang popmenu__item-icon"></i>
+            <span class="popmenu__item-text">分享</span>
+          </div>
+          <div class="popmenu__item">
+            <i class="wego-iconfont-s icon-fuzhi popmenu__item-icon"></i>
+            <span class="popmenu__item-text">复制</span>
+          </div>
+          <div class="popmenu__item">
+            <i class="wego-iconfont-s icon-shanchu popmenu__item-icon"></i>
+            <span class="popmenu__item-text">删除</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var triggerSelect = document.getElementById('js-trigger-select');
+  var triggerAction = document.getElementById('js-trigger-action');
+  var popmenuSelect = document.getElementById('js-popmenu-select');
+  var popmenuAction = document.getElementById('js-popmenu-action');
+
+  function closeAll() {
+    popmenuSelect.setAttribute('data-state', 'closed');
+    popmenuAction.setAttribute('data-state', 'closed');
+  }
+
+  function toggle(popmenu) {
+    var isOpen = popmenu.getAttribute('data-state') === 'open';
+    closeAll();
+    if (!isOpen) {
+      popmenu.setAttribute('data-state', 'open');
+    }
+  }
+
+  triggerSelect.addEventListener('click', function(e) {
+    e.stopPropagation();
+    toggle(popmenuSelect);
+  });
+  triggerAction.addEventListener('click', function(e) {
+    e.stopPropagation();
+    toggle(popmenuAction);
+  });
+
+  // select 模式：点击切换选中
+  popmenuSelect.querySelectorAll('.popmenu__item').forEach(function(item) {
+    item.addEventListener('click', function(e) {
+      e.stopPropagation();
+      popmenuSelect.querySelectorAll('.popmenu__item').forEach(function(i) {
+        i.classList.remove('popmenu__item--selected');
+      });
+      item.classList.add('popmenu__item--selected');
+      setTimeout(closeAll, 150);
+    });
+  });
+
+  // action 模式：点击关闭
+  popmenuAction.querySelectorAll('.popmenu__item').forEach(function(item) {
+    item.addEventListener('click', function(e) {
+      e.stopPropagation();
+      setTimeout(closeAll, 150);
+    });
+  });
+
+  // 点击外部关闭
+  document.addEventListener('click', function() {
+    closeAll();
+  });
+})();
+</script>
+</body>
+</html>

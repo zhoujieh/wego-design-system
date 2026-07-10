@@ -160,6 +160,13 @@
       "category": "feedback",
       "status": "stable",
       "preview": "preview/component-modal.html"
+    },
+    {
+      "slug": "popmenu",
+      "name": "气泡菜单",
+      "category": "feedback",
+      "status": "stable",
+      "preview": "preview/component-popmenu.html"
     }
   ],
   "componentContractSchemaVersion": 3

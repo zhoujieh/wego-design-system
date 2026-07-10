@@ -264,6 +264,50 @@
       },
       "created_at": "2026-07-09T00:00:00.000Z",
       "updated_at": "2026-07-09T00:00:00.000Z"
+    },
+    {
+      "id": "exp-component-visual-fact-from-design-source",
+      "normalized_key": "component-visual-facts-must-be-confirmed-from-design-source-not-inferred-from-similar-components",
+      "title": "组件基础视觉事实必须从设计稿实际值确认，不得凭相似组件推断",
+      "status": "observing",
+      "occurrence_count": 1,
+      "threshold": 3,
+      "primary_owner": "wego-uxsystem-iterate",
+      "secondary_owners": ["wego-design"],
+      "ownership_reason": "问题最早产生在 wego-uxsystem-iterate 迭代模式的新组件创建阶段。当新组件与已有组件在形态上相似（如 popmenu 与 toast 都是浮层气泡），AI 容易直接复用已有组件的视觉 Token（如 --bg-toast 深色底 + --text-inverse 白字），而不从设计稿截图或 get_design_context 返回的实际填充值确认底色、文字色、描边等基础视觉事实。设计稿中两个形态相似的组件可能使用完全不同的底色方案（toast 深色底 vs popmenu 白色底），凭相似性推断会导致整个组件视觉方向错误。",
+      "problem_pattern": "创建新组件时，因 Figma get_design_context 超时或失败，AI 退而用 get_metadata 获取节点结构 + get_screenshot 获取截图，但截图返回后未实际分析底色，而是直接参考形态相似的已有组件（toast）的深色 Token 方案。用户审查后发现设计稿实际是白底，整个组件的背景、文字、分隔线、按下态、箭头颜色全部需要返工。",
+      "scene_evidence": [
+        {
+          "date": "2026-07-10",
+          "scene": "气泡菜单 popmenu 组件创建",
+          "summary": "创建 popmenu 组件时，get_design_context 超时失败，AI 改用 get_metadata + get_screenshot 获取设计稿信息。截图返回后 AI 未实际分析底色，而是参考 toast 组件（同为浮层气泡）使用了 --bg-toast（深色 rgba(63,67,71,0.96)）+ --text-inverse（白字）+ --bg-inverse-surface-l1（分隔线）。用户指出『为什么做出来是黑色底？设计稿是白色的』。修复：背景改 var(--bg-surface)，文字改 var(--text-default)，分隔线改 var(--border-neutral-l2)，按下态改 var(--bg-state-hover)，箭头颜色同步。契约中 description/anatomy/structurePatterns/designTokens/tokensConsumed 全部需要同步修改。",
+          "source": "用户直接指出：为什么做出来是黑色底？设计稿是白色的"
+        }
+      ],
+      "applies_when_candidates": [
+        "创建新组件时确定容器背景色、文字颜色、描边、分隔线等基础视觉规格",
+        "新组件与已有组件形态相似（都是浮层/气泡/卡片），但底色方案可能不同",
+        "Figma get_design_context 失败或超时，退而使用 get_metadata + get_screenshot",
+        "get_screenshot 返回截图后需要确认底色、文字色等基础视觉事实"
+      ],
+      "avoid_when_candidates": [
+        "组件视觉规格已从 get_design_context 返回的实际填充值中明确获取",
+        "设计稿中明确标注了颜色 hex 值或 Token 名称",
+        "纯结构/布局问题不涉及颜色规格",
+        "组件确实与参考组件共用同一套视觉 Token（如同一个深色浮层体系）"
+      ],
+      "expected_rule_target": {
+        "file": ".codex/skills/wego-uxsystem-iterate/SKILL.md",
+        "field": "迭代模式 / 新组件创建时视觉事实确认步骤"
+      },
+      "runtime_reachability": {
+        "consumer_skill": "wego-uxsystem-iterate 迭代模式（创建新组件或修改组件视觉规格时）",
+        "output_field": "组件契约 designTokens.containerBg / itemTextColor 和 Preview CSS 中的 background / color 属性",
+        "downstream_consumer": "wego-design 消费组件契约和 Preview 时继承视觉规格，wego-ux 实现时复制组件 CSS",
+        "acceptance_check": "创建组件后必须对照设计稿截图确认基础视觉事实（底色、文字色、描边、分隔线、按下态）；get_screenshot 返回的截图必须实际分析底色而非跳过"
+      },
+      "created_at": "2026-07-10T00:00:00.000Z",
+      "updated_at": "2026-07-10T00:00:00.000Z"
     }
   ]
 }

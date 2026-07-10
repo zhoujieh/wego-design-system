@@ -1,0 +1,227 @@
+{
+  "schemaVersion": 3,
+  "slug": "popmenu",
+  "name": "气泡菜单",
+  "category": "feedback",
+  "status": "stable",
+  "sourceKind": "figma",
+  "confidence": "high",
+  "description": "相对目标元素弹出的白色气泡菜单，用于快捷操作或单选切换。两种模式：action（操作模式，支持左侧图标，无选中态）和 select（选择模式，选中项右侧绿色对勾+标题加粗）。容器宽度根据最长的 item 内容自适应，不写死宽度。与 actionsheet 的区别：actionsheet 是底部弹层（通栏、带取消按钮、slide-up）；popmenu 是紧凑气泡（自适应宽度、无取消按钮、淡入、锚定目标元素）。",
+  "semanticTypeCandidates": [
+    "popover-menu",
+    "bubble-menu",
+    "dropdown-popover",
+    "context-menu"
+  ],
+  "variantDimensions": {
+    "mode": [
+      "action",
+      "select"
+    ],
+    "icon": [
+      "none",
+      "left"
+    ],
+    "state": [
+      "open",
+      "closed"
+    ]
+  },
+  "representativeVariants": [
+    {
+      "mode": "select",
+      "icon": "none"
+    },
+    {
+      "mode": "action",
+      "icon": "none"
+    },
+    {
+      "mode": "action",
+      "icon": "left"
+    }
+  ],
+  "anatomy": [
+    {
+      "name": "root",
+      "selector": ".popmenu",
+      "role": "气泡容器，白色圆角背景，承载列表、定位与淡入动画；宽度 max-content 自适应"
+    },
+    {
+      "name": "arrow",
+      "selector": ".popmenu__arrow",
+      "role": "指向目标元素的小三角，可选；根据弹出方向定位在容器边缘"
+    },
+    {
+      "name": "list",
+      "selector": ".popmenu__list",
+      "role": "选项列表容器，纵向排列 item"
+    },
+    {
+      "name": "item",
+      "selector": ".popmenu__item",
+      "role": "单个选项，高 48px，flex 横向布局；底 0.5px 分隔线，最后一项不显示"
+    },
+    {
+      "name": "itemIcon",
+      "selector": ".popmenu__item-icon",
+      "role": "选项左侧图标，仅 action 模式可选；20×20 iconfont，颜色 var(--text-default)"
+    },
+    {
+      "name": "itemText",
+      "selector": ".popmenu__item-text",
+      "role": "选项文本，14px var(--text-default)；select 模式选中时加粗 var(--font-weight-medium)；单行不换行，超出 max-width 时尾部省略号"
+    },
+    {
+      "name": "itemCheck",
+      "selector": ".popmenu__item-check",
+      "role": "选择模式选中指示，16×16 iconfont .icon-gou-jiacu，颜色 var(--status-success-default)；默认 visibility:hidden，选中时 visibility:visible，始终保留空间避免文本跳动"
+    }
+  ],
+  "structurePatterns": [
+    "根节点 .popmenu 是白色气泡容器，背景 var(--bg-surface)，圆角 var(--radius-8)，0.5px 外描边 var(--border-neutral-l2) + 阴影 var(--shadow-lg)，z-index var(--z-popover)",
+    "容器宽度自适应：width: max-content，由最长的 item 内容决定；max-width: var(--popmenu-max-width, 240px) 防止过宽；min-width: var(--popmenu-min-width, 120px) 防止过窄；不写死固定宽度",
+    ".popmenu 内部结构：.popmenu__list → 多个 .popmenu__item；.popmenu__arrow 可选，定位在容器边缘指向目标",
+    "选项高度固定 48px；item 之间通过 box-shadow: inset 0 -0.5px 0 0 var(--border-neutral-l2) 绘制分隔线，最后一项不显示",
+    "action 模式（无图标）选项结构：.popmenu__item（padding: 0 var(--spacer-16)）→ .popmenu__item-text（flex 1，左对齐）",
+    "action 模式（带图标）选项结构：.popmenu__item（padding: 0 var(--spacer-12)，gap var(--spacer-8)）→ .popmenu__item-icon（20×20，shrink 0）+ .popmenu__item-text（flex 1，左对齐）",
+    "select 模式选项结构：.popmenu__item（padding: 0 var(--spacer-12)，gap var(--spacer-8)）→ .popmenu__item-text（flex 1，左对齐）+ .popmenu__item-check（16×16，shrink 0，始终保留空间）",
+    "select 模式选中项：.popmenu__item--selected，标题加粗 var(--font-weight-medium)，对勾 visibility: visible",
+    "select 模式未选中项：对勾 visibility: hidden（保留空间，不 display:none，避免切换选中态时容器宽度跳动）",
+    "选项文本单行不换行（white-space: nowrap, lines: 1），超过 max-width 时 text-overflow: ellipsis 尾部截断",
+    "图标模式要求所有 item 统一带图标或不带图标，不允许混用",
+    "状态机通过 data-state='open'/'closed' 属性切换；closed 时 visibility:hidden + opacity:0"
+  ],
+  "behavior": {
+    "closeByOutside": "默认 true（点击气泡外部关闭，无可见遮罩，仅透明捕获层）",
+    "closeAfterClick": "默认 true（点击选项后关闭）；业务可通过 closeAfterClick=false 覆盖",
+    "persistence": "交互式常驻，不自动关闭，需用户操作",
+    "conflicting": "同屏仅展示一个 popmenu，新 popmenu 出现时立即替换旧",
+    "position": "锚定目标元素弹出，支持 top/bottom/left/right 四个方向；底部空间不足时自动翻转到顶部",
+    "animation": "入场 opacity 0→1 + scale 0.96→1 淡入缩放，时长 var(--duration-normal)（250ms），缓动 var(--ease-enter)；出场反向淡出，时长 var(--duration-fast)（150ms），缓动 var(--ease-exit)",
+    "zIndex": "var(--z-popover)=300，高于 dropdown(200)，低于 overlay(500)、modal(600)、toast(700)",
+    "scrollable": "选项超过 7 个时列表内部纵向滚动，最大高度限制"
+  },
+  "accessibility": {
+    "role": "role=\"menu\" 或 role=\"listbox\"（select 模式）",
+    "labelRule": "目标元素的 aria-label 作为可访问名称",
+    "focusTrap": "打开时焦点锁定在菜单内，关闭后返回触发元素",
+    "textRule": "选项文本单行，超出 max-width 时省略号截断"
+  },
+  "usageHints": [
+    "用于相对目标元素弹出的快捷操作菜单或单选下拉，例如'更多'按钮的操作菜单、筛选条件的选择列表",
+    "action 模式适合'分享/复制/删除'等并列操作；select 模式适合'全部/已处理/未处理'等单选场景",
+    "action 模式支持左侧图标配置；启用图标时所有 item 必须都带图标，不允许混用",
+    "容器宽度根据最长的 item 内容自适应，不写死宽度；可通过 --popmenu-max-width 覆盖最大宽度上限",
+    "选项建议 2-7 个，超过 7 个时考虑使用专门的选择列表页或 actionsheet",
+    "与 actionsheet 的区别：actionsheet 是底部弹层（通栏、带取消按钮、slide-up）；popmenu 是紧凑气泡（自适应宽度、无取消按钮、淡入、锚定目标）",
+    "与 dialog 的区别：dialog 是居中模态确认弹窗（2-3 按钮轻量确认）；popmenu 是锚定目标的快捷菜单",
+    "与 toast 的区别：toast 是瞬时自动消失的纯告知浮层；popmenu 是交互式常驻需用户操作"
+  ],
+  "doNotInvent": [
+    "不要在 popmenu 内放置输入框、多字段表单、副标题、推荐标签等复杂内容（那是 actionsheet/modal 的职责）",
+    "不要超过 7 个选项，超过时考虑用专门的选择列表页或 actionsheet",
+    "不要写死容器宽度，必须使用 max-content 自适应",
+    "不要持久化 popmenu 状态到 localStorage",
+    "不要给 popmenu 设置自动关闭时长（交互式常驻，需用户操作）",
+    "不要在图标模式下混用带图标和不带图标的 item",
+    "不要自定义选项颜色，仅允许 default/selected(select 模式)两种状态",
+    "不要在 select 模式下使用 display:none 隐藏未选中项的对勾（会破坏自适应宽度计算）"
+  ],
+  "tokensConsumed": [
+    "--bg-surface",
+    "--bg-state-hover",
+    "--border-neutral-l2",
+    "--text-default",
+    "--status-success-default",
+    "--font-family-system",
+    "--font-family-icon",
+    "--body-md-font-size",
+    "--body-md-line-height",
+    "--font-weight-medium",
+    "--font-weight-regular",
+    "--spacer-8",
+    "--spacer-12",
+    "--spacer-16",
+    "--radius-8",
+    "--shadow-lg",
+    "--duration-normal",
+    "--duration-fast",
+    "--ease-enter",
+    "--ease-exit",
+    "--z-popover",
+    "--size-16",
+    "--size-20",
+    "--stroke-hairline"
+  ],
+  "designTokens": {
+    "containerBg": "var(--bg-surface)",
+    "containerRadius": "var(--radius-8)",
+    "containerShadow": "0 0 0 var(--stroke-hairline) var(--border-neutral-l2), var(--shadow-lg)",
+    "containerMaxWidth": "var(--popmenu-max-width, 240px)",
+    "containerMinWidth": "var(--popmenu-min-width, 120px)",
+    "containerStroke": "var(--stroke-hairline) var(--border-neutral-l2)",
+    "containerWidth": "max-content",
+    "itemHeight": "48px",
+    "itemPaddingAction": "0 var(--spacer-16)",
+    "itemPaddingActionIcon": "0 var(--spacer-12)",
+    "itemPaddingSelect": "0 var(--spacer-12)",
+    "itemGap": "var(--spacer-8)",
+    "itemIconSize": "var(--size-20)",
+    "itemCheckSize": "var(--size-16)",
+    "itemCheckIcon": "icon-gou-jiacu",
+    "itemCheckColor": "var(--status-success-default)",
+    "itemTextFont": "var(--body-md-font-size) / var(--body-md-line-height) / var(--font-weight-regular)",
+    "itemTextFontSelected": "var(--body-md-font-size) / var(--body-md-line-height) / var(--font-weight-medium)",
+    "itemTextColor": "var(--text-default)",
+    "itemDividerShadow": "inset 0 -0.5px 0 0 var(--border-neutral-l2)",
+    "itemPressedBg": "var(--bg-state-hover)",
+    "zIndex": "var(--z-popover)",
+    "enterDuration": "var(--duration-normal)",
+    "leaveDuration": "var(--duration-fast)",
+    "enterEase": "var(--ease-enter)",
+    "leaveEase": "var(--ease-exit)",
+    "enterScaleStart": "0.96",
+    "enterScaleEnd": "1"
+  },
+  "cssCustomProperties": [
+    {
+      "name": "--popmenu-max-width",
+      "default": "240px",
+      "appliesTo": "气泡菜单最大宽度，超出时文本以省略号截断"
+    },
+    {
+      "name": "--popmenu-min-width",
+      "default": "120px",
+      "appliesTo": "气泡菜单最小宽度，防止短文本时过窄"
+    }
+  ],
+  "specRefs": [
+    "specs/交互设计原则.md"
+  ],
+  "domAnatomy": {
+    "root": ".popmenu",
+    "modifiers": [
+      ".popmenu--action",
+      ".popmenu--select",
+      "[data-state=\"open\"]",
+      "[data-state=\"closed\"]"
+    ],
+    "optionalChildren": [
+      ".popmenu__arrow",
+      ".popmenu__list",
+      ".popmenu__item",
+      ".popmenu__item--selected",
+      ".popmenu__item-icon",
+      ".popmenu__item-text",
+      ".popmenu__item-check"
+    ]
+  },
+  "provenance": {
+    "preview": "preview/component-popmenu.html",
+    "cssSource": "preview/component-popmenu.html",
+    "embedded": false,
+    "hostComponent": null
+  },
+  "unknowns": []
+}
