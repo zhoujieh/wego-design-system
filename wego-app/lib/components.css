@@ -1159,21 +1159,33 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  background: var(--bg-mask-light);
+  background: transparent;
   z-index: var(--z-modal);
   pointer-events: auto;
   visibility: visible;
+}
+.modal::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--bg-mask-light);
   opacity: 1;
   transition: opacity var(--duration-normal) var(--ease-enter);
+  pointer-events: none;
 }
 .modal[data-state="closed"] {
   visibility: hidden;
-  opacity: 0;
-  transition: opacity var(--duration-normal) var(--ease-exit), visibility 0s linear var(--duration-normal);
+  transition: visibility 0s linear var(--duration-normal);
   pointer-events: none;
+}
+.modal[data-state="closed"]::before {
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease-exit);
 }
 .modal__panel {
   box-sizing: border-box;
+  position: relative;
+  z-index: 1;
   width: var(--modal-panel-width);
   max-width: 670px;
   margin-inline: auto;
@@ -1202,6 +1214,9 @@
 /* fullscreen 变体：全屏覆盖，无遮罩；背景由 --modal-panel-bg 决定 */
 .modal--fullscreen {
   background: transparent;
+}
+.modal--fullscreen::before {
+  display: none;
 }
 .modal--fullscreen .modal__panel {
   height: 100dvh;

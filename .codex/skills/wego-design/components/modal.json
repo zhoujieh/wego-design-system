@@ -58,7 +58,7 @@
     {
       "name": "root",
       "selector": ".modal",
-      "role": "浮层容器，自身承担半透明遮罩（frame/frame-x 为 var(--bg-mask-light)，fullscreen 为 transparent），承载面板、定位与动画"
+      "role": "浮层容器，承载面板和定位；遮罩由 .modal::before 承担，避免根节点 opacity 影响面板"
     },
     {
       "name": "panel",
@@ -152,7 +152,7 @@
     }
   ],
   "structurePatterns": [
-    "根节点 .modal 是 overlay 定位容器（fixed; inset:0; flex-end），frame/frame-x 遮罩 var(--bg-mask-light)，fullscreen 遮罩 transparent。",
+    "根节点 .modal 是 overlay 定位容器（fixed; inset:0; flex-end），自身不得做 opacity 动画；frame/frame-x 遮罩由 .modal::before 渲染 var(--bg-mask-light) 并单独做 opacity 淡入淡出，fullscreen 不显示遮罩。",
     "面板 .modal__panel 三段式结构：title → body → actions。",
     "frame 变体：面板 max-height: calc(100vh-40px)，宽度 var(--modal-panel-width)（max 670px），圆角 16px 16px 0 0。",
     "frame-x 变体：面板固定高度 70vh，可拖拽至全屏（手势由宿主实现）。",
@@ -167,7 +167,7 @@
     "全屏 fullscreen 变体的遮罩为透明，手机状态栏通过高 z-index 穿透透明层显示；NavBar 正常避让 safe-area-top。",
     "嵌套 push 模式：modal 内可 push 多层面板（最多 3 层），新面板从右侧滑入（translateX），返回时逐层退出；所有层级共享同一遮罩；蒙层点击从最顶层开始逐层关闭。",
     "状态机通过 data-state='open'/'closed' 切换；嵌套 push 动画通过 data-push 属性控制。",
-    "动画约定：蒙层（.modal）必须有 opacity 淡入淡出动画（进入和退出都要有）；面板（.modal__panel）只能有 translateY 位移动画，打开和关闭都不能有 opacity 透明度变化。"
+    "动画约定：蒙层视觉层（.modal::before）必须有 opacity 淡入淡出动画（进入和退出都要有）；.modal 根节点不得使用 opacity，避免影响子级面板；面板（.modal__panel）只能有 translateY 位移动画，打开和关闭都不能有 opacity 透明度变化。"
   ],
   "behavior": {
     "closeByMask": "默认 true，点击 .modal overlay 空白区域可关闭；嵌套模式时逐层关闭（最顶层优先）",
@@ -176,7 +176,7 @@
     "persistence": "阻断式常驻，不自动关闭",
     "conflicting": "同屏仅展示一个 modal，新 modal 出现时替换旧 modal",
     "position": "底部贴底悬浮（frame/frame-x），全屏覆盖（fullscreen）",
-    "animation": "蒙层（.modal）opacity 淡入淡出（进入 ease-enter，退出 ease-exit）；面板（.modal__panel）仅 translateY 位移动画（从底部 100% 滑入滑出），打开和关闭时面板都不得设置 opacity 或 opacity transition；嵌套 push 使用 translateX（右侧滑入/滑出）",
+    "animation": "蒙层视觉层（.modal::before）opacity 淡入淡出（进入 ease-enter，退出 ease-exit），.modal 根节点不设置 opacity；面板（.modal__panel）仅 translateY 位移动画（从底部 100% 滑入滑出），打开和关闭时面板都不得设置 opacity 或 opacity transition；嵌套 push 使用 translateX（右侧滑入/滑出）",
     "zIndex": "var(--z-modal)=600",
     "maxNestingDepth": 3,
     "frameX.enableDrag": "默认 true（向上拖扩展至全屏，H5 不生效；手势由宿主实现）",
@@ -207,7 +207,7 @@
     "不要发明标题栏类，default 标题必须使用 navbar 组件完整 .navbar 结构。",
     "frame/frame-x 变体默认左侧为下箭头（icon-xiajiantou16），不要擅自改成关闭叉（icon-guanbi），除非用户明确指定。",
     "default title 左侧图标必须使用已注册图标类名（icon-xiajiantou16 / icon-guanbi），不得使用不存在的图标（如 icon-guanbi-mian）。",
-    "不要给 modal 面板（.modal__panel）加 opacity、opacity transition 或 opacity animation；面板只能有 translateY 位移动画；淡入淡出只在蒙层（.modal）上。",
+    "不要给 .modal 根节点或 .modal__panel 加 opacity、opacity transition 或 opacity animation；面板只能有 translateY 位移动画；淡入淡出只在蒙层视觉层（.modal::before）上。",
     "不要在 modal CSS 内重写 .modal__body 内业务放入的已注册组件样式。",
     "不要超过 2 个主按钮（1 主操作 + 1 次操作）。",
     "不要持久化 modal 状态到 localStorage。",

@@ -380,6 +380,24 @@
   position: absolute;
 }
 
+.phone-screen .dynamic-resale-sheet__modal .modal__panel {
+  opacity: 1;
+  transition-property: transform;
+}
+
+.phone-screen .dynamic-resale-sheet__modal .modal__title--default {
+  --safe-area-top: 0px;
+}
+
+.phone-screen .dynamic-resale-sheet__modal .modal__title--default .navbar {
+  padding-top: 0;
+}
+
+.phone-screen .dynamic-resale-sheet__modal .modal__title--default .navbar__body {
+  height: var(--navbar-body-height, 44px);
+  min-height: var(--navbar-body-height, 44px);
+}
+
 /* 2. cell-group：在 modal body 内，body 已有 padding，cell-group 不需要额外 margin */
 .dynamic-resale-sheet__cell-group .cell-group__content {
   border-radius: var(--radius-8);
