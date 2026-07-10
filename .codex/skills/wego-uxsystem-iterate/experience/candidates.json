@@ -274,7 +274,7 @@
       "threshold": 3,
       "primary_owner": "wego-uxsystem-iterate",
       "secondary_owners": ["wego-design"],
-      "ownership_reason": "问题最早产生在 wego-uxsystem-iterate 迭代模式的新组件创建阶段。当新组件与已有组件在形态上相似（如 popmenu 与 toast 都是浮层气泡），AI 容易直接复用已有组件的视觉 Token（如 --bg-toast 深色底 + --text-inverse 白字），而不从设计稿截图或 get_design_context 返回的实际填充值确认底色、文字色、描边等基础视觉事实。设计稿中两个形态相似的组件可能使用完全不同的底色方案（toast 深色底 vs popmenu 白色底），凭相似性推断会导致整个组件视觉方向错误。",
+      "ownership_reason": "问题最早产生在 wego-uxsystem-iterate 迭代模式的新组件创建阶段。该技能负责组件契约和 Preview 的创建与修改，当新组件与已有组件在形态上相似（如 popmenu 与 toast 都是浮层气泡），AI 容易直接复用已有组件的视觉 Token（如 --bg-toast 深色底 + --text-inverse 白字），而不从设计稿截图或 get_design_context 返回的实际填充值确认底色、文字色、描边等基础视觉事实。设计稿中两个形态相似的组件可能使用完全不同的底色方案（toast 深色底 vs popmenu 白色底），凭相似性推断会导致整个组件视觉方向错误。规则最终落到 wego-uxsystem-iterate 的 SKILL.md 迭代模式中，wego-design 在消费组件契约时继承视觉规格。",
       "problem_pattern": "创建新组件时，因 Figma get_design_context 超时或失败，AI 退而用 get_metadata 获取节点结构 + get_screenshot 获取截图，但截图返回后未实际分析底色，而是直接参考形态相似的已有组件（toast）的深色 Token 方案。用户审查后发现设计稿实际是白底，整个组件的背景、文字、分隔线、按下态、箭头颜色全部需要返工。",
       "scene_evidence": [
         {
@@ -301,7 +301,7 @@
         "field": "迭代模式 / 新组件创建时视觉事实确认步骤"
       },
       "runtime_reachability": {
-        "consumer_skill": "wego-uxsystem-iterate 迭代模式（创建新组件或修改组件视觉规格时）",
+        "consumer_skill": "wego-uxsystem-iterate 迭代模式（创建新组件或修改组件视觉规格时），wego-design 消费组件契约和 Preview 时继承视觉规格",
         "output_field": "组件契约 designTokens.containerBg / itemTextColor 和 Preview CSS 中的 background / color 属性",
         "downstream_consumer": "wego-design 消费组件契约和 Preview 时继承视觉规格，wego-ux 实现时复制组件 CSS",
         "acceptance_check": "创建组件后必须对照设计稿截图确认基础视觉事实（底色、文字色、描边、分隔线、按下态）；get_screenshot 返回的截图必须实际分析底色而非跳过"

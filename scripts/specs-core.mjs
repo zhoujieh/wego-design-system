@@ -332,7 +332,7 @@ function render() {
 
 function candidateErrors(pool) {
   const errors = [];
-  const owners = new Set(['wego-product','wego-design','wego-ux','wego-tests']);
+  const owners = new Set(['wego-product','wego-design','wego-ux','wego-tests','wego-uxsystem-iterate']);
   const statuses = new Set(['observing','awaiting-confirmation','promoted','rejected']);
   if (!pool || typeof pool !== 'object' || Array.isArray(pool)) return ['候选池必须是对象'];
   if (pool.schemaVersion !== 1) errors.push('schemaVersion 必须为 1');
