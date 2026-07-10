@@ -22,6 +22,16 @@
       "none",
       "left"
     ],
+    "placement": [
+      "bottom",
+      "top",
+      "right",
+      "left"
+    ],
+    "align": [
+      "start",
+      "end"
+    ],
     "state": [
       "open",
       "closed"
@@ -83,29 +93,33 @@
     "容器宽度自适应：width: max-content，由最长的 item 内容决定；max-width: var(--popmenu-max-width, 240px) 防止过宽；min-width: var(--popmenu-min-width, 120px) 防止过窄；不写死固定宽度",
     ".popmenu 内部结构：.popmenu__list → 多个 .popmenu__item；.popmenu__arrow 可选，定位在容器边缘指向目标",
     "选项高度固定 48px；item 之间通过 box-shadow: inset 0 -0.5px 0 0 var(--border-neutral-l2) 绘制分隔线，最后一项不显示",
-    "action 模式（无图标）选项结构：.popmenu__item（padding: 0 var(--spacer-16)）→ .popmenu__item-text（flex 1，左对齐）",
-    "action 模式（带图标）选项结构：.popmenu__item（padding: 0 var(--spacer-12)，gap var(--spacer-8)）→ .popmenu__item-icon（20×20，shrink 0）+ .popmenu__item-text（flex 1，左对齐）",
+    "action 模式（无图标）选项结构：.popmenu__item（padding-left: var(--spacer-16); padding-right: var(--spacer-16)）→ .popmenu__item-text（flex 1，左对齐）",
+    "action 模式（带图标）选项结构：.popmenu__item（padding-left: var(--spacer-12); padding-right: var(--spacer-16)，gap var(--spacer-8)）→ .popmenu__item-icon（20×20，shrink 0）+ .popmenu__item-text（flex 1，左对齐）",
     "select 模式选项结构：.popmenu__item（padding: 0 var(--spacer-12)，gap var(--spacer-8)）→ .popmenu__item-text（flex 1，左对齐）+ .popmenu__item-check（16×16，shrink 0，始终保留空间）",
     "select 模式选中项：.popmenu__item--selected，标题加粗 var(--font-weight-medium)，对勾 visibility: visible",
     "select 模式未选中项：对勾 visibility: hidden（保留空间，不 display:none，避免切换选中态时容器宽度跳动）",
     "选项文本单行不换行（white-space: nowrap, lines: 1），超过 max-width 时 text-overflow: ellipsis 尾部截断",
     "图标模式要求所有 item 统一带图标或不带图标，不允许混用",
-    "状态机通过 data-state='open'/'closed' 属性切换；closed 时 visibility:hidden + opacity:0"
+    "挂载时使用 data-placement='bottom'/'top' 与 data-align='start'/'end' 描述相对目标的位置；默认必须在目标下方，菜单左缘或右缘与目标对应边缘对齐，间距固定 4px",
+    "定位由宿主根据目标和视口计算：优先选择目标所在一侧的对齐边；若菜单会越过左右边缘则切换到另一侧，并在两侧都不足时收敛到 4px 安全边距内；默认先尝试底部，只有底部空间不足才翻转到顶部；上下均不能完整容纳时才改放到目标左右侧；定位尺寸必须以关闭动画和缩放都被临时禁用后的真实菜单尺寸计算，不能使用过渡中的尺寸",
+    "菜单与目标的可见区域不得重叠；若视口四侧都无法完整容纳菜单，必须保持关闭并由宿主改用其他承载方式，不能以夹紧坐标的方式盖住目标",
+    "状态机通过 data-state='open'/'closed' 属性切换；closed 时 visibility:hidden + opacity:0 + scale(0.9)"
   ],
   "behavior": {
-    "closeByOutside": "默认 true（点击气泡外部关闭，无可见遮罩，仅透明捕获层）",
+    "closeByOutside": "默认 true（页面任意非菜单操作立即关闭，无可见遮罩、无拦截层，触发该操作的页面功能继续执行）",
     "closeAfterClick": "默认 true（点击选项后关闭）；业务可通过 closeAfterClick=false 覆盖",
     "persistence": "交互式常驻，不自动关闭，需用户操作",
     "conflicting": "同屏仅展示一个 popmenu，新 popmenu 出现时立即替换旧",
-    "position": "锚定目标元素弹出，支持 top/bottom/left/right 四个方向；底部空间不足时自动翻转到顶部",
-    "animation": "入场 opacity 0→1 + scale 0.96→1 淡入缩放，时长 var(--duration-normal)（250ms），缓动 var(--ease-enter)；出场反向淡出，时长 var(--duration-fast)（150ms），缓动 var(--ease-exit)",
+    "position": "锚定目标元素，默认先在下方；根据目标在屏幕左右位置选择左缘或右缘对齐。菜单距目标固定 4px；若将越过左右边缘则切换对齐边；只有下方空间不足时才翻转到上方，上下均不足时再选择左右侧。定位计算必须基于关闭动画与缩放临时禁用后的真实尺寸。菜单不得与目标重叠；四侧均无法完整容纳时不打开",
+    "dismiss": "页面任意非菜单点击、焦点切换、滚动或视口尺寸变化时立即关闭；关闭行为不得阻断原页面事件、滚动或焦点操作",
+    "animation": "仅入场使用 opacity 0→1 + scale 0.9→1 淡入缩放，时长 var(--duration-normal)（250ms），缓动 var(--ease-enter)；关闭时不做退场动画，立即隐藏",
     "zIndex": "var(--z-popover)=300，高于 dropdown(200)，低于 overlay(500)、modal(600)、toast(700)",
     "scrollable": "选项超过 7 个时列表内部纵向滚动，最大高度限制"
   },
   "accessibility": {
     "role": "role=\"menu\" 或 role=\"listbox\"（select 模式）",
     "labelRule": "目标元素的 aria-label 作为可访问名称",
-    "focusTrap": "打开时焦点锁定在菜单内，关闭后返回触发元素",
+    "focusTrap": "不锁定焦点；焦点移至菜单和触发元素以外的页面内容时立即关闭，避免阻断页面操作",
     "textRule": "选项文本单行，超出 max-width 时省略号截断"
   },
   "usageHints": [
@@ -113,6 +127,9 @@
     "action 模式适合'分享/复制/删除'等并列操作；select 模式适合'全部/已处理/未处理'等单选场景",
     "action 模式支持左侧图标配置；启用图标时所有 item 必须都带图标，不允许混用",
     "容器宽度根据最长的 item 内容自适应，不写死宽度；可通过 --popmenu-max-width 覆盖最大宽度上限",
+    "打开时必须以触发元素为锚点：左侧目标优先菜单左缘对齐，右侧目标优先菜单右缘对齐；定位计算必须先尝试下方，再尝试上方，最后才允许左右侧放置，不能把菜单固定在页面坐标",
+    "菜单不可遮挡触发元素；空间不足时宁可不打开并转用其他承载方式，也不能把菜单夹紧后覆盖目标",
+    "页面任意非菜单点击、焦点切换或滚动时立即关闭菜单；关闭不得阻止原页面控件的默认行为或事件处理",
     "选项建议 2-7 个，超过 7 个时考虑使用专门的选择列表页或 actionsheet",
     "与 actionsheet 的区别：actionsheet 是底部弹层（通栏、带取消按钮、slide-up）；popmenu 是紧凑气泡（自适应宽度、无取消按钮、淡入、锚定目标）",
     "与 dialog 的区别：dialog 是居中模态确认弹窗（2-3 按钮轻量确认）；popmenu 是锚定目标的快捷菜单",
@@ -123,6 +140,8 @@
     "不要超过 7 个选项，超过时考虑用专门的选择列表页或 actionsheet",
     "不要写死容器宽度，必须使用 max-content 自适应",
     "不要持久化 popmenu 状态到 localStorage",
+    "不要用大于 4px 的默认锚点间距，也不要只依赖固定 left/top 让菜单脱离触发元素",
+    "不要为了留在视口内而把菜单压到或盖住触发元素；四侧都放不下时不要强行显示",
     "不要给 popmenu 设置自动关闭时长（交互式常驻，需用户操作）",
     "不要在图标模式下混用带图标和不带图标的 item",
     "不要自定义选项颜色，仅允许 default/selected(select 模式)两种状态",
@@ -146,9 +165,7 @@
     "--radius-8",
     "--shadow-lg",
     "--duration-normal",
-    "--duration-fast",
     "--ease-enter",
-    "--ease-exit",
     "--z-popover",
     "--size-16",
     "--size-20",
@@ -163,8 +180,10 @@
     "containerStroke": "var(--stroke-hairline) var(--border-neutral-l2)",
     "containerWidth": "max-content",
     "itemHeight": "48px",
-    "itemPaddingAction": "0 var(--spacer-16)",
-    "itemPaddingActionIcon": "0 var(--spacer-12)",
+    "itemPaddingActionLeft": "var(--spacer-16)",
+    "itemPaddingActionRight": "var(--spacer-16)",
+    "itemPaddingActionIconLeft": "var(--spacer-12)",
+    "itemPaddingActionIconRight": "var(--spacer-16)",
     "itemPaddingSelect": "0 var(--spacer-12)",
     "itemGap": "var(--spacer-8)",
     "itemIconSize": "var(--size-20)",
@@ -178,10 +197,9 @@
     "itemPressedBg": "var(--bg-state-hover)",
     "zIndex": "var(--z-popover)",
     "enterDuration": "var(--duration-normal)",
-    "leaveDuration": "var(--duration-fast)",
     "enterEase": "var(--ease-enter)",
-    "leaveEase": "var(--ease-exit)",
-    "enterScaleStart": "0.96",
+    "anchorGap": "4px",
+    "enterScaleStart": "0.9",
     "enterScaleEnd": "1"
   },
   "cssCustomProperties": [
@@ -194,6 +212,11 @@
       "name": "--popmenu-min-width",
       "default": "120px",
       "appliesTo": "气泡菜单最小宽度，防止短文本时过窄"
+    },
+    {
+      "name": "--popmenu-gap",
+      "default": "4px",
+      "appliesTo": "菜单与触发元素及视口安全边距；定位逻辑读取该值，默认不得改大"
     }
   ],
   "specRefs": [
@@ -204,6 +227,12 @@
     "modifiers": [
       ".popmenu--action",
       ".popmenu--select",
+      "[data-placement=\"bottom\"]",
+      "[data-placement=\"top\"]",
+      "[data-placement=\"right\"]",
+      "[data-placement=\"left\"]",
+      "[data-align=\"start\"]",
+      "[data-align=\"end\"]",
       "[data-state=\"open\"]",
       "[data-state=\"closed\"]"
     ],

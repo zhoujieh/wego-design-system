@@ -18,7 +18,7 @@
 .demo-stage:has(.popmenu) .demo-stage-label {
   color: var(--text-secondary);
 }
-.demo-stage .popmenu {
+.demo-stage .popmenu:not(.popmenu--demo-floating) {
   position: relative;
   inset: auto;
   transform: scale(1);
@@ -27,8 +27,11 @@
   pointer-events: auto;
   z-index: auto;
 }
-.demo-stage .popmenu[data-state="closed"] {
+.demo-stage .popmenu:not(.popmenu--demo-floating)[data-state="closed"] {
   display: none;
+}
+.popmenu--demo-floating {
+  position: fixed !important;
 }
 .demo-trigger-row {
   display: flex;
@@ -79,6 +82,7 @@
 .popmenu{
   --popmenu-max-width: 240px;
   --popmenu-min-width: 120px;
+  --popmenu-gap: 4px;
   box-sizing: border-box;
   position: absolute;
   display: inline-flex;
@@ -93,18 +97,32 @@
   overflow: hidden;
   opacity: 1;
   transform: scale(1);
+  transform-origin: top left;
   visibility: visible;
   transition: opacity var(--duration-normal) var(--ease-enter),
               transform var(--duration-normal) var(--ease-enter);
 }
 .popmenu[data-state="closed"]{
   opacity: 0;
-  transform: scale(0.96);
+  transform: scale(0.9);
   visibility: hidden;
-  transition: opacity var(--duration-fast) var(--ease-exit),
-              transform var(--duration-fast) var(--ease-exit),
-              visibility 0s linear var(--duration-fast);
+  transition: none;
   pointer-events: none;
+}
+.popmenu[data-placement="bottom"][data-align="end"]{
+  transform-origin: top right;
+}
+.popmenu[data-placement="top"][data-align="start"]{
+  transform-origin: bottom left;
+}
+.popmenu[data-placement="top"][data-align="end"]{
+  transform-origin: bottom right;
+}
+.popmenu[data-placement="right"]{
+  transform-origin: center left;
+}
+.popmenu[data-placement="left"]{
+  transform-origin: center right;
 }
 .popmenu__list{
   display: flex;
@@ -128,12 +146,14 @@
 }
 /* action 模式（无图标）：文本左对齐 */
 .popmenu--action .popmenu__item{
-  padding: 0 var(--spacer-16);
+  padding-left: var(--spacer-16);
+  padding-right: var(--spacer-16);
   justify-content: flex-start;
 }
 /* action 模式（带图标）：图标+文本左对齐 */
 .popmenu--action.popmenu--has-icon .popmenu__item{
-  padding: 0 var(--spacer-12);
+  padding-left: var(--spacer-12);
+  padding-right: var(--spacer-16);
   gap: var(--spacer-8);
   justify-content: flex-start;
 }
@@ -434,15 +454,15 @@
 <!-- 交互演示 -->
 <div class="pv-section">
   <div class="pv-section__title">交互演示 Interactive Demo</div>
-  <div class="pv-section__sub">点击按钮弹出气泡菜单，点击选项切换选中，点击外部关闭</div>
+  <div class="pv-section__sub">菜单默认向下展开，空间不够再向上；与触发元素固定间隔 4px，绝不遮挡触发元素</div>
 
   <div class="demo-stage demo-stage--col" style="min-height: 200px; align-items: flex-start;">
     <div class="demo-trigger-row">
       <button class="demo-btn" id="js-trigger-select">筛选（选择模式）</button>
       <button class="demo-btn" id="js-trigger-action">更多操作（带图标）</button>
     </div>
-    <div style="position: relative; width: 100%; min-height: 120px;">
-      <div class="popmenu popmenu--select" role="listbox" data-state="closed" id="js-popmenu-select" style="position: absolute; top: 0; left: 0;">
+    <div style="width: 100%; min-height: 120px;">
+      <div class="popmenu popmenu--select popmenu--demo-floating" role="listbox" data-state="closed" id="js-popmenu-select">
         <div class="popmenu__list">
           <div class="popmenu__item popmenu__item--selected" data-index="0">
             <span class="popmenu__item-text">全部</span>
@@ -458,7 +478,7 @@
           </div>
         </div>
       </div>
-      <div class="popmenu popmenu--action popmenu--has-icon" role="menu" data-state="closed" id="js-popmenu-action" style="position: absolute; top: 0; left: 0;">
+      <div class="popmenu popmenu--action popmenu--has-icon popmenu--demo-floating" role="menu" data-state="closed" id="js-popmenu-action">
         <div class="popmenu__list">
           <div class="popmenu__item">
             <i class="wego-iconfont-s icon-fenxiang popmenu__item-icon"></i>
@@ -484,27 +504,101 @@
   var triggerAction = document.getElementById('js-trigger-action');
   var popmenuSelect = document.getElementById('js-popmenu-select');
   var popmenuAction = document.getElementById('js-popmenu-action');
-
   function closeAll() {
     popmenuSelect.setAttribute('data-state', 'closed');
     popmenuAction.setAttribute('data-state', 'closed');
   }
 
-  function toggle(popmenu) {
+  function measureOpenRect(popmenu) {
+    var previousState = popmenu.getAttribute('data-state');
+    var previousVisibility = popmenu.style.visibility;
+    var previousPointerEvents = popmenu.style.pointerEvents;
+    var previousTransition = popmenu.style.transition;
+    var previousTransform = popmenu.style.transform;
+
+    popmenu.setAttribute('data-state', 'open');
+    popmenu.style.visibility = 'hidden';
+    popmenu.style.pointerEvents = 'none';
+    popmenu.style.transition = 'none';
+    popmenu.style.transform = 'scale(1)';
+
+    var rect = popmenu.getBoundingClientRect();
+
+    popmenu.setAttribute('data-state', previousState || 'closed');
+    popmenu.style.visibility = previousVisibility;
+    popmenu.style.pointerEvents = previousPointerEvents;
+    popmenu.style.transition = previousTransition;
+    popmenu.style.transform = previousTransform;
+
+    return rect;
+  }
+
+  function position(popmenu, trigger) {
+    var triggerRect = trigger.getBoundingClientRect();
+    var gap = parseFloat(getComputedStyle(popmenu).getPropertyValue('--popmenu-gap')) || 4;
+    var viewportWidth = window.innerWidth;
+    var viewportHeight = window.innerHeight;
+    var menuRect = measureOpenRect(popmenu);
+    var align = triggerRect.left + triggerRect.width / 2 > viewportWidth / 2 ? 'end' : 'start';
+    var left = align === 'end' ? triggerRect.right - menuRect.width : triggerRect.left;
+    var canFitWidth = menuRect.width <= viewportWidth - gap * 2;
+
+    if (align === 'start' && left + menuRect.width > viewportWidth - gap) {
+      align = 'end';
+      left = triggerRect.right - menuRect.width;
+    } else if (align === 'end' && left < gap) {
+      align = 'start';
+      left = triggerRect.left;
+    }
+    left = Math.max(gap, Math.min(left, viewportWidth - menuRect.width - gap));
+
+    function place(placement, x, y, nextAlign) {
+      popmenu.setAttribute('data-placement', placement);
+      popmenu.setAttribute('data-align', nextAlign || align);
+      popmenu.style.left = x + 'px';
+      popmenu.style.top = y + 'px';
+      return true;
+    }
+
+    if (canFitWidth && triggerRect.bottom + gap + menuRect.height <= viewportHeight - gap) {
+      return place('bottom', left, triggerRect.bottom + gap, align);
+    }
+    if (canFitWidth && triggerRect.top - gap - menuRect.height >= gap) {
+      return place('top', left, triggerRect.top - gap - menuRect.height, align);
+    }
+
+    var top = Math.max(gap, Math.min(triggerRect.top, viewportHeight - menuRect.height - gap));
+    var preferRight = triggerRect.left + triggerRect.width / 2 <= viewportWidth / 2;
+    if (preferRight && triggerRect.right + gap + menuRect.width <= viewportWidth - gap) {
+      return place('right', triggerRect.right + gap, top, 'start');
+    }
+    if (triggerRect.left - gap - menuRect.width >= gap) {
+      return place('left', triggerRect.left - gap - menuRect.width, top, 'end');
+    }
+    if (triggerRect.right + gap + menuRect.width <= viewportWidth - gap) {
+      return place('right', triggerRect.right + gap, top, 'start');
+    }
+    return false;
+  }
+
+  function toggle(popmenu, trigger) {
     var isOpen = popmenu.getAttribute('data-state') === 'open';
     closeAll();
     if (!isOpen) {
-      popmenu.setAttribute('data-state', 'open');
+      if (!position(popmenu, trigger)) return;
+      requestAnimationFrame(function() {
+        popmenu.setAttribute('data-state', 'open');
+      });
     }
   }
 
   triggerSelect.addEventListener('click', function(e) {
     e.stopPropagation();
-    toggle(popmenuSelect);
+    toggle(popmenuSelect, triggerSelect);
   });
   triggerAction.addEventListener('click', function(e) {
     e.stopPropagation();
-    toggle(popmenuAction);
+    toggle(popmenuAction, triggerAction);
   });
 
   // select 模式：点击切换选中
@@ -527,8 +621,18 @@
     });
   });
 
-  // 点击外部关闭
-  document.addEventListener('click', function() {
+  document.addEventListener('pointerdown', function(e) {
+    if (!e.target.closest('.popmenu') && e.target !== triggerSelect && e.target !== triggerAction) closeAll();
+  }, true);
+
+  document.addEventListener('focusin', function(e) {
+    if (!e.target.closest('.popmenu') && e.target !== triggerSelect && e.target !== triggerAction) closeAll();
+  });
+
+  document.addEventListener('scroll', closeAll, true);
+  window.addEventListener('scroll', closeAll, { passive: true });
+
+  window.addEventListener('resize', function() {
     closeAll();
   });
 })();

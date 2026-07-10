@@ -308,6 +308,48 @@
       },
       "created_at": "2026-07-10T00:00:00.000Z",
       "updated_at": "2026-07-10T00:00:00.000Z"
+    },
+    {
+      "id": "exp-component-variant-branch-sync",
+      "normalized_key": "component-variant-branch-must-sync-contract-preview-and-generated-css-together",
+      "title": "组件变体分支迭代时必须同步覆盖更具体修饰分支",
+      "status": "observing",
+      "occurrence_count": 1,
+      "threshold": 3,
+      "primary_owner": "wego-uxsystem-iterate",
+      "secondary_owners": ["wego-design"],
+      "ownership_reason": "问题最早产生在 wego-uxsystem-iterate 的已注册组件迭代阶段。组件规则修改时，AI 只改了基础分支（如 .popmenu--action .popmenu__item），没有继续检查更具体的修饰分支（如 .popmenu--action.popmenu--has-icon .popmenu__item）和下游生成副本，导致契约、预览、聚合样式和真实渲染多次脱节。这个错误首先发生在设计系统本体迭代步骤，而不是业务消费阶段。",
+      "problem_pattern": "修改组件某个模式的公共规则后，只同步了基础选择器或主结构说明，没有继续核对更具体的修饰分支、交互演示分支、提取后的 components.css 和部署副本。结果是用户看到的真实渲染仍保留旧值，AI 误以为『已经改了』，需要多轮返工才能补齐。",
+      "scene_evidence": [
+        {
+          "date": "2026-07-10",
+          "scene": "popmenu 组件迭代审查",
+          "summary": "用户多次要求调整 PopMenu 操作模式右侧间距、关闭动画和向上展开定位。AI 先修改了 action 基础分支和契约说明，但遗漏了 .popmenu--action.popmenu--has-icon 的更具体分支，导致预览页检查器里仍显示 padding 0 12px；同时多次出现 preview、components.css、wego-app/lib/components.css 未同步到同一状态。最终修复需要回查更具体分支、重跑提取脚本并重新同步副本。",
+          "source": "用户连续指出『预览页没改到』『还是 12px』『向上展开在预览页看还是盖住的』"
+        }
+      ],
+      "applies_when_candidates": [
+        "已注册组件存在基础模式和更具体修饰模式并存，例如基础类 + 修饰类叠加",
+        "本轮修改涉及间距、状态、动画、定位等容易被更具体分支覆盖的规则",
+        "组件修改后需要从 Preview 提取 components.css，并同步到 wego-app/lib 副本"
+      ],
+      "avoid_when_candidates": [
+        "组件只有单一选择器分支，没有更具体修饰类或交互演示分支",
+        "本轮仅改纯文案说明，不涉及 CSS、契约字段或交互脚本",
+        "变更只发生在非设计系统源文件，不触发提取和部署副本同步"
+      ],
+      "expected_rule_target": {
+        "file": ".codex/skills/wego-uxsystem-iterate/references/workflow.md",
+        "field": "已注册组件迭代标准步骤 / 组件迭代特有补充规则"
+      },
+      "runtime_reachability": {
+        "consumer_skill": "wego-uxsystem-iterate 迭代模式",
+        "output_field": "组件迭代时的读取检查清单与完成后同步动作",
+        "downstream_consumer": "wego-design 消费组件契约和 Preview，wego-app/lib 消费提取后的部署副本",
+        "acceptance_check": "组件审查时同时核对契约、Preview 更具体分支、提取后的 components.css 和 wego-app/lib 副本；浏览器检查最终渲染是否仍命中旧分支"
+      },
+      "created_at": "2026-07-10T00:00:00.000Z",
+      "updated_at": "2026-07-10T00:00:00.000Z"
     }
   ]
 }

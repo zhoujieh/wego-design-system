@@ -1524,6 +1524,7 @@
 .popmenu{
   --popmenu-max-width: 240px;
   --popmenu-min-width: 120px;
+  --popmenu-gap: 4px;
   box-sizing: border-box;
   position: absolute;
   display: inline-flex;
@@ -1538,18 +1539,32 @@
   overflow: hidden;
   opacity: 1;
   transform: scale(1);
+  transform-origin: top left;
   visibility: visible;
   transition: opacity var(--duration-normal) var(--ease-enter),
               transform var(--duration-normal) var(--ease-enter);
 }
 .popmenu[data-state="closed"]{
   opacity: 0;
-  transform: scale(0.96);
+  transform: scale(0.9);
   visibility: hidden;
-  transition: opacity var(--duration-fast) var(--ease-exit),
-              transform var(--duration-fast) var(--ease-exit),
-              visibility 0s linear var(--duration-fast);
+  transition: none;
   pointer-events: none;
+}
+.popmenu[data-placement="bottom"][data-align="end"]{
+  transform-origin: top right;
+}
+.popmenu[data-placement="top"][data-align="start"]{
+  transform-origin: bottom left;
+}
+.popmenu[data-placement="top"][data-align="end"]{
+  transform-origin: bottom right;
+}
+.popmenu[data-placement="right"]{
+  transform-origin: center left;
+}
+.popmenu[data-placement="left"]{
+  transform-origin: center right;
 }
 .popmenu__list{
   display: flex;
@@ -1573,12 +1588,14 @@
 }
 /* action 模式（无图标）：文本左对齐 */
 .popmenu--action .popmenu__item{
-  padding: 0 var(--spacer-16);
+  padding-left: var(--spacer-16);
+  padding-right: var(--spacer-16);
   justify-content: flex-start;
 }
 /* action 模式（带图标）：图标+文本左对齐 */
 .popmenu--action.popmenu--has-icon .popmenu__item{
-  padding: 0 var(--spacer-12);
+  padding-left: var(--spacer-12);
+  padding-right: var(--spacer-16);
   gap: var(--spacer-8);
   justify-content: flex-start;
 }
