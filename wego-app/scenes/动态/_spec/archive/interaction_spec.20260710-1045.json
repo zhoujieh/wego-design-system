@@ -7,8 +7,7 @@
       "动态流列表页：工具栏（搜索入口 + 发布入口）",
       "筛选 Tab（全部 / 上新）",
       "动态卡片列表（发布者身份、动态标题、产品九宫格图、产品摘要、产品信息、操作按钮、帮卖按钮）",
-      "帮卖半弹窗：标题+帮助入口、供货价展示、加价比例输入（1%-300%，2位小数）、自动计算我的售价和佣金、快捷加价选项（+30%/+20%/手动输入）、底部说明、保存和分享主按钮",
-      "支持两种帮卖模式：自由定价（标题'加价卖'，可编辑比例）和固定佣金（标题'赚佣金'，只读展示）"
+      "加价卖半弹窗：标题+帮助入口、我的售价输入、实时收益、快捷加价、底部说明、帮卖并分享主按钮"
     ],
     "excluded": [
       "发布产品完整流程（已有独立场景）",
@@ -17,9 +16,7 @@
       "图片搜索识别流程",
       "真实分享流程（本次 stub 提示）",
       "加价卖说明详情页（外链跳转）",
-      "帮卖商品后续管理",
-      "不同 SKU 价格区间处理（本次简化，按单一供货价处理）",
-      "供应商修改佣金规则后的同步处理（本次简化）"
+      "帮卖商品后续管理"
     ]
   },
   "actors": [
@@ -140,17 +137,15 @@
       "node_refs": ["configure-resale-price", "submit-resale"],
       "content_refs": [
         "resale-sheet-header",
-        "resale-supply-price",
         "resale-price-input",
-        "resale-display-price",
-        "resale-display-commission",
+        "resale-earnings",
         "resale-quick-markup",
         "resale-bottom-note",
         "resale-submit-action"
       ],
       "interaction_mode": "edit-then-save",
-      "purpose": "帮卖半弹窗，自由定价模式下设置加价比例并自动计算售价和佣金，固定佣金模式下只读展示；确认后保存并进入分享流程",
-      "states": ["自由定价-初始态", "自由定价-输入中", "自由定价-非法输入", "固定佣金-只读态", "关闭不保存"]
+      "purpose": "加价卖半弹窗，设置帮卖售价并实时查看收益，确认后生成帮卖商品并进入分享流程",
+      "states": ["初始态", "输入中", "非法输入", "关闭不保存"]
     }
   ],
   "content_blocks": [
@@ -236,64 +231,48 @@
     },
     {
       "content_id": "resale-sheet-header",
-      "content": "弹窗标题，自由定价模式显示'加价卖'，固定佣金模式显示'赚佣金'；左侧关闭X，右侧带帮助说明入口(?)",
-      "group": "帮卖弹窗",
+      "content": "加价卖标题，右侧带帮助说明入口(?)，点击跳转加价卖说明外链",
+      "group": "加价卖弹窗",
       "interaction": "action",
       "editable": false,
-      "key_states": ["加价卖标题", "赚佣金标题"]
-    },
-    {
-      "content_id": "resale-supply-price",
-      "content": "供货价展示，显示供应商设置的供货价（如¥100），作为计算基准",
-      "group": "帮卖弹窗",
-      "interaction": "view",
-      "editable": false,
-      "key_states": ["默认展示"]
+      "key_states": ["默认"]
     },
     {
       "content_id": "resale-price-input",
-      "content": "加价比例输入框，自由定价模式下可编辑；自动带入供应商设置的默认加价比例；仅允许输入数字，支持2位小数，后缀显示%；校验范围1%-300%，超出时toast提示；固定佣金模式下隐藏",
-      "group": "帮卖弹窗",
+      "content": "我的售价金额输入框，自动带入商品售价+默认加价金额；仅允许输入整数，带¥符号，不允许为空或不小于商品售价，超出范围提示错误",
+      "group": "加价卖弹窗",
       "interaction": "input",
       "editable": true,
-      "key_states": ["默认填入推荐比例", "输入中", "非法输入错误态", "固定佣金模式下隐藏"]
+      "key_states": ["默认填入推荐价", "输入中", "非法输入错误态"]
     },
     {
-      "content_id": "resale-display-price",
-      "content": "我的售价自动计算展示：供货价 × (1 + 加价比例)，实时随比例输入更新；自由定价和固定佣金模式均显示",
-      "group": "帮卖弹窗",
-      "interaction": "view",
-      "editable": false,
-      "key_states": ["实时更新"]
-    },
-    {
-      "content_id": "resale-display-commission",
-      "content": "佣金自动计算展示：我的售价 - 供货价，实时随比例输入更新；自由定价和固定佣金模式均显示",
-      "group": "帮卖弹窗",
+      "content_id": "resale-earnings",
+      "content": "收益实时展示，收益=我的售价-商品售价，显示为'赚 ¥X'，随售价输入实时更新",
+      "group": "加价卖弹窗",
       "interaction": "view",
       "editable": false,
       "key_states": ["实时更新"]
     },
     {
       "content_id": "resale-quick-markup",
-      "content": "快捷加价区：推荐加价按钮（+30%）和快捷按钮（+20%）水平排列，点击后刷新比例输入框和计算结果；用户可直接在输入框内手动输入比例；固定佣金模式下隐藏",
-      "group": "帮卖弹窗",
+      "content": "快捷加价区：推荐加价(可修改售价赚更多，右侧展示推荐比例如+30%)和快捷按钮(+20%，点击刷新售价和收益)；另含手动输入入口，点击进入自定义输入模式并聚焦价格输入框",
+      "group": "加价卖弹窗",
       "interaction": "select",
       "editable": false,
-      "key_states": ["推荐加价选中", "快捷按钮选中", "固定佣金模式下隐藏"]
+      "key_states": ["推荐加价选中", "快捷按钮选中", "手动输入模式"]
     },
     {
       "content_id": "resale-bottom-note",
       "content": "底部说明文案：帮卖佣金仅自己可见，可放心分享",
-      "group": "帮卖弹窗",
+      "group": "加价卖弹窗",
       "interaction": "view",
       "editable": false,
       "key_states": ["默认"]
     },
     {
       "content_id": "resale-submit-action",
-      "content": "底部主按钮'保存和分享'，点击后保存帮卖配置、生成分享内容并进入分享流程；自由定价模式下非法输入时按钮不可点击，固定佣金模式下始终可点击",
-      "group": "帮卖弹窗",
+      "content": "底部主按钮'帮卖并分享'，点击后保存帮卖售价、生成帮卖商品、生成分享内容并进入分享流程；非法输入时按钮不可点击",
+      "group": "加价卖弹窗",
       "interaction": "action",
       "editable": false,
       "key_states": ["可点击", "禁用(非法输入)", "提交反馈"]
@@ -389,13 +368,13 @@
     {
       "node_id": "configure-resale-price",
       "depth": "functional",
-      "reason": "加价比例输入、自动计算售价和佣金、快捷加价、手动输入均可真实交互；支持自由定价和固定佣金两种模式切换"
+      "reason": "售价输入、实时收益计算、快捷加价、手动输入均可真实交互"
     },
     {
       "node_id": "submit-resale",
       "depth": "stub",
-      "reason": "保存和分享本次只提供入口和反馈，不实现真实分享流程",
-      "feedback": "toast 提示'已保存帮卖配置，进入分享'并关闭弹窗"
+      "reason": "帮卖并分享本次只提供入口和反馈，不实现真实分享流程",
+      "feedback": "toast 提示'已生成帮卖，进入分享'并关闭弹窗"
     }
   ],
   "states": [
@@ -417,17 +396,12 @@
       "reversible": true
     },
     {
-      "assumption": "推荐加价比例固定模拟为+30%，快捷按钮固定+20%；供货价使用模拟数据(如¥100)；默认按供货价+30%计算我的售价",
+      "assumption": "推荐加价比例固定模拟为+30%（对应需求示例商品售价¥20→默认售价¥26），快捷按钮固定+20%；商品售价使用模拟数据(如¥20)",
       "impact_level": "low",
       "reversible": true
     },
     {
-      "assumption": "加价比例校验范围1%-300%，支持2位小数；超出范围时toast提示'佣金比例不能小于1%'或'佣金比例不能大于300%'；已输入2位小数后不能再输入第3位",
-      "impact_level": "low",
-      "reversible": true
-    },
-    {
-      "assumption": "帮卖模式通过数据属性区分：自由定价模式（可编辑比例）和固定佣金模式（只读展示）；默认打开为自由定价模式",
+      "assumption": "售价校验上限取商品售价×10，超出范围提示错误（需求未给出具体上限，取合理值）",
       "impact_level": "low",
       "reversible": true
     },

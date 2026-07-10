@@ -454,13 +454,14 @@
 <!-- 交互演示 -->
 <div class="pv-section">
   <div class="pv-section__title">交互演示 Interactive Demo</div>
-  <div class="pv-section__sub">菜单默认向下展开，空间不够再向上；与触发元素固定间隔 4px，绝不遮挡触发元素</div>
+  <div class="pv-section__sub">菜单默认向下展开，空间不够再向上；与触发元素固定间隔 4px，绝不遮挡触发元素；交互态示例使用顶层 fixed 挂载，避免局部容器裁剪</div>
 
   <div class="demo-stage demo-stage--col" style="min-height: 200px; align-items: flex-start;">
     <div class="demo-trigger-row">
       <button class="demo-btn" id="js-trigger-select">筛选（选择模式）</button>
       <button class="demo-btn" id="js-trigger-action">更多操作（带图标）</button>
     </div>
+    <div class="demo-hint">宿主建议：挂载到 body 或统一 overlay root，避免放进带 overflow / transform 的小容器里。</div>
     <div style="width: 100%; min-height: 120px;">
       <div class="popmenu popmenu--select popmenu--demo-floating" role="listbox" data-state="closed" id="js-popmenu-select">
         <div class="popmenu__list">
@@ -498,6 +499,7 @@
   </div>
 </div>
 
+<script src="popmenu-positioning.js"></script>
 <script>
 (function() {
   var triggerSelect = document.getElementById('js-trigger-select');
@@ -509,83 +511,11 @@
     popmenuAction.setAttribute('data-state', 'closed');
   }
 
-  function measureOpenRect(popmenu) {
-    var previousState = popmenu.getAttribute('data-state');
-    var previousVisibility = popmenu.style.visibility;
-    var previousPointerEvents = popmenu.style.pointerEvents;
-    var previousTransition = popmenu.style.transition;
-    var previousTransform = popmenu.style.transform;
-
-    popmenu.setAttribute('data-state', 'open');
-    popmenu.style.visibility = 'hidden';
-    popmenu.style.pointerEvents = 'none';
-    popmenu.style.transition = 'none';
-    popmenu.style.transform = 'scale(1)';
-
-    var rect = popmenu.getBoundingClientRect();
-
-    popmenu.setAttribute('data-state', previousState || 'closed');
-    popmenu.style.visibility = previousVisibility;
-    popmenu.style.pointerEvents = previousPointerEvents;
-    popmenu.style.transition = previousTransition;
-    popmenu.style.transform = previousTransform;
-
-    return rect;
-  }
-
-  function position(popmenu, trigger) {
-    var triggerRect = trigger.getBoundingClientRect();
-    var gap = parseFloat(getComputedStyle(popmenu).getPropertyValue('--popmenu-gap')) || 4;
-    var viewportWidth = window.innerWidth;
-    var viewportHeight = window.innerHeight;
-    var menuRect = measureOpenRect(popmenu);
-    var align = triggerRect.left + triggerRect.width / 2 > viewportWidth / 2 ? 'end' : 'start';
-    var left = align === 'end' ? triggerRect.right - menuRect.width : triggerRect.left;
-    var canFitWidth = menuRect.width <= viewportWidth - gap * 2;
-
-    if (align === 'start' && left + menuRect.width > viewportWidth - gap) {
-      align = 'end';
-      left = triggerRect.right - menuRect.width;
-    } else if (align === 'end' && left < gap) {
-      align = 'start';
-      left = triggerRect.left;
-    }
-    left = Math.max(gap, Math.min(left, viewportWidth - menuRect.width - gap));
-
-    function place(placement, x, y, nextAlign) {
-      popmenu.setAttribute('data-placement', placement);
-      popmenu.setAttribute('data-align', nextAlign || align);
-      popmenu.style.left = x + 'px';
-      popmenu.style.top = y + 'px';
-      return true;
-    }
-
-    if (canFitWidth && triggerRect.bottom + gap + menuRect.height <= viewportHeight - gap) {
-      return place('bottom', left, triggerRect.bottom + gap, align);
-    }
-    if (canFitWidth && triggerRect.top - gap - menuRect.height >= gap) {
-      return place('top', left, triggerRect.top - gap - menuRect.height, align);
-    }
-
-    var top = Math.max(gap, Math.min(triggerRect.top, viewportHeight - menuRect.height - gap));
-    var preferRight = triggerRect.left + triggerRect.width / 2 <= viewportWidth / 2;
-    if (preferRight && triggerRect.right + gap + menuRect.width <= viewportWidth - gap) {
-      return place('right', triggerRect.right + gap, top, 'start');
-    }
-    if (triggerRect.left - gap - menuRect.width >= gap) {
-      return place('left', triggerRect.left - gap - menuRect.width, top, 'end');
-    }
-    if (triggerRect.right + gap + menuRect.width <= viewportWidth - gap) {
-      return place('right', triggerRect.right + gap, top, 'start');
-    }
-    return false;
-  }
-
   function toggle(popmenu, trigger) {
     var isOpen = popmenu.getAttribute('data-state') === 'open';
     closeAll();
     if (!isOpen) {
-      if (!position(popmenu, trigger)) return;
+      if (!window.WegoPreviewPopmenu.position(popmenu, trigger)) return;
       requestAnimationFrame(function() {
         popmenu.setAttribute('data-state', 'open');
       });

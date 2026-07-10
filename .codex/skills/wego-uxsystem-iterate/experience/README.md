@@ -18,12 +18,14 @@
 ```json
 {
   "schemaVersion": 1,
-  "threshold": 3,
+  "mode": "fast-iteration",
+  "threshold": 1,
+  "standard_threshold": 3,
   "candidates": []
 }
 ```
 
-`threshold` 固定为 `3`。
+当前 `threshold` 为快速迭代阶段生效阈值，默认 `1`；`standard_threshold` 保留标准稳定阶段的 `3` 次门槛。历史 `observing` 候选不因阈值调整批量改为待确认，只有新增或本轮复用更新时才按当前阈值进入确认。
 
 ## 候选字段
 
@@ -34,7 +36,7 @@
 - `title`：抽象后的经验名称。
 - `status`：`observing | awaiting-confirmation | promoted | rejected`。
 - `occurrence_count`：累计出现次数，从 1 开始。
-- `threshold`：固定为 3。
+- `threshold`：候选自身的确认阈值；快速迭代阶段新候选默认 1，标准稳定阶段默认 3。
 - `primary_owner`：`wego-product | wego-design | wego-ux | wego-tests`。
 - `secondary_owners`：次要关联环节数组。
 - `ownership_reason`：为什么问题最初产生在主要归属环节。
@@ -68,8 +70,8 @@
 1. 先按 `normalized_key`、`problem_pattern`、主要归属、预期落点和触发条件判断是否同类。
 2. 业务名称不同但错误模式与未来决策动作相同，必须累计原候选，不得新增。
 3. 同类候选只增加 `occurrence_count` 并追加去重证据。
-4. 新候选初始状态为 `observing`、次数为 1。
-5. 达到第 3 次时改为 `awaiting-confirmation` 并询问用户，不得自动升级。
+4. 新候选次数从 1 开始，并使用当前候选池 `threshold`；若已达到阈值，同轮置为 `awaiting-confirmation`。
+5. 达到候选自身 `threshold` 时改为 `awaiting-confirmation` 并询问用户，不得自动升级。
 6. 用户明确确认且正式规则、运行时链路、回归验证均已落地后，才能改为 `promoted`。
 
 ## 禁止事项
@@ -77,7 +79,7 @@
 - 禁止把普通反馈或 AI 自查自动写入候选池。
 - 禁止一次审查批量记录多条经验。
 - 禁止因业务名不同重复创建同类候选。
-- 禁止在第 3 次出现时直接修改正式规则。
+- 禁止在达到当前阈值时直接修改正式规则。
 - 禁止把候选写入 `scenarioTypeRegistry`。
 - 禁止让业务开发技能读取候选池并影响页面生成。
 - 禁止把 `specs/*.md` 当作候选或正式规则的权威落点。

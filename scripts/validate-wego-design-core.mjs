@@ -509,14 +509,15 @@ function rawColorMatches(css) {
 }
 
 function selectorLikelyPresent(css, selector) {
+  const cssWithoutComments = css.replace(/\/\*[\s\S]*?\*\//g, '');
   if (selector.endsWith('-')) {
-    return css.includes(selector);
+    return cssWithoutComments.includes(selector);
   }
   const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   if (selector.startsWith('.')) {
-    return new RegExp(`(^|[}\\n,\\s])${escaped}(?=[:\\s,{.#>\\[])`).test(css);
+    return new RegExp(`(^|[}\\n,\\s])${escaped}(?=[:\\s,{.#>\\[])`).test(cssWithoutComments);
   }
-  return new RegExp(`(^|[}\\n,\\s])${escaped}(?=[:\\s,{])`).test(css);
+  return new RegExp(`(^|[}\\n,\\s])${escaped}(?=[:\\s,{])`).test(cssWithoutComments);
 }
 
 function usesIconFontMarkup(html) {

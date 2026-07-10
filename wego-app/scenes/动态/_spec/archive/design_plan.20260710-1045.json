@@ -123,9 +123,9 @@
       "layout": "vertical-stack",
       "width": "full",
       "scroll_behavior": "scroll",
-      "component_refs": ["resale-price-input", "resale-display-price", "resale-display-commission"],
+      "component_refs": ["resale-price-input", "resale-earnings"],
       "relation": { "above": "sheet-header", "below": "quick-markup" },
-      "rule_sources": ["interaction_spec.content_blocks[resale-price-input,resale-display-price,resale-display-commission]"]
+      "rule_sources": ["interaction_spec.content_blocks[resale-price-input,resale-earnings]"]
     },
     {
       "region_id": "quick-markup",
@@ -258,13 +258,11 @@
       "matched_page_pattern": null,
       "matched_blueprint": "generic-mobile-task-page",
       "presentation_ref": "sheet",
-      "scene_fit_reason": "帮卖半弹窗是 sheet presentation primitive 承载的二级表单：包含供货价展示、加价比例输入、自动计算售价和佣金、快捷加价和底部主操作；支持自由定价（可编辑）和固定佣金（只读）两种模式；现有 pagePattern 和 fallbackPageBlueprints 无 sheet 表单精确范式，内容组织参考 generic-mobile-task-page 的组件清单（input/button/link），展示方式由 sheet presentation primitive 约束，容器由场景级自写承载；modal 组件待补充，已记为 design_gap",
+      "scene_fit_reason": "加价卖半弹窗是 sheet presentation primitive 承载的二级表单：包含金额输入、实时收益、快捷加价和底部主操作；现有 pagePattern 和 fallbackPageBlueprints 无 sheet 表单精确范式，内容组织参考 generic-mobile-task-page 的组件清单（input/button/link），展示方式由 sheet presentation primitive 约束，容器由场景级自写承载；modal 组件待补充，已记为 design_gap",
       "component_mapping": [
         "resale-sheet-header",
-        "resale-supply-price",
         "resale-price-input",
-        "resale-display-price",
-        "resale-display-commission",
+        "resale-earnings",
         "resale-quick-markup",
         "resale-bottom-note",
         "resale-submit-action"
@@ -273,15 +271,13 @@
         "半弹窗容器类命名空间 .dynamic-resale-sheet__*（场景级业务样式，仅限本场景使用，不注册为通用组件，待 modal 组件上线后替换）",
         "容器：position:fixed; inset:0; 背景 var(--bg-mask-light) 半透明遮罩；面板 var(--bg-surface) 白底 + var(--radius-16) 顶部圆角；z-index var(--z-modal)=600",
         "面板动画：translateY(100%)→0 入场，0→100% 出场；时长 var(--duration-normal)，缓动 var(--ease-enter)/var(--ease-exit)",
-        "sheet 头部：横向布局，左侧关闭 X 用 iconfont icon-guanbi-mian + 页面级业务样式热区承载，中间标题文字（页面级样式，参考 dialog title 18px Medium var(--text-default)），右侧帮助入口 ? 用 link standalone 14px + iconfont icon-bangzhu",
-        "供货价展示区：标签+金额，页面级样式 14px var(--text-secondary) 标签，16px var(--text-default) 金额",
-        "加价比例输入区：纵向布局，标签文字（页面级样式 14px var(--text-secondary)）+ input 组件 number 变体（.number-input + .number-input__field + .number-input__suffix 显示 %）；state 切换 default/focus/error；固定佣金模式下隐藏",
-        "我的售价展示区：标签+自动计算金额，页面级样式；自由定价和固定佣金模式均显示",
-        "佣金展示区：标签+自动计算金额，用 var(--text-brand) 强调；自由定价和固定佣金模式均显示",
-        "快捷加价区：推荐加价卡用页面级业务样式（带选中态边框 var(--border-brand)）+ 右侧 +30% 文字；快捷按钮 +20% 用 button weak sm；手动输入入口用 link standalone 14px；固定佣金模式下隐藏",
+        "sheet 头部：横向布局，左侧标题文字（页面级样式，参考 dialog title 18px Medium var(--text-default)），右侧关闭 X 用 iconfont icon-guanbi-mian + 帮助入口 ? 用 link standalone 14px + iconfont icon-bangzhu",
+        "售价输入区：纵向布局，标签文字（页面级样式 14px var(--text-secondary)）+ input 组件 number 变体（.number-input + .number-input__field + .number-input__suffix 显示 ¥）；state 切换 default/focus/error",
+        "收益反馈：紧邻输入框下方，文案'赚 ¥X'用 var(--text-brand) 强调；非法输入时隐藏收益反馈",
+        "快捷加价区：推荐加价卡用页面级业务样式（带选中态边框 var(--border-brand)）+ 右侧 +30% 文字；快捷按钮 +20% 用 button weak sm；手动输入入口用 link standalone 14px",
         "底部说明：小字 12px var(--text-secondary) 居左",
-        "主按钮区：固定底部，padding 含 var(--safe-area-bottom)；button strong lg 通栏；自由定价模式下非法输入时 .btn--disabled，固定佣金模式下始终可点击",
-        "sheet 内部分组间距 16px；输入区与计算结果间距 8px；快捷加价项之间间距 12px"
+        "主按钮区：固定底部，padding 含 var(--safe-area-bottom)；button strong lg 通栏；非法输入时 .btn--disabled",
+        "sheet 内部分组间距 16px；输入区与收益反馈间距 8px；快捷加价项之间间距 12px"
       ],
       "design_gap": "半弹窗/modal 组件尚未在设计系统中注册；本次按用户确认由场景级自写容器 .dynamic-resale-sheet__* 承载，参考 actionsheet 容器机制（fixed inset:0 + mask + translateY 入场）和 sheet presentationPrimitive 约束。modal 组件上线后应迁移到正式组件，移除场景级容器类。"
     }
@@ -381,55 +377,37 @@
       "block": "resale-sheet-header",
       "scenario_type": "component-consumption-decision",
       "consumption_mode": "free-composition",
-      "selected": "标题文字由页面级业务样式承载（参考 dialog title 18px Medium var(--text-default)），自由定价模式显示'加价卖'，固定佣金模式显示'赚佣金'；右侧帮助入口'?'用 link standalone 14px + iconfont icon-bangzhu 图标；左侧关闭 X 由 iconfont icon-guanbi-mian + 页面级业务样式热区承载",
+      "selected": "标题文字由页面级业务样式承载（参考 dialog title 18px Medium var(--text-default)）；右侧帮助入口'?'用 link standalone 14px + iconfont icon-bangzhu 图标；左侧关闭 X 由 iconfont icon-guanbi-mian + 页面级业务样式热区承载",
       "constraint_ref": {},
-      "reason": "sheet 头部无对应稳定变体；标题根据模式切换、关闭和帮助入口由页面级业务样式组合，图标复用 iconfont；点击帮助入口跳转外链 https://mp.weixin.qq.com/s/H05MjX1OTmng8nXVl3GXrQ",
+      "reason": "sheet 头部无对应稳定变体；标题、关闭和帮助入口由页面级业务样式组合，图标复用 iconfont；点击帮助入口跳转外链 https://mp.weixin.qq.com/s/H05MjX1OTmng8nXVl3GXrQ",
       "rule_sources": ["components/dialog.json.designTokens.titleFont", "components/link.json.variantDimensions", "library-consumption.json.iconUsage.fontClassMode", "interaction_spec.assumptions[加价卖说明入口跳转外链]"]
-    },
-    {
-      "block": "resale-supply-price",
-      "scenario_type": "component-consumption-decision",
-      "consumption_mode": "free-composition",
-      "selected": "页面级业务样式承载供货价展示行：标签'供货价'14px var(--text-secondary) + 金额'¥X' 16px var(--text-default)",
-      "constraint_ref": {},
-      "reason": "供货价是纯文本展示，无对应稳定变体；作为计算基准需要明确展示",
-      "rule_sources": ["uikit-plan.json.fallbackPageBlueprints[object-management-list-page].allowedPageStyles", "interaction_spec.content_blocks[resale-supply-price]"]
     },
     {
       "block": "resale-price-input",
       "scenario_type": "component-consumption-decision",
       "consumption_mode": "stable-variant",
-      "selected": ["fieldType=number", "surface=default", "state=默认填入推荐比例→输入中→非法输入错误态"],
+      "selected": ["fieldType=number", "surface=default", "state=默认填入推荐价→输入中→非法输入错误态"],
       "constraint_ref": {},
-      "reason": "加价比例输入用 input 组件 number 变体（.number-input + .number-input__field + .number-input__suffix），suffix 固定显示 %；自动带入默认加价比例（如+30%）；仅允许数字，支持2位小数；非法输入（空/小于1%/大于300%）触发 is-error 状态；固定佣金模式下隐藏",
-      "rule_sources": ["components/input.json.variantDimensions", "components/input.json.domAnatomy", "components/input.json.behavior.error", "interaction_spec.assumptions[加价比例校验范围1%-300%]"]
+      "reason": "金额输入用 input 组件 number 变体（.number-input + .number-input__field + .number-input__suffix），suffix 固定显示 ¥；自动带入商品售价+默认加价金额（如¥20→¥26）；仅允许整数；非法输入（空/小于商品售价/超出商品售价×10）触发 is-error 状态",
+      "rule_sources": ["components/input.json.variantDimensions", "components/input.json.domAnatomy", "components/input.json.behavior.error", "interaction_spec.assumptions[售价校验上限取商品售价×10]"]
     },
     {
-      "block": "resale-display-price",
+      "block": "resale-earnings",
       "scenario_type": "component-consumption-decision",
       "consumption_mode": "free-composition",
-      "selected": "页面级业务样式承载我的售价展示行：标签'我的售价'14px var(--text-secondary) + 自动计算金额'¥X' 16px var(--text-default)；实时随比例输入更新",
+      "selected": "页面级业务样式承载收益文字行：'赚 ¥X'格式，¥X 用 var(--text-brand) 强调色；非法输入时隐藏收益反馈",
       "constraint_ref": {},
-      "reason": "我的售价是根据比例自动计算的纯文本展示，无对应稳定变体；自由定价和固定佣金模式均显示",
-      "rule_sources": ["uikit-plan.json.fallbackPageBlueprints[object-management-list-page].allowedPageStyles", "interaction_spec.content_blocks[resale-display-price]"]
-    },
-    {
-      "block": "resale-display-commission",
-      "scenario_type": "component-consumption-decision",
-      "consumption_mode": "free-composition",
-      "selected": "页面级业务样式承载佣金展示行：标签'佣金'14px var(--text-secondary) + 自动计算金额'¥X' 16px var(--text-brand) 强调色；实时随比例输入更新",
-      "constraint_ref": {},
-      "reason": "佣金是根据比例自动计算的纯文本展示，无对应稳定变体；用品牌色突出可获得的收益；自由定价和固定佣金模式均显示",
-      "rule_sources": ["uikit-plan.json.fallbackPageBlueprints[object-management-list-page].allowedPageStyles", "interaction_spec.content_blocks[resale-display-commission]"]
+      "reason": "收益是实时计算的纯文本展示，无对应稳定变体；紧邻输入框下方表达因果关系；用品牌色突出可获得的收益",
+      "rule_sources": ["uikit-plan.json.fallbackPageBlueprints[object-management-list-page].allowedPageStyles", "components/input.json.tokensConsumed[--text-default]", "interaction_spec.content_blocks[resale-earnings]"]
     },
     {
       "block": "resale-quick-markup",
       "scenario_type": "component-consumption-decision",
       "consumption_mode": "free-composition",
-      "selected": "快捷加价选项使用 button weak sm 组件水平排列：推荐 +30% 和快捷 +20%；点击后刷新比例输入框和计算结果；固定佣金模式下隐藏；用户可直接在输入框内手动输入，无需额外入口",
+      "selected": "推荐加价卡用页面级业务样式（带选中态边框 var(--border-brand)）承载，含左侧文案'可修改你的售价，赚更多'和右侧 +30% 文字；快捷按钮 +20% 用 button weak sm；手动输入入口用 link standalone 14px；点击快捷按钮或推荐卡刷新输入框和收益，点击手动输入聚焦价格输入框",
       "constraint_ref": {},
-      "reason": "快捷加价区无对应稳定变体或组合约束；使用 button 组件承接快捷选项；输入框已承载手动输入交互，无需额外入口",
-      "rule_sources": ["components/button.json.variantDimensions", "interaction_spec.content_blocks[resale-quick-markup]", "interaction_spec.assumptions[推荐加价比例固定模拟为+30%,快捷按钮固定+20%]"]
+      "reason": "快捷加价区无对应稳定变体或组合约束；推荐加价是带选中态的卡片型选项，快捷按钮是次级操作，手动输入是文字跳转，三种交互形态由页面级业务样式 + button/link 组件组合承接",
+      "rule_sources": ["components/button.json.variantDimensions", "components/link.json.variantDimensions", "interaction_spec.content_blocks[resale-quick-markup]", "interaction_spec.assumptions[推荐加价比例固定模拟为+30%,快捷按钮固定+20%]"]
     },
     {
       "block": "resale-bottom-note",
@@ -444,9 +422,9 @@
       "block": "resale-submit-action",
       "scenario_type": "component-consumption-decision",
       "consumption_mode": "stable-variant",
-      "selected": ["emphasis=strong", "size=lg", "iconMode=text-only", "state=default→disabled(自由定价模式下非法输入)"],
+      "selected": ["emphasis=strong", "size=lg", "iconMode=text-only", "state=default→disabled(非法输入)"],
       "constraint_ref": {},
-      "reason": "底部主按钮'保存和分享'是当前 sheet 唯一核心操作，用 button strong lg；自由定价模式下非法输入时切到 disabled 状态禁用提交，固定佣金模式下始终可点击；本次为 stub 反馈，点击后调用 WegoApp.toast('已保存帮卖配置，进入分享')并关闭 sheet",
+      "reason": "底部主按钮'帮卖并分享'是当前 sheet 唯一核心操作，用 button strong lg；非法输入时切到 disabled 状态禁用提交；本次为 stub 反馈，点击后调用 WegoApp.toast('已生成帮卖，进入分享')并关闭 sheet",
       "rule_sources": ["components/button.json.variantDimensions", "components/button.json.behavior.primaryRule", "components/button.json.domAnatomy.stateClasses", "interaction_spec.prototype_boundaries[submit-resale].feedback"]
     }
   ],
@@ -484,15 +462,15 @@
     "动态卡片之间的分割线为 0.5px，左侧对齐右侧内容起始处（左 padding 16px + 头像 40px + gap 12px），右侧贴屏幕边缘；375px 断点 left 改为 12px+40px+8px",
     "操作按钮区使用 link 组件 standalone + 12px 变体；帮卖按钮为操作行最后一项，与既有按钮同变体，不得使用未登记变体或自定义 min-height 覆盖 link 热区",
     "九宫格单格必须使用 image 组件圆角变体；gallery 网格容器（3 列等分，gap 4px，单格 aspect-ratio 1）属于页面级业务样式",
-    "帮卖半弹窗容器类命名空间 .dynamic-resale-sheet__* 仅限本场景使用，不注册为通用组件；modal 组件上线后必须迁移到正式组件并移除场景级容器类",
+    "加价卖半弹窗容器类命名空间 .dynamic-resale-sheet__* 仅限本场景使用，不注册为通用组件；modal 组件上线后必须迁移到正式组件并移除场景级容器类",
     "半弹窗容器：position:fixed; inset:0; 背景 var(--bg-mask-light)；面板 var(--bg-surface) + var(--radius-16) 顶部圆角；z-index var(--z-modal)=600；动画 translateY(100%)→0 入场，反向出场，时长 var(--duration-normal)，缓动 var(--ease-enter)/var(--ease-exit)",
     "关闭方式：左上角 X（iconfont icon-guanbi-mian + 页面级业务样式热区）+ 点击遮罩关闭（业务明确要求，由场景级 JS 在 sheet overlay 上接管 click 并显式判断 e.target===overlay 后关闭）；关闭后不保存未确认修改，再次进入重新填入默认推荐价",
-    "加价比例输入框必须使用 input 组件 number 变体（.number-input + .number-input__field + .number-input__suffix），suffix 固定显示 %；仅允许数字，支持2位小数；非法输入（空/小于1%/大于300%）触发根节点 .is-error 状态，错误提示用 .field-error 单行省略；固定佣金模式下隐藏",
-    "我的售价和佣金为自动计算展示：售价=供货价×(1+比例)，佣金=售价-供货价；自由定价和固定佣金模式均显示",
-    "快捷加价区：推荐加价卡用页面级业务样式带选中态边框 var(--border-brand)；快捷按钮 +20% 用 button weak sm；手动输入入口用 link standalone 14px；点击后实时刷新比例和计算结果；固定佣金模式下隐藏",
-    "底部主按钮'保存和分享'用 button strong lg 通栏；自由定价模式下非法输入时切 .btn--disabled 禁用提交，固定佣金模式下始终可点击；本次 stub 反馈：点击后调用 WegoApp.toast('已保存帮卖配置，进入分享') 并关闭 sheet",
+    "售价输入框必须使用 input 组件 number 变体（.number-input + .number-input__field + .number-input__suffix），suffix 固定显示 ¥；仅允许整数；非法输入（空/小于商品售价/超出商品售价×10）触发根节点 .is-error 状态，错误提示用 .field-error 单行省略",
+    "收益反馈文字'赚 ¥X'用 var(--text-brand) 强调色；非法输入时隐藏收益反馈",
+    "快捷加价区：推荐加价卡用页面级业务样式带选中态边框 var(--border-brand)；快捷按钮 +20% 用 button weak sm；手动输入入口用 link standalone 14px；点击后实时刷新输入框和收益",
+    "底部主按钮'帮卖并分享'用 button strong lg 通栏；非法输入时切 .btn--disabled 禁用提交；本次 stub 反馈：点击后调用 WegoApp.toast('已生成帮卖，进入分享') 并关闭 sheet",
     "帮助入口'?'点击跳转外链 https://mp.weixin.qq.com/s/H05MjX1OTmng8nXVl3GXrQ（用 window.open 或 location.href，不在原型内实现说明详情页）",
-    "推荐加价比例固定模拟为 +30%，快捷按钮固定 +20%；供货价使用模拟数据（如 ¥100）；默认按供货价+30%计算我的售价",
+    "推荐加价比例固定模拟为 +30%（对应需求示例 ¥20→¥26），快捷按钮固定 +20%；商品售价使用模拟数据（如 ¥20）",
     "禁止使用 inline style 控制颜色/间距，必须用 Token",
     "禁止发明未注册组件类或修饰类（半弹窗容器类 .dynamic-resale-sheet__* 是场景级业务样式例外，已在 design_gap 标注待替换）"
   ]

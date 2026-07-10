@@ -375,6 +375,8 @@ node scripts/validate-wego-design.mjs
 node scripts/validate-wego-design.mjs --scope=full --strict
 ```
 
+启动本地验证服务器做布局验证前，必须遵守 [AGENTS.md](../AGENTS.md) 的"Git 与验证"小节：使用 `timeout` / `trap kill` / `EXIT trap` / `pgrep cleanup` 等包装避免进程残留，任务前后用 `lsof -iTCP -sTCP:LISTEN -P | grep python` 确认无残留 http.server。
+
 随后交给 `wego-tests`，并提供：
 
 - App 入口、场景目录和 `prototype_target.routes[]`（或旧 `route_id`）。

@@ -1,0 +1,226 @@
+{
+  "schemaVersion": 3,
+  "slug": "tabs",
+  "name": "标签栏",
+  "category": "navigation",
+  "status": "stable",
+  "sourceKind": "provided",
+  "confidence": "high",
+  "description": "顶部或内容分区标签栏，用于在同一页面层级内切换内容分类。",
+  "semanticTypeCandidates": [
+    "tabs",
+    "category-tabs",
+    "section-tabs"
+  ],
+  "variantDimensions": {
+    "size": [
+      "standard",
+      "mini"
+    ],
+    "layout": [
+      "divide",
+      "scroll"
+    ],
+    "icon": [
+      "none",
+      "left",
+      "right"
+    ],
+    "state": [
+      "default",
+      "pressed",
+      "focus-visible"
+    ]
+  },
+  "representativeVariants": [
+    {
+      "size": "standard",
+      "layout": "divide",
+      "icon": "none"
+    },
+    {
+      "size": "standard",
+      "layout": "scroll",
+      "icon": "none"
+    },
+    {
+      "size": "mini",
+      "layout": "scroll",
+      "icon": "none"
+    },
+    {
+      "size": "mini",
+      "layout": "scroll",
+      "icon": "left"
+    },
+    {
+      "size": "standard",
+      "layout": "divide",
+      "icon": "left"
+    },
+    {
+      "size": "standard",
+      "layout": "scroll",
+      "icon": "right"
+    }
+  ],
+  "anatomy": [
+    {
+      "name": "root",
+      "selector": ".wg-tabs",
+      "role": "标签栏容器"
+    },
+    {
+      "name": "scroll",
+      "selector": ".wg-tabs__scroll",
+      "role": "横向标签承载层"
+    },
+    {
+      "name": "item",
+      "selector": ".wg-tabs__item",
+      "role": "单个标签按钮"
+    },
+    {
+      "name": "content",
+      "selector": ".wg-tabs__content",
+      "role": "标签内容对齐容器"
+    },
+    {
+      "name": "label",
+      "selector": ".wg-tabs__label",
+      "role": "标签文案"
+    },
+    {
+      "name": "icon",
+      "selector": ".wg-tabs__icon",
+      "role": "可选标签图标"
+    },
+    {
+      "name": "activeIndicator",
+      "selector": ".wg-tabs__active-indicator",
+      "role": "当前选中标签的底部指示条"
+    }
+  ],
+  "structurePatterns": [
+    "根节点固定使用 .wg-tabs，并同时添加尺寸修饰类 .wg-tabs--standard 或 .wg-tabs--mini。",
+    "布局固定使用 .wg-tabs--divide 或 .wg-tabs--scroll；divide 适合 2-5 个短标签均分，scroll 适合 6 个以上标签或强制横向滚动。",
+    "每个标签必须使用 button.wg-tabs__item[role='tab']，选中态只通过 aria-selected='true' 表达。",
+    "每个 item 内必须保留 .wg-tabs__content，活动指示条依赖该内容容器计算文本或图标组合的宽度与位置。",
+    "每组 tabs 只能有一个 .wg-tabs__active-indicator，并放在 .wg-tabs__scroll 内，与所有 item 同级。",
+    "mini 尺寸默认用于 scroll 布局；首个 mini item 可加 .wg-tabs__item--first 保持左侧起始留白。"
+  ],
+  "behavior": {
+    "selection": "点击标签时，宿主把当前 item 的 aria-selected 设为 true，并把同组其他 item 设为 false。",
+    "indicator": "切换后按选中项 .wg-tabs__content 的 x 坐标和宽度更新 --_tabs-indicator-x 与 --_tabs-indicator-width。",
+    "scroll": "scroll 布局可横向滚动，选中项应滚动到可视区域中间附近。"
+  },
+  "accessibility": {
+    "role": "根节点使用 role='tablist'，item 使用 role='tab'。",
+    "selectedState": "当前标签必须使用 aria-selected='true'，未选标签使用 aria-selected='false'。",
+    "keyboardRule": "宿主若实现键盘切换，应同步更新 aria-selected 与活动指示条。"
+  },
+  "usageHints": [
+    "standard 尺寸：item 高 56px，label 使用 16px，indicator 高 3px。",
+    "mini 尺寸：item 高 48px，label 使用 14px，indicator 高 2px。",
+    "选中态文字和图标使用 --text-default，未选态使用 --text-secondary，指示条固定使用 --bg-brand。",
+    "图标只使用 .wg-tabs__icon，放在 label 左侧或右侧，颜色跟随当前标签状态。",
+    "左侧图标尺寸随 tabs 尺寸变化：standard 为 20px，mini 为 16px。",
+    "右侧箭头尺寸随 tabs 尺寸变化：standard 为 16px，mini 为 12px。",
+    "icon-right 场景默认只在选中的 tab 上显示右侧箭头；未选中项不显示箭头。",
+    "icon-right 场景箭头与文字间距为 0；该规则只作用于右箭头与文本的组合，不影响 icon-left 场景图标与文字的 4px 间距。",
+    "icon-right 呼出的 popmenu 层级使用 --z-popover，必须挂载到页面顶层浮层容器，避免被局部 overflow 裁剪。",
+    "右侧箭头可作为下拉筛选入口：第一次点击未选中项只切换选中态，已选中后再次点击才打开锚定当前 tab 的 popmenu。",
+    "pressed 状态只降低 opacity，不添加背景色变化。",
+    "根元素背景固定为 --bg-surface，不随页面背景变化。",
+    "标签文案单行截断，standard 最多约 4 个 16px 字宽，mini 最多约 4 个 14px 字宽。",
+    "需要页面主 Tab 时优先使用 bottom-nav；需要方块式选项选择时使用 stack；需要同页内容分类切换时使用 tabs。"
+  ],
+  "doNotInvent": [
+    "不要自创标签尺寸，只能使用 standard 或 mini。",
+    "不要自创布局方式，只能使用 divide 或 scroll。",
+    "不要用 class 表达选中态，选中态只能通过 aria-selected='true' 表达。",
+    "不要给每个 tab 各放一个 indicator；每组 tabs 只能共用一个 .wg-tabs__active-indicator。",
+    "不要省略 .wg-tabs__content。",
+    "不要修改指示条颜色、高度或圆角。",
+    "不要给 pressed 状态添加背景色。",
+    "不要在 scroll 模式下给 item 设置固定宽度。",
+    "不要修改 label 的单行截断策略。",
+    "不要为了右箭头贴近文字而改变 icon-left 场景的图标与文字间距。",
+    "不要把 tabs 当作底部主导航或方块选择项使用。"
+  ],
+  "tokensConsumed": [
+    "--bg-surface",
+    "--bg-brand",
+    "--text-default",
+    "--text-secondary",
+    "--border-brand",
+    "--body-md-font-size",
+    "--body-md-line-height",
+    "--body-lg-font-size",
+    "--body-lg-line-height",
+    "--font-weight-medium",
+    "--radius-0",
+    "--spacer-0",
+    "--spacer-2",
+    "--spacer-4",
+    "--spacer-8",
+    "--spacer-16",
+    "--size-12",
+    "--size-16",
+    "--size-48",
+    "--size-56",
+    "--duration-fast",
+    "--duration-normal",
+    "--ease-standard",
+    "--ease-emphasized"
+  ],
+  "designTokens": {
+    "standardHeight": "var(--size-56)",
+    "miniHeight": "var(--size-48)",
+    "standardLabel": "var(--body-lg-font-size) / var(--body-lg-line-height) / var(--font-weight-medium)",
+    "miniLabel": "var(--body-md-font-size) / var(--body-md-line-height) / var(--font-weight-medium)",
+    "indicator": "standard 3px, mini 2px, background var(--bg-brand), radius var(--radius-0)",
+    "iconSize": "icon-left: standard 20px, mini 16px; icon-right arrow: standard 16px, mini 12px",
+    "indicatorRuntimeVars": "--_tabs-indicator-x 默认 var(--spacer-0)，--_tabs-indicator-width 默认 0，由脚本按选中项内容位置更新",
+    "transition": "var(--duration-normal) / var(--ease-emphasized)"
+  },
+  "specRefs": [
+    "specs/交互设计原则.md",
+    "specs/布局与间距规范.md"
+  ],
+  "domAnatomy": {
+    "root": ".wg-tabs",
+    "requiredChildren": [
+      ".wg-tabs__scroll",
+      ".wg-tabs__scroll .wg-tabs__item",
+      ".wg-tabs__item .wg-tabs__content",
+      ".wg-tabs__content .wg-tabs__label",
+      ".wg-tabs__scroll > .wg-tabs__active-indicator"
+    ],
+    "optionalChildren": [
+      ".wg-tabs__content .wg-tabs__icon"
+    ],
+    "modifiers": [
+      ".wg-tabs--standard",
+      ".wg-tabs--mini",
+      ".wg-tabs--divide",
+      ".wg-tabs--scroll",
+      ".wg-tabs--icon-left",
+      ".wg-tabs--icon-right"
+    ],
+    "stateAttributes": [
+      ".wg-tabs__item[aria-selected='true']",
+      ".wg-tabs__item[aria-selected='false']"
+    ],
+    "stateClasses": [
+      ".wg-tabs__item--first"
+    ]
+  },
+  "provenance": {
+    "preview": "preview/component-tabs.html",
+    "cssSource": "preview/component-tabs.html",
+    "embedded": false,
+    "hostComponent": null
+  },
+  "unknowns": []
+}

@@ -57,6 +57,13 @@
       "preview": "preview/component-input.html"
     },
     {
+      "slug": "search",
+      "name": "搜索框",
+      "category": "form",
+      "status": "stable",
+      "preview": "preview/component-search.html"
+    },
+    {
       "slug": "counter",
       "name": "计数器",
       "category": "form",
@@ -118,6 +125,13 @@
       "category": "navigation",
       "status": "stable",
       "preview": "preview/component-stack.html"
+    },
+    {
+      "slug": "tabs",
+      "name": "标签栏",
+      "category": "navigation",
+      "status": "stable",
+      "preview": "preview/component-tabs.html"
     },
     {
       "slug": "switch",

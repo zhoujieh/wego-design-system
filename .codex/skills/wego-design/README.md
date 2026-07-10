@@ -49,7 +49,7 @@
 
 组件清单以 `components/index.json` 为唯一注册表。当前包括：
 
-`button`、`card`、`avatar`、`tag`、`bottom-nav`、`input`、`counter`、`badge`、`cell`、`checkbox`、`form`、`image`、`link`、`radio`、`stack`、`switch`、`navbar`、`toast`、`dialog`、`actionsheet`、`modal`、`popmenu`。
+`button`、`card`、`avatar`、`tag`、`bottom-nav`、`input`、`search`、`counter`、`badge`、`cell`、`checkbox`、`form`、`image`、`link`、`radio`、`stack`、`tabs`、`switch`、`navbar`、`toast`、`dialog`、`actionsheet`、`modal`、`popmenu`。
 
 ## 当前 UI Kit
 

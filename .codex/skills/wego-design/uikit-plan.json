@@ -74,11 +74,19 @@
       "slot": "input"
     },
     {
+      "slug": "search",
+      "reason": "文搜、图搜、覆盖式搜索结果、导航栏搜索和页面内部筛选工具栏。",
+      "evidenceFile": "components/search.json",
+      "previewFile": "preview/component-search.html",
+      "priority": 8,
+      "slot": "search"
+    },
+    {
       "slug": "counter",
       "reason": "商品详情和购物车数量增减。",
       "evidenceFile": "components/counter.json",
       "previewFile": "preview/component-counter.html",
-      "priority": 8,
+      "priority": 9,
       "slot": "quantity-stepper"
     },
     {
@@ -86,7 +94,7 @@
       "reason": "筛选、状态和业务标签。",
       "evidenceFile": "components/tag.json",
       "previewFile": "preview/component-tag.html",
-      "priority": 9,
+      "priority": 10,
       "slot": "tag-filter"
     },
     {
@@ -94,7 +102,7 @@
       "reason": "未读、促销、提醒和角标。",
       "evidenceFile": "components/badge.json",
       "previewFile": "preview/component-badge.html",
-      "priority": 10,
+      "priority": 11,
       "slot": "badge"
     },
     {
@@ -102,7 +110,7 @@
       "reason": "用户资料和成员信息。",
       "evidenceFile": "components/avatar.json",
       "previewFile": "preview/component-avatar.html",
-      "priority": 11,
+      "priority": 12,
       "slot": "identity"
     },
     {
@@ -110,7 +118,7 @@
       "reason": "商品图、头像图和加载失败状态。",
       "evidenceFile": "components/image.json",
       "previewFile": "preview/component-image.html",
-      "priority": 12,
+      "priority": 13,
       "slot": "media"
     },
     {
@@ -118,7 +126,7 @@
       "reason": "设置页布尔开关。",
       "evidenceFile": "components/switch.json",
       "previewFile": "preview/component-switch.html",
-      "priority": 13,
+      "priority": 14,
       "slot": "boolean-toggle"
     },
     {
@@ -126,7 +134,7 @@
       "reason": "多选、权限项和半选状态。",
       "evidenceFile": "components/checkbox.json",
       "previewFile": "preview/component-checkbox.html",
-      "priority": 14,
+      "priority": 15,
       "slot": "multi-select"
     },
     {
@@ -134,7 +142,7 @@
       "reason": "互斥选择。",
       "evidenceFile": "components/radio.json",
       "previewFile": "preview/component-radio.html",
-      "priority": 15,
+      "priority": 16,
       "slot": "single-select"
     },
     {
@@ -142,7 +150,7 @@
       "reason": "文字跳转和内联操作。",
       "evidenceFile": "components/link.json",
       "previewFile": "preview/component-link.html",
-      "priority": 16,
+      "priority": 17,
       "slot": "text-action"
     },
     {
@@ -150,15 +158,23 @@
       "reason": "方块式选项卡和选择项。",
       "evidenceFile": "components/stack.json",
       "previewFile": "preview/component-stack.html",
-      "priority": 17,
+      "priority": 18,
       "slot": "option-stack"
+    },
+    {
+      "slug": "tabs",
+      "reason": "顶部或内容分区标签栏，用于同页内容分类切换。",
+      "evidenceFile": "components/tabs.json",
+      "previewFile": "preview/component-tabs.html",
+      "priority": 19,
+      "slot": "section-tabs"
     },
     {
       "slug": "dialog",
       "reason": "居中模态确认弹窗，用于确认操作、风险提示、重要信息告知和快速单行输入新建。",
       "evidenceFile": "components/dialog.json",
       "previewFile": "preview/component-dialog.html",
-      "priority": 18,
+      "priority": 20,
       "slot": "confirmation-overlay"
     },
     {
@@ -166,7 +182,7 @@
       "reason": "底部弹层操作表单，用于 3+ 并列操作或单选切换场景。",
       "evidenceFile": "components/actionsheet.json",
       "previewFile": "preview/component-actionsheet.html",
-      "priority": 19,
+      "priority": 21,
       "slot": "bottom-action-sheet"
     },
     {
@@ -174,7 +190,7 @@
       "reason": "底部模态框，三段式结构（title/body/action），title 分 info（大标题+辅助说明）和 default（NavBar 风格），action 支持双按钮/单按钮/竖向按钮+链接/取消栏/无操作区，支持 frame（自适应）、frame-x（70vh 可拖拽）、fullscreen（全屏）三种变体，以及二级嵌套 push（最多 3 层）。",
       "evidenceFile": "components/modal.json",
       "previewFile": "preview/component-modal.html",
-      "priority": 20,
+      "priority": 22,
       "slot": "bottom-modal-frame"
     }
   ],
@@ -185,6 +201,7 @@
     "tag",
     "bottom-nav",
     "input",
+    "search",
     "counter",
     "badge",
     "cell",
@@ -194,6 +211,7 @@
     "link",
     "radio",
     "stack",
+    "tabs",
     "switch",
     "navbar",
     "toast",
@@ -206,6 +224,7 @@
       "name": "首页/商品流",
       "componentSlugs": [
         "bottom-nav",
+        "search",
         "tag",
         "card",
         "badge",
@@ -660,6 +679,7 @@
       ],
       "allowedComponents": [
         "navbar",
+        "search",
         "card",
         "image",
         "tag",
@@ -713,6 +733,7 @@
       ],
       "allowedComponents": [
         "navbar",
+        "search",
         "form",
         "cell",
         "input",

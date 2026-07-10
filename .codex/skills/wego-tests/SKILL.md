@@ -343,6 +343,8 @@ node scripts/validate-wego-design.mjs --scope=full --strict
 node scripts/sync-wego-app-lib.mjs --check
 ```
 
+启动本地验证服务器做验收前，必须遵守 [AGENTS.md](../../AGENTS.md) 的"Git 与验证"小节：使用 `timeout` / `trap kill` / `EXIT trap` / `pgrep cleanup` 等包装避免进程残留，验收前后用 `lsof -iTCP -sTCP:LISTEN -P | grep python` 确认无残留 http.server。
+
 把实际命令、退出码、错误、warning 和关键发现写入 `automated_checks`。不得把未执行命令写成通过。
 
 ## 硬门禁与人工验收

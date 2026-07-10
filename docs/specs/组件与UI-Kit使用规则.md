@@ -10,7 +10,7 @@
 
 ### 组件与 UI Kit 总览
 
-- 当前稳定组件包括：按钮、卡片、头像、标签、底部导航、输入框、计数器、角标、列表单元格、复选框、表单容器、图片、链接、单选、选项卡、开关、导航栏、提示、对话框、底部操作表单、底部模态框、气泡菜单。
+- 当前稳定组件包括：按钮、卡片、头像、标签、底部导航、输入框、搜索框、计数器、角标、列表单元格、复选框、表单容器、图片、链接、单选、选项卡、标签栏、开关、导航栏、提示、对话框、底部操作表单、底部模态框、气泡菜单。
 - 当前页面示例包括：业务规则配置、系统设置。
 - 先看组件契约和真实示例，再决定结构、状态和组合。
 - 页面示例只用于理解骨架、节奏和固定位置，业务内容必须按当前需求重新组织。
@@ -68,7 +68,7 @@
 - 列表项包含对象识别物、名称、关键状态、摘要和至少一个操作
 - 现有 UI Kit/pagePattern 无精确范式，但可由已注册组件和页面级业务样式安全组成
 
-- **允许组件：**navbar、card、image、tag、button、link、dialog、toast
+- **允许组件：**navbar、search、card、image、tag、button、link、dialog、toast
 
 #### 通用移动任务页（generic-mobile-task-page）
 
@@ -77,7 +77,7 @@
 - 现有 UI Kit/pagePattern 无精确范式
 - 任务可由已注册组件、section 分组和规范约束完成
 
-- **允许组件：**navbar、form、cell、input、button、tag、link、switch、radio、checkbox
+- **允许组件：**navbar、search、form、cell、input、button、tag、link、switch、radio、checkbox
 
 #### 二级选择列表页（selection-list-page）
 
@@ -171,4 +171,4 @@
 组件已在注册表中存在，结构与状态符合契约，页面示例只用于结构参考，设计系统源文件与部署副本保持一致。
 
 <!-- generated-by: scripts/specs.mjs@5 -->
-<!-- source-fingerprint: 05429a3c802e203ea8863404e45b99ebbc02a6573df09d68bd825b1195042eae -->
+<!-- source-fingerprint: a94220e8a69c17b1b55610c861979876ab242ee2286b446d93e946fd5be66f8e -->

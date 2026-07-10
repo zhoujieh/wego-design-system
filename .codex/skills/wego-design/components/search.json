@@ -1,0 +1,324 @@
+{
+  "schemaVersion": 3,
+  "slug": "search",
+  "name": "搜索框",
+  "category": "form",
+  "status": "stable",
+  "sourceKind": "figma-and-kuikly",
+  "confidence": "high",
+  "description": "移动端搜索输入组件，由左侧搜索图标、中间输入内容区和右侧内部操作区组成，支持文搜、图搜、清除、选图、扫码，以及导航栏和页面内部的搜索组合范式。",
+  "semanticTypeCandidates": [
+    "search-input",
+    "image-search",
+    "search-toolbar",
+    "navbar-search"
+  ],
+  "variantDimensions": {
+    "size": [
+      "md",
+      "sm"
+    ],
+    "surface": [
+      "gray",
+      "white",
+      "transparent-dark-host",
+      "accent-outline"
+    ],
+    "mode": [
+      "text",
+      "image-single",
+      "image-multiple"
+    ],
+    "state": [
+      "empty",
+      "inputting",
+      "result"
+    ],
+    "internalActions": [
+      "clear",
+      "select-image",
+      "scan"
+    ],
+    "hostPattern": [
+      "inline",
+      "search-overlay-cancel",
+      "navbar-search-back",
+      "content-search-filter",
+      "navbar-title-accent-search"
+    ]
+  },
+  "representativeVariants": [
+    {
+      "size": "md",
+      "surface": "gray",
+      "mode": "text",
+      "state": "empty",
+      "hostPattern": "inline"
+    },
+    {
+      "size": "md",
+      "surface": "white",
+      "mode": "text",
+      "state": "result",
+      "internalActions": "clear select-image",
+      "hostPattern": "inline"
+    },
+    {
+      "size": "sm",
+      "surface": "gray",
+      "mode": "image-multiple",
+      "state": "result",
+      "hostPattern": "content-search-filter"
+    },
+    {
+      "size": "md",
+      "surface": "white",
+      "mode": "text",
+      "state": "inputting",
+      "hostPattern": "search-overlay-cancel"
+    },
+    {
+      "size": "md",
+      "surface": "gray",
+      "mode": "text",
+      "state": "empty",
+      "hostPattern": "navbar-search-back"
+    },
+    {
+      "size": "md",
+      "surface": "accent-outline",
+      "mode": "text",
+      "state": "empty",
+      "hostPattern": "navbar-title-accent-search"
+    },
+    {
+      "size": "md",
+      "surface": "transparent-dark-host",
+      "mode": "image-single",
+      "state": "result",
+      "hostPattern": "inline"
+    }
+  ],
+  "anatomy": [
+    {
+      "name": "root",
+      "selector": ".searchbox",
+      "role": "基础搜索框根节点，宽度默认 100% 并随父容器自适应"
+    },
+    {
+      "name": "leftIcon",
+      "selector": ".searchbox__icon",
+      "role": "左侧搜索图标区"
+    },
+    {
+      "name": "inputArea",
+      "selector": ".searchbox__input",
+      "role": "中间输入、占位、关键词、单图或多图搜索内容区，必须 flex: 1 且 min-width: 0"
+    },
+    {
+      "name": "field",
+      "selector": ".searchbox__field",
+      "role": "文本输入控件，透明背景、无边框"
+    },
+    {
+      "name": "placeholder",
+      "selector": ".searchbox__placeholder",
+      "role": "静态占位文本"
+    },
+    {
+      "name": "keyword",
+      "selector": ".searchbox__keyword",
+      "role": "文本搜索关键词"
+    },
+    {
+      "name": "imageToken",
+      "selector": ".searchbox__image-token",
+      "role": "图搜关键词，承载单图缩略图或多图胶囊"
+    },
+    {
+      "name": "actions",
+      "selector": ".searchbox__actions",
+      "role": "搜索框内部动作区，只放清除、选图和扫码"
+    },
+    {
+      "name": "overlayBar",
+      "selector": ".search-overlay-bar",
+      "role": "覆盖式搜索结果态宿主栏，右侧取消用于关闭搜索态"
+    },
+    {
+      "name": "navBar",
+      "selector": ".search-nav-bar",
+      "role": "导航栏搜索宿主，左侧固定返回，右侧为可配置业务操作槽"
+    },
+    {
+      "name": "toolbar",
+      "selector": ".search-toolbar",
+      "role": "页面内部搜索工具栏，右侧为筛选或其他业务操作槽"
+    },
+    {
+      "name": "titleBar",
+      "selector": ".search-title-bar",
+      "role": "导航标题区强调搜索宿主"
+    }
+  ],
+  "structurePatterns": [
+    "基础搜索框始终使用 .searchbox > .searchbox__icon + .searchbox__input + .searchbox__actions 三段式结构。",
+    ".searchbox__actions 只承载搜索框内部动作，包括清除、选图和扫码；筛选、搜索、发布、更多等业务操作必须放在外层 host pattern 的 actions 槽。",
+    "36 高度为默认尺寸，根节点宽度不得写死 Figma 示例宽度，必须使用 width: 100% 或作为 flex 子项占满父容器剩余空间。",
+    "32 高度用于页面局部嵌入，可由宿主容器或 --searchbox-width 自定义宽度。",
+    "图搜是可配置能力：宿主可关闭图片按钮，可传入图片列表；单图用 24x24 缩略图，多图用图片 + 共 N 张胶囊表达。",
+    "有图搜且业务开启 autoHidePlaceHolder 时，图片列表非空后可隐藏 placeholder；图片列表清空后恢复。",
+    "search-overlay-cancel 只用于点击搜索框后出现接近全屏搜索结果层的覆盖式搜索态，右侧取消用于关闭搜索态，不泛化到所有页面局部搜索。",
+    "navbar-search-back 用于导航栏搜索场景，左侧返回固定，右侧动作可配置，不强制绑定搜索文案。",
+    "content-search-filter 用于页面内部工具栏，允许右侧筛选或业务操作槽，不出现返回按钮。",
+    "navbar-title-accent-search 用于导航标题区特别强调搜索入口，使用绿色描边胶囊。"
+  ],
+  "behavior": {
+    "input": "输入变化对应 Kuikly textDidChange；回车对应 inputReturn，blurOnReturn 由宿主决定。",
+    "clear": "点击清除按钮清空文本并触发 textClearClick；若同时需要清空图片列表，由宿主在回调中处理。",
+    "imageSearch": "select-image 动作对应 pictureClick；picList 非空时中间内容区展示单图或多图胶囊。",
+    "scan": "scan 动作对应 scanClick；组件只沉淀结构、样式和交互语义，不实现真实扫码流程。",
+    "overlayCancel": "覆盖式搜索态的取消按钮关闭搜索结果层并回到原页面内容。",
+    "hostActions": "导航栏和页面工具栏右侧业务动作由外层 slot 承载，不进入基础搜索框内部状态机。"
+  },
+  "accessibility": {
+    "labelRule": "真实输入控件应提供 aria-label 或由宿主提供可感知名称。",
+    "buttonNames": "清除、选图、扫码、取消、返回、筛选等按钮必须提供中文 aria-label。",
+    "keyboard": "搜索输入保持原生 input 行为，清除按钮点击后可由宿主决定是否重新聚焦。",
+    "contrast": "深色宿主下搜索框本体保持白色胶囊，避免透明暗底导致输入内容不可读。"
+  },
+  "usageHints": [
+    "列表、商品流、对象管理页需要搜索入口时优先使用 search，而不是把 input 临时扩展成搜索框。",
+    "页面内部筛选场景使用 .search-toolbar，右侧筛选放在 .search-toolbar__actions，不放进 .searchbox__actions。",
+    "导航搜索场景使用 .search-nav-bar，左侧返回固定，右侧动作由业务配置。",
+    "覆盖式搜索结果层使用 .search-overlay-bar + 结果容器，取消只服务关闭搜索态。",
+    "导航标题区需要突出搜索入口时使用 .search-title-bar + .searchbox--accent。",
+    "36 搜索框默认自适应父容器；32 搜索框可定宽但仍保持内部三段结构。"
+  ],
+  "doNotInvent": [
+    "不要把搜索框扩展为桌面搜索栏或多行筛选表单。",
+    "不要把筛选、发布、更多等业务按钮放进 .searchbox__actions。",
+    "不要把右侧取消按钮泛化为所有局部搜索的默认结构。",
+    "不要在基础搜索框上写死 295px、255px、311px 等 Figma 示例宽度。",
+    "不要为单个业务场景新增临时搜索框皮肤。"
+  ],
+  "tokensConsumed": [
+    "--bg-brand",
+    "--bg-inverse",
+    "--bg-overlay-l1",
+    "--bg-page",
+    "--bg-subtle",
+    "--bg-surface",
+    "--bg-toast",
+    "--border-neutral-l2",
+    "--body-lg-font-size",
+    "--body-lg-line-height",
+    "--body-md-font-family",
+    "--body-md-font-size",
+    "--body-md-line-height",
+    "--body-sm-font-size",
+    "--body-sm-line-height",
+    "--body-xs-font-size",
+    "--body-xs-line-height",
+    "--font-family-icon",
+    "--font-weight-medium",
+    "--font-weight-regular",
+    "--icon-secondary",
+    "--radius-6",
+    "--radius-8",
+    "--radius-full",
+    "--size-16",
+    "--size-20",
+    "--size-24",
+    "--size-28",
+    "--size-32",
+    "--size-36",
+    "--size-40",
+    "--size-48",
+    "--spacer-4",
+    "--spacer-8",
+    "--spacer-12",
+    "--stroke-strong",
+    "--text-default",
+    "--text-disabled",
+    "--text-inverse",
+    "--text-placeholder",
+    "--text-secondary",
+    "--transparent"
+  ],
+  "designTokens": {
+    "mdHeight": "36px",
+    "mdRadius": "var(--radius-8)",
+    "mdIconSlot": "36px",
+    "mdIconSize": "20px",
+    "mdFontSize": "var(--body-lg-font-size)",
+    "smHeight": "32px",
+    "smRadius": "var(--radius-6)",
+    "smIconSlot": "32px",
+    "smIconSize": "16px",
+    "smFontSize": "var(--body-md-font-size)",
+    "singleImageSize": "24px",
+    "singleImageRadius": "2px",
+    "multiImageTokenWidth": "64px",
+    "multiImageTokenHeight": "24px",
+    "darkImageTokenWidth": "68px",
+    "darkImageTokenHeight": "28px",
+    "accentRadius": "var(--radius-full)",
+    "accentBorder": "var(--stroke-strong) solid var(--bg-brand)"
+  },
+  "specRefs": [
+    "docs/kuikly_components/Search.md",
+    "specs/交互设计原则.md",
+    "specs/布局与间距规范.md"
+  ],
+  "domAnatomy": {
+    "root": ".searchbox",
+    "requiredChildren": [
+      ".searchbox > .searchbox__icon",
+      ".searchbox > .searchbox__input",
+      ".searchbox > .searchbox__actions"
+    ],
+    "optionalChildren": [
+      ".searchbox__field",
+      ".searchbox__placeholder",
+      ".searchbox__keyword",
+      ".searchbox__image-token",
+      ".searchbox__actions .searchbox__action",
+      ".search-overlay-bar > .searchbox + .search-overlay-bar__cancel",
+      ".search-nav-bar > .search-nav-bar__back + .searchbox + .search-nav-bar__actions",
+      ".search-toolbar > .searchbox + .search-toolbar__actions",
+      ".search-title-bar > .searchbox.searchbox--accent"
+    ],
+    "modifiers": [
+      ".searchbox--md",
+      ".searchbox--sm",
+      ".searchbox--gray",
+      ".searchbox--white",
+      ".searchbox--accent",
+      ".searchbox__image-token--single",
+      ".searchbox__image-token--multi",
+      ".searchbox__image-token--dark"
+    ],
+    "stateClasses": [
+      ".is-inputting",
+      ".is-result"
+    ]
+  },
+  "provenance": {
+    "preview": "preview/component-search.html",
+    "cssSource": "preview/component-search.html",
+    "embedded": false,
+    "hostComponent": null,
+    "figma": "8041:9363 提供普通搜索框、搜索栏、右侧操作和深色宿主参考；13102:2425 提供导航标题区绿色描边强调搜索参考。",
+    "figmaNodes": [
+      "8041:9363",
+      "13102:2425"
+    ],
+    "kuikly": "docs/kuikly_components/Search.md 提供 placeholder、autoHidePlaceHolder、showSelectImageButton、showScanButton、picList、blurOnReturn 和事件边界。",
+    "decisions": [
+      "仓库原型只沉淀结构、样式和交互语义，不实现真实原生输入 API。",
+      "右侧业务操作作为 host pattern 插槽，不污染基础搜索框的内部 actions。"
+    ]
+  },
+  "unknowns": []
+}

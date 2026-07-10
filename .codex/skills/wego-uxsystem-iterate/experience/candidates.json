@@ -1,6 +1,8 @@
 {
   "schemaVersion": 1,
-  "threshold": 3,
+  "mode": "fast-iteration",
+  "threshold": 1,
+  "standard_threshold": 3,
   "candidates": [
     {
       "id": "exp-nested-component-bg-css-variable-chain",
@@ -347,6 +349,101 @@
         "output_field": "组件迭代时的读取检查清单与完成后同步动作",
         "downstream_consumer": "wego-design 消费组件契约和 Preview，wego-app/lib 消费提取后的部署副本",
         "acceptance_check": "组件审查时同时核对契约、Preview 更具体分支、提取后的 components.css 和 wego-app/lib 副本；浏览器检查最终渲染是否仍命中旧分支"
+      },
+      "created_at": "2026-07-10T00:00:00.000Z",
+      "updated_at": "2026-07-10T00:00:00.000Z"
+    },
+    {
+      "id": "exp-shared-interaction-helper-for-component-composition",
+      "normalized_key": "component-composition-must-reuse-shared-interaction-helper-instead-of-copying-simplified-behavior",
+      "title": "组件组合中的公共交互行为必须复用共享 helper，禁止复制简化算法",
+      "status": "awaiting-confirmation",
+      "occurrence_count": 1,
+      "threshold": 1,
+      "primary_owner": "wego-uxsystem-iterate",
+      "secondary_owners": ["wego-design", "wego-ux"],
+      "ownership_reason": "问题最早产生在 wego-uxsystem-iterate 的已注册组件迭代阶段。popmenu 组件契约和自身 Preview 已经定义了完整定位算法，但 tabs 组合 popmenu 时重新手写了一份简化定位逻辑，只处理左右边界，不处理真实尺寸测量、上下翻转、左右侧 fallback 和空间不足不打开，导致组合示例违反 popmenu 契约。该问题属于设计系统本体的组件组合示例与公共交互能力复用缺失，而不是普通业务实现偏差。",
+      "problem_pattern": "一个组件已经在契约或 Preview 中沉淀了可复用的交互算法（如浮层定位、尺寸测量、翻转、互斥关闭），另一个组件或组合示例需要调用该能力时没有复用公共 helper，而是复制一段简化算法。复制分支遗漏原算法的边界条件，导致组合场景与单组件契约不一致，并在后续迭代中形成多处维护点。",
+      "scene_evidence": [
+        {
+          "date": "2026-07-10",
+          "scene": "tabs 组件内嵌 popmenu 定位适配",
+          "summary": "tabs 的 standard + icon-right 示例内嵌 popmenu 时，openTabsPopmenu 只根据触发 tab 计算 left/top，并固定向下展开。它没有复用 popmenu 自身 Preview 中的 measureOpenRect + position 算法，因此漏掉关闭缩放禁用后的真实尺寸测量、下方空间不足翻转到顶部、上下不足改放左右侧、四侧放不下时不打开等契约规则。修复：新增 preview/popmenu-positioning.js 作为共享 helper，component-popmenu.html 和 component-tabs.html 同时调用同一定位算法。",
+          "source": "用户指出：tabs 组件里内嵌 popmenu 组件，没有按照契约规则处理适配定位位置"
+        }
+      ],
+      "applies_when_candidates": [
+        "已注册组件的 Preview 或契约中已经存在一套可复用交互算法",
+        "另一个组件、UI Kit 或组合示例需要调用同一交互行为，例如浮层定位、尺寸测量、互斥关闭、滚动适配、焦点管理",
+        "该行为包含视口、滚动、动画状态、尺寸测量或边界 fallback 等多个条件分支",
+        "组合示例需要证明内嵌关联组件仍遵守被嵌入组件的契约"
+      ],
+      "avoid_when_candidates": [
+        "行为只是一次性静态样式或纯展示文案，不包含可复用交互算法",
+        "两个组件只是视觉相似但交互语义不同，不能共用同一 helper",
+        "已有组件算法本身还未稳定，当前任务只是在探索单组件契约",
+        "业务场景存在明确偏离契约的需求，此时应先回到设计系统迭代重新定义契约，而不是强行复用旧 helper"
+      ],
+      "expected_rule_target": {
+        "file": ".codex/skills/wego-uxsystem-iterate/references/workflow.md",
+        "field": "已注册组件迭代标准步骤 / 组件组合与公共交互 helper 复用检查"
+      },
+      "runtime_reachability": {
+        "consumer_skill": "wego-uxsystem-iterate 迭代模式（修改组件 Preview、组件组合示例、UI Kit 组合示例时）",
+        "output_field": "Preview 交互脚本、组件契约中的 behavior / usageHints，以及必要的共享 helper 文件",
+        "downstream_consumer": "wego-design 读取组件契约和 Preview 做设计消费；wego-ux 根据同一交互行为实现业务场景；wego-tests 验证组合场景仍满足被复用组件契约",
+        "acceptance_check": "组件迭代完成前扫描是否存在复制的简化交互算法；涉及浮层/定位/测量时用浏览器验证单组件 Preview 和组合 Preview 命中同一 helper，并覆盖边缘位置、空间不足和关闭状态测量"
+      },
+      "created_at": "2026-07-10T00:00:00.000Z",
+      "updated_at": "2026-07-10T00:00:00.000Z"
+    },
+    {
+      "id": "exp-local-server-must-auto-exit",
+      "normalized_key": "local-validation-server-must-auto-exit-or-be-cleaned-up-after-task",
+      "title": "本地验证服务器必须自动退出或任务结束后显式清理",
+      "status": "promoted",
+      "occurrence_count": 1,
+      "threshold": 3,
+      "primary_owner": "wego-ux",
+      "secondary_owners": ["wego-tests", "wego-uxsystem-iterate"],
+      "ownership_reason": "问题最早产生在 wego-ux 或 wego-tests 启动本地验证服务器做布局验证时。AI 当前启动 `python -m http.server` 没有任何自动退出机制（无 timeout、无 trap kill、无任务结束清理），进程脱离 AI 进程在后台持续运行。同一会话或跨会话重复启动后，残留进程累积成 7+ 个 http.server，占用 8080/8081/8090/8765/8766/9876 等端口，新任务启动时被打回，AI 反复切端口而非清理旧进程。wego-ux 的『真实业务交互验证』环节和 wego-tests 的验收动作都依赖本地服务器，必须在启动层面强制自带自动退出或显式清理。",
+      "problem_pattern": "AI 启动 `python -m http.server` 做 wego-app 布局验证时未使用 timeout、nohup 守护或任务结束清理逻辑，进程脱离当前会话继续运行，跨会话/跨任务累积。表现为：lsof -iTCP -sTCP:LISTEN 出现多个 python http.server 进程，新任务启动服务器时被端口占用打回，AI 切端口规避但不清理。",
+      "scene_evidence": [
+        {
+          "date": "2026-07-10",
+          "scene": "wego-app 布局验证后清理",
+          "summary": "用户报告频繁出现『端口 8080 已被占用，让我尝试使用其他端口，比如 8081』的提示。lsof 查到 7 个 python -m http.server 残留进程（PID 9368/25862/5620/33005/53428/56548/83490），占用端口 8080/8081/8090/8765/8766/9876，全部是早前布局验证时启动后未清理。PPID 分布显示部分进程的父进程（25798/9304/53364/56484/83426/14792）也已不存在或不是当前会话，证明是历史残留。用户要求『补一个规则，一定要自动退』，并明确指示『这个直接提升』。",
+          "source": "用户直接要求补充规则并直接提升为正式规则：本地验证服务器一定要自动退出"
+        }
+      ],
+      "applies_when_candidates": [
+        "使用 python -m http.server 或其他本地 HTTP 服务器做布局/接口验证",
+        "wego-ux 实现完成后准备进入 wego-tests 验收",
+        "agent-browser 自动化验证需要服务器可达",
+        "在长会话或多轮任务中重复启动本地服务器"
+      ],
+      "avoid_when_candidates": [
+        "使用 Vercel 固定预览链接（不需要本地服务器）",
+        "已使用 timeout / trap kill / EXIT 信号清理 / pgrep cleanup 包装器保证自动退出",
+        "本会话只启动一次服务器，验证完成后立即 kill 并确认进程已退出",
+        "服务器进程被显式注册到当前会话生命周期，会话结束自动清理"
+      ],
+      "expected_rule_target": {
+        "file": "AGENTS.md",
+        "field": "Git 与验证 / 启动本地验证服务器的要求（必须自动退出或任务结束显式清理）"
+      },
+      "runtime_reachability": {
+        "consumer_skill": "wego-ux 和 wego-tests（启动本地服务器做验证时）",
+        "output_field": "本地服务器启动命令的包装方式（timeout / trap kill / pgrep cleanup / EXIT trap）",
+        "downstream_consumer": "AI 进程本身在每个验证任务前后显式管理服务器进程",
+        "acceptance_check": "任务开始前 `lsof -iTCP -sTCP:LISTEN -P | grep python` 确认无残留 http.server；任务结束后再次执行确认无新增；启动命令必须包含 timeout / trap kill / 类似自动清理机制"
+      },
+      "formal_rule": {
+        "confirmed_at": "2026-07-10T00:00:00.000Z",
+        "file": "AGENTS.md",
+        "field": "Git 与验证 / 启动本地验证服务器的要求（必须自动退出或任务结束显式清理）",
+        "rule_id": "local-server-must-auto-exit",
+        "migration_exception_reason": "用户在 2026-07-10 明确指示『这个直接提升』，跳过三次阈值等待。本规则适用面广（任何需要启动本地服务器做验证的任务都会触发），端口残留问题已严重影响后续任务的验证效率，证据充分但用户选择不累计到 3 次。后续同类经验仍按正常阈值累计。"
       },
       "created_at": "2026-07-10T00:00:00.000Z",
       "updated_at": "2026-07-10T00:00:00.000Z"

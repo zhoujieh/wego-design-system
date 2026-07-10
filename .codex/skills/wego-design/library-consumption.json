@@ -253,6 +253,7 @@
     "cell",
     "form",
     "input",
+    "search",
     "card"
   ],
   "supportComponents": [
@@ -265,6 +266,7 @@
     "link",
     "radio",
     "stack",
+    "tabs",
     "switch",
     "toast",
     "dialog",
@@ -280,6 +282,9 @@
   ],
   "componentContractSchemaVersion": 3,
   "componentContractReadRule": "components/{slug}.json 统一使用 schemaVersion 3；读取时依次关注 semanticTypeCandidates、variantDimensions、usageHints、doNotInvent、tokensConsumed、provenance。",
+  "componentConsumptionNotes": [
+    "搜索语义必须优先消费 search 组件，不得用 input 临时拼搜索框；基础 searchbox 固定为左图标、中间输入、右侧内部动作三段式，业务右侧操作放在 search 的 host pattern actions 槽。"
+  ],
   "scenarioTypeRegistry": {
     "description": "通用场景类型注册表。所有经验沉淀必须先归入一个场景类型并标注工作流环节，再按四段式落地。新类型需经通用化验证。",
     "types": [
