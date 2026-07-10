@@ -28,6 +28,19 @@ window.WEGO_APP_ROUTES = [
    * }
    */
   {
+    routeId: 'workspace-merchant-workbench',
+    scene: '商家工作台',
+    script: './scenes/商家工作台/scene.js',
+    style: './scenes/商家工作台/scene.css',
+    entry: {
+      tab: 'workspace',
+      group: 'workspace-tools',
+      label: '商家工作台',
+      type: 'grid-entry',
+      icon: './lib/icons/app-center/数据中心.svg'
+    }
+  },
+  {
     routeId: 'my-price-management',
     scene: '价格权限管理',
     script: './scenes/价格权限管理/scene.js',

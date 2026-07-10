@@ -1,0 +1,185 @@
+{
+  "requirement_coverage": [
+    {
+      "requirement": "核心经营数据看板",
+      "status": "pass",
+      "evidence": "business-dashboard 展示实收金额、销售单数、成交人数、访问人数、粉丝浏览量、员工业绩，并包含昨日对比或趋势。"
+    },
+    {
+      "requirement": "核心业务操作",
+      "status": "pass",
+      "evidence": "core-actions 展示 8 个入口；发布商品、采购入库、查库存走已有路由，其余入口 toast 占位反馈。"
+    },
+    {
+      "requirement": "销售订单管理",
+      "status": "pass",
+      "evidence": "order-management 展示待收款、待发货、已挂起、待售后和全部销售单、收益查看入口。"
+    },
+    {
+      "requirement": "客户智能待办",
+      "status": "pass",
+      "evidence": "customer-todo 展示 32 位即将流失客户、回访和营销触达入口。"
+    },
+    {
+      "requirement": "模块化应用中心",
+      "status": "pass",
+      "evidence": "app-center 按店铺管理、数据报表、进销存、营销中心、财务与客户分组展示入口。"
+    },
+    {
+      "requirement": "流量与传播明细",
+      "status": "pass",
+      "evidence": "traffic-analytics 展示分享到聊天、分享到朋友圈、今日新增、全部粉丝。"
+    }
+  ],
+  "scene_judgement_check": {
+    "status": "pass",
+    "scene_folder": "wego-app/scenes/商家工作台",
+    "route_id": "workspace-merchant-workbench",
+    "judgement": "新建移动端商家工作台单页原型，范围与用户确认的单页深度一致。"
+  },
+  "surface_design_check": {
+    "status": "pass",
+    "surfaces": [
+      "merchant-workbench-main"
+    ],
+    "notes": "design_plan.surface_designs 覆盖 interaction_spec.surfaces。"
+  },
+  "uikit_consumption_check": {
+    "status": "pass",
+    "notes": "未命中精确 UI Kit，使用 generic-mobile-task-page fallback；组件来自 navbar/card/cell/tag/badge/button/toast。"
+  },
+  "component_discipline_check": {
+    "status": "pass",
+    "notes": "连续应用入口使用 cell-group；业务样式限定在 merchant-workbench 作用域；未修改 wego-app/lib。"
+  },
+  "rule_source_check": {
+    "status": "pass",
+    "notes": "interaction_spec 使用 rule_sources；design_plan 使用 rule_sources_used；未引用 docs/specs 作为运行时来源。"
+  },
+  "copy_check": {
+    "status": "pass",
+    "notes": "页面仅展示面向商户的业务文案，无工作流说明文案。"
+  },
+  "route_check": {
+    "status": "pass",
+    "route": {
+      "routeId": "workspace-merchant-workbench",
+      "entry_tab": "workspace",
+      "entry_group": "workspace-tools",
+      "entry_type": "grid-entry"
+    },
+    "notes": "路由唯一，入口挂在工作台分组。"
+  },
+  "interaction_check": {
+    "status": "pass",
+    "tested": [
+      "刷新数据：显示今日经营数据已更新，并把更新时间改为刚刚更新",
+      "销售开单：显示销售开单功能入口已预留",
+      "查库存：hash 跳转到 #/my-inventory-management，顶层命中库存页面"
+    ]
+  },
+  "layout_check": {
+    "status": "pass",
+    "viewport": "375x812",
+    "notes": "首屏展示经营数据、核心操作和销售订单；横向溢出数量为 0。"
+  },
+  "viewport_keyboard_check": {
+    "status": "pass",
+    "notes": "本场景无输入框，不涉及键盘流程；移动视口滚动和安全区留白已检查。"
+  },
+  "app_scene_check": {
+    "status": "pass",
+    "notes": "scene.js 使用 window.WegoApp.registerScene；未使用 fetch/XHR；push presentation 与 design_plan 一致。"
+  },
+  "resource_sync_check": {
+    "status": "pass",
+    "notes": "本次未修改设计系统源资源或 wego-app/lib；使用已有 app-center 图标资产。"
+  },
+  "flow_coverage": {
+    "status": "pass",
+    "covered_nodes": [
+      "enter-workbench",
+      "scan-business-data",
+      "use-workbench-entry",
+      "refresh-business-data"
+    ]
+  },
+  "transition_check": {
+    "status": "pass",
+    "notes": "open-workbench-route、click-entry、refresh-dashboard 均有实现或反馈。"
+  },
+  "state_handoff_check": {
+    "status": "pass",
+    "notes": "刷新和入口反馈均按 keep 策略保留当前页面状态。"
+  },
+  "back_restore_check": {
+    "status": "pass",
+    "notes": "工作台使用 push 场景；进入时滚动复位到顶部，避免继承下钻前滚动状态。"
+  },
+  "prototype_boundary_check": {
+    "status": "pass",
+    "notes": "functional/simulated 节点已实现；未展开子系统均有 toast 反馈。"
+  },
+  "end_to_end_paths": [
+    {
+      "path": "进入工作台 -> 查看经营数据 -> 刷新数据",
+      "status": "pass"
+    },
+    {
+      "path": "进入工作台 -> 点击销售开单",
+      "status": "pass"
+    },
+    {
+      "path": "进入工作台 -> 点击查库存 -> 进入库存管理",
+      "status": "pass"
+    }
+  ],
+  "design_contraction_check": {
+    "status": "pass",
+    "notes": "未把未确认二级子系统扩展为完整页面。"
+  },
+  "compatibility_check": {
+    "status": "pass",
+    "notes": "保留 route_id 兼容字段，同时使用 prototype_target.routes。"
+  },
+  "deployment_readiness_check": {
+    "push_attempted": false,
+    "push_commit_hash": "",
+    "deploy_status": "not-run",
+    "production_domain": "",
+    "fallback_local_entry": "wego-app/index.html",
+    "errors": []
+  },
+  "automated_checks": {
+    "commands": [
+      "git pull --ff-only origin main",
+      "node --check wego-app/scenes/商家工作台/scene.js",
+      "node scripts/specs.mjs check",
+      "node scripts/validate-wego-design.mjs"
+    ],
+    "exit_codes": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "errors": [],
+    "warnings_count": 0,
+      "key_findings": [
+      "初次 validate 发现未跟踪 .DS_Store，已清理后通过。",
+      "视觉检查发现 flex 子项被压缩，已补 flex: 0 0 auto 后复查通过。",
+      "复查发现同一 hash 重复进入可能恢复旧滚动位置，已延后复位滚动后通过。"
+    ]
+  },
+  "findings": [],
+  "risk_log": [
+    {
+      "risk": "数据为本地模拟数据，不代表真实经营后台。",
+      "impact": "符合本轮静态原型边界。"
+    }
+  ],
+  "manual_verify_items": [
+    "后续如接入真实订单/报表/营销子系统，需要补充对应二级页面 interaction_spec 和 design_plan。"
+  ],
+  "final_status": "pass"
+}
