@@ -348,7 +348,7 @@
         "host-tab"
       ],
       "entryHierarchy": {
-        "rule": "当 interaction_spec.host_container.leaf_level > 1 且 surfaces[host-entry]（或兼容字段 page_surfaces[host-entry]）已声明父子入口层级时，wego-ux 必须按声明生成视觉从属，不得与一级入口 DOM 平级只靠 data-parent-entry 数据标记",
+        "rule": "当 interaction_spec.host_container.leaf_level > 1 且 surfaces[host-entry] 已声明父子入口层级时，wego-ux 必须按声明生成视觉从属，不得与一级入口 DOM 平级只靠 data-parent-entry 数据标记",
         "visualExpression": "二级入口 cell 使用 .cell--indent 修饰类表达缩进；或嵌套在父入口下方的子列表容器内（如 .host-shell-list__sub）；缩进宽度 24px，与 cell.json 的 leftGuidePattern.indentWidth 对齐",
         "domPattern": "父项 .cell + 子项 .cell.cell--indent；父子必须在同一 .cell-group/.host-shell-list 内连续排列",
         "forbidden": "只用 data-parent-entry 数据标记而无视觉从属；二级入口与一级入口完全平级"
@@ -409,7 +409,7 @@
     "decorative-orb-background"
   ],
   "surfaceDecisionRules": {
-    "surfaceMatching": "必须先按 interaction_spec.surfaces[]（兼容旧 page_surfaces[]）逐个 surface 判断命中状态；不能只给整个任务一个 matched_uikit 后跳过宿主页、二级页或结果页。",
+    "surfaceMatching": "必须先按 interaction_spec.surfaces[] 逐个 surface 判断命中状态；不能只给整个任务一个 matched_uikit 后跳过宿主页、二级页或结果页。",
     "hostEntryBoundary": "当 interaction_spec 包含 host_container + route_id 时，host-entry 只负责输出宿主页入口、结果回填和状态摘要所需的 surface 依据；不要把固定宿主 App 本身当作新的 pagePattern，也不要让下游参考后重画宿主 App。",
     "fallbackAndGap": "未命中 UI Kit/pagePattern 但能安全输出时，必须引用 fallbackPageBlueprints；不能临时发明页面范式。任何 surface 为 gap 时，不输出可执行原型计划，只输出设计缺口与建议补充的 blueprint、UI Kit 或组件契约。"
   },
@@ -633,7 +633,7 @@
         "页面背景按内容密度选择 data-bg=surface 或 data-bg=page，导航栏与页面背景保持一致",
         "主体优先由状态摘要 section、入口 cell/button、必要的业务说明组成",
         "禁止使用营销 hero、工作流说明文案或大面积装饰背景",
-        "当 host_container.leaf_level > 1 且 page_surfaces[host-entry] 已声明父子入口层级时，二级入口 cell 必须使用 .cell--indent 修饰类或嵌套子列表容器表达视觉从属，不得与一级入口 DOM 平级只靠 data-parent-entry 标记"
+        "当 host_container.leaf_level > 1 且 surfaces[host-entry] 已声明父子入口层级时，二级入口 cell 必须使用 .cell--indent 修饰类或嵌套子列表容器表达视觉从属，不得与一级入口 DOM 平级只靠 data-parent-entry 标记"
       ],
       "allowedComponents": [
         "navbar",

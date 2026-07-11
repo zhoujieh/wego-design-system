@@ -7,9 +7,9 @@
   - 正式产物维护在 wego-app/,保留 Tab、工作台、我的页、默认入口、UI 和基础交互
   - AI 只按 route_id 增量更新 routes.js、目标入口、业务场景、结果回填和必要交互,不得重画宿主 App
   - preview-shell / phone-frame / phone-screen 是全局预览外壳:电脑端显示,移动端同链接隐藏
-  - 宿主路径由 page_spec.app_target + host_container + route_id 驱动
+  - 宿主路径由 interaction_spec.prototype_target + host_container 驱动
   - 一级/二级入口请在 data-route-id、data-entry-label、data-parent-entry 中补齐真实值
-  - 业务场景按 design_consumption_plan 生成到 wego-app/scenes/{中文业务场景}/,通过 scene.js 注册
+  - 业务场景按 design_plan 生成到 wego-app/scenes/{中文业务场景}/,通过 scene.js 注册
   - 图标优先使用 lib/icons/app-center/*.svg 作为业务入口图标资产
   - 直接打开本模板预览时,下方 fallback 资源会从 wego-design / wego-ux/assets/templates 读取;落到 wego-app 后使用 ./lib / ./css / ./js
 -->

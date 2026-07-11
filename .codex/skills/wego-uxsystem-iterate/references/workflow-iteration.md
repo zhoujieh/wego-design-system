@@ -1,5 +1,7 @@
 # 工作流迭代与经验沉淀
 
+> 角色：经验归属与升级方法。读取条件：用户明确要求沉淀经验、补充规则、复盘或优化工作流时；正式规则只写入归属注册表指定的唯一来源。
+
 适用于用户明确要求“审查并沉淀经验”“补充规则”“复盘并形成经验”或“优化工作流”的场景。普通反馈、AI 自查、验收失败和实现偏差只用于完成当前任务，不自动进入经验池。
 
 ## 1. 入口门禁
@@ -58,13 +60,13 @@
 
 负责用户目标、页面范围、流程拆分、页面状态、信息块、业务规则和异常流程。
 
-典型问题：需求理解错误、页面或状态遗漏、`page_spec` 信息不足。
+典型问题：需求理解错误、页面或状态遗漏、规格信息不足。
 
 ### 4.2 wego-design
 
 负责页面范式、UI Kit 匹配、布局、信息组织、组件选择组合和设计系统消费。
 
-典型问题：页面范式错误、布局方向错误、组合约束未命中、`design_consumption_plan` 决策错误。
+典型问题：页面范式错误、布局方向错误、组合约束未命中、设计计划决策错误。
 
 ### 4.3 wego-ux
 
@@ -80,12 +82,25 @@
 
 ### 4.5 权威落点
 
-- 单个组件结构、状态、变体和行为：`components/{slug}.json`
-- 页面范式、fallback 和多组件组合：`uikit-plan.json`
-- 设计系统读取、消费、复制和全局限制：`library-consumption.json`
-- 技能触发、输入输出、职责和交接：对应 `SKILL.md` 或 references
-- 跨技能仓库硬约束：`AGENTS.md`
-- 经验候选：`experience/candidates.json`
+- 单个组件结构、状态、变体和行为：`components/{slug}.json`，必要时同步对应 Preview。
+- 页面范式、fallback、presentation 和多组件组合：`uikit-plan.json`。
+- 设计系统读取、消费、复制和全局限制：`library-consumption.json`。
+- Token 取值与语义：`colors_and_type.css` 与 `css.json`。
+- 跨技能仓库硬约束：`AGENTS.md`。
+- 技能触发条件、职责边界、必要输入、正式输出契约和跨技能交接：对应技能的 `SKILL.md`。
+- 技能内部判断方法、详细步骤、检查清单、例外处理和案例：对应技能中由 `SKILL.md` 直接引用的 `references/*.md`。
+- 可自动判断的问题：对应脚本、回归测试或守门规则。
+- 经验候选：`experience/candidates.json`。
+
+正式经验默认不得修改 `SKILL.md`。只有经验直接改变以下五项入口契约时，才允许修改对应技能的 `SKILL.md`：
+
+1. 触发条件。
+2. 职责边界。
+3. 必要输入。
+4. 输出契约。
+5. 跨技能交接。
+
+无法命中五项白名单时，禁止修改 `SKILL.md`。不得以“补充说明”“最佳实践”“注意事项”“新增检查项”或“经验沉淀”为由绕过该限制。
 
 归属、权威落点、运行时消费或验收方式任一项不明确，本轮经验不得入池。
 
@@ -151,15 +166,16 @@
 2. 完成适用、不适用、例外和回退拆分。
 3. 检查已有规则，优先合并、补充或增加例外。
 4. 确定主要归属和次要归属。
-5. 将规则写入正确的结构化权威来源。
-6. 只有成熟且会被运行时消费时，才新增或更新 `scenarioTypeRegistry`。
-7. 更新对应技能的读取、输出或交接引用。
-8. 增加回归测试或守门。
-9. 涉及设计系统本体时递增 `metadata.json.version`。
-10. 运行 `node scripts/specs.mjs generate`。
-11. 运行 `node scripts/specs.mjs check` 和 `node scripts/validate-wego-design.mjs`。
-12. 人工检查生成文档是否准确表达规则。
-13. 将候选状态改为 `promoted`，记录正式落点、确认时间和规则标识。
+5. 先执行 `SKILL.md` 五项白名单判断；未命中时不得修改 `SKILL.md`。
+6. 将规则写入正确的结构化权威来源、reference、脚本或测试。
+7. 只有成熟且会被运行时消费时，才新增或更新 `scenarioTypeRegistry`。
+8. 更新对应技能的读取、输出或交接引用；只在入口契约确实变化时修改 `SKILL.md`。
+9. 增加回归测试或守门。
+10. 涉及设计系统本体时递增 `metadata.json.version`。
+11. 运行 `node scripts/specs.mjs generate`。
+12. 运行 `node scripts/specs.mjs check`、`node scripts/validate-skill-entry-boundary.mjs` 和 `node scripts/validate-wego-design.mjs`。
+13. 人工检查生成文档是否准确表达规则。
+14. 将候选状态改为 `promoted`，记录正式落点、确认时间和规则标识。
 
 ## 10. scenarioTypeRegistry 边界
 
@@ -192,13 +208,16 @@
 ## 12. 最终检查
 
 - 是否由用户明确触发经验沉淀。
-- 是否只记录一条最重要经验。
-- 是否正确去重和累计。
+- 是否正确去重和累计候选。
 - 是否明确主要归属、次要归属和原因。
 - 是否明确权威落点、消费方、输出字段、下游和验收方式。
 - 达到当前阈值时是否仅提示确认。
 - 未确认时是否没有修改正式规则。
 - 正式沉淀前是否拆分适用、不适用、例外和回退。
+- 是否先执行 `SKILL.md` 五项白名单判断。
+- 未命中五项白名单时是否没有修改任何 `SKILL.md`。
+- 是否没有把组件、页面、案例或详细检查规则追加到 `SKILL.md`。
 - 是否没有把候选写入 `scenarioTypeRegistry`。
 - 是否增加回归验证。
+- 是否通过 `node scripts/validate-skill-entry-boundary.mjs`。
 - 生成文档是否一致。

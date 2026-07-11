@@ -1,5 +1,7 @@
 # Acceptance Report 结构
 
+> 角色：报告结构。读取条件：创建或校验 `acceptance_report` 时；不替代验收方法或正式规则来源。
+
 构造、迁移或校验 `acceptance_report` 时读取。
 
 ```json

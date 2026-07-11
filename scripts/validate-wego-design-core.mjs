@@ -1296,29 +1296,12 @@ function readJsonFile(file) {
   }
 }
 
-// 兼容读取：优先 interaction_spec.json，回退 page_spec.json；优先 design_plan.json，回退 design_consumption_plan.json
 function resolveSceneSpecFiles(scene) {
   const scenePath = path.join(SCENES_ROOT, scene);
   const specDir = path.join(scenePath, '_spec');
   const interactionSpecPath = path.join(specDir, 'interaction_spec.json');
-  const pageSpecPath = path.join(specDir, 'page_spec.json');
   const designPlanPath = path.join(specDir, 'design_plan.json');
-  const consumptionPlanPath = path.join(specDir, 'design_consumption_plan.json');
-  const hasNewSpec = fs.existsSync(interactionSpecPath);
-  const hasLegacySpec = fs.existsSync(pageSpecPath);
-  const hasNewPlan = fs.existsSync(designPlanPath);
-  const hasLegacyPlan = fs.existsSync(consumptionPlanPath);
-  const specPath = hasNewSpec ? interactionSpecPath : (hasLegacySpec ? pageSpecPath : null);
-  const planPath = hasNewPlan ? designPlanPath : (hasLegacyPlan ? consumptionPlanPath : null);
-  const specFormat = hasNewSpec ? 'new' : (hasLegacySpec ? 'legacy' : null);
-  const planFormat = hasNewPlan ? 'new' : (hasLegacyPlan ? 'legacy' : null);
-  return {
-    scenePath, specDir,
-    specPath, planPath,
-    specFormat, planFormat,
-    hasNewSpec, hasLegacySpec, hasNewPlan, hasLegacyPlan,
-    interactionSpecPath, pageSpecPath, designPlanPath, consumptionPlanPath,
-  };
+  return { scenePath, specDir, specPath: fs.existsSync(interactionSpecPath) ? interactionSpecPath : null, planPath: fs.existsSync(designPlanPath) ? designPlanPath : null, interactionSpecPath, designPlanPath };
 }
 
 function isV2PrototypeOnlyScene(scene) {
@@ -1335,39 +1318,17 @@ function isV2PrototypeOnlyScene(scene) {
   return false;
 }
 
-// 从 spec 中提取 route_id：新格式读 prototype_target.routes[0].id，旧格式读 route_id
-function extractRouteIdFromSpec(spec, format) {
-  if (!spec) return null;
-  if (format === 'new') {
-    const routes = spec?.prototype_target?.routes || [];
-    return routes[0]?.id || null;
-  }
-  return spec?.route_id || null;
+function extractRouteIdFromSpec(spec) {
+  return spec?.prototype_target?.routes?.[0]?.id || null;
 }
 
-// 从 spec 中提取 app_target：新格式从 prototype_target 推导，旧格式直接读 app_target
-function extractAppTargetFromSpec(spec, format) {
-  if (!spec) return null;
-  if (format === 'new') {
-    const pt = spec?.prototype_target;
-    if (!pt) return null;
-    return {
-      mode: 'wego-app-scene',
-      app_root: pt.app_root,
-      scene_folder: pt.scenario_folder,
-      route_mode: pt.route_mode || 'hash',
-    };
-  }
-  return spec?.app_target || null;
+function extractAppTargetFromSpec(spec) {
+  const pt = spec?.prototype_target;
+  return pt ? { mode: 'wego-app-scene', app_root: pt.app_root, scene_folder: pt.scenario_folder, route_mode: pt.route_mode || 'hash' } : null;
 }
 
-// 从 spec 中提取 surfaces 列表（统一为 {id, role} 结构）：新格式读 surfaces[]，旧格式读 page_surfaces[]
-function extractSurfacesFromSpec(spec, format) {
-  if (!spec) return [];
-  if (format === 'new') {
-    return (spec?.surfaces || []).map(s => ({ id: s?.surface_id, role: null }));
-  }
-  return (spec?.page_surfaces || []).map(s => ({ id: s?.id, role: s?.role }));
+function extractSurfacesFromSpec(spec) {
+  return (spec?.surfaces || []).map(s => ({ id: s?.surface_id, role: null }));
 }
 
 function checkPrototypeSurfaceDesigns(context) {
@@ -1384,18 +1345,18 @@ function checkPrototypeSurfaceDesigns(context) {
   let checkedPlans = 0;
   for (const scene of scenes) {
     const resolved = resolveSceneSpecFiles(scene);
-    const { scenePath, specDir, specPath, planPath, specFormat, planFormat } = resolved;
+    const { scenePath, specDir, specPath, planPath } = resolved;
     if (!specPath || !planPath) {
       if (isV2PrototypeOnlyScene(scene)) continue;
       add('error', 'app_scene.spec_missing',
-        'App 场景必须包含 _spec/interaction_spec.json（或 page_spec.json）和 _spec/design_plan.json（或 design_consumption_plan.json）',
+        'App 场景必须包含 _spec/interaction_spec.json 和 _spec/design_plan.json',
         scenePath);
       continue;
     }
 
     const pageSpec = readJsonFile(specPath);
-    const routeId = extractRouteIdFromSpec(pageSpec, specFormat);
-    const appTarget = extractAppTargetFromSpec(pageSpec, specFormat);
+    const routeId = extractRouteIdFromSpec(pageSpec);
+    const appTarget = extractAppTargetFromSpec(pageSpec);
     if (!appTarget || appTarget.mode !== 'wego-app-scene') {
       add('error', 'app_scene.target_missing',
         'spec 的 app_target.mode（或 prototype_target）必须为 wego-app-scene',
@@ -1438,11 +1399,6 @@ function checkPrototypeSurfaceDesigns(context) {
     checkedPlans++;
     const plan = readJsonFile(planPath);
     if (!plan) continue;
-    if (planFormat === 'legacy' && plan.app_target?.route_id && routeId && plan.app_target.route_id !== routeId) {
-      add('error', 'app_scene.plan_route_mismatch',
-        `design_consumption_plan.app_target.route_id 与 spec.route_id 不一致：${plan.app_target.route_id} !== ${routeId}`,
-        planPath);
-    }
     const presentationType = plan.page_presentation?.type;
     if (presentationType && !PRESENTATION_TYPES.has(presentationType)) {
       add('error', 'prototype.presentation_type_invalid',
@@ -1517,10 +1473,10 @@ function checkPrototypeSurfaceDesigns(context) {
     }
 
     if (pageSpec) {
-      const specSurfaces = extractSurfacesFromSpec(pageSpec, specFormat);
+      const specSurfaces = extractSurfacesFromSpec(pageSpec);
       if (specSurfaces.length === 0) {
-        add('error', 'prototype.page_surfaces_missing',
-          'spec 必须包含 surfaces[]（或 page_surfaces[]），供 surface_designs[] 覆盖',
+        add('error', 'prototype.surfaces_missing',
+          'spec 必须包含 surfaces[]，供 surface_designs[] 覆盖',
           specPath);
       }
       for (const specSurface of specSurfaces) {
@@ -1533,7 +1489,7 @@ function checkPrototypeSurfaceDesigns(context) {
       }
 
       const hostContainer = pageSpec?.host_container;
-      const hostRouteId = extractRouteIdFromSpec(pageSpec, specFormat);
+      const hostRouteId = extractRouteIdFromSpec(pageSpec);
       if ((hostContainer && !hostRouteId) || (!hostContainer && hostRouteId)) {
         add('error', 'prototype.host_route_pair_required',
           'spec 中 host_container 和 route_id 必须成对出现',
@@ -1573,17 +1529,11 @@ function checkPrototypeSurfaceDesigns(context) {
               'host_container.needs_host_entry_surface 必须为布尔值',
               specPath);
           }
-          // host-entry surface 检查：旧格式查 page_surfaces[].role==='host-entry'；新格式查 prototype_target.routes[] 非空
           if (hostContainer.needs_host_entry_surface) {
-            let hasHostEntry = false;
-            if (specFormat === 'legacy') {
-              hasHostEntry = specSurfaces.some(surface => surface?.role === 'host-entry' || surface?.id === 'host-entry');
-            } else {
-              hasHostEntry = (pageSpec?.prototype_target?.routes || []).length > 0;
-            }
+            const hasHostEntry = (pageSpec?.prototype_target?.routes || []).length > 0;
             if (!hasHostEntry) {
               add('error', 'prototype.host_container_host_entry_missing',
-                '声明 needs_host_entry_surface=true 时，spec 必须包含 host-entry surface（或 prototype_target.routes[]）',
+                '声明 needs_host_entry_surface=true 时，spec 必须包含 prototype_target.routes[]',
                 specPath);
             }
           }
@@ -2104,14 +2054,6 @@ function checkInteractionSpecAndDesignPlanReferences(context) {
     const spec = readJsonFile(interactionSpecPath);
     if (!spec) continue;
 
-    // 禁止新旧格式同时维护
-    const oldSpecPath = path.join(specDir, 'page_spec.json');
-    if (fs.existsSync(oldSpecPath)) {
-      add('error', 'spec.dual_format_forbidden',
-        '禁止同一场景同时维护 interaction_spec.json 和 page_spec.json；旧文件只作为迁移来源，应归档到 _spec/archive/',
-        specDir);
-    }
-
     // 收集各类 ID 并检查唯一性
     const flowIds = new Set();
     const nodeIds = new Set();
@@ -2313,14 +2255,6 @@ function checkInteractionSpecAndDesignPlanReferences(context) {
     if (!fs.existsSync(designPlanPath)) continue;
     const plan = readJsonFile(designPlanPath);
     if (!plan) continue;
-
-    // 禁止新旧设计计划同时维护
-    const oldPlanPath = path.join(specDir, 'design_consumption_plan.json');
-    if (fs.existsSync(oldPlanPath)) {
-      add('error', 'plan.dual_format_forbidden',
-        '禁止同一场景同时维护 design_plan.json 和 design_consumption_plan.json；旧文件只作为迁移来源，应归档到 _spec/archive/',
-        specDir);
-    }
 
     // 6. design_plan 只能引用 interaction_spec 中存在的对象
     const planSurfaceIds = new Set();

@@ -1,5 +1,7 @@
 # Interaction Spec 结构
 
+> 角色：规格结构。读取条件：创建或校验 `interaction_spec` 时；不替代迭代状态机或设计决策。
+
 仅在创建、迁移或校验 `interaction_spec` 时读取。这里定义详细数据结构；触发、门禁和交接仍以 `../SKILL.md` 为准。
 
 ## 新任务字段
@@ -93,12 +95,9 @@ interaction_spec
 - 下游只引用上游 ID，不复制或改写业务内容。
 - flow steps → node，node → surface，surface → node/content，transition → node，handoff → transition/node/content，route → surface。
 
-## 兼容规则
+## 当前格式
 
-- 新任务只维护新字段。
-- 旧任务可读取 `business_goal`、`information_blocks`、`page_surfaces` 和顶层 `route_id`。
-- 新旧字段并存时优先新字段，但不得维护语义不同的两份规格。
-- 开始迁移后一次性补齐新字段并归档旧版，不长期双轨维护。
+- 只维护本文件定义的当前字段；旧字段、旧文件或旧 route 结构必须报错并先迁移。
 
 ## rule_sources
 
