@@ -6,6 +6,15 @@
 
 默认面向移动端、微信生态、电商、工具和社交场景，不依赖特定 agent 运行时。设计方向固定为简洁、干净、淡雅、克制，判断优先级固定为：清晰 > 一致 > 效率 > 美观 > 创新。
 
+## 顶层演进规则：测试阶段禁止兼容
+
+- 当前项目处于测试与快速迭代阶段，所有规则、Schema、文件格式、脚本接口和工作流只保留当前唯一版本。
+- 禁止新增或保留任何兼容旧版本的分支，包括但不限于：`v1/v2` 双轨判断、旧字段兜底、旧文件回退读取、旧命令别名、双写、新旧格式并存、静默迁移和 deprecated 路径继续可用。
+- 规则升级时必须直接修改当前实现，并同步迁移或删除仓库内测试数据、旧产物和旧调用方；不得通过兼容层降低改动成本。
+- 遇到旧格式或旧版本输入时必须明确报错并停止，提示按当前规范迁移；不得自动回退、猜测映射或继续执行。
+- 文档不得使用“旧版继续支持”“兼容期”“优先新格式、缺失时回退旧格式”等表述。历史信息只能存在于 Git 记录或明确标注为非运行时依据的复盘文档中。
+- 任何新增兼容逻辑均视为违反仓库顶层规则；代码审查和工作流验收必须检查并阻断。
+
 ## 固定产物
 
 - `wego-app/index.html` 是唯一 App 入口和预览宿主。
@@ -39,16 +48,17 @@
 ## 主链路硬门禁
 
 - 正式规则生效后的新业务需求或已有业务场景修改必须归属主业务场景 `_iterations/` 下的有效迭代；历史场景无需补录，后续再次修改时进入新流程。
-- 新建 schema v2 迭代先用 `submit-brief → confirm-brief` 在 `awaiting-brief-confirmation` 确认 `prototype_brief` 的目标、范围、入口和关键路径，进入 `prototyping` 后可连续完成设计约束与交互原型；原型定稿前不得写入或修改正式规格、验收和交接产物。
-- v2 原型定稿通过 `confirm-prototype` 锁定运行时快照，并直接承担正式范围确认；只有 `prototype-confirmed` 后才可补齐 `interaction_spec` 并进入 `product-confirmed`。既有 schema v1 迭代继续按原范围确认流程执行。
+- 新迭代先用 `submit-brief → confirm-brief` 在 `awaiting-brief-confirmation` 确认 `prototype_brief` 的目标、范围、入口和关键路径，进入 `prototyping` 后可连续完成设计约束与交互原型；原型定稿前不得写入或修改正式规格、验收和交接产物。
+- 原型定稿通过 `confirm-prototype` 锁定运行时快照，并直接承担正式范围确认；只有 `prototype-confirmed` 后才可补齐 `interaction_spec` 并进入 `product-confirmed`。
 - `wego-design` 不得新增产品内容，`wego-ux` 不得修改未登记场景或宿主文件，`wego-tests` 必须按 `requirement_id` 覆盖全部确认需求后才能生成开发交接和冻结迭代。
 - 冻结迭代不得覆盖；后续业务变化建立新迭代。纯设计系统、工作流或仓库管理变化不建立业务迭代。
 - 模糊的业务页面请求默认先走 `wego-product`；关键需求未确认前不得进入下一环节，且不得擅自修改用户明确的产品要求。
-- v2 原型期的 `wego-design` 只消费已确认 `prototype_brief` 并写入 `prototype_design`；正式 `interaction_spec` 和 `design_plan` 均在原型定稿后补齐。v1 继续要求先有可继续的 `interaction_spec`。
-- v2 原型期的 `wego-ux` 只执行 `prototype_design`；正式化后的实现追踪仍要求无 gap 的 `design_plan`。v1 继续要求实现前完整设计计划已落盘。
+- 原型期的 `wego-design` 只消费已确认 `prototype_brief` 并写入 `prototype_design`；正式 `interaction_spec` 和 `design_plan` 均在原型定稿后补齐。
+- 原型期的 `wego-ux` 只执行 `prototype_design`；正式化后的实现追踪仍要求无 gap 的 `design_plan`。
 - 已有业务场景的任何修改都必须先进入 `wego-ux` 做偏差判定；文案、间距或使用已注册 Token 的实现微调也不能绕过。修改 Token 源、组件或设计系统规则必须转入 `wego-uxsystem-iterate`。
 - 当前场景未生成且未注册 `route_id`，不得进入 `wego-tests`。
 - 组件、UI Kit、工作流问题不得误走普通业务开发链路。
+- 任一阶段发现旧 Schema、旧规格文件或旧命令调用，必须停止并迁移到当前规范，不得进入兼容执行分支。
 
 ## 仓库级约束
 
