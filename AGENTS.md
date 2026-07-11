@@ -10,7 +10,7 @@
 
 - `wego-app/index.html` 是唯一 App 入口和预览宿主。
 - 业务场景统一进入 `wego-app/scenes/{中文业务场景}/`。
-- 路由使用稳定的 hash `route_id`，例如 `#/my-permission-management`。
+- 路由使用稳定的 kebab-case `route_id`，例如 `my-permission-management`；访问地址使用 `#/my-permission-management`。
 - 电脑端显示手机预览外壳，移动端同链接铺满真实 viewport。
 - 预览以 Vercel 固定链接为主，同时必须支持本地直接打开 `wego-app/index.html`。
 - `wego-app/lib/` 是设计系统部署副本，禁止直接编辑；必须先改 `.codex/skills/wego-design/` 源文件，再运行 `node scripts/sync-wego-app-lib.mjs`。
@@ -27,8 +27,8 @@
 | 用户意图 | 必须先触发 | 前置条件 | 下一步 |
 | --- | --- | --- | --- |
 | 原始业务需求、做页面、做原型、做新场景 | `wego-product` | 无 | 输出并落盘 `interaction_spec` |
-| 基于已有 `interaction_spec` 选择页面范式、UI Kit、组件和打开方式 | `wego-design` | 已有 `interaction_spec` | 输出并落盘 `design_plan` |
-| 正式生成或更新 `wego-app` 场景 | `wego-ux` | 两份规格均已落盘 | 完成后交给 `wego-tests` |
+| 基于已有 `interaction_spec` 选择页面范式、UI Kit、组件和打开方式 | `wego-design` | 规格已落盘且 `readiness != blocked` | 输出并落盘无 gap 的 `design_plan` |
+| 正式生成或更新 `wego-app` 场景 | `wego-ux` | 两份规格已落盘且设计无 gap | 完成后交给 `wego-tests` |
 | 验收、回归、检查当前业务场景 | `wego-tests` | 场景已生成并注册路由 | 输出 `acceptance_report` |
 | 改组件、Token、Preview、UI Kit 或设计系统守门 | `wego-uxsystem-iterate` 的迭代模式 | 目标属于设计系统本体 | 按组件/UI Kit 同步矩阵执行 |
 | 审查并沉淀经验、补充规则、优化工作流 | `wego-uxsystem-iterate` 的工作流迭代模式 | 用户明确要求沉淀或优化 | 先进入经验候选流程 |
@@ -39,9 +39,9 @@
 ## 主链路硬门禁
 
 - 模糊的业务页面请求默认先走 `wego-product`；关键需求未确认前不得进入下一环节，且不得擅自修改用户明确的产品要求。
-- 没有 `interaction_spec`，不得直接进入 `wego-design`。
-- 没有 `design_plan`，不得直接进入 `wego-ux`。
-- 已有场景的任何修改都必须先进入 `wego-ux` 做偏差判定；即使只是间距、文案、Token 或工程实现微调也不能绕过。
+- 没有已落盘且 `readiness != blocked` 的 `interaction_spec`，不得进入 `wego-design`；`partially-ready` 只处理已确认范围。
+- 没有已落盘、覆盖全部可实现 surface 且无 `gap` 的 `design_plan`，不得进入 `wego-ux`。
+- 已有业务场景的任何修改都必须先进入 `wego-ux` 做偏差判定；文案、间距或使用已注册 Token 的实现微调也不能绕过。修改 Token 源、组件或设计系统规则必须转入 `wego-uxsystem-iterate`。
 - 当前场景未生成且未注册 `route_id`，不得进入 `wego-tests`。
 - 组件、UI Kit、工作流问题不得误走普通业务开发链路。
 
@@ -55,7 +55,7 @@
 - 设计系统本体正式迭代必须递增 `.codex/skills/wego-design/metadata.json.version`；纯仓库管理类变更可不递增。
 - 不提交 `.DS_Store`、`.uploads/`。
 - AGENTS.md 只承载跨技能硬约束；具体组件规则、工作流方法和经验候选分别落到对应权威文件。
-- `.trae/skills` 文件夹下的内容是符号链接的副本，禁止直接修改。应该修改 `.codex/skills`下的原始文件。
+- `.trae/skills/*` 是指向 `.codex/skills/*` 的符号链接，禁止把它当作独立副本维护；统一修改 `.codex/skills/` 下的源文件。
 
 ## 经验沉淀硬规则
 
@@ -86,6 +86,7 @@
 - 不强推已存在的远端分支。
 - 提交信息使用简短中文动词短语。
 - 提交前运行：
+  - `node scripts/specs.mjs test`
   - `node scripts/specs.mjs check`
   - `node scripts/validate-wego-design.mjs`
   - 正式合并前按需运行 `node scripts/validate-wego-design.mjs --scope=full --strict`

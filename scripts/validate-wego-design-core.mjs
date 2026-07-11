@@ -55,7 +55,7 @@ const stagedOnly = args.has('--staged');
 
 const REQUIRED_ROOT_FILES = [
   'SKILL.md',
-  'README.md',
+  'references/library-map.md',
   'colors_and_type.css',
   'css.json',
   'components.css',
@@ -404,7 +404,7 @@ function createContext(allSlugs = []) {
     if (/^preview\/component-.+\.html$/.test(rel)) previewChanged = true;
     if (rel === 'colors_and_type.css' || rel === 'css.json') tokenChanged = true;
     if (rel === 'components.css') componentsCssChanged = true;
-    if (rel === 'library-consumption.json' || rel === 'uikit-plan.json' || rel === 'README.md' || rel === 'SKILL.md') {
+    if (rel === 'library-consumption.json' || rel === 'uikit-plan.json' || rel === 'references/library-map.md' || rel === 'SKILL.md') {
       consumptionChanged = true;
     }
     if (rel === 'scripts/extract-components-css.mjs') extractorChanged = true;
@@ -1080,7 +1080,7 @@ function checkConsumptionContracts() {
     }
   }
 
-  const textFiles = ['SKILL.md', 'README.md', 'library-consumption.json'];
+  const textFiles = ['SKILL.md', 'references/library-map.md', 'library-consumption.json'];
   for (const rel of textFiles) {
     if (!exists(rel)) continue;
     const text = read(rel);
@@ -1194,8 +1194,8 @@ function checkSingleShellRuleConflicts(context) {
     path.join(libraryRoot, 'uikit-plan.json'),
     path.join(libraryRoot, 'specs/交互设计原则.md'),
     path.join(libraryRoot, '..', 'wego-ux', 'SKILL.md'),
-    path.join(libraryRoot, '..', 'wego-ux', 'templates/page-shell.html'),
-    path.join(libraryRoot, '..', 'wego-ux', 'templates/page.css'),
+    path.join(libraryRoot, '..', 'wego-ux', 'assets/templates/page-shell.html'),
+    path.join(libraryRoot, '..', 'wego-ux', 'assets/templates/page.css'),
     path.join(libraryRoot, '..', 'wego-tests', 'SKILL.md'),
   ].map(file => path.resolve(file));
   const changedAbs = new Set(context.changedFiles.map(file => path.resolve(repoRoot, file)));

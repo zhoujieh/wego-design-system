@@ -1,7 +1,7 @@
 interface:
   display_name: "Wego Product"
-  short_description: "当用户给原始业务需求、要做页面或新场景时，先理解需求并输出 interaction_spec"
-  default_prompt: "当用户说“帮我做这个业务页面/原型/场景”、给出原始中文业务需求、要求先做需求理解或页面规格定义时，隐式调用 $wego-product。Use this skill before any design-system consumption, classify the task, determine the page scene, and produce an interaction_spec first."
+  short_description: "理解新页面与业务变更，产出 interaction_spec"
+  default_prompt: "Use $wego-product to turn this business request into a confirmed, traceable interaction_spec before design or implementation."
 
 policy:
   allow_implicit_invocation: true

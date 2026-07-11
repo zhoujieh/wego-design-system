@@ -690,6 +690,73 @@
         "field": "页面打开方式 / page_presentation 结构规范（多 route 场景必须按 surface_id 索引）",
         "rule_id": "multi-route-page-presentation-indexed-by-surface"
       }
+    },
+    {
+      "id": "exp-skill-packages-progressive-disclosure-and-structural-guardrails",
+      "normalized_key": "workflow-skill-packages-must-use-concise-entry-progressive-disclosure-standard-resource-roles-and-structural-guardrails",
+      "title": "五技能包必须采用短入口、按需引用、明确资源角色和结构守门",
+      "status": "promoted",
+      "occurrence_count": 1,
+      "threshold": 1,
+      "primary_owner": "wego-uxsystem-iterate",
+      "secondary_owners": ["wego-product", "wego-design", "wego-ux", "wego-tests"],
+      "ownership_reason": "问题最早产生在 wego-uxsystem-iterate 对五技能包结构和工作流规则的治理环节。现行守门只保证每个目录存在唯一 SKILL.md，尚未约束入口文档的信息预算、按需引用可达性、README/templates 等资源角色、链接有效性和技能元数据同步，因此各业务技能持续把完整 schema、迁移说明、长示例和专项检查累积到入口文件，最终增加上下文竞争、重复规则和断链风险。",
+      "problem_pattern": "跨技能工作流把核心路由、详细字段字典、兼容迁移、长示例、专项实现或验收清单混放在 SKILL.md，并存在 README 被脚本当作平级规则来源、模板未归入 assets、reference 读取条件不明确或相对链接失效。基础 frontmatter 校验仍会通过，但 AI 触发后需要一次加载大量非本轮信息，且目录漂移、引用断链和元数据过期无法被机械发现。",
+      "scene_evidence": [
+        {
+          "date": "2026-07-11",
+          "scene": "五个工作流技能文档与技能包目录结构审查",
+          "summary": "官方 skill-creator 建议 SKILL.md 只保留必要流程并采用渐进披露，详细资料放 references、输出模板放 assets、重复且需确定性的操作放 scripts，同时不保留 README 等额外文档。仓库现状为 wego-product/design/ux/tests/uxsystem-iterate 的 SKILL.md 分别 476/551/407/405/203 行，wego-design 超过官方建议的 500 行；wego-design/README.md 仍被 specs source manifest 和同步矩阵当作规则来源；wego-ux/templates 未归入 assets；wego-ux 与 wego-tests 指向 AGENTS.md 的 Markdown 相对链接均无法解析。五个目录通过 quick_validate.py，说明现有校验只覆盖基础格式，未覆盖渐进披露和引用完整性。",
+          "source": "用户明确要求参考官方最佳实践审查并优化五个技能的 SKILL 文档结构和技能包目录结构，并支持自循环工作流迭代"
+        }
+      ],
+      "applies_when_candidates": [
+        "维护 wego-product、wego-design、wego-ux、wego-tests、wego-uxsystem-iterate 任一技能的职责、流程、输入输出、门禁或交接规则",
+        "SKILL.md 同时承载核心执行流程与完整 schema、长示例、兼容迁移或专项检查清单",
+        "技能目录新增 README、模板、参考文档、脚本或其他资源，并需要明确运行时加载角色",
+        "工作流迭代需要让结构漂移、断链引用、入口膨胀和 agents/openai.yaml 过期可被自动检查"
+      ],
+      "avoid_when_candidates": [
+        "组件 JSON、Preview HTML、Token CSS、UI Kit 和字体图标等设计系统领域资产本身；这些资源可按既有运行时依赖图保留专用目录，不应为了形式统一盲目迁移",
+        "仅修改业务场景 interaction_spec、design_plan、scene.js 或 scene.css，且不改变技能包规则或目录",
+        "短小且只有单一路径的技能；没有独立加载价值时不强制拆分 reference"
+      ],
+      "expected_rule_target": {
+        "file": ".codex/skills/wego-uxsystem-iterate/SKILL.md",
+        "field": "Skill 包渐进披露、目录角色与结构守门"
+      },
+      "runtime_reachability": {
+        "consumer_skill": "wego-uxsystem-iterate 在创建、审查或修改五个技能包时读取；五个技能各自通过精简 SKILL.md 的显式读取路由按需加载 references",
+        "output_field": "五个 SKILL.md 的核心流程与条件式 reference 路由、标准化资源目录、agents/openai.yaml，以及工作流结构校验结果",
+        "downstream_consumer": "wego-product、wego-design、wego-ux、wego-tests 只加载当前任务需要的详细规则并保持既有 interaction_spec → design_plan → scene → acceptance_report 交接字段不变；wego-uxsystem-iterate 根据验证失败继续修正文档或目录",
+        "acceptance_check": "新增或扩展结构守门，检查 frontmatter 仅含 name/description、目录名一致、SKILL.md 信息预算、所有直接 reference/Markdown 链接可解析、禁止平级 README 规则源、模板归入 assets、脚本归入 scripts、agents/openai.yaml 与 description/职责一致；再运行 quick_validate、specs check/test 和 system strict，并用代表性任务做前向验证"
+      },
+      "applies_when": [
+        "创建、审查或修改五个工作流技能包",
+        "入口同时承载详细 schema、迁移、长示例或专项清单",
+        "新增 reference、模板、脚本或其他技能资源",
+        "需要机械发现入口膨胀、断链、资源角色和 agents 元数据漂移"
+      ],
+      "avoid_when": [
+        "只修改业务场景规格或实现且不改变工作流规则",
+        "普通组件、Preview、Token 或 UI Kit 内容迭代",
+        "短小单路径技能没有独立按需加载价值"
+      ],
+      "exceptions": [
+        "设计系统稳定的组件 JSON、Preview、Token 和 UI Kit 可保留领域专用目录",
+        "核心门禁拆分后不可见时将最小决策规则保留在 SKILL.md"
+      ],
+      "fallback": "移动资源会破坏稳定路径时保留原目录并登记角色；reference 读取条件不明确时先收回到 SKILL.md，明确边界后再拆分。",
+      "merge_target": "并入 wego-uxsystem-iterate 既有 Skill 单一入口硬规则，升级为 Skill 包渐进披露与目录硬规则，不新增平级治理体系。",
+      "new_scenario_type_needed": false,
+      "created_at": "2026-07-11T10:17:53+08:00",
+      "updated_at": "2026-07-11T10:33:15+08:00",
+      "formal_rule": {
+        "confirmed_at": "2026-07-11T10:33:15+08:00",
+        "file": ".codex/skills/wego-uxsystem-iterate/SKILL.md",
+        "field": "Skill 包渐进披露与目录硬规则",
+        "rule_id": "skill-packages-progressive-disclosure-and-structural-guardrails"
+      }
     }
   ]
 }

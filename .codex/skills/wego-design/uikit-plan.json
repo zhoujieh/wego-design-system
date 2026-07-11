@@ -296,14 +296,14 @@
   "hostShell": {
     "managedBy": "wego-ux",
     "templateFiles": [
-      "../wego-ux/templates/host-shell.html",
-      "../wego-ux/templates/host-shell.css",
-      "../wego-ux/templates/host-shell.js",
+      "../wego-ux/assets/templates/host-shell.html",
+      "../wego-ux/assets/templates/host-shell.css",
+      "../wego-ux/assets/templates/host-shell.js",
       "../../../wego-app/index.html",
       "../../../wego-app/css/app.css",
       "../../../wego-app/js/app.js"
     ],
-    "rule": "固定宿主 App 正式维护在 wego-app/，wego-ux/templates/host-shell.* 只作为宿主基线来源，不属于 wego-design 的 UI Kit 或 pagePattern。若 interaction_spec 声明 app_target + host_container + route_id，wego-design 只为 host-entry 或 host-tab 产出入口/结果回填和打开方式依据；wego-ux 只按 route_id 增量更新 routes.js、入口、业务场景和必要交互。",
+    "rule": "固定宿主 App 正式维护在 wego-app/，wego-ux/assets/templates/host-shell.* 只作为宿主基线来源，不属于 wego-design 的 UI Kit 或 pagePattern。若 interaction_spec 声明 app_target + host_container + route_id，wego-design 只为 host-entry 或 host-tab 产出入口/结果回填和打开方式依据；wego-ux 只按 route_id 增量更新 routes.js、入口、业务场景和必要交互。",
     "fixedTabs": [
       {
         "id": "dongtai",
@@ -347,8 +347,8 @@
     },
     "previewShellPolicy": {
       "appliesTo": [
-        "../wego-ux/templates/host-shell.*",
-        "../wego-ux/templates/page-shell.html",
+        "../wego-ux/assets/templates/host-shell.*",
+        "../wego-ux/assets/templates/page-shell.html",
         "ui_kits/*/index.html",
         "wego-app/index.html"
       ],
@@ -814,7 +814,7 @@
   ],
   "lowConfidence": false,
   "warnings": [
-    "app 宿主页不属于 UI Kit；固定宿主 App 正式维护在 wego-app/，wego-ux/templates/host-shell.* 只作为宿主基线来源。",
+    "app 宿主页不属于 UI Kit；固定宿主 App 正式维护在 wego-app/，wego-ux/assets/templates/host-shell.* 只作为宿主基线来源。",
     "带 app_target + host_container + route_id 的任务必须维护现有 wego-app 宿主，只按 route_id 增量更新 routes.js、入口、业务场景、结果回填和交互，不复制第二套 host-shell，也不重画宿主 Tab、工作台、我的页等现成内容。",
     "手机预览外壳是全局预览能力：电脑端显示，移动端同链接隐藏；外壳类不得成为业务布局依赖。",
     "不要把“不能复制 .uikit-shell/.phone-frame/.phone-screen”误读成“不能贴近最佳页面范式”；页面模式、section 节奏和摘要结构可以继承。",

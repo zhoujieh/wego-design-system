@@ -9,7 +9,7 @@
 必看：
 
 - `references/workflow-iteration.md`
-- `experience/README.md`
+- `references/experience-candidates.md`
 - `experience/candidates.json`
 - 与主要归属对应的技能和权威文件
 
@@ -83,7 +83,7 @@
 - 明确由哪个技能读取、影响哪个输出、如何交接和验收。
 - 确认技能目录不存在 `SKILL.runtime.md` 或其他并列入口。
 - 全仓清理已删除入口、旧字段和旧规则路径引用。
-- 更新生成脚本 source manifest、README 和同步矩阵。
+- 更新生成脚本 source manifest、library map 和同步矩阵。
 - 运行规则文档生成、检查和测试。
 - 若 `.codex/skills/wego-design/` 内正式设计系统文件发生变化，递增 `metadata.json.version`。
 
@@ -98,7 +98,7 @@
 
 - 把有效规则整理进唯一 `SKILL.md`，消除冲突和重复。
 - 删除 `SKILL.runtime.md`、`SKILL.override.md` 等历史入口。
-- 更新 `.codex/skills/README.md`、技能 README、生成脚本 source manifest 和所有运行时引用。
+- 更新 `.codex/skills/README.md`、技能直接引用的 references、生成脚本 source manifest 和所有运行时引用。
 - 增加结构守门，禁止历史入口重新出现。
 
 必查：

@@ -3,7 +3,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const VERSION = '5';
+const VERSION = '6';
 const ROOT = path.resolve(process.env.WEGO_REPO_ROOT || process.cwd());
 const OUT = path.join(ROOT, '.codex/skills/wego-design/specs');
 const CMD = process.argv[2];
@@ -57,21 +57,34 @@ function sources() {
     'README.md',
     '.codex/skills/README.md',
     '.codex/skills/wego-product/SKILL.md',
+    '.codex/skills/wego-product/references/interaction-spec.md',
+    '.codex/skills/wego-product/references/readiness-and-boundaries.md',
     '.codex/skills/wego-design/SKILL.md',
-    '.codex/skills/wego-design/README.md',
+    '.codex/skills/wego-design/references/library-map.md',
+    '.codex/skills/wego-design/references/design-plan.md',
+    '.codex/skills/wego-design/references/design-decisions.md',
     '.codex/skills/wego-design/library-consumption.json',
     '.codex/skills/wego-design/uikit-plan.json',
     '.codex/skills/wego-design/components/index.json',
     ...components,
     '.codex/skills/wego-ux/SKILL.md',
+    '.codex/skills/wego-ux/references/scene-runtime.md',
+    '.codex/skills/wego-ux/references/interaction-implementation.md',
+    '.codex/skills/wego-ux/references/delivery.md',
     '.codex/skills/wego-tests/SKILL.md',
+    '.codex/skills/wego-tests/references/acceptance-report.md',
+    '.codex/skills/wego-tests/references/acceptance-checks.md',
+    '.codex/skills/wego-tests/references/browser-verification.md',
     '.codex/skills/wego-uxsystem-iterate/SKILL.md',
     '.codex/skills/wego-uxsystem-iterate/references/workflow.md',
+    '.codex/skills/wego-uxsystem-iterate/references/button-example.md',
+    '.codex/skills/wego-uxsystem-iterate/references/case-usagehint-size-as-state.md',
     '.codex/skills/wego-uxsystem-iterate/references/judgment-principles.md',
     '.codex/skills/wego-uxsystem-iterate/references/workflow-iteration.md',
     '.codex/skills/wego-uxsystem-iterate/references/sync-matrix.md',
     '.codex/skills/wego-uxsystem-iterate/references/sync-matrix.runtime.md',
-    '.codex/skills/wego-uxsystem-iterate/experience/README.md',
+    '.codex/skills/wego-uxsystem-iterate/references/experience-candidates.md',
+    '.codex/skills/wego-uxsystem-iterate/references/skill-package-structure.md',
     'scripts/validate-wego-design.mjs',
     'scripts/validate-wego-design-core.mjs',
   ].sort();
@@ -447,15 +460,58 @@ function structuralErrors() {
   if (manifest.some(rel => /\/SKILL\.(?!md$)/.test(rel))) errors.push('规则来源清单不得包含历史 Skill 入口');
   for (const dir of SKILL_DIRS) {
     const root = path.join(ROOT, dir);
-    if (!fs.existsSync(path.join(root, 'SKILL.md'))) errors.push(`${dir} 缺少唯一 SKILL.md`);
+    const skillFile = path.join(root, 'SKILL.md');
+    if (!fs.existsSync(skillFile)) errors.push(`${dir} 缺少唯一 SKILL.md`);
     if (fs.existsSync(root)) for (const name of fs.readdirSync(root).filter(name => /^SKILL\..+\.md$/.test(name) && name !== 'SKILL.md')) errors.push(`${dir}/${name} 是禁止保留的并列 Skill 入口`);
+    if (fs.existsSync(path.join(root, 'README.md'))) errors.push(`${dir}/README.md 是禁止保留的平级辅助文档；详细资料应进入 references/`);
+    if (fs.existsSync(path.join(root, 'templates'))) errors.push(`${dir}/templates 角色不明确；输出模板应进入 assets/templates/`);
+    const agentFile = path.join(root, 'agents/openai.yaml');
+    if (!fs.existsSync(agentFile)) errors.push(`${dir} 缺少 agents/openai.yaml`);
+    else {
+      const agent = fs.readFileSync(agentFile, 'utf8');
+      const shortDescription = agent.match(/^\s*short_description:\s*"([^"]+)"/m)?.[1] || '';
+      const defaultPrompt = agent.match(/^\s*default_prompt:\s*"([^"]+)"/m)?.[1] || '';
+      if (shortDescription.length < 25 || shortDescription.length > 64) errors.push(`${dir}/agents/openai.yaml short_description 必须为 25–64 字符`);
+      if (!defaultPrompt.includes(`$${path.basename(root)}`)) errors.push(`${dir}/agents/openai.yaml default_prompt 必须显式包含 $${path.basename(root)}`);
+    }
+    const commonEntries = new Set(['SKILL.md','agents','references','scripts','assets']);
+    const domainEntries = {
+      'wego-design': new Set(['colors_and_type.css','components.css','components','css.json','iconfont.css','library-consumption.json','metadata.json','preview','scaffold.css','specs','ui_kits','uikit-plan.json']),
+      'wego-uxsystem-iterate': new Set(['experience']),
+    }[path.basename(root)] || new Set();
+    if (fs.existsSync(root)) for (const entry of fs.readdirSync(root)) if (!commonEntries.has(entry) && !domainEntries.has(entry)) errors.push(`${dir}/${entry} 资源角色未登记；应归入 references/scripts/assets 或正式领域目录`);
+    if (fs.existsSync(skillFile)) {
+      const value = fs.readFileSync(skillFile, 'utf8');
+      const lineCount = value.split(/\r?\n/).length;
+      if (lineCount >= 500) errors.push(`${dir}/SKILL.md 共 ${lineCount} 行，必须少于 500 行并使用渐进披露`);
+      const frontmatter = value.match(/^---\n([\s\S]*?)\n---/);
+      if (!frontmatter) errors.push(`${dir}/SKILL.md 缺少 YAML frontmatter`);
+      else {
+        const fields = [...frontmatter[1].matchAll(/^([a-zA-Z0-9_-]+):/gm)].map(match => match[1]);
+        for (const field of fields) if (!['name','description'].includes(field)) errors.push(`${dir}/SKILL.md frontmatter 含非标准字段 ${field}`);
+        const name = frontmatter[1].match(/^name:\s*["']?([^"'\n]+)["']?\s*$/m)?.[1]?.trim();
+        if (name !== path.basename(root)) errors.push(`${dir}/SKILL.md name 必须与目录名一致`);
+      }
+      const linked = new Set();
+      for (const match of value.matchAll(/\[[^\]]+\]\(([^)]+)\)/g)) {
+        const target = match[1].split('#')[0];
+        if (!target || /^(?:https?:|mailto:)/.test(target)) continue;
+        const resolved = path.resolve(root, target);
+        if (!fs.existsSync(resolved)) errors.push(`${dir}/SKILL.md 链接不存在：${target}`);
+        linked.add(path.normalize(target));
+      }
+      const references = path.join(root, 'references');
+      if (fs.existsSync(references)) for (const entry of fs.readdirSync(references, { withFileTypes: true })) {
+        if (entry.isFile() && entry.name.endsWith('.md') && !linked.has(path.normalize(`references/${entry.name}`))) errors.push(`${dir}/references/${entry.name} 未由 SKILL.md 直接链接`);
+      }
+    }
   }
   const consumption = json('.codex/skills/wego-design/library-consumption.json');
   for (const [i, item] of (consumption.scenarioTypeRegistry?.types || []).entries()) {
     for (const key of ['occurrence_count','scene_evidence','threshold','status','normalized_key']) if (Object.hasOwn(item, key)) errors.push(`scenarioTypeRegistry.types[${i}] 含候选字段 ${key}`);
     if (/observing|awaiting-confirmation/.test(JSON.stringify(item))) errors.push(`scenarioTypeRegistry.types[${i}] 含候选状态，不得进入正式注册表`);
   }
-  const runtimeFiles = ['AGENTS.md','.codex/skills/README.md','.codex/skills/wego-product/SKILL.md','.codex/skills/wego-design/SKILL.md','.codex/skills/wego-ux/SKILL.md','.codex/skills/wego-tests/SKILL.md','.codex/skills/wego-uxsystem-iterate/SKILL.md','.codex/skills/wego-design/README.md'];
+  const runtimeFiles = ['AGENTS.md','README.md','.codex/skills/README.md','.codex/skills/wego-product/SKILL.md','.codex/skills/wego-design/SKILL.md','.codex/skills/wego-ux/SKILL.md','.codex/skills/wego-tests/SKILL.md','.codex/skills/wego-uxsystem-iterate/SKILL.md','.codex/skills/wego-design/references/library-map.md'];
   for (const rel of runtimeFiles) {
     const value = text(rel);
     if (/先读取\s*`?SKILL\.runtime\.md/.test(value)) errors.push(`${rel} 仍要求读取历史 Skill 入口`);

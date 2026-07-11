@@ -76,7 +76,7 @@
 ### 设计系统本体
 
 - `.codex/skills/wego-design/SKILL.md`
-- `.codex/skills/wego-design/README.md`
+- `.codex/skills/wego-design/references/library-map.md`
 - `.codex/skills/wego-design/library-consumption.json`
 - `.codex/skills/wego-design/uikit-plan.json`
 - `.codex/skills/wego-design/components/index.json`

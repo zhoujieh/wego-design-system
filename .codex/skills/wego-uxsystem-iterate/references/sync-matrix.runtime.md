@@ -15,7 +15,7 @@
 按需改：
 
 - `.codex/skills/wego-design/preview/component-{slug}.html`：当契约变化影响结构、状态、变体示例时
-- `.codex/skills/wego-design/README.md`、`.codex/skills/wego-design/SKILL.md`：当边界或清单说明变化时
+- `.codex/skills/wego-design/references/library-map.md`、`.codex/skills/wego-design/SKILL.md`：当边界或清单说明变化时
 
 通常不需要：
 
@@ -66,7 +66,7 @@
 
 按需改：
 
-- `.codex/skills/wego-design/README.md`
+- `.codex/skills/wego-design/references/library-map.md`
 - `.codex/skills/wego-design/SKILL.md`
 - `.codex/skills/wego-design/library-consumption.json`
 - 受影响 UI Kit 的 `ui_kits/{slug}/index.html` 与对应 `quality-report.json`：当契约收敛影响该 UI Kit 已有示例时
@@ -101,7 +101,7 @@
 
 - `.codex/skills/wego-design/components/{slug}.json`
 - `.codex/skills/wego-design/preview/component-{slug}.html`
-- `.codex/skills/wego-design/README.md`
+- `.codex/skills/wego-design/references/library-map.md`
 - `.codex/skills/wego-design/SKILL.md`
 
 必做：
@@ -132,7 +132,7 @@
 - `.codex/skills/wego-design/iconfont.css`
 - `.codex/skills/wego-design/library-consumption.json`
 - `.codex/skills/wego-design/SKILL.md`
-- `.codex/skills/wego-design/README.md`：当存在 iconfont 规则例外或下游复制边界变化时
+- `.codex/skills/wego-design/references/library-map.md`：当存在 iconfont 规则例外或下游复制边界变化时
 - 调用该组件的 preview / UI Kit：当它们仍在使用旧图标、内联 SVG 或旧 helper
 
 限制：
@@ -162,7 +162,7 @@
 - `.codex/skills/wego-design/uikit-plan.json`：当 UI Kit 内的页面范式、组合约束、槽位分配变化时
 - 相关组件契约与 preview：当 UI Kit 中暴露出组件使用问题，需要收回规则时
 - `.codex/skills/wego-design/library-consumption.json`：当该 UI Kit 的复制边界、消费说明变化时
-- `.codex/skills/wego-design/README.md`、`.codex/skills/wego-design/SKILL.md`：当 UI Kit 数量、清单或定位说明变化时
+- `.codex/skills/wego-design/references/library-map.md`、`.codex/skills/wego-design/SKILL.md`：当 UI Kit 数量、清单或定位说明变化时
 
 必做：
 
@@ -186,7 +186,7 @@
 - `.codex/skills/wego-design/metadata.json`
 - `.codex/skills/wego-design/uikit-plan.json`
 - `.codex/skills/wego-design/library-consumption.json`
-- `.codex/skills/wego-design/README.md`
+- `.codex/skills/wego-design/references/library-map.md`
 - `.codex/skills/wego-design/SKILL.md`
 
 必改：
@@ -195,7 +195,7 @@
 - 新增 `.codex/skills/wego-design/ui_kits/{slug}/quality-report.json`
 - `.codex/skills/wego-design/uikit-plan.json`：在 `uiKits`、`productContext.selectedFrameNames` 中登记，并按需补 `pagePatterns` / `screenBlueprints` / `compositionConstraints`
 - `.codex/skills/wego-design/library-consumption.json`：在 `consumptionLayers.uikit.files` 中登记新 UI Kit 入口与 quality-report，必要时更新 `downstreamScenarios.buildMobileAppPage.read`
-- `.codex/skills/wego-design/README.md` 与顶层 `.codex/skills/wego-design/SKILL.md`：同步 UI Kit 清单、定位与根目录结构
+- `.codex/skills/wego-design/references/library-map.md` 与顶层 `.codex/skills/wego-design/SKILL.md`：同步 UI Kit 清单、定位与根目录结构
 
 必做：
 
@@ -215,7 +215,7 @@
 - `.codex/skills/wego-design/components/index.json`
 - `.codex/skills/wego-design/uikit-plan.json`
 - `.codex/skills/wego-design/library-consumption.json`
-- `.codex/skills/wego-design/README.md`
+- `.codex/skills/wego-design/references/library-map.md`
 - `.codex/skills/wego-design/SKILL.md`
 
 必改：
@@ -225,7 +225,7 @@
 - `.codex/skills/wego-design/components/index.json`
 - `.codex/skills/wego-design/uikit-plan.json`
 - `.codex/skills/wego-design/library-consumption.json`
-- `.codex/skills/wego-design/README.md`
+- `.codex/skills/wego-design/references/library-map.md`
 - `.codex/skills/wego-design/SKILL.md`
 
 必做：

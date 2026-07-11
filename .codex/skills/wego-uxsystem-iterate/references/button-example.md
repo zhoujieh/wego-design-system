@@ -18,7 +18,7 @@
 ## 2. 读取顺序
 
 1. `.codex/skills/wego-design/SKILL.md`
-2. `.codex/skills/wego-design/README.md`
+2. `.codex/skills/wego-design/references/library-map.md`
 3. `.codex/skills/wego-design/library-consumption.json`
 4. `.codex/skills/wego-design/uikit-plan.json`
 5. `.codex/skills/wego-design/components/index.json`

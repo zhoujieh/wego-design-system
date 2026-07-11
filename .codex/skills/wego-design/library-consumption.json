@@ -60,7 +60,7 @@
       ],
       "copyable": false,
       "purpose": "业务规则配置等页面组合 Showcase，用来理解页面结构和组件搭配；App 宿主页正式维护在 wego-app/，不是 UI Kit",
-      "downstreamRule": "只参考页面结构和组件组合，不要直接复制 .uikit-shell、.phone-frame 或业务演示里的自定义 biz-* 样式作为通用组件。固定宿主 App 正式维护在 wego-app/index.html，wego-ux/templates/host-shell.* 只作为宿主基线来源，不由 UI Kit 下发，也不在每个业务场景中复制。命中页面范式后，检查 uikit-plan.json 中对应 pagePatterns[].compositionConstraints 获取组件组合约束（如 radio 的 cell vs form 取舍）。UI Kit 中出现的 section 标题现在应回收为组件正式节点（如 .cell-group__title、.form-group__title），不再把 .uikit-section-title 当下游可复制规则。"
+      "downstreamRule": "只参考页面结构和组件组合，不要直接复制 .uikit-shell、.phone-frame 或业务演示里的自定义 biz-* 样式作为通用组件。固定宿主 App 正式维护在 wego-app/index.html，wego-ux/assets/templates/host-shell.* 只作为宿主基线来源，不由 UI Kit 下发，也不在每个业务场景中复制。命中页面范式后，检查 uikit-plan.json 中对应 pagePatterns[].compositionConstraints 获取组件组合约束（如 radio 的 cell vs form 取舍）。UI Kit 中出现的 section 标题现在应回收为组件正式节点（如 .cell-group__title、.form-group__title），不再把 .uikit-section-title 当下游可复制规则。"
     }
   },
   "iconUsage": {
@@ -176,11 +176,11 @@
   },
   "uikitConstraints": {
     "kitType": "business-page-showcase",
-    "appHostTemplateSource": "../wego-ux/templates/host-shell.*",
+    "appHostTemplateSource": "../wego-ux/assets/templates/host-shell.*",
     "previewShellPolicy": {
       "appliesTo": [
         "ui_kits/*/index.html",
-        "../wego-ux/templates/*.html",
+        "../wego-ux/assets/templates/*.html",
         "wego-app/index.html"
       ],
       "desktop": "显示手机预览外壳",
@@ -194,7 +194,7 @@
       ".phone-frame",
       ".phone-screen"
     ],
-    "warningForDownstream": "UI Kit 是展示样品，不是真实宿主模板；App 宿主模板直接从 wego-ux/templates/host-shell.* 复制。",
+    "warningForDownstream": "UI Kit 是展示样品，不是真实宿主模板；App 宿主模板直接从 wego-ux/assets/templates/host-shell.* 复制。",
     "showcaseStructureRule": {
       "applicableTo": "包含 pagePattern 的 UI Kit（即有 presentation 定义的 UI Kit）",
       "structureRequirement": {
@@ -218,7 +218,7 @@
   },
   "globalConsumptionRules": {
     "uikitReferenceBoundary": "UI Kit 只作业务页面结构和组件组合参考，禁止复制 Showcase 外壳与内容，也不承担 App 宿主模板职责。",
-    "appHostBoundary": "`app` 不属于 UI Kit；固定宿主 App 的唯一运行落点是 wego-app/index.html，宿主模板基线由 wego-ux/templates/host-shell.* 维护。",
+    "appHostBoundary": "`app` 不属于 UI Kit；固定宿主 App 的唯一运行落点是 wego-app/index.html，宿主模板基线由 wego-ux/assets/templates/host-shell.* 维护。",
     "contractFirst": "组件必须优先复用已注册契约；若命中组件契约已定义的稳定场景，页面层不得再重定义其内嵌关联控件规格、父子联动结构或冗余 helper。若发现组件契约问题，任务完成后必须作为风险性告知用户。",
     "specAuthority": "业务内容来自 interaction_spec；布局、交互和视觉规则引用实际命中的 Token、组件契约、Preview、uikit-plan.json、library-consumption.json 或 SKILL.md 字段。自动生成的 specs/*.md 只用于人工审查，不得进入运行时规则来源。",
     "demoStyleBoundary": "不把 biz-* 演示样式当通用组件，也不把示例中的主操作位置误写成唯一强制规则。",

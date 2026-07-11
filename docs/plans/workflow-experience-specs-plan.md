@@ -352,7 +352,7 @@ scripts/validate-wego-design.mjs
 
 ```text
 .codex/skills/wego-uxsystem-iterate/experience/candidates.json
-.codex/skills/wego-uxsystem-iterate/experience/README.md
+.codex/skills/wego-uxsystem-iterate/references/experience-candidates.md
 scripts/specs.mjs
 ```
 

@@ -15,7 +15,7 @@
 
 ## 2. 已注册组件迭代标准步骤
 
-1. 读取 `.codex/skills/wego-design/SKILL.md`、`.codex/skills/wego-design/README.md`、`.codex/skills/wego-design/library-consumption.json`、`.codex/skills/wego-design/uikit-plan.json`
+1. 读取 `.codex/skills/wego-design/SKILL.md`、`.codex/skills/wego-design/references/library-map.md`、`.codex/skills/wego-design/library-consumption.json`、`.codex/skills/wego-design/uikit-plan.json`
 2. 读取 `.codex/skills/wego-design/components/index.json`，确认 slug 已注册
 3. 读取 `.codex/skills/wego-design/components/{slug}.json` 与 `.codex/skills/wego-design/preview/component-{slug}.html`
 4. 判断这次变化落在哪些面：
@@ -48,7 +48,7 @@
    - 组件 CSS 只改 `/* @component-css-start */` 与 `/* @component-css-end */` 之间
    - 脚手架样式不要混进组件核心样式区
 7. 若样式有变化，在仓库根执行 `node .codex/skills/wego-design/scripts/extract-components-css.mjs .codex/skills/wego-design`
-8. 若影响 `.codex/skills/wego-design/README.md`、顶层 `.codex/skills/wego-design/SKILL.md`、`.codex/skills/wego-design/library-consumption.json`、`.codex/skills/wego-design/uikit-plan.json`，一并同步
+8. 若影响 `.codex/skills/wego-design/references/library-map.md`、顶层 `.codex/skills/wego-design/SKILL.md`、`.codex/skills/wego-design/library-consumption.json`、`.codex/skills/wego-design/uikit-plan.json`，一并同步
 9. 递增 `.codex/skills/wego-design/metadata.json.version`
 10. 做最小必要验证并汇报风险
 
@@ -103,7 +103,7 @@
 5. 在仓库根执行 `node .codex/skills/wego-design/scripts/extract-components-css.mjs .codex/skills/wego-design` 生成 `.codex/skills/wego-design/components.css`
 6. 同步 `.codex/skills/wego-design/uikit-plan.json`
 7. 同步 `.codex/skills/wego-design/library-consumption.json`
-8. 同步 `.codex/skills/wego-design/README.md` 与顶层 `.codex/skills/wego-design/SKILL.md` 中的组件数量、清单、状态和边界
+8. 同步 `.codex/skills/wego-design/references/library-map.md` 与顶层 `.codex/skills/wego-design/SKILL.md` 中的组件数量、清单、状态和边界
 9. 递增 `.codex/skills/wego-design/metadata.json.version`
 10. 验证新增组件是否符合移动端、微信生态、电商/工具场景
 
@@ -121,7 +121,7 @@
    - **演示外壳**：`.uikit-shell`、`.phone-frame`、`.phone-screen`、`biz-*` 是否被误升级为通用组件
 5. 修改目标 `ui_kits/{slug}/index.html` 的演示层
 6. 修改对应 `quality-report.json`，使报告与页面当前状态一致
-7. 按需同步 `.codex/skills/wego-design/uikit-plan.json`、`library-consumption.json`、`README.md`、顶层 `SKILL.md`
+7. 按需同步 `.codex/skills/wego-design/uikit-plan.json`、`library-consumption.json`、`references/library-map.md`、顶层 `SKILL.md`
 8. 递增 `.codex/skills/wego-design/metadata.json.version`
 9. 同一变更若影响多个 UI Kit，逐个同步各自的 `index.html` 与 `quality-report.json`
 10. 做最小必要验证并汇报风险
@@ -140,7 +140,7 @@
 - 若只是同一套页面范式换了业务外壳（如另一类规则配置页），优先扩展现有 UI Kit 的示例区，而不是新增
 - 若页面范式、组件组合节奏、固定槽位与现有 UI Kit 明显不同，才走新增流程
 
-1. 读取 `.codex/skills/wego-design/uikit-plan.json`、`library-consumption.json`、`README.md`、顶层 `SKILL.md`，确认现有 UI Kit 全集与新 `slug` 不冲突
+1. 读取 `.codex/skills/wego-design/uikit-plan.json`、`library-consumption.json`、`references/library-map.md`、顶层 `SKILL.md`，确认现有 UI Kit 全集与新 `slug` 不冲突
 2. 新增 `.codex/skills/wego-design/ui_kits/{slug}/index.html`，复用已注册组件契约，不发明组件类、子元素类或修饰类
 3. 新增 `.codex/skills/wego-design/ui_kits/{slug}/quality-report.json`
 4. 在 `.codex/skills/wego-design/uikit-plan.json` 中登记：
@@ -148,7 +148,7 @@
    - `productContext.selectedFrameNames` 追加 `ui_kits/{slug}/index.html`
    - 按需补 `pagePatterns` / `screenBlueprints` / `compositionConstraints`
 5. 在 `.codex/skills/wego-design/library-consumption.json` 的 `consumptionLayers.uikit.files` 中登记新 UI Kit 入口与 quality-report；若新 UI Kit 是某下游场景的主蓝本，更新 `downstreamScenarios.buildMobileAppPage.read`
-6. 同步 `.codex/skills/wego-design/README.md` 与顶层 `.codex/skills/wego-design/SKILL.md` 中的 UI Kit 清单、定位与根目录结构
+6. 同步 `.codex/skills/wego-design/references/library-map.md` 与顶层 `.codex/skills/wego-design/SKILL.md` 中的 UI Kit 清单、定位与根目录结构
 7. 在仓库根运行 `node scripts/validate-wego-design.mjs` 做文件完整性守门
 8. 递增 `.codex/skills/wego-design/metadata.json.version`
 9. 验证新 UI Kit 是否符合移动端、微信生态、电商/工具场景，且保持 `.uikit-shell`、`.phone-frame`、`.phone-screen` 演示外壳
@@ -161,7 +161,7 @@
 
 ## 4. 什么时候同步顶层文档
 
-出现下面任一情况时，要考虑同步 `.codex/skills/wego-design/README.md` 和顶层 `.codex/skills/wego-design/SKILL.md`：
+出现下面任一情况时，要考虑同步 `.codex/skills/wego-design/references/library-map.md` 和顶层 `.codex/skills/wego-design/SKILL.md`：
 
 - 组件数量变化
 - 已发布组件清单变化
@@ -196,7 +196,7 @@
 提取后检查：
 
 - 顺序执行提取脚本后再扫描 `.codex/skills/wego-design/components.css`，不要并行读取旧输出
-- 如果刚删除某个 class 或场景，必须扫 preview、契约、README/SKILL、`library-consumption.json` 和 `components.css` 是否仍残留旧词
+- 如果刚删除某个 class 或场景，必须扫 preview、契约、library map/SKILL、`library-consumption.json` 和 `components.css` 是否仍残留旧词
 - 对特殊 SVG 资产，额外扫是否还有 iconfont、内联 SVG 或旧脚本常量承担同一语义
 - 如果 `components.css` 出现无关组件差异，继续回查对应 `preview/component-*.html` 和工作区 diff，确认是本轮连带修改、既有漂移还是他人脏改动，再决定是否拆任务处理
 
@@ -242,7 +242,7 @@
 - 先读 `assets/icons/` 中的对应文件，确认路径和尺寸
 - preview、UI Kit、嵌套调用方都引用同一资产，不使用 iconfont 或内联 SVG 代替
 - 契约里补 `assetUsage` 或等价说明
-- 如影响下游复制规则，同步 `library-consumption.json`、README 和顶层 SKILL 的图标规则
+- 如影响下游复制规则，同步 `library-consumption.json`、`references/library-map.md` 和顶层 SKILL 的图标规则
 
 ### 设计反馈取消独立场景
 

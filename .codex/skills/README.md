@@ -29,8 +29,9 @@
 
 - 五个主技能目录都只使用一个 `SKILL.md` 作为运行时入口。
 - 禁止创建 `SKILL.runtime.md`、`SKILL.override.md` 或其他并列入口。
-- 专项背景和复杂流程可以放进 `references/`，但必须由 `SKILL.md` 明确引用，且不能覆盖 `SKILL.md`。
-- 生成脚本、README、同步矩阵和守门只能引用当前 `SKILL.md`，不得引用历史副本。
+- `SKILL.md` 保留触发边界、职责、主流程、门禁、输出和交接；详细 schema、迁移、长示例和专项检查进入 `references/`。
+- `references/` 必须由 `SKILL.md` 直接链接并说明读取条件；模板进入 `assets/`，确定性操作进入 `scripts/`。
+- 技能目录不保留平级 README 或 `templates/`；生成脚本、同步矩阵和守门只引用当前入口与其直接引用的正式 reference。
 
 ## 详细入口
 

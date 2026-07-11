@@ -1,6 +1,6 @@
 ---
 name: "wego-uxsystem-iterate"
-description: 用于 wego-design 设计系统与工作流本体的正式迭代，包括组件、Token、Preview、UI Kit、消费边界、守门、经验候选、规则沉淀和技能链路优化。
+description: 审查或正式迭代微购设计系统与五技能工作流，包括组件、Token、Preview、UI Kit、消费边界、技能包结构、守门、经验候选和规则升级。用于用户要求修改设计系统本体、审查规则、沉淀经验、补充规则、复盘或优化工作流时；不要用于普通业务页面生成、实现偏差或单纯场景验收。
 ---
 
 # 项目级迭代 Skill
@@ -18,6 +18,8 @@ description: 用于 wego-design 设计系统与工作流本体的正式迭代，
 
 `wego-product → wego-design → wego-ux → wego-tests`
 
+专项读取：组件、Token、Preview 或 UI Kit 变更还要读取 [sync-matrix.runtime.md](references/sync-matrix.runtime.md)；需要对照完整按钮迭代样例时读取 [button-example.md](references/button-example.md)；复查 usageHint 尺寸误用案例时读取 [case-usagehint-size-as-state.md](references/case-usagehint-size-as-state.md)。未命中这些条件时不要加载。
+
 ## 三种模式
 
 ### 迭代模式
@@ -27,9 +29,9 @@ description: 用于 wego-design 设计系统与工作流本体的正式迭代，
 读取顺序：
 
 1. 本文件。
-2. `references/workflow.md`。
-3. `references/sync-matrix.md`。
-4. `references/judgment-principles.md`。
+2. [workflow.md](references/workflow.md)。
+3. [sync-matrix.md](references/sync-matrix.md)。
+4. [judgment-principles.md](references/judgment-principles.md)。
 5. 本轮目标对应的结构化权威来源、Preview、UI Kit 和验证脚本。
 
 执行要求：
@@ -59,11 +61,11 @@ description: 用于 wego-design 设计系统与工作流本体的正式迭代，
 
 读取顺序：
 
-1. `references/workflow-iteration.md`。
-2. `experience/README.md`。
+1. [workflow-iteration.md](references/workflow-iteration.md)。
+2. [experience-candidates.md](references/experience-candidates.md)。
 3. `experience/candidates.json`。
 4. 按问题最早归属读取对应技能及正式权威来源。
-5. `references/sync-matrix.md`。
+5. [sync-matrix.md](references/sync-matrix.md)。
 6. 相关生成与验证脚本。
 
 ## 规则归属
@@ -82,15 +84,22 @@ description: 用于 wego-design 设计系统与工作流本体的正式迭代，
 
 不得把同一规则正文复制到多个平级权威文件。下游只记录引用、执行要求或验收要求，不重复定义上游规则。
 
-## Skill 单一入口硬规则
+## Skill 包渐进披露与目录硬规则
 
 - 每个技能目录只能有一个运行时入口：`SKILL.md`。
 - 禁止创建或保留 `SKILL.runtime.md`、`SKILL.core.md`、`SKILL.override.md` 等并列入口。
-- `SKILL.md` 必须直接包含完整触发条件、职责边界、读取顺序、输入输出、门禁、交接和禁止事项。
-- 需要拆分长篇背景、示例或专项流程时放入 `references/`，并由 `SKILL.md` 明确说明何时读取；reference 不能反向覆盖 `SKILL.md`。
-- 更新技能时必须全仓检查旧入口引用、生成脚本来源、README、同步矩阵和守门逻辑。
+- `description` 必须完整表达用途与触发边界；正文直接包含职责、必要输入、主流程、核心门禁、输出和交接。
+- `SKILL.md` 保持为精简导航入口并少于 500 行；详细 schema、兼容迁移、长示例和专项检查放入一层 `references/`。
+- 每个 reference 必须由 `SKILL.md` 直接链接并说明读取条件；reference 不能反向覆盖入口规则，也不能形成深层引用链。
+- 输出模板、字体、图标和可复制样板放入 `assets/`；重复且需要确定性的操作放入 `scripts/`。禁止在技能目录保留平级 `README.md`、`templates/` 或其他角色不明的辅助文档。
+- 设计系统的组件 JSON、Preview、Token、UI Kit 等领域资产可保留既有专用目录，不为形式统一破坏稳定运行时路径。
+- `agents/openai.yaml` 必须与 `SKILL.md` 的 description、职责和交接保持一致。
+- 结构守门必须检查 frontmatter、目录名、入口行数、直接链接、资源角色和 agents 元数据；基础格式校验通过不能替代这些检查。
+- 更新技能时必须全仓检查旧入口引用、生成脚本来源、直接 references、同步矩阵和守门逻辑。
 - 删除旧入口前先把仍有效的规则合并到唯一 `SKILL.md`，清理已经废弃或被正式来源替代的规则，不能简单拼接。
-- `scripts/specs.mjs` 和其他运行时脚本只能读取唯一 `SKILL.md`，不得把历史副本加入 source manifest。
+- `scripts/specs.mjs` 和其他运行时脚本只把 `SKILL.md` 与被直接引用的正式 references 加入 source manifest，不得加入 README、历史副本或未被运行时消费的文档。
+
+完整适用、不适用、例外、回退和验收方式见 [skill-package-structure.md](references/skill-package-structure.md)。
 
 ## 经验候选硬门禁
 
@@ -185,7 +194,7 @@ node scripts/sync-wego-app-lib.mjs --check
 
 - 上游输出字段是否仍被下游读取。
 - 下游是否仍引用已删除文件、旧字段或旧规则路径。
-- 生成脚本、README、同步矩阵、守门和示例是否同步。
+- 生成脚本、直接 references、同步矩阵、守门和示例是否同步。
 - 正常场景、边界场景、异常场景和回退路径是否都有覆盖。
 - 是否出现新的规则重复、优先级冲突或循环依赖。
 - 是否存在“脚本通过但运行时不消费”或“运行时消费但无人验收”的断链。
