@@ -1,0 +1,279 @@
+{
+  "schemaVersion": 2,
+  "identity": {
+    "iteration_id": "feed001",
+    "title": "动态商品流",
+    "date": "2026-07-11",
+    "primary_scene": "动态商品流",
+    "related_scenes": []
+  },
+  "status": "implemented",
+  "scope_revision": 1,
+  "prototype_brief": {
+    "goal": "设计一个适合微购相册连续浏览的动态商品流，让用户在滑动过程中稳定查看商品动态并快速下钻。",
+    "included": [
+      "动态列表连续浏览",
+      "发布者、时间、文案、图片、商品信息完整展示",
+      "进入商品详情",
+      "保留筛选、转发、加入选货单等关键动作"
+    ],
+    "excluded": [
+      "真实接口接入",
+      "发布后台",
+      "图片全屏预览"
+    ],
+    "entry_points": [
+      "底部动态 Tab"
+    ],
+    "critical_paths": [
+      "浏览多条动态并快速识别商品",
+      "从动态进入商品详情",
+      "在详情页执行加入选货单或联系店主"
+    ],
+    "prototype_boundaries": [
+      {
+        "scope": "动态浏览与详情承接",
+        "mode": "functional"
+      },
+      {
+        "scope": "筛选、分享和更多操作",
+        "mode": "simulated"
+      }
+    ],
+    "assumptions": [
+      "使用静态模拟商品数据",
+      "动作反馈通过 toast、sheet、dialog 呈现"
+    ],
+    "open_questions": []
+  },
+  "prototype_design": {
+    "surface_decisions": [
+      {
+        "surface_id": "surface-feed",
+        "summary": "动态页作为宿主 Tab 主页面，采用单列卡片连续浏览。",
+        "presentation": {
+          "type": "host-tab",
+          "transition": "none",
+          "covers_tab_bar": false
+        },
+        "rule_sources_used": [
+          "用户需求",
+          "AGENTS.md",
+          ".codex/skills/wego-design/references/design-decisions.md"
+        ]
+      },
+      {
+        "surface_id": "surface-detail",
+        "summary": "商品详情作为 push 页面承接深一层商品判断与动作。",
+        "presentation": {
+          "type": "push",
+          "transition": "slide-left",
+          "covers_tab_bar": true
+        },
+        "rule_sources_used": [
+          "用户需求",
+          ".codex/skills/wego-ux/references/scene-runtime.md"
+        ]
+      },
+      {
+        "surface_id": "surface-action-sheet",
+        "summary": "筛选与更多动作收纳到底部 sheet，避免打断浏览节奏。",
+        "presentation": {
+          "type": "sheet",
+          "transition": "slide-up",
+          "covers_tab_bar": false
+        },
+        "rule_sources_used": [
+          ".codex/skills/wego-design/references/design-decisions.md"
+        ]
+      }
+    ]
+  },
+  "brief_confirmation": {
+    "confirmed_at": "2026-07-11T13:31:05.480Z",
+    "confirmed_by": "codex",
+    "brief_fingerprint": "2ed8f751f4932289b845b346ac1e181f12651f3a1022e4b704286abee58c7f78"
+  },
+  "prototype_confirmation": {
+    "confirmed_at": "2026-07-11T13:31:05.710Z",
+    "confirmed_by": "codex",
+    "prototype_fingerprint": "3416e0fd7458e8ac859d1d2cd44bb277bf8d75d7437db3936e8cb85c69ef52fc",
+    "fingerprints": {
+      "wego-app/scenes/动态商品流/scene.css": "ccc7b12b1174f3eb3a53d2a6405b8ebaf3d37962f37dd3841fb137fc840d45e3",
+      "wego-app/scenes/动态商品流/scene.js": "c13d0eb0832e6387274b42ab2d16b8557b81f3c2f75a51b873daf238109afbd9",
+      "wego-app/js/routes.js": "fc5ab35121755c289196e27c2b9a97771b1e140b31b38e398d6dcc64bf1e8acc",
+      "wego-app/index.html": "c02a05e77f290e16122fe9e353a302054060e28a5471e16b20aec67518de4dca"
+    }
+  },
+  "base_fingerprint": {
+    "wego-app/scenes/动态商品流/scene.css": "ccc7b12b1174f3eb3a53d2a6405b8ebaf3d37962f37dd3841fb137fc840d45e3",
+    "wego-app/scenes/动态商品流/scene.js": "c13d0eb0832e6387274b42ab2d16b8557b81f3c2f75a51b873daf238109afbd9",
+    "wego-app/js/routes.js": "fc5ab35121755c289196e27c2b9a97771b1e140b31b38e398d6dcc64bf1e8acc",
+    "wego-app/index.html": "c02a05e77f290e16122fe9e353a302054060e28a5471e16b20aec67518de4dca"
+  },
+  "product_scope": {
+    "goal": "建立一个适合连续浏览的商品动态流原型，帮助用户高效判断商品并进入详情。",
+    "value": "把商品动态从零散发布转成稳定的内容流，降低连续浏览时的信息跳跃感。",
+    "success_signals": [
+      "每条动态都能在一屏内看清关键要素",
+      "文案为空、多图和长商品信息时不跳版",
+      "可从动态直接进入商品详情并执行关键动作"
+    ]
+  },
+  "features": [
+    {
+      "feature_id": "album-product-feed",
+      "title": "动态商品流浏览",
+      "scene_refs": [
+        "动态商品流"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "requirement_id": "feed001-R01",
+      "title": "连续浏览动态",
+      "summary": "用户可以在动态 Tab 连续浏览店主发布的商品动态。",
+      "scene_refs": [
+        "动态商品流"
+      ]
+    },
+    {
+      "requirement_id": "feed001-R02",
+      "title": "完整展示关键信息",
+      "summary": "每条动态都要清晰呈现发布者、发布时间、商品内容、商品图片和商品信息。",
+      "scene_refs": [
+        "动态商品流"
+      ]
+    },
+    {
+      "requirement_id": "feed001-R03",
+      "title": "支持进入详情和关键动作",
+      "summary": "用户可进入商品详情，并执行加入选货单、联系店主等必要操作。",
+      "scene_refs": [
+        "动态商品流"
+      ]
+    },
+    {
+      "requirement_id": "feed001-R04",
+      "title": "异常内容稳定性",
+      "summary": "当文案为空、图片数量不同或商品信息较长时，页面仍需稳定完整且便于连续浏览。",
+      "scene_refs": [
+        "动态商品流"
+      ]
+    }
+  ],
+  "traceability": [
+    {
+      "requirement_id": "feed001-R01",
+      "scene": "动态商品流",
+      "design_refs": [
+        "wego-app/scenes/动态商品流/_spec/design_plan.json#flow_to_surface_decisions",
+        "wego-app/scenes/动态商品流/_spec/design_plan.json#region_composition"
+      ],
+      "implementation_refs": [
+        "wego-app/scenes/动态商品流/scene.js",
+        "wego-app/scenes/动态商品流/scene.css"
+      ]
+    },
+    {
+      "requirement_id": "feed001-R02",
+      "scene": "动态商品流",
+      "design_refs": [
+        "wego-app/scenes/动态商品流/_spec/design_plan.json#page_strategy",
+        "wego-app/scenes/动态商品流/_spec/design_plan.json#surface_designs"
+      ],
+      "implementation_refs": [
+        "wego-app/scenes/动态商品流/scene.js",
+        "wego-app/scenes/动态商品流/scene.css"
+      ]
+    },
+    {
+      "requirement_id": "feed001-R03",
+      "scene": "动态商品流",
+      "design_refs": [
+        "wego-app/scenes/动态商品流/_spec/design_plan.json#page_presentation"
+      ],
+      "implementation_refs": [
+        "wego-app/scenes/动态商品流/scene.js"
+      ]
+    },
+    {
+      "requirement_id": "feed001-R04",
+      "scene": "动态商品流",
+      "design_refs": [
+        "wego-app/scenes/动态商品流/_spec/design_plan.json#implementation_constraints"
+      ],
+      "implementation_refs": [
+        "wego-app/scenes/动态商品流/scene.js",
+        "wego-app/scenes/动态商品流/scene.css"
+      ]
+    }
+  ],
+  "affected_scenes": [
+    {
+      "scene": "动态商品流",
+      "role": "primary",
+      "change_type": "changed"
+    }
+  ],
+  "affected_runtime": [
+    "wego-app/js/routes.js",
+    "wego-app/index.html"
+  ],
+  "stage_outputs": {
+    "product": {
+      "valid": true,
+      "completed_at": "2026-07-11T13:31:05.818Z",
+      "fingerprint": "f44f48e4a3ac5147208bec520c60f4aef5edf13bbb916255587894880f3fbe94"
+    },
+    "design": {
+      "valid": true,
+      "completed_at": "2026-07-11T13:31:05.920Z",
+      "fingerprint": "da8714132adcaf39938041a2db0fab80da7be5ae1cf69cfbc172e6f07b4c551d"
+    },
+    "implementation": {
+      "valid": true,
+      "completed_at": "2026-07-11T13:31:06.014Z",
+      "fingerprint": "01c95bd419f46e3e80476fd53bca35632cc6275d44cd3a2234cd71d00a102055"
+    },
+    "acceptance": {
+      "valid": false
+    }
+  },
+  "change_log": [
+    {
+      "at": "2026-07-11T13:24:46.798Z",
+      "action": "init"
+    },
+    {
+      "at": "2026-07-11T13:30:52.031Z",
+      "action": "submit-brief"
+    },
+    {
+      "at": "2026-07-11T13:31:05.483Z",
+      "action": "confirm-brief"
+    },
+    {
+      "at": "2026-07-11T13:31:05.590Z",
+      "action": "submit-prototype"
+    },
+    {
+      "at": "2026-07-11T13:31:05.713Z",
+      "action": "confirm-prototype"
+    },
+    {
+      "at": "2026-07-11T13:31:05.819Z",
+      "action": "formalize-product"
+    },
+    {
+      "at": "2026-07-11T13:31:05.921Z",
+      "action": "mark-design"
+    },
+    {
+      "at": "2026-07-11T13:31:06.015Z",
+      "action": "mark-implemented"
+    }
+  ],
+  "freeze": null
+}
