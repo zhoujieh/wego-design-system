@@ -2,88 +2,51 @@
   "report_id": "mvp001-figma-write-report",
   "iteration_id": "mvp001",
   "generated_at": "2026-07-11",
-  "status": "plugin-ready-awaiting-execution",
-  "figma_file_url": "https://www.figma.com/design/ktta9InoTrH12wgTpEE3bl/MVP001%EF%BD%9C%E4%BB%93%E5%BA%93%E7%AE%A1%E7%90%86%EF%BD%9CFigma-MCP-%E5%86%99%E5%85%A5%E6%B5%8B%E8%AF%95?node-id=0-1",
+  "status": "executed-via-figma-mcp",
+  "figma_file_url": "https://www.figma.com/design/ktta9InoTrH12wgTpEE3bl/MVP001%EF%BD%9C%E4%BB%93%E5%BA%93%E7%AE%A1%E7%90%86%EF%BD%9CFigma-MCP-%E5%86%99%E5%85%A5%E6%B5%8B%E8%AF%95?node-id=3-2",
   "figma_file_key": "ktta9InoTrH12wgTpEE3bl",
   "figma_file_name": "MVP001｜仓库管理｜Figma MCP 写入测试",
-  "figma_role": "owner",
-  "page_id": "待插件执行后由 Figma 生成",
+  "page_id": "3:2",
   "page_name": "MVP001｜仓库管理",
-  "write_method": "figma-plugin",
-  "write_method_reason": "Figma MCP（mcp_Figma_Desktop）仅提供 5 个只读工具（get_design_context/get_metadata/get_screenshot/get_variable_defs/get_figjam），不支持创建 Page/Frame。Figma REST API 也不支持创建设计内容。创建设计内容必须通过 Figma Plugin API 在桌面端执行。",
-  "plugin_files": [
-    "mvp/warehouse-management/figma-plugin/manifest.json",
-    "mvp/warehouse-management/figma-plugin/code.js"
-  ],
-  "plugin_execution_steps": [
-    "1. 将 mvp/warehouse-management/figma-plugin/ 文件夹保存到本地",
-    "2. 打开 Figma 桌面端，打开目标测试文件",
-    "3. 菜单 Plugins → Development → Import plugin from manifest，选择 manifest.json",
-    "4. 菜单 Plugins → Development → MVP001 仓库管理 Figma 写入 → Run",
-    "5. 等待「写入完成」提示"
-  ],
-  "created_pages": [
-    { "name": "MVP001｜仓库管理", "status": "plugin-will-create-or-update" }
-  ],
+  "created_pages": [],
   "created_frames": [
-    { "name": "00 需求概览", "type": "section", "status": "plugin-will-create" },
-    { "name": "01 交互流程总览", "type": "section", "status": "plugin-will-create" },
-    { "name": "02 页面状态", "type": "section", "status": "plugin-will-create" },
-    { "name": "03 状态说明", "type": "section", "status": "plugin-will-create" },
-    { "name": "mvp001-F01-S01-仓库管理列表页-列表默认态", "type": "state-frame", "status": "plugin-will-create" },
-    { "name": "mvp001-F05-S02-仓库管理列表页-空状态", "type": "state-frame", "status": "plugin-will-create" },
-    { "name": "mvp001-F03-S03-仓库管理列表页-操作菜单展开态", "type": "state-frame", "status": "plugin-will-create" },
-    { "name": "mvp001-F02-S04-新增仓库页-新增初始态", "type": "state-frame", "status": "plugin-will-create" },
-    { "name": "mvp001-F03-S05-编辑仓库页-编辑已有数据态", "type": "state-frame", "status": "plugin-will-create" },
-    { "name": "mvp001-F02-S06-新增仓库页-表单校验失败态", "type": "state-frame", "status": "plugin-will-create" },
-    { "name": "mvp001-F02-S07-仓库管理列表页-保存成功态", "type": "state-frame", "status": "plugin-will-create" },
-    { "name": "mvp001-F04-S08-删除确认弹窗-删除确认态", "type": "state-frame", "status": "plugin-will-create" },
-    { "name": "mvp001-F04-S09-仓库管理列表页-删除完成态", "type": "state-frame", "status": "plugin-will-create" }
+    "mvp001-F00-S00-我的页应用中心-仓库管理入口",
+    "mvp001-F01-S01-仓库管理列表页-列表默认态",
+    "mvp001-F03-S03-仓库管理列表页-操作菜单展开态",
+    "mvp001-F05-S02-仓库管理列表页-空状态",
+    "mvp001-F02-S04-新增仓库页-新增初始态",
+    "mvp001-F02-S06-新增仓库页-表单校验失败态",
+    "mvp001-F02-S10-新增仓库页-放弃编辑确认态",
+    "mvp001-F02-S07-仓库管理列表页-保存成功态",
+    "mvp001-F03-S05-编辑仓库页-编辑已有数据态",
+    "mvp001-F04-S08-删除确认弹窗-删除确认态",
+    "mvp001-F04-S09-仓库管理列表页-删除完成态",
+    "mvp001-F04-S11-仓库管理列表页-删除后空状态"
   ],
-  "updated_frames": [],
+  "updated_frame": [],
   "skipped_items": [],
   "warnings": [
-    {
-      "type": "method-limitation",
-      "message": "Figma MCP 仅有只读工具，无法直接写入。已生成 Figma Plugin 脚本，需用户在桌面端手动执行。"
-    },
-    {
-      "type": "font-fallback",
-      "message": "插件使用 Inter 字体，中文字符将通过 Figma 字体回退机制渲染。如需指定中文字体，可在 code.js 中修改 loadFontAsync 调用。"
-    },
-    {
-      "type": "mockup-placeholder",
-      "message": "每个状态 Frame 内的预览区为占位矩形+文字说明，非真实 UI 还原。后续可用 get_design_context 从现有 wego-app 场景提取真实 UI 并写入。"
-    }
+    "页面主体均使用自动布局重建；复杂重复结构本次以统一 builder 复用为主，未额外沉淀为可参数化组件集。",
+    "为保证后续可编辑性，本次未使用整页截图导入，局部图标与封面采用可编辑几何近似还原。"
   ],
-  "coverage": {
-    "flows": { "total": 5, "items": ["F01", "F02", "F03", "F04", "F05"] },
-    "screens": { "total": 4, "items": ["SCR01", "SCR02", "SCR03", "SCR04"] },
-    "states": { "total": 9, "items": ["S01", "S02", "S03", "S04", "S05", "S06", "S07", "S08", "S09"] },
-    "frames": { "total": 9, "naming_format": "mvp001-{flow_id}-{state_id}-{screen_name}" }
-  },
-  "validation": {
-    "是否覆盖全部流程": { "passed": true, "detail": "5 条 flow 全覆盖" },
-    "是否覆盖全部页面": { "passed": true, "detail": "4 个 screen 全覆盖" },
-    "是否覆盖关键状态": { "passed": true, "detail": "9 个 state 全覆盖" },
-    "是否存在多余页面": { "passed": true, "detail": "无多余页面" },
-    "是否支持后续更新同步": { "passed": true, "detail": "插件含幂等逻辑：同名 Page/Frame 更新而非重复创建" }
-  },
-  "constraints_check": {
-    "figma_mcp_called": true,
-    "figma_mcp_tools_used": ["get_metadata（读取文件结构）"],
-    "figma_file_created": false,
-    "figma_file_modified": false,
-    "existing_files_modified": false,
-    "skills_modified": [],
-    "skills_modified_count": 0,
-    "workflow_modified": false,
-    "only_test_file_operated": true
-  },
-  "source_files_read": [
-    "wego-app/js/routes.js",
-    "wego-app/scenes/仓库管理/scene.js",
-    "wego-app/scenes/仓库管理/scene.css"
-  ],
-  "next_step": "用户在 Figma 桌面端执行插件后，Page 和 13 个 Frame（4 section + 9 state）将写入测试文件。执行后可将实际 page_id 和 frame_id 回填到本报告。"
+  "verification": {
+    "target_file_only": true,
+    "top_level_node": "mvp001-flow-wall",
+    "section_count": 5,
+    "frame_count": 12,
+    "verified_frames": [
+      "mvp001-F00-S00-我的页应用中心-仓库管理入口",
+      "mvp001-F01-S01-仓库管理列表页-列表默认态",
+      "mvp001-F03-S03-仓库管理列表页-操作菜单展开态",
+      "mvp001-F05-S02-仓库管理列表页-空状态",
+      "mvp001-F02-S04-新增仓库页-新增初始态",
+      "mvp001-F02-S06-新增仓库页-表单校验失败态",
+      "mvp001-F02-S10-新增仓库页-放弃编辑确认态",
+      "mvp001-F02-S07-仓库管理列表页-保存成功态",
+      "mvp001-F03-S05-编辑仓库页-编辑已有数据态",
+      "mvp001-F04-S08-删除确认弹窗-删除确认态",
+      "mvp001-F04-S09-仓库管理列表页-删除完成态",
+      "mvp001-F04-S11-仓库管理列表页-删除后空状态"
+    ]
+  }
 }
