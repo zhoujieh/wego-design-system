@@ -33,6 +33,9 @@
 
 ## 连续内容流
 
+- 若 `design_plan.surface_designs[]` 已声明 `layout_contract`，验收必须先核对实现是否真的消费了该对象，而不是只在 plan 里写过。
+- `layout_contract.page_edge_mode` 为 `M0/M8/M16/M32` 时，页面横向边距只能落在对应正式模式；不能出现未登记的页面边距决策。
+- `layout_contract.media_priority=supporting` 时，首屏视觉主判断对象仍应是文字与对象摘要；媒体只能辅助，不得反客为主。
 - 复杂内容流默认不应误用 M16 卡片式压缩横向空间；若使用 M16，必须有正式 pagePattern 或 fallback blueprint 依据。
 - 单条内容同时承载正文、媒体、对象摘要和操作时，媒体区域没有主导首屏高度，文字与对象信息仍是主要判断对象。
 - 价格、金额、统计值和划线价命中 metric 语义时，必须能追溯到 metric 消费；不能只靠数字字体类自定义数值样式通过。

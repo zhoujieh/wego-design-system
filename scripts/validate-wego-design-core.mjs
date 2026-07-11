@@ -250,6 +250,8 @@ const SURFACE_MATCH_STATUSES = new Set(['exact', 'near', 'fallback', 'gap']);
 const PRESENTATION_TYPES = new Set(['push', 'modal', 'sheet', 'full-screen-modal', 'host-tab', 'host-fixed-tab']);
 const HOST_CONTAINER_TABS = new Set(['my', 'workspace', 'dongtai', 'xiaoxi', 'haoyou']);
 const HOST_ENTRY_TYPES = new Set(['cell', 'grid-entry', 'host-tab']);
+const PAGE_EDGE_MODES = new Set(['M0', 'M8', 'M16', 'M32']);
+const MEDIA_PRIORITY_MODES = new Set(['supporting', 'balanced']);
 
 const INTERNAL_PROTOTYPE_COPY_PATTERNS = [
   /工作流验证任务/,
@@ -1519,6 +1521,35 @@ function checkPrototypeSurfaceDesigns(context) {
         add('error', 'prototype.surface_allowed_styles_missing',
           `surface ${id} 必须包含 allowed_page_styles[]`,
           planPath);
+      }
+      if (surface.matched_blueprint === 'continuous-content-feed-page') {
+        const layoutContract = surface.layout_contract;
+        if (!layoutContract || typeof layoutContract !== 'object') {
+          add('error', 'prototype.surface_layout_contract_missing',
+            `surface ${id} 命中 continuous-content-feed-page 时必须声明 layout_contract`,
+            planPath);
+        } else {
+          if (!PAGE_EDGE_MODES.has(layoutContract.page_edge_mode)) {
+            add('error', 'prototype.surface_layout_edge_mode_invalid',
+              `surface ${id} 的 layout_contract.page_edge_mode 必须是 M0/M8/M16/M32，当前为 ${layoutContract.page_edge_mode || '空'}`,
+              planPath);
+          }
+          if (typeof layoutContract.page_edge_mode_reason !== 'string' || !layoutContract.page_edge_mode_reason.trim()) {
+            add('error', 'prototype.surface_layout_edge_reason_missing',
+              `surface ${id} 必须说明 layout_contract.page_edge_mode_reason`,
+              planPath);
+          }
+          if (!MEDIA_PRIORITY_MODES.has(layoutContract.media_priority)) {
+            add('error', 'prototype.surface_layout_media_priority_invalid',
+              `surface ${id} 的 layout_contract.media_priority 必须是 supporting/balanced，当前为 ${layoutContract.media_priority || '空'}`,
+              planPath);
+          }
+          if (typeof layoutContract.media_priority_reason !== 'string' || !layoutContract.media_priority_reason.trim()) {
+            add('error', 'prototype.surface_layout_media_reason_missing',
+              `surface ${id} 必须说明 layout_contract.media_priority_reason`,
+              planPath);
+          }
+        }
       }
     }
 

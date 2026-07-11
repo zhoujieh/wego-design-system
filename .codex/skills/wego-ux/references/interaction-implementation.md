@@ -31,6 +31,8 @@ simple 可省略区域层；structured/complex 必须先编排区域。
 
 ## 连续内容流
 
+- 若 `design_plan.surface_designs[].layout_contract` 已声明 `page_edge_mode`，实现必须按该正式模式落地页面横向边距：`M0/M8/M16/M32` 只能对应正式模式，不得在页面内容层再发明 12px 等中间值替代。
+- 若 `design_plan.surface_designs[].layout_contract` 已声明 `media_priority=supporting`，实现时媒体区只能服务扫读辅助，不能通过首屏高度、宽高比或占位面积重新压过文字与对象摘要。
 - 连续浏览型内容流默认优先信息密度与扫读效率，不默认套 M16 卡片页；命中正式 pagePattern/blueprint 前，先判断是否应使用 M0 或 M8。
 - 单条内容同时包含发布者、时间、正文、媒体、对象摘要和操作时，媒体只作辅助，不得主导首屏高度。
 - 价格、金额、统计值和划线价优先消费 metric；不要只因页面里用了数字字体就退回自定义 price 类。

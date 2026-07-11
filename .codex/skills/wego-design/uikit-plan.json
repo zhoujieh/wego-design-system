@@ -770,6 +770,19 @@
         "自造 actionsheet 结构替代正式组件",
         "解释设计意图或 Benchmark 背景的首屏说明文案"
       ],
+      "requiredSurfaceDesignContract": {
+        "appliesTo": "命中该 blueprint 的主内容流 surface",
+        "fields": {
+          "page_edge_mode": "M0 | M8 | M16 | M32",
+          "page_edge_mode_reason": "必须说明为何选择该正式页面边距模式，不得发明 12px 等中间值作为页面横向边距决策",
+          "media_priority": "supporting | balanced",
+          "media_priority_reason": "必须说明媒体是否只作辅助判断，以及为何不会压过文字与对象摘要"
+        },
+        "defaultExpectation": {
+          "page_edge_mode": "M0 或 M8",
+          "media_priority": "supporting"
+        }
+      },
       "specRefs": [
         "specs/布局与间距规范.md",
         "specs/交互设计原则.md",

@@ -59,6 +59,8 @@ design_plan
 - `matched_blueprint` 只允许引用 `uikit-plan.json.fallbackPageBlueprints[].id`。
 - `matched_ui_kit` 如填写，只允许引用 `uikit-plan.json.uiKits[].slug`，不写展示名称或临时中文名。
 - `component_refs` 只允许引用已注册组件 slug；primitive 名称如 `sheet`、`push` 不作为组件填写。
+- 若命中的 `pagePattern` 或 `fallback blueprint` 声明了 `requiredSurfaceDesignContract`，对应 surface 必须补齐 `layout_contract` 对象，并原样输出要求的字段；该对象用于把布局决策传递给 `wego-ux` 和 `wego-tests`，不能只把规则留在自然语言 reason 中。
+- 连续内容流命中 `continuous-content-feed-page` 时，`layout_contract.page_edge_mode` 只能是 `M0 | M8 | M16 | M32`；`layout_contract.media_priority` 只能是 `supporting | balanced`；并且必须分别给出 reason，说明页面横向边距模式与媒体权重判断。
 
 ## component_mapping
 
