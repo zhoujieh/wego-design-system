@@ -1,0 +1,224 @@
+{
+  "schemaVersion": 3,
+  "slug": "metric",
+  "name": "数值展示",
+  "category": "display",
+  "status": "stable",
+  "sourceKind": "inferred",
+  "confidence": "high",
+  "description": "通用数值展示组件，覆盖价格和数据两种场景。价格场景带货币符号、小数、区间价、划线价、前缀和后缀；数据场景默认黑色、支持过万省略。使用 WegoKeyboard N9 数字字体，支持营销橙/黑/白三色系和 6 档字号。采用 align-items: baseline 保证不同字号混排时的基线对齐；提供 .metric--wrap 修饰类处理极窄容器下的换行场景，换行后仍保持基线对齐，数字内部禁止断行。",
+  "semanticTypeCandidates": [
+    "price",
+    "amount",
+    "metric",
+    "statistic"
+  ],
+  "variantDimensions": {
+    "size": [
+      "14",
+      "16",
+      "18",
+      "20",
+      "24",
+      "32"
+    ],
+    "theme": [
+      "marketing",
+      "black",
+      "white"
+    ]
+  },
+  "representativeVariants": [
+    {
+      "size": "14",
+      "theme": "marketing"
+    },
+    {
+      "size": "20",
+      "theme": "black"
+    },
+    {
+      "size": "32",
+      "theme": "marketing"
+    },
+    {
+      "size": "16",
+      "theme": "black"
+    }
+  ],
+  "anatomy": [
+    {
+      "name": "root",
+      "selector": ".metric",
+      "role": "容器，inline-flex items-baseline gap，默认 nowrap"
+    },
+    {
+      "name": "prefix",
+      "selector": ".metric__prefix",
+      "role": "前缀文字，如会员"
+    },
+    {
+      "name": "main",
+      "selector": ".metric__main",
+      "role": "主数值组，inline-flex items-baseline"
+    },
+    {
+      "name": "symbol",
+      "selector": ".metric__symbol",
+      "role": "货币符号 ¥，小写"
+    },
+    {
+      "name": "value",
+      "selector": ".metric__value",
+      "role": "数值组，white-space: nowrap 防止数字内部断行"
+    },
+    {
+      "name": "integer",
+      "selector": ".metric__integer",
+      "role": "整数部分，主字号"
+    },
+    {
+      "name": "decimal",
+      "selector": ".metric__decimal",
+      "role": "小数部分，小写"
+    },
+    {
+      "name": "unit",
+      "selector": ".metric__unit",
+      "role": "万/亿后缀，小写"
+    },
+    {
+      "name": "rangeSep",
+      "selector": ".metric__range-sep",
+      "role": "区间分隔符 ~，独立 flex item 便于换行"
+    },
+    {
+      "name": "valueHigh",
+      "selector": ".metric__value--high",
+      "role": "区间高价，同 value 结构"
+    },
+    {
+      "name": "line",
+      "selector": ".metric__line",
+      "role": "划线价，Regular 字重灰色"
+    },
+    {
+      "name": "badge",
+      "selector": ".metric__badge",
+      "role": "帮卖标签，如赚¥8"
+    }
+  ],
+  "structurePatterns": [
+    "价格场景：带货币符号 ¥、主数字用 Medium 字重、小数部分和货币符号小写(60-75% 或 10-14px 同号)、强制两位小数末尾零保留。",
+    "数据场景：无货币符号、默认黑色、>=10万显示万后缀、非金额末尾零省略。",
+    "区间价：~ 不小写、仅开头用货币符号；区间低价组(.metric__value)和高价组(.metric__value--high)是两个独立 flex item，中间用 .metric__range-sep 连接，换行时优先在 ~ 处断开。",
+    "划线价：使用 Regular 字重、灰色 --text-tertiary、字号与小写部分一致。",
+    "前缀(如会员)使用 --body-xs-font-family、10px、与主色同色。",
+    "帮卖标签(赚¥X)使用营销橙背景 --status-promotion-surface-l1、营销橙文字 --status-promotion-default、10px。",
+    "换行规则：默认 nowrap 单行展示；极窄容器加 .metric--wrap 允许换行，换行时保持 align-items: baseline，row-gap 控制行间距，数字内部(integer/decimal)禁止断行。"
+  ],
+  "behavior": {
+    "baselineAlignment": ".metric 与 .metric__main 均使用 align-items: baseline，确保前缀、货币符号、整数、小数、单位、划线价和帮卖标签在基线上对齐。不使用 items-end，因为 end 对齐在字号差异大时(如 32px 整数 + 22px 小数)会导致小数部分明显偏高。",
+    "wrapMode": "默认 flex-wrap: nowrap 单行展示；.metric--wrap 开启 flex-wrap: wrap 并设置 row-gap: var(--spacer-1) 控制行间距。换行后所有元素仍保持 baseline 对齐。换行优先级：区间价 ~ 处 > 划线价前 > 帮卖标签前。",
+    "noBreakInNumber": ".metric__value 设 white-space: nowrap，保证 integer 和 decimal 不被拆开，数字是最小不可拆分单元。",
+    "fontFeature": "font-feature-settings: zero 确保数字 0 带斜线以区分字母 O。"
+  },
+  "accessibility": {
+    "contentRule": "价格强制两位小数(￥20.00)；数据非金额末尾零省略(20.8%)。>=10万可选择数字+万省略，省略时四舍五入最多两位小数，末尾零省略(12万、22.99万)。需要计算或修改的数字不应省略。",
+    "rangeRule": "范围格式用 ~ 连接，前后空格，仅开头用货币符号(￥20.00 ~ 30.00)。"
+  },
+  "usageHints": [
+    "商品价格用营销橙主题，常规数据展示用黑色主题，深色背景用白色主题。",
+    "价格场景强制两位小数(￥20.00)；数据场景非金额末尾零省略(20.8%)。",
+    ">=10万可选择数字+万省略，省略时四舍五入最多两位小数，末尾零省略(12万、22.99万)。",
+    "需要计算或修改的数字不应省略。",
+    "范围格式用 ~ 连接，仅开头用货币符号(￥20.00 ~ 30.00)。",
+    "默认单行展示；当容器宽度不足以容纳完整内容时(如商品卡片价格列、紧凑列表项)，加 .metric--wrap 允许换行，换行后保持基线对齐。",
+    "不要在数字内部断行；integer、decimal、unit 是最小不可拆分单元。"
+  ],
+  "doNotInvent": [
+    "不要把 metric 扩成统计面板、图表或多行数据表格。",
+    "不要在 metric 组件内发明新的字号档位。",
+    "不要用 inline style 控制颜色或字号。"
+  ],
+  "tokensConsumed": [
+    "--number-md-font-family",
+    "--number-lg2-font-size",
+    "--text-default",
+    "--text-inverse",
+    "--text-inverse-weak",
+    "--status-promotion-default",
+    "--text-tertiary",
+    "--font-weight-medium",
+    "--font-weight-regular",
+    "--body-xs-font-family",
+    "--body-xs-font-size",
+    "--body-sm-font-size",
+    "--status-promotion-surface-l1",
+    "--radius-4",
+    "--spacer-2",
+    "--spacer-1"
+  ],
+  "designTokens": {
+    "sizes": {
+      "14": { "main": "14px", "small": "14px", "line": "12px", "prefix": "10px" },
+      "16": { "main": "16px", "small": "12px", "line": "12px", "prefix": "10px" },
+      "18": { "main": "18px", "small": "12px", "line": "12px", "prefix": "10px" },
+      "20": { "main": "20px", "small": "14px", "line": "14px", "prefix": "10px" },
+      "24": { "main": "24px", "small": "16px", "line": "16px", "prefix": "12px" },
+      "32": { "main": "32px", "small": "22px", "line": "22px", "prefix": "16px" }
+    },
+    "themeColor": {
+      "marketing": "var(--status-promotion-default)",
+      "black": "var(--text-default)",
+      "white": "var(--text-inverse)"
+    },
+    "lineColor": "var(--text-tertiary)",
+    "fontFamily": "var(--number-md-font-family)",
+    "mainWeight": "var(--font-weight-medium)",
+    "lineWeight": "var(--font-weight-regular)",
+    "gap": "var(--spacer-2)",
+    "wrapRowGap": "var(--spacer-2)",
+    "align": "baseline"
+  },
+  "specRefs": [
+    "specs/文案与数据规范.md",
+    "specs/交互设计原则.md",
+    "specs/设计风格与品牌原则.md"
+  ],
+  "domAnatomy": {
+    "root": ".metric",
+    "modifiers": [
+      ".metric--14",
+      ".metric--16",
+      ".metric--18",
+      ".metric--20",
+      ".metric--24",
+      ".metric--32",
+      ".metric--marketing",
+      ".metric--black",
+      ".metric--white",
+      ".metric--wrap"
+    ],
+    "optionalChildren": [
+      ".metric__prefix",
+      ".metric__main",
+      ".metric__symbol",
+      ".metric__value",
+      ".metric__integer",
+      ".metric__decimal",
+      ".metric__unit",
+      ".metric__range-sep",
+      ".metric__value--high",
+      ".metric__line",
+      ".metric__badge"
+    ]
+  },
+  "provenance": {
+    "preview": "preview/component-metric.html",
+    "cssSource": "preview/component-metric.html",
+    "embedded": false,
+    "hostComponent": null
+  },
+  "unknowns": []
+}

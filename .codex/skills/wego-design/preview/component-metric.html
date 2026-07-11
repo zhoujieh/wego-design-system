@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数值展示 — 微购设计系统</title>
+  <link rel="stylesheet" href="../colors_and_type.css">
+  <link rel="stylesheet" href="../scaffold.css">
+  <link rel="stylesheet" href="../iconfont.css">
+  <style>
+    .demo-dark-bg { background: #1E2028; padding: var(--spacer-16); border-radius: var(--radius-8); }
+    .demo-narrow { background: var(--bg-overlay-l1); padding: var(--spacer-4) var(--spacer-8); border-radius: var(--radius-4); margin-bottom: var(--spacer-8); overflow: hidden; }
+    .demo-narrow-label { color: var(--text-tertiary); font-size: var(--body-xs-font-size); line-height: var(--body-xs-line-height); margin-bottom: var(--spacer-4); }
+    /* @component-css-start */
+    .metric { display:inline-flex; align-items:baseline; gap:var(--spacer-2); flex-wrap:nowrap; font-family:var(--number-md-font-family); font-feature-settings:"zero"; vertical-align:baseline; }
+    .metric__main { display:inline-flex; align-items:baseline; }
+    .metric__value { display:inline-flex; align-items:baseline; white-space:nowrap; }
+    .metric__symbol { font-weight:var(--font-weight-medium); }
+    .metric__integer { font-weight:var(--font-weight-medium); }
+    .metric__decimal { font-weight:var(--font-weight-medium); }
+    .metric__unit { font-weight:var(--font-weight-medium); }
+    .metric__range-sep { font-weight:var(--font-weight-regular); padding:0 2px; }
+    .metric__line { font-weight:var(--font-weight-regular); color:var(--text-tertiary); text-decoration:line-through; text-decoration-thickness:1px; white-space:nowrap; }
+    .metric__prefix { font-family:var(--body-xs-font-family); font-weight:var(--font-weight-medium); }
+    .metric__badge { display:inline-flex; align-items:baseline; padding:1px var(--spacer-2); border-radius:var(--radius-4); background:var(--status-promotion-surface-l1); color:var(--status-promotion-default); font-family:var(--body-xs-font-family); font-size:10px; line-height:14px; font-weight:var(--font-weight-medium); white-space:nowrap; }
+    .metric--14 .metric__integer { font-size:14px; line-height:20px; }
+    .metric--14 .metric__symbol, .metric--14 .metric__decimal, .metric--14 .metric__unit { font-size:14px; line-height:20px; }
+    .metric--14 .metric__line { font-size:12px; line-height:16px; }
+    .metric--14 .metric__prefix { font-size:10px; line-height:14px; }
+    .metric--14 .metric__range-sep { font-size:14px; line-height:20px; }
+    .metric--16 .metric__integer { font-size:16px; line-height:22px; }
+    .metric--16 .metric__symbol, .metric--16 .metric__decimal, .metric--16 .metric__unit { font-size:12px; line-height:16px; }
+    .metric--16 .metric__line { font-size:12px; line-height:16px; }
+    .metric--16 .metric__prefix { font-size:10px; line-height:14px; }
+    .metric--16 .metric__range-sep { font-size:16px; line-height:22px; }
+    .metric--18 .metric__integer { font-size:18px; line-height:24px; }
+    .metric--18 .metric__symbol, .metric--18 .metric__decimal, .metric--18 .metric__unit { font-size:12px; line-height:16px; }
+    .metric--18 .metric__line { font-size:12px; line-height:16px; }
+    .metric--18 .metric__prefix { font-size:10px; line-height:14px; }
+    .metric--18 .metric__range-sep { font-size:18px; line-height:24px; }
+    .metric--20 .metric__integer { font-size:20px; line-height:28px; }
+    .metric--20 .metric__symbol, .metric--20 .metric__decimal, .metric--20 .metric__unit { font-size:14px; line-height:20px; }
+    .metric--20 .metric__line { font-size:14px; line-height:20px; }
+    .metric--20 .metric__prefix { font-size:10px; line-height:14px; }
+    .metric--20 .metric__range-sep { font-size:20px; line-height:28px; }
+    .metric--24 .metric__integer { font-size:24px; line-height:32px; }
+    .metric--24 .metric__symbol, .metric--24 .metric__decimal, .metric--24 .metric__unit { font-size:16px; line-height:22px; }
+    .metric--24 .metric__line { font-size:16px; line-height:22px; }
+    .metric--24 .metric__prefix { font-size:12px; line-height:16px; }
+    .metric--24 .metric__range-sep { font-size:24px; line-height:32px; }
+    .metric--32 .metric__integer { font-size:32px; line-height:44px; }
+    .metric--32 .metric__symbol, .metric--32 .metric__decimal, .metric--32 .metric__unit { font-size:22px; line-height:30px; }
+    .metric--32 .metric__line { font-size:22px; line-height:30px; }
+    .metric--32 .metric__prefix { font-size:16px; line-height:22px; }
+    .metric--32 .metric__range-sep { font-size:32px; line-height:44px; }
+    .metric--marketing { color:var(--status-promotion-default); }
+    .metric--marketing .metric__line { color:var(--text-tertiary); }
+    .metric--marketing .metric__prefix { color:var(--status-promotion-default); }
+    .metric--black { color:var(--text-default); }
+    .metric--black .metric__line { color:var(--text-tertiary); }
+    .metric--black .metric__prefix { color:var(--text-default); }
+    .metric--white { color:var(--text-inverse); }
+    .metric--white .metric__line { color:var(--text-inverse-weak); }
+    .metric--white .metric__prefix { color:var(--text-inverse); }
+    .metric--wrap { flex-wrap:wrap; row-gap:var(--spacer-2); }
+    /* @component-css-end */
+    .pv-section { background:var(--bg-surface); border-radius:var(--radius-12); padding:var(--spacer-16); box-shadow:var(--shadow-xs); }
+    .pv-section + .pv-section { margin-top:var(--spacer-16); }
+    .pv-section__title { margin-bottom:var(--spacer-4); color:var(--text-default); font-size:var(--heading-sm-font-size); line-height:var(--heading-sm-line-height); }
+    .pv-section__sub { margin-bottom:var(--spacer-12); color:var(--text-tertiary); font-size:var(--body-sm-font-size); line-height:var(--body-sm-line-height); }
+    .row { display:flex; align-items:baseline; gap:var(--spacer-16); padding:var(--spacer-6) 0; flex-wrap:wrap; }
+    .row__label { flex-shrink:0; width:56px; color:var(--text-tertiary); font-size:var(--body-xs-font-size); line-height:var(--body-xs-line-height); }
+    .row__content { display:flex; align-items:baseline; gap:var(--spacer-16); flex-wrap:wrap; }
+    .row__divider { width:100%; height:1px; background:var(--border-neutral-l1); margin:var(--spacer-4) 0; }
+  </style>
+</head>
+<body>
+<div class="pv-header"><h1>数值展示</h1><p>覆盖价格和数据两种场景，使用 WegoKeyboard N9 数字字体，支持营销橙/黑/白三色系和 6 档字号。价格强制两位小数，数据末尾零省略，≥10 万可选择"数字+万"省略。</p></div>
+
+  <div class="pv-section">
+    <div class="pv-section__title">营销橙价格</div>
+    <div class="pv-section__sub">商品价格默认营销橙主题，货币符号和小数部分小写（10~14px 同号），强制两位小数。</div>
+    <div class="row"><span class="row__label">14px</span><div class="row__content"><span class="metric metric--14 metric--marketing"><span class="metric__main"><span class="metric__symbol">¥</span><span class="metric__value"><span class="metric__integer">9</span><span class="metric__decimal">.90</span></span></span></span><span class="metric metric--14 metric--marketing"><span class="metric__main"><span class="metric__symbol">¥</span><span class="metric__value"><span class="metric__integer">19</span><span class="metric__decimal">.90</span></span></span></span></div></div>
+    <div class="row"><span class="row__label">16px</span><div class="row__content"><span class="metric metric--16 metric--marketing"><span class="metric__main"><span class="metric__symbol">¥</span><span class="metric__value"><span class="metric__integer">29</span><span class="metric__decimal">.90</span></span></span></span><span class="metric metric--16 metric--marketing"><span class="metric__main"><span class="metric__symbol">¥</span><span class="metric__value"><span class="metric__integer">99</span><span class="metric__decimal">.00</span></span></span></span></div></div>
+    <div class="row"><span class="row__label">18px</span><div class="row__content"><span class="metric metric--18 metric--marketing"><span class="metric__main"><span class="metric__symbol">¥</span><span class="metric__value"><span class="metric__integer">99</span><span class="metric__decimal">.00</span></span></span></span><span class="metric metric--18 metric--marketing"><span class="metric__main"><span class="metric__symbol">¥</span><span class="metric__value"><span class="metric__integer">199</span><span class="metric__decimal">.00</span></span></span></span></div></div>
+    <div class="row"><span class="row__label">20px</span><div class="row__content"><span class="metric metric--20 metric--marketing"><span class="metric__main"><span class="metric__symbol">¥</span><span class="metric__value"><span class="metric__integer">199</span><span class="metric__decimal">.00</span></span></span></span><span class="metric metric--20 metric--marketing"><span class="metric__main"><span class="metric__symbol">¥</span><span class="metric__value"><span class="metric__integer">1299</span><span class="metric__decimal">.00</span></span></span></span></div></div>
+    <div class="row"><span class="row__label">24px</span><div class="row__content"><span class="metric metric--24 metric--marketing"><span class="metric__main"><span class="metric__symbol">¥</span><span class="metric__value"><span class="metric__integer">1299</span><span class="metric__decimal">.00</span></span></span></span></div></div>
+    <div class="row"><span class="row__label">32px</span><div class="row__content"><span class="metric metric--32 metric--marketing"><span class="metric__main"><span class="metric__symbol">¥</span><span class="metric__value"><span class="metric__integer">1299</span><span class="metric__decimal">.00</span></span></span></span></div></div>
+    <div class="row__divider"></div>
+    <div class="row"><span class="row__label">前缀</span><div class="row__content"><span class="metric metric--20 metric--marketing"><span class="metric__prefix">会员</span><span class="metric__main"><span class="metric__symbol">¥</span><span class="metric__value"><span class="metric__integer">99</span><span class="metric__decimal">.00</span></span></span></span></div></div>
+    <div class="row"><span class="row__label">帮卖标签</span><div class="row__content"><span class="metric metric--20 metric--marketing"><span class="metric__main"><span class="metric__symbol">¥</span><span class="metric__value"><span class="metric__integer">29</span><span class="metric__decimal">.90</span></span></span></span><span class="metric__badge">赚¥8</span></div></div>
+    <div class="row"><span class="row__label">划线价</span><div class="row__content"><span class="metric metric--20 metric--marketing"><span class="metric__main"><span class="metric__symbol">¥</span><span class="metric__value"><span class="metric__integer">99</span><span class="metric__decimal">.00</span></span></span></span><span class="metric metric--20 metric--marketing"><span class="metric__line">¥129.00</span></span></div></div>
+    <div class="row"><span class="row__label">区间价</span><div class="row__content"><span class="metric metric--20 metric--marketing"><span class="metric__main"><span class="metric__symbol">¥</span><span class="metric__value"><span class="metric__integer">20</span><span class="metric__decimal">.00</span></span></span></span><span class="metric__range-sep">~</span><span class="metric__value metric__value--high"><span class="metric__integer">30</span><span class="metric__decimal">.00</span></span></span></div></div>
+  </div>
+
+  <div class="pv-section">
+    <div class="pv-section__title">黑色数据</div>
+    <div class="pv-section__sub">常规数据展示默认黑色，无货币符号，非金额末尾零省略。</div>
+    <div class="row"><span class="row__label">14px</span><div class="row__content"><span class="metric metric--14 metric--black"><span class="metric__value"><span class="metric__integer">128</span></span></span><span class="metric metric--14 metric--black"><span class="metric__value"><span class="metric__integer">20.8</span><span class="metric__unit">%</span></span></span></div></div>
+    <div class="row"><span class="row__label">16px</span><div class="row__content"><span class="metric metric--16 metric--black"><span class="metric__value"><span class="metric__integer">1,280</span></span></span><span class="metric metric--16 metric--black"><span class="metric__value"><span class="metric__integer">20.8</span><span class="metric__unit">%</span></span></span></div></div>
+    <div class="row"><span class="row__label">18px</span><div class="row__content"><span class="metric metric--18 metric--black"><span class="metric__value"><span class="metric__integer">12</span><span class="metric__unit">万</span></span></span><span class="metric metric--18 metric--black"><span class="metric__value"><span class="metric__integer">20.8</span><span class="metric__unit">%</span></span></span></div></div>
+    <div class="row"><span class="row__label">20px</span><div class="row__content"><span class="metric metric--20 metric--black"><span class="metric__value"><span class="metric__integer">12</span><span class="metric__unit">万</span></span></span><span class="metric metric--20 metric--black"><span class="metric__value"><span class="metric__integer">22.99</span><span class="metric__unit">万</span></span></span></div></div>
+    <div class="row"><span class="row__label">24px</span><div class="row__content"><span class="metric metric--24 metric--black"><span class="metric__value"><span class="metric__integer">22.99</span><span class="metric__unit">万</span></span></span></div></div>
+    <div class="row"><span class="row__label">32px</span><div class="row__content"><span class="metric metric--32 metric--black"><span class="metric__value"><span class="metric__integer">123,456</span></span></span></div></div>
+  </div>
+
+  <div class="pv-section">
+    <div class="pv-section__title">白色主题</div>
+    <div class="pv-section__sub">深色背景使用白色主题，如营销 Banner、深色卡片。</div>
+    <div class="demo-dark-bg">
+      <div class="row"><span class="row__label" style="color:rgba(255,255,255,0.6);">20px</span><div class="row__content"><span class="metric metric--20 metric--white"><span class="metric__main"><span class="metric__symbol">¥</span><span class="metric__value"><span class="metric__integer">99</span><span class="metric__decimal">.00</span></span></span></span><span class="metric metric--20 metric--white"><span class="metric__main"><span class="metric__symbol">¥</span><span class="metric__value"><span class="metric__integer">199</span><span class="metric__decimal">.00</span></span></span></span><span class="metric metric--20 metric--white"><span class="metric__line">¥259.00</span></span></div></div>
+      <div class="row"><span class="row__label" style="color:rgba(255,255,255,0.6);">32px</span><div class="row__content"><span class="metric metric--32 metric--white"><span class="metric__main"><span class="metric__symbol">¥</span><span class="metric__value"><span class="metric__integer">1299</span><span class="metric__decimal">.00</span></span></span></span></div></div>
+      <div class="row"><span class="row__label" style="color:rgba(255,255,255,0.6);">数据</span><div class="row__content"><span class="metric metric--24 metric--white"><span class="metric__value"><span class="metric__integer">12</span><span class="metric__unit">万</span></span></span><span class="metric metric--24 metric--white"><span class="metric__value"><span class="metric__integer">20.8</span><span class="metric__unit">%</span></span></span></div></div>
+    </div>
+  </div>
+
+  <div class="pv-section">
+    <div class="pv-section__title">数据省略规则</div>
+    <div class="pv-section__sub">≥10 万可选择"数字+万"省略，四舍五入最多两位小数，末尾零省略；需要计算的数字不省略。</div>
+    <div class="row"><span class="row__label">省略</span><div class="row__content"><span class="metric metric--20 metric--black"><span class="metric__value"><span class="metric__integer">12</span><span class="metric__unit">万</span></span></span><span class="metric metric--20 metric--black"><span class="metric__value"><span class="metric__integer">22.99</span><span class="metric__unit">万</span></span></span><span class="metric metric--20 metric--black"><span class="metric__value"><span class="metric__integer">23</span><span class="metric__unit">万</span></span></span></div></div>
+    <div class="row"><span class="row__label">不省略</span><div class="row__content"><span class="metric metric--20 metric--black"><span class="metric__value"><span class="metric__integer">1234.56</span></span></span><span class="metric metric--20 metric--black"><span class="metric__value"><span class="metric__integer">9.8</span><span class="metric__unit">万</span></span></span></div></div>
+    <div class="row"><span class="row__label">百分比</span><div class="row__content"><span class="metric metric--20 metric--black"><span class="metric__value"><span class="metric__integer">20.8</span><span class="metric__unit">%</span></span></span><span class="metric metric--20 metric--black"><span class="metric__value"><span class="metric__integer">50</span><span class="metric__unit">%</span></span></span><span class="metric metric--20 metric--black"><span class="metric__value"><span class="metric__integer">0</span></span></span></div></div>
+  </div>
+
+  <div class="pv-section">
+    <div class="pv-section__title">换行示例</div>
+    <div class="pv-section__sub">极窄容器加 .metric--wrap 允许换行，换行后保持基线对齐，数字内部禁止断行。</div>
+    <div class="demo-narrow" style="width:80px;">
+      <div class="demo-narrow-label">80px 宽容器</div>
+      <span class="metric metric--16 metric--marketing metric--wrap"><span class="metric__main"><span class="metric__symbol">¥</span><span class="metric__value"><span class="metric__integer">1299</span><span class="metric__decimal">.00</span></span></span></span><span class="metric__badge">赚¥8</span></span>
+    </div>
+    <div class="demo-narrow" style="width:120px;">
+      <div class="demo-narrow-label">120px 宽容器</div>
+      <span class="metric metric--16 metric--marketing metric--wrap"><span class="metric__main"><span class="metric__symbol">¥</span><span class="metric__value"><span class="metric__integer">20</span><span class="metric__decimal">.00</span></span></span></span><span class="metric__range-sep">~</span><span class="metric__value metric__value--high"><span class="metric__integer">30</span><span class="metric__decimal">.00</span></span></span>
+    </div>
+    <div class="demo-narrow" style="width:160px;">
+      <div class="demo-narrow-label">160px 宽容器</div>
+      <span class="metric metric--16 metric--marketing metric--wrap"><span class="metric__prefix">会员</span><span class="metric__main"><span class="metric__symbol">¥</span><span class="metric__value"><span class="metric__integer">99</span><span class="metric__decimal">.00</span></span></span></span><span class="metric metric--16 metric--marketing"><span class="metric__line">¥129.00</span></span></span>
+    </div>
+  </div>
+</body>
+</html>

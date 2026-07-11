@@ -800,6 +800,7 @@
             "number-sm-font-family": "WegoKeyboard N9, DIN Alternate, SF Pro Display, -apple-system, BlinkMacSystemFont, sans-serif",
             "number-md-font-family": "WegoKeyboard N9, DIN Alternate, SF Pro Display, -apple-system, BlinkMacSystemFont, sans-serif",
             "number-lg-font-family": "WegoKeyboard N9, DIN Alternate, SF Pro Display, -apple-system, BlinkMacSystemFont, sans-serif",
+            "number-lg2-font-family": "WegoKeyboard N9, DIN Alternate, SF Pro Display, -apple-system, BlinkMacSystemFont, sans-serif",
             "number-xl-font-family": "WegoKeyboard N9, DIN Alternate, SF Pro Display, -apple-system, BlinkMacSystemFont, sans-serif",
             "number-xxl-font-family": "WegoKeyboard N9, DIN Alternate, SF Pro Display, -apple-system, BlinkMacSystemFont, sans-serif",
             "number-display-font-family": "WegoKeyboard N9, DIN Alternate, SF Pro Display, -apple-system, BlinkMacSystemFont, sans-serif",
@@ -821,6 +822,7 @@
             "number-sm-font-size": "12px",
             "number-md-font-size": "14px",
             "number-lg-font-size": "16px",
+            "number-lg2-font-size": "18px",
             "number-xl-font-size": "20px",
             "number-xxl-font-size": "24px",
             "number-display-font-size": "32px"
@@ -844,6 +846,7 @@
             "number-sm-font-weight": "500",
             "number-md-font-weight": "500",
             "number-lg-font-weight": "500",
+            "number-lg2-font-weight": "500",
             "number-xl-font-weight": "500",
             "number-xxl-font-weight": "500",
             "number-display-font-weight": "500"
@@ -864,6 +867,7 @@
             "number-sm-line-height": "16px",
             "number-md-line-height": "18px",
             "number-lg-line-height": "20px",
+            "number-lg2-line-height": "24px",
             "number-xl-line-height": "24px",
             "number-xxl-line-height": "30px",
             "number-display-line-height": "38px"

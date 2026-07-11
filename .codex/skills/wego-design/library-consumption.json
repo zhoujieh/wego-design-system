@@ -214,6 +214,13 @@
         "system-settings（HostScreen + SystemSettingsScreen，push + slide-left）"
       ],
       "purpose": "让 AI 从规则文档直接学到 UI Kit 必须演示双层结构 + 打开方式 + 动画定义，不依赖隐性实践推断"
+    },
+    "pageBottomPaddingRule": {
+      "description": "页面底部预留规则，适用于所有页面底部间距",
+      "noBottomActionBar": "页面没有固定底部操作栏时，可滚动内容容器底部必须补 calc(40px + var(--safe-area-bottom))，对应 Token --safe-area-bottom-content",
+      "hasBottomActionBar": "页面有固定底部操作栏时，操作栏自身声明 padding-bottom: var(--safe-area-bottom) 避开安全区，内容容器底部只需补 40px（--spacer-40）确保最后一项内容不被操作栏遮挡",
+      "appliesTo": "所有 wego-app 业务场景页面底部",
+      "exception": "modal、sheet 等浮层组件自带安全区处理，不适用此规则"
     }
   },
   "globalConsumptionRules": {
@@ -270,7 +277,8 @@
     "dialog",
     "actionsheet",
     "modal",
-    "popmenu"
+    "popmenu",
+    "metric"
   ],
   "embeddedComponents": [],
   "unpublishedContracts": [],
@@ -282,7 +290,8 @@
   "componentContractReadRule": "components/{slug}.json 统一使用 schemaVersion 3；读取时依次关注 semanticTypeCandidates、variantDimensions、usageHints、doNotInvent、tokensConsumed、provenance。",
   "componentConsumptionNotes": [
     "搜索语义必须优先消费 search 组件，不得用 input 临时拼搜索框；基础 searchbox 固定为左图标、中间输入、右侧内部动作三段式，业务右侧操作放在 search 的 host pattern actions 槽。",
-    "独立文字跳转操作（如卡片头部右侧的'全部'、'配置'、'查看详情'，列表项右侧的轻操作文字）必须消费 link 组件的 standalone 模式，不得用业务作用域自定义类（如 __text-action）模拟 link 视觉（color: var(--text-link) + transparent 背景）。link standalone 已提供 14px/12px 尺寸、40px 紧凑热区和按压态反馈；自定义模拟会丢失热区、按压态和视觉一致性。页面主操作仍用 button，不用 link 代替强动作。"
+    "独立文字跳转操作（如卡片头部右侧的'全部'、'配置'、'查看详情'，列表项右侧的轻操作文字）必须消费 link 组件的 standalone 模式，不得用业务作用域自定义类（如 __text-action）模拟 link 视觉（color: var(--text-link) + transparent 背景）。link standalone 已提供 14px/12px 尺寸、40px 紧凑热区和按压态反馈；自定义模拟会丢失热区、按压态和视觉一致性。页面主操作仍用 button，不用 link 代替强动作。",
+    "页面内搜索框（search-nav-bar、search-toolbar）默认固定在页面顶部，不跟随页面滚动；搜索框使用 position: sticky 或等价固定方式，确保用户向下滚动时仍可触达搜索入口。例外：覆盖式搜索结果层（search-overlay）是全屏搜索态，不适用此规则。"
   ],
   "scenarioTypeRegistry": {
     "description": "通用场景类型注册表。所有经验沉淀必须先归入一个场景类型并标注工作流环节，再按四段式落地。新类型需经通用化验证。",

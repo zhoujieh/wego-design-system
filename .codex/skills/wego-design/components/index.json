@@ -181,6 +181,13 @@
       "category": "feedback",
       "status": "stable",
       "preview": "preview/component-popmenu.html"
+    },
+    {
+      "slug": "metric",
+      "name": "数值展示",
+      "category": "display",
+      "status": "stable",
+      "preview": "preview/component-metric.html"
     }
   ],
   "componentContractSchemaVersion": 3

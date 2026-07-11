@@ -192,6 +192,14 @@
       "previewFile": "preview/component-modal.html",
       "priority": 22,
       "slot": "bottom-modal-frame"
+    },
+    {
+      "slug": "metric",
+      "reason": "通用数值展示，覆盖商品价格和数据统计两种场景，支持营销橙/黑/白三色系和 6 档字号。",
+      "evidenceFile": "components/metric.json",
+      "previewFile": "preview/component-metric.html",
+      "priority": 23,
+      "slot": "numeric-display"
     }
   ],
   "allowedComponents": [
@@ -217,7 +225,8 @@
     "toast",
     "dialog",
     "actionsheet",
-    "modal"
+    "modal",
+    "metric"
   ],
   "screenBlueprints": [
     {

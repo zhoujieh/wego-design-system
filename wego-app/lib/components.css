@@ -1145,6 +1145,62 @@
 .link--inline:active,
 .link--inline.is-pressed { background:var(--bg-overlay-l2); }
 
+/* ── Metric ────────────────────────────────────────────────── */
+/* @anatomy
+   <span class="row__label">14px</span><div class="row__content"><span class="metric metric--14 metric--marketing"><span class="metric__main"><span class="metric__symbol">¥</span><span class="metric__value"><span class="metric__integer">9</span><span class="metric__decimal">.90</span></span></span></span><span class="metric metric--14 metric--marketing"><span class="metric__main"><span class="metr...
+*/
+.metric { display:inline-flex; align-items:baseline; gap:var(--spacer-2); flex-wrap:nowrap; font-family:var(--number-md-font-family); font-feature-settings:"zero"; vertical-align:baseline; }
+    .metric__main { display:inline-flex; align-items:baseline; }
+    .metric__value { display:inline-flex; align-items:baseline; white-space:nowrap; }
+    .metric__symbol { font-weight:var(--font-weight-medium); }
+    .metric__integer { font-weight:var(--font-weight-medium); }
+    .metric__decimal { font-weight:var(--font-weight-medium); }
+    .metric__unit { font-weight:var(--font-weight-medium); }
+    .metric__range-sep { font-weight:var(--font-weight-regular); padding:0 2px; }
+    .metric__line { font-weight:var(--font-weight-regular); color:var(--text-tertiary); text-decoration:line-through; text-decoration-thickness:1px; white-space:nowrap; }
+    .metric__prefix { font-family:var(--body-xs-font-family); font-weight:var(--font-weight-medium); }
+    .metric__badge { display:inline-flex; align-items:baseline; padding:1px var(--spacer-2); border-radius:var(--radius-4); background:var(--status-promotion-surface-l1); color:var(--status-promotion-default); font-family:var(--body-xs-font-family); font-size:10px; line-height:14px; font-weight:var(--font-weight-medium); white-space:nowrap; }
+    .metric--14 .metric__integer { font-size:14px; line-height:20px; }
+    .metric--14 .metric__symbol, .metric--14 .metric__decimal, .metric--14 .metric__unit { font-size:14px; line-height:20px; }
+    .metric--14 .metric__line { font-size:12px; line-height:16px; }
+    .metric--14 .metric__prefix { font-size:10px; line-height:14px; }
+    .metric--14 .metric__range-sep { font-size:14px; line-height:20px; }
+    .metric--16 .metric__integer { font-size:16px; line-height:22px; }
+    .metric--16 .metric__symbol, .metric--16 .metric__decimal, .metric--16 .metric__unit { font-size:12px; line-height:16px; }
+    .metric--16 .metric__line { font-size:12px; line-height:16px; }
+    .metric--16 .metric__prefix { font-size:10px; line-height:14px; }
+    .metric--16 .metric__range-sep { font-size:16px; line-height:22px; }
+    .metric--18 .metric__integer { font-size:18px; line-height:24px; }
+    .metric--18 .metric__symbol, .metric--18 .metric__decimal, .metric--18 .metric__unit { font-size:12px; line-height:16px; }
+    .metric--18 .metric__line { font-size:12px; line-height:16px; }
+    .metric--18 .metric__prefix { font-size:10px; line-height:14px; }
+    .metric--18 .metric__range-sep { font-size:18px; line-height:24px; }
+    .metric--20 .metric__integer { font-size:20px; line-height:28px; }
+    .metric--20 .metric__symbol, .metric--20 .metric__decimal, .metric--20 .metric__unit { font-size:14px; line-height:20px; }
+    .metric--20 .metric__line { font-size:14px; line-height:20px; }
+    .metric--20 .metric__prefix { font-size:10px; line-height:14px; }
+    .metric--20 .metric__range-sep { font-size:20px; line-height:28px; }
+    .metric--24 .metric__integer { font-size:24px; line-height:32px; }
+    .metric--24 .metric__symbol, .metric--24 .metric__decimal, .metric--24 .metric__unit { font-size:16px; line-height:22px; }
+    .metric--24 .metric__line { font-size:16px; line-height:22px; }
+    .metric--24 .metric__prefix { font-size:12px; line-height:16px; }
+    .metric--24 .metric__range-sep { font-size:24px; line-height:32px; }
+    .metric--32 .metric__integer { font-size:32px; line-height:44px; }
+    .metric--32 .metric__symbol, .metric--32 .metric__decimal, .metric--32 .metric__unit { font-size:22px; line-height:30px; }
+    .metric--32 .metric__line { font-size:22px; line-height:30px; }
+    .metric--32 .metric__prefix { font-size:16px; line-height:22px; }
+    .metric--32 .metric__range-sep { font-size:32px; line-height:44px; }
+    .metric--marketing { color:var(--status-promotion-default); }
+    .metric--marketing .metric__line { color:var(--text-tertiary); }
+    .metric--marketing .metric__prefix { color:var(--status-promotion-default); }
+    .metric--black { color:var(--text-default); }
+    .metric--black .metric__line { color:var(--text-tertiary); }
+    .metric--black .metric__prefix { color:var(--text-default); }
+    .metric--white { color:var(--text-inverse); }
+    .metric--white .metric__line { color:var(--text-inverse-weak); }
+    .metric--white .metric__prefix { color:var(--text-inverse); }
+    .metric--wrap { flex-wrap:wrap; row-gap:var(--spacer-2); }
+
 /* ── Modal ─────────────────────────────────────────────────── */
 /* @anatomy
    <div class="pv-header"> <h1>底部模态框 Modal</h1> <p>底部模态框，用于承载标题+正文+操作区或自定义内容的底部弹层。与 dialog（居中轻量确认）和 actionsheet（底部操作列表）互补。操作区按钮复用 button 组件，链接复用 link 组件，frame-x 标题栏复用 navbar 组件。</p> </div>

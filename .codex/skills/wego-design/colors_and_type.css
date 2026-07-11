@@ -9,6 +9,29 @@
  * - No legacy compatibility layer is retained.
  */
 
+/* WegoKeyboard N9 数字字体 */
+@font-face {
+  font-family: "WegoKeyboard N9";
+  src: url('assets/fonts/WegoKeyboardN9-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "WegoKeyboard N9";
+  src: url('assets/fonts/WegoKeyboardN9-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "WegoKeyboard N9";
+  src: url('assets/fonts/WegoKeyboardN9-Bold.otf') format('opentype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   /* palette-green */
   --palette-green-100: #e5fff2;
@@ -315,6 +338,10 @@
   --number-lg-font-size: 16px;
   --number-lg-font-weight: 500;
   --number-lg-line-height: 20px;
+  --number-lg2-font-family: "WegoKeyboard N9", "DIN Alternate", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+  --number-lg2-font-size: 18px;
+  --number-lg2-font-weight: 500;
+  --number-lg2-line-height: 24px;
   --number-xl-font-family: "WegoKeyboard N9", "DIN Alternate", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
   --number-xl-font-size: 20px;
   --number-xl-font-weight: 500;
