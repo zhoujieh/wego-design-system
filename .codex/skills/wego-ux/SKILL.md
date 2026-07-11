@@ -1,16 +1,17 @@
 ---
 name: "wego-ux"
-description: 按已确认业务迭代、interaction_spec 和 design_plan 实现 wego-app 静态 App 场景，或按规格迭代已有场景。用于生成或修改登记范围内的 scene.js、scene.css、routes.js、宿主入口、交互状态、数据回填、路由和资源同步；任何已有业务场景修改都先用本技能做偏差判定。不要用于需求重定义、设计系统本体维护或只做验收。
+description: 按已确认原型简报与设计约束快速实现 wego-app 交互原型，并在定稿后按 interaction_spec 和 design_plan 补齐正式实现追踪；用于生成或修改登记范围内的 scene.js、scene.css、routes.js、宿主入口、交互状态、数据回填、路由和资源同步。不要用于需求重定义、设计系统本体维护或只做验收。
 ---
 
 # Wego UX
 
-这是唯一正式生成或修改业务原型的环节。持续维护同一个 `wego-app`，不生成孤立 demo。
+这是唯一正式生成或修改业务原型的环节。持续维护同一个 `wego-app`，不生成孤立 demo；schema v2 先实现可交互原型，再在定稿后正式化追踪。
 
 ## 前置门禁与路由
 
-- 必须有已落盘 `_spec/interaction_spec.json` 和 `_spec/design_plan.json`。
-- 业务实现必须归属有效迭代，状态为 `design-ready`，且产品、设计和 `base_fingerprint` 未失效。
+- schema v2 的 `prototyping` 状态必须有用户确认的 `prototype_brief` 和 `prototype_design`；此时只可修改登记范围内的运行时文件，禁止改写正式规格、验收或交接产物。
+- schema v2 定稿后，正式实现追踪必须有已落盘 `_spec/interaction_spec.json`、`_spec/design_plan.json` 且状态为 `design-ready`；运行 `check-prototype-snapshot` 后才能 `mark-implemented`。
+- v1 必须有两份规格且状态为 `design-ready`，产品、设计和 `base_fingerprint` 未失效。
 - `readiness = blocked`、存在 design gap 或任一 surface 为 gap：停止并回到上游。
 - 只改组件、Token、UI Kit、Preview、消费边界或工作流：交给 `wego-uxsystem-iterate`。
 - 只验收或回归：交给 `wego-tests`。
@@ -19,8 +20,8 @@ description: 按已确认业务迭代、interaction_spec 和 design_plan 实现 
 
 1. 仓库根目录 [AGENTS.md](../../../AGENTS.md)。
 2. 当前业务迭代 `iteration.json` 和 [业务迭代契约](../wego-product/references/iteration-workflow.md)。
-3. 所有相关场景两份 `_spec`；优先新字段，缺失时才兼容旧字段。
-4. `design_plan.rule_sources_used` 指向的正式来源。
+3. schema v2 原型期读取 `prototype_brief` 和 `prototype_design`；定稿后及 v1 读取所有相关场景两份 `_spec`。
+4. `prototype_design.rule_sources_used` 或 `design_plan.rule_sources_used` 指向的正式来源。
 5. 命中的组件契约、Preview、Token、pagePattern 和 fallback。
 6. 当前 `wego-app` 宿主、路由和目标场景。
 7. 修改路由、宿主、presentation 或场景注册时读取 [scene-runtime.md](references/scene-runtime.md)。
@@ -31,10 +32,10 @@ description: 按已确认业务迭代、interaction_spec 和 design_plan 实现 
 
 ## 核心规则
 
-- 实现只能执行已确认的 `interaction_spec`、`design_plan` 和其中记录的真实规则来源，自动生成文档不得参与实现判断。
+- schema v2 原型期只能执行已确认的 `prototype_brief`、`prototype_design` 和真实规则来源；定稿后及 v1 只能执行 `interaction_spec`、`design_plan` 和真实规则来源。
 - 修改已有场景前必须先做偏差判定；禁止绕过规格直接修改 scene、样式或路由。
 - 组件结构、变体、状态、Token、页面布局和打开方式必须严格执行设计计划，不得二次设计。
-- 发现内容、组件、展示或规则来源偏差时必须回退上游并更新、归档 `_spec`，不能在实现层补造规则。
+- 原型期发现范围偏差回到 `wego-product` 更新简报并重新确认；设计偏差回到 `wego-design` 更新原型约束。定稿后及 v1 的偏差仍须回退上游并更新、归档 `_spec`。
 - 场景完成后必须经过 `wego-tests`；提交、推送和部署状态只按真实执行结果报告。
 - 只能修改 `affected_scenes` 和 `affected_runtime` 登记范围；新增业务、场景或产品结果必须回到 `wego-product`，设计变化回到 `wego-design`。
 
@@ -52,7 +53,7 @@ description: 按已确认业务迭代、interaction_spec 和 design_plan 实现 
 
 不改变需求或设计的 Token 替换、安全区修复、响应式修复、Bug 修复、性能重构通常可直接实现，但仍须满足正式规格。
 
-进入实现前运行 `iteration-record.mjs check-base`；共享场景基线变化时不得直接覆盖。实现完成后补齐每项需求的 `implementation_refs` 并运行 `mark-implemented`。
+v2 原型实现完成后运行 `submit-prototype` 等待用户定稿；文档化阶段运行 `check-prototype-snapshot`，补齐每项需求的 `implementation_refs` 后运行 `mark-implemented`。v1 继续在实现前运行 `check-base`。
 
 ## 产物与宿主
 

@@ -18,14 +18,23 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const ID_RE = /^[a-z][a-z0-9-]*\d{3}$/;
 const REQUIREMENT_RE = /^[a-z][a-z0-9-]*\d{3}-R\d{2,}$/;
 const FEATURE_RE = /^[a-z0-9]+(?:[.-][a-z0-9]+)+$/;
-const ACTIVE_STATUSES = new Set(['draft', 'awaiting-scope-confirmation', 'product-confirmed', 'design-ready', 'implemented', 'testing', 'accepted', 'accepted-with-risk', 'blocked']);
+const V1_ACTIVE_STATUSES = new Set(['draft', 'awaiting-scope-confirmation', 'product-confirmed', 'design-ready', 'implemented', 'testing', 'accepted', 'accepted-with-risk', 'blocked']);
+const V2_ACTIVE_STATUSES = new Set(['draft', 'awaiting-brief-confirmation', 'prototyping', 'awaiting-prototype-confirmation', 'prototype-confirmed', 'product-confirmed', 'design-ready', 'implemented', 'testing', 'accepted', 'accepted-with-risk', 'blocked']);
+const ACTIVE_STATUSES = new Set([...V1_ACTIVE_STATUSES, ...V2_ACTIVE_STATUSES]);
 const ALL_STATUSES = new Set([...ACTIVE_STATUSES, 'cancelled', 'superseded', 'frozen']);
-const BLOCKABLE_STATUSES = new Set(['draft', 'awaiting-scope-confirmation', 'product-confirmed', 'design-ready', 'implemented', 'testing']);
+const V1_BLOCKABLE_STATUSES = new Set(['draft', 'awaiting-scope-confirmation', 'product-confirmed', 'design-ready', 'implemented', 'testing']);
+const V2_BLOCKABLE_STATUSES = new Set(['draft', 'awaiting-brief-confirmation', 'prototyping', 'awaiting-prototype-confirmation', 'prototype-confirmed', 'product-confirmed', 'design-ready', 'implemented', 'testing']);
+const BLOCKABLE_STATUSES = new Set([...V1_BLOCKABLE_STATUSES, ...V2_BLOCKABLE_STATUSES]);
 const CHANGE_TYPES = new Set(['added', 'changed', 'removed', 'verification-only']);
 const DEPTHS = new Set(['functional', 'simulated', 'stub', 'excluded']);
 const STAGE_ORDER = new Map([
   ['draft', 0], ['awaiting-scope-confirmation', 1], ['product-confirmed', 2], ['design-ready', 3],
   ['implemented', 4], ['testing', 5], ['accepted', 6], ['accepted-with-risk', 6], ['frozen', 7],
+]);
+const V2_STAGE_ORDER = new Map([
+  ['draft', 0], ['awaiting-brief-confirmation', 1], ['prototyping', 2], ['awaiting-prototype-confirmation', 3], ['prototype-confirmed', 4],
+  ['product-confirmed', 5], ['design-ready', 6], ['implemented', 7], ['testing', 8],
+  ['accepted', 9], ['accepted-with-risk', 9], ['frozen', 10],
 ]);
 
 const now = () => new Date().toISOString();
@@ -39,6 +48,7 @@ const unique = values => values.length === new Set(values).size;
 const asArray = value => Array.isArray(value) ? value : [];
 const hasRefs = value => Array.isArray(value) && value.length > 0 && value.every(item => typeof item === 'string' && item.length > 0);
 const stageAtLeast = (status, stage) => (STAGE_ORDER.get(status) ?? -1) >= (STAGE_ORDER.get(stage) ?? 99);
+const v2StageAtLeast = (status, stage) => (V2_STAGE_ORDER.get(status) ?? -1) >= (V2_STAGE_ORDER.get(stage) ?? 99);
 const isSafeSceneName = value => typeof value === 'string' && value.trim() === value && value.length > 0 && !/[\\/]/.test(value) && !['.', '..'].includes(value);
 const isSafeTitle = value => typeof value === 'string' && value.trim() === value && value.length > 0 && !/[\\/]/.test(value);
 
@@ -161,7 +171,114 @@ function assertIterationContext(value, record, file, expectedIds) {
   if (JSON.stringify(actual) !== JSON.stringify(expected)) fail(`${rel(file)} requirement_ids 与当前场景需求不一致`);
 }
 
+function isV2(record) {
+  return record.schemaVersion === 2;
+}
+
+function isActiveIteration(record) {
+  return (isV2(record) ? V2_ACTIVE_STATUSES : V1_ACTIVE_STATUSES).has(record.status);
+}
+
+function prototypeFiles(record) {
+  const files = [];
+  for (const item of affectedScenes(record)) {
+    const root = path.join(SCENES_ROOT, item.scene);
+    for (const file of listFiles(root)) {
+      const relative = rel(file);
+      if (!relative.includes('/_iterations/') && !relative.includes('/_spec/')) files.push(file);
+    }
+  }
+  for (const runtime of affectedRuntimeFiles(record)) {
+    const file = path.join(ROOT, runtime);
+    if (exists(file)) files.push(file);
+  }
+  return [...new Set(files)];
+}
+
+function prototypeBriefProjection(record) {
+  return {
+    prototype_brief: record.prototype_brief,
+    prototype_design: record.prototype_design,
+    affected_scenes: record.affected_scenes,
+    affected_runtime: record.affected_runtime,
+  };
+}
+
+function validatePrototypeBrief(record) {
+  const brief = record.prototype_brief || {};
+  const requiredArrays = ['included', 'excluded', 'entry_points', 'critical_paths'];
+  if (!brief.goal || requiredArrays.some(key => !Array.isArray(brief[key]))) fail('prototype_brief 必须包含 goal、included、excluded、entry_points、critical_paths');
+  if (brief.included.length === 0 || brief.entry_points.length === 0 || brief.critical_paths.length === 0) fail('prototype_brief 的 included、entry_points、critical_paths 不得为空');
+  if (brief.open_questions && !Array.isArray(brief.open_questions)) fail('prototype_brief.open_questions 必须为数组');
+  if (asArray(brief.open_questions).some(item => item?.blocking === true || item?.impact_level === 'core')) fail('prototype_brief 仍有阻塞问题，不能确认范围');
+}
+
+function validatePrototypeDesign(record) {
+  const designs = asArray(record.prototype_design?.surface_decisions);
+  if (designs.length === 0) fail('prototype_design 至少需要一个 surface_decision');
+  const ids = designs.map(item => item?.surface_id);
+  if (!unique(ids) || ids.some(id => typeof id !== 'string' || !id)) fail('prototype_design.surface_decisions 的 surface_id 必须唯一');
+  for (const item of designs) {
+    if (!item?.presentation || !Array.isArray(item?.rule_sources_used) || item.rule_sources_used.length === 0) fail(`prototype_design.surface_decisions.${item?.surface_id || '?'} 必须包含 presentation 和 rule_sources_used`);
+  }
+}
+
+function assertBriefConfirmation(record) {
+  const confirmation = record.brief_confirmation;
+  if (!confirmation?.brief_fingerprint) fail('缺少有效的 brief_confirmation');
+  const current = hashValue({ prototype_brief: record.prototype_brief, affected_scenes: record.affected_scenes, affected_runtime: record.affected_runtime });
+  if (confirmation.brief_fingerprint !== current) fail('极简原型简报已变化，必须先 invalidate --stage=brief 并重新确认范围');
+}
+
+function assertPrototypeSnapshot(record) {
+  const confirmation = record.prototype_confirmation;
+  if (!confirmation?.fingerprints || !confirmation?.brief_fingerprint) fail('缺少有效的 prototype_confirmation');
+  if (confirmation.brief_fingerprint !== hashValue(prototypeBriefProjection(record))) fail('原型简报或设计约束已变化，必须重新确认原型');
+  verifyFingerprints(confirmation.fingerprints, '已确认原型');
+}
+
+function validateBasicV2(record, file) {
+  const errors = [];
+  const add = message => errors.push(`${rel(file)}：${message}`);
+  const identity = record.identity || {};
+  if (record.schemaVersion !== 2) add('schemaVersion 必须为 2');
+  if (!ID_RE.test(identity.iteration_id || '')) add('identity.iteration_id 必须是小写前缀加三位序号，例如 shop001');
+  if (!isSafeTitle(identity.title)) add('identity.title 必须为不含路径分隔符的非空文本');
+  if (!isValidDate(identity.date)) add('identity.date 必须为有效 YYYY-MM-DD 日期');
+  if (!isSafeSceneName(identity.primary_scene)) add('identity.primary_scene 必须为不含路径分隔符的非空业务场景名');
+  if (!ALL_STATUSES.has(record.status) || ![...V2_ACTIVE_STATUSES, 'cancelled', 'superseded', 'frozen'].includes(record.status)) add(`非法 v2 status：${record.status}`);
+  if (record.status === 'blocked' && (!record.pause || !V2_BLOCKABLE_STATUSES.has(record.pause.resume_status))) add('blocked 必须记录可恢复的 v2 pause.resume_status');
+  if (!Number.isInteger(record.scope_revision) || record.scope_revision < 1) add('scope_revision 必须为正整数');
+  if (!Array.isArray(record.affected_scenes) || !Array.isArray(record.affected_runtime) || !Array.isArray(record.change_log)) add('affected_scenes、affected_runtime、change_log 必须为数组');
+  const scenes = affectedScenes(record);
+  const names = scenes.map(item => item?.scene).filter(Boolean);
+  if (!unique(names) || !scenes.some(item => item?.scene === identity.primary_scene && item?.role === 'primary') || scenes.filter(item => item?.role === 'primary').length !== 1) add('affected_scenes 必须包含唯一且合法的主场景');
+  for (const item of scenes) if (!isSafeSceneName(item?.scene) || !['primary', 'related'].includes(item?.role) || !CHANGE_TYPES.has(item?.change_type)) add('affected_scenes 每项必须包含合法 scene/role/change_type');
+  const related = asArray(identity.related_scenes);
+  const actualRelated = scenes.filter(item => item?.role === 'related').map(item => item.scene).sort();
+  if (!unique(related) || JSON.stringify([...related].sort()) !== JSON.stringify(actualRelated)) add('identity.related_scenes 必须完整等于 affected_scenes 中的 related 场景');
+  const runtime = affectedRuntimeFiles(record);
+  if (!unique(runtime) || runtime.some(value => !isBusinessRuntimeFile(value))) add('affected_runtime 必须是唯一且合法的 wego-app 路径');
+  const status = effectiveStatus(record);
+  try {
+    if (status !== 'draft') validatePrototypeBrief(record);
+    if (v2StageAtLeast(status, 'awaiting-prototype-confirmation')) validatePrototypeDesign(record);
+    if (v2StageAtLeast(status, 'prototyping')) assertBriefConfirmation(record);
+    if (v2StageAtLeast(status, 'prototype-confirmed') && !record.prototype_confirmation?.confirmed_at) add('prototype-confirmed 及后续状态必须有 prototype_confirmation');
+    if (v2StageAtLeast(status, 'product-confirmed') && record.stage_outputs?.product?.valid !== true) add('product-confirmed 及后续状态必须有有效产品阶段结果');
+    if (v2StageAtLeast(status, 'design-ready') && record.stage_outputs?.design?.valid !== true) add('design-ready 及后续状态必须有有效设计阶段结果');
+    if (v2StageAtLeast(status, 'implemented') && record.stage_outputs?.implementation?.valid !== true) add('implemented 及后续状态必须有有效实现阶段结果');
+    if (v2StageAtLeast(status, 'accepted') && record.stage_outputs?.acceptance?.valid !== true) add('accepted 及后续状态必须有有效验收阶段结果');
+  } catch (error) { add(error.message); }
+  const expectedFolder = `${identity.date.replaceAll('-', '')}-${identity.iteration_id}-${identity.title}`;
+  if (path.basename(iterationDir(file)) !== expectedFolder) add(`迭代目录必须命名为 ${expectedFolder}`);
+  if (path.basename(path.dirname(path.dirname(iterationDir(file)))) !== identity.primary_scene) add('迭代目录必须位于主业务场景的 _iterations 下');
+  if (errors.length) fail(errors.join('\n'));
+  return identityNames(record);
+}
+
 function validateBasic(record, file) {
+  if (isV2(record)) return validateBasicV2(record, file);
   const errors = [];
   const add = message => errors.push(`${rel(file)}：${message}`);
   if (record.schemaVersion !== 1) add('schemaVersion 必须为 1');
@@ -466,7 +583,7 @@ function assertNoActiveOverlap(record, file) {
   for (const otherFile of findIterationFiles()) {
     if (path.resolve(otherFile) === path.resolve(file)) continue;
     const other = readJson(otherFile);
-    if (!ACTIVE_STATUSES.has(other.status)) continue;
+    if (!isActiveIteration(other)) continue;
     const overlap = [...activeIterationClaims(other)].filter(value => claims.has(value));
     if (overlap.length > 0) fail(`与活跃迭代 ${other.identity?.iteration_id || rel(otherFile)} 范围冲突：${overlap.join('、')}；同一场景或宿主文件必须串行`);
   }
@@ -477,12 +594,14 @@ function commandInit() {
   const id = option('id');
   const title = option('title');
   const date = option('date') || new Date().toISOString().slice(0, 10);
+  const schemaVersion = option('schema') ? Number(option('schema')) : 2;
   if (!scene || !id || !title) fail('init 必须提供 --scene、--id、--title');
   if (!isSafeSceneName(scene) || !ID_RE.test(id) || !isValidDate(date) || !isSafeTitle(title)) fail('init 参数格式非法');
+  if (![1, 2].includes(schemaVersion)) fail('init 的 --schema 仅支持 1 或 2');
   for (const existingFile of findIterationFiles()) {
     const existing = readJson(existingFile);
     if (existing.identity?.iteration_id === id) fail(`iteration_id 已存在：${id}`);
-    if (ACTIVE_STATUSES.has(existing.status) && affectedScenes(existing).some(item => item.scene === scene)) fail(`场景 ${scene} 已被活跃迭代 ${existing.identity?.iteration_id} 认领`);
+    if (isActiveIteration(existing) && affectedScenes(existing).some(item => item.scene === scene)) fail(`场景 ${scene} 已被活跃迭代 ${existing.identity?.iteration_id} 认领`);
   }
   const sceneAlreadyExists = exists(path.join(SCENES_ROOT, scene));
   const dir = path.join(SCENES_ROOT, scene, '_iterations', `${date.replaceAll('-', '')}-${id}-${title}`);
@@ -490,9 +609,15 @@ function commandInit() {
   if (exists(file)) fail(`迭代已存在：${rel(file)}`);
   mkdir(dir);
   const record = {
-    schemaVersion: 1,
+    schemaVersion,
     identity: { iteration_id: id, title, date, primary_scene: scene, related_scenes: [] },
     status: 'draft', scope_revision: 1, base_fingerprint: {},
+    ...(schemaVersion === 2 ? {
+      prototype_brief: { goal: '', included: [], excluded: [], entry_points: [], critical_paths: [], prototype_boundaries: [], assumptions: [], open_questions: [] },
+      prototype_design: { surface_decisions: [] },
+      brief_confirmation: null,
+      prototype_confirmation: null,
+    } : {}),
     product_scope: { problem: '', goal: '', actors: [], success_criteria: [], included: [], excluded: [], assumptions: [], open_questions: [], dependencies: [] },
     features: [], requirements: [], traceability: [],
     affected_scenes: [{ scene, role: 'primary', change_type: sceneAlreadyExists ? 'changed' : 'added' }],
@@ -504,9 +629,110 @@ function commandInit() {
   console.log(rel(dir));
 }
 
+function commandConfirmBrief() {
+  const file = getIterationFile();
+  const { record } = loadAndValidate(file);
+  if (!isV2(record)) fail('confirm-brief 仅适用于 schemaVersion=2 的新迭代');
+  if (record.status !== 'awaiting-brief-confirmation') fail('只有 awaiting-brief-confirmation 可以确认极简原型简报');
+  assertNoActiveOverlap(record, file);
+  validatePrototypeBrief(record);
+  record.status = 'prototyping';
+  record.brief_confirmation = {
+    confirmed_at: now(),
+    confirmed_by: option('by') || 'user',
+    brief_fingerprint: hashValue({ prototype_brief: record.prototype_brief, affected_scenes: record.affected_scenes, affected_runtime: record.affected_runtime }),
+  };
+  saveRecord(file, record, 'brief-confirmed');
+}
+
+function commandSubmitBrief() {
+  const file = getIterationFile();
+  const { record } = loadAndValidate(file);
+  if (!isV2(record)) fail('submit-brief 仅适用于 schemaVersion=2 的新迭代');
+  if (record.status !== 'draft') fail('只有 draft 可以提交极简原型简报');
+  assertNoActiveOverlap(record, file);
+  validatePrototypeBrief(record);
+  record.status = 'awaiting-brief-confirmation';
+  saveRecord(file, record, 'brief-submitted');
+}
+
+function validatePrototypeImplementation(record) {
+  validatePrototypeBrief(record);
+  validatePrototypeDesign(record);
+  for (const item of affectedScenes(record)) {
+    if (item.change_type === 'removed' || item.change_type === 'verification-only') continue;
+    if (!exists(specFiles(item.scene).sceneJs)) fail(`缺少原型场景实现：${rel(specFiles(item.scene).sceneJs)}`);
+  }
+  for (const runtime of affectedRuntimeFiles(record)) {
+    if (!exists(path.join(ROOT, runtime))) fail(`原型 affected_runtime 文件不存在：${runtime}`);
+  }
+  if (prototypeFiles(record).length === 0) fail('原型尚未产生可确认的运行时文件');
+}
+
+function commandSubmitPrototype() {
+  const file = getIterationFile();
+  const { record } = loadAndValidate(file);
+  if (!isV2(record)) fail('submit-prototype 仅适用于 schemaVersion=2 的新迭代');
+  if (record.status !== 'prototyping') fail('只有 prototyping 可以提交原型确认');
+  assertBriefConfirmation(record);
+  validatePrototypeImplementation(record);
+  record.status = 'awaiting-prototype-confirmation';
+  saveRecord(file, record, 'prototype-submitted');
+}
+
+function commandConfirmPrototype() {
+  const file = getIterationFile();
+  const { record } = loadAndValidate(file);
+  if (!isV2(record)) fail('confirm-prototype 仅适用于 schemaVersion=2 的新迭代');
+  if (record.status !== 'awaiting-prototype-confirmation') fail('只有 awaiting-prototype-confirmation 可以确认原型定稿');
+  validatePrototypeImplementation(record);
+  record.status = 'prototype-confirmed';
+  record.prototype_confirmation = {
+    confirmed_at: now(),
+    confirmed_by: option('by') || 'user',
+    brief_fingerprint: hashValue(prototypeBriefProjection(record)),
+    fingerprints: fingerprintFiles(prototypeFiles(record)),
+  };
+  saveRecord(file, record, 'prototype-confirmed');
+}
+
+function commandFormalizeProduct() {
+  const file = getIterationFile();
+  const { record, names } = loadAndValidate(file);
+  if (!isV2(record)) fail('formalize-product 仅适用于 schemaVersion=2 的新迭代');
+  if (record.status !== 'prototype-confirmed') fail('只有 prototype-confirmed 可以补全正式产品规格');
+  assertPrototypeSnapshot(record);
+  validateProduct(record, file);
+  const target = path.join(iterationDir(file), names.scope);
+  fs.writeFileSync(target, renderScope(record));
+  record.status = 'product-confirmed';
+  record.stage_outputs.product = {
+    valid: true,
+    scope_document: rel(target),
+    formalized_at: now(),
+    record_fingerprint: hashValue(productRecordProjection(record)),
+    fingerprints: fingerprintFiles(affectedScenes(record).map(item => specFiles(item.scene).interaction).filter(exists)),
+  };
+  saveRecord(file, record, 'product-formalized');
+  console.log(rel(target));
+}
+
+function commandCheckPrototypeSnapshot() {
+  const file = getIterationFile();
+  const { record } = loadAndValidate(file);
+  if (!isV2(record)) fail('check-prototype-snapshot 仅适用于 schemaVersion=2 的新迭代');
+  if (record.status !== 'design-ready') fail('只有 design-ready 可以核验已确认原型快照');
+  validateByStatus(record, file);
+  assertPrototypeSnapshot(record);
+  record.stage_outputs.design.prototype_checked_at = now();
+  record.stage_outputs.design.prototype_checked_fingerprint = hashValue(record.prototype_confirmation.fingerprints);
+  saveRecord(file, record, 'prototype-snapshot-checked');
+}
+
 function commandScope() {
   const file = getIterationFile();
   const { record, names } = loadAndValidate(file);
+  if (isV2(record)) fail('v2 迭代请先 confirm-brief、submit-prototype、confirm-prototype，再用 formalize-product 生成正式范围记录');
   if (!['draft', 'awaiting-scope-confirmation'].includes(record.status)) fail('只有 draft 或 awaiting-scope-confirmation 可以生成范围确认文档；已确认范围变化请先 invalidate product');
   assertNoActiveOverlap(record, file);
   validateProduct(record, file);
@@ -521,6 +747,7 @@ function commandScope() {
 function commandConfirmScope() {
   const file = getIterationFile();
   const { record, names } = loadAndValidate(file);
+  if (isV2(record)) fail('v2 迭代以 confirm-prototype 作为正式范围确认，不使用 confirm-scope');
   if (record.status !== 'awaiting-scope-confirmation') fail('只有 awaiting-scope-confirmation 可以确认范围');
   assertNoActiveOverlap(record, file);
   validateProduct(record, file);
@@ -544,6 +771,7 @@ function commandMarkDesign() {
   if (record.status !== 'product-confirmed') fail('只有 product-confirmed 可以标记设计完成');
   validateByStatus(record, file);
   validateDesign(record);
+  if (isV2(record)) assertPrototypeSnapshot(record);
   record.status = 'design-ready';
   record.base_fingerprint = fingerprintFiles(currentFiles(record));
   record.stage_outputs.design = {
@@ -558,6 +786,7 @@ function commandMarkDesign() {
 function commandCheckBase() {
   const file = getIterationFile();
   const { record } = loadAndValidate(file);
+  if (isV2(record)) fail('v2 迭代请使用 check-prototype-snapshot 核验定稿原型');
   if (record.status !== 'design-ready') fail('只有 design-ready 可以检查实现基线');
   validateByStatus(record, file);
   for (const [name, hash] of Object.entries(record.base_fingerprint || {})) {
@@ -574,7 +803,10 @@ function commandMarkImplemented() {
   const { record } = loadAndValidate(file);
   if (record.status !== 'design-ready') fail('只有 design-ready 可以标记实现完成');
   validateByStatus(record, file);
-  if (!record.stage_outputs.design.base_checked_at || record.stage_outputs.design.base_checked_fingerprint !== hashValue(record.base_fingerprint)) fail('实现前必须先执行 check-base，且检查后基线不得变化');
+  if (isV2(record)) {
+    if (!record.stage_outputs.design.prototype_checked_at || record.stage_outputs.design.prototype_checked_fingerprint !== hashValue(record.prototype_confirmation?.fingerprints)) fail('v2 原型正式化前必须先执行 check-prototype-snapshot');
+    assertPrototypeSnapshot(record);
+  } else if (!record.stage_outputs.design.base_checked_at || record.stage_outputs.design.base_checked_fingerprint !== hashValue(record.base_fingerprint)) fail('实现前必须先执行 check-base，且检查后基线不得变化');
   validateImplementation(record);
   record.status = 'implemented';
   record.stage_outputs.implementation = {
@@ -636,6 +868,35 @@ function commandInvalidate() {
   const { record } = loadAndValidate(file);
   if (['frozen', 'cancelled', 'superseded'].includes(record.status)) fail('冻结、取消或已替代迭代不得失效或修改');
   const stage = option('stage');
+  if (isV2(record)) {
+    const config = {
+      brief: { minimum: 'prototyping', status: 'draft', outputs: ['product', 'design', 'implementation', 'acceptance'], confirmation: 'all', revision: true },
+      prototype: { minimum: 'prototype-confirmed', status: 'prototyping', outputs: ['product', 'design', 'implementation', 'acceptance'], confirmation: 'prototype' },
+      product: { minimum: 'product-confirmed', status: 'prototype-confirmed', outputs: ['product', 'design', 'implementation', 'acceptance'] },
+      design: { minimum: 'design-ready', status: 'product-confirmed', outputs: ['design', 'implementation', 'acceptance'] },
+      implementation: { minimum: 'implemented', status: 'design-ready', outputs: ['implementation', 'acceptance'] },
+      acceptance: { minimum: 'testing', status: 'implemented', outputs: ['acceptance'] },
+    }[stage];
+    if (!config) fail('v2 invalidate 必须提供 --stage=brief|prototype|product|design|implementation|acceptance');
+    if (!v2StageAtLeast(effectiveStatus(record), config.minimum)) fail(`当前状态尚未到达 ${stage} 阶段，不能向前推进式失效`);
+    for (const key of config.outputs) record.stage_outputs[key] = { valid: false, invalidated_at: now(), reason: option('reason') || '上游内容发生变化' };
+    if (config.revision) record.scope_revision += 1;
+    if (config.confirmation === 'all') {
+      record.brief_confirmation = null;
+      record.prototype_confirmation = null;
+    } else if (config.confirmation === 'prototype') record.prototype_confirmation = null;
+    if (['brief', 'prototype', 'product', 'design'].includes(stage)) record.base_fingerprint = {};
+    if (stage === 'implementation') {
+      record.base_fingerprint = fingerprintFiles(currentFiles(record));
+      delete record.stage_outputs.design.prototype_checked_at;
+      delete record.stage_outputs.design.prototype_checked_fingerprint;
+    }
+    record.status = config.status;
+    delete record.pause;
+    record.freeze = null;
+    saveRecord(file, record, 'invalidated', { stage, reason: option('reason') || '上游内容发生变化' });
+    return;
+  }
   if (!['product', 'design', 'implementation', 'acceptance'].includes(stage)) fail('invalidate 必须提供 --stage=product|design|implementation|acceptance');
   const minimum = { product: 'product-confirmed', design: 'design-ready', implementation: 'implemented', acceptance: 'testing' }[stage];
   if (!stageAtLeast(effectiveStatus(record), minimum)) fail(`当前状态尚未到达 ${stage} 阶段，不能向前推进式失效`);
@@ -774,6 +1035,26 @@ function validateByStatus(record, file) {
     return;
   }
   const statusForValidation = effectiveStatus(record);
+  if (isV2(record)) {
+    if (v2StageAtLeast(statusForValidation, 'prototype-confirmed')) assertPrototypeSnapshot(record);
+    if (v2StageAtLeast(statusForValidation, 'product-confirmed')) {
+      validateProduct(record, file);
+      validateStageIntegrity(record, 'product');
+    }
+    if (v2StageAtLeast(statusForValidation, 'design-ready')) {
+      validateDesign(record);
+      validateStageIntegrity(record, 'design');
+    }
+    if (v2StageAtLeast(statusForValidation, 'implemented')) {
+      validateImplementation(record);
+      validateStageIntegrity(record, 'implementation');
+    }
+    if (v2StageAtLeast(statusForValidation, 'accepted')) {
+      validateAcceptance(record);
+      validateStageIntegrity(record, 'acceptance');
+    }
+    return;
+  }
   if (stageAtLeast(statusForValidation, 'product-confirmed')) {
     validateProduct(record, file);
     validateStageIntegrity(record, 'product');
@@ -802,7 +1083,15 @@ function changedSceneFromFile(value) {
   return { scene: match[1], kind: 'runtime' };
 }
 
-function activeStatusCanClaim(status, kind) {
+function activeStatusCanClaim(record, kind) {
+  const status = record.status;
+  if (isV2(record)) {
+    if (kind === '_spec/interaction_spec.json' || kind === 'spec') return ['prototype-confirmed', 'product-confirmed', 'design-ready', 'implemented', 'testing', 'accepted', 'accepted-with-risk'].includes(status);
+    if (kind === '_spec/design_plan.json') return ['product-confirmed', 'design-ready', 'implemented', 'testing', 'accepted', 'accepted-with-risk'].includes(status);
+    if (kind === 'runtime') return ['prototyping', 'awaiting-prototype-confirmation'].includes(status);
+    if (kind === '_spec/acceptance_report.json') return ['implemented', 'testing', 'accepted', 'accepted-with-risk'].includes(status);
+    return false;
+  }
   if (kind === '_spec/interaction_spec.json') return ACTIVE_STATUSES.has(status);
   if (kind === 'spec') return ACTIVE_STATUSES.has(status);
   if (kind === '_spec/design_plan.json') return ['product-confirmed', 'design-ready', 'implemented', 'testing', 'accepted', 'accepted-with-risk'].includes(status);
@@ -834,7 +1123,7 @@ function validateChangedClaims(records) {
       if (runtimeChange && !runtimeFiles.includes(changed)) return false;
       const kind = runtimeChange ? 'runtime' : sceneChange.kind;
       if (sceneChange && kind === 'runtime' && affected.change_type === 'verification-only') return false;
-      if (activeStatusCanClaim(record.status, kind)) return true;
+      if (activeStatusCanClaim(record, kind)) return true;
       if (record.status !== 'frozen') return false;
       if (sceneChange && currentHash === null && affected.change_type === 'removed') return true;
       const freezeFile = path.join(iterationDir(file), 'freeze.json');
@@ -871,7 +1160,7 @@ function commandTest() {
       if ((result.status === 0) !== ok) fail(`测试命令失败：${args.join(' ')}\n${result.stdout}\n${result.stderr}`);
       return result;
     };
-    const init = run(['init', '--scene=测试场景', '--id=test001', '--title=测试迭代', '--date=2026-07-11']);
+    const init = run(['init', '--schema=1', '--scene=测试场景', '--id=test001', '--title=测试迭代', '--date=2026-07-11']);
     const dir = path.join(temp, init.stdout.trim());
     const file = path.join(dir, 'iteration.json');
     run(['init', '--scene=../越界', '--id=bad001', '--title=非法', '--date=2026-07-11'], false);
@@ -953,7 +1242,7 @@ function commandTest() {
     run(['check', `--iteration=${relFor(temp, dir)}`, '--changed-file=wego-app/scenes/测试场景/scene.js'], false);
     fs.writeFileSync(path.join(temp, 'wego-app/scenes/测试场景/scene.js'), acceptedRuntime);
     run(['check', `--iteration=${relFor(temp, dir)}`]);
-    const nextInit = run(['init', '--scene=测试场景', '--id=test002', '--title=后续迭代', '--date=2026-07-12']);
+    const nextInit = run(['init', '--schema=1', '--scene=测试场景', '--id=test002', '--title=后续迭代', '--date=2026-07-12']);
     const nextFile = path.join(temp, nextInit.stdout.trim(), 'iteration.json');
     const nextRecord = readJson(nextFile);
     nextRecord.affected_scenes[0].change_type = 'changed';
@@ -962,8 +1251,65 @@ function commandTest() {
     nextSpec.followup_draft = true;
     writeJson(path.join(temp, 'wego-app/scenes/测试场景/_spec/interaction_spec.json'), nextSpec);
     run(['check', '--changed-file=wego-app/scenes/测试场景/_spec/interaction_spec.json']);
+    const pristineHandoff = fs.readFileSync(path.join(dir, 'test001-测试迭代-开发交接.md'), 'utf8');
     fs.appendFileSync(path.join(dir, 'test001-测试迭代-开发交接.md'), '\n篡改\n');
     run(['check', `--iteration=${relFor(temp, dir)}`], false);
+    fs.writeFileSync(path.join(dir, 'test001-测试迭代-开发交接.md'), pristineHandoff);
+    const prototypeInit = run(['init', '--scene=原型场景', '--id=proto001', '--title=原型冲刺', '--date=2026-07-13']);
+    const prototypeDir = path.join(temp, prototypeInit.stdout.trim());
+    const prototypeFile = path.join(prototypeDir, 'iteration.json');
+    mkdir(path.join(temp, 'wego-app/scenes/原型场景/_spec'));
+    const prototypeRecord = readJson(prototypeFile);
+    prototypeRecord.prototype_brief = {
+      goal: '快速验证一个可交互原型', included: ['原型主流程'], excluded: ['真实接口'],
+      entry_points: ['工作台入口'], critical_paths: ['进入 → 操作 → 获得反馈'], prototype_boundaries: ['本地模拟'], assumptions: [], open_questions: [],
+    };
+    writeJson(prototypeFile, prototypeRecord);
+    run(['submit-prototype', `--iteration=${relFor(temp, prototypeDir)}`], false);
+    run(['confirm-brief', `--iteration=${relFor(temp, prototypeDir)}`, '--by=user'], false);
+    run(['submit-brief', `--iteration=${relFor(temp, prototypeDir)}`]);
+    run(['confirm-brief', `--iteration=${relFor(temp, prototypeDir)}`, '--by=user']);
+    fs.writeFileSync(path.join(temp, 'wego-app/scenes/原型场景/scene.js'), 'window.WegoApp?.registerScene?.({ routeId: "prototype" });\n');
+    run(['check', '--changed-file=wego-app/scenes/原型场景/scene.js']);
+    run(['submit-prototype', `--iteration=${relFor(temp, prototypeDir)}`], false);
+    const designedPrototype = readJson(prototypeFile);
+    designedPrototype.prototype_design = { surface_decisions: [{ surface_id: 'prototype-main', presentation: 'push', rule_sources_used: ['uikit-plan.json:pagePatterns'] }] };
+    writeJson(prototypeFile, designedPrototype);
+    run(['check', '--changed-file=wego-app/scenes/原型场景/_spec/interaction_spec.json'], false);
+    run(['submit-prototype', `--iteration=${relFor(temp, prototypeDir)}`]);
+    run(['confirm-prototype', `--iteration=${relFor(temp, prototypeDir)}`, '--by=user']);
+    fs.appendFileSync(path.join(temp, 'wego-app/scenes/原型场景/scene.js'), '// drift\n');
+    run(['check', '--changed-file=wego-app/scenes/原型场景/scene.js'], false);
+    fs.writeFileSync(path.join(temp, 'wego-app/scenes/原型场景/scene.js'), 'window.WegoApp?.registerScene?.({ routeId: "prototype" });\n');
+    run(['invalidate', `--iteration=${relFor(temp, prototypeDir)}`, '--stage=prototype', '--reason=验证重新定稿']);
+    run(['confirm-prototype', `--iteration=${relFor(temp, prototypeDir)}`], false);
+    run(['submit-prototype', `--iteration=${relFor(temp, prototypeDir)}`]);
+    run(['confirm-prototype', `--iteration=${relFor(temp, prototypeDir)}`, '--by=user']);
+    const formal = readJson(prototypeFile);
+    formal.product_scope = { problem: '缺少原型验证', goal: '完成原型冲刺', actors: ['用户'], success_criteria: ['原型可确认'], included: ['原型主流程'], excluded: ['真实接口'], assumptions: [], open_questions: [], dependencies: [] };
+    formal.features = [{ feature_id: 'proto.workflow', title: '原型冲刺', current_behavior: '可以完成确认', scene_refs: ['原型场景'], status: 'active' }];
+    formal.requirements = [{ requirement_id: 'proto001-R01', feature_id: 'proto.workflow', title: '确认原型', change_type: 'added', user_outcome: '完成交互验证', scene_refs: ['原型场景'], surface_refs: ['prototype-main'], prototype_depth: 'functional', acceptance_criteria: ['页面可打开'] }];
+    formal.traceability = [{ requirement_id: 'proto001-R01', scene: '原型场景', flow_refs: ['prototype-flow'], node_refs: ['prototype-node'], surface_refs: ['prototype-main'], exit_result_refs: ['prototype-result'] }];
+    writeJson(prototypeFile, formal);
+    writeJson(path.join(temp, 'wego-app/scenes/原型场景/_spec/interaction_spec.json'), { iteration_context: { iteration_id: 'proto001', scope_revision: 1, requirement_ids: ['proto001-R01'] }, flows: [{ flow_id: 'prototype-flow' }], flow_nodes: [{ node_id: 'prototype-node' }], surfaces: [{ surface_id: 'prototype-main' }], exit_results: [{ result_id: 'prototype-result' }], readiness: { status: 'ready' } });
+    run(['formalize-product', `--iteration=${relFor(temp, prototypeDir)}`]);
+    const formalized = readJson(prototypeFile);
+    formalized.traceability[0].design_refs = ['surface_designs:prototype-main'];
+    writeJson(prototypeFile, formalized);
+    writeJson(path.join(temp, 'wego-app/scenes/原型场景/_spec/design_plan.json'), { iteration_context: { iteration_id: 'proto001', scope_revision: 1, requirement_ids: ['proto001-R01'] }, design_gaps: [], surface_designs: [{ surface_id: 'prototype-main', match_status: 'fallback' }] });
+    run(['mark-design', `--iteration=${relFor(temp, prototypeDir)}`]);
+    run(['check-prototype-snapshot', `--iteration=${relFor(temp, prototypeDir)}`]);
+    const implementedPrototype = readJson(prototypeFile);
+    implementedPrototype.traceability[0].implementation_refs = ['wego-app/scenes/原型场景/scene.js'];
+    writeJson(prototypeFile, implementedPrototype);
+    run(['mark-implemented', `--iteration=${relFor(temp, prototypeDir)}`]);
+    run(['start-testing', `--iteration=${relFor(temp, prototypeDir)}`]);
+    writeJson(path.join(temp, 'wego-app/scenes/原型场景/_spec/acceptance_report.json'), { iteration_context: { iteration_id: 'proto001', scope_revision: 1, requirement_ids: ['proto001-R01'] }, requirement_coverage: [{ requirement_id: 'proto001-R01', status: 'fail' }], final_status: 'fail' });
+    run(['handoff', `--iteration=${relFor(temp, prototypeDir)}`], false);
+    writeJson(path.join(temp, 'wego-app/scenes/原型场景/_spec/acceptance_report.json'), { iteration_context: { iteration_id: 'proto001', scope_revision: 1, requirement_ids: ['proto001-R01'] }, requirement_coverage: [{ requirement_id: 'proto001-R01', status: 'pass' }], final_status: 'pass' });
+    run(['handoff', `--iteration=${relFor(temp, prototypeDir)}`]);
+    run(['freeze', `--iteration=${relFor(temp, prototypeDir)}`]);
+    run(['check', `--iteration=${relFor(temp, prototypeDir)}`]);
     console.log('iteration-record 回归测试通过');
   } finally {
     fs.rmSync(temp, { recursive: true, force: true });
@@ -977,6 +1323,12 @@ function relFor(root, file) {
 try {
   switch (command) {
     case 'init': commandInit(); break;
+    case 'submit-brief': commandSubmitBrief(); break;
+    case 'confirm-brief': commandConfirmBrief(); break;
+    case 'submit-prototype': commandSubmitPrototype(); break;
+    case 'confirm-prototype': commandConfirmPrototype(); break;
+    case 'formalize-product': commandFormalizeProduct(); break;
+    case 'check-prototype-snapshot': commandCheckPrototypeSnapshot(); break;
     case 'scope': commandScope(); break;
     case 'confirm-scope': commandConfirmScope(); break;
     case 'mark-design': commandMarkDesign(); break;

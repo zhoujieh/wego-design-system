@@ -1321,6 +1321,20 @@ function resolveSceneSpecFiles(scene) {
   };
 }
 
+function isV2PrototypeOnlyScene(scene) {
+  const root = path.join(SCENES_ROOT, scene, '_iterations');
+  if (!fs.existsSync(root)) return false;
+  const prototypeStatuses = new Set(['prototyping', 'awaiting-prototype-confirmation']);
+  for (const entry of fs.readdirSync(root, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const file = path.join(root, entry.name, 'iteration.json');
+    if (!fs.existsSync(file)) continue;
+    const record = readJsonFile(file);
+    if (record?.schemaVersion === 2 && prototypeStatuses.has(record.status) && (record.affected_scenes || []).some(item => (typeof item === 'string' ? item : item?.scene) === scene)) return true;
+  }
+  return false;
+}
+
 // 从 spec 中提取 route_id：新格式读 prototype_target.routes[0].id，旧格式读 route_id
 function extractRouteIdFromSpec(spec, format) {
   if (!spec) return null;
@@ -1372,6 +1386,7 @@ function checkPrototypeSurfaceDesigns(context) {
     const resolved = resolveSceneSpecFiles(scene);
     const { scenePath, specDir, specPath, planPath, specFormat, planFormat } = resolved;
     if (!specPath || !planPath) {
+      if (isV2PrototypeOnlyScene(scene)) continue;
       add('error', 'app_scene.spec_missing',
         'App 场景必须包含 _spec/interaction_spec.json（或 page_spec.json）和 _spec/design_plan.json（或 design_consumption_plan.json）',
         scenePath);

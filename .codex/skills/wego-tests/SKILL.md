@@ -1,6 +1,6 @@
 ---
 name: "wego-tests"
-description: 按已确认业务迭代验收 wego-app 关联场景，比较 interaction_spec、design_plan、正式规则来源和真实实现，输出 acceptance_report，并在通过后生成开发交接和冻结记录。用于验收、回归、review、浏览器交互检查、布局检查和交付就绪判断；不要在场景未生成时使用，也不要把验收问题直接沉淀为正式工作流规则。
+description: 按原型定稿后完成正式化的业务迭代验收 wego-app 关联场景，比较 interaction_spec、design_plan、正式规则来源和真实实现，输出 acceptance_report，并在通过后生成开发交接和冻结记录。用于验收、回归、review、浏览器交互检查、布局检查和交付就绪判断；不要在原型未定稿或场景未生成时使用，也不要把验收问题直接沉淀为正式工作流规则。
 ---
 
 # Wego Tests
@@ -12,7 +12,7 @@ description: 按已确认业务迭代验收 wego-app 关联场景，比较 inter
 必须存在并读取：
 
 1. 仓库根目录 [AGENTS.md](../../../AGENTS.md)。
-2. 状态为 `implemented` 的当前业务迭代和 [业务迭代契约](../wego-product/references/iteration-workflow.md)。
+2. 状态为 `implemented` 的当前业务迭代和 [业务迭代契约](../wego-product/references/iteration-workflow.md)；schema v2 还必须有未漂移的 `prototype_confirmation`。
 3. 所有相关场景 `_spec/interaction_spec.json`。
 4. 所有相关场景 `_spec/design_plan.json`。
 5. `rule_sources_used` 指向的正式组件、pagePattern、fallback、Token 和 Preview。
@@ -21,7 +21,7 @@ description: 按已确认业务迭代验收 wego-app 关联场景，比较 inter
 8. 验完整业务路径、兼容迁移或专项规则时读取 [acceptance-checks.md](references/acceptance-checks.md)。
 9. 做布局、键盘、交互或线上验证时读取 [browser-verification.md](references/browser-verification.md)。
 
-缺少规格、场景未注册、设计仍有 gap 时直接失败并归因到上游。不得用截图或 `docs/specs/*.md` 代替正式依据。
+原型期只支持供用户定稿的真实交互检查，不输出 `acceptance_report`、开发交接或冻结。定稿后缺少规格、场景未注册、设计仍有 gap 或确认原型已漂移时直接失败并归因到上游。不得用截图或 `docs/specs/*.md` 代替正式依据。
 
 业务迭代验收必须按 `requirement_id` 覆盖全部非 excluded 需求；`iteration_context`、`scope_revision` 或上游指纹不一致时停止并返回最早失效环节。
 
@@ -35,7 +35,7 @@ description: 按已确认业务迭代验收 wego-app 关联场景，比较 inter
 
 ## 验收流程
 
-1. 校验迭代、两份规格、readiness、surface、route 和设计缺口，通过后运行 `iteration-record.mjs start-testing`。
+1. 校验迭代、原型定稿快照、两份规格、readiness、surface、route 和设计缺口，通过后运行 `iteration-record.mjs start-testing`。
 2. 建立 requirement → design → rule source → implementation 的覆盖关系。
 3. 检查 DOM、组件、Token、布局、presentation、路由和稳定 ID。
 4. 从真实入口执行正常、异常、中断、重复与返回恢复路径。

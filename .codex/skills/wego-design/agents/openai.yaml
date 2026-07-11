@@ -1,7 +1,7 @@
 interface:
   display_name: "Wego Design"
-  short_description: "消费微购设计系统，产出可追溯 design_plan"
-  default_prompt: "Use $wego-design to consume the confirmed business iteration and local design system, then produce gap-free design_plan files without changing product scope."
+  short_description: "消费微购设计系统，原型期写约束、定稿后产出 design_plan"
+  default_prompt: "Use $wego-design to turn a confirmed prototype brief into design-system-backed prototype decisions, then produce a gap-free design_plan after prototype approval."
 
 policy:
   allow_implicit_invocation: true

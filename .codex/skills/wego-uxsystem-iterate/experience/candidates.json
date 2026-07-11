@@ -760,10 +760,10 @@
     },
     {
       "id": "exp-business-iteration-contract-and-stage-guardrails",
-      "normalized_key": "business-iterations-must-have-confirmed-scope-stage-owned-artifacts-traceability-handoff-and-freeze-guardrails",
-      "title": "业务迭代必须具备范围确认、阶段归属、全链路追踪、开发交接与冻结守门",
+      "normalized_key": "business-iterations-must-have-brief-confirmation-prototype-approval-stage-owned-artifacts-traceability-handoff-and-freeze-guardrails",
+      "title": "业务迭代必须先确认范围、再定稿原型，并保持交接与冻结守门",
       "status": "promoted",
-      "occurrence_count": 1,
+      "occurrence_count": 2,
       "threshold": 1,
       "primary_owner": "wego-product",
       "secondary_owners": ["wego-design", "wego-ux", "wego-tests", "wego-uxsystem-iterate"],
@@ -775,12 +775,19 @@
           "scene": "微购业务迭代工作流规划与全链路复审",
           "summary": "用户要求以 shop001-快捷发布等迭代编号组织产物，并明确迭代内容、产品范围确认、跨业务关联页面、开发交接文档命名与输出技能、过程中修改、技能守门和冻结追溯。复查现有五技能与验证脚本后确认：interaction_spec、design_plan、scene 和 acceptance_report 已形成单场景链路，但缺少跨场景 iteration.json、范围确认状态、feature_id/requirement_id 区分、阶段失效、开发交接生成和冻结校验；现有 _spec/archive 只能证明文件被归档，不能证明一次交付批次的范围与验收闭合。",
           "source": "用户明确要求优化并执行完整微购业务迭代工作流"
+        },
+        {
+          "date": "2026-07-11",
+          "scene": "智能补货计划原型流程复盘",
+          "summary": "补货计划在快速验证阶段被要求先完成完整 interaction_spec、design_plan 和两次状态推进，用户指出此时目标是快速看到并迭代真实交互。确认后的规则将范围确认收敛为极简原型简报，允许设计与实现连续冲刺；用户对实际原型定稿后，才补齐正式规格、验收、交接和冻结，并以运行时快照防止文档与定稿原型脱节。",
+          "source": "用户明确确认升级为正式工作流规则，并要求只对后续迭代生效"
         }
       ],
       "applies_when_candidates": [
         "新业务需求或已有业务场景变化需要按明确迭代编号交付",
         "一次迭代影响多个 scene、route、宿主入口或无独立 route 的 surface",
-        "产品范围确认后仍可能发生设计、实现或验收修订",
+        "需要先确认最小业务范围，再快速验证和迭代真实交互",
+        "原型定稿后仍需要生成可靠的设计、验收和开发交接",
         "需要向开发交付当前迭代的功能、页面、数据、边界和验收清单",
         "需要防止冻结版本被覆盖，并让后续迭代基于可识别的场景基线继续"
       ],
@@ -814,16 +821,16 @@
         "紧急修复可以使用轻量 hotfix 迭代，但仍需范围确认和验收",
         "Sheet、Modal、Dialog 和 inline 使用 surface_id 追踪，不强制注册独立 route"
       ],
-      "fallback": "无法确认完整交付范围时保持 draft/blocked，不进入设计；设计系统缺口转入 wego-uxsystem-iterate，完成后从设计阶段恢复。",
-      "merge_target": "并入现有 interaction_spec → design_plan → scene → acceptance_report 主链路，在上层增加跨场景 iteration 契约，不建立平行的第六业务技能。",
+      "fallback": "无法确认极简范围时保持 draft/blocked；原型运行时、简报或设计约束与定稿快照不一致时回到 prototyping 并重新定稿；设计系统缺口转入 wego-uxsystem-iterate。",
+      "merge_target": "并入现有 interaction_spec → design_plan → scene → acceptance_report 主链路，在上层增加先简报确认、后原型定稿的 v2 迭代契约，不建立平行的第六业务技能。",
       "new_scenario_type_needed": false,
       "created_at": "2026-07-11T16:40:00+08:00",
-      "updated_at": "2026-07-11T17:20:00+08:00",
+      "updated_at": "2026-07-11T18:00:00+08:00",
       "formal_rule": {
-        "confirmed_at": "2026-07-11T17:20:00+08:00",
+        "confirmed_at": "2026-07-11T18:00:00+08:00",
         "file": ".codex/skills/wego-product/references/iteration-workflow.md",
         "field": "业务迭代契约、范围确认、状态流转、跨技能交接和冻结规则",
-        "rule_id": "business-iteration-contract-and-stage-guardrails"
+        "rule_id": "business-iteration-prototype-first-stage-guardrails"
       }
     }
   ]

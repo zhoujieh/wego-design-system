@@ -98,7 +98,7 @@
 
 1. 先确认它不是已有组件或嵌入式组件的变体
 2. 新增 `.codex/skills/wego-design/components/{slug}.json`
-3. 新增 `.codex/skills/wego-design/preview/component-{slug}.html`
+3. 新增 `.codex/skills/wego-design/preview/component-{slug}.html`，并在 `preview/index.html` 对应分类导航组中追加该组件的入口按钮（data-slug、data-src 与契约一致）
 4. 注册到 `.codex/skills/wego-design/components/index.json`
 5. 在仓库根执行 `node .codex/skills/wego-design/scripts/extract-components-css.mjs .codex/skills/wego-design` 生成 `.codex/skills/wego-design/components.css`
 6. 同步 `.codex/skills/wego-design/uikit-plan.json`
@@ -226,6 +226,14 @@
 
 - 如果不影响结构、状态、变体、Token 消费，可只改 preview 展示内容
 - 如果文案变化暴露了契约边界变化，需要同步组件契约
+
+### 新增组件未关联 preview/index.html
+
+当新增组件已注册到 `components/index.json` 但未在 `preview/index.html` 对应分类导航组中添加入口按钮时：
+
+1. 拦截，补回 `preview/index.html` 中对应分类导航组的入口按钮
+2. 确认 data-slug、data-src 与组件契约一致
+3. 同时检查是否有其他已注册但未关联的组件，一并补齐
 
 ### preview 里出现 inline style 组件语义
 

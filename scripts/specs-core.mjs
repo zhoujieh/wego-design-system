@@ -255,12 +255,13 @@ function render() {
     { match: /页面信息、状态、异常流程和宿主路径只能来自/, output: '页面信息、状态、异常流程和宿主路径必须来自用户需求与真实业务事实，不能凭模板或惯例发明。' },
     { match: /关键歧义.*用户确认/, output: '会改变页面范围、核心流程、数据含义或宿主层级的关键歧义，必须在进入设计前确认。' },
     { match: /使用 `rule_sources`/, output: '需求规格只记录真实判断依据，不引用自动生成文档。' },
-    { match: /必须先落盘\s`interaction_spec`/, output: '需求确认后先保存需求规格，再交给页面设计。' },
+    { match: /schema v2 新迭代先确认只含目标/, output: '新迭代先确认极简原型简报，快速验证交互后再补齐完整需求规格。' },
     { match: /必须先用 `scripts\/iteration-record\.mjs init`/, output: '新业务或已有场景变化先创建业务迭代，明确长期功能、本轮需求、主场景和所有关联范围。' },
-    { match: /必须包含同一 `iteration_context`/, output: '所有相关场景使用同一迭代编号和范围版本，用户确认后才能交给页面设计。' },
+    { match: /confirm-prototype.*formalize-product/, output: '用户原型定稿直接承担正式范围确认，随后补齐可追踪的正式规格。' },
   ]);
   const designRules = mappedRules('.codex/skills/wego-design/SKILL.md', '核心规则', [
     { match: /设计判断只能来自/, output: '设计判断只使用已确认需求、正式页面范式、设计令牌、组件契约和真实示例。' },
+    { match: /v2 原型期必须先把每个 surface/, output: '原型期先记录页面打开方式、组件组合和真实规则来源，再快速实现。' },
     { match: /必须记录到 `rule_sources_used`/, output: '每个关键设计决定都要记录真实依据，方便实现和验收追溯。' },
     { match: /不得重新发明需求/, output: '页面设计不能重新发明字段、状态或流程，发现需求缺口要回到需求理解环节。' },
     { match: /必须标记 `gap`/, output: '找不到可靠页面范式、兜底结构或组件依据时必须标记设计缺口，不能把判断甩给实现阶段。' },
@@ -269,9 +270,11 @@ function render() {
   ]);
   const uxRules = mappedRules('.codex/skills/wego-ux/SKILL.md', '核心规则', [
     { match: /实现只能执行已确认的/, output: '实现只执行已确认的需求规格、设计计划和正式规则依据，不从自动生成文档重新做设计判断。' },
+    { match: /原型期只能执行已确认的 `prototype_brief`/, output: '原型期只按已确认范围与设计约束实现；定稿前不写正式规格或交接。' },
     { match: /修改已有场景前必须先做偏差判定/, output: '修改已有场景前先核对需求、组件、布局和打开方式是否仍在规格范围内。' },
     { match: /必须严格执行设计计划/, output: '组件结构、状态、页面布局和打开方式必须严格执行设计计划，不得二次设计。' },
     { match: /必须回退上游/, output: '发现内容、组件、展示或规则来源偏差时，回到最早产生问题的环节修正。' },
+    { match: /原型期发现范围偏差/, output: '原型期范围或设计变化要回到简报或设计约束，并在定稿后保持与正式文档一致。' },
     { match: /必须经过 `wego-tests`/, output: '场景完成后必须验收，提交、推送和部署状态只按真实执行结果报告。' },
     { match: /只能修改 `affected_scenes`/, output: '实现只能修改当前迭代登记的场景和宿主文件，发现范围或设计变化时退回上游。' },
   ]);
@@ -284,7 +287,7 @@ function render() {
   ]);
   const experienceRules = mappedRules('.codex/skills/wego-uxsystem-iterate/SKILL.md', '经验候选硬门禁', [
     { match: /不能自动进入经验池/, output: '普通反馈、自查和验收失败只用于修复当前任务，不会自动沉淀经验。' },
-    { match: /每轮最多选择一条/, output: '一次审查最多记录一条最重要、最可复用的经验。' },
+    { match: /一次审查可以记录多条经验候选/, output: '一次审查可以记录多条经验候选，但每条都必须完成归属判定、运行时可达性验证和场景拆分，且用户确认后才能升级为正式规则。' },
     { match: /入池前必须确认/, output: '记录前必须明确问题最早产生的位置、规则归属、未来落点、消费方和验收方式。' },
     { match: /归属不明确/, output: '归属不明确时不得进入候选池。' },
     { match: /同类经验复用/, output: '同类经验只累计次数和场景证据，不重复创建。' },
@@ -584,7 +587,7 @@ function tests() {
   expect(!sources().some(rel => rel.endsWith('/SKILL.runtime.md')), 'source manifest 不得包含历史 Skill 入口');
   for (const dir of SKILL_DIRS) expect(!fs.existsSync(path.join(ROOT, dir, 'SKILL.runtime.md')), `${dir} 不得存在 SKILL.runtime.md`);
   const workflow = text('.codex/skills/wego-uxsystem-iterate/references/workflow-iteration.md');
-  expect(workflow.includes('每轮只记录一条经验') && workflow.includes('是否现在将其升级为正式规则') && workflow.includes('运行时可达性') && workflow.includes('快速迭代阶段当前阈值为 1'), '工作流门禁不完整');
+  expect(workflow.includes('经验候选录入') && workflow.includes('是否现在将其升级为正式规则') && workflow.includes('运行时可达性') && workflow.includes('快速迭代阶段当前阈值为 1'), '工作流门禁不完整');
   const iterationContract = text('.codex/skills/wego-product/references/iteration-workflow.md');
   expect(iterationContract.includes('iteration.json') && iterationContract.includes('feature_id') && iterationContract.includes('requirement_id') && iterationContract.includes('开发交接') && iterationContract.includes('freeze.json'), '业务迭代契约缺少范围、追踪、交接或冻结规则');
   const iterationTest = spawnSync(process.execPath, [path.join(ROOT, 'scripts/iteration-record.mjs'), 'test'], { cwd: ROOT, encoding: 'utf8' });

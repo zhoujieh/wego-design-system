@@ -1,7 +1,7 @@
 interface:
   display_name: "Wego UX"
-  short_description: "按两份规格生成或迭代 wego-app 业务场景并验证交付"
-  default_prompt: "Use $wego-ux to implement only the scenes and runtime files declared by the approved business iteration, interaction_spec, and design_plan."
+  short_description: "按已确认原型简报快速实现交互场景，并在定稿后补齐正式实现追踪"
+  default_prompt: "Use $wego-ux to implement only the declared runtime scope from a confirmed prototype brief and design decisions, then formalize implementation references after prototype approval."
 
 policy:
   allow_implicit_invocation: true
