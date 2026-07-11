@@ -1,0 +1,330 @@
+{
+  "spec_id": "mvp001-warehouse-management",
+  "spec_purpose": "MVP 验证用交互规格，面向 Figma MCP 写入计划，独立于 _spec/ 下的正式规格",
+  "user_goal": "店主集中维护仓库资料，覆盖列表浏览、新增、编辑、删除和空状态新增五个核心流程",
+  "page_entry": {
+    "route_id": "my-warehouse-management",
+    "entry_carrier": "host-grid-entry",
+    "host_tab": "my",
+    "host_group": "my-app-center",
+    "entry_label": "仓库管理"
+  },
+  "flows": [
+    {
+      "flow_id": "F01",
+      "flow_name": "仓库列表浏览流程",
+      "flow_type": "main",
+      "steps": [
+        "enter-warehouse",
+        "view-list",
+        "browse-summary",
+        "browse-cards"
+      ],
+      "start_point": "我的 Tab 应用中心点击仓库管理入口",
+      "end_result": "用户停留在列表页浏览仓库资料"
+    },
+    {
+      "flow_id": "F02",
+      "flow_name": "新增仓库流程",
+      "flow_type": "main",
+      "steps": [
+        "view-list",
+        "click-create",
+        "open-create-editor",
+        "fill-form",
+        "save-warehouse",
+        "return-list-saved"
+      ],
+      "start_point": "列表页点击 navbar 右侧「新建」按钮",
+      "end_result": "新仓库插入列表顶部，toast 提示「仓库已新增」"
+    },
+    {
+      "flow_id": "F03",
+      "flow_name": "编辑仓库流程",
+      "flow_type": "branch",
+      "steps": [
+        "view-list",
+        "open-card-menu",
+        "click-edit",
+        "open-edit-editor",
+        "modify-form",
+        "save-warehouse",
+        "return-list-saved"
+      ],
+      "start_point": "列表页点击某张仓库卡片的更多按钮",
+      "end_result": "对应仓库在列表原位更新，toast 提示「仓库已更新」"
+    },
+    {
+      "flow_id": "F04",
+      "flow_name": "删除仓库流程",
+      "flow_type": "branch",
+      "steps": [
+        "view-list",
+        "open-card-menu",
+        "click-delete",
+        "confirm-delete-dialog",
+        "execute-delete",
+        "return-list-deleted"
+      ],
+      "start_point": "列表页点击某张仓库卡片的更多按钮",
+      "end_result": "对应仓库从列表移除，toast 提示「仓库已删除」"
+    },
+    {
+      "flow_id": "F05",
+      "flow_name": "空状态新增流程",
+      "flow_type": "branch",
+      "steps": [
+        "view-empty-list",
+        "click-create-first",
+        "open-create-editor",
+        "fill-form",
+        "save-warehouse",
+        "return-list-saved"
+      ],
+      "start_point": "列表为空时点击「新增仓库」按钮",
+      "end_result": "首个仓库出现在列表中，toast 提示「仓库已新增」"
+    }
+  ],
+  "flow_nodes": [
+    {
+      "node_id": "enter-warehouse",
+      "purpose": "从我的 Tab 应用中心进入仓库管理",
+      "surface_ref": "warehouse-list",
+      "inputs": [],
+      "outputs": [],
+      "key_states": ["列表默认态"]
+    },
+    {
+      "node_id": "view-list",
+      "purpose": "查看仓库列表与摘要",
+      "surface_ref": "warehouse-list",
+      "inputs": [],
+      "outputs": [],
+      "key_states": ["列表默认态"]
+    },
+    {
+      "node_id": "view-empty-list",
+      "purpose": "仓库列表为空时查看空状态",
+      "surface_ref": "warehouse-list",
+      "inputs": [],
+      "outputs": [],
+      "key_states": ["空状态"]
+    },
+    {
+      "node_id": "browse-summary",
+      "purpose": "浏览仓库总数、启用数、默认仓数",
+      "surface_ref": "warehouse-list",
+      "inputs": [],
+      "outputs": [],
+      "key_states": ["列表默认态"]
+    },
+    {
+      "node_id": "browse-cards",
+      "purpose": "浏览仓库卡片名称、徽章、摘要",
+      "surface_ref": "warehouse-list",
+      "inputs": [],
+      "outputs": [],
+      "key_states": ["列表默认态"]
+    },
+    {
+      "node_id": "click-create",
+      "purpose": "点击 navbar 新建按钮",
+      "surface_ref": "warehouse-list",
+      "inputs": [],
+      "outputs": [],
+      "key_states": ["列表默认态"]
+    },
+    {
+      "node_id": "open-card-menu",
+      "purpose": "点击卡片更多按钮展开操作菜单",
+      "surface_ref": "warehouse-list",
+      "inputs": ["warehouse-id"],
+      "outputs": [],
+      "key_states": ["操作菜单展开态"]
+    },
+    {
+      "node_id": "click-edit",
+      "purpose": "点击菜单中的编辑",
+      "surface_ref": "warehouse-list",
+      "inputs": ["warehouse-id"],
+      "outputs": [],
+      "key_states": ["操作菜单展开态"]
+    },
+    {
+      "node_id": "click-delete",
+      "purpose": "点击菜单中的删除",
+      "surface_ref": "warehouse-list",
+      "inputs": ["warehouse-id"],
+      "outputs": [],
+      "key_states": ["操作菜单展开态"]
+    },
+    {
+      "node_id": "click-create-first",
+      "purpose": "空状态下点击新增仓库按钮",
+      "surface_ref": "warehouse-list",
+      "inputs": [],
+      "outputs": [],
+      "key_states": ["空状态"]
+    },
+    {
+      "node_id": "open-create-editor",
+      "purpose": "打开新增仓库表单（full-screen-modal）",
+      "surface_ref": "warehouse-editor",
+      "inputs": [],
+      "outputs": [],
+      "key_states": ["新增仓库初始态"]
+    },
+    {
+      "node_id": "open-edit-editor",
+      "purpose": "打开编辑仓库表单（full-screen-modal），回填已有数据",
+      "surface_ref": "warehouse-editor",
+      "inputs": ["warehouse-id"],
+      "outputs": [],
+      "key_states": ["编辑已有数据态"]
+    },
+    {
+      "node_id": "fill-form",
+      "purpose": "填写或修改仓库表单字段",
+      "surface_ref": "warehouse-editor",
+      "inputs": [],
+      "outputs": ["draft-warehouse-data"],
+      "key_states": ["新增仓库初始态", "编辑已有数据态"]
+    },
+    {
+      "node_id": "modify-form",
+      "purpose": "修改已有仓库字段",
+      "surface_ref": "warehouse-editor",
+      "inputs": ["warehouse-record"],
+      "outputs": ["draft-warehouse-data"],
+      "key_states": ["编辑已有数据态"]
+    },
+    {
+      "node_id": "save-warehouse",
+      "purpose": "点击保存，校验通过后持久化",
+      "surface_ref": "warehouse-editor",
+      "inputs": ["draft-warehouse-data"],
+      "outputs": ["warehouse-record"],
+      "key_states": ["表单校验失败态", "保存成功态"]
+    },
+    {
+      "node_id": "confirm-delete-dialog",
+      "purpose": "删除二次确认弹窗",
+      "surface_ref": "delete-dialog",
+      "inputs": ["warehouse-id"],
+      "outputs": [],
+      "key_states": ["删除确认态"]
+    },
+    {
+      "node_id": "execute-delete",
+      "purpose": "确认删除，从列表移除",
+      "surface_ref": "delete-dialog",
+      "inputs": ["warehouse-id"],
+      "outputs": ["deleted-warehouse-id"],
+      "key_states": ["删除完成态"]
+    },
+    {
+      "node_id": "return-list-saved",
+      "purpose": "保存后返回列表并回填",
+      "surface_ref": "warehouse-list",
+      "inputs": ["warehouse-record"],
+      "outputs": [],
+      "key_states": ["保存成功态"]
+    },
+    {
+      "node_id": "return-list-deleted",
+      "purpose": "删除后返回列表并移除",
+      "surface_ref": "warehouse-list",
+      "inputs": ["deleted-warehouse-id"],
+      "outputs": [],
+      "key_states": ["删除完成态"]
+    }
+  ],
+  "surfaces": [
+    {
+      "surface_id": "warehouse-list",
+      "role": "primary-task-page",
+      "carrier": "push-page",
+      "presentation": { "type": "push", "transition": "slide-left", "covers_tab_bar": true },
+      "node_refs": ["enter-warehouse", "view-list", "view-empty-list", "browse-summary", "browse-cards", "click-create", "open-card-menu", "click-edit", "click-delete", "click-create-first", "return-list-saved", "return-list-deleted"],
+      "interaction_mode": "instant-apply",
+      "purpose": "仓库列表页，展示摘要、卡片列表或空状态，承载新建入口与更多操作菜单",
+      "states": ["列表默认态", "空状态", "操作菜单展开态", "保存成功态", "删除完成态"]
+    },
+    {
+      "surface_id": "warehouse-editor",
+      "role": "secondary-task-page",
+      "carrier": "full-screen-modal",
+      "presentation": { "type": "full-screen-modal", "transition": "slide-up-enter, slide-down-exit", "covers_tab_bar": true },
+      "node_refs": ["open-create-editor", "open-edit-editor", "fill-form", "modify-form", "save-warehouse"],
+      "interaction_mode": "edit-then-save",
+      "purpose": "新增/编辑仓库表单，五个分组：仓库状态、基础信息、履约能力、库存与发货、补充信息",
+      "states": ["新增仓库初始态", "编辑已有数据态", "表单校验失败态", "保存成功态"]
+    },
+    {
+      "surface_id": "delete-dialog",
+      "role": "secondary-task-page",
+      "carrier": "dialog",
+      "presentation": { "type": "dialog", "transition": "fade", "covers_tab_bar": false },
+      "node_refs": ["confirm-delete-dialog", "execute-delete"],
+      "interaction_mode": "select",
+      "purpose": "删除仓库二次确认弹窗，含取消与删除两个按钮",
+      "states": ["删除确认态"]
+    }
+  ],
+  "states": [
+    { "state_id": "S01", "state_name": "列表默认态", "surface_ref": "warehouse-list", "description": "展示 3 条仓库卡片与摘要统计" },
+    { "state_id": "S02", "state_name": "空状态", "surface_ref": "warehouse-list", "description": "无仓库时展示空状态组件与新增引导" },
+    { "state_id": "S03", "state_name": "操作菜单展开态", "surface_ref": "warehouse-list", "description": "某张卡片下方展开编辑/删除菜单" },
+    { "state_id": "S04", "state_name": "新增仓库初始态", "surface_ref": "warehouse-editor", "description": "空表单含默认值，标题为「新增仓库」" },
+    { "state_id": "S05", "state_name": "编辑已有数据态", "surface_ref": "warehouse-editor", "description": "表单回填已有仓库数据，标题为「编辑仓库」" },
+    { "state_id": "S06", "state_name": "表单校验失败态", "surface_ref": "warehouse-editor", "description": "保存时必填项缺失，toast 提示具体原因" },
+    { "state_id": "S07", "state_name": "保存成功态", "surface_ref": "warehouse-list", "description": "保存后返回列表，toast 提示成功并回填" },
+    { "state_id": "S08", "state_name": "删除确认态", "surface_ref": "delete-dialog", "description": "弹出删除确认 dialog，等待用户选择" },
+    { "state_id": "S09", "state_name": "删除完成态", "surface_ref": "warehouse-list", "description": "确认删除后列表移除该项，toast 提示已删除" }
+  ],
+  "transitions": [
+    { "transition_id": "T01", "from_flow": "F01", "trigger": "点击仓库管理入口", "from_state": "S01", "to_state": "S01", "data_in": [], "result_out": [] },
+    { "transition_id": "T02", "from_flow": "F02", "trigger": "点击 navbar 新建按钮", "from_state": "S01", "to_state": "S04", "data_in": [], "result_out": [] },
+    { "transition_id": "T03", "from_flow": "F05", "trigger": "点击空状态新增仓库按钮", "from_state": "S02", "to_state": "S04", "data_in": [], "result_out": [] },
+    { "transition_id": "T04", "from_flow": "F03", "trigger": "点击更多按钮展开菜单", "from_state": "S01", "to_state": "S03", "data_in": ["warehouse-id"], "result_out": [] },
+    { "transition_id": "T05", "from_flow": "F03", "trigger": "点击菜单编辑", "from_state": "S03", "to_state": "S05", "data_in": ["warehouse-id"], "result_out": [] },
+    { "transition_id": "T06", "from_flow": "F04", "trigger": "点击菜单删除", "from_state": "S03", "to_state": "S08", "data_in": ["warehouse-id"], "result_out": [] },
+    { "transition_id": "T07", "from_flow": "F02/F03/F05", "trigger": "点击保存且校验失败", "from_state": "S04或S05", "to_state": "S06", "data_in": ["draft"], "result_out": [] },
+    { "transition_id": "T08", "from_flow": "F02/F03/F05", "trigger": "点击保存且校验通过", "from_state": "S04或S05", "to_state": "S07", "data_in": ["draft"], "result_out": ["warehouse-record"] },
+    { "transition_id": "T09", "from_flow": "F04", "trigger": "确认删除", "from_state": "S08", "to_state": "S09", "data_in": ["warehouse-id"], "result_out": ["deleted-warehouse-id"] },
+    { "transition_id": "T10", "from_flow": "F04", "trigger": "取消删除", "from_state": "S08", "to_state": "S01", "data_in": [], "result_out": [] }
+  ],
+  "data_handoffs": [
+    {
+      "handoff_id": "DH01",
+      "transition_ref": "T08",
+      "source_node": "save-warehouse",
+      "target_node": "return-list-saved",
+      "payload_content_refs": ["warehouse-list-items"],
+      "reset_policy": "clear-on-success",
+      "description": "保存成功后仓库记录回填列表：新增项 unshift 到顶部，编辑项原位更新；若设为默认仓则同步取消其他默认标记"
+    },
+    {
+      "handoff_id": "DH02",
+      "transition_ref": "T09",
+      "source_node": "execute-delete",
+      "target_node": "return-list-deleted",
+      "payload_content_refs": ["warehouse-list-items"],
+      "reset_policy": "clear-on-success",
+      "description": "删除确认后从列表 filter 移除对应仓库"
+    }
+  ],
+  "exit_results": [
+    { "exit_id": "ER01", "description": "点击返回按钮回到我的 Tab", "trigger": "点击 navbar 左侧返回" },
+    { "exit_id": "ER02", "description": "保存成功 toast：仓库已新增 / 仓库已更新", "trigger": "保存校验通过" },
+    { "exit_id": "ER03", "description": "删除成功 toast：仓库已删除", "trigger": "确认删除" },
+    { "exit_id": "ER04", "description": "校验失败 toast：请先填写仓库名称/联系人/地址 或 联系电话需要填写 11 位手机号", "trigger": "保存校验失败" }
+  ],
+  "business_rules": [
+    { "rule_id": "BR01", "description": "默认发货仓互斥：设为默认时自动取消其他仓库的默认标记" },
+    { "rule_id": "BR02", "description": "启停与默认联动：停用仓库时自动取消其默认标记；设为默认时自动启用" },
+    { "rule_id": "BR03", "description": "必填校验：仓库名称、联系人、联系电话（11 位手机号正则 /^1\\d{10}$/）、仓库地址" },
+    { "rule_id": "BR04", "description": "取消挽留：表单有未保存修改（isDirty）时，点击取消弹出「放弃未保存内容？」dialog" },
+    { "rule_id": "BR05", "description": "数据不持久化：刷新后恢复初始 3 条模拟数据" }
+  ]
+}

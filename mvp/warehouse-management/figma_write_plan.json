@@ -1,0 +1,402 @@
+{
+  "iteration": {
+    "id": "mvp001",
+    "name": "仓库管理 Figma MCP 写入验证",
+    "description": "基于 wego-design-system 仓库管理场景，验证从真实仓库内容生成可执行 Figma 写入计划的 MVP",
+    "created_at": "2026-07-11"
+  },
+  "source_scene": {
+    "route_id": "my-warehouse-management",
+    "scene_name": "仓库管理",
+    "repo": "zhoujieh/wego-design-system",
+    "source_files": [
+      "wego-app/js/routes.js",
+      "wego-app/scenes/仓库管理/scene.js",
+      "wego-app/scenes/仓库管理/scene.css"
+    ],
+    "spec_refs": [
+      "mvp/warehouse-management/interaction_spec.json",
+      "mvp/warehouse-management/design_plan.json"
+    ]
+  },
+  "figma_target": {
+    "mode": "new_file",
+    "purpose": "MVP测试"
+  },
+  "write_scope": {
+    "included": [
+      "仓库管理列表页",
+      "新增仓库流程",
+      "编辑仓库流程",
+      "删除确认流程",
+      "空状态流程"
+    ],
+    "excluded": [
+      "其他业务场景",
+      "库存管理",
+      "订单流程",
+      "非本次需求页面"
+    ]
+  },
+  "figma_pages": [
+    {
+      "page_id": "FGP01",
+      "page_name": "仓库管理 MVP 验证",
+      "frame_groups": [
+        { "group_id": "FG01", "group_name": "仓库管理列表页", "screen_ref": "SCR01" },
+        { "group_id": "FG02", "group_name": "新增仓库页", "screen_ref": "SCR02" },
+        { "group_id": "FG03", "group_name": "编辑仓库页", "screen_ref": "SCR03" },
+        { "group_id": "FG04", "group_name": "删除确认弹窗", "screen_ref": "SCR04" }
+      ]
+    }
+  ],
+  "flows": [
+    {
+      "flow_id": "F01",
+      "flow_name": "仓库列表浏览流程",
+      "flow_type": "main",
+      "steps": [
+        "从我的 Tab 应用中心进入仓库管理",
+        "查看摘要统计（总数/启用数/默认仓数）",
+        "浏览仓库卡片列表"
+      ],
+      "start_point": "我的 Tab 应用中心点击仓库管理入口",
+      "end_result": "用户停留在列表页浏览仓库资料"
+    },
+    {
+      "flow_id": "F02",
+      "flow_name": "新增仓库流程",
+      "flow_type": "main",
+      "steps": [
+        "在列表页点击 navbar 右侧「新建」按钮",
+        "full-screen-modal 打开新增仓库表单（空表单+默认值）",
+        "填写仓库基础信息、履约能力、库存与发货参数",
+        "点击保存，校验通过后关闭 modal",
+        "列表页回填，新仓库置顶，toast 提示「仓库已新增」"
+      ],
+      "start_point": "列表页点击 navbar 右侧「新建」按钮",
+      "end_result": "新仓库插入列表顶部，toast 提示「仓库已新增」"
+    },
+    {
+      "flow_id": "F03",
+      "flow_name": "编辑仓库流程",
+      "flow_type": "branch",
+      "steps": [
+        "在列表页点击某张仓库卡片的更多按钮",
+        "展开操作菜单（含编辑/删除）",
+        "点击「编辑」",
+        "full-screen-modal 打开编辑表单，回填已有数据",
+        "修改字段后点击保存，校验通过后关闭 modal",
+        "列表页原位更新，toast 提示「仓库已更新」"
+      ],
+      "start_point": "列表页点击某张仓库卡片的更多按钮",
+      "end_result": "对应仓库在列表原位更新，toast 提示「仓库已更新」"
+    },
+    {
+      "flow_id": "F04",
+      "flow_name": "删除仓库流程",
+      "flow_type": "branch",
+      "steps": [
+        "在列表页点击某张仓库卡片的更多按钮",
+        "展开操作菜单（含编辑/删除）",
+        "点击「删除」",
+        "弹出删除确认 dialog（含仓库名称）",
+        "点击「删除」确认",
+        "dialog 关闭，列表移除该卡片，toast 提示「仓库已删除」"
+      ],
+      "start_point": "列表页点击某张仓库卡片的更多按钮",
+      "end_result": "对应仓库从列表移除，toast 提示「仓库已删除」"
+    },
+    {
+      "flow_id": "F05",
+      "flow_name": "空状态新增流程",
+      "flow_type": "branch",
+      "steps": [
+        "列表为空时展示空状态组件",
+        "点击「新增仓库」按钮",
+        "full-screen-modal 打开新增仓库表单（空表单+默认值）",
+        "填写仓库资料",
+        "点击保存，校验通过后关闭 modal",
+        "列表显示首个仓库，toast 提示「仓库已新增」"
+      ],
+      "start_point": "列表为空时点击「新增仓库」按钮",
+      "end_result": "首个仓库出现在列表中，toast 提示「仓库已新增」"
+    }
+  ],
+  "screens": [
+    {
+      "screen_id": "SCR01",
+      "screen_name": "仓库管理列表页",
+      "surface_type": "push-page",
+      "related_flows": ["F01", "F02", "F03", "F04", "F05"],
+      "required_states": ["S01", "S02", "S03", "S07", "S09"],
+      "description": "仓库列表主页面，含 navbar（返回/标题/新建）、摘要统计、仓库卡片列表或空状态、卡片更多操作菜单"
+    },
+    {
+      "screen_id": "SCR02",
+      "screen_name": "新增仓库页",
+      "surface_type": "full-screen-modal",
+      "related_flows": ["F02", "F05"],
+      "required_states": ["S04", "S06", "S07"],
+      "description": "新增仓库表单页，空表单含默认值，五个分组：仓库状态、基础信息、履约能力、库存与发货、补充信息"
+    },
+    {
+      "screen_id": "SCR03",
+      "screen_name": "编辑仓库页",
+      "surface_type": "full-screen-modal",
+      "related_flows": ["F03"],
+      "required_states": ["S05", "S06", "S07"],
+      "description": "编辑仓库表单页，回填已有数据，结构与新增页一致，标题改为「编辑仓库」"
+    },
+    {
+      "screen_id": "SCR04",
+      "screen_name": "删除确认弹窗",
+      "surface_type": "dialog",
+      "related_flows": ["F04"],
+      "required_states": ["S08"],
+      "description": "删除二次确认弹窗，含标题、内容文案（含仓库名称）、取消和删除两个按钮"
+    }
+  ],
+  "states": [
+    {
+      "state_id": "S01",
+      "state_name": "列表默认态",
+      "screen_id": "SCR01",
+      "trigger": "从我的 Tab 应用中心进入仓库管理",
+      "precondition": "仓库数据不为空（3 条模拟数据）",
+      "visual_change": "展示 navbar、摘要区（已接入仓库 3 个，启用中 3 个，默认发货仓 1 个）、3 张仓库卡片",
+      "data_change": "加载 STATE.warehouses 数组",
+      "next_action": "浏览卡片、点击新建、点击更多按钮",
+      "edge_cases": ["仓库全部停用时摘要启用数显示 0", "默认仓被取消时摘要默认仓数显示 0"],
+      "figma_frame_name": "mvp001-F01-S01-仓库管理列表页-列表默认态"
+    },
+    {
+      "state_id": "S02",
+      "state_name": "空状态",
+      "screen_id": "SCR01",
+      "trigger": "仓库列表为空（STATE.warehouses.length === 0）",
+      "precondition": "无仓库数据",
+      "visual_change": "列表区域替换为空状态组件：圆形品牌色图标 + 「还没有仓库」标题 + 引导文案 + 「新增仓库」按钮",
+      "data_change": "无数据加载",
+      "next_action": "点击「新增仓库」按钮进入 F05 流程",
+      "edge_cases": ["删除最后一个仓库后进入此状态"],
+      "figma_frame_name": "mvp001-F05-S02-仓库管理列表页-空状态"
+    },
+    {
+      "state_id": "S03",
+      "state_name": "操作菜单展开态",
+      "screen_id": "SCR01",
+      "trigger": "点击某张仓库卡片的更多按钮（data-action=toggle-menu）",
+      "precondition": "该卡片对应仓库存在",
+      "visual_change": "该卡片更多按钮下方展开操作菜单，带向上箭头小三角，含「编辑」和「删除」（danger 红色）两项",
+      "data_change": "STATE.openMenuId 设为该仓库 id",
+      "next_action": "点击编辑（进入 F03）、点击删除（进入 F04）、点击空白处关闭菜单",
+      "edge_cases": ["再次点击同一更多按钮可收起菜单", "点击其他卡片更多按钮切换菜单"],
+      "figma_frame_name": "mvp001-F03-S03-仓库管理列表页-操作菜单展开态"
+    },
+    {
+      "state_id": "S04",
+      "state_name": "新增仓库初始态",
+      "screen_id": "SCR02",
+      "trigger": "点击 navbar「新建」按钮或空状态「新增仓库」按钮",
+      "precondition": "从列表页或空状态进入",
+      "visual_change": "full-screen-modal 从底部滑入，展示空表单含默认值（类型=直营网仓、服务范围=多渠道履约、时效=24小时内发货、温层=常温、安全库存=10、单日上限=500），标题「新增仓库」",
+      "data_change": "createDraft(null) 生成空 draft",
+      "next_action": "填写表单、点击保存、点击取消",
+      "edge_cases": ["取消时有修改会弹出放弃确认 dialog"],
+      "figma_frame_name": "mvp001-F02-S04-新增仓库页-新增初始态"
+    },
+    {
+      "state_id": "S05",
+      "state_name": "编辑已有数据态",
+      "screen_id": "SCR03",
+      "trigger": "点击操作菜单中的「编辑」",
+      "precondition": "该仓库数据存在",
+      "visual_change": "full-screen-modal 打开，表单回填已有仓库全部字段，标题「编辑仓库」，封面图使用已有 imageUrl 或按名称生成示意图",
+      "data_change": "createDraft(currentWarehouse) 生成带数据的 draft",
+      "next_action": "修改字段、点击保存、点击取消",
+      "edge_cases": ["取消时有修改会弹出放弃确认 dialog"],
+      "figma_frame_name": "mvp001-F03-S05-编辑仓库页-编辑已有数据态"
+    },
+    {
+      "state_id": "S06",
+      "state_name": "表单校验失败态",
+      "screen_id": "SCR02",
+      "trigger": "点击保存但必填项缺失或电话格式错误",
+      "precondition": "处于新增或编辑表单页",
+      "visual_change": "表单保持当前内容，顶部 toast 提示具体校验失败原因",
+      "data_change": "无数据持久化",
+      "next_action": "根据 toast 提示补充必填项后重新保存",
+      "edge_cases": [
+        "仓库名称为空：toast「请先填写仓库名称」",
+        "联系人为空：toast「请先填写仓库联系人」",
+        "电话非 11 位手机号：toast「联系电话需要填写 11 位手机号」",
+        "地址为空：toast「请先填写仓库地址」"
+      ],
+      "figma_frame_name": "mvp001-F02-S06-新增仓库页-表单校验失败态"
+    },
+    {
+      "state_id": "S07",
+      "state_name": "保存成功态",
+      "screen_id": "SCR01",
+      "trigger": "点击保存且校验通过",
+      "precondition": "处于新增或编辑表单页且必填项已满足",
+      "visual_change": "编辑 modal 关闭，列表页显示 toast「仓库已新增」或「仓库已更新」，列表回填（新增项 unshift 置顶，编辑项原位更新）",
+      "data_change": "persistWarehouse 写入 STATE.warehouses；若设为默认仓则同步取消其他默认标记",
+      "next_action": "继续浏览列表、新增、编辑或删除",
+      "edge_cases": ["设为默认仓时其他仓库默认标记被自动取消"],
+      "figma_frame_name": "mvp001-F02-S07-仓库管理列表页-保存成功态"
+    },
+    {
+      "state_id": "S08",
+      "state_name": "删除确认态",
+      "screen_id": "SCR04",
+      "trigger": "点击操作菜单中的「删除」",
+      "precondition": "该仓库数据存在",
+      "visual_change": "列表上方弹出 dialog：标题「确认删除仓库？」、内容文案含仓库名称、底部两按钮「取消」（dismiss）+「删除」（danger）",
+      "data_change": "无数据变更，等待用户确认",
+      "next_action": "点击删除确认、点击取消返回列表",
+      "edge_cases": ["点击遮罩或取消按钮不删除任何数据"],
+      "figma_frame_name": "mvp001-F04-S08-删除确认弹窗-删除确认态"
+    },
+    {
+      "state_id": "S09",
+      "state_name": "删除完成态",
+      "screen_id": "SCR01",
+      "trigger": "在删除确认 dialog 中点击「删除」",
+      "precondition": "删除确认 dialog 已弹出",
+      "visual_change": "dialog 关闭，列表移除对应卡片，toast 提示「仓库已删除」",
+      "data_change": "STATE.warehouses filter 移除对应 id 的仓库",
+      "next_action": "继续浏览列表、新增、编辑或删除",
+      "edge_cases": ["删除最后一个仓库后列表进入空状态 S02"],
+      "figma_frame_name": "mvp001-F04-S09-仓库管理列表页-删除完成态"
+    }
+  ],
+  "annotations": [
+    {
+      "frame_ref": "mvp001-F01-S01-仓库管理列表页-列表默认态",
+      "状态名称": "列表默认态",
+      "触发条件": "从我的 Tab 应用中心进入仓库管理",
+      "页面变化": "展示 navbar、摘要区、3 张仓库卡片",
+      "数据变化": "加载 3 条模拟仓库数据",
+      "下一步动作": "浏览卡片、点击新建、点击更多按钮",
+      "边界情况": "仓库全部停用时摘要启用数显示 0；默认仓被取消时默认仓数显示 0"
+    },
+    {
+      "frame_ref": "mvp001-F05-S02-仓库管理列表页-空状态",
+      "状态名称": "空状态",
+      "触发条件": "仓库列表为空",
+      "页面变化": "列表区域替换为空状态组件（图标+标题+引导文案+新增按钮）",
+      "数据变化": "无数据加载",
+      "下一步动作": "点击「新增仓库」按钮进入新增流程",
+      "边界情况": "删除最后一个仓库后进入此状态"
+    },
+    {
+      "frame_ref": "mvp001-F03-S03-仓库管理列表页-操作菜单展开态",
+      "状态名称": "操作菜单展开态",
+      "触发条件": "点击仓库卡片的更多按钮",
+      "页面变化": "卡片下方展开编辑/删除操作菜单",
+      "数据变化": "记录当前展开菜单的仓库 id",
+      "下一步动作": "点击编辑、点击删除、点击空白处关闭",
+      "边界情况": "再次点击同一按钮可收起；点击其他卡片按钮切换菜单"
+    },
+    {
+      "frame_ref": "mvp001-F02-S04-新增仓库页-新增初始态",
+      "状态名称": "新增仓库初始态",
+      "触发条件": "点击 navbar 新建按钮或空状态新增按钮",
+      "页面变化": "full-screen-modal 滑入，展示空表单含默认值",
+      "数据变化": "生成空 draft",
+      "下一步动作": "填写表单、点击保存、点击取消",
+      "边界情况": "取消时有修改会弹出放弃确认 dialog"
+    },
+    {
+      "frame_ref": "mvp001-F03-S05-编辑仓库页-编辑已有数据态",
+      "状态名称": "编辑已有数据态",
+      "触发条件": "点击操作菜单中的编辑",
+      "页面变化": "modal 打开，表单回填已有数据，标题「编辑仓库」",
+      "数据变化": "生成带数据的 draft",
+      "下一步动作": "修改字段、点击保存、点击取消",
+      "边界情况": "取消时有修改会弹出放弃确认 dialog"
+    },
+    {
+      "frame_ref": "mvp001-F02-S06-新增仓库页-表单校验失败态",
+      "状态名称": "表单校验失败态",
+      "触发条件": "点击保存但必填项缺失或电话格式错误",
+      "页面变化": "表单保持当前内容，toast 提示失败原因",
+      "数据变化": "无数据持久化",
+      "下一步动作": "补充必填项后重新保存",
+      "边界情况": "四种校验失败场景：名称空、联系人空、电话非 11 位、地址空"
+    },
+    {
+      "frame_ref": "mvp001-F02-S07-仓库管理列表页-保存成功态",
+      "状态名称": "保存成功态",
+      "触发条件": "点击保存且校验通过",
+      "页面变化": "modal 关闭，列表回填，toast 提示成功",
+      "数据变化": "新增项 unshift 置顶或编辑项原位更新；默认仓互斥处理",
+      "下一步动作": "继续浏览、新增、编辑或删除",
+      "边界情况": "设为默认仓时其他仓库默认标记自动取消"
+    },
+    {
+      "frame_ref": "mvp001-F04-S08-删除确认弹窗-删除确认态",
+      "状态名称": "删除确认态",
+      "触发条件": "点击操作菜单中的删除",
+      "页面变化": "弹出 dialog，含仓库名称，取消+删除按钮",
+      "数据变化": "无数据变更，等待确认",
+      "下一步动作": "点击删除确认、点击取消返回",
+      "边界情况": "点击遮罩或取消不删除任何数据"
+    },
+    {
+      "frame_ref": "mvp001-F04-S09-仓库管理列表页-删除完成态",
+      "状态名称": "删除完成态",
+      "触发条件": "在确认 dialog 中点击删除",
+      "页面变化": "dialog 关闭，列表移除该卡片，toast 提示已删除",
+      "数据变化": "从仓库数组 filter 移除对应 id",
+      "下一步动作": "继续浏览、新增、编辑或删除",
+      "边界情况": "删除最后一个仓库后进入空状态"
+    }
+  ],
+  "frame_naming": {
+    "format": "{iteration_id}-{flow_id}-{state_id}-{screen_name}",
+    "example": "mvp001-F01-S01-仓库管理页-列表态",
+    "rules": [
+      "iteration_id 固定为 mvp001",
+      "flow_id 为 F01-F05",
+      "state_id 为 S01-S09",
+      "screen_name 使用中文页面简称",
+      "多 flow 共享的 state 取主要 flow 编号"
+    ],
+    "all_frames": [
+      "mvp001-F01-S01-仓库管理列表页-列表默认态",
+      "mvp001-F05-S02-仓库管理列表页-空状态",
+      "mvp001-F03-S03-仓库管理列表页-操作菜单展开态",
+      "mvp001-F02-S04-新增仓库页-新增初始态",
+      "mvp001-F03-S05-编辑仓库页-编辑已有数据态",
+      "mvp001-F02-S06-新增仓库页-表单校验失败态",
+      "mvp001-F02-S07-仓库管理列表页-保存成功态",
+      "mvp001-F04-S08-删除确认弹窗-删除确认态",
+      "mvp001-F04-S09-仓库管理列表页-删除完成态"
+    ]
+  },
+  "validation_checklist": {
+    "是否覆盖全部流程": {
+      "passed": true,
+      "detail": "5 条 flow 全部覆盖：F01 列表浏览、F02 新增、F03 编辑、F04 删除、F05 空状态新增"
+    },
+    "是否覆盖全部页面": {
+      "passed": true,
+      "detail": "4 个 screen 全部覆盖：SCR01 列表页、SCR02 新增页、SCR03 编辑页、SCR04 删除弹窗"
+    },
+    "是否覆盖关键状态": {
+      "passed": true,
+      "detail": "9 个 state 全部覆盖：S01-S09，含列表默认、空状态、菜单展开、新增初始、编辑数据、校验失败、保存成功、删除确认、删除完成"
+    },
+    "是否存在多余页面": {
+      "passed": true,
+      "detail": "无多余页面，所有 screen 均有对应 flow 和 state 引用"
+    },
+    "是否支持后续更新同步": {
+      "passed": true,
+      "detail": "state 与 frame 一一对应，可通过 figma_frame_name 定位增量更新；flow 和 screen 结构化，支持后续新增 flow 或 state 扩展"
+    }
+  }
+}
