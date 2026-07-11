@@ -89,6 +89,7 @@
   - `node scripts/specs.mjs check`
   - `node scripts/validate-wego-design.mjs`
   - 正式合并前按需运行 `node scripts/validate-wego-design.mjs --scope=full --strict`
+  - 只审查设计系统或工作流本体、且业务场景是测试数据时，运行 `node scripts/validate-wego-design.mjs --scope=system --strict`；该范围仍检查设计系统全量资源和 `wego-app/lib/` 同步，但跳过 `wego-app/scenes/` 业务产物。
 - 若涉及设计系统源资源，再检查 `wego-app/lib/` 同步状态。
 - **启动本地验证服务器（`python -m http.server` 等）必须自带自动退出或任务结束显式清理**：
   - 必须使用 `timeout` / `trap kill` / `EXIT trap` / `pgrep cleanup` 等包装，禁止直接 `nohup ... &` 让进程脱离会话。

@@ -2,7 +2,7 @@
 
 ## 定位
 
-`wego-design` 是面向移动端、微信生态、电商、工具与社交场景的中文设计系统。在已有 `page_spec` 的前提下，它负责选择页面范式、UI Kit、组件组合、布局方式和页面打开方式，并输出 `design_consumption_plan`。
+`wego-design` 是面向移动端、微信生态、电商、工具与社交场景的中文设计系统。在已有 `interaction_spec` 的前提下，它负责选择页面范式、UI Kit、组件组合、布局方式和页面打开方式，并输出 `design_plan`。
 
 它不负责重新理解原始需求，也不直接生成最终原型。设计方向固定为：简洁、干净、淡雅、克制。判断优先级固定为：清晰 > 一致 > 效率 > 美观 > 创新。
 
@@ -26,13 +26,13 @@
 ## 正确消费顺序
 
 1. 读取唯一 `SKILL.md`，确认职责、门禁和输出结构。
-2. 读取已落盘的 `page_spec`。
+2. 读取已落盘的 `interaction_spec`。
 3. 读取 `library-consumption.json`，确认全局消费边界。
 4. 读取 `uikit-plan.json`，判断 pagePattern、fallback 和 presentation。
 5. 读取 `colors_and_type.css` 与 `css.json`，确认 Token。
 6. 读取 `components/index.json`，确认可用组件。
 7. 读取命中的组件契约与 Preview。
-8. 输出 `design_consumption_plan`，用 `rule_sources_used` 记录真实决策来源。
+8. 输出 `design_plan`，用 `rule_sources_used` 记录真实决策来源。
 
 禁止读取 `specs/*.md` 辅助运行时决策。历史数据中若仍存在指向 `specs` 的兼容字段，也不得加入本轮规则来源。
 

@@ -126,7 +126,7 @@ description: 用于 wego-design 设计系统与工作流本体的正式迭代，
 
 ## 自动生成规则文档
 
-`.codex/skills/wego-design/specs/*.md` 由 `scripts/specs.mjs` 从正式权威来源自动生成，只用于人工检查规则是否完整、清晰、重复或冲突。
+`docs/specs/*.md` 由 `scripts/specs.mjs` 从正式权威来源自动生成，只用于人工检查规则是否完整、清晰、重复或冲突。
 
 - 不直接修改生成文档。
 - 业务运行时技能不得读取生成文档。
@@ -162,6 +162,14 @@ node scripts/validate-wego-design.mjs
 ```bash
 node scripts/validate-wego-design.mjs --scope=full --strict
 ```
+
+当用户明确只审查设计系统或工作流本体、业务场景仅为测试数据时：
+
+```bash
+node scripts/validate-wego-design.mjs --scope=system --strict
+```
+
+`system` 仍全量检查设计系统权威来源、组件、Preview、UI Kit、生成规则和 `wego-app/lib/` 同步，只跳过 `wego-app/scenes/` 业务产物；不得用它替代正式业务场景验收。
 
 涉及设计系统部署资源时补充：
 

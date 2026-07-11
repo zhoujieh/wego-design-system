@@ -461,6 +461,14 @@ function structuralErrors() {
     if (/先读取\s*`?SKILL\.runtime\.md/.test(value)) errors.push(`${rel} 仍要求读取历史 Skill 入口`);
     for (const name of FILES) if (value.includes(name)) errors.push(`${rel} 不得引用自动生成文档 ${name}`);
   }
+  const agentEntryFiles = ['.codex/skills/wego-product/agents/openai.yaml','.codex/skills/wego-design/agents/openai.yaml','.codex/skills/wego-ux/agents/openai.yaml','.codex/skills/wego-tests/agents/openai.yaml'];
+  for (const rel of agentEntryFiles) {
+    const value = text(rel);
+    if (/page_spec|design_consumption_plan/.test(value)) errors.push(`${rel} 仍使用旧规格产物名，技能可能被错误触发或错误交接`);
+  }
+  const consumptionText = text('.codex/skills/wego-design/library-consumption.json');
+  if (/先新增类型再沉淀规则/.test(consumptionText)) errors.push('library-consumption.json 仍允许候选先污染 scenarioTypeRegistry');
+  if (/"recommendedReadOrder"[\s\S]*?specs\/\*\.md/.test(consumptionText)) errors.push('library-consumption.json 仍把自动生成 specs 加入运行时推荐读取顺序');
   errors.push(...stage23Errors());
   return errors;
 }

@@ -13,6 +13,7 @@
  *   node scripts/validate-wego-design.mjs --scope=changed --base=origin/main
  *   node scripts/validate-wego-design.mjs --scope=full
  *   node scripts/validate-wego-design.mjs --scope=full --strict
+ *   node scripts/validate-wego-design.mjs --scope=system --strict
  *   node scripts/validate-wego-design.mjs --json
  */
 
@@ -413,7 +414,11 @@ function createContext(allSlugs = []) {
     if (kitMatch) changedKits.add(kitMatch[1]);
   }
 
-  const effectiveScope = requestedScope === 'full' || validatorChanged || extractorChanged ? 'full' : 'changed';
+  const effectiveScope = requestedScope === 'system'
+    ? 'system'
+    : requestedScope === 'full' || validatorChanged || extractorChanged
+      ? 'full'
+      : 'changed';
   if (registryChanged || tokenChanged) {
     allSlugs.forEach(slug => changedSlugs.add(slug));
   }
@@ -2428,8 +2433,8 @@ function checkInteractionSpecAndDesignPlanReferences(context) {
 }
 
 function main() {
-  if (!['changed', 'full'].includes(requestedScope)) {
-    add('error', 'args.scope_invalid', `--scope 只能是 changed 或 full，当前为：${requestedScope}`);
+  if (!['changed', 'system', 'full'].includes(requestedScope)) {
+    add('error', 'args.scope_invalid', `--scope 只能是 changed、system 或 full，当前为：${requestedScope}`);
     return finish();
   }
 
@@ -2438,7 +2443,8 @@ function main() {
 
   let slugs = checkComponentFiles({ full: false });
   const context = createContext(slugs);
-  const full = context.effectiveScope === 'full';
+  const full = context.effectiveScope === 'full' || context.effectiveScope === 'system';
+  const includePrototypeOutputs = context.effectiveScope !== 'system';
   const scopedSlugs = full ? slugs : [...context.changedSlugs].filter(slug => slugs.includes(slug));
 
   report.scope = context.effectiveScope;
@@ -2486,17 +2492,21 @@ function main() {
   checkDirectionDrift({ full, changedLibraryFiles: context.libraryChangedFiles });
   checkSingleShellRuleConflicts(context);
   checkTrackedJunk();
-  checkWegoAppStructure(context);
   checkWegoAppLibSync(context);
-  checkPrototypeSurfaceDesigns(context);
-  checkPrototypeJunkAndInternalCopy(context);
-  checkPrototypeShellLeakage(context);
-  checkPrototypeSpecArchive(context);
-  checkPrototypeTokenHardcoding(context);
-  checkPrototypeComponentClassInvention(context);
-  checkPrototypeSinglePreviewShellRouting(context);
-  checkPrototypeHostShellUniqueness(context);
-  checkInteractionSpecAndDesignPlanReferences(context);
+  if (includePrototypeOutputs) {
+    checkWegoAppStructure(context);
+    checkPrototypeSurfaceDesigns(context);
+    checkPrototypeJunkAndInternalCopy(context);
+    checkPrototypeShellLeakage(context);
+    checkPrototypeSpecArchive(context);
+    checkPrototypeTokenHardcoding(context);
+    checkPrototypeComponentClassInvention(context);
+    checkPrototypeSinglePreviewShellRouting(context);
+    checkPrototypeHostShellUniqueness(context);
+    checkInteractionSpecAndDesignPlanReferences(context);
+  } else {
+    add('info', 'scope.prototype_outputs_skipped', 'system 范围只验证设计系统与工作流本体，已跳过 wego-app 业务场景产物。');
+  }
   checkMetadataVersionGate(context);
 
   finish();

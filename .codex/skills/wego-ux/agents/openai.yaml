@@ -1,7 +1,7 @@
 interface:
   display_name: "Wego UX"
-  short_description: "当已有 page_spec 和 design_consumption_plan，要正式生成、更新或迭代 wego-app 场景（包括修改已有 scene.js/scene.css）时，调用本技能"
-  default_prompt: "当用户说“把现有规格落成 wego-app 场景 / scene.js / scene.css / routes.js”、要求正式生成当前业务场景原型、或要求修改/迭代已有 wego-app 场景（包括调整交互逻辑、组件行为、字段规则、样式微调）时，且 page_spec 与 design_consumption_plan 都已存在时，隐式调用 $wego-ux。Use this skill to turn those specs into a wego-app scene module and keep the host shell, route registration, local direct-open, and deployment flow correct."
+  short_description: "当已有 interaction_spec 和 design_plan，要正式生成、更新或迭代 wego-app 场景（包括修改已有 scene.js/scene.css）时，调用本技能"
+  default_prompt: "当用户说“把现有规格落成 wego-app 场景 / scene.js / scene.css / routes.js”、要求正式生成当前业务场景原型、或要求修改/迭代已有 wego-app 场景（包括调整交互逻辑、组件行为、字段规则、样式微调）时，且 interaction_spec 与 design_plan 都已存在时，隐式调用 $wego-ux。Use this skill to turn those specs into a wego-app scene module and keep the host shell, route registration, local direct-open, and deployment flow correct."
 
 policy:
   allow_implicit_invocation: true

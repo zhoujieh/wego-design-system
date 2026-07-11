@@ -46,7 +46,7 @@ description: 验收 wego-app 当前业务场景并输出 acceptance_report，检
 4. 当前 scene、路由、宿主入口、资源和真实状态变化。
 5. 自动化守门和本轮实际执行记录。
 
-`.codex/skills/wego-design/specs/*.md` 是人工检查文档，不得作为验收依据，也不得输出 `spec_ref_check`。
+`docs/specs/*.md` 是人工检查文档，不得作为验收依据，也不得输出 `spec_ref_check`。
 
 ## 核心规则
 

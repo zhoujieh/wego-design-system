@@ -48,8 +48,8 @@
         "specs/*.md"
       ],
       "copyable": false,
-      "purpose": "品牌、布局、交互、动效、图标、文案和数据格式的细则",
-      "downstreamRule": "遇到页面布局、日期金额、状态反馈、图标尺寸、点击热区等问题时读取对应规范。"
+      "purpose": "由正式权威来源生成的人工审查投影，不参与运行时决策",
+      "downstreamRule": "业务技能不得读取、引用或复制 specs/*.md；发现冲突时回到 Token、组件契约、uikit-plan.json、library-consumption.json 或对应 SKILL.md 修复。"
     },
     "uikit": {
       "files": [
@@ -89,7 +89,7 @@
         "components/index.json",
         "components/{slug}.json",
         "preview/component-{slug}.html",
-        "specs/*.md"
+        "SKILL.md"
       ],
       "consume": "默认输出 wego-app 静态 App 原型项目，不依赖前端框架；预览以 Vercel 固定链接为主，同时支持本地直接打开 wego-app/index.html；完整流程必须拆成 App 宿主、hash route、scene.js 注册场景、modal/sheet/push 等交互层，不能把所有内容聚合成一个长页面；运行时不得依赖 fetch()/XHR 读取本地 HTML 片段。wego-app/lib/ 是由 .codex/skills/wego-design/ 源资源同步出来的部署副本，不作为修改源；样式、Token、iconfont 或资产变更必须先改源文件，再运行 node scripts/sync-wego-app-lib.mjs。",
       "deliverables": [
@@ -130,7 +130,6 @@
         "components/{slug}.json",
         "preview/component-{slug}.html",
         "uikit-plan.json",
-        "specs/布局与间距规范.md",
         "ui_kits/biz-rule-config/index.html",
         "ui_kits/system-settings/index.html"
       ],
@@ -141,7 +140,7 @@
         "assets/"
       ],
       "copyRule": "copyFiles 只描述部署副本需要包含的资源；不得直接编辑 wego-app/lib/ 内文件。需要改 Token、组件聚合 CSS、iconfont 或 assets 时，先修改 .codex/skills/wego-design/ 源文件，再运行 node scripts/sync-wego-app-lib.mjs 生成副本。",
-      "consume": "UI Kit 只作业务页面结构参考（看组件如何组合），不复制外壳；App 宿主页不是 UI Kit，固定宿主 App 正式维护在 wego-app/index.html，不再为每个任务复制 host-shell.*。先检查 page_spec.app_target + host_container + route_id：wego-design 只输出宿主入口/结果回填和页面打开方式依据，wego-ux 只增量更新 wego-app/js/routes.js、对应 scene.js/scene.css、入口和状态反馈，不重画宿主 Tab、工作台、我的页等现成内容。随后在 uikit-plan.json 中判断业务页所属范式；设置、权限、规则、配置类页面优先参考 ui_kits/biz-rule-config/index.html。所有场景使用同链接预览外壳规则：电脑端显示手机壳，移动端隐藏外壳视觉；业务场景不得依赖外壳类实现内容结构。禁止事项：不把 app 当 UI Kit；不重画固定宿主 App；不把 .uikit-shell/.phone-frame/.phone-screen 当业务结构；不发明组件类（如 .profile-header）；不发明组件子元素类（如 .profile-header__name）；不发明组件修饰类（如 .cell__action-text--accent）；不使用 inline style 控制颜色/间距；不硬编码 hex/rem 值。同步 assets/ 时必须整体复制到 wego-app/lib/，不做任何子目录筛选或文件判断。",
+      "consume": "UI Kit 只作业务页面结构参考（看组件如何组合），不复制外壳；App 宿主页不是 UI Kit，固定宿主 App 正式维护在 wego-app/index.html，不再为每个任务复制 host-shell.*。先检查 interaction_spec.app_target + host_container + route_id：wego-design 只输出宿主入口/结果回填和页面打开方式依据，wego-ux 只增量更新 wego-app/js/routes.js、对应 scene.js/scene.css、入口和状态反馈，不重画宿主 Tab、工作台、我的页等现成内容。随后在 uikit-plan.json 中判断业务页所属范式；设置、权限、规则、配置类页面优先参考 ui_kits/biz-rule-config/index.html。所有场景使用同链接预览外壳规则：电脑端显示手机壳，移动端隐藏外壳视觉；业务场景不得依赖外壳类实现内容结构。禁止事项：不把 app 当 UI Kit；不重画固定宿主 App；不把 .uikit-shell/.phone-frame/.phone-screen 当业务结构；不发明组件类（如 .profile-header）；不发明组件子元素类（如 .profile-header__name）；不发明组件修饰类（如 .cell__action-text--accent）；不使用 inline style 控制颜色/间距；不硬编码 hex/rem 值。同步 assets/ 时必须整体复制到 wego-app/lib/，不做任何子目录筛选或文件判断。",
       "forbidden": [
         "复制 UI Kit 外壳作为页面容器",
         "发明未在 components/index.json 注册的组件类",
@@ -157,7 +156,7 @@
         "基础重置样式（box-sizing: border-box; margin: 0; padding: 0）"
       ],
       "recommendedWorkflow": [
-        "先检查 page_spec.app_target、host_container 和 route_id，确认目标是 wego-app/scenes/{中文业务场景}/",
+        "先检查 interaction_spec.app_target、host_container 和 route_id，确认目标是 wego-app/scenes/{中文业务场景}/",
         "按 route_id 增量更新 wego-app/js/routes.js，不重复插入入口",
         "匹配业务页面范式，确定最优 UI Kit 蓝本和页面打开方式",
         "生成或更新 scene.js/scene.css，通过 window.WegoApp.registerScene 注册 template、presentation 和真实交互",
@@ -170,9 +169,9 @@
     },
     "writeChineseCopyOrData": {
       "read": [
-        "specs/文案与数据规范.md"
+        "SKILL.md"
       ],
-      "consume": "金额、日期、时间、空数据、省略和中文标点按规范输出。"
+      "consume": "只使用 interaction_spec 中已确认的业务文案和数据格式；不得从自动生成的 specs/*.md 补充或改变业务内容。"
     }
   },
   "uikitConstraints": {
@@ -221,7 +220,7 @@
     "uikitReferenceBoundary": "UI Kit 只作业务页面结构和组件组合参考，禁止复制 Showcase 外壳与内容，也不承担 App 宿主模板职责。",
     "appHostBoundary": "`app` 不属于 UI Kit；固定宿主 App 的唯一运行落点是 wego-app/index.html，宿主模板基线由 wego-ux/templates/host-shell.* 维护。",
     "contractFirst": "组件必须优先复用已注册契约；若命中组件契约已定义的稳定场景，页面层不得再重定义其内嵌关联控件规格、父子联动结构或冗余 helper。若发现组件契约问题，任务完成后必须作为风险性告知用户。",
-    "specAuthority": "文案、布局、交互、视觉规则只通过 specs/*.md 引用，不在消费说明里重复规范正文。",
+    "specAuthority": "业务内容来自 interaction_spec；布局、交互和视觉规则引用实际命中的 Token、组件契约、Preview、uikit-plan.json、library-consumption.json 或 SKILL.md 字段。自动生成的 specs/*.md 只用于人工审查，不得进入运行时规则来源。",
     "demoStyleBoundary": "不把 biz-* 演示样式当通用组件，也不把示例中的主操作位置误写成唯一强制规则。",
     "groupStructureFirst": "命中连续列表或表单分组时，优先消费 .cell-group / .form-group 的正式结构：标题使用 group 自带 title 节点，连续内容放进 group 自带 content 容器；卡片修饰只开在内容容器上。"
   },
@@ -233,15 +232,14 @@
     "css.json",
     "components/index.json",
     "components/{slug}.json",
-    "preview/component-{slug}.html",
-    "specs/*.md"
+    "preview/component-{slug}.html"
   ],
   "defaultDeliveryMode": "static-single-preview-shell-flow",
   "deliveryGuardrails": [
     "默认输出 wego-app 静态 App 原型，不引入前端框架依赖",
     "wego-app/index.html 是唯一 App 宿主和预览外壳；业务场景不复制第二套手机壳",
     "业务场景全部落在 wego-app/scenes/{中文业务场景}/，通过 scene.js 注册 template、presentation 和交互",
-    "页面打开方式由 design_consumption_plan.page_presentation.type 决定，支持 push、modal、sheet、full-screen-modal",
+    "页面打开方式由 design_plan.page_presentation.type 决定，支持 push、modal、sheet、full-screen-modal",
     "预览以 Vercel 固定链接为主，同时支持本地直接打开 wego-app/index.html",
     "运行时禁止依赖 fetch()/XHR 读取本地 HTML 片段；禁止普通 <a href=\"./scenes/*.html\"> 或 location.href 顶层离开 App",
     "原型必须体现真实业务数据状态和流程闭环，但不默认强制 localStorage 持久化"
@@ -329,7 +327,7 @@
           "二级选择页",
           "设计缺口拦截"
         ],
-        "judgmentLogic": "当 page_spec.page_surfaces[] 中的页面角色或结构无法精确命中现有 pagePattern/UI Kit，但仍能由已注册组件和 specs 安全组成时，输出 match_status=fallback 并引用 uikit-plan.json.fallbackPageBlueprints；若 fallback blueprint 也无法覆盖，输出 match_status=gap 并阻止进入 wego-ux",
+        "judgmentLogic": "当 interaction_spec.surfaces[]（或兼容字段 page_surfaces[]）中的页面角色或结构无法精确命中现有 pagePattern/UI Kit，但仍能由已注册组件、Token 和正式消费规则安全组成时，输出 match_status=fallback 并引用 uikit-plan.json.fallbackPageBlueprints；若 fallback blueprint 也无法覆盖，输出 match_status=gap 并阻止进入 wego-ux",
         "landingPriority": [
           "uikit-plan.json 的 fallbackPageBlueprints",
           "wego-design/SKILL.md 的 surface_designs 输出规则"
@@ -466,11 +464,11 @@
           "宿主资源同步完整性",
           "二级入口页面层级定义"
         ],
-        "judgmentLogic": "当 page_spec 声明 app_target + host_container + route_id 时，任务属于 wego-app 固定宿主挂载场景。wego-product 负责输出结构化路径、scene_folder 和稳定 route_id；wego-design 只输出宿主入口/结果回填和页面打开依据；wego-ux 必须维护现有 wego-app/index.html，不再复制第二套 host-shell，只按 route_id 增量更新 routes.js、入口、业务场景、状态回填和必要交互；后续迭代按 route_id 定位旧入口增量更新，不重画宿主 Tab、工作台、我的页等现成内容。",
+        "judgmentLogic": "当 interaction_spec 声明 app_target + host_container + route_id 时，任务属于 wego-app 固定宿主挂载场景。wego-product 负责输出结构化路径、scene_folder 和稳定 route_id；wego-design 只输出宿主入口/结果回填和页面打开依据；wego-ux 必须维护现有 wego-app/index.html，不再复制第二套 host-shell，只按 route_id 增量更新 routes.js、入口、业务场景、状态回填和必要交互；后续迭代按 route_id 定位旧入口增量更新，不重画宿主 Tab、工作台、我的页等现成内容。",
         "landingPriority": [
           "wego-ux/SKILL.md 的固定 App 宿主规则",
           "wego-app/index.html / js/routes.js / scenes/{scene}/scene.js",
-          "wego-product/SKILL.md 的 app_target 与 page_spec 字段定义"
+          "wego-product/SKILL.md 的 app_target 与 interaction_spec 字段定义"
         ],
         "secondaryLanding": [
           "wego-tests/SKILL.md 的 App 宿主路径验收规则"
@@ -522,7 +520,7 @@
           "Vercel-first 预览",
           "本地直接打开兼容"
         ],
-        "judgmentLogic": "当 page_spec.app_target.mode=wego-app-scene 时，交付对象是 wego-app 内的场景模块，而不是独立原型目录。wego-ux 必须在 wego-app/js/routes.js 注册 route_id，并在 wego-app/scenes/{中文业务场景}/scene.js 中通过 window.WegoApp.registerScene 注册 template、presentation 和交互；运行时只能通过 script/link 加载静态资源，不依赖 fetch()/XHR 读取本地 HTML。",
+        "judgmentLogic": "当 interaction_spec.app_target.mode=wego-app-scene 时，交付对象是 wego-app 内的场景模块，而不是独立原型目录。wego-ux 必须在 wego-app/js/routes.js 注册 route_id，并在 wego-app/scenes/{中文业务场景}/scene.js 中通过 window.WegoApp.registerScene 注册 template、presentation 和交互；运行时只能通过 script/link 加载静态资源，不依赖 fetch()/XHR 读取本地 HTML。",
         "landingPriority": [
           "wego-ux/SKILL.md 的场景模块和路由注册规则",
           "wego-app/js/routes.js",
@@ -537,11 +535,11 @@
       }
     ],
     "workflowStageDefinitions": {
-      "wego-product": "需求理解、任务分类、场景判断、信息块拆解；经验回流到 wego-product 技能文档或 page_spec 字段定义",
+      "wego-product": "需求理解、任务分类、场景判断、信息块拆解；经验回流到 wego-product 技能文档或 interaction_spec 字段定义",
       "wego-design": "设计系统消费、组件映射、组合约束决策；经验回流到 wego-design 技能文档、消费契约和组合约束文件",
       "wego-ux": "原型生成、App 宿主维护、场景模块注册、交互实现；经验回流到 wego-ux 技能文档或模板目录",
       "wego-tests": "验收项定义、当前任务范围、归因规则、风险记录；经验回流到 wego-tests 技能文档或验收报告字段定义"
     },
-    "rule": "新增经验沉淀时，必须先标注工作流环节归属(primaryWorkflowStage)，再匹配 scenarioTypeRegistry 中的类型；若无匹配类型，先新增类型再沉淀规则。已沉淀规则必须通过 `.codex/skills/wego-uxsystem-iterate/references/workflow-iteration.md` 中的通用化验证清单。"
+    "rule": "正式规则升级前必须先标注工作流环节归属（primaryWorkflowStage），再判断是否需要匹配 scenarioTypeRegistry 中的成熟类型。经验候选只进入 wego-uxsystem-iterate/experience/candidates.json；无匹配类型时保持候选，不得为了候选先新增正式类型。只有用户确认升级、规则可被运行时消费且确有新类型必要时，才新增 scenarioTypeRegistry 类型。"
   }
 }

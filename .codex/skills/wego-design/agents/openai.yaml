@@ -1,7 +1,7 @@
 interface:
   display_name: "Wego Design"
-  short_description: "当已有 page_spec 且要选页面范式、UI Kit、组件映射时，做设计系统消费并输出 design_consumption_plan"
-  default_prompt: "当用户说“基于现有 page_spec 出 design_consumption_plan”、要判断页面范式/UI Kit/组件映射/打开方式，且前置 page_spec 已存在时，隐式调用 $wego-design。Use this skill only after page_spec exists, consume the local design system, and produce a design_consumption_plan."
+  short_description: "当已有 interaction_spec 且要选页面范式、UI Kit、组件映射时，做设计系统消费并输出 design_plan"
+  default_prompt: "当用户说“基于现有 interaction_spec 出 design_plan”、要判断页面范式/UI Kit/组件映射/打开方式，且前置 interaction_spec 已存在时，隐式调用 $wego-design。Use this skill only after interaction_spec exists, consume the local design system, and produce a design_plan."
 
 policy:
   allow_implicit_invocation: true

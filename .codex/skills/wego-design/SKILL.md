@@ -45,7 +45,7 @@ description: 消费微购设计系统并输出 design_plan。用于已有 intera
 7. 命中的 `components/{slug}.json`：组件结构、状态、变体和行为契约。
 8. 命中的 `preview/component-{slug}.html`：真实 DOM 与稳定示例。
 
-`.codex/skills/wego-design/specs/*.md` 只用于人工检查，不得在运行时读取、引用或作为设计依据。`library-consumption.json` 中任何仍指向 `specs/*.md` 的历史读取项均视为非运行时兼容信息，不得进入 `rule_sources_used`。
+`docs/specs/*.md` 只用于人工检查，不得在运行时读取、引用或作为设计依据。`library-consumption.json` 中任何仍指向旧 `specs/*.md` 的历史字段均视为非运行时兼容信息，不得进入 `rule_sources_used`。
 
 ## 核心规则
 

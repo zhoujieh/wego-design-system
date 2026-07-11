@@ -32,7 +32,7 @@ description: 将已落盘的 interaction_spec 和 design_plan 实现为 wego-app
 
 `interaction_spec.readiness = blocked` 时停止实现；`partially-ready` 时只实现已确认节点，未确认节点按 `prototype_boundaries` 的 `stub` 或 `excluded` 处理。
 
-`.codex/skills/wego-design/specs/*.md` 只用于人工检查，不得作为实现依据。发现规格、来源或实现约束缺失时，必须回到最早产生问题的上游技能修正，不得在实现阶段补造规则。
+`docs/specs/*.md` 只用于人工检查，不得作为实现依据。发现规格、来源或实现约束缺失时，必须回到最早产生问题的上游技能修正，不得在实现阶段补造规则。
 
 ## 核心规则
 

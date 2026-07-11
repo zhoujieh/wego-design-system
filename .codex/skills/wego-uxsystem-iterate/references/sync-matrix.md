@@ -114,7 +114,7 @@
 修改任何正式规则来源后：
 
 1. 运行 `node scripts/specs.mjs generate`。
-2. 检查 `.codex/skills/wego-design/specs/` 下 7 份自动生成文档。
+2. 检查 `docs/specs/` 下 7 份自动生成文档。
 3. 运行 `node scripts/specs.mjs check`。
 4. 运行 `node scripts/specs.mjs test`。
 5. 运行 `node scripts/validate-wego-design.mjs`。
