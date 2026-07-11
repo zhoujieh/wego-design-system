@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 2,
+  "entryWhitelist": ["trigger", "responsibility", "input", "output", "handoff"],
+  "categories": {
+    "skill-entry": { "paths": [".codex/skills/*/SKILL.md"], "requiresEntryScope": true },
+    "skill-runtime-flow": { "paths": [".codex/skills/*/references/*.md"] },
+    "component-contract": { "paths": [".codex/skills/wego-design/components/*.json"] },
+    "design-system": { "paths": [".codex/skills/wego-design/*.css", ".codex/skills/wego-design/css.json"] },
+    "ui-kit": { "paths": [".codex/skills/wego-design/uikit-plan.json", ".codex/skills/wego-design/ui_kits/*/index.html"] },
+    "token": { "paths": [".codex/skills/wego-design/colors_and_type.css", ".codex/skills/wego-design/css.json"] },
+    "library-consumption": { "paths": [".codex/skills/wego-design/library-consumption.json"] },
+    "agents": { "paths": ["AGENTS.md"] },
+    "script": { "paths": ["scripts/*.mjs"] },
+    "test": { "paths": ["scripts/*.mjs", ".codex/skills/wego-tests/references/*.md"] }
+  }
+}

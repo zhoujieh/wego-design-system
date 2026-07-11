@@ -4,7 +4,7 @@
  * 规则:
  * - 宿主 Tab 切换和 route_id 回填作为 wego-app 基线能力维护
  * - 同场景迭代时按 route_id 定位旧入口;不要按文案模糊匹配
- * - 业务页打开方式仍由 design_consumption_plan.page_presentation.type 决定
+ * - 业务页打开方式仍由 design_plan.page_presentation.type 决定
  */
 
 (function initHostShell() {

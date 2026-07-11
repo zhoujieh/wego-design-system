@@ -1,5 +1,7 @@
 # Design Plan 结构
 
+> 角色：设计计划结构。读取条件：创建或校验 `design_plan` 时；不替代业务规格或设计系统契约。
+
 仅在创建、迁移或校验 `design_plan` 时读取。触发、核心门禁和交接以 `../SKILL.md` 为准。
 
 业务迭代中的 `design_plan` 必须包含与产品规格完全一致的 `iteration_context`，只引用已确认的 `requirement_ids[]`。设计阶段不得新增需求编号或提升 `scope_revision`。
@@ -63,8 +65,6 @@ design_plan
 
 单 route 单 surface 可使用单数对象；多 route 或多 surface 必须按 `surface_id` 索引。每项完整声明打开类型、动画、关闭动作、层级、是否覆盖 Tab 和真实来源。
 
-## 兼容规则
+## 当前格式
 
-- 新任务只维护新结构。
-- 旧场景可回退 `matched_uikit`、`navigation_pattern`、`layout_pattern`、`interaction_pattern` 和旧式 `selected`。
-- 新旧字段不得维护语义不同的两份计划；迁移时归档旧版并一次补齐新字段。
+- 只维护本文件定义的当前结构；发现旧字段时停止并迁移，禁止兼容读取或双写。

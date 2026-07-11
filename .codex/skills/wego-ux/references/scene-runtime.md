@@ -1,5 +1,7 @@
 # Scene Runtime
 
+> 角色：运行时接入方法。读取条件：修改场景注册、路由、push 或 overlay 时；不替代设计计划。
+
 修改场景注册、路由、宿主、presentation、push 栈或 overlay 时读取。
 
 ## registerScene

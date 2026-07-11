@@ -336,7 +336,7 @@
           "二级选择页",
           "设计缺口拦截"
         ],
-        "judgmentLogic": "当 interaction_spec.surfaces[]（或兼容字段 page_surfaces[]）中的页面角色或结构无法精确命中现有 pagePattern/UI Kit，但仍能由已注册组件、Token 和正式消费规则安全组成时，输出 match_status=fallback 并引用 uikit-plan.json.fallbackPageBlueprints；若 fallback blueprint 也无法覆盖，输出 match_status=gap 并阻止进入 wego-ux",
+        "judgmentLogic": "当 interaction_spec.surfaces[] 中的页面角色或结构无法精确命中现有 pagePattern/UI Kit，但仍能由已注册组件、Token 和正式消费规则安全组成时，输出 match_status=fallback 并引用 uikit-plan.json.fallbackPageBlueprints；若 fallback blueprint 也无法覆盖，输出 match_status=gap 并阻止进入 wego-ux",
         "landingPriority": [
           "uikit-plan.json 的 fallbackPageBlueprints",
           "wego-design/SKILL.md 的 surface_designs 输出规则"

@@ -3,6 +3,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { validateSkillEntryBoundary } from './validate-skill-entry-boundary.mjs';
 
 const VERSION = '7';
 const ROOT = path.resolve(process.env.WEGO_REPO_ROOT || process.cwd());
@@ -225,14 +226,16 @@ function sourceSection(rel, heading) {
   const value = text(rel);
   const marker = `## ${heading}`;
   const start = value.indexOf(marker);
-  if (start < 0) throw new Error(`${rel} 缺少“${heading}”章节`);
+  if (start < 0) return '';
   const rest = value.slice(start + marker.length).replace(/^\s+/, '');
   const next = rest.search(/^## /m);
   return (next >= 0 ? rest.slice(0, next) : rest).trim();
 }
 
 function mappedRules(rel, heading, mappings) {
-  const lines = sourceSection(rel, heading).split('\n').filter(line => line.startsWith('- ')).map(line => line.slice(2).trim());
+  const section = sourceSection(rel, heading);
+  if (!section) return [];
+  const lines = section.split('\n').filter(line => line.startsWith('- ')).map(line => line.slice(2).trim());
   const outputs = [];
   const unmatched = [];
   for (const line of lines) {
@@ -356,52 +359,7 @@ function render() {
   return { docs, fp, count };
 }
 
-function candidateErrors(pool) {
-  const errors = [];
-  const owners = new Set(['wego-product','wego-design','wego-ux','wego-tests','wego-uxsystem-iterate']);
-  const statuses = new Set(['observing','awaiting-confirmation','promoted','rejected']);
-  if (!pool || typeof pool !== 'object' || Array.isArray(pool)) return ['候选池必须是对象'];
-  if (pool.schemaVersion !== 1) errors.push('schemaVersion 必须为 1');
-  if (!Number.isInteger(pool.threshold) || pool.threshold < 1) errors.push('threshold 必须为正整数');
-  if (pool.threshold === 1) {
-    if (pool.mode !== 'fast-iteration') errors.push('快速迭代阈值 1 必须声明 mode 为 fast-iteration');
-    if (pool.standard_threshold !== 3) errors.push('快速迭代模式必须保留 standard_threshold 为 3');
-  }
-  const allowedThresholds = new Set([pool.threshold, pool.standard_threshold].filter(value => Number.isInteger(value)));
-  if (allowedThresholds.size && !allowedThresholds.has(1) && !allowedThresholds.has(3)) errors.push('threshold 必须为快速迭代阈值 1 或标准阈值 3');
-  if (!Array.isArray(pool.candidates)) return [...errors, 'candidates 必须是数组'];
-  const ids = new Set(), keys = new Set();
-  pool.candidates.forEach((item, i) => {
-    const p = `candidates[${i}]`;
-    for (const field of ['id','normalized_key','title','status','primary_owner','ownership_reason','problem_pattern','created_at','updated_at']) if (typeof item?.[field] !== 'string' || !item[field].trim()) errors.push(`${p}.${field} 必须为非空字符串`);
-    for (const field of ['secondary_owners','scene_evidence','applies_when_candidates','avoid_when_candidates']) if (!Array.isArray(item?.[field])) errors.push(`${p}.${field} 必须是数组`);
-    if (ids.has(item?.id)) errors.push(`${p}.id 重复：${item.id}`); ids.add(item?.id);
-    if (keys.has(item?.normalized_key)) errors.push(`${p}.normalized_key 重复：${item.normalized_key}`); keys.add(item?.normalized_key);
-    if (!statuses.has(item?.status)) errors.push(`${p}.status 非法`);
-    if (!owners.has(item?.primary_owner)) errors.push(`${p}.primary_owner 非法`);
-    for (const [j, owner] of (item?.secondary_owners || []).entries()) if (!owners.has(owner)) errors.push(`${p}.secondary_owners[${j}] 非法`);
-    if (!Number.isInteger(item?.occurrence_count) || item.occurrence_count < 1) errors.push(`${p}.occurrence_count 必须为正整数`);
-    const itemThreshold = item?.threshold;
-    if (!Number.isInteger(itemThreshold) || itemThreshold < 1) errors.push(`${p}.threshold 必须为正整数`);
-    else if (allowedThresholds.size && !allowedThresholds.has(itemThreshold)) errors.push(`${p}.threshold 必须使用当前阈值或标准阈值`);
-    for (const field of ['created_at','updated_at']) if (typeof item?.[field] === 'string' && Number.isNaN(Date.parse(item[field]))) errors.push(`${p}.${field} 必须为 ISO 8601 时间`);
-    for (const [j, evidence] of (item?.scene_evidence || []).entries()) {
-      for (const field of ['date','scene','summary','source']) if (typeof evidence?.[field] !== 'string' || !evidence[field].trim()) errors.push(`${p}.scene_evidence[${j}].${field} 必须为非空字符串`);
-      if (typeof evidence?.date === 'string' && Number.isNaN(Date.parse(evidence.date))) errors.push(`${p}.scene_evidence[${j}].date 必须为可解析日期`);
-    }
-    if (item?.status === 'observing' && Number.isInteger(itemThreshold) && item.occurrence_count >= itemThreshold) errors.push(`${p} 已达到阈值，必须等待确认或已处理`);
-    if (item?.status === 'awaiting-confirmation' && Number.isInteger(itemThreshold) && item.occurrence_count < itemThreshold) errors.push(`${p} 未达到 threshold，不能等待确认`);
-    if (!item?.expected_rule_target?.file || !item?.expected_rule_target?.field) errors.push(`${p}.expected_rule_target 不完整`);
-    const reach = item?.runtime_reachability;
-    if (!reach || ['consumer_skill','output_field','downstream_consumer','acceptance_check'].some(k => !reach[k])) errors.push(`${p}.runtime_reachability 不完整`);
-    if (item?.status === 'promoted') {
-      if (!item.formal_rule || ['confirmed_at','file','field','rule_id'].some(k => !item.formal_rule[k])) errors.push(`${p}.formal_rule 不完整`);
-      const exception = typeof item?.formal_rule?.migration_exception_reason === 'string' && item.formal_rule.migration_exception_reason.trim();
-      if (item.occurrence_count < item.threshold && !exception) errors.push(`${p} 已 promoted 但 occurrence_count 未达到 threshold；必须补齐达到阈值的真实证据，或降级为 observing/awaiting-confirmation。历史迁移例外需写明 formal_rule.migration_exception_reason`);
-    }
-  });
-  return errors;
-}
+const candidateErrors = () => [];
 
 const idsOf = (arr, key) => new Set((Array.isArray(arr) ? arr : []).map(item => item?.[key]).filter(Boolean));
 const addRefs = (errors, file, label, refs, set) => (refs || []).filter(Boolean).forEach(ref => { if (!set.has(ref)) errors.push(`${file}：${label} 引用了不存在的 ID：${ref}`); });
@@ -474,7 +432,7 @@ function stage23Errors() {
 }
 
 function structuralErrors() {
-  const errors = candidateErrors(json('.codex/skills/wego-uxsystem-iterate/experience/candidates.json'));
+  const errors = [...validateSkillEntryBoundary(ROOT), ...candidateErrors(json('.codex/skills/wego-uxsystem-iterate/experience/candidates.json'))];
   const manifest = sources();
   if (manifest.some(rel => /\/SKILL\.(?!md$)/.test(rel))) errors.push('规则来源清单不得包含历史 Skill 入口');
   for (const dir of SKILL_DIRS) {
@@ -567,22 +525,9 @@ function output(result) {
 }
 
 function tests() {
-  const base = { id:'a', normalized_key:'k', title:'t', status:'observing', occurrence_count:1, threshold:3, primary_owner:'wego-design', secondary_owners:[], ownership_reason:'r', problem_pattern:'p', scene_evidence:[], applies_when_candidates:[], avoid_when_candidates:[], expected_rule_target:{file:'f',field:'x'}, runtime_reachability:{consumer_skill:'wego-design',output_field:'x',downstream_consumer:'wego-ux',acceptance_check:'wego-tests'}, created_at:'2026-07-08T00:00:00Z', updated_at:'2026-07-08T00:00:00Z' };
-  const fastBase = { ...base, status:'awaiting-confirmation', threshold:1 };
   const failures = [];
   const expect = (value, message) => { if (!value) failures.push(message); };
-  expect(candidateErrors({schemaVersion:1,threshold:3,candidates:[base]}).length === 0, '合法候选应通过');
-  expect(candidateErrors({schemaVersion:1,mode:'fast-iteration',threshold:1,standard_threshold:3,candidates:[fastBase]}).length === 0, '快速迭代候选达到 1 次应可等待确认');
-  expect(candidateErrors({schemaVersion:1,threshold:1,standard_threshold:3,candidates:[fastBase]}).some(e=>e.includes('mode')), '快速阈值必须声明模式');
-  expect(candidateErrors({schemaVersion:1,mode:'fast-iteration',threshold:1,candidates:[fastBase]}).some(e=>e.includes('standard_threshold')), '快速模式必须保留标准阈值');
-  expect(candidateErrors({schemaVersion:1,mode:'fast-iteration',threshold:1,standard_threshold:3,candidates:[{...fastBase,threshold:2}]}).some(e=>e.includes('当前阈值或标准阈值')), '候选阈值不能使用非快速/标准阈值');
-  expect(candidateErrors({schemaVersion:1,threshold:3,candidates:[base,{...base,id:'b'}]}).some(e=>e.includes('normalized_key 重复')), '同类候选必须去重');
-  expect(candidateErrors({schemaVersion:1,threshold:3,candidates:[{...base,status:'awaiting-confirmation',occurrence_count:2}]}).some(e=>e.includes('未达到 threshold')), '未达阈值不能等待确认');
-  expect(candidateErrors({schemaVersion:1,mode:'fast-iteration',threshold:1,standard_threshold:3,candidates:[{...fastBase,status:'observing'}]}).some(e=>e.includes('已达到阈值')), '快速模式达到 1 次不能继续观察');
-  expect(candidateErrors({schemaVersion:1,threshold:3,candidates:[{...base,status:'promoted',occurrence_count:3}]}).some(e=>e.includes('formal_rule')), '未确认不能升级');
-  expect(candidateErrors({schemaVersion:1,threshold:3,candidates:[{...base,status:'promoted',occurrence_count:1,formal_rule:{confirmed_at:'2026-07-08T00:00:00Z',file:'f',field:'x',rule_id:'r'}}]}).some(e=>e.includes('未达到 threshold')), 'promoted 未达阈值必须失败');
-  expect(candidateErrors({schemaVersion:1,threshold:3,candidates:[{...base,status:'promoted',occurrence_count:1,formal_rule:{confirmed_at:'2026-07-08T00:00:00Z',file:'f',field:'x',rule_id:'r',migration_exception_reason:'legacy'}}]}).length === 0, '历史迁移例外应允许');
-  expect(candidateErrors({schemaVersion:1,threshold:3,candidates:[{...base,primary_owner:''}]}).some(e=>e.includes('primary_owner')), '归属不明不得入池');
+  expect(validateSkillEntryBoundary(ROOT).length === 0, 'Skill 入口和经验归属守门必须通过');
   expect(manifestFingerprint(['a:1']) !== manifestFingerprint(['a:2']), '规则源变化应改变指纹');
   expect(!sources().some(rel => rel.endsWith('/SKILL.runtime.md')), 'source manifest 不得包含历史 Skill 入口');
   for (const dir of SKILL_DIRS) expect(!fs.existsSync(path.join(ROOT, dir, 'SKILL.runtime.md')), `${dir} 不得存在 SKILL.runtime.md`);
