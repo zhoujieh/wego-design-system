@@ -1,0 +1,2 @@
+.benchmark-smoke { min-height: 100%; background: var(--bg-page); }
+.benchmark-smoke__body { padding: 24px 16px; color: var(--text-primary); }
