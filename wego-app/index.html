@@ -11,7 +11,6 @@
   <link rel="stylesheet" href="./lib/components.css" />
   <link rel="stylesheet" href="./lib/iconfont.css" />
   <link rel="stylesheet" href="./css/app.css" />
-  <link rel="stylesheet" href="./css/dynamic-feed.css" />
   <link rel="stylesheet" href="./css/safe-area.css" />
 </head>
 <body data-bg="page" data-host-shell="true">
@@ -24,97 +23,11 @@
         </div>
 
         <main class="host-shell-page" data-host-content>
-          <section class="host-shell-page__panel host-shell-page__panel--active" data-host-tab="dongtai" aria-label="动态">
-            <div class="navbar host-dongtai-navbar" data-bg="page">
-              <div class="navbar__body">
-                <div class="navbar__left">
-                  <button type="button" class="host-dongtai-navbar__vip" data-vip-level="vip" aria-label="VIP">
-                    <img src="./lib/icons/icon-dongtai-vip.svg" alt="" />
-                  </button>
-                </div>
-                <div class="navbar__center"></div>
-                <div class="navbar__right navbar__right--button">
-                  <div class="navbar__action navbar__action--button">
-                    <button type="button" class="btn btn--strong btn--sm" onclick="WegoApp.navigate('quick-publish-product')">发布</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="host-dongtai-body">
-              <p class="host-shell-empty">动态内容占位</p>
-            </div>
-          </section>
+          <section class="host-shell-page__panel host-shell-page__panel--active host-shell-page__panel--blank" data-host-tab="dongtai" aria-label="动态"></section>
           <section class="host-shell-page__panel host-shell-page__panel--blank" data-host-tab="haoyou" hidden aria-label="好友"></section>
           <section class="host-shell-page__panel host-shell-page__panel--blank" data-host-tab="workspace" hidden aria-label="工作台"></section>
           <section class="host-shell-page__panel host-shell-page__panel--blank" data-host-tab="xiaoxi" hidden aria-label="消息"></section>
-
-          <section class="host-shell-page__panel" data-host-tab="my" data-surface-id="my-home-main" hidden>
-            <section class="card card--surface host-shell-profile-card">
-              <div class="card__content host-shell-profile">
-                <div class="host-shell-profile__main" data-content-id="profile-identity">
-                  <div class="avatar avatar--56 avatar--image">
-                    <img src="./lib/image/avatar-defult.png" alt="默认头像" />
-                  </div>
-                  <div class="host-shell-profile__meta">
-                    <div class="host-shell-profile__title-row">
-                      <h1 class="host-shell-profile__title">微购相册·店主</h1>
-                      <span class="badge badge--inline badge--text host-shell-profile__badge"><span class="badge__text">SVIP</span></span>
-                    </div>
-                    <p class="host-shell-profile__subtitle">超级管理员</p>
-                  </div>
-                </div>
-                <div class="host-shell-profile__actions" data-content-id="profile-actions">
-                  <button type="button" class="btn btn--weak btn--sm" data-route-id="my-add-staff" data-entry-label="添加员工">+ 员工</button>
-                  <button type="button" class="btn btn--weak btn--sm" data-route-id="my-staff-management" data-entry-label="员工管理">员工管理</button>
-                </div>
-              </div>
-            </section>
-
-            <section class="card card--filled host-shell-membership-card">
-              <div class="card__content host-shell-membership" data-content-id="membership-info">
-                <div class="host-shell-membership__header">
-                  <span class="card__header host-shell-membership__label">SVIP 年度超级会员</span>
-                  <button type="button" class="btn btn--strong btn--sm" data-route-id="my-renew-membership" data-entry-label="去续费">去续费</button>
-                </div>
-                <div class="host-shell-membership__body">
-                  <div class="card__body host-shell-membership__usage">
-                    <strong>90.33G</strong>
-                    <span>/360G</span>
-                  </div>
-                  <button type="button" class="link host-shell-link-button" data-route-id="my-space-management" data-entry-label="空间管理">空间管理</button>
-                </div>
-              </div>
-            </section>
-
-            <section class="card card--surface host-shell-app-card">
-              <div class="card__content host-shell-app-card__content">
-                <div class="host-shell-grid" data-entry-group="my-app-center" data-content-id="app-center-entries">
-                  <button type="button" class="host-shell-grid-entry" data-route-id="my-start-group" data-entry-label="一键开团">
-                    <img src="./lib/icons/app-center/一键开团.svg" alt="" class="host-shell-grid-entry__icon" />
-                    <span class="host-shell-grid-entry__label">一键开团</span>
-                  </button>
-                  <button type="button" class="host-shell-grid-entry" data-route-id="my-shop-decoration" data-entry-label="店铺装修">
-                    <img src="./lib/icons/app-center/店铺装修.svg" alt="" class="host-shell-grid-entry__icon" />
-                    <span class="host-shell-grid-entry__label">店铺装修</span>
-                  </button>
-                  <button type="button" class="host-shell-grid-entry" data-route-id="my-collect-code" data-entry-label="收款码">
-                    <img src="./lib/icons/app-center/收款码.svg" alt="" class="host-shell-grid-entry__icon" />
-                    <span class="host-shell-grid-entry__label">收款码</span>
-                  </button>
-                  <button type="button" class="host-shell-grid-entry" data-route-id="my-store" data-entry-label="我的小店">
-                    <img src="./lib/icons/app-center/我的小店.svg" alt="" class="host-shell-grid-entry__icon" />
-                    <span class="host-shell-grid-entry__label">我的小店</span>
-                  </button>
-                </div>
-              </div>
-            </section>
-
-            <section class="card card--surface host-shell-list-card">
-              <div class="card__content host-shell-list-card__content">
-                <div class="host-shell-list" data-entry-group="my-settings" data-content-id="settings-entries"></div>
-              </div>
-            </section>
-          </section>
+          <section class="host-shell-page__panel host-shell-page__panel--blank" data-host-tab="my" hidden aria-label="我的"></section>
         </main>
 
         <div class="app-scene-layer" data-scene-layer hidden></div>
@@ -152,53 +65,6 @@
     </div>
   </div>
 
-  <script>
-    (function lockStableMobileViewport() {
-      var mobileQuery = window.matchMedia('(max-width: 767px)');
-      var root = document.documentElement;
-      var stableHeight = 0;
-      var orientationTimer = 0;
-
-      function hasFocusedEditor() {
-        var active = document.activeElement;
-        if (!active) return false;
-        return active.matches('input, textarea, select, [contenteditable="true"], [contenteditable=""]');
-      }
-
-      function measureStableHeight() {
-        if (!mobileQuery.matches || hasFocusedEditor()) return;
-        var nextHeight = Math.round(window.innerHeight || root.clientHeight || 0);
-        if (nextHeight <= 0) return;
-        stableHeight = nextHeight;
-        root.style.setProperty('--wego-stable-viewport-height', stableHeight + 'px');
-      }
-
-      function restoreStableHeight() {
-        if (!mobileQuery.matches || stableHeight <= 0) return;
-        root.style.setProperty('--wego-stable-viewport-height', stableHeight + 'px');
-      }
-
-      measureStableHeight();
-
-      document.addEventListener('focusin', function (event) {
-        if (!event.target.matches('input, textarea, select, [contenteditable="true"], [contenteditable=""]')) return;
-        restoreStableHeight();
-      }, true);
-
-      document.addEventListener('focusout', function () {
-        window.setTimeout(restoreStableHeight, 350);
-      }, true);
-
-      window.addEventListener('orientationchange', function () {
-        window.clearTimeout(orientationTimer);
-        orientationTimer = window.setTimeout(measureStableHeight, 450);
-      });
-
-      window.addEventListener('pageshow', function () {
-        window.setTimeout(measureStableHeight, 0);
-      });
-    })();
-  </script>
   <script src="./js/routes.js"></script>
   <script src="./js/app.js"></script>
 </body>
