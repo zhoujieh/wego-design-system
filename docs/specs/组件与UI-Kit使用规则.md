@@ -70,6 +70,16 @@
 
 - **允许组件：**navbar、search、card、image、tag、button、link、dialog、toast
 
+#### 连续内容流页面（continuous-content-feed-page）
+
+**适用条件：**
+- 页面角色为 primary-task-page
+- 主任务是连续浏览多条内容并快速判断是否下钻或执行轻操作
+- 单条内容同时可能包含发布信息、正文、媒体、对象摘要和轻操作
+- 现有 UI Kit/pagePattern 无精确范式，但可由已注册组件和页面级业务样式安全组成
+
+- **允许组件：**navbar、avatar、image、card、tag、metric、link、button、actionsheet、toast
+
 #### 通用移动任务页（generic-mobile-task-page）
 
 **适用条件：**
@@ -171,4 +181,4 @@
 组件已在注册表中存在，结构与状态符合契约，页面示例只用于结构参考，设计系统源文件与部署副本保持一致。
 
 <!-- generated-by: scripts/specs.mjs@7 -->
-<!-- source-fingerprint: 7d596e6446ddf323235e390504c9f355362f5284c401a65b26ae908dd1c0e610 -->
+<!-- source-fingerprint: 9611b65aecce92a89e22ac3a896f3c63e22a2aa62454d5d5b821d00c38f15ef7 -->

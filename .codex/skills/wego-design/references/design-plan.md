@@ -39,6 +39,8 @@ design_plan
 
 声明 `page_goal`、`page_pattern`、`layout_pattern`、`main_scroll_direction`、`content_density`、`fixed_vs_scroll`。复杂页面还必须声明 `first_screen_goal`、`region_priority`、`scroll_rhythm` 和 `visual_competition`。
 
+- `page_strategy.page_pattern` 只能填写已在 `uikit-plan.json.pagePatterns[]` 注册的 `slug`，或在明确使用 fallback blueprint 时留空；不得自由发明内容流、详情页等临时范式名。
+
 ## region_composition
 
 每个区域使用稳定 `region_id`，声明 `role`、`priority`、`order`、`layout`、`width`、`scroll_behavior`、`component_refs[]`、`relation` 和 `rule_sources`。
@@ -52,6 +54,11 @@ design_plan
 ## surface_designs
 
 覆盖全部 `interaction_spec.surfaces[]`，至少包含 `surface_id`、`role`、`match_status`、命中的 UI Kit/pagePattern/blueprint、`presentation_ref`、组件映射和允许的页面样式。
+
+- `matched_page_pattern` 只允许引用 `uikit-plan.json.pagePatterns[].slug`。
+- `matched_blueprint` 只允许引用 `uikit-plan.json.fallbackPageBlueprints[].id`。
+- `matched_ui_kit` 如填写，只允许引用 `uikit-plan.json.uiKits[].slug`，不写展示名称或临时中文名。
+- `component_refs` 只允许引用已注册组件 slug；primitive 名称如 `sheet`、`push` 不作为组件填写。
 
 ## component_mapping
 

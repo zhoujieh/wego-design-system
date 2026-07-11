@@ -1340,6 +1340,8 @@ function checkPrototypeSurfaceDesigns(context) {
   const uikitPlan = readJson('uikit-plan.json') || {};
   const pagePatternIds = new Set((uikitPlan.pagePatterns || []).map(item => item.slug).filter(Boolean));
   const fallbackBlueprintIds = new Set((uikitPlan.fallbackPageBlueprints || []).map(item => item.id).filter(Boolean));
+  const uiKitIds = new Set((uikitPlan.uiKits || []).map(item => item.slug).filter(Boolean));
+  const allowedComponents = new Set(uikitPlan.allowedComponents || []);
   const routesPath = path.join(APP_ROOT, 'js/routes.js');
   const registeredRoutes = fs.existsSync(routesPath) ? fs.readFileSync(routesPath, 'utf8') : '';
   let checkedPlans = 0;
@@ -1394,15 +1396,45 @@ function checkPrototypeSurfaceDesigns(context) {
       if (routeId && !sceneJs.includes(routeId)) {
         add('error', 'app_scene.route_id_missing_in_scene', `scene.js 必须包含当前 route_id：${routeId}`, sceneJsPath);
       }
+      if (sceneJs.includes('.codex/skills/')) {
+        add('error', 'app_scene.source_asset_reference_forbidden',
+          'scene.js 不得引用 .codex/skills/wego-design 源目录资源；运行时只能引用 wego-app/lib/ 或场景内可部署资源',
+          sceneJsPath);
+      }
+    }
+
+    const sceneCssPath = path.join(scenePath, 'scene.css');
+    if (fs.existsSync(sceneCssPath)) {
+      const sceneCss = fs.readFileSync(sceneCssPath, 'utf8');
+      if (sceneCss.includes('.codex/skills/')) {
+        add('error', 'app_scene.source_asset_reference_forbidden',
+          'scene.css 不得引用 .codex/skills/wego-design 源目录资源；运行时只能引用 wego-app/lib/ 或场景内可部署资源',
+          sceneCssPath);
+      }
     }
 
     checkedPlans++;
     const plan = readJsonFile(planPath);
     if (!plan) continue;
-    const presentationType = plan.page_presentation?.type;
-    if (presentationType && !PRESENTATION_TYPES.has(presentationType)) {
-      add('error', 'prototype.presentation_type_invalid',
-        `page_presentation.type 必须是 push/modal/sheet/full-screen-modal/host-tab/host-fixed-tab，当前为 ${presentationType}`,
+    const presentationEntries = [];
+    if (plan.page_presentation && typeof plan.page_presentation === 'object' && typeof plan.page_presentation.type === 'string') {
+      presentationEntries.push({ key: 'page_presentation', value: plan.page_presentation });
+    } else if (plan.page_presentation && typeof plan.page_presentation === 'object') {
+      for (const [key, value] of Object.entries(plan.page_presentation)) {
+        if (value && typeof value === 'object') presentationEntries.push({ key, value });
+      }
+    }
+    for (const entry of presentationEntries) {
+      const presentationType = entry.value?.type;
+      if (presentationType && !PRESENTATION_TYPES.has(presentationType)) {
+        add('error', 'prototype.presentation_type_invalid',
+          `${entry.key}.type 必须是 push/modal/sheet/full-screen-modal/host-tab/host-fixed-tab，当前为 ${presentationType}`,
+          planPath);
+      }
+    }
+    if (plan.page_strategy?.page_pattern && !pagePatternIds.has(plan.page_strategy.page_pattern)) {
+      add('error', 'prototype.page_strategy_pattern_unknown',
+        `page_strategy.page_pattern 引用了不存在的 pagePattern：${plan.page_strategy.page_pattern}`,
         planPath);
     }
     const surfaces = Array.isArray(plan.surface_designs) ? plan.surface_designs : null;
@@ -1440,6 +1472,11 @@ function checkPrototypeSurfaceDesigns(context) {
           `surface ${id} 引用了不存在的 pagePattern：${surface.matched_page_pattern}`,
           planPath);
       }
+      if (surface.matched_ui_kit && !uiKitIds.has(surface.matched_ui_kit)) {
+        add('error', 'prototype.surface_uikit_unknown',
+          `surface ${id} 引用了不存在的 UI Kit slug：${surface.matched_ui_kit}`,
+          planPath);
+      }
       if (surface.match_status === 'fallback' && !surface.matched_blueprint) {
         add('error', 'prototype.surface_blueprint_missing',
           `surface ${id} 为 fallback 时必须声明 matched_blueprint`,
@@ -1458,6 +1495,19 @@ function checkPrototypeSurfaceDesigns(context) {
       if (surface.match_status === 'gap') {
         add('error', 'prototype.surface_gap_present',
           `surface ${id} 仍是 gap，不能进入原型交付；请先补齐 blueprint/UI Kit/组件契约`,
+          planPath);
+      }
+      if (Array.isArray(surface.component_refs)) {
+        for (const ref of surface.component_refs) {
+          if (!allowedComponents.has(ref)) {
+            add('error', 'prototype.surface_component_ref_unknown',
+              `surface ${id} 的 component_refs[] 引用了未注册组件：${ref}`,
+              planPath);
+          }
+        }
+      } else {
+        add('error', 'prototype.surface_component_refs_missing',
+          `surface ${id} 必须包含 component_refs[]`,
           planPath);
       }
       if (!Array.isArray(surface.component_mapping)) {

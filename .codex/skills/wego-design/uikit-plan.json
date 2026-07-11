@@ -723,6 +723,61 @@
       ]
     },
     {
+      "id": "continuous-content-feed-page",
+      "name": "连续内容流页面",
+      "primaryWorkflowStage": "wego-design",
+      "secondaryWorkflowStages": [
+        "wego-ux",
+        "wego-tests"
+      ],
+      "appliesWhen": [
+        "页面角色为 primary-task-page",
+        "主任务是连续浏览多条内容并快速判断是否下钻或执行轻操作",
+        "单条内容同时可能包含发布信息、正文、媒体、对象摘要和轻操作",
+        "现有 UI Kit/pagePattern 无精确范式，但可由已注册组件和页面级业务样式安全组成"
+      ],
+      "layoutRules": [
+        "复杂内容流优先保证扫读效率与信息密度，不默认套常规卡片页 M16；默认从通栏 M0 或长列表 M8 判断，只有内容明显稀疏且不是连续浏览主任务时才升级到 M16",
+        "媒体在内容流中是辅助判断，不得主导单条内容首屏高度；当单条内容同时承载发布者、时间、正文、对象信息和操作时，媒体区域应让位于文字与对象摘要",
+        "单条内容先呈现识别信息，再呈现正文和对象摘要，最后才呈现轻操作；不要用大图、装饰说明或多主按钮打断连续浏览节奏",
+        "列表页只外露 1-2 个高频安全操作；3 个及以上操作或包含低频/危险动作时，收进 actionsheet、详情页或更多操作承载",
+        "重复列表项中禁止出现多处 strong 主按钮；strong 只保留给页面级唯一主动作，列表项内默认使用 link、weak、medium 或对象卡片点击承载下钻",
+        "页面首屏文案必须直接服务用户任务，不写解释设计意图、浏览方法或工作流背景的说明块"
+      ],
+      "allowedComponents": [
+        "navbar",
+        "avatar",
+        "image",
+        "card",
+        "tag",
+        "metric",
+        "link",
+        "button",
+        "actionsheet",
+        "toast"
+      ],
+      "allowedPageStyles": [
+        "内容流纵向节奏",
+        "媒体与正文的面积分配",
+        "对象摘要布局",
+        "列表项轻操作收口",
+        "页面级筛选条布局"
+      ],
+      "forbidden": [
+        "默认使用 M16 卡片式压缩复杂内容流",
+        "媒体区域主导单条内容首屏高度",
+        "重复列表项内使用 strong 主按钮",
+        "自造 actionsheet 结构替代正式组件",
+        "解释设计意图或 Benchmark 背景的首屏说明文案"
+      ],
+      "specRefs": [
+        "specs/布局与间距规范.md",
+        "specs/交互设计原则.md",
+        "specs/文案与数据规范.md",
+        "specs/设计风格与品牌原则.md"
+      ]
+    },
+    {
       "id": "generic-mobile-task-page",
       "name": "通用移动任务页",
       "primaryWorkflowStage": "wego-design",
