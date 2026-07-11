@@ -111,6 +111,38 @@ window.WEGO_APP_ROUTES = [
       icon: './lib/icons/app-center/库存管理.svg'
     }
   },
+  /*
+   * 内部入口：『补货计划』挂在商家工作台常用应用区，不从宿主 workspace 分组挂载。
+   * entry.group 指向不存在的容器名，避免与商家工作台内部入口重复；
+   * 该 route 仅通过商家工作台 scene.js 中 ctx.navigate('restock-plan') 触发。
+   */
+  {
+    routeId: 'restock-plan',
+    scene: '补货计划',
+    script: './scenes/补货计划/scene.js',
+    style: './scenes/补货计划/scene.css',
+    entry: {
+      tab: 'workspace',
+      group: 'workspace-workbench-internal',
+      label: '补货计划',
+      type: 'cell'
+    }
+  },
+  /*
+   * 内部入口：『补货商品选择』仅由补货计划场景内部 push 打开，不从宿主直接挂载。
+   */
+  {
+    routeId: 'restock-product-picker',
+    scene: '补货商品选择',
+    script: './scenes/补货商品选择/scene.js',
+    style: './scenes/补货商品选择/scene.css',
+    entry: {
+      tab: 'workspace',
+      group: 'restock-plan-internal',
+      label: '补货商品选择',
+      type: 'cell'
+    }
+  },
   {
     routeId: 'my-warehouse-management',
     scene: '仓库管理',
@@ -139,6 +171,18 @@ window.WEGO_APP_ROUTES = [
       group: 'my-system-settings-internal',
       label: '交易设置',
       type: 'cell'
+    }
+  },
+  {
+    routeId: 'friends',
+    scene: '好友',
+    script: './scenes/好友/scene.js',
+    style: './scenes/好友/scene.css',
+    entry: {
+      tab: 'haoyou',
+      group: 'friends-tab',
+      label: '好友',
+      type: 'host-tab'
     }
   }
 ];

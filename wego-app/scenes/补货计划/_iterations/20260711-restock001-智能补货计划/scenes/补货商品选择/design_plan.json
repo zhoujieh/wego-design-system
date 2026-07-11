@@ -1,0 +1,423 @@
+{
+  "schemaVersion": 3,
+  "complexity_level": "structured",
+  "matched_uikit": null,
+  "scene_fit_reason": "补货商品选择页是典型的搜索 + 多选列表 + 完成返回二级页面，包含 5 个上限反馈和会话内已选状态恢复；适合使用对象管理列表 fallback 结合 search、checkbox、cell 和 navbar 正式组件。",
+  "navigation_pattern": "补货计划页 push → 补货商品选择页搜索与勾选 → 点击完成返回补货计划页，或取消返回保持草稿",
+  "layout_pattern": "通栏列表主结构，顶部搜索工具区 + 已选数量提示，主体为连续 cell 列表，底部固定完成按钮。",
+  "interaction_pattern": "搜索筛选 + 多选勾选 + 达到上限反馈 + 完成返回",
+  "app_target": {
+    "mode": "wego-app-scene",
+    "app_root": "wego-app",
+    "scene_folder": "wego-app/scenes/补货商品选择",
+    "route_id": "restock-product-picker",
+    "route_mode": "hash",
+    "runtime_entry": "scene.js"
+  },
+  "iteration_context": {
+    "iteration_id": "restock001",
+    "scope_revision": 2,
+    "requirement_ids": [
+      "restock001-R02"
+    ]
+  },
+  "flow_to_surface_decisions": [
+    {
+      "decision_id": "picker-page-nodes",
+      "flow_ref": "pick-restock-products",
+      "node_refs": [
+        "enter-product-picker",
+        "view-product-picker-list",
+        "search-restock-products",
+        "toggle-product-selection",
+        "complete-product-selection",
+        "cancel-product-selection"
+      ],
+      "surface_ref": "restock-product-picker-page",
+      "carrier_decision": "standalone-page",
+      "reason": "搜索、勾选、取消和完成返回都集中在一个 push 二级页完成。",
+      "rule_sources": [
+        "interaction_spec.surfaces[restock-product-picker-page].carrier=standalone-page"
+      ]
+    },
+    {
+      "decision_id": "picker-limit-feedback-node",
+      "flow_ref": "picker-selection-limit",
+      "node_refs": [
+        "show-selection-limit-feedback"
+      ],
+      "surface_ref": "restock-product-picker-page",
+      "carrier_decision": "merge-into-surface",
+      "reason": "达到上限反馈属于当前页内即时反馈，无需新浮层。",
+      "rule_sources": [
+        "interaction_spec.surfaces[restock-product-picker-page].carrier=standalone-page"
+      ]
+    }
+  ],
+  "page_strategy": {
+    "page_goal": "让商家快速搜索候选商品，并在同一页内完成最多 5 个商品的勾选和返回。",
+    "page_pattern": "object-management-list-page",
+    "layout_pattern": "通栏模式 M0",
+    "main_scroll_direction": "vertical",
+    "content_density": "medium-high",
+    "fixed_vs_scroll": "navbar sticky，顶部搜索工具区和底部完成按钮固定/半固定，商品列表主体滚动。",
+    "first_screen_goal": "进入后立刻看到搜索框、已选数量和前几条候选商品，能快速开始勾选。",
+    "region_priority": [
+      "picker-toolbar-region",
+      "picker-list-region",
+      "picker-submit-region"
+    ],
+    "scroll_rhythm": "搜索工具区和列表之间保持 8px 间距；商品列表行使用连续 cell 分割线节奏；底部完成按钮与列表之间保留 12px 呼吸。",
+    "visual_competition": "搜索框和已选数量是首屏导向信息；勾选控件与商品标题是列表内主焦点；上限反馈以 toast/页内提示点到为止，不抢走主流程。"
+  },
+  "region_composition": [
+    {
+      "region_id": "picker-navbar",
+      "surface_ref": "restock-product-picker-page",
+      "role": "navigation",
+      "priority": 1,
+      "order": 1,
+      "layout": "horizontal-3-slot",
+      "width": "full",
+      "scroll_behavior": "fixed",
+      "component_refs": [],
+      "relation": {
+        "below": "picker-toolbar-region"
+      },
+      "rule_sources": [
+        "uikit-plan.json.fallbackPageBlueprints[object-management-list-page]"
+      ]
+    },
+    {
+      "region_id": "picker-toolbar-region",
+      "surface_ref": "restock-product-picker-page",
+      "role": "search-and-summary",
+      "priority": 2,
+      "order": 2,
+      "layout": "vertical-stack",
+      "width": "full",
+      "scroll_behavior": "fixed",
+      "component_refs": [
+        "picker-search-input",
+        "picker-selected-counter",
+        "picker-limit-feedback"
+      ],
+      "relation": {
+        "above": "picker-navbar",
+        "below": "picker-list-region"
+      },
+      "rule_sources": [
+        "uikit-plan.json.fallbackPageBlueprints[object-management-list-page]",
+        "components/search.json.variantDimensions"
+      ]
+    },
+    {
+      "region_id": "picker-list-region",
+      "surface_ref": "restock-product-picker-page",
+      "role": "object-list",
+      "priority": 3,
+      "order": 3,
+      "layout": "vertical-stack",
+      "width": "full",
+      "scroll_behavior": "scroll",
+      "component_refs": [
+        "picker-product-list",
+        "picker-product-selection"
+      ],
+      "relation": {
+        "above": "picker-toolbar-region",
+        "below": "picker-submit-region"
+      },
+      "rule_sources": [
+        "uikit-plan.json.fallbackPageBlueprints[object-management-list-page]"
+      ]
+    },
+    {
+      "region_id": "picker-submit-region",
+      "surface_ref": "restock-product-picker-page",
+      "role": "primary-action",
+      "priority": 4,
+      "order": 4,
+      "layout": "vertical-stack",
+      "width": "full",
+      "scroll_behavior": "fixed",
+      "component_refs": [
+        "picker-complete-action"
+      ],
+      "relation": {
+        "above": "picker-list-region"
+      },
+      "rule_sources": [
+        "components/button.json.behavior.primaryRule"
+      ]
+    }
+  ],
+  "component_patterns": [
+    {
+      "pattern_id": "picker-navbar-pattern",
+      "applies_to": [
+        "picker-cancel-action"
+      ],
+      "component_pattern": "push page navbar",
+      "matched_page_pattern": null,
+      "matched_blueprint": "object-management-list-page",
+      "constraint_ref": null,
+      "reason": "商品选择页是标准 push 二级页，使用返回图标居中标题导航。",
+      "rule_sources": [
+        "components/navbar.json.variantDimensions"
+      ]
+    },
+    {
+      "pattern_id": "picker-search-toolbar",
+      "applies_to": [
+        "picker-search-input",
+        "picker-selected-counter",
+        "picker-limit-feedback"
+      ],
+      "component_pattern": "content search filter toolbar + feedback",
+      "matched_page_pattern": null,
+      "matched_blueprint": "object-management-list-page",
+      "constraint_ref": null,
+      "reason": "搜索与已选统计应固定在列表上方，便于连续筛选与判断上限。",
+      "rule_sources": [
+        "components/search.json.variantDimensions",
+        "components/toast.json.variantDimensions"
+      ]
+    },
+    {
+      "pattern_id": "picker-cell-selection",
+      "applies_to": [
+        "picker-product-list",
+        "picker-product-selection"
+      ],
+      "component_pattern": "cell with checkbox leading and secondary summary",
+      "matched_page_pattern": null,
+      "matched_blueprint": "object-management-list-page",
+      "constraint_ref": null,
+      "reason": "候选商品需要在连续列表中展示名称、库存摘要和勾选控件。",
+      "rule_sources": [
+        "uikit-plan.json.fallbackPageBlueprints[object-management-list-page]",
+        "components/cell.json.variantDimensions",
+        "components/checkbox.json.variantDimensions"
+      ]
+    },
+    {
+      "pattern_id": "picker-complete-button",
+      "applies_to": [
+        "picker-complete-action"
+      ],
+      "component_pattern": "single strong page action",
+      "matched_page_pattern": null,
+      "matched_blueprint": "object-management-list-page",
+      "constraint_ref": null,
+      "reason": "完成是当前页面唯一强主按钮。",
+      "rule_sources": [
+        "components/button.json.behavior.primaryRule",
+        "components/button.json.variantDimensions"
+      ]
+    }
+  ],
+  "page_presentation": {
+    "restock-product-picker-page": {
+      "type": "push",
+      "transition": "slide-left",
+      "dismiss_action": "back-button-or-complete",
+      "overlay_level": "scene-overlay",
+      "covers_tab_bar": true,
+      "source": "补货商品选择为补货计划下钻 push 页面"
+    }
+  },
+  "surface_designs": [
+    {
+      "surface_id": "restock-product-picker-page",
+      "role": "secondary-task-page",
+      "match_status": "fallback",
+      "matched_uikit": null,
+      "matched_page_pattern": null,
+      "matched_blueprint": "object-management-list-page",
+      "presentation_ref": "push，slide-left，back-button-or-complete，coversTabBar=true",
+      "scene_fit_reason": "商品选择页是搜索驱动的对象列表页，使用对象管理列表 fallback 配合 search/checkbox 更可靠。",
+      "component_mapping": [
+        "picker-search-input",
+        "picker-product-list",
+        "picker-product-selection",
+        "picker-selected-counter",
+        "picker-limit-feedback",
+        "picker-complete-action",
+        "picker-cancel-action"
+      ],
+      "allowed_page_styles": [
+        "通栏模式 M0：phone-body 0px 横向 padding，列表白底通栏",
+        "搜索工具区保留 16px 横向内边距",
+        "列表行使用 checkbox leading + 双行 cell",
+        "底部完成按钮使用页面安全区留白"
+      ],
+      "design_gap": ""
+    }
+  ],
+  "component_mapping": [
+    {
+      "block": "picker-cancel-action",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": [
+        "leftControl=back-icon",
+        "titleAlignment=center",
+        "actions=none",
+        "pageTransition=push"
+      ],
+      "constraint_ref": {},
+      "reason": "商品选择页通过返回图标取消返回。",
+      "rule_sources": [
+        "components/navbar.json.variantDimensions"
+      ]
+    },
+    {
+      "block": "picker-search-input",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": [
+        "size=md",
+        "surface=gray",
+        "mode=text",
+        "state=empty/inputting/result",
+        "hostPattern=content-search-filter"
+      ],
+      "constraint_ref": {},
+      "reason": "商品选择页搜索属于页面内部工具栏搜索。",
+      "rule_sources": [
+        "components/search.json.variantDimensions"
+      ]
+    },
+    {
+      "block": "picker-selected-counter",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": [
+        "variant=default"
+      ],
+      "constraint_ref": {},
+      "reason": "已选数量用 badge/tag 类弱强调计数呈现。",
+      "rule_sources": [
+        "components/badge.json.variantDimensions"
+      ]
+    },
+    {
+      "block": "picker-limit-feedback",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": [
+        "variant=default",
+        "iconMode=none",
+        "actionMode=none"
+      ],
+      "constraint_ref": {},
+      "reason": "达到上限时使用 toast 或页内轻提示，不新开浮层。",
+      "rule_sources": [
+        "components/toast.json.variantDimensions"
+      ]
+    },
+    {
+      "block": "picker-product-list",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": [
+        "density=double",
+        "surface=bg-white",
+        "interaction=static",
+        "leadingSlot=select",
+        "trailingSlot=none"
+      ],
+      "constraint_ref": {},
+      "reason": "候选商品列表用双行 cell 展示名称和库存摘要，左侧承载勾选控件。",
+      "rule_sources": [
+        "components/cell.json.variantDimensions"
+      ]
+    },
+    {
+      "block": "picker-product-selection",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": [
+        "size=sm",
+        "state=unchecked/checked/disabled",
+        "presentation=standalone",
+        "mode=standalone"
+      ],
+      "constraint_ref": {},
+      "reason": "商品勾选控件使用小尺寸 checkbox，达到上限时对新增勾选展示禁选态。",
+      "rule_sources": [
+        "components/checkbox.json.variantDimensions"
+      ]
+    },
+    {
+      "block": "picker-complete-action",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": [
+        "emphasis=strong",
+        "size=lg",
+        "iconMode=text-only",
+        "state=default"
+      ],
+      "constraint_ref": {},
+      "reason": "完成是页面唯一强主按钮。",
+      "rule_sources": [
+        "components/button.json.variantDimensions",
+        "components/button.json.behavior.primaryRule"
+      ]
+    }
+  ],
+  "design_gaps": [],
+  "rule_sources_used": [
+    {
+      "file": "/Users/dk/Documents/code/wego-design-system/wego-app/scenes/补货商品选择/_spec/interaction_spec.json",
+      "field": "surfaces/content_blocks/transitions/prototype_boundaries",
+      "supports": [
+        "搜索、勾选、上限反馈、取消返回与完成返回"
+      ]
+    },
+    {
+      "file": "/Users/dk/Documents/code/wego-design-system/.codex/skills/wego-design/uikit-plan.json",
+      "field": "fallbackPageBlueprints[object-management-list-page]",
+      "supports": [
+        "商品选择页的列表骨架与通栏节奏"
+      ]
+    },
+    {
+      "file": "/Users/dk/Documents/code/wego-design-system/.codex/skills/wego-design/components/search.json",
+      "field": "variantDimensions.hostPattern=content-search-filter",
+      "supports": [
+        "页面内部搜索工具区"
+      ]
+    },
+    {
+      "file": "/Users/dk/Documents/code/wego-design-system/.codex/skills/wego-design/components/cell.json",
+      "field": "variantDimensions.leadingSlot=select + density=double",
+      "supports": [
+        "商品列表双行 cell + 左侧选择位"
+      ]
+    },
+    {
+      "file": "/Users/dk/Documents/code/wego-design-system/.codex/skills/wego-design/components/checkbox.json",
+      "field": "variantDimensions.size=sm + state",
+      "supports": [
+        "勾选/取消勾选与上限禁选态"
+      ]
+    },
+    {
+      "file": "/Users/dk/Documents/code/wego-design-system/.codex/skills/wego-design/components/button.json",
+      "field": "variantDimensions + behavior.primaryRule",
+      "supports": [
+        "完成主按钮"
+      ]
+    }
+  ],
+  "implementation_constraints": [
+    "补货商品选择页使用通栏 M0，列表区不加卡片圆角，依靠连续 cell 分割线建立节奏。",
+    "搜索工具区使用页面内 search toolbar，右侧不额外塞业务按钮。",
+    "商品行整行保持静态，勾选交互落在 checkbox 或明确的行点击切换逻辑上，避免与返回/下钻语义冲突。",
+    "达到 5 个上限时，只阻止新增第 6 个商品；已选商品仍可取消勾选。",
+    "完成按钮保持唯一 strong 主按钮，取消通过导航返回承担。"
+  ]
+}

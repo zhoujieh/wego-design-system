@@ -59,10 +59,10 @@
       panel.hidden = !active;
       panel.classList.toggle('host-shell-page__panel--active', active);
     });
-    // 动态页与商家工作台有自己的 navbar 与 body 容器，需要让 host-shell-page 取消默认 padding，
+    // 动态页、商家工作台与好友页有自己的 navbar 与 body 容器，需要让 host-shell-page 取消默认 padding，
     // 否则页面 navbar 会被外层 padding 限制无法撑满宽度与顶到顶部安全区，并与 scene body 形成双重横向 padding。
     if (hostContent) {
-      hostContent.classList.toggle('host-shell-page--flush', nextTab === 'dongtai' || nextTab === 'workspace');
+      hostContent.classList.toggle('host-shell-page--flush', nextTab === 'dongtai' || nextTab === 'workspace' || nextTab === 'haoyou');
     }
     tabTriggers.forEach(function (trigger) {
       var active = trigger.dataset.hostTabTrigger === nextTab;

@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "iteration_id": "restock001",
+  "frozen_at": "2026-07-11T07:18:26.976Z",
+  "final_status": "accepted-with-risk",
+  "iteration_files": {
+    "wego-app/scenes/补货计划/_iterations/20260711-restock001-智能补货计划/iteration.json": "8185098afcff7933231da2daa7fa442cb713fcb079d806530ad139fe319afd21",
+    "wego-app/scenes/补货计划/_iterations/20260711-restock001-智能补货计划/restock001-智能补货计划-开发交接.md": "2950360168c5929e8e421783f1025ea4fcc1c27c1db86bfa6c8a6638ade99fdd",
+    "wego-app/scenes/补货计划/_iterations/20260711-restock001-智能补货计划/restock001-智能补货计划-范围确认.md": "5dbd7d131d0651ff36cb04f9a1bbd6d6f1c7683fef8c7257ff661b4b96ee0d6c",
+    "wego-app/scenes/补货计划/_iterations/20260711-restock001-智能补货计划/scenes/补货商品选择/acceptance_report.json": "58b0ca4adfd78e8a5f58822f6fe6c0634417ebbf7a613f84143352cf054b76ee",
+    "wego-app/scenes/补货计划/_iterations/20260711-restock001-智能补货计划/scenes/补货商品选择/design_plan.json": "133eb50dda5ab54abee6aae7dfccadc6b5f309a7fec6e8e950376e4e6c9c10d6",
+    "wego-app/scenes/补货计划/_iterations/20260711-restock001-智能补货计划/scenes/补货商品选择/interaction_spec.json": "e269f9184be1bf199f0edf7f622c97f26f0218a21e2bbfe1d5cdfad6c430a333",
+    "wego-app/scenes/补货计划/_iterations/20260711-restock001-智能补货计划/scenes/补货计划/acceptance_report.json": "c62a8f71458c4af6d2f2b5eb9b2d29d24183163abc257d6e581eef926f15c248",
+    "wego-app/scenes/补货计划/_iterations/20260711-restock001-智能补货计划/scenes/补货计划/design_plan.json": "7fb52d0af6d051693d9d7c4c9f75f7d824954485af057347e5e94c53f3f60527",
+    "wego-app/scenes/补货计划/_iterations/20260711-restock001-智能补货计划/scenes/补货计划/interaction_spec.json": "aa721f94dbffae9af45ce6822cea576ebbc8712c38edfeb81eb24f2913065289"
+  },
+  "current_files": {
+    "wego-app/js/routes.js": "644b8c4dbb56c0b1d1664ef613afe0fceccf75a4c97c40cff3e8e92d34f0acc5",
+    "wego-app/scenes/补货商品选择/_spec/acceptance_report.json": "58b0ca4adfd78e8a5f58822f6fe6c0634417ebbf7a613f84143352cf054b76ee",
+    "wego-app/scenes/补货商品选择/_spec/design_plan.json": "133eb50dda5ab54abee6aae7dfccadc6b5f309a7fec6e8e950376e4e6c9c10d6",
+    "wego-app/scenes/补货商品选择/_spec/interaction_spec.json": "e269f9184be1bf199f0edf7f622c97f26f0218a21e2bbfe1d5cdfad6c430a333",
+    "wego-app/scenes/补货商品选择/scene.css": "396de98a2bac9936a95a39e7d864ca634fa9bed9a5eecdf4d0a5d74064db3834",
+    "wego-app/scenes/补货商品选择/scene.js": "66ec5b593da6fca804a52491649902ed602a5b149bab92017a937c46b5565e1c",
+    "wego-app/scenes/补货计划/_spec/acceptance_report.json": "c62a8f71458c4af6d2f2b5eb9b2d29d24183163abc257d6e581eef926f15c248",
+    "wego-app/scenes/补货计划/_spec/design_plan.json": "7fb52d0af6d051693d9d7c4c9f75f7d824954485af057347e5e94c53f3f60527",
+    "wego-app/scenes/补货计划/_spec/interaction_spec.json": "aa721f94dbffae9af45ce6822cea576ebbc8712c38edfeb81eb24f2913065289",
+    "wego-app/scenes/补货计划/scene.css": "3ea7a06630176ec633117b5ab0415f871697b2353b24d8d3d2b5829c405e03dd",
+    "wego-app/scenes/补货计划/scene.js": "3f8834be3bfe6f3f0885f11bf6b5fde1f8d69a6ead3d3427cdc4ea04446e33c5"
+  },
+  "git_commit": null
+}

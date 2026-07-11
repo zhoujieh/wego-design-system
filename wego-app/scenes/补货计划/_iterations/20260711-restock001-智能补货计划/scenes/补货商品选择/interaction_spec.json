@@ -1,0 +1,518 @@
+{
+  "schemaVersion": 2,
+  "task_type": "design-system-consumption",
+  "scene_category": "picker-list",
+  "iteration_context": {
+    "iteration_id": "restock001",
+    "scope_revision": 2,
+    "requirement_ids": [
+      "restock001-R02"
+    ]
+  },
+  "goal": "让商家在补货商品选择页搜索、勾选和取消勾选商品，最多选择 5 个商品，并把选择结果返回补货计划页。",
+  "scope": {
+    "included": [
+      "从补货计划页 push 打开商品选择页",
+      "商品搜索",
+      "勾选与取消勾选",
+      "最多 5 个商品的上限控制和明确反馈",
+      "点击完成返回补货计划页并回填选择结果",
+      "取消返回",
+      "再次进入时恢复本次会话中的勾选状态"
+    ],
+    "excluded": [
+      "真实商品搜索接口",
+      "分页加载",
+      "真实库存同步",
+      "刷新后恢复会话"
+    ]
+  },
+  "actors": [
+    {
+      "id": "merchant-operator",
+      "role": "商家经营者",
+      "purpose": "从候选商品中快速选出需要补货的商品"
+    }
+  ],
+  "entry_points": [
+    {
+      "id": "restock-plan-add-products",
+      "carrier": "push-navigation",
+      "description": "补货计划页点击添加补货商品后 push 进入商品选择页"
+    }
+  ],
+  "interaction_mode": "select-return",
+  "app_target": {
+    "mode": "wego-app-scene",
+    "app_root": "wego-app",
+    "scene_folder": "wego-app/scenes/补货商品选择",
+    "runtime_entry": "scene.js",
+    "route_mode": "hash"
+  },
+  "host_container": {
+    "tab": "my",
+    "entry_label": "补货计划",
+    "subentry_label": "补货商品选择",
+    "leaf_level": 2,
+    "entry_type": "cell",
+    "needs_host_entry_surface": false
+  },
+  "prototype_target": {
+    "app_root": "wego-app",
+    "scenario_folder": "wego-app/scenes/补货商品选择",
+    "routes": [
+      {
+        "id": "restock-product-picker",
+        "surface_ref": "restock-product-picker-page"
+      }
+    ]
+  },
+  "flows": [
+    {
+      "flow_id": "pick-restock-products",
+      "flow_type": "main",
+      "entry_node": "enter-product-picker",
+      "steps": [
+        "enter-product-picker",
+        "view-product-picker-list",
+        "search-restock-products",
+        "toggle-product-selection",
+        "complete-product-selection"
+      ],
+      "exit_condition": "选择结果返回补货计划页"
+    },
+    {
+      "flow_id": "picker-selection-limit",
+      "flow_type": "exception",
+      "entry_node": "toggle-product-selection",
+      "steps": [
+        "toggle-product-selection",
+        "show-selection-limit-feedback"
+      ],
+      "exit_condition": "达到 5 个上限时给出明确反馈，且不新增第 6 个商品"
+    },
+    {
+      "flow_id": "picker-cancel-return",
+      "flow_type": "interrupt-resume",
+      "entry_node": "view-product-picker-list",
+      "steps": [
+        "view-product-picker-list",
+        "cancel-product-selection"
+      ],
+      "exit_condition": "取消返回补货计划页，不改动当前草稿"
+    }
+  ],
+  "flow_nodes": [
+    {
+      "node_id": "enter-product-picker",
+      "purpose": "从补货计划页进入商品选择页",
+      "surface_ref": "restock-product-picker-page",
+      "inputs": [
+        "当前已选商品草稿"
+      ],
+      "outputs": [],
+      "key_states": [
+        "首次进入",
+        "再次编辑进入"
+      ]
+    },
+    {
+      "node_id": "view-product-picker-list",
+      "purpose": "查看候选商品列表和当前已选数量",
+      "surface_ref": "restock-product-picker-page",
+      "inputs": [
+        "候选商品数据",
+        "当前已选商品草稿"
+      ],
+      "outputs": [],
+      "key_states": [
+        "默认列表",
+        "带已选状态"
+      ]
+    },
+    {
+      "node_id": "search-restock-products",
+      "purpose": "按关键词筛选候选商品",
+      "surface_ref": "restock-product-picker-page",
+      "inputs": [
+        "搜索词"
+      ],
+      "outputs": [
+        "筛选结果"
+      ],
+      "key_states": [
+        "未搜索",
+        "搜索命中",
+        "无结果"
+      ]
+    },
+    {
+      "node_id": "toggle-product-selection",
+      "purpose": "勾选或取消勾选候选商品",
+      "surface_ref": "restock-product-picker-page",
+      "inputs": [
+        "当前勾选状态"
+      ],
+      "outputs": [
+        "更新后的勾选集合"
+      ],
+      "key_states": [
+        "勾选",
+        "取消勾选",
+        "达到上限"
+      ]
+    },
+    {
+      "node_id": "show-selection-limit-feedback",
+      "purpose": "达到 5 个上限时提示不可继续选择",
+      "surface_ref": "restock-product-picker-page",
+      "inputs": [
+        "当前勾选集合"
+      ],
+      "outputs": [
+        "上限反馈"
+      ],
+      "key_states": [
+        "上限提示"
+      ]
+    },
+    {
+      "node_id": "complete-product-selection",
+      "purpose": "点击完成并返回补货计划页",
+      "surface_ref": "restock-product-picker-page",
+      "inputs": [
+        "更新后的勾选集合"
+      ],
+      "outputs": [
+        "商品选择结果"
+      ],
+      "key_states": [
+        "可完成",
+        "返回回填"
+      ]
+    },
+    {
+      "node_id": "cancel-product-selection",
+      "purpose": "点击返回或取消离开商品选择页",
+      "surface_ref": "restock-product-picker-page",
+      "inputs": [
+        "当前勾选集合"
+      ],
+      "outputs": [],
+      "key_states": [
+        "取消返回"
+      ]
+    }
+  ],
+  "surfaces": [
+    {
+      "surface_id": "restock-product-picker-page",
+      "role": "secondary-task-page",
+      "carrier": "standalone-page",
+      "node_refs": [
+        "enter-product-picker",
+        "view-product-picker-list",
+        "search-restock-products",
+        "toggle-product-selection",
+        "show-selection-limit-feedback",
+        "complete-product-selection",
+        "cancel-product-selection"
+      ],
+      "content_refs": [
+        "picker-search-input",
+        "picker-product-list",
+        "picker-product-selection",
+        "picker-selected-counter",
+        "picker-limit-feedback",
+        "picker-complete-action",
+        "picker-cancel-action"
+      ],
+      "interaction_mode": "select-return",
+      "purpose": "补货商品选择页，承载搜索、勾选、取消勾选、上限反馈和完成返回",
+      "states": [
+        "默认状态",
+        "搜索状态",
+        "达到选择上限",
+        "取消返回",
+        "完成返回"
+      ]
+    }
+  ],
+  "content_blocks": [
+    {
+      "content_id": "picker-search-input",
+      "content": "商品搜索输入",
+      "group": "顶部工具区",
+      "interaction": "input",
+      "editable": true,
+      "key_states": [
+        "默认",
+        "输入中",
+        "无结果"
+      ]
+    },
+    {
+      "content_id": "picker-product-list",
+      "content": "候选补货商品列表",
+      "group": "商品列表",
+      "interaction": "view",
+      "editable": false,
+      "key_states": [
+        "默认列表",
+        "搜索结果列表"
+      ]
+    },
+    {
+      "content_id": "picker-product-selection",
+      "content": "商品勾选和取消勾选控件",
+      "group": "商品列表",
+      "interaction": "select",
+      "editable": true,
+      "key_states": [
+        "未选中",
+        "已选中",
+        "上限后禁选新增"
+      ]
+    },
+    {
+      "content_id": "picker-selected-counter",
+      "content": "当前已选数量与上限提示",
+      "group": "顶部工具区",
+      "interaction": "view",
+      "editable": false,
+      "key_states": [
+        "0/5",
+        "1-5/5"
+      ]
+    },
+    {
+      "content_id": "picker-limit-feedback",
+      "content": "达到选择上限时的明确反馈",
+      "group": "反馈",
+      "interaction": "feedback",
+      "editable": false,
+      "key_states": [
+        "最多选择 5 个商品"
+      ]
+    },
+    {
+      "content_id": "picker-complete-action",
+      "content": "完成按钮",
+      "group": "底部操作",
+      "interaction": "action",
+      "editable": false,
+      "key_states": [
+        "可点击",
+        "返回中"
+      ]
+    },
+    {
+      "content_id": "picker-cancel-action",
+      "content": "返回或取消按钮",
+      "group": "顶部工具区",
+      "interaction": "action",
+      "editable": false,
+      "key_states": [
+        "默认"
+      ]
+    }
+  ],
+  "states": [
+    {
+      "id": "default",
+      "description": "显示本地模拟商品列表和当前已选状态"
+    },
+    {
+      "id": "searching",
+      "description": "根据关键词筛选候选商品"
+    },
+    {
+      "id": "limit-reached",
+      "description": "已选 5 个商品时，继续勾选第 6 个商品会触发明确反馈"
+    },
+    {
+      "id": "cancel-return",
+      "description": "取消返回补货计划页，不提交新的选择结果"
+    },
+    {
+      "id": "complete-return",
+      "description": "点击完成后把选择结果返回补货计划页，并在再次进入时恢复本次会话的勾选状态"
+    }
+  ],
+  "transitions": [
+    {
+      "transition_id": "enter-restock-product-picker",
+      "from": "enter-product-picker",
+      "trigger": "补货计划页 push 进入",
+      "to": "view-product-picker-list",
+      "data_in": [
+        "当前已选商品草稿"
+      ],
+      "result_out": [],
+      "return_to": null
+    },
+    {
+      "transition_id": "search-products",
+      "from": "view-product-picker-list",
+      "trigger": "输入搜索关键词",
+      "to": "search-restock-products",
+      "data_in": [
+        "搜索词"
+      ],
+      "result_out": [],
+      "return_to": null
+    },
+    {
+      "transition_id": "toggle-picker-selection",
+      "from": "view-product-picker-list",
+      "trigger": "点击勾选框",
+      "to": "toggle-product-selection",
+      "data_in": [
+        "当前勾选状态"
+      ],
+      "result_out": [],
+      "return_to": null
+    },
+    {
+      "transition_id": "hit-picker-limit",
+      "from": "toggle-product-selection",
+      "trigger": "已选 5 个后继续勾选新商品",
+      "to": "show-selection-limit-feedback",
+      "data_in": [
+        "当前勾选集合"
+      ],
+      "result_out": [
+        "picker-limit-feedback-result"
+      ],
+      "return_to": null
+    },
+    {
+      "transition_id": "complete-picker-selection",
+      "from": "toggle-product-selection",
+      "trigger": "点击完成",
+      "to": "complete-product-selection",
+      "data_in": [
+        "更新后的勾选集合"
+      ],
+      "result_out": [
+        "picker-returned-with-selection"
+      ],
+      "return_to": "complete-product-selection",
+      "return_payload": [
+        "商品名称",
+        "当前库存",
+        "商品 ID"
+      ]
+    },
+    {
+      "transition_id": "cancel-picker-selection",
+      "from": "view-product-picker-list",
+      "trigger": "点击返回或取消",
+      "to": "cancel-product-selection",
+      "data_in": [
+        "当前勾选集合"
+      ],
+      "result_out": [
+        "picker-cancelled"
+      ],
+      "return_to": "cancel-product-selection"
+    }
+  ],
+  "data_handoffs": [
+    {
+      "handoff_id": "picker-session-selection",
+      "transition_ref": "toggle-picker-selection",
+      "source_node": "toggle-product-selection",
+      "target_node": "view-product-picker-list",
+      "payload_content_refs": [
+        "picker-product-selection",
+        "picker-selected-counter"
+      ],
+      "reset_policy": "keep",
+      "description": "勾选结果在当前会话内保持，再次进入商品选择页时恢复相同勾选状态"
+    }
+  ],
+  "exit_results": [
+    {
+      "result_id": "picker-returned-with-selection",
+      "description": "商品选择结果已返回补货计划页"
+    },
+    {
+      "result_id": "picker-cancelled",
+      "description": "取消返回补货计划页，当前草稿不被更新"
+    },
+    {
+      "result_id": "picker-limit-feedback-result",
+      "description": "达到 5 个商品上限时展示明确反馈，并阻止继续新增"
+    }
+  ],
+  "prototype_boundaries": [
+    {
+      "node_id": "enter-product-picker",
+      "depth": "functional",
+      "reason": "与补货计划页之间的 push 和返回是主流程关键路径"
+    },
+    {
+      "node_id": "view-product-picker-list",
+      "depth": "simulated",
+      "reason": "候选商品和库存数据使用本地模拟数据"
+    },
+    {
+      "node_id": "search-restock-products",
+      "depth": "functional",
+      "reason": "搜索必须真实影响当前列表结果"
+    },
+    {
+      "node_id": "toggle-product-selection",
+      "depth": "functional",
+      "reason": "勾选、取消勾选与再次进入恢复是核心操作"
+    },
+    {
+      "node_id": "show-selection-limit-feedback",
+      "depth": "functional",
+      "reason": "达到选择上限时必须给出明确反馈"
+    },
+    {
+      "node_id": "complete-product-selection",
+      "depth": "functional",
+      "reason": "完成返回并回填结果是主流程关键结果"
+    },
+    {
+      "node_id": "cancel-product-selection",
+      "depth": "functional",
+      "reason": "取消返回是明确要求的状态之一"
+    }
+  ],
+  "assumptions": [
+    {
+      "assumption": "候选商品、库存和搜索结果均使用本地模拟数据集",
+      "impact_level": "low",
+      "reversible": true
+    }
+  ],
+  "open_questions": [],
+  "readiness": {
+    "status": "ready-with-assumptions",
+    "reason": "选择规则、返回方式、上限反馈与会话内恢复都已明确，仅保留本地模拟数据的低风险可逆假设。"
+  },
+  "rule_sources": [
+    {
+      "source": "user-request-2026-07-11",
+      "supports": [
+        "搜索、勾选、取消勾选、最多 5 个、重复商品不可再次选择、完成返回、取消返回与会话内恢复"
+      ]
+    },
+    {
+      "source": "AGENTS.md",
+      "supports": [
+        "业务迭代主链路、hash route、刷新后不保留数据"
+      ]
+    },
+    {
+      "source": "wego-product/SKILL.md",
+      "supports": [
+        "interaction_spec Stage 2 结构、select-return 交接与 readiness 门禁"
+      ]
+    }
+  ]
+}

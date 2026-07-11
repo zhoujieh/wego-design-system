@@ -1,0 +1,162 @@
+{
+  "iteration_context": {
+    "iteration_id": "restock001",
+    "scope_revision": 2,
+    "requirement_ids": [
+      "restock001-R01",
+      "restock001-R02",
+      "restock001-R03"
+    ]
+  },
+  "requirement_coverage": [
+    {
+      "requirement_id": "restock001-R01",
+      "status": "pass-with-risk",
+      "evidence": "wego-app/scenes/商家工作台/scene.js 的 COMMON_APPS 和 APP_GROUPS 新增“补货计划”入口；wego-app/js/routes.js 注册稳定 route restock-plan；wego-app/scenes/补货计划/scene.js:90-99、129-166 提供首次进入空状态与“添加补货商品”主按钮。"
+    },
+    {
+      "requirement_id": "restock001-R02",
+      "status": "pass-with-risk",
+      "evidence": "wego-app/scenes/补货计划/scene.js:54-58、187-191 在进入选择页前准备并恢复会话内勾选草稿；scene.js:102-126、129-166 在返回后回填商品名称、当前库存和商品 ID；补货商品选择页完成后通过共享运行时回写 selectedIds 和 quantities。"
+    },
+    {
+      "requirement_id": "restock001-R03",
+      "status": "pass-with-risk",
+      "evidence": "wego-app/scenes/补货计划/scene.js:60-83 校验 1-999 数量并阻止非法保存；scene.js:206-234 保存前弹出确认 Dialog，确认后把状态改为“待提交”，展示成功文案并触发 toast。"
+    }
+  ],
+  "scene_judgement_check": {
+    "status": "pass",
+    "note": "补货计划被实现为主业务 push 页面，承接入口、回填、校验、确认和成功反馈，场景判断与 interaction_spec 一致。"
+  },
+  "surface_design_check": {
+    "status": "pass",
+    "note": "host-entry、restock-plan-page、restock-save-dialog 三个 surface 均有设计覆盖，且实现中存在对应入口、主页面和确认弹层。"
+  },
+  "uikit_consumption_check": {
+    "status": "pass",
+    "note": "页面使用 navbar、card、badge、button、number-input 与 dialog 正式组件组合，没有新增未注册组件。"
+  },
+  "component_discipline_check": {
+    "status": "pass",
+    "note": "数量输入、状态徽标、空状态和确认弹层均复用设计系统组件语义，错误态通过 number-input 与就地错误文案承接。"
+  },
+  "rule_source_check": {
+    "status": "pass",
+    "note": "interaction_spec 与 design_plan 的 iteration_context、scope_revision 已对齐当前迭代，关键实现点可追溯到 route、scene.js 和正式组件。"
+  },
+  "copy_check": {
+    "status": "pass",
+    "note": "页面文案围绕补货计划、补货数量、待提交和保存确认展开，提示语与异常反馈清晰且未超出原型边界。"
+  },
+  "route_check": {
+    "status": "pass",
+    "note": "restock-plan 已在 wego-app/js/routes.js 注册为稳定 route，并由商家工作台常用应用与全部应用分组内入口触发。"
+  },
+  "interaction_check": {
+    "status": "pass-with-risk",
+    "note": "基于代码路径核对，支持空状态进选择页、返回回填、数量输入过滤与校验、非法值阻止保存、确认后成功反馈与待提交状态回写；本轮未做真实浏览器逐项点击复验。"
+  },
+  "layout_check": {
+    "status": "pass-with-risk",
+    "note": "scene.css 为补货计划单独定义了摘要卡片、商品卡片、错误提示和底部按钮布局；未做真实视口量测与截图复核。"
+  },
+  "viewport_keyboard_check": {
+    "status": "pass-with-risk",
+    "note": "数量输入使用 text + inputmode=numeric，代码层未发现双层滚动或失焦逻辑冲突；未在真实浏览器验证键盘顶起与收起恢复。"
+  },
+  "app_scene_check": {
+    "status": "pass",
+    "note": "场景通过 window.WegoApp.registerScene 注册为 push 页面，运行时使用本地内存模拟数据，不依赖 fetch、XHR 或刷新持久化。"
+  },
+  "resource_sync_check": {
+    "status": "pass",
+    "note": "本轮未修改 wego-app/lib 设计系统部署副本。"
+  },
+  "flow_coverage": {
+    "status": "pass-with-risk",
+    "note": "已覆盖首次进入空状态、添加商品、取消返回、回填后编辑数量、数量错误阻断、确认保存与成功反馈；基于实现路径和守门脚本得出，缺少浏览器实操证据。"
+  },
+  "transition_check": {
+    "status": "pass-with-risk",
+    "note": "补货计划页通过 ctx.navigate 打开 restock-product-picker，通过 ctx.back 返回，通过 ctx.dialog 打开确认层；未做 presentation 动画和遮罩层实测。"
+  },
+  "state_handoff_check": {
+    "status": "pass",
+    "note": "selectedIds、pickerDraftIds、quantities、planErrors 与 showSaveSuccess 都保存在会话内共享运行时中，完成选择后只保留当前已选商品的数量数据。"
+  },
+  "back_restore_check": {
+    "status": "pass-with-risk",
+    "note": "取消返回会把 pickerDraftIds 重置为已提交选择，再次进入前由 preparePickerDraft 恢复当前勾选；刷新页面后因为共享运行时重建而不保留数据。"
+  },
+  "prototype_boundary_check": {
+    "status": "pass",
+    "note": "搜索、选择、回填、数量校验、确认和成功反馈均为真实可操作，本地模拟商品、库存和保存结果符合原型边界；未接入真实库存接口、登录、推送或刷新持久化。"
+  },
+  "end_to_end_paths": [
+    {
+      "path": "工作台 > 常用应用 > 补货计划 > 空状态 > 添加补货商品 > 完成返回 > 回填商品 > 填写合法数量 > 保存确认 > 待提交成功反馈",
+      "status": "pass-with-risk"
+    },
+    {
+      "path": "补货计划 > 添加补货商品 > 取消返回 > 原计划草稿保持不变 > 再次进入恢复会话勾选",
+      "status": "pass-with-risk"
+    },
+    {
+      "path": "补货计划 > 已选商品 > 留空/0/负数/超上限 > 保存被阻止并就地提示",
+      "status": "pass-with-risk"
+    }
+  ],
+  "design_contraction_check": {
+    "status": "pass",
+    "note": "实现没有擅自增加真实接口、登录、生产部署或刷新持久化等超范围能力。"
+  },
+  "compatibility_check": {
+    "status": "pass",
+    "note": "scene.js 与 routes.js 保持现有原型运行时写法，新增路由和场景不会要求宿主额外升级。"
+  },
+  "deployment_readiness_check": {
+    "push_attempted": false,
+    "push_commit_hash": "",
+    "deploy_status": "not-run",
+    "production_domain": "",
+    "fallback_local_entry": "wego-app/index.html",
+    "errors": [
+      "本轮未执行 git push 或生产部署验证。"
+    ]
+  },
+  "automated_checks": {
+    "commands": [
+      "node scripts/specs.mjs check",
+      "node scripts/specs.mjs test",
+      "node scripts/validate-wego-design.mjs --scope=changed"
+    ],
+    "exit_codes": [
+      0,
+      0,
+      0
+    ],
+    "errors": [],
+    "warnings_count": 0,
+    "key_findings": [
+      "规则文档一致性检查通过。",
+      "规则文档与经验池测试通过。",
+      "wego-design 守门验证通过，baseline changed 范围错误 0、警告 0。"
+    ]
+  },
+  "findings": [],
+  "risk_log": [
+    {
+      "level": "medium",
+      "owner": "wego-tests",
+      "detail": "当前没有可用浏览器自动化能力，本轮未对 push 动画、Dialog 覆盖层、输入键盘与实际视口做真实量测。"
+    }
+  ],
+  "manual_verify_items": [
+    "打开 wego-app/index.html，从工作台 Tab 的常用应用进入“补货计划”，确认首次为空状态。",
+    "进入补货商品选择页，搜索并选择商品，验证返回后显示商品名称、库存、商品 ID。",
+    "在补货计划页分别输入空值、0、负数和大于 999 的数量，确认保存被阻止且错误提示就地出现。",
+    "填写合法数量后点击保存，确认 Dialog 打开，确认后状态更新为“待提交”并出现成功反馈。"
+  ],
+  "final_status": "pass-with-risk"
+}

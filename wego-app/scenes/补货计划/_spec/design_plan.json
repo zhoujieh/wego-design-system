@@ -1,0 +1,649 @@
+{
+  "schemaVersion": 3,
+  "complexity_level": "structured",
+  "matched_uikit": null,
+  "scene_fit_reason": "补货计划场景由工作台常用应用入口、带空状态和对象行编辑的主页面，以及保存前确认 Dialog 组成；主页面需承载列表、数量输入和统一保存，适合用 generic-mobile-task-page fallback 配合正式 dialog 组件。",
+  "navigation_pattern": "工作台常用应用入口 → push 进入补货计划页 → push 打开补货商品选择页 → 返回回填商品 → dialog 确认保存 → 成功反馈并保留在主页面",
+  "layout_pattern": "host-entry 由工作台常用应用区承载；补货计划页使用卡片模式 M16，空状态与商品卡片纵向编排；确认保存使用标准 dialog。",
+  "interaction_pattern": "对象选择回填 + 行内数量输入校验 + 统一保存确认 + 成功回填状态",
+  "app_target": {
+    "mode": "wego-app-scene",
+    "app_root": "wego-app",
+    "scene_folder": "wego-app/scenes/补货计划",
+    "route_id": "restock-plan",
+    "route_mode": "hash",
+    "runtime_entry": "scene.js"
+  },
+  "iteration_context": {
+    "iteration_id": "restock001",
+    "scope_revision": 2,
+    "requirement_ids": [
+      "restock001-R01",
+      "restock001-R02",
+      "restock001-R03"
+    ]
+  },
+  "flow_to_surface_decisions": [
+    {
+      "decision_id": "restock-entry-to-workbench",
+      "flow_ref": "restock-plan-build",
+      "node_refs": [
+        "enter-restock-plan"
+      ],
+      "surface_ref": "host-entry",
+      "carrier_decision": "merge-into-surface",
+      "reason": "补货计划入口由工作台常用应用区承载，不单独绘制宿主页。",
+      "rule_sources": [
+        "interaction_spec.surfaces[host-entry].carrier=host-section"
+      ]
+    },
+    {
+      "decision_id": "restock-main-page-nodes",
+      "flow_ref": "restock-plan-build",
+      "node_refs": [
+        "view-restock-plan",
+        "request-product-picker",
+        "receive-selected-products",
+        "edit-restock-quantities",
+        "validate-restock-quantities",
+        "show-save-success",
+        "resume-after-picker-cancel"
+      ],
+      "surface_ref": "restock-plan-page",
+      "carrier_decision": "standalone-page",
+      "reason": "空状态、已选商品、数量输入、保存按钮和成功反馈都合并在一个 push 主页面，降低层级。",
+      "rule_sources": [
+        "interaction_spec.surfaces[restock-plan-page].carrier=standalone-page"
+      ]
+    },
+    {
+      "decision_id": "restock-save-dialog-nodes",
+      "flow_ref": "restock-plan-build",
+      "node_refs": [
+        "request-save-confirmation",
+        "confirm-save-plan"
+      ],
+      "surface_ref": "restock-save-dialog",
+      "carrier_decision": "dialog",
+      "reason": "保存前确认属于轻量阻断式确认，必须使用标准 dialog。",
+      "rule_sources": [
+        "interaction_spec.surfaces[restock-save-dialog].carrier=dialog"
+      ]
+    }
+  ],
+  "page_strategy": {
+    "page_goal": "让商家在一个主页面内完成补货商品回填、数量编辑、错误修正和统一保存。",
+    "page_pattern": "generic-mobile-task-page",
+    "layout_pattern": "卡片模式 M16",
+    "main_scroll_direction": "vertical",
+    "content_density": "medium",
+    "fixed_vs_scroll": "navbar sticky；页面主体滚动；保存按钮在内容底部作为页面主操作，不做吸底悬浮。",
+    "first_screen_goal": "首次进入立即感知空状态主动作；已有商品时首屏优先看到计划状态、商品列表起始区和补货数量输入。",
+    "region_priority": [
+      "plan-summary-region",
+      "empty-or-list-region",
+      "secondary-action-region",
+      "submit-region"
+    ],
+    "scroll_rhythm": "导航栏下先给计划状态/空状态，主体各分组间距 12px；商品卡片内部用 8px/12px 节奏组织信息、输入和错误提示。",
+    "visual_competition": "空状态主按钮和保存按钮是最强视觉主操作；商品名称和数量输入为列表内主信息，库存与商品 ID 降为次级说明。"
+  },
+  "region_composition": [
+    {
+      "region_id": "plan-navbar",
+      "surface_ref": "restock-plan-page",
+      "role": "navigation",
+      "priority": 1,
+      "order": 1,
+      "layout": "horizontal-3-slot",
+      "width": "full",
+      "scroll_behavior": "fixed",
+      "component_refs": [],
+      "relation": {
+        "below": "plan-summary-region"
+      },
+      "rule_sources": [
+        "uikit-plan.json.fallbackPageBlueprints[generic-mobile-task-page]"
+      ]
+    },
+    {
+      "region_id": "plan-summary-region",
+      "surface_ref": "restock-plan-page",
+      "role": "status-summary",
+      "priority": 2,
+      "order": 2,
+      "layout": "vertical-stack",
+      "width": "full",
+      "scroll_behavior": "scroll",
+      "component_refs": [
+        "restock-plan-status",
+        "restock-success-feedback"
+      ],
+      "relation": {
+        "above": "plan-navbar",
+        "below": "empty-or-list-region"
+      },
+      "rule_sources": [
+        "uikit-plan.json.fallbackPageBlueprints[generic-mobile-task-page]"
+      ]
+    },
+    {
+      "region_id": "empty-or-list-region",
+      "surface_ref": "restock-plan-page",
+      "role": "primary-content",
+      "priority": 3,
+      "order": 3,
+      "layout": "vertical-stack",
+      "width": "full",
+      "scroll_behavior": "scroll",
+      "component_refs": [
+        "restock-empty-state",
+        "restock-item-list",
+        "restock-item-stock",
+        "restock-item-id",
+        "restock-quantity-input",
+        "restock-quantity-error"
+      ],
+      "relation": {
+        "above": "plan-summary-region",
+        "below": "secondary-action-region"
+      },
+      "rule_sources": [
+        "uikit-plan.json.fallbackPageBlueprints[generic-mobile-task-page]",
+        "uikit-plan.json.fallbackPageBlueprints[object-management-list-page]"
+      ]
+    },
+    {
+      "region_id": "secondary-action-region",
+      "surface_ref": "restock-plan-page",
+      "role": "secondary-action",
+      "priority": 4,
+      "order": 4,
+      "layout": "vertical-stack",
+      "width": "full",
+      "scroll_behavior": "scroll",
+      "component_refs": [
+        "restock-add-products-action"
+      ],
+      "relation": {
+        "above": "empty-or-list-region",
+        "below": "submit-region"
+      },
+      "rule_sources": [
+        "uikit-plan.json.fallbackPageBlueprints[generic-mobile-task-page]"
+      ]
+    },
+    {
+      "region_id": "submit-region",
+      "surface_ref": "restock-plan-page",
+      "role": "primary-action",
+      "priority": 5,
+      "order": 5,
+      "layout": "vertical-stack",
+      "width": "full",
+      "scroll_behavior": "scroll",
+      "component_refs": [
+        "restock-save-action"
+      ],
+      "relation": {
+        "above": "secondary-action-region"
+      },
+      "rule_sources": [
+        "uikit-plan.json.fallbackPageBlueprints[generic-mobile-task-page]",
+        "components/button.json.behavior.primaryRule"
+      ]
+    },
+    {
+      "region_id": "save-dialog-body",
+      "surface_ref": "restock-save-dialog",
+      "role": "risk-confirmation",
+      "priority": 1,
+      "order": 1,
+      "layout": "vertical-stack",
+      "width": "full",
+      "scroll_behavior": "static",
+      "component_refs": [
+        "restock-save-confirmation"
+      ],
+      "relation": {
+        "below": "save-dialog-actions"
+      },
+      "rule_sources": [
+        "components/dialog.json"
+      ]
+    },
+    {
+      "region_id": "save-dialog-actions",
+      "surface_ref": "restock-save-dialog",
+      "role": "confirm-cancel",
+      "priority": 2,
+      "order": 2,
+      "layout": "horizontal-row",
+      "width": "full",
+      "scroll_behavior": "static",
+      "component_refs": [
+        "restock-save-confirmation"
+      ],
+      "relation": {
+        "above": "save-dialog-body"
+      },
+      "rule_sources": [
+        "components/dialog.json"
+      ]
+    }
+  ],
+  "component_patterns": [
+    {
+      "pattern_id": "workbench-common-app-entry",
+      "applies_to": [
+        "restock-plan-entry"
+      ],
+      "component_pattern": "workbench common app entry",
+      "matched_page_pattern": null,
+      "matched_blueprint": "generic-mobile-task-page",
+      "constraint_ref": null,
+      "reason": "工作台常用应用入口沿用商家工作台内的常用应用入口模式。",
+      "rule_sources": [
+        "wego-app/scenes/商家工作台/_spec/design_plan.json"
+      ]
+    },
+    {
+      "pattern_id": "empty-state-card",
+      "applies_to": [
+        "restock-empty-state"
+      ],
+      "component_pattern": "card + strong button empty state",
+      "matched_page_pattern": null,
+      "matched_blueprint": "generic-mobile-task-page",
+      "constraint_ref": null,
+      "reason": "空状态使用卡片承载提示和主按钮，突出首次进入主动作。",
+      "rule_sources": [
+        "uikit-plan.json.fallbackPageBlueprints[generic-mobile-task-page]",
+        "components/card.json.variantDimensions",
+        "components/button.json.variantDimensions"
+      ]
+    },
+    {
+      "pattern_id": "restock-item-card",
+      "applies_to": [
+        "restock-item-list",
+        "restock-item-stock",
+        "restock-item-id",
+        "restock-quantity-input",
+        "restock-quantity-error"
+      ],
+      "component_pattern": "object list card with inline number input",
+      "matched_page_pattern": null,
+      "matched_blueprint": "object-management-list-page",
+      "constraint_ref": null,
+      "reason": "已选商品按对象列表卡片展示，名称和库存信息置顶，数量输入与错误提示紧随其后。",
+      "rule_sources": [
+        "uikit-plan.json.fallbackPageBlueprints[object-management-list-page]",
+        "components/card.json.domAnatomy",
+        "components/input.json.variantDimensions"
+      ]
+    },
+    {
+      "pattern_id": "restock-secondary-action",
+      "applies_to": [
+        "restock-add-products-action"
+      ],
+      "component_pattern": "weak secondary button",
+      "matched_page_pattern": null,
+      "matched_blueprint": "generic-mobile-task-page",
+      "constraint_ref": null,
+      "reason": "已有商品后追加商品是次级动作，避免与保存主按钮竞争。",
+      "rule_sources": [
+        "components/button.json.variantDimensions"
+      ]
+    },
+    {
+      "pattern_id": "restock-primary-save",
+      "applies_to": [
+        "restock-save-action"
+      ],
+      "component_pattern": "single strong page action",
+      "matched_page_pattern": null,
+      "matched_blueprint": "generic-mobile-task-page",
+      "constraint_ref": null,
+      "reason": "保存是当前页面唯一强主按钮。",
+      "rule_sources": [
+        "components/button.json.behavior.primaryRule",
+        "components/button.json.variantDimensions"
+      ]
+    },
+    {
+      "pattern_id": "restock-confirm-dialog",
+      "applies_to": [
+        "restock-save-confirmation"
+      ],
+      "component_pattern": "title dialog with dual actions",
+      "matched_page_pattern": null,
+      "matched_blueprint": null,
+      "constraint_ref": null,
+      "reason": "确认保存属于标题+正文+双按钮确认 Dialog。",
+      "rule_sources": [
+        "components/dialog.json.variantDimensions"
+      ]
+    }
+  ],
+  "page_presentation": {
+    "host-entry": {
+      "type": "host-section-entry",
+      "transition": "none",
+      "dismiss_action": "none",
+      "overlay_level": "inline",
+      "covers_tab_bar": false,
+      "source": "工作台常用应用入口由宿主页承载"
+    },
+    "restock-plan-page": {
+      "type": "push",
+      "transition": "slide-left",
+      "dismiss_action": "back-button",
+      "overlay_level": "scene-overlay",
+      "covers_tab_bar": true,
+      "source": "补货计划主页面为工作台常用应用下钻 push 页面"
+    },
+    "restock-save-dialog": {
+      "type": "dialog",
+      "transition": "fade",
+      "dismiss_action": "cancel-or-confirm",
+      "overlay_level": "scene-overlay",
+      "covers_tab_bar": false,
+      "source": "保存前确认使用标准 dialog"
+    }
+  },
+  "surface_designs": [
+    {
+      "surface_id": "host-entry",
+      "role": "host-entry",
+      "match_status": "fallback",
+      "matched_uikit": null,
+      "matched_page_pattern": null,
+      "matched_blueprint": "mobile-host-entry",
+      "presentation_ref": "host-section-entry",
+      "scene_fit_reason": "补货计划入口由工作台常用应用区承载，无独立宿主页面。",
+      "component_mapping": [
+        "restock-plan-entry"
+      ],
+      "allowed_page_styles": [],
+      "design_gap": ""
+    },
+    {
+      "surface_id": "restock-plan-page",
+      "role": "primary-task-page",
+      "match_status": "fallback",
+      "matched_uikit": null,
+      "matched_page_pattern": null,
+      "matched_blueprint": "generic-mobile-task-page",
+      "presentation_ref": "push，slide-left，back-button，coversTabBar=true",
+      "scene_fit_reason": "补货计划页需要同时承载空状态、对象列表、行内输入和统一保存，使用通用任务页 fallback 更稳妥。",
+      "component_mapping": [
+        "restock-empty-state",
+        "restock-item-list",
+        "restock-item-stock",
+        "restock-item-id",
+        "restock-quantity-input",
+        "restock-quantity-error",
+        "restock-add-products-action",
+        "restock-save-action",
+        "restock-plan-status",
+        "restock-success-feedback"
+      ],
+      "allowed_page_styles": [
+        "卡片模式 M16：phone-body 16px 横向 padding",
+        "空状态卡片居中信息 + 强主按钮",
+        "商品项使用白底卡片，数量输入使用 number input 变体",
+        "错误提示跟随对应输入项显示，不悬浮到页面其他区域"
+      ],
+      "design_gap": ""
+    },
+    {
+      "surface_id": "restock-save-dialog",
+      "role": "secondary-task-page",
+      "match_status": "exact",
+      "matched_uikit": null,
+      "matched_page_pattern": "dialog",
+      "matched_blueprint": null,
+      "presentation_ref": "dialog，fade，cancel-or-confirm，coversTabBar=false",
+      "scene_fit_reason": "保存前确认直接命中标准 dialog 组件能力。",
+      "component_mapping": [
+        "restock-save-confirmation"
+      ],
+      "allowed_page_styles": [
+        "标题+正文双按钮确认 Dialog",
+        "取消按钮 default/dismiss，确认按钮 confirm"
+      ],
+      "design_gap": ""
+    }
+  ],
+  "component_mapping": [
+    {
+      "block": "restock-plan-entry",
+      "scenario_type": "no-uikit-page-composition",
+      "consumption_mode": "free-composition",
+      "selected": "复用工作台常用应用区的图标入口结构",
+      "constraint_ref": {},
+      "reason": "入口由工作台场景内部承载，不在本场景单独造宿主 DOM。",
+      "rule_sources": [
+        "wego-app/scenes/商家工作台/_spec/design_plan.json"
+      ]
+    },
+    {
+      "block": "restock-empty-state",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "free-composition",
+      "selected": "card 承载空状态文案，内部放置 1 个 strong lg 文本按钮",
+      "constraint_ref": {},
+      "reason": "首次进入需要突出主按钮而不是列表骨架。",
+      "rule_sources": [
+        "components/card.json.domAnatomy",
+        "components/button.json.variantDimensions"
+      ]
+    },
+    {
+      "block": "restock-item-list",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "free-composition",
+      "selected": "连续商品项使用 card 纵向堆叠，每项内按标题/摘要/输入/错误提示组织",
+      "constraint_ref": {},
+      "reason": "对象列表信息量较高，使用 card 比 cell 更适合容纳数量输入和错误提示。",
+      "rule_sources": [
+        "components/card.json.domAnatomy",
+        "uikit-plan.json.fallbackPageBlueprints[object-management-list-page]"
+      ]
+    },
+    {
+      "block": "restock-item-stock",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": [
+        "surface=filled"
+      ],
+      "constraint_ref": {},
+      "reason": "库存与商品摘要作为卡片内次级信息展示。",
+      "rule_sources": [
+        "components/card.json.variantDimensions"
+      ]
+    },
+    {
+      "block": "restock-item-id",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": [
+        "mode=standalone",
+        "size=12"
+      ],
+      "constraint_ref": {},
+      "reason": "商品 ID 作为辅助识别信息，使用低强调文本/链接样式呈现。",
+      "rule_sources": [
+        "components/link.json.variantDimensions"
+      ]
+    },
+    {
+      "block": "restock-quantity-input",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": [
+        "fieldType=number",
+        "surface=white",
+        "state=default/error"
+      ],
+      "constraint_ref": {},
+      "reason": "补货数量是短数字输入，适合 number input 白底变体，方便在卡片内突出可编辑区域。",
+      "rule_sources": [
+        "components/input.json.variantDimensions"
+      ]
+    },
+    {
+      "block": "restock-quantity-error",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": [
+        "fieldType=number",
+        "state=error"
+      ],
+      "constraint_ref": {},
+      "reason": "数量错误提示跟随 number input 的 error 状态呈现。",
+      "rule_sources": [
+        "components/input.json.behavior.error",
+        "components/input.json.variantDimensions"
+      ]
+    },
+    {
+      "block": "restock-add-products-action",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": [
+        "emphasis=weak",
+        "size=lg",
+        "iconMode=text-only"
+      ],
+      "constraint_ref": {},
+      "reason": "追加商品是次级操作，保留较大点击面积但不与保存按钮争夺层级。",
+      "rule_sources": [
+        "components/button.json.variantDimensions"
+      ]
+    },
+    {
+      "block": "restock-save-action",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": [
+        "emphasis=strong",
+        "size=lg",
+        "iconMode=text-only",
+        "state=default/disabled"
+      ],
+      "constraint_ref": {},
+      "reason": "保存是当前页面唯一强主按钮，需要覆盖可提交和校验失败禁用态。",
+      "rule_sources": [
+        "components/button.json.variantDimensions",
+        "components/button.json.behavior.primaryRule"
+      ]
+    },
+    {
+      "block": "restock-plan-status",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": [
+        "variant=default"
+      ],
+      "constraint_ref": {},
+      "reason": "计划状态适合用 badge/tag 类弱强调状态块表达草稿与待提交。",
+      "rule_sources": [
+        "components/badge.json.variantDimensions"
+      ]
+    },
+    {
+      "block": "restock-success-feedback",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": [
+        "variant=default",
+        "iconMode=none",
+        "actionMode=none"
+      ],
+      "constraint_ref": {},
+      "reason": "保存成功使用标准 toast 反馈，再同步页面状态文案。",
+      "rule_sources": [
+        "components/toast.json.variantDimensions"
+      ]
+    },
+    {
+      "block": "restock-save-confirmation",
+      "scenario_type": "component-consumption-decision",
+      "consumption_mode": "stable-variant",
+      "selected": [
+        "variant=title",
+        "buttonCount=2",
+        "buttonTone=confirm",
+        "state=open"
+      ],
+      "constraint_ref": {},
+      "reason": "确认保存采用标题+正文双按钮 Dialog。",
+      "rule_sources": [
+        "components/dialog.json.variantDimensions"
+      ]
+    }
+  ],
+  "design_gaps": [],
+  "rule_sources_used": [
+    {
+      "file": "/Users/dk/Documents/code/wego-design-system/wego-app/scenes/补货计划/_spec/interaction_spec.json",
+      "field": "surfaces/content_blocks/transitions/prototype_boundaries",
+      "supports": [
+        "补货计划主页面、保存确认 Dialog、空状态、数量错误和成功反馈"
+      ]
+    },
+    {
+      "file": "/Users/dk/Documents/code/wego-design-system/wego-app/scenes/商家工作台/_spec/design_plan.json",
+      "field": "component_patterns[card-common-apps-grid]",
+      "supports": [
+        "工作台常用应用入口承载方式"
+      ]
+    },
+    {
+      "file": "/Users/dk/Documents/code/wego-design-system/.codex/skills/wego-design/uikit-plan.json",
+      "field": "fallbackPageBlueprints[generic-mobile-task-page] + fallbackPageBlueprints[object-management-list-page]",
+      "supports": [
+        "补货计划页任务型布局、卡片节奏和对象列表承载"
+      ]
+    },
+    {
+      "file": "/Users/dk/Documents/code/wego-design-system/.codex/skills/wego-design/components/navbar.json",
+      "field": "variantDimensions",
+      "supports": [
+        "push 页面导航栏返回模式"
+      ]
+    },
+    {
+      "file": "/Users/dk/Documents/code/wego-design-system/.codex/skills/wego-design/components/input.json",
+      "field": "variantDimensions + behavior.error",
+      "supports": [
+        "数量输入与错误态"
+      ]
+    },
+    {
+      "file": "/Users/dk/Documents/code/wego-design-system/.codex/skills/wego-design/components/button.json",
+      "field": "variantDimensions + behavior.primaryRule",
+      "supports": [
+        "空状态主按钮、追加商品次级按钮和保存主按钮"
+      ]
+    },
+    {
+      "file": "/Users/dk/Documents/code/wego-design-system/.codex/skills/wego-design/components/dialog.json",
+      "field": "variantDimensions + structurePatterns",
+      "supports": [
+        "保存前确认 Dialog 的双按钮结构"
+      ]
+    }
+  ],
+  "implementation_constraints": [
+    "补货计划页使用卡片模式 M16，phone-body 16px 横向 padding，卡片之间保持 12px 间距。",
+    "工作台入口只在商家工作台常用应用区挂载，不额外复制到我的 Tab 或其他宿主分组。",
+    "每个商品项的数量输入必须使用数字输入态，错误提示绑定到对应行，不允许汇总成页级错误横幅。",
+    "页面内同屏只允许 1 个 strong 保存按钮；追加商品按钮降为 weak。",
+    "成功反馈使用 toast，计划状态同步更新为待提交；刷新后不持久化会话数据。"
+  ]
+}

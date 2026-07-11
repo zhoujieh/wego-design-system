@@ -15,7 +15,7 @@
     { label: '查库存', icon: '库存管理.svg', route: 'my-inventory-management' },
     { label: '去发货', icon: '查订单-查快递.svg', toast: '待发货处理入口已预留' },
     { label: '发起直播', icon: '私域直播.svg', toast: '直播能力接入中' },
-    { label: '库存管理', icon: '库存管理.svg', route: 'my-inventory-management' },
+    { label: '补货计划', icon: '备货.svg', route: 'restock-plan' },
     { label: '全部应用', icon: '规则中心.svg', action: 'open-app-center' }
   ];
 
@@ -44,6 +44,7 @@
       title: '进销存管理',
       apps: [
         { label: '库存管理', subtitle: '盘点、调拨和预警', icon: '库存管理.svg', route: 'my-inventory-management' },
+        { label: '补货计划', subtitle: '临时挑选商品并生成待提交计划', icon: '备货.svg', route: 'restock-plan' },
         { label: '销售单', subtitle: '销售历史单据', icon: '销售单.svg', toast: '销售单列表入口已预留' },
         { label: '采购单', subtitle: '采购历史与审批', icon: '采购单.svg', route: 'my-warehouse-management' }
       ]

@@ -1,0 +1,62 @@
+/* 好友页场景样式 */
+/* host-tab panel 激活后需要 flex:1 填满 host-shell-page，
+   否则 scene 根元素无法获得固定高度做内部滚动（搜索固定 + 列表滚动）。 */
+.host-shell-page__panel--active[data-host-tab="haoyou"] {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.friends-page {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-page);
+}
+
+.friends-search {
+  flex: 0 0 auto;
+  padding: var(--spacer-12) var(--spacer-16) var(--spacer-8);
+}
+
+.friends-sortbar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacer-4) var(--spacer-16) var(--spacer-12);
+}
+
+.friends-sortbar__count {
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+  color: var(--text-tertiary);
+}
+
+.friends-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: var(--spacer-40);
+}
+
+.friends-list__group {
+  margin-bottom: var(--spacer-16);
+}
+
+.friends-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px var(--spacer-16);
+  text-align: center;
+}
+
+.friends-empty__text {
+  margin: 0;
+  font-size: var(--body-md-font-size);
+  line-height: var(--body-md-line-height);
+  color: var(--text-tertiary);
+}
