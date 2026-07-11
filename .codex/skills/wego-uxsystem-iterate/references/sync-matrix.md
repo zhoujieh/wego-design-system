@@ -87,6 +87,16 @@
 - 运行规则文档生成、检查和测试。
 - 若 `.codex/skills/wego-design/` 内正式设计系统文件发生变化，递增 `metadata.json.version`。
 
+### 业务迭代工作流专项
+
+修改 `iteration.json`、范围确认、阶段状态、开发交接或冻结规则时：
+
+- 主要权威落点为 `wego-product/references/iteration-workflow.md`，AGENTS 只保留跨技能硬门禁。
+- 同步检查 wego-product 创建与确认、wego-design 消费、wego-ux 实现范围、wego-tests 验收/交接/冻结四段职责。
+- 同步 `scripts/iteration-record.mjs`、`validate-wego-design-core.mjs`、`specs-core.mjs` 和对应回归测试。
+- 检查生成 Markdown 不是运行时规则来源，技能实际读取 `iteration.json` 和正式规格。
+- 检查历史场景兼容、新迭代强制认领、范围失效、共享场景基线和冻结防覆盖。
+
 ## 合并或删除历史 Skill 入口
 
 前提：

@@ -1,6 +1,6 @@
 ---
 name: "wego-ux"
-description: 将已落盘且无阻塞的 interaction_spec 和 design_plan 实现为 wego-app 静态 App 场景，或按规格迭代已有场景。用于生成或修改 scene.js、scene.css、routes.js、宿主入口、交互状态、数据回填、路由和资源同步；任何已有业务场景修改都先用本技能做偏差判定。不要用于需求重定义、设计系统本体维护或只做验收。
+description: 按已确认业务迭代、interaction_spec 和 design_plan 实现 wego-app 静态 App 场景，或按规格迭代已有场景。用于生成或修改登记范围内的 scene.js、scene.css、routes.js、宿主入口、交互状态、数据回填、路由和资源同步；任何已有业务场景修改都先用本技能做偏差判定。不要用于需求重定义、设计系统本体维护或只做验收。
 ---
 
 # Wego UX
@@ -10,6 +10,7 @@ description: 将已落盘且无阻塞的 interaction_spec 和 design_plan 实现
 ## 前置门禁与路由
 
 - 必须有已落盘 `_spec/interaction_spec.json` 和 `_spec/design_plan.json`。
+- 业务实现必须归属有效迭代，状态为 `design-ready`，且产品、设计和 `base_fingerprint` 未失效。
 - `readiness = blocked`、存在 design gap 或任一 surface 为 gap：停止并回到上游。
 - 只改组件、Token、UI Kit、Preview、消费边界或工作流：交给 `wego-uxsystem-iterate`。
 - 只验收或回归：交给 `wego-tests`。
@@ -17,13 +18,14 @@ description: 将已落盘且无阻塞的 interaction_spec 和 design_plan 实现
 ## 读取顺序
 
 1. 仓库根目录 [AGENTS.md](../../../AGENTS.md)。
-2. 当前场景两份 `_spec`；优先新字段，缺失时才兼容旧字段。
-3. `design_plan.rule_sources_used` 指向的正式来源。
-4. 命中的组件契约、Preview、Token、pagePattern 和 fallback。
-5. 当前 `wego-app` 宿主、路由和目标场景。
-6. 修改路由、宿主、presentation 或场景注册时读取 [scene-runtime.md](references/scene-runtime.md)。
-7. 实现多节点、状态交接、原型边界、键盘或列表时读取 [interaction-implementation.md](references/interaction-implementation.md)。
-8. 同步、验证或交付时读取 [delivery.md](references/delivery.md)。
+2. 当前业务迭代 `iteration.json` 和 [业务迭代契约](../wego-product/references/iteration-workflow.md)。
+3. 所有相关场景两份 `_spec`；优先新字段，缺失时才兼容旧字段。
+4. `design_plan.rule_sources_used` 指向的正式来源。
+5. 命中的组件契约、Preview、Token、pagePattern 和 fallback。
+6. 当前 `wego-app` 宿主、路由和目标场景。
+7. 修改路由、宿主、presentation 或场景注册时读取 [scene-runtime.md](references/scene-runtime.md)。
+8. 实现多节点、状态交接、原型边界、键盘或列表时读取 [interaction-implementation.md](references/interaction-implementation.md)。
+9. 同步、验证或交付时读取 [delivery.md](references/delivery.md)。
 
 不得读取 `docs/specs/*.md` 作为实现依据。
 
@@ -34,6 +36,7 @@ description: 将已落盘且无阻塞的 interaction_spec 和 design_plan 实现
 - 组件结构、变体、状态、Token、页面布局和打开方式必须严格执行设计计划，不得二次设计。
 - 发现内容、组件、展示或规则来源偏差时必须回退上游并更新、归档 `_spec`，不能在实现层补造规则。
 - 场景完成后必须经过 `wego-tests`；提交、推送和部署状态只按真实执行结果报告。
+- 只能修改 `affected_scenes` 和 `affected_runtime` 登记范围；新增业务、场景或产品结果必须回到 `wego-product`，设计变化回到 `wego-design`。
 
 ## 强制偏差判定
 
@@ -48,6 +51,8 @@ description: 将已落盘且无阻塞的 interaction_spec 和 design_plan 实现
 内容、范围或流程偏差回到 `wego-product → wego-design`；设计组合或打开方式偏差回到 `wego-design`；设计系统来源缺失回到 `wego-uxsystem-iterate`。
 
 不改变需求或设计的 Token 替换、安全区修复、响应式修复、Bug 修复、性能重构通常可直接实现，但仍须满足正式规格。
+
+进入实现前运行 `iteration-record.mjs check-base`；共享场景基线变化时不得直接覆盖。实现完成后补齐每项需求的 `implementation_refs` 并运行 `mark-implemented`。
 
 ## 产物与宿主
 

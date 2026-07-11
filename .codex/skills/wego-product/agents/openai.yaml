@@ -1,7 +1,7 @@
 interface:
   display_name: "Wego Product"
-  short_description: "理解新页面与业务变更，产出 interaction_spec"
-  default_prompt: "Use $wego-product to turn this business request into a confirmed, traceable interaction_spec before design or implementation."
+  short_description: "创建并确认业务迭代范围，产出可追踪 interaction_spec"
+  default_prompt: "Use $wego-product to create the business iteration, confirm its cross-scene scope, and produce traceable interaction_spec files before design or implementation."
 
 policy:
   allow_implicit_invocation: true

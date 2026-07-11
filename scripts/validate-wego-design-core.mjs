@@ -363,15 +363,15 @@ function collectChangedFiles() {
 
   const files = new Set();
   if (diffBase) {
-    const primary = git(['diff', '--name-only', '--diff-filter=ACMRT', `${diffBase}...HEAD`]);
+    const primary = git(['diff', '--name-only', '--diff-filter=ACDMRT', `${diffBase}...HEAD`]);
     const fallback = primary && primary.length > 0
       ? primary
-      : git(['diff', '--name-only', '--diff-filter=ACMRT', diffBase]);
+      : git(['diff', '--name-only', '--diff-filter=ACDMRT', diffBase]);
     splitLines(fallback).forEach(file => files.add(file));
   } else if (stagedOnly) {
-    splitLines(git(['diff', '--cached', '--name-only', '--diff-filter=ACMRT'])).forEach(file => files.add(file));
+    splitLines(git(['diff', '--cached', '--name-only', '--diff-filter=ACDMRT'])).forEach(file => files.add(file));
   } else {
-    splitLines(git(['diff', '--name-only', '--diff-filter=ACMRT', 'HEAD'])).forEach(file => files.add(file));
+    splitLines(git(['diff', '--name-only', '--diff-filter=ACDMRT', 'HEAD'])).forEach(file => files.add(file));
     splitLines(git(['ls-files', '--others', '--exclude-standard'])).forEach(file => files.add(file));
   }
   return [...files].sort();
@@ -393,7 +393,7 @@ function createContext(allSlugs = []) {
   let componentContractChanged = false;
 
   for (const file of changedFiles) {
-    if (file === 'scripts/validate-wego-design.mjs') validatorChanged = true;
+    if (['scripts/validate-wego-design.mjs', 'scripts/validate-wego-design-core.mjs', 'scripts/iteration-record.mjs'].includes(file)) validatorChanged = true;
   }
 
   for (const { rel } of relFiles) {
@@ -2432,6 +2432,26 @@ function checkInteractionSpecAndDesignPlanReferences(context) {
   report.metrics.interactionSpecChecked = checkedNewFormat;
 }
 
+function checkBusinessIterationWorkflow(context) {
+  const script = path.join(repoRoot, 'scripts/iteration-record.mjs');
+  if (!fs.existsSync(script)) {
+    add('error', 'iteration.script_missing', '缺少业务迭代状态机脚本 scripts/iteration-record.mjs', script);
+    return;
+  }
+  const claimFiles = context.effectiveScope === 'system' ? [] : context.changedFiles;
+  const commandArgs = [script, 'check', ...claimFiles.map(file => `--changed-file=${file}`)];
+  const checked = spawnSync(process.execPath, commandArgs, { cwd: repoRoot, encoding: 'utf8' });
+  if (checked.status !== 0) {
+    add('error', 'iteration.check_failed', (checked.stderr || checked.stdout || '业务迭代检查失败').trim(), script);
+  } else {
+    report.metrics.businessIterations = Number(checked.stdout.match(/(\d+) 个迭代/)?.[1] || 0);
+  }
+  if (context.validatorChanged || context.effectiveScope === 'system' || context.effectiveScope === 'full') {
+    const tested = spawnSync(process.execPath, [script, 'test'], { cwd: repoRoot, encoding: 'utf8' });
+    if (tested.status !== 0) add('error', 'iteration.tests_failed', (tested.stderr || tested.stdout || '业务迭代状态机回归失败').trim(), script);
+  }
+}
+
 function main() {
   if (!['changed', 'system', 'full'].includes(requestedScope)) {
     add('error', 'args.scope_invalid', `--scope 只能是 changed、system 或 full，当前为：${requestedScope}`);
@@ -2451,6 +2471,7 @@ function main() {
   report.metrics.changedFiles = context.changedFiles.length;
   report.metrics.changedComponents = scopedSlugs.length;
   report.metrics.changedUiKits = context.changedKits.size;
+  checkBusinessIterationWorkflow(context);
   if (context.validatorChanged || context.extractorChanged) {
     add('info', 'scope.promoted_full', '验证脚本或 CSS 抽取脚本发生变更，本次自动提升为 full 范围');
   }

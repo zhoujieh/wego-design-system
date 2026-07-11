@@ -2,6 +2,8 @@
 
 仅在创建、迁移或校验 `design_plan` 时读取。触发、核心门禁和交接以 `../SKILL.md` 为准。
 
+业务迭代中的 `design_plan` 必须包含与产品规格完全一致的 `iteration_context`，只引用已确认的 `requirement_ids[]`。设计阶段不得新增需求编号或提升 `scope_revision`。
+
 ## 新任务结构
 
 ```text

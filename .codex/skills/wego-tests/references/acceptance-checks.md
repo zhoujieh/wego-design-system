@@ -11,6 +11,8 @@
 
 ## 数据交接与返回
 
+业务迭代验收先按 `iteration.json.requirements[].requirement_id` 建立覆盖矩阵；每个非 excluded 需求都必须能追踪到产品 flow/node/surface、设计决策、实现位置和 `acceptance_report.requirement_coverage[]`，未知编号、缺号或范围版本不一致直接失败。
+
 - handoff 覆盖所有需要回填的 transition。
 - payload 回填到正确 content ID。
 - keep/reset/clear-on-success 与规格一致。

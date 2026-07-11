@@ -17,6 +17,8 @@
 
 每个 readiness 必须有 `reason` 和受影响范围。`partially-ready` 只把已确认范围交给设计；`blocked` 不得交接。
 
+正式业务迭代第一版的本轮交付范围必须整体达到 `ready` 或 `ready-with-assumptions` 才能 `product-confirmed`；`partially-ready` 仅用于历史无迭代规格兼容，或继续停留在产品阶段拆分延期/排除范围，不直接推进整个迭代。
+
 ## 边界选择
 
 - 用户必须真实操作并看到状态变化：`functional`。

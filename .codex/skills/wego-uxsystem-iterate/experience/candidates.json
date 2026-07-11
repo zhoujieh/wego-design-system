@@ -757,6 +757,74 @@
         "field": "Skill 包渐进披露与目录硬规则",
         "rule_id": "skill-packages-progressive-disclosure-and-structural-guardrails"
       }
+    },
+    {
+      "id": "exp-business-iteration-contract-and-stage-guardrails",
+      "normalized_key": "business-iterations-must-have-confirmed-scope-stage-owned-artifacts-traceability-handoff-and-freeze-guardrails",
+      "title": "业务迭代必须具备范围确认、阶段归属、全链路追踪、开发交接与冻结守门",
+      "status": "promoted",
+      "occurrence_count": 1,
+      "threshold": 1,
+      "primary_owner": "wego-product",
+      "secondary_owners": ["wego-design", "wego-ux", "wego-tests", "wego-uxsystem-iterate"],
+      "ownership_reason": "问题最早产生在业务需求进入工作流时缺少跨场景迭代契约。现有 wego-product 只按单场景输出 interaction_spec，无法表达一次交付批次的主业务、关联场景、长期功能、当轮变化、范围确认和阶段状态；下游虽各自有门禁，却没有共同的迭代身份、范围版本和需求追踪键，导致设计、实现、验收与开发交接可能使用不同口径。",
+      "problem_pattern": "业务原型持续迭代时，仅用场景当前规格和时间戳 archive 记录变化，没有一份按交付批次组织的结构化迭代契约。跨场景需求、宿主改动、范围二次确认、同场景并行基线、开发交接和验收冻结无法稳定追踪；下游技能可能在不知范围已变化的情况下继续工作，最终交接文档也无法证明功能、页面、规格、实现和验收来自同一确认版本。",
+      "scene_evidence": [
+        {
+          "date": "2026-07-11",
+          "scene": "微购业务迭代工作流规划与全链路复审",
+          "summary": "用户要求以 shop001-快捷发布等迭代编号组织产物，并明确迭代内容、产品范围确认、跨业务关联页面、开发交接文档命名与输出技能、过程中修改、技能守门和冻结追溯。复查现有五技能与验证脚本后确认：interaction_spec、design_plan、scene 和 acceptance_report 已形成单场景链路，但缺少跨场景 iteration.json、范围确认状态、feature_id/requirement_id 区分、阶段失效、开发交接生成和冻结校验；现有 _spec/archive 只能证明文件被归档，不能证明一次交付批次的范围与验收闭合。",
+          "source": "用户明确要求优化并执行完整微购业务迭代工作流"
+        }
+      ],
+      "applies_when_candidates": [
+        "新业务需求或已有业务场景变化需要按明确迭代编号交付",
+        "一次迭代影响多个 scene、route、宿主入口或无独立 route 的 surface",
+        "产品范围确认后仍可能发生设计、实现或验收修订",
+        "需要向开发交付当前迭代的功能、页面、数据、边界和验收清单",
+        "需要防止冻结版本被覆盖，并让后续迭代基于可识别的场景基线继续"
+      ],
+      "avoid_when_candidates": [
+        "只审查或迭代组件、Token、Preview、UI Kit 和设计系统规则，且没有业务场景交付",
+        "纯仓库管理、脚本重构或文档整理，不改变业务场景规格和实现",
+        "只读取或验收历史场景，没有形成新的业务交付批次"
+      ],
+      "expected_rule_target": {
+        "file": ".codex/skills/wego-product/references/iteration-workflow.md",
+        "field": "业务迭代契约、范围确认、状态流转、跨技能交接和冻结规则"
+      },
+      "runtime_reachability": {
+        "consumer_skill": "wego-product 创建并确认迭代；wego-design、wego-ux、wego-tests 按阶段读取同一迭代契约；wego-uxsystem-iterate 维护正式工作流规则",
+        "output_field": "主业务场景 _iterations/{YYYYMMDD}-{iteration_id}-{title}/iteration.json、范围确认文档、开发交接文档、场景规格快照和 freeze.json",
+        "downstream_consumer": "wego-design 只消费已确认 scope_revision；wego-ux 只实现已登记场景和运行时文件；wego-tests 按 requirement_id 验收并生成当前迭代开发交接和冻结记录",
+        "acceptance_check": "iteration-record.mjs 与 validate-wego-design.mjs 检查目录、状态机、范围确认、feature_id/requirement_id、跨文件追踪、设计 gap、实现影响范围、验收覆盖、交接生成和冻结防覆盖；再用单场景、跨场景、范围变更、共享场景基线冲突、失败验收和历史兼容用例回归"
+      },
+      "applies_when": [
+        "新业务需求或已有业务场景变化形成明确交付批次",
+        "一次交付影响一个或多个业务场景、route、宿主入口或 surface",
+        "需要生成可追踪的产品范围、验收结论和开发交接"
+      ],
+      "avoid_when": [
+        "只修改设计系统组件、Token、Preview、UI Kit 或工作流本体",
+        "纯仓库管理和不改变业务场景的脚本或文档调整",
+        "只读取历史场景且没有新的交付批次"
+      ],
+      "exceptions": [
+        "历史场景不补录旧迭代，但再次修改时必须进入新流程",
+        "紧急修复可以使用轻量 hotfix 迭代，但仍需范围确认和验收",
+        "Sheet、Modal、Dialog 和 inline 使用 surface_id 追踪，不强制注册独立 route"
+      ],
+      "fallback": "无法确认完整交付范围时保持 draft/blocked，不进入设计；设计系统缺口转入 wego-uxsystem-iterate，完成后从设计阶段恢复。",
+      "merge_target": "并入现有 interaction_spec → design_plan → scene → acceptance_report 主链路，在上层增加跨场景 iteration 契约，不建立平行的第六业务技能。",
+      "new_scenario_type_needed": false,
+      "created_at": "2026-07-11T16:40:00+08:00",
+      "updated_at": "2026-07-11T17:20:00+08:00",
+      "formal_rule": {
+        "confirmed_at": "2026-07-11T17:20:00+08:00",
+        "file": ".codex/skills/wego-product/references/iteration-workflow.md",
+        "field": "业务迭代契约、范围确认、状态流转、跨技能交接和冻结规则",
+        "rule_id": "business-iteration-contract-and-stage-guardrails"
+      }
     }
   ]
 }

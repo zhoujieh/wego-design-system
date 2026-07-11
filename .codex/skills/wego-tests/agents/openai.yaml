@@ -1,7 +1,7 @@
 interface:
   display_name: "Wego Tests"
-  short_description: "验收已注册场景的需求、设计、实现、浏览器交互与交付一致性并输出完整报告"
-  default_prompt: "Use $wego-tests to validate this registered wego-app scene against both specs, formal rule sources, browser behavior, and delivery readiness."
+  short_description: "按业务迭代验收全部关联场景并生成完整开发交接文档与冻结记录"
+  default_prompt: "Use $wego-tests to validate every requirement in the business iteration across related scenes, then generate the development handoff and freeze record when eligible."
 
 policy:
   allow_implicit_invocation: true

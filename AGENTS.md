@@ -26,8 +26,8 @@
 
 | 用户意图 | 必须先触发 | 前置条件 | 下一步 |
 | --- | --- | --- | --- |
-| 原始业务需求、做页面、做原型、做新场景 | `wego-product` | 无 | 输出并落盘 `interaction_spec` |
-| 基于已有 `interaction_spec` 选择页面范式、UI Kit、组件和打开方式 | `wego-design` | 规格已落盘且 `readiness != blocked` | 输出并落盘无 gap 的 `design_plan` |
+| 原始业务需求、做页面、做原型、做新场景 | `wego-product` | 无 | 创建业务迭代、确认范围并落盘 `interaction_spec` |
+| 基于已确认迭代和 `interaction_spec` 选择页面范式、UI Kit、组件和打开方式 | `wego-design` | 迭代为 `product-confirmed`，规格可继续 | 输出并落盘无 gap 的 `design_plan` |
 | 正式生成或更新 `wego-app` 场景 | `wego-ux` | 两份规格已落盘且设计无 gap | 完成后交给 `wego-tests` |
 | 验收、回归、检查当前业务场景 | `wego-tests` | 场景已生成并注册路由 | 输出 `acceptance_report` |
 | 改组件、Token、Preview、UI Kit 或设计系统守门 | `wego-uxsystem-iterate` 的迭代模式 | 目标属于设计系统本体 | 按组件/UI Kit 同步矩阵执行 |
@@ -38,8 +38,12 @@
 
 ## 主链路硬门禁
 
+- 正式规则生效后的新业务需求或已有业务场景修改必须归属主业务场景 `_iterations/` 下的有效迭代；历史场景无需补录，后续再次修改时进入新流程。
+- 产品范围未经用户明确确认、`iteration.json.status != product-confirmed` 或相关场景 `scope_revision` 不一致，不得进入 `wego-design`；状态只能通过 `scripts/iteration-record.mjs` 推进。
+- `wego-design` 不得新增产品内容，`wego-ux` 不得修改未登记场景或宿主文件，`wego-tests` 必须按 `requirement_id` 覆盖全部确认需求后才能生成开发交接和冻结迭代。
+- 冻结迭代不得覆盖；后续业务变化建立新迭代。纯设计系统、工作流或仓库管理变化不建立业务迭代。
 - 模糊的业务页面请求默认先走 `wego-product`；关键需求未确认前不得进入下一环节，且不得擅自修改用户明确的产品要求。
-- 没有已落盘且 `readiness != blocked` 的 `interaction_spec`，不得进入 `wego-design`；`partially-ready` 只处理已确认范围。
+- 没有已落盘且可继续的 `interaction_spec`，不得进入 `wego-design`；新业务迭代的本轮交付范围必须为 `ready` 或 `ready-with-assumptions`，历史无迭代规格的 `partially-ready` 只处理已确认且非 excluded 范围。
 - 没有已落盘、覆盖全部可实现 surface 且无 `gap` 的 `design_plan`，不得进入 `wego-ux`。
 - 已有业务场景的任何修改都必须先进入 `wego-ux` 做偏差判定；文案、间距或使用已注册 Token 的实现微调也不能绕过。修改 Token 源、组件或设计系统规则必须转入 `wego-uxsystem-iterate`。
 - 当前场景未生成且未注册 `route_id`，不得进入 `wego-tests`。

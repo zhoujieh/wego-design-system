@@ -6,6 +6,7 @@
 
 ```text
 interaction_spec
+├── iteration_context
 ├── goal
 ├── scope
 ├── actors
@@ -26,6 +27,8 @@ interaction_spec
 ├── readiness
 └── rule_sources
 ```
+
+`iteration_context` 只保存当前业务迭代的 `iteration_id`、`scope_revision` 和本场景 `requirement_ids[]`。跨场景范围、长期功能和状态机由主业务场景 `iteration.json` 维护，不在各场景规格重复定义。
 
 ### flows
 

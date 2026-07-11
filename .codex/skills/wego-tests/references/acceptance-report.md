@@ -4,6 +4,11 @@
 
 ```json
 {
+  "iteration_context": {
+    "iteration_id": "shop001",
+    "scope_revision": 1,
+    "requirement_ids": ["shop001-R01"]
+  },
   "requirement_coverage": [],
   "scene_judgement_check": {},
   "surface_design_check": {},
@@ -33,6 +38,8 @@
   "final_status": "pass | pass-with-risk | fail"
 }
 ```
+
+业务迭代的 `requirement_coverage[]` 每项必须包含 `requirement_id` 和真实 `status`，覆盖本场景全部非 excluded 需求；自然语言描述不能代替稳定编号。
 
 ## automated_checks
 

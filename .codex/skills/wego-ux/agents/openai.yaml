@@ -1,7 +1,7 @@
 interface:
   display_name: "Wego UX"
   short_description: "按两份规格生成或迭代 wego-app 业务场景并验证交付"
-  default_prompt: "Use $wego-ux to implement or update this wego-app scene from the approved interaction_spec and design_plan, including routes, states, and verification."
+  default_prompt: "Use $wego-ux to implement only the scenes and runtime files declared by the approved business iteration, interaction_spec, and design_plan."
 
 policy:
   allow_implicit_invocation: true
