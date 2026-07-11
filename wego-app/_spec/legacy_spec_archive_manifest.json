@@ -1,0 +1,146 @@
+{
+  "manifest_type": "legacy-spec-archive-manifest",
+  "created_at": "2026-07-09",
+  "workflow_standard": "docs/interaction-prototype-workflow-refactor-conclusion.md",
+  "archive_strategy": "safe-reference-archive",
+  "reason": "过渡期不能一次性删除旧格式，否则可能影响已有场景迭代、设计消费、自动校验和验收；当前以归档清单锁定旧文件为迁移来源，新工作流优先读取新格式。",
+  "effective_read_order": {
+    "product_spec": ["interaction_spec.json", "page_spec.json"],
+    "design_plan": ["design_plan.json", "design_consumption_plan.json"]
+  },
+  "rules": [
+    "旧 page_spec.json 和 design_consumption_plan.json 不再作为编辑目标",
+    "新任务只生成 interaction_spec.json 和 design_plan.json",
+    "如需删除旧格式，必须先确认四个技能、脚本、README、AGENTS 和生成文档都不再依赖旧格式",
+    "任一阶段不得破坏现有 scene.js、scene.css、routes.js 和宿主运行"
+  ],
+  "scenes": [
+    {
+      "scene": "动态",
+      "new_files": [
+        "wego-app/scenes/动态/_spec/interaction_spec.json",
+        "wego-app/scenes/动态/_spec/design_plan.json"
+      ],
+      "legacy_files": [
+        "wego-app/scenes/动态/_spec/page_spec.json",
+        "wego-app/scenes/动态/_spec/design_consumption_plan.json"
+      ],
+      "legacy_status": "reference-only-if-present",
+      "migration_status": "new-format-ready"
+    },
+    {
+      "scene": "我的",
+      "new_files": [
+        "wego-app/scenes/我的/_spec/interaction_spec.json",
+        "wego-app/scenes/我的/_spec/design_plan.json"
+      ],
+      "legacy_files": [
+        "wego-app/scenes/我的/_spec/page_spec.json",
+        "wego-app/scenes/我的/_spec/design_consumption_plan.json"
+      ],
+      "legacy_status": "reference-only-if-present",
+      "migration_status": "new-format-ready"
+    },
+    {
+      "scene": "快捷发布产品",
+      "new_files": [
+        "wego-app/scenes/快捷发布产品/_spec/interaction_spec.json",
+        "wego-app/scenes/快捷发布产品/_spec/design_plan.json"
+      ],
+      "legacy_files": [
+        "wego-app/scenes/快捷发布产品/_spec/page_spec.json",
+        "wego-app/scenes/快捷发布产品/_spec/design_consumption_plan.json"
+      ],
+      "legacy_status": "reference-only-if-present",
+      "migration_status": "new-format-ready"
+    },
+    {
+      "scene": "价格权限管理",
+      "new_files": [
+        "wego-app/scenes/价格权限管理/_spec/interaction_spec.json",
+        "wego-app/scenes/价格权限管理/_spec/design_plan.json"
+      ],
+      "legacy_files": [
+        "wego-app/scenes/价格权限管理/_spec/page_spec.json",
+        "wego-app/scenes/价格权限管理/_spec/design_consumption_plan.json"
+      ],
+      "legacy_status": "reference-only-if-present",
+      "migration_status": "new-format-ready"
+    },
+    {
+      "scene": "系统设置",
+      "new_files": [
+        "wego-app/scenes/系统设置/_spec/interaction_spec.json",
+        "wego-app/scenes/系统设置/_spec/design_plan.json"
+      ],
+      "legacy_files": [
+        "wego-app/scenes/系统设置/_spec/page_spec.json",
+        "wego-app/scenes/系统设置/_spec/design_consumption_plan.json"
+      ],
+      "legacy_status": "reference-only-if-present",
+      "migration_status": "new-format-ready"
+    },
+    {
+      "scene": "产品与笔记",
+      "new_files": [
+        "wego-app/scenes/产品与笔记/_spec/interaction_spec.json",
+        "wego-app/scenes/产品与笔记/_spec/design_plan.json"
+      ],
+      "legacy_files": [
+        "wego-app/scenes/产品与笔记/_spec/page_spec.json",
+        "wego-app/scenes/产品与笔记/_spec/design_consumption_plan.json"
+      ],
+      "legacy_status": "reference-only-if-present",
+      "migration_status": "new-format-ready"
+    },
+    {
+      "scene": "交易设置",
+      "new_files": [
+        "wego-app/scenes/交易设置/_spec/interaction_spec.json",
+        "wego-app/scenes/交易设置/_spec/design_plan.json"
+      ],
+      "legacy_files": [
+        "wego-app/scenes/交易设置/_spec/page_spec.json",
+        "wego-app/scenes/交易设置/_spec/design_consumption_plan.json"
+      ],
+      "legacy_status": "reference-only-if-present",
+      "migration_status": "new-format-ready"
+    },
+    {
+      "scene": "库存管理",
+      "new_files": [
+        "wego-app/scenes/库存管理/_spec/interaction_spec.json",
+        "wego-app/scenes/库存管理/_spec/design_plan.json"
+      ],
+      "legacy_files": [
+        "wego-app/scenes/库存管理/_spec/page_spec.json",
+        "wego-app/scenes/库存管理/_spec/design_consumption_plan.json"
+      ],
+      "legacy_status": "reference-only-if-present",
+      "migration_status": "new-format-ready"
+    },
+    {
+      "scene": "仓库管理",
+      "new_files": [
+        "wego-app/scenes/仓库管理/_spec/interaction_spec.json",
+        "wego-app/scenes/仓库管理/_spec/design_plan.json"
+      ],
+      "legacy_files": [
+        "wego-app/scenes/仓库管理/_spec/page_spec.json",
+        "wego-app/scenes/仓库管理/_spec/design_consumption_plan.json"
+      ],
+      "legacy_status": "reference-only-if-present",
+      "migration_status": "new-format-ready"
+    }
+  ],
+  "deletion_policy": {
+    "can_delete_legacy_files_now": false,
+    "delete_only_after": [
+      "仓库内不存在仍依赖旧规格的有效场景",
+      "四个技能已不再生成旧格式",
+      "所有脚本、模板、README、AGENTS 和生成文档已切换",
+      "真实浏览器完整路径验收通过"
+    ]
+  },
+  "overall_status": "legacy-files-archived-by-reference; new-format-active"
+}
