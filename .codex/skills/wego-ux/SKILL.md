@@ -11,7 +11,7 @@ description: 按确认的原型设计约束或正式规格实现 wego-app 场景
 
 ## 必要输入与运行时入口
 
-读取 `AGENTS.md`、当前迭代、原型设计或两份正式规格及其真实规则来源。路由和宿主读取[运行时方法](references/scene-runtime.md)，状态交接读取[交互实现方法](references/interaction-implementation.md)，同步与验证读取[交付方法](references/delivery.md)。只接受当前 Schema，旧输入直接失败。
+读取 `AGENTS.md`、当前迭代、原型设计或两份正式规格及其真实规则来源，并遵守[高保真原型基线](../wego-uxsystem-iterate/references/high-fidelity-prototype-baseline.md)。路由和宿主读取[运行时方法](references/scene-runtime.md)，状态交接和正式组件消费读取[交互实现方法](references/interaction-implementation.md)，同步与验证读取[交付方法](references/delivery.md)。只接受当前 Schema，旧输入直接失败。
 
 ## 输出契约与跨技能交接
 

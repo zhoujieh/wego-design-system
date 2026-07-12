@@ -297,6 +297,16 @@ function validateDesign(record) {
   }
 }
 
+function assertResolvableImplementationRef(value, requirementId, scene) {
+  if (typeof value !== 'string' || !value.includes('#')) fail(`traceability ${requirementId}/${scene} implementation_refs 必须使用“仓库相对路径#真实代码锚点”格式`);
+  const [filePart, anchor] = value.split(/#(.+)/u);
+  if (!filePart || !anchor || value.indexOf('#') !== value.lastIndexOf('#')) fail(`traceability ${requirementId}/${scene} implementation_ref 非法：${value}`);
+  const file = path.resolve(ROOT, filePart);
+  const relative = path.relative(ROOT, file);
+  if (relative.startsWith('..') || path.isAbsolute(relative) || !exists(file) || !fs.statSync(file).isFile()) fail(`traceability ${requirementId}/${scene} implementation_ref 文件不存在：${value}`);
+  if (!fs.readFileSync(file, 'utf8').includes(anchor)) fail(`traceability ${requirementId}/${scene} implementation_ref 锚点不存在：${value}`);
+}
+
 function validateImplementation(record) {
   assertPrototypeSnapshot(record);
   for (const scene of affectedScenes(record)) {
@@ -305,6 +315,7 @@ function validateImplementation(record) {
   }
   for (const item of asArray(record.traceability)) {
     if (asArray(item.implementation_refs).length === 0) fail(`traceability ${item.requirement_id}/${item.scene} 缺少 implementation_refs`);
+    for (const ref of asArray(item.implementation_refs)) assertResolvableImplementationRef(ref, item.requirement_id, item.scene);
   }
 }
 

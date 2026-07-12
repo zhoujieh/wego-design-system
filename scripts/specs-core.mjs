@@ -5,7 +5,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { validateSkillEntryBoundary } from './validate-skill-entry-boundary.mjs';
 
-const VERSION = '7';
+const VERSION = '8';
 const ROOT = path.resolve(process.env.WEGO_REPO_ROOT || process.cwd());
 const OUT = path.join(ROOT, '.codex/skills/wego-design/specs');
 const CMD = process.argv[2];
@@ -108,253 +108,107 @@ const section = (title, body) => `## ${title}\n\n${body}\n`;
 const subSection = (title, body) => `### ${title}\n\n${body}\n`;
 const doc = (title, body, fp) => `# ${title}\n\n${NOTICE}\n\n${body.trim()}\n\n<!-- generated-by: scripts/specs.mjs@${VERSION} -->\n<!-- source-fingerprint: ${fp} -->\n`;
 
-function extractUiKitDecisionTree(uikitPlan) {
-  const priority = uikitPlan.paradigmSelectionPriority;
-  if (!priority) return '';
-  const lines = [];
-  (priority.decisionTree || []).forEach((node, i) => {
-    const q = node.question;
-    lines.push(`${i + 1}. **${q}**`);
-    const keys = Object.keys(node).filter(k => k !== 'question');
-    keys.forEach(key => lines.push(`   - ${key}：${node[key]}`));
-  });
-  if (priority.quickReference) {
-    lines.push('');
-    lines.push('**快速对照：**');
-    Object.entries(priority.quickReference).forEach(([k, v]) => lines.push(`- ${k}：${v}`));
-  }
-  if (priority.exception) {
-    lines.push('');
-    lines.push(`**例外：**${priority.exception}`);
-  }
-  return lines.join('\n');
+function normalizeMarkdown(value, headingOffset = 2) {
+  return value.replace(/^---\n[\s\S]*?\n---\n?/, '').trim()
+    .replace(/^(#{1,6})\s+/gm, (_, hashes) => `${'#'.repeat(Math.min(6, hashes.length + headingOffset))} `);
 }
 
-function extractPagePatternScenarios(uikitPlan) {
-  const patterns = uikitPlan.pagePatterns || [];
-  return patterns.map(p => {
-    const scenarios = (p.applicableScenarios || []).join('、');
-    const components = (p.componentSlugs || []).join('、');
-    return [
-      `#### ${p.name}（${p.slug}）`,
-      '',
-      `- **适用场景：**${scenarios || '暂无'}`,
-      `- **交互模式：**${p.interactionPattern || '暂无'}`,
-      `- **默认打开方式：**${p.presentation || '暂无'}`,
-      `- **主要组件：**${components || '暂无'}`,
-    ].join('\n');
-  }).join('\n\n');
+function source(rel, label) {
+  return `### ${label}\n\n来源：\`${rel}\`\n\n${normalizeMarkdown(text(rel), 3)}`;
 }
 
-function extractFallbackBlueprints(uikitPlan) {
-  const blueprints = uikitPlan.fallbackPageBlueprints || [];
-  return blueprints.map(bp => {
-    const applies = (bp.appliesWhen || []).map(s => `- ${s}`).join('\n');
-    const components = (bp.allowedComponents || []).join('、');
-    return [
-      `#### ${bp.name}（${bp.id}）`,
-      '',
-      `**适用条件：**`,
-      applies,
-      '',
-      `- **允许组件：**${components || '暂无'}`,
-    ].join('\n');
-  }).join('\n\n');
+function jsonSummary(rel, label, formatter) {
+  return `### ${label}\n\n来源：\`${rel}\`\n\n${formatter(json(rel))}`;
 }
 
-function extractCompositionConstraints(uikitPlan) {
-  const patterns = uikitPlan.pagePatterns || [];
-  const sections = [];
-  patterns.forEach(p => {
-    const constraints = p.compositionConstraints || [];
-    if (constraints.length === 0) return;
-    const items = constraints.map((c, i) => {
-      const allowWhen = c.allowWhen ? `\n   - 例外：${c.allowWhen}` : '';
-      return [
-        `${i + 1}. **触发条件：**${c.trigger}`,
-        `   - 推荐：${c.use}`,
-        `   - 避免：${c.avoid}`,
-        `   - 原因：${c.reason}${allowWhen}`,
-      ].join('\n');
-    }).join('\n\n');
-    sections.push(`#### ${p.name} 组合约束\n\n${items}`);
-  });
-  return sections.join('\n\n');
-}
-
-function extractLayoutModeRules(uikitPlan) {
-  const patterns = uikitPlan.pagePatterns || [];
-  const rules = [];
-  patterns.forEach(p => {
-    (p.structureHighlights || []).forEach(h => {
-      if (h.includes('通栏模式') || h.includes('长列表模式') || h.includes('卡片模式') || h.includes('白底大留白模式') || h.includes('M0') || h.includes('M8') || h.includes('M16') || h.includes('M32')) rules.push(`- ${h}`);
-    });
-  });
-  if (rules.length === 0) {
-    rules.push('- 通栏模式 M0：页面内容层横向 padding 为 0；分组内容使用通栏结构，不开启卡片修饰类。');
-    rules.push('- 长列表模式 M8：页面内容层横向 padding 为 8px；分组内容开启卡片修饰类，cell 分割线使用 .cell--divider-right-edge。');
-    rules.push('- 卡片模式 M16：页面内容层横向 padding 为 16px；分组内容使用已注册卡片修饰类。');
-    rules.push('- 白底大留白模式 M32：页面内容层横向 padding 为 32px；页面背景使用 --bg-surface，cell 分割线使用 .cell--divider-center，不开卡片修饰类。');
-  }
-  return rules.join('\n');
-}
-
-function extractSectionByMarker(value, marker) {
-  const start = value.indexOf(marker);
-  if (start < 0) return '';
-  const rest = value.slice(start + marker.length).replace(/^\s+/, '');
-  const next = rest.search(/^## /m);
-  return (next >= 0 ? rest.slice(0, next) : rest).trim();
-}
-const extractSurfaceMatchRules = designSkill => extractSectionByMarker(designSkill, '## surface 命中规则');
-const extractComponentMappingRules = designSkill => extractSectionByMarker(designSkill, '## 组件映射');
-const extractObjectManagementRules = designSkill => extractSectionByMarker(designSkill, '## 对象管理列表');
-const extractPagePresentationRules = designSkill => extractSectionByMarker(designSkill, '## 页面打开方式');
-const extractPageRoleRules = productSkill => extractSectionByMarker(productSkill, '## 页面角色拆分');
-const extractUxPresentationRules = uxSkill => extractSectionByMarker(uxSkill, '## 页面打开方式');
-const extractUxComponentConsumption = uxSkill => extractSectionByMarker(uxSkill, '## 组件与设计计划消费');
-function extractFieldGradingRules(productSkill) {
-  const marker = '### 对象管理列表字段分级';
-  const start = productSkill.indexOf(marker);
-  if (start < 0) return '';
-  const rest = productSkill.slice(start + marker.length).replace(/^\s+/, '');
-  const next = rest.search(/^## |^### /m);
-  return (next >= 0 ? rest.slice(0, next) : rest).trim();
-}
-
-function sourceSection(rel, heading) {
-  const value = text(rel);
-  const marker = `## ${heading}`;
-  const start = value.indexOf(marker);
-  if (start < 0) return '';
-  const rest = value.slice(start + marker.length).replace(/^\s+/, '');
-  const next = rest.search(/^## /m);
-  return (next >= 0 ? rest.slice(0, next) : rest).trim();
-}
-
-function mappedRules(rel, heading, mappings) {
-  const section = sourceSection(rel, heading);
-  if (!section) return [];
-  const lines = section.split('\n').filter(line => line.startsWith('- ')).map(line => line.slice(2).trim());
-  const outputs = [];
-  const unmatched = [];
-  for (const line of lines) {
-    const mapping = mappings.find(item => item.match.test(line));
-    if (!mapping) unmatched.push(line);
-    else if (!outputs.includes(mapping.output)) outputs.push(mapping.output);
-  }
-  if (unmatched.length > 0) throw new Error(`${rel} 的“${heading}”出现未映射规则：${unmatched.join('；')}`);
-  return outputs;
+function renderUiKitSummary(plan) {
+  const patterns = (plan.pagePatterns || []).map(item =>
+    `#### ${item.name}（\`${item.slug}\`）\n\n- 适用：${(item.applicableScenarios || []).join('、') || '未声明'}\n- 打开方式：${item.presentation || '未声明'}\n- 交互：${item.interactionPattern || '未声明'}\n- 组件：${(item.componentSlugs || []).join('、') || '未声明'}`);
+  const fallbacks = (plan.fallbackPageBlueprints || []).map(item =>
+    `#### ${item.name}（\`${item.id}\`）\n\n- 适用条件：${(item.appliesWhen || []).join('；')}\n- 允许组件：${(item.allowedComponents || []).join('、') || '未声明'}`);
+  return ['#### 选择优先级', '', ...(plan.paradigmSelectionPriority?.decisionTree || []).map((item, i) => `${i + 1}. ${item.question}`), '', '#### 已登记页面范式', '', ...patterns, '', '#### 兜底蓝图', '', ...fallbacks].join('\n');
 }
 
 function render() {
-  const index = json('.codex/skills/wego-design/components/index.json');
   const { value: fp, count } = fingerprint();
-  const componentNames = (index.components || []).map(item => item.name).join('、') || '暂无';
-  const kitNames = (index.uiKits || []).map(item => ({ 'biz-rule-config': '业务规则配置', 'system-settings': '系统设置' }[item.slug] || item.slug)).join('、') || '暂无';
-
-  const productRules = mappedRules('.codex/skills/wego-product/SKILL.md', '核心规则', [
-    { match: /自动生成.*不得作为运行时规则来源/, output: '只根据用户需求和正式工作流规则理解任务，自动生成的检查文档不能补充或改变需求。' },
-    { match: /页面信息、状态、异常流程和宿主路径只能来自/, output: '页面信息、状态、异常流程和宿主路径必须来自用户需求与真实业务事实，不能凭模板或惯例发明。' },
-    { match: /关键歧义.*用户确认/, output: '会改变页面范围、核心流程、数据含义或宿主层级的关键歧义，必须在进入设计前确认。' },
-    { match: /使用 `rule_sources`/, output: '需求规格只记录真实判断依据，不引用自动生成文档。' },
-    { match: /schema v2 新迭代先确认只含目标/, output: '新迭代先确认极简原型简报，快速验证交互后再补齐完整需求规格。' },
-    { match: /必须先用 `scripts\/iteration-record\.mjs init`/, output: '新业务或已有场景变化先创建业务迭代，明确长期功能、本轮需求、主场景和所有关联范围。' },
-    { match: /confirm-prototype.*formalize-product/, output: '用户原型定稿直接承担正式范围确认，随后补齐可追踪的正式规格。' },
-  ]);
-  const designRules = mappedRules('.codex/skills/wego-design/SKILL.md', '核心规则', [
-    { match: /设计判断只能来自/, output: '设计判断只使用已确认需求、正式页面范式、设计令牌、组件契约和真实示例。' },
-    { match: /v2 原型期必须先把每个 surface/, output: '原型期先记录页面打开方式、组件组合和真实规则来源，再快速实现。' },
-    { match: /必须记录到 `rule_sources_used`/, output: '每个关键设计决定都要记录真实依据，方便实现和验收追溯。' },
-    { match: /不得重新发明需求/, output: '页面设计不能重新发明字段、状态或流程，发现需求缺口要回到需求理解环节。' },
-    { match: /必须标记 `gap`/, output: '找不到可靠页面范式、兜底结构或组件依据时必须标记设计缺口，不能把判断甩给实现阶段。' },
-    { match: /必须落盘后才能交给/, output: '设计计划保存并通过完整性检查后，才能进入原型实现。' },
-    { match: /`design_plan\.iteration_context` 必须/, output: '设计计划必须使用已确认的迭代范围和需求编号，不能在设计阶段增加产品内容。' },
-  ]);
-  const uxRules = mappedRules('.codex/skills/wego-ux/SKILL.md', '核心规则', [
-    { match: /实现只能执行已确认的/, output: '实现只执行已确认的需求规格、设计计划和正式规则依据，不从自动生成文档重新做设计判断。' },
-    { match: /原型期只能执行已确认的 `prototype_brief`/, output: '原型期只按已确认范围与设计约束实现；定稿前不写正式规格或交接。' },
-    { match: /修改已有场景前必须先做偏差判定/, output: '修改已有场景前先核对需求、组件、布局和打开方式是否仍在规格范围内。' },
-    { match: /必须严格执行设计计划/, output: '组件结构、状态、页面布局和打开方式必须严格执行设计计划，不得二次设计。' },
-    { match: /必须回退上游/, output: '发现内容、组件、展示或规则来源偏差时，回到最早产生问题的环节修正。' },
-    { match: /原型期发现范围偏差/, output: '原型期范围或设计变化要回到简报或设计约束，并在定稿后保持与正式文档一致。' },
-    { match: /必须经过 `wego-tests`/, output: '场景完成后必须验收，提交、推送和部署状态只按真实执行结果报告。' },
-    { match: /只能修改 `affected_scenes`/, output: '实现只能修改当前迭代登记的场景和宿主文件，发现范围或设计变化时退回上游。' },
-  ]);
-  const testRules = mappedRules('.codex/skills/wego-tests/SKILL.md', '核心规则', [
-    { match: /必须同时比较需求、设计计划/, output: '验收必须一起检查需求、设计计划、正式规则依据和当前实现，不能只看截图或脚本结果。' },
-    { match: /使用 `rule_source_check`/, output: '每个关键设计和实现决定都要能追溯到正式规则来源。' },
-    { match: /最早产生错误决定的工作流环节/, output: '问题必须归因到最早做错决定的环节，不能只看最后改了哪个文件。' },
-    { match: /正常路径、空内容、长内容/, output: '除正常路径外，还要按需求检查空内容、长内容、重复操作、中断、失败、键盘焦点和返回恢复。' },
-    { match: /只有真实执行过的/, output: '只记录真实执行过的脚本、浏览器检查、提交、推送和部署结果。' },
-  ]);
-  const experienceRules = mappedRules('.codex/skills/wego-uxsystem-iterate/SKILL.md', '经验候选硬门禁', [
-    { match: /不能自动进入经验池/, output: '普通反馈、自查和验收失败只用于修复当前任务，不会自动沉淀经验。' },
-    { match: /一次审查可以记录多条经验候选/, output: '一次审查可以记录多条经验候选，但每条都必须完成归属判定、运行时可达性验证和场景拆分，且用户确认后才能升级为正式规则。' },
-    { match: /入池前必须确认/, output: '记录前必须明确问题最早产生的位置、规则归属、未来落点、消费方和验收方式。' },
-    { match: /归属不明确/, output: '归属不明确时不得进入候选池。' },
-    { match: /同类经验复用/, output: '同类经验只累计次数和场景证据，不重复创建。' },
-    { match: /当前处于快速迭代阶段/, output: '快速迭代阶段当前阈值为 1 次；标准稳定阶段阈值保留为 3 次，后续只调整阈值配置即可恢复。' },
-    { match: /候选达到自身 `threshold`/, output: '同类经验达到当前阈值时只进入等待确认状态，并询问用户是否升级。快速迭代阶段当前阈值为 1，标准稳定阶段保留 3。' },
-    { match: /未明确确认前/, output: '用户未确认前不得修改正式规则，也不得登记正式场景类型。' },
-    { match: /正式沉淀前必须拆分/, output: '正式升级前必须写清适用、不适用、例外和回退条件，并优先并入已有规则。' },
-    { match: /只保存成熟/, output: '正式场景注册表只保存成熟、经过验证且会被实际消费的规则类型。' },
-  ]);
-
-  const uikitPlan = json('.codex/skills/wego-design/uikit-plan.json');
-  const designSkill = text('.codex/skills/wego-design/SKILL.md');
-  const productSkill = text('.codex/skills/wego-product/SKILL.md');
-  const uxSkill = text('.codex/skills/wego-ux/SKILL.md');
-
   const docs = {};
+  const shared = [
+    section('阅读方式', '本目录按工作阶段编排。每个“权威规则全文”小节均标明来源；生成文档仅供阅读，不是运行时规则来源。'),
+  ];
+
   docs[FILES[0]] = doc('工作流总览与优先级', [
-    section('什么时候使用', '任何新页面、新场景或业务修改，都先判断任务属于需求理解、页面设计、原型实现、验收，还是设计系统迭代。'),
-    section('应该怎么做', bullets(['新需求或已有场景变化先创建业务迭代，形成并确认跨场景产品范围。','产品范围确认后形成设计计划。','设计计划无缺口后只实现迭代登记的场景和宿主文件。','场景完成后按需求编号验收并生成开发交接，随后冻结迭代。','组件、页面范式和工作流本体进入项目级迭代。'])),
-    section('不能怎么做', bullets(['不能跳过上游规格直接写页面。','不能把组件或工作流问题当普通业务开发处理。','不能用自动生成文档代替正式规则来源。','每个技能只能有一个运行时入口。'])),
-    section('完成后如何检查', '确认每一阶段都有唯一入口、明确输入、输出、真实规则来源和下一步交接，且判断优先级始终是：清晰 > 一致 > 效率 > 美观 > 创新。'),
+    ...shared,
+    section('主链路', '业务需求按 **需求理解 → 原型设计 → 原型实现 → 验收冻结** 推进；组件、Token、UI Kit 与工作流本体改动进入系统迭代。'),
+    section('仓库级硬约束', source('AGENTS.md', '仓库定位、技能路由与主链路门禁')),
+    section('技能入口与交接', source('.codex/skills/README.md', '五技能入口总览')),
   ].join('\n'), fp);
+
   docs[FILES[1]] = doc('需求理解规则', [
-    section('什么时候使用', '收到新的业务页面、原型、场景或流程调整需求时使用。'),
-    section('应该怎么做', [subSection('核心原则', bullets(productRules)), subSection('页面角色拆分', extractPageRoleRules(productSkill)), subSection('对象管理列表字段分级', extractFieldGradingRules(productSkill))].join('\n')),
-    section('不能怎么做', bullets(['不能提前选择组件或布局代替需求判断。','不能从历史示例、页面模板或自动生成文档中发明字段、状态和流程。'])),
-    section('完成后如何检查', '用户目标、页面范围、信息块、状态、异常流程和宿主路径都已明确；业务迭代、长期功能、本轮需求和关联场景已登记，范围已经用户确认，需求规格已经保存。'),
+    ...shared,
+    section('阶段目标', '确认原型简报、业务迭代范围和正式需求规格；此阶段不决定组件或视觉布局。'),
+    section('权威规则全文', [
+      source('.codex/skills/wego-product/SKILL.md', '技能职责、输入与交接'),
+      source('.codex/skills/wego-product/references/iteration-workflow.md', '业务迭代生命周期'),
+      source('.codex/skills/wego-product/references/interaction-spec.md', '交互规格结构'),
+      source('.codex/skills/wego-product/references/readiness-and-boundaries.md', '就绪条件与边界'),
+    ].join('\n\n')),
   ].join('\n'), fp);
+
   docs[FILES[2]] = doc('页面设计规则', [
-    section('什么时候使用', '需求规格已经确认，需要决定页面结构、布局、组件组合和打开方式时使用。'),
-    section('应该怎么做', [subSection('核心原则', bullets(designRules)), subSection('Surface 命中判断', extractSurfaceMatchRules(designSkill)), subSection('组件映射决策', extractComponentMappingRules(designSkill)), subSection('对象管理列表判断', extractObjectManagementRules(designSkill)), subSection('页面打开方式选择', extractPagePresentationRules(designSkill))].join('\n')),
-    section('不能怎么做', bullets(['不能只凭视觉感觉拼组件。','不能临时发明页面范式、组件类或打开方式。','不能让内容多少改变主要区域的整体宽度和对齐。'])),
-    section('完成后如何检查', '检查每个页面都能说明使用了什么结构、为什么这样组合、如何打开，以及依据来自哪个正式文件和字段。'),
+    ...shared,
+    section('阶段目标', '只消费已确认范围，选择页面范式、组件组合、布局和打开方式；发现缺口必须回退上游。'),
+    section('权威规则全文', [
+      source('.codex/skills/wego-design/SKILL.md', '技能职责、输入与交接'),
+      source('.codex/skills/wego-design/references/design-plan.md', '设计计划结构与无缺口要求'),
+      source('.codex/skills/wego-design/references/design-decisions.md', '设计判断方法'),
+      source('.codex/skills/wego-design/references/library-map.md', '设计系统读取路径'),
+    ].join('\n\n')),
   ].join('\n'), fp);
+
   docs[FILES[3]] = doc('组件与 UI Kit 使用规则', [
-    section('什么时候使用', '页面结构已经确定，需要选择稳定组件、组合方式或页面示例时使用。'),
-    section('应该怎么做', [
-      subSection('组件与 UI Kit 总览', bullets([`当前稳定组件包括：${componentNames}。`,`当前页面示例包括：${kitNames}。`,'先看组件契约和真实示例，再决定结构、状态和组合。','页面示例只用于理解骨架、节奏和固定位置，业务内容必须按当前需求重新组织。'])),
-      subSection('UI Kit 选择决策树', extractUiKitDecisionTree(uikitPlan)),
-      subSection('各页面范式适用场景速查', extractPagePatternScenarios(uikitPlan)),
-      subSection('兜底蓝图适用场景', extractFallbackBlueprints(uikitPlan)),
-      subSection('组件组合约束', extractCompositionConstraints(uikitPlan)),
-      subSection('布局模式判断（通栏 M0 / 长列表 M8 / 卡片 M16 / 白底大留白 M32）', extractLayoutModeRules(uikitPlan)),
-    ].join('\n')),
-    section('不能怎么做', bullets(['不能复制手机壳、展示外框或演示业务内容作为正式页面。','不能发明未登记的组件、子结构或修饰方式。','不能直接修改 App 中的设计系统副本。'])),
-    section('完成后如何检查', '组件已在注册表中存在，结构与状态符合契约，页面示例只用于结构参考，设计系统源文件与部署副本保持一致。'),
+    ...shared,
+    section('阶段目标', '从已登记组件、页面范式和兜底蓝图中选择，不新增未登记的结构或样式能力。'),
+    section('速查', jsonSummary('.codex/skills/wego-design/uikit-plan.json', '页面范式、选择优先级与兜底蓝图', renderUiKitSummary)),
+    section('权威规则全文', [
+      source('.codex/skills/wego-design/library-consumption.json', '设计系统消费边界'),
+      source('.codex/skills/wego-uxsystem-iterate/references/sync-matrix.runtime.md', '组件与 UI Kit 变更同步矩阵'),
+    ].join('\n\n')),
   ].join('\n'), fp);
+
   docs[FILES[4]] = doc('原型实现规则', [
-    section('什么时候使用', '需求规格和设计计划都已保存且没有设计缺口，需要生成或更新真实 App 场景时使用。'),
-    section('应该怎么做', [subSection('核心原则', bullets(uxRules)), subSection('页面打开方式实现', extractUxPresentationRules(uxSkill)), subSection('组件消费模式实现', extractUxComponentConsumption(uxSkill))].join('\n')),
-    section('不能怎么做', bullets(['不能复制第二套 App 宿主。','不能跳出 App 打开独立页面。','不能依赖运行时读取本地页面片段。','不能因为内容为空或较少让主要区域缩成小块。'])),
-    section('完成后如何检查', '入口、路由、页面打开方式、保存回填、取消删除、键盘焦点、滚动和空内容等状态都形成完整闭环；电脑端和移动端使用同一链接。'),
+    ...shared,
+    section('阶段目标', '严格按已确认的原型简报和设计约束，将场景注册到唯一 App 宿主；正式化后补齐实现追踪。'),
+    section('权威规则全文', [
+      source('.codex/skills/wego-ux/SKILL.md', '技能职责、输入与交接'),
+      source('.codex/skills/wego-ux/references/scene-runtime.md', '场景运行时与宿主接入'),
+      source('.codex/skills/wego-ux/references/interaction-implementation.md', '交互实现规则'),
+      source('.codex/skills/wego-ux/references/delivery.md', '交付与实现追踪'),
+    ].join('\n\n')),
   ].join('\n'), fp);
+
   docs[FILES[5]] = doc('验收与回归规则', [
-    section('什么时候使用', '场景已经实现并注册路由，需要判断是否正确承接需求和设计时使用。'),
-    section('应该怎么做', bullets(testRules)),
-    section('不能怎么做', bullets(['不能只看自动化通过就认定体验正确。','不能只验证正常路径，忽略需求明确的边界和中断操作。','不能把实现偏差误归因到组件或最后修改的文件。'])),
-    section('完成后如何检查', '所有迭代需求编号都已覆盖，页面、信息、状态、异常流程、组件结构、打开方式、路由、反馈、键盘视口和资源同步均通过；通过后生成开发交接并冻结，问题有明确归属和复现依据。'),
+    ...shared,
+    section('阶段目标', '按 requirement_id 覆盖确认需求，比较规格、规则与实现，输出验收、开发交接并冻结迭代。'),
+    section('权威规则全文', [
+      source('.codex/skills/wego-tests/SKILL.md', '技能职责、输入与交接'),
+      source('.codex/skills/wego-tests/references/acceptance-report.md', '验收报告结构'),
+      source('.codex/skills/wego-tests/references/acceptance-checks.md', '验收检查项'),
+      source('.codex/skills/wego-tests/references/browser-verification.md', '浏览器验证方法'),
+    ].join('\n\n')),
   ].join('\n'), fp);
+
   docs[FILES[6]] = doc('工作流迭代与经验沉淀规则', [
-    section('什么时候使用', '只有用户明确要求沉淀经验、补充规则、复盘形成经验或优化工作流时使用。'),
-    section('应该怎么做', bullets(experienceRules)),
-    section('不能怎么做', bullets(['不能一次批量记录多条经验。','不能因为业务名称不同重复创建同类候选。','不能在达到当前阈值时自动升级正式规则。','不能把候选内容写进正式场景注册表。','不能为技能创建并列运行时入口。'])),
-    section('完成后如何检查', '候选次数、场景证据、主要归属、未来规则落点、实际消费方和验收方式都完整；正式升级还必须有用户确认、场景边界和回归验证。'),
+    ...shared,
+    section('阶段目标', '仅在用户明确要求时审查或优化设计系统、工作流和经验沉淀；普通业务页面不进入本流程。'),
+    section('权威规则全文', [
+      source('.codex/skills/wego-uxsystem-iterate/SKILL.md', '技能职责、输入与交接'),
+      source('.codex/skills/wego-uxsystem-iterate/references/workflow.md', '设计系统与组件迭代流程'),
+      source('.codex/skills/wego-uxsystem-iterate/references/judgment-principles.md', '设计系统审查判断原则'),
+      source('.codex/skills/wego-uxsystem-iterate/references/workflow-iteration.md', '经验沉淀与规则升级流程'),
+      source('.codex/skills/wego-uxsystem-iterate/references/experience-candidates.md', '候选池结构'),
+      source('.codex/skills/wego-uxsystem-iterate/references/sync-matrix.md', '工作流变更同步矩阵'),
+      source('.codex/skills/wego-uxsystem-iterate/references/skill-package-structure.md', '技能包结构规则'),
+    ].join('\n\n')),
   ].join('\n'), fp);
   return { docs, fp, count };
 }
@@ -540,28 +394,24 @@ function tests() {
   const componentWorkflow = text('.codex/skills/wego-uxsystem-iterate/references/workflow.md');
   expect(componentWorkflow.includes('共享 helper') && componentWorkflow.includes('不得复制简化算法') && componentWorkflow.includes('单组件 Preview 和组合 Preview'), '组件组合公共交互 helper 复用规则不完整');
   const rendered = render().docs;
+  const expectedSources = {
+    [FILES[0]]: ['AGENTS.md', '.codex/skills/README.md'],
+    [FILES[1]]: ['wego-product/SKILL.md', 'iteration-workflow.md', 'interaction-spec.md', 'readiness-and-boundaries.md'],
+    [FILES[2]]: ['wego-design/SKILL.md', 'design-plan.md', 'design-decisions.md', 'library-map.md'],
+    [FILES[3]]: ['uikit-plan.json', 'library-consumption.json', 'sync-matrix.runtime.md'],
+    [FILES[4]]: ['wego-ux/SKILL.md', 'scene-runtime.md', 'interaction-implementation.md', 'delivery.md'],
+    [FILES[5]]: ['wego-tests/SKILL.md', 'acceptance-report.md', 'acceptance-checks.md', 'browser-verification.md'],
+    [FILES[6]]: ['wego-uxsystem-iterate/SKILL.md', 'workflow.md', 'judgment-principles.md', 'workflow-iteration.md', 'experience-candidates.md', 'sync-matrix.md', 'skill-package-structure.md'],
+  };
   for (const [name, value] of Object.entries(rendered)) {
-    expect(value.includes('## 什么时候使用') && value.includes('## 应该怎么做') && value.includes('## 不能怎么做') && value.includes('## 完成后如何检查'), `${name} 缺少统一的人话结构`);
-    const body = value.replace(/<!--[^]*?-->/g, '');
-    expect(!body.includes('.codex/skills/') && !body.includes('SKILL.runtime.md') && !body.includes('spec_refs'), `${name} 仍堆叠运行时文件名或旧字段`);
+    expect(value.includes('## 阅读方式'), `${name} 缺少阅读说明`);
+    expect(value.includes('## 权威规则全文') || name === FILES[0], `${name} 缺少按来源编排的规则正文`);
+    expect(value.length > 1200, `${name} 内容过短，可能遗漏权威规则`);
+    expect(!/## [^\n]+\n\n\n+(?=## |<!--)/.test(value), `${name} 存在空的一级章节`);
+    for (const rel of expectedSources[name]) expect(value.includes(rel), `${name} 缺少来源：${rel}`);
   }
   const componentKitDoc = rendered[FILES[3]];
-  expect(componentKitDoc.includes('UI Kit 选择决策树'), '组件与 UI Kit 使用规则应包含 UI Kit 选择决策树');
-  expect(componentKitDoc.includes('各页面范式适用场景速查'), '组件与 UI Kit 使用规则应包含页面范式适用场景');
-  expect(componentKitDoc.includes('兜底蓝图适用场景'), '组件与 UI Kit 使用规则应包含兜底蓝图适用场景');
-  expect(componentKitDoc.includes('组件组合约束'), '组件与 UI Kit 使用规则应包含组件组合约束');
-  expect(componentKitDoc.includes('布局模式判断'), '组件与 UI Kit 使用规则应包含布局模式判断');
-  const pageDesignDoc = rendered[FILES[2]];
-  expect(pageDesignDoc.includes('Surface 命中判断'), '页面设计规则应包含 Surface 命中判断');
-  expect(pageDesignDoc.includes('组件映射决策'), '页面设计规则应包含组件映射决策');
-  expect(pageDesignDoc.includes('对象管理列表判断'), '页面设计规则应包含对象管理列表判断');
-  expect(pageDesignDoc.includes('页面打开方式选择'), '页面设计规则应包含页面打开方式选择');
-  const productDoc = rendered[FILES[1]];
-  expect(productDoc.includes('页面角色拆分'), '需求理解规则应包含页面角色拆分');
-  expect(productDoc.includes('对象管理列表字段分级'), '需求理解规则应包含字段分级');
-  const uxDoc = rendered[FILES[4]];
-  expect(uxDoc.includes('页面打开方式实现'), '原型实现规则应包含页面打开方式实现');
-  expect(uxDoc.includes('组件消费模式实现'), '原型实现规则应包含组件消费模式实现');
+  expect(componentKitDoc.includes('选择优先级') && componentKitDoc.includes('已登记页面范式') && componentKitDoc.includes('兜底蓝图'), '组件与 UI Kit 使用规则缺少选择或兜底信息');
   return failures;
 }
 

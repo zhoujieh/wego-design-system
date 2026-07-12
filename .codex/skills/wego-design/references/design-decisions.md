@@ -2,7 +2,17 @@
 
 > 角色：设计判断方法。读取条件：页面范式、组件组合或承载方式需要决策时；正式领域规则仍以结构化设计系统来源为准。
 
-仅在判断页面复杂度、pagePattern、fallback、组件组合或打开方式时读取。
+仅在判断页面复杂度、pagePattern、fallback、组件组合或打开方式时读取。它只组织消费路径，不补充业务事实；所有业务对象、字段、状态、文案和操作必须已存在于已确认的 `prototype_brief` 或 `interaction_spec`。
+
+## 固定消费路径
+
+1. 校验已确认的业务范围、surface 和原型边界；缺少业务依据立即退回 `wego-product`。
+2. 读取 `library-consumption.json`，确认复制边界、图标与 UI Kit 的使用方式。
+3. 读取 `uikit-plan.json`，逐个 surface 匹配 exact、near、fallback 或 gap。
+4. 读取 Token 与组件索引；只加载本轮命中的组件契约和 Preview，确定区域、稳定变体、组合约束和 presentation。
+5. 将已命中决定写入 `prototype_design` 或 `design_plan`，连同真实 `rule_sources_used` 和实现约束交给下游。
+
+UI Kit 只用于理解区域结构和组件组合，禁止复制展示外壳、演示业务内容或业务自定义样式。`gap` 不能由业务 class、说明文案或临时组件绕过。
 
 ## 决策顺序
 
@@ -18,6 +28,8 @@
 - 稳定变体优先于组合约束，组合约束优先于自由组合。
 - 自由组合只能使用正式 `domAnatomy`，业务 class 只允许做区域布局胶水。
 - 业务需要但契约无法覆盖时形成 design gap，不能发明组件类。
+- 所有组件映射必须说明实现可追溯到的稳定变体、组合约束或正式 anatomy；只在计划中列组件名、实现仍自造完整业务壳，不构成有效消费。
+- 可选内容为空时默认折叠对应结构；只有缺失本身属于已确认业务状态时，才允许显示状态文案。不得自动补“未填写”“暂无”或原型解释。
 
 ## presentation
 

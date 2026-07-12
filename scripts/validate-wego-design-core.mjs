@@ -1549,6 +1549,16 @@ function checkPrototypeSurfaceDesigns(context) {
               `surface ${id} 必须说明 layout_contract.media_priority_reason`,
               planPath);
           }
+          if (typeof layoutContract.first_screen_content_rule !== 'string' || !layoutContract.first_screen_content_rule.trim()) {
+            add('error', 'prototype.surface_layout_first_screen_rule_missing',
+              `surface ${id} 必须声明 layout_contract.first_screen_content_rule`,
+              planPath);
+          }
+          if (typeof layoutContract.optional_content_policy !== 'string' || !layoutContract.optional_content_policy.trim()) {
+            add('error', 'prototype.surface_layout_optional_content_policy_missing',
+              `surface ${id} 必须声明 layout_contract.optional_content_policy`,
+              planPath);
+          }
         }
       }
     }
@@ -1896,6 +1906,7 @@ function checkPrototypeComponentClassInvention(context) {
     '库存管理': ['stock', 'inventory', 'stock-page'],
     '快捷发布产品': ['quick-publish', 'publish', 'quick-publish-page'],
     '系统设置': ['system', 'settings', 'system-page'],
+    '动态商品流': ['dynamic', 'dynamic-feed', 'dynamic-detail', 'dynamic-feed-page', 'dynamic-detail-page'],
   };
 
   function isBusinessPrefix(className, scene) {

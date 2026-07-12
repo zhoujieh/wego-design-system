@@ -55,6 +55,7 @@ function compatibilityErrors() {
     { code: 'compat.old_specs', pattern: /page_spec\.json|design_consumption_plan\.json/g, message: '仍存在旧规格文件运行时引用' },
     { code: 'compat.old_fields', pattern: /page_surfaces|回退顶层\s*`?route_id`?|fallback.*route_id/gi, message: '仍存在旧字段回退逻辑' },
     { code: 'compat.dual_track', pattern: /v1\s*(?:继续|兼容|状态机|流程)|v2\s*(?:且|原型期|状态机).*v1/gi, message: '仍存在 v1/v2 双轨表述或逻辑' },
+    { code: 'compat.historical_runtime', pattern: /兼容(?:旧(?:任务|结构|版本|格式|字段)|历史(?:任务|结构|版本|规格))|历史(?:任务|结构|规格).{0,12}兼容/g, message: '仍存在面向历史产物的兼容规则' },
   ];
   const allowed = new Set([
     path.join(repoRoot, 'AGENTS.md'),
@@ -78,6 +79,23 @@ function compatibilityErrors() {
         code: check.code,
         file: path.relative(repoRoot, file).split(path.sep).join('/'),
         message: check.message,
+      });
+    }
+  }
+  const legacyFormFiles = [
+    path.join(repoRoot, '.codex/skills/wego-design/components/form.json'),
+    path.join(repoRoot, '.codex/skills/wego-design/preview/component-form.html'),
+    path.join(repoRoot, '.codex/skills/wego-design/components.css'),
+    path.join(repoRoot, 'wego-app/lib/components.css'),
+  ];
+  for (const file of legacyFormFiles) {
+    if (!fs.existsSync(file)) continue;
+    const content = fs.readFileSync(file, 'utf8');
+    if (/"fallbackSelector"/.test(content) || /\.form(?![-\w])/u.test(content)) {
+      errors.push({
+        code: 'compat.legacy_form_container',
+        file: path.relative(repoRoot, file).split(path.sep).join('/'),
+        message: '仍保留旧 .form 容器或 fallbackSelector 兼容分支',
       });
     }
   }

@@ -130,7 +130,6 @@
     {
       "name": "container",
       "selector": ".form-group",
-      "fallbackSelector": ".form",
       "role": "字段分组最外层容器，承接组标题、内容容器和同组节奏；成组出现的 form 必须用 .form-group 包裹，不发明场景级 xxx-page__group"
     },
     {
@@ -218,7 +217,7 @@
     "成组出现的 form 必须用 .form-group 包裹，不发明场景级 xxx-page__group 自定义类。",
     "需要组标题时，标题使用 .form-group__title 单独成行，不能把标题塞进白底圆角内容区里。",
     "连续 form-body 默认放进 .form-group__content；当承接该组的宿主内容层提供横向留白时，在 .form-group__content 上开启卡片修饰类；当分组内容直接通栏贴边排列时，不开启卡片修饰类。",
-    "历史结构允许 .form 直接包连续 form-body 以兼容旧任务，但新任务和 UI Kit 一律优先使用标题 + 内容容器的正式结构。"
+    "连续 form-body 必须使用标题与内容容器的正式结构。"
   ],
   "behavior": {
     "pressFeedback": "移动端按压态由 :active 与 .is-pressed 共同承载。宿主 App 通过 wego-app/js/app.js 在触控设备上自动为 .form-body--clickable、.form-body__select、.form-body__upload、.form-body__icon-action 等可点击元素添加/移除 .is-pressed；桌面端继续由 :active 兜底。同时设置 -webkit-user-select: none / user-select: none 以禁用长按文本选择和拖杆控件。",
@@ -250,7 +249,7 @@
     "custom 与 counter 的组合只表示容器嵌套，不代表 form 接管 counter 内部图标、按钮、输入字号；默认同时隐藏 counter 自带底部消息位，如需范围反馈改由宿主自己的消息槽位承接。",
     "radio 组合场景沿用 radio 组件固定的 root + inner + dot 三层结构，不额外嵌套 svg 或其他视觉节点。",
     "checkbox 组合场景沿用 checkbox 组件固定的 inner / icon / minus 结构，勾选态继续使用随库 SVG 资产。",
-    "成组 form 优先用 .form-group；.form 仅为兼容历史任务产物，新任务不再使用。",
+    "成组 form 使用 .form-group。",
     "页面需要 section 标题时，直接使用 .form-group__title，不再复制 UI Kit 私有的 .uikit-section-title 或手写额外标题样式。",
     "当 phone-body 或等价宿主内容层承担左右内边距时，把该组视为卡片式分组，在 .form-group__content 上使用卡片修饰类；宿主层不提供横向留白时保持通栏白底，不要额外再包一层只为白底和圆角存在的容器。"
   ],
@@ -323,8 +322,7 @@
     ],
     "containerModifiers": [
       ".form-group__content--card",
-      ".form-group--no-divider",
-      ".form--no-divider"
+      ".form-group--no-divider"
     ],
     "containerChildren": [
       ".form-group__title",

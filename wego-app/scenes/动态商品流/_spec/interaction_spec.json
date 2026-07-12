@@ -1,0 +1,515 @@
+{
+  "iteration_context": {
+    "iteration_id": "album001",
+    "scope_revision": 1,
+    "requirement_ids": [
+      "album001-R01",
+      "album001-R02",
+      "album001-R03",
+      "album001-R04"
+    ]
+  },
+  "goal": "让用户在动态 Tab 中连续浏览店主发布的商品动态，并能稳定查看商品摘要、进入详情或执行轻操作。",
+  "scope": {
+    "included": [
+      "动态流浏览",
+      "详情下钻",
+      "轻操作与更多操作收口"
+    ],
+    "excluded": [
+      "真实下单",
+      "评论与点赞",
+      "服务端刷新与分页"
+    ]
+  },
+  "actors": [
+    {
+      "actor_id": "shop-visitor",
+      "role": "逛店用户",
+      "goal": "快速判断动态里的商品是否值得点进详情或继续操作"
+    }
+  ],
+  "entry_points": [
+    {
+      "entry_id": "tab-dongtai",
+      "label": "底部 Tab「动态」",
+      "surface_ref": "feed-surface"
+    }
+  ],
+  "flows": [
+    {
+      "flow_id": "feed-browse-flow",
+      "flow_type": "main",
+      "entry_node": "enter-feed",
+      "steps": [
+        "enter-feed",
+        "scan-feed",
+        "compare-posts"
+      ],
+      "exit_condition": "用户继续停留在动态流中浏览下一条内容"
+    },
+    {
+      "flow_id": "detail-drill-flow",
+      "flow_type": "branch",
+      "entry_node": "scan-feed",
+      "steps": [
+        "scan-feed",
+        "open-detail",
+        "view-detail"
+      ],
+      "exit_condition": "用户完成商品详情浏览并可返回动态流"
+    },
+    {
+      "flow_id": "action-sheet-flow",
+      "flow_type": "branch",
+      "entry_node": "scan-feed",
+      "steps": [
+        "scan-feed",
+        "open-more-actions",
+        "execute-light-action"
+      ],
+      "exit_condition": "用户完成轻操作并回到原动态流位置"
+    }
+  ],
+  "flow_nodes": [
+    {
+      "node_id": "enter-feed",
+      "purpose": "进入动态 Tab 宿主页并看到连续内容流首屏",
+      "surface_ref": "feed-surface",
+      "inputs": [],
+      "outputs": [],
+      "key_states": [
+        "默认浏览态"
+      ]
+    },
+    {
+      "node_id": "scan-feed",
+      "purpose": "纵向浏览多条动态并识别发布者、时间、正文、图片和商品摘要",
+      "surface_ref": "feed-surface",
+      "inputs": [
+        "feed-posts"
+      ],
+      "outputs": [
+        "selected-post-id"
+      ],
+      "key_states": [
+        "多图态",
+        "无正文态",
+        "长商品信息态"
+      ]
+    },
+    {
+      "node_id": "compare-posts",
+      "purpose": "在不跳页的情况下快速比较多条动态中的商品信息和发布节奏",
+      "surface_ref": "feed-surface",
+      "inputs": [
+        "feed-posts"
+      ],
+      "outputs": [],
+      "key_states": [
+        "连续浏览态"
+      ]
+    },
+    {
+      "node_id": "open-detail",
+      "purpose": "点击商品摘要或详情入口，带着选中动态进入商品详情页",
+      "surface_ref": "detail-surface",
+      "inputs": [
+        "selected-post-id"
+      ],
+      "outputs": [
+        "detail-post"
+      ],
+      "key_states": [
+        "详情打开态"
+      ]
+    },
+    {
+      "node_id": "view-detail",
+      "purpose": "查看完整商品图片、价格、规格和动态说明，并执行联系店主或下单等后续动作",
+      "surface_ref": "detail-surface",
+      "inputs": [
+        "detail-post"
+      ],
+      "outputs": [],
+      "key_states": [
+        "详情浏览态",
+        "商品图切换态"
+      ]
+    },
+    {
+      "node_id": "open-more-actions",
+      "purpose": "打开更多操作 sheet，查看转发、收藏、联系店主等操作入口",
+      "surface_ref": "action-sheet-surface",
+      "inputs": [
+        "selected-post-id"
+      ],
+      "outputs": [],
+      "key_states": [
+        "操作收口态"
+      ]
+    },
+    {
+      "node_id": "execute-light-action",
+      "purpose": "执行询价、转发或收藏等轻操作并回到原浏览位置",
+      "surface_ref": "action-sheet-surface",
+      "inputs": [
+        "selected-post-id",
+        "action-type"
+      ],
+      "outputs": [
+        "action-feedback"
+      ],
+      "key_states": [
+        "操作完成态"
+      ]
+    }
+  ],
+  "surfaces": [
+    {
+      "surface_id": "feed-surface",
+      "role": "primary-task-page",
+      "carrier": "host-section",
+      "node_refs": [
+        "enter-feed",
+        "scan-feed",
+        "compare-posts"
+      ],
+      "content_refs": [
+        "post-identity",
+        "post-text",
+        "post-media",
+        "post-product",
+        "post-actions"
+      ],
+      "interaction_mode": "continuous-browse",
+      "purpose": "动态 Tab 宿主页中的连续商品流，服务连续扫读和轻量判断",
+      "states": [
+        "默认浏览态",
+        "无正文态",
+        "单图态",
+        "双图态",
+        "多图态",
+        "长商品信息态"
+      ]
+    },
+    {
+      "surface_id": "detail-surface",
+      "role": "secondary-task-page",
+      "carrier": "standalone-page",
+      "node_refs": [
+        "open-detail",
+        "view-detail"
+      ],
+      "content_refs": [
+        "detail-gallery",
+        "detail-product",
+        "detail-dynamic-note",
+        "detail-actions"
+      ],
+      "interaction_mode": "browse-then-act",
+      "purpose": "商品详情承接完整商品信息、图片浏览和后续动作",
+      "states": [
+        "详情浏览态",
+        "商品图切换态",
+        "无正文补充态"
+      ]
+    },
+    {
+      "surface_id": "action-sheet-surface",
+      "role": "secondary-task-page",
+      "carrier": "sheet",
+      "node_refs": [
+        "open-more-actions",
+        "execute-light-action"
+      ],
+      "content_refs": [
+        "sheet-actions"
+      ],
+      "interaction_mode": "single-step-action",
+      "purpose": "收纳多余轻操作，避免在列表项中堆叠过多入口",
+      "states": [
+        "操作收口态",
+        "操作完成态"
+      ]
+    }
+  ],
+  "content_blocks": [
+    {
+      "content_id": "feed-summary",
+      "group": "feed-header",
+      "content": "动态总数、今日更新数、在售商品数",
+      "interaction": "只读摘要",
+      "default_state": "显示",
+      "editable": false,
+      "key_states": [
+        "默认浏览态"
+      ]
+    },
+    {
+      "content_id": "post-identity",
+      "group": "post-card",
+      "content": "发布者头像、名称、身份标签、发布时间",
+      "interaction": "轻识别",
+      "default_state": "显示",
+      "editable": false,
+      "key_states": [
+        "默认浏览态"
+      ]
+    },
+    {
+      "content_id": "post-text",
+      "group": "post-card",
+      "content": "动态正文，可为空",
+      "interaction": "浏览",
+      "default_state": "按数据有无决定显示",
+      "editable": false,
+      "key_states": [
+        "无正文态"
+      ]
+    },
+    {
+      "content_id": "post-media",
+      "group": "post-card",
+      "content": "1 到多张商品图片，按数量切换布局",
+      "interaction": "浏览图片",
+      "default_state": "显示",
+      "editable": false,
+      "key_states": [
+        "单图态",
+        "双图态",
+        "多图态"
+      ]
+    },
+    {
+      "content_id": "post-product",
+      "group": "post-card",
+      "content": "商品标题、价格、划线价、标签、规格摘要和库存提示",
+      "interaction": "点击进入详情",
+      "default_state": "显示",
+      "editable": false,
+      "key_states": [
+        "长商品信息态"
+      ]
+    },
+    {
+      "content_id": "post-actions",
+      "group": "post-card",
+      "content": "看详情、询价和更多操作",
+      "interaction": "轻操作",
+      "default_state": "显示",
+      "editable": false,
+      "key_states": [
+        "默认浏览态"
+      ]
+    },
+    {
+      "content_id": "detail-gallery",
+      "group": "detail-page",
+      "content": "商品详情主图和缩略图切换",
+      "interaction": "切换图片",
+      "default_state": "显示",
+      "editable": false,
+      "key_states": [
+        "商品图切换态"
+      ]
+    },
+    {
+      "content_id": "detail-product",
+      "group": "detail-page",
+      "content": "完整商品信息、价格、规格、配送和服务承诺",
+      "interaction": "浏览",
+      "default_state": "显示",
+      "editable": false,
+      "key_states": [
+        "详情浏览态"
+      ]
+    },
+    {
+      "content_id": "detail-dynamic-note",
+      "group": "detail-page",
+      "content": "对应动态正文；当正文为空时改为“仅发布商品”状态说明",
+      "interaction": "浏览",
+      "default_state": "显示",
+      "editable": false,
+      "key_states": [
+        "无正文补充态"
+      ]
+    },
+    {
+      "content_id": "detail-actions",
+      "group": "detail-page",
+      "content": "联系店主和立即下单的详情页动作收口",
+      "interaction": "页面级动作",
+      "default_state": "显示",
+      "editable": false,
+      "key_states": [
+        "详情浏览态"
+      ]
+    },
+    {
+      "content_id": "sheet-actions",
+      "group": "sheet",
+      "content": "查看详情、转发给客户、收藏商品、联系店主",
+      "interaction": "单步操作",
+      "default_state": "显示",
+      "editable": false,
+      "key_states": [
+        "操作收口态"
+      ]
+    }
+  ],
+  "states": [
+    {
+      "state_id": "edge-cases",
+      "description": "正文为空时直接让媒体或商品摘要顶上；多图时按数量自动切换 1 图、2 图和多图布局；长商品信息允许两行标题和多行辅助信息，不压缩成单行省略。"
+    }
+  ],
+  "transitions": [
+    {
+      "transition_id": "go-detail-from-post",
+      "from": "scan-feed",
+      "trigger": "点击商品摘要或看详情",
+      "to": "open-detail",
+      "data_in": [
+        "selected-post-id"
+      ],
+      "result_out": [
+        "detail-post"
+      ]
+    },
+    {
+      "transition_id": "open-sheet-from-post",
+      "from": "scan-feed",
+      "trigger": "点击更多",
+      "to": "open-more-actions",
+      "data_in": [
+        "selected-post-id"
+      ],
+      "result_out": []
+    },
+    {
+      "transition_id": "finish-sheet-action",
+      "from": "open-more-actions",
+      "trigger": "点击某个轻操作",
+      "to": "execute-light-action",
+      "data_in": [
+        "action-type",
+        "selected-post-id"
+      ],
+      "result_out": [
+        "action-feedback"
+      ],
+      "return_to": "scan-feed",
+      "return_payload": [
+        "action-feedback"
+      ]
+    }
+  ],
+  "data_handoffs": [
+    {
+      "handoff_id": "selected-post-to-detail",
+      "transition_id": "go-detail-from-post",
+      "source_node": "scan-feed",
+      "target_node": "open-detail",
+      "payload_content_refs": [
+        "post-product",
+        "post-media",
+        "post-text"
+      ],
+      "reset_policy": "keep"
+    },
+    {
+      "handoff_id": "sheet-action-feedback",
+      "transition_id": "finish-sheet-action",
+      "source_node": "open-more-actions",
+      "target_node": "execute-light-action",
+      "payload_content_refs": [
+        "sheet-actions"
+      ],
+      "reset_policy": "clear-on-success"
+    }
+  ],
+  "exit_results": [
+    {
+      "result_id": "stay-in-feed",
+      "description": "用户继续浏览动态流"
+    },
+    {
+      "result_id": "enter-product-detail",
+      "description": "用户进入商品详情"
+    },
+    {
+      "result_id": "finish-light-action",
+      "description": "用户完成轻操作并收到 toast 反馈"
+    }
+  ],
+  "prototype_boundaries": [
+    {
+      "node_id": "enter-feed",
+      "depth": "functional"
+    },
+    {
+      "node_id": "scan-feed",
+      "depth": "functional"
+    },
+    {
+      "node_id": "compare-posts",
+      "depth": "functional"
+    },
+    {
+      "node_id": "open-detail",
+      "depth": "functional"
+    },
+    {
+      "node_id": "view-detail",
+      "depth": "functional"
+    },
+    {
+      "node_id": "open-more-actions",
+      "depth": "functional"
+    },
+    {
+      "node_id": "execute-light-action",
+      "depth": "simulated"
+    }
+  ],
+  "prototype_target": {
+    "app_root": "wego-app",
+    "scenario_folder": "wego-app/scenes/动态商品流",
+    "routes": [
+      {
+        "id": "dynamic-product-feed",
+        "surface_ref": "feed-surface"
+      },
+      {
+        "id": "dynamic-product-detail",
+        "surface_ref": "detail-surface"
+      }
+    ]
+  },
+  "host_container": {
+    "tab": "dongtai",
+    "entry_label": "动态",
+    "subentry_label": "",
+    "entry_type": "host-tab",
+    "detail_route_type": "push",
+    "leaf_level": 1,
+    "needs_host_entry_surface": false
+  },
+  "assumptions": [
+    "动态流以单店主连续发布内容为主",
+    "轻操作反馈使用 toast 模拟"
+  ],
+  "open_questions": [],
+  "readiness": {
+    "status": "ready",
+    "notes": "规格已覆盖动态流、详情和轻操作边界。"
+  },
+  "rule_sources": [
+    "用户需求",
+    "AGENTS.md",
+    ".codex/skills/wego-product/SKILL.md",
+    ".codex/skills/wego-product/references/interaction-spec.md"
+  ]
+}
