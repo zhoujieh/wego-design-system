@@ -17,6 +17,7 @@ const jsonOutput = args.has('--json');
 
 const report = {
   mode: checkOnly ? 'check' : 'apply',
+  planned: [],
   updated: [],
   removed: [],
   kept: [],
@@ -24,9 +25,13 @@ const report = {
   errors: [],
 };
 
-function assertInsideWegoApp(target) {
-  const relative = path.relative(wegoAppRoot, target);
-  if (!relative || relative.startsWith('..') || path.isAbsolute(relative)) {
+function assertWithinScope(target, allowedRoots) {
+  const normalizedTarget = path.resolve(target);
+  const allowed = allowedRoots.some(root => {
+    const normalizedRoot = path.resolve(root);
+    return normalizedTarget === normalizedRoot || normalizedTarget.startsWith(`${normalizedRoot}${path.sep}`);
+  });
+  if (!allowed) {
     throw new Error(`目标路径越界：${target}`);
   }
 }
@@ -42,13 +47,18 @@ function record(kind, target, detail) {
   });
 }
 
+function plan(target, detail) {
+  record('planned', target, detail);
+}
+
 function resetRoutesFile() {
-  assertInsideWegoApp(routesFile);
+  assertWithinScope(routesFile, [routesFile]);
   const current = fs.existsSync(routesFile) ? fs.readFileSync(routesFile, 'utf8') : '';
   if (current === routesBaseline) {
     record('kept', routesFile, 'routes already baseline');
     return;
   }
+  plan(routesFile, 'reset routes to empty baseline');
   if (!checkOnly) {
     ensureParentDir(routesFile);
     fs.writeFileSync(routesFile, routesBaseline);
@@ -63,23 +73,29 @@ function listSceneEntries() {
 
 function cleanScenes() {
   if (!fs.existsSync(scenesRoot)) {
-    if (!checkOnly) fs.mkdirSync(scenesRoot, { recursive: true });
-    record('kept', scenesRoot, 'scenes directory missing and recreated as needed');
+    if (checkOnly) {
+      record('kept', scenesRoot, 'no scenes task artifacts');
+      return;
+    }
+    fs.mkdirSync(scenesRoot, { recursive: true });
+    record('updated', scenesRoot, 'restore scenes directory');
   }
 
   const entries = listSceneEntries();
   if (entries.length === 0 && !fs.existsSync(keepSceneFile)) {
+    plan(keepSceneFile, 'restore scenes/.gitkeep');
     if (!checkOnly) fs.writeFileSync(keepSceneFile, '');
     record('updated', keepSceneFile, 'restore scenes/.gitkeep');
     return;
   }
 
   for (const entry of entries) {
-    assertInsideWegoApp(entry);
+    assertWithinScope(entry, [scenesRoot]);
     if (entry === keepSceneFile) {
       record('kept', entry, 'preserve scenes/.gitkeep');
       continue;
     }
+    plan(entry, 'remove scene task artifact');
     if (!checkOnly) {
       fs.rmSync(entry, { recursive: true, force: true });
     }
@@ -87,6 +103,7 @@ function cleanScenes() {
   }
 
   if (!fs.existsSync(keepSceneFile)) {
+    plan(keepSceneFile, 'restore scenes/.gitkeep');
     if (!checkOnly) fs.writeFileSync(keepSceneFile, '');
     record('updated', keepSceneFile, 'restore scenes/.gitkeep');
   }
@@ -97,7 +114,8 @@ function cleanSpec() {
     record('kept', specRoot, 'no _spec task artifacts');
     return;
   }
-  assertInsideWegoApp(specRoot);
+  assertWithinScope(specRoot, [specRoot]);
+  plan(specRoot, 'remove _spec task artifacts');
   if (!checkOnly) {
     fs.rmSync(specRoot, { recursive: true, force: true });
   }
@@ -146,6 +164,13 @@ function finish(code) {
   }
 
   console.log(checkOnly ? '\nwego-app 空白基线检查完成' : '\nwego-app 空白基线重置完成');
+
+  if (report.planned.length > 0) {
+    console.log('\n计划处理：');
+    for (const item of report.planned) {
+      console.log(`- ${item.target}：${item.detail}`);
+    }
+  }
 
   if (report.updated.length > 0) {
     console.log('\n已重置：');
