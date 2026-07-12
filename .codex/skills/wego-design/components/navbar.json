@@ -147,7 +147,7 @@
     "actionPress": "右侧操作以轻压暗或按钮背景变化反馈。",
     "pageTransitionRule": "左侧为返回图标 (back-icon) 对应 push 转场（右侧滑入，普通二级页）；左侧为关闭/叉 (close-icon) 或取消文本 (text-cancel) 对应 present 转场（底部滑入，弹出式页面）。",
     "fullscreenModalPatterns": "全屏模态页面有且仅有两种固定导航模式，不要自由组合：模式 A（取消文本 + 实心按钮）用于表单/设置类底部弹出页；模式 B（关闭叉图标 + 图标操作）用于浏览/选择类底部弹出页。",
-    "backgroundRule": "导航栏必须显式设置背景色，与页面 data-bg 声明的背景色保持一致；默认 var(--bg-page)（灰色），data-bg=\"surface\" 时为 var(--bg-surface)（白色）；深色或图片背景场景使用 fixed-transparent 模式，navbar background: transparent，文字/图标用 --text-inverse 反白，确保透过导航栏看到背景内容。",
+    "backgroundRule": "导航栏必须显式设置背景色，与页面 data-bg 声明的背景色保持一致；默认 var(--bg-page)（灰色），data-bg=\"surface\" 时为 var(--bg-surface)（白色）；深色或图片背景场景使用 fixed-transparent 模式，navbar background: transparent，文字/图标用 --text-inverse 反白，确保透过导航栏看到背景内容。fixed-transparent 与 data-bg 互斥：navbar--fixed-transparent 不得声明在 data-bg=\"page\" 或 data-bg=\"surface\" 的容器内；fixed-transparent 模式下 navbar 背景必须为 transparent，由页面根容器提供深色或图片背景（如 --bg-inverse）。",
     "positionRule": "navbar 默认 sticky 吸顶（components.css 已配置 position: sticky; top: 0; z-index: var(--z-sticky)），保留文档流，宿主无需额外处理；顶部安全区由 navbar 组件内部通过 padding-top: var(--safe-area-top, 0px) 处理：.phone-screen 内定义 44px 模拟值时，导航主体会自动落在安全区下方，未定义时 fallback 为 0px，移动端 @media 重置 Token 为 0 后导航顶到最上方；导航主体高度由 --navbar-body-height 控制，默认 56px，桌面手机壳显示 phone-status 时可覆盖为 44px；深色或图片背景场景使用 fixed-transparent 模式，navbar position: fixed 透明背景、文字/图标反白，此时 page-body 需加 padding-top: calc(var(--navbar-body-height, 56px) + var(--safe-area-top, 0px)) 为 navbar 与顶部安全区让位。"
   },
   "accessibility": {

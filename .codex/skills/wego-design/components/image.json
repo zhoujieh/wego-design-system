@@ -115,7 +115,8 @@
     "对象管理列表中的识别图优先使用真实业务图片、真实对象缩略图或低饱和占位图；占位只辅助识别，不抢标题、状态和操作的视觉层级。",
     "contain 适合完整展示 logo、海报缩略或比例敏感资产。",
     "错误占位图使用 assets/icons/default-diagram.svg，图形按容器宽度约 40% 等比缩放，最大尺寸限制为 40px。",
-    "error 占位只做兜底提示，不替代正式空状态组件。"
+    "error 占位只做兜底提示，不替代正式空状态组件。",
+    "动态生成 wg-image 时，必须在 img 元素上监听 load 事件并添加 is-loaded class；wg-image__src 默认 opacity:0，只有 is-loaded 才可见。静态 HTML 可直接在 img 上写 is-loaded。"
   ],
   "doNotInvent": [
     "不要把 image 扩成轮播、视频播放器或带复杂编辑能力的媒体组件。",

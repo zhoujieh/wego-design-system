@@ -200,13 +200,19 @@
       ".metric--white",
       ".metric--wrap"
     ],
+    "requiredChildren": [
+      ".metric__main"
+    ],
+    "mainChildren": [
+      ".metric__symbol",
+      ".metric__value"
+    ],
+    "valueChildren": [
+      ".metric__integer",
+      ".metric__decimal"
+    ],
     "optionalChildren": [
       ".metric__prefix",
-      ".metric__main",
-      ".metric__symbol",
-      ".metric__value",
-      ".metric__integer",
-      ".metric__decimal",
       ".metric__unit",
       ".metric__range-sep",
       ".metric__value--high",

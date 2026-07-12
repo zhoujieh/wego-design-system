@@ -1,0 +1,396 @@
+{
+  "schemaVersion": 2,
+  "identity": {
+    "iteration_id": "feed001",
+    "title": "动态商品流",
+    "date": "2026-07-12",
+    "primary_scene": "相册动态",
+    "related_scenes": []
+  },
+  "status": "awaiting-prototype-confirmation",
+  "scope_revision": 3,
+  "prototype_brief": {
+    "goal": "让用户在微购相册中连续浏览店主发布的商品动态，每条动态稳定呈现发布者、发布时间、商品内容、商品图片与相关产品信息，并支持进入产品详情或执行必要操作。",
+    "included": [
+      "动态商品流浏览场景：连续浏览店主发布的商品动态",
+      "每条动态稳定呈现发布者、发布时间、商品内容、商品图片、相关产品信息",
+      "兼容只有产品信息与同时含文字两种动态形态",
+      "兼容文字为空、图片数量不同、产品信息较长时的稳定展示",
+      "进入产品详情入口",
+      "必要操作入口：一键转发（核心操作）、复制文案、分享、收藏、下载图片、搜索、编辑、复制动态、图片点击看大图"
+    ],
+    "excluded": [
+      "发布动态（用户未提及）",
+      "评论、点赞等社交互动（用户未提及）",
+      "必要操作的具体功能实现（本轮只放入口，不下钻）",
+      "真实后端接口与持久化（原型范围）"
+    ],
+    "entry_points": [
+      "动态主 tab：作为底部导航「动态」tab 的内容，打开 App 即默认进入"
+    ],
+    "critical_paths": [
+      "进入动态流 → 连续浏览动态 → 进入产品详情",
+      "进入动态流 → 连续浏览动态 → 执行必要操作"
+    ],
+    "prototype_boundaries": [
+      "动态商品流浏览场景 functional：可连续浏览、动态状态真实可操作",
+      "产品详情 simulated：用本地模拟数据展示基本产品信息，不实现完整电商详情能力",
+      "必要操作入口 stub：本轮只呈现入口与明确反馈，不下钻具体功能实现"
+    ],
+    "assumptions": [
+      {
+        "item": "原型使用 wego-app/lib/image/clothing 下已有服装图片作为商品图占位",
+        "impact_level": "low",
+        "reversible": true
+      }
+    ],
+    "open_questions": []
+  },
+  "prototype_design": {
+    "surface_decisions": [
+      {
+        "surface_id": "feed-host-tab",
+        "role": "host-entry",
+        "matched_blueprint": "continuous-content-feed-page",
+        "match_status": "fallback",
+        "presentation": "host-tab",
+        "covers_tab_bar": true,
+        "layout_contract": {
+          "page_edge_mode": "M0",
+          "page_edge_mode_reason": "命中 continuous-content-feed-page blueprint 的默认期望；连续内容流优先保证扫读效率与信息密度，不套常规卡片页 M16；动态卡片横向边距由卡片自身 padding 承担",
+          "media_priority": "supporting",
+          "media_priority_reason": "单条动态同时承载发布者、时间、正文、商品摘要和操作，媒体只作辅助判断，不主导首屏高度；商品图区让位于文字与对象摘要",
+          "first_screen_content_rule": "首屏只承接已确认业务对象：发布者、时间、正文、商品图、商品摘要、操作入口；禁止默认总览、导览、刷新、原型和评审说明",
+          "optional_content_policy": "动态正文为空时折叠正文结构；商品图数量为 0 时不渲染图区；商品摘要字段缺失时不补未填写/暂无；只有缺失本身是已确认业务状态时才显示状态文案"
+        },
+        "component_mapping": [
+          {
+            "slot": "page-top-search",
+            "slug": "search",
+            "consumption_mode": "stable-variant",
+            "variant": "searchbox 基础三段式（左图标+中输入+右内部动作），sticky 吸顶",
+            "reason": "命中 search 组件 semanticTypeCandidates.searchbox；简报必要操作包含搜索，搜索语义必须消费 search 组件不得用 input 临时拼"
+          },
+          {
+            "slot": "feed-item-author",
+            "slug": "avatar",
+            "consumption_mode": "stable-variant",
+            "variant": "type=image size=40",
+            "reason": "avatar 40 用于常规身份位，承载发布者头像"
+          },
+          {
+            "slot": "feed-item-body",
+            "slug": "card",
+            "consumption_mode": "free-composition",
+            "variant": "surface=none，作为单条动态的内容分组容器，不自带 padding",
+            "reason": "card 默认只承担内容分组语义；页面级留白由业务作用域样式承担，不扩展成业务卡片"
+          },
+          {
+            "slot": "feed-item-media",
+            "slug": "image",
+            "consumption_mode": "stable-variant",
+            "variant": "fit=cover, radius=rounded-md, interaction=clickable",
+            "reason": "商品图优先使用矩形规格；clickable 承载图片点击看大图入口；图片数量不同时由页面级布局胶水承担自适应，不发明新组件"
+          },
+          {
+            "slot": "feed-item-product-price",
+            "slug": "metric",
+            "consumption_mode": "stable-variant",
+            "variant": "size=16 或 20, theme=marketing",
+            "reason": "商品价格必须消费 metric 组件，不得回退成自定义 price 类；营销橙主题用于商品价格"
+          },
+          {
+            "slot": "feed-item-product-tags",
+            "slug": "tag",
+            "consumption_mode": "stable-variant",
+            "variant": "size=20 theme=gray display-only 或 size=24 theme=brand entry",
+            "reason": "商品状态/业务标签使用 tag；20 用于纯展示，24 用于入口跳转"
+          },
+          {
+            "slot": "feed-item-product-entry",
+            "slug": "link",
+            "consumption_mode": "stable-variant",
+            "variant": "mode=standalone size=14",
+            "reason": "进入产品详情入口使用 link standalone，不用 button 强动作；standalone 提供紧凑热区和按压态"
+          },
+          {
+            "slot": "feed-item-primary-action",
+            "slug": "button",
+            "consumption_mode": "stable-variant",
+            "variant": "weak 或 medium 尺寸，不用 strong",
+            "reason": "一键转发是核心操作但属于列表项内操作，按 blueprint 约束重复列表项内禁止 strong 主按钮；strong 只保留给页面级唯一主动作"
+          },
+          {
+            "slot": "feed-item-more-actions",
+            "slug": "actionsheet",
+            "consumption_mode": "stable-variant",
+            "variant": "mode=action, header=text, item=text 或 icon",
+            "reason": "3+ 并列操作（复制文案/分享/收藏/下载图片/搜索/编辑/复制动态）收进 actionsheet；actionsheet 是 sheet primitive 的具体组件实现"
+          },
+          {
+            "slot": "feed-feedback",
+            "slug": "toast",
+            "consumption_mode": "stable-variant",
+            "variant": "default 或 guide",
+            "reason": "必要操作 stub 反馈使用 toast；dialog 用于需要二次确认的危险操作"
+          }
+        ],
+        "rule_sources_used": [
+          "uikit-plan.json#fallbackPageBlueprints[continuous-content-feed-page]",
+          "uikit-plan.json#hostShell.fixedTabs[dongtai]",
+          "uikit-plan.json#pagePresentationBindingRules",
+          "library-consumption.json#downstreamScenarios.buildMobileAppPage",
+          "components/search.json#semanticTypeCandidates",
+          "components/avatar.json#variantDimensions",
+          "components/card.json#structurePatterns",
+          "components/image.json#variantDimensions",
+          "components/metric.json#usageHints",
+          "components/tag.json#variantDimensions",
+          "components/link.json#variantDimensions",
+          "components/button.json",
+          "components/actionsheet.json#usageHints",
+          "components/toast.json"
+        ]
+      },
+      {
+        "surface_id": "feed-product-detail",
+        "role": "primary-task-page",
+        "matched_blueprint": "continuous-content-feed-page",
+        "match_status": "fallback",
+        "presentation": "push",
+        "transition": "slide-left-enter, slide-right-exit",
+        "dismiss_action": "back-button",
+        "overlay_level": "inline",
+        "covers_tab_bar": true,
+        "prototype_boundary": "simulated",
+        "layout_contract": {
+          "page_edge_mode": "M16",
+          "page_edge_mode_reason": "产品详情非连续浏览主任务，使用卡片模式 M16 承载商品图、标题、价格、属性和操作区",
+          "media_priority": "balanced",
+          "media_priority_reason": "产品详情页商品图是核心判断物，需要较大展示面积，但仍需保留价格和操作区的信息层级",
+          "first_screen_content_rule": "首屏展示商品主图、标题、价格、关键属性和进入下一步的入口；不写导览或原型说明",
+          "optional_content_policy": "商品属性缺失时折叠对应结构；不补未填写/暂无"
+        },
+        "component_mapping": [
+          {
+            "slot": "detail-navbar",
+            "slug": "navbar",
+            "consumption_mode": "stable-variant",
+            "variant": "leftControl=back-icon, titleAlignment=center, actions=none, pageTransition=push, position=sticky",
+            "reason": "push 二级页面固定返回导航"
+          },
+          {
+            "slot": "detail-main-image",
+            "slug": "image",
+            "consumption_mode": "stable-variant",
+            "variant": "fit=cover, size=custom-wide, radius=rounded-lg",
+            "reason": "产品详情主图使用宽幅规格"
+          },
+          {
+            "slot": "detail-price",
+            "slug": "metric",
+            "consumption_mode": "stable-variant",
+            "variant": "size=24 或 32, theme=marketing",
+            "reason": "详情页价格使用更大字号突出"
+          },
+          {
+            "slot": "detail-tags",
+            "slug": "tag",
+            "consumption_mode": "stable-variant",
+            "variant": "size=20 theme=gray display-only",
+            "reason": "商品属性标签纯展示"
+          },
+          {
+            "slot": "detail-body",
+            "slug": "card",
+            "consumption_mode": "free-composition",
+            "variant": "surface=surface 或 outlined",
+            "reason": "详情页内容分组使用白底卡片承载"
+          },
+          {
+            "slot": "detail-back-action",
+            "slug": "button",
+            "consumption_mode": "stable-variant",
+            "variant": "strong 全宽底部按钮",
+            "reason": "详情页页面级唯一主动作（如联系店主/查看更多）"
+          }
+        ],
+        "rule_sources_used": [
+          "uikit-plan.json#fallbackPageBlueprints[continuous-content-feed-page]",
+          "uikit-plan.json#pagePresentationBindingRules",
+          "components/navbar.json#representativeVariants",
+          "components/image.json#variantDimensions",
+          "components/metric.json#variantDimensions",
+          "components/tag.json#variantDimensions",
+          "components/card.json#domAnatomy",
+          "components/button.json"
+        ]
+      },
+      {
+        "surface_id": "feed-more-actions",
+        "role": "secondary-task-page",
+        "matched_blueprint": "continuous-content-feed-page",
+        "match_status": "fallback",
+        "presentation": "sheet",
+        "dismiss_action": "cancel-button",
+        "overlay_level": "overlay",
+        "covers_tab_bar": true,
+        "prototype_boundary": "stub",
+        "layout_contract": {
+          "page_edge_mode": "M0",
+          "page_edge_mode_reason": "actionsheet 自带面板布局，不走页面边距模式",
+          "media_priority": "supporting",
+          "media_priority_reason": "操作表无媒体",
+          "first_screen_content_rule": "只呈现已确认的操作入口，点击后给出明确反馈；不下钻具体功能实现",
+          "optional_content_policy": "不适用"
+        },
+        "component_mapping": [
+          {
+            "slot": "more-actions-sheet",
+            "slug": "actionsheet",
+            "consumption_mode": "stable-variant",
+            "variant": "mode=action, header=text, item=text，操作列表包含：一键转发、复制文案、分享、收藏、下载图片、搜索、编辑、复制动态",
+            "reason": "3+ 并列操作收进 actionsheet；header=text 承载动态标题或'更多操作'说明"
+          },
+          {
+            "slot": "more-actions-feedback",
+            "slug": "toast",
+            "consumption_mode": "stable-variant",
+            "variant": "default 纯文本反馈",
+            "reason": "stub 边界下点击操作后以 toast 呈现'功能开发中'或操作名称反馈"
+          }
+        ],
+        "rule_sources_used": [
+          "uikit-plan.json#fallbackPageBlueprints[continuous-content-feed-page]",
+          "uikit-plan.json#presentationPrimitives[sheet]",
+          "components/actionsheet.json#representativeVariants",
+          "components/actionsheet.json#doNotInvent",
+          "components/toast.json"
+        ]
+      },
+      {
+        "surface_id": "feed-image-viewer",
+        "role": "secondary-task-page",
+        "matched_blueprint": "continuous-content-feed-page",
+        "match_status": "fallback",
+        "presentation": "full-screen-modal",
+        "dismiss_action": "close-button",
+        "overlay_level": "overlay",
+        "covers_tab_bar": true,
+        "prototype_boundary": "stub",
+        "layout_contract": {
+          "page_edge_mode": "M0",
+          "page_edge_mode_reason": "全屏图片查看器无页面边距",
+          "media_priority": "balanced",
+          "media_priority_reason": "图片是查看器核心内容",
+          "first_screen_content_rule": "呈现点击的图片大图，支持关闭；不下钻图片编辑或轮播",
+          "optional_content_policy": "不适用"
+        },
+        "component_mapping": [
+          {
+            "slot": "image-viewer-close",
+            "slug": "navbar",
+            "consumption_mode": "stable-variant",
+            "variant": "leftControl=close-icon, titleAlignment=center, actions=none, pageTransition=present, position=sticky",
+            "reason": "present 转场使用关闭叉"
+          },
+          {
+            "slot": "image-viewer-media",
+            "slug": "image",
+            "consumption_mode": "stable-variant",
+            "variant": "fit=contain, size=custom-wide, radius=none",
+            "reason": "大图查看使用 contain 完整展示"
+          }
+        ],
+        "rule_sources_used": [
+          "uikit-plan.json#fallbackPageBlueprints[continuous-content-feed-page]",
+          "uikit-plan.json#presentationPrimitives[full-screen-modal]",
+          "components/navbar.json#representativeVariants",
+          "components/image.json#variantDimensions"
+        ]
+      }
+    ]
+  },
+  "brief_confirmation": {
+    "confirmed_at": "2026-07-12T03:03:40.763Z",
+    "confirmed_by": "user",
+    "brief_fingerprint": "bbbc8e742d0af121fd39397f2b4853fc137367c71e7afe23021c4759d2ff1fa3"
+  },
+  "prototype_confirmation": null,
+  "base_fingerprint": {},
+  "product_scope": {},
+  "features": [],
+  "requirements": [],
+  "traceability": [],
+  "affected_scenes": [
+    {
+      "scene": "相册动态",
+      "role": "primary",
+      "change_type": "changed"
+    }
+  ],
+  "affected_runtime": [],
+  "stage_outputs": {
+    "product": {
+      "valid": false
+    },
+    "design": {
+      "valid": false
+    },
+    "implementation": {
+      "valid": false
+    },
+    "acceptance": {
+      "valid": false
+    }
+  },
+  "change_log": [
+    {
+      "at": "2026-07-12T02:51:24.387Z",
+      "action": "init"
+    },
+    {
+      "at": "2026-07-12T02:52:14.090Z",
+      "action": "submit-brief"
+    },
+    {
+      "at": "2026-07-12T02:56:14.429Z",
+      "action": "invalidate",
+      "stage": "brief",
+      "reason": "prototype_brief.assumptions"
+    },
+    {
+      "at": "2026-07-12T02:56:42.232Z",
+      "action": "submit-brief"
+    },
+    {
+      "at": "2026-07-12T02:59:22.827Z",
+      "action": "invalidate",
+      "stage": "brief",
+      "reason": "入口位置应由"
+    },
+    {
+      "at": "2026-07-12T03:02:40.904Z",
+      "action": "submit-brief"
+    },
+    {
+      "at": "2026-07-12T03:03:40.766Z",
+      "action": "confirm-brief"
+    },
+    {
+      "at": "2026-07-12T03:05:17.689Z",
+      "action": "submit-prototype"
+    },
+    {
+      "at": "2026-07-12T03:05:36.865Z",
+      "action": "invalidate",
+      "stage": "prototype",
+      "reason": "wego-ux"
+    },
+    {
+      "at": "2026-07-12T03:13:11.358Z",
+      "action": "submit-prototype"
+    }
+  ],
+  "freeze": null
+}

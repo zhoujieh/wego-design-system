@@ -1,0 +1,378 @@
+/* 相册动态场景样式
+   只承担页面级布局胶水与业务语义样式；组件结构从 wego-app/lib/components.css 消费。
+   作用域：.album-feed-page / .album-detail-page / .album-viewer-page
+   page_edge_mode: M0（命中 continuous-content-feed-page blueprint） */
+
+/* ── 动态流主页（host-tab）── */
+.album-feed-page {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-page);
+}
+
+.album-feed-page__topbar {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  background: var(--bg-page);
+  padding: var(--safe-area-top, 0px) 0 0;
+}
+
+.album-feed-page__topbar-inner {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-12);
+  padding: var(--spacer-8) var(--spacer-16);
+}
+
+.album-feed-page__topbar-title {
+  flex: 0 0 auto;
+  font-size: var(--heading-md-font-size);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-default);
+  margin: 0;
+}
+
+.album-feed-page__search {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.album-feed-page__list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 0 calc(var(--spacer-40) + var(--safe-area-bottom, 0px));
+}
+
+/* ── 动态卡片 ──
+   命中 continuous-content-feed-page 的 media_priority=supporting：
+   单条动态先呈现发布者识别信息，再呈现正文和对象摘要，最后才呈现轻操作；
+   媒体区让位于文字与对象摘要。 */
+.album-feed-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-12);
+  padding: var(--spacer-16);
+  background: var(--bg-surface);
+  border-bottom: 0.5px solid var(--border-neutral-l2);
+}
+
+.album-feed-item__header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-12);
+}
+
+.album-feed-item__author {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-2);
+}
+
+.album-feed-item__name {
+  font-size: var(--body-md-font-size);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-default);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.album-feed-item__time {
+  font-size: var(--body-xs-font-size);
+  color: var(--text-tertiary);
+}
+
+.album-feed-item__more {
+  flex: 0 0 auto;
+  border: 0;
+  background: transparent;
+  padding: var(--spacer-4);
+  color: var(--icon-secondary);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.album-feed-item__more:active,
+.album-feed-item__more.is-pressed {
+  opacity: 0.6;
+}
+
+/* 正文：可选，为空时折叠 */
+.album-feed-item__text {
+  margin: 0;
+  font-size: var(--body-md-font-size);
+  line-height: var(--body-md-line-height);
+  color: var(--text-default);
+  word-break: break-word;
+}
+
+/* 媒体区：辅助判断，不主导首屏高度 */
+.album-feed-item__media {
+  display: grid;
+  gap: var(--spacer-4);
+}
+
+.album-feed-item__media--single {
+  grid-template-columns: 1fr;
+}
+
+.album-feed-item__media--single .album-feed-item__media-item {
+  aspect-ratio: 4 / 3;
+}
+
+.album-feed-item__media--double {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.album-feed-item__media--grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.album-feed-item__media--grid .album-feed-item__media-item,
+.album-feed-item__media--double .album-feed-item__media-item {
+  aspect-ratio: 1 / 1;
+}
+
+.album-feed-item__media-item {
+  overflow: hidden;
+  border-radius: var(--radius-8);
+  background: var(--bg-subtle);
+}
+
+.album-feed-item__media-item .wg-image {
+  width: 100%;
+  height: 100%;
+}
+
+.album-feed-item__media-item .wg-image__src {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 商品摘要：对象信息卡片，让位于文字与对象摘要层级 */
+.album-feed-item__product {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacer-12);
+  padding: var(--spacer-12);
+  background: var(--bg-subtle);
+  border-radius: var(--radius-8);
+}
+
+.album-feed-item__product-image {
+  flex: 0 0 auto;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-6);
+  overflow: hidden;
+  background: var(--bg-surface);
+}
+
+.album-feed-item__product-image .wg-image,
+.album-feed-item__product-image .wg-image__src {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.album-feed-item__product-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-4);
+}
+
+.album-feed-item__product-title {
+  font-size: var(--body-md-font-size);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-default);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.album-feed-item__product-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacer-4);
+}
+
+.album-feed-item__product-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacer-8);
+  flex-wrap: wrap;
+}
+
+.album-feed-item__product-link {
+  flex: 0 0 auto;
+}
+
+/* 操作区：核心操作 + 进入详情 */
+.album-feed-item__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-12);
+  justify-content: flex-end;
+}
+
+.album-feed-item__action-forward {
+  flex: 0 0 auto;
+}
+
+/* 加载更多 */
+.album-feed-page__loading {
+  text-align: center;
+  padding: var(--spacer-24) var(--spacer-16);
+  color: var(--text-tertiary);
+  font-size: var(--body-sm-font-size);
+}
+
+/* ── 商品详情页（push, M16）── */
+.album-detail-page {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-page);
+}
+
+.album-detail-page__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 var(--spacer-16) calc(var(--spacer-40) + var(--safe-area-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-16);
+}
+
+.album-detail-page__hero {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: var(--radius-12);
+  background: var(--bg-subtle);
+}
+
+.album-detail-page__hero .wg-image,
+.album-detail-page__hero .wg-image__src {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.album-detail-page__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-12);
+  padding: var(--spacer-16);
+  background: var(--bg-surface);
+  border-radius: var(--radius-12);
+}
+
+.album-detail-page__title {
+  margin: 0;
+  font-size: var(--heading-sm-font-size);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-default);
+  line-height: 1.4;
+}
+
+.album-detail-page__price-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacer-12);
+  flex-wrap: wrap;
+}
+
+.album-detail-page__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacer-8);
+}
+
+.album-detail-page__attr-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.album-detail-page__attr {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacer-12);
+  font-size: var(--body-md-font-size);
+  line-height: var(--body-md-line-height);
+}
+
+.album-detail-page__attr-label {
+  flex: 0 0 auto;
+  color: var(--text-secondary);
+}
+
+.album-detail-page__attr-value {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: right;
+  color: var(--text-default);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.album-detail-page__footer {
+  flex: 0 0 auto;
+  padding: var(--spacer-12) var(--spacer-16) calc(var(--spacer-12) + var(--safe-area-bottom, 0px));
+  background: var(--bg-surface);
+  border-top: 0.5px solid var(--border-neutral-l2);
+}
+
+.album-detail-page__footer-action {
+  width: 100%;
+}
+
+/* ── 图片查看器（full-screen-modal）── */
+.album-viewer-page {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-inverse);
+}
+
+.album-viewer-page__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacer-16);
+}
+
+.album-viewer-page__image {
+  width: 100%;
+  max-height: 100%;
+}
+
+.album-viewer-page__image .wg-image__src {
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+  object-fit: contain;
+}

@@ -742,6 +742,7 @@
         "单条内容先呈现识别信息，再呈现正文和对象摘要，最后才呈现轻操作；不要用大图、装饰说明或多主按钮打断连续浏览节奏",
         "列表页只外露 1-2 个高频安全操作；3 个及以上操作或包含低频/危险动作时，收进 actionsheet、详情页或更多操作承载",
         "重复列表项中禁止出现多处 strong 主按钮；strong 只保留给页面级唯一主动作，列表项内默认使用 link、weak、medium 或对象卡片点击承载下钻",
+        "列表项内容本身（标题、图片、对象卡片）可作为下钻入口时，优先用内容点击承载，不额外加'查看详情'按钮；只有内容不可点击或需要强调下钻入口时才加 link 或 weak 按钮",
         "页面首屏文案必须直接服务用户任务，不写解释设计意图、浏览方法、刷新说明、原型说明或工作流背景的说明块",
         "可选正文、说明或补充媒体为空时默认折叠对应结构；只有缺失本身是已确认业务状态时才显示状态文案"
       ],
@@ -785,6 +786,71 @@
         "defaultExpectation": {
           "page_edge_mode": "M0 或 M8",
           "media_priority": "supporting"
+        }
+      },
+      "specRefs": [
+        "specs/布局与间距规范.md",
+        "specs/交互设计原则.md",
+        "specs/文案与数据规范.md",
+        "specs/设计风格与品牌原则.md"
+      ]
+    },
+    {
+      "id": "object-detail-page",
+      "name": "对象详情页",
+      "primaryWorkflowStage": "wego-design",
+      "secondaryWorkflowStages": [
+        "wego-ux",
+        "wego-tests"
+      ],
+      "appliesWhen": [
+        "页面角色为 secondary-task-page",
+        "主任务是呈现单个业务对象的完整信息并支持少量操作",
+        "页面通常从列表或内容流下钻进入",
+        "现有 UI Kit/pagePattern 无精确范式，但可由已注册组件和页面级业务样式安全组成"
+      ],
+      "layoutRules": [
+        "详情页默认使用白底（--bg-surface）背景，保持内容可读性；只有明确需要区分内容块时才用灰色背景（--bg-page）+ 白色卡片分组",
+        "页面横向边距默认 M16；内容块用 card 或分隔线分组，不默认套灰色背景 + 卡片式压缩",
+        "详情页主图优先使用宽幅矩形（aspect-ratio 4:3 或 1:1），不强制固定高度",
+        "底部固定操作栏内的主操作按钮默认靠右对齐；单按钮时使用 width:100% 占满；多按钮时主操作靠右，次操作靠左",
+        "详情页 navbar 使用 back-icon + center 标题 + sticky 变体；不使用 fixed-transparent（除非页面主图需要延伸到导航栏下方）"
+      ],
+      "allowedComponents": [
+        "navbar",
+        "image",
+        "card",
+        "tag",
+        "metric",
+        "link",
+        "button",
+        "cell",
+        "actionsheet",
+        "toast"
+      ],
+      "allowedPageStyles": [
+        "详情页主图区布局",
+        "信息块分组与间距",
+        "底部固定操作栏布局",
+        "属性列表布局"
+      ],
+      "forbidden": [
+        "默认使用灰色背景压缩详情页内容",
+        "底部操作栏主按钮靠左对齐",
+        "详情页主图使用固定高度或强制宽高比导致图片裁切",
+        "自造属性列表结构替代 cell 组件"
+      ],
+      "requiredSurfaceDesignContract": {
+        "appliesTo": "命中该 blueprint 的详情页 surface",
+        "fields": {
+          "page_edge_mode": "M8 | M16 | M32",
+          "page_edge_mode_reason": "必须说明为何选择该正式页面边距模式",
+          "background_mode": "surface | page",
+          "background_mode_reason": "必须说明页面背景色选择依据；默认 surface（白底），只有明确需要区分内容块时才用 page（灰底）+ 卡片分组"
+        },
+        "defaultExpectation": {
+          "page_edge_mode": "M16",
+          "background_mode": "surface"
         }
       },
       "specRefs": [

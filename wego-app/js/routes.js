@@ -1,32 +1,33 @@
 window.WEGO_APP_ROUTES = [
   {
-    routeId: 'dynamic-product-feed',
-    scene: '动态商品流',
-    script: './scenes/动态商品流/scene.js',
-    style: './scenes/动态商品流/scene.css',
+    routeId: 'album-feed',
+    scene: '相册动态',
+    script: './scenes/相册动态/scene.js',
+    style: './scenes/相册动态/scene.css',
     entry: {
+      type: 'host-tab',
       tab: 'dongtai',
-      type: 'host-tab',
       label: '动态'
-    },
-    presentation: {
-      type: 'host-tab',
-      transition: 'none',
-      coversTabBar: false
     }
   },
   {
-    routeId: 'dynamic-product-detail',
-    scene: '商品详情',
-    script: './scenes/动态商品流/scene.js',
-    style: './scenes/动态商品流/scene.css',
+    routeId: 'album-product-detail',
+    scene: '相册动态',
+    script: './scenes/相册动态/scene.js',
+    style: './scenes/相册动态/scene.css',
     entry: {
-      tab: 'dongtai'
-    },
-    presentation: {
       type: 'push',
-      transition: 'slide-left',
-      coversTabBar: true
+      label: '商品详情'
+    }
+  },
+  {
+    routeId: 'album-image-viewer',
+    scene: '相册动态',
+    script: './scenes/相册动态/scene.js',
+    style: './scenes/相册动态/scene.css',
+    entry: {
+      type: 'push',
+      label: '图片查看'
     }
   }
 ];

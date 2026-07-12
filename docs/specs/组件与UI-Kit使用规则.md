@@ -51,6 +51,10 @@
 
 - 适用条件：页面角色为 primary-task-page；主任务是连续浏览多条内容并快速判断是否下钻或执行轻操作；单条内容同时可能包含发布信息、正文、媒体、对象摘要和轻操作；现有 UI Kit/pagePattern 无精确范式，但可由已注册组件和页面级业务样式安全组成
 - 允许组件：navbar、avatar、image、card、tag、metric、link、button、actionsheet、toast
+#### 对象详情页（`object-detail-page`）
+
+- 适用条件：页面角色为 secondary-task-page；主任务是呈现单个业务对象的完整信息并支持少量操作；页面通常从列表或内容流下钻进入；现有 UI Kit/pagePattern 无精确范式，但可由已注册组件和页面级业务样式安全组成
+- 允许组件：navbar、image、card、tag、metric、link、button、cell、actionsheet、toast
 #### 通用移动任务页（`generic-mobile-task-page`）
 
 - 适用条件：页面角色为 primary-task-page；现有 UI Kit/pagePattern 无精确范式；任务可由已注册组件、section 分组和规范约束完成
@@ -289,6 +293,13 @@
       "hasBottomActionBar": "页面有固定底部操作栏时，操作栏自身声明 padding-bottom: var(--safe-area-bottom) 避开安全区，内容容器底部只需补 40px（--spacer-40）确保最后一项内容不被操作栏遮挡",
       "appliesTo": "所有 wego-app 业务场景页面底部",
       "exception": "modal、sheet 等浮层组件自带安全区处理，不适用此规则"
+    },
+    "bottomActionBarAlignment": {
+      "description": "底部固定操作栏内按钮对齐规则",
+      "singleButton": "单按钮时使用 width:100% 占满操作栏宽度",
+      "multiButton": "多按钮时主操作靠右，次操作靠左，按钮间用 spacer 间隔",
+      "appliesTo": "所有含底部固定操作栏的 wego-app 业务场景页面",
+      "exception": "modal、sheet 等浮层组件自带的底部操作区由组件内部布局决定，不适用此规则"
     }
   },
   "globalConsumptionRules": {
@@ -363,7 +374,8 @@
     "命中 navbar 语义时，必须直接消费 navbar 组件的正式 DOM 与行为约束；页面级样式只允许补内容区留白和业务布局，不得在场景样式里重写 navbar 的 sticky、安全区、背景跟随或左右操作热区逻辑。",
     "命中数值展示语义时，价格、金额、统计值和划线价优先消费 metric 组件，不得只因为页面已经引入数字字体就回退成自定义 price 类；自定义数值样式只允许做业务布局胶水，不替代 metric 的字号、字重、划线价和颜色语义。",
     "命中 sheet primitive 且内容是 3 个以上并列操作、轻量筛选或单选切换时，优先消费 actionsheet 组件；不得在 scene.js/scene.css 中自造业务版 action-sheet 结构去替代正式组件。",
-    "页面文案只表达业务对象、状态、结果、风险和动作，不写解释设计意图、Benchmark 背景、工作流提示或面向评审/AI 的说明文案；当首屏说明与用户任务无直接关系时，应删除而不是保留为'导览文案'。"
+    "页面文案只表达业务对象、状态、结果、风险和动作，不写解释设计意图、Benchmark 背景、工作流提示或面向评审/AI 的说明文案；当首屏说明与用户任务无直接关系时，应删除而不是保留为'导览文案'。",
+    "使用图标时必须从 wego-app/lib/iconfont.css 中引用已存在的 .icon-xxx 类名，不得从语义推测发明图标名；iconfont.css 中不存在的图标不得在 scene.js/scene.css 中使用，应改用文字或已有图标替代。"
   ],
   "scenarioTypeRegistry": {
     "description": "通用场景类型注册表。所有经验沉淀必须先归入一个场景类型并标注工作流环节，再按四段式落地。新类型需经通用化验证。",
@@ -953,4 +965,4 @@
 - 若涉及设计系统本体，递增 `metadata.json.version`
 
 <!-- generated-by: scripts/specs.mjs@8 -->
-<!-- source-fingerprint: b05a71802e9f13cdec95d3b5daa51b25945ad690c458fb517d55c1368c95f717 -->
+<!-- source-fingerprint: e87e8187eb6cb9f8e39256b79d177c6eb4588aa9526c8e23c264cd8608c182f5 -->
