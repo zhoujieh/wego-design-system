@@ -50,6 +50,13 @@
       "preview": "preview/component-bottom-nav.html"
     },
     {
+      "slug": "bottom-action-bar",
+      "name": "底部操作栏",
+      "category": "action",
+      "status": "stable",
+      "preview": "preview/component-bottom-action-bar.html"
+    },
+    {
       "slug": "input",
       "name": "输入框",
       "category": "form",

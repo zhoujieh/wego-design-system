@@ -132,6 +132,7 @@
   /* bg */
   --bg-page: var(--palette-neutral-500);
   --bg-surface: var(--palette-neutral-100);
+  --bg-panel: #f6f6f6;
   --bg-muted: var(--palette-neutral-300);
   --bg-subtle: var(--palette-neutral-200);
   --bg-active: var(--palette-neutral-400);

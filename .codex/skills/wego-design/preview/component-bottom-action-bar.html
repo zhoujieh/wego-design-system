@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Bottom Action Bar - 底部操作栏</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../scaffold.css">
+<link rel="stylesheet" href="../iconfont.css">
+<link rel="stylesheet" href="../components.css">
+<script src="popmenu-positioning.js"></script>
+<style>
+/* @component-css-start */
+/* ── Bottom Action Bar ── */
+/* @anatomy
+   <div class="bottom-action-bar [bottom-action-bar--page-actions|bottom-action-bar--primary-secondary|bottom-action-bar--selection]">
+     [<div class="bottom-action-bar__hint">已选 1 个内容</div>]
+     <div class="bottom-action-bar__inner">
+       <div class="bottom-action-bar__leading">
+         [<button class="bottom-action-bar__more"><i class="wego-iconfont-s icon-sandian16"></i></button>]
+         <button class="bottom-action-bar__action">按钮文本</button>
+       </div>
+       <div class="bottom-action-bar__trailing">...</div>
+     </div>
+   </div>
+*/
+.bottom-action-bar {
+  --bottom-action-bar-action-min-width: 56px;
+  --bottom-action-bar-action-max-width: 72px;
+  width: 100%;
+  background: var(--bg-panel);
+  flex-shrink: 0;
+  padding-bottom: var(--safe-area-bottom, env(safe-area-inset-bottom, 0px));
+  position: relative;
+}
+.bottom-action-bar::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 0.5px;
+  background: var(--border-neutral-l2);
+  pointer-events: none;
+}
+.bottom-action-bar__hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: var(--spacer-8) var(--spacer-16) 0;
+  color: var(--text-secondary);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-md-line-height);
+  text-align: center;
+}
+.bottom-action-bar__inner {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-12);
+  padding: 0 var(--spacer-16);
+}
+.bottom-action-bar__leading,
+.bottom-action-bar__trailing {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.bottom-action-bar__leading {
+  flex: 1 1 auto;
+  gap: var(--spacer-4);
+}
+.bottom-action-bar__trailing {
+  flex: 0 0 auto;
+  gap: var(--spacer-8);
+  margin-left: auto;
+}
+.bottom-action-bar__more,
+.bottom-action-bar__action,
+.bottom-action-bar__selection-toggle {
+  position: relative;
+  border: none;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: pointer;
+}
+.bottom-action-bar__more:active,
+.bottom-action-bar__more.is-pressed,
+.bottom-action-bar__action:active,
+.bottom-action-bar__action.is-pressed {
+  opacity: 0.6;
+}
+.bottom-action-bar__more {
+  width: auto;
+  min-width: 52px;
+  padding: 0 var(--spacer-8);
+  gap: 2px;
+  flex: 0 0 auto;
+  color: var(--text-default);
+  font-size: var(--body-lg-font-size);
+  line-height: 1.5;
+}
+.bottom-action-bar__more .wego-iconfont-s {
+  font-size: 16px;
+}
+.bottom-action-bar__more-label {
+  white-space: nowrap;
+}
+.bottom-action-bar__action {
+  flex: 0 0 auto;
+  min-width: var(--bottom-action-bar-action-min-width, 56px);
+  max-width: var(--bottom-action-bar-action-max-width, 72px);
+  flex-direction: column;
+  gap: var(--spacer-4);
+  padding: 0 var(--spacer-4);
+  color: var(--text-default);
+}
+.bottom-action-bar__action-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-default);
+  line-height: 1;
+}
+.bottom-action-bar__action-label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: inherit;
+  font-size: var(--body-xs-font-size);
+  line-height: 1.2;
+}
+.bottom-action-bar--page-actions:not(.bottom-action-bar--icon-text) .bottom-action-bar__action {
+  min-width: 0;
+  max-width: none;
+  padding: 0 var(--spacer-12);
+}
+.bottom-action-bar--page-actions:not(.bottom-action-bar--icon-text) .bottom-action-bar__action-icon {
+  display: none;
+}
+.bottom-action-bar--page-actions:not(.bottom-action-bar--icon-text) .bottom-action-bar__action-label {
+  font-size: var(--body-lg-font-size);
+  line-height: 1.5;
+}
+.bottom-action-bar--page-actions .bottom-action-bar__inner {
+  padding-left: 0;
+  padding-right: 0;
+  gap: 0;
+}
+.bottom-action-bar--page-actions .bottom-action-bar__leading {
+  flex: 1 1 auto;
+  width: 100%;
+  gap: 0;
+}
+.bottom-action-bar--page-actions .bottom-action-bar__action {
+  min-height: 56px;
+  max-width: none;
+  flex: 1 1 0;
+  flex-direction: row;
+  gap: var(--spacer-4);
+  padding: 0 var(--spacer-12);
+  justify-content: center;
+}
+.bottom-action-bar--page-actions .bottom-action-bar__action + .bottom-action-bar__action {
+  position: relative;
+}
+.bottom-action-bar--page-actions .bottom-action-bar__action + .bottom-action-bar__action::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 1px;
+  height: 16px;
+  transform: translateY(-50%);
+  background: var(--border-neutral-l2);
+}
+.bottom-action-bar--page-actions .bottom-action-bar__action-label {
+  font-size: var(--body-lg-font-size);
+  line-height: 1.2;
+}
+.bottom-action-bar--page-actions .bottom-action-bar__action-icon .wego-iconfont-s {
+  font-size: 20px;
+}
+.bottom-action-bar--page-actions .bottom-action-bar__more {
+  display: none;
+  min-height: 56px;
+  min-width: 0;
+  max-width: none;
+  flex: 1 1 0;
+  padding: 0 var(--spacer-12);
+  gap: var(--spacer-4);
+  font-size: var(--body-lg-font-size);
+  line-height: 1.2;
+  justify-content: center;
+}
+.bottom-action-bar--page-actions .bottom-action-bar__more .wego-iconfont-s {
+  font-size: 20px;
+}
+.bottom-action-bar--page-actions .bottom-action-bar__more-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--body-lg-font-size);
+  line-height: 1.2;
+}
+.bottom-action-bar--page-actions .bottom-action-bar__more + .bottom-action-bar__action::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 1px;
+  height: 16px;
+  transform: translateY(-50%);
+  background: var(--border-neutral-l2);
+}
+.bottom-action-bar--primary-secondary .bottom-action-bar__inner {
+  gap: var(--spacer-8);
+  padding-left: 4px;
+}
+.bottom-action-bar--primary-secondary.bottom-action-bar--edge-16 .bottom-action-bar__inner {
+  padding-left: 16px;
+}
+.bottom-action-bar--primary-secondary .bottom-action-bar__leading {
+  flex: 1 1 auto;
+  gap: 0;
+}
+.bottom-action-bar--primary-secondary .bottom-action-bar__trailing {
+  flex: 0 0 auto;
+  gap: var(--spacer-8);
+}
+.bottom-action-bar--primary-secondary .bottom-action-bar__action {
+  min-width: 44px;
+  width: auto;
+  min-height: 44px;
+  padding: 0 4px;
+  flex: 0 1 auto;
+  gap: 2px;
+}
+.bottom-action-bar--primary-secondary .bottom-action-bar__more {
+  display: none;
+  min-width: 44px;
+  width: auto;
+  min-height: 44px;
+  padding: 0 4px;
+  flex: 0 1 auto;
+  flex-direction: column;
+  gap: 2px;
+  justify-content: center;
+  align-items: center;
+  font-size: var(--body-xs-font-size);
+  line-height: 1.2;
+}
+.bottom-action-bar--primary-secondary .bottom-action-bar__more .wego-iconfont-s {
+  font-size: 20px;
+}
+.bottom-action-bar--primary-secondary .bottom-action-bar__more-label {
+  font-size: var(--body-xs-font-size);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.bottom-action-bar--primary-secondary .bottom-action-bar__action-label {
+  font-size: var(--body-xs-font-size);
+  line-height: 1.2;
+}
+.bottom-action-bar--primary-secondary .bottom-action-bar__selection-toggle:active,
+.bottom-action-bar--primary-secondary .bottom-action-bar__selection-toggle.is-pressed {
+  opacity: 0.6;
+}
+.bottom-action-bar--primary-secondary .bottom-action-bar__action-icon .wego-iconfont-s {
+  font-size: 20px;
+}
+.bottom-action-bar--primary-secondary .bottom-action-bar__trailing .btn {
+  min-width: 88px;
+}
+.bottom-action-bar--primary-secondary .btn--strong {
+  min-width: 112px;
+}
+.bottom-action-bar__selection {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacer-8);
+  min-width: 0;
+  color: var(--text-default);
+  font-size: var(--body-lg-font-size);
+}
+.bottom-action-bar__selection-control {
+  width: var(--size-24);
+  height: var(--size-24);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+}
+.bottom-action-bar__checkbox-field {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.bottom-action-bar__checkbox-field::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -8px;
+  right: 0;
+  width: calc(100% + 8px);
+  height: 56px;
+  transform: translateY(-50%);
+}
+.bottom-action-bar__checkbox-field .checkbox-field__text {
+  white-space: nowrap;
+  font-size: var(--body-lg-font-size);
+}
+.bottom-action-bar__selection-count {
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+.bottom-action-bar__selection-count-main {
+  color: var(--text-default);
+  font-size: var(--body-lg-font-size);
+}
+.bottom-action-bar__selection-count-sub {
+  color: var(--text-tertiary);
+  font-size: var(--body-sm-font-size);
+}
+.bottom-action-bar__selection-toggle {
+  min-width: 72px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: flex-start;
+  padding: 0;
+  color: var(--text-default);
+  font-size: var(--body-lg-font-size);
+}
+.bottom-action-bar__selection-value {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  white-space: nowrap;
+}
+.bottom-action-bar__selection-value::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: -8px;
+  width: calc(100% + 8px);
+  height: 56px;
+  transform: translateY(-50%);
+}
+.bottom-action-bar__selection-value:active,
+.bottom-action-bar__selection-value.is-pressed {
+  opacity: 0.6;
+}
+.bottom-action-bar__selection-caret {
+  margin-left: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+.bottom-action-bar--selection .bottom-action-bar__trailing .btn {
+  min-width: 94px;
+}
+.bottom-action-bar--selection .bottom-action-bar__trailing {
+  gap: var(--spacer-8);
+}
+.bottom-action-bar--selection .bottom-action-bar__more {
+  display: none;
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  min-height: 40px;
+  padding: 0;
+  border-radius: var(--radius-8);
+  background: var(--bg-overlay-l1);
+  flex: 0 0 auto;
+}
+.bottom-action-bar--selection .bottom-action-bar__more .wego-iconfont-s {
+  font-size: 18px;
+}
+.bottom-action-bar--selection .bottom-action-bar__more-label {
+  display: none;
+}
+.bottom-action-bar--primary-secondary .bottom-action-bar__trailing .btn {
+  min-width: 88px;
+}
+.bottom-action-bar--page-actions .bottom-action-bar__trailing .btn {
+  min-width: 88px;
+}
+.bottom-action-bar__action[disabled],
+.bottom-action-bar__more[disabled],
+.bottom-action-bar__selection-toggle[disabled] {
+  opacity: 0.4;
+  pointer-events: none;
+}
+.bottom-action-bar__collapsed-item {
+  display: none !important;
+}
+/* @component-css-end */
+
+.bottom-action-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(375px, 1fr));
+  gap: var(--spacer-16);
+}
+.bottom-action-preview-grid .preview-phone {
+  margin-bottom: 0;
+}
+.bottom-action-demo .label {
+  width: auto;
+  padding: var(--spacer-12) var(--spacer-16) var(--spacer-8);
+  margin: 0;
+  text-align: left;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-neutral-l2);
+}
+.bottom-action-stage {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 200px;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.02) 0, rgba(0, 0, 0, 0.02) 1px, transparent 1px) 0 0 / 100% 32px,
+    var(--bg-page);
+}
+.bottom-action-ghost {
+  flex: 1 1 auto;
+}
+.bottom-action-demo-widths {
+  display: flex;
+  gap: var(--spacer-12);
+  flex-wrap: wrap;
+}
+.popmenu--demo-floating {
+  position: fixed !important;
+}
+.bottom-action-responsive {
+  width: 100%;
+  border: 1px dashed var(--border-neutral-l2);
+  border-radius: var(--radius-8);
+  overflow: hidden;
+  background: var(--bg-page);
+}
+.bottom-action-responsive[data-width="375"] {
+  max-width: 375px;
+}
+.bottom-action-responsive[data-width="320"] {
+  max-width: 320px;
+}
+.bottom-action-responsive[data-width="280"] {
+  max-width: 280px;
+}
+.bottom-action-responsive__body {
+  min-height: 120px;
+  background: var(--bg-page);
+}
+.bottom-action-responsive__caption {
+  padding: var(--spacer-8) var(--spacer-12);
+  color: var(--text-tertiary);
+  font-size: var(--body-xs-font-size);
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-neutral-l2);
+}
+</style>
+</head>
+<body>
+<div class="pv-header">
+  <h1>底部操作栏</h1>
+  <p>覆盖页面操作、主次操作、选择操作三类底部固定栏。页面操作默认纯文字；宽度不足时左侧辅助操作收进更多，更多菜单复用 popmenu。</p>
+</div>
+
+<div class="pv-section">
+  <div class="pv-section__title">页面操作 · Figma 默认态</div>
+  <div class="pv-section__sub">默认纯文字；只有产品明确要求时才启用图标+文字版本。</div>
+  <div class="bottom-action-preview-grid">
+    <div class="preview-phone bottom-action-demo">
+      <div class="label">页面操作 · 1 项</div>
+      <div class="bottom-action-stage">
+        <div class="bottom-action-ghost"></div>
+        <div class="bottom-action-bar bottom-action-bar--page-actions js-page-overflow-bar">
+          <div class="bottom-action-bar__inner">
+            <div class="bottom-action-bar__leading">
+              <button class="bottom-action-bar__more" type="button" aria-label="更多操作"><i class="wego-iconfont-s icon-sandian16"></i><span class="bottom-action-bar__more-label">更多</span></button>
+              <button class="bottom-action-bar__action" type="button">
+                <span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-bianji"></i></span>
+                <span class="bottom-action-bar__action-label" data-menu-label="按钮文本">按钮文本</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-phone bottom-action-demo">
+      <div class="label">页面操作 · 2 项</div>
+      <div class="bottom-action-stage">
+        <div class="bottom-action-ghost"></div>
+        <div class="bottom-action-bar bottom-action-bar--page-actions js-page-overflow-bar">
+          <div class="bottom-action-bar__inner">
+            <div class="bottom-action-bar__leading">
+              <button class="bottom-action-bar__more" type="button" aria-label="更多操作"><i class="wego-iconfont-s icon-sandian16"></i><span class="bottom-action-bar__more-label">更多</span></button>
+              <button class="bottom-action-bar__action" type="button">
+                <span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-bianji"></i></span>
+                <span class="bottom-action-bar__action-label" data-menu-label="按钮文本 A">按钮文本</span>
+              </button>
+              <button class="bottom-action-bar__action" type="button">
+                <span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-bianji"></i></span>
+                <span class="bottom-action-bar__action-label" data-menu-label="按钮文本 B">按钮文本</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-phone bottom-action-demo">
+      <div class="label">页面操作 · 3 项</div>
+      <div class="bottom-action-stage">
+        <div class="bottom-action-ghost"></div>
+        <div class="bottom-action-bar bottom-action-bar--page-actions js-page-overflow-bar">
+          <div class="bottom-action-bar__inner">
+            <div class="bottom-action-bar__leading">
+              <button class="bottom-action-bar__more" type="button" aria-label="更多操作"><i class="wego-iconfont-s icon-sandian16"></i><span class="bottom-action-bar__more-label">更多</span></button>
+              <button class="bottom-action-bar__action" type="button">
+                <span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-bianji"></i></span>
+                <span class="bottom-action-bar__action-label" data-menu-label="按钮文本 A">按钮文本</span>
+              </button>
+              <button class="bottom-action-bar__action" type="button">
+                <span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-bianji"></i></span>
+                <span class="bottom-action-bar__action-label" data-menu-label="按钮文本 B">按钮文本</span>
+              </button>
+              <button class="bottom-action-bar__action" type="button">
+                <span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-bianji"></i></span>
+                <span class="bottom-action-bar__action-label" data-menu-label="按钮文本 C">按钮文本</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-phone bottom-action-demo">
+      <div class="label">页面操作 · 4 项</div>
+      <div class="bottom-action-stage">
+        <div class="bottom-action-ghost"></div>
+        <div class="bottom-action-bar bottom-action-bar--page-actions js-page-overflow-bar">
+          <div class="bottom-action-bar__inner">
+            <div class="bottom-action-bar__leading">
+              <button class="bottom-action-bar__more" type="button" aria-label="更多操作"><i class="wego-iconfont-s icon-sandian16"></i><span class="bottom-action-bar__more-label">更多</span></button>
+              <button class="bottom-action-bar__action" type="button">
+                <span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-bianji"></i></span>
+                <span class="bottom-action-bar__action-label" data-menu-label="按钮文本 A">按钮文本</span>
+              </button>
+              <button class="bottom-action-bar__action" type="button">
+                <span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-bianji"></i></span>
+                <span class="bottom-action-bar__action-label" data-menu-label="按钮文本 B">按钮文本</span>
+              </button>
+              <button class="bottom-action-bar__action" type="button">
+                <span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-bianji"></i></span>
+                <span class="bottom-action-bar__action-label" data-menu-label="按钮文本 C">按钮文本</span>
+              </button>
+              <button class="bottom-action-bar__action" type="button">
+                <span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-bianji"></i></span>
+                <span class="bottom-action-bar__action-label" data-menu-label="按钮文本 D">按钮文本</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-phone bottom-action-demo">
+      <div class="label">页面操作 · 图标项（按需启用）</div>
+      <div class="bottom-action-stage">
+        <div class="bottom-action-ghost"></div>
+        <div class="bottom-action-bar bottom-action-bar--page-actions bottom-action-bar--icon-text js-page-overflow-bar">
+          <div class="bottom-action-bar__inner">
+            <div class="bottom-action-bar__leading">
+              <button class="bottom-action-bar__more" type="button" aria-label="更多操作"><i class="wego-iconfont-s icon-sandian16"></i><span class="bottom-action-bar__more-label">更多</span></button>
+              <button class="bottom-action-bar__action" type="button">
+                <span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-bianji"></i></span>
+                <span class="bottom-action-bar__action-label" data-menu-label="按钮文本 A">按钮文本</span>
+              </button>
+              <button class="bottom-action-bar__action" type="button">
+                <span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-bianji"></i></span>
+                <span class="bottom-action-bar__action-label" data-menu-label="按钮文本 B">按钮文本</span>
+              </button>
+              <button class="bottom-action-bar__action" type="button">
+                <span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-bianji"></i></span>
+                <span class="bottom-action-bar__action-label" data-menu-label="按钮文本 C">按钮文本</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pv-section">
+  <div class="pv-section__title">主次操作 · Figma 默认态</div>
+  <div class="pv-section__sub">右侧最多 2 个结果按钮，左侧辅助操作可折叠进更多。</div>
+  <div class="bottom-action-preview-grid">
+    <div class="preview-phone bottom-action-demo">
+      <div class="label">主次操作 · 3 项入口 + 双按钮</div>
+      <div class="bottom-action-stage">
+        <div class="bottom-action-ghost"></div>
+        <div class="bottom-action-bar bottom-action-bar--primary-secondary js-overflow-bar">
+          <div class="bottom-action-bar__inner">
+            <div class="bottom-action-bar__leading">
+              <button class="bottom-action-bar__more" type="button" aria-label="更多操作"><i class="wego-iconfont-s icon-sandian16"></i><span class="bottom-action-bar__more-label">更多</span></button>
+              <button class="bottom-action-bar__action" type="button">
+                <span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-shoucang"></i></span>
+                <span class="bottom-action-bar__action-label">操作1</span>
+              </button>
+              <button class="bottom-action-bar__action" type="button">
+                <span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-shoucang"></i></span>
+                <span class="bottom-action-bar__action-label">操作2</span>
+              </button>
+              <button class="bottom-action-bar__action" type="button">
+                <span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-shoucang"></i></span>
+                <span class="bottom-action-bar__action-label">操作3</span>
+              </button>
+            </div>
+            <div class="bottom-action-bar__trailing">
+              <button class="btn btn--weak btn--md">次要按钮</button>
+              <button class="btn btn--strong btn--md">主要按钮</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-phone bottom-action-demo">
+      <div class="label">主次操作 · 4 项入口 + 单按钮</div>
+      <div class="bottom-action-stage">
+        <div class="bottom-action-ghost"></div>
+        <div class="bottom-action-bar bottom-action-bar--primary-secondary bottom-action-bar--icon-text js-overflow-bar">
+          <div class="bottom-action-bar__inner">
+            <div class="bottom-action-bar__leading">
+              <button class="bottom-action-bar__more" type="button" aria-label="更多操作"><i class="wego-iconfont-s icon-sandian16"></i><span class="bottom-action-bar__more-label">更多</span></button>
+              <button class="bottom-action-bar__action" type="button"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-kefu-guanfang"></i></span><span class="bottom-action-bar__action-label">操作1</span></button>
+              <button class="bottom-action-bar__action" type="button"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-fenxiang"></i></span><span class="bottom-action-bar__action-label">操作2</span></button>
+              <button class="bottom-action-bar__action" type="button"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-shoucang"></i></span><span class="bottom-action-bar__action-label">操作3</span></button>
+              <button class="bottom-action-bar__action" type="button"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-xiazai"></i></span><span class="bottom-action-bar__action-label">操作4</span></button>
+            </div>
+            <div class="bottom-action-bar__trailing">
+              <button class="btn btn--strong btn--md">主要按钮</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-phone bottom-action-demo">
+      <div class="label">主次操作 · 4 项入口 + 双按钮</div>
+      <div class="bottom-action-stage">
+        <div class="bottom-action-ghost"></div>
+        <div class="bottom-action-bar bottom-action-bar--primary-secondary bottom-action-bar--icon-text js-overflow-bar">
+          <div class="bottom-action-bar__inner">
+            <div class="bottom-action-bar__leading">
+              <button class="bottom-action-bar__more" type="button" aria-label="更多操作"><i class="wego-iconfont-s icon-sandian16"></i><span class="bottom-action-bar__more-label">更多</span></button>
+              <button class="bottom-action-bar__action" type="button"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-kefu-guanfang"></i></span><span class="bottom-action-bar__action-label">操作1</span></button>
+              <button class="bottom-action-bar__action" type="button"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-shoucang"></i></span><span class="bottom-action-bar__action-label">操作2</span></button>
+              <button class="bottom-action-bar__action" type="button"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-xiazai"></i></span><span class="bottom-action-bar__action-label">操作3</span></button>
+              <button class="bottom-action-bar__action" type="button"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-fenxiangzhuan"></i></span><span class="bottom-action-bar__action-label">操作4</span></button>
+            </div>
+            <div class="bottom-action-bar__trailing">
+              <button class="btn btn--weak btn--md">次要按钮</button>
+              <button class="btn btn--strong btn--md">主要按钮</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-phone bottom-action-demo">
+      <div class="label">主次操作 · 带提示 + 单按钮</div>
+      <div class="bottom-action-stage">
+        <div class="bottom-action-ghost"></div>
+        <div class="bottom-action-bar bottom-action-bar--primary-secondary bottom-action-bar--with-hint">
+          <div class="bottom-action-bar__hint">辅助提示文案</div>
+          <div class="bottom-action-bar__inner">
+            <div class="bottom-action-bar__leading"></div>
+            <div class="bottom-action-bar__trailing">
+              <button class="btn btn--strong btn--md">主要按钮</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-phone bottom-action-demo">
+      <div class="label">主次操作 · 3 项入口 + 单按钮</div>
+      <div class="bottom-action-stage">
+        <div class="bottom-action-ghost"></div>
+        <div class="bottom-action-bar bottom-action-bar--primary-secondary bottom-action-bar--icon-text js-overflow-bar">
+          <div class="bottom-action-bar__inner">
+            <div class="bottom-action-bar__leading">
+              <button class="bottom-action-bar__more" type="button" aria-label="更多操作"><i class="wego-iconfont-s icon-sandian16"></i><span class="bottom-action-bar__more-label">更多</span></button>
+              <button class="bottom-action-bar__action" type="button"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-chexiao"></i></span><span class="bottom-action-bar__action-label">操作1</span></button>
+              <button class="bottom-action-bar__action" type="button"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-mulu"></i></span><span class="bottom-action-bar__action-label">操作2</span></button>
+              <button class="bottom-action-bar__action" type="button"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-xianshi"></i></span><span class="bottom-action-bar__action-label">操作3</span></button>
+            </div>
+            <div class="bottom-action-bar__trailing">
+              <button class="btn btn--strong btn--md">主要按钮</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-phone bottom-action-demo">
+      <div class="label">主次操作 · 左侧切换 + 单按钮</div>
+      <div class="bottom-action-stage">
+        <div class="bottom-action-ghost"></div>
+        <div class="bottom-action-bar bottom-action-bar--primary-secondary bottom-action-bar--edge-16">
+          <div class="bottom-action-bar__inner">
+            <div class="bottom-action-bar__leading">
+              <button class="bottom-action-bar__selection-toggle" type="button" data-menu-labels="100|200|300">
+                <span>选项文字</span>
+                <i class="bottom-action-bar__selection-caret wego-iconfont-s icon-xiajiantou16"></i>
+              </button>
+            </div>
+            <div class="bottom-action-bar__trailing">
+              <button class="btn btn--strong btn--md">主要按钮</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pv-section">
+  <div class="pv-section__title">选择操作 · Figma 默认态</div>
+  <div class="pv-section__sub">左侧绑定选择态，右侧承载批量处理。</div>
+  <div class="bottom-action-preview-grid">
+    <div class="preview-phone bottom-action-demo">
+      <div class="label">选择操作 · 全选 + 单按钮</div>
+      <div class="bottom-action-stage">
+        <div class="bottom-action-ghost"></div>
+        <div class="bottom-action-bar bottom-action-bar--selection">
+          <div class="bottom-action-bar__inner">
+            <div class="bottom-action-bar__leading">
+              <div class="bottom-action-bar__checkbox-field" data-bab-checkbox tabindex="0" role="checkbox" aria-checked="false">
+                <div class="checkbox"><div class="checkbox__inner"></div><div class="checkbox__icon"><img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt=""></div></div>
+                <span class="checkbox-field__text">全选</span>
+              </div>
+            </div>
+            <div class="bottom-action-bar__trailing">
+              <button class="btn btn--strong btn--md">主要按钮</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-phone bottom-action-demo">
+      <div class="label">选择操作 · 全选统计 + 双按钮</div>
+      <div class="bottom-action-stage">
+        <div class="bottom-action-ghost"></div>
+        <div class="bottom-action-bar bottom-action-bar--selection">
+          <div class="bottom-action-bar__inner">
+            <div class="bottom-action-bar__leading">
+              <div class="bottom-action-bar__checkbox-field" data-bab-checkbox tabindex="0" role="checkbox" aria-checked="false">
+                <div class="checkbox"><div class="checkbox__inner"></div><div class="checkbox__icon"><img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt=""></div></div>
+                <span class="bottom-action-bar__selection-count">
+                  <span class="bottom-action-bar__selection-count-main">全选</span>
+                  <span class="bottom-action-bar__selection-count-sub">共20000</span>
+                </span>
+              </div>
+            </div>
+            <div class="bottom-action-bar__trailing">
+              <button class="btn btn--weak btn--md">次要按钮</button>
+              <button class="btn btn--strong btn--md">主要按钮</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-phone bottom-action-demo">
+      <div class="label">选择操作 · 计数切换 + 危险按钮</div>
+      <div class="bottom-action-stage">
+        <div class="bottom-action-ghost"></div>
+        <div class="bottom-action-bar bottom-action-bar--selection">
+          <div class="bottom-action-bar__inner">
+            <div class="bottom-action-bar__leading">
+              <button class="bottom-action-bar__selection-toggle" type="button" data-menu-labels="100|200|300">
+                <span class="bottom-action-bar__checkbox-field" data-bab-checkbox tabindex="-1" role="checkbox" aria-checked="false">
+                  <span class="checkbox"><span class="checkbox__inner"></span><span class="checkbox__icon"><img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt=""></span></span>
+                </span>
+                <span class="bottom-action-bar__selection-value"><span>0/100</span><i class="bottom-action-bar__selection-caret wego-iconfont-s icon-xiajiantou16"></i></span>
+              </button>
+            </div>
+            <div class="bottom-action-bar__trailing">
+              <button class="btn btn--weak btn--md">次要按钮</button>
+              <button class="btn btn--danger btn--md">危险按钮</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-phone bottom-action-demo">
+      <div class="label">选择操作 · 计数切换 + 单按钮</div>
+      <div class="bottom-action-stage">
+        <div class="bottom-action-ghost"></div>
+        <div class="bottom-action-bar bottom-action-bar--selection">
+          <div class="bottom-action-bar__inner">
+            <div class="bottom-action-bar__leading">
+              <button class="bottom-action-bar__selection-toggle" type="button" data-menu-labels="100|200|300">
+                <span class="bottom-action-bar__checkbox-field" data-bab-checkbox tabindex="-1" role="checkbox" aria-checked="false">
+                  <span class="checkbox"><span class="checkbox__inner"></span><span class="checkbox__icon"><img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt=""></span></span>
+                </span>
+                <span class="bottom-action-bar__selection-value"><span>0/200</span><i class="bottom-action-bar__selection-caret wego-iconfont-s icon-xiajiantou16"></i></span>
+              </button>
+            </div>
+            <div class="bottom-action-bar__trailing">
+              <button class="btn btn--strong btn--md">主要按钮</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-phone bottom-action-demo">
+      <div class="label">选择操作 · 计数切换 + 三按钮</div>
+      <div class="bottom-action-stage">
+        <div class="bottom-action-ghost"></div>
+        <div class="bottom-action-bar bottom-action-bar--selection">
+          <div class="bottom-action-bar__inner">
+            <div class="bottom-action-bar__leading">
+              <button class="bottom-action-bar__selection-toggle" type="button" data-menu-labels="100|200|300">
+                <span class="bottom-action-bar__checkbox-field" data-bab-checkbox tabindex="-1" role="checkbox" aria-checked="false">
+                  <span class="checkbox"><span class="checkbox__inner"></span><span class="checkbox__icon"><img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt=""></span></span>
+                </span>
+                <span class="bottom-action-bar__selection-value"><span>0/100</span><i class="bottom-action-bar__selection-caret wego-iconfont-s icon-xiajiantou16"></i></span>
+              </button>
+            </div>
+            <div class="bottom-action-bar__trailing">
+              <button class="bottom-action-bar__more" type="button" aria-label="更多操作"><i class="wego-iconfont-s icon-sandian16"></i><span class="bottom-action-bar__more-label">更多</span></button>
+              <button class="btn btn--weak btn--md">次要按钮</button>
+              <button class="btn btn--weak btn--md">次要按钮</button>
+              <button class="btn btn--strong btn--md">主要按钮</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-phone bottom-action-demo">
+      <div class="label">选择操作 · 计数切换 + 禁用按钮</div>
+      <div class="bottom-action-stage">
+        <div class="bottom-action-ghost"></div>
+        <div class="bottom-action-bar bottom-action-bar--selection">
+          <div class="bottom-action-bar__inner">
+            <div class="bottom-action-bar__leading">
+              <button class="bottom-action-bar__selection-toggle" type="button">
+                <span class="bottom-action-bar__checkbox-field" data-bab-checkbox tabindex="-1" role="checkbox" aria-checked="false">
+                  <span class="checkbox"><span class="checkbox__inner"></span><span class="checkbox__icon"><img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt=""></span></span>
+                </span>
+                <span class="bottom-action-bar__selection-value"><span>0/100</span><i class="bottom-action-bar__selection-caret wego-iconfont-s icon-xiajiantou16"></i></span>
+              </button>
+            </div>
+            <div class="bottom-action-bar__trailing">
+              <button class="btn btn--weak btn--md" disabled>禁用按钮</button>
+              <button class="btn btn--strong btn--md">主要按钮</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pv-section">
+  <div class="pv-section__title">响应式收纳</div>
+  <div class="pv-section__sub">演示宽度不足时左侧辅助操作收进更多，右侧关键操作仍外露。</div>
+  <div class="bottom-action-demo-widths">
+    <div class="bottom-action-responsive" data-width="375">
+      <div class="bottom-action-responsive__caption">375 宽度</div>
+      <div class="bottom-action-responsive__body"></div>
+      <div class="bottom-action-bar bottom-action-bar--primary-secondary bottom-action-bar--icon-text js-overflow-bar" data-popmenu-id="demo-popmenu-375">
+        <div class="bottom-action-bar__inner">
+          <div class="bottom-action-bar__leading">
+            <button class="bottom-action-bar__more" type="button" aria-label="更多操作"><i class="wego-iconfont-s icon-sandian16"></i><span class="bottom-action-bar__more-label">更多</span></button>
+            <button class="bottom-action-bar__action js-overflow-item" type="button" data-menu-label="操作1"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-kefu-guanfang"></i></span><span class="bottom-action-bar__action-label">操作1</span></button>
+            <button class="bottom-action-bar__action js-overflow-item" type="button" data-menu-label="操作2"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-fenxiang"></i></span><span class="bottom-action-bar__action-label">操作2</span></button>
+            <button class="bottom-action-bar__action js-overflow-item" type="button" data-menu-label="操作3"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-shoucang"></i></span><span class="bottom-action-bar__action-label">操作3</span></button>
+            <button class="bottom-action-bar__action js-overflow-item" type="button" data-menu-label="操作4"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-xiazai"></i></span><span class="bottom-action-bar__action-label">操作4</span></button>
+          </div>
+          <div class="bottom-action-bar__trailing">
+            <button class="btn btn--weak btn--md">次要按钮</button>
+            <button class="btn btn--strong btn--md">主要按钮</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-action-responsive" data-width="320">
+      <div class="bottom-action-responsive__caption">320 宽度</div>
+      <div class="bottom-action-responsive__body"></div>
+      <div class="bottom-action-bar bottom-action-bar--primary-secondary bottom-action-bar--icon-text js-overflow-bar" data-popmenu-id="demo-popmenu-320">
+        <div class="bottom-action-bar__inner">
+          <div class="bottom-action-bar__leading">
+            <button class="bottom-action-bar__more" type="button" aria-label="更多操作"><i class="wego-iconfont-s icon-sandian16"></i><span class="bottom-action-bar__more-label">更多</span></button>
+            <button class="bottom-action-bar__action js-overflow-item" type="button" data-menu-label="操作1"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-kefu-guanfang"></i></span><span class="bottom-action-bar__action-label">操作1</span></button>
+            <button class="bottom-action-bar__action js-overflow-item" type="button" data-menu-label="操作2"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-fenxiang"></i></span><span class="bottom-action-bar__action-label">操作2</span></button>
+            <button class="bottom-action-bar__action js-overflow-item" type="button" data-menu-label="操作3"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-shoucang"></i></span><span class="bottom-action-bar__action-label">操作3</span></button>
+            <button class="bottom-action-bar__action js-overflow-item" type="button" data-menu-label="操作4"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-xiazai"></i></span><span class="bottom-action-bar__action-label">操作4</span></button>
+          </div>
+          <div class="bottom-action-bar__trailing">
+            <button class="btn btn--weak btn--md">次要按钮</button>
+            <button class="btn btn--strong btn--md">主要按钮</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-action-responsive" data-width="280">
+      <div class="bottom-action-responsive__caption">280 宽度</div>
+      <div class="bottom-action-responsive__body"></div>
+      <div class="bottom-action-bar bottom-action-bar--primary-secondary bottom-action-bar--icon-text js-overflow-bar" data-popmenu-id="demo-popmenu-280">
+        <div class="bottom-action-bar__inner">
+          <div class="bottom-action-bar__leading">
+            <button class="bottom-action-bar__more" type="button" aria-label="更多操作"><i class="wego-iconfont-s icon-sandian16"></i><span class="bottom-action-bar__more-label">更多</span></button>
+            <button class="bottom-action-bar__action js-overflow-item" type="button" data-menu-label="操作1"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-kefu-guanfang"></i></span><span class="bottom-action-bar__action-label">操作1</span></button>
+            <button class="bottom-action-bar__action js-overflow-item" type="button" data-menu-label="操作2"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-fenxiang"></i></span><span class="bottom-action-bar__action-label">操作2</span></button>
+            <button class="bottom-action-bar__action js-overflow-item" type="button" data-menu-label="操作3"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-shoucang"></i></span><span class="bottom-action-bar__action-label">操作3</span></button>
+            <button class="bottom-action-bar__action js-overflow-item" type="button" data-menu-label="操作4"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-xiazai"></i></span><span class="bottom-action-bar__action-label">操作4</span></button>
+          </div>
+          <div class="bottom-action-bar__trailing">
+            <button class="btn btn--weak btn--md">次要按钮</button>
+            <button class="btn btn--strong btn--md">主要按钮</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="bottom-action-popmenu-root"></div>
+
+<script>
+(function () {
+  let currentMenu = null;
+
+  function layoutOverflowBar(bar) {
+    const inner = bar.querySelector('.bottom-action-bar__inner');
+    const leading = bar.querySelector('.bottom-action-bar__leading');
+    const trailing = bar.querySelector('.bottom-action-bar__trailing');
+    const more = bar.querySelector('.bottom-action-bar__more');
+    const items = Array.from(leading ? leading.querySelectorAll('.bottom-action-bar__action') : []);
+    if (!inner || !leading || !trailing || !more || items.length === 0) return;
+
+    items.forEach(item => item.classList.remove('bottom-action-bar__collapsed-item'));
+    more.style.display = 'none';
+
+    const innerWidth = inner.clientWidth;
+    const trailingWidth = trailing.offsetWidth;
+    const available = innerWidth - trailingWidth - 12;
+    let used = 0;
+    let collapsed = false;
+
+    items.forEach((item, index) => {
+      const width = item.offsetWidth;
+      if (!collapsed && used + width <= available) {
+        used += width;
+        return;
+      }
+      if (!collapsed) {
+        collapsed = true;
+        more.style.display = 'inline-flex';
+        used += more.offsetWidth;
+      }
+      item.classList.add('bottom-action-bar__collapsed-item');
+    });
+
+    if (!collapsed) {
+      more.style.display = 'none';
+      bar.classList.remove('is-collapsed');
+      return;
+    }
+
+    bar.classList.add('is-collapsed');
+    const visibleItems = items.filter(item => !item.classList.contains('bottom-action-bar__collapsed-item'));
+    while (used > available && visibleItems.length > 0) {
+      const lastVisible = visibleItems.pop();
+      used -= lastVisible.offsetWidth;
+      lastVisible.classList.add('bottom-action-bar__collapsed-item');
+    }
+  }
+
+  function closeAllMenus() {
+    if (!currentMenu) return;
+    currentMenu.remove();
+    currentMenu = null;
+  }
+
+  function buildMenu(labels, mode, selectedLabel) {
+    const menu = document.createElement('div');
+    menu.className = 'popmenu popmenu--demo-floating ' + (mode === 'select' ? 'popmenu--select' : 'popmenu--action');
+    menu.setAttribute('role', mode === 'select' ? 'listbox' : 'menu');
+    menu.setAttribute('data-state', 'closed');
+    menu.setAttribute('data-placement', 'bottom');
+    menu.setAttribute('data-align', 'start');
+
+    let html = '<div class="popmenu__list">';
+    labels.forEach(function (label, index) {
+      if (mode === 'select') {
+        const selected = label === selectedLabel || (!selectedLabel && index === 0);
+        html += '<div class="popmenu__item' + (selected ? ' popmenu__item--selected' : '') + '" role="option" aria-selected="' + (selected ? 'true' : 'false') + '"><span class="popmenu__item-text">' + label + '</span><i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check"></i></div>';
+        return;
+      }
+      html += '<div class="popmenu__item" role="menuitem"><span class="popmenu__item-text">' + label + '</span></div>';
+    });
+    html += '</div>';
+    menu.innerHTML = html;
+    return menu;
+  }
+
+  function openMenu(trigger, labels, options) {
+    const mode = options && options.mode ? options.mode : 'action';
+    const selectedLabel = options && options.selectedLabel ? options.selectedLabel : '';
+    closeAllMenus();
+    const root = document.getElementById('bottom-action-popmenu-root');
+    const menu = buildMenu(labels, mode, selectedLabel);
+    menu.addEventListener('click', function (event) {
+      const item = event.target.closest('.popmenu__item');
+      if (!item) return;
+      if (mode === 'select') {
+        menu.querySelectorAll('.popmenu__item').forEach(function (candidate) {
+          candidate.classList.toggle('popmenu__item--selected', candidate === item);
+          candidate.setAttribute('aria-selected', candidate === item ? 'true' : 'false');
+        });
+      }
+      closeAllMenus();
+    });
+    root.appendChild(menu);
+    if (!window.WegoPreviewPopmenu || !window.WegoPreviewPopmenu.position(menu, trigger)) {
+      menu.remove();
+      return null;
+    }
+    requestAnimationFrame(function () {
+      menu.setAttribute('data-state', 'open');
+    });
+    currentMenu = menu;
+    return menu;
+  }
+
+  function bindOverflowBars() {
+    const bars = Array.from(document.querySelectorAll('.js-overflow-bar'));
+    bars.forEach(bar => {
+      layoutOverflowBar(bar);
+      const more = bar.querySelector('.bottom-action-bar__more');
+      if (!more) return;
+      more.addEventListener('click', function (event) {
+        event.stopPropagation();
+        const hiddenLabels = Array.from(bar.querySelectorAll('.bottom-action-bar__action.bottom-action-bar__collapsed-item'))
+          .map(function (item) {
+            return item.getAttribute('data-menu-label') ||
+              (item.querySelector('.bottom-action-bar__action-label') ? item.querySelector('.bottom-action-bar__action-label').textContent.trim() : '');
+          })
+          .filter(Boolean);
+        if (hiddenLabels.length === 0) return;
+        openMenu(more, hiddenLabels, { mode: 'action' });
+      });
+    });
+
+    window.addEventListener('resize', function () {
+      bars.forEach(layoutOverflowBar);
+      closeAllMenus();
+    });
+  }
+
+  function layoutPageOverflowBar(bar) {
+    const leading = bar.querySelector('.bottom-action-bar__leading');
+    const more = bar.querySelector('.bottom-action-bar__more');
+    const items = Array.from(bar.querySelectorAll('.bottom-action-bar__action'));
+    if (!leading || !more || items.length === 0) return;
+
+    items.forEach(item => item.classList.remove('bottom-action-bar__collapsed-item'));
+    more.style.display = 'none';
+    bar.classList.remove('is-collapsed');
+
+    const hasEllipsis = function () {
+      return items.some(function (item) {
+        if (item.classList.contains('bottom-action-bar__collapsed-item')) return false;
+        const label = item.querySelector('.bottom-action-bar__action-label');
+        return label && label.scrollWidth > label.clientWidth + 1;
+      });
+    };
+
+    while ((leading.scrollWidth > leading.clientWidth || hasEllipsis()) && items.filter(function (item) {
+      return !item.classList.contains('bottom-action-bar__collapsed-item');
+    }).length > 1) {
+      more.style.display = 'inline-flex';
+      bar.classList.add('is-collapsed');
+      const visible = items.filter(function (item) {
+        return !item.classList.contains('bottom-action-bar__collapsed-item');
+      });
+      visible[0].classList.add('bottom-action-bar__collapsed-item');
+    }
+  }
+
+  function bindPageOverflowBars() {
+    const bars = Array.from(document.querySelectorAll('.js-page-overflow-bar'));
+    bars.forEach(function (bar) {
+      layoutPageOverflowBar(bar);
+      const more = bar.querySelector('.bottom-action-bar__more');
+      if (!more) return;
+      more.addEventListener('click', function (event) {
+        event.stopPropagation();
+        const hiddenLabels = Array.from(bar.querySelectorAll('.bottom-action-bar__action.bottom-action-bar__collapsed-item .bottom-action-bar__action-label'))
+          .map(function (label) { return label.getAttribute('data-menu-label') || label.textContent.trim(); })
+          .filter(Boolean);
+        if (hiddenLabels.length === 0) return;
+        openMenu(more, hiddenLabels, { mode: 'action' });
+      });
+    });
+
+    window.addEventListener('resize', function () {
+      bars.forEach(layoutPageOverflowBar);
+      closeAllMenus();
+    });
+  }
+
+  function setBabCheckboxState(host, checked) {
+    const checkbox = host.querySelector('.checkbox');
+    if (!checkbox) return;
+    checkbox.classList.toggle('checkbox--checked', checked);
+    host.setAttribute('aria-checked', checked ? 'true' : 'false');
+  }
+
+  function bindBabCheckboxes() {
+    const hosts = Array.from(document.querySelectorAll('[data-bab-checkbox]'));
+    hosts.forEach(function (host) {
+      host.addEventListener('click', function (event) {
+        if (host.closest('.bottom-action-bar__selection-toggle')) {
+          event.stopPropagation();
+        }
+        const next = host.getAttribute('aria-checked') !== 'true';
+        setBabCheckboxState(host, next);
+      });
+    });
+  }
+
+  function bindSelectionMenus() {
+    const toggles = Array.from(document.querySelectorAll('.bottom-action-bar__selection-toggle[data-menu-labels]'));
+    toggles.forEach(function (toggle) {
+      const value = toggle.querySelector('.bottom-action-bar__selection-value');
+      const trigger = value || toggle;
+      trigger.addEventListener('click', function (event) {
+        event.stopPropagation();
+        const labels = (toggle.getAttribute('data-menu-labels') || '')
+          .split('|')
+          .map(function (label) { return label.trim(); })
+          .filter(Boolean);
+        if (labels.length === 0) return;
+        let currentLabel = '';
+        if (value) {
+          const rawValue = value.querySelector('span') ? value.querySelector('span').textContent.trim() : value.textContent.trim();
+          currentLabel = rawValue.includes('/') ? rawValue.split('/').pop().trim() : rawValue;
+        }
+        openMenu(trigger, labels, { mode: 'select', selectedLabel: currentLabel });
+      });
+    });
+  }
+
+  function layoutSelectionBars() {
+    const bars = Array.from(document.querySelectorAll('.bottom-action-bar--selection'));
+    bars.forEach(function (bar) {
+      const trailing = bar.querySelector('.bottom-action-bar__trailing');
+      const more = trailing ? trailing.querySelector('.bottom-action-bar__more') : null;
+      const buttons = trailing ? Array.from(trailing.querySelectorAll('.btn')) : [];
+      if (!trailing || !more || buttons.length === 0) return;
+
+      buttons.forEach(function (btn) { btn.classList.remove('bottom-action-bar__collapsed-item'); });
+      more.style.display = 'none';
+
+      if (buttons.length <= 2) return;
+
+      more.style.display = 'inline-flex';
+      buttons.slice(0, buttons.length - 2).forEach(function (btn) {
+        btn.classList.add('bottom-action-bar__collapsed-item');
+      });
+
+      more.onclick = function (event) {
+        event.stopPropagation();
+        const hiddenLabels = buttons
+          .filter(function (btn) { return btn.classList.contains('bottom-action-bar__collapsed-item'); })
+          .map(function (btn) { return btn.textContent.trim(); })
+          .filter(Boolean);
+        if (hiddenLabels.length === 0) return;
+        openMenu(more, hiddenLabels, { mode: 'action' });
+      };
+    });
+  }
+
+  window.addEventListener('resize', closeAllMenus);
+  window.addEventListener('scroll', closeAllMenus, true);
+
+  document.addEventListener('click', function (event) {
+    if (!event.target.closest('.popmenu--demo-floating')) {
+      closeAllMenus();
+    }
+  });
+
+  document.addEventListener('focusin', function (event) {
+    if (!event.target.closest('.popmenu--demo-floating')) {
+      closeAllMenus();
+    }
+  });
+
+  bindOverflowBars();
+  bindPageOverflowBars();
+  bindBabCheckboxes();
+  bindSelectionMenus();
+  layoutSelectionBars();
+})();
+</script>
+</body>
+</html>

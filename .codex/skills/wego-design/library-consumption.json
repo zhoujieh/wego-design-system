@@ -223,9 +223,12 @@
       "exception": "modal、sheet 等浮层组件自带安全区处理，不适用此规则"
     },
     "bottomActionBarAlignment": {
-      "description": "底部固定操作栏内按钮对齐规则",
-      "singleButton": "单按钮时使用 width:100% 占满操作栏宽度",
-      "multiButton": "多按钮时主操作靠右，次操作靠左，按钮间用 spacer 间隔",
+      "description": "底部固定操作栏优先命中 bottom-action-bar 组件，并按三类正式语义消费",
+      "pageActions": "页面操作（page-actions）用于当前页面相关操作或功能入口，不预设左右主次分区；默认纯文字，只有产品明确要求时才显示图标。",
+      "primarySecondaryActions": "主次操作（primary-secondary-actions）右侧最多固定 2 个结果按钮，且只能是主按钮 + 次按钮；左侧辅助操作可收进更多。",
+      "selectionActions": "选择操作（selection-actions）强绑定选择态，左侧承载全选、已选数或范围切换，右侧承载批量处理。",
+      "singleButton": "只有 1 个结果按钮时，按钮占满右侧可用主操作区，不与左侧轻量操作抢层级。",
+      "multiButton": "宽度不足时优先保证右侧关键操作外露；左侧辅助操作统一收进最左侧更多入口，更多菜单默认复用 popmenu 纯文字竖向菜单。",
       "appliesTo": "所有含底部固定操作栏的 wego-app 业务场景页面",
       "exception": "modal、sheet 等浮层组件自带的底部操作区由组件内部布局决定，不适用此规则"
     }

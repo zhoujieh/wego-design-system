@@ -1,0 +1,238 @@
+{
+  "schemaVersion": 3,
+  "slug": "bottom-action-bar",
+  "name": "底部操作栏",
+  "category": "action",
+  "status": "stable",
+  "sourceKind": "figma",
+  "confidence": "high",
+  "description": "移动端页面底部固定操作栏，覆盖页面操作、主次操作和选择操作三类语义，组件自身承担底部安全区处理与响应式收纳。",
+  "semanticTypeCandidates": [
+    "bottom-action-bar",
+    "page-actions-bar",
+    "primary-secondary-action-bar",
+    "selection-action-bar"
+  ],
+  "variantDimensions": {
+    "type": [
+      "page-actions",
+      "primary-secondary-actions",
+      "selection-actions"
+    ],
+    "iconMode": [
+      "text-only",
+      "icon-text"
+    ],
+    "state": [
+      "default",
+      "active",
+      "disabled"
+    ],
+    "selectionState": [
+      "unchecked",
+      "checked"
+    ],
+    "overflow": [
+      "expanded",
+      "collapsed-more"
+    ]
+  },
+  "representativeVariants": [
+    {
+      "type": "page-actions",
+      "iconMode": "text-only",
+      "state": "default",
+      "overflow": "expanded"
+    },
+    {
+      "type": "page-actions",
+      "iconMode": "icon-text",
+      "state": "default",
+      "overflow": "expanded"
+    },
+    {
+      "type": "primary-secondary-actions",
+      "state": "default",
+      "overflow": "expanded"
+    },
+    {
+      "type": "selection-actions",
+      "selectionState": "checked",
+      "state": "default"
+    },
+    {
+      "type": "selection-actions",
+      "selectionState": "unchecked",
+      "state": "disabled"
+    }
+  ],
+  "anatomy": [
+    {
+      "name": "root",
+      "selector": ".bottom-action-bar",
+      "role": "底部固定操作栏根节点，承担白底、顶部分隔线与 safe area 补偿"
+    },
+    {
+      "name": "inner",
+      "selector": ".bottom-action-bar__inner",
+      "role": "内容主容器，控制左右区、按钮区和最小宽度"
+    },
+    {
+      "name": "leading",
+      "selector": ".bottom-action-bar__leading",
+      "role": "左侧辅助操作或选择状态区域，可折叠进更多"
+    },
+    {
+      "name": "more",
+      "selector": ".bottom-action-bar__more",
+      "role": "左侧收纳入口，承载溢出操作并触发 popmenu"
+    },
+    {
+      "name": "action",
+      "selector": ".bottom-action-bar__action",
+      "role": "单个轻量操作项，支持纯文字或图标+文字"
+    },
+    {
+      "name": "selection",
+      "selector": ".bottom-action-bar__selection",
+      "role": "选择态信息区，承载全选、已选数量或范围切换"
+    },
+    {
+      "name": "hint",
+      "selector": ".bottom-action-bar__hint",
+      "role": "操作栏上方辅助提示文案"
+    },
+    {
+      "name": "trailing",
+      "selector": ".bottom-action-bar__trailing",
+      "role": "右侧结果性按钮区，主次操作稳定外露"
+    }
+  ],
+  "structurePatterns": [
+    "根节点固定使用 .bottom-action-bar > .bottom-action-bar__inner，组件自身声明 padding-bottom: var(--safe-area-bottom, env(safe-area-inset-bottom, 0px))，页面内容区不再额外承担安全区。",
+    "页面操作（page-actions）是页面级相关操作集合，不预设左右主次分区；默认纯文字，只有产品明确要求时才切换 icon-text。",
+    "主次操作（primary-secondary-actions）右侧最多固定 2 个结果操作，且只能是 1 个主按钮 + 1 个次按钮；左侧辅助操作可折叠进更多。",
+    "选择操作（selection-actions）强绑定选择态，左侧承载全选、已选数量或范围切换，右侧承载批量处理按钮。",
+    "左侧溢出统一收进最左侧的 .bottom-action-bar__more，更多菜单复用 popmenu 的 action 模式，默认纯文字竖向菜单。",
+    "组件级只保证一条收纳原则：宽度不足时优先保留右侧关键操作外露；具体留存顺序由产品决定，不写死在组件规则里。",
+    "页面操作与主次操作的轻量操作项默认使用 44px 热区与单行文案，不把图标、文案、间距压缩到互相碰撞。",
+    "主按钮和次按钮直接复用 button 组件；禁止在底部操作栏内另造按钮视觉体系。",
+    "选择操作的勾选控件复用 checkbox / radio 视觉语言，不在底部操作栏中发明新选择控件。",
+    "带提示场景使用 .bottom-action-bar__hint 放在操作栏上方，提示与操作栏保持同底色与顶部发丝分隔。"
+  ],
+  "behavior": {
+    "overflow": "当左侧操作在当前宽度下无法满足最小显示宽度时，左侧溢出操作收进更多；更多菜单默认复用 popmenu action 模式的纯文字竖向菜单。",
+    "priority": "组件只保证收纳后右侧关键操作优先外露；外露顺序和保留策略由业务场景定义。",
+    "iconMode": "页面操作默认 text-only；只有产品明确要求时才使用 icon-text。组件不主动推断带图标版本。",
+    "selection": "选择操作未满足业务前置条件时，右侧批量处理按钮可以置 disabled，但组件不自行推断文案或数量逻辑。"
+  },
+  "accessibility": {
+    "role": "toolbar",
+    "buttonRule": "轻量操作、更多入口和右侧按钮都必须提供可感知名称。",
+    "menuRule": "更多菜单触发后应为 popmenu 提供可访问菜单语义。",
+    "selectionRule": "选择操作中的勾选和数量信息必须保持可读，不允许只依赖颜色区分状态。 "
+  },
+  "usageHints": [
+    "页面操作用于当前页面的其他操作或相关功能入口，不用于强交易详情和批量选择。",
+    "主次操作适合详情导向或结果导向场景，右侧关键动作优先级最明确。",
+    "选择操作只用于存在选择上下文的批量处理页面。",
+    "页面操作默认纯文字；只有产品明确要求时才启用图标+文字版本。",
+    "超过可用宽度时优先收纳左侧辅助操作，不挤压右侧关键按钮。"
+  ],
+  "doNotInvent": [
+    "不要把页面操作强行套成固定左侧入口区 + 右侧主按钮的双区模型。",
+    "不要为更多菜单发明宫格、图文混排或第二套弹层体系，默认复用 popmenu。",
+    "不要把主次操作的右侧扩成 3 个及以上结果按钮。",
+    "不要让轻量操作项通过压缩字号、压缩图标或压缩间距来硬塞进小屏。",
+    "不要自动猜测哪些左侧操作必须常驻外露。"
+  ],
+  "tokensConsumed": [
+    "--bg-page",
+    "--bg-panel",
+    "--bg-overlay-l1",
+    "--border-neutral-l2",
+    "--body-lg-font-size",
+    "--body-md-font-size",
+    "--body-md-line-height",
+    "--body-sm-font-size",
+    "--body-xs-font-size",
+    "--font-weight-medium",
+    "--radius-8",
+    "--size-20",
+    "--size-24",
+    "--spacer-4",
+    "--spacer-8",
+    "--spacer-12",
+    "--spacer-16",
+    "--spacer-20",
+    "--status-danger-default",
+    "--text-brand",
+    "--text-default",
+    "--text-secondary",
+    "--text-tertiary"
+  ],
+  "designTokens": {
+    "barMinHeight": "56px",
+    "barPaddingInline": "var(--spacer-16)",
+    "barGap": "var(--spacer-12)",
+    "safeAreaBottom": "var(--safe-area-bottom, env(safe-area-inset-bottom, 0px))",
+    "hintPaddingTop": "var(--spacer-8)",
+    "actionMinWidth": "56px",
+    "actionMaxWidth": "72px",
+    "actionGap": "var(--spacer-4)",
+    "actionHotArea": "44px",
+    "iconSize": "20px",
+    "selectionCountWidth": "72px",
+    "selectionMoreButtonSize": "40px",
+    "divider": "0.5px solid var(--border-neutral-l2)"
+  },
+  "cssCustomProperties": [
+    {
+      "name": "--bottom-action-bar-action-min-width",
+      "default": "56px",
+      "appliesTo": "页面操作与左侧辅助操作的单项最小显示宽度"
+    },
+    {
+      "name": "--bottom-action-bar-action-max-width",
+      "default": "72px",
+      "appliesTo": "轻量操作项单列文案的默认最大宽度"
+    }
+  ],
+  "specRefs": [
+    "specs/交互设计原则.md",
+    "specs/布局与间距规范.md",
+    "specs/预览页脚手架规范.md"
+  ],
+  "domAnatomy": {
+    "root": ".bottom-action-bar",
+    "requiredChildren": [
+      ".bottom-action-bar__inner"
+    ],
+    "optionalChildren": [
+      ".bottom-action-bar__hint",
+      ".bottom-action-bar__leading",
+      ".bottom-action-bar__more",
+      ".bottom-action-bar__selection",
+      ".bottom-action-bar__trailing"
+    ],
+    "modifiers": [
+      ".bottom-action-bar--page-actions",
+      ".bottom-action-bar--primary-secondary",
+      ".bottom-action-bar--selection",
+      ".bottom-action-bar--icon-text",
+      ".bottom-action-bar--with-hint"
+    ],
+    "stateClasses": [
+      ".is-collapsed",
+      ".is-active",
+      ".is-disabled"
+    ]
+  },
+  "provenance": {
+    "preview": "preview/component-bottom-action-bar.html",
+    "cssSource": "preview/component-bottom-action-bar.html",
+    "embedded": false,
+    "hostComponent": null
+  },
+  "unknowns": []
+}

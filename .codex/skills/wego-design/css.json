@@ -345,6 +345,10 @@
                 "hex": "#ffffff",
                 "opacity": "1"
             },
+            "bg-panel": {
+                "hex": "#f6f6f6",
+                "opacity": "1"
+            },
             "bg-muted": {
                 "hex": "#f2f3f6",
                 "opacity": "1"

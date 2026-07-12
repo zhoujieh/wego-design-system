@@ -200,6 +200,14 @@
       "previewFile": "preview/component-metric.html",
       "priority": 23,
       "slot": "numeric-display"
+    },
+    {
+      "slug": "bottom-action-bar",
+      "reason": "页面底部固定操作栏，覆盖页面操作、主次操作和选择操作三类正式语义，更多收纳复用 popmenu。",
+      "evidenceFile": "components/bottom-action-bar.json",
+      "previewFile": "preview/component-bottom-action-bar.html",
+      "priority": 24,
+      "slot": "bottom-fixed-action-bar"
     }
   ],
   "allowedComponents": [
@@ -226,7 +234,8 @@
     "dialog",
     "actionsheet",
     "modal",
-    "metric"
+    "metric",
+    "bottom-action-bar"
   ],
   "screenBlueprints": [
     {
@@ -238,7 +247,8 @@
         "card",
         "badge",
         "button",
-        "image"
+        "image",
+        "bottom-action-bar"
       ],
       "role": "primary"
     },
@@ -251,7 +261,8 @@
         "tag",
         "counter",
         "button",
-        "badge"
+        "badge",
+        "bottom-action-bar"
       ],
       "role": "primary"
     },
@@ -275,7 +286,8 @@
         "checkbox",
         "switch",
         "form",
-        "link"
+        "link",
+        "bottom-action-bar"
       ],
       "role": "secondary"
     }
