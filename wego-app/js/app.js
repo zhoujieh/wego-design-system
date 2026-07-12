@@ -45,7 +45,7 @@
   };
 
   function iconSrcFor(img, iconName, active) {
-    var current = img.getAttribute('src') || './lib/icons/tab-dongtai.svg';
+    var current = img.getAttribute('src') || './lib/assets/icons/tab-dongtai.svg';
     var prefix = current.slice(0, current.lastIndexOf('/') + 1);
     return prefix + 'tab-' + (active ? 'active-' : '') + iconName + '.svg';
   }
@@ -830,7 +830,7 @@
   function gridEntryMarkup(route) {
     var entry = route.entry || {};
     var label = entry.label || route.scene || route.routeId;
-    var icon = entry.icon || './lib/icons/app-center/标签管理.svg';
+    var icon = entry.icon || './lib/assets/icons/app-center/标签管理.svg';
     return ''
       + '<button type="button" class="host-shell-grid-entry" data-route-id="' + route.routeId + '" data-entry-label="' + label + '">'
       +   '<img src="' + icon + '" alt="" class="host-shell-grid-entry__icon" />'

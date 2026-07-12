@@ -5,7 +5,7 @@
 - 宿主 Tab：「我的」（my）
 - 入口分组：应用中心（my-app-center）
 - 入口类型：grid-entry（网格图标入口）
-- 入口图标：`./lib/icons/app-center/配货管理.svg`
+- 入口图标：`./lib/assets/icons/app-center/配货管理.svg`
 - 入口标签：「仓库管理」
 - 路由方式：hash 路由 `#/my-warehouse-management`
 - 进入方式：push（slide-left 动画），覆盖底部 TabBar

@@ -10,7 +10,7 @@
   - 宿主路径由 interaction_spec.prototype_target + host_container 驱动
   - 一级/二级入口请在 data-route-id、data-entry-label、data-parent-entry 中补齐真实值
   - 业务场景按 design_plan 生成到 wego-app/scenes/{中文业务场景}/,通过 scene.js 注册
-  - 图标优先使用 lib/icons/app-center/*.svg 作为业务入口图标资产
+  - 图标优先使用 lib/assets/icons/app-center/*.svg 作为业务入口图标资产
   - 直接打开本模板预览时,下方 fallback 资源会从 wego-design / wego-ux/assets/templates 读取;落到 wego-app 后使用 ./lib / ./css / ./js
 -->
 <html lang="zh-CN">
@@ -99,27 +99,27 @@
         <div class="card__content host-shell-app-card__content">
           <div class="host-shell-grid" data-entry-group="my-app-center">
           <button type="button" class="host-shell-grid-entry" data-route-id="my-start-group" data-entry-label="一键开团">
-            <img src="./lib/icons/app-center/一键开团.svg" alt="" class="host-shell-grid-entry__icon" />
+            <img src="./lib/assets/icons/app-center/一键开团.svg" alt="" class="host-shell-grid-entry__icon" />
             <span class="host-shell-grid-entry__label">一键开团</span>
           </button>
           <button type="button" class="host-shell-grid-entry" data-route-id="my-shop-decoration" data-entry-label="店铺装修">
-            <img src="./lib/icons/app-center/店铺装修.svg" alt="" class="host-shell-grid-entry__icon" />
+            <img src="./lib/assets/icons/app-center/店铺装修.svg" alt="" class="host-shell-grid-entry__icon" />
             <span class="host-shell-grid-entry__label">店铺装修</span>
           </button>
           <button type="button" class="host-shell-grid-entry" data-route-id="my-collect-code" data-entry-label="收款码">
-            <img src="./lib/icons/app-center/收款码.svg" alt="" class="host-shell-grid-entry__icon" />
+            <img src="./lib/assets/icons/app-center/收款码.svg" alt="" class="host-shell-grid-entry__icon" />
             <span class="host-shell-grid-entry__label">收款码</span>
           </button>
           <button type="button" class="host-shell-grid-entry" data-route-id="my-store" data-entry-label="我的小店">
-            <img src="./lib/icons/app-center/我的小店.svg" alt="" class="host-shell-grid-entry__icon" />
+            <img src="./lib/assets/icons/app-center/我的小店.svg" alt="" class="host-shell-grid-entry__icon" />
             <span class="host-shell-grid-entry__label">我的小店</span>
           </button>
           <button type="button" class="host-shell-grid-entry" data-route-id="my-data-center" data-entry-label="数据中心">
-            <img src="./lib/icons/app-center/数据中心.svg" alt="" class="host-shell-grid-entry__icon" />
+            <img src="./lib/assets/icons/app-center/数据中心.svg" alt="" class="host-shell-grid-entry__icon" />
             <span class="host-shell-grid-entry__label">数据中心</span>
           </button>
           <button type="button" class="host-shell-grid-entry" data-route-id="my-private-keyboard" data-entry-label="私域键盘">
-            <img src="./lib/icons/app-center/私域键盘.svg" alt="" class="host-shell-grid-entry__icon" />
+            <img src="./lib/assets/icons/app-center/私域键盘.svg" alt="" class="host-shell-grid-entry__icon" />
             <span class="host-shell-grid-entry__label">私域键盘</span>
           </button>
           </div>
@@ -178,23 +178,23 @@
 
   <nav class="bottom-nav">
     <button type="button" class="bottom-nav__item" data-host-tab-trigger="dongtai">
-      <span class="bottom-nav__icon"><img src="./lib/icons/tab-dongtai.svg" alt="" data-tab-icon="dongtai" /></span>
+      <span class="bottom-nav__icon"><img src="./lib/assets/icons/tab-dongtai.svg" alt="" data-tab-icon="dongtai" /></span>
       <span class="bottom-nav__label">动态</span>
     </button>
     <button type="button" class="bottom-nav__item" data-host-tab-trigger="haoyou">
-      <span class="bottom-nav__icon"><img src="./lib/icons/tab-haoyou.svg" alt="" data-tab-icon="haoyou" /></span>
+      <span class="bottom-nav__icon"><img src="./lib/assets/icons/tab-haoyou.svg" alt="" data-tab-icon="haoyou" /></span>
       <span class="bottom-nav__label">好友</span>
     </button>
     <button type="button" class="bottom-nav__item" data-host-tab-trigger="workspace">
-      <span class="bottom-nav__icon"><img src="./lib/icons/tab-gongzuotai.svg" alt="" data-tab-icon="gongzuotai" /></span>
+      <span class="bottom-nav__icon"><img src="./lib/assets/icons/tab-gongzuotai.svg" alt="" data-tab-icon="gongzuotai" /></span>
       <span class="bottom-nav__label">工作台</span>
     </button>
     <button type="button" class="bottom-nav__item" data-host-tab-trigger="xiaoxi">
-      <span class="bottom-nav__icon"><img src="./lib/icons/tab-xiaoxi.svg" alt="" data-tab-icon="xiaoxi" /></span>
+      <span class="bottom-nav__icon"><img src="./lib/assets/icons/tab-xiaoxi.svg" alt="" data-tab-icon="xiaoxi" /></span>
       <span class="bottom-nav__label">消息</span>
     </button>
     <button type="button" class="bottom-nav__item active" data-host-tab-trigger="my">
-      <span class="bottom-nav__icon"><img src="./lib/icons/tab-active-wode.svg" alt="" data-tab-icon="wode" /></span>
+      <span class="bottom-nav__icon"><img src="./lib/assets/icons/tab-active-wode.svg" alt="" data-tab-icon="wode" /></span>
       <span class="bottom-nav__label">我的</span>
     </button>
   </nav>

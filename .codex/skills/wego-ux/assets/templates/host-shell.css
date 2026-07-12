@@ -3,7 +3,7 @@
  * 规则:
  * - 仅服务 host-shell.html,不得下沉为通用组件样式
  * - 入口新增/替换时优先复用 data-route-id,避免靠文案匹配
- * - 业务入口图标优先使用 lib/icons/app-center/*.svg
+ * - 业务入口图标优先使用 lib/assets/icons/app-center/*.svg
  */
 
 body[data-host-shell="true"] {

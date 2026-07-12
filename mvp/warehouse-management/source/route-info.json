@@ -8,7 +8,7 @@
     "group": "my-app-center",
     "label": "仓库管理",
     "type": "grid-entry",
-    "icon": "./lib/icons/app-center/配货管理.svg"
+    "icon": "./lib/assets/icons/app-center/配货管理.svg"
   },
   "presentation": {
     "type": "push",

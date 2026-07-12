@@ -44,7 +44,7 @@
   }
 
   function iconSrcFor(img, iconName, active) {
-    const current = img.getAttribute('src') || './lib/icons/tab-dongtai.svg';
+    const current = img.getAttribute('src') || './lib/assets/icons/tab-dongtai.svg';
     const prefix = current.slice(0, current.lastIndexOf('/') + 1);
     return `${prefix}tab-${active ? 'active-' : ''}${iconName}.svg`;
   }
