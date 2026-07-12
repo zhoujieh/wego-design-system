@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "slug": "image",
   "name": "图片",
   "category": "display",
@@ -124,49 +124,6 @@
     "不要在对象管理列表中用大面积高饱和渐变插画冒充真实业务图片；真实图片缺失时使用克制占位或默认占位资产。",
     "不要让失败占位 logo 随容器无限放大。"
   ],
-  "tokensConsumed": [
-    "--bg-mask-press",
-    "--ease-standard",
-    "--palette-neutral-100",
-    "--radius-12",
-    "--radius-6",
-    "--radius-8",
-    "--radius-full",
-    "--size-104",
-    "--size-16",
-    "--size-32",
-    "--size-64",
-    "--size-72",
-    "--text-disabled"
-  ],
-  "designTokens": {
-    "sizes": {
-      "xs": "16px",
-      "sm": "32px",
-      "md": "64px",
-      "lg": "104px",
-      "xl": "72px",
-      "rect": "180px × 120px",
-      "wide": "260px × 160px"
-    },
-    "radius": {
-      "sm": "var(--radius-6)",
-      "md": "var(--radius-8)",
-      "lg": "var(--radius-12)",
-      "circle": "var(--radius-full)"
-    },
-    "placeholderBackground": "var(--bg-page)",
-    "placeholderAsset": "assets/icons/default-diagram.svg",
-    "placeholderInset": "clamp(6px, 10%, 12px)",
-    "placeholderScale": "40% of inner container width",
-    "placeholderMaxSize": "40px",
-    "transition": "opacity var(--duration-fast) var(--ease-standard)",
-    "skeleton": "linear-gradient(90deg, var(--bg-page) 0%, var(--palette-neutral-100) 50%, var(--bg-page) 100%)"
-  },
-  "specRefs": [
-    "specs/动效与视觉效果.md",
-    "specs/布局与间距规范.md"
-  ],
   "domAnatomy": {
     "root": ".wg-image",
     "requiredChildren": [
@@ -186,13 +143,48 @@
       ".wg-image--loading",
       ".wg-image--clickable",
       ".wg-image--transparent"
-    ]
+    ],
+    "alternatives": []
   },
   "provenance": {
     "preview": "preview/component-image.html",
     "cssSource": "preview/component-image.html",
     "embedded": false,
-    "hostComponent": null
+    "hostComponent": null,
+    "externalSources": []
   },
-  "unknowns": []
+  "unknowns": [],
+  "ruleRefs": [
+    "colors_and_type.css#image",
+    "components.css#image",
+    "preview/component-image.html"
+  ],
+  "runtimeTokens": [
+    "--bg-mask-press",
+    "--bg-page",
+    "--duration-fast",
+    "--ease-standard",
+    "--palette-neutral-100",
+    "--radius-12",
+    "--radius-6",
+    "--radius-8",
+    "--radius-full",
+    "--size-104",
+    "--size-16",
+    "--size-32",
+    "--size-40",
+    "--size-64",
+    "--size-72",
+    "--spacer-12",
+    "--spacer-6"
+  ],
+  "previewOnlyTokens": [
+    "--bg-surface",
+    "--shadow-xs",
+    "--spacer-16",
+    "--spacer-4"
+  ],
+  "localTokens": [
+    "--wg-image-placeholder-bg"
+  ]
 }

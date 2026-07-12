@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "slug": "badge",
   "name": "角标",
   "category": "display",
@@ -93,55 +93,6 @@
     "不要把 badge 扩成长句横幅、统计面板或多行提示气泡。",
     "不要在 inline 模式叠加角标定位类，也不要用 remove 替代真正的关闭按钮。"
   ],
-  "tokensConsumed": [
-    "--accent-green",
-    "--body-md-font-family",
-    "--body-xs-font-size",
-    "--duration-xslow",
-    "--ease-linear",
-    "--font-weight-medium",
-    "--number-md-font-family",
-    "--palette-neutral-100",
-    "--radius-full",
-    "--status-danger-default",
-    "--text-inverse"
-  ],
-  "designTokens": {
-    "dotSize": "8px",
-    "numberMinWidth": "16px",
-    "numberMultiMinWidth": "22px",
-    "numberPaddingInline": "4px",
-    "textHeight": "16px",
-    "removeSize": "16px",
-    "stroke": "0.5px solid var(--palette-neutral-100)",
-    "numberFont": "12px / 500 / var(--number-md-font-family)",
-    "textDefaultBg": "var(--accent-green)",
-    "scrollWidthDefault": "32px",
-    "marqueeDuration": "calc(var(--duration-xslow) * 8)",
-    "marqueeEasing": "var(--ease-linear)"
-  },
-  "cssCustomProperties": [
-    {
-      "name": "--badge-text-bg",
-      "default": "var(--accent-green)",
-      "appliesTo": "文字类背景色"
-    },
-    {
-      "name": "--badge-text-color",
-      "default": "var(--text-inverse)",
-      "appliesTo": "文字类前景色"
-    },
-    {
-      "name": "--badge-scroll-width",
-      "default": "32px",
-      "appliesTo": "scrollable 文字类宽度"
-    }
-  ],
-  "specRefs": [
-    "specs/交互设计原则.md",
-    "specs/设计风格与品牌原则.md",
-    "specs/动效与视觉效果.md"
-  ],
   "domAnatomy": {
     "root": ".badge",
     "modifiers": [
@@ -159,13 +110,52 @@
       ".badge__remove-line",
       ".badge__marquee",
       ".badge__marquee-group"
-    ]
+    ],
+    "alternatives": []
   },
   "provenance": {
     "preview": "preview/component-badge.html",
     "cssSource": "preview/component-badge.html",
     "embedded": false,
-    "hostComponent": null
+    "hostComponent": null,
+    "externalSources": []
   },
-  "unknowns": []
+  "unknowns": [],
+  "ruleRefs": [
+    "colors_and_type.css#badge",
+    "components.css#badge",
+    "preview/component-badge.html"
+  ],
+  "runtimeTokens": [
+    "--accent-green",
+    "--body-md-font-family",
+    "--body-xs-font-size",
+    "--duration-xslow",
+    "--ease-linear",
+    "--font-weight-medium",
+    "--number-md-font-family",
+    "--palette-neutral-100",
+    "--radius-full",
+    "--size-32",
+    "--status-danger-default",
+    "--text-inverse"
+  ],
+  "previewOnlyTokens": [
+    "--bg-brand-surface-l1",
+    "--bg-overlay-l2",
+    "--bg-state-selected",
+    "--bg-surface",
+    "--body-md-font-size",
+    "--border-neutral-l2",
+    "--radius-12",
+    "--radius-8",
+    "--size-104",
+    "--text-brand",
+    "--text-default"
+  ],
+  "localTokens": [
+    "--badge-scroll-width",
+    "--badge-text-bg",
+    "--badge-text-color"
+  ]
 }

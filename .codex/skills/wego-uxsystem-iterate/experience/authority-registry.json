@@ -11,6 +11,6 @@
     "library-consumption": { "paths": [".codex/skills/wego-design/library-consumption.json"] },
     "agents": { "paths": ["AGENTS.md"] },
     "script": { "paths": ["scripts/*.mjs"] },
-    "test": { "paths": ["scripts/*.mjs", ".codex/skills/wego-tests/references/*.md"] }
+    "test": { "paths": ["scripts/*.mjs"] }
   }
 }

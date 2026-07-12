@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "slug": "counter",
   "name": "计数器",
   "category": "form",
@@ -98,13 +98,55 @@
     "不要把 counter 扩成日期步进器、滑杆或复杂金额编辑器。",
     "不要牺牲紧凑视觉去强行放大本体尺寸。"
   ],
-  "tokensConsumed": [
+  "domAnatomy": {
+    "root": ".counter",
+    "requiredChildren": [],
+    "bodyChildren": [
+      ".counter__btn--minus",
+      ".counter__value",
+      ".counter__btn--plus"
+    ],
+    "stateClasses": [
+      ".is-hint",
+      ".is-error",
+      ".is-disabled",
+      ".counter--sm",
+      ".counter--lg"
+    ],
+    "alternatives": [
+      {
+        "allOf": [
+          ".counter__message"
+        ],
+        "oneOf": [
+          [
+            ".counter__hint"
+          ],
+          [
+            ".counter__error"
+          ]
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "preview": "preview/component-counter.html",
+    "cssSource": "preview/component-counter.html",
+    "embedded": false,
+    "hostComponent": null,
+    "externalSources": []
+  },
+  "unknowns": [],
+  "ruleRefs": [
+    "colors_and_type.css#counter",
+    "components.css#counter",
+    "preview/component-counter.html"
+  ],
+  "runtimeTokens": [
     "--bg-overlay-l1",
     "--bg-overlay-l2",
     "--bg-surface",
     "--body-md-font-family",
-    "--body-sm-font-size",
-    "--body-sm-line-height",
     "--body-xs-font-size",
     "--border-neutral-l2",
     "--duration-fast",
@@ -118,64 +160,22 @@
     "--size-16",
     "--size-28",
     "--size-32",
-    "--spacer-0",
-    "--spacer-16",
     "--spacer-2",
-    "--spacer-32",
     "--spacer-4",
-    "--spacer-8",
     "--status-danger-default",
     "--stroke-hairline",
     "--text-default",
     "--text-disabled",
-    "--text-placeholder",
+    "--text-placeholder"
+  ],
+  "previewOnlyTokens": [
+    "--body-sm-font-size",
+    "--body-sm-line-height",
+    "--spacer-0",
+    "--spacer-16",
+    "--spacer-32",
+    "--spacer-8",
     "--text-secondary"
   ],
-  "designTokens": {
-    "widths": {
-      "default": "96px",
-      "sm": "80px",
-      "lg": "120px"
-    },
-    "height": "32px",
-    "buttonSize": "28px",
-    "touchTarget": "40px",
-    "gap": "var(--spacer-4)",
-    "radius": {
-      "body": "var(--radius-6)",
-      "button": "var(--radius-4)"
-    },
-    "messageFont": "var(--body-xs-font-size)"
-  },
-  "specRefs": [
-    "specs/布局与间距规范.md",
-    "specs/交互设计原则.md"
-  ],
-  "domAnatomy": {
-    "root": ".counter",
-    "requiredChildren": [
-      ".counter__body",
-      ".counter__message.counter__hint",
-      ".counter__message.counter__error"
-    ],
-    "bodyChildren": [
-      ".counter__btn--minus",
-      ".counter__value",
-      ".counter__btn--plus"
-    ],
-    "stateClasses": [
-      ".is-hint",
-      ".is-error",
-      ".is-disabled",
-      ".counter--sm",
-      ".counter--lg"
-    ]
-  },
-  "provenance": {
-    "preview": "preview/component-counter.html",
-    "cssSource": "preview/component-counter.html",
-    "embedded": false,
-    "hostComponent": null
-  },
-  "unknowns": []
+  "localTokens": []
 }

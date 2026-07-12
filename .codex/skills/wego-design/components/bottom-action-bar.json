@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "slug": "bottom-action-bar",
   "name": "底部操作栏",
   "category": "action",
@@ -146,63 +146,6 @@
     "不要让轻量操作项通过压缩字号、压缩图标或压缩间距来硬塞进小屏。",
     "不要自动猜测哪些左侧操作必须常驻外露。"
   ],
-  "tokensConsumed": [
-    "--bg-page",
-    "--bg-panel",
-    "--bg-overlay-l1",
-    "--border-neutral-l2",
-    "--body-lg-font-size",
-    "--body-md-font-size",
-    "--body-md-line-height",
-    "--body-sm-font-size",
-    "--body-xs-font-size",
-    "--font-weight-medium",
-    "--radius-8",
-    "--size-20",
-    "--size-24",
-    "--spacer-4",
-    "--spacer-8",
-    "--spacer-12",
-    "--spacer-16",
-    "--spacer-20",
-    "--status-danger-default",
-    "--text-brand",
-    "--text-default",
-    "--text-secondary",
-    "--text-tertiary"
-  ],
-  "designTokens": {
-    "barMinHeight": "56px",
-    "barPaddingInline": "var(--spacer-16)",
-    "barGap": "var(--spacer-12)",
-    "safeAreaBottom": "var(--safe-area-bottom, env(safe-area-inset-bottom, 0px))",
-    "hintPaddingTop": "var(--spacer-8)",
-    "actionMinWidth": "56px",
-    "actionMaxWidth": "72px",
-    "actionGap": "var(--spacer-4)",
-    "actionHotArea": "44px",
-    "iconSize": "20px",
-    "selectionCountWidth": "72px",
-    "selectionMoreButtonSize": "40px",
-    "divider": "0.5px solid var(--border-neutral-l2)"
-  },
-  "cssCustomProperties": [
-    {
-      "name": "--bottom-action-bar-action-min-width",
-      "default": "56px",
-      "appliesTo": "页面操作与左侧辅助操作的单项最小显示宽度"
-    },
-    {
-      "name": "--bottom-action-bar-action-max-width",
-      "default": "72px",
-      "appliesTo": "轻量操作项单列文案的默认最大宽度"
-    }
-  ],
-  "specRefs": [
-    "specs/交互设计原则.md",
-    "specs/布局与间距规范.md",
-    "specs/预览页脚手架规范.md"
-  ],
   "domAnatomy": {
     "root": ".bottom-action-bar",
     "requiredChildren": [
@@ -226,13 +169,47 @@
       ".is-collapsed",
       ".is-active",
       ".is-disabled"
-    ]
+    ],
+    "alternatives": []
   },
   "provenance": {
     "preview": "preview/component-bottom-action-bar.html",
     "cssSource": "preview/component-bottom-action-bar.html",
     "embedded": false,
-    "hostComponent": null
+    "hostComponent": null,
+    "externalSources": []
   },
-  "unknowns": []
+  "unknowns": [],
+  "ruleRefs": [
+    "colors_and_type.css#bottom-action-bar",
+    "components.css#bottom-action-bar",
+    "preview/component-bottom-action-bar.html"
+  ],
+  "runtimeTokens": [
+    "--bg-overlay-l1",
+    "--bg-panel",
+    "--body-lg-font-size",
+    "--body-md-line-height",
+    "--body-sm-font-size",
+    "--body-xs-font-size",
+    "--border-neutral-l2",
+    "--radius-8",
+    "--safe-area-bottom",
+    "--size-24",
+    "--spacer-12",
+    "--spacer-16",
+    "--spacer-4",
+    "--spacer-8",
+    "--text-default",
+    "--text-secondary",
+    "--text-tertiary"
+  ],
+  "previewOnlyTokens": [
+    "--bg-page",
+    "--bg-surface"
+  ],
+  "localTokens": [
+    "--bottom-action-bar-action-max-width",
+    "--bottom-action-bar-action-min-width"
+  ]
 }

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "slug": "input",
   "name": "输入框",
   "category": "form",
@@ -144,20 +144,60 @@
     "不要扩展为桌面搜索框、富文本编辑器或带复杂前后缀的超级输入框。",
     "不要为单页业务新增临时字段皮肤。"
   ],
-  "tokensConsumed": [
+  "domAnatomy": {
+    "root": ".input-group | .number-input",
+    "requiredChildren": [],
+    "stateClasses": [
+      ".is-error",
+      ".is-disabled",
+      ".is-focus"
+    ],
+    "modifiers": [
+      ".input-group--surface-white",
+      ".number-input--surface-white"
+    ],
+    "alternatives": [
+      {
+        "allOf": [
+          ".field-label"
+        ],
+        "oneOf": [
+          [
+            ".input-wrapper",
+            "input"
+          ],
+          [
+            "textarea"
+          ]
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "preview": "preview/component-input.html",
+    "cssSource": "preview/component-input.html",
+    "embedded": false,
+    "hostComponent": null,
+    "externalSources": []
+  },
+  "unknowns": [],
+  "ruleRefs": [
+    "colors_and_type.css#input",
+    "components.css#input",
+    "preview/component-input.html"
+  ],
+  "runtimeTokens": [
     "--bg-muted",
     "--bg-subtle",
     "--bg-surface",
     "--body-lg-font-size",
-    "--body-xs-line-height",
     "--body-md-font-family",
     "--body-md-font-size",
     "--body-md-line-height",
-    "--body-sm-font-size",
-    "--body-sm-line-height",
     "--body-xs-font-size",
-    "--border-disabled",
+    "--body-xs-line-height",
     "--border-danger",
+    "--border-disabled",
     "--border-neutral-l2",
     "--duration-fast",
     "--ease-standard",
@@ -167,9 +207,7 @@
     "--number-md-font-family",
     "--radius-6",
     "--size-32",
-    "--spacer-0",
-    "--spacer-12",
-    "--spacer-16",
+    "--spacer-4",
     "--spacer-8",
     "--status-danger-default",
     "--status-danger-surface-l1",
@@ -178,47 +216,13 @@
     "--text-placeholder",
     "--text-secondary"
   ],
-  "designTokens": {
-    "maxWidth": "320px",
-    "inputHeight": "36px",
-    "textareaMinHeight": "96px",
-    "numberInputWidth": "120px",
-    "numberInputMinHeight": "32px",
-    "defaultSurface": "var(--bg-subtle)",
-    "whiteSurface": "var(--bg-surface)",
-    "clearHitTarget": "32px",
-    "gap": "var(--spacer-8)",
-    "radius": "var(--radius-6)",
-    "borderWidth": "0.5px",
-    "transition": "border-color var(--duration-fast) var(--ease-standard)",
-    "errorOffset": "var(--spacer-4)"
-  },
-  "specRefs": [
-    "specs/交互设计原则.md",
-    "specs/文案与数据规范.md"
+  "previewOnlyTokens": [
+    "--body-sm-font-size",
+    "--body-sm-line-height",
+    "--spacer-0",
+    "--spacer-12",
+    "--spacer-16",
+    "--spacer-24"
   ],
-  "domAnatomy": {
-    "root": ".input-group | .number-input",
-    "requiredChildren": [
-      ".field-label + (.input-wrapper > input | textarea) | (.field-label + textarea)",
-      ".number-input__field",
-      ".number-input__suffix"
-    ],
-    "stateClasses": [
-      ".is-error",
-      ".is-disabled",
-      ".is-focus"
-    ],
-    "modifiers": [
-      ".input-group--surface-white",
-      ".number-input--surface-white"
-    ]
-  },
-  "provenance": {
-    "preview": "preview/component-input.html",
-    "cssSource": "preview/component-input.html",
-    "embedded": false,
-    "hostComponent": null
-  },
-  "unknowns": []
+  "localTokens": []
 }

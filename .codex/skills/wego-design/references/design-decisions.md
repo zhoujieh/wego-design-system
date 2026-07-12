@@ -1,92 +1,88 @@
-# 设计决策细则
+# 设计决策方法
 
-> 角色：设计判断方法。读取条件：页面范式、组件组合或承载方式需要决策时；正式领域规则仍以结构化设计系统来源为准。
+> 角色：生成场景前的页面级约束合同。读取条件：每个新场景、已有场景结构/交互/样式修改；不定义业务事实或修改设计系统源。
 
-仅在判断页面复杂度、pagePattern、fallback、组件组合或打开方式时读取。它只组织消费路径，不补充业务事实；所有业务对象、字段、状态、文案和操作必须已存在于已确认的 `prototype_brief` 或 `interaction_spec`。
+## 1. 输入与失败条件
 
-## 固定消费路径
+先读取已确认 `prototype_brief`。它必须给出场景目标、入口、关键路径、所需状态、业务数据和场景目录语义；缺少任何影响页面结构或交互的信息时退回 `wego-product`。
 
-1. 校验已确认的业务范围、surface 和原型边界；缺少业务依据立即退回 `wego-product`。
-2. 读取 `library-consumption.json`，确认复制边界、图标与 UI Kit 的使用方式。
-3. 读取 `uikit-plan.json`，逐个 surface 匹配 exact、near、fallback 或 gap。
-4. 读取 Token 与组件索引；只加载本轮命中的组件契约和 Preview，确定区域、稳定变体、组合约束和 presentation。
-5. 将已命中决定写入 `prototype_design` 或 `design_plan`，连同真实 `rule_sources_used` 和实现约束交给下游。
-6. 写入 `design_plan` 时，每个需要字号/字重/颜色的业务元素必须直接输出 CSS 选择器到 Token 的绑定（如 `.feed-item__author-name → --heading-xs-font-size`，附内容角色和规则来源），不得仅写语义约束（如“发布者名称用 heading-xs”）。wego-ux 只做翻译执行，不做二次推理。
+设计系统输入固定为：
 
-UI Kit 只用于理解区域结构和组件组合，禁止复制展示外壳、演示业务内容或业务自定义样式。`gap` 不能由业务 class、说明文案或临时组件绕过。
+1. `library-consumption.json`：资源边界和消费规则。
+2. `uikit-plan.json`：页面范式、fallback blueprint、presentation 和本页组件计划。
+3. `components/index.json`：可选组件清单。
+4. 本页命中组件的 Preview：实际 DOM、class、Token、间距和状态。
+5. 同一组件的契约：变体、语义、行为、可访问性、`runtimeTokens` 和结构边界。
 
-## 决策顺序
+禁止读取或引用已删除的规则投影、旧技能、废弃设计计划文件或历史实现来替代以上输入。
 
-1. 先按业务交互模式与 surface 角色匹配 pagePattern，不按内容主题或页面名称猜测。
-2. exact/near 不成立时检查正式 fallback blueprint。
-3. 仍无法覆盖时标记 gap，不自由设计。
-4. 先确定页面与区域结构，再映射组件模式和稳定变体。
-5. 每个决定记录命中条件和真实来源。
+## 2. Preview-first 选择过程
 
-## 组件消费
+1. 按业务交互模式、surface 角色和状态匹配 `pagePatterns`；未命中时匹配正式 fallback blueprint。
+2. 从 `componentPlan` 选出本页实际需要的 3–6 个组件。每项记录 slug、选择原因、Preview、契约和 UI Kit 来源。
+3. 先读 Preview，再读契约；只使用 Preview 中存在且契约允许的根 class、子节点和 modifier。
+4. 有稳定变体时直接消费；没有稳定变体但能在 `domAnatomy` 允许范围内组合时记录 `free-composition`；都不能覆盖时创建 DDR，选择最近似正式结构继续完成原型。
+5. 禁止自造完整组件、猜 Token、猜 iconfont 名称、复制 UI Kit 外壳或用业务 class 覆盖组件内部样式。
 
-- 先查 `scenarioTypeRegistry`，再查组件契约与 Preview。
-- 稳定变体优先于组合约束，组合约束优先于自由组合。
-- 自由组合只能使用正式 `domAnatomy`，业务 class 只允许做区域布局胶水。
-- 业务需要但契约无法覆盖时形成 design gap，不能发明组件类。
-- 所有组件映射必须说明实现可追溯到的稳定变体、组合约束或正式 anatomy；只在计划中列组件名、实现仍自造完整业务壳，不构成有效消费。
-- 可选内容为空时默认折叠对应结构；只有缺失本身属于已确认业务状态时，才允许显示状态文案。不得自动补“未填写”“暂无”或原型解释。
-- 消费组件稳定变体时，必须检查 `components.css` 是否实现了该变体的样式规则。若契约 `variantDimensions` 声明了某变体但 `components.css` 未实现，标记为 `match_status=gap` 并转交 `wego-uxsystem-iterate`，不得在场景样式层补齐组件样式。
-- 同时必须验证变体的关键参数（尺寸、比例、默认状态等）是否适用于当前布局场景。若变体的固定参数不适用（如固定尺寸变体不适合响应式网格、固定比例变体不适合自由布局），应改用组件基础类配合业务布局类提供尺寸，或标记为 `match_status=gap`；不得在 `component_mapping` 中声明无法落地的变体后又绕过它自造完整组件外壳。
+## 3. prompt_contract
 
-## 字号与字重决策
+每个 surface 必须生成以下结构并由同一任务直接消费：
 
-字号和字重选择由信息层级驱动，核心原则是“通过对比建立层级，而非无脑放大或加粗”。
+```yaml
+prompt_contract:
+  design_system_snapshot:
+    version: 0
+    component_inputs:
+      - slug: "cell"
+        preview_file: "preview/component-cell.html"
+        contract_file: "components/cell.json"
+  token_whitelist:
+    - "var(--text-default)"
+  token_bindings:
+    - content_role: "page-title"
+      css_property: "font-size"
+      token: "var(--heading-sm-font-size)"
+      rule_ref: "components/navbar.json#/runtimeTokens"
+  component_bindings:
+    - slot: "settings-row"
+      slug: "cell"
+      root_class: "cell cell--single"
+      required_structure: [".cell__body", ".cell__content"]
+      modifiers: ["cell--clickable"]
+      source: "preview/component-cell.html"
+      contract_file: "components/cell.json"
+  layout_contract:
+    source: "uikit-plan.json#/pagePatterns"
+    rules: ["连续列表使用正式 group 结构"]
+    mutable_regions: [".scene-content"]
+  interaction_contract: []
+  state_contract: []
+  hard_rules:
+    - "禁止硬编码颜色"
+    - "禁止使用白名单之外的 Token"
+```
 
-### 字号决策（按内容角色）
+`token_whitelist` 只能来自本页命中组件的 `runtimeTokens`、场景允许的基础 Token 和 `colors_and_type.css` 的实际变量。组件 `localTokens` 仅服务组件内部参数，场景不得直接绑定或猜测。`css.json` 只帮助理解 Token 关系，不能推导变量名。
 
-- **识别信息**（发布者名称、列表标题、对象名称）：优先使用 `heading-xs`(16px) 或 `heading-sm`(18px)，确保扫读时第一眼识别。判断标准：在连续内容流中，用户扫读时需要"第一眼识别"的内容即为识别信息——如果某项内容用正文字号，用户是否还能快速区分它与其他内容，如果不能则它是识别信息。产品名称、商品名称、店铺名称等对象名称在连续内容流中属于识别信息，不得使用正文字号 14px。
-- **正文内容**（动态文案、描述文字、说明）：使用 `body-md`(14px) 或 `body-lg`(16px)。
-- **辅助信息**（时间、标签、状态、计数）：使用 `body-sm`(12px) 或 `body-xs`(10px)。
-- **页面标题**（navbar 标题、页面主标题）：使用 `heading-sm`(18px) 或 `heading-md`(22px)。
-- 连续内容流中的识别信息字号下限为 16px，不得低于正文字号。
-- Token 的语义约束优先于像素值相等：即使两个 Token 的像素值相同（如 `body-lg` 和 `heading-xs` 都是 16px），也必须按内容角色选择对应语义的 Token，不得用 body 语义的 Token 代替 heading 语义的 Token。原因：Token 体系调整比例关系时，语义错误的字号不会跟随对应层级变化。
+`layout_contract` 必须把选中的页面范式或 fallback 的布局规则写成当前页面直接消费的 `rules`，以 `source` 指向 `uikit-plan.json` 或其他权威来源；`mutable_regions` 明确状态变化时允许改变的区域。不得把布局决定只留在 UI Kit 的自然语言说明中。
 
-### 字重决策（加粗克制原则）
+## 4. 页面、状态与交互
 
-- 加粗的本质是建立对比：加粗只有在“与周围内容形成反差”时才有效，多处加粗等于没有加粗。
-- **一页一加粗**：一个页面或一个局部内容区域中，只有最重要的那一处内容使用 `font-weight: 600`（semibold），其他内容用 `regular`(400) 或 `medium`(500)。
-- **识别信息不默认加粗**：列表项/卡片的标题、发布者名称等识别信息，默认使用 `regular`(400) 或 `medium`(500)，不默认用 `semibold`(600)。只有当该内容是页面级唯一焦点时才用 600。
-- **禁止无脑加粗**：不得因为“这是标题”就加粗，不得因为“需要突出”就加粗——加粗必须服务于“让用户第一眼看到页面最重要的一处信息”这个目标。
+- 选择 presentation 时同时记录 type、transition、dismiss action、overlay level 和 `coversTabBar`。
+- 每个可见变化必须有 `state_contract`：初始值、触发器、可见结果、空/加载/错误状态、回退动作和持久化策略。
+- 新场景必须明确入口和目标 `route_id`；已有场景必须复用 route，不得重复注册。
+- 组件右侧独立控件承担自身交互；只有带箭头、进入下一层或展开选择面板的 row 才可整行点击。
+- 动态数据、状态、保存、取消、删除和回填必须体现真实业务路径，默认使用内存状态。
 
-### 字重选择参考
+## 5. 视觉约束
 
-| 字重 | Token | 适用场景 |
-|------|-------|----------|
-| regular | `--font-weight-regular` (400) | 正文、辅助信息、识别信息默认 |
-| medium | `--font-weight-medium` (500) | 需要轻微强调的识别信息、按钮文字、链接 |
-| semibold | `--font-weight-semibold` (600) | 页面级唯一焦点内容，一页仅一处 |
+- 识别信息使用语义 heading Token；正文使用 body Token；辅助信息使用 small Token。字重只允许一处页面级 semibold 焦点。
+- 连续列表和表单优先使用 `.cell-group`、`.form-group` 的正式结构；避免额外白底壳、圆角容器和重复 section 标题。
+- 页面横向边距、固定栏、安全区和组件内部样式遵循命中组件与页面范式；业务 CSS 只负责区域布局。
+- 生成后按 375px、393px 检查溢出、重叠、裁切、按钮换行、首屏密度、容器嵌套、右侧操作数量和分隔策略。
 
-## 颜色语义决策
+## 6. DDR
 
-状态色 Token 有严格的使用场景约束，不得跨场景使用：
+可记录的 DDR 仅限正式设计系统无法覆盖的 pattern、variant、参数或组件缺口。错误 Token、错误 class、未读 Preview、缺少路由或未实现交互不是 DDR，必须直接修复。
 
-| Token 系列 | 颜色 | 仅用于 |
-|-------|------|--------|
-| `--status-success-*` | 绿色 | 成功反馈、品牌强调、收藏/关注等正面状态 |
-| `--status-warning-*` | 橙色 | 警告提示、待处理状态 |
-| `--status-danger-*` | 红色 | 危险操作、删除确认、错误反馈 |
-| `--status-promotion-*` | 红橙色 | 促销价格、限时标签、营销场景 |
-
-- 收藏、关注、点赞等正面交互状态使用品牌色（`--text-brand` / `--icon-brand`），不得使用 `--status-promotion-*` 或 `--status-danger-*`。
-- `--status-promotion-*` 仅用于与价格/营销直接相关的场景，不用于一般状态反馈。
-- 需要强调某项内容时优先使用品牌色或字重对比，不使用红色。
-
-## presentation
-
-- 层级返回语义优先 push。
-- 当前任务上的轻量确认或说明使用 modal/dialog。
-- 底部选项或短操作使用 sheet。
-- 复杂编辑且需要覆盖全屏时使用 full-screen-modal。
-- 宿主固定 Tab 内容使用 host-tab。
-
-surface 的打开方式、overlay 层级、返回动作和 Tab 覆盖必须一起决定，不能只选择动画或容器。
-
-## 回退
-
-pagePattern、fallback 和组件契约冲突时，停止交接并回到 `wego-uxsystem-iterate` 修正规则；业务规格不足时回到 `wego-product`。不要在 `design_plan` 中写临时发明的规则。
+DDR 使用 `open → extended → resolved | wontfix | escalated`；`extended` 最多两次。`resolved` 时必须同步修复设计系统源、Preview、契约、聚合 CSS 与守卫。

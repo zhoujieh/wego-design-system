@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "slug": "toast",
   "name": "提示",
   "category": "feedback",
@@ -118,102 +118,6 @@
     "不要让 toast 持续显示超过 5000ms 或叠加多个并存。",
     "不要持久化 toast 状态到 localStorage；toast 是瞬时浮层。"
   ],
-  "tokensConsumed": [
-    "--bg-toast",
-    "--border-toast",
-    "--text-inverse",
-    "--text-tertiary",
-    "--text-brand",
-    "--font-family-icon",
-    "--spacer-12",
-    "--spacer-16",
-    "--spacer-8",
-    "--spacer-24",
-    "--radius-8",
-    "--body-md-font-family",
-    "--body-md-font-size",
-    "--body-md-line-height",
-    "--font-weight-medium",
-    "--duration-normal",
-    "--duration-fast",
-    "--ease-enter",
-    "--ease-exit",
-    "--z-toast",
-    "--stroke-hairline",
-    "--shadow-sm"
-  ],
-  "designTokens": {
-    "bg": "var(--bg-toast)",
-    "border": "var(--stroke-hairline) solid var(--border-toast)",
-    "textColor": "var(--text-inverse)",
-    "iconColor": "var(--text-inverse)",
-    "actionWeakColor": "var(--text-tertiary)",
-    "actionStrongColor": "var(--text-brand)",
-    "bottomOffset": "var(--toast-bottom)",
-    "defaultMaxWidth": "var(--toast-default-max-width)",
-    "guideMaxWidth": "var(--toast-guide-max-width)",
-    "guideEdgeGap": "var(--toast-edge-gap)",
-    "actionGap": "var(--spacer-24)",
-    "actionIconGap": "0px",
-    "actionHeight": "var(--toast-action-height)",
-    "actionArrowSize": "var(--toast-action-arrow-size)",
-    "enterOffsetY": "var(--toast-enter-offset-y)",
-    "radius": "var(--radius-8)",
-    "paddingDefault": "12px var(--spacer-16)",
-    "paddingGuide": "12px var(--spacer-12)",
-    "fontBody": "var(--body-md-font-size) / var(--body-md-line-height) / var(--body-md-font-family)",
-    "fontAction": "var(--body-md-font-size) / var(--body-md-line-height) / var(--font-weight-medium)",
-    "enterDuration": "var(--duration-normal)",
-    "enterEase": "var(--ease-enter)",
-    "leaveDuration": "var(--duration-fast)",
-    "leaveEase": "var(--ease-exit)"
-  },
-  "cssCustomProperties": [
-    {
-      "name": "--toast-bottom",
-      "default": "106px",
-      "appliesTo": "距底部偏移，业务可按 tabbar 高度覆盖"
-    },
-    {
-      "name": "--toast-default-max-width",
-      "default": "268px",
-      "appliesTo": "默认 toast 最大宽度"
-    },
-    {
-      "name": "--toast-guide-max-width",
-      "default": "400px",
-      "appliesTo": "引导 toast 最大宽度上限"
-    },
-    {
-      "name": "--toast-edge-gap",
-      "default": "16px",
-      "appliesTo": "引导 toast 距屏幕左右边缘的安全间距"
-    },
-    {
-      "name": "--toast-action-gap",
-      "default": "var(--spacer-24)",
-      "appliesTo": "左侧内容与右侧操作按钮的间距"
-    },
-    {
-      "name": "--toast-action-height",
-      "default": "24px",
-      "appliesTo": "右侧操作按钮最小高度"
-    },
-    {
-      "name": "--toast-action-arrow-size",
-      "default": "14px",
-      "appliesTo": "weak 操作按钮内右箭头图标尺寸"
-    },
-    {
-      "name": "--toast-enter-offset-y",
-      "default": "8px",
-      "appliesTo": "入场动画纵向偏移"
-    }
-  ],
-  "specRefs": [
-    "specs/交互设计原则.md",
-    "specs/动效与视觉效果.md"
-  ],
   "domAnatomy": {
     "root": ".toast",
     "modifiers": [
@@ -230,13 +134,62 @@
       ".toast__action--weak",
       ".toast__action--strong",
       ".toast__action-arrow"
-    ]
+    ],
+    "alternatives": []
   },
   "provenance": {
     "preview": "preview/component-toast.html",
     "cssSource": "preview/component-toast.html",
     "embedded": false,
-    "hostComponent": null
+    "hostComponent": null,
+    "externalSources": []
   },
-  "unknowns": []
+  "unknowns": [],
+  "ruleRefs": [
+    "colors_and_type.css#toast",
+    "components.css#toast",
+    "preview/component-toast.html"
+  ],
+  "runtimeTokens": [
+    "--bg-toast",
+    "--body-md-font-family",
+    "--body-md-font-size",
+    "--body-md-line-height",
+    "--border-toast",
+    "--duration-fast",
+    "--duration-normal",
+    "--ease-enter",
+    "--ease-exit",
+    "--font-family-icon",
+    "--font-weight-medium",
+    "--radius-8",
+    "--shadow-sm",
+    "--spacer-12",
+    "--spacer-16",
+    "--spacer-24",
+    "--spacer-8",
+    "--stroke-hairline",
+    "--text-brand",
+    "--text-inverse",
+    "--text-tertiary",
+    "--z-toast"
+  ],
+  "previewOnlyTokens": [
+    "--bg-brand-surface-l1",
+    "--bg-brand-surface-l2",
+    "--body-sm-font-size",
+    "--body-xs-font-size",
+    "--border-brand",
+    "--spacer-4"
+  ],
+  "localTokens": [
+    "--toast-action-arrow-size",
+    "--toast-action-gap",
+    "--toast-action-height",
+    "--toast-bottom",
+    "--toast-default-max-width",
+    "--toast-edge-gap",
+    "--toast-enter-offset-y",
+    "--toast-guide-max-width"
+  ]
 }

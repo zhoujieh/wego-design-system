@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "slug": "switch",
   "name": "开关",
   "category": "form",
@@ -81,39 +81,6 @@
     "不要在业务 scene 中覆盖或移除 .switch / .switch__thumb 的 transition。",
     "不要增加复杂弹跳和发光效果。"
   ],
-  "tokensConsumed": [
-    "--bg-brand",
-    "--bg-brand-surface-l2",
-    "--bg-inverse-control",
-    "--bg-inverse-control-disabled",
-    "--bg-overlay-l2",
-    "--body-md-font-size",
-    "--body-sm-font-size",
-    "--border-neutral-l2",
-    "--duration-fast",
-    "--ease-standard",
-    "--font-weight-medium",
-    "--spacer-12",
-    "--spacer-4",
-    "--spacer-8",
-    "--status-success-surface-l3",
-    "--text-default",
-    "--text-inverse",
-    "--text-tertiary"
-  ],
-  "designTokens": {
-    "size": "44px × 24px",
-    "radius": "12px",
-    "thumbSize": "20px",
-    "thumbInset": "2px",
-    "darkMode": "暗色上下文使用 .dark 选择器消费 inverse control 与 success surface Token，提升关闭态与禁用态轨道可见度",
-    "touchCompensation": "switch::before 上下各扩展 8px，视觉尺寸不变",
-    "transition": "background var(--duration-fast) var(--ease-standard), thumb left/opacity var(--duration-fast) var(--ease-standard)"
-  },
-  "specRefs": [
-    "specs/交互设计原则.md",
-    "specs/动效与视觉效果.md"
-  ],
   "domAnatomy": {
     "root": ".switch",
     "requiredChildren": [
@@ -123,13 +90,46 @@
       ".switch--on",
       ".switch--off",
       ".switch--disabled"
-    ]
+    ],
+    "alternatives": []
   },
   "provenance": {
     "preview": "preview/component-switch.html",
     "cssSource": "preview/component-switch.html",
     "embedded": false,
-    "hostComponent": null
+    "hostComponent": null,
+    "externalSources": []
   },
-  "unknowns": []
+  "unknowns": [],
+  "ruleRefs": [
+    "colors_and_type.css#switch",
+    "components.css#switch",
+    "preview/component-switch.html"
+  ],
+  "runtimeTokens": [
+    "--bg-brand",
+    "--bg-brand-surface-l2",
+    "--bg-inverse-control",
+    "--bg-inverse-control-disabled",
+    "--bg-overlay-l2",
+    "--duration-fast",
+    "--ease-standard",
+    "--status-success-surface-l3",
+    "--text-inverse"
+  ],
+  "previewOnlyTokens": [
+    "--bg-surface",
+    "--body-md-font-size",
+    "--body-sm-font-size",
+    "--border-neutral-l2",
+    "--font-weight-medium",
+    "--radius-8",
+    "--spacer-12",
+    "--spacer-16",
+    "--spacer-8",
+    "--text-default",
+    "--text-secondary",
+    "--text-tertiary"
+  ],
+  "localTokens": []
 }

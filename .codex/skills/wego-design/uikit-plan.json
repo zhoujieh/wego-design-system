@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "library": "wego-design",
   "headBoilerplate": "<link rel=\"stylesheet\" href=\"../../colors_and_type.css\"><link rel=\"stylesheet\" href=\"../../scaffold.css\"><link rel=\"stylesheet\" href=\"../../iconfont.css\"><link rel=\"stylesheet\" href=\"../../components.css\">",
   "uiKits": [
@@ -208,6 +208,22 @@
       "previewFile": "preview/component-bottom-action-bar.html",
       "priority": 24,
       "slot": "bottom-fixed-action-bar"
+    },
+    {
+      "slug": "toast",
+      "reason": "运行时状态反馈。",
+      "evidenceFile": "components/toast.json",
+      "previewFile": "preview/component-toast.html",
+      "priority": 19,
+      "slot": "runtime-feedback"
+    },
+    {
+      "slug": "popmenu",
+      "reason": "底部操作栏更多菜单与轻量上下文操作。",
+      "evidenceFile": "components/popmenu.json",
+      "previewFile": "preview/component-popmenu.html",
+      "priority": 20,
+      "slot": "context-menu"
     }
   ],
   "allowedComponents": [
@@ -235,7 +251,8 @@
     "actionsheet",
     "modal",
     "metric",
-    "bottom-action-bar"
+    "bottom-action-bar",
+    "popmenu"
   ],
   "screenBlueprints": [
     {
@@ -315,16 +332,13 @@
     ]
   },
   "hostShell": {
-    "managedBy": "wego-ux",
+    "managedBy": "wego-design",
     "templateFiles": [
-      "../wego-ux/assets/templates/host-shell.html",
-      "../wego-ux/assets/templates/host-shell.css",
-      "../wego-ux/assets/templates/host-shell.js",
       "../../../wego-app/index.html",
       "../../../wego-app/css/app.css",
       "../../../wego-app/js/app.js"
     ],
-    "rule": "固定宿主 App 正式维护在 wego-app/，wego-ux/assets/templates/host-shell.* 只作为宿主基线来源，不属于 wego-design 的 UI Kit 或 pagePattern。若 interaction_spec 声明 app_target + host_container + route_id，wego-design 只为 host-entry 或 host-tab 产出入口/结果回填和打开方式依据；wego-ux 只按 route_id 增量更新 routes.js、入口、业务场景和必要交互。",
+    "rule": "固定宿主 App 正式维护在 wego-app/，wego-app/index.html 只作为宿主基线来源，不属于 wego-design 的 UI Kit 或 pagePattern。若已确认 prototype_brief 声明业务入口归属和关键路径，wego-design 只为对应 host-entry 或 host-tab 产出入口、结果回填和打开方式依据；wego-design 只按 route_id 增量更新 routes.js、入口、业务场景和必要交互。",
     "fixedTabs": [
       {
         "id": "dongtai",
@@ -360,7 +374,7 @@
         "host-tab"
       ],
       "entryHierarchy": {
-        "rule": "当 interaction_spec.host_container.leaf_level > 1 且 surfaces[host-entry] 已声明父子入口层级时，wego-ux 必须按声明生成视觉从属，不得与一级入口 DOM 平级只靠 data-parent-entry 数据标记",
+        "rule": "当 prototype_brief.entry_points 已声明父子业务入口层级时，wego-design 必须按该层级生成视觉从属，不得与一级入口 DOM 平级只靠 data-parent-entry 数据标记",
         "visualExpression": "二级入口 cell 使用 .cell--indent 修饰类表达缩进；或嵌套在父入口下方的子列表容器内（如 .host-shell-list__sub）；缩进宽度 24px，与 cell.json 的 leftGuidePattern.indentWidth 对齐",
         "domPattern": "父项 .cell + 子项 .cell.cell--indent；父子必须在同一 .cell-group/.host-shell-list 内连续排列",
         "forbidden": "只用 data-parent-entry 数据标记而无视觉从属；二级入口与一级入口完全平级"
@@ -368,8 +382,8 @@
     },
     "previewShellPolicy": {
       "appliesTo": [
-        "../wego-ux/assets/templates/host-shell.*",
-        "../wego-ux/assets/templates/page-shell.html",
+        "../../../wego-app/index.html",
+        "../../../wego-app/index.html",
         "ui_kits/*/index.html",
         "wego-app/index.html"
       ],
@@ -380,9 +394,9 @@
     }
   },
   "selectionPolicy": "mobile-app-fixed-slots-first",
-  "pagePatternSelectionRule": "先检查 interaction_spec.app_target + host_container + route_id；若是 wego-app 场景任务，由 wego-ux 维护现有 wego-app 宿主，不从 UI Kit 参考后重画，也不复制第二套 host-shell。随后只判断业务页属于哪种既有页面范式，再选择最贴近的 UI Kit 蓝本；禁止因为宿主模板已迁出 UI Kit 而回避其业务页面模式、section 组织、摘要结构和信息密度。",
+  "pagePatternSelectionRule": "先检查 prototype_brief 的 entry_points、critical_paths 与场景目录语义；若是 wego-app 场景任务，由 wego-design 维护现有 wego-app 宿主，不从 UI Kit 参考后重画，也不复制第二套 host-shell。随后只判断业务页属于哪种既有页面范式，再选择最贴近的 UI Kit 蓝本；禁止因为宿主模板已迁出 UI Kit 而回避其业务页面模式、section 组织、摘要结构和信息密度。",
   "deliveryMode": "static-single-preview-shell-flow",
-  "deliveryRule": "页面蓝图用于指导 wego-app/scenes/{中文业务场景}/ 中的真实业务场景实现；默认交付可部署到 Vercel、也可本地直接打开 wego-app/index.html 的静态 App 原型；wego-app/index.html 是唯一 App 宿主和预览外壳，不是唯一业务页面；完整流程必须拆成 hash route、scene.js template、push/modal/sheet/full-screen-modal 等 screen 或 overlay；scene.html 若存在只能作为源码参考或迁移内容源，运行时不得依赖 fetch()/XHR 加载。",
+  "deliveryRule": "页面蓝图用于指导 wego-app/scenes/{中文业务场景}/ 中的真实业务场景实现；默认交付可部署到 Vercel、也可本地直接打开 wego-app/index.html 的静态 App 原型；wego-app/index.html 是唯一 App 宿主和预览外壳，不是唯一业务页面；完整流程必须拆成 hash route、scene.js template、push/modal/sheet/full-screen-modal 等 screen 或 overlay；运行时不得依赖 fetch()/XHR 加载。",
   "slotAssignments": [
     {
       "slot": "top-navigation",
@@ -421,12 +435,12 @@
     "decorative-orb-background"
   ],
   "surfaceDecisionRules": {
-    "surfaceMatching": "必须先按 interaction_spec.surfaces[] 逐个 surface 判断命中状态；不能只给整个任务一个 matched_uikit 后跳过宿主页、二级页或结果页。",
-    "hostEntryBoundary": "当 interaction_spec 包含 host_container + route_id 时，host-entry 只负责输出宿主页入口、结果回填和状态摘要所需的 surface 依据；不要把固定宿主 App 本身当作新的 pagePattern，也不要让下游参考后重画宿主 App。",
-    "fallbackAndGap": "未命中 UI Kit/pagePattern 但能安全输出时，必须引用 fallbackPageBlueprints；不能临时发明页面范式。任何 surface 为 gap 时，不输出可执行原型计划，只输出设计缺口与建议补充的 blueprint、UI Kit 或组件契约。"
+    "surfaceMatching": "必须按 prototype_brief 的每个入口、关键路径和业务结果逐个判断需要的 surface；不能只给整个任务一个 matched_uikit 后跳过宿主页、二级页或结果页。",
+    "hostEntryBoundary": "当 prototype_brief 已确认宿主入口归属时，host-entry 只负责输出宿主页入口、结果回填和状态摘要所需的 surface 依据；不要把固定宿主 App 本身当作新的 pagePattern，也不要让下游参考后重画宿主 App。",
+    "fallbackAndGap": "未命中 UI Kit/pagePattern 时必须创建 DDR，选择最近似的正式 fallback blueprint 或组件结构完成原型；禁止临时发明页面范式或组件。"
   },
   "pagePresentationBindingRules": {
-    "fieldMapping": "匹配 pagePattern 后，必须将 presentation、transition、dismissAction、overlayLevel、coversTabBar 五个字段映射为 design_plan.page_presentation 输出（presentation→type，dismissAction→dismiss_action，overlayLevel→overlay_level，coversTabBar→covers_tab_bar）；若 pagePattern 未声明 presentation，默认 type=push、overlay_level=inline、covers_tab_bar=true。",
+    "fieldMapping": "匹配 pagePattern 后，必须将 presentation、transition、dismissAction、overlayLevel、coversTabBar 五个字段写入场景设计合同（presentation→type，dismissAction→dismiss_action，overlayLevel→overlay_level，coversTabBar→covers_tab_bar）；若 pagePattern 未声明 presentation，默认 type=push、overlay_level=inline、covers_tab_bar=true。",
     "traceability": "page_presentation 必须能从业务主 surface 的 matched_page_pattern 和 presentation_ref 反查来源，不能只给顶层字段而不说明命中的页面范式。",
     "coversTabBarConstraint": "wego-app/scenes/ 下业务场景的 page_presentation.covers_tab_bar 必须为 true；不得输出 false，除非 surface 角色为 host-entry inline grid 入口，或 host_container.entry_type 为 host-tab 且页面直接挂在固定宿主 Tab 面板内。",
     "compositionTraceability": "命中 pagePattern 的 compositionConstraints 时，component_mapping 必须标注所选组合、对应规则 ID 和 trigger，形成可追溯链路。"
@@ -486,7 +500,6 @@
         "link"
       ],
       "uikitFile": "ui_kits/biz-rule-config/index.html",
-      "specRef": "specs/交互设计原则.md#页面模式与转场",
       "structureHighlights": [
         "使用编辑型二级页导航，页面级主操作统一收口",
         "页面顶部可放置摘要区（方案名称、状态、说明等），但摘要区不是必需结构——是否包含摘要区由原始业务需求决定；UI Kit 中的 biz-summary 是演示参考，不是页面范式的强制元素。",
@@ -519,7 +532,7 @@
         {
           "trigger": "主互斥配置项命中已注册稳定场景，且内嵌选择控件、标题/副标题和间距已由该场景承接",
           "use": "完整消费命中的稳定场景，不再拆出内嵌选择控件做二次规格判断",
-          "avoid": "在 wego-ux 阶段单独改小 radio/checkbox、重写偏移或追加局部说明去补结构",
+          "avoid": "在 wego-design 阶段单独改小 radio/checkbox、重写偏移或追加局部说明去补结构",
           "reason": "组件稳定场景已经定义了内嵌控件规格、对齐和信息节奏；继续拆开判断会造成尺寸漂移和关系失真。",
           "allowWhen": "只有设计系统明确开放新的可变维度，并已回流权威契约后，才允许偏离原场景"
         },
@@ -583,7 +596,6 @@
         "cell"
       ],
       "uikitFile": "ui_kits/system-settings/index.html",
-      "specRef": "specs/交互设计原则.md#页面模式与转场",
       "structureHighlights": [
         "使用层级导航(push),从右侧 slide-left 进入,返回按钮收口;不使用模态或底部弹层",
         "设置项按账号/业务/系统三组 cell-group 分类,每组使用 cell-group__title + cell-group__content 正式结构",
@@ -632,8 +644,8 @@
       "name": "移动端宿主页入口",
       "primaryWorkflowStage": "wego-design",
       "secondaryWorkflowStages": [
-        "wego-ux",
-        "wego-tests"
+        "wego-design",
+        "wego-design"
       ],
       "appliesWhen": [
         "页面角色为 host-entry",
@@ -667,11 +679,6 @@
         ".phone-screen",
         "未注册组件类",
         "面向 AI/工作流的说明文案"
-      ],
-      "specRefs": [
-        "specs/布局与间距规范.md",
-        "specs/文案与数据规范.md",
-        "specs/设计风格与品牌原则.md"
       ]
     },
     {
@@ -680,8 +687,8 @@
       "primaryWorkflowStage": "wego-design",
       "secondaryWorkflowStages": [
         "wego-product",
-        "wego-ux",
-        "wego-tests"
+        "wego-design",
+        "wego-design"
       ],
       "appliesWhen": [
         "页面角色为 primary-task-page",
@@ -726,12 +733,6 @@
         "列表项内多个同级强按钮",
         "教程式说明文案",
         "新增页面范式名但不登记"
-      ],
-      "specRefs": [
-        "specs/布局与间距规范.md",
-        "specs/交互设计原则.md",
-        "specs/文案与数据规范.md",
-        "specs/设计风格与品牌原则.md"
       ]
     },
     {
@@ -739,8 +740,8 @@
       "name": "连续内容流页面",
       "primaryWorkflowStage": "wego-design",
       "secondaryWorkflowStages": [
-        "wego-ux",
-        "wego-tests"
+        "wego-design",
+        "wego-design"
       ],
       "appliesWhen": [
         "页面角色为 primary-task-page",
@@ -801,21 +802,15 @@
           "page_edge_mode": "M0 或 M8",
           "media_priority": "supporting"
         }
-      },
-      "specRefs": [
-        "specs/布局与间距规范.md",
-        "specs/交互设计原则.md",
-        "specs/文案与数据规范.md",
-        "specs/设计风格与品牌原则.md"
-      ]
+      }
     },
     {
       "id": "object-detail-page",
       "name": "对象详情页",
       "primaryWorkflowStage": "wego-design",
       "secondaryWorkflowStages": [
-        "wego-ux",
-        "wego-tests"
+        "wego-design",
+        "wego-design"
       ],
       "appliesWhen": [
         "页面角色为 secondary-task-page",
@@ -866,21 +861,15 @@
           "page_edge_mode": "M16",
           "background_mode": "surface"
         }
-      },
-      "specRefs": [
-        "specs/布局与间距规范.md",
-        "specs/交互设计原则.md",
-        "specs/文案与数据规范.md",
-        "specs/设计风格与品牌原则.md"
-      ]
+      }
     },
     {
       "id": "generic-mobile-task-page",
       "name": "通用移动任务页",
       "primaryWorkflowStage": "wego-design",
       "secondaryWorkflowStages": [
-        "wego-ux",
-        "wego-tests"
+        "wego-design",
+        "wego-design"
       ],
       "appliesWhen": [
         "页面角色为 primary-task-page",
@@ -917,12 +906,6 @@
         "未注册组件类",
         "未定义修饰类",
         "硬编码颜色或间距"
-      ],
-      "specRefs": [
-        "specs/布局与间距规范.md",
-        "specs/交互设计原则.md",
-        "specs/文案与数据规范.md",
-        "specs/设计风格与品牌原则.md"
       ]
     },
     {
@@ -930,8 +913,8 @@
       "name": "二级选择列表页",
       "primaryWorkflowStage": "wego-design",
       "secondaryWorkflowStages": [
-        "wego-ux",
-        "wego-tests"
+        "wego-design",
+        "wego-design"
       ],
       "appliesWhen": [
         "页面角色为 secondary-task-page",
@@ -965,17 +948,12 @@
         "自定义列表项组件类",
         "未登记的选择页范式",
         "面向 AI/工作流的说明文案"
-      ],
-      "specRefs": [
-        "specs/布局与间距规范.md",
-        "specs/交互设计原则.md",
-        "specs/文案与数据规范.md"
       ]
     }
   ],
   "lowConfidence": false,
   "warnings": [
-    "app 宿主页不属于 UI Kit；固定宿主 App 正式维护在 wego-app/，wego-ux/assets/templates/host-shell.* 只作为宿主基线来源。",
+    "app 宿主页不属于 UI Kit；固定宿主 App 正式维护在 wego-app/，wego-app/index.html 只作为宿主基线来源。",
     "带 app_target + host_container + route_id 的任务必须维护现有 wego-app 宿主，只按 route_id 增量更新 routes.js、入口、业务场景、结果回填和交互，不复制第二套 host-shell，也不重画宿主 Tab、工作台、我的页等现成内容。",
     "手机预览外壳是全局预览能力：电脑端显示，移动端同链接隐藏；外壳类不得成为业务布局依赖。",
     "不要把“不能复制 .uikit-shell/.phone-frame/.phone-screen”误读成“不能贴近最佳页面范式”；页面模式、section 节奏和摘要结构可以继承。",

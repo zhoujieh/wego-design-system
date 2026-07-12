@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "slug": "popmenu",
   "name": "气泡菜单",
   "category": "feedback",
@@ -150,81 +150,6 @@
     "不要自定义选项颜色，仅允许 default/selected(select 模式)两种状态",
     "不要在 select 模式下使用 display:none 隐藏未选中项的对勾（会破坏自适应宽度计算）"
   ],
-  "tokensConsumed": [
-    "--bg-surface",
-    "--bg-state-hover",
-    "--border-neutral-l2",
-    "--text-default",
-    "--status-success-default",
-    "--font-family-system",
-    "--font-family-icon",
-    "--body-md-font-size",
-    "--body-md-line-height",
-    "--font-weight-medium",
-    "--font-weight-regular",
-    "--spacer-8",
-    "--spacer-12",
-    "--spacer-16",
-    "--radius-8",
-    "--shadow-lg",
-    "--duration-normal",
-    "--ease-enter",
-    "--z-popover",
-    "--size-16",
-    "--size-20",
-    "--stroke-hairline"
-  ],
-  "designTokens": {
-    "containerBg": "var(--bg-surface)",
-    "containerRadius": "var(--radius-8)",
-    "containerShadow": "0 0 0 var(--stroke-hairline) var(--border-neutral-l2), var(--shadow-lg)",
-    "containerMaxWidth": "var(--popmenu-max-width, 240px)",
-    "containerMinWidth": "var(--popmenu-min-width, 120px)",
-    "containerStroke": "var(--stroke-hairline) var(--border-neutral-l2)",
-    "containerWidth": "max-content",
-    "itemHeight": "48px",
-    "itemPaddingActionLeft": "var(--spacer-16)",
-    "itemPaddingActionRight": "var(--spacer-16)",
-    "itemPaddingActionIconLeft": "var(--spacer-12)",
-    "itemPaddingActionIconRight": "var(--spacer-16)",
-    "itemPaddingSelect": "0 var(--spacer-12)",
-    "itemGap": "var(--spacer-8)",
-    "itemIconSize": "var(--size-20)",
-    "itemCheckSize": "var(--size-16)",
-    "itemCheckIcon": "icon-gou-jiacu",
-    "itemCheckColor": "var(--status-success-default)",
-    "itemTextFont": "var(--body-md-font-size) / var(--body-md-line-height) / var(--font-weight-regular)",
-    "itemTextFontSelected": "var(--body-md-font-size) / var(--body-md-line-height) / var(--font-weight-medium)",
-    "itemTextColor": "var(--text-default)",
-    "itemDividerShadow": "inset 0 -0.5px 0 0 var(--border-neutral-l2)",
-    "itemPressedBg": "var(--bg-state-hover)",
-    "zIndex": "var(--z-popover)",
-    "enterDuration": "var(--duration-normal)",
-    "enterEase": "var(--ease-enter)",
-    "anchorGap": "4px",
-    "enterScaleStart": "0.9",
-    "enterScaleEnd": "1"
-  },
-  "cssCustomProperties": [
-    {
-      "name": "--popmenu-max-width",
-      "default": "240px",
-      "appliesTo": "气泡菜单最大宽度，超出时文本以省略号截断"
-    },
-    {
-      "name": "--popmenu-min-width",
-      "default": "120px",
-      "appliesTo": "气泡菜单最小宽度，防止短文本时过窄"
-    },
-    {
-      "name": "--popmenu-gap",
-      "default": "4px",
-      "appliesTo": "菜单与触发元素及视口安全边距；定位逻辑读取该值，默认不得改大"
-    }
-  ],
-  "specRefs": [
-    "specs/交互设计原则.md"
-  ],
   "domAnatomy": {
     "root": ".popmenu",
     "modifiers": [
@@ -247,13 +172,62 @@
       ".popmenu__item-icon",
       ".popmenu__item-text",
       ".popmenu__item-check"
-    ]
+    ],
+    "alternatives": []
   },
   "provenance": {
     "preview": "preview/component-popmenu.html",
     "cssSource": "preview/component-popmenu.html",
     "embedded": false,
-    "hostComponent": null
+    "hostComponent": null,
+    "externalSources": []
   },
-  "unknowns": []
+  "unknowns": [],
+  "ruleRefs": [
+    "colors_and_type.css#popmenu",
+    "components.css#popmenu",
+    "preview/component-popmenu.html"
+  ],
+  "runtimeTokens": [
+    "--bg-state-hover",
+    "--bg-surface",
+    "--body-md-font-family",
+    "--body-md-font-size",
+    "--body-md-line-height",
+    "--border-neutral-l2",
+    "--duration-fast",
+    "--duration-normal",
+    "--ease-enter",
+    "--font-weight-medium",
+    "--font-weight-regular",
+    "--radius-8",
+    "--shadow-lg",
+    "--size-16",
+    "--size-20",
+    "--spacer-12",
+    "--spacer-16",
+    "--spacer-8",
+    "--status-success-default",
+    "--stroke-hairline",
+    "--text-default",
+    "--z-popover"
+  ],
+  "previewOnlyTokens": [
+    "--bg-brand-surface-l1",
+    "--bg-brand-surface-l2",
+    "--bg-page",
+    "--body-sm-font-size",
+    "--body-xs-font-size",
+    "--border-brand",
+    "--border-neutral-l1",
+    "--spacer-24",
+    "--spacer-4",
+    "--text-brand",
+    "--text-secondary",
+    "--text-tertiary"
+  ],
+  "localTokens": [
+    "--popmenu-max-width",
+    "--popmenu-min-width"
+  ]
 }

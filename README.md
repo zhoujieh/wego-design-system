@@ -15,11 +15,9 @@
 
 ## 技能闭环
 
-1. `wego-product`：创建业务迭代、确认跨场景范围，输出相关 `interaction_spec`。
-2. `wego-design`：只消费已确认范围，输出无 gap 的 `design_plan`。
-3. `wego-ux`：只更新迭代登记的场景、路由和宿主文件。
-4. `wego-tests`：按 `requirement_id` 验收关联场景，输出 `acceptance_report`、开发交接和冻结记录。
-5. `wego-uxsystem-iterate`：负责组件、UI Kit、工作流迭代和审查。
+1. `wego-product`：创建业务迭代、确认范围与 `prototype_brief`。
+2. `wego-design`：Preview-first 地消费设计系统，在同一任务中实现和验证场景。
+3. `wego-uxsystem-iterate`：负责组件、UI Kit、Token、DDR、工作流迭代和审查。
 
 统一技能路由见 `.codex/skills/README.md`，仓库级约束见 `AGENTS.md`。
 
@@ -34,8 +32,6 @@
 - 技能职责和交接：各技能 `SKILL.md` 与其直接引用的 `references/`
 - 仓库级硬约束：`AGENTS.md`
 
-`docs/specs/*.md` 由正式规则来源自动生成，只用于人工检查，不是运行时权威来源，也不得直接修改。
-
 ## 经验沉淀
 
 只有用户明确要求沉淀经验、补充规则、复盘形成经验或优化工作流时，才进入候选流程：
@@ -49,16 +45,15 @@
 ## 验证
 
 ```bash
-node scripts/specs.mjs generate
-node scripts/specs.mjs check
-node scripts/specs.mjs test
+node .codex/skills/wego-design/scripts/extract-components-css.mjs .codex/skills/wego-design
+node scripts/validate-component-contract-parity.mjs
 node scripts/iteration-record.mjs test
 node scripts/validate-wego-design.mjs
 node scripts/validate-wego-design.mjs --scope=full --strict
 ```
 
-`validate-wego-design.mjs` 会先检查自动生成规则文档与权威来源是否一致，再执行原有设计系统和 App 守门。
+`validate-wego-design.mjs` 会先检查组件契约一致性，再执行设计系统、场景和 App 守门。
 
-`iteration-record.mjs` 负责业务迭代状态机、范围确认、阶段失效、开发交接和冻结；历史场景无需补录，后续再次修改时必须创建有效迭代。
+`iteration-record.mjs` 负责业务迭代状态机、范围确认、原型失效和冻结；历史场景无需补录，后续再次修改时必须创建有效迭代。
 
 只修改设计系统或工作流本体时，可使用 `node scripts/validate-wego-design.mjs --scope=system --strict`；该范围跳过业务场景产物。涉及设计系统部署资源时，再运行 `node scripts/sync-wego-app-lib.mjs --check`。

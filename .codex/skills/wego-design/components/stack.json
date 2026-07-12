@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "slug": "stack",
   "name": "选项卡",
   "category": "navigation",
@@ -79,7 +79,38 @@
     "不要把 stack 扩成复杂 tab bar、卡片宫格或营销入口块。",
     "不要在同一组件里混入数字角标、倒计时等额外状态。"
   ],
-  "tokensConsumed": [
+  "domAnatomy": {
+    "root": ".stack",
+    "requiredChildren": [],
+    "optionalChildren": [],
+    "stateClasses": [
+      ".stack--selected"
+    ],
+    "alternatives": [
+      {
+        "allOf": [
+          ".stack__bg",
+          ".stack__label",
+          ".stack__check-corner",
+          ".stack__check-icon"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "preview": "preview/component-stack.html",
+    "cssSource": "preview/component-stack.html",
+    "embedded": false,
+    "hostComponent": null,
+    "externalSources": []
+  },
+  "unknowns": [],
+  "ruleRefs": [
+    "colors_and_type.css#stack",
+    "components.css#stack",
+    "preview/component-stack.html"
+  ],
+  "runtimeTokens": [
     "--bg-brand",
     "--bg-brand-surface-l2",
     "--bg-subtle",
@@ -95,35 +126,11 @@
     "--text-brand",
     "--text-secondary"
   ],
-  "designTokens": {
-    "blockSize": "56px x 32px",
-    "radius": "var(--radius-6)",
-    "labelFont": "var(--body-md-font-size) / var(--font-weight-regular)",
-    "selectedLabelFontWeight": "var(--font-weight-medium)",
-    "transition": "var(--duration-fast) / var(--ease-standard)"
-  },
-  "specRefs": [
-    "specs/交互设计原则.md",
-    "specs/布局与间距规范.md"
+  "previewOnlyTokens": [
+    "--body-sm-font-size",
+    "--spacer-4",
+    "--spacer-8",
+    "--text-tertiary"
   ],
-  "domAnatomy": {
-    "root": ".stack",
-    "requiredChildren": [
-      ".stack__bg",
-      ".stack__bg .stack__label",
-      ".stack__bg .stack__check-corner",
-      ".stack__bg .stack__check-corner .stack__check-icon"
-    ],
-    "optionalChildren": [],
-    "stateClasses": [
-      ".stack--selected"
-    ]
-  },
-  "provenance": {
-    "preview": "preview/component-stack.html",
-    "cssSource": "preview/component-stack.html",
-    "embedded": false,
-    "hostComponent": null
-  },
-  "unknowns": []
+  "localTokens": []
 }

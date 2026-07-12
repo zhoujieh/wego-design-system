@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "slug": "bottom-nav",
   "name": "底部导航",
   "category": "navigation",
@@ -94,26 +94,6 @@
     "不要把文案、图标、入口数量做成运行时动态配置。",
     "不要引入 Lucide 或外部图标体系替代库内资产。"
   ],
-  "tokensConsumed": [
-    "--bg-surface",
-    "--body-md-font-family",
-    "--body-xs-font-size",
-    "--border-neutral-l2",
-    "--font-weight-regular",
-    "--size-32",
-    "--size-56",
-    "--spacer-16",
-    "--text-brand",
-    "--text-default"
-  ],
-  "designTokens": {
-    "height": "var(--size-56)",
-    "iconSize": "var(--size-32)",
-    "labelFont": "var(--body-xs-font-size) / var(--font-weight-regular)",
-    "paddingHorizontal": "var(--spacer-16)",
-    "safeAreaBottom": "var(--safe-area-bottom, env(safe-area-inset-bottom, 0px))",
-    "overflow": "visible"
-  },
   "fixedTabs": [
     {
       "key": "dongtai",
@@ -146,10 +126,6 @@
       "activeIcon": "assets/icons/tab-active-wode.svg"
     }
   ],
-  "specRefs": [
-    "specs/交互设计原则.md",
-    "specs/布局与间距规范.md"
-  ],
   "domAnatomy": {
     "root": ".bottom-nav",
     "repeatingChild": ".bottom-nav__item",
@@ -157,13 +133,37 @@
       ".bottom-nav__icon",
       ".bottom-nav__label"
     ],
-    "optionalNestedComponent": "badge"
+    "optionalNestedComponent": "badge",
+    "alternatives": []
   },
   "provenance": {
     "preview": "preview/component-bottom-nav.html",
     "cssSource": "preview/component-bottom-nav.html",
     "embedded": false,
-    "hostComponent": null
+    "hostComponent": null,
+    "externalSources": []
   },
-  "unknowns": []
+  "unknowns": [],
+  "ruleRefs": [
+    "colors_and_type.css#bottom-nav",
+    "components.css#bottom-nav",
+    "preview/component-bottom-nav.html"
+  ],
+  "runtimeTokens": [
+    "--bg-surface",
+    "--body-md-font-family",
+    "--body-xs-font-size",
+    "--border-neutral-l2",
+    "--duration-fast",
+    "--ease-standard",
+    "--font-weight-regular",
+    "--safe-area-bottom",
+    "--size-32",
+    "--size-56",
+    "--spacer-16",
+    "--text-brand",
+    "--text-default"
+  ],
+  "previewOnlyTokens": [],
+  "localTokens": []
 }

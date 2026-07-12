@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "slug": "modal",
   "name": "底部模态框",
   "category": "feedback",
@@ -41,18 +41,78 @@
     ]
   },
   "representativeVariants": [
-    { "variant": "frame", "title": "info", "action": "double-h", "align": "center" },
-    { "variant": "frame", "title": "info", "action": "double-h", "align": "left" },
-    { "variant": "frame", "title": "info", "action": "cancel", "align": "center" },
-    { "variant": "frame", "title": "info", "action": "double-h", "align": "center" },
-    { "variant": "frame", "title": "info", "action": "double-h", "align": "center" },
-    { "variant": "frame", "title": "info", "action": "none", "align": "center" },
-    { "variant": "frame-x", "title": "default", "action": "none", "align": "center" },
-    { "variant": "frame-x", "title": "default", "action": "double-h", "align": "center" },
-    { "variant": "frame", "title": "info", "action": "single-h", "align": "center" },
-    { "variant": "frame", "title": "info", "action": "single-v", "align": "center" },
-    { "variant": "frame", "title": "info", "action": "single-v-links", "align": "center" },
-    { "variant": "fullscreen", "title": "default", "action": "none", "align": "center" }
+    {
+      "variant": "frame",
+      "title": "info",
+      "action": "double-h",
+      "align": "center"
+    },
+    {
+      "variant": "frame",
+      "title": "info",
+      "action": "double-h",
+      "align": "left"
+    },
+    {
+      "variant": "frame",
+      "title": "info",
+      "action": "cancel",
+      "align": "center"
+    },
+    {
+      "variant": "frame",
+      "title": "info",
+      "action": "double-h",
+      "align": "center"
+    },
+    {
+      "variant": "frame",
+      "title": "info",
+      "action": "double-h",
+      "align": "center"
+    },
+    {
+      "variant": "frame",
+      "title": "info",
+      "action": "none",
+      "align": "center"
+    },
+    {
+      "variant": "frame-x",
+      "title": "default",
+      "action": "none",
+      "align": "center"
+    },
+    {
+      "variant": "frame-x",
+      "title": "default",
+      "action": "double-h",
+      "align": "center"
+    },
+    {
+      "variant": "frame",
+      "title": "info",
+      "action": "single-h",
+      "align": "center"
+    },
+    {
+      "variant": "frame",
+      "title": "info",
+      "action": "single-v",
+      "align": "center"
+    },
+    {
+      "variant": "frame",
+      "title": "info",
+      "action": "single-v-links",
+      "align": "center"
+    },
+    {
+      "variant": "fullscreen",
+      "title": "default",
+      "action": "none",
+      "align": "center"
+    }
   ],
   "anatomy": [
     {
@@ -131,11 +191,6 @@
       "role": "单个竖向按钮（居中），padding 0 32px 16px；btn max-width: 180px"
     },
     {
-      "name": "actionLink",
-      "selector": ".modal__action--link",
-      "role": "链接按钮容器（竖向按钮下方居中），padding 0 16px 12px + safe-area；内放 .link 组件"
-    },
-    {
       "name": "links",
       "selector": ".modal__links",
       "role": "链接容器（双按钮下方），至多 2 个 .link standalone（14px）"
@@ -196,7 +251,7 @@
     "frame/frame-x 变体默认使用 default 标题 + 下箭头（icon-xiajiantou16），关闭叉仅在用户明确指定场景时使用。",
     "frame/frame-x 非全屏模态的 default title 不预留顶部状态栏高度（--safe-area-top: 0px），弹窗顶部直接显示标题栏；fullscreen 全屏模态的 default title 恢复 safe-area-top，避让手机状态栏。",
     "action 区按钮复用 button 组件 .btn--lg，强调级别 strong/weak/danger；同面板仅 1 个 strong/danger 主按钮。",
-    "链接按钮复用 link 组件 .link（standalone），放在 .modal__links 或 .modal__action--link 内。",
+    "链接按钮复用 link 组件 .link（standalone），放在 .modal__links 内。",
     "fullscreen 变体 NavBar 仅限两种固定模式：text-cancel+button 或 close-icon。",
     "嵌套 push 通过 data-layer 和 data-push 属性管理，宿主 JS 负责层间切换和动画触发。"
   ],
@@ -214,81 +269,6 @@
     "不要给 modal 设置自动关闭时长（阻断式常驻）。",
     "fullscreen 变体 NavBar 禁止自由组合 leftControl 和 rightControl，只允许两种固定模式。",
     "嵌套深度超过 3 层时禁止继续 push。"
-  ],
-  "tokensConsumed": [
-    "--bg-mask-light",
-    "--bg-surface",
-    "--bg-page",
-    "--bg-placeholder",
-    "--bg-state-hover",
-    "--bg-state-pressed",
-    "--text-default",
-    "--text-secondary",
-    "--text-link",
-    "--text-brand",
-    "--font-family-system",
-    "--heading-sm-font-size",
-    "--body-lg-font-size",
-    "--body-md-font-size",
-    "--font-weight-medium",
-    "--font-weight-regular",
-    "--spacer-4",
-    "--spacer-8",
-    "--spacer-12",
-    "--spacer-16",
-    "--spacer-20",
-    "--spacer-24",
-    "--spacer-32",
-    "--spacer-40",
-    "--radius-12",
-    "--radius-16",
-    "--stroke-hairline",
-    "--border-neutral-l2",
-    "--duration-normal",
-    "--ease-enter",
-    "--ease-exit",
-    "--z-modal",
-    "--safe-area-bottom",
-    "--safe-area-top"
-  ],
-  "designTokens": {
-    "panelBg": "var(--modal-panel-bg, var(--bg-surface))",
-    "maskBg": "var(--bg-mask-light)（frame/frame-x）；transparent（fullscreen）",
-    "frameMaxHeight": "calc(100vh - 40px)",
-    "frameXHeight": "70vh（var(--modal-frame-x-height)）",
-    "fullscreenHeight": "100dvh / 100%",
-    "panelRadius": "var(--radius-16)（frame/frame-x）；0（fullscreen）",
-    "infoTitlePadding": "var(--spacer-32) var(--spacer-32) 0",
-    "infoTitleGap": "var(--spacer-8)",
-    "titleFont": "var(--heading-sm-font-size) / var(--font-weight-medium) / var(--font-family-system)",
-    "subtitleFont": "var(--body-md-font-size) / var(--font-weight-regular) / var(--font-family-system)",
-    "subtitleColor": "var(--text-secondary)",
-    "actionGradientHeight": "var(--spacer-40)",
-    "buttonsPadding": "var(--spacer-16)",
-    "buttonsGap": "var(--spacer-12)",
-    "singleHMaxWidth": "180px",
-    "singleVMaxWidth": "180px",
-    "cancelLetterSpacing": "0.1em",
-    "safeAreaBottom": "var(--safe-area-bottom)",
-    "zIndex": "var(--z-modal)",
-    "maxNestingDepth": 3
-  },
-  "cssCustomProperties": [
-    {
-      "name": "--modal-panel-width",
-      "default": "100%",
-      "appliesTo": "面板宽度"
-    },
-    {
-      "name": "--modal-frame-x-height",
-      "default": "70vh",
-      "appliesTo": "frame-x 面板高度"
-    },
-    {
-      "name": "--modal-panel-bg",
-      "default": "var(--bg-surface)",
-      "appliesTo": "面板、标题、body、actions 和 fullscreen 最底层背景色；业务可覆盖为 var(--bg-page) 实现灰色主题，也可保持默认 var(--bg-surface) 实现白底"
-    }
   ],
   "domAnatomy": {
     "root": ".modal",
@@ -318,19 +298,67 @@
       ".modal__links",
       ".modal__cancel",
       ".modal__action--single-h",
-      ".modal__action--single-v",
-      ".modal__action--link"
-    ]
+      ".modal__action--single-v"
+    ],
+    "alternatives": []
   },
   "provenance": {
     "preview": "preview/component-modal.html",
     "cssSource": "preview/component-modal.html",
     "embedded": false,
-    "hostComponent": null
+    "hostComponent": null,
+    "externalSources": []
   },
-  "specRefs": [
-    "specs/交互设计原则.md",
-    "specs/文案与数据规范.md"
+  "unknowns": [],
+  "ruleRefs": [
+    "colors_and_type.css#modal",
+    "components.css#modal",
+    "preview/component-modal.html"
   ],
-  "unknowns": []
+  "runtimeTokens": [
+    "--bg-mask-light",
+    "--bg-state-hover",
+    "--bg-state-pressed",
+    "--bg-surface",
+    "--body-lg-font-size",
+    "--body-md-font-size",
+    "--border-neutral-l2",
+    "--duration-normal",
+    "--ease-enter",
+    "--ease-exit",
+    "--font-family-system",
+    "--font-weight-medium",
+    "--font-weight-regular",
+    "--heading-sm-font-size",
+    "--radius-16",
+    "--safe-area-bottom",
+    "--spacer-12",
+    "--spacer-16",
+    "--spacer-20",
+    "--spacer-32",
+    "--spacer-40",
+    "--spacer-8",
+    "--text-default",
+    "--text-secondary",
+    "--z-modal"
+  ],
+  "previewOnlyTokens": [
+    "--bg-brand-surface-l1",
+    "--bg-brand-surface-l2",
+    "--bg-page",
+    "--body-md-font-family",
+    "--body-sm-font-size",
+    "--body-xs-font-size",
+    "--border-brand",
+    "--border-neutral-l1",
+    "--radius-8",
+    "--spacer-4",
+    "--text-brand",
+    "--text-tertiary"
+  ],
+  "localTokens": [
+    "--modal-frame-x-height",
+    "--modal-panel-bg",
+    "--modal-panel-width"
+  ]
 }

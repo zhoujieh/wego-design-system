@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "slug": "checkbox",
   "name": "复选框",
   "category": "form",
@@ -136,66 +136,11 @@
     "不要把 checkbox 扩成开关、单选或树控件。",
     "不要新增发光、描边动画等强视觉反馈。"
   ],
-  "tokensConsumed": [
-    "--bg-brand",
-    "--bg-control-disabled",
-    "--bg-inverse-surface-l1",
-    "--bg-inverse-surface-disabled",
-    "--body-md-font-size",
-    "--body-md-line-height",
-    "--body-sm-font-size",
-    "--border-control",
-    "--border-disabled",
-    "--border-inverse",
-    "--border-inverse-weak",
-    "--duration-fast",
-    "--ease-standard",
-    "--font-weight-medium",
-    "--number-md-font-family",
-    "--radius-full",
-    "--spacer-2",
-    "--spacer-12",
-    "--text-brand",
-    "--text-default",
-    "--text-inverse",
-    "--touch-min"
-  ],
-  "designTokens": {
-    "sizes": {
-      "default": "24px",
-      "sm": "20px"
-    },
-    "visualSizes": {
-      "default": "20px inner circle, 19.5px count circle",
-      "sm": "16px inner circle"
-    },
-    "withText": {
-      "controlSize": "20px",
-      "gap": "2px",
-      "fontSize": "14px",
-      "groupGap": "12px",
-      "groupFontSize": "14px"
-    },
-    "radius": "var(--radius-full)",
-    "borderWidth": "1.5px",
-    "assetSizes": {
-      "check": "13px x 10px, selected layer translated 0.5px to the right",
-      "minus": "8px x 1.5px CSS centered line"
-    },
-    "countFont": "12px / var(--font-weight-medium)",
-    "transition": "background var(--duration-fast) var(--ease-standard)",
-    "touchTarget": "通过 .checkbox::before 将 24px / 20px 视觉尺寸补到 40px 热区，不改变布局占用",
-    "darkMode": "暗色上下文通过 .dark 切换到 inverse 边框、inverse 弱表面和 inverse 弱边框 Token，未选和禁用态不再依赖 preview 专用覆盖"
-  },
   "assetUsage": {
     "check": "assets/icons/checkbox-check.svg",
     "minus": ".checkbox__minus::before",
     "rule": "勾选标记使用随库 SVG 资产；半选标记用 CSS 横线居中绘制，不同目录的调用方只需确保 .checkbox__minus 存在。"
   },
-  "specRefs": [
-    "specs/交互设计原则.md",
-    "specs/布局与间距规范.md"
-  ],
   "domAnatomy": {
     "root": ".checkbox",
     "requiredChildren": [
@@ -215,13 +160,61 @@
       ".checkbox--indeterminate",
       ".checkbox--disabled",
       ".checkbox--count"
-    ]
+    ],
+    "alternatives": []
   },
   "provenance": {
     "preview": "preview/component-checkbox.html",
     "cssSource": "preview/component-checkbox.html",
     "embedded": false,
-    "hostComponent": null
+    "hostComponent": null,
+    "externalSources": []
   },
-  "unknowns": []
+  "unknowns": [],
+  "ruleRefs": [
+    "colors_and_type.css#checkbox",
+    "components.css#checkbox",
+    "preview/component-checkbox.html"
+  ],
+  "runtimeTokens": [
+    "--bg-brand",
+    "--bg-control-disabled",
+    "--bg-inverse-surface-disabled",
+    "--bg-inverse-surface-l1",
+    "--body-md-font-size",
+    "--body-md-line-height",
+    "--body-sm-font-size",
+    "--border-control",
+    "--border-disabled",
+    "--border-inverse",
+    "--border-inverse-weak",
+    "--duration-fast",
+    "--ease-standard",
+    "--font-weight-medium",
+    "--number-md-font-family",
+    "--radius-full",
+    "--spacer-12",
+    "--spacer-2",
+    "--text-brand",
+    "--text-default",
+    "--text-inverse",
+    "--touch-min"
+  ],
+  "previewOnlyTokens": [
+    "--bg-surface",
+    "--body-sm-line-height",
+    "--border-neutral-l2",
+    "--radius-8",
+    "--spacer-16",
+    "--spacer-8",
+    "--text-secondary",
+    "--text-tertiary"
+  ],
+  "localTokens": [
+    "--checkbox-border",
+    "--checkbox-disabled-border",
+    "--checkbox-disabled-surface",
+    "--checkbox-size",
+    "--checkbox-surface"
+  ]
 }

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "slug": "button",
   "name": "按钮",
   "category": "action",
@@ -111,78 +111,6 @@
     "不要为单个业务场景新增临时颜色按钮。",
     "不要在非新建场景使用纯图标或带图标按钮。"
   ],
-  "tokensConsumed": [
-    "--bg-brand",
-    "--bg-brand-disabled",
-    "--bg-brand-hover",
-    "--bg-overlay-l1",
-    "--bg-overlay-l2",
-    "--bg-state-selected",
-    "--status-danger-default",
-    "--status-danger-surface-l1",
-    "--status-danger-surface-l2",
-    "--body-lg-font-size",
-    "--body-md-font-family",
-    "--body-md-font-size",
-    "--duration-fast",
-    "--ease-standard",
-    "--font-weight-medium",
-    "--heading-sm-font-size",
-    "--radius-6",
-    "--radius-8",
-    "--size-24",
-    "--size-32",
-    "--size-36",
-    "--size-40",
-    "--size-48",
-    "--spacer-4",
-    "--spacer-12",
-    "--spacer-14",
-    "--text-brand",
-    "--text-default",
-    "--text-disabled",
-    "--text-inverse"
-  ],
-  "designTokens": {
-    "sizes": {
-      "lg": "48px",
-      "md": "40px",
-      "sm": "32px"
-    },
-    "minWidth": {
-      "lg": "calc(var(--size-48) * 3)",
-      "md": "var(--size-40)",
-      "sm": "var(--size-32)"
-    },
-    "maxWidth": {
-      "lg": "calc(var(--size-36) * 5)",
-      "sm": "calc(var(--size-24) * 5)"
-    },
-    "paddingInline": {
-      "lg": "var(--spacer-14)",
-      "md": "var(--spacer-14)",
-      "sm": "var(--spacer-12)"
-    },
-    "fontSize": {
-      "lg": "var(--heading-sm-font-size)",
-      "md": "var(--body-lg-font-size)",
-      "sm": "var(--body-md-font-size)"
-    },
-    "radius": {
-      "lg": "var(--radius-8)",
-      "md": "var(--radius-8)",
-      "sm": "var(--radius-6)"
-    },
-    "iconOnlyWidth": {
-      "md": "var(--size-40)",
-      "sm": "var(--size-32)"
-    },
-    "transition": "background var(--duration-fast) var(--ease-standard)"
-  },
-  "specRefs": [
-    "specs/交互设计原则.md",
-    "specs/布局与间距规范.md"
-  ],
   "domAnatomy": {
     "root": ".btn",
     "optionalChildren": [
@@ -203,13 +131,54 @@
     ],
     "modeClasses": [
       ".btn--icon-only"
-    ]
+    ],
+    "alternatives": []
   },
   "provenance": {
     "preview": "preview/component-button.html",
     "cssSource": "preview/component-button.html",
     "embedded": false,
-    "hostComponent": null
+    "hostComponent": null,
+    "externalSources": []
   },
-  "unknowns": []
+  "unknowns": [],
+  "ruleRefs": [
+    "colors_and_type.css#button",
+    "components.css#button",
+    "preview/component-button.html"
+  ],
+  "runtimeTokens": [
+    "--bg-brand",
+    "--bg-brand-disabled",
+    "--bg-brand-hover",
+    "--bg-overlay-l1",
+    "--bg-overlay-l2",
+    "--bg-state-selected",
+    "--body-lg-font-size",
+    "--body-md-font-family",
+    "--body-md-font-size",
+    "--duration-fast",
+    "--ease-standard",
+    "--font-weight-medium",
+    "--heading-sm-font-size",
+    "--radius-6",
+    "--radius-8",
+    "--size-24",
+    "--size-32",
+    "--size-36",
+    "--size-40",
+    "--size-48",
+    "--spacer-12",
+    "--spacer-14",
+    "--spacer-4",
+    "--status-danger-default",
+    "--status-danger-surface-l1",
+    "--status-danger-surface-l2",
+    "--text-brand",
+    "--text-default",
+    "--text-disabled",
+    "--text-inverse"
+  ],
+  "previewOnlyTokens": [],
+  "localTokens": []
 }

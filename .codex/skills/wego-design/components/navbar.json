@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "slug": "navbar",
   "name": "导航栏",
   "category": "navigation",
@@ -164,7 +164,7 @@
     "适合标准页面顶部导航、详情页返回和设置页保存动作。",
     "多个右侧动作应保持克制，优先一到两个高频操作。",
     "navbar 右侧操作使用图标时必须搭配文字（图标+文字组合），不使用纯单图标；纯单图标缺乏文字语义，用户无法感知操作含义。host-tab 首页（工作台、动态等底部 Tab 直挂页面）若没有需要承载高频页面级业务动作（如设置、消息、扫一扫）的图标+文字组合，右侧留空，不要为填充空间放纯单图标；低频页面内功能（如手动刷新、筛选）优先用页面内交互（下拉刷新、页面内按钮）承载。全屏模态模式 B 的关闭叉属于左侧控件，不受此约束。",
-    "列表页或管理页的右侧新增/新建入口，默认使用带加号图标的图标+文字动作；纯文字新增只在用户明确要求、空间不足且 design_plan 写明降级原因，或当前宿主 slot 只支持文字时使用。",
+    "列表页或管理页的右侧新增/新建入口，默认使用带加号图标的图标+文字动作；纯文字新增只在用户明确要求、空间不足且场景设计合同写明降级原因，或当前宿主 slot 只支持文字时使用。",
     "页面打开模式由左侧控件决定：返回图标 → 右侧滑入 (push)；关闭/叉/取消 → 底部滑入 (present / bottom-sheet)。",
     "所有左侧可交互内容点击热区通过伪元素扩大至 48px，不改变布局尺寸。",
     "右侧操作使用 navbar 内部 .navbar__action 结构；不要把它当独立组件消费。",
@@ -178,42 +178,6 @@
     "不要把 navbar 扩成桌面多行标题栏、营销大顶栏或搜索综合头部。",
     "不要把状态栏、标题栏和筛选条硬拼成单一组件。",
     "不要给 navbar 写死固定宽度（如 375px）；navbar 宽度默认 100%，由外层容器约束。"
-  ],
-  "tokensConsumed": [
-    "--body-lg-font-size",
-    "--body-xs-font-size",
-    "--font-weight-medium",
-    "--heading-sm-font-size",
-    "--text-default",
-    "--text-inverse",
-    "--bg-page",
-    "--bg-surface",
-    "--safe-area-top",
-    "--navbar-body-height"
-  ],
-  "designTokens": {
-    "bodyHeight": "var(--navbar-body-height, 56px)",
-    "totalHeight": "calc(var(--navbar-body-height, 56px) + var(--safe-area-top, 0px))",
-    "gridColumns": "10",
-    "titleFont": "var(--heading-sm-font-size) / var(--font-weight-medium)",
-    "actionButtonHeight": "32px",
-    "leftPadding": "16px",
-    "rightPadding": {
-      "icon": "4px",
-      "text": "16px",
-      "button": "16px"
-    },
-    "spacedLeftPadding": "16px",
-    "spacedRightPadding": "16px",
-    "touchTargetSize": "48px",
-    "iconActionGap": "0",
-    "safeAreaTop": "var(--safe-area-top, 0px)",
-    "bodyHeightVariable": "var(--navbar-body-height, 56px)",
-    "totalHeightWithSafeArea": "calc(var(--navbar-body-height, 56px) + var(--safe-area-top, 0px))"
-  },
-  "specRefs": [
-    "specs/交互设计原则.md",
-    "specs/布局与间距规范.md"
   ],
   "domAnatomy": {
     "root": ".navbar",
@@ -237,13 +201,45 @@
       ".navbar__right--button",
       ".navbar__right--gap",
       ".navbar--fixed-transparent"
-    ]
+    ],
+    "alternatives": []
   },
   "provenance": {
     "preview": "preview/component-navbar.html",
     "cssSource": "preview/component-navbar.html",
     "embedded": false,
-    "hostComponent": null
+    "hostComponent": null,
+    "externalSources": []
   },
-  "unknowns": []
+  "unknowns": [],
+  "ruleRefs": [
+    "colors_and_type.css#navbar",
+    "components.css#navbar",
+    "preview/component-navbar.html"
+  ],
+  "runtimeTokens": [
+    "--bg-page",
+    "--bg-placeholder",
+    "--bg-state-pressed",
+    "--bg-surface",
+    "--body-lg-font-size",
+    "--body-xs-font-size",
+    "--font-weight-medium",
+    "--heading-sm-font-size",
+    "--navbar-body-height",
+    "--radius-12",
+    "--safe-area-top",
+    "--text-default",
+    "--text-inverse",
+    "--text-secondary",
+    "--z-sticky"
+  ],
+  "previewOnlyTokens": [
+    "--body-md-font-size",
+    "--border-neutral-l2",
+    "--spacer-12",
+    "--spacer-16",
+    "--spacer-8"
+  ],
+  "localTokens": []
 }

@@ -1,7 +1,0 @@
-interface:
-  display_name: "Wego Tests"
-  short_description: "验收原型定稿并正式化后的业务迭代，生成开发交接与冻结记录"
-  default_prompt: "Use $wego-tests to validate every requirement after the interactive prototype is approved and formally documented, then generate the development handoff and freeze record when eligible."
-
-policy:
-  allow_implicit_invocation: true

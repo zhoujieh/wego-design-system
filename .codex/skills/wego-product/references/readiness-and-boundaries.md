@@ -12,7 +12,7 @@
 
 ## UI 假设与入口归属
 
-`prototype_brief` 和 `interaction_spec` 的产品阶段字段必须用业务语言描述，不得带入任何 UI 假设倾向，以免误导下游设计决策。
+`prototype_brief` 的产品阶段字段必须用业务语言描述，不得带入任何 UI 假设倾向，以免误导下游设计决策。
 
 ### UI 假设的禁止表现
 
@@ -36,9 +36,7 @@
 需要区分两个概念：
 
 - **业务入口归属**（在哪个 tab、哪个宿主区域、从哪个页面进入）→ `wego-product` 决定，写入 `entry_points`。
-- **入口的视觉呈现和打开方式**（用什么组件、什么动画、什么布局）→ `wego-design` 决定，写入 `prototype_design` 或 `design_plan`。
-
-`interaction_spec.surfaces.carrier` 表达“产品承载意图”（如 `host-section`、`standalone-page`、`sheet`、`modal`、`dialog`、`inline-area`），仅用于区分产品承载语义，不等于最终打开方式；最终打开方式由 `wego-design` 决定。
+- **入口的视觉呈现和打开方式**（用什么组件、什么动画、什么布局）→ `wego-design` 决定，写入场景设计合同与决策证据。
 
 ### 正面规则
 
@@ -68,7 +66,7 @@
 
 每个 readiness 必须有 `reason` 和受影响范围。`partially-ready` 只把已确认范围交给设计；`blocked` 不得交接。
 
-正式业务迭代第一版的本轮交付范围必须整体达到 `ready` 或 `ready-with-assumptions` 才能 `product-confirmed`；`partially-ready` 只能继续停留在产品阶段拆分延期或排除范围，不直接推进整个迭代。
+进入 `wego-design` 前，本轮交付范围必须整体达到 `ready` 或 `ready-with-assumptions`；`partially-ready` 只能继续停留在产品阶段拆分延期或排除范围，不得交给场景实现。
 
 ## 边界选择
 

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "slug": "search",
   "name": "搜索框",
   "category": "form",
@@ -203,82 +203,9 @@
     "不要在基础搜索框上写死 295px、255px、311px 等 Figma 示例宽度。",
     "不要为单个业务场景新增临时搜索框皮肤。"
   ],
-  "tokensConsumed": [
-    "--bg-brand",
-    "--bg-inverse",
-    "--bg-overlay-l1",
-    "--bg-page",
-    "--bg-subtle",
-    "--bg-surface",
-    "--bg-toast",
-    "--border-neutral-l2",
-    "--body-lg-font-size",
-    "--body-lg-line-height",
-    "--body-md-font-family",
-    "--body-md-font-size",
-    "--body-md-line-height",
-    "--body-sm-font-size",
-    "--body-sm-line-height",
-    "--body-xs-font-size",
-    "--body-xs-line-height",
-    "--font-family-icon",
-    "--font-weight-medium",
-    "--font-weight-regular",
-    "--icon-secondary",
-    "--radius-6",
-    "--radius-8",
-    "--radius-full",
-    "--size-16",
-    "--size-20",
-    "--size-24",
-    "--size-28",
-    "--size-32",
-    "--size-36",
-    "--size-40",
-    "--size-48",
-    "--spacer-4",
-    "--spacer-8",
-    "--spacer-12",
-    "--stroke-strong",
-    "--text-default",
-    "--text-disabled",
-    "--text-inverse",
-    "--text-placeholder",
-    "--text-secondary",
-    "--transparent"
-  ],
-  "designTokens": {
-    "mdHeight": "36px",
-    "mdRadius": "var(--radius-8)",
-    "mdIconSlot": "36px",
-    "mdIconSize": "20px",
-    "mdFontSize": "var(--body-lg-font-size)",
-    "smHeight": "32px",
-    "smRadius": "var(--radius-6)",
-    "smIconSlot": "32px",
-    "smIconSize": "16px",
-    "smFontSize": "var(--body-md-font-size)",
-    "singleImageSize": "24px",
-    "singleImageRadius": "2px",
-    "multiImageTokenWidth": "64px",
-    "multiImageTokenHeight": "24px",
-    "darkImageTokenWidth": "68px",
-    "darkImageTokenHeight": "28px",
-    "accentRadius": "var(--radius-full)",
-    "accentBorder": "var(--stroke-strong) solid var(--bg-brand)"
-  },
-  "specRefs": [
-    "docs/kuikly_components/Search.md",
-    "specs/交互设计原则.md",
-    "specs/布局与间距规范.md"
-  ],
   "domAnatomy": {
     "root": ".searchbox",
-    "requiredChildren": [
-      ".searchbox > .searchbox__icon",
-      ".searchbox > .searchbox__input",
-      ".searchbox > .searchbox__actions"
-    ],
+    "requiredChildren": [],
     "optionalChildren": [
       ".searchbox__field",
       ".searchbox__placeholder",
@@ -303,6 +230,16 @@
     "stateClasses": [
       ".is-inputting",
       ".is-result"
+    ],
+    "alternatives": [
+      {
+        "allOf": [
+          ".searchbox",
+          ".searchbox__icon",
+          ".searchbox__input",
+          ".searchbox__actions"
+        ]
+      }
     ]
   },
   "provenance": {
@@ -315,11 +252,79 @@
       "8041:9363",
       "13102:2425"
     ],
-    "kuikly": "docs/kuikly_components/Search.md 提供 placeholder、autoHidePlaceHolder、showSelectImageButton、showScanButton、picList、blurOnReturn 和事件边界。",
     "decisions": [
       "仓库原型只沉淀结构、样式和交互语义，不实现真实原生输入 API。",
       "右侧业务操作作为 host pattern 插槽，不污染基础搜索框的内部 actions。"
+    ],
+    "externalSources": [
+      {
+        "name": "Kuikly Search",
+        "sourceFile": "docs/kuikly_components/Search.md"
+      }
     ]
   },
-  "unknowns": []
+  "unknowns": [],
+  "ruleRefs": [
+    "colors_and_type.css#search",
+    "components.css#search",
+    "preview/component-search.html"
+  ],
+  "runtimeTokens": [
+    "--bg-brand",
+    "--bg-inverse",
+    "--bg-page",
+    "--bg-subtle",
+    "--bg-surface",
+    "--bg-toast",
+    "--body-lg-font-size",
+    "--body-lg-line-height",
+    "--body-md-font-size",
+    "--body-md-line-height",
+    "--body-xs-font-size",
+    "--body-xs-line-height",
+    "--icon-secondary",
+    "--radius-6",
+    "--radius-8",
+    "--radius-full",
+    "--shadow-xs",
+    "--size-16",
+    "--size-20",
+    "--size-24",
+    "--size-28",
+    "--size-32",
+    "--size-36",
+    "--size-40",
+    "--size-48",
+    "--spacer-12",
+    "--spacer-16",
+    "--spacer-4",
+    "--spacer-8",
+    "--stroke-strong",
+    "--text-default",
+    "--text-disabled",
+    "--text-inverse",
+    "--text-placeholder",
+    "--text-secondary",
+    "--transparent"
+  ],
+  "previewOnlyTokens": [
+    "--bg-muted",
+    "--body-sm-font-size",
+    "--body-sm-line-height",
+    "--border-neutral-l2",
+    "--demo-width",
+    "--radius-12",
+    "--shadow-sm"
+  ],
+  "localTokens": [
+    "--searchbox-bg",
+    "--searchbox-color",
+    "--searchbox-font-size",
+    "--searchbox-height",
+    "--searchbox-icon-size",
+    "--searchbox-icon-slot",
+    "--searchbox-placeholder-color",
+    "--searchbox-radius",
+    "--searchbox-width"
+  ]
 }

@@ -1,5 +1,7 @@
 # 动态商品流 Benchmark Skill 审查与 Design 回归方案
 
+> 历史归档文档（不参与当前技能、规则或运行时判断）：本文记录的是重构前的审查过程，其中的 `wego-ux`、`wego-tests`、`design_plan` 与 `specs` 路径均已删除。当前唯一权威来源是 `AGENTS.md`、`.codex/skills/README.md` 与各现行 `SKILL.md`。
+
 ## 背景
 
 本次会话围绕 `docs/benchmark/002-动态商品流.md` 对当前生成结果进行了 Skill 级审查，目标不是修复单个页面，而是找出会重复影响未来页面生成的通用问题，并判断是否应参考 `wego-design` 最早版本中“AI 如何消费设计系统”的方案来重构当前设计消费链路。

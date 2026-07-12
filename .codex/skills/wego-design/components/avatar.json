@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "slug": "avatar",
   "name": "头像",
   "category": "display",
@@ -73,28 +73,6 @@
     "不要扩展为带徽章、在线状态光环或营销贴纸的复合头像。",
     "不要引入非圆形默认外观。"
   ],
-  "tokensConsumed": [
-    "--bg-fill-strong",
-    "--body-md-font-family",
-    "--border-neutral-l2",
-    "--font-weight-medium",
-    "--radius-full",
-    "--text-inverse"
-  ],
-  "designTokens": {
-    "radius": "var(--radius-full)",
-    "border": "0.5px solid var(--border-neutral-l2)",
-    "initialsFontWeight": "var(--font-weight-medium)",
-    "sizes": {
-      "24": "24px",
-      "40": "40px",
-      "56": "56px"
-    }
-  },
-  "specRefs": [
-    "specs/设计风格与品牌原则.md",
-    "specs/布局与间距规范.md"
-  ],
   "domAnatomy": {
     "root": ".avatar",
     "optionalChildren": [
@@ -106,13 +84,30 @@
       ".avatar--40",
       ".avatar--56",
       ".avatar--initials"
-    ]
+    ],
+    "alternatives": []
   },
   "provenance": {
     "preview": "preview/component-avatar.html",
     "cssSource": "preview/component-avatar.html",
     "embedded": false,
-    "hostComponent": null
+    "hostComponent": null,
+    "externalSources": []
   },
-  "unknowns": []
+  "unknowns": [],
+  "ruleRefs": [
+    "colors_and_type.css#avatar",
+    "components.css#avatar",
+    "preview/component-avatar.html"
+  ],
+  "runtimeTokens": [
+    "--bg-fill-strong",
+    "--body-md-font-family",
+    "--border-neutral-l2",
+    "--font-weight-medium",
+    "--radius-full",
+    "--text-inverse"
+  ],
+  "previewOnlyTokens": [],
+  "localTokens": []
 }

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "slug": "metric",
   "name": "数值展示",
   "category": "display",
@@ -141,51 +141,6 @@
     "不要在 metric 组件内发明新的字号档位。",
     "不要用 inline style 控制颜色或字号。"
   ],
-  "tokensConsumed": [
-    "--number-md-font-family",
-    "--number-lg2-font-size",
-    "--text-default",
-    "--text-inverse",
-    "--text-inverse-weak",
-    "--status-promotion-default",
-    "--text-tertiary",
-    "--font-weight-medium",
-    "--font-weight-regular",
-    "--body-xs-font-family",
-    "--body-xs-font-size",
-    "--body-sm-font-size",
-    "--status-promotion-surface-l1",
-    "--radius-4",
-    "--spacer-2",
-    "--spacer-1"
-  ],
-  "designTokens": {
-    "sizes": {
-      "14": { "main": "14px", "small": "14px", "line": "12px", "prefix": "10px" },
-      "16": { "main": "16px", "small": "12px", "line": "12px", "prefix": "10px" },
-      "18": { "main": "18px", "small": "12px", "line": "12px", "prefix": "10px" },
-      "20": { "main": "20px", "small": "14px", "line": "14px", "prefix": "10px" },
-      "24": { "main": "24px", "small": "16px", "line": "16px", "prefix": "12px" },
-      "32": { "main": "32px", "small": "22px", "line": "22px", "prefix": "16px" }
-    },
-    "themeColor": {
-      "marketing": "var(--status-promotion-default)",
-      "black": "var(--text-default)",
-      "white": "var(--text-inverse)"
-    },
-    "lineColor": "var(--text-tertiary)",
-    "fontFamily": "var(--number-md-font-family)",
-    "mainWeight": "var(--font-weight-medium)",
-    "lineWeight": "var(--font-weight-regular)",
-    "gap": "var(--spacer-2)",
-    "wrapRowGap": "var(--spacer-2)",
-    "align": "baseline"
-  },
-  "specRefs": [
-    "specs/文案与数据规范.md",
-    "specs/交互设计原则.md",
-    "specs/设计风格与品牌原则.md"
-  ],
   "domAnatomy": {
     "root": ".metric",
     "modifiers": [
@@ -218,13 +173,54 @@
       ".metric__value--high",
       ".metric__line",
       ".metric__badge"
-    ]
+    ],
+    "alternatives": []
   },
   "provenance": {
     "preview": "preview/component-metric.html",
     "cssSource": "preview/component-metric.html",
     "embedded": false,
-    "hostComponent": null
+    "hostComponent": null,
+    "externalSources": []
   },
-  "unknowns": []
+  "unknowns": [],
+  "ruleRefs": [
+    "colors_and_type.css#metric",
+    "components.css#metric",
+    "preview/component-metric.html"
+  ],
+  "runtimeTokens": [
+    "--body-xs-font-family",
+    "--font-weight-medium",
+    "--font-weight-regular",
+    "--number-md-font-family",
+    "--radius-4",
+    "--spacer-2",
+    "--status-promotion-default",
+    "--status-promotion-surface-l1",
+    "--text-default",
+    "--text-inverse",
+    "--text-inverse-weak",
+    "--text-tertiary"
+  ],
+  "previewOnlyTokens": [
+    "--bg-overlay-l1",
+    "--bg-surface",
+    "--body-sm-font-size",
+    "--body-sm-line-height",
+    "--body-xs-font-size",
+    "--body-xs-line-height",
+    "--border-neutral-l1",
+    "--heading-sm-font-size",
+    "--heading-sm-line-height",
+    "--radius-12",
+    "--radius-8",
+    "--shadow-xs",
+    "--spacer-12",
+    "--spacer-16",
+    "--spacer-4",
+    "--spacer-6",
+    "--spacer-8"
+  ],
+  "localTokens": []
 }

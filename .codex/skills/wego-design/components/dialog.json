@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "slug": "dialog",
   "name": "对话框",
   "category": "feedback",
@@ -175,7 +175,7 @@
     "同一 dialog 只能有一个主按钮（confirm 或 danger），其余按钮须使用 default 或 dismiss；禁止同时出现两个 confirm 或两个 danger 按钮。",
     "按钮文字默认居中对齐。",
     "title 变体（仅标题）的 .dialog__body 上下内边距为 32px（左右保持 20px），以强化标题的呼吸感。",
-    "input 变体的 .dialog__input 复用 input 组件的 .input-group > .input-wrapper > input[type=text] + .input-clear 完整结构，不再在 dialog 内部重写 input 样式；dialog 只通过 .dialog__input 控制宽度，并隐藏 .field-label。",    
+    "input 变体的 .dialog__input 复用 input 组件的 .input-group > .input-wrapper > input[type=text] + .input-clear 完整结构，不再在 dialog 内部重写 input 样式；dialog 只通过 .dialog__input 控制宽度，并隐藏 .field-label。",
     ".dialog__header 采用横向布局（flex-direction: row），状态图标 .dialog__icon 与标题 .dialog__title 在同一行水平排列，图标在标题前方；无图标时标题独占一行居中。",
     "状态图标尺寸 24px，与标题文字垂直居中对齐，图标与标题间距 8px。",
     "状态机通过 data-state='open'/'closed' 属性切换，不再使用 is-visible/is-leaving 类。",
@@ -201,7 +201,7 @@
     "role": "dialog 容器使用 role=\"dialog\" aria-modal=\"true\"。",
     "labelRule": "标题作为 dialog 的可访问名称，正文作为可访问描述。",
     "focusTrap": "打开时焦点锁定在 dialog 内，关闭后焦点返回触发元素。",
-    "textRule": "标题和正文默认不限制显示行数，但文案应精简表达（参见 specs/文案与数据规范.md#文案精简原则）；dialog 不对文本做截断处理，由业务侧保证文案质量。"
+    "textRule": "标题和正文默认不限制显示行数，但文案必须保持简洁；dialog 不对文本做截断处理，由业务侧保证文案质量。"
   },
   "usageHints": [
     "用于确认关键操作（删除、清空、提交、扣费）或展示必须阅读的重要信息。",
@@ -222,98 +222,6 @@
     "不要给 dialog 设置自动关闭时长（dialog 是阻断式常驻，必须由用户操作触发关闭）。",
     "不要默认给 dialog 添加点击蒙层关闭逻辑；closeByMask 默认且必须保持 false。只有用户在业务需求里明确要求'点击蒙层关闭'时才允许开启，且必须由宿主在 scene.js 里自行接管 click 事件并显式判断 e.target === dialog 后关闭，不在组件 CSS 或默认交互里实现。",
     "不要给 dialog 或 dialog 按钮添加任何禁用态：禁止 disabled 属性、is-disabled 类、disabled-style 修饰类、pointer-events:none 或任何置灰样式；dialog 里所有按钮、输入框、勾选项必须可正常操作。"
-  ],
-  "tokensConsumed": [
-    "--bg-mask-light",
-    "--bg-surface",
-    "--bg-state-hover",
-    "--bg-state-pressed",
-    "--text-default",
-    "--text-tertiary",
-    "--text-placeholder",
-    "--text-link",
-    "--text-brand",
-    "--status-success-default",
-    "--status-warning-default",
-    "--status-danger-default",
-    "--font-family-icon",
-    "--font-family-system",
-    "--heading-sm-font-size",
-    "--body-lg-font-size",
-    "--body-md-font-size",
-    "--font-weight-semibold",
-    "--font-weight-medium",
-    "--spacer-2",
-    "--spacer-8",
-    "--spacer-12",
-    "--spacer-16",
-    "--spacer-20",
-    "--spacer-24",
-    "--spacer-32",
-    "--radius-6",
-    "--radius-8",
-    "--radius-12",
-    "--stroke-hairline",
-    "--stroke-strong",
-    "--border-neutral-l2",
-    "--border-brand",
-    "--shadow-xl",
-    "--duration-fast",
-    "--duration-normal",
-    "--ease-enter",
-    "--ease-standard",
-    "--z-modal",
-    "--size-24"
-  ],
-  "designTokens": {
-    "cardWidth": "300px",
-    "cardRadius": "var(--radius-12)",
-    "cardBg": "var(--bg-surface)",
-    "cardShadow": "var(--shadow-xl)",
-    "bodyPadding": "var(--spacer-24) var(--spacer-20)",
-    "titleBodyPadding": "var(--spacer-32) var(--spacer-20)",
-    "bodyGap": "var(--spacer-12)",
-    "maskBg": "var(--bg-mask-light)",
-    "titleFont": "var(--heading-sm-font-size) / var(--font-weight-medium) / var(--font-family-system)",
-    "titleColor": "var(--text-default)",
-    "contentFont": "var(--body-lg-font-size) / var(--font-family-system)",
-    "contentColor": "var(--text-default)",
-    "linkColor": "var(--text-link)",
-    "iconSize": "var(--size-24)",
-    "iconTitleGap": "var(--spacer-8)",
-    "iconColorSuccess": "var(--status-success-default)",
-    "iconColorWarning": "var(--status-warning-default)",
-    "iconColorDanger": "var(--status-danger-default)",
-    "btnColorDefault": "var(--text-default)",
-    "btnColorDismiss": "var(--text-default)",
-    "btnColorConfirm": "var(--text-link)",
-    "btnColorDanger": "var(--status-danger-default)",
-    "btnFont": "var(--body-lg-font-size) / var(--font-weight-medium)",
-    "btnHeight": "48px",
-    "dividerColor": "var(--border-neutral-l2)",
-    "actionsDividerShadow": "inset 0 0.5px 0 0 var(--border-neutral-l2)",
-    "enterScale": "0.9",
-    "leaveScale": "0.9",
-    "enterDuration": "var(--duration-normal)",
-    "leaveDuration": "var(--duration-fast)",
-    "enterEase": "var(--ease-standard)",
-    "leaveEase": "var(--ease-standard)"
-  },
-  "cssCustomProperties": [
-    {
-      "name": "--dialog-width",
-      "default": "300px",
-      "appliesTo": "卡片宽度，业务可覆盖"
-    },
-    {
-      "name": "--dialog-enter-scale",
-      "default": "0.9",
-      "appliesTo": "入场缩放起点"
-    }
-  ],
-  "specRefs": [
-    "specs/交互设计原则.md",
-    "specs/文案与数据规范.md"
   ],
   "domAnatomy": {
     "root": ".dialog",
@@ -348,13 +256,68 @@
       ".dialog__btn--confirm",
       ".dialog__btn--danger",
       ".dialog__divider"
-    ]
+    ],
+    "alternatives": []
   },
   "provenance": {
     "preview": "preview/component-dialog.html",
     "cssSource": "preview/component-dialog.html",
     "embedded": false,
-    "hostComponent": null
+    "hostComponent": null,
+    "externalSources": []
   },
-  "unknowns": []
+  "unknowns": [],
+  "ruleRefs": [
+    "colors_and_type.css#dialog",
+    "components.css#dialog",
+    "preview/component-dialog.html"
+  ],
+  "runtimeTokens": [
+    "--bg-mask-light",
+    "--bg-state-hover",
+    "--bg-state-pressed",
+    "--bg-surface",
+    "--body-lg-font-size",
+    "--border-brand",
+    "--border-neutral-l2",
+    "--duration-fast",
+    "--duration-normal",
+    "--ease-enter",
+    "--ease-standard",
+    "--font-family-icon",
+    "--font-family-system",
+    "--font-weight-medium",
+    "--heading-sm-font-size",
+    "--radius-12",
+    "--shadow-xl",
+    "--size-24",
+    "--spacer-12",
+    "--spacer-2",
+    "--spacer-20",
+    "--spacer-24",
+    "--spacer-32",
+    "--spacer-4",
+    "--spacer-8",
+    "--status-danger-default",
+    "--status-success-default",
+    "--status-warning-default",
+    "--stroke-strong",
+    "--text-default",
+    "--text-link",
+    "--z-modal"
+  ],
+  "previewOnlyTokens": [
+    "--bg-brand-surface-l1",
+    "--bg-brand-surface-l2",
+    "--body-md-font-family",
+    "--body-sm-font-size",
+    "--body-xs-font-size",
+    "--radius-8",
+    "--text-brand",
+    "--text-tertiary"
+  ],
+  "localTokens": [
+    "--dialog-enter-scale",
+    "--dialog-width"
+  ]
 }

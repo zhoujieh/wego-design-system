@@ -86,8 +86,7 @@ function filesEqual(a, b) {
 }
 
 function dirsEqual(a, b) {
-  // 比较两目录所有相对文件路径的 size + 内容（前 4KB）是否一致
-  // 用内容比较避免 mtime 浮点精度问题；前 4KB 采样足够检测同步状态
+  // 比较两目录所有相对文件路径与完整字节内容；部署副本不得以采样比较掩盖尾部漂移。
   try {
     const collect = (root) => {
       const out = new Map();
@@ -111,16 +110,7 @@ function dirsEqual(a, b) {
     if (ma.size !== mb.size) return false;
     for (const [k, size] of ma) {
       if (mb.get(k) !== size) return false;
-      // size 相同的文件再采样比较前 4KB 内容，避免 size 巧合
-      const fa = fs.openSync(path.join(a, k), 'r');
-      const fb = fs.openSync(path.join(b, k), 'r');
-      const bufA = Buffer.alloc(Math.min(4096, size));
-      const bufB = Buffer.alloc(Math.min(4096, size));
-      fs.readSync(fa, bufA, 0, bufA.length, 0);
-      fs.readSync(fb, bufB, 0, bufB.length, 0);
-      fs.closeSync(fa);
-      fs.closeSync(fb);
-      if (!bufA.equals(bufB)) return false;
+      if (!fs.readFileSync(path.join(a, k)).equals(fs.readFileSync(path.join(b, k)))) return false;
     }
     return true;
   } catch {

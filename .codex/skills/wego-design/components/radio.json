@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "slug": "radio",
   "name": "单选",
   "category": "form",
@@ -122,55 +122,6 @@
     "不要把 radio 扩成多选、评分星级或多段开关。",
     "不要允许再次点击已选中项回退为空。"
   ],
-  "tokensConsumed": [
-    "--bg-brand",
-    "--bg-control-disabled",
-    "--bg-inverse-surface-l1",
-    "--bg-inverse-surface-disabled",
-    "--body-md-font-size",
-    "--body-md-line-height",
-    "--border-control",
-    "--border-disabled",
-    "--border-inverse",
-    "--border-inverse-weak",
-    "--duration-fast",
-    "--ease-standard",
-    "--icon-inverse-disabled",
-    "--spacer-2",
-    "--spacer-12",
-    "--text-brand",
-    "--text-default",
-    "--touch-min"
-  ],
-  "designTokens": {
-    "sizes": {
-      "default": "24px",
-      "sm": "20px"
-    },
-    "innerSizes": {
-      "default": "20px",
-      "sm": "16px"
-    },
-    "dotSizes": {
-      "default": "11px",
-      "sm": "8px"
-    },
-    "withText": {
-      "controlSize": "20px",
-      "gap": "2px",
-      "fontSize": "14px",
-      "groupGap": "12px",
-      "groupFontSize": "14px"
-    },
-    "borderWidth": "1.5px",
-    "transition": "var(--duration-fast) / var(--ease-standard)",
-    "touchTarget": "通过 .radio::before 将 24px / 20px 视觉尺寸补到 40px 热区，不改变布局占用",
-    "darkMode": "暗色上下文通过 .dark 切换到 inverse 边框、inverse 弱表面、inverse 弱边框和禁用图标 Token，保证未选和禁用态在暗卡片中仍可见"
-  },
-  "specRefs": [
-    "specs/交互设计原则.md",
-    "specs/布局与间距规范.md"
-  ],
   "domAnatomy": {
     "root": ".radio",
     "requiredChildren": [
@@ -185,13 +136,59 @@
       ".radio--checked",
       ".radio--disabled"
     ],
-    "groupAttr": "data-group"
+    "groupAttr": "data-group",
+    "alternatives": []
   },
   "provenance": {
     "preview": "preview/component-radio.html",
     "cssSource": "preview/component-radio.html",
     "embedded": false,
-    "hostComponent": null
+    "hostComponent": null,
+    "externalSources": []
   },
-  "unknowns": []
+  "unknowns": [],
+  "ruleRefs": [
+    "colors_and_type.css#radio",
+    "components.css#radio",
+    "preview/component-radio.html"
+  ],
+  "runtimeTokens": [
+    "--bg-brand",
+    "--bg-control-disabled",
+    "--bg-inverse-surface-disabled",
+    "--bg-inverse-surface-l1",
+    "--body-md-font-size",
+    "--body-md-line-height",
+    "--border-control",
+    "--border-disabled",
+    "--border-inverse",
+    "--border-inverse-weak",
+    "--duration-fast",
+    "--ease-standard",
+    "--icon-inverse-disabled",
+    "--spacer-12",
+    "--spacer-2",
+    "--text-brand",
+    "--text-default",
+    "--touch-min"
+  ],
+  "previewOnlyTokens": [
+    "--bg-surface",
+    "--body-sm-font-size",
+    "--body-sm-line-height",
+    "--border-neutral-l2",
+    "--radius-8",
+    "--spacer-16",
+    "--spacer-8",
+    "--text-secondary",
+    "--text-tertiary"
+  ],
+  "localTokens": [
+    "--radio-border",
+    "--radio-disabled-border",
+    "--radio-disabled-dot",
+    "--radio-disabled-surface",
+    "--radio-size",
+    "--radio-surface"
+  ]
 }

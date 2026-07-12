@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "slug": "tag",
   "name": "标签",
   "category": "display",
@@ -111,10 +111,51 @@
     "不要把 tag 扩成桌面 Tab、分段控件或可输入 token。",
     "不要新增夸张渐变、插画底纹或重阴影标签。"
   ],
-  "tokensConsumed": [
+  "assetUsage": {
+    "businessBadges": [
+      "assets/icons/tag-seckill-14.svg",
+      "assets/icons/tag-group-14.svg",
+      "assets/icons/tag-seckill-16.svg",
+      "assets/icons/tag-group-16.svg"
+    ],
+    "rule": "业务促销标签使用随库 SVG 资产引用，不在预览或下游实现中内联 SVG。"
+  },
+  "domAnatomy": {
+    "root": ".tag",
+    "requiredChildren": [
+      ".tag__label"
+    ],
+    "optionalChildren": [
+      ".tag__close",
+      ".tag__icon-left"
+    ],
+    "modifiers": [
+      ".tag--coupon",
+      ".tag--20",
+      ".tag--24",
+      ".tag--28",
+      ".tag--32",
+      ".tag--32-add",
+      ".tag--closable"
+    ],
+    "alternatives": []
+  },
+  "provenance": {
+    "preview": "preview/component-tag.html",
+    "cssSource": "preview/component-tag.html",
+    "embedded": false,
+    "hostComponent": null,
+    "externalSources": []
+  },
+  "unknowns": [],
+  "ruleRefs": [
+    "colors_and_type.css#tag",
+    "components.css#tag",
+    "preview/component-tag.html"
+  ],
+  "runtimeTokens": [
     "--bg-brand-surface-l1",
     "--bg-brand-surface-l2",
-    "--bg-inverse",
     "--bg-inverse-surface-l1",
     "--bg-state-hover",
     "--bg-state-selected",
@@ -135,71 +176,22 @@
     "--size-24",
     "--size-28",
     "--size-32",
-    "--size-40",
-    "--size-48",
     "--spacer-12",
     "--spacer-4",
     "--spacer-8",
     "--text-brand",
     "--text-disabled",
-    "--text-inverse-secondary",
     "--text-promotion-strong",
-    "--text-secondary",
+    "--text-secondary"
+  ],
+  "previewOnlyTokens": [
+    "--bg-inverse",
+    "--radius-12",
+    "--radius-8",
+    "--spacer-16",
+    "--text-default",
+    "--text-inverse-secondary",
     "--text-tertiary"
   ],
-  "designTokens": {
-    "sizes": {
-      "20": "var(--size-24)",
-      "24": "var(--size-24)",
-      "28": "var(--size-28)",
-      "32": "var(--size-32)",
-      "32-add": "var(--size-32)"
-    },
-    "radius": {
-      "round": "var(--radius-16)",
-      "coupon": "var(--radius-4)"
-    },
-    "gap": "var(--spacer-4)",
-    "closeSize": "var(--size-16)",
-    "iconSize": "var(--size-16)"
-  },
-  "assetUsage": {
-    "businessBadges": [
-      "assets/icons/tag-seckill-14.svg",
-      "assets/icons/tag-group-14.svg",
-      "assets/icons/tag-seckill-16.svg",
-      "assets/icons/tag-group-16.svg"
-    ],
-    "rule": "业务促销标签使用随库 SVG 资产引用，不在预览或下游实现中内联 SVG。"
-  },
-  "specRefs": [
-    "specs/交互设计原则.md",
-    "specs/设计风格与品牌原则.md"
-  ],
-  "domAnatomy": {
-    "root": ".tag",
-    "requiredChildren": [
-      ".tag__label"
-    ],
-    "optionalChildren": [
-      ".tag__close",
-      ".tag__icon-left"
-    ],
-    "modifiers": [
-      ".tag--coupon",
-      ".tag--20",
-      ".tag--24",
-      ".tag--28",
-      ".tag--32",
-      ".tag--32-add",
-      ".tag--closable"
-    ]
-  },
-  "provenance": {
-    "preview": "preview/component-tag.html",
-    "cssSource": "preview/component-tag.html",
-    "embedded": false,
-    "hostComponent": null
-  },
-  "unknowns": []
+  "localTokens": []
 }

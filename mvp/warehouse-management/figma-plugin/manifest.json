@@ -1,7 +1,0 @@
-{
-  "name": "MVP001 仓库管理 Figma 写入",
-  "id": "mvp001-warehouse-figma-write",
-  "api": "1.0.0",
-  "main": "code.js",
-  "editorType": ["figma"]
-}

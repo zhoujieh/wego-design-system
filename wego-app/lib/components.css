@@ -1033,6 +1033,7 @@
 .cell__select ~ .cell__body,
 .cell__avatar ~ .cell__body,
 .cell__backspace ~ .cell__body{--cell-divider-left:12px}
+.cell--indent .cell__body{padding-left:40px}
 
 /* ── Checkbox ──────────────────────────────────────────────── */
 /* @anatomy

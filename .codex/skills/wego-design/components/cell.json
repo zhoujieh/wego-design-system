@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "slug": "cell",
   "name": "列表单元格",
   "category": "display",
@@ -166,46 +166,6 @@
     "不要把 cell 扩成桌面表格行、树形列表或多列数据面板。",
     "不要在 cell 内同时放多个同级主操作按钮。"
   ],
-  "tokensConsumed": [
-    "--accent-green",
-    "--bg-page",
-    "--bg-state-pressed",
-    "--bg-surface",
-    "--body-lg-font-size",
-    "--body-lg-line-height",
-    "--body-md-font-size",
-    "--body-md-line-height",
-    "--body-sm-font-size",
-    "--body-sm-line-height",
-    "--border-neutral-l2",
-    "--font-weight-medium",
-    "--font-weight-regular",
-    "--text-default",
-    "--text-link",
-    "--text-secondary",
-    "--text-tertiary"
-  ],
-  "designTokens": {
-    "height": {
-      "single": "56px",
-      "double": "76px"
-    },
-    "paddingHorizontal": "16px",
-    "gap": "12px",
-    "leadingToContentGap": "12px",
-    "titleFont": "var(--body-lg-font-size)",
-    "subtitleFont": "var(--body-sm-font-size)",
-    "actionFont": "var(--body-lg-font-size)",
-    "divider": "0.5px solid var(--border-neutral-l2)",
-    "paddingVertical": "12px",
-    "groupGap": "8px",
-    "groupTitlePadding": "16px 16px 8px",
-    "groupRadius": "8px"
-  },
-  "specRefs": [
-    "specs/布局与间距规范.md",
-    "specs/交互设计原则.md"
-  ],
   "domAnatomy": {
     "root": ".cell",
     "containerSelector": ".cell-group",
@@ -245,13 +205,42 @@
       ".cell__title-row",
       ".cell__title",
       ".cell__subtitle"
-    ]
+    ],
+    "alternatives": []
   },
   "provenance": {
     "preview": "preview/component-cell.html",
     "cssSource": "preview/component-cell.html",
     "embedded": false,
-    "hostComponent": null
+    "hostComponent": null,
+    "externalSources": []
   },
-  "unknowns": []
+  "unknowns": [],
+  "ruleRefs": [
+    "colors_and_type.css#cell",
+    "components.css#cell",
+    "preview/component-cell.html"
+  ],
+  "runtimeTokens": [
+    "--bg-state-pressed",
+    "--bg-surface",
+    "--body-lg-font-size",
+    "--body-lg-line-height",
+    "--body-sm-font-size",
+    "--body-sm-line-height",
+    "--border-neutral-l2",
+    "--font-weight-medium",
+    "--font-weight-regular",
+    "--radius-8",
+    "--text-default",
+    "--text-link",
+    "--text-secondary",
+    "--text-tertiary"
+  ],
+  "previewOnlyTokens": [
+    "--bg-page"
+  ],
+  "localTokens": [
+    "--cell-divider-left"
+  ]
 }

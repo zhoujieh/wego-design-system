@@ -8,6 +8,7 @@
  *
  * Usage:
  *   node extract-components-css.mjs <output_dir>
+ *   node extract-components-css.mjs <output_dir> --check
  *
  * Output:
  *   - Writes {output_dir}/components.css
@@ -238,9 +239,11 @@ function stripKeyframesForSelectorScan(css) {
 // ─── Main ───────────────────────────────────────────────────────────────────
 
 function main() {
-  const outputDir = process.argv[2];
+  const args = process.argv.slice(2);
+  const outputDir = args.find(arg => !arg.startsWith('--'));
+  const checkOnly = args.includes('--check');
   if (!outputDir) {
-    console.error('Usage: extract-components-css.mjs <output_dir>');
+    console.error('Usage: extract-components-css.mjs <output_dir> [--check]');
     process.exit(2);
   }
 
@@ -363,14 +366,16 @@ function main() {
 
   const output = header + '\n\n' + sections.join('\n\n') + '\n';
 
-  // Write output
-  fs.writeFileSync(outputPath, output, 'utf-8');
+  const outOfDate = !fs.existsSync(outputPath) || fs.readFileSync(outputPath, 'utf-8') !== output;
+  if (!checkOnly) fs.writeFileSync(outputPath, output, 'utf-8');
 
   const result = {
-    ok: extractedCount > 0,
+    ok: extractedCount > 0 && (!checkOnly || !outOfDate),
     extractedCount,
     totalRules,
     outputFile: 'components.css',
+    checkOnly,
+    outOfDate,
     warnings: warnings.map(w => typeof w === 'string' ? w : `${w.file}: ${w.reason}`),
   };
 

@@ -1,7 +1,7 @@
 interface:
   display_name: "Wego Product"
-  short_description: "确认极简原型范围，定稿后产出可追踪 interaction_spec"
-  default_prompt: "Use $wego-product to create the business iteration, confirm a concise prototype brief, then formalize traceable interaction_spec files after the user approves the interactive prototype."
+  short_description: "确认极简原型范围并交给场景技能实现"
+  default_prompt: "Use $wego-product to create the business iteration and confirm a concise prototype brief before handing the confirmed scope to $wego-design."
 
 policy:
   allow_implicit_invocation: true

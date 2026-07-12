@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "slug": "tabs",
   "name": "标签栏",
   "category": "navigation",
@@ -148,55 +148,9 @@
     "不要为了右箭头贴近文字而改变 icon-left 场景的图标与文字间距。",
     "不要把 tabs 当作底部主导航或方块选择项使用。"
   ],
-  "tokensConsumed": [
-    "--bg-surface",
-    "--bg-brand",
-    "--text-default",
-    "--text-secondary",
-    "--border-brand",
-    "--body-md-font-size",
-    "--body-md-line-height",
-    "--body-lg-font-size",
-    "--body-lg-line-height",
-    "--font-weight-medium",
-    "--radius-0",
-    "--spacer-0",
-    "--spacer-2",
-    "--spacer-4",
-    "--spacer-8",
-    "--spacer-16",
-    "--size-12",
-    "--size-16",
-    "--size-48",
-    "--size-56",
-    "--duration-fast",
-    "--duration-normal",
-    "--ease-standard",
-    "--ease-emphasized"
-  ],
-  "designTokens": {
-    "standardHeight": "var(--size-56)",
-    "miniHeight": "var(--size-48)",
-    "standardLabel": "var(--body-lg-font-size) / var(--body-lg-line-height) / var(--font-weight-medium)",
-    "miniLabel": "var(--body-md-font-size) / var(--body-md-line-height) / var(--font-weight-medium)",
-    "indicator": "standard 3px, mini 2px, background var(--bg-brand), radius var(--radius-0)",
-    "iconSize": "icon-left: standard 20px, mini 16px; icon-right arrow: standard 16px, mini 12px",
-    "indicatorRuntimeVars": "--_tabs-indicator-x 默认 var(--spacer-0)，--_tabs-indicator-width 默认 0，由脚本按选中项内容位置更新",
-    "transition": "var(--duration-normal) / var(--ease-emphasized)"
-  },
-  "specRefs": [
-    "specs/交互设计原则.md",
-    "specs/布局与间距规范.md"
-  ],
   "domAnatomy": {
     "root": ".wg-tabs",
-    "requiredChildren": [
-      ".wg-tabs__scroll",
-      ".wg-tabs__scroll .wg-tabs__item",
-      ".wg-tabs__item .wg-tabs__content",
-      ".wg-tabs__content .wg-tabs__label",
-      ".wg-tabs__scroll > .wg-tabs__active-indicator"
-    ],
+    "requiredChildren": [],
     "optionalChildren": [
       ".wg-tabs__content .wg-tabs__icon"
     ],
@@ -214,13 +168,70 @@
     ],
     "stateClasses": [
       ".wg-tabs__item--first"
+    ],
+    "alternatives": [
+      {
+        "allOf": [
+          ".wg-tabs__scroll",
+          ".wg-tabs__item",
+          ".wg-tabs__content",
+          ".wg-tabs__label",
+          ".wg-tabs__active-indicator"
+        ]
+      }
     ]
   },
   "provenance": {
     "preview": "preview/component-tabs.html",
     "cssSource": "preview/component-tabs.html",
     "embedded": false,
-    "hostComponent": null
+    "hostComponent": null,
+    "externalSources": []
   },
-  "unknowns": []
+  "unknowns": [],
+  "ruleRefs": [
+    "colors_and_type.css#tabs",
+    "components.css#tabs",
+    "preview/component-tabs.html"
+  ],
+  "runtimeTokens": [
+    "--bg-brand",
+    "--bg-surface",
+    "--body-lg-font-size",
+    "--body-lg-line-height",
+    "--body-md-font-size",
+    "--body-md-line-height",
+    "--border-brand",
+    "--duration-fast",
+    "--duration-normal",
+    "--ease-emphasized",
+    "--ease-standard",
+    "--font-family-system",
+    "--font-weight-medium",
+    "--radius-0",
+    "--size-12",
+    "--size-16",
+    "--size-20",
+    "--size-48",
+    "--size-56",
+    "--spacer-0",
+    "--spacer-16",
+    "--spacer-2",
+    "--spacer-4",
+    "--spacer-8",
+    "--text-default",
+    "--text-secondary"
+  ],
+  "previewOnlyTokens": [
+    "--radius-12",
+    "--shadow-xs"
+  ],
+  "localTokens": [
+    "--_tabs-indicator-mini-height",
+    "--_tabs-indicator-standard-height",
+    "--_tabs-indicator-width",
+    "--_tabs-indicator-x",
+    "--_tabs-label-mini-max",
+    "--_tabs-label-standard-max"
+  ]
 }

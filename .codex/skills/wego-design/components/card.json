@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "slug": "card",
   "name": "卡片",
   "category": "display",
@@ -86,49 +86,6 @@
     "不要把基础 card 扩成商品卡、笔记卡、营销海报卡、复杂统计面板或多层悬浮卡。",
     "不要给基础 card 增加默认阴影、固定高度、固定宽度或默认内边距。"
   ],
-  "tokensConsumed": [
-    "--bg-subtle",
-    "--bg-surface",
-    "--body-lg-font-size",
-    "--body-lg-line-height",
-    "--body-md-font-family",
-    "--body-md-font-size",
-    "--body-md-line-height",
-    "--body-sm-font-size",
-    "--body-xs-font-size",
-    "--border-neutral-l2",
-    "--font-weight-semibold",
-    "--radius-8",
-    "--text-default",
-    "--text-secondary",
-    "--text-tertiary"
-  ],
-  "designTokens": {
-    "root": {
-      "width": "auto",
-      "height": "auto",
-      "padding": "0",
-      "margin": "0",
-      "radius": "var(--radius-8)"
-    },
-    "content": {
-      "padding": "0",
-      "gap": "0"
-    },
-    "radius": {
-      "default": "var(--radius-8)",
-      "surface": "var(--radius-8)",
-      "outlined": "var(--radius-8)",
-      "filled": "var(--radius-8)"
-    },
-    "titleFont": "var(--body-lg-font-size) / var(--font-weight-semibold)",
-    "bodyFont": "var(--body-md-font-size)",
-    "footerFont": "var(--body-sm-font-size)"
-  },
-  "specRefs": [
-    "specs/设计风格与品牌原则.md",
-    "specs/布局与间距规范.md"
-  ],
   "domAnatomy": {
     "root": ".card",
     "optionalChildren": [
@@ -141,13 +98,43 @@
       ".card--surface",
       ".card--outlined",
       ".card--filled"
-    ]
+    ],
+    "alternatives": []
   },
   "provenance": {
     "preview": "preview/component-card.html",
     "cssSource": "preview/component-card.html",
     "embedded": false,
-    "hostComponent": null
+    "hostComponent": null,
+    "externalSources": []
   },
-  "unknowns": []
+  "unknowns": [],
+  "ruleRefs": [
+    "colors_and_type.css#card",
+    "components.css#card",
+    "preview/component-card.html"
+  ],
+  "runtimeTokens": [
+    "--bg-subtle",
+    "--bg-surface",
+    "--body-lg-font-size",
+    "--body-lg-line-height",
+    "--body-md-font-family",
+    "--body-md-font-size",
+    "--body-md-line-height",
+    "--body-sm-font-size",
+    "--border-neutral-l2",
+    "--font-weight-semibold",
+    "--radius-8",
+    "--text-default",
+    "--text-secondary",
+    "--text-tertiary"
+  ],
+  "previewOnlyTokens": [
+    "--spacer-12",
+    "--spacer-16",
+    "--spacer-4",
+    "--spacer-8"
+  ],
+  "localTokens": []
 }

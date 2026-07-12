@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "slug": "actionsheet",
   "name": "底部操作表单",
   "category": "feedback",
@@ -177,17 +177,12 @@
       "name": "cancel",
       "selector": ".actionsheet__cancel",
       "role": "取消按钮区，padding 16px，文本居中"
-    },
-    {
-      "name": "safeArea",
-      "selector": ".actionsheet__safe-area",
-      "role": "底部 iOS 安全区，高 safe-area-bottom"
     }
   ],
   "structurePatterns": [
     "根节点 .actionsheet 是 overlay 定位容器，自身承担半透明遮罩 var(--bg-mask-light)，position:fixed; inset:0",
     "在 wego-app overlay 架构下消费时，遮罩和 position:fixed 由 .app-overlay-layer--sheet 承担，场景只需提供 .actionsheet__panel 及其子内容，通过 ctx.openSheet() 打开；此时 .actionsheet 根节点不渲染，避免双重遮罩",
-    "面板 .actionsheet__panel 内部从上到下：.actionsheet__header（可选）→ .actionsheet__list → .actionsheet__cancel-gap → .actionsheet__cancel → .actionsheet__safe-area",
+    "面板 .actionsheet__panel 内部从上到下：.actionsheet__header（可选）→ .actionsheet__list → .actionsheet__cancel-gap → .actionsheet__cancel；底部安全区由 panel 的 padding-bottom 处理，不额外渲染空节点",
     "分组规则：.actionsheet__list 内部可包含多个 .actionsheet__group，每个 group 之间 8px gap 灰色间隔（var(--bg-state-hover)），与取消按钮上方 .actionsheet__cancel-gap 视觉效果一致；若不使用分组，.actionsheet__list 直接包含 .actionsheet__item",
     "头部 2 种布局规则：header--text 纯文本居中；header--text-link 左文本、右链接两端对齐",
     "操作模式选项结构：.actionsheet__item（padding 16px，gap 12px）→ 可选 .actionsheet__item-icon（20×20）+ .actionsheet__item-main（flex 1）→ .actionsheet__item-title / .actionsheet__item-subtitle / .actionsheet__item-recommend；无图标时标题居中对齐，有图标时标题左对齐",
@@ -250,118 +245,6 @@
     "不要在图标模式下混用带图标和不带图标的 item，要么所有 item 都带图标，要么都不带",
     "不要在 actionsheet__list 内放置非 actionsheet__item 结构的内容展示列表（如评论列表、消息列表）；actionsheet 只承载操作列表或单选切换，内容展示应使用 modal 或自定义 sheet 承载"
   ],
-  "tokensConsumed": [
-    "--bg-mask-light",
-    "--bg-surface",
-    "--bg-state-hover",
-    "--bg-state-pressed",
-    "--text-default",
-    "--text-secondary",
-    "--text-tertiary",
-    "--text-link",
-    "--status-success-default",
-    "--status-success-surface-l1",
-    "--font-family-system",
-    "--font-family-icon",
-    "--body-md-font-size",
-    "--body-lg-font-size",
-    "--body-sm-font-size",
-    "--body-xs-font-size",
-    "--font-weight-medium",
-    "--font-weight-regular",
-    "--spacer-2",
-    "--spacer-4",
-    "--spacer-8",
-    "--spacer-12",
-    "--spacer-16",
-    "--spacer-24",
-    "--radius-16",
-    "--radius-8",
-    "--radius-4",
-    "--stroke-hairline",
-    "--border-neutral-l2",
-    "--duration-normal",
-    "--duration-fast",
-    "--ease-enter",
-    "--ease-exit",
-    "--z-modal",
-    "--safe-area-bottom",
-    "--size-20",
-    "--size-24"
-  ],
-  "designTokens": {
-    "panelWidth": "100% (max 670px)",
-    "panelRadius": "var(--radius-16)",
-    "panelBg": "var(--bg-surface)",
-    "maskBg": "var(--bg-mask-light)",
-    "headerHeight": "64px",
-    "headerPadding": "var(--spacer-16)",
-    "headerFont": "var(--body-md-font-size) / var(--font-family-system)",
-    "headerColor": "var(--text-secondary)",
-    "headerLinkColor": "var(--text-link)",
-    "headerGap": "var(--spacer-24)",
-    "itemHeight": "56px",
-    "itemPaddingAction": "var(--spacer-16)",
-    "itemPaddingSelect": "0 0 0 var(--spacer-16)",
-    "itemGap": "var(--spacer-12)",
-    "itemRowGap": "var(--spacer-24)",
-    "itemIconSize": "var(--size-20)",
-    "itemCheckSlotWidth": "56px",
-    "itemCheckSize": "var(--size-24)",
-    "itemCheckIcon": "icon-gou-jiacu",
-    "itemTitleFont": "var(--body-lg-font-size) / var(--font-weight-regular)",
-    "itemTitleFontSelected": "var(--body-lg-font-size) / var(--font-weight-medium)",
-    "itemTitleColor": "var(--text-default)",
-    "itemSubtitleFont": "var(--body-sm-font-size)",
-    "itemSubtitleColor": "var(--text-secondary)",
-    "itemDisabledColor": "var(--text-tertiary)",
-    "itemDividerShadow": "inset 0 -0.5px 0 0 var(--border-neutral-l2)",
-    "cancelGapHeight": "var(--spacer-8)",
-    "cancelGapBg": "var(--bg-state-hover)",
-    "groupGapHeight": "var(--spacer-8)",
-    "groupGapBg": "var(--bg-state-hover)",
-    "cancelPadding": "var(--spacer-16)",
-    "cancelFont": "var(--body-lg-font-size) / var(--font-weight-regular)",
-    "cancelColor": "var(--text-default)",
-    "cancelLetterSpacing": "0.1em",
-    "safeAreaHeight": "var(--safe-area-bottom)",
-    "checkColor": "var(--status-success-default)",
-    "recommendFont": "var(--body-xs-font-size)",
-    "recommendColor": "var(--status-success-default)",
-    "recommendBg": "var(--status-success-surface-l1)",
-    "enterOffsetY": "100%",
-    "enterDuration": "var(--duration-normal)",
-    "leaveDuration": "var(--duration-normal)",
-    "enterEase": "var(--ease-enter)",
-    "leaveEase": "var(--ease-exit)",
-    "zIndex": "var(--z-modal)"
-  },
-  "cssCustomProperties": [
-    {
-      "name": "--actionsheet-panel-width",
-      "default": "100%",
-      "appliesTo": "面板宽度，业务可覆盖"
-    },
-    {
-      "name": "--actionsheet-item-divider-color",
-      "default": "var(--border-neutral-l2)",
-      "appliesTo": "选项底部分隔线颜色，对应 Kuikly borderBottomColor"
-    },
-    {
-      "name": "--actionsheet-item-font-weight",
-      "default": "var(--font-weight-regular)",
-      "appliesTo": "选项标题字重，业务强调选项可覆盖为 var(--font-weight-medium)"
-    },
-    {
-      "name": "--actionsheet-cancel-letter-spacing",
-      "default": "0.1em",
-      "appliesTo": "取消按钮字间距，业务可覆盖"
-    }
-  ],
-  "specRefs": [
-    "specs/交互设计原则.md",
-    "specs/文案与数据规范.md"
-  ],
   "domAnatomy": {
     "root": ".actionsheet",
     "modifiers": [
@@ -391,15 +274,70 @@
       ".actionsheet__item-check-slot",
       ".actionsheet__item-check",
       ".actionsheet__cancel-gap",
-      ".actionsheet__cancel",
-      ".actionsheet__safe-area"
-    ]
+      ".actionsheet__cancel"
+    ],
+    "alternatives": []
   },
   "provenance": {
     "preview": "preview/component-actionsheet.html",
     "cssSource": "preview/component-actionsheet.html",
     "embedded": false,
-    "hostComponent": null
+    "hostComponent": null,
+    "externalSources": []
   },
-  "unknowns": []
+  "unknowns": [],
+  "ruleRefs": [
+    "colors_and_type.css#actionsheet",
+    "components.css#actionsheet",
+    "preview/component-actionsheet.html"
+  ],
+  "runtimeTokens": [
+    "--bg-mask-light",
+    "--bg-state-hover",
+    "--bg-state-pressed",
+    "--bg-surface",
+    "--body-lg-font-size",
+    "--body-md-font-size",
+    "--body-sm-font-size",
+    "--body-xs-font-size",
+    "--border-neutral-l2",
+    "--duration-normal",
+    "--ease-enter",
+    "--ease-exit",
+    "--font-family-system",
+    "--font-weight-medium",
+    "--font-weight-regular",
+    "--radius-16",
+    "--radius-4",
+    "--size-20",
+    "--size-24",
+    "--spacer-12",
+    "--spacer-16",
+    "--spacer-2",
+    "--spacer-24",
+    "--spacer-4",
+    "--spacer-8",
+    "--status-success-default",
+    "--status-success-surface-l1",
+    "--text-default",
+    "--text-secondary",
+    "--text-tertiary",
+    "--z-modal"
+  ],
+  "previewOnlyTokens": [
+    "--bg-brand-surface-l1",
+    "--bg-brand-surface-l2",
+    "--bg-page",
+    "--body-md-font-family",
+    "--border-brand",
+    "--border-neutral-l1",
+    "--radius-8",
+    "--text-brand"
+  ],
+  "localTokens": [
+    "--actionsheet-cancel-letter-spacing",
+    "--actionsheet-item-divider-color",
+    "--actionsheet-item-font-weight",
+    "--actionsheet-panel-width"
+  ]
 }

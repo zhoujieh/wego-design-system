@@ -1,7 +1,4 @@
 interface:
   display_name: "Wego Design"
-  short_description: "消费微购设计系统，原型期写约束、定稿后产出 design_plan"
-  default_prompt: "Use $wego-design to turn a confirmed prototype brief into design-system-backed prototype decisions, then produce a gap-free design_plan after prototype approval."
-
-policy:
-  allow_implicit_invocation: true
+  short_description: "基于确认简报生成可交互微购 App 场景"
+  default_prompt: "Use $wego-design to consume the confirmed prototype brief, build a preview-first prompt contract, implement the declared wego-app scene, and produce verified design decisions."

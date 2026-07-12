@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "slug": "form",
   "name": "表单容器",
   "category": "form",
@@ -206,7 +206,6 @@
     "同一组 form 内如果需要保持统一对齐基线，不要混用默认 label 宽度和 label-w80 / label-w120；带前缀字段所在组优先保持统一 label 宽度。",
     "同一页面存在多组 form-group / cell-group 时，应先确定页面级对齐策略，并让各组的 label 宽度、右侧操作列和内容起点保持一致；不要一组左、一组右、一组自定义宽度地临时拼接。",
     "右侧辅助操作统一挂在 .form-body__right-btn，不靠 inline style 单独补尺寸和颜色。",
-    
     "prefix field、icon-text、upload、stack-group、radio-group、checkbox-group、switch 都归入 .form-body--preserve-content-align，保持中段内容原始顺序和左对齐基线；其中手机号区号和金额货币符号都属于前缀字段。",
     "stack-group、radio-group、checkbox-group、switch 等选项类控件统一放在 .form-body__action 中左对齐，不放入右侧操作区；中段保留完整内容展示，由控件自身承担交互。",
     "icon-text 右侧入口使用 44px 固定宽度，多个入口并排时间距为 0，并针对该场景单独收敛右侧边距，不影响其他右侧操作场景。",
@@ -257,55 +256,6 @@
     "不要把 form 扩成桌面属性面板、富文本表单或多列表格表单。",
     "不要为单业务在 form 内新增独占型字段皮肤。"
   ],
-  "tokensConsumed": [
-    "--bg-state-pressed",
-    "--bg-overlay-l1",
-    "--bg-page",
-    "--bg-surface",
-    "--body-lg-font-size",
-    "--body-lg-line-height",
-    "--body-md-font-family",
-    "--body-md-font-size",
-    "--body-md-line-height",
-    "--body-sm-font-size",
-    "--body-xs-font-size",
-    "--border-neutral-l2",
-    "--font-weight-medium",
-    "--font-weight-regular",
-    "--number-md-font-family",
-    "--radius-6",
-    "--radius-8",
-    "--radius-full",
-    "--size-28",
-    "--size-32",
-    "--status-danger-default",
-    "--text-brand",
-    "--text-default",
-    "--text-disabled",
-    "--text-placeholder",
-    "--text-secondary",
-    "--text-tertiary"
-  ],
-  "designTokens": {
-    "labelWidths": {
-      "default": "96px",
-      "compact": "80px",
-      "wide": "120px"
-    },
-    "horizontalGap": "24px",
-    "minHeight": "56px",
-    "fixedHeight": "120px",
-    "messageFont": "var(--body-xs-font-size)",
-    "uploadSize": "64px",
-    "iconActionSize": "24px",
-    "groupTitlePadding": "16px 16px 8px",
-    "groupRadius": "8px"
-  },
-  "specRefs": [
-    "specs/交互设计原则.md",
-    "specs/布局与间距规范.md",
-    "specs/文案与数据规范.md"
-  ],
   "domAnatomy": {
     "root": ".form-body",
     "requiredChildren": [
@@ -339,13 +289,51 @@
       ".form-body--clickable",
       ".form-body--icon-text-actions",
       ".form-body--preserve-content-align"
-    ]
+    ],
+    "alternatives": []
   },
   "provenance": {
     "preview": "preview/component-form.html",
     "cssSource": "preview/component-form.html",
     "embedded": false,
-    "hostComponent": null
+    "hostComponent": null,
+    "externalSources": []
   },
-  "unknowns": []
+  "unknowns": [],
+  "ruleRefs": [
+    "colors_and_type.css#form",
+    "components.css#form",
+    "preview/component-form.html"
+  ],
+  "runtimeTokens": [
+    "--bg-state-pressed",
+    "--bg-surface",
+    "--body-lg-font-size",
+    "--body-lg-line-height",
+    "--body-md-font-family",
+    "--body-md-font-size",
+    "--body-md-line-height",
+    "--body-sm-font-size",
+    "--body-sm-line-height",
+    "--body-xs-font-size",
+    "--border-neutral-l2",
+    "--duration-fast",
+    "--ease-standard",
+    "--font-weight-medium",
+    "--font-weight-regular",
+    "--number-md-font-family",
+    "--radius-6",
+    "--radius-8",
+    "--status-danger-default",
+    "--text-brand",
+    "--text-default",
+    "--text-disabled",
+    "--text-placeholder",
+    "--text-secondary",
+    "--text-tertiary"
+  ],
+  "previewOnlyTokens": [
+    "--bg-page"
+  ],
+  "localTokens": []
 }

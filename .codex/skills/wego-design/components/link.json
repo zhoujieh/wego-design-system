@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "slug": "link",
   "name": "链接",
   "category": "action",
@@ -91,7 +91,32 @@
     "不要把 link 扩成胶囊按钮、菜单项或桌面超链接列表。",
     "不要给 link 新增多彩下划线或营销态动画。"
   ],
-  "tokensConsumed": [
+  "domAnatomy": {
+    "root": ".link",
+    "modifiers": [
+      ".link--inline",
+      ".link--12",
+      ".link--disabled"
+    ],
+    "optionalChildren": [
+      "text"
+    ],
+    "alternatives": []
+  },
+  "provenance": {
+    "preview": "preview/component-link.html",
+    "cssSource": "preview/component-link.html",
+    "embedded": false,
+    "hostComponent": null,
+    "externalSources": []
+  },
+  "unknowns": [],
+  "ruleRefs": [
+    "colors_and_type.css#link",
+    "components.css#link",
+    "preview/component-link.html"
+  ],
+  "runtimeTokens": [
     "--bg-overlay-l2",
     "--body-md-font-size",
     "--body-md-line-height",
@@ -103,39 +128,15 @@
     "--spacer-4",
     "--text-disabled",
     "--text-link",
-    "--text-secondary",
-    "--text-tertiary",
     "--touch-min"
   ],
-  "designTokens": {
-    "standaloneHeight": "20px",
-    "paddingHorizontal": "0",
-    "inlineHostGap": "var(--spacer-4)",
-    "font14": "var(--body-md-font-size) / var(--font-weight-medium)",
-    "font12": "var(--body-sm-font-size) / var(--font-weight-medium)",
-    "compactHotzone": "var(--touch-min)",
-    "transition": "background var(--duration-fast) var(--ease-standard)"
-  },
-  "specRefs": [
-    "specs/交互设计原则.md",
-    "specs/文案与数据规范.md"
+  "previewOnlyTokens": [
+    "--spacer-16",
+    "--text-secondary",
+    "--text-tertiary"
   ],
-  "domAnatomy": {
-    "root": ".link",
-    "modifiers": [
-      ".link--inline",
-      ".link--12",
-      ".link--disabled"
-    ],
-    "optionalChildren": [
-      "text"
-    ]
-  },
-  "provenance": {
-    "preview": "preview/component-link.html",
-    "cssSource": "preview/component-link.html",
-    "embedded": false,
-    "hostComponent": null
-  },
-  "unknowns": []
+  "localTokens": [
+    "--link-font-size",
+    "--link-line-height"
+  ]
 }
