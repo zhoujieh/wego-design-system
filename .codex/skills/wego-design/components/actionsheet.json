@@ -186,6 +186,7 @@
   ],
   "structurePatterns": [
     "根节点 .actionsheet 是 overlay 定位容器，自身承担半透明遮罩 var(--bg-mask-light)，position:fixed; inset:0",
+    "在 wego-app overlay 架构下消费时，遮罩和 position:fixed 由 .app-overlay-layer--sheet 承担，场景只需提供 .actionsheet__panel 及其子内容，通过 ctx.openSheet() 打开；此时 .actionsheet 根节点不渲染，避免双重遮罩",
     "面板 .actionsheet__panel 内部从上到下：.actionsheet__header（可选）→ .actionsheet__list → .actionsheet__cancel-gap → .actionsheet__cancel → .actionsheet__safe-area",
     "分组规则：.actionsheet__list 内部可包含多个 .actionsheet__group，每个 group 之间 8px gap 灰色间隔（var(--bg-state-hover)），与取消按钮上方 .actionsheet__cancel-gap 视觉效果一致；若不使用分组，.actionsheet__list 直接包含 .actionsheet__item",
     "头部 2 种布局规则：header--text 纯文本居中；header--text-link 左文本、右链接两端对齐",

@@ -37,6 +37,7 @@
 - 遮罩透明度动画放在独立 mask 层，不能让 overlay 根节点 opacity 带透明面板。
 - full-screen-modal 根节点声明 `data-bg="page"` 或 `data-bg="surface"`，panel 背景跟随声明。
 - overlay 生命周期由其交互关闭逻辑管理，不因普通 route 变化无条件清空。
+- actionsheet、modal、sheet 必须通过 `ctx.openSheet()` / `ctx.openModal()` / `ctx.openOverlay()` 打开，由 `.app-overlay-layer` 提供统一遮罩、定位和 z-index 层级。不得直接把 overlay 组件根节点插入场景 DOM 并覆盖其 `position`，否则会逃出 `.phone-screen`、无法盖住 bottom-nav 或产生双重遮罩。actionsheet 的 template 只提供 `.actionsheet__panel` 及其子内容，遮罩和定位由 `.app-overlay-layer--sheet` 承担。
 
 ## 宿主布局
 

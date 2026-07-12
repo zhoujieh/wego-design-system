@@ -37,9 +37,9 @@ const APP_LIB_SYNC_MAP = [
   { src: 'colors_and_type.css', dest: 'lib/colors_and_type.css', type: 'file' },
   { src: 'components.css', dest: 'lib/components.css', type: 'file' },
   { src: 'iconfont.css', dest: 'lib/iconfont.css', type: 'file' },
-  { src: 'assets/fonts', dest: 'lib/fonts', type: 'dir' },
-  { src: 'assets/icons', dest: 'lib/icons', type: 'dir' },
-  { src: 'assets/image', dest: 'lib/image', type: 'dir' },
+  { src: 'assets/fonts', dest: 'lib/assets/fonts', type: 'dir' },
+  { src: 'assets/icons', dest: 'lib/assets/icons', type: 'dir' },
+  { src: 'assets/image', dest: 'lib/assets/image', type: 'dir' },
 ];
 const scopeArg = rawArgs.find(arg => arg.startsWith('--scope='));
 const requestedScope = args.has('--full')
@@ -2045,9 +2045,9 @@ function checkWegoAppStructure(context) {
     'lib/colors_and_type.css',
     'lib/components.css',
     'lib/iconfont.css',
-    'lib/fonts',
-    'lib/icons',
-    'lib/image',
+    'lib/assets/fonts',
+    'lib/assets/icons',
+    'lib/assets/image',
   ];
   for (const rel of required) {
     const target = path.join(APP_ROOT, rel);

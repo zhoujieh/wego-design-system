@@ -1,0 +1,263 @@
+/* ── 动态商品流场景样式 ── */
+
+/* 场景面板填满宿主 */
+[data-host-scene-route-id="dongtai-feed"] {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* 容器：全高 flex column，作为 actionsheet 定位上下文 */
+.dongtai-feed {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* navbar 背景跟随 data-bg=page 灰底 */
+.host-dongtai-navbar {
+  background: var(--bg-page);
+}
+
+/* ── 动态列表 ── */
+.dongtai-feed__list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-8);
+  padding: var(--spacer-8) 0 calc(var(--spacer-40) + var(--safe-area-bottom));
+}
+
+/* ── 动态卡片 ── */
+.feed-item {
+  flex-shrink: 0;
+}
+
+.feed-item .card__content {
+  padding: var(--spacer-12) var(--spacer-16);
+  gap: 0;
+}
+
+/* ── 发布者行 ── */
+.feed-item__header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-12);
+}
+
+.feed-item__meta {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-4);
+}
+
+.feed-item__name {
+  font-size: var(--body-lg-font-size);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-default);
+  line-height: var(--body-lg-line-height);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.feed-item__time {
+  font-size: var(--body-sm-font-size);
+  color: var(--text-tertiary);
+  line-height: var(--body-sm-line-height);
+}
+
+/* ── 正文 ── */
+.feed-item__text {
+  font-size: var(--body-md-font-size);
+  color: var(--text-default);
+  line-height: 1.6;
+  margin-top: var(--spacer-12);
+  word-break: break-word;
+}
+
+/* ── 图片网格 ── */
+.feed-item__images {
+  display: grid;
+  gap: var(--spacer-4);
+  margin-top: var(--spacer-12);
+}
+
+.feed-item__images--grid-1 {
+  grid-template-columns: 1fr;
+}
+
+.feed-item__images--grid-1 .wg-image {
+  width: 100%;
+  height: 200px;
+}
+
+.feed-item__images--grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.feed-item__images--grid-2 .wg-image {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+}
+
+.feed-item__images--grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.feed-item__images--grid-3 .wg-image {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+}
+
+/* ── 产品摘要卡 ── */
+.feed-item__product {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-12);
+  padding: var(--spacer-12);
+  background: var(--bg-subtle);
+  border-radius: var(--radius-8);
+  margin-top: var(--spacer-12);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: background var(--duration-fast) var(--ease-standard);
+}
+
+.feed-item__product:active {
+  background: var(--bg-state-hover);
+}
+
+.feed-item__product-thumb {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+}
+
+.feed-item__product-info {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-4);
+}
+
+.feed-item__product-name {
+  font-size: var(--body-md-font-size);
+  color: var(--text-default);
+  line-height: var(--body-md-line-height);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+}
+
+.feed-item__product-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacer-4);
+}
+
+/* ── 促销标签（tag--promotion 在白底上的主题） ── */
+.tag--20.tag--promotion {
+  background: var(--status-promotion-surface-l1);
+  color: var(--status-promotion-default);
+  border: 0.5px solid transparent;
+}
+
+/* ── 操作行 ── */
+.feed-item__actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--spacer-12);
+}
+
+/* ── 一键转发已转发状态 ── */
+.btn--weak.is-forwarded {
+  background: var(--bg-subtle);
+  color: var(--text-tertiary);
+}
+
+.btn--weak.is-forwarded:active,
+.btn--weak.is-forwarded.is-pressed {
+  background: var(--bg-state-hover);
+}
+
+/* ── Actionsheet 定位覆盖：避免 position:fixed 逃出手机壳 ── */
+.dongtai-feed > .actionsheet {
+  position: absolute;
+}
+
+/* ── image-viewer 大图查看 ── */
+.image-viewer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.9);
+}
+
+.image-viewer__img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.image-viewer__close {
+  position: absolute;
+  top: var(--spacer-12);
+  right: var(--spacer-12);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  background: rgba(0, 0, 0, 0.5);
+  color: var(--text-inverse);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.image-viewer__close:active {
+  opacity: 0.6;
+}
+
+.image-viewer__close .wego-iconfont-s {
+  font-size: 20px;
+  color: var(--text-inverse);
+}
+
+/* 覆盖 app-overlay-panel 默认白色背景和圆角，使 image-viewer 全屏深色 */
+.app-overlay-layer:has(.image-viewer) {
+  padding: 0;
+}
+
+.app-overlay-panel:has(.image-viewer) {
+  background: rgba(0, 0, 0, 0.9);
+  border-radius: 0;
+  box-shadow: none;
+  max-height: 100%;
+  width: 100%;
+  height: 100%;
+}
