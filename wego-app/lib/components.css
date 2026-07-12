@@ -576,6 +576,9 @@
   max-width: none;
   padding: 0 var(--spacer-12);
 }
+.bottom-action-bar--page-actions:not(.bottom-action-bar--icon-text) .bottom-action-bar__action-icon {
+  display: none;
+}
 .bottom-action-bar--page-actions:not(.bottom-action-bar--icon-text) .bottom-action-bar__action-label {
   font-size: var(--body-lg-font-size);
   line-height: 1.5;
@@ -615,8 +618,6 @@
 .bottom-action-bar--page-actions .bottom-action-bar__action-label {
   font-size: var(--body-lg-font-size);
   line-height: 1.2;
-}
-.bottom-action-bar--page-actions .bottom-action-bar__action-icon {
 }
 .bottom-action-bar--page-actions .bottom-action-bar__action-icon .wego-iconfont-s {
   font-size: 20px;
