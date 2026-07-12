@@ -1,0 +1,119 @@
+{
+  "project": {
+    "name": "关注动态",
+    "path": "/Users/baobei/CODE/wego-design-system/dynamic-feed",
+    "operation": "create",
+    "deviceType": "mobile",
+    "language": "zh-CN",
+    "dashboardMode": false,
+    "replicationMode": null,
+    "sourceUrl": null,
+    "visualSpecExcerpt": null,
+    "styleDefinitionBrief": "苹果设计系统风格，移动端内容动态首页，信息流布局类似淘宝关注tab",
+    "designRead": "电商关注流 / 普通消费者 / 商业简洁 / 中密度 / 避免信息过载",
+    "designDials": {
+      "layoutVariance": 2,
+      "motionIntensity": 1,
+      "visualDensity": 3
+    },
+    "styleContinuityAnchors": {
+      "colorSystem": {
+        "primaryColorRole": "single brand hue #007aff for primary CTA and selected states",
+        "brandHuePolicy": "library-bound: follow Apple design system palette",
+        "stateColors": "optional semantic success/warning/error tokens only"
+      },
+      "shapeSystem": {
+        "borderRadius": "1.2rem (19.2px) cards, 9999px pills",
+        "borderWidth": "1px",
+        "cardBorderStyle": "light hairline or no border"
+      },
+      "typographySystem": {
+        "fontFamily": "DM Sans, system-ui, -apple-system, sans-serif",
+        "headingWeight": 600,
+        "bodyWeight": 400,
+        "bodySize": "14px",
+        "lineHeight": 1.5
+      },
+      "spacingSystem": "base unit 4px, scale: 4/8/12/16/24/32/48/64",
+      "componentLanguage": "pill buttons, rounded cards, pill inputs, centered action bars",
+      "surfaceAndDepth": "whisper-light shadow (alpha ≤ 0.04), cards prefer border over shadow",
+      "imageryAndIconography": "product photography on white/black grounds, icon-only actions",
+      "interactionTone": "150ms cubic-bezier(0.32,0.72,0,1), minimal feedback"
+    },
+    "sharedProjectShellContract": null,
+    "generationTree": null
+  },
+  "designSource": {
+    "operatingMode": "library-bound",
+    "libraryIdentity": {
+      "name": "苹果",
+      "id": "dl_builtin_apple",
+      "version": "",
+      "scope": "built-in-global",
+      "path": "/Users/baobei/.trae-cn/design_libraries/dl_builtin_apple",
+      "versionSource": "metadata.json"
+    },
+    "iconAssets": {
+      "source": "assets/icons",
+      "projectIconDir": "assets/icons/dl_builtin_apple",
+      "libraryKey": "dl_builtin_apple",
+      "renderMethod": "css-mask",
+      "pathTemplate": "../assets/icons/dl_builtin_apple/{name}.svg",
+      "availableNames": ["arrow-down","arrow-left","arrow-right","arrow-up","box","check","chevron-down","chevron-left","chevron-right","chevron-up","chevrons-down-up","chevrons-up-down","circle-alert","circle-check","circle-minus","circle-pause","circle-play","circle-plus","circle-question-mark","external-link","file","folder-open","folder","funnel","grip","heart","house","mail","map-pin","message-circle-more","mouse-pointer-click","pen-line","send-horizontal","star","tag","thumbs-down","thumbs-up","trash-2","triangle-alert","user"],
+      "totalCount": 40,
+      "coloringRule": "currentColor by default; override with Library token when needed"
+    }
+  },
+  "pages": [
+    {
+      "nodeId": "page-follow-feed",
+      "title": "关注",
+      "htmlSrc": "pages/follow-feed.html",
+      "pageIndex": 1,
+      "group": 0,
+      "deviceType": "mobile",
+      "pageType": "showcase",
+      "visualNorthStar": "沉浸式信息流，焦点在商品图文内容上，卡片干净利落",
+      "compositionPattern": "single-column vertical feed with full-width cards",
+      "continuityAnchors": [
+        "Apple design system: #007aff brand blue, #f2f2f7 background, DM Sans font",
+        "card-style: rounded container, light border, avatar + name header, product image body, action footer",
+        "bottom tab bar with 5 icons (首页/关注/购物车/消息/我的)"
+      ],
+      "imagePlan": [
+        {
+          "filename": "feed-product-1.jpg",
+          "role": "supporting-content",
+          "sectionType": "product",
+          "owningPage": "page-follow-feed",
+          "status": "planned"
+        },
+        {
+          "filename": "feed-product-2.jpg",
+          "role": "supporting-content",
+          "sectionType": "product",
+          "owningPage": "page-follow-feed",
+          "status": "planned"
+        },
+        {
+          "filename": "feed-product-3.jpg",
+          "role": "supporting-content",
+          "sectionType": "product",
+          "owningPage": "page-follow-feed",
+          "status": "planned"
+        },
+        {
+          "filename": "feed-product-4.jpg",
+          "role": "supporting-content",
+          "sectionType": "product",
+          "owningPage": "page-follow-feed",
+          "status": "planned"
+        }
+      ],
+      "componentPlan": []
+    }
+  ],
+  "assets": [],
+  "wiringPlan": [],
+  "hiddenInteractionPlan": []
+}
