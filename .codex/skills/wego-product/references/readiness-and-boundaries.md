@@ -10,6 +10,47 @@
 
 向用户确认时，使用简短摘要逐项列出“本次要做什么、不做什么、从哪里进入、关键操作如何完成、原型模拟到什么程度”。只有用户明确确认后才能运行 `confirm-brief` 并交给 `wego-design`。
 
+## UI 假设与入口归属
+
+`prototype_brief` 和 `interaction_spec` 的产品阶段字段必须用业务语言描述，不得带入任何 UI 假设倾向，以免误导下游设计决策。
+
+### UI 假设的禁止表现
+
+`prototype_brief` 的 `goal`、`included`、`excluded`、`entry_points`、`critical_paths`、`prototype_boundaries`、`assumptions`、`open_questions` 字段中，不得出现以下内容：
+
+- 组件名或 CSS 类（如 navbar、cell、card、tab、search、actionsheet、`wg-image`、`.cell-group`）。
+- 页面范式或布局结构（如“顶部导航栏”“底部 Tab”“卡片列表”“表单分组”“左图右文”“宽幅矩形图”）。
+- 视觉位置或排版描述（如“居中”“靠右”“固定底部”“悬浮”“铺满”“横向滚动”）。
+- 交互控件类型（如“开关”“单选”“多选”“计数器”“标签筛选”“底部弹层”）。
+- 动画或打开方式（如“slide-up”“push”“modal”“sheet”“全屏弹窗”）。
+- 字号、颜色、间距、圆角、阴影等 Token 级视觉属性。
+
+### 业务入口归属属于产品决策
+
+`entry_points` 字段必须明确声明每个入口的业务归属位置，由 `wego-product` 决定，不由 `wego-design` 推断：
+
+- 入口属于哪个宿主区域或主 tab（如“动态主 tab”“工作台 tab 下页面入口”“我的页设置入口”）。
+- 入口从哪个业务页面或业务流程节点进入（如“从商品详情页底部操作区进入”“从相册列表页长按进入”）。
+- 入口在业务流程中的触发条件（如“店主身份可见”“商品上架后出现”）。
+
+需要区分两个概念：
+
+- **业务入口归属**（在哪个 tab、哪个宿主区域、从哪个页面进入）→ `wego-product` 决定，写入 `entry_points`。
+- **入口的视觉呈现和打开方式**（用什么组件、什么动画、什么布局）→ `wego-design` 决定，写入 `prototype_design` 或 `design_plan`。
+
+`interaction_spec.surfaces.carrier` 表达“产品承载意图”（如 `host-section`、`standalone-page`、`sheet`、`modal`、`dialog`、`inline-area`），仅用于区分产品承载语义，不等于最终打开方式；最终打开方式由 `wego-design` 决定。
+
+### 正面规则
+
+`prototype_brief` 字段应该用业务语言描述：
+
+- `goal`：业务目标和用户价值（如“让店主连续发布商品动态”）。
+- `entry_points`：业务入口归属（如“动态主 tab”“工作台 tab 下页面入口”）。
+- `critical_paths`：业务关键路径（如“浏览动态 → 查看详情 → 一键转发”）。
+- `prototype_boundaries`：原型实现深度（如“一键转发 functional，搜索 stub”）。
+- `assumptions`：低风险可逆的业务假设（如“假设店主默认已登录”）。
+- `open_questions`：待确认的业务问题（如“是否需要支持未登录访客浏览”）。
+
 ## 风险分级
 
 - 低风险、可逆：记录到 `assumptions`，标记 `impact_level: low`、`reversible: true`，可继续。
