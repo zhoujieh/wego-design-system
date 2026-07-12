@@ -69,7 +69,6 @@
 /* @component-css-start */
 .actionsheet {
   --actionsheet-panel-width: 100%;
-  --actionsheet-item-divider-color: var(--border-neutral-l2);
   --actionsheet-item-font-weight: var(--font-weight-regular);
   --actionsheet-cancel-letter-spacing: 0.1em;
   box-sizing: border-box;
@@ -92,6 +91,7 @@
   pointer-events: none;
 }
 .actionsheet__panel {
+  --actionsheet-item-divider-color: var(--border-neutral-l2);
   box-sizing: border-box;
   width: var(--actionsheet-panel-width);
   max-width: 670px;
@@ -346,7 +346,6 @@
 .actionsheet__cancel {
   box-sizing: border-box;
   padding: var(--spacer-16);
-  padding-bottom: calc(var(--spacer-16) + var(--safe-area-bottom));
   text-align: center;
   font-family: var(--font-family-system);
   font-size: var(--body-lg-font-size);
