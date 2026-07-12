@@ -1,0 +1,377 @@
+{
+  "schemaVersion": 2,
+  "identity": {
+    "iteration_id": "feed001",
+    "title": "动态商品流浏览",
+    "date": "2026-07-12",
+    "primary_scene": "动态商品流",
+    "related_scenes": []
+  },
+  "status": "awaiting-prototype-confirmation",
+  "scope_revision": 1,
+  "prototype_brief": {
+    "goal": "让用户在微购相册中连续浏览店主发布的商品动态，每条动态稳定呈现发布者、发布时间、商品内容、商品图片与相关产品信息，并支持进入产品详情或执行必要操作。",
+    "included": [
+      "动态商品流浏览场景：连续浏览店主发布的商品动态",
+      "每条动态稳定呈现：发布者、发布时间、商品内容、商品图片、相关产品信息",
+      "兼容只有产品信息 / 同时含文字 两种动态形态",
+      "兼容文字为空、图片数量不同、产品信息较长时的稳定展示",
+      "进入产品详情入口",
+      "必要操作入口：一键转发（核心操作）、复制文案、分享、收藏、下载图片、搜索、编辑、复制动态、图片点击看大图"
+    ],
+    "excluded": [
+      "发布动态、评论点赞等社交互动",
+      "必要操作的具体功能实现（本轮只放入口，不下钻）",
+      "真实后端接口与持久化"
+    ],
+    "entry_points": [
+      "动态主 tab：作为底部导航「动态」tab 的内容，打开 App 即默认进入"
+    ],
+    "critical_paths": [
+      "进入动态流 → 连续浏览动态 → 进入产品详情",
+      "进入动态流 → 连续浏览动态 → 执行必要操作"
+    ],
+    "prototype_boundaries": [
+      "动态商品流浏览场景 functional：可连续浏览、动态状态真实可操作",
+      "产品详情 simulated：本地模拟数据展示基本产品信息",
+      "必要操作入口 stub：本轮只呈现入口与明确反馈，不下钻具体功能实现"
+    ],
+    "assumptions": [
+      {
+        "content": "假设店主默认已登录，可直接浏览动态流",
+        "impact_level": "low",
+        "reversible": true
+      },
+      {
+        "content": "假设动态流使用本地模拟数据，覆盖两种动态形态和边界情况（文字为空、图片数量不同、产品信息较长）",
+        "impact_level": "low",
+        "reversible": true
+      },
+      {
+        "content": "假设搜索、编辑等必要操作的精确作用范围在 stub 阶段不展开，只提供入口与明确反馈",
+        "impact_level": "low",
+        "reversible": true
+      }
+    ],
+    "open_questions": []
+  },
+  "prototype_design": {
+    "surface_decisions": [
+      {
+        "surface_id": "feed-main",
+        "role": "primary-task-page",
+        "carrier": "host-section",
+        "presentation": "host-tab",
+        "route_id": "dongtai-feed",
+        "host_tab": "dongtai",
+        "matched_blueprint": "continuous-content-feed-page",
+        "match_status": "fallback",
+        "complexity_level": "complex",
+        "first_screen_goal": "用户进入动态流即可看到店主发布的商品动态，首屏直接承接业务内容",
+        "region_priority": [
+          "发布者识别区",
+          "正文内容区",
+          "图片媒体区",
+          "产品摘要区",
+          "操作收口区"
+        ],
+        "component_refs": [
+          "navbar",
+          "avatar",
+          "image",
+          "card",
+          "tag",
+          "metric",
+          "link",
+          "button",
+          "actionsheet",
+          "toast"
+        ],
+        "layout_contract": {
+          "page_edge_mode": "M8",
+          "page_edge_mode_reason": "单条动态包含发布者、时间、正文、图片、产品信息和操作共 6 个信息块（≥4），采用 M8 灰底卡片模式以白底 card 分隔各条动态，保证连续浏览时的视觉节奏",
+          "media_priority": "supporting",
+          "media_priority_reason": "图片是辅助判断手段，发布者、正文和产品摘要才是用户判断是否下钻的核心信息，媒体区域不主导首屏高度",
+          "first_screen_content_rule": "首屏只承接已确认的动态业务对象、状态和操作；不添加总览、导览、刷新说明或原型说明",
+          "optional_content_policy": "正文为空时折叠正文结构；图片数量为 0 时不渲染图片区；产品信息始终存在（已确认业务状态）"
+        },
+        "page_presentation": {
+          "type": "host-tab",
+          "overlay_level": "inline",
+          "covers_tab_bar": false,
+          "reason": "动态主 tab 内容直接挂在宿主 dongtai 面板内，不覆盖 bottom-nav"
+        },
+        "dynamic_variants": [
+          {
+            "variant": "text-and-product",
+            "description": "同时含文字和产品信息的动态",
+            "fields": [
+              "发布者",
+              "时间",
+              "正文",
+              "图片(1-9张)",
+              "产品信息",
+              "操作行"
+            ]
+          },
+          {
+            "variant": "product-only",
+            "description": "只有产品信息、文字为空的动态",
+            "fields": [
+              "发布者",
+              "时间",
+              "图片(1-9张)",
+              "产品信息",
+              "操作行"
+            ]
+          }
+        ],
+        "operation_layout": {
+          "exposed": [
+            {
+              "name": "一键转发",
+              "type": "link",
+              "position": "right",
+              "emphasis": "primary",
+              "feedback": "toast 确认"
+            },
+            {
+              "name": "收藏",
+              "type": "link",
+              "position": "right",
+              "emphasis": "secondary",
+              "feedback": "图标状态切换 + toast"
+            }
+          ],
+          "collapsed": {
+            "trigger": "更多",
+            "carrier": "actionsheet",
+            "items": [
+              "复制文案",
+              "分享",
+              "下载图片",
+              "编辑",
+              "复制动态"
+            ],
+            "feedback": "点击后 toast 确认并关闭 actionsheet"
+          },
+          "global": [
+            {
+              "name": "搜索",
+              "carrier": "navbar 右侧 icon+文字",
+              "feedback": "toast 确认"
+            }
+          ],
+          "image_interaction": {
+            "trigger": "点击动态中的图片",
+            "carrier": "image-viewer surface",
+            "feedback": "全屏查看大图，点击关闭"
+          }
+        },
+        "implementation_constraints": [
+          "navbar 使用 sticky 变体，背景跟随 data-bg=surface；右侧搜索入口使用 icon+文字组合",
+          "单条动态用 card--surface 包裹，card 间距由页面级业务样式控制",
+          "发布者区使用 avatar--40 + 名称(heading-xs/regular) + 时间(body-sm/tertiary)",
+          "正文使用 body-md，为空时折叠",
+          "图片网格：1 张单图宽幅、2-4 张两列、5-9 张三列；图片使用 wg-image--rounded-md cover",
+          "产品摘要区用 card--outlined 包裹产品图(wg-image sm)+名称+metric 价格，整卡可点击进入 product-detail",
+          "操作行使用 space-between，一键转发和收藏靠右，更多靠左",
+          "底部留白 calc(40px + var(--safe-area-bottom))"
+        ],
+        "rule_sources_used": [
+          "uikit-plan.json#fallbackPageBlueprints[continuous-content-feed-page]",
+          "uikit-plan.json#pagePresentationBindingRules",
+          "library-consumption.json#consumptionLayers.components",
+          "components/avatar.json#variantDimensions",
+          "components/image.json#variantDimensions",
+          "components/card.json#domAnatomy",
+          "components/metric.json#representativeVariants",
+          "components/link.json#variantDimensions",
+          "components/actionsheet.json#structurePatterns",
+          "components/navbar.json#usageHints",
+          "wego-design/references/design-decisions.md#字号与字重决策"
+        ]
+      },
+      {
+        "surface_id": "product-detail",
+        "role": "secondary-task-page",
+        "carrier": "standalone-page",
+        "presentation": "push",
+        "route_id": "product-detail",
+        "matched_blueprint": "object-detail-page",
+        "match_status": "fallback",
+        "complexity_level": "structured",
+        "component_refs": [
+          "navbar",
+          "image",
+          "card",
+          "tag",
+          "metric",
+          "link",
+          "button",
+          "cell",
+          "actionsheet",
+          "toast"
+        ],
+        "layout_contract": {
+          "page_edge_mode": "M16",
+          "page_edge_mode_reason": "详情页默认 M16 横向边距，内容块用 card 或分隔线分组",
+          "background_mode": "surface",
+          "background_mode_reason": "白底保证内容可读性"
+        },
+        "page_presentation": {
+          "type": "push",
+          "transition": "slide-left-enter, slide-right-exit",
+          "dismiss_action": "back-button",
+          "overlay_level": "inline",
+          "covers_tab_bar": true,
+          "reason": "从动态流下钻进入产品详情，使用 push 从右侧滑入，返回按钮收口"
+        },
+        "implementation_constraints": [
+          "navbar 使用 back-icon + center 标题 + sticky 变体，背景 surface",
+          "产品主图使用 wg-image 宽幅矩形(4:3 或 1:1)，不强制固定高度",
+          "产品信息块用 card--surface 分组：标题区、价格区、属性区",
+          "价格使用 metric--marketing 主题，支持区间价和划线价",
+          "底部固定操作栏使用 bottom-action-bar 或页面级固定栏，主操作靠右",
+          "数据来自本地模拟，覆盖基本产品信息"
+        ],
+        "rule_sources_used": [
+          "uikit-plan.json#fallbackPageBlueprints[object-detail-page]",
+          "uikit-plan.json#pagePresentationBindingRules",
+          "components/navbar.json#variantDimensions",
+          "components/image.json#variantDimensions",
+          "components/metric.json#representativeVariants",
+          "components/card.json#domAnatomy",
+          "wego-design/references/design-decisions.md#presentation"
+        ]
+      },
+      {
+        "surface_id": "image-viewer",
+        "role": "stub-overlay",
+        "carrier": "standalone-page",
+        "presentation": "full-screen-modal",
+        "match_status": "stub",
+        "prototype_boundary": "stub",
+        "component_refs": [
+          "image",
+          "button"
+        ],
+        "page_presentation": {
+          "type": "full-screen-modal",
+          "transition": "slide-up-enter, slide-down-exit",
+          "dismiss_action": "tap-to-close",
+          "overlay_level": "overlay",
+          "covers_tab_bar": true,
+          "reason": "图片看大图是全屏沉浸式查看，从底部滑入覆盖整个屏幕"
+        },
+        "implementation_constraints": [
+          "全屏黑色背景(--bg-inverse)，图片居中展示使用 wg-image--contain",
+          "右上角或点击任意位置关闭",
+          "本轮只展示单张图片，不支持滑动切换和双指缩放",
+          "点击后给出关闭反馈"
+        ],
+        "rule_sources_used": [
+          "uikit-plan.json#presentationPrimitives[full-screen-modal]",
+          "wego-design/references/design-decisions.md#presentation",
+          "components/image.json#variantDimensions"
+        ]
+      },
+      {
+        "surface_id": "more-actions",
+        "role": "stub-overlay",
+        "carrier": "sheet",
+        "presentation": "sheet",
+        "match_status": "exact",
+        "matched_component": "actionsheet",
+        "prototype_boundary": "stub",
+        "component_refs": [
+          "actionsheet"
+        ],
+        "page_presentation": {
+          "type": "sheet",
+          "transition": "slide-up-enter, slide-down-exit",
+          "dismiss_action": "cancel-button",
+          "overlay_level": "overlay",
+          "covers_tab_bar": true,
+          "reason": "更多操作使用 actionsheet 从底部弹出，包含 5 个并列操作项"
+        },
+        "implementation_constraints": [
+          "使用 actionsheet--action 模式，纯文本选项",
+          "选项：复制文案、分享、下载图片、编辑、复制动态",
+          "每项点击后显示 toast 确认并自动关闭 actionsheet",
+          "底部固定取消按钮"
+        ],
+        "rule_sources_used": [
+          "components/actionsheet.json#structurePatterns",
+          "uikit-plan.json#presentationPrimitives[sheet]",
+          "wego-design/references/design-decisions.md#presentation"
+        ]
+      }
+    ]
+  },
+  "brief_confirmation": {
+    "confirmed_at": "2026-07-12T07:55:50.065Z",
+    "confirmed_by": "user",
+    "brief_fingerprint": "606c2568eaf3b42949cbfa2215c6836249bcfc3561fee80b33bedd9cce09dfc9"
+  },
+  "prototype_confirmation": null,
+  "base_fingerprint": {},
+  "product_scope": {},
+  "features": [],
+  "requirements": [],
+  "traceability": [],
+  "affected_scenes": [
+    {
+      "scene": "动态商品流",
+      "role": "primary",
+      "change_type": "changed"
+    }
+  ],
+  "affected_runtime": [
+    "wego-app/js/app.js",
+    "wego-app/js/routes.js"
+  ],
+  "stage_outputs": {
+    "product": {
+      "valid": false
+    },
+    "design": {
+      "valid": false
+    },
+    "implementation": {
+      "valid": false
+    },
+    "acceptance": {
+      "valid": false
+    }
+  },
+  "change_log": [
+    {
+      "at": "2026-07-12T07:53:20.803Z",
+      "action": "init"
+    },
+    {
+      "at": "2026-07-12T07:54:18.161Z",
+      "action": "submit-brief"
+    },
+    {
+      "at": "2026-07-12T07:55:50.067Z",
+      "action": "confirm-brief"
+    },
+    {
+      "at": "2026-07-12T07:59:39.009Z",
+      "action": "submit-prototype"
+    },
+    {
+      "at": "2026-07-12T08:00:16.614Z",
+      "action": "invalidate",
+      "stage": "prototype",
+      "reason": "需要回到 prototyping 让 wego-ux 实现原型运行时"
+    },
+    {
+      "at": "2026-07-12T08:12:26.558Z",
+      "action": "submit-prototype"
+    }
+  ],
+  "freeze": null
+}

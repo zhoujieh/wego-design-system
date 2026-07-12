@@ -1549,7 +1549,7 @@
 
 /* ── Metric ────────────────────────────────────────────────── */
 /* @anatomy
-   <span class="row__label">14px</span><div class="row__content"><span class="metric metric--14 metric--marketing"><span class="metric__main"><span class="metric__symbol">¥</span><span class="metric__value"><span class="metric__integer">9</span><span class="metric__decimal">.90</span></span></span></span><span class="metric metric--14 metric--marketing"><span class="metric__main"><span class="metr...
+   <span class="row__label">14px</span><div class="row__content"><span class="metric metric--14 metric--marketing"><span class="metric__main"><span class="metric__symbol">¥</span><span class="metric__value"><span class="metric__integer">9</span><span class="metric__decimal">.9</span></span></span></span><span class="metric metric--14 metric--marketing"><span class="metric__main"><span class="metri...
 */
 .metric { display:inline-flex; align-items:baseline; gap:var(--spacer-2); flex-wrap:nowrap; font-family:var(--number-md-font-family); font-feature-settings:"zero"; vertical-align:baseline; }
     .metric__main { display:inline-flex; align-items:baseline; }
