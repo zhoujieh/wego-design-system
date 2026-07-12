@@ -1,19 +1,21 @@
 window.WEGO_APP_ROUTES = [
   {
     routeId: 'dongtai-feed',
-    scene: '动态商品流',
-    script: './scenes/动态商品流/scene.js',
-    style: './scenes/动态商品流/scene.css',
-    entry: {
-      type: 'host-tab',
-      tab: 'dongtai',
-      label: '动态'
-    }
+    scene: '动态',
+    style: './scenes/动态/scene.css',
+    script: './scenes/动态/scene.js',
+    entry: { type: 'host-tab', tab: 'dongtai' }
   },
   {
-    routeId: 'product-detail',
-    scene: '动态商品流',
-    script: './scenes/动态商品流/scene.js',
-    style: './scenes/动态商品流/scene.css'
+    routeId: 'shop-home-stub',
+    scene: '动态',
+    style: './scenes/动态/scene.css',
+    script: './scenes/动态/scene.js'
+  },
+  {
+    routeId: 'product-detail-stub',
+    scene: '动态',
+    style: './scenes/动态/scene.css',
+    script: './scenes/动态/scene.js'
   }
 ];

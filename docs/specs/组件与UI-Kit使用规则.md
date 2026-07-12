@@ -968,4 +968,4 @@
 - 若涉及设计系统本体，递增 `metadata.json.version`
 
 <!-- generated-by: scripts/specs.mjs@8 -->
-<!-- source-fingerprint: dbd808f4193df321258c4b927a5adc536e98ccc04ad9777e472dc194393c6eca -->
+<!-- source-fingerprint: 85955488a7ae4545198ab7da1ae1078395183cc860a5038f1ce2ed75bbab891d -->

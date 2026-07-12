@@ -1,0 +1,576 @@
+{
+  "schemaVersion": 2,
+  "identity": {
+    "iteration_id": "dongtai001",
+    "title": "动态首页",
+    "date": "2026-07-12",
+    "primary_scene": "动态",
+    "related_scenes": []
+  },
+  "status": "awaiting-prototype-confirmation",
+  "scope_revision": 3,
+  "prototype_brief": {
+    "goal": "让用户在动态主 tab 浏览已关注店主发布的图文动态与上新商品，发现感兴趣的内容与店主，参考淘宝首页关注 tab 的内容组织方式",
+    "included": [
+      "按内容分类切换浏览动态（关注、推荐、视频）",
+      "已关注店主的快捷入口，可进入店主主页",
+      "店主发布的图文动态，包含纯图文动态和带关联商品的动态两种内容形式",
+      "动态内容按发布时间倒序排列，关注分类只展示已关注店主的动态",
+      "动态关联商品的展示与点击进入商品详情",
+      "动态的点赞、评论、转发互动",
+      "已关注店主有新动态时的未读标记",
+      "搜索店主或商品入口"
+    ],
+    "excluded": [
+      "视频播放与直播详情",
+      "私信与聊天会话",
+      "动态页顶部消息入口（消息复用底部消息 tab，不在动态页内放置消息入口）",
+      "后端真实数据接口与登录态校验",
+      "支付与下单流程",
+      "店主主页与商品详情的完整实现",
+      "动态发布功能",
+      "推荐分类的个性化推荐算法（仅本地模拟若干条动态）"
+    ],
+    "entry_points": [
+      "动态主 tab（应用启动默认入口）"
+    ],
+    "critical_paths": [
+      "进入动态主 tab → 浏览已关注店主发布的动态",
+      "浏览动态 → 查看动态内关联商品 → 进入商品详情",
+      "浏览动态 → 进入发布该动态的店主主页",
+      "浏览动态 → 点赞 / 评论 / 转发",
+      "通过已关注店主快捷入口 → 进入店主主页"
+    ],
+    "prototype_boundaries": [
+      "内容分类切换：functional（本地切换状态，三分类固定）",
+      "已关注店主快捷入口：functional（点击进入店主主页 stub，含未读标记）",
+      "图文动态浏览：functional（本地模拟数据填充动态流，按发布时间倒序）",
+      "动态内关联商品点击：functional（跳转商品详情 stub）",
+      "点赞：functional（本地状态切换与计数）",
+      "评论：simulated（本地模拟评论列表与发布反馈）",
+      "转发：simulated（本地模拟转发成功反馈）",
+      "搜索：stub（提供入口与占位反馈，不实现结果）",
+      "店主主页：stub（独立 route，占位反馈）",
+      "商品详情：stub（独立 route，占位反馈）"
+    ],
+    "assumptions": [
+      {
+        "description": "假设用户默认已登录",
+        "impact_level": "low",
+        "reversible": true
+      },
+      {
+        "description": "假设已关注若干店主，用本地模拟数据填充关注列表与动态流",
+        "impact_level": "low",
+        "reversible": true
+      },
+      {
+        "description": "内容分类固定为关注、推荐、视频三类，后续迭代再扩展",
+        "impact_level": "low",
+        "reversible": true
+      },
+      {
+        "description": "推荐分类用本地模拟数据展示若干条动态，不实现真实推荐算法",
+        "impact_level": "low",
+        "reversible": true
+      }
+    ],
+    "open_questions": [
+      {
+        "description": "是否需要支持未登录访客浏览动态？",
+        "impact_level": "local",
+        "blocking": false
+      }
+    ]
+  },
+  "prototype_design": {
+    "surface_decisions": [
+      {
+        "surface_id": "dongtai-feed",
+        "role": "host-entry",
+        "match_status": "fallback",
+        "matched_blueprint": "continuous-content-feed-page",
+        "presentation": {
+          "type": "host-tab",
+          "transition": "none",
+          "covers_tab_bar": false
+        },
+        "carrier_decision": "merge-into-surface",
+        "layout_contract": {
+          "page_edge_mode": "M8",
+          "page_edge_mode_reason": "单条动态包含发布者头像与名称、发布时间、正文、图片、关联商品卡片和互动栏共 6 个信息块，命中 continuous-content-feed-page 中「单条内容字段多（≥4 个信息块）用 M8 灰底卡片」的决策依据；页面背景使用 --bg-page 灰底，单条动态用 card 包裹并配合 8px 横向 padding，避免灰底+白色 card 贴边导致圆角失效",
+          "media_priority": "supporting",
+          "media_priority_reason": "动态图片辅助发布者信息和正文识别，用户首屏第一眼识别的是发布者名称和正文摘要，图片在内容流中只作为辅助判断，不让图片主导单条内容首屏高度",
+          "first_screen_content_rule": "首屏只承接已确认的动态分类切换、关注店主快捷入口、动态信息流和搜索入口；禁止导览、刷新说明、原型说明或 Benchmark 背景说明块",
+          "optional_content_policy": "关联商品为空时折叠对应结构；正文为空时折叠正文区；只有缺失本身是已确认业务状态时才显示状态文案"
+        },
+        "region_decisions": [
+          {
+            "region_id": "top-search-bar",
+            "role": "search-entry",
+            "priority": 1,
+            "order": 1,
+            "layout": "sticky-top",
+            "component_refs": [
+              "search"
+            ],
+            "rule_sources": [
+              "components/search.json",
+              "uikit-plan.json"
+            ]
+          },
+          {
+            "region_id": "category-tabs",
+            "role": "section-switch",
+            "priority": 2,
+            "order": 2,
+            "layout": "sticky-below-search",
+            "component_refs": [
+              "tabs"
+            ],
+            "rule_sources": [
+              "components/tabs.json",
+              "uikit-plan.json"
+            ]
+          },
+          {
+            "region_id": "followed-shops-strip",
+            "role": "quick-entry",
+            "priority": 3,
+            "order": 3,
+            "layout": "horizontal-scroll",
+            "component_refs": [
+              "avatar",
+              "badge"
+            ],
+            "rule_sources": [
+              "components/avatar.json",
+              "components/badge.json"
+            ]
+          },
+          {
+            "region_id": "feed-list",
+            "role": "content-feed",
+            "priority": 4,
+            "order": 4,
+            "layout": "vertical-scroll",
+            "component_refs": [
+              "avatar",
+              "image",
+              "card",
+              "metric",
+              "link",
+              "tag"
+            ],
+            "rule_sources": [
+              "uikit-plan.json#fallbackPageBlueprints/continuous-content-feed-page"
+            ]
+          }
+        ],
+        "component_mapping": [
+          {
+            "component_slug": "search",
+            "consumption_mode": "stable-variant",
+            "variant": {
+              "size": "md",
+              "surface": "gray",
+              "mode": "text",
+              "state": "empty",
+              "hostPattern": "inline"
+            },
+            "implementation_anchor": "使用 .searchbox.searchbox--md.searchbox--gray + .searchbox__icon + .searchbox__input + .searchbox__actions 三段式结构；点击触发 stub 反馈",
+            "rule_sources": [
+              "components/search.json"
+            ]
+          },
+          {
+            "component_slug": "tabs",
+            "consumption_mode": "stable-variant",
+            "variant": {
+              "size": "standard",
+              "layout": "divide",
+              "icon": "none"
+            },
+            "implementation_anchor": "使用 .wg-tabs.wg-tabs--standard.wg-tabs--divide + 3 个 button.wg-tabs__item[role='tab'] + 共用 .wg-tabs__active-indicator；选中态由 aria-selected='true' 表达",
+            "rule_sources": [
+              "components/tabs.json"
+            ]
+          },
+          {
+            "component_slug": "avatar",
+            "consumption_mode": "stable-variant",
+            "variant": {
+              "type": "image",
+              "size": "40"
+            },
+            "implementation_anchor": "关注店主快捷入口与动态发布者头像均使用 .avatar.avatar--image.avatar--40；无业务数据时使用 assets/image/avatar-defult.png",
+            "rule_sources": [
+              "components/avatar.json"
+            ]
+          },
+          {
+            "component_slug": "badge",
+            "consumption_mode": "stable-variant",
+            "variant": {
+              "type": "dot",
+              "placement": "corner"
+            },
+            "implementation_anchor": "关注店主有新动态时在头像右上角挂 .badge.badge--dot.badge--corner；宿主需提供 position: relative",
+            "rule_sources": [
+              "components/badge.json"
+            ]
+          },
+          {
+            "component_slug": "image",
+            "consumption_mode": "stable-variant",
+            "variant": {
+              "fit": "cover",
+              "size": "custom-rect",
+              "radius": "rounded-md",
+              "state": "loaded",
+              "interaction": "clickable"
+            },
+            "implementation_anchor": "动态图片使用 .wg-image.wg-image--rounded-md.wg-image--clickable，尺寸由业务作用域样式按 1:1 或 4:3 比例给出；img 元素需监听 load 事件并添加 is-loaded",
+            "rule_sources": [
+              "components/image.json"
+            ]
+          },
+          {
+            "component_slug": "card",
+            "consumption_mode": "stable-variant",
+            "variant": {
+              "base": "auto",
+              "surface": "surface"
+            },
+            "implementation_anchor": "单条动态和关联商品均用 .card.card--surface 包裹；card 不写固定 padding，留白由业务作用域样式承担",
+            "rule_sources": [
+              "components/card.json"
+            ]
+          },
+          {
+            "component_slug": "metric",
+            "consumption_mode": "stable-variant",
+            "variant": {
+              "size": "16",
+              "theme": "marketing"
+            },
+            "implementation_anchor": "关联商品价格使用 .metric.metric--16.metric--marketing + .metric__main + .metric__symbol + .metric__value + .metric__integer；末尾零省略",
+            "rule_sources": [
+              "components/metric.json"
+            ]
+          },
+          {
+            "component_slug": "tag",
+            "consumption_mode": "stable-variant",
+            "variant": {
+              "size": "20",
+              "theme": "brand",
+              "state": "normal",
+              "affordance": "display-only"
+            },
+            "implementation_anchor": "上新、推荐等动态类型标签使用 .tag.tag--20，已选或强调用 brand 主题，普通标签用 gray 主题",
+            "rule_sources": [
+              "components/tag.json"
+            ]
+          },
+          {
+            "component_slug": "link",
+            "consumption_mode": "stable-variant",
+            "variant": {
+              "mode": "standalone",
+              "size": "14",
+              "state": "default"
+            },
+            "implementation_anchor": "动态卡片内「查看商品详情」「进入店铺」等轻操作使用 .link standalone，不用业务自定义类模拟",
+            "rule_sources": [
+              "components/link.json"
+            ]
+          }
+        ],
+        "interaction_decisions": [
+          {
+            "interaction_id": "like-toggle",
+            "trigger": "点击动态卡片内点赞按钮",
+            "behavior": "functional：本地切换点赞状态，已赞时图标变品牌色并 +1，未赞时恢复",
+            "rule_sources": [
+              "uikit-plan.json#fallbackPageBlueprints/continuous-content-feed-page"
+            ]
+          },
+          {
+            "interaction_id": "comment-simulated",
+            "trigger": "点击动态卡片内评论按钮",
+            "behavior": "simulated：打开底部 actionsheet 展示本地模拟评论列表，支持发布评论并追加到列表",
+            "rule_sources": [
+              "components/actionsheet.json"
+            ]
+          },
+          {
+            "interaction_id": "share-simulated",
+            "trigger": "点击动态卡片内转发按钮",
+            "behavior": "simulated：打开底部 actionsheet 展示转发选项，选择后 toast 反馈成功",
+            "rule_sources": [
+              "components/actionsheet.json"
+            ]
+          },
+          {
+            "interaction_id": "shop-entry",
+            "trigger": "点击关注店主快捷入口头像或动态卡片内店主名称",
+            "behavior": "functional：navigate 到店主主页 stub route",
+            "rule_sources": [
+              "wego-app/js/app.js"
+            ]
+          },
+          {
+            "interaction_id": "product-entry",
+            "trigger": "点击动态卡片内关联商品",
+            "behavior": "functional：navigate 到商品详情 stub route",
+            "rule_sources": [
+              "wego-app/js/app.js"
+            ]
+          },
+          {
+            "interaction_id": "search-stub",
+            "trigger": "点击顶部搜索框",
+            "behavior": "stub：toast 提示搜索功能开发中",
+            "rule_sources": [
+              "wego-app/js/app.js"
+            ]
+          }
+        ],
+        "rule_sources_used": [
+          "uikit-plan.json#fallbackPageBlueprints/continuous-content-feed-page",
+          "components/search.json",
+          "components/tabs.json",
+          "components/avatar.json",
+          "components/badge.json",
+          "components/image.json",
+          "components/card.json",
+          "components/metric.json",
+          "components/tag.json",
+          "components/link.json",
+          "components/actionsheet.json",
+          "wego-app/js/app.js"
+        ]
+      },
+      {
+        "surface_id": "shop-home-stub",
+        "role": "primary-task-page",
+        "match_status": "fallback",
+        "matched_blueprint": "object-detail-page",
+        "presentation": {
+          "type": "push",
+          "transition": "slide-left-enter, slide-right-exit",
+          "dismiss_action": "back-button",
+          "overlay_level": "inline",
+          "covers_tab_bar": true
+        },
+        "carrier_decision": "standalone-page",
+        "layout_contract": {
+          "page_edge_mode": "M16",
+          "page_edge_mode_reason": "店主主页是对象详情页，默认使用 M16 横向边距，保持内容可读性",
+          "background_mode": "surface",
+          "background_mode_reason": "详情页默认白底 --bg-surface 背景"
+        },
+        "component_mapping": [
+          {
+            "component_slug": "navbar",
+            "consumption_mode": "stable-variant",
+            "variant": {
+              "leftControl": "back-icon",
+              "titleAlignment": "center",
+              "actions": "none",
+              "position": "sticky"
+            },
+            "implementation_anchor": "使用 .navbar + .navbar__body > .navbar__left(返回) + .navbar__center(店主名称) + .navbar__right(空)",
+            "rule_sources": [
+              "components/navbar.json"
+            ]
+          },
+          {
+            "component_slug": "avatar",
+            "consumption_mode": "stable-variant",
+            "variant": {
+              "type": "image",
+              "size": "56"
+            },
+            "implementation_anchor": "店主主页头部使用 .avatar.avatar--image.avatar--56",
+            "rule_sources": [
+              "components/avatar.json"
+            ]
+          },
+          {
+            "component_slug": "button",
+            "consumption_mode": "stable-variant",
+            "variant": {
+              "emphasis": "weak",
+              "size": "sm",
+              "iconMode": "text-only",
+              "state": "default"
+            },
+            "implementation_anchor": "关注/已关注按钮使用 .btn.btn--weak.btn--sm；同页仅 1 个 weak 按钮",
+            "rule_sources": [
+              "components/button.json"
+            ]
+          }
+        ],
+        "stub_feedback": "页面显示店主信息摘要与占位提示，toast 提示「店主主页开发中」",
+        "rule_sources_used": [
+          "uikit-plan.json#fallbackPageBlueprints/object-detail-page",
+          "components/navbar.json",
+          "components/avatar.json",
+          "components/button.json"
+        ]
+      },
+      {
+        "surface_id": "product-detail-stub",
+        "role": "primary-task-page",
+        "match_status": "fallback",
+        "matched_blueprint": "object-detail-page",
+        "presentation": {
+          "type": "push",
+          "transition": "slide-left-enter, slide-right-exit",
+          "dismiss_action": "back-button",
+          "overlay_level": "inline",
+          "covers_tab_bar": true
+        },
+        "carrier_decision": "standalone-page",
+        "layout_contract": {
+          "page_edge_mode": "M16",
+          "page_edge_mode_reason": "商品详情页默认使用 M16 横向边距",
+          "background_mode": "surface",
+          "background_mode_reason": "详情页默认白底 --bg-surface 背景"
+        },
+        "component_mapping": [
+          {
+            "component_slug": "navbar",
+            "consumption_mode": "stable-variant",
+            "variant": {
+              "leftControl": "back-icon",
+              "titleAlignment": "center",
+              "actions": "none",
+              "position": "sticky"
+            },
+            "implementation_anchor": "使用 .navbar + .navbar__body > .navbar__left + .navbar__center(商品名称) + .navbar__right(空)",
+            "rule_sources": [
+              "components/navbar.json"
+            ]
+          },
+          {
+            "component_slug": "image",
+            "consumption_mode": "stable-variant",
+            "variant": {
+              "fit": "cover",
+              "size": "custom-wide",
+              "radius": "none",
+              "state": "loaded",
+              "interaction": "static"
+            },
+            "implementation_anchor": "商品主图使用 .wg-image 宽幅矩形（4:3 或 1:1），不加圆角",
+            "rule_sources": [
+              "components/image.json"
+            ]
+          },
+          {
+            "component_slug": "metric",
+            "consumption_mode": "stable-variant",
+            "variant": {
+              "size": "24",
+              "theme": "marketing"
+            },
+            "implementation_anchor": "商品价格使用 .metric.metric--24.metric--marketing",
+            "rule_sources": [
+              "components/metric.json"
+            ]
+          }
+        ],
+        "stub_feedback": "页面显示商品图、标题、价格摘要与占位提示，toast 提示「商品详情开发中」",
+        "rule_sources_used": [
+          "uikit-plan.json#fallbackPageBlueprints/object-detail-page",
+          "components/navbar.json",
+          "components/image.json",
+          "components/metric.json"
+        ]
+      }
+    ]
+  },
+  "brief_confirmation": {
+    "confirmed_at": "2026-07-12T09:14:40.179Z",
+    "confirmed_by": "user",
+    "brief_fingerprint": "fee32e39e58feb0ea11a68d266810b9866038f63f2df649c6623d76cfcd64b5d"
+  },
+  "prototype_confirmation": null,
+  "base_fingerprint": {},
+  "product_scope": {},
+  "features": [],
+  "requirements": [],
+  "traceability": [],
+  "affected_scenes": [
+    {
+      "scene": "动态",
+      "role": "primary",
+      "change_type": "changed"
+    }
+  ],
+  "affected_runtime": [
+    "wego-app/js/routes.js",
+    "wego-app/scenes/动态/scene.js",
+    "wego-app/scenes/动态/scene.css"
+  ],
+  "stage_outputs": {
+    "product": {
+      "valid": false
+    },
+    "design": {
+      "valid": false
+    },
+    "implementation": {
+      "valid": false
+    },
+    "acceptance": {
+      "valid": false
+    }
+  },
+  "change_log": [
+    {
+      "at": "2026-07-12T08:52:47.396Z",
+      "action": "init"
+    },
+    {
+      "at": "2026-07-12T08:53:57.791Z",
+      "action": "submit-brief"
+    },
+    {
+      "at": "2026-07-12T08:59:36.022Z",
+      "action": "invalidate",
+      "stage": "brief",
+      "reason": "用户确认线框方向后调整简报：移除动态页顶部消息入口，补充动态内容与排序业务描述"
+    },
+    {
+      "at": "2026-07-12T09:00:13.510Z",
+      "action": "submit-brief"
+    },
+    {
+      "at": "2026-07-12T09:11:24.068Z",
+      "action": "confirm-brief"
+    },
+    {
+      "at": "2026-07-12T09:14:33.386Z",
+      "action": "invalidate",
+      "stage": "brief",
+      "reason": "补登"
+    },
+    {
+      "at": "2026-07-12T09:14:40.094Z",
+      "action": "submit-brief"
+    },
+    {
+      "at": "2026-07-12T09:14:40.182Z",
+      "action": "confirm-brief"
+    },
+    {
+      "at": "2026-07-12T09:14:40.266Z",
+      "action": "submit-prototype"
+    }
+  ],
+  "freeze": null
+}

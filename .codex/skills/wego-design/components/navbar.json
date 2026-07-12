@@ -132,6 +132,11 @@
       "name": "right",
       "selector": ".navbar__right",
       "role": "操作区"
+    },
+    {
+      "name": "title",
+      "selector": ".navbar__title",
+      "role": "标题文本，必须放在 .navbar__center 内部，字号为 heading-sm(18px) medium"
     }
   ],
   "structurePatterns": [
@@ -166,7 +171,8 @@
     "全屏模态页面直接调用固定模式，不要自由组合：模式 A（取消+按钮）用于表单/设置类；模式 B（叉+图标）用于浏览/选择类。",
     "导航栏必须显式设置背景色，与页面 data-bg 声明的背景色一致；不要使用 transparent（深色/图片背景场景除外，此时用 fixed-transparent 模式）。",
     "navbar 宽度默认 100%，由页面外层容器约束最大宽度（768px）；不需要在项目中覆盖宽度。",
-    "navbar 默认 sticky 吸顶，宿主无需额外配置（components.css 已配置 position: sticky; top: 0; z-index: var(--z-sticky)）；顶部安全区由组件内部通过 padding-top: var(--safe-area-top, 0px) 处理；导航主体高度默认 56px，桌面手机壳显示 phone-status 时可把 --navbar-body-height 覆盖为 44px；深色/图片背景场景加 .navbar--fixed-transparent 修饰类，切换为 fixed 透明反白模式，此时 page-body 需加 padding-top: calc(var(--navbar-body-height, 56px) + var(--safe-area-top, 0px)) 为 navbar 与顶部安全区让位。"
+    "navbar 默认 sticky 吸顶，宿主无需额外配置（components.css 已配置 position: sticky; top: 0; z-index: var(--z-sticky)）；顶部安全区由组件内部通过 padding-top: var(--safe-area-top, 0px) 处理；导航主体高度默认 56px，桌面手机壳显示 phone-status 时可把 --navbar-body-height 覆盖为 44px；深色/图片背景场景加 .navbar--fixed-transparent 修饰类，切换为 fixed 透明反白模式，此时 page-body 需加 padding-top: calc(var(--navbar-body-height, 56px) + var(--safe-area-top, 0px)) 为 navbar 与顶部安全区让位。",
+    "标题文本必须使用 .navbar__title 并放在 .navbar__center 内部，不得在 .navbar__center 中直接写纯文本；.navbar__title 提供 heading-sm(18px) medium 样式。"
   ],
   "doNotInvent": [
     "不要把 navbar 扩成桌面多行标题栏、营销大顶栏或搜索综合头部。",
@@ -218,6 +224,9 @@
       ".navbar__left",
       ".navbar__center",
       ".navbar__right"
+    ],
+    "centerChildren": [
+      ".navbar__title"
     ],
     "optionalActionClasses": [
       ".navbar__body--spaced",

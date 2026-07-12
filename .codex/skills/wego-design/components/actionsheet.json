@@ -247,7 +247,8 @@
     "不要持久化 actionsheet 状态到 localStorage",
     "不要给 actionsheet 设置自动关闭时长（阻断式常驻）",
     "不要给每个 item 都带描述文本（副标题），双行只用于主文本描述不清或有特定说明的个别 item",
-    "不要在图标模式下混用带图标和不带图标的 item，要么所有 item 都带图标，要么都不带"
+    "不要在图标模式下混用带图标和不带图标的 item，要么所有 item 都带图标，要么都不带",
+    "不要在 actionsheet__list 内放置非 actionsheet__item 结构的内容展示列表（如评论列表、消息列表）；actionsheet 只承载操作列表或单选切换，内容展示应使用 modal 或自定义 sheet 承载"
   ],
   "tokensConsumed": [
     "--bg-mask-light",

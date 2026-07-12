@@ -163,6 +163,7 @@
   ],
   "structurePatterns": [
     "基础搜索框始终使用 .searchbox > .searchbox__icon + .searchbox__input + .searchbox__actions 三段式结构。",
+    "左侧搜索图标区 .searchbox__icon 必须直接承载 iconfont 类（如 <span class=\"searchbox__icon wego-iconfont-s icon-sousuo\">），不得在 .searchbox__icon 内部嵌套 <i> 元素；嵌套会导致 iconfont 默认字号覆盖 .searchbox__icon 的图标尺寸（md 为 20px，内嵌 <i> 退化回 16px）。",
     ".searchbox__actions 只承载搜索框内部动作，包括清除、选图和扫码；筛选、搜索、发布、更多等业务操作必须放在外层 host pattern 的 actions 槽。",
     "36 高度为默认尺寸，根节点宽度不得写死 Figma 示例宽度，必须使用 width: 100% 或作为 flex 子项占满父容器剩余空间。",
     "32 高度用于页面局部嵌入，可由宿主容器或 --searchbox-width 自定义宽度。",
