@@ -15,9 +15,13 @@
 
   .preview-shell {
     position: fixed;
-    inset: 0;
+    top: 0;
+    right: 0;
+    bottom: auto;
+    left: 0;
     width: 100%;
-    height: 100%;
+    height: 100vh;
+    height: 100dvh;
     min-height: 0;
     overflow: hidden;
   }
@@ -33,12 +37,7 @@
   }
 
   .bottom-nav {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
     padding-bottom: env(safe-area-inset-bottom, 0px);
-    z-index: var(--z-sticky);
   }
 
   /* 好友、工作台、消息、我的等无独立 navbar 的宿主页，由 host-shell-page 预留顶部状态栏安全区。 */

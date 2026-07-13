@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="./lib/iconfont.css" />
   <link rel="stylesheet" href="./css/app.css" />
   <link rel="stylesheet" href="./css/safe-area.css" />
+  <link rel="stylesheet" href="./css/viewport.css" />
 </head>
 <body data-bg="page" data-host-shell="true">
   <div class="preview-shell">
@@ -65,6 +66,63 @@
     </div>
   </div>
 
+  <script>
+    (function lockStableMobileViewport() {
+      var root = document.documentElement;
+      var body = document.body;
+      var html = document.documentElement;
+      var stableHeight = 0;
+      var stableTallest = 0;
+      var hostShell = body && body.getAttribute('data-host-shell') === 'true';
+      var allowLock = hostShell;
+
+      function readViewport() {
+        return {
+          innerHeight: window.innerHeight,
+          innerWidth: window.innerWidth,
+          clientHeight: html.clientHeight,
+          visualHeight: window.visualViewport ? Math.round(window.visualViewport.height) : window.innerHeight
+        };
+      }
+
+      function updateHeight() {
+        if (!allowLock) return;
+        var sizes = readViewport();
+        var target = sizes.visualHeight || sizes.innerHeight;
+        if (target && target !== stableHeight) {
+          stableHeight = target;
+          root.style.setProperty('--wego-stable-viewport-height', target + 'px');
+        }
+        if (sizes.innerHeight > stableTallest) {
+          stableTallest = sizes.innerHeight;
+          root.style.setProperty('--wego-stable-viewport-tallest', stableTallest + 'px');
+        }
+      }
+
+      function clearStableHeight() {
+        if (!allowLock) return;
+        if (stableHeight) {
+          stableHeight = 0;
+          root.style.removeProperty('--wego-stable-viewport-height');
+        }
+      }
+
+      window.addEventListener('resize', updateHeight);
+      window.addEventListener('orientationchange', function () {
+        clearStableHeight();
+        updateHeight();
+      });
+      window.addEventListener('pageshow', updateHeight);
+      document.addEventListener('focusout', function () {
+        setTimeout(updateHeight, 0);
+        setTimeout(updateHeight, 120);
+        setTimeout(updateHeight, 320);
+      });
+      document.addEventListener('focusin', updateHeight);
+      updateHeight();
+    })();
+  </script>
+  <script src="./js/viewport.js"></script>
   <script src="./js/routes.js"></script>
   <script src="./js/app.js"></script>
 </body>
