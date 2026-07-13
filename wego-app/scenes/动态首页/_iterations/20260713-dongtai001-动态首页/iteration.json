@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 3,
+  "identity": {
+    "iteration_id": "dongtai001",
+    "title": "动态首页",
+    "date": "2026-07-13",
+    "primary_scene": "动态首页",
+    "related_scenes": []
+  },
+  "status": "awaiting-prototype-confirmation",
+  "scope_revision": 1,
+  "prototype_brief": {
+    "goal": "让店主在动态主 tab 快速浏览关注店铺的上新与热卖动态，并在同一页完成频道切换、条件筛选和商品点击预览。",
+    "included": [
+      "动态主 tab 首页默认关注频道",
+      "顶部频道切换与搜索入口",
+      "快捷入口区",
+      "动态筛选标签区",
+      "店铺动态卡片和三列商品宫格",
+      "关注按钮与商品点击反馈"
+    ],
+    "excluded": [
+      "真实搜索结果页",
+      "商品详情页与下单流程",
+      "直播间详情页",
+      "关注店铺列表页",
+      "站外内容抓取与实时接口"
+    ],
+    "entry_points": [
+      "App 主导航的动态 tab"
+    ],
+    "critical_paths": [
+      "进入动态首页后浏览默认关注流",
+      "切换顶部频道查看不同动态内容",
+      "点击筛选标签收窄动态范围",
+      "点击关注按钮和商品入口获得可见反馈"
+    ],
+    "states": [
+      "默认关注频道内容",
+      "频道切换后的内容变化",
+      "筛选结果为空时的提示",
+      "店铺关注按钮切换状态"
+    ],
+    "data_contract": {
+      "main_tabs": ["关注", "推荐", "闪购", "预告", "国补", "直播"],
+      "filters": ["全部", "上新", "预告", "分类", "直播"],
+      "feed_card_shape": {
+        "header": ["店铺头像", "店铺名", "轻标签", "发布时间", "关注按钮"],
+        "content": ["动态标题", "三列商品宫格"]
+      },
+      "quick_entries": ["关注店铺", "AI 主题", "领金币", "新品上架", "限时拼团"]
+    },
+    "assumptions": [
+      {
+        "text": "默认以关注频道作为动态首页首屏，不额外增加未确认的运营位。",
+        "impact_level": "low",
+        "reversible": true
+      },
+      {
+        "text": "本轮所有搜索、快捷入口和商品点击统一用站内提示反馈，不补造下游业务页。",
+        "impact_level": "low",
+        "reversible": true
+      }
+    ],
+    "open_questions": []
+  },
+  "brief_confirmation": {
+    "confirmed": true,
+    "confirmed_at": "2026-07-13T22:55:00+08:00",
+    "source": "user"
+  },
+  "prototype_confirmation": null,
+  "affected_scenes": ["动态首页"],
+  "affected_runtime": [
+    "wego-app/js/routes.js",
+    "wego-app/scenes/动态首页/scene.js",
+    "wego-app/scenes/动态首页/scene.css",
+    "wego-app/scenes/动态首页/design-decisions.json"
+  ],
+  "stage_outputs": {
+    "product": {
+      "valid": true
+    },
+    "design": {
+      "valid": true
+    }
+  },
+  "change_log": [
+    {
+      "at": "2026-07-13T22:55:00+08:00",
+      "stage": "product",
+      "summary": "确认动态首页关注流原型范围"
+    },
+    {
+      "at": "2026-07-13T23:20:00+08:00",
+      "stage": "design",
+      "summary": "完成动态首页场景实现并进入待原型确认"
+    }
+  ],
+  "freeze": null
+}

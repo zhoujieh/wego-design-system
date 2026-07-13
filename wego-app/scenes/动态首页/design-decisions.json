@@ -1,0 +1,802 @@
+{
+  "schemaVersion": 1,
+  "scene": "动态首页",
+  "surface_id": "dynamic-home",
+  "route_id": "dynamic-home",
+  "layout_mode": "composed",
+  "page_pattern": null,
+  "presentation": {
+    "type": "host-tab",
+    "transition": "none",
+    "dismissAction": "switch-tab",
+    "overlayLevel": "inline",
+    "coversTabBar": false,
+    "source": "library-consumption.json#/appRuntime/presentationTypes"
+  },
+  "prompt_contract": {
+    "design_system_snapshot": {
+      "version": 409,
+      "token_css": "colors_and_type.css",
+      "component_css": "components.css",
+      "component_inputs": [
+        {
+          "slug": "tabs",
+          "preview_file": "preview/component-tabs.html",
+          "contract_file": "components/tabs.json"
+        },
+        {
+          "slug": "search",
+          "preview_file": "preview/component-search.html",
+          "contract_file": "components/search.json"
+        },
+        {
+          "slug": "avatar",
+          "preview_file": "preview/component-avatar.html",
+          "contract_file": "components/avatar.json"
+        },
+        {
+          "slug": "tag",
+          "preview_file": "preview/component-tag.html",
+          "contract_file": "components/tag.json"
+        },
+        {
+          "slug": "button",
+          "preview_file": "preview/component-button.html",
+          "contract_file": "components/button.json"
+        },
+        {
+          "slug": "image",
+          "preview_file": "preview/component-image.html",
+          "contract_file": "components/image.json"
+        }
+      ]
+    },
+    "token_whitelist": [
+      "var(--bg-page)",
+      "var(--bg-subtle)",
+      "var(--bg-surface)",
+      "var(--body-lg-font-size)",
+      "var(--body-lg-line-height)",
+      "var(--body-md-font-size)",
+      "var(--body-md-line-height)",
+      "var(--body-sm-font-size)",
+      "var(--body-sm-line-height)",
+      "var(--border-neutral-l2)",
+      "var(--font-weight-medium)",
+      "var(--font-weight-semibold)",
+      "var(--heading-xs-font-size)",
+      "var(--heading-xs-line-height)",
+      "var(--size-40)",
+      "var(--size-56)",
+      "var(--spacer-4)",
+      "var(--spacer-8)",
+      "var(--spacer-12)",
+      "var(--spacer-16)",
+      "var(--spacer-20)",
+      "var(--spacer-24)",
+      "var(--text-default)",
+      "var(--text-secondary)"
+    ],
+    "token_bindings": [
+      {
+        "selector": ".dynamic-home-search__hint",
+        "content_role": "搜索词提示",
+        "css_property": "color",
+        "token": "var(--text-default)",
+        "rule_ref": "colors_and_type.css#/text-default"
+      },
+      {
+        "selector": ".dynamic-home-shortcut__label",
+        "content_role": "快捷入口文案",
+        "css_property": "color",
+        "token": "var(--text-secondary)",
+        "rule_ref": "colors_and_type.css#/text-secondary"
+      },
+      {
+        "selector": ".dynamic-home-filter__hint",
+        "content_role": "筛选提示文案",
+        "css_property": "color",
+        "token": "var(--text-secondary)",
+        "rule_ref": "colors_and_type.css#/text-secondary"
+      },
+      {
+        "selector": ".dynamic-home-summary__title",
+        "content_role": "动态摘要标题",
+        "css_property": "font-size",
+        "token": "var(--heading-xs-font-size)",
+        "rule_ref": "colors_and_type.css#/heading-xs-font-size"
+      },
+      {
+        "selector": ".dynamic-home-summary__subcopy",
+        "content_role": "动态摘要说明",
+        "css_property": "color",
+        "token": "var(--text-secondary)",
+        "rule_ref": "colors_and_type.css#/text-secondary"
+      },
+      {
+        "selector": ".dynamic-home-feed-card__shop",
+        "content_role": "店铺名称",
+        "css_property": "font-size",
+        "token": "var(--heading-xs-font-size)",
+        "rule_ref": "colors_and_type.css#/heading-xs-font-size"
+      },
+      {
+        "selector": ".dynamic-home-feed-card__meta",
+        "content_role": "店铺发布时间",
+        "css_property": "color",
+        "token": "var(--text-secondary)",
+        "rule_ref": "colors_and_type.css#/text-secondary"
+      },
+      {
+        "selector": ".dynamic-home-feed-card__title",
+        "content_role": "动态标题",
+        "css_property": "font-size",
+        "token": "var(--body-lg-font-size)",
+        "rule_ref": "colors_and_type.css#/body-lg-font-size"
+      },
+      {
+        "selector": ".dynamic-home-product__name",
+        "content_role": "商品名称",
+        "css_property": "font-size",
+        "token": "var(--body-sm-font-size)",
+        "rule_ref": "colors_and_type.css#/body-sm-font-size"
+      },
+      {
+        "selector": ".dynamic-home-product__price",
+        "content_role": "商品价格",
+        "css_property": "font-size",
+        "token": "var(--body-md-font-size)",
+        "rule_ref": "colors_and_type.css#/body-md-font-size"
+      },
+      {
+        "selector": ".dynamic-home-empty__text",
+        "content_role": "空状态提示",
+        "css_property": "color",
+        "token": "var(--text-secondary)",
+        "rule_ref": "colors_and_type.css#/text-secondary"
+      }
+    ],
+    "component_bindings": [
+      {
+        "slot": "main-tabs",
+        "slug": "tabs",
+        "reason": "顶部内容分类切换使用正式滚动 tabs 承载，默认落在关注频道。",
+        "root_class": "wg-tabs",
+        "required_structure": [
+          ".wg-tabs__scroll",
+          ".wg-tabs__item",
+          ".wg-tabs__content",
+          ".wg-tabs__label",
+          ".wg-tabs__active-indicator"
+        ],
+        "modifiers": [
+          "wg-tabs--standard",
+          "wg-tabs--scroll"
+        ],
+        "variant_dimensions": {
+          "size": "standard",
+          "layout": "scroll",
+          "icon": "none"
+        },
+        "source": "preview/component-tabs.html",
+        "contract_file": "components/tabs.json"
+      },
+      {
+        "slot": "top-search",
+        "slug": "search",
+        "reason": "页面搜索入口使用正式 accent 搜索框表达关注流检索与扫一扫能力。",
+        "root_class": "searchbox",
+        "required_structure": [
+          ".searchbox__icon",
+          ".searchbox__input",
+          ".searchbox__actions"
+        ],
+        "modifiers": [
+          "searchbox--md",
+          "searchbox--accent"
+        ],
+        "variant_dimensions": {
+          "size": "md",
+          "surface": "accent-outline",
+          "mode": "text",
+          "state": "result",
+          "hostPattern": "navbar-title-accent-search"
+        },
+        "source": "preview/component-search.html",
+        "contract_file": "components/search.json"
+      },
+      {
+        "slot": "shortcut-and-shop-avatar",
+        "slug": "avatar",
+        "reason": "频道快捷入口和动态卡片头像都使用 40 规格图片头像，维持圆形识别锚点。",
+        "root_class": "avatar",
+        "required_structure": [],
+        "modifiers": [
+          "avatar--40",
+          "avatar--image"
+        ],
+        "variant_dimensions": {
+          "type": "image",
+          "size": "40"
+        },
+        "source": "preview/component-avatar.html",
+        "contract_file": "components/avatar.json"
+      },
+      {
+        "slot": "filter-tag",
+        "slug": "tag",
+        "reason": "筛选条件和店铺轻标签统一消费正式 tag，合同按本页主筛选的 28 规格记录。",
+        "root_class": "tag",
+        "required_structure": [
+          ".tag__label"
+        ],
+        "modifiers": [
+          "tag--28"
+        ],
+        "variant_dimensions": {
+          "size": "28",
+          "theme": "brand",
+          "state": "selected",
+          "affordance": "entry"
+        },
+        "source": "preview/component-tag.html",
+        "contract_file": "components/tag.json"
+      },
+      {
+        "slot": "feed-follow-button",
+        "slug": "button",
+        "reason": "关注动作使用正式小按钮表达关注与已关注两种轻操作状态。",
+        "root_class": "btn",
+        "required_structure": [],
+        "modifiers": [
+          "btn--medium",
+          "btn--sm"
+        ],
+        "variant_dimensions": {
+          "emphasis": "medium",
+          "size": "sm",
+          "iconMode": "text-only",
+          "state": "default"
+        },
+        "source": "preview/component-button.html",
+        "contract_file": "components/button.json"
+      },
+      {
+        "slot": "product-thumbnail",
+        "slug": "image",
+        "reason": "动态商品宫格使用正式图片组件承载商品缩略图与按压反馈。",
+        "root_class": "wg-image",
+        "required_structure": [
+          ".wg-image__src"
+        ],
+        "modifiers": [
+          "wg-image--rounded-md",
+          "wg-image--clickable"
+        ],
+        "variant_dimensions": {
+          "fit": "cover",
+          "size": "custom-rect",
+          "radius": "rounded-md",
+          "state": "loaded",
+          "interaction": "clickable"
+        },
+        "source": "preview/component-image.html",
+        "contract_file": "components/image.json"
+      }
+    ],
+    "layout_contract": {
+      "mode": "composed",
+      "source": "references/design-decisions.md",
+      "selection_reason": "动态首页同时包含频道切换、搜索、快捷入口、关注店铺动态和商品宫格，未命中现有正式范式，因此按已确认业务层级自主组合。",
+      "page_edge_mode": "M0",
+      "page_edge_mode_reason": "页面主体保持通栏白底，组件自身承担内部留白与内容分组节奏。",
+      "rules": [
+        "顶部区域吸顶并保持 tabs、搜索、快捷入口和筛选的连续阅读顺序。",
+        "动态列表使用头像、店铺信息、轻关注按钮和三列商品宫格的稳定结构。",
+        "商品缩略图、价格和店铺标签只表达业务状态，不复制参考图的强营销色块。"
+      ],
+      "mutable_regions": [
+        ".dynamic-home-scene"
+      ]
+    },
+    "interaction_contract": [
+      {
+        "dom_id": "dynamic-search",
+        "target": "toast:search"
+      },
+      {
+        "dom_id": "tab-follow",
+        "target": "state:main-tab-follow"
+      },
+      {
+        "dom_id": "tab-recommend",
+        "target": "state:main-tab-recommend"
+      },
+      {
+        "dom_id": "tab-flash",
+        "target": "state:main-tab-flash"
+      },
+      {
+        "dom_id": "tab-preview",
+        "target": "state:main-tab-preview"
+      },
+      {
+        "dom_id": "tab-subsidy",
+        "target": "state:main-tab-subsidy"
+      },
+      {
+        "dom_id": "tab-live",
+        "target": "state:main-tab-live"
+      },
+      {
+        "dom_id": "shortcut-follow-shop",
+        "target": "toast:shortcut-follow-shop"
+      },
+      {
+        "dom_id": "shortcut-ai-topic",
+        "target": "toast:shortcut-ai-topic"
+      },
+      {
+        "dom_id": "shortcut-coins",
+        "target": "toast:shortcut-coins"
+      },
+      {
+        "dom_id": "shortcut-new-arrivals",
+        "target": "toast:shortcut-new-arrivals"
+      },
+      {
+        "dom_id": "shortcut-group-buy",
+        "target": "toast:shortcut-group-buy"
+      },
+      {
+        "dom_id": "filter-all",
+        "target": "state:filter-all"
+      },
+      {
+        "dom_id": "filter-new",
+        "target": "state:filter-new"
+      },
+      {
+        "dom_id": "filter-preview",
+        "target": "state:filter-preview"
+      },
+      {
+        "dom_id": "filter-category",
+        "target": "state:filter-category"
+      },
+      {
+        "dom_id": "filter-live",
+        "target": "state:filter-live"
+      },
+      {
+        "dom_id": "feed-follow-0",
+        "target": "state:toggle-follow-card-0"
+      },
+      {
+        "dom_id": "feed-follow-1",
+        "target": "state:toggle-follow-card-1"
+      },
+      {
+        "dom_id": "product-0-0",
+        "target": "toast:product-0-0"
+      },
+      {
+        "dom_id": "product-0-1",
+        "target": "toast:product-0-1"
+      },
+      {
+        "dom_id": "product-0-2",
+        "target": "toast:product-0-2"
+      },
+      {
+        "dom_id": "product-1-0",
+        "target": "toast:product-1-0"
+      },
+      {
+        "dom_id": "product-1-1",
+        "target": "toast:product-1-1"
+      },
+      {
+        "dom_id": "product-1-2",
+        "target": "toast:product-1-2"
+      }
+    ],
+    "state_contract": [
+      {
+        "state_id": "initial-follow-feed",
+        "initial": true,
+        "trigger": "进入动态主 tab",
+        "visible_result": "默认展示关注频道、全部筛选和两条关注店铺动态",
+        "fallback": "保留最近一次有效频道与筛选",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "main-tab-switch",
+        "initial": false,
+        "trigger": "点击顶部频道 tabs",
+        "visible_result": "切换摘要、搜索词提示和两条动态内容",
+        "fallback": "回退到关注频道内容",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "filter-switch",
+        "initial": false,
+        "trigger": "点击筛选标签",
+        "visible_result": "更新当前动态列表，必要时显示空状态提示",
+        "fallback": "回退到全部筛选",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "follow-toggle",
+        "initial": false,
+        "trigger": "点击店铺关注按钮",
+        "visible_result": "按钮在已关注与可关注之间切换",
+        "fallback": "保留最近一次有效按钮状态",
+        "persistence": "memory"
+      }
+    ],
+    "hard_rules": [
+      "禁止硬编码颜色和间距",
+      "禁止使用 token_whitelist 之外的 Token",
+      "禁止把淘宝参考图直接等比复刻成微购页面"
+    ]
+  },
+  "decisions": [
+    {
+      "dd_id": "tabs-main",
+      "component_slug": "tabs",
+      "rule_source": "preview/component-tabs.html",
+      "token_binding": null,
+      "class_name": "wg-tabs wg-tabs--standard wg-tabs--scroll"
+    },
+    {
+      "dd_id": "search-main",
+      "component_slug": "search",
+      "rule_source": "preview/component-search.html",
+      "token_binding": null,
+      "class_name": "searchbox searchbox--md searchbox--accent"
+    },
+    {
+      "dd_id": "shortcut-avatar-follow-shop",
+      "component_slug": "avatar",
+      "rule_source": "preview/component-avatar.html",
+      "token_binding": null,
+      "class_name": "avatar avatar--40 avatar--image"
+    },
+    {
+      "dd_id": "shortcut-avatar-ai-topic",
+      "component_slug": "avatar",
+      "rule_source": "preview/component-avatar.html",
+      "token_binding": null,
+      "class_name": "avatar avatar--40 avatar--image"
+    },
+    {
+      "dd_id": "shortcut-avatar-coins",
+      "component_slug": "avatar",
+      "rule_source": "preview/component-avatar.html",
+      "token_binding": null,
+      "class_name": "avatar avatar--40 avatar--image"
+    },
+    {
+      "dd_id": "shortcut-avatar-new-arrivals",
+      "component_slug": "avatar",
+      "rule_source": "preview/component-avatar.html",
+      "token_binding": null,
+      "class_name": "avatar avatar--40 avatar--image"
+    },
+    {
+      "dd_id": "shortcut-avatar-group-buy",
+      "component_slug": "avatar",
+      "rule_source": "preview/component-avatar.html",
+      "token_binding": null,
+      "class_name": "avatar avatar--40 avatar--image"
+    },
+    {
+      "dd_id": "filter-all-chip",
+      "component_slug": "tag",
+      "rule_source": "preview/component-tag.html",
+      "token_binding": null,
+      "class_name": "tag tag--28 tag--brand tag--selected dynamic-home-filter__chip"
+    },
+    {
+      "dd_id": "filter-new-chip",
+      "component_slug": "tag",
+      "rule_source": "preview/component-tag.html",
+      "token_binding": null,
+      "class_name": "tag tag--28 tag--gray tag--normal dynamic-home-filter__chip"
+    },
+    {
+      "dd_id": "filter-preview-chip",
+      "component_slug": "tag",
+      "rule_source": "preview/component-tag.html",
+      "token_binding": null,
+      "class_name": "tag tag--28 tag--gray tag--normal dynamic-home-filter__chip"
+    },
+    {
+      "dd_id": "filter-category-chip",
+      "component_slug": "tag",
+      "rule_source": "preview/component-tag.html",
+      "token_binding": null,
+      "class_name": "tag tag--28 tag--gray tag--normal dynamic-home-filter__chip"
+    },
+    {
+      "dd_id": "filter-live-chip",
+      "component_slug": "tag",
+      "rule_source": "preview/component-tag.html",
+      "token_binding": null,
+      "class_name": "tag tag--28 tag--gray tag--normal dynamic-home-filter__chip"
+    },
+    {
+      "dd_id": "feed-avatar-0",
+      "component_slug": "avatar",
+      "rule_source": "preview/component-avatar.html",
+      "token_binding": null,
+      "class_name": "avatar avatar--40 avatar--image"
+    },
+    {
+      "dd_id": "feed-badge-0",
+      "component_slug": "tag",
+      "rule_source": "preview/component-tag.html",
+      "token_binding": null,
+      "class_name": "tag tag--20 tag--brand-stroke"
+    },
+    {
+      "dd_id": "button-follow-0",
+      "component_slug": "button",
+      "rule_source": "preview/component-button.html",
+      "token_binding": null,
+      "class_name": "btn btn--medium btn--sm dynamic-home-feed-card__action"
+    },
+    {
+      "dd_id": "product-image-0-0",
+      "component_slug": "image",
+      "rule_source": "preview/component-image.html",
+      "token_binding": null,
+      "class_name": "wg-image wg-image--rounded-md wg-image--clickable"
+    },
+    {
+      "dd_id": "product-image-0-1",
+      "component_slug": "image",
+      "rule_source": "preview/component-image.html",
+      "token_binding": null,
+      "class_name": "wg-image wg-image--rounded-md wg-image--clickable"
+    },
+    {
+      "dd_id": "product-image-0-2",
+      "component_slug": "image",
+      "rule_source": "preview/component-image.html",
+      "token_binding": null,
+      "class_name": "wg-image wg-image--rounded-md wg-image--clickable"
+    },
+    {
+      "dd_id": "feed-avatar-1",
+      "component_slug": "avatar",
+      "rule_source": "preview/component-avatar.html",
+      "token_binding": null,
+      "class_name": "avatar avatar--40 avatar--image"
+    },
+    {
+      "dd_id": "feed-badge-1",
+      "component_slug": "tag",
+      "rule_source": "preview/component-tag.html",
+      "token_binding": null,
+      "class_name": "tag tag--20 tag--brand-stroke"
+    },
+    {
+      "dd_id": "button-follow-1",
+      "component_slug": "button",
+      "rule_source": "preview/component-button.html",
+      "token_binding": null,
+      "class_name": "btn btn--weak btn--sm dynamic-home-feed-card__action"
+    },
+    {
+      "dd_id": "product-image-1-0",
+      "component_slug": "image",
+      "rule_source": "preview/component-image.html",
+      "token_binding": null,
+      "class_name": "wg-image wg-image--rounded-md wg-image--clickable"
+    },
+    {
+      "dd_id": "product-image-1-1",
+      "component_slug": "image",
+      "rule_source": "preview/component-image.html",
+      "token_binding": null,
+      "class_name": "wg-image wg-image--rounded-md wg-image--clickable"
+    },
+    {
+      "dd_id": "product-image-1-2",
+      "component_slug": "image",
+      "rule_source": "preview/component-image.html",
+      "token_binding": null,
+      "class_name": "wg-image wg-image--rounded-md wg-image--clickable"
+    }
+  ],
+  "generation_evidence": {
+    "scene_js": "wego-app/scenes/动态首页/scene.js",
+    "scene_css": "wego-app/scenes/动态首页/scene.css",
+    "source_sha256": "ad13f945da9f58e8f2fc3bac163bfa18badfff51fda059c72ae50addad79489e",
+    "dom_ids": [
+      "tab-follow",
+      "tab-recommend",
+      "tab-flash",
+      "tab-preview",
+      "tab-subsidy",
+      "tab-live",
+      "dynamic-search",
+      "shortcut-follow-shop",
+      "shortcut-ai-topic",
+      "shortcut-coins",
+      "shortcut-new-arrivals",
+      "shortcut-group-buy",
+      "filter-all",
+      "filter-new",
+      "filter-preview",
+      "filter-category",
+      "filter-live",
+      "feed-follow-0",
+      "product-0-0",
+      "product-0-1",
+      "product-0-2",
+      "feed-follow-1",
+      "product-1-0",
+      "product-1-1",
+      "product-1-2"
+    ],
+    "component_count": 24,
+    "visualCheck": {
+      "status": "passed",
+      "viewports": [
+        375,
+        393
+      ],
+      "checked_at": "2026-07-13T23:20:00+08:00"
+    },
+    "crowdingCheck": {
+      "status": "passed",
+      "items": [
+        "无横向溢出",
+        "无文字重叠",
+        "无图片裁切异常",
+        "关注按钮不换行",
+        "首屏信息层级清晰",
+        "三列商品宫格在 375 和 393 视口均可读"
+      ]
+    }
+  },
+  "state_contract": [
+    {
+      "state_id": "initial-follow-feed",
+      "initial": true,
+      "trigger": "进入动态主 tab",
+      "visible_result": "默认展示关注频道、全部筛选和两条关注店铺动态",
+      "fallback": "保留最近一次有效频道与筛选",
+      "persistence": "memory"
+    },
+    {
+      "state_id": "main-tab-switch",
+      "initial": false,
+      "trigger": "点击顶部频道 tabs",
+      "visible_result": "切换摘要、搜索词提示和两条动态内容",
+      "fallback": "回退到关注频道内容",
+      "persistence": "memory"
+    },
+    {
+      "state_id": "filter-switch",
+      "initial": false,
+      "trigger": "点击筛选标签",
+      "visible_result": "更新当前动态列表，必要时显示空状态提示",
+      "fallback": "回退到全部筛选",
+      "persistence": "memory"
+    },
+    {
+      "state_id": "follow-toggle",
+      "initial": false,
+      "trigger": "点击店铺关注按钮",
+      "visible_result": "按钮在已关注与可关注之间切换",
+      "fallback": "保留最近一次有效按钮状态",
+      "persistence": "memory"
+    }
+  ],
+  "interaction_contract": [
+    {
+      "dom_id": "dynamic-search",
+      "target": "toast:search"
+    },
+    {
+      "dom_id": "tab-follow",
+      "target": "state:main-tab-follow"
+    },
+    {
+      "dom_id": "tab-recommend",
+      "target": "state:main-tab-recommend"
+    },
+    {
+      "dom_id": "tab-flash",
+      "target": "state:main-tab-flash"
+    },
+    {
+      "dom_id": "tab-preview",
+      "target": "state:main-tab-preview"
+    },
+    {
+      "dom_id": "tab-subsidy",
+      "target": "state:main-tab-subsidy"
+    },
+    {
+      "dom_id": "tab-live",
+      "target": "state:main-tab-live"
+    },
+    {
+      "dom_id": "shortcut-follow-shop",
+      "target": "toast:shortcut-follow-shop"
+    },
+    {
+      "dom_id": "shortcut-ai-topic",
+      "target": "toast:shortcut-ai-topic"
+    },
+    {
+      "dom_id": "shortcut-coins",
+      "target": "toast:shortcut-coins"
+    },
+    {
+      "dom_id": "shortcut-new-arrivals",
+      "target": "toast:shortcut-new-arrivals"
+    },
+    {
+      "dom_id": "shortcut-group-buy",
+      "target": "toast:shortcut-group-buy"
+    },
+    {
+      "dom_id": "filter-all",
+      "target": "state:filter-all"
+    },
+    {
+      "dom_id": "filter-new",
+      "target": "state:filter-new"
+    },
+    {
+      "dom_id": "filter-preview",
+      "target": "state:filter-preview"
+    },
+    {
+      "dom_id": "filter-category",
+      "target": "state:filter-category"
+    },
+    {
+      "dom_id": "filter-live",
+      "target": "state:filter-live"
+    },
+    {
+      "dom_id": "feed-follow-0",
+      "target": "state:toggle-follow-card-0"
+    },
+    {
+      "dom_id": "feed-follow-1",
+      "target": "state:toggle-follow-card-1"
+    },
+    {
+      "dom_id": "product-0-0",
+      "target": "toast:product-0-0"
+    },
+    {
+      "dom_id": "product-0-1",
+      "target": "toast:product-0-1"
+    },
+    {
+      "dom_id": "product-0-2",
+      "target": "toast:product-0-2"
+    },
+    {
+      "dom_id": "product-1-0",
+      "target": "toast:product-1-0"
+    },
+    {
+      "dom_id": "product-1-1",
+      "target": "toast:product-1-1"
+    },
+    {
+      "dom_id": "product-1-2",
+      "target": "toast:product-1-2"
+    }
+  ]
+}
