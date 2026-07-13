@@ -1,4 +1,4 @@
-# wego-design-system
+# wego-app AI UXDesign 工作流
 
 微购中文静态 App 原型与设计系统仓库。用户提供业务需求，AI 通过固定技能链路生成符合微购设计语言的移动端交互原型。
 
@@ -36,7 +36,6 @@
 
 只有用户明确要求沉淀经验、补充规则、复盘形成经验或优化工作流时，才进入候选流程：
 
-- 一次审查最多记录一条经验。
 - 同类经验累计，不因业务名不同重复新增。
 - 生效阈值与迭代模式以候选池顶层配置为准；达到生效阈值后先询问用户，未确认不升级正式规则。
 - 候选数据位于 `.codex/skills/wego-uxsystem-iterate/experience/candidates.json`，字段和流程见 `.codex/skills/wego-uxsystem-iterate/references/experience-candidates.md`。

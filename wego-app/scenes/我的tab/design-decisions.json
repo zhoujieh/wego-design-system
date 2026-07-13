@@ -15,7 +15,7 @@
   },
   "prompt_contract": {
     "design_system_snapshot": {
-      "version": 409,
+      "version": 410,
       "token_css": "colors_and_type.css",
       "component_css": "components.css",
       "component_inputs": [
@@ -450,7 +450,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/我的tab/scene.js",
     "scene_css": "wego-app/scenes/我的tab/scene.css",
-    "source_sha256": "c907e0ee311eecab9019c17d1265d50bbacab58696345b5d6af50b74574f706e",
+    "source_sha256": "2fc5e859f64131d239c91c83f8dad69cedbae318d9375d3afac79b88df2ad297",
     "dom_ids": [
       "my-tab-add-staff",
       "my-tab-staff-manage",

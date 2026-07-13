@@ -14,7 +14,7 @@
   },
   "prompt_contract": {
     "design_system_snapshot": {
-      "version": 409,
+      "version": 410,
       "token_css": "colors_and_type.css",
       "component_css": "components.css",
       "component_inputs": [

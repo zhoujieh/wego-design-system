@@ -15,7 +15,7 @@
   },
   "prompt_contract": {
     "design_system_snapshot": {
-      "version": 409,
+      "version": 410,
       "token_css": "colors_and_type.css",
       "component_css": "components.css",
       "component_inputs": [
@@ -614,7 +614,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/动态首页/scene.js",
     "scene_css": "wego-app/scenes/动态首页/scene.css",
-    "source_sha256": "ad13f945da9f58e8f2fc3bac163bfa18badfff51fda059c72ae50addad79489e",
+    "source_sha256": "25e273ff15d2594c0b77775be9aaaf4022015c8458d07d0f170ab5805a09b878",
     "dom_ids": [
       "tab-follow",
       "tab-recommend",

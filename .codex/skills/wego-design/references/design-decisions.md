@@ -21,7 +21,7 @@ authoritySources:
 
 <!-- rule-id: wego-scene-decision-scope; source-ref: AGENTS.md#仓库定位 -->
 
-微购面向移动端、微信生态、电商、工具和社交场景。页面应是简洁、干净、淡雅、克制的中文 App 界面，不做营销落地页、桌面后台或独立网页。判断优先级固定为：清晰 > 一致 > 效率 > 美观 > 创新。
+微购面向移动端、微信生态、电商、工具场景。页面应是简洁、干净、淡雅、克制的中文 App 界面，不做营销落地页、桌面后台或独立网页。最高判断优先级固定为：清晰 > 一致 > 效率 > 美观 > 创新。
 
 <!-- rule-id: prototype-brief-required; source-ref: AGENTS.md#主链路硬门禁 -->
 
