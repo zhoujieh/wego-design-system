@@ -2,6 +2,18 @@
   var shell = document.querySelector('[data-host-shell="true"]');
   if (!shell) return;
 
+  if ('CSS' in window && 'setProperty' in document.documentElement.style) {
+    var stableHeight = window.innerHeight;
+    document.documentElement.style.setProperty('--wego-stable-viewport-height', stableHeight + 'px');
+    window.addEventListener('resize', function () {
+      var h = window.innerHeight;
+      if (h !== stableHeight) {
+        stableHeight = h;
+        document.documentElement.style.setProperty('--wego-stable-viewport-height', h + 'px');
+      }
+    });
+  }
+
   var panels = Array.from(document.querySelectorAll('[data-host-tab]'));
   var tabTriggers = Array.from(document.querySelectorAll('[data-host-tab-trigger]'));
   var sceneLayer = document.querySelector('[data-scene-layer]');
