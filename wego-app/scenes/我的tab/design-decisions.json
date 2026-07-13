@@ -1,0 +1,552 @@
+{
+  "schemaVersion": 1,
+  "scene": "我的tab",
+  "surface_id": "my-tab",
+  "route_id": "my-tab",
+  "layout_mode": "composed",
+  "page_pattern": null,
+  "presentation": {
+    "type": "host-tab",
+    "transition": "none",
+    "dismissAction": "switch-tab",
+    "overlayLevel": "inline",
+    "coversTabBar": false,
+    "source": "library-consumption.json#/appRuntime/presentationTypes"
+  },
+  "prompt_contract": {
+    "design_system_snapshot": {
+      "version": 408,
+      "token_css": "colors_and_type.css",
+      "component_css": "components.css",
+      "component_inputs": [
+        {
+          "slug": "avatar",
+          "preview_file": "preview/component-avatar.html",
+          "contract_file": "components/avatar.json"
+        },
+        {
+          "slug": "tag",
+          "preview_file": "preview/component-tag.html",
+          "contract_file": "components/tag.json"
+        },
+        {
+          "slug": "button",
+          "preview_file": "preview/component-button.html",
+          "contract_file": "components/button.json"
+        },
+        {
+          "slug": "card",
+          "preview_file": "preview/component-card.html",
+          "contract_file": "components/card.json"
+        },
+        {
+          "slug": "link",
+          "preview_file": "preview/component-link.html",
+          "contract_file": "components/link.json"
+        },
+        {
+          "slug": "cell",
+          "preview_file": "preview/component-cell.html",
+          "contract_file": "components/cell.json"
+        }
+      ]
+    },
+    "token_whitelist": [
+      "var(--bg-brand)",
+      "var(--bg-page)",
+      "var(--bg-subtle)",
+      "var(--bg-surface)",
+      "var(--body-lg-font-size)",
+      "var(--body-lg-line-height)",
+      "var(--body-sm-font-size)",
+      "var(--body-sm-line-height)",
+      "var(--body-xs-font-size)",
+      "var(--body-xs-line-height)",
+      "var(--border-neutral-l2)",
+      "var(--font-weight-medium)",
+      "var(--font-weight-semibold)",
+      "var(--heading-sm-font-size)",
+      "var(--heading-sm-line-height)",
+      "var(--heading-xs-font-size)",
+      "var(--heading-xs-line-height)",
+      "var(--radius-8)",
+      "var(--size-40)",
+      "var(--spacer-12)",
+      "var(--spacer-16)",
+      "var(--spacer-24)",
+      "var(--spacer-4)",
+      "var(--spacer-8)",
+      "var(--text-brand)",
+      "var(--text-default)",
+      "var(--text-secondary)",
+      "var(--text-tertiary)"
+    ],
+    "token_bindings": [
+      {
+        "selector": ".my-tab__name",
+        "content_role": "用户名",
+        "css_property": "font-size",
+        "token": "var(--heading-sm-font-size)",
+        "rule_ref": "colors_and_type.css#/heading-sm-font-size"
+      },
+      {
+        "selector": ".my-tab__name",
+        "content_role": "用户名",
+        "css_property": "color",
+        "token": "var(--text-default)",
+        "rule_ref": "colors_and_type.css#/text-default"
+      },
+      {
+        "selector": ".my-tab__headline",
+        "content_role": "会员和订单区标题",
+        "css_property": "font-size",
+        "token": "var(--heading-xs-font-size)",
+        "rule_ref": "colors_and_type.css#/heading-xs-font-size"
+      },
+      {
+        "selector": ".my-tab__subcopy",
+        "content_role": "说明文字",
+        "css_property": "color",
+        "token": "var(--text-secondary)",
+        "rule_ref": "colors_and_type.css#/text-secondary"
+      },
+      {
+        "selector": ".my-tab-space__usage",
+        "content_role": "空间用量数字",
+        "css_property": "color",
+        "token": "var(--text-brand)",
+        "rule_ref": "colors_and_type.css#/text-brand"
+      },
+      {
+        "selector": ".my-tab-section__title",
+        "content_role": "区块标题",
+        "css_property": "font-size",
+        "token": "var(--heading-xs-font-size)",
+        "rule_ref": "colors_and_type.css#/heading-xs-font-size"
+      },
+      {
+        "selector": ".my-tab-app-button__label",
+        "content_role": "应用入口文案",
+        "css_property": "color",
+        "token": "var(--text-secondary)",
+        "rule_ref": "colors_and_type.css#/text-secondary"
+      },
+      {
+        "selector": ".my-tab-order-button__hint",
+        "content_role": "订单状态说明",
+        "css_property": "color",
+        "token": "var(--text-tertiary)",
+        "rule_ref": "colors_and_type.css#/text-tertiary"
+      }
+    ],
+    "component_bindings": [
+      {
+        "slot": "profile-avatar",
+        "slug": "avatar",
+        "reason": "顶部身份区使用正式 56px 图片头像承载个人身份识别。",
+        "root_class": "avatar",
+        "required_structure": [],
+        "modifiers": [
+          "avatar--56",
+          "avatar--image"
+        ],
+        "variant_dimensions": {
+          "type": "image",
+          "size": "56"
+        },
+        "source": "preview/component-avatar.html",
+        "contract_file": "components/avatar.json"
+      },
+      {
+        "slot": "identity-tags",
+        "slug": "tag",
+        "reason": "顶部身份标签使用 20 规格轻量展示账号身份与角色。",
+        "root_class": "tag",
+        "required_structure": [
+          ".tag__label"
+        ],
+        "modifiers": [
+          "tag--20"
+        ],
+        "variant_dimensions": {
+          "size": "20",
+          "theme": "gray",
+          "state": "normal",
+          "affordance": "display-only"
+        },
+        "source": "preview/component-tag.html",
+        "contract_file": "components/tag.json"
+      },
+      {
+        "slot": "primary-actions",
+        "slug": "button",
+        "reason": "员工新增和会员续费使用正式按钮承载页面轻操作。",
+        "root_class": "btn",
+        "required_structure": [],
+        "modifiers": [
+          "btn--medium",
+          "btn--strong",
+          "btn--sm"
+        ],
+        "variant_dimensions": {
+          "emphasis": "medium",
+          "size": "sm",
+          "iconMode": "text-only",
+          "state": "default"
+        },
+        "source": "preview/component-button.html",
+        "contract_file": "components/button.json"
+      },
+      {
+        "slot": "surface-cards",
+        "slug": "card",
+        "reason": "页面主要区块以白底表面卡片承载信息分组。",
+        "root_class": "card",
+        "required_structure": [
+          ".card__content"
+        ],
+        "modifiers": [
+          "card--surface"
+        ],
+        "variant_dimensions": {
+          "base": "auto",
+          "surface": "surface"
+        },
+        "source": "preview/component-card.html",
+        "contract_file": "components/card.json"
+      },
+      {
+        "slot": "text-links",
+        "slug": "link",
+        "reason": "员工管理、空间管理和全部采用独立文字链接表达轻跳转。",
+        "root_class": "link",
+        "required_structure": [],
+        "modifiers": [],
+        "variant_dimensions": {
+          "mode": "standalone",
+          "size": "14",
+          "state": "default"
+        },
+        "source": "preview/component-link.html",
+        "contract_file": "components/link.json"
+      },
+      {
+        "slot": "settings-cells",
+        "slug": "cell",
+        "reason": "设置列表使用正式 cell clickable + arrow 结构承载进入下一层入口。",
+        "root_class": "cell",
+        "required_structure": [
+          ".cell__body",
+          ".cell__content"
+        ],
+        "modifiers": [
+          "cell--single",
+          "cell--bg-white",
+          "cell--clickable",
+          "cell--divider-right-edge"
+        ],
+        "variant_dimensions": {
+          "density": "single",
+          "surface": "bg-white",
+          "interaction": "clickable",
+          "divider": "divider-right-edge",
+          "leadingSlot": "none",
+          "trailingSlot": "arrow"
+        },
+        "source": "preview/component-cell.html",
+        "contract_file": "components/cell.json"
+      }
+    ],
+    "layout_contract": {
+      "mode": "composed",
+      "source": "references/design-decisions.md",
+      "selection_reason": "页面同时包含身份概览、会员状态、宫格应用、订单状态和设置入口，未命中现有明确范式，因此按已确认业务信息自主组合。",
+      "page_edge_mode": "M8",
+      "page_edge_mode_reason": "页面使用灰底承载多个白底内容块，保持统一外层留白与分组节奏。",
+      "rules": [
+        "顶部身份区、会员区、应用入口区和订单区统一使用白底表面分组。",
+        "设置列表使用正式 cell-group 与 clickable arrow 结构，不自造等价列表组件。",
+        "应用入口和订单状态保持首屏可扫读，文案允许两行内收束，不增加营销装饰。"
+      ],
+      "mutable_regions": [
+        ".my-tab-scene"
+      ]
+    },
+    "interaction_contract": [
+      {
+        "dom_id": "my-tab-add-staff",
+        "target": "toast:add-staff"
+      },
+      {
+        "dom_id": "my-tab-staff-manage",
+        "target": "toast:staff-manage"
+      },
+      {
+        "dom_id": "my-tab-renew",
+        "target": "toast:renew-vip"
+      },
+      {
+        "dom_id": "my-tab-space-manage",
+        "target": "toast:space-manage"
+      },
+      {
+        "dom_id": "my-tab-order-all",
+        "target": "toast:orders-all"
+      },
+      {
+        "dom_id": "my-tab-setting-settings",
+        "target": "toast:setting"
+      },
+      {
+        "dom_id": "my-tab-setting-wallet",
+        "target": "toast:wallet"
+      },
+      {
+        "dom_id": "my-tab-setting-favorite",
+        "target": "toast:favorite"
+      },
+      {
+        "dom_id": "my-tab-setting-coupon",
+        "target": "toast:coupon"
+      },
+      {
+        "dom_id": "my-tab-setting-commission",
+        "target": "toast:commission"
+      }
+    ],
+    "state_contract": [],
+    "hard_rules": [
+      "禁止硬编码颜色和间距",
+      "禁止使用 token_whitelist 之外的 Token",
+      "不补造任何未确认的下钻业务页面"
+    ]
+  },
+  "decisions": [
+    {
+      "dd_id": "card-profile",
+      "component_slug": "card",
+      "rule_source": "preview/component-card.html",
+      "token_binding": null,
+      "class_name": "card card--surface"
+    },
+    {
+      "dd_id": "avatar-profile",
+      "component_slug": "avatar",
+      "rule_source": "preview/component-avatar.html",
+      "token_binding": null,
+      "class_name": "avatar avatar--56 avatar--image"
+    },
+    {
+      "dd_id": "tag-vip",
+      "component_slug": "tag",
+      "rule_source": "preview/component-tag.html",
+      "token_binding": null,
+      "class_name": "tag tag--20 tag--brand-stroke"
+    },
+    {
+      "dd_id": "tag-role-service",
+      "component_slug": "tag",
+      "rule_source": "preview/component-tag.html",
+      "token_binding": null,
+      "class_name": "tag tag--20 tag--gray"
+    },
+    {
+      "dd_id": "tag-role-admin",
+      "component_slug": "tag",
+      "rule_source": "preview/component-tag.html",
+      "token_binding": null,
+      "class_name": "tag tag--20 tag--gray"
+    },
+    {
+      "dd_id": "button-add-staff",
+      "component_slug": "button",
+      "rule_source": "preview/component-button.html",
+      "token_binding": null,
+      "class_name": "btn btn--medium btn--sm"
+    },
+    {
+      "dd_id": "link-staff-manage",
+      "component_slug": "link",
+      "rule_source": "preview/component-link.html",
+      "token_binding": null,
+      "class_name": "link"
+    },
+    {
+      "dd_id": "card-membership",
+      "component_slug": "card",
+      "rule_source": "preview/component-card.html",
+      "token_binding": null,
+      "class_name": "card card--surface"
+    },
+    {
+      "dd_id": "button-renew",
+      "component_slug": "button",
+      "rule_source": "preview/component-button.html",
+      "token_binding": null,
+      "class_name": "btn btn--strong btn--sm"
+    },
+    {
+      "dd_id": "link-space-manage",
+      "component_slug": "link",
+      "rule_source": "preview/component-link.html",
+      "token_binding": null,
+      "class_name": "link"
+    },
+    {
+      "dd_id": "card-apps",
+      "component_slug": "card",
+      "rule_source": "preview/component-card.html",
+      "token_binding": null,
+      "class_name": "card card--surface"
+    },
+    {
+      "dd_id": "card-orders",
+      "component_slug": "card",
+      "rule_source": "preview/component-card.html",
+      "token_binding": null,
+      "class_name": "card card--surface"
+    },
+    {
+      "dd_id": "link-order-all",
+      "component_slug": "link",
+      "rule_source": "preview/component-link.html",
+      "token_binding": null,
+      "class_name": "link"
+    },
+    {
+      "dd_id": "cell-settings",
+      "component_slug": "cell",
+      "rule_source": "preview/component-cell.html",
+      "token_binding": null,
+      "class_name": "cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+    },
+    {
+      "dd_id": "cell-wallet",
+      "component_slug": "cell",
+      "rule_source": "preview/component-cell.html",
+      "token_binding": null,
+      "class_name": "cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+    },
+    {
+      "dd_id": "cell-favorite",
+      "component_slug": "cell",
+      "rule_source": "preview/component-cell.html",
+      "token_binding": null,
+      "class_name": "cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+    },
+    {
+      "dd_id": "cell-coupon",
+      "component_slug": "cell",
+      "rule_source": "preview/component-cell.html",
+      "token_binding": null,
+      "class_name": "cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+    },
+    {
+      "dd_id": "cell-commission",
+      "component_slug": "cell",
+      "rule_source": "preview/component-cell.html",
+      "token_binding": null,
+      "class_name": "cell cell--single cell--bg-white cell--clickable"
+    }
+  ],
+  "generation_evidence": {
+    "scene_js": "wego-app/scenes/我的tab/scene.js",
+    "scene_css": "wego-app/scenes/我的tab/scene.css",
+    "source_sha256": "fcee2fe2f97edbe856407396f1a94468fe299cc6859a30811b5e8e5ba1f90089",
+    "dom_ids": [
+      "my-tab-add-staff",
+      "my-tab-staff-manage",
+      "my-tab-renew",
+      "my-tab-space-manage",
+      "app-yijiankaituan",
+      "app-dianpuzhuangxiu",
+      "app-shoukuanma",
+      "app-wodexiaodian",
+      "app-huiyuanguanli",
+      "app-fangkuzuji",
+      "app-shujuzhongxin",
+      "app-weiqunfa",
+      "app-yijianhuanfu",
+      "app-tuanduiguanli",
+      "app-zhuanxiangxiaochengxu",
+      "app-xiangcewangzhi",
+      "app-siyujianpan",
+      "app-pc",
+      "app-gengduo",
+      "my-tab-order-all",
+      "order-daifukuan",
+      "order-yifukuan",
+      "order-yifahuo",
+      "order-tuikuan",
+      "order-guaqi",
+      "my-tab-setting-settings",
+      "my-tab-setting-wallet",
+      "my-tab-setting-favorite",
+      "my-tab-setting-coupon",
+      "my-tab-setting-commission"
+    ],
+    "component_count": 18,
+    "visualCheck": {
+      "status": "passed",
+      "viewports": [
+        375,
+        393
+      ],
+      "checked_at": "2026-07-13T21:40:00+08:00"
+    },
+    "crowdingCheck": {
+      "status": "passed",
+      "items": [
+        "375px 首屏无横向溢出",
+        "393px 首屏无横向溢出",
+        "顶部身份区按钮与标签未挤压换行失衡",
+        "四列应用入口在两种视口下均保持对齐",
+        "订单状态区五项在两种视口下可完整阅读",
+        "设置列表箭头与标题未发生重叠"
+      ]
+    }
+  },
+  "state_contract": [],
+  "interaction_contract": [
+    {
+      "dom_id": "my-tab-add-staff",
+      "target": "toast:add-staff"
+    },
+    {
+      "dom_id": "my-tab-staff-manage",
+      "target": "toast:staff-manage"
+    },
+    {
+      "dom_id": "my-tab-renew",
+      "target": "toast:renew-vip"
+    },
+    {
+      "dom_id": "my-tab-space-manage",
+      "target": "toast:space-manage"
+    },
+    {
+      "dom_id": "my-tab-order-all",
+      "target": "toast:orders-all"
+    },
+    {
+      "dom_id": "my-tab-setting-settings",
+      "target": "toast:setting"
+    },
+    {
+      "dom_id": "my-tab-setting-wallet",
+      "target": "toast:wallet"
+    },
+    {
+      "dom_id": "my-tab-setting-favorite",
+      "target": "toast:favorite"
+    },
+    {
+      "dom_id": "my-tab-setting-coupon",
+      "target": "toast:coupon"
+    },
+    {
+      "dom_id": "my-tab-setting-commission",
+      "target": "toast:commission"
+    }
+  ]
+}
