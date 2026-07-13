@@ -470,6 +470,48 @@
     },
     "exception": "当页面名称或主题与交互模式冲突时，以交互模式为准。例如：'库存预警设置'虽然叫'设置'，但如果是表单编辑页（有保存按钮），应选择 biz-rule-config；'交易设置'虽然叫'设置'，但如果是层级导航列表（无保存按钮），应选择 system-settings。"
   },
+  "pageEdgeModes": {
+    "description": "页面横向边距模式统一定义。消费设计系统时必须先选定 page_edge_mode 作为页面基底，再进入页面范式选择。禁止发明 12px 等中间值作为页面横向边距决策。",
+    "source": "uikit-plan.json#/pageEdgeModes",
+    "modes": [
+      {
+        "id": "M0",
+        "name": "通栏模式",
+        "implementation": "phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰",
+        "contentEdgeDistance": "16px（由 cell__body / form-body 自带 16px padding 承担）",
+        "backgroundColor": "白底（--bg-surface）",
+        "useCase": "设置类页面、详情页、连续浏览类页面默认选择；cell 横向边距由组件自身 padding 承担，避免双重 padding"
+      },
+      {
+        "id": "M8",
+        "name": "卡片模式",
+        "implementation": "phone-body 8px 横向 padding + cell-group__content--card 修饰",
+        "contentEdgeDistance": "24px（8px phone-body + 16px cell__body）",
+        "backgroundColor": "灰底（--bg-page）+ 白色卡片",
+        "useCase": "对象管理列表、连续内容流等需要卡片分组和圆角的场景；卡片模式必须配合 8px 横向 padding，禁止灰底+白色 card 贴边"
+      },
+      {
+        "id": "M32",
+        "name": "大边距模式",
+        "implementation": "phone-body 32px 横向 padding + cell-group__content--card 修饰",
+        "contentEdgeDistance": "48px（32px phone-body + 16px cell__body）",
+        "backgroundColor": "灰底（--bg-page）+ 白色卡片",
+        "useCase": "特殊沉浸式页面或需要大留白的展示场景"
+      }
+    ],
+    "removed": [
+      {
+        "id": "M16",
+        "reason": "已移除。原实现为 phone-body 16px 横向 padding + cell-group__content--card，与 M8 合并为统一卡片模式 M8（8px 横向 padding）。原 M16 引用点已迁移到 M0 或 M8。"
+      }
+    ],
+    "forbidden": [
+      "发明 12px 等中间值作为页面横向边距",
+      "灰底+白色 card 贴边（横向 padding=0 但用 card 包裹内容）",
+      "卡片模式不配合对应横向 padding",
+      "使用已移除的 M16 模式"
+    ]
+  },
   "pagePatterns": [
     {
       "name": "业务规则配置",
@@ -505,7 +547,7 @@
         "页面顶部可放置摘要区（方案名称、状态、说明等），但摘要区不是必需结构——是否包含摘要区由原始业务需求决定；UI Kit 中的 biz-summary 是演示参考，不是页面范式的强制元素。",
         "整体保持高信息密度和连续设置节奏，避免做成松散营销页",
         "section 标题优先使用 cell/form 分组自带的 title 节点；标题独立一行，连续内容放进 group 自带 content 容器，不再复制 UI Kit 私有标题类。",
-        "biz-rule-config 命中页面默认通栏模式 M0（phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰），cell 横向边距由 cell__body 自带 16px padding 承担，避免双重 padding。仅当 surface 角色为 host-entry（宿主入口列表）时才改为卡片模式 M16（phone-body 16px 横向 padding + cell-group__content--card 修饰）。判断依据是 surface 语义角色，不是组件名+修饰类名。",
+        "biz-rule-config 命中页面统一使用通栏模式 M0（phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰），cell 横向边距由 cell__body 自带 16px padding 承担，避免双重 padding。页面边距模式统一定义见 pageEdgeModes。",
         "整行点击只保留给带箭头、会进入下一层选择/跳转/展开的行；右侧是 switch、radio-group、checkbox-group 或按钮等独立控件时，不把整行当作主热区。",
         "子级条件区域（left-guide）：子级 cell 缩进结构以 cell.json 的 structurePatterns 为权威来源。父级 cell 和子级 cell 必须在同一 .cell-group 内连续排列；子项左侧没有其他前导语义时使用 cell__backspace + backspace-icon 显示子级标识，已有图标、checkbox、radio、switch 等前导内容时不再补 cell__backspace。",
         "页面背景一旦确定，navbar 背景默认跟随 data-bg 的公共 CSS 约定：page=灰底，surface=白底。普通业务页不要在场景级 page.css 单独覆盖 navbar 背景，透明反白仅走已注册的 .navbar--fixed-transparent 例外。"
@@ -552,10 +594,9 @@
         },
         {
           "trigger": "section 由连续 cell 或连续 form-body 组成，且标题与内容属于同一业务分组",
-          "use": "使用 `.cell-group` / `.form-group` 的正式标题节点 + 内容容器结构；biz-rule-config 命中页面默认通栏 M0（cell-group__content 不开 --card），仅当 surface 角色为 host-entry 时才开卡片修饰 M16",
+          "use": "使用 `.cell-group` / `.form-group` 的正式标题节点 + 内容容器结构；biz-rule-config 命中页面统一使用通栏 M0（cell-group__content 不开 --card）",
           "avoid": "复用 `.uikit-section-title`、手写 section 间距，或额外包一层只为白底圆角存在的容器",
-          "reason": "分组标题、内容区表面和卡片圆角已经收敛为组件正式能力；是否开卡片修饰由宿主内容层是否承担横向留白决定，继续放在页面层拼接会造成节奏、圆角和复制边界漂移。",
-          "allowWhen": "仅当 surface 角色为 host-entry（宿主入口列表）时，才改为卡片模式 M16（开 --card 修饰 + phone-body 16px 横向 padding）；其他 biz-rule-config 命中页面一律通栏 M0"
+          "reason": "分组标题、内容区表面和卡片圆角已经收敛为组件正式能力；通栏模式下 cell 横向边距由 cell__body padding 承担，继续放在页面层拼接会造成节奏、圆角和复制边界漂移。"
         },
         {
           "trigger": "行内主语义是进入下一层选择/跳转/展开，且右侧存在箭头或等价的下一步指示",
@@ -563,13 +604,6 @@
           "avoid": "把 switch、radio-group、checkbox-group、button、upload、icon actions 这类独立控件行也做成整行热区",
           "reason": "整行点击只服务于进入下一步的行式交互；独立控件需要清晰边界，否则容易和状态切换、焦点顺序冲突。",
           "allowWhen": "只有行内交互本身就是打开选择面板、进入下一级页面或展开补充内容时，才保留整行 clickable"
-        },
-        {
-          "trigger": "surface 命中 biz-rule-config pagePattern，且 surface 角色不是 host-entry",
-          "use": "通栏模式 M0：phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰；cell 横向边距由 cell__body 自带 16px padding 承担",
-          "avoid": "给 phone-body 加 12px/16px 横向 padding 后再开 cell-group__content--card（双重 padding 浪费空间，且违反 M0 规范）",
-          "reason": "biz-rule-config UI Kit 范式 BizSettingsContent 已明确示范通栏模式：phone-body 无横向 padding + cell-group__content 无 --card，cell 横向边距由 cell__body padding 承担。这是 biz-rule-config 范式的稳定结构，AI 不得自决策改为卡片模式。通栏模式下移动端与桌面端视觉一致（cell 内容都有 16px 横向边距），不会出现移动端边距变小问题。",
-          "allowWhen": "仅当 surface 角色为 host-entry（宿主入口列表）时，才改为卡片模式 M16"
         }
       ],
       "presentationDescription": "默认作为 full-screen-modal 打开；若需求语义明确属于二级页面、当前页轻弹窗或底部选择器，必须由对应 pagePattern/fallback blueprint 明确支持 push、modal 或 sheet 后才能改用其他 type。"
@@ -617,8 +651,7 @@
           "trigger": "section 由连续 cell 组成,且标题与内容属于同一业务分组(账号/业务/系统)",
           "use": "使用 .cell-group 的正式标题节点(cell-group__title) + 内容容器(cell-group__content);通栏模式 M0(cell-group__content 不开 --card 修饰)",
           "avoid": "复用 .uikit-section-title、手写 section 间距,或额外包一层只为白底圆角存在的容器",
-          "reason": "分组标题、内容区表面和卡片圆角已经收敛为组件正式能力;通栏模式下 cell 横向边距由 cell__body padding 承担,继续放在页面层拼接会造成节奏、圆角和复制边界漂移。",
-          "allowWhen": "仅当 surface 角色为 host-entry(宿主入口列表)时,才改为卡片模式 M16(开 --card 修饰 + phone-body 16px 横向 padding)"
+          "reason": "分组标题、内容区表面和卡片圆角已经收敛为组件正式能力;通栏模式下 cell 横向边距由 cell__body padding 承担,继续放在页面层拼接会造成节奏、圆角和复制边界漂移。"
         },
         {
           "trigger": "设置项需要展示副标题或补充说明",
@@ -718,7 +751,7 @@
         "toast"
       ],
       "allowedPageStyles": [
-        "卡片模式 M16 页面外层间距",
+        "卡片模式 M8 页面外层间距",
         "对象卡片横向布局",
         "识别图固定尺寸与裁切",
         "标题单行省略与摘要截断",
@@ -750,8 +783,8 @@
         "现有 UI Kit/pagePattern 无精确范式，但可由已注册组件和页面级业务样式安全组成"
       ],
       "layoutRules": [
-        "复杂内容流优先保证扫读效率与信息密度，不默认套常规卡片页 M16；默认从通栏 M0 或长列表 M8 判断，只有内容明显稀疏且不是连续浏览主任务时才升级到 M16",
-        "页面边距与内容承载方式必须联动：M0 通栏模式必须为白底（--bg-surface），内容通栏铺满，不使用 card 组件包裹单条内容；M8/M16 卡片模式页面背景为灰底（--bg-page），单条内容用 card 组件包裹且必须配合对应横向 padding。禁止灰底+白色 card 贴边（横向 padding=0 但用 card 包裹内容），这会导致卡片圆角失效、信息贴边。决策依据：单条内容字段少（≤3 个信息块）用 M0 白底通栏；单条内容字段多（≥4 个信息块）用 M8 灰底卡片",
+        "复杂内容流默认使用卡片模式 M8，不区分数据多少；页面边距模式统一定义见 pageEdgeModes",
+        "页面边距与内容承载方式必须联动：M0 通栏模式必须为白底（--bg-surface），内容通栏铺满，不使用 card 组件包裹单条内容；M8 卡片模式页面背景为灰底（--bg-page），单条内容用 card 组件包裹且必须配合 8px 横向 padding。禁止灰底+白色 card 贴边（横向 padding=0 但用 card 包裹内容），这会导致卡片圆角失效、信息贴边。",
         "媒体在内容流中是辅助判断，不得主导单条内容首屏高度；当单条内容同时承载发布者、时间、正文、对象信息和操作时，媒体区域应让位于文字与对象摘要",
         "单条内容先呈现识别信息，再呈现正文和对象摘要，最后才呈现轻操作；不要用大图、装饰说明或多主按钮打断连续浏览节奏",
         "列表项操作行内的核心操作（如转发、收藏、点赞等确定性/前进性操作）默认靠右对齐；次要操作（如'更多'、取消）靠左。当操作行使用 space-between 布局时，核心操作放在右侧位置",
@@ -781,7 +814,7 @@
         "页面级筛选条布局"
       ],
       "forbidden": [
-        "默认使用 M16 卡片式压缩复杂内容流",
+        "默认使用 M0 通栏压缩复杂内容流",
         "媒体区域主导单条内容首屏高度",
         "重复列表项内使用 strong 主按钮",
         "自造 actionsheet 结构替代正式组件",
@@ -791,7 +824,7 @@
       "requiredSurfaceDesignContract": {
         "appliesTo": "命中该 blueprint 的主内容流 surface",
         "fields": {
-          "page_edge_mode": "M0 | M8 | M16 | M32",
+          "page_edge_mode": "M0 | M8 | M32",
           "page_edge_mode_reason": "必须说明为何选择该正式页面边距模式，不得发明 12px 等中间值作为页面横向边距决策",
           "media_priority": "supporting | balanced",
           "media_priority_reason": "必须说明媒体是否只作辅助判断，以及为何不会压过文字与对象摘要",
@@ -799,7 +832,7 @@
           "optional_content_policy": "可选正文、说明和补充媒体为空时默认折叠结构；仅当缺失是已确认业务状态时显示状态反馈"
         },
         "defaultExpectation": {
-          "page_edge_mode": "M0 或 M8",
+          "page_edge_mode": "M8",
           "media_priority": "supporting"
         }
       }
@@ -820,7 +853,7 @@
       ],
       "layoutRules": [
         "详情页默认使用白底（--bg-surface）背景，保持内容可读性；只有明确需要区分内容块时才用灰色背景（--bg-page）+ 白色卡片分组",
-        "页面横向边距默认 M16；内容块用 card 或分隔线分组，不默认套灰色背景 + 卡片式压缩",
+        "页面横向边距默认 M0 通栏；cell 横向边距由 cell__body 自带 16px padding 承担。内容块用 card 或分隔线分组，不默认套灰色背景 + 卡片式压缩",
         "详情页主图优先使用宽幅矩形（aspect-ratio 4:3 或 1:1），不强制固定高度",
         "底部固定操作栏内的主操作按钮默认靠右对齐；单按钮时使用 width:100% 占满；多按钮时主操作靠右，次操作靠左",
         "详情页 navbar 使用 back-icon + center 标题 + sticky 变体；不使用 fixed-transparent（除非页面主图需要延伸到导航栏下方）"
@@ -852,13 +885,13 @@
       "requiredSurfaceDesignContract": {
         "appliesTo": "命中该 blueprint 的详情页 surface",
         "fields": {
-          "page_edge_mode": "M8 | M16 | M32",
+          "page_edge_mode": "M0 | M8 | M32",
           "page_edge_mode_reason": "必须说明为何选择该正式页面边距模式",
           "background_mode": "surface | page",
           "background_mode_reason": "必须说明页面背景色选择依据；默认 surface（白底），只有明确需要区分内容块时才用 page（灰底）+ 卡片分组"
         },
         "defaultExpectation": {
-          "page_edge_mode": "M16",
+          "page_edge_mode": "M0",
           "background_mode": "surface"
         }
       }

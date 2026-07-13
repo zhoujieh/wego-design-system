@@ -26,7 +26,7 @@
   },
   "prompt_contract": {
     "design_system_snapshot": {
-      "version": 402,
+      "version": 403,
       "component_inputs": [
         { "slug": "avatar", "preview_file": "preview/component-avatar.html", "contract_file": "components/avatar.json" },
         { "slug": "cell", "preview_file": "preview/component-cell.html", "contract_file": "components/cell.json" },

@@ -1001,7 +1001,7 @@
         "acceptance_check": "wego-design"
       },
       "evidence": [
-        "AI 在连续内容流中选择灰底+白色 card 但横向 padding=0，导致卡片贴边、圆角失效；M0 通栏必须白底不用 card，M8/M16 卡片模式必须配合对应横向 padding。"
+        "AI 在连续内容流中选择灰底+白色 card 但横向 padding=0，导致卡片贴边、圆角失效；M0 通栏必须白底不用 card，M8 卡片模式必须配合 8px 横向 padding。"
       ],
       "created_at": "2026-07-12T00:00:00Z",
       "updated_at": "2026-07-12T00:00:00Z"

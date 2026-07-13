@@ -11,7 +11,7 @@
   },
   "prompt_contract": {
     "design_system_snapshot": {
-      "version": 402,
+      "version": 403,
       "component_inputs": [
         {
           "slug": "avatar",
@@ -691,7 +691,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/我的/scene.js",
     "scene_css": "wego-app/scenes/我的/scene.css",
-    "source_sha256": "243fd3319ee4668256e878ee4664ef943724c40a2b122dc4efdb7148a82ff9e5",
+    "source_sha256": "257210a9c89cf5e81106538410ebbc1f23ef33252fd8849601b7cdd62465ef23",
     "dom_ids": [
       "entry-switch-album",
       "entry-add-employee",
