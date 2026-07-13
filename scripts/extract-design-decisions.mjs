@@ -3,6 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
+import { validatePromptContractShape } from './prompt-contract-schema.mjs';
 
 const [sceneDirectory, ...args] = process.argv.slice(2);
 if (!sceneDirectory) {
@@ -32,25 +33,23 @@ let contract;
 try { contract = JSON.parse(match[1].trim()); }
 catch (error) { fail(`wego-design-contract 不是合法 JSON：${error.message}`); }
 const prompt = contract.prompt_contract;
-if (!contract.surface_id || !contract.route_id || !contract.page_pattern || !prompt || typeof prompt !== 'object' || Array.isArray(prompt)) {
-  fail('wego-design-contract 必须包含 surface_id、route_id、page_pattern 和对象形式的 prompt_contract');
+if (!contract.surface_id || !contract.route_id || !['pattern', 'composed'].includes(contract.layout_mode) || !prompt || typeof prompt !== 'object' || Array.isArray(prompt)) {
+  fail('wego-design-contract 必须包含 surface_id、route_id、layout_mode 和对象形式的 prompt_contract');
 }
-for (const field of ['token_whitelist', 'token_bindings', 'component_bindings', 'interaction_contract', 'state_contract', 'hard_rules']) {
-  if (!Array.isArray(prompt[field])) fail(`prompt_contract.${field} 必须是数组`);
-}
-if (!prompt.design_system_snapshot || !Number.isInteger(prompt.design_system_snapshot.version) || prompt.design_system_snapshot.version < 1) {
-  fail('prompt_contract.design_system_snapshot.version 必须是正整数');
-}
-if (!prompt.layout_contract || !Array.isArray(prompt.layout_contract.rules) || !prompt.layout_contract.rules.length || !Array.isArray(prompt.layout_contract.mutable_regions)) {
-  fail('prompt_contract.layout_contract 必须包含非空 rules 数组和 mutable_regions 数组');
-}
+if (contract.layout_mode === 'pattern' && (typeof contract.page_pattern !== 'string' || !contract.page_pattern)) fail('pattern 模式必须声明非空 page_pattern');
+if (contract.layout_mode === 'composed' && contract.page_pattern !== null) fail('composed 模式的 page_pattern 必须为 null');
+if (!contract.presentation || typeof contract.presentation !== 'object' || Array.isArray(contract.presentation)) fail('wego-design-contract 必须包含对象形式的 presentation');
+const promptErrors = validatePromptContractShape(prompt);
+if (promptErrors.length) fail(promptErrors.map(item => `${item.path} ${item.message}`).join('\n'));
 
 const tags = [...js.matchAll(/<[A-Za-z][^<>]*>/g)].map(item => item[0]);
 const attribute = (tag, name) => tag.match(new RegExp(`${name}=["']([^"']+)["']`))?.[1] || null;
-const rootTag = tags.find(tag => attribute(tag, 'data-surface-id') || attribute(tag, 'data-route-id') || attribute(tag, 'data-page-pattern'));
-if (!rootTag || attribute(rootTag, 'data-surface-id') !== contract.surface_id || attribute(rootTag, 'data-route-id') !== contract.route_id || attribute(rootTag, 'data-page-pattern') !== contract.page_pattern) {
-  fail('template 根节点的 data-surface-id、data-route-id、data-page-pattern 必须与 wego-design-contract 一致');
+const rootTag = tags.find(tag => attribute(tag, 'data-surface-id') || attribute(tag, 'data-route-id') || attribute(tag, 'data-layout-mode'));
+if (!rootTag || attribute(rootTag, 'data-surface-id') !== contract.surface_id || attribute(rootTag, 'data-route-id') !== contract.route_id || attribute(rootTag, 'data-layout-mode') !== contract.layout_mode) {
+  fail('template 根节点的 data-surface-id、data-route-id、data-layout-mode 必须与 wego-design-contract 一致');
 }
+if (contract.layout_mode === 'pattern' && attribute(rootTag, 'data-page-pattern') !== contract.page_pattern) fail('pattern 模式根节点的 data-page-pattern 必须与 wego-design-contract 一致');
+if (contract.layout_mode === 'composed' && attribute(rootTag, 'data-page-pattern') !== null) fail('composed 模式根节点不得声明 data-page-pattern');
 const componentNodes = tags
   .map(tag => ({
     dd_id: attribute(tag, 'data-dd-id'),
@@ -69,8 +68,9 @@ const result = {
   scene: path.basename(sceneRoot),
   surface_id: contract.surface_id,
   route_id: contract.route_id,
+  layout_mode: contract.layout_mode,
   page_pattern: contract.page_pattern,
-  presentation: contract.presentation || null,
+  presentation: contract.presentation,
   prompt_contract: prompt,
   decisions: componentNodes,
   generation_evidence: {

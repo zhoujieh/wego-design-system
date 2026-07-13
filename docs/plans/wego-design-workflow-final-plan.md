@@ -65,7 +65,11 @@ prompt_contract:
   token_bindings: []
   component_bindings: []
   layout_contract:
-    source: "uikit-plan.json#/pagePatterns"
+    mode: "pattern | composed"
+    source: "uikit-plan.json#/pagePatterns/{id} | references/design-decisions.md#layout"
+    selection_reason: ""
+    page_edge_mode: "M0 | M8 | M32"
+    page_edge_mode_reason: ""
     rules: []
     mutable_regions: []
   interaction_contract: []
@@ -84,7 +88,7 @@ prompt_contract:
 
 ```text
 library-consumption.json
-→ uikit-plan.json（选出本页 componentPlan）
+→ uikit-plan.json（仅在明确命中时选择页面范式；未命中按设计决策方法自主组合）
 → components/index.json
 → preview/component-{slug}.html
 → components/{slug}.json
@@ -149,12 +153,12 @@ wego-app/scenes/{中文业务场景}/scene.css
 - `componentPlan` 的字段定义与每页 3–6 个预选组件边界。
 - `actualTokenNameReference` 的生成输入：只从 `colors_and_type.css` 的实际 CSS 自定义属性得到名称，`css.json` 仅用于理解 Token 结构。
 - `componentContractKind`、`previewFile`、`contractFile`、`runtimeTokens`、`previewOnlyTokens` 的消费规则。
-- `allowedComponents` 与 `components/index.json` 的一致性规则。当前 `popmenu` 已注册却不在 allowed 列表、`toast` 已允许却不在支持组件清单，必须统一。
+- `components/index.json` 是唯一组件注册与允许范围来源；页面范式仅声明自身的候选组件，并由守卫校验其已注册。
 
 ### 4.3 `uikit-plan.json`
 
-- `hostShell.managedBy`、`templateFiles`、选择规则和所有文字规则改为新 wego-design 与 `wego-app/`，删除 `../wego-ux/assets/templates/*`。
-- `fallbackAndGap` 改为：无法覆盖时创建 DDR，选择最近似的正式结构继续生成；不得临时发明组件。
+- UI Kit 仅保留明确页面范式、范式候选组件、presentation、组合约束和关联质量报告；宿主与交付规则归 `library-consumption.json`。
+- 未命中明确范式时按设计决策方法自主组合；只有组件、变体或 presentation 能力缺口才创建 DDR。
 - 场景交付路径固定为 `routes.js + scene.js + scene.css`。
 - `popmenu` 必须进入允许和支持组件清单；`toast` 明确为运行时反馈组件并进入相应清单。
 - `.cell--indent` 必须与组件契约、Preview、`components.css`、UI Kit 和宿主逻辑统一；未统一前不得被 pagePattern 引用。
@@ -192,7 +196,7 @@ domAnatomy:
 - 组件契约列出的 root、必需子节点、modifier 和运行时 Token 必须在 Preview 与 `components.css` 中可验证。
 - `cell--indent` 是现有明确不一致项：要么补齐正式 CSS，要么从 cell 契约、Preview、UI Kit 和宿主动态 class 中一次性删除。
 - `components.css` 是生成物，禁止直接编辑；修改 Preview 后运行提取脚本重新生成。
-- `components/index.json` 只维护组件注册，必须与组件文件、Preview、`allowedComponents`、核心/支持组件清单一一对应；不得重复维护 UI Kit，UI Kit 唯一来源是 `uikit-plan.json`。
+- `components/index.json` 只维护组件注册与 Preview 路径，必须与组件文件和 Preview 一一对应；不得重复维护 UI Kit，明确页面范式唯一来源是 `uikit-plan.json`。
 
 ### 4.5 Preview、CSS、资源与生成脚本
 
@@ -218,7 +222,7 @@ domAnatomy:
 3. Preview 中组件范围的运行时 Token 是否全部列入 `runtimeTokens`，而展示专属 Token 是否显式列入 `previewOnlyTokens`。
 4. `runtimeTokens` 是否都在 `colors_and_type.css` 定义。
 5. `ruleRefs` 是否只指向权威来源；禁止 `specs/`、不存在的相对路径和旧技能路径。
-6. `allowedComponents`、核心/支持组件、页面蓝图与组件索引是否一致。
+6. 明确页面范式的候选组件是否全部已注册，范式、UI Kit 入口和质量报告是否一致。
 7. UI Kit 是否只使用注册组件和允许的业务区域胶水，不引用旧宿主模板、生成 specs 或旧技能；质量报告必须与当前系统版本和质量门禁一致。
 
 ### 5.2 场景守卫
@@ -282,7 +286,7 @@ open → extended → resolved | wontfix | escalated
 
 1. 先判定改动属于组件契约、Preview、Token、UI Kit、消费规则或场景实现；普通场景实现不进入本技能。
 2. 修改唯一权威源；禁止直接改 `wego-app/lib/` 或 `components.css`。
-3. 同步检查组件索引、允许列表、核心/支持组件、页面蓝图和 UI Kit 报告。
+3. 同步检查组件索引、明确页面范式的候选组件和 UI Kit 质量报告。
 4. 运行 `extract-components-css.mjs` 和 `validate-component-contract-parity.mjs`。
 5. 若影响运行时资源，运行同步脚本并验证 `wego-app/lib/` 一致。
 6. 若规则变化影响业务场景，按影响范围运行场景合同、交互和视觉回归。

@@ -64,6 +64,11 @@ function validRuleRef(ref) {
   return fileExists(relative);
 }
 
+function textNodesByClass(html, className) {
+  const escaped = className.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return [...html.matchAll(new RegExp(`<[^>]+class=["'][^"']*\\b${escaped}\\b[^"']*["'][^>]*>([^<]*)<\\/`, 'g'))].map(match => match[1].trim());
+}
+
 const tokenCss = fs.readFileSync(path.join(libraryRoot, 'colors_and_type.css'), 'utf8');
 const declaredTokens = new Set([...tokenCss.matchAll(/(--[\w-]+)\s*:/g)].map(match => match[1]));
 const extraction = spawnSync(process.execPath, ['.codex/skills/wego-design/scripts/extract-components-css.mjs', '.codex/skills/wego-design', '--check'], { cwd: root, encoding: 'utf8' });
@@ -79,38 +84,31 @@ if (index?.schemaVersion !== 4 || index?.componentContractSchemaVersion !== 4) {
   fail('index.schema', 'components/index.json 必须使用 schemaVersion 4 与 componentContractSchemaVersion 4', 'components/index.json');
 }
 if (Object.hasOwn(index || {}, 'uiKits')) fail('index.duplicate_uikits', 'components/index.json 不得重复维护 UI Kit；唯一来源是 uikit-plan.json', 'components/index.json');
-if (uiKit?.schemaVersion !== 4) fail('uikit.schema', 'uikit-plan.json 必须使用 schemaVersion 4', 'uikit-plan.json');
+if (uiKit?.schemaVersion !== 5 || !Array.isArray(uiKit?.pagePatterns)) fail('uikit.schema', 'uikit-plan.json 必须使用 schemaVersion 5 且包含 pagePatterns', 'uikit-plan.json');
 if (library?.schemaVersion !== 4) fail('library.schema', 'library-consumption.json 必须使用 schemaVersion 4', 'library-consumption.json');
 
 const registered = new Set((index?.components || []).map(item => item.slug));
-const allowed = new Set(uiKit?.allowedComponents || []);
-for (const slug of registered) if (!allowed.has(slug)) fail('uikit.allowed_missing', `已注册组件 ${slug} 不在 allowedComponents`, 'uikit-plan.json');
-for (const slug of allowed) if (!registered.has(slug)) fail('uikit.allowed_unknown', `allowedComponents 包含未注册组件 ${slug}`, 'uikit-plan.json');
-const evidence = [...(uiKit?.corePreviewComponents || []), ...(uiKit?.supportEvidenceComponents || [])].map(item => item.slug);
-for (const slug of registered) if (!evidence.includes(slug)) fail('uikit.evidence_missing', `已注册组件 ${slug} 未进入核心或支持组件清单`, 'uikit-plan.json');
-function checkNestedAllowed(value, locator = 'uikit-plan.json') {
-  if (Array.isArray(value)) return value.forEach((item, index) => checkNestedAllowed(item, `${locator}/${index}`));
-  if (!value || typeof value !== 'object') return;
-  if (Array.isArray(value.allowedComponents)) for (const slug of value.allowedComponents) if (!registered.has(slug) || !allowed.has(slug)) fail('uikit.pattern_component', `${locator}.allowedComponents 使用未注册或未允许组件：${slug}`, 'uikit-plan.json');
-  for (const [key, child] of Object.entries(value)) if (key !== 'allowedComponents') checkNestedAllowed(child, `${locator}/${key}`);
+const patternIds = new Set();
+for (const pattern of uiKit?.pagePatterns || []) {
+  if (!pattern?.id || patternIds.has(pattern.id)) fail('uikit.pattern_id', `页面范式 id 缺失或重复：${pattern?.id || '未声明'}`, 'uikit-plan.json');
+  patternIds.add(pattern.id);
+  if (!Array.isArray(pattern.componentCandidates) || !pattern.componentCandidates.length) fail('uikit.pattern_candidates', `页面范式 ${pattern.id} 必须声明非空 componentCandidates`, 'uikit-plan.json');
+  for (const slug of pattern.componentCandidates || []) if (!registered.has(slug)) fail('uikit.pattern_component', `页面范式 ${pattern.id} 使用未注册组件：${slug}`, 'uikit-plan.json');
+  for (const field of ['entry', 'qualityReport']) if (!pattern.uiKit?.[field] || !fileExists(pattern.uiKit[field])) fail('uikit.pattern_asset', `页面范式 ${pattern.id} 缺少有效 UI Kit ${field}`, pattern.uiKit?.[field] || 'uikit-plan.json');
+  if (!pattern.presentation || !['type', 'transition', 'dismissAction', 'overlayLevel'].every(field => typeof pattern.presentation[field] === 'string' && pattern.presentation[field]) || typeof pattern.presentation.coversTabBar !== 'boolean') fail('uikit.pattern_presentation', `页面范式 ${pattern.id} 缺少完整 presentation`, 'uikit-plan.json');
 }
-checkNestedAllowed(uiKit?.pagePatterns || [], 'pagePatterns');
-checkNestedAllowed(uiKit?.fallbackPageBlueprints || [], 'fallbackPageBlueprints');
-for (const item of [...(uiKit?.corePreviewComponents || []), ...(uiKit?.supportEvidenceComponents || [])]) {
-  if (item.evidenceFile !== `components/${item.slug}.json` || item.previewFile !== `preview/component-${item.slug}.html`) fail('uikit.evidence_source', `组件 ${item.slug} 的 UI Kit 证据路径必须使用当前契约与 Preview`, 'uikit-plan.json');
-}
-for (const kit of uiKit?.uiKits || []) {
-  const relative = kit.qualityReport;
+for (const pattern of uiKit?.pagePatterns || []) {
+  const relative = pattern.uiKit?.qualityReport;
   if (!relative || !fileExists(relative)) {
-    fail('uikit.quality_report_missing', `UI Kit ${kit.slug || '未命名'} 缺少质量报告`, relative || 'uikit-plan.json');
+    fail('uikit.quality_report_missing', `页面范式 ${pattern.id || '未命名'} 缺少质量报告`, relative || 'uikit-plan.json');
     continue;
   }
   const quality = json(relative);
   if (!quality) continue;
-  if (quality.schemaVersion !== 4 || quality.designSystemVersion !== metadata?.version || quality.kitType !== kit.slug) fail('uikit.quality_report_schema', `${relative} 必须记录当前 schemaVersion、designSystemVersion 与 kitType`, relative);
+  if (quality.schemaVersion !== 4 || quality.designSystemVersion !== metadata?.version || quality.kitType !== pattern.id) fail('uikit.quality_report_schema', `${relative} 必须记录当前 schemaVersion、designSystemVersion 与 kitType`, relative);
   if (quality.designSystemParity?.status !== 'passed' || !quality.designSystemParity?.checked_at || !Array.isArray(quality.designSystemParity?.checks) || !quality.designSystemParity.checks.length) fail('uikit.quality_report_parity', `${relative} 必须记录已通过的设计系统一致性检查`, relative);
   const used = [...(quality.coreComponentsUsed || []), ...(quality.supportComponentsUsed || [])];
-  for (const slug of used) if (!registered.has(slug) || !allowed.has(slug)) fail('uikit.quality_report_component', `${relative} 使用未注册或未允许组件：${slug}`, relative);
+  for (const slug of used) if (!registered.has(slug)) fail('uikit.quality_report_component', `${relative} 使用未注册组件：${slug}`, relative);
   if (!Array.isArray(quality.inventedComponents) || quality.inventedComponents.length) fail('uikit.quality_report_invented', `${relative} 不得记录自造组件`, relative);
   if (!quality.qualityGates || !Object.keys(quality.qualityGates).length) fail('uikit.quality_gate_missing', `${relative} 必须至少声明一个质量门禁`, relative);
   for (const [gate, result] of Object.entries(quality.qualityGates || {})) {
@@ -184,6 +182,22 @@ for (const item of index?.components || []) {
   for (const selector of contract.domAnatomy?.modifierClasses || []) {
     const className = classNamesFromSelector(selector)[0];
     if (!className || !previewClasses.has(className) || !componentClasses.has(className)) fail('component.modifier', `${contractRelative} modifier 必须在 Preview 与 components.css 中存在：${selector}`, contractRelative);
+  }
+  if (slug === 'metric') {
+    const numeric = contract.domAnatomy?.numericStructure;
+    const expected = {
+      integer: '.metric__integer',
+      decimal: '.metric__decimal',
+      symbol: '.metric__symbol',
+      unit: '.metric__unit'
+    };
+    for (const [key, selector] of Object.entries(expected)) {
+      if (numeric?.[key]?.selector !== selector) fail('metric.numeric_structure', `${contractRelative}.domAnatomy.numericStructure.${key} 必须指向 ${selector}`, contractRelative);
+    }
+    if (numeric?.integer?.required !== true || !numeric?.decimal?.requiredWhen) fail('metric.numeric_requirement', `${contractRelative} 必须声明 integer 必需且 decimal 按小数位条件出现`, contractRelative);
+    const invalidIntegers = textNodesByClass(preview, 'metric__integer').filter(value => /[.。]/.test(value));
+    if (invalidIntegers.length) fail('metric.integer_decimal_mixed', `${previewRelative} 的 metric__integer 不得包含小数：${invalidIntegers.join(', ')}`, previewRelative);
+    if (!textNodesByClass(preview, 'metric__decimal').some(value => /^\.\d+$/.test(value))) fail('metric.decimal_example', `${previewRelative} 必须展示独立的小数节点`, previewRelative);
   }
 }
 

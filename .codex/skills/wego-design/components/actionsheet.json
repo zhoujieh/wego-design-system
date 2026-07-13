@@ -233,11 +233,11 @@
     "禁用项不响应点击、按压态和回调，文本变浅",
     "与 dialog 的区别：dialog 是居中模态确认弹窗用于 2-3 按钮轻量确认；actionsheet 是底部弹层用于 3+ 并列操作或单选切换",
     "与 toast 的区别：toast 瞬时非阻塞自动消失；actionsheet 阻塞式常驻需用户操作",
-    "与 uikit-plan presentationPrimitives.sheet 的对应：actionsheet 是 sheet primitive 的具体组件实现"
+    "与 library-consumption.json.appRuntime.presentationTypes 中 sheet 类型的对应：actionsheet 是 sheet presentation 的具体组件实现"
   ],
   "doNotInvent": [
     "不要在 actionsheet 内放置输入框、多字段表单、上传等复杂交互组件（那是 modal/sheet/full-screen_modal 的职责）",
-    "不要超过 8 个选项，超过时考虑用专门的选择列表页（presentationPrimitives.push）",
+    "不要超过 8 个选项，超过时考虑用专门的选择列表页（由 appRuntime.presentationTypes 的 push 承载）",
     "不要自定义选项颜色，仅允许 default/disabled 两种状态",
     "不要持久化 actionsheet 状态到 localStorage",
     "不要给 actionsheet 设置自动关闭时长（阻断式常驻）",

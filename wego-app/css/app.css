@@ -163,7 +163,6 @@ input, textarea,
   padding: calc(var(--spacer-16) + var(--safe-area-top)) 0 calc(var(--spacer-40) + var(--safe-area-bottom) + 56px);
   display: flex;
   flex-direction: column;
-  gap: var(--spacer-12);
 }
 
 .host-shell-page--card {
@@ -183,7 +182,6 @@ input, textarea,
 .host-shell-page__panel {
   display: flex;
   flex-direction: column;
-  gap: var(--spacer-12);
 }
 
 .host-shell-page__panel--blank {

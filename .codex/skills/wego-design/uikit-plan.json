@@ -1,1030 +1,113 @@
 {
-  "schemaVersion": 4,
+  "schemaVersion": 5,
   "library": "wego-design",
-  "headBoilerplate": "<link rel=\"stylesheet\" href=\"../../colors_and_type.css\"><link rel=\"stylesheet\" href=\"../../scaffold.css\"><link rel=\"stylesheet\" href=\"../../iconfont.css\"><link rel=\"stylesheet\" href=\"../../components.css\">",
-  "uiKits": [
+  "pagePatterns": [
     {
-      "slug": "biz-rule-config",
-      "entry": "ui_kits/biz-rule-config/index.html",
-      "qualityReport": "ui_kits/biz-rule-config/quality-report.json"
-    },
-    {
-      "slug": "system-settings",
-      "entry": "ui_kits/system-settings/index.html",
-      "qualityReport": "ui_kits/system-settings/quality-report.json"
-    }
-  ],
-  "corePreviewComponents": [
-    {
-      "slug": "navbar",
-      "reason": "移动端页面固定顶部导航 slot；承载返回、标题和右侧操作。",
-      "evidenceFile": "components/navbar.json",
-      "previewFile": "preview/component-navbar.html",
-      "priority": 1,
-      "slot": "top-navigation"
-    },
-    {
-      "slug": "bottom-nav",
-      "reason": "移动端应用主 Tab 固定 slot；固定五项为动态、好友、工作台、消息、我的，适合微信生态 App 主框架。",
-      "evidenceFile": "components/bottom-nav.json",
-      "previewFile": "preview/component-bottom-nav.html",
-      "priority": 2,
-      "slot": "primary-tabbar"
-    },
-    {
-      "slug": "button",
-      "reason": "主要操作固定 slot；用于保存、提交、购买、添加等关键动作。",
-      "evidenceFile": "components/button.json",
-      "previewFile": "preview/component-button.html",
-      "priority": 3,
-      "slot": "primary-action"
-    },
-    {
-      "slug": "cell",
-      "reason": "移动端列表和设置页基础信息行。",
-      "evidenceFile": "components/cell.json",
-      "previewFile": "preview/component-cell.html",
-      "priority": 4,
-      "slot": "list-row"
-    },
-    {
-      "slug": "form",
-      "reason": "业务规则配置、资料编辑和表单页基础容器。",
-      "evidenceFile": "components/form.json",
-      "previewFile": "preview/component-form.html",
-      "priority": 5,
-      "slot": "form"
-    },
-    {
-      "slug": "card",
-      "reason": "商品、订单、账户信息等内容容器。",
-      "evidenceFile": "components/card.json",
-      "previewFile": "preview/component-card.html",
-      "priority": 6,
-      "slot": "content-card"
-    }
-  ],
-  "supportEvidenceComponents": [
-    {
-      "slug": "input",
-      "reason": "独立输入和资料编辑场景。",
-      "evidenceFile": "components/input.json",
-      "previewFile": "preview/component-input.html",
-      "priority": 7,
-      "slot": "input"
-    },
-    {
-      "slug": "search",
-      "reason": "文搜、图搜、覆盖式搜索结果、导航栏搜索和页面内部筛选工具栏。",
-      "evidenceFile": "components/search.json",
-      "previewFile": "preview/component-search.html",
-      "priority": 8,
-      "slot": "search"
-    },
-    {
-      "slug": "counter",
-      "reason": "商品详情和购物车数量增减。",
-      "evidenceFile": "components/counter.json",
-      "previewFile": "preview/component-counter.html",
-      "priority": 9,
-      "slot": "quantity-stepper"
-    },
-    {
-      "slug": "tag",
-      "reason": "筛选、状态和业务标签。",
-      "evidenceFile": "components/tag.json",
-      "previewFile": "preview/component-tag.html",
-      "priority": 10,
-      "slot": "tag-filter"
-    },
-    {
-      "slug": "badge",
-      "reason": "未读、促销、提醒和角标。",
-      "evidenceFile": "components/badge.json",
-      "previewFile": "preview/component-badge.html",
-      "priority": 11,
-      "slot": "badge"
-    },
-    {
-      "slug": "avatar",
-      "reason": "用户资料和成员信息。",
-      "evidenceFile": "components/avatar.json",
-      "previewFile": "preview/component-avatar.html",
-      "priority": 12,
-      "slot": "identity"
-    },
-    {
-      "slug": "image",
-      "reason": "商品图、头像图和加载失败状态。",
-      "evidenceFile": "components/image.json",
-      "previewFile": "preview/component-image.html",
-      "priority": 13,
-      "slot": "media"
-    },
-    {
-      "slug": "switch",
-      "reason": "设置页布尔开关。",
-      "evidenceFile": "components/switch.json",
-      "previewFile": "preview/component-switch.html",
-      "priority": 14,
-      "slot": "boolean-toggle"
-    },
-    {
-      "slug": "checkbox",
-      "reason": "多选、权限项和半选状态。",
-      "evidenceFile": "components/checkbox.json",
-      "previewFile": "preview/component-checkbox.html",
-      "priority": 15,
-      "slot": "multi-select"
-    },
-    {
-      "slug": "radio",
-      "reason": "互斥选择。",
-      "evidenceFile": "components/radio.json",
-      "previewFile": "preview/component-radio.html",
-      "priority": 16,
-      "slot": "single-select"
-    },
-    {
-      "slug": "link",
-      "reason": "文字跳转和内联操作。",
-      "evidenceFile": "components/link.json",
-      "previewFile": "preview/component-link.html",
-      "priority": 17,
-      "slot": "text-action"
-    },
-    {
-      "slug": "stack",
-      "reason": "方块式选项卡和选择项。",
-      "evidenceFile": "components/stack.json",
-      "previewFile": "preview/component-stack.html",
-      "priority": 18,
-      "slot": "option-stack"
-    },
-    {
-      "slug": "tabs",
-      "reason": "顶部或内容分区标签栏，用于同页内容分类切换。",
-      "evidenceFile": "components/tabs.json",
-      "previewFile": "preview/component-tabs.html",
-      "priority": 19,
-      "slot": "section-tabs"
-    },
-    {
-      "slug": "dialog",
-      "reason": "居中模态确认弹窗，用于确认操作、风险提示、重要信息告知和快速单行输入新建。",
-      "evidenceFile": "components/dialog.json",
-      "previewFile": "preview/component-dialog.html",
-      "priority": 20,
-      "slot": "confirmation-overlay"
-    },
-    {
-      "slug": "actionsheet",
-      "reason": "底部弹层操作表单，用于 3+ 并列操作或单选切换场景。",
-      "evidenceFile": "components/actionsheet.json",
-      "previewFile": "preview/component-actionsheet.html",
-      "priority": 21,
-      "slot": "bottom-action-sheet"
-    },
-    {
-      "slug": "modal",
-      "reason": "底部模态框，三段式结构（title/body/action），title 分 info（大标题+辅助说明）和 default（NavBar 风格），action 支持双按钮/单按钮/竖向按钮+链接/取消栏/无操作区，支持 frame（自适应）、frame-x（70vh 可拖拽）、fullscreen（全屏）三种变体，以及二级嵌套 push（最多 3 层）。",
-      "evidenceFile": "components/modal.json",
-      "previewFile": "preview/component-modal.html",
-      "priority": 22,
-      "slot": "bottom-modal-frame"
-    },
-    {
-      "slug": "metric",
-      "reason": "通用数值展示，覆盖商品价格和数据统计两种场景，支持营销橙/黑/白三色系和 6 档字号。",
-      "evidenceFile": "components/metric.json",
-      "previewFile": "preview/component-metric.html",
-      "priority": 23,
-      "slot": "numeric-display"
-    },
-    {
-      "slug": "bottom-action-bar",
-      "reason": "页面底部固定操作栏，覆盖页面操作、主次操作和选择操作三类正式语义，更多收纳复用 popmenu。",
-      "evidenceFile": "components/bottom-action-bar.json",
-      "previewFile": "preview/component-bottom-action-bar.html",
-      "priority": 24,
-      "slot": "bottom-fixed-action-bar"
-    },
-    {
-      "slug": "toast",
-      "reason": "运行时状态反馈。",
-      "evidenceFile": "components/toast.json",
-      "previewFile": "preview/component-toast.html",
-      "priority": 19,
-      "slot": "runtime-feedback"
-    },
-    {
-      "slug": "popmenu",
-      "reason": "底部操作栏更多菜单与轻量上下文操作。",
-      "evidenceFile": "components/popmenu.json",
-      "previewFile": "preview/component-popmenu.html",
-      "priority": 20,
-      "slot": "context-menu"
-    }
-  ],
-  "allowedComponents": [
-    "button",
-    "card",
-    "avatar",
-    "tag",
-    "bottom-nav",
-    "input",
-    "search",
-    "counter",
-    "badge",
-    "cell",
-    "checkbox",
-    "form",
-    "image",
-    "link",
-    "radio",
-    "stack",
-    "tabs",
-    "switch",
-    "navbar",
-    "toast",
-    "dialog",
-    "actionsheet",
-    "modal",
-    "metric",
-    "bottom-action-bar",
-    "popmenu"
-  ],
-  "screenBlueprints": [
-    {
-      "name": "首页/商品流",
-      "componentSlugs": [
-        "bottom-nav",
-        "search",
-        "tag",
-        "card",
-        "badge",
-        "button",
-        "image",
-        "bottom-action-bar"
+      "id": "biz-rule-config",
+      "name": "业务规则配置",
+      "rule_id": "paradigm-selection-by-interaction-mode",
+      "appliesWhen": [
+        "页面以编辑控件、规则配置或权限配置为主",
+        "编辑结果需要页面级保存或统一提交后生效"
       ],
-      "role": "primary"
-    },
-    {
-      "name": "商品详情",
-      "componentSlugs": [
-        "navbar",
-        "image",
-        "card",
-        "tag",
-        "counter",
-        "button",
-        "badge",
-        "bottom-action-bar"
+      "excludeWhen": [
+        "页面主要提供带箭头的层级导航且没有页面级保存",
+        "仅需局部选择或即时生效的轻量操作"
       ],
-      "role": "primary"
-    },
-    {
-      "name": "我的/资料编辑",
-      "componentSlugs": [
+      "uiKit": {
+        "entry": "ui_kits/biz-rule-config/index.html",
+        "qualityReport": "ui_kits/biz-rule-config/quality-report.json"
+      },
+      "presentation": {
+        "type": "full-screen-modal",
+        "transition": "slide-up-enter, slide-down-exit",
+        "dismissAction": "page-level-save",
+        "overlayLevel": "overlay",
+        "coversTabBar": true
+      },
+      "componentCandidates": [
         "navbar",
-        "avatar",
-        "tag",
+        "form",
         "cell",
+        "checkbox",
+        "switch",
+        "radio",
+        "tag",
+        "link",
         "input",
         "button"
       ],
-      "role": "secondary"
-    },
-    {
-      "name": "业务规则配置/权限",
-      "componentSlugs": [
-        "navbar",
-        "cell",
-        "checkbox",
-        "switch",
-        "form",
-        "link",
-        "bottom-action-bar"
-      ],
-      "role": "secondary"
-    }
-  ],
-  "productContext": {
-    "kitType": "mobile-commerce-tool",
-    "productType": "移动端电商/微信生态工具",
-    "dominantCopy": [
-      "首页",
-      "商品详情",
-      "我的",
-      "业务规则配置",
-      "权限",
-      "加入购物车",
-      "立即购买"
-    ],
-    "pageNames": [
-      "首页",
-      "商品详情",
-      "我的",
-      "业务规则配置"
-    ],
-    "selectedFrameNames": [
-      "ui_kits/biz-rule-config/index.html"
-    ]
-  },
-  "hostShell": {
-    "managedBy": "wego-design",
-    "templateFiles": [
-      "../../../wego-app/index.html",
-      "../../../wego-app/css/app.css",
-      "../../../wego-app/js/app.js"
-    ],
-    "rule": "固定宿主 App 正式维护在 wego-app/，wego-app/index.html 只作为宿主基线来源，不属于 wego-design 的 UI Kit 或 pagePattern。若已确认 prototype_brief 声明业务入口归属和关键路径，wego-design 只为对应 host-entry 或 host-tab 产出入口、结果回填和打开方式依据；wego-design 只按 route_id 增量更新 routes.js、入口、业务场景和必要交互。",
-    "fixedTabs": [
-      {
-        "id": "dongtai",
-        "label": "动态"
-      },
-      {
-        "id": "haoyou",
-        "label": "好友"
-      },
-      {
-        "id": "workspace",
-        "label": "工作台"
-      },
-      {
-        "id": "xiaoxi",
-        "label": "消息"
-      },
-      {
-        "id": "my",
-        "label": "我的"
-      }
-    ],
-    "routeBinding": {
-      "requiredPageSpecFields": [
-        "app_target",
-        "host_container",
-        "route_id"
-      ],
-      "iterationRule": "同一业务场景后续迭代按 route_id 定位入口、routes.js 和 scene.js，不重复套壳、不重复插入入口",
-      "entryTypes": [
-        "cell",
-        "grid-entry",
-        "host-tab"
-      ],
-      "entryHierarchy": {
-        "rule": "当 prototype_brief.entry_points 已声明父子业务入口层级时，wego-design 必须按该层级生成视觉从属，不得与一级入口 DOM 平级只靠 data-parent-entry 数据标记",
-        "visualExpression": "二级入口 cell 使用 .cell--indent 修饰类表达缩进；或嵌套在父入口下方的子列表容器内（如 .host-shell-list__sub）；缩进宽度 24px，与 cell.json 的 leftGuidePattern.indentWidth 对齐",
-        "domPattern": "父项 .cell + 子项 .cell.cell--indent；父子必须在同一 .cell-group/.host-shell-list 内连续排列",
-        "forbidden": "只用 data-parent-entry 数据标记而无视觉从属；二级入口与一级入口完全平级"
-      }
-    },
-    "previewShellPolicy": {
-      "appliesTo": [
-        "../../../wego-app/index.html",
-        "../../../wego-app/index.html",
-        "ui_kits/*/index.html",
-        "wego-app/index.html"
-      ],
-      "desktop": "显示手机预览外壳，便于电脑端验收移动端页面",
-      "mobile": "同一个链接在窄屏/手机端隐藏外壳视觉，内容铺满真实 viewport",
-      "boundary": "预览外壳只服务验收，不参与业务布局；业务页面不得依赖 .uikit-shell/.phone-frame/.phone-screen 实现内容结构",
-      "statusBarRule": "phone-status / phone-indicator 仅属于预览外壳，默认 absolute 悬浮、不占文档流，并保持预览层级最高（z-index 使用 var(--z-critical)）；桌面手机壳用固定模拟值，移动端隐藏并回落到真实 safe-area。"
-    }
-  },
-  "selectionPolicy": "mobile-app-fixed-slots-first",
-  "pagePatternSelectionRule": "先检查 prototype_brief 的 entry_points、critical_paths 与场景目录语义；若是 wego-app 场景任务，由 wego-design 维护现有 wego-app 宿主，不从 UI Kit 参考后重画，也不复制第二套 host-shell。随后只判断业务页属于哪种既有页面范式，再选择最贴近的 UI Kit 蓝本；禁止因为宿主模板已迁出 UI Kit 而回避其业务页面模式、section 组织、摘要结构和信息密度。",
-  "deliveryMode": "static-single-preview-shell-flow",
-  "deliveryRule": "页面蓝图用于指导 wego-app/scenes/{中文业务场景}/ 中的真实业务场景实现；默认交付可部署到 Vercel、也可本地直接打开 wego-app/index.html 的静态 App 原型；wego-app/index.html 是唯一 App 宿主和预览外壳，不是唯一业务页面；完整流程必须拆成 hash route、scene.js template、push/modal/sheet/full-screen-modal 等 screen 或 overlay；运行时不得依赖 fetch()/XHR 加载。",
-  "slotAssignments": [
-    {
-      "slot": "top-navigation",
-      "slug": "navbar",
-      "reason": "移动端页面顶部导航固定需求"
-    },
-    {
-      "slot": "primary-tabbar",
-      "slug": "bottom-nav",
-      "reason": "App 主导航固定需求，使用 bottom-nav 固定五项结构"
-    },
-    {
-      "slot": "primary-action",
-      "slug": "button",
-      "reason": "关键操作固定需求"
-    },
-    {
-      "slot": "list-row",
-      "slug": "cell",
-      "reason": "设置和信息列表固定需求"
-    },
-    {
-      "slot": "form",
-      "slug": "form",
-      "reason": "表单页固定需求"
-    }
-  ],
-  "missingFixedSlots": [],
-  "fallbackComponents": [],
-  "embeddedComponents": [],
-  "unpublishedContracts": [],
-  "forbiddenInventedComponents": [
-    "desktop-sidebar",
-    "marketing-hero",
-    "large-gradient-hero",
-    "decorative-orb-background"
-  ],
-  "surfaceDecisionRules": {
-    "surfaceMatching": "必须按 prototype_brief 的每个入口、关键路径和业务结果逐个判断需要的 surface；不能只给整个任务一个 matched_uikit 后跳过宿主页、二级页或结果页。",
-    "hostEntryBoundary": "当 prototype_brief 已确认宿主入口归属时，host-entry 只负责输出宿主页入口、结果回填和状态摘要所需的 surface 依据；不要把固定宿主 App 本身当作新的 pagePattern，也不要让下游参考后重画宿主 App。",
-    "fallbackAndGap": "未命中 UI Kit/pagePattern 时必须创建 DDR，选择最近似的正式 fallback blueprint 或组件结构完成原型；禁止临时发明页面范式或组件。"
-  },
-  "pagePresentationBindingRules": {
-    "fieldMapping": "匹配 pagePattern 后，必须将 presentation、transition、dismissAction、overlayLevel、coversTabBar 五个字段写入场景设计合同（presentation→type，dismissAction→dismiss_action，overlayLevel→overlay_level，coversTabBar→covers_tab_bar）；若 pagePattern 未声明 presentation，默认 type=push、overlay_level=inline、covers_tab_bar=true。",
-    "traceability": "page_presentation 必须能从业务主 surface 的 matched_page_pattern 和 presentation_ref 反查来源，不能只给顶层字段而不说明命中的页面范式。",
-    "coversTabBarConstraint": "wego-app/scenes/ 下业务场景的 page_presentation.covers_tab_bar 必须为 true；不得输出 false，除非 surface 角色为 host-entry inline grid 入口，或 host_container.entry_type 为 host-tab 且页面直接挂在固定宿主 Tab 面板内。",
-    "compositionTraceability": "命中 pagePattern 的 compositionConstraints 时，component_mapping 必须标注所选组合、对应规则 ID 和 trigger，形成可追溯链路。"
-  },
-  "paradigmSelectionPriority": {
-    "rule": "设置类页面的 pagePattern 选择以交互模式为第一判断维度，不以页面名称或内容主题为判断依据。biz-rule-config 与 system-settings 的核心差异是交互模型和打开方式，而非内容主题（业务 vs 系统）。",
-    "decisionTree": [
-      {
-        "question": "页面是否有页面级保存按钮（或需要统一提交后生效）？",
-        "yes": "选择 biz-rule-config（编辑后统一保存，full-screen-modal 打开）",
-        "no": "继续判断"
-      },
-      {
-        "question": "页面主要内容是导航入口（箭头跳转）还是编辑控件（表单、单选、多选等）？",
-        "navigation-majority": "选择 system-settings（层级导航，push 打开）",
-        "edit-majority": "选择 biz-rule-config（规则配置，full-screen-modal 打开）"
-      },
-      {
-        "question": "导航入口和编辑控件混合且占比相近时？",
-        "no-save-button": "选择 system-settings（无保存按钮意味着即时生效或层级导航为主）",
-        "has-save-button": "选择 biz-rule-config（有保存按钮意味着需要统一提交）"
-      }
-    ],
-    "quickReference": {
-      "system-settings": "层级导航列表页，push 打开，无保存按钮，以箭头入口为主，允许包含即时生效的开关",
-      "biz-rule-config": "规则配置编辑页，full-screen-modal 打开，有保存按钮，以表单/选择控件为主"
-    },
-    "exception": "当页面名称或主题与交互模式冲突时，以交互模式为准。例如：'库存预警设置'虽然叫'设置'，但如果是表单编辑页（有保存按钮），应选择 biz-rule-config；'交易设置'虽然叫'设置'，但如果是层级导航列表（无保存按钮），应选择 system-settings。"
-  },
-  "pageEdgeModes": {
-    "description": "页面横向边距模式统一定义。宿主容器层（.host-shell-page / .phone-body）默认不提供任何横向间距，所有内容边距由组件自身或场景级 CSS 决定。消费设计系统时必须先选定 page_edge_mode 作为页面基底，再进入页面范式选择。禁止发明 12px 等中间值作为页面横向边距决策。",
-    "source": "uikit-plan.json#/pageEdgeModes",
-    "modes": [
-      {
-        "id": "M0",
-        "name": "通栏模式（默认）",
-        "implementation": {
-          "phone-body": "phone-body 默认样式（0px 横向 padding）+ cell-group__content 不开 --card 修饰",
-          "host-shell-page": "host-shell-page 默认样式（0px 横向 padding）+ 场景根元素使用 data-bg=\"surface\" + cell-group__content 不开 --card 修饰"
-        },
-        "contentEdgeDistance": "16px（由 cell__body / form-body 自带 16px padding 承担）",
-        "backgroundColor": "白底（--bg-surface）",
-        "useCase": "所有页面的默认模式。设置类页面、详情页、连续浏览类页面、宿主 Tab 页（我的、工作台等）均默认选择；cell 横向边距由组件自身 padding 承担，避免双重 padding"
-      },
-      {
-        "id": "M8",
-        "name": "卡片模式",
-        "implementation": {
-          "phone-body": "phone-body--card 修饰类（8px 横向 padding）+ cell-group__content--card 修饰",
-          "host-shell-page": "host-shell-page--card 修饰类（8px 横向 padding）+ 场景根元素使用 data-bg=\"page\" + cell-group__content--card 修饰"
-        },
-        "contentEdgeDistance": "24px（8px 外层 padding + 16px cell__body）",
-        "backgroundColor": "灰底（--bg-page）+ 白色卡片",
-        "useCase": "对象管理列表、连续内容流等需要卡片分组和圆角的场景；卡片模式必须配合 8px 横向 padding，禁止灰底+白色 card 贴边"
-      },
-      {
-        "id": "M32",
-        "name": "大边距模式",
-        "implementation": {
-          "phone-body": "phone-body--wide 修饰类（32px 横向 padding）+ cell-group__content--card 修饰",
-          "host-shell-page": "host-shell-page--wide 修饰类（32px 横向 padding）+ 场景根元素使用 data-bg=\"page\" + cell-group__content--card 修饰"
-        },
-        "contentEdgeDistance": "48px（32px 外层 padding + 16px cell__body）",
-        "backgroundColor": "灰底（--bg-page）+ 白色卡片",
-        "useCase": "特殊沉浸式页面或需要大留白的展示场景"
-      }
-    ],
-    "removed": [
-      {
-        "id": "M16",
-        "reason": "已移除。宿主容器层默认不提供横向间距，所有边距由内容组件自身承担。原 M16（16px 宿主层 padding）违背此原则，已迁移到 M0（宿主层 0px + 组件自身 padding）。"
-      }
-    ],
-    "forbidden": [
-      "发明 12px 等中间值作为页面横向边距",
-      "灰底+白色 card 贴边（横向 padding=0 但用 card 包裹内容）",
-      "卡片模式不配合对应横向 padding",
-      "宿主容器层提供默认横向间距",
-      "同一页面混合使用通栏和卡片两种模式而未显式声明边距策略"
-    ]
-  },
-  "pagePatterns": [
-    {
-      "name": "业务规则配置",
-      "slug": "biz-rule-config",
-      "applicableScenarios": [
-        "业务规则配置",
-        "业务参数编辑",
-        "权限管理",
-        "库存规则维护",
-        "发货规则维护",
-        "业务数据编辑"
-      ],
-      "interactionPattern": "编辑后统一保存，页面级主操作收口，不在内容区和底部重复堆叠保存动作",
-      "priority": "highest-for-settings-pages",
-      "presentation": "full-screen-modal",
-      "transition": "slide-up-enter, slide-down-exit",
-      "dismissAction": "page-level-save",
-      "overlayLevel": "overlay",
-      "coversTabBar": true,
-      "componentSlugs": [
-        "navbar",
-        "form",
-        "cell",
-        "checkbox",
-        "switch",
-        "radio",
-        "tag",
-        "link"
-      ],
-      "uikitFile": "ui_kits/biz-rule-config/index.html",
-      "structureHighlights": [
-        "使用编辑型二级页导航，页面级主操作统一收口",
-        "页面顶部可放置摘要区（方案名称、状态、说明等），但摘要区不是必需结构——是否包含摘要区由原始业务需求决定；UI Kit 中的 biz-summary 是演示参考，不是页面范式的强制元素。",
-        "整体保持高信息密度和连续设置节奏，避免做成松散营销页",
-        "section 标题优先使用 cell/form 分组自带的 title 节点；标题独立一行，连续内容放进 group 自带 content 容器，不再复制 UI Kit 私有标题类。",
-        "biz-rule-config 命中页面统一使用通栏模式 M0（phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰），cell 横向边距由 cell__body 自带 16px padding 承担，避免双重 padding。页面边距模式统一定义见 pageEdgeModes。",
-        "整行点击只保留给带箭头、会进入下一层选择/跳转/展开的行；右侧是 switch、radio-group、checkbox-group 或按钮等独立控件时，不把整行当作主热区。",
-        "子级条件区域（left-guide）：子级 cell 缩进结构以 cell.json 的 structurePatterns 为权威来源。父级 cell 和子级 cell 必须在同一 .cell-group 内连续排列；子项左侧没有其他前导语义时使用 cell__backspace + backspace-icon 显示子级标识，已有图标、checkbox、radio、switch 等前导内容时不再补 cell__backspace。",
-        "页面背景一旦确定，navbar 背景默认跟随 data-bg 的公共 CSS 约定：page=灰底，surface=白底。普通业务页不要在场景级 page.css 单独覆盖 navbar 背景，透明反白仅走已注册的 .navbar--fixed-transparent 例外。"
-      ],
-      "templates": [
-        "业务配置",
-        "价格规则设置",
-        "成员权限设置",
-        "库存预警设置"
-      ],
-      "leftGuidePattern": {
-        "domPattern": "父项 .cell + 子项 .cell.cell--indent；无前导内容的子项使用 .cell__backspace > .cell__backspace-icon > .cell__body，有前导内容的子项直接使用现有前导节点 + .cell__body",
-        "rule": "子级 cell 的层级标识由 cell 正式结构承接：cell__backspace 只用于无前导内容的子项，并通过 backspace-icon 表达子级身份；已有图标、checkbox、radio、switch 等前导内容时不再额外补缩进占位，不发明自定义 guide-line 样式",
-        "indentWidth": "24px"
-      },
       "compositionConstraints": [
         {
-          "trigger": "多选项互斥单选（选项≥3 或单条文案>4字）",
-          "use": "cell + cell__select + radio",
-          "avoid": "form-body--preserve-content-align + radio-field-group",
-          "reason": "form 右侧 radio-group 在移动端窄屏存在适配风险：label 固定 96px 后右侧空间仅约 255px，3 项以上或长文案容易溢出。cell 竖排不受此限制。",
-          "allowWhen": "2 选项短文案（单条 ≤4 字）时 form 仍可用，如 UI Kit 中「统计口径」示例"
+          "id": "config-group-structure",
+          "trigger": "连续设置或表单属于同一业务分组",
+          "use": "使用 cell-group 或 form-group 的正式标题和内容结构",
+          "avoid": "额外创建仅用于白底、圆角或重复标题的业务容器"
         },
         {
-          "trigger": "主互斥配置项命中已注册稳定场景，且内嵌选择控件、标题/副标题和间距已由该场景承接",
-          "use": "完整消费命中的稳定场景，不再拆出内嵌选择控件做二次规格判断",
-          "avoid": "在 wego-design 阶段单独改小 radio/checkbox、重写偏移或追加局部说明去补结构",
-          "reason": "组件稳定场景已经定义了内嵌控件规格、对齐和信息节奏；继续拆开判断会造成尺寸漂移和关系失真。",
-          "allowWhen": "只有设计系统明确开放新的可变维度，并已回流权威契约后，才允许偏离原场景"
+          "id": "config-independent-control-hit-area",
+          "trigger": "行尾是 switch、radio、checkbox 或 button 等独立控件",
+          "use": "由控件自身承担交互",
+          "avoid": "同时把整行设为主热区"
         },
         {
-          "trigger": "父项选中后才出现补充字段、跳转入口、筛选范围或排除条件",
-          "use": "把补充内容视为父场景延展，和父项保持同组连续结构",
-          "avoid": "拆成独立平级 section，或依赖 helper 文案解释父子关联",
-          "reason": "这类信息的核心是从属关系，必须由结构直接表达；平级 section 和冗余 helper 会削弱选中态与条件区之间的可感知关联。",
-          "allowWhen": "仅当补充内容已经升级为独立任务块、与父项不再存在显式从属关系时，才允许脱离原场景单独成组"
-        },
-        {
-          "trigger": "helper 文案仅重复摘要、选中态、禁用条件、跳转语义或结构已表达的信息",
-          "use": "删除冗余 helper，优先用标题、副标题、摘要、禁用态和同组结构表达",
-          "avoid": "把 helper 当成默认兜底说明层",
-          "reason": "规则配置页需要高信息密度和连续设置节奏，冗余 helper 会掩盖结构主次并放大场景拆解问题。",
-          "allowWhen": "只有结构无法承载且业务必须提醒风险、时效或不可逆后果时，才保留 helper"
-        },
-        {
-          "trigger": "section 由连续 cell 或连续 form-body 组成，且标题与内容属于同一业务分组",
-          "use": "使用 `.cell-group` / `.form-group` 的正式标题节点 + 内容容器结构；biz-rule-config 命中页面统一使用通栏 M0（cell-group__content 不开 --card）",
-          "avoid": "复用 `.uikit-section-title`、手写 section 间距，或额外包一层只为白底圆角存在的容器",
-          "reason": "分组标题、内容区表面和卡片圆角已经收敛为组件正式能力；通栏模式下 cell 横向边距由 cell__body padding 承担，继续放在页面层拼接会造成节奏、圆角和复制边界漂移。"
-        },
-        {
-          "trigger": "行内主语义是进入下一层选择/跳转/展开，且右侧存在箭头或等价的下一步指示",
-          "use": "给 cell / form-body 保留整行 clickable 标记和按压反馈",
-          "avoid": "把 switch、radio-group、checkbox-group、button、upload、icon actions 这类独立控件行也做成整行热区",
-          "reason": "整行点击只服务于进入下一步的行式交互；独立控件需要清晰边界，否则容易和状态切换、焦点顺序冲突。",
-          "allowWhen": "只有行内交互本身就是打开选择面板、进入下一级页面或展开补充内容时，才保留整行 clickable"
+          "id": "config-long-radio-choice",
+          "trigger": "互斥选项较多或选项文案较长",
+          "use": "选择能纵向承载选项的正式 cell 与 radio 组合",
+          "avoid": "在窄屏中强行压缩同一行的多项选择"
         }
-      ],
-      "presentationDescription": "默认作为 full-screen-modal 打开；若需求语义明确属于二级页面、当前页轻弹窗或底部选择器，必须由对应 pagePattern/fallback blueprint 明确支持 push、modal 或 sheet 后才能改用其他 type。"
+      ]
     },
     {
+      "id": "system-settings",
       "name": "系统设置",
-      "slug": "system-settings",
-      "applicableScenarios": [
-        "系统设置",
-        "应用设置",
-        "账号设置",
-        "通用设置",
-        "App 设置"
+      "appliesWhen": [
+        "页面主要是带箭头的层级导航入口",
+        "没有页面级保存，设置即时生效或进入下一层完成"
       ],
-      "interactionPattern": "层级导航,从右侧 push 进入,返回按钮收口;设置项按账号/业务/系统三组分类,整行点击进入下一层",
-      "priority": "highest-for-system-settings-pages",
-      "presentation": "push",
-      "transition": "slide-left-enter, slide-right-exit",
-      "dismissAction": "back-button",
-      "overlayLevel": "inline",
-      "coversTabBar": true,
-      "componentSlugs": [
+      "excludeWhen": [
+        "页面以表单、单选或多选编辑为主且需要统一保存",
+        "页面是局部选择器或确认弹层"
+      ],
+      "uiKit": {
+        "entry": "ui_kits/system-settings/index.html",
+        "qualityReport": "ui_kits/system-settings/quality-report.json"
+      },
+      "presentation": {
+        "type": "push",
+        "transition": "slide-left-enter, slide-right-exit",
+        "dismissAction": "back-button",
+        "overlayLevel": "inline",
+        "coversTabBar": true
+      },
+      "componentCandidates": [
         "navbar",
-        "cell"
-      ],
-      "uikitFile": "ui_kits/system-settings/index.html",
-      "structureHighlights": [
-        "使用层级导航(push),从右侧 slide-left 进入,返回按钮收口;不使用模态或底部弹层",
-        "设置项按账号/业务/系统三组 cell-group 分类,每组使用 cell-group__title + cell-group__content 正式结构",
-        "通栏模式 M0:phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰;cell 横向边距由 cell__body 自带 16px padding 承担",
-        "cell 变体:cell--double(带副标题) / cell--single(单行) + trailing 变体(text-arrow / dot-arrow / arrow)",
-        "整行点击只保留给带箭头、会进入下一层的入口行;右侧是 switch、radio-group、checkbox-group 等独立控件时由控件自身承担交互",
-        "不包含退出登录按钮和客服入口;这两项属于业务场景级功能,不属于系统设置 UI Kit 范式",
-        "navbar 通过 padding-top: var(--safe-area-top, 0px) + sticky top: 0 避让状态栏;页面背景一旦确定,navbar 背景默认跟随 data-bg 的公共 CSS 约定",
-        "UI Kit 必须演示双层结构(HostScreen + SystemSettingsScreen),让 AI 能学到 push 类页面的打开方式和 slide-left 动画定义"
-      ],
-      "templates": [
-        "系统设置",
-        "应用设置",
-        "通用设置",
-        "账号设置"
+        "cell",
+        "badge",
+        "switch",
+        "link",
+        "toast"
       ],
       "compositionConstraints": [
         {
-          "trigger": "section 由连续 cell 组成,且标题与内容属于同一业务分组(账号/业务/系统)",
-          "use": "使用 .cell-group 的正式标题节点(cell-group__title) + 内容容器(cell-group__content);通栏模式 M0(cell-group__content 不开 --card 修饰)",
-          "avoid": "复用 .uikit-section-title、手写 section 间距,或额外包一层只为白底圆角存在的容器",
-          "reason": "分组标题、内容区表面和卡片圆角已经收敛为组件正式能力;通栏模式下 cell 横向边距由 cell__body padding 承担,继续放在页面层拼接会造成节奏、圆角和复制边界漂移。"
+          "id": "settings-group-structure",
+          "trigger": "设置项属于账号、业务或系统等连续分组",
+          "use": "使用 cell-group 的正式标题和内容结构",
+          "avoid": "复刻 UI Kit 私有标题类或手写等价分组容器"
         },
         {
-          "trigger": "设置项需要展示副标题或补充说明",
-          "use": "cell--double + cell__subtitle 承接副标题",
-          "avoid": "在 cell 外部补 helper 文案或自定义说明栏",
-          "reason": "cell--double 的 subtitle 已经是组件正式能力,不需要额外发明说明层。",
-          "allowWhen": "只有结构无法承载且业务必须提醒风险、时效或不可逆后果时,才保留 helper"
+          "id": "settings-cell-variants",
+          "trigger": "设置项需要副标题、状态或进入下一层提示",
+          "use": "使用 cell 已登记的副标题和 trailing 变体",
+          "avoid": "在 cell 外部增加等价说明栏或自造 trailing 样式"
         },
         {
-          "trigger": "设置项需要展示状态或操作入口",
-          "use": "trailing 变体:text-arrow(状态文字+箭头)、dot-arrow(红点+箭头)、arrow(纯箭头)",
-          "avoid": "发明自定义 trailing 样式或未定义修饰类",
-          "reason": "trailing 变体已经收敛为 cell 组件正式能力,直接消费已注册变体即可。",
-          "allowWhen": "只有当业务需要新的 trailing 类型且已回流组件契约后,才允许扩展"
+          "id": "settings-row-click-boundary",
+          "trigger": "设置项进入下一层或展开选择",
+          "use": "保留整行点击与按压反馈",
+          "avoid": "把独立 switch、radio 或 checkbox 行也设为整行点击"
         }
-      ],
-      "presentationDescription": "默认作为 push 页面从右侧 slide-left 进入;若需求语义明确属于模态编辑或底部选择器,必须由对应 pagePattern/fallback blueprint 明确支持 full-screen-modal、modal 或 sheet 后才能改用其他 type。"
-    }
-  ],
-  "fallbackPageBlueprints": [
-    {
-      "id": "mobile-host-entry",
-      "name": "移动端宿主页入口",
-      "primaryWorkflowStage": "wego-design",
-      "secondaryWorkflowStages": [
-        "wego-design",
-        "wego-design"
-      ],
-      "appliesWhen": [
-        "页面角色为 host-entry",
-        "页面只承接打开入口、当前状态摘要、保存回填或结果概览",
-        "没有精确命中的 pagePattern，但可用移动端基础组件安全组成"
-      ],
-      "layoutRules": [
-        "使用真实 page-shell，不复制 UI Kit Showcase 外壳",
-        "页面背景按内容密度选择 data-bg=surface 或 data-bg=page，导航栏与页面背景保持一致",
-        "主体优先由状态摘要 section、入口 cell/button、必要的业务说明组成",
-        "禁止使用营销 hero、工作流说明文案或大面积装饰背景",
-        "当 host_container.leaf_level > 1 且 surfaces[host-entry] 已声明父子入口层级时，二级入口 cell 必须使用 .cell--indent 修饰类或嵌套子列表容器表达视觉从属，不得与一级入口 DOM 平级只靠 data-parent-entry 标记"
-      ],
-      "allowedComponents": [
-        "navbar",
-        "cell",
-        "button",
-        "tag",
-        "card",
-        "link"
-      ],
-      "allowedPageStyles": [
-        "页面外层间距",
-        "摘要区栅格或行布局",
-        "入口区垂直间距",
-        "业务作用域状态回填样式"
-      ],
-      "forbidden": [
-        ".uikit-shell",
-        ".phone-frame",
-        ".phone-screen",
-        "未注册组件类",
-        "面向 AI/工作流的说明文案"
       ]
-    },
-    {
-      "id": "object-management-list-page",
-      "name": "对象管理列表页",
-      "primaryWorkflowStage": "wego-design",
-      "secondaryWorkflowStages": [
-        "wego-product",
-        "wego-design",
-        "wego-design"
-      ],
-      "appliesWhen": [
-        "页面角色为 primary-task-page",
-        "主任务是管理一组可新增、编辑、删除、启停或进入详情的业务对象",
-        "列表项包含对象识别物、名称、关键状态、摘要和至少一个操作",
-        "现有 UI Kit/pagePattern 无精确范式，但可由已注册组件和页面级业务样式安全组成"
-      ],
-      "layoutRules": [
-        "对象管理列表不是资料详情页；列表页优先服务扫读和行动，只展示识别对象与完成当前判断所需的信息",
-        "列表字段必须先分成四类：必显字段（对象名称、关键状态）、摘要字段（1-2 条影响判断的信息）、详情/编辑字段（完整地址、联系人、备注、配置明细、长文本）、操作字段（新增、编辑、删除、启停、更多）",
-        "列表项默认采用横向主结构：左侧放对象识别物（真实缩略图、头像、门店图、商品图或低干扰占位），右侧放名称、关键状态、1-2 条摘要和高频操作；只有无稳定识别物、文本摘要极短或业务明确需要纵向浏览时，才使用纵向卡片",
-        "对象图片优先使用真实业务图片或低饱和占位；禁止使用大面积高饱和渐变插画替代真实对象图，避免列表视觉抢占信息层级",
-        "列表操作默认允许保留在列表内：1 个高频安全操作可直接外露；2 个操作可外露但需区分主次；3 个及以上或包含危险/低频操作时，优先收进已注册的气泡/操作菜单/更多操作承载。若当前设计系统没有对应组件，默认改用 sheet、详情/编辑页承接，或输出 design_gap 建议补充操作菜单组件；只有用户明确要求列表内直接操作并接受临时气泡菜单时，才允许用场景级业务作用域样式先承接，且不得把该样式注册或描述成通用组件",
-        "导航栏新增入口默认使用图标+文字的新建样式；只有用户明确要求纯文字、空间不足且设计消费已说明原因，或当前 navbar 契约不支持图文样式时，才降级为纯文字",
-        "摘要区只展示业务状态或结果回填，不写教程式说明；列表已有操作可见时，不额外解释如何编辑、删除或新增",
-        "危险操作必须和主操作分开，并保留二次确认；若在列表中收纳到更多操作，也必须在触发后进入 dialog 确认"
-      ],
-      "allowedComponents": [
-        "navbar",
-        "search",
-        "card",
-        "image",
-        "tag",
-        "button",
-        "link",
-        "dialog",
-        "toast"
-      ],
-      "allowedPageStyles": [
-        "卡片模式 M8 页面外层间距",
-        "对象卡片横向布局",
-        "识别图固定尺寸与裁切",
-        "标题单行省略与摘要截断",
-        "列表操作区或更多操作触发位",
-        "用户明确要求时的场景级临时气泡菜单定位、箭头和轻阴影（仅限业务作用域，不注册为通用组件）",
-        "空态和状态摘要布局"
-      ],
-      "forbidden": [
-        "把完整资料摊在列表卡片里",
-        "大面积高饱和渐变占位图",
-        "无业务明确要求时发明未注册气泡菜单，或把场景级临时气泡菜单沉淀成通用组件类",
-        "列表项内多个同级强按钮",
-        "教程式说明文案",
-        "新增页面范式名但不登记"
-      ]
-    },
-    {
-      "id": "continuous-content-feed-page",
-      "name": "连续内容流页面",
-      "primaryWorkflowStage": "wego-design",
-      "secondaryWorkflowStages": [
-        "wego-design",
-        "wego-design"
-      ],
-      "appliesWhen": [
-        "页面角色为 primary-task-page",
-        "主任务是连续浏览多条内容并快速判断是否下钻或执行轻操作",
-        "单条内容同时可能包含发布信息、正文、媒体、对象摘要和轻操作",
-        "现有 UI Kit/pagePattern 无精确范式，但可由已注册组件和页面级业务样式安全组成"
-      ],
-      "layoutRules": [
-        "复杂内容流默认使用卡片模式 M8，不区分数据多少；页面边距模式统一定义见 pageEdgeModes",
-        "页面边距与内容承载方式必须联动：M0 通栏模式必须为白底（--bg-surface），内容通栏铺满，不使用 card 组件包裹单条内容；M8 卡片模式页面背景为灰底（--bg-page），单条内容用 card 组件包裹且必须配合 8px 横向 padding。禁止灰底+白色 card 贴边（横向 padding=0 但用 card 包裹内容），这会导致卡片圆角失效、信息贴边。",
-        "媒体在内容流中是辅助判断，不得主导单条内容首屏高度；当单条内容同时承载发布者、时间、正文、对象信息和操作时，媒体区域应让位于文字与对象摘要",
-        "单条内容先呈现识别信息，再呈现正文和对象摘要，最后才呈现轻操作；不要用大图、装饰说明或多主按钮打断连续浏览节奏",
-        "列表项操作行内的核心操作（如转发、收藏、点赞等确定性/前进性操作）默认靠右对齐；次要操作（如'更多'、取消）靠左。当操作行使用 space-between 布局时，核心操作放在右侧位置",
-        "列表页只外露 1-2 个高频安全操作；3 个及以上操作或包含低频/危险动作时，收进 actionsheet、详情页或更多操作承载",
-        "重复列表项中禁止出现多处 strong 主按钮；strong 只保留给页面级唯一主动作，列表项内默认使用 link、weak、medium 或对象卡片点击承载下钻",
-        "列表项内容本身（标题、图片、对象卡片）可作为下钻入口时，优先用内容点击承载，不额外加'查看详情'按钮；只有内容不可点击或需要强调下钻入口时才加 link 或 weak 按钮",
-        "页面首屏文案必须直接服务用户任务，不写解释设计意图、浏览方法、刷新说明、原型说明或工作流背景的说明块",
-        "可选正文、说明或补充媒体为空时默认折叠对应结构；只有缺失本身是已确认业务状态时才显示状态文案"
-      ],
-      "allowedComponents": [
-        "navbar",
-        "avatar",
-        "image",
-        "card",
-        "tag",
-        "metric",
-        "link",
-        "button",
-        "actionsheet",
-        "toast"
-      ],
-      "allowedPageStyles": [
-        "内容流纵向节奏",
-        "媒体与正文的面积分配",
-        "对象摘要布局",
-        "列表项轻操作收口",
-        "页面级筛选条布局"
-      ],
-      "forbidden": [
-        "默认使用 M0 通栏压缩复杂内容流",
-        "媒体区域主导单条内容首屏高度",
-        "重复列表项内使用 strong 主按钮",
-        "自造 actionsheet 结构替代正式组件",
-        "解释设计意图、浏览方法、刷新说明、原型说明或 Benchmark 背景的首屏说明文案",
-        "为空的可选内容自动补未填写、暂无或原型解释"
-      ],
-      "requiredSurfaceDesignContract": {
-        "appliesTo": "命中该 blueprint 的主内容流 surface",
-        "fields": {
-          "page_edge_mode": "M0 | M8 | M32",
-          "page_edge_mode_reason": "必须说明为何选择该正式页面边距模式，不得发明 12px 等中间值作为页面横向边距决策",
-          "media_priority": "supporting | balanced",
-          "media_priority_reason": "必须说明媒体是否只作辅助判断，以及为何不会压过文字与对象摘要",
-          "first_screen_content_rule": "首屏只承接已确认业务对象、状态、动作和任务直接相关摘要；禁止默认总览、导览、刷新、原型和评审说明",
-          "optional_content_policy": "可选正文、说明和补充媒体为空时默认折叠结构；仅当缺失是已确认业务状态时显示状态反馈"
-        },
-        "defaultExpectation": {
-          "page_edge_mode": "M8",
-          "media_priority": "supporting"
-        }
-      }
-    },
-    {
-      "id": "object-detail-page",
-      "name": "对象详情页",
-      "primaryWorkflowStage": "wego-design",
-      "secondaryWorkflowStages": [
-        "wego-design",
-        "wego-design"
-      ],
-      "appliesWhen": [
-        "页面角色为 secondary-task-page",
-        "主任务是呈现单个业务对象的完整信息并支持少量操作",
-        "页面通常从列表或内容流下钻进入",
-        "现有 UI Kit/pagePattern 无精确范式，但可由已注册组件和页面级业务样式安全组成"
-      ],
-      "layoutRules": [
-        "详情页默认使用白底（--bg-surface）背景，保持内容可读性；只有明确需要区分内容块时才用灰色背景（--bg-page）+ 白色卡片分组",
-        "页面横向边距默认 M0 通栏；cell 横向边距由 cell__body 自带 16px padding 承担。内容块用 card 或分隔线分组，不默认套灰色背景 + 卡片式压缩",
-        "详情页主图优先使用宽幅矩形（aspect-ratio 4:3 或 1:1），不强制固定高度",
-        "底部固定操作栏内的主操作按钮默认靠右对齐；单按钮时使用 width:100% 占满；多按钮时主操作靠右，次操作靠左",
-        "详情页 navbar 使用 back-icon + center 标题 + sticky 变体；不使用 fixed-transparent（除非页面主图需要延伸到导航栏下方）"
-      ],
-      "allowedComponents": [
-        "navbar",
-        "image",
-        "card",
-        "tag",
-        "metric",
-        "link",
-        "button",
-        "cell",
-        "actionsheet",
-        "toast"
-      ],
-      "allowedPageStyles": [
-        "详情页主图区布局",
-        "信息块分组与间距",
-        "底部固定操作栏布局",
-        "属性列表布局"
-      ],
-      "forbidden": [
-        "默认使用灰色背景压缩详情页内容",
-        "底部操作栏主按钮靠左对齐",
-        "详情页主图使用固定高度或强制宽高比导致图片裁切",
-        "自造属性列表结构替代 cell 组件"
-      ],
-      "requiredSurfaceDesignContract": {
-        "appliesTo": "命中该 blueprint 的详情页 surface",
-        "fields": {
-          "page_edge_mode": "M0 | M8 | M32",
-          "page_edge_mode_reason": "必须说明为何选择该正式页面边距模式",
-          "background_mode": "surface | page",
-          "background_mode_reason": "必须说明页面背景色选择依据；默认 surface（白底），只有明确需要区分内容块时才用 page（灰底）+ 卡片分组"
-        },
-        "defaultExpectation": {
-          "page_edge_mode": "M0",
-          "background_mode": "surface"
-        }
-      }
-    },
-    {
-      "id": "generic-mobile-task-page",
-      "name": "通用移动任务页",
-      "primaryWorkflowStage": "wego-design",
-      "secondaryWorkflowStages": [
-        "wego-design",
-        "wego-design"
-      ],
-      "appliesWhen": [
-        "页面角色为 primary-task-page",
-        "现有 UI Kit/pagePattern 无精确范式",
-        "任务可由已注册组件、section 分组和规范约束完成"
-      ],
-      "layoutRules": [
-        "使用 navbar + page-body + 语义化 section",
-        "内容按 information_blocks 顺序分组，组间距遵守布局规范",
-        "主操作保持单一收口，不在多个区域重复堆叠",
-        "页面级样式只做布局胶水，组件结构从 preview/component-{slug}.html 复制"
-      ],
-      "allowedComponents": [
-        "navbar",
-        "search",
-        "form",
-        "cell",
-        "input",
-        "button",
-        "tag",
-        "link",
-        "switch",
-        "radio",
-        "checkbox"
-      ],
-      "allowedPageStyles": [
-        "页面外层间距",
-        "section 标题和分组间距",
-        "辅助说明文字",
-        "底部或导航操作承载区"
-      ],
-      "forbidden": [
-        "新增页面范式名但不登记",
-        "未注册组件类",
-        "未定义修饰类",
-        "硬编码颜色或间距"
-      ]
-    },
-    {
-      "id": "selection-list-page",
-      "name": "二级选择列表页",
-      "primaryWorkflowStage": "wego-design",
-      "secondaryWorkflowStages": [
-        "wego-design",
-        "wego-design"
-      ],
-      "appliesWhen": [
-        "页面角色为 secondary-task-page",
-        "核心任务是单选、多选、创建后回填或列表选择",
-        "没有独立 UI Kit，但可由 cell + radio/checkbox/tag 承接"
-      ],
-      "layoutRules": [
-        "使用 navbar 承接返回和保存/完成动作",
-        "选择项使用 .cell-group + cell 组织",
-        "单选使用 radio，多选使用 checkbox，已选摘要可用 tag",
-        "创建或补充动作使用 button/link，不把选择项做成自定义卡片"
-      ],
-      "allowedComponents": [
-        "navbar",
-        "cell",
-        "radio",
-        "checkbox",
-        "tag",
-        "button",
-        "link",
-        "input"
-      ],
-      "allowedPageStyles": [
-        "列表分组间距",
-        "已选摘要区域",
-        "空状态文字",
-        "创建入口布局"
-      ],
-      "forbidden": [
-        "自定义 checkbox/radio DOM",
-        "自定义列表项组件类",
-        "未登记的选择页范式",
-        "面向 AI/工作流的说明文案"
-      ]
-    }
-  ],
-  "lowConfidence": false,
-  "warnings": [
-    "app 宿主页不属于 UI Kit；固定宿主 App 正式维护在 wego-app/，wego-app/index.html 只作为宿主基线来源。",
-    "带 app_target + host_container + route_id 的任务必须维护现有 wego-app 宿主，只按 route_id 增量更新 routes.js、入口、业务场景、结果回填和交互，不复制第二套 host-shell，也不重画宿主 Tab、工作台、我的页等现成内容。",
-    "手机预览外壳是全局预览能力：电脑端显示，移动端同链接隐藏；外壳类不得成为业务布局依赖。",
-    "不要把“不能复制 .uikit-shell/.phone-frame/.phone-screen”误读成“不能贴近最佳页面范式”；页面模式、section 节奏和摘要结构可以继承。",
-    "凡是设置、权限、规则、配置类页面，默认优先匹配 biz-rule-config 范式，再决定是否需要补充业务差异。",
-    "最终应落成 wego-app 中的真实场景模块，而不是单个静态页面文件。",
-    "生产组件图标应优先使用 iconfont.css；UI Kit 中的演示图标如使用 CDN，应在真实项目中替换为库内图标体系。"
-  ],
-  "componentContractSchemaVersion": 3,
-  "presentationPrimitives": [
-    {
-      "type": "push",
-      "description": "App 内二级页面跳转，在 .phone-screen 内打开，可用 hash route 表示当前页面，不触发浏览器顶层跳转。wego-app/scenes/ 下业务场景必须盖住 bottom-nav（5 个主 tab 走 host-shell 内嵌面板，不走 primitive）。",
-      "coversTabBarDefault": true
-    },
-    {
-      "type": "modal",
-      "description": "底部弹层容器，三段式结构（title/body/action），支持 frame/frame-x/fullscreen 三种变体及二级嵌套 push。wego-app/scenes/ 下业务场景必须盖住 bottom-nav。",
-      "coversTabBarDefault": true
-    },
-    {
-      "type": "sheet",
-      "description": "底部弹层，用于筛选、选择器、批量操作等局部流程。wego-app/scenes/ 下业务场景必须盖住 bottom-nav（5 个主 tab 走 host-shell 内嵌面板，不走 primitive）。",
-      "coversTabBarDefault": true
-    },
-    {
-      "type": "full-screen-modal",
-      "description": "从底部进入并覆盖整个手机屏的复杂编辑流程，通常覆盖底部 Tab。wego-app/scenes/ 下业务场景必须盖住 bottom-nav（5 个主 tab 走 host-shell 内嵌面板，不走 primitive）。",
-      "coversTabBarDefault": true
     }
   ]
 }

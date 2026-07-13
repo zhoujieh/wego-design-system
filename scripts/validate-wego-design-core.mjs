@@ -75,7 +75,12 @@ function checkRequiredFiles() {
     'scripts/validate-skill-entry-boundary.mjs',
     'scripts/validate-scene-contract.mjs',
     'scripts/extract-design-decisions.mjs',
-    'scripts/test-scene-contract-tools.mjs'
+    'scripts/prompt-contract-schema.mjs',
+    'scripts/test-prompt-contract-schema.mjs',
+    'scripts/test-uikit-plan-schema.mjs',
+    'scripts/test-scene-contract-tools.mjs',
+    'scripts/validate-design-decision-method.mjs',
+    'scripts/test-design-decision-method.mjs'
   ];
   for (const relative of required) if (!exists(relative)) add('error', 'required.missing', `缺少当前工作流必需文件：${relative}`, path.join(root, relative));
   for (const removed of ['.codex/skills/wego-ux', '.codex/skills/wego-tests', '.codex/skills/wego-design/specs', 'docs/specs', 'scripts/specs.mjs', 'scripts/specs-core.mjs']) {
@@ -90,7 +95,7 @@ function checkLibrarySchema() {
   const metadata = readJson('.codex/skills/wego-design/metadata.json');
   if (!index || !plan || !consumption || !metadata) return;
   if (index.schemaVersion !== 4 || index.componentContractSchemaVersion !== 4) add('error', 'library.component_schema', '组件索引必须使用 schemaVersion 4', path.join(libraryRoot, 'components/index.json'));
-  if (plan.schemaVersion !== 4 || consumption.schemaVersion !== 4) add('error', 'library.schema', 'UI Kit 与消费契约必须使用 schemaVersion 4', libraryRoot);
+  if (plan.schemaVersion !== 5 || consumption.schemaVersion !== 4) add('error', 'library.schema', 'UI Kit 必须使用 schemaVersion 5，消费契约必须使用 schemaVersion 4', libraryRoot);
   if (!Number.isInteger(metadata.version) || metadata.version < 1) add('error', 'library.version', 'metadata.version 必须为正整数', path.join(libraryRoot, 'metadata.json'));
   const slugs = new Set((index.components || []).map(item => item.slug));
   report.metrics.registeredComponents = slugs.size;
@@ -100,8 +105,8 @@ function checkLibrarySchema() {
     if (!fs.existsSync(contract)) add('error', 'component.contract_missing', `缺少组件契约：${component.slug}`, contract);
     if (!fs.existsSync(preview)) add('error', 'component.preview_missing', `缺少组件 Preview：${component.slug}`, preview);
   }
-  for (const kit of plan.uiKits || []) {
-    for (const relative of [kit.entry, kit.qualityReport]) if (!relative || !fs.existsSync(path.join(libraryRoot, relative))) add('error', 'uikit.file_missing', `UI Kit 文件缺失：${relative}`, path.join(libraryRoot, relative || ''));
+  for (const pattern of plan.pagePatterns || []) {
+    for (const relative of [pattern.uiKit?.entry, pattern.uiKit?.qualityReport]) if (!relative || !fs.existsSync(path.join(libraryRoot, relative))) add('error', 'uikit.file_missing', `UI Kit 文件缺失：${relative}`, path.join(libraryRoot, relative || ''));
   }
 }
 
@@ -189,8 +194,19 @@ function checkIteration() {
 }
 
 function checkSceneContractTools() {
+  const uikitTests = spawnSync(process.execPath, ['scripts/test-uikit-plan-schema.mjs'], { cwd: root, encoding: 'utf8' });
+  if (uikitTests.status !== 0) add('error', 'uikit_schema.test', (uikitTests.stderr || uikitTests.stdout || 'UI Kit schema 测试失败').trim(), path.join(root, 'scripts/test-uikit-plan-schema.mjs'));
+  const schemaTests = spawnSync(process.execPath, ['scripts/test-prompt-contract-schema.mjs'], { cwd: root, encoding: 'utf8' });
+  if (schemaTests.status !== 0) add('error', 'prompt_contract_schema.test', (schemaTests.stderr || schemaTests.stdout || 'prompt_contract Schema 测试失败').trim(), path.join(root, 'scripts/test-prompt-contract-schema.mjs'));
   const tests = spawnSync(process.execPath, ['scripts/test-scene-contract-tools.mjs'], { cwd: root, encoding: 'utf8' });
   if (tests.status !== 0) add('error', 'scene_contract.test', (tests.stderr || tests.stdout || '场景合同工具测试失败').trim(), path.join(root, 'scripts/test-scene-contract-tools.mjs'));
+}
+
+function checkDesignDecisionMethod() {
+  const validation = spawnSync(process.execPath, ['scripts/validate-design-decision-method.mjs', '--json'], { cwd: root, encoding: 'utf8' });
+  if (validation.status !== 0) add('error', 'design_decision_method.validation', (validation.stderr || validation.stdout || '设计决策方法守卫失败').trim(), path.join(libraryRoot, 'references/design-decisions.md'));
+  const tests = spawnSync(process.execPath, ['scripts/test-design-decision-method.mjs'], { cwd: root, encoding: 'utf8' });
+  if (tests.status !== 0) add('error', 'design_decision_method.test', (tests.stderr || tests.stdout || '设计决策方法守卫测试失败').trim(), path.join(root, 'scripts/test-design-decision-method.mjs'));
 }
 
 function checkSkillEntryBoundary() {
@@ -215,6 +231,7 @@ function main() {
     checkLibrarySync();
     checkIteration();
     checkSceneContractTools();
+    checkDesignDecisionMethod();
     checkSkillEntryBoundary();
     checkMetadataVersion();
   }

@@ -27,7 +27,7 @@
 
 - Token：`.codex/skills/wego-design/colors_and_type.css`、`.codex/skills/wego-design/css.json`
 - 组件：`.codex/skills/wego-design/components/index.json`、`.codex/skills/wego-design/components/{slug}.json`、`.codex/skills/wego-design/preview/component-{slug}.html`
-- 页面范式与组合：`.codex/skills/wego-design/uikit-plan.json`
+- 明确页面范式：`.codex/skills/wego-design/uikit-plan.json`（未命中时按设计决策方法自主组合）
 - 消费边界：`.codex/skills/wego-design/library-consumption.json`
 - 技能职责和交接：各技能 `SKILL.md` 与其直接引用的 `references/`
 - 仓库级硬约束：`AGENTS.md`

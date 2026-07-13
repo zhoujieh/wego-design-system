@@ -23,7 +23,7 @@
     },
     "uiKit": {
       "files": ["uikit-plan.json", "ui_kits/*/index.html"],
-      "purpose": "页面范式、组合约束、fallback 和 presentation 的参考；不是业务宿主模板。",
+      "purpose": "已验证页面范式、组合约束与范式 presentation 的参考；未命中范式时按设计决策方法自主组合，不是业务宿主模板。",
       "copyable": false
     },
     "icons": {
@@ -48,6 +48,24 @@
     "format": "var(--token-name)",
     "rule": "场景 token_whitelist 只能使用实际声明变量；禁止根据 css.json 或语义猜变量名。"
   },
+  "sceneTokenPolicy": {
+    "baseTokens": [
+      "--bg-page",
+      "--bg-surface",
+      "--bg-panel",
+      "--bg-subtle"
+    ],
+    "baseTokenPrefixes": [
+      "--text-",
+      "--heading-",
+      "--body-",
+      "--font-weight-",
+      "--spacer-",
+      "--layout-",
+      "--border-neutral-"
+    ],
+    "rule": "场景 token_whitelist 只能包含本页 component_bindings 对应组件的 runtimeTokens，以及本策略声明的基础 Token；组件 localTokens、其他组件 Token、原始 palette 与状态色不得直接加入。"
+  },
   "iconUsage": {
     "fontClassMode": {
       "syntax": "<i class=\"wego-iconfont-s icon-{name}\"></i>",
@@ -67,6 +85,7 @@
     "sceneFiles": ["scene.js", "scene.css", "design-decisions.json"],
     "registration": "window.WegoApp.registerScene",
     "deliveryCopy": "wego-app/lib",
+    "presentationTypes": ["host-tab", "push", "modal", "sheet", "full-screen-modal"],
     "rules": [
       "新场景必须新增 route、scene.js 与 scene.css；已有场景稳定复用 route_id。",
       "业务模板只能来自 scene.js 注册，不得通过 fetch/XHR 加载本地 HTML。",

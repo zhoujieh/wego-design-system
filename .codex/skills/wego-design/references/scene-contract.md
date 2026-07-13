@@ -16,7 +16,7 @@ wego-app/scenes/{中文业务场景}/design-decisions.json
 ## 2. scene.js
 
 - 通过 `window.WegoApp.registerScene` 注册 `routeId`、template、presentation 和 `init`。
-- template 根节点必须含 `data-surface-id`、`data-route-id`、`data-page-pattern`。
+- template 根节点必须含 `data-surface-id`、`data-route-id`、`data-layout-mode`。`pattern` 模式额外含 `data-page-pattern`；`composed` 模式不得伪造页面范式标记。
 - 每个正式组件实例必须含稳定 `data-dd-id`、`data-component-slug`、`data-rule-source`；涉及 Token 的元素用 `data-token-binding` 标明属性与变量。
 - 所有交互触发器必须有稳定 `data-dom-id`，并能从 `interaction_contract` 追溯到目标 route 或 overlay。
 - 场景状态只写当前场景 `ctx.state` 或明确的共享 `ctx.appState` 键；不得直接写其他场景的 state。
@@ -31,11 +31,13 @@ wego-app/scenes/{中文业务场景}/design-decisions.json
 
 由 `extract-design-decisions.mjs` 从场景目录生成，包含：
 
-- 场景身份、页面范式、presentation、设计系统版本快照。
+- 场景身份、布局模式、页面范式（如命中）、presentation、设计系统版本快照。
 - 完整 `prompt_contract`、实际组件 class、Token 绑定、Preview/契约输入和规则引用。
 - `state_contract`、交互合同、视觉检查、拥挤检查、守卫结果、修复次数和基线信息。
 - 任何影响 DOM、class、Token、状态、路由或 data 标注的修改后必须重新生成。
 - 生成结果含 `source_sha256`；即使只改动文案或注释，只要源码变化，旧决策文件也会被视为过期并要求重提取。
+
+`prompt_contract` 的唯一标准格式见 [场景设计决策方法的“当前标准 prompt_contract”](design-decisions.md#当前标准-prompt_contract)。不得仅依据本节摘要手写字段；提取器会校验完整结构，场景守卫还会校验设计系统快照、组件输入、组件契约根节点、Token 绑定和场景源码的一致性。
 
 ## 5. 完成门禁
 

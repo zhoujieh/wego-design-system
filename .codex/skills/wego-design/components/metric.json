@@ -110,7 +110,8 @@
   ],
   "structurePatterns": [
     "价格场景：带货币符号 ¥、主数字用 Medium 字重、小数部分和货币符号小写(60-75% 或 10-14px 同号)、末尾零省略(￥20、￥20.5、￥20.99)。",
-    "数据场景：无货币符号、默认黑色、>=10万显示万后缀、非金额末尾零省略。",
+    "数值结构：金额和数据都必须先拆分为 integer、可选 decimal、可选 symbol、可选 unit；decimal 必须包含小数点和小数位，纯整数省略 decimal，不创建空节点。",
+    "数据场景：无货币符号、默认黑色、>=10万显示万后缀、非金额末尾零省略；百分比、万单位和未省略小数同样拆分 integer 与 decimal。",
     "区间价：~ 不小写、仅开头用货币符号；区间低价组(.metric__value)和高价组(.metric__value--high)是两个独立 flex item，中间用 .metric__range-sep 连接，换行时优先在 ~ 处断开。",
     "划线价：使用 Regular 字重、灰色 --text-tertiary、字号与小写部分一致。",
     "前缀(如会员)使用 --body-xs-font-family、10px、与主色同色。",
@@ -134,12 +135,14 @@
     "需要计算或修改的数字不应省略。",
     "范围格式用 ~ 连接，仅开头用货币符号(￥20 ~ 30.99)。",
     "默认单行展示；当容器宽度不足以容纳完整内容时(如商品卡片价格列、紧凑列表项)，加 .metric--wrap 允许换行，换行后保持基线对齐。",
-    "不要在数字内部断行；integer、decimal、unit 是最小不可拆分单元。"
+    "不要在数字内部断行；integer、decimal、unit 是最小不可拆分单元。",
+    "金额和统计数据必须以结构化字段渲染：integer 始终独立，存在小数时 decimal 独立；不要把 128.00、20.8% 或 22.99万作为一个 integer 文本。"
   ],
   "doNotInvent": [
     "不要把 metric 扩成统计面板、图表或多行数据表格。",
     "不要在 metric 组件内发明新的字号档位。",
-    "不要用 inline style 控制颜色或字号。"
+    "不要用 inline style 控制颜色或字号。",
+    "不要把完整小数金额或统计数值塞入 .metric__integer；不要为纯整数创建空 .metric__decimal。"
   ],
   "domAnatomy": {
     "root": ".metric",
@@ -166,6 +169,26 @@
       ".metric__integer",
       ".metric__decimal"
     ],
+    "numericStructure": {
+      "integer": {
+        "selector": ".metric__integer",
+        "required": true,
+        "content": "只包含整数部分，可含千分位分隔符"
+      },
+      "decimal": {
+        "selector": ".metric__decimal",
+        "requiredWhen": "规范化数值存在小数位",
+        "content": "小数点和小数位"
+      },
+      "symbol": {
+        "selector": ".metric__symbol",
+        "requiredWhen": "金额展示"
+      },
+      "unit": {
+        "selector": ".metric__unit",
+        "requiredWhen": "存在万、亿、百分比或其他单位"
+      }
+    },
     "optionalChildren": [
       ".metric__prefix",
       ".metric__unit",

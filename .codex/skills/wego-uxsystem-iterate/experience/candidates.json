@@ -343,36 +343,6 @@
       "updated_at": "2026-07-10T00:00:00Z"
     },
     {
-      "id": "exp-derived-value-form-input-feedback-grouping",
-      "normalized_key": "derived-value-feedback-group",
-      "title": "派生值编辑反馈分组",
-      "status": "awaiting-confirmation",
-      "occurrence_count": 1,
-      "threshold": 1,
-      "primary_owner": "wego-design",
-      "secondary_owners": [],
-      "ownership_reason": "页面组合约束属于 UI Kit。",
-      "rule_ownership": {
-        "category": "ui-kit",
-        "canonical": {
-          "file": ".codex/skills/wego-design/uikit-plan.json",
-          "locator": "/pagePatterns",
-          "rule_id": "derived-value-edit-feedback"
-        }
-      },
-      "runtime_reachability": {
-        "consumer_skill": "wego-design",
-        "output_field": "component_mapping",
-        "downstream_consumer": "wego-design",
-        "acceptance_check": "wego-design"
-      },
-      "evidence": [
-        "派生值编辑观察"
-      ],
-      "created_at": "2026-07-10T00:00:00Z",
-      "updated_at": "2026-07-10T00:00:00Z"
-    },
-    {
       "id": "exp-tests-layout-check-multilevel-visual-validation",
       "normalized_key": "multilevel-layout-validation",
       "title": "多层级布局验收",
@@ -525,39 +495,6 @@
       ],
       "created_at": "2026-07-11T18:00:00Z",
       "updated_at": "2026-07-11T18:00:00Z"
-    },
-    {
-      "id": "exp-blueprint-layout-contract-must-be-structured-and-consumed",
-      "normalized_key": "blueprint-layout-contract-runtime",
-      "title": "Blueprint 布局契约结构化下发",
-      "status": "promoted",
-      "occurrence_count": 1,
-      "threshold": 1,
-      "primary_owner": "wego-design",
-      "secondary_owners": [
-        "wego-design",
-        "wego-design"
-      ],
-      "ownership_reason": "问题首次发生在 fallback blueprint 的布局决策只停留在自然语言描述，没有进入下游可消费字段。",
-      "rule_ownership": {
-        "category": "ui-kit",
-        "canonical": {
-          "file": ".codex/skills/wego-design/uikit-plan.json",
-          "locator": "/pagePatterns",
-          "rule_id": "continuous-content-feed-layout-contract"
-        }
-      },
-      "runtime_reachability": {
-        "consumer_skill": "wego-design",
-        "output_field": "design-decisions.json.prompt_contract.layout_contract",
-        "downstream_consumer": "wego-design, validate-scene-contract",
-        "acceptance_check": "validate-scene-contract + validate-wego-design"
-      },
-      "evidence": [
-        "商品动态流 Benchmark 连续两轮仍发明页面边距并让媒体压过文本，说明仅有自然语言规则没有形成运行时闭环。"
-      ],
-      "created_at": "2026-07-12T00:00:00Z",
-      "updated_at": "2026-07-12T00:00:00Z"
     },
     {
       "id": "exp-image-dynamic-usage-must-add-is-loaded",
@@ -713,71 +650,6 @@
       },
       "evidence": [
         "AI 在 push/modal/sheet 下钻页 route 上声明 entry.type，导致宿主入口列表出现非预期项；entry.type 仅用于宿主入口列表生成，打开方式由 presentation.type 决定。"
-      ],
-      "created_at": "2026-07-12T00:00:00Z",
-      "updated_at": "2026-07-12T00:00:00Z"
-    },
-    {
-      "id": "exp-feed-page-content-click-priority",
-      "normalized_key": "feed-content-click",
-      "title": "内容流列表项优先用内容承载下钻",
-      "status": "promoted",
-      "occurrence_count": 1,
-      "threshold": 1,
-      "primary_owner": "wego-design",
-      "secondary_owners": [
-        "wego-design"
-      ],
-      "ownership_reason": "页面级交互模式属于 UI Kit。",
-      "rule_ownership": {
-        "category": "ui-kit",
-        "canonical": {
-          "file": ".codex/skills/wego-design/uikit-plan.json",
-          "locator": "/pagePatterns",
-          "rule_id": "continuous-content-feed-content-click-priority"
-        }
-      },
-      "runtime_reachability": {
-        "consumer_skill": "wego-design",
-        "output_field": "page_presentation",
-        "downstream_consumer": "wego-design",
-        "acceptance_check": "wego-design"
-      },
-      "evidence": [
-        "AI 在内容流列表项右侧额外加'查看详情'按钮，导致与标题/图片重复承载下钻入口；列表项内容本身可点击时应优先用内容点击。"
-      ],
-      "created_at": "2026-07-12T00:00:00Z",
-      "updated_at": "2026-07-12T00:00:00Z"
-    },
-    {
-      "id": "exp-object-detail-page-fallback-blueprint",
-      "normalized_key": "object-detail-blueprint",
-      "title": "新增 object-detail-page fallback blueprint",
-      "status": "promoted",
-      "occurrence_count": 1,
-      "threshold": 1,
-      "primary_owner": "wego-design",
-      "secondary_owners": [
-        "wego-design",
-        "wego-design"
-      ],
-      "ownership_reason": "页面范式由 UI Kit 定义。",
-      "rule_ownership": {
-        "category": "ui-kit",
-        "canonical": {
-          "file": ".codex/skills/wego-design/uikit-plan.json",
-          "locator": "/pagePatterns",
-          "rule_id": "object-detail-page-blueprint"
-        }
-      },
-      "runtime_reachability": {
-        "consumer_skill": "wego-design",
-        "output_field": "page_presentation",
-        "downstream_consumer": "wego-design",
-        "acceptance_check": "wego-design"
-      },
-      "evidence": [
-        "详情页在现有 UI Kit/pagePattern 无精确范式时被错误套用 generic-mobile-task-page，导致背景色、边距、主图比例、底部操作栏对齐决策偏离；新增 object-detail-page fallback blueprint 收敛详情页通用约束。"
       ],
       "created_at": "2026-07-12T00:00:00Z",
       "updated_at": "2026-07-12T00:00:00Z"
@@ -975,70 +847,6 @@
       "updated_at": "2026-07-12T00:00:00Z"
     },
     {
-      "id": "exp-feed-edge-mode-and-content-carrier-linkage",
-      "normalized_key": "feed-edge-mode-carrier-linkage",
-      "title": "连续内容流边距与内容承载方式联动",
-      "status": "promoted",
-      "occurrence_count": 1,
-      "threshold": 1,
-      "primary_owner": "wego-design",
-      "secondary_owners": [
-        "wego-design"
-      ],
-      "ownership_reason": "页面边距与内容承载方式的联动属于页面范式。",
-      "rule_ownership": {
-        "category": "ui-kit",
-        "canonical": {
-          "file": ".codex/skills/wego-design/uikit-plan.json",
-          "locator": "/pagePatterns",
-          "rule_id": "continuous-content-feed-edge-mode-carrier-linkage"
-        }
-      },
-      "runtime_reachability": {
-        "consumer_skill": "wego-design",
-        "output_field": "design-decisions.json.prompt_contract.layout_contract",
-        "downstream_consumer": "wego-design",
-        "acceptance_check": "wego-design"
-      },
-      "evidence": [
-        "AI 在连续内容流中选择灰底+白色 card 但横向 padding=0，导致卡片贴边、圆角失效；M0 通栏必须白底不用 card，M8 卡片模式必须配合 8px 横向 padding。"
-      ],
-      "created_at": "2026-07-12T00:00:00Z",
-      "updated_at": "2026-07-12T00:00:00Z"
-    },
-    {
-      "id": "exp-feed-list-item-core-action-right-aligned",
-      "normalized_key": "feed-list-item-action-position",
-      "title": "列表项核心操作靠右",
-      "status": "promoted",
-      "occurrence_count": 1,
-      "threshold": 1,
-      "primary_owner": "wego-design",
-      "secondary_owners": [
-        "wego-design"
-      ],
-      "ownership_reason": "列表项操作位置属于页面范式。",
-      "rule_ownership": {
-        "category": "ui-kit",
-        "canonical": {
-          "file": ".codex/skills/wego-design/uikit-plan.json",
-          "locator": "/pagePatterns",
-          "rule_id": "continuous-content-feed-core-action-right"
-        }
-      },
-      "runtime_reachability": {
-        "consumer_skill": "wego-design",
-        "output_field": "design-decisions.json.prompt_contract.layout_contract",
-        "downstream_consumer": "wego-design",
-        "acceptance_check": "wego-design"
-      },
-      "evidence": [
-        "AI 在动态列表项操作行把核心操作（一键转发）放左侧、次要操作（更多）放右侧，违反'主要操作放右侧'原则；列表项核心操作应靠右对齐。"
-      ],
-      "created_at": "2026-07-12T00:00:00Z",
-      "updated_at": "2026-07-12T00:00:00Z"
-    },
-    {
       "id": "exp-font-size-weight-decision-by-content-role",
       "normalized_key": "font-size-weight-content-role",
       "title": "字号字重按内容角色决策",
@@ -1226,8 +1034,8 @@
     {
       "id": "exp-metric-price-integer-decimal-must-separate",
       "normalized_key": "metric-integer-decimal-separation",
-      "title": "metric 价格必须分离 integer 和 decimal",
-      "status": "awaiting-confirmation",
+      "title": "metric 金额与数据必须分离 integer 和 decimal",
+      "status": "promoted",
       "occurrence_count": 1,
       "threshold": 1,
       "primary_owner": "wego-design",
@@ -1239,7 +1047,7 @@
         "category": "component-contract",
         "canonical": {
           "file": ".codex/skills/wego-design/components/metric.json",
-          "locator": "/runtimeTokens",
+          "locator": "/domAnatomy/numericStructure",
           "rule_id": "metric-price-integer-decimal-separation"
         }
       },
@@ -1250,10 +1058,19 @@
         "acceptance_check": "wego-design"
       },
       "evidence": [
-        "动态商品流 Benchmark 中 AI 将完整金额字符串（如 128.00）整个塞进 .metric__integer，没有用 .metric__decimal 分离小数部分，导致 metric--16 下小数部分应为 12px 但实际继承 integer 的 16px；模型自造 formatPrice 函数返回字符串而非按 domAnatomy 分离渲染。"
+        "动态商品流 Benchmark 中 AI 将完整金额字符串（如 128.00）整个塞进 .metric__integer，没有用 .metric__decimal 分离小数部分，导致 metric--16 下小数部分应为 12px 但实际继承 integer 的 16px；模型自造 formatPrice 函数返回字符串而非按 domAnatomy 分离渲染。",
+        "用户确认该规则同样适用于 metric 的统计数据展示：百分比、万/亿单位和未省略小数必须拆分 integer、decimal 与 unit。"
       ],
       "created_at": "2026-07-12T00:00:00Z",
-      "updated_at": "2026-07-12T00:00:00Z"
+      "updated_at": "2026-07-13T00:00:00Z",
+      "promoted_at": "2026-07-13T00:00:00Z",
+      "promotion_landing": {
+        "file": ".codex/skills/wego-design/components/metric.json",
+        "locator": "/domAnatomy/numericStructure",
+        "rule_id": "metric-price-integer-decimal-separation",
+        "constraint_area": "金额与统计数值的结构化渲染",
+        "description": "metric 的金额与统计数据必须拆分整数、小数、货币符号和单位节点；纯整数省略小数节点。"
+      }
     },
     {
       "id": "exp-iconfont-base-class-must-be-wego-iconfont-s",
@@ -1385,7 +1202,7 @@
       "promoted_at": "2026-07-12T00:00:00Z",
       "promotion_landing": {
         "file": ".codex/skills/wego-design/references/design-decisions.md",
-        "locator": "固定消费路径 第6步",
+        "locator": "Typography",
         "rule_id": "design-decisions-css-token-binding-precision",
         "constraint_area": "design-decisions 输出格式精度要求",
         "description": "写入 design-decisions 时，每个需要字号/字重/颜色的业务元素必须直接输出 CSS 选择器到 Token 的绑定，不得仅写语义约束。wego-design 只做翻译执行，不做二次推理。"
@@ -1407,7 +1224,7 @@
         "category": "skill-runtime-flow",
         "canonical": {
           "file": ".codex/skills/wego-design/references/design-decisions.md",
-          "locator": "Preview-first 选择过程",
+        "locator": "Components",
           "rule_id": "component-visual-usage-consume-registered"
         }
       },
@@ -1425,7 +1242,7 @@
       "promoted_at": "2026-07-13T00:00:00Z",
       "promotion_landing": {
         "file": ".codex/skills/wego-design/references/design-decisions.md",
-        "locator": "Preview-first 选择过程 第6步",
+        "locator": "Components",
         "rule_id": "component-visual-usage-consume-registered",
         "constraint_area": "组件消费优先级",
         "description": "当页面元素的视觉用途与已注册组件匹配时（标签→tag、角标→badge、操作按钮→button、列表行→cell、头像→avatar），必须消费对应正式组件，不得用场景 CSS 复刻组件视觉模式。badge 角标定位必须基于设了 position:relative 的宿主元素。"
@@ -1447,7 +1264,7 @@
         "category": "skill-runtime-flow",
         "canonical": {
           "file": ".codex/skills/wego-design/references/design-decisions.md",
-          "locator": "视觉约束",
+          "locator": "Colors",
           "rule_id": "no-large-color-background-app-center-svg-priority"
         }
       },
@@ -1465,7 +1282,7 @@
       "promoted_at": "2026-07-13T00:00:00Z",
       "promotion_landing": {
         "file": ".codex/skills/wego-design/references/design-decisions.md",
-        "locator": "视觉约束",
+        "locator": "Colors",
         "rule_id": "no-large-color-background-app-center-svg-priority",
         "constraint_area": "大面积彩色背景禁止与 app-center SVG 优先",
         "description": "禁止大面积彩色/渐变背景，状态色 Token 只用于点缀。功能入口图标优先使用 assets/icons/app-center/ SVG 资源，无对应 SVG 时才用 iconfont 并查证类名。"
