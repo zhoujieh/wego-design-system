@@ -56,7 +56,7 @@
 .my-tab-profile__actions {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: var(--spacer-12);
   flex-wrap: wrap;
 }
@@ -70,7 +70,7 @@
 
 .my-tab-membership__block {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: var(--spacer-12);
 }
@@ -112,7 +112,7 @@
 }
 
 .my-tab-space__usage {
-  color: var(--text-brand);
+  color: var(--text-default);
   font-size: var(--body-lg-font-size);
   line-height: var(--body-lg-line-height);
   font-weight: var(--font-weight-semibold);
@@ -135,7 +135,7 @@
 .my-tab-app-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--spacer-16) var(--spacer-8);
+  gap: var(--spacer-12) var(--spacer-8);
 }
 
 .my-tab-app-button {
@@ -152,8 +152,8 @@
 }
 
 .my-tab-app-button__icon {
-  width: var(--size-40);
-  height: var(--size-40);
+  width: var(--size-32);
+  height: var(--size-32);
   display: block;
 }
 
@@ -162,24 +162,26 @@
   font-size: var(--body-sm-font-size);
   line-height: var(--body-sm-line-height);
   text-align: center;
+  max-width: 100%;
 }
 
 .my-tab-order-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--spacer-8);
 }
 
 .my-tab-order-button {
   border: 0;
-  padding: var(--spacer-12) var(--spacer-4);
+  min-height: 56px;
+  padding: var(--spacer-12);
   margin: 0;
   border-radius: var(--radius-8);
-  background: var(--bg-subtle);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-neutral-l2);
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: var(--spacer-4);
+  justify-content: center;
   color: inherit;
   font: inherit;
 }
@@ -189,13 +191,6 @@
   font-size: var(--body-sm-font-size);
   line-height: var(--body-sm-line-height);
   font-weight: var(--font-weight-medium);
-  text-align: center;
-}
-
-.my-tab-order-button__hint {
-  color: var(--text-tertiary);
-  font-size: var(--body-xs-font-size);
-  line-height: var(--body-xs-line-height);
   text-align: center;
 }
 
@@ -211,10 +206,6 @@
 
 @media (max-width: 359px) {
   .my-tab-app-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .my-tab-order-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }

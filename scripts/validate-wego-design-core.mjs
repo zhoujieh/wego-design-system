@@ -97,6 +97,20 @@ function checkLibrarySchema() {
   if (index.schemaVersion !== 4 || index.componentContractSchemaVersion !== 4) add('error', 'library.component_schema', '组件索引必须使用 schemaVersion 4', path.join(libraryRoot, 'components/index.json'));
   if (plan.schemaVersion !== 5 || consumption.schemaVersion !== 4) add('error', 'library.schema', 'UI Kit 必须使用 schemaVersion 5，消费契约必须使用 schemaVersion 4', libraryRoot);
   if (!Number.isInteger(metadata.version) || metadata.version < 1) add('error', 'library.version', 'metadata.version 必须为正整数', path.join(libraryRoot, 'metadata.json'));
+  const expectedReadOrder = [
+    'AGENTS.md',
+    'effective iteration + confirmed prototype_brief',
+    'SKILL.md',
+    'references/design-decisions.md',
+    'library-consumption.json',
+    'uikit-plan.json',
+    'components/index.json',
+    'preview/component-{slug}.html',
+    'components/{slug}.json',
+    'colors_and_type.css',
+    'references/scene-contract.md'
+  ];
+  if (JSON.stringify(consumption.recommendedReadOrder || []) !== JSON.stringify(expectedReadOrder)) add('error', 'library.read_order', 'library-consumption.json 必须声明当前唯一读取顺序', path.join(libraryRoot, 'library-consumption.json'));
   const slugs = new Set((index.components || []).map(item => item.slug));
   report.metrics.registeredComponents = slugs.size;
   for (const component of index.components || []) {
@@ -164,7 +178,7 @@ function checkAppHost() {
     const js = fs.readFileSync(path.join(dir, 'scene.js'), 'utf8');
     const css = fs.readFileSync(path.join(dir, 'scene.css'), 'utf8');
     if (!js.includes('window.WegoApp.registerScene')) add('error', 'scene.register_missing', `场景 ${scene} 未注册 registerScene`, path.join(dir, 'scene.js'));
-    if (!js.includes('data-surface-id') || !js.includes('data-route-id') || !js.includes('data-page-pattern')) add('error', 'scene.annotation_missing', `场景 ${scene} 缺少根设计标注`, path.join(dir, 'scene.js'));
+    if (!js.includes('data-surface-id') || !js.includes('data-route-id') || !js.includes('data-layout-mode')) add('error', 'scene.annotation_missing', `场景 ${scene} 缺少根设计标注`, path.join(dir, 'scene.js'));
     if (rawColors(`${js}\n${css}`).length) add('error', 'scene.raw_color', `场景 ${scene} 含硬编码颜色`, dir);
     const validation = spawnSync(process.execPath, ['scripts/validate-scene-contract.mjs', path.relative(root, dir), '--json'], { cwd: root, encoding: 'utf8' });
     if (validation.status !== 0) {

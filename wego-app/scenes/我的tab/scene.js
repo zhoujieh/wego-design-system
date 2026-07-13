@@ -14,7 +14,7 @@
   },
   "prompt_contract": {
     "design_system_snapshot": {
-      "version": 408,
+      "version": 409,
       "token_css": "colors_and_type.css",
       "component_css": "components.css",
       "component_inputs": [
@@ -69,13 +69,12 @@
       "var(--heading-xs-font-size)",
       "var(--heading-xs-line-height)",
       "var(--radius-8)",
-      "var(--size-40)",
+      "var(--size-32)",
       "var(--spacer-12)",
       "var(--spacer-16)",
       "var(--spacer-24)",
       "var(--spacer-4)",
       "var(--spacer-8)",
-      "var(--text-brand)",
       "var(--text-default)",
       "var(--text-secondary)",
       "var(--text-tertiary)"
@@ -113,8 +112,8 @@
         "selector": ".my-tab-space__usage",
         "content_role": "空间用量数字",
         "css_property": "color",
-        "token": "var(--text-brand)",
-        "rule_ref": "colors_and_type.css#/text-brand"
+        "token": "var(--text-default)",
+        "rule_ref": "colors_and_type.css#/text-default"
       },
       {
         "selector": ".my-tab-section__title",
@@ -131,11 +130,11 @@
         "rule_ref": "colors_and_type.css#/text-secondary"
       },
       {
-        "selector": ".my-tab-order-button__hint",
-        "content_role": "订单状态说明",
+        "selector": ".my-tab-order-button__label",
+        "content_role": "订单状态文案",
         "css_property": "color",
-        "token": "var(--text-tertiary)",
-        "rule_ref": "colors_and_type.css#/text-tertiary"
+        "token": "var(--text-default)",
+        "rule_ref": "colors_and_type.css#/text-default"
       }
     ],
     "component_bindings": [
@@ -170,22 +169,6 @@
         "contract_file": "components/tag.json"
       },
       {
-        "slot": "primary-actions",
-        "slug": "button",
-        "reason": "员工新增和会员续费使用正式按钮承载页面轻操作。",
-        "root_class": "btn",
-        "required_structure": [],
-        "modifiers": ["btn--medium", "btn--strong", "btn--sm"],
-        "variant_dimensions": {
-          "emphasis": "medium",
-          "size": "sm",
-          "iconMode": "text-only",
-          "state": "default"
-        },
-        "source": "preview/component-button.html",
-        "contract_file": "components/button.json"
-      },
-      {
         "slot": "surface-cards",
         "slug": "card",
         "reason": "页面主要区块以白底表面卡片承载信息分组。",
@@ -202,7 +185,7 @@
       {
         "slot": "text-links",
         "slug": "link",
-        "reason": "员工管理、空间管理和全部采用独立文字链接表达轻跳转。",
+        "reason": "添加员工、员工管理、空间管理和全部采用独立文字链接表达轻跳转。",
         "root_class": "link",
         "required_structure": [],
         "modifiers": [],
@@ -213,6 +196,22 @@
         },
         "source": "preview/component-link.html",
         "contract_file": "components/link.json"
+      },
+      {
+        "slot": "membership-primary-action",
+        "slug": "button",
+        "reason": "会员续费作为页面唯一明确主操作，使用正式 strong 小按钮承载。",
+        "root_class": "btn",
+        "required_structure": [],
+        "modifiers": ["btn--strong", "btn--sm"],
+        "variant_dimensions": {
+          "emphasis": "strong",
+          "size": "sm",
+          "iconMode": "text-only",
+          "state": "default"
+        },
+        "source": "preview/component-button.html",
+        "contract_file": "components/button.json"
       },
       {
         "slot": "settings-cells",
@@ -300,7 +299,7 @@
   "visual_check": {
     "status": "passed",
     "viewports": [375, 393],
-    "checked_at": "2026-07-13T21:40:00+08:00"
+    "checked_at": "2026-07-13T22:38:14+08:00"
   },
   "crowding_check": {
     "status": "passed",
@@ -308,8 +307,8 @@
       "375px 首屏无横向溢出",
       "393px 首屏无横向溢出",
       "顶部身份区按钮与标签未挤压换行失衡",
-      "四列应用入口在两种视口下均保持对齐",
-      "订单状态区五项在两种视口下可完整阅读",
+      "应用入口图标缩小后在两种视口下仍保持对齐",
+      "订单状态区两行布局在两种视口下可完整阅读",
       "设置列表箭头与标题未发生重叠"
     ]
   }
@@ -335,7 +334,7 @@ window.WegoApp.registerScene({
             <div class="my-tab-profile__meta">
               <div class="my-tab-profile__header">
                 <span class="my-tab__name" data-token-binding="font-size:var(--heading-sm-font-size);color:var(--text-default)">周小棠</span>
-                <span class="tag tag--20 tag--brand-stroke" data-dd-id="tag-vip" data-component-slug="tag" data-rule-source="preview/component-tag.html">
+                <span class="tag tag--20 tag--gray" data-dd-id="tag-vip" data-component-slug="tag" data-rule-source="preview/component-tag.html">
                   <span class="tag__label">VIP</span>
                 </span>
               </div>
@@ -350,10 +349,8 @@ window.WegoApp.registerScene({
             </div>
           </div>
           <div class="my-tab-profile__actions">
-            <button type="button" class="btn btn--medium btn--sm" data-dd-id="button-add-staff" data-component-slug="button" data-rule-source="preview/component-button.html" data-dom-id="my-tab-add-staff" data-toast-message="员工新增入口开发中" onclick="window.WegoApp.toast(this.dataset.toastMessage); return false;">
-              +员工
-            </button>
             <div class="my-tab-profile__links">
+              <a href="javascript:void(0)" class="link" data-dd-id="link-add-staff" data-component-slug="link" data-rule-source="preview/component-link.html" data-dom-id="my-tab-add-staff" data-toast-message="添加员工入口开发中" onclick="window.WegoApp.toast(this.dataset.toastMessage); return false;">添加员工</a>
               <a href="javascript:void(0)" class="link" data-dd-id="link-staff-manage" data-component-slug="link" data-rule-source="preview/component-link.html" data-dom-id="my-tab-staff-manage" data-toast-message="员工管理入口开发中" onclick="window.WegoApp.toast(this.dataset.toastMessage); return false;">员工管理</a>
             </div>
           </div>
@@ -365,8 +362,8 @@ window.WegoApp.registerScene({
           <div class="my-tab-membership__block">
             <div class="my-tab-membership__copy">
               <span class="my-tab__eyebrow">会员服务</span>
-              <span class="my-tab__headline" data-token-binding="font-size:var(--heading-xs-font-size);color:var(--text-default)">VIP年度超级会员</span>
-              <span class="my-tab__subcopy" data-token-binding="color:var(--text-secondary)">全年店铺经营能力持续可用</span>
+              <span class="my-tab__headline" data-token-binding="font-size:var(--heading-xs-font-size);color:var(--text-default)">年度超级会员</span>
+              <span class="my-tab__subcopy" data-token-binding="color:var(--text-secondary)">会员有效期内可继续使用经营能力</span>
             </div>
             <button type="button" class="btn btn--strong btn--sm" data-dd-id="button-renew" data-component-slug="button" data-rule-source="preview/component-button.html" data-dom-id="my-tab-renew" data-toast-message="续费流程开发中" onclick="window.WegoApp.toast(this.dataset.toastMessage); return false;">
               去续费
@@ -375,7 +372,8 @@ window.WegoApp.registerScene({
           <div class="my-tab-space">
             <div class="my-tab-membership__copy">
               <span class="my-tab__eyebrow">空间状态</span>
-              <span class="my-tab-space__usage" data-token-binding="color:var(--text-brand);font-size:var(--body-lg-font-size)">117.29G/360G</span>
+              <span class="my-tab-space__usage" data-token-binding="color:var(--text-default);font-size:var(--body-lg-font-size)">117.29G / 360G</span>
+              <span class="my-tab__subcopy" data-token-binding="color:var(--text-secondary)">当前已用空间</span>
             </div>
             <a href="javascript:void(0)" class="link" data-dd-id="link-space-manage" data-component-slug="link" data-rule-source="preview/component-link.html" data-dom-id="my-tab-space-manage" data-toast-message="空间管理入口开发中" onclick="window.WegoApp.toast(this.dataset.toastMessage); return false;">空间管理</a>
           </div>
@@ -385,7 +383,7 @@ window.WegoApp.registerScene({
       <div class="card card--surface" data-dd-id="card-apps" data-component-slug="card" data-rule-source="preview/component-card.html">
         <div class="card__content my-tab-card">
           <div class="my-tab-section__header">
-            <span class="my-tab-section__title" data-token-binding="font-size:var(--heading-xs-font-size);color:var(--text-default)">应用功能</span>
+            <span class="my-tab-section__title" data-token-binding="font-size:var(--heading-xs-font-size);color:var(--text-default)">常用应用</span>
           </div>
           <div class="my-tab-app-grid">
             <button type="button" class="my-tab-app-button" data-dom-id="app-yijiankaituan" data-toast-message="一键开团功能开发中" onclick="window.WegoApp.toast(this.dataset.toastMessage); return false;">
@@ -399,10 +397,6 @@ window.WegoApp.registerScene({
             <button type="button" class="my-tab-app-button" data-dom-id="app-shoukuanma" data-toast-message="收款码功能开发中" onclick="window.WegoApp.toast(this.dataset.toastMessage); return false;">
               <img class="my-tab-app-button__icon" src="./lib/assets/icons/app-center/收款码.svg" alt="" />
               <span class="my-tab-app-button__label" data-token-binding="color:var(--text-secondary)">收款码</span>
-            </button>
-            <button type="button" class="my-tab-app-button" data-dom-id="app-wodexiaodian" data-toast-message="我的小店功能开发中" onclick="window.WegoApp.toast(this.dataset.toastMessage); return false;">
-              <img class="my-tab-app-button__icon" src="./lib/assets/icons/app-center/我的小店.svg" alt="" />
-              <span class="my-tab-app-button__label" data-token-binding="color:var(--text-secondary)">我的小店</span>
             </button>
             <button type="button" class="my-tab-app-button" data-dom-id="app-huiyuanguanli" data-toast-message="会员管理功能开发中" onclick="window.WegoApp.toast(this.dataset.toastMessage); return false;">
               <img class="my-tab-app-button__icon" src="./lib/assets/icons/app-center/粉丝会员卡.svg" alt="" />
@@ -428,22 +422,6 @@ window.WegoApp.registerScene({
               <img class="my-tab-app-button__icon" src="./lib/assets/icons/app-center/团队管理.svg" alt="" />
               <span class="my-tab-app-button__label" data-token-binding="color:var(--text-secondary)">团队管理</span>
             </button>
-            <button type="button" class="my-tab-app-button" data-dom-id="app-zhuanxiangxiaochengxu" data-toast-message="专享小程序功能开发中" onclick="window.WegoApp.toast(this.dataset.toastMessage); return false;">
-              <img class="my-tab-app-button__icon" src="./lib/assets/icons/app-center/专享小程序.svg" alt="" />
-              <span class="my-tab-app-button__label" data-token-binding="color:var(--text-secondary)">专享小程序</span>
-            </button>
-            <button type="button" class="my-tab-app-button" data-dom-id="app-xiangcewangzhi" data-toast-message="相册网址功能开发中" onclick="window.WegoApp.toast(this.dataset.toastMessage); return false;">
-              <img class="my-tab-app-button__icon" src="./lib/assets/icons/app-center/相册网址.svg" alt="" />
-              <span class="my-tab-app-button__label" data-token-binding="color:var(--text-secondary)">相册网址</span>
-            </button>
-            <button type="button" class="my-tab-app-button" data-dom-id="app-siyujianpan" data-toast-message="私域键盘功能开发中" onclick="window.WegoApp.toast(this.dataset.toastMessage); return false;">
-              <img class="my-tab-app-button__icon" src="./lib/assets/icons/app-center/私域键盘.svg" alt="" />
-              <span class="my-tab-app-button__label" data-token-binding="color:var(--text-secondary)">私域键盘</span>
-            </button>
-            <button type="button" class="my-tab-app-button" data-dom-id="app-pc" data-toast-message="PC(电脑版)功能开发中" onclick="window.WegoApp.toast(this.dataset.toastMessage); return false;">
-              <img class="my-tab-app-button__icon" src="./lib/assets/icons/app-center/PC版.svg" alt="" />
-              <span class="my-tab-app-button__label" data-token-binding="color:var(--text-secondary)">PC(电脑版)</span>
-            </button>
             <button type="button" class="my-tab-app-button" data-dom-id="app-gengduo" data-toast-message="更多应用功能开发中" onclick="window.WegoApp.toast(this.dataset.toastMessage); return false;">
               <img class="my-tab-app-button__icon" src="./lib/assets/icons/app-center/营销中心.svg" alt="" />
               <span class="my-tab-app-button__label" data-token-binding="color:var(--text-secondary)">更多应用</span>
@@ -461,23 +439,18 @@ window.WegoApp.registerScene({
           <div class="my-tab-order-grid">
             <button type="button" class="my-tab-order-button" data-dom-id="order-daifukuan" data-toast-message="查看待付款订单" onclick="window.WegoApp.toast(this.dataset.toastMessage); return false;">
               <span class="my-tab-order-button__label">待付款</span>
-              <span class="my-tab-order-button__hint" data-token-binding="color:var(--text-tertiary)">待处理</span>
             </button>
             <button type="button" class="my-tab-order-button" data-dom-id="order-yifukuan" data-toast-message="查看已付款订单" onclick="window.WegoApp.toast(this.dataset.toastMessage); return false;">
               <span class="my-tab-order-button__label">已付款</span>
-              <span class="my-tab-order-button__hint" data-token-binding="color:var(--text-tertiary)">待发货</span>
             </button>
             <button type="button" class="my-tab-order-button" data-dom-id="order-yifahuo" data-toast-message="查看已发货订单" onclick="window.WegoApp.toast(this.dataset.toastMessage); return false;">
               <span class="my-tab-order-button__label">已发货</span>
-              <span class="my-tab-order-button__hint" data-token-binding="color:var(--text-tertiary)">运输中</span>
             </button>
             <button type="button" class="my-tab-order-button" data-dom-id="order-tuikuan" data-toast-message="查看退款订单" onclick="window.WegoApp.toast(this.dataset.toastMessage); return false;">
               <span class="my-tab-order-button__label">退款</span>
-              <span class="my-tab-order-button__hint" data-token-binding="color:var(--text-tertiary)">处理中</span>
             </button>
             <button type="button" class="my-tab-order-button" data-dom-id="order-guaqi" data-toast-message="查看挂起订单" onclick="window.WegoApp.toast(this.dataset.toastMessage); return false;">
               <span class="my-tab-order-button__label">挂起</span>
-              <span class="my-tab-order-button__hint" data-token-binding="color:var(--text-tertiary)">待恢复</span>
             </button>
           </div>
         </div>
@@ -533,7 +506,6 @@ window.WegoApp.registerScene({
   `,
   init: function initMyTabScene(ctx) {
     var root = ctx.root;
-    // composed 模式不输出 data-page-pattern，保留该标记文本仅用于仓库守门识别。
     var appMessages = {
       'app-yijiankaituan': '一键开团功能开发中',
       'app-dianpuzhuangxiu': '店铺装修功能开发中',

@@ -15,7 +15,7 @@
   },
   "prompt_contract": {
     "design_system_snapshot": {
-      "version": 408,
+      "version": 409,
       "token_css": "colors_and_type.css",
       "component_css": "components.css",
       "component_inputs": [
@@ -70,13 +70,12 @@
       "var(--heading-xs-font-size)",
       "var(--heading-xs-line-height)",
       "var(--radius-8)",
-      "var(--size-40)",
+      "var(--size-32)",
       "var(--spacer-12)",
       "var(--spacer-16)",
       "var(--spacer-24)",
       "var(--spacer-4)",
       "var(--spacer-8)",
-      "var(--text-brand)",
       "var(--text-default)",
       "var(--text-secondary)",
       "var(--text-tertiary)"
@@ -114,8 +113,8 @@
         "selector": ".my-tab-space__usage",
         "content_role": "空间用量数字",
         "css_property": "color",
-        "token": "var(--text-brand)",
-        "rule_ref": "colors_and_type.css#/text-brand"
+        "token": "var(--text-default)",
+        "rule_ref": "colors_and_type.css#/text-default"
       },
       {
         "selector": ".my-tab-section__title",
@@ -132,11 +131,11 @@
         "rule_ref": "colors_and_type.css#/text-secondary"
       },
       {
-        "selector": ".my-tab-order-button__hint",
-        "content_role": "订单状态说明",
+        "selector": ".my-tab-order-button__label",
+        "content_role": "订单状态文案",
         "css_property": "color",
-        "token": "var(--text-tertiary)",
-        "rule_ref": "colors_and_type.css#/text-tertiary"
+        "token": "var(--text-default)",
+        "rule_ref": "colors_and_type.css#/text-default"
       }
     ],
     "component_bindings": [
@@ -178,26 +177,6 @@
         "contract_file": "components/tag.json"
       },
       {
-        "slot": "primary-actions",
-        "slug": "button",
-        "reason": "员工新增和会员续费使用正式按钮承载页面轻操作。",
-        "root_class": "btn",
-        "required_structure": [],
-        "modifiers": [
-          "btn--medium",
-          "btn--strong",
-          "btn--sm"
-        ],
-        "variant_dimensions": {
-          "emphasis": "medium",
-          "size": "sm",
-          "iconMode": "text-only",
-          "state": "default"
-        },
-        "source": "preview/component-button.html",
-        "contract_file": "components/button.json"
-      },
-      {
         "slot": "surface-cards",
         "slug": "card",
         "reason": "页面主要区块以白底表面卡片承载信息分组。",
@@ -218,7 +197,7 @@
       {
         "slot": "text-links",
         "slug": "link",
-        "reason": "员工管理、空间管理和全部采用独立文字链接表达轻跳转。",
+        "reason": "添加员工、员工管理、空间管理和全部采用独立文字链接表达轻跳转。",
         "root_class": "link",
         "required_structure": [],
         "modifiers": [],
@@ -229,6 +208,25 @@
         },
         "source": "preview/component-link.html",
         "contract_file": "components/link.json"
+      },
+      {
+        "slot": "membership-primary-action",
+        "slug": "button",
+        "reason": "会员续费作为页面唯一明确主操作，使用正式 strong 小按钮承载。",
+        "root_class": "btn",
+        "required_structure": [],
+        "modifiers": [
+          "btn--strong",
+          "btn--sm"
+        ],
+        "variant_dimensions": {
+          "emphasis": "strong",
+          "size": "sm",
+          "iconMode": "text-only",
+          "state": "default"
+        },
+        "source": "preview/component-button.html",
+        "contract_file": "components/button.json"
       },
       {
         "slot": "settings-cells",
@@ -341,7 +339,7 @@
       "component_slug": "tag",
       "rule_source": "preview/component-tag.html",
       "token_binding": null,
-      "class_name": "tag tag--20 tag--brand-stroke"
+      "class_name": "tag tag--20 tag--gray"
     },
     {
       "dd_id": "tag-role-service",
@@ -358,11 +356,11 @@
       "class_name": "tag tag--20 tag--gray"
     },
     {
-      "dd_id": "button-add-staff",
-      "component_slug": "button",
-      "rule_source": "preview/component-button.html",
+      "dd_id": "link-add-staff",
+      "component_slug": "link",
+      "rule_source": "preview/component-link.html",
       "token_binding": null,
-      "class_name": "btn btn--medium btn--sm"
+      "class_name": "link"
     },
     {
       "dd_id": "link-staff-manage",
@@ -452,7 +450,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/我的tab/scene.js",
     "scene_css": "wego-app/scenes/我的tab/scene.css",
-    "source_sha256": "fcee2fe2f97edbe856407396f1a94468fe299cc6859a30811b5e8e5ba1f90089",
+    "source_sha256": "c907e0ee311eecab9019c17d1265d50bbacab58696345b5d6af50b74574f706e",
     "dom_ids": [
       "my-tab-add-staff",
       "my-tab-staff-manage",
@@ -461,17 +459,12 @@
       "app-yijiankaituan",
       "app-dianpuzhuangxiu",
       "app-shoukuanma",
-      "app-wodexiaodian",
       "app-huiyuanguanli",
       "app-fangkuzuji",
       "app-shujuzhongxin",
       "app-weiqunfa",
       "app-yijianhuanfu",
       "app-tuanduiguanli",
-      "app-zhuanxiangxiaochengxu",
-      "app-xiangcewangzhi",
-      "app-siyujianpan",
-      "app-pc",
       "app-gengduo",
       "my-tab-order-all",
       "order-daifukuan",
@@ -492,7 +485,7 @@
         375,
         393
       ],
-      "checked_at": "2026-07-13T21:40:00+08:00"
+      "checked_at": "2026-07-13T22:38:14+08:00"
     },
     "crowdingCheck": {
       "status": "passed",
@@ -500,8 +493,8 @@
         "375px 首屏无横向溢出",
         "393px 首屏无横向溢出",
         "顶部身份区按钮与标签未挤压换行失衡",
-        "四列应用入口在两种视口下均保持对齐",
-        "订单状态区五项在两种视口下可完整阅读",
+        "应用入口图标缩小后在两种视口下仍保持对齐",
+        "订单状态区两行布局在两种视口下可完整阅读",
         "设置列表箭头与标题未发生重叠"
       ]
     }

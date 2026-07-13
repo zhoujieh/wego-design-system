@@ -102,14 +102,17 @@
     "noGeneratedSpecs": "不存在自动生成 specs 规则目录；所有运行时规则必须回到当前权威源。"
   },
   "recommendedReadOrder": [
+    "AGENTS.md",
+    "effective iteration + confirmed prototype_brief",
     "SKILL.md",
+    "references/design-decisions.md",
     "library-consumption.json",
     "uikit-plan.json",
     "components/index.json",
     "preview/component-{slug}.html",
     "components/{slug}.json",
     "colors_and_type.css",
-    "css.json"
+    "references/scene-contract.md"
   ],
   "scenarioTypeRegistry": {
     "description": "仅保存成熟且被运行时消费的场景类型。",

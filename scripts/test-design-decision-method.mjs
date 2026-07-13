@@ -22,6 +22,8 @@ try {
   if (run(temp).status === 0) throw new Error('失效规则来源应被守卫拦截');
   fs.writeFileSync(temp, fs.readFileSync(source, 'utf8').replace('    component_css: "components.css"\n', ''));
   if (run(temp).status === 0) throw new Error('完整 prompt_contract 模板缺字段应被守卫拦截');
+  fs.writeFileSync(temp, fs.readFileSync(source, 'utf8').replace('`references/scene-contract.md`', '`scene-contract.md`'));
+  if (run(temp).status === 0) throw new Error('读取顺序缺少 scene-contract 应被守卫拦截');
   fs.copyFileSync(source, temp);
   const candidates = JSON.parse(fs.readFileSync(candidateSource, 'utf8'));
   candidates.candidates.find(item => item.id === 'exp-component-visual-usage-must-consume-registered-component').promotion_landing.rule_id = 'missing-rule-id';

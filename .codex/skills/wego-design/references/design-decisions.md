@@ -25,9 +25,9 @@ authoritySources:
 
 <!-- rule-id: prototype-brief-required; source-ref: AGENTS.md#主链路硬门禁 -->
 
-开始设计前必须读取已确认的 `prototype_brief`。它必须明确场景目标、入口、关键路径、所需状态、业务数据和场景目录语义；缺少会影响页面结构或交互的信息时退回 `wego-product`，不得补造业务事实。
+开始设计前必须先读取 `AGENTS.md`、已确认的 `prototype_brief` 与当前有效迭代，再读取本技能入口与本文。`prototype_brief` 必须明确场景目标、入口、关键路径、所需状态、业务数据和场景目录语义；缺少会影响页面结构或交互的信息时退回 `wego-product`，不得补造业务事实。
 
-设计系统按固定顺序读取：`library-consumption.json`、`uikit-plan.json`、`components/index.json`、本页命中组件 Preview、同一组件契约、`colors_and_type.css`。禁止以历史场景、已删除工作流、旧技能或废弃设计计划替代这些输入。
+进入设计系统消费后，固定读取顺序为：`library-consumption.json`、`uikit-plan.json`、`components/index.json`、本页命中组件 Preview、同一组件契约、`colors_and_type.css`、`references/scene-contract.md`。`design-decisions.json` 不是设计前权威输入；新场景不得以它替代权威源，已有场景修改时也只可把它当作辅助对照。禁止以历史场景、已删除工作流、旧技能或废弃设计计划替代这些输入。
 
 ## Colors
 

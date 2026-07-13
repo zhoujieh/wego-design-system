@@ -43,6 +43,20 @@ for (let index = 0; index < expectedHeadings.length; index += 1) {
 }
 if (headings.length !== expectedHeadings.length) add('section.count', '设计决策方法不得增加未受守卫的二级章节');
 
+const requiredReadSequence = [
+  '`AGENTS.md`',
+  '`prototype_brief`',
+  '`library-consumption.json`',
+  '`uikit-plan.json`',
+  '`components/index.json`',
+  '本页命中组件 Preview',
+  '同一组件契约',
+  '`colors_and_type.css`',
+  '`references/scene-contract.md`'
+];
+for (const token of requiredReadSequence) if (!content.includes(token)) add('read_order.missing', `设计决策方法缺少必需读取顺序项：${token}`);
+if (!content.includes('`design-decisions.json` 不是设计前权威输入')) add('read_order.decisions_json', '设计决策方法必须明确 design-decisions.json 不是设计前权威输入');
+
 const rules = [...content.matchAll(/<!--\s*rule-id:\s*([a-z0-9-]+);\s*source-ref:\s*([^\s]+)\s*-->/g)].map(match => ({ id: match[1], source: match[2] }));
 const ruleIds = new Set();
 for (const rule of rules) {
