@@ -579,7 +579,6 @@ input, textarea,
 
 @media (max-width: 767px) {
   .preview-shell {
-    min-height: 100vh;
     min-height: 100dvh;
     align-items: stretch;
     padding: 0;
@@ -588,7 +587,6 @@ input, textarea,
 
   .phone-frame {
     width: 100%;
-    height: 100vh;
     height: 100dvh;
     max-height: none;
     border: none;
@@ -608,10 +606,9 @@ input, textarea,
     display: none;
   }
 
-  /* 移动端显式 padding 护栏：避免 3 值 padding 简写在 CSS 变量级联场景下整条声明失效；同时用 env() 替代被 .phone-screen 覆盖为 0 的 --safe-area-* 变量，支持真机安全区（需配合 viewport-fit=cover） */
   .host-shell-page {
     padding-top: calc(var(--spacer-16) + env(safe-area-inset-top, 0px));
-    padding-bottom: calc(var(--spacer-40) + 56px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(var(--spacer-40) + 56px);
     padding-left: calc(var(--spacer-16) + env(safe-area-inset-left, 0px));
     padding-right: calc(var(--spacer-16) + env(safe-area-inset-right, 0px));
   }
