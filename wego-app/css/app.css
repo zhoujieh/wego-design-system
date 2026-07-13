@@ -579,7 +579,7 @@ input, textarea,
 
 @media (max-width: 767px) {
   .preview-shell {
-    min-height: 100dvh;
+    height: 100dvh;
     align-items: stretch;
     padding: 0;
     background: var(--bg-page);
@@ -587,7 +587,7 @@ input, textarea,
 
   .phone-frame {
     width: 100%;
-    height: 100dvh;
+    height: 100%;
     max-height: none;
     border: none;
     border-radius: 0;
