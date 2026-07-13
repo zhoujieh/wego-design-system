@@ -160,16 +160,20 @@ input, textarea,
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-  padding: calc(var(--spacer-16) + var(--safe-area-top)) var(--spacer-16) calc(var(--spacer-40) + var(--safe-area-bottom) + 56px);
+  padding: calc(var(--spacer-16) + var(--safe-area-top)) 0 calc(var(--spacer-40) + var(--safe-area-bottom) + 56px);
   display: flex;
   flex-direction: column;
   gap: var(--spacer-12);
 }
 
-/* 动态页有自己的 navbar 与 body 容器，激活时由 app.js 切换此修饰类取消外层 padding，
-   让 navbar 撑满宽度并顶到顶部安全区，body 自行处理内边距。 */
-.host-shell-page--flush {
-  padding: 0;
+.host-shell-page--card {
+  padding-left: var(--spacer-8);
+  padding-right: var(--spacer-8);
+}
+
+.host-shell-page--wide {
+  padding-left: var(--spacer-32);
+  padding-right: var(--spacer-32);
 }
 
 .host-shell-page__panel[hidden] {

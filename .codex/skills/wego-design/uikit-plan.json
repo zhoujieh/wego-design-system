@@ -471,30 +471,39 @@
     "exception": "当页面名称或主题与交互模式冲突时，以交互模式为准。例如：'库存预警设置'虽然叫'设置'，但如果是表单编辑页（有保存按钮），应选择 biz-rule-config；'交易设置'虽然叫'设置'，但如果是层级导航列表（无保存按钮），应选择 system-settings。"
   },
   "pageEdgeModes": {
-    "description": "页面横向边距模式统一定义。消费设计系统时必须先选定 page_edge_mode 作为页面基底，再进入页面范式选择。禁止发明 12px 等中间值作为页面横向边距决策。",
+    "description": "页面横向边距模式统一定义。宿主容器层（.host-shell-page / .phone-body）默认不提供任何横向间距，所有内容边距由组件自身或场景级 CSS 决定。消费设计系统时必须先选定 page_edge_mode 作为页面基底，再进入页面范式选择。禁止发明 12px 等中间值作为页面横向边距决策。",
     "source": "uikit-plan.json#/pageEdgeModes",
     "modes": [
       {
         "id": "M0",
-        "name": "通栏模式",
-        "implementation": "phone-body 0px 横向 padding + cell-group__content 不开 --card 修饰",
+        "name": "通栏模式（默认）",
+        "implementation": {
+          "phone-body": "phone-body 默认样式（0px 横向 padding）+ cell-group__content 不开 --card 修饰",
+          "host-shell-page": "host-shell-page 默认样式（0px 横向 padding）+ 场景根元素使用 data-bg=\"surface\" + cell-group__content 不开 --card 修饰"
+        },
         "contentEdgeDistance": "16px（由 cell__body / form-body 自带 16px padding 承担）",
         "backgroundColor": "白底（--bg-surface）",
-        "useCase": "设置类页面、详情页、连续浏览类页面默认选择；cell 横向边距由组件自身 padding 承担，避免双重 padding"
+        "useCase": "所有页面的默认模式。设置类页面、详情页、连续浏览类页面、宿主 Tab 页（我的、工作台等）均默认选择；cell 横向边距由组件自身 padding 承担，避免双重 padding"
       },
       {
         "id": "M8",
         "name": "卡片模式",
-        "implementation": "phone-body 8px 横向 padding + cell-group__content--card 修饰",
-        "contentEdgeDistance": "24px（8px phone-body + 16px cell__body）",
+        "implementation": {
+          "phone-body": "phone-body--card 修饰类（8px 横向 padding）+ cell-group__content--card 修饰",
+          "host-shell-page": "host-shell-page--card 修饰类（8px 横向 padding）+ 场景根元素使用 data-bg=\"page\" + cell-group__content--card 修饰"
+        },
+        "contentEdgeDistance": "24px（8px 外层 padding + 16px cell__body）",
         "backgroundColor": "灰底（--bg-page）+ 白色卡片",
         "useCase": "对象管理列表、连续内容流等需要卡片分组和圆角的场景；卡片模式必须配合 8px 横向 padding，禁止灰底+白色 card 贴边"
       },
       {
         "id": "M32",
         "name": "大边距模式",
-        "implementation": "phone-body 32px 横向 padding + cell-group__content--card 修饰",
-        "contentEdgeDistance": "48px（32px phone-body + 16px cell__body）",
+        "implementation": {
+          "phone-body": "phone-body--wide 修饰类（32px 横向 padding）+ cell-group__content--card 修饰",
+          "host-shell-page": "host-shell-page--wide 修饰类（32px 横向 padding）+ 场景根元素使用 data-bg=\"page\" + cell-group__content--card 修饰"
+        },
+        "contentEdgeDistance": "48px（32px 外层 padding + 16px cell__body）",
         "backgroundColor": "灰底（--bg-page）+ 白色卡片",
         "useCase": "特殊沉浸式页面或需要大留白的展示场景"
       }
@@ -502,14 +511,15 @@
     "removed": [
       {
         "id": "M16",
-        "reason": "已移除。原实现为 phone-body 16px 横向 padding + cell-group__content--card，与 M8 合并为统一卡片模式 M8（8px 横向 padding）。原 M16 引用点已迁移到 M0 或 M8。"
+        "reason": "已移除。宿主容器层默认不提供横向间距，所有边距由内容组件自身承担。原 M16（16px 宿主层 padding）违背此原则，已迁移到 M0（宿主层 0px + 组件自身 padding）。"
       }
     ],
     "forbidden": [
       "发明 12px 等中间值作为页面横向边距",
       "灰底+白色 card 贴边（横向 padding=0 但用 card 包裹内容）",
       "卡片模式不配合对应横向 padding",
-      "使用已移除的 M16 模式"
+      "宿主容器层提供默认横向间距",
+      "同一页面混合使用通栏和卡片两种模式而未显式声明边距策略"
     ]
   },
   "pagePatterns": [

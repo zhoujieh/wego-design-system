@@ -1,4 +1,6 @@
-# wego 设计工作流优化计划
+# 历史归档文档 - wego 设计工作流优化计划
+
+> **归档说明**：本文档为历史工作流计划，已不再作为当前重构依据。当前设计系统演进依据为 `docs/plans/wego-design-workflow-final-plan.md`。
 
 > 基于 solo-design 与 wego-design 深度对比分析，针对"双次翻译 + 文本中介"结构性问题提出的系统性优化方案。
 

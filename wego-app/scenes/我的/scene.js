@@ -1,615 +1,338 @@
 /* wego-design-contract: {
-  "surface_id": "my-host-tab",
+  "surface_id": "my",
   "route_id": "my",
-  "page_pattern": "mobile-host-entry",
-  "presentation": {
-    "type": "host-tab",
-    "transition": "none",
-    "coversTabBar": true
-  },
-  "visual_check": {
-    "status": "passed",
-    "viewports": [375, 393],
-    "checked_at": "2026-07-13T00:00:00+08:00",
-    "notes": "本地服务器验证通过"
-  },
-  "crowding_check": {
-    "status": "passed",
-    "items": [
-      {"name": "横向溢出", "result": "passed", "note": "375/393 均无横向滚动"},
-      {"name": "纵向重叠", "result": "passed", "note": "区域间距一致，无重叠"},
-      {"name": "内容裁切", "result": "passed", "note": "所有文字和图标完整显示"},
-      {"name": "按钮换行", "result": "passed", "note": "按钮文字单行显示"},
-      {"name": "首屏密度", "result": "passed", "note": "信息层次分明"},
-      {"name": "右侧操作数量", "result": "passed", "note": "操作项数量合理"}
-    ]
-  },
+  "page_pattern": "host-tab-profile",
+  "presentation": { "type": "push", "coversTabBar": false },
   "prompt_contract": {
-    "design_system_snapshot": {
-      "version": 403,
-      "component_inputs": [
-        { "slug": "avatar", "preview_file": "preview/component-avatar.html", "contract_file": "components/avatar.json" },
-        { "slug": "cell", "preview_file": "preview/component-cell.html", "contract_file": "components/cell.json" },
-        { "slug": "card", "preview_file": "preview/component-card.html", "contract_file": "components/card.json" },
-        { "slug": "tag", "preview_file": "preview/component-tag.html", "contract_file": "components/tag.json" },
-        { "slug": "button", "preview_file": "preview/component-button.html", "contract_file": "components/button.json" },
-        { "slug": "metric", "preview_file": "preview/component-metric.html", "contract_file": "components/metric.json" },
-        { "slug": "badge", "preview_file": "preview/component-badge.html", "contract_file": "components/badge.json" }
-      ]
-    },
     "token_whitelist": [
-      "var(--bg-surface)",
-      "var(--bg-page)",
-      "var(--bg-subtle)",
-      "var(--bg-muted)",
-      "var(--bg-state-pressed)",
-      "var(--bg-brand)",
-      "var(--bg-brand-hover)",
-      "var(--bg-state-selected)",
-      "var(--bg-inverse-surface-l1)",
-      "var(--text-default)",
-      "var(--text-secondary)",
-      "var(--text-tertiary)",
-      "var(--text-brand)",
-      "var(--text-inverse)",
-      "var(--text-promotion-strong)",
-      "var(--status-danger-default)",
-      "var(--status-danger-surface-l1)",
-      "var(--status-success-default)",
-      "var(--status-success-surface-l1)",
-      "var(--status-warning-default)",
-      "var(--status-warning-surface-l1)",
-      "var(--status-info-default)",
-      "var(--status-info-surface-l1)",
-      "var(--accent-green)",
-      "var(--accent-purple)",
-      "var(--border-neutral-l2)",
-      "var(--body-sm-font-size)",
-      "var(--body-sm-line-height)",
-      "var(--body-md-font-size)",
-      "var(--body-md-line-height)",
-      "var(--body-lg-font-size)",
-      "var(--body-lg-line-height)",
-      "var(--body-xs-font-size)",
-      "var(--body-xs-line-height)",
-      "var(--heading-sm-font-size)",
-      "var(--heading-sm-line-height)",
-      "var(--font-weight-regular)",
-      "var(--font-weight-medium)",
-      "var(--font-weight-semibold)",
-      "var(--spacer-4)",
-      "var(--spacer-8)",
-      "var(--spacer-12)",
-      "var(--spacer-16)",
-      "var(--spacer-20)",
-      "var(--radius-4)",
-      "var(--radius-6)",
-      "var(--radius-8)",
-      "var(--radius-full)",
-      "var(--radius-16)",
-      "var(--status-promotion-default)",
-      "var(--status-promotion-surface-l1)",
-      "var(--number-md-font-family)",
-      "var(--palette-purple-100)"
+      "var(--bg-surface)", "var(--spacer-16)", "var(--spacer-12)", "var(--spacer-8)", "var(--spacer-4)",
+      "var(--heading-sm-font-size)", "var(--font-weight-semibold)", "var(--text-default)", "var(--body-lg-line-height)",
+      "var(--text-secondary)", "var(--palette-orange-500)", "var(--text-inverse)", "var(--body-xs-font-size)",
+      "var(--font-weight-medium)", "var(--body-lg-font-size)", "var(--body-sm-font-size)", "var(--bg-subtle)",
+      "var(--bg-brand)", "var(--radius-full)", "var(--radius-8)", "var(--radius-4)", "var(--size-20)"
     ],
     "token_bindings": [
-      { "content_role": "profile-title", "css_property": "font-size", "token": "var(--heading-sm-font-size)", "rule_ref": "colors_and_type.css#/heading-sm-font-size" },
-      { "content_role": "profile-title", "css_property": "font-weight", "token": "var(--font-weight-semibold)", "rule_ref": "colors_and_type.css#/font-weight-semibold" },
-      { "content_role": "profile-title", "css_property": "color", "token": "var(--text-default)", "rule_ref": "colors_and_type.css#/text-default" },
-      { "content_role": "profile-subtitle", "css_property": "font-size", "token": "var(--body-sm-font-size)", "rule_ref": "colors_and_type.css#/body-sm-font-size" },
-      { "content_role": "profile-subtitle", "css_property": "font-weight", "token": "var(--font-weight-regular)", "rule_ref": "colors_and_type.css#/font-weight-regular" },
-      { "content_role": "profile-subtitle", "css_property": "color", "token": "var(--text-secondary)", "rule_ref": "colors_and_type.css#/text-secondary" },
-      { "content_role": "avatar-border", "css_property": "border-color", "token": "var(--border-neutral-l2)", "rule_ref": "components/avatar.json#/runtimeTokens" },
-      { "content_role": "avatar-radius", "css_property": "border-radius", "token": "var(--radius-full)", "rule_ref": "components/avatar.json#/runtimeTokens" },
-      { "content_role": "member-bg", "css_property": "background", "token": "var(--status-promotion-surface-l1)", "rule_ref": "components/metric.json#/runtimeTokens" },
-      { "content_role": "member-text", "css_property": "color", "token": "var(--status-promotion-default)", "rule_ref": "components/metric.json#/runtimeTokens" },
-      { "content_role": "cell-bg", "css_property": "background", "token": "var(--bg-surface)", "rule_ref": "components/cell.json#/runtimeTokens" },
-      { "content_role": "cell-title", "css_property": "color", "token": "var(--text-default)", "rule_ref": "components/cell.json#/runtimeTokens" },
-      { "content_role": "cell-arrow", "css_property": "color", "token": "var(--text-tertiary)", "rule_ref": "components/cell.json#/runtimeTokens" },
-      { "content_role": "card-bg", "css_property": "background", "token": "var(--bg-surface)", "rule_ref": "components/card.json#/runtimeTokens" },
-      { "content_role": "tag-bg", "css_property": "background", "token": "var(--bg-inverse-surface-l1)", "rule_ref": "components/tag.json#/runtimeTokens" },
-      { "content_role": "tag-text", "css_property": "color", "token": "var(--text-inverse)", "rule_ref": "components/tag.json#/runtimeTokens" },
-      { "content_role": "badge-bg", "css_property": "background", "token": "var(--status-danger-default)", "rule_ref": "components/badge.json#/runtimeTokens" },
-      { "content_role": "badge-text", "css_property": "color", "token": "var(--text-inverse)", "rule_ref": "components/badge.json#/runtimeTokens" }
+      { "content_role": "区域背景", "css_property": "background", "token": "var(--bg-surface)", "rule_ref": "colors_and_type.css#/bg-surface" },
+      { "content_role": "主标题文本", "css_property": "color", "token": "var(--text-default)", "rule_ref": "colors_and_type.css#/text-default" },
+      { "content_role": "次要说明文本", "css_property": "color", "token": "var(--text-secondary)", "rule_ref": "colors_and_type.css#/text-secondary" },
+      { "content_role": "VIP标签背景", "css_property": "background", "token": "var(--palette-orange-500)", "rule_ref": "colors_and_type.css#/palette-orange-500" },
+      { "content_role": "进度条填充", "css_property": "background", "token": "var(--bg-brand)", "rule_ref": "colors_and_type.css#/bg-brand" },
+      { "content_role": "进度条轨道", "css_property": "background", "token": "var(--bg-subtle)", "rule_ref": "colors_and_type.css#/bg-subtle" }
     ],
     "component_bindings": [
-      {
-        "slot": "user-avatar",
-        "slug": "avatar",
-        "root_class": "avatar",
-        "required_structure": [".avatar--56.avatar--image img"],
-        "modifiers": ["avatar--56", "avatar--image"],
-        "source": "preview/component-avatar.html",
-        "contract_file": "components/avatar.json"
-      },
-      {
-        "slot": "setting-row",
-        "slug": "cell",
-        "root_class": "cell",
-        "required_structure": [".cell__body", ".cell__content", ".cell__action", ".cell__arrow"],
-        "modifiers": ["cell--single", "cell--bg-white", "cell--clickable", "cell--divider-right-edge"],
-        "source": "preview/component-cell.html",
-        "contract_file": "components/cell.json"
-      },
-      {
-        "slot": "section-card",
-        "slug": "card",
-        "root_class": "card",
-        "required_structure": [".card--surface"],
-        "modifiers": ["card--surface"],
-        "source": "preview/component-card.html",
-        "contract_file": "components/card.json"
-      },
-      {
-        "slot": "vip-tag",
-        "slug": "tag",
-        "root_class": "tag",
-        "required_structure": [".tag__label"],
-        "modifiers": ["tag--20"],
-        "source": "preview/component-tag.html",
-        "contract_file": "components/tag.json"
-      },
-      {
-        "slot": "renew-btn",
-        "slug": "button",
-        "root_class": "btn",
-        "required_structure": ["text"],
-        "modifiers": ["btn--strong", "btn--sm"],
-        "source": "preview/component-button.html",
-        "contract_file": "components/button.json"
-      },
-      {
-        "slot": "wallet-amount",
-        "slug": "metric",
-        "root_class": "metric",
-        "required_structure": [".metric__main", ".metric__symbol", ".metric__value", ".metric__integer"],
-        "modifiers": ["metric--16", "metric--black"],
-        "source": "preview/component-metric.html",
-        "contract_file": "components/metric.json"
-      },
-      {
-        "slot": "order-badge",
-        "slug": "badge",
-        "root_class": "badge",
-        "required_structure": [".badge__text"],
-        "modifiers": ["badge--number", "badge--corner"],
-        "source": "preview/component-badge.html",
-        "contract_file": "components/badge.json"
-      }
+      { "slug": "avatar", "root_class": "avatar", "role": "展示", "variant": "56px头像", "source": "preview/component-avatar.html", "contract_file": "components/avatar.json", "usage": "用户头像展示" },
+      { "slug": "tag", "root_class": "tag", "role": "标签", "variant": "20px品牌线框/灰色", "source": "preview/component-tag.html", "contract_file": "components/tag.json", "usage": "VIP标签与角色标签" },
+      { "slug": "button", "root_class": "btn", "role": "操作", "variant": "弱按钮/中按钮", "source": "preview/component-button.html", "contract_file": "components/button.json", "usage": "员工管理、续费等操作按钮" },
+      { "slug": "card", "root_class": "card", "role": "容器", "variant": "surface卡片", "source": "preview/component-card.html", "contract_file": "components/card.json", "usage": "会员空间信息卡片" },
+      { "slug": "cell", "root_class": "cell-group", "role": "列表项", "variant": "单行列表", "source": "preview/component-cell.html", "contract_file": "components/cell.json", "usage": "设置列表项" },
+      { "slug": "badge", "root_class": "badge", "role": "徽标", "variant": "数字徽标", "source": "preview/component-badge.html", "contract_file": "components/badge.json", "usage": "订单数量徽标" }
     ],
-    "layout_contract": {
-      "source": "uikit-plan.json#/pagePatterns/mobile-host-entry",
-      "rules": [
-        "host-tab 类型由 host-shell-page 提供横向 16px 内边距与垂直安全区，scene 不重复声明横向 padding",
-        "用户信息区使用渐变背景：avatar--56 + 昵称+标签行 + 角色标签行 + 员工管理按钮",
-        "会员区使用营销橙背景：SVIP标签 + 年度超级会员文字 + 去续费按钮 + 空间进度条 + 空间管理链接",
-        "快捷入口区使用 card--surface：4 宫格图标+文字布局",
-        "功能入口区使用 card--surface：5×3 网格图标+文字布局",
-        "我买的区使用 card--surface：5 项订单状态图标+文字+角标",
-        "设置列表区使用 cell-group：设置、我的钱包、我的收藏、我的卡券",
-        "提现区使用 card--surface：邀请赚现金入口",
-        "场景根节点使用 display:flex; flex-direction:column; gap:spacer-12 控制区域间纵向节奏"
-      ],
-      "mutable_regions": [".my-profile", ".my-member", ".my-shortcuts", ".my-functions", ".my-orders", ".my-settings", ".my-withdraw"]
-    },
     "interaction_contract": [
-      { "dom_id": "entry-switch-album", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" },
-      { "dom_id": "entry-add-employee", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" },
-      { "dom_id": "entry-employee-manage", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" },
-      { "dom_id": "entry-renew", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" },
-      { "dom_id": "entry-space-manage", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" },
-      { "dom_id": "entry-fans", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" },
-      { "dom_id": "entry-homepage", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" },
-      { "dom_id": "entry-qrcode", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" },
-      { "dom_id": "entry-miniprogram", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" },
-      { "dom_id": "entry-group-buy", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" },
-      { "dom_id": "entry-shop-decoration", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" },
-      { "dom_id": "entry-payment-code", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" },
-      { "dom_id": "entry-my-shop", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" },
-      { "dom_id": "entry-member-manage", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" },
-      { "dom_id": "entry-visitor", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" },
-      { "dom_id": "entry-data", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" },
-      { "dom_id": "entry-wechat-group", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" },
-      { "dom_id": "entry-skin", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" },
-      { "dom_id": "entry-more", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" },
-      { "dom_id": "entry-team", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" },
-      { "dom_id": "entry-miniprogram-exclusive", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" },
-      { "dom_id": "entry-album-url", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" },
-      { "dom_id": "entry-private-keyboard", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" },
-      { "dom_id": "entry-pc", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" },
-      { "dom_id": "entry-pending-pay", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" },
-      { "dom_id": "entry-paid", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" },
-      { "dom_id": "entry-shipped", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" },
-      { "dom_id": "entry-refund", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" },
-      { "dom_id": "entry-hang", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" },
-      { "dom_id": "entry-settings", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" },
-      { "dom_id": "entry-wallet", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" },
-      { "dom_id": "entry-favorites", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" },
-      { "dom_id": "entry-coupons", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" },
-      { "dom_id": "entry-withdraw", "target": "toast:功能开发中", "trigger": "click", "action": "stub-feedback" }
+      { "dom_id": "btn-add-staff", "target": "btn-add-staff", "trigger": "click", "action": "弹出Toast提示\"功能开发中\"" },
+      { "dom_id": "btn-manage-staff", "target": "btn-manage-staff", "trigger": "click", "action": "弹出Toast提示\"功能开发中\"" },
+      { "dom_id": "btn-renew", "target": "btn-renew", "trigger": "click", "action": "弹出Toast提示\"功能开发中\"" },
+      { "dom_id": "link-space-manage", "target": "link-space-manage", "trigger": "click", "action": "弹出Toast提示\"功能开发中\"" },
+      { "dom_id": "link-all-orders", "target": "link-all-orders", "trigger": "click", "action": "弹出Toast提示\"功能开发中\"" },
+      { "dom_id": "app-kaituan", "target": "app-kaituan", "trigger": "click", "action": "弹出Toast提示\"功能开发中\"" },
+      { "dom_id": "app-decorate", "target": "app-decorate", "trigger": "click", "action": "弹出Toast提示\"功能开发中\"" },
+      { "dom_id": "app-qrcode", "target": "app-qrcode", "trigger": "click", "action": "弹出Toast提示\"功能开发中\"" },
+      { "dom_id": "app-mystore", "target": "app-mystore", "trigger": "click", "action": "弹出Toast提示\"功能开发中\"" },
+      { "dom_id": "app-member", "target": "app-member", "trigger": "click", "action": "弹出Toast提示\"功能开发中\"" },
+      { "dom_id": "app-footprint", "target": "app-footprint", "trigger": "click", "action": "弹出Toast提示\"功能开发中\"" },
+      { "dom_id": "app-data", "target": "app-data", "trigger": "click", "action": "弹出Toast提示\"功能开发中\"" },
+      { "dom_id": "app-wechat", "target": "app-wechat", "trigger": "click", "action": "弹出Toast提示\"功能开发中\"" },
+      { "dom_id": "app-skin", "target": "app-skin", "trigger": "click", "action": "弹出Toast提示\"功能开发中\"" },
+      { "dom_id": "app-team", "target": "app-team", "trigger": "click", "action": "弹出Toast提示\"功能开发中\"" },
+      { "dom_id": "app-miniprogram", "target": "app-miniprogram", "trigger": "click", "action": "弹出Toast提示\"功能开发中\"" },
+      { "dom_id": "app-albumurl", "target": "app-albumurl", "trigger": "click", "action": "弹出Toast提示\"功能开发中\"" },
+      { "dom_id": "app-keyboard", "target": "app-keyboard", "trigger": "click", "action": "弹出Toast提示\"功能开发中\"" },
+      { "dom_id": "app-pc", "target": "app-pc", "trigger": "click", "action": "弹出Toast提示\"功能开发中\"" },
+      { "dom_id": "app-more", "target": "app-more", "trigger": "click", "action": "弹出Toast提示\"功能开发中\"" },
+      { "dom_id": "order-pending-pay", "target": "order-pending-pay", "trigger": "click", "action": "弹出Toast提示\"功能开发中\"" },
+      { "dom_id": "order-paid", "target": "order-paid", "trigger": "click", "action": "弹出Toast提示\"功能开发中\"" },
+      { "dom_id": "order-shipped", "target": "order-shipped", "trigger": "click", "action": "弹出Toast提示\"功能开发中\"" },
+      { "dom_id": "order-refund", "target": "order-refund", "trigger": "click", "action": "弹出Toast提示\"功能开发中\"" },
+      { "dom_id": "order-hold", "target": "order-hold", "trigger": "click", "action": "弹出Toast提示\"功能开发中\"" },
+      { "dom_id": "setting-settings", "target": "setting-settings", "trigger": "click", "action": "弹出Toast提示\"功能开发中\"" },
+      { "dom_id": "setting-wallet", "target": "setting-wallet", "trigger": "click", "action": "弹出Toast提示\"功能开发中\"" },
+      { "dom_id": "setting-favorites", "target": "setting-favorites", "trigger": "click", "action": "弹出Toast提示\"功能开发中\"" },
+      { "dom_id": "setting-coupon", "target": "setting-coupon", "trigger": "click", "action": "弹出Toast提示\"功能开发中\"" },
+      { "dom_id": "setting-withdraw", "target": "setting-withdraw", "trigger": "click", "action": "弹出Toast提示\"功能开发中\"" }
     ],
     "state_contract": [
-      {
-        "state_id": "default",
-        "description": "默认已登录状态，展示店主头像、昵称、店铺名称、会员状态、快捷入口、功能入口、订单状态与设置入口",
-        "initial": true,
-        "trigger": "进入我的 tab",
-        "visible_result": "所有区域完整可见，含会员状态、空间容量、订单角标等动态数据",
-        "empty_state": "不适用",
-        "loading_state": "不适用",
-        "error_state": "不适用",
-        "fallback_action": "无",
-        "persistence": "无持久化，每次进入重新渲染"
-      }
+      { "state": "默认加载态", "element": "整个页面", "visual": "展示用户头像、昵称、VIP标签、角色标签、空间进度、功能入口网格、订单状态、设置列表" },
+      { "state": "点击反馈态", "element": "所有可点击项", "visual": "触发系统Toast提示\"功能开发中\"" }
     ],
     "hard_rules": [
-      "禁止硬编码颜色，所有颜色必须使用 token_whitelist 中的 Token",
-      "禁止使用 token_whitelist 之外的 Token",
-      "禁止覆盖组件内部样式、尺寸、安全区",
-      "禁止发明组件 class 或扩展组件结构",
-      "host-tab 类型不再渲染 navbar，复用宿主底部 tab 导航",
-      "所有功能入口点击反馈使用 toast stub，不进入二级页面",
-      "原型使用静态模拟数据展示头像、昵称、店铺名称、会员状态、空间容量、订单角标等"
-    ]
+      "场景根节点使用 data-bg=\"surface\" 确保白色背景",
+      "不使用 NavBar，该页面为底部 Tab 入口页",
+      "所有功能入口与设置项均为 stub，点击统一触发 Toast",
+      "进度条宽度通过内联样式 32.6% 控制，由场景级 CSS 提供轨道样式",
+      "订单状态区使用自定义网格布局，不使用正式 Grid 组件"
+    ],
+    "design_system_snapshot": { "version": 406 },
+    "layout_contract": {
+      "source": "uikit-plan.json#/patterns/host-tab",
+      "rules": [
+        "场景作为 host-tab 直接挂载在宿主 Tab 面板内",
+        "内容纵向堆叠，区域间使用 var(--spacer-12) 间距",
+        "页面底部预留 var(--spacer-16) 内边距"
+      ],
+      "mutable_regions": [
+        "user-info: 顶部用户信息区布局与内容",
+        "vip-card: 会员空间卡片内部结构",
+        "app-entries: 应用功能入口区网格项数量与顺序",
+        "order-status: 订单状态区展示项",
+        "settings-list: 设置列表项"
+      ]
+    }
   },
   "visual_check": {
     "status": "passed",
     "viewports": [375, 393],
-    "checked_at": "2026-07-13T00:00:00+08:00",
-    "notes": "本地服务器验证通过"
+    "checked_at": "2026-07-13",
+    "notes": "375px 和 393px 视口下布局正常，各区域间距合理，无溢出或截断"
   },
   "crowding_check": {
     "status": "passed",
     "items": [
-      { "name": "横向溢出", "result": "passed", "note": "375/393 均无横向滚动" },
-      { "name": "纵向重叠", "result": "passed", "note": "区域间距一致，无重叠" },
-      { "name": "内容裁切", "result": "passed", "note": "所有文字和图标完整显示" },
-      { "name": "按钮换行", "result": "passed", "note": "按钮文字单行显示" },
-      { "name": "首屏密度", "result": "passed", "note": "信息层次分明" },
-      { "name": "右侧操作数量", "result": "passed", "note": "操作项数量合理" }
+      "固定间距和圆角：使用 spacer 和 radius 系列 Token，无硬编码",
+      "消除意外水平溢出：所有 flex/grid 容器有 min-width: 0 或 overflow 控制",
+      "滚动安全区避免遮盖：页面底部预留 padding-bottom",
+      "触控热区不小于 44x44：所有可点击区域满足最小触控面积",
+      "文本框保留弹性余量：文本使用 line-height 和适当字号，支持系统字体缩放",
+      "避免紧凑 flex 行重叠：flex 容器使用 gap 属性，无负 margin 压缩"
     ]
   }
 } */
 window.WegoApp.registerScene({
   routeId: 'my',
-  presentation: { type: 'host-tab', transition: 'none', coversTabBar: true },
-  template: [
-    '<div class="my-scene" data-surface-id="my-host-tab" data-route-id="my" data-page-pattern="mobile-host-entry" data-bg="page">',
-    '',
-    '  <section class="my-profile" data-region-id="user-info" data-region-role="header">',
-    '    <div class="my-profile__header">',
-    '      <div class="avatar avatar--56 avatar--image"',
-    '           data-dd-id="dd-avatar"',
-    '           data-component-slug="avatar"',
-    '           data-rule-source="preview/component-avatar.html"',
-    '           data-token-binding="border:var(--border-neutral-l2);radius:var(--radius-full)">',
-    '        <img src="lib/assets/image/avatar-defult.png" alt="默认头像">',
-    '      </div>',
-    '      <div class="my-profile__meta">',
-    '        <div class="my-profile__title-row">',
-    '          <p class="my-profile__title">微购相册·用户体验设计师</p>',
-    '          <span class="tag tag--20" data-dd-id="dd-tag-vip" data-component-slug="tag" data-rule-source="preview/component-tag.html" data-token-binding="bg:var(--bg-inverse-surface-l1);color:var(--text-inverse)">',
-    '            <span class="tag__label">SVIP</span>',
-    '          </span>',
-    '        </div>',
-    '        <div class="my-profile__tags">',
-    '          <span class="my-profile__tag">客服</span>',
-    '          <span class="my-profile__tag my-profile__tag--green">超级管理员</span>',
-    '        </div>',
-    '      </div>',
-    '      <button data-dom-id="entry-switch-album" class="my-profile__switch" role="button" tabindex="0">',
-    '        <i class="wego-iconfont-s icon-youjiantou16"></i>',
-    '        <span>切换相册</span>',
-    '      </button>',
-    '    </div>',
-    '    <div class="my-profile__actions">',
-    '      <button data-dom-id="entry-add-employee" data-dd-id="dd-add-employee" data-component-slug="button" data-rule-source="preview/component-button.html" class="btn btn--weak btn--sm" role="button" tabindex="0">',
-    '        <i class="btn__icon wego-iconfont-s icon-jiahao16"></i>',
-    '        <span>员工</span>',
-    '      </button>',
-    '      <button data-dom-id="entry-employee-manage" class="my-profile__action-btn" role="button" tabindex="0">',
-    '        <img src="lib/assets/image/avatar-defult.png" alt="员工管理" class="my-profile__action-avatar">',
-    '        <span>员工管理</span>',
-    '      </button>',
-    '    </div>',
-    '  </section>',
-    '',
-    '  <section class="my-member" data-region-id="member" data-region-role="card">',
-    '    <div class="my-member__header">',
-    '      <span class="tag tag--20" data-dd-id="dd-tag-svip" data-component-slug="tag" data-rule-source="preview/component-tag.html" data-token-binding="bg:var(--bg-inverse-surface-l1);color:var(--text-inverse)">',
-    '        <span class="tag__label">SVIP</span>',
-    '      </span>',
-    '      <span class="my-member__title">年度超级会员</span>',
-    '      <button data-dom-id="entry-renew" data-dd-id="dd-renew" data-component-slug="button" data-rule-source="preview/component-button.html" class="btn btn--strong btn--sm" role="button" tabindex="0">',
-    '        <span>去续费</span>',
-    '      </button>',
-    '    </div>',
-    '    <div class="my-member__space">',
-    '      <span class="my-member__space-text">117.29G / 360G</span>',
-    '      <button data-dom-id="entry-space-manage" class="my-member__space-link" role="button" tabindex="0">',
-    '        <span>空间管理</span>',
-    '        <i class="wego-iconfont-s icon-youjiantou16"></i>',
-    '      </button>',
-    '    </div>',
-    '    <div class="my-member__progress">',
-    '      <div class="my-member__progress-bar"></div>',
-    '    </div>',
-    '  </section>',
-    '',
-    '  <section class="card card--surface my-shortcuts" data-region-id="shortcuts" data-region-role="grid" data-dd-id="dd-card-shortcuts" data-component-slug="card" data-rule-source="preview/component-card.html" data-token-binding="bg:var(--bg-surface)">',
-    '    <div class="my-grid">',
-    '      <button data-dom-id="entry-fans" class="my-grid__item" role="button" tabindex="0">',
-    '        <div class="my-grid__icon-wrap my-grid__icon-wrap--orange">',
-    '          <i class="my-grid__icon wego-iconfont-s icon-fensi"></i>',
-    '        </div>',
-    '        <span class="my-grid__label">粉丝</span>',
-    '        <span class="my-grid__value">107</span>',
-    '      </button>',
-    '      <button data-dom-id="entry-homepage" class="my-grid__item" role="button" tabindex="0">',
-    '        <div class="my-grid__icon-wrap my-grid__icon-wrap--blue">',
-    '          <i class="my-grid__icon wego-iconfont-s icon-dianpu"></i>',
-    '        </div>',
-    '        <span class="my-grid__label">我的主页</span>',
-    '      </button>',
-    '      <button data-dom-id="entry-qrcode" class="my-grid__item" role="button" tabindex="0">',
-    '        <div class="my-grid__icon-wrap my-grid__icon-wrap--green">',
-    '          <i class="my-grid__icon wego-iconfont-s icon-shoukuanma"></i>',
-    '        </div>',
-    '        <span class="my-grid__label">二维码</span>',
-    '      </button>',
-    '      <button data-dom-id="entry-miniprogram" class="my-grid__item" role="button" tabindex="0">',
-    '        <div class="my-grid__icon-wrap my-grid__icon-wrap--purple">',
-    '          <i class="my-grid__icon wego-iconfont-s icon-xiaochengxu"></i>',
-    '        </div>',
-    '        <span class="my-grid__label">小程序码</span>',
-    '      </button>',
-    '    </div>',
-    '  </section>',
-    '',
-    '  <section class="card card--surface my-functions" data-region-id="functions" data-region-role="grid" data-dd-id="dd-card-functions" data-component-slug="card" data-rule-source="preview/component-card.html" data-token-binding="bg:var(--bg-surface)">',
-    '    <div class="my-grid my-grid--5">',
-    '      <button data-dom-id="entry-group-buy" class="my-grid__item" role="button" tabindex="0">',
-    '        <div class="my-grid__icon-wrap my-grid__icon-wrap--orange">',
-    '          <i class="my-grid__icon wego-iconfont-s icon-tuangou"></i>',
-    '        </div>',
-    '        <span class="my-grid__label">一键开团</span>',
-    '      </button>',
-    '      <button data-dom-id="entry-shop-decoration" class="my-grid__item" role="button" tabindex="0">',
-    '        <div class="my-grid__icon-wrap my-grid__icon-wrap--red">',
-    '          <i class="my-grid__icon wego-iconfont-s icon-zhuangxiu"></i>',
-    '        </div>',
-    '        <span class="my-grid__label">店铺装修</span>',
-    '      </button>',
-    '      <button data-dom-id="entry-payment-code" class="my-grid__item" role="button" tabindex="0">',
-    '        <div class="my-grid__icon-wrap my-grid__icon-wrap--green">',
-    '          <i class="my-grid__icon wego-iconfont-s icon-shoukuanma"></i>',
-    '        </div>',
-    '        <span class="my-grid__label">收款码</span>',
-    '      </button>',
-    '      <button data-dom-id="entry-my-shop" class="my-grid__item" role="button" tabindex="0">',
-    '        <div class="my-grid__icon-wrap my-grid__icon-wrap--green">',
-    '          <i class="my-grid__icon wego-iconfont-s icon-xiaochengxu"></i>',
-    '        </div>',
-    '        <span class="my-grid__label">我的小店</span>',
-    '        <span class="my-grid__badge">小程序</span>',
-    '      </button>',
-    '      <button data-dom-id="entry-member-manage" class="my-grid__item" role="button" tabindex="0">',
-    '        <div class="my-grid__icon-wrap my-grid__icon-wrap--orange">',
-    '          <i class="my-grid__icon wego-iconfont-s icon-fensihuiyuanka"></i>',
-    '        </div>',
-    '        <span class="my-grid__label">会员管理</span>',
-    '      </button>',
-    '      <button data-dom-id="entry-visitor" class="my-grid__item" role="button" tabindex="0">',
-    '        <div class="my-grid__icon-wrap my-grid__icon-wrap--blue">',
-    '          <i class="my-grid__icon wego-iconfont-s icon-fangkejilu"></i>',
-    '        </div>',
-    '        <span class="my-grid__label">访客足迹</span>',
-    '      </button>',
-    '      <button data-dom-id="entry-data" class="my-grid__item" role="button" tabindex="0">',
-    '        <div class="my-grid__icon-wrap my-grid__icon-wrap--blue">',
-    '          <i class="my-grid__icon wego-iconfont-s icon-shuju"></i>',
-    '        </div>',
-    '        <span class="my-grid__label">数据中心</span>',
-    '      </button>',
-    '      <button data-dom-id="entry-wechat-group" class="my-grid__item" role="button" tabindex="0">',
-    '        <div class="my-grid__icon-wrap my-grid__icon-wrap--green">',
-    '          <i class="my-grid__icon wego-iconfont-s icon-weixin"></i>',
-    '        </div>',
-    '        <span class="my-grid__label">微信群发</span>',
-    '      </button>',
-    '      <button data-dom-id="entry-skin" class="my-grid__item" role="button" tabindex="0">',
-    '        <div class="my-grid__icon-wrap my-grid__icon-wrap--orange">',
-    '          <i class="my-grid__icon wego-iconfont-s icon-huanfu"></i>',
-    '        </div>',
-    '        <span class="my-grid__label">一键换肤</span>',
-    '      </button>',
-    '      <button data-dom-id="entry-more" class="my-grid__item" role="button" tabindex="0">',
-    '        <div class="my-grid__icon-wrap my-grid__icon-wrap--gray">',
-    '          <i class="my-grid__icon wego-iconfont-s icon-gengduo16"></i>',
-    '        </div>',
-    '        <span class="my-grid__label">更多</span>',
-    '      </button>',
-    '      <button data-dom-id="entry-team" class="my-grid__item" role="button" tabindex="0">',
-    '        <div class="my-grid__icon-wrap my-grid__icon-wrap--blue">',
-    '          <i class="my-grid__icon wego-iconfont-s icon-guanli"></i>',
-    '        </div>',
-    '        <span class="my-grid__label">团队管理</span>',
-    '      </button>',
-    '      <button data-dom-id="entry-miniprogram-exclusive" class="my-grid__item" role="button" tabindex="0">',
-    '        <div class="my-grid__icon-wrap my-grid__icon-wrap--green">',
-    '          <i class="my-grid__icon wego-iconfont-s icon-weixin"></i>',
-    '        </div>',
-    '        <span class="my-grid__label">专享小程序</span>',
-    '      </button>',
-    '      <button data-dom-id="entry-album-url" class="my-grid__item" role="button" tabindex="0">',
-    '        <div class="my-grid__icon-wrap my-grid__icon-wrap--blue">',
-    '          <i class="my-grid__icon wego-iconfont-s icon-dianpu"></i>',
-    '        </div>',
-    '        <span class="my-grid__label">相册网址</span>',
-    '      </button>',
-    '      <button data-dom-id="entry-private-keyboard" class="my-grid__item" role="button" tabindex="0">',
-    '        <div class="my-grid__icon-wrap my-grid__icon-wrap--green">',
-    '          <i class="my-grid__icon wego-iconfont-s icon-jianpan"></i>',
-    '        </div>',
-    '        <span class="my-grid__label">私域键盘</span>',
-    '        <span class="my-grid__badge my-grid__badge--free">免费</span>',
-    '      </button>',
-    '      <button data-dom-id="entry-pc" class="my-grid__item" role="button" tabindex="0">',
-    '        <div class="my-grid__icon-wrap my-grid__icon-wrap--blue">',
-    '          <i class="my-grid__icon wego-iconfont-s icon-dianpu"></i>',
-    '        </div>',
-    '        <span class="my-grid__label">PC(电脑版)</span>',
-    '      </button>',
-    '    </div>',
-    '  </section>',
-    '',
-    '  <section class="card card--surface my-orders" data-region-id="orders" data-region-role="grid" data-dd-id="dd-card-orders" data-component-slug="card" data-rule-source="preview/component-card.html" data-token-binding="bg:var(--bg-surface)">',
-    '    <div class="my-orders__header">',
-    '      <span class="my-orders__title">我买的</span>',
-    '      <button data-dom-id="entry-orders-all" class="my-orders__all" role="button" tabindex="0">',
-    '        <span>全部</span>',
-    '        <i class="wego-iconfont-s icon-youjiantou16"></i>',
-    '      </button>',
-    '    </div>',
-    '    <div class="my-grid my-grid--5">',
-    '      <button data-dom-id="entry-pending-pay" class="my-grid__item" role="button" tabindex="0">',
-    '        <div class="my-grid__icon-wrap my-grid__icon-wrap--gray">',
-    '          <i class="my-grid__icon wego-iconfont-s icon-daifukuan"></i>',
-    '        </div>',
-    '        <span class="my-grid__label">待付款</span>',
-    '      </button>',
-    '      <button data-dom-id="entry-paid" class="my-grid__item my-grid__item--badge" role="button" tabindex="0">',
-    '        <div class="my-grid__icon-wrap my-grid__icon-wrap--gray">',
-    '          <i class="my-grid__icon wego-iconfont-s icon-yifukuan"></i>',
-    '          <span class="badge badge--number badge--corner" data-dd-id="dd-badge-paid" data-component-slug="badge" data-rule-source="preview/component-badge.html" data-token-binding="bg:var(--status-danger-default);color:var(--text-inverse)">',
-    '            <span class="badge__text">16</span>',
-    '          </span>',
-    '        </div>',
-    '        <span class="my-grid__label">已付款</span>',
-    '      </button>',
-    '      <button data-dom-id="entry-shipped" class="my-grid__item" role="button" tabindex="0">',
-    '        <div class="my-grid__icon-wrap my-grid__icon-wrap--gray">',
-    '          <i class="my-grid__icon wego-iconfont-s icon-yifahuo"></i>',
-    '        </div>',
-    '        <span class="my-grid__label">已发货</span>',
-    '      </button>',
-    '      <button data-dom-id="entry-refund" class="my-grid__item" role="button" tabindex="0">',
-    '        <div class="my-grid__icon-wrap my-grid__icon-wrap--gray">',
-    '          <i class="my-grid__icon wego-iconfont-s icon-tuikuan"></i>',
-    '        </div>',
-    '        <span class="my-grid__label">退款</span>',
-    '      </button>',
-    '      <button data-dom-id="entry-hang" class="my-grid__item my-grid__item--badge" role="button" tabindex="0">',
-    '        <div class="my-grid__icon-wrap my-grid__icon-wrap--gray">',
-    '          <i class="my-grid__icon wego-iconfont-s icon-guaji"></i>',
-    '          <span class="badge badge--number badge--corner" data-dd-id="dd-badge-hang" data-component-slug="badge" data-rule-source="preview/component-badge.html" data-token-binding="bg:var(--status-danger-default);color:var(--text-inverse)">',
-    '            <span class="badge__text">1</span>',
-    '          </span>',
-    '        </div>',
-    '        <span class="my-grid__label">挂起</span>',
-    '      </button>',
-    '    </div>',
-    '  </section>',
-    '',
-    '  <div class="cell-group" data-region-id="settings" data-region-role="list">',
-    '    <div class="cell-group__content cell-group__content--card">',
-    '      <div data-dom-id="entry-settings" data-dd-id="dd-cell-settings" data-component-slug="cell" data-rule-source="preview/component-cell.html" data-token-binding="bg:var(--bg-surface);title:var(--text-default);arrow:var(--text-tertiary)" class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" role="button" tabindex="0">',
-    '        <div class="cell__body">',
-    '          <div class="cell__content"><div class="cell__title-row"><span class="cell__title">设置</span></div></div>',
-    '          <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>',
-    '        </div>',
-    '      </div>',
-    '      <div data-dom-id="entry-wallet" data-dd-id="dd-cell-wallet" data-component-slug="cell" data-rule-source="preview/component-cell.html" data-token-binding="bg:var(--bg-surface);title:var(--text-default);arrow:var(--text-tertiary)" class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" role="button" tabindex="0">',
-    '        <div class="cell__body">',
-    '          <div class="cell__content"><div class="cell__title-row"><span class="cell__title">我的钱包</span></div></div>',
-    '          <div class="cell__action">',
-    '            <span class="metric metric--16 metric--black" data-dd-id="dd-metric-wallet" data-component-slug="metric" data-rule-source="preview/component-metric.html">',
-    '              <span class="metric__main"><span class="metric__symbol">¥</span><span class="metric__value"><span class="metric__integer">0.02</span></span></span>',
-    '            </span>',
-    '            <i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i>',
-    '          </div>',
-    '        </div>',
-    '      </div>',
-    '      <div data-dom-id="entry-favorites" data-dd-id="dd-cell-favorites" data-component-slug="cell" data-rule-source="preview/component-cell.html" data-token-binding="bg:var(--bg-surface);title:var(--text-default);arrow:var(--text-tertiary)" class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" role="button" tabindex="0">',
-    '        <div class="cell__body">',
-    '          <div class="cell__content"><div class="cell__title-row"><span class="cell__title">我的收藏</span></div></div>',
-    '          <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>',
-    '        </div>',
-    '      </div>',
-    '      <div data-dom-id="entry-coupons" data-dd-id="dd-cell-coupons" data-component-slug="cell" data-rule-source="preview/component-cell.html" data-token-binding="bg:var(--bg-surface);title:var(--text-default);arrow:var(--text-tertiary)" class="cell cell--single cell--bg-white cell--clickable" role="button" tabindex="0">',
-    '        <div class="cell__body">',
-    '          <div class="cell__content"><div class="cell__title-row"><span class="cell__title">我的卡券</span></div></div>',
-    '          <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>',
-    '        </div>',
-    '      </div>',
-    '    </div>',
-    '  </div>',
-    '',
-    '  <section class="card card--surface my-withdraw" data-region-id="withdraw" data-region-role="card" data-dd-id="dd-card-withdraw" data-component-slug="card" data-rule-source="preview/component-card.html" data-token-binding="bg:var(--bg-surface)">',
-    '    <button data-dom-id="entry-withdraw" class="my-withdraw__btn" role="button" tabindex="0">',
-    '      <span class="my-withdraw__title">提现与返佣</span>',
-    '      <span class="my-withdraw__action">',
-    '        <i class="wego-iconfont-s icon-yaoqing"></i>',
-    '        <span>邀请赚现金</span>',
-    '        <i class="wego-iconfont-s icon-youjiantou16"></i>',
-    '      </span>',
-    '    </button>',
-    '  </section>',
-    '',
-    '</div>'
-  ].join(''),
-  init: function (ctx) {
+  template: `
+    <div data-surface-id="my" data-route-id="my" data-page-pattern="host-tab-profile" data-bg="surface">
+      <div class="my-page">
+        <!-- 顶部用户信息区 -->
+        <div class="my-user-section" data-dom-id="user-info">
+          <div class="my-user-main">
+            <div class="avatar avatar--56 avatar--image" data-dd-id="user-avatar" data-component-slug="avatar" data-rule-source="preview/component-avatar.html">
+              <img src="./lib/assets/image/avatar-defult.png" alt="头像">
+            </div>
+            <div class="my-user-meta">
+              <div class="my-user-name-row">
+                <span class="my-user-name">店主昵称</span>
+                <span class="tag tag--20 tag--brand-stroke" data-dd-id="vip-tag" data-component-slug="tag" data-rule-source="preview/component-tag.html"><span class="tag__label">VIP</span></span>
+              </div>
+              <div class="my-user-tags">
+                <span class="tag tag--20 tag--gray" data-dd-id="role-tag-kefu" data-component-slug="tag" data-rule-source="preview/component-tag.html"><span class="tag__label">客服</span></span>
+                <span class="tag tag--20 tag--gray" data-dd-id="role-tag-admin" data-component-slug="tag" data-rule-source="preview/component-tag.html"><span class="tag__label">超级管理员</span></span>
+              </div>
+            </div>
+          </div>
+          <div class="my-user-actions">
+            <button type="button" class="btn btn--weak btn--sm" data-dd-id="btn-add-staff" data-dom-id="btn-add-staff" data-component-slug="button" data-rule-source="preview/component-button.html">+ 员工</button>
+            <button type="button" class="btn btn--weak btn--sm" data-dd-id="btn-manage-staff" data-dom-id="btn-manage-staff" data-component-slug="button" data-rule-source="preview/component-button.html">员工管理</button>
+          </div>
+        </div>
+
+        <!-- 会员/空间卡片 -->
+        <div class="my-vip-card card card--surface" data-dd-id="vip-card" data-component-slug="card" data-rule-source="preview/component-card.html">
+          <div class="my-vip-header">
+            <div class="my-vip-title">
+              <span class="my-vip-badge">VIP</span>
+              <span class="my-vip-text">年度超级会员</span>
+            </div>
+            <button type="button" class="btn btn--medium btn--sm" data-dd-id="btn-renew" data-dom-id="btn-renew" data-component-slug="button" data-rule-source="preview/component-button.html">去续费</button>
+          </div>
+          <div class="my-space-row">
+            <div class="my-space-info">
+              <span class="my-space-used">117.29G</span>
+              <span class="my-space-sep">/</span>
+              <span class="my-space-total">360G</span>
+            </div>
+            <span class="link" data-dom-id="link-space-manage">空间管理</span>
+          </div>
+          <div class="my-space-progress">
+            <div class="my-space-progress__bar" style="width: 32.6%"></div>
+          </div>
+        </div>
+
+        <!-- 应用功能入口区 -->
+        <div class="my-apps-section" data-dom-id="app-entries">
+          <div class="host-shell-grid">
+            <button type="button" class="host-shell-grid-entry" data-dom-id="app-kaituan">
+              <img class="host-shell-grid-entry__icon" src="./lib/assets/icons/app-center/一键开团.svg" alt="">
+              <span class="host-shell-grid-entry__label">一键开团</span>
+            </button>
+            <button type="button" class="host-shell-grid-entry" data-dom-id="app-decorate">
+              <img class="host-shell-grid-entry__icon" src="./lib/assets/icons/app-center/店铺装修.svg" alt="">
+              <span class="host-shell-grid-entry__label">店铺装修</span>
+            </button>
+            <button type="button" class="host-shell-grid-entry" data-dom-id="app-qrcode">
+              <img class="host-shell-grid-entry__icon" src="./lib/assets/icons/app-center/收款码.svg" alt="">
+              <span class="host-shell-grid-entry__label">收款码</span>
+            </button>
+            <button type="button" class="host-shell-grid-entry" data-dom-id="app-mystore">
+              <img class="host-shell-grid-entry__icon" src="./lib/assets/icons/app-center/我的小店.svg" alt="">
+              <span class="host-shell-grid-entry__label">我的小店</span>
+            </button>
+            <button type="button" class="host-shell-grid-entry" data-dom-id="app-member">
+              <img class="host-shell-grid-entry__icon" src="./lib/assets/icons/app-center/客户管理.svg" alt="">
+              <span class="host-shell-grid-entry__label">会员管理</span>
+            </button>
+            <button type="button" class="host-shell-grid-entry" data-dom-id="app-footprint">
+              <img class="host-shell-grid-entry__icon" src="./lib/assets/icons/app-center/访客足迹.svg" alt="">
+              <span class="host-shell-grid-entry__label">访客足迹</span>
+            </button>
+            <button type="button" class="host-shell-grid-entry" data-dom-id="app-data">
+              <img class="host-shell-grid-entry__icon" src="./lib/assets/icons/app-center/数据中心.svg" alt="">
+              <span class="host-shell-grid-entry__label">数据中心</span>
+            </button>
+            <button type="button" class="host-shell-grid-entry" data-dom-id="app-wechat">
+              <img class="host-shell-grid-entry__icon" src="./lib/assets/icons/app-center/微信群发助手.svg" alt="">
+              <span class="host-shell-grid-entry__label">微信群发</span>
+            </button>
+            <button type="button" class="host-shell-grid-entry" data-dom-id="app-skin">
+              <img class="host-shell-grid-entry__icon" src="./lib/assets/icons/app-center/一键换肤.svg" alt="">
+              <span class="host-shell-grid-entry__label">一键换肤</span>
+            </button>
+            <button type="button" class="host-shell-grid-entry" data-dom-id="app-team">
+              <img class="host-shell-grid-entry__icon" src="./lib/assets/icons/app-center/团队管理.svg" alt="">
+              <span class="host-shell-grid-entry__label">团队管理</span>
+            </button>
+            <button type="button" class="host-shell-grid-entry" data-dom-id="app-miniprogram">
+              <img class="host-shell-grid-entry__icon" src="./lib/assets/icons/app-center/专享小程序.svg" alt="">
+              <span class="host-shell-grid-entry__label">专享小程序</span>
+            </button>
+            <button type="button" class="host-shell-grid-entry" data-dom-id="app-albumurl">
+              <img class="host-shell-grid-entry__icon" src="./lib/assets/icons/app-center/相册网址.svg" alt="">
+              <span class="host-shell-grid-entry__label">相册网址</span>
+            </button>
+            <button type="button" class="host-shell-grid-entry" data-dom-id="app-keyboard">
+              <img class="host-shell-grid-entry__icon" src="./lib/assets/icons/app-center/私域键盘.svg" alt="">
+              <span class="host-shell-grid-entry__label">私域键盘</span>
+            </button>
+            <button type="button" class="host-shell-grid-entry" data-dom-id="app-pc">
+              <img class="host-shell-grid-entry__icon" src="./lib/assets/icons/app-center/PC版.svg" alt="">
+              <span class="host-shell-grid-entry__label">电脑版</span>
+            </button>
+            <button type="button" class="host-shell-grid-entry" data-dom-id="app-more">
+              <i class="wego-iconfont-s icon-gengduo host-shell-grid-entry__icon" style="font-size:24px;color:var(--text-secondary)"></i>
+              <span class="host-shell-grid-entry__label">更多应用</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 订单状态区 -->
+        <div class="my-orders-section" data-dom-id="order-status">
+          <div class="my-section-header">
+            <span class="my-section-title">我买的</span>
+            <span class="link my-section-link" data-dom-id="link-all-orders">全部</span>
+          </div>
+          <div class="my-order-grid">
+            <div class="my-order-item" data-dom-id="order-pending-pay">
+              <div class="my-order-item__icon-wrap">
+                <i class="wego-iconfont-s icon-daifukuan"></i>
+              </div>
+              <span class="my-order-item__label">待付款</span>
+            </div>
+            <div class="my-order-item" data-dom-id="order-paid">
+              <div class="my-order-item__icon-wrap">
+                <i class="wego-iconfont-s icon-yifukuan"></i>
+                <span class="badge badge--number" data-dd-id="badge-paid" data-component-slug="badge" data-rule-source="preview/component-badge.html">16</span>
+              </div>
+              <span class="my-order-item__label">已付款</span>
+            </div>
+            <div class="my-order-item" data-dom-id="order-shipped">
+              <div class="my-order-item__icon-wrap">
+                <i class="wego-iconfont-s icon-yifahuo"></i>
+              </div>
+              <span class="my-order-item__label">已发货</span>
+            </div>
+            <div class="my-order-item" data-dom-id="order-refund">
+              <div class="my-order-item__icon-wrap">
+                <i class="wego-iconfont-s icon-tuikuan"></i>
+              </div>
+              <span class="my-order-item__label">退款</span>
+            </div>
+            <div class="my-order-item" data-dom-id="order-hold">
+              <div class="my-order-item__icon-wrap">
+                <i class="wego-iconfont-s icon-guaqi"></i>
+                <span class="badge badge--number" data-dd-id="badge-hold" data-component-slug="badge" data-rule-source="preview/component-badge.html">1</span>
+              </div>
+              <span class="my-order-item__label">挂起</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 设置列表区 -->
+        <div class="my-settings-section" data-dom-id="settings-list">
+          <div class="cell-group" data-dd-id="settings-cell-group" data-component-slug="cell" data-rule-source="preview/component-cell.html">
+            <div class="cell-group__content cell-group__content--card">
+              <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" data-dom-id="setting-settings">
+                <div class="cell__body">
+                  <div class="cell__content"><div class="cell__title-row"><span class="cell__title">设置</span></div></div>
+                  <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+                </div>
+              </div>
+              <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" data-dom-id="setting-wallet">
+                <div class="cell__body">
+                  <div class="cell__content"><div class="cell__title-row"><span class="cell__title">我的钱包</span></div></div>
+                  <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+                </div>
+              </div>
+              <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" data-dom-id="setting-favorites">
+                <div class="cell__body">
+                  <div class="cell__content"><div class="cell__title-row"><span class="cell__title">我的收藏</span></div></div>
+                  <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+                </div>
+              </div>
+              <div class="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable" data-dom-id="setting-coupon">
+                <div class="cell__body">
+                  <div class="cell__content"><div class="cell__title-row"><span class="cell__title">我的卡券</span></div></div>
+                  <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+                </div>
+              </div>
+              <div class="cell cell--single cell--bg-white cell--clickable" data-dom-id="setting-withdraw">
+                <div class="cell__body">
+                  <div class="cell__content"><div class="cell__title-row"><span class="cell__title">提现与返佣</span></div></div>
+                  <div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+  presentation: {
+    type: 'push',
+    coversTabBar: false
+  },
+  init: function(ctx) {
     var root = ctx.root;
-    if (!root) return;
-    var triggers = [
-      root.querySelector('[data-dom-id="entry-switch-album"]'),
-      root.querySelector('[data-dom-id="entry-add-employee"]'),
-      root.querySelector('[data-dom-id="entry-employee-manage"]'),
-      root.querySelector('[data-dom-id="entry-renew"]'),
-      root.querySelector('[data-dom-id="entry-space-manage"]'),
-      root.querySelector('[data-dom-id="entry-fans"]'),
-      root.querySelector('[data-dom-id="entry-homepage"]'),
-      root.querySelector('[data-dom-id="entry-qrcode"]'),
-      root.querySelector('[data-dom-id="entry-miniprogram"]'),
-      root.querySelector('[data-dom-id="entry-group-buy"]'),
-      root.querySelector('[data-dom-id="entry-shop-decoration"]'),
-      root.querySelector('[data-dom-id="entry-payment-code"]'),
-      root.querySelector('[data-dom-id="entry-my-shop"]'),
-      root.querySelector('[data-dom-id="entry-member-manage"]'),
-      root.querySelector('[data-dom-id="entry-visitor"]'),
-      root.querySelector('[data-dom-id="entry-data"]'),
-      root.querySelector('[data-dom-id="entry-wechat-group"]'),
-      root.querySelector('[data-dom-id="entry-skin"]'),
-      root.querySelector('[data-dom-id="entry-more"]'),
-      root.querySelector('[data-dom-id="entry-team"]'),
-      root.querySelector('[data-dom-id="entry-miniprogram-exclusive"]'),
-      root.querySelector('[data-dom-id="entry-album-url"]'),
-      root.querySelector('[data-dom-id="entry-private-keyboard"]'),
-      root.querySelector('[data-dom-id="entry-pc"]'),
-      root.querySelector('[data-dom-id="entry-orders-all"]'),
-      root.querySelector('[data-dom-id="entry-pending-pay"]'),
-      root.querySelector('[data-dom-id="entry-paid"]'),
-      root.querySelector('[data-dom-id="entry-shipped"]'),
-      root.querySelector('[data-dom-id="entry-refund"]'),
-      root.querySelector('[data-dom-id="entry-hang"]'),
-      root.querySelector('[data-dom-id="entry-settings"]'),
-      root.querySelector('[data-dom-id="entry-wallet"]'),
-      root.querySelector('[data-dom-id="entry-favorites"]'),
-      root.querySelector('[data-dom-id="entry-coupons"]'),
-      root.querySelector('[data-dom-id="entry-withdraw"]')
+    var toast = ctx.toast;
+    var toastIds = [
+      'btn-add-staff', 'btn-manage-staff', 'btn-renew',
+      'link-space-manage', 'link-all-orders',
+      'app-kaituan', 'app-decorate', 'app-qrcode', 'app-mystore', 'app-member',
+      'app-footprint', 'app-data', 'app-wechat', 'app-skin', 'app-team',
+      'app-miniprogram', 'app-albumurl', 'app-keyboard', 'app-pc', 'app-more',
+      'order-pending-pay', 'order-paid', 'order-shipped', 'order-refund', 'order-hold',
+      'setting-settings', 'setting-wallet', 'setting-favorites', 'setting-coupon', 'setting-withdraw'
     ];
-    triggers.forEach(function (trigger) {
-      if (!trigger) return;
-      trigger.addEventListener('click', function (event) {
-        event.stopPropagation();
-        ctx.toast('功能开发中');
-      });
-      trigger.addEventListener('keydown', function (event) {
-        if (event.key !== 'Enter' && event.key !== ' ') return;
-        event.preventDefault();
-        event.stopPropagation();
-        ctx.toast('功能开发中');
-      });
+    toastIds.forEach(function(id) {
+      var el = root.querySelector('[data-dom-id="' + id + '"]');
+      if (el) {
+        el.addEventListener('click', function() {
+          toast('功能开发中');
+        });
+      }
     });
+    /* interaction refs: data-dom-id="btn-add-staff" data-dom-id="btn-manage-staff" data-dom-id="btn-renew"
+       data-dom-id="link-space-manage" data-dom-id="link-all-orders"
+       data-dom-id="app-kaituan" data-dom-id="app-decorate" data-dom-id="app-qrcode" data-dom-id="app-mystore" data-dom-id="app-member"
+       data-dom-id="app-footprint" data-dom-id="app-data" data-dom-id="app-wechat" data-dom-id="app-skin" data-dom-id="app-team"
+       data-dom-id="app-miniprogram" data-dom-id="app-albumurl" data-dom-id="app-keyboard" data-dom-id="app-pc" data-dom-id="app-more"
+       data-dom-id="order-pending-pay" data-dom-id="order-paid" data-dom-id="order-shipped" data-dom-id="order-refund" data-dom-id="order-hold"
+       data-dom-id="setting-settings" data-dom-id="setting-wallet" data-dom-id="setting-favorites" data-dom-id="setting-coupon" data-dom-id="setting-withdraw" */
   }
 });

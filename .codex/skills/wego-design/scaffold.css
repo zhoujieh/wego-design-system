@@ -191,6 +191,14 @@ body.uikit-page {
   -webkit-overflow-scrolling: touch;
   padding-top: var(--spacer-8);
 }
+.phone-body--card {
+  padding-left: var(--spacer-8);
+  padding-right: var(--spacer-8);
+}
+.phone-body--wide {
+  padding-left: var(--spacer-32);
+  padding-right: var(--spacer-32);
+}
 .phone-body::-webkit-scrollbar { display: none; }
 .phone-indicator {
   position: absolute;

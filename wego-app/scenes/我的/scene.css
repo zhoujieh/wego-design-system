@@ -1,351 +1,213 @@
-.my-scene {
+/* 我的页面 - 场景级布局与业务胶水 */
+
+[data-route-id="my"] {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.my-page {
   display: flex;
   flex-direction: column;
   gap: var(--spacer-12);
+  padding-bottom: var(--spacer-16);
 }
 
-.my-profile {
-  background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-subtle) 100%);
-  border-radius: var(--radius-8);
-  padding: var(--spacer-16);
-  box-sizing: border-box;
-}
-
-.my-profile__header {
+/* ── 顶部用户信息区 ── */
+.my-user-section {
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
+  gap: var(--spacer-12);
+  padding: var(--spacer-16);
+  background: var(--bg-surface);
+}
+
+.my-user-main {
+  display: flex;
+  align-items: center;
   gap: var(--spacer-12);
 }
 
-.my-profile__meta {
-  flex: 1 1 auto;
-  min-width: 0;
+.my-user-meta {
   display: flex;
   flex-direction: column;
   gap: var(--spacer-8);
+  flex: 1;
+  min-width: 0;
 }
 
-.my-profile__title-row {
+.my-user-name-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-8);
+}
+
+.my-user-name {
+  font-size: var(--heading-sm-font-size);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-default);
+  line-height: var(--body-lg-line-height);
+}
+
+.my-user-tags {
   display: flex;
   align-items: center;
   gap: var(--spacer-8);
   flex-wrap: wrap;
 }
 
-.my-profile__title {
-  margin: 0;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: var(--heading-sm-font-size);
-  line-height: var(--heading-sm-line-height);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-default);
-}
-
-.my-profile__tags {
+.my-user-actions {
   display: flex;
+  align-items: center;
   gap: var(--spacer-8);
 }
 
-.my-profile__tag {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 8px;
-  font-size: var(--body-xs-font-size);
-  line-height: var(--body-xs-line-height);
-  font-weight: var(--font-weight-regular);
-  color: var(--text-secondary);
-  background: var(--bg-subtle);
-  border-radius: var(--radius-4);
-}
-
-.my-profile__tag--green {
-  color: var(--status-success-default);
-  background: var(--status-success-surface-l1);
-}
-
-.my-profile__switch {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 10px;
-  font-size: var(--body-xs-font-size);
-  line-height: var(--body-xs-line-height);
-  font-weight: var(--font-weight-regular);
-  color: var(--text-secondary);
-  background: var(--bg-subtle);
-  border: none;
-  border-radius: var(--radius-6);
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.my-profile__switch i {
-  font-size: 14px;
-}
-
-.my-profile__actions {
-  display: flex;
-  gap: var(--spacer-12);
-  margin-top: var(--spacer-16);
-  padding-top: var(--spacer-16);
-  border-top: 0.5px solid var(--border-neutral-l2);
-}
-
-.my-profile__action-btn {
-  display: flex;
-  align-items: center;
-  gap: var(--spacer-4);
-  padding: 0;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: var(--body-sm-font-size);
-  line-height: var(--body-sm-line-height);
-  font-weight: var(--font-weight-regular);
-  color: var(--text-secondary);
-}
-
-.my-profile__action-avatar {
-  width: 24px;
-  height: 24px;
-  border-radius: var(--radius-full);
-}
-
-.my-member {
-  background: var(--status-promotion-surface-l1);
-  border-radius: var(--radius-8);
+/* ── 会员/空间卡片 ── */
+.my-vip-card {
+  margin: 0 var(--spacer-16);
   padding: var(--spacer-16);
-  box-sizing: border-box;
+  gap: var(--spacer-12);
 }
 
-.my-member__header {
-  display: flex;
-  align-items: center;
-  gap: var(--spacer-8);
-}
-
-.my-member__title {
-  flex: 1;
-  font-size: var(--body-lg-font-size);
-  line-height: var(--body-lg-line-height);
-  font-weight: var(--font-weight-semibold);
-  color: var(--status-promotion-default);
-}
-
-.my-member__space {
+.my-vip-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: var(--spacer-12);
 }
 
-.my-member__space-text {
-  font-size: var(--body-sm-font-size);
-  line-height: var(--body-sm-line-height);
-  font-weight: var(--font-weight-regular);
-  color: var(--text-secondary);
-}
-
-.my-member__space-link {
+.my-vip-title {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 0;
-  background: none;
-  border: none;
-  cursor: pointer;
+  gap: var(--spacer-8);
+}
+
+.my-vip-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--size-20);
+  padding: 0 var(--spacer-8);
+  border-radius: var(--radius-4);
+  background: var(--palette-orange-500);
+  color: var(--text-inverse);
+  font-size: var(--body-xs-font-size);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+}
+
+.my-vip-text {
+  font-size: var(--body-lg-font-size);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-default);
+}
+
+.my-space-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.my-space-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-4);
   font-size: var(--body-sm-font-size);
-  line-height: var(--body-sm-line-height);
-  font-weight: var(--font-weight-regular);
   color: var(--text-secondary);
 }
 
-.my-member__space-link i {
-  font-size: 14px;
+.my-space-used {
+  color: var(--text-default);
+  font-weight: var(--font-weight-medium);
 }
 
-.my-member__progress {
-  margin-top: var(--spacer-8);
+.my-space-progress {
+  width: 100%;
   height: 6px;
-  background: var(--bg-muted);
+  background: var(--bg-subtle);
   border-radius: var(--radius-full);
   overflow: hidden;
 }
 
-.my-member__progress-bar {
-  width: 32.6%;
+.my-space-progress__bar {
   height: 100%;
-  background: var(--status-promotion-default);
+  background: var(--bg-brand);
   border-radius: var(--radius-full);
 }
 
-.my-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--spacer-16);
+/* ── 应用功能入口区 ── */
+.my-apps-section {
+  background: var(--bg-surface);
+  padding: var(--spacer-12) 0;
+}
+
+.my-apps-section .host-shell-grid {
+  gap: var(--spacer-16) var(--spacer-12);
+}
+
+/* ── 订单状态区 ── */
+.my-orders-section {
+  background: var(--bg-surface);
   padding: var(--spacer-16);
+  margin: 0 var(--spacer-16);
+  border-radius: var(--radius-8);
 }
 
-.my-grid--5 {
-  grid-template-columns: repeat(5, 1fr);
-  gap: var(--spacer-12);
+.my-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacer-16);
 }
 
-.my-grid__item {
+.my-section-title {
+  font-size: var(--body-lg-font-size);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-default);
+}
+
+.my-order-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--spacer-8);
+}
+
+.my-order-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacer-4);
-  padding: 0;
-  background: none;
-  border: none;
+  gap: var(--spacer-8);
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
-.my-grid__icon-wrap {
+.my-order-item__icon-wrap {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-8);
-  position: relative;
-}
-
-.my-grid__icon-wrap--orange {
-  background: var(--status-warning-surface-l1);
-  color: var(--status-warning-default);
-}
-
-.my-grid__icon-wrap--blue {
-  background: var(--status-info-surface-l1);
-  color: var(--status-info-default);
-}
-
-.my-grid__icon-wrap--green {
-  background: var(--status-success-surface-l1);
-  color: var(--status-success-default);
-}
-
-.my-grid__icon-wrap--purple {
-  background: var(--palette-purple-100);
-  color: var(--accent-purple);
-}
-
-.my-grid__icon-wrap--red {
-  background: var(--status-danger-surface-l1);
-  color: var(--status-danger-default);
-}
-
-.my-grid__icon-wrap--gray {
-  background: var(--bg-muted);
-  color: var(--text-tertiary);
-}
-
-.my-grid__icon {
+  width: 44px;
+  height: 44px;
   font-size: 24px;
-}
-
-.my-grid__label {
-  font-size: var(--body-xs-font-size);
-  line-height: var(--body-xs-line-height);
-  font-weight: var(--font-weight-regular);
-  color: var(--text-default);
-  text-align: center;
-}
-
-.my-grid__value {
-  font-size: var(--body-sm-font-size);
-  line-height: var(--body-sm-line-height);
-  font-weight: var(--font-weight-semibold);
   color: var(--text-default);
 }
 
-.my-grid__badge {
+.my-order-item__icon-wrap .badge {
   position: absolute;
-  top: -4px;
-  right: -4px;
-  padding: 1px 6px;
-  font-size: 10px;
-  line-height: 16px;
-  font-weight: var(--font-weight-medium);
-  color: var(--text-inverse);
-  background: var(--accent-green);
-  border-radius: var(--radius-full);
-  white-space: nowrap;
+  top: 0;
+  right: 0;
+  transform: translate(30%, -20%);
 }
 
-.my-grid__badge--free {
-  background: var(--text-brand);
-}
-
-.my-grid__item--badge .my-grid__icon-wrap {
-  padding-top: 4px;
-}
-
-.my-orders__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--spacer-16) var(--spacer-16) 0;
-}
-
-.my-orders__title {
-  font-size: var(--body-lg-font-size);
-  line-height: var(--body-lg-line-height);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-default);
-}
-
-.my-orders__all {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 0;
-  background: none;
-  border: none;
-  cursor: pointer;
+.my-order-item__label {
   font-size: var(--body-sm-font-size);
-  line-height: var(--body-sm-line-height);
-  font-weight: var(--font-weight-regular);
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
+  line-height: 1;
 }
 
-.my-orders__all i {
-  font-size: 14px;
-}
-
-.my-withdraw__btn {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: var(--spacer-16);
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-.my-withdraw__title {
-  font-size: var(--body-lg-font-size);
-  line-height: var(--body-lg-line-height);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-default);
-}
-
-.my-withdraw__action {
-  display: flex;
-  align-items: center;
-  gap: var(--spacer-4);
-  font-size: var(--body-sm-font-size);
-  line-height: var(--body-sm-line-height);
-  font-weight: var(--font-weight-regular);
-  color: var(--text-promotion-strong);
-}
-
-.my-withdraw__action i {
-  font-size: 14px;
+/* ── 设置列表区 ── */
+.my-settings-section {
+  padding: 0 var(--spacer-16);
 }

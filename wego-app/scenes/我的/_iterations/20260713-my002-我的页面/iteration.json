@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 3,
+  "identity": {
+    "iteration_id": "my002",
+    "title": "我的页面",
+    "date": "2026-07-13",
+    "primary_scene": "我的",
+    "related_scenes": []
+  },
+  "status": "awaiting-brief-confirmation",
+  "scope_revision": 1,
+  "prototype_brief": {
+    "goal": "为店主提供一个个人中心页面，集中展示用户身份、会员状态、应用功能入口、订单状态和常用设置，方便快速访问核心功能",
+    "included": [
+      "顶部用户信息展示（头像、用户名、VIP身份、角色标签、员工管理入口）",
+      "会员/空间卡片（VIP年度超级会员标识、续费入口、空间使用进度）",
+      "应用功能入口区（一键开团、店铺装修、收款码、我的小店、会员管理、访客足迹、数据中心、微信群发、一键换肤、团队管理、专享小程序、相册网址、私域键盘、PC电脑版、更多应用）",
+      "订单状态区（我买的、待付款、已付款、已发货、退款、挂起）",
+      "设置列表区（设置、我的钱包、我的收藏、我的卡券、提现与返佣）"
+    ],
+    "excluded": [
+      "二级页面实现（如员工管理详情、空间管理详情、设置详情页等）",
+      "登录/注册流程",
+      "真实数据接口对接",
+      "支付、续费等真实交易流程"
+    ],
+    "entry_points": [
+      "底部 Tab 栏「我的」入口"
+    ],
+    "critical_paths": [
+      "用户打开「我的」页面 → 查看个人身份和会员状态 → 点击各功能入口/设置项 → 触发功能开发中提示"
+    ],
+    "states": [
+      "页面加载态：展示用户基本信息、会员状态、各功能入口和订单状态",
+      "点击功能入口/设置项：触发「功能开发中」轻提示"
+    ],
+    "data_contract": {
+      "user": {
+        "avatar": "用户头像URL",
+        "nickname": "用户名",
+        "is_vip": "是否VIP",
+        "vip_level": "VIP等级（如年度超级会员）",
+        "roles": "角色标签列表（客服、超级管理员）",
+        "space_used": "已使用空间（如117.29G）",
+        "space_total": "总空间（如360G）",
+        "order_counts": "各订单状态数量"
+      }
+    },
+    "assumptions": [
+      {
+        "assumption": "假设用户默认已登录",
+        "impact_level": "low",
+        "reversible": true
+      },
+      {
+        "assumption": "订单状态数量使用静态模拟数据",
+        "impact_level": "low",
+        "reversible": true
+      }
+    ],
+    "open_questions": []
+  },
+  "brief_confirmation": {
+    "confirmed_at": "2026-07-13",
+    "confirmed_by": "user",
+    "note": "用户确认范围"
+  },
+  "prototype_confirmation": null,
+  "affected_scenes": ["我的"],
+  "affected_runtime": ["routes.js"],
+  "stage_outputs": {
+    "product": { "valid": false },
+    "design": { "valid": false }
+  },
+  "change_log": [
+    {
+      "date": "2026-07-13",
+      "action": "submit-brief",
+      "scope_revision": 1,
+      "note": "初始范围提交"
+    }
+  ],
+  "freeze": null
+}

@@ -1,4 +1,6 @@
-# wego 优化：实施规格
+# 历史归档文档 - wego 优化：实施规格
+
+> **归档说明**：本文档为历史工作流计划，已不再作为当前重构依据。当前设计系统演进依据为 `docs/plans/wego-design-workflow-final-plan.md`。
 
 > 只搬运 solo-design 中**上下文无关**的核心机制，去掉 wego 不存在的环节。
 >
