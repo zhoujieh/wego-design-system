@@ -1,0 +1,573 @@
+{
+  "schemaVersion": 1,
+  "scene": "动态商品流",
+  "surface_id": "dongtai-feed",
+  "route_id": "dongtai",
+  "layout_mode": "composed",
+  "page_pattern": null,
+  "presentation": {
+    "type": "host-tab",
+    "transition": "none",
+    "dismissAction": "none",
+    "overlayLevel": "none",
+    "source": "library-consumption.json#/appRuntime/presentationTypes",
+    "coversTabBar": false
+  },
+  "prompt_contract": {
+    "design_system_snapshot": {
+      "version": 410,
+      "token_css": "colors_and_type.css",
+      "component_css": "components.css",
+      "component_inputs": [
+        {
+          "slug": "avatar",
+          "preview_file": "preview/component-avatar.html",
+          "contract_file": "components/avatar.json"
+        },
+        {
+          "slug": "image",
+          "preview_file": "preview/component-image.html",
+          "contract_file": "components/image.json"
+        },
+        {
+          "slug": "button",
+          "preview_file": "preview/component-button.html",
+          "contract_file": "components/button.json"
+        },
+        {
+          "slug": "navbar",
+          "preview_file": "preview/component-navbar.html",
+          "contract_file": "components/navbar.json"
+        },
+        {
+          "slug": "metric",
+          "preview_file": "preview/component-metric.html",
+          "contract_file": "components/metric.json"
+        }
+      ]
+    },
+    "token_whitelist": [
+      "var(--bg-page)",
+      "var(--bg-surface)",
+      "var(--bg-subtle)",
+      "var(--bg-placeholder)",
+      "var(--bg-overlay-l1)",
+      "var(--bg-overlay-l2)",
+      "var(--bg-fill-strong)",
+      "var(--bg-brand)",
+      "var(--z-sticky)",
+      "var(--text-default)",
+      "var(--text-secondary)",
+      "var(--text-tertiary)",
+      "var(--heading-xs-font-size)",
+      "var(--heading-xs-font-weight)",
+      "var(--heading-xs-line-height)",
+      "var(--body-sm-font-size)",
+      "var(--body-sm-font-weight)",
+      "var(--body-sm-line-height)",
+      "var(--body-sm-strong-font-size)",
+      "var(--body-sm-strong-font-weight)",
+      "var(--body-sm-strong-line-height)",
+      "var(--body-md-font-size)",
+      "var(--body-md-font-weight)",
+      "var(--body-md-line-height)",
+      "var(--body-md-strong-font-size)",
+      "var(--body-md-strong-font-weight)",
+      "var(--body-md-strong-line-height)",
+      "var(--body-xs-font-size)",
+      "var(--body-xs-line-height)",
+      "var(--status-promotion-default)",
+      "var(--spacer-2)",
+      "var(--spacer-4)",
+      "var(--spacer-8)",
+      "var(--spacer-12)",
+      "var(--spacer-16)",
+      "var(--spacer-40)",
+      "var(--border-neutral-l1)",
+      "var(--radius-full)",
+      "var(--radius-12)",
+      "var(--radius-8)",
+      "var(--radius-6)",
+      "var(--size-16)",
+      "var(--size-32)",
+      "var(--size-36)",
+      "var(--size-40)"
+    ],
+    "token_bindings": [
+      {
+        "selector": ".dongtai-feed",
+        "content_role": "场景根容器背景",
+        "css_property": "background",
+        "token": "var(--bg-page)",
+        "rule_ref": "colors_and_type.css#bg-page"
+      },
+      {
+        "selector": ".feed-card",
+        "content_role": "动态卡片背景",
+        "css_property": "background",
+        "token": "var(--bg-surface)",
+        "rule_ref": "colors_and_type.css#bg-surface"
+      },
+      {
+        "selector": ".feed-card__product",
+        "content_role": "产品信息区背景",
+        "css_property": "background",
+        "token": "var(--bg-subtle)",
+        "rule_ref": "colors_and_type.css#bg-subtle"
+      },
+      {
+        "selector": ".feed-card__publisher-name",
+        "content_role": "发布者名称文字",
+        "css_property": "color",
+        "token": "var(--text-default)",
+        "rule_ref": "colors_and_type.css#text-default"
+      },
+      {
+        "selector": ".feed-card__publish-time",
+        "content_role": "发布时间文字",
+        "css_property": "color",
+        "token": "var(--text-tertiary)",
+        "rule_ref": "colors_and_type.css#text-tertiary"
+      },
+      {
+        "selector": ".feed-card__text",
+        "content_role": "动态正文文字",
+        "css_property": "color",
+        "token": "var(--text-default)",
+        "rule_ref": "colors_and_type.css#text-default"
+      },
+      {
+        "selector": ".dongtai-feed__topbar",
+        "content_role": "顶部搜索栏层级",
+        "css_property": "z-index",
+        "token": "var(--z-sticky)",
+        "rule_ref": "colors_and_type.css#z-sticky"
+      },
+      {
+        "selector": ".dongtai-feed__search-entry:active",
+        "content_role": "搜索入口按压态背景",
+        "css_property": "background",
+        "token": "var(--bg-overlay-l1)",
+        "rule_ref": "colors_and_type.css#bg-overlay-l1"
+      },
+      {
+        "selector": ".feed-card__product:active",
+        "content_role": "产品卡按压态背景",
+        "css_property": "background",
+        "token": "var(--bg-overlay-l1)",
+        "rule_ref": "colors_and_type.css#bg-overlay-l1"
+      },
+      {
+        "selector": ".feed-card__image-item",
+        "content_role": "图片项背景占位",
+        "css_property": "background",
+        "token": "var(--bg-placeholder)",
+        "rule_ref": "colors_and_type.css#bg-placeholder"
+      }
+    ],
+    "component_bindings": [
+      {
+        "slot": "发布者头像",
+        "slug": "avatar",
+        "reason": "每条动态头部展示发布者头像，使用 image 类型 40 尺寸",
+        "root_class": "avatar",
+        "source": "preview/component-avatar.html",
+        "contract_file": "components/avatar.json",
+        "required_structure": [
+          ".avatar--image img"
+        ],
+        "modifiers": [
+          ".avatar--40",
+          ".avatar--image"
+        ],
+        "variant_dimensions": {
+          "type": "image",
+          "size": "40"
+        }
+      },
+      {
+        "slot": "动态图片与产品缩略图",
+        "slug": "image",
+        "reason": "展示动态中的商品图片和产品缩略图，使用 rounded-md 圆角",
+        "root_class": "wg-image",
+        "source": "preview/component-image.html",
+        "contract_file": "components/image.json",
+        "required_structure": [
+          ".wg-image__src"
+        ],
+        "modifiers": [
+          ".wg-image--rounded-sm",
+          ".wg-image--rounded-md"
+        ],
+        "variant_dimensions": {
+          "fit": "cover",
+          "radius": "rounded-md"
+        }
+      },
+      {
+        "slot": "一键转发按钮",
+        "slug": "button",
+        "reason": "每条动态的核心操作按钮，使用 strong 强调引导转发",
+        "root_class": "btn",
+        "source": "preview/component-button.html",
+        "contract_file": "components/button.json",
+        "required_structure": [
+          ".btn__icon"
+        ],
+        "modifiers": [
+          ".btn--strong",
+          ".btn--md"
+        ],
+        "variant_dimensions": {
+          "emphasis": "strong",
+          "size": "md",
+          "iconMode": "leading-icon"
+        }
+      },
+      {
+        "slot": "产品详情导航栏",
+        "slug": "navbar",
+        "reason": "产品详情 push 页顶部导航，返回图标+居中标题",
+        "root_class": "navbar",
+        "source": "preview/component-navbar.html",
+        "contract_file": "components/navbar.json",
+        "required_structure": [
+          ".navbar__body",
+          ".navbar__left",
+          ".navbar__center",
+          ".navbar__title"
+        ],
+        "modifiers": [],
+        "variant_dimensions": {
+          "leftControl": "back-icon",
+          "titleAlignment": "center",
+          "actions": "none",
+          "spacing": "default",
+          "pageTransition": "push",
+          "position": "sticky"
+        }
+      },
+      {
+        "slot": "产品价格展示",
+        "slug": "metric",
+        "reason": "动态卡片和产品详情中的价格展示，使用营销橙主题 14 号",
+        "root_class": "metric",
+        "source": "preview/component-metric.html",
+        "contract_file": "components/metric.json",
+        "required_structure": [
+          ".metric__main",
+          ".metric__symbol",
+          ".metric__value",
+          ".metric__integer"
+        ],
+        "modifiers": [
+          ".metric--14",
+          ".metric--marketing"
+        ],
+        "variant_dimensions": {
+          "size": "14",
+          "theme": "marketing"
+        }
+      }
+    ],
+    "layout_contract": {
+      "mode": "composed",
+      "source": "references/design-decisions.md",
+      "selection_reason": "动态商品流为连续内容浏览场景，不匹配 biz-rule-config 或 system-settings 范式，采用 composed 模式自主组合",
+      "page_edge_mode": "M8",
+      "page_edge_mode_reason": "灰底白卡分组布局，外层保留 8px 留白，卡片间 12px 间距，符合连续内容流的视觉节奏",
+      "rules": [
+        "页面根背景 var(--bg-page)，卡片背景 var(--bg-surface)",
+        "顶部搜索栏 sticky 吸顶，背景与页面一致",
+        "动态卡片纵向排列，间距 var(--spacer-12)",
+        "每条卡片内部：头部→正文→图片→产品信息→操作栏",
+        "产品详情 push 页：navbar + hero 图 + 信息区 + 底部操作栏"
+      ],
+      "mutable_regions": [
+        "dongtai-feed__list：动态列表区域，由 JS 动态渲染卡片",
+        "feed-card__images：图片网格区域，根据图片数量自适应布局",
+        "dongtai-product__info：产品详情信息区，由 JS 填充"
+      ]
+    },
+    "interaction_contract": [
+      {
+        "dom_id": "search-entry",
+        "target": "toast:搜索功能开发中"
+      },
+      {
+        "dom_id": "forward-action",
+        "target": "toast:已加入转发队列"
+      },
+      {
+        "dom_id": "copy-text-action",
+        "target": "clipboard+toast:文案已复制"
+      },
+      {
+        "dom_id": "more-action",
+        "target": "sheet:more-actions"
+      },
+      {
+        "dom_id": "product-entry",
+        "target": "route:dongtai-product"
+      },
+      {
+        "dom_id": "image-click",
+        "target": "full-screen-modal:image-viewer"
+      },
+      {
+        "dom_id": "product-back",
+        "target": "back:dongtai"
+      },
+      {
+        "dom_id": "product-forward",
+        "target": "toast:已加入转发队列"
+      }
+    ],
+    "state_contract": [
+      {
+        "state_id": "feed_loaded",
+        "initial": true,
+        "trigger": "场景挂载后自动加载本地模拟数据",
+        "visible_result": "动态列表展示 5 条模拟动态，每条含发布者、时间、文案（可选）、图片（0-4 张）和产品信息",
+        "fallback": "数据为空时展示空状态文案",
+        "persistence": "session"
+      },
+      {
+        "state_id": "feed_empty",
+        "initial": false,
+        "trigger": "模拟数据为空数组",
+        "visible_result": "列表区域展示空状态提示文案",
+        "fallback": "不适用，空状态即终态",
+        "persistence": "session"
+      },
+      {
+        "state_id": "item_with_text_and_product",
+        "initial": false,
+        "trigger": "动态数据 content 非空且 product 存在",
+        "visible_result": "卡片展示文案段落和产品信息卡，文案在图片上方",
+        "fallback": "content 为空时省略文案段落",
+        "persistence": "session"
+      },
+      {
+        "state_id": "item_product_only",
+        "initial": false,
+        "trigger": "动态数据 content 为空字符串且 product 存在",
+        "visible_result": "卡片省略文案段落，仅展示产品信息卡",
+        "fallback": "不适用，产品信息即主内容",
+        "persistence": "session"
+      },
+      {
+        "state_id": "item_images_varied",
+        "initial": false,
+        "trigger": "动态数据 images 数组长度为 0、1、2、3 或 4+",
+        "visible_result": "0 张时省略图片网格；1 张时 4:3 大图；2 张时 1:1 双列；3 张时 1:1 三列；4+ 张时 1:1 三列网格",
+        "fallback": "图片加载失败时显示骨架占位",
+        "persistence": "session"
+      },
+      {
+        "state_id": "product_detail_entered",
+        "initial": false,
+        "trigger": "点击动态卡片中的产品信息区",
+        "visible_result": "push 进入产品详情页，展示 hero 图、产品名称、价格和描述，底部展示转发按钮",
+        "fallback": "返回动态流",
+        "persistence": "session"
+      },
+      {
+        "state_id": "operation_triggered",
+        "initial": false,
+        "trigger": "点击一键转发、复制文案、更多操作等入口",
+        "visible_result": "转发和复制触发 toast 反馈；更多操作弹出 actionsheet 展示分享、收藏、下载、编辑、复制动态入口",
+        "fallback": "toast 或 actionsheet 关闭后回到动态流",
+        "persistence": "none"
+      }
+    ],
+    "hard_rules": [
+      "每条动态必须稳定呈现发布者头像、发布者名称、发布时间三项头部信息",
+      "动态文案为空时省略文案段落，不影响产品信息展示",
+      "图片数量为 0 时省略图片网格区域",
+      "一键转发为 strong 按钮，是每条动态的核心操作",
+      "产品详情为 push 场景，本地模拟数据展示",
+      "所有操作入口仅提供 stub 级反馈（toast 或 actionsheet），不下钻功能实现"
+    ]
+  },
+  "decisions": [
+    {
+      "dd_id": "metric-",
+      "component_slug": "metric",
+      "rule_source": "preview/component-metric.html",
+      "token_binding": "color:var(--status-promotion-default)",
+      "class_name": "metric metric--14 metric--marketing"
+    },
+    {
+      "dd_id": "img-",
+      "component_slug": "image",
+      "rule_source": "preview/component-image.html",
+      "token_binding": null,
+      "class_name": "wg-image "
+    },
+    {
+      "dd_id": "avatar-",
+      "component_slug": "avatar",
+      "rule_source": "preview/component-avatar.html",
+      "token_binding": "background:var(--bg-fill-strong)",
+      "class_name": "avatar avatar--40 avatar--image"
+    },
+    {
+      "dd_id": "btn-forward-",
+      "component_slug": "button",
+      "rule_source": "preview/component-button.html",
+      "token_binding": "background:var(--bg-brand)",
+      "class_name": "btn btn--strong btn--md feed-card__forward-btn"
+    },
+    {
+      "dd_id": "navbar-product",
+      "component_slug": "navbar",
+      "rule_source": "preview/component-navbar.html",
+      "token_binding": null,
+      "class_name": "navbar"
+    },
+    {
+      "dd_id": "btn-product-forward",
+      "component_slug": "button",
+      "rule_source": "preview/component-button.html",
+      "token_binding": "background:var(--bg-brand)",
+      "class_name": "btn btn--strong btn--md"
+    },
+    {
+      "dd_id": "metric-product-price",
+      "component_slug": "metric",
+      "rule_source": "preview/component-metric.html",
+      "token_binding": "color:var(--status-promotion-default)",
+      "class_name": "metric metric--20 metric--marketing"
+    }
+  ],
+  "generation_evidence": {
+    "scene_js": "wego-app/scenes/动态商品流/scene.js",
+    "scene_css": "wego-app/scenes/动态商品流/scene.css",
+    "source_sha256": "58034cf37b2e3d43d498250294c00b41a9d825e3ebedf16c3b959ff8b00f0fd7",
+    "dom_ids": [
+      "image-click",
+      "product-entry",
+      "forward-action",
+      "copy-text-action",
+      "more-action",
+      "image-viewer-close",
+      "search-entry",
+      "feed-list",
+      "product-back",
+      "product-forward"
+    ],
+    "component_count": 7,
+    "visualCheck": {
+      "status": "passed",
+      "viewports": [
+        375,
+        393
+      ],
+      "checked_at": "2026-07-14"
+    },
+    "crowdingCheck": {
+      "status": "passed",
+      "items": [
+        "顶部搜索栏高度 44px，不遮挡动态卡片",
+        "动态卡片间距 12px，卡片内边距 16px，节奏清晰",
+        "图片网格 1/2/3 张采用不同布局，不超过 3 列",
+        "产品信息行高 56px，缩略图 40px，文字与箭头对齐",
+        "操作区按钮间距 8px，主按钮与次操作层级分明",
+        "底部留白 32px，最后一条动态不贴底"
+      ]
+    }
+  },
+  "state_contract": [
+    {
+      "state_id": "feed_loaded",
+      "initial": true,
+      "trigger": "场景挂载后自动加载本地模拟数据",
+      "visible_result": "动态列表展示 5 条模拟动态，每条含发布者、时间、文案（可选）、图片（0-4 张）和产品信息",
+      "fallback": "数据为空时展示空状态文案",
+      "persistence": "session"
+    },
+    {
+      "state_id": "feed_empty",
+      "initial": false,
+      "trigger": "模拟数据为空数组",
+      "visible_result": "列表区域展示空状态提示文案",
+      "fallback": "不适用，空状态即终态",
+      "persistence": "session"
+    },
+    {
+      "state_id": "item_with_text_and_product",
+      "initial": false,
+      "trigger": "动态数据 content 非空且 product 存在",
+      "visible_result": "卡片展示文案段落和产品信息卡，文案在图片上方",
+      "fallback": "content 为空时省略文案段落",
+      "persistence": "session"
+    },
+    {
+      "state_id": "item_product_only",
+      "initial": false,
+      "trigger": "动态数据 content 为空字符串且 product 存在",
+      "visible_result": "卡片省略文案段落，仅展示产品信息卡",
+      "fallback": "不适用，产品信息即主内容",
+      "persistence": "session"
+    },
+    {
+      "state_id": "item_images_varied",
+      "initial": false,
+      "trigger": "动态数据 images 数组长度为 0、1、2、3 或 4+",
+      "visible_result": "0 张时省略图片网格；1 张时 4:3 大图；2 张时 1:1 双列；3 张时 1:1 三列；4+ 张时 1:1 三列网格",
+      "fallback": "图片加载失败时显示骨架占位",
+      "persistence": "session"
+    },
+    {
+      "state_id": "product_detail_entered",
+      "initial": false,
+      "trigger": "点击动态卡片中的产品信息区",
+      "visible_result": "push 进入产品详情页，展示 hero 图、产品名称、价格和描述，底部展示转发按钮",
+      "fallback": "返回动态流",
+      "persistence": "session"
+    },
+    {
+      "state_id": "operation_triggered",
+      "initial": false,
+      "trigger": "点击一键转发、复制文案、更多操作等入口",
+      "visible_result": "转发和复制触发 toast 反馈；更多操作弹出 actionsheet 展示分享、收藏、下载、编辑、复制动态入口",
+      "fallback": "toast 或 actionsheet 关闭后回到动态流",
+      "persistence": "none"
+    }
+  ],
+  "interaction_contract": [
+    {
+      "dom_id": "search-entry",
+      "target": "toast:搜索功能开发中"
+    },
+    {
+      "dom_id": "forward-action",
+      "target": "toast:已加入转发队列"
+    },
+    {
+      "dom_id": "copy-text-action",
+      "target": "clipboard+toast:文案已复制"
+    },
+    {
+      "dom_id": "more-action",
+      "target": "sheet:more-actions"
+    },
+    {
+      "dom_id": "product-entry",
+      "target": "route:dongtai-product"
+    },
+    {
+      "dom_id": "image-click",
+      "target": "full-screen-modal:image-viewer"
+    },
+    {
+      "dom_id": "product-back",
+      "target": "back:dongtai"
+    },
+    {
+      "dom_id": "product-forward",
+      "target": "toast:已加入转发队列"
+    }
+  ]
+}
