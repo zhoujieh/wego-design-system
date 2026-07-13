@@ -40,9 +40,22 @@ authoritySources:
 - `--status-*-surface-l*` 与促销状态色只能用于提示、标签和局部反馈，不得大面积铺底。
 - 禁止大面积彩色或渐变背景、玻璃拟态和与微购中性基调冲突的强装饰效果。
 
+## Asset Semantics
+
 <!-- rule-id: no-large-color-background-app-center-svg-priority; source-ref: library-consumption.json -->
 
-功能入口图标优先使用 `assets/icons/app-center/` 中与业务语义匹配的 SVG。无对应 SVG 时，才使用 `iconfont.css` 中已查证的图标名；都不适用时选择最近似已交付资产或文字，不得猜测 icon class。
+页面中的视觉资产必须区分为三类，禁止跨语义代用：
+
+- 身份资产：用户头像、店铺头像、品牌头像、作者头像。
+- 应用资产：应用入口图标优先使用 `assets/icons/app-center/` 中与业务语义匹配的 SVG。
+- 内容资产：商品图、封面图、场景图、内容缩略图、媒体图。
+- 功能资产：必须使用 `iconfont.css` 中已查证的图标名；都不适用时选择最近似已交付资产或文字，不得猜测 icon class。
+
+硬规则：
+- 不得用身份组件承载功能入口图标。
+- 不得用功能图标冒充商品图、店铺头像、品牌图或内容缩略图。
+- 不得用商品图承载功能入口语义。
+- 产品、商品、内容、动态卡片图片只能使用 `assets/image/clothing/` 中的图片，根据图片生成对应的文案。
 
 ## Typography
 
@@ -85,8 +98,14 @@ layout_contract:
   rules: ["连续列表使用正式 group 结构"]
   mutable_regions: [".scene-content"]
 ```
+## Scroll & Sticky
 
-生成后按 375px、393px 视口检查横向溢出、重叠、裁切、按钮换行、首屏密度、容器嵌套、右侧操作数量和分隔策略。
+页面必须先定义滚动分层，再开始组件组合。
+
+默认规则：
+- 连续内容流页面同一时刻只允许一个主要 sticky 层，sticky 区域禁止过高。
+- 页面主 tabs、一级分类切换可作为主要 sticky 层；搜索栏和筛选条只有在确属高频收窄条件时才设置 sticky。
+- 滚动层必须设置 overflow：hidden, 避免出现内容重叠的情况。
 
 ## Elevation & Depth
 
