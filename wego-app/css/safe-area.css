@@ -43,7 +43,7 @@
   .host-shell-page {
     padding-top: calc(var(--spacer-16) + env(safe-area-inset-top, 0px)) !important;
     padding-right: var(--spacer-16) !important;
-    padding-bottom: calc(var(--spacer-40) + 56px) !important;
+    padding-bottom: calc(var(--spacer-40) + 56px + env(safe-area-inset-bottom, 0px)) !important;
     padding-left: var(--spacer-16) !important;
   }
 
