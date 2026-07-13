@@ -24,7 +24,7 @@ wego-app/scenes/{中文业务场景}/design-decisions.json
 ## 3. scene.css
 
 - 只写场景根作用域下的布局、区域关系和业务胶水。
-- 禁止硬编码颜色、越权 Token、覆盖正式组件内部 Token/尺寸/安全区、发明组件 class 和使用未注册图标。
+- 禁止硬编码颜色和间距值、越权 Token、覆盖正式组件内部 Token/尺寸/安全区、发明组件 class 和使用未注册图标。所有间距（gap/padding/margin）必须使用 `var(--spacer-*)` Token，不得使用裸像素值；组件内部尺寸（如图标 font-size）遵循组件 Preview 模式，不在此约束范围内。
 - 固定操作栏由正式组件处理安全区；无固定栏的滚动内容按宿主规则预留底部安全区。
 
 ## 4. design-decisions.json

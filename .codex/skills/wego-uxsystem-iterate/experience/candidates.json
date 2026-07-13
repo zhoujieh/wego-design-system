@@ -1390,6 +1390,126 @@
         "constraint_area": "design-decisions 输出格式精度要求",
         "description": "写入 design-decisions 时，每个需要字号/字重/颜色的业务元素必须直接输出 CSS 选择器到 Token 的绑定，不得仅写语义约束。wego-design 只做翻译执行，不做二次推理。"
       }
+    },
+    {
+      "id": "exp-component-visual-usage-must-consume-registered-component",
+      "normalized_key": "component-visual-usage-consume",
+      "title": "视觉用途匹配时必须消费正式组件",
+      "status": "promoted",
+      "occurrence_count": 1,
+      "threshold": 1,
+      "primary_owner": "wego-design",
+      "secondary_owners": [
+        "wego-design"
+      ],
+      "ownership_reason": "组件消费边界属于设计判断方法。",
+      "rule_ownership": {
+        "category": "skill-runtime-flow",
+        "canonical": {
+          "file": ".codex/skills/wego-design/references/design-decisions.md",
+          "locator": "Preview-first 选择过程",
+          "rule_id": "component-visual-usage-consume-registered"
+        }
+      },
+      "runtime_reachability": {
+        "consumer_skill": "wego-design",
+        "output_field": "component_mapping",
+        "downstream_consumer": "wego-design",
+        "acceptance_check": "wego-design"
+      },
+      "evidence": [
+        "我的页面 Benchmark 中 AI 对标签用 tag 组件但对角色标签手写 .my-profile__tag，对角标用 badge 组件但对小程序角标手写 .my-grid__badge，对提现区不用 cell 而手写 card+button 组合，badge 绝对定位参照系错误导致角标偏移到卡片右上角。"
+      ],
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "promoted_at": "2026-07-13T00:00:00Z",
+      "promotion_landing": {
+        "file": ".codex/skills/wego-design/references/design-decisions.md",
+        "locator": "Preview-first 选择过程 第6步",
+        "rule_id": "component-visual-usage-consume-registered",
+        "constraint_area": "组件消费优先级",
+        "description": "当页面元素的视觉用途与已注册组件匹配时（标签→tag、角标→badge、操作按钮→button、列表行→cell、头像→avatar），必须消费对应正式组件，不得用场景 CSS 复刻组件视觉模式。badge 角标定位必须基于设了 position:relative 的宿主元素。"
+      }
+    },
+    {
+      "id": "exp-no-large-area-color-background-prefer-app-center-svg",
+      "normalized_key": "large-color-background-app-center-svg",
+      "title": "禁止大面积彩色背景，功能入口优先用 app-center SVG",
+      "status": "promoted",
+      "occurrence_count": 1,
+      "threshold": 1,
+      "primary_owner": "wego-design",
+      "secondary_owners": [
+        "wego-design"
+      ],
+      "ownership_reason": "视觉克制原则和图标资产消费属于设计判断方法。",
+      "rule_ownership": {
+        "category": "skill-runtime-flow",
+        "canonical": {
+          "file": ".codex/skills/wego-design/references/design-decisions.md",
+          "locator": "视觉约束",
+          "rule_id": "no-large-color-background-app-center-svg-priority"
+        }
+      },
+      "runtime_reachability": {
+        "consumer_skill": "wego-design",
+        "output_field": "component_mapping",
+        "downstream_consumer": "wego-design",
+        "acceptance_check": "wego-design"
+      },
+      "evidence": [
+        "我的页面 Benchmark 中 AI 对用户信息区用 linear-gradient 渐变背景，会员区用 --status-promotion-surface-l1 大面积橙底，6 个图标背景手写彩色修饰类系统；同时 9 个 iconfont 图标名不存在导致渲染为空白，而 assets/icons/app-center/ 下有 84 个业务 SVG 资源闲置未用。"
+      ],
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "promoted_at": "2026-07-13T00:00:00Z",
+      "promotion_landing": {
+        "file": ".codex/skills/wego-design/references/design-decisions.md",
+        "locator": "视觉约束",
+        "rule_id": "no-large-color-background-app-center-svg-priority",
+        "constraint_area": "大面积彩色背景禁止与 app-center SVG 优先",
+        "description": "禁止大面积彩色/渐变背景，状态色 Token 只用于点缀。功能入口图标优先使用 assets/icons/app-center/ SVG 资源，无对应 SVG 时才用 iconfont 并查证类名。"
+      }
+    },
+    {
+      "id": "exp-spacing-must-use-spacer-token",
+      "normalized_key": "spacing-spacer-token",
+      "title": "间距必须使用 spacer Token",
+      "status": "promoted",
+      "occurrence_count": 1,
+      "threshold": 1,
+      "primary_owner": "wego-design",
+      "secondary_owners": [
+        "wego-design"
+      ],
+      "ownership_reason": "间距 Token 一致性属于场景合同约束。",
+      "rule_ownership": {
+        "category": "skill-runtime-flow",
+        "canonical": {
+          "file": ".codex/skills/wego-design/references/scene-contract.md",
+          "locator": "scene.css",
+          "rule_id": "spacing-must-use-spacer-token"
+        }
+      },
+      "runtime_reachability": {
+        "consumer_skill": "wego-design",
+        "output_field": "scene.css",
+        "downstream_consumer": "wego-design",
+        "acceptance_check": "wego-design"
+      },
+      "evidence": [
+        "我的页面 Benchmark 中 scene.css 同一文件内 gap: var(--spacer-4) 和 gap: 4px 混用，3 处使用裸像素值，其他位置正确使用 spacer Token。"
+      ],
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "promoted_at": "2026-07-13T00:00:00Z",
+      "promotion_landing": {
+        "file": ".codex/skills/wego-design/references/scene-contract.md",
+        "locator": "scene.css",
+        "rule_id": "spacing-must-use-spacer-token",
+        "constraint_area": "间距 Token 强制使用",
+        "description": "所有间距（gap/padding/margin）必须使用 var(--spacer-*) Token，不得使用裸像素值；组件内部尺寸遵循组件 Preview 模式，不在此约束范围内。"
+      }
     }
   ]
 }

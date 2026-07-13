@@ -23,6 +23,7 @@
 3. 先读 Preview，再读契约；只使用 Preview 中存在且契约允许的根 class、子节点和 modifier。
 4. 有稳定变体时直接消费；没有稳定变体但能在 `domAnatomy` 允许范围内组合时记录 `free-composition`；都不能覆盖时创建 DDR，选择最近似正式结构继续完成原型。
 5. 禁止自造完整组件、猜 Token、猜 iconfont 名称、复制 UI Kit 外壳或用业务 class 覆盖组件内部样式。
+6. 当页面元素的视觉用途与已注册组件匹配时（标签→tag、角标→badge、操作按钮→button、列表行→cell、头像→avatar），必须消费对应正式组件，不得用场景 CSS 复刻组件视觉模式（圆角、背景色、字号、字重等）。场景 CSS 只负责区域布局（flex/grid/gap/padding）和区域间纵向节奏。badge 的角标定位必须基于设了 `position: relative` 的宿主元素，不得相对于外层容器绝对定位。
 
 ## 3. prompt_contract
 
@@ -80,6 +81,8 @@ prompt_contract:
 - 连续列表和表单优先使用 `.cell-group`、`.form-group` 的正式结构；避免额外白底壳、圆角容器和重复 section 标题。
 - 页面横向边距、固定栏、安全区和组件内部样式遵循命中组件与页面范式；业务 CSS 只负责区域布局。
 - 生成后按 375px、393px 检查溢出、重叠、裁切、按钮换行、首屏密度、容器嵌套、右侧操作数量和分隔策略。
+- 禁止大面积彩色背景和渐变背景。`--status-*-surface-l1` 等状态色 Token 只用于点缀和提示，不作为区域级背景大面积铺设；区域背景使用 `--bg-surface`/`--bg-page`/`--bg-subtle` 等中性 Token。
+- 功能入口图标优先使用 `assets/icons/app-center/` 中的 SVG 资源（通过 `<img src="lib/assets/icons/app-center/{名称}.svg">` 引用），按业务语义匹配对应 SVG 文件名；app-center 无对应 SVG 时才使用 iconfont，且必须从 iconfont.css 查证类名。
 
 ## 6. DDR
 
