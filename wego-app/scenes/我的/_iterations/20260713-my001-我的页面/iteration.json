@@ -1,0 +1,193 @@
+{
+  "schemaVersion": 3,
+  "identity": {
+    "iteration_id": "my001",
+    "title": "我的页面",
+    "date": "2026-07-13",
+    "primary_scene": "我的",
+    "related_scenes": []
+  },
+  "status": "awaiting-prototype-confirmation",
+  "scope_revision": 1,
+  "prototype_brief": {
+    "goal": "为微购相册店主提供个人中心落地页，集中展示账号与店铺基础信息，并聚合常用经营与设置入口，作为底部我的 tab 的承载页面",
+    "included": [
+      {
+        "node_id": "my-page",
+        "description": "我的 tab 主页面整体展示，包含用户信息区、功能入口区、设置区三个分区",
+        "boundary": "functional"
+      },
+      {
+        "node_id": "user-info",
+        "description": "展示当前店主头像、昵称、店铺名称等基础身份信息",
+        "boundary": "functional"
+      },
+      {
+        "node_id": "shop-management-entries",
+        "description": "店铺经营类入口聚合，包含我的订单、店铺管理、商品管理、客户管理、数据中心等常用经营入口",
+        "boundary": "stub"
+      },
+      {
+        "node_id": "marketing-entries",
+        "description": "营销与推广类入口聚合，包含营销中心、推广员等入口",
+        "boundary": "stub"
+      },
+      {
+        "node_id": "settings-entries",
+        "description": "设置与工具类入口，包含设置、客服与帮助、关于等",
+        "boundary": "stub"
+      }
+    ],
+    "excluded": [
+      {
+        "node_id": "secondary-pages",
+        "description": "所有二级页面（订单列表、店铺管理详情、设置详情、营销中心详情等）均不在本次范围",
+        "reason": "本次只实现我的 tab 主页面"
+      },
+      {
+        "node_id": "login-flow",
+        "description": "登录注册流程不在本次范围，默认已登录",
+        "reason": "假设默认已登录店主身份"
+      },
+      {
+        "node_id": "profile-edit",
+        "description": "个人资料编辑、店铺信息编辑页不在本次范围",
+        "reason": "本次不实现编辑能力"
+      }
+    ],
+    "entry_points": [
+      {
+        "entry_id": "my-tab",
+        "description": "底部我的 tab 作为唯一入口",
+        "host": "底部主导航",
+        "trigger": "点击底部我的 tab 后切换显示"
+      }
+    ],
+    "critical_paths": [
+      {
+        "path_id": "view-profile",
+        "description": "点击底部我的 tab → 查看个人与店铺基础信息",
+        "nodes": ["my-tab", "user-info"]
+      },
+      {
+        "path_id": "access-entries",
+        "description": "在我的页面点击任一功能入口 → 收到入口已识别的反馈",
+        "nodes": ["my-page", "shop-management-entries", "marketing-entries", "settings-entries"]
+      }
+    ],
+    "states": [
+      {
+        "state_id": "default",
+        "description": "默认已登录状态，展示店主身份与店铺信息",
+        "initial": true
+      }
+    ],
+    "data_contract": {
+      "user": {
+        "avatar": "头像 URL，使用默认头像占位",
+        "nickname": "店主昵称",
+        "shop_name": "店铺名称"
+      },
+      "entries": {
+        "shop_management": ["我的订单", "店铺管理", "商品管理", "客户管理", "数据中心"],
+        "marketing": ["营销中心", "推广员"],
+        "settings": ["设置", "客服与帮助", "关于"]
+      }
+    },
+    "assumptions": [
+      {
+        "assumption_id": "logged-in-shop-owner",
+        "description": "假设进入我的 tab 时已默认登录为店主身份，不展示未登录态",
+        "impact_level": "low",
+        "reversible": true
+      },
+      {
+        "assumption_id": "static-data",
+        "description": "原型使用静态模拟数据展示头像、昵称、店铺名称与入口列表",
+        "impact_level": "low",
+        "reversible": true
+      },
+      {
+        "assumption_id": "entries-list",
+        "description": "功能入口列表参考微购相册店主常用经营场景，包含订单、店铺、商品、客户、数据、营销、推广、设置、客服、关于等",
+        "impact_level": "low",
+        "reversible": true
+      }
+    ],
+    "open_questions": [
+      {
+        "question_id": "entries-confirmation",
+        "question": "功能入口列表是否需要调整？例如是否需要新增分销、直播、相册网址等其他入口，或移除某些入口",
+        "impact": "影响页面入口数量与分组"
+      },
+      {
+        "question_id": "stats-display",
+        "question": "是否需要在用户信息区展示经营数据（如今日订单数、新增客户数等）",
+        "impact": "影响用户信息区内容"
+      }
+    ]
+  },
+  "brief_confirmation": {
+    "confirmed_at": "2026-07-13",
+    "confirmed_by": "user",
+    "scope_revision": 1,
+    "notes": "用户确认范围，按当前 prototype_brief 交给 wego-design 实现"
+  },
+  "prototype_confirmation": {
+    "completed_at": "2026-07-13",
+    "status": "awaiting-user",
+    "deliverables": [
+      "wego-app/js/routes.js — 新增 my 路由（host-tab 类型绑定 my tab）",
+      "wego-app/scenes/我的/scene.js — 场景模板、init 交互、scene contract",
+      "wego-app/scenes/我的/scene.css — 用户信息区、会员区、快捷入口、功能入口、我买的、设置、提现区布局样式",
+      "wego-app/scenes/我的/design-decisions.json — 16 条设计决策"
+    ],
+    "verification": {
+      "extract_design_decisions": "通过（16 决策，7245 字节 CSS）",
+      "validate_scene_contract": "通过",
+      "visual_check_375": "scene 343x810、七分区完整布局、无水平溢出、首屏全部可见",
+      "visual_check_393": "scene 361x810、七分区完整布局、无水平溢出",
+      "interaction_check": "35 个入口点击均触发 toast「功能开发中」，stopPropagation 隔离宿主 navigate 干扰",
+      "crowding_check": "六项全部 pass"
+    }
+  },
+  "affected_scenes": ["我的"],
+  "affected_runtime": ["wego-app/js/routes.js", "wego-app/scenes/我的/scene.js", "wego-app/scenes/我的/scene.css"],
+  "stage_outputs": {
+    "product": { "valid": false },
+    "design": { "valid": true }
+  },
+  "change_log": [
+    {
+      "time": "2026-07-13",
+      "action": "create-iteration",
+      "summary": "创建我的页面迭代，提交 prototype_brief 草稿"
+    },
+    {
+      "time": "2026-07-13",
+      "action": "submit-brief",
+      "summary": "提交简报，进入 awaiting-brief-confirmation 状态等待用户确认"
+    },
+    {
+      "time": "2026-07-13",
+      "action": "confirm-brief",
+      "summary": "用户确认范围，状态进入 prototyping，交给 wego-design 实现场景"
+    },
+    {
+      "time": "2026-07-13",
+      "action": "complete-prototype",
+      "summary": "完成场景实现：avatar+cell 组件消费、三组功能入口、toast stub 交互、375/393 视觉与拥挤检查通过"
+    },
+    {
+      "time": "2026-07-13",
+      "action": "submit-prototype",
+      "summary": "提交原型等待用户确认，状态进入 awaiting-prototype-confirmation"
+    },
+    {
+      "time": "2026-07-13",
+      "action": "optimize-layout",
+      "summary": "参考真实产品截图优化布局：新增用户信息区（头像+昵称+角色标签）、会员区（SVIP+年度超级会员+进度条）、快捷入口（4宫格）、功能入口（5×3网格）、我买的（5项订单状态+角标）、设置列表（4项cell）、提现区（邀请赚现金）；35个入口绑定toast反馈；修复组件标注、硬编码颜色、token_whitelist等验证问题"
+    }
+  ],
+  "freeze": null
+}
