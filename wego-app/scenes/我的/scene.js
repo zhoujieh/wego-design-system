@@ -39,65 +39,45 @@
       "var(--bg-page)",
       "var(--bg-surface)",
       "var(--bg-subtle)",
-      "var(--bg-placeholder)",
-      "var(--bg-overlay-l1)",
-      "var(--bg-overlay-l2)",
       "var(--bg-fill-strong)",
       "var(--bg-brand)",
-      "var(--bg-accent-yellow)",
+      "var(--bg-state-selected)",
+      "var(--bg-overlay-l2)",
+      "var(--text-inverse)",
+      "var(--text-inverse-secondary)",
       "var(--text-default)",
       "var(--text-secondary)",
       "var(--text-tertiary)",
       "var(--text-brand)",
       "var(--text-link)",
-      "var(--text-promotion)",
-      "var(--status-promotion-default)",
-      "var(--status-success-default)",
-      "var(--accent-gold)",
       "var(--heading-xs-font-size)",
       "var(--heading-xs-font-weight)",
       "var(--heading-xs-line-height)",
+      "var(--body-xs-font-size)",
+      "var(--body-xs-line-height)",
       "var(--body-sm-font-size)",
-      "var(--body-sm-font-weight)",
       "var(--body-sm-line-height)",
-      "var(--body-sm-strong-font-size)",
-      "var(--body-sm-strong-font-weight)",
-      "var(--body-sm-strong-line-height)",
       "var(--body-md-font-size)",
       "var(--body-md-font-weight)",
       "var(--body-md-line-height)",
       "var(--body-md-strong-font-size)",
       "var(--body-md-strong-font-weight)",
       "var(--body-md-strong-line-height)",
-      "var(--body-lg-font-size)",
-      "var(--body-lg-font-weight)",
-      "var(--body-lg-line-height)",
-      "var(--body-xs-font-size)",
-      "var(--body-xs-line-height)",
       "var(--spacer-2)",
-      "var(--spacer-4)",
+      "var(--spacer-6)",
       "var(--spacer-8)",
       "var(--spacer-12)",
       "var(--spacer-16)",
       "var(--spacer-20)",
-      "var(--spacer-24)",
-      "var(--spacer-32)",
       "var(--spacer-40)",
-      "var(--border-neutral-l1)",
-      "var(--border-neutral-l2)",
       "var(--radius-full)",
-      "var(--radius-12)",
       "var(--radius-8)",
-      "var(--radius-6)",
-      "var(--size-16)",
-      "var(--size-20)",
       "var(--size-24)",
       "var(--size-32)",
       "var(--size-40)",
       "var(--size-48)",
-      "var(--size-56)",
-      "var(--size-72)",
-      "var(--size-96)"
+      "var(--duration-fast)",
+      "var(--ease-standard)"
     ],
     "token_bindings": [
       {
@@ -125,27 +105,6 @@
         "selector": ".wode-profile__card--vip",
         "content_role": "VIP卡片背景",
         "css_property": "background",
-        "token": "var(--bg-accent-yellow)",
-        "rule_ref": "colors_and_type.css#bg-accent-yellow"
-      },
-      {
-        "selector": ".wode-profile__app-grid",
-        "content_role": "应用功能区背景",
-        "css_property": "background",
-        "token": "var(--bg-surface)",
-        "rule_ref": "colors_and_type.css#bg-surface"
-      },
-      {
-        "selector": ".wode-profile__orders",
-        "content_role": "订单状态区背景",
-        "css_property": "background",
-        "token": "var(--bg-surface)",
-        "rule_ref": "colors_and_type.css#bg-surface"
-      },
-      {
-        "selector": ".wode-profile__settings",
-        "content_role": "设置列表背景",
-        "css_property": "background",
         "token": "var(--bg-surface)",
         "rule_ref": "colors_and_type.css#bg-surface"
       },
@@ -157,18 +116,46 @@
         "rule_ref": "colors_and_type.css#text-inverse"
       },
       {
-        "selector": ".wode-profile__role-tag",
-        "content_role": "角色标签背景",
-        "css_property": "background",
-        "token": "var(--bg-overlay-l1)",
-        "rule_ref": "colors_and_type.css#bg-overlay-l1"
-      },
-      {
         "selector": ".wode-profile__vip-badge",
         "content_role": "VIP标签文字",
         "css_property": "color",
-        "token": "var(--accent-gold)",
-        "rule_ref": "colors_and_type.css#accent-gold"
+        "token": "var(--text-inverse)",
+        "rule_ref": "colors_and_type.css#text-inverse"
+      },
+      {
+        "selector": ".wode-profile__vip-badge",
+        "content_role": "VIP标签背景",
+        "css_property": "background",
+        "token": "var(--bg-state-selected)",
+        "rule_ref": "colors_and_type.css#bg-state-selected"
+      },
+      {
+        "selector": ".wode-profile__role-tag",
+        "content_role": "角色标签文字",
+        "css_property": "color",
+        "token": "var(--text-inverse-secondary)",
+        "rule_ref": "colors_and_type.css#text-inverse-secondary"
+      },
+      {
+        "selector": ".wode-profile__role-tag",
+        "content_role": "角色标签背景",
+        "css_property": "background",
+        "token": "var(--bg-overlay-l2)",
+        "rule_ref": "colors_and_type.css#bg-overlay-l2"
+      },
+      {
+        "selector": ".wode-profile__vip-icon",
+        "content_role": "VIP图标容器背景",
+        "css_property": "background",
+        "token": "var(--bg-subtle)",
+        "rule_ref": "colors_and_type.css#bg-subtle"
+      },
+      {
+        "selector": ".wode-profile__vip-icon .wego-iconfont-s",
+        "content_role": "VIP图标颜色",
+        "css_property": "color",
+        "token": "var(--text-brand)",
+        "rule_ref": "colors_and_type.css#text-brand"
       },
       {
         "selector": ".wode-profile__space-bar",
@@ -176,6 +163,13 @@
         "css_property": "background",
         "token": "var(--bg-subtle)",
         "rule_ref": "colors_and_type.css#bg-subtle"
+      },
+      {
+        "selector": ".wode-profile__space-bar",
+        "content_role": "空间进度条高度",
+        "css_property": "height",
+        "token": "var(--spacer-6)",
+        "rule_ref": "colors_and_type.css#spacer-6"
       },
       {
         "selector": ".wode-profile__space-bar-fill",
@@ -186,14 +180,14 @@
       },
       {
         "selector": ".wode-profile__btn-add-staff",
-        "content_role": "+员工按钮",
+        "content_role": "+员工按钮背景",
         "css_property": "background",
-        "token": "var(--bg-overlay-l1)",
-        "rule_ref": "colors_and_type.css#bg-overlay-l1"
+        "token": "var(--bg-state-selected)",
+        "rule_ref": "colors_and_type.css#bg-state-selected"
       },
       {
         "selector": ".wode-profile__btn-staff-manage",
-        "content_role": "员工管理按钮",
+        "content_role": "员工管理按钮背景",
         "css_property": "background",
         "token": "var(--bg-overlay-l2)",
         "rule_ref": "colors_and_type.css#bg-overlay-l2"
@@ -203,46 +197,24 @@
       {
         "slot": "用户头像",
         "slug": "avatar",
-        "reason": "顶部用户信息区展示大头像，使用 image 类型 72 尺寸",
+        "reason": "顶部用户信息区展示头像，使用 image 类型 56 尺寸",
         "root_class": "avatar",
         "source": "preview/component-avatar.html",
         "contract_file": "components/avatar.json",
         "required_structure": [".avatar--image img"],
-        "modifiers": [".avatar--72", ".avatar--image"],
-        "variant_dimensions": { "type": "image", "size": "72" }
+        "modifiers": [".avatar--56", ".avatar--image"],
+        "variant_dimensions": { "type": "image", "size": "56" }
       },
       {
-        "slot": "去续费按钮",
+        "slot": "操作按钮组",
         "slug": "button",
-        "reason": "VIP卡片中的续费操作，使用 medium 强调级别",
+        "reason": "VIP 续费按钮使用 medium 强调；+员工与员工管理按钮使用 weak 强调，三处按钮均使用 sm 尺寸",
         "root_class": "btn",
         "source": "preview/component-button.html",
         "contract_file": "components/button.json",
         "required_structure": [],
-        "modifiers": [".btn--medium", ".btn--sm"],
+        "modifiers": [".btn--medium", ".btn--weak", ".btn--sm"],
         "variant_dimensions": { "emphasis": "medium", "size": "sm" }
-      },
-      {
-        "slot": "+员工按钮",
-        "slug": "button",
-        "reason": "添加员工操作，使用 weak 级别",
-        "root_class": "btn",
-        "source": "preview/component-button.html",
-        "contract_file": "components/button.json",
-        "required_structure": [],
-        "modifiers": [".btn--weak", ".btn--sm"],
-        "variant_dimensions": { "emphasis": "weak", "size": "sm" }
-      },
-      {
-        "slot": "员工管理按钮",
-        "slug": "button",
-        "reason": "员工管理操作，使用 weak 级别",
-        "root_class": "btn",
-        "source": "preview/component-button.html",
-        "contract_file": "components/button.json",
-        "required_structure": [],
-        "modifiers": [".btn--weak", ".btn--sm"],
-        "variant_dimensions": { "emphasis": "weak", "size": "sm" }
       },
       {
         "slot": "设置列表项",
@@ -253,7 +225,7 @@
         "contract_file": "components/cell.json",
         "required_structure": [".cell__body", ".cell__content", ".cell__title", ".cell__arrow"],
         "modifiers": [".cell--single", ".cell--clickable", ".cell--divider-center"],
-        "variant_dimensions": { "type": "single", "clickable": true, "divider": "center" }
+        "variant_dimensions": { "density": "single", "surface": "bg-white", "interaction": "clickable", "divider": "divider-center" }
       }
     ],
     "layout_contract": {
@@ -298,44 +270,12 @@
         "target": "toast:查看全部订单"
       },
       {
-        "dom_id": "entry-order-pending",
-        "target": "toast:待付款订单功能开发中"
+        "dom_id": "order-list",
+        "target": "toast:对应订单状态功能开发中"
       },
       {
-        "dom_id": "entry-order-paid",
-        "target": "toast:已付款订单功能开发中"
-      },
-      {
-        "dom_id": "entry-order-shipped",
-        "target": "toast:已发货订单功能开发中"
-      },
-      {
-        "dom_id": "entry-order-refund",
-        "target": "toast:退款订单功能开发中"
-      },
-      {
-        "dom_id": "entry-order-suspended",
-        "target": "toast:挂起订单功能开发中"
-      },
-      {
-        "dom_id": "entry-settings",
-        "target": "toast:设置功能开发中"
-      },
-      {
-        "dom_id": "entry-wallet",
-        "target": "toast:我的钱包功能开发中"
-      },
-      {
-        "dom_id": "entry-favorites",
-        "target": "toast:我的收藏功能开发中"
-      },
-      {
-        "dom_id": "entry-coupons",
-        "target": "toast:我的卡券功能开发中"
-      },
-      {
-        "dom_id": "entry-withdraw",
-        "target": "toast:提现与返佣功能开发中"
+        "dom_id": "settings-list",
+        "target": "toast:对应设置项功能开发中"
       },
       {
         "dom_id": "entry-app",
@@ -402,12 +342,12 @@
   "crowding_check": {
     "status": "passed",
     "items": [
-      "顶部用户信息区高度约 180px，头像 72px，间距合理",
+      "顶部用户信息区高度约 160px，头像 56px，间距合理",
       "会员/空间卡片内边距 16px，信息层级清晰",
-      "应用功能区 4 列网格，每个图标 64x64px，间距 12px",
+      "应用功能区 4 列网格，每个图标 48x48px，间距 12px",
       "订单状态区横向排列，每个状态宽度均等，文字清晰",
       "设置列表行高 56px，分割线居中，点击区域足够",
-      "底部留白 32px，最后一项不贴底"
+      "底部留白 40px，最后一项不贴底"
     ]
   }
 }
@@ -438,21 +378,21 @@
   };
 
   var APP_ENTRIES = [
-    { id: 'app-kaituan', name: '一键开团', icon: 'icon-yijiankaituan' },
-    { id: 'app-zhuangxiu', name: '店铺装修', icon: 'icon-dianpuzhuangxiu' },
-    { id: 'app-shoukuan', name: '收款码', icon: 'icon-shoukuanma' },
-    { id: 'app-xiaodian', name: '我的小店', icon: 'icon-wodexiaodian' },
-    { id: 'app-huiyuan', name: '会员管理', icon: 'icon-huiyuanguanli' },
-    { id: 'app-fangke', name: '访客足迹', icon: 'icon-fangkezuji' },
-    { id: 'app-data', name: '数据中心', icon: 'icon-shujuzhongxin' },
-    { id: 'app-qunfa', name: '微信群发', icon: 'icon-weixinqunfa' },
-    { id: 'app-huanfu', name: '一键换肤', icon: 'icon-yijianhuanfu' },
-    { id: 'app-team', name: '团队管理', icon: 'icon-tuanduiguanli' },
-    { id: 'app-miniprogram', name: '专享小程序', icon: 'icon-zhuanxiangxiaochengxu' },
-    { id: 'app-album', name: '相册网址', icon: 'icon-xiangcewangzhi' },
-    { id: 'app-keyboard', name: '私域键盘', icon: 'icon-siyujianpan' },
-    { id: 'app-pc', name: 'PC版', icon: 'icon-pcban' },
-    { id: 'app-more', name: '更多应用', icon: 'icon-gengduoyingyong' }
+    { id: 'app-kaituan', name: '一键开团', icon: '一键开团' },
+    { id: 'app-zhuangxiu', name: '店铺装修', icon: '店铺装修' },
+    { id: 'app-shoukuan', name: '收款码', icon: '收款码' },
+    { id: 'app-xiaodian', name: '我的小店', icon: '我的小店' },
+    { id: 'app-huiyuan', name: '会员管理', icon: '粉丝会员卡' },
+    { id: 'app-fangke', name: '访客足迹', icon: '访客足迹' },
+    { id: 'app-data', name: '数据中心', icon: '数据中心' },
+    { id: 'app-qunfa', name: '微信群发', icon: '微信群发助手' },
+    { id: 'app-huanfu', name: '一键换肤', icon: '一键换肤' },
+    { id: 'app-team', name: '团队管理', icon: '团队管理' },
+    { id: 'app-miniprogram', name: '专享小程序', icon: '专享小程序' },
+    { id: 'app-album', name: '相册网址', icon: '相册网址' },
+    { id: 'app-keyboard', name: '私域键盘', icon: '私域键盘' },
+    { id: 'app-pc', name: 'PC版', icon: 'PC版' },
+    { id: 'app-more', name: '更多应用', icon: 'icon-yingyongzhongxin' }
   ];
 
   var SETTINGS_ITEMS = [
@@ -473,10 +413,16 @@
 
   function renderAppGrid() {
     return APP_ENTRIES.map(function (app) {
+      var iconHtml;
+      if (app.icon.indexOf('icon-') === 0) {
+        iconHtml = '<i class="wego-iconfont-s ' + app.icon + ' wode-profile__app-iconfont"></i>';
+      } else {
+        iconHtml = '<img src="./lib/assets/icons/app-center/' + app.icon + '.svg" alt="' + app.name + '" class="wode-profile__app-icon">';
+      }
       return ''
         + '<div class="wode-profile__app-item" data-dom-id="entry-app" data-app-name="' + app.name + '">'
         +   '<div class="wode-profile__app-icon-wrapper">'
-        +     '<img src="./lib/assets/icons/app-center/' + app.icon + '.svg" alt="' + app.name + '" class="wode-profile__app-icon">'
+        +     iconHtml
         +   '</div>'
         +   '<span class="wode-profile__app-name">' + app.name + '</span>'
         + '</div>';
@@ -498,7 +444,7 @@
     return SETTINGS_ITEMS.map(function (item, index) {
       var dividerClass = index < SETTINGS_ITEMS.length - 1 ? 'cell--divider-center' : '';
       return ''
-        + '<div class="cell cell--single cell--clickable ' + dividerClass + '" data-dom-id="entry-' + item.id + '">'
+        + '<div class="cell cell--single cell--clickable ' + dividerClass + '"' + (index === 0 ? ' data-dd-id="cell-first" data-component-slug="cell" data-rule-source="preview/component-cell.html"' : '') + ' data-dom-id="entry-' + item.id + '">'
         +   '<div class="cell__body">'
         +     '<div class="cell__content">'
         +       '<span class="cell__title">' + item.name + '</span>'
@@ -514,9 +460,8 @@
   var wodeTemplate = ''
     + '<div class="wode-profile" data-surface-id="wode-profile" data-route-id="wode" data-layout-mode="composed" data-bg="page">'
     +   '<div class="wode-profile__header">'
-    +     '<div class="wode-profile__header-bg"></div>'
     +     '<div class="wode-profile__user-info">'
-    +       '<div class="avatar avatar--72 avatar--image" data-dd-id="avatar-user" data-component-slug="avatar" data-rule-source="preview/component-avatar.html" data-token-binding="background:var(--bg-fill-strong)">'
+    +       '<div class="avatar avatar--56 avatar--image" data-dd-id="avatar-user" data-component-slug="avatar" data-rule-source="preview/component-avatar.html" data-token-binding="background:var(--bg-fill-strong)">'
     +         '<img src="' + USER_DATA.avatar + '" alt="' + USER_DATA.name + '">'
     +       '</div>'
     +       '<div class="wode-profile__user-detail">'
@@ -528,7 +473,7 @@
     +       '</div>'
     +     '</div>'
     +     '<div class="wode-profile__staff-actions">'
-    +       '<button type="button" class="btn btn--weak btn--sm wode-profile__btn-add-staff" data-dd-id="btn-add-staff" data-component-slug="button" data-rule-source="preview/component-button.html" data-token-binding="background:var(--bg-overlay-l1)" data-dom-id="entry-add-staff">'
+    +       '<button type="button" class="btn btn--weak btn--sm wode-profile__btn-add-staff" data-dd-id="btn-add-staff" data-component-slug="button" data-rule-source="preview/component-button.html" data-token-binding="background:var(--bg-state-selected)" data-dom-id="entry-add-staff">'
     +         '<i class="btn__icon wego-iconfont-s icon-jia"></i>'
     +         '+员工'
     +       '</button>'
@@ -570,10 +515,10 @@
     +         '<span class="wode-profile__orders-title">我买的</span>'
     +         '<span class="wode-profile__orders-all" data-dom-id="entry-all-orders">全部</span>'
     +       '</div>'
-    +       '<div class="wode-profile__orders-list">' + renderOrderList() + '</div>'
+    +       '<div class="wode-profile__orders-list" data-dom-id="order-list">' + renderOrderList() + '</div>'
     +     '</div>'
     +     '<div class="wode-profile__card wode-profile__settings">'
-    +       '<div class="wode-profile__settings-list">' + renderSettingsList() + '</div>'
+    +       '<div class="wode-profile__settings-list" data-dom-id="settings-list">' + renderSettingsList() + '</div>'
     +     '</div>'
     +   '</div>'
     + '</div>';
@@ -616,9 +561,11 @@
       });
     }
 
-    var orderItems = root.querySelectorAll('[data-dom-id^="order-"]');
-    orderItems.forEach(function (item) {
-      item.addEventListener('click', function () {
+    var orderList = root.querySelector('[data-dom-id="order-list"]');
+    if (orderList) {
+      orderList.addEventListener('click', function (e) {
+        var item = e.target.closest('.wode-profile__order-item');
+        if (!item) return;
         var domId = item.getAttribute('data-dom-id');
         var names = {
           'order-pending': '待付款',
@@ -629,11 +576,13 @@
         };
         ctx.toast(names[domId] + '订单功能开发中');
       });
-    });
+    }
 
-    var settingItems = root.querySelectorAll('[data-dom-id^="entry-settings"], [data-dom-id^="entry-wallet"], [data-dom-id^="entry-favorites"], [data-dom-id^="entry-coupons"], [data-dom-id^="entry-withdraw"]');
-    settingItems.forEach(function (item) {
-      item.addEventListener('click', function () {
+    var settingsList = root.querySelector('[data-dom-id="settings-list"]');
+    if (settingsList) {
+      settingsList.addEventListener('click', function (e) {
+        var item = e.target.closest('.cell');
+        if (!item) return;
         var domId = item.getAttribute('data-dom-id');
         var names = {
           'entry-settings': '设置',
@@ -644,7 +593,7 @@
         };
         ctx.toast(names[domId] + '功能开发中');
       });
-    });
+    }
 
     var appItems = root.querySelectorAll('[data-dom-id="entry-app"]');
     appItems.forEach(function (item) {
