@@ -1,0 +1,577 @@
+{
+  "schemaVersion": 1,
+  "scene": "我的",
+  "surface_id": "wode-profile",
+  "route_id": "wode",
+  "layout_mode": "composed",
+  "page_pattern": null,
+  "presentation": {
+    "type": "host-tab",
+    "transition": "none",
+    "dismissAction": "none",
+    "overlayLevel": "none",
+    "source": "library-consumption.json#/appRuntime/presentationTypes",
+    "coversTabBar": false
+  },
+  "prompt_contract": {
+    "design_system_snapshot": {
+      "version": 410,
+      "token_css": "colors_and_type.css",
+      "component_css": "components.css",
+      "component_inputs": [
+        {
+          "slug": "avatar",
+          "preview_file": "preview/component-avatar.html",
+          "contract_file": "components/avatar.json"
+        },
+        {
+          "slug": "button",
+          "preview_file": "preview/component-button.html",
+          "contract_file": "components/button.json"
+        },
+        {
+          "slug": "cell",
+          "preview_file": "preview/component-cell.html",
+          "contract_file": "components/cell.json"
+        }
+      ]
+    },
+    "token_whitelist": [
+      "var(--bg-page)",
+      "var(--bg-surface)",
+      "var(--bg-subtle)",
+      "var(--bg-placeholder)",
+      "var(--bg-overlay-l1)",
+      "var(--bg-overlay-l2)",
+      "var(--bg-fill-strong)",
+      "var(--bg-brand)",
+      "var(--bg-accent-yellow)",
+      "var(--text-default)",
+      "var(--text-secondary)",
+      "var(--text-tertiary)",
+      "var(--text-brand)",
+      "var(--text-link)",
+      "var(--text-promotion)",
+      "var(--status-promotion-default)",
+      "var(--status-success-default)",
+      "var(--accent-gold)",
+      "var(--heading-xs-font-size)",
+      "var(--heading-xs-font-weight)",
+      "var(--heading-xs-line-height)",
+      "var(--body-sm-font-size)",
+      "var(--body-sm-font-weight)",
+      "var(--body-sm-line-height)",
+      "var(--body-sm-strong-font-size)",
+      "var(--body-sm-strong-font-weight)",
+      "var(--body-sm-strong-line-height)",
+      "var(--body-md-font-size)",
+      "var(--body-md-font-weight)",
+      "var(--body-md-line-height)",
+      "var(--body-md-strong-font-size)",
+      "var(--body-md-strong-font-weight)",
+      "var(--body-md-strong-line-height)",
+      "var(--body-lg-font-size)",
+      "var(--body-lg-font-weight)",
+      "var(--body-lg-line-height)",
+      "var(--body-xs-font-size)",
+      "var(--body-xs-line-height)",
+      "var(--spacer-2)",
+      "var(--spacer-4)",
+      "var(--spacer-8)",
+      "var(--spacer-12)",
+      "var(--spacer-16)",
+      "var(--spacer-20)",
+      "var(--spacer-24)",
+      "var(--spacer-32)",
+      "var(--spacer-40)",
+      "var(--border-neutral-l1)",
+      "var(--border-neutral-l2)",
+      "var(--radius-full)",
+      "var(--radius-12)",
+      "var(--radius-8)",
+      "var(--radius-6)",
+      "var(--size-16)",
+      "var(--size-20)",
+      "var(--size-24)",
+      "var(--size-32)",
+      "var(--size-40)",
+      "var(--size-48)",
+      "var(--size-56)",
+      "var(--size-72)",
+      "var(--size-96)"
+    ],
+    "token_bindings": [
+      {
+        "selector": ".wode-profile",
+        "content_role": "场景根容器背景",
+        "css_property": "background",
+        "token": "var(--bg-page)",
+        "rule_ref": "colors_and_type.css#bg-page"
+      },
+      {
+        "selector": ".wode-profile__header",
+        "content_role": "顶部用户信息区背景",
+        "css_property": "background",
+        "token": "var(--bg-brand)",
+        "rule_ref": "colors_and_type.css#bg-brand"
+      },
+      {
+        "selector": ".wode-profile__card",
+        "content_role": "会员/空间卡片背景",
+        "css_property": "background",
+        "token": "var(--bg-surface)",
+        "rule_ref": "colors_and_type.css#bg-surface"
+      },
+      {
+        "selector": ".wode-profile__card--vip",
+        "content_role": "VIP卡片背景",
+        "css_property": "background",
+        "token": "var(--bg-accent-yellow)",
+        "rule_ref": "colors_and_type.css#bg-accent-yellow"
+      },
+      {
+        "selector": ".wode-profile__app-grid",
+        "content_role": "应用功能区背景",
+        "css_property": "background",
+        "token": "var(--bg-surface)",
+        "rule_ref": "colors_and_type.css#bg-surface"
+      },
+      {
+        "selector": ".wode-profile__orders",
+        "content_role": "订单状态区背景",
+        "css_property": "background",
+        "token": "var(--bg-surface)",
+        "rule_ref": "colors_and_type.css#bg-surface"
+      },
+      {
+        "selector": ".wode-profile__settings",
+        "content_role": "设置列表背景",
+        "css_property": "background",
+        "token": "var(--bg-surface)",
+        "rule_ref": "colors_and_type.css#bg-surface"
+      },
+      {
+        "selector": ".wode-profile__user-name",
+        "content_role": "用户名文字",
+        "css_property": "color",
+        "token": "var(--text-inverse)",
+        "rule_ref": "colors_and_type.css#text-inverse"
+      },
+      {
+        "selector": ".wode-profile__role-tag",
+        "content_role": "角色标签背景",
+        "css_property": "background",
+        "token": "var(--bg-overlay-l1)",
+        "rule_ref": "colors_and_type.css#bg-overlay-l1"
+      },
+      {
+        "selector": ".wode-profile__vip-badge",
+        "content_role": "VIP标签文字",
+        "css_property": "color",
+        "token": "var(--accent-gold)",
+        "rule_ref": "colors_and_type.css#accent-gold"
+      },
+      {
+        "selector": ".wode-profile__space-bar",
+        "content_role": "空间进度条背景",
+        "css_property": "background",
+        "token": "var(--bg-subtle)",
+        "rule_ref": "colors_and_type.css#bg-subtle"
+      },
+      {
+        "selector": ".wode-profile__space-bar-fill",
+        "content_role": "空间进度条填充",
+        "css_property": "background",
+        "token": "var(--bg-brand)",
+        "rule_ref": "colors_and_type.css#bg-brand"
+      },
+      {
+        "selector": ".wode-profile__btn-add-staff",
+        "content_role": "+员工按钮",
+        "css_property": "background",
+        "token": "var(--bg-overlay-l1)",
+        "rule_ref": "colors_and_type.css#bg-overlay-l1"
+      },
+      {
+        "selector": ".wode-profile__btn-staff-manage",
+        "content_role": "员工管理按钮",
+        "css_property": "background",
+        "token": "var(--bg-overlay-l2)",
+        "rule_ref": "colors_and_type.css#bg-overlay-l2"
+      }
+    ],
+    "component_bindings": [
+      {
+        "slot": "用户头像",
+        "slug": "avatar",
+        "reason": "顶部用户信息区展示大头像，使用 image 类型 72 尺寸",
+        "root_class": "avatar",
+        "source": "preview/component-avatar.html",
+        "contract_file": "components/avatar.json",
+        "required_structure": [".avatar--image img"],
+        "modifiers": [".avatar--72", ".avatar--image"],
+        "variant_dimensions": { "type": "image", "size": "72" }
+      },
+      {
+        "slot": "去续费按钮",
+        "slug": "button",
+        "reason": "VIP卡片中的续费操作，使用 medium 强调级别",
+        "root_class": "btn",
+        "source": "preview/component-button.html",
+        "contract_file": "components/button.json",
+        "required_structure": [],
+        "modifiers": [".btn--medium", ".btn--sm"],
+        "variant_dimensions": { "emphasis": "medium", "size": "sm" }
+      },
+      {
+        "slot": "+员工按钮",
+        "slug": "button",
+        "reason": "添加员工操作，使用 weak 级别",
+        "root_class": "btn",
+        "source": "preview/component-button.html",
+        "contract_file": "components/button.json",
+        "required_structure": [],
+        "modifiers": [".btn--weak", ".btn--sm"],
+        "variant_dimensions": { "emphasis": "weak", "size": "sm" }
+      },
+      {
+        "slot": "员工管理按钮",
+        "slug": "button",
+        "reason": "员工管理操作，使用 weak 级别",
+        "root_class": "btn",
+        "source": "preview/component-button.html",
+        "contract_file": "components/button.json",
+        "required_structure": [],
+        "modifiers": [".btn--weak", ".btn--sm"],
+        "variant_dimensions": { "emphasis": "weak", "size": "sm" }
+      },
+      {
+        "slot": "设置列表项",
+        "slug": "cell",
+        "reason": "设置区域使用单元格组件展示各项设置入口",
+        "root_class": "cell",
+        "source": "preview/component-cell.html",
+        "contract_file": "components/cell.json",
+        "required_structure": [".cell__body", ".cell__content", ".cell__title", ".cell__arrow"],
+        "modifiers": [".cell--single", ".cell--clickable", ".cell--divider-center"],
+        "variant_dimensions": { "type": "single", "clickable": true, "divider": "center" }
+      }
+    ],
+    "layout_contract": {
+      "mode": "composed",
+      "source": "references/design-decisions.md",
+      "selection_reason": "我的页面为个人中心场景，包含多种信息区块，不匹配 biz-rule-config 或 system-settings 范式，采用 composed 模式自主组合",
+      "page_edge_mode": "M8",
+      "page_edge_mode_reason": "灰底白卡分组布局，外层保留 8px 留白，卡片间 12px 间距",
+      "rules": [
+        "页面根背景 var(--bg-page)，卡片背景 var(--bg-surface)",
+        "顶部用户信息区使用品牌绿背景，包含头像、用户名、标签和员工管理按钮",
+        "会员/空间卡片使用圆角白卡，包含 VIP 标识和空间进度条",
+        "应用功能区使用 4 列网格布局，15 个功能入口",
+        "订单状态区横向排列，显示各状态数量",
+        "设置列表区使用 cell 组件纵向排列"
+      ],
+      "mutable_regions": [
+        "wode-profile__app-grid：应用功能网格，由 JS 动态渲染",
+        "wode-profile__orders-list：订单状态列表，由 JS 动态渲染",
+        "wode-profile__settings-list：设置列表，由 JS 动态渲染"
+      ]
+    },
+    "interaction_contract": [
+      {
+        "dom_id": "entry-add-staff",
+        "target": "toast:+员工功能开发中"
+      },
+      {
+        "dom_id": "entry-staff-manage",
+        "target": "toast:员工管理功能开发中"
+      },
+      {
+        "dom_id": "entry-renew-vip",
+        "target": "toast:VIP续费功能开发中"
+      },
+      {
+        "dom_id": "entry-space-manage",
+        "target": "toast:空间管理功能开发中"
+      },
+      {
+        "dom_id": "entry-all-orders",
+        "target": "toast:查看全部订单"
+      },
+      {
+        "dom_id": "order-pending",
+        "target": "toast:待付款订单功能开发中"
+      },
+      {
+        "dom_id": "order-paid",
+        "target": "toast:已付款订单功能开发中"
+      },
+      {
+        "dom_id": "order-shipped",
+        "target": "toast:已发货订单功能开发中"
+      },
+      {
+        "dom_id": "order-refund",
+        "target": "toast:退款订单功能开发中"
+      },
+      {
+        "dom_id": "order-suspended",
+        "target": "toast:挂起订单功能开发中"
+      },
+      {
+        "dom_id": "entry-settings",
+        "target": "toast:设置功能开发中"
+      },
+      {
+        "dom_id": "entry-wallet",
+        "target": "toast:我的钱包功能开发中"
+      },
+      {
+        "dom_id": "entry-favorites",
+        "target": "toast:我的收藏功能开发中"
+      },
+      {
+        "dom_id": "entry-coupons",
+        "target": "toast:我的卡券功能开发中"
+      },
+      {
+        "dom_id": "entry-withdraw",
+        "target": "toast:提现与返佣功能开发中"
+      },
+      {
+        "dom_id": "entry-app",
+        "target": "toast:{appName}功能开发中"
+      }
+    ],
+    "state_contract": [
+      {
+        "state_id": "profile_loaded",
+        "initial": true,
+        "trigger": "场景挂载后自动加载本地模拟数据",
+        "visible_result": "页面展示完整用户信息、会员卡片、应用入口、订单状态和设置列表",
+        "fallback": "数据加载失败时展示默认空状态",
+        "persistence": "session"
+      },
+      {
+        "state_id": "vip_active",
+        "initial": true,
+        "trigger": "用户数据中 is_vip 为 true",
+        "visible_result": "VIP年度超级会员标识显示，去续费按钮可点击",
+        "fallback": "非 VIP 用户显示普通会员标识",
+        "persistence": "session"
+      },
+      {
+        "state_id": "space_usage",
+        "initial": true,
+        "trigger": "空间数据加载完成",
+        "visible_result": "空间进度条显示 117.29G/360G，进度条填充约 32.5%",
+        "fallback": "数据为空时显示 0/360G",
+        "persistence": "session"
+      },
+      {
+        "state_id": "order_counts",
+        "initial": true,
+        "trigger": "订单数据加载完成",
+        "visible_result": "订单状态区显示各状态数量（已付款16、挂起1）",
+        "fallback": "数据为空时显示默认 0",
+        "persistence": "session"
+      },
+      {
+        "state_id": "entry_clicked",
+        "initial": false,
+        "trigger": "点击任一功能入口",
+        "visible_result": "触发 toast 反馈，显示对应功能开发中提示",
+        "fallback": "toast 关闭后回到「我的」页面",
+        "persistence": "none"
+      }
+    ],
+    "hard_rules": [
+      "用户信息区必须展示头像、用户名、VIP标签和角色标签",
+      "VIP卡片必须显示年度超级会员标识和去续费按钮",
+      "空间进度条必须显示 117.29G/360G 和空间管理链接",
+      "应用功能区必须包含 15 个功能入口，4 列网格布局",
+      "订单状态区必须显示待付款、已付款(16)、已发货、退款、挂起(1)",
+      "设置列表区必须包含设置、我的钱包、我的收藏、我的卡券、提现与返佣",
+      "所有入口仅提供 stub 级反馈（toast），不下钻功能实现"
+    ]
+  },
+  "decisions": [
+    {
+      "dd_id": "avatar-user",
+      "component_slug": "avatar",
+      "rule_source": "preview/component-avatar.html",
+      "token_binding": "background:var(--bg-fill-strong)",
+      "class_name": "avatar avatar--72 avatar--image"
+    },
+    {
+      "dd_id": "btn-add-staff",
+      "component_slug": "button",
+      "rule_source": "preview/component-button.html",
+      "token_binding": "background:var(--bg-overlay-l1)",
+      "class_name": "btn btn--weak btn--sm wode-profile__btn-add-staff"
+    },
+    {
+      "dd_id": "btn-staff-manage",
+      "component_slug": "button",
+      "rule_source": "preview/component-button.html",
+      "token_binding": "background:var(--bg-overlay-l2)",
+      "class_name": "btn btn--weak btn--sm wode-profile__btn-staff-manage"
+    },
+    {
+      "dd_id": "btn-renew",
+      "component_slug": "button",
+      "rule_source": "preview/component-button.html",
+      "token_binding": null,
+      "class_name": "btn btn--medium btn--sm wode-profile__btn-renew"
+    }
+  ],
+  "generation_evidence": {
+    "scene_js": "wego-app/scenes/我的/scene.js",
+    "scene_css": "wego-app/scenes/我的/scene.css",
+    "source_sha256": "",
+    "dom_ids": [
+      "entry-add-staff",
+      "entry-staff-manage",
+      "entry-renew-vip",
+      "entry-space-manage",
+      "entry-all-orders",
+      "order-pending",
+      "order-paid",
+      "order-shipped",
+      "order-refund",
+      "order-suspended",
+      "entry-settings",
+      "entry-wallet",
+      "entry-favorites",
+      "entry-coupons",
+      "entry-withdraw",
+      "entry-app",
+      "app-grid"
+    ],
+    "component_count": 5,
+    "visualCheck": {
+      "status": "passed",
+      "viewports": [375, 393],
+      "checked_at": "2026-07-14"
+    },
+    "crowdingCheck": {
+      "status": "passed",
+      "items": [
+        "顶部用户信息区高度约 180px，头像 72px，间距合理",
+        "会员/空间卡片内边距 16px，信息层级清晰",
+        "应用功能区 4 列网格，每个图标 48x48px，间距 16px",
+        "订单状态区横向排列，每个状态宽度均等，文字清晰",
+        "设置列表行高 56px，分割线居中，点击区域足够",
+        "底部留白 40px，最后一项不贴底"
+      ]
+    }
+  },
+  "state_contract": [
+    {
+      "state_id": "profile_loaded",
+      "initial": true,
+      "trigger": "场景挂载后自动加载本地模拟数据",
+      "visible_result": "页面展示完整用户信息、会员卡片、应用入口、订单状态和设置列表",
+      "fallback": "数据加载失败时展示默认空状态",
+      "persistence": "session"
+    },
+    {
+      "state_id": "vip_active",
+      "initial": true,
+      "trigger": "用户数据中 is_vip 为 true",
+      "visible_result": "VIP年度超级会员标识显示，去续费按钮可点击",
+      "fallback": "非 VIP 用户显示普通会员标识",
+      "persistence": "session"
+    },
+    {
+      "state_id": "space_usage",
+      "initial": true,
+      "trigger": "空间数据加载完成",
+      "visible_result": "空间进度条显示 117.29G/360G，进度条填充约 32.5%",
+      "fallback": "数据为空时显示 0/360G",
+      "persistence": "session"
+    },
+    {
+      "state_id": "order_counts",
+      "initial": true,
+      "trigger": "订单数据加载完成",
+      "visible_result": "订单状态区显示各状态数量（已付款16、挂起1）",
+      "fallback": "数据为空时显示默认 0",
+      "persistence": "session"
+    },
+    {
+      "state_id": "entry_clicked",
+      "initial": false,
+      "trigger": "点击任一功能入口",
+      "visible_result": "触发 toast 反馈，显示对应功能开发中提示",
+      "fallback": "toast 关闭后回到「我的」页面",
+      "persistence": "none"
+    }
+  ],
+  "interaction_contract": [
+    {
+      "dom_id": "entry-add-staff",
+      "target": "toast:+员工功能开发中"
+    },
+    {
+      "dom_id": "entry-staff-manage",
+      "target": "toast:员工管理功能开发中"
+    },
+    {
+      "dom_id": "entry-renew-vip",
+      "target": "toast:VIP续费功能开发中"
+    },
+    {
+      "dom_id": "entry-space-manage",
+      "target": "toast:空间管理功能开发中"
+    },
+    {
+      "dom_id": "entry-all-orders",
+      "target": "toast:查看全部订单"
+    },
+    {
+      "dom_id": "order-pending",
+      "target": "toast:待付款订单功能开发中"
+    },
+    {
+      "dom_id": "order-paid",
+      "target": "toast:已付款订单功能开发中"
+    },
+    {
+      "dom_id": "order-shipped",
+      "target": "toast:已发货订单功能开发中"
+    },
+    {
+      "dom_id": "order-refund",
+      "target": "toast:退款订单功能开发中"
+    },
+    {
+      "dom_id": "order-suspended",
+      "target": "toast:挂起订单功能开发中"
+    },
+    {
+      "dom_id": "entry-settings",
+      "target": "toast:设置功能开发中"
+    },
+    {
+      "dom_id": "entry-wallet",
+      "target": "toast:我的钱包功能开发中"
+    },
+    {
+      "dom_id": "entry-favorites",
+      "target": "toast:我的收藏功能开发中"
+    },
+    {
+      "dom_id": "entry-coupons",
+      "target": "toast:我的卡券功能开发中"
+    },
+    {
+      "dom_id": "entry-withdraw",
+      "target": "toast:提现与返佣功能开发中"
+    },
+    {
+      "dom_id": "entry-app",
+      "target": "toast:{appName}功能开发中"
+    }
+  ]
+}
