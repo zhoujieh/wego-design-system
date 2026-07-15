@@ -6,6 +6,10 @@ import path from 'node:path';
 const expectedSkills = new Set(['wego-product', 'wego-design', 'wego-uxsystem-iterate']);
 const requiredHeadings = ['触发与职责边界', '必要输入与运行时入口', '输出契约与跨技能交接'];
 const categories = new Set(['skill-entry', 'skill-runtime-flow', 'component-contract', 'design-system', 'ui-kit', 'token', 'library-consumption', 'agents', 'script', 'test']);
+const traceableRuleFiles = new Set([
+  '.codex/skills/wego-design/references/design-decisions.md',
+  '.codex/skills/wego-design/references/scene-contract.md'
+]);
 
 function pathMatches(file, pattern) {
   const patternRegex = `^${pattern.split('*').map(part => part.replace(/[|\\{}()[\]^$+?.]/g, '\\$&')).join('[^/]*')}$`;
@@ -24,6 +28,34 @@ function locatorExists(root, relative, locator) {
     return true;
   }
   return content.includes(locator);
+}
+
+function markdownRuleIds(content) {
+  return new Set([...content.matchAll(/<!--\s*rule-id:\s*([a-z0-9][a-z0-9._-]*)\b/giu)].map(match => match[1]));
+}
+
+export function validatePromotedRuleTargets(root, pool) {
+  const errors = [];
+  for (const candidate of pool.candidates || []) {
+    if (candidate.status !== 'promoted') continue;
+    const targets = [
+      ['canonical', candidate.rule_ownership?.canonical],
+      ['promotion_landing', candidate.promotion_landing]
+    ];
+    for (const [kind, target] of targets) {
+      if (!target || !traceableRuleFiles.has(target.file)) continue;
+      const expectedLocator = `rule-id: ${target.rule_id}`;
+      if (!target.rule_id || target.locator !== expectedLocator) {
+        errors.push(`候选 ${candidate.id} 的 ${kind} 必须精确定位 rule_id：${target.file}#${expectedLocator}`);
+        continue;
+      }
+      const file = path.join(root, target.file);
+      if (!fs.existsSync(file) || !markdownRuleIds(fs.readFileSync(file, 'utf8')).has(target.rule_id)) {
+        errors.push(`候选 ${candidate.id} 的 ${kind} rule_id 未落地：${target.file}#${target.rule_id}`);
+      }
+    }
+  }
+  return errors;
 }
 
 export function validateSkillEntryBoundary(root = process.cwd()) {
@@ -48,6 +80,7 @@ export function validateSkillEntryBoundary(root = process.cwd()) {
     const references = path.join(skillDir, 'references');
     if (fs.existsSync(references)) for (const entry of fs.readdirSync(references).filter(file => file.endsWith('.md'))) if (!links.has(`references/${entry}`)) errors.push(`${name}/references/${entry} 未由 SKILL.md 直接引用`);
   }
+  if (fs.existsSync(path.join(root, '.codex/skills/wego-uxsystem-iterate/references/high-fidelity-prototype-baseline.md'))) errors.push('重复的原型基线 reference 必须删除');
   const registryFile = '.codex/skills/wego-uxsystem-iterate/experience/authority-registry.json';
   const candidatesFile = '.codex/skills/wego-uxsystem-iterate/experience/candidates.json';
   let registry, pool;
@@ -67,6 +100,7 @@ export function validateSkillEntryBoundary(root = process.cwd()) {
     if (!fs.existsSync(target) || !locatorExists(root, canonical.file, canonical.locator)) errors.push(`候选 ${candidate.id} 的 canonical 定位无效：${canonical.file}#${canonical.locator}`);
     if (/wego-ux(?!system-iterate)|wego-tests|specs\/|interaction[_-]spec|design[_-]plan|design-decisions\.surface_designs|acceptance_report|acceptance-checks|browser-verification/.test(JSON.stringify(candidate))) errors.push(`候选 ${candidate.id} 仍引用已删除的工作流或规则字段`);
   }
+  errors.push(...validatePromotedRuleTargets(root, pool));
   return errors;
 }
 

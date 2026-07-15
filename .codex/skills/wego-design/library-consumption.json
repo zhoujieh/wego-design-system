@@ -1,8 +1,7 @@
 {
-  "schemaVersion": 4,
+  "schemaVersion": 5,
   "library": "wego-design",
   "tokenCss": "colors_and_type.css",
-  "tokenSource": "css.json",
   "componentsCss": "components.css",
   "componentsIndex": "components/index.json",
   "componentContractDir": "components",
@@ -23,7 +22,7 @@
     },
     "uiKit": {
       "files": ["uikit-plan.json", "ui_kits/*/index.html"],
-      "purpose": "已验证页面范式、组合约束与范式 presentation 的参考；未命中范式时按设计决策方法自主组合，不是业务宿主模板。",
+      "purpose": "已验证页面范式、组合约束与范式 presentation 的参考；未命中范式时按设计决策原则自主组合，不是业务宿主模板。",
       "copyable": false
     },
     "icons": {
@@ -33,9 +32,7 @@
     }
   },
   "componentPlan": {
-    "min": 3,
-    "max": 6,
-    "requiredFields": ["slug", "reason", "previewFile", "contractFile", "rootClass", "runtimeTokens", "localTokens"],
+    "requiredFields": ["binding_id", "slug", "reason", "variant_dimensions"],
     "previewFirst": true,
     "forbidden": [
       "未读 Preview 即使用组件",
@@ -43,10 +40,16 @@
       "扫描全量组件索引代替页面组件计划"
     ]
   },
+  "pageEdgeModes": ["M0", "M8", "M32"],
+  "pageEdgeTokens": {
+    "M0": "--layout-page-margin-m0",
+    "M8": "--layout-page-margin-m8",
+    "M32": "--layout-page-margin-m32"
+  },
   "actualTokenNameReference": {
     "source": "colors_and_type.css:root",
     "format": "var(--token-name)",
-    "rule": "场景 token_whitelist 只能使用实际声明变量；禁止根据 css.json 或语义猜变量名。"
+    "rule": "场景只能使用实际声明变量；禁止根据 css.json 或语义猜变量名。"
   },
   "sceneTokenPolicy": {
     "baseTokens": [
@@ -64,7 +67,7 @@
       "--layout-",
       "--border-neutral-"
     ],
-    "rule": "场景 token_whitelist 只能包含本页 component_bindings 对应组件的 runtimeTokens，以及本策略声明的基础 Token；组件 localTokens、其他组件 Token、原始 palette 与状态色不得直接加入。"
+    "rule": "场景只能使用本页 component_bindings 对应组件的 runtimeTokens，以及本策略声明的基础 Token；组件 localTokens、其他组件 Token、原始 palette 与状态色不得直接使用。"
   },
   "iconUsage": {
     "fontClassMode": {
@@ -101,19 +104,6 @@
     "appHostBoundary": "唯一宿主是 wego-app/index.html；场景通过 routes.js、scene.js、scene.css 增量接入。",
     "noGeneratedSpecs": "不存在自动生成 specs 规则目录；所有运行时规则必须回到当前权威源。"
   },
-  "recommendedReadOrder": [
-    "AGENTS.md",
-    "effective iteration + confirmed prototype_brief",
-    "SKILL.md",
-    "references/design-decisions.md",
-    "library-consumption.json",
-    "uikit-plan.json",
-    "components/index.json",
-    "preview/component-{slug}.html",
-    "components/{slug}.json",
-    "colors_and_type.css",
-    "references/scene-contract.md"
-  ],
   "scenarioTypeRegistry": {
     "description": "仅保存成熟且被运行时消费的场景类型。",
     "types": [
@@ -121,7 +111,7 @@
         "id": "component-consumption",
         "primaryWorkflowStage": "wego-design",
         "covers": ["组件选择", "Preview-first", "稳定变体", "组合约束", "Token 绑定"],
-        "verification": "componentPlan 中每个组件均有 Preview、契约、根 class、Token 和规则来源。"
+        "verification": "每个 binding 均由组件索引解析 Preview 与契约，并与实际 DOM、变体和允许 Token 一致。"
       },
       {
         "id": "app-scene-runtime",
@@ -132,7 +122,7 @@
       {
         "id": "design-system-parity",
         "primaryWorkflowStage": "wego-uxsystem-iterate",
-        "covers": ["组件契约", "Preview", "components.css", "UI Kit", "Token", "DDR"],
+        "covers": ["组件契约", "Preview", "components.css", "UI Kit", "Token", "设计系统缺口"],
         "verification": "组件一致性守卫、资源同步与受影响场景回归通过。"
       }
     ]

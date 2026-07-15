@@ -12,7 +12,7 @@
 
 - 业务目标、范围、状态、入口：wego-product。
 - 场景设计消费、组件计划、路由、交互、状态、视觉：wego-design。
-- 组件、Preview、Token、UI Kit、DDR、消费规则与守卫：wego-uxsystem-iterate。
+- 组件、Preview、Token、UI Kit、设计系统缺口、消费规则与守卫：wego-uxsystem-iterate。
 
 ## 3. 候选与升级
 

@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { validatePromptContractShape } from './prompt-contract-schema.mjs';
+import { parseRegisteredSceneSource, parseSceneTemplate } from './scene-source-parser.mjs';
 
 const [sceneDirectory, ...args] = process.argv.slice(2);
 if (!sceneDirectory) {
@@ -32,39 +33,46 @@ if (!match) fail('scene.js 缺少 /* wego-design-contract: {...} */ 合同注释
 let contract;
 try { contract = JSON.parse(match[1].trim()); }
 catch (error) { fail(`wego-design-contract 不是合法 JSON：${error.message}`); }
+const runtimeJs = js.replace(match[0], '');
+const allowedContractFields = new Set(['surface_id', 'route_id', 'layout_mode', 'page_pattern', 'presentation', 'prompt_contract', 'visual_check']);
+for (const field of Object.keys(contract)) if (!allowedContractFields.has(field)) fail(`wego-design-contract.${field} 不是当前 Schema 字段`);
 const prompt = contract.prompt_contract;
 if (!contract.surface_id || !contract.route_id || !['pattern', 'composed'].includes(contract.layout_mode) || !prompt || typeof prompt !== 'object' || Array.isArray(prompt)) {
   fail('wego-design-contract 必须包含 surface_id、route_id、layout_mode 和对象形式的 prompt_contract');
 }
+if (typeof contract.route_id !== 'string' || !/^[a-z][a-z0-9-]*$/.test(contract.route_id)) fail('wego-design-contract.route_id 必须是稳定 kebab-case');
 if (contract.layout_mode === 'pattern' && (typeof contract.page_pattern !== 'string' || !contract.page_pattern)) fail('pattern 模式必须声明非空 page_pattern');
 if (contract.layout_mode === 'composed' && contract.page_pattern !== null) fail('composed 模式的 page_pattern 必须为 null');
 if (!contract.presentation || typeof contract.presentation !== 'object' || Array.isArray(contract.presentation)) fail('wego-design-contract 必须包含对象形式的 presentation');
 const promptErrors = validatePromptContractShape(prompt);
 if (promptErrors.length) fail(promptErrors.map(item => `${item.path} ${item.message}`).join('\n'));
 
-const tags = [...js.matchAll(/<[A-Za-z][^<>]*>/g)].map(item => item[0]);
-const attribute = (tag, name) => tag.match(new RegExp(`${name}=["']([^"']+)["']`))?.[1] || null;
-const rootTag = tags.find(tag => attribute(tag, 'data-surface-id') || attribute(tag, 'data-route-id') || attribute(tag, 'data-layout-mode'));
-if (!rootTag || attribute(rootTag, 'data-surface-id') !== contract.surface_id || attribute(rootTag, 'data-route-id') !== contract.route_id || attribute(rootTag, 'data-layout-mode') !== contract.layout_mode) {
+let registeredScene;
+let templateTree;
+try {
+  registeredScene = parseRegisteredSceneSource(runtimeJs, contract.route_id);
+  templateTree = parseSceneTemplate(registeredScene.template);
+} catch (error) { fail(error.message); }
+const rootNode = templateTree.root;
+if (rootNode.attrs['data-surface-id'] !== contract.surface_id || rootNode.attrs['data-route-id'] !== contract.route_id || rootNode.attrs['data-layout-mode'] !== contract.layout_mode) {
   fail('template 根节点的 data-surface-id、data-route-id、data-layout-mode 必须与 wego-design-contract 一致');
 }
-if (contract.layout_mode === 'pattern' && attribute(rootTag, 'data-page-pattern') !== contract.page_pattern) fail('pattern 模式根节点的 data-page-pattern 必须与 wego-design-contract 一致');
-if (contract.layout_mode === 'composed' && attribute(rootTag, 'data-page-pattern') !== null) fail('composed 模式根节点不得声明 data-page-pattern');
-const componentNodes = tags
-  .map(tag => ({
-    dd_id: attribute(tag, 'data-dd-id'),
-    component_slug: attribute(tag, 'data-component-slug'),
-    rule_source: attribute(tag, 'data-rule-source'),
-    token_binding: attribute(tag, 'data-token-binding'),
-    class_name: attribute(tag, 'class')
+if (rootNode.attrs['data-page-edge-mode'] !== prompt.layout_contract.page_edge_mode) fail('template 根节点的 data-page-edge-mode 必须与 layout_contract.page_edge_mode 一致');
+if (contract.layout_mode === 'pattern' && rootNode.attrs['data-page-pattern'] !== contract.page_pattern) fail('pattern 模式根节点的 data-page-pattern 必须与 wego-design-contract 一致');
+if (contract.layout_mode === 'composed' && Object.hasOwn(rootNode.attrs, 'data-page-pattern')) fail('composed 模式根节点不得声明 data-page-pattern');
+const componentNodes = templateTree.nodes
+  .map(node => ({
+    dd_id: node.attrs['data-dd-id'] || null,
+    binding_id: node.attrs['data-component-binding'] || null,
+    component_slug: node.attrs['data-component-slug'] || null
   }))
-  .filter(node => node.dd_id || node.component_slug || node.rule_source);
+  .filter(node => node.dd_id || node.binding_id || node.component_slug);
 for (const node of componentNodes) {
-  if (!node.dd_id || !node.component_slug || !node.rule_source) fail('每个正式组件实例必须同时包含 data-dd-id、data-component-slug、data-rule-source');
+  if (!node.dd_id || !node.binding_id || !node.component_slug) fail('每个正式组件实例必须同时包含 data-dd-id、data-component-binding、data-component-slug');
 }
-const domIds = tags.map(tag => attribute(tag, 'data-dom-id')).filter(Boolean);
+const domIds = templateTree.nodes.map(node => node.attrs['data-dom-id']).filter(Boolean);
 const result = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   scene: path.basename(sceneRoot),
   surface_id: contract.surface_id,
   route_id: contract.route_id,
@@ -79,11 +87,8 @@ const result = {
     source_sha256: createHash('sha256').update(js).update('\u0000').update(css).digest('hex'),
     dom_ids: domIds,
     component_count: componentNodes.length,
-    visualCheck: contract.visual_check || null,
-    crowdingCheck: contract.crowding_check || null
-  },
-  state_contract: prompt.state_contract || [],
-  interaction_contract: prompt.interaction_contract || []
+    visualCheck: contract.visual_check || null
+  }
 };
 const serialized = `${JSON.stringify(result, null, 2)}\n`;
 if (checkOnly) {

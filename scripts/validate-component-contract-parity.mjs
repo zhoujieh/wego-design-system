@@ -54,6 +54,29 @@ function classNamesFromSelector(value) {
   return [...String(value || '').matchAll(/\.([A-Za-z_][\w-]*)/g)].map(match => match[1]);
 }
 
+function attributeSelectorEvidence(selector, css) {
+  const match = String(selector || '').match(/^\[([:\w-]+)(?:=(["'])(.*?)\2)?\]$/);
+  if (!match) return false;
+  const name = match[1].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  if (match[2]) {
+    const expected = match[3].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return new RegExp(`\\[\\s*${name}\\s*=\\s*["']${expected}["']\\s*\\]`).test(css);
+  }
+  return new RegExp(`\\[\\s*${name}(?:\\s*=|\\s*\\])`).test(css)
+    || (match[1] === 'disabled' && /:disabled\b/.test(css));
+}
+
+function selectorsFromAlternativeBranch(branch) {
+  if (Array.isArray(branch)) return branch;
+  return branch && typeof branch === 'object' && Array.isArray(branch.allOf) ? branch.allOf : [];
+}
+
+function isPlainObject(value) {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+}
+
+const variantConstraintFields = ['rootAllOf', 'rootOneOf', 'rootNoneOf', 'descendantAllOf', 'descendantOneOf', 'descendantNoneOf'];
+
 function fileExists(relative) {
   return fs.existsSync(path.join(libraryRoot, relative));
 }
@@ -85,7 +108,7 @@ if (index?.schemaVersion !== 4 || index?.componentContractSchemaVersion !== 4) {
 }
 if (Object.hasOwn(index || {}, 'uiKits')) fail('index.duplicate_uikits', 'components/index.json 不得重复维护 UI Kit；唯一来源是 uikit-plan.json', 'components/index.json');
 if (uiKit?.schemaVersion !== 5 || !Array.isArray(uiKit?.pagePatterns)) fail('uikit.schema', 'uikit-plan.json 必须使用 schemaVersion 5 且包含 pagePatterns', 'uikit-plan.json');
-if (library?.schemaVersion !== 4) fail('library.schema', 'library-consumption.json 必须使用 schemaVersion 4', 'library-consumption.json');
+if (library?.schemaVersion !== 5) fail('library.schema', 'library-consumption.json 必须使用 schemaVersion 5', 'library-consumption.json');
 
 const registered = new Set((index?.components || []).map(item => item.slug));
 const patternIds = new Set();
@@ -165,17 +188,85 @@ for (const item of index?.components || []) {
   for (const anatomy of contract.anatomy || []) {
     for (const className of classNamesFromSelector(anatomy.selector)) if (!previewClasses.has(className)) fail('component.anatomy', `${contractRelative}.anatomy 指向不存在的 Preview class：${className}`, contractRelative);
   }
-  const rootClass = classNamesFromSelector(contract.domAnatomy?.root)[0];
-  if (!rootClass || !previewClasses.has(rootClass) || !componentClasses.has(rootClass)) fail('component.root', `${contractRelative}.domAnatomy.root 必须在 Preview 与 components.css 中存在`, contractRelative);
+  const rootClasses = classNamesFromSelector(contract.domAnatomy?.root);
+  if (!rootClasses.length) fail('component.root', `${contractRelative}.domAnatomy.root 必须声明至少一个根 class`, contractRelative);
+  for (const rootClass of rootClasses) {
+    if (!previewClasses.has(rootClass) || !componentClasses.has(rootClass)) fail('component.root', `${contractRelative}.domAnatomy.root 必须全部在 Preview 与 components.css 中存在：${rootClass}`, contractRelative);
+  }
   for (const selector of contract.domAnatomy?.requiredChildren || []) {
     for (const className of classNamesFromSelector(selector)) {
       if (!previewClasses.has(className)) fail('component.required_child', `${contractRelative} 必需结构未出现在 Preview：${className}`, contractRelative);
     }
   }
+  for (const selector of [contract.domAnatomy?.repeatingChild, ...(contract.domAnatomy?.bodyChildren || []), ...(contract.domAnatomy?.itemChildren || [])].filter(Boolean)) {
+    for (const className of classNamesFromSelector(selector)) {
+      if (!previewClasses.has(className)) fail('component.nested_anatomy', `${contractRelative} 嵌套结构未出现在 Preview：${className}`, contractRelative);
+    }
+  }
   for (const alternative of contract.domAnatomy?.alternatives || []) {
-    for (const branch of [...(alternative.allOf ? [alternative.allOf] : []), ...(alternative.oneOf || [])]) {
-      for (const selector of branch) {
+    const branches = [...(alternative.allOf ? [alternative.allOf] : []), ...(alternative.oneOf || [])];
+    const conditional = (alternative.oneOf || []).filter(branch => branch && typeof branch === 'object' && !Array.isArray(branch));
+    if (conditional.length && conditional.length !== (alternative.oneOf || []).length) fail('component.alternative_shape', `${contractRelative} alternatives.oneOf 不得混用条件分支与数组分支`, contractRelative);
+    const conditions = new Set();
+    for (const branch of conditional) {
+      if (!branch.when || typeof branch.when !== 'object' || Array.isArray(branch.when) || !Object.keys(branch.when).length || !Array.isArray(branch.allOf) || !branch.allOf.length) {
+        fail('component.alternative_shape', `${contractRelative} 条件分支必须包含非空 when 与 allOf`, contractRelative);
+        continue;
+      }
+      const conditionKey = JSON.stringify(branch.when);
+      if (conditions.has(conditionKey)) fail('component.alternative_condition', `${contractRelative} alternatives.oneOf 条件不得重复：${conditionKey}`, contractRelative);
+      conditions.add(conditionKey);
+      for (const [dimension, value] of Object.entries(branch.when)) {
+        if (!Array.isArray(contract.variantDimensions?.[dimension]) || !contract.variantDimensions[dimension].includes(value)) fail('component.alternative_condition', `${contractRelative} 条件分支引用非法变体：${dimension}=${value}`, contractRelative);
+      }
+    }
+    for (const branch of branches) {
+      for (const selector of selectorsFromAlternativeBranch(branch)) {
         for (const className of classNamesFromSelector(selector)) if (!previewClasses.has(className)) fail('component.alternative', `${contractRelative} alternatives 指向不存在的 Preview class：${className}`, contractRelative);
+      }
+    }
+  }
+  const variantRules = contract.domAnatomy?.variantRules;
+  if (variantRules !== undefined && !isPlainObject(variantRules)) fail('component.variant_rules_shape', `${contractRelative}.domAnatomy.variantRules 必须是对象`, contractRelative);
+  for (const [dimension, rule] of Object.entries(isPlainObject(variantRules) ? variantRules : {})) {
+    const allowedValues = contract.variantDimensions?.[dimension];
+    if (!Array.isArray(allowedValues) || !allowedValues.length) {
+      fail('component.variant_rules_dimension', `${contractRelative}.domAnatomy.variantRules 引用未登记维度：${dimension}`, contractRelative);
+      continue;
+    }
+    if (!isPlainObject(rule) || typeof rule.required !== 'boolean' || typeof rule.exclusive !== 'boolean' || !isPlainObject(rule.values)) {
+      fail('component.variant_rules_shape', `${contractRelative}.domAnatomy.variantRules.${dimension} 必须声明 required、exclusive 和 values`, contractRelative);
+      continue;
+    }
+    const unexpectedRuleFields = Object.keys(rule).filter(field => !['required', 'exclusive', 'values'].includes(field));
+    if (unexpectedRuleFields.length) fail('component.variant_rules_shape', `${contractRelative}.${dimension} 含未知规则字段：${unexpectedRuleFields.join('、')}`, contractRelative);
+    const mappedValues = Object.keys(rule.values);
+    const missingValues = allowedValues.filter(value => !mappedValues.includes(value));
+    const unknownValues = mappedValues.filter(value => !allowedValues.includes(value));
+    if (missingValues.length || unknownValues.length) fail('component.variant_rules_values', `${contractRelative}.${dimension} 的 DOM 规则必须精确覆盖正式值${missingValues.length ? `；缺少：${missingValues.join('、')}` : ''}${unknownValues.length ? `；未知：${unknownValues.join('、')}` : ''}`, contractRelative);
+    for (const [value, constraints] of Object.entries(rule.values)) {
+      if (!isPlainObject(constraints) || !Object.keys(constraints).length) {
+        fail('component.variant_rules_shape', `${contractRelative}.${dimension}.${value} 必须声明非空 DOM 约束`, contractRelative);
+        continue;
+      }
+      const unexpectedConstraints = Object.keys(constraints).filter(field => !variantConstraintFields.includes(field));
+      if (unexpectedConstraints.length) fail('component.variant_rules_shape', `${contractRelative}.${dimension}.${value} 含未知约束：${unexpectedConstraints.join('、')}`, contractRelative);
+      for (const field of variantConstraintFields) {
+        if (!Object.hasOwn(constraints, field)) continue;
+        const selectors = constraints[field];
+        if (!Array.isArray(selectors) || !selectors.length || selectors.some(selector => typeof selector !== 'string' || !selector.trim()) || new Set(selectors).size !== selectors.length) {
+          fail('component.variant_rules_shape', `${contractRelative}.${dimension}.${value}.${field} 必须是非空、去重的 selector 数组`, contractRelative);
+          continue;
+        }
+        for (const selector of selectors) {
+          const classNames = classNamesFromSelector(selector);
+          const classEvidence = classNames.length && classNames.every(className => previewClasses.has(className) && componentClasses.has(className));
+          const attributeEvidence = attributeSelectorEvidence(selector, block);
+          if (!classEvidence && !attributeEvidence) fail('component.variant_rules_selector', `${contractRelative}.${dimension}.${value}.${field} 指向无 Preview/CSS 证据的 selector：${selector}`, contractRelative);
+        }
+      }
+      if (rule.exclusive && !['rootAllOf', 'rootOneOf', 'descendantAllOf', 'descendantOneOf'].some(field => Array.isArray(constraints[field]) && constraints[field].length)) {
+        fail('component.variant_rules_exclusive', `${contractRelative}.${dimension}.${value} 开启 exclusive 时必须有正向 DOM 证据`, contractRelative);
       }
     }
   }

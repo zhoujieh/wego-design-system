@@ -837,9 +837,10 @@
   function mountRouteEntries() {
     routes.forEach(function (route) {
       if (!route || !route.routeId) return;
-      if (route.entry && route.entry.type === 'host-tab') return;
+      if (!route.entry) return;
+      if (route.entry.type === 'host-tab') return;
       if (document.querySelector('[data-route-id="' + CSS.escape(route.routeId) + '"]')) return;
-      var entry = route.entry || {};
+      var entry = route.entry;
       var groupName = entry.group || (entry.tab === 'workspace' ? 'workspace-tools' : 'my-settings');
       var group = document.querySelector('[data-entry-group="' + CSS.escape(groupName) + '"]');
       if (!group) return;

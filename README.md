@@ -15,9 +15,9 @@
 
 ## 技能闭环
 
-1. `wego-product`：创建业务迭代、确认范围与 `prototype_brief`。
-2. `wego-design`：Preview-first 地消费设计系统，在同一任务中实现和验证场景。
-3. `wego-uxsystem-iterate`：负责组件、UI Kit、Token、DDR、工作流迭代和审查。
+1. `wego-product`：创建业务迭代，确认范围、原型边界与 `prototype_brief`。
+2. `wego-design`：先遵循唯一设计决策原则，再 Preview-first 地消费设计系统并实现、验证场景。
+3. `wego-uxsystem-iterate`：负责组件、UI Kit、Token、设计系统缺口、工作流迭代和审查。
 
 统一技能路由见 `.codex/skills/README.md`，仓库级约束见 `AGENTS.md`。
 
@@ -25,9 +25,10 @@
 
 ## 设计系统权威来源
 
+- 设计决策原则：`.codex/skills/wego-design/references/design-decisions.md`
 - Token：`.codex/skills/wego-design/colors_and_type.css`、`.codex/skills/wego-design/css.json`
 - 组件：`.codex/skills/wego-design/components/index.json`、`.codex/skills/wego-design/components/{slug}.json`、`.codex/skills/wego-design/preview/component-{slug}.html`
-- 明确页面范式：`.codex/skills/wego-design/uikit-plan.json`（未命中时按设计决策方法自主组合）
+- 明确页面范式：`.codex/skills/wego-design/uikit-plan.json`（未命中时按设计决策原则自主组合）
 - 消费边界：`.codex/skills/wego-design/library-consumption.json`
 - 技能职责和交接：各技能 `SKILL.md` 与其直接引用的 `references/`
 - 仓库级硬约束：`AGENTS.md`
@@ -55,4 +56,4 @@ node scripts/validate-wego-design.mjs --scope=full --strict
 
 `iteration-record.mjs` 负责业务迭代状态机、范围确认、原型失效和冻结；历史场景无需补录，后续再次修改时必须创建有效迭代。
 
-只修改设计系统或工作流本体时，可使用 `node scripts/validate-wego-design.mjs --scope=system --strict`；该范围跳过业务场景产物。涉及设计系统部署资源时，再运行 `node scripts/sync-wego-app-lib.mjs --check`。
+只修改设计系统或工作流本体时，可使用 `node scripts/validate-wego-design.mjs --scope=system --strict`；该范围跳过业务场景产物，`--strict` 会把警告视为失败。涉及设计系统部署资源时，再运行 `node scripts/sync-wego-app-lib.mjs --check`。

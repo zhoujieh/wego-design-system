@@ -16,7 +16,7 @@
 }
 ```
 
-每条候选必须包含稳定 `id`、`normalized_key`、归属环节、`rule_ownership`、运行时可达性、证据和时间。`rule_ownership` 必须包含归属类别，以及唯一 `file`、`locator`、`rule_id`；只有 `skill-entry` 类可声明 `entry_scope`，且只能取归属注册表的五项白名单。
+每条候选必须包含稳定 `id`、`normalized_key`、归属环节、`rule_ownership`、运行时可达性、证据和时间。`rule_ownership` 必须包含归属类别，以及唯一 `file`、`locator`、`rule_id`；已升级规则指向设计决策原则或场景合同时，`locator` 必须精确写成 `rule-id: {rule_id}`，且正文存在同名标记。只有 `skill-entry` 类可声明 `entry_scope`，且只能取归属注册表的五项白名单。
 
 ## 录入与升级
 

@@ -158,17 +158,32 @@
     ],
     "alternatives": [
       {
-        "allOf": [
-          ".field-label"
-        ],
         "oneOf": [
-          [
-            ".input-wrapper",
-            "input"
-          ],
-          [
-            "textarea"
-          ]
+          {
+            "when": { "fieldType": "text" },
+            "allOf": [
+              ".input-group",
+              ".field-label",
+              ".input-wrapper",
+              "input"
+            ]
+          },
+          {
+            "when": { "fieldType": "textarea" },
+            "allOf": [
+              ".input-group",
+              ".field-label",
+              "textarea"
+            ]
+          },
+          {
+            "when": { "fieldType": "number" },
+            "allOf": [
+              ".number-input",
+              ".number-input__field",
+              ".number-input__suffix"
+            ]
+          }
         ]
       }
     ]

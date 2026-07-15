@@ -32,8 +32,6 @@
     ],
     "state": [
       "default",
-      "hover",
-      "active",
       "disabled"
     ]
   },
@@ -81,7 +79,7 @@
     }
   ],
   "structurePatterns": [
-    "根节点始终使用 .btn，并叠加强调级别、尺寸和状态类。",
+    "根节点始终使用 .btn，并叠加强调级别与尺寸类；disabled 使用语义属性，.btn--disabled 只作显式状态类补充。",
     "带图标模式使用前置 .btn__icon，纯图标模式仍保留 .btn 根节点但不放文字。",
     "纯图标和带图标按钮只用于新建场景，其它场景默认使用纯文字按钮。"
   ],
@@ -117,21 +115,44 @@
       ".btn__icon",
       "text"
     ],
-    "stateClasses": [
-      ".btn--strong",
-      ".btn--medium",
-      ".btn--weak",
-      ".btn--danger",
-      ".btn--disabled"
-    ],
-    "sizeClasses": [
-      ".btn--lg",
-      ".btn--md",
-      ".btn--sm"
-    ],
-    "modeClasses": [
-      ".btn--icon-only"
-    ],
+    "variantRules": {
+      "emphasis": {
+        "required": true,
+        "exclusive": true,
+        "values": {
+          "strong": { "rootAllOf": [".btn--strong"] },
+          "medium": { "rootAllOf": [".btn--medium"] },
+          "weak": { "rootAllOf": [".btn--weak"] },
+          "danger": { "rootAllOf": [".btn--danger"] }
+        }
+      },
+      "size": {
+        "required": true,
+        "exclusive": true,
+        "values": {
+          "lg": { "rootAllOf": [".btn--lg"] },
+          "md": { "rootAllOf": [".btn--md"] },
+          "sm": { "rootAllOf": [".btn--sm"] }
+        }
+      },
+      "iconMode": {
+        "required": true,
+        "exclusive": false,
+        "values": {
+          "text-only": { "rootNoneOf": [".btn--icon-only"], "descendantNoneOf": [".btn__icon"] },
+          "leading-icon": { "rootNoneOf": [".btn--icon-only"], "descendantAllOf": [".btn__icon"] },
+          "icon-only": { "rootAllOf": [".btn--icon-only"], "descendantAllOf": [".btn__icon"] }
+        }
+      },
+      "state": {
+        "required": true,
+        "exclusive": false,
+        "values": {
+          "default": { "rootNoneOf": [".btn--disabled", "[disabled]", "[aria-disabled=\"true\"]"] },
+          "disabled": { "rootOneOf": ["[disabled]", "[aria-disabled=\"true\"]"] }
+        }
+      }
+    },
     "alternatives": []
   },
   "provenance": {

@@ -1,4 +1,4 @@
-# Readiness 与原型边界
+# 范围确认与原型边界
 
 > 角色：范围判断方法。读取条件：需求存在歧义或需要控制原型深度时；不替代规格字段定义。
 
@@ -6,7 +6,9 @@
 
 ## 提交简报与确认
 
-每个业务需求都必须先提交极简 `prototype_brief`，内容只包括：目标、纳入范围、排除范围、入口、关键路径、原型边界、低风险假设和待确认问题。不得在此阶段输出组件、布局、页面范式、打开方式或正式规格。
+每个业务需求都必须先整理极简 `prototype_brief`，内容只包括：目标、纳入范围、排除范围、入口、关键路径、原型边界、业务状态、数据合同、低风险假设和待确认问题。不得在此阶段输出组件、布局、页面范式、打开方式或正式规格。
+
+`open_questions` 可在范围澄清时暂存问题，但运行 `submit-brief` 前必须全部解决：将用户答案写回业务事实，低风险可逆项转为 `assumptions`，本次不处理的事项移入 `excluded`。不得把仍有待确认问题的简报交给设计。
 
 向用户确认时，使用简短摘要逐项列出“本次要做什么、不做什么、从哪里进入、关键操作如何完成、原型模拟到什么程度”。必须由用户明确确认后才能运行 `confirm-brief` 并交给 `wego-design`。
 
@@ -16,7 +18,7 @@
 
 ### UI 假设的禁止表现
 
-`prototype_brief` 的 `goal`、`included`、`excluded`、`entry_points`、`critical_paths`、`prototype_boundaries`、`assumptions`、`open_questions` 字段中，不得出现以下内容：
+`prototype_brief` 的 `goal`、`included`、`excluded`、`entry_points`、`critical_paths`、`prototype_boundaries`、`states`、`data_contract`、`assumptions`、`open_questions` 字段及其嵌套内容中，不得出现以下内容：
 
 - 组件名或 CSS 类（如 navbar、cell、card、tab、search、actionsheet、`wg-image`、`.cell-group`）。
 - 页面范式或布局结构（如“顶部导航栏”“底部 Tab”“卡片列表”“表单分组”“左图右文”“宽幅矩形图”）。
@@ -45,28 +47,23 @@
 - `goal`：业务目标和用户价值（如“让店主连续发布商品动态”）。
 - `entry_points`：业务入口归属（如“动态主 tab”“工作台 tab 下页面入口”）。
 - `critical_paths`：业务关键路径（如“浏览动态 → 查看详情 → 一键转发”）。
-- `prototype_boundaries`：原型实现深度（如“一键转发 functional，搜索 stub”）。
+- `prototype_boundaries`：原型实现深度，使用 `{flow_id, mode, visible_result}`，例如 `{"flow_id":"share-product","mode":"functional","visible_result":"用户完成转发并看到成功结果"}`。
+- `states`：业务状态、进入条件和用户可感知结果（如“未发布→发布成功，用户可查看新动态”）；不指定控件或视觉状态。
+- `data_contract`：原型必须展示、读取或修改的业务数据、含义与约束（如“商品名称必填，发布成功后返回动态标识”）；不指定呈现格式或布局。
 - `assumptions`：低风险可逆的业务假设（如“假设店主默认已登录”）。
 - `open_questions`：待确认的业务问题（如“是否需要支持未登录访客浏览”）。
 
 ## 风险分级
 
-- 低风险、可逆：记录到 `assumptions`，标记 `impact_level: low`、`reversible: true`，可继续。
-- 影响局部流程：记录到 `open_questions`，关联 `node_id` 或 `flow_id`；已确认范围继续，未确认节点设为 `stub` 或 `excluded`。
-- 影响核心目标、主流程或完成结果：必须询问用户，设置 `readiness = blocked`。
+- 低风险、可逆：记录到 `assumptions`，写清假设及影响，可继续。
+- 影响局部流程：澄清期间记录到 `open_questions`，关联 `node_id` 或 `flow_id`；提交前必须确认、转为低风险假设，或移入 `excluded`。
+- 影响核心目标、主流程或完成结果：必须询问用户，在确认前不得运行 `submit-brief`。
 
 下列不确定项一律属于必须询问：业务目标、纳入或排除范围、入口、主路径、完成结果、不可逆业务规则、影响多个 surface 的状态。不得把这些问题降级为 assumption。
 
-## readiness
+## 交接门禁
 
-- `ready`：关键流程、状态和结果明确。
-- `ready-with-assumptions`：只有低风险可逆假设。
-- `partially-ready`：主流程可继续，局部节点待确认。
-- `blocked`：核心目标、流程或结果不清晰。
-
-每个 readiness 必须有 `reason` 和受影响范围。`partially-ready` 只把已确认范围交给设计；`blocked` 不得交接。
-
-进入 `wego-design` 前，本轮交付范围必须整体达到 `ready` 或 `ready-with-assumptions`；`partially-ready` 只能继续停留在产品阶段拆分延期或排除范围，不得交给场景实现。
+进入 `wego-design` 前，目标、入口、关键路径、状态、数据和原型边界必须完整，`open_questions` 必须为空。局部未确认内容只能继续澄清或移入 `excluded`，不得交给场景实现。
 
 ## 边界选择
 
@@ -75,4 +72,4 @@
 - 只需表达入口和边界：`stub`，必须有用户可见反馈。
 - 明确不在本次范围：`excluded`。
 
-不得用 `stub` 回避已经明确要求的核心路径，也不得实现 `excluded` 节点。
+每个边界必须提供稳定 `flow_id` 和明确的 `visible_result`。同一事项只能属于原型边界或 `excluded` 之一；不得用 `stub` 回避已经明确要求的核心路径，也不得实现 `excluded` 节点。

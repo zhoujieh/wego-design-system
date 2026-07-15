@@ -4,7 +4,7 @@
 
 微购中文静态 App 原型与设计系统仓库。用户提供业务需求，AI 按固定链路生成符合微购设计语言的移动端交互原型。
 
-默认面向移动端、微信生态、电商、工具场景。设计方向固定为简洁、干净、淡雅、克制；最高判断优先级为：清晰 > 一致 > 效率 > 美观 > 创新。
+默认面向移动端、微信生态、电商、工具场景。所有设计输出必须先读取并遵循 `wego-design` 的唯一设计决策原则；本文件不重复定义设计原则。
 
 ## 固定产物
 
@@ -28,8 +28,8 @@
 | 用户意图                                     | 必须先触发                   | 前置条件                        | 下一步                                          |
 | ---------------------------------------- | ----------------------- | --------------------------- | -------------------------------------------- |
 | 原始业务需求、做页面、做原型、做新场景                      | `wego-product`          | 无                           | 必须由用户确认 `prototype_brief` 后再交给 `wego-design` |
-| 基于已确认原型简报设计并实现业务场景、修改已有业务场景              | `wego-design`           | 必须有用户已确认的 `prototype_brief` | 生成场景、决策证据、守卫结果与必要 DDR                        |
-| 改组件、Token、Preview、UI Kit、设计库消费规则、守门或 DDR | `wego-uxsystem-iterate` | 目标属于设计系统本体或系统规则             | 按组件/UI Kit 同步矩阵执行                            |
+| 基于已确认原型简报设计并实现业务场景、修改已有业务场景              | `wego-design`           | 必须有用户已确认的 `prototype_brief` | 生成场景、决策证据、守卫结果与必要的最小缺口说明                   |
+| 改组件、Token、Preview、UI Kit、设计库消费规则、守门或处理设计系统缺口 | `wego-uxsystem-iterate` | 目标属于设计系统本体或系统规则             | 按组件/UI Kit 同步矩阵执行                            |
 | 审查并沉淀经验、补充规则、优化工作流                       | `wego-uxsystem-iterate` | 用户明确要求沉淀或优化                 | 先进入经验候选流程                                    |
 
 统一路由入口见 `.codex/skills/README.md`。
@@ -37,8 +37,8 @@
 ## 主链路硬门禁
 
 - 新业务需求或已有场景修改必须归属主业务场景 `_iterations/` 下的有效迭代；历史场景再次修改时进入新流程。
-- 新迭代必须先通过 `submit-brief → confirm-brief` 确认目标、范围、入口和关键路径；确认后 `wego-design` 在同一任务中完成设计系统消费与交互原型。
-- `wego-design` 不得定义业务事实或直接改设计系统源；业务需求描述不足必须退回 `wego-product`，设计系统缺口创建 DDR 并由 `wego-uxsystem-iterate` 收敛。
+- 新迭代必须先通过 `submit-brief → confirm-brief` 确认目标、范围、入口、关键路径和原型边界；确认后 `wego-design` 在同一任务中完成设计系统消费与交互原型。
+- `wego-design` 不得定义业务事实或直接改设计系统源；业务需求描述不足必须退回 `wego-product`，设计系统缺口只记录最小缺口说明并由 `wego-uxsystem-iterate` 收敛。
 - 每个场景必须有页面级 `prompt_contract`（含 `layout_contract`）、状态合同、设计决策证据、场景合同守卫、交互守卫和固定视口视觉检查；任何场景源码变化后都必须重提取决策文件。
 - 组件消费必须 Preview-first：先读本页命中组件 Preview，再读契约；禁止猜 Token、class、子元素或 modifier。
 - 组件、UI Kit、工作流问题不得误走普通业务开发链路。
@@ -79,4 +79,3 @@
   - `node scripts/validate-wego-design.mjs`
   - 正式合并前按需运行 `node scripts/validate-wego-design.mjs --scope=full --strict`
 - 启动本地验证服务器必须自动退出或在任务结束时清理；开始与结束均用 `lsof -iTCP -sTCP:LISTEN -P | grep python` 检查残留。
-

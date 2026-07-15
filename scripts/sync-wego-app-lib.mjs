@@ -7,8 +7,8 @@
  *
  * 设计原则：
  *   - wego-app/lib/ 是部署副本，不是源文件；任何修改只能改原始文件后跑本脚本同步
- *   - 同步采用"清空再复制"策略，避免残留过期文件
- *   - 同步范围与 validate-wego-design.mjs 的 checkWegoAppStructure required 列表对齐
+ *   - 已映射资源采用“清空再复制”，允许清单外资源会被识别并清理
+ *   - 同步范围由下方 SYNC_MAP 唯一声明，完整性由同步测试与主守门检查
  *
  * Usage:
  *   node scripts/sync-wego-app-lib.mjs
@@ -27,8 +27,10 @@ const args = new Set(process.argv.slice(2));
 const checkOnly = args.has('--check');
 const jsonOutput = args.has('--json');
 
+// 仓库级禁用资源：无论出现在源或部署副本的哪一层，都不参与复制与一致性比较。
+const IGNORED_ENTRY_NAMES = new Set(['.DS_Store', '.uploads']);
+
 // 同步映射：源（相对 libraryRoot）→ 目标（相对 libRoot）
-// 与 validate-wego-design.mjs 的 checkWegoAppStructure required 列表对齐
 const SYNC_MAP = [
   { src: 'colors_and_type.css', dest: 'colors_and_type.css', type: 'file' },
   { src: 'components.css', dest: 'components.css', type: 'file' },
@@ -38,6 +40,14 @@ const SYNC_MAP = [
   { src: 'assets/image', dest: 'assets/image', type: 'dir' },
 ];
 
+const ALLOWED_LIB_ROOT_ENTRIES = new Set([
+  'colors_and_type.css',
+  'components.css',
+  'iconfont.css',
+  'assets',
+]);
+const ALLOWED_ASSETS_ROOT_ENTRIES = new Set(['fonts', 'icons', 'image']);
+
 const report = {
   synced: [],
   missing: [],
@@ -45,12 +55,23 @@ const report = {
   errors: [],
 };
 
-function ensureLibRoot() {
-  if (!fs.existsSync(libRoot)) {
-    if (checkOnly) return false;
-    fs.mkdirSync(libRoot, { recursive: true });
+function ensureDirectory(target, label) {
+  if (!fs.existsSync(target)) {
+    if (checkOnly) {
+      report.errors.push(`部署目录不存在：${label}`);
+      return false;
+    }
+    fs.mkdirSync(target, { recursive: true });
     return true;
   }
+  if (fs.statSync(target).isDirectory()) return true;
+  if (checkOnly) {
+    report.errors.push(`部署路径必须是目录：${label}`);
+    return false;
+  }
+  fs.rmSync(target, { recursive: true, force: true });
+  fs.mkdirSync(target, { recursive: true });
+  report.removed.push({ dest: path.relative(libRoot, target).split(path.sep).join('/') || '.', action: 'replaced-wrong-type', type: 'file' });
   return true;
 }
 
@@ -59,14 +80,22 @@ function clearTarget(destAbs, type) {
   if (type === 'dir') {
     fs.rmSync(destAbs, { recursive: true, force: true });
   } else {
-    fs.rmSync(destAbs, { force: true });
+    fs.rmSync(destAbs, { recursive: true, force: true });
   }
+}
+
+function isIgnoredEntry(filePath) {
+  return IGNORED_ENTRY_NAMES.has(path.basename(filePath));
 }
 
 function copyItem(srcAbs, destAbs, type) {
   if (type === 'dir') {
-    // preserveTimestamps 让副本 mtime 与源一致，--check 模式下 mtime 比较才靠谱
-    fs.cpSync(srcAbs, destAbs, { recursive: true, preserveTimestamps: true });
+    // 保留时间戳便于部署副本追溯；一致性判断仍以完整字节内容为准。
+    fs.cpSync(srcAbs, destAbs, {
+      recursive: true,
+      preserveTimestamps: true,
+      filter: (sourcePath) => !isIgnoredEntry(sourcePath),
+    });
   } else {
     fs.copyFileSync(srcAbs, destAbs);
     const st = fs.statSync(srcAbs);
@@ -92,6 +121,7 @@ function dirsEqual(a, b) {
       const out = new Map();
       const walk = (dir, base = '') => {
         for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+          if (IGNORED_ENTRY_NAMES.has(entry.name)) continue;
           const rel = base ? `${base}/${entry.name}` : entry.name;
           const full = path.join(dir, entry.name);
           if (entry.isDirectory()) {
@@ -118,13 +148,48 @@ function dirsEqual(a, b) {
   }
 }
 
+function collectStaleEntries() {
+  const stale = [];
+  const collect = (root, allowedNames) => {
+    if (!fs.existsSync(root) || !fs.statSync(root).isDirectory()) return;
+    for (const entry of fs.readdirSync(root, { withFileTypes: true })) {
+      if (IGNORED_ENTRY_NAMES.has(entry.name) || allowedNames.has(entry.name)) continue;
+      const absolutePath = path.join(root, entry.name);
+      stale.push({
+        absolutePath,
+        dest: path.relative(libRoot, absolutePath).split(path.sep).join('/'),
+        type: entry.isDirectory() ? 'dir' : 'file',
+      });
+    }
+  };
+
+  collect(libRoot, ALLOWED_LIB_ROOT_ENTRIES);
+  collect(path.join(libRoot, 'assets'), ALLOWED_ASSETS_ROOT_ENTRIES);
+  return stale;
+}
+
+function removeOrReportStaleEntries() {
+  for (const item of collectStaleEntries()) {
+    if (!checkOnly) {
+      fs.rmSync(item.absolutePath, { recursive: true, force: true });
+    }
+    report.removed.push({
+      dest: item.dest,
+      action: checkOnly ? 'stale-in-dest' : 'removed',
+      type: item.type,
+    });
+  }
+}
+
 function run() {
   if (!fs.existsSync(libraryRoot)) {
     report.errors.push(`设计系统源目录不存在：${path.relative(repoRoot, libraryRoot)}`);
     return finish(1);
   }
 
-  ensureLibRoot();
+  if (!ensureDirectory(libRoot, 'wego-app/lib')) return finish(1);
+  if (!ensureDirectory(path.join(libRoot, 'assets'), 'wego-app/lib/assets')) return finish(1);
+  removeOrReportStaleEntries();
 
   for (const item of SYNC_MAP) {
     const srcAbs = path.join(libraryRoot, item.src);
@@ -132,6 +197,11 @@ function run() {
 
     if (!fs.existsSync(srcAbs)) {
       report.missing.push({ src: item.src, type: item.type });
+      continue;
+    }
+    const sourceMatchesType = item.type === 'dir' ? fs.statSync(srcAbs).isDirectory() : fs.statSync(srcAbs).isFile();
+    if (!sourceMatchesType) {
+      report.errors.push(`源类型错误：${item.src} 应为 ${item.type}`);
       continue;
     }
 
@@ -154,7 +224,10 @@ function run() {
     report.synced.push({ dest: item.dest, action: 'synced', type: item.type });
   }
 
-  return finish(0);
+  const failed = report.missing.length > 0
+    || report.errors.length > 0
+    || (checkOnly && (report.synced.length > 0 || report.removed.length > 0));
+  return finish(failed ? 1 : 0);
 }
 
 function finish(code) {
@@ -162,11 +235,17 @@ function finish(code) {
     console.log(JSON.stringify(report, null, 2));
   } else {
     if (checkOnly) {
-      const outOfSync = report.synced.length > 0;
+      const outOfSync = report.synced.length > 0 || report.removed.length > 0;
       console.log(`\n${outOfSync ? 'wego-app/lib 副本与源不一致' : 'wego-app/lib 副本与源一致'}`);
       if (report.synced.length > 0) {
         console.log('\n需同步项：');
         for (const item of report.synced) {
+          console.log(`- [${item.action}] ${item.dest} (${item.type})`);
+        }
+      }
+      if (report.removed.length > 0) {
+        console.log('\n陈旧项：');
+        for (const item of report.removed) {
           console.log(`- [${item.action}] ${item.dest} (${item.type})`);
         }
       }
@@ -175,6 +254,12 @@ function finish(code) {
       if (report.synced.length > 0) {
         console.log('\n已同步：');
         for (const item of report.synced) {
+          console.log(`- ${item.dest} (${item.type})`);
+        }
+      }
+      if (report.removed.length > 0) {
+        console.log('\n已删除陈旧项：');
+        for (const item of report.removed) {
           console.log(`- ${item.dest} (${item.type})`);
         }
       }

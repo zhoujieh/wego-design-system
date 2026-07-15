@@ -4,6 +4,7 @@ import { spawnSync } from 'node:child_process';
 
 const args = process.argv.slice(2);
 const jsonOutput = args.includes('--json');
+const strict = args.includes('--strict');
 const run = script => spawnSync(process.execPath, [script, '--json'], { cwd: process.cwd(), encoding: 'utf8' });
 const parity = run('scripts/validate-component-contract-parity.mjs');
 const core = spawnSync(process.execPath, ['scripts/validate-wego-design-core.mjs', ...args.filter(arg => arg !== '--json'), '--json'], { cwd: process.cwd(), encoding: 'utf8' });
@@ -21,6 +22,10 @@ const report = {
   warnings: [...(parityReport.warnings || []), ...(coreReport.warnings || [])],
   metrics: { ...(coreReport.metrics || {}), componentParity: parityReport.metrics || {} }
 };
+if (strict && report.warnings.length) {
+  report.errors.push(...report.warnings.map(item => ({ ...item, code: `strict.${item.code}`, message: `严格模式不允许警告：${item.message}` })));
+  report.warnings = [];
+}
 report.ok = report.errors.length === 0;
 if (jsonOutput) console.log(JSON.stringify(report, null, 2));
 else {

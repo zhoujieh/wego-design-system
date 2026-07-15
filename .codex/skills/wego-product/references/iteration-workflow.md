@@ -4,11 +4,11 @@
 
 ## 1. 当前 Schema
 
-迭代固定使用 `schemaVersion: 3`。旧 Schema、旧命令、废弃设计计划文件、实现追踪、验收报告和自动生成规则文档均不是当前输入；发现后必须停止并显式迁移。
+迭代固定使用 `schemaVersion: 4`。旧 Schema、旧命令、废弃设计计划文件、实现追踪、验收报告和自动生成规则文档均不是当前输入；发现后必须停止并显式迁移。
 
 ```json
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "identity": {
     "iteration_id": "shop001",
     "title": "快捷发布",
@@ -24,14 +24,23 @@
     "excluded": [],
     "entry_points": [],
     "critical_paths": [],
+    "prototype_boundaries": [
+      {
+        "flow_id": "publish-product",
+        "mode": "functional",
+        "visible_result": "用户完成发布并看到成功结果"
+      }
+    ],
     "states": [],
-    "data_contract": {},
+    "data_contract": {
+      "product": { "required": ["title"] }
+    },
     "assumptions": [],
     "open_questions": []
   },
   "brief_confirmation": null,
   "prototype_confirmation": null,
-  "affected_scenes": [],
+  "affected_scenes": ["快捷发布产品"],
   "affected_runtime": [],
   "stage_outputs": {
     "product": { "valid": false },
@@ -42,6 +51,8 @@
 }
 ```
 
+`prototype_brief` 只允许上例中的 10 个字段；`readiness`、UI 描述或其他旧字段必须删除或显式迁移，不得作为兼容输入继续流转。
+
 ## 2. 状态机
 
 ```text
@@ -50,20 +61,50 @@ draft → awaiting-brief-confirmation → prototyping → awaiting-prototype-con
 
 暂停或终止状态：`blocked | cancelled | superseded`。
 
-- `submit-brief`：产品提交非空的目标、范围、入口、关键路径、状态和数据合同。
-- `confirm-brief`：用户确认范围，交给 `wego-design`。
+- `submit-brief`：产品提交非空的目标、范围、入口、关键路径、原型边界、状态和数据合同；`data_contract` 必须是至少包含一个键的普通对象，此时不得遗留 `open_questions`。
+- `confirm-brief`：用户确认范围，确认对象绑定当前 `scope_revision` 和范围哈希，交给 `wego-design`。
 - `submit-prototype`：场景、决策证据和守卫均已完成；命令会实际运行每个受影响场景的场景合同，全部通过后才可等待用户定稿。
-- `confirm-prototype`：锁定场景文件指纹与设计系统版本。
-- `freeze`：在 `iteration.json.freeze` 与同目录 `freeze.json` 同时记录当前场景、路由和决策证据的指纹，禁止覆盖。
-- `invalidate --stage=brief|prototype`：在对应产物修改前失效确认。
+- `confirm-prototype`：先重新运行受影响场景合同，再让确认对象绑定当前 `scope_revision`、`affected_scenes`、场景源码、场景自身路由条目、决策证据和 `affected_runtime` 的 SHA-256。
+- `freeze`：先确认原型确认后的文件没有漂移，再在 `iteration.json.freeze` 与同目录 `freeze.json` 同时记录设计系统版本、当前范围版本和完整指纹；已有 `freeze.json` 禁止覆盖。
+- `invalidate --stage=brief|prototype`：在对应产物修改前失效确认；命令同时支持 `--stage prototype` 与 `--stage=prototype`，其他带值参数同理。
+
+主链路状态的确认矩阵固定如下，不允许提前写入或漏写确认：
+
+| 状态 | `brief_confirmation` | `prototype_confirmation` |
+| --- | --- | --- |
+| `draft` | `null` | `null` |
+| `awaiting-brief-confirmation` | `null` | `null` |
+| `prototyping` | 当前 `scope_revision` 的确认对象 | `null` |
+| `awaiting-prototype-confirmation` | 当前 `scope_revision` 的确认对象 | `null` |
+| `prototype-confirmed` | 当前 `scope_revision` 的确认对象 | 当前源码指纹确认对象 |
+| `frozen` | 当前 `scope_revision` 的确认对象 | 当前源码指纹确认对象 |
+
+范围哈希 `scope_sha256` 稳定覆盖 `identity.primary_scene`、`prototype_brief`、`affected_scenes` 和 `affected_runtime`。`invalidate --stage=brief` 会递增 `scope_revision` 并清空两类确认；`invalidate --stage=prototype` 只清空原型确认，不改变已经确认的业务范围版本。直接修改范围版本、已确认范围内容或原型确认后的指纹目标，会在下一次检查或冻结前被拦截。
 
 ## 3. 所有权
 
 - `wego-product`：创建迭代、确认范围、维护 `prototype_brief` 和业务事实。
 - `wego-design`：消费已确认简报，在同一任务中实现已登记场景、生成决策证据、场景合同和视觉检查。
-- `wego-uxsystem-iterate`：只处理设计系统缺口、DDR 和系统规则；不实现业务场景。
+- `wego-uxsystem-iterate`：只处理设计系统缺口和系统规则；不实现业务场景。
 
-## 4. 目录与冻结
+## 4. 原型边界
+
+`prototype_boundaries` 必须是非空数组，每个纳入原型的流程写一项：
+
+```json
+{
+  "flow_id": "publish-product",
+  "mode": "functional",
+  "visible_result": "用户完成发布并看到成功结果"
+}
+```
+
+- `flow_id`：稳定且非空的业务流程标识，同一简报内不得重复。
+- `mode`：只能是 `functional`、`simulated` 或 `stub`。
+- `visible_result`：用户在原型中实际可见的结果，不描述组件或布局。
+- `excluded` 中的事项不得再次写入 `prototype_boundaries`；排除范围不实现，也不使用 `stub` 占位。
+
+## 5. 目录与冻结
 
 ```text
 wego-app/scenes/{主业务场景}/_iterations/{YYYYMMDD}-{iteration_id}-{title}/
@@ -72,10 +113,12 @@ wego-app/scenes/{主业务场景}/_iterations/{YYYYMMDD}-{iteration_id}-{title}/
 └── freeze.json
 ```
 
-冻结记录必须包含实际场景文件、`routes.js`、`design-decisions.json`、设计系统版本和 SHA-256。后续业务变化建立新迭代；设计系统迭代不建立业务迭代。
+活动迭代的 `affected_scenes` 必须是非空、去重的单层场景名并包含 `identity.primary_scene`，禁止 `/`、`\`、`.` 和 `..`。`affected_runtime` 的每一项必须是非空、去重的仓库相对安全路径，禁止绝对路径、反斜杠以及 `.`、`..` 路径段。所有命令的 `--file` 必须固定指向 `wego-app/scenes/{identity.primary_scene}/_iterations/{迭代目录}/iteration.json`，禁止仓库外路径、错场景目录、非 `_iterations` 位置和符号链接跳转。
 
-## 5. 修改边界
+冻结记录必须完整包含 `at`、`design_system_version`、`scope_revision` 和非空 `fingerprints`。指纹键集合必须恰好等于 `affected_runtime`、每个场景的 `scene.js`、`scene.css`、`design-decisions.json` 和该场景的虚拟路由条目键。路由指纹只计算真实全局 `window.WEGO_APP_ROUTES` 注册中属于本场景的完整路由集合；该全局变量必须且只能静态赋值一次，数组直接包含静态路由对象。指纹覆盖运行时消费的 `routeId`、`scene`、`script`、`style` 以及 `entry.type/tab/group/label/icon/parentEntry`，同场景多条路由按完整语义稳定排序。整个真实路由数组中的 `routeId` 必须非空且全局唯一；`host-tab` 必须声明非空 `entry.tab`，同一 tab 只能注册一次，避免宿主 `Map` 被后项静默覆盖。格式、顺序、注释和其他场景路由变化不影响旧冻结记录，伪造的对象属性注册、删除或修改本场景任一路由语义则视为漂移。即使 `affected_runtime` 显式包含 `wego-app/js/routes.js`，也只使用分场景路由指纹，不冻结整个路由文件。其余文件会确认存在并重算 SHA-256。`freeze.json` 必须与 `iteration.json.freeze` 一致，冻结后任一目标漂移都会失败。后续业务变化建立新迭代；设计系统迭代不建立业务迭代。
+
+## 6. 修改边界
 
 - 目标、范围、入口、关键路径、状态或数据变化：失效 brief，回到 `wego-product`。
 - 组件、布局、presentation、Token、路由或场景交互变化：失效 prototype，回到 `wego-design`。
-- 组件、Preview、UI Kit、Token 或消费规则缺口：创建 DDR，转交 `wego-uxsystem-iterate`；DDR 不可替代业务范围确认。
+- 组件、Preview、UI Kit、Token 或消费规则缺口：记录缺失能力、受影响 surface、是否阻断和正式回退，转交 `wego-uxsystem-iterate`；最小缺口说明不可替代业务范围确认。

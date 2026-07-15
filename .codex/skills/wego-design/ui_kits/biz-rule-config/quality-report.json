@@ -1,9 +1,9 @@
 {
   "schemaVersion": 4,
-  "designSystemVersion": 410,
+  "designSystemVersion": 411,
   "designSystemParity": {
     "status": "passed",
-    "checked_at": "2026-07-13T00:00:00+08:00",
+    "checked_at": "2026-07-15T00:00:00+08:00",
     "checks": ["组件均已注册且允许使用", "组件契约与 Preview 一致性守卫通过", "不存在生成规则文档或已删除技能引用", "UI Kit 仅作为明确页面范式证据"]
   },
   "kitType": "biz-rule-config",
