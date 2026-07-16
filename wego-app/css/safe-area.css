@@ -1,6 +1,6 @@
 /* iOS 桌面书签 / standalone 安全区策略
  * - 顶部安全区由页面首个固定元素承担（navbar 或无导航页的场景根容器）
- * - host-shell-page 只负责内容间距，不重复计算安全区
+ * - host-shell-page 不承担顶部安全区，padding-top 为 0
  * - 底部安全区仅由 bottom-nav 或明确的底部操作栏承担
  * - Dialog 在移动端覆盖完整屏幕（含状态栏与底部安全区）
  */
@@ -17,7 +17,7 @@
   }
 
   .host-shell-page {
-    padding-top: var(--spacer-16) !important;
+    padding-top: 0 !important;
     padding-right: 0 !important;
     padding-bottom: calc(var(--spacer-40) + 56px) !important;
     padding-left: 0 !important;

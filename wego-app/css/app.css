@@ -605,7 +605,7 @@ input, textarea,
   }
 
   .host-shell-page {
-    padding-top: var(--spacer-16);
+    padding-top: 0;
     padding-bottom: calc(var(--spacer-40) + 56px);
   }
 
