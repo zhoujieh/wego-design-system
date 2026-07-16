@@ -11,6 +11,17 @@ window.WEGO_APP_ROUTES = [
     }
   },
   {
+    routeId: 'friend-list',
+    scene: '好友列表',
+    script: 'scenes/好友列表/scene.js',
+    style: 'scenes/好友列表/scene.css',
+    entry: {
+      type: 'host-tab',
+      tab: 'haoyou',
+      label: '好友'
+    }
+  },
+  {
     routeId: 'my',
     scene: '我的',
     script: 'scenes/我的/scene.js',

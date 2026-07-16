@@ -1,0 +1,501 @@
+{
+  "schemaVersion": 2,
+  "scene": "好友列表",
+  "surface_id": "friend-list",
+  "route_id": "friend-list",
+  "layout_mode": "composed",
+  "page_pattern": null,
+  "presentation": {
+    "type": "host-tab",
+    "transition": "none",
+    "dismissAction": "tab-switch",
+    "overlayLevel": "inline",
+    "coversTabBar": false,
+    "source": "library-consumption.json#/appRuntime/presentationTypes"
+  },
+  "prompt_contract": {
+    "design_system_version": 412,
+    "token_bindings": [
+      {
+        "selector": ".friend-list",
+        "content_role": "页面背景",
+        "css_property": "background",
+        "token": "var(--bg-page)"
+      },
+      {
+        "selector": ".friend-list",
+        "content_role": "页面文字",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".friend-list",
+        "content_role": "页面字体",
+        "css_property": "font-family",
+        "token": "var(--body-md-font-family)"
+      },
+      {
+        "selector": ".friend-list",
+        "content_role": "页面边距",
+        "css_property": "padding-inline",
+        "token": "var(--layout-page-margin-m0)"
+      },
+      {
+        "selector": ".friend-list__navbar",
+        "content_role": "导航栏背景",
+        "css_property": "background",
+        "token": "var(--bg-page)"
+      },
+      {
+        "selector": ".friend-list__search",
+        "content_role": "搜索区背景",
+        "css_property": "background",
+        "token": "var(--bg-surface)"
+      },
+      {
+        "selector": ".friend-list__search",
+        "content_role": "搜索区留白",
+        "css_property": "padding",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".friend-list__search .searchbox__action",
+        "content_role": "搜索操作颜色",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".friend-list__scroll",
+        "content_role": "列表底部留白",
+        "css_property": "padding-bottom",
+        "token": "var(--spacer-24)"
+      },
+      {
+        "selector": ".friend-list__group-title",
+        "content_role": "分组标题顶部留白",
+        "css_property": "padding-top",
+        "token": "var(--spacer-16)"
+      },
+      {
+        "selector": ".friend-list__group-title",
+        "content_role": "分组标题横向留白",
+        "css_property": "padding-inline",
+        "token": "var(--spacer-16)"
+      },
+      {
+        "selector": ".friend-list__group-title",
+        "content_role": "分组标题底部留白",
+        "css_property": "padding-bottom",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".friend-list__group-title",
+        "content_role": "分组标题字号",
+        "css_property": "font-size",
+        "token": "var(--body-sm-font-size)"
+      },
+      {
+        "selector": ".friend-list__group-title",
+        "content_role": "分组标题字重",
+        "css_property": "font-weight",
+        "token": "var(--font-weight-medium)"
+      },
+      {
+        "selector": ".friend-list__group-title",
+        "content_role": "分组标题行高",
+        "css_property": "line-height",
+        "token": "var(--body-sm-line-height)"
+      },
+      {
+        "selector": ".friend-list__group-title",
+        "content_role": "分组标题颜色",
+        "css_property": "color",
+        "token": "var(--text-tertiary)"
+      },
+      {
+        "selector": ".friend-list__meta",
+        "content_role": "好友元信息间距",
+        "css_property": "gap",
+        "token": "var(--spacer-4)"
+      },
+      {
+        "selector": ".friend-list__meta",
+        "content_role": "好友元信息上间距",
+        "css_property": "margin-top",
+        "token": "var(--spacer-4)"
+      },
+      {
+        "selector": ".friend-list__meta-text",
+        "content_role": "好友元信息字号",
+        "css_property": "font-size",
+        "token": "var(--body-sm-font-size)"
+      },
+      {
+        "selector": ".friend-list__meta-text",
+        "content_role": "好友元信息行高",
+        "css_property": "line-height",
+        "token": "var(--body-sm-line-height)"
+      },
+      {
+        "selector": ".friend-list__meta-text",
+        "content_role": "好友元信息颜色",
+        "css_property": "color",
+        "token": "var(--text-tertiary)"
+      },
+      {
+        "selector": ".friend-list__new-count",
+        "content_role": "上新数量颜色",
+        "css_property": "color",
+        "token": "var(--text-brand)"
+      },
+      {
+        "selector": ".friend-list__index",
+        "content_role": "索引区背景",
+        "css_property": "background",
+        "token": "var(--bg-surface)"
+      },
+      {
+        "selector": ".friend-list__index",
+        "content_role": "索引区圆角",
+        "css_property": "border-radius",
+        "token": "var(--radius-12)"
+      },
+      {
+        "selector": ".friend-list__index",
+        "content_role": "索引区间距",
+        "css_property": "gap",
+        "token": "var(--spacer-4)"
+      },
+      {
+        "selector": ".friend-list__index",
+        "content_role": "索引区纵向留白",
+        "css_property": "padding-block",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".friend-list__index",
+        "content_role": "索引区横向留白",
+        "css_property": "padding-inline",
+        "token": "var(--spacer-4)"
+      },
+      {
+        "selector": ".friend-list__index",
+        "content_role": "索引区阴影",
+        "css_property": "box-shadow",
+        "token": "var(--shadow-xs)"
+      },
+      {
+        "selector": ".friend-list__index",
+        "content_role": "索引区层级",
+        "css_property": "z-index",
+        "token": "var(--z-sticky)"
+      },
+      {
+        "selector": ".friend-list__index-item",
+        "content_role": "索引项字号",
+        "css_property": "font-size",
+        "token": "var(--body-xs-font-size)"
+      },
+      {
+        "selector": ".friend-list__index-item",
+        "content_role": "索引项行高",
+        "css_property": "line-height",
+        "token": "var(--body-xs-line-height)"
+      },
+      {
+        "selector": ".friend-list__index-item",
+        "content_role": "索引项颜色",
+        "css_property": "color",
+        "token": "var(--text-secondary)"
+      },
+      {
+        "selector": ".friend-list__index-item",
+        "content_role": "索引项最小宽高",
+        "css_property": "min-width",
+        "token": "var(--size-20)"
+      },
+      {
+        "selector": ".friend-list__index-item",
+        "content_role": "索引项留白",
+        "css_property": "padding",
+        "token": "var(--spacer-4)"
+      },
+      {
+        "selector": ".friend-list__index-item",
+        "content_role": "索引项圆角",
+        "css_property": "border-radius",
+        "token": "var(--radius-6)"
+      },
+      {
+        "selector": ".friend-list__index-item:active",
+        "content_role": "索引项按压背景",
+        "css_property": "background",
+        "token": "var(--bg-state-pressed)"
+      },
+      {
+        "selector": ".friend-list__index-item.is-pressed",
+        "content_role": "索引项按压背景",
+        "css_property": "background",
+        "token": "var(--bg-state-pressed)"
+      },
+      {
+        "selector": ".friend-list__index-item--active",
+        "content_role": "索引项激活背景",
+        "css_property": "background",
+        "token": "var(--bg-state-pressed)"
+      },
+      {
+        "selector": ".friend-list__index-item--active",
+        "content_role": "索引项激活颜色",
+        "css_property": "color",
+        "token": "var(--text-brand)"
+      },
+      {
+        "selector": ".friend-list__index-item--active",
+        "content_role": "索引项激活字重",
+        "css_property": "font-weight",
+        "token": "var(--font-weight-medium)"
+      },
+      {
+        "selector": ".friend-list__empty",
+        "content_role": "空状态留白",
+        "css_property": "padding",
+        "token": "var(--spacer-24)"
+      },
+      {
+        "selector": ".friend-list__empty",
+        "content_role": "空状态间距",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".friend-list__empty-icon",
+        "content_role": "空状态图标字号",
+        "css_property": "font-size",
+        "token": "var(--size-48)"
+      },
+      {
+        "selector": ".friend-list__empty-icon",
+        "content_role": "空状态图标行高",
+        "css_property": "line-height",
+        "token": "var(--body-xs-line-height)"
+      },
+      {
+        "selector": ".friend-list__empty-icon",
+        "content_role": "空状态图标颜色",
+        "css_property": "color",
+        "token": "var(--text-disabled)"
+      },
+      {
+        "selector": ".friend-list__empty-text",
+        "content_role": "空状态文字颜色",
+        "css_property": "color",
+        "token": "var(--text-tertiary)"
+      },
+      {
+        "selector": ".friend-list__empty-text",
+        "content_role": "空状态文字字号",
+        "css_property": "font-size",
+        "token": "var(--body-md-font-size)"
+      },
+      {
+        "selector": ".friend-list__empty-text",
+        "content_role": "空状态文字行高",
+        "css_property": "line-height",
+        "token": "var(--body-md-line-height)"
+      },
+      {
+        "selector": ".friend-add-form",
+        "content_role": "表单页背景",
+        "css_property": "background",
+        "token": "var(--bg-page)"
+      },
+      {
+        "selector": ".friend-add-form",
+        "content_role": "表单页文字",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".friend-add-form",
+        "content_role": "表单页字体",
+        "css_property": "font-family",
+        "token": "var(--body-md-font-family)"
+      },
+      {
+        "selector": ".friend-add-form__body",
+        "content_role": "表单内容留白",
+        "css_property": "padding-bottom",
+        "token": "var(--spacer-24)"
+      },
+      {
+        "selector": ".friend-add-form__footer",
+        "content_role": "表单底部纵向留白",
+        "css_property": "padding-block",
+        "token": "var(--spacer-12)"
+      },
+      {
+        "selector": ".friend-add-form__footer",
+        "content_role": "表单底部横向留白",
+        "css_property": "padding-inline",
+        "token": "var(--spacer-16)"
+      },
+      {
+        "selector": ".friend-add-form__footer",
+        "content_role": "表单底部背景",
+        "css_property": "background",
+        "token": "var(--bg-surface)"
+      }
+    ],
+    "component_bindings": [
+      {
+        "binding_id": "friend-navbar",
+        "slug": "navbar",
+        "reason": "承载好友页面标题与排序切换入口",
+        "variant_dimensions": {
+          "leftControl": "none",
+          "titleAlignment": "center",
+          "actions": "text",
+          "rightActionType": "text",
+          "spacing": "default",
+          "pageTransition": "push",
+          "position": "sticky"
+        }
+      },
+      {
+        "binding_id": "friend-search",
+        "slug": "search",
+        "reason": "提供好友昵称搜索与添加好友入口",
+        "variant_dimensions": {
+          "size": "md",
+          "surface": "gray",
+          "mode": "text",
+          "state": "empty",
+          "hostPattern": "inline"
+        }
+      }
+    ],
+    "layout_contract": {
+      "mode": "composed",
+      "source": "references/design-decisions.md",
+      "selection_reason": "好友列表以连续浏览为主，采用通栏白底行减少阅读中断；搜索与排序切换固定在顶部，索引悬浮在右侧。",
+      "page_edge_mode": "M0",
+      "mutable_regions": [
+        ".friend-list__scroll",
+        ".friend-list__group",
+        ".friend-list__index"
+      ]
+    },
+    "interaction_contract": [
+      {
+        "dom_id": "sort-toggle",
+        "target": "state:sort-by-letter"
+      },
+      {
+        "dom_id": "friend-search-input",
+        "target": "state:searching"
+      },
+      {
+        "dom_id": "add-friend-entry",
+        "target": "overlay:full-screen-modal"
+      }
+    ],
+    "state_contract": [
+      {
+        "state_id": "list-ready",
+        "initial": true,
+        "trigger": "进入好友主 tab",
+        "visible_result": "默认字母排序展示好友列表，右侧悬浮字母索引",
+        "fallback": "保留当前可浏览的好友列表",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "sort-by-letter",
+        "initial": false,
+        "trigger": "点击导航栏右侧排序切换（目标为字母）",
+        "visible_result": "按拼音首字母 A-Z + # 分组，右侧索引显示字母",
+        "fallback": "保持当前排序",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "sort-by-group",
+        "initial": false,
+        "trigger": "点击导航栏右侧排序切换（目标为分组）",
+        "visible_result": "按自定义分组聚合，组内按拼音排序，右侧索引显示分组名",
+        "fallback": "保持当前排序",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "searching",
+        "initial": false,
+        "trigger": "在搜索框输入关键词",
+        "visible_result": "实时过滤匹配昵称的好友，隐藏分组标题与索引",
+        "fallback": "清空关键词回到列表",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "search-empty",
+        "initial": false,
+        "trigger": "搜索无匹配结果",
+        "visible_result": "展示搜索无结果空状态",
+        "fallback": "清空关键词回到列表",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "add-form",
+        "initial": false,
+        "trigger": "点击搜索框右侧加号入口",
+        "visible_result": "打开添加好友全屏表单",
+        "fallback": "取消关闭表单",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "submit-success",
+        "initial": false,
+        "trigger": "提交添加好友表单",
+        "visible_result": "关闭表单，显示成功 toast，列表新增好友",
+        "fallback": "回到列表",
+        "persistence": "memory"
+      }
+    ]
+  },
+  "decisions": [
+    {
+      "dd_id": "friend-navbar",
+      "binding_id": "friend-navbar",
+      "component_slug": "navbar"
+    },
+    {
+      "dd_id": "friend-search",
+      "binding_id": "friend-search",
+      "component_slug": "search"
+    }
+  ],
+  "generation_evidence": {
+    "scene_js": "wego-app/scenes/好友列表/scene.js",
+    "scene_css": "wego-app/scenes/好友列表/scene.css",
+    "source_sha256": "631fb9ceb23c30a247577ea4e7effad498d86310d18f075505006f637eeb9af3",
+    "dom_ids": [
+      "sort-toggle",
+      "friend-search-input",
+      "add-friend-entry"
+    ],
+    "component_count": 2,
+    "visualCheck": {
+      "status": "passed",
+      "viewports": [
+        375,
+        393
+      ],
+      "checked_at": "2026-07-16T12:00:00.000Z",
+      "checks": {
+        "horizontal_overflow": true,
+        "overlap": true,
+        "clipping": true,
+        "action_legibility": true,
+        "primary_focus": true,
+        "state_feedback": true
+      }
+    }
+  }
+}

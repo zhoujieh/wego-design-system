@@ -1,0 +1,193 @@
+{
+  "schemaVersion": 4,
+  "identity": {
+    "iteration_id": "friend001",
+    "title": "好友列表",
+    "date": "2026-07-16",
+    "primary_scene": "好友列表",
+    "related_scenes": []
+  },
+  "status": "prototyping",
+  "scope_revision": 1,
+  "prototype_brief": {
+    "goal": "让店主快速找到并管理微购好友，并了解好友作为店主的上新动态和商品规模。",
+    "included": [
+      "浏览好友：每个好友展示头像、昵称、上新数量和产品总数",
+      "按昵称搜索好友，支持模糊匹配",
+      "排序切换：支持字母排序和分组排序两种维度",
+      "字母排序：按昵称拼音首字母 A-Z 聚合",
+      "分组排序：按用户自定义好友分组聚合，分组内默认按昵称拼音首字母排序",
+      "快速跳转：提供与当前排序维度联动的快速跳转能力，字母排序下可跳转到各拼音首字母位置，分组排序下可跳转到各自定义分组位置",
+      "添加好友入口及完整新建好友信息收集（含头像、昵称、账号或手机号、备注、所属分组、标签、来源渠道、验证留言）",
+      "好友为空状态和搜索无结果状态"
+    ],
+    "excluded": [
+      "好友详情页（本期点击好友无跳转事件）",
+      "好友店铺动态和商品流跳转",
+      "删除好友、编辑好友、移动分组",
+      "好友消息和聊天",
+      "真实后端数据持久化（原型用内置数据模拟）"
+    ],
+    "entry_points": [
+      "好友主 tab，与动态、我的同级，用户打开 App 后可通过主 tab 切换进入"
+    ],
+    "critical_paths": [
+      "进入好友 tab → 浏览好友 → 切换排序 → 通过快速跳转到达对应位置",
+      "进入好友 tab → 搜索好友 → 查看匹配结果或无结果状态",
+      "进入好友 tab → 添加好友 → 填写完整信息 → 提交成功 → 好友集合新增该好友"
+    ],
+    "prototype_boundaries": [
+      {
+        "flow_id": "browse-friend",
+        "mode": "functional",
+        "visible_result": "用户进入好友 tab 看到好友集合，可浏览每个好友的头像、昵称、上新数量和产品总数"
+      },
+      {
+        "flow_id": "search-friend",
+        "mode": "functional",
+        "visible_result": "用户输入关键词后看到匹配好友或无结果提示"
+      },
+      {
+        "flow_id": "sort-by-letter",
+        "mode": "functional",
+        "visible_result": "切换到字母排序，好友按昵称拼音首字母 A-Z 聚合，快速跳转能力同步对应字母维度"
+      },
+      {
+        "flow_id": "sort-by-group",
+        "mode": "functional",
+        "visible_result": "切换到分组排序，好友按自定义分组聚合，分组内默认按昵称拼音首字母排序，快速跳转能力同步对应分组维度"
+      },
+      {
+        "flow_id": "quick-jump",
+        "mode": "functional",
+        "visible_result": "用户触发快速跳转后，好友集合定位到当前排序维度下的对应位置"
+      },
+      {
+        "flow_id": "add-friend",
+        "mode": "functional",
+        "visible_result": "用户填写完整新建好友信息并提交，看到添加成功反馈，好友集合出现新好友"
+      }
+    ],
+    "states": [
+      "无好友 → 有好友：添加好友成功后好友集合从空状态变为展示新好友",
+      "搜索有关键词 → 无匹配：展示搜索无结果状态，清空关键词后回到完整好友集合",
+      "字母排序 ↔ 分组排序：切换排序时好友聚合方式和快速跳转目标同步变化"
+    ],
+    "data_contract": {
+      "friend": {
+        "required": [
+          "friend_id",
+          "avatar",
+          "nickname",
+          "py_initial",
+          "group_id",
+          "group_name",
+          "new_count",
+          "product_total"
+        ],
+        "constraints": [
+          "py_initial 为昵称拼音首字母大写，非 A-Z 统一归入 #",
+          "new_count 为好友作为店主的上新数量",
+          "product_total 为好友作为店主的产品总数"
+        ]
+      },
+      "friend_group": {
+        "required": [
+          "group_id",
+          "group_name"
+        ]
+      },
+      "add_friend_form": {
+        "fields": [
+          {
+            "name": "avatar",
+            "required": false,
+            "desc": "好友头像"
+          },
+          {
+            "name": "nickname",
+            "required": true,
+            "desc": "好友昵称"
+          },
+          {
+            "name": "account_or_phone",
+            "required": true,
+            "desc": "账号或手机号"
+          },
+          {
+            "name": "remark",
+            "required": false,
+            "desc": "自定义备注"
+          },
+          {
+            "name": "group",
+            "required": false,
+            "desc": "所属分组，可从已有分组选择或新建"
+          },
+          {
+            "name": "tags",
+            "required": false,
+            "desc": "多个标签"
+          },
+          {
+            "name": "source_channel",
+            "required": false,
+            "desc": "来源渠道，如群聊、推荐、扫码、搜索"
+          },
+          {
+            "name": "verify_message",
+            "required": false,
+            "desc": "发送给对方的验证留言"
+          }
+        ]
+      },
+      "search": {
+        "match": "按昵称模糊匹配",
+        "empty_result": "展示搜索无结果状态"
+      }
+    },
+    "assumptions": [
+      "默认内置若干好友和自定义分组数据，用于演示字母排序和分组排序效果",
+      "好友头像使用占位图",
+      "昵称拼音首字母非 A-Z 的统一归入 # 分组",
+      "添加好友提交后模拟成功，不写入真实后端",
+      "假设用户默认已登录"
+    ],
+    "open_questions": []
+  },
+  "brief_confirmation": {
+    "at": "2026-07-16T13:48:16.417Z",
+    "scope_revision": 1,
+    "scope_sha256": "925187d1e7de7d96686ad0d0a6b8c1b550cd55cdcbf6c0701b2ffecbb9b64f66"
+  },
+  "prototype_confirmation": null,
+  "affected_scenes": [
+    "好友列表"
+  ],
+  "affected_runtime": [
+    "wego-app/js/routes.js"
+  ],
+  "stage_outputs": {
+    "product": {
+      "valid": true
+    },
+    "design": {
+      "valid": false
+    }
+  },
+  "change_log": [
+    {
+      "action": "init",
+      "at": "2026-07-16T13:47:09.148Z"
+    },
+    {
+      "action": "submit-brief",
+      "at": "2026-07-16T13:48:08.172Z"
+    },
+    {
+      "action": "confirm-brief",
+      "at": "2026-07-16T13:48:16.425Z"
+    }
+  ],
+  "freeze": null
+}
