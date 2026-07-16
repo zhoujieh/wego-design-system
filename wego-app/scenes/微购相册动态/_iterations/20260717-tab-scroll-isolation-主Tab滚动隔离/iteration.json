@@ -1,0 +1,175 @@
+{
+  "schemaVersion": 4,
+  "identity": {
+    "iteration_id": "tab-scroll-isolation",
+    "title": "主Tab滚动隔离",
+    "date": "2026-07-17",
+    "primary_scene": "微购相册动态",
+    "related_scenes": [
+      "好友列表",
+      "我的"
+    ]
+  },
+  "status": "frozen",
+  "scope_revision": 1,
+  "prototype_brief": {
+    "goal": "让用户在五个主业务入口之间切换时，始终从目标入口的默认起始位置浏览，避免一个入口的浏览位置影响其他入口。",
+    "included": [
+      "动态、好友、工作台、消息和我的五个主业务入口分别承载各自的浏览位置",
+      "用户切换主业务入口时，目标入口回到默认起始位置",
+      "用户切换主业务入口时，其他入口不继承当前入口的浏览位置",
+      "用户再次进入曾经浏览过的主业务入口时，该入口回到默认起始位置",
+      "全面审查并清理主业务入口切换与浏览位置之间的冲突逻辑"
+    ],
+    "excluded": [
+      "修改五个主业务入口的业务内容、文案或功能范围",
+      "修改二级页面、弹层和独立业务流程的返回位置规则",
+      "刷新后保存任一主业务入口的浏览位置",
+      "新增真实后端接口或数据持久化"
+    ],
+    "entry_points": [
+      "微购 App 的动态、好友、工作台、消息和我的五个主业务入口"
+    ],
+    "critical_paths": [
+      "进入动态主业务入口并浏览内容 → 切换到其他主业务入口 → 目标入口从默认起始位置展示",
+      "进入任一主业务入口并浏览内容 → 依次切换多个主业务入口 → 每个目标入口均从默认起始位置展示",
+      "返回曾经浏览过的主业务入口 → 该入口从默认起始位置重新展示"
+    ],
+    "prototype_boundaries": [
+      {
+        "flow_id": "switch-main-entry-from-start",
+        "mode": "functional",
+        "visible_result": "用户切换到任一主业务入口后，看到该入口从默认起始位置展示，且不受其他入口先前浏览位置影响"
+      },
+      {
+        "flow_id": "reenter-main-entry-from-start",
+        "mode": "functional",
+        "visible_result": "用户再次进入曾经浏览过的主业务入口后，看到该入口重新从默认起始位置展示"
+      }
+    ],
+    "states": [
+      "默认状态：当前主业务入口从起始位置展示",
+      "浏览状态：用户只改变当前主业务入口的浏览位置，不改变其他入口",
+      "切换后状态：目标主业务入口恢复默认起始位置"
+    ],
+    "data_contract": {
+      "main_entry_navigation": {
+        "entries": [
+          "动态",
+          "好友",
+          "工作台",
+          "消息",
+          "我的"
+        ],
+        "default_position": "起始位置",
+        "persistence": "仅当前展示期间有效，切换后不保留"
+      }
+    },
+    "assumptions": [
+      "假设五个主业务入口的业务内容和现有可见反馈保持不变"
+    ],
+    "open_questions": []
+  },
+  "brief_confirmation": {
+    "at": "2026-07-16T23:17:51.341Z",
+    "scope_revision": 1,
+    "scope_sha256": "f9c4d1efcff35bffc14ff7deb86a34eb0e63f65d4ee2f1320bc9b1fd6239bc97"
+  },
+  "prototype_confirmation": {
+    "at": "2026-07-16T23:25:01.691Z",
+    "scope_revision": 1,
+    "affected_scenes": [
+      "微购相册动态",
+      "好友列表",
+      "我的"
+    ],
+    "fingerprints": {
+      "@route-entry/%E5%A5%BD%E5%8F%8B%E5%88%97%E8%A1%A8": "f2eb4d0acc5c17d3b578aa7e0250e8d732b5ccb86cab36821789822cdfe4ae15",
+      "@route-entry/%E5%BE%AE%E8%B4%AD%E7%9B%B8%E5%86%8C%E5%8A%A8%E6%80%81": "79c0590810ca2dbf402f2643741513085b5d1b712678c74aede4afb6a6c44701",
+      "@route-entry/%E6%88%91%E7%9A%84": "0cb327addfe552eea181fcd8e896671f0cb725cdc3f3f30da8389e7d11457f75",
+      "wego-app/css/app.css": "3811b60a464439ec5b7e28f7277a88c175090756f7db7bd780dc7f3f6d5ae439",
+      "wego-app/js/app.js": "337d9f9122baf739128921fdbae8a7bf8cc5eb2aab39d05be485649151f66d22",
+      "wego-app/scenes/好友列表/design-decisions.json": "49aea37c546fe9b33674ca7606917af058f7aca60b74e5163a7247cd45f5f64c",
+      "wego-app/scenes/好友列表/scene.css": "f667c8857caed1f1a141a4926b8c6fdbe7128ae104eeb537f5b188a08028f93d",
+      "wego-app/scenes/好友列表/scene.js": "ac4043740304af030cd5fe7a1d96106003de0b19eefe734cac2a5dcd89ce099b",
+      "wego-app/scenes/微购相册动态/design-decisions.json": "ac254ba04e8c62340b3818ce30c551d35e93b5da7bb21e997333f9dc631fd9b2",
+      "wego-app/scenes/微购相册动态/scene.css": "f3da756bc1a5c400f2855532c6fe5925df9b35c116eb3ed3af2ca3fb48762cdb",
+      "wego-app/scenes/微购相册动态/scene.js": "2ab99de944164939a659862f8320ae5d4c9198869a67f5c2f6aa9a284ea5c4f8",
+      "wego-app/scenes/我的/design-decisions.json": "5296288194c691a8c39a909398b8adf3f7faac69aae8479b20fc2c07b39175d7",
+      "wego-app/scenes/我的/scene.css": "4a8660a6ea04a56b8e26a933c7ea84660b8e0275c8ed453744378af2f07c5f11",
+      "wego-app/scenes/我的/scene.js": "7dac5fab8d3378ce37c9e0cba6aa3d3444d0c095758138eaf7206333e4ed1a06"
+    }
+  },
+  "affected_scenes": [
+    "微购相册动态",
+    "好友列表",
+    "我的"
+  ],
+  "affected_runtime": [
+    "wego-app/js/app.js",
+    "wego-app/css/app.css"
+  ],
+  "stage_outputs": {
+    "product": {
+      "valid": true
+    },
+    "design": {
+      "valid": true
+    }
+  },
+  "change_log": [
+    {
+      "action": "init",
+      "at": "2026-07-16T23:17:11.395Z"
+    },
+    {
+      "action": "submit-brief",
+      "at": "2026-07-16T23:17:51.296Z"
+    },
+    {
+      "action": "confirm-brief",
+      "at": "2026-07-16T23:17:51.345Z"
+    },
+    {
+      "action": "submit-prototype",
+      "at": "2026-07-16T23:18:02.050Z"
+    },
+    {
+      "action": "invalidate",
+      "at": "2026-07-16T23:22:27.896Z"
+    },
+    {
+      "action": "submit-prototype",
+      "at": "2026-07-16T23:22:28.427Z"
+    },
+    {
+      "action": "confirm-prototype",
+      "at": "2026-07-16T23:25:01.707Z"
+    },
+    {
+      "action": "freeze",
+      "at": "2026-07-16T23:25:01.760Z"
+    }
+  ],
+  "freeze": {
+    "at": "2026-07-16T23:25:01.755Z",
+    "design_system_version": 413,
+    "scope_revision": 1,
+    "fingerprints": {
+      "@route-entry/%E5%A5%BD%E5%8F%8B%E5%88%97%E8%A1%A8": "f2eb4d0acc5c17d3b578aa7e0250e8d732b5ccb86cab36821789822cdfe4ae15",
+      "@route-entry/%E5%BE%AE%E8%B4%AD%E7%9B%B8%E5%86%8C%E5%8A%A8%E6%80%81": "79c0590810ca2dbf402f2643741513085b5d1b712678c74aede4afb6a6c44701",
+      "@route-entry/%E6%88%91%E7%9A%84": "0cb327addfe552eea181fcd8e896671f0cb725cdc3f3f30da8389e7d11457f75",
+      "wego-app/css/app.css": "3811b60a464439ec5b7e28f7277a88c175090756f7db7bd780dc7f3f6d5ae439",
+      "wego-app/js/app.js": "337d9f9122baf739128921fdbae8a7bf8cc5eb2aab39d05be485649151f66d22",
+      "wego-app/scenes/好友列表/design-decisions.json": "49aea37c546fe9b33674ca7606917af058f7aca60b74e5163a7247cd45f5f64c",
+      "wego-app/scenes/好友列表/scene.css": "f667c8857caed1f1a141a4926b8c6fdbe7128ae104eeb537f5b188a08028f93d",
+      "wego-app/scenes/好友列表/scene.js": "ac4043740304af030cd5fe7a1d96106003de0b19eefe734cac2a5dcd89ce099b",
+      "wego-app/scenes/微购相册动态/design-decisions.json": "ac254ba04e8c62340b3818ce30c551d35e93b5da7bb21e997333f9dc631fd9b2",
+      "wego-app/scenes/微购相册动态/scene.css": "f3da756bc1a5c400f2855532c6fe5925df9b35c116eb3ed3af2ca3fb48762cdb",
+      "wego-app/scenes/微购相册动态/scene.js": "2ab99de944164939a659862f8320ae5d4c9198869a67f5c2f6aa9a284ea5c4f8",
+      "wego-app/scenes/我的/design-decisions.json": "5296288194c691a8c39a909398b8adf3f7faac69aae8479b20fc2c07b39175d7",
+      "wego-app/scenes/我的/scene.css": "4a8660a6ea04a56b8e26a933c7ea84660b8e0275c8ed453744378af2f07c5f11",
+      "wego-app/scenes/我的/scene.js": "7dac5fab8d3378ce37c9e0cba6aa3d3444d0c095758138eaf7206333e4ed1a06"
+    }
+  }
+}

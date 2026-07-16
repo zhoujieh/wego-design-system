@@ -1,0 +1,21 @@
+{
+  "at": "2026-07-16T23:25:01.755Z",
+  "design_system_version": 413,
+  "scope_revision": 1,
+  "fingerprints": {
+    "@route-entry/%E5%A5%BD%E5%8F%8B%E5%88%97%E8%A1%A8": "f2eb4d0acc5c17d3b578aa7e0250e8d732b5ccb86cab36821789822cdfe4ae15",
+    "@route-entry/%E5%BE%AE%E8%B4%AD%E7%9B%B8%E5%86%8C%E5%8A%A8%E6%80%81": "79c0590810ca2dbf402f2643741513085b5d1b712678c74aede4afb6a6c44701",
+    "@route-entry/%E6%88%91%E7%9A%84": "0cb327addfe552eea181fcd8e896671f0cb725cdc3f3f30da8389e7d11457f75",
+    "wego-app/css/app.css": "3811b60a464439ec5b7e28f7277a88c175090756f7db7bd780dc7f3f6d5ae439",
+    "wego-app/js/app.js": "337d9f9122baf739128921fdbae8a7bf8cc5eb2aab39d05be485649151f66d22",
+    "wego-app/scenes/好友列表/design-decisions.json": "49aea37c546fe9b33674ca7606917af058f7aca60b74e5163a7247cd45f5f64c",
+    "wego-app/scenes/好友列表/scene.css": "f667c8857caed1f1a141a4926b8c6fdbe7128ae104eeb537f5b188a08028f93d",
+    "wego-app/scenes/好友列表/scene.js": "ac4043740304af030cd5fe7a1d96106003de0b19eefe734cac2a5dcd89ce099b",
+    "wego-app/scenes/微购相册动态/design-decisions.json": "ac254ba04e8c62340b3818ce30c551d35e93b5da7bb21e997333f9dc631fd9b2",
+    "wego-app/scenes/微购相册动态/scene.css": "f3da756bc1a5c400f2855532c6fe5925df9b35c116eb3ed3af2ca3fb48762cdb",
+    "wego-app/scenes/微购相册动态/scene.js": "2ab99de944164939a659862f8320ae5d4c9198869a67f5c2f6aa9a284ea5c4f8",
+    "wego-app/scenes/我的/design-decisions.json": "5296288194c691a8c39a909398b8adf3f7faac69aae8479b20fc2c07b39175d7",
+    "wego-app/scenes/我的/scene.css": "4a8660a6ea04a56b8e26a933c7ea84660b8e0275c8ed453744378af2f07c5f11",
+    "wego-app/scenes/我的/scene.js": "7dac5fab8d3378ce37c9e0cba6aa3d3444d0c095758138eaf7206333e4ed1a06"
+  }
+}

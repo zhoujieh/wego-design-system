@@ -266,7 +266,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/应用中心/scene.js",
     "scene_css": "wego-app/scenes/应用中心/scene.css",
-    "source_sha256": "bf85cd07081d5b5d34ad994171430f76348184327689b0ea3008c2fc6a8a2695",
+    "source_sha256": "e6c3e43b12de6520b301970bda7cd6b1954b21e048b361f041bb65721b6e92d9",
     "dom_ids": [
       "app-center-back",
       "app-center-body"

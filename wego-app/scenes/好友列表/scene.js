@@ -394,7 +394,7 @@ const friendListTemplate = `
         </div>
       </div>
     </div>
-    <div class="friend-list__scroll" data-friend-scroll></div>
+    <div class="friend-list__scroll" data-friend-scroll data-tab-scroll></div>
     <div class="friend-list__index" data-friend-index hidden></div>
   </section>
 `;

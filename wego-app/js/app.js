@@ -9,6 +9,7 @@
   var toastHost = document.querySelector('[data-toast-host]');
   var dialogHost = document.querySelector('[data-dialog-host]');
   var bottomNav = document.querySelector('[data-bottom-nav]');
+  var hostContent = document.querySelector('[data-host-content]');
 
   var validTabs = new Set(panels.map(function (panel) { return panel.dataset.hostTab; }));
   var routes = Array.isArray(window.WEGO_APP_ROUTES) ? window.WEGO_APP_ROUTES : [];
@@ -50,6 +51,20 @@
     return prefix + 'tab-' + (active ? 'active-' : '') + iconName + '.svg';
   }
 
+  function resetHostTabScrollPositions() {
+    // 主内容层不再承担滚动；仍回顶一次，清除旧实现或浏览器恢复的残留位置。
+    if (hostContent) hostContent.scrollTop = 0;
+    // 主 Tab 面板及显式标记的页内滚动区都要回顶，避免隐藏页面保留旧位置。
+    panels.forEach(function (panel) {
+      panel.scrollTop = 0;
+      panel.scrollLeft = 0;
+      panel.querySelectorAll('[data-tab-scroll]').forEach(function (scrollTarget) {
+        scrollTarget.scrollTop = 0;
+        scrollTarget.scrollLeft = 0;
+      });
+    });
+  }
+
   function setActiveTab(tab) {
     clearAllPressStates();
     var nextTab = validTabs.has(tab) ? tab : 'my';
@@ -59,6 +74,7 @@
       panel.hidden = !active;
       panel.classList.toggle('host-shell-page__panel--active', active);
     });
+    resetHostTabScrollPositions();
 
     tabTriggers.forEach(function (trigger) {
       var active = trigger.dataset.hostTabTrigger === nextTab;

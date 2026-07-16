@@ -474,7 +474,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/好友列表/scene.js",
     "scene_css": "wego-app/scenes/好友列表/scene.css",
-    "source_sha256": "17034f0213561a53aa76ff3c3eeec471c0a139c13189d2c21b3512898dd47bef",
+    "source_sha256": "e5fb92f0bf9d00a8a60dc3f1c03a7e2a84219d9afd952d4be83512ccbeb2474f",
     "dom_ids": [
       "sort-toggle",
       "friend-search-input",
