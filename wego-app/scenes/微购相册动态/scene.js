@@ -13,7 +13,7 @@
     "source": "library-consumption.json#/appRuntime/presentationTypes"
   },
   "prompt_contract": {
-    "design_system_version": 411,
+    "design_system_version": 412,
     "token_bindings": [
       { "selector": ".album-feed", "content_role": "页面背景", "css_property": "background", "token": "var(--bg-page)" },
       { "selector": ".album-feed", "content_role": "页面文字", "css_property": "color", "token": "var(--text-default)" },

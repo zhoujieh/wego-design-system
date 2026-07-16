@@ -14,7 +14,7 @@
     "source": "library-consumption.json#/appRuntime/presentationTypes"
   },
   "prompt_contract": {
-    "design_system_version": 411,
+    "design_system_version": 412,
     "token_bindings": [
       {
         "selector": ".album-feed",
@@ -557,7 +557,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/微购相册动态/scene.js",
     "scene_css": "wego-app/scenes/微购相册动态/scene.css",
-    "source_sha256": "0fbcb544839bda8410bd124e167df8df46aee1b299f26471cc469a8fdc75c07a",
+    "source_sha256": "b57436680ef909c1d7bbc341450dd9d4d5001222b2674a30e5efbceadb80de72",
     "dom_ids": [
       "view-image-one",
       "view-image-two",

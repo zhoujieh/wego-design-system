@@ -14,7 +14,7 @@
     "source": "library-consumption.json#/appRuntime/presentationTypes"
   },
   "prompt_contract": {
-    "design_system_version": 411,
+    "design_system_version": 412,
     "token_bindings": [
       {
         "selector": ".my-page",
@@ -660,7 +660,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/我的/scene.js",
     "scene_css": "wego-app/scenes/我的/scene.css",
-    "source_sha256": "7b63ec3e8aa1c4daa55e633f8c98c6b5066493a7e6af0593b6c11003e06ee8fa",
+    "source_sha256": "d5d80d31c990a4a20a7e998c890c440ce5a4d92073dcd6daeb09acca6ee50c1e",
     "dom_ids": [
       "renew-vip",
       "manage-storage",

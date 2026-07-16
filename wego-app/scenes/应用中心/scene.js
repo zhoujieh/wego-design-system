@@ -13,7 +13,7 @@
     "source": "library-consumption.json#/appRuntime/presentationTypes"
   },
   "prompt_contract": {
-    "design_system_version": 411,
+    "design_system_version": 412,
     "token_bindings": [
       { "selector": ".app-center-page", "content_role": "页面边距", "css_property": "padding-inline", "token": "var(--layout-page-margin-m0)" },
       { "selector": ".app-center-page", "content_role": "页面背景", "css_property": "background", "token": "var(--bg-page)" },

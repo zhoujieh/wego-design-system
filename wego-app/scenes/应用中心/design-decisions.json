@@ -14,7 +14,7 @@
     "source": "library-consumption.json#/appRuntime/presentationTypes"
   },
   "prompt_contract": {
-    "design_system_version": 411,
+    "design_system_version": 412,
     "token_bindings": [
       {
         "selector": ".app-center-page",
@@ -266,7 +266,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/应用中心/scene.js",
     "scene_css": "wego-app/scenes/应用中心/scene.css",
-    "source_sha256": "9604d3314ad36ec2e053738d0a08d74f4e59aeed329ca4302e51c54c41433472",
+    "source_sha256": "c98d3a2bbcbb955e51117172e9c5f84204ec5be2c059a5743ba48bcce855b7d6",
     "dom_ids": [
       "app-center-back",
       "app-center-body"
