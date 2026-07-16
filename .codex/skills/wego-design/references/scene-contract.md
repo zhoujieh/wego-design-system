@@ -145,6 +145,11 @@ wego-app/scenes/{中文业务场景}/design-decisions.json
 - 页面滚动容器使用实际可滚动行为；`overflow:hidden` 只用于明确的组件裁切边界，不得用来禁用页面滚动。
 - 固定操作栏由正式组件处理安全区；无固定栏的滚动内容按宿主规则预留底部安全区。
 
+<!-- rule-id: safe-area-top-single-owner -->
+
+- 顶部安全区由页面首个固定元素承担且只承担一次：有 navbar 的场景由 navbar 组件内置 `padding-top: var(--safe-area-top)` 处理，`host-shell-page` 和场景容器不得再重复加安全区；无 navbar 的场景由场景根容器或滚动区通过 `var(--safe-area-top)` 自行承担。
+- 禁止用 JS 读取 `--safe-area-top` 再设置 padding；安全区必须通过 CSS 变量声明。
+
 ## 提取与完成门禁
 
 每次 scene.js 或 scene.css 变化后必须按以下顺序执行：

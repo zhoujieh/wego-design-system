@@ -56,7 +56,8 @@
       "--bg-page",
       "--bg-surface",
       "--bg-panel",
-      "--bg-subtle"
+      "--bg-subtle",
+      "--safe-area-top"
     ],
     "baseTokenPrefixes": [
       "--text-",
@@ -93,7 +94,8 @@
       "新场景必须新增 route、scene.js 与 scene.css；已有场景稳定复用 route_id。",
       "业务模板只能来自 scene.js 注册，不得通过 fetch/XHR 加载本地 HTML。",
       "电脑端显示预览壳，移动端同链接铺满真实 viewport。",
-      "不得重画 index.html 宿主、复制第二套外壳或直接编辑 wego-app/lib。"
+      "不得重画 index.html 宿主、复制第二套外壳或直接编辑 wego-app/lib。",
+      "顶部安全区由页面首个固定元素承担且只承担一次：有 navbar 的场景由 navbar 组件内置 padding-top: var(--safe-area-top) 处理，host-shell-page 和场景容器不得再重复加安全区；无 navbar 的场景由场景根容器或滚动区通过 var(--safe-area-top) 自行承担。禁止用 JS 读取 --safe-area-top 再设置 padding。"
     ]
   },
   "globalConsumptionRules": {

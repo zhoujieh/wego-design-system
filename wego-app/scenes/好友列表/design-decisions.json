@@ -14,7 +14,7 @@
     "source": "library-consumption.json#/appRuntime/presentationTypes"
   },
   "prompt_contract": {
-    "design_system_version": 412,
+    "design_system_version": 413,
     "token_bindings": [
       {
         "selector": ".friend-list",
@@ -474,7 +474,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/好友列表/scene.js",
     "scene_css": "wego-app/scenes/好友列表/scene.css",
-    "source_sha256": "631fb9ceb23c30a247577ea4e7effad498d86310d18f075505006f637eeb9af3",
+    "source_sha256": "17034f0213561a53aa76ff3c3eeec471c0a139c13189d2c21b3512898dd47bef",
     "dom_ids": [
       "sort-toggle",
       "friend-search-input",

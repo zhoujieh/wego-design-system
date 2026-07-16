@@ -14,13 +14,19 @@
     "source": "library-consumption.json#/appRuntime/presentationTypes"
   },
   "prompt_contract": {
-    "design_system_version": 411,
+    "design_system_version": 413,
     "token_bindings": [
       {
         "selector": ".my-page",
         "content_role": "页面边距",
         "css_property": "padding-inline",
         "token": "var(--layout-page-margin-m8)"
+      },
+      {
+        "selector": ".my-page",
+        "content_role": "页面顶部安全区",
+        "css_property": "padding-top",
+        "token": "var(--safe-area-top)"
       },
       {
         "selector": ".my-page",
@@ -660,7 +666,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/我的/scene.js",
     "scene_css": "wego-app/scenes/我的/scene.css",
-    "source_sha256": "7b63ec3e8aa1c4daa55e633f8c98c6b5066493a7e6af0593b6c11003e06ee8fa",
+    "source_sha256": "4b5fcbb3a3c6f0313c574453ba635c1f97855b7b5a2cf3de0c34cf761100c853",
     "dom_ids": [
       "renew-vip",
       "manage-storage",

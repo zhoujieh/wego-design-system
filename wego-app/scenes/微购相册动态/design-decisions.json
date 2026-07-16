@@ -14,7 +14,7 @@
     "source": "library-consumption.json#/appRuntime/presentationTypes"
   },
   "prompt_contract": {
-    "design_system_version": 411,
+    "design_system_version": 413,
     "token_bindings": [
       {
         "selector": ".album-feed",
@@ -39,6 +39,12 @@
         "content_role": "页面边距",
         "css_property": "padding-inline",
         "token": "var(--layout-page-margin-m0)"
+      },
+      {
+        "selector": ".album-feed",
+        "content_role": "页面顶部安全区",
+        "css_property": "padding-top",
+        "token": "var(--safe-area-top)"
       },
       {
         "selector": ".album-feed__scroll",
@@ -557,7 +563,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/微购相册动态/scene.js",
     "scene_css": "wego-app/scenes/微购相册动态/scene.css",
-    "source_sha256": "0fbcb544839bda8410bd124e167df8df46aee1b299f26471cc469a8fdc75c07a",
+    "source_sha256": "4a4b23cc9eda4b4b728ac6c3ce302b1116a925fc94d5cb4f84e0193c278b6d42",
     "dom_ids": [
       "view-image-one",
       "view-image-two",

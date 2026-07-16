@@ -1,6 +1,7 @@
 .my-page {
   min-height: 100%;
   padding-inline: var(--layout-page-margin-m8);
+  padding-top: var(--safe-area-top);
   background: var(--bg-page);
   color: var(--text-default);
   font-family: var(--body-md-font-family);

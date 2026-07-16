@@ -119,13 +119,6 @@
   flex-direction: column;
 }
 
-/* 移动端覆盖 host-shell-page 的 padding-top，让 navbar 贴顶 */
-@media (max-width: 767px) {
-  .host-shell-page__panel[data-host-tab="haoyou"] {
-    padding-top: 0 !important;
-  }
-}
-
 /* navbar */
 .friend-list__navbar {
   background: var(--bg-page);

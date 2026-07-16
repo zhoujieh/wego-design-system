@@ -13,12 +13,13 @@
     "source": "library-consumption.json#/appRuntime/presentationTypes"
   },
   "prompt_contract": {
-    "design_system_version": 411,
+    "design_system_version": 413,
     "token_bindings": [
       { "selector": ".album-feed", "content_role": "页面背景", "css_property": "background", "token": "var(--bg-page)" },
       { "selector": ".album-feed", "content_role": "页面文字", "css_property": "color", "token": "var(--text-default)" },
       { "selector": ".album-feed", "content_role": "页面字体", "css_property": "font-family", "token": "var(--body-md-font-family)" },
       { "selector": ".album-feed", "content_role": "页面边距", "css_property": "padding-inline", "token": "var(--layout-page-margin-m0)" },
+      { "selector": ".album-feed", "content_role": "页面顶部安全区", "css_property": "padding-top", "token": "var(--safe-area-top)" },
       { "selector": ".album-feed__scroll", "content_role": "内容底部留白", "css_property": "padding-bottom", "token": "var(--spacer-24)" },
       { "selector": ".album-feed__intro", "content_role": "页面引导留白", "css_property": "padding", "token": "var(--spacer-16)" },
       { "selector": ".album-feed__intro", "content_role": "标题信息间距", "css_property": "gap", "token": "var(--spacer-4)" },
@@ -168,13 +169,6 @@ window.WegoApp.registerScene({
   template: albumProductFeedTemplate,
   presentation: { type: 'host-tab', transition: 'none', dismissAction: 'tab-switch', overlayLevel: 'inline', coversTabBar: false },
   init: function initAlbumProductFeed(ctx) {
-    var scroll = ctx.root.querySelector('.album-feed__scroll');
-    function updateSafeTop() {
-      var safeTop = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--safe-area-top')) || 0;
-      scroll.style.paddingTop = safeTop ? safeTop + 'px' : '';
-    }
-    updateSafeTop();
-    window.addEventListener('resize', updateSafeTop);
     var detailData = {
       'open-product-one': ['云感垂坠针织短袖', '¥89', './lib/assets/image/clothing/clothing_6/img_1708defc_20240216_i1708092817_7404_0.jpg.jpg', '轻薄透气的基础短袖，适合夏日通勤。'],
       'open-product-two': ['亚麻纹理多用途收纳篮', '¥46', './lib/assets/image/clothing/clothing_5/1663741067252_48951.jpg', '一篮多用，整理日常收纳更轻松。'],

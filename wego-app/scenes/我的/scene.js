@@ -13,9 +13,10 @@
     "source": "library-consumption.json#/appRuntime/presentationTypes"
   },
   "prompt_contract": {
-    "design_system_version": 411,
+    "design_system_version": 413,
     "token_bindings": [
       { "selector": ".my-page", "content_role": "页面边距", "css_property": "padding-inline", "token": "var(--layout-page-margin-m8)" },
+      { "selector": ".my-page", "content_role": "页面顶部安全区", "css_property": "padding-top", "token": "var(--safe-area-top)" },
       { "selector": ".my-page", "content_role": "页面背景", "css_property": "background", "token": "var(--bg-page)" },
       { "selector": ".my-page", "content_role": "页面默认文字", "css_property": "color", "token": "var(--text-default)" },
       { "selector": ".my-page", "content_role": "页面基础字体", "css_property": "font-family", "token": "var(--body-md-font-family)" },
@@ -473,17 +474,6 @@ window.WegoApp.registerScene({
     init: function initMyScene(ctx) {
       var mainGrid = ctx.root.querySelector('[data-dom-id="main-app-grid"]');
       var moreButton = ctx.root.querySelector('[data-dom-id="open-app-center"]');
-      var scrollContainer = ctx.root.querySelector('.my-page__scroll');
-
-      // 顶部安全区适配（phone-status遮挡）
-      function updateSafeTop() {
-        var safeTop = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--safe-area-top')) || 0;
-        if (safeTop > 0) {
-          scrollContainer.style.paddingTop = safeTop + 'px';
-        }
-      }
-      updateSafeTop();
-      window.addEventListener('resize', updateSafeTop);
 
       var sortedApps = sortAppsByRecentUsage(mySceneAllApps);
       var allEntries = sortedApps.map(createMySceneAppEntry);

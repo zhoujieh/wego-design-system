@@ -1,7 +1,7 @@
 /* iOS 桌面书签 / standalone 安全区策略
- * - 顶部安全区由 navbar 或宿主非导航页承担
+ * - 顶部安全区由页面首个固定元素承担（navbar 或无导航页的场景根容器）
+ * - host-shell-page 只负责内容间距，不重复计算安全区
  * - 底部安全区仅由 bottom-nav 或明确的底部操作栏承担
- * - 页面正文与滚动区不重复计算安全区
  * - Dialog 在移动端覆盖完整屏幕（含状态栏与底部安全区）
  */
 @media (max-width: 767px) {
@@ -12,16 +12,12 @@
     overflow: hidden;
   }
 
-  .navbar {
-    padding-top: env(safe-area-inset-top, 0px);
-  }
-
   .bottom-nav {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
   .host-shell-page {
-    padding-top: calc(var(--spacer-16) + env(safe-area-inset-top, 0px)) !important;
+    padding-top: var(--spacer-16) !important;
     padding-right: 0 !important;
     padding-bottom: calc(var(--spacer-40) + 56px) !important;
     padding-left: 0 !important;
