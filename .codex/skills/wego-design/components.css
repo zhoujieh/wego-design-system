@@ -989,7 +989,7 @@
 
 /* ── Cell ──────────────────────────────────────────────────── */
 /* @anatomy
-   <div class="pv-header"><h1>单元格</h1><p>列表行，支持标题、内容、箭头、图标、徽标和副操作。</p></div>
+   <div class="pv-header"><h1>单元格</h1><p>列表行，支持标题、内容、箭头、图标、徽标和副操作。默认通栏白底，宿主层有横向留白（M8）时才开启 card 圆角修饰。</p></div>
 */
 .cell-group{display:flex;flex-direction:column;width:100%}
 .cell-group__title{padding:16px 16px 8px;font-size:var(--body-sm-font-size);font-weight:var(--font-weight-medium);line-height:var(--body-sm-line-height);color:var(--text-tertiary);font-feature-settings:"zero"}
@@ -1328,7 +1328,7 @@
 
 /* ── Form ──────────────────────────────────────────────────── */
 /* @anatomy
-   <div class="pv-header"><h1>表单容器</h1><p>表单字段容器，支持水平/垂直布局、多输入类型、错误与计数共用消息槽位，并在输入恢复合法后自动回到默认态。</p></div>
+   <div class="pv-header"><h1>表单容器</h1><p>表单字段容器，支持水平/垂直布局、多输入类型、错误与计数共用消息槽位，并在输入恢复合法后自动回到默认态。默认通栏白底，宿主层有横向留白（M8）时才开启 card 圆角修饰。</p></div>
 */
 :is(.form-group,.form-group__content){width:100%}
 .form-group{display:flex;flex-direction:column}

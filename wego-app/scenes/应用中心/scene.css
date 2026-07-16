@@ -1,0 +1,115 @@
+.app-center-page {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding-inline: var(--layout-page-margin-m0);
+  background: var(--bg-page);
+  color: var(--text-default);
+  font-family: var(--body-md-font-family);
+  overflow: hidden;
+}
+
+.app-center-page .navbar {
+  flex-shrink: 0;
+}
+
+.app-center-page__tabs {
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--bg-page);
+  margin-bottom: var(--spacer-8);
+}
+
+.app-center-page__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-8);
+  padding-inline: var(--layout-page-margin-m8);
+  /* 底部安全区：使用spacer-72作为安全区预留（设计系统最大值） */
+  padding-bottom: var(--spacer-72);
+}
+
+.app-center-page__category {
+  flex-shrink: 0;
+}
+
+.app-center-page__category-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-12);
+  padding: var(--spacer-12);
+}
+
+.app-center-page__category-title {
+  color: var(--text-default);
+  font-size: var(--heading-xs-font-size);
+  font-weight: var(--heading-xs-font-weight);
+  line-height: var(--heading-xs-line-height);
+}
+
+.app-center-page__app-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacer-4);
+}
+
+.app-center-page__app-placeholder {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.app-center-page__app-entry {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--spacer-4);
+  padding-block: var(--spacer-8);
+  border: none;
+  border-radius: var(--radius-8);
+  background: transparent;
+  cursor: pointer;
+}
+
+.app-center-page__app-entry:active {
+  border-radius: var(--radius-8);
+  background: var(--bg-state-pressed);
+}
+
+.app-center-page__app-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--spacer-4);
+  padding-block: var(--spacer-8);
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.app-center-page__app-icon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.app-center-page__app-label {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--text-secondary);
+  display: -webkit-box;
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+  text-align: center;
+  text-overflow: ellipsis;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  word-break: break-all;
+}

@@ -60,6 +60,7 @@
       { "selector": ".my-page__app-grid", "content_role": "应用入口间距", "css_property": "gap", "token": "var(--spacer-4)" },
       { "selector": ".my-page__app-entry", "content_role": "应用图标与名称间距", "css_property": "gap", "token": "var(--spacer-4)" },
       { "selector": ".my-page__order-entry", "content_role": "订单图标与名称间距", "css_property": "gap", "token": "var(--spacer-4)" },
+
       { "selector": ".my-page__app-entry", "content_role": "应用入口热区", "css_property": "padding-block", "token": "var(--spacer-8)" },
       { "selector": ".my-page__order-entry", "content_role": "订单入口热区", "css_property": "padding-block", "token": "var(--spacer-8)" },
       { "selector": ".my-page__app-entry", "content_role": "应用入口按压边界", "css_property": "border-radius", "token": "var(--radius-8)" },
@@ -68,26 +69,16 @@
       { "selector": ".my-page__app-entry.is-pressed", "content_role": "应用入口触控反馈", "css_property": "background", "token": "var(--bg-state-pressed)" },
       { "selector": ".my-page__order-entry:active", "content_role": "订单入口按压反馈", "css_property": "background", "token": "var(--bg-state-pressed)" },
       { "selector": ".my-page__order-entry.is-pressed", "content_role": "订单入口触控反馈", "css_property": "background", "token": "var(--bg-state-pressed)" },
-      { "selector": ".my-page__more-icon", "content_role": "更多应用图标容器", "css_property": "border-radius", "token": "var(--radius-12)" },
-      { "selector": ".my-page__more-icon", "content_role": "更多应用图标容器", "css_property": "background", "token": "var(--bg-subtle)" },
-      { "selector": ".my-page__more-icon", "content_role": "更多应用图标", "css_property": "color", "token": "var(--text-secondary)" },
-      { "selector": ".my-page__more-icon .wego-iconfont-s", "content_role": "更多应用图标", "css_property": "font-size", "token": "var(--size-24)" },
       { "selector": ".my-page__app-label", "content_role": "应用名称", "css_property": "color", "token": "var(--text-secondary)" },
       { "selector": ".my-page__app-label", "content_role": "应用名称", "css_property": "font-size", "token": "var(--body-sm-font-size)" },
       { "selector": ".my-page__app-label", "content_role": "应用名称", "css_property": "line-height", "token": "var(--body-sm-line-height)" },
       { "selector": ".my-page__order-grid", "content_role": "订单入口间距", "css_property": "gap", "token": "var(--spacer-4)" },
-      { "selector": ".my-page__order-entry .wego-iconfont-s", "content_role": "订单状态图标", "css_property": "color", "token": "var(--text-secondary)" },
-      { "selector": ".my-page__order-entry .wego-iconfont-s", "content_role": "订单状态图标", "css_property": "font-size", "token": "var(--size-24)" },
-      { "selector": ".my-page__order-entry span", "content_role": "订单状态名称", "css_property": "color", "token": "var(--text-secondary)" },
-      { "selector": ".my-page__order-entry span", "content_role": "订单状态名称", "css_property": "font-size", "token": "var(--body-sm-font-size)" },
-      { "selector": ".my-page__order-entry span", "content_role": "订单状态名称", "css_property": "line-height", "token": "var(--body-sm-line-height)" },
-      { "selector": ".my-page__app-center", "content_role": "应用中心背景", "css_property": "background", "token": "var(--bg-page)" },
-      { "selector": ".my-page__app-center-body", "content_role": "应用中心内容节奏", "css_property": "gap", "token": "var(--spacer-12)" },
-      { "selector": ".my-page__app-center-body", "content_role": "应用中心内容留白", "css_property": "padding", "token": "var(--spacer-16)" },
-      { "selector": ".my-page__app-center-summary", "content_role": "应用总量说明", "css_property": "color", "token": "var(--text-tertiary)" },
-      { "selector": ".my-page__app-center-summary", "content_role": "应用总量说明", "css_property": "font-size", "token": "var(--body-sm-font-size)" },
-      { "selector": ".my-page__app-center-summary", "content_role": "应用总量说明", "css_property": "line-height", "token": "var(--body-sm-line-height)" },
-      { "selector": ".my-page__app-grid--all", "content_role": "应用中心底部留白", "css_property": "padding-bottom", "token": "var(--spacer-16)" }
+      { "selector": ".my-page__order-entry .wego-iconfont-s", "content_role": "全部订单图标", "css_property": "color", "token": "var(--text-secondary)" },
+      { "selector": ".my-page__order-entry .wego-iconfont-s", "content_role": "全部订单图标", "css_property": "font-size", "token": "var(--size-24)" },
+      { "selector": ".my-page__order-label", "content_role": "订单状态名称", "css_property": "color", "token": "var(--text-secondary)" },
+      { "selector": ".my-page__order-label", "content_role": "订单状态名称", "css_property": "font-size", "token": "var(--body-sm-font-size)" },
+      { "selector": ".my-page__order-label", "content_role": "订单状态名称", "css_property": "line-height", "token": "var(--body-sm-line-height)" },
+      { "selector": ".my-page__order-metric", "content_role": "订单数量最小高度", "css_property": "min-height", "token": "var(--size-24)" }
     ],
     "component_bindings": [
       {
@@ -178,16 +169,12 @@
         }
       },
       {
-        "binding_id": "app-center-navbar",
-        "slug": "navbar",
-        "reason": "承载应用中心全屏二级层的关闭与页面标题",
+        "binding_id": "order-metric",
+        "slug": "metric",
+        "reason": "承载我买的卡片前5个订单状态数量展示，替换原图标位置",
         "variant_dimensions": {
-          "leftControl": "close-icon",
-          "titleAlignment": "center",
-          "actions": "none",
-          "spacing": "default",
-          "pageTransition": "present",
-          "position": "sticky"
+          "size": "20",
+          "theme": "black"
         }
       }
     ],
@@ -199,23 +186,20 @@
       "mutable_regions": [
         ".my-page__quick-apps",
         ".my-page__order-grid",
-        ".my-page__services",
-        ".my-page__app-center-template"
+        ".my-page__services"
       ]
     },
     "interaction_contract": [
       { "dom_id": "renew-vip", "target": "feedback:toast" },
       { "dom_id": "manage-storage", "target": "feedback:toast" },
       { "dom_id": "main-app-grid", "target": "feedback:toast" },
-      { "dom_id": "open-app-center", "target": "overlay:modal" },
+      { "dom_id": "open-app-center", "target": "route:app-center" },
       { "dom_id": "order-grid", "target": "feedback:toast" },
       { "dom_id": "open-settings", "target": "feedback:toast" },
       { "dom_id": "open-wallet", "target": "feedback:toast" },
       { "dom_id": "open-favorites", "target": "feedback:toast" },
       { "dom_id": "open-coupons", "target": "feedback:toast" },
-      { "dom_id": "open-rebate", "target": "feedback:toast" },
-      { "dom_id": "close-app-center", "target": "overlay:close" },
-      { "dom_id": "app-center-grid", "target": "feedback:toast" }
+      { "dom_id": "open-rebate", "target": "feedback:toast" }
     ],
     "state_contract": [
       {
@@ -224,14 +208,6 @@
         "trigger": "进入我的主 tab",
         "visible_result": "展示已登录超级管理员的会员、空间、应用、订单和个人服务信息",
         "fallback": "保持当前可用入口与固定演示数据",
-        "persistence": "memory"
-      },
-      {
-        "state_id": "app-center-visible",
-        "initial": false,
-        "trigger": "选择更多应用",
-        "visible_result": "全屏展示资源包中的 78 个去重应用，并提供关闭返回",
-        "fallback": "关闭二级层并返回我的页原位置",
         "persistence": "memory"
       },
       {
@@ -261,105 +237,113 @@
 */
 
 var mySceneAllApps = [
-    { name: '备货', asset: '备货' },
-    { name: '标签管理', asset: '标签管理' },
-    { name: '采购单', asset: '采购单' },
-    { name: '查订单-查快递', asset: '查订单-查快递' },
-    { name: '查件码', asset: '查件码' },
-    { name: '抽奖大转盘', asset: '抽奖大转盘' },
-    { name: '创建客户', asset: '创建客户' },
-    { name: '导出记录', asset: '导出记录' },
+    { name: '我的小店', asset: '我的小店' },
     { name: '店铺装修', asset: '店铺装修' },
-    { name: '抖音引流', asset: '抖音引流' },
-    { name: '发布', asset: '发布' },
-    { name: '发新客福利', asset: '发新客福利' },
-    { name: '访客足迹', asset: '访客足迹' },
-    { name: '分销', asset: '分销' },
-    { name: '公域引流', asset: '公域引流' },
-    { name: '公众号', asset: '公众号' },
-    { name: '供应商', asset: '供应商' },
-    { name: '规则中心', asset: '规则中心' },
-    { name: '红包雨', asset: '红包雨' },
-    { name: '会员管理', asset: '粉丝会员卡' },
-    { name: '积分商城', asset: '积分商城' },
-    { name: '价格管理', asset: '价格管理' },
-    { name: '客户标签', asset: '客户标签' },
-    { name: '客户管理', asset: '客户管理' },
-    { name: '客户审核', asset: '客户审核' },
-    { name: '库存管理', asset: '库存管理' },
-    { name: '快捷发布', asset: '快捷发布' },
-    { name: '满减促销', asset: '满减促销' },
-    { name: '配货管理', asset: '配货管理' },
-    { name: '批量编辑', asset: '批量编辑' },
-    { name: '批量导出', asset: '批量导出' },
-    { name: '批量发布', asset: '批量发布' },
-    { name: '批量分享', asset: '批量分享' },
-    { name: '批量删除', asset: '批量删除' },
-    { name: '批量选择', asset: '批量选择' },
-    { name: '批量抓图', asset: '批量抓图' },
-    { name: '批量转发', asset: '批量转发' },
-    { name: '铺货管家', asset: '铺货管家' },
-    { name: '企业微信', asset: '企业微信' },
-    { name: '弃购召回', asset: '弃购召回' },
     { name: '商品管理', asset: '商品管理' },
     { name: '商品详情装修', asset: '商品详情装修' },
     { name: '上下架', asset: '上下架' },
-    { name: '视频号', asset: '视频号' },
-    { name: '收款码', asset: '收款码' },
-    { name: '售后', asset: '售后' },
-    { name: '数据中心', asset: '数据中心' },
-    { name: '私域键盘', asset: '私域键盘' },
-    { name: '私域直播', asset: '私域直播' },
-    { name: '团队管理', asset: '团队管理' },
-    { name: '推广员', asset: '推广员' },
-    { name: '推送上新（群发消息）', asset: '推送上新（群发消息）' },
-    { name: '微信群发', asset: '微信群发助手' },
-    { name: '微信小店', asset: '微信小店' },
-    { name: '文本导入', asset: '文本导入' },
-    { name: '我的小店', asset: '我的小店' },
-    { name: '限时秒杀', asset: '限时秒杀' },
-    { name: '相册网址', asset: '相册网址' },
-    { name: '相册学堂', asset: '相册学堂' },
-    { name: '销售报表', asset: '销售报表' },
-    { name: '销售单', asset: '销售单' },
-    { name: '一键搬家', asset: '一键搬家' },
-    { name: '一键复制好友相册', asset: '一键复制好友相册' },
     { name: '一键换肤', asset: '一键换肤' },
-    { name: '一键开团', asset: '一键开团' },
-    { name: '营销中心', asset: '营销中心' },
-    { name: '硬件商城(智能硬件)', asset: '硬件商城(智能硬件)' },
-    { name: '优惠券', asset: '优惠券' },
-    { name: '员工业绩', asset: '员工业绩' },
-    { name: '整理相册', asset: '整理相册' },
-    { name: '支付后送券', asset: '支付后送券' },
-    { name: '直播开单', asset: '直播开单' },
     { name: '专享小程序', asset: '专享小程序' },
-    { name: '转图代理', asset: '转图代理' },
+    { name: '微信小店', asset: '微信小店' },
+    { name: '一键开团', asset: '一键开团' },
+    { name: '发布', asset: '发布' },
+    { name: '快捷发布', asset: '快捷发布' },
+    { name: '批量发布', asset: '批量发布' },
+    { name: '一键搬家', asset: '一键搬家' },
+    { name: '铺货管家', asset: '铺货管家' },
+    { name: '整理相册', asset: '整理相册' },
+    { name: '批量编辑', asset: '批量编辑' },
+    { name: '营销中心', asset: '营销中心' },
+    { name: '数据中心', asset: '数据中心' },
+    { name: '优惠券', asset: '优惠券' },
+    { name: '限时秒杀', asset: '限时秒杀' },
+    { name: '满减促销', asset: '满减促销' },
+    { name: '红包雨', asset: '红包雨' },
+    { name: '抽奖大转盘', asset: '抽奖大转盘' },
+    { name: '支付后送券', asset: '支付后送券' },
     { name: '追福袋', asset: '追福袋' },
+    { name: '分销', asset: '分销' },
+    { name: '推广员', asset: '推广员' },
+    { name: '发新客福利', asset: '发新客福利' },
+    { name: '弃购召回', asset: '弃购召回' },
+    { name: '一键复制好友相册', asset: '一键复制好友相册' },
+    { name: '微信群发', asset: '微信群发助手' },
+    { name: '推送上新', asset: '推送上新（群发消息）' },
+    { name: '公众号', asset: '公众号' },
+    { name: '企业微信', asset: '企业微信' },
+    { name: '视频号', asset: '视频号' },
+    { name: '抖音引流', asset: '抖音引流' },
+    { name: '公域引流', asset: '公域引流' },
+    { name: '私域直播', asset: '私域直播' },
+    { name: '直播开单', asset: '直播开单' },
+    { name: '私域键盘', asset: '私域键盘' },
+    { name: '客户管理', asset: '客户管理' },
+    { name: '创建客户', asset: '创建客户' },
+    { name: '客户审核', asset: '客户审核' },
+    { name: '客户标签', asset: '客户标签' },
+    { name: '会员管理', asset: '粉丝会员卡' },
+    { name: '访客足迹', asset: '访客足迹' },
+    { name: '标签管理', asset: '标签管理' },
+    { name: '积分商城', asset: '积分商城' },
+    { name: '收款码', asset: '收款码' },
+    { name: '查订单-查快递', asset: '查订单-查快递' },
+    { name: '售后', asset: '售后' },
+    { name: '销售单', asset: '销售单' },
+    { name: '销售报表', asset: '销售报表' },
+    { name: '库存管理', asset: '库存管理' },
+    { name: '备货', asset: '备货' },
+    { name: '配货管理', asset: '配货管理' },
+    { name: '采购单', asset: '采购单' },
+    { name: '供应商', asset: '供应商' },
+    { name: '转图代理', asset: '转图代理' },
+    { name: '查件码', asset: '查件码' },
+    { name: '团队管理', asset: '团队管理' },
+    { name: '员工业绩', asset: '员工业绩' },
+    { name: '批量导出', asset: '批量导出' },
+    { name: '导出记录', asset: '导出记录' },
+    { name: '规则中心', asset: '规则中心' },
+    { name: '价格管理', asset: '价格管理' },
     { name: 'ERP', asset: 'ERP' },
-    { name: 'P图', asset: 'P图' },
+    { name: '相册网址', asset: '相册网址' },
+    { name: '硬件商城', asset: '硬件商城(智能硬件)' },
+    { name: '相册学堂', asset: '相册学堂' },
     { name: 'PC(电脑版)', asset: 'PC版' }
   ];
 
-var myScenePriorityNames = [
-    '一键开团',
-    '店铺装修',
-    '收款码',
-    '我的小店',
-    '会员管理',
-    '访客足迹',
-    '数据中心',
-    '微信群发',
-    '一键换肤',
-    '团队管理',
-    '专享小程序',
-    '相册网址',
-    '私域键盘',
-    'PC(电脑版)'
-  ];
+function getRecentlyUsedApps() {
+  try {
+    var stored = localStorage.getItem('wego_recent_apps');
+    return stored ? JSON.parse(stored) : [];
+  } catch (e) {
+    return [];
+  }
+}
 
-function mySceneAppByName(name) {
-  return mySceneAllApps.find(function (app) { return app.name === name; });
+function setRecentlyUsedApps(appNames) {
+  try {
+    localStorage.setItem('wego_recent_apps', JSON.stringify(appNames.slice(0, 20)));
+  } catch (e) {}
+}
+
+function recordAppUsage(appName) {
+  var recent = getRecentlyUsedApps();
+  recent = recent.filter(function (name) { return name !== appName; });
+  recent.unshift(appName);
+  setRecentlyUsedApps(recent);
+}
+
+function sortAppsByRecentUsage(apps) {
+  var recent = getRecentlyUsedApps();
+  var recentSet = new Set(recent);
+  var sorted = apps.slice().sort(function (a, b) {
+    var aIndex = recent.indexOf(a.name);
+    var bIndex = recent.indexOf(b.name);
+    if (aIndex === -1 && bIndex === -1) return 0;
+    if (aIndex === -1) return 1;
+    if (bIndex === -1) return -1;
+    return aIndex - bIndex;
+  });
+  return sorted;
 }
 
 function createMySceneAppEntry(app) {
@@ -380,12 +364,6 @@ function createMySceneAppEntry(app) {
 
     button.append(icon, label);
     return button;
-}
-
-function fillMySceneAppGrid(grid, apps) {
-    var fragment = document.createDocumentFragment();
-    apps.forEach(function (app) { fragment.appendChild(createMySceneAppEntry(app)); });
-    grid.appendChild(fragment);
 }
 
 const mySceneTemplate = `
@@ -436,9 +414,9 @@ const mySceneTemplate = `
           <div class="card__content my-page__section-content">
             <h2 class="my-page__section-title">应用</h2>
             <div class="my-page__app-grid" data-dom-id="main-app-grid">
-              <button type="button" class="my-page__app-entry" data-dom-id="open-app-center" aria-label="打开更多应用">
-                <span class="my-page__more-icon"><i class="wego-iconfont-s icon-yingyongzhongxin"></i></span>
-                <span class="my-page__app-label">更多应用</span>
+              <button type="button" class="my-page__app-entry" data-dom-id="open-app-center" aria-label="打开全部应用">
+                <img class="my-page__app-icon" src="./lib/assets/icons/app-center/全部应用.svg" alt="">
+                <span class="my-page__app-label">全部应用</span>
               </button>
             </div>
           </div>
@@ -448,12 +426,12 @@ const mySceneTemplate = `
           <div class="card__content my-page__section-content">
             <h2 class="my-page__section-title">我买的</h2>
             <div class="my-page__order-grid" data-dom-id="order-grid">
-              <button type="button" class="my-page__order-entry" data-order-name="待付款"><i class="wego-iconfont-s icon-fukuan1"></i><span>待付款</span></button>
-              <button type="button" class="my-page__order-entry" data-order-name="已付款"><i class="wego-iconfont-s icon-fukuan-mian"></i><span>已付款</span></button>
-              <button type="button" class="my-page__order-entry" data-order-name="已发货"><i class="wego-iconfont-s icon-fahuoshezhi"></i><span>已发货</span></button>
-              <button type="button" class="my-page__order-entry" data-order-name="退款"><i class="wego-iconfont-s icon-tuikuan"></i><span>退款</span></button>
-              <button type="button" class="my-page__order-entry" data-order-name="挂起"><i class="wego-iconfont-s icon-zanting"></i><span>挂起</span></button>
-              <button type="button" class="my-page__order-entry" data-order-name="全部订单"><i class="wego-iconfont-s icon-dingdan"></i><span>全部订单</span></button>
+              <button type="button" class="my-page__order-entry" data-order-name="待付款" data-order-count="3"><span class="metric metric--20 metric--black my-page__order-metric" data-dd-id="order-metric-pending" data-component-slug="metric" data-component-binding="order-metric"><span class="metric__main"><span class="metric__value"><span class="metric__integer">3</span></span></span></span><span class="my-page__order-label">待付款</span></button>
+              <button type="button" class="my-page__order-entry" data-order-name="已付款" data-order-count="8"><span class="metric metric--20 metric--black my-page__order-metric" data-dd-id="order-metric-paid" data-component-slug="metric" data-component-binding="order-metric"><span class="metric__main"><span class="metric__value"><span class="metric__integer">8</span></span></span></span><span class="my-page__order-label">已付款</span></button>
+              <button type="button" class="my-page__order-entry" data-order-name="已发货" data-order-count="0"><span class="metric metric--20 metric--black my-page__order-metric" data-dd-id="order-metric-shipped" data-component-slug="metric" data-component-binding="order-metric"><span class="metric__main"><span class="metric__value"><span class="metric__integer">0</span></span></span></span><span class="my-page__order-label">已发货</span></button>
+              <button type="button" class="my-page__order-entry" data-order-name="退款" data-order-count="2"><span class="metric metric--20 metric--black my-page__order-metric" data-dd-id="order-metric-refund" data-component-slug="metric" data-component-binding="order-metric"><span class="metric__main"><span class="metric__value"><span class="metric__integer">2</span></span></span></span><span class="my-page__order-label">退款</span></button>
+              <button type="button" class="my-page__order-entry" data-order-name="挂起" data-order-count="0"><span class="metric metric--20 metric--black my-page__order-metric" data-dd-id="order-metric-hold" data-component-slug="metric" data-component-binding="order-metric"><span class="metric__main"><span class="metric__value"><span class="metric__integer">0</span></span></span></span><span class="my-page__order-label">挂起</span></button>
+              <button type="button" class="my-page__order-entry" data-order-name="全部订单"><span class="my-page__order-icon-wrapper"><i class="wego-iconfont-s icon-dingdan"></i></span><span class="my-page__order-label">全部订单</span></button>
             </div>
           </div>
         </section>
@@ -478,22 +456,6 @@ const mySceneTemplate = `
           </div>
         </div>
       </div>
-
-      <template class="my-page__app-center-template" data-app-center-template>
-        <section class="my-page__app-center" data-bg="page">
-          <div class="navbar" data-dd-id="app-center-navbar" data-component-slug="navbar" data-component-binding="app-center-navbar">
-            <div class="navbar__body">
-              <div class="navbar__left"><button type="button" class="navbar__left-btn" data-dom-id="close-app-center" aria-label="关闭应用中心"><i class="wego-iconfont-s icon-cha"></i></button></div>
-              <div class="navbar__center"><span class="navbar__title">应用中心</span></div>
-              <div class="navbar__right"></div>
-            </div>
-          </div>
-          <div class="my-page__app-center-body">
-            <p class="my-page__app-center-summary">全部应用 · 78</p>
-            <div class="my-page__app-grid my-page__app-grid--all" data-dom-id="app-center-grid"></div>
-          </div>
-        </section>
-      </template>
     </section>
   `;
 
@@ -511,15 +473,33 @@ window.WegoApp.registerScene({
     init: function initMyScene(ctx) {
       var mainGrid = ctx.root.querySelector('[data-dom-id="main-app-grid"]');
       var moreButton = ctx.root.querySelector('[data-dom-id="open-app-center"]');
-      var mainApps = myScenePriorityNames.map(mySceneAppByName).filter(Boolean);
-      var mainEntries = mainApps.map(createMySceneAppEntry);
+      var scrollContainer = ctx.root.querySelector('.my-page__scroll');
 
-      mainEntries.forEach(function (entry) { mainGrid.insertBefore(entry, moreButton); });
+      // 顶部安全区适配（phone-status遮挡）
+      function updateSafeTop() {
+        var safeTop = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--safe-area-top')) || 0;
+        if (safeTop > 0) {
+          scrollContainer.style.paddingTop = safeTop + 'px';
+        }
+      }
+      updateSafeTop();
+      window.addEventListener('resize', updateSafeTop);
+
+      var sortedApps = sortAppsByRecentUsage(mySceneAllApps);
+      var allEntries = sortedApps.map(createMySceneAppEntry);
 
       function updateMainAppCapacity() {
-        var columns = getComputedStyle(mainGrid).gridTemplateColumns.split(' ').filter(Boolean).length;
-        var visibleCount = Math.max(1, Math.min(mainEntries.length, columns * 2 - 1));
-        mainEntries.forEach(function (entry, index) { entry.hidden = index >= visibleCount; });
+        var columns = Math.max(1, Math.floor(mainGrid.getBoundingClientRect().width / 80));
+        var needCount = columns * 2 - 1; // 两行满格，减去"全部应用"按钮
+
+        // 清空并重新填充
+        mainGrid.innerHTML = '';
+        for (var i = 0; i < needCount && i < allEntries.length; i += 1) {
+          mainGrid.appendChild(allEntries[i]);
+        }
+        mainGrid.appendChild(moreButton);
+
+        mainGrid.style.gridTemplateColumns = 'repeat(' + columns + ', 1fr)';
       }
 
       requestAnimationFrame(updateMainAppCapacity);
@@ -533,29 +513,12 @@ window.WegoApp.registerScene({
       mainGrid.addEventListener('click', function (event) {
         var entry = event.target.closest('[data-app-name]');
         if (!entry || !mainGrid.contains(entry)) return;
+        recordAppUsage(entry.dataset.appName);
         ctx.toast(entry.dataset.appName + '入口已打开');
       });
 
       moreButton.addEventListener('click', function () {
-        var appCenterTemplate = ctx.root.querySelector('[data-app-center-template]');
-        ctx.openModal(appCenterTemplate.innerHTML, {
-          label: '应用中心',
-          init: function initAppCenter(overlayCtx) {
-            var closeAppCenter = overlayCtx.root.querySelector('[data-dom-id="close-app-center"]');
-            var appCenterGrid = overlayCtx.root.querySelector('[data-dom-id="app-center-grid"]');
-            fillMySceneAppGrid(appCenterGrid, mySceneAllApps);
-
-            closeAppCenter.addEventListener('click', function () {
-              ctx.closeOverlay();
-            });
-
-            appCenterGrid.addEventListener('click', function (event) {
-              var entry = event.target.closest('[data-app-name]');
-              if (!entry || !appCenterGrid.contains(entry)) return;
-              ctx.toast(entry.dataset.appName + '入口已打开');
-            });
-          }
-        });
+        ctx.navigate('app-center');
       });
 
       var renewVip = ctx.root.querySelector('[data-dom-id="renew-vip"]');

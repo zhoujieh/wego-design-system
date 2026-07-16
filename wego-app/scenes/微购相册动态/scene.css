@@ -1,0 +1,51 @@
+.album-feed {
+  min-height: 100%;
+  padding-inline: var(--layout-page-margin-m0);
+  background: var(--bg-page);
+  color: var(--text-default);
+  font-family: var(--body-md-font-family);
+}
+
+.album-feed__scroll { padding-bottom: var(--spacer-24); }
+
+.album-feed__intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-4);
+  padding: var(--spacer-16);
+  background: var(--bg-surface);
+}
+
+.album-feed__title { font-size: var(--heading-sm-font-size); font-weight: var(--heading-sm-font-weight); line-height: var(--heading-sm-line-height); }
+.album-feed__subtitle { color: var(--text-tertiary); font-size: var(--body-sm-font-size); line-height: var(--body-sm-line-height); }
+
+.album-feed__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-12);
+  padding: var(--spacer-16);
+  background: var(--bg-surface);
+}
+
+.album-feed__author { display: flex; align-items: center; gap: var(--spacer-8); }
+.album-feed__author-name { font-size: var(--body-md-strong-font-size); font-weight: var(--body-md-strong-font-weight); line-height: var(--body-md-strong-line-height); }
+.album-feed__time { color: var(--text-tertiary); font-size: var(--body-sm-font-size); line-height: var(--body-sm-line-height); }
+.album-feed__copy { font-size: var(--body-md-font-size); line-height: var(--body-md-line-height); }
+
+.album-feed__media { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--spacer-4); }
+.album-feed__media--two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.album-feed__media--single { grid-template-columns: minmax(0, 1fr); }
+.album-feed__media .wg-image { width: 100%; height: auto; aspect-ratio: 1; }
+
+.album-feed__product { width: 100%; padding: var(--spacer-12); text-align: left; }
+.album-feed__product-title { font-size: var(--body-md-strong-font-size); font-weight: var(--body-md-strong-font-weight); line-height: var(--body-md-strong-line-height); }
+.album-feed__product-meta { color: var(--text-secondary); font-size: var(--body-sm-font-size); line-height: var(--body-sm-line-height); }
+.album-feed__price { color: var(--text-promotion); font-size: var(--body-lg-font-size); font-weight: var(--font-weight-semibold); line-height: var(--body-lg-line-height); }
+
+.album-feed__actions { display: flex; align-items: center; gap: var(--spacer-8); }
+.album-feed__more { margin-left: auto; color: var(--text-secondary); font-size: var(--body-sm-font-size); line-height: var(--body-sm-line-height); }
+
+.album-product-modal { display: flex; flex-direction: column; gap: var(--spacer-12); padding: var(--spacer-16); background: var(--bg-surface); color: var(--text-default); font-family: var(--body-md-font-family); }
+.album-product-modal__head { display: flex; align-items: center; justify-content: space-between; gap: var(--spacer-12); font-size: var(--heading-xs-font-size); font-weight: var(--heading-xs-font-weight); line-height: var(--heading-xs-line-height); }
+.album-product-modal img { width: 100%; border-radius: var(--radius-8); }
+.album-product-modal p { color: var(--text-secondary); font-size: var(--body-md-font-size); line-height: var(--body-md-line-height); }

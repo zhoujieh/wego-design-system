@@ -335,30 +335,6 @@
         "token": "var(--bg-state-pressed)"
       },
       {
-        "selector": ".my-page__more-icon",
-        "content_role": "更多应用图标容器",
-        "css_property": "border-radius",
-        "token": "var(--radius-12)"
-      },
-      {
-        "selector": ".my-page__more-icon",
-        "content_role": "更多应用图标容器",
-        "css_property": "background",
-        "token": "var(--bg-subtle)"
-      },
-      {
-        "selector": ".my-page__more-icon",
-        "content_role": "更多应用图标",
-        "css_property": "color",
-        "token": "var(--text-secondary)"
-      },
-      {
-        "selector": ".my-page__more-icon .wego-iconfont-s",
-        "content_role": "更多应用图标",
-        "css_property": "font-size",
-        "token": "var(--size-24)"
-      },
-      {
         "selector": ".my-page__app-label",
         "content_role": "应用名称",
         "css_property": "color",
@@ -384,75 +360,39 @@
       },
       {
         "selector": ".my-page__order-entry .wego-iconfont-s",
-        "content_role": "订单状态图标",
+        "content_role": "全部订单图标",
         "css_property": "color",
         "token": "var(--text-secondary)"
       },
       {
         "selector": ".my-page__order-entry .wego-iconfont-s",
-        "content_role": "订单状态图标",
+        "content_role": "全部订单图标",
         "css_property": "font-size",
         "token": "var(--size-24)"
       },
       {
-        "selector": ".my-page__order-entry span",
+        "selector": ".my-page__order-label",
         "content_role": "订单状态名称",
         "css_property": "color",
         "token": "var(--text-secondary)"
       },
       {
-        "selector": ".my-page__order-entry span",
+        "selector": ".my-page__order-label",
         "content_role": "订单状态名称",
         "css_property": "font-size",
         "token": "var(--body-sm-font-size)"
       },
       {
-        "selector": ".my-page__order-entry span",
+        "selector": ".my-page__order-label",
         "content_role": "订单状态名称",
         "css_property": "line-height",
         "token": "var(--body-sm-line-height)"
       },
       {
-        "selector": ".my-page__app-center",
-        "content_role": "应用中心背景",
-        "css_property": "background",
-        "token": "var(--bg-page)"
-      },
-      {
-        "selector": ".my-page__app-center-body",
-        "content_role": "应用中心内容节奏",
-        "css_property": "gap",
-        "token": "var(--spacer-12)"
-      },
-      {
-        "selector": ".my-page__app-center-body",
-        "content_role": "应用中心内容留白",
-        "css_property": "padding",
-        "token": "var(--spacer-16)"
-      },
-      {
-        "selector": ".my-page__app-center-summary",
-        "content_role": "应用总量说明",
-        "css_property": "color",
-        "token": "var(--text-tertiary)"
-      },
-      {
-        "selector": ".my-page__app-center-summary",
-        "content_role": "应用总量说明",
-        "css_property": "font-size",
-        "token": "var(--body-sm-font-size)"
-      },
-      {
-        "selector": ".my-page__app-center-summary",
-        "content_role": "应用总量说明",
-        "css_property": "line-height",
-        "token": "var(--body-sm-line-height)"
-      },
-      {
-        "selector": ".my-page__app-grid--all",
-        "content_role": "应用中心底部留白",
-        "css_property": "padding-bottom",
-        "token": "var(--spacer-16)"
+        "selector": ".my-page__order-metric",
+        "content_role": "订单数量最小高度",
+        "css_property": "min-height",
+        "token": "var(--size-24)"
       }
     ],
     "component_bindings": [
@@ -544,16 +484,12 @@
         }
       },
       {
-        "binding_id": "app-center-navbar",
-        "slug": "navbar",
-        "reason": "承载应用中心全屏二级层的关闭与页面标题",
+        "binding_id": "order-metric",
+        "slug": "metric",
+        "reason": "承载我买的卡片前5个订单状态数量展示，替换原图标位置",
         "variant_dimensions": {
-          "leftControl": "close-icon",
-          "titleAlignment": "center",
-          "actions": "none",
-          "spacing": "default",
-          "pageTransition": "present",
-          "position": "sticky"
+          "size": "20",
+          "theme": "black"
         }
       }
     ],
@@ -565,8 +501,7 @@
       "mutable_regions": [
         ".my-page__quick-apps",
         ".my-page__order-grid",
-        ".my-page__services",
-        ".my-page__app-center-template"
+        ".my-page__services"
       ]
     },
     "interaction_contract": [
@@ -584,7 +519,7 @@
       },
       {
         "dom_id": "open-app-center",
-        "target": "overlay:modal"
+        "target": "route:app-center"
       },
       {
         "dom_id": "order-grid",
@@ -609,14 +544,6 @@
       {
         "dom_id": "open-rebate",
         "target": "feedback:toast"
-      },
-      {
-        "dom_id": "close-app-center",
-        "target": "overlay:close"
-      },
-      {
-        "dom_id": "app-center-grid",
-        "target": "feedback:toast"
       }
     ],
     "state_contract": [
@@ -626,14 +553,6 @@
         "trigger": "进入我的主 tab",
         "visible_result": "展示已登录超级管理员的会员、空间、应用、订单和个人服务信息",
         "fallback": "保持当前可用入口与固定演示数据",
-        "persistence": "memory"
-      },
-      {
-        "state_id": "app-center-visible",
-        "initial": false,
-        "trigger": "选择更多应用",
-        "visible_result": "全屏展示资源包中的 78 个去重应用，并提供关闭返回",
-        "fallback": "关闭二级层并返回我的页原位置",
         "persistence": "memory"
       },
       {
@@ -688,6 +607,31 @@
       "component_slug": "card"
     },
     {
+      "dd_id": "order-metric-pending",
+      "binding_id": "order-metric",
+      "component_slug": "metric"
+    },
+    {
+      "dd_id": "order-metric-paid",
+      "binding_id": "order-metric",
+      "component_slug": "metric"
+    },
+    {
+      "dd_id": "order-metric-shipped",
+      "binding_id": "order-metric",
+      "component_slug": "metric"
+    },
+    {
+      "dd_id": "order-metric-refund",
+      "binding_id": "order-metric",
+      "component_slug": "metric"
+    },
+    {
+      "dd_id": "order-metric-hold",
+      "binding_id": "order-metric",
+      "component_slug": "metric"
+    },
+    {
       "dd_id": "settings-cell",
       "binding_id": "settings-cell-divided",
       "component_slug": "cell"
@@ -711,17 +655,12 @@
       "dd_id": "rebate-cell",
       "binding_id": "settings-cell-last",
       "component_slug": "cell"
-    },
-    {
-      "dd_id": "app-center-navbar",
-      "binding_id": "app-center-navbar",
-      "component_slug": "navbar"
     }
   ],
   "generation_evidence": {
     "scene_js": "wego-app/scenes/我的/scene.js",
     "scene_css": "wego-app/scenes/我的/scene.css",
-    "source_sha256": "5ceb4d56e77dd5d169b6d0dd201bf1fd7c080010e87ab30020b1f4f1957267d4",
+    "source_sha256": "7b63ec3e8aa1c4daa55e633f8c98c6b5066493a7e6af0593b6c11003e06ee8fa",
     "dom_ids": [
       "renew-vip",
       "manage-storage",
@@ -732,11 +671,9 @@
       "open-wallet",
       "open-favorites",
       "open-coupons",
-      "open-rebate",
-      "close-app-center",
-      "app-center-grid"
+      "open-rebate"
     ],
-    "component_count": 14,
+    "component_count": 18,
     "visualCheck": {
       "status": "passed",
       "viewports": [

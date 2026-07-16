@@ -100,7 +100,7 @@
     "previewFirst": "每个命中组件先读 Preview，再读契约；Preview 决定实现结构，契约决定语义和边界。",
     "componentBoundary": "稳定变体优先。业务 class 只承担场景区域布局，不能替代正式组件结构或覆盖组件内部样式。",
     "uikitBoundary": "UI Kit 只用于页面结构和组件组合；禁止复制 .uikit-shell、.phone-frame、.phone-screen、biz-* 或演示业务内容。",
-    "groupStructure": "连续列表和表单优先使用 .cell-group/.form-group 的正式 title 和 content 结构，不额外发明白底壳、圆角壳或 section title。",
+    "groupStructure": "连续列表和表单优先使用 .cell-group/.form-group 的正式 title 和 content 结构，不额外发明白底壳、圆角壳或 section title；页面边距为 M0（通栏）时，group__content 默认不加 --card 修饰；页面边距为 M8 时，才给 group__content 加 --card 圆角修饰。",
     "appHostBoundary": "唯一宿主是 wego-app/index.html；场景通过 routes.js、scene.js、scene.css 增量接入。",
     "noGeneratedSpecs": "不存在自动生成 specs 规则目录；所有运行时规则必须回到当前权威源。"
   },

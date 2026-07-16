@@ -1,0 +1,169 @@
+{
+  "schemaVersion": 4,
+  "identity": {
+    "iteration_id": "album-product-feed",
+    "title": "动态商品流",
+    "date": "2026-07-16",
+    "primary_scene": "微购相册动态",
+    "related_scenes": []
+  },
+  "status": "awaiting-prototype-confirmation",
+  "scope_revision": 2,
+  "prototype_brief": {
+    "goal": "让用户在微购相册中连续浏览店主发布的商品动态，稳定获取商品和发布信息，并能查看产品详情或触发所需操作入口。",
+    "included": [
+      "连续浏览店主发布的商品动态",
+      "每条动态展示发布者、发布时间、商品内容、商品图片和相关产品信息",
+      "展示仅含产品信息与同时含文字的两种动态内容",
+      "稳定展示文字为空、图片数量不同和产品信息较长的动态",
+      "提供进入产品详情的入口，并以本地数据展示基本产品信息",
+      "提供一键转发和下载图片两个核心操作入口",
+      "提供复制文案、分享、收藏、搜索、编辑、复制动态和查看大图的弱化操作入口",
+      "对必要操作入口提供明确的可见反馈"
+    ],
+    "excluded": [
+      "发布动态",
+      "评论、点赞等社交互动",
+      "一键转发、复制文案、分享、收藏、下载图片、搜索、编辑、复制动态和查看大图的具体功能下钻",
+      "真实后端接口",
+      "刷新后的数据或操作状态持久化"
+    ],
+    "entry_points": [
+      "微购 App 的动态主 tab，用户打开 App 后默认进入"
+    ],
+    "critical_paths": [
+      "进入动态商品流 → 连续浏览店主商品动态 → 进入产品详情",
+      "进入动态商品流 → 连续浏览店主商品动态 → 选择一键转发或下载图片 → 获得对应入口反馈",
+      "进入动态商品流 → 连续浏览店主商品动态 → 选择其他操作 → 获得对应入口反馈",
+      "进入动态商品流 → 选择动态图片 → 查看图片内容"
+    ],
+    "prototype_boundaries": [
+      {
+        "flow_id": "browse-product-feed",
+        "mode": "functional",
+        "visible_result": "用户可连续浏览具有不同内容组合的商品动态，并查看每条动态的发布和产品信息"
+      },
+      {
+        "flow_id": "view-product-detail",
+        "mode": "simulated",
+        "visible_result": "用户可从任一动态进入并查看该产品的本地模拟基本信息"
+      },
+      {
+        "flow_id": "open-required-actions",
+        "mode": "stub",
+        "visible_result": "用户可优先找到一键转发和下载图片入口，也可找到其他操作入口；选择后看到明确反馈"
+      },
+      {
+        "flow_id": "view-feed-image",
+        "mode": "stub",
+        "visible_result": "用户选择动态图片后看到图片查看入口已触发的明确反馈"
+      }
+    ],
+    "states": [
+      "默认状态：用户进入动态主 tab，可连续查看多条店主商品动态",
+      "动态内容状态：动态可以只含产品信息，也可以同时含文字；文字可为空，图片数量可不同，产品信息可较长",
+      "产品详情状态：用户选择某条动态关联产品后，可查看该产品的本地模拟基本信息并返回动态商品流",
+      "操作入口反馈状态：用户优先选择一键转发或下载图片，或选择其他操作入口后，均看到与所选操作相符的反馈"
+    ],
+    "data_contract": {
+      "feed_item": {
+        "required": [
+          "id",
+          "publisher_name",
+          "publisher_avatar",
+          "published_at",
+          "product",
+          "image_list"
+        ],
+        "optional": [
+          "text_content"
+        ],
+        "constraints": [
+          "至少包含仅产品信息与产品信息加文字两种内容组合",
+          "文字内容允许为空",
+          "每条动态的图片数量允许不同",
+          "产品信息允许包含较长的名称或说明"
+        ]
+      },
+      "product": {
+        "required": [
+          "id",
+          "name",
+          "price",
+          "cover_image",
+          "basic_description"
+        ],
+        "actions": [
+          "进入产品详情"
+        ]
+      },
+      "required_action": {
+        "core": [
+          "一键转发",
+          "下载图片"
+        ],
+        "secondary": [
+          "复制文案",
+          "分享",
+          "收藏",
+          "搜索",
+          "编辑",
+          "复制动态",
+          "查看大图"
+        ],
+        "result": "仅返回本地可见反馈，不执行实际业务操作"
+      }
+    },
+    "assumptions": [
+      "假设用户已进入微购相册且可浏览店主公开发布的商品动态",
+      "假设原型使用与截图无关的虚构店主、商品文案和本地图片资源",
+      "假设搜索、编辑等入口均面向当前动态商品流上下文，不扩展至独立业务流程"
+    ],
+    "open_questions": []
+  },
+  "brief_confirmation": {
+    "at": "2026-07-16T11:00:48.573Z",
+    "scope_revision": 2,
+    "scope_sha256": "78547a000eb28d943ada5d59bd427fb5c1600c2674fae54454378731d9f007e5"
+  },
+  "prototype_confirmation": null,
+  "affected_scenes": [
+    "微购相册动态"
+  ],
+  "affected_runtime": [],
+  "stage_outputs": {
+    "product": {
+      "valid": true
+    },
+    "design": {
+      "valid": true
+    }
+  },
+  "change_log": [
+    {
+      "action": "init",
+      "at": "2026-07-16T07:08:14.314Z"
+    },
+    {
+      "action": "submit-brief",
+      "at": "2026-07-16T07:09:00.186Z"
+    },
+    {
+      "action": "invalidate",
+      "at": "2026-07-16T10:59:54.744Z"
+    },
+    {
+      "action": "submit-brief",
+      "at": "2026-07-16T11:00:15.239Z"
+    },
+    {
+      "action": "confirm-brief",
+      "at": "2026-07-16T11:00:48.575Z"
+    },
+    {
+      "action": "submit-prototype",
+      "at": "2026-07-16T11:09:19.405Z"
+    }
+  ],
+  "freeze": null
+}

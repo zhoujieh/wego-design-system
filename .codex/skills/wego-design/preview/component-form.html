@@ -13,6 +13,8 @@
 .page{max-width:420px;margin:0 auto}
 .section-group{background:var(--bg-surface);width:100%}
 .section-gap{height:8px;background:var(--bg-page)}
+.pv-demo-note{padding:12px 16px;background:var(--bg-subtle);font-size:var(--body-sm-font-size);color:var(--text-secondary);line-height:1.6;margin-bottom:8px}
+.pv-demo-note code{background:var(--bg-surface);padding:1px 6px;border-radius:4px;font-size:var(--body-sm-font-size)}
 
 /* @component-css-start */
 :is(.form-group,.form-group__content){width:100%}
@@ -131,11 +133,15 @@
 </style>
 </head>
 <body>
-<div class="pv-header"><h1>表单容器</h1><p>表单字段容器，支持水平/垂直布局、多输入类型、错误与计数共用消息槽位，并在输入恢复合法后自动回到默认态。</p></div>
+<div class="pv-header"><h1>表单容器</h1><p>表单字段容器，支持水平/垂直布局、多输入类型、错误与计数共用消息槽位，并在输入恢复合法后自动回到默认态。默认通栏白底，宿主层有横向留白（M8）时才开启 card 圆角修饰。</p></div>
 <div class="page">
 
+<div class="pv-demo-note">
+  <strong>使用规则：</strong>页面边距 M0（通栏）时，<code>.form-group__content</code> 不加 <code>--card</code> 修饰；页面边距 M8 时，才加 <code>--card</code> 圆角修饰。
+</div>
+
 <div class="form-group">
-  <div class="form-group__title">通栏分组</div>
+  <div class="form-group__title">通栏分组 [M0 / 无 card]</div>
   <div class="form-group__content">
     <div class="form-body">
       <div class="form-body__label">字段名称</div>
@@ -150,7 +156,90 @@
 <div class="section-gap"></div>
 
 <div class="form-group">
-  <div class="form-group__title">标题 + 卡片内容</div>
+  <div class="form-group__title">通栏 - 基础输入 [M0 / 无 card]</div>
+  <div class="form-group__content">
+  <div class="form-body" data-validate="text-required">
+    <div class="form-body__label">姓名</div>
+    <div class="form-body__action">
+      <input type="text" placeholder="请输入姓名">
+      <span class="form-body__error">姓名不能为空</span>
+    </div>
+  </div>
+  <div class="form-body" data-validate="number-required">
+    <div class="form-body__label">数量</div>
+    <div class="form-body__action">
+      <input type="text" inputmode="numeric" data-sanitize="digits" placeholder="0">
+      <span class="form-body__error">数量不能为空</span>
+    </div>
+  </div>
+  <div class="form-body form-body--clickable">
+    <div class="form-body__label">支付方式</div>
+    <div class="form-body__action">
+      <div class="form-body__select">
+        <span class="form-body__select-text has-value">即时到账</span>
+        <i class="form-body__select-arrow wego-iconfont-s icon-youjiantou16"></i>
+      </div>
+    </div>
+  </div>
+  </div>
+</div>
+<div class="section-gap"></div>
+
+<div class="form-group">
+  <div class="form-group__title">通栏 - 前缀字段 [M0 / 无 card]</div>
+  <div class="form-group__content">
+  <div class="form-body form-body--preserve-content-align" data-validate="money-range">
+    <div class="form-body__label">金额</div>
+    <div class="form-body__action">
+      <div class="form-body__money">
+        <span class="form-body__money-symbol has-value">¥</span>
+        <input class="form-body__money-input" type="text" inputmode="decimal" data-sanitize="money" value="888.00">
+      </div>
+      <span class="form-body__error">请输入有效金额，单笔最多 50,000 元</span>
+    </div>
+  </div>
+  <div class="form-body form-body--preserve-content-align" data-validate="phone">
+    <div class="form-body__label form-body__label--required"><span class="form-body__label-text">手机号</span><span class="form-body__required">(必填)</span></div>
+    <div class="form-body__action">
+      <div class="form-body__phone">
+        <span class="form-body__phone-prefix">+86</span>
+        <div class="form-body__phone-divider"></div>
+        <input class="form-body__phone-input" type="text" inputmode="numeric" data-sanitize="phone" value="17799097490" maxlength="11">
+      </div>
+      <span class="form-body__error">请输入 11 位手机号</span>
+    </div>
+  </div>
+  </div>
+</div>
+<div class="section-gap"></div>
+
+<div class="form-group">
+  <div class="form-group__title">通栏 - 右侧控件 [M0 / 无 card]</div>
+  <div class="form-group__content">
+  <div class="form-body form-body--preserve-content-align">
+    <div class="form-body__label">金额</div>
+    <div class="form-body__action">
+      <div class="form-body__money">
+        <span class="form-body__money-symbol has-value">¥</span>
+        <input class="form-body__money-input" type="text" inputmode="decimal" data-sanitize="money" value="50000.00">
+      </div>
+    </div>
+    <div class="form-body__right-btn">
+      <a class="link" href="javascript:void(0)" data-fill-all>全部</a>
+    </div>
+  </div>
+  <div class="form-body form-body--preserve-content-align">
+    <div class="form-body__label">推送通知</div>
+    <div class="form-body__action">
+      <div class="switch switch--on"><div class="switch__thumb"></div></div>
+    </div>
+  </div>
+  </div>
+</div>
+<div class="section-gap"></div>
+
+<div class="form-group">
+  <div class="form-group__title">标题 + 卡片内容 [M8 / card]</div>
   <div class="form-group__content form-group__content--card">
     <div class="form-body">
       <div class="form-body__label">方案名称</div>
@@ -165,7 +254,7 @@
 <div class="section-gap"></div>
 
 <div class="form-group">
-  <div class="form-group__title">基础输入对照 / 左对齐</div>
+  <div class="form-group__title">基础输入对照 / 左对齐 [M8 / card]</div>
   <div class="form-group__content form-group__content--card">
   <div class="form-body" data-validate="text-required">
     <div class="form-body__label">姓名</div>
@@ -195,7 +284,7 @@
 <div class="section-gap"></div>
 
 <div class="form-group">
-  <div class="form-group__title">前缀字段与整组左对齐</div>
+  <div class="form-group__title">前缀字段与整组左对齐 [M8 / card]</div>
   <div class="form-group__content form-group__content--card">
   <div class="form-body form-body--preserve-content-align" data-validate="money-range">
     <div class="form-body__label">金额</div>
@@ -239,7 +328,7 @@
 <div class="section-gap"></div>
 
 <div class="form-group">
-  <div class="form-group__title">多行文本与计数</div>
+  <div class="form-group__title">多行文本与计数 [M8 / card]</div>
   <div class="form-group__content form-group__content--card">
   <div class="form-body form-body--vertical" data-validate="textarea-counter">
     <div class="form-body__label">备注</div>
@@ -263,7 +352,7 @@
 <div class="section-gap"></div>
 
 <div class="form-group">
-  <div class="form-group__title">右侧控件场景</div>
+  <div class="form-group__title">右侧控件场景 [M8 / card]</div>
   <div class="form-group__content form-group__content--card">
   <div class="form-body form-body--preserve-content-align">
     <div class="form-body__label">金额</div>
@@ -406,7 +495,7 @@
 <div class="section-gap"></div>
 
 <div class="form-group">
-  <div class="form-group__title">自定义组合与展开</div>
+  <div class="form-group__title">自定义组合与展开 [M8 / card]</div>
   <div class="form-group__content form-group__content--card">
   <div class="form-body">
     <div class="form-body__label">采购数量</div>
@@ -462,7 +551,7 @@
 <div class="section-gap"></div>
 
 <div class="form-group" data-demo-form="transfer-left">
-  <div class="form-group__title">完整业务表单 / 转账场景</div>
+  <div class="form-group__title">完整业务表单 / 转账场景 [M8 / card]</div>
   <div class="form-group__content form-group__content--card">
   <div class="form-body" data-validate="text-required">
     <div class="form-body__label">收款人</div>

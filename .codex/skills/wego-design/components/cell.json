@@ -6,7 +6,7 @@
   "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "移动端列表单元格，承载信息展示、跳转、选择和轻操作插槽。",
+  "description": "移动端列表单元格，承载信息展示、跳转、选择和轻操作插槽。默认通栏白底无圆角；当宿主内容层提供横向留白（M8）时，才在 .cell-group__content 上开启 --card 卡片修饰类。",
   "semanticTypeCandidates": [
     "list-row",
     "setting-row",
@@ -131,7 +131,7 @@
     "子级缩进场景中，父项行和子项行必须在同一个 .cell-group 内连续排列。子项左侧没有其他前导内容时，使用 .cell__backspace > .cell__backspace-icon > .cell__body，并由 backspace-icon 作为子级标识；缩进前导区与正文内容之间继续保持 12px 间距，不额外扩大 body 左内边距。子项左侧已有图标、checkbox、radio、switch 等前导语义时，不再补 cell__backspace，直接沿用现有前导节点。",
     "成组出现的 cell 必须用 .cell-group 包裹，不发明场景级 xxx-page__group 自定义类。",
     "需要组标题时，标题使用 .cell-group__title 单独成行，不能把标题塞进白底圆角内容区里。",
-    "连续 cell 默认放进 .cell-group__content；当承接该组的宿主内容层提供横向留白时，在 .cell-group__content 上开启卡片修饰类；当分组内容直接通栏贴边排列时，不开启卡片修饰类。",
+    "连续 cell 默认放进 .cell-group__content；.cell-group__content 默认通栏白底无圆角（M0 场景），仅当承接该组的宿主内容层提供横向留白（M8 场景）时，才在 .cell-group__content 上开启 --card 卡片修饰类。",
     ".cell-group__content 内连续 cell 除最后一行外均加分割线修饰类；孤立单行 cell 不加分割线。",
     "连续 cell 必须使用标题与内容容器的正式结构。"
   ],
@@ -147,7 +147,7 @@
     "nestedControl": "嵌套 checkbox、radio 或 switch 时，只有明确进入下一层配置的场景才允许整行点击；否则交互只落在控件本体，避免状态切换冲突。"
   },
   "usageHints": [
-    "适合设置页、资料页、订单信息摘要等移动端高密度列表。",
+    "适合设置页、资料页、订单信息摘要等移动端高密度列表。页面内容通栏（M0）时 .cell-group__content 不加 card 修饰；页面有横向留白（M8）时才加 --card 圆角。",
     "双行模式用于副标题需要解释信息时，避免在单行强塞长文案。",
     "头像尺寸与行密度绑定：单行 cell 用 avatar--24，双行 cell 用 avatar--40；不要在单行场景使用 40px 头像。",
     "只有带箭头、语义明确为进入下一层或展开下一步的行，才使用 .cell--clickable 和整行点击态。",
@@ -160,7 +160,7 @@
     "cell__body 内置上下 12px padding，结合 min-height（cell--single: 56px, cell--double: 76px），副标题换行时 cell 可自然撑高。标题仍由 nowrap 截断。如需自定义 cell 内间距，优先通过调整 body padding 而非覆盖 min-height。",
     "子级条件区域的层级缩进必须复用 cell 组件正式结构：无前导内容的子项用 cell__backspace + backspace-icon 表达子级身份；已有前导内容的子项通过同组连续排列和既有前导节点表达层级，禁止手写 border-left / margin-left 等自定义样式实现缩进。",
     "页面需要 section 标题时，直接使用 .cell-group__title，不再复制 UI Kit 私有的 .uikit-section-title 或手写额外标题样式。",
-    "当 phone-body 或等价宿主内容层承担左右内边距时，把该组视为卡片式分组，在 .cell-group__content 上使用卡片修饰类；宿主层不提供横向留白时保持通栏白底，不要额外再包一层只为白底和圆角存在的容器。"
+    "当 phone-body 或等价宿主内容层承担左右内边距（M8）时，把该组视为卡片式分组，在 .cell-group__content 上使用 --card 卡片修饰类；宿主层不提供横向留白（M0）时保持通栏白底，不要额外再包一层只为白底和圆角存在的容器。"
   ],
   "doNotInvent": [
     "不要把 cell 扩成桌面表格行、树形列表或多列数据面板。",
@@ -238,7 +238,8 @@
     "--text-tertiary"
   ],
   "previewOnlyTokens": [
-    "--bg-page"
+    "--bg-page",
+    "--bg-subtle"
   ],
   "localTokens": [
     "--cell-divider-left"

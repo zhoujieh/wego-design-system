@@ -1,0 +1,292 @@
+{
+  "schemaVersion": 2,
+  "scene": "应用中心",
+  "surface_id": "app-center",
+  "route_id": "app-center",
+  "layout_mode": "composed",
+  "page_pattern": null,
+  "presentation": {
+    "type": "push",
+    "transition": "push",
+    "dismissAction": "back",
+    "overlayLevel": "inline",
+    "coversTabBar": true,
+    "source": "library-consumption.json#/appRuntime/presentationTypes"
+  },
+  "prompt_contract": {
+    "design_system_version": 411,
+    "token_bindings": [
+      {
+        "selector": ".app-center-page",
+        "content_role": "页面边距",
+        "css_property": "padding-inline",
+        "token": "var(--layout-page-margin-m0)"
+      },
+      {
+        "selector": ".app-center-page",
+        "content_role": "页面背景",
+        "css_property": "background",
+        "token": "var(--bg-page)"
+      },
+      {
+        "selector": ".app-center-page",
+        "content_role": "页面默认文字",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".app-center-page",
+        "content_role": "页面基础字体",
+        "css_property": "font-family",
+        "token": "var(--body-md-font-family)"
+      },
+      {
+        "selector": ".app-center-page__tabs",
+        "content_role": "标签栏背景",
+        "css_property": "background",
+        "token": "var(--bg-page)"
+      },
+      {
+        "selector": ".app-center-page__tabs",
+        "content_role": "标签栏与内容间距",
+        "css_property": "margin-bottom",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".app-center-page__body",
+        "content_role": "内容区横向边距",
+        "css_property": "padding-inline",
+        "token": "var(--layout-page-margin-m8)"
+      },
+      {
+        "selector": ".app-center-page__body",
+        "content_role": "内容区底部安全区",
+        "css_property": "padding-bottom",
+        "token": "var(--spacer-72)"
+      },
+      {
+        "selector": ".app-center-page__body",
+        "content_role": "内容区分组间距",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".app-center-page__category-content",
+        "content_role": "卡片内容节奏",
+        "css_property": "gap",
+        "token": "var(--spacer-12)"
+      },
+      {
+        "selector": ".app-center-page__category-content",
+        "content_role": "卡片内容留白",
+        "css_property": "padding",
+        "token": "var(--spacer-12)"
+      },
+      {
+        "selector": ".app-center-page__category-title",
+        "content_role": "分类标题文字",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".app-center-page__category-title",
+        "content_role": "分类标题层级",
+        "css_property": "font-size",
+        "token": "var(--heading-xs-font-size)"
+      },
+      {
+        "selector": ".app-center-page__category-title",
+        "content_role": "分类标题层级",
+        "css_property": "font-weight",
+        "token": "var(--heading-xs-font-weight)"
+      },
+      {
+        "selector": ".app-center-page__category-title",
+        "content_role": "分类标题层级",
+        "css_property": "line-height",
+        "token": "var(--heading-xs-line-height)"
+      },
+      {
+        "selector": ".app-center-page__app-grid",
+        "content_role": "应用入口间距",
+        "css_property": "gap",
+        "token": "var(--spacer-4)"
+      },
+      {
+        "selector": ".app-center-page__app-entry",
+        "content_role": "应用入口圆角",
+        "css_property": "border-radius",
+        "token": "var(--radius-8)"
+      },
+      {
+        "selector": ".app-center-page__app-entry",
+        "content_role": "应用图标与名称间距",
+        "css_property": "gap",
+        "token": "var(--spacer-4)"
+      },
+      {
+        "selector": ".app-center-page__app-entry",
+        "content_role": "应用入口热区",
+        "css_property": "padding-block",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".app-center-page__app-entry:active",
+        "content_role": "应用入口按压圆角",
+        "css_property": "border-radius",
+        "token": "var(--radius-8)"
+      },
+      {
+        "selector": ".app-center-page__app-entry:active",
+        "content_role": "应用入口按压反馈",
+        "css_property": "background",
+        "token": "var(--bg-state-pressed)"
+      },
+      {
+        "selector": ".app-center-page__app-placeholder",
+        "content_role": "占位元素间距",
+        "css_property": "gap",
+        "token": "var(--spacer-4)"
+      },
+      {
+        "selector": ".app-center-page__app-placeholder",
+        "content_role": "占位元素热区",
+        "css_property": "padding-block",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".app-center-page__app-label",
+        "content_role": "应用名称",
+        "css_property": "color",
+        "token": "var(--text-secondary)"
+      },
+      {
+        "selector": ".app-center-page__app-label",
+        "content_role": "应用名称",
+        "css_property": "font-size",
+        "token": "var(--body-sm-font-size)"
+      },
+      {
+        "selector": ".app-center-page__app-label",
+        "content_role": "应用名称",
+        "css_property": "line-height",
+        "token": "var(--body-sm-line-height)"
+      }
+    ],
+    "component_bindings": [
+      {
+        "binding_id": "app-center-navbar",
+        "slug": "navbar",
+        "reason": "承载应用中心二级页面的返回与页面标题",
+        "variant_dimensions": {
+          "leftControl": "back-icon",
+          "titleAlignment": "center",
+          "actions": "none",
+          "spacing": "default",
+          "pageTransition": "push",
+          "position": "sticky"
+        }
+      },
+      {
+        "binding_id": "app-center-tabs",
+        "slug": "tabs",
+        "reason": "承载分类快捷定位切换",
+        "variant_dimensions": {
+          "size": "mini",
+          "layout": "scroll",
+          "icon": "none",
+          "state": "default"
+        }
+      },
+      {
+        "binding_id": "category-card",
+        "slug": "card",
+        "reason": "承载每个分类的应用网格内容分组",
+        "variant_dimensions": {
+          "base": "auto",
+          "surface": "surface"
+        }
+      }
+    ],
+    "layout_contract": {
+      "mode": "composed",
+      "source": "references/design-decisions.md",
+      "selection_reason": "应用中心是二级页面，使用 tabs 做分类切换，card 做内容分组",
+      "page_edge_mode": "M0",
+      "mutable_regions": [
+        ".app-center-page__body"
+      ]
+    },
+    "interaction_contract": [
+      {
+        "dom_id": "app-center-back",
+        "target": "navigation:back"
+      },
+      {
+        "dom_id": "app-center-body",
+        "target": "feedback:toast"
+      }
+    ],
+    "state_contract": [
+      {
+        "state_id": "app-center-default",
+        "initial": true,
+        "trigger": "进入应用中心页面",
+        "visible_result": "展示全部应用按业务场景分类，顶部 tabs 可快速切换分类",
+        "fallback": "保持当前分类展示和演示数据",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "app-entry-feedback",
+        "initial": false,
+        "trigger": "选择应用入口",
+        "visible_result": "显示与当前入口对应的瞬时反馈",
+        "fallback": "保留当前页面",
+        "persistence": "memory"
+      }
+    ]
+  },
+  "decisions": [
+    {
+      "dd_id": "app-center-navbar",
+      "binding_id": "app-center-navbar",
+      "component_slug": "navbar"
+    },
+    {
+      "dd_id": "app-center-tabs",
+      "binding_id": "app-center-tabs",
+      "component_slug": "tabs"
+    },
+    {
+      "dd_id": "category-card",
+      "binding_id": "category-card",
+      "component_slug": "card"
+    }
+  ],
+  "generation_evidence": {
+    "scene_js": "wego-app/scenes/应用中心/scene.js",
+    "scene_css": "wego-app/scenes/应用中心/scene.css",
+    "source_sha256": "9604d3314ad36ec2e053738d0a08d74f4e59aeed329ca4302e51c54c41433472",
+    "dom_ids": [
+      "app-center-back",
+      "app-center-body"
+    ],
+    "component_count": 3,
+    "visualCheck": {
+      "status": "passed",
+      "viewports": [
+        375,
+        393
+      ],
+      "checked_at": "2026-07-16T02:50:00.000Z",
+      "checks": {
+        "horizontal_overflow": true,
+        "overlap": true,
+        "clipping": true,
+        "action_legibility": true,
+        "primary_focus": true,
+        "state_feedback": true
+      }
+    }
+  }
+}

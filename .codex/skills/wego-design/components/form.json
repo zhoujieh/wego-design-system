@@ -6,7 +6,7 @@
   "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "表单字段容器，统一承载横向和纵向字段布局、必填说明、只读前缀输入、选择项、上传位与反馈文案。",
+  "description": "表单字段容器，统一承载横向和纵向字段布局、必填说明、只读前缀输入、选择项、上传位与反馈文案。默认通栏白底无圆角；当宿主内容层提供横向留白（M8）时，才在 .form-group__content 上开启 --card 卡片修饰类。",
   "semanticTypeCandidates": [
     "form-row",
     "field-container",
@@ -215,7 +215,7 @@
     "radio / checkbox 成组场景直接复用各自组件契约里的 .radio-field-group / .checkbox-field-group 与 .radio-field / .checkbox-field 结构，不额外发明 form 专属包装层。",
     "成组出现的 form 必须用 .form-group 包裹，不发明场景级 xxx-page__group 自定义类。",
     "需要组标题时，标题使用 .form-group__title 单独成行，不能把标题塞进白底圆角内容区里。",
-    "连续 form-body 默认放进 .form-group__content；当承接该组的宿主内容层提供横向留白时，在 .form-group__content 上开启卡片修饰类；当分组内容直接通栏贴边排列时，不开启卡片修饰类。",
+    "连续 form-body 默认放进 .form-group__content；.form-group__content 默认通栏白底无圆角（M0 场景），仅当承接该组的宿主内容层提供横向留白（M8 场景）时，才在 .form-group__content 上开启 --card 卡片修饰类。",
     "连续 form-body 必须使用标题与内容容器的正式结构。"
   ],
   "behavior": {
@@ -232,7 +232,7 @@
     "clickTarget": "只有选择/展开类字段才使用整行可点击语义；承载独立控件的字段行应让焦点和键盘操作直接落在控件本体。"
   },
   "usageHints": [
-    "适合资料编辑、业务设置、权限配置等高密度表单页。",
+    "适合资料编辑、业务设置、权限配置等高密度表单页。页面内容通栏（M0）时 .form-group__content 不加 card 修饰；页面有横向留白（M8）时才加 --card 圆角。",
     "手机号和金额类型沿用统一字段骨架，不单独发明业务组件。",
     "必填字段优先通过 .form-body__label--required + .form-body__required 表达，手机号区号前缀使用只读文本 .form-body__phone-prefix。",
     "字段内容统一左对齐，保持页面视觉一致性。",
@@ -250,7 +250,7 @@
     "checkbox 组合场景沿用 checkbox 组件固定的 inner / icon / minus 结构，勾选态继续使用随库 SVG 资产。",
     "成组 form 使用 .form-group。",
     "页面需要 section 标题时，直接使用 .form-group__title，不再复制 UI Kit 私有的 .uikit-section-title 或手写额外标题样式。",
-    "当 phone-body 或等价宿主内容层承担左右内边距时，把该组视为卡片式分组，在 .form-group__content 上使用卡片修饰类；宿主层不提供横向留白时保持通栏白底，不要额外再包一层只为白底和圆角存在的容器。"
+    "当 phone-body 或等价宿主内容层承担左右内边距（M8）时，把该组视为卡片式分组，在 .form-group__content 上使用 --card 卡片修饰类；宿主层不提供横向留白（M0）时保持通栏白底，不要额外再包一层只为白底和圆角存在的容器。"
   ],
   "doNotInvent": [
     "不要把 form 扩成桌面属性面板、富文本表单或多列表格表单。",
@@ -333,7 +333,8 @@
     "--text-tertiary"
   ],
   "previewOnlyTokens": [
-    "--bg-page"
+    "--bg-page",
+    "--bg-subtle"
   ],
   "localTokens": []
 }
