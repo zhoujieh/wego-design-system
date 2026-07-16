@@ -1,0 +1,757 @@
+{
+  "schemaVersion": 2,
+  "scene": "我的",
+  "surface_id": "my-home",
+  "route_id": "my",
+  "layout_mode": "composed",
+  "page_pattern": null,
+  "presentation": {
+    "type": "host-tab",
+    "transition": "none",
+    "dismissAction": "tab-switch",
+    "overlayLevel": "inline",
+    "coversTabBar": false,
+    "source": "library-consumption.json#/appRuntime/presentationTypes"
+  },
+  "prompt_contract": {
+    "design_system_version": 411,
+    "token_bindings": [
+      {
+        "selector": ".my-page",
+        "content_role": "页面边距",
+        "css_property": "padding-inline",
+        "token": "var(--layout-page-margin-m8)"
+      },
+      {
+        "selector": ".my-page",
+        "content_role": "页面背景",
+        "css_property": "background",
+        "token": "var(--bg-page)"
+      },
+      {
+        "selector": ".my-page",
+        "content_role": "页面默认文字",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".my-page",
+        "content_role": "页面基础字体",
+        "css_property": "font-family",
+        "token": "var(--body-md-font-family)"
+      },
+      {
+        "selector": ".my-page__scroll",
+        "content_role": "页面分组间距",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".my-page__scroll",
+        "content_role": "页面上下留白",
+        "css_property": "padding-block",
+        "token": "var(--spacer-16)"
+      },
+      {
+        "selector": ".my-page__profile",
+        "content_role": "头像与身份间距",
+        "css_property": "gap",
+        "token": "var(--spacer-12)"
+      },
+      {
+        "selector": ".my-page__profile",
+        "content_role": "用户信息留白",
+        "css_property": "padding",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".my-page__profile-meta",
+        "content_role": "用户名与身份间距",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".my-page__username",
+        "content_role": "用户名文字",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".my-page__username",
+        "content_role": "用户名层级",
+        "css_property": "font-size",
+        "token": "var(--heading-md-font-size)"
+      },
+      {
+        "selector": ".my-page__username",
+        "content_role": "用户名层级",
+        "css_property": "font-weight",
+        "token": "var(--heading-md-font-weight)"
+      },
+      {
+        "selector": ".my-page__username",
+        "content_role": "用户名层级",
+        "css_property": "line-height",
+        "token": "var(--heading-md-line-height)"
+      },
+      {
+        "selector": ".my-page__identity",
+        "content_role": "身份标签间距",
+        "css_property": "gap",
+        "token": "var(--spacer-4)"
+      },
+      {
+        "selector": ".my-page__section-content",
+        "content_role": "卡片内容节奏",
+        "css_property": "gap",
+        "token": "var(--spacer-12)"
+      },
+      {
+        "selector": ".my-page__section-content",
+        "content_role": "卡片内容留白",
+        "css_property": "padding",
+        "token": "var(--spacer-12)"
+      },
+      {
+        "selector": ".my-page__membership-row",
+        "content_role": "会员信息与续费间距",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".my-page__storage-row",
+        "content_role": "空间信息与管理间距",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".my-page__membership-mark",
+        "content_role": "会员标识内容间距",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".my-page__membership-label",
+        "content_role": "会员辅助信息",
+        "css_property": "color",
+        "token": "var(--text-tertiary)"
+      },
+      {
+        "selector": ".my-page__storage-label",
+        "content_role": "空间辅助信息",
+        "css_property": "color",
+        "token": "var(--text-tertiary)"
+      },
+      {
+        "selector": ".my-page__membership-label",
+        "content_role": "会员辅助信息",
+        "css_property": "font-size",
+        "token": "var(--body-sm-font-size)"
+      },
+      {
+        "selector": ".my-page__storage-label",
+        "content_role": "空间辅助信息",
+        "css_property": "font-size",
+        "token": "var(--body-sm-font-size)"
+      },
+      {
+        "selector": ".my-page__membership-label",
+        "content_role": "会员辅助信息",
+        "css_property": "line-height",
+        "token": "var(--body-sm-line-height)"
+      },
+      {
+        "selector": ".my-page__storage-label",
+        "content_role": "空间辅助信息",
+        "css_property": "line-height",
+        "token": "var(--body-sm-line-height)"
+      },
+      {
+        "selector": ".my-page__membership-title",
+        "content_role": "会员名称",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".my-page__membership-title",
+        "content_role": "会员名称",
+        "css_property": "font-size",
+        "token": "var(--body-lg-font-size)"
+      },
+      {
+        "selector": ".my-page__membership-title",
+        "content_role": "会员名称",
+        "css_property": "font-weight",
+        "token": "var(--font-weight-semibold)"
+      },
+      {
+        "selector": ".my-page__membership-title",
+        "content_role": "会员名称",
+        "css_property": "line-height",
+        "token": "var(--body-lg-line-height)"
+      },
+      {
+        "selector": ".my-page__storage",
+        "content_role": "空间信息节奏",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".my-page__storage-value",
+        "content_role": "空间用量",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".my-page__storage-value",
+        "content_role": "空间用量",
+        "css_property": "font-size",
+        "token": "var(--body-md-font-size)"
+      },
+      {
+        "selector": ".my-page__storage-value",
+        "content_role": "空间用量",
+        "css_property": "font-weight",
+        "token": "var(--font-weight-medium)"
+      },
+      {
+        "selector": ".my-page__storage-value",
+        "content_role": "空间用量",
+        "css_property": "line-height",
+        "token": "var(--body-md-line-height)"
+      },
+      {
+        "selector": ".my-page__progress",
+        "content_role": "空间进度轨道",
+        "css_property": "border-radius",
+        "token": "var(--radius-full)"
+      },
+      {
+        "selector": ".my-page__progress",
+        "content_role": "空间进度轨道",
+        "css_property": "background",
+        "token": "var(--bg-subtle)"
+      },
+      {
+        "selector": ".my-page__progress-value",
+        "content_role": "空间已用进度",
+        "css_property": "border-radius",
+        "token": "var(--radius-full)"
+      },
+      {
+        "selector": ".my-page__progress-value",
+        "content_role": "空间已用进度",
+        "css_property": "background",
+        "token": "var(--text-brand)"
+      },
+      {
+        "selector": ".my-page__section-title",
+        "content_role": "分组标题",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".my-page__section-title",
+        "content_role": "分组标题",
+        "css_property": "font-size",
+        "token": "var(--heading-xs-font-size)"
+      },
+      {
+        "selector": ".my-page__section-title",
+        "content_role": "分组标题",
+        "css_property": "font-weight",
+        "token": "var(--heading-xs-font-weight)"
+      },
+      {
+        "selector": ".my-page__section-title",
+        "content_role": "分组标题",
+        "css_property": "line-height",
+        "token": "var(--heading-xs-line-height)"
+      },
+      {
+        "selector": ".my-page__app-grid",
+        "content_role": "应用入口间距",
+        "css_property": "gap",
+        "token": "var(--spacer-4)"
+      },
+      {
+        "selector": ".my-page__app-entry",
+        "content_role": "应用图标与名称间距",
+        "css_property": "gap",
+        "token": "var(--spacer-4)"
+      },
+      {
+        "selector": ".my-page__order-entry",
+        "content_role": "订单图标与名称间距",
+        "css_property": "gap",
+        "token": "var(--spacer-4)"
+      },
+      {
+        "selector": ".my-page__app-entry",
+        "content_role": "应用入口热区",
+        "css_property": "padding-block",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".my-page__order-entry",
+        "content_role": "订单入口热区",
+        "css_property": "padding-block",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".my-page__app-entry",
+        "content_role": "应用入口按压边界",
+        "css_property": "border-radius",
+        "token": "var(--radius-8)"
+      },
+      {
+        "selector": ".my-page__order-entry",
+        "content_role": "订单入口按压边界",
+        "css_property": "border-radius",
+        "token": "var(--radius-8)"
+      },
+      {
+        "selector": ".my-page__app-entry:active",
+        "content_role": "应用入口按压反馈",
+        "css_property": "background",
+        "token": "var(--bg-state-pressed)"
+      },
+      {
+        "selector": ".my-page__app-entry.is-pressed",
+        "content_role": "应用入口触控反馈",
+        "css_property": "background",
+        "token": "var(--bg-state-pressed)"
+      },
+      {
+        "selector": ".my-page__order-entry:active",
+        "content_role": "订单入口按压反馈",
+        "css_property": "background",
+        "token": "var(--bg-state-pressed)"
+      },
+      {
+        "selector": ".my-page__order-entry.is-pressed",
+        "content_role": "订单入口触控反馈",
+        "css_property": "background",
+        "token": "var(--bg-state-pressed)"
+      },
+      {
+        "selector": ".my-page__more-icon",
+        "content_role": "更多应用图标容器",
+        "css_property": "border-radius",
+        "token": "var(--radius-12)"
+      },
+      {
+        "selector": ".my-page__more-icon",
+        "content_role": "更多应用图标容器",
+        "css_property": "background",
+        "token": "var(--bg-subtle)"
+      },
+      {
+        "selector": ".my-page__more-icon",
+        "content_role": "更多应用图标",
+        "css_property": "color",
+        "token": "var(--text-secondary)"
+      },
+      {
+        "selector": ".my-page__more-icon .wego-iconfont-s",
+        "content_role": "更多应用图标",
+        "css_property": "font-size",
+        "token": "var(--size-24)"
+      },
+      {
+        "selector": ".my-page__app-label",
+        "content_role": "应用名称",
+        "css_property": "color",
+        "token": "var(--text-secondary)"
+      },
+      {
+        "selector": ".my-page__app-label",
+        "content_role": "应用名称",
+        "css_property": "font-size",
+        "token": "var(--body-sm-font-size)"
+      },
+      {
+        "selector": ".my-page__app-label",
+        "content_role": "应用名称",
+        "css_property": "line-height",
+        "token": "var(--body-sm-line-height)"
+      },
+      {
+        "selector": ".my-page__order-grid",
+        "content_role": "订单入口间距",
+        "css_property": "gap",
+        "token": "var(--spacer-4)"
+      },
+      {
+        "selector": ".my-page__order-entry .wego-iconfont-s",
+        "content_role": "订单状态图标",
+        "css_property": "color",
+        "token": "var(--text-secondary)"
+      },
+      {
+        "selector": ".my-page__order-entry .wego-iconfont-s",
+        "content_role": "订单状态图标",
+        "css_property": "font-size",
+        "token": "var(--size-24)"
+      },
+      {
+        "selector": ".my-page__order-entry span",
+        "content_role": "订单状态名称",
+        "css_property": "color",
+        "token": "var(--text-secondary)"
+      },
+      {
+        "selector": ".my-page__order-entry span",
+        "content_role": "订单状态名称",
+        "css_property": "font-size",
+        "token": "var(--body-sm-font-size)"
+      },
+      {
+        "selector": ".my-page__order-entry span",
+        "content_role": "订单状态名称",
+        "css_property": "line-height",
+        "token": "var(--body-sm-line-height)"
+      },
+      {
+        "selector": ".my-page__app-center",
+        "content_role": "应用中心背景",
+        "css_property": "background",
+        "token": "var(--bg-page)"
+      },
+      {
+        "selector": ".my-page__app-center-body",
+        "content_role": "应用中心内容节奏",
+        "css_property": "gap",
+        "token": "var(--spacer-12)"
+      },
+      {
+        "selector": ".my-page__app-center-body",
+        "content_role": "应用中心内容留白",
+        "css_property": "padding",
+        "token": "var(--spacer-16)"
+      },
+      {
+        "selector": ".my-page__app-center-summary",
+        "content_role": "应用总量说明",
+        "css_property": "color",
+        "token": "var(--text-tertiary)"
+      },
+      {
+        "selector": ".my-page__app-center-summary",
+        "content_role": "应用总量说明",
+        "css_property": "font-size",
+        "token": "var(--body-sm-font-size)"
+      },
+      {
+        "selector": ".my-page__app-center-summary",
+        "content_role": "应用总量说明",
+        "css_property": "line-height",
+        "token": "var(--body-sm-line-height)"
+      },
+      {
+        "selector": ".my-page__app-grid--all",
+        "content_role": "应用中心底部留白",
+        "css_property": "padding-bottom",
+        "token": "var(--spacer-16)"
+      }
+    ],
+    "component_bindings": [
+      {
+        "binding_id": "profile-avatar",
+        "slug": "avatar",
+        "reason": "承载我的页头部用户身份识别",
+        "variant_dimensions": {
+          "type": "image",
+          "size": "56"
+        }
+      },
+      {
+        "binding_id": "vip-tag",
+        "slug": "tag",
+        "reason": "轻量展示 VIP 身份，不与主行动竞争",
+        "variant_dimensions": {
+          "size": "20",
+          "theme": "brand-stroke",
+          "state": "normal",
+          "affordance": "display-only"
+        }
+      },
+      {
+        "binding_id": "role-tag",
+        "slug": "tag",
+        "reason": "轻量展示超级管理员角色",
+        "variant_dimensions": {
+          "size": "20",
+          "theme": "gray",
+          "state": "normal",
+          "affordance": "display-only"
+        }
+      },
+      {
+        "binding_id": "section-card",
+        "slug": "card",
+        "reason": "承载会员空间、应用和订单三类独立内容分组",
+        "variant_dimensions": {
+          "base": "auto",
+          "surface": "surface"
+        }
+      },
+      {
+        "binding_id": "renew-action",
+        "slug": "button",
+        "reason": "承载会员卡内的次级续费入口",
+        "variant_dimensions": {
+          "emphasis": "medium",
+          "size": "sm",
+          "iconMode": "text-only",
+          "state": "default"
+        }
+      },
+      {
+        "binding_id": "storage-action",
+        "slug": "link",
+        "reason": "承载空间信息旁的轻量管理入口",
+        "variant_dimensions": {
+          "mode": "standalone",
+          "size": "12",
+          "state": "default"
+        }
+      },
+      {
+        "binding_id": "settings-cell-divided",
+        "slug": "cell",
+        "reason": "承载连续个人服务中的层级入口与分割节奏",
+        "variant_dimensions": {
+          "density": "single",
+          "surface": "bg-white",
+          "interaction": "clickable",
+          "divider": "divider-right-edge",
+          "leadingSlot": "none",
+          "trailingSlot": "arrow"
+        }
+      },
+      {
+        "binding_id": "settings-cell-last",
+        "slug": "cell",
+        "reason": "承载个人服务分组末项并收口分割线",
+        "variant_dimensions": {
+          "density": "single",
+          "surface": "bg-white",
+          "interaction": "clickable",
+          "divider": "none",
+          "leadingSlot": "none",
+          "trailingSlot": "arrow"
+        }
+      },
+      {
+        "binding_id": "app-center-navbar",
+        "slug": "navbar",
+        "reason": "承载应用中心全屏二级层的关闭与页面标题",
+        "variant_dimensions": {
+          "leftControl": "close-icon",
+          "titleAlignment": "center",
+          "actions": "none",
+          "spacing": "default",
+          "pageTransition": "present",
+          "position": "sticky"
+        }
+      }
+    ],
+    "layout_contract": {
+      "mode": "composed",
+      "source": "references/design-decisions.md",
+      "selection_reason": "页面同时承载身份、状态和多类入口，未命中单一页面范式；使用 M8 卡片边距保持高密度内容的分组清晰",
+      "page_edge_mode": "M8",
+      "mutable_regions": [
+        ".my-page__quick-apps",
+        ".my-page__order-grid",
+        ".my-page__services",
+        ".my-page__app-center-template"
+      ]
+    },
+    "interaction_contract": [
+      {
+        "dom_id": "renew-vip",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "manage-storage",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "main-app-grid",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "open-app-center",
+        "target": "overlay:modal"
+      },
+      {
+        "dom_id": "order-grid",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "open-settings",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "open-wallet",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "open-favorites",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "open-coupons",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "open-rebate",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "close-app-center",
+        "target": "overlay:close"
+      },
+      {
+        "dom_id": "app-center-grid",
+        "target": "feedback:toast"
+      }
+    ],
+    "state_contract": [
+      {
+        "state_id": "my-home-default",
+        "initial": true,
+        "trigger": "进入我的主 tab",
+        "visible_result": "展示已登录超级管理员的会员、空间、应用、订单和个人服务信息",
+        "fallback": "保持当前可用入口与固定演示数据",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "app-center-visible",
+        "initial": false,
+        "trigger": "选择更多应用",
+        "visible_result": "全屏展示资源包中的 78 个去重应用，并提供关闭返回",
+        "fallback": "关闭二级层并返回我的页原位置",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "entry-feedback-visible",
+        "initial": false,
+        "trigger": "选择续费、空间、应用、订单或个人服务入口",
+        "visible_result": "显示与当前入口对应的瞬时反馈",
+        "fallback": "保留当前页面和固定演示数据",
+        "persistence": "memory"
+      }
+    ]
+  },
+  "decisions": [
+    {
+      "dd_id": "profile-avatar",
+      "binding_id": "profile-avatar",
+      "component_slug": "avatar"
+    },
+    {
+      "dd_id": "vip-tag",
+      "binding_id": "vip-tag",
+      "component_slug": "tag"
+    },
+    {
+      "dd_id": "role-tag",
+      "binding_id": "role-tag",
+      "component_slug": "tag"
+    },
+    {
+      "dd_id": "membership-card",
+      "binding_id": "section-card",
+      "component_slug": "card"
+    },
+    {
+      "dd_id": "renew-action",
+      "binding_id": "renew-action",
+      "component_slug": "button"
+    },
+    {
+      "dd_id": "storage-action",
+      "binding_id": "storage-action",
+      "component_slug": "link"
+    },
+    {
+      "dd_id": "applications-card",
+      "binding_id": "section-card",
+      "component_slug": "card"
+    },
+    {
+      "dd_id": "orders-card",
+      "binding_id": "section-card",
+      "component_slug": "card"
+    },
+    {
+      "dd_id": "settings-cell",
+      "binding_id": "settings-cell-divided",
+      "component_slug": "cell"
+    },
+    {
+      "dd_id": "wallet-cell",
+      "binding_id": "settings-cell-divided",
+      "component_slug": "cell"
+    },
+    {
+      "dd_id": "favorites-cell",
+      "binding_id": "settings-cell-divided",
+      "component_slug": "cell"
+    },
+    {
+      "dd_id": "coupons-cell",
+      "binding_id": "settings-cell-divided",
+      "component_slug": "cell"
+    },
+    {
+      "dd_id": "rebate-cell",
+      "binding_id": "settings-cell-last",
+      "component_slug": "cell"
+    },
+    {
+      "dd_id": "app-center-navbar",
+      "binding_id": "app-center-navbar",
+      "component_slug": "navbar"
+    }
+  ],
+  "generation_evidence": {
+    "scene_js": "wego-app/scenes/我的/scene.js",
+    "scene_css": "wego-app/scenes/我的/scene.css",
+    "source_sha256": "5ceb4d56e77dd5d169b6d0dd201bf1fd7c080010e87ab30020b1f4f1957267d4",
+    "dom_ids": [
+      "renew-vip",
+      "manage-storage",
+      "main-app-grid",
+      "open-app-center",
+      "order-grid",
+      "open-settings",
+      "open-wallet",
+      "open-favorites",
+      "open-coupons",
+      "open-rebate",
+      "close-app-center",
+      "app-center-grid"
+    ],
+    "component_count": 14,
+    "visualCheck": {
+      "status": "passed",
+      "viewports": [
+        375,
+        393
+      ],
+      "checked_at": "2026-07-16T01:45:16.000Z",
+      "checks": {
+        "horizontal_overflow": true,
+        "overlap": true,
+        "clipping": true,
+        "action_legibility": true,
+        "primary_focus": true,
+        "state_feedback": true
+      }
+    }
+  }
+}

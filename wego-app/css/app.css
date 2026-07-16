@@ -177,6 +177,13 @@ input, textarea,
   flex: 1 1 auto;
 }
 
+.host-shell-page__scroll {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: var(--spacer-16) 0;
+  -webkit-overflow-scrolling: touch;
+}
+
 .host-shell-profile {
   display: flex;
   flex-direction: column;

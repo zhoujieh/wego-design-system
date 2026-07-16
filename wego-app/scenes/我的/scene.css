@@ -1,0 +1,245 @@
+.my-page {
+  min-height: 100%;
+  padding-inline: var(--layout-page-margin-m8);
+  background: var(--bg-page);
+  color: var(--text-default);
+  font-family: var(--body-md-font-family);
+}
+
+.my-page__scroll {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-8);
+  padding-block: var(--spacer-16);
+}
+
+.my-page__profile {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-12);
+  padding: var(--spacer-8);
+}
+
+.my-page__profile-meta {
+  min-width: 0;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--spacer-8);
+}
+
+.my-page__username {
+  overflow: hidden;
+  color: var(--text-default);
+  font-size: var(--heading-md-font-size);
+  font-weight: var(--heading-md-font-weight);
+  line-height: var(--heading-md-line-height);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.my-page__identity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacer-4);
+}
+
+.my-page__section-content {
+  gap: var(--spacer-12);
+  padding: var(--spacer-12);
+}
+
+.my-page__membership-row,
+.my-page__storage-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacer-8);
+}
+
+.my-page__membership-mark {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-8);
+}
+
+.my-page__membership-icon {
+  width: var(--size-32);
+  height: var(--size-32);
+  flex-shrink: 0;
+}
+
+.my-page__membership-label,
+.my-page__storage-label {
+  color: var(--text-tertiary);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+}
+
+.my-page__membership-title {
+  color: var(--text-default);
+  font-size: var(--body-lg-font-size);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--body-lg-line-height);
+}
+
+.my-page__storage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-8);
+}
+
+.my-page__storage-value {
+  color: var(--text-default);
+  font-size: var(--body-md-font-size);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--body-md-line-height);
+}
+
+.my-page__progress {
+  width: 100%;
+  height: var(--spacer-6);
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--bg-subtle);
+}
+
+.my-page__progress-value {
+  display: block;
+  width: 32.58%;
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--text-brand);
+}
+
+.my-page__section-title {
+  color: var(--text-default);
+  font-size: var(--heading-xs-font-size);
+  font-weight: var(--heading-xs-font-weight);
+  line-height: var(--heading-xs-line-height);
+}
+
+.my-page__app-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(calc(var(--size-48) + var(--spacer-12)), 1fr));
+  gap: var(--spacer-4);
+}
+
+.my-page__app-entry,
+.my-page__order-entry {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--spacer-4);
+  padding-block: var(--spacer-8);
+  border-radius: var(--radius-8);
+}
+
+.my-page__app-entry[hidden] {
+  display: none;
+}
+
+.my-page__app-entry:active,
+.my-page__app-entry.is-pressed,
+.my-page__order-entry:active,
+.my-page__order-entry.is-pressed {
+  background: var(--bg-state-pressed);
+}
+
+.my-page__app-icon,
+.my-page__more-icon {
+  width: var(--size-48);
+  height: var(--size-48);
+  flex-shrink: 0;
+}
+
+.my-page__more-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-12);
+  background: var(--bg-subtle);
+  color: var(--text-secondary);
+}
+
+.my-page__more-icon .wego-iconfont-s {
+  font-size: var(--size-24);
+}
+
+.my-page__app-label {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--text-secondary);
+  display: -webkit-box;
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+  text-align: center;
+  text-overflow: ellipsis;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.my-page__order-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--spacer-4);
+}
+
+.my-page__order-entry .wego-iconfont-s {
+  color: var(--text-secondary);
+  font-size: var(--size-24);
+}
+
+.my-page__order-entry span {
+  color: var(--text-secondary);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.my-page__app-center {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-page);
+}
+
+.app-overlay-layer--modal:has(.my-page__app-center) {
+  justify-content: flex-start;
+  padding: 0;
+  background: transparent;
+}
+
+.app-overlay-layer--modal .app-overlay-panel:has(> .my-page__app-center) {
+  height: 100%;
+  max-height: 100%;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.my-page__app-center-body {
+  min-height: 0;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--spacer-12);
+  overflow-y: auto;
+  padding: var(--spacer-16);
+  -webkit-overflow-scrolling: touch;
+}
+
+.my-page__app-center-summary {
+  color: var(--text-tertiary);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+}
+
+.my-page__app-grid--all {
+  align-content: start;
+  padding-bottom: var(--spacer-16);
+}
