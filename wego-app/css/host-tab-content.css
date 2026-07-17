@@ -7,6 +7,11 @@
 .host-shell-page__panel {
   min-height: 0;
   overflow: hidden;
+  /* app.css 给 panel 设了 -webkit-overflow-scrolling: touch，
+     在 iOS 真机上即使 overflow: hidden 也会创建原生 UIScrollView 合成层，
+     导致 iOS 自动叠加 safe-area-inset-top，与场景根容器的 padding-top: var(--safe-area-top)
+     形成双重安全区。此处覆盖为 auto，让 panel 不创建原生滚动层。 */
+  -webkit-overflow-scrolling: auto;
 }
 
 .host-shell-page__panel > .album-feed,
