@@ -13,7 +13,7 @@
     "source": "library-consumption.json#/appRuntime/presentationTypes"
   },
   "prompt_contract": {
-    "design_system_version": 414,
+    "design_system_version": 416,
     "token_bindings": [
       { "selector": ".my-page", "content_role": "页面边距", "css_property": "padding-inline", "token": "var(--layout-page-margin-m8)" },
       { "selector": ".my-page", "content_role": "页面顶部安全区", "css_property": "padding-top", "token": "var(--safe-area-top)" },

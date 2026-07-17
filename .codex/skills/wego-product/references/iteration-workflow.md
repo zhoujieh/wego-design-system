@@ -51,7 +51,7 @@
 }
 ```
 
-`prototype_brief` 只允许上例中的 10 个字段；`readiness`、UI 描述或其他旧字段必须删除或显式迁移，不得作为兼容输入继续流转。
+`prototype_brief` 只允许上例中的 10 个字段；`readiness` 或其他旧字段必须删除或显式迁移，不得作为兼容输入继续流转。字段内容可附带交互视觉描述（布局位置、控件类型、视觉强调、打开方式倾向等），由 `wego-design` 严格遵循；具体组件名、CSS 类、Token、动画名等正式规格仍由设计阶段在设计系统范围内决定。
 
 ## 2. 状态机
 
@@ -111,7 +111,7 @@ draft → awaiting-brief-confirmation → prototyping → awaiting-prototype-con
 
 - `flow_id`：稳定且非空的业务流程标识，同一简报内不得重复。
 - `mode`：只能是 `functional`、`simulated` 或 `stub`。
-- `visible_result`：用户在原型中实际可见的结果，不描述组件或布局。
+- `visible_result`：用户在原型中实际可见的结果，可包含交互视觉描述（如"用户完成转发并看到成功提示，转发按钮高亮"）。
 - `excluded` 中的事项不得再次写入 `prototype_boundaries`；排除范围不实现，也不使用 `stub` 占位。
 
 ## 5. 目录与冻结

@@ -722,7 +722,7 @@
       "id": "exp-product-stage-must-not-carry-ui-assumptions",
       "normalized_key": "product-ui-assumption-ban",
       "title": "product 阶段禁止 UI 假设倾向",
-      "status": "promoted",
+      "status": "superseded",
       "occurrence_count": 1,
       "threshold": 1,
       "primary_owner": "wego-product",
@@ -745,10 +745,12 @@
         "acceptance_check": "wego-design"
       },
       "evidence": [
-        "AI 在 prototype_brief 的 entry_points、critical_paths 字段中带入'顶部导航栏''底部 Tab''卡片列表'等 UI 倾向描述，误导下游设计决策；原规则只有分散的'不得...'否定式约束，没有正面定义 UI 假设的具体表现清单和业务语言正面规则。"
+        "AI 在 prototype_brief 的 entry_points、critical_paths 字段中带入'顶部导航栏''底部 Tab''卡片列表'等 UI 倾向描述，误导下游设计决策；原规则只有分散的'不得...'否定式约束，没有正面定义 UI 假设的具体表现清单和业务语言正面规则。",
+        "2026-07-17 用户明确要求反转该规则：产品阶段可以定义明确的交互视觉，设计阶段严格遵循；原禁止清单过度限制产品表达，导致产品意图丢失。规则被 exp-product-stage-ui-directive-allowed 取代。"
       ],
       "created_at": "2026-07-12T00:00:00Z",
-      "updated_at": "2026-07-12T00:00:00Z"
+      "updated_at": "2026-07-17T00:00:00Z",
+      "superseded_by": "exp-product-stage-ui-directive-allowed"
     },
     {
       "id": "exp-entry-points-business-ownership-by-product",
@@ -1369,6 +1371,47 @@
         "constraint_area": "迭代冻结授权与验收期复用",
         "description": "验收与反馈修改复用当前未冻结迭代；原型确认或验证通过都不冻结，仅当用户明确指定迭代并要求冻结时才生成不可覆盖快照。"
       }
+    },
+    {
+      "id": "exp-product-stage-ui-directive-allowed",
+      "normalized_key": "product-ui-directive-allowed",
+      "title": "product 阶段可定义交互视觉，design 严格遵循",
+      "status": "promoted",
+      "occurrence_count": 1,
+      "threshold": 1,
+      "primary_owner": "wego-product",
+      "secondary_owners": [
+        "wego-design"
+      ],
+      "ownership_reason": "产品阶段字段边界与跨技能职责转移属于产品流程方法。",
+      "rule_ownership": {
+        "category": "skill-runtime-flow",
+        "canonical": {
+          "file": ".codex/skills/wego-product/references/scope-and-boundaries.md",
+          "locator": "rule-id: product-stage-ui-directive-allowed",
+          "rule_id": "product-stage-ui-directive-allowed"
+        }
+      },
+      "runtime_reachability": {
+        "consumer_skill": "wego-product",
+        "output_field": "prototype_brief",
+        "downstream_consumer": "wego-design",
+        "acceptance_check": "wego-design"
+      },
+      "evidence": [
+        "用户明确要求反转 exp-product-stage-must-not-carry-ui-assumptions：去掉产品阶段禁止 UI 假设的限制，允许产品阶段在 prototype_brief 字段中描述交互视觉（布局位置、控件类型、视觉强调、打开方式倾向等），设计阶段严格遵循；唯一例外是组件不支持或设计系统规范不允许，此时设计系统优先并退回 product 重新确认。原禁止清单导致产品意图丢失，设计阶段无法获取完整视觉约束。"
+      ],
+      "created_at": "2026-07-17T00:00:00Z",
+      "updated_at": "2026-07-17T00:00:00Z",
+      "promoted_at": "2026-07-17T00:00:00Z",
+      "promotion_landing": {
+        "file": ".codex/skills/wego-product/references/scope-and-boundaries.md",
+        "locator": "rule-id: product-stage-ui-directive-allowed",
+        "rule_id": "product-stage-ui-directive-allowed",
+        "constraint_area": "产品阶段交互视觉描述与设计阶段遵循边界",
+        "description": "产品阶段可在 prototype_brief 字段中附带交互视觉描述作为 wego-design 的强约束输入；设计阶段严格遵循，除非组件不支持或设计系统规范不允许，此时设计系统优先并退回 product 重新确认。"
+      },
+      "supersedes": "exp-product-stage-must-not-carry-ui-assumptions"
     }
   ]
 }
