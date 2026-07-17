@@ -187,9 +187,14 @@
   z-index: var(--z-sticky);
 }
 
-@supports (-webkit-touch-callout: none) {
-  .friend-list__index {
-    position: fixed;
+/* iOS Safari 下 position:absolute 在 -webkit-overflow-scrolling:touch 滚动容器内
+   会跟随惯性滚动，切换为 fixed 让索引保持位置。
+   仅限移动端：桌面端 phone-frame 居中于视口，fixed 会脱离手机壳定位到视口右边缘。 */
+@media (max-width: 767px) {
+  @supports (-webkit-touch-callout: none) {
+    .friend-list__index {
+      position: fixed;
+    }
   }
 }
 
