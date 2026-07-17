@@ -54,6 +54,6 @@ node scripts/validate-wego-design.mjs --scope=full --strict
 
 `validate-wego-design.mjs` 会先检查组件契约一致性，再执行设计系统、场景和 App 守门。
 
-`iteration-record.mjs` 负责业务迭代状态机、范围确认、原型失效和冻结；历史场景无需补录，后续再次修改时必须创建有效迭代。
+`iteration-record.mjs` 负责业务迭代状态机、范围确认、原型失效和冻结。验收期反馈复用当前未冻结迭代；只有用户明确指定并要求冻结后才允许生成不可修改的冻结快照。历史场景无需补录，后续再次修改时必须进入有效迭代。
 
 只修改设计系统或工作流本体时，可使用 `node scripts/validate-wego-design.mjs --scope=system --strict`；该范围跳过业务场景产物，`--strict` 会把警告视为失败。涉及设计系统部署资源时，再运行 `node scripts/sync-wego-app-lib.mjs --check`。

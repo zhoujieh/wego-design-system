@@ -530,6 +530,13 @@ function applyInvalidation(record, stage) {
 function freeze() {
   const file = requireFile();
   const record = load(file);
+  const userConfirmedIterationId = value('--user-confirmed-freeze');
+  if (!userConfirmedIterationId) {
+    fail('freeze 只能在用户明确指定迭代并要求冻结后执行；请传 --user-confirmed-freeze <iteration_id>');
+  }
+  if (userConfirmedIterationId !== record.identity?.iteration_id) {
+    fail(`${file}: --user-confirmed-freeze 必须等于当前 iteration_id：${record.identity?.iteration_id ?? '未定义'}`);
+  }
   const errors = validate(record, file);
   if (errors.length) fail(errors.join('\n'));
   if (record.status !== 'prototype-confirmed') fail(`${file}: 当前状态 ${record.status} 不能执行 freeze`);
@@ -724,6 +731,8 @@ function test() {
     fs.writeFileSync(path.join(sceneRoot, 'scene.js'), 'window.testScene = true;\n');
     const validConfirmation = run(['confirm-prototype', '--file', iterationArgument]);
     assert(validConfirmation.status === 0, `合法 confirm-prototype 失败：${(validConfirmation.stderr || validConfirmation.stdout).trim()}`);
+    assert(JSON.parse(fs.readFileSync(iterationFile, 'utf8')).status === 'prototype-confirmed', 'confirm-prototype 只能确认原型，不得自动冻结');
+    assert(!fs.existsSync(freezeFile), 'confirm-prototype 不得生成 freeze.json');
 
     const equalFlagResult = run(['invalidate', `--file=${iterationArgument}`, '--stage=prototype']);
     assert(equalFlagResult.status === 0, `invalidate 未支持等号参数：${(equalFlagResult.stderr || equalFlagResult.stdout).trim()}`);
@@ -732,14 +741,20 @@ function test() {
 
     const confirmed = makeConfirmed();
     fs.writeFileSync(iterationFile, `${JSON.stringify(confirmed, null, 2)}\n`);
+    const unapprovedFreeze = run(['freeze', '--file', iterationArgument]);
+    assert(unapprovedFreeze.status !== 0 && (unapprovedFreeze.stderr || '').includes('用户明确指定迭代'), 'freeze 未拦截缺少用户明确授权的请求');
+    assert(JSON.parse(fs.readFileSync(iterationFile, 'utf8')).status === 'prototype-confirmed', '无用户授权的 freeze 不得改变迭代状态');
+    assert(!fs.existsSync(freezeFile), '无用户授权的 freeze 不得生成 freeze.json');
+    const wrongTargetFreeze = run(['freeze', '--file', iterationArgument, '--user-confirmed-freeze', 'other-iteration']);
+    assert(wrongTargetFreeze.status !== 0 && (wrongTargetFreeze.stderr || '').includes('必须等于当前 iteration_id'), 'freeze 未拦截用户授权与目标迭代不一致');
     fs.writeFileSync(path.join(sceneRoot, 'scene.js'), 'window.testScene = "drift";\n');
-    const driftedFreeze = run(['freeze', '--file', iterationArgument]);
+    const driftedFreeze = run(['freeze', '--file', iterationArgument, '--user-confirmed-freeze', 'test']);
     assert(driftedFreeze.status !== 0 && (driftedFreeze.stderr || '').includes('原型确认后已漂移'), 'freeze 未拦截原型确认后的源码漂移');
     assert(JSON.parse(fs.readFileSync(iterationFile, 'utf8')).status === 'prototype-confirmed', 'freeze 失败后不应写入 frozen 状态');
     assert(!fs.existsSync(freezeFile), 'freeze 失败后不应遗留 freeze.json');
 
     fs.writeFileSync(path.join(sceneRoot, 'scene.js'), 'window.testScene = true;\n');
-    const freezeResult = run(['freeze', `--file=${iterationArgument}`]);
+    const freezeResult = run(['freeze', `--file=${iterationArgument}`, '--user-confirmed-freeze=test']);
     assert(freezeResult.status === 0, `合法 freeze 失败：${(freezeResult.stderr || freezeResult.stdout).trim()}`);
     const frozen = JSON.parse(fs.readFileSync(iterationFile, 'utf8'));
     assert(!validate(frozen, iterationFile, fixtureRoot).length, '合法 frozen 记录未通过复验');
@@ -836,5 +851,5 @@ switch (command) {
   }
   case 'check': check(); break;
   case 'test': test(); break;
-  default: fail('用法：init|submit-brief|confirm-brief|submit-prototype|confirm-prototype|invalidate|freeze|check|test');
+  default: fail('用法：init|submit-brief|confirm-brief|submit-prototype|confirm-prototype|invalidate|freeze --user-confirmed-freeze <iteration_id>|check|test');
 }

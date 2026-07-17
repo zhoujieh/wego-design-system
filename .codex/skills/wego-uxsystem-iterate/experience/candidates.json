@@ -1327,6 +1327,48 @@
         "constraint_area": "间距 Token 强制使用",
         "description": "除已登记页面边距外，场景间距必须使用 var(--spacer-*) Token，不得使用裸像素值；组件内部尺寸遵循组件 Preview。"
       }
+    },
+    {
+      "id": "exp-business-iteration-freeze-requires-explicit-user-intent",
+      "normalized_key": "business-iteration-explicit-user-freeze",
+      "title": "业务迭代仅在用户明确要求后冻结",
+      "status": "promoted",
+      "occurrence_count": 2,
+      "threshold": 1,
+      "primary_owner": "wego-product",
+      "secondary_owners": [
+        "wego-design",
+        "wego-uxsystem-iterate"
+      ],
+      "ownership_reason": "冻结时机、验收期迭代复用和失效路径属于业务迭代状态机。",
+      "rule_ownership": {
+        "category": "skill-runtime-flow",
+        "canonical": {
+          "file": ".codex/skills/wego-product/references/iteration-workflow.md",
+          "locator": "rule-id: business-iteration-explicit-user-freeze",
+          "rule_id": "business-iteration-explicit-user-freeze"
+        }
+      },
+      "runtime_reachability": {
+        "consumer_skill": "wego-product",
+        "output_field": "iteration.json.status/freeze",
+        "downstream_consumer": "wego-design",
+        "acceptance_check": "iteration-record"
+      },
+      "evidence": [
+        "tab-scroll-isolation 迭代在 confirm-prototype 后约 64 毫秒即执行 freeze，说明原流程会把原型确认误当为冻结授权。",
+        "用户明确要求验收期的频繁修改复用同一未冻结迭代，只有用户明确指定某个迭代冻结后才不能继续修改。"
+      ],
+      "created_at": "2026-07-16T23:46:54Z",
+      "updated_at": "2026-07-16T23:46:54Z",
+      "promoted_at": "2026-07-16T23:46:54Z",
+      "promotion_landing": {
+        "file": ".codex/skills/wego-product/references/iteration-workflow.md",
+        "locator": "rule-id: business-iteration-explicit-user-freeze",
+        "rule_id": "business-iteration-explicit-user-freeze",
+        "constraint_area": "迭代冻结授权与验收期复用",
+        "description": "验收与反馈修改复用当前未冻结迭代；原型确认或验证通过都不冻结，仅当用户明确指定迭代并要求冻结时才生成不可覆盖快照。"
+      }
     }
   ]
 }
