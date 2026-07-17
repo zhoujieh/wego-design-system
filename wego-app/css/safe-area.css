@@ -17,20 +17,7 @@
   }
 
   .host-shell-page {
-    padding-top: 0 !important;
-    padding-right: 0 !important;
-    padding-bottom: calc(var(--spacer-40) + 56px) !important;
-    padding-left: 0 !important;
-  }
-
-  .host-shell-page--card {
-    padding-left: var(--spacer-8) !important;
-    padding-right: var(--spacer-8) !important;
-  }
-
-  .host-shell-page--wide {
-    padding-left: var(--spacer-32) !important;
-    padding-right: var(--spacer-32) !important;
+    padding: 0 !important;
   }
 
   .quick-publish__body {

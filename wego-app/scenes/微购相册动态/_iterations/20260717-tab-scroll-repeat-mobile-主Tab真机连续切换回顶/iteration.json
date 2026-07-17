@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 4,
+  "identity": {
+    "iteration_id": "tab-scroll-repeat-mobile",
+    "title": "主Tab真机连续切换回顶",
+    "date": "2026-07-17",
+    "primary_scene": "微购相册动态",
+    "related_scenes": [
+      "好友列表",
+      "我的"
+    ]
+  },
+  "status": "awaiting-prototype-confirmation",
+  "scope_revision": 3,
+  "prototype_brief": {
+    "goal": "让用户在真机上连续多次切换五个主业务入口后，每次进入目标入口仍从默认起始位置浏览，不因切换次数或上一入口的浏览过程失效。",
+    "included": [
+      "动态、好友、工作台、消息和我的五个主业务入口的真机连续切换路径",
+      "用户在任一入口改变浏览位置后切换，目标入口回到默认起始位置",
+      "用户连续多轮切换并再次进入曾经浏览过的入口，该入口仍回到默认起始位置",
+      "切换发生时尚未完全结束的浏览过程不得改变后续入口的默认起始位置",
+      "回归首轮切换与多轮切换的一致结果"
+    ],
+    "excluded": [
+      "修改五个主业务入口的业务内容、文案或功能范围",
+      "修改二级页面、弹层和独立业务流程的返回位置规则",
+      "刷新后保存任一主业务入口的浏览位置",
+      "新增真实后端接口或数据持久化"
+    ],
+    "entry_points": [
+      "微购 App 的动态、好友、工作台、消息和我的五个主业务入口"
+    ],
+    "critical_paths": [
+      "在任一主业务入口浏览到非起始位置 → 切换到另一入口 → 目标入口从默认起始位置展示",
+      "在多个主业务入口之间连续切换三轮以上 → 每次到达的目标入口均从默认起始位置展示",
+      "在浏览过程尚未完全结束时切换入口 → 再次返回原入口 → 原入口从默认起始位置展示"
+    ],
+    "prototype_boundaries": [
+      {
+        "flow_id": "repeat-switch-main-entry-from-start",
+        "mode": "functional",
+        "visible_result": "用户连续多轮切换任一主业务入口后，每次看到的目标入口都从默认起始位置展示"
+      },
+      {
+        "flow_id": "switch-during-active-browsing-from-start",
+        "mode": "functional",
+        "visible_result": "用户在浏览过程尚未完全结束时切换并再次进入原入口，仍看到该入口从默认起始位置展示"
+      }
+    ],
+    "states": [
+      "默认状态：当前主业务入口从起始位置展示",
+      "浏览状态：用户只改变当前入口的浏览位置",
+      "连续切换后状态：无论已切换多少轮，目标入口都恢复默认起始位置"
+    ],
+    "data_contract": {
+      "main_entry_navigation": {
+        "entries": [
+          "动态",
+          "好友",
+          "工作台",
+          "消息",
+          "我的"
+        ],
+        "default_position": "起始位置",
+        "persistence": "仅当前展示期间有效，每次切换后不保留",
+        "repeat_switch_requirement": "连续切换次数不改变回到起始位置的结果"
+      }
+    },
+    "assumptions": [
+      "假设五个主业务入口的现有业务内容和可见反馈保持不变"
+    ],
+    "open_questions": []
+  },
+  "brief_confirmation": {
+    "at": "2026-07-16T23:53:23.658Z",
+    "scope_revision": 3,
+    "scope_sha256": "e31bc424265054b56c76fad9e014f1255a31bdf5bccad7610c7d79e92f7ec685"
+  },
+  "prototype_confirmation": null,
+  "affected_scenes": [
+    "微购相册动态",
+    "好友列表",
+    "我的"
+  ],
+  "affected_runtime": [
+    "wego-app/css/host-tab-content.css",
+    "wego-app/css/safe-area.css",
+    "wego-app/index.html",
+    "wego-app/js/tab-scroll-reset.js"
+  ],
+  "stage_outputs": {
+    "product": {
+      "valid": true
+    },
+    "design": {
+      "valid": true
+    }
+  },
+  "change_log": [
+    {
+      "action": "init",
+      "at": "2026-07-16T23:34:25.945Z"
+    },
+    {
+      "action": "submit-brief",
+      "at": "2026-07-16T23:35:49.882Z"
+    },
+    {
+      "action": "confirm-brief",
+      "at": "2026-07-16T23:35:49.963Z"
+    },
+    {
+      "action": "submit-prototype",
+      "at": "2026-07-16T23:45:00.058Z"
+    },
+    {
+      "action": "invalidate",
+      "at": "2026-07-16T23:47:41.210Z"
+    },
+    {
+      "action": "invalidate",
+      "at": "2026-07-16T23:49:47.412Z"
+    },
+    {
+      "action": "submit-brief",
+      "at": "2026-07-16T23:50:34.330Z"
+    },
+    {
+      "action": "confirm-brief",
+      "at": "2026-07-16T23:50:34.413Z"
+    },
+    {
+      "action": "invalidate",
+      "at": "2026-07-16T23:53:07.335Z"
+    },
+    {
+      "action": "submit-brief",
+      "at": "2026-07-16T23:53:23.578Z"
+    },
+    {
+      "action": "confirm-brief",
+      "at": "2026-07-16T23:53:23.660Z"
+    },
+    {
+      "action": "submit-prototype",
+      "at": "2026-07-17T00:01:00.095Z"
+    }
+  ],
+  "freeze": null
+}
