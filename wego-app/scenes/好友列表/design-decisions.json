@@ -14,7 +14,7 @@
     "source": "library-consumption.json#/appRuntime/presentationTypes"
   },
   "prompt_contract": {
-    "design_system_version": 413,
+    "design_system_version": 414,
     "token_bindings": [
       {
         "selector": ".friend-list",
@@ -50,19 +50,13 @@
         "selector": ".friend-list__search",
         "content_role": "搜索区背景",
         "css_property": "background",
-        "token": "var(--bg-surface)"
+        "token": "var(--bg-page)"
       },
       {
         "selector": ".friend-list__search",
         "content_role": "搜索区留白",
         "css_property": "padding",
         "token": "var(--spacer-8)"
-      },
-      {
-        "selector": ".friend-list__search .searchbox__action",
-        "content_role": "搜索操作颜色",
-        "css_property": "color",
-        "token": "var(--text-default)"
       },
       {
         "selector": ".friend-list__scroll",
@@ -351,12 +345,12 @@
       {
         "binding_id": "friend-navbar",
         "slug": "navbar",
-        "reason": "承载好友页面标题与排序切换入口",
+        "reason": "承载好友页面左对齐大标题、新建好友与排序切换入口",
         "variant_dimensions": {
           "leftControl": "none",
-          "titleAlignment": "center",
-          "actions": "text",
-          "rightActionType": "text",
+          "titleAlignment": "left-wide",
+          "actions": "icon",
+          "rightActionType": "icon",
           "spacing": "default",
           "pageTransition": "push",
           "position": "sticky"
@@ -365,10 +359,10 @@
       {
         "binding_id": "friend-search",
         "slug": "search",
-        "reason": "提供好友昵称搜索与添加好友入口",
+        "reason": "提供好友昵称搜索入口，白底搜索框放在灰底页面上",
         "variant_dimensions": {
           "size": "md",
-          "surface": "gray",
+          "surface": "white",
           "mode": "text",
           "state": "empty",
           "hostPattern": "inline"
@@ -378,7 +372,7 @@
     "layout_contract": {
       "mode": "composed",
       "source": "references/design-decisions.md",
-      "selection_reason": "好友列表以连续浏览为主，采用通栏白底行减少阅读中断；搜索与排序切换固定在顶部，索引悬浮在右侧。",
+      "selection_reason": "好友列表以连续浏览为主，采用通栏白底行减少阅读中断；搜索固定在顶部，索引固定悬浮在右侧中间。",
       "page_edge_mode": "M0",
       "mutable_regions": [
         ".friend-list__scroll",
@@ -444,7 +438,7 @@
       {
         "state_id": "add-form",
         "initial": false,
-        "trigger": "点击搜索框右侧加号入口",
+        "trigger": "点击导航栏右侧新建好友入口",
         "visible_result": "打开添加好友全屏表单",
         "fallback": "取消关闭表单",
         "persistence": "memory"
@@ -474,11 +468,11 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/好友列表/scene.js",
     "scene_css": "wego-app/scenes/好友列表/scene.css",
-    "source_sha256": "e5fb92f0bf9d00a8a60dc3f1c03a7e2a84219d9afd952d4be83512ccbeb2474f",
+    "source_sha256": "0418f7a02e6b9a66235e320ede12812d4abebda171cf5a51490b368836425156",
     "dom_ids": [
+      "add-friend-entry",
       "sort-toggle",
-      "friend-search-input",
-      "add-friend-entry"
+      "friend-search-input"
     ],
     "component_count": 2,
     "visualCheck": {
@@ -487,7 +481,7 @@
         375,
         393
       ],
-      "checked_at": "2026-07-16T12:00:00.000Z",
+      "checked_at": "2026-07-17T01:05:00.000Z",
       "checks": {
         "horizontal_overflow": true,
         "overlap": true,

@@ -13,16 +13,15 @@
     "source": "library-consumption.json#/appRuntime/presentationTypes"
   },
   "prompt_contract": {
-    "design_system_version": 413,
+    "design_system_version": 414,
     "token_bindings": [
       { "selector": ".friend-list", "content_role": "页面背景", "css_property": "background", "token": "var(--bg-page)" },
       { "selector": ".friend-list", "content_role": "页面文字", "css_property": "color", "token": "var(--text-default)" },
       { "selector": ".friend-list", "content_role": "页面字体", "css_property": "font-family", "token": "var(--body-md-font-family)" },
       { "selector": ".friend-list", "content_role": "页面边距", "css_property": "padding-inline", "token": "var(--layout-page-margin-m0)" },
       { "selector": ".friend-list__navbar", "content_role": "导航栏背景", "css_property": "background", "token": "var(--bg-page)" },
-      { "selector": ".friend-list__search", "content_role": "搜索区背景", "css_property": "background", "token": "var(--bg-surface)" },
+      { "selector": ".friend-list__search", "content_role": "搜索区背景", "css_property": "background", "token": "var(--bg-page)" },
       { "selector": ".friend-list__search", "content_role": "搜索区留白", "css_property": "padding", "token": "var(--spacer-8)" },
-      { "selector": ".friend-list__search .searchbox__action", "content_role": "搜索操作颜色", "css_property": "color", "token": "var(--text-default)" },
       { "selector": ".friend-list__scroll", "content_role": "列表底部留白", "css_property": "padding-bottom", "token": "var(--spacer-24)" },
       { "selector": ".friend-list__group-title", "content_role": "分组标题顶部留白", "css_property": "padding-top", "token": "var(--spacer-16)" },
       { "selector": ".friend-list__group-title", "content_role": "分组标题横向留白", "css_property": "padding-inline", "token": "var(--spacer-16)" },
@@ -72,13 +71,13 @@
       { "selector": ".friend-add-form__footer", "content_role": "表单底部背景", "css_property": "background", "token": "var(--bg-surface)" }
     ],
     "component_bindings": [
-      { "binding_id": "friend-navbar", "slug": "navbar", "reason": "承载好友页面标题与排序切换入口", "variant_dimensions": { "leftControl": "none", "titleAlignment": "center", "actions": "text", "rightActionType": "text", "spacing": "default", "pageTransition": "push", "position": "sticky" } },
-      { "binding_id": "friend-search", "slug": "search", "reason": "提供好友昵称搜索与添加好友入口", "variant_dimensions": { "size": "md", "surface": "gray", "mode": "text", "state": "empty", "hostPattern": "inline" } }
+      { "binding_id": "friend-navbar", "slug": "navbar", "reason": "承载好友页面左对齐大标题、新建好友与排序切换入口", "variant_dimensions": { "leftControl": "none", "titleAlignment": "left-wide", "actions": "icon", "rightActionType": "icon", "spacing": "default", "pageTransition": "push", "position": "sticky" } },
+      { "binding_id": "friend-search", "slug": "search", "reason": "提供好友昵称搜索入口，白底搜索框放在灰底页面上", "variant_dimensions": { "size": "md", "surface": "white", "mode": "text", "state": "empty", "hostPattern": "inline" } }
     ],
     "layout_contract": {
       "mode": "composed",
       "source": "references/design-decisions.md",
-      "selection_reason": "好友列表以连续浏览为主，采用通栏白底行减少阅读中断；搜索与排序切换固定在顶部，索引悬浮在右侧。",
+      "selection_reason": "好友列表以连续浏览为主，采用通栏白底行减少阅读中断；搜索固定在顶部，索引固定悬浮在右侧中间。",
       "page_edge_mode": "M0",
       "mutable_regions": [".friend-list__scroll", ".friend-list__group", ".friend-list__index"]
     },
@@ -93,14 +92,14 @@
       { "state_id": "sort-by-group", "initial": false, "trigger": "点击导航栏右侧排序切换（目标为分组）", "visible_result": "按自定义分组聚合，组内按拼音排序，右侧索引显示分组名", "fallback": "保持当前排序", "persistence": "memory" },
       { "state_id": "searching", "initial": false, "trigger": "在搜索框输入关键词", "visible_result": "实时过滤匹配昵称的好友，隐藏分组标题与索引", "fallback": "清空关键词回到列表", "persistence": "memory" },
       { "state_id": "search-empty", "initial": false, "trigger": "搜索无匹配结果", "visible_result": "展示搜索无结果空状态", "fallback": "清空关键词回到列表", "persistence": "memory" },
-      { "state_id": "add-form", "initial": false, "trigger": "点击搜索框右侧加号入口", "visible_result": "打开添加好友全屏表单", "fallback": "取消关闭表单", "persistence": "memory" },
+      { "state_id": "add-form", "initial": false, "trigger": "点击导航栏右侧新建好友入口", "visible_result": "打开添加好友全屏表单", "fallback": "取消关闭表单", "persistence": "memory" },
       { "state_id": "submit-success", "initial": false, "trigger": "提交添加好友表单", "visible_result": "关闭表单，显示成功 toast，列表新增好友", "fallback": "回到列表", "persistence": "memory" }
     ]
   },
   "visual_check": {
     "status": "passed",
     "viewports": [375, 393],
-    "checked_at": "2026-07-16T12:00:00.000Z",
+    "checked_at": "2026-07-17T01:05:00.000Z",
     "checks": { "horizontal_overflow": true, "overlap": true, "clipping": true, "action_legibility": true, "primary_focus": true, "state_feedback": true }
   }
 }
@@ -115,23 +114,49 @@ var FRIEND_GROUPS = [
   { group_id: 'g-follow', group_name: '待跟进' }
 ];
 
-var FRIENDS_DATA = [
-  { friend_id: 'f001', nickname: '阿明', py_initial: 'A', group_id: 'g-vip', new_count: 3, product_total: 28 },
-  { friend_id: 'f002', nickname: '安然', py_initial: 'A', group_id: 'g-normal', new_count: 0, product_total: 15 },
-  { friend_id: 'f003', nickname: '白雪', py_initial: 'B', group_id: 'g-vip', new_count: 5, product_total: 42 },
-  { friend_id: 'f004', nickname: '斌哥', py_initial: 'B', group_id: 'g-normal', new_count: 1, product_total: 8 },
-  { friend_id: 'f005', nickname: '陈晨', py_initial: 'C', group_id: 'g-vip', new_count: 2, product_total: 35 },
-  { friend_id: 'f006', nickname: '超哥', py_initial: 'C', group_id: 'g-normal', new_count: 0, product_total: 12 },
-  { friend_id: 'f007', nickname: '丁丁', py_initial: 'D', group_id: 'g-normal', new_count: 4, product_total: 22 },
-  { friend_id: 'f008', nickname: '冬雨', py_initial: 'D', group_id: 'g-vip', new_count: 1, product_total: 18 },
-  { friend_id: 'f009', nickname: '方圆', py_initial: 'F', group_id: 'g-follow', new_count: 0, product_total: 5 },
-  { friend_id: 'f010', nickname: '芬芬', py_initial: 'F', group_id: 'g-vip', new_count: 6, product_total: 50 },
-  { friend_id: 'f011', nickname: '李娜', py_initial: 'L', group_id: 'g-normal', new_count: 2, product_total: 30 },
-  { friend_id: 'f012', nickname: '王芳', py_initial: 'W', group_id: 'g-follow', new_count: 0, product_total: 10 },
-  { friend_id: 'f013', nickname: '小明', py_initial: 'X', group_id: 'g-vip', new_count: 1, product_total: 25 },
-  { friend_id: 'f014', nickname: '张伟', py_initial: 'Z', group_id: 'g-normal', new_count: 3, product_total: 45 },
-  { friend_id: 'f015', nickname: '007 代理', py_initial: '#', group_id: 'g-follow', new_count: 0, product_total: 3 }
-];
+var NICKNAME_PREFIXES = ['阿', '安', '白', '冰', '晨', '大', '东', '芳', '光', '海', '红', '华', '静', '俊', '可', '兰', '丽', '亮', '林', '龙', '美', '明', '娜', '鹏', '强', '青', '秋', '然', '瑞', '山', '婷', '伟', '文', '雯', '霞', '小', '欣', '雪', '雅', '燕', '洋', '怡', '颖', '宇', '玉', '媛', '月', '云', '泽', '志'];
+var NICKNAME_SUFFIXES = ['哥', '姐', '总', '老板', '老板娘', '代理', '客户', '分销', '店主', '朋友', '同学', '邻居', '亲戚', '同事', '合作方'];
+
+function generateFriends(count) {
+  var friends = [];
+  var groups = ['g-vip', 'g-normal', 'g-follow'];
+  for (var i = 0; i < count; i++) {
+    var prefix = NICKNAME_PREFIXES[i % NICKNAME_PREFIXES.length];
+    var suffix = NICKNAME_SUFFIXES[Math.floor(i / NICKNAME_PREFIXES.length) % NICKNAME_SUFFIXES.length];
+    var nickname = prefix + suffix + (i < NICKNAME_PREFIXES.length ? '' : Math.floor(i / NICKNAME_PREFIXES.length / NICKNAME_SUFFIXES.length));
+    var pyInitial = getPyInitial(nickname.charAt(0));
+    var groupId = groups[i % groups.length];
+    var avatarIndex = (i % 100) + 1;
+    friends.push({
+      friend_id: 'f' + String(i + 1).padStart(3, '0'),
+      nickname: nickname,
+      py_initial: pyInitial,
+      group_id: groupId,
+      new_count: Math.floor(Math.random() * 10),
+      product_total: Math.floor(Math.random() * 100) + 1,
+      avatar: './lib/assets/image/avatar/avatar_' + String(avatarIndex).padStart(3, '0') + '.jpg'
+    });
+  }
+  return friends;
+}
+
+function getPyInitial(char) {
+  var map = {
+    '阿': 'A', '安': 'A', '白': 'B', '冰': 'B', '晨': 'C', '大': 'D', '东': 'D',
+    '芳': 'F', '光': 'G', '海': 'H', '红': 'H', '华': 'H', '静': 'J', '俊': 'J',
+    '可': 'K', '兰': 'L', '丽': 'L', '亮': 'L', '林': 'L', '龙': 'L', '美': 'M',
+    '明': 'M', '娜': 'N', '鹏': 'P', '强': 'Q', '青': 'Q', '秋': 'Q', '然': 'R',
+    '瑞': 'R', '山': 'S', '婷': 'T', '伟': 'W', '文': 'W', '雯': 'W', '霞': 'X',
+    '小': 'X', '欣': 'X', '雪': 'X', '雅': 'Y', '燕': 'Y', '洋': 'Y', '怡': 'Y',
+    '颖': 'Y', '宇': 'Y', '玉': 'Y', '媛': 'Y', '月': 'Y', '云': 'Y', '泽': 'Z',
+    '志': 'Z', '老': 'L', '总': 'Z', '代': 'D', '客': 'K', '分': 'F', '店': 'D',
+    '朋': 'P', '同': 'T', '邻': 'L', '亲': 'Q', '合': 'H', '0': '#', '1': '#',
+    '2': '#', '3': '#', '4': '#', '5': '#', '6': '#', '7': '#', '8': '#', '9': '#'
+  };
+  return map[char] || '#';
+}
+
+var FRIENDS_DATA = generateFriends(100);
 
 /* ── 工具函数 ── */
 function getGroupName(groupId) {
@@ -184,14 +209,15 @@ function searchFriends(keyword) {
 
 /* ── 模板函数 ── */
 function friendCellTemplate(friend, bindingId) {
-  var initial = friend.nickname.charAt(0);
   var newCountHtml = friend.new_count > 0
     ? '<span class="friend-list__meta-text friend-list__new-count">上新 ' + friend.new_count + '</span>'
     : '';
   return ''
     + '<div class="cell cell--double cell--bg-white cell--clickable" data-friend-id="' + friend.friend_id + '">'
     +   '<div class="cell__avatar">'
-    +     '<div class="avatar avatar--40 avatar--initials" data-dd-id="friend-avatar-' + friend.friend_id + '" data-component-slug="avatar" data-component-binding="' + bindingId + '">' + initial + '</div>'
+    +     '<div class="avatar avatar--40 avatar--image" data-dd-id="friend-avatar-' + friend.friend_id + '" data-component-slug="avatar" data-component-binding="' + bindingId + '">'
+    +       '<img src="' + friend.avatar + '" alt="' + friend.nickname + '">'
+    +     '</div>'
     +   '</div>'
     +   '<div class="cell__body">'
     +     '<div class="cell__content">'
@@ -375,23 +401,26 @@ const friendListTemplate = `
     <div class="navbar friend-list__navbar" data-dd-id="friend-navbar" data-component-slug="navbar" data-component-binding="friend-navbar">
       <div class="navbar__body">
         <div class="navbar__left"></div>
-        <div class="navbar__center"><span class="navbar__title">好友</span></div>
-        <div class="navbar__right navbar__right--text">
-          <button type="button" class="navbar__action navbar__action--text" data-dom-id="sort-toggle">
+        <div class="navbar__center navbar__center--wide"><span class="navbar__title">好友</span></div>
+        <div class="navbar__right navbar__right--wide navbar__right--icon">
+          <div class="navbar__action" data-dom-id="add-friend-entry">
+            <div class="navbar__action-icon"><i class="wego-iconfont-s icon-yuanjia"></i></div>
+            <span class="navbar__action-label">新建</span>
+          </div>
+          <div class="navbar__action" data-dom-id="sort-toggle">
+            <div class="navbar__action-icon"><i class="wego-iconfont-s icon-paixu"></i></div>
             <span class="navbar__action-label" data-sort-label>分组</span>
-          </button>
+          </div>
         </div>
       </div>
     </div>
     <div class="friend-list__search">
-      <div class="searchbox searchbox--md searchbox--gray" data-dd-id="friend-search" data-component-slug="search" data-component-binding="friend-search">
+      <div class="searchbox searchbox--md searchbox--white" data-dd-id="friend-search" data-component-slug="search" data-component-binding="friend-search">
         <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
         <div class="searchbox__input">
           <input class="searchbox__field" type="search" placeholder="搜索好友昵称" data-dom-id="friend-search-input" />
         </div>
-        <div class="searchbox__actions">
-          <button class="searchbox__action wego-iconfont-s icon-jia16" type="button" data-dom-id="add-friend-entry" aria-label="添加好友"></button>
-        </div>
+        <div class="searchbox__actions"></div>
       </div>
     </div>
     <div class="friend-list__scroll" data-friend-scroll data-tab-scroll></div>
@@ -580,7 +609,8 @@ window.WegoApp.registerScene({
               py_initial: nickname.value.trim().charAt(0).toUpperCase(),
               group_id: formState.groupId || 'g-normal',
               new_count: 0,
-              product_total: 0
+              product_total: 0,
+              avatar: './lib/assets/image/avatar-defult.png'
             };
             if (!/[A-Z]/.test(newFriend.py_initial)) {
               newFriend.py_initial = '#';

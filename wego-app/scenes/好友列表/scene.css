@@ -13,16 +13,15 @@
     "source": "library-consumption.json#/appRuntime/presentationTypes"
   },
   "prompt_contract": {
-    "design_system_version": 412,
+    "design_system_version": 414,
     "token_bindings": [
       { "selector": ".friend-list", "content_role": "页面背景", "css_property": "background", "token": "var(--bg-page)" },
       { "selector": ".friend-list", "content_role": "页面文字", "css_property": "color", "token": "var(--text-default)" },
       { "selector": ".friend-list", "content_role": "页面字体", "css_property": "font-family", "token": "var(--body-md-font-family)" },
       { "selector": ".friend-list", "content_role": "页面边距", "css_property": "padding-inline", "token": "var(--layout-page-margin-m0)" },
       { "selector": ".friend-list__navbar", "content_role": "导航栏背景", "css_property": "background", "token": "var(--bg-page)" },
-      { "selector": ".friend-list__search", "content_role": "搜索区背景", "css_property": "background", "token": "var(--bg-surface)" },
+      { "selector": ".friend-list__search", "content_role": "搜索区背景", "css_property": "background", "token": "var(--bg-page)" },
       { "selector": ".friend-list__search", "content_role": "搜索区留白", "css_property": "padding", "token": "var(--spacer-8)" },
-      { "selector": ".friend-list__search .searchbox__action", "content_role": "搜索操作颜色", "css_property": "color", "token": "var(--text-default)" },
       { "selector": ".friend-list__scroll", "content_role": "列表底部留白", "css_property": "padding-bottom", "token": "var(--spacer-24)" },
       { "selector": ".friend-list__group-title", "content_role": "分组标题顶部留白", "css_property": "padding-top", "token": "var(--spacer-16)" },
       { "selector": ".friend-list__group-title", "content_role": "分组标题横向留白", "css_property": "padding-inline", "token": "var(--spacer-16)" },
@@ -72,13 +71,13 @@
       { "selector": ".friend-add-form__footer", "content_role": "表单底部背景", "css_property": "background", "token": "var(--bg-surface)" }
     ],
     "component_bindings": [
-      { "binding_id": "friend-navbar", "slug": "navbar", "reason": "承载好友页面标题与排序切换入口", "variant_dimensions": { "leftControl": "none", "titleAlignment": "center", "actions": "text", "rightActionType": "text", "spacing": "default", "pageTransition": "push", "position": "sticky" } },
-      { "binding_id": "friend-search", "slug": "search", "reason": "提供好友昵称搜索与添加好友入口", "variant_dimensions": { "size": "md", "surface": "gray", "mode": "text", "state": "empty", "hostPattern": "inline" } }
+      { "binding_id": "friend-navbar", "slug": "navbar", "reason": "承载好友页面左对齐大标题、新建好友与排序切换入口", "variant_dimensions": { "leftControl": "none", "titleAlignment": "left-wide", "actions": "icon", "rightActionType": "icon", "spacing": "default", "pageTransition": "push", "position": "sticky" } },
+      { "binding_id": "friend-search", "slug": "search", "reason": "提供好友昵称搜索入口，白底搜索框放在灰底页面上", "variant_dimensions": { "size": "md", "surface": "white", "mode": "text", "state": "empty", "hostPattern": "inline" } }
     ],
     "layout_contract": {
       "mode": "composed",
       "source": "references/design-decisions.md",
-      "selection_reason": "好友列表以连续浏览为主，采用通栏白底行减少阅读中断；搜索与排序切换固定在顶部，索引悬浮在右侧。",
+      "selection_reason": "好友列表以连续浏览为主，采用通栏白底行减少阅读中断；搜索固定在顶部，索引固定悬浮在右侧中间。",
       "page_edge_mode": "M0",
       "mutable_regions": [".friend-list__scroll", ".friend-list__group", ".friend-list__index"]
     },
@@ -93,14 +92,14 @@
       { "state_id": "sort-by-group", "initial": false, "trigger": "点击导航栏右侧排序切换（目标为分组）", "visible_result": "按自定义分组聚合，组内按拼音排序，右侧索引显示分组名", "fallback": "保持当前排序", "persistence": "memory" },
       { "state_id": "searching", "initial": false, "trigger": "在搜索框输入关键词", "visible_result": "实时过滤匹配昵称的好友，隐藏分组标题与索引", "fallback": "清空关键词回到列表", "persistence": "memory" },
       { "state_id": "search-empty", "initial": false, "trigger": "搜索无匹配结果", "visible_result": "展示搜索无结果空状态", "fallback": "清空关键词回到列表", "persistence": "memory" },
-      { "state_id": "add-form", "initial": false, "trigger": "点击搜索框右侧加号入口", "visible_result": "打开添加好友全屏表单", "fallback": "取消关闭表单", "persistence": "memory" },
+      { "state_id": "add-form", "initial": false, "trigger": "点击导航栏右侧新建好友入口", "visible_result": "打开添加好友全屏表单", "fallback": "取消关闭表单", "persistence": "memory" },
       { "state_id": "submit-success", "initial": false, "trigger": "提交添加好友表单", "visible_result": "关闭表单，显示成功 toast，列表新增好友", "fallback": "回到列表", "persistence": "memory" }
     ]
   },
   "visual_check": {
     "status": "passed",
     "viewports": [375, 393],
-    "checked_at": "2026-07-16T12:00:00.000Z",
+    "checked_at": "2026-07-17T00:00:00.000Z",
     "checks": { "horizontal_overflow": true, "overlap": true, "clipping": true, "action_legibility": true, "primary_focus": true, "state_feedback": true }
   }
 }
@@ -128,11 +127,7 @@
 .friend-list__search {
   flex-shrink: 0;
   padding: var(--spacer-8);
-  background: var(--bg-surface);
-}
-
-.friend-list__search .searchbox__action {
-  color: var(--text-default);
+  background: var(--bg-page);
 }
 
 /* 列表滚动区 */
@@ -190,6 +185,12 @@
   border-radius: var(--radius-12);
   box-shadow: var(--shadow-xs);
   z-index: var(--z-sticky);
+}
+
+@supports (-webkit-touch-callout: none) {
+  .friend-list__index {
+    position: fixed;
+  }
 }
 
 .friend-list__index-item {
