@@ -8,11 +8,13 @@
       "rule_id": "paradigm-selection-by-interaction-mode",
       "appliesWhen": [
         "页面以编辑控件、规则配置或权限配置为主",
+        "页面以 switch、radio、checkbox 等开关/单选/多选配置为主，文本录入只是辅助",
         "编辑结果需要页面级保存或统一提交后生效"
       ],
       "excludeWhen": [
         "页面主要提供带箭头的层级导航且没有页面级保存",
-        "仅需局部选择或即时生效的轻量操作"
+        "仅需局部选择或即时生效的轻量操作",
+        "页面以新建或编辑实体的文本、头像或长文本录入为主，规则/权限选项不是主体（用 entity-form）"
       ],
       "uiKit": {
         "entry": "ui_kits/biz-rule-config/index.html",
@@ -106,6 +108,74 @@
           "trigger": "设置项进入下一层或展开选择",
           "use": "保留整行点击与按压反馈",
           "avoid": "把独立 switch、radio 或 checkbox 行也设为整行点击"
+        }
+      ]
+    },
+    {
+      "id": "entity-form",
+      "name": "实体信息录入",
+      "rule_id": "paradigm-selection-by-content-dominance",
+      "appliesWhen": [
+        "页面以新建或编辑实体的信息收集为主，需要录入文本、长文本、头像或带前缀的复合输入",
+        "页面以页面级保存或取消关闭，规则/权限选项不是主体"
+      ],
+      "excludeWhen": [
+        "页面以 switch、radio、checkbox 等规则或权限配置为主，文本录入只是辅助（用 biz-rule-config）",
+        "页面主要提供带箭头的层级导航且没有页面级保存（用 system-settings）",
+        "仅需局部选择或即时生效的轻量操作"
+      ],
+      "uiKit": {
+        "entry": "ui_kits/entity-form/index.html",
+        "qualityReport": "ui_kits/entity-form/quality-report.json"
+      },
+      "presentation": {
+        "type": "full-screen-modal",
+        "transition": "slide-up-enter, slide-down-exit",
+        "dismissAction": "page-level-save",
+        "overlayLevel": "overlay",
+        "coversTabBar": true
+      },
+      "componentCandidates": [
+        "navbar",
+        "form",
+        "cell",
+        "avatar",
+        "actionsheet",
+        "tag",
+        "input",
+        "button",
+        "toast"
+      ],
+      "compositionConstraints": [
+        {
+          "id": "entity-form-group-structure",
+          "trigger": "新建/编辑实体的连续字段属于同一业务分组（如基本信息、归属信息、来源与备注）",
+          "use": "使用 form-group 的正式标题和内容结构按业务维度切分多组",
+          "avoid": "把所有字段塞进单个 form-group，或发明场景级 xxx-page__group 自定义容器"
+        },
+        {
+          "id": "entity-form-vertical-for-rich-input",
+          "trigger": "字段为头像上传、长文本（验证消息、备注、说明）或多行内容",
+          "use": "使用 form-body--vertical + 对应 inputType（textarea/custom/upload），头像位使用 form-body__upload",
+          "avoid": "把头像或长文本硬塞进横向行，或自造上传/textarea 包装层"
+        },
+        {
+          "id": "entity-form-required-and-prefix",
+          "trigger": "字段有必填约束或带只读前缀（如 +86 区号、货币符号）",
+          "use": "使用 form-body__label--required + form-body__required 表达必填，使用 form-body__phone + form-body__phone-prefix + form-body__phone-divider 表达前缀",
+          "avoid": "用红色星号或自造必填标记，为区号单独写样式"
+        },
+        {
+          "id": "entity-form-actionsheet-select",
+          "trigger": "字段是单选枚举（分组、来源渠道、标签等）",
+          "use": "使用 form-body--clickable + form-body__select，点击通过 actionsheet 选择模式打开，选中后回填 select-text 并加 has-value",
+          "avoid": "在 form-body 内嵌入原生 select，或把整行点击热区和 actionsheet 自身热区混淆"
+        },
+        {
+          "id": "entity-form-single-primary-action",
+          "trigger": "页面级保存",
+          "use": "主操作只在 navbar 右侧按钮区收口，使用 btn--strong btn--sm",
+          "avoid": "在页面底部或内容区重复放保存按钮"
         }
       ]
     }

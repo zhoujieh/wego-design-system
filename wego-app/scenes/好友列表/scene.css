@@ -13,7 +13,7 @@
     "source": "library-consumption.json#/appRuntime/presentationTypes"
   },
   "prompt_contract": {
-    "design_system_version": 414,
+    "design_system_version": 415,
     "token_bindings": [
       { "selector": ".friend-list", "content_role": "页面背景", "css_property": "background", "token": "var(--bg-page)" },
       { "selector": ".friend-list", "content_role": "页面文字", "css_property": "color", "token": "var(--text-default)" },
@@ -65,10 +65,7 @@
       { "selector": ".friend-add-form", "content_role": "表单页背景", "css_property": "background", "token": "var(--bg-page)" },
       { "selector": ".friend-add-form", "content_role": "表单页文字", "css_property": "color", "token": "var(--text-default)" },
       { "selector": ".friend-add-form", "content_role": "表单页字体", "css_property": "font-family", "token": "var(--body-md-font-family)" },
-      { "selector": ".friend-add-form__body", "content_role": "表单内容留白", "css_property": "padding-bottom", "token": "var(--spacer-24)" },
-      { "selector": ".friend-add-form__footer", "content_role": "表单底部纵向留白", "css_property": "padding-block", "token": "var(--spacer-12)" },
-      { "selector": ".friend-add-form__footer", "content_role": "表单底部横向留白", "css_property": "padding-inline", "token": "var(--spacer-16)" },
-      { "selector": ".friend-add-form__footer", "content_role": "表单底部背景", "css_property": "background", "token": "var(--bg-surface)" }
+      { "selector": ".friend-add-form__body", "content_role": "表单内容底部留白", "css_property": "padding-bottom", "token": "var(--spacer-24)" }
     ],
     "component_bindings": [
       { "binding_id": "friend-navbar", "slug": "navbar", "reason": "承载好友页面左对齐大标题、新建好友与排序切换入口", "variant_dimensions": { "leftControl": "none", "titleAlignment": "left-wide", "actions": "icon", "rightActionType": "icon", "spacing": "default", "pageTransition": "push", "position": "sticky" } },
@@ -268,15 +265,4 @@
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   padding-bottom: var(--spacer-24);
-}
-
-.friend-add-form__footer {
-  flex-shrink: 0;
-  padding-block: var(--spacer-12);
-  padding-inline: var(--spacer-16);
-  background: var(--bg-surface);
-}
-
-.friend-add-form__footer .btn {
-  width: 100%;
 }

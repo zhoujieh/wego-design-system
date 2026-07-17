@@ -14,7 +14,7 @@
     "source": "library-consumption.json#/appRuntime/presentationTypes"
   },
   "prompt_contract": {
-    "design_system_version": 414,
+    "design_system_version": 415,
     "token_bindings": [
       {
         "selector": ".friend-list",
@@ -318,27 +318,9 @@
       },
       {
         "selector": ".friend-add-form__body",
-        "content_role": "表单内容留白",
+        "content_role": "表单内容底部留白",
         "css_property": "padding-bottom",
         "token": "var(--spacer-24)"
-      },
-      {
-        "selector": ".friend-add-form__footer",
-        "content_role": "表单底部纵向留白",
-        "css_property": "padding-block",
-        "token": "var(--spacer-12)"
-      },
-      {
-        "selector": ".friend-add-form__footer",
-        "content_role": "表单底部横向留白",
-        "css_property": "padding-inline",
-        "token": "var(--spacer-16)"
-      },
-      {
-        "selector": ".friend-add-form__footer",
-        "content_role": "表单底部背景",
-        "css_property": "background",
-        "token": "var(--bg-surface)"
       }
     ],
     "component_bindings": [
@@ -468,7 +450,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/好友列表/scene.js",
     "scene_css": "wego-app/scenes/好友列表/scene.css",
-    "source_sha256": "06c35b516680433ba45aca9b03d53834dc3ca2b02e41222d7c06308ba1f08d63",
+    "source_sha256": "d9faa04ff0d54bd55940900b49c827a722c310dad93ac3e1102bf389d635a155",
     "dom_ids": [
       "add-friend-entry",
       "sort-toggle",
@@ -481,7 +463,8 @@
         375,
         393
       ],
-      "checked_at": "2026-07-17T01:05:00.000Z",
+      "checked_at": "2026-07-17T02:30:00.000Z",
+      "scope": "好友列表主页 + 新建好友全屏模态表单层",
       "checks": {
         "horizontal_overflow": true,
         "overlap": true,

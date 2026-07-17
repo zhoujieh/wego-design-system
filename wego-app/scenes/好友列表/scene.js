@@ -13,7 +13,7 @@
     "source": "library-consumption.json#/appRuntime/presentationTypes"
   },
   "prompt_contract": {
-    "design_system_version": 414,
+    "design_system_version": 415,
     "token_bindings": [
       { "selector": ".friend-list", "content_role": "页面背景", "css_property": "background", "token": "var(--bg-page)" },
       { "selector": ".friend-list", "content_role": "页面文字", "css_property": "color", "token": "var(--text-default)" },
@@ -65,10 +65,7 @@
       { "selector": ".friend-add-form", "content_role": "表单页背景", "css_property": "background", "token": "var(--bg-page)" },
       { "selector": ".friend-add-form", "content_role": "表单页文字", "css_property": "color", "token": "var(--text-default)" },
       { "selector": ".friend-add-form", "content_role": "表单页字体", "css_property": "font-family", "token": "var(--body-md-font-family)" },
-      { "selector": ".friend-add-form__body", "content_role": "表单内容留白", "css_property": "padding-bottom", "token": "var(--spacer-24)" },
-      { "selector": ".friend-add-form__footer", "content_role": "表单底部纵向留白", "css_property": "padding-block", "token": "var(--spacer-12)" },
-      { "selector": ".friend-add-form__footer", "content_role": "表单底部横向留白", "css_property": "padding-inline", "token": "var(--spacer-16)" },
-      { "selector": ".friend-add-form__footer", "content_role": "表单底部背景", "css_property": "background", "token": "var(--bg-surface)" }
+      { "selector": ".friend-add-form__body", "content_role": "表单内容底部留白", "css_property": "padding-bottom", "token": "var(--spacer-24)" }
     ],
     "component_bindings": [
       { "binding_id": "friend-navbar", "slug": "navbar", "reason": "承载好友页面左对齐大标题、新建好友与排序切换入口", "variant_dimensions": { "leftControl": "none", "titleAlignment": "left-wide", "actions": "icon", "rightActionType": "icon", "spacing": "default", "pageTransition": "push", "position": "sticky" } },
@@ -99,7 +96,8 @@
   "visual_check": {
     "status": "passed",
     "viewports": [375, 393],
-    "checked_at": "2026-07-17T01:05:00.000Z",
+    "checked_at": "2026-07-17T02:30:00.000Z",
+    "scope": "好友列表主页 + 新建好友全屏模态表单层",
     "checks": { "horizontal_overflow": true, "overlap": true, "clipping": true, "action_legibility": true, "primary_focus": true, "state_feedback": true }
   }
 }
@@ -269,7 +267,7 @@ function emptyTemplate(text) {
 function addFriendFormTemplate() {
   return ''
     + '<section class="friend-add-form" data-bg="page" aria-label="添加好友">'
-    +   '<div class="navbar">'
+    +   '<div class="navbar" data-dd-id="friend-add-form-navbar" data-component-slug="navbar" data-component-binding="friend-add-form-navbar">'
     +     '<div class="navbar__body navbar__body--spaced">'
     +       '<div class="navbar__left"><span class="navbar__left-text" data-close-add-form>取消</span></div>'
     +       '<div class="navbar__center"><span class="navbar__title">添加好友</span></div>'
@@ -349,9 +347,6 @@ function addFriendFormTemplate() {
     +         '</div>'
     +       '</div>'
     +     '</div>'
-    +   '</div>'
-    +   '<div class="friend-add-form__footer">'
-    +     '<button type="button" class="btn btn--strong btn--lg" data-dom-id="submit-add-friend">保存好友</button>'
     +   '</div>'
     + '</section>';
 }

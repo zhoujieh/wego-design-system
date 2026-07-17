@@ -187,6 +187,11 @@
     {
       "action": "confirm-brief",
       "at": "2026-07-16T13:48:16.425Z"
+    },
+    {
+      "action": "design-fix",
+      "at": "2026-07-17T02:30:00.000Z",
+      "note": "新建好友表单层对齐新增的 entity-form 范式：删除底部重复保存按钮收口到 navbar 右侧，表单层 navbar 打组件标记，visual_check 覆盖表单模态层"
     }
   ],
   "freeze": null

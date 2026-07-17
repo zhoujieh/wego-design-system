@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>实体信息录入 - 全屏模态</title>
+<link rel="stylesheet" href="../../colors_and_type.css">
+<link rel="stylesheet" href="../../scaffold.css">
+<link rel="stylesheet" href="../../iconfont.css">
+<link rel="stylesheet" href="../../components.css">
+<style>
+html, body { min-height: auto; }
+
+.phone-status {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spacer-16);
+  background: transparent;
+  box-sizing: border-box;
+  font-size: var(--body-sm-font-size);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-default);
+  z-index: var(--z-critical);
+  pointer-events: none;
+}
+
+.uikit-host-screen {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-page);
+  position: relative;
+}
+
+.phone-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-8);
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-top: var(--spacer-8);
+  padding-bottom: var(--safe-area-bottom-content);
+}
+
+.bottom-nav {
+  padding-bottom: var(--safe-area-bottom);
+}
+
+.form-body--clickable:focus-visible,
+.cell[role="button"]:focus-visible {
+  outline: 2px solid var(--bg-brand);
+  outline-offset: -2px;
+}
+
+.uikit-modal-screen {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-overlay);
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-page);
+  transform: translateY(100%);
+  transition: transform var(--duration-normal) var(--ease-exit);
+  will-change: transform;
+}
+
+.uikit-modal-screen.is-open {
+  transform: translateY(0);
+  transition: transform var(--duration-normal) var(--ease-enter);
+}
+
+.uikit-modal-screen.is-hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.uikit-modal-screen .navbar {
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.uikit-modal-screen .navbar__left-text,
+.uikit-modal-screen .navbar__action-label {
+  font-size: var(--body-lg-font-size);
+}
+
+.uikit-toast-host {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: var(--z-toast);
+}
+
+/* phone-frame 预览中 toast 相对宿主定位而非视口 */
+.uikit-toast-host .toast.is-floating {
+  position: absolute;
+}
+
+@media (max-width: 767px) {
+  .uikit-shell {
+    min-height: 100vh;
+    min-height: 100dvh;
+    align-items: stretch;
+    padding: 0;
+  }
+
+  .phone-frame {
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 900px;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .phone-screen {
+    border-radius: 0;
+  }
+
+  .phone-status,
+  .phone-indicator {
+    display: none;
+  }
+}
+</style>
+</head>
+<body class="uikit-page">
+<div class="uikit-shell">
+  <div class="phone-frame">
+    <div class="phone-screen" id="root"></div>
+  </div>
+</div>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script type="text/babel">
+const { useEffect, useState } = React;
+
+const GROUP_OPTIONS = [
+  { id: 'vip', name: 'VIP 客户' },
+  { id: 'normal', name: '普通客户' },
+  { id: 'pending', name: '待跟进' }
+];
+
+const SOURCE_OPTIONS = [
+  { id: 'search', name: '搜索导入' },
+  { id: 'scan', name: '名片扫码' },
+  { id: 'group', name: '群聊添加' },
+  { id: 'contacts', name: '手机通讯录' },
+  { id: 'manual', name: '手动输入' }
+];
+
+function handleActionKeyDown(event, action) {
+  if (event.key !== 'Enter' && event.key !== ' ') return;
+  event.preventDefault();
+  action();
+}
+
+function StatusBar() {
+  return (
+    <div className="phone-status">
+      <span>9:41</span>
+      <span>5G</span>
+    </div>
+  );
+}
+
+function HomeIndicator() {
+  return (
+    <div className="phone-indicator">
+      <div className="phone-indicator-bar"></div>
+    </div>
+  );
+}
+
+function BottomNav() {
+  const iconSrc = (tab) => `../../assets/icons/tab-${tab === 'haoyou' ? 'active-' : ''}${tab}.svg`;
+
+  return (
+    <nav data-component="bottom-nav" className="bottom-nav">
+      <div className="bottom-nav__item" data-tab="dongtai">
+        <div className="bottom-nav__icon"><img src={iconSrc('dongtai')} width="32" height="32" alt="" /></div>
+        <span className="bottom-nav__label">动态</span>
+      </div>
+      <div className="bottom-nav__item active" data-tab="haoyou">
+        <div className="bottom-nav__icon"><img src={iconSrc('haoyou')} width="32" height="32" alt="" /></div>
+        <span className="bottom-nav__label">好友</span>
+      </div>
+      <div className="bottom-nav__item" data-tab="gongzuotai">
+        <div className="bottom-nav__icon"><img src={iconSrc('gongzuotai')} width="32" height="32" alt="" /></div>
+        <span className="bottom-nav__label">工作台</span>
+      </div>
+      <div className="bottom-nav__item" data-tab="xiaoxi">
+        <div className="bottom-nav__icon"><img src={iconSrc('xiaoxi')} width="32" height="32" alt="" /></div>
+        <span className="bottom-nav__label">消息</span>
+      </div>
+      <div className="bottom-nav__item" data-tab="wode">
+        <div className="bottom-nav__icon"><img src={iconSrc('wode')} width="32" height="32" alt="" /></div>
+        <span className="bottom-nav__label">我的</span>
+      </div>
+    </nav>
+  );
+}
+
+function GroupSheet({ open, selectedId, onSelect, onClose }) {
+  return (
+    <div
+      className="actionsheet actionsheet--select"
+      role="dialog"
+      aria-modal="true"
+      data-state={open ? 'open' : 'closed'}
+      onClick={onClose}
+    >
+      <div className="actionsheet__panel" onClick={(e) => e.stopPropagation()}>
+        <div className="actionsheet__header actionsheet__header--text">
+          <span className="actionsheet__header-text">选择分组</span>
+        </div>
+        <div className="actionsheet__list">
+          {GROUP_OPTIONS.map((opt) => (
+            <button
+              key={opt.id}
+              type="button"
+              className={`actionsheet__item${selectedId === opt.id ? ' actionsheet__item--selected' : ''}`}
+              onClick={() => onSelect(opt.id, opt.name)}
+            >
+              <div className="actionsheet__item-row">
+                <div className="actionsheet__item-main">
+                  <span className="actionsheet__item-title">{opt.name}</span>
+                </div>
+                <div className="actionsheet__item-check-slot">
+                  <i className="wego-iconfont-s icon-gou-jiacu actionsheet__item-check"></i>
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+        <div className="actionsheet__cancel-gap"></div>
+        <button type="button" className="actionsheet__cancel" onClick={onClose}>取 消</button>
+      </div>
+    </div>
+  );
+}
+
+function SourceSheet({ open, selectedId, onSelect, onClose }) {
+  return (
+    <div
+      className="actionsheet actionsheet--select"
+      role="dialog"
+      aria-modal="true"
+      data-state={open ? 'open' : 'closed'}
+      onClick={onClose}
+    >
+      <div className="actionsheet__panel" onClick={(e) => e.stopPropagation()}>
+        <div className="actionsheet__header actionsheet__header--text">
+          <span className="actionsheet__header-text">选择来源</span>
+        </div>
+        <div className="actionsheet__list">
+          {SOURCE_OPTIONS.map((opt) => (
+            <button
+              key={opt.id}
+              type="button"
+              className={`actionsheet__item${selectedId === opt.id ? ' actionsheet__item--selected' : ''}`}
+              onClick={() => onSelect(opt.id, opt.name)}
+            >
+              <div className="actionsheet__item-row">
+                <div className="actionsheet__item-main">
+                  <span className="actionsheet__item-title">{opt.name}</span>
+                </div>
+                <div className="actionsheet__item-check-slot">
+                  <i className="wego-iconfont-s icon-gou-jiacu actionsheet__item-check"></i>
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+        <div className="actionsheet__cancel-gap"></div>
+        <button type="button" className="actionsheet__cancel" onClick={onClose}>取 消</button>
+      </div>
+    </div>
+  );
+}
+
+function EntityFormContent({
+  nickname, setNickname,
+  account, setAccount,
+  groupName,
+  sourceName,
+  tags, setTags,
+  remark, setRemark,
+  verifyMessage, setVerifyMessage,
+  onOpenGroupSheet,
+  onOpenSourceSheet,
+  onUploadAvatar
+}) {
+  return (
+    <>
+      <div className="form-group">
+        <div className="form-group__title">基本信息</div>
+        <div className="form-group__content">
+          <div className="form-body form-body--vertical">
+            <div className="form-body__label form-body__label--required">
+              <span className="form-body__label-text">头像</span>
+              <span className="form-body__required">(必填)</span>
+            </div>
+            <div className="form-body__action">
+              <div className="form-body__upload" onClick={onUploadAvatar}>
+                <div className="form-body__upload-icon wego-iconfont-s icon-jia16"></div>
+                <span className="form-body__upload-text">上传</span>
+              </div>
+            </div>
+          </div>
+          <div className="form-body form-body--vertical">
+            <div className="form-body__label form-body__label--required">
+              <span className="form-body__label-text">昵称</span>
+              <span className="form-body__required">(必填)</span>
+            </div>
+            <div className="form-body__action">
+              <input
+                type="text"
+                placeholder="请输入好友昵称"
+                maxLength="20"
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="form-body form-body--vertical">
+            <div className="form-body__label form-body__label--required">
+              <span className="form-body__label-text">账号/手机号</span>
+              <span className="form-body__required">(必填)</span>
+            </div>
+            <div className="form-body__action">
+              <div className="form-body__phone">
+                <span className="form-body__phone-prefix">+86</span>
+                <span className="form-body__phone-divider"></span>
+                <input
+                  className="form-body__phone-input"
+                  type="tel"
+                  placeholder="请输入账号或手机号"
+                  value={account}
+                  onChange={(e) => setAccount(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="form-group">
+        <div className="form-group__title">归属与标签</div>
+        <div className="form-group__content">
+          <div
+            className="form-body form-body--clickable"
+            role="button"
+            tabIndex={0}
+            onClick={onOpenGroupSheet}
+            onKeyDown={(e) => handleActionKeyDown(e, onOpenGroupSheet)}
+          >
+            <div className="form-body__label">分组</div>
+            <div className="form-body__action">
+              <div className="form-body__select">
+                <span className={`form-body__select-text${groupName ? ' has-value' : ''}`}>
+                  {groupName || '请选择分组'}
+                </span>
+                <span className="form-body__select-arrow wego-iconfont-s icon-xiajiantou16"></span>
+              </div>
+            </div>
+          </div>
+          <div className="form-body form-body--vertical">
+            <div className="form-body__label">标签</div>
+            <div className="form-body__action">
+              <input
+                type="text"
+                placeholder="多个标签用逗号分隔"
+                value={tags}
+                onChange={(e) => setTags(e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="form-group">
+        <div className="form-group__title">来源与备注</div>
+        <div className="form-group__content">
+          <div
+            className="form-body form-body--clickable"
+            role="button"
+            tabIndex={0}
+            onClick={onOpenSourceSheet}
+            onKeyDown={(e) => handleActionKeyDown(e, onOpenSourceSheet)}
+          >
+            <div className="form-body__label">来源渠道</div>
+            <div className="form-body__action">
+              <div className="form-body__select">
+                <span className={`form-body__select-text${sourceName ? ' has-value' : ''}`}>
+                  {sourceName || '请选择来源渠道'}
+                </span>
+                <span className="form-body__select-arrow wego-iconfont-s icon-xiajiantou16"></span>
+              </div>
+            </div>
+          </div>
+          <div className="form-body form-body--vertical">
+            <div className="form-body__label">备注</div>
+            <div className="form-body__action">
+              <input
+                type="text"
+                placeholder="添加备注信息"
+                maxLength="50"
+                value={remark}
+                onChange={(e) => setRemark(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="form-body form-body--vertical form-body--fixed-height">
+            <div className="form-body__label">验证消息</div>
+            <div className="form-body__action">
+              <textarea
+                rows="3"
+                placeholder="发送给好友的验证消息"
+                value={verifyMessage}
+                onChange={(e) => setVerifyMessage(e.target.value)}
+              ></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function EntityFormModal({
+  isOpen,
+  onCancel,
+  onSave,
+  nickname, setNickname,
+  account, setAccount,
+  groupName,
+  sourceName,
+  tags, setTags,
+  remark, setRemark,
+  verifyMessage, setVerifyMessage,
+  groupId,
+  sourceId,
+  groupSheetOpen,
+  sourceSheetOpen,
+  onSelectGroup,
+  onSelectSource,
+  onOpenGroupSheet,
+  onOpenSourceSheet,
+  onCloseGroupSheet,
+  onCloseSourceSheet,
+  onUploadAvatar
+}) {
+  return (
+    <div className={`uikit-modal-screen${isOpen ? ' is-open' : ''}`} aria-hidden={!isOpen}>
+      <StatusBar />
+      <div data-component="navbar" className="navbar">
+        <div className="navbar__body navbar__body--spaced">
+          <div className="navbar__left">
+            <button type="button" className="navbar__left-text" onClick={onCancel}>取消</button>
+          </div>
+          <div className="navbar__center">
+            <span className="navbar__title">新建好友</span>
+          </div>
+          <div className="navbar__right navbar__right--button">
+            <div className="navbar__action navbar__action--button">
+              <button type="button" className="btn btn--strong btn--sm" onClick={onSave}>保存</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="phone-body">
+        <EntityFormContent
+          nickname={nickname}
+          setNickname={setNickname}
+          account={account}
+          setAccount={setAccount}
+          groupName={groupName}
+          sourceName={sourceName}
+          tags={tags}
+          setTags={setTags}
+          remark={remark}
+          setRemark={setRemark}
+          verifyMessage={verifyMessage}
+          setVerifyMessage={setVerifyMessage}
+          onOpenGroupSheet={onOpenGroupSheet}
+          onOpenSourceSheet={onOpenSourceSheet}
+          onUploadAvatar={onUploadAvatar}
+        />
+      </div>
+      <HomeIndicator />
+      <GroupSheet
+        open={groupSheetOpen}
+        selectedId={groupId}
+        onSelect={onSelectGroup}
+        onClose={onCloseGroupSheet}
+      />
+      <SourceSheet
+        open={sourceSheetOpen}
+        selectedId={sourceId}
+        onSelect={onSelectSource}
+        onClose={onCloseSourceSheet}
+      />
+    </div>
+  );
+}
+
+function BaseScreen({ onOpen }) {
+  return (
+    <div className="uikit-host-screen">
+      <StatusBar />
+      <div data-component="navbar" className="navbar">
+        <div className="navbar__body">
+          <div className="navbar__left"></div>
+          <div className="navbar__center navbar__center--wide">
+            <span className="navbar__title">好友</span>
+          </div>
+          <div className="navbar__right"></div>
+        </div>
+      </div>
+      <div className="phone-body">
+        <div className="cell-group">
+          <div className="cell-group__title">好友管理</div>
+          <div className="cell-group__content">
+            <div
+              data-component="cell"
+              className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+              role="button"
+              tabIndex={0}
+              onClick={onOpen}
+              onKeyDown={(e) => handleActionKeyDown(e, onOpen)}
+            >
+              <div className="cell__body">
+                <div className="cell__content">
+                  <div className="cell__title-row"><span className="cell__title">新建好友</span></div>
+                </div>
+                <div className="cell__action">
+                  <i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <BottomNav />
+      <HomeIndicator />
+    </div>
+  );
+}
+
+function App() {
+  const [avatar, setAvatar] = useState('');
+  const [nickname, setNickname] = useState('');
+  const [account, setAccount] = useState('');
+  const [groupId, setGroupId] = useState('vip');
+  const [groupName, setGroupName] = useState('VIP 客户');
+  const [source, setSource] = useState('');
+  const [tags, setTags] = useState('');
+  const [remark, setRemark] = useState('');
+  const [verifyMessage, setVerifyMessage] = useState('');
+
+  const [modalMounted, setModalMounted] = useState(true);
+  const [modalOpen, setModalOpen] = useState(true);
+
+  const [groupSheetOpen, setGroupSheetOpen] = useState(false);
+  const [sourceSheetOpen, setSourceSheetOpen] = useState(false);
+
+  // toast 状态机：idle → entering → visible → leaving → idle
+  // 必须分两步挂 is-visible，浏览器才有机会先布局初始态再触发过渡，否则入场动画不生效；
+  // 出场先加 is-leaving 触发淡出过渡，过渡结束后再卸载 DOM。
+  const [toastMsg, setToastMsg] = useState('');
+  const [toastPhase, setToastPhase] = useState('idle');
+
+  useEffect(() => {
+    if (toastPhase !== 'entering') return undefined;
+    const rafId = requestAnimationFrame(() => requestAnimationFrame(() => setToastPhase('visible')));
+    return () => cancelAnimationFrame(rafId);
+  }, [toastPhase]);
+
+  useEffect(() => {
+    if (toastPhase !== 'visible') return undefined;
+    const leaveTimer = window.setTimeout(() => setToastPhase('leaving'), 4000);
+    return () => window.clearTimeout(leaveTimer);
+  }, [toastPhase]);
+
+  useEffect(() => {
+    if (toastPhase !== 'leaving') return undefined;
+    const removeTimer = window.setTimeout(() => {
+      setToastMsg('');
+      setToastPhase('idle');
+    }, 200);
+    return () => window.clearTimeout(removeTimer);
+  }, [toastPhase]);
+
+  const showToast = (msg) => {
+    if (!msg) return;
+    setToastMsg(msg);
+    setToastPhase('entering');
+  };
+
+  const openModal = () => {
+    setModalMounted(true);
+    window.setTimeout(() => setModalOpen(true), 16);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    window.setTimeout(() => setModalMounted(false), 260);
+  };
+
+  const handleSave = () => {
+    if (!nickname.trim()) {
+      showToast('请输入好友昵称');
+      return;
+    }
+    showToast(`已添加好友 ${nickname}`);
+    closeModal();
+  };
+
+  const handleUploadAvatar = () => {
+    showToast('已打开头像选择入口');
+  };
+
+  const handleSelectGroup = (id, name) => {
+    setGroupId(id);
+    setGroupName(name);
+    setGroupSheetOpen(false);
+  };
+
+  const handleSelectSource = (id) => {
+    setSource(id);
+    setSourceSheetOpen(false);
+  };
+
+  const sourceName = SOURCE_OPTIONS.find((o) => o.id === source)?.name || '';
+
+  return (
+    <>
+      <BaseScreen onOpen={openModal} />
+      {modalMounted ? (
+        <EntityFormModal
+          isOpen={modalOpen}
+          onCancel={closeModal}
+          onSave={handleSave}
+          nickname={nickname}
+          setNickname={setNickname}
+          account={account}
+          setAccount={setAccount}
+          groupName={groupName}
+          sourceName={sourceName}
+          tags={tags}
+          setTags={setTags}
+          remark={remark}
+          setRemark={setRemark}
+          verifyMessage={verifyMessage}
+          setVerifyMessage={setVerifyMessage}
+          groupId={groupId}
+          sourceId={source}
+          groupSheetOpen={groupSheetOpen}
+          sourceSheetOpen={sourceSheetOpen}
+          onSelectGroup={handleSelectGroup}
+          onSelectSource={handleSelectSource}
+          onOpenGroupSheet={() => setGroupSheetOpen(true)}
+          onOpenSourceSheet={() => setSourceSheetOpen(true)}
+          onCloseGroupSheet={() => setGroupSheetOpen(false)}
+          onCloseSourceSheet={() => setSourceSheetOpen(false)}
+          onUploadAvatar={handleUploadAvatar}
+        />
+      ) : null}
+      <div className="uikit-toast-host" aria-live="polite" role="status">
+        {toastMsg ? (
+          <div className={`toast toast--default is-floating${toastPhase === 'visible' ? ' is-visible' : ''}${toastPhase === 'leaving' ? ' is-leaving' : ''}`}>
+            <span className="toast__text">{toastMsg}</span>
+          </div>
+        ) : null}
+      </div>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
