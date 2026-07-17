@@ -26,12 +26,15 @@
 }
 
 .host-shell-page__panel .album-feed__scroll,
-.host-shell-page__panel .my-page__scroll {
+.host-shell-page__panel .my-page__scroll,
+.host-shell-page__panel .friend-list__scroll {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+  overflow-anchor: none;
   overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
+  /* iOS 13+ 的 overflow 滚动默认已加速，避免旧属性额外创建滚动合成层。 */
+  -webkit-overflow-scrolling: auto;
 }
 
 .host-shell-page__panel .my-page__scroll > * {

@@ -35,6 +35,7 @@
   }
 
   function resetTarget(target) {
+    if (!target) return;
     target.scrollTop = 0;
     target.scrollLeft = 0;
     if (typeof target.scrollTo === 'function') {
@@ -42,8 +43,26 @@
     }
   }
 
-  function resetTargets(targets) {
-    targets.forEach(resetTarget);
+  function rebuildScrollLayer(target) {
+    var parent = target && target.parentNode;
+    if (!parent) {
+      resetTarget(target);
+      return;
+    }
+
+    // iOS 的动量滚动由原生 UIScrollView 异步驱动；单写 scrollTop/scrollTo
+    // 不能保证中断它。把同一个内容节点暂时移出再原位插回，保留节点状态与
+    // 事件监听，同时销毁旧滚动层，让重新创建的滚动层从 0 开始。
+    var marker = document.createComment('host-tab-scroll-reset');
+    parent.replaceChild(marker, target);
+    resetTarget(target);
+    parent.replaceChild(target, marker);
+    target.getBoundingClientRect();
+    resetTarget(target);
+  }
+
+  function rebuildScrollLayers(targets) {
+    targets.forEach(rebuildScrollLayer);
   }
 
   function forceScrollLayout() {
@@ -70,11 +89,9 @@
   function suspendMomentum(target) {
     var snapshots = [
       rememberInlineProperty(target, 'scroll-behavior'),
-      rememberInlineProperty(target, '-webkit-overflow-scrolling'),
       rememberInlineProperty(target, 'overflow-y')
     ];
     target.style.setProperty('scroll-behavior', 'auto', 'important');
-    target.style.setProperty('-webkit-overflow-scrolling', 'auto', 'important');
     target.style.setProperty('overflow-y', 'hidden', 'important');
     return function restoreMomentumStyles() {
       snapshots.forEach(function (snapshot) {
@@ -94,10 +111,10 @@
     if (!cycle || cycle.released) return;
     cycle.released = true;
     window.clearTimeout(cycle.safetyTimer);
-    if (shouldReset) resetTargets(cycle.targets);
+    if (shouldReset) rebuildScrollLayers(cycle.targets);
     cycle.restoreStyles.forEach(function (restore) { restore(); });
     forceScrollLayout();
-    if (shouldReset) resetTargets(cycle.targets);
+    if (shouldReset) rebuildScrollLayers(activeScrollTargets());
     if (activeCycle === cycle) activeCycle = null;
   }
 
@@ -105,9 +122,8 @@
     if (activeCycle && !activeCycle.released && activeCycle.trigger === trigger) {
       if (shouldReset) {
         activeCycle.committed = true;
-        resetTargets(activeCycle.targets);
+        rebuildScrollLayers(activeCycle.targets);
         forceScrollLayout();
-        resetTargets(activeCycle.targets);
       }
       return activeCycle;
     }
@@ -126,7 +142,7 @@
     };
     activeCycle = cycle;
     forceScrollLayout();
-    if (shouldReset) resetTargets(targets);
+    if (shouldReset) rebuildScrollLayers(targets);
     cycle.safetyTimer = window.setTimeout(function () {
       var committed = cycle.committed;
       releaseCycle(cycle, committed);
@@ -137,15 +153,10 @@
 
   function scheduleActiveReset() {
     cancelScheduledFrames();
-    var remainingFrames = 3;
-    function resetOnFrame() {
-      resetTargets(activeScrollTargets());
-      remainingFrames -= 1;
-      if (remainingFrames > 0) {
-        scheduledFrames.push(window.requestAnimationFrame(resetOnFrame));
-      }
-    }
-    scheduledFrames.push(window.requestAnimationFrame(resetOnFrame));
+    scheduledFrames.push(window.requestAnimationFrame(function () {
+      rebuildScrollLayers(activeScrollTargets());
+      scheduledFrames = [];
+    }));
   }
 
   function finishCycle(cycle) {
@@ -190,7 +201,7 @@
   panels.forEach(function (panel) {
     var observer = new MutationObserver(function () {
       if (activeCycle && activeCycle.committed) {
-        resetTargets(allScrollTargets());
+        rebuildScrollLayers(allScrollTargets());
         return;
       }
       if (!activeCycle && !panel.hidden && panel.classList.contains('host-shell-page__panel--active')) {
