@@ -10,7 +10,12 @@
       "我的"
     ]
   },
-  "status": "frozen",
+  "status": "superseded",
+  "superseded_by": {
+    "iteration_id": "feed-redesign",
+    "scene": "微购相册动态",
+    "at": "2026-07-20T12:30:00.000Z"
+  },
   "scope_revision": 1,
   "prototype_brief": {
     "goal": "让用户在五个主业务入口之间切换时，始终从目标入口的默认起始位置浏览，避免一个入口的浏览位置影响其他入口。",
@@ -149,6 +154,10 @@
     {
       "action": "freeze",
       "at": "2026-07-16T23:25:01.760Z"
+    },
+    {
+      "action": "supersede",
+      "at": "2026-07-20T12:30:00.000Z"
     }
   ],
   "freeze": {

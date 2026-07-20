@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 4,
+  "identity": {
+    "iteration_id": "feed-redesign",
+    "title": "微购动态重做",
+    "date": "2026-07-20",
+    "primary_scene": "微购相册动态",
+    "related_scenes": [
+      "好友列表"
+    ]
+  },
+  "status": "prototyping",
+  "scope_revision": 1,
+  "prototype_brief": {
+    "goal": "重新设计「动态」主 tab，让用户能更高效地浏览好友动态与商品上新，并通过搜索和快捷入口快速定位好友或商品内容。",
+    "included": [
+      "完全替代现有「相册动态」页面内容与排版",
+      "顶部固定搜索区，支持按好友昵称、商品名称、动态文案实时过滤",
+      "横向好友快捷入口，头像与数据直接取自「好友」tab 的 FRIENDS_DATA",
+      "顶部标签筛选：全部、好友上新、图文动态",
+      "动态信息流卡片：发布者头像/名称、发布时间、动态文案、图片网格、关联商品卡片",
+      "搜索无结果空状态",
+      "点击好友头像后动态流切换为仅该好友的内容，并提供清除过滤入口",
+      "点击商品/图片/更多操作时给出 Toast 或底部操作面板反馈，不打开新页面"
+    ],
+    "excluded": [
+      "搜索下钻结果页、好友主页、商品详情页等二级页面",
+      "真实后端接口、数据持久化、动态发布功能",
+      "评论、点赞、转发的真实业务闭环",
+      "消息、工作台、我的 tab 的业务内容修改"
+    ],
+    "entry_points": [
+      "底部导航「动态」主 tab（dongtai）"
+    ],
+    "critical_paths": [
+      "进入动态 tab → 上下滚动浏览混合信息流 → 切换顶部标签筛选内容类型",
+      "进入动态 tab → 在搜索框输入关键词 → 查看实时过滤后的动态结果",
+      "进入动态 tab → 点击横向好友头像 → 动态流过滤为该好友内容 → 可清除过滤回到全部",
+      "点击动态卡片上的商品/图片/更多操作 → 获得即时反馈"
+    ],
+    "prototype_boundaries": [
+      {
+        "flow_id": "browse-feed",
+        "mode": "functional",
+        "visible_result": "用户可连续滚动浏览动态内容，卡片信息完整可读"
+      },
+      {
+        "flow_id": "search-feed",
+        "mode": "functional",
+        "visible_result": "用户输入关键词后动态列表实时过滤并展示结果"
+      },
+      {
+        "flow_id": "filter-by-friend",
+        "mode": "functional",
+        "visible_result": "用户点击好友头像后动态流仅展示该好友内容，可一键清除过滤"
+      },
+      {
+        "flow_id": "filter-by-tag",
+        "mode": "functional",
+        "visible_result": "用户切换顶部标签后动态流按内容类型过滤"
+      },
+      {
+        "flow_id": "interact-with-content",
+        "mode": "simulated",
+        "visible_result": "用户点击商品/图片/更多操作时给出可见反馈，不下钻到新页面"
+      }
+    ],
+    "states": [
+      "feed-ready：默认展示全部动态，顶部搜索常态，标签为「全部」",
+      "searching：搜索框有内容，隐藏标签和好友快捷入口，展示过滤结果",
+      "search-empty：无匹配结果，展示空状态",
+      "friend-filtered：点击好友头像后，动态流仅展示该好友内容，显示「清除过滤」入口",
+      "tag-filtered：切换标签后按内容类型过滤"
+    ],
+    "data_contract": {
+      "friends": {
+        "source": "好友列表场景的 FRIENDS_DATA",
+        "fields": [
+          "friend_id",
+          "nickname",
+          "avatar",
+          "py_initial",
+          "group_id",
+          "new_count",
+          "product_total"
+        ]
+      },
+      "feed_posts": {
+        "source": "前端基于好友数据模拟生成",
+        "fields": [
+          "post_id",
+          "author_id",
+          "author_name",
+          "author_avatar",
+          "type",
+          "content",
+          "images",
+          "product",
+          "published_at",
+          "tags"
+        ]
+      }
+    },
+    "assumptions": [
+      "动态内容由前端基于好友数据模拟生成，不与后端同步",
+      "搜索仅过滤当前已加载的模拟动态内容，不做分页",
+      "好友数据与「好友」tab 共用同一份内存数据，修改任一 tab 数据会同步影响另一 tab"
+    ],
+    "open_questions": []
+  },
+  "brief_confirmation": {
+    "at": "2026-07-20T03:48:46.647Z",
+    "scope_revision": 1,
+    "scope_sha256": "e0fe32478d3496fff69bc80edbbc4cbbf0736fc9d240f931771872fa94827303"
+  },
+  "prototype_confirmation": null,
+  "affected_scenes": [
+    "微购相册动态",
+    "好友列表"
+  ],
+  "affected_runtime": [],
+  "stage_outputs": {
+    "product": {
+      "valid": true
+    },
+    "design": {
+      "valid": false
+    }
+  },
+  "change_log": [
+    {
+      "action": "init",
+      "at": "2026-07-20T03:48:06.308Z"
+    },
+    {
+      "action": "submit-brief",
+      "at": "2026-07-20T03:48:42.525Z"
+    },
+    {
+      "action": "confirm-brief",
+      "at": "2026-07-20T03:48:46.651Z"
+    }
+  ],
+  "freeze": null
+}

@@ -306,6 +306,7 @@ function exactKeysErrors(value, expected, field) {
 }
 function confirmationErrors(record, file, repositoryRoot) {
   const errors = [];
+  if (record.status === 'superseded') return errors;
   const expected = expectedConfirmations.get(record.status);
   const briefPresent = record.brief_confirmation !== null && record.brief_confirmation !== undefined;
   const prototypePresent = record.prototype_confirmation !== null && record.prototype_confirmation !== undefined;
@@ -339,6 +340,7 @@ function confirmationErrors(record, file, repositoryRoot) {
 }
 function freezeErrors(record, file, repositoryRoot) {
   const errors = [];
+  if (record.status === 'superseded') return errors;
   if (record.status !== 'frozen') {
     if (record.freeze !== null) errors.push(`${file}: 非 frozen 状态的 freeze 必须为 null`);
     return errors;

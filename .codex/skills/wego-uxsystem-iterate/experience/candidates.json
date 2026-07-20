@@ -1427,7 +1427,7 @@
         "category": "skill-runtime-flow",
         "canonical": {
           "file": ".codex/skills/wego-design/references/scene-contract.md",
-          "locator": "约束列表 design_system_version 条目",
+          "locator": "rule-id: scene-version-snapshot-not-pinned",
           "rule_id": "scene-version-snapshot-not-pinned"
         }
       },
@@ -1445,7 +1445,7 @@
       "promoted_at": "2026-07-17T00:00:00Z",
       "promotion_landing": {
         "file": ".codex/skills/wego-design/references/scene-contract.md",
-        "locator": "约束列表 design_system_version 条目",
+        "locator": "rule-id: scene-version-snapshot-not-pinned",
         "rule_id": "scene-version-snapshot-not-pinned",
         "constraint_area": "场景与 UI Kit 版本号语义",
         "description": "design_system_version 与 designSystemVersion 是创建时基于的 metadata.version 快照（正整数），不要求随设计系统升级连锁更新；场景适配由 components.css 提取校验、组件契约一致性、source_sha256 和 visual_check 守护。"

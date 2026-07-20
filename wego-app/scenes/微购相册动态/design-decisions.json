@@ -14,8 +14,20 @@
     "source": "library-consumption.json#/appRuntime/presentationTypes"
   },
   "prompt_contract": {
-    "design_system_version": 417,
+    "design_system_version": 418,
     "token_bindings": [
+      {
+        "selector": ".album-feed",
+        "content_role": "页面边距",
+        "css_property": "padding-inline",
+        "token": "var(--layout-page-margin-m0)"
+      },
+      {
+        "selector": ".album-feed",
+        "content_role": "页面顶部安全区",
+        "css_property": "padding-top",
+        "token": "var(--safe-area-top)"
+      },
       {
         "selector": ".album-feed",
         "content_role": "页面背景",
@@ -35,16 +47,10 @@
         "token": "var(--body-md-font-family)"
       },
       {
-        "selector": ".album-feed",
-        "content_role": "页面边距",
-        "css_property": "padding-inline",
-        "token": "var(--layout-page-margin-m0)"
-      },
-      {
-        "selector": ".album-feed",
-        "content_role": "页面顶部安全区",
-        "css_property": "padding-top",
-        "token": "var(--safe-area-top)"
+        "selector": ".album-feed__scroll",
+        "content_role": "内容节奏",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
       },
       {
         "selector": ".album-feed__scroll",
@@ -53,354 +59,379 @@
         "token": "var(--spacer-24)"
       },
       {
-        "selector": ".album-feed__intro",
-        "content_role": "页面引导留白",
-        "css_property": "padding",
+        "selector": ".album-feed__header",
+        "content_role": "搜索区纵向留白",
+        "css_property": "padding-block",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".album-feed__header",
+        "content_role": "搜索区横向留白",
+        "css_property": "padding-inline",
         "token": "var(--spacer-16)"
       },
       {
-        "selector": ".album-feed__intro",
-        "content_role": "标题信息间距",
-        "css_property": "gap",
-        "token": "var(--spacer-4)"
-      },
-      {
-        "selector": ".album-feed__intro",
-        "content_role": "页面引导背景",
+        "selector": ".album-feed__header",
+        "content_role": "搜索区背景",
         "css_property": "background",
-        "token": "var(--bg-surface)"
+        "token": "var(--bg-page)"
       },
       {
-        "selector": ".album-feed__title",
-        "content_role": "页面标题",
-        "css_property": "font-size",
-        "token": "var(--heading-sm-font-size)"
+        "selector": ".album-feed__friends",
+        "content_role": "好友入口区纵向留白",
+        "css_property": "padding-block",
+        "token": "var(--spacer-12)"
       },
       {
-        "selector": ".album-feed__title",
-        "content_role": "页面标题",
-        "css_property": "font-weight",
-        "token": "var(--heading-sm-font-weight)"
+        "selector": ".album-feed__friends",
+        "content_role": "好友入口区背景",
+        "css_property": "background",
+        "token": "var(--bg-page)"
       },
       {
-        "selector": ".album-feed__title",
-        "content_role": "页面标题",
-        "css_property": "line-height",
-        "token": "var(--heading-sm-line-height)"
-      },
-      {
-        "selector": ".album-feed__subtitle",
-        "content_role": "页面说明",
-        "css_property": "color",
-        "token": "var(--text-tertiary)"
-      },
-      {
-        "selector": ".album-feed__subtitle",
-        "content_role": "页面说明",
-        "css_property": "font-size",
-        "token": "var(--body-sm-font-size)"
-      },
-      {
-        "selector": ".album-feed__subtitle",
-        "content_role": "页面说明",
-        "css_property": "line-height",
-        "token": "var(--body-sm-line-height)"
-      },
-      {
-        "selector": ".album-feed__item",
-        "content_role": "动态内容留白",
-        "css_property": "padding",
-        "token": "var(--spacer-16)"
-      },
-      {
-        "selector": ".album-feed__item",
-        "content_role": "动态内容节奏",
+        "selector": ".album-feed__friends-scroll",
+        "content_role": "好友入口横向节奏",
         "css_property": "gap",
         "token": "var(--spacer-12)"
       },
       {
-        "selector": ".album-feed__item",
-        "content_role": "动态内容背景",
+        "selector": ".album-feed__friends-scroll",
+        "content_role": "好友入口横向留白",
+        "css_property": "padding-inline",
+        "token": "var(--spacer-16)"
+      },
+      {
+        "selector": ".album-feed__friend-chip",
+        "content_role": "好友头像与名称节奏",
+        "css_property": "gap",
+        "token": "var(--spacer-4)"
+      },
+      {
+        "selector": ".album-feed__friend-name",
+        "content_role": "好友昵称颜色",
+        "css_property": "color",
+        "token": "var(--text-secondary)"
+      },
+      {
+        "selector": ".album-feed__friend-name",
+        "content_role": "好友昵称字号",
+        "css_property": "font-size",
+        "token": "var(--body-xs-font-size)"
+      },
+      {
+        "selector": ".album-feed__friend-name",
+        "content_role": "好友昵称行高",
+        "css_property": "line-height",
+        "token": "var(--body-xs-line-height)"
+      },
+      {
+        "selector": ".album-feed__filter-bar",
+        "content_role": "过滤栏节奏",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".album-feed__filter-bar",
+        "content_role": "过滤栏纵向留白",
+        "css_property": "padding-block",
+        "token": "var(--spacer-12)"
+      },
+      {
+        "selector": ".album-feed__filter-bar",
+        "content_role": "过滤栏横向留白",
+        "css_property": "padding-inline",
+        "token": "var(--spacer-16)"
+      },
+      {
+        "selector": ".album-feed__filter-bar",
+        "content_role": "过滤栏背景",
+        "css_property": "background",
+        "token": "var(--bg-surface)"
+      },
+      {
+        "selector": ".album-feed__filter-text",
+        "content_role": "过滤文案颜色",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".album-feed__filter-text",
+        "content_role": "过滤文案字号",
+        "css_property": "font-size",
+        "token": "var(--body-md-font-size)"
+      },
+      {
+        "selector": ".album-feed__filter-text",
+        "content_role": "过滤文案行高",
+        "css_property": "line-height",
+        "token": "var(--body-md-line-height)"
+      },
+      {
+        "selector": ".album-feed__list",
+        "content_role": "动态列表节奏",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".album-feed__card",
+        "content_role": "动态卡片节奏",
+        "css_property": "gap",
+        "token": "var(--spacer-12)"
+      },
+      {
+        "selector": ".album-feed__card",
+        "content_role": "动态卡片留白",
+        "css_property": "padding",
+        "token": "var(--spacer-16)"
+      },
+      {
+        "selector": ".album-feed__card",
+        "content_role": "动态卡片背景",
         "css_property": "background",
         "token": "var(--bg-surface)"
       },
       {
         "selector": ".album-feed__author",
-        "content_role": "发布信息间距",
+        "content_role": "作者行节奏",
         "css_property": "gap",
         "token": "var(--spacer-8)"
       },
       {
+        "selector": ".album-feed__author-info",
+        "content_role": "作者信息节奏",
+        "css_property": "gap",
+        "token": "var(--spacer-4)"
+      },
+      {
         "selector": ".album-feed__author-name",
-        "content_role": "发布者名称",
+        "content_role": "作者名称颜色",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".album-feed__author-name",
+        "content_role": "作者名称字号",
         "css_property": "font-size",
         "token": "var(--body-md-strong-font-size)"
       },
       {
         "selector": ".album-feed__author-name",
-        "content_role": "发布者名称",
+        "content_role": "作者名称字重",
         "css_property": "font-weight",
         "token": "var(--body-md-strong-font-weight)"
       },
       {
         "selector": ".album-feed__author-name",
-        "content_role": "发布者名称",
+        "content_role": "作者名称行高",
         "css_property": "line-height",
         "token": "var(--body-md-strong-line-height)"
       },
       {
         "selector": ".album-feed__time",
-        "content_role": "发布时间",
+        "content_role": "发布时间颜色",
         "css_property": "color",
         "token": "var(--text-tertiary)"
       },
       {
         "selector": ".album-feed__time",
-        "content_role": "发布时间",
+        "content_role": "发布时间字号",
         "css_property": "font-size",
         "token": "var(--body-sm-font-size)"
       },
       {
         "selector": ".album-feed__time",
-        "content_role": "发布时间",
+        "content_role": "发布时间行高",
         "css_property": "line-height",
         "token": "var(--body-sm-line-height)"
       },
       {
         "selector": ".album-feed__copy",
-        "content_role": "动态正文",
+        "content_role": "动态正文颜色",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".album-feed__copy",
+        "content_role": "动态正文字号",
         "css_property": "font-size",
         "token": "var(--body-md-font-size)"
       },
       {
         "selector": ".album-feed__copy",
-        "content_role": "动态正文",
+        "content_role": "动态正文行高",
         "css_property": "line-height",
         "token": "var(--body-md-line-height)"
       },
       {
         "selector": ".album-feed__media",
-        "content_role": "商品图片间距",
+        "content_role": "图片网格节奏",
         "css_property": "gap",
         "token": "var(--spacer-4)"
       },
       {
         "selector": ".album-feed__product",
-        "content_role": "商品信息留白",
-        "css_property": "padding",
+        "content_role": "商品卡片上间距",
+        "css_property": "margin-top",
         "token": "var(--spacer-12)"
       },
       {
         "selector": ".album-feed__product-title",
-        "content_role": "商品名称",
+        "content_role": "商品名称颜色",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".album-feed__product-title",
+        "content_role": "商品名称字号",
         "css_property": "font-size",
         "token": "var(--body-md-strong-font-size)"
       },
       {
         "selector": ".album-feed__product-title",
-        "content_role": "商品名称",
+        "content_role": "商品名称字重",
         "css_property": "font-weight",
         "token": "var(--body-md-strong-font-weight)"
       },
       {
         "selector": ".album-feed__product-title",
-        "content_role": "商品名称",
+        "content_role": "商品名称行高",
         "css_property": "line-height",
         "token": "var(--body-md-strong-line-height)"
       },
       {
         "selector": ".album-feed__product-meta",
-        "content_role": "商品说明",
+        "content_role": "商品说明颜色",
         "css_property": "color",
         "token": "var(--text-secondary)"
       },
       {
         "selector": ".album-feed__product-meta",
-        "content_role": "商品说明",
+        "content_role": "商品说明字号",
         "css_property": "font-size",
         "token": "var(--body-sm-font-size)"
       },
       {
         "selector": ".album-feed__product-meta",
-        "content_role": "商品说明",
+        "content_role": "商品说明行高",
         "css_property": "line-height",
         "token": "var(--body-sm-line-height)"
       },
       {
-        "selector": ".album-feed__price",
-        "content_role": "商品价格",
+        "selector": ".album-feed__product-price",
+        "content_role": "商品价格颜色",
         "css_property": "color",
         "token": "var(--text-promotion)"
       },
       {
-        "selector": ".album-feed__price",
-        "content_role": "商品价格",
+        "selector": ".album-feed__product-price",
+        "content_role": "商品价格字号",
         "css_property": "font-size",
         "token": "var(--body-lg-font-size)"
       },
       {
-        "selector": ".album-feed__price",
-        "content_role": "商品价格",
+        "selector": ".album-feed__product-price",
+        "content_role": "商品价格字重",
         "css_property": "font-weight",
         "token": "var(--font-weight-semibold)"
       },
       {
-        "selector": ".album-feed__price",
-        "content_role": "商品价格",
+        "selector": ".album-feed__product-price",
+        "content_role": "商品价格行高",
         "css_property": "line-height",
         "token": "var(--body-lg-line-height)"
       },
       {
         "selector": ".album-feed__actions",
-        "content_role": "核心操作间距",
+        "content_role": "操作区节奏",
         "css_property": "gap",
         "token": "var(--spacer-8)"
       },
       {
-        "selector": ".album-feed__more",
-        "content_role": "弱化操作文字",
-        "css_property": "color",
-        "token": "var(--text-secondary)"
-      },
-      {
-        "selector": ".album-feed__more",
-        "content_role": "弱化操作文字",
-        "css_property": "font-size",
-        "token": "var(--body-sm-font-size)"
-      },
-      {
-        "selector": ".album-feed__more",
-        "content_role": "弱化操作文字",
-        "css_property": "line-height",
-        "token": "var(--body-sm-line-height)"
-      },
-      {
-        "selector": ".album-product-modal",
-        "content_role": "详情内容间距",
-        "css_property": "gap",
+        "selector": ".album-feed__actions",
+        "content_role": "操作区上间距",
+        "css_property": "margin-top",
         "token": "var(--spacer-12)"
       },
       {
-        "selector": ".album-product-modal",
-        "content_role": "详情内容留白",
+        "selector": ".album-feed__empty",
+        "content_role": "空状态间距",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".album-feed__empty",
+        "content_role": "空状态留白",
         "css_property": "padding",
-        "token": "var(--spacer-16)"
+        "token": "var(--spacer-24)"
       },
       {
-        "selector": ".album-product-modal",
-        "content_role": "详情背景",
-        "css_property": "background",
-        "token": "var(--bg-surface)"
-      },
-      {
-        "selector": ".album-product-modal",
-        "content_role": "详情文字",
-        "css_property": "color",
-        "token": "var(--text-default)"
-      },
-      {
-        "selector": ".album-product-modal",
-        "content_role": "详情字体",
-        "css_property": "font-family",
-        "token": "var(--body-md-font-family)"
-      },
-      {
-        "selector": ".album-product-modal__head",
-        "content_role": "详情标题间距",
-        "css_property": "gap",
-        "token": "var(--spacer-12)"
-      },
-      {
-        "selector": ".album-product-modal__head",
-        "content_role": "详情标题",
+        "selector": ".album-feed__empty-icon",
+        "content_role": "空状态图标字号",
         "css_property": "font-size",
-        "token": "var(--heading-xs-font-size)"
+        "token": "var(--size-48)"
       },
       {
-        "selector": ".album-product-modal__head",
-        "content_role": "详情标题",
-        "css_property": "font-weight",
-        "token": "var(--heading-xs-font-weight)"
-      },
-      {
-        "selector": ".album-product-modal__head",
-        "content_role": "详情标题",
-        "css_property": "line-height",
-        "token": "var(--heading-xs-line-height)"
-      },
-      {
-        "selector": ".album-product-modal img",
-        "content_role": "详情图片圆角",
-        "css_property": "border-radius",
-        "token": "var(--radius-8)"
-      },
-      {
-        "selector": ".album-product-modal p",
-        "content_role": "详情说明",
+        "selector": ".album-feed__empty-icon",
+        "content_role": "空状态图标颜色",
         "css_property": "color",
-        "token": "var(--text-secondary)"
+        "token": "var(--text-disabled)"
       },
       {
-        "selector": ".album-product-modal p",
-        "content_role": "详情说明",
+        "selector": ".album-feed__empty-icon",
+        "content_role": "空状态图标行高",
+        "css_property": "line-height",
+        "token": "var(--body-xs-line-height)"
+      },
+      {
+        "selector": ".album-feed__empty-text",
+        "content_role": "空状态文字颜色",
+        "css_property": "color",
+        "token": "var(--text-tertiary)"
+      },
+      {
+        "selector": ".album-feed__empty-text",
+        "content_role": "空状态文字字号",
         "css_property": "font-size",
         "token": "var(--body-md-font-size)"
       },
       {
-        "selector": ".album-product-modal p",
-        "content_role": "详情说明",
+        "selector": ".album-feed__empty-text",
+        "content_role": "空状态文字行高",
         "css_property": "line-height",
         "token": "var(--body-md-line-height)"
       }
     ],
     "component_bindings": [
       {
-        "binding_id": "feed-avatar",
-        "slug": "avatar",
-        "reason": "呈现每条动态的发布者身份",
+        "binding_id": "feed-search",
+        "slug": "search",
+        "reason": "顶部固定搜索入口，支持按好友、商品、动态文案实时过滤",
         "variant_dimensions": {
-          "type": "initials",
-          "size": "40"
+          "size": "md",
+          "surface": "gray",
+          "mode": "text",
+          "state": "empty",
+          "hostPattern": "inline",
+          "internalActions": "clear"
         }
       },
       {
-        "binding_id": "feed-image",
-        "slug": "image",
-        "reason": "展示可点击查看的商品图片",
+        "binding_id": "feed-tabs",
+        "slug": "tabs",
+        "reason": "顶部内容分类标签，切换全部、好友上新、图文动态",
         "variant_dimensions": {
-          "fit": "cover",
-          "size": "custom-rect",
-          "radius": "rounded-md",
-          "state": "loaded",
-          "interaction": "clickable"
-        }
-      },
-      {
-        "binding_id": "product-card",
-        "slug": "card",
-        "reason": "归纳动态关联的商品信息",
-        "variant_dimensions": {
-          "base": "auto",
-          "surface": "outlined"
-        }
-      },
-      {
-        "binding_id": "forward-action",
-        "slug": "button",
-        "reason": "承载一键转发核心操作",
-        "variant_dimensions": {
-          "emphasis": "strong",
-          "size": "sm",
-          "iconMode": "text-only",
+          "size": "standard",
+          "layout": "divide",
+          "icon": "none",
           "state": "default"
         }
       },
       {
-        "binding_id": "download-action",
+        "binding_id": "feed-clear-filter-action",
         "slug": "button",
-        "reason": "承载下载图片核心操作",
+        "reason": "清除好友过滤",
         "variant_dimensions": {
-          "emphasis": "medium",
+          "emphasis": "weak",
           "size": "sm",
           "iconMode": "text-only",
           "state": "default"
@@ -410,182 +441,121 @@
     "layout_contract": {
       "mode": "composed",
       "source": "references/design-decisions.md",
-      "selection_reason": "页面首要任务是连续浏览商品动态，采用通栏内容以减少阅读中断并为不同图片数量保留稳定空间。",
+      "selection_reason": "页面首要任务是连续浏览商品动态，采用通栏卡片减少阅读中断；顶部搜索、横向好友入口与标签栏帮助用户快速定位内容。",
       "page_edge_mode": "M0",
       "mutable_regions": [
         ".album-feed__scroll",
-        ".album-feed__item",
+        ".album-feed__card",
         ".album-feed__media",
         ".album-feed__product"
       ]
     },
     "interaction_contract": [
       {
-        "dom_id": "open-product-one",
-        "target": "overlay:modal"
+        "dom_id": "search-input",
+        "target": "state:searching"
       },
       {
-        "dom_id": "open-product-two",
-        "target": "overlay:modal"
+        "dom_id": "search-clear",
+        "target": "state:feed-ready"
       },
       {
-        "dom_id": "open-product-three",
-        "target": "overlay:modal"
+        "dom_id": "tab-all",
+        "target": "state:feed-ready"
       },
       {
-        "dom_id": "forward-one",
-        "target": "feedback:toast"
+        "dom_id": "tab-new",
+        "target": "state:feed-new"
       },
       {
-        "dom_id": "download-one",
-        "target": "feedback:toast"
+        "dom_id": "tab-photo",
+        "target": "state:feed-photo"
       },
       {
-        "dom_id": "more-actions-one",
-        "target": "overlay:sheet"
-      },
-      {
-        "dom_id": "view-image-one",
-        "target": "feedback:toast"
-      },
-      {
-        "dom_id": "view-image-two",
-        "target": "feedback:toast"
-      },
-      {
-        "dom_id": "view-image-three",
-        "target": "feedback:toast"
-      },
-      {
-        "dom_id": "view-image-four",
-        "target": "feedback:toast"
-      },
-      {
-        "dom_id": "view-image-five",
-        "target": "feedback:toast"
-      },
-      {
-        "dom_id": "view-image-six",
-        "target": "feedback:toast"
+        "dom_id": "clear-filter",
+        "target": "state:feed-ready"
       }
     ],
     "state_contract": [
       {
         "state_id": "feed-ready",
         "initial": true,
-        "trigger": "进入动态主 tab",
-        "visible_result": "展示连续商品动态、核心操作与弱化操作入口",
+        "trigger": "进入动态主 tab 或切换到全部标签/清除搜索过滤",
+        "visible_result": "展示全部动态、顶部搜索、横向好友入口与标签栏",
         "fallback": "保留当前可浏览的动态内容",
         "persistence": "memory"
       },
       {
-        "state_id": "action-feedback",
+        "state_id": "searching",
         "initial": false,
-        "trigger": "选择核心操作、弱化操作或商品图片",
-        "visible_result": "展示与所选入口相符的瞬时反馈或操作列表",
-        "fallback": "关闭反馈后回到同一动态位置",
+        "trigger": "在搜索框输入关键词",
+        "visible_result": "实时过滤好友、商品与动态文案，隐藏好友入口与标签栏",
+        "fallback": "清空关键词回到 feed-ready",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "feed-new",
+        "initial": false,
+        "trigger": "点击好友上新标签",
+        "visible_result": "只展示好友上新类型动态",
+        "fallback": "切换到全部标签",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "feed-photo",
+        "initial": false,
+        "trigger": "点击图文动态标签",
+        "visible_result": "只展示图文动态类型",
+        "fallback": "切换到全部标签",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "friend-filter",
+        "initial": false,
+        "trigger": "点击好友快捷入口",
+        "visible_result": "只展示所选好友的动态",
+        "fallback": "清除过滤回到 feed-ready",
         "persistence": "memory"
       }
     ]
   },
   "decisions": [
     {
-      "dd_id": "author-one",
-      "binding_id": "feed-avatar",
-      "component_slug": "avatar"
+      "dd_id": "feed-search",
+      "binding_id": "feed-search",
+      "component_slug": "search"
     },
     {
-      "dd_id": "feed-image-one",
-      "binding_id": "feed-image",
-      "component_slug": "image"
+      "dd_id": "feed-tabs",
+      "binding_id": "feed-tabs",
+      "component_slug": "tabs"
     },
     {
-      "dd_id": "feed-image-two",
-      "binding_id": "feed-image",
-      "component_slug": "image"
-    },
-    {
-      "dd_id": "feed-image-three",
-      "binding_id": "feed-image",
-      "component_slug": "image"
-    },
-    {
-      "dd_id": "product-one",
-      "binding_id": "product-card",
-      "component_slug": "card"
-    },
-    {
-      "dd_id": "forward-one-button",
-      "binding_id": "forward-action",
+      "dd_id": "clear-filter",
+      "binding_id": "feed-clear-filter-action",
       "component_slug": "button"
-    },
-    {
-      "dd_id": "download-one-button",
-      "binding_id": "download-action",
-      "component_slug": "button"
-    },
-    {
-      "dd_id": "author-two",
-      "binding_id": "feed-avatar",
-      "component_slug": "avatar"
-    },
-    {
-      "dd_id": "feed-image-four",
-      "binding_id": "feed-image",
-      "component_slug": "image"
-    },
-    {
-      "dd_id": "product-two",
-      "binding_id": "product-card",
-      "component_slug": "card"
-    },
-    {
-      "dd_id": "author-three",
-      "binding_id": "feed-avatar",
-      "component_slug": "avatar"
-    },
-    {
-      "dd_id": "feed-image-five",
-      "binding_id": "feed-image",
-      "component_slug": "image"
-    },
-    {
-      "dd_id": "feed-image-six",
-      "binding_id": "feed-image",
-      "component_slug": "image"
-    },
-    {
-      "dd_id": "product-three",
-      "binding_id": "product-card",
-      "component_slug": "card"
     }
   ],
   "generation_evidence": {
     "scene_js": "wego-app/scenes/微购相册动态/scene.js",
     "scene_css": "wego-app/scenes/微购相册动态/scene.css",
-    "source_sha256": "d213b6ae572ffa642bfed6c6e7befe0d0962988ea6b1d98a3b89a6574158bffa",
+    "source_sha256": "3ab786a692b2b717c27e3de930f7ffb13c50a01d3998ea834fb29eb638d46486",
     "dom_ids": [
-      "view-image-one",
-      "view-image-two",
-      "view-image-three",
-      "open-product-one",
-      "forward-one",
-      "download-one",
-      "more-actions-one",
-      "view-image-four",
-      "open-product-two",
-      "view-image-five",
-      "view-image-six",
-      "open-product-three"
+      "search-input",
+      "search-clear",
+      "tab-all",
+      "tab-new",
+      "tab-photo",
+      "clear-filter"
     ],
-    "component_count": 14,
+    "component_count": 3,
     "visualCheck": {
       "status": "passed",
       "viewports": [
         375,
         393
       ],
-      "checked_at": "2026-07-16T11:10:00.000Z",
+      "checked_at": "2026-07-20T12:00:00.000Z",
       "checks": {
         "horizontal_overflow": true,
         "overlap": true,
