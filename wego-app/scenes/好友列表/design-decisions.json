@@ -144,39 +144,15 @@
       },
       {
         "selector": ".friend-list__index",
-        "content_role": "索引区背景",
-        "css_property": "background",
-        "token": "var(--bg-surface)"
+        "content_role": "索引区右侧安全间距",
+        "css_property": "right",
+        "token": "var(--spacer-2)"
       },
       {
         "selector": ".friend-list__index",
-        "content_role": "索引区圆角",
-        "css_property": "border-radius",
-        "token": "var(--radius-12)"
-      },
-      {
-        "selector": ".friend-list__index",
-        "content_role": "索引区间距",
+        "content_role": "索引项紧凑间距",
         "css_property": "gap",
-        "token": "var(--spacer-4)"
-      },
-      {
-        "selector": ".friend-list__index",
-        "content_role": "索引区纵向留白",
-        "css_property": "padding-block",
-        "token": "var(--spacer-8)"
-      },
-      {
-        "selector": ".friend-list__index",
-        "content_role": "索引区横向留白",
-        "css_property": "padding-inline",
-        "token": "var(--spacer-4)"
-      },
-      {
-        "selector": ".friend-list__index",
-        "content_role": "索引区阴影",
-        "css_property": "box-shadow",
-        "token": "var(--shadow-xs)"
+        "token": "var(--spacer-2)"
       },
       {
         "selector": ".friend-list__index",
@@ -206,37 +182,19 @@
         "selector": ".friend-list__index-item",
         "content_role": "索引项最小宽高",
         "css_property": "min-width",
-        "token": "var(--size-20)"
-      },
-      {
-        "selector": ".friend-list__index-item",
-        "content_role": "索引项留白",
-        "css_property": "padding",
-        "token": "var(--spacer-4)"
-      },
-      {
-        "selector": ".friend-list__index-item",
-        "content_role": "索引项圆角",
-        "css_property": "border-radius",
-        "token": "var(--radius-6)"
+        "token": "var(--size-16)"
       },
       {
         "selector": ".friend-list__index-item:active",
-        "content_role": "索引项按压背景",
-        "css_property": "background",
-        "token": "var(--bg-state-pressed)"
+        "content_role": "索引项按压颜色",
+        "css_property": "color",
+        "token": "var(--text-brand)"
       },
       {
         "selector": ".friend-list__index-item.is-pressed",
-        "content_role": "索引项按压背景",
-        "css_property": "background",
-        "token": "var(--bg-state-pressed)"
-      },
-      {
-        "selector": ".friend-list__index-item--active",
-        "content_role": "索引项激活背景",
-        "css_property": "background",
-        "token": "var(--bg-state-pressed)"
+        "content_role": "索引项按压颜色",
+        "css_property": "color",
+        "token": "var(--text-brand)"
       },
       {
         "selector": ".friend-list__index-item--active",
@@ -450,7 +408,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/好友列表/scene.js",
     "scene_css": "wego-app/scenes/好友列表/scene.css",
-    "source_sha256": "c5c6c98ee005154bcb14d8d62ab54ccadc64892df3d7ba010a89b214d5f33d15",
+    "source_sha256": "a5ed7f74ad8d22d2562abc0afe7676996868c6fb714c7c7cabd39b5e06b0eefc",
     "dom_ids": [
       "add-friend-entry",
       "sort-toggle",

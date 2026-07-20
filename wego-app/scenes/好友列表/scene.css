@@ -36,22 +36,13 @@
       { "selector": ".friend-list__meta-text", "content_role": "好友元信息行高", "css_property": "line-height", "token": "var(--body-sm-line-height)" },
       { "selector": ".friend-list__meta-text", "content_role": "好友元信息颜色", "css_property": "color", "token": "var(--text-tertiary)" },
       { "selector": ".friend-list__new-count", "content_role": "上新数量颜色", "css_property": "color", "token": "var(--text-brand)" },
-      { "selector": ".friend-list__index", "content_role": "索引区背景", "css_property": "background", "token": "var(--bg-surface)" },
-      { "selector": ".friend-list__index", "content_role": "索引区圆角", "css_property": "border-radius", "token": "var(--radius-12)" },
-      { "selector": ".friend-list__index", "content_role": "索引区间距", "css_property": "gap", "token": "var(--spacer-4)" },
-      { "selector": ".friend-list__index", "content_role": "索引区纵向留白", "css_property": "padding-block", "token": "var(--spacer-8)" },
-      { "selector": ".friend-list__index", "content_role": "索引区横向留白", "css_property": "padding-inline", "token": "var(--spacer-4)" },
-      { "selector": ".friend-list__index", "content_role": "索引区阴影", "css_property": "box-shadow", "token": "var(--shadow-xs)" },
+      { "selector": ".friend-list__index", "content_role": "索引区右侧安全间距", "css_property": "right", "token": "var(--spacer-2)" },
+      { "selector": ".friend-list__index", "content_role": "索引项紧凑间距", "css_property": "gap", "token": "var(--spacer-2)" },
       { "selector": ".friend-list__index", "content_role": "索引区层级", "css_property": "z-index", "token": "var(--z-sticky)" },
       { "selector": ".friend-list__index-item", "content_role": "索引项字号", "css_property": "font-size", "token": "var(--body-xs-font-size)" },
       { "selector": ".friend-list__index-item", "content_role": "索引项行高", "css_property": "line-height", "token": "var(--body-xs-line-height)" },
       { "selector": ".friend-list__index-item", "content_role": "索引项颜色", "css_property": "color", "token": "var(--text-secondary)" },
-      { "selector": ".friend-list__index-item", "content_role": "索引项最小宽高", "css_property": "min-width", "token": "var(--size-20)" },
-      { "selector": ".friend-list__index-item", "content_role": "索引项留白", "css_property": "padding", "token": "var(--spacer-4)" },
-      { "selector": ".friend-list__index-item", "content_role": "索引项圆角", "css_property": "border-radius", "token": "var(--radius-6)" },
-      { "selector": ".friend-list__index-item:active", "content_role": "索引项按压背景", "css_property": "background", "token": "var(--bg-state-pressed)" },
-      { "selector": ".friend-list__index-item.is-pressed", "content_role": "索引项按压背景", "css_property": "background", "token": "var(--bg-state-pressed)" },
-      { "selector": ".friend-list__index-item--active", "content_role": "索引项激活背景", "css_property": "background", "token": "var(--bg-state-pressed)" },
+      { "selector": ".friend-list__index-item", "content_role": "索引项最小宽高", "css_property": "min-width", "token": "var(--size-16)" },
       { "selector": ".friend-list__index-item--active", "content_role": "索引项激活颜色", "css_property": "color", "token": "var(--text-brand)" },
       { "selector": ".friend-list__index-item--active", "content_role": "索引项激活字重", "css_property": "font-weight", "token": "var(--font-weight-medium)" },
       { "selector": ".friend-list__empty", "content_role": "空状态留白", "css_property": "padding", "token": "var(--spacer-24)" },
@@ -169,19 +160,15 @@
 /* 右侧悬浮索引 */
 .friend-list__index {
   position: absolute;
-  right: var(--spacer-4);
+  right: var(--spacer-2);
   top: 50%;
   transform: translateY(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacer-4);
-  padding-block: var(--spacer-8);
-  padding-inline: var(--spacer-4);
-  background: var(--bg-surface);
-  border-radius: var(--radius-12);
-  box-shadow: var(--shadow-xs);
+  gap: var(--spacer-2);
   z-index: var(--z-sticky);
+  touch-action: none;
 }
 
 /* iOS Safari 下 position:absolute 在 -webkit-overflow-scrolling:touch 滚动容器内
@@ -199,18 +186,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: var(--size-20);
-  min-height: var(--size-20);
-  padding: var(--spacer-4);
+  min-width: var(--size-16);
+  min-height: var(--size-16);
+  padding: 0;
   border: 0;
   background: transparent;
-  border-radius: var(--radius-6);
   font-size: var(--body-xs-font-size);
   line-height: var(--body-xs-line-height);
   color: var(--text-secondary);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
+  touch-action: none;
   -webkit-user-select: none;
   user-select: none;
   font-feature-settings: "zero";
@@ -218,11 +204,10 @@
 
 .friend-list__index-item:active,
 .friend-list__index-item.is-pressed {
-  background: var(--bg-state-pressed);
+  color: var(--text-brand);
 }
 
 .friend-list__index-item--active {
-  background: var(--bg-state-pressed);
   color: var(--text-brand);
   font-weight: var(--font-weight-medium);
 }

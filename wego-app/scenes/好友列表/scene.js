@@ -36,22 +36,15 @@
       { "selector": ".friend-list__meta-text", "content_role": "好友元信息行高", "css_property": "line-height", "token": "var(--body-sm-line-height)" },
       { "selector": ".friend-list__meta-text", "content_role": "好友元信息颜色", "css_property": "color", "token": "var(--text-tertiary)" },
       { "selector": ".friend-list__new-count", "content_role": "上新数量颜色", "css_property": "color", "token": "var(--text-brand)" },
-      { "selector": ".friend-list__index", "content_role": "索引区背景", "css_property": "background", "token": "var(--bg-surface)" },
-      { "selector": ".friend-list__index", "content_role": "索引区圆角", "css_property": "border-radius", "token": "var(--radius-12)" },
-      { "selector": ".friend-list__index", "content_role": "索引区间距", "css_property": "gap", "token": "var(--spacer-4)" },
-      { "selector": ".friend-list__index", "content_role": "索引区纵向留白", "css_property": "padding-block", "token": "var(--spacer-8)" },
-      { "selector": ".friend-list__index", "content_role": "索引区横向留白", "css_property": "padding-inline", "token": "var(--spacer-4)" },
-      { "selector": ".friend-list__index", "content_role": "索引区阴影", "css_property": "box-shadow", "token": "var(--shadow-xs)" },
+      { "selector": ".friend-list__index", "content_role": "索引区右侧安全间距", "css_property": "right", "token": "var(--spacer-2)" },
+      { "selector": ".friend-list__index", "content_role": "索引项紧凑间距", "css_property": "gap", "token": "var(--spacer-2)" },
       { "selector": ".friend-list__index", "content_role": "索引区层级", "css_property": "z-index", "token": "var(--z-sticky)" },
       { "selector": ".friend-list__index-item", "content_role": "索引项字号", "css_property": "font-size", "token": "var(--body-xs-font-size)" },
       { "selector": ".friend-list__index-item", "content_role": "索引项行高", "css_property": "line-height", "token": "var(--body-xs-line-height)" },
       { "selector": ".friend-list__index-item", "content_role": "索引项颜色", "css_property": "color", "token": "var(--text-secondary)" },
-      { "selector": ".friend-list__index-item", "content_role": "索引项最小宽高", "css_property": "min-width", "token": "var(--size-20)" },
-      { "selector": ".friend-list__index-item", "content_role": "索引项留白", "css_property": "padding", "token": "var(--spacer-4)" },
-      { "selector": ".friend-list__index-item", "content_role": "索引项圆角", "css_property": "border-radius", "token": "var(--radius-6)" },
-      { "selector": ".friend-list__index-item:active", "content_role": "索引项按压背景", "css_property": "background", "token": "var(--bg-state-pressed)" },
-      { "selector": ".friend-list__index-item.is-pressed", "content_role": "索引项按压背景", "css_property": "background", "token": "var(--bg-state-pressed)" },
-      { "selector": ".friend-list__index-item--active", "content_role": "索引项激活背景", "css_property": "background", "token": "var(--bg-state-pressed)" },
+      { "selector": ".friend-list__index-item", "content_role": "索引项最小宽高", "css_property": "min-width", "token": "var(--size-16)" },
+      { "selector": ".friend-list__index-item:active", "content_role": "索引项按压颜色", "css_property": "color", "token": "var(--text-brand)" },
+      { "selector": ".friend-list__index-item.is-pressed", "content_role": "索引项按压颜色", "css_property": "color", "token": "var(--text-brand)" },
       { "selector": ".friend-list__index-item--active", "content_role": "索引项激活颜色", "css_property": "color", "token": "var(--text-brand)" },
       { "selector": ".friend-list__index-item--active", "content_role": "索引项激活字重", "css_property": "font-weight", "token": "var(--font-weight-medium)" },
       { "selector": ".friend-list__empty", "content_role": "空状态留白", "css_property": "padding", "token": "var(--spacer-24)" },
@@ -251,7 +244,7 @@ function customGroupTemplate(group, cellBindingId, avatarBindingId) {
 
 function indexTemplate(items) {
   return items.map(function (item) {
-    return '<button type="button" class="friend-list__index-item" data-index-key="' + item.key + '" data-dom-id="friend-index-item">' + item.label + '</button>';
+    return '<button type="button" class="friend-list__index-item" data-index-key="' + item.key + '" data-dom-id="friend-index-item" aria-label="定位到 ' + item.label + '">' + item.label + '</button>';
   }).join('');
 }
 
@@ -419,7 +412,7 @@ const friendListTemplate = `
       </div>
     </div>
     <div class="friend-list__scroll" data-friend-scroll data-tab-scroll></div>
-    <div class="friend-list__index" data-friend-index hidden></div>
+    <div class="friend-list__index" data-friend-index hidden aria-label="快速定位：点按字母立即定位；按住后上下滑动，松手定位当前字母"></div>
   </section>
 `;
 
@@ -501,19 +494,75 @@ window.WegoApp.registerScene({
     function scrollToGroup(key) {
       var target = scrollEl.querySelector('[data-group-key="' + CSS.escape(key) + '"]');
       if (target) {
-        target.scrollIntoView({ behavior: 'auto', block: 'start' });
+        var targetTop = target.getBoundingClientRect().top;
+        var scrollTop = scrollEl.getBoundingClientRect().top;
+        scrollEl.scrollTo({ top: scrollEl.scrollTop + targetTop - scrollTop, behavior: 'auto' });
       }
     }
 
+    function setActiveIndexItem(btn) {
+      if (!btn) return;
+      indexEl.querySelectorAll('.friend-list__index-item').forEach(function (el) {
+        el.classList.toggle('friend-list__index-item--active', el === btn);
+      });
+    }
+
+    var suppressNextIndexClick = false;
+
     function handleIndexClick(e) {
+      if (suppressNextIndexClick) {
+        suppressNextIndexClick = false;
+        return;
+      }
       var btn = e.target.closest('[data-index-key]');
       if (!btn) return;
       var key = btn.getAttribute('data-index-key');
       scrollToGroup(key);
-      indexEl.querySelectorAll('.friend-list__index-item').forEach(function (el) {
-        el.classList.remove('friend-list__index-item--active');
-      });
-      btn.classList.add('friend-list__index-item--active');
+      setActiveIndexItem(btn);
+    }
+
+    /* 点按仍由 click 即时定位；按住滑动时只更新候选项，松手后再定位。 */
+    var indexPointer = { id: null, startY: 0, isSliding: false, candidate: null };
+
+    function getIndexItemAt(clientY) {
+      var items = Array.prototype.slice.call(indexEl.querySelectorAll('[data-index-key]'));
+      if (!items.length) return null;
+      return items.reduce(function (nearest, item) {
+        var rect = item.getBoundingClientRect();
+        var distance = Math.abs(clientY - (rect.top + rect.height / 2));
+        return !nearest || distance < nearest.distance ? { item: item, distance: distance } : nearest;
+      }, null).item;
+    }
+
+    function handleIndexPointerDown(e) {
+      if (e.pointerType !== 'touch') return;
+      var btn = e.target.closest('[data-index-key]');
+      if (!btn) return;
+      indexPointer = { id: e.pointerId, startY: e.clientY, isSliding: false, candidate: btn };
+      indexEl.setPointerCapture(e.pointerId);
+    }
+
+    function handleIndexPointerMove(e) {
+      if (e.pointerId !== indexPointer.id) return;
+      if (Math.abs(e.clientY - indexPointer.startY) > 6) indexPointer.isSliding = true;
+      if (!indexPointer.isSliding) return;
+      var candidate = getIndexItemAt(e.clientY);
+      if (candidate) {
+        indexPointer.candidate = candidate;
+        setActiveIndexItem(candidate);
+      }
+    }
+
+    function handleIndexPointerEnd(e) {
+      if (e.pointerId !== indexPointer.id) return;
+      var pointer = indexPointer;
+      if (indexEl.hasPointerCapture(e.pointerId)) indexEl.releasePointerCapture(e.pointerId);
+      indexPointer = { id: null, startY: 0, isSliding: false, candidate: null };
+      if (!pointer.isSliding || !pointer.candidate) return;
+      suppressNextIndexClick = true;
+      setTimeout(function () { suppressNextIndexClick = false; }, 0);
+      scrollToGroup(pointer.candidate.getAttribute('data-index-key'));
+      setActiveIndexItem(pointer.candidate);
     }
 
     function handleSearch() {
@@ -628,6 +677,12 @@ window.WegoApp.registerScene({
     searchInput.addEventListener('input', handleSearch);
     addBtn.addEventListener('click', openAddForm);
     indexEl.addEventListener('click', handleIndexClick);
+    indexEl.addEventListener('pointerdown', handleIndexPointerDown);
+    indexEl.addEventListener('pointermove', handleIndexPointerMove);
+    indexEl.addEventListener('pointerup', handleIndexPointerEnd);
+    indexEl.addEventListener('pointercancel', function (e) {
+      if (e.pointerId === indexPointer.id) indexPointer = { id: null, startY: 0, isSliding: false, candidate: null };
+    });
 
     /* 滚动时更新索引激活态 */
     var scrollTimer = null;
@@ -636,20 +691,18 @@ window.WegoApp.registerScene({
       if (scrollTimer) clearTimeout(scrollTimer);
       scrollTimer = setTimeout(function () {
         var groups = scrollEl.querySelectorAll('.friend-list__group');
-        var scrollTop = scrollEl.scrollTop;
+        var scrollRect = scrollEl.getBoundingClientRect();
         var activeKey = null;
         for (var i = 0; i < groups.length; i++) {
-          var top = groups[i].offsetTop;
-          if (top - scrollTop <= 10) {
+          var top = groups[i].getBoundingClientRect().top - scrollRect.top;
+          if (top <= 10) {
             activeKey = groups[i].getAttribute('data-group-key');
           } else {
             break;
           }
         }
         if (activeKey) {
-          indexEl.querySelectorAll('.friend-list__index-item').forEach(function (el) {
-            el.classList.toggle('friend-list__index-item--active', el.getAttribute('data-index-key') === activeKey);
-          });
+          setActiveIndexItem(indexEl.querySelector('[data-index-key="' + CSS.escape(activeKey) + '"]'));
         }
       }, 80);
     });
