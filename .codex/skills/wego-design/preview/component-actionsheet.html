@@ -101,6 +101,9 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  /* 底部安全区由组件自身承担，与 modal/bottom-action-bar 一致；
+     overlay 架构下宿主层 .app-overlay-panel 不再重复加 padding-bottom */
+  padding-bottom: var(--safe-area-bottom);
   transform: translateY(0);
   transition: transform var(--duration-normal) var(--ease-enter);
 }

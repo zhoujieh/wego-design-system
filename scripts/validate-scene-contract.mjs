@@ -478,9 +478,36 @@ function findReceiverStart(masked, methodIndex) {
 function interactionHandlersByDomId(source, initBody, domIds) {
   const maskedInit = maskJavaScript(initBody);
   const callables = collectLocalCallables(source);
+  // 构造占位符 dom_id 的匹配正则：支持 "more-{post_id}" 这类声明匹配 "more-' + variable + '" 或 "more-${...}" 拼接
+  const patternMatchers = domIds
+    .filter(id => /\{[^}]+\}/.test(id))
+    .map(id => {
+      const parts = id.split(/(\{[^}]+\})/);
+      const literalParts = parts.map(part => {
+        if (/^\{[^}]+\}$/.test(part)) return '\\$\\{[^}]+\\}';
+        return escapeRegex(part);
+      });
+      const concatParts = parts.map(part => {
+        if (/^\{[^}]+\}$/.test(part)) return '[\\s\\S]*?';
+        return escapeRegex(part);
+      });
+      return {
+        id,
+        literalRegex: new RegExp(`data-dom-id\\s*=\\s*["'][^"']*${literalParts.join('')}[^"']*["']`),
+        concatRegex: new RegExp(`data-dom-id\\s*=\\s*["']${concatParts.join('')}["']`)
+      };
+    });
+  const findDomIdWithPattern = (expression) => {
+    const exact = findReferencedDomId(expression, domIds);
+    if (exact) return exact;
+    for (const { id, literalRegex, concatRegex } of patternMatchers) {
+      if (literalRegex.test(expression) || concatRegex.test(expression)) return id;
+    }
+    return null;
+  };
   const variableIds = new Map();
   for (const [name, expression] of collectVariableInitializers(initBody)) {
-    const id = findReferencedDomId(expression, domIds);
+    const id = findDomIdWithPattern(expression);
     if (id && /\bquerySelector\s*\(/.test(maskJavaScript(expression))) variableIds.set(name, id);
   }
   const handlers = new Map(domIds.map(id => [id, []]));
@@ -488,7 +515,7 @@ function interactionHandlersByDomId(source, initBody, domIds) {
     const methodIndex = match.index;
     const receiver = initBody.slice(findReceiverStart(maskedInit, methodIndex), methodIndex).trim();
     const variable = maskJavaScript(receiver).match(/([A-Za-z_$][\w$]*)\s*$/)?.[1];
-    const id = variableIds.get(variable) || findReferencedDomId(receiver, domIds);
+    const id = variableIds.get(variable) || findDomIdWithPattern(receiver);
     if (!id) continue;
     const openParen = maskedInit.indexOf('(', methodIndex);
     const handlerExpression = splitCallArguments(initBody, openParen)[1] || '';
@@ -870,7 +897,21 @@ if (decision) {
     }
     validateVariantDomRules(bindingId, binding, contract, node, (code, message) => add(code, message, sceneJs));
   }
-  for (const bindingId of bindings.keys()) if (!usedBindings.has(bindingId)) add('scene.component_binding_unused', `component binding 未被实际 DOM 使用：${bindingId}`, decisionsFile);
+  for (const bindingId of bindings.keys()) if (!usedBindings.has(bindingId)) {
+    // overlay 类组件（actionsheet、dialog、modal、form 等）通过 ctx.openSheet / ctx.openModal / ctx.openFullScreenModal 运行时注入，
+    // 不在静态 template DOM 里；动态列表项里的组件（如卡片里的按钮）也在列表渲染函数里通过字符串拼接注入。
+    // 这两类组件通过扫描 scene.js 源码（排除主 template 字符串，避免 HTML 注释里的组件被误判为使用）中的 binding_id 引用来确认使用；
+    // 其他组件必须出现在静态 template DOM 里。
+    const binding = bindings.get(bindingId);
+    const isOverlayOrDynamicComponent = binding && ['actionsheet', 'dialog', 'modal', 'form', 'button', 'avatar', 'image', 'card'].includes(binding.slug);
+    const sourceWithoutTemplate = isOverlayOrDynamicComponent ? runtimeJs.replace(activeTemplate, '') : '';
+    const referencedInSource = isOverlayOrDynamicComponent && new RegExp(`data-component-binding=["']${escapeRegex(bindingId)}["']`).test(sourceWithoutTemplate);
+    if (referencedInSource) {
+      usedBindings.add(bindingId);
+    } else {
+      add('scene.component_binding_unused', `component binding 未被实际 DOM 使用：${bindingId}`, decisionsFile);
+    }
+  }
 
   const declaredTokens = declaredDesignTokens;
   const tokenPolicy = consumption?.sceneTokenPolicy;
@@ -914,10 +955,39 @@ if (decision) {
   }
 
   const interactions = new Map((prompt.interaction_contract || []).map(item => [item.dom_id, item]));
+  // 动态列表项 dom_id 占位符支持：dom_id 形如 "more-{post_id}" 表示运行时由列表渲染函数拼接生成。
+  // 占位符 dom_id 不会出现在静态 template DOM 里，守卫通过把占位符模式转成正则，匹配 scene.js 中的三种拼接形式：
+  //   1. 模板字面量：data-dom-id="more-${post.post_id}"
+  //   2. 字符串拼接：data-dom-id="more-' + post.post_id + '"
+  //   3. 字符串拼接（无引号闭合）：data-dom-id="more-' + postId + '"
+  // 提取器 extract-design-decisions.mjs 会把模板字面量形式归一化为 "prefix-{placeholder}suffix" 写入 dom_ids；
+  // 这里支持 contract 直接写 "more-{post_id}" 等带语义占位符。
+  const patternInteractions = new Map();
+  for (const item of prompt.interaction_contract || []) {
+    const domId = String(item.dom_id || '');
+    if (!/\{[^}]+\}/.test(domId)) continue;
+    // 把 "more-{post_id}" 拆为 prefix "more-" 和 suffix ""，构造匹配三种形式的正则
+    const parts = domId.split(/(\{[^}]+\})/);
+    const literalParts = parts.map(part => {
+      if (/^\{[^}]+\}$/.test(part)) return '\\$\\{[^}]+\\}';
+      return escapeRegex(part);
+    });
+    const concatParts = parts.map(part => {
+      if (/^\{[^}]+\}$/.test(part)) return "[\\s\\S]*?";
+      return escapeRegex(part);
+    });
+    patternInteractions.set(domId, {
+      // 模板字面量形式：data-dom-id="more-${post.post_id}"
+      literalRegex: new RegExp(`data-dom-id\\s*=\\s*["'][^"']*${literalParts.join('')}[^"']*["']`),
+      // 字符串拼接形式：data-dom-id="more-' + post.post_id + '"
+      concatRegex: new RegExp(`data-dom-id\\s*=\\s*["']${concatParts.join('')}["']`),
+      item
+    });
+  }
   const domInteractionIds = domNodes.map(node => node.attrs['data-dom-id']).filter(Boolean);
   for (const id of new Set(domInteractionIds)) {
     if (domInteractionIds.filter(value => value === id).length !== 1) add('scene.interaction_dom_duplicate', `data-dom-id 必须唯一：${id}`, sceneJs);
-    if (!interactions.has(id)) add('scene.interaction_contract_missing', `DOM 交互未进入 interaction_contract：${id}`, sceneJs);
+    if (!interactions.has(id) && !patternInteractions.has(id)) add('scene.interaction_contract_missing', `DOM 交互未进入 interaction_contract：${id}`, sceneJs);
   }
   const stateIds = new Set((prompt.state_contract || []).map(state => state.state_id));
   const routesSource = fs.existsSync(routesFile) ? fs.readFileSync(routesFile, 'utf8') : '';
@@ -933,9 +1003,30 @@ if (decision) {
   }
   const handlersByDomId = interactionHandlersByDomId(runtimeJs, registeredScene?.initBody || '', [...interactions.keys()]);
   for (const interaction of prompt.interaction_contract || []) {
-    if (!domInteractionIds.includes(interaction.dom_id)) add('scene.interaction_dom', `交互合同缺少 DOM 触发器：${interaction.dom_id}`, sceneJs);
+    const isPattern = patternInteractions.has(interaction.dom_id);
+    // 反向校验：dom_id 必须在静态 template DOM 出现，或在 scene.js 源码的字符串模板中出现
+    // （动态列表项占位符模式或 overlay 子页面模板字符串）
+    if (!domInteractionIds.includes(interaction.dom_id)) {
+      if (isPattern) {
+        const pattern = patternInteractions.get(interaction.dom_id);
+        const found = pattern.literalRegex.test(runtimeJs) || pattern.concatRegex.test(runtimeJs);
+        if (!found) add('scene.interaction_dom', `交互合同占位符 dom_id 在 scene.js 中未找到对应模板拼接：${interaction.dom_id}`, sceneJs);
+      } else {
+        // 检查是否在 scene.js 源码的模板字符串里（如 overlay 子页面模板）
+        const sourcePattern = new RegExp(`data-dom-id\\s*=\\s*["']${escapeRegex(interaction.dom_id)}["']`);
+        if (!sourcePattern.test(runtimeJs)) {
+          add('scene.interaction_dom', `交互合同缺少 DOM 触发器：${interaction.dom_id}`, sceneJs);
+        }
+      }
+    }
     const handlers = handlersByDomId.get(interaction.dom_id) || [];
-    if (!handlers.length) add('scene.interaction_handler', `交互触发器未在 init 中绑定具体 listener：${interaction.dom_id}`, sceneJs);
+    // 对动态列表项占位符 dom_id，handler 校验放宽：允许 init 中通过 querySelector('[data-dom-id="more-' + postId + '"]') 等模式逐项绑定 listener
+    if (!handlers.length && !isPattern) add('scene.interaction_handler', `交互触发器未在 init 中绑定具体 listener：${interaction.dom_id}`, sceneJs);
+    if (isPattern && !handlers.length) {
+      const prefix = String(interaction.dom_id || '').replace(/\{[^}]+\}.*$/, '');
+      const prefixPattern = new RegExp(`querySelector(?:All)?\\s*\\(\\s*["'][^"']*data-dom-id[^"']*${escapeRegex(prefix)}`);
+      if (!prefixPattern.test(runtimeJs)) add('scene.interaction_handler', `动态列表项交互未在 init 中通过 querySelector 绑定 listener：${interaction.dom_id}`, sceneJs);
+    }
     const handlerSource = handlers.join('\n');
     const [scheme, value] = String(interaction.target || '').split(':');
     if (scheme === 'route' && !routeRecords.some(record => record.routeId === value)) add('scene.interaction_target', `目标路由不存在：${value}`, routesFile);
@@ -952,6 +1043,25 @@ if (decision) {
     } else if (scheme === 'state') {
       if (!mutatesVisibleState(handlerSource, value)) add('scene.interaction_runtime', `交互 ${interaction.dom_id} 的 handler 未写入或删除目标状态 ${value}`, sceneJs);
     } else if (expectedApi && !contextCallArguments(handlerSource, expectedApi.split('.').at(-1)).length) add('scene.interaction_runtime', `交互 ${interaction.dom_id} 的 handler 未调用 ${expectedApi}`, sceneJs);
+  }
+
+  // 逆向校验：scene.js 中的 overlay API 调用必须都在 interaction_contract 中登记。
+  // 防止 wego-design 跳过 component_bindings 与 interaction_contract，直接用 ctx.openSheet 等注入 overlay 组件。
+  const overlayApiToTarget = {
+    openSheet: 'overlay:sheet',
+    openModal: 'overlay:modal',
+    openFullScreenModal: 'overlay:full-screen-modal'
+  };
+  const declaredOverlayTargets = new Set(
+    (prompt.interaction_contract || [])
+      .map(item => String(item.target || ''))
+      .filter(target => target.startsWith('overlay:'))
+  );
+  for (const [api, target] of Object.entries(overlayApiToTarget)) {
+    const callCount = contextCallArguments(runtimeJs, api).length;
+    if (callCount > 0 && !declaredOverlayTargets.has(target)) {
+      add('scene.overlay_consumption_unlisted', `scene.js 调用了 ctx.${api}() ${callCount} 次，但 interaction_contract 未声明 ${target}；overlay 类组件消费必须登记对应 interaction_contract 与 component_bindings`, sceneJs);
+    }
   }
 
   const visual = decision.generation_evidence?.visualCheck;

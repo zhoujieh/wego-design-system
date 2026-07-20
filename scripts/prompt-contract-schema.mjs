@@ -72,7 +72,8 @@ export function validatePromptContractShape(prompt) {
     for (const field of Object.keys(interaction)) if (!allowed.has(field)) add(`${prefix}.${field}`, '不是当前 Schema 字段');
     for (const field of allowed) if (!isNonEmptyString(interaction[field])) add(`${prefix}.${field}`, '必须是非空字符串');
     if (isNonEmptyString(interaction.dom_id)) {
-      if (!/^[a-z][a-z0-9-]*$/.test(interaction.dom_id)) add(`${prefix}.dom_id`, '必须是稳定 kebab-case');
+      // 支持 kebab-case 和动态列表项占位符语法（如 "more-{post_id}"）
+      if (!/^[a-z][a-z0-9-]*(?:\{[a-z][a-z0-9_-]*\}[a-z0-9-]*)?$/.test(interaction.dom_id)) add(`${prefix}.dom_id`, '必须是稳定 kebab-case 或带单个占位符的 kebab-case（如 more-{post_id}）');
       if (interactionIds.has(interaction.dom_id)) add(`${prefix}.dom_id`, '不得重复');
       interactionIds.add(interaction.dom_id);
     }

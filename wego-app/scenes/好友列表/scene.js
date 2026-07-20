@@ -62,7 +62,10 @@
     ],
     "component_bindings": [
       { "binding_id": "friend-navbar", "slug": "navbar", "reason": "承载好友页面左对齐大标题、新建好友与排序切换入口", "variant_dimensions": { "leftControl": "none", "titleAlignment": "left-wide", "actions": "icon", "rightActionType": "icon", "spacing": "default", "pageTransition": "push", "position": "sticky" } },
-      { "binding_id": "friend-search", "slug": "search", "reason": "提供好友昵称搜索入口，白底搜索框放在灰底页面上", "variant_dimensions": { "size": "md", "surface": "white", "mode": "text", "state": "empty", "hostPattern": "inline" } }
+      { "binding_id": "friend-search", "slug": "search", "reason": "提供好友昵称搜索入口，白底搜索框放在灰底页面上", "variant_dimensions": { "size": "md", "surface": "white", "mode": "text", "state": "empty", "hostPattern": "inline" } },
+      { "binding_id": "friend-add-form", "slug": "form", "reason": "新建好友全屏表单，通过 ctx.openFullScreenModal 消费；含昵称、账号、备注、分组、来源渠道、标签等字段", "variant_dimensions": { "layout": "vertical" } },
+      { "binding_id": "friend-group-sheet", "slug": "actionsheet", "reason": "选择好友分组底部面板，通过 ctx.openSheet 消费；只渲染 .actionsheet__panel 及子内容，关闭行为覆盖 cancel 与 mask", "variant_dimensions": { "mode": "select", "header": "text", "item": "text", "state": "open" } },
+      { "binding_id": "friend-source-sheet", "slug": "actionsheet", "reason": "选择好友来源渠道底部面板，通过 ctx.openSheet 消费；只渲染 .actionsheet__panel 及子内容，关闭行为覆盖 cancel 与 mask", "variant_dimensions": { "mode": "select", "header": "text", "item": "text", "state": "open" } }
     ],
     "layout_contract": {
       "mode": "composed",
@@ -74,7 +77,9 @@
     "interaction_contract": [
       { "dom_id": "sort-toggle", "target": "state:sort-by-letter" },
       { "dom_id": "friend-search-input", "target": "state:searching" },
-      { "dom_id": "add-friend-entry", "target": "overlay:full-screen-modal" }
+      { "dom_id": "add-friend-entry", "target": "overlay:full-screen-modal" },
+      { "dom_id": "select-friend-group", "target": "overlay:sheet" },
+      { "dom_id": "select-friend-source", "target": "overlay:sheet" }
     ],
     "state_contract": [
       { "state_id": "list-ready", "initial": true, "trigger": "进入好友主 tab", "visible_result": "默认字母排序展示好友列表，右侧悬浮字母索引", "fallback": "保留当前可浏览的好友列表", "persistence": "memory" },
@@ -259,7 +264,7 @@ function emptyTemplate(text) {
 /* ── 添加好友表单模板 ── */
 function addFriendFormTemplate() {
   return ''
-    + '<section class="friend-add-form" data-bg="page" aria-label="添加好友">'
+    + '<section class="friend-add-form" data-bg="page" aria-label="添加好友" data-dd-id="friend-add-form" data-component-slug="form" data-component-binding="friend-add-form">'
     +   '<div class="navbar" data-dd-id="friend-add-form-navbar" data-component-slug="navbar" data-component-binding="friend-add-form-navbar">'
     +     '<div class="navbar__body navbar__body--spaced">'
     +       '<div class="navbar__left"><span class="navbar__left-text" data-close-add-form>取消</span></div>'
@@ -324,7 +329,7 @@ function addFriendFormTemplate() {
     +         '<div class="form-body form-body--vertical">'
     +           '<div class="form-body__label"><span class="form-body__label-text">来源渠道</span></div>'
     +           '<div class="form-body__action">'
-    +             '<div class="form-body__select" data-source-select>'
+    +             '<div class="form-body__select" data-dom-id="select-friend-source">'
     +               '<span class="form-body__select-text" data-source-select-text>请选择来源</span>'
     +               '<span class="form-body__select-arrow wego-iconfont-s icon-xiajiantou16"></span>'
     +             '</div>'
@@ -358,7 +363,7 @@ function groupSelectTemplate(selectedId) {
       + '</button>';
   }).join('');
   return ''
-    + '<div class="actionsheet__panel">'
+    + '<div class="actionsheet__panel" data-dd-id="friend-group-sheet" data-component-slug="actionsheet" data-component-binding="friend-group-sheet">'
     +   '<div class="actionsheet__header actionsheet__header--text"><span class="actionsheet__header-text">选择分组</span></div>'
     +   '<div class="actionsheet__list">' + items + '</div>'
     +   '<div class="actionsheet__cancel-gap"></div>'
@@ -375,7 +380,7 @@ function sourceSelectTemplate() {
       + '</button>';
   }).join('');
   return ''
-    + '<div class="actionsheet__panel">'
+    + '<div class="actionsheet__panel" data-dd-id="friend-source-sheet" data-component-slug="actionsheet" data-component-binding="friend-source-sheet">'
     +   '<div class="actionsheet__header actionsheet__header--text"><span class="actionsheet__header-text">选择来源</span></div>'
     +   '<div class="actionsheet__list">' + items + '</div>'
     +   '<div class="actionsheet__cancel-gap"></div>'
@@ -582,7 +587,7 @@ window.WegoApp.registerScene({
           var saveBtns = formRoot.querySelectorAll('[data-dom-id="submit-add-friend"]');
           var groupSelect = formRoot.querySelector('[data-dom-id="select-friend-group"]');
           var groupSelectText = formRoot.querySelector('[data-group-select-text]');
-          var sourceSelect = formRoot.querySelector('[data-source-select]');
+          var sourceSelect = formRoot.querySelector('[data-dom-id="select-friend-source"]');
           var sourceSelectText = formRoot.querySelector('[data-source-select-text]');
           var uploadBtn = formRoot.querySelector('[data-upload-avatar]');
 
@@ -614,6 +619,13 @@ window.WegoApp.registerScene({
                   if (cancelBtn) {
                     cancelBtn.addEventListener('click', function () { sheet.close(); });
                   }
+                  // mask 关闭：点击 overlay 层（panel 外区域）关闭面板，符合 actionsheet closeByMask 默认行为
+                  var overlayLayer = sheet.root.parentNode;
+                  if (overlayLayer && overlayLayer.classList.contains('app-overlay-layer')) {
+                    overlayLayer.addEventListener('click', function (event) {
+                      if (event.target === overlayLayer) sheet.close();
+                    });
+                  }
                 }
               });
             });
@@ -635,6 +647,13 @@ window.WegoApp.registerScene({
                   var cancelBtn = sheet.root.querySelector('[data-close-source-sheet]');
                   if (cancelBtn) {
                     cancelBtn.addEventListener('click', function () { sheet.close(); });
+                  }
+                  // mask 关闭：点击 overlay 层（panel 外区域）关闭面板，符合 actionsheet closeByMask 默认行为
+                  var overlayLayer = sheet.root.parentNode;
+                  if (overlayLayer && overlayLayer.classList.contains('app-overlay-layer')) {
+                    overlayLayer.addEventListener('click', function (event) {
+                      if (event.target === overlayLayer) sheet.close();
+                    });
                   }
                 }
               });

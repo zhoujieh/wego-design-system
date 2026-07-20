@@ -9,7 +9,7 @@
       "好友列表"
     ]
   },
-  "status": "prototyping",
+  "status": "awaiting-prototype-confirmation",
   "scope_revision": 1,
   "prototype_brief": {
     "goal": "重新设计「动态」主 tab，让用户能更高效地浏览好友动态与商品上新，并通过搜索和快捷入口快速定位好友或商品内容。",
@@ -124,7 +124,7 @@
       "valid": true
     },
     "design": {
-      "valid": false
+      "valid": true
     }
   },
   "change_log": [
@@ -139,6 +139,10 @@
     {
       "action": "confirm-brief",
       "at": "2026-07-20T03:48:46.651Z"
+    },
+    {
+      "action": "submit-prototype",
+      "at": "2026-07-20T23:54:57.486Z"
     }
   ],
   "freeze": null

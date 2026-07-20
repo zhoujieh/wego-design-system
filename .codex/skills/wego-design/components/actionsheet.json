@@ -309,6 +309,7 @@
     "--font-weight-regular",
     "--radius-16",
     "--radius-4",
+    "--safe-area-bottom",
     "--size-20",
     "--size-24",
     "--spacer-12",

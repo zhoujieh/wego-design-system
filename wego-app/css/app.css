@@ -502,7 +502,8 @@ input, textarea,
 
 .app-overlay-layer--sheet .app-overlay-panel {
   border-radius: var(--radius-8) var(--radius-8) 0 0;
-  padding-bottom: var(--safe-area-bottom);
+  /* 底部安全区由 sheet 类组件自身承担（actionsheet 已在 .actionsheet__panel 处理）；
+     宿主层不再重复加 padding-bottom，避免双重安全区空白 */
   animation: wego-sheet-enter var(--duration-normal, 250ms) var(--ease-enter, ease-out);
 }
 

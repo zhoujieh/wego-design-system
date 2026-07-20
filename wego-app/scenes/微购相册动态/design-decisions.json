@@ -436,6 +436,28 @@
           "iconMode": "text-only",
           "state": "default"
         }
+      },
+      {
+        "binding_id": "feed-more-action",
+        "slug": "button",
+        "reason": "动态卡片更多操作入口，打开底部 actionsheet 展示分享/复制链接/收藏/举报",
+        "variant_dimensions": {
+          "emphasis": "weak",
+          "size": "sm",
+          "iconMode": "text-only",
+          "state": "default"
+        }
+      },
+      {
+        "binding_id": "feed-more-sheet",
+        "slug": "actionsheet",
+        "reason": "动态卡片更多操作底部面板，通过 ctx.openSheet 消费；只渲染 .actionsheet__panel 及子内容，关闭行为覆盖 cancel 与 mask",
+        "variant_dimensions": {
+          "mode": "action",
+          "header": "none",
+          "item": "text",
+          "state": "open"
+        }
       }
     ],
     "layout_contract": {
@@ -474,6 +496,10 @@
       {
         "dom_id": "clear-filter",
         "target": "state:feed-ready"
+      },
+      {
+        "dom_id": "more-{post_id}",
+        "target": "overlay:sheet"
       }
     ],
     "state_contract": [
@@ -539,7 +565,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/微购相册动态/scene.js",
     "scene_css": "wego-app/scenes/微购相册动态/scene.css",
-    "source_sha256": "3ab786a692b2b717c27e3de930f7ffb13c50a01d3998ea834fb29eb638d46486",
+    "source_sha256": "295837b9e409d23f327ada1ac69a72eb304f125645c8f544ae88cd6b2e401942",
     "dom_ids": [
       "search-input",
       "search-clear",

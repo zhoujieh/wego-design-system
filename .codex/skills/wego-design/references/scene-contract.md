@@ -133,6 +133,18 @@ wego-app/scenes/{中文业务场景}/design-decisions.json
 - 非空 `state_contract` 必须且只能有一个初始状态。仅实现简报和真实操作需要的状态；刷新后保留必须有明确需求。
 - `interaction_contract.target` 只使用实际存在的 `route:*`、`state:*`、`overlay:modal|sheet|full-screen-modal|close`、`feedback:toast|dialog` 或 `navigation:back`。
 
+<!-- rule-id: interaction-dom-id-placeholder -->
+
+- `interaction_contract.dom_id` 必须与 template DOM 中的 `data-dom-id` 一一对应。
+- 动态列表项的 dom_id 在运行时由列表渲染函数拼接（如 `data-dom-id="more-${post_id}"`），无法在静态 template DOM 中预先声明。此类交互在 `interaction_contract` 中使用占位符语法 `more-{post_id}`：`{}` 内为占位符变量名，与 scene.js 模板拼接中的 `${...}` 对应。守卫会把占位符模式转成正则匹配 scene.js 源码，确认对应模板拼接确实存在；handler 校验放宽至允许通过 `querySelectorAll('[data-dom-id^="prefix-"]')` 等模式批量绑定 listener。
+- 占位符 dom_id 在提取器 `extract-design-decisions.mjs` 中会归一化为 `prefix-{placeholder}suffix` 写入 `generation_evidence.dom_ids`，与 `interaction_contract` 中的占位符声明对照。
+
+<!-- rule-id: overlay-component-consumption-binding -->
+
+- 通过 `ctx.openSheet`、`ctx.openModal`、`ctx.openFullScreenModal` 消费 overlay 类组件（actionsheet、dialog、modal 等）前，必须先把组件作为 `component_bindings` 登记并补 `interaction_contract`（`overlay:sheet|modal|full-screen-modal`）。守卫会逆向扫描 scene.js 中的 `ctx.openSheet` 等调用，未登记即 fail。
+- overlay 类组件的默认关闭行为（如 actionsheet 的 `closeByMask`、`closeByCancel` 默认 true）必须在场景 init 中实际实现：mask click 与 cancel click 必须调用 `ctx.closeOverlay()` 或对应关闭 API；不能只给 `.actionsheet__item` 绑 click 而漏掉 cancel 与 mask。
+- 场景提供给 overlay API 的 HTML 必须遵守组件契约 `structurePatterns`：例如 actionsheet 在 wego-app overlay 架构下只渲染 `.actionsheet__panel` 及其子内容，不再渲染 `.actionsheet` 根节点，避免双重遮罩与动画错位。
+
 ## scene.css
 
 <!-- rule-id: business-state-class-scoped-prefix -->

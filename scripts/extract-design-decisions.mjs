@@ -70,7 +70,17 @@ const componentNodes = templateTree.nodes
 for (const node of componentNodes) {
   if (!node.dd_id || !node.binding_id || !node.component_slug) fail('每个正式组件实例必须同时包含 data-dd-id、data-component-binding、data-component-slug');
 }
-const domIds = templateTree.nodes.map(node => node.attrs['data-dom-id']).filter(Boolean);
+const staticDomIds = templateTree.nodes.map(node => node.attrs['data-dom-id']).filter(Boolean);
+// 动态列表项 dom_id 提取：扫描 scene.js 源码中 data-dom-id="prefix${...}suffix" 形式的模板拼接，
+// 归一化为占位符形式 "prefix-{placeholder}-suffix" 加入 dom_ids，让场景合同守卫可对照 interaction_contract 的占位符声明。
+const dynamicDomIdPattern = /data-dom-id\s*=\s*["']([^"'\\]*?)\$\{[^}]+\}([^"']*?)["']/g;
+const dynamicDomIds = new Set();
+for (const match of js.matchAll(dynamicDomIdPattern)) {
+  const prefix = match[1];
+  const suffix = match[2];
+  dynamicDomIds.add(`${prefix}{placeholder}${suffix}`);
+}
+const domIds = [...staticDomIds, ...dynamicDomIds];
 const result = {
   schemaVersion: 2,
   scene: path.basename(sceneRoot),
