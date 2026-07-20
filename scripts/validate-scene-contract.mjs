@@ -714,7 +714,6 @@ if (decision) {
   const indexedComponents = new Map((index?.components || []).map(component => [component.slug, component]));
   const pagePatterns = Array.isArray(plan?.pagePatterns) ? plan.pagePatterns : [];
   if (decision.schemaVersion !== 2 || decision.scene !== path.basename(sceneRoot)) add('scene.decisions_schema', 'design-decisions.json 必须使用 schemaVersion 2 且 scene 与目录一致', decisionsFile);
-  if (!Number.isInteger(prompt.design_system_version) || prompt.design_system_version !== metadata?.version) add('scene.snapshot', 'prompt_contract.design_system_version 必须等于当前 metadata.version', decisionsFile);
   if (consumption?.schemaVersion !== 5) add('scene.consumption_schema', 'library-consumption.json 必须使用 schemaVersion 5', consumptionFile);
   if (plan?.schemaVersion !== 5 || !Array.isArray(plan?.pagePatterns)) add('scene.uikit_schema', 'uikit-plan.json 必须使用 schemaVersion 5 且包含 pagePatterns', uikitPlanFile);
 

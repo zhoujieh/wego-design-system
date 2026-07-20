@@ -128,7 +128,7 @@ for (const pattern of uiKit?.pagePatterns || []) {
   }
   const quality = json(relative);
   if (!quality) continue;
-  if (quality.schemaVersion !== 4 || quality.designSystemVersion !== metadata?.version || quality.kitType !== pattern.id) fail('uikit.quality_report_schema', `${relative} 必须记录当前 schemaVersion、designSystemVersion 与 kitType`, relative);
+  if (quality.schemaVersion !== 4 || !Number.isInteger(quality.designSystemVersion) || quality.designSystemVersion < 1 || quality.kitType !== pattern.id) fail('uikit.quality_report_schema', `${relative} 必须记录 schemaVersion、designSystemVersion（正整数）与 kitType`, relative);
   if (quality.designSystemParity?.status !== 'passed' || !quality.designSystemParity?.checked_at || !Array.isArray(quality.designSystemParity?.checks) || !quality.designSystemParity.checks.length) fail('uikit.quality_report_parity', `${relative} 必须记录已通过的设计系统一致性检查`, relative);
   const used = [...(quality.coreComponentsUsed || []), ...(quality.supportComponentsUsed || [])];
   for (const slug of used) if (!registered.has(slug)) fail('uikit.quality_report_component', `${relative} 使用未注册组件：${slug}`, relative);

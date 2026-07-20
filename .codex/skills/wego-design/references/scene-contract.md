@@ -54,7 +54,7 @@ wego-app/scenes/{中文业务场景}/design-decisions.json
     "source": "uikit-plan.json#/pagePatterns/biz-rule-config/presentation"
   },
   "prompt_contract": {
-    "design_system_version": "<metadata.version 的整数值>",
+    "design_system_version": "<场景创建时基于的 metadata.version 快照>",
     "token_bindings": [
       {
         "selector": ".settings-edit__title",
@@ -121,7 +121,7 @@ wego-app/scenes/{中文业务场景}/design-decisions.json
 
 约束：
 
-- `design_system_version` 必须等于当前 `metadata.json.version`。
+- `design_system_version` 是场景创建时基于的 `metadata.json.version` 快照（正整数），不要求随设计系统升级而连锁更新；场景适配由 `components.css` 提取校验、组件契约一致性、`source_sha256` 和 `visual_check` 守护。
 - 同一组件可有多个 binding，但 `binding_id` 唯一且每项必须被实际 DOM 使用。
 - `variant_dimensions` 使用组件契约的实际维度和值，不写 Preview、契约路径、根 class 或必需子节点。守卫检查所有值是否合法；契约已声明 `domAnatomy.variantRules` 的维度还会核对实际 DOM。未映射维度仍必须按 Preview 对照，不得宣称已自动验证。
 <!-- rule-id: design-decisions-css-token-binding-precision -->

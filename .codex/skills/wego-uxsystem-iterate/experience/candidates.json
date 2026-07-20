@@ -1412,6 +1412,44 @@
         "description": "产品阶段可在 prototype_brief 字段中附带交互视觉描述作为 wego-design 的强约束输入；设计阶段严格遵循，除非组件不支持或设计系统规范不允许，此时设计系统优先并退回 product 重新确认。"
       },
       "supersedes": "exp-product-stage-must-not-carry-ui-assumptions"
+    },
+    {
+      "id": "exp-scene-version-snapshot-not-pinned",
+      "normalized_key": "scene-version-snapshot-not-pinned",
+      "title": "场景与 UI Kit 版本号是创建快照，不强制等于当前 metadata.version",
+      "status": "promoted",
+      "occurrence_count": 1,
+      "threshold": 1,
+      "primary_owner": "wego-design",
+      "secondary_owners": [],
+      "ownership_reason": "场景合同与 UI Kit 质量报告的版本号语义属于设计系统消费规则。",
+      "rule_ownership": {
+        "category": "skill-runtime-flow",
+        "canonical": {
+          "file": ".codex/skills/wego-design/references/scene-contract.md",
+          "locator": "约束列表 design_system_version 条目",
+          "rule_id": "scene-version-snapshot-not-pinned"
+        }
+      },
+      "runtime_reachability": {
+        "consumer_skill": "wego-design",
+        "output_field": "prompt_contract.design_system_version",
+        "downstream_consumer": "wego-design",
+        "acceptance_check": "wego-design"
+      },
+      "evidence": [
+        "用户质疑场景 design_system_version 每次设计系统升级都要连锁改的必要性。分析发现：旧规则要求场景 prompt_contract.design_system_version 与 UI Kit quality-report.designSystemVersion 必须等于当前 metadata.version，叠加 metadata.version 在任何设计系统源变更（含头像压缩等纯资源）时都强制递增，导致每次升级都要连锁改所有场景与 UI Kit 的版本号——但版本号相等本身不提供实际适配保障，真正的保障来自 components.css 提取校验、组件契约一致性、source_sha256 和 visual_check。用户明确要求移除该规则。"
+      ],
+      "created_at": "2026-07-17T00:00:00Z",
+      "updated_at": "2026-07-17T00:00:00Z",
+      "promoted_at": "2026-07-17T00:00:00Z",
+      "promotion_landing": {
+        "file": ".codex/skills/wego-design/references/scene-contract.md",
+        "locator": "约束列表 design_system_version 条目",
+        "rule_id": "scene-version-snapshot-not-pinned",
+        "constraint_area": "场景与 UI Kit 版本号语义",
+        "description": "design_system_version 与 designSystemVersion 是创建时基于的 metadata.version 快照（正整数），不要求随设计系统升级连锁更新；场景适配由 components.css 提取校验、组件契约一致性、source_sha256 和 visual_check 守护。"
+      }
     }
   ]
 }
