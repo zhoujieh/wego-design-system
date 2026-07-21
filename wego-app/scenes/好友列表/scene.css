@@ -115,7 +115,8 @@
 /* 搜索区 */
 .friend-list__search {
   flex-shrink: 0;
-  padding: var(--spacer-8);
+  padding-block: var(--spacer-8);
+  padding-inline: var(--spacer-16);
   background: var(--bg-page);
 }
 

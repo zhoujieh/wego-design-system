@@ -21,7 +21,8 @@
       { "selector": ".friend-list", "content_role": "页面边距", "css_property": "padding-inline", "token": "var(--layout-page-margin-m0)" },
       { "selector": ".friend-list__navbar", "content_role": "导航栏背景", "css_property": "background", "token": "var(--bg-page)" },
       { "selector": ".friend-list__search", "content_role": "搜索区背景", "css_property": "background", "token": "var(--bg-page)" },
-      { "selector": ".friend-list__search", "content_role": "搜索区留白", "css_property": "padding", "token": "var(--spacer-8)" },
+      { "selector": ".friend-list__search", "content_role": "搜索区纵向留白", "css_property": "padding-block", "token": "var(--spacer-8)" },
+      { "selector": ".friend-list__search", "content_role": "搜索区横向留白", "css_property": "padding-inline", "token": "var(--spacer-16)" },
       { "selector": ".friend-list__scroll", "content_role": "列表底部留白", "css_property": "padding-bottom", "token": "var(--spacer-24)" },
       { "selector": ".friend-list__group-title", "content_role": "分组标题顶部留白", "css_property": "padding-top", "token": "var(--spacer-16)" },
       { "selector": ".friend-list__group-title", "content_role": "分组标题横向留白", "css_property": "padding-inline", "token": "var(--spacer-16)" },
@@ -446,6 +447,7 @@ window.WegoApp.registerScene({
     var root = ctx.root;
     var scrollEl = root.querySelector('[data-friend-scroll]');
     var indexEl = root.querySelector('[data-friend-index]');
+    var searchBox = root.querySelector('[data-component-binding="friend-search"]');
     var sortToggleBtn = root.querySelector('[data-dom-id="sort-toggle"]');
     var sortLabel = root.querySelector('[data-sort-label]');
     var searchInput = root.querySelector('[data-dom-id="friend-search-input"]');
@@ -589,7 +591,7 @@ window.WegoApp.registerScene({
     function handleSearch() {
       state.keyword = searchInput.value;
       ctx.state['searching'] = Boolean(state.keyword);
-      searchClear.hidden = !searchInput.value;
+      syncSearchState();
       renderList();
     }
 
@@ -598,9 +600,19 @@ window.WegoApp.registerScene({
       state.keyword = '';
       ctx.state['searching'] = false;
       ctx.state['list-ready'] = true;
-      searchClear.hidden = true;
+      syncSearchState();
       renderList();
       searchInput.focus();
+    }
+
+    function syncSearchState() {
+      var hasQuery = Boolean(searchInput.value);
+      var isFocused = document.activeElement === searchInput;
+      searchClear.hidden = !hasQuery;
+      if (searchBox) {
+        searchBox.classList.toggle('is-inputting', hasQuery && isFocused);
+        searchBox.classList.toggle('is-text-result', hasQuery && !isFocused);
+      }
     }
 
     /* ── 添加好友表单 ── */
@@ -715,6 +727,8 @@ window.WegoApp.registerScene({
     /* ── 绑定事件 ── */
     sortToggleBtn.addEventListener('click', toggleSort);
     searchInput.addEventListener('input', handleSearch);
+    searchInput.addEventListener('focus', syncSearchState);
+    searchInput.addEventListener('blur', syncSearchState);
     searchClear.addEventListener('click', clearSearch);
     addBtn.addEventListener('click', openAddForm);
     indexEl.addEventListener('click', handleIndexClick);
@@ -750,7 +764,7 @@ window.WegoApp.registerScene({
 
     /* 初始化渲染 */
     updateSortLabel();
-    searchClear.hidden = true;
+    syncSearchState();
     renderList();
   }
 });

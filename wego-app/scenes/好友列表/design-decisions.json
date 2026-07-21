@@ -54,9 +54,15 @@
       },
       {
         "selector": ".friend-list__search",
-        "content_role": "搜索区留白",
-        "css_property": "padding",
+        "content_role": "搜索区纵向留白",
+        "css_property": "padding-block",
         "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".friend-list__search",
+        "content_role": "搜索区横向留白",
+        "css_property": "padding-inline",
+        "token": "var(--spacer-16)"
       },
       {
         "selector": ".friend-list__scroll",
@@ -448,7 +454,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/好友列表/scene.js",
     "scene_css": "wego-app/scenes/好友列表/scene.css",
-    "source_sha256": "015b649773ef7fc305e7aa36af9bab2ff992f56a5456ae06895d151825604e9c",
+    "source_sha256": "686ce9abd8ff73fe43afde9f0c1753879b3f7bb03000699f6c75b047182508b7",
     "dom_ids": [
       "add-friend-entry",
       "sort-toggle",

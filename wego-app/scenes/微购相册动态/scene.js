@@ -421,6 +421,7 @@ window.WegoApp.registerScene({
     friendId: null
   };
 
+  var searchBox = root.querySelector('[data-component-binding="feed-search"]');
   var searchField = root.querySelector('[data-dom-id="search-input"]');
   var searchClear = root.querySelector('[data-dom-id="search-clear"]');
   var tabAll = root.querySelector('[data-dom-id="tab-all"]');
@@ -505,7 +506,12 @@ window.WegoApp.registerScene({
 
   function updateSearchUI() {
     var hasQuery = searchField.value.length > 0;
+    var isFocused = document.activeElement === searchField;
     searchClear.hidden = !hasQuery;
+    if (searchBox) {
+      searchBox.classList.toggle('is-inputting', hasQuery && isFocused);
+      searchBox.classList.toggle('is-text-result', hasQuery && !isFocused);
+    }
     root.querySelector('.album-feed__friends').hidden = hasQuery;
     root.querySelector('.album-feed__tabs').hidden = hasQuery;
   }
@@ -600,6 +606,8 @@ window.WegoApp.registerScene({
     ctx.state['searching'] = Boolean(state.query);
     applyState();
   });
+  searchField.addEventListener('focus', updateSearchUI);
+  searchField.addEventListener('blur', updateSearchUI);
 
   searchClear.addEventListener('click', function() {
     searchField.value = '';
