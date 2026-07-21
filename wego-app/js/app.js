@@ -321,21 +321,38 @@
     overlayClosing = false;
     overlayLayer.hidden = false;
     overlayLayer.className = 'app-overlay-layer app-overlay-layer--' + type;
-    var panel = document.createElement('div');
-    panel.className = 'app-overlay-panel';
-    panel.setAttribute('role', type === 'modal' ? 'dialog' : 'region');
-    if (options.label) panel.setAttribute('aria-label', options.label);
-    renderTemplate(panel, template);
-    overlayLayer.replaceChildren(panel);
+    // 模板直接挂载到 overlayLayer，第一个子元素即组件根节点（.actionsheet / .modal）；
+    // 不再创建 .app-overlay-panel 包裹层，蒙层视觉与动画均由组件自身承担
+    var temp = document.createElement('div');
+    renderTemplate(temp, template);
+    var componentRoot = temp.firstElementChild;
+    if (!componentRoot) {
+      overlayLayer.hidden = true;
+      overlayLayer.className = 'app-overlay-layer';
+      return;
+    }
+    // 入场动画：组件根节点先设 closed，挂载后下一帧改 open 触发组件 CSS 过渡
+    if (componentRoot.matches('.actionsheet, .modal')) {
+      componentRoot.setAttribute('data-state', 'closed');
+    }
+    if (options.label) componentRoot.setAttribute('aria-label', options.label);
+    overlayLayer.replaceChildren(componentRoot);
     pushOverlayHistoryState(type);
     if (typeof options.init === 'function') {
       options.init({
-        root: panel,
+        root: componentRoot,
         close: closeOverlay,
         toast: toast,
         dialog: dialog,
         updateEntrySummary: updateEntrySummary,
         navigate: navigate
+      });
+    }
+    if (componentRoot.matches('.actionsheet, .modal')) {
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          componentRoot.setAttribute('data-state', 'open');
+        });
       });
     }
   }
@@ -346,10 +363,10 @@
   function closeOverlay(skipHistory, animated) {
     clearAllPressStates();
     if (overlayClosing) return;
-    var panel = overlayLayer.querySelector('.app-overlay-panel');
+    var componentRoot = overlayLayer.firstElementChild;
     var isSheet = overlayLayer.classList.contains('app-overlay-layer--sheet');
     var isFullScreenModal = overlayLayer.classList.contains('app-overlay-layer--full-screen-modal');
-    if (panel && (isSheet || isFullScreenModal)) {
+    if (componentRoot && (isSheet || isFullScreenModal)) {
       if (!skipHistory && overlayHistoryActive) {
         // 用户主动关闭：先清 flag 再 history.back()，避免 popstate 再次触发
         overlayHistoryActive = false;
@@ -375,9 +392,20 @@
         return;
       }
       overlayClosing = true;
-      panel.classList.add('app-overlay-panel--exit');
-      var onTransitionEnd = function () {
-        panel.removeEventListener('transitionend', onTransitionEnd);
+      // 退场动画：组件根节点设 closed，触发组件 CSS 过渡（蒙层 opacity + 面板 translateY 同步退场）
+      if (componentRoot.matches('.actionsheet, .modal')) {
+        componentRoot.setAttribute('data-state', 'closed');
+      }
+      // 等待退场动画完成后清理（与 dialog 的 DIALOG_REMOVE_DELAY 一致，纯 setTimeout 更稳定，
+      // 不依赖 transitionend 冒泡；actionsheet 根节点 opacity 过渡，modal-fullscreen 面板 transform 过渡，
+      // transitionend 来源不一致，setTimeout 统一处理避免事件漏触发）
+      var removeDelay = 280; // 250ms 过渡 + 30ms 缓冲
+      setTimeout(function () {
+        // 防御：如果 overlayLayer 已被新 overlay 替换（openOverlay 在过渡中触发），跳过清理
+        if (overlayLayer.firstElementChild !== componentRoot) {
+          overlayClosing = false;
+          return;
+        }
         overlayLayer.hidden = true;
         overlayLayer.className = 'app-overlay-layer';
         overlayLayer.replaceChildren();
@@ -385,8 +413,7 @@
         if (!skipHistory && sceneStack.length === 0 && window.location.hash) {
           history.back();
         }
-      };
-      panel.addEventListener('transitionend', onTransitionEnd);
+      }, removeDelay);
       return;
     }
     overlayLayer.hidden = true;

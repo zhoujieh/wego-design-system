@@ -85,7 +85,7 @@
       { "binding_id": "feed-tabs", "slug": "tabs", "reason": "顶部内容分类标签，切换全部、好友上新、图文动态", "variant_dimensions": { "size": "standard", "layout": "divide", "icon": "none", "state": "default" } },
       { "binding_id": "feed-clear-filter-action", "slug": "button", "reason": "清除好友过滤", "variant_dimensions": { "emphasis": "weak", "size": "sm", "iconMode": "text-only", "state": "default" } },
       { "binding_id": "feed-more-action", "slug": "button", "reason": "动态卡片更多操作入口，打开底部 actionsheet 展示分享/复制链接/收藏/举报", "variant_dimensions": { "emphasis": "weak", "size": "sm", "iconMode": "text-only", "state": "default" } },
-      { "binding_id": "feed-more-sheet", "slug": "actionsheet", "reason": "动态卡片更多操作底部面板，通过 ctx.openSheet 消费；只渲染 .actionsheet__panel 及子内容，关闭行为覆盖 cancel 与 mask", "variant_dimensions": { "mode": "action", "header": "none", "item": "text", "state": "open" } }
+      { "binding_id": "feed-more-sheet", "slug": "actionsheet", "reason": "动态卡片更多操作底部面板，通过 ctx.openSheet 消费；渲染完整 .actionsheet 根节点 + .actionsheet__panel 及子内容，关闭行为覆盖 cancel 与 mask", "variant_dimensions": { "mode": "action", "header": "none", "item": "text", "state": "open" } }
     ],
     "layout_contract": {
       "mode": "composed",
@@ -559,15 +559,17 @@ window.WegoApp.registerScene({
 
   function openMoreSheet(postId) {
     var sheetHtml = ''
-      + '<div class="actionsheet__panel" data-dd-id="feed-more-sheet" data-component-slug="actionsheet" data-component-binding="feed-more-sheet">'
-      +   '<div class="actionsheet__list">'
-      +     '<div class="actionsheet__item" data-action="share"><div class="actionsheet__item-main"><div class="actionsheet__item-title">分享</div></div></div>'
-      +     '<div class="actionsheet__item" data-action="copy"><div class="actionsheet__item-main"><div class="actionsheet__item-title">复制链接</div></div></div>'
-      +     '<div class="actionsheet__item" data-action="collect"><div class="actionsheet__item-main"><div class="actionsheet__item-title">收藏</div></div></div>'
-      +     '<div class="actionsheet__item" data-action="report"><div class="actionsheet__item-main"><div class="actionsheet__item-title">举报</div></div></div>'
+      + '<div class="actionsheet actionsheet--action" role="dialog" aria-modal="true" data-state="closed" data-dd-id="feed-more-sheet" data-component-slug="actionsheet" data-component-binding="feed-more-sheet">'
+      +   '<div class="actionsheet__panel">'
+      +     '<div class="actionsheet__list">'
+      +       '<div class="actionsheet__item" data-action="share"><div class="actionsheet__item-main"><div class="actionsheet__item-title">分享</div></div></div>'
+      +       '<div class="actionsheet__item" data-action="copy"><div class="actionsheet__item-main"><div class="actionsheet__item-title">复制链接</div></div></div>'
+      +       '<div class="actionsheet__item" data-action="collect"><div class="actionsheet__item-main"><div class="actionsheet__item-title">收藏</div></div></div>'
+      +       '<div class="actionsheet__item" data-action="report"><div class="actionsheet__item-main"><div class="actionsheet__item-title">举报</div></div></div>'
+      +     '</div>'
+      +     '<div class="actionsheet__cancel-gap"></div>'
+      +     '<button type="button" class="actionsheet__cancel" data-close-more-sheet>取消</button>'
       +   '</div>'
-      +   '<div class="actionsheet__cancel-gap"></div>'
-      +   '<button type="button" class="actionsheet__cancel" data-close-more-sheet>取消</button>'
       + '</div>';
     ctx.openSheet(sheetHtml, {
       label: '更多操作',
@@ -584,13 +586,10 @@ window.WegoApp.registerScene({
         if (cancelBtn) {
           cancelBtn.addEventListener('click', function() { api.close(); });
         }
-        // mask 关闭：点击 overlay 层（panel 外区域）关闭面板，符合 actionsheet closeByMask 默认行为
-        var overlayLayer = api.root.parentNode;
-        if (overlayLayer && overlayLayer.classList.contains('app-overlay-layer')) {
-          overlayLayer.addEventListener('click', function(event) {
-            if (event.target === overlayLayer) api.close();
-          });
-        }
+        // mask 关闭：点击 actionsheet 根节点（蒙层）非面板区域关闭面板，符合 actionsheet closeByMask 默认行为
+        api.root.addEventListener('click', function(event) {
+          if (event.target === api.root) api.close();
+        });
       }
     });
   }

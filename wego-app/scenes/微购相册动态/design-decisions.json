@@ -451,7 +451,7 @@
       {
         "binding_id": "feed-more-sheet",
         "slug": "actionsheet",
-        "reason": "动态卡片更多操作底部面板，通过 ctx.openSheet 消费；只渲染 .actionsheet__panel 及子内容，关闭行为覆盖 cancel 与 mask",
+        "reason": "动态卡片更多操作底部面板，通过 ctx.openSheet 消费；渲染完整 .actionsheet 根节点 + .actionsheet__panel 及子内容，关闭行为覆盖 cancel 与 mask",
         "variant_dimensions": {
           "mode": "action",
           "header": "none",
@@ -565,7 +565,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/微购相册动态/scene.js",
     "scene_css": "wego-app/scenes/微购相册动态/scene.css",
-    "source_sha256": "295837b9e409d23f327ada1ac69a72eb304f125645c8f544ae88cd6b2e401942",
+    "source_sha256": "1f172df900086be721a894822d110ba70487ba1e0177f3e33c8bc8bdedf06fc9",
     "dom_ids": [
       "search-input",
       "search-clear",

@@ -193,7 +193,7 @@
     "persistence": "阻断式常驻，不自动关闭，用户必须通过按钮操作后才会消失；不设置自动关闭时长（与 toast 的 4s 自动消失形成对比）。",
     "conflicting": "同屏仅展示一个 dialog，新 dialog 出现时立即替换旧 dialog，默认开启互斥。",
     "position": "居中悬浮，垂直水平双向居中。",
-    "animation": "overlay opacity 0→1 + card scale 0.9→1，时长 var(--duration-normal)，缓动 var(--ease-enter)/var(--ease-standard)；出场反向，data-state='closed' 触发 opacity→0 与 scale→0.9。",
+    "animation": "蒙层与卡片同步由 data-state='open'/'closed' 驱动：入场蒙层 opacity 0→1、card scale 0.9→1；出场反向；时长 var(--duration-normal)，缓动 var(--ease-enter)/var(--ease-standard)；宿主层 .app-dialog-host 透明不承担蒙层视觉职责，蒙层与动画均由组件自身承担。",
     "zIndex": "var(--z-modal)=600，高于 overlay(500)，低于 toast(700) 和 critical(900)。",
     "inputFocus": "input 变体打开时自动聚焦输入框，回车键触发主按钮（第一个 confirm 或 danger 按钮）点击。"
   },

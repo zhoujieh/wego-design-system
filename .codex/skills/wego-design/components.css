@@ -42,9 +42,9 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  /* 底部安全区由组件自身承担，与 modal/bottom-action-bar 一致；
-     overlay 架构下宿主层 .app-overlay-panel 不再重复加 padding-bottom */
-  padding-bottom: var(--safe-area-bottom);
+  /* 安全区由 .actionsheet__cancel 的 padding-bottom 承担，
+     作为取消按钮底部 padding 一部分，让 :active 态延伸到屏幕底部；
+     panel 不再加 padding-bottom，避免与 cancel 双重安全区空白 */
   transform: translateY(0);
   transition: transform var(--duration-normal) var(--ease-enter);
 }
@@ -290,6 +290,8 @@
 .actionsheet__cancel {
   box-sizing: border-box;
   padding: var(--spacer-16);
+  /* 安全区作为取消按钮底部 padding 一部分，让 :active 态延伸到屏幕底部 */
+  padding-bottom: calc(var(--spacer-16) + var(--safe-area-bottom));
   text-align: center;
   font-family: var(--font-family-system);
   font-size: var(--body-lg-font-size);

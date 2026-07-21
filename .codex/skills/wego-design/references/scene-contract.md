@@ -143,7 +143,7 @@ wego-app/scenes/{中文业务场景}/design-decisions.json
 
 - 通过 `ctx.openSheet`、`ctx.openModal`、`ctx.openFullScreenModal` 消费 overlay 类组件（actionsheet、dialog、modal 等）前，必须先把组件作为 `component_bindings` 登记并补 `interaction_contract`（`overlay:sheet|modal|full-screen-modal`）。守卫会逆向扫描 scene.js 中的 `ctx.openSheet` 等调用，未登记即 fail。
 - overlay 类组件的默认关闭行为（如 actionsheet 的 `closeByMask`、`closeByCancel` 默认 true）必须在场景 init 中实际实现：mask click 与 cancel click 必须调用 `ctx.closeOverlay()` 或对应关闭 API；不能只给 `.actionsheet__item` 绑 click 而漏掉 cancel 与 mask。
-- 场景提供给 overlay API 的 HTML 必须遵守组件契约 `structurePatterns`：例如 actionsheet 在 wego-app overlay 架构下只渲染 `.actionsheet__panel` 及其子内容，不再渲染 `.actionsheet` 根节点，避免双重遮罩与动画错位。
+- 场景提供给 overlay API 的 HTML 必须遵守组件契约 `structurePatterns`：overlay 类组件（actionsheet、modal 等）必须渲染完整组件根节点（如 `.actionsheet`、`.modal`，含 `data-state='open'/'closed'`）+ 面板节点及子内容，蒙层视觉与动画均由组件自身承担，宿主层 `.app-overlay-layer` 透明，与 dialog 行为一致；禁止只渲染面板节点，避免蒙层缺失与动画错位。
 
 ## scene.css
 

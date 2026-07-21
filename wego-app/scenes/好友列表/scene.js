@@ -55,17 +55,17 @@
       { "selector": ".friend-list__empty-text", "content_role": "空状态文字颜色", "css_property": "color", "token": "var(--text-tertiary)" },
       { "selector": ".friend-list__empty-text", "content_role": "空状态文字字号", "css_property": "font-size", "token": "var(--body-md-font-size)" },
       { "selector": ".friend-list__empty-text", "content_role": "空状态文字行高", "css_property": "line-height", "token": "var(--body-md-line-height)" },
-      { "selector": ".friend-add-form", "content_role": "表单页背景", "css_property": "background", "token": "var(--bg-page)" },
-      { "selector": ".friend-add-form", "content_role": "表单页文字", "css_property": "color", "token": "var(--text-default)" },
-      { "selector": ".friend-add-form", "content_role": "表单页字体", "css_property": "font-family", "token": "var(--body-md-font-family)" },
+      { "selector": ".friend-add-form__body", "content_role": "全屏模态表单容器背景", "css_property": "background", "token": "var(--bg-page)" },
+      { "selector": ".friend-add-form__body", "content_role": "全屏模态表单容器文字", "css_property": "color", "token": "var(--text-default)" },
+      { "selector": ".friend-add-form__body", "content_role": "全屏模态表单容器字体", "css_property": "font-family", "token": "var(--body-md-font-family)" },
       { "selector": ".friend-add-form__body", "content_role": "表单内容底部留白", "css_property": "padding-bottom", "token": "var(--spacer-24)" }
     ],
     "component_bindings": [
       { "binding_id": "friend-navbar", "slug": "navbar", "reason": "承载好友页面左对齐大标题、新建好友与排序切换入口", "variant_dimensions": { "leftControl": "none", "titleAlignment": "left-wide", "actions": "icon", "rightActionType": "icon", "spacing": "default", "pageTransition": "push", "position": "sticky" } },
       { "binding_id": "friend-search", "slug": "search", "reason": "提供好友昵称搜索入口，白底搜索框放在灰底页面上", "variant_dimensions": { "size": "md", "surface": "white", "mode": "text", "state": "empty", "hostPattern": "inline" } },
-      { "binding_id": "friend-add-form", "slug": "form", "reason": "新建好友全屏表单，通过 ctx.openFullScreenModal 消费；含昵称、账号、备注、分组、来源渠道、标签等字段", "variant_dimensions": { "layout": "vertical" } },
-      { "binding_id": "friend-group-sheet", "slug": "actionsheet", "reason": "选择好友分组底部面板，通过 ctx.openSheet 消费；只渲染 .actionsheet__panel 及子内容，关闭行为覆盖 cancel 与 mask", "variant_dimensions": { "mode": "select", "header": "text", "item": "text", "state": "open" } },
-      { "binding_id": "friend-source-sheet", "slug": "actionsheet", "reason": "选择好友来源渠道底部面板，通过 ctx.openSheet 消费；只渲染 .actionsheet__panel 及子内容，关闭行为覆盖 cancel 与 mask", "variant_dimensions": { "mode": "select", "header": "text", "item": "text", "state": "open" } }
+      { "binding_id": "friend-add-form-modal", "slug": "modal", "reason": "新建好友全屏模态容器，fullscreen 变体，通过 ctx.openFullScreenModal 消费；内含 navbar + 表单 body，蒙层与动画由组件自身承担", "variant_dimensions": { "variant": "fullscreen", "title": "default", "action": "none", "state": "open" } },
+      { "binding_id": "friend-group-sheet", "slug": "actionsheet", "reason": "选择好友分组底部面板，通过 ctx.openSheet 消费；渲染完整 .actionsheet 根节点 + .actionsheet__panel 及子内容，关闭行为覆盖 cancel 与 mask", "variant_dimensions": { "mode": "select", "header": "text", "item": "text", "state": "open" } },
+      { "binding_id": "friend-source-sheet", "slug": "actionsheet", "reason": "选择好友来源渠道底部面板，通过 ctx.openSheet 消费；渲染完整 .actionsheet 根节点 + .actionsheet__panel 及子内容，关闭行为覆盖 cancel 与 mask", "variant_dimensions": { "mode": "select", "header": "text", "item": "text", "state": "open" } }
     ],
     "layout_contract": {
       "mode": "composed",
@@ -264,89 +264,95 @@ function emptyTemplate(text) {
 /* ── 添加好友表单模板 ── */
 function addFriendFormTemplate() {
   return ''
-    + '<section class="friend-add-form" data-bg="page" aria-label="添加好友" data-dd-id="friend-add-form" data-component-slug="form" data-component-binding="friend-add-form">'
-    +   '<div class="navbar" data-dd-id="friend-add-form-navbar" data-component-slug="navbar" data-component-binding="friend-add-form-navbar">'
-    +     '<div class="navbar__body navbar__body--spaced">'
-    +       '<div class="navbar__left"><span class="navbar__left-text" data-close-add-form>取消</span></div>'
-    +       '<div class="navbar__center"><span class="navbar__title">添加好友</span></div>'
-    +       '<div class="navbar__right navbar__right--button">'
-    +         '<div class="navbar__action navbar__action--button">'
-    +           '<button class="btn btn--strong btn--sm" data-dom-id="submit-add-friend">保存</button>'
+    + '<div class="modal modal--fullscreen" data-state="closed" data-dd-id="friend-add-form-modal" data-component-slug="modal" data-component-binding="friend-add-form-modal" role="dialog" aria-modal="true" aria-label="添加好友">'
+    +   '<div class="modal__panel" style="--modal-panel-bg: var(--bg-page);">'
+    +     '<div class="modal__title modal__title--default">'
+    +       '<div class="navbar" data-dd-id="friend-add-form-navbar" data-component-slug="navbar" data-component-binding="friend-add-form-navbar">'
+    +         '<div class="navbar__body navbar__body--spaced">'
+    +           '<div class="navbar__left"><span class="navbar__left-text" data-close-add-form>取消</span></div>'
+    +           '<div class="navbar__center"><span class="navbar__title">添加好友</span></div>'
+    +           '<div class="navbar__right navbar__right--button">'
+    +             '<div class="navbar__action navbar__action--button">'
+    +               '<button class="btn btn--strong btn--sm" data-dom-id="submit-add-friend">保存</button>'
+    +             '</div>'
+    +           '</div>'
+    +         '</div>'
+    +       '</div>'
+    +     '</div>'
+    +     '<div class="modal__body">'
+    +       '<div class="friend-add-form__body">'
+    +         '<div class="form-group">'
+    +           '<div class="form-group__title">基本信息</div>'
+    +           '<div class="form-group__content form-group__content--card">'
+    +             '<div class="form-body form-body--vertical">'
+    +               '<div class="form-body__label form-body__label--required"><span class="form-body__label-text">头像</span><span class="form-body__required">*</span></div>'
+    +               '<div class="form-body__action">'
+    +                 '<div class="form-body__upload" data-upload-avatar>'
+    +                   '<div class="form-body__upload-icon wego-iconfont-s icon-jia16"></div>'
+    +                   '<span class="form-body__upload-text">上传</span>'
+    +                 '</div>'
+    +               '</div>'
+    +             '</div>'
+    +             '<div class="form-body form-body--vertical">'
+    +               '<div class="form-body__label form-body__label--required"><span class="form-body__label-text">昵称</span><span class="form-body__required">*</span></div>'
+    +               '<div class="form-body__action"><input type="text" placeholder="请输入好友昵称" data-form-field="nickname" maxlength="20" /></div>'
+    +             '</div>'
+    +             '<div class="form-body form-body--vertical">'
+    +               '<div class="form-body__label"><span class="form-body__label-text">账号/手机号</span></div>'
+    +               '<div class="form-body__action">'
+    +                 '<div class="form-body__phone">'
+    +                   '<span class="form-body__phone-prefix">+86</span>'
+    +                   '<span class="form-body__phone-divider"></span>'
+    +                   '<input class="form-body__phone-input" type="tel" placeholder="请输入账号或手机号" data-form-field="account_or_phone" />'
+    +                 '</div>'
+    +               '</div>'
+    +             '</div>'
+    +           '</div>'
+    +         '</div>'
+    +         '<div class="form-group">'
+    +           '<div class="form-group__title">分组与标签</div>'
+    +           '<div class="form-group__content form-group__content--card">'
+    +             '<div class="form-body form-body--vertical">'
+    +               '<div class="form-body__label"><span class="form-body__label-text">分组</span></div>'
+    +               '<div class="form-body__action">'
+    +                 '<div class="form-body__select" data-dom-id="select-friend-group">'
+    +                   '<span class="form-body__select-text" data-group-select-text>请选择分组</span>'
+    +                   '<span class="form-body__select-arrow wego-iconfont-s icon-xiajiantou16"></span>'
+    +                 '</div>'
+    +               '</div>'
+    +             '</div>'
+    +             '<div class="form-body form-body--vertical">'
+    +               '<div class="form-body__label"><span class="form-body__label-text">标签</span></div>'
+    +               '<div class="form-body__action"><input type="text" placeholder="多个标签用逗号分隔" data-form-field="tags" /></div>'
+    +             '</div>'
+    +           '</div>'
+    +         '</div>'
+    +         '<div class="form-group">'
+    +           '<div class="form-group__title">来源与验证</div>'
+    +           '<div class="form-group__content form-group__content--card">'
+    +             '<div class="form-body form-body--vertical">'
+    +               '<div class="form-body__label"><span class="form-body__label-text">来源渠道</span></div>'
+    +               '<div class="form-body__action">'
+    +                 '<div class="form-body__select" data-dom-id="select-friend-source">'
+    +                   '<span class="form-body__select-text" data-source-select-text>请选择来源</span>'
+    +                   '<span class="form-body__select-arrow wego-iconfont-s icon-xiajiantou16"></span>'
+    +                 '</div>'
+    +               '</div>'
+    +             '</div>'
+    +             '<div class="form-body form-body--vertical">'
+    +               '<div class="form-body__label"><span class="form-body__label-text">备注</span></div>'
+    +               '<div class="form-body__action"><input type="text" placeholder="添加备注信息" data-form-field="remark" maxlength="50" /></div>'
+    +             '</div>'
+    +             '<div class="form-body form-body--vertical form-body--fixed-height">'
+    +               '<div class="form-body__label"><span class="form-body__label-text">验证消息</span></div>'
+    +               '<div class="form-body__action"><textarea placeholder="发送给好友的验证消息" data-form-field="verify_message"></textarea></div>'
+    +             '</div>'
+    +           '</div>'
     +         '</div>'
     +       '</div>'
     +     '</div>'
     +   '</div>'
-    +   '<div class="friend-add-form__body">'
-    +     '<div class="form-group">'
-    +       '<div class="form-group__title">基本信息</div>'
-    +       '<div class="form-group__content form-group__content--card">'
-    +         '<div class="form-body form-body--vertical">'
-    +           '<div class="form-body__label form-body__label--required"><span class="form-body__label-text">头像</span><span class="form-body__required">*</span></div>'
-    +           '<div class="form-body__action">'
-    +             '<div class="form-body__upload" data-upload-avatar>'
-    +               '<div class="form-body__upload-icon wego-iconfont-s icon-jia16"></div>'
-    +               '<span class="form-body__upload-text">上传</span>'
-    +             '</div>'
-    +           '</div>'
-    +         '</div>'
-    +         '<div class="form-body form-body--vertical">'
-    +           '<div class="form-body__label form-body__label--required"><span class="form-body__label-text">昵称</span><span class="form-body__required">*</span></div>'
-    +           '<div class="form-body__action"><input type="text" placeholder="请输入好友昵称" data-form-field="nickname" maxlength="20" /></div>'
-    +         '</div>'
-    +         '<div class="form-body form-body--vertical">'
-    +           '<div class="form-body__label"><span class="form-body__label-text">账号/手机号</span></div>'
-    +           '<div class="form-body__action">'
-    +             '<div class="form-body__phone">'
-    +               '<span class="form-body__phone-prefix">+86</span>'
-    +               '<span class="form-body__phone-divider"></span>'
-    +               '<input class="form-body__phone-input" type="tel" placeholder="请输入账号或手机号" data-form-field="account_or_phone" />'
-    +             '</div>'
-    +           '</div>'
-    +         '</div>'
-    +       '</div>'
-    +     '</div>'
-    +     '<div class="form-group">'
-    +       '<div class="form-group__title">分组与标签</div>'
-    +       '<div class="form-group__content form-group__content--card">'
-    +         '<div class="form-body form-body--vertical">'
-    +           '<div class="form-body__label"><span class="form-body__label-text">分组</span></div>'
-    +           '<div class="form-body__action">'
-    +             '<div class="form-body__select" data-dom-id="select-friend-group">'
-    +               '<span class="form-body__select-text" data-group-select-text>请选择分组</span>'
-    +               '<span class="form-body__select-arrow wego-iconfont-s icon-xiajiantou16"></span>'
-    +             '</div>'
-    +           '</div>'
-    +         '</div>'
-    +         '<div class="form-body form-body--vertical">'
-    +           '<div class="form-body__label"><span class="form-body__label-text">标签</span></div>'
-    +           '<div class="form-body__action"><input type="text" placeholder="多个标签用逗号分隔" data-form-field="tags" /></div>'
-    +         '</div>'
-    +       '</div>'
-    +     '</div>'
-    +     '<div class="form-group">'
-    +       '<div class="form-group__title">来源与验证</div>'
-    +       '<div class="form-group__content form-group__content--card">'
-    +         '<div class="form-body form-body--vertical">'
-    +           '<div class="form-body__label"><span class="form-body__label-text">来源渠道</span></div>'
-    +           '<div class="form-body__action">'
-    +             '<div class="form-body__select" data-dom-id="select-friend-source">'
-    +               '<span class="form-body__select-text" data-source-select-text>请选择来源</span>'
-    +               '<span class="form-body__select-arrow wego-iconfont-s icon-xiajiantou16"></span>'
-    +             '</div>'
-    +           '</div>'
-    +         '</div>'
-    +         '<div class="form-body form-body--vertical">'
-    +           '<div class="form-body__label"><span class="form-body__label-text">备注</span></div>'
-    +           '<div class="form-body__action"><input type="text" placeholder="添加备注信息" data-form-field="remark" maxlength="50" /></div>'
-    +         '</div>'
-    +         '<div class="form-body form-body--vertical form-body--fixed-height">'
-    +           '<div class="form-body__label"><span class="form-body__label-text">验证消息</span></div>'
-    +           '<div class="form-body__action"><textarea placeholder="发送给好友的验证消息" data-form-field="verify_message"></textarea></div>'
-    +         '</div>'
-    +       '</div>'
-    +     '</div>'
-    +   '</div>'
-    + '</section>';
+    + '</div>';
 }
 
 /* ── 分组选择 actionsheet 模板 ── */
@@ -363,11 +369,13 @@ function groupSelectTemplate(selectedId) {
       + '</button>';
   }).join('');
   return ''
-    + '<div class="actionsheet__panel" data-dd-id="friend-group-sheet" data-component-slug="actionsheet" data-component-binding="friend-group-sheet">'
-    +   '<div class="actionsheet__header actionsheet__header--text"><span class="actionsheet__header-text">选择分组</span></div>'
-    +   '<div class="actionsheet__list">' + items + '</div>'
-    +   '<div class="actionsheet__cancel-gap"></div>'
-    +   '<button type="button" class="actionsheet__cancel" data-close-group-sheet>取 消</button>'
+    + '<div class="actionsheet actionsheet--select" role="dialog" aria-modal="true" data-state="closed" data-dd-id="friend-group-sheet" data-component-slug="actionsheet" data-component-binding="friend-group-sheet">'
+    +   '<div class="actionsheet__panel">'
+    +     '<div class="actionsheet__header actionsheet__header--text"><span class="actionsheet__header-text">选择分组</span></div>'
+    +     '<div class="actionsheet__list">' + items + '</div>'
+    +     '<div class="actionsheet__cancel-gap"></div>'
+    +     '<button type="button" class="actionsheet__cancel" data-close-group-sheet>取 消</button>'
+    +   '</div>'
     + '</div>';
 }
 
@@ -380,11 +388,13 @@ function sourceSelectTemplate() {
       + '</button>';
   }).join('');
   return ''
-    + '<div class="actionsheet__panel" data-dd-id="friend-source-sheet" data-component-slug="actionsheet" data-component-binding="friend-source-sheet">'
-    +   '<div class="actionsheet__header actionsheet__header--text"><span class="actionsheet__header-text">选择来源</span></div>'
-    +   '<div class="actionsheet__list">' + items + '</div>'
-    +   '<div class="actionsheet__cancel-gap"></div>'
-    +   '<button type="button" class="actionsheet__cancel" data-close-source-sheet>取 消</button>'
+    + '<div class="actionsheet actionsheet--select" role="dialog" aria-modal="true" data-state="closed" data-dd-id="friend-source-sheet" data-component-slug="actionsheet" data-component-binding="friend-source-sheet">'
+    +   '<div class="actionsheet__panel">'
+    +     '<div class="actionsheet__header actionsheet__header--text"><span class="actionsheet__header-text">选择来源</span></div>'
+    +     '<div class="actionsheet__list">' + items + '</div>'
+    +     '<div class="actionsheet__cancel-gap"></div>'
+    +     '<button type="button" class="actionsheet__cancel" data-close-source-sheet>取 消</button>'
+    +   '</div>'
     + '</div>';
 }
 
@@ -619,13 +629,10 @@ window.WegoApp.registerScene({
                   if (cancelBtn) {
                     cancelBtn.addEventListener('click', function () { sheet.close(); });
                   }
-                  // mask 关闭：点击 overlay 层（panel 外区域）关闭面板，符合 actionsheet closeByMask 默认行为
-                  var overlayLayer = sheet.root.parentNode;
-                  if (overlayLayer && overlayLayer.classList.contains('app-overlay-layer')) {
-                    overlayLayer.addEventListener('click', function (event) {
-                      if (event.target === overlayLayer) sheet.close();
-                    });
-                  }
+                  // mask 关闭：点击 actionsheet 根节点（蒙层）非面板区域关闭面板，符合 actionsheet closeByMask 默认行为
+                  sheet.root.addEventListener('click', function (event) {
+                    if (event.target === sheet.root) sheet.close();
+                  });
                 }
               });
             });
@@ -648,13 +655,10 @@ window.WegoApp.registerScene({
                   if (cancelBtn) {
                     cancelBtn.addEventListener('click', function () { sheet.close(); });
                   }
-                  // mask 关闭：点击 overlay 层（panel 外区域）关闭面板，符合 actionsheet closeByMask 默认行为
-                  var overlayLayer = sheet.root.parentNode;
-                  if (overlayLayer && overlayLayer.classList.contains('app-overlay-layer')) {
-                    overlayLayer.addEventListener('click', function (event) {
-                      if (event.target === overlayLayer) sheet.close();
-                    });
-                  }
+                  // mask 关闭：点击 actionsheet 根节点（蒙层）非面板区域关闭面板，符合 actionsheet closeByMask 默认行为
+                  sheet.root.addEventListener('click', function (event) {
+                    if (event.target === sheet.root) sheet.close();
+                  });
                 }
               });
             });

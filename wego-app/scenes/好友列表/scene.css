@@ -235,19 +235,10 @@
   color: var(--text-tertiary);
 }
 
-/* 添加好友表单 */
-.friend-add-form {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+/* 添加好友表单（modal-fullscreen 内 body 子元素） */
+.friend-add-form__body {
   background: var(--bg-page);
   color: var(--text-default);
   font-family: var(--body-md-font-family);
-}
-
-.friend-add-form__body {
-  flex: 1 1 auto;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
   padding-bottom: var(--spacer-24);
 }

@@ -39,7 +39,6 @@ input, textarea,
 /* 内部滚动容器：阻止滚动链到 document，防止触顶/触底带动外层 */
 .host-shell-page,
 .app-scene-layer__panel,
-.app-overlay-panel,
 .quick-publish__body {
   overscroll-behavior: contain;
 }
@@ -442,7 +441,7 @@ input, textarea,
 }
 
 .app-overlay-layer {
-  background: rgb(0 0 0 / 32%);
+  background: transparent;
 }
 
 .app-scene-layer[hidden],
@@ -474,66 +473,18 @@ input, textarea,
   transform: translateX(100%);
 }
 
+/* overlay 层透明容器：蒙层视觉与动画均由组件自身承担（actionsheet / modal / dialog 行为一致）；
+   不再创建 .app-overlay-panel 包裹层，组件根节点直接挂载到本层 */
 .app-overlay-layer {
-  background: rgb(0 0 0 / 32%);
-  justify-content: center;
-  padding: var(--spacer-24);
-}
-
-.app-overlay-layer--sheet,
-.app-overlay-layer--full-screen-modal {
-  justify-content: flex-end;
-  padding: 0;
-}
-
-.app-overlay-layer--full-screen-modal {
   background: transparent;
 }
 
-.app-overlay-panel {
-  position: relative;
-  width: 100%;
-  max-height: calc(100% - var(--safe-area-top));
-  overflow: auto;
-  background: var(--bg-surface);
-  border-radius: var(--radius-8);
-  box-shadow: var(--shadow-lg);
-}
-
-.app-overlay-layer--sheet .app-overlay-panel {
-  border-radius: var(--radius-8) var(--radius-8) 0 0;
-  /* 底部安全区由 sheet 类组件自身承担（actionsheet 已在 .actionsheet__panel 处理）；
-     宿主层不再重复加 padding-bottom，避免双重安全区空白 */
-  animation: wego-sheet-enter var(--duration-normal, 250ms) var(--ease-enter, ease-out);
-}
-
-.app-overlay-layer--sheet .app-overlay-panel.app-overlay-panel--exit {
-  animation: none;
-  transition: transform var(--duration-normal, 250ms) var(--ease-exit, ease-in);
-  transform: translateY(100%);
-}
-
-.app-overlay-layer--full-screen-modal .app-overlay-panel {
-  height: 100%;
-  max-height: 100%;
-  border-radius: 0;
-  box-shadow: none;
-  background: var(--bg-surface);
-  animation: wego-sheet-enter var(--duration-normal, 250ms) var(--ease-enter, ease-out);
-}
-
-.app-overlay-layer--full-screen-modal .app-overlay-panel:has(> [data-bg="page"]) {
-  background: var(--bg-page);
-}
-
-.app-overlay-layer--full-screen-modal .app-overlay-panel:has(> [data-bg="surface"]) {
-  background: var(--bg-surface);
-}
-
-.app-overlay-layer--full-screen-modal .app-overlay-panel.app-overlay-panel--exit {
-  animation: none;
-  transition: transform var(--duration-normal, 250ms) var(--ease-exit, ease-in);
-  transform: translateY(100%);
+/* overlay 层下组件根节点定位覆盖：组件 CSS 默认 position:fixed，但 overlayLayer 有 transform
+   会导致 fixed 失效，显式覆盖为 absolute 与 .app-dialog-host .dialog 行为一致 */
+.app-overlay-layer > .actionsheet,
+.app-overlay-layer > .modal {
+  position: absolute;
+  inset: 0;
 }
 
 .app-toast-host {
@@ -567,15 +518,6 @@ input, textarea,
   }
   to {
     transform: translateX(0);
-  }
-}
-
-@keyframes wego-sheet-enter {
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: translateY(0);
   }
 }
 

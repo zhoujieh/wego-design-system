@@ -176,13 +176,13 @@
     {
       "name": "cancel",
       "selector": ".actionsheet__cancel",
-      "role": "取消按钮区，padding 16px，文本居中"
+      "role": "取消按钮区，padding 16px，底部 padding 由 calc(var(--spacer-16) + var(--safe-area-bottom)) 承担安全区高度；文本居中；:active 态延伸到屏幕底部"
     }
   ],
   "structurePatterns": [
     "根节点 .actionsheet 是 overlay 定位容器，自身承担半透明遮罩 var(--bg-mask-light)，position:fixed; inset:0",
-    "在 wego-app overlay 架构下消费时，遮罩和 position:fixed 由 .app-overlay-layer--sheet 承担，场景只需提供 .actionsheet__panel 及其子内容，通过 ctx.openSheet() 打开；此时 .actionsheet 根节点不渲染，避免双重遮罩",
-    "面板 .actionsheet__panel 内部从上到下：.actionsheet__header（可选）→ .actionsheet__list → .actionsheet__cancel-gap → .actionsheet__cancel；底部安全区由 panel 的 padding-bottom 处理，不额外渲染空节点",
+    "在 wego-app overlay 架构下消费时，场景必须提供完整 .actionsheet 根节点（含 data-state='open'/'closed'）+ .actionsheet__panel 及子内容，通过 ctx.openSheet() 打开；蒙层视觉与动画均由组件自身承担，宿主层 .app-overlay-layer 透明，与 dialog 行为一致；mode 修饰类 .actionsheet--action / .actionsheet--select 挂在根节点上",
+    "面板 .actionsheet__panel 内部从上到下：.actionsheet__header（可选）→ .actionsheet__list → .actionsheet__cancel-gap → .actionsheet__cancel；底部安全区由 .actionsheet__cancel 的 padding-bottom 承担（calc(var(--spacer-16) + var(--safe-area-bottom))），作为取消按钮底部 padding 一部分，按压 :active 态延伸到屏幕底部；panel 不再加 padding-bottom",
     "分组规则：.actionsheet__list 内部可包含多个 .actionsheet__group，每个 group 之间 8px gap 灰色间隔（var(--bg-state-hover)），与取消按钮上方 .actionsheet__cancel-gap 视觉效果一致；若不使用分组，.actionsheet__list 直接包含 .actionsheet__item",
     "头部 2 种布局规则：header--text 纯文本居中；header--text-link 左文本、右链接两端对齐",
     "操作模式选项结构：.actionsheet__item（padding 16px，gap 12px）→ 可选 .actionsheet__item-icon（20×20）+ .actionsheet__item-main（flex 1）→ .actionsheet__item-title / .actionsheet__item-subtitle / .actionsheet__item-recommend；无图标时标题居中对齐，有图标时标题左对齐",
@@ -211,7 +211,7 @@
     "persistence": "阻断式常驻，不自动关闭",
     "conflicting": "同屏仅展示一个 actionsheet，新 actionsheet 出现时立即替换旧",
     "position": "底部贴底悬浮，面板从屏幕底部边缘上移到完整显示",
-    "animation": "入场面板 translateY(100%)→0 从屏幕底部边缘上移到完整显示，无 opacity 变化；出场反向 translateY(0)→100%；时长 var(--duration-normal)（250ms），缓动 var(--ease-enter)/var(--ease-exit)；遮罩无 opacity 过渡，closed 状态通过 visibility 延迟 var(--duration-normal) 隐藏以等面板退出动画播放完",
+    "animation": "蒙层与面板同步由 data-state='open'/'closed' 驱动：入场蒙层 opacity 0→1、面板 translateY(100%)→0；出场反向；时长 var(--duration-normal)（250ms），缓动 var(--ease-enter)/var(--ease-exit)；与 dialog 行为一致，宿主层 .app-overlay-layer 透明不承担蒙层视觉职责",
     "zIndex": "var(--z-modal)=600，与 dialog 同层，低于 toast(700)",
     "scrollable": "选项列表超过屏幕高度时，.actionsheet__list 内部纵向滚动，头部和取消按钮固定"
   },

@@ -222,7 +222,8 @@
     "全屏 fullscreen 变体的遮罩为透明，手机状态栏通过高 z-index 穿透透明层显示；NavBar 正常避让 safe-area-top。",
     "嵌套 push 模式：modal 内可 push 多层面板（最多 3 层），新面板从右侧滑入（translateX），返回时逐层退出；所有层级共享同一遮罩；蒙层点击从最顶层开始逐层关闭。",
     "状态机通过 data-state='open'/'closed' 切换；嵌套 push 动画通过 data-push 属性控制。",
-    "动画约定：蒙层视觉层（.modal::before）必须有 opacity 淡入淡出动画（进入和退出都要有）；.modal 根节点不得使用 opacity，避免影响子级面板；面板（.modal__panel）只能有 translateY 位移动画，打开和关闭都不能有 opacity 透明度变化。"
+    "动画约定：蒙层视觉层（.modal::before）必须有 opacity 淡入淡出动画（进入和退出都要有）；.modal 根节点不得使用 opacity，避免影响子级面板；面板（.modal__panel）只能有 translateY 位移动画，打开和关闭都不能有 opacity 透明度变化。",
+    "wego-app overlay 架构消费规则：frame/frame-x 变体通过 ctx.openSheet() 消费，fullscreen 变体通过 ctx.openFullScreenModal() 消费；两种消费方式都必须提供完整 .modal 根节点（含 data-state='open'/'closed'）+ .modal__panel 及子内容；蒙层视觉与动画均由组件自身承担，宿主层 .app-overlay-layer 透明，与 dialog/actionsheet 行为一致。"
   ],
   "behavior": {
     "closeByMask": "默认 true，点击 .modal overlay 空白区域可关闭；嵌套模式时逐层关闭（最顶层优先）",

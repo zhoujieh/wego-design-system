@@ -257,20 +257,20 @@
         "token": "var(--body-md-line-height)"
       },
       {
-        "selector": ".friend-add-form",
-        "content_role": "表单页背景",
+        "selector": ".friend-add-form__body",
+        "content_role": "全屏模态表单容器背景",
         "css_property": "background",
         "token": "var(--bg-page)"
       },
       {
-        "selector": ".friend-add-form",
-        "content_role": "表单页文字",
+        "selector": ".friend-add-form__body",
+        "content_role": "全屏模态表单容器文字",
         "css_property": "color",
         "token": "var(--text-default)"
       },
       {
-        "selector": ".friend-add-form",
-        "content_role": "表单页字体",
+        "selector": ".friend-add-form__body",
+        "content_role": "全屏模态表单容器字体",
         "css_property": "font-family",
         "token": "var(--body-md-font-family)"
       },
@@ -309,17 +309,20 @@
         }
       },
       {
-        "binding_id": "friend-add-form",
-        "slug": "form",
-        "reason": "新建好友全屏表单，通过 ctx.openFullScreenModal 消费；含昵称、账号、备注、分组、来源渠道、标签等字段",
+        "binding_id": "friend-add-form-modal",
+        "slug": "modal",
+        "reason": "新建好友全屏模态容器，fullscreen 变体，通过 ctx.openFullScreenModal 消费；内含 navbar + 表单 body，蒙层与动画由组件自身承担",
         "variant_dimensions": {
-          "layout": "vertical"
+          "variant": "fullscreen",
+          "title": "default",
+          "action": "none",
+          "state": "open"
         }
       },
       {
         "binding_id": "friend-group-sheet",
         "slug": "actionsheet",
-        "reason": "选择好友分组底部面板，通过 ctx.openSheet 消费；只渲染 .actionsheet__panel 及子内容，关闭行为覆盖 cancel 与 mask",
+        "reason": "选择好友分组底部面板，通过 ctx.openSheet 消费；渲染完整 .actionsheet 根节点 + .actionsheet__panel 及子内容，关闭行为覆盖 cancel 与 mask",
         "variant_dimensions": {
           "mode": "select",
           "header": "text",
@@ -330,7 +333,7 @@
       {
         "binding_id": "friend-source-sheet",
         "slug": "actionsheet",
-        "reason": "选择好友来源渠道底部面板，通过 ctx.openSheet 消费；只渲染 .actionsheet__panel 及子内容，关闭行为覆盖 cancel 与 mask",
+        "reason": "选择好友来源渠道底部面板，通过 ctx.openSheet 消费；渲染完整 .actionsheet 根节点 + .actionsheet__panel 及子内容，关闭行为覆盖 cancel 与 mask",
         "variant_dimensions": {
           "mode": "select",
           "header": "text",
@@ -446,7 +449,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/好友列表/scene.js",
     "scene_css": "wego-app/scenes/好友列表/scene.css",
-    "source_sha256": "643fb9b245a90b4d001cf885d151c531ee9b8e3e190ca1c3f65b4e8118d4917f",
+    "source_sha256": "0593596ff52f6c51904ca385b7dfbc704344a4f11ffd1b08db0b1c200358edab",
     "dom_ids": [
       "add-friend-entry",
       "sort-toggle",
