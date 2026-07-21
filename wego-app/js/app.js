@@ -2,22 +2,18 @@
   var shell = document.querySelector('[data-host-shell="true"]');
   if (!shell) return;
 
-  // iOS standalone 模式键盘弹起时，env(safe-area-inset-bottom) 不会变为 0
-  // 检测键盘状态，键盘弹起时将 --keyboard-safe-bottom 设为 0px
-  var initialHeight = window.innerHeight;
-  function syncKeyboardState() {
+  // iOS standalone 模式键盘拉起时 100dvh 不能可靠收缩，
+  // 用 visualViewport.height 实时同步实际可视高度
+  function syncViewportHeight() {
     var vv = window.visualViewport;
-    var currentHeight = vv ? vv.height : window.innerHeight;
-    // 可视高度小于初始高度的 80% 时认为键盘弹起
-    var isKeyboardOpen = currentHeight < initialHeight * 0.8;
-    var safeBottom = isKeyboardOpen ? '0px' : 'env(safe-area-inset-bottom, 0px)';
-    document.documentElement.style.setProperty('--keyboard-safe-bottom', safeBottom);
+    var h = vv ? vv.height : window.innerHeight;
+    document.documentElement.style.setProperty('--vv-height', h + 'px');
   }
-  syncKeyboardState();
+  syncViewportHeight();
   if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', syncKeyboardState);
+    window.visualViewport.addEventListener('resize', syncViewportHeight);
   }
-  window.addEventListener('resize', syncKeyboardState);
+  window.addEventListener('resize', syncViewportHeight);
 
   var panels = Array.from(document.querySelectorAll('[data-host-tab]'));
   var tabTriggers = Array.from(document.querySelectorAll('[data-host-tab-trigger]'));
