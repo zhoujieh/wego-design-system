@@ -1,9 +1,6 @@
 (function initWegoApp() {
   var shell = document.querySelector('[data-host-shell="true"]');
   if (!shell) return;
-  var viewportDebug = window.WegoViewportDebug
-    ? window.WegoViewportDebug.create({ shell: shell })
-    : { enabled: false, record: function () {}, schedule: function () {} };
 
   // iOS standalone 收起键盘后可能把 100dvh 永久停在去掉状态栏后的短高度。
   // 外壳使用键盘前的完整高度；visualViewport 只用于识别键盘会话，
@@ -65,7 +62,6 @@
       if (nextHeight <= 0) return;
       if (!baselineHeight || allowShrink || nextHeight > baselineHeight) {
         baselineHeight = nextHeight;
-        viewportDebug.record('controller:baseline', { baselineHeight: baselineHeight });
       }
       applyFullHeight();
     }
@@ -80,7 +76,7 @@
       timers.length = 0;
     }
 
-    function restoreDocumentPosition(delay) {
+    function restoreDocumentPosition() {
       // 兼容旧页面会话留下的变量；当前 CSS 已不再消费它。
       root.style.removeProperty('--vv-height');
       var scrollingElement = document.scrollingElement || root;
@@ -92,26 +88,15 @@
       }
       applyFullHeight();
       window.scrollTo(0, 0);
-      viewportDebug.record('controller:recovery-run', {
-        delay: delay,
-        baselineHeight: baselineHeight,
-        editorSession: editorSession,
-        keyboardWasOpen: keyboardWasOpen
-      });
     }
 
     function scheduleRecovery() {
       clearTimers(recoveryTimers);
-      viewportDebug.record('controller:recovery-scheduled', {
-        baselineHeight: baselineHeight,
-        editorSession: editorSession,
-        keyboardWasOpen: keyboardWasOpen
-      });
       settledDelays.forEach(function (delay) {
         recoveryTimers.push(setTimeout(function () {
           requestAnimationFrame(function () {
             requestAnimationFrame(function () {
-              restoreDocumentPosition(delay);
+              restoreDocumentPosition();
               if (!hasFocusedEditor()) measureBaseline();
             });
           });
@@ -128,14 +113,6 @@
       var openThreshold = Math.max(160, baselineHeight * 0.2);
 
       if (editorSession && heightDelta >= openThreshold) {
-        if (!keyboardWasOpen) {
-          viewportDebug.record('controller:keyboard-open', {
-            baselineHeight: baselineHeight,
-            visualHeight: readVisualHeight(),
-            heightDelta: heightDelta,
-            openThreshold: openThreshold
-          });
-        }
         keyboardWasOpen = true;
         return;
       }
@@ -143,12 +120,6 @@
       // 约 60-70px 的残留属于收起后的 WebKit 中间态，不继续视为键盘打开。
       if (editorSession && keyboardWasOpen && heightDelta <= 96) {
         keyboardWasOpen = false;
-        viewportDebug.record('controller:keyboard-close-signal', {
-          baselineHeight: baselineHeight,
-          visualHeight: readVisualHeight(),
-          heightDelta: heightDelta,
-          closeThreshold: 96
-        });
         scheduleRecovery();
         return;
       }
@@ -179,7 +150,6 @@
       orientationChanging = false;
       editorSession = hasFocusedEditor();
       keyboardWasOpen = false;
-      viewportDebug.record('controller:session-reset', { editorSession: editorSession });
       if (editorSession) {
         scheduleSettledChecks();
         return;
@@ -194,14 +164,12 @@
       keyboardWasOpen = false;
       clearTimers(recoveryTimers);
       applyFullHeight();
-      viewportDebug.record('controller:focusin', { tag: event.target.tagName.toLowerCase() });
       scheduleSettledChecks();
     }, true);
 
     document.addEventListener('focusout', function () {
       setTimeout(function () {
         editorSession = hasFocusedEditor();
-        viewportDebug.record('controller:focusout-settled', { editorSession: editorSession });
         if (editorSession) {
           scheduleSettledChecks();
           return;
@@ -230,7 +198,6 @@
       if (shouldLockFullHeight) root.style.removeProperty('--standalone-full-height');
       editorSession = hasFocusedEditor();
       keyboardWasOpen = false;
-      viewportDebug.record('controller:orientation-reset', { editorSession: editorSession });
       if (editorSession) scheduleSettledChecks();
       else scheduleRecovery();
       clearTimers(orientationTimers);
@@ -246,7 +213,6 @@
     });
 
     measureBaseline();
-    viewportDebug.record('controller:ready', { baselineHeight: baselineHeight });
   })();
 
   var panels = Array.from(document.querySelectorAll('[data-host-tab]'));
