@@ -565,7 +565,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/微购相册动态/scene.js",
     "scene_css": "wego-app/scenes/微购相册动态/scene.css",
-    "source_sha256": "b99d21a0554172abbc219ec82451a704a4903052fe2c0f9f92ca98edb87a9910",
+    "source_sha256": "8648af5dd36eac1ce713c25f5ba7e159e15d3df266d31681f2cf756ba2f886b8",
     "dom_ids": [
       "search-input",
       "search-clear",

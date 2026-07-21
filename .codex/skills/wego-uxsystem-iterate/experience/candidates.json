@@ -1490,6 +1490,39 @@
         "constraint_area": "组件 DOM 结构生成约束",
         "description": "场景代码中的组件 DOM 结构必须逐字复制 Preview 中对应变体的 HTML，包括节点层级、class 组合、修饰类顺序和可选子元素位置；禁止理解大意后自己写。"
       }
+    },
+    {
+      "id": "exp-search-component-native-decoration-and-host-order",
+      "normalized_key": "search-component-native-decoration-host-order",
+      "title": "搜索组件需抑制原生装饰并校验宿主资源顺序",
+      "status": "awaiting-confirmation",
+      "occurrence_count": 1,
+      "threshold": 1,
+      "primary_owner": "wego-design",
+      "secondary_owners": [
+        "wego-uxsystem-iterate"
+      ],
+      "ownership_reason": "问题在业务场景交付时暴露，但根因同时落在搜索组件实现和宿主接入顺序，需先由场景消费校验，再由系统规则收敛。",
+      "rule_ownership": {
+        "category": "skill-runtime-flow",
+        "canonical": {
+          "file": ".codex/skills/wego-design/references/scene-contract.md",
+          "locator": "场景合同",
+          "rule_id": "search-component-native-decoration-host-order"
+        }
+      },
+      "runtime_reachability": {
+        "consumer_skill": "wego-design",
+        "output_field": "scene.js",
+        "downstream_consumer": "wego-design",
+        "acceptance_check": "visual-check"
+      },
+      "evidence": [
+        "动态页与好友页搜索框使用正式 search 组件时，若不抑制浏览器原生 search decoration，会出现正式 clear 之外的原生清除装饰风险。",
+        "宿主页先加载 components.css 再加载 iconfont.css，会把 search md 图标尺寸从组件定义的 20px 顶回 iconfont 默认 16px，导致放大镜与 clear 图标偏小。"
+      ],
+      "created_at": "2026-07-21T00:00:00Z",
+      "updated_at": "2026-07-21T00:00:00Z"
     }
   ]
 }

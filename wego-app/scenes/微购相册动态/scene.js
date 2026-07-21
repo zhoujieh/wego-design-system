@@ -420,6 +420,7 @@ window.WegoApp.registerScene({
     tag: FEED_TAG_ALL,
     friendId: null
   };
+  var suppressClearClick = false;
 
   var searchBox = root.querySelector('[data-component-binding="feed-search"]');
   var searchField = root.querySelector('[data-dom-id="search-input"]');
@@ -516,6 +517,32 @@ window.WegoApp.registerScene({
     root.querySelector('.album-feed__tabs').hidden = hasQuery;
   }
 
+  function clearSearch() {
+    searchField.value = '';
+    state.query = '';
+    ctx.state['searching'] = false;
+    ctx.state['feed-ready'] = true;
+    applyState();
+    searchField.focus();
+  }
+
+  function handleClearPointerDown(event) {
+    suppressClearClick = true;
+    event.preventDefault();
+    clearSearch();
+    setTimeout(function() {
+      suppressClearClick = false;
+    }, 0);
+  }
+
+  function handleClearClick(event) {
+    if (suppressClearClick) {
+      event.preventDefault();
+      return;
+    }
+    clearSearch();
+  }
+
   function updateFilterBar() {
     if (state.friendId) {
       var friend = friends.find(function(f) { return f.friend_id === state.friendId; });
@@ -608,15 +635,8 @@ window.WegoApp.registerScene({
   });
   searchField.addEventListener('focus', updateSearchUI);
   searchField.addEventListener('blur', updateSearchUI);
-
-  searchClear.addEventListener('click', function() {
-    searchField.value = '';
-    state.query = '';
-    ctx.state['searching'] = false;
-    ctx.state['feed-ready'] = true;
-    applyState();
-    searchField.focus();
-  });
+  searchClear.addEventListener('pointerdown', handleClearPointerDown);
+  searchClear.addEventListener('click', handleClearClick);
 
   /* 好友快捷入口 */
   els.friendsScroll.addEventListener('click', function(e) {

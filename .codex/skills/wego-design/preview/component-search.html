@@ -112,10 +112,20 @@
   padding: 0;
   border: 0;
   outline: 0;
+  appearance: none;
+  -webkit-appearance: none;
   background: var(--transparent);
   color: var(--searchbox-color);
   font: inherit;
   font-size: var(--searchbox-font-size);
+}
+
+.searchbox__field::-webkit-search-decoration,
+.searchbox__field::-webkit-search-cancel-button,
+.searchbox__field::-webkit-search-results-button,
+.searchbox__field::-webkit-search-results-decoration {
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 .searchbox__field::placeholder,

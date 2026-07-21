@@ -461,6 +461,7 @@ window.WegoApp.registerScene({
       sortMode: 'letter',
       keyword: ''
     };
+    var suppressClearClick = false;
 
     function getCurrentFriends() {
       return searchFriends(state.keyword);
@@ -589,7 +590,7 @@ window.WegoApp.registerScene({
     }
 
     function handleSearch() {
-      state.keyword = searchInput.value;
+      state.keyword = searchInput.value.trim();
       ctx.state['searching'] = Boolean(state.keyword);
       syncSearchState();
       renderList();
@@ -613,6 +614,23 @@ window.WegoApp.registerScene({
         searchBox.classList.toggle('is-inputting', hasQuery && isFocused);
         searchBox.classList.toggle('is-text-result', hasQuery && !isFocused);
       }
+    }
+
+    function handleClearPointerDown(event) {
+      suppressClearClick = true;
+      event.preventDefault();
+      clearSearch();
+      setTimeout(function () {
+        suppressClearClick = false;
+      }, 0);
+    }
+
+    function handleClearClick(event) {
+      if (suppressClearClick) {
+        event.preventDefault();
+        return;
+      }
+      clearSearch();
     }
 
     /* ── 添加好友表单 ── */
@@ -729,7 +747,8 @@ window.WegoApp.registerScene({
     searchInput.addEventListener('input', handleSearch);
     searchInput.addEventListener('focus', syncSearchState);
     searchInput.addEventListener('blur', syncSearchState);
-    searchClear.addEventListener('click', clearSearch);
+    searchClear.addEventListener('pointerdown', handleClearPointerDown);
+    searchClear.addEventListener('click', handleClearClick);
     addBtn.addEventListener('click', openAddForm);
     indexEl.addEventListener('click', handleIndexClick);
     indexEl.addEventListener('pointerdown', handleIndexPointerDown);
