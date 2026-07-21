@@ -22,6 +22,10 @@
       },
       "presentation": {
         "type": "full-screen-modal",
+        "modalVariant": "fullscreen",
+        "modalTitle": "default",
+        "consumesModalComponent": true,
+        "modalBindingNote": "通过 modal 组件 fullscreen 变体（.modal.modal--fullscreen[data-state] + .modal__panel > .modal__title--default > .navbar + .modal__body）消费，蒙层与 slide-up/slide-down 过渡由组件自身 data-state 状态机承担；不允许再维护 .uikit-modal-screen 私有 transform 状态机；fullscreen NavBar 仅允许 3 种固定模式：模式 A=text-cancel+button（取消+保存，本页取此）、模式 B=down-arrow+icon-text（无明确操作时的浏览/跳转）、模式 C=back-arrow+button（Modal 内二级页面）；右侧只支持 button（明确操作）与 icon-text（跳转/浏览）两种入口样式，纯文字入口已删除",
         "transition": "slide-up-enter, slide-down-exit",
         "dismissAction": "page-level-save",
         "overlayLevel": "overlay",
@@ -37,7 +41,8 @@
         "tag",
         "link",
         "input",
-        "button"
+        "button",
+        "modal"
       ],
       "compositionConstraints": [
         {
@@ -130,6 +135,10 @@
       },
       "presentation": {
         "type": "full-screen-modal",
+        "modalVariant": "fullscreen",
+        "modalTitle": "default",
+        "consumesModalComponent": true,
+        "modalBindingNote": "通过 modal 组件 fullscreen 变体（.modal.modal--fullscreen[data-state] + .modal__panel > .modal__title--default > .navbar + .modal__body）消费，蒙层与 slide-up/slide-down 过渡由组件自身 data-state 状态机承担；不允许再维护 .uikit-modal-screen 私有 transform 状态机；fullscreen NavBar 仅允许 3 种固定模式：模式 A=text-cancel+button（取消+保存，本页取此）、模式 B=down-arrow+icon-text（无明确操作时的浏览/跳转）、模式 C=back-arrow+button（Modal 内二级页面）；右侧只支持 button（明确操作）与 icon-text（跳转/浏览）两种入口样式，纯文字入口已删除",
         "transition": "slide-up-enter, slide-down-exit",
         "dismissAction": "page-level-save",
         "overlayLevel": "overlay",
@@ -144,7 +153,8 @@
         "tag",
         "input",
         "button",
-        "toast"
+        "toast",
+        "modal"
       ],
       "compositionConstraints": [
         {

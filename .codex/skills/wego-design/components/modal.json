@@ -153,17 +153,17 @@
     {
       "name": "body",
       "selector": ".modal__body",
-      "role": "自定义内容区，无默认内边距；flex:1 1 auto + overflow-y:auto（内容长时滚动）；有 action 时 padding-bottom: spacer-40（防遮盖）"
+      "role": "自定义内容区，无默认内边距；flex:1 1 auto + overflow-y:auto（内容长时滚动）；modal 根节点带 .modal--has-actions 时，body 自动补 padding-bottom: spacer-40（防 40px 渐变蒙层遮挡），安全区由 .modal__actions 自身承担"
     },
     {
       "name": "bodySafeBottom",
       "selector": ".modal__body--safe-bottom",
-      "role": "无 action 时 body 末尾安全区：padding-bottom: 40px + safe-area-bottom"
+      "role": "无底部 action/cancel 时，由 body 自己预留末尾安全区：padding-bottom: 40px + safe-area-bottom"
     },
     {
       "name": "actions",
       "selector": ".modal__actions",
-      "role": "操作区外层，flex-shrink:0 固定底部"
+      "role": "操作区外层，flex-shrink:0 固定底部；默认 padding-bottom: 32px + safe-area-bottom；包含 .modal__links 或 .modal__cancel 时 padding-bottom 仅保留 safe-area-bottom（链接/取消栏自身高度已足够），安全区由 action 区内部处理，业务不得在 body 重复加 safe-bottom"
     },
     {
       "name": "actionGradient",
@@ -173,7 +173,7 @@
     {
       "name": "buttons",
       "selector": ".modal__buttons",
-      "role": "横向双按钮容器，padding 16px + safe-area，gap 12px；内放 .btn--lg 按钮，flex:1 等分"
+      "role": "横向双按钮容器，padding 16px，gap 12px；内放 .btn--lg 按钮，flex:1 等分；安全区由外层 .modal__actions 承担"
     },
     {
       "name": "button",
@@ -203,7 +203,7 @@
     {
       "name": "cancel",
       "selector": ".modal__cancel",
-      "role": "取消栏，padding 16px + safe-area，16px default 文本居中，letter-spacing 0.1em"
+      "role": "取消栏，8px 灰色顶部分隔 + 56px 按钮行；safe-area-bottom 由外层 .modal__actions 承担，不要在取消栏自身重复加安全区"
     }
   ],
   "structurePatterns": [
@@ -213,12 +213,12 @@
     "frame-x 变体：面板固定高度 70vh，可拖拽至全屏（手势由宿主实现）。",
     "fullscreen 变体：面板 100dvh / 100%，无圆角，无遮罩，宽度 100%，max-width none；背景不强制白底，必须继续使用 --modal-panel-bg，默认白底，需要灰底页面时由业务覆盖为 var(--bg-page)。",
     "title 区：info 模式为大标题+可选辅助说明（padding 32px 32px 0，gap 8px），仅用于引导性内容展示场景（通常搭配图片或说明性文字）；default 模式为完整 navbar 组件，是 frame/frame-x 的默认标题模式；frame/frame-x 非全屏模态下 default title 强制 --safe-area-top: 0px（不预留顶部状态栏高度），fullscreen 全屏模态下恢复 safe-area-top。",
-    "default title 左侧图标默认规则：frame/frame-x 变体默认使用下箭头（icon-xiajiantou16），关闭叉（icon-guanbi）仅在用户明确指定的场景使用；fullscreen 模式 A 用取消文本，模式 B 用关闭叉。",
+    "default title 左侧图标默认规则：frame/frame-x 变体默认使用下箭头（icon-xiajiantou16）并带圆形背景（.navbar__left-btn--circle），关闭叉（icon-guanbi）仅在用户明确指定的场景使用；fullscreen 变体有 3 种固定组合：模式 A=text-cancel+button（文本按钮，无背景）、模式 B=down-arrow+icon-text（带背景圆框 .navbar__left-btn--circle + icon-xiajiantou16）、模式 C=back-arrow+button（带背景圆框 .navbar__left-btn--circle + icon-zuojiantou16）。",
     "title、body、actions 和 fullscreen 最底层背景色都跟随 panel（--modal-panel-bg），默认 bg-surface；业务可覆盖为 bg-page（灰色），灰底页面必须让最底层容器也使用同一个灰色背景，避免白底宿主层、灰底内容层叠出多个背景层级。",
-    "body 区：无默认 padding，flex:1 1 auto + min-height:0 + overflow-y:auto；有 action 时 padding-bottom: spacer-40（防渐变遮盖）；无 action 时需加 .modal__body--safe-bottom（40+safe-area）。",
-    "action 区：flex-shrink:0 固定底部；上方有 40px 渐变蒙层（linear-gradient transparent → panel-bg）；支持 6 种布局：double-h/single-h/single-v/single-v-links/cancel/none。",
+    "body 区：无默认 padding，flex:1 1 auto + min-height:0 + overflow-y:auto；modal 根节点带 .modal--has-actions 时 body 自动补 padding-bottom: spacer-40（仅防 40px 渐变蒙层遮盖，不含安全区）；无 action/cancel 时必须在 .modal__body 上加 .modal__body--safe-bottom，由 body 自己预留 40px + safe-area-bottom。",
+    "action 区：flex-shrink:0 固定底部；默认 padding-bottom: 32px + safe-area-bottom；包含 .modal__links 或 .modal__cancel 时 padding-bottom 仅保留 safe-area-bottom（链接/取消栏自身高度已足够）；安全区由 action 区内部处理，body 不再重复承担。上方有 40px 渐变蒙层（linear-gradient transparent → panel-bg）；支持 6 种布局：double-h/single-h/single-v/single-v-links/cancel/none。",
     "操作区按钮必须使用已注册 button 组件 .btn--lg；链接必须使用已注册 link 组件。禁止发明按钮/链接/标题栏类。",
-    "fullscreen 变体只允许两种 NavBar 组合：text-cancel+button（模式 A，表单类）或 close-icon（模式 B，浏览类）。",
+    "fullscreen 变体只允许 3 种 NavBar 固定组合：text-cancel+button（模式 A，表单类，左侧文本取消无背景）、down-arrow+icon-text（模式 B，浏览/查看默认，左侧下箭头带圆形背景）、back-arrow+button（模式 C，Modal 内 push 二级页面，左侧返回箭头带圆形背景）；禁止任何其他 leftControl/rightControl 自由组合。",
     "全屏 fullscreen 变体的遮罩为透明，手机状态栏通过高 z-index 穿透透明层显示；NavBar 正常避让 safe-area-top。",
     "嵌套 push 模式：modal 内可 push 多层面板（最多 3 层），新面板从右侧滑入（translateX），返回时逐层退出；所有层级共享同一遮罩；蒙层点击从最顶层开始逐层关闭。",
     "状态机通过 data-state='open'/'closed' 切换；嵌套 push 动画通过 data-push 属性控制。",
@@ -249,11 +249,13 @@
     "与 dialog 区别：dialog 居中轻量确认（2-3 文本按钮，300px），modal 底部带标题正文+填充按钮组件。",
     "与 actionsheet 区别：actionsheet 是操作列表+取消栏，modal 是标题正文+按钮或自定义内容。",
     "info 标题仅用于引导性内容展示场景（通常搭配图片或说明性文字），普通业务弹层默认使用 default 标题。",
-    "frame/frame-x 变体默认使用 default 标题 + 下箭头（icon-xiajiantou16），关闭叉仅在用户明确指定场景时使用。",
+    "frame/frame-x 变体默认使用 default 标题 + 下箭头（icon-xiajiantou16），下箭头按钮必须加 .navbar__left-btn--circle 圆形背景；关闭叉仅在用户明确指定场景时使用。",
+    "fullscreen 变体 default 标题只允许 3 种固定组合：text-cancel+button（模式 A）、down-arrow+icon-text（模式 B，推荐默认，左侧下箭头必须加 .navbar__left-btn--circle）、back-arrow+button（模式 C，仅 Modal 内 push 二级页面，左侧返回箭头必须加 .navbar__left-btn--circle）。",
+    "fullscreen 右侧入口只支持 button 与 icon-text 两种样式，纯文字入口已被删除；明确操作（保存/下一步/确认）用 button，浏览/跳转类入口优先用 icon-text。",
     "frame/frame-x 非全屏模态的 default title 不预留顶部状态栏高度（--safe-area-top: 0px），弹窗顶部直接显示标题栏；fullscreen 全屏模态的 default title 恢复 safe-area-top，避让手机状态栏。",
     "action 区按钮复用 button 组件 .btn--lg，强调级别 strong/weak/danger；同面板仅 1 个 strong/danger 主按钮。",
     "链接按钮复用 link 组件 .link（standalone），放在 .modal__links 内。",
-    "fullscreen 变体 NavBar 仅限两种固定模式：text-cancel+button 或 close-icon。",
+    "fullscreen 变体 NavBar 仅限 3 种固定模式：text-cancel+button、down-arrow+icon-text、back-arrow+button。",
     "嵌套 push 通过 data-layer 和 data-push 属性管理，宿主 JS 负责层间切换和动画触发。"
   ],
   "doNotInvent": [
@@ -261,14 +263,14 @@
     "不要使用 dialog 的文本按钮（.dialog__btn），modal 操作区必须使用 button 组件 .btn。",
     "不要发明链接类，modal 链接按钮必须使用 link 组件 .link。",
     "不要发明标题栏类，default 标题必须使用 navbar 组件完整 .navbar 结构。",
-    "frame/frame-x 变体默认左侧为下箭头（icon-xiajiantou16），不要擅自改成关闭叉（icon-guanbi），除非用户明确指定。",
-    "default title 左侧图标必须使用已注册图标类名（icon-xiajiantou16 / icon-guanbi），不得使用不存在的图标（如 icon-guanbi-mian）。",
+    "frame/frame-x 变体默认左侧为带背景圆形的下箭头（.navbar__left-btn--circle + icon-xiajiantou16），不要擅自改成关闭叉（icon-guanbi），除非用户明确指定。",
+    "default title 左侧图标必须使用已注册图标类名（icon-xiajiantou16 / icon-zuojiantou16 / icon-guanbi），不得使用不存在的图标（如 icon-guanbi-mian）；frame/frame-x 及 fullscreen 模式 B/C 的下箭头/返回箭头必须同时加 .navbar__left-btn--circle，只有文本取消与明确用户要求的关闭叉不加此修饰。",
     "不要给 .modal 根节点或 .modal__panel 加 opacity、opacity transition 或 opacity animation；面板只能有 translateY 位移动画；淡入淡出只在蒙层视觉层（.modal::before）上。",
     "不要在 modal CSS 内重写 .modal__body 内业务放入的已注册组件样式。",
     "不要超过 2 个主按钮（1 主操作 + 1 次操作）。",
     "不要持久化 modal 状态到 localStorage。",
     "不要给 modal 设置自动关闭时长（阻断式常驻）。",
-    "fullscreen 变体 NavBar 禁止自由组合 leftControl 和 rightControl，只允许两种固定模式。",
+    "fullscreen 变体 NavBar 禁止自由组合 leftControl 和 rightControl，只允许 3 种固定模式（text-cancel+button、down-arrow+icon-text、back-arrow+button）。",
     "嵌套深度超过 3 层时禁止继续 push。"
   ],
   "domAnatomy": {
@@ -333,9 +335,9 @@
     "--heading-sm-font-size",
     "--radius-16",
     "--safe-area-bottom",
+    "--safe-area-top",
     "--spacer-12",
     "--spacer-16",
-    "--spacer-20",
     "--spacer-32",
     "--spacer-40",
     "--spacer-8",
@@ -353,6 +355,7 @@
     "--border-brand",
     "--border-neutral-l1",
     "--radius-8",
+    "--spacer-20",
     "--spacer-4",
     "--text-brand",
     "--text-tertiary"

@@ -42,7 +42,7 @@
   height: 600px;
 }
 .demo-custom-placeholder {
-  padding: var(--spacer-8) 0;
+  padding: var(--spacer-8) var(--spacer-20);
   color: var(--text-secondary);
   font-size: var(--body-md-font-size);
   font-family: var(--font-family-system);
@@ -52,7 +52,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacer-12) 0;
+  padding: var(--spacer-12) var(--spacer-20);
   font-family: var(--font-family-system);
   font-size: var(--body-lg-font-size);
   color: var(--text-default);
@@ -175,9 +175,11 @@
   --modal-panel-width: 100%;
   max-width: none;
 }
-/* fullscreen 标题区恢复 safe-area-top */
+/* fullscreen 标题区恢复 safe-area-top：默认 .modal__title--default 强制 0（半屏弹窗紧贴面板顶部），
+   fullscreen 需要 navbar 真正继承宿主 --safe-area-top，因此显式 inherit；initial 会把自定义属性
+   重置为"未定义"，var(--safe-area-top, 0px) 会回落到 0px，导致 phone-status 与 navbar 重叠 */
 .modal--fullscreen .modal__title--default {
-  --safe-area-top: initial;
+  --safe-area-top: inherit;
 }
 
 /* ========== 标题区 ========== */
@@ -235,8 +237,13 @@
   width: 100%;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: var(--spacer-16) var(--spacer-20);
+  /* 契约规定 body 区无默认 padding；横向留白由业务层按 M0/M8/M32 自行决定，
+     纵向呼吸距离同样交由业务内容自己管，避免 frame/frame-x 底部圆角被强制内推 */
 }
+/* 安全高度职责边界：
+   - 底部有 action/cancel 时，modal 根节点必须带 .modal--has-actions；此时 body 仅预留 40px
+     防渐变蒙层遮盖，safe-area-bottom 由 .modal__actions 自身 padding-bottom 承担。
+   - 底部无 action/cancel 时，body 必须加 .modal__body--safe-bottom，自行预留 40px + safe-area-bottom。 */
 .modal--has-actions .modal__body {
   padding-bottom: var(--spacer-40);
 }
@@ -253,8 +260,10 @@
   gap: var(--spacer-16);
   position: relative;
   background: var(--modal-panel-bg, var(--bg-surface));
+  /* 按钮/主操作模式：32px 底部间距 + 安全区 */
   padding-bottom: calc(var(--spacer-32) + var(--safe-area-bottom));
 }
+/* links/cancel 模式本身已有足够高度（links 48px / cancel 56px+8px 分隔），安全区由 action 外层承担即可，不再追加 32px */
 .modal__actions:has(.modal__links) {
   padding-bottom: var(--safe-area-bottom);
 }
@@ -396,7 +405,7 @@
   <div class="pv-section__title">frame · info 居中 · 双按钮</div>
   <div class="demo-stage">
     <div class="demo-stage-label">frame · info · double-h</div>
-    <div class="modal modal--frame" role="dialog" aria-modal="true" data-state="open">
+    <div class="modal modal--frame modal--has-actions" role="dialog" aria-modal="true" data-state="open">
       <div class="modal__panel">
         <div class="modal__title modal__title--info">
           <div class="modal__title-text">确认提交订单？</div>
@@ -440,7 +449,7 @@
   <div class="pv-section__title">frame · info · 取消栏</div>
   <div class="demo-stage">
     <div class="demo-stage-label">frame · info · cancel</div>
-    <div class="modal modal--frame" role="dialog" aria-modal="true" data-state="open">
+    <div class="modal modal--frame modal--has-actions" role="dialog" aria-modal="true" data-state="open">
       <div class="modal__panel">
         <div class="modal__title modal__title--info">
           <div class="modal__title-text">提示</div>
@@ -458,7 +467,7 @@
   <div class="pv-section__title">frame · info · 双按钮 + 链接</div>
   <div class="demo-stage">
     <div class="demo-stage-label">frame · info · double-h + links</div>
-    <div class="modal modal--frame" role="dialog" aria-modal="true" data-state="open">
+    <div class="modal modal--frame modal--has-actions" role="dialog" aria-modal="true" data-state="open">
       <div class="modal__panel">
         <div class="modal__title modal__title--info">
           <div class="modal__title-text">开通会员</div>
@@ -483,7 +492,7 @@
   <div class="pv-section__title">frame · info · 自定义内容 + 双按钮</div>
   <div class="demo-stage">
     <div class="demo-stage-label">frame · info · double-h · custom body</div>
-    <div class="modal modal--frame" role="dialog" aria-modal="true" data-state="open">
+    <div class="modal modal--frame modal--has-actions" role="dialog" aria-modal="true" data-state="open">
       <div class="modal__panel">
         <div class="modal__title modal__title--info">
           <div class="modal__title-text">配送方式</div>
@@ -509,7 +518,7 @@
   <div class="pv-section__title">frame · default 下箭头 · 双按钮</div>
   <div class="demo-stage">
     <div class="demo-stage-label">frame · default 下箭头 · double-h（默认模式）</div>
-    <div class="modal modal--frame" role="dialog" aria-modal="true" data-state="open">
+    <div class="modal modal--frame modal--has-actions" role="dialog" aria-modal="true" data-state="open">
       <div class="modal__panel">
         <div class="modal__title modal__title--default">
           <div class="navbar">
@@ -585,7 +594,7 @@
   <div class="pv-section__title">frame-x · default 下箭头 · 双按钮</div>
   <div class="demo-stage">
     <div class="demo-stage-label">frame-x · default 下箭头 · double-h</div>
-    <div class="modal modal--frame-x" role="dialog" aria-modal="true" data-state="open">
+    <div class="modal modal--frame-x modal--has-actions" role="dialog" aria-modal="true" data-state="open">
       <div class="modal__panel">
         <div class="modal__title modal__title--default">
           <div class="navbar">
@@ -618,7 +627,7 @@
   <div class="pv-section__title">frame · info · 单个水平按钮</div>
   <div class="demo-stage">
     <div class="demo-stage-label">frame · info · single-h</div>
-    <div class="modal modal--frame" role="dialog" aria-modal="true" data-state="open">
+    <div class="modal modal--frame modal--has-actions" role="dialog" aria-modal="true" data-state="open">
       <div class="modal__panel">
         <div class="modal__title modal__title--info">
           <div class="modal__title-text">操作成功</div>
@@ -639,7 +648,7 @@
   <div class="pv-section__title">frame · info · 竖向单按钮</div>
   <div class="demo-stage">
     <div class="demo-stage-label">frame · info · single-v</div>
-    <div class="modal modal--frame" role="dialog" aria-modal="true" data-state="open">
+    <div class="modal modal--frame modal--has-actions" role="dialog" aria-modal="true" data-state="open">
       <div class="modal__panel">
         <div class="modal__title modal__title--info">
           <div class="modal__title-text">确认删除？</div>
@@ -660,7 +669,7 @@
   <div class="pv-section__title">frame · info · 竖向单按钮 + 链接</div>
   <div class="demo-stage">
     <div class="demo-stage-label">frame · info · single-v + link</div>
-    <div class="modal modal--frame" role="dialog" aria-modal="true" data-state="open">
+    <div class="modal modal--frame modal--has-actions" role="dialog" aria-modal="true" data-state="open">
       <div class="modal__panel">
         <div class="modal__title modal__title--info">
           <div class="modal__title-text">帮卖此商品</div>
@@ -701,34 +710,65 @@
             </div>
           </div>
         </div>
-        <div class="modal__body">
+        <div class="modal__body modal__body--safe-bottom">
           <div class="demo-custom-placeholder">全屏自定义内容区（可放置表单、列表、设置项等）</div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Stage 13: fullscreen · default mode-b -->
-  <div class="pv-section__title">fullscreen · default 关闭+图标</div>
+  <!-- Stage 13: fullscreen · default 下箭头 + 图标+文字上下 -->
+  <div class="pv-section__title">fullscreen · default 下箭头 + 图标+文字上下</div>
   <div class="demo-stage">
-    <div class="demo-stage-label">fullscreen · default close-icon + icon · 模式 B</div>
+    <div class="demo-stage-label">fullscreen · default down-arrow + icon-text · 模式 B（推荐默认）</div>
     <div class="modal modal--fullscreen" role="dialog" aria-modal="true" data-state="open">
       <div class="modal__panel">
         <div class="modal__title modal__title--default">
           <div class="navbar">
             <div class="navbar__body">
               <div class="navbar__left">
-                <div class="navbar__left-btn navbar__left-btn--circle"><i class="wego-iconfont-s icon-guanbi" aria-hidden="true"></i></div>
+                <div class="navbar__left-btn navbar__left-btn--circle"><i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></div>
               </div>
-              <div class="navbar__center"><span class="navbar__title">选择图片</span></div>
-              <div class="navbar__right navbar__right--icon">
-                <div class="navbar__action"><i class="wego-iconfont-s icon-xiaochengxulianjie" aria-hidden="true"></i></div>
+              <div class="navbar__center"><span class="navbar__title">好友详情</span></div>
+              <div class="navbar__right navbar__right--icon-text">
+                <div class="navbar__action">
+                  <div class="navbar__action-icon"><i class="wego-iconfont-s icon-bianji16" aria-hidden="true"></i></div>
+                  <div class="navbar__action-label">编辑</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-        <div class="modal__body">
-          <div class="demo-custom-placeholder">全屏浏览/选择内容区（图片选择、地址选择等）</div>
+        <div class="modal__body modal__body--safe-bottom">
+          <div class="demo-custom-placeholder">全屏浏览/查看内容区（详情、设置预览等）</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stage 14: fullscreen · default 返回（左箭头） + 按钮 -->
+  <div class="pv-section__title">fullscreen · default 返回 + 按钮</div>
+  <div class="demo-stage">
+    <div class="demo-stage-label">fullscreen · default back-arrow + button · 模式 C（Modal 内二级页面）</div>
+    <div class="modal modal--fullscreen" role="dialog" aria-modal="true" data-state="open">
+      <div class="modal__panel">
+        <div class="modal__title modal__title--default">
+          <div class="navbar">
+            <div class="navbar__body">
+              <div class="navbar__left">
+                <div class="navbar__left-btn navbar__left-btn--circle"><i class="wego-iconfont-s icon-zuojiantou16" aria-hidden="true"></i></div>
+              </div>
+              <div class="navbar__center"><span class="navbar__title">选择标签</span></div>
+              <div class="navbar__right navbar__right--button">
+                <div class="navbar__action navbar__action--button">
+                  <button class="btn btn--strong btn--sm">确认</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal__body modal__body--safe-bottom">
+          <div class="demo-custom-placeholder">Modal 内 push 二级页面</div>
         </div>
       </div>
     </div>
@@ -757,14 +797,14 @@
 
         var html = '';
         if (preset === 'frame-double-h') {
-          html = '<div class="modal modal--frame" role="dialog" aria-modal="true" data-state="closed">'
+          html = '<div class="modal modal--frame modal--has-actions" role="dialog" aria-modal="true" data-state="closed">'
             + '<div class="modal__panel">'
             + '<div class="modal__title modal__title--info"><div class="modal__title-text">确认删除？</div><div class="modal__subtitle">删除后将无法恢复，请确认操作。</div></div>'
             + '<div class="modal__body"></div>'
             + '<div class="modal__actions"><div class="modal__action-gradient"></div><div class="modal__buttons"><button class="btn btn--weak btn--lg">取消</button><button class="btn btn--danger btn--lg">确认删除</button></div></div>'
             + '</div></div>';
         } else if (preset === 'frame-cancel') {
-          html = '<div class="modal modal--frame" role="dialog" aria-modal="true" data-state="closed">'
+          html = '<div class="modal modal--frame modal--has-actions" role="dialog" aria-modal="true" data-state="closed">'
             + '<div class="modal__panel">'
             + '<div class="modal__title modal__title--info"><div class="modal__title-text">提示</div><div class="modal__subtitle">操作已完成。</div></div>'
             + '<div class="modal__body"></div>'
@@ -780,7 +820,7 @@
           html = '<div class="modal modal--fullscreen" role="dialog" aria-modal="true" data-state="closed">'
             + '<div class="modal__panel">'
             + '<div class="modal__title modal__title--default"><div class="navbar"><div class="navbar__body navbar__body--spaced"><div class="navbar__left"><button class="navbar__left-text">取消</button></div><div class="navbar__center"><span class="navbar__title">编辑</span></div><div class="navbar__right navbar__right--button"><div class="navbar__action navbar__action--button"><button class="btn btn--strong btn--sm">保存</button></div></div></div></div></div>'
-            + '<div class="modal__body"><div class="demo-custom-placeholder">全屏模式</div></div>'
+            + '<div class="modal__body modal__body--safe-bottom"><div class="demo-custom-placeholder">全屏模式</div></div>'
             + '</div></div>';
         }
 

@@ -273,12 +273,6 @@
         "content_role": "全屏模态表单容器字体",
         "css_property": "font-family",
         "token": "var(--body-md-font-family)"
-      },
-      {
-        "selector": ".friend-add-form__body",
-        "content_role": "表单内容底部留白",
-        "css_property": "padding-bottom",
-        "token": "var(--spacer-24)"
       }
     ],
     "component_bindings": [
@@ -311,7 +305,7 @@
       {
         "binding_id": "friend-add-form-modal",
         "slug": "modal",
-        "reason": "新建好友全屏模态容器，fullscreen 变体，通过 ctx.openFullScreenModal 消费；内含 navbar + 表单 body，蒙层与动画由组件自身承担",
+        "reason": "新建好友全屏模态容器，fullscreen 变体，通过 ctx.openFullScreenModal 消费；内含 navbar + 表单 body，蒙层与动画由组件自身承担；modal__body 无默认 padding，本场景无底部 action/cancel，body 必须加 modal__body--safe-bottom 预留 40px + safe-area-bottom；表单走 entity-form 范式（M0 通栏白底、form-group__content 不加 --card）",
         "variant_dimensions": {
           "variant": "fullscreen",
           "title": "default",
@@ -345,7 +339,7 @@
     "layout_contract": {
       "mode": "composed",
       "source": "references/design-decisions.md",
-      "selection_reason": "好友列表以连续浏览为主，采用通栏白底行减少阅读中断；搜索固定在顶部，索引固定悬浮在右侧中间。",
+      "selection_reason": "好友列表以连续浏览为主，采用通栏白底行减少阅读中断；搜索固定在顶部，索引固定悬浮在右侧中间。新建好友全屏模态内部走 entity-form 范式（M0 通栏白底、form-group__title 与 form-body 共享 16px 起点节奏、不挂 --card）。",
       "page_edge_mode": "M0",
       "mutable_regions": [
         ".friend-list__scroll",
@@ -449,7 +443,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/好友列表/scene.js",
     "scene_css": "wego-app/scenes/好友列表/scene.css",
-    "source_sha256": "0593596ff52f6c51904ca385b7dfbc704344a4f11ffd1b08db0b1c200358edab",
+    "source_sha256": "33e8532fbd01078271c5a2a54c2d8ed02841569fad7f3ffc03ffb308a1bc0856",
     "dom_ids": [
       "add-friend-entry",
       "sort-toggle",
@@ -462,8 +456,8 @@
         375,
         393
       ],
-      "checked_at": "2026-07-17T02:30:00.000Z",
-      "scope": "好友列表主页 + 新建好友全屏模态表单层",
+      "checked_at": "2026-07-21T08:00:00.000Z",
+      "scope": "好友列表主页 + 新建好友全屏模态表单层（modal fullscreen safe-area-top 恢复 inherit、modal__body 默认 padding 移除、entity-form 范式 M0 通栏白底无 --card）",
       "checks": {
         "horizontal_overflow": true,
         "overlap": true,

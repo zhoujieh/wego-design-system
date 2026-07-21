@@ -9,26 +9,8 @@
 <link rel="stylesheet" href="../../iconfont.css">
 <link rel="stylesheet" href="../../components.css">
 <style>
+/* UI Kit 页面级样式只承载本页特殊演示；模态自身的双层结构、蒙层、动画由 modal 组件承担 */
 html, body { min-height: auto; }
-
-.phone-status {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 var(--spacer-16);
-  background: transparent;
-  box-sizing: border-box;
-  font-size: var(--body-sm-font-size);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-default);
-  z-index: var(--z-critical);
-  pointer-events: none;
-}
 
 .uikit-host-screen {
   height: 100%;
@@ -60,33 +42,6 @@ html, body { min-height: auto; }
 .switch[role="switch"]:focus-visible {
   outline: 2px solid var(--bg-brand);
   outline-offset: -2px;
-}
-
-.uikit-modal-screen {
-  position: absolute;
-  inset: 0;
-  z-index: var(--z-overlay);
-  display: flex;
-  flex-direction: column;
-  background: var(--bg-page);
-  transform: translateY(100%);
-  transition: transform var(--duration-normal) var(--ease-exit);
-  will-change: transform;
-}
-
-.uikit-modal-screen.is-open {
-  transform: translateY(0);
-  transition: transform var(--duration-normal) var(--ease-enter);
-}
-
-.uikit-modal-screen.is-hidden {
-  visibility: hidden;
-  pointer-events: none;
-}
-
-.uikit-modal-screen .navbar {
-  width: 100%;
-  flex-shrink: 0;
 }
 
 .uikit-modal-screen .navbar__left-text,
@@ -154,6 +109,7 @@ function handleActionKeyDown(event, action) {
 }
 
 function StatusBar() {
+  /* phone-status 始终在 phone-screen 顶层，模态与底页共享一份，z-index=critical */
   return (
     <div className="phone-status">
       <span>9:41</span>
@@ -461,29 +417,35 @@ function BizSettingsContent({ onPreviewAction }) {
   );
 }
 
-function BizSettingsModal({ isOpen, onCancel, onSave, onPreviewAction }) {
+/* 消费 modal 组件 fullscreen 变体：双层结构、蒙层、动画由组件自身 data-state 承担；
+   业务只需在 open/closed 切换时同步 data-state，组件 CSS 负责 slide-up/down + 蒙层淡入淡出 */
+function BizSettingsModal({ dataState, onCancel, onSave, onPreviewAction }) {
   return (
-    <div className={`uikit-modal-screen${isOpen ? ' is-open' : ''}`} aria-hidden={!isOpen}>
-      <StatusBar />
-      <div data-component="navbar" className="navbar">
-          <div className="navbar__body navbar__body--spaced">
-          <div className="navbar__left">
-            <button type="button" className="navbar__left-text" onClick={onCancel}>取消</button>
-          </div>
-          <div className="navbar__center">
-            <span className="navbar__title">业务规则配置</span>
-          </div>
-          <div className="navbar__right navbar__right--button">
-            <div className="navbar__action navbar__action--button">
-              <button type="button" className="btn btn--strong btn--sm" onClick={onSave}>保存</button>
+    <div className="modal modal--fullscreen" data-state={dataState} role="dialog" aria-modal="true">
+      <div className="modal__panel" style={{ '--modal-panel-bg': 'var(--bg-page)' }}>
+        <div className="modal__title modal__title--default">
+          <div data-component="navbar" className="navbar">
+            <div className="navbar__body navbar__body--spaced">
+              <div className="navbar__left">
+                <button type="button" className="navbar__left-text" onClick={onCancel}>取消</button>
+              </div>
+              <div className="navbar__center">
+                <span className="navbar__title">业务规则配置</span>
+              </div>
+              <div className="navbar__right navbar__right--button">
+                <div className="navbar__action navbar__action--button">
+                  <button type="button" className="btn btn--strong btn--sm" onClick={onSave}>保存</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
+        <div className="modal__body">
+          <div className="friend-add-form__body" style={{ paddingBottom: 'var(--spacer-24)' }}>
+            <BizSettingsContent onPreviewAction={onPreviewAction} />
+          </div>
+        </div>
       </div>
-      <div className="phone-body">
-        <BizSettingsContent onPreviewAction={onPreviewAction} />
-      </div>
-      <HomeIndicator />
     </div>
   );
 }
@@ -528,8 +490,10 @@ function BaseScreen({ onOpen }) {
 }
 
 function App() {
-  const [modalMounted, setModalMounted] = useState(true);
-  const [modalOpen, setModalOpen] = useState(true);
+  /* 模态状态机：mount 控制 DOM 在场，dataState 控制组件自身 data-state 过渡；
+     必须分两步挂 data-state="open"，浏览器才有机会先布局 closed 初始态再触发过渡 */
+  const [modalMounted, setModalMounted] = useState(false);
+  const [dataState, setDataState] = useState('closed');
   // toast 状态机：idle → entering → visible → leaving → idle
   // 必须分两步挂 is-visible，浏览器才有机会先布局初始态再触发过渡，否则入场动画不生效；
   // 出场先加 is-leaving 触发淡出过渡，过渡结束后再卸载 DOM。
@@ -565,11 +529,12 @@ function App() {
 
   const openModal = () => {
     setModalMounted(true);
-    window.setTimeout(() => setModalOpen(true), 16);
+    setDataState('closed');
+    requestAnimationFrame(() => requestAnimationFrame(() => setDataState('open')));
   };
 
   const closeModal = () => {
-    setModalOpen(false);
+    setDataState('closed');
     window.setTimeout(() => setModalMounted(false), 260);
   };
 
@@ -581,7 +546,7 @@ function App() {
   return (
     <>
       <BaseScreen onOpen={openModal} />
-      {modalMounted ? <BizSettingsModal isOpen={modalOpen} onCancel={closeModal} onSave={handleSave} onPreviewAction={showToast} /> : null}
+      {modalMounted ? <BizSettingsModal dataState={dataState} onCancel={closeModal} onSave={handleSave} onPreviewAction={showToast} /> : null}
       <div className="uikit-toast-host" aria-live="polite" role="status">
         {toastMsg ? (
           <div className={`toast toast--default is-floating${toastPhase === 'visible' ? ' is-visible' : ''}${toastPhase === 'leaving' ? ' is-leaving' : ''}`}>

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 4,
-  "designSystemVersion": 417,
+  "designSystemVersion": 422,
   "designSystemParity": {
     "status": "passed",
-    "checked_at": "2026-07-15T00:00:00+08:00",
-    "checks": ["组件均已注册且允许使用", "组件契约与 Preview 一致性守卫通过", "不存在生成规则文档或已删除技能引用", "UI Kit 仅作为明确页面范式证据"]
+    "checked_at": "2026-07-21T00:00:00+08:00",
+    "checks": ["组件均已注册且允许使用", "组件契约与 Preview 一致性守卫通过", "不存在生成规则文档或已删除技能引用", "UI Kit 仅作为明确页面范式证据", "全屏模态消费 modal 组件 fullscreen 变体，无自定义 .uikit-modal-screen 私有层"]
   },
   "kitType": "biz-rule-config",
   "presentation": "full-screen-modal",
@@ -12,7 +12,7 @@
   "exitTransition": "slide-down",
   "coversTabBar": true,
   "screensGenerated": 1,
-  "coreComponentsUsed": ["navbar", "cell", "form"],
+  "coreComponentsUsed": ["navbar", "cell", "form", "modal"],
   "supportComponentsUsed": ["checkbox", "switch", "radio", "toast"],
   "previewClassReuseRate": 0.933,
   "reuseAssessment": "主体内容已收敛为一个通用业务规则配置母版，基础信息、规则开关和范围权限都复用已注册组件结构；主骨架使用 navbar、cell、form，辅助选择能力由 checkbox、switch、radio 承载，保存反馈复用正式 toast 宿主层；整行点击只保留给进入下一层的字段/列表行，规则开关改由 switch 本体承担交互；section 标题与分组内容都回收为 cell/form 正式 group 能力，示例中的页面级主操作统一收口到导航操作区，避免页面底部重复主操作。",
@@ -53,6 +53,7 @@
   },
   "warnings": [
     "本 UI Kit 展示的是从底部进入、落稳后全屏覆盖的业务规则配置模态页。",
+    "全屏模态统一消费 modal 组件 fullscreen 变体（.modal.modal--fullscreen[data-state] + .modal__panel > .modal__title--default > .navbar + .modal__body），蒙层与 slide-up/slide-down 过渡由组件自身承担，UI Kit 不再维护 .uikit-modal-screen 私有 transform 状态机。",
     "phone-status 为当前页面状态栏展示样式；phone-indicator 等通用 Showcase 外壳由 scaffold.css 提供，非通用组件。",
     "navbar 通过组件自身的 padding-top: var(--safe-area-top, 0px) + sticky top: 0 避让状态栏，UI Kit 演示层不要再额外给页面容器补顶部 safe-area。",
     "页面纵向节奏应由 phone-body 的 8px 组间距和各组自身的 stack / group 结构承担，不再插入 .uikit-section-gap 这类纯占位元素。",

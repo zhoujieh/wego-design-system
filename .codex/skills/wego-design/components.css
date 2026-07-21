@@ -1690,9 +1690,11 @@
   --modal-panel-width: 100%;
   max-width: none;
 }
-/* fullscreen 标题区恢复 safe-area-top */
+/* fullscreen 标题区恢复 safe-area-top：默认 .modal__title--default 强制 0（半屏弹窗紧贴面板顶部），
+   fullscreen 需要 navbar 真正继承宿主 --safe-area-top，因此显式 inherit；initial 会把自定义属性
+   重置为"未定义"，var(--safe-area-top, 0px) 会回落到 0px，导致 phone-status 与 navbar 重叠 */
 .modal--fullscreen .modal__title--default {
-  --safe-area-top: initial;
+  --safe-area-top: inherit;
 }
 
 /* ========== 标题区 ========== */
@@ -1750,8 +1752,13 @@
   width: 100%;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: var(--spacer-16) var(--spacer-20);
+  /* 契约规定 body 区无默认 padding；横向留白由业务层按 M0/M8/M32 自行决定，
+     纵向呼吸距离同样交由业务内容自己管，避免 frame/frame-x 底部圆角被强制内推 */
 }
+/* 安全高度职责边界：
+   - 底部有 action/cancel 时，modal 根节点必须带 .modal--has-actions；此时 body 仅预留 40px
+     防渐变蒙层遮盖，safe-area-bottom 由 .modal__actions 自身 padding-bottom 承担。
+   - 底部无 action/cancel 时，body 必须加 .modal__body--safe-bottom，自行预留 40px + safe-area-bottom。 */
 .modal--has-actions .modal__body {
   padding-bottom: var(--spacer-40);
 }
@@ -1768,8 +1775,10 @@
   gap: var(--spacer-16);
   position: relative;
   background: var(--modal-panel-bg, var(--bg-surface));
+  /* 按钮/主操作模式：32px 底部间距 + 安全区 */
   padding-bottom: calc(var(--spacer-32) + var(--safe-area-bottom));
 }
+/* links/cancel 模式本身已有足够高度（links 48px / cancel 56px+8px 分隔），安全区由 action 外层承担即可，不再追加 32px */
 .modal__actions:has(.modal__links) {
   padding-bottom: var(--safe-area-bottom);
 }

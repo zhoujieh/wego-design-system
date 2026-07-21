@@ -57,20 +57,19 @@
       { "selector": ".friend-list__empty-text", "content_role": "空状态文字行高", "css_property": "line-height", "token": "var(--body-md-line-height)" },
       { "selector": ".friend-add-form__body", "content_role": "全屏模态表单容器背景", "css_property": "background", "token": "var(--bg-page)" },
       { "selector": ".friend-add-form__body", "content_role": "全屏模态表单容器文字", "css_property": "color", "token": "var(--text-default)" },
-      { "selector": ".friend-add-form__body", "content_role": "全屏模态表单容器字体", "css_property": "font-family", "token": "var(--body-md-font-family)" },
-      { "selector": ".friend-add-form__body", "content_role": "表单内容底部留白", "css_property": "padding-bottom", "token": "var(--spacer-24)" }
+      { "selector": ".friend-add-form__body", "content_role": "全屏模态表单容器字体", "css_property": "font-family", "token": "var(--body-md-font-family)" }
     ],
     "component_bindings": [
       { "binding_id": "friend-navbar", "slug": "navbar", "reason": "承载好友页面左对齐大标题、新建好友与排序切换入口", "variant_dimensions": { "leftControl": "none", "titleAlignment": "left-wide", "actions": "icon", "rightActionType": "icon", "spacing": "default", "pageTransition": "push", "position": "sticky" } },
       { "binding_id": "friend-search", "slug": "search", "reason": "提供好友昵称搜索入口，白底搜索框放在灰底页面上", "variant_dimensions": { "size": "md", "surface": "white", "mode": "text", "state": "empty", "hostPattern": "inline" } },
-      { "binding_id": "friend-add-form-modal", "slug": "modal", "reason": "新建好友全屏模态容器，fullscreen 变体，通过 ctx.openFullScreenModal 消费；内含 navbar + 表单 body，蒙层与动画由组件自身承担", "variant_dimensions": { "variant": "fullscreen", "title": "default", "action": "none", "state": "open" } },
+      { "binding_id": "friend-add-form-modal", "slug": "modal", "reason": "新建好友全屏模态容器，fullscreen 变体，通过 ctx.openFullScreenModal 消费；内含 navbar + 表单 body，蒙层与动画由组件自身承担；modal__body 无默认 padding，本场景无底部 action/cancel，body 必须加 modal__body--safe-bottom 预留 40px + safe-area-bottom；表单走 entity-form 范式（M0 通栏白底、form-group__content 不加 --card）", "variant_dimensions": { "variant": "fullscreen", "title": "default", "action": "none", "state": "open" } },
       { "binding_id": "friend-group-sheet", "slug": "actionsheet", "reason": "选择好友分组底部面板，通过 ctx.openSheet 消费；渲染完整 .actionsheet 根节点 + .actionsheet__panel 及子内容，关闭行为覆盖 cancel 与 mask", "variant_dimensions": { "mode": "select", "header": "text", "item": "text", "state": "open" } },
       { "binding_id": "friend-source-sheet", "slug": "actionsheet", "reason": "选择好友来源渠道底部面板，通过 ctx.openSheet 消费；渲染完整 .actionsheet 根节点 + .actionsheet__panel 及子内容，关闭行为覆盖 cancel 与 mask", "variant_dimensions": { "mode": "select", "header": "text", "item": "text", "state": "open" } }
     ],
     "layout_contract": {
       "mode": "composed",
       "source": "references/design-decisions.md",
-      "selection_reason": "好友列表以连续浏览为主，采用通栏白底行减少阅读中断；搜索固定在顶部，索引固定悬浮在右侧中间。",
+      "selection_reason": "好友列表以连续浏览为主，采用通栏白底行减少阅读中断；搜索固定在顶部，索引固定悬浮在右侧中间。新建好友全屏模态内部走 entity-form 范式（M0 通栏白底、form-group__title 与 form-body 共享 16px 起点节奏、不挂 --card）。",
       "page_edge_mode": "M0",
       "mutable_regions": [".friend-list__scroll", ".friend-list__group", ".friend-list__index"]
     },
@@ -94,8 +93,8 @@
   "visual_check": {
     "status": "passed",
     "viewports": [375, 393],
-    "checked_at": "2026-07-17T02:30:00.000Z",
-    "scope": "好友列表主页 + 新建好友全屏模态表单层",
+    "checked_at": "2026-07-21T08:00:00.000Z",
+    "scope": "好友列表主页 + 新建好友全屏模态表单层（modal fullscreen safe-area-top 恢复 inherit、modal__body 默认 padding 移除、entity-form 范式 M0 通栏白底无 --card）",
     "checks": { "horizontal_overflow": true, "overlap": true, "clipping": true, "action_legibility": true, "primary_focus": true, "state_feedback": true }
   }
 }
@@ -279,11 +278,11 @@ function addFriendFormTemplate() {
     +         '</div>'
     +       '</div>'
     +     '</div>'
-    +     '<div class="modal__body">'
+    +     '<div class="modal__body modal__body--safe-bottom">'
     +       '<div class="friend-add-form__body">'
     +         '<div class="form-group">'
     +           '<div class="form-group__title">基本信息</div>'
-    +           '<div class="form-group__content form-group__content--card">'
+    +           '<div class="form-group__content">'
     +             '<div class="form-body form-body--vertical">'
     +               '<div class="form-body__label form-body__label--required"><span class="form-body__label-text">头像</span><span class="form-body__required">*</span></div>'
     +               '<div class="form-body__action">'
@@ -311,7 +310,7 @@ function addFriendFormTemplate() {
     +         '</div>'
     +         '<div class="form-group">'
     +           '<div class="form-group__title">分组与标签</div>'
-    +           '<div class="form-group__content form-group__content--card">'
+    +           '<div class="form-group__content">'
     +             '<div class="form-body form-body--vertical">'
     +               '<div class="form-body__label"><span class="form-body__label-text">分组</span></div>'
     +               '<div class="form-body__action">'
@@ -329,7 +328,7 @@ function addFriendFormTemplate() {
     +         '</div>'
     +         '<div class="form-group">'
     +           '<div class="form-group__title">来源与验证</div>'
-    +           '<div class="form-group__content form-group__content--card">'
+    +           '<div class="form-group__content">'
     +             '<div class="form-body form-body--vertical">'
     +               '<div class="form-body__label"><span class="form-body__label-text">来源渠道</span></div>'
     +               '<div class="form-body__action">'
