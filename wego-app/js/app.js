@@ -5,9 +5,9 @@
     ? window.WegoViewportDebug.create({ shell: shell })
     : { enabled: false, record: function () {}, schedule: function () {} };
 
-  // iOS standalone 的 visualViewport 在键盘收起后可能短暂或持续返回偏小高度。
-  // App 外壳始终由 CSS 的 100dvh 管理；这里只观察键盘会话并清理 document 位移，
-  // 不再把 visualViewport.height、offsetTop 或 safe-area 写回布局。
+  // iOS standalone 收起键盘后可能把 100dvh 永久停在去掉状态栏后的短高度。
+  // 外壳使用键盘前的完整高度；visualViewport 只用于识别键盘会话，
+  // 不把键盘期间的瞬时高度、offsetTop 或 safe-area 写回布局。
   (function initStandaloneKeyboardRecovery() {
     var root = document.documentElement;
     root.style.removeProperty('--vv-height');
@@ -15,6 +15,7 @@
     var mobileQuery = window.matchMedia && window.matchMedia('(max-width: 767px)');
     var standaloneQuery = window.matchMedia && window.matchMedia('(display-mode: standalone)');
     var isStandalone = window.navigator.standalone === true || Boolean(standaloneQuery && standaloneQuery.matches);
+    var shouldLockFullHeight = window.navigator.standalone === true;
     if (!isStandalone || (mobileQuery && !mobileQuery.matches)) return;
 
     var viewport = window.visualViewport;
@@ -27,6 +28,7 @@
     var checkTimers = [];
     var recoveryTimers = [];
     var orientationTimers = [];
+    var orientationChanging = false;
 
     function isEditable(element) {
       return Boolean(element && element.matches && element.matches(editableSelector));
@@ -37,24 +39,40 @@
     }
 
     function readStableHeight() {
-      return Math.round(Math.max(
+      var candidates = [
         window.innerHeight || 0,
         root.clientHeight || 0,
         viewport ? viewport.height : 0
-      ));
+      ];
+      if (shouldLockFullHeight) {
+        candidates.push(window.outerHeight || 0);
+        candidates.push(window.screen ? window.screen.height || 0 : 0);
+      }
+      return Math.round(Math.max.apply(Math, candidates));
     }
 
     function readVisualHeight() {
       return Math.round(viewport ? viewport.height : (window.innerHeight || root.clientHeight || 0));
     }
 
-    function measureBaseline() {
-      if (editorSession || hasFocusedEditor()) return;
-      var nextHeight = readStableHeight();
-      if (nextHeight > 0 && nextHeight !== baselineHeight) {
+    function applyFullHeight() {
+      if (shouldLockFullHeight && baselineHeight > 0) {
+        root.style.setProperty('--standalone-full-height', baselineHeight + 'px');
+      }
+    }
+
+    function updateBaseline(nextHeight, allowShrink) {
+      if (nextHeight <= 0) return;
+      if (!baselineHeight || allowShrink || nextHeight > baselineHeight) {
         baselineHeight = nextHeight;
         viewportDebug.record('controller:baseline', { baselineHeight: baselineHeight });
       }
+      applyFullHeight();
+    }
+
+    function measureBaseline() {
+      if (orientationChanging || editorSession || hasFocusedEditor()) return;
+      updateBaseline(readStableHeight(), false);
     }
 
     function clearTimers(timers) {
@@ -72,6 +90,7 @@
         document.body.scrollTop = 0;
         document.body.scrollLeft = 0;
       }
+      applyFullHeight();
       window.scrollTo(0, 0);
       viewportDebug.record('controller:recovery-run', {
         delay: delay,
@@ -102,7 +121,7 @@
 
     function inspectViewport() {
       rafId = 0;
-      if (!baselineHeight) baselineHeight = readStableHeight();
+      if (!baselineHeight) updateBaseline(readStableHeight(), true);
       if (!baselineHeight) return;
 
       var heightDelta = baselineHeight - readVisualHeight();
@@ -157,6 +176,7 @@
       if (rafId) cancelAnimationFrame(rafId);
       rafId = 0;
       baselineHeight = 0;
+      orientationChanging = false;
       editorSession = hasFocusedEditor();
       keyboardWasOpen = false;
       viewportDebug.record('controller:session-reset', { editorSession: editorSession });
@@ -173,6 +193,7 @@
       editorSession = true;
       keyboardWasOpen = false;
       clearTimers(recoveryTimers);
+      applyFullHeight();
       viewportDebug.record('controller:focusin', { tag: event.target.tagName.toLowerCase() });
       scheduleSettledChecks();
     }, true);
@@ -204,15 +225,24 @@
       clearTimers(recoveryTimers);
       if (rafId) cancelAnimationFrame(rafId);
       rafId = 0;
+      orientationChanging = true;
       baselineHeight = 0;
+      if (shouldLockFullHeight) root.style.removeProperty('--standalone-full-height');
       editorSession = hasFocusedEditor();
       keyboardWasOpen = false;
       viewportDebug.record('controller:orientation-reset', { editorSession: editorSession });
       if (editorSession) scheduleSettledChecks();
       else scheduleRecovery();
       clearTimers(orientationTimers);
-      orientationTimers.push(setTimeout(measureBaseline, 450));
-      orientationTimers.push(setTimeout(measureBaseline, 900));
+      orientationTimers.push(setTimeout(function () {
+        orientationChanging = false;
+        baselineHeight = 0;
+        measureBaseline();
+      }, 450));
+      orientationTimers.push(setTimeout(function () {
+        baselineHeight = 0;
+        measureBaseline();
+      }, 900));
     });
 
     measureBaseline();

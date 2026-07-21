@@ -1,5 +1,5 @@
 (function initWegoViewportDebugModule() {
-  var VERSION = 'ios-keyboard-debug-v1';
+  var VERSION = 'ios-keyboard-debug-v2';
   var SETTLED_DELAYS = [0, 120, 320, 700];
   var MAX_RECORDS = 160;
 
@@ -152,6 +152,7 @@
           shellMinHeight: shellStyle ? shellStyle.minHeight : null,
           shellTransform: shellStyle ? shellStyle.transform : null,
           legacyVvHeight: getComputedStyle(root).getPropertyValue('--vv-height').trim(),
+          standaloneFullHeight: getComputedStyle(root).getPropertyValue('--standalone-full-height').trim(),
           safeAreaBottom: phoneStyle ? phoneStyle.getPropertyValue('--safe-area-bottom').trim() : null
         },
         focus: activeElementLabel()
