@@ -4,35 +4,47 @@
 
   // iOS standalone 模式键盘弹起时：
   // 1. 100dvh 不收缩 → 用 visualViewport.height 同步 --vv-height
-  // 2. env(safe-area-inset-bottom) 不变为 0 → 键盘弹起时将 safe-area 相关变量设为 0px
+  // 2. visualViewport.offsetTop > 0（可视区域下移）→ 用 translateY 把 shell 拉到可视区域
+  // 3. env(safe-area-inset-bottom) 不变为 0 → 键盘弹起时将 safe-area 相关变量设为 0px
   var previewShell = document.querySelector('.preview-shell');
   var phoneScreen = document.querySelector('.phone-screen');
-  var vv = window.visualViewport;
-  var initialVvHeight = vv ? vv.height : window.innerHeight;
+  var initialHeight = window.innerHeight;
+  var lastVvHeight = 0;
+  var lastOffsetTop = 0;
+  var isKeyboardOpen = false;
 
   function syncViewport() {
+    var vv = window.visualViewport;
     if (!vv) return;
 
     var vvHeight = vv.height;
+    var offsetTop = vv.offsetTop;
 
-    // 同步高度
+    // 始终同步高度和位置（键盘弹起/收起过程中需要逐帧更新）
     document.documentElement.style.setProperty('--vv-height', vvHeight + 'px');
+    if (previewShell) {
+      previewShell.style.transform = offsetTop > 0 ? ('translateY(-' + offsetTop + 'px)') : '';
+    }
 
-    // 检测键盘状态（当前高度小于初始高度的 90% 认为键盘弹起）
-    var isKeyboardOpen = vvHeight < initialVvHeight * 0.9;
-    var safeBottom = isKeyboardOpen ? '0px' : 'env(safe-area-inset-bottom, 0px)';
+    // 键盘状态检测（仅在状态变化时更新 safe-area 变量，避免不必要的样式重计算）
+    var wasKeyboardOpen = isKeyboardOpen;
+    isKeyboardOpen = vvHeight < initialHeight * 0.85;
 
-    // 更新 safe-area 变量
-    document.documentElement.style.setProperty('--safe-area-bottom', safeBottom);
-    document.documentElement.style.setProperty('--keyboard-safe-bottom', safeBottom);
-    if (phoneScreen) {
-      phoneScreen.style.setProperty('--safe-area-bottom', safeBottom);
+    if (isKeyboardOpen !== wasKeyboardOpen) {
+      var safeBottom = isKeyboardOpen ? '0px' : 'env(safe-area-inset-bottom, 0px)';
+      // iOS standalone 模式下 env(safe-area-inset-bottom) 不会随键盘自动归零
+      document.documentElement.style.setProperty('--safe-area-bottom', safeBottom);
+      document.documentElement.style.setProperty('--keyboard-safe-bottom', safeBottom);
+      if (phoneScreen) {
+        phoneScreen.style.setProperty('--safe-area-bottom', safeBottom);
+      }
     }
   }
 
   syncViewport();
-  if (vv) {
-    vv.addEventListener('resize', syncViewport);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', syncViewport);
+    window.visualViewport.addEventListener('scroll', syncViewport);
   }
   window.addEventListener('resize', syncViewport);
 
