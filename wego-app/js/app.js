@@ -2,6 +2,19 @@
   var shell = document.querySelector('[data-host-shell="true"]');
   if (!shell) return;
 
+  // iOS standalone 模式键盘拉起时 100dvh 不能可靠收缩，
+  // 用 visualViewport.height 实时同步实际可视高度
+  function syncViewportHeight() {
+    var vv = window.visualViewport;
+    var h = vv ? vv.height : window.innerHeight;
+    document.documentElement.style.setProperty('--vv-height', h + 'px');
+  }
+  syncViewportHeight();
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', syncViewportHeight);
+  }
+  window.addEventListener('resize', syncViewportHeight);
+
   var panels = Array.from(document.querySelectorAll('[data-host-tab]'));
   var tabTriggers = Array.from(document.querySelectorAll('[data-host-tab-trigger]'));
   var sceneLayer = document.querySelector('[data-scene-layer]');

@@ -7,6 +7,10 @@ body[data-host-shell="true"] {
    禁用浏览器默认交互：外层滚动、长按选词/呼出菜单、双击放大、
    点击高亮、橡皮筋、横屏字号放大。仅 input/textarea/contenteditable
    保留文本选择能力。桌面端手机壳预览不受影响（桌面无 touch 行为）。 */
+:root {
+  --vv-height: 100dvh;
+}
+
 html, body {
   margin: 0;
   overflow: hidden;
@@ -98,7 +102,7 @@ input, textarea,
 
 .preview-shell {
   min-height: 100vh;
-  min-height: 100dvh;
+  min-height: var(--vv-height, 100dvh);
   width: 100%;
   max-width: 1184px;
   margin: 0 auto;
@@ -532,7 +536,7 @@ input, textarea,
 
 @media (max-width: 767px) {
   .preview-shell {
-    height: 100dvh;
+    height: var(--vv-height, 100dvh);
     align-items: stretch;
     padding: 0;
     background: var(--bg-page);
