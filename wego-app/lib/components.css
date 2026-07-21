@@ -2193,7 +2193,7 @@
 
 /* ── Search ────────────────────────────────────────────────── */
 /* @anatomy
-   <h2>36 默认自适应</h2> <div class="search-demo__row"> <div class="search-demo__surface search-demo__surface--wide"> <span class="search-demo__label">宽宿主</span> <div class="searchbox searchbox--md searchbox--gray"> <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span> <div class="searchbox__input"> <input class="searchbox__field" type="search" placeholder="提示词" aria-lab...
+   <h2>36 默认自适应</h2> <div class="search-demo__row"> <div class="search-demo__surface search-demo__surface--wide"> <span class="search-demo__label">宽宿主</span> <div class="searchbox searchbox--md searchbox--white"> <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span> <div class="searchbox__input"> <input class="searchbox__field" type="search" placeholder="提示词" aria-la...
 */
 .searchbox {
   --searchbox-height: var(--size-36);

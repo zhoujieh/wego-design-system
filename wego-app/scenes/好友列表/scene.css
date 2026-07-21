@@ -60,7 +60,7 @@
     ],
     "component_bindings": [
       { "binding_id": "friend-navbar", "slug": "navbar", "reason": "承载好友页面左对齐大标题、新建好友与排序切换入口", "variant_dimensions": { "leftControl": "none", "titleAlignment": "left-wide", "actions": "icon", "rightActionType": "icon", "spacing": "default", "pageTransition": "push", "position": "sticky" } },
-      { "binding_id": "friend-search", "slug": "search", "reason": "提供好友昵称搜索入口，白底搜索框放在灰底页面上", "variant_dimensions": { "size": "md", "surface": "white", "mode": "text", "state": "empty", "hostPattern": "inline" } }
+      { "binding_id": "friend-search", "slug": "search", "reason": "提供好友昵称搜索入口，白底搜索框放在灰底页面上，输入后显示清除并支持继续输入", "variant_dimensions": { "size": "md", "surface": "white", "mode": "text", "state": "empty", "hostPattern": "inline", "internalActions": "clear" } }
     ],
     "layout_contract": {
       "mode": "composed",
@@ -72,6 +72,7 @@
     "interaction_contract": [
       { "dom_id": "sort-toggle", "target": "state:sort-by-letter" },
       { "dom_id": "friend-search-input", "target": "state:searching" },
+      { "dom_id": "friend-search-clear", "target": "state:list-ready" },
       { "dom_id": "add-friend-entry", "target": "overlay:full-screen-modal" }
     ],
     "state_contract": [

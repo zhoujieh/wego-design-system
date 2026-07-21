@@ -369,14 +369,12 @@
     <div class="search-demo__row">
       <div class="search-demo__surface search-demo__surface--wide">
         <span class="search-demo__label">宽宿主</span>
-        <div class="searchbox searchbox--md searchbox--gray">
+        <div class="searchbox searchbox--md searchbox--white">
           <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
           <div class="searchbox__input">
             <input class="searchbox__field" type="search" placeholder="提示词" aria-label="搜索商品">
           </div>
-          <div class="searchbox__actions">
-            <button class="searchbox__action wego-iconfont-s icon-tupian" type="button" aria-label="选择图片"></button>
-          </div>
+          <div class="searchbox__actions"></div>
         </div>
       </div>
       <div class="search-demo__surface search-demo__surface--narrow">
@@ -386,9 +384,7 @@
           <div class="searchbox__input">
             <span class="searchbox__placeholder">提示词</span>
           </div>
-          <div class="searchbox__actions">
-            <button class="searchbox__action wego-iconfont-s icon-tupian" type="button" aria-label="选择图片"></button>
-          </div>
+          <div class="searchbox__actions"></div>
         </div>
       </div>
     </div>
@@ -410,7 +406,7 @@
         </div>
         <span class="search-demo__label">180px</span>
         <div class="search-demo__fixed search-demo__fixed--180">
-          <div class="searchbox searchbox--sm searchbox--white is-result">
+          <div class="searchbox searchbox--sm searchbox--white is-text-result">
             <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
             <div class="searchbox__input"><span class="searchbox__keyword">关键词关键词</span></div>
             <div class="searchbox__actions">
@@ -426,7 +422,18 @@
     <h2>文搜与图搜</h2>
     <div class="search-demo__row">
       <div class="search-demo__surface">
-        <div class="searchbox searchbox--md searchbox--gray">
+        <span class="search-demo__label">文搜输入中</span>
+        <div class="searchbox searchbox--md searchbox--white is-inputting">
+          <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
+          <div class="searchbox__input">
+            <input class="searchbox__field" type="search" value="关键词" aria-label="搜索商品">
+          </div>
+          <div class="searchbox__actions">
+            <button class="searchbox__action searchbox__clear wego-iconfont-s icon-yuancha-mian" type="button" aria-label="清除"></button>
+          </div>
+        </div>
+        <span class="search-demo__label">文搜结果态</span>
+        <div class="searchbox searchbox--md searchbox--white is-text-result">
           <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
           <div class="searchbox__input"><span class="searchbox__keyword">关键词</span></div>
           <div class="searchbox__actions">
@@ -434,18 +441,21 @@
             <button class="searchbox__action wego-iconfont-s icon-tupian" type="button" aria-label="选择图片"></button>
           </div>
         </div>
-        <div class="searchbox searchbox--md searchbox--white">
+        <span class="search-demo__label">显式开启图搜后的结果态</span>
+        <div class="searchbox searchbox--md searchbox--white is-image-result">
           <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
           <div class="searchbox__input">
             <span class="searchbox__image-token searchbox__image-token--single">
               <img class="searchbox__image-thumb" src="../assets/image/clothing/clothing_5/1663741067252_48951.jpg" alt="">
             </span>
+            <input class="searchbox__field" type="search" placeholder="继续输入文字切回文搜" aria-label="按图搜索后继续输入文字">
           </div>
           <div class="searchbox__actions">
-            <button class="searchbox__action wego-iconfont-s icon-tupian" type="button" aria-label="选择图片"></button>
+            <button class="searchbox__action searchbox__clear wego-iconfont-s icon-yuancha-mian" type="button" aria-label="清除"></button>
           </div>
         </div>
-        <div class="searchbox searchbox--md searchbox--gray">
+        <span class="search-demo__label">显式开启图搜后的多图结果态</span>
+        <div class="searchbox searchbox--md searchbox--white is-image-result">
           <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
           <div class="searchbox__input">
             <span class="searchbox__image-token searchbox__image-token--multi">
@@ -482,7 +492,7 @@
     <h2>覆盖式搜索取消</h2>
     <div class="search-demo__surface">
       <div class="search-overlay-bar">
-        <div class="searchbox searchbox--md searchbox--gray is-inputting">
+        <div class="searchbox searchbox--md searchbox--white is-inputting">
           <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
           <div class="searchbox__input">
             <input class="searchbox__field" type="search" value="羽绒外套" aria-label="搜索商品">
@@ -538,7 +548,7 @@
           </div>
         </div>
         <div class="search-toolbar">
-          <div class="searchbox searchbox--sm searchbox--white is-result">
+          <div class="searchbox searchbox--sm searchbox--white is-text-result">
             <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
             <div class="searchbox__input"><span class="searchbox__keyword">连衣裙</span></div>
             <div class="searchbox__actions">
@@ -574,7 +584,11 @@ document.querySelectorAll(".searchbox__clear").forEach((button) => {
   button.addEventListener("click", () => {
     const box = button.closest(".searchbox");
     const field = box?.querySelector(".searchbox__field");
-    if (field) field.value = "";
+    if (field) {
+      field.value = "";
+      field.focus();
+    }
+    box?.querySelectorAll(".searchbox__image-token").forEach((token) => token.remove());
   });
 });
 </script>

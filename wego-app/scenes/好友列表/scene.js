@@ -61,7 +61,7 @@
     ],
     "component_bindings": [
       { "binding_id": "friend-navbar", "slug": "navbar", "reason": "承载好友页面左对齐大标题、新建好友与排序切换入口", "variant_dimensions": { "leftControl": "none", "titleAlignment": "left-wide", "actions": "icon", "rightActionType": "icon", "spacing": "default", "pageTransition": "push", "position": "sticky" } },
-      { "binding_id": "friend-search", "slug": "search", "reason": "提供好友昵称搜索入口，白底搜索框放在灰底页面上", "variant_dimensions": { "size": "md", "surface": "white", "mode": "text", "state": "empty", "hostPattern": "inline" } },
+      { "binding_id": "friend-search", "slug": "search", "reason": "提供好友昵称搜索入口，白底搜索框放在灰底页面上，输入后显示清除并支持继续输入", "variant_dimensions": { "size": "md", "surface": "white", "mode": "text", "state": "empty", "hostPattern": "inline", "internalActions": "clear" } },
       { "binding_id": "friend-add-form-modal", "slug": "modal", "reason": "新建好友全屏模态容器，fullscreen 变体，通过 ctx.openFullScreenModal 消费；内含 navbar + 表单 body，蒙层与动画由组件自身承担；modal__body 无默认 padding，本场景无底部 action/cancel，body 必须加 modal__body--safe-bottom 预留 40px + safe-area-bottom；表单走 entity-form 范式（M0 通栏白底、form-group__content 不加 --card）", "variant_dimensions": { "variant": "fullscreen", "title": "default", "action": "none", "state": "open" } },
       { "binding_id": "friend-group-sheet", "slug": "actionsheet", "reason": "选择好友分组底部面板，通过 ctx.openSheet 消费；渲染完整 .actionsheet 根节点 + .actionsheet__panel 及子内容，关闭行为覆盖 cancel 与 mask", "variant_dimensions": { "mode": "select", "header": "text", "item": "text", "state": "open" } },
       { "binding_id": "friend-source-sheet", "slug": "actionsheet", "reason": "选择好友来源渠道底部面板，通过 ctx.openSheet 消费；渲染完整 .actionsheet 根节点 + .actionsheet__panel 及子内容，关闭行为覆盖 cancel 与 mask", "variant_dimensions": { "mode": "select", "header": "text", "item": "text", "state": "open" } }
@@ -76,6 +76,7 @@
     "interaction_contract": [
       { "dom_id": "sort-toggle", "target": "state:sort-by-letter" },
       { "dom_id": "friend-search-input", "target": "state:searching" },
+      { "dom_id": "friend-search-clear", "target": "state:list-ready" },
       { "dom_id": "add-friend-entry", "target": "overlay:full-screen-modal" },
       { "dom_id": "select-friend-group", "target": "overlay:sheet" },
       { "dom_id": "select-friend-source", "target": "overlay:sheet" }
@@ -423,9 +424,11 @@ const friendListTemplate = `
       <div class="searchbox searchbox--md searchbox--white" data-dd-id="friend-search" data-component-slug="search" data-component-binding="friend-search">
         <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
         <div class="searchbox__input">
-          <input class="searchbox__field" type="search" placeholder="搜索好友昵称" data-dom-id="friend-search-input" />
+          <input class="searchbox__field" type="search" placeholder="搜索好友昵称" aria-label="搜索好友昵称" data-dom-id="friend-search-input" />
         </div>
-        <div class="searchbox__actions"></div>
+        <div class="searchbox__actions">
+          <button class="searchbox__action searchbox__clear wego-iconfont-s icon-yuancha-mian" type="button" aria-label="清除" data-dom-id="friend-search-clear" hidden></button>
+        </div>
       </div>
     </div>
     <div class="friend-list__scroll" data-friend-scroll data-tab-scroll></div>
@@ -446,6 +449,7 @@ window.WegoApp.registerScene({
     var sortToggleBtn = root.querySelector('[data-dom-id="sort-toggle"]');
     var sortLabel = root.querySelector('[data-sort-label]');
     var searchInput = root.querySelector('[data-dom-id="friend-search-input"]');
+    var searchClear = root.querySelector('[data-dom-id="friend-search-clear"]');
     var addBtn = root.querySelector('[data-dom-id="add-friend-entry"]');
 
     var CELL_BINDING = 'friend-cell';
@@ -585,7 +589,18 @@ window.WegoApp.registerScene({
     function handleSearch() {
       state.keyword = searchInput.value;
       ctx.state['searching'] = Boolean(state.keyword);
+      searchClear.hidden = !searchInput.value;
       renderList();
+    }
+
+    function clearSearch() {
+      searchInput.value = '';
+      state.keyword = '';
+      ctx.state['searching'] = false;
+      ctx.state['list-ready'] = true;
+      searchClear.hidden = true;
+      renderList();
+      searchInput.focus();
     }
 
     /* ── 添加好友表单 ── */
@@ -700,6 +715,7 @@ window.WegoApp.registerScene({
     /* ── 绑定事件 ── */
     sortToggleBtn.addEventListener('click', toggleSort);
     searchInput.addEventListener('input', handleSearch);
+    searchClear.addEventListener('click', clearSearch);
     addBtn.addEventListener('click', openAddForm);
     indexEl.addEventListener('click', handleIndexClick);
     indexEl.addEventListener('pointerdown', handleIndexPointerDown);
@@ -734,6 +750,7 @@ window.WegoApp.registerScene({
 
     /* 初始化渲染 */
     updateSortLabel();
+    searchClear.hidden = true;
     renderList();
   }
 });

@@ -81,7 +81,7 @@
       { "selector": ".album-feed__empty-text", "content_role": "空状态文字行高", "css_property": "line-height", "token": "var(--body-md-line-height)" }
     ],
     "component_bindings": [
-      { "binding_id": "feed-search", "slug": "search", "reason": "顶部固定搜索入口，支持按好友、商品、动态文案实时过滤", "variant_dimensions": { "size": "md", "surface": "gray", "mode": "text", "state": "empty", "hostPattern": "inline", "internalActions": "clear" } },
+      { "binding_id": "feed-search", "slug": "search", "reason": "顶部固定搜索入口，支持按好友、商品、动态文案实时过滤", "variant_dimensions": { "size": "md", "surface": "white", "mode": "text", "state": "empty", "hostPattern": "inline", "internalActions": "clear" } },
       { "binding_id": "feed-tabs", "slug": "tabs", "reason": "顶部内容分类标签，切换全部、好友上新、图文动态", "variant_dimensions": { "size": "standard", "layout": "divide", "icon": "none", "state": "default" } },
       { "binding_id": "feed-clear-filter-action", "slug": "button", "reason": "清除好友过滤", "variant_dimensions": { "emphasis": "weak", "size": "sm", "iconMode": "text-only", "state": "default" } },
       { "binding_id": "feed-more-action", "slug": "button", "reason": "动态卡片更多操作入口，打开底部 actionsheet 展示分享/复制链接/收藏/举报", "variant_dimensions": { "emphasis": "weak", "size": "sm", "iconMode": "text-only", "state": "default" } },
@@ -361,7 +361,7 @@ const albumProductFeedTemplate = `
   <section class="album-feed" data-surface-id="album-product-feed" data-route-id="album-product-feed" data-route-bound="true" data-layout-mode="composed" data-page-edge-mode="M0" data-bg="page">
     <div class="album-feed__scroll">
       <header class="album-feed__header">
-        <div class="searchbox searchbox--md searchbox--gray" data-dd-id="feed-search" data-component-slug="search" data-component-binding="feed-search">
+        <div class="searchbox searchbox--md searchbox--white" data-dd-id="feed-search" data-component-slug="search" data-component-binding="feed-search">
           <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
           <div class="searchbox__input">
             <input class="searchbox__field" type="search" placeholder="搜索好友、商品或动态" aria-label="搜索好友、商品或动态" data-dom-id="search-input">
@@ -504,7 +504,7 @@ window.WegoApp.registerScene({
   }
 
   function updateSearchUI() {
-    var hasQuery = state.query.length > 0;
+    var hasQuery = searchField.value.length > 0;
     searchClear.hidden = !hasQuery;
     root.querySelector('.album-feed__friends').hidden = hasQuery;
     root.querySelector('.album-feed__tabs').hidden = hasQuery;

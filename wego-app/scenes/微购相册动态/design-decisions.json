@@ -408,7 +408,7 @@
         "reason": "顶部固定搜索入口，支持按好友、商品、动态文案实时过滤",
         "variant_dimensions": {
           "size": "md",
-          "surface": "gray",
+          "surface": "white",
           "mode": "text",
           "state": "empty",
           "hostPattern": "inline",
@@ -565,7 +565,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/微购相册动态/scene.js",
     "scene_css": "wego-app/scenes/微购相册动态/scene.css",
-    "source_sha256": "1f172df900086be721a894822d110ba70487ba1e0177f3e33c8bc8bdedf06fc9",
+    "source_sha256": "99990d3be04c327dcf6b2d7058619e60b9410f0f7021a90cbad5bef21893fa91",
     "dom_ids": [
       "search-input",
       "search-clear",

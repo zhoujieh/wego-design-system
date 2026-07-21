@@ -293,13 +293,14 @@
       {
         "binding_id": "friend-search",
         "slug": "search",
-        "reason": "提供好友昵称搜索入口，白底搜索框放在灰底页面上",
+        "reason": "提供好友昵称搜索入口，白底搜索框放在灰底页面上，输入后显示清除并支持继续输入",
         "variant_dimensions": {
           "size": "md",
           "surface": "white",
           "mode": "text",
           "state": "empty",
-          "hostPattern": "inline"
+          "hostPattern": "inline",
+          "internalActions": "clear"
         }
       },
       {
@@ -355,6 +356,10 @@
       {
         "dom_id": "friend-search-input",
         "target": "state:searching"
+      },
+      {
+        "dom_id": "friend-search-clear",
+        "target": "state:list-ready"
       },
       {
         "dom_id": "add-friend-entry",
@@ -443,11 +448,12 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/好友列表/scene.js",
     "scene_css": "wego-app/scenes/好友列表/scene.css",
-    "source_sha256": "3cbab50e73c9bc01712a439c1db4cf1d9a997cc30eb1c04d585f3f909faf3502",
+    "source_sha256": "015b649773ef7fc305e7aa36af9bab2ff992f56a5456ae06895d151825604e9c",
     "dom_ids": [
       "add-friend-entry",
       "sort-toggle",
-      "friend-search-input"
+      "friend-search-input",
+      "friend-search-clear"
     ],
     "component_count": 2,
     "visualCheck": {
