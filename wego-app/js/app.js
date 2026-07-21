@@ -315,6 +315,9 @@
   var OVERLAY_MAX_DEPTH = 3;
   // 全局重入保护：任意 overlay 处于关闭动画中时，后续 openOverlay 调用会清空残留态
   var overlayClosing = false;
+  // 用户主动关闭栈顶时置 true：closeOverlayEntry 内部 history.back() 触发的 popstate
+  // 必须丢弃，否则栈顶已 splice，新栈顶（如下层 modal）会被 popstate 误关
+  var closingTopByUser = false;
 
   // overlay 打开时 push 一条 history state（不改变 hash），使侧滑返回先关模态再返回上一页
   // 栈式 overlay：每层都独立 push 一条 history，popstate 按栈顶关闭
@@ -331,7 +334,12 @@
 
   // 侧滑/返回键触发 popstate 时，如果栈顶 overlay 占了一条 history，就关闭它
   // 传 animated=false：iOS 侧滑返回时系统已完成页面过渡，JS 不再叠加 CSS 退场动画
+  // closingTopByUser 防重入：用户主动关闭栈顶时 history.back() 触发的 popstate 必须丢弃
   window.addEventListener('popstate', function () {
+    if (closingTopByUser) {
+      closingTopByUser = false;
+      return;
+    }
     var top = overlayStack[overlayStack.length - 1];
     if (top && top.historyPushed) {
       top.historyPushed = false;
@@ -438,6 +446,18 @@
     }
     entry.closing = true;
     if (!skipHistory && entry.historyPushed) {
+      // 用户主动关闭栈顶：history.back() 会触发 popstate，关闭流程内已把 entry splice 出去，
+      // 新栈顶会被 popstate 误关。这里设标志让 popstate 丢弃本次事件。
+      if (overlayStack[overlayStack.length - 1] === entry) {
+        closingTopByUser = true;
+        // 兜底：如果 popstate 因异常未触发（例如 iOS 系统限制），300ms 后清标志，避免影响后续 popstate
+        setTimeout(function () {
+          if (closingTopByUser) {
+            console.warn('[wego-app] closingTopByUser 未被 popstate 消费，已自动清零');
+            closingTopByUser = false;
+          }
+        }, 300);
+      }
       // 用户主动关闭：先清 flag 再 history.back()，避免 popstate 再次触发
       entry.historyPushed = false;
       try { history.back(); } catch (e) {}
@@ -1063,7 +1083,7 @@
       'button', '[role="button"]', '[role="radio"]', '[role="checkbox"]',
       '.btn', '.cell--clickable', '.navbar__left-btn', '.navbar__left-text',
       '.navbar__action', '.bottom-nav__item', '.form-body--clickable',
-      '.form-body__select', '.form-body__upload', '.form-body__icon-action',
+      '.form-body__upload', '.form-body__icon-action',
       '.counter__btn', '.icon-text-btn', '.wg-image--clickable', '.link',
       '.host-shell-grid-entry', '.host-shell-link-button', '[data-route-id]'
     ].join(', ');

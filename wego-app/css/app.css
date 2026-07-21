@@ -78,8 +78,9 @@ input, textarea,
 
   /* .is-pressed 用重复类名提高特异性到 (0,3,0)，确保按压态显示 */
   .cell--clickable.cell--clickable.is-pressed { background: var(--bg-state-pressed); }
-  .form-body--clickable.form-body--clickable.is-pressed,
-  .form-body__select.form-body__select.is-pressed { background: var(--bg-state-pressed); }
+  /* form-body--clickable 整行按压态：宿主 is-pressed 加在 form-body 行（不是内层 .form-body__select），
+     整行变灰；之前 .form-body__select.form-body__select.is-pressed 规则已删除避免视觉错位 */
+  .form-body--clickable.form-body--clickable.is-pressed { background: var(--bg-state-pressed); }
   .btn--strong.btn--strong.is-pressed { background: var(--bg-brand-disabled); }
   .btn--medium.btn--medium.is-pressed { background: var(--bg-state-selected); }
   .btn--weak.btn--weak.is-pressed { background: var(--bg-state-selected); }
