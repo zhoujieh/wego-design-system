@@ -35,9 +35,6 @@
     vv.addEventListener('resize', syncViewport);
   }
   window.addEventListener('resize', syncViewport);
-  // 输入框聚焦/失焦时立即同步，确保键盘状态快速响应
-  document.addEventListener('focusin', function() { setTimeout(syncViewport, 100); });
-  document.addEventListener('focusout', function() { setTimeout(syncViewport, 200); });
 
   var panels = Array.from(document.querySelectorAll('[data-host-tab]'));
   var tabTriggers = Array.from(document.querySelectorAll('[data-host-tab-trigger]'));
