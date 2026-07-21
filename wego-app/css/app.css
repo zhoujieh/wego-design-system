@@ -487,6 +487,15 @@ input, textarea,
   inset: 0;
 }
 
+/* 栈式 overlay：非栈顶的蒙层透明度降低，避免多层 mask 叠加后颜色过深；
+   栈顶由 JS 维护（openOverlay / closeOverlayEntry 重新计算），非栈顶加 .is-overlay-under */
+.app-overlay-layer > .actionsheet.is-overlay-under {
+  background: transparent;
+}
+.app-overlay-layer > .modal.is-overlay-under::before {
+  opacity: 0.2;
+}
+
 .app-toast-host {
   position: absolute;
   inset: 0;

@@ -195,6 +195,18 @@
   // 清空整个 push 栈（无动画），用于切 Tab、打开 overlay 场景前重置
   function clearSceneLayer() {
     clearAllPressStates();
+    // 同时清空 overlay 栈（不触发退场动画）：每个 entry 的 history 状态一次性 replaceState 清掉
+    if (overlayStack.length > 0) {
+      try { history.replaceState(null, document.title, window.location.href); } catch (e) {}
+      overlayStack.slice().forEach(function (entry) {
+        if (entry.componentRoot.parentNode) entry.componentRoot.parentNode.removeChild(entry.componentRoot);
+      });
+      overlayStack = [];
+      overlayLayer.hidden = true;
+      overlayLayer.className = 'app-overlay-layer';
+      overlayLayer.replaceChildren();
+      overlayClosing = false;
+    }
     sceneStack.forEach(function (entry) { entry.host.remove(); });
     sceneStack = [];
     sceneLayer.hidden = true;
@@ -282,53 +294,67 @@
     if (typeof scene.init === 'function') scene.init(sceneContext(scene, panel));
   }
 
-  var overlayHistoryActive = false;
+  // overlay 栈：bottom-to-top 顺序，每个 entry = { type, componentRoot, historyPushed, closing }
+  // type 取自 'sheet' | 'full-screen-modal'；栈顶是当前可见的最上层 overlay
+  // 栈深度上限 OVERLAY_MAX_DEPTH（超过时强制关闭最旧的，保持栈顶不变）
+  // 底层 overlay 不被销毁，DOM 与滚动位置都保留，新 overlay 直接叠加在它上方
+  var overlayStack = [];
+  var OVERLAY_MAX_DEPTH = 3;
+  // 全局重入保护：任意 overlay 处于关闭动画中时，后续 openOverlay 调用会清空残留态
   var overlayClosing = false;
 
   // overlay 打开时 push 一条 history state（不改变 hash），使侧滑返回先关模态再返回上一页
+  // 栈式 overlay：每层都独立 push 一条 history，popstate 按栈顶关闭
   function pushOverlayHistoryState(type) {
     if (type !== 'sheet' && type !== 'full-screen-modal') return;
-    if (overlayHistoryActive) return;
     var state = { wegoOverlay: type };
     try {
       history.pushState(state, document.title, window.location.href);
-      overlayHistoryActive = true;
-    } catch (e) {}
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
-  // 侧滑/返回键触发 popstate 时，如果当前 overlay 占了一条 history，就关闭它
+  // 侧滑/返回键触发 popstate 时，如果栈顶 overlay 占了一条 history，就关闭它
   // 传 animated=false：iOS 侧滑返回时系统已完成页面过渡，JS 不再叠加 CSS 退场动画
   window.addEventListener('popstate', function () {
-    if (overlayHistoryActive && !overlayLayer.hidden) {
-      overlayHistoryActive = false;
-      closeOverlay(true, false);
+    var top = overlayStack[overlayStack.length - 1];
+    if (top && top.historyPushed) {
+      top.historyPushed = false;
+      closeOverlayEntry(top, true, false);
     }
   });
 
   function openOverlay(type, template, options) {
     clearAllPressStates();
     options = options || {};
-    // 打开新 overlay 前先清掉旧的（含历史记录）
-    if (!overlayLayer.hidden) {
-      if (overlayHistoryActive) {
-        overlayHistoryActive = false;
-        try { history.back(); } catch (e) {}
-      }
-      overlayLayer.hidden = true;
-      overlayLayer.className = 'app-overlay-layer';
-      overlayLayer.replaceChildren();
+
+    // 栈深度上限：超过时强制关闭最旧一层（保留栈顶 OVERLAY_MAX_DEPTH - 1 槽位给新 overlay）
+    while (overlayStack.length >= OVERLAY_MAX_DEPTH) {
+      console.warn('[wego-app] overlay stack exceeded max depth ' + OVERLAY_MAX_DEPTH + ', closing oldest');
+      closeOverlayEntry(overlayStack[0], false, false);
     }
+
     overlayClosing = false;
-    overlayLayer.hidden = false;
-    overlayLayer.className = 'app-overlay-layer app-overlay-layer--' + type;
+    if (overlayStack.length === 0) {
+      overlayLayer.hidden = false;
+      overlayLayer.className = 'app-overlay-layer app-overlay-layer--' + type;
+    } else {
+      // 嵌套：组件根节点直接叠加挂载，overlayLayer 类名追加新的 type 标记
+      overlayLayer.classList.add('app-overlay-layer--' + type);
+    }
+
     // 模板直接挂载到 overlayLayer，第一个子元素即组件根节点（.actionsheet / .modal）；
     // 不再创建 .app-overlay-panel 包裹层，蒙层视觉与动画均由组件自身承担
     var temp = document.createElement('div');
     renderTemplate(temp, template);
     var componentRoot = temp.firstElementChild;
     if (!componentRoot) {
-      overlayLayer.hidden = true;
-      overlayLayer.className = 'app-overlay-layer';
+      if (overlayStack.length === 0) {
+        overlayLayer.hidden = true;
+        overlayLayer.className = 'app-overlay-layer';
+      }
       return;
     }
     // 入场动画：组件根节点先设 closed，挂载后下一帧改 open 触发组件 CSS 过渡
@@ -336,12 +362,29 @@
       componentRoot.setAttribute('data-state', 'closed');
     }
     if (options.label) componentRoot.setAttribute('aria-label', options.label);
-    overlayLayer.replaceChildren(componentRoot);
-    pushOverlayHistoryState(type);
+    overlayLayer.appendChild(componentRoot);
+
+    // 旧栈顶（非最旧）变 under，新入栈的为 top
+    var prevTop = overlayStack[overlayStack.length - 1];
+    if (prevTop && prevTop.componentRoot) {
+      prevTop.componentRoot.classList.remove('is-overlay-top');
+      prevTop.componentRoot.classList.add('is-overlay-under');
+    }
+    componentRoot.classList.add('is-overlay-top');
+
+    var entry = { type: type, componentRoot: componentRoot, historyPushed: false, closing: false };
+    overlayStack.push(entry);
+
+    // 栈式 history：每层独立 push 一条，侧滑返回逐层关闭
+    if (pushOverlayHistoryState(type)) {
+      entry.historyPushed = true;
+    }
+
     if (typeof options.init === 'function') {
       options.init({
         root: componentRoot,
-        close: closeOverlay,
+        // close 回调：始终关闭当前 entry（即 init 时所在的那一层），不影响下层
+        close: function () { closeOverlayEntry(entry, false); },
         toast: toast,
         dialog: dialog,
         updateEntrySummary: updateEntrySummary,
@@ -360,65 +403,76 @@
   // skipHistory：由 popstate 触发关闭时传 true，不再回退 history（state 已被消费）
   // animated：可选，默认 true 带退场动画；popstate/侧滑返回传 false 无动画
   //   （iOS 系统侧滑返回已有系统级动画，JS 再叠加 CSS 退场会导致 panel "先重新出现再滑出"闪烁）
+  // 外部 API：关闭栈顶 overlay
   function closeOverlay(skipHistory, animated) {
+    if (overlayStack.length === 0) return;
+    closeOverlayEntry(overlayStack[overlayStack.length - 1], skipHistory, animated);
+  }
+
+  // 关闭指定 entry（栈式 overlay 内部使用）
+  // - 立即从栈中移除（防止后续 close 误关到该 entry，并让 newTop 立即恢复为栈顶视觉）
+  // - 组件根节点保留在 DOM 中跑退场动画，动画结束后再摘除
+  // - 同 entry 重复关闭会直接返回（closing 自旋保护）
+  function closeOverlayEntry(entry, skipHistory, animated) {
+    if (!entry || entry.closing) return;
     clearAllPressStates();
-    if (overlayClosing) return;
-    var componentRoot = overlayLayer.firstElementChild;
-    var isSheet = overlayLayer.classList.contains('app-overlay-layer--sheet');
-    var isFullScreenModal = overlayLayer.classList.contains('app-overlay-layer--full-screen-modal');
-    if (componentRoot && (isSheet || isFullScreenModal)) {
-      if (!skipHistory && overlayHistoryActive) {
-        // 用户主动关闭：先清 flag 再 history.back()，避免 popstate 再次触发
-        overlayHistoryActive = false;
-        try { history.back(); } catch (e) {}
-      }
-      if (animated === false) {
-        // 无动画：直接清除（用于 popstate/侧滑返回，系统动画已完成）
-        overlayLayer.hidden = true;
-        overlayLayer.className = 'app-overlay-layer';
-        overlayLayer.replaceChildren();
-        overlayClosing = false;
-        if (sceneStack.length === 0 && window.location.hash) {
-          if (skipHistory) {
-            history.replaceState(null, document.title, window.location.pathname + window.location.search);
-            setTimeout(function () { history.back(); }, 0);
-          } else {
-            history.back();
-          }
-        }
-        // 与 popSceneLayer 对称：侧滑返回后强制重绘 host 入口，
-        // 清除 iOS Safari 可能残留的 :active 合成层缓存
-        forceHostEntriesRepaint();
-        return;
-      }
-      overlayClosing = true;
-      // 退场动画：组件根节点设 closed，触发组件 CSS 过渡（蒙层 opacity + 面板 translateY 同步退场）
-      if (componentRoot.matches('.actionsheet, .modal')) {
-        componentRoot.setAttribute('data-state', 'closed');
-      }
-      // 等待退场动画完成后清理（与 dialog 的 DIALOG_REMOVE_DELAY 一致，纯 setTimeout 更稳定，
-      // 不依赖 transitionend 冒泡；actionsheet 根节点 opacity 过渡，modal-fullscreen 面板 transform 过渡，
-      // transitionend 来源不一致，setTimeout 统一处理避免事件漏触发）
-      var removeDelay = 280; // 250ms 过渡 + 30ms 缓冲
-      setTimeout(function () {
-        // 防御：如果 overlayLayer 已被新 overlay 替换（openOverlay 在过渡中触发），跳过清理
-        if (overlayLayer.firstElementChild !== componentRoot) {
-          overlayClosing = false;
-          return;
-        }
-        overlayLayer.hidden = true;
-        overlayLayer.className = 'app-overlay-layer';
-        overlayLayer.replaceChildren();
-        overlayClosing = false;
-        if (!skipHistory && sceneStack.length === 0 && window.location.hash) {
-          history.back();
-        }
-      }, removeDelay);
+    var isSheet = entry.type === 'sheet';
+    var isFullScreenModal = entry.type === 'full-screen-modal';
+    if (!(isSheet || isFullScreenModal)) {
+      // 非 sheet / full-screen-modal 类型不参与栈，外部兼容默认走原始清理
+      if (entry.componentRoot.parentNode) entry.componentRoot.parentNode.removeChild(entry.componentRoot);
       return;
     }
-    overlayLayer.hidden = true;
-    overlayLayer.className = 'app-overlay-layer';
-    overlayLayer.replaceChildren();
+    entry.closing = true;
+    if (!skipHistory && entry.historyPushed) {
+      // 用户主动关闭：先清 flag 再 history.back()，避免 popstate 再次触发
+      entry.historyPushed = false;
+      try { history.back(); } catch (e) {}
+    }
+
+    // 立即从栈中移除（保留 DOM 跑退场动画），并把新的栈顶恢复为 top 视觉
+    var idx = overlayStack.indexOf(entry);
+    if (idx !== -1) overlayStack.splice(idx, 1);
+    var newTop = overlayStack[overlayStack.length - 1];
+    if (newTop) {
+      // overlayLayer 类名同步为新栈顶 type；新栈顶从 under 变回 top，蒙层透明度恢复
+      overlayLayer.className = 'app-overlay-layer app-overlay-layer--' + newTop.type;
+      newTop.componentRoot.classList.remove('is-overlay-under');
+      newTop.componentRoot.classList.add('is-overlay-top');
+    }
+
+    if (animated === false) {
+      finalizeCloseOverlayEntry(entry);
+      // 与 popSceneLayer 对称：侧滑返回后强制重绘 host 入口，
+      // 清除 iOS Safari 可能残留的 :active 合成层缓存
+      forceHostEntriesRepaint();
+      return;
+    }
+    overlayClosing = true;
+    // 退场动画：组件根节点设 closed，触发组件 CSS 过渡（蒙层 opacity + 面板 translateY 同步退场）
+    if (entry.componentRoot.matches('.actionsheet, .modal')) {
+      entry.componentRoot.setAttribute('data-state', 'closed');
+    }
+    // 等待退场动画完成后清理（与 dialog 的 DIALOG_REMOVE_DELAY 一致，纯 setTimeout 更稳定，
+    // 不依赖 transitionend 冒泡；actionsheet 根节点 opacity 过渡，modal-fullscreen 面板 transform 过渡，
+    // transitionend 来源不一致，setTimeout 统一处理避免事件漏触发）
+    var removeDelay = 280; // 250ms 过渡 + 30ms 缓冲
+    setTimeout(function () { finalizeCloseOverlayEntry(entry); }, removeDelay);
+  }
+
+  // 实际摘除 entry 并维护容器（无动画与动画完成两个路径共用）
+  // entry 已在 closeOverlayEntry 阶段从栈中移除，这里只做 DOM 摘除 + 容器收尾
+  function finalizeCloseOverlayEntry(entry) {
+    if (entry.componentRoot.parentNode) {
+      entry.componentRoot.parentNode.removeChild(entry.componentRoot);
+    }
+    entry.closing = false;
+    if (overlayStack.length === 0) {
+      overlayLayer.hidden = true;
+      overlayLayer.className = 'app-overlay-layer';
+      overlayClosing = false;
+    }
+    // 栈非空：容器状态已在 closeOverlayEntry 时维护（newTop 切回 top），这里不动
   }
 
   function closeTopLayer() {
@@ -937,13 +991,12 @@
 
     // hash 变空：返回到宿主（iOS 侧滑 / history.back 最常见场景）
     if (!routeId) {
-      if (!overlayLayer.hidden) {
+      if (overlayStack.length > 0) {
         // hashchange 触发的关闭：iOS 侧滑返回时系统已完成页面过渡动画，
         // JS 不再叠加 CSS 退场动画，也不回退 history（state 已被消费）
         // 与 popstate 路径保持一致，避免 overlay 退场动画期间与 host 同时可见
-        if (overlayHistoryActive) {
-          overlayHistoryActive = false;
-        }
+        var top = overlayStack[overlayStack.length - 1];
+        if (top.historyPushed) top.historyPushed = false;
         closeOverlay(true, false);
       } else if (sceneStack.length > 0) {
         // hashchange 触发的返回无动画：iOS 侧滑返回时系统已完成页面过渡动画，

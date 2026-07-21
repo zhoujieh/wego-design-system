@@ -250,7 +250,8 @@
     "checkbox 组合场景沿用 checkbox 组件固定的 inner / icon / minus 结构，勾选态继续使用随库 SVG 资产。",
     "成组 form 使用 .form-group。",
     "页面需要 section 标题时，直接使用 .form-group__title，不再复制 UI Kit 私有的 .uikit-section-title 或手写额外标题样式。",
-    "当 phone-body 或等价宿主内容层承担左右内边距（M8）时，把该组视为卡片式分组，在 .form-group__content 上使用 --card 卡片修饰类；宿主层不提供横向留白（M0）时保持通栏白底，不要额外再包一层只为白底和圆角存在的容器。"
+    "当 phone-body 或等价宿主内容层承担左右内边距（M8）时，把该组视为卡片式分组，在 .form-group__content 上使用 --card 卡片修饰类；宿主层不提供横向留白（M0）时保持通栏白底，不要额外再包一层只为白底和圆角存在的容器。",
+    "select 字段的 picker 消费两种合法模式：(1) inline 模式，使用 .form-dropdown 嵌入 form-body 内部（自定义内容或非标准选项），不需要打开任何 overlay；(2) overlay 模式，通过 ctx.openSheet() 打开 actionsheet 作为字段选择器（标准分组/标签/来源等单选切换），宿主栈式 overlay 已支持 modal 之上叠 sheet，下层 modal 不被关闭。无论哪种模式，整行 .form-body 都必须挂 .form-body--clickable 修饰类，click handler 挂在 .form-body 行上，不是内层 .form-body__select。"
   ],
   "doNotInvent": [
     "不要把 form 扩成桌面属性面板、富文本表单或多列表格表单。",

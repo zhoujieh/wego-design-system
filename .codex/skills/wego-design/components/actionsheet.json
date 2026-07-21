@@ -182,6 +182,7 @@
   "structurePatterns": [
     "根节点 .actionsheet 是 overlay 定位容器，自身承担半透明遮罩 var(--bg-mask-light)，position:fixed; inset:0",
     "在 wego-app overlay 架构下消费时，场景必须提供完整 .actionsheet 根节点（含 data-state='open'/'closed'）+ .actionsheet__panel 及子内容，通过 ctx.openSheet() 打开；蒙层视觉与动画均由组件自身承担，宿主层 .app-overlay-layer 透明，与 dialog 行为一致；mode 修饰类 .actionsheet--action / .actionsheet--select 挂在根节点上",
+    "宿主栈式 overlay 支持：actionsheet 可以在已有 full-screen-modal 或 sheet 之上再打开，底层 overlay 不销毁、滚动位置保留；宿主层给非栈顶的根节点加 .is-overlay-under 修饰类降低其蒙层透明度（actionsheet 自身 background 改为 transparent），栈顶加 .is-overlay-top 维持默认蒙层；新 sheet 从下方上滑覆盖下层，下层蒙层变淡让用户感知层级",
     "面板 .actionsheet__panel 内部从上到下：.actionsheet__header（可选）→ .actionsheet__list → .actionsheet__cancel-gap → .actionsheet__cancel；底部安全区由 .actionsheet__cancel 的 padding-bottom 承担（calc(var(--spacer-16) + var(--safe-area-bottom))），作为取消按钮底部 padding 一部分，按压 :active 态延伸到屏幕底部；panel 不再加 padding-bottom",
     "分组规则：.actionsheet__list 内部可包含多个 .actionsheet__group，每个 group 之间 8px gap 灰色间隔（var(--bg-state-hover)），与取消按钮上方 .actionsheet__cancel-gap 视觉效果一致；若不使用分组，.actionsheet__list 直接包含 .actionsheet__item",
     "头部 2 种布局规则：header--text 纯文本居中；header--text-link 左文本、右链接两端对齐",
@@ -209,10 +210,10 @@
     "closeByCancel": "默认 true",
     "closeAfterClick": "默认 true（操作模式点击选项即关闭）；选择模式也默认关闭，业务可通过 closeAfterClick=false 覆盖",
     "persistence": "阻断式常驻，不自动关闭",
-    "conflicting": "同屏仅展示一个 actionsheet，新 actionsheet 出现时立即替换旧",
+    "conflicting": "宿主 overlay 栈内仅展示一个栈顶 actionsheet；栈式支持已有 sheet / full-screen-modal 之上再开新 sheet（深度上限 3），旧 sheet 自动变为非栈顶",
     "position": "底部贴底悬浮，面板从屏幕底部边缘上移到完整显示",
-    "animation": "蒙层与面板同步由 data-state='open'/'closed' 驱动：入场蒙层 opacity 0→1、面板 translateY(100%)→0；出场反向；时长 var(--duration-normal)（250ms），缓动 var(--ease-enter)/var(--ease-exit)；与 dialog 行为一致，宿主层 .app-overlay-layer 透明不承担蒙层视觉职责",
-    "zIndex": "var(--z-modal)=600，与 dialog 同层，低于 toast(700)",
+    "animation": "蒙层与面板同步由 data-state='open'/'closed' 驱动：入场蒙层 opacity 0→1、面板 translateY(100%)→0；出场反向；时长 var(--duration-normal)（250ms），缓动 var(--ease-enter)/var(--ease-exit)；与 dialog 行为一致，宿主层 .app-overlay-layer 透明不承担蒙层视觉职责；栈式场景下底层 sheet 蒙层被 .is-overlay-under 修饰类降透明度，新 sheet 入场时底层保持可见但视觉让位",
+    "zIndex": "var(--z-modal)=600，与 dialog 同层，低于 toast(700)；栈式多 overlay 时栈顶节点在 DOM 中最后插入，paint 顺序自然在上",
     "scrollable": "选项列表超过屏幕高度时，.actionsheet__list 内部纵向滚动，头部和取消按钮固定"
   },
   "accessibility": {
@@ -224,6 +225,7 @@
   "usageHints": [
     "用于 3 个以上并列操作（分享/复制/删除/收藏）或单选切换（筛选/排序）",
     "操作模式适合'分享/复制/删除'等并列操作；选择模式适合'全部/已处理/未处理'等单选场景",
+    "宿主栈式 overlay 支持：可在已有 full-screen-modal 之上打开 sheet 作为字段选择器（如新建好友表单的分组/来源选择）；宿主自动维护 is-overlay-top/under 修饰类，场景代码不需关心栈管理",
     "头部说明可选，1 行以内，超出省略号",
     "头部两种布局：无链接纯文本居中；有链接左文本右链接两端对齐",
     "选择模式下无论是否设置居中，文本强制左对齐以给绿色对勾留位置",
