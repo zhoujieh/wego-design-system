@@ -73,6 +73,7 @@
 ## Git 与验证
 
 - 默认目标分支为 `main`；显式路径暂存，不执行 `git add -A`。
+- 除非用户明确要求单独开分支、PR 流程或风险隔离，默认直接在 `main` 开发、提交与推送；不要自行创建 `agent/*` 或其他临时分支。
 - 提交信息使用简短中文动词短语；不强推已存在远端分支。
 - 提交前运行：
   - `node .codex/skills/wego-design/scripts/extract-components-css.mjs .codex/skills/wego-design`
