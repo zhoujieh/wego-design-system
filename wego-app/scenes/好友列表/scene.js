@@ -427,9 +427,7 @@ const friendListTemplate = `
         <div class="searchbox__input">
           <input class="searchbox__field" type="search" placeholder="搜索好友昵称" aria-label="搜索好友昵称" data-dom-id="friend-search-input" />
         </div>
-        <div class="searchbox__actions">
-          <button class="searchbox__action searchbox__clear wego-iconfont-s icon-yuancha-mian" type="button" aria-label="清除" data-dom-id="friend-search-clear" hidden></button>
-        </div>
+        <div class="searchbox__actions"></div>
       </div>
     </div>
     <div class="friend-list__scroll" data-friend-scroll data-tab-scroll></div>
@@ -451,7 +449,7 @@ window.WegoApp.registerScene({
     var sortToggleBtn = root.querySelector('[data-dom-id="sort-toggle"]');
     var sortLabel = root.querySelector('[data-sort-label]');
     var searchInput = root.querySelector('[data-dom-id="friend-search-input"]');
-    var searchClear = root.querySelector('[data-dom-id="friend-search-clear"]');
+    var searchActions = searchBox ? searchBox.querySelector('.searchbox__actions') : null;
     var addBtn = root.querySelector('[data-dom-id="add-friend-entry"]');
 
     var CELL_BINDING = 'friend-cell';
@@ -462,6 +460,7 @@ window.WegoApp.registerScene({
       keyword: ''
     };
     var suppressClearClick = false;
+    var clearActionTemplate = '<button class="searchbox__action searchbox__clear wego-iconfont-s icon-yuancha-mian" type="button" aria-label="清除" data-dom-id="friend-search-clear"></button>';
 
     function getCurrentFriends() {
       return searchFriends(state.keyword);
@@ -609,7 +608,10 @@ window.WegoApp.registerScene({
     function syncSearchState() {
       var hasQuery = Boolean(searchInput.value);
       var isFocused = document.activeElement === searchInput;
-      searchClear.hidden = !hasQuery;
+      if (searchActions) {
+        searchActions.innerHTML = hasQuery ? clearActionTemplate : '';
+        bindSearchClear();
+      }
       if (searchBox) {
         searchBox.classList.toggle('is-inputting', hasQuery && isFocused);
         searchBox.classList.toggle('is-text-result', hasQuery && !isFocused);
@@ -631,6 +633,14 @@ window.WegoApp.registerScene({
         return;
       }
       clearSearch();
+    }
+
+    function bindSearchClear() {
+      var searchClear = searchBox ? searchBox.querySelector('[data-dom-id="friend-search-clear"]') : null;
+      if (!searchClear || searchClear.dataset.bound === 'true') return;
+      searchClear.dataset.bound = 'true';
+      searchClear.addEventListener('pointerdown', handleClearPointerDown);
+      searchClear.addEventListener('click', handleClearClick);
     }
 
     /* ── 添加好友表单 ── */
@@ -747,8 +757,6 @@ window.WegoApp.registerScene({
     searchInput.addEventListener('input', handleSearch);
     searchInput.addEventListener('focus', syncSearchState);
     searchInput.addEventListener('blur', syncSearchState);
-    searchClear.addEventListener('pointerdown', handleClearPointerDown);
-    searchClear.addEventListener('click', handleClearClick);
     addBtn.addEventListener('click', openAddForm);
     indexEl.addEventListener('click', handleIndexClick);
     indexEl.addEventListener('pointerdown', handleIndexPointerDown);

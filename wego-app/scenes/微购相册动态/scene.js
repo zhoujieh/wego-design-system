@@ -366,9 +366,7 @@ const albumProductFeedTemplate = `
           <div class="searchbox__input">
             <input class="searchbox__field" type="search" placeholder="搜索好友、商品或动态" aria-label="搜索好友、商品或动态" data-dom-id="search-input">
           </div>
-          <div class="searchbox__actions">
-            <button class="searchbox__action searchbox__clear wego-iconfont-s icon-yuancha-mian" type="button" aria-label="清除" data-dom-id="search-clear" hidden></button>
-          </div>
+          <div class="searchbox__actions"></div>
         </div>
       </header>
 
@@ -421,10 +419,11 @@ window.WegoApp.registerScene({
     friendId: null
   };
   var suppressClearClick = false;
+  var clearActionTemplate = '<button class="searchbox__action searchbox__clear wego-iconfont-s icon-yuancha-mian" type="button" aria-label="清除" data-dom-id="search-clear"></button>';
 
   var searchBox = root.querySelector('[data-component-binding="feed-search"]');
   var searchField = root.querySelector('[data-dom-id="search-input"]');
-  var searchClear = root.querySelector('[data-dom-id="search-clear"]');
+  var searchActions = searchBox ? searchBox.querySelector('.searchbox__actions') : null;
   var tabAll = root.querySelector('[data-dom-id="tab-all"]');
   var tabNew = root.querySelector('[data-dom-id="tab-new"]');
   var tabPhoto = root.querySelector('[data-dom-id="tab-photo"]');
@@ -508,7 +507,10 @@ window.WegoApp.registerScene({
   function updateSearchUI() {
     var hasQuery = searchField.value.length > 0;
     var isFocused = document.activeElement === searchField;
-    searchClear.hidden = !hasQuery;
+    if (searchActions) {
+      searchActions.innerHTML = hasQuery ? clearActionTemplate : '';
+      bindSearchClear();
+    }
     if (searchBox) {
       searchBox.classList.toggle('is-inputting', hasQuery && isFocused);
       searchBox.classList.toggle('is-text-result', hasQuery && !isFocused);
@@ -541,6 +543,14 @@ window.WegoApp.registerScene({
       return;
     }
     clearSearch();
+  }
+
+  function bindSearchClear() {
+    var searchClear = searchBox ? searchBox.querySelector('[data-dom-id="search-clear"]') : null;
+    if (!searchClear || searchClear.dataset.bound === 'true') return;
+    searchClear.dataset.bound = 'true';
+    searchClear.addEventListener('pointerdown', handleClearPointerDown);
+    searchClear.addEventListener('click', handleClearClick);
   }
 
   function updateFilterBar() {
@@ -635,8 +645,6 @@ window.WegoApp.registerScene({
   });
   searchField.addEventListener('focus', updateSearchUI);
   searchField.addEventListener('blur', updateSearchUI);
-  searchClear.addEventListener('pointerdown', handleClearPointerDown);
-  searchClear.addEventListener('click', handleClearClick);
 
   /* 好友快捷入口 */
   els.friendsScroll.addEventListener('click', function(e) {

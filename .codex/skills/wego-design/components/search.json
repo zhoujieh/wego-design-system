@@ -170,7 +170,7 @@
     "32 高度用于页面局部嵌入，可由宿主容器或 --searchbox-width 自定义宽度。",
     "inline 页面主搜索默认使用 md；sm 只用于工具栏、局部筛选等明确的紧凑容器。",
     "图搜是显式启用能力：只有业务明确需要并声明 select-image 动作时，搜索框才显示图片按钮；单图用 24x24 缩略图，多图用图片 + 共 N 张胶囊表达。",
-    "文本输入控件使用 type=search 时，组件必须抑制浏览器原生 search decoration 与原生清除按钮，只保留 .searchbox__actions 内的正式 clear 动作。",
+    "文本输入控件使用 type=search 时，组件必须通过 search field 伪元素规则彻底抑制浏览器原生 search decoration 与原生清除按钮（含 display:none 与 appearance:none），只保留 .searchbox__actions 内的正式 clear 动作。",
     "有图搜且业务开启 autoHidePlaceHolder 时，图片列表非空后可隐藏 placeholder；图片列表清空后恢复。",
     "可编辑文本搜索默认带 clear 能力，但 clear 只在输入值非空或图搜结果存在时显示；空态隐藏 clear。",
     "inline 文搜若同时支持图搜，仅在宿主显式启用 select-image 后才显示选图入口；输入过程中隐藏选图入口，输入结束并停留在文搜结果态后恢复显示选图入口，便于直接切换图搜。",
