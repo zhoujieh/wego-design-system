@@ -612,6 +612,7 @@ window.WegoApp.registerScene({
   searchClear.addEventListener('click', function() {
     searchField.value = '';
     state.query = '';
+    ctx.state['searching'] = false;
     ctx.state['feed-ready'] = true;
     applyState();
     searchField.focus();
@@ -669,6 +670,7 @@ window.WegoApp.registerScene({
     state.query = '';
     state.friendId = null;
     state.tag = FEED_TAG_ALL;
+    ctx.state['searching'] = false;
     ctx.state['feed-ready'] = true;
     setActiveTag(FEED_TAG_ALL);
     applyState();
