@@ -7,10 +7,6 @@ body[data-host-shell="true"] {
    禁用浏览器默认交互：外层滚动、长按选词/呼出菜单、双击放大、
    点击高亮、橡皮筋、横屏字号放大。仅 input/textarea/contenteditable
    保留文本选择能力。桌面端手机壳预览不受影响（桌面无 touch 行为）。 */
-:root {
-  --vv-height: 100dvh;
-}
-
 html, body {
   margin: 0;
   overflow: hidden;
@@ -55,8 +51,7 @@ input, textarea,
 @media (hover: none) {
   /* :active 覆盖为默认值 */
   .cell--clickable:active { background: var(--bg-surface); }
-  .form-body--clickable:active,
-  .form-body__select:active { background: var(--bg-surface); }
+  .form-body--clickable:active { background: var(--bg-surface); }
   .btn--strong:active { background: var(--bg-brand); }
   .btn--medium:active,
   .btn--weak:active { background: var(--bg-overlay-l1); }
@@ -103,7 +98,7 @@ input, textarea,
 
 .preview-shell {
   min-height: 100vh;
-  min-height: var(--vv-height, 100dvh);
+  min-height: 100dvh;
   width: 100%;
   max-width: 1184px;
   margin: 0 auto;

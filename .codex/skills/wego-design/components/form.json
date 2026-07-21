@@ -196,6 +196,21 @@
       "name": "dropdown",
       "selector": ".form-dropdown",
       "role": "展开选项面板"
+    },
+    {
+      "name": "selectControl",
+      "selector": ".form-body__select",
+      "role": "select 字段的内层 layout 容器，仅用于承载 select-text + select-arrow 的两端对齐，自身不响应按压、不接收 click、不设置背景；iOS WebKit 误把可点击 div 标记为 selected 而显示灰色态，故强制 pointer-events:none + background:transparent；click 由外层 .form-body--clickable 整行承担"
+    },
+    {
+      "name": "selectText",
+      "selector": ".form-body__select-text",
+      "role": "select 字段的当前值文本；placeholder 态用 var(--text-placeholder)，回填后加 .has-value 切换为 var(--text-default)；无背景"
+    },
+    {
+      "name": "selectArrow",
+      "selector": ".form-body__select-arrow",
+      "role": "select 字段的下拉箭头图标节点，使用 wego-iconfont-s icon-xiajiantou16；固定 16×16，右对齐，无背景"
     }
   ],
   "structurePatterns": [
@@ -219,8 +234,8 @@
     "连续 form-body 必须使用标题与内容容器的正式结构。"
   ],
   "behavior": {
-    "pressFeedback": "移动端按压态由 :active 与 .is-pressed 共同承载。宿主 App 通过 wego-app/js/app.js 在触控设备上自动为 .form-body--clickable、.form-body__select、.form-body__upload、.form-body__icon-action 等可点击元素添加/移除 .is-pressed；桌面端继续由 :active 兜底。同时设置 -webkit-user-select: none / user-select: none 以禁用长按文本选择和拖杆控件。",
-    "click": ".form-body--clickable 只用于 select / dropdown 这类会打开选择面板或展开内容的字段行；其按压态使用与 cell 一致的 pressed 背景色。右侧是 switch、radio-group、checkbox-group、upload、button、icon actions 时，不提供整行按压反馈，交互由具体控件承担。",
+    "pressFeedback": "仅 .form-body--clickable、.form-body__upload、.form-body__icon-action、.form-body__right-btn 等容器级节点允许响应 :active 与 .is-pressed；.form-body__select / .form-body__select-text / .form-body__select-arrow 等内层结构件强制 pointer-events:none + background:transparent（!important），禁止任何形式的背景色与按压态响应；宿主 App 仅对容器级节点加入 .is-pressed。iOS WebKit 误把可点击 div 标记为 selected 灰色态，强制透明与不可交互彻底关闭该路径；同时设置 -webkit-user-select: none / user-select: none 以禁用长按文本选择和拖杆控件。",
+    "click": ".form-body--clickable 只用于 select / dropdown 这类会打开选择面板或展开内容的字段行；其按压态使用与 cell 一致的 pressed 背景色。右侧是 switch、radio-group、checkbox-group、upload、button、icon actions 时，不提供整行按压反馈，交互由具体控件承担。click handler 始终挂在外层 .form-body 行上，禁止挂在 .form-body__select / .form-body__select-text 等内层节点——内层节点 pointer-events:none，挂在它们身上的 handler 无法触发。",
     "validation": "错误态优先显示错误文案并覆盖计数提示；当输入值重新满足当前字段校验条件时，自动移除错误态并恢复默认显示。",
     "inputSanitizing": "数字输入仅保留 0-9，手机号仅保留数字并受长度限制，金额仅保留数字和单个小数点；手机号区号前缀为只读文本，不参与输入清洗。",
     "layout": "label 宽度修饰类只改变简单字段内容块在 action 区中的摆放位置；前缀字段和所有需要保留中段内容顺序的场景统一使用 preserve-content-align，保持中段内容原始顺序和左对齐基线；金额的货币符号与手机号区号一样，都跟随内容组一起处理；带箭头的选择内容若需要和右侧操作共存，也归入 preserve-content-align；选项类控件（stack-group、radio-group、checkbox-group、switch）统一放在 action 区左对齐，由控件自身承担交互。",
@@ -251,11 +266,15 @@
     "成组 form 使用 .form-group。",
     "页面需要 section 标题时，直接使用 .form-group__title，不再复制 UI Kit 私有的 .uikit-section-title 或手写额外标题样式。",
     "当 phone-body 或等价宿主内容层承担左右内边距（M8）时，把该组视为卡片式分组，在 .form-group__content 上使用 --card 卡片修饰类；宿主层不提供横向留白（M0）时保持通栏白底，不要额外再包一层只为白底和圆角存在的容器。",
-    "select 字段的 picker 消费两种合法模式：(1) inline 模式，使用 .form-dropdown 嵌入 form-body 内部（自定义内容或非标准选项），不需要打开任何 overlay；(2) overlay 模式，通过 ctx.openSheet() 打开 actionsheet 作为字段选择器（标准分组/标签/来源等单选切换），宿主栈式 overlay 已支持 modal 之上叠 sheet，下层 modal 不被关闭。无论哪种模式，整行 .form-body 都必须挂 .form-body--clickable 修饰类，click handler 挂在 .form-body 行上，不是内层 .form-body__select。"
+    "select 字段的 picker 消费两种合法模式：(1) inline 模式，使用 .form-dropdown 嵌入 form-body 内部（自定义内容或非标准选项），不需要打开任何 overlay；(2) overlay 模式，通过 ctx.openSheet() 打开 actionsheet 作为字段选择器（标准分组/标签/来源等单选切换），宿主栈式 overlay 已支持 modal 之上叠 sheet，下层 modal 不被关闭。无论哪种模式，整行 .form-body 都必须挂 .form-body--clickable 修饰类，click handler 挂在 .form-body 行上，不是内层 .form-body__select。",
+    "select 字段的 DOM 结构固定为 .form-body(form-body--clickable) > .form-body__action > .form-body__select > (.form-body__select-text + .form-body__select-arrow)；.form-body__select 仅作 layout 容器，禁止作为按压态目标、禁止接收 click、禁止任何背景色（iOS WebKit 会把可点击 div 误标记为 selected 灰色态）；宿主 App 仅在容器级 .form-body 节点上添加 .is-pressed。",
+    "select 字段在没有 form-body--clickable 修饰类时不可点击；如果 select 字段不应打开任何选择面板，应改用普通 text/textarea 字段或 input，不需要 form-body--clickable，也不需要 form-body__select 内层结构。"
   ],
   "doNotInvent": [
     "不要把 form 扩成桌面属性面板、富文本表单或多列表格表单。",
-    "不要为单业务在 form 内新增独占型字段皮肤。"
+    "不要为单业务在 form 内新增独占型字段皮肤。",
+    "不要给 .form-body__select / .form-body__select-text / .form-body__select-arrow 任何 background、cursor:pointer、pointer-events:auto、onclick 等使其可视或可交互的修饰；这些节点仅作 layout 容器，click 必须挂在 .form-body 整行。",
+    "不要在 select 字段使用 .form-body--clickable 但不挂 data-dom-id 也不挂 click handler——会显示整行按压态但点击无响应。"
   ],
   "domAnatomy": {
     "root": ".form-body",
@@ -269,7 +288,12 @@
       ".form-body__counter",
       ".form-body__right-btn",
       ".form-body__value",
-      ".form-dropdown"
+      ".form-dropdown",
+      ".form-body__select"
+    ],
+    "selectChildren": [
+      ".form-body__select-text",
+      ".form-body__select-arrow"
     ],
     "containerModifiers": [
       ".form-group__content--card",
