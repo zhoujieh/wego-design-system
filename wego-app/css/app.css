@@ -532,7 +532,7 @@ input, textarea,
 
 @media (max-width: 767px) {
   .preview-shell {
-    height: var(--vv-height, 100dvh);
+    height: 100dvh;
     align-items: stretch;
     padding: 0;
     background: var(--bg-page);

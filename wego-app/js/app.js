@@ -2,18 +2,186 @@
   var shell = document.querySelector('[data-host-shell="true"]');
   if (!shell) return;
 
-  // iOS standalone 模式键盘拉起时 100dvh 不能可靠收缩，
-  // 用 visualViewport.height 实时同步实际可视高度
-  function syncViewportHeight() {
-    var vv = window.visualViewport;
-    var h = vv ? vv.height : window.innerHeight;
-    document.documentElement.style.setProperty('--vv-height', h + 'px');
-  }
-  syncViewportHeight();
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', syncViewportHeight);
-  }
-  window.addEventListener('resize', syncViewportHeight);
+  // iOS standalone 的 visualViewport 在键盘收起后可能短暂或持续返回偏小高度。
+  // App 外壳始终由 CSS 的 100dvh 管理；这里只观察键盘会话并清理 document 位移，
+  // 不再把 visualViewport.height、offsetTop 或 safe-area 写回布局。
+  (function initStandaloneKeyboardRecovery() {
+    var root = document.documentElement;
+    root.style.removeProperty('--vv-height');
+
+    var mobileQuery = window.matchMedia && window.matchMedia('(max-width: 767px)');
+    var standaloneQuery = window.matchMedia && window.matchMedia('(display-mode: standalone)');
+    var isStandalone = window.navigator.standalone === true || Boolean(standaloneQuery && standaloneQuery.matches);
+    if (!isStandalone || (mobileQuery && !mobileQuery.matches)) return;
+
+    var viewport = window.visualViewport;
+    var editableSelector = 'input, textarea, select, [contenteditable="true"], [contenteditable=""]';
+    var settledDelays = [0, 120, 320, 700];
+    var baselineHeight = 0;
+    var editorSession = false;
+    var keyboardWasOpen = false;
+    var rafId = 0;
+    var checkTimers = [];
+    var recoveryTimers = [];
+    var orientationTimers = [];
+
+    function isEditable(element) {
+      return Boolean(element && element.matches && element.matches(editableSelector));
+    }
+
+    function hasFocusedEditor() {
+      return isEditable(document.activeElement);
+    }
+
+    function readStableHeight() {
+      return Math.round(Math.max(
+        window.innerHeight || 0,
+        root.clientHeight || 0,
+        viewport ? viewport.height : 0
+      ));
+    }
+
+    function readVisualHeight() {
+      return Math.round(viewport ? viewport.height : (window.innerHeight || root.clientHeight || 0));
+    }
+
+    function measureBaseline() {
+      if (editorSession || hasFocusedEditor()) return;
+      var nextHeight = readStableHeight();
+      if (nextHeight > 0) baselineHeight = nextHeight;
+    }
+
+    function clearTimers(timers) {
+      timers.forEach(function (timer) { clearTimeout(timer); });
+      timers.length = 0;
+    }
+
+    function restoreDocumentPosition() {
+      // 兼容旧页面会话留下的变量；当前 CSS 已不再消费它。
+      root.style.removeProperty('--vv-height');
+      var scrollingElement = document.scrollingElement || root;
+      scrollingElement.scrollTop = 0;
+      scrollingElement.scrollLeft = 0;
+      if (document.body) {
+        document.body.scrollTop = 0;
+        document.body.scrollLeft = 0;
+      }
+      window.scrollTo(0, 0);
+    }
+
+    function scheduleRecovery() {
+      clearTimers(recoveryTimers);
+      settledDelays.forEach(function (delay) {
+        recoveryTimers.push(setTimeout(function () {
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              restoreDocumentPosition();
+              if (!hasFocusedEditor()) measureBaseline();
+            });
+          });
+        }, delay));
+      });
+    }
+
+    function inspectViewport() {
+      rafId = 0;
+      if (!baselineHeight) baselineHeight = readStableHeight();
+      if (!baselineHeight) return;
+
+      var heightDelta = baselineHeight - readVisualHeight();
+      var openThreshold = Math.max(160, baselineHeight * 0.2);
+
+      if (editorSession && heightDelta >= openThreshold) {
+        keyboardWasOpen = true;
+        return;
+      }
+
+      // 约 60-70px 的残留属于收起后的 WebKit 中间态，不继续视为键盘打开。
+      if (editorSession && keyboardWasOpen && heightDelta <= 96) {
+        keyboardWasOpen = false;
+        scheduleRecovery();
+        return;
+      }
+
+      if (!editorSession && !hasFocusedEditor()) measureBaseline();
+    }
+
+    function scheduleViewportCheck() {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(function () {
+        rafId = requestAnimationFrame(inspectViewport);
+      });
+    }
+
+    function scheduleSettledChecks() {
+      clearTimers(checkTimers);
+      settledDelays.forEach(function (delay) {
+        checkTimers.push(setTimeout(scheduleViewportCheck, delay));
+      });
+    }
+
+    function resetPageSession() {
+      clearTimers(checkTimers);
+      clearTimers(recoveryTimers);
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = 0;
+      baselineHeight = 0;
+      editorSession = hasFocusedEditor();
+      keyboardWasOpen = false;
+      if (editorSession) {
+        scheduleSettledChecks();
+        return;
+      }
+      scheduleRecovery();
+      measureBaseline();
+    }
+
+    document.addEventListener('focusin', function (event) {
+      if (!isEditable(event.target)) return;
+      editorSession = true;
+      keyboardWasOpen = false;
+      clearTimers(recoveryTimers);
+      scheduleSettledChecks();
+    }, true);
+
+    document.addEventListener('focusout', function () {
+      setTimeout(function () {
+        editorSession = hasFocusedEditor();
+        if (editorSession) {
+          scheduleSettledChecks();
+          return;
+        }
+        keyboardWasOpen = false;
+        scheduleRecovery();
+      }, 0);
+    }, true);
+
+    if (viewport) {
+      viewport.addEventListener('resize', scheduleSettledChecks);
+      viewport.addEventListener('scroll', scheduleSettledChecks);
+    }
+    window.addEventListener('resize', scheduleSettledChecks);
+    window.addEventListener('pageshow', resetPageSession);
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) resetPageSession();
+    });
+    window.addEventListener('orientationchange', function () {
+      clearTimers(checkTimers);
+      clearTimers(recoveryTimers);
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = 0;
+      baselineHeight = 0;
+      editorSession = hasFocusedEditor();
+      keyboardWasOpen = false;
+      if (editorSession) scheduleSettledChecks();
+      else scheduleRecovery();
+      clearTimers(orientationTimers);
+      orientationTimers.push(setTimeout(measureBaseline, 450));
+      orientationTimers.push(setTimeout(measureBaseline, 900));
+    });
+
+    measureBaseline();
+  })();
 
   var panels = Array.from(document.querySelectorAll('[data-host-tab]'));
   var tabTriggers = Array.from(document.querySelectorAll('[data-host-tab-trigger]'));
