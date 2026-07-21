@@ -283,7 +283,7 @@ function addFriendFormTemplate() {
     +         '<div class="form-group">'
     +           '<div class="form-group__title">基本信息</div>'
     +           '<div class="form-group__content">'
-    +             '<div class="form-body form-body--vertical">'
+    +             '<div class="form-body form-body--preserve-content-align">'
     +               '<div class="form-body__label form-body__label--required"><span class="form-body__label-text">头像</span><span class="form-body__required">*</span></div>'
     +               '<div class="form-body__action">'
     +                 '<div class="form-body__upload" data-upload-avatar>'
@@ -292,11 +292,11 @@ function addFriendFormTemplate() {
     +                 '</div>'
     +               '</div>'
     +             '</div>'
-    +             '<div class="form-body form-body--vertical">'
+    +             '<div class="form-body">'
     +               '<div class="form-body__label form-body__label--required"><span class="form-body__label-text">昵称</span><span class="form-body__required">*</span></div>'
     +               '<div class="form-body__action"><input type="text" placeholder="请输入好友昵称" data-form-field="nickname" maxlength="20" /></div>'
     +             '</div>'
-    +             '<div class="form-body form-body--vertical">'
+    +             '<div class="form-body form-body--preserve-content-align">'
     +               '<div class="form-body__label"><span class="form-body__label-text">账号/手机号</span></div>'
     +               '<div class="form-body__action">'
     +                 '<div class="form-body__phone">'
@@ -311,7 +311,7 @@ function addFriendFormTemplate() {
     +         '<div class="form-group">'
         +   '<div class="form-group__title">分组与标签</div>'
         +   '<div class="form-group__content">'
-        +     '<div class="form-body form-body--vertical form-body--clickable" data-dom-id="select-friend-group">'
+        +     '<div class="form-body form-body--clickable" data-dom-id="select-friend-group">'
         +       '<div class="form-body__label"><span class="form-body__label-text">分组</span></div>'
         +       '<div class="form-body__action">'
         +         '<div class="form-body__select">'
@@ -320,7 +320,7 @@ function addFriendFormTemplate() {
         +         '</div>'
         +       '</div>'
         +     '</div>'
-        +     '<div class="form-body form-body--vertical">'
+        +     '<div class="form-body">'
         +       '<div class="form-body__label"><span class="form-body__label-text">标签</span></div>'
         +       '<div class="form-body__action"><input type="text" placeholder="多个标签用逗号分隔" data-form-field="tags" /></div>'
         +     '</div>'
@@ -329,7 +329,7 @@ function addFriendFormTemplate() {
         + '<div class="form-group">'
         +   '<div class="form-group__title">来源与验证</div>'
         +   '<div class="form-group__content">'
-        +     '<div class="form-body form-body--vertical form-body--clickable" data-dom-id="select-friend-source">'
+        +     '<div class="form-body form-body--clickable" data-dom-id="select-friend-source">'
         +       '<div class="form-body__label"><span class="form-body__label-text">来源渠道</span></div>'
         +       '<div class="form-body__action">'
         +         '<div class="form-body__select">'
@@ -338,7 +338,7 @@ function addFriendFormTemplate() {
         +         '</div>'
         +       '</div>'
         +     '</div>'
-    +             '<div class="form-body form-body--vertical">'
+    +             '<div class="form-body">'
     +               '<div class="form-body__label"><span class="form-body__label-text">备注</span></div>'
     +               '<div class="form-body__action"><input type="text" placeholder="添加备注信息" data-form-field="remark" maxlength="50" /></div>'
     +             '</div>'
@@ -362,9 +362,8 @@ function groupSelectTemplate(selectedId) {
       + '<button type="button" class="actionsheet__item' + selected + '" data-select-group="' + g.group_id + '">'
       +   '<div class="actionsheet__item-row">'
       +     '<div class="actionsheet__item-main"><span class="actionsheet__item-title">' + g.group_name + '</span></div>'
-      +     '<i class="wego-iconfont-s icon-gou-jiacu actionsheet__item-check"></i>'
+      +     '<div class="actionsheet__item-check-slot"><i class="wego-iconfont-s icon-gou-jiacu actionsheet__item-check"></i></div>'
       +   '</div>'
-      +   '<div class="actionsheet__item-check-slot"></div>'
       + '</button>';
   }).join('');
   return ''
@@ -378,12 +377,16 @@ function groupSelectTemplate(selectedId) {
     + '</div>';
 }
 
-function sourceSelectTemplate() {
+function sourceSelectTemplate(selectedSource) {
   var sources = ['搜索导入', '名片扫码', '群聊添加', '手机通讯录', '手动输入'];
   var items = sources.map(function (s) {
+    var selected = s === selectedSource ? ' actionsheet__item--selected' : '';
     return ''
-      + '<button type="button" class="actionsheet__item" data-select-source="' + s + '">'
-      +   '<div class="actionsheet__item-main"><span class="actionsheet__item-title">' + s + '</span></div>'
+      + '<button type="button" class="actionsheet__item' + selected + '" data-select-source="' + s + '">'
+      +   '<div class="actionsheet__item-row">'
+      +     '<div class="actionsheet__item-main"><span class="actionsheet__item-title">' + s + '</span></div>'
+      +     '<div class="actionsheet__item-check-slot"><i class="wego-iconfont-s icon-gou-jiacu actionsheet__item-check"></i></div>'
+      +   '</div>'
       + '</button>';
   }).join('');
   return ''
@@ -639,7 +642,7 @@ window.WegoApp.registerScene({
 
           if (sourceSelect) {
             sourceSelect.addEventListener('click', function () {
-              ctx.openSheet(sourceSelectTemplate(), {
+              ctx.openSheet(sourceSelectTemplate(formState.source), {
                 label: '选择来源',
                 init: function (sheet) {
                   sheet.root.querySelectorAll('[data-select-source]').forEach(function (item) {

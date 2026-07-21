@@ -1450,6 +1450,46 @@
         "constraint_area": "场景与 UI Kit 版本号语义",
         "description": "design_system_version 与 designSystemVersion 是创建时基于的 metadata.version 快照（正整数），不要求随设计系统升级连锁更新；场景适配由 components.css 提取校验、组件契约一致性、source_sha256 和 visual_check 守护。"
       }
+    },
+    {
+      "id": "exp-scene-dom-must-copy-preview-verbatim",
+      "normalized_key": "scene-dom-copy-preview-verbatim",
+      "title": "场景组件 DOM 必须逐字复制 Preview 变体",
+      "status": "promoted",
+      "occurrence_count": 3,
+      "threshold": 1,
+      "primary_owner": "wego-design",
+      "secondary_owners": [],
+      "ownership_reason": "组件 DOM 结构生成约束属于技能入口方法。",
+      "rule_ownership": {
+        "category": "skill-entry",
+        "canonical": {
+          "file": ".codex/skills/wego-design/SKILL.md",
+          "locator": "必要输入与运行时入口",
+          "rule_id": "scene-dom-copy-preview-verbatim"
+        }
+      },
+      "runtime_reachability": {
+        "consumer_skill": "wego-design",
+        "output_field": "scene.js",
+        "downstream_consumer": "wego-design",
+        "acceptance_check": "validate-wego-design"
+      },
+      "evidence": [
+        "好友列表场景 actionsheet select 模式：分组 actionsheet 的 .actionsheet__item-check-slot 放在了 .actionsheet__item-row 外面，.actionsheet__item-check 放在了 row 里面。契约和 Preview 都明确 check-slot 必须在 row 内与 main 形成 flex 布局。",
+        "好友列表场景 actionsheet select 模式：来源 actionsheet 的 item 用了 action 模式的纯文本结构（只有 .actionsheet__item-main），完全没有 .actionsheet__item-row、.actionsheet__item-check-slot、.actionsheet__item-check。",
+        "好友列表场景 form 布局：所有字段都用了 form-body--vertical（上下布局），契约 representativeVariants 中绝大多数是 horizontal，只有 textarea 才是 vertical。"
+      ],
+      "created_at": "2026-07-21T00:00:00Z",
+      "updated_at": "2026-07-21T00:00:00Z",
+      "promoted_at": "2026-07-21T00:00:00Z",
+      "promotion_landing": {
+        "file": ".codex/skills/wego-design/SKILL.md",
+        "locator": "必要输入与运行时入口",
+        "rule_id": "scene-dom-copy-preview-verbatim",
+        "constraint_area": "组件 DOM 结构生成约束",
+        "description": "场景代码中的组件 DOM 结构必须逐字复制 Preview 中对应变体的 HTML，包括节点层级、class 组合、修饰类顺序和可选子元素位置；禁止理解大意后自己写。"
+      }
     }
   ]
 }

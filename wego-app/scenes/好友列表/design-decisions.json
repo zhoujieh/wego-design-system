@@ -443,7 +443,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/好友列表/scene.js",
     "scene_css": "wego-app/scenes/好友列表/scene.css",
-    "source_sha256": "8c3d526576f48dfae2780a6c0a9ef68783b146c12d8d237889fade2f154d7d0b",
+    "source_sha256": "3cbab50e73c9bc01712a439c1db4cf1d9a997cc30eb1c04d585f3f909faf3502",
     "dom_ids": [
       "add-friend-entry",
       "sort-toggle",
