@@ -687,7 +687,7 @@
       entry.componentRoot.setAttribute('data-state', 'closed');
     }
     // 等待退场动画完成后清理（与 dialog 的 DIALOG_REMOVE_DELAY 一致，纯 setTimeout 更稳定，
-    // 不依赖 transitionend 冒泡；actionsheet 根节点 opacity 过渡，modal-fullscreen 面板 transform 过渡，
+    // 不依赖 transitionend 冒泡；actionsheet 遮罩 opacity 与面板 transform 同步过渡，modal-fullscreen 面板 transform 过渡，
     // transitionend 来源不一致，setTimeout 统一处理避免事件漏触发）
     var removeDelay = 280; // 250ms 过渡 + 30ms 缓冲
     setTimeout(function () { finalizeCloseOverlayEntry(entry); }, removeDelay);

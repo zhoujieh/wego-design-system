@@ -492,6 +492,9 @@ input, textarea,
 .app-overlay-layer > .actionsheet.is-overlay-under {
   background: transparent;
 }
+.app-overlay-layer > .actionsheet.is-overlay-under::before {
+  opacity: 0.2;
+}
 .app-overlay-layer > .modal.is-overlay-under::before {
   opacity: 0.2;
 }
