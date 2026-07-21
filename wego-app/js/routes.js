@@ -36,11 +36,6 @@ window.WEGO_APP_ROUTES = [
     routeId: 'app-center',
     scene: '应用中心',
     script: 'scenes/应用中心/scene.js',
-    style: 'scenes/应用中心/scene.css',
-    entry: {
-      type: 'cell-entry',
-      tab: 'my',
-      label: '应用中心'
-    }
+    style: 'scenes/应用中心/scene.css'
   }
 ];
