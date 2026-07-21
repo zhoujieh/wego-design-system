@@ -532,6 +532,7 @@ input, textarea,
 
 @media (max-width: 767px) {
   .preview-shell {
+    min-height: 0;
     height: var(--vv-height, 100dvh);
     align-items: stretch;
     padding: 0;
@@ -549,7 +550,6 @@ input, textarea,
 
   .phone-screen {
     --safe-area-top: env(safe-area-inset-top, 0px);
-    --safe-area-bottom: env(safe-area-inset-bottom, 0px);
     --navbar-body-height: 56px;
     border-radius: 0;
   }
