@@ -22,6 +22,18 @@ window.WEGO_APP_ROUTES = [
     }
   },
   {
+    routeId: 'dynamic-detail',
+    scene: '动态详情',
+    script: 'scenes/动态详情/scene.js',
+    style: 'scenes/动态详情/scene.css'
+  },
+  {
+    routeId: 'product-detail',
+    scene: '商品详情',
+    script: 'scenes/商品详情/scene.js',
+    style: 'scenes/商品详情/scene.css'
+  },
+  {
     routeId: 'my',
     scene: '我的',
     script: 'scenes/我的/scene.js',
