@@ -12,35 +12,23 @@
   font-family: var(--body-md-font-family);
 }
 
+/* 滚动容器：承担瀑布流、人维度、筛选标签；底部留白仅保留 16px 与卡片间距，bottom-nav + safe-area 由 host-shell-page 处理 */
 .album-feed__scroll {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
   min-height: 0;
-  gap: var(--spacer-8);
-  /* 底部视觉留白：host-tab 宿主层 main 与 bottom-nav 为兄弟节点，
-     滚动区已不延伸到 bottom-nav 下方，这里只补视觉间距 */
-  padding-bottom: var(--spacer-40);
+  gap: var(--spacer-12);
+  padding-bottom: var(--spacer-16);
   overflow-y: auto;
 }
 
-.album-feed__toolbar {
+/* 顶部：仅固定页面级 tabs 一行 */
+.album-feed__page-tabs {
   position: sticky;
   top: 0;
   z-index: var(--z-sticky);
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacer-8);
-  padding-block: var(--spacer-8);
-  background: var(--bg-page);
-}
-
-.album-feed__toolbar .search-toolbar {
-  padding-block: var(--spacer-0);
-}
-
-/* 顶部第一层：页面级 tabs，背景跟随页面 */
-.album-feed__page-tabs {
+  flex-shrink: 0;
   background: var(--bg-page);
 }
 
@@ -53,7 +41,38 @@
   display: none;
 }
 
-/* 顶部第三层：人维度横滑头像列表 */
+/* 搜索框 + 筛选入口工具栏：默认隐藏在 tabs 上方，下滑手势浮现
+   使用 fixed 定位脱离 scroll layout；top 由 JS 读取 page-tabs bottom 设置 */
+.album-feed__floating-toolbar {
+  position: fixed;
+  top: var(--safe-area-top);
+  left: 0;
+  right: 0;
+  z-index: var(--z-sticky);
+  padding-block: var(--spacer-8);
+  padding-inline: var(--layout-page-margin-m8);
+  background: var(--bg-page);
+  transform: translateY(-100%);
+  transition: transform 0.2s ease;
+  pointer-events: none;
+  will-change: transform;
+  box-sizing: border-box;
+}
+
+.album-feed__floating-toolbar.is-revealed {
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.album-feed__floating-toolbar .search-toolbar {
+  padding-block: var(--spacer-0);
+}
+
+/* 人维度横滑区 */
+.album-feed__people-wrap {
+  margin-top: var(--spacer-0);
+}
+
 .album-feed__people-scroll {
   display: flex;
   align-items: flex-start;
@@ -77,6 +96,7 @@
 
 .album-feed__people-self {
   flex: 0 0 auto;
+  margin-left: auto;
 }
 
 .album-feed__people-item {
@@ -89,6 +109,14 @@
   background: var(--transparent);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  flex: 0 0 auto;
+}
+
+.album-feed__people-avatar {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  overflow: visible;
 }
 
 .album-feed__people-name {
@@ -101,7 +129,7 @@
   line-height: var(--body-xs-line-height);
 }
 
-/* 顶部第四层：tag 多维度筛选标签横滑 */
+/* 多维度筛选标签横滑 */
 .album-feed__filter-tags {
   display: flex;
   align-items: center;
@@ -120,33 +148,17 @@
   flex: 0 0 auto;
 }
 
-.album-feed__applied {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacer-8);
-  min-height: var(--size-32);
-  padding-inline: var(--spacer-8);
-  color: var(--text-secondary);
-  font-size: var(--body-sm-font-size);
-  line-height: var(--body-sm-line-height);
-}
-
-.album-feed__applied[hidden] {
-  display: none;
-}
-
-/* 瀑布流：CSS columns 双列，宽屏自动增列且单卡宽度约束在 168~220px */
+/* 瀑布流：CSS columns 双列，宽屏自动增列且单卡宽度约束在 168~220px；显式 row-gap 让列内卡片上下不贴在一起 */
 .album-feed__grid {
   column-count: 2;
   column-gap: var(--spacer-8);
+  row-gap: var(--spacer-12);
   width: 100%;
   max-width: 912px;
   margin-inline: auto;
 }
 
 .album-feed__card {
-  /* columns 布局下卡片断行隔离，按自然高度撑高 */
   display: inline-block;
   width: 100%;
   min-width: 0;
@@ -176,7 +188,6 @@
 .album-feed__cover {
   width: 100%;
   height: auto;
-  /* 瀑布流：按媒体自然比例撑高，不做固定比例约束 */
   aspect-ratio: auto;
 }
 
@@ -191,7 +202,7 @@
   right: var(--spacer-8);
   bottom: var(--spacer-8);
   padding-block: var(--spacer-2);
-  padding-inline: var(--spacer-6);
+  padding-inline: var(--spacer-4);
   border-radius: var(--radius-4);
   background: var(--bg-toast);
   color: var(--text-inverse);
@@ -202,26 +213,87 @@
 .album-feed__card-content {
   display: flex;
   flex-direction: column;
-  gap: var(--spacer-6);
+  gap: var(--spacer-4);
   padding: var(--spacer-8);
 }
 
-/* 发布者区单行：头像 + 名字 + 类型标签 + 状态标签紧凑 inline，空间不足时状态换行 */
+/* 发布者区单行：头像（含店铺标识）+ 类型图标前缀 + 名字；不再使用 type/status tag 堆砌 */
 .album-feed__publisher-row {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
   gap: var(--spacer-4);
   min-width: 0;
+}
+
+.album-feed__publisher-avatar {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+.album-feed__shop-badge {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-12);
+  height: var(--size-12);
+  border-radius: var(--radius-full);
+  background: var(--bg-inverse);
+  color: var(--text-inverse);
+  font-size: var(--size-12);
+  line-height: var(--body-xs-line-height);
+  border: 1.5px solid var(--bg-surface);
+}
+
+.album-feed__type-icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  font-size: var(--size-12);
+  line-height: var(--body-xs-line-height);
 }
 
 .album-feed__publisher-name {
   min-width: 0;
   overflow: hidden;
   color: var(--text-default);
-  font-size: var(--body-sm-strong-font-size);
-  font-weight: var(--body-sm-strong-font-weight);
-  line-height: var(--body-sm-strong-line-height);
+  font-size: var(--body-sm-font-size);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--body-sm-line-height);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 状态行：状态图标（最多 2 个）+ 发布时间独立成行，状态用图标前缀不用 tag 堆砌 */
+.album-feed__status-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-4);
+  min-width: 0;
+}
+
+.album-feed__status-icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  font-size: var(--size-12);
+  line-height: var(--body-xs-line-height);
+}
+
+.album-feed__publisher-meta {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-tertiary);
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -240,23 +312,19 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: var(--spacer-6);
+  gap: var(--spacer-4);
   padding-top: var(--spacer-0);
   padding-inline: var(--spacer-8);
   padding-bottom: var(--spacer-8);
 }
 
-/* 操作行：一键转发靠右（核心操作），商品入口靠左弱化 */
+/* 操作行：一键转发靠右（核心操作），首页不再保留商品入口 */
 .album-feed__actions {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: var(--spacer-12);
   min-width: 0;
-}
-
-.album-feed__product-link {
-  margin-right: auto;
 }
 
 .album-feed__forward-link {
@@ -268,7 +336,7 @@
   flex-direction: column;
   align-items: center;
   gap: var(--spacer-8);
-  padding-block: var(--spacer-40);
+  padding-block: var(--spacer-16);
   padding-inline: var(--spacer-16);
   text-align: center;
 }
@@ -289,7 +357,7 @@
 .album-feed__filter-body {
   display: flex;
   flex-direction: column;
-  gap: var(--spacer-24);
+  gap: var(--spacer-12);
   padding: var(--spacer-16);
 }
 
@@ -321,11 +389,5 @@
   .album-feed__grid {
     column-count: auto;
     column-width: 200px;
-  }
-
-  .album-feed__toolbar {
-    max-width: 912px;
-    width: 100%;
-    margin-inline: auto;
   }
 }

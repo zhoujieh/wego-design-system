@@ -50,49 +50,55 @@
         "selector": ".album-feed__scroll",
         "content_role": ".album-feed__scroll 的 gap",
         "css_property": "gap",
-        "token": "var(--spacer-8)"
+        "token": "var(--spacer-12)"
       },
       {
         "selector": ".album-feed__scroll",
         "content_role": ".album-feed__scroll 的 padding-bottom",
         "css_property": "padding-bottom",
-        "token": "var(--spacer-40)"
-      },
-      {
-        "selector": ".album-feed__toolbar",
-        "content_role": ".album-feed__toolbar 的 z-index",
-        "css_property": "z-index",
-        "token": "var(--z-sticky)"
-      },
-      {
-        "selector": ".album-feed__toolbar",
-        "content_role": ".album-feed__toolbar 的 gap",
-        "css_property": "gap",
-        "token": "var(--spacer-8)"
-      },
-      {
-        "selector": ".album-feed__toolbar",
-        "content_role": ".album-feed__toolbar 的 padding-block",
-        "css_property": "padding-block",
-        "token": "var(--spacer-8)"
-      },
-      {
-        "selector": ".album-feed__toolbar",
-        "content_role": ".album-feed__toolbar 的 background",
-        "css_property": "background",
-        "token": "var(--bg-page)"
-      },
-      {
-        "selector": ".album-feed__toolbar .search-toolbar",
-        "content_role": ".album-feed__toolbar .search-toolbar 的 padding-block",
-        "css_property": "padding-block",
-        "token": "var(--spacer-0)"
+        "token": "var(--spacer-16)"
       },
       {
         "selector": ".album-feed__page-tabs",
         "content_role": ".album-feed__page-tabs 的 background",
         "css_property": "background",
         "token": "var(--bg-page)"
+      },
+      {
+        "selector": ".album-feed__floating-toolbar",
+        "content_role": ".album-feed__floating-toolbar 的 top",
+        "css_property": "top",
+        "token": "var(--safe-area-top)"
+      },
+      {
+        "selector": ".album-feed__floating-toolbar",
+        "content_role": ".album-feed__floating-toolbar 的 background",
+        "css_property": "background",
+        "token": "var(--bg-page)"
+      },
+      {
+        "selector": ".album-feed__floating-toolbar",
+        "content_role": ".album-feed__floating-toolbar 的 padding-block",
+        "css_property": "padding-block",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".album-feed__floating-toolbar",
+        "content_role": ".album-feed__floating-toolbar 的 padding-inline",
+        "css_property": "padding-inline",
+        "token": "var(--layout-page-margin-m8)"
+      },
+      {
+        "selector": ".album-feed__floating-toolbar .search-toolbar",
+        "content_role": ".album-feed__floating-toolbar .search-toolbar 的 padding-block",
+        "css_property": "padding-block",
+        "token": "var(--spacer-0)"
+      },
+      {
+        "selector": ".album-feed__people-wrap",
+        "content_role": ".album-feed__people-wrap 的 margin-top",
+        "css_property": "margin-top",
+        "token": "var(--spacer-0)"
       },
       {
         "selector": ".album-feed__people-scroll",
@@ -143,46 +149,16 @@
         "token": "var(--spacer-8)"
       },
       {
-        "selector": ".album-feed__applied",
-        "content_role": ".album-feed__applied 的 gap",
-        "css_property": "gap",
-        "token": "var(--spacer-8)"
-      },
-      {
-        "selector": ".album-feed__applied",
-        "content_role": ".album-feed__applied 的 min-height",
-        "css_property": "min-height",
-        "token": "var(--size-32)"
-      },
-      {
-        "selector": ".album-feed__applied",
-        "content_role": ".album-feed__applied 的 padding-inline",
-        "css_property": "padding-inline",
-        "token": "var(--spacer-8)"
-      },
-      {
-        "selector": ".album-feed__applied",
-        "content_role": ".album-feed__applied 的 color",
-        "css_property": "color",
-        "token": "var(--text-secondary)"
-      },
-      {
-        "selector": ".album-feed__applied",
-        "content_role": ".album-feed__applied 的 font-size",
-        "css_property": "font-size",
-        "token": "var(--body-sm-font-size)"
-      },
-      {
-        "selector": ".album-feed__applied",
-        "content_role": ".album-feed__applied 的 line-height",
-        "css_property": "line-height",
-        "token": "var(--body-sm-line-height)"
-      },
-      {
         "selector": ".album-feed__grid",
         "content_role": ".album-feed__grid 的 column-gap",
         "css_property": "column-gap",
         "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".album-feed__grid",
+        "content_role": ".album-feed__grid 的 row-gap",
+        "css_property": "row-gap",
+        "token": "var(--spacer-12)"
       },
       {
         "selector": ".album-feed__card:focus-visible",
@@ -230,7 +206,7 @@
         "selector": ".album-feed__duration",
         "content_role": "视频时长横向内边距",
         "css_property": "padding-inline",
-        "token": "var(--spacer-6)"
+        "token": "var(--spacer-4)"
       },
       {
         "selector": ".album-feed__duration",
@@ -266,7 +242,7 @@
         "selector": ".album-feed__card-content",
         "content_role": ".album-feed__card-content 的 gap",
         "css_property": "gap",
-        "token": "var(--spacer-6)"
+        "token": "var(--spacer-4)"
       },
       {
         "selector": ".album-feed__card-content",
@@ -281,10 +257,124 @@
         "token": "var(--spacer-4)"
       },
       {
-        "selector": ".album-feed__actions",
-        "content_role": "操作行横向间距",
+        "selector": ".album-feed__status-row",
+        "content_role": "状态行横向间距",
         "css_property": "gap",
-        "token": "var(--spacer-12)"
+        "token": "var(--spacer-4)"
+      },
+      {
+        "selector": ".album-feed__publisher-name",
+        "content_role": ".album-feed__publisher-name 的 color",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".album-feed__publisher-name",
+        "content_role": ".album-feed__publisher-name 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--body-sm-font-size)"
+      },
+      {
+        "selector": ".album-feed__publisher-name",
+        "content_role": ".album-feed__publisher-name 的 font-weight",
+        "css_property": "font-weight",
+        "token": "var(--font-weight-medium)"
+      },
+      {
+        "selector": ".album-feed__publisher-name",
+        "content_role": ".album-feed__publisher-name 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--body-sm-line-height)"
+      },
+      {
+        "selector": ".album-feed__publisher-meta",
+        "content_role": ".album-feed__publisher-meta 的 color",
+        "css_property": "color",
+        "token": "var(--text-tertiary)"
+      },
+      {
+        "selector": ".album-feed__publisher-meta",
+        "content_role": ".album-feed__publisher-meta 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--body-xs-font-size)"
+      },
+      {
+        "selector": ".album-feed__publisher-meta",
+        "content_role": ".album-feed__publisher-meta 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--body-xs-line-height)"
+      },
+      {
+        "selector": ".album-feed__status-icon",
+        "content_role": ".album-feed__status-icon 的 color",
+        "css_property": "color",
+        "token": "var(--text-tertiary)"
+      },
+      {
+        "selector": ".album-feed__status-icon",
+        "content_role": ".album-feed__status-icon 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--size-12)"
+      },
+      {
+        "selector": ".album-feed__status-icon",
+        "content_role": ".album-feed__status-icon 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--body-xs-line-height)"
+      },
+      {
+        "selector": ".album-feed__type-icon",
+        "content_role": ".album-feed__type-icon 的 color",
+        "css_property": "color",
+        "token": "var(--text-tertiary)"
+      },
+      {
+        "selector": ".album-feed__type-icon",
+        "content_role": ".album-feed__type-icon 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--size-12)"
+      },
+      {
+        "selector": ".album-feed__type-icon",
+        "content_role": ".album-feed__type-icon 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--body-xs-line-height)"
+      },
+      {
+        "selector": ".album-feed__shop-badge",
+        "content_role": ".album-feed__shop-badge 的 background",
+        "css_property": "background",
+        "token": "var(--bg-inverse)"
+      },
+      {
+        "selector": ".album-feed__shop-badge",
+        "content_role": ".album-feed__shop-badge 的 color",
+        "css_property": "color",
+        "token": "var(--text-inverse)"
+      },
+      {
+        "selector": ".album-feed__shop-badge",
+        "content_role": ".album-feed__shop-badge 的 border-radius",
+        "css_property": "border-radius",
+        "token": "var(--radius-full)"
+      },
+      {
+        "selector": ".album-feed__shop-badge",
+        "content_role": ".album-feed__shop-badge 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--size-12)"
+      },
+      {
+        "selector": ".album-feed__shop-badge",
+        "content_role": ".album-feed__shop-badge 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--body-xs-line-height)"
+      },
+      {
+        "selector": ".album-feed__shop-badge",
+        "content_role": ".album-feed__shop-badge 的 border",
+        "css_property": "border",
+        "token": "var(--bg-surface)"
       },
       {
         "selector": ".album-feed__summary",
@@ -306,9 +396,9 @@
       },
       {
         "selector": ".album-feed__card-footer",
-        "content_role": ".album-feed__card-footer 的 gap",
-        "css_property": "gap",
-        "token": "var(--spacer-6)"
+        "content_role": "卡片底部区域横向内边距",
+        "css_property": "padding-inline",
+        "token": "var(--spacer-8)"
       },
       {
         "selector": ".album-feed__card-footer",
@@ -318,39 +408,21 @@
       },
       {
         "selector": ".album-feed__card-footer",
-        "content_role": "卡片底部区域横向内边距",
-        "css_property": "padding-inline",
-        "token": "var(--spacer-8)"
-      },
-      {
-        "selector": ".album-feed__card-footer",
         "content_role": "卡片底部区域底部内边距",
         "css_property": "padding-bottom",
         "token": "var(--spacer-8)"
       },
       {
-        "selector": ".album-feed__publisher-name",
-        "content_role": ".album-feed__publisher-name 的 color",
-        "css_property": "color",
-        "token": "var(--text-default)"
+        "selector": ".album-feed__card-footer",
+        "content_role": "卡片底部区域 gap",
+        "css_property": "gap",
+        "token": "var(--spacer-4)"
       },
       {
-        "selector": ".album-feed__publisher-name",
-        "content_role": ".album-feed__publisher-name 的 font-size",
-        "css_property": "font-size",
-        "token": "var(--body-sm-strong-font-size)"
-      },
-      {
-        "selector": ".album-feed__publisher-name",
-        "content_role": ".album-feed__publisher-name 的 font-weight",
-        "css_property": "font-weight",
-        "token": "var(--body-sm-strong-font-weight)"
-      },
-      {
-        "selector": ".album-feed__publisher-name",
-        "content_role": ".album-feed__publisher-name 的 line-height",
-        "css_property": "line-height",
-        "token": "var(--body-sm-strong-line-height)"
+        "selector": ".album-feed__actions",
+        "content_role": "操作行横向间距",
+        "css_property": "gap",
+        "token": "var(--spacer-12)"
       },
       {
         "selector": ".album-feed__empty",
@@ -362,7 +434,7 @@
         "selector": ".album-feed__empty",
         "content_role": "空结果纵向内边距",
         "css_property": "padding-block",
-        "token": "var(--spacer-40)"
+        "token": "var(--spacer-16)"
       },
       {
         "selector": ".album-feed__empty",
@@ -416,7 +488,7 @@
         "selector": ".album-feed__filter-body",
         "content_role": ".album-feed__filter-body 的 gap",
         "css_property": "gap",
-        "token": "var(--spacer-24)"
+        "token": "var(--spacer-12)"
       },
       {
         "selector": ".album-feed__filter-body",
@@ -476,12 +548,13 @@
       {
         "binding_id": "feed-search-toolbar",
         "slug": "search",
-        "reason": "顶部全局搜索入口与筛选入口使用正式页面内搜索工具栏结构",
+        "reason": "下滑手势浮现的工具栏使用 search 组件的 content-search-filter 模式，搜索框使用 sm/gray + 内嵌 select-image 动作",
         "variant_dimensions": {
-          "size": "md",
-          "surface": "white",
-          "mode": "text",
-          "state": "empty",
+          "size": "sm",
+          "surface": "gray",
+          "mode": "image-multiple",
+          "state": "image-result",
+          "internalActions": "select-image",
           "hostPattern": "content-search-filter"
         }
       },
@@ -544,20 +617,9 @@
         }
       },
       {
-        "binding_id": "feed-label-tag",
-        "slug": "tag",
-        "reason": "紧凑展示产品或笔记类型及发布者状态",
-        "variant_dimensions": {
-          "size": "20",
-          "theme": "gray",
-          "state": "normal",
-          "affordance": "display-only"
-        }
-      },
-      {
-        "binding_id": "feed-card-link",
+        "binding_id": "feed-forward-link",
         "slug": "link",
-        "reason": "在窄卡片内承载一键转发和弱化商品入口，不扩大常驻操作占用",
+        "reason": "卡片核心操作一键转发，靠右显示",
         "variant_dimensions": {
           "mode": "standalone",
           "size": "12",
@@ -648,10 +710,10 @@
     "layout_contract": {
       "mode": "composed",
       "source": "references/design-decisions.md",
-      "selection_reason": "页面首要任务是发现并进入动态详情；顶部四层结构：页面级 tabs（关注/推荐/上新）→ 强调搜索框+筛选入口 → 人维度横滑头像列表 → tag 多维度筛选标签；瀑布流双列按媒体自然比例撑高参差，375/393px 双列，768px 自动增列且单卡不超过 220px；卡片信息层级紧凑，核心操作一键转发靠右、商品入口靠左弱化；底部为 tabbar 与安全区预留留白。",
+      "selection_reason": "页面首要任务是发现并进入动态详情；顶部只固定页面级 tabs 一行，搜索框与筛选入口由下滑手势在 tabs 下方平滑浮现、上滑手势隐藏，滚到顶部保持隐藏以最大化首屏可视区域；人维度栏约 10 个发布者支持横滑、自己固定在可视区最右侧；瀑布流双列按媒体自然比例撑高参差，显式设置 row-gap 让列内卡片上下不贴在一起，375/393px 双列，768px 自动增列且单卡不超过 220px；卡片信息层级紧凑，发布者区单行（头像含店铺标识 + 类型图标前缀 + 名字），状态行用图标前缀和时间独立成行最多展示 2 个状态，1 至 2 行摘要，底部操作行一键转发靠右不再保留商品入口；底部为 bottom-nav 与安全区预留留白。",
       "page_edge_mode": "M8",
       "mutable_regions": [
-        ".album-feed__toolbar",
+        ".album-feed__floating-toolbar",
         ".album-feed__grid",
         ".album-feed__card-content",
         ".album-feed__empty"
@@ -715,7 +777,7 @@
         "target": "state:filter-applied"
       },
       {
-        "dom_id": "clear-filters",
+        "dom_id": "empty-clear",
         "target": "state:feed-ready"
       },
       {
@@ -725,10 +787,6 @@
       {
         "dom_id": "forward-{dynamic_id}",
         "target": "feedback:toast"
-      },
-      {
-        "dom_id": "open-product-{dynamic_id}",
-        "target": "route:product-detail"
       }
     ],
     "state_contract": [
@@ -736,7 +794,7 @@
         "state_id": "feed-ready",
         "initial": true,
         "trigger": "进入动态主 tab",
-        "visible_result": "关注视图下显示四层顶部（页面Tab+搜索+人维度+筛选标签）与瀑布流双列动态内容",
+        "visible_result": "页面级 tabs 固定顶部，搜索框与筛选入口隐藏在 tabs 上方不占可视区域，首屏显示双列瀑布流与人维度栏",
         "fallback": "保留可浏览的本地动态",
         "persistence": "memory"
       },
@@ -776,7 +834,7 @@
         "state_id": "filter-applied",
         "initial": false,
         "trigger": "点击筛选标签或查看结果",
-        "visible_result": "按筛选维度组合过滤并显示已选标签高亮",
+        "visible_result": "按筛选维度组合过滤并显示已选标签高亮，搜索框右侧筛选文案显示筛选·已选",
         "fallback": "清除条件回到全部",
         "persistence": "memory"
       },
@@ -786,6 +844,14 @@
         "trigger": "组合条件无匹配动态",
         "visible_result": "展示无结果说明与清除条件入口",
         "fallback": "清除条件恢复内容",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "toolbar-revealed",
+        "initial": false,
+        "trigger": "下滑手势",
+        "visible_result": "搜索框与筛选入口从页面级 tabs 下方平滑浮现，再次上滑手势或滚到顶部后隐藏",
+        "fallback": "滑回顶部仍保持隐藏",
         "persistence": "memory"
       },
       {
@@ -800,7 +866,7 @@
         "state_id": "feed-wide-layout",
         "initial": false,
         "trigger": "视口宽度增至 768px",
-        "visible_result": "瀑布流至少三列、单卡不超过 220px并居中，交互层级不变",
+        "visible_result": "瀑布流自动增列且单卡不超过 220px 并居中，交互层级不变",
         "fallback": "常见手机宽度保持双列",
         "persistence": "memory"
       }
@@ -853,16 +919,6 @@
       "component_slug": "tag"
     },
     {
-      "dd_id": "feed-clear-filters",
-      "binding_id": "feed-card-link",
-      "component_slug": "link"
-    },
-    {
-      "dd_id": "feed-tag-seed",
-      "binding_id": "feed-label-tag",
-      "component_slug": "tag"
-    },
-    {
       "dd_id": "feed-filter-navbar-seed",
       "binding_id": "feed-filter-navbar",
       "component_slug": "navbar"
@@ -876,12 +932,17 @@
       "dd_id": "feed-radio-unchecked-seed",
       "binding_id": "feed-filter-radio-unchecked",
       "component_slug": "radio"
+    },
+    {
+      "dd_id": "feed-forward-link-seed",
+      "binding_id": "feed-forward-link",
+      "component_slug": "link"
     }
   ],
   "generation_evidence": {
     "scene_js": "wego-app/scenes/微购相册动态/scene.js",
     "scene_css": "wego-app/scenes/微购相册动态/scene.css",
-    "source_sha256": "65299612b5b2183d69aed77c3cda65c9ec965f609e125604d43b6e7542f6c2b4",
+    "source_sha256": "ee461c69f9a6045162070de91739e16252780bcb727b6f63d31c90d8dda99764",
     "dom_ids": [
       "page-tab-following",
       "page-tab-recommended",
@@ -895,18 +956,17 @@
       "filter-tag-collection",
       "filter-tag-presale",
       "filter-tag-live",
-      "clear-filters",
       "feed-open-dynamic"
     ],
-    "component_count": 14,
+    "component_count": 13,
     "visualCheck": {
       "status": "passed",
       "viewports": [
         375,
         393
       ],
-      "checked_at": "2026-07-22T06:30:00.000Z",
-      "scope": "动态首页四层顶部（页面Tab+搜索+人维度+筛选标签）与瀑布流双列卡片；768px 桌面预览壳检查瀑布流自动增列。",
+      "checked_at": "2026-07-22T13:50:00.000Z",
+      "scope": "页面级 tabs 顶部固定、搜索框与筛选入口下滑浮现、人维度横滑含自己、瀑布流双列卡片、双列信息层级紧凑、底部留白与 bottom-nav 隔离，375/393px 全部通过。",
       "checks": {
         "horizontal_overflow": true,
         "overlap": true,
