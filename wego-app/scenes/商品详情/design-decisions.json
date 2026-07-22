@@ -1,0 +1,484 @@
+{
+  "schemaVersion": 2,
+  "scene": "商品详情",
+  "surface_id": "product-detail",
+  "route_id": "product-detail",
+  "layout_mode": "composed",
+  "page_pattern": null,
+  "presentation": {
+    "type": "push",
+    "transition": "slide-left-enter, slide-right-exit",
+    "dismissAction": "back-button",
+    "overlayLevel": "inline",
+    "coversTabBar": true,
+    "source": "library-consumption.json#/appRuntime/presentationTypes"
+  },
+  "prompt_contract": {
+    "design_system_version": 435,
+    "token_bindings": [
+      {
+        "selector": ".product-detail",
+        "content_role": ".product-detail 的 padding-inline",
+        "css_property": "padding-inline",
+        "token": "var(--layout-page-margin-m0)"
+      },
+      {
+        "selector": ".product-detail",
+        "content_role": ".product-detail 的 background",
+        "css_property": "background",
+        "token": "var(--bg-page)"
+      },
+      {
+        "selector": ".product-detail",
+        "content_role": ".product-detail 的 color",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".product-detail",
+        "content_role": ".product-detail 的 font-family",
+        "css_property": "font-family",
+        "token": "var(--body-md-font-family)"
+      },
+      {
+        "selector": ".product-detail__body",
+        "content_role": ".product-detail__body 的 gap",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".product-detail__body",
+        "content_role": "商品信息区顶部内边距",
+        "css_property": "padding-top",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".product-detail__body",
+        "content_role": "商品信息区横向内边距",
+        "css_property": "padding-inline",
+        "token": "var(--spacer-16)"
+      },
+      {
+        "selector": ".product-detail__body",
+        "content_role": "商品信息区底部内边距",
+        "css_property": "padding-bottom",
+        "token": "var(--spacer-16)"
+      },
+      {
+        "selector": ".product-detail__card-content",
+        "content_role": ".product-detail__card-content 的 gap",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".product-detail__card-content",
+        "content_role": ".product-detail__card-content 的 padding",
+        "css_property": "padding",
+        "token": "var(--spacer-16)"
+      },
+      {
+        "selector": ".product-detail__price",
+        "content_role": ".product-detail__price 的 color",
+        "css_property": "color",
+        "token": "var(--text-promotion)"
+      },
+      {
+        "selector": ".product-detail__price",
+        "content_role": ".product-detail__price 的 font-family",
+        "css_property": "font-family",
+        "token": "var(--heading-sm-font-family)"
+      },
+      {
+        "selector": ".product-detail__price",
+        "content_role": ".product-detail__price 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--heading-sm-font-size)"
+      },
+      {
+        "selector": ".product-detail__price",
+        "content_role": ".product-detail__price 的 font-weight",
+        "css_property": "font-weight",
+        "token": "var(--heading-sm-font-weight)"
+      },
+      {
+        "selector": ".product-detail__price",
+        "content_role": ".product-detail__price 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--heading-sm-line-height)"
+      },
+      {
+        "selector": ".product-detail__name",
+        "content_role": ".product-detail__name 的 color",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".product-detail__name",
+        "content_role": ".product-detail__name 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--heading-sm-font-size)"
+      },
+      {
+        "selector": ".product-detail__name",
+        "content_role": ".product-detail__name 的 font-weight",
+        "css_property": "font-weight",
+        "token": "var(--heading-sm-font-weight)"
+      },
+      {
+        "selector": ".product-detail__name",
+        "content_role": ".product-detail__name 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--heading-sm-line-height)"
+      },
+      {
+        "selector": ".product-detail__points",
+        "content_role": ".product-detail__points 的 gap",
+        "css_property": "gap",
+        "token": "var(--spacer-4)"
+      },
+      {
+        "selector": ".product-detail__points",
+        "content_role": ".product-detail__points 的 margin-top",
+        "css_property": "margin-top",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".product-detail__seller-status",
+        "content_role": ".product-detail__seller-status 的 gap",
+        "css_property": "gap",
+        "token": "var(--spacer-4)"
+      },
+      {
+        "selector": ".product-detail__seller-status",
+        "content_role": ".product-detail__seller-status 的 margin-top",
+        "css_property": "margin-top",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".product-detail__section-title",
+        "content_role": ".product-detail__section-title 的 color",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".product-detail__section-title",
+        "content_role": ".product-detail__section-title 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--heading-xs-font-size)"
+      },
+      {
+        "selector": ".product-detail__section-title",
+        "content_role": ".product-detail__section-title 的 font-weight",
+        "css_property": "font-weight",
+        "token": "var(--heading-xs-font-weight)"
+      },
+      {
+        "selector": ".product-detail__section-title",
+        "content_role": ".product-detail__section-title 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--heading-xs-line-height)"
+      },
+      {
+        "selector": ".product-detail__seller-name",
+        "content_role": ".product-detail__seller-name 的 color",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".product-detail__seller-name",
+        "content_role": ".product-detail__seller-name 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--heading-xs-font-size)"
+      },
+      {
+        "selector": ".product-detail__seller-name",
+        "content_role": ".product-detail__seller-name 的 font-weight",
+        "css_property": "font-weight",
+        "token": "var(--heading-xs-font-weight)"
+      },
+      {
+        "selector": ".product-detail__seller-name",
+        "content_role": ".product-detail__seller-name 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--heading-xs-line-height)"
+      },
+      {
+        "selector": ".product-detail__section-body",
+        "content_role": ".product-detail__section-body 的 color",
+        "css_property": "color",
+        "token": "var(--text-secondary)"
+      },
+      {
+        "selector": ".product-detail__section-body",
+        "content_role": ".product-detail__section-body 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--body-md-font-size)"
+      },
+      {
+        "selector": ".product-detail__section-body",
+        "content_role": ".product-detail__section-body 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--body-md-line-height)"
+      },
+      {
+        "selector": ".product-detail__detail-copy",
+        "content_role": ".product-detail__detail-copy 的 color",
+        "css_property": "color",
+        "token": "var(--text-secondary)"
+      },
+      {
+        "selector": ".product-detail__detail-copy",
+        "content_role": ".product-detail__detail-copy 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--body-md-font-size)"
+      },
+      {
+        "selector": ".product-detail__detail-copy",
+        "content_role": ".product-detail__detail-copy 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--body-md-line-height)"
+      },
+      {
+        "selector": ".product-detail__list",
+        "content_role": ".product-detail__list 的 color",
+        "css_property": "color",
+        "token": "var(--text-secondary)"
+      },
+      {
+        "selector": ".product-detail__list",
+        "content_role": ".product-detail__list 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--body-md-font-size)"
+      },
+      {
+        "selector": ".product-detail__list",
+        "content_role": ".product-detail__list 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--body-md-line-height)"
+      },
+      {
+        "selector": ".product-detail__list",
+        "content_role": ".product-detail__list 的 gap",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".product-detail__detail-copy",
+        "content_role": ".product-detail__detail-copy 的 gap",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".product-detail__seller",
+        "content_role": ".product-detail__seller 的 gap",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".product-detail__seller-type",
+        "content_role": ".product-detail__seller-type 的 color",
+        "css_property": "color",
+        "token": "var(--text-tertiary)"
+      },
+      {
+        "selector": ".product-detail__seller-type",
+        "content_role": ".product-detail__seller-type 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--body-sm-font-size)"
+      },
+      {
+        "selector": ".product-detail__seller-type",
+        "content_role": ".product-detail__seller-type 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--body-sm-line-height)"
+      }
+    ],
+    "component_bindings": [
+      {
+        "binding_id": "product-detail-navbar",
+        "slug": "navbar",
+        "reason": "普通二级商品详情使用返回箭头和居中标题",
+        "variant_dimensions": {
+          "leftControl": "back-icon",
+          "titleAlignment": "center",
+          "actions": "none",
+          "spacing": "default",
+          "pageTransition": "push",
+          "position": "sticky"
+        }
+      },
+      {
+        "binding_id": "product-detail-image",
+        "slug": "image",
+        "reason": "展示商品主图",
+        "variant_dimensions": {
+          "fit": "cover",
+          "size": "custom-wide",
+          "radius": "none",
+          "state": "loaded",
+          "interaction": "static"
+        }
+      },
+      {
+        "binding_id": "product-detail-card",
+        "slug": "card",
+        "reason": "按传统电商信息结构分组承载价格卖点、规格属性和详情说明",
+        "variant_dimensions": {
+          "base": "auto",
+          "surface": "surface"
+        }
+      },
+      {
+        "binding_id": "product-detail-avatar",
+        "slug": "avatar",
+        "reason": "展示店铺或发布者身份",
+        "variant_dimensions": {
+          "type": "image",
+          "size": "40"
+        }
+      },
+      {
+        "binding_id": "product-detail-tag",
+        "slug": "tag",
+        "reason": "展示店铺或发布者状态",
+        "variant_dimensions": {
+          "size": "20",
+          "theme": "gray",
+          "state": "normal",
+          "affordance": "display-only"
+        }
+      },
+      {
+        "binding_id": "product-detail-actions",
+        "slug": "bottom-action-bar",
+        "reason": "固定承载联系卖家与立即购买入口",
+        "variant_dimensions": {
+          "type": "primary-secondary-actions",
+          "iconMode": "text-only",
+          "state": "default",
+          "overflow": "expanded"
+        }
+      },
+      {
+        "binding_id": "product-detail-contact",
+        "slug": "button",
+        "reason": "弱化的联系卖家入口",
+        "variant_dimensions": {
+          "emphasis": "weak",
+          "size": "md",
+          "iconMode": "text-only",
+          "state": "default"
+        }
+      },
+      {
+        "binding_id": "product-detail-buy",
+        "slug": "button",
+        "reason": "商品详情页唯一强调的购买入口；本期点击明确提示边界",
+        "variant_dimensions": {
+          "emphasis": "strong",
+          "size": "md",
+          "iconMode": "text-only",
+          "state": "default"
+        }
+      }
+    ],
+    "layout_contract": {
+      "mode": "composed",
+      "source": "references/design-decisions.md",
+      "selection_reason": "商品详情是次级普通 Push 页面；采用 M0 通栏主图、内部信息分组与固定底部双操作，遵循传统电商阅读顺序。",
+      "page_edge_mode": "M0",
+      "mutable_regions": [
+        ".product-detail__hero",
+        ".product-detail__body",
+        ".product-detail__seller"
+      ]
+    },
+    "interaction_contract": [
+      {
+        "dom_id": "product-detail-back",
+        "target": "navigation:back"
+      },
+      {
+        "dom_id": "product-contact",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "product-buy",
+        "target": "feedback:toast"
+      }
+    ],
+    "state_contract": [
+      {
+        "state_id": "product-detail-ready",
+        "initial": true,
+        "trigger": "从动态首页或动态详情进入",
+        "visible_result": "按传统电商顺序展示商品图片、价格、名称、卖点、规格属性、详情说明和卖家信息",
+        "fallback": "使用本地示例商品",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "product-commerce-entry-feedback",
+        "initial": false,
+        "trigger": "点击联系卖家或立即购买",
+        "visible_result": "Toast 明确提示对应能力本期暂未开放，不产生联系或订单",
+        "fallback": "停留当前商品详情",
+        "persistence": "memory"
+      }
+    ]
+  },
+  "decisions": [
+    {
+      "dd_id": "product-detail-navbar",
+      "binding_id": "product-detail-navbar",
+      "component_slug": "navbar"
+    },
+    {
+      "dd_id": "product-detail-tag-seed",
+      "binding_id": "product-detail-tag",
+      "component_slug": "tag"
+    },
+    {
+      "dd_id": "product-detail-actions",
+      "binding_id": "product-detail-actions",
+      "component_slug": "bottom-action-bar"
+    },
+    {
+      "dd_id": "product-detail-contact",
+      "binding_id": "product-detail-contact",
+      "component_slug": "button"
+    },
+    {
+      "dd_id": "product-detail-buy",
+      "binding_id": "product-detail-buy",
+      "component_slug": "button"
+    }
+  ],
+  "generation_evidence": {
+    "scene_js": "wego-app/scenes/商品详情/scene.js",
+    "scene_css": "wego-app/scenes/商品详情/scene.css",
+    "source_sha256": "6c4400383557c009b4b8e3b07d8e2c659e80b87324b75beeb3c94390f2099c3a",
+    "dom_ids": [
+      "product-detail-back",
+      "product-contact",
+      "product-buy"
+    ],
+    "component_count": 5,
+    "visualCheck": {
+      "status": "passed",
+      "viewports": [
+        375,
+        393
+      ],
+      "checked_at": "2026-07-22T02:44:17.000Z",
+      "scope": "商品主图、价格卖点、规格属性、详情卖家信息、固定底部交易入口与嵌套二级页返回。",
+      "checks": {
+        "horizontal_overflow": true,
+        "overlap": true,
+        "clipping": true,
+        "action_legibility": true,
+        "primary_focus": true,
+        "state_feedback": true
+      }
+    }
+  }
+}
