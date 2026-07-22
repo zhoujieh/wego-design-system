@@ -32,7 +32,7 @@
 .form-body__label{width:96px;flex-shrink:0;font-size:var(--body-lg-font-size);font-weight:var(--font-weight-regular);color:var(--text-default);line-height:var(--body-lg-line-height);box-sizing:border-box;-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden;font-feature-settings:"zero"}
 .form-body__label--required{display:flex;align-items:center;gap:4px;-webkit-box-orient:initial;-webkit-line-clamp:unset}
 .form-body__label-text{display:block;min-width:0}
-.form-body__required{flex-shrink:0;margin-top:0;font-size:var(--body-sm-font-size);font-weight:var(--font-weight-regular);line-height:1;color:var(--text-disabled);font-feature-settings:"zero"}
+.form-body__required{flex-shrink:0;margin-top:0;font-size:var(--body-sm-font-size);font-weight:var(--font-weight-regular);line-height:1;color:var(--status-danger-default);font-feature-settings:"zero"}
 .form-body--error .form-body__label{color:var(--text-default)}
 .form-body__action{flex:1;min-width:0;position:relative}
 
@@ -199,7 +199,7 @@
     </div>
   </div>
   <div class="form-body form-body--preserve-content-align" data-validate="phone">
-    <div class="form-body__label form-body__label--required"><span class="form-body__label-text">手机号</span><span class="form-body__required">(必填)</span></div>
+    <div class="form-body__label form-body__label--required"><span class="form-body__label-text">手机号</span><span class="form-body__required">*</span></div>
     <div class="form-body__action">
       <div class="form-body__phone">
         <span class="form-body__phone-prefix">+86</span>
@@ -297,14 +297,14 @@
     </div>
   </div>
   <div class="form-body" data-validate="text-required">
-    <div class="form-body__label form-body__label--required"><span class="form-body__label-text">联系人</span><span class="form-body__required">(必填)</span></div>
+    <div class="form-body__label form-body__label--required"><span class="form-body__label-text">联系人</span><span class="form-body__required">*</span></div>
     <div class="form-body__action">
       <input type="text" value="王小满">
       <span class="form-body__error">联系人不能为空</span>
     </div>
   </div>
   <div class="form-body form-body--preserve-content-align" data-validate="phone">
-    <div class="form-body__label form-body__label--required"><span class="form-body__label-text">手机号</span><span class="form-body__required">(必填)</span></div>
+    <div class="form-body__label form-body__label--required"><span class="form-body__label-text">手机号</span><span class="form-body__required">*</span></div>
     <div class="form-body__action">
       <div class="form-body__phone">
         <span class="form-body__phone-prefix">+86</span>

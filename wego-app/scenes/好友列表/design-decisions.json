@@ -14,7 +14,7 @@
     "source": "library-consumption.json#/appRuntime/presentationTypes"
   },
   "prompt_contract": {
-    "design_system_version": 417,
+    "design_system_version": 433,
     "token_bindings": [
       {
         "selector": ".friend-list",
@@ -321,6 +321,19 @@
         }
       },
       {
+        "binding_id": "friend-add-form-fields",
+        "slug": "form",
+        "reason": "新建好友表单字段组，复用 entity-form 范式的 form-group / form-body 结构，覆盖头像上传、昵称输入、手机号前缀、分组选择和备注长文本；必填字段通过 form-body__label--required + form-body__required 使用红色星号",
+        "variant_dimensions": {
+          "layout": "vertical",
+          "alignment": "default",
+          "inputType": "custom",
+          "state": "default",
+          "modifier": "label-required",
+          "rightAction": "upload"
+        }
+      },
+      {
         "binding_id": "friend-group-sheet",
         "slug": "actionsheet",
         "reason": "选择好友分组底部面板，通过 ctx.openSheet 消费；渲染完整 .actionsheet 根节点 + .actionsheet__panel 及子内容，关闭行为覆盖 cancel 与 mask",
@@ -454,7 +467,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/好友列表/scene.js",
     "scene_css": "wego-app/scenes/好友列表/scene.css",
-    "source_sha256": "2ce0e92a5703c853d0edc67d2e6e3bb3d0dcc5ede0c36ad8453d14db78247bfe",
+    "source_sha256": "7c748a2b110868692831fa70ae7b1a1437ed5f940618f1dbaa6e776d5fe4e529",
     "dom_ids": [
       "add-friend-entry",
       "sort-toggle",

@@ -13,7 +13,7 @@
     "source": "library-consumption.json#/appRuntime/presentationTypes"
   },
   "prompt_contract": {
-    "design_system_version": 417,
+    "design_system_version": 433,
     "token_bindings": [
       { "selector": ".friend-list", "content_role": "页面背景", "css_property": "background", "token": "var(--bg-page)" },
       { "selector": ".friend-list", "content_role": "页面文字", "css_property": "color", "token": "var(--text-default)" },
@@ -64,6 +64,7 @@
       { "binding_id": "friend-navbar", "slug": "navbar", "reason": "承载好友页面左对齐大标题、新建好友与排序切换入口", "variant_dimensions": { "leftControl": "none", "titleAlignment": "left-wide", "actions": "icon", "rightActionType": "icon", "spacing": "default", "pageTransition": "push", "position": "sticky" } },
       { "binding_id": "friend-search", "slug": "search", "reason": "提供好友昵称搜索入口，白底搜索框放在灰底页面上，输入后显示清除并支持继续输入", "variant_dimensions": { "size": "md", "surface": "white", "mode": "text", "state": "empty", "hostPattern": "inline", "internalActions": "clear" } },
       { "binding_id": "friend-add-form-modal", "slug": "modal", "reason": "新建好友全屏模态容器，fullscreen 变体，通过 ctx.openFullScreenModal 消费；内含 navbar + 表单 body，蒙层与动画由组件自身承担；modal__body 无默认 padding，本场景无底部 action/cancel，body 必须加 modal__body--safe-bottom 预留 40px + safe-area-bottom；表单走 entity-form 范式（M0 通栏白底、form-group__content 不加 --card）", "variant_dimensions": { "variant": "fullscreen", "title": "default", "action": "none", "state": "open" } },
+      { "binding_id": "friend-add-form-fields", "slug": "form", "reason": "新建好友表单字段组，复用 entity-form 范式的 form-group / form-body 结构，覆盖头像上传、昵称输入、手机号前缀、分组选择和备注长文本；必填字段通过 form-body__label--required + form-body__required 使用红色星号", "variant_dimensions": { "layout": "vertical", "alignment": "default", "inputType": "custom", "state": "default", "modifier": "label-required", "rightAction": "upload" } },
       { "binding_id": "friend-group-sheet", "slug": "actionsheet", "reason": "选择好友分组底部面板，通过 ctx.openSheet 消费；渲染完整 .actionsheet 根节点 + .actionsheet__panel 及子内容，关闭行为覆盖 cancel 与 mask", "variant_dimensions": { "mode": "select", "header": "text", "item": "text", "state": "open" } },
       { "binding_id": "friend-source-sheet", "slug": "actionsheet", "reason": "选择好友来源渠道底部面板，通过 ctx.openSheet 消费；渲染完整 .actionsheet 根节点 + .actionsheet__panel 及子内容，关闭行为覆盖 cancel 与 mask", "variant_dimensions": { "mode": "select", "header": "text", "item": "text", "state": "open" } }
     ],
@@ -282,7 +283,7 @@ function addFriendFormTemplate() {
     +     '</div>'
     +     '<div class="modal__body modal__body--safe-bottom">'
     +       '<div class="friend-add-form__body">'
-    +         '<div class="form-group">'
+    +         '<div class="form-group" data-dd-id="friend-add-form-basic" data-component-slug="form" data-component-binding="friend-add-form-fields">'
     +           '<div class="form-group__title">基本信息</div>'
     +           '<div class="form-group__content">'
     +             '<div class="form-body form-body--preserve-content-align">'
@@ -310,7 +311,7 @@ function addFriendFormTemplate() {
     +             '</div>'
     +           '</div>'
     +         '</div>'
-    +         '<div class="form-group">'
+    +         '<div class="form-group" data-dd-id="friend-add-form-groups" data-component-slug="form" data-component-binding="friend-add-form-fields">'
         +   '<div class="form-group__title">分组与标签</div>'
         +   '<div class="form-group__content">'
         +     '<div class="form-body form-body--clickable" data-dom-id="select-friend-group">'
@@ -328,7 +329,7 @@ function addFriendFormTemplate() {
         +     '</div>'
         +   '</div>'
         + '</div>'
-        + '<div class="form-group">'
+        + '<div class="form-group" data-dd-id="friend-add-form-source" data-component-slug="form" data-component-binding="friend-add-form-fields">'
         +   '<div class="form-group__title">来源与验证</div>'
         +   '<div class="form-group__content">'
         +     '<div class="form-body form-body--clickable" data-dom-id="select-friend-source">'

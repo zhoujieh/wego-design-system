@@ -155,12 +155,12 @@
     {
       "name": "requiredLabel",
       "selector": ".form-body__label.form-body__label--required",
-      "role": "必填字段标题，标题后拼接灰色说明文本"
+      "role": "必填字段标题，标题后拼接红色星号"
     },
     {
       "name": "requiredText",
       "selector": ".form-body__required",
-      "role": "必填说明文本，文案固定为 (必填)"
+      "role": "必填星号，文案固定为 *"
     },
     {
       "name": "action",
@@ -217,7 +217,7 @@
     "横向布局用于常规设置和资料编辑，纵向布局用于较长输入或说明内容。",
     "select、upload、icon actions 等增强能力都挂在同一字段容器体系内。",
     "错误文案与计数字段占用同一消息槽位，不新增第二套反馈结构；默认只显示一条文案，长文案单行省略。",
-    "必填字段通过 .form-body__label--required + .form-body__required 组合表达，标题与灰色 (必填) 文案保持同一行垂直居中，不使用红色星号。",
+    "必填字段通过 .form-body__label--required + .form-body__required 组合表达，标题与红色星号保持同一行垂直居中。",
     "同一组 form 内如果需要保持统一对齐基线，不要混用默认 label 宽度和 label-w80 / label-w120；带前缀字段所在组优先保持统一 label 宽度。",
     "同一页面存在多组 form-group / cell-group 时，应先确定页面级对齐策略，并让各组的 label 宽度、右侧操作列和内容起点保持一致；不要一组左、一组右、一组自定义宽度地临时拼接。",
     "右侧辅助操作统一挂在 .form-body__right-btn，不靠 inline style 单独补尺寸和颜色。",
@@ -249,7 +249,7 @@
   "usageHints": [
     "适合资料编辑、业务设置、权限配置等高密度表单页。页面内容通栏（M0）时 .form-group__content 不加 card 修饰；页面有横向留白（M8）时才加 --card 圆角。",
     "手机号和金额类型沿用统一字段骨架，不单独发明业务组件。",
-    "必填字段优先通过 .form-body__label--required + .form-body__required 表达，手机号区号前缀使用只读文本 .form-body__phone-prefix。",
+    "必填字段优先通过 .form-body__label--required + .form-body__required 表达，必填标记使用红色星号；手机号区号前缀使用只读文本 .form-body__phone-prefix。",
     "字段内容统一左对齐，保持页面视觉一致性。",
     "手机号区号前缀行和金额货币前缀行都使用 .form-body--preserve-content-align，让前缀左缘成为同组字段的稳定起点。",
     "金额字段的货币符号与前缀字段一起归到三段式整组左对齐。",

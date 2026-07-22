@@ -172,8 +172,8 @@
         {
           "id": "entity-form-required-and-prefix",
           "trigger": "字段有必填约束或带只读前缀（如 +86 区号、货币符号）",
-          "use": "使用 form-body__label--required + form-body__required 表达必填，使用 form-body__phone + form-body__phone-prefix + form-body__phone-divider 表达前缀",
-          "avoid": "用红色星号或自造必填标记，为区号单独写样式"
+          "use": "使用 form-body__label--required + form-body__required 表达红色星号必填，使用 form-body__phone + form-body__phone-prefix + form-body__phone-divider 表达前缀",
+          "avoid": "自造必填标记、写死必填颜色，或为区号单独写样式"
         },
         {
           "id": "entity-form-actionsheet-select",
