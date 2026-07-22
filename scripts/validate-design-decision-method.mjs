@@ -54,7 +54,6 @@ for (const statement of ['`wego-product` 创建或变更 `prototype_brief`', '`w
   if (!content.includes(statement)) add('principle.shared_consumer', `共享原则缺少产品/设计共用约束：${statement}`);
 }
 if (!content.includes('`design-decisions.json` 不是设计前权威输入')) add('input.decisions_json', '必须明确 design-decisions.json 不是设计前权威输入');
-if (!content.includes('先读 Preview，再读对应契约')) add('component.preview_first', '必须明确 Preview-first 组件消费顺序');
 
 const productSkill = readOptional('.codex/skills/wego-product/SKILL.md');
 const designSkill = readOptional('.codex/skills/wego-design/SKILL.md');
@@ -69,7 +68,11 @@ const forbidden = [
   ['Legacy Traceability', '设计决策原则不得保留迁移历史'],
   ['3–6', '设计决策原则不得强制组件数量'],
   ['assets/image/clothing/', '设计决策原则不得限制内容图片目录或据图编造文案'],
-  ['overflow：hidden', '设计决策原则不得用 overflow:hidden 禁用页面滚动']
+  ['overflow：hidden', '设计决策原则不得用 overflow:hidden 禁用页面滚动'],
+  ['Preview 决定实际 DOM', '设计决策原则不得重复 Preview-first 执行细则'],
+  ['视觉用途命中已注册组件时必须直接消费正式组件', '设计决策原则不得重复组件消费清单'],
+  ['只使用实际语义 Token', '设计决策原则不得重复 Token 消费细则'],
+  ['app-center SVG', '设计决策原则不得重复资产消费细则']
 ];
 for (const [token, message] of forbidden) if (content.includes(token)) add('document.redundancy', message);
 
@@ -81,9 +84,8 @@ for (const rule of rules) {
   if (!existsSource(rule.source)) add('rule.source_missing', `rule_id ${rule.id} 指向不存在来源：${rule.source}`);
 }
 const requiredRules = [
-  'wego-scene-decision-scope', 'wego-page-pattern-layout-contract', 'wego-page-edge-modes', 'wego-semantic-color-consumption',
-  'wego-content-role-typography', 'no-large-color-background-app-center-svg-priority',
-  'preview-first-component-consumption', 'component-visual-usage-consume-registered',
+  'wego-scene-decision-scope', 'wego-page-pattern-layout-contract',
+  'wego-content-role-typography',
   'wego-state-interaction-contract', 'wego-design-system-gap-boundary'
 ];
 for (const id of requiredRules) if (!ruleIds.has(id)) add('rule.required_missing', `缺少必需 rule_id：${id}`);
@@ -96,6 +98,7 @@ else {
     const canonical = candidate.rule_ownership?.canonical;
     const landing = candidate.promotion_landing;
     const pointsToDocument = canonical?.file === canonicalPath || landing?.file === canonicalPath;
+    if (canonical?.file === canonicalPath && candidate.rule_ownership?.category !== 'shared-principle') add('candidate.wrong_category', `指向设计决策原则的候选必须使用 shared-principle 归属：${candidate.id}`, candidateFile);
     if (canonical?.file === canonicalPath && candidate.status !== 'promoted') add('candidate.unpromoted_document', `未晋升候选不得指向设计决策原则文档：${candidate.id}`, candidateFile);
     if (pointsToDocument && candidate.status === 'promoted' && !ruleIds.has((landing || canonical).rule_id)) add('candidate.rule_missing', `已晋升候选缺少文档 rule_id：${candidate.id}`, candidateFile);
   }

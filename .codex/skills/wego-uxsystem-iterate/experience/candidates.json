@@ -859,7 +859,7 @@
       "secondary_owners": [],
       "ownership_reason": "字号字重决策属于设计判断方法。",
       "rule_ownership": {
-        "category": "skill-runtime-flow",
+        "category": "shared-principle",
         "canonical": {
           "file": ".codex/skills/shared/references/design-decisions.md",
           "locator": "rule-id: wego-content-role-typography",
@@ -920,13 +920,13 @@
       "secondary_owners": [
         "wego-uxsystem-iterate"
       ],
-      "ownership_reason": "组件消费时的 gap 检测属于设计判断方法。",
+      "ownership_reason": "组件消费时的 gap 检测属于设计消费规则。",
       "rule_ownership": {
-        "category": "skill-runtime-flow",
+        "category": "design-consumption",
         "canonical": {
-          "file": ".codex/skills/shared/references/design-decisions.md",
-          "locator": "rule-id: preview-first-component-consumption",
-          "rule_id": "preview-first-component-consumption"
+          "file": ".codex/skills/wego-design/library-consumption.json",
+          "locator": "/globalConsumptionRules",
+          "rule_id": "contract-css-implementation-check"
         }
       },
       "runtime_reachability": {
@@ -982,13 +982,13 @@
       "threshold": 1,
       "primary_owner": "wego-design",
       "secondary_owners": [],
-      "ownership_reason": "颜色 Token 语义判断属于设计判断方法。",
+      "ownership_reason": "颜色 Token 语义判断属于设计消费规则。",
       "rule_ownership": {
-        "category": "skill-runtime-flow",
+        "category": "design-consumption",
         "canonical": {
-          "file": ".codex/skills/shared/references/design-decisions.md",
-          "locator": "rule-id: wego-semantic-color-consumption",
-          "rule_id": "wego-semantic-color-consumption"
+          "file": ".codex/skills/wego-design/library-consumption.json",
+          "locator": "/globalConsumptionRules",
+          "rule_id": "semantic-token-usage"
         }
       },
       "runtime_reachability": {
@@ -1012,13 +1012,13 @@
       "threshold": 1,
       "primary_owner": "wego-design",
       "secondary_owners": [],
-      "ownership_reason": "变体适用性判断属于设计判断方法。",
+      "ownership_reason": "变体适用性判断属于设计消费规则。",
       "rule_ownership": {
-        "category": "skill-runtime-flow",
+        "category": "design-consumption",
         "canonical": {
-          "file": ".codex/skills/shared/references/design-decisions.md",
-          "locator": "rule-id: preview-first-component-consumption",
-          "rule_id": "preview-first-component-consumption"
+          "file": ".codex/skills/wego-design/library-consumption.json",
+          "locator": "/globalConsumptionRules",
+          "rule_id": "component-variant-applicability"
         }
       },
       "runtime_reachability": {
@@ -1221,12 +1221,12 @@
       "secondary_owners": [
         "wego-design"
       ],
-      "ownership_reason": "组件消费边界属于设计判断方法。",
+      "ownership_reason": "组件消费边界属于设计消费规则。",
       "rule_ownership": {
-        "category": "skill-runtime-flow",
+        "category": "design-consumption",
         "canonical": {
-          "file": ".codex/skills/shared/references/design-decisions.md",
-          "locator": "rule-id: component-visual-usage-consume-registered",
+          "file": ".codex/skills/wego-design/library-consumption.json",
+          "locator": "/globalConsumptionRules",
           "rule_id": "component-visual-usage-consume-registered"
         }
       },
@@ -1243,8 +1243,8 @@
       "updated_at": "2026-07-13T00:00:00Z",
       "promoted_at": "2026-07-13T00:00:00Z",
       "promotion_landing": {
-        "file": ".codex/skills/shared/references/design-decisions.md",
-        "locator": "rule-id: component-visual-usage-consume-registered",
+        "file": ".codex/skills/wego-design/library-consumption.json",
+        "locator": "/globalConsumptionRules",
         "rule_id": "component-visual-usage-consume-registered",
         "constraint_area": "组件消费优先级",
         "description": "视觉用途命中已注册组件时必须直接消费正式组件；业务 class 只承担区域关系和业务胶水，不复刻组件视觉或覆盖组件内部样式。"
@@ -1261,13 +1261,13 @@
       "secondary_owners": [
         "wego-design"
       ],
-      "ownership_reason": "视觉克制原则和图标资产消费属于设计判断方法。",
+      "ownership_reason": "视觉克制原则和图标资产消费属于设计消费规则。",
       "rule_ownership": {
-        "category": "skill-runtime-flow",
+        "category": "design-consumption",
         "canonical": {
-          "file": ".codex/skills/shared/references/design-decisions.md",
-          "locator": "rule-id: no-large-color-background-app-center-svg-priority",
-          "rule_id": "no-large-color-background-app-center-svg-priority"
+          "file": ".codex/skills/wego-design/library-consumption.json",
+          "locator": "/globalConsumptionRules",
+          "rule_id": "asset-semantic-usage"
         }
       },
       "runtime_reachability": {
@@ -1283,9 +1283,9 @@
       "updated_at": "2026-07-13T00:00:00Z",
       "promoted_at": "2026-07-13T00:00:00Z",
       "promotion_landing": {
-        "file": ".codex/skills/shared/references/design-decisions.md",
-        "locator": "rule-id: no-large-color-background-app-center-svg-priority",
-        "rule_id": "no-large-color-background-app-center-svg-priority",
+        "file": ".codex/skills/wego-design/library-consumption.json",
+        "locator": "/globalConsumptionRules",
+        "rule_id": "asset-semantic-usage",
         "constraint_area": "大面积彩色背景禁止与 app-center SVG 优先",
         "description": "禁止大面积彩色/渐变背景，状态色 Token 只用于点缀。功能入口图标优先使用 assets/icons/app-center/ SVG 资源，无对应 SVG 时才用 iconfont 并查证类名。"
       }

@@ -80,35 +80,19 @@ authoritySources:
 
 先按业务任务、surface 角色和状态匹配明确 `pagePatterns`。命中时使用对应范式；未命中时采用 `composed`，按首要任务、信息层级、状态和正式组件能力自主组合，不伪造页面范式，也不复制 UI Kit 宿主、演示文案或私有 class。
 
-<!-- rule-id: wego-page-edge-modes; source-ref: ../../wego-design/library-consumption.json#/pageEdgeModes -->
-
-页面边距只选择已登记的 `M0`、`M8`、`M32`：通栏连续内容默认 `M0`，卡片模式使用 `M8`，明确的大留白沉浸展示才使用 `M32`。选择结果和理由写入 `layout_contract`，不为视觉变化发明中间值。
+页面边距、presentation 和布局合同的具体可选值由设计消费源与场景合同决定；本文只裁决是否需要通栏、卡片化或沉浸式表达，不为视觉变化发明中间层级。
 
 ## 视觉与资产
 
-<!-- rule-id: wego-semantic-color-consumption; source-ref: ../../wego-design/colors_and_type.css -->
-
-颜色、字号、字重、行高、间距和圆角只使用实际语义 Token。中性色承载内容，品牌绿色承担主行动，状态色只表达对应状态且不大面积铺底；不得根据外观猜变量名或直接写视觉值。
-
 <!-- rule-id: wego-content-role-typography; source-ref: ../../wego-design/colors_and_type.css -->
 
-对象名称、标题和关键识别信息使用 heading 语义；正文和字段值使用 body 语义；时间、提示和低优先级元数据使用较弱层级。页面只保留一个明确的页面级视觉焦点。
+对象名称、标题和关键识别信息应高于正文与字段值；时间、提示和低优先级元数据应弱化。页面只保留一个明确的视觉焦点，具体 Token、字号、字重、行高、间距、圆角和资产路径以设计系统实际消费源为准。
 
-<!-- rule-id: no-large-color-background-app-center-svg-priority; source-ref: ../../wego-design/library-consumption.json -->
-
-身份、应用、内容和功能资产必须按语义使用，禁止互相冒充。功能入口优先选择已交付且语义匹配的 app-center SVG；无匹配资产时才使用已查证的 iconfont 或文字。禁止大面积彩色、渐变背景和为图标临时发明多套彩色底板。
+中性色应承载主要内容，品牌色承担主行动，状态色只表达对应状态。禁止用大面积彩色、渐变背景或装饰性图标底板抢夺页面主任务。
 
 ## 组件消费
 
-<!-- rule-id: preview-first-component-consumption; source-ref: ../../wego-design/library-consumption.json -->
-
-只选择当前页面实际需要的组件。每个命中组件先读 Preview，再读对应契约：Preview 决定实际 DOM、class、Token 和状态表现，契约决定语义、合法变体、行为和边界。不得扫描全量组件后拼凑页面。
-
-<!-- rule-id: component-visual-usage-consume-registered; source-ref: ../../wego-design/components/index.json -->
-
-视觉用途命中已注册组件时必须直接消费正式组件，例如标签用 `tag`、角标用 `badge`、操作按钮用 `button`、列表行用 `cell`、头像用 `avatar`、文本操作用 `link`。业务 class 只承担区域关系和业务胶水，不复刻组件视觉或覆盖组件内部样式。
-
-优先使用稳定且适合当前容器的变体；只在契约允许的组合范围内自由组合。组件、变体或 presentation 确实无法覆盖时，不在场景内自造替代组件。
+页面应优先复用正式设计系统能力。组件选择先服从业务任务和信息层级，再由设计消费源决定 Preview-first 顺序、合法变体、DOM、class、Token 和资产用法。组件、变体或 presentation 确实无法覆盖时，不在场景内自造替代组件。
 
 ## 状态与交互
 

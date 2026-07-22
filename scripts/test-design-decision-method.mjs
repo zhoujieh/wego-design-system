@@ -27,8 +27,9 @@ try {
   if (run(temp).status === 0) throw new Error('重复合同模板应被守卫拦截');
   fs.writeFileSync(temp, original);
   const candidates = JSON.parse(fs.readFileSync(candidateSource, 'utf8'));
-  const candidate = candidates.candidates.find(item => item.id === 'exp-component-visual-usage-must-consume-registered-component');
-  candidate.promotion_landing.rule_id = 'missing-rule-id';
+  const candidate = candidates.candidates.find(item => item.id === 'exp-font-size-weight-decision-by-content-role');
+  candidate.rule_ownership.canonical.rule_id = 'missing-rule-id';
+  candidate.rule_ownership.canonical.locator = 'rule-id: missing-rule-id';
   fs.writeFileSync(candidateTemp, `${JSON.stringify(candidates, null, 2)}\n`);
   if (run(temp, candidateTemp).status === 0) throw new Error('候选与规则 ID 断链应被守卫拦截');
   console.log('设计决策原则守卫测试通过。');

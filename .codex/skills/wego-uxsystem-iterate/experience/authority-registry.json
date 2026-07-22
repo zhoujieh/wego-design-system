@@ -4,6 +4,10 @@
   "categories": {
     "skill-entry": { "paths": [".codex/skills/*/SKILL.md"], "requiresEntryScope": true },
     "skill-runtime-flow": { "paths": [".codex/skills/*/references/*.md"] },
+    "shared-principle": { "paths": [".codex/skills/shared/references/design-decisions.md"] },
+    "product-workflow": { "paths": [".codex/skills/wego-product/references/*.md"] },
+    "scene-contract": { "paths": [".codex/skills/wego-design/references/scene-contract.md"] },
+    "design-consumption": { "paths": [".codex/skills/wego-design/library-consumption.json"] },
     "component-contract": { "paths": [".codex/skills/wego-design/components/*.json"] },
     "design-system": { "paths": [".codex/skills/wego-design/*.css", ".codex/skills/wego-design/css.json"] },
     "ui-kit": { "paths": [".codex/skills/wego-design/uikit-plan.json", ".codex/skills/wego-design/ui_kits/*/index.html"] },

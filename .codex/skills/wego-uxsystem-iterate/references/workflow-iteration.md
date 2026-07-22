@@ -8,7 +8,7 @@
 
 ## 2. 归属
 
-按“问题首次产生 → 应做正确决定的技能 → 唯一权威源 → 运行时消费者 → 验收守卫”判断。
+按“问题首次产生 → 应做正确决定的技能 → 唯一权威源 → 运行时消费者 → 验收守卫”判断。正式升级前必须先对比目标权威源和相邻消费者；已有同义规则时只合并、补齐或修正追溯，不新增平行表述。
 
 - 业务目标、范围、状态、入口：wego-product。
 - 场景设计消费、组件计划、路由、交互、状态、视觉：wego-design。
@@ -18,7 +18,7 @@
 
 候选只写 `experience/candidates.json`。同类问题累计证据；达到阈值后变为 `awaiting-confirmation`，用户确认前不得修改正式规则。
 
-确认后必须写清 `applies_when`、`avoid_when`、`exceptions`、`fallback`、唯一落点、运行时消费者和验证守卫。顶层页面判断可落入 `.codex/skills/shared/references/design-decisions.md` 的前提是：它跨场景复用、直接约束产品阶段 `prototype_brief` 或设计阶段 `prompt_contract`，且不属于业务事实、组件内部结构、页面范式、运行时实现、资源消费或测试方法。规则升级后更新候选状态为 `promoted`，并运行：
+确认后必须写清 `applies_when`、`avoid_when`、`exceptions`、`fallback`、唯一落点、运行时消费者和验证守卫。顶层页面判断可落入 `.codex/skills/shared/references/design-decisions.md` 的前提是：它跨场景复用、直接约束产品阶段 `prototype_brief` 或设计阶段 `prompt_contract`，且不属于业务事实、组件内部结构、页面范式、运行时实现、资源消费、场景合同字段或测试方法。组件、Token、资产、UI Kit、宿主运行和守卫类规则必须落到对应权威源，设计原则只保留必要裁决语义。规则升级后更新候选状态为 `promoted`，并运行：
 
 ```bash
 node scripts/validate-component-contract-parity.mjs

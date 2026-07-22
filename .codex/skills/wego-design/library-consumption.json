@@ -37,7 +37,8 @@
     "forbidden": [
       "未读 Preview 即使用组件",
       "命中稳定组件后重写等价结构",
-      "扫描全量组件索引代替页面组件计划"
+      "扫描全量组件索引代替页面组件计划",
+      "声明契约未实现或不适合当前容器的变体后在场景内补样式"
     ]
   },
   "pageEdgeModes": ["M0", "M8", "M32"],
@@ -100,8 +101,12 @@
   },
   "globalConsumptionRules": {
     "previewFirst": "每个命中组件先读 Preview，再读契约；Preview 决定实现结构，契约决定语义和边界。",
-    "componentBoundary": "稳定变体优先。业务 class 只承担场景区域布局，不能替代正式组件结构或覆盖组件内部样式。",
+    "contractImplementationCheck": "消费稳定变体时必须确认 Preview 与 components.css 已实现对应 DOM、class、状态和样式；契约声明但 CSS 不可达时按设计系统缺口处理，不在 scene.css 内补组件内部样式。",
+    "variantApplicability": "只使用适合当前容器和响应式需求的稳定变体；固定尺寸或固定结构变体不适合时，先选择其他正式能力或提交缺口，不把不适合的变体写入合同。",
+    "componentBoundary": "稳定变体优先。视觉用途命中已注册组件时必须直接消费正式组件，例如标签用 tag、角标用 badge、操作按钮用 button、列表行用 cell、头像用 avatar、文本操作用 link。业务 class 只承担场景区域布局，不能替代正式组件结构或覆盖组件内部样式。",
+    "semanticTokenUsage": "颜色、字号、字重、行高、间距和圆角只使用实际语义 Token。中性色承载内容，品牌绿色承担主行动，状态色只表达对应状态且不大面积铺底；不得根据外观猜变量名或直接写视觉值。",
     "uikitBoundary": "UI Kit 只用于页面结构和组件组合；禁止复制 .uikit-shell、.phone-frame、.phone-screen、biz-* 或演示业务内容。",
+    "assetSemantics": "身份、应用、内容和功能资产必须按语义使用，禁止互相冒充。功能入口优先选择已交付且语义匹配的 app-center SVG；无匹配资产时才使用已查证的 iconfont 或文字。禁止为图标临时发明多套彩色底板。",
     "groupStructure": "连续列表和表单优先使用 .cell-group/.form-group 的正式 title 和 content 结构，不额外发明白底壳、圆角壳或 section title；页面边距为 M0（通栏）时，group__content 默认不加 --card 修饰；页面边距为 M8 时，才给 group__content 加 --card 圆角修饰。",
     "appHostBoundary": "唯一宿主是 wego-app/index.html；场景通过 routes.js、scene.js、scene.css 增量接入。",
     "noGeneratedSpecs": "不存在自动生成 specs 规则目录；所有运行时规则必须回到当前权威源。"

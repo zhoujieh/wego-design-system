@@ -5,7 +5,10 @@ import path from 'node:path';
 
 const expectedSkills = new Set(['wego-product', 'wego-design', 'wego-uxsystem-iterate']);
 const requiredHeadings = ['触发与职责边界', '必要输入与运行时入口', '输出契约与跨技能交接'];
-const categories = new Set(['skill-entry', 'skill-runtime-flow', 'component-contract', 'design-system', 'ui-kit', 'token', 'library-consumption', 'agents', 'script', 'test']);
+const categories = new Set([
+  'skill-entry', 'skill-runtime-flow', 'shared-principle', 'product-workflow', 'scene-contract', 'design-consumption',
+  'component-contract', 'design-system', 'ui-kit', 'token', 'library-consumption', 'agents', 'script', 'test'
+]);
 const traceableRuleFiles = new Set([
   '.codex/skills/shared/references/design-decisions.md',
   '.codex/skills/wego-design/references/scene-contract.md'
@@ -93,7 +96,7 @@ export function validateSkillEntryBoundary(root = process.cwd()) {
   try { pool = JSON.parse(read(root, candidatesFile, errors)); } catch { errors.push('经验候选池 JSON 无法解析'); }
   if (!registry || !pool) return errors;
   if (registry.schemaVersion !== 2 || !Array.isArray(registry.entryWhitelist)) errors.push('经验归属注册表必须使用 schemaVersion 2');
-  if (new Set(Object.keys(registry.categories || {})).size !== categories.size || [...categories].some(category => !registry.categories?.[category])) errors.push('经验归属注册表必须定义当前十类归属');
+  if (new Set(Object.keys(registry.categories || {})).size !== categories.size || [...categories].some(category => !registry.categories?.[category])) errors.push('经验归属注册表必须定义当前十四类归属');
   if (pool.schemaVersion !== 2 || !Array.isArray(pool.candidates)) errors.push('经验候选池必须使用 schemaVersion 2 和 candidates 数组');
   for (const candidate of pool.candidates || []) {
     const ownership = candidate.rule_ownership;
@@ -101,6 +104,8 @@ export function validateSkillEntryBoundary(root = process.cwd()) {
     if (!categories.has(ownership?.category) || !canonical?.file || !canonical?.locator || !canonical?.rule_id) { errors.push(`候选 ${candidate.id} 缺少有效 rule_ownership`); continue; }
     const rule = registry.categories[ownership.category];
     if (!rule.paths.some(pattern => pathMatches(canonical.file, pattern))) errors.push(`候选 ${candidate.id} 指向错误归属路径：${canonical.file}`);
+    if (canonical.file === '.codex/skills/shared/references/design-decisions.md' && ownership.category !== 'shared-principle') errors.push(`候选 ${candidate.id} 指向设计原则时必须使用 shared-principle 归属`);
+    if (ownership.category === 'shared-principle' && canonical.file !== '.codex/skills/shared/references/design-decisions.md') errors.push(`候选 ${candidate.id} 的 shared-principle 归属只能落到共享设计原则`);
     const target = path.join(root, canonical.file);
     if (!fs.existsSync(target) || !locatorExists(root, canonical.file, canonical.locator)) errors.push(`候选 ${candidate.id} 的 canonical 定位无效：${canonical.file}#${canonical.locator}`);
     if (/wego-ux(?!system-iterate)|wego-tests|specs\/|interaction[_-]spec|design[_-]plan|design-decisions\.surface_designs|acceptance_report|acceptance-checks|browser-verification/.test(JSON.stringify(candidate))) errors.push(`候选 ${candidate.id} 仍引用已删除的工作流或规则字段`);
