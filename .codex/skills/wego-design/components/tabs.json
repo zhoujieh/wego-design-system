@@ -6,7 +6,7 @@
   "status": "stable",
   "sourceKind": "provided",
   "confidence": "high",
-  "description": "顶部或内容分区标签栏，用于在同一页面层级内切换内容分类。",
+  "description": "顶部或内容分区标签栏，用于在同一页面层级内切换内容分类；每个分类对应相对独立的内容视图，而非对同一列表做筛选或排序。",
   "semanticTypeCandidates": [
     "tabs",
     "category-tabs",
@@ -133,7 +133,9 @@
     "pressed 状态只降低 opacity，不添加背景色变化。",
     "根元素背景固定为 --bg-surface，不随页面背景变化。",
     "标签文案单行截断，standard 最多约 4 个 16px 字宽，mini 最多约 4 个 14px 字宽。",
-    "需要页面主 Tab 时优先使用 bottom-nav；需要方块式选项选择时使用 stack；需要同页内容分类切换时使用 tabs。"
+    "需要页面主 Tab 时优先使用 bottom-nav；需要同页内容分类切换时使用 tabs。",
+    "tabs 的每个标签应代表一个可独立成区的内容分类（如推荐/关注/热榜），而不是对当前列表的过滤条件（如全部/产品/笔记）或排序方式（如推荐/最新）。",
+    "对同一数据做筛选、排序或条件开关时：行内紧凑筛选标签使用 tag，方块式视觉化选项使用 stack，下拉筛选面板使用 popmenu；均不应使用 tabs。"
   ],
   "doNotInvent": [
     "不要自创标签尺寸，只能使用 standard 或 mini。",
@@ -146,7 +148,8 @@
     "不要在 scroll 模式下给 item 设置固定宽度。",
     "不要修改 label 的单行截断策略。",
     "不要为了右箭头贴近文字而改变 icon-left 场景的图标与文字间距。",
-    "不要把 tabs 当作底部主导航或方块选择项使用。"
+    "不要把 tabs 当作底部主导航或方块选择项使用。",
+    "不要把 tabs 用作数据筛选、排序条件或列表过滤开关；行内筛选请使用 tag，方块选项请使用 stack，下拉筛选请使用 popmenu。"
   ],
   "domAnatomy": {
     "root": ".wg-tabs",
@@ -186,7 +189,18 @@
     "cssSource": "preview/component-tabs.html",
     "embedded": false,
     "hostComponent": null,
-    "externalSources": []
+    "externalSources": [
+      {
+        "name": "Material Design - Tabs",
+        "url": "https://m3.material.io/components/tabs/overview",
+        "note": "Tabs organize content at a high level, such as switching between views, data groups, or functions."
+      },
+      {
+        "name": "Apple HIG - Segmented controls",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/segmented-controls",
+        "note": "Use a segmented control to provide closely related choices that affect an object, state, or view; use a tab bar for completely separate sections of an app."
+      }
+    ]
   },
   "unknowns": [],
   "ruleRefs": [
