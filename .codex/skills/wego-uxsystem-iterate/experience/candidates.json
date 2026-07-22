@@ -861,7 +861,7 @@
       "rule_ownership": {
         "category": "skill-runtime-flow",
         "canonical": {
-          "file": ".codex/skills/wego-design/references/design-decisions.md",
+          "file": ".codex/skills/shared/references/design-decisions.md",
           "locator": "rule-id: wego-content-role-typography",
           "rule_id": "wego-content-role-typography"
         }
@@ -924,7 +924,7 @@
       "rule_ownership": {
         "category": "skill-runtime-flow",
         "canonical": {
-          "file": ".codex/skills/wego-design/references/design-decisions.md",
+          "file": ".codex/skills/shared/references/design-decisions.md",
           "locator": "rule-id: preview-first-component-consumption",
           "rule_id": "preview-first-component-consumption"
         }
@@ -986,7 +986,7 @@
       "rule_ownership": {
         "category": "skill-runtime-flow",
         "canonical": {
-          "file": ".codex/skills/wego-design/references/design-decisions.md",
+          "file": ".codex/skills/shared/references/design-decisions.md",
           "locator": "rule-id: wego-semantic-color-consumption",
           "rule_id": "wego-semantic-color-consumption"
         }
@@ -1016,7 +1016,7 @@
       "rule_ownership": {
         "category": "skill-runtime-flow",
         "canonical": {
-          "file": ".codex/skills/wego-design/references/design-decisions.md",
+          "file": ".codex/skills/shared/references/design-decisions.md",
           "locator": "rule-id: preview-first-component-consumption",
           "rule_id": "preview-first-component-consumption"
         }
@@ -1225,7 +1225,7 @@
       "rule_ownership": {
         "category": "skill-runtime-flow",
         "canonical": {
-          "file": ".codex/skills/wego-design/references/design-decisions.md",
+          "file": ".codex/skills/shared/references/design-decisions.md",
           "locator": "rule-id: component-visual-usage-consume-registered",
           "rule_id": "component-visual-usage-consume-registered"
         }
@@ -1243,7 +1243,7 @@
       "updated_at": "2026-07-13T00:00:00Z",
       "promoted_at": "2026-07-13T00:00:00Z",
       "promotion_landing": {
-        "file": ".codex/skills/wego-design/references/design-decisions.md",
+        "file": ".codex/skills/shared/references/design-decisions.md",
         "locator": "rule-id: component-visual-usage-consume-registered",
         "rule_id": "component-visual-usage-consume-registered",
         "constraint_area": "组件消费优先级",
@@ -1265,7 +1265,7 @@
       "rule_ownership": {
         "category": "skill-runtime-flow",
         "canonical": {
-          "file": ".codex/skills/wego-design/references/design-decisions.md",
+          "file": ".codex/skills/shared/references/design-decisions.md",
           "locator": "rule-id: no-large-color-background-app-center-svg-priority",
           "rule_id": "no-large-color-background-app-center-svg-priority"
         }
@@ -1283,7 +1283,7 @@
       "updated_at": "2026-07-13T00:00:00Z",
       "promoted_at": "2026-07-13T00:00:00Z",
       "promotion_landing": {
-        "file": ".codex/skills/wego-design/references/design-decisions.md",
+        "file": ".codex/skills/shared/references/design-decisions.md",
         "locator": "rule-id: no-large-color-background-app-center-svg-priority",
         "rule_id": "no-large-color-background-app-center-svg-priority",
         "constraint_area": "大面积彩色背景禁止与 app-center SVG 优先",

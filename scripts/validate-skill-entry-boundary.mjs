@@ -7,7 +7,7 @@ const expectedSkills = new Set(['wego-product', 'wego-design', 'wego-uxsystem-it
 const requiredHeadings = ['触发与职责边界', '必要输入与运行时入口', '输出契约与跨技能交接'];
 const categories = new Set(['skill-entry', 'skill-runtime-flow', 'component-contract', 'design-system', 'ui-kit', 'token', 'library-consumption', 'agents', 'script', 'test']);
 const traceableRuleFiles = new Set([
-  '.codex/skills/wego-design/references/design-decisions.md',
+  '.codex/skills/shared/references/design-decisions.md',
   '.codex/skills/wego-design/references/scene-contract.md'
 ]);
 
@@ -80,6 +80,11 @@ export function validateSkillEntryBoundary(root = process.cwd()) {
     const references = path.join(skillDir, 'references');
     if (fs.existsSync(references)) for (const entry of fs.readdirSync(references).filter(file => file.endsWith('.md'))) if (!links.has(`references/${entry}`)) errors.push(`${name}/references/${entry} 未由 SKILL.md 直接引用`);
   }
+  const productSkill = read(root, '.codex/skills/wego-product/SKILL.md', errors);
+  const designSkill = read(root, '.codex/skills/wego-design/SKILL.md', errors);
+  if (!productSkill.includes('../shared/references/design-decisions.md')) errors.push('wego-product/SKILL.md 必须直接引用共享设计决策原则');
+  if (!designSkill.includes('../shared/references/design-decisions.md')) errors.push('wego-design/SKILL.md 必须直接引用共享设计决策原则');
+  if (fs.existsSync(path.join(root, '.codex/skills/wego-design/references/design-decisions.md'))) errors.push('设计决策原则不得保留在 wego-design 私有 references 下');
   if (fs.existsSync(path.join(root, '.codex/skills/wego-uxsystem-iterate/references/high-fidelity-prototype-baseline.md'))) errors.push('重复的原型基线 reference 必须删除');
   const registryFile = '.codex/skills/wego-uxsystem-iterate/experience/authority-registry.json';
   const candidatesFile = '.codex/skills/wego-uxsystem-iterate/experience/candidates.json';

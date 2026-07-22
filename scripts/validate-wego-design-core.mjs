@@ -222,7 +222,7 @@ function checkSceneContractTools() {
 
 function checkDesignDecisionPrinciples() {
   const validation = spawnSync(process.execPath, ['scripts/validate-design-decision-method.mjs', '--json'], { cwd: root, encoding: 'utf8' });
-  if (validation.status !== 0) add('error', 'design_decision_principles.validation', (validation.stderr || validation.stdout || '设计决策原则守卫失败').trim(), path.join(libraryRoot, 'references/design-decisions.md'));
+  if (validation.status !== 0) add('error', 'design_decision_principles.validation', (validation.stderr || validation.stdout || '设计决策原则守卫失败').trim(), path.join(root, '.codex/skills/shared/references/design-decisions.md'));
   const tests = spawnSync(process.execPath, ['scripts/test-design-decision-method.mjs'], { cwd: root, encoding: 'utf8' });
   if (tests.status !== 0) add('error', 'design_decision_principles.test', (tests.stderr || tests.stdout || '设计决策原则守卫测试失败').trim(), path.join(root, 'scripts/test-design-decision-method.mjs'));
 }

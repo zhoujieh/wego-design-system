@@ -4,7 +4,7 @@
 
 | 领域 | 权威来源 | 使用方式 |
 | --- | --- | --- |
-| 设计决策原则 | `design-decisions.md` | 所有设计输出先据此裁决清晰、高效、一致与美观。 |
+| 设计决策原则 | `../../shared/references/design-decisions.md` | 产品范围确认和设计输出共用，先据此裁决清晰、高效、一致与美观。 |
 | 实际 CSS 变量 | `../colors_and_type.css` | `:root` 中已声明的变量名是唯一可用 Token 名称。 |
 | Token 结构 | `../css.json` | 仅用于理解 palette、语义和层级，不推导 CSS 变量名。 |
 | 组件注册 | `../components/index.json` | 已注册组件及其 Preview 路径的唯一清单。 |

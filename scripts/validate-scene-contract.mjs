@@ -22,6 +22,7 @@ if (routesFlag >= 0 && !args[routesFlag + 1]) {
 
 const root = process.cwd();
 const libraryRoot = path.join(root, '.codex/skills/wego-design');
+const sharedDesignDecisionsFile = path.join(root, '.codex/skills/shared/references/design-decisions.md');
 const sceneRoot = path.resolve(root, sceneDirectory);
 const sceneJs = path.join(sceneRoot, 'scene.js');
 const sceneCss = path.join(sceneRoot, 'scene.css');
@@ -746,7 +747,8 @@ if (decision) {
 
   const layout = prompt.layout_contract || {};
   const layoutSource = String(layout.source || '').split('#')[0];
-  if (!layoutSource || !fs.existsSync(path.join(libraryRoot, layoutSource))) add('scene.layout_source', 'layout_contract.source 必须指向现存页面范式或设计原则', decisionsFile);
+  const layoutSourceFile = layoutSource === 'references/design-decisions.md' ? sharedDesignDecisionsFile : path.join(libraryRoot, layoutSource || '');
+  if (!layoutSource || !fs.existsSync(layoutSourceFile)) add('scene.layout_source', 'layout_contract.source 必须指向现存页面范式或设计原则', decisionsFile);
   if (!['pattern', 'composed'].includes(decision.layout_mode) || layout.mode !== decision.layout_mode) add('scene.layout_mode', '设计决策与 layout_contract 必须使用相同且合法的 layout_mode', decisionsFile);
   for (const selector of layout.mutable_regions || []) {
     if (!domNodes.some(node => selectorMatchesNode(selector, node)) && !css.includes(selector)) add('scene.mutable_region', `mutable_regions 未命中实际 DOM 或 CSS：${selector}`, decisionsFile);

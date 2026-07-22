@@ -1,26 +1,27 @@
 ---
 schemaVersion: 2
 name: "微购设计决策原则"
-description: "所有微购业务场景设计与修改必须遵循的顶层原则和页面裁决方法。"
+description: "微购产品范围确认与业务场景设计必须共用的顶层原则和页面裁决方法。"
 principleAuthority:
   title: "微购设计决策原则"
   status: "user-confirmed"
   priority: ["clarity", "efficiency", "consistency", "aesthetics"]
 authoritySources:
-  - "../wego-product/references/iteration-workflow.md"
-  - "../wego-uxsystem-iterate/references/workflow.md"
-  - "library-consumption.json"
-  - "colors_and_type.css"
-  - "uikit-plan.json"
-  - "components/index.json"
-  - "preview/component-{slug}.html"
-  - "components/{slug}.json"
-  - "references/scene-contract.md"
+  - "../../wego-product/references/iteration-workflow.md"
+  - "../../wego-product/references/scope-and-boundaries.md"
+  - "../../wego-uxsystem-iterate/references/workflow.md"
+  - "../../wego-design/library-consumption.json"
+  - "../../wego-design/colors_and_type.css"
+  - "../../wego-design/uikit-plan.json"
+  - "../../wego-design/components/index.json"
+  - "../../wego-design/preview/component-{slug}.html"
+  - "../../wego-design/components/{slug}.json"
+  - "../../wego-design/references/scene-contract.md"
 ---
 
 # 微购设计决策原则
 
-> 角色：所有新建或修改场景在选择布局、组件、Token 和交互前必须读取的顶层设计决策原则。本文决定“如何判断”；业务事实来自已确认 `prototype_brief`，精确实现来自 Preview、组件契约和 Token 源。
+> 角色：`wego-product` 创建或变更 `prototype_brief`、`wego-design` 设计或修改业务场景前共同读取的顶层决策原则。本文决定“如何判断”；业务事实来自用户需求和已确认 `prototype_brief`，精确实现来自 Preview、组件契约和 Token 源。
 
 ## 顶层原则
 
@@ -67,41 +68,43 @@ authoritySources:
 
 ## 输入与页面裁决
 
-<!-- rule-id: wego-scene-decision-scope; source-ref: ../wego-product/references/iteration-workflow.md -->
+<!-- rule-id: wego-scene-decision-scope; source-ref: ../../wego-product/references/iteration-workflow.md -->
 
-只依据有效迭代和已确认 `prototype_brief` 中的目标、范围、入口、关键路径、状态、数据、原型边界以及产品阶段定义的交互视觉描述进行设计。`wego-design` 必须严格遵循产品阶段的交互视觉描述（布局位置、控件类型、视觉强调、打开方式倾向等），不得自行替换或偏离；唯一例外是组件不支持或设计系统规范不允许，此时设计系统优先，冲突项记录到场景决策证据并退回 `wego-product` 重新确认。缺少会改变页面结构或结果的业务事实时退回 `wego-product`，不得从组件、UI Kit、历史场景或图片补造事实和文案。
+`wego-product` 必须先用本文约束 `prototype_brief` 的首要任务、入口、关键路径、状态、信息层级和交互视觉描述，避免把低效、混乱或违反设计系统的方向交给设计阶段。
+
+`wego-design` 只依据有效迭代和已确认 `prototype_brief` 中的目标、范围、入口、关键路径、状态、数据、原型边界以及产品阶段定义的交互视觉描述进行设计。`wego-design` 必须严格遵循产品阶段的交互视觉描述（布局位置、控件类型、视觉强调、打开方式倾向等），不得自行替换或偏离；唯一例外是组件不支持或设计系统规范不允许，此时设计系统优先，冲突项记录到场景决策证据并退回 `wego-product` 重新确认。缺少会改变页面结构或结果的业务事实时退回 `wego-product`，不得从组件、UI Kit、历史场景或图片补造事实和文案。
 
 `design-decisions.json` 不是设计前权威输入；新场景不得以它代替本文和正式设计系统来源，已有场景修改时也只能辅助对照。
 
-<!-- rule-id: wego-page-pattern-layout-contract; source-ref: uikit-plan.json -->
+<!-- rule-id: wego-page-pattern-layout-contract; source-ref: ../../wego-design/uikit-plan.json -->
 
 先按业务任务、surface 角色和状态匹配明确 `pagePatterns`。命中时使用对应范式；未命中时采用 `composed`，按首要任务、信息层级、状态和正式组件能力自主组合，不伪造页面范式，也不复制 UI Kit 宿主、演示文案或私有 class。
 
-<!-- rule-id: wego-page-edge-modes; source-ref: library-consumption.json#/pageEdgeModes -->
+<!-- rule-id: wego-page-edge-modes; source-ref: ../../wego-design/library-consumption.json#/pageEdgeModes -->
 
 页面边距只选择已登记的 `M0`、`M8`、`M32`：通栏连续内容默认 `M0`，卡片模式使用 `M8`，明确的大留白沉浸展示才使用 `M32`。选择结果和理由写入 `layout_contract`，不为视觉变化发明中间值。
 
 ## 视觉与资产
 
-<!-- rule-id: wego-semantic-color-consumption; source-ref: colors_and_type.css -->
+<!-- rule-id: wego-semantic-color-consumption; source-ref: ../../wego-design/colors_and_type.css -->
 
 颜色、字号、字重、行高、间距和圆角只使用实际语义 Token。中性色承载内容，品牌绿色承担主行动，状态色只表达对应状态且不大面积铺底；不得根据外观猜变量名或直接写视觉值。
 
-<!-- rule-id: wego-content-role-typography; source-ref: colors_and_type.css -->
+<!-- rule-id: wego-content-role-typography; source-ref: ../../wego-design/colors_and_type.css -->
 
 对象名称、标题和关键识别信息使用 heading 语义；正文和字段值使用 body 语义；时间、提示和低优先级元数据使用较弱层级。页面只保留一个明确的页面级视觉焦点。
 
-<!-- rule-id: no-large-color-background-app-center-svg-priority; source-ref: library-consumption.json -->
+<!-- rule-id: no-large-color-background-app-center-svg-priority; source-ref: ../../wego-design/library-consumption.json -->
 
 身份、应用、内容和功能资产必须按语义使用，禁止互相冒充。功能入口优先选择已交付且语义匹配的 app-center SVG；无匹配资产时才使用已查证的 iconfont 或文字。禁止大面积彩色、渐变背景和为图标临时发明多套彩色底板。
 
 ## 组件消费
 
-<!-- rule-id: preview-first-component-consumption; source-ref: library-consumption.json -->
+<!-- rule-id: preview-first-component-consumption; source-ref: ../../wego-design/library-consumption.json -->
 
 只选择当前页面实际需要的组件。每个命中组件先读 Preview，再读对应契约：Preview 决定实际 DOM、class、Token 和状态表现，契约决定语义、合法变体、行为和边界。不得扫描全量组件后拼凑页面。
 
-<!-- rule-id: component-visual-usage-consume-registered; source-ref: components/index.json -->
+<!-- rule-id: component-visual-usage-consume-registered; source-ref: ../../wego-design/components/index.json -->
 
 视觉用途命中已注册组件时必须直接消费正式组件，例如标签用 `tag`、角标用 `badge`、操作按钮用 `button`、列表行用 `cell`、头像用 `avatar`、文本操作用 `link`。业务 class 只承担区域关系和业务胶水，不复刻组件视觉或覆盖组件内部样式。
 
@@ -109,7 +112,7 @@ authoritySources:
 
 ## 状态与交互
 
-<!-- rule-id: wego-state-interaction-contract; source-ref: references/scene-contract.md -->
+<!-- rule-id: wego-state-interaction-contract; source-ref: ../../wego-design/references/scene-contract.md -->
 
 只实现已确认简报要求、关键路径真实需要或操作必然产生的可见状态，不为了填合同补造加载、空、错误或持久化。每个实际状态写清初始条件、触发方式、可见结果、失败回退和持久化边界。
 
@@ -117,7 +120,7 @@ authoritySources:
 
 ## 设计系统缺口
 
-<!-- rule-id: wego-design-system-gap-boundary; source-ref: ../wego-uxsystem-iterate/references/workflow.md -->
+<!-- rule-id: wego-design-system-gap-boundary; source-ref: ../../wego-uxsystem-iterate/references/workflow.md -->
 
 错误 Token、错误 class、未读 Preview、缺少路由、遗漏状态或交互失败都属于实现错误，必须直接修复。
 

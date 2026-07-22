@@ -6,7 +6,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const root = process.cwd();
-const source = path.join(root, '.codex/skills/wego-design/references/design-decisions.md');
+const source = path.join(root, '.codex/skills/shared/references/design-decisions.md');
 const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'wego-design-principles-'));
 const temp = path.join(tempRoot, 'design-decisions.md');
 const candidateSource = path.join(root, '.codex/skills/wego-uxsystem-iterate/experience/candidates.json');
@@ -21,7 +21,7 @@ try {
   if (run(temp).status === 0) throw new Error('错误优先级应被守卫拦截');
   fs.writeFileSync(temp, original.replace('## 组件消费', '## 组件方案'));
   if (run(temp).status === 0) throw new Error('缺少关键章节应被守卫拦截');
-  fs.writeFileSync(temp, original.replace('source-ref: colors_and_type.css', 'source-ref: colors-and-type-missing.css'));
+  fs.writeFileSync(temp, original.replace('source-ref: ../../wego-design/colors_and_type.css', 'source-ref: ../../wego-design/colors-and-type-missing.css'));
   if (run(temp).status === 0) throw new Error('失效规则来源应被守卫拦截');
   fs.writeFileSync(temp, `${original}\n\`\`\`yaml\nprompt_contract:\n\`\`\`\n`);
   if (run(temp).status === 0) throw new Error('重复合同模板应被守卫拦截');

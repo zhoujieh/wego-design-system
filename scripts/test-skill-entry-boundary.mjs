@@ -7,7 +7,7 @@ import path from 'node:path';
 import { validatePromotedRuleTargets } from './validate-skill-entry-boundary.mjs';
 
 const root = fs.mkdtempSync(path.join(os.tmpdir(), 'wego-skill-entry-'));
-const designFile = '.codex/skills/wego-design/references/design-decisions.md';
+const designFile = '.codex/skills/shared/references/design-decisions.md';
 const sceneFile = '.codex/skills/wego-design/references/scene-contract.md';
 
 function write(relative, content) {

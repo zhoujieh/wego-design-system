@@ -4,8 +4,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const root = process.cwd();
-const libraryRoot = path.join(root, '.codex/skills/wego-design');
-const defaultDocument = path.join(libraryRoot, 'references/design-decisions.md');
+const designRoot = path.join(root, '.codex/skills/wego-design');
+const defaultDocument = path.join(root, '.codex/skills/shared/references/design-decisions.md');
+const sourceBaseDirectory = path.dirname(defaultDocument);
+const sharedDocumentPath = '.codex/skills/shared/references/design-decisions.md';
 const args = process.argv.slice(2);
 const jsonOutput = args.includes('--json');
 const fileFlag = args.indexOf('--file');
@@ -18,7 +20,11 @@ const warnings = [];
 function add(code, message, file = documentFile) { errors.push({ code, message, file: path.relative(root, file).replaceAll(path.sep, '/') }); }
 function existsSource(ref) {
   const relative = String(ref).split('#')[0];
-  return Boolean(relative) && fs.existsSync(path.join(libraryRoot, relative));
+  return Boolean(relative) && fs.existsSync(path.resolve(sourceBaseDirectory, relative));
+}
+function readOptional(relative) {
+  const file = path.join(root, relative);
+  return fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : '';
 }
 
 if (!fs.existsSync(documentFile)) add('document.missing', '缺少设计决策原则文档');
@@ -44,8 +50,17 @@ for (const principle of ['### 清晰', '### 高效', '### 一致', '### 美观']
 for (const statement of ['一个首要任务', '可靠默认值', '微信生态', '错误发生后', '反向操作', '不得从组件、UI Kit、历史场景或图片补造事实和文案']) {
   if (!content.includes(statement)) add('principle.behavior', `缺少可执行原则：${statement}`);
 }
+for (const statement of ['`wego-product` 创建或变更 `prototype_brief`', '`wego-design` 设计或修改业务场景', '`wego-product` 必须先用本文约束 `prototype_brief`']) {
+  if (!content.includes(statement)) add('principle.shared_consumer', `共享原则缺少产品/设计共用约束：${statement}`);
+}
 if (!content.includes('`design-decisions.json` 不是设计前权威输入')) add('input.decisions_json', '必须明确 design-decisions.json 不是设计前权威输入');
 if (!content.includes('先读 Preview，再读对应契约')) add('component.preview_first', '必须明确 Preview-first 组件消费顺序');
+
+const productSkill = readOptional('.codex/skills/wego-product/SKILL.md');
+const designSkill = readOptional('.codex/skills/wego-design/SKILL.md');
+if (!productSkill.includes('../shared/references/design-decisions.md')) add('consumer.product_missing', 'wego-product 必须直接读取共享设计决策原则', path.join(root, '.codex/skills/wego-product/SKILL.md'));
+if (!designSkill.includes('../shared/references/design-decisions.md')) add('consumer.design_missing', 'wego-design 必须直接读取共享设计决策原则', path.join(root, '.codex/skills/wego-design/SKILL.md'));
+if (fs.existsSync(path.join(designRoot, 'references/design-decisions.md'))) add('document.old_location', '设计决策原则不得继续保留在 wego-design 私有 references 下', path.join(designRoot, 'references/design-decisions.md'));
 
 const forbidden = [
   ['`AGENTS.md`', '设计决策原则不得要求重复读取 AGENTS.md'],
@@ -76,7 +91,7 @@ for (const id of requiredRules) if (!ruleIds.has(id)) add('rule.required_missing
 if (!fs.existsSync(candidateFile)) add('candidate.missing', '缺少经验候选池', candidateFile);
 else {
   const candidates = JSON.parse(fs.readFileSync(candidateFile, 'utf8')).candidates || [];
-  const canonicalPath = '.codex/skills/wego-design/references/design-decisions.md';
+  const canonicalPath = sharedDocumentPath;
   for (const candidate of candidates) {
     const canonical = candidate.rule_ownership?.canonical;
     const landing = candidate.promotion_landing;
