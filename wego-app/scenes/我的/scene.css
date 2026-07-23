@@ -1,7 +1,6 @@
 .my-page {
   min-height: 100%;
   padding-inline: var(--layout-page-margin-m8);
-  padding-top: var(--safe-area-top);
   background: var(--bg-page);
   color: var(--text-default);
   font-family: var(--body-md-font-family);
@@ -11,7 +10,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacer-8);
-  padding-block: var(--spacer-16);
+  padding-top: var(--safe-area-top);
+  padding-bottom: var(--spacer-16);
 }
 
 .my-page__profile {

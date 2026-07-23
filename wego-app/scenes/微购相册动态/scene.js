@@ -16,8 +16,8 @@
     "design_system_version": 438,
     "token_bindings": [
       {
-        "selector": ".album-feed",
-        "content_role": ".album-feed 的 padding-top",
+        "selector": ".album-feed__page-tabs",
+        "content_role": ".album-feed__page-tabs 的 padding-top",
         "css_property": "padding-top",
         "token": "var(--safe-area-top)"
       },

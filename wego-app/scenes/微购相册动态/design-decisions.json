@@ -17,8 +17,8 @@
     "design_system_version": 438,
     "token_bindings": [
       {
-        "selector": ".album-feed",
-        "content_role": ".album-feed 的 padding-top",
+        "selector": ".album-feed__page-tabs",
+        "content_role": ".album-feed__page-tabs 的 padding-top",
         "css_property": "padding-top",
         "token": "var(--safe-area-top)"
       },
@@ -1047,7 +1047,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/微购相册动态/scene.js",
     "scene_css": "wego-app/scenes/微购相册动态/scene.css",
-    "source_sha256": "0d36df1b6792ca99fb80a8feb31c75dbab816f804a6fcaf71e36c8eb4d6d81b5",
+    "source_sha256": "1cc1d46849276494e03f22445d40271d54c03886f3ff4aba860a5b363b43886f",
     "dom_ids": [
       "page-tab-following",
       "page-tab-recommended",

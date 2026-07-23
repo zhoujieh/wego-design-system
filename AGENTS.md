@@ -55,6 +55,14 @@
 - 不提交 `.DS_Store`、`.uploads/`。
 - `.trae/skills/*` 是指向 `.codex/skills/*` 的符号链接，禁止把它当作独立副本维护。
 
+## 页面安全区与电池栏
+
+- 页面根节点（scene root）必须保持 `position: absolute; inset: 0` 全屏撑满，禁止在根节点上通过 `padding-top` 预留电池栏（status bar）高度。
+- 有 NavBar 的页面：由 NavBar 组件内部通过 `padding-top: var(--safe-area-top)` 处理顶部安全区。
+- 无 NavBar 但顶部有固定/吸顶元素（tabs、header 等）的页面：由该固定元素自身内部通过 `padding-top: var(--safe-area-top)` 让位。
+- 无 NavBar 且无固定顶部元素的页面：由滚动内容层通过 `padding-top: var(--safe-area-top)` 让位。
+- 桌面预览壳的 `.phone-status` 仅作为透明视觉覆盖层存在，不参与页面布局，禁止把它的处理职责下沉到业务场景之外的全局容器。
+
 ## 组件与 UI Kit 一致性
 
 - 组件契约、Preview、`components.css`、组件索引、允许组件清单和 UI Kit 必须同步。
