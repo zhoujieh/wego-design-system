@@ -182,11 +182,10 @@
   flex: 0 0 auto;
 }
 
-/* 瀑布流：CSS columns 双列，宽屏自动增列且单卡宽度约束在 168~220px；显式 row-gap 让列内卡片上下不贴在一起 */
+/* 瀑布流：CSS columns 双列，宽屏自动增列且单卡宽度约束在 168~220px；使用 margin-bottom 确保列内卡片上下不贴在一起 */
 .album-feed__grid {
   column-count: 2;
   column-gap: var(--spacer-8);
-  row-gap: var(--spacer-12);
   width: 100%;
   max-width: 912px;
   margin-inline: auto;
@@ -196,7 +195,7 @@
   display: inline-block;
   width: 100%;
   min-width: 0;
-  margin-block: 0 0;
+  margin-block: 0 var(--spacer-12);
   break-inside: avoid;
   page-break-inside: avoid;
   -webkit-column-break-inside: avoid;
@@ -416,5 +415,12 @@
   .album-feed__grid {
     column-count: auto;
     column-width: 200px;
+    max-width: 100%;
+  }
+}
+
+@media (min-width: 960px) {
+  .album-feed__grid {
+    column-width: 220px;
   }
 }

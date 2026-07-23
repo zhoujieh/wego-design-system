@@ -111,7 +111,8 @@ input, textarea,
 }
 
 .phone-frame {
-  width: 390px;
+  width: 100%;
+  max-width: 390px;
   height: 780px;
   border: 8px solid var(--bg-inverse);
   border-radius: 40px;
@@ -135,6 +136,25 @@ input, textarea,
   border-radius: inherit;
   background: var(--bg-page);
   position: relative;
+}
+
+@media (min-width: 768px) {
+  .preview-shell {
+    max-width: none;
+    padding: var(--spacer-32);
+  }
+  
+  .phone-frame {
+    max-width: 100%;
+    height: auto;
+    min-height: 780px;
+    border-radius: var(--radius-16);
+  }
+  
+  .phone-screen {
+    height: auto;
+    min-height: calc(780px - 16px);
+  }
 }
 
 .phone-status {
