@@ -61,19 +61,22 @@
   display: none;
 }
 
-/* 搜索栏：占文档流，默认显示；上滑手势收起（max-height 归零让下方内容上移），
-   下滑手势或滚回顶部重现；层级低于 page-tabs，收起时被 tabs 遮挡 */
+/* 搜索栏：占文档流，默认显示；上滑手势收起（max-height 精确到搜索框实际高度，避免无效动画区间），
+   下滑手势或滚回顶部重现；层级低于 page-tabs，收起时被 tabs 遮挡；
+   max-height 用 calc 精确匹配 size-36 + spacer-8*2，避免 max-height:80px 时前 28px 无效动画；
+   contain:content 隔离重排到本容器，子元素 transform 走合成层提升丝滑度；
+   cubic-bezier(0.32,0.72,0,1) ease-out 适合收起动画，开始快结束慢 */
 .album-feed__floating-toolbar {
   position: relative;
   z-index: 1;
-  max-height: 80px;
+  max-height: calc(var(--size-36) + var(--spacer-8) + var(--spacer-8));
   padding-block: var(--spacer-8);
   background: transparent;
   opacity: 1;
   overflow: hidden;
-  transition: max-height 0.2s ease, opacity 0.2s ease, padding-block 0.2s ease;
-  will-change: max-height, opacity;
+  transition: max-height 0.25s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.2s ease, padding-block 0.25s cubic-bezier(0.32, 0.72, 0, 1);
   box-sizing: border-box;
+  contain: content;
 }
 
 .album-feed__floating-toolbar.is-hidden {
@@ -83,8 +86,15 @@
   pointer-events: none;
 }
 
+/* 搜索框内部：transform 走 GPU 合成层，配合父容器 max-height 动画形成视觉上移；
+   父容器重排不可避免（让出空间），但子元素 transform 不重排，提升整体丝滑度 */
 .album-feed__floating-toolbar .search-toolbar {
   padding-block: var(--spacer-0);
+  transition: transform 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.album-feed__floating-toolbar.is-hidden .search-toolbar {
+  transform: translateY(-100%);
 }
 
 /* 人维度横滑区：与顶部吸顶栈保留间距，避免拥挤 */

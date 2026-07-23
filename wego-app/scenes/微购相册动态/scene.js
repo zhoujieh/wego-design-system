@@ -773,7 +773,7 @@
     "layout_contract": {
       "mode": "composed",
       "source": "references/design-decisions.md",
-      "selection_reason": "页面首要任务是发现并进入动态详情；顶部 page-tabs 与搜索栏共同包进 sticky top-stack 吸顶，背景跟随顶部白色；页面背景从顶部白色渐变到 --bg-page 灰色，过渡完成点在瀑布流往下一点位置；搜索框使用 searchbox--accent 强调模式，默认显示占据文档流，层级低于 page-tabs，上滑手势收起（max-height 归零让下方内容上移）、下滑手势或滚回顶部重现；筛选入口从搜索框右侧移除，弱化后放到全部上新这一栏的横滑标签末尾，使用 tag--gray；全部上新横滑标签区保留最小高度确保可见；人维度栏约 10 个发布者支持横滑、头像右下角不再放置店铺标识、「我的相册」项 sticky right 固定在可视区最右侧；瀑布流双列按媒体自然比例撑高参差，显式设置 row-gap 让列内卡片上下不贴在一起，375/393px 双列，768px 自动增列且单卡不超过 220px；卡片信息层级紧凑，发布者区单行（头像 + 名字 + 店铺文字徽章），状态恢复为文字徽章后与内容类型、时间组成 meta 行并保留间距，1 至 2 行摘要，底部操作行一键转发靠右不再保留商品入口；通过 host-shell-page__panel 相对定位让场景根元素正确约束在 tab 内容区内，配合滚动容器底部预留 40px + safe-area-bottom，避免内容被 bottom-nav 遮挡。",
+      "selection_reason": "页面首要任务是发现并进入动态详情；顶部 page-tabs 与搜索栏共同包进 sticky top-stack 吸顶，背景跟随顶部白色；搜索框占文档流默认显示，层级低于 page-tabs，上滑手势收起（max-height 精确为 calc(var(--size-36) + var(--spacer-8) * 2) 避免无效动画区间，子元素 .search-toolbar 用 transform translateY 走 GPU 合成层、contain:content 隔离重排到本容器提升丝滑度）、下滑手势或滚回顶部重现，顶部边界强制显示、底部边界抑制下滑手势重现避免橡皮筋回弹误触发；页面背景从顶部白色渐变到 --bg-page 灰色，过渡完成点在瀑布流往下一点位置；搜索框使用 searchbox--accent 强调模式；筛选入口从搜索框右侧移除，弱化后放到全部上新这一栏的横滑标签末尾，使用 tag--gray；全部上新横滑标签区保留最小高度确保可见；人维度栏约 10 个发布者支持横滑、头像右下角不再放置店铺标识、「我的相册」项 sticky right 固定在可视区最右侧；瀑布流双列按媒体自然比例撑高参差，显式设置 row-gap 让列内卡片上下不贴在一起，375/393px 双列，768px 自动增列且单卡不超过 220px；卡片信息层级紧凑，发布者区单行（头像 + 名字 + 店铺文字徽章），状态恢复为文字徽章后与内容类型、时间组成 meta 行并保留间距，1 至 2 行摘要，底部操作行一键转发靠右不再保留商品入口；通过 host-shell-page__panel 相对定位让场景根元素正确约束在 tab 内容区内，配合滚动容器底部预留 40px + safe-area-bottom，避免内容被 bottom-nav 遮挡。",
       "page_edge_mode": "M8",
       "mutable_regions": [
         ".album-feed__floating-toolbar",
@@ -941,8 +941,8 @@
       375,
       393
     ],
-    "checked_at": "2026-07-23T12:00:00.000Z",
-    "scope": "顶部 page-tabs 与搜索栏 sticky 吸顶且搜索栏层级低于 tabs、背景白到灰渐变在瀑布流位置过渡、搜索栏默认显示且上滑收起下滑重现、人维度栏无店铺 badge 且我的相册 sticky right、瀑布流双列卡片信息层级紧凑、底部留白与 bottom-nav 隔离，375/393px 全部通过。",
+    "checked_at": "2026-07-23T13:50:00.000Z",
+    "scope": "顶部 page-tabs 与搜索栏 sticky 吸顶且搜索栏层级低于 tabs、搜索框 max-height 精确为 calc(size-36 + spacer-8*2) 避免无效动画区间、子元素 transform translateY 走合成层、contain:content 隔离重排、顶部边界强制显示与底部边界抑制下滑手势重现避免橡皮筋回弹误触发、背景白到灰渐变在瀑布流位置过渡、人维度栏无店铺 badge 且我的相册 sticky right、瀑布流双列卡片信息层级紧凑、底部留白与 bottom-nav 隔离，375/393px 全部通过。",
     "checks": {
       "horizontal_overflow": true,
       "overlap": true,
@@ -1421,10 +1421,12 @@
       }
 
       /* 工具栏显隐：默认显示，上滑（内容向下）收起、下滑（内容向上）重现，滚到顶部恢复显示
-         使用 requestAnimationFrame 与累积方向阈值，避免抖动与误触发 */
+         使用 requestAnimationFrame 与累积方向阈值，避免抖动与误触发；
+         顶部边界强制显示，底部边界抑制下滑手势重现，避免橡皮筋回弹误触发 */
       var lastScrollTop = 0;
       var scrollDirectionDelta = 0;
       var toolbarRevealThreshold = 12;
+      var toolbarBottomGuardPx = 8;
       var toolbarRafId = null;
       var pendingScrollTop = 0;
       var isToolbarRevealed = true;
@@ -1443,9 +1445,23 @@
         toolbarRafId = null;
         var currentTop = pendingScrollTop;
         var delta = currentTop - lastScrollTop;
-        if (currentTop <= 0) {
+        var isAtTop = currentTop <= 0;
+        var isAtBottom = currentTop + scroll.clientHeight >= scroll.scrollHeight - toolbarBottomGuardPx;
+        if (isAtTop) {
           setToolbarRevealed(true);
           scrollDirectionDelta = 0;
+        } else if (isAtBottom) {
+          /* 底部边界：抑制下滑手势（delta < 0）重现搜索框，避免橡皮筋回弹误触发；
+             保留上滑手势收起逻辑以维持状态一致，用户脱离底部后恢复正常响应 */
+          if (delta > 0) {
+            scrollDirectionDelta += delta;
+            if (scrollDirectionDelta > toolbarRevealThreshold) {
+              setToolbarRevealed(false);
+              scrollDirectionDelta = 0;
+            }
+          } else {
+            scrollDirectionDelta = 0;
+          }
         } else {
           scrollDirectionDelta += delta;
           if (scrollDirectionDelta > toolbarRevealThreshold) {
