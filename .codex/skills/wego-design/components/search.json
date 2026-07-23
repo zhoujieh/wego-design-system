@@ -306,10 +306,12 @@
     "--body-md-line-height",
     "--body-xs-font-size",
     "--body-xs-line-height",
+    "--body-xs-strong-font-weight",
     "--icon-inverse",
     "--icon-secondary",
     "--radius-6",
     "--radius-8",
+    "--radius-full",
     "--size-20",
     "--size-24",
     "--size-28",
@@ -335,10 +337,8 @@
     "--bg-muted",
     "--body-sm-font-size",
     "--body-sm-line-height",
-    "--body-xs-strong-font-weight",
     "--border-neutral-l2",
     "--radius-12",
-    "--radius-full",
     "--shadow-sm"
   ],
   "localTokens": [
