@@ -127,6 +127,8 @@
 
 .album-feed__publish-trigger-plus img {
   display: block;
+  width: var(--size-32);
+  height: var(--size-32);
 }
 
 .album-feed__publish-trigger.is-open .album-feed__publish-trigger-bg {
@@ -134,7 +136,7 @@
 }
 
 .album-feed__publish-trigger.is-open .album-feed__publish-trigger-plus {
-  transform: rotate(45deg);
+  transform: translate(-50%, -50%) rotate(45deg);
 }
 
 .album-feed__page-tabs .wg-tabs__scroll {
@@ -215,12 +217,21 @@
 
 .album-feed__sticky-fade {
   position: absolute;
-  top: 0;
-  bottom: 0;
   left: calc(var(--spacer-16) * -1);
   width: var(--spacer-16);
-  height: 100%;
   pointer-events: none;
+}
+
+.album-feed__sticky-fade--people {
+  top: 0;
+  bottom: 0;
+  height: 100%;
+}
+
+.album-feed__sticky-fade--filter {
+  top: 50%;
+  height: var(--size-28);
+  transform: translateY(-50%);
 }
 
 .album-feed__people-item {
@@ -277,9 +288,14 @@
   position: sticky;
   right: 0;
   display: flex;
+  align-items: center;
   flex: 0 0 auto;
   margin-left: auto;
-  background: var(--bg-surface);
+  z-index: 1;
+}
+
+.album-feed__filter-open {
+  position: relative;
   z-index: 1;
 }
 

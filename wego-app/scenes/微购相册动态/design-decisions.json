@@ -155,12 +155,6 @@
         "token": "var(--size-28)"
       },
       {
-        "selector": ".album-feed__filter-open-host",
-        "content_role": "筛选固定区背景",
-        "css_property": "background",
-        "token": "var(--bg-surface)"
-      },
-      {
         "selector": ".album-feed__grid",
         "content_role": ".album-feed__grid 的 column-gap",
         "css_property": "column-gap",
@@ -1004,7 +998,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/微购相册动态/scene.js",
     "scene_css": "wego-app/scenes/微购相册动态/scene.css",
-    "source_sha256": "f70d8e2809bde3719a3d729c476fe4aabf15e1bf40f181217fc84b5565145245",
+    "source_sha256": "788a54852f05b15117955ea0088c86c8a5d29c2f54610d16abe47a19d64f247d",
     "dom_ids": [
       "page-tab-following",
       "page-tab-recommended",
