@@ -2410,7 +2410,7 @@
 }
 
 .search-overlay-bar {
-  padding: var(--spacer-8) var(--spacer-12);
+  padding: var(--spacer-8);
   background: var(--bg-surface);
 }
 
@@ -2515,7 +2515,7 @@
   align-items: center;
   width: 100%;
   min-width: 0;
-  padding: var(--spacer-4) var(--spacer-8);
+  padding: var(--spacer-8);
   box-sizing: border-box;
 }
 
