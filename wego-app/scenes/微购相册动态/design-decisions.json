@@ -119,6 +119,78 @@
         "token": "var(--transparent)"
       },
       {
+        "selector": ".album-feed__publish-fab",
+        "content_role": "右下角悬浮发布入口背景",
+        "css_property": "background",
+        "token": "var(--bg-brand)"
+      },
+      {
+        "selector": ".album-feed__publish-fab",
+        "content_role": "右下角悬浮发布入口阴影",
+        "css_property": "box-shadow",
+        "token": "var(--shadow-lg)"
+      },
+      {
+        "selector": ".album-feed__publish-fab",
+        "content_role": "右下角悬浮发布入口宽度",
+        "css_property": "width",
+        "token": "var(--size-56)"
+      },
+      {
+        "selector": ".album-feed__publish-fab",
+        "content_role": "右下角悬浮发布入口高度",
+        "css_property": "height",
+        "token": "var(--size-56)"
+      },
+      {
+        "selector": ".album-feed__publish-fab",
+        "content_role": "右下角悬浮发布入口内边距",
+        "css_property": "padding",
+        "token": "var(--spacer-0)"
+      },
+      {
+        "selector": ".album-feed__publish-fab",
+        "content_role": "右下角悬浮发布入口圆角",
+        "css_property": "border-radius",
+        "token": "var(--radius-full)"
+      },
+      {
+        "selector": ".album-feed__publish-fab",
+        "content_role": "右下角悬浮发布入口文字色",
+        "css_property": "color",
+        "token": "var(--text-inverse)"
+      },
+      {
+        "selector": ".album-feed__publish-fab-ripple",
+        "content_role": "右下角悬浮发布入口波纹背景",
+        "css_property": "background",
+        "token": "var(--bg-brand)"
+      },
+      {
+        "selector": ".album-feed__publish-fab-ripple",
+        "content_role": "右下角悬浮发布入口波纹圆角",
+        "css_property": "border-radius",
+        "token": "var(--radius-full)"
+      },
+      {
+        "selector": ".album-feed__publish-fab-icon",
+        "content_role": "悬浮发布入口加号颜色",
+        "css_property": "color",
+        "token": "var(--text-inverse)"
+      },
+      {
+        "selector": ".album-feed__publish-fab-icon",
+        "content_role": "悬浮发布入口加号字号",
+        "css_property": "font-size",
+        "token": "var(--size-24)"
+      },
+      {
+        "selector": ".album-feed__publish-scrim",
+        "content_role": "发布菜单打开时的弱化遮罩",
+        "css_property": "background",
+        "token": "var(--text-default)"
+      },
+      {
         "selector": ".album-feed__people-name",
         "content_role": ".album-feed__people-name 的 color",
         "css_property": "color",
@@ -719,18 +791,27 @@
     "layout_contract": {
       "mode": "composed",
       "source": "references/design-decisions.md",
-      "selection_reason": "页面首要任务是发现并进入动态详情；顶部 page-tabs 与搜索栏共同吸顶，搜索栏使用 Search 组件 Preview 的标准强调结构（白底、品牌描边、右侧正式小号主按钮），场景包装层只承担收起动画。人维度栏支持横滑且「我的相册」与筛选入口固定在右侧，并用渐变蒙层隔开滚动内容；瀑布流在手机壳和窄容器中固定双列，在场景自身可用宽度增大后按 168px 目标列宽自动增列并居中，避免根据桌面窗口宽度误把手机壳拉成单列。卡片信息紧凑，发布时间下沉到操作栏左侧，与一键转发形成稳定底部信息带；场景根由 host-shell-page__panel 约束，并预留底部导航安全区。",
+      "selection_reason": "页面首要任务是发现并进入动态详情；顶部 page-tabs 与搜索栏共同吸顶，搜索栏使用 Search 组件 Preview 的标准强调结构（白底、品牌描边、右侧正式小号主按钮），场景包装层只承担收起动画。人维度栏支持横滑且「我的相册」与筛选入口固定在右侧，并用渐变蒙层隔开滚动内容；瀑布流在手机壳和窄容器中固定双列，在场景自身可用宽度增大后按 168px 目标列宽自动增列并居中，避免根据桌面窗口宽度误把手机壳拉成单列。卡片信息紧凑，发布时间下沉到操作栏左侧，与一键转发形成稳定底部信息带；发布操作保留右上角入口，同时新增右下角拇指区悬浮入口，复用同一组 popmenu 动作并从触发点向上浮出，降低单手操作距离；场景根由 host-shell-page__panel 约束，并预留底部导航安全区。",
       "page_edge_mode": "M8",
       "mutable_regions": [
         ".album-feed__floating-toolbar",
         ".album-feed__grid",
         ".album-feed__card-content",
-        ".album-feed__empty"
+        ".album-feed__empty",
+        ".album-feed__publish-fab"
       ]
     },
     "interaction_contract": [
       {
         "dom_id": "open-publish-menu",
+        "target": "state:publish-menu-open"
+      },
+      {
+        "dom_id": "open-publish-menu-floating",
+        "target": "state:publish-menu-open"
+      },
+      {
+        "dom_id": "publish-scrim",
         "target": "state:publish-menu-open"
       },
       {
@@ -834,8 +915,8 @@
       {
         "state_id": "publish-menu-open",
         "initial": false,
-        "trigger": "点击导航栏右侧发布入口",
-        "visible_result": "发布入口仅加号顺时针旋转 45 度、圆形背景不跟随旋转，并在入口下方显示带图标的发布快捷菜单",
+        "trigger": "点击导航栏右侧发布入口或右下角悬浮发布入口",
+        "visible_result": "右上角入口保持原有加号旋转；右下角悬浮入口在拇指区展开同一组发布操作，菜单从入口位置向上错层浮出并轻微弱化背景",
         "fallback": "点击页面其他位置、滚动或选择菜单项后关闭菜单并恢复发布入口默认状态",
         "persistence": "memory"
       },
@@ -998,7 +1079,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/微购相册动态/scene.js",
     "scene_css": "wego-app/scenes/微购相册动态/scene.css",
-    "source_sha256": "788a54852f05b15117955ea0088c86c8a5d29c2f54610d16abe47a19d64f247d",
+    "source_sha256": "4f7f4266f5625d5ff923ab39c066e7ac99cb2fcba8b3a7ffe686d5094ca5f091",
     "dom_ids": [
       "page-tab-following",
       "page-tab-recommended",
@@ -1014,6 +1095,8 @@
       "filter-tag-live",
       "open-filter",
       "feed-open-dynamic",
+      "publish-scrim",
+      "open-publish-menu-floating",
       "publish-action-product",
       "publish-action-note",
       "publish-action-live",
@@ -1027,8 +1110,8 @@
         375,
         393
       ],
-      "checked_at": "2026-07-23T12:06:20.000Z",
-      "scope": "顶部 page-tabs 居中且左右预留对称栏位，右侧发布入口仅旋转加号并可展开带图标 popmenu；搜索工具栏 sticky 吸顶；人维度里的我的相册与筛选入口固定在右侧并各自带 16px 左侧渐变蒙层；卡片发布时间移动到底部操作栏左侧；瀑布流上下与左右间距均为 8px。375/393px 全部通过。",
+      "checked_at": "2026-07-23T16:22:09.000Z",
+      "scope": "顶部 page-tabs 居中且左右预留对称栏位，右上角发布入口保持原有 popmenu；右下角新增悬浮发布入口，点击后同一组发布操作在按钮上方错层浮出并显示弱化遮罩。375/393px 验证菜单在视口内、不与按钮重叠、无横向溢出，点击发笔记后菜单关闭并出现未开放 toast。",
       "checks": {
         "horizontal_overflow": true,
         "overlap": true,

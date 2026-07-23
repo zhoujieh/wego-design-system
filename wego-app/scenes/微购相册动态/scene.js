@@ -118,6 +118,78 @@
         "token": "var(--transparent)"
       },
       {
+        "selector": ".album-feed__publish-fab",
+        "content_role": "右下角悬浮发布入口背景",
+        "css_property": "background",
+        "token": "var(--bg-brand)"
+      },
+      {
+        "selector": ".album-feed__publish-fab",
+        "content_role": "右下角悬浮发布入口阴影",
+        "css_property": "box-shadow",
+        "token": "var(--shadow-lg)"
+      },
+      {
+        "selector": ".album-feed__publish-fab",
+        "content_role": "右下角悬浮发布入口宽度",
+        "css_property": "width",
+        "token": "var(--size-56)"
+      },
+      {
+        "selector": ".album-feed__publish-fab",
+        "content_role": "右下角悬浮发布入口高度",
+        "css_property": "height",
+        "token": "var(--size-56)"
+      },
+      {
+        "selector": ".album-feed__publish-fab",
+        "content_role": "右下角悬浮发布入口内边距",
+        "css_property": "padding",
+        "token": "var(--spacer-0)"
+      },
+      {
+        "selector": ".album-feed__publish-fab",
+        "content_role": "右下角悬浮发布入口圆角",
+        "css_property": "border-radius",
+        "token": "var(--radius-full)"
+      },
+      {
+        "selector": ".album-feed__publish-fab",
+        "content_role": "右下角悬浮发布入口文字色",
+        "css_property": "color",
+        "token": "var(--text-inverse)"
+      },
+      {
+        "selector": ".album-feed__publish-fab-ripple",
+        "content_role": "右下角悬浮发布入口波纹背景",
+        "css_property": "background",
+        "token": "var(--bg-brand)"
+      },
+      {
+        "selector": ".album-feed__publish-fab-ripple",
+        "content_role": "右下角悬浮发布入口波纹圆角",
+        "css_property": "border-radius",
+        "token": "var(--radius-full)"
+      },
+      {
+        "selector": ".album-feed__publish-fab-icon",
+        "content_role": "悬浮发布入口加号颜色",
+        "css_property": "color",
+        "token": "var(--text-inverse)"
+      },
+      {
+        "selector": ".album-feed__publish-fab-icon",
+        "content_role": "悬浮发布入口加号字号",
+        "css_property": "font-size",
+        "token": "var(--size-24)"
+      },
+      {
+        "selector": ".album-feed__publish-scrim",
+        "content_role": "发布菜单打开时的弱化遮罩",
+        "css_property": "background",
+        "token": "var(--text-default)"
+      },
+      {
         "selector": ".album-feed__people-name",
         "content_role": ".album-feed__people-name 的 color",
         "css_property": "color",
@@ -718,18 +790,27 @@
     "layout_contract": {
       "mode": "composed",
       "source": "references/design-decisions.md",
-      "selection_reason": "页面首要任务是发现并进入动态详情；顶部 page-tabs 与搜索栏共同吸顶，搜索栏使用 Search 组件 Preview 的标准强调结构（白底、品牌描边、右侧正式小号主按钮），场景包装层只承担收起动画。人维度栏支持横滑且「我的相册」与筛选入口固定在右侧，并用渐变蒙层隔开滚动内容；瀑布流在手机壳和窄容器中固定双列，在场景自身可用宽度增大后按 168px 目标列宽自动增列并居中，避免根据桌面窗口宽度误把手机壳拉成单列。卡片信息紧凑，发布时间下沉到操作栏左侧，与一键转发形成稳定底部信息带；场景根由 host-shell-page__panel 约束，并预留底部导航安全区。",
+      "selection_reason": "页面首要任务是发现并进入动态详情；顶部 page-tabs 与搜索栏共同吸顶，搜索栏使用 Search 组件 Preview 的标准强调结构（白底、品牌描边、右侧正式小号主按钮），场景包装层只承担收起动画。人维度栏支持横滑且「我的相册」与筛选入口固定在右侧，并用渐变蒙层隔开滚动内容；瀑布流在手机壳和窄容器中固定双列，在场景自身可用宽度增大后按 168px 目标列宽自动增列并居中，避免根据桌面窗口宽度误把手机壳拉成单列。卡片信息紧凑，发布时间下沉到操作栏左侧，与一键转发形成稳定底部信息带；发布操作保留右上角入口，同时新增右下角拇指区悬浮入口，复用同一组 popmenu 动作并从触发点向上浮出，降低单手操作距离；场景根由 host-shell-page__panel 约束，并预留底部导航安全区。",
       "page_edge_mode": "M8",
       "mutable_regions": [
         ".album-feed__floating-toolbar",
         ".album-feed__grid",
         ".album-feed__card-content",
-        ".album-feed__empty"
+        ".album-feed__empty",
+        ".album-feed__publish-fab"
       ]
     },
     "interaction_contract": [
       {
         "dom_id": "open-publish-menu",
+        "target": "state:publish-menu-open"
+      },
+      {
+        "dom_id": "open-publish-menu-floating",
+        "target": "state:publish-menu-open"
+      },
+      {
+        "dom_id": "publish-scrim",
         "target": "state:publish-menu-open"
       },
       {
@@ -833,8 +914,8 @@
       {
         "state_id": "publish-menu-open",
         "initial": false,
-        "trigger": "点击导航栏右侧发布入口",
-        "visible_result": "发布入口仅加号顺时针旋转 45 度、圆形背景不跟随旋转，并在入口下方显示带图标的发布快捷菜单",
+        "trigger": "点击导航栏右侧发布入口或右下角悬浮发布入口",
+        "visible_result": "右上角入口保持原有加号旋转；右下角悬浮入口在拇指区展开同一组发布操作，菜单从入口位置向上错层浮出并轻微弱化背景",
         "fallback": "点击页面其他位置、滚动或选择菜单项后关闭菜单并恢复发布入口默认状态",
         "persistence": "memory"
       },
@@ -918,8 +999,8 @@
       375,
       393
     ],
-    "checked_at": "2026-07-23T12:06:20.000Z",
-    "scope": "顶部 page-tabs 居中且左右预留对称栏位，右侧发布入口仅旋转加号并可展开带图标 popmenu；搜索工具栏 sticky 吸顶；人维度里的我的相册与筛选入口固定在右侧并各自带 16px 左侧渐变蒙层；卡片发布时间移动到底部操作栏左侧；瀑布流上下与左右间距均为 8px。375/393px 全部通过。",
+    "checked_at": "2026-07-23T16:22:09.000Z",
+    "scope": "顶部 page-tabs 居中且左右预留对称栏位，右上角发布入口保持原有 popmenu；右下角新增悬浮发布入口，点击后同一组发布操作在按钮上方错层浮出并显示弱化遮罩。375/393px 验证菜单在视口内、不与按钮重叠、无横向溢出，点击发笔记后菜单关闭并出现未开放 toast。",
     "checks": {
       "horizontal_overflow": true,
       "overlap": true,
@@ -1132,6 +1213,11 @@
         </div>
         <main class="album-feed__grid" data-region="feed-grid" data-dom-id="feed-open-dynamic"></main>
         <div data-region="empty-host" hidden></div>
+        <div class="album-feed__publish-scrim" data-dom-id="publish-scrim" aria-hidden="true"></div>
+        <button type="button" class="album-feed__publish-fab" aria-label="发布动态" aria-haspopup="menu" aria-expanded="false" data-dom-id="open-publish-menu-floating">
+          <span class="album-feed__publish-fab-ripple" aria-hidden="true"></span>
+          <i class="wego-iconfont-s icon-jia album-feed__publish-fab-icon" aria-hidden="true"></i>
+        </button>
         <div class="album-feed__contract-seed" hidden aria-hidden="true">
           <div class="navbar" data-dd-id="feed-filter-navbar-seed" data-component-slug="navbar" data-component-binding="feed-filter-navbar"><div class="navbar__body"><div class="navbar__left"><button type="button" class="navbar__left-btn navbar__left-btn--circle" aria-label="关闭"><i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button></div><div class="navbar__center"><span class="navbar__title">筛选动态</span></div><div class="navbar__right"></div></div></div>
           <div class="radio radio--sm radio--checked" data-group="feed-seed-checked" data-dd-id="feed-radio-checked-seed" data-component-slug="radio" data-component-binding="feed-filter-radio-checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
@@ -1162,6 +1248,9 @@
       var peopleList = root.querySelector('[data-region="people-list"]');
       var filterTags = root.querySelector('[data-region="filter-tags"]');
       var publishTrigger = root.querySelector('[data-dom-id="open-publish-menu"]');
+      var floatingPublishTrigger = root.querySelector('[data-dom-id="open-publish-menu-floating"]');
+      var publishScrim = root.querySelector('[data-dom-id="publish-scrim"]');
+      var activePublishTrigger = publishTrigger;
       var publishMenu = null;
       var removePublishListeners = null;
 
@@ -1206,6 +1295,11 @@
           publishTrigger.classList.remove('is-open');
           publishTrigger.setAttribute('aria-expanded', 'false');
         }
+        if (floatingPublishTrigger) {
+          floatingPublishTrigger.classList.remove('is-open');
+          floatingPublishTrigger.setAttribute('aria-expanded', 'false');
+        }
+        if (publishScrim) publishScrim.classList.remove('is-visible');
         ctx.state['publish-menu-open'] = false;
         if (removePublishListeners) {
           removePublishListeners();
@@ -1214,20 +1308,26 @@
       }
 
       function positionPublishMenu() {
-        if (!publishMenu || !publishTrigger) return false;
-        var triggerRect = publishTrigger.getBoundingClientRect();
+        var trigger = activePublishTrigger || publishTrigger;
+        if (!publishMenu || !trigger) return false;
+        var isFloating = trigger === floatingPublishTrigger;
+        var triggerRect = trigger.getBoundingClientRect();
         publishMenu.style.left = '-9999px';
         publishMenu.style.top = '-9999px';
         publishMenu.setAttribute('data-state', 'closed');
+        publishMenu.classList.toggle('album-feed__publish-menu--floating', isFloating);
+        publishMenu.setAttribute('data-placement', isFloating ? 'top' : 'bottom');
+        publishMenu.setAttribute('data-align', 'end');
         var menuWidth = publishMenu.offsetWidth;
         var menuHeight = publishMenu.offsetHeight;
-        var gap = 4;
+        var gap = isFloating ? 16 : 4;
         var sideGap = 4;
         var left = triggerRect.right - menuWidth;
-        var top = triggerRect.bottom + gap;
+        var top = isFloating ? triggerRect.top - gap - menuHeight : triggerRect.bottom + gap;
         if (left < sideGap) left = sideGap;
         if (left + menuWidth > window.innerWidth - sideGap) left = Math.max(sideGap, window.innerWidth - sideGap - menuWidth);
-        if (top + menuHeight > window.innerHeight - sideGap) top = triggerRect.top - gap - menuHeight;
+        if (!isFloating && top + menuHeight > window.innerHeight - sideGap) top = triggerRect.top - gap - menuHeight;
+        if (isFloating && top < sideGap) top = triggerRect.bottom + gap;
         if (top < sideGap || top + menuHeight > window.innerHeight - sideGap) return false;
         publishMenu.style.left = left + 'px';
         publishMenu.style.top = top + 'px';
@@ -1239,7 +1339,7 @@
 
       function openPublishMenu() {
         closePublishMenu();
-        if (!publishTrigger) return;
+        if (!activePublishTrigger) return;
         publishMenu = document.createElement('div');
         publishMenu.innerHTML = publishMenuTemplate();
         publishMenu = publishMenu.firstElementChild;
@@ -1249,8 +1349,9 @@
           ctx.toast('发布菜单空间不足');
           return;
         }
-        publishTrigger.classList.add('is-open');
-        publishTrigger.setAttribute('aria-expanded', 'true');
+        activePublishTrigger.classList.add('is-open');
+        activePublishTrigger.setAttribute('aria-expanded', 'true');
+        if (publishScrim && activePublishTrigger === floatingPublishTrigger) publishScrim.classList.add('is-visible');
         ctx.state['publish-menu-open'] = true;
         publishMenu.querySelector('[data-dom-id="publish-action-product"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); ctx.toast('发产品能力本期暂未开放'); });
         publishMenu.querySelector('[data-dom-id="publish-action-note"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); ctx.toast('发笔记能力本期暂未开放'); });
@@ -1258,7 +1359,7 @@
         publishMenu.querySelector('[data-dom-id="publish-action-import"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); ctx.toast('批量导入能力本期暂未开放'); });
         publishMenu.querySelector('[data-dom-id="publish-action-scan"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); ctx.toast('扫一扫能力本期暂未开放'); });
         var onOutsidePointer = function(event) {
-          if (publishTrigger.contains(event.target) || (publishMenu && publishMenu.contains(event.target))) return;
+          if ((publishTrigger && publishTrigger.contains(event.target)) || (floatingPublishTrigger && floatingPublishTrigger.contains(event.target)) || (publishMenu && publishMenu.contains(event.target))) return;
           closePublishMenu();
         };
         var onDismiss = function() { closePublishMenu(); };
@@ -1274,8 +1375,13 @@
 
       function togglePublishMenu(event) {
         event.stopPropagation();
-        if (publishMenu) closePublishMenu();
-        else openPublishMenu();
+        var requestedTrigger = event.currentTarget;
+        if (publishMenu && activePublishTrigger === requestedTrigger) {
+          closePublishMenu();
+          return;
+        }
+        activePublishTrigger = requestedTrigger;
+        openPublishMenu();
       }
 
       function syncPageTabs() {
@@ -1508,6 +1614,8 @@
         if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); ctx.toast('全局搜索能力本期暂未开放'); }
       });
       if (publishTrigger) publishTrigger.addEventListener('click', togglePublishMenu);
+      if (floatingPublishTrigger) floatingPublishTrigger.addEventListener('click', togglePublishMenu);
+      if (publishScrim) publishScrim.addEventListener('click', closePublishMenu);
       root.querySelector('[data-dom-id="open-filter"]').addEventListener('click', openFilterModal);
       root.querySelector('[data-dom-id="feed-open-dynamic"]').addEventListener('click', function(event) {
         if (event.target.closest('button, a')) return;
