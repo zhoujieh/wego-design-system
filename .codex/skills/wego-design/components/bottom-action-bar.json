@@ -6,7 +6,23 @@
   "status": "stable",
   "sourceKind": "figma",
   "confidence": "high",
-  "description": "移动端页面底部固定操作栏，覆盖页面操作、主次操作和选择操作三类语义，组件自身承担底部安全区处理与响应式收纳。",
+  "description": "移动端页面底部固定操作栏，覆盖页面操作、主次操作和选择操作三类语义。组件 CSS 负责结构、安全区与折叠态样式；左侧自适应折叠为可选运行时行为，需宿主显式标记并由运行时测量折叠。组件自身承担底部安全区处理与响应式收纳。",
+  "runtime": {
+    "overflow": {
+      "enabledBy": "根节点存在 .js-overflow-bar",
+      "requiredElements": [
+        ".bottom-action-bar__leading",
+        ".bottom-action-bar__more",
+        ".bottom-action-bar__action"
+      ],
+      "requiredData": {
+        "data-menu-label": "每个可能被折叠的 .bottom-action-bar__action 建议设置，用于折叠后 popmenu 项文案；未设置时回退到 .bottom-action-bar__action-label 文本",
+        "data-menu-icon": "可选，值为 iconfont 类名（如 icon-fenxiang），带图标时 popmenu 需加 popmenu--has-icon"
+      },
+      "behavior": "宿主初始化时及 resize 时测量 .bottom-action-bar__leading 可用宽度，从后往前折叠 .bottom-action-bar__action 直到可见项与 .bottom-action-bar__more 宽度之和不超 leading 宽度；无折叠时隐藏 .bottom-action-bar__more，有折叠时显示 .bottom-action-bar__more 并生成 popmenu；点击更多入口展开 popmenu，点击外部关闭。",
+      "helper": "宿主运行时提供 window.WegoApp.layoutBottomActionBar(bar) 与 window.WegoApp.layoutAllBottomActionBars(root)，并在场景挂载后调用 layoutAllBottomActionBars。"
+    }
+  },
   "semanticTypeCandidates": [
     "bottom-action-bar",
     "page-actions-bar",
@@ -114,14 +130,17 @@
     "主次操作（primary-secondary-actions）右侧最多固定 2 个结果操作，且只能是 1 个主按钮 + 1 个次按钮；左侧辅助操作可折叠进更多。",
     "选择操作（selection-actions）强绑定选择态，左侧承载全选、已选数量或范围切换，右侧承载批量处理按钮。",
     "左侧溢出统一收进最左侧的 .bottom-action-bar__more，更多菜单复用 popmenu 的 action 模式，默认纯文字竖向菜单。",
+    "需要自适应折叠时，根节点加 .js-overflow-bar；每个可能被折叠的左侧操作项设置 data-menu-label，可选 data-menu-icon，由宿主运行时测量并折叠。",
     "组件级只保证一条收纳原则：宽度不足时优先保留右侧关键操作外露；具体留存顺序由产品决定，不写死在组件规则里。",
+    "无折叠时 .bottom-action-bar__more 应隐藏；有折叠时显示并触发 popmenu。",
+    ".bottom-action-bar__more 固定在最左侧，不要把更多做成普通 .bottom-action-bar__action 项。",
     "页面操作与主次操作的轻量操作项默认使用 44px 热区与单行文案，不把图标、文案、间距压缩到互相碰撞。",
     "主按钮和次按钮直接复用 button 组件；禁止在底部操作栏内另造按钮视觉体系。",
     "选择操作的勾选控件复用 checkbox / radio 视觉语言，不在底部操作栏中发明新选择控件。",
     "带提示场景使用 .bottom-action-bar__hint 放在操作栏上方，提示与操作栏保持同底色与顶部发丝分隔。"
   ],
   "behavior": {
-    "overflow": "当左侧操作在当前宽度下无法满足最小显示宽度时，左侧溢出操作收进更多；更多菜单默认复用 popmenu action 模式的纯文字竖向菜单。",
+    "overflow": "CSS 只提供折叠态结构；真正的自适应折叠需宿主运行时初始化。带 .js-overflow-bar 的操作栏，运行时按 .bottom-action-bar__leading 可用宽度从后往前折叠 .bottom-action-bar__action，被折叠项文案优先取自 data-menu-label，未设置时回退到 .bottom-action-bar__action-label 文本；有折叠时根节点添加 .is-collapsed，无折叠时移除，组件 CSS 据此显示 .bottom-action-bar__more 并触发 popmenu。",
     "priority": "组件只保证收纳后右侧关键操作优先外露；外露顺序和保留策略由业务场景定义。",
     "iconMode": "页面操作默认 text-only；只有产品明确要求时才使用 icon-text。组件不主动推断带图标版本。",
     "selection": "选择操作未满足业务前置条件时，右侧批量处理按钮可以置 disabled，但组件不自行推断文案或数量逻辑。"
@@ -137,7 +156,8 @@
     "主次操作适合详情导向或结果导向场景，右侧关键动作优先级最明确。",
     "选择操作只用于存在选择上下文的批量处理页面。",
     "页面操作默认纯文字；只有产品明确要求时才启用图标+文字版本。",
-    "超过可用宽度时优先收纳左侧辅助操作，不挤压右侧关键按钮。"
+    "超过可用宽度时优先收纳左侧辅助操作，不挤压右侧关键按钮。",
+    "需要自适应折叠时给根节点加 .js-overflow-bar，并为每个可折叠操作项提供 data-menu-label；不要把 .bottom-action-bar__more 当成普通操作项。"
   ],
   "doNotInvent": [
     "不要把页面操作强行套成固定左侧入口区 + 右侧主按钮的双区模型。",

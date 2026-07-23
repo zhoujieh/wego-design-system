@@ -212,16 +212,6 @@
   font-size: var(--body-lg-font-size);
   line-height: 1.2;
 }
-.bottom-action-bar--page-actions .bottom-action-bar__more + .bottom-action-bar__action::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 50%;
-  width: 1px;
-  height: 16px;
-  transform: translateY(-50%);
-  background: var(--border-neutral-l2);
-}
 .bottom-action-bar--primary-secondary .bottom-action-bar__inner {
   gap: var(--spacer-8);
   padding-left: 4px;
@@ -412,6 +402,11 @@
 .bottom-action-bar__collapsed-item {
   display: none !important;
 }
+.bottom-action-bar--page-actions.is-collapsed .bottom-action-bar__more,
+.bottom-action-bar--primary-secondary.is-collapsed .bottom-action-bar__more,
+.bottom-action-bar--selection.is-collapsed .bottom-action-bar__more {
+  display: inline-flex;
+}
 /* @component-css-end */
 
 .bottom-action-preview-grid {
@@ -451,20 +446,20 @@
   position: fixed !important;
 }
 .bottom-action-responsive {
-  width: 100%;
+  flex: 0 0 auto;
   border: 1px dashed var(--border-neutral-l2);
   border-radius: var(--radius-8);
   overflow: hidden;
   background: var(--bg-page);
 }
 .bottom-action-responsive[data-width="375"] {
-  max-width: 375px;
+  width: 375px;
 }
 .bottom-action-responsive[data-width="320"] {
-  max-width: 320px;
+  width: 320px;
 }
 .bottom-action-responsive[data-width="280"] {
-  max-width: 280px;
+  width: 280px;
 }
 .bottom-action-responsive__body {
   min-height: 120px;
@@ -493,7 +488,7 @@
       <div class="label">页面操作 · 1 项</div>
       <div class="bottom-action-stage">
         <div class="bottom-action-ghost"></div>
-        <div class="bottom-action-bar bottom-action-bar--page-actions js-page-overflow-bar">
+        <div class="bottom-action-bar bottom-action-bar--page-actions js-overflow-bar">
           <div class="bottom-action-bar__inner">
             <div class="bottom-action-bar__leading">
               <button class="bottom-action-bar__more" type="button" aria-label="更多操作"><i class="wego-iconfont-s icon-sandian16"></i><span class="bottom-action-bar__more-label">更多</span></button>
@@ -511,7 +506,7 @@
       <div class="label">页面操作 · 2 项</div>
       <div class="bottom-action-stage">
         <div class="bottom-action-ghost"></div>
-        <div class="bottom-action-bar bottom-action-bar--page-actions js-page-overflow-bar">
+        <div class="bottom-action-bar bottom-action-bar--page-actions js-overflow-bar">
           <div class="bottom-action-bar__inner">
             <div class="bottom-action-bar__leading">
               <button class="bottom-action-bar__more" type="button" aria-label="更多操作"><i class="wego-iconfont-s icon-sandian16"></i><span class="bottom-action-bar__more-label">更多</span></button>
@@ -533,7 +528,7 @@
       <div class="label">页面操作 · 3 项</div>
       <div class="bottom-action-stage">
         <div class="bottom-action-ghost"></div>
-        <div class="bottom-action-bar bottom-action-bar--page-actions js-page-overflow-bar">
+        <div class="bottom-action-bar bottom-action-bar--page-actions js-overflow-bar">
           <div class="bottom-action-bar__inner">
             <div class="bottom-action-bar__leading">
               <button class="bottom-action-bar__more" type="button" aria-label="更多操作"><i class="wego-iconfont-s icon-sandian16"></i><span class="bottom-action-bar__more-label">更多</span></button>
@@ -559,7 +554,7 @@
       <div class="label">页面操作 · 4 项</div>
       <div class="bottom-action-stage">
         <div class="bottom-action-ghost"></div>
-        <div class="bottom-action-bar bottom-action-bar--page-actions js-page-overflow-bar">
+        <div class="bottom-action-bar bottom-action-bar--page-actions js-overflow-bar">
           <div class="bottom-action-bar__inner">
             <div class="bottom-action-bar__leading">
               <button class="bottom-action-bar__more" type="button" aria-label="更多操作"><i class="wego-iconfont-s icon-sandian16"></i><span class="bottom-action-bar__more-label">更多</span></button>
@@ -589,7 +584,7 @@
       <div class="label">页面操作 · 图标项（按需启用）</div>
       <div class="bottom-action-stage">
         <div class="bottom-action-ghost"></div>
-        <div class="bottom-action-bar bottom-action-bar--page-actions bottom-action-bar--icon-text js-page-overflow-bar">
+        <div class="bottom-action-bar bottom-action-bar--page-actions bottom-action-bar--icon-text js-overflow-bar">
           <div class="bottom-action-bar__inner">
             <div class="bottom-action-bar__leading">
               <button class="bottom-action-bar__more" type="button" aria-label="更多操作"><i class="wego-iconfont-s icon-sandian16"></i><span class="bottom-action-bar__more-label">更多</span></button>
@@ -893,19 +888,73 @@
 
 <div class="pv-section">
   <div class="pv-section__title">响应式收纳</div>
-  <div class="pv-section__sub">演示宽度不足时左侧辅助操作收进更多，右侧关键操作仍外露。</div>
+  <div class="pv-section__sub">演示宽度不足时操作项收进更多。页面操作（等分纯文本）与主次操作（左侧图标文本）两类均支持；实际业务场景需配合宿主运行时（.js-overflow-bar + data-menu-label）自动测量折叠。</div>
   <div class="bottom-action-demo-widths">
     <div class="bottom-action-responsive" data-width="375">
-      <div class="bottom-action-responsive__caption">375 宽度</div>
+      <div class="bottom-action-responsive__caption">页面操作 · 375 宽度</div>
       <div class="bottom-action-responsive__body"></div>
-      <div class="bottom-action-bar bottom-action-bar--primary-secondary bottom-action-bar--icon-text js-overflow-bar" data-popmenu-id="demo-popmenu-375">
+      <div class="bottom-action-bar bottom-action-bar--page-actions js-overflow-bar">
         <div class="bottom-action-bar__inner">
           <div class="bottom-action-bar__leading">
             <button class="bottom-action-bar__more" type="button" aria-label="更多操作"><i class="wego-iconfont-s icon-sandian16"></i><span class="bottom-action-bar__more-label">更多</span></button>
-            <button class="bottom-action-bar__action js-overflow-item" type="button" data-menu-label="操作1"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-kefu-guanfang"></i></span><span class="bottom-action-bar__action-label">操作1</span></button>
-            <button class="bottom-action-bar__action js-overflow-item" type="button" data-menu-label="操作2"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-fenxiang"></i></span><span class="bottom-action-bar__action-label">操作2</span></button>
-            <button class="bottom-action-bar__action js-overflow-item" type="button" data-menu-label="操作3"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-shoucang"></i></span><span class="bottom-action-bar__action-label">操作3</span></button>
-            <button class="bottom-action-bar__action js-overflow-item" type="button" data-menu-label="操作4"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-xiazai"></i></span><span class="bottom-action-bar__action-label">操作4</span></button>
+            <button class="bottom-action-bar__action" type="button" data-menu-label="编辑笔记"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-bianji"></i></span><span class="bottom-action-bar__action-label">编辑笔记</span></button>
+            <button class="bottom-action-bar__action" type="button" data-menu-label="分享好友"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-fenxiang"></i></span><span class="bottom-action-bar__action-label">分享好友</span></button>
+            <button class="bottom-action-bar__action" type="button" data-menu-label="收藏内容"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-shoucang"></i></span><span class="bottom-action-bar__action-label">收藏内容</span></button>
+            <button class="bottom-action-bar__action" type="button" data-menu-label="下载本地"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-xiazai"></i></span><span class="bottom-action-bar__action-label">下载本地</span></button>
+            <button class="bottom-action-bar__action" type="button" data-menu-label="复制链接"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-fuzhi"></i></span><span class="bottom-action-bar__action-label">复制链接</span></button>
+            <button class="bottom-action-bar__action" type="button" data-menu-label="查看详情"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-bianji"></i></span><span class="bottom-action-bar__action-label">查看详情</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-action-responsive" data-width="320">
+      <div class="bottom-action-responsive__caption">页面操作 · 320 宽度</div>
+      <div class="bottom-action-responsive__body"></div>
+      <div class="bottom-action-bar bottom-action-bar--page-actions js-overflow-bar">
+        <div class="bottom-action-bar__inner">
+          <div class="bottom-action-bar__leading">
+            <button class="bottom-action-bar__more" type="button" aria-label="更多操作"><i class="wego-iconfont-s icon-sandian16"></i><span class="bottom-action-bar__more-label">更多</span></button>
+            <button class="bottom-action-bar__action" type="button" data-menu-label="编辑笔记"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-bianji"></i></span><span class="bottom-action-bar__action-label">编辑笔记</span></button>
+            <button class="bottom-action-bar__action" type="button" data-menu-label="分享好友"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-fenxiang"></i></span><span class="bottom-action-bar__action-label">分享好友</span></button>
+            <button class="bottom-action-bar__action" type="button" data-menu-label="收藏内容"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-shoucang"></i></span><span class="bottom-action-bar__action-label">收藏内容</span></button>
+            <button class="bottom-action-bar__action" type="button" data-menu-label="下载本地"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-xiazai"></i></span><span class="bottom-action-bar__action-label">下载本地</span></button>
+            <button class="bottom-action-bar__action" type="button" data-menu-label="复制链接"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-fuzhi"></i></span><span class="bottom-action-bar__action-label">复制链接</span></button>
+            <button class="bottom-action-bar__action" type="button" data-menu-label="查看详情"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-bianji"></i></span><span class="bottom-action-bar__action-label">查看详情</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-action-responsive" data-width="280">
+      <div class="bottom-action-responsive__caption">页面操作 · 280 宽度</div>
+      <div class="bottom-action-responsive__body"></div>
+      <div class="bottom-action-bar bottom-action-bar--page-actions js-overflow-bar">
+        <div class="bottom-action-bar__inner">
+          <div class="bottom-action-bar__leading">
+            <button class="bottom-action-bar__more" type="button" aria-label="更多操作"><i class="wego-iconfont-s icon-sandian16"></i><span class="bottom-action-bar__more-label">更多</span></button>
+            <button class="bottom-action-bar__action" type="button" data-menu-label="编辑笔记"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-bianji"></i></span><span class="bottom-action-bar__action-label">编辑笔记</span></button>
+            <button class="bottom-action-bar__action" type="button" data-menu-label="分享好友"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-fenxiang"></i></span><span class="bottom-action-bar__action-label">分享好友</span></button>
+            <button class="bottom-action-bar__action" type="button" data-menu-label="收藏内容"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-shoucang"></i></span><span class="bottom-action-bar__action-label">收藏内容</span></button>
+            <button class="bottom-action-bar__action" type="button" data-menu-label="下载本地"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-xiazai"></i></span><span class="bottom-action-bar__action-label">下载本地</span></button>
+            <button class="bottom-action-bar__action" type="button" data-menu-label="复制链接"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-fuzhi"></i></span><span class="bottom-action-bar__action-label">复制链接</span></button>
+            <button class="bottom-action-bar__action" type="button" data-menu-label="查看详情"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-bianji"></i></span><span class="bottom-action-bar__action-label">查看详情</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-action-responsive" data-width="375">
+      <div class="bottom-action-responsive__caption">主次操作 · 375 宽度</div>
+      <div class="bottom-action-responsive__body"></div>
+      <div class="bottom-action-bar bottom-action-bar--primary-secondary bottom-action-bar--icon-text js-overflow-bar">
+        <div class="bottom-action-bar__inner">
+          <div class="bottom-action-bar__leading">
+            <button class="bottom-action-bar__more" type="button" aria-label="更多操作"><i class="wego-iconfont-s icon-sandian16"></i><span class="bottom-action-bar__more-label">更多</span></button>
+            <button class="bottom-action-bar__action" type="button" data-menu-label="操作1"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-kefu-guanfang"></i></span><span class="bottom-action-bar__action-label">操作1</span></button>
+            <button class="bottom-action-bar__action" type="button" data-menu-label="操作2"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-fenxiang"></i></span><span class="bottom-action-bar__action-label">操作2</span></button>
+            <button class="bottom-action-bar__action" type="button" data-menu-label="操作3"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-shoucang"></i></span><span class="bottom-action-bar__action-label">操作3</span></button>
+            <button class="bottom-action-bar__action" type="button" data-menu-label="操作4"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-xiazai"></i></span><span class="bottom-action-bar__action-label">操作4</span></button>
           </div>
           <div class="bottom-action-bar__trailing">
             <button class="btn btn--weak btn--md">次要按钮</button>
@@ -916,16 +965,16 @@
     </div>
 
     <div class="bottom-action-responsive" data-width="320">
-      <div class="bottom-action-responsive__caption">320 宽度</div>
+      <div class="bottom-action-responsive__caption">主次操作 · 320 宽度</div>
       <div class="bottom-action-responsive__body"></div>
-      <div class="bottom-action-bar bottom-action-bar--primary-secondary bottom-action-bar--icon-text js-overflow-bar" data-popmenu-id="demo-popmenu-320">
+      <div class="bottom-action-bar bottom-action-bar--primary-secondary bottom-action-bar--icon-text js-overflow-bar">
         <div class="bottom-action-bar__inner">
           <div class="bottom-action-bar__leading">
             <button class="bottom-action-bar__more" type="button" aria-label="更多操作"><i class="wego-iconfont-s icon-sandian16"></i><span class="bottom-action-bar__more-label">更多</span></button>
-            <button class="bottom-action-bar__action js-overflow-item" type="button" data-menu-label="操作1"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-kefu-guanfang"></i></span><span class="bottom-action-bar__action-label">操作1</span></button>
-            <button class="bottom-action-bar__action js-overflow-item" type="button" data-menu-label="操作2"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-fenxiang"></i></span><span class="bottom-action-bar__action-label">操作2</span></button>
-            <button class="bottom-action-bar__action js-overflow-item" type="button" data-menu-label="操作3"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-shoucang"></i></span><span class="bottom-action-bar__action-label">操作3</span></button>
-            <button class="bottom-action-bar__action js-overflow-item" type="button" data-menu-label="操作4"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-xiazai"></i></span><span class="bottom-action-bar__action-label">操作4</span></button>
+            <button class="bottom-action-bar__action" type="button" data-menu-label="操作1"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-kefu-guanfang"></i></span><span class="bottom-action-bar__action-label">操作1</span></button>
+            <button class="bottom-action-bar__action" type="button" data-menu-label="操作2"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-fenxiang"></i></span><span class="bottom-action-bar__action-label">操作2</span></button>
+            <button class="bottom-action-bar__action" type="button" data-menu-label="操作3"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-shoucang"></i></span><span class="bottom-action-bar__action-label">操作3</span></button>
+            <button class="bottom-action-bar__action" type="button" data-menu-label="操作4"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-xiazai"></i></span><span class="bottom-action-bar__action-label">操作4</span></button>
           </div>
           <div class="bottom-action-bar__trailing">
             <button class="btn btn--weak btn--md">次要按钮</button>
@@ -936,16 +985,16 @@
     </div>
 
     <div class="bottom-action-responsive" data-width="280">
-      <div class="bottom-action-responsive__caption">280 宽度</div>
+      <div class="bottom-action-responsive__caption">主次操作 · 280 宽度</div>
       <div class="bottom-action-responsive__body"></div>
-      <div class="bottom-action-bar bottom-action-bar--primary-secondary bottom-action-bar--icon-text js-overflow-bar" data-popmenu-id="demo-popmenu-280">
+      <div class="bottom-action-bar bottom-action-bar--primary-secondary bottom-action-bar--icon-text js-overflow-bar">
         <div class="bottom-action-bar__inner">
           <div class="bottom-action-bar__leading">
             <button class="bottom-action-bar__more" type="button" aria-label="更多操作"><i class="wego-iconfont-s icon-sandian16"></i><span class="bottom-action-bar__more-label">更多</span></button>
-            <button class="bottom-action-bar__action js-overflow-item" type="button" data-menu-label="操作1"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-kefu-guanfang"></i></span><span class="bottom-action-bar__action-label">操作1</span></button>
-            <button class="bottom-action-bar__action js-overflow-item" type="button" data-menu-label="操作2"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-fenxiang"></i></span><span class="bottom-action-bar__action-label">操作2</span></button>
-            <button class="bottom-action-bar__action js-overflow-item" type="button" data-menu-label="操作3"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-shoucang"></i></span><span class="bottom-action-bar__action-label">操作3</span></button>
-            <button class="bottom-action-bar__action js-overflow-item" type="button" data-menu-label="操作4"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-xiazai"></i></span><span class="bottom-action-bar__action-label">操作4</span></button>
+            <button class="bottom-action-bar__action" type="button" data-menu-label="操作1"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-kefu-guanfang"></i></span><span class="bottom-action-bar__action-label">操作1</span></button>
+            <button class="bottom-action-bar__action" type="button" data-menu-label="操作2"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-fenxiang"></i></span><span class="bottom-action-bar__action-label">操作2</span></button>
+            <button class="bottom-action-bar__action" type="button" data-menu-label="操作3"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-shoucang"></i></span><span class="bottom-action-bar__action-label">操作3</span></button>
+            <button class="bottom-action-bar__action" type="button" data-menu-label="操作4"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-xiazai"></i></span><span class="bottom-action-bar__action-label">操作4</span></button>
           </div>
           <div class="bottom-action-bar__trailing">
             <button class="btn btn--weak btn--md">次要按钮</button>
@@ -961,53 +1010,198 @@
 
 <script>
 (function () {
-  let currentMenu = null;
+  var throttleTimer = null;
 
-  function layoutOverflowBar(bar) {
-    const inner = bar.querySelector('.bottom-action-bar__inner');
-    const leading = bar.querySelector('.bottom-action-bar__leading');
-    const trailing = bar.querySelector('.bottom-action-bar__trailing');
-    const more = bar.querySelector('.bottom-action-bar__more');
-    const items = Array.from(leading ? leading.querySelectorAll('.bottom-action-bar__action') : []);
-    if (!inner || !leading || !trailing || !more || items.length === 0) return;
+  function throttle(fn, wait) {
+    return function () {
+      clearTimeout(throttleTimer);
+      throttleTimer = setTimeout(fn, wait);
+    };
+  }
 
-    items.forEach(item => item.classList.remove('bottom-action-bar__collapsed-item'));
-    more.style.display = 'none';
+  function getGap(el) {
+    return parseFloat(getComputedStyle(el).gap) || 0;
+  }
 
-    const innerWidth = inner.clientWidth;
-    const trailingWidth = trailing.offsetWidth;
-    const available = innerWidth - trailingWidth - 12;
-    let used = 0;
-    let collapsed = false;
+  function closePopmenu(popmenu) {
+    if (!popmenu) return;
+    popmenu.setAttribute('data-state', 'closed');
+  }
 
-    items.forEach((item, index) => {
-      const width = item.offsetWidth;
-      if (!collapsed && used + width <= available) {
-        used += width;
-        return;
+  function removeExistingMenu(bar) {
+    var existing = bar._overflowPopmenu || bar.querySelector('.bottom-action-bar__overflow-menu');
+    if (existing) existing.remove();
+    bar._overflowPopmenu = null;
+  }
+
+  function buildPopmenu(bar, collapsedItems) {
+    removeExistingMenu(bar);
+
+    var hasIcon = collapsedItems.some(function (item) { return item.dataset.menuIcon; });
+    var popmenu = document.createElement('div');
+    popmenu.className = 'popmenu popmenu--action popmenu--demo-floating' + (hasIcon ? ' popmenu--has-icon' : '');
+    popmenu.setAttribute('role', 'menu');
+    popmenu.setAttribute('data-state', 'closed');
+    popmenu.classList.add('bottom-action-bar__overflow-menu');
+
+    var list = document.createElement('div');
+    list.className = 'popmenu__list';
+
+    collapsedItems.forEach(function (item) {
+      var label = item.dataset.menuLabel || item.textContent.trim();
+      var iconClass = item.dataset.menuIcon;
+      var menuItem = document.createElement('div');
+      menuItem.className = 'popmenu__item';
+      menuItem.setAttribute('role', 'menuitem');
+      if (iconClass) {
+        var icon = document.createElement('i');
+        icon.className = 'wego-iconfont-s ' + iconClass + ' popmenu__item-icon';
+        menuItem.appendChild(icon);
       }
-      if (!collapsed) {
-        collapsed = true;
-        more.style.display = 'inline-flex';
-        used += more.offsetWidth;
-      }
-      item.classList.add('bottom-action-bar__collapsed-item');
+      var text = document.createElement('span');
+      text.className = 'popmenu__item-text';
+      text.textContent = label;
+      menuItem.appendChild(text);
+      menuItem.addEventListener('click', function (e) {
+        // 阻止冒泡到 document，避免 item.click() 触发的 click 事件误关其他菜单
+        e.stopPropagation();
+        item.click();
+        closePopmenu(popmenu);
+      });
+      list.appendChild(menuItem);
     });
 
-    if (!collapsed) {
-      more.style.display = 'none';
+    popmenu.appendChild(list);
+    document.getElementById('bottom-action-popmenu-root').appendChild(popmenu);
+    bar._overflowPopmenu = popmenu;
+    return popmenu;
+  }
+
+  function closeAllOverflowMenus(except) {
+    Array.prototype.forEach.call(document.querySelectorAll('.bottom-action-bar__overflow-menu[data-state="open"]'), function (menu) {
+      if (menu !== except) closePopmenu(menu);
+    });
+  }
+
+  function bindMoreButton(moreBtn, bar) {
+    if (moreBtn.dataset.overflowBound === 'true') return;
+    moreBtn.dataset.overflowBound = 'true';
+    moreBtn.addEventListener('click', function (e) {
+      // 不调用 stopPropagation：规范要求 dismiss 不得阻断原页面事件
+      // document click 监听器通过排除 more 按钮自身来避免立即关闭
+      var popmenu = bar._overflowPopmenu;
+      if (!popmenu) return;
+      if (popmenu.getAttribute('data-state') === 'open') {
+        closePopmenu(popmenu);
+        return;
+      }
+      // 同屏仅展示一个 popmenu：打开前关闭其他
+      closeAllOverflowMenus(popmenu);
+      if (!window.WegoPreviewPopmenu || !window.WegoPreviewPopmenu.position(popmenu, moreBtn)) {
+        popmenu.remove();
+        bar._overflowPopmenu = null;
+        return;
+      }
+      // 用 rAF 包裹 open，确保 popmenu 先以 closed 状态渲染一帧，
+      // 再切换到 open 触发 opacity 0→1 + scale 0.9→1 入场过渡
+      requestAnimationFrame(function () {
+        popmenu.setAttribute('data-state', 'open');
+      });
+    });
+  }
+
+  function layoutBar(bar) {
+    if (!bar.classList.contains('js-overflow-bar')) return;
+    var leading = bar.querySelector('.bottom-action-bar__leading');
+    var moreBtn = bar.querySelector('.bottom-action-bar__more');
+    if (!leading || !moreBtn) return;
+
+    var actions = Array.prototype.filter.call(leading.querySelectorAll('.bottom-action-bar__action'), function (a) {
+      return a.closest('.bottom-action-bar__leading') === leading;
+    });
+    if (!actions.length) {
+      moreBtn.style.display = 'none';
       bar.classList.remove('is-collapsed');
+      removeExistingMenu(bar);
       return;
     }
 
+    // 重置：所有 action 可见，more 隐藏，便于测量真实溢出状态
+    actions.forEach(function (a) { a.classList.remove('bottom-action-bar__collapsed-item'); });
+    moreBtn.style.display = 'none';
+    bar.classList.remove('is-collapsed');
+
+    // 溢出检测：leading 横向溢出 或 任意可见 action 的 label 文本被省略
+    // 覆盖两类布局：primary-secondary(flex:0 1 auto，min-width 溢出) 与 page-actions(flex:1 1 0，等分省略)
+    function isOverflowing() {
+      if (leading.scrollWidth > leading.clientWidth + 0.5) return true;
+      return actions.some(function (a) {
+        if (a.classList.contains('bottom-action-bar__collapsed-item')) return false;
+        var label = a.querySelector('.bottom-action-bar__action-label');
+        return label && label.scrollWidth > label.clientWidth + 1;
+      });
+    }
+
+    if (!isOverflowing()) {
+      removeExistingMenu(bar);
+      return;
+    }
+
+    // 需要折叠：先显示 more 占位，再按模式从对应方向逐个折叠直到不溢出
+    moreBtn.style.display = 'inline-flex';
     bar.classList.add('is-collapsed');
-    const visibleItems = items.filter(item => !item.classList.contains('bottom-action-bar__collapsed-item'));
-    while (used > available && visibleItems.length > 0) {
-      const lastVisible = visibleItems.pop();
-      used -= lastVisible.offsetWidth;
-      lastVisible.classList.add('bottom-action-bar__collapsed-item');
+
+    // page-actions 等分布局下优先保留末尾操作（与验收通过版本一致）；其他模式从末尾折叠保留头部
+    var isPageActions = bar.classList.contains('bottom-action-bar--page-actions');
+    var order = isPageActions ? actions.slice() : actions.slice().reverse();
+    for (var i = 0; i < order.length; i++) {
+      if (!isOverflowing()) break;
+      order[i].classList.add('bottom-action-bar__collapsed-item');
+    }
+
+    var collapsed = actions.filter(function (a) {
+      return a.classList.contains('bottom-action-bar__collapsed-item');
+    });
+
+    if (collapsed.length === 0) {
+      moreBtn.style.display = 'none';
+      bar.classList.remove('is-collapsed');
+      removeExistingMenu(bar);
+    } else {
+      buildPopmenu(bar, collapsed);
+      bindMoreButton(moreBtn, bar);
     }
   }
+
+  function layoutAll(root) {
+    root = root || document;
+    Array.prototype.forEach.call(root.querySelectorAll('.bottom-action-bar.js-overflow-bar'), layoutBar);
+  }
+
+  var throttledLayout = throttle(function () {
+    closeAllOverflowMenus();
+    layoutAll(document);
+  }, 100);
+  window.addEventListener('resize', throttledLayout);
+  window.addEventListener('orientationchange', throttledLayout);
+
+  // popmenu dismiss：页面任意非菜单点击、焦点切换、滚动均立即关闭，不阻断原页面事件
+  // 排除 more 按钮自身：点击 more 打开菜单的逻辑由 bindMoreButton 处理，不应被 dismiss 误关
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest) return;
+    if (e.target.closest('.bottom-action-bar__overflow-menu')) return;
+    if (e.target.closest('.bottom-action-bar__more')) return;
+    closeAllOverflowMenus();
+  });
+  document.addEventListener('focusin', function (e) {
+    if (!e.target.closest || !e.target.closest('.bottom-action-bar__overflow-menu')) {
+      closeAllOverflowMenus();
+    }
+  });
+  window.addEventListener('scroll', closeAllOverflowMenus, true);
+
+  // Preview-specific: selection demos
+  var currentMenu = null;
 
   function closeAllMenus() {
     if (!currentMenu) return;
@@ -1015,45 +1209,92 @@
     currentMenu = null;
   }
 
-  function buildMenu(labels, mode, selectedLabel) {
-    const menu = document.createElement('div');
-    menu.className = 'popmenu popmenu--demo-floating ' + (mode === 'select' ? 'popmenu--select' : 'popmenu--action');
-    menu.setAttribute('role', mode === 'select' ? 'listbox' : 'menu');
+  function setBabCheckboxState(host, checked) {
+    var checkbox = host.querySelector('.checkbox');
+    if (!checkbox) return;
+    checkbox.classList.toggle('checkbox--checked', checked);
+    host.setAttribute('aria-checked', checked ? 'true' : 'false');
+  }
+
+  function bindBabCheckboxes() {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-bab-checkbox]'), function (host) {
+      host.addEventListener('click', function (event) {
+        if (host.closest('.bottom-action-bar__selection-toggle')) {
+          event.stopPropagation();
+        }
+        var next = host.getAttribute('aria-checked') !== 'true';
+        setBabCheckboxState(host, next);
+      });
+    });
+  }
+
+  function buildSelectMenu(labels, selectedLabel) {
+    var menu = document.createElement('div');
+    menu.className = 'popmenu popmenu--demo-floating popmenu--select';
+    menu.setAttribute('role', 'listbox');
     menu.setAttribute('data-state', 'closed');
     menu.setAttribute('data-placement', 'bottom');
     menu.setAttribute('data-align', 'start');
 
-    let html = '<div class="popmenu__list">';
+    var list = document.createElement('div');
+    list.className = 'popmenu__list';
     labels.forEach(function (label, index) {
-      if (mode === 'select') {
-        const selected = label === selectedLabel || (!selectedLabel && index === 0);
-        html += '<div class="popmenu__item' + (selected ? ' popmenu__item--selected' : '') + '" role="option" aria-selected="' + (selected ? 'true' : 'false') + '"><span class="popmenu__item-text">' + label + '</span><i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check"></i></div>';
-        return;
-      }
-      html += '<div class="popmenu__item" role="menuitem"><span class="popmenu__item-text">' + label + '</span></div>';
+      var selected = label === selectedLabel || (!selectedLabel && index === 0);
+      var item = document.createElement('div');
+      item.className = 'popmenu__item' + (selected ? ' popmenu__item--selected' : '');
+      item.setAttribute('role', 'option');
+      item.setAttribute('aria-selected', selected ? 'true' : 'false');
+      var text = document.createElement('span');
+      text.className = 'popmenu__item-text';
+      text.textContent = label;
+      item.appendChild(text);
+      var check = document.createElement('i');
+      check.className = 'wego-iconfont-s icon-gou-jiacu popmenu__item-check';
+      item.appendChild(check);
+      item.addEventListener('click', function () {
+        menu.querySelectorAll('.popmenu__item').forEach(function (candidate) {
+          var isSelected = candidate === item;
+          candidate.classList.toggle('popmenu__item--selected', isSelected);
+          candidate.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+        });
+        closeAllMenus();
+      });
+      list.appendChild(item);
     });
-    html += '</div>';
-    menu.innerHTML = html;
+    menu.appendChild(list);
     return menu;
   }
 
   function openMenu(trigger, labels, options) {
-    const mode = options && options.mode ? options.mode : 'action';
-    const selectedLabel = options && options.selectedLabel ? options.selectedLabel : '';
+    options = options || {};
+    var mode = options.mode || 'action';
+    var selectedLabel = options.selectedLabel || '';
     closeAllMenus();
-    const root = document.getElementById('bottom-action-popmenu-root');
-    const menu = buildMenu(labels, mode, selectedLabel);
-    menu.addEventListener('click', function (event) {
-      const item = event.target.closest('.popmenu__item');
-      if (!item) return;
-      if (mode === 'select') {
-        menu.querySelectorAll('.popmenu__item').forEach(function (candidate) {
-          candidate.classList.toggle('popmenu__item--selected', candidate === item);
-          candidate.setAttribute('aria-selected', candidate === item ? 'true' : 'false');
-        });
-      }
-      closeAllMenus();
-    });
+    var root = document.getElementById('bottom-action-popmenu-root');
+    var menu;
+    if (mode === 'select') {
+      menu = buildSelectMenu(labels, selectedLabel);
+    } else {
+      menu = document.createElement('div');
+      menu.className = 'popmenu popmenu--demo-floating popmenu--action';
+      menu.setAttribute('role', 'menu');
+      menu.setAttribute('data-state', 'closed');
+      menu.setAttribute('data-placement', 'bottom');
+      menu.setAttribute('data-align', 'start');
+      var list = document.createElement('div');
+      list.className = 'popmenu__list';
+      labels.forEach(function (label) {
+        var item = document.createElement('div');
+        item.className = 'popmenu__item';
+        item.setAttribute('role', 'menuitem');
+        var text = document.createElement('span');
+        text.className = 'popmenu__item-text';
+        text.textContent = label;
+        item.appendChild(text);
+        list.appendChild(item);
+      });
+      menu.appendChild(list);
+    }
     root.appendChild(menu);
     if (!window.WegoPreviewPopmenu || !window.WegoPreviewPopmenu.position(menu, trigger)) {
       menu.remove();
@@ -1066,118 +1307,17 @@
     return menu;
   }
 
-  function bindOverflowBars() {
-    const bars = Array.from(document.querySelectorAll('.js-overflow-bar'));
-    bars.forEach(bar => {
-      layoutOverflowBar(bar);
-      const more = bar.querySelector('.bottom-action-bar__more');
-      if (!more) return;
-      more.addEventListener('click', function (event) {
-        event.stopPropagation();
-        const hiddenLabels = Array.from(bar.querySelectorAll('.bottom-action-bar__action.bottom-action-bar__collapsed-item'))
-          .map(function (item) {
-            return item.getAttribute('data-menu-label') ||
-              (item.querySelector('.bottom-action-bar__action-label') ? item.querySelector('.bottom-action-bar__action-label').textContent.trim() : '');
-          })
-          .filter(Boolean);
-        if (hiddenLabels.length === 0) return;
-        openMenu(more, hiddenLabels, { mode: 'action' });
-      });
-    });
-
-    window.addEventListener('resize', function () {
-      bars.forEach(layoutOverflowBar);
-      closeAllMenus();
-    });
-  }
-
-  function layoutPageOverflowBar(bar) {
-    const leading = bar.querySelector('.bottom-action-bar__leading');
-    const more = bar.querySelector('.bottom-action-bar__more');
-    const items = Array.from(bar.querySelectorAll('.bottom-action-bar__action'));
-    if (!leading || !more || items.length === 0) return;
-
-    items.forEach(item => item.classList.remove('bottom-action-bar__collapsed-item'));
-    more.style.display = 'none';
-    bar.classList.remove('is-collapsed');
-
-    const hasEllipsis = function () {
-      return items.some(function (item) {
-        if (item.classList.contains('bottom-action-bar__collapsed-item')) return false;
-        const label = item.querySelector('.bottom-action-bar__action-label');
-        return label && label.scrollWidth > label.clientWidth + 1;
-      });
-    };
-
-    while ((leading.scrollWidth > leading.clientWidth || hasEllipsis()) && items.filter(function (item) {
-      return !item.classList.contains('bottom-action-bar__collapsed-item');
-    }).length > 1) {
-      more.style.display = 'inline-flex';
-      bar.classList.add('is-collapsed');
-      const visible = items.filter(function (item) {
-        return !item.classList.contains('bottom-action-bar__collapsed-item');
-      });
-      visible[0].classList.add('bottom-action-bar__collapsed-item');
-    }
-  }
-
-  function bindPageOverflowBars() {
-    const bars = Array.from(document.querySelectorAll('.js-page-overflow-bar'));
-    bars.forEach(function (bar) {
-      layoutPageOverflowBar(bar);
-      const more = bar.querySelector('.bottom-action-bar__more');
-      if (!more) return;
-      more.addEventListener('click', function (event) {
-        event.stopPropagation();
-        const hiddenLabels = Array.from(bar.querySelectorAll('.bottom-action-bar__action.bottom-action-bar__collapsed-item .bottom-action-bar__action-label'))
-          .map(function (label) { return label.getAttribute('data-menu-label') || label.textContent.trim(); })
-          .filter(Boolean);
-        if (hiddenLabels.length === 0) return;
-        openMenu(more, hiddenLabels, { mode: 'action' });
-      });
-    });
-
-    window.addEventListener('resize', function () {
-      bars.forEach(layoutPageOverflowBar);
-      closeAllMenus();
-    });
-  }
-
-  function setBabCheckboxState(host, checked) {
-    const checkbox = host.querySelector('.checkbox');
-    if (!checkbox) return;
-    checkbox.classList.toggle('checkbox--checked', checked);
-    host.setAttribute('aria-checked', checked ? 'true' : 'false');
-  }
-
-  function bindBabCheckboxes() {
-    const hosts = Array.from(document.querySelectorAll('[data-bab-checkbox]'));
-    hosts.forEach(function (host) {
-      host.addEventListener('click', function (event) {
-        if (host.closest('.bottom-action-bar__selection-toggle')) {
-          event.stopPropagation();
-        }
-        const next = host.getAttribute('aria-checked') !== 'true';
-        setBabCheckboxState(host, next);
-      });
-    });
-  }
-
   function bindSelectionMenus() {
-    const toggles = Array.from(document.querySelectorAll('.bottom-action-bar__selection-toggle[data-menu-labels]'));
-    toggles.forEach(function (toggle) {
-      const value = toggle.querySelector('.bottom-action-bar__selection-value');
-      const trigger = value || toggle;
+    Array.prototype.forEach.call(document.querySelectorAll('.bottom-action-bar__selection-toggle[data-menu-labels]'), function (toggle) {
+      var value = toggle.querySelector('.bottom-action-bar__selection-value');
+      var trigger = value || toggle;
       trigger.addEventListener('click', function (event) {
         event.stopPropagation();
-        const labels = (toggle.getAttribute('data-menu-labels') || '')
-          .split('|')
-          .map(function (label) { return label.trim(); })
-          .filter(Boolean);
+        var labels = (toggle.getAttribute('data-menu-labels') || '').split('|').map(function (label) { return label.trim(); }).filter(Boolean);
         if (labels.length === 0) return;
-        let currentLabel = '';
+        var currentLabel = '';
         if (value) {
-          const rawValue = value.querySelector('span') ? value.querySelector('span').textContent.trim() : value.textContent.trim();
+          var rawValue = value.querySelector('span') ? value.querySelector('span').textContent.trim() : value.textContent.trim();
           currentLabel = rawValue.includes('/') ? rawValue.split('/').pop().trim() : rawValue;
         }
         openMenu(trigger, labels, { mode: 'select', selectedLabel: currentLabel });
@@ -1186,11 +1326,10 @@
   }
 
   function layoutSelectionBars() {
-    const bars = Array.from(document.querySelectorAll('.bottom-action-bar--selection'));
-    bars.forEach(function (bar) {
-      const trailing = bar.querySelector('.bottom-action-bar__trailing');
-      const more = trailing ? trailing.querySelector('.bottom-action-bar__more') : null;
-      const buttons = trailing ? Array.from(trailing.querySelectorAll('.btn')) : [];
+    Array.prototype.forEach.call(document.querySelectorAll('.bottom-action-bar--selection'), function (bar) {
+      var trailing = bar.querySelector('.bottom-action-bar__trailing');
+      var more = trailing ? trailing.querySelector('.bottom-action-bar__more') : null;
+      var buttons = trailing ? Array.prototype.slice.call(trailing.querySelectorAll('.btn')) : [];
       if (!trailing || !more || buttons.length === 0) return;
 
       buttons.forEach(function (btn) { btn.classList.remove('bottom-action-bar__collapsed-item'); });
@@ -1205,17 +1344,17 @@
 
       more.onclick = function (event) {
         event.stopPropagation();
-        const hiddenLabels = buttons
-          .filter(function (btn) { return btn.classList.contains('bottom-action-bar__collapsed-item'); })
-          .map(function (btn) { return btn.textContent.trim(); })
-          .filter(Boolean);
+        var hiddenLabels = buttons.filter(function (btn) { return btn.classList.contains('bottom-action-bar__collapsed-item'); }).map(function (btn) { return btn.textContent.trim(); }).filter(Boolean);
         if (hiddenLabels.length === 0) return;
         openMenu(more, hiddenLabels, { mode: 'action' });
       };
     });
   }
 
-  window.addEventListener('resize', closeAllMenus);
+  window.addEventListener('resize', function () {
+    layoutAll(document);
+    closeAllMenus();
+  });
   window.addEventListener('scroll', closeAllMenus, true);
 
   document.addEventListener('click', function (event) {
@@ -1230,8 +1369,7 @@
     }
   });
 
-  bindOverflowBars();
-  bindPageOverflowBars();
+  layoutAll(document);
   bindBabCheckboxes();
   bindSelectionMenus();
   layoutSelectionBars();

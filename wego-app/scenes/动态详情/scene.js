@@ -13,10 +13,10 @@
     "source": "library-consumption.json#/appRuntime/presentationTypes"
   },
   "prompt_contract": {
-    "design_system_version": 435,
+    "design_system_version": 439,
     "token_bindings": [
       {"selector":".dynamic-detail","content_role":".dynamic-detail 的 padding-inline","css_property":"padding-inline","token":"var(--layout-page-margin-m0)"},
-      {"selector":".dynamic-detail","content_role":".dynamic-detail 的 background","css_property":"background","token":"var(--bg-page)"},
+      {"selector":".dynamic-detail","content_role":".dynamic-detail 的 background","css_property":"background","token":"var(--bg-surface)"},
       {"selector":".dynamic-detail","content_role":".dynamic-detail 的 color","css_property":"color","token":"var(--text-default)"},
       {"selector":".dynamic-detail","content_role":".dynamic-detail 的 font-family","css_property":"font-family","token":"var(--body-md-font-family)"},
       {"selector":".dynamic-detail__content","content_role":".dynamic-detail__content 的 gap","css_property":"gap","token":"var(--spacer-16)"},
@@ -73,7 +73,7 @@
       { "binding_id": "dynamic-detail-media", "slug": "image", "reason": "完整展示动态图片或视频封面", "variant_dimensions": { "fit": "cover", "size": "custom-wide", "radius": "rounded-md", "state": "loaded", "interaction": "static" } },
       { "binding_id": "dynamic-detail-product-card", "slug": "card", "reason": "产品动态展示可进入商品详情的关联商品模块", "variant_dimensions": { "base": "auto", "surface": "outlined" } },
       { "binding_id": "dynamic-detail-product-image", "slug": "image", "reason": "关联商品识别图", "variant_dimensions": { "fit": "cover", "size": "xl", "radius": "rounded-md", "state": "loaded", "interaction": "static" } },
-      { "binding_id": "dynamic-detail-actions", "slug": "bottom-action-bar", "reason": "固定承载弱化下载、更多和唯一强调的一键转发", "variant_dimensions": { "type": "primary-secondary-actions", "iconMode": "text-only", "state": "default", "overflow": "expanded" } },
+      { "binding_id": "dynamic-detail-actions", "slug": "bottom-action-bar", "reason": "固定承载弱化下载、分享、收藏、复制文案、编辑、复制动态、查看大图等左侧操作，溢出项收进更多入口，右侧为一键转发", "variant_dimensions": { "type": "primary-secondary-actions", "iconMode": "icon-text", "state": "default", "overflow": "collapsed-more" } },
       { "binding_id": "dynamic-detail-forward", "slug": "button", "reason": "动态详情唯一强调操作", "variant_dimensions": { "emphasis": "strong", "size": "md", "iconMode": "text-only", "state": "default" } }
     ],
     "layout_contract": {
@@ -87,22 +87,27 @@
       { "dom_id": "dynamic-detail-back", "target": "navigation:back" },
       { "dom_id": "open-related-product", "target": "route:product-detail" },
       { "dom_id": "dynamic-detail-download", "target": "feedback:toast" },
-      { "dom_id": "dynamic-detail-more", "target": "feedback:toast" },
+      { "dom_id": "dynamic-detail-share", "target": "feedback:toast" },
+      { "dom_id": "dynamic-detail-favorite", "target": "feedback:toast" },
+      { "dom_id": "dynamic-detail-copy-text", "target": "feedback:toast" },
+      { "dom_id": "dynamic-detail-edit", "target": "feedback:toast" },
+      { "dom_id": "dynamic-detail-copy-dynamic", "target": "feedback:toast" },
+      { "dom_id": "dynamic-detail-view-image", "target": "feedback:toast" },
       { "dom_id": "dynamic-detail-forward", "target": "feedback:toast" }
     ],
     "state_contract": [
       { "state_id": "dynamic-detail-ready", "initial": true, "trigger": "从动态首页进入", "visible_result": "展示发布者、时间、全文、全部图片或视频及产品动态的关联商品", "fallback": "使用本地示例动态", "persistence": "memory" },
       { "state_id": "video-playing", "initial": false, "trigger": "点击视频媒体", "visible_result": "当前视频封面显示播放中或已暂停状态", "fallback": "保持视频封面可见", "persistence": "memory" },
       { "state_id": "forward-success", "initial": false, "trigger": "点击一键转发", "visible_result": "Toast 提示动态已转发，当前详情不变", "fallback": "停留当前详情", "persistence": "memory" },
-      { "state_id": "secondary-action-feedback", "initial": false, "trigger": "点击下载图片或更多", "visible_result": "分别提示原型下载边界或更多能力未开放", "fallback": "停留当前详情", "persistence": "memory" }
+      { "state_id": "secondary-action-feedback", "initial": false, "trigger": "点击下载图片、分享、收藏、复制文案、编辑、复制动态或查看大图", "visible_result": "分别提示对应操作的原型边界或成功状态", "fallback": "停留当前详情", "persistence": "memory" }
     ]
   },
   "visual_check": {
-    "status": "passed",
+    "status": "pending",
     "viewports": [375, 393],
-    "checked_at": "2026-07-22T02:44:17.000Z",
-    "scope": "产品动态与笔记动态详情、图片和模拟视频、关联商品、固定底部一键转发与二级页返回。",
-    "checks": { "horizontal_overflow": true, "overlap": true, "clipping": true, "action_legibility": true, "primary_focus": true, "state_feedback": true }
+    "checked_at": "",
+    "scope": "产品动态与笔记动态详情、图片和模拟视频、关联商品、底部操作栏自适应折叠与溢出菜单、二级页返回。",
+    "checks": { "horizontal_overflow": false, "overlap": false, "clipping": false, "action_legibility": false, "primary_focus": false, "state_feedback": false }
   }
 }
 */
@@ -148,7 +153,7 @@
     routeId: 'dynamic-detail',
     title: '动态详情',
     template: `
-    <section class="dynamic-detail" data-surface-id="dynamic-detail" data-route-id="dynamic-detail" data-route-bound="true" data-layout-mode="composed" data-page-edge-mode="M0" data-bg="page">
+    <section class="dynamic-detail" data-surface-id="dynamic-detail" data-route-id="dynamic-detail" data-route-bound="true" data-layout-mode="composed" data-page-edge-mode="M0" data-bg="surface">
       <div class="navbar" data-dd-id="dynamic-detail-navbar" data-component-slug="navbar" data-component-binding="dynamic-detail-navbar">
         <div class="navbar__body">
           <div class="navbar__left"><button type="button" class="navbar__left-btn" aria-label="返回" data-dom-id="dynamic-detail-back"><i class="wego-iconfont-s icon-fanhui" aria-hidden="true"></i></button></div>
@@ -158,13 +163,18 @@
       </div>
       <main class="dynamic-detail__scroll">
         <article class="dynamic-detail__content" data-region="dynamic-content"></article>
-        <span class="tag tag--20 tag--gray" hidden aria-hidden="true" data-dd-id="dynamic-detail-tag-seed" data-component-slug="tag" data-component-binding="dynamic-detail-tag"><span class="tag__label">笔记</span></span>
       </main>
-      <div class="bottom-action-bar bottom-action-bar--primary-secondary" role="toolbar" aria-label="动态操作" data-dd-id="dynamic-detail-actions" data-component-slug="bottom-action-bar" data-component-binding="dynamic-detail-actions">
+      <div class="bottom-action-bar bottom-action-bar--primary-secondary bottom-action-bar--icon-text js-overflow-bar" role="toolbar" aria-label="动态操作" data-dd-id="dynamic-detail-actions" data-component-slug="bottom-action-bar" data-component-binding="dynamic-detail-actions">
         <div class="bottom-action-bar__inner">
           <div class="bottom-action-bar__leading">
-            <button class="bottom-action-bar__action" type="button" data-dom-id="dynamic-detail-download"><span class="bottom-action-bar__action-label">下载图片</span></button>
-            <button class="bottom-action-bar__action" type="button" data-dom-id="dynamic-detail-more"><span class="bottom-action-bar__action-label">更多</span></button>
+            <button class="bottom-action-bar__more" type="button" aria-label="更多操作"><i class="wego-iconfont-s icon-sandian16"></i><span class="bottom-action-bar__more-label">更多</span></button>
+            <button class="bottom-action-bar__action" type="button" data-dom-id="dynamic-detail-download" data-menu-label="下载图片"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-xiazai"></i></span><span class="bottom-action-bar__action-label">下载图片</span></button>
+            <button class="bottom-action-bar__action" type="button" data-dom-id="dynamic-detail-share" data-menu-label="分享"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-fenxiang"></i></span><span class="bottom-action-bar__action-label">分享</span></button>
+            <button class="bottom-action-bar__action" type="button" data-dom-id="dynamic-detail-favorite" data-menu-label="收藏"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-shoucang"></i></span><span class="bottom-action-bar__action-label">收藏</span></button>
+            <button class="bottom-action-bar__action" type="button" data-dom-id="dynamic-detail-copy-text" data-menu-label="复制文案"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-fuzhi"></i></span><span class="bottom-action-bar__action-label">复制文案</span></button>
+            <button class="bottom-action-bar__action" type="button" data-dom-id="dynamic-detail-edit" data-menu-label="编辑"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-bianji"></i></span><span class="bottom-action-bar__action-label">编辑</span></button>
+            <button class="bottom-action-bar__action" type="button" data-dom-id="dynamic-detail-copy-dynamic" data-menu-label="复制动态"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-fuzhi"></i></span><span class="bottom-action-bar__action-label">复制动态</span></button>
+            <button class="bottom-action-bar__action" type="button" data-dom-id="dynamic-detail-view-image" data-menu-label="查看大图"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-tupian"></i></span><span class="bottom-action-bar__action-label">查看大图</span></button>
           </div>
           <div class="bottom-action-bar__trailing">
             <button class="btn btn--strong btn--md" type="button" data-dd-id="dynamic-detail-forward" data-component-slug="button" data-component-binding="dynamic-detail-forward" data-dom-id="dynamic-detail-forward">一键转发</button>
@@ -195,8 +205,17 @@
         ctx.back();
         if (payload.source_route) window.history.replaceState('', document.title, '#/' + payload.source_route);
       });
-      ctx.root.querySelector('[data-dom-id="dynamic-detail-download"]').addEventListener('click', function() { ctx.toast('图片下载为原型演示，本期不保存到设备'); });
-      ctx.root.querySelector('[data-dom-id="dynamic-detail-more"]').addEventListener('click', function() { ctx.toast('更多操作能力本期暂未开放'); });
+      function bindAction(domId, message) {
+        var el = ctx.root.querySelector('[data-dom-id="' + domId + '"]');
+        if (el) el.addEventListener('click', function() { ctx.toast(message); });
+      }
+      bindAction('dynamic-detail-download', '图片下载为原型演示，本期不保存到设备');
+      bindAction('dynamic-detail-share', '分享能力本期暂未开放');
+      bindAction('dynamic-detail-favorite', '收藏成功');
+      bindAction('dynamic-detail-copy-text', '文案已复制（原型演示）');
+      bindAction('dynamic-detail-edit', '编辑能力本期暂未开放');
+      bindAction('dynamic-detail-copy-dynamic', '动态已复制（原型演示）');
+      bindAction('dynamic-detail-view-image', '查看大图能力本期暂未开放');
       ctx.root.querySelector('[data-dom-id="dynamic-detail-forward"]').addEventListener('click', function() { ctx.toast('动态已转发'); });
 
       content.querySelectorAll('[data-media-id]').forEach(function(button) {

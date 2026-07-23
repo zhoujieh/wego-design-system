@@ -473,6 +473,7 @@
       panel.classList.remove('host-shell-page__panel--blank');
       panel.dataset.hostSceneRouteId = config.routeId;
       if (typeof scene.init === 'function') scene.init(sceneContext(scene, panel));
+      WegoApp.layoutAllBottomActionBars(panel);
       bindRouteEntries(panel);
     }).catch(function () {
       toast('场景脚本加载失败');
@@ -505,6 +506,7 @@
     sceneStack.push({ routeId: scene.routeId, host: panel, scene: scene });
     appState.currentRouteId = scene.routeId;
     if (typeof scene.init === 'function') scene.init(sceneContext(scene, panel));
+    WegoApp.layoutAllBottomActionBars(panel);
   }
 
   // overlay 栈：bottom-to-top 顺序，每个 entry = { type, componentRoot, historyPushed, closing }
@@ -1105,6 +1107,7 @@
     var template = scene.template || '';
     var init = function (ctx) {
       if (typeof scene.init === 'function') scene.init(sceneContext(scene, ctx.root));
+      WegoApp.layoutAllBottomActionBars(ctx.root);
     };
     openOverlay(presentation.type, template, { label: scene.title, init: init });
   }
@@ -1256,6 +1259,277 @@
     openRoute(routeId);
   });
 
+  // ── Bottom action bar overflow runtime ──
+  (function initBottomActionBarRuntime() {
+    var throttleTimer = null;
+
+    function throttle(fn, wait) {
+      return function () {
+        clearTimeout(throttleTimer);
+        throttleTimer = setTimeout(fn, wait);
+      };
+    }
+
+    function getGap(el) {
+      return parseFloat(getComputedStyle(el).gap) || 0;
+    }
+
+    function measureOpenRect(popmenu) {
+      var previousState = popmenu.getAttribute('data-state');
+      var previousVisibility = popmenu.style.visibility;
+      var previousPointerEvents = popmenu.style.pointerEvents;
+      var previousTransition = popmenu.style.transition;
+      var previousTransform = popmenu.style.transform;
+
+      popmenu.setAttribute('data-state', 'open');
+      popmenu.style.visibility = 'hidden';
+      popmenu.style.pointerEvents = 'none';
+      popmenu.style.transition = 'none';
+      popmenu.style.transform = 'scale(1)';
+
+      var rect = popmenu.getBoundingClientRect();
+
+      popmenu.setAttribute('data-state', previousState || 'closed');
+      popmenu.style.visibility = previousVisibility;
+      popmenu.style.pointerEvents = previousPointerEvents;
+      popmenu.style.transition = previousTransition;
+      popmenu.style.transform = previousTransform;
+
+      return rect;
+    }
+
+    function positionPopmenu(popmenu, trigger) {
+      var triggerRect = trigger.getBoundingClientRect();
+      var gap = parseFloat(getComputedStyle(popmenu).getPropertyValue('--popmenu-gap')) || 4;
+      var viewportWidth = window.innerWidth;
+      var viewportHeight = window.innerHeight;
+      var menuRect = measureOpenRect(popmenu);
+      var align = triggerRect.left + triggerRect.width / 2 > viewportWidth / 2 ? 'end' : 'start';
+      var left = align === 'end' ? triggerRect.right - menuRect.width : triggerRect.left;
+      var canFitWidth = menuRect.width <= viewportWidth - gap * 2;
+
+      if (align === 'start' && left + menuRect.width > viewportWidth - gap) {
+        align = 'end';
+        left = triggerRect.right - menuRect.width;
+      } else if (align === 'end' && left < gap) {
+        align = 'start';
+        left = triggerRect.left;
+      }
+      left = Math.max(gap, Math.min(left, viewportWidth - menuRect.width - gap));
+
+      function place(placement, x, y, nextAlign) {
+        popmenu.setAttribute('data-placement', placement);
+        popmenu.setAttribute('data-align', nextAlign || align);
+        popmenu.style.left = x + 'px';
+        popmenu.style.top = y + 'px';
+        return true;
+      }
+
+      // 优先底部，再顶部，最后左右侧；与 popmenu-positioning.js 的 position 函数对齐
+      if (canFitWidth && triggerRect.bottom + gap + menuRect.height <= viewportHeight - gap) {
+        return place('bottom', left, triggerRect.bottom + gap, align);
+      }
+      if (canFitWidth && triggerRect.top - gap - menuRect.height >= gap) {
+        return place('top', left, triggerRect.top - gap - menuRect.height, align);
+      }
+      var top = Math.max(gap, Math.min(triggerRect.top, viewportHeight - menuRect.height - gap));
+      var preferRight = triggerRect.left + triggerRect.width / 2 <= viewportWidth / 2;
+      if (preferRight && triggerRect.right + gap + menuRect.width <= viewportWidth - gap) {
+        return place('right', triggerRect.right + gap, top, 'start');
+      }
+      if (triggerRect.left - gap - menuRect.width >= gap) {
+        return place('left', triggerRect.left - gap - menuRect.width, top, 'end');
+      }
+      if (triggerRect.right + gap + menuRect.width <= viewportWidth - gap) {
+        return place('right', triggerRect.right + gap, top, 'start');
+      }
+      return false;
+    }
+
+    function closePopmenu(popmenu) {
+      if (!popmenu) return;
+      popmenu.setAttribute('data-state', 'closed');
+    }
+
+    function removeExistingMenu(bar) {
+      var existing = bar._overflowPopmenu || bar.querySelector('.bottom-action-bar__overflow-menu');
+      if (existing) existing.remove();
+      bar._overflowPopmenu = null;
+    }
+
+    function buildPopmenu(bar, collapsedItems) {
+      removeExistingMenu(bar);
+
+      var hasIcon = collapsedItems.some(function (item) { return item.dataset.menuIcon; });
+      var popmenu = document.createElement('div');
+      popmenu.className = 'popmenu popmenu--action' + (hasIcon ? ' popmenu--has-icon' : '');
+      popmenu.setAttribute('role', 'menu');
+      popmenu.setAttribute('data-state', 'closed');
+      // 显式设置 fixed 定位：规范要求交互态 popmenu 以 fixed/顶层绝对定位跟随触发元素
+      // 挂到 document.body 后默认 position:absolute 会随页面滚动偏离触发元素
+      popmenu.style.position = 'fixed';
+      popmenu.classList.add('bottom-action-bar__overflow-menu');
+
+      var list = document.createElement('div');
+      list.className = 'popmenu__list';
+
+      collapsedItems.forEach(function (item) {
+        var label = item.dataset.menuLabel || item.textContent.trim();
+        var iconClass = item.dataset.menuIcon;
+        var menuItem = document.createElement('div');
+        menuItem.className = 'popmenu__item';
+        menuItem.setAttribute('role', 'menuitem');
+        if (iconClass) {
+          var icon = document.createElement('i');
+          icon.className = 'wego-iconfont-s ' + iconClass + ' popmenu__item-icon';
+          menuItem.appendChild(icon);
+        }
+        var text = document.createElement('span');
+        text.className = 'popmenu__item-text';
+        text.textContent = label;
+        menuItem.appendChild(text);
+        menuItem.addEventListener('click', function (e) {
+          // 阻止冒泡到 document，避免 item.click() 触发的 click 事件误关其他菜单
+          e.stopPropagation();
+          item.click();
+          closePopmenu(popmenu);
+        });
+        list.appendChild(menuItem);
+      });
+
+      popmenu.appendChild(list);
+      document.body.appendChild(popmenu);
+      bar._overflowPopmenu = popmenu;
+      return popmenu;
+    }
+
+    function closeAllOverflowMenus(except) {
+      document.querySelectorAll('.bottom-action-bar__overflow-menu[data-state="open"]').forEach(function (menu) {
+        if (menu !== except) closePopmenu(menu);
+      });
+    }
+
+    function bindMoreButton(moreBtn, bar) {
+      if (moreBtn.dataset.overflowBound === 'true') return;
+      moreBtn.dataset.overflowBound = 'true';
+      moreBtn.addEventListener('click', function (e) {
+        // 不调用 stopPropagation：规范要求 dismiss 不得阻断原页面事件
+        // document click 监听器通过排除 more 按钮自身来避免立即关闭
+        var popmenu = bar._overflowPopmenu;
+        if (!popmenu) return;
+        if (popmenu.getAttribute('data-state') === 'open') {
+          closePopmenu(popmenu);
+          return;
+        }
+        // 同屏仅展示一个 popmenu：打开前关闭其他
+        closeAllOverflowMenus(popmenu);
+        if (!positionPopmenu(popmenu, moreBtn)) {
+          popmenu.remove();
+          bar._overflowPopmenu = null;
+          return;
+        }
+        // 用 rAF 包裹 open，确保 popmenu 先以 closed 状态渲染一帧，
+        // 再切换到 open 触发 opacity 0→1 + scale 0.9→1 入场过渡
+        requestAnimationFrame(function () {
+          popmenu.setAttribute('data-state', 'open');
+        });
+      });
+    }
+
+    function layoutBar(bar) {
+      if (!bar.classList.contains('js-overflow-bar')) return;
+      var leading = bar.querySelector('.bottom-action-bar__leading');
+      var moreBtn = bar.querySelector('.bottom-action-bar__more');
+      if (!leading || !moreBtn) return;
+
+      var actions = Array.prototype.filter.call(leading.querySelectorAll('.bottom-action-bar__action'), function (a) {
+        return a.closest('.bottom-action-bar__leading') === leading;
+      });
+      if (!actions.length) {
+        moreBtn.style.display = 'none';
+        bar.classList.remove('is-collapsed');
+        removeExistingMenu(bar);
+        return;
+      }
+
+      // 重置：所有 action 可见，more 隐藏，便于测量真实溢出状态
+      actions.forEach(function (a) { a.classList.remove('bottom-action-bar__collapsed-item'); });
+      moreBtn.style.display = 'none';
+      bar.classList.remove('is-collapsed');
+
+      // 溢出检测：leading 横向溢出 或 任意可见 action 的 label 文本被省略
+      function isOverflowing() {
+        if (leading.scrollWidth > leading.clientWidth + 0.5) return true;
+        return actions.some(function (a) {
+          if (a.classList.contains('bottom-action-bar__collapsed-item')) return false;
+          var label = a.querySelector('.bottom-action-bar__action-label');
+          return label && label.scrollWidth > label.clientWidth + 1;
+        });
+      }
+
+      if (!isOverflowing()) {
+        removeExistingMenu(bar);
+        return;
+      }
+
+      // 需要折叠：先显示 more 占位，再按模式从对应方向逐个折叠直到不溢出
+      moreBtn.style.display = 'inline-flex';
+      bar.classList.add('is-collapsed');
+
+      // page-actions 等分布局下优先保留末尾操作；其他模式从末尾折叠保留头部
+      var isPageActions = bar.classList.contains('bottom-action-bar--page-actions');
+      var order = isPageActions ? actions.slice() : actions.slice().reverse();
+      for (var i = 0; i < order.length; i++) {
+        if (!isOverflowing()) break;
+        order[i].classList.add('bottom-action-bar__collapsed-item');
+      }
+
+      var collapsed = actions.filter(function (a) {
+        return a.classList.contains('bottom-action-bar__collapsed-item');
+      });
+
+      if (collapsed.length === 0) {
+        moreBtn.style.display = 'none';
+        bar.classList.remove('is-collapsed');
+        removeExistingMenu(bar);
+      } else {
+        buildPopmenu(bar, collapsed);
+        bindMoreButton(moreBtn, bar);
+      }
+    }
+
+    function layoutAll(root) {
+      root = root || document;
+      root.querySelectorAll('.bottom-action-bar.js-overflow-bar').forEach(layoutBar);
+    }
+
+    var throttledLayout = throttle(function () {
+      closeAllOverflowMenus();
+      layoutAll(document);
+    }, 100);
+    window.addEventListener('resize', throttledLayout);
+    window.addEventListener('orientationchange', throttledLayout);
+
+    // popmenu dismiss：页面任意非菜单点击、焦点切换、滚动均立即关闭，不阻断原页面事件
+    // 排除 more 按钮自身：点击 more 打开菜单的逻辑由 bindMoreButton 处理，不应被 dismiss 误关
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest) return;
+      if (e.target.closest('.bottom-action-bar__overflow-menu')) return;
+      if (e.target.closest('.bottom-action-bar__more')) return;
+      closeAllOverflowMenus();
+    });
+    document.addEventListener('focusin', function (e) {
+      if (!e.target.closest || !e.target.closest('.bottom-action-bar__overflow-menu')) {
+        closeAllOverflowMenus();
+      }
+    });
+    window.addEventListener('scroll', closeAllOverflowMenus, true);
+
+    window.WegoApp = window.WegoApp || {};
+    window.WegoApp.layoutBottomActionBar = layoutBar;
+    window.WegoApp.layoutAllBottomActionBars = layoutAll;
+  })();
+
   window.WegoApp = {
     registerScene: function (scene) {
       if (!scene || !scene.routeId) return;
@@ -1268,6 +1542,8 @@
     toast: toast,
     updateEntrySummary: updateEntrySummary,
     setActiveTab: setActiveTab,
+    layoutBottomActionBar: window.WegoApp.layoutBottomActionBar,
+    layoutAllBottomActionBars: window.WegoApp.layoutAllBottomActionBars,
     getState: function () { return appState; }
   };
 
