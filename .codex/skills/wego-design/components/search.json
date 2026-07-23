@@ -177,9 +177,9 @@
     "有图搜且业务开启 autoHidePlaceHolder 时，图片列表非空后可隐藏 placeholder；图片列表清空后恢复。",
     "可编辑文本搜索默认带 clear 能力，但 clear 只在输入值非空或图搜结果存在时显示；空态隐藏 clear。",
     "inline 文搜若同时支持图搜，仅在宿主显式启用 select-image 后才显示选图入口；输入过程中隐藏选图入口，输入结束并停留在文搜结果态后恢复显示选图入口，便于直接切换图搜。",
-    "图搜结果态必须保留 clear，且仍允许继续输入文字；宿主确认执行文搜后，显示态切回文搜结果。",
+    "图搜结果态必须保留 clear，且仍允许继续输入文字；输入过程中保留图搜 token 不移除，仅当宿主确认执行文搜（回车/失焦触发搜索）后才移除图搜 token 并切回文搜结果。",
     "所有可点击入口（清除、选图、扫码、取消、返回、筛选、图搜小按钮、role=button 的搜索框本身）必须有 :active 点击态，按下时 opacity: 0.6。",
-    "search-overlay-cancel 只用于点击搜索框后出现接近全屏搜索结果层的覆盖式搜索态，右侧取消用于关闭搜索态，不泛化到所有页面局部搜索。",
+    "search-overlay-cancel 只用于点击搜索框后出现接近全屏搜索结果层的覆盖式搜索态，右侧取消用于关闭搜索态，不泛化到所有页面局部搜索；取消文字使用一级文本色（text-default）和 body-lg 字号（16px）。",
     "navbar-search-back 用于导航栏搜索场景，左侧返回固定，右侧动作可配置，不强制绑定搜索文案。",
     "content-search-filter 用于页面内部工具栏，筛选入口固定为纵向图标（20px）+ 文字（10px）布局，无背景无阴影；不出现返回按钮。",
     "navbar-title-accent-search 用于导航标题区特别强调搜索入口，仅以品牌色边框区分，图搜入口复用 button 组件 strong + sm 变体（文字「图搜」）。"
@@ -187,7 +187,7 @@
   "behavior": {
     "input": "输入变化对应 Kuikly textDidChange；回车对应 inputReturn，blurOnReturn 由宿主决定。",
     "clear": "点击清除按钮清空当前搜索内容并触发 textClearClick；若当前存在图搜结果，默认同时清空图片结果并回到空态，随后重新聚焦输入框。",
-    "imageSearch": "select-image 动作对应 pictureClick；仅当宿主显式启用该动作时显示图片入口。picList 非空时中间内容区展示单图或多图胶囊，且仍保留文本输入能力供后续切回文搜。强调搜索（.searchbox--accent）的图搜入口复用 button 组件 strong + sm 变体（文字「图搜」）替代普通图标按钮。",
+    "imageSearch": "select-image 动作对应 pictureClick；仅当宿主显式启用该动作时显示图片入口。picList 非空时中间内容区展示单图或多图胶囊，且仍保留文本输入能力供后续切回文搜；输入过程中保留图搜 token 不移除，仅当宿主确认执行文搜（回车/失焦触发搜索）后才移除图搜 token 并切回文搜结果。强调搜索（.searchbox--accent）的图搜入口复用 button 组件 strong + sm 变体（文字「图搜」）替代普通图标按钮。",
     "scan": "scan 动作对应 scanClick；组件只沉淀结构、样式和交互语义，不实现真实扫码流程。",
     "overlayCancel": "覆盖式搜索态的取消按钮关闭搜索结果层并回到原页面内容。",
     "hostActions": "导航栏和页面工具栏右侧业务动作由外层 slot 承载，不进入基础搜索框内部状态机。"

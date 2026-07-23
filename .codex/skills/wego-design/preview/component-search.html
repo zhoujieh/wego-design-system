@@ -273,7 +273,9 @@
 
 .search-overlay-bar__cancel {
   padding: 0 var(--spacer-4);
-  color: var(--text-secondary);
+  color: var(--text-default);
+  font-size: var(--body-lg-font-size);
+  line-height: var(--body-lg-line-height);
   white-space: nowrap;
   cursor: pointer;
 }
@@ -635,35 +637,42 @@
     var actions = box.querySelector(".searchbox__actions");
     if (!field || !actions) return;
 
-    var hasSelectImage = actions.querySelector(".searchbox__action:not(.searchbox__clear)") !== null;
     var hasImageToken = box.querySelector(".searchbox__image-token") !== null;
+    var initialClear = actions.querySelector(".searchbox__clear");
+    var initialClearVisible = !!initialClear;
+
+    function ensureClear() {
+      var existing = actions.querySelector(".searchbox__clear");
+      if (existing) return existing;
+      var clear = document.createElement("button");
+      clear.className = "searchbox__action searchbox__clear wego-iconfont-s icon-yuancha-mian";
+      clear.type = "button";
+      clear.setAttribute("aria-label", "清除");
+      clear.addEventListener("click", function () {
+        field.value = "";
+        box.querySelectorAll(".searchbox__image-token").forEach((token) => token.remove());
+        hasImageToken = false;
+        renderActions();
+        field.focus();
+      });
+      actions.insertBefore(clear, actions.firstChild);
+      return clear;
+    }
+
+    function removeClear() {
+      var existing = actions.querySelector(".searchbox__clear");
+      if (existing) existing.remove();
+    }
 
     function renderActions() {
       var value = field.value.trim();
-      var existingClear = actions.querySelector(".searchbox__clear");
-
       if (value || hasImageToken) {
-        if (!existingClear) {
-          var clear = document.createElement("button");
-          clear.className = "searchbox__action searchbox__clear wego-iconfont-s icon-yuancha-mian";
-          clear.type = "button";
-          clear.setAttribute("aria-label", "清除");
-          clear.addEventListener("click", function () {
-            field.value = "";
-            field.focus();
-            box.querySelectorAll(".searchbox__image-token").forEach((token) => token.remove());
-            hasImageToken = false;
-            renderActions();
-          });
-          actions.insertBefore(clear, actions.firstChild);
-        }
+        ensureClear();
       } else {
-        if (existingClear) {
-          existingClear.remove();
-        }
+        removeClear();
       }
 
-      if (box.dataset.stateTag) {
+      if (box.dataset.stateTag !== undefined) {
         var stateTag = document.querySelector("[data-state-tag]");
         if (stateTag) {
           if (document.activeElement === field && value) {
@@ -682,23 +691,35 @@
       }
     }
 
+    // 输入时：保留图搜 token，仅更新 clear 显隐与状态
     field.addEventListener("input", renderActions);
     field.addEventListener("focus", renderActions);
-    field.addEventListener("blur", renderActions);
 
-    actions.querySelectorAll(".searchbox__action").forEach(function (action) {
-      if (action.classList.contains("searchbox__clear")) {
-        action.addEventListener("click", function () {
-          field.value = "";
-          field.focus();
-          box.querySelectorAll(".searchbox__image-token").forEach((token) => token.remove());
-          hasImageToken = false;
-          renderActions();
-        });
+    // 失焦（执行搜索）：若有文搜内容，移除图搜 token 切回文搜结果
+    field.addEventListener("blur", function () {
+      var value = field.value.trim();
+      if (value && hasImageToken) {
+        box.querySelectorAll(".searchbox__image-token").forEach((token) => token.remove());
+        hasImageToken = false;
       }
+      renderActions();
     });
 
-    renderActions();
+    // 绑定静态 clear 按钮
+    actions.querySelectorAll(".searchbox__action.searchbox__clear").forEach(function (action) {
+      action.addEventListener("click", function () {
+        field.value = "";
+        box.querySelectorAll(".searchbox__image-token").forEach((token) => token.remove());
+        hasImageToken = false;
+        renderActions();
+        field.focus();
+      });
+    });
+
+    // 初始渲染：保持静态展示的 clear 显隐状态，避免误移除图搜 token
+    if (!initialClearVisible) {
+      removeClear();
+    }
   }
 
   document.querySelectorAll(".searchbox").forEach(initSearchBox);

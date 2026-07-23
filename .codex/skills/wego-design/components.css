@@ -2453,7 +2453,9 @@
 
 .search-overlay-bar__cancel {
   padding: 0 var(--spacer-4);
-  color: var(--text-secondary);
+  color: var(--text-default);
+  font-size: var(--body-lg-font-size);
+  line-height: var(--body-lg-line-height);
   white-space: nowrap;
   cursor: pointer;
 }
