@@ -471,6 +471,7 @@
           </div>
           <div class="searchbox__actions">
             <button class="searchbox__action searchbox__clear wego-iconfont-s icon-yuancha-mian" type="button" aria-label="清除"></button>
+            <button class="searchbox__action wego-iconfont-s icon-tupian" type="button" aria-label="选择图片"></button>
           </div>
         </div>
         <span class="search-demo__label">图搜多图结果态</span>
@@ -484,6 +485,7 @@
           </div>
           <div class="searchbox__actions">
             <button class="searchbox__action searchbox__clear wego-iconfont-s icon-yuancha-mian" type="button" aria-label="清除"></button>
+            <button class="searchbox__action wego-iconfont-s icon-tupian" type="button" aria-label="选择图片"></button>
             <button class="searchbox__action wego-iconfont-s icon-saoyisao" type="button" aria-label="扫一扫"></button>
           </div>
         </div>
@@ -612,7 +614,7 @@ document.querySelectorAll(".searchbox__clear").forEach((button) => {
   var actionsSlot = container.querySelector("[data-actions-slot]");
   var stateTag = document.querySelector("[data-state-tag]");
 
-  function renderState() {
+  function renderState(isBlur) {
     var value = field.value.trim();
     actionsSlot.innerHTML = "";
     if (value) {
@@ -623,27 +625,32 @@ document.querySelectorAll(".searchbox__clear").forEach((button) => {
       clear.addEventListener("click", function () {
         field.value = "";
         field.focus();
-        renderState();
+        renderState(false);
       });
       actionsSlot.appendChild(clear);
-      stateTag.textContent = "inputting 输入中";
-      container.classList.remove("is-text-result");
-      container.classList.add("is-inputting");
+      if (isBlur) {
+        var selectImage = document.createElement("button");
+        selectImage.className = "searchbox__action wego-iconfont-s icon-tupian";
+        selectImage.type = "button";
+        selectImage.setAttribute("aria-label", "选择图片");
+        actionsSlot.appendChild(selectImage);
+        stateTag.textContent = "text-result 文搜结果态";
+        container.classList.remove("is-inputting");
+        container.classList.add("is-text-result");
+      } else {
+        stateTag.textContent = "inputting 输入中";
+        container.classList.remove("is-text-result");
+        container.classList.add("is-inputting");
+      }
     } else {
       stateTag.textContent = "empty 空态";
       container.classList.remove("is-inputting", "is-text-result");
     }
   }
 
-  field.addEventListener("input", renderState);
-  field.addEventListener("focus", renderState);
-  field.addEventListener("blur", function () {
-    if (field.value.trim()) {
-      stateTag.textContent = "text-result 文搜结果态";
-      container.classList.remove("is-inputting");
-      container.classList.add("is-text-result");
-    }
-  });
+  field.addEventListener("input", function () { renderState(false); });
+  field.addEventListener("focus", function () { renderState(false); });
+  field.addEventListener("blur", function () { renderState(true); });
   renderState();
 })();
 </script>
