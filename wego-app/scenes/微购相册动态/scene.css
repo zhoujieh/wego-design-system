@@ -4,6 +4,7 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
+  container-type: inline-size;
   padding-inline: var(--layout-page-margin-m8);
   overflow: hidden;
   isolation: isolate;
@@ -52,6 +53,66 @@
   background: transparent;
 }
 
+.album-feed__nav-row {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  align-items: center;
+  min-height: var(--size-56);
+}
+
+.album-feed__nav-left,
+.album-feed__nav-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+
+.album-feed__nav-tabs {
+  min-width: 0;
+}
+
+.album-feed__nav-tabs .wg-tabs {
+  background: transparent;
+}
+
+.album-feed__nav-tabs .wg-tabs__scroll {
+  justify-content: center;
+}
+
+.album-feed__nav-tabs .wg-tabs--standard .wg-tabs__item {
+  padding-inline: var(--spacer-8);
+}
+
+.album-feed__publish-trigger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--size-40) + var(--spacer-4));
+  height: calc(var(--size-40) + var(--spacer-4));
+  padding: var(--spacer-0);
+  border: 0;
+  background: var(--transparent);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.album-feed__publish-trigger img {
+  display: block;
+  width: var(--size-32);
+  height: var(--size-32);
+  transition:
+    transform var(--duration-normal) var(--ease-enter),
+    opacity var(--duration-fast) var(--ease-enter);
+}
+
+.album-feed__publish-trigger.is-open img {
+  opacity: 0.6;
+  transform: rotate(45deg);
+}
+
 .album-feed__page-tabs .wg-tabs__scroll {
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
@@ -63,37 +124,32 @@
 
 /* 搜索栏：占文档流，默认显示；上滑手势收起（max-height 精确到搜索框实际高度，避免无效动画区间），
    下滑手势或滚回顶部重现；层级低于 page-tabs，收起时被 tabs 遮挡；
-   max-height 用 calc 精确匹配 size-36 + spacer-8*2，避免 max-height:80px 时前 28px 无效动画；
    contain:content 隔离重排到本容器，子元素 transform 走合成层提升丝滑度；
    cubic-bezier(0.32,0.72,0,1) ease-out 适合收起动画，开始快结束慢 */
 .album-feed__floating-toolbar {
   position: relative;
   z-index: 1;
   max-height: calc(var(--size-36) + var(--spacer-8) + var(--spacer-8));
-  padding-block: var(--spacer-8);
   background: transparent;
   opacity: 1;
   overflow: hidden;
-  transition: max-height 0.25s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.2s ease, padding-block 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+  transition: max-height 0.25s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.2s ease;
   box-sizing: border-box;
   contain: content;
 }
 
 .album-feed__floating-toolbar.is-hidden {
   max-height: 0;
-  padding-block: 0;
   opacity: 0;
   pointer-events: none;
 }
 
-/* 搜索框内部：transform 走 GPU 合成层，配合父容器 max-height 动画形成视觉上移；
-   父容器重排不可避免（让出空间），但子元素 transform 不重排，提升整体丝滑度 */
-.album-feed__floating-toolbar .search-toolbar {
-  padding-block: var(--spacer-0);
+/* 搜索栏动效只作用于场景包装层，Search 组件的 search-toolbar 保持 Preview 原样。 */
+.album-feed__toolbar-motion {
   transition: transform 0.25s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-.album-feed__floating-toolbar.is-hidden .search-toolbar {
+.album-feed__floating-toolbar.is-hidden .album-feed__toolbar-motion {
   transform: translateY(-100%);
 }
 
@@ -182,12 +238,13 @@
   flex: 0 0 auto;
 }
 
-/* 瀑布流：CSS columns 双列，宽屏自动增列且单卡宽度约束在 168~220px；使用 margin-bottom 确保列内卡片上下不贴在一起 */
+/* 瀑布流：手机壳及窄容器固定双列；只在动态页自身可用宽度增加后自动增列，
+   避免桌面浏览器的窗口宽度误把 390px 手机壳识别为宽屏。 */
 .album-feed__grid {
   column-count: 2;
   column-gap: var(--spacer-8);
   width: 100%;
-  max-width: 912px;
+  max-width: 448px;
   margin-inline: auto;
 }
 
@@ -195,7 +252,7 @@
   display: inline-block;
   width: 100%;
   min-width: 0;
-  margin-block: 0 var(--spacer-12);
+  margin-block: 0 var(--spacer-8);
   break-inside: avoid;
   page-break-inside: avoid;
   -webkit-column-break-inside: avoid;
@@ -250,7 +307,7 @@
   padding: var(--spacer-8);
 }
 
-/* 发布者区：头像 + 名字 + 店铺文字徽章 */
+/* 发布者区：头像 + 名字 + 认证图标 */
 .album-feed__publisher-row {
   display: flex;
   align-items: center;
@@ -263,6 +320,20 @@
   display: inline-flex;
   flex-shrink: 0;
   overflow: visible;
+}
+
+.album-feed__new-dot {
+  position: absolute;
+  right: calc(var(--spacer-2) * -1);
+  bottom: calc(var(--spacer-2) * -1);
+  width: calc(var(--size-16) / 2);
+  height: calc(var(--size-16) / 2);
+  border-width: var(--stroke-strong);
+  border-style: solid;
+  border-color: var(--bg-surface);
+  border-radius: var(--radius-full);
+  background: var(--status-success-default);
+  box-sizing: border-box;
 }
 
 .album-feed__publisher-name {
@@ -285,33 +356,16 @@
   min-width: 0;
 }
 
-.album-feed__type-badge,
-.album-feed__status-badge,
-.album-feed__shop-badge {
+.album-feed__verified-icon {
   display: inline-flex;
   align-items: center;
   flex-shrink: 0;
-  padding-block: var(--spacer-2);
-  padding-inline: var(--spacer-4);
-  border-radius: var(--radius-4);
-  font-size: var(--body-xs-font-size);
-  line-height: var(--body-xs-line-height);
-  white-space: nowrap;
-}
-
-.album-feed__type-badge {
-  background: var(--bg-brand-surface-l1);
+  justify-content: center;
+  width: var(--size-16);
+  height: var(--size-16);
   color: var(--text-brand);
-}
-
-.album-feed__status-badge {
-  background: var(--bg-subtle);
-  color: var(--text-secondary);
-}
-
-.album-feed__shop-badge {
-  background: var(--bg-inverse);
-  color: var(--text-inverse);
+  font-size: var(--size-16);
+  line-height: var(--body-xs-line-height);
 }
 
 .album-feed__publisher-meta {
@@ -355,6 +409,11 @@
 
 .album-feed__forward-link {
   flex-shrink: 0;
+}
+
+.album-feed__publish-menu {
+  position: fixed;
+  z-index: var(--z-popover);
 }
 
 .album-feed__empty {
@@ -411,16 +470,10 @@
   width: 100%;
 }
 
-@media (min-width: 768px) {
+@container (min-width: 480px) {
   .album-feed__grid {
     column-count: auto;
-    column-width: 200px;
-    max-width: 100%;
-  }
-}
-
-@media (min-width: 960px) {
-  .album-feed__grid {
-    column-width: 220px;
+    column-width: 168px;
+    max-width: 912px;
   }
 }

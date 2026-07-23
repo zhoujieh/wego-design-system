@@ -71,18 +71,6 @@
         "token": "var(--bg-surface)"
       },
       {
-        "selector": ".album-feed__floating-toolbar",
-        "content_role": ".album-feed__floating-toolbar 的 padding-block",
-        "css_property": "padding-block",
-        "token": "var(--spacer-8)"
-      },
-      {
-        "selector": ".album-feed__floating-toolbar .search-toolbar",
-        "content_role": ".album-feed__floating-toolbar .search-toolbar 的 padding-block",
-        "css_property": "padding-block",
-        "token": "var(--spacer-0)"
-      },
-      {
         "selector": ".album-feed__people-wrap",
         "content_role": ".album-feed__people-wrap 的 margin-top",
         "css_property": "margin-top",
@@ -109,6 +97,24 @@
       {
         "selector": ".album-feed__people-item",
         "content_role": ".album-feed__people-item 的 background",
+        "css_property": "background",
+        "token": "var(--transparent)"
+      },
+      {
+        "selector": ".album-feed__nav-tabs .wg-tabs--standard .wg-tabs__item",
+        "content_role": "居中导航标签横向间距",
+        "css_property": "padding-inline",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".album-feed__publish-trigger",
+        "content_role": "发布入口内边距",
+        "css_property": "padding",
+        "token": "var(--spacer-0)"
+      },
+      {
+        "selector": ".album-feed__publish-trigger",
+        "content_role": "发布入口透明背景",
         "css_property": "background",
         "token": "var(--transparent)"
       },
@@ -155,10 +161,10 @@
         "token": "var(--spacer-8)"
       },
       {
-        "selector": ".album-feed__grid",
-        "content_role": ".album-feed__grid 的 row-gap",
-        "css_property": "row-gap",
-        "token": "var(--spacer-12)"
+        "selector": ".album-feed__card",
+        "content_role": ".album-feed__card 的列内间距",
+        "css_property": "margin-block",
+        "token": "var(--spacer-8)"
       },
       {
         "selector": ".album-feed__card:focus-visible",
@@ -305,128 +311,44 @@
         "token": "var(--body-xs-line-height)"
       },
       {
-        "selector": ".album-feed__type-badge",
-        "content_role": "内容类型徽章纵向内边距",
-        "css_property": "padding-block",
-        "token": "var(--spacer-2)"
+        "selector": ".album-feed__new-dot",
+        "content_role": "上新绿点边框宽度",
+        "css_property": "border-width",
+        "token": "var(--stroke-strong)"
       },
       {
-        "selector": ".album-feed__type-badge",
-        "content_role": "内容类型徽章横向内边距",
-        "css_property": "padding-inline",
-        "token": "var(--spacer-4)"
+        "selector": ".album-feed__new-dot",
+        "content_role": "上新绿点外圈与卡片底色一致",
+        "css_property": "border-color",
+        "token": "var(--bg-surface)"
       },
       {
-        "selector": ".album-feed__type-badge",
-        "content_role": "内容类型徽章 border-radius",
+        "selector": ".album-feed__new-dot",
+        "content_role": "上新绿点圆形",
         "css_property": "border-radius",
-        "token": "var(--radius-4)"
+        "token": "var(--radius-full)"
       },
       {
-        "selector": ".album-feed__type-badge",
-        "content_role": "内容类型徽章 background",
+        "selector": ".album-feed__new-dot",
+        "content_role": "上新绿点状态色",
         "css_property": "background",
-        "token": "var(--bg-brand-surface-l1)"
+        "token": "var(--status-success-default)"
       },
       {
-        "selector": ".album-feed__type-badge",
-        "content_role": "内容类型徽章 color",
+        "selector": ".album-feed__verified-icon",
+        "content_role": "已认证图标颜色",
         "css_property": "color",
         "token": "var(--text-brand)"
       },
       {
-        "selector": ".album-feed__type-badge",
-        "content_role": "内容类型徽章 font-size",
+        "selector": ".album-feed__verified-icon",
+        "content_role": "已认证图标字号",
         "css_property": "font-size",
-        "token": "var(--body-xs-font-size)"
+        "token": "var(--size-16)"
       },
       {
-        "selector": ".album-feed__type-badge",
-        "content_role": "内容类型徽章 line-height",
-        "css_property": "line-height",
-        "token": "var(--body-xs-line-height)"
-      },
-      {
-        "selector": ".album-feed__status-badge",
-        "content_role": "发布者状态徽章纵向内边距",
-        "css_property": "padding-block",
-        "token": "var(--spacer-2)"
-      },
-      {
-        "selector": ".album-feed__status-badge",
-        "content_role": "发布者状态徽章横向内边距",
-        "css_property": "padding-inline",
-        "token": "var(--spacer-4)"
-      },
-      {
-        "selector": ".album-feed__status-badge",
-        "content_role": "发布者状态徽章 border-radius",
-        "css_property": "border-radius",
-        "token": "var(--radius-4)"
-      },
-      {
-        "selector": ".album-feed__status-badge",
-        "content_role": "发布者状态徽章 background",
-        "css_property": "background",
-        "token": "var(--bg-subtle)"
-      },
-      {
-        "selector": ".album-feed__status-badge",
-        "content_role": "发布者状态徽章 color",
-        "css_property": "color",
-        "token": "var(--text-secondary)"
-      },
-      {
-        "selector": ".album-feed__status-badge",
-        "content_role": "发布者状态徽章 font-size",
-        "css_property": "font-size",
-        "token": "var(--body-xs-font-size)"
-      },
-      {
-        "selector": ".album-feed__status-badge",
-        "content_role": "发布者状态徽章 line-height",
-        "css_property": "line-height",
-        "token": "var(--body-xs-line-height)"
-      },
-      {
-        "selector": ".album-feed__shop-badge",
-        "content_role": "卡片店铺徽章纵向内边距",
-        "css_property": "padding-block",
-        "token": "var(--spacer-2)"
-      },
-      {
-        "selector": ".album-feed__shop-badge",
-        "content_role": "卡片店铺徽章横向内边距",
-        "css_property": "padding-inline",
-        "token": "var(--spacer-4)"
-      },
-      {
-        "selector": ".album-feed__shop-badge",
-        "content_role": "卡片店铺徽章 border-radius",
-        "css_property": "border-radius",
-        "token": "var(--radius-4)"
-      },
-      {
-        "selector": ".album-feed__shop-badge",
-        "content_role": "卡片店铺徽章 background",
-        "css_property": "background",
-        "token": "var(--bg-inverse)"
-      },
-      {
-        "selector": ".album-feed__shop-badge",
-        "content_role": "卡片店铺徽章 color",
-        "css_property": "color",
-        "token": "var(--text-inverse)"
-      },
-      {
-        "selector": ".album-feed__shop-badge",
-        "content_role": "卡片店铺徽章 font-size",
-        "css_property": "font-size",
-        "token": "var(--body-xs-font-size)"
-      },
-      {
-        "selector": ".album-feed__shop-badge",
-        "content_role": "卡片店铺徽章 line-height",
+        "selector": ".album-feed__verified-icon",
+        "content_role": "已认证图标行高",
         "css_property": "line-height",
         "token": "var(--body-xs-line-height)"
       },
@@ -602,7 +524,7 @@
       {
         "binding_id": "feed-search-toolbar",
         "slug": "search",
-        "reason": "下滑手势浮现的工具栏使用 search 组件的 navbar-title-accent-search 强调变体，搜索框使用 md/accent-outline + 内嵌 select-image 动作",
+        "reason": "下滑手势浮现的工具栏使用 search 组件的标准强调搜索结构，作为全局搜索入口；图搜复用正式小号主按钮，不添加场景私有皮肤",
         "variant_dimensions": {
           "size": "md",
           "surface": "accent-outline",
@@ -610,6 +532,29 @@
           "state": "empty",
           "internalActions": "select-image",
           "hostPattern": "navbar-title-accent-search"
+        }
+      },
+      {
+        "binding_id": "feed-search-image",
+        "slug": "button",
+        "reason": "强调搜索框内的图搜入口复用 Search Preview 规定的小号主按钮",
+        "variant_dimensions": {
+          "emphasis": "strong",
+          "size": "sm",
+          "iconMode": "text-only",
+          "state": "default"
+        }
+      },
+      {
+        "binding_id": "feed-publish-popmenu",
+        "slug": "popmenu",
+        "reason": "导航栏右侧发布入口展开紧凑快捷菜单",
+        "variant_dimensions": {
+          "mode": "action",
+          "icon": "left",
+          "placement": "bottom",
+          "align": "end",
+          "state": "open"
         }
       },
       {
@@ -774,7 +719,7 @@
     "layout_contract": {
       "mode": "composed",
       "source": "references/design-decisions.md",
-      "selection_reason": "页面首要任务是发现并进入动态详情；顶部 page-tabs 与搜索栏共同包进 sticky top-stack 吸顶，背景跟随顶部白色；搜索框占文档流默认显示，层级低于 page-tabs，上滑手势收起（max-height 精确为 calc(var(--size-36) + var(--spacer-8) * 2) 避免无效动画区间，子元素 .search-toolbar 用 transform translateY 走 GPU 合成层、contain:content 隔离重排到本容器提升丝滑度）、下滑手势或滚回顶部重现，顶部边界强制显示、底部边界抑制下滑手势重现避免橡皮筋回弹误触发；页面背景从顶部白色渐变到 --bg-page 灰色，过渡完成点在瀑布流往下一点位置；搜索框使用 searchbox--accent 强调模式；筛选入口从搜索框右侧移除，弱化后放到全部上新这一栏的横滑标签末尾，使用 tag--gray；全部上新横滑标签区保留最小高度确保可见；人维度栏约 10 个发布者支持横滑、头像右下角不再放置店铺标识、「我的相册」项 sticky right 固定在可视区最右侧；瀑布流双列按媒体自然比例撑高参差，显式设置 row-gap 让列内卡片上下不贴在一起，375/393px 双列，768px 自动增列且单卡不超过 220px；卡片信息层级紧凑，发布者区单行（头像 + 名字 + 店铺文字徽章），状态恢复为文字徽章后与内容类型、时间组成 meta 行并保留间距，1 至 2 行摘要，底部操作行一键转发靠右不再保留商品入口；通过 host-shell-page__panel 相对定位让场景根元素正确约束在 tab 内容区内，配合滚动容器底部预留 40px + safe-area-bottom，避免内容被 bottom-nav 遮挡。",
+      "selection_reason": "页面首要任务是发现并进入动态详情；顶部 page-tabs 与搜索栏共同吸顶，搜索栏使用 Search 组件 Preview 的标准强调结构（白底、品牌描边、右侧正式小号主按钮），场景包装层只承担收起动画。人维度栏支持横滑且「我的相册」固定在右侧；瀑布流在手机壳和窄容器中固定双列，在场景自身可用宽度增大后按 168px 目标列宽自动增列并居中，避免根据桌面窗口宽度误把手机壳拉成单列。卡片信息紧凑，底部操作行的一键转发靠右；场景根由 host-shell-page__panel 约束，并预留底部导航安全区。",
       "page_edge_mode": "M8",
       "mutable_regions": [
         ".album-feed__floating-toolbar",
@@ -784,6 +729,30 @@
       ]
     },
     "interaction_contract": [
+      {
+        "dom_id": "open-publish-menu",
+        "target": "state:publish-menu-open"
+      },
+      {
+        "dom_id": "publish-action-product",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "publish-action-note",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "publish-action-live",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "publish-action-import",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "publish-action-scan",
+        "target": "feedback:toast"
+      },
       {
         "dom_id": "open-global-search",
         "target": "feedback:toast"
@@ -858,8 +827,16 @@
         "state_id": "feed-ready",
         "initial": true,
         "trigger": "进入动态主 tab",
-        "visible_result": "页面级 tabs 与搜索栏共同吸顶顶部，搜索栏默认显示占据文档流，首屏显示双列瀑布流与人维度栏",
+        "visible_result": "页面级 tabs 与标准强调搜索工具栏共同吸顶顶部，搜索栏默认显示占据文档流，首屏显示双列瀑布流与人维度栏",
         "fallback": "保留可浏览的本地动态",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "publish-menu-open",
+        "initial": false,
+        "trigger": "点击导航栏右侧发布入口",
+        "visible_result": "发布入口加号顺时针旋转 45 度、背景不透明度降低，并在入口下方显示带图标的发布快捷菜单",
+        "fallback": "点击页面其他位置、滚动或选择菜单项后关闭菜单并恢复发布入口默认状态",
         "persistence": "memory"
       },
       {
@@ -929,9 +906,9 @@
       {
         "state_id": "feed-wide-layout",
         "initial": false,
-        "trigger": "视口宽度增至 768px",
-        "visible_result": "瀑布流自动增列且单卡不超过 220px 并居中，交互层级不变",
-        "fallback": "常见手机宽度保持双列",
+        "trigger": "动态页自身可用宽度增至 480px",
+        "visible_result": "瀑布流按实际容器宽度自动增列并居中，手机壳中的双列不受桌面窗口宽度影响",
+        "fallback": "手机壳和窄容器保持双列",
         "persistence": "memory"
       }
     ]
@@ -946,6 +923,11 @@
       "dd_id": "feed-search-toolbar",
       "binding_id": "feed-search-toolbar",
       "component_slug": "search"
+    },
+    {
+      "dd_id": "feed-search-image",
+      "binding_id": "feed-search-image",
+      "component_slug": "button"
     },
     {
       "dd_id": "feed-people-avatar-self",
@@ -1006,16 +988,22 @@
       "dd_id": "feed-forward-link-seed",
       "binding_id": "feed-forward-link",
       "component_slug": "link"
+    },
+    {
+      "dd_id": "feed-publish-popmenu-seed",
+      "binding_id": "feed-publish-popmenu",
+      "component_slug": "popmenu"
     }
   ],
   "generation_evidence": {
     "scene_js": "wego-app/scenes/微购相册动态/scene.js",
     "scene_css": "wego-app/scenes/微购相册动态/scene.css",
-    "source_sha256": "16504a272ea41a5d343124499fea3fe68a4a6e8110db42ddd3cf030ade8b083d",
+    "source_sha256": "b77e76cea9304f83ecf0832520de4e495d4aee24de41857143c19e5cc8ec515e",
     "dom_ids": [
       "page-tab-following",
       "page-tab-recommended",
       "page-tab-new",
+      "open-publish-menu",
       "open-global-search",
       "people-self",
       "filter-tag-all",
@@ -1025,17 +1013,22 @@
       "filter-tag-presale",
       "filter-tag-live",
       "open-filter",
-      "feed-open-dynamic"
+      "feed-open-dynamic",
+      "publish-action-product",
+      "publish-action-note",
+      "publish-action-live",
+      "publish-action-import",
+      "publish-action-scan"
     ],
-    "component_count": 14,
+    "component_count": 16,
     "visualCheck": {
       "status": "passed",
       "viewports": [
         375,
         393
       ],
-      "checked_at": "2026-07-23T13:50:00.000Z",
-      "scope": "顶部 page-tabs 与搜索栏 sticky 吸顶且搜索栏层级低于 tabs、搜索框 max-height 精确为 calc(size-36 + spacer-8*2) 避免无效动画区间、子元素 transform translateY 走合成层、contain:content 隔离重排、顶部边界强制显示与底部边界抑制下滑手势重现避免橡皮筋回弹误触发、背景白到灰渐变在瀑布流位置过渡、人维度栏无店铺 badge 且我的相册 sticky right、瀑布流双列卡片信息层级紧凑、底部留白与 bottom-nav 隔离，375/393px 全部通过。",
+      "checked_at": "2026-07-23T12:06:20.000Z",
+      "scope": "顶部 page-tabs 居中且左右预留对称栏位，右侧发布入口可展开带图标 popmenu 并在关闭后恢复；搜索工具栏 sticky 吸顶；瀑布流上下与左右间距均为 8px；卡片去除店铺和内容类型徽章，认证图标与上新绿点可见；服装封面跨多个 clothing 目录。375/393px 全部通过。",
       "checks": {
         "horizontal_overflow": true,
         "overlap": true,

@@ -70,18 +70,6 @@
         "token": "var(--bg-surface)"
       },
       {
-        "selector": ".album-feed__floating-toolbar",
-        "content_role": ".album-feed__floating-toolbar 的 padding-block",
-        "css_property": "padding-block",
-        "token": "var(--spacer-8)"
-      },
-      {
-        "selector": ".album-feed__floating-toolbar .search-toolbar",
-        "content_role": ".album-feed__floating-toolbar .search-toolbar 的 padding-block",
-        "css_property": "padding-block",
-        "token": "var(--spacer-0)"
-      },
-      {
         "selector": ".album-feed__people-wrap",
         "content_role": ".album-feed__people-wrap 的 margin-top",
         "css_property": "margin-top",
@@ -108,6 +96,24 @@
       {
         "selector": ".album-feed__people-item",
         "content_role": ".album-feed__people-item 的 background",
+        "css_property": "background",
+        "token": "var(--transparent)"
+      },
+      {
+        "selector": ".album-feed__nav-tabs .wg-tabs--standard .wg-tabs__item",
+        "content_role": "居中导航标签横向间距",
+        "css_property": "padding-inline",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".album-feed__publish-trigger",
+        "content_role": "发布入口内边距",
+        "css_property": "padding",
+        "token": "var(--spacer-0)"
+      },
+      {
+        "selector": ".album-feed__publish-trigger",
+        "content_role": "发布入口透明背景",
         "css_property": "background",
         "token": "var(--transparent)"
       },
@@ -154,10 +160,10 @@
         "token": "var(--spacer-8)"
       },
       {
-        "selector": ".album-feed__grid",
-        "content_role": ".album-feed__grid 的 row-gap",
-        "css_property": "row-gap",
-        "token": "var(--spacer-12)"
+        "selector": ".album-feed__card",
+        "content_role": ".album-feed__card 的列内间距",
+        "css_property": "margin-block",
+        "token": "var(--spacer-8)"
       },
       {
         "selector": ".album-feed__card:focus-visible",
@@ -304,128 +310,44 @@
         "token": "var(--body-xs-line-height)"
       },
       {
-        "selector": ".album-feed__type-badge",
-        "content_role": "内容类型徽章纵向内边距",
-        "css_property": "padding-block",
-        "token": "var(--spacer-2)"
+        "selector": ".album-feed__new-dot",
+        "content_role": "上新绿点边框宽度",
+        "css_property": "border-width",
+        "token": "var(--stroke-strong)"
       },
       {
-        "selector": ".album-feed__type-badge",
-        "content_role": "内容类型徽章横向内边距",
-        "css_property": "padding-inline",
-        "token": "var(--spacer-4)"
+        "selector": ".album-feed__new-dot",
+        "content_role": "上新绿点外圈与卡片底色一致",
+        "css_property": "border-color",
+        "token": "var(--bg-surface)"
       },
       {
-        "selector": ".album-feed__type-badge",
-        "content_role": "内容类型徽章 border-radius",
+        "selector": ".album-feed__new-dot",
+        "content_role": "上新绿点圆形",
         "css_property": "border-radius",
-        "token": "var(--radius-4)"
+        "token": "var(--radius-full)"
       },
       {
-        "selector": ".album-feed__type-badge",
-        "content_role": "内容类型徽章 background",
+        "selector": ".album-feed__new-dot",
+        "content_role": "上新绿点状态色",
         "css_property": "background",
-        "token": "var(--bg-brand-surface-l1)"
+        "token": "var(--status-success-default)"
       },
       {
-        "selector": ".album-feed__type-badge",
-        "content_role": "内容类型徽章 color",
+        "selector": ".album-feed__verified-icon",
+        "content_role": "已认证图标颜色",
         "css_property": "color",
         "token": "var(--text-brand)"
       },
       {
-        "selector": ".album-feed__type-badge",
-        "content_role": "内容类型徽章 font-size",
+        "selector": ".album-feed__verified-icon",
+        "content_role": "已认证图标字号",
         "css_property": "font-size",
-        "token": "var(--body-xs-font-size)"
+        "token": "var(--size-16)"
       },
       {
-        "selector": ".album-feed__type-badge",
-        "content_role": "内容类型徽章 line-height",
-        "css_property": "line-height",
-        "token": "var(--body-xs-line-height)"
-      },
-      {
-        "selector": ".album-feed__status-badge",
-        "content_role": "发布者状态徽章纵向内边距",
-        "css_property": "padding-block",
-        "token": "var(--spacer-2)"
-      },
-      {
-        "selector": ".album-feed__status-badge",
-        "content_role": "发布者状态徽章横向内边距",
-        "css_property": "padding-inline",
-        "token": "var(--spacer-4)"
-      },
-      {
-        "selector": ".album-feed__status-badge",
-        "content_role": "发布者状态徽章 border-radius",
-        "css_property": "border-radius",
-        "token": "var(--radius-4)"
-      },
-      {
-        "selector": ".album-feed__status-badge",
-        "content_role": "发布者状态徽章 background",
-        "css_property": "background",
-        "token": "var(--bg-subtle)"
-      },
-      {
-        "selector": ".album-feed__status-badge",
-        "content_role": "发布者状态徽章 color",
-        "css_property": "color",
-        "token": "var(--text-secondary)"
-      },
-      {
-        "selector": ".album-feed__status-badge",
-        "content_role": "发布者状态徽章 font-size",
-        "css_property": "font-size",
-        "token": "var(--body-xs-font-size)"
-      },
-      {
-        "selector": ".album-feed__status-badge",
-        "content_role": "发布者状态徽章 line-height",
-        "css_property": "line-height",
-        "token": "var(--body-xs-line-height)"
-      },
-      {
-        "selector": ".album-feed__shop-badge",
-        "content_role": "卡片店铺徽章纵向内边距",
-        "css_property": "padding-block",
-        "token": "var(--spacer-2)"
-      },
-      {
-        "selector": ".album-feed__shop-badge",
-        "content_role": "卡片店铺徽章横向内边距",
-        "css_property": "padding-inline",
-        "token": "var(--spacer-4)"
-      },
-      {
-        "selector": ".album-feed__shop-badge",
-        "content_role": "卡片店铺徽章 border-radius",
-        "css_property": "border-radius",
-        "token": "var(--radius-4)"
-      },
-      {
-        "selector": ".album-feed__shop-badge",
-        "content_role": "卡片店铺徽章 background",
-        "css_property": "background",
-        "token": "var(--bg-inverse)"
-      },
-      {
-        "selector": ".album-feed__shop-badge",
-        "content_role": "卡片店铺徽章 color",
-        "css_property": "color",
-        "token": "var(--text-inverse)"
-      },
-      {
-        "selector": ".album-feed__shop-badge",
-        "content_role": "卡片店铺徽章 font-size",
-        "css_property": "font-size",
-        "token": "var(--body-xs-font-size)"
-      },
-      {
-        "selector": ".album-feed__shop-badge",
-        "content_role": "卡片店铺徽章 line-height",
+        "selector": ".album-feed__verified-icon",
+        "content_role": "已认证图标行高",
         "css_property": "line-height",
         "token": "var(--body-xs-line-height)"
       },
@@ -601,7 +523,7 @@
       {
         "binding_id": "feed-search-toolbar",
         "slug": "search",
-        "reason": "下滑手势浮现的工具栏使用 search 组件的 navbar-title-accent-search 强调变体，搜索框使用 md/accent-outline + 内嵌 select-image 动作",
+        "reason": "下滑手势浮现的工具栏使用 search 组件的标准强调搜索结构，作为全局搜索入口；图搜复用正式小号主按钮，不添加场景私有皮肤",
         "variant_dimensions": {
           "size": "md",
           "surface": "accent-outline",
@@ -609,6 +531,29 @@
           "state": "empty",
           "internalActions": "select-image",
           "hostPattern": "navbar-title-accent-search"
+        }
+      },
+      {
+        "binding_id": "feed-search-image",
+        "slug": "button",
+        "reason": "强调搜索框内的图搜入口复用 Search Preview 规定的小号主按钮",
+        "variant_dimensions": {
+          "emphasis": "strong",
+          "size": "sm",
+          "iconMode": "text-only",
+          "state": "default"
+        }
+      },
+      {
+        "binding_id": "feed-publish-popmenu",
+        "slug": "popmenu",
+        "reason": "导航栏右侧发布入口展开紧凑快捷菜单",
+        "variant_dimensions": {
+          "mode": "action",
+          "icon": "left",
+          "placement": "bottom",
+          "align": "end",
+          "state": "open"
         }
       },
       {
@@ -773,7 +718,7 @@
     "layout_contract": {
       "mode": "composed",
       "source": "references/design-decisions.md",
-      "selection_reason": "页面首要任务是发现并进入动态详情；顶部 page-tabs 与搜索栏共同包进 sticky top-stack 吸顶，背景跟随顶部白色；搜索框占文档流默认显示，层级低于 page-tabs，上滑手势收起（max-height 精确为 calc(var(--size-36) + var(--spacer-8) * 2) 避免无效动画区间，子元素 .search-toolbar 用 transform translateY 走 GPU 合成层、contain:content 隔离重排到本容器提升丝滑度）、下滑手势或滚回顶部重现，顶部边界强制显示、底部边界抑制下滑手势重现避免橡皮筋回弹误触发；页面背景从顶部白色渐变到 --bg-page 灰色，过渡完成点在瀑布流往下一点位置；搜索框使用 searchbox--accent 强调模式；筛选入口从搜索框右侧移除，弱化后放到全部上新这一栏的横滑标签末尾，使用 tag--gray；全部上新横滑标签区保留最小高度确保可见；人维度栏约 10 个发布者支持横滑、头像右下角不再放置店铺标识、「我的相册」项 sticky right 固定在可视区最右侧；瀑布流双列按媒体自然比例撑高参差，显式设置 row-gap 让列内卡片上下不贴在一起，375/393px 双列，768px 自动增列且单卡不超过 220px；卡片信息层级紧凑，发布者区单行（头像 + 名字 + 店铺文字徽章），状态恢复为文字徽章后与内容类型、时间组成 meta 行并保留间距，1 至 2 行摘要，底部操作行一键转发靠右不再保留商品入口；通过 host-shell-page__panel 相对定位让场景根元素正确约束在 tab 内容区内，配合滚动容器底部预留 40px + safe-area-bottom，避免内容被 bottom-nav 遮挡。",
+      "selection_reason": "页面首要任务是发现并进入动态详情；顶部 page-tabs 与搜索栏共同吸顶，搜索栏使用 Search 组件 Preview 的标准强调结构（白底、品牌描边、右侧正式小号主按钮），场景包装层只承担收起动画。人维度栏支持横滑且「我的相册」固定在右侧；瀑布流在手机壳和窄容器中固定双列，在场景自身可用宽度增大后按 168px 目标列宽自动增列并居中，避免根据桌面窗口宽度误把手机壳拉成单列。卡片信息紧凑，底部操作行的一键转发靠右；场景根由 host-shell-page__panel 约束，并预留底部导航安全区。",
       "page_edge_mode": "M8",
       "mutable_regions": [
         ".album-feed__floating-toolbar",
@@ -783,6 +728,30 @@
       ]
     },
     "interaction_contract": [
+      {
+        "dom_id": "open-publish-menu",
+        "target": "state:publish-menu-open"
+      },
+      {
+        "dom_id": "publish-action-product",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "publish-action-note",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "publish-action-live",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "publish-action-import",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "publish-action-scan",
+        "target": "feedback:toast"
+      },
       {
         "dom_id": "open-global-search",
         "target": "feedback:toast"
@@ -857,8 +826,16 @@
         "state_id": "feed-ready",
         "initial": true,
         "trigger": "进入动态主 tab",
-        "visible_result": "页面级 tabs 与搜索栏共同吸顶顶部，搜索栏默认显示占据文档流，首屏显示双列瀑布流与人维度栏",
+        "visible_result": "页面级 tabs 与标准强调搜索工具栏共同吸顶顶部，搜索栏默认显示占据文档流，首屏显示双列瀑布流与人维度栏",
         "fallback": "保留可浏览的本地动态",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "publish-menu-open",
+        "initial": false,
+        "trigger": "点击导航栏右侧发布入口",
+        "visible_result": "发布入口加号顺时针旋转 45 度、背景不透明度降低，并在入口下方显示带图标的发布快捷菜单",
+        "fallback": "点击页面其他位置、滚动或选择菜单项后关闭菜单并恢复发布入口默认状态",
         "persistence": "memory"
       },
       {
@@ -928,9 +905,9 @@
       {
         "state_id": "feed-wide-layout",
         "initial": false,
-        "trigger": "视口宽度增至 768px",
-        "visible_result": "瀑布流自动增列且单卡不超过 220px 并居中，交互层级不变",
-        "fallback": "常见手机宽度保持双列",
+        "trigger": "动态页自身可用宽度增至 480px",
+        "visible_result": "瀑布流按实际容器宽度自动增列并居中，手机壳中的双列不受桌面窗口宽度影响",
+        "fallback": "手机壳和窄容器保持双列",
         "persistence": "memory"
       }
     ]
@@ -941,8 +918,8 @@
       375,
       393
     ],
-    "checked_at": "2026-07-23T13:50:00.000Z",
-    "scope": "顶部 page-tabs 与搜索栏 sticky 吸顶且搜索栏层级低于 tabs、搜索框 max-height 精确为 calc(size-36 + spacer-8*2) 避免无效动画区间、子元素 transform translateY 走合成层、contain:content 隔离重排、顶部边界强制显示与底部边界抑制下滑手势重现避免橡皮筋回弹误触发、背景白到灰渐变在瀑布流位置过渡、人维度栏无店铺 badge 且我的相册 sticky right、瀑布流双列卡片信息层级紧凑、底部留白与 bottom-nav 隔离，375/393px 全部通过。",
+    "checked_at": "2026-07-23T12:06:20.000Z",
+    "scope": "顶部 page-tabs 居中且左右预留对称栏位，右侧发布入口可展开带图标 popmenu 并在关闭后恢复；搜索工具栏 sticky 吸顶；瀑布流上下与左右间距均为 8px；卡片去除店铺和内容类型徽章，认证图标与上新绿点可见；服装封面跨多个 clothing 目录。375/393px 全部通过。",
     "checks": {
       "horizontal_overflow": true,
       "overlap": true,
@@ -965,6 +942,16 @@
     './lib/assets/image/clothing/clothing_8/img_1708defc_20240216_i1708092860_9030_2.jpg.jpg',
     './lib/assets/image/clothing/clothing_8/img_1708defc_20240216_i1708092843_9294_21.jpg.jpg',
     './lib/assets/image/clothing/clothing_8/img_1708defc_20240216_i1708092843_8369_2.jpg.jpg',
+    './lib/assets/image/clothing/clothing_1/clothing_1_1.jpg',
+    './lib/assets/image/clothing/clothing_3/1663740989357_27184.jpg',
+    './lib/assets/image/clothing/clothing_4/1663741029863_23235.jpg',
+    './lib/assets/image/clothing/clothing_7/1663741042724_84375.jpg',
+    './lib/assets/image/clothing/clothing_9/1663740558500_5660.jpg',
+    './lib/assets/image/clothing/clothing_11/1663741015636_57550.jpg',
+    './lib/assets/image/clothing/clothing_12/1663741493021_53473.jpg',
+    './lib/assets/image/clothing/clothing_13/1664276865083_43086.jpg',
+    './lib/assets/image/clothing/clothing_14/1664276960205_96017.jpg',
+    './lib/assets/image/clothing/clothing_15/1664277250606_29741.jpg',
     './lib/assets/image/avatar/avatar_001.jpg',
     './lib/assets/image/avatar/avatar_008.jpg',
     './lib/assets/image/avatar/avatar_016.jpg',
@@ -978,23 +965,23 @@
   ];
 
   var publishers = [
-    { publisher_id: 'pub-01', publisher_name: '云朵服饰', publisher_avatar: imagePool[8], publisher_type: 'shop', publisher_statuses: ['live', 'verified'] },
-    { publisher_id: 'pub-02', publisher_name: '小满的衣橱', publisher_avatar: imagePool[9], publisher_type: 'person', publisher_statuses: ['new', 'starred'] },
-    { publisher_id: 'pub-03', publisher_name: '漫川生活馆', publisher_avatar: imagePool[10], publisher_type: 'shop', publisher_statuses: ['new', 'verified'] },
-    { publisher_id: 'pub-04', publisher_name: '阿宁手记', publisher_avatar: imagePool[11], publisher_type: 'person', publisher_statuses: ['starred', 'verified'] },
-    { publisher_id: 'pub-05', publisher_name: '微光面料室', publisher_avatar: imagePool[12], publisher_type: 'shop', publisher_statuses: ['new', 'starred'] },
-    { publisher_id: 'pub-06', publisher_name: '陆小满', publisher_avatar: imagePool[13], publisher_type: 'person', publisher_statuses: ['verified'] },
-    { publisher_id: 'pub-07', publisher_name: '白茶手作', publisher_avatar: imagePool[14], publisher_type: 'shop', publisher_statuses: ['live', 'new'] },
-    { publisher_id: 'pub-08', publisher_name: '苏野', publisher_avatar: imagePool[15], publisher_type: 'person', publisher_statuses: ['starred'] },
-    { publisher_id: 'pub-09', publisher_name: '云间集', publisher_avatar: imagePool[16], publisher_type: 'shop', publisher_statuses: ['verified'] },
-    { publisher_id: 'pub-10', publisher_name: '朝晚穿搭', publisher_avatar: imagePool[17], publisher_type: 'person', publisher_statuses: ['new'] }
+    { publisher_id: 'pub-01', publisher_name: '云朵服饰', publisher_avatar: imagePool[18], publisher_type: 'shop', publisher_statuses: ['live', 'verified'] },
+    { publisher_id: 'pub-02', publisher_name: '小满的衣橱', publisher_avatar: imagePool[19], publisher_type: 'person', publisher_statuses: ['new', 'starred'] },
+    { publisher_id: 'pub-03', publisher_name: '漫川生活馆', publisher_avatar: imagePool[20], publisher_type: 'shop', publisher_statuses: ['new', 'verified'] },
+    { publisher_id: 'pub-04', publisher_name: '阿宁手记', publisher_avatar: imagePool[21], publisher_type: 'person', publisher_statuses: ['starred', 'verified'] },
+    { publisher_id: 'pub-05', publisher_name: '微光面料室', publisher_avatar: imagePool[22], publisher_type: 'shop', publisher_statuses: ['new', 'starred'] },
+    { publisher_id: 'pub-06', publisher_name: '陆小满', publisher_avatar: imagePool[23], publisher_type: 'person', publisher_statuses: ['verified'] },
+    { publisher_id: 'pub-07', publisher_name: '白茶手作', publisher_avatar: imagePool[24], publisher_type: 'shop', publisher_statuses: ['live', 'new'] },
+    { publisher_id: 'pub-08', publisher_name: '苏野', publisher_avatar: imagePool[25], publisher_type: 'person', publisher_statuses: ['starred'] },
+    { publisher_id: 'pub-09', publisher_name: '云间集', publisher_avatar: imagePool[26], publisher_type: 'shop', publisher_statuses: ['verified'] },
+    { publisher_id: 'pub-10', publisher_name: '朝晚穿搭', publisher_avatar: imagePool[27], publisher_type: 'person', publisher_statuses: ['new'] }
   ];
 
   var products = [
-    { product_id: 'prod-01', name: '云感垂坠针织短袖', price: 129, image_list: [imagePool[0], imagePool[1], imagePool[2]], selling_points: ['柔软亲肤', '轻薄不透', '通勤百搭'], sku_options: ['奶油白', '雾霾蓝', 'S / M / L'], attributes: ['材质：棉混纺', '版型：合身', '季节：夏季'], detail_sections: ['细密针织兼顾透气与垂坠感。', '建议冷水轻柔洗涤并平铺晾干。'], seller_id: 'pub-01', seller_name: '云朵服饰' },
-    { product_id: 'prod-02', name: '复古高腰直筒牛仔裤', price: 169, image_list: [imagePool[3], imagePool[4]], selling_points: ['高腰显腿长', '微弹不紧绷', '复古水洗'], sku_options: ['浅蓝', '深蓝', '26–30'], attributes: ['材质：棉丹宁', '裤型：直筒', '腰型：高腰'], detail_sections: ['直筒剪裁修饰腿型，日常搭配更省心。'], seller_id: 'pub-03', seller_name: '漫川生活馆' },
-    { product_id: 'prod-03', name: '法式碎花连衣裙', price: 219, image_list: [imagePool[5], imagePool[6]], selling_points: ['收腰剪裁', '轻盈里衬', '通勤度假两穿'], sku_options: ['杏色花卉', 'S / M / L'], attributes: ['面料：雪纺', '裙长：中长款'], detail_sections: ['细碎花型和自然腰线，单穿即可完成搭配。'], seller_id: 'pub-02', seller_name: '小满的衣橱' },
-    { product_id: 'prod-04', name: '极简通勤托特包', price: 99, image_list: [imagePool[7], imagePool[2]], selling_points: ['轻量大容量', '内置分区', '可肩背'], sku_options: ['黑色', '燕麦色'], attributes: ['材质：环保皮革', '闭合：磁吸'], detail_sections: ['可容纳折叠伞、平板与日常随身物。'], seller_id: 'pub-04', seller_name: '阿宁手记' }
+    { product_id: 'prod-01', name: '云感垂坠针织短袖', price: 129, image_list: [imagePool[0], imagePool[8], imagePool[12]], selling_points: ['柔软亲肤', '轻薄不透', '通勤百搭'], sku_options: ['奶油白', '雾霾蓝', 'S / M / L'], attributes: ['材质：棉混纺', '版型：合身', '季节：夏季'], detail_sections: ['细密针织兼顾透气与垂坠感。', '建议冷水轻柔洗涤并平铺晾干。'], seller_id: 'pub-01', seller_name: '云朵服饰' },
+    { product_id: 'prod-02', name: '复古高腰直筒牛仔裤', price: 169, image_list: [imagePool[9], imagePool[3]], selling_points: ['高腰显腿长', '微弹不紧绷', '复古水洗'], sku_options: ['浅蓝', '深蓝', '26-30'], attributes: ['材质：棉丹宁', '裤型：直筒', '腰型：高腰'], detail_sections: ['直筒剪裁修饰腿型，日常搭配更省心。'], seller_id: 'pub-03', seller_name: '漫川生活馆' },
+    { product_id: 'prod-03', name: '法式碎花连衣裙', price: 219, image_list: [imagePool[10], imagePool[4]], selling_points: ['收腰剪裁', '轻盈里衬', '通勤度假两穿'], sku_options: ['杏色花卉', 'S / M / L'], attributes: ['面料：雪纺', '裙长：中长款'], detail_sections: ['细碎花型和自然腰线，单穿即可完成搭配。'], seller_id: 'pub-02', seller_name: '小满的衣橱' },
+    { product_id: 'prod-04', name: '极简通勤托特包', price: 99, image_list: [imagePool[11], imagePool[5]], selling_points: ['轻量大容量', '内置分区', '可肩背'], sku_options: ['黑色', '燕麦色'], attributes: ['材质：环保皮革', '闭合：磁吸'], detail_sections: ['可容纳折叠伞、平板与日常随身物。'], seller_id: 'pub-04', seller_name: '阿宁手记' }
   ];
 
   function media(id, type, src, duration) {
@@ -1004,33 +991,21 @@
   }
 
   var dynamics = [
-    { dynamic_id: 'dyn-01', publisher_id: 'pub-01', published_at: '刚刚', published_order: 10, content_type: 'product', category_id: 'women', text_content: '今日上新这件云感针织短袖，垂坠但不贴身，通勤和周末都很好搭。实拍是自然光，颜色更接近第一张。', media_list: [media('m-01', 'video', imagePool[0], '00:18'), media('m-02', 'image', imagePool[1])], related_product_ids: ['prod-01'] },
-    { dynamic_id: 'dyn-02', publisher_id: 'pub-02', published_at: '8 分钟前', published_order: 9, content_type: 'note', text_content: '最近常穿的三套清爽通勤搭配。比起堆叠单品，我更喜欢把颜色控制在两种以内，早上出门会轻松很多。', media_list: [media('m-03', 'image', imagePool[5]), media('m-04', 'video', imagePool[6], '00:26')] },
-    { dynamic_id: 'dyn-03', publisher_id: 'pub-03', published_at: '20 分钟前', published_order: 8, content_type: 'product', category_id: 'women', text_content: '直筒牛仔裤补到货了，腰头做了微弹处理，坐久也不会勒。浅蓝色更适合夏天。', media_list: [media('m-05', 'image', imagePool[3]), media('m-06', 'image', imagePool[4])], related_product_ids: ['prod-02'] },
-    { dynamic_id: 'dyn-04', publisher_id: 'pub-04', published_at: '今天 10:30', published_order: 7, content_type: 'note', text_content: '把旧衣重新整理了一次，留下真正会反复穿的单品。衣橱变轻之后，每天做选择也更快。', media_list: [media('m-07', 'video', imagePool[7], '00:34'), media('m-08', 'image', imagePool[2])] },
-    { dynamic_id: 'dyn-05', publisher_id: 'pub-02', published_at: '今天 09:15', published_order: 6, content_type: 'product', category_id: 'women', text_content: '碎花裙这次把里衬做得更轻，保留垂感也不容易透。腰线位置对小个子更友好。', media_list: [media('m-09', 'image', imagePool[5]), media('m-10', 'video', imagePool[6], '00:21')], related_product_ids: ['prod-03'] },
-    { dynamic_id: 'dyn-06', publisher_id: 'pub-01', published_at: '昨天 18:40', published_order: 5, content_type: 'note', text_content: '直播结束后整理了大家最常问的面料护理方法，针织类尽量不要悬挂晾晒，肩线会更耐穿。', media_list: [media('m-11', 'image', imagePool[1])] },
-    { dynamic_id: 'dyn-07', publisher_id: 'pub-04', published_at: '昨天', published_order: 4, content_type: 'product', category_id: 'accessory', text_content: '这个托特包我连续背了一周，最喜欢的是自重很轻，通勤需要的东西都能分区放好。', media_list: [media('m-12', 'video', imagePool[7], '00:16'), media('m-13', 'image', imagePool[2])], related_product_ids: ['prod-04'] },
-    { dynamic_id: 'dyn-08', publisher_id: 'pub-03', published_at: '2 天前', published_order: 3, content_type: 'note', text_content: '店里换了新的陈列方式，同色系放在一起后，客人挑选搭配明显更快了。', media_list: [media('m-14', 'image', imagePool[4]), media('m-15', 'image', imagePool[3])] },
-    { dynamic_id: 'dyn-09', publisher_id: 'pub-01', published_at: '3 天前', published_order: 2, content_type: 'product', category_id: 'women', text_content: '针织基础款补了一批新色，奶油白和雾霾蓝都很显肤色，尺码按正常码选择即可。', media_list: [media('m-16', 'image', imagePool[2]), media('m-17', 'video', imagePool[0], '00:12')], related_product_ids: ['prod-01'] },
-    { dynamic_id: 'dyn-10', publisher_id: 'pub-02', published_at: '本周一', published_order: 1, content_type: 'note', text_content: '周末去看了一个小型面料展，记录了几组很舒服的中性色，准备慢慢用到后面的搭配里。', media_list: [media('m-18', 'image', imagePool[6]), media('m-19', 'image', imagePool[5])] },
-    { dynamic_id: 'dyn-11', publisher_id: 'pub-07', published_at: '12 分钟前', published_order: 0, content_type: 'product', category_id: 'home', text_content: '今天店里现场裁剪的桌旗上线了，手工锁边，颜色比图片更柔和一些。', media_list: [media('m-20', 'image', imagePool[4]), media('m-21', 'image', imagePool[3])], related_product_ids: [] },
-    { dynamic_id: 'dyn-12', publisher_id: 'pub-05', published_at: '昨天 22:10', published_order: -1, content_type: 'note', text_content: '把上周整理的色卡和面料样本重新归档，未来一段时间的搭配主线会围绕这组中性色。', media_list: [media('m-22', 'image', imagePool[2])] }
+    { dynamic_id: 'dyn-01', publisher_id: 'pub-01', published_at: '刚刚', published_order: 10, content_type: 'product', category_id: 'women', text_content: '今日上新这件云感针织短袖，垂坠但不贴身，通勤和周末都很好搭。实拍是自然光，颜色更接近第一张。', media_list: [media('m-01', 'video', imagePool[0], '00:18'), media('m-02', 'image', imagePool[8])], related_product_ids: ['prod-01'] },
+    { dynamic_id: 'dyn-02', publisher_id: 'pub-02', published_at: '8 分钟前', published_order: 9, content_type: 'note', text_content: '最近常穿的三套清爽通勤搭配。比起堆叠单品，我更喜欢把颜色控制在两种以内，早上出门会轻松很多。', media_list: [media('m-03', 'image', imagePool[9]), media('m-04', 'video', imagePool[4], '00:26')] },
+    { dynamic_id: 'dyn-03', publisher_id: 'pub-03', published_at: '20 分钟前', published_order: 8, content_type: 'product', category_id: 'women', text_content: '直筒牛仔裤补到货了，腰头做了微弹处理，坐久也不会勒。浅蓝色更适合夏天。', media_list: [media('m-05', 'image', imagePool[10]), media('m-06', 'image', imagePool[3])], related_product_ids: ['prod-02'] },
+    { dynamic_id: 'dyn-04', publisher_id: 'pub-04', published_at: '今天 10:30', published_order: 7, content_type: 'note', text_content: '把旧衣重新整理了一次，留下真正会反复穿的单品。衣橱变轻之后，每天做选择也更快。', media_list: [media('m-07', 'video', imagePool[11], '00:34'), media('m-08', 'image', imagePool[12])] },
+    { dynamic_id: 'dyn-05', publisher_id: 'pub-02', published_at: '今天 09:15', published_order: 6, content_type: 'product', category_id: 'women', text_content: '碎花裙这次把里衬做得更轻，保留垂感也不容易透。腰线位置对小个子更友好。', media_list: [media('m-09', 'image', imagePool[13]), media('m-10', 'video', imagePool[5], '00:21')], related_product_ids: ['prod-03'] },
+    { dynamic_id: 'dyn-06', publisher_id: 'pub-01', published_at: '昨天 18:40', published_order: 5, content_type: 'note', text_content: '直播结束后整理了大家最常问的面料护理方法，针织类尽量不要悬挂晾晒，肩线会更耐穿。', media_list: [media('m-11', 'image', imagePool[14])] },
+    { dynamic_id: 'dyn-07', publisher_id: 'pub-04', published_at: '昨天', published_order: 4, content_type: 'product', category_id: 'accessory', text_content: '这个托特包我连续背了一周，最喜欢的是自重很轻，通勤需要的东西都能分区放好。', media_list: [media('m-12', 'video', imagePool[15], '00:16'), media('m-13', 'image', imagePool[6])], related_product_ids: ['prod-04'] },
+    { dynamic_id: 'dyn-08', publisher_id: 'pub-03', published_at: '2 天前', published_order: 3, content_type: 'note', text_content: '店里换了新的陈列方式，同色系放在一起后，客人挑选搭配明显更快了。', media_list: [media('m-14', 'image', imagePool[16]), media('m-15', 'image', imagePool[7])] },
+    { dynamic_id: 'dyn-09', publisher_id: 'pub-01', published_at: '3 天前', published_order: 2, content_type: 'product', category_id: 'women', text_content: '针织基础款补了一批新色，奶油白和雾霾蓝都很显肤色，尺码按正常码选择即可。', media_list: [media('m-16', 'image', imagePool[17]), media('m-17', 'video', imagePool[1], '00:12')], related_product_ids: ['prod-01'] },
+    { dynamic_id: 'dyn-10', publisher_id: 'pub-02', published_at: '本周一', published_order: 1, content_type: 'note', text_content: '周末去看了一个小型面料展，记录了几组很舒服的中性色，准备慢慢用到后面的搭配里。', media_list: [media('m-18', 'image', imagePool[2]), media('m-19', 'image', imagePool[8])] },
+    { dynamic_id: 'dyn-11', publisher_id: 'pub-07', published_at: '12 分钟前', published_order: 0, content_type: 'product', category_id: 'home', text_content: '今天店里现场裁剪的桌旗上线了，手工锁边，颜色比图片更柔和一些。', media_list: [media('m-20', 'image', imagePool[9]), media('m-21', 'image', imagePool[13])], related_product_ids: [] },
+    { dynamic_id: 'dyn-12', publisher_id: 'pub-05', published_at: '昨天 22:10', published_order: -1, content_type: 'note', text_content: '把上周整理的色卡和面料样本重新归档，未来一段时间的搭配主线会围绕这组中性色。', media_list: [media('m-22', 'image', imagePool[15])] }
   ];
 
   window.WEGO_DYNAMIC_CATALOG = { publishers: publishers, products: products, dynamics: dynamics };
-
-  /* 状态配置：优先级与显示文案（使用文字徽章替代图标，避免碎片化） */
-  var statusConfig = [
-    { value: 'verified', label: '已认证' },
-    { value: 'starred', label: '已星标' },
-    { value: 'live', label: '直播中' },
-    { value: 'new', label: '上新' }
-  ];
-  var typeConfig = {
-    product: { label: '产品' },
-    note: { label: '笔记' }
-  };
 
   function escapeHtml(value) {
     var map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
@@ -1045,29 +1020,35 @@
     return products.find(function(item) { return item.product_id === id; }) || products[0];
   }
 
-  function orderedStatuses(statuses) {
-    var ordered = [];
-    statusConfig.forEach(function(cfg) {
-      if (statuses.indexOf(cfg.value) !== -1) ordered.push(cfg);
-    });
-    return ordered;
+  function hasPublisherStatus(publisher, status) {
+    return publisher.publisher_statuses.indexOf(status) !== -1;
   }
 
-  function statusBadgesTemplate(publisher) {
-    return orderedStatuses(publisher.publisher_statuses).map(function(cfg) {
-      return '<span class="album-feed__status-badge">' + escapeHtml(cfg.label) + '</span>';
-    }).join('');
+  function publisherVerifiedTemplate(publisher) {
+    if (!hasPublisherStatus(publisher, 'verified')) return '';
+    return '<i class="wego-iconfont-s icon-renzheng album-feed__verified-icon" aria-label="已认证"></i>';
   }
 
-  function feedShopBadgeTemplate(publisher) {
-    if (publisher.publisher_type !== 'shop') return '';
-    return '<span class="album-feed__shop-badge">店铺</span>';
+  function publisherNewDotTemplate(publisher) {
+    if (!hasPublisherStatus(publisher, 'new')) return '';
+    return '<span class="album-feed__new-dot" aria-label="上新"></span>';
+  }
+
+  function publishMenuTemplate() {
+    return '<div class="popmenu popmenu--action popmenu--has-icon album-feed__publish-menu" role="menu" data-state="closed" data-placement="bottom" data-align="end" data-dd-id="feed-publish-popmenu" data-component-slug="popmenu" data-component-binding="feed-publish-popmenu">'
+      + '<div class="popmenu__list">'
+      + '<div class="popmenu__item" role="menuitem" data-dom-id="publish-action-product"><i class="wego-iconfont-s icon-fabushangpin popmenu__item-icon"></i><span class="popmenu__item-text">发产品</span></div>'
+      + '<div class="popmenu__item" role="menuitem" data-dom-id="publish-action-note"><i class="wego-iconfont-s icon-fabubiji popmenu__item-icon"></i><span class="popmenu__item-text">发笔记</span></div>'
+      + '<div class="popmenu__item" role="menuitem" data-dom-id="publish-action-live"><i class="wego-iconfont-s icon-zhibo popmenu__item-icon"></i><span class="popmenu__item-text">开直播</span></div>'
+      + '<div class="popmenu__item" role="menuitem" data-dom-id="publish-action-import"><i class="wego-iconfont-s icon-piliangdaoru popmenu__item-icon"></i><span class="popmenu__item-text">批量导入</span></div>'
+      + '<div class="popmenu__item" role="menuitem" data-dom-id="publish-action-scan"><i class="wego-iconfont-s icon-saoyisao popmenu__item-icon"></i><span class="popmenu__item-text">扫一扫</span></div>'
+      + '</div>'
+      + '</div>';
   }
 
   function feedCardTemplate(item) {
     var publisher = getPublisher(item.publisher_id);
     var cover = item.media_list[0];
-    var typeCfg = typeConfig[item.content_type];
     var videoMark = cover.media_type === 'video'
       ? '<span class="album-feed__duration">' + escapeHtml(cover.duration_label) + '</span>'
       : '';
@@ -1084,13 +1065,12 @@
       +       '<div class="album-feed__publisher-row">'
       +         '<div class="avatar avatar--24 avatar--image album-feed__publisher-avatar" data-dd-id="feed-avatar-' + item.dynamic_id + '" data-component-slug="avatar" data-component-binding="feed-publisher-avatar">'
       +           '<img src="' + publisher.publisher_avatar + '" alt="' + escapeHtml(publisher.publisher_name) + '">'
+      +           publisherNewDotTemplate(publisher)
       +         '</div>'
       +         '<span class="album-feed__publisher-name">' + escapeHtml(publisher.publisher_name) + '</span>'
-      +         feedShopBadgeTemplate(publisher)
+      +         publisherVerifiedTemplate(publisher)
       +       '</div>'
       +       '<div class="album-feed__meta-row">'
-      +         '<span class="album-feed__type-badge">' + escapeHtml(typeCfg.label) + '</span>'
-      +         statusBadgesTemplate(publisher)
       +         '<span class="album-feed__publisher-meta">' + escapeHtml(item.published_at) + '</span>'
       +       '</div>'
       +       '<p class="album-feed__summary">' + escapeHtml(item.text_content) + '</p>'
@@ -1162,22 +1142,32 @@
     <section class="album-feed" data-surface-id="album-product-feed" data-route-id="album-product-feed" data-route-bound="true" data-layout-mode="composed" data-page-edge-mode="M8" data-bg="page">
       <div class="album-feed__top-stack" data-top-stack>
         <div class="album-feed__page-tabs" data-page-tabs>
-          <div class="wg-tabs wg-tabs--standard wg-tabs--scroll" role="tablist" data-dd-id="feed-page-tabs" data-component-slug="tabs" data-component-binding="feed-page-tabs">
-            <div class="wg-tabs__scroll">
-              <button class="wg-tabs__item" role="tab" aria-selected="true" type="button" data-page-tab="following" data-dom-id="page-tab-following"><span class="wg-tabs__content"><span class="wg-tabs__label">关注</span></span></button>
-              <button class="wg-tabs__item" role="tab" aria-selected="false" type="button" data-page-tab="recommended" data-dom-id="page-tab-recommended"><span class="wg-tabs__content"><span class="wg-tabs__label">推荐</span></span></button>
-              <button class="wg-tabs__item" role="tab" aria-selected="false" type="button" data-page-tab="new" data-dom-id="page-tab-new"><span class="wg-tabs__content"><span class="wg-tabs__label">上新</span></span></button>
-              <span class="wg-tabs__active-indicator" aria-hidden="true"></span>
+          <div class="album-feed__nav-row">
+            <div class="album-feed__nav-left" aria-hidden="true"></div>
+            <div class="album-feed__nav-tabs">
+              <div class="wg-tabs wg-tabs--standard wg-tabs--scroll" role="tablist" data-dd-id="feed-page-tabs" data-component-slug="tabs" data-component-binding="feed-page-tabs">
+                <div class="wg-tabs__scroll">
+                  <button class="wg-tabs__item" role="tab" aria-selected="true" type="button" data-page-tab="following" data-dom-id="page-tab-following"><span class="wg-tabs__content"><span class="wg-tabs__label">关注</span></span></button>
+                  <button class="wg-tabs__item" role="tab" aria-selected="false" type="button" data-page-tab="recommended" data-dom-id="page-tab-recommended"><span class="wg-tabs__content"><span class="wg-tabs__label">推荐</span></span></button>
+                  <button class="wg-tabs__item" role="tab" aria-selected="false" type="button" data-page-tab="new" data-dom-id="page-tab-new"><span class="wg-tabs__content"><span class="wg-tabs__label">上新</span></span></button>
+                  <span class="wg-tabs__active-indicator" aria-hidden="true"></span>
+                </div>
+              </div>
+            </div>
+            <div class="album-feed__nav-right">
+              <button type="button" class="album-feed__publish-trigger" aria-label="发布动态" aria-haspopup="menu" aria-expanded="false" data-dom-id="open-publish-menu">
+                <img src="./lib/assets/icons/dongtai-add.svg" alt="">
+              </button>
             </div>
           </div>
         </div>
         <div class="album-feed__floating-toolbar" data-toolbar-floating aria-hidden="false">
-          <div class="search-toolbar">
-            <div class="searchbox searchbox--md searchbox--accent" role="button" tabindex="0" aria-label="打开全局搜索" data-dom-id="open-global-search" data-dd-id="feed-search-toolbar" data-component-slug="search" data-component-binding="feed-search-toolbar">
-              <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
-              <div class="searchbox__input"><span class="searchbox__placeholder">搜索全局内容</span></div>
-              <div class="searchbox__actions">
-                <button class="searchbox__action wego-iconfont-s icon-tupian" type="button" aria-label="选择图片"></button>
+          <div class="album-feed__toolbar-motion">
+            <div class="search-toolbar">
+              <div class="searchbox searchbox--md searchbox--white searchbox--accent" role="button" tabindex="0" aria-label="打开全局搜索" data-dom-id="open-global-search" data-dd-id="feed-search-toolbar" data-component-slug="search" data-component-binding="feed-search-toolbar">
+                <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
+                <div class="searchbox__input"><span class="searchbox__placeholder">搜索全局内容</span></div>
+                <div class="searchbox__actions"><button class="btn btn--strong btn--sm" type="button" aria-label="图搜" data-dd-id="feed-search-image" data-component-slug="button" data-component-binding="feed-search-image">图搜</button></div>
               </div>
             </div>
           </div>
@@ -1211,6 +1201,15 @@
           <div class="radio radio--sm radio--checked" data-group="feed-seed-checked" data-dd-id="feed-radio-checked-seed" data-component-slug="radio" data-component-binding="feed-filter-radio-checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
           <div class="radio radio--sm" data-group="feed-seed-unchecked" data-dd-id="feed-radio-unchecked-seed" data-component-slug="radio" data-component-binding="feed-filter-radio-unchecked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
           <button type="button" class="link link--12" data-dd-id="feed-forward-link-seed" data-component-slug="link" data-component-binding="feed-forward-link">一键转发</button>
+          <div class="popmenu popmenu--action popmenu--has-icon" role="menu" data-state="open" data-placement="bottom" data-align="end" data-dd-id="feed-publish-popmenu-seed" data-component-slug="popmenu" data-component-binding="feed-publish-popmenu">
+            <div class="popmenu__list">
+              <div class="popmenu__item" role="menuitem" data-dom-id="publish-action-product"><i class="wego-iconfont-s icon-fabushangpin popmenu__item-icon"></i><span class="popmenu__item-text">发产品</span></div>
+              <div class="popmenu__item" role="menuitem" data-dom-id="publish-action-note"><i class="wego-iconfont-s icon-fabubiji popmenu__item-icon"></i><span class="popmenu__item-text">发笔记</span></div>
+              <div class="popmenu__item" role="menuitem" data-dom-id="publish-action-live"><i class="wego-iconfont-s icon-zhibo popmenu__item-icon"></i><span class="popmenu__item-text">开直播</span></div>
+              <div class="popmenu__item" role="menuitem" data-dom-id="publish-action-import"><i class="wego-iconfont-s icon-piliangdaoru popmenu__item-icon"></i><span class="popmenu__item-text">批量导入</span></div>
+              <div class="popmenu__item" role="menuitem" data-dom-id="publish-action-scan"><i class="wego-iconfont-s icon-saoyisao popmenu__item-icon"></i><span class="popmenu__item-text">扫一扫</span></div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -1226,6 +1225,9 @@
       var filterOpenTag = root.querySelector('[data-dom-id="open-filter"]');
       var peopleList = root.querySelector('[data-region="people-list"]');
       var filterTags = root.querySelector('[data-region="filter-tags"]');
+      var publishTrigger = root.querySelector('[data-dom-id="open-publish-menu"]');
+      var publishMenu = null;
+      var removePublishListeners = null;
 
       var filterDimensions = [
         { value: 'all', label: '全部' },
@@ -1256,6 +1258,88 @@
         requestAnimationFrame(function() {
           updateTabsIndicator(pageTabs.querySelector('.wg-tabs'));
         });
+      }
+
+      function closePublishMenu() {
+        if (publishMenu) {
+          publishMenu.setAttribute('data-state', 'closed');
+          publishMenu.remove();
+          publishMenu = null;
+        }
+        if (publishTrigger) {
+          publishTrigger.classList.remove('is-open');
+          publishTrigger.setAttribute('aria-expanded', 'false');
+        }
+        ctx.state['publish-menu-open'] = false;
+        if (removePublishListeners) {
+          removePublishListeners();
+          removePublishListeners = null;
+        }
+      }
+
+      function positionPublishMenu() {
+        if (!publishMenu || !publishTrigger) return false;
+        var triggerRect = publishTrigger.getBoundingClientRect();
+        publishMenu.style.left = '-9999px';
+        publishMenu.style.top = '-9999px';
+        publishMenu.setAttribute('data-state', 'closed');
+        var menuWidth = publishMenu.offsetWidth;
+        var menuHeight = publishMenu.offsetHeight;
+        var gap = 4;
+        var sideGap = 4;
+        var left = triggerRect.right - menuWidth;
+        var top = triggerRect.bottom + gap;
+        if (left < sideGap) left = sideGap;
+        if (left + menuWidth > window.innerWidth - sideGap) left = Math.max(sideGap, window.innerWidth - sideGap - menuWidth);
+        if (top + menuHeight > window.innerHeight - sideGap) top = triggerRect.top - gap - menuHeight;
+        if (top < sideGap || top + menuHeight > window.innerHeight - sideGap) return false;
+        publishMenu.style.left = left + 'px';
+        publishMenu.style.top = top + 'px';
+        requestAnimationFrame(function() {
+          if (publishMenu) publishMenu.setAttribute('data-state', 'open');
+        });
+        return true;
+      }
+
+      function openPublishMenu() {
+        closePublishMenu();
+        if (!publishTrigger) return;
+        publishMenu = document.createElement('div');
+        publishMenu.innerHTML = publishMenuTemplate();
+        publishMenu = publishMenu.firstElementChild;
+        document.body.appendChild(publishMenu);
+        if (!positionPublishMenu()) {
+          closePublishMenu();
+          ctx.toast('发布菜单空间不足');
+          return;
+        }
+        publishTrigger.classList.add('is-open');
+        publishTrigger.setAttribute('aria-expanded', 'true');
+        ctx.state['publish-menu-open'] = true;
+        publishMenu.querySelector('[data-dom-id="publish-action-product"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); ctx.toast('发产品能力本期暂未开放'); });
+        publishMenu.querySelector('[data-dom-id="publish-action-note"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); ctx.toast('发笔记能力本期暂未开放'); });
+        publishMenu.querySelector('[data-dom-id="publish-action-live"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); ctx.toast('开直播能力本期暂未开放'); });
+        publishMenu.querySelector('[data-dom-id="publish-action-import"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); ctx.toast('批量导入能力本期暂未开放'); });
+        publishMenu.querySelector('[data-dom-id="publish-action-scan"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); ctx.toast('扫一扫能力本期暂未开放'); });
+        var onOutsidePointer = function(event) {
+          if (publishTrigger.contains(event.target) || (publishMenu && publishMenu.contains(event.target))) return;
+          closePublishMenu();
+        };
+        var onDismiss = function() { closePublishMenu(); };
+        document.addEventListener('pointerdown', onOutsidePointer, true);
+        window.addEventListener('resize', onDismiss);
+        scroll.addEventListener('scroll', onDismiss, { once: true });
+        removePublishListeners = function() {
+          document.removeEventListener('pointerdown', onOutsidePointer, true);
+          window.removeEventListener('resize', onDismiss);
+          scroll.removeEventListener('scroll', onDismiss);
+        };
+      }
+
+      function togglePublishMenu(event) {
+        event.stopPropagation();
+        if (publishMenu) closePublishMenu();
+        else openPublishMenu();
       }
 
       function syncPageTabs() {
@@ -1375,6 +1459,7 @@
       }
 
       function openFilterModal() {
+        closePublishMenu();
         var draft = {
           publisher: ctx.state.filters.publisher,
           category: ctx.state.filters.category
@@ -1486,6 +1571,7 @@
       root.querySelector('[data-dom-id="open-global-search"]').addEventListener('keydown', function(event) {
         if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); ctx.toast('全局搜索能力本期暂未开放'); }
       });
+      if (publishTrigger) publishTrigger.addEventListener('click', togglePublishMenu);
       root.querySelector('[data-dom-id="open-filter"]').addEventListener('click', openFilterModal);
       root.querySelector('[data-dom-id="feed-open-dynamic"]').addEventListener('click', function(event) {
         if (event.target.closest('button, a')) return;
@@ -1499,12 +1585,12 @@
       });
 
       /* 页面级 Tab：关注默认可用，推荐/上新本期不下钻 */
-      root.querySelector('[data-dom-id="page-tab-following"]').addEventListener('click', function() { ctx.state.pageTab = 'following'; ctx.state['feed-ready'] = true; syncPageTabs(); updateAllIndicators(); });
-      root.querySelector('[data-dom-id="page-tab-recommended"]').addEventListener('click', function() { ctx.toast('推荐视图本期暂未开放'); });
-      root.querySelector('[data-dom-id="page-tab-new"]').addEventListener('click', function() { ctx.toast('上新视图本期暂未开放'); });
+      root.querySelector('[data-dom-id="page-tab-following"]').addEventListener('click', function() { closePublishMenu(); ctx.state.pageTab = 'following'; ctx.state['feed-ready'] = true; syncPageTabs(); updateAllIndicators(); });
+      root.querySelector('[data-dom-id="page-tab-recommended"]').addEventListener('click', function() { closePublishMenu(); ctx.toast('推荐视图本期暂未开放'); });
+      root.querySelector('[data-dom-id="page-tab-new"]').addEventListener('click', function() { closePublishMenu(); ctx.toast('上新视图本期暂未开放'); });
 
       /* 人维度头像：自己入口直接绑定，好友项由 bindPeopleEvents 逐项绑定 */
-      root.querySelector('[data-dom-id="people-self"]').addEventListener('click', function() { ctx.toast('个人主页本期暂未开放'); });
+      root.querySelector('[data-dom-id="people-self"]').addEventListener('click', function() { closePublishMenu(); ctx.toast('个人主页本期暂未开放'); });
 
       /* 多维度筛选标签：直接绑定 */
       root.querySelector('[data-dom-id="filter-tag-all"]').addEventListener('click', function() { switchDimension('all'); });
