@@ -99,17 +99,41 @@
   touch-action: manipulation;
 }
 
-.album-feed__publish-trigger img {
-  display: block;
-  width: var(--size-32);
-  height: var(--size-32);
-  transition:
-    transform var(--duration-normal) var(--ease-enter),
-    opacity var(--duration-fast) var(--ease-enter);
+.album-feed__publish-trigger-bg,
+.album-feed__publish-trigger-plus {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%);
 }
 
-.album-feed__publish-trigger.is-open img {
+.album-feed__publish-trigger-bg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-32);
+  height: var(--size-32);
+  transition: opacity var(--duration-fast) var(--ease-enter);
+}
+
+.album-feed__publish-trigger-bg img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.album-feed__publish-trigger-plus {
+  transition: transform var(--duration-normal) var(--ease-enter);
+}
+
+.album-feed__publish-trigger-plus img {
+  display: block;
+}
+
+.album-feed__publish-trigger.is-open .album-feed__publish-trigger-bg {
   opacity: 0.6;
+}
+
+.album-feed__publish-trigger.is-open .album-feed__publish-trigger-plus {
   transform: rotate(45deg);
 }
 
@@ -186,6 +210,17 @@
   flex: 0 0 auto;
   margin-left: auto;
   background: var(--bg-surface);
+  z-index: 1;
+}
+
+.album-feed__sticky-fade {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--spacer-16) * -1);
+  width: var(--spacer-16);
+  height: 100%;
+  pointer-events: none;
 }
 
 .album-feed__people-item {
@@ -236,6 +271,16 @@
 
 .album-feed__filter-tags .tag {
   flex: 0 0 auto;
+}
+
+.album-feed__filter-open-host {
+  position: sticky;
+  right: 0;
+  display: flex;
+  flex: 0 0 auto;
+  margin-left: auto;
+  background: var(--bg-surface);
+  z-index: 1;
 }
 
 /* 瀑布流：手机壳及窄容器固定双列；只在动态页自身可用宽度增加后自动增列，
@@ -347,7 +392,7 @@
   white-space: nowrap;
 }
 
-/* Meta 行：内容类型徽章 + 发布者状态徽章 + 发布时间，彼此不贴在一起 */
+/* Meta 行：保留发布时间样式，位置下沉到底部操作栏左侧 */
 .album-feed__meta-row {
   display: flex;
   align-items: center;
@@ -402,9 +447,13 @@
 .album-feed__actions {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: var(--spacer-12);
   min-width: 0;
+}
+
+.album-feed__actions .album-feed__publisher-meta {
+  flex: 1 1 auto;
 }
 
 .album-feed__forward-link {

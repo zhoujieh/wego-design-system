@@ -154,6 +154,12 @@
         "token": "var(--size-28)"
       },
       {
+        "selector": ".album-feed__filter-open-host",
+        "content_role": "筛选固定区背景",
+        "css_property": "background",
+        "token": "var(--bg-surface)"
+      },
+      {
         "selector": ".album-feed__grid",
         "content_role": ".album-feed__grid 的 column-gap",
         "css_property": "column-gap",
@@ -718,7 +724,7 @@
     "layout_contract": {
       "mode": "composed",
       "source": "references/design-decisions.md",
-      "selection_reason": "页面首要任务是发现并进入动态详情；顶部 page-tabs 与搜索栏共同吸顶，搜索栏使用 Search 组件 Preview 的标准强调结构（白底、品牌描边、右侧正式小号主按钮），场景包装层只承担收起动画。人维度栏支持横滑且「我的相册」固定在右侧；瀑布流在手机壳和窄容器中固定双列，在场景自身可用宽度增大后按 168px 目标列宽自动增列并居中，避免根据桌面窗口宽度误把手机壳拉成单列。卡片信息紧凑，底部操作行的一键转发靠右；场景根由 host-shell-page__panel 约束，并预留底部导航安全区。",
+      "selection_reason": "页面首要任务是发现并进入动态详情；顶部 page-tabs 与搜索栏共同吸顶，搜索栏使用 Search 组件 Preview 的标准强调结构（白底、品牌描边、右侧正式小号主按钮），场景包装层只承担收起动画。人维度栏支持横滑且「我的相册」与筛选入口固定在右侧，并用渐变蒙层隔开滚动内容；瀑布流在手机壳和窄容器中固定双列，在场景自身可用宽度增大后按 168px 目标列宽自动增列并居中，避免根据桌面窗口宽度误把手机壳拉成单列。卡片信息紧凑，发布时间下沉到操作栏左侧，与一键转发形成稳定底部信息带；场景根由 host-shell-page__panel 约束，并预留底部导航安全区。",
       "page_edge_mode": "M8",
       "mutable_regions": [
         ".album-feed__floating-toolbar",
@@ -834,7 +840,7 @@
         "state_id": "publish-menu-open",
         "initial": false,
         "trigger": "点击导航栏右侧发布入口",
-        "visible_result": "发布入口加号顺时针旋转 45 度、背景不透明度降低，并在入口下方显示带图标的发布快捷菜单",
+        "visible_result": "发布入口仅加号顺时针旋转 45 度、圆形背景不跟随旋转，并在入口下方显示带图标的发布快捷菜单",
         "fallback": "点击页面其他位置、滚动或选择菜单项后关闭菜单并恢复发布入口默认状态",
         "persistence": "memory"
       },
@@ -919,7 +925,7 @@
       393
     ],
     "checked_at": "2026-07-23T12:06:20.000Z",
-    "scope": "顶部 page-tabs 居中且左右预留对称栏位，右侧发布入口可展开带图标 popmenu 并在关闭后恢复；搜索工具栏 sticky 吸顶；瀑布流上下与左右间距均为 8px；卡片去除店铺和内容类型徽章，认证图标与上新绿点可见；服装封面跨多个 clothing 目录。375/393px 全部通过。",
+    "scope": "顶部 page-tabs 居中且左右预留对称栏位，右侧发布入口仅旋转加号并可展开带图标 popmenu；搜索工具栏 sticky 吸顶；人维度里的我的相册与筛选入口固定在右侧并各自带 16px 左侧渐变蒙层；卡片发布时间移动到底部操作栏左侧；瀑布流上下与左右间距均为 8px。375/393px 全部通过。",
     "checks": {
       "horizontal_overflow": true,
       "overlap": true,
@@ -1003,13 +1009,11 @@
       +         '<span class="album-feed__publisher-name">' + escapeHtml(publisher.publisher_name) + '</span>'
       +         publisherVerifiedTemplate(publisher)
       +       '</div>'
-      +       '<div class="album-feed__meta-row">'
-      +         '<span class="album-feed__publisher-meta">' + escapeHtml(item.published_at) + '</span>'
-      +       '</div>'
       +       '<p class="album-feed__summary">' + escapeHtml(item.text_content) + '</p>'
       +     '</div>'
       +     '<div class="card__footer album-feed__card-footer">'
       +       '<div class="album-feed__actions">'
+      +         '<span class="album-feed__publisher-meta">' + escapeHtml(item.published_at) + '</span>'
       +         '<button type="button" class="link link--12 album-feed__forward-link" data-dd-id="feed-forward-' + item.dynamic_id + '" data-component-slug="link" data-component-binding="feed-forward-link" data-dom-id="forward-' + item.dynamic_id + '">一键转发</button>'
       +       '</div>'
       +     '</div>'
@@ -1089,7 +1093,8 @@
             </div>
             <div class="album-feed__nav-right">
               <button type="button" class="album-feed__publish-trigger" aria-label="发布动态" aria-haspopup="menu" aria-expanded="false" data-dom-id="open-publish-menu">
-                <img src="./lib/assets/icons/dongtai-add.svg" alt="">
+                <span class="album-feed__publish-trigger-bg" aria-hidden="true"><img src="./lib/assets/icons/dongtai-add-bg.svg" alt=""></span>
+                <span class="album-feed__publish-trigger-plus" aria-hidden="true"><img src="./lib/assets/icons/dongtai-add-plus.svg" alt=""></span>
               </button>
             </div>
           </div>
@@ -1111,8 +1116,9 @@
           <div class="album-feed__people-scroll" data-region="people-scroll">
             <div class="album-feed__people-list" data-region="people-list"></div>
             <div class="album-feed__people-self" data-dom-id="people-self">
+              <img class="album-feed__sticky-fade" src="./lib/assets/icons/sticky-fade-16.svg" alt="" aria-hidden="true">
               <div class="album-feed__people-item">
-                <div class="avatar avatar--40 avatar--image album-feed__people-avatar" data-dd-id="feed-people-avatar-self" data-component-slug="avatar" data-component-binding="feed-people-avatar-self"><img src="./lib/assets/image/avatar-defult.png" alt="我的相册"></div>
+                <div class="avatar avatar--40 avatar--image album-feed__people-avatar" data-dd-id="feed-people-avatar-self" data-component-slug="avatar" data-component-binding="feed-people-avatar-self"><img src="./lib/assets/image/avatar/avatar_083.jpg" alt="我的相册"></div>
                 <span class="album-feed__people-name">我的相册</span>
               </div>
             </div>
@@ -1125,7 +1131,10 @@
           <button type="button" class="tag tag--28 tag--white tag--normal" data-filter-dimension="collection" data-dom-id="filter-tag-collection" data-dd-id="feed-filter-tag-collection" data-component-slug="tag" data-component-binding="feed-filter-tag"><span class="tag__label">合集</span></button>
           <button type="button" class="tag tag--28 tag--white tag--normal" data-filter-dimension="presale" data-dom-id="filter-tag-presale" data-dd-id="feed-filter-tag-presale" data-component-slug="tag" data-component-binding="feed-filter-tag"><span class="tag__label">预售</span></button>
           <button type="button" class="tag tag--28 tag--white tag--normal" data-filter-dimension="live" data-dom-id="filter-tag-live" data-dd-id="feed-filter-tag-live" data-component-slug="tag" data-component-binding="feed-filter-tag"><span class="tag__label">直播</span></button>
-          <button type="button" class="tag tag--28 tag--gray tag--normal album-feed__filter-open" data-dom-id="open-filter" data-dd-id="feed-filter-open" data-component-slug="tag" data-component-binding="feed-filter-open-tag"><span class="tag__label">筛选</span></button>
+          <div class="album-feed__filter-open-host">
+            <img class="album-feed__sticky-fade" src="./lib/assets/icons/sticky-fade-16.svg" alt="" aria-hidden="true">
+            <button type="button" class="tag tag--28 tag--gray tag--normal album-feed__filter-open" data-dom-id="open-filter" data-dd-id="feed-filter-open" data-component-slug="tag" data-component-binding="feed-filter-open-tag"><span class="tag__label">筛选</span></button>
+          </div>
         </div>
         <main class="album-feed__grid" data-region="feed-grid" data-dom-id="feed-open-dynamic"></main>
         <div data-region="empty-host" hidden></div>

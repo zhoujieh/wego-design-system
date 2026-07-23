@@ -372,7 +372,7 @@ const mySceneTemplate = `
       <div class="my-page__scroll">
         <header class="my-page__profile">
           <div class="avatar avatar--56 avatar--image" data-dd-id="profile-avatar" data-component-slug="avatar" data-component-binding="profile-avatar">
-            <img src="./lib/assets/image/avatar-defult.png" alt="微购用户头像">
+            <img src="./lib/assets/image/avatar/avatar_083.jpg" alt="微购用户头像">
           </div>
           <div class="my-page__profile-meta">
             <h1 class="my-page__username">微购用户</h1>
