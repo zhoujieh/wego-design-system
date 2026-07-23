@@ -1,19 +1,45 @@
 (function initWegoApp() {
   var shell = document.querySelector('[data-host-shell="true"]');
   if (!shell) return;
+  var root = document.documentElement;
+  var body = document.body;
+
+  function isNativeViewportDevice() {
+    var ua = window.navigator.userAgent || '';
+    var platform = window.navigator.platform || '';
+    var maxTouchPoints = Number(window.navigator.maxTouchPoints || 0);
+    var coarseQuery = window.matchMedia && window.matchMedia('(any-pointer: coarse)');
+    var hoverNoneQuery = window.matchMedia && window.matchMedia('(any-hover: none)');
+    var isAppleTablet = /iPad/.test(ua) || (platform === 'MacIntel' && maxTouchPoints > 1);
+    var isAndroidMobileOrTablet = /Android/i.test(ua);
+    var isPhone = /iPhone|iPod/i.test(ua);
+    var isMobileToken = /Mobile/i.test(ua);
+    var hasTouchLikePointer = Boolean(coarseQuery && coarseQuery.matches);
+    var noHover = Boolean(hoverNoneQuery && hoverNoneQuery.matches);
+
+    if (isAppleTablet || isPhone || isAndroidMobileOrTablet) return true;
+    if (hasTouchLikePointer && noHover && isMobileToken) return true;
+    return false;
+  }
+
+  function syncHostViewportMode() {
+    var nativeViewport = isNativeViewportDevice();
+    body.setAttribute('data-viewport-mode', nativeViewport ? 'native' : 'framed');
+  }
+
+  syncHostViewportMode();
+  window.addEventListener('resize', syncHostViewportMode);
 
   // iOS standalone 收起键盘后可能把 100dvh 永久停在去掉状态栏后的短高度。
   // 外壳使用键盘前的完整高度；visualViewport 只用于识别键盘会话，
   // 不把键盘期间的瞬时高度、offsetTop 或 safe-area 写回布局。
   (function initStandaloneKeyboardRecovery() {
-    var root = document.documentElement;
     root.style.removeProperty('--vv-height');
 
-    var mobileQuery = window.matchMedia && window.matchMedia('(max-width: 767px)');
     var standaloneQuery = window.matchMedia && window.matchMedia('(display-mode: standalone)');
     var isStandalone = window.navigator.standalone === true || Boolean(standaloneQuery && standaloneQuery.matches);
     var shouldLockFullHeight = window.navigator.standalone === true;
-    if (!isStandalone || (mobileQuery && !mobileQuery.matches)) return;
+    if (!isStandalone || !isNativeViewportDevice()) return;
 
     var viewport = window.visualViewport;
     var editableSelector = 'input, textarea, select, [contenteditable="true"], [contenteditable=""]';
