@@ -68,7 +68,21 @@
   border: var(--stroke-strong) solid var(--bg-brand);
 }
 
-.searchbox__icon,
+.searchbox__icon {
+  flex: 0 0 var(--searchbox-icon-slot);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--searchbox-icon-slot);
+  height: var(--searchbox-height);
+  border: 0;
+  background: var(--transparent);
+  color: var(--text-placeholder);
+  font-size: var(--searchbox-icon-size);
+  line-height: 1;
+  box-sizing: border-box;
+}
+
 .searchbox__action {
   flex: 0 0 var(--searchbox-icon-slot);
   display: flex;
@@ -503,13 +517,13 @@
       </div>
       <div class="search-demo__surface search-demo__surface--dark search-host--dark">
         <span class="search-demo__label" style="color: var(--text-inverse-secondary);">深色宿主（半透明融入，非纯白）</span>
-        <div class="searchbox searchbox--md">
+        <div class="searchbox searchbox--md is-image-result">
           <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
           <div class="searchbox__input">
-            <span class="searchbox__image-token searchbox__image-token--dark">
+            <span class="searchbox__image-token searchbox__image-token--single">
               <img class="searchbox__image-thumb" src="../assets/image/clothing/clothing_10/1663740458800_66991.jpg" alt="">
-              <span class="searchbox__image-count">共3张</span>
             </span>
+            <input class="searchbox__field" type="search" placeholder="继续输入文字切回文搜" aria-label="按图搜索后继续输入">
           </div>
           <div class="searchbox__actions">
             <button class="searchbox__action searchbox__clear wego-iconfont-s icon-yuancha-mian" type="button" aria-label="清除"></button>
@@ -556,7 +570,7 @@
         <span class="search-demo__label">导航栏返回搜索（navbar-search-back）</span>
         <div class="search-nav-bar search-nav-bar--page">
           <button class="search-nav-bar__back wego-iconfont-s icon-fanhui" type="button" aria-label="返回"></button>
-          <div class="searchbox searchbox--md searchbox--white">
+          <div class="searchbox searchbox--md searchbox--gray">
             <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
             <div class="searchbox__input">
               <input class="searchbox__field" type="search" placeholder="商品名/货号" aria-label="搜索商品">
@@ -570,6 +584,7 @@
           </div>
         </div>
         <span class="search-demo__label">页面内部筛选（content-search-filter）</span>
+        <span class="search-demo__hint">空态 — sm + white（灰底页面配白框）</span>
         <div class="search-toolbar">
           <div class="searchbox searchbox--sm searchbox--white">
             <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
@@ -578,6 +593,34 @@
             </div>
             <div class="searchbox__actions">
               <button class="searchbox__action wego-iconfont-s icon-tupian" type="button" aria-label="选择图片"></button>
+            </div>
+          </div>
+          <div class="search-toolbar__actions">
+            <button class="search-toolbar__action" type="button">
+              <span class="search-toolbar__action-icon wego-iconfont-s icon-shaixuan" aria-hidden="true"></span>
+              筛选
+            </button>
+            <button class="search-toolbar__action" type="button">
+              <span class="search-toolbar__action-icon wego-iconfont-s icon-saoyisao" aria-hidden="true"></span>
+              扫一扫
+            </button>
+          </div>
+        </div>
+        <span class="search-demo__hint">多图图搜结果态 — sm + gray（白底工具栏配灰框）</span>
+        <div class="search-toolbar">
+          <div class="searchbox searchbox--sm searchbox--gray is-image-result">
+            <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
+            <div class="searchbox__input">
+              <span class="searchbox__image-token searchbox__image-token--multi">
+                <img class="searchbox__image-thumb" src="../assets/image/clothing/clothing_6/img_1708defc_20240216_i1708092843_7820_16.jpg.jpg" alt="">
+                <span class="searchbox__image-count">共3张</span>
+              </span>
+              <input class="searchbox__field" type="search" placeholder="继续输入文字切回文搜" aria-label="按图搜索后继续输入">
+            </div>
+            <div class="searchbox__actions">
+              <button class="searchbox__action searchbox__clear wego-iconfont-s icon-yuancha-mian" type="button" aria-label="清除"></button>
+              <button class="searchbox__action wego-iconfont-s icon-tupian" type="button" aria-label="选择图片"></button>
+              <button class="searchbox__action wego-iconfont-s icon-saoyisao" type="button" aria-label="扫一扫"></button>
             </div>
           </div>
           <div class="search-toolbar__actions">
