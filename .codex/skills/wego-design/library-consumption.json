@@ -58,7 +58,8 @@
       "--bg-surface",
       "--bg-panel",
       "--bg-subtle",
-      "--safe-area-top"
+      "--safe-area-top",
+      "--safe-area-bottom-content"
     ],
     "baseTokenPrefixes": [
       "--text-",

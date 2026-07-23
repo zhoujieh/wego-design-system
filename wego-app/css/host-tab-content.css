@@ -5,6 +5,7 @@
 }
 
 .host-shell-page__panel {
+  position: relative;
   min-height: 0;
   overflow: hidden;
   /* app.css 给 panel 设了 -webkit-overflow-scrolling: touch，
