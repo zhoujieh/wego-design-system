@@ -12,6 +12,7 @@
 .search-demo__row { display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--spacer-16); }
 .search-demo__cell { display: flex; flex-direction: column; gap: var(--spacer-8); min-width: 0; }
 .search-demo__label { color: var(--text-secondary); font-size: var(--body-sm-font-size); line-height: var(--body-sm-line-height); }
+.search-demo__hint { color: var(--text-placeholder); font-size: var(--body-xs-font-size); line-height: var(--body-xs-line-height); }
 .search-demo__surface { display: flex; flex-direction: column; gap: var(--spacer-12); width: 360px; max-width: 100%; padding: var(--spacer-16); border-radius: var(--radius-12); background: var(--bg-surface); box-shadow: var(--shadow-xs); box-sizing: border-box; }
 .search-demo__surface--page { background: var(--bg-page); }
 .search-demo__surface--dark { background: var(--bg-inverse); }
@@ -23,6 +24,7 @@
 .search-results-panel { width: 360px; max-width: 100%; min-height: 360px; background: var(--bg-surface); border-radius: 0 0 var(--radius-12) var(--radius-12); box-shadow: var(--shadow-sm); overflow: hidden; }
 .search-results-panel__item { display: flex; align-items: center; gap: var(--spacer-12); padding: var(--spacer-12) var(--spacer-16); border-bottom: 0.5px solid var(--border-neutral-l2); color: var(--text-default); font-size: var(--body-md-font-size); line-height: var(--body-md-line-height); }
 .search-results-panel__thumb { width: var(--size-36); height: var(--size-36); border-radius: var(--radius-6); object-fit: cover; background: var(--bg-muted); }
+.search-demo__state-tag { display: inline-flex; align-items: center; padding: 2px var(--spacer-8); border-radius: var(--radius-full); background: var(--bg-brand-surface-l1); color: var(--bg-brand); font-size: var(--body-xs-font-size); line-height: var(--body-xs-line-height); font-weight: var(--body-xs-strong-font-weight); align-self: flex-start; }
 
 /* @component-css-start */
 .searchbox {
@@ -59,19 +61,15 @@
   --searchbox-height: var(--size-32);
   --searchbox-radius: var(--radius-6);
   --searchbox-icon-slot: var(--size-32);
-  --searchbox-icon-size: var(--size-16);
-  --searchbox-font-size: var(--body-md-font-size);
+  --searchbox-icon-size: var(--size-20);
+  --searchbox-font-size: var(--body-lg-font-size);
 }
 
 .searchbox--gray { --searchbox-bg: var(--bg-subtle); }
 .searchbox--white { --searchbox-bg: var(--bg-surface); }
 
 .searchbox--accent {
-  --searchbox-radius: var(--radius-full);
-  --searchbox-font-size: var(--body-md-font-size);
-  padding-right: var(--spacer-12);
   border: var(--stroke-strong) solid var(--bg-brand);
-  background: var(--transparent);
 }
 
 .searchbox__icon,
@@ -94,6 +92,22 @@
   flex-basis: var(--size-32);
   width: var(--size-32);
   cursor: pointer;
+}
+
+.searchbox__action--image-search {
+  flex: 0 0 auto;
+  flex-basis: auto;
+  width: auto;
+  height: var(--size-24);
+  padding: 0 var(--spacer-8);
+  margin-right: var(--spacer-4);
+  border-radius: var(--radius-full);
+  background: var(--bg-brand);
+  color: var(--text-inverse);
+  font-size: var(--body-xs-font-size);
+  font-weight: var(--body-xs-strong-font-weight);
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .searchbox__input {
@@ -213,18 +227,6 @@
 
 .searchbox__image-token--dark .searchbox__image-count { color: var(--text-inverse); }
 
-.searchbox--accent .searchbox__icon,
-.searchbox--accent .searchbox__action {
-  flex-basis: var(--size-20);
-  width: var(--size-20);
-  height: var(--searchbox-height);
-  color: var(--bg-brand);
-}
-
-.searchbox--accent .searchbox__input {
-  padding-left: var(--spacer-8);
-}
-
 .search-host--dark {
   padding: var(--spacer-16);
   background: var(--bg-inverse);
@@ -326,34 +328,20 @@
 
 .search-toolbar__action {
   display: inline-flex;
-  align-items: center;
-  gap: var(--spacer-4);
-  min-height: var(--size-32);
-  padding: 0 var(--spacer-8);
-  border-radius: var(--radius-6);
-  background: var(--bg-surface);
-  box-shadow: var(--shadow-xs);
-  cursor: pointer;
-}
-
-.search-toolbar__action-icon {
-  color: var(--icon-secondary);
-  font-size: var(--size-16);
-  line-height: 1;
-}
-
-.search-toolbar__action--stacked {
   flex-direction: column;
-  gap: 0;
+  align-items: center;
   min-width: var(--size-40);
   min-height: var(--size-40);
   padding: var(--spacer-4);
   font-size: var(--body-xs-font-size);
   line-height: var(--body-xs-line-height);
+  cursor: pointer;
 }
 
-.search-toolbar__action--stacked .search-toolbar__action-icon {
+.search-toolbar__action-icon {
+  color: var(--icon-secondary);
   font-size: var(--size-20);
+  line-height: 1;
 }
 
 .search-title-bar {
@@ -363,6 +351,16 @@
   min-width: 0;
   padding: var(--spacer-4) var(--spacer-8);
   box-sizing: border-box;
+}
+
+.searchbox__action:active,
+.searchbox__action--image-search:active,
+.search-overlay-bar__cancel:active,
+.search-nav-bar__back:active,
+.search-nav-bar__action:active,
+.search-toolbar__action:active,
+.searchbox[role="button"]:active {
+  opacity: 0.6;
 }
 /* @component-css-end */
 </style>
@@ -375,21 +373,42 @@
 </div>
 
 <div class="search-demo">
+
   <section class="pv-section">
-    <h2>36 默认自适应</h2>
+    <h2>灰底与白底的使用场景</h2>
+    <p class="search-demo__hint">灰底页面（bg-page）用白色搜索框形成对比；白底内容区（bg-surface）用灰色搜索框弱化边界。</p>
     <div class="search-demo__row">
-      <div class="search-demo__surface search-demo__surface--wide">
-        <span class="search-demo__label">宽宿主</span>
+      <div class="search-demo__surface search-demo__surface--page">
+        <span class="search-demo__label">灰底页面 → 白色搜索框（searchbox--white）</span>
         <div class="searchbox searchbox--md searchbox--white">
           <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
           <div class="searchbox__input">
-            <input class="searchbox__field" type="search" placeholder="提示词" aria-label="搜索商品">
+            <input class="searchbox__field" type="search" placeholder="搜索商品" aria-label="搜索商品">
           </div>
           <div class="searchbox__actions"></div>
         </div>
+        <span class="search-demo__hint">页面主搜索直接落在灰底上，白色胶囊保证可读性。</span>
       </div>
-      <div class="search-demo__surface search-demo__surface--narrow">
-        <span class="search-demo__label">窄宿主</span>
+      <div class="search-demo__surface">
+        <span class="search-demo__label">白底内容区 → 灰色搜索框（searchbox--gray）</span>
+        <div class="searchbox searchbox--md searchbox--gray">
+          <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
+          <div class="searchbox__input">
+            <input class="searchbox__field" type="search" placeholder="搜索商品" aria-label="搜索商品">
+          </div>
+          <div class="searchbox__actions"></div>
+        </div>
+        <span class="search-demo__hint">搜索框嵌在白底内容内部，灰色弱化边界避免视觉冲突。</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="pv-section">
+    <h2>尺寸：md 默认与 sm 局部</h2>
+    <p class="search-demo__hint">两种尺寸的图标（20px）和文字（body-lg）大小一致，仅高度不同；sm 仅用于工具栏、局部筛选等紧凑场景。</p>
+    <div class="search-demo__row">
+      <div class="search-demo__surface">
+        <span class="search-demo__label">md（36px）— 页面主搜索默认尺寸</span>
         <div class="searchbox searchbox--md searchbox--white">
           <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
           <div class="searchbox__input">
@@ -398,14 +417,8 @@
           <div class="searchbox__actions"></div>
         </div>
       </div>
-    </div>
-  </section>
-
-  <section class="pv-section">
-    <h2>32 局部定宽</h2>
-    <div class="search-demo__row">
       <div class="search-demo__surface">
-        <span class="search-demo__label">240px</span>
+        <span class="search-demo__label">sm（32px）— 仅用于局部场景</span>
         <div class="search-demo__fixed search-demo__fixed--240">
           <div class="searchbox searchbox--sm searchbox--gray">
             <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
@@ -415,14 +428,54 @@
             </div>
           </div>
         </div>
-        <span class="search-demo__label">180px</span>
-        <div class="search-demo__fixed search-demo__fixed--180">
-          <div class="searchbox searchbox--sm searchbox--white is-text-result">
-            <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
-            <div class="searchbox__input"><span class="searchbox__keyword">关键词关键词</span></div>
-            <div class="searchbox__actions">
-              <button class="searchbox__action searchbox__clear wego-iconfont-s icon-yuancha-mian" type="button" aria-label="清除"></button>
-            </div>
+        <span class="search-demo__hint">sm 用于页面内嵌工具栏、紧凑筛选等局部位置，不用于页面主搜索。</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="pv-section">
+    <h2>交互状态</h2>
+    <p class="search-demo__hint">点击下方输入框体验状态流转：empty → inputting → text-result。清除按钮仅在内容非空时出现。</p>
+    <div class="search-demo__surface">
+      <span class="search-demo__state-tag" data-state-tag>empty 空态</span>
+      <div class="searchbox searchbox--md searchbox--white" data-interactive-search>
+        <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
+        <div class="searchbox__input">
+          <input class="searchbox__field" type="search" placeholder="输入关键词体验状态流转" aria-label="交互状态演示">
+        </div>
+        <div class="searchbox__actions" data-actions-slot></div>
+      </div>
+      <span class="search-demo__hint">输入文字 → 显示清除按钮（inputting）；失焦 → 关键词停留（text-result）；点击清除 → 回到空态。</span>
+    </div>
+    <div class="search-demo__row">
+      <div class="search-demo__surface">
+        <span class="search-demo__label">empty 空态</span>
+        <div class="searchbox searchbox--md searchbox--white">
+          <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
+          <div class="searchbox__input"><span class="searchbox__placeholder">提示词</span></div>
+          <div class="searchbox__actions"></div>
+        </div>
+      </div>
+      <div class="search-demo__surface">
+        <span class="search-demo__label">inputting 输入中</span>
+        <div class="searchbox searchbox--md searchbox--white is-inputting">
+          <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
+          <div class="searchbox__input">
+            <input class="searchbox__field" type="search" value="关键词" aria-label="搜索商品">
+          </div>
+          <div class="searchbox__actions">
+            <button class="searchbox__action searchbox__clear wego-iconfont-s icon-yuancha-mian" type="button" aria-label="清除"></button>
+          </div>
+        </div>
+      </div>
+      <div class="search-demo__surface">
+        <span class="search-demo__label">text-result 文搜结果态</span>
+        <div class="searchbox searchbox--md searchbox--white is-text-result">
+          <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
+          <div class="searchbox__input"><span class="searchbox__keyword">关键词</span></div>
+          <div class="searchbox__actions">
+            <button class="searchbox__action searchbox__clear wego-iconfont-s icon-yuancha-mian" type="button" aria-label="清除"></button>
+            <button class="searchbox__action wego-iconfont-s icon-tupian" type="button" aria-label="选择图片"></button>
           </div>
         </div>
       </div>
@@ -433,25 +486,6 @@
     <h2>文搜与图搜</h2>
     <div class="search-demo__row">
       <div class="search-demo__surface">
-        <span class="search-demo__label">文搜输入中</span>
-        <div class="searchbox searchbox--md searchbox--white is-inputting">
-          <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
-          <div class="searchbox__input">
-            <input class="searchbox__field" type="search" value="关键词" aria-label="搜索商品">
-          </div>
-          <div class="searchbox__actions">
-            <button class="searchbox__action searchbox__clear wego-iconfont-s icon-yuancha-mian" type="button" aria-label="清除"></button>
-          </div>
-        </div>
-        <span class="search-demo__label">文搜结果态</span>
-        <div class="searchbox searchbox--md searchbox--white is-text-result">
-          <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
-          <div class="searchbox__input"><span class="searchbox__keyword">关键词</span></div>
-          <div class="searchbox__actions">
-            <button class="searchbox__action searchbox__clear wego-iconfont-s icon-yuancha-mian" type="button" aria-label="清除"></button>
-            <button class="searchbox__action wego-iconfont-s icon-tupian" type="button" aria-label="选择图片"></button>
-          </div>
-        </div>
         <span class="search-demo__label">显式开启图搜后的结果态</span>
         <div class="searchbox searchbox--md searchbox--white is-image-result">
           <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
@@ -545,7 +579,7 @@
             <button class="search-nav-bar__action" type="button">搜索</button>
           </div>
         </div>
-        <span class="search-demo__label">页面内部筛选</span>
+        <span class="search-demo__label">页面内部筛选（纵向图标+文字，无背景阴影）</span>
         <div class="search-toolbar">
           <div class="searchbox searchbox--sm searchbox--gray">
             <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
@@ -555,7 +589,10 @@
             </div>
           </div>
           <div class="search-toolbar__actions">
-            <button class="search-toolbar__action" type="button"><span class="search-toolbar__action-icon wego-iconfont-s icon-shaixuan" aria-hidden="true"></span>筛选</button>
+            <button class="search-toolbar__action" type="button">
+              <span class="search-toolbar__action-icon wego-iconfont-s icon-shaixuan" aria-hidden="true"></span>
+              筛选
+            </button>
           </div>
         </div>
         <div class="search-toolbar">
@@ -567,24 +604,29 @@
             </div>
           </div>
           <div class="search-toolbar__actions">
-            <button class="search-toolbar__action search-toolbar__action--stacked" type="button">
+            <button class="search-toolbar__action" type="button">
               <span class="search-toolbar__action-icon wego-iconfont-s icon-shaixuan" aria-hidden="true"></span>
               筛选
+            </button>
+            <button class="search-toolbar__action" type="button">
+              <span class="search-toolbar__action-icon wego-iconfont-s icon-saoyisao" aria-hidden="true"></span>
+              扫一扫
             </button>
           </div>
         </div>
       </div>
       <div class="search-demo__surface">
-        <span class="search-demo__label">导航标题区强调搜索</span>
+        <span class="search-demo__label">导航标题区强调搜索（仅边框区别，图搜入口为「图搜」小按钮）</span>
         <div class="search-title-bar">
           <div class="searchbox searchbox--md searchbox--accent">
             <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
             <div class="searchbox__input"><span class="searchbox__placeholder">搜索</span></div>
             <div class="searchbox__actions">
-              <button class="searchbox__action wego-iconfont-s icon-tupian" type="button" aria-label="选择图片"></button>
+              <button class="searchbox__action searchbox__action--image-search" type="button" aria-label="图搜">图搜</button>
             </div>
           </div>
         </div>
+        <span class="search-demo__hint">强调搜索与默认搜索框布局、圆角、图标文字颜色一致，仅多一圈品牌色边框；图搜入口加强为绿色小按钮。</span>
       </div>
     </div>
   </section>
@@ -602,6 +644,48 @@ document.querySelectorAll(".searchbox__clear").forEach((button) => {
     box?.querySelectorAll(".searchbox__image-token").forEach((token) => token.remove());
   });
 });
+
+(function () {
+  var container = document.querySelector("[data-interactive-search]");
+  if (!container) return;
+  var field = container.querySelector(".searchbox__field");
+  var actionsSlot = container.querySelector("[data-actions-slot]");
+  var stateTag = document.querySelector("[data-state-tag]");
+
+  function renderState() {
+    var value = field.value.trim();
+    actionsSlot.innerHTML = "";
+    if (value) {
+      var clear = document.createElement("button");
+      clear.className = "searchbox__action searchbox__clear wego-iconfont-s icon-yuancha-mian";
+      clear.type = "button";
+      clear.setAttribute("aria-label", "清除");
+      clear.addEventListener("click", function () {
+        field.value = "";
+        field.focus();
+        renderState();
+      });
+      actionsSlot.appendChild(clear);
+      stateTag.textContent = "inputting 输入中";
+      container.classList.remove("is-text-result");
+      container.classList.add("is-inputting");
+    } else {
+      stateTag.textContent = "empty 空态";
+      container.classList.remove("is-inputting", "is-text-result");
+    }
+  }
+
+  field.addEventListener("input", renderState);
+  field.addEventListener("focus", renderState);
+  field.addEventListener("blur", function () {
+    if (field.value.trim()) {
+      stateTag.textContent = "text-result 文搜结果态";
+      container.classList.remove("is-inputting");
+      container.classList.add("is-text-result");
+    }
+  });
+  renderState();
+})();
 </script>
 </body>
 </html>
