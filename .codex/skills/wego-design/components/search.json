@@ -172,7 +172,7 @@
     "灰底页面（bg-page、bg-subtle）默认使用 .searchbox--white 形成对比；白底内容区（bg-surface）内部使用 .searchbox--gray 弱化边界。",
     "图搜是显式启用能力：只有业务明确需要并声明 select-image 动作时，搜索框才显示图片按钮；单图用 24x24 缩略图，多图用图片 + 共 N 张胶囊表达。",
     "强调搜索（.searchbox--accent）与默认搜索框的布局、圆角、图标颜色、文字颜色完全一致，仅多一圈品牌色边框（border: stroke-strong solid bg-brand）；不覆盖圆角、字号、背景或图标颜色。",
-    "强调搜索的图搜入口使用 .searchbox__action--image-search 绿色小按钮（文字「图搜」），替代普通图标按钮以加强入口感知；普通搜索框的图搜入口仍使用图标按钮。",
+    "强调搜索的图搜入口复用 button 组件的 strong + sm 变体（.btn.btn--strong.btn--sm，文字「图搜」），替代普通图标按钮以加强入口感知；普通搜索框的图搜入口仍使用 .searchbox__action 图标按钮。",
     "文本输入控件使用 type=search 时，组件必须通过 search field 伪元素规则彻底抑制浏览器原生 search decoration 与原生清除按钮（含 display:none 与 appearance:none），只保留 .searchbox__actions 内的正式 clear 动作。",
     "有图搜且业务开启 autoHidePlaceHolder 时，图片列表非空后可隐藏 placeholder；图片列表清空后恢复。",
     "可编辑文本搜索默认带 clear 能力，但 clear 只在输入值非空或图搜结果存在时显示；空态隐藏 clear。",
@@ -182,12 +182,12 @@
     "search-overlay-cancel 只用于点击搜索框后出现接近全屏搜索结果层的覆盖式搜索态，右侧取消用于关闭搜索态，不泛化到所有页面局部搜索。",
     "navbar-search-back 用于导航栏搜索场景，左侧返回固定，右侧动作可配置，不强制绑定搜索文案。",
     "content-search-filter 用于页面内部工具栏，筛选入口固定为纵向图标（20px）+ 文字（10px）布局，无背景无阴影；不出现返回按钮。",
-    "navbar-title-accent-search 用于导航标题区特别强调搜索入口，仅以品牌色边框区分，图搜入口使用「图搜」绿色小按钮。"
+    "navbar-title-accent-search 用于导航标题区特别强调搜索入口，仅以品牌色边框区分，图搜入口复用 button 组件 strong + sm 变体（文字「图搜」）。"
   ],
   "behavior": {
     "input": "输入变化对应 Kuikly textDidChange；回车对应 inputReturn，blurOnReturn 由宿主决定。",
     "clear": "点击清除按钮清空当前搜索内容并触发 textClearClick；若当前存在图搜结果，默认同时清空图片结果并回到空态，随后重新聚焦输入框。",
-    "imageSearch": "select-image 动作对应 pictureClick；仅当宿主显式启用该动作时显示图片入口。picList 非空时中间内容区展示单图或多图胶囊，且仍保留文本输入能力供后续切回文搜。强调搜索（.searchbox--accent）的图搜入口使用 .searchbox__action--image-search 绿色小按钮（文字「图搜」）替代普通图标按钮。",
+    "imageSearch": "select-image 动作对应 pictureClick；仅当宿主显式启用该动作时显示图片入口。picList 非空时中间内容区展示单图或多图胶囊，且仍保留文本输入能力供后续切回文搜。强调搜索（.searchbox--accent）的图搜入口复用 button 组件 strong + sm 变体（文字「图搜」）替代普通图标按钮。",
     "scan": "scan 动作对应 scanClick；组件只沉淀结构、样式和交互语义，不实现真实扫码流程。",
     "overlayCancel": "覆盖式搜索态的取消按钮关闭搜索结果层并回到原页面内容。",
     "hostActions": "导航栏和页面工具栏右侧业务动作由外层 slot 承载，不进入基础搜索框内部状态机。"
@@ -196,7 +196,7 @@
     "labelRule": "真实输入控件应提供 aria-label 或由宿主提供可感知名称。",
     "buttonNames": "清除、选图、扫码、取消、返回、筛选等按钮必须提供中文 aria-label。",
     "keyboard": "搜索输入保持原生 input 行为；可编辑搜索的清除按钮点击后默认重新聚焦输入框，便于继续输入。",
-    "contrast": "深色宿主与灰底页面宿主下搜索框本体优先保持白色胶囊，避免透明或浅灰底导致输入内容不可读。"
+    "contrast": "深色宿主下搜索框使用半透明白底（bg-inverse-surface-l1）融入背景，文字图标反色（text-inverse / icon-inverse），避免纯白胶囊在深色背景上突兀；灰底页面宿主下搜索框本体保持白色胶囊保证可读性。"
   },
   "usageHints": [
     "列表、商品流、对象管理页需要搜索入口时优先使用 search，而不是把 input 临时扩展成搜索框。",
@@ -206,7 +206,7 @@
     "页面内部筛选场景使用 .search-toolbar，筛选入口为纵向图标+文字布局（无背景阴影），放在 .search-toolbar__actions，不放进 .searchbox__actions。",
     "导航搜索场景使用 .search-nav-bar，左侧返回固定，右侧动作由业务配置。",
     "覆盖式搜索结果层使用 .search-overlay-bar + 结果容器，取消只服务关闭搜索态。",
-    "导航标题区需要突出搜索入口时使用 .search-title-bar + .searchbox--accent；强调搜索仅以品牌色边框区分，图搜入口使用「图搜」绿色小按钮。",
+    "导航标题区需要突出搜索入口时使用 .search-title-bar + .searchbox--accent；强调搜索仅以品牌色边框区分，图搜入口复用 button 组件 strong + sm 变体（文字「图搜」）。",
     "36 搜索框默认自适应父容器；32 搜索框可定宽但仍保持内部三段结构。"
   ],
   "doNotInvent": [
@@ -229,7 +229,7 @@
       ".searchbox__keyword",
       ".searchbox__image-token",
       ".searchbox__actions .searchbox__action",
-      ".searchbox__actions .searchbox__action--image-search",
+      ".searchbox__actions .btn",
       ".search-overlay-bar > .searchbox + .search-overlay-bar__cancel",
       ".search-nav-bar > .search-nav-bar__back + .searchbox + .search-nav-bar__actions",
       ".search-toolbar > .searchbox + .search-toolbar__actions",
@@ -241,7 +241,6 @@
       ".searchbox--gray",
       ".searchbox--white",
       ".searchbox--accent",
-      ".searchbox__action--image-search",
       ".searchbox__image-token--single",
       ".searchbox__image-token--multi",
       ".searchbox__image-token--dark"
@@ -277,7 +276,7 @@
       "右侧业务操作作为 host pattern 插槽，不污染基础搜索框的内部 actions。",
       "可编辑 inline 搜索的 clear 显隐、清空回焦与灰底白底优先级属于组件默认规则，不再由单个宿主各自决定。",
       "md 与 sm 尺寸的图标和文字大小归一化（20px / body-lg），仅高度不同；sm 严格限定局部场景。",
-      "强调搜索（.searchbox--accent）简化为仅品牌色边框差异，不覆盖圆角、字号、背景或图标颜色；图搜入口加强为「图搜」绿色小按钮。",
+      "强调搜索（.searchbox--accent）简化为仅品牌色边框差异，不覆盖圆角、字号、背景或图标颜色；图搜入口复用 button 组件 strong + sm 变体（文字「图搜」），不自造搜索框内部按钮样式。",
       "筛选入口统一为纵向图标+文字布局，无背景阴影；所有可点击入口统一 :active opacity:0.6 点击态。"
     ],
     "externalSources": [
@@ -296,6 +295,7 @@
   "runtimeTokens": [
     "--bg-brand",
     "--bg-inverse",
+    "--bg-inverse-surface-l1",
     "--bg-page",
     "--bg-subtle",
     "--bg-surface",
@@ -306,11 +306,10 @@
     "--body-md-line-height",
     "--body-xs-font-size",
     "--body-xs-line-height",
-    "--body-xs-strong-font-weight",
+    "--icon-inverse",
     "--icon-secondary",
     "--radius-6",
     "--radius-8",
-    "--radius-full",
     "--size-20",
     "--size-24",
     "--size-28",
@@ -326,6 +325,7 @@
     "--text-default",
     "--text-disabled",
     "--text-inverse",
+    "--text-inverse-secondary",
     "--text-placeholder",
     "--text-secondary",
     "--transparent"
@@ -335,11 +335,11 @@
     "--bg-muted",
     "--body-sm-font-size",
     "--body-sm-line-height",
+    "--body-xs-strong-font-weight",
     "--border-neutral-l2",
-    "--demo-width",
     "--radius-12",
-    "--shadow-sm",
-    "--shadow-xs"
+    "--radius-full",
+    "--shadow-sm"
   ],
   "localTokens": [
     "--searchbox-bg",

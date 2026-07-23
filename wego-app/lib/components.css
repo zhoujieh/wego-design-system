@@ -2200,7 +2200,7 @@
 
 /* ── Search ────────────────────────────────────────────────── */
 /* @anatomy
-   <h2>灰底与白底的使用场景</h2> <p class="search-demo__hint">灰底页面（bg-page）用白色搜索框形成对比；白底内容区（bg-surface）用灰色搜索框弱化边界。</p> <div class="search-demo__row"> <div class="search-demo__surface search-demo__surface--page"> <span class="search-demo__label">灰底页面 → 白色搜索框（searchbox--white）</span> <div class="searchbox searchbox--md searchbox--white"> <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="t...
+   <h2>使用场景：灰底配白框，白底配灰框</h2> <div class="search-demo__row"> <div class="search-demo__surface search-demo__surface--page"> <span class="search-demo__label">灰底页面（bg-page）→ 白色搜索框</span> <div class="searchbox searchbox--md searchbox--white"> <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span> <div class="searchbox__input"> <input class="searchbox__field" type="search" ...
 */
 .searchbox {
   --searchbox-height: var(--size-36);
@@ -2267,22 +2267,6 @@
   flex-basis: var(--size-32);
   width: var(--size-32);
   cursor: pointer;
-}
-
-.searchbox__action--image-search {
-  flex: 0 0 auto;
-  flex-basis: auto;
-  width: auto;
-  height: var(--size-24);
-  padding: 0 var(--spacer-8);
-  margin-right: var(--spacer-4);
-  border-radius: var(--radius-full);
-  background: var(--bg-brand);
-  color: var(--text-inverse);
-  font-size: var(--body-xs-font-size);
-  font-weight: var(--body-xs-strong-font-weight);
-  line-height: 1;
-  white-space: nowrap;
 }
 
 .searchbox__input {
@@ -2408,7 +2392,14 @@
 }
 
 .search-host--dark .searchbox:not(.searchbox--accent) {
-  --searchbox-bg: var(--bg-surface);
+  --searchbox-bg: var(--bg-inverse-surface-l1);
+  --searchbox-color: var(--text-inverse);
+  --searchbox-placeholder-color: var(--text-inverse-secondary);
+}
+
+.search-host--dark .searchbox:not(.searchbox--accent) .searchbox__icon,
+.search-host--dark .searchbox:not(.searchbox--accent) .searchbox__action {
+  color: var(--icon-inverse);
 }
 
 .search-overlay-bar,
@@ -2529,7 +2520,6 @@
 }
 
 .searchbox__action:active,
-.searchbox__action--image-search:active,
 .search-overlay-bar__cancel:active,
 .search-nav-bar__back:active,
 .search-nav-bar__action:active,
