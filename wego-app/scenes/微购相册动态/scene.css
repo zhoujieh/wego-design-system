@@ -6,9 +6,22 @@
   min-height: 0;
   padding-inline: var(--layout-page-margin-m8);
   overflow: hidden;
+  isolation: isolate;
   background: var(--bg-page);
   color: var(--text-default);
   font-family: var(--body-md-font-family);
+}
+
+/* 背景渐变层：白色覆盖层 + mask 渐变，让顶部白色平滑过渡到页面灰色，过渡完成点在瀑布流往下一点位置 */
+.album-feed::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--bg-surface);
+  -webkit-mask-image: linear-gradient(to bottom, black 0, black 220px, transparent 380px);
+  mask-image: linear-gradient(to bottom, black 0, black 220px, transparent 380px);
+  pointer-events: none;
+  z-index: -1;
 }
 
 /* 滚动容器：承担瀑布流、人维度、筛选标签；底部预留 40px + safe-area-bottom，避免内容被 bottom-nav 遮挡 */
@@ -22,14 +35,21 @@
   overflow-y: auto;
 }
 
-/* 顶部：仅固定页面级 tabs 一行 */
-.album-feed__page-tabs {
+/* 顶部吸顶栈：page-tabs + 搜索栏整体 sticky 吸顶，背景跟随顶部白色 */
+.album-feed__top-stack {
   position: sticky;
   top: 0;
   z-index: var(--z-sticky);
   flex-shrink: 0;
   padding-top: var(--safe-area-top);
-  background: var(--bg-page);
+  background: var(--bg-surface);
+}
+
+/* 页面级 tabs：相对定位，层级高于搜索栏，避免搜索栏收起时遮挡 */
+.album-feed__page-tabs {
+  position: relative;
+  z-index: 2;
+  background: transparent;
 }
 
 .album-feed__page-tabs .wg-tabs__scroll {
@@ -41,36 +61,35 @@
   display: none;
 }
 
-/* 搜索框工具栏：默认完全隐藏在视口上方，下滑手势浮现
-   使用 fixed 定位；显示时的 top 由 JS 读取 page-tabs bottom 动态设置 */
+/* 搜索栏：占文档流，默认显示；上滑手势收起（max-height 归零让下方内容上移），
+   下滑手势或滚回顶部重现；层级低于 page-tabs，收起时被 tabs 遮挡 */
 .album-feed__floating-toolbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: var(--z-sticky);
+  position: relative;
+  z-index: 1;
+  max-height: 80px;
   padding-block: var(--spacer-8);
-  padding-inline: var(--layout-page-margin-m8);
-  background: var(--bg-page);
-  transform: translateY(-100%);
-  transition: transform 0.2s ease;
-  pointer-events: none;
-  will-change: transform;
+  background: transparent;
+  opacity: 1;
+  overflow: hidden;
+  transition: max-height 0.2s ease, opacity 0.2s ease, padding-block 0.2s ease;
+  will-change: max-height, opacity;
   box-sizing: border-box;
 }
 
-.album-feed__floating-toolbar.is-revealed {
-  transform: translateY(0);
-  pointer-events: auto;
+.album-feed__floating-toolbar.is-hidden {
+  max-height: 0;
+  padding-block: 0;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .album-feed__floating-toolbar .search-toolbar {
   padding-block: var(--spacer-0);
 }
 
-/* 人维度横滑区 */
+/* 人维度横滑区：与顶部吸顶栈保留间距，避免拥挤 */
 .album-feed__people-wrap {
-  margin-top: var(--spacer-0);
+  margin-top: var(--spacer-12);
 }
 
 .album-feed__people-scroll {
@@ -94,9 +113,13 @@
   flex: 0 0 auto;
 }
 
+/* 我的相册：内容较多时横向 sticky 固定在可视区右侧，不透明背景遮挡后方滚动头像 */
 .album-feed__people-self {
+  position: sticky;
+  right: 0;
   flex: 0 0 auto;
   margin-left: auto;
+  background: var(--bg-surface);
 }
 
 .album-feed__people-item {
@@ -117,23 +140,6 @@
   display: inline-flex;
   flex-shrink: 0;
   overflow: visible;
-}
-
-.album-feed__people-shop-badge {
-  position: absolute;
-  right: -2px;
-  bottom: -2px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--size-12);
-  height: var(--size-12);
-  border-radius: var(--radius-full);
-  background: var(--bg-inverse);
-  color: var(--text-inverse);
-  font-size: var(--size-12);
-  line-height: var(--body-xs-line-height);
-  border: 1.5px solid var(--bg-surface);
 }
 
 .album-feed__people-name {

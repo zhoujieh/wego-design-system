@@ -13,11 +13,11 @@
     "source": "library-consumption.json#/appRuntime/presentationTypes"
   },
   "prompt_contract": {
-    "design_system_version": 438,
+    "design_system_version": 440,
     "token_bindings": [
       {
-        "selector": ".album-feed__page-tabs",
-        "content_role": ".album-feed__page-tabs 的 padding-top",
+        "selector": ".album-feed__top-stack",
+        "content_role": ".album-feed__top-stack 的 padding-top",
         "css_property": "padding-top",
         "token": "var(--safe-area-top)"
       },
@@ -32,6 +32,12 @@
         "content_role": ".album-feed 的 background",
         "css_property": "background",
         "token": "var(--bg-page)"
+      },
+      {
+        "selector": ".album-feed::before",
+        "content_role": "背景渐变白色覆盖层",
+        "css_property": "background",
+        "token": "var(--bg-surface)"
       },
       {
         "selector": ".album-feed",
@@ -58,28 +64,16 @@
         "token": "var(--safe-area-bottom-content)"
       },
       {
-        "selector": ".album-feed__page-tabs",
-        "content_role": ".album-feed__page-tabs 的 background",
+        "selector": ".album-feed__top-stack",
+        "content_role": ".album-feed__top-stack 的 background",
         "css_property": "background",
-        "token": "var(--bg-page)"
-      },
-      {
-        "selector": ".album-feed__floating-toolbar",
-        "content_role": ".album-feed__floating-toolbar 的 background",
-        "css_property": "background",
-        "token": "var(--bg-page)"
+        "token": "var(--bg-surface)"
       },
       {
         "selector": ".album-feed__floating-toolbar",
         "content_role": ".album-feed__floating-toolbar 的 padding-block",
         "css_property": "padding-block",
         "token": "var(--spacer-8)"
-      },
-      {
-        "selector": ".album-feed__floating-toolbar",
-        "content_role": ".album-feed__floating-toolbar 的 padding-inline",
-        "css_property": "padding-inline",
-        "token": "var(--layout-page-margin-m8)"
       },
       {
         "selector": ".album-feed__floating-toolbar .search-toolbar",
@@ -91,7 +85,7 @@
         "selector": ".album-feed__people-wrap",
         "content_role": ".album-feed__people-wrap 的 margin-top",
         "css_property": "margin-top",
-        "token": "var(--spacer-0)"
+        "token": "var(--spacer-12)"
       },
       {
         "selector": ".album-feed__people-scroll",
@@ -136,39 +130,9 @@
         "token": "var(--body-xs-line-height)"
       },
       {
-        "selector": ".album-feed__people-shop-badge",
-        "content_role": "人维度店铺标识 border-radius",
-        "css_property": "border-radius",
-        "token": "var(--radius-full)"
-      },
-      {
-        "selector": ".album-feed__people-shop-badge",
-        "content_role": "人维度店铺标识 background",
+        "selector": ".album-feed__people-self",
+        "content_role": ".album-feed__people-self 的 background",
         "css_property": "background",
-        "token": "var(--bg-inverse)"
-      },
-      {
-        "selector": ".album-feed__people-shop-badge",
-        "content_role": "人维度店铺标识 color",
-        "css_property": "color",
-        "token": "var(--text-inverse)"
-      },
-      {
-        "selector": ".album-feed__people-shop-badge",
-        "content_role": "人维度店铺标识 font-size",
-        "css_property": "font-size",
-        "token": "var(--size-12)"
-      },
-      {
-        "selector": ".album-feed__people-shop-badge",
-        "content_role": "人维度店铺标识 line-height",
-        "css_property": "line-height",
-        "token": "var(--body-xs-line-height)"
-      },
-      {
-        "selector": ".album-feed__people-shop-badge",
-        "content_role": "人维度店铺标识 border",
-        "css_property": "border",
         "token": "var(--bg-surface)"
       },
       {
@@ -809,7 +773,7 @@
     "layout_contract": {
       "mode": "composed",
       "source": "references/design-decisions.md",
-      "selection_reason": "页面首要任务是发现并进入动态详情；顶部只固定页面级 tabs 一行，搜索框使用 searchbox--accent 强调模式，默认完全隐藏在视口上方不占首屏可视区域，由下滑手势在 tabs 下方平滑浮现、上滑手势或滚回顶部隐藏；筛选入口从搜索框右侧移除，弱化后放到全部上新这一栏的横滑标签末尾，使用 tag--gray；全部上新横滑标签区保留最小高度确保可见；人维度栏约 10 个发布者支持横滑、自己固定在可视区最右侧；瀑布流双列按媒体自然比例撑高参差，显式设置 row-gap 让列内卡片上下不贴在一起，375/393px 双列，768px 自动增列且单卡不超过 220px；卡片信息层级紧凑，发布者区单行（头像 + 名字 + 店铺文字徽章），状态恢复为文字徽章后与内容类型、时间组成 meta 行并保留间距，1 至 2 行摘要，底部操作行一键转发靠右不再保留商品入口；通过 host-shell-page__panel 相对定位让场景根元素正确约束在 tab 内容区内，配合滚动容器底部预留 40px + safe-area-bottom，避免内容被 bottom-nav 遮挡。",
+      "selection_reason": "页面首要任务是发现并进入动态详情；顶部 page-tabs 与搜索栏共同包进 sticky top-stack 吸顶，背景跟随顶部白色；页面背景从顶部白色渐变到 --bg-page 灰色，过渡完成点在瀑布流往下一点位置；搜索框使用 searchbox--accent 强调模式，默认显示占据文档流，层级低于 page-tabs，上滑手势收起（max-height 归零让下方内容上移）、下滑手势或滚回顶部重现；筛选入口从搜索框右侧移除，弱化后放到全部上新这一栏的横滑标签末尾，使用 tag--gray；全部上新横滑标签区保留最小高度确保可见；人维度栏约 10 个发布者支持横滑、头像右下角不再放置店铺标识、「我的相册」项 sticky right 固定在可视区最右侧；瀑布流双列按媒体自然比例撑高参差，显式设置 row-gap 让列内卡片上下不贴在一起，375/393px 双列，768px 自动增列且单卡不超过 220px；卡片信息层级紧凑，发布者区单行（头像 + 名字 + 店铺文字徽章），状态恢复为文字徽章后与内容类型、时间组成 meta 行并保留间距，1 至 2 行摘要，底部操作行一键转发靠右不再保留商品入口；通过 host-shell-page__panel 相对定位让场景根元素正确约束在 tab 内容区内，配合滚动容器底部预留 40px + safe-area-bottom，避免内容被 bottom-nav 遮挡。",
       "page_edge_mode": "M8",
       "mutable_regions": [
         ".album-feed__floating-toolbar",
@@ -893,7 +857,7 @@
         "state_id": "feed-ready",
         "initial": true,
         "trigger": "进入动态主 tab",
-        "visible_result": "页面级 tabs 固定顶部，搜索框与筛选入口隐藏在 tabs 上方不占可视区域，首屏显示双列瀑布流与人维度栏",
+        "visible_result": "页面级 tabs 与搜索栏共同吸顶顶部，搜索栏默认显示占据文档流，首屏显示双列瀑布流与人维度栏",
         "fallback": "保留可浏览的本地动态",
         "persistence": "memory"
       },
@@ -948,9 +912,9 @@
       {
         "state_id": "toolbar-revealed",
         "initial": false,
-        "trigger": "下滑手势",
-        "visible_result": "搜索框与筛选入口从页面级 tabs 下方平滑浮现，再次上滑手势或滚到顶部后隐藏",
-        "fallback": "滑回顶部仍保持隐藏",
+        "trigger": "下滑手势或滚回顶部",
+        "visible_result": "搜索栏在吸顶栈中展开占据文档流，上滑手势后收起让出可视区域",
+        "fallback": "滚回顶部恢复显示",
         "persistence": "memory"
       },
       {
@@ -977,8 +941,8 @@
       375,
       393
     ],
-    "checked_at": "2026-07-22T13:50:00.000Z",
-    "scope": "页面级 tabs 顶部固定、搜索框与筛选入口下滑浮现、人维度横滑含自己、瀑布流双列卡片、双列信息层级紧凑、底部留白与 bottom-nav 隔离，375/393px 全部通过。",
+    "checked_at": "2026-07-23T12:00:00.000Z",
+    "scope": "顶部 page-tabs 与搜索栏 sticky 吸顶且搜索栏层级低于 tabs、背景白到灰渐变在瀑布流位置过渡、搜索栏默认显示且上滑收起下滑重现、人维度栏无店铺 badge 且我的相册 sticky right、瀑布流双列卡片信息层级紧凑、底部留白与 bottom-nav 隔离，375/393px 全部通过。",
     "checks": {
       "horizontal_overflow": true,
       "overlap": true,
@@ -1100,11 +1064,6 @@
     return '<span class="album-feed__shop-badge">店铺</span>';
   }
 
-  function peopleShopBadgeTemplate(publisher) {
-    if (publisher.publisher_type !== 'shop') return '';
-    return '<span class="album-feed__people-shop-badge wego-iconfont-s icon-dianpu" aria-label="店铺"></span>';
-  }
-
   function feedCardTemplate(item) {
     var publisher = getPublisher(item.publisher_id);
     var cover = item.media_list[0];
@@ -1201,23 +1160,25 @@
     title: '动态',
     template: `
     <section class="album-feed" data-surface-id="album-product-feed" data-route-id="album-product-feed" data-route-bound="true" data-layout-mode="composed" data-page-edge-mode="M8" data-bg="page">
-      <div class="album-feed__page-tabs" data-page-tabs>
-        <div class="wg-tabs wg-tabs--standard wg-tabs--scroll" role="tablist" data-dd-id="feed-page-tabs" data-component-slug="tabs" data-component-binding="feed-page-tabs">
-          <div class="wg-tabs__scroll">
-            <button class="wg-tabs__item" role="tab" aria-selected="true" type="button" data-page-tab="following" data-dom-id="page-tab-following"><span class="wg-tabs__content"><span class="wg-tabs__label">关注</span></span></button>
-            <button class="wg-tabs__item" role="tab" aria-selected="false" type="button" data-page-tab="recommended" data-dom-id="page-tab-recommended"><span class="wg-tabs__content"><span class="wg-tabs__label">推荐</span></span></button>
-            <button class="wg-tabs__item" role="tab" aria-selected="false" type="button" data-page-tab="new" data-dom-id="page-tab-new"><span class="wg-tabs__content"><span class="wg-tabs__label">上新</span></span></button>
-            <span class="wg-tabs__active-indicator" aria-hidden="true"></span>
+      <div class="album-feed__top-stack" data-top-stack>
+        <div class="album-feed__page-tabs" data-page-tabs>
+          <div class="wg-tabs wg-tabs--standard wg-tabs--scroll" role="tablist" data-dd-id="feed-page-tabs" data-component-slug="tabs" data-component-binding="feed-page-tabs">
+            <div class="wg-tabs__scroll">
+              <button class="wg-tabs__item" role="tab" aria-selected="true" type="button" data-page-tab="following" data-dom-id="page-tab-following"><span class="wg-tabs__content"><span class="wg-tabs__label">关注</span></span></button>
+              <button class="wg-tabs__item" role="tab" aria-selected="false" type="button" data-page-tab="recommended" data-dom-id="page-tab-recommended"><span class="wg-tabs__content"><span class="wg-tabs__label">推荐</span></span></button>
+              <button class="wg-tabs__item" role="tab" aria-selected="false" type="button" data-page-tab="new" data-dom-id="page-tab-new"><span class="wg-tabs__content"><span class="wg-tabs__label">上新</span></span></button>
+              <span class="wg-tabs__active-indicator" aria-hidden="true"></span>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="album-feed__floating-toolbar" data-toolbar-floating aria-hidden="true">
-        <div class="search-toolbar">
-          <div class="searchbox searchbox--md searchbox--accent" role="button" tabindex="0" aria-label="打开全局搜索" data-dom-id="open-global-search" data-dd-id="feed-search-toolbar" data-component-slug="search" data-component-binding="feed-search-toolbar">
-            <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
-            <div class="searchbox__input"><span class="searchbox__placeholder">搜索全局内容</span></div>
-            <div class="searchbox__actions">
-              <button class="searchbox__action wego-iconfont-s icon-tupian" type="button" aria-label="选择图片"></button>
+        <div class="album-feed__floating-toolbar" data-toolbar-floating aria-hidden="false">
+          <div class="search-toolbar">
+            <div class="searchbox searchbox--md searchbox--accent" role="button" tabindex="0" aria-label="打开全局搜索" data-dom-id="open-global-search" data-dd-id="feed-search-toolbar" data-component-slug="search" data-component-binding="feed-search-toolbar">
+              <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
+              <div class="searchbox__input"><span class="searchbox__placeholder">搜索全局内容</span></div>
+              <div class="searchbox__actions">
+                <button class="searchbox__action wego-iconfont-s icon-tupian" type="button" aria-label="选择图片"></button>
+              </div>
             </div>
           </div>
         </div>
@@ -1228,8 +1189,8 @@
             <div class="album-feed__people-list" data-region="people-list"></div>
             <div class="album-feed__people-self" data-dom-id="people-self">
               <div class="album-feed__people-item">
-                <div class="avatar avatar--40 avatar--image album-feed__people-avatar" data-dd-id="feed-people-avatar-self" data-component-slug="avatar" data-component-binding="feed-people-avatar-self"><img src="' + imagePool[8] + '" alt="我自己"></div>
-                <span class="album-feed__people-name">自己</span>
+                <div class="avatar avatar--40 avatar--image album-feed__people-avatar" data-dd-id="feed-people-avatar-self" data-component-slug="avatar" data-component-binding="feed-people-avatar-self"><img src="./lib/assets/image/avatar-defult.png" alt="我的相册"></div>
+                <span class="album-feed__people-name">我的相册</span>
               </div>
             </div>
           </div>
@@ -1279,18 +1240,6 @@
       if (!ctx.state.filters) ctx.state.filters = { content: 'all', publisher: 'all', category: 'all', dimension: 'all' };
       if (typeof ctx.state.scrollPosition !== 'number') ctx.state.scrollPosition = 0;
 
-      function setFloatingToolbarTop() {
-        if (!pageTabs || !floatingToolbar) return;
-        if (!isToolbarRevealed) {
-          floatingToolbar.style.top = '0px';
-          return;
-        }
-        var pageTabsRect = pageTabs.getBoundingClientRect();
-        var rootRect = root.getBoundingClientRect();
-        var top = pageTabsRect.bottom - rootRect.top;
-        if (top > 0) floatingToolbar.style.top = top + 'px';
-      }
-
       function updateTabsIndicator(tabs) {
         if (!tabs) return;
         var tabScroll = tabs.querySelector('.wg-tabs__scroll');
@@ -1306,7 +1255,6 @@
       function updateAllIndicators() {
         requestAnimationFrame(function() {
           updateTabsIndicator(pageTabs.querySelector('.wg-tabs'));
-          setFloatingToolbarTop();
         });
       }
 
@@ -1320,7 +1268,6 @@
         return '<button type="button" class="album-feed__people-item" data-dom-id="people-' + publisher.publisher_id + '">'
           + '<div class="avatar avatar--40 avatar--image album-feed__people-avatar" data-dd-id="feed-people-avatar-' + publisher.publisher_id + '" data-component-slug="avatar" data-component-binding="feed-people-avatar">'
           +   '<img src="' + publisher.publisher_avatar + '" alt="' + escapeHtml(publisher.publisher_name) + '">'
-          +   peopleShopBadgeTemplate(publisher)
           + '</div>'
           + '<span class="album-feed__people-name">' + escapeHtml(publisher.publisher_name) + '</span>'
           + '</button>';
@@ -1473,23 +1420,22 @@
         });
       }
 
-      /* 工具栏显隐：上滑（内容向下）隐藏、下滑（内容向上）显示，滚到顶部保持隐藏
+      /* 工具栏显隐：默认显示，上滑（内容向下）收起、下滑（内容向上）重现，滚到顶部恢复显示
          使用 requestAnimationFrame 与累积方向阈值，避免抖动与误触发 */
       var lastScrollTop = 0;
       var scrollDirectionDelta = 0;
       var toolbarRevealThreshold = 12;
       var toolbarRafId = null;
       var pendingScrollTop = 0;
-      var isToolbarRevealed = false;
+      var isToolbarRevealed = true;
       function setToolbarRevealed(revealed) {
         if (isToolbarRevealed === revealed) return;
         isToolbarRevealed = revealed;
-        setFloatingToolbarTop();
         if (revealed) {
-          floatingToolbar.classList.add('is-revealed');
+          floatingToolbar.classList.remove('is-hidden');
           floatingToolbar.setAttribute('aria-hidden', 'false');
         } else {
-          floatingToolbar.classList.remove('is-revealed');
+          floatingToolbar.classList.add('is-hidden');
           floatingToolbar.setAttribute('aria-hidden', 'true');
         }
       }
@@ -1498,16 +1444,16 @@
         var currentTop = pendingScrollTop;
         var delta = currentTop - lastScrollTop;
         if (currentTop <= 0) {
-          setToolbarRevealed(false);
+          setToolbarRevealed(true);
           scrollDirectionDelta = 0;
         } else {
           scrollDirectionDelta += delta;
           if (scrollDirectionDelta > toolbarRevealThreshold) {
-            /* 上滑手势：内容向下滚动，隐藏工具栏 */
+            /* 上滑手势：内容向下滚动，收起工具栏 */
             setToolbarRevealed(false);
             scrollDirectionDelta = 0;
           } else if (scrollDirectionDelta < -toolbarRevealThreshold) {
-            /* 下滑手势：内容向上滚动，显示工具栏 */
+            /* 下滑手势：内容向上滚动，重现工具栏 */
             setToolbarRevealed(true);
             scrollDirectionDelta = 0;
           }
@@ -1571,7 +1517,6 @@
       ctx.state['feed-ready'] = true;
       render();
       requestAnimationFrame(function() {
-        setFloatingToolbarTop();
         scroll.scrollTop = ctx.state.scrollPosition;
         lastScrollTop = scroll.scrollTop;
         updateAllIndicators();

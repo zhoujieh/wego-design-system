@@ -14,11 +14,11 @@
     "source": "library-consumption.json#/appRuntime/presentationTypes"
   },
   "prompt_contract": {
-    "design_system_version": 438,
+    "design_system_version": 440,
     "token_bindings": [
       {
-        "selector": ".album-feed__page-tabs",
-        "content_role": ".album-feed__page-tabs 的 padding-top",
+        "selector": ".album-feed__top-stack",
+        "content_role": ".album-feed__top-stack 的 padding-top",
         "css_property": "padding-top",
         "token": "var(--safe-area-top)"
       },
@@ -33,6 +33,12 @@
         "content_role": ".album-feed 的 background",
         "css_property": "background",
         "token": "var(--bg-page)"
+      },
+      {
+        "selector": ".album-feed::before",
+        "content_role": "背景渐变白色覆盖层",
+        "css_property": "background",
+        "token": "var(--bg-surface)"
       },
       {
         "selector": ".album-feed",
@@ -59,28 +65,16 @@
         "token": "var(--safe-area-bottom-content)"
       },
       {
-        "selector": ".album-feed__page-tabs",
-        "content_role": ".album-feed__page-tabs 的 background",
+        "selector": ".album-feed__top-stack",
+        "content_role": ".album-feed__top-stack 的 background",
         "css_property": "background",
-        "token": "var(--bg-page)"
-      },
-      {
-        "selector": ".album-feed__floating-toolbar",
-        "content_role": ".album-feed__floating-toolbar 的 background",
-        "css_property": "background",
-        "token": "var(--bg-page)"
+        "token": "var(--bg-surface)"
       },
       {
         "selector": ".album-feed__floating-toolbar",
         "content_role": ".album-feed__floating-toolbar 的 padding-block",
         "css_property": "padding-block",
         "token": "var(--spacer-8)"
-      },
-      {
-        "selector": ".album-feed__floating-toolbar",
-        "content_role": ".album-feed__floating-toolbar 的 padding-inline",
-        "css_property": "padding-inline",
-        "token": "var(--layout-page-margin-m8)"
       },
       {
         "selector": ".album-feed__floating-toolbar .search-toolbar",
@@ -92,7 +86,7 @@
         "selector": ".album-feed__people-wrap",
         "content_role": ".album-feed__people-wrap 的 margin-top",
         "css_property": "margin-top",
-        "token": "var(--spacer-0)"
+        "token": "var(--spacer-12)"
       },
       {
         "selector": ".album-feed__people-scroll",
@@ -137,39 +131,9 @@
         "token": "var(--body-xs-line-height)"
       },
       {
-        "selector": ".album-feed__people-shop-badge",
-        "content_role": "人维度店铺标识 border-radius",
-        "css_property": "border-radius",
-        "token": "var(--radius-full)"
-      },
-      {
-        "selector": ".album-feed__people-shop-badge",
-        "content_role": "人维度店铺标识 background",
+        "selector": ".album-feed__people-self",
+        "content_role": ".album-feed__people-self 的 background",
         "css_property": "background",
-        "token": "var(--bg-inverse)"
-      },
-      {
-        "selector": ".album-feed__people-shop-badge",
-        "content_role": "人维度店铺标识 color",
-        "css_property": "color",
-        "token": "var(--text-inverse)"
-      },
-      {
-        "selector": ".album-feed__people-shop-badge",
-        "content_role": "人维度店铺标识 font-size",
-        "css_property": "font-size",
-        "token": "var(--size-12)"
-      },
-      {
-        "selector": ".album-feed__people-shop-badge",
-        "content_role": "人维度店铺标识 line-height",
-        "css_property": "line-height",
-        "token": "var(--body-xs-line-height)"
-      },
-      {
-        "selector": ".album-feed__people-shop-badge",
-        "content_role": "人维度店铺标识 border",
-        "css_property": "border",
         "token": "var(--bg-surface)"
       },
       {
@@ -810,7 +774,7 @@
     "layout_contract": {
       "mode": "composed",
       "source": "references/design-decisions.md",
-      "selection_reason": "页面首要任务是发现并进入动态详情；顶部只固定页面级 tabs 一行，搜索框使用 searchbox--accent 强调模式，默认完全隐藏在视口上方不占首屏可视区域，由下滑手势在 tabs 下方平滑浮现、上滑手势或滚回顶部隐藏；筛选入口从搜索框右侧移除，弱化后放到全部上新这一栏的横滑标签末尾，使用 tag--gray；全部上新横滑标签区保留最小高度确保可见；人维度栏约 10 个发布者支持横滑、自己固定在可视区最右侧；瀑布流双列按媒体自然比例撑高参差，显式设置 row-gap 让列内卡片上下不贴在一起，375/393px 双列，768px 自动增列且单卡不超过 220px；卡片信息层级紧凑，发布者区单行（头像 + 名字 + 店铺文字徽章），状态恢复为文字徽章后与内容类型、时间组成 meta 行并保留间距，1 至 2 行摘要，底部操作行一键转发靠右不再保留商品入口；通过 host-shell-page__panel 相对定位让场景根元素正确约束在 tab 内容区内，配合滚动容器底部预留 40px + safe-area-bottom，避免内容被 bottom-nav 遮挡。",
+      "selection_reason": "页面首要任务是发现并进入动态详情；顶部 page-tabs 与搜索栏共同包进 sticky top-stack 吸顶，背景跟随顶部白色；页面背景从顶部白色渐变到 --bg-page 灰色，过渡完成点在瀑布流往下一点位置；搜索框使用 searchbox--accent 强调模式，默认显示占据文档流，层级低于 page-tabs，上滑手势收起（max-height 归零让下方内容上移）、下滑手势或滚回顶部重现；筛选入口从搜索框右侧移除，弱化后放到全部上新这一栏的横滑标签末尾，使用 tag--gray；全部上新横滑标签区保留最小高度确保可见；人维度栏约 10 个发布者支持横滑、头像右下角不再放置店铺标识、「我的相册」项 sticky right 固定在可视区最右侧；瀑布流双列按媒体自然比例撑高参差，显式设置 row-gap 让列内卡片上下不贴在一起，375/393px 双列，768px 自动增列且单卡不超过 220px；卡片信息层级紧凑，发布者区单行（头像 + 名字 + 店铺文字徽章），状态恢复为文字徽章后与内容类型、时间组成 meta 行并保留间距，1 至 2 行摘要，底部操作行一键转发靠右不再保留商品入口；通过 host-shell-page__panel 相对定位让场景根元素正确约束在 tab 内容区内，配合滚动容器底部预留 40px + safe-area-bottom，避免内容被 bottom-nav 遮挡。",
       "page_edge_mode": "M8",
       "mutable_regions": [
         ".album-feed__floating-toolbar",
@@ -894,7 +858,7 @@
         "state_id": "feed-ready",
         "initial": true,
         "trigger": "进入动态主 tab",
-        "visible_result": "页面级 tabs 固定顶部，搜索框与筛选入口隐藏在 tabs 上方不占可视区域，首屏显示双列瀑布流与人维度栏",
+        "visible_result": "页面级 tabs 与搜索栏共同吸顶顶部，搜索栏默认显示占据文档流，首屏显示双列瀑布流与人维度栏",
         "fallback": "保留可浏览的本地动态",
         "persistence": "memory"
       },
@@ -949,9 +913,9 @@
       {
         "state_id": "toolbar-revealed",
         "initial": false,
-        "trigger": "下滑手势",
-        "visible_result": "搜索框与筛选入口从页面级 tabs 下方平滑浮现，再次上滑手势或滚到顶部后隐藏",
-        "fallback": "滑回顶部仍保持隐藏",
+        "trigger": "下滑手势或滚回顶部",
+        "visible_result": "搜索栏在吸顶栈中展开占据文档流，上滑手势后收起让出可视区域",
+        "fallback": "滚回顶部恢复显示",
         "persistence": "memory"
       },
       {
@@ -1047,7 +1011,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/微购相册动态/scene.js",
     "scene_css": "wego-app/scenes/微购相册动态/scene.css",
-    "source_sha256": "1cc1d46849276494e03f22445d40271d54c03886f3ff4aba860a5b363b43886f",
+    "source_sha256": "123b5eda3d30aa94ff2c76b905137e27786cf945c8ad882c49c7543106927602",
     "dom_ids": [
       "page-tab-following",
       "page-tab-recommended",
@@ -1070,8 +1034,8 @@
         375,
         393
       ],
-      "checked_at": "2026-07-22T13:50:00.000Z",
-      "scope": "页面级 tabs 顶部固定、搜索框与筛选入口下滑浮现、人维度横滑含自己、瀑布流双列卡片、双列信息层级紧凑、底部留白与 bottom-nav 隔离，375/393px 全部通过。",
+      "checked_at": "2026-07-23T12:00:00.000Z",
+      "scope": "顶部 page-tabs 与搜索栏 sticky 吸顶且搜索栏层级低于 tabs、背景白到灰渐变在瀑布流位置过渡、搜索栏默认显示且上滑收起下滑重现、人维度栏无店铺 badge 且我的相册 sticky right、瀑布流双列卡片信息层级紧凑、底部留白与 bottom-nav 隔离，375/393px 全部通过。",
       "checks": {
         "horizontal_overflow": true,
         "overlap": true,
