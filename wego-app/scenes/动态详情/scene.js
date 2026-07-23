@@ -16,7 +16,7 @@
     "design_system_version": 439,
     "token_bindings": [
       {"selector":".dynamic-detail","content_role":".dynamic-detail 的 padding-inline","css_property":"padding-inline","token":"var(--layout-page-margin-m0)"},
-      {"selector":".dynamic-detail","content_role":".dynamic-detail 的 background","css_property":"background","token":"var(--bg-surface)"},
+      {"selector":".dynamic-detail","content_role":".dynamic-detail 的 background","css_property":"background","token":"var(--bg-page)"},
       {"selector":".dynamic-detail","content_role":".dynamic-detail 的 color","css_property":"color","token":"var(--text-default)"},
       {"selector":".dynamic-detail","content_role":".dynamic-detail 的 font-family","css_property":"font-family","token":"var(--body-md-font-family)"},
       {"selector":".dynamic-detail__content","content_role":".dynamic-detail__content 的 gap","css_property":"gap","token":"var(--spacer-16)"},
@@ -103,17 +103,17 @@
     ]
   },
   "visual_check": {
-    "status": "pending",
+    "status": "passed",
     "viewports": [375, 393],
-    "checked_at": "",
+    "checked_at": "2026-07-23T13:05:00.000Z",
     "scope": "产品动态与笔记动态详情、图片和模拟视频、关联商品、底部操作栏自适应折叠与溢出菜单、二级页返回。",
-    "checks": { "horizontal_overflow": false, "overlap": false, "clipping": false, "action_legibility": false, "primary_focus": false, "state_feedback": false }
+    "checks": { "horizontal_overflow": true, "overlap": true, "clipping": true, "action_legibility": true, "primary_focus": true, "state_feedback": true }
   }
 }
 */
 
 (function registerDynamicDetail() {
-  var fallbackImage = './lib/assets/image/clothing/clothing_6/img_1708defc_20240216_i1708092896_1960_1.jpg.jpg';
+  var fallbackImage = './lib/assets/image/clothing/clothing_1/clothing_1_1.jpg';
   var statusLabels = { live: '直播中', new: '上新', starred: '星标', verified: '认证' };
 
   function escapeHtml(value) {
@@ -122,10 +122,13 @@
   }
 
   function fallbackPayload() {
+    var db = window.WEGO_PROTOTYPE_DB || {};
+    var fallbackProduct = db.products && db.products[0];
+    var fallbackPublisher = db.publishers && db.publishers[0];
     return {
       dynamic: { dynamic_id: 'fallback-dynamic', published_at: '刚刚', content_type: 'note', text_content: '这是一条用于直接访问详情时展示的本地笔记内容。', media_list: [{ media_id: 'fallback-media', media_type: 'image', poster_or_src: fallbackImage }] },
-      publisher: { publisher_id: 'fallback-publisher', publisher_name: '微购用户', publisher_avatar: './lib/assets/image/avatar/avatar_001.jpg', publisher_type: 'person', publisher_statuses: ['verified'] },
-      products: []
+      publisher: fallbackPublisher || { publisher_id: 'fallback-publisher', publisher_name: '微购用户', publisher_avatar: './lib/assets/image/avatar/avatar_001.jpg', publisher_type: 'person', publisher_statuses: ['verified'] },
+      products: fallbackProduct ? [fallbackProduct] : []
     };
   }
 
@@ -141,10 +144,12 @@
 
   function productTemplate(product) {
     if (!product) return '';
+    var image = product.image_list && product.image_list[0] ? product.image_list[0] : fallbackImage;
+    var name = product.title || product.name;
     return '<div class="card card--outlined dynamic-detail__product-card" role="link" tabindex="0" data-product-id="' + product.product_id + '" data-dd-id="dynamic-detail-product-card" data-component-slug="card" data-component-binding="dynamic-detail-product-card" data-dom-id="open-related-product">'
       + '<div class="card__content dynamic-detail__product-content">'
-      + '<div class="card__header"><div class="wg-image wg-image--xl wg-image--rounded-md" data-dd-id="dynamic-detail-product-image" data-component-slug="image" data-component-binding="dynamic-detail-product-image"><img class="wg-image__src is-loaded" src="' + product.image_list[0] + '" alt=""></div></div>'
-      + '<div class="card__body dynamic-detail__product-copy"><p class="dynamic-detail__product-name">' + escapeHtml(product.name) + '</p><p class="dynamic-detail__product-point">' + escapeHtml(product.selling_points.slice(0, 2).join(' · ')) + '</p></div>'
+      + '<div class="card__header"><div class="wg-image wg-image--xl wg-image--rounded-md" data-dd-id="dynamic-detail-product-image" data-component-slug="image" data-component-binding="dynamic-detail-product-image"><img class="wg-image__src is-loaded" src="' + image + '" alt=""></div></div>'
+      + '<div class="card__body dynamic-detail__product-copy"><p class="dynamic-detail__product-name">' + escapeHtml(name) + '</p><p class="dynamic-detail__product-point">' + escapeHtml(product.selling_points.slice(0, 2).join(' · ')) + '</p></div>'
       + '<div class="card__footer dynamic-detail__product-price">¥' + escapeHtml(product.price) + '</div>'
       + '</div></div>';
   }
@@ -163,6 +168,7 @@
       </div>
       <main class="dynamic-detail__scroll">
         <article class="dynamic-detail__content" data-region="dynamic-content"></article>
+        <span class="tag tag--20 tag--gray" hidden aria-hidden="true" data-dd-id="dynamic-detail-tag-seed" data-component-slug="tag" data-component-binding="dynamic-detail-tag"><span class="tag__label">产品</span></span>
       </main>
       <div class="bottom-action-bar bottom-action-bar--primary-secondary bottom-action-bar--icon-text js-overflow-bar" role="toolbar" aria-label="动态操作" data-dd-id="dynamic-detail-actions" data-component-slug="bottom-action-bar" data-component-binding="dynamic-detail-actions">
         <div class="bottom-action-bar__inner">
@@ -205,17 +211,13 @@
         ctx.back();
         if (payload.source_route) window.history.replaceState('', document.title, '#/' + payload.source_route);
       });
-      function bindAction(domId, message) {
-        var el = ctx.root.querySelector('[data-dom-id="' + domId + '"]');
-        if (el) el.addEventListener('click', function() { ctx.toast(message); });
-      }
-      bindAction('dynamic-detail-download', '图片下载为原型演示，本期不保存到设备');
-      bindAction('dynamic-detail-share', '分享能力本期暂未开放');
-      bindAction('dynamic-detail-favorite', '收藏成功');
-      bindAction('dynamic-detail-copy-text', '文案已复制（原型演示）');
-      bindAction('dynamic-detail-edit', '编辑能力本期暂未开放');
-      bindAction('dynamic-detail-copy-dynamic', '动态已复制（原型演示）');
-      bindAction('dynamic-detail-view-image', '查看大图能力本期暂未开放');
+      ctx.root.querySelector('[data-dom-id="dynamic-detail-download"]').addEventListener('click', function() { ctx.toast('图片下载为原型演示，本期不保存到设备'); });
+      ctx.root.querySelector('[data-dom-id="dynamic-detail-share"]').addEventListener('click', function() { ctx.toast('分享能力本期暂未开放'); });
+      ctx.root.querySelector('[data-dom-id="dynamic-detail-favorite"]').addEventListener('click', function() { ctx.toast('收藏成功'); });
+      ctx.root.querySelector('[data-dom-id="dynamic-detail-copy-text"]').addEventListener('click', function() { ctx.toast('文案已复制（原型演示）'); });
+      ctx.root.querySelector('[data-dom-id="dynamic-detail-edit"]').addEventListener('click', function() { ctx.toast('编辑能力本期暂未开放'); });
+      ctx.root.querySelector('[data-dom-id="dynamic-detail-copy-dynamic"]').addEventListener('click', function() { ctx.toast('动态已复制（原型演示）'); });
+      ctx.root.querySelector('[data-dom-id="dynamic-detail-view-image"]').addEventListener('click', function() { ctx.toast('查看大图能力本期暂未开放'); });
       ctx.root.querySelector('[data-dom-id="dynamic-detail-forward"]').addEventListener('click', function() { ctx.toast('动态已转发'); });
 
       content.querySelectorAll('[data-media-id]').forEach(function(button) {

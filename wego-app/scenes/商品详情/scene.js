@@ -100,7 +100,7 @@
 */
 
 (function registerProductDetail() {
-  var fallbackImage = './lib/assets/image/clothing/clothing_6/img_1708defc_20240216_i1708092896_1960_1.jpg.jpg';
+  var fallbackImage = './lib/assets/image/clothing/clothing_1/clothing_1_1.jpg';
   var statusLabels = { live: '直播中', new: '上新', starred: '星标', verified: '认证' };
 
   function escapeHtml(value) {
@@ -109,9 +109,12 @@
   }
 
   function fallbackPayload() {
+    var db = window.WEGO_PROTOTYPE_DB || {};
+    var fallbackProduct = db.products && db.products[0];
+    var fallbackPublisher = db.publishers && db.publishers[0];
     return {
-      product: { product_id: 'fallback-product', name: '云感垂坠针织短袖', price: 129, image_list: [fallbackImage], selling_points: ['柔软亲肤', '轻薄不透', '通勤百搭'], sku_options: ['奶油白', 'S / M / L'], attributes: ['材质：棉混纺', '版型：合身'], detail_sections: ['细密针织兼顾透气与垂坠感。'], seller_id: 'fallback-seller', seller_name: '云朵服饰' },
-      publisher: { publisher_id: 'fallback-seller', publisher_name: '云朵服饰', publisher_avatar: './lib/assets/image/avatar/avatar_001.jpg', publisher_type: 'shop', publisher_statuses: ['verified'] }
+      product: fallbackProduct || { product_id: 'fallback-product', title: '荷叶边方领短袖上衣', name: '荷叶边方领短袖上衣', price: 139, image_list: [fallbackImage], selling_points: ['方领修饰颈部线条', '荷叶边增加层次'], specs: { sizes: ['S', 'M', 'L'], fit: '正常码', care: '建议轻柔洗涤' }, attributes: { color: ['白色'], style: ['轻甜'], silhouette: '合身短款', season: '春夏', material_note: '轻薄梭织感' }, detail_sections: ['适合日常约会和周末出行。'] },
+      publisher: fallbackPublisher || { publisher_id: 'fallback-seller', publisher_name: '云朵服饰', publisher_avatar: './lib/assets/image/avatar/avatar_001.jpg', publisher_type: 'shop', publisher_statuses: ['verified'] }
     };
   }
 
@@ -121,6 +124,32 @@
 
   function cardTemplate(id, title, body) {
     return '<section class="card card--surface product-detail__card" data-dd-id="product-detail-card-' + id + '" data-component-slug="card" data-component-binding="product-detail-card"><div class="card__content product-detail__card-content"><h2 class="card__header product-detail__section-title">' + escapeHtml(title) + '</h2><div class="card__body product-detail__section-body">' + body + '</div></div></section>';
+  }
+
+  function listItems(items) {
+    return items.map(function(item) { return '<li>' + escapeHtml(item) + '</li>'; }).join('');
+  }
+
+  function productSpecs(product) {
+    var specs = product.specs || {};
+    if (Array.isArray(product.sku_options)) return product.sku_options;
+    return [
+      '尺码：' + (specs.sizes || []).join(' / '),
+      '版型建议：' + (specs.fit || '正常码'),
+      '护理：' + (specs.care || '按衣物标签护理')
+    ].filter(function(item) { return item.indexOf('：') === -1 || item.split('：')[1]; });
+  }
+
+  function productAttributes(product) {
+    var attrs = product.attributes || {};
+    if (Array.isArray(attrs)) return attrs;
+    return [
+      '颜色：' + (attrs.color || []).join(' / '),
+      '风格：' + (attrs.style || []).join(' / '),
+      '版型：' + (attrs.silhouette || ''),
+      '季节：' + (attrs.season || ''),
+      '材质观感：' + (attrs.material_note || '')
+    ].filter(function(item) { return item.indexOf('：') === -1 || item.split('：')[1]; });
   }
 
   window.WegoApp.registerScene({
@@ -152,16 +181,18 @@
       var payload = ctx.appState.productDetailPayload || fallbackPayload();
       var product = payload.product;
       var publisher = payload.publisher || fallbackPayload().publisher;
+      var productName = product.title || product.name;
+      var productImage = product.image_list && product.image_list[0] ? product.image_list[0] : fallbackImage;
       var sellerStatuses = (publisher.publisher_statuses || []).map(function(status, index) { return tagTemplate(statusLabels[status] || status, index); }).join('');
       var sellingPoints = product.selling_points.map(function(point) { return tagTemplate(point, 'point-' + point); }).join('');
-      var specs = product.sku_options.map(function(option) { return '<li>' + escapeHtml(option) + '</li>'; }).join('');
-      var attributes = product.attributes.map(function(attribute) { return '<li>' + escapeHtml(attribute) + '</li>'; }).join('');
+      var specs = listItems(productSpecs(product));
+      var attributes = listItems(productAttributes(product));
       var details = product.detail_sections.map(function(section) { return '<p>' + escapeHtml(section) + '</p>'; }).join('');
       var content = ctx.root.querySelector('[data-region="product-content"]');
       content.innerHTML = ''
-        + '<div class="product-detail__hero"><div class="wg-image product-detail__image" data-dd-id="product-detail-image" data-component-slug="image" data-component-binding="product-detail-image"><img class="wg-image__src is-loaded" src="' + product.image_list[0] + '" alt="' + escapeHtml(product.name) + '"></div></div>'
+        + '<div class="product-detail__hero"><div class="wg-image product-detail__image" data-dd-id="product-detail-image" data-component-slug="image" data-component-binding="product-detail-image"><img class="wg-image__src is-loaded" src="' + productImage + '" alt="' + escapeHtml(productName) + '"></div></div>'
         + '<div class="product-detail__body">'
-        +   '<section class="card card--surface product-detail__card" data-dd-id="product-detail-card-main" data-component-slug="card" data-component-binding="product-detail-card"><div class="card__content product-detail__card-content"><div class="card__header product-detail__price">¥' + escapeHtml(product.price) + '</div><div class="card__body"><h1 class="product-detail__name">' + escapeHtml(product.name) + '</h1><div class="product-detail__points">' + sellingPoints + '</div></div></div></section>'
+        +   '<section class="card card--surface product-detail__card" data-dd-id="product-detail-card-main" data-component-slug="card" data-component-binding="product-detail-card"><div class="card__content product-detail__card-content"><div class="card__header product-detail__price">¥' + escapeHtml(product.price) + '</div><div class="card__body"><h1 class="product-detail__name">' + escapeHtml(productName) + '</h1><div class="product-detail__points">' + sellingPoints + '</div></div></div></section>'
         +   cardTemplate('spec', '规格选择', '<ul class="product-detail__list">' + specs + '</ul>')
         +   cardTemplate('attributes', '商品属性', '<ul class="product-detail__list">' + attributes + '</ul>')
         +   cardTemplate('detail', '详情说明', '<div class="product-detail__detail-copy">' + details + '</div>')

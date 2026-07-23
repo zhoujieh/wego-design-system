@@ -933,79 +933,12 @@
 */
 
 (function registerAlbumProductFeed() {
-  var imagePool = [
-    './lib/assets/image/clothing/clothing_6/img_1708defc_20240216_i1708092896_1960_1.jpg.jpg',
-    './lib/assets/image/clothing/clothing_6/img_1708defc_20240216_i1708092896_1518_0.jpg.jpg',
-    './lib/assets/image/clothing/clothing_6/img_1708defc_20240216_i1708092843_8406_8.jpg.jpg',
-    './lib/assets/image/clothing/clothing_6/img_1708defc_20240216_i1708092843_7820_16.jpg.jpg',
-    './lib/assets/image/clothing/clothing_8/img_1708defc_20240216_i1708092877_8943_0.jpg.jpg',
-    './lib/assets/image/clothing/clothing_8/img_1708defc_20240216_i1708092860_9030_2.jpg.jpg',
-    './lib/assets/image/clothing/clothing_8/img_1708defc_20240216_i1708092843_9294_21.jpg.jpg',
-    './lib/assets/image/clothing/clothing_8/img_1708defc_20240216_i1708092843_8369_2.jpg.jpg',
-    './lib/assets/image/clothing/clothing_1/clothing_1_1.jpg',
-    './lib/assets/image/clothing/clothing_3/1663740989357_27184.jpg',
-    './lib/assets/image/clothing/clothing_4/1663741029863_23235.jpg',
-    './lib/assets/image/clothing/clothing_7/1663741042724_84375.jpg',
-    './lib/assets/image/clothing/clothing_9/1663740558500_5660.jpg',
-    './lib/assets/image/clothing/clothing_11/1663741015636_57550.jpg',
-    './lib/assets/image/clothing/clothing_12/1663741493021_53473.jpg',
-    './lib/assets/image/clothing/clothing_13/1664276865083_43086.jpg',
-    './lib/assets/image/clothing/clothing_14/1664276960205_96017.jpg',
-    './lib/assets/image/clothing/clothing_15/1664277250606_29741.jpg',
-    './lib/assets/image/avatar/avatar_001.jpg',
-    './lib/assets/image/avatar/avatar_008.jpg',
-    './lib/assets/image/avatar/avatar_016.jpg',
-    './lib/assets/image/avatar/avatar_024.jpg',
-    './lib/assets/image/avatar/avatar_032.jpg',
-    './lib/assets/image/avatar/avatar_040.jpg',
-    './lib/assets/image/avatar/avatar_048.jpg',
-    './lib/assets/image/avatar/avatar_056.jpg',
-    './lib/assets/image/avatar/avatar_064.jpg',
-    './lib/assets/image/avatar/avatar_072.jpg'
-  ];
+  var db = window.WEGO_PROTOTYPE_DB || {};
+  var publishers = db.publishers || [];
+  var products = db.products || [];
+  var dynamics = db.dynamics || [];
 
-  var publishers = [
-    { publisher_id: 'pub-01', publisher_name: '云朵服饰', publisher_avatar: imagePool[18], publisher_type: 'shop', publisher_statuses: ['live', 'verified'] },
-    { publisher_id: 'pub-02', publisher_name: '小满的衣橱', publisher_avatar: imagePool[19], publisher_type: 'person', publisher_statuses: ['new', 'starred'] },
-    { publisher_id: 'pub-03', publisher_name: '漫川生活馆', publisher_avatar: imagePool[20], publisher_type: 'shop', publisher_statuses: ['new', 'verified'] },
-    { publisher_id: 'pub-04', publisher_name: '阿宁手记', publisher_avatar: imagePool[21], publisher_type: 'person', publisher_statuses: ['starred', 'verified'] },
-    { publisher_id: 'pub-05', publisher_name: '微光面料室', publisher_avatar: imagePool[22], publisher_type: 'shop', publisher_statuses: ['new', 'starred'] },
-    { publisher_id: 'pub-06', publisher_name: '陆小满', publisher_avatar: imagePool[23], publisher_type: 'person', publisher_statuses: ['verified'] },
-    { publisher_id: 'pub-07', publisher_name: '白茶手作', publisher_avatar: imagePool[24], publisher_type: 'shop', publisher_statuses: ['live', 'new'] },
-    { publisher_id: 'pub-08', publisher_name: '苏野', publisher_avatar: imagePool[25], publisher_type: 'person', publisher_statuses: ['starred'] },
-    { publisher_id: 'pub-09', publisher_name: '云间集', publisher_avatar: imagePool[26], publisher_type: 'shop', publisher_statuses: ['verified'] },
-    { publisher_id: 'pub-10', publisher_name: '朝晚穿搭', publisher_avatar: imagePool[27], publisher_type: 'person', publisher_statuses: ['new'] }
-  ];
-
-  var products = [
-    { product_id: 'prod-01', name: '云感垂坠针织短袖', price: 129, image_list: [imagePool[0], imagePool[8], imagePool[12]], selling_points: ['柔软亲肤', '轻薄不透', '通勤百搭'], sku_options: ['奶油白', '雾霾蓝', 'S / M / L'], attributes: ['材质：棉混纺', '版型：合身', '季节：夏季'], detail_sections: ['细密针织兼顾透气与垂坠感。', '建议冷水轻柔洗涤并平铺晾干。'], seller_id: 'pub-01', seller_name: '云朵服饰' },
-    { product_id: 'prod-02', name: '复古高腰直筒牛仔裤', price: 169, image_list: [imagePool[9], imagePool[3]], selling_points: ['高腰显腿长', '微弹不紧绷', '复古水洗'], sku_options: ['浅蓝', '深蓝', '26-30'], attributes: ['材质：棉丹宁', '裤型：直筒', '腰型：高腰'], detail_sections: ['直筒剪裁修饰腿型，日常搭配更省心。'], seller_id: 'pub-03', seller_name: '漫川生活馆' },
-    { product_id: 'prod-03', name: '法式碎花连衣裙', price: 219, image_list: [imagePool[10], imagePool[4]], selling_points: ['收腰剪裁', '轻盈里衬', '通勤度假两穿'], sku_options: ['杏色花卉', 'S / M / L'], attributes: ['面料：雪纺', '裙长：中长款'], detail_sections: ['细碎花型和自然腰线，单穿即可完成搭配。'], seller_id: 'pub-02', seller_name: '小满的衣橱' },
-    { product_id: 'prod-04', name: '极简通勤托特包', price: 99, image_list: [imagePool[11], imagePool[5]], selling_points: ['轻量大容量', '内置分区', '可肩背'], sku_options: ['黑色', '燕麦色'], attributes: ['材质：环保皮革', '闭合：磁吸'], detail_sections: ['可容纳折叠伞、平板与日常随身物。'], seller_id: 'pub-04', seller_name: '阿宁手记' }
-  ];
-
-  function media(id, type, src, duration) {
-    var item = { media_id: id, media_type: type, poster_or_src: src };
-    if (duration) item.duration_label = duration;
-    return item;
-  }
-
-  var dynamics = [
-    { dynamic_id: 'dyn-01', publisher_id: 'pub-01', published_at: '刚刚', published_order: 10, content_type: 'product', category_id: 'women', text_content: '今日上新这件云感针织短袖，垂坠但不贴身，通勤和周末都很好搭。实拍是自然光，颜色更接近第一张。', media_list: [media('m-01', 'video', imagePool[0], '00:18'), media('m-02', 'image', imagePool[8])], related_product_ids: ['prod-01'] },
-    { dynamic_id: 'dyn-02', publisher_id: 'pub-02', published_at: '8 分钟前', published_order: 9, content_type: 'note', text_content: '最近常穿的三套清爽通勤搭配。比起堆叠单品，我更喜欢把颜色控制在两种以内，早上出门会轻松很多。', media_list: [media('m-03', 'image', imagePool[9]), media('m-04', 'video', imagePool[4], '00:26')] },
-    { dynamic_id: 'dyn-03', publisher_id: 'pub-03', published_at: '20 分钟前', published_order: 8, content_type: 'product', category_id: 'women', text_content: '直筒牛仔裤补到货了，腰头做了微弹处理，坐久也不会勒。浅蓝色更适合夏天。', media_list: [media('m-05', 'image', imagePool[10]), media('m-06', 'image', imagePool[3])], related_product_ids: ['prod-02'] },
-    { dynamic_id: 'dyn-04', publisher_id: 'pub-04', published_at: '今天 10:30', published_order: 7, content_type: 'note', text_content: '把旧衣重新整理了一次，留下真正会反复穿的单品。衣橱变轻之后，每天做选择也更快。', media_list: [media('m-07', 'video', imagePool[11], '00:34'), media('m-08', 'image', imagePool[12])] },
-    { dynamic_id: 'dyn-05', publisher_id: 'pub-02', published_at: '今天 09:15', published_order: 6, content_type: 'product', category_id: 'women', text_content: '碎花裙这次把里衬做得更轻，保留垂感也不容易透。腰线位置对小个子更友好。', media_list: [media('m-09', 'image', imagePool[13]), media('m-10', 'video', imagePool[5], '00:21')], related_product_ids: ['prod-03'] },
-    { dynamic_id: 'dyn-06', publisher_id: 'pub-01', published_at: '昨天 18:40', published_order: 5, content_type: 'note', text_content: '直播结束后整理了大家最常问的面料护理方法，针织类尽量不要悬挂晾晒，肩线会更耐穿。', media_list: [media('m-11', 'image', imagePool[14])] },
-    { dynamic_id: 'dyn-07', publisher_id: 'pub-04', published_at: '昨天', published_order: 4, content_type: 'product', category_id: 'accessory', text_content: '这个托特包我连续背了一周，最喜欢的是自重很轻，通勤需要的东西都能分区放好。', media_list: [media('m-12', 'video', imagePool[15], '00:16'), media('m-13', 'image', imagePool[6])], related_product_ids: ['prod-04'] },
-    { dynamic_id: 'dyn-08', publisher_id: 'pub-03', published_at: '2 天前', published_order: 3, content_type: 'note', text_content: '店里换了新的陈列方式，同色系放在一起后，客人挑选搭配明显更快了。', media_list: [media('m-14', 'image', imagePool[16]), media('m-15', 'image', imagePool[7])] },
-    { dynamic_id: 'dyn-09', publisher_id: 'pub-01', published_at: '3 天前', published_order: 2, content_type: 'product', category_id: 'women', text_content: '针织基础款补了一批新色，奶油白和雾霾蓝都很显肤色，尺码按正常码选择即可。', media_list: [media('m-16', 'image', imagePool[17]), media('m-17', 'video', imagePool[1], '00:12')], related_product_ids: ['prod-01'] },
-    { dynamic_id: 'dyn-10', publisher_id: 'pub-02', published_at: '本周一', published_order: 1, content_type: 'note', text_content: '周末去看了一个小型面料展，记录了几组很舒服的中性色，准备慢慢用到后面的搭配里。', media_list: [media('m-18', 'image', imagePool[2]), media('m-19', 'image', imagePool[8])] },
-    { dynamic_id: 'dyn-11', publisher_id: 'pub-07', published_at: '12 分钟前', published_order: 0, content_type: 'product', category_id: 'home', text_content: '今天店里现场裁剪的桌旗上线了，手工锁边，颜色比图片更柔和一些。', media_list: [media('m-20', 'image', imagePool[9]), media('m-21', 'image', imagePool[13])], related_product_ids: [] },
-    { dynamic_id: 'dyn-12', publisher_id: 'pub-05', published_at: '昨天 22:10', published_order: -1, content_type: 'note', text_content: '把上周整理的色卡和面料样本重新归档，未来一段时间的搭配主线会围绕这组中性色。', media_list: [media('m-22', 'image', imagePool[15])] }
-  ];
-
-  window.WEGO_DYNAMIC_CATALOG = { publishers: publishers, products: products, dynamics: dynamics };
+  window.WEGO_DYNAMIC_CATALOG = { publishers: publishers, products: products, dynamics: dynamics, source: 'WEGO_PROTOTYPE_DB' };
 
   function escapeHtml(value) {
     var map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
@@ -1013,7 +946,7 @@
   }
 
   function getPublisher(id) {
-    return publishers.find(function(item) { return item.publisher_id === id; }) || publishers[0];
+    return publishers.find(function(item) { return item.publisher_id === id; }) || publishers[0] || { publisher_id: 'fallback-publisher', publisher_name: '微购用户', publisher_avatar: './lib/assets/image/avatar-defult.png', publisher_type: 'person', publisher_statuses: [] };
   }
 
   function getProduct(id) {
@@ -1104,7 +1037,7 @@
     var publisherOptions = [['all', '全部发布者']].concat(publishers.map(function(publisher) {
       return [publisher.publisher_id, (publisher.publisher_type === 'shop' ? '店铺 · ' : '个人 · ') + publisher.publisher_name];
     }));
-    var categoryOptions = [['all', '全部分类'], ['women', '女装'], ['accessory', '配饰'], ['home', '家居']];
+    var categoryOptions = [['all', '全部分类'], ['clothing', '服装'], ['shoes', '鞋子'], ['bags', '包袋']];
     function options(group, list, selected) {
       return list.map(function(option) { return radioOptionTemplate(group, option[0], option[1], selected === option[0]); }).join('');
     }

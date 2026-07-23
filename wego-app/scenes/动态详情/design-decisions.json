@@ -14,7 +14,7 @@
     "source": "library-consumption.json#/appRuntime/presentationTypes"
   },
   "prompt_contract": {
-    "design_system_version": 435,
+    "design_system_version": 439,
     "token_bindings": [
       {
         "selector": ".dynamic-detail",
@@ -387,12 +387,12 @@
       {
         "binding_id": "dynamic-detail-actions",
         "slug": "bottom-action-bar",
-        "reason": "固定承载弱化下载、更多和唯一强调的一键转发",
+        "reason": "固定承载弱化下载、分享、收藏、复制文案、编辑、复制动态、查看大图等左侧操作，溢出项收进更多入口，右侧为一键转发",
         "variant_dimensions": {
           "type": "primary-secondary-actions",
-          "iconMode": "text-only",
+          "iconMode": "icon-text",
           "state": "default",
-          "overflow": "expanded"
+          "overflow": "collapsed-more"
         }
       },
       {
@@ -432,7 +432,27 @@
         "target": "feedback:toast"
       },
       {
-        "dom_id": "dynamic-detail-more",
+        "dom_id": "dynamic-detail-share",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "dynamic-detail-favorite",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "dynamic-detail-copy-text",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "dynamic-detail-edit",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "dynamic-detail-copy-dynamic",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "dynamic-detail-view-image",
         "target": "feedback:toast"
       },
       {
@@ -468,8 +488,8 @@
       {
         "state_id": "secondary-action-feedback",
         "initial": false,
-        "trigger": "点击下载图片或更多",
-        "visible_result": "分别提示原型下载边界或更多能力未开放",
+        "trigger": "点击下载图片、分享、收藏、复制文案、编辑、复制动态或查看大图",
+        "visible_result": "分别提示对应操作的原型边界或成功状态",
         "fallback": "停留当前详情",
         "persistence": "memory"
       }
@@ -500,11 +520,16 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/动态详情/scene.js",
     "scene_css": "wego-app/scenes/动态详情/scene.css",
-    "source_sha256": "69f99cee004d305a059e1c763f4295d7bfa9632d091d1e59c8d6e0e4b0176390",
+    "source_sha256": "897b37ddf265c0f36dfcab8a2820bf1218a21fdeb27464fad66883e40d5012a4",
     "dom_ids": [
       "dynamic-detail-back",
       "dynamic-detail-download",
-      "dynamic-detail-more",
+      "dynamic-detail-share",
+      "dynamic-detail-favorite",
+      "dynamic-detail-copy-text",
+      "dynamic-detail-edit",
+      "dynamic-detail-copy-dynamic",
+      "dynamic-detail-view-image",
       "dynamic-detail-forward"
     ],
     "component_count": 4,
@@ -514,8 +539,8 @@
         375,
         393
       ],
-      "checked_at": "2026-07-22T02:44:17.000Z",
-      "scope": "产品动态与笔记动态详情、图片和模拟视频、关联商品、固定底部一键转发与二级页返回。",
+      "checked_at": "2026-07-23T13:05:00.000Z",
+      "scope": "产品动态与笔记动态详情、图片和模拟视频、关联商品、底部操作栏自适应折叠与溢出菜单、二级页返回。",
       "checks": {
         "horizontal_overflow": true,
         "overlap": true,

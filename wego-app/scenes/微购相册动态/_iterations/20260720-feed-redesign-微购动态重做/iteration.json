@@ -11,14 +11,14 @@
       "商品详情"
     ]
   },
-  "status": "prototyping",
-  "scope_revision": 11,
+  "status": "awaiting-prototype-confirmation",
+  "scope_revision": 13,
   "prototype_brief": {
     "goal": "重构「动态」主 tab 的首屏分发效率与发现流体验，让用户在首屏快速识别并进入感兴趣的动态详情，完整消费文本、图片或视频内容；关联商品详情作为次级链路存在。顶部、卡片信息层级与操作布局必须符合清晰与高效原则。",
     "included": [
       "重构现有「动态」主 tab 的内容层级与排版，发现动态和进入动态详情成为页面首要任务",
       "顶部 sticky 仅固定页面级 tabs（关注/推荐/上新）一行；搜索框与筛选入口不再常驻顶部，改为下滑手势时在 tab 栏下方平滑浮现、上滑手势时收起隐藏，滚到顶部时保持隐藏以最大化首屏可视区域",
-      "顶部搜索框使用 search 组件的 search--sm searchbox--gray 标准视觉并内嵌图搜入口；筛选入口使用 search-toolbar 模式（search-toolbar__action），不自定义新样式",
+      "顶部搜索框使用 search 组件的强调搜索标准视觉：白底、品牌描边，图搜入口复用正式小号主按钮；不自定义新样式",
       "人维度横滑头像列表扩充到约 10 个发布者项支持左右滚动；多于可视区域时「自己」项固定在可视区最右侧，与好友项分隔",
       "压缩首屏固定占用：顶部采用单行紧凑结构——仅固定页面级 tabs（关注/推荐/上新）",
       "动态首页使用瀑布流双列卡片提高首屏分发密度：375px 与 393px 等常见手机宽度保持双列，卡片按媒体封面自然比例与摘要长度自然撑高、参差错落，不做等高约束；宽屏在维持合理单卡宽度的前提下自动增加列数，不固定双列拉伸；内容类型只分为产品和笔记两类，两类卡片都可展示文本摘要以及图片或视频媒体封面",
@@ -39,7 +39,8 @@
       "筛选无结果空状态",
       "动态首页瀑布流使用 CSS columns 双列布局并显式设置 row-gap，避免列内卡片上下贴在一起",
       "动态首页滚动区底部必须为底部导航栏与安全区预留足够留白，列表底部内容不被 tabbar 遮挡",
-      "动态首页不再单独显示「已应用筛选」行，筛选结果和已选状态由 tag 筛选标签高亮和搜索框右侧筛选文案承担"
+      "动态首页不再单独显示「已应用筛选」行，筛选结果和已选状态由 tag 筛选标签高亮和搜索框右侧筛选文案承担",
+      "建立 wego-app 级统一原型数据库：所有后续交互原型统一从 wego-app/data/prototype-db.js 读取商品、素材、发布者和动态文案；当前 15 个服装素材目录必须有与图片识别结果匹配的完整商品信息、商品属性和运营文案，并定义可扩展到鞋子、包袋等后续品类的数据类型；动态、商品和笔记不得继续按图片下标随意拼接不匹配文案"
     ],
     "excluded": [
       "将商品详情作为动态首页主点击目标",
@@ -195,21 +196,67 @@
           "视频项额外提供 duration_label，并使用本地封面模拟播放状态"
         ]
       },
-      "product": {
-        "source": "前端本地模拟商品数据",
+      "content_asset": {
+        "source": "wego-app/data/prototype-db.js",
         "required": [
-          "product_id",
-          "name",
-          "price",
-          "image_list",
-          "selling_points",
-          "sku_options",
-          "attributes",
-          "detail_sections",
-          "seller_id",
-          "seller_name"
+          "asset_id",
+          "category",
+          "subcategory",
+          "product_type",
+          "source_dir",
+          "image_count",
+          "primary_image",
+          "gallery_pattern",
+          "confidence",
+          "visual_tags",
+          "color_tags",
+          "season_tags"
         ],
         "constraints": [
+          "asset_id 使用稳定 kebab-case，不随页面排序变化",
+          "category 作为一级品类，当前服装使用 clothing；后续鞋子、包袋等品类必须复用同一结构扩展",
+          "source_dir 下的图片默认表达同一商品或同一搭配组；目录混合多款商品时 confidence 必须降级并在落页面前人工确认主商品",
+          "gallery_pattern 只使用 single-product、outfit-set、multi-color 或 mixed-reference",
+          "动态首页卡片封面所属 asset_id 必须和对应 text_content 或商品文案一致"
+        ]
+      },
+      "content_asset_copy": {
+        "source": "wego-app/data/prototype-db.js#dynamicCopy；迭代文案库文档仅保留本次图片识别说明",
+        "required": [
+          "asset_id",
+          "display_name",
+          "feed_text",
+          "detail_intro",
+          "selling_points",
+          "search_keywords",
+          "usage_notes"
+        ],
+        "constraints": [
+          "文案必须基于图片可见商品、颜色、款式和穿搭场景，不写真实品牌名、真实材质成分、明星姓名、库存、折扣或功效承诺",
+          "每个服装素材目录 clothing_1 至 clothing_15 必须至少有一条 copy 记录",
+          "动态、商品详情和笔记内容优先引用统一数据库的 copy 字段生成，不再在页面实现里按 imagePool 下标临时编写文案",
+          "后续新增鞋子等品类时必须先在 wego-app/data/prototype-db.js 新增 content_asset、product 与 dynamicCopy，再进入页面数据接入"
+        ]
+      },
+      "product": {
+        "source": "wego-app/data/prototype-db.js",
+        "required": [
+          "product_id",
+          "asset_id",
+          "category",
+          "title",
+          "price",
+          "currency",
+          "unit",
+          "attributes",
+          "specs",
+          "selling_points",
+          "detail_sections",
+          "feed_text"
+        ],
+        "constraints": [
+          "product 必须绑定 asset_id，商品图片从对应 content_asset 读取，不在场景内另建 image_list",
+          "attributes 至少描述颜色、风格、版型、季节和可确认的材质观感；specs 至少描述尺码、版型建议和护理提示",
           "商品详情遵循传统电商信息顺序并提供固定底部商品操作区",
           "固定底部操作明确为联系卖家和立即购买，两者本期均为不下钻入口",
           "点击后分别提示「联系卖家能力本期暂未开放」和「购买能力本期暂未开放」，不产生联系、订单或持久化结果"
@@ -263,14 +310,15 @@
       "全局搜索、联系卖家和立即购买都是本期不下钻入口，点击后必须给出包含具体能力名称的未开放提示",
       "动态详情与商品详情都是从动态链路进入的普通二级页，使用稳定路由、右侧推入转场和左上返回，不使用全屏模态或底部呈现",
       "手机首屏效率以 375px 和 393px 宽固定视口的未滚动状态为准；宽屏适配以 768px 视口验证自动增列、单卡最大宽度和瀑布流居中",
-      "返回时只在当前会话内恢复查找条件与浏览位置，刷新后重置"
+      "返回时只在当前会话内恢复查找条件与浏览位置，刷新后重置",
+      "当前 15 个服装素材的命名、商品属性和文案基于图片识别，属于可逆的运营文案建议；真实商家供稿接入后可以保留 asset_id/product_id 并替换商品字段与 copy 内容"
     ],
     "open_questions": []
   },
   "brief_confirmation": {
-    "at": "2026-07-22T13:30:00.000Z",
-    "scope_revision": 11,
-    "scope_sha256": "bbcf8f15c0f42f2ef535c69723dd9069fe90de370d47865ec111cc38a9ef770e"
+    "at": "2026-07-23T12:55:58.196Z",
+    "scope_revision": 13,
+    "scope_sha256": "7d577a9e325007e2a67ef306344bc7058b19c2509af924d49a8beb4aad7e951a"
   },
   "prototype_confirmation": null,
   "affected_scenes": [
@@ -278,14 +326,17 @@
     "动态详情",
     "商品详情"
   ],
-  "affected_runtime": [],
+  "affected_runtime": [
+    "wego-app/data/prototype-db.js",
+    "wego-app/index.html",
+    "wego-app/README.md"
+  ],
   "stage_outputs": {
     "product": {
       "valid": true
     },
     "design": {
-      "valid": false,
-      "reason": "scope_revision 11 调整后正在重做顶部 sticky、状态信息表达、人维度栏数据量、瀑布流间距、商品入口和搜索框组件样式"
+      "valid": true
     }
   },
   "change_log": [
@@ -408,6 +459,34 @@
     {
       "action": "confirm-brief",
       "at": "2026-07-22T13:30:00.000Z"
+    },
+    {
+      "action": "invalidate",
+      "at": "2026-07-23T11:09:05.470Z"
+    },
+    {
+      "action": "submit-brief",
+      "at": "2026-07-23T11:09:52.128Z"
+    },
+    {
+      "action": "confirm-brief",
+      "at": "2026-07-23T11:09:52.165Z"
+    },
+    {
+      "action": "invalidate",
+      "at": "2026-07-23T12:40:34.777Z"
+    },
+    {
+      "action": "submit-brief",
+      "at": "2026-07-23T12:42:09.979Z"
+    },
+    {
+      "action": "confirm-brief",
+      "at": "2026-07-23T12:55:58.199Z"
+    },
+    {
+      "action": "submit-prototype",
+      "at": "2026-07-23T13:03:07.297Z"
     }
   ],
   "freeze": null

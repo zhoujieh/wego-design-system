@@ -43,7 +43,7 @@
       { "selector": ".friend-list__index-item", "content_role": "索引项字号", "css_property": "font-size", "token": "var(--body-xs-font-size)" },
       { "selector": ".friend-list__index-item", "content_role": "索引项行高", "css_property": "line-height", "token": "var(--body-xs-line-height)" },
       { "selector": ".friend-list__index-item", "content_role": "索引项颜色", "css_property": "color", "token": "var(--text-secondary)" },
-      { "selector": ".friend-list__index-item", "content_role": "索引项最小宽高", "css_property": "min-width", "token": "var(--size-16)" },
+      { "selector": ".friend-list__index-item", "content_role": "索引项最小宽高", "css_property": "min-width", "token": "var(--spacer-16)" },
       { "selector": ".friend-list__index-item:active", "content_role": "索引项按压颜色", "css_property": "color", "token": "var(--text-brand)" },
       { "selector": ".friend-list__index-item.is-pressed", "content_role": "索引项按压颜色", "css_property": "color", "token": "var(--text-brand)" },
       { "selector": ".friend-list__index-item--active", "content_role": "索引项激活颜色", "css_property": "color", "token": "var(--text-brand)" },

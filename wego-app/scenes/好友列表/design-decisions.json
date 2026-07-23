@@ -188,7 +188,7 @@
         "selector": ".friend-list__index-item",
         "content_role": "索引项最小宽高",
         "css_property": "min-width",
-        "token": "var(--size-16)"
+        "token": "var(--spacer-16)"
       },
       {
         "selector": ".friend-list__index-item:active",
@@ -467,7 +467,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/好友列表/scene.js",
     "scene_css": "wego-app/scenes/好友列表/scene.css",
-    "source_sha256": "7c748a2b110868692831fa70ae7b1a1437ed5f940618f1dbaa6e776d5fe4e529",
+    "source_sha256": "709a55422d43ec7ca084b666d4772dada60e1f0b59db87faf5e9ccf3befe3aa5",
     "dom_ids": [
       "add-friend-entry",
       "sort-toggle",

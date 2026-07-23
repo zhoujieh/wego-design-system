@@ -456,7 +456,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/商品详情/scene.js",
     "scene_css": "wego-app/scenes/商品详情/scene.css",
-    "source_sha256": "6c4400383557c009b4b8e3b07d8e2c659e80b87324b75beeb3c94390f2099c3a",
+    "source_sha256": "003f839dbb7dafee84172c85ad05be6b9b7c52d682d258c445a488d3146cd134",
     "dom_ids": [
       "product-detail-back",
       "product-contact",
