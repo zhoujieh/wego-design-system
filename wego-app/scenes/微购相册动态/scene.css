@@ -168,16 +168,16 @@
 .album-feed__publish-dock-surface {
   display: flex;
   flex-direction: column;
-  gap: var(--spacer-8);
+  gap: var(--spacer-4);
   width: 100%;
-  max-width: calc(var(--size-104) + var(--size-104) + var(--size-64));
+  max-width: calc(var(--size-104) + var(--size-104) + var(--size-56));
   padding: var(--spacer-8);
   border-radius: var(--radius-16);
   background: var(--bg-surface);
   box-shadow: var(--shadow-lg);
   opacity: 0;
   pointer-events: none;
-  transform: translate3d(var(--spacer-16), var(--spacer-20), 0) scale(0.72, 0.18);
+  transform: translate3d(var(--spacer-16), var(--spacer-20), 0) scale(0.74, 0.2);
   transform-origin: bottom right;
   transition: opacity var(--duration-fast) var(--ease-enter),
               transform var(--duration-normal) var(--ease-emphasized);
@@ -190,31 +190,30 @@
   transform: translate3d(0, 0, 0) scale(1);
 }
 
-.album-feed__publish-primary-row,
-.album-feed__publish-secondary-row {
-  display: grid;
-  gap: var(--spacer-8);
-}
-
-.album-feed__publish-primary-row {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.album-feed__publish-secondary-row {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+.album-feed__publish-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-4);
 }
 
 .album-feed__publish-choice {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  gap: var(--spacer-12);
   min-width: 0;
+  min-height: var(--size-56);
+  padding-block: var(--spacer-0);
+  padding-inline: var(--spacer-12);
   border: 0;
+  border-radius: var(--radius-12);
+  background: var(--transparent);
+  color: var(--text-default);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   opacity: 0;
-  transform: translate3d(var(--spacer-8), var(--spacer-12), 0) scale(0.96);
+  transform: translate3d(var(--spacer-8), var(--spacer-8), 0) scale(0.98);
   transition: opacity var(--duration-normal) var(--ease-enter),
               transform var(--duration-normal) var(--ease-emphasized),
               background var(--duration-fast) var(--ease-enter);
@@ -226,38 +225,28 @@
   transform: translate3d(0, 0, 0) scale(1);
 }
 
-.album-feed__publish-primary {
-  flex-direction: row;
-  gap: var(--spacer-8);
-  min-height: var(--size-56);
-  padding-block: var(--spacer-0);
-  padding-inline: var(--spacer-12);
-  border-radius: var(--radius-12);
-  background: var(--bg-brand);
-  color: var(--text-inverse);
-}
-
-.album-feed__publish-secondary {
-  flex-direction: column;
-  gap: var(--spacer-4);
-  min-height: var(--size-64);
-  padding-block: var(--spacer-8);
-  padding-inline: var(--spacer-4);
-  border-radius: var(--radius-8);
-  background: var(--bg-subtle);
-  color: var(--text-default);
-}
-
 .album-feed__publish-choice:active,
 .album-feed__publish-choice.is-pressed {
-  transform: scale(0.96);
+  background: var(--bg-subtle);
+  transform: scale(0.98);
 }
 
-.album-feed__publish-dock[data-state="open"] .album-feed__publish-primary:nth-child(1) { transition-delay: 20ms; }
-.album-feed__publish-dock[data-state="open"] .album-feed__publish-primary:nth-child(2) { transition-delay: 50ms; }
-.album-feed__publish-dock[data-state="open"] .album-feed__publish-secondary:nth-child(1) { transition-delay: 80ms; }
-.album-feed__publish-dock[data-state="open"] .album-feed__publish-secondary:nth-child(2) { transition-delay: 110ms; }
-.album-feed__publish-dock[data-state="open"] .album-feed__publish-secondary:nth-child(3) { transition-delay: 140ms; }
+.album-feed__publish-icon-host {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--size-40);
+  height: var(--size-40);
+  border-radius: var(--radius-full);
+  background: var(--bg-subtle);
+}
+
+.album-feed__publish-dock[data-state="open"] .album-feed__publish-choice:nth-child(1) { transition-delay: 20ms; }
+.album-feed__publish-dock[data-state="open"] .album-feed__publish-choice:nth-child(2) { transition-delay: 45ms; }
+.album-feed__publish-dock[data-state="open"] .album-feed__publish-choice:nth-child(3) { transition-delay: 70ms; }
+.album-feed__publish-dock[data-state="open"] .album-feed__publish-choice:nth-child(4) { transition-delay: 95ms; }
+.album-feed__publish-dock[data-state="open"] .album-feed__publish-choice:nth-child(5) { transition-delay: 120ms; }
 
 .album-feed__publish-choice-icon {
   flex-shrink: 0;
@@ -287,9 +276,9 @@
   padding: var(--spacer-0);
   border: 0;
   border-radius: var(--radius-full);
-  background: var(--bg-brand);
+  background: var(--bg-surface);
   box-shadow: var(--shadow-lg);
-  color: var(--text-inverse);
+  color: var(--text-default);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
@@ -310,7 +299,7 @@
   position: absolute;
   inset: calc(var(--spacer-4) * -1);
   border-radius: var(--radius-full);
-  background: var(--bg-brand);
+  background: var(--bg-subtle);
   opacity: 0;
   transform: scale(0.8);
   pointer-events: none;
@@ -325,7 +314,7 @@
 .album-feed__publish-fab-icon {
   position: relative;
   z-index: 1;
-  color: var(--text-inverse);
+  color: var(--text-default);
   font-size: var(--size-24);
   transition: transform var(--duration-normal) var(--ease-emphasized);
 }

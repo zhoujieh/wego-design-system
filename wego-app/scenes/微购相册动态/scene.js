@@ -121,7 +121,7 @@
         "selector": ".album-feed__publish-fab",
         "content_role": "右下角悬浮发布入口背景",
         "css_property": "background",
-        "token": "var(--bg-brand)"
+        "token": "var(--bg-surface)"
       },
       {
         "selector": ".album-feed__publish-fab",
@@ -157,13 +157,13 @@
         "selector": ".album-feed__publish-fab",
         "content_role": "右下角悬浮发布入口文字色",
         "css_property": "color",
-        "token": "var(--text-inverse)"
+        "token": "var(--text-default)"
       },
       {
         "selector": ".album-feed__publish-fab-ripple",
         "content_role": "右下角悬浮发布入口波纹背景",
         "css_property": "background",
-        "token": "var(--bg-brand)"
+        "token": "var(--bg-subtle)"
       },
       {
         "selector": ".album-feed__publish-fab-ripple",
@@ -175,7 +175,7 @@
         "selector": ".album-feed__publish-fab-icon",
         "content_role": "悬浮发布入口加号颜色",
         "css_property": "color",
-        "token": "var(--text-inverse)"
+        "token": "var(--text-default)"
       },
       {
         "selector": ".album-feed__publish-fab-icon",
@@ -217,91 +217,91 @@
         "selector": ".album-feed__publish-dock-surface",
         "content_role": "发布托盘分组间距",
         "css_property": "gap",
-        "token": "var(--spacer-8)"
+        "token": "var(--spacer-4)"
       },
       {
-        "selector": ".album-feed__publish-primary-row",
-        "content_role": "发布主类型横向间距",
+        "selector": ".album-feed__publish-list",
+        "content_role": "发布列表组间距",
         "css_property": "gap",
-        "token": "var(--spacer-8)"
+        "token": "var(--spacer-4)"
       },
       {
-        "selector": ".album-feed__publish-secondary-row",
-        "content_role": "发布次类型横向间距",
+        "selector": ".album-feed__publish-choice",
+        "content_role": "发布列表项图文间距",
         "css_property": "gap",
-        "token": "var(--spacer-8)"
-      },
-      {
-        "selector": ".album-feed__publish-primary",
-        "content_role": "发布主类型按钮内图文间距",
-        "css_property": "gap",
-        "token": "var(--spacer-8)"
-      },
-      {
-        "selector": ".album-feed__publish-primary",
-        "content_role": "发布主类型按钮纵向内边距",
-        "css_property": "padding-block",
-        "token": "var(--spacer-0)"
-      },
-      {
-        "selector": ".album-feed__publish-primary",
-        "content_role": "发布主类型按钮横向内边距",
-        "css_property": "padding-inline",
         "token": "var(--spacer-12)"
       },
       {
-        "selector": ".album-feed__publish-primary",
-        "content_role": "发布主类型按钮背景",
+        "selector": ".album-feed__publish-choice",
+        "content_role": "发布列表项背景",
         "css_property": "background",
-        "token": "var(--bg-brand)"
+        "token": "var(--transparent)"
       },
       {
-        "selector": ".album-feed__publish-primary",
-        "content_role": "发布主类型按钮文字色",
-        "css_property": "color",
-        "token": "var(--text-inverse)"
-      },
-      {
-        "selector": ".album-feed__publish-primary",
-        "content_role": "发布主类型按钮圆角",
-        "css_property": "border-radius",
-        "token": "var(--radius-12)"
-      },
-      {
-        "selector": ".album-feed__publish-secondary",
-        "content_role": "发布次类型按钮内图文间距",
-        "css_property": "gap",
-        "token": "var(--spacer-4)"
-      },
-      {
-        "selector": ".album-feed__publish-secondary",
-        "content_role": "发布次类型按钮纵向内边距",
-        "css_property": "padding-block",
-        "token": "var(--spacer-8)"
-      },
-      {
-        "selector": ".album-feed__publish-secondary",
-        "content_role": "发布次类型按钮横向内边距",
-        "css_property": "padding-inline",
-        "token": "var(--spacer-4)"
-      },
-      {
-        "selector": ".album-feed__publish-secondary",
-        "content_role": "发布次类型按钮背景",
-        "css_property": "background",
-        "token": "var(--bg-subtle)"
-      },
-      {
-        "selector": ".album-feed__publish-secondary",
-        "content_role": "发布次类型按钮文字色",
+        "selector": ".album-feed__publish-choice",
+        "content_role": "发布列表项文字色",
         "css_property": "color",
         "token": "var(--text-default)"
       },
       {
-        "selector": ".album-feed__publish-secondary",
-        "content_role": "发布次类型按钮圆角",
+        "selector": ".album-feed__publish-choice",
+        "content_role": "发布列表项圆角",
         "css_property": "border-radius",
-        "token": "var(--radius-8)"
+        "token": "var(--radius-12)"
+      },
+      {
+        "selector": ".album-feed__publish-choice",
+        "content_role": "发布列表项最小高度",
+        "css_property": "min-height",
+        "token": "var(--size-56)"
+      },
+      {
+        "selector": ".album-feed__publish-choice",
+        "content_role": "发布列表项纵向内边距",
+        "css_property": "padding-block",
+        "token": "var(--spacer-0)"
+      },
+      {
+        "selector": ".album-feed__publish-choice",
+        "content_role": "发布列表项横向内边距",
+        "css_property": "padding-inline",
+        "token": "var(--spacer-12)"
+      },
+      {
+        "selector": ".album-feed__publish-choice:active",
+        "content_role": "发布列表项按压背景",
+        "css_property": "background",
+        "token": "var(--bg-subtle)"
+      },
+      {
+        "selector": ".album-feed__publish-choice.is-pressed",
+        "content_role": "发布列表项触控反馈背景",
+        "css_property": "background",
+        "token": "var(--bg-subtle)"
+      },
+      {
+        "selector": ".album-feed__publish-icon-host",
+        "content_role": "发布列表图标底板宽度",
+        "css_property": "width",
+        "token": "var(--size-40)"
+      },
+      {
+        "selector": ".album-feed__publish-icon-host",
+        "content_role": "发布列表图标底板高度",
+        "css_property": "height",
+        "token": "var(--size-40)"
+      },
+      {
+        "selector": ".album-feed__publish-icon-host",
+        "content_role": "发布列表图标底板背景",
+        "css_property": "background",
+        "token": "var(--bg-subtle)"
+      },
+      {
+        "selector": ".album-feed__publish-icon-host",
+        "content_role": "发布列表图标底板圆角",
+        "css_property": "border-radius",
+        "token": "var(--radius-full)"
       },
       {
         "selector": ".album-feed__publish-choice-icon",
@@ -1137,8 +1137,8 @@
       375,
       393
     ],
-    "checked_at": "2026-07-24T00:54:14.000Z",
-    "scope": "顶部 page-tabs 居中且左右预留对称栏位，右上角发布入口保持原有 popmenu；右下角悬浮入口保持纯加号，点击时触发短震动并从按钮右下角原点形变展开无标题发布类型托盘。375/393px 验证托盘在视口内、不压加号、不覆盖底部 Tab、无横向溢出，点击发产品后托盘关闭并出现未开放 toast。",
+    "checked_at": "2026-07-24T01:06:23.000Z",
+    "scope": "顶部 page-tabs 居中且左右预留对称栏位，右上角发布入口保持原有 popmenu；右下角悬浮入口保持纯加号和中性白底，点击时触发短震动并从按钮右下角原点形变展开无标题发布类型列表面板。移动端预览验证列表面板在视口内、层级高于局部弱化层、不覆盖底部 Tab、无横向溢出，点击发产品后面板关闭并出现未开放 toast。",
     "checks": {
       "horizontal_overflow": true,
       "overlap": true,
@@ -1355,27 +1355,25 @@
         <div class="album-feed__publish-focus" data-dom-id="publish-focus" aria-hidden="true"></div>
         <div class="album-feed__publish-dock" data-region="publish-dock" data-state="closed" aria-hidden="true">
           <div class="album-feed__publish-dock-surface">
-            <div class="album-feed__publish-primary-row">
-              <button type="button" class="album-feed__publish-choice album-feed__publish-primary" data-dom-id="publish-action-product">
-                <i class="wego-iconfont-s icon-fabushangpin album-feed__publish-choice-icon" aria-hidden="true"></i>
+            <div class="album-feed__publish-list">
+              <button type="button" class="album-feed__publish-choice" data-dom-id="publish-action-product">
+                <span class="album-feed__publish-icon-host"><i class="wego-iconfont-s icon-fabushangpin album-feed__publish-choice-icon" aria-hidden="true"></i></span>
                 <span class="album-feed__publish-choice-text">发产品</span>
               </button>
-              <button type="button" class="album-feed__publish-choice album-feed__publish-primary" data-dom-id="publish-action-note">
-                <i class="wego-iconfont-s icon-fabubiji album-feed__publish-choice-icon" aria-hidden="true"></i>
+              <button type="button" class="album-feed__publish-choice" data-dom-id="publish-action-note">
+                <span class="album-feed__publish-icon-host"><i class="wego-iconfont-s icon-fabubiji album-feed__publish-choice-icon" aria-hidden="true"></i></span>
                 <span class="album-feed__publish-choice-text">发笔记</span>
               </button>
-            </div>
-            <div class="album-feed__publish-secondary-row">
-              <button type="button" class="album-feed__publish-choice album-feed__publish-secondary" data-dom-id="publish-action-live">
-                <i class="wego-iconfont-s icon-zhibo album-feed__publish-choice-icon" aria-hidden="true"></i>
+              <button type="button" class="album-feed__publish-choice" data-dom-id="publish-action-live">
+                <span class="album-feed__publish-icon-host"><i class="wego-iconfont-s icon-zhibo album-feed__publish-choice-icon" aria-hidden="true"></i></span>
                 <span class="album-feed__publish-choice-text">开直播</span>
               </button>
-              <button type="button" class="album-feed__publish-choice album-feed__publish-secondary" data-dom-id="publish-action-import">
-                <i class="wego-iconfont-s icon-piliangdaoru album-feed__publish-choice-icon" aria-hidden="true"></i>
+              <button type="button" class="album-feed__publish-choice" data-dom-id="publish-action-import">
+                <span class="album-feed__publish-icon-host"><i class="wego-iconfont-s icon-piliangdaoru album-feed__publish-choice-icon" aria-hidden="true"></i></span>
                 <span class="album-feed__publish-choice-text">批量导入</span>
               </button>
-              <button type="button" class="album-feed__publish-choice album-feed__publish-secondary" data-dom-id="publish-action-scan">
-                <i class="wego-iconfont-s icon-saoyisao album-feed__publish-choice-icon" aria-hidden="true"></i>
+              <button type="button" class="album-feed__publish-choice" data-dom-id="publish-action-scan">
+                <span class="album-feed__publish-icon-host"><i class="wego-iconfont-s icon-saoyisao album-feed__publish-choice-icon" aria-hidden="true"></i></span>
                 <span class="album-feed__publish-choice-text">扫一扫</span>
               </button>
             </div>
