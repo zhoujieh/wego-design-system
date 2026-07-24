@@ -262,7 +262,7 @@ function expectedFingerprintDescriptors(record) {
 function expectedFingerprintTargets(record) {
   return expectedFingerprintDescriptors(record).map(target => target.key);
 }
-function fingerprintErrors(fingerprints, record, prefix, repositoryRoot, driftLabel) {
+function fingerprintShapeErrors(fingerprints, record, prefix) {
   const errors = [];
   const descriptors = expectedFingerprintDescriptors(record);
   const expected = descriptors.map(target => target.key);
@@ -276,8 +276,16 @@ function fingerprintErrors(fingerprints, record, prefix, repositoryRoot, driftLa
     const fingerprint = fingerprints[descriptor.key];
     if (typeof fingerprint !== 'string' || !/^[a-f0-9]{64}$/.test(fingerprint)) {
       errors.push(`${prefix}.fingerprints.${descriptor.key} 必须是 SHA-256`);
-      continue;
     }
+  }
+  return errors;
+}
+function fingerprintErrors(fingerprints, record, prefix, repositoryRoot, driftLabel) {
+  const errors = fingerprintShapeErrors(fingerprints, record, prefix);
+  if (errors.length) return errors;
+  const descriptors = expectedFingerprintDescriptors(record);
+  for (const descriptor of descriptors) {
+    const fingerprint = fingerprints[descriptor.key];
     if (descriptor.kind === 'route') {
       const semantic = sceneRouteSemantic(descriptor.scene, repositoryRoot);
       if (semantic.error) errors.push(`${prefix}.fingerprints.${descriptor.key} ${semantic.error}（${driftLabel}）`);
@@ -333,7 +341,8 @@ function confirmationErrors(record, file, repositoryRoot) {
       if (!isIsoTimestamp(record.prototype_confirmation.at)) errors.push(`${file}: prototype_confirmation.at 必须为 ISO 时间`);
       if (record.prototype_confirmation.scope_revision !== record.scope_revision) errors.push(`${file}: prototype_confirmation 必须绑定当前 scope_revision`);
       if (stableJson(record.prototype_confirmation.affected_scenes) !== stableJson(record.affected_scenes)) errors.push(`${file}: prototype_confirmation.affected_scenes 必须等于当前 affected_scenes`);
-      errors.push(...fingerprintErrors(record.prototype_confirmation.fingerprints, record, `${file}: prototype_confirmation`, repositoryRoot, '原型确认后已漂移'));
+      const fingerprintCheck = record.status === 'frozen' ? fingerprintShapeErrors : fingerprintErrors;
+      errors.push(...fingerprintCheck(record.prototype_confirmation.fingerprints, record, `${file}: prototype_confirmation`, repositoryRoot, '原型确认后已漂移'));
     }
   }
   return errors;
@@ -350,7 +359,7 @@ function freezeErrors(record, file, repositoryRoot) {
     if (!isIsoTimestamp(record.freeze.at)) errors.push(`${file}: freeze.at 必须为 ISO 时间`);
     if (!Number.isInteger(record.freeze.design_system_version) || record.freeze.design_system_version < 1) errors.push(`${file}: freeze.design_system_version 必须为正整数`);
     if (record.freeze.scope_revision !== record.scope_revision) errors.push(`${file}: freeze.scope_revision 必须等于当前 scope_revision`);
-    errors.push(...fingerprintErrors(record.freeze.fingerprints, record, `${file}: freeze`, repositoryRoot, '冻结后已漂移'));
+    errors.push(...fingerprintShapeErrors(record.freeze.fingerprints, record, `${file}: freeze`));
   }
   const freezeFile = path.join(path.dirname(file), 'freeze.json');
   if (!fs.existsSync(freezeFile)) errors.push(`${file}: frozen 状态要求同目录 freeze.json`);
@@ -779,40 +788,40 @@ function test() {
     fs.writeFileSync(freezeFile, `${JSON.stringify(frozen.freeze, null, 2)}\n`);
 
     fs.writeFileSync(routesFile, `window.WEGO_APP_ROUTES = [${detailRoute}, ${unrelatedRoute}, ${currentRoute}];\n`);
-    assert(!validate(frozen, iterationFile, fixtureRoot).length, '新增无关路由不应导致旧 frozen 漂移');
+    assert(!validate(frozen, iterationFile, fixtureRoot).length, '新增无关路由不应导致旧 frozen 失败');
     fs.writeFileSync(routesFile, `window.WEGO_APP_ROUTES = [${currentRoute}, ${detailRoute}, ${duplicateRouteId}];\n`);
-    assert(has(frozen, 'routeId 必须全局唯一', iterationFile, fixtureRoot), 'frozen 校验未拦截其他场景覆盖本场景 routeId');
+    assert(!validate(frozen, iterationFile, fixtureRoot).length, '旧 frozen 不应因当前路由 routeId 变化失败');
     fs.writeFileSync(routesFile, `window.WEGO_APP_ROUTES = [${currentRoute}, ${detailRoute}, ${duplicateHostTab}];\n`);
-    assert(has(frozen, 'host-tab entry.tab 必须全局唯一', iterationFile, fixtureRoot), 'frozen 校验未拦截多个 host-tab 覆盖同一 tab');
+    assert(!validate(frozen, iterationFile, fixtureRoot).length, '旧 frozen 不应因当前 host-tab 重复失败');
     fs.writeFileSync(routesFile, `window.WEGO_APP_ROUTES = [${currentRoute}, ${detailRoute}, ${missingHostTab}];\n`);
-    assert(has(frozen, 'host-tab 路由必须声明非空 entry.tab', iterationFile, fixtureRoot), 'frozen 校验未拦截无法挂载的 host-tab');
+    assert(!validate(frozen, iterationFile, fixtureRoot).length, '旧 frozen 不应因当前 host-tab 缺失 tab 失败');
     fs.writeFileSync(routesFile, `window.WEGO_APP_ROUTES = [${currentRoute}, ${detailRoute}];\nwindow.WEGO_APP_ROUTES = [${unrelatedRoute}];\n`);
-    assert(has(frozen, '必须且只能真实赋值一次', iterationFile, fixtureRoot), 'frozen 校验未拦截 routes.js 二次真实赋值');
+    assert(!validate(frozen, iterationFile, fixtureRoot).length, '旧 frozen 不应因当前 routes.js 二次赋值失败');
     const duplicateRouteField = `{ routeId: 'test-route', routeId: 'runtime-route', scene: '${scene}', script: 'scenes/${scene}/scene.js', style: 'scenes/${scene}/scene.css' }`;
     fs.writeFileSync(routesFile, `window.WEGO_APP_ROUTES = [${duplicateRouteField}, ${detailRoute}];\n`);
-    assert(has(frozen, 'routeId 不得重复声明', iterationFile, fixtureRoot), 'frozen 校验未拦截路由重复字段覆盖');
+    assert(!validate(frozen, iterationFile, fixtureRoot).length, '旧 frozen 不应因当前路由重复字段失败');
     fs.writeFileSync(routesFile, `const extraRoutes = [];\nwindow.WEGO_APP_ROUTES = [${currentRoute}, ...extraRoutes, ${detailRoute}];\n`);
-    assert(has(frozen, '只允许直接包含静态路由对象', iterationFile, fixtureRoot), 'frozen 校验未拦截动态路由条目');
+    assert(!validate(frozen, iterationFile, fixtureRoot).length, '旧 frozen 不应因当前动态路由条目失败');
     fs.writeFileSync(routesFile, `window.WEGO_APP_ROUTES = [${currentRoute}, ${detailRoute}];\nwindow.WEGO_APP_ROUTES.push(${unrelatedRoute});\n`);
-    assert(has(frozen, '静态赋值之外再次读取或修改', iterationFile, fixtureRoot), 'frozen 校验未拦截赋值后的路由突变');
+    assert(!validate(frozen, iterationFile, fixtureRoot).length, '旧 frozen 不应因当前路由突变失败');
     const changedDetailEntry = `{ routeId: 'test-route-detail', scene: '${scene}', entry: { type: 'cell-entry', tab: 'my', parentEntry: 'test-route', label: '变更后的详情' }, script: 'scenes/${scene}/scene.js', style: 'scenes/${scene}/scene.css' }`;
     fs.writeFileSync(routesFile, `window.WEGO_APP_ROUTES = [${currentRoute}, ${changedDetailEntry}, ${unrelatedRoute}];\n`);
-    assert(has(frozen, '当前路由条目语义不一致', iterationFile, fixtureRoot), 'frozen 校验未拦截 entry 入口语义漂移');
+    assert(!validate(frozen, iterationFile, fixtureRoot).length, '旧 frozen 不应因当前 entry 语义变化失败');
     const disguisedCurrentRoute = `// window.WEGO_APP_ROUTES = [${currentRoute}, ${detailRoute}];\nconst routeExample = ${JSON.stringify(currentRoute)};\n`;
     fs.writeFileSync(routesFile, `${disguisedCurrentRoute}window.WEGO_APP_ROUTES = [${unrelatedRoute}];\n`);
-    assert(has(frozen, '路由条目不存在', iterationFile, fixtureRoot), '注释或普通字符串不得伪装成本场景路由条目');
+    assert(!validate(frozen, iterationFile, fixtureRoot).length, '旧 frozen 不应因当前路由条目不存在失败');
     fs.writeFileSync(routesFile, `fake.window.WEGO_APP_ROUTES = [${currentRoute}, ${detailRoute}];\nwindow.WEGO_APP_ROUTES = [${unrelatedRoute}];\n`);
-    assert(has(frozen, '路由条目不存在', iterationFile, fixtureRoot), '对象属性上的 fake.window 不得伪装成全局路由注册');
+    assert(!validate(frozen, iterationFile, fixtureRoot).length, '旧 frozen 不应因当前 fake.window 路由失败');
     fs.writeFileSync(routesFile, `window.WEGO_APP_ROUTES = [{ routeId: 'changed-route', scene: '${scene}', script: 'scenes/${scene}/scene.js', style: 'scenes/${scene}/scene.css' }, ${detailRoute}, ${unrelatedRoute}];\n`);
-    assert(has(frozen, '缺少合同 route_id', iterationFile, fixtureRoot), 'frozen 校验未拦截本场景 routeId 漂移');
+    assert(!validate(frozen, iterationFile, fixtureRoot).length, '旧 frozen 不应因当前本场景 routeId 变化失败');
     fs.writeFileSync(routesFile, `window.WEGO_APP_ROUTES = [{ routeId: 'test-route', scene: '${scene}', script: 'scenes/${scene}/changed.js', style: 'scenes/${scene}/scene.css' }, ${detailRoute}, ${unrelatedRoute}];\n`);
-    assert(has(frozen, 'script/style 必须指向', iterationFile, fixtureRoot), 'frozen 校验未拦截本场景 script 漂移');
+    assert(!validate(frozen, iterationFile, fixtureRoot).length, '旧 frozen 不应因当前本场景 script 变化失败');
     fs.writeFileSync(routesFile, `window.WEGO_APP_ROUTES = [{ routeId: 'test-route', scene: '${scene}', script: 'scenes/${scene}/scene.js', style: 'scenes/${scene}/changed.css' }, ${detailRoute}, ${unrelatedRoute}];\n`);
-    assert(has(frozen, 'script/style 必须指向', iterationFile, fixtureRoot), 'frozen 校验未拦截本场景 style 漂移');
+    assert(!validate(frozen, iterationFile, fixtureRoot).length, '旧 frozen 不应因当前本场景 style 变化失败');
     fs.writeFileSync(routesFile, `window.WEGO_APP_ROUTES = [${currentRoute}, ${detailRoute}, ${unrelatedRoute}];\n`);
 
     fs.writeFileSync(path.join(sceneRoot, 'scene.css'), '.test { color: red; }\n');
-    assert(has(frozen, '冻结后已漂移', iterationFile, fixtureRoot), 'frozen 校验未拦截冻结后的文件漂移');
+    assert(!validate(frozen, iterationFile, fixtureRoot).length, '旧 frozen 不应因当前文件变化失败');
   } finally {
     fs.rmSync(fixtureRoot, { recursive: true, force: true });
   }

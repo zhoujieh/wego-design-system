@@ -145,6 +145,11 @@
   line-height: var(--heading-xs-line-height);
 }
 
+.dynamic-detail__select-cart.is-added .bottom-action-bar__action-icon,
+.dynamic-detail__select-cart.is-added .bottom-action-bar__action-label {
+  color: var(--text-brand);
+}
+
 @media (min-width: 768px) {
   .dynamic-detail__media-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));

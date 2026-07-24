@@ -11,7 +11,7 @@
       "商品详情"
     ]
   },
-  "status": "awaiting-prototype-confirmation",
+  "status": "frozen",
   "scope_revision": 14,
   "prototype_brief": {
     "goal": "重构「动态」主 tab 的首屏分发效率与发现流体验，让用户在首屏快速识别并进入感兴趣的动态详情，完整消费文本、图片或视频内容；关联商品详情作为次级链路存在。顶部、卡片信息层级与操作布局必须符合清晰与高效原则。",
@@ -389,7 +389,43 @@
     "scope_revision": 14,
     "scope_sha256": "c968cf89f54537278122041d207ec857cff26c1cb382a0401dce9c0deee6011a"
   },
-  "prototype_confirmation": null,
+  "prototype_confirmation": {
+    "at": "2026-07-24T01:16:51.028Z",
+    "scope_revision": 14,
+    "affected_scenes": [
+      "微购相册动态",
+      "动态详情",
+      "商品详情",
+      "好友列表",
+      "我的"
+    ],
+    "fingerprints": {
+      "@route-entry/%E5%8A%A8%E6%80%81%E8%AF%A6%E6%83%85": "2b96611f0e8f2c4fb2985724ce0c18ff823bd9132d81c144e0d5cae437f547f1",
+      "@route-entry/%E5%95%86%E5%93%81%E8%AF%A6%E6%83%85": "f9384a3acadf34c64221e8ab506d725878ec23424eccffb3f25bdbb4909a0144",
+      "@route-entry/%E5%A5%BD%E5%8F%8B%E5%88%97%E8%A1%A8": "f2eb4d0acc5c17d3b578aa7e0250e8d732b5ccb86cab36821789822cdfe4ae15",
+      "@route-entry/%E5%BE%AE%E8%B4%AD%E7%9B%B8%E5%86%8C%E5%8A%A8%E6%80%81": "79c0590810ca2dbf402f2643741513085b5d1b712678c74aede4afb6a6c44701",
+      "@route-entry/%E6%88%91%E7%9A%84": "0cb327addfe552eea181fcd8e896671f0cb725cdc3f3f30da8389e7d11457f75",
+      "wego-app/data/prototype-db.js": "fc929aa555291d3b012495a6e9e3b26e4534642480298a4b8860b8cccc8f4364",
+      "wego-app/data/README.md": "0321d09b6ff6a178d3ccb764a7ee704ecc623cab850922050d89b8b2b3f09f26",
+      "wego-app/index.html": "b670a7689560dd498decc1af0ba638fd8791f6cacc9e60978fdac9f42b766760",
+      "wego-app/README.md": "a4fb50af4757d3866d853fa7705e75e1608f27ec22ece0aa58333b9adfb88d86",
+      "wego-app/scenes/动态详情/design-decisions.json": "901859001106267f2d41e02662a848a7fa7cce74ce0e395b35f2c5c23a9791ee",
+      "wego-app/scenes/动态详情/scene.css": "30fb4b15229196220f7be49de8cbb8dfc3631b9671c2974b1059d4acb3935a35",
+      "wego-app/scenes/动态详情/scene.js": "b37ddf2d685b8274c64536e10b5a038828ba17fb3a8f630382f1f02b24c291d3",
+      "wego-app/scenes/商品详情/design-decisions.json": "6bca1a0846e176f8e311a12f6c8e2776408821936572e01a1f6ab32c0720f715",
+      "wego-app/scenes/商品详情/scene.css": "3c333893f84cb4fc80702411a37217452eb11152a7b681a8108d4202f70bebb5",
+      "wego-app/scenes/商品详情/scene.js": "fe1958a6ba00c358729b37543c5aa8dc56e69127fef79f337dec27c64a05f941",
+      "wego-app/scenes/好友列表/design-decisions.json": "baebb5bc2e7b2eec49e83bad122f60ad0e0048327f4f4f43732d01eb855279c6",
+      "wego-app/scenes/好友列表/scene.css": "d7bb0ca539869490e484ae61120fcfe519948c3bd992536ae50f385cd36a9c6f",
+      "wego-app/scenes/好友列表/scene.js": "a38167c8695c9b0a76be860438a5096d910b886ac5c98f1c08f8e051c3512093",
+      "wego-app/scenes/微购相册动态/design-decisions.json": "adc652136093b217cceae27859c0e76c0fb3525035c0ad4ec03e3de86bfd9b1b",
+      "wego-app/scenes/微购相册动态/scene.css": "b9edcdf48003459cefe60a14a75f3df8bcadac23d3f8ce0dcf71089b68027e00",
+      "wego-app/scenes/微购相册动态/scene.js": "e3db16c91ebfa10040c82c82123a41d209ff734db2b5aef021a2f2fffffa54a2",
+      "wego-app/scenes/我的/design-decisions.json": "99296de01d962249b90931e091337015dea3f796fe62796ccbf912142103e08b",
+      "wego-app/scenes/我的/scene.css": "758b45e01a01acbfed92195f20f03b568cf9f8d6d1e9055598a39727a5838add",
+      "wego-app/scenes/我的/scene.js": "a9081ae98e622fde0a746f4425bf605c6f137b3bfef1837bf722fb8e0c6c7778"
+    }
+  },
   "affected_scenes": [
     "微购相册动态",
     "动态详情",
@@ -575,7 +611,45 @@
     {
       "action": "submit-prototype",
       "at": "2026-07-24T00:33:40.622Z"
+    },
+    {
+      "action": "confirm-prototype",
+      "at": "2026-07-24T01:16:51.046Z"
+    },
+    {
+      "action": "freeze",
+      "at": "2026-07-24T01:16:55.339Z"
     }
   ],
-  "freeze": null
+  "freeze": {
+    "at": "2026-07-24T01:16:55.332Z",
+    "design_system_version": 451,
+    "scope_revision": 14,
+    "fingerprints": {
+      "@route-entry/%E5%8A%A8%E6%80%81%E8%AF%A6%E6%83%85": "2b96611f0e8f2c4fb2985724ce0c18ff823bd9132d81c144e0d5cae437f547f1",
+      "@route-entry/%E5%95%86%E5%93%81%E8%AF%A6%E6%83%85": "f9384a3acadf34c64221e8ab506d725878ec23424eccffb3f25bdbb4909a0144",
+      "@route-entry/%E5%A5%BD%E5%8F%8B%E5%88%97%E8%A1%A8": "f2eb4d0acc5c17d3b578aa7e0250e8d732b5ccb86cab36821789822cdfe4ae15",
+      "@route-entry/%E5%BE%AE%E8%B4%AD%E7%9B%B8%E5%86%8C%E5%8A%A8%E6%80%81": "79c0590810ca2dbf402f2643741513085b5d1b712678c74aede4afb6a6c44701",
+      "@route-entry/%E6%88%91%E7%9A%84": "0cb327addfe552eea181fcd8e896671f0cb725cdc3f3f30da8389e7d11457f75",
+      "wego-app/data/prototype-db.js": "fc929aa555291d3b012495a6e9e3b26e4534642480298a4b8860b8cccc8f4364",
+      "wego-app/data/README.md": "0321d09b6ff6a178d3ccb764a7ee704ecc623cab850922050d89b8b2b3f09f26",
+      "wego-app/index.html": "b670a7689560dd498decc1af0ba638fd8791f6cacc9e60978fdac9f42b766760",
+      "wego-app/README.md": "a4fb50af4757d3866d853fa7705e75e1608f27ec22ece0aa58333b9adfb88d86",
+      "wego-app/scenes/动态详情/design-decisions.json": "901859001106267f2d41e02662a848a7fa7cce74ce0e395b35f2c5c23a9791ee",
+      "wego-app/scenes/动态详情/scene.css": "30fb4b15229196220f7be49de8cbb8dfc3631b9671c2974b1059d4acb3935a35",
+      "wego-app/scenes/动态详情/scene.js": "b37ddf2d685b8274c64536e10b5a038828ba17fb3a8f630382f1f02b24c291d3",
+      "wego-app/scenes/商品详情/design-decisions.json": "6bca1a0846e176f8e311a12f6c8e2776408821936572e01a1f6ab32c0720f715",
+      "wego-app/scenes/商品详情/scene.css": "3c333893f84cb4fc80702411a37217452eb11152a7b681a8108d4202f70bebb5",
+      "wego-app/scenes/商品详情/scene.js": "fe1958a6ba00c358729b37543c5aa8dc56e69127fef79f337dec27c64a05f941",
+      "wego-app/scenes/好友列表/design-decisions.json": "baebb5bc2e7b2eec49e83bad122f60ad0e0048327f4f4f43732d01eb855279c6",
+      "wego-app/scenes/好友列表/scene.css": "d7bb0ca539869490e484ae61120fcfe519948c3bd992536ae50f385cd36a9c6f",
+      "wego-app/scenes/好友列表/scene.js": "a38167c8695c9b0a76be860438a5096d910b886ac5c98f1c08f8e051c3512093",
+      "wego-app/scenes/微购相册动态/design-decisions.json": "adc652136093b217cceae27859c0e76c0fb3525035c0ad4ec03e3de86bfd9b1b",
+      "wego-app/scenes/微购相册动态/scene.css": "b9edcdf48003459cefe60a14a75f3df8bcadac23d3f8ce0dcf71089b68027e00",
+      "wego-app/scenes/微购相册动态/scene.js": "e3db16c91ebfa10040c82c82123a41d209ff734db2b5aef021a2f2fffffa54a2",
+      "wego-app/scenes/我的/design-decisions.json": "99296de01d962249b90931e091337015dea3f796fe62796ccbf912142103e08b",
+      "wego-app/scenes/我的/scene.css": "758b45e01a01acbfed92195f20f03b568cf9f8d6d1e9055598a39727a5838add",
+      "wego-app/scenes/我的/scene.js": "a9081ae98e622fde0a746f4425bf605c6f137b3bfef1837bf722fb8e0c6c7778"
+    }
+  }
 }

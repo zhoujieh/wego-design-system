@@ -67,7 +67,7 @@ draft → awaiting-brief-confirmation → prototyping → awaiting-prototype-con
 - `confirm-brief`：用户确认范围，确认对象绑定当前 `scope_revision` 和范围哈希，交给 `wego-design`。
 - `submit-prototype`：场景、决策证据和守卫均已完成；命令会实际运行每个受影响场景的场景合同，全部通过后才可等待用户定稿。
 - `confirm-prototype`：先重新运行受影响场景合同，再让确认对象绑定当前 `scope_revision`、`affected_scenes`、场景源码、场景自身路由条目、决策证据和 `affected_runtime` 的 SHA-256。该状态仍可失效后继续验收修改，不代表冻结。
-- `freeze`：仅在用户明确指定当前迭代并要求“冻结”后执行；命令必须携带 `--user-confirmed-freeze <iteration_id>`。命令会先确认原型确认后的文件没有漂移，再在 `iteration.json.freeze` 与同目录 `freeze.json` 同时记录设计系统版本、当前范围版本和完整指纹；已有 `freeze.json` 禁止覆盖。
+- `freeze`：仅在用户明确指定当前迭代并要求“冻结”后执行；命令必须携带 `--user-confirmed-freeze <iteration_id>`。命令会先确认原型确认后的文件没有漂移，再在 `iteration.json.freeze` 与同目录 `freeze.json` 同时记录设计系统版本、当前范围版本和完整指纹；已有 `freeze.json` 禁止覆盖。冻结完成后，该迭代作为历史快照保留，后续全量检查只校验冻结记录格式、指纹键集合和 `freeze.json` 一致性，不再要求当前源码继续等于冻结时源码。
 - `invalidate --stage=brief|prototype`：在对应产物修改前失效确认；命令同时支持 `--stage prototype` 与 `--stage=prototype`，其他带值参数同理。
 
 <!-- rule-id: business-iteration-explicit-user-freeze -->
@@ -125,7 +125,7 @@ wego-app/scenes/{主业务场景}/_iterations/{YYYYMMDD}-{iteration_id}-{title}/
 
 活动迭代的 `affected_scenes` 必须是非空、去重的单层场景名并包含 `identity.primary_scene`，禁止 `/`、`\`、`.` 和 `..`。`affected_runtime` 的每一项必须是非空、去重的仓库相对安全路径，禁止绝对路径、反斜杠以及 `.`、`..` 路径段。所有命令的 `--file` 必须固定指向 `wego-app/scenes/{identity.primary_scene}/_iterations/{迭代目录}/iteration.json`，禁止仓库外路径、错场景目录、非 `_iterations` 位置和符号链接跳转。
 
-冻结记录必须完整包含 `at`、`design_system_version`、`scope_revision` 和非空 `fingerprints`。指纹键集合必须恰好等于 `affected_runtime`、每个场景的 `scene.js`、`scene.css`、`design-decisions.json` 和该场景的虚拟路由条目键。路由指纹只计算真实全局 `window.WEGO_APP_ROUTES` 注册中属于本场景的完整路由集合；该全局变量必须且只能静态赋值一次，数组直接包含静态路由对象。指纹覆盖运行时消费的 `routeId`、`scene`、`script`、`style` 以及 `entry.type/tab/group/label/icon/parentEntry`，同场景多条路由按完整语义稳定排序。整个真实路由数组中的 `routeId` 必须非空且全局唯一；`host-tab` 必须声明非空 `entry.tab`，同一 tab 只能注册一次，避免宿主 `Map` 被后项静默覆盖。格式、顺序、注释和其他场景路由变化不影响旧冻结记录，伪造的对象属性注册、删除或修改本场景任一路由语义则视为漂移。即使 `affected_runtime` 显式包含 `wego-app/js/routes.js`，也只使用分场景路由指纹，不冻结整个路由文件。其余文件会确认存在并重算 SHA-256。`freeze.json` 必须与 `iteration.json.freeze` 一致，冻结后任一目标漂移都会失败。同一需求在迭代已冻结或终止后再变化时建立新迭代；用户明确开始独立需求时也可建立新迭代；验收期反馈复用当前未冻结迭代。设计系统迭代不建立业务迭代。
+冻结记录必须完整包含 `at`、`design_system_version`、`scope_revision` 和非空 `fingerprints`。冻结时的指纹键集合必须恰好等于 `affected_runtime`、每个场景的 `scene.js`、`scene.css`、`design-decisions.json` 和该场景的虚拟路由条目键。路由指纹只计算真实全局 `window.WEGO_APP_ROUTES` 注册中属于本场景的完整路由集合；该全局变量必须且只能静态赋值一次，数组直接包含静态路由对象。指纹覆盖运行时消费的 `routeId`、`scene`、`script`、`style` 以及 `entry.type/tab/group/label/icon/parentEntry`，同场景多条路由按完整语义稳定排序。整个真实路由数组中的 `routeId` 必须非空且全局唯一；`host-tab` 必须声明非空 `entry.tab`，同一 tab 只能注册一次，避免宿主 `Map` 被后项静默覆盖。即使 `affected_runtime` 显式包含 `wego-app/js/routes.js`，也只使用分场景路由指纹，不冻结整个路由文件。其余文件会在冻结时确认存在并重算 SHA-256。`freeze.json` 必须与 `iteration.json.freeze` 一致。迭代进入 `frozen` 后视为历史快照，后续源码、路由或设计决策变化不再回放为冻结漂移；新变化必须进入新迭代或当前未冻结迭代，不得覆盖旧冻结记录。同一需求在迭代已冻结或终止后再变化时建立新迭代；用户明确开始独立需求时也可建立新迭代；验收期反馈复用当前未冻结迭代。设计系统迭代不建立业务迭代。
 
 ## 6. 修改边界
 

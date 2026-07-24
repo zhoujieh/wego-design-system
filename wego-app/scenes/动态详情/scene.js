@@ -13,101 +13,528 @@
     "source": "library-consumption.json#/appRuntime/presentationTypes"
   },
   "prompt_contract": {
-    "design_system_version": 439,
+    "design_system_version": 451,
     "token_bindings": [
-      {"selector":".dynamic-detail","content_role":".dynamic-detail 的 padding-inline","css_property":"padding-inline","token":"var(--layout-page-margin-m0)"},
-      {"selector":".dynamic-detail","content_role":".dynamic-detail 的 background","css_property":"background","token":"var(--bg-page)"},
-      {"selector":".dynamic-detail","content_role":".dynamic-detail 的 color","css_property":"color","token":"var(--text-default)"},
-      {"selector":".dynamic-detail","content_role":".dynamic-detail 的 font-family","css_property":"font-family","token":"var(--body-md-font-family)"},
-      {"selector":".dynamic-detail__content","content_role":".dynamic-detail__content 的 gap","css_property":"gap","token":"var(--spacer-16)"},
-      {"selector":".dynamic-detail__content","content_role":".dynamic-detail__content 的 padding","css_property":"padding","token":"var(--spacer-16)"},
-      {"selector":".dynamic-detail__publisher","content_role":".dynamic-detail__publisher 的 gap","css_property":"gap","token":"var(--spacer-8)"},
-      {"selector":".dynamic-detail__tags","content_role":".dynamic-detail__tags 的 gap","css_property":"gap","token":"var(--spacer-8)"},
-      {"selector":".dynamic-detail__product-content","content_role":".dynamic-detail__product-content 的 gap","css_property":"gap","token":"var(--spacer-8)"},
-      {"selector":".dynamic-detail__publisher-copy","content_role":".dynamic-detail__publisher-copy 的 gap","css_property":"gap","token":"var(--spacer-2)"},
-      {"selector":".dynamic-detail__publisher-name","content_role":".dynamic-detail__publisher-name 的 color","css_property":"color","token":"var(--text-default)"},
-      {"selector":".dynamic-detail__publisher-name","content_role":".dynamic-detail__publisher-name 的 font-size","css_property":"font-size","token":"var(--heading-xs-font-size)"},
-      {"selector":".dynamic-detail__publisher-name","content_role":".dynamic-detail__publisher-name 的 font-weight","css_property":"font-weight","token":"var(--heading-xs-font-weight)"},
-      {"selector":".dynamic-detail__publisher-name","content_role":".dynamic-detail__publisher-name 的 line-height","css_property":"line-height","token":"var(--heading-xs-line-height)"},
-      {"selector":".dynamic-detail__section-title","content_role":".dynamic-detail__section-title 的 color","css_property":"color","token":"var(--text-default)"},
-      {"selector":".dynamic-detail__section-title","content_role":".dynamic-detail__section-title 的 font-size","css_property":"font-size","token":"var(--heading-xs-font-size)"},
-      {"selector":".dynamic-detail__section-title","content_role":".dynamic-detail__section-title 的 font-weight","css_property":"font-weight","token":"var(--heading-xs-font-weight)"},
-      {"selector":".dynamic-detail__section-title","content_role":".dynamic-detail__section-title 的 line-height","css_property":"line-height","token":"var(--heading-xs-line-height)"},
-      {"selector":".dynamic-detail__product-name","content_role":".dynamic-detail__product-name 的 color","css_property":"color","token":"var(--text-default)"},
-      {"selector":".dynamic-detail__product-name","content_role":".dynamic-detail__product-name 的 font-size","css_property":"font-size","token":"var(--heading-xs-font-size)"},
-      {"selector":".dynamic-detail__product-name","content_role":".dynamic-detail__product-name 的 font-weight","css_property":"font-weight","token":"var(--heading-xs-font-weight)"},
-      {"selector":".dynamic-detail__product-name","content_role":".dynamic-detail__product-name 的 line-height","css_property":"line-height","token":"var(--heading-xs-line-height)"},
-      {"selector":".dynamic-detail__meta","content_role":".dynamic-detail__meta 的 color","css_property":"color","token":"var(--text-tertiary)"},
-      {"selector":".dynamic-detail__meta","content_role":".dynamic-detail__meta 的 font-size","css_property":"font-size","token":"var(--body-sm-font-size)"},
-      {"selector":".dynamic-detail__meta","content_role":".dynamic-detail__meta 的 line-height","css_property":"line-height","token":"var(--body-sm-line-height)"},
-      {"selector":".dynamic-detail__text","content_role":".dynamic-detail__text 的 color","css_property":"color","token":"var(--text-default)"},
-      {"selector":".dynamic-detail__text","content_role":".dynamic-detail__text 的 font-size","css_property":"font-size","token":"var(--body-lg-font-size)"},
-      {"selector":".dynamic-detail__text","content_role":".dynamic-detail__text 的 line-height","css_property":"line-height","token":"var(--body-lg-line-height)"},
-      {"selector":".dynamic-detail__media-list","content_role":".dynamic-detail__media-list 的 gap","css_property":"gap","token":"var(--spacer-12)"},
-      {"selector":".dynamic-detail__media-item","content_role":".dynamic-detail__media-item 的 border-radius","css_property":"border-radius","token":"var(--radius-8)"},
-      {"selector":".dynamic-detail__video-state","content_role":".dynamic-detail__video-state 的 right","css_property":"right","token":"var(--spacer-8)"},
-      {"selector":".dynamic-detail__video-state","content_role":".dynamic-detail__video-state 的 bottom","css_property":"bottom","token":"var(--spacer-8)"},
-      {"selector":".dynamic-detail__video-state","content_role":"视频状态纵向内边距","css_property":"padding-block","token":"var(--spacer-4)"},
-      {"selector":".dynamic-detail__video-state","content_role":"视频状态横向内边距","css_property":"padding-inline","token":"var(--spacer-8)"},
-      {"selector":".dynamic-detail__video-state","content_role":".dynamic-detail__video-state 的 border-radius","css_property":"border-radius","token":"var(--radius-4)"},
-      {"selector":".dynamic-detail__video-state","content_role":".dynamic-detail__video-state 的 background","css_property":"background","token":"var(--bg-mask-press)"},
-      {"selector":".dynamic-detail__video-state","content_role":".dynamic-detail__video-state 的 color","css_property":"color","token":"var(--text-inverse)"},
-      {"selector":".dynamic-detail__video-state","content_role":".dynamic-detail__video-state 的 font-size","css_property":"font-size","token":"var(--body-sm-font-size)"},
-      {"selector":".dynamic-detail__video-state","content_role":".dynamic-detail__video-state 的 line-height","css_property":"line-height","token":"var(--body-sm-line-height)"},
-      {"selector":".dynamic-detail__product-host","content_role":".dynamic-detail__product-host 的 gap","css_property":"gap","token":"var(--spacer-8)"},
-      {"selector":".dynamic-detail__product-content","content_role":".dynamic-detail__product-content 的 padding","css_property":"padding","token":"var(--spacer-12)"},
-      {"selector":".dynamic-detail__product-copy","content_role":".dynamic-detail__product-copy 的 gap","css_property":"gap","token":"var(--spacer-4)"},
-      {"selector":".dynamic-detail__product-point","content_role":".dynamic-detail__product-point 的 color","css_property":"color","token":"var(--text-secondary)"},
-      {"selector":".dynamic-detail__product-point","content_role":".dynamic-detail__product-point 的 font-size","css_property":"font-size","token":"var(--body-sm-font-size)"},
-      {"selector":".dynamic-detail__product-point","content_role":".dynamic-detail__product-point 的 line-height","css_property":"line-height","token":"var(--body-sm-line-height)"},
-      {"selector":".dynamic-detail__product-price","content_role":".dynamic-detail__product-price 的 color","css_property":"color","token":"var(--text-promotion)"},
-      {"selector":".dynamic-detail__product-price","content_role":".dynamic-detail__product-price 的 font-family","css_property":"font-family","token":"var(--heading-xs-font-family)"},
-      {"selector":".dynamic-detail__product-price","content_role":".dynamic-detail__product-price 的 font-size","css_property":"font-size","token":"var(--heading-xs-font-size)"},
-      {"selector":".dynamic-detail__product-price","content_role":".dynamic-detail__product-price 的 font-weight","css_property":"font-weight","token":"var(--heading-xs-font-weight)"},
-      {"selector":".dynamic-detail__product-price","content_role":".dynamic-detail__product-price 的 line-height","css_property":"line-height","token":"var(--heading-xs-line-height)"}
+      {
+        "selector": ".dynamic-detail",
+        "content_role": ".dynamic-detail 的 padding-inline",
+        "css_property": "padding-inline",
+        "token": "var(--layout-page-margin-m0)"
+      },
+      {
+        "selector": ".dynamic-detail",
+        "content_role": ".dynamic-detail 的 background",
+        "css_property": "background",
+        "token": "var(--bg-page)"
+      },
+      {
+        "selector": ".dynamic-detail",
+        "content_role": ".dynamic-detail 的 color",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".dynamic-detail",
+        "content_role": ".dynamic-detail 的 font-family",
+        "css_property": "font-family",
+        "token": "var(--body-md-font-family)"
+      },
+      {
+        "selector": ".dynamic-detail__content",
+        "content_role": ".dynamic-detail__content 的 gap",
+        "css_property": "gap",
+        "token": "var(--spacer-16)"
+      },
+      {
+        "selector": ".dynamic-detail__content",
+        "content_role": ".dynamic-detail__content 的 padding",
+        "css_property": "padding",
+        "token": "var(--spacer-16)"
+      },
+      {
+        "selector": ".dynamic-detail__publisher",
+        "content_role": ".dynamic-detail__publisher 的 gap",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".dynamic-detail__tags",
+        "content_role": ".dynamic-detail__tags 的 gap",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".dynamic-detail__product-content",
+        "content_role": ".dynamic-detail__product-content 的 gap",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".dynamic-detail__publisher-copy",
+        "content_role": ".dynamic-detail__publisher-copy 的 gap",
+        "css_property": "gap",
+        "token": "var(--spacer-2)"
+      },
+      {
+        "selector": ".dynamic-detail__publisher-name",
+        "content_role": ".dynamic-detail__publisher-name 的 color",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".dynamic-detail__publisher-name",
+        "content_role": ".dynamic-detail__publisher-name 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--heading-xs-font-size)"
+      },
+      {
+        "selector": ".dynamic-detail__publisher-name",
+        "content_role": ".dynamic-detail__publisher-name 的 font-weight",
+        "css_property": "font-weight",
+        "token": "var(--heading-xs-font-weight)"
+      },
+      {
+        "selector": ".dynamic-detail__publisher-name",
+        "content_role": ".dynamic-detail__publisher-name 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--heading-xs-line-height)"
+      },
+      {
+        "selector": ".dynamic-detail__section-title",
+        "content_role": ".dynamic-detail__section-title 的 color",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".dynamic-detail__section-title",
+        "content_role": ".dynamic-detail__section-title 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--heading-xs-font-size)"
+      },
+      {
+        "selector": ".dynamic-detail__section-title",
+        "content_role": ".dynamic-detail__section-title 的 font-weight",
+        "css_property": "font-weight",
+        "token": "var(--heading-xs-font-weight)"
+      },
+      {
+        "selector": ".dynamic-detail__section-title",
+        "content_role": ".dynamic-detail__section-title 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--heading-xs-line-height)"
+      },
+      {
+        "selector": ".dynamic-detail__product-name",
+        "content_role": ".dynamic-detail__product-name 的 color",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".dynamic-detail__product-name",
+        "content_role": ".dynamic-detail__product-name 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--heading-xs-font-size)"
+      },
+      {
+        "selector": ".dynamic-detail__product-name",
+        "content_role": ".dynamic-detail__product-name 的 font-weight",
+        "css_property": "font-weight",
+        "token": "var(--heading-xs-font-weight)"
+      },
+      {
+        "selector": ".dynamic-detail__product-name",
+        "content_role": ".dynamic-detail__product-name 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--heading-xs-line-height)"
+      },
+      {
+        "selector": ".dynamic-detail__meta",
+        "content_role": ".dynamic-detail__meta 的 color",
+        "css_property": "color",
+        "token": "var(--text-tertiary)"
+      },
+      {
+        "selector": ".dynamic-detail__meta",
+        "content_role": ".dynamic-detail__meta 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--body-sm-font-size)"
+      },
+      {
+        "selector": ".dynamic-detail__meta",
+        "content_role": ".dynamic-detail__meta 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--body-sm-line-height)"
+      },
+      {
+        "selector": ".dynamic-detail__text",
+        "content_role": ".dynamic-detail__text 的 color",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".dynamic-detail__text",
+        "content_role": ".dynamic-detail__text 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--body-lg-font-size)"
+      },
+      {
+        "selector": ".dynamic-detail__text",
+        "content_role": ".dynamic-detail__text 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--body-lg-line-height)"
+      },
+      {
+        "selector": ".dynamic-detail__media-list",
+        "content_role": ".dynamic-detail__media-list 的 gap",
+        "css_property": "gap",
+        "token": "var(--spacer-12)"
+      },
+      {
+        "selector": ".dynamic-detail__media-item",
+        "content_role": ".dynamic-detail__media-item 的 border-radius",
+        "css_property": "border-radius",
+        "token": "var(--radius-8)"
+      },
+      {
+        "selector": ".dynamic-detail__video-state",
+        "content_role": ".dynamic-detail__video-state 的 right",
+        "css_property": "right",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".dynamic-detail__video-state",
+        "content_role": ".dynamic-detail__video-state 的 bottom",
+        "css_property": "bottom",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".dynamic-detail__video-state",
+        "content_role": "视频状态纵向内边距",
+        "css_property": "padding-block",
+        "token": "var(--spacer-4)"
+      },
+      {
+        "selector": ".dynamic-detail__video-state",
+        "content_role": "视频状态横向内边距",
+        "css_property": "padding-inline",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".dynamic-detail__video-state",
+        "content_role": ".dynamic-detail__video-state 的 border-radius",
+        "css_property": "border-radius",
+        "token": "var(--radius-4)"
+      },
+      {
+        "selector": ".dynamic-detail__video-state",
+        "content_role": ".dynamic-detail__video-state 的 background",
+        "css_property": "background",
+        "token": "var(--bg-mask-press)"
+      },
+      {
+        "selector": ".dynamic-detail__video-state",
+        "content_role": ".dynamic-detail__video-state 的 color",
+        "css_property": "color",
+        "token": "var(--text-inverse)"
+      },
+      {
+        "selector": ".dynamic-detail__video-state",
+        "content_role": ".dynamic-detail__video-state 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--body-sm-font-size)"
+      },
+      {
+        "selector": ".dynamic-detail__video-state",
+        "content_role": ".dynamic-detail__video-state 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--body-sm-line-height)"
+      },
+      {
+        "selector": ".dynamic-detail__product-host",
+        "content_role": ".dynamic-detail__product-host 的 gap",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".dynamic-detail__product-content",
+        "content_role": ".dynamic-detail__product-content 的 padding",
+        "css_property": "padding",
+        "token": "var(--spacer-12)"
+      },
+      {
+        "selector": ".dynamic-detail__product-copy",
+        "content_role": ".dynamic-detail__product-copy 的 gap",
+        "css_property": "gap",
+        "token": "var(--spacer-4)"
+      },
+      {
+        "selector": ".dynamic-detail__product-point",
+        "content_role": ".dynamic-detail__product-point 的 color",
+        "css_property": "color",
+        "token": "var(--text-secondary)"
+      },
+      {
+        "selector": ".dynamic-detail__product-point",
+        "content_role": ".dynamic-detail__product-point 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--body-sm-font-size)"
+      },
+      {
+        "selector": ".dynamic-detail__product-point",
+        "content_role": ".dynamic-detail__product-point 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--body-sm-line-height)"
+      },
+      {
+        "selector": ".dynamic-detail__product-price",
+        "content_role": ".dynamic-detail__product-price 的 color",
+        "css_property": "color",
+        "token": "var(--text-promotion)"
+      },
+      {
+        "selector": ".dynamic-detail__product-price",
+        "content_role": ".dynamic-detail__product-price 的 font-family",
+        "css_property": "font-family",
+        "token": "var(--heading-xs-font-family)"
+      },
+      {
+        "selector": ".dynamic-detail__product-price",
+        "content_role": ".dynamic-detail__product-price 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--heading-xs-font-size)"
+      },
+      {
+        "selector": ".dynamic-detail__product-price",
+        "content_role": ".dynamic-detail__product-price 的 font-weight",
+        "css_property": "font-weight",
+        "token": "var(--heading-xs-font-weight)"
+      },
+      {
+        "selector": ".dynamic-detail__product-price",
+        "content_role": ".dynamic-detail__product-price 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--heading-xs-line-height)"
+      },
+      {
+        "selector": ".dynamic-detail__select-cart.is-added .bottom-action-bar__action-icon",
+        "content_role": ".dynamic-detail__select-cart.is-added .bottom-action-bar__action-icon 的 color",
+        "css_property": "color",
+        "token": "var(--text-brand)"
+      },
+      {
+        "selector": ".dynamic-detail__select-cart.is-added .bottom-action-bar__action-label",
+        "content_role": ".dynamic-detail__select-cart.is-added .bottom-action-bar__action-label 的 color",
+        "css_property": "color",
+        "token": "var(--text-brand)"
+      }
     ],
     "component_bindings": [
-      { "binding_id": "dynamic-detail-navbar", "slug": "navbar", "reason": "普通二级动态详情使用返回箭头和居中标题", "variant_dimensions": { "leftControl": "back-icon", "titleAlignment": "center", "actions": "none", "spacing": "default", "pageTransition": "push", "position": "sticky" } },
-      { "binding_id": "dynamic-detail-avatar", "slug": "avatar", "reason": "展示发布者身份", "variant_dimensions": { "type": "image", "size": "40" } },
-      { "binding_id": "dynamic-detail-tag", "slug": "tag", "reason": "展示内容类型和发布者全部状态", "variant_dimensions": { "size": "20", "theme": "gray", "state": "normal", "affordance": "display-only" } },
-      { "binding_id": "dynamic-detail-media", "slug": "image", "reason": "完整展示动态图片或视频封面", "variant_dimensions": { "fit": "cover", "size": "custom-wide", "radius": "rounded-md", "state": "loaded", "interaction": "static" } },
-      { "binding_id": "dynamic-detail-product-card", "slug": "card", "reason": "产品动态展示可进入商品详情的关联商品模块", "variant_dimensions": { "base": "auto", "surface": "outlined" } },
-      { "binding_id": "dynamic-detail-product-image", "slug": "image", "reason": "关联商品识别图", "variant_dimensions": { "fit": "cover", "size": "xl", "radius": "rounded-md", "state": "loaded", "interaction": "static" } },
-      { "binding_id": "dynamic-detail-actions", "slug": "bottom-action-bar", "reason": "固定承载弱化下载、分享、收藏、复制文案、编辑、复制动态、查看大图等左侧操作，溢出项收进更多入口，右侧为一键转发", "variant_dimensions": { "type": "primary-secondary-actions", "iconMode": "icon-text", "state": "default", "overflow": "collapsed-more" } },
-      { "binding_id": "dynamic-detail-forward", "slug": "button", "reason": "动态详情唯一强调操作", "variant_dimensions": { "emphasis": "strong", "size": "md", "iconMode": "text-only", "state": "default" } }
+      {
+        "binding_id": "dynamic-detail-navbar",
+        "slug": "navbar",
+        "reason": "普通二级动态详情使用返回箭头和居中标题",
+        "variant_dimensions": {
+          "leftControl": "back-icon",
+          "titleAlignment": "center",
+          "actions": "none",
+          "spacing": "default",
+          "pageTransition": "push",
+          "position": "sticky"
+        }
+      },
+      {
+        "binding_id": "dynamic-detail-avatar",
+        "slug": "avatar",
+        "reason": "展示发布者身份",
+        "variant_dimensions": {
+          "type": "image",
+          "size": "40"
+        }
+      },
+      {
+        "binding_id": "dynamic-detail-tag",
+        "slug": "tag",
+        "reason": "展示内容类型和发布者全部状态",
+        "variant_dimensions": {
+          "size": "20",
+          "theme": "gray",
+          "state": "normal",
+          "affordance": "display-only"
+        }
+      },
+      {
+        "binding_id": "dynamic-detail-media",
+        "slug": "image",
+        "reason": "完整展示动态图片或视频封面",
+        "variant_dimensions": {
+          "fit": "cover",
+          "size": "custom-wide",
+          "radius": "rounded-md",
+          "state": "loaded",
+          "interaction": "static"
+        }
+      },
+      {
+        "binding_id": "dynamic-detail-product-card",
+        "slug": "card",
+        "reason": "产品动态展示可进入商品详情的关联商品模块",
+        "variant_dimensions": {
+          "base": "auto",
+          "surface": "outlined"
+        }
+      },
+      {
+        "binding_id": "dynamic-detail-product-image",
+        "slug": "image",
+        "reason": "关联商品识别图",
+        "variant_dimensions": {
+          "fit": "cover",
+          "size": "xl",
+          "radius": "rounded-md",
+          "state": "loaded",
+          "interaction": "static"
+        }
+      },
+      {
+        "binding_id": "dynamic-detail-actions",
+        "slug": "bottom-action-bar",
+        "reason": "固定承载弱化下载、分享、收藏、复制文案、编辑、复制动态、查看大图等左侧操作，溢出项收进更多入口，右侧为一键转发",
+        "variant_dimensions": {
+          "type": "primary-secondary-actions",
+          "iconMode": "icon-text",
+          "state": "default",
+          "overflow": "collapsed-more"
+        }
+      },
+      {
+        "binding_id": "dynamic-detail-forward",
+        "slug": "button",
+        "reason": "动态详情唯一强调操作",
+        "variant_dimensions": {
+          "emphasis": "strong",
+          "size": "md",
+          "iconMode": "text-only",
+          "state": "default"
+        }
+      }
     ],
     "layout_contract": {
       "mode": "composed",
       "source": "references/design-decisions.md",
       "selection_reason": "详情是普通 Push 二级页；采用 M0 让导航栏和底部操作栏通栏，正文在内部使用内容留白，首要任务是阅读完整动态。",
       "page_edge_mode": "M0",
-      "mutable_regions": [".dynamic-detail__content", ".dynamic-detail__media-list", ".dynamic-detail__product-host"]
+      "mutable_regions": [
+        ".dynamic-detail__content",
+        ".dynamic-detail__media-list",
+        ".dynamic-detail__product-host"
+      ]
     },
     "interaction_contract": [
-      { "dom_id": "dynamic-detail-back", "target": "navigation:back" },
-      { "dom_id": "open-related-product", "target": "route:product-detail" },
-      { "dom_id": "dynamic-detail-download", "target": "feedback:toast" },
-      { "dom_id": "dynamic-detail-share", "target": "feedback:toast" },
-      { "dom_id": "dynamic-detail-favorite", "target": "feedback:toast" },
-      { "dom_id": "dynamic-detail-copy-text", "target": "feedback:toast" },
-      { "dom_id": "dynamic-detail-edit", "target": "feedback:toast" },
-      { "dom_id": "dynamic-detail-copy-dynamic", "target": "feedback:toast" },
-      { "dom_id": "dynamic-detail-view-image", "target": "feedback:toast" },
-      { "dom_id": "dynamic-detail-forward", "target": "feedback:toast" }
+      {
+        "dom_id": "dynamic-detail-back",
+        "target": "navigation:back"
+      },
+      {
+        "dom_id": "open-related-product",
+        "target": "route:product-detail"
+      },
+      {
+        "dom_id": "dynamic-detail-download",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "dynamic-detail-share",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "dynamic-detail-favorite",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "dynamic-detail-copy-text",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "dynamic-detail-edit",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "dynamic-detail-copy-dynamic",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "dynamic-detail-view-image",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "dynamic-detail-forward",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "dynamic-detail-select-cart",
+        "target": "state:selection-item-added"
+      }
     ],
     "state_contract": [
-      { "state_id": "dynamic-detail-ready", "initial": true, "trigger": "从动态首页进入", "visible_result": "展示发布者、时间、全文、全部图片或视频及产品动态的关联商品", "fallback": "使用本地示例动态", "persistence": "memory" },
-      { "state_id": "video-playing", "initial": false, "trigger": "点击视频媒体", "visible_result": "当前视频封面显示播放中或已暂停状态", "fallback": "保持视频封面可见", "persistence": "memory" },
-      { "state_id": "forward-success", "initial": false, "trigger": "点击一键转发", "visible_result": "Toast 提示动态已转发，当前详情不变", "fallback": "停留当前详情", "persistence": "memory" },
-      { "state_id": "secondary-action-feedback", "initial": false, "trigger": "点击下载图片、分享、收藏、复制文案、编辑、复制动态或查看大图", "visible_result": "分别提示对应操作的原型边界或成功状态", "fallback": "停留当前详情", "persistence": "memory" }
+      {
+        "state_id": "dynamic-detail-ready",
+        "initial": true,
+        "trigger": "从动态首页进入",
+        "visible_result": "展示发布者、时间、全文、全部图片或视频及产品动态的关联商品",
+        "fallback": "使用本地示例动态",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "video-playing",
+        "initial": false,
+        "trigger": "点击视频媒体",
+        "visible_result": "当前视频封面显示播放中或已暂停状态",
+        "fallback": "保持视频封面可见",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "forward-success",
+        "initial": false,
+        "trigger": "点击一键转发",
+        "visible_result": "Toast 提示动态已转发，当前详情不变",
+        "fallback": "停留当前详情",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "secondary-action-feedback",
+        "initial": false,
+        "trigger": "点击下载图片、分享、收藏、复制文案、编辑、复制动态或查看大图",
+        "visible_result": "分别提示对应操作的原型边界或成功状态",
+        "fallback": "停留当前详情",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "selection-item-added",
+        "initial": false,
+        "trigger": "点击详情页加入选品车",
+        "visible_result": "当前产品加入或移出选品车，并与动态列表状态同步",
+        "fallback": "当前浏览上下文不变",
+        "persistence": "memory"
+      }
     ]
   },
   "visual_check": {
     "status": "passed",
-    "viewports": [375, 393],
-    "checked_at": "2026-07-23T13:05:00.000Z",
-    "scope": "产品动态与笔记动态详情、图片和模拟视频、关联商品、底部操作栏自适应折叠与溢出菜单、二级页返回。",
-    "checks": { "horizontal_overflow": true, "overlap": true, "clipping": true, "action_legibility": true, "primary_focus": true, "state_feedback": true }
+    "viewports": [
+      375,
+      393
+    ],
+    "checked_at": "2026-07-24T03:03:45.000Z",
+    "scope": "动态详情独立页面的加入选品车入口、列表已选状态同步、关联商品入口；移动端预览验证详情底部操作栏不遮挡内容并保持可查看产品细节。",
+    "checks": {
+      "horizontal_overflow": true,
+      "overlap": true,
+      "clipping": true,
+      "action_legibility": true,
+      "primary_focus": true,
+      "state_feedback": true
+    },
+    "checked": true
   }
 }
 */
@@ -119,6 +546,17 @@
   function escapeHtml(value) {
     var map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
     return String(value == null ? '' : value).split('').map(function(char) { return map[char] || char; }).join('');
+  }
+
+  function ensureCartState(ctx) {
+    if (!ctx.appState.cartState) {
+      ctx.appState.cartState = { selectionIds: [], goodsIds: [], lastTab: 'selection', firstCardGuideDismissed: false, firstAddGuideDismissed: false };
+    }
+    return ctx.appState.cartState;
+  }
+
+  function selectionHas(ctx, dynamicId) {
+    return ensureCartState(ctx).selectionIds.indexOf(dynamicId) !== -1;
   }
 
   function fallbackPayload() {
@@ -176,6 +614,7 @@
             <button class="bottom-action-bar__more" type="button" aria-label="更多操作"><i class="wego-iconfont-s icon-sandian16"></i><span class="bottom-action-bar__more-label">更多</span></button>
             <button class="bottom-action-bar__action" type="button" data-dom-id="dynamic-detail-download" data-menu-label="下载图片"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-xiazai"></i></span><span class="bottom-action-bar__action-label">下载图片</span></button>
             <button class="bottom-action-bar__action" type="button" data-dom-id="dynamic-detail-share" data-menu-label="分享"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-fenxiang"></i></span><span class="bottom-action-bar__action-label">分享</span></button>
+            <button class="bottom-action-bar__action dynamic-detail__select-cart" type="button" data-dom-id="dynamic-detail-select-cart" data-menu-label="加入选品车"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-gouwuche"></i></span><span class="bottom-action-bar__action-label">加入选品车</span></button>
             <button class="bottom-action-bar__action" type="button" data-dom-id="dynamic-detail-favorite" data-menu-label="收藏"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-shoucang"></i></span><span class="bottom-action-bar__action-label">收藏</span></button>
             <button class="bottom-action-bar__action" type="button" data-dom-id="dynamic-detail-copy-text" data-menu-label="复制文案"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-fuzhi"></i></span><span class="bottom-action-bar__action-label">复制文案</span></button>
             <button class="bottom-action-bar__action" type="button" data-dom-id="dynamic-detail-edit" data-menu-label="编辑"><span class="bottom-action-bar__action-icon"><i class="wego-iconfont-s icon-bianji"></i></span><span class="bottom-action-bar__action-label">编辑</span></button>
@@ -196,6 +635,7 @@
       var publisher = payload.publisher;
       var product = payload.products && payload.products[0];
       var content = ctx.root.querySelector('[data-region="dynamic-content"]');
+      ensureCartState(ctx);
       var statuses = (publisher.publisher_statuses || []).map(function(status, index) { return tagTemplate(statusLabels[status] || status, 'status-' + index); }).join('');
       content.innerHTML = ''
         + '<header class="dynamic-detail__publisher">'
@@ -213,6 +653,31 @@
       });
       ctx.root.querySelector('[data-dom-id="dynamic-detail-download"]').addEventListener('click', function() { ctx.toast('图片下载为原型演示，本期不保存到设备'); });
       ctx.root.querySelector('[data-dom-id="dynamic-detail-share"]').addEventListener('click', function() { ctx.toast('分享能力本期暂未开放'); });
+      function syncSelectButton() {
+        var button = ctx.root.querySelector('[data-dom-id="dynamic-detail-select-cart"]');
+        if (!button) return;
+        var added = selectionHas(ctx, dynamic.dynamic_id);
+        button.classList.toggle('is-added', added);
+        button.dataset.menuLabel = added ? '移出选品车' : '加入选品车';
+        button.querySelector('.bottom-action-bar__action-label').textContent = added ? '已加入' : '加入选品车';
+        button.querySelector('.bottom-action-bar__action-icon i').className = 'wego-iconfont-s ' + (added ? 'icon-gou16' : 'icon-gouwuche');
+      }
+      ctx.root.querySelector('[data-dom-id="dynamic-detail-select-cart"]').addEventListener('click', function() {
+        var cart = ensureCartState(ctx);
+        var index = cart.selectionIds.indexOf(dynamic.dynamic_id);
+        if (index === -1) {
+          cart.selectionIds.push(dynamic.dynamic_id);
+          cart.lastTab = 'selection';
+          cart.firstAddGuideDismissed = false;
+          ctx.state['selection-item-added'] = true;
+          ctx.toast('已加入选品车，返回动态页可从购物车入口查看');
+        } else {
+          cart.selectionIds.splice(index, 1);
+          ctx.state['selection-item-added'] = cart.selectionIds.indexOf(dynamic.dynamic_id) !== -1;
+          ctx.toast('已移出选品车');
+        }
+        syncSelectButton();
+      });
       ctx.root.querySelector('[data-dom-id="dynamic-detail-favorite"]').addEventListener('click', function() { ctx.toast('收藏成功'); });
       ctx.root.querySelector('[data-dom-id="dynamic-detail-copy-text"]').addEventListener('click', function() { ctx.toast('文案已复制（原型演示）'); });
       ctx.root.querySelector('[data-dom-id="dynamic-detail-edit"]').addEventListener('click', function() { ctx.toast('编辑能力本期暂未开放'); });
@@ -241,6 +706,7 @@
         productCard.addEventListener('click', openProduct);
         productCard.addEventListener('keydown', function(event) { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openProduct(); } });
       }
+      syncSelectButton();
       ctx.state['dynamic-detail-ready'] = true;
     }
   });

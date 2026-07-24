@@ -13,7 +13,7 @@
     "source": "library-consumption.json#/appRuntime/presentationTypes"
   },
   "prompt_contract": {
-    "design_system_version": 440,
+    "design_system_version": 451,
     "token_bindings": [
       {
         "selector": ".album-feed__top-stack",
@@ -599,15 +599,15 @@
       },
       {
         "selector": ".album-feed__card-footer",
-        "content_role": "卡片底部区域 gap",
+        "content_role": ".album-feed__card-footer 的 gap",
         "css_property": "gap",
-        "token": "var(--spacer-4)"
+        "token": "var(--spacer-8)"
       },
       {
         "selector": ".album-feed__actions",
-        "content_role": "操作行横向间距",
+        "content_role": ".album-feed__actions 的 gap",
         "css_property": "gap",
-        "token": "var(--spacer-12)"
+        "token": "var(--spacer-8)"
       },
       {
         "selector": ".album-feed__empty",
@@ -716,6 +716,426 @@
         "content_role": ".album-feed__filter-options 的 gap",
         "css_property": "gap",
         "token": "var(--spacer-12)"
+      },
+      {
+        "selector": ".album-feed__share-action",
+        "content_role": ".album-feed__share-action 的 box-shadow",
+        "css_property": "box-shadow",
+        "token": "var(--shadow-lg)"
+      },
+      {
+        "selector": ".album-feed__action-buttons",
+        "content_role": ".album-feed__action-buttons 的 gap",
+        "css_property": "gap",
+        "token": "var(--spacer-6)"
+      },
+      {
+        "selector": ".album-feed__select-action.is-added",
+        "content_role": ".album-feed__select-action.is-added 的 color",
+        "css_property": "color",
+        "token": "var(--text-brand)"
+      },
+      {
+        "selector": ".album-feed__selection-guide",
+        "content_role": ".album-feed__selection-guide 的 padding",
+        "css_property": "padding",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".album-feed__selection-guide",
+        "content_role": ".album-feed__selection-guide 的 border-radius",
+        "css_property": "border-radius",
+        "token": "var(--radius-8)"
+      },
+      {
+        "selector": ".album-feed__selection-guide",
+        "content_role": ".album-feed__selection-guide 的 background",
+        "css_property": "background",
+        "token": "var(--bg-brand-surface-l1)"
+      },
+      {
+        "selector": ".album-feed__selection-guide",
+        "content_role": ".album-feed__selection-guide 的 color",
+        "css_property": "color",
+        "token": "var(--text-brand)"
+      },
+      {
+        "selector": ".album-feed__selection-guide",
+        "content_role": ".album-feed__selection-guide 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--body-xs-font-size)"
+      },
+      {
+        "selector": ".album-feed__selection-guide",
+        "content_role": ".album-feed__selection-guide 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--body-xs-line-height)"
+      },
+      {
+        "selector": ".album-feed__cart-fab",
+        "content_role": ".album-feed__cart-fab 的 padding",
+        "css_property": "padding",
+        "token": "var(--spacer-0)"
+      },
+      {
+        "selector": ".album-feed__cart-fab",
+        "content_role": ".album-feed__cart-fab 的 border-radius",
+        "css_property": "border-radius",
+        "token": "var(--radius-full)"
+      },
+      {
+        "selector": ".album-feed__cart-fab",
+        "content_role": ".album-feed__cart-fab 的 background",
+        "css_property": "background",
+        "token": "var(--bg-surface)"
+      },
+      {
+        "selector": ".album-feed__cart-fab",
+        "content_role": ".album-feed__cart-fab 的 box-shadow",
+        "css_property": "box-shadow",
+        "token": "var(--shadow-lg)"
+      },
+      {
+        "selector": ".album-feed__cart-fab",
+        "content_role": ".album-feed__cart-fab 的 color",
+        "css_property": "color",
+        "token": "var(--text-brand)"
+      },
+      {
+        "selector": ".album-feed__cart-fab-icon",
+        "content_role": ".album-feed__cart-fab-icon 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--size-24)"
+      },
+      {
+        "selector": ".album-feed__cart-fab-count",
+        "content_role": ".album-feed__cart-fab-count 的 padding-inline",
+        "css_property": "padding-inline",
+        "token": "var(--spacer-4)"
+      },
+      {
+        "selector": ".album-feed__cart-fab-count",
+        "content_role": ".album-feed__cart-fab-count 的 border-radius",
+        "css_property": "border-radius",
+        "token": "var(--radius-full)"
+      },
+      {
+        "selector": ".album-feed__cart-fab-count",
+        "content_role": ".album-feed__cart-fab-count 的 background",
+        "css_property": "background",
+        "token": "var(--bg-brand)"
+      },
+      {
+        "selector": ".album-feed__cart-fab-count",
+        "content_role": ".album-feed__cart-fab-count 的 color",
+        "css_property": "color",
+        "token": "var(--text-inverse)"
+      },
+      {
+        "selector": ".album-feed__cart-fab-count",
+        "content_role": ".album-feed__cart-fab-count 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--body-xs-font-size)"
+      },
+      {
+        "selector": ".album-feed__cart-fab-count",
+        "content_role": ".album-feed__cart-fab-count 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--size-20)"
+      },
+      {
+        "selector": ".album-feed__cart-guide",
+        "content_role": ".album-feed__cart-guide 的 border-radius",
+        "css_property": "border-radius",
+        "token": "var(--radius-8)"
+      },
+      {
+        "selector": ".album-feed__cart-guide",
+        "content_role": ".album-feed__cart-guide 的 background",
+        "css_property": "background",
+        "token": "var(--bg-surface)"
+      },
+      {
+        "selector": ".album-feed__cart-guide",
+        "content_role": ".album-feed__cart-guide 的 box-shadow",
+        "css_property": "box-shadow",
+        "token": "var(--shadow-lg)"
+      },
+      {
+        "selector": ".album-feed__cart-guide",
+        "content_role": ".album-feed__cart-guide 的 color",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".album-feed__cart-guide",
+        "content_role": ".album-feed__cart-guide 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--body-sm-font-size)"
+      },
+      {
+        "selector": ".album-feed__cart-guide",
+        "content_role": ".album-feed__cart-guide 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--body-sm-line-height)"
+      },
+      {
+        "selector": ".cart-panel__title .navbar",
+        "content_role": ".cart-panel__title .navbar 的 background",
+        "css_property": "background",
+        "token": "var(--bg-page)"
+      },
+      {
+        "selector": ".cart-panel__tabs",
+        "content_role": ".cart-panel__tabs 的 background",
+        "css_property": "background",
+        "token": "var(--bg-page)"
+      },
+      {
+        "selector": ".cart-panel__view",
+        "content_role": ".cart-panel__view 的 gap",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".cart-panel__item",
+        "content_role": ".cart-panel__item 的 gap",
+        "css_property": "gap",
+        "token": "var(--spacer-12)"
+      },
+      {
+        "selector": ".cart-panel__item",
+        "content_role": ".cart-panel__item 的 padding",
+        "css_property": "padding",
+        "token": "var(--spacer-12)"
+      },
+      {
+        "selector": ".cart-panel__item",
+        "content_role": ".cart-panel__item 的 border-radius",
+        "css_property": "border-radius",
+        "token": "var(--radius-8)"
+      },
+      {
+        "selector": ".cart-panel__item",
+        "content_role": ".cart-panel__item 的 background",
+        "css_property": "background",
+        "token": "var(--bg-surface)"
+      },
+      {
+        "selector": ".cart-panel__thumb",
+        "content_role": ".cart-panel__thumb 的 border-radius",
+        "css_property": "border-radius",
+        "token": "var(--radius-8)"
+      },
+      {
+        "selector": ".cart-panel__name",
+        "content_role": ".cart-panel__name 的 color",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".cart-panel__name",
+        "content_role": ".cart-panel__name 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--body-md-font-size)"
+      },
+      {
+        "selector": ".cart-panel__name",
+        "content_role": ".cart-panel__name 的 font-weight",
+        "css_property": "font-weight",
+        "token": "var(--font-weight-medium)"
+      },
+      {
+        "selector": ".cart-panel__name",
+        "content_role": ".cart-panel__name 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--body-md-line-height)"
+      },
+      {
+        "selector": ".cart-panel__meta",
+        "content_role": ".cart-panel__meta 的 color",
+        "css_property": "color",
+        "token": "var(--text-tertiary)"
+      },
+      {
+        "selector": ".cart-panel__meta",
+        "content_role": ".cart-panel__meta 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--body-sm-font-size)"
+      },
+      {
+        "selector": ".cart-panel__meta",
+        "content_role": ".cart-panel__meta 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--body-sm-line-height)"
+      },
+      {
+        "selector": ".cart-panel__remove",
+        "content_role": ".cart-panel__remove 的 background",
+        "css_property": "background",
+        "token": "var(--transparent)"
+      },
+      {
+        "selector": ".cart-panel__remove",
+        "content_role": ".cart-panel__remove 的 color",
+        "css_property": "color",
+        "token": "var(--text-brand)"
+      },
+      {
+        "selector": ".cart-panel__remove",
+        "content_role": ".cart-panel__remove 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--body-sm-font-size)"
+      },
+      {
+        "selector": ".cart-panel__empty",
+        "content_role": ".cart-panel__empty 的 color",
+        "css_property": "color",
+        "token": "var(--text-secondary)"
+      },
+      {
+        "selector": ".cart-panel__empty h3",
+        "content_role": ".cart-panel__empty h3 的 color",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".cart-panel__empty h3",
+        "content_role": ".cart-panel__empty h3 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--heading-xs-font-size)"
+      },
+      {
+        "selector": ".cart-panel__empty h3",
+        "content_role": ".cart-panel__empty h3 的 font-weight",
+        "css_property": "font-weight",
+        "token": "var(--heading-xs-font-weight)"
+      },
+      {
+        "selector": ".cart-panel__empty h3",
+        "content_role": ".cart-panel__empty h3 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--heading-xs-line-height)"
+      },
+      {
+        "selector": ".cart-panel__empty p",
+        "content_role": ".cart-panel__empty p 的 margin-top",
+        "css_property": "margin-top",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".cart-panel__empty p",
+        "content_role": ".cart-panel__empty p 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--body-md-font-size)"
+      },
+      {
+        "selector": ".cart-panel__empty p",
+        "content_role": ".cart-panel__empty p 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--body-md-line-height)"
+      },
+      {
+        "selector": ".cart-panel__actions",
+        "content_role": ".cart-panel__actions 的 gap",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".cart-panel__actions",
+        "content_role": ".cart-panel__actions 的 background",
+        "css_property": "background",
+        "token": "var(--bg-surface)"
+      },
+      {
+        "selector": ".album-feed__cart-guide",
+        "content_role": ".album-feed__cart-guide 的 padding-top",
+        "css_property": "padding-top",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".album-feed__cart-guide",
+        "content_role": ".album-feed__cart-guide 的 padding-right",
+        "css_property": "padding-right",
+        "token": "var(--spacer-12)"
+      },
+      {
+        "selector": ".album-feed__cart-guide",
+        "content_role": ".album-feed__cart-guide 的 padding-bottom",
+        "css_property": "padding-bottom",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".album-feed__cart-guide",
+        "content_role": ".album-feed__cart-guide 的 padding-left",
+        "css_property": "padding-left",
+        "token": "var(--spacer-12)"
+      },
+      {
+        "selector": ".cart-panel__body",
+        "content_role": ".cart-panel__body 的 padding-top",
+        "css_property": "padding-top",
+        "token": "var(--spacer-12)"
+      },
+      {
+        "selector": ".cart-panel__body",
+        "content_role": ".cart-panel__body 的 padding-right",
+        "css_property": "padding-right",
+        "token": "var(--spacer-16)"
+      },
+      {
+        "selector": ".cart-panel__body",
+        "content_role": ".cart-panel__body 的 padding-left",
+        "css_property": "padding-left",
+        "token": "var(--spacer-16)"
+      },
+      {
+        "selector": ".cart-panel__empty",
+        "content_role": ".cart-panel__empty 的 padding-top",
+        "css_property": "padding-top",
+        "token": "var(--spacer-32)"
+      },
+      {
+        "selector": ".cart-panel__empty",
+        "content_role": ".cart-panel__empty 的 padding-right",
+        "css_property": "padding-right",
+        "token": "var(--spacer-16)"
+      },
+      {
+        "selector": ".cart-panel__empty",
+        "content_role": ".cart-panel__empty 的 padding-bottom",
+        "css_property": "padding-bottom",
+        "token": "var(--spacer-32)"
+      },
+      {
+        "selector": ".cart-panel__empty",
+        "content_role": ".cart-panel__empty 的 padding-left",
+        "css_property": "padding-left",
+        "token": "var(--spacer-16)"
+      },
+      {
+        "selector": ".cart-panel__actions",
+        "content_role": ".cart-panel__actions 的 padding-top",
+        "css_property": "padding-top",
+        "token": "var(--spacer-12)"
+      },
+      {
+        "selector": ".cart-panel__actions",
+        "content_role": ".cart-panel__actions 的 padding-right",
+        "css_property": "padding-right",
+        "token": "var(--spacer-16)"
+      },
+      {
+        "selector": ".cart-panel__actions",
+        "content_role": ".cart-panel__actions 的 padding-left",
+        "css_property": "padding-left",
+        "token": "var(--spacer-16)"
+      },
+      {
+        "selector": ".cart-panel__actions",
+        "content_role": ".cart-panel__actions 的 padding-bottom",
+        "css_property": "padding-bottom",
+        "token": "var(--safe-area-bottom-content)"
       }
     ],
     "component_bindings": [
@@ -835,16 +1255,6 @@
         }
       },
       {
-        "binding_id": "feed-forward-link",
-        "slug": "link",
-        "reason": "卡片核心操作一键转发，靠右显示",
-        "variant_dimensions": {
-          "mode": "standalone",
-          "size": "12",
-          "state": "default"
-        }
-      },
-      {
         "binding_id": "feed-empty-action",
         "slug": "button",
         "reason": "筛选无结果时清除条件恢复内容",
@@ -920,6 +1330,119 @@
         "variant_dimensions": {
           "emphasis": "strong",
           "size": "lg",
+          "iconMode": "text-only",
+          "state": "default"
+        }
+      },
+      {
+        "binding_id": "feed-forward-button",
+        "slug": "button",
+        "reason": "卡片底部灰底绿字一键转发，是产品卡片最高优先级快捷操作",
+        "variant_dimensions": {
+          "emphasis": "medium",
+          "size": "sm",
+          "iconMode": "text-only",
+          "state": "default"
+        }
+      },
+      {
+        "binding_id": "feed-select-button",
+        "slug": "button",
+        "reason": "卡片底部加入选品车入口，图标加文案，弱于一键转发但常驻可见",
+        "variant_dimensions": {
+          "emphasis": "weak",
+          "size": "sm",
+          "iconMode": "leading-icon",
+          "state": "default"
+        }
+      },
+      {
+        "binding_id": "feed-share-action",
+        "slug": "button",
+        "reason": "图片右上角单条分享入口，只处理当前产品",
+        "variant_dimensions": {
+          "emphasis": "weak",
+          "size": "sm",
+          "iconMode": "icon-only",
+          "state": "default"
+        }
+      },
+      {
+        "binding_id": "feed-cart-modal",
+        "slug": "modal",
+        "reason": "承载选品车和购物车的全屏面板",
+        "variant_dimensions": {
+          "variant": "fullscreen",
+          "title": "default",
+          "action": "none",
+          "align": "center",
+          "state": "open"
+        }
+      },
+      {
+        "binding_id": "feed-cart-navbar",
+        "slug": "navbar",
+        "reason": "全屏购物车面板关闭入口和顶部承载区",
+        "variant_dimensions": {
+          "leftControl": "close-icon",
+          "titleAlignment": "center",
+          "actions": "none",
+          "spacing": "default",
+          "pageTransition": "present",
+          "position": "sticky"
+        }
+      },
+      {
+        "binding_id": "feed-cart-tabs",
+        "slug": "tabs",
+        "reason": "全屏面板顶部直接区分选品车和购物车两个场景",
+        "variant_dimensions": {
+          "size": "standard",
+          "layout": "divide",
+          "icon": "none",
+          "state": "default"
+        }
+      },
+      {
+        "binding_id": "feed-cart-selection-forward",
+        "slug": "button",
+        "reason": "选品车统一转发操作",
+        "variant_dimensions": {
+          "emphasis": "medium",
+          "size": "md",
+          "iconMode": "text-only",
+          "state": "default"
+        }
+      },
+      {
+        "binding_id": "feed-cart-selection-share",
+        "slug": "button",
+        "reason": "选品车统一分享操作",
+        "variant_dimensions": {
+          "emphasis": "weak",
+          "size": "md",
+          "iconMode": "text-only",
+          "state": "default"
+        }
+      },
+      {
+        "binding_id": "feed-cart-selection-download",
+        "slug": "button",
+        "reason": "选品车统一下载图片操作",
+        "variant_dimensions": {
+          "emphasis": "weak",
+          "size": "md",
+          "iconMode": "text-only",
+          "state": "default"
+        }
+      },
+      {
+        "binding_id": "feed-cart-goods-checkout",
+        "slug": "button",
+        "reason": "购物车结算入口，本期只反馈未开放",
+        "variant_dimensions": {
+          "emphasis": "strong",
+          "size": "md",
           "iconMode": "text-only",
           "state": "default"
         }
@@ -1038,6 +1561,22 @@
       {
         "dom_id": "forward-{dynamic_id}",
         "target": "feedback:toast"
+      },
+      {
+        "dom_id": "share-{dynamic_id}",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "select-cart-{dynamic_id}",
+        "target": "state:selection-item-added"
+      },
+      {
+        "dom_id": "open-cart-panel",
+        "target": "overlay:full-screen-modal"
+      },
+      {
+        "dom_id": "first-add-guide",
+        "target": "overlay:full-screen-modal"
       }
     ],
     "state_contract": [
@@ -1128,6 +1667,30 @@
         "visible_result": "瀑布流按实际容器宽度自动增列并居中，手机壳中的双列不受桌面窗口宽度影响",
         "fallback": "手机壳和窄容器保持双列",
         "persistence": "memory"
+      },
+      {
+        "state_id": "selection-item-added",
+        "initial": false,
+        "trigger": "点击卡片底部加入选品车",
+        "visible_result": "产品加入或移出选品车，卡片状态和浮动购物车数量同步",
+        "fallback": "当前浏览上下文不变",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "cart-active",
+        "initial": false,
+        "trigger": "加入选品车或购物车后",
+        "visible_result": "浮动购物车入口在发布入口上方出现并显示总数量",
+        "fallback": "当前浏览上下文不变",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "cart-panel-open-selection",
+        "initial": false,
+        "trigger": "点击浮动购物车入口",
+        "visible_result": "打开全屏面板并展示选品车 tab",
+        "fallback": "当前浏览上下文不变",
+        "persistence": "memory"
       }
     ]
   },
@@ -1137,8 +1700,8 @@
       375,
       393
     ],
-    "checked_at": "2026-07-24T01:06:23.000Z",
-    "scope": "顶部 page-tabs 居中且左右预留对称栏位，右上角发布入口保持原有 popmenu；右下角悬浮入口保持纯加号和中性白底，点击时触发短震动并从按钮右下角原点形变展开无标题发布类型列表面板。移动端预览验证列表面板在视口内、层级高于局部弱化层、不覆盖底部 Tab、无横向溢出，点击发产品后面板关闭并出现未开放 toast。",
+    "checked_at": "2026-07-24T03:03:45.000Z",
+    "scope": "动态列表加入选品车、首次引导、浮动购物车入口、全屏选品车/购物车 tabs、选品车统一转发/分享/下载操作；移动端预览验证图片右上角仅保留分享、入口不遮挡、首次加入后数量与引导同步、全屏面板顶部无单独标题。",
     "checks": {
       "horizontal_overflow": true,
       "overlap": true,
@@ -1146,7 +1709,8 @@
       "action_legibility": true,
       "primary_focus": true,
       "state_feedback": true
-    }
+    },
+    "checked": true
   }
 }
 */
@@ -1177,6 +1741,153 @@
     return publisher.publisher_statuses.indexOf(status) !== -1;
   }
 
+  function ensureCartState(ctx) {
+    if (!ctx.appState.cartState) {
+      ctx.appState.cartState = {
+        selectionIds: [],
+        goodsIds: [],
+        lastTab: 'selection',
+        firstCardGuideDismissed: false,
+        firstAddGuideDismissed: false
+      };
+    }
+    return ctx.appState.cartState;
+  }
+
+  function cartCount(ctx) {
+    var cart = ensureCartState(ctx);
+    return cart.selectionIds.length + cart.goodsIds.length;
+  }
+
+  function selectionHas(ctx, dynamicId) {
+    return ensureCartState(ctx).selectionIds.indexOf(dynamicId) !== -1;
+  }
+
+  function cartProductForDynamic(dynamic) {
+    var productId = dynamic.related_product_ids && dynamic.related_product_ids[0];
+    return productId ? getProduct(productId) : null;
+  }
+
+  function cartItemImage(dynamic) {
+    var product = cartProductForDynamic(dynamic);
+    if (product && product.image_list && product.image_list[0]) return product.image_list[0];
+    return dynamic.media_list && dynamic.media_list[0] ? dynamic.media_list[0].poster_or_src : '';
+  }
+
+  function cartItemTitle(dynamic) {
+    var product = cartProductForDynamic(dynamic);
+    return (product && (product.title || product.name)) || dynamic.text_content;
+  }
+
+  function cartModalTemplate(ctx, activeTab) {
+    var cart = ensureCartState(ctx);
+    var selectedTab = activeTab || cart.lastTab || 'selection';
+    var selectionItems = cart.selectionIds.map(function(id) {
+      return dynamics.find(function(item) { return item.dynamic_id === id; });
+    }).filter(Boolean);
+    var goodsItems = cart.goodsIds.map(function(id) {
+      return products.find(function(item) { return item.product_id === id; });
+    }).filter(Boolean);
+    function selectionRow(item) {
+      return '<article class="cart-panel__item" data-selection-id="' + item.dynamic_id + '">'
+        + '<img class="cart-panel__thumb" src="' + cartItemImage(item) + '" alt="">'
+        + '<div class="cart-panel__copy"><h3 class="cart-panel__name">' + escapeHtml(cartItemTitle(item)) + '</h3><p class="cart-panel__meta">' + escapeHtml(getPublisher(item.publisher_id).publisher_name) + ' · ' + escapeHtml(item.published_at) + '</p></div>'
+        + '<button type="button" class="cart-panel__remove" data-dom-id="cart-remove-selection-' + item.dynamic_id + '">移除</button>'
+        + '</article>';
+    }
+    function goodsRow(item) {
+      var image = item.image_list && item.image_list[0] ? item.image_list[0] : cartItemImage(dynamics[0] || {});
+      return '<article class="cart-panel__item" data-goods-id="' + item.product_id + '">'
+        + '<img class="cart-panel__thumb" src="' + image + '" alt="">'
+        + '<div class="cart-panel__copy"><h3 class="cart-panel__name">' + escapeHtml(item.title || item.name) + '</h3><p class="cart-panel__meta">¥' + escapeHtml(item.price) + ' · 1 件</p></div>'
+        + '<button type="button" class="cart-panel__remove" data-dom-id="cart-remove-goods-' + item.product_id + '">移除</button>'
+        + '</article>';
+    }
+    function emptyCopy(type) {
+      return '<div class="cart-panel__empty"><h3>' + (type === 'selection' ? '还没有加入选品车的产品' : '还没有加入购物车的商品') + '</h3><p>' + (type === 'selection' ? '浏览产品时点击加入选品车，可以在这里统一转发、分享或下载图片。' : '从商品详情点击加入购物车后，会在这里展示加购商品。') + '</p></div>';
+    }
+    return ''
+      + '<div class="modal modal--fullscreen" role="dialog" aria-modal="true" data-state="closed" data-dd-id="feed-cart-modal" data-component-slug="modal" data-component-binding="feed-cart-modal">'
+      + '<div class="modal__panel cart-panel">'
+      + '<div class="modal__title modal__title--default cart-panel__title">'
+      + '<div class="navbar" data-dd-id="feed-cart-navbar" data-component-slug="navbar" data-component-binding="feed-cart-navbar">'
+      + '<div class="navbar__body">'
+      + '<div class="navbar__left"><button type="button" class="navbar__left-btn navbar__left-btn--circle" aria-label="关闭购物车" data-dom-id="cart-close"><i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button></div>'
+      + '<div class="navbar__center cart-panel__tabs-center"><div class="wg-tabs wg-tabs--standard wg-tabs--divide cart-panel__tabs" role="tablist" data-dd-id="feed-cart-tabs" data-component-slug="tabs" data-component-binding="feed-cart-tabs"><div class="wg-tabs__scroll"><button class="wg-tabs__item" role="tab" aria-selected="' + (selectedTab === 'selection' ? 'true' : 'false') + '" type="button" data-cart-tab="selection" data-dom-id="cart-tab-selection"><span class="wg-tabs__content"><span class="wg-tabs__label">选品车</span></span></button><button class="wg-tabs__item" role="tab" aria-selected="' + (selectedTab === 'goods' ? 'true' : 'false') + '" type="button" data-cart-tab="goods" data-dom-id="cart-tab-goods"><span class="wg-tabs__content"><span class="wg-tabs__label">购物车</span></span></button><span class="wg-tabs__active-indicator" aria-hidden="true"></span></div></div></div>'
+      + '<div class="navbar__right"></div>'
+      + '</div></div></div>'
+      + '<div class="modal__body modal__body--safe-bottom cart-panel__body">'
+      + '<section class="cart-panel__view' + (selectedTab === 'selection' ? ' is-active' : '') + '" data-cart-view="selection">' + (selectionItems.length ? selectionItems.map(selectionRow).join('') : emptyCopy('selection')) + '</section>'
+      + '<section class="cart-panel__view' + (selectedTab === 'goods' ? ' is-active' : '') + '" data-cart-view="goods">' + (goodsItems.length ? goodsItems.map(goodsRow).join('') : emptyCopy('goods')) + '</section>'
+      + '</div>'
+      + '<div class="cart-panel__actions" data-cart-actions="selection" ' + (selectedTab === 'selection' ? '' : 'hidden') + '><button type="button" class="btn btn--medium btn--md" data-dom-id="cart-selection-forward" data-dd-id="feed-cart-selection-forward" data-component-slug="button" data-component-binding="feed-cart-selection-forward">统一转发</button><button type="button" class="btn btn--weak btn--md" data-dom-id="cart-selection-share" data-dd-id="feed-cart-selection-share" data-component-slug="button" data-component-binding="feed-cart-selection-share">分享</button><button type="button" class="btn btn--weak btn--md" data-dom-id="cart-selection-download" data-dd-id="feed-cart-selection-download" data-component-slug="button" data-component-binding="feed-cart-selection-download">下载图片</button></div>'
+      + '<div class="cart-panel__actions" data-cart-actions="goods" ' + (selectedTab === 'goods' ? '' : 'hidden') + '><button type="button" class="btn btn--strong btn--md" data-dom-id="cart-goods-checkout" data-dd-id="feed-cart-goods-checkout" data-component-slug="button" data-component-binding="feed-cart-goods-checkout">去结算</button></div>'
+      + '</div></div>';
+  }
+
+  function syncCartTabs(root) {
+    var tabs = root.querySelector('.cart-panel__tabs');
+    if (!tabs) return;
+    var selected = tabs.querySelector('.wg-tabs__item[aria-selected="true"] .wg-tabs__content');
+    var scroll = tabs.querySelector('.wg-tabs__scroll');
+    var indicator = tabs.querySelector('.wg-tabs__active-indicator');
+    if (!selected || !scroll || !indicator) return;
+    var selectedRect = selected.getBoundingClientRect();
+    var scrollRect = scroll.getBoundingClientRect();
+    indicator.style.setProperty('--_tabs-indicator-x', (selectedRect.left - scrollRect.left + scroll.scrollLeft) + 'px');
+    indicator.style.setProperty('--_tabs-indicator-width', selectedRect.width + 'px');
+  }
+
+  function openCartPanel(ctx, preferredTab, afterClose) {
+    var cart = ensureCartState(ctx);
+    cart.lastTab = preferredTab || cart.lastTab || 'selection';
+    ctx.openFullScreenModal(cartModalTemplate(ctx, cart.lastTab), {
+      label: '购物车',
+      init: function(api) {
+        function switchTab(tab) {
+          cart.lastTab = tab;
+          api.root.querySelectorAll('[data-cart-tab]').forEach(function(item) {
+            item.setAttribute('aria-selected', item.dataset.cartTab === tab ? 'true' : 'false');
+          });
+          api.root.querySelectorAll('[data-cart-view]').forEach(function(view) {
+            view.classList.toggle('is-active', view.dataset.cartView === tab);
+          });
+          api.root.querySelectorAll('[data-cart-actions]').forEach(function(actions) {
+            actions.hidden = actions.dataset.cartActions !== tab;
+          });
+          syncCartTabs(api.root);
+        }
+        api.root.querySelector('[data-dom-id="cart-close"]').addEventListener('click', function() {
+          api.close();
+          if (typeof afterClose === 'function') afterClose();
+        });
+        api.root.querySelector('[data-dom-id="cart-tab-selection"]').addEventListener('click', function() { switchTab('selection'); });
+        api.root.querySelector('[data-dom-id="cart-tab-goods"]').addEventListener('click', function() { switchTab('goods'); });
+        api.root.querySelectorAll('[data-dom-id^="cart-remove-selection-"]').forEach(function(button) {
+          button.addEventListener('click', function() {
+            var id = button.dataset.domId.replace('cart-remove-selection-', '');
+            cart.selectionIds = cart.selectionIds.filter(function(item) { return item !== id; });
+            api.close();
+            openCartPanel(ctx, 'selection', afterClose);
+          });
+        });
+        api.root.querySelectorAll('[data-dom-id^="cart-remove-goods-"]').forEach(function(button) {
+          button.addEventListener('click', function() {
+            var id = button.dataset.domId.replace('cart-remove-goods-', '');
+            cart.goodsIds = cart.goodsIds.filter(function(item) { return item !== id; });
+            api.close();
+            openCartPanel(ctx, 'goods', afterClose);
+          });
+        });
+        api.root.querySelector('[data-dom-id="cart-selection-forward"]').addEventListener('click', function() { api.toast('已转发 ' + cart.selectionIds.length + ' 个产品'); });
+        api.root.querySelector('[data-dom-id="cart-selection-share"]').addEventListener('click', function() { api.toast('已分享 ' + cart.selectionIds.length + ' 个产品'); });
+        api.root.querySelector('[data-dom-id="cart-selection-download"]').addEventListener('click', function() { api.toast('已下载 ' + cart.selectionIds.length + ' 个产品的图片'); });
+        api.root.querySelector('[data-dom-id="cart-goods-checkout"]').addEventListener('click', function() { api.toast('结算能力本期暂未开放'); });
+        requestAnimationFrame(function() { syncCartTabs(api.root); });
+      }
+    });
+  }
+
   function publisherVerifiedTemplate(publisher) {
     if (!hasPublisherStatus(publisher, 'verified')) return '';
     return '<i class="wego-iconfont-s icon-renzheng album-feed__verified-icon" aria-label="已认证"></i>';
@@ -1199,9 +1910,11 @@
       + '</div>';
   }
 
-  function feedCardTemplate(item) {
+  function feedCardTemplate(item, index, ctx) {
     var publisher = getPublisher(item.publisher_id);
     var cover = item.media_list[0];
+    var added = selectionHas(ctx, item.dynamic_id);
+    var showGuide = index === 0 && !ensureCartState(ctx).firstCardGuideDismissed;
     var videoMark = cover.media_type === 'video'
       ? '<span class="album-feed__duration">' + escapeHtml(cover.duration_label) + '</span>'
       : '';
@@ -1212,6 +1925,7 @@
       +       '<div class="wg-image album-feed__cover" data-dd-id="feed-cover-' + item.dynamic_id + '" data-component-slug="image" data-component-binding="feed-cover-image">'
       +         '<img class="wg-image__src is-loaded" src="' + cover.poster_or_src + '" alt="">'
       +       '</div>'
+      +       '<button type="button" class="btn btn--weak btn--sm btn--icon-only album-feed__share-action" aria-label="分享当前产品" data-dd-id="feed-share-' + item.dynamic_id + '" data-component-slug="button" data-component-binding="feed-share-action" data-dom-id="share-' + item.dynamic_id + '"><i class="btn__icon icon-fenxiang" aria-hidden="true"></i></button>'
       +       videoMark
       +     '</div>'
       +     '<div class="card__body album-feed__card-content">'
@@ -1226,9 +1940,13 @@
       +       '<p class="album-feed__summary">' + escapeHtml(item.text_content) + '</p>'
       +     '</div>'
       +     '<div class="card__footer album-feed__card-footer">'
+      +       (showGuide ? '<div class="album-feed__selection-guide" data-dom-id="first-card-guide"><span>加入选品车后可统一转发/下载</span></div>' : '')
       +       '<div class="album-feed__actions">'
       +         '<span class="album-feed__publisher-meta">' + escapeHtml(item.published_at) + '</span>'
-      +         '<button type="button" class="link link--12 album-feed__forward-link" data-dd-id="feed-forward-' + item.dynamic_id + '" data-component-slug="link" data-component-binding="feed-forward-link" data-dom-id="forward-' + item.dynamic_id + '">一键转发</button>'
+      +         '<div class="album-feed__action-buttons">'
+      +           '<button type="button" class="btn btn--medium btn--sm album-feed__forward-link" data-dd-id="feed-forward-' + item.dynamic_id + '" data-component-slug="button" data-component-binding="feed-forward-button" data-dom-id="forward-' + item.dynamic_id + '">一键转发</button>'
+      +           '<button type="button" class="btn btn--weak btn--sm album-feed__select-action' + (added ? ' is-added' : '') + '" data-dd-id="feed-select-' + item.dynamic_id + '" data-component-slug="button" data-component-binding="feed-select-button" data-dom-id="select-cart-' + item.dynamic_id + '" aria-pressed="' + (added ? 'true' : 'false') + '"><i class="btn__icon ' + (added ? 'icon-gou16' : 'icon-gouwuche') + '" aria-hidden="true"></i>' + (added ? '已加入' : '加入选品车') + '</button>'
+      +         '</div>'
       +       '</div>'
       +     '</div>'
       +   '</div>'
@@ -1383,11 +2101,21 @@
           <span class="album-feed__publish-fab-ripple" aria-hidden="true"></span>
           <i class="wego-iconfont-s icon-jia album-feed__publish-fab-icon" aria-hidden="true"></i>
         </button>
+        <button type="button" class="album-feed__cart-fab" aria-label="打开购物车" data-dom-id="open-cart-panel" hidden>
+          <i class="wego-iconfont-s icon-gouwuche album-feed__cart-fab-icon" aria-hidden="true"></i>
+          <span class="album-feed__cart-fab-count" data-cart-count>0</span>
+        </button>
+        <div class="album-feed__cart-guide" data-dom-id="first-add-guide" hidden>
+          <span>已加入选品车，可从这里统一转发/下载</span>
+        </div>
         <div class="album-feed__contract-seed" hidden aria-hidden="true">
           <div class="navbar" data-dd-id="feed-filter-navbar-seed" data-component-slug="navbar" data-component-binding="feed-filter-navbar"><div class="navbar__body"><div class="navbar__left"><button type="button" class="navbar__left-btn navbar__left-btn--circle" aria-label="关闭"><i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button></div><div class="navbar__center"><span class="navbar__title">筛选动态</span></div><div class="navbar__right"></div></div></div>
           <div class="radio radio--sm radio--checked" data-group="feed-seed-checked" data-dd-id="feed-radio-checked-seed" data-component-slug="radio" data-component-binding="feed-filter-radio-checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
           <div class="radio radio--sm" data-group="feed-seed-unchecked" data-dd-id="feed-radio-unchecked-seed" data-component-slug="radio" data-component-binding="feed-filter-radio-unchecked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
-          <button type="button" class="link link--12" data-dd-id="feed-forward-link-seed" data-component-slug="link" data-component-binding="feed-forward-link">一键转发</button>
+          <button type="button" class="btn btn--medium btn--sm" data-dd-id="feed-forward-button-seed" data-component-slug="button" data-component-binding="feed-forward-button">一键转发</button>
+          <button type="button" class="btn btn--weak btn--sm" data-dd-id="feed-select-button-seed" data-component-slug="button" data-component-binding="feed-select-button"><i class="btn__icon icon-gouwuche" aria-hidden="true"></i>加入选品车</button>
+          <button type="button" class="btn btn--weak btn--sm btn--icon-only" aria-label="分享当前产品" data-dd-id="feed-share-action-seed" data-component-slug="button" data-component-binding="feed-share-action"><i class="btn__icon icon-fenxiang" aria-hidden="true"></i></button>
+          <div class="modal modal--fullscreen" role="dialog" aria-modal="true" data-state="open" data-dd-id="feed-cart-modal-seed" data-component-slug="modal" data-component-binding="feed-cart-modal"><div class="modal__panel"><div class="modal__title modal__title--default"><div class="navbar" data-dd-id="feed-cart-navbar-seed" data-component-slug="navbar" data-component-binding="feed-cart-navbar"><div class="navbar__body"><div class="navbar__left"><button type="button" class="navbar__left-btn navbar__left-btn--circle" aria-label="关闭"><i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button></div><div class="navbar__center"><div class="wg-tabs wg-tabs--standard wg-tabs--divide" role="tablist" data-dd-id="feed-cart-tabs-seed" data-component-slug="tabs" data-component-binding="feed-cart-tabs"><div class="wg-tabs__scroll"><button class="wg-tabs__item" role="tab" aria-selected="true" type="button"><span class="wg-tabs__content"><span class="wg-tabs__label">选品车</span></span></button><button class="wg-tabs__item" role="tab" aria-selected="false" type="button"><span class="wg-tabs__content"><span class="wg-tabs__label">购物车</span></span></button><span class="wg-tabs__active-indicator" aria-hidden="true"></span></div></div></div><div class="navbar__right"></div></div></div></div><div class="modal__body modal__body--safe-bottom"></div></div></div>
           <div class="popmenu popmenu--action popmenu--has-icon" role="menu" data-state="open" data-placement="bottom" data-align="end" data-dd-id="feed-publish-popmenu-seed" data-component-slug="popmenu" data-component-binding="feed-publish-popmenu">
             <div class="popmenu__list">
               <div class="popmenu__item" role="menuitem"><i class="wego-iconfont-s icon-fabushangpin popmenu__item-icon"></i><span class="popmenu__item-text">发产品</span></div>
@@ -1414,6 +2142,8 @@
       var filterTags = root.querySelector('[data-region="filter-tags"]');
       var publishTrigger = root.querySelector('[data-dom-id="open-publish-menu"]');
       var floatingPublishTrigger = root.querySelector('[data-dom-id="open-publish-menu-floating"]');
+      var floatingCartTrigger = root.querySelector('[data-dom-id="open-cart-panel"]');
+      var firstAddGuide = root.querySelector('[data-dom-id="first-add-guide"]');
       var publishFocus = root.querySelector('[data-dom-id="publish-focus"]');
       var publishDock = root.querySelector('[data-region="publish-dock"]');
       var activePublishTrigger = publishTrigger;
@@ -1432,6 +2162,7 @@
       if (!ctx.state.pageTab) ctx.state.pageTab = 'following';
       if (!ctx.state.filters) ctx.state.filters = { content: 'all', publisher: 'all', category: 'all', dimension: 'all' };
       if (typeof ctx.state.scrollPosition !== 'number') ctx.state.scrollPosition = 0;
+      ensureCartState(ctx);
 
       function updateTabsIndicator(tabs) {
         if (!tabs) return;
@@ -1650,6 +2381,44 @@
         return filters.content !== 'all' || filters.publisher !== 'all' || filters.category !== 'all' || filters.dimension !== 'all';
       }
 
+      function syncCartFloatingEntry() {
+        var count = cartCount(ctx);
+        if (!floatingCartTrigger) return;
+        floatingCartTrigger.hidden = count === 0;
+        var countNode = floatingCartTrigger.querySelector('[data-cart-count]');
+        if (countNode) countNode.textContent = String(count);
+      }
+
+      function showFirstAddGuide() {
+        var cart = ensureCartState(ctx);
+        if (!firstAddGuide || cart.firstAddGuideDismissed) return;
+        firstAddGuide.hidden = false;
+        window.clearTimeout(ctx.state.firstAddGuideTimer);
+        ctx.state.firstAddGuideTimer = window.setTimeout(function() {
+          cart.firstAddGuideDismissed = true;
+          if (firstAddGuide) firstAddGuide.hidden = true;
+        }, 3200);
+      }
+
+      function toggleSelectionItem(item) {
+        var cart = ensureCartState(ctx);
+        var index = cart.selectionIds.indexOf(item.dynamic_id);
+        var added = index === -1;
+        if (added) {
+          cart.selectionIds.push(item.dynamic_id);
+          cart.lastTab = 'selection';
+          ctx.state['selection-item-added'] = true;
+          showFirstAddGuide();
+          ctx.toast('已加入选品车');
+        } else {
+          cart.selectionIds.splice(index, 1);
+          ctx.toast('已移出选品车');
+        }
+        cart.firstCardGuideDismissed = true;
+        syncCartFloatingEntry();
+        render();
+      }
+
       function openDynamic(item) {
         ctx.state.scrollPosition = scroll.scrollTop;
         ctx.appState.dynamicFeedPayload = { dynamic: item, publisher: getPublisher(item.publisher_id), products: item.related_product_ids ? item.related_product_ids.map(getProduct) : [], source_route: 'album-product-feed' };
@@ -1667,7 +2436,17 @@
             }
           });
           var forward = card.querySelector('[data-dom-id="forward-' + item.dynamic_id + '"]');
-          if (forward) forward.addEventListener('click', function(event) { event.stopPropagation(); ctx.toast('动态已转发'); });
+          if (forward) forward.addEventListener('click', function(event) { event.stopPropagation(); ctx.toast('已转发当前产品'); });
+          var share = card.querySelector('[data-dom-id="share-' + item.dynamic_id + '"]');
+          if (share) share.addEventListener('click', function(event) { event.stopPropagation(); ctx.toast('分享能力本期暂未开放'); });
+          var select = card.querySelector('[data-dom-id="select-cart-' + item.dynamic_id + '"]');
+          if (select) select.addEventListener('click', function(event) { event.stopPropagation(); toggleSelectionItem(item); });
+          var firstGuide = card.querySelector('[data-dom-id="first-card-guide"]');
+          if (firstGuide) firstGuide.addEventListener('click', function(event) {
+            event.stopPropagation();
+            ensureCartState(ctx).firstCardGuideDismissed = true;
+            render();
+          });
         });
       }
 
@@ -1688,9 +2467,10 @@
         } else {
           emptyHost.hidden = true;
           emptyHost.innerHTML = '';
-          grid.innerHTML = items.map(feedCardTemplate).join('');
+          grid.innerHTML = items.map(function(item, index) { return feedCardTemplate(item, index, ctx); }).join('');
           bindCardEvents();
         }
+        syncCartFloatingEntry();
         updateAllIndicators();
       }
 
@@ -1826,6 +2606,17 @@
       });
       if (publishTrigger) publishTrigger.addEventListener('click', togglePublishMenu);
       if (floatingPublishTrigger) floatingPublishTrigger.addEventListener('click', togglePublishMenu);
+      if (floatingCartTrigger) floatingCartTrigger.addEventListener('click', function() {
+        closePublishMenu();
+        ensureCartState(ctx).firstAddGuideDismissed = true;
+        if (firstAddGuide) firstAddGuide.hidden = true;
+        openCartPanel(ctx, ensureCartState(ctx).lastTab, function() { syncCartFloatingEntry(); render(); });
+      });
+      if (firstAddGuide) firstAddGuide.addEventListener('click', function() {
+        ensureCartState(ctx).firstAddGuideDismissed = true;
+        firstAddGuide.hidden = true;
+        openCartPanel(ctx, 'selection', function() { syncCartFloatingEntry(); render(); });
+      });
       if (publishFocus) publishFocus.addEventListener('click', closePublishMenu);
       if (publishDock) {
         publishDock.querySelector('[data-dom-id="publish-action-product"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); ctx.toast('发产品能力本期暂未开放'); });

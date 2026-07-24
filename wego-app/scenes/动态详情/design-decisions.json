@@ -14,7 +14,7 @@
     "source": "library-consumption.json#/appRuntime/presentationTypes"
   },
   "prompt_contract": {
-    "design_system_version": 439,
+    "design_system_version": 451,
     "token_bindings": [
       {
         "selector": ".dynamic-detail",
@@ -315,6 +315,18 @@
         "content_role": ".dynamic-detail__product-price 的 line-height",
         "css_property": "line-height",
         "token": "var(--heading-xs-line-height)"
+      },
+      {
+        "selector": ".dynamic-detail__select-cart.is-added .bottom-action-bar__action-icon",
+        "content_role": ".dynamic-detail__select-cart.is-added .bottom-action-bar__action-icon 的 color",
+        "css_property": "color",
+        "token": "var(--text-brand)"
+      },
+      {
+        "selector": ".dynamic-detail__select-cart.is-added .bottom-action-bar__action-label",
+        "content_role": ".dynamic-detail__select-cart.is-added .bottom-action-bar__action-label 的 color",
+        "css_property": "color",
+        "token": "var(--text-brand)"
       }
     ],
     "component_bindings": [
@@ -458,6 +470,10 @@
       {
         "dom_id": "dynamic-detail-forward",
         "target": "feedback:toast"
+      },
+      {
+        "dom_id": "dynamic-detail-select-cart",
+        "target": "state:selection-item-added"
       }
     ],
     "state_contract": [
@@ -492,6 +508,14 @@
         "visible_result": "分别提示对应操作的原型边界或成功状态",
         "fallback": "停留当前详情",
         "persistence": "memory"
+      },
+      {
+        "state_id": "selection-item-added",
+        "initial": false,
+        "trigger": "点击详情页加入选品车",
+        "visible_result": "当前产品加入或移出选品车，并与动态列表状态同步",
+        "fallback": "当前浏览上下文不变",
+        "persistence": "memory"
       }
     ]
   },
@@ -520,11 +544,12 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/动态详情/scene.js",
     "scene_css": "wego-app/scenes/动态详情/scene.css",
-    "source_sha256": "897b37ddf265c0f36dfcab8a2820bf1218a21fdeb27464fad66883e40d5012a4",
+    "source_sha256": "a035f3c278e42beb4f384c6228bb7212bcf81e3665d509015229a8f201fb22cd",
     "dom_ids": [
       "dynamic-detail-back",
       "dynamic-detail-download",
       "dynamic-detail-share",
+      "dynamic-detail-select-cart",
       "dynamic-detail-favorite",
       "dynamic-detail-copy-text",
       "dynamic-detail-edit",
@@ -539,8 +564,8 @@
         375,
         393
       ],
-      "checked_at": "2026-07-23T13:05:00.000Z",
-      "scope": "产品动态与笔记动态详情、图片和模拟视频、关联商品、底部操作栏自适应折叠与溢出菜单、二级页返回。",
+      "checked_at": "2026-07-24T03:03:45.000Z",
+      "scope": "动态详情独立页面的加入选品车入口、列表已选状态同步、关联商品入口；移动端预览验证详情底部操作栏不遮挡内容并保持可查看产品细节。",
       "checks": {
         "horizontal_overflow": true,
         "overlap": true,
@@ -548,7 +573,8 @@
         "action_legibility": true,
         "primary_focus": true,
         "state_feedback": true
-      }
+      },
+      "checked": true
     }
   }
 }

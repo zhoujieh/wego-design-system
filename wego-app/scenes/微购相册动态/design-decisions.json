@@ -14,7 +14,7 @@
     "source": "library-consumption.json#/appRuntime/presentationTypes"
   },
   "prompt_contract": {
-    "design_system_version": 440,
+    "design_system_version": 451,
     "token_bindings": [
       {
         "selector": ".album-feed__top-stack",
@@ -600,15 +600,15 @@
       },
       {
         "selector": ".album-feed__card-footer",
-        "content_role": "卡片底部区域 gap",
+        "content_role": ".album-feed__card-footer 的 gap",
         "css_property": "gap",
-        "token": "var(--spacer-4)"
+        "token": "var(--spacer-8)"
       },
       {
         "selector": ".album-feed__actions",
-        "content_role": "操作行横向间距",
+        "content_role": ".album-feed__actions 的 gap",
         "css_property": "gap",
-        "token": "var(--spacer-12)"
+        "token": "var(--spacer-8)"
       },
       {
         "selector": ".album-feed__empty",
@@ -717,6 +717,426 @@
         "content_role": ".album-feed__filter-options 的 gap",
         "css_property": "gap",
         "token": "var(--spacer-12)"
+      },
+      {
+        "selector": ".album-feed__share-action",
+        "content_role": ".album-feed__share-action 的 box-shadow",
+        "css_property": "box-shadow",
+        "token": "var(--shadow-lg)"
+      },
+      {
+        "selector": ".album-feed__action-buttons",
+        "content_role": ".album-feed__action-buttons 的 gap",
+        "css_property": "gap",
+        "token": "var(--spacer-6)"
+      },
+      {
+        "selector": ".album-feed__select-action.is-added",
+        "content_role": ".album-feed__select-action.is-added 的 color",
+        "css_property": "color",
+        "token": "var(--text-brand)"
+      },
+      {
+        "selector": ".album-feed__selection-guide",
+        "content_role": ".album-feed__selection-guide 的 padding",
+        "css_property": "padding",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".album-feed__selection-guide",
+        "content_role": ".album-feed__selection-guide 的 border-radius",
+        "css_property": "border-radius",
+        "token": "var(--radius-8)"
+      },
+      {
+        "selector": ".album-feed__selection-guide",
+        "content_role": ".album-feed__selection-guide 的 background",
+        "css_property": "background",
+        "token": "var(--bg-brand-surface-l1)"
+      },
+      {
+        "selector": ".album-feed__selection-guide",
+        "content_role": ".album-feed__selection-guide 的 color",
+        "css_property": "color",
+        "token": "var(--text-brand)"
+      },
+      {
+        "selector": ".album-feed__selection-guide",
+        "content_role": ".album-feed__selection-guide 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--body-xs-font-size)"
+      },
+      {
+        "selector": ".album-feed__selection-guide",
+        "content_role": ".album-feed__selection-guide 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--body-xs-line-height)"
+      },
+      {
+        "selector": ".album-feed__cart-fab",
+        "content_role": ".album-feed__cart-fab 的 padding",
+        "css_property": "padding",
+        "token": "var(--spacer-0)"
+      },
+      {
+        "selector": ".album-feed__cart-fab",
+        "content_role": ".album-feed__cart-fab 的 border-radius",
+        "css_property": "border-radius",
+        "token": "var(--radius-full)"
+      },
+      {
+        "selector": ".album-feed__cart-fab",
+        "content_role": ".album-feed__cart-fab 的 background",
+        "css_property": "background",
+        "token": "var(--bg-surface)"
+      },
+      {
+        "selector": ".album-feed__cart-fab",
+        "content_role": ".album-feed__cart-fab 的 box-shadow",
+        "css_property": "box-shadow",
+        "token": "var(--shadow-lg)"
+      },
+      {
+        "selector": ".album-feed__cart-fab",
+        "content_role": ".album-feed__cart-fab 的 color",
+        "css_property": "color",
+        "token": "var(--text-brand)"
+      },
+      {
+        "selector": ".album-feed__cart-fab-icon",
+        "content_role": ".album-feed__cart-fab-icon 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--size-24)"
+      },
+      {
+        "selector": ".album-feed__cart-fab-count",
+        "content_role": ".album-feed__cart-fab-count 的 padding-inline",
+        "css_property": "padding-inline",
+        "token": "var(--spacer-4)"
+      },
+      {
+        "selector": ".album-feed__cart-fab-count",
+        "content_role": ".album-feed__cart-fab-count 的 border-radius",
+        "css_property": "border-radius",
+        "token": "var(--radius-full)"
+      },
+      {
+        "selector": ".album-feed__cart-fab-count",
+        "content_role": ".album-feed__cart-fab-count 的 background",
+        "css_property": "background",
+        "token": "var(--bg-brand)"
+      },
+      {
+        "selector": ".album-feed__cart-fab-count",
+        "content_role": ".album-feed__cart-fab-count 的 color",
+        "css_property": "color",
+        "token": "var(--text-inverse)"
+      },
+      {
+        "selector": ".album-feed__cart-fab-count",
+        "content_role": ".album-feed__cart-fab-count 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--body-xs-font-size)"
+      },
+      {
+        "selector": ".album-feed__cart-fab-count",
+        "content_role": ".album-feed__cart-fab-count 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--size-20)"
+      },
+      {
+        "selector": ".album-feed__cart-guide",
+        "content_role": ".album-feed__cart-guide 的 border-radius",
+        "css_property": "border-radius",
+        "token": "var(--radius-8)"
+      },
+      {
+        "selector": ".album-feed__cart-guide",
+        "content_role": ".album-feed__cart-guide 的 background",
+        "css_property": "background",
+        "token": "var(--bg-surface)"
+      },
+      {
+        "selector": ".album-feed__cart-guide",
+        "content_role": ".album-feed__cart-guide 的 box-shadow",
+        "css_property": "box-shadow",
+        "token": "var(--shadow-lg)"
+      },
+      {
+        "selector": ".album-feed__cart-guide",
+        "content_role": ".album-feed__cart-guide 的 color",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".album-feed__cart-guide",
+        "content_role": ".album-feed__cart-guide 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--body-sm-font-size)"
+      },
+      {
+        "selector": ".album-feed__cart-guide",
+        "content_role": ".album-feed__cart-guide 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--body-sm-line-height)"
+      },
+      {
+        "selector": ".cart-panel__title .navbar",
+        "content_role": ".cart-panel__title .navbar 的 background",
+        "css_property": "background",
+        "token": "var(--bg-page)"
+      },
+      {
+        "selector": ".cart-panel__tabs",
+        "content_role": ".cart-panel__tabs 的 background",
+        "css_property": "background",
+        "token": "var(--bg-page)"
+      },
+      {
+        "selector": ".cart-panel__view",
+        "content_role": ".cart-panel__view 的 gap",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".cart-panel__item",
+        "content_role": ".cart-panel__item 的 gap",
+        "css_property": "gap",
+        "token": "var(--spacer-12)"
+      },
+      {
+        "selector": ".cart-panel__item",
+        "content_role": ".cart-panel__item 的 padding",
+        "css_property": "padding",
+        "token": "var(--spacer-12)"
+      },
+      {
+        "selector": ".cart-panel__item",
+        "content_role": ".cart-panel__item 的 border-radius",
+        "css_property": "border-radius",
+        "token": "var(--radius-8)"
+      },
+      {
+        "selector": ".cart-panel__item",
+        "content_role": ".cart-panel__item 的 background",
+        "css_property": "background",
+        "token": "var(--bg-surface)"
+      },
+      {
+        "selector": ".cart-panel__thumb",
+        "content_role": ".cart-panel__thumb 的 border-radius",
+        "css_property": "border-radius",
+        "token": "var(--radius-8)"
+      },
+      {
+        "selector": ".cart-panel__name",
+        "content_role": ".cart-panel__name 的 color",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".cart-panel__name",
+        "content_role": ".cart-panel__name 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--body-md-font-size)"
+      },
+      {
+        "selector": ".cart-panel__name",
+        "content_role": ".cart-panel__name 的 font-weight",
+        "css_property": "font-weight",
+        "token": "var(--font-weight-medium)"
+      },
+      {
+        "selector": ".cart-panel__name",
+        "content_role": ".cart-panel__name 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--body-md-line-height)"
+      },
+      {
+        "selector": ".cart-panel__meta",
+        "content_role": ".cart-panel__meta 的 color",
+        "css_property": "color",
+        "token": "var(--text-tertiary)"
+      },
+      {
+        "selector": ".cart-panel__meta",
+        "content_role": ".cart-panel__meta 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--body-sm-font-size)"
+      },
+      {
+        "selector": ".cart-panel__meta",
+        "content_role": ".cart-panel__meta 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--body-sm-line-height)"
+      },
+      {
+        "selector": ".cart-panel__remove",
+        "content_role": ".cart-panel__remove 的 background",
+        "css_property": "background",
+        "token": "var(--transparent)"
+      },
+      {
+        "selector": ".cart-panel__remove",
+        "content_role": ".cart-panel__remove 的 color",
+        "css_property": "color",
+        "token": "var(--text-brand)"
+      },
+      {
+        "selector": ".cart-panel__remove",
+        "content_role": ".cart-panel__remove 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--body-sm-font-size)"
+      },
+      {
+        "selector": ".cart-panel__empty",
+        "content_role": ".cart-panel__empty 的 color",
+        "css_property": "color",
+        "token": "var(--text-secondary)"
+      },
+      {
+        "selector": ".cart-panel__empty h3",
+        "content_role": ".cart-panel__empty h3 的 color",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".cart-panel__empty h3",
+        "content_role": ".cart-panel__empty h3 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--heading-xs-font-size)"
+      },
+      {
+        "selector": ".cart-panel__empty h3",
+        "content_role": ".cart-panel__empty h3 的 font-weight",
+        "css_property": "font-weight",
+        "token": "var(--heading-xs-font-weight)"
+      },
+      {
+        "selector": ".cart-panel__empty h3",
+        "content_role": ".cart-panel__empty h3 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--heading-xs-line-height)"
+      },
+      {
+        "selector": ".cart-panel__empty p",
+        "content_role": ".cart-panel__empty p 的 margin-top",
+        "css_property": "margin-top",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".cart-panel__empty p",
+        "content_role": ".cart-panel__empty p 的 font-size",
+        "css_property": "font-size",
+        "token": "var(--body-md-font-size)"
+      },
+      {
+        "selector": ".cart-panel__empty p",
+        "content_role": ".cart-panel__empty p 的 line-height",
+        "css_property": "line-height",
+        "token": "var(--body-md-line-height)"
+      },
+      {
+        "selector": ".cart-panel__actions",
+        "content_role": ".cart-panel__actions 的 gap",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".cart-panel__actions",
+        "content_role": ".cart-panel__actions 的 background",
+        "css_property": "background",
+        "token": "var(--bg-surface)"
+      },
+      {
+        "selector": ".album-feed__cart-guide",
+        "content_role": ".album-feed__cart-guide 的 padding-top",
+        "css_property": "padding-top",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".album-feed__cart-guide",
+        "content_role": ".album-feed__cart-guide 的 padding-right",
+        "css_property": "padding-right",
+        "token": "var(--spacer-12)"
+      },
+      {
+        "selector": ".album-feed__cart-guide",
+        "content_role": ".album-feed__cart-guide 的 padding-bottom",
+        "css_property": "padding-bottom",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".album-feed__cart-guide",
+        "content_role": ".album-feed__cart-guide 的 padding-left",
+        "css_property": "padding-left",
+        "token": "var(--spacer-12)"
+      },
+      {
+        "selector": ".cart-panel__body",
+        "content_role": ".cart-panel__body 的 padding-top",
+        "css_property": "padding-top",
+        "token": "var(--spacer-12)"
+      },
+      {
+        "selector": ".cart-panel__body",
+        "content_role": ".cart-panel__body 的 padding-right",
+        "css_property": "padding-right",
+        "token": "var(--spacer-16)"
+      },
+      {
+        "selector": ".cart-panel__body",
+        "content_role": ".cart-panel__body 的 padding-left",
+        "css_property": "padding-left",
+        "token": "var(--spacer-16)"
+      },
+      {
+        "selector": ".cart-panel__empty",
+        "content_role": ".cart-panel__empty 的 padding-top",
+        "css_property": "padding-top",
+        "token": "var(--spacer-32)"
+      },
+      {
+        "selector": ".cart-panel__empty",
+        "content_role": ".cart-panel__empty 的 padding-right",
+        "css_property": "padding-right",
+        "token": "var(--spacer-16)"
+      },
+      {
+        "selector": ".cart-panel__empty",
+        "content_role": ".cart-panel__empty 的 padding-bottom",
+        "css_property": "padding-bottom",
+        "token": "var(--spacer-32)"
+      },
+      {
+        "selector": ".cart-panel__empty",
+        "content_role": ".cart-panel__empty 的 padding-left",
+        "css_property": "padding-left",
+        "token": "var(--spacer-16)"
+      },
+      {
+        "selector": ".cart-panel__actions",
+        "content_role": ".cart-panel__actions 的 padding-top",
+        "css_property": "padding-top",
+        "token": "var(--spacer-12)"
+      },
+      {
+        "selector": ".cart-panel__actions",
+        "content_role": ".cart-panel__actions 的 padding-right",
+        "css_property": "padding-right",
+        "token": "var(--spacer-16)"
+      },
+      {
+        "selector": ".cart-panel__actions",
+        "content_role": ".cart-panel__actions 的 padding-left",
+        "css_property": "padding-left",
+        "token": "var(--spacer-16)"
+      },
+      {
+        "selector": ".cart-panel__actions",
+        "content_role": ".cart-panel__actions 的 padding-bottom",
+        "css_property": "padding-bottom",
+        "token": "var(--safe-area-bottom-content)"
       }
     ],
     "component_bindings": [
@@ -836,16 +1256,6 @@
         }
       },
       {
-        "binding_id": "feed-forward-link",
-        "slug": "link",
-        "reason": "卡片核心操作一键转发，靠右显示",
-        "variant_dimensions": {
-          "mode": "standalone",
-          "size": "12",
-          "state": "default"
-        }
-      },
-      {
         "binding_id": "feed-empty-action",
         "slug": "button",
         "reason": "筛选无结果时清除条件恢复内容",
@@ -921,6 +1331,119 @@
         "variant_dimensions": {
           "emphasis": "strong",
           "size": "lg",
+          "iconMode": "text-only",
+          "state": "default"
+        }
+      },
+      {
+        "binding_id": "feed-forward-button",
+        "slug": "button",
+        "reason": "卡片底部灰底绿字一键转发，是产品卡片最高优先级快捷操作",
+        "variant_dimensions": {
+          "emphasis": "medium",
+          "size": "sm",
+          "iconMode": "text-only",
+          "state": "default"
+        }
+      },
+      {
+        "binding_id": "feed-select-button",
+        "slug": "button",
+        "reason": "卡片底部加入选品车入口，图标加文案，弱于一键转发但常驻可见",
+        "variant_dimensions": {
+          "emphasis": "weak",
+          "size": "sm",
+          "iconMode": "leading-icon",
+          "state": "default"
+        }
+      },
+      {
+        "binding_id": "feed-share-action",
+        "slug": "button",
+        "reason": "图片右上角单条分享入口，只处理当前产品",
+        "variant_dimensions": {
+          "emphasis": "weak",
+          "size": "sm",
+          "iconMode": "icon-only",
+          "state": "default"
+        }
+      },
+      {
+        "binding_id": "feed-cart-modal",
+        "slug": "modal",
+        "reason": "承载选品车和购物车的全屏面板",
+        "variant_dimensions": {
+          "variant": "fullscreen",
+          "title": "default",
+          "action": "none",
+          "align": "center",
+          "state": "open"
+        }
+      },
+      {
+        "binding_id": "feed-cart-navbar",
+        "slug": "navbar",
+        "reason": "全屏购物车面板关闭入口和顶部承载区",
+        "variant_dimensions": {
+          "leftControl": "close-icon",
+          "titleAlignment": "center",
+          "actions": "none",
+          "spacing": "default",
+          "pageTransition": "present",
+          "position": "sticky"
+        }
+      },
+      {
+        "binding_id": "feed-cart-tabs",
+        "slug": "tabs",
+        "reason": "全屏面板顶部直接区分选品车和购物车两个场景",
+        "variant_dimensions": {
+          "size": "standard",
+          "layout": "divide",
+          "icon": "none",
+          "state": "default"
+        }
+      },
+      {
+        "binding_id": "feed-cart-selection-forward",
+        "slug": "button",
+        "reason": "选品车统一转发操作",
+        "variant_dimensions": {
+          "emphasis": "medium",
+          "size": "md",
+          "iconMode": "text-only",
+          "state": "default"
+        }
+      },
+      {
+        "binding_id": "feed-cart-selection-share",
+        "slug": "button",
+        "reason": "选品车统一分享操作",
+        "variant_dimensions": {
+          "emphasis": "weak",
+          "size": "md",
+          "iconMode": "text-only",
+          "state": "default"
+        }
+      },
+      {
+        "binding_id": "feed-cart-selection-download",
+        "slug": "button",
+        "reason": "选品车统一下载图片操作",
+        "variant_dimensions": {
+          "emphasis": "weak",
+          "size": "md",
+          "iconMode": "text-only",
+          "state": "default"
+        }
+      },
+      {
+        "binding_id": "feed-cart-goods-checkout",
+        "slug": "button",
+        "reason": "购物车结算入口，本期只反馈未开放",
+        "variant_dimensions": {
+          "emphasis": "strong",
+          "size": "md",
           "iconMode": "text-only",
           "state": "default"
         }
@@ -1039,6 +1562,22 @@
       {
         "dom_id": "forward-{dynamic_id}",
         "target": "feedback:toast"
+      },
+      {
+        "dom_id": "share-{dynamic_id}",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "select-cart-{dynamic_id}",
+        "target": "state:selection-item-added"
+      },
+      {
+        "dom_id": "open-cart-panel",
+        "target": "overlay:full-screen-modal"
+      },
+      {
+        "dom_id": "first-add-guide",
+        "target": "overlay:full-screen-modal"
       }
     ],
     "state_contract": [
@@ -1129,6 +1668,30 @@
         "visible_result": "瀑布流按实际容器宽度自动增列并居中，手机壳中的双列不受桌面窗口宽度影响",
         "fallback": "手机壳和窄容器保持双列",
         "persistence": "memory"
+      },
+      {
+        "state_id": "selection-item-added",
+        "initial": false,
+        "trigger": "点击卡片底部加入选品车",
+        "visible_result": "产品加入或移出选品车，卡片状态和浮动购物车数量同步",
+        "fallback": "当前浏览上下文不变",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "cart-active",
+        "initial": false,
+        "trigger": "加入选品车或购物车后",
+        "visible_result": "浮动购物车入口在发布入口上方出现并显示总数量",
+        "fallback": "当前浏览上下文不变",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "cart-panel-open-selection",
+        "initial": false,
+        "trigger": "点击浮动购物车入口",
+        "visible_result": "打开全屏面板并展示选品车 tab",
+        "fallback": "当前浏览上下文不变",
+        "persistence": "memory"
       }
     ]
   },
@@ -1204,9 +1767,34 @@
       "component_slug": "radio"
     },
     {
-      "dd_id": "feed-forward-link-seed",
-      "binding_id": "feed-forward-link",
-      "component_slug": "link"
+      "dd_id": "feed-forward-button-seed",
+      "binding_id": "feed-forward-button",
+      "component_slug": "button"
+    },
+    {
+      "dd_id": "feed-select-button-seed",
+      "binding_id": "feed-select-button",
+      "component_slug": "button"
+    },
+    {
+      "dd_id": "feed-share-action-seed",
+      "binding_id": "feed-share-action",
+      "component_slug": "button"
+    },
+    {
+      "dd_id": "feed-cart-modal-seed",
+      "binding_id": "feed-cart-modal",
+      "component_slug": "modal"
+    },
+    {
+      "dd_id": "feed-cart-navbar-seed",
+      "binding_id": "feed-cart-navbar",
+      "component_slug": "navbar"
+    },
+    {
+      "dd_id": "feed-cart-tabs-seed",
+      "binding_id": "feed-cart-tabs",
+      "component_slug": "tabs"
     },
     {
       "dd_id": "feed-publish-popmenu-seed",
@@ -1217,7 +1805,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/微购相册动态/scene.js",
     "scene_css": "wego-app/scenes/微购相册动态/scene.css",
-    "source_sha256": "27a5b202bf74d767de67b80a78fcda6c83c0f38f20b68b6fb4b0d438cf408294",
+    "source_sha256": "01d932468048a0ee5ae50691f02cabca0e8b31cf8ec45a8e87f8d684e1f85501",
     "dom_ids": [
       "page-tab-following",
       "page-tab-recommended",
@@ -1239,17 +1827,19 @@
       "publish-action-live",
       "publish-action-import",
       "publish-action-scan",
-      "open-publish-menu-floating"
+      "open-publish-menu-floating",
+      "open-cart-panel",
+      "first-add-guide"
     ],
-    "component_count": 16,
+    "component_count": 21,
     "visualCheck": {
       "status": "passed",
       "viewports": [
         375,
         393
       ],
-      "checked_at": "2026-07-24T01:06:23.000Z",
-      "scope": "顶部 page-tabs 居中且左右预留对称栏位，右上角发布入口保持原有 popmenu；右下角悬浮入口保持纯加号和中性白底，点击时触发短震动并从按钮右下角原点形变展开无标题发布类型列表面板。移动端预览验证列表面板在视口内、层级高于局部弱化层、不覆盖底部 Tab、无横向溢出，点击发产品后面板关闭并出现未开放 toast。",
+      "checked_at": "2026-07-24T03:03:45.000Z",
+      "scope": "动态列表加入选品车、首次引导、浮动购物车入口、全屏选品车/购物车 tabs、选品车统一转发/分享/下载操作；移动端预览验证图片右上角仅保留分享、入口不遮挡、首次加入后数量与引导同步、全屏面板顶部无单独标题。",
       "checks": {
         "horizontal_overflow": true,
         "overlap": true,
@@ -1257,7 +1847,8 @@
         "action_legibility": true,
         "primary_focus": true,
         "state_feedback": true
-      }
+      },
+      "checked": true
     }
   }
 }
