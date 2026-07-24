@@ -13,9 +13,9 @@ description: 审查或迭代微购设计系统、组件、Preview、UI Kit、设
 
 固定先读 `AGENTS.md`，再按任务只读取对应分支：
 
-- 组件、Token、Preview 或 UI Kit：读[组件与 UI Kit 迭代](references/workflow.md)、[资源同步矩阵](references/sync-matrix.runtime.md)，以及目标组件契约、Preview、索引、生成后的 `components.css` 和受影响明确范式。
+- 组件、Token、Preview 或 UI Kit：读[组件与 UI Kit 迭代](./references/workflow.md)、[资源同步矩阵](./references/sync-matrix.runtime.md)，以及目标组件契约、Preview、索引、生成后的 `components.css` 和受影响明确范式。
 - 消费规则、守门或设计系统缺口：读直接受影响的权威源和消费者；涉及顶层页面判断时才读共享[设计决策原则](../shared/references/design-decisions.md)。
-- 用户明确要求优化工作流或沉淀经验：读[工作流迭代](references/workflow-iteration.md)和[工作流与经验同步](references/sync-matrix.md)；只有录入、确认或升级候选时再读[经验候选](references/experience-candidates.md)、归属注册表和候选池。
+- 用户明确要求优化工作流或沉淀经验：读[工作流迭代](./references/workflow-iteration.md)和[工作流与经验同步](./references/sync-matrix.md)；只有录入、确认或升级候选时再读[经验候选](./references/experience-candidates.md)、归属注册表和候选池。
 
 ## 输出契约与跨技能交接
 

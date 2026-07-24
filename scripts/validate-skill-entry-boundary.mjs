@@ -78,7 +78,7 @@ export function validateSkillEntryBoundary(root = process.cwd()) {
     if (headings.length !== requiredHeadings.length || headings.some((heading, index) => heading !== requiredHeadings[index])) errors.push(`${name}/SKILL.md 必须且只能包含三项入口章节`);
     if (content.split(/\r?\n/).length > 120) errors.push(`${name}/SKILL.md 超出入口信息预算`);
     if (/wego-ux(?!system-iterate)|wego-tests|specs\/|interaction[_-]spec/.test(content)) errors.push(`${name}/SKILL.md 包含旧技能、废弃业务规格或生成规则路径`);
-    const links = new Set([...content.matchAll(/\[[^\]]+\]\(([^)]+)\)/g)].map(match => match[1].split('#')[0]).filter(Boolean));
+    const links = new Set([...content.matchAll(/\[[^\]]+\]\(([^)]+)\)/g)].map(match => match[1].split('#')[0].replace(/^\.\//, '')).filter(Boolean));
     for (const link of links) if (!/^(?:https?:|mailto:)/.test(link) && !fs.existsSync(path.resolve(skillDir, link))) errors.push(`${name}/SKILL.md 链接不存在：${link}`);
     const references = path.join(skillDir, 'references');
     if (fs.existsSync(references)) for (const entry of fs.readdirSync(references).filter(file => file.endsWith('.md'))) if (!links.has(`references/${entry}`)) errors.push(`${name}/references/${entry} 未由 SKILL.md 直接引用`);
