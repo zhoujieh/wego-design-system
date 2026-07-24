@@ -12,7 +12,7 @@
     ]
   },
   "status": "awaiting-prototype-confirmation",
-  "scope_revision": 13,
+  "scope_revision": 14,
   "prototype_brief": {
     "goal": "重构「动态」主 tab 的首屏分发效率与发现流体验，让用户在首屏快速识别并进入感兴趣的动态详情，完整消费文本、图片或视频内容；关联商品详情作为次级链路存在。顶部、卡片信息层级与操作布局必须符合清晰与高效原则。",
     "included": [
@@ -40,7 +40,9 @@
       "动态首页瀑布流使用 CSS columns 双列布局并显式设置 row-gap，避免列内卡片上下贴在一起",
       "动态首页滚动区底部必须为底部导航栏与安全区预留足够留白，列表底部内容不被 tabbar 遮挡",
       "动态首页不再单独显示「已应用筛选」行，筛选结果和已选状态由 tag 筛选标签高亮和搜索框右侧筛选文案承担",
-      "建立 wego-app 级统一原型数据库：所有后续交互原型统一从 wego-app/data/prototype-db.js 读取商品、素材、发布者和动态文案；当前 15 个服装素材目录必须有与图片识别结果匹配的完整商品信息、商品属性和运营文案，并定义可扩展到鞋子、包袋等后续品类的数据类型；动态、商品和笔记不得继续按图片下标随意拼接不匹配文案"
+      "建立 wego-app 级统一原型数据库：所有后续交互原型统一从 wego-app/data/prototype-db.js 读取商品、素材、发布者和动态文案；当前 15 个服装素材目录必须有与图片识别结果匹配的完整商品信息、商品属性和运营文案，并定义可扩展到鞋子、包袋等后续品类的数据类型；动态、商品和笔记不得继续按图片下标随意拼接不匹配文案",
+      "建立统一商家用户数据库：所有后续交互原型统一从 wego-app/data/prototype-db.js 读取 users、currentUser、friends 与 publishers；微购好友、动态发布者和当前登录用户均为商家账号，名称必须符合商家主体定位，不再使用随机昵称、个人名或个人账号类型。",
+      "好友字段和好友分组信息都维护在统一数据库：friends 记录商家好友完整字段，friendGroups 记录分组 ID、名称、说明和排序，好友列表只消费统一数据库，不再在场景内硬编码正式分组。"
     ],
     "excluded": [
       "将商品详情作为动态首页主点击目标",
@@ -53,8 +55,7 @@
       "独立好友主页、店铺主页和搜索结果路由",
       "真实后端接口、分页加载、数据持久化和动态发布功能",
       "评论、点赞和真实转发发送的业务闭环；一键转发仅模拟成功反馈",
-      "刷新后保留筛选或浏览位置",
-      "消息、工作台、我的 tab 的业务内容修改"
+      "刷新后保留筛选或浏览位置"
     ],
     "entry_points": [
       "底部导航「动态」主 tab（dongtai），用户打开 App 后默认进入",
@@ -63,7 +64,9 @@
       "动态首页每张卡片提供不压过内容入口的一键转发快捷操作；动态详情提供唯一强调的一键转发入口",
       "动态页顶部全局独立搜索入口点击后明确提示「全局搜索能力本期暂未开放」，并留在当前动态页",
       "动态页顶部筛选入口打开集中筛选面板（发布者与商品分类）；顶部一级切换直接切换内容模式与内容类型，无需打开面板",
-      "商品详情固定底部「联系卖家」和「立即购买」入口点击后给出对应能力本期暂未开放的明确提示，不进入后续页面"
+      "商品详情固定底部「联系卖家」和「立即购买」入口点击后给出对应能力本期暂未开放的明确提示，不进入后续页面",
+      "底部导航「好友」tab 消费统一 friends 商家账号数据，支持按商家名称搜索、分组查看和新增商家原型表单",
+      "底部导航「我的」tab 的头像、名称和角色标签消费 currentUser 当前商家账号数据"
     ],
     "critical_paths": [
       "进入动态 tab → 首屏浏览瀑布流双列动态卡片 → 点击整张卡片 → 在动态详情查看全文与图片或视频 → 返回并保留首页上下文",
@@ -73,7 +76,8 @@
       "进入动态详情 → 查看关联商品 → 进入传统商品详情 → 返回原动态详情",
       "进入动态首页或动态详情 → 点击一次一键转发 → 直接看到转发成功反馈，当前浏览上下文不变",
       "进入动态详情 → 点击下载图片 → 看到「图片下载为原型演示，本期不保存到设备」；点击更多 → 看到「更多操作能力本期暂未开放」",
-      "进入商品详情 → 点击联系卖家或立即购买 → 立即看到具体能力本期暂未开放的提示并停留在当前页"
+      "进入商品详情 → 点击联系卖家或立即购买 → 立即看到具体能力本期暂未开放的提示并停留在当前页",
+      "进入好友 tab → 查看统一用户库里的商家好友 → 按商家名称搜索或按商家分组浏览 → 新增商家后列表即时更新"
     ],
     "prototype_boundaries": [
       {
@@ -142,11 +146,13 @@
       "product-detail：按传统电商结构展示关联商品，返回时回到原动态首页或动态详情上下文",
       "forward-success：点击一次一键转发后立即显示成功反馈，当前动态和浏览上下文保持不变",
       "secondary-action-feedback：在动态详情点击下载后显示「图片下载为原型演示，本期不保存到设备」；点击更多后显示「更多操作能力本期暂未开放」",
-      "product-commerce-entry-feedback：在商品详情点击联系卖家或立即购买后显示对应能力本期暂未开放的明确提示"
+      "product-commerce-entry-feedback：在商品详情点击联系卖家或立即购买后显示对应能力本期暂未开放的明确提示",
+      "merchant-friends-ready：好友 tab 从统一数据库读取商家好友列表，展示商家名称、商家类型、上新数和商品数",
+      "current-merchant-profile：我的 tab 从 currentUser 读取当前商家头像、商家名称和商家类型"
     ],
     "data_contract": {
       "publisher": {
-        "source": "复用现有好友数据或同结构的本地回退数据",
+        "source": "wego-app/data/prototype-db.js#publishers，由 users 商家账号派生",
         "required": [
           "publisher_id",
           "publisher_name",
@@ -155,9 +161,9 @@
           "publisher_statuses"
         ],
         "constraints": [
-          "publisher_type 只使用 person 或 shop，筛选面板统一归入发布者维度并显示个人或店铺类型",
+          "publisher_type 固定为 shop；动态页筛选面板统一显示为商家发布者，不再出现个人发布者类型",
           "publisher_statuses 可包含 live、new、starred、verified，一个发布者可同时拥有多个状态",
-          "首页人维度栏展示约 10 个发布者头像用于验证横滑与右侧固定；首页不再用 tag 堆叠状态与类型，店铺标识使用头像旁的标识元素，状态使用发布时间旁的图标前缀"
+          "publisher_name 必须是商家主体名称，使用商行、店、档口、铺、集合店、买手店等真实商家定位后缀，不使用个人昵称"
         ]
       },
       "dynamic_item": {
@@ -296,10 +302,73 @@
           "scroll_position",
           "source_dynamic_id"
         ]
+      },
+      "merchant_user": {
+        "source": "wego-app/data/prototype-db.js#users",
+        "required": [
+          "user_id",
+          "merchant_id",
+          "merchant_name",
+          "display_name",
+          "avatar",
+          "account_type",
+          "merchant_type",
+          "group_id",
+          "py_initial",
+          "shop_statuses",
+          "product_total",
+          "new_count",
+          "region",
+          "main_categories",
+          "is_self"
+        ],
+        "constraints": [
+          "account_type 固定为 merchant；当前用户与好友使用同一用户结构",
+          "is_self=true 的记录作为 currentUser，供我的页与动态页我的商家入口消费",
+          "非 self 记录可派生为 friends 和 publishers，保持旧场景字段兼容",
+          "merchant_name 必须符合商家主体命名，不使用个人姓名、个人昵称或随机器生成名称"
+        ]
+      },
+      "friend": {
+        "source": "wego-app/data/prototype-db.js#friends，由 users 商家账号派生",
+        "required": [
+          "friend_id",
+          "user_id",
+          "merchant_id",
+          "nickname",
+          "merchant_name",
+          "avatar",
+          "py_initial",
+          "group_id",
+          "new_count",
+          "product_total",
+          "merchant_type",
+          "region",
+          "account_type"
+        ],
+        "constraints": [
+          "nickname 仅作为好友列表旧字段兼容，值必须等于 merchant_name",
+          "好友分组使用重点商家、常合作商家、待跟进商家",
+          "好友列表不得再调用随机昵称生成逻辑"
+        ]
+      },
+      "friend_group": {
+        "source": "wego-app/data/prototype-db.js#friendGroups",
+        "required": [
+          "group_id",
+          "group_name",
+          "description",
+          "sort_order"
+        ],
+        "constraints": [
+          "好友分组必须和 friends.group_id 对齐，作为好友列表分组排序和选择面板的数据源",
+          "默认分组为重点商家、常合作商家、待跟进商家，名称必须体现商家关系，不使用客户分组命名",
+          "场景不得维护另一套正式分组；新增分组应先进入统一数据库"
+        ]
       }
     },
     "assumptions": [
-      "默认用户已登录并可浏览好友或店铺公开发布的动态",
+      "默认用户已登录为商家账号；微购好友、动态发布者和当前用户都按商家账号展示。",
       "推荐顺序使用稳定的本地模拟规则，重点验证内容发现和动态详情消费路径",
       "组合筛选仅处理当前已加载的本地模拟数据，不做分页",
       "全局搜索是独立能力，本轮不承载任何搜索业务状态或结果数据",
@@ -316,20 +385,23 @@
     "open_questions": []
   },
   "brief_confirmation": {
-    "at": "2026-07-23T12:55:58.196Z",
-    "scope_revision": 13,
-    "scope_sha256": "7d577a9e325007e2a67ef306344bc7058b19c2509af924d49a8beb4aad7e951a"
+    "at": "2026-07-24T00:32:04.476Z",
+    "scope_revision": 14,
+    "scope_sha256": "c968cf89f54537278122041d207ec857cff26c1cb382a0401dce9c0deee6011a"
   },
   "prototype_confirmation": null,
   "affected_scenes": [
     "微购相册动态",
     "动态详情",
-    "商品详情"
+    "商品详情",
+    "好友列表",
+    "我的"
   ],
   "affected_runtime": [
     "wego-app/data/prototype-db.js",
     "wego-app/index.html",
-    "wego-app/README.md"
+    "wego-app/README.md",
+    "wego-app/data/README.md"
   ],
   "stage_outputs": {
     "product": {
@@ -487,6 +559,22 @@
     {
       "action": "submit-prototype",
       "at": "2026-07-23T13:03:07.297Z"
+    },
+    {
+      "action": "invalidate",
+      "at": "2026-07-24T00:30:09.882Z"
+    },
+    {
+      "action": "submit-brief",
+      "at": "2026-07-24T00:32:04.441Z"
+    },
+    {
+      "action": "confirm-brief",
+      "at": "2026-07-24T00:32:04.479Z"
+    },
+    {
+      "action": "submit-prototype",
+      "at": "2026-07-24T00:33:40.622Z"
     }
   ],
   "freeze": null

@@ -425,7 +425,7 @@
       {
         "binding_id": "role-tag",
         "slug": "tag",
-        "reason": "轻量展示超级管理员角色",
+        "reason": "轻量展示当前商家账号类型",
         "variant_dimensions": {
           "size": "20",
           "theme": "gray",
@@ -557,7 +557,7 @@
         "state_id": "my-home-default",
         "initial": true,
         "trigger": "进入我的主 tab",
-        "visible_result": "展示已登录超级管理员的会员、空间、应用、订单和个人服务信息",
+        "visible_result": "展示已登录商家账号的会员、空间、应用、订单和个人服务信息",
         "fallback": "保持当前可用入口与固定演示数据",
         "persistence": "memory"
       },
@@ -666,7 +666,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/我的/scene.js",
     "scene_css": "wego-app/scenes/我的/scene.css",
-    "source_sha256": "fa486b82369b9a95feea90191353b0ceeb22673eefe94d578880ef31649d0cda",
+    "source_sha256": "d2e66999c2722f7528f66d1c726604864752c931824784840b4b90f466a79ef7",
     "dom_ids": [
       "renew-vip",
       "manage-storage",

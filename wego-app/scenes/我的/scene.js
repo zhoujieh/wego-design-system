@@ -105,7 +105,7 @@
       {
         "binding_id": "role-tag",
         "slug": "tag",
-        "reason": "轻量展示超级管理员角色",
+        "reason": "轻量展示当前商家账号类型",
         "variant_dimensions": {
           "size": "20",
           "theme": "gray",
@@ -207,7 +207,7 @@
         "state_id": "my-home-default",
         "initial": true,
         "trigger": "进入我的主 tab",
-        "visible_result": "展示已登录超级管理员的会员、空间、应用、订单和个人服务信息",
+        "visible_result": "展示已登录商家账号的会员、空间、应用、订单和个人服务信息",
         "fallback": "保持当前可用入口与固定演示数据",
         "persistence": "memory"
       },
@@ -372,13 +372,13 @@ const mySceneTemplate = `
       <div class="my-page__scroll">
         <header class="my-page__profile">
           <div class="avatar avatar--56 avatar--image" data-dd-id="profile-avatar" data-component-slug="avatar" data-component-binding="profile-avatar">
-            <img src="./lib/assets/image/avatar/avatar_083.jpg" alt="微购用户头像">
+            <img src="./lib/assets/image/avatar/avatar_083.jpg" alt="商家头像" data-current-merchant-avatar>
           </div>
           <div class="my-page__profile-meta">
-            <h1 class="my-page__username">微购用户</h1>
+            <h1 class="my-page__username" data-current-merchant-name>微购优选商行</h1>
             <div class="my-page__identity">
               <span class="tag tag--20 tag--brand-stroke" data-dd-id="vip-tag" data-component-slug="tag" data-component-binding="vip-tag"><span class="tag__label">VIP</span></span>
-              <span class="tag tag--20 tag--gray" data-dd-id="role-tag" data-component-slug="tag" data-component-binding="role-tag"><span class="tag__label">超级管理员</span></span>
+              <span class="tag tag--20 tag--gray" data-dd-id="role-tag" data-component-slug="tag" data-component-binding="role-tag"><span class="tag__label" data-current-merchant-role>商家账号</span></span>
             </div>
           </div>
         </header>
@@ -472,6 +472,19 @@ window.WegoApp.registerScene({
       coversTabBar: false
     },
     init: function initMyScene(ctx) {
+      var db = window.WEGO_PROTOTYPE_DB || {};
+      var currentUser = db.currentUser || (db.users || []).find(function (item) { return item.is_self; }) || {};
+      var merchantName = currentUser.merchant_name || currentUser.display_name || '微购优选商行';
+      var avatar = ctx.root.querySelector('[data-current-merchant-avatar]');
+      var name = ctx.root.querySelector('[data-current-merchant-name]');
+      var role = ctx.root.querySelector('[data-current-merchant-role]');
+      if (avatar) {
+        avatar.src = currentUser.avatar || './lib/assets/image/avatar/avatar_083.jpg';
+        avatar.alt = merchantName + '头像';
+      }
+      if (name) name.textContent = merchantName;
+      if (role) role.textContent = currentUser.merchant_type || '商家账号';
+
       var mainGrid = ctx.root.querySelector('[data-dom-id="main-app-grid"]');
       var moreButton = ctx.root.querySelector('[data-dom-id="open-app-center"]');
 

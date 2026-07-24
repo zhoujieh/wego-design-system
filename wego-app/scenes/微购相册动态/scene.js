@@ -790,7 +790,7 @@
     "layout_contract": {
       "mode": "composed",
       "source": "references/design-decisions.md",
-      "selection_reason": "页面首要任务是发现并进入动态详情；顶部 page-tabs 与搜索栏共同吸顶，搜索栏使用 Search 组件 Preview 的标准强调结构（白底、品牌描边、右侧正式小号主按钮），场景包装层只承担收起动画。人维度栏支持横滑且「我的相册」与筛选入口固定在右侧，并用渐变蒙层隔开滚动内容；瀑布流在手机壳和窄容器中固定双列，在场景自身可用宽度增大后按 168px 目标列宽自动增列并居中，避免根据桌面窗口宽度误把手机壳拉成单列。卡片信息紧凑，发布时间下沉到操作栏左侧，与一键转发形成稳定底部信息带；发布操作保留右上角入口，同时新增右下角拇指区悬浮入口，复用同一组 popmenu 动作并从触发点向上浮出，降低单手操作距离；场景根由 host-shell-page__panel 约束，并预留底部导航安全区。",
+      "selection_reason": "页面首要任务是发现并进入动态详情；顶部 page-tabs 与搜索栏共同吸顶，搜索栏使用 Search 组件 Preview 的标准强调结构（白底、品牌描边、右侧正式小号主按钮），场景包装层只承担收起动画。人维度栏支持横滑且「我的商家」与筛选入口固定在右侧，并用渐变蒙层隔开滚动内容；瀑布流在手机壳和窄容器中固定双列，在场景自身可用宽度增大后按 168px 目标列宽自动增列并居中，避免根据桌面窗口宽度误把手机壳拉成单列。卡片信息紧凑，发布时间下沉到操作栏左侧，与一键转发形成稳定底部信息带；发布操作保留右上角入口，同时新增右下角拇指区悬浮入口，复用同一组 popmenu 动作并从触发点向上浮出，降低单手操作距离；场景根由 host-shell-page__panel 约束，并预留底部导航安全区。",
       "page_edge_mode": "M8",
       "mutable_regions": [
         ".album-feed__floating-toolbar",
@@ -1018,8 +1018,9 @@
   var publishers = db.publishers || [];
   var products = db.products || [];
   var dynamics = db.dynamics || [];
+  var currentUser = db.currentUser || (db.users || []).find(function(item) { return item.is_self; }) || { merchant_name: '微购优选商行', avatar: './lib/assets/image/avatar/avatar_083.jpg' };
 
-  window.WEGO_DYNAMIC_CATALOG = { publishers: publishers, products: products, dynamics: dynamics, source: 'WEGO_PROTOTYPE_DB' };
+  window.WEGO_DYNAMIC_CATALOG = { publishers: publishers, products: products, dynamics: dynamics, currentUser: currentUser, source: 'WEGO_PROTOTYPE_DB' };
 
   function escapeHtml(value) {
     var map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
@@ -1027,7 +1028,7 @@
   }
 
   function getPublisher(id) {
-    return publishers.find(function(item) { return item.publisher_id === id; }) || publishers[0] || { publisher_id: 'fallback-publisher', publisher_name: '微购用户', publisher_avatar: './lib/assets/image/avatar-defult.png', publisher_type: 'person', publisher_statuses: [] };
+    return publishers.find(function(item) { return item.publisher_id === id; }) || publishers[0] || { publisher_id: 'fallback-publisher', publisher_name: '微购商家', publisher_avatar: './lib/assets/image/avatar-defult.png', publisher_type: 'shop', publisher_statuses: [] };
   }
 
   function getProduct(id) {
@@ -1114,7 +1115,7 @@
 
   function filterModalTemplate(draft) {
     var publisherOptions = [['all', '全部发布者']].concat(publishers.map(function(publisher) {
-      return [publisher.publisher_id, (publisher.publisher_type === 'shop' ? '店铺 · ' : '个人 · ') + publisher.publisher_name];
+      return [publisher.publisher_id, '商家 · ' + publisher.publisher_name];
     }));
     var categoryOptions = [['all', '全部分类'], ['clothing', '服装'], ['shoes', '鞋子'], ['bags', '包袋']];
     function options(group, list, selected) {
@@ -1193,8 +1194,8 @@
             <div class="album-feed__people-self" data-dom-id="people-self">
               <img class="album-feed__sticky-fade album-feed__sticky-fade--people" src="./lib/assets/icons/sticky-fade-16.svg" alt="" aria-hidden="true">
               <div class="album-feed__people-item">
-                <div class="avatar avatar--40 avatar--image album-feed__people-avatar" data-dd-id="feed-people-avatar-self" data-component-slug="avatar" data-component-binding="feed-people-avatar-self"><img src="./lib/assets/image/avatar/avatar_083.jpg" alt="我的相册"></div>
-                <span class="album-feed__people-name">我的相册</span>
+                <div class="avatar avatar--40 avatar--image album-feed__people-avatar" data-dd-id="feed-people-avatar-self" data-component-slug="avatar" data-component-binding="feed-people-avatar-self"><img src="./lib/assets/image/avatar/avatar_083.jpg" alt="我的商家"></div>
+                <span class="album-feed__people-name">我的商家</span>
               </div>
             </div>
           </div>
@@ -1401,6 +1402,19 @@
 
       function renderPeopleList() {
         peopleList.innerHTML = publishers.map(peopleItemTemplate).join('');
+      }
+
+      function renderCurrentMerchant() {
+        var selfRoot = root.querySelector('[data-dom-id="people-self"]');
+        if (!selfRoot) return;
+        var selfImg = selfRoot.querySelector('.album-feed__people-avatar img');
+        var selfName = selfRoot.querySelector('.album-feed__people-name');
+        var merchantName = currentUser.merchant_name || currentUser.display_name || '我的商家';
+        if (selfImg) {
+          selfImg.src = currentUser.avatar || './lib/assets/image/avatar/avatar_083.jpg';
+          selfImg.alt = merchantName;
+        }
+        if (selfName) selfName.textContent = merchantName;
       }
 
       function bindPeopleEvents() {
@@ -1634,7 +1648,7 @@
       root.querySelector('[data-dom-id="page-tab-new"]').addEventListener('click', function() { closePublishMenu(); ctx.toast('上新视图本期暂未开放'); });
 
       /* 人维度头像：自己入口直接绑定，好友项由 bindPeopleEvents 逐项绑定 */
-      root.querySelector('[data-dom-id="people-self"]').addEventListener('click', function() { closePublishMenu(); ctx.toast('个人主页本期暂未开放'); });
+      root.querySelector('[data-dom-id="people-self"]').addEventListener('click', function() { closePublishMenu(); ctx.toast('商家主页本期暂未开放'); });
 
       /* 多维度筛选标签：直接绑定 */
       root.querySelector('[data-dom-id="filter-tag-all"]').addEventListener('click', function() { switchDimension('all'); });
@@ -1659,6 +1673,7 @@
       }
 
       renderPeopleList();
+      renderCurrentMerchant();
       bindPeopleEvents();
       ctx.state['feed-ready'] = true;
       render();

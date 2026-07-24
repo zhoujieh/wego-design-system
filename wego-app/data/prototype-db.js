@@ -96,18 +96,93 @@
     product('prod-clothing-015', 'clothing-beige-logo-pullover', '米色宽松字母卫衣', 169, { color: ['米色', '黑色'], style: ['街头', '舒适'], silhouette: '宽松套头', season: '秋冬', material_note: '卫衣感' }, { sizes: ['M', 'L', 'XL'], fit: '宽松', care: '反面洗涤' }, ['宽松舒适', '字母图案有识别度', '适合短裤和靴子搭配'], ['适合秋季轻外套内容。', '文案避免暗示真实品牌。'], '米色宽松卫衣搭黑色短裤和厚底靴，适合做舒适、街头和秋季轻外套内容。')
   ];
 
-  var publishers = [
-    { publisher_id: 'pub-01', publisher_name: '云朵服饰', publisher_avatar: avatarBase + 'avatar_001.jpg', publisher_type: 'shop', publisher_statuses: ['live', 'verified'] },
-    { publisher_id: 'pub-02', publisher_name: '小满的衣橱', publisher_avatar: avatarBase + 'avatar_008.jpg', publisher_type: 'person', publisher_statuses: ['new', 'starred'] },
-    { publisher_id: 'pub-03', publisher_name: '漫川生活馆', publisher_avatar: avatarBase + 'avatar_016.jpg', publisher_type: 'shop', publisher_statuses: ['new', 'verified'] },
-    { publisher_id: 'pub-04', publisher_name: '阿宁手记', publisher_avatar: avatarBase + 'avatar_024.jpg', publisher_type: 'person', publisher_statuses: ['starred', 'verified'] },
-    { publisher_id: 'pub-05', publisher_name: '微光面料室', publisher_avatar: avatarBase + 'avatar_032.jpg', publisher_type: 'shop', publisher_statuses: ['new', 'starred'] },
-    { publisher_id: 'pub-06', publisher_name: '陆小满', publisher_avatar: avatarBase + 'avatar_040.jpg', publisher_type: 'person', publisher_statuses: ['verified'] },
-    { publisher_id: 'pub-07', publisher_name: '白茶手作', publisher_avatar: avatarBase + 'avatar_048.jpg', publisher_type: 'shop', publisher_statuses: ['live', 'new'] },
-    { publisher_id: 'pub-08', publisher_name: '苏野', publisher_avatar: avatarBase + 'avatar_056.jpg', publisher_type: 'person', publisher_statuses: ['starred'] },
-    { publisher_id: 'pub-09', publisher_name: '云间集', publisher_avatar: avatarBase + 'avatar_064.jpg', publisher_type: 'shop', publisher_statuses: ['verified'] },
-    { publisher_id: 'pub-10', publisher_name: '朝晚穿搭', publisher_avatar: avatarBase + 'avatar_072.jpg', publisher_type: 'person', publisher_statuses: ['new'] }
+  function user(id, merchantName, avatarFile, groupId, pyInitial, statuses, productTotal, newCount, merchantType, region, categories, isSelf) {
+    return {
+      user_id: id,
+      merchant_id: 'merchant-' + id.replace(/^pub-/, '').replace(/^user-/, ''),
+      merchant_name: merchantName,
+      display_name: merchantName,
+      avatar: avatarBase + avatarFile,
+      account_type: 'merchant',
+      merchant_type: merchantType,
+      publisher_type: 'shop',
+      group_id: groupId,
+      py_initial: pyInitial,
+      shop_statuses: statuses,
+      publisher_statuses: statuses,
+      product_total: productTotal,
+      new_count: newCount,
+      region: region,
+      main_categories: categories,
+      is_self: Boolean(isSelf)
+    };
+  }
+
+  var users = [
+    user('user-self', '微购优选商行', 'avatar_083.jpg', 'g-self', 'W', ['verified', 'starred'], 128, 6, '综合买手商家', '杭州', ['服装', '鞋包'], true),
+    user('pub-01', '云朵服饰商行', 'avatar_001.jpg', 'g-key', 'Y', ['live', 'verified'], 86, 5, '女装商家', '广州', ['服装'], false),
+    user('pub-02', '青禾女装档口', 'avatar_008.jpg', 'g-key', 'Q', ['new', 'starred'], 64, 8, '女装档口', '广州十三行', ['服装'], false),
+    user('pub-03', '漫川生活集合店', 'avatar_016.jpg', 'g-coop', 'M', ['new', 'verified'], 72, 4, '生活方式集合店', '杭州', ['服装', '配饰'], false),
+    user('pub-04', '拾光买手店', 'avatar_024.jpg', 'g-key', 'S', ['starred', 'verified'], 58, 3, '买手店', '上海', ['服装', '包袋'], false),
+    user('pub-05', '微光面料商行', 'avatar_032.jpg', 'g-follow', 'W', ['new', 'starred'], 41, 7, '面料选品商家', '绍兴柯桥', ['服装'], false),
+    user('pub-06', '棉岛基础款服饰店', 'avatar_040.jpg', 'g-coop', 'M', ['verified'], 93, 2, '基础款供应商', '佛山', ['服装'], false),
+    user('pub-07', '白茶手作服饰店', 'avatar_048.jpg', 'g-key', 'B', ['live', 'new'], 37, 6, '原创手作服饰', '苏州', ['服装', '配饰'], false),
+    user('pub-08', '森屿童装铺', 'avatar_056.jpg', 'g-follow', 'S', ['starred'], 55, 1, '童装商家', '湖州织里', ['服装'], false),
+    user('pub-09', '云间集女装店', 'avatar_064.jpg', 'g-coop', 'Y', ['verified'], 77, 0, '女装集合店', '成都', ['服装'], false),
+    user('pub-10', '朝晚穿搭服饰店', 'avatar_072.jpg', 'g-follow', 'Z', ['new'], 46, 5, '穿搭内容商家', '武汉', ['服装'], false),
+    user('pub-11', '野橘原创女装店', 'avatar_011.jpg', 'g-key', 'Y', ['new', 'verified'], 39, 4, '原创女装商家', '厦门', ['服装'], false),
+    user('pub-12', '南风衣局服饰店', 'avatar_012.jpg', 'g-coop', 'N', ['starred'], 68, 2, '外套品类商家', '广州', ['服装'], false),
+    user('pub-13', '禾木鞋履店', 'avatar_013.jpg', 'g-follow', 'H', ['verified'], 52, 3, '鞋履商家', '温州', ['鞋子'], false),
+    user('pub-14', '麦田包袋集合店', 'avatar_014.jpg', 'g-coop', 'M', ['new'], 31, 4, '包袋集合店', '广州', ['包袋'], false),
+    user('pub-15', '岚山配饰铺', 'avatar_015.jpg', 'g-follow', 'L', ['starred'], 44, 1, '配饰商家', '义乌', ['配饰'], false)
   ];
+
+  var friendGroups = [
+    { group_id: 'g-key', group_name: '重点商家', description: '高频合作或重点关注的商家账号', sort_order: 1 },
+    { group_id: 'g-coop', group_name: '常合作商家', description: '稳定供货、互转或日常协作的商家账号', sort_order: 2 },
+    { group_id: 'g-follow', group_name: '待跟进商家', description: '已添加但仍需确认合作关系的商家账号', sort_order: 3 }
+  ];
+
+  var currentUser = users.find(function (item) { return item.is_self; }) || users[0];
+
+  function publisherFromUser(item) {
+    return {
+      publisher_id: item.user_id,
+      publisher_name: item.merchant_name,
+      publisher_avatar: item.avatar,
+      publisher_type: 'shop',
+      publisher_statuses: item.publisher_statuses,
+      merchant_id: item.merchant_id,
+      merchant_type: item.merchant_type,
+      region: item.region,
+      main_categories: item.main_categories
+    };
+  }
+
+  function friendFromUser(item) {
+    return {
+      friend_id: item.user_id,
+      user_id: item.user_id,
+      merchant_id: item.merchant_id,
+      nickname: item.merchant_name,
+      merchant_name: item.merchant_name,
+      display_name: item.display_name,
+      avatar: item.avatar,
+      py_initial: item.py_initial,
+      group_id: item.group_id,
+      new_count: item.new_count,
+      product_total: item.product_total,
+      merchant_type: item.merchant_type,
+      region: item.region,
+      main_categories: item.main_categories,
+      account_type: item.account_type,
+      relation_type: 'merchant_friend',
+      relation_status: 'active'
+    };
+  }
+
+  var publishers = users.filter(function (item) { return !item.is_self; }).map(publisherFromUser);
+  var friends = users.filter(function (item) { return !item.is_self; }).map(friendFromUser);
 
   var dynamics = [
     { dynamic_id: 'dyn-01', publisher_id: 'pub-01', published_at: '刚刚', published_order: 15, content_type: 'product', category_id: 'clothing', text_content: productById('prod-clothing-001').feed_text, media_list: [media('m-01', 'video', assetImage('prod-clothing-001'), '00:18')], related_product_ids: ['prod-clothing-001'] },
@@ -137,6 +212,11 @@
     },
     assets: assets,
     products: products,
+    current_user_id: currentUser.user_id,
+    currentUser: currentUser,
+    users: users,
+    friendGroups: friendGroups,
+    friends: friends,
     publishers: publishers,
     dynamics: dynamics,
     dynamicCopy: products.map(function (item) {

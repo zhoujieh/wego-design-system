@@ -62,9 +62,9 @@
     ],
     "component_bindings": [
       { "binding_id": "friend-navbar", "slug": "navbar", "reason": "承载好友页面左对齐大标题、新建好友与排序切换入口", "variant_dimensions": { "leftControl": "none", "titleAlignment": "left-wide", "actions": "icon", "rightActionType": "icon", "spacing": "default", "pageTransition": "push", "position": "sticky" } },
-      { "binding_id": "friend-search", "slug": "search", "reason": "提供好友昵称搜索入口，白底搜索框放在灰底页面上，输入后显示清除并支持继续输入", "variant_dimensions": { "size": "md", "surface": "white", "mode": "text", "state": "empty", "hostPattern": "inline", "internalActions": "clear" } },
-      { "binding_id": "friend-add-form-modal", "slug": "modal", "reason": "新建好友全屏模态容器，fullscreen 变体，通过 ctx.openFullScreenModal 消费；内含 navbar + 表单 body，蒙层与动画由组件自身承担；modal__body 无默认 padding，本场景无底部 action/cancel，body 必须加 modal__body--safe-bottom 预留 40px + safe-area-bottom；表单走 entity-form 范式（M0 通栏白底、form-group__content 不加 --card）", "variant_dimensions": { "variant": "fullscreen", "title": "default", "action": "none", "state": "open" } },
-      { "binding_id": "friend-add-form-fields", "slug": "form", "reason": "新建好友表单字段组，复用 entity-form 范式的 form-group / form-body 结构，覆盖头像上传、昵称输入、手机号前缀、分组选择和备注长文本；必填字段通过 form-body__label--required + form-body__required 使用红色星号", "variant_dimensions": { "layout": "vertical", "alignment": "default", "inputType": "custom", "state": "default", "modifier": "label-required", "rightAction": "upload" } },
+      { "binding_id": "friend-search", "slug": "search", "reason": "提供商家名称搜索入口，白底搜索框放在灰底页面上，输入后显示清除并支持继续输入", "variant_dimensions": { "size": "md", "surface": "white", "mode": "text", "state": "empty", "hostPattern": "inline", "internalActions": "clear" } },
+      { "binding_id": "friend-add-form-modal", "slug": "modal", "reason": "新建商家好友全屏模态容器，fullscreen 变体，通过 ctx.openFullScreenModal 消费；内含 navbar + 表单 body，蒙层与动画由组件自身承担；modal__body 无默认 padding，本场景无底部 action/cancel，body 必须加 modal__body--safe-bottom 预留 40px + safe-area-bottom；表单走 entity-form 范式（M0 通栏白底、form-group__content 不加 --card）", "variant_dimensions": { "variant": "fullscreen", "title": "default", "action": "none", "state": "open" } },
+      { "binding_id": "friend-add-form-fields", "slug": "form", "reason": "新建商家好友表单字段组，复用 entity-form 范式的 form-group / form-body 结构，覆盖头像上传、商家名称输入、手机号前缀、分组选择和备注长文本；必填字段通过 form-body__label--required + form-body__required 使用红色星号", "variant_dimensions": { "layout": "vertical", "alignment": "default", "inputType": "custom", "state": "default", "modifier": "label-required", "rightAction": "upload" } },
       { "binding_id": "friend-group-sheet", "slug": "actionsheet", "reason": "选择好友分组底部面板，通过 ctx.openSheet 消费；渲染完整 .actionsheet 根节点 + .actionsheet__panel 及子内容，关闭行为覆盖 cancel 与 mask", "variant_dimensions": { "mode": "select", "header": "text", "item": "text", "state": "open" } },
       { "binding_id": "friend-source-sheet", "slug": "actionsheet", "reason": "选择好友来源渠道底部面板，通过 ctx.openSheet 消费；渲染完整 .actionsheet 根节点 + .actionsheet__panel 及子内容，关闭行为覆盖 cancel 与 mask", "variant_dimensions": { "mode": "select", "header": "text", "item": "text", "state": "open" } }
     ],
@@ -87,10 +87,10 @@
       { "state_id": "list-ready", "initial": true, "trigger": "进入好友主 tab", "visible_result": "默认字母排序展示好友列表，右侧悬浮字母索引", "fallback": "保留当前可浏览的好友列表", "persistence": "memory" },
       { "state_id": "sort-by-letter", "initial": false, "trigger": "点击导航栏右侧排序切换（目标为字母）", "visible_result": "按拼音首字母 A-Z + # 分组，右侧索引显示字母", "fallback": "保持当前排序", "persistence": "memory" },
       { "state_id": "sort-by-group", "initial": false, "trigger": "点击导航栏右侧排序切换（目标为分组）", "visible_result": "按自定义分组聚合，组内按拼音排序，右侧索引显示分组名", "fallback": "保持当前排序", "persistence": "memory" },
-      { "state_id": "searching", "initial": false, "trigger": "在搜索框输入关键词", "visible_result": "实时过滤匹配昵称的好友，隐藏分组标题与索引", "fallback": "清空关键词回到列表", "persistence": "memory" },
+      { "state_id": "searching", "initial": false, "trigger": "在搜索框输入关键词", "visible_result": "实时过滤匹配商家名称、商家类型或地区的好友，隐藏分组标题与索引", "fallback": "清空关键词回到列表", "persistence": "memory" },
       { "state_id": "search-empty", "initial": false, "trigger": "搜索无匹配结果", "visible_result": "展示搜索无结果空状态", "fallback": "清空关键词回到列表", "persistence": "memory" },
-      { "state_id": "add-form", "initial": false, "trigger": "点击导航栏右侧新建好友入口", "visible_result": "打开添加好友全屏表单", "fallback": "取消关闭表单", "persistence": "memory" },
-      { "state_id": "submit-success", "initial": false, "trigger": "提交添加好友表单", "visible_result": "关闭表单，显示成功 toast，列表新增好友", "fallback": "回到列表", "persistence": "memory" }
+      { "state_id": "add-form", "initial": false, "trigger": "点击导航栏右侧新建商家入口", "visible_result": "打开添加商家全屏表单", "fallback": "取消关闭表单", "persistence": "memory" },
+      { "state_id": "submit-success", "initial": false, "trigger": "提交添加商家表单", "visible_result": "关闭表单，显示成功 toast，列表新增商家好友", "fallback": "回到列表", "persistence": "memory" }
     ]
   },
   "visual_check": {
@@ -106,55 +106,41 @@
 /* 好友列表场景 */
 
 /* ── 内置数据 ── */
-var FRIEND_GROUPS = [
-  { group_id: 'g-vip', group_name: 'VIP 客户' },
-  { group_id: 'g-normal', group_name: '普通客户' },
-  { group_id: 'g-follow', group_name: '待跟进' }
+var db = window.WEGO_PROTOTYPE_DB || {};
+var FRIEND_GROUPS = db.friendGroups || [
+  { group_id: 'g-key', group_name: '重点商家' },
+  { group_id: 'g-coop', group_name: '常合作商家' },
+  { group_id: 'g-follow', group_name: '待跟进商家' }
 ];
-
-var NICKNAME_PREFIXES = ['阿', '安', '白', '冰', '晨', '大', '东', '芳', '光', '海', '红', '华', '静', '俊', '可', '兰', '丽', '亮', '林', '龙', '美', '明', '娜', '鹏', '强', '青', '秋', '然', '瑞', '山', '婷', '伟', '文', '雯', '霞', '小', '欣', '雪', '雅', '燕', '洋', '怡', '颖', '宇', '玉', '媛', '月', '云', '泽', '志'];
-var NICKNAME_SUFFIXES = ['哥', '姐', '总', '老板', '老板娘', '代理', '客户', '分销', '店主', '朋友', '同学', '邻居', '亲戚', '同事', '合作方'];
-
-function generateFriends(count) {
-  var friends = [];
-  var groups = ['g-vip', 'g-normal', 'g-follow'];
-  for (var i = 0; i < count; i++) {
-    var prefix = NICKNAME_PREFIXES[i % NICKNAME_PREFIXES.length];
-    var suffix = NICKNAME_SUFFIXES[Math.floor(i / NICKNAME_PREFIXES.length) % NICKNAME_SUFFIXES.length];
-    var nickname = prefix + suffix + (i < NICKNAME_PREFIXES.length ? '' : Math.floor(i / NICKNAME_PREFIXES.length / NICKNAME_SUFFIXES.length));
-    var pyInitial = getPyInitial(nickname.charAt(0));
-    var groupId = groups[i % groups.length];
-    var avatarIndex = (i % 100) + 1;
-    friends.push({
-      friend_id: 'f' + String(i + 1).padStart(3, '0'),
-      nickname: nickname,
-      py_initial: pyInitial,
-      group_id: groupId,
-      new_count: Math.floor(Math.random() * 10),
-      product_total: Math.floor(Math.random() * 100) + 1,
-      avatar: './lib/assets/image/avatar/avatar_' + String(avatarIndex).padStart(3, '0') + '.jpg'
-    });
-  }
-  return friends;
-}
 
 function getPyInitial(char) {
   var map = {
-    '阿': 'A', '安': 'A', '白': 'B', '冰': 'B', '晨': 'C', '大': 'D', '东': 'D',
-    '芳': 'F', '光': 'G', '海': 'H', '红': 'H', '华': 'H', '静': 'J', '俊': 'J',
-    '可': 'K', '兰': 'L', '丽': 'L', '亮': 'L', '林': 'L', '龙': 'L', '美': 'M',
-    '明': 'M', '娜': 'N', '鹏': 'P', '强': 'Q', '青': 'Q', '秋': 'Q', '然': 'R',
-    '瑞': 'R', '山': 'S', '婷': 'T', '伟': 'W', '文': 'W', '雯': 'W', '霞': 'X',
-    '小': 'X', '欣': 'X', '雪': 'X', '雅': 'Y', '燕': 'Y', '洋': 'Y', '怡': 'Y',
-    '颖': 'Y', '宇': 'Y', '玉': 'Y', '媛': 'Y', '月': 'Y', '云': 'Y', '泽': 'Z',
-    '志': 'Z', '老': 'L', '总': 'Z', '代': 'D', '客': 'K', '分': 'F', '店': 'D',
-    '朋': 'P', '同': 'T', '邻': 'L', '亲': 'Q', '合': 'H', '0': '#', '1': '#',
+    '白': 'B', '茶': 'C', '朝': 'Z', '岛': 'D', '禾': 'H', '岚': 'L', '麦': 'M',
+    '漫': 'M', '棉': 'M', '南': 'N', '青': 'Q', '森': 'S', '拾': 'S', '微': 'W',
+    '野': 'Y', '云': 'Y', '0': '#', '1': '#',
     '2': '#', '3': '#', '4': '#', '5': '#', '6': '#', '7': '#', '8': '#', '9': '#'
   };
   return map[char] || '#';
 }
 
-var FRIENDS_DATA = generateFriends(100);
+function normalizeFriend(item, index) {
+  var name = item.merchant_name || item.nickname || item.display_name || item.publisher_name || '未命名商家';
+  return {
+    friend_id: item.friend_id || item.user_id || item.publisher_id || ('merchant-' + index),
+    nickname: name,
+    merchant_name: name,
+    py_initial: item.py_initial || getPyInitial(name.charAt(0)),
+    group_id: item.group_id || FRIEND_GROUPS[index % FRIEND_GROUPS.length].group_id,
+    new_count: Number(item.new_count || 0),
+    product_total: Number(item.product_total || 0),
+    avatar: item.avatar || item.publisher_avatar || './lib/assets/image/avatar-defult.png',
+    merchant_type: item.merchant_type || '商家',
+    region: item.region || '',
+    account_type: item.account_type || 'merchant'
+  };
+}
+
+var FRIENDS_DATA = (db.friends && db.friends.length ? db.friends : (db.publishers || [])).map(normalizeFriend);
 
 /* ── 工具函数 ── */
 function getGroupName(groupId) {
@@ -201,7 +187,7 @@ function searchFriends(keyword) {
   var kw = (keyword || '').trim().toLowerCase();
   if (!kw) return FRIENDS_DATA.slice();
   return FRIENDS_DATA.filter(function (f) {
-    return f.nickname.toLowerCase().indexOf(kw) !== -1;
+    return (f.nickname + ' ' + f.merchant_type + ' ' + f.region).toLowerCase().indexOf(kw) !== -1;
   });
 }
 
@@ -222,6 +208,7 @@ function friendCellTemplate(friend, bindingId) {
     +       '<div class="cell__title-row"><span class="cell__title">' + friend.nickname + '</span></div>'
     +       '<div class="friend-list__meta">'
     +         newCountHtml
+    +         '<span class="friend-list__meta-text">' + friend.merchant_type + '</span>'
     +         '<span class="friend-list__meta-text">产品 ' + friend.product_total + '</span>'
     +       '</div>'
     +     '</div>'
@@ -266,13 +253,13 @@ function emptyTemplate(text) {
 /* ── 添加好友表单模板 ── */
 function addFriendFormTemplate() {
   return ''
-    + '<div class="modal modal--fullscreen" data-state="closed" data-dd-id="friend-add-form-modal" data-component-slug="modal" data-component-binding="friend-add-form-modal" role="dialog" aria-modal="true" aria-label="添加好友">'
+    + '<div class="modal modal--fullscreen" data-state="closed" data-dd-id="friend-add-form-modal" data-component-slug="modal" data-component-binding="friend-add-form-modal" role="dialog" aria-modal="true" aria-label="添加商家">'
     +   '<div class="modal__panel" style="--modal-panel-bg: var(--bg-page);">'
     +     '<div class="modal__title modal__title--default">'
     +       '<div class="navbar" data-dd-id="friend-add-form-navbar" data-component-slug="navbar" data-component-binding="friend-add-form-navbar">'
     +         '<div class="navbar__body navbar__body--spaced">'
     +           '<div class="navbar__left"><span class="navbar__left-text" data-close-add-form>取消</span></div>'
-    +           '<div class="navbar__center"><span class="navbar__title">添加好友</span></div>'
+    +           '<div class="navbar__center"><span class="navbar__title">添加商家</span></div>'
     +           '<div class="navbar__right navbar__right--button">'
     +             '<div class="navbar__action navbar__action--button">'
     +               '<button class="btn btn--strong btn--sm" data-dom-id="submit-add-friend">保存</button>'
@@ -296,11 +283,11 @@ function addFriendFormTemplate() {
     +               '</div>'
     +             '</div>'
     +             '<div class="form-body">'
-    +               '<div class="form-body__label form-body__label--required"><span class="form-body__label-text">昵称</span><span class="form-body__required">*</span></div>'
-    +               '<div class="form-body__action"><input type="text" placeholder="请输入好友昵称" data-form-field="nickname" maxlength="20" /></div>'
+    +               '<div class="form-body__label form-body__label--required"><span class="form-body__label-text">商家名称</span><span class="form-body__required">*</span></div>'
+    +               '<div class="form-body__action"><input type="text" placeholder="请输入商家名称" data-form-field="nickname" maxlength="20" /></div>'
     +             '</div>'
     +             '<div class="form-body form-body--preserve-content-align">'
-    +               '<div class="form-body__label"><span class="form-body__label-text">账号/手机号</span></div>'
+    +               '<div class="form-body__label"><span class="form-body__label-text">商家账号/手机号</span></div>'
     +               '<div class="form-body__action">'
     +                 '<div class="form-body__phone">'
     +                   '<span class="form-body__phone-prefix">+86</span>'
@@ -347,7 +334,7 @@ function addFriendFormTemplate() {
     +             '</div>'
     +             '<div class="form-body form-body--vertical form-body--fixed-height">'
     +               '<div class="form-body__label"><span class="form-body__label-text">验证消息</span></div>'
-    +               '<div class="form-body__action"><textarea placeholder="发送给好友的验证消息" data-form-field="verify_message"></textarea></div>'
+    +               '<div class="form-body__action"><textarea placeholder="发送给商家的验证消息" data-form-field="verify_message"></textarea></div>'
     +             '</div>'
     +           '</div>'
     +         '</div>'
@@ -426,7 +413,7 @@ const friendListTemplate = `
       <div class="searchbox searchbox--md searchbox--white" data-dd-id="friend-search" data-component-slug="search" data-component-binding="friend-search">
         <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
         <div class="searchbox__input">
-          <input class="searchbox__field" type="search" placeholder="搜索好友昵称" aria-label="搜索好友昵称" data-dom-id="friend-search-input" />
+          <input class="searchbox__field" type="search" placeholder="搜索商家名称" aria-label="搜索商家名称" data-dom-id="friend-search-input" />
         </div>
         <div class="searchbox__actions"></div>
       </div>
@@ -470,7 +457,7 @@ window.WegoApp.registerScene({
     function renderList() {
       var friends = getCurrentFriends();
       if (friends.length === 0) {
-        var text = state.keyword ? '未找到匹配的好友' : '还没有好友';
+        var text = state.keyword ? '未找到匹配的商家' : '还没有商家好友';
         scrollEl.innerHTML = emptyTemplate(text);
         indexEl.hidden = true;
         return;
@@ -648,7 +635,7 @@ window.WegoApp.registerScene({
     function openAddForm() {
       var formState = { groupId: '', groupName: '', source: '' };
       ctx.openFullScreenModal(addFriendFormTemplate(), {
-        label: '添加好友',
+        label: '添加商家',
         init: function (overlay) {
           var formRoot = overlay.root;
           var closeBtn = formRoot.querySelector('[data-close-add-form]');
@@ -725,24 +712,26 @@ window.WegoApp.registerScene({
           function submitForm() {
             var nickname = formRoot.querySelector('[data-form-field="nickname"]');
             if (!nickname || !nickname.value.trim()) {
-              ctx.toast('请输入好友昵称');
+              ctx.toast('请输入商家名称');
               return;
             }
+            var merchantName = nickname.value.trim();
             var newFriend = {
               friend_id: 'f' + Date.now(),
-              nickname: nickname.value.trim(),
-              py_initial: nickname.value.trim().charAt(0).toUpperCase(),
-              group_id: formState.groupId || 'g-normal',
+              nickname: merchantName,
+              merchant_name: merchantName,
+              py_initial: getPyInitial(merchantName.charAt(0)),
+              group_id: formState.groupId || 'g-follow',
               new_count: 0,
               product_total: 0,
-              avatar: './lib/assets/image/avatar-defult.png'
+              avatar: './lib/assets/image/avatar-defult.png',
+              merchant_type: '商家',
+              region: '',
+              account_type: 'merchant'
             };
-            if (!/[A-Z]/.test(newFriend.py_initial)) {
-              newFriend.py_initial = '#';
-            }
             FRIENDS_DATA.push(newFriend);
             overlay.close();
-            ctx.toast('已添加好友 ' + newFriend.nickname);
+            ctx.toast('已添加商家 ' + newFriend.nickname);
             renderList();
           }
 

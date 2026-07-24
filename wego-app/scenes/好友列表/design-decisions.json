@@ -299,7 +299,7 @@
       {
         "binding_id": "friend-search",
         "slug": "search",
-        "reason": "提供好友昵称搜索入口，白底搜索框放在灰底页面上，输入后显示清除并支持继续输入",
+        "reason": "提供商家名称搜索入口，白底搜索框放在灰底页面上，输入后显示清除并支持继续输入",
         "variant_dimensions": {
           "size": "md",
           "surface": "white",
@@ -312,7 +312,7 @@
       {
         "binding_id": "friend-add-form-modal",
         "slug": "modal",
-        "reason": "新建好友全屏模态容器，fullscreen 变体，通过 ctx.openFullScreenModal 消费；内含 navbar + 表单 body，蒙层与动画由组件自身承担；modal__body 无默认 padding，本场景无底部 action/cancel，body 必须加 modal__body--safe-bottom 预留 40px + safe-area-bottom；表单走 entity-form 范式（M0 通栏白底、form-group__content 不加 --card）",
+        "reason": "新建商家好友全屏模态容器，fullscreen 变体，通过 ctx.openFullScreenModal 消费；内含 navbar + 表单 body，蒙层与动画由组件自身承担；modal__body 无默认 padding，本场景无底部 action/cancel，body 必须加 modal__body--safe-bottom 预留 40px + safe-area-bottom；表单走 entity-form 范式（M0 通栏白底、form-group__content 不加 --card）",
         "variant_dimensions": {
           "variant": "fullscreen",
           "title": "default",
@@ -323,7 +323,7 @@
       {
         "binding_id": "friend-add-form-fields",
         "slug": "form",
-        "reason": "新建好友表单字段组，复用 entity-form 范式的 form-group / form-body 结构，覆盖头像上传、昵称输入、手机号前缀、分组选择和备注长文本；必填字段通过 form-body__label--required + form-body__required 使用红色星号",
+        "reason": "新建商家好友表单字段组，复用 entity-form 范式的 form-group / form-body 结构，覆盖头像上传、商家名称输入、手机号前缀、分组选择和备注长文本；必填字段通过 form-body__label--required + form-body__required 使用红色星号",
         "variant_dimensions": {
           "layout": "vertical",
           "alignment": "default",
@@ -422,7 +422,7 @@
         "state_id": "searching",
         "initial": false,
         "trigger": "在搜索框输入关键词",
-        "visible_result": "实时过滤匹配昵称的好友，隐藏分组标题与索引",
+        "visible_result": "实时过滤匹配商家名称、商家类型或地区的好友，隐藏分组标题与索引",
         "fallback": "清空关键词回到列表",
         "persistence": "memory"
       },
@@ -437,16 +437,16 @@
       {
         "state_id": "add-form",
         "initial": false,
-        "trigger": "点击导航栏右侧新建好友入口",
-        "visible_result": "打开添加好友全屏表单",
+        "trigger": "点击导航栏右侧新建商家入口",
+        "visible_result": "打开添加商家全屏表单",
         "fallback": "取消关闭表单",
         "persistence": "memory"
       },
       {
         "state_id": "submit-success",
         "initial": false,
-        "trigger": "提交添加好友表单",
-        "visible_result": "关闭表单，显示成功 toast，列表新增好友",
+        "trigger": "提交添加商家表单",
+        "visible_result": "关闭表单，显示成功 toast，列表新增商家好友",
         "fallback": "回到列表",
         "persistence": "memory"
       }
@@ -467,7 +467,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/好友列表/scene.js",
     "scene_css": "wego-app/scenes/好友列表/scene.css",
-    "source_sha256": "709a55422d43ec7ca084b666d4772dada60e1f0b59db87faf5e9ccf3befe3aa5",
+    "source_sha256": "b28f669f1dd6d8e34460c6a17192901cbfa621e051cf8039681bc8c223455414",
     "dom_ids": [
       "add-friend-entry",
       "sort-toggle",
