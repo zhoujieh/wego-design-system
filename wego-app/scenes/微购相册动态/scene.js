@@ -1359,11 +1359,11 @@
       {
         "binding_id": "feed-select-button",
         "slug": "button",
-        "reason": "卡片底部加入选品车入口，图标加文案，弱于一键转发但常驻可见",
+        "reason": "卡片底部加入选品车入口，仅图标，弱于一键转发但常驻可见",
         "variant_dimensions": {
           "emphasis": "weak",
           "size": "sm",
-          "iconMode": "leading-icon",
+          "iconMode": "icon-only",
           "state": "default"
         }
       },
@@ -2066,8 +2066,8 @@
       +       '<div class="album-feed__actions">'
       +         '<span class="album-feed__publisher-meta">' + escapeHtml(item.published_at) + '</span>'
       +         '<div class="album-feed__action-buttons">'
+      +           '<button type="button" class="btn btn--weak btn--sm btn--icon-only album-feed__select-action" aria-label="加入选品车" data-dd-id="feed-select-' + item.dynamic_id + '" data-component-slug="button" data-component-binding="feed-select-button" data-dom-id="select-cart-' + item.dynamic_id + '" aria-pressed="' + (added ? 'true' : 'false') + '"><i class="btn__icon ' + (added ? 'icon-gou16' : 'icon-gouwuche') + '" aria-hidden="true"></i></button>'
       +           '<button type="button" class="btn btn--medium btn--sm album-feed__forward-link" data-dd-id="feed-forward-' + item.dynamic_id + '" data-component-slug="button" data-component-binding="feed-forward-button" data-dom-id="forward-' + item.dynamic_id + '">一键转发</button>'
-      +           '<button type="button" class="btn btn--weak btn--sm album-feed__select-action" data-dd-id="feed-select-' + item.dynamic_id + '" data-component-slug="button" data-component-binding="feed-select-button" data-dom-id="select-cart-' + item.dynamic_id + '" aria-pressed="' + (added ? 'true' : 'false') + '"><i class="btn__icon ' + (added ? 'icon-gou16' : 'icon-gouwuche') + '" aria-hidden="true"></i>' + (added ? '已加入' : '加入选品车') + '</button>'
       +         '</div>'
       +       '</div>'
       +     '</div>'
@@ -2238,8 +2238,8 @@
           <div class="navbar" data-dd-id="feed-filter-navbar-seed" data-component-slug="navbar" data-component-binding="feed-filter-navbar"><div class="navbar__body"><div class="navbar__left"><button type="button" class="navbar__left-btn navbar__left-btn--circle" aria-label="关闭"><i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button></div><div class="navbar__center"><span class="navbar__title">筛选动态</span></div><div class="navbar__right"></div></div></div>
           <div class="radio radio--sm radio--checked" data-group="feed-seed-checked" data-dd-id="feed-radio-checked-seed" data-component-slug="radio" data-component-binding="feed-filter-radio-checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
           <div class="radio radio--sm" data-group="feed-seed-unchecked" data-dd-id="feed-radio-unchecked-seed" data-component-slug="radio" data-component-binding="feed-filter-radio-unchecked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
+          <button type="button" class="btn btn--weak btn--sm btn--icon-only" aria-label="加入选品车" data-dd-id="feed-select-button-seed" data-component-slug="button" data-component-binding="feed-select-button"><i class="btn__icon icon-gouwuche" aria-hidden="true"></i></button>
           <button type="button" class="btn btn--medium btn--sm" data-dd-id="feed-forward-button-seed" data-component-slug="button" data-component-binding="feed-forward-button">一键转发</button>
-          <button type="button" class="btn btn--weak btn--sm" data-dd-id="feed-select-button-seed" data-component-slug="button" data-component-binding="feed-select-button"><i class="btn__icon icon-gouwuche" aria-hidden="true"></i>加入选品车</button>
           <button type="button" class="btn btn--weak btn--sm btn--icon-only" aria-label="分享当前产品" data-dd-id="feed-share-action-seed" data-component-slug="button" data-component-binding="feed-share-action"><i class="btn__icon icon-fenxiang" aria-hidden="true"></i></button>
           <div class="tag tag--20 tag--white" data-dd-id="feed-content-type-tag-seed" data-component-slug="tag" data-component-binding="feed-content-type-tag"><span class="tag__label">产品</span></div>
           <div class="modal modal--fullscreen" role="dialog" aria-modal="true" data-state="open" data-dd-id="feed-cart-modal-seed" data-component-slug="modal" data-component-binding="feed-cart-modal"><div class="modal__panel"><div class="modal__title modal__title--default"><div class="navbar" data-dd-id="feed-cart-navbar-seed" data-component-slug="navbar" data-component-binding="feed-cart-navbar"><div class="navbar__body"><div class="navbar__left"><button type="button" class="navbar__left-btn navbar__left-btn--circle" aria-label="关闭"><i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button></div><div class="navbar__center"><div class="wg-tabs wg-tabs--standard wg-tabs--divide" role="tablist" data-dd-id="feed-cart-tabs-seed" data-component-slug="tabs" data-component-binding="feed-cart-tabs"><div class="wg-tabs__scroll"><button class="wg-tabs__item" role="tab" aria-selected="true" type="button"><span class="wg-tabs__content"><span class="wg-tabs__label">选品车</span></span></button><button class="wg-tabs__item" role="tab" aria-selected="false" type="button"><span class="wg-tabs__content"><span class="wg-tabs__label">购物车</span></span></button><span class="wg-tabs__active-indicator" aria-hidden="true"></span></div></div></div><div class="navbar__right"></div></div></div></div><div class="modal__body modal__body--safe-bottom"></div></div></div>

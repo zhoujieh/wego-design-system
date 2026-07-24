@@ -694,9 +694,9 @@
   padding-bottom: var(--spacer-8);
 }
 
-/* 操作行：左侧发布时间，右侧一键转发 + 加入选品车并排。
-   一键转发为最高优先级快捷操作（button medium 灰底黑字回退，设计系统缺口见 design-decisions.json）。
-   选品按钮通过图标+文案变化表达已加入状态，颜色变体缺口见 design-decisions.json。 */
+/* 操作行：左侧发布时间，右侧加入选品车 + 一键转发并排。
+   一键转发为最高优先级快捷操作（button medium 灰底绿字），靠右符合核心操作优先右侧原则。
+   选品按钮为仅图标弱化入口，通过图标变化表达已加入状态。 */
 .album-feed__actions {
   display: flex;
   flex-direction: row;

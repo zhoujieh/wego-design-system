@@ -1360,11 +1360,11 @@
       {
         "binding_id": "feed-select-button",
         "slug": "button",
-        "reason": "卡片底部加入选品车入口，图标加文案，弱于一键转发但常驻可见",
+        "reason": "卡片底部加入选品车入口，仅图标，弱于一键转发但常驻可见",
         "variant_dimensions": {
           "emphasis": "weak",
           "size": "sm",
-          "iconMode": "leading-icon",
+          "iconMode": "icon-only",
           "state": "default"
         }
       },
@@ -1815,13 +1815,13 @@
       "component_slug": "radio"
     },
     {
-      "dd_id": "feed-forward-button-seed",
-      "binding_id": "feed-forward-button",
+      "dd_id": "feed-select-button-seed",
+      "binding_id": "feed-select-button",
       "component_slug": "button"
     },
     {
-      "dd_id": "feed-select-button-seed",
-      "binding_id": "feed-select-button",
+      "dd_id": "feed-forward-button-seed",
+      "binding_id": "feed-forward-button",
       "component_slug": "button"
     },
     {
@@ -1888,7 +1888,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/微购相册动态/scene.js",
     "scene_css": "wego-app/scenes/微购相册动态/scene.css",
-    "source_sha256": "d0b1f43414c91ed53a5d762edcf8f71fcb2af253b0c67647d325e12e99acb1e5",
+    "source_sha256": "89ef707ed8dfb9fc122714991d8132b52446c03e217aa31326b815aa6ee11cf5",
     "dom_ids": [
       "page-tab-following",
       "page-tab-recommended",
