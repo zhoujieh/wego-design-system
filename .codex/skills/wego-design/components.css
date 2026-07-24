@@ -2168,6 +2168,310 @@
   border-color: var(--bg-surface) transparent transparent transparent;
 }
 
+/* ── Popover ───────────────────────────────────────────────── */
+/* @anatomy
+   <div class="pv-header"> <h1>气泡提示 Popover</h1> <p>锚定目标元素弹出的气泡，三种类型共用一套 placement / align / arrow 体系。normal 引导型（深色背景白色文字），action 操作型（深色背景横排操作项，支持有图标多行和无图标单行两种模式），input 快捷填充型（白色背景灰色文字）。所有类型支持上下左右四方向展示，箭头指向目标，箭头带圆角与边框。</p> </div>
+*/
+.popover{
+  --popover-gap: 4px;
+  --popover-max-width: 240px;
+  --popover-action-item-height: 64px;
+  --popover-action-item-size: 56px;
+  --popover-action-item-gap: 2px;
+  --popover-action-list-padding: 8px;
+  --popover-action-pressed-bg: rgba(30, 32, 40, 0.3);
+  --popover-action-text-item-height: 40px;
+  --popover-action-max-width: 300px;
+  --popover-action-divider: rgba(255, 255, 255, 0.1);
+  --popover-bg-dark: #3f4347;
+  --popover-arrow-size: 8px;
+  --popover-arrow-radius: 2px;
+  box-sizing: border-box;
+  position: absolute;
+  display: inline-flex;
+  flex-direction: column;
+  width: max-content;
+  max-width: var(--popover-max-width);
+  border-radius: var(--radius-8);
+  z-index: var(--z-popover);
+  opacity: 1;
+  transform: scale(1);
+  visibility: visible;
+  transition: opacity var(--duration-normal) var(--ease-enter),
+              transform var(--duration-normal) var(--ease-enter);
+}
+.popover[data-state="closed"]{
+  opacity: 0;
+  transform: scale(0.9);
+  visibility: hidden;
+  transition: none;
+  pointer-events: none;
+}
+
+/* 变体背景、边框与阴影 */
+/* 深色气泡（normal/action）：不透明背景 + 整体 opacity 模拟 --bg-toast 的 0.96 透明度，避免箭头与背景叠加变深 */
+.popover--normal,
+.popover--action{
+  background: var(--popover-bg-dark);
+  border: var(--stroke-hairline) solid var(--border-toast);
+  box-shadow: var(--shadow-sm);
+  opacity: 0.96;
+}
+.popover--normal[data-state="closed"],
+.popover--action[data-state="closed"]{
+  opacity: 0;
+}
+/* 白色气泡（input）：纯白不透明背景 */
+.popover--input{
+  background: var(--bg-surface);
+  border: var(--stroke-hairline) solid var(--border-neutral-l2);
+  box-shadow: var(--shadow-sm);
+}
+
+/* transform-origin 跟随 placement/align */
+.popover[data-placement="bottom"][data-align="start"]{ transform-origin: top left; }
+.popover[data-placement="bottom"][data-align="center"]{ transform-origin: top center; }
+.popover[data-placement="bottom"][data-align="end"]{ transform-origin: top right; }
+.popover[data-placement="top"][data-align="start"]{ transform-origin: bottom left; }
+.popover[data-placement="top"][data-align="center"]{ transform-origin: bottom center; }
+.popover[data-placement="top"][data-align="end"]{ transform-origin: bottom right; }
+.popover[data-placement="right"]{ transform-origin: center left; }
+.popover[data-placement="left"]{ transform-origin: center right; }
+
+/* 箭头：div + rotate(45deg)，带 border；用 clip-path 只显示露在外面的半个菱形；absolute 定位相对 padding edge，偏移 -半边长 使方块中心落在 padding edge，三角形底边（过中心的水平线）刚好在 border 下边缘，完整覆盖边框线；圆角只在露出的尖角上，底边两角为直角 */
+.popover__arrow{
+  position: absolute;
+  width: var(--popover-arrow-size);
+  height: var(--popover-arrow-size);
+  background: var(--bg-surface);
+  border: var(--stroke-hairline) solid var(--border-neutral-l2);
+  transform: rotate(45deg);
+  box-sizing: border-box;
+}
+.popover--normal .popover__arrow,
+.popover--action .popover__arrow{
+  background: var(--popover-bg-dark);
+  border-color: var(--border-toast);
+}
+/* placement=bottom（气泡在目标下方，箭头朝上，位于气泡顶部）：clip-path 只显示上半三角形；top:-半边长 让方块中心落在 padding edge，三角形底边刚好覆盖气泡顶部边框线 */
+.popover[data-placement="bottom"] .popover__arrow{
+  top: calc(-1 * var(--popover-arrow-size) / 2);
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+  border-radius: var(--popover-arrow-radius) 0 0 0;
+}
+.popover[data-placement="bottom"][data-align="start"] .popover__arrow{
+  left: 16px;
+}
+.popover[data-placement="bottom"][data-align="center"] .popover__arrow{
+  left: 50%;
+  margin-left: calc(-1 * var(--popover-arrow-size) / 2);
+}
+.popover[data-placement="bottom"][data-align="end"] .popover__arrow{
+  right: 16px;
+}
+/* placement=top（气泡在目标上方，箭头朝下，位于气泡底部）：clip-path 只显示下半三角形；底边刚好覆盖气泡底部边框线 */
+.popover[data-placement="top"] .popover__arrow{
+  bottom: calc(-1 * var(--popover-arrow-size) / 2);
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+  border-radius: 0 0 var(--popover-arrow-radius) 0;
+}
+.popover[data-placement="top"][data-align="start"] .popover__arrow{
+  left: 16px;
+}
+.popover[data-placement="top"][data-align="center"] .popover__arrow{
+  left: 50%;
+  margin-left: calc(-1 * var(--popover-arrow-size) / 2);
+}
+.popover[data-placement="top"][data-align="end"] .popover__arrow{
+  right: 16px;
+}
+/* placement=right（气泡在目标右侧，箭头朝左，位于气泡左边缘）：clip-path 只显示左半三角形；底边刚好覆盖气泡左侧边框线 */
+.popover[data-placement="right"] .popover__arrow{
+  left: calc(-1 * var(--popover-arrow-size) / 2);
+  top: 50%;
+  margin-top: calc(-1 * var(--popover-arrow-size) / 2);
+  clip-path: polygon(0 0, 0 100%, 100% 100%);
+  border-radius: 0 0 0 var(--popover-arrow-radius);
+}
+/* placement=left（气泡在目标左侧，箭头朝右，位于气泡右边缘）：clip-path 只显示右半三角形；底边刚好覆盖气泡右侧边框线 */
+.popover[data-placement="left"] .popover__arrow{
+  right: calc(-1 * var(--popover-arrow-size) / 2);
+  top: 50%;
+  margin-top: calc(-1 * var(--popover-arrow-size) / 2);
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
+  border-radius: 0 var(--popover-arrow-radius) 0 0;
+}
+
+/* body 容器 */
+.popover__body{
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  position: relative;
+  z-index: 1;
+}
+
+/* normal 变体 body：水平 padding 12，垂直 padding 8 */
+.popover--normal .popover__body{
+  padding: var(--spacer-8) var(--spacer-12);
+  gap: var(--spacer-8);
+  justify-content: center;
+}
+.popover--normal.popover--has-close-icon .popover__body{
+  padding-right: var(--spacer-8);
+}
+/* action 变体：max-width 单独放宽到 300px，让有图标模式一行默认容纳 5 个 item（5×56 + 2×8 padding + 2×0.5 border = 297px，300px 留 3px 余量避免渲染舍入导致第 5 个换行）*/
+.popover--action{
+  max-width: var(--popover-action-max-width);
+}
+/* input 变体 body：水平 padding 8，垂直 padding 4，高度 28px */
+.popover--input .popover__body{
+  padding: var(--spacer-4) var(--spacer-8);
+  gap: var(--spacer-4);
+  min-height: 28px;
+  justify-content: flex-start;
+}
+/* action 变体 body：无 padding，由 action-list 内部控制 */
+.popover--action .popover__body{
+  padding: 0;
+  display: block;
+}
+
+/* 文本 */
+.popover__text{
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.popover--normal .popover__text{
+  font-family: var(--body-md-font-family);
+  font-size: var(--body-md-font-size);
+  line-height: var(--body-md-line-height);
+  font-weight: var(--font-weight-regular);
+  color: var(--text-inverse);
+}
+.popover--input .popover__text{
+  font-family: var(--body-sm-font-family);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+  font-weight: var(--font-weight-regular);
+  color: var(--text-secondary);
+}
+
+/* 图标 */
+.popover__icon--left,
+.popover__icon--close{
+  flex-shrink: 0;
+  width: var(--size-16);
+  height: var(--size-16);
+  font-size: var(--size-16);
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.popover--input .popover__icon--left{
+  color: var(--text-secondary);
+  cursor: default;
+}
+.popover--normal .popover__icon--close{
+  color: var(--text-inverse);
+}
+
+/* input 图片 */
+.popover__image{
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-4);
+  object-fit: cover;
+  background: var(--bg-subtle);
+}
+
+/* action 变体操作列表：flex-wrap 自动换行，padding 8px，无分隔线（按 Figma 设计稿）；超过 2 行（即 7+ 项）时纵向滚动，最大高度 2 行 item + 上下 padding，隐藏滚动条避免破坏深色气泡视觉 */
+.popover__action-list{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  padding: var(--popover-action-list-padding);
+  max-height: calc(2 * var(--popover-action-item-height) + 2 * var(--popover-action-list-padding));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.popover__action-list::-webkit-scrollbar{
+  display: none;
+}
+.popover__action-item{
+  flex: 0 0 auto;
+  width: var(--popover-action-item-size);
+  height: var(--popover-action-item-height);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--popover-action-item-gap);
+  padding: var(--spacer-12);
+  border-radius: var(--radius-4);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background var(--duration-fast) var(--ease-enter);
+  box-sizing: border-box;
+}
+.popover--action .popover__action-item:active{
+  background: var(--popover-action-pressed-bg);
+}
+.popover__action-icon{
+  flex-shrink: 0;
+  width: var(--size-20);
+  height: var(--size-20);
+  font-size: var(--size-20);
+  line-height: 1;
+  color: var(--text-inverse);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.popover__action-text{
+  font-family: var(--body-sm-font-family);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+  font-weight: var(--font-weight-regular);
+  color: var(--text-inverse);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+/* 无图标模式（text-only）：单行水平布局，去掉四周 padding，项之间显示垂直分隔线（白色 0.1 不透明度）；覆盖 max-height/overflow 让单行不被裁剪 */
+.popover--action.popover--action-text-only .popover__action-list{
+  flex-wrap: nowrap;
+  padding: 0;
+  max-height: none;
+  overflow: visible;
+}
+.popover--action.popover--action-text-only .popover__action-item{
+  flex-direction: row;
+  height: var(--popover-action-text-item-height);
+  width: auto;
+  gap: 0;
+  padding: 0 var(--spacer-12);
+  border-radius: 0;
+  box-shadow: inset -0.5px 0 0 0 var(--popover-action-divider);
+}
+.popover--action.popover--action-text-only .popover__action-item:last-child{
+  box-shadow: none;
+}
+/* text-only 模式文字 14px，与 icon 模式 12px 区分 */
+.popover--action.popover--action-text-only .popover__action-text{
+  font-family: var(--body-md-font-family);
+  font-size: var(--body-md-font-size);
+  line-height: var(--body-md-line-height);
+}
+
 /* ── Radio ─────────────────────────────────────────────────── */
 /* @anatomy
    <div class="pv-header"><h1>单选</h1><p>24 / 20px，品牌绿圆点选中态。</p></div>

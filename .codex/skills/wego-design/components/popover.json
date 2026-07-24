@@ -1,0 +1,324 @@
+{
+  "schemaVersion": 4,
+  "slug": "popover",
+  "name": "气泡提示",
+  "category": "feedback",
+  "status": "stable",
+  "sourceKind": "figma",
+  "confidence": "high",
+  "description": "锚定目标元素弹出的气泡，用于引导、操作或快捷填充。三种类型共用一套 placement / align / arrow 体系：normal（引导型，深色背景白色文字，页面引导提示）、action（操作型，深色背景白色文字/图标横排操作项，有图标模式 max-width 300px 一行默认 5 个、超过自动 flex-wrap 换行、item 固定宽度 56px，无图标 text-only 模式仅单行无四周 padding、文字 14px、左右间距 12px、项之间垂直分隔线 rgba(255,255,255,0.1)，空间有限且操作较多时使用）、input（快捷填充型，白色背景灰色文字，表单内快捷录入）。所有类型均支持 top/bottom/left/right 四方向展示，箭头始终指向目标元素，箭头带圆角与边框。深色气泡（normal/action）使用不透明背景 + 整体 opacity 控制透明度，避免箭头与背景叠加变深；边框与 toast 一致。与 popmenu 的区别：popmenu 是紧凑白色菜单（action/select 模式，无深色变体、无输入变体、无横向多排布局）；popover 是更广义的气泡，承担引导提示与表单内快捷录入职责。",
+  "semanticTypeCandidates": [
+    "popover",
+    "tooltip-popover",
+    "guide-bubble",
+    "quick-fill-bubble"
+  ],
+  "variantDimensions": {
+    "variant": [
+      "normal",
+      "action",
+      "input"
+    ],
+    "placement": [
+      "top",
+      "bottom",
+      "left",
+      "right"
+    ],
+    "align": [
+      "start",
+      "center",
+      "end"
+    ],
+    "iconMode": [
+      "none",
+      "left",
+      "right-close"
+    ],
+    "imageMode": [
+      "false",
+      "true"
+    ],
+    "actionStyle": [
+      "icon",
+      "text-only"
+    ],
+    "state": [
+      "open",
+      "closed"
+    ]
+  },
+  "representativeVariants": [
+    {
+      "variant": "normal",
+      "iconMode": "none",
+      "placement": "bottom",
+      "align": "center"
+    },
+    {
+      "variant": "normal",
+      "iconMode": "right-close",
+      "placement": "bottom",
+      "align": "center"
+    },
+    {
+      "variant": "action",
+      "actionStyle": "icon",
+      "placement": "bottom",
+      "align": "center"
+    },
+    {
+      "variant": "action",
+      "actionStyle": "text-only",
+      "placement": "bottom",
+      "align": "center"
+    },
+    {
+      "variant": "input",
+      "iconMode": "left",
+      "imageMode": "false",
+      "placement": "right",
+      "align": "center"
+    },
+    {
+      "variant": "input",
+      "iconMode": "left",
+      "imageMode": "true",
+      "placement": "right",
+      "align": "center"
+    }
+  ],
+  "anatomy": [
+    {
+      "name": "root",
+      "selector": ".popover",
+      "role": "气泡容器，承载定位、箭头、动画与背景；通过 data-variant/data-placement/data-align/data-state 描述变体"
+    },
+    {
+      "name": "arrow",
+      "selector": ".popover__arrow",
+      "role": "指向目标元素的小三角，始终存在；根据 placement 定位在容器对应边缘，背景与气泡一致，带 border + border-radius（深色气泡边框 var(--border-toast)，白色气泡边框 var(--border-neutral-l2)）；用 clip-path 只显示露在外面的半个菱形，与气泡边缘重叠 0.5px，让气泡边框自然覆盖接缝；圆角只在露出的尖角上，底边两角为直角便于与气泡边框衔接"
+    },
+    {
+      "name": "body",
+      "selector": ".popover__body",
+      "role": "气泡内容区，承载文本/图标/操作项；横向 flex 布局"
+    },
+    {
+      "name": "text",
+      "selector": ".popover__text",
+      "role": "气泡文本，单行不换行，超出 max-width 时尾部省略号截断"
+    },
+    {
+      "name": "iconLeft",
+      "selector": ".popover__icon--left",
+      "role": "左侧图标，仅 input 变体可选；16×16 iconfont，颜色 var(--text-secondary)"
+    },
+    {
+      "name": "iconClose",
+      "selector": ".popover__icon--close",
+      "role": "右侧关闭图标，仅 normal 变体可选；16×16 iconfont，颜色 var(--text-inverse)"
+    },
+    {
+      "name": "image",
+      "selector": ".popover__image",
+      "role": "右侧图片缩略图，仅 input 变体 imageMode=true 可选；20×20 圆角 var(--radius-4)"
+    },
+    {
+      "name": "actionList",
+      "selector": ".popover__action-list",
+      "role": "action 变体操作项容器，flex-row + flex-wrap 自动换行；有图标模式 padding var(--popover-action-list-padding) 8px，由 .popover--action 的 max-width var(--popover-action-max-width) 300px 控制一行默认 5 个（5×56+2×8 padding+2×0.5 border=297，300 留余量），超过自动换行；max-height 限制最多 2 行（2×item-height + 2×padding），超出纵向滚动并隐藏滚动条；text-only 模式 padding 0 无四周间距、nowrap 单行、max-height none 不裁剪"
+    },
+    {
+      "name": "actionItem",
+      "selector": ".popover__action-item",
+      "role": "单个操作项；有图标时固定宽度 var(--popover-action-item-size) 56px，垂直布局（icon 上 text 下）高度 64px，padding var(--spacer-12) 四面，圆角 var(--radius-4)，图标文字间距 var(--popover-action-item-gap) 2px，无分隔线，点击态背景 var(--popover-action-pressed-bg) rgba(30,32,40,0.3)；text-only 时水平布局宽度 auto，高度 var(--popover-action-text-item-height) 40px，padding 0 var(--spacer-12) 左右间距 12px，项之间通过 box-shadow 绘制垂直分隔线（颜色 var(--popover-action-divider) rgba(255,255,255,0.1) 白色 0.1 不透明度），最后一项不显示"
+    },
+    {
+      "name": "actionIcon",
+      "selector": ".popover__action-icon",
+      "role": "操作项上方图标（仅 actionStyle=icon 使用），20×20 iconfont，颜色 var(--text-inverse) 白色"
+    },
+    {
+      "name": "actionText",
+      "selector": ".popover__action-text",
+      "role": "操作项文本，var(--text-inverse) 白色，单行省略号；icon 模式字号 var(--body-sm-font-size) 12px，text-only 模式字号 var(--body-md-font-size) 14px、行高 var(--body-md-line-height) 22px"
+    }
+  ],
+  "structurePatterns": [
+    "根节点 .popover 是气泡容器，通过 data-variant='normal/action/input' 区分三种类型；data-placement='top/bottom/left/right' 描述相对目标的位置；data-align='start/center/end' 描述沿交叉轴的对齐；data-state='open/closed' 切换可见性",
+    "气泡容器统一背景圆角 var(--radius-8)；normal 和 action 变体使用不透明深色背景 var(--popover-bg-dark) #3f4347 + var(--stroke-hairline) solid var(--border-toast) 边框（与 toast 一致）+ var(--shadow-sm) + 整体 opacity:0.96 模拟 --bg-toast 透明度，避免箭头与背景叠加变深；input 变体使用 var(--bg-surface) 白色背景 + var(--stroke-hairline) solid var(--border-neutral-l2) 边框 + var(--shadow-sm)",
+    ".popover 内部结构统一为 .popover__arrow + .popover__body；箭头必须存在以指向目标，不可省略",
+    "normal 变体 body 结构：[.popover__icon--left]? + .popover__text + [.popover__icon--close]?；默认含水平 padding var(--spacer-12)、垂直 padding var(--spacer-8)；文本 var(--text-inverse) 白色，字号 var(--body-md-font-size)，行高 var(--body-md-line-height)；左侧图标 normal 变体不使用，右侧关闭图标可选 16×16 var(--text-inverse)",
+    "input 变体 body 结构：[.popover__icon--left]? + .popover__text + [.popover__image]?；默认含水平 padding var(--spacer-8)、垂直 padding var(--spacer-4)；高度 28px；文本 var(--text-secondary) 灰色，字号 var(--body-sm-font-size)，行高 var(--body-sm-line-height)；左侧图标可选 16×16 var(--text-secondary)；右侧图片可选 20×20 圆角 var(--radius-4)",
+    "action 变体 body 结构：.popover__action-list → 直接包含 1-N 个 .popover__action-item（无中间 action-row 层）；action-list 为 flex-row + flex-wrap 自动换行。两种 actionStyle：icon 模式 action-list padding var(--popover-action-list-padding) 8px，action-item 固定宽度 var(--popover-action-item-size) 56px，内部为 .popover__action-icon（20×20）+ .popover__action-text（12px var(--body-sm-font-size)），垂直布局高度 64px，padding var(--spacer-12) 四面，圆角 var(--radius-4)，图标文字间距 var(--popover-action-item-gap) 2px，项之间无分隔线，点击态背景 var(--popover-action-pressed-bg) rgba(30,32,40,0.3)；text-only 模式 action-list padding 0 无四周间距、flex-nowrap 单行，action-item 宽度 auto，内部仅 .popover__action-text（14px var(--body-md-font-size)），水平布局高度 var(--popover-action-text-item-height) 40px，padding 0 var(--spacer-12) 左右间距 12px，项之间有垂直分隔线（颜色 var(--popover-action-divider) rgba(255,255,255,0.1) 白色 0.1 不透明度，最后一项不显示）",
+    "action 变体有图标模式：.popover--action 单独设置 max-width var(--popover-action-max-width) 300px（覆盖 .popover 默认 240px），让 flex-wrap 一行默认容纳 5 个 item（5×56 items + 2×8 action-list padding + 2×0.5 popover border = 297px，300px 留余量避免渲染舍入导致第 5 个换行）；1-5 项单行，6-10 项两行（5+1、5+2…），11+ 项三行；action-list max-height 限制为 2 行（2×item-height + 2×padding），超过 2 行（即 11+ 项）时纵向滚动并隐藏滚动条；容器宽度由内容决定，不强制拉满 max-width；text-only 模式仅单行不换行，无四周 padding，宽度跟随文字内容，max-height none 不裁剪",
+    "action-item 尺寸：icon 模式固定 56×64px（padding 12px + icon 20px + gap 2px + text 12px×1.5=18px + padding 12px），垂直居中排列；text-only 模式高度 40px，水平居中排列，padding 0 var(--spacer-12)，文字 14px×1.57≈22px",
+    "箭头 .popover__arrow 实现：使用 8×8 方块（var(--popover-arrow-size)）+ transform rotate(45deg) + clip-path 只显示露在外面的半个菱形（三角形）；背景与气泡一致（normal/action 用 var(--popover-bg-dark) 不透明深色，input 用 var(--bg-surface)）；边框 var(--stroke-hairline) solid，深色气泡用 var(--border-toast)，白色气泡用 var(--border-neutral-l2)；absolute 定位相对 padding edge，偏移 calc(-1 * 半边长) 使方块中心落在 padding edge，三角形底边（穿过方块中心的裁剪线）刚好落在气泡 border 下边缘，完整覆盖边框线实现无缝衔接；圆角 var(--popover-arrow-radius) 2px 只作用于露出的尖角（bottom→左上角，top→右下角，right→左下角，left→右上角），底边两角为直角便于与气泡边框干净衔接",
+    "箭头位置：data-placement='bottom' 时箭头在气泡顶部边缘居中（或按 align 偏移）；data-placement='top' 时箭头在底部边缘；data-placement='left' 时箭头在右边缘垂直居中；data-placement='right' 时箭头在左边缘垂直居中；align='start' 时箭头贴近起始边 16px 处，align='end' 时贴近结束边 16px 处，align='center' 时居中",
+    "气泡与目标间距固定 4px（var(--popover-gap)）；定位由宿主根据目标 rect 与视口计算，优先选择 placement 指定方向，空间不足时按 bottom→top→right→left 顺序回退；箭头始终跟随 placement 实际方向，与 data-placement 属性一致",
+    "交互态 popover 必须挂载到页面顶层浮层容器（body 或 overlay root），以 fixed / 顶层绝对定位跟随触发元素；不要直接渲染在带 overflow / transform / filter / perspective 的局部容器内，避免被裁剪",
+    "状态机通过 data-state='open'/'closed' 属性切换；closed 时 visibility:hidden + opacity:0 + scale(0.9)；open 时使用 opacity 0→1 + scale 0.9→1 淡入缩放，时长 var(--duration-normal)，缓动 var(--ease-enter)；关闭时无退场动画立即隐藏",
+    "normal 变体建议自动关闭（duration 默认 3000ms）；input/action 变体交互式常驻，需用户操作（点击外部、点击操作项、点击关闭图标）后关闭",
+    "z-index 统一 var(--z-popover)=300，与 popmenu 一致，高于 dropdown(200)，低于 overlay(500)、modal(600)、toast(700)"
+  ],
+  "behavior": {
+    "closeByOutside": "normal 默认 false（自动关闭），action/input 默认 true（页面任意非气泡操作立即关闭，无可见遮罩、无拦截层，触发该操作的页面功能继续执行）",
+    "closeAfterClick": "action 默认 true（点击操作项后关闭），input 默认 false（除非点击关闭图标或外部），normal 默认 false（除非配置 duration 或点击关闭图标）",
+    "autoClose": "normal 变体默认 duration=3000ms 自动关闭；action/input 不自动关闭",
+    "persistence": "交互式常驻（action/input）或瞬时（normal duration）；不持久化到 localStorage",
+    "conflicting": "同屏仅展示一个 popover，新 popover 出现时立即替换旧；同屏也不与 popmenu 共存",
+    "position": "锚定目标元素，placement 默认 bottom；目标在屏幕左右位置选择 start/center/end 对齐。气泡距目标固定 4px；定位计算必须基于关闭动画与缩放临时禁用后的真实尺寸；placement 方向空间不足时按 bottom→top→right→left 回退；四侧均无法完整容纳时不打开，由宿主改用其他承载方式，不能以夹紧坐标盖住目标",
+    "dismiss": "action/input：页面任意非气泡点击、焦点切换、滚动或视口尺寸变化时立即关闭；关闭行为不得阻断原页面事件、滚动或焦点操作。normal：duration 到期或点击关闭图标时关闭",
+    "animation": "仅入场使用 opacity 0→1 + scale 0.9→1 淡入缩放，时长 var(--duration-normal)（250ms），缓动 var(--ease-enter)；关闭时不做退场动画，立即隐藏",
+    "zIndex": "var(--z-popover)=300，与 popmenu 一致，高于 dropdown(200)，低于 overlay(500)、modal(600)、toast(700)",
+    "scrollable": "action 变体 action-list max-height 限制为 2 行（2×item-height + 2×padding）；操作项超过 2 行（即 11+ 项，按一行 5 个计算）时列表内部纵向滚动并隐藏滚动条。doNotInvent 限制 6 个以内，scrollable 仅作为兜底"
+  },
+  "accessibility": {
+    "role": "normal 使用 role=\"tooltip\"；action 使用 role=\"menu\"；input 使用 role=\"dialog\" aria-label 由宿主提供",
+    "labelRule": "目标元素的 aria-label 或 aria-describedby 作为可访问名称",
+    "focusTrap": "不锁定焦点；焦点移至气泡和触发元素以外的页面内容时立即关闭（action/input），避免阻断页面操作",
+    "textRule": "文本单行，超出 max-width 时省略号截断；normal 文案保持短句，建议不超过 12 个汉字"
+  },
+  "usageHints": [
+    "normal 变体用于页面引导提示：新手引导、功能说明、操作反馈提示等深色气泡场景",
+    "action 变体用于空间有限且操作较多的场景：图片上的快捷操作栏、卡片角落的操作集合等；有图标模式适合操作项较多需要多行排列，无图标 text-only 模式适合操作项少且仅需文字的紧凑场景",
+    "input 变体用于表单内快捷录入：表单字段附近的快捷填充建议、最近输入、智能推荐等",
+    "placement 选择：优先使用 bottom（气泡在目标下方，箭头朝上）；底部空间不足用 top；目标在屏幕边缘且上下都不够时用 left/right",
+    "align 选择：目标在视口左侧用 start（箭头贴近气泡左边），右侧用 end，中间用 center；避免箭头超出目标范围",
+    "normal 变体建议配置 duration 自动关闭，避免长时间遮挡；如需用户手动关闭则配置 right-close 图标",
+    "action 变体操作项建议 1-6 个；icon 模式每项固定 56px，flex-wrap 自动换行（.popover--action max-width 300px 一行默认 5 个，超过自动换到第二行）；text-only 模式仅单行 1-3 个，无四周 padding，文字 14px、左右间距 12px、项之间垂直分隔线 rgba(255,255,255,0.1)；超过 6 个考虑用 actionsheet 或专门的操作页",
+    "input 变体 imageMode=true 用于智能识别场景（如识别图片中的商品快速填充表单字段）",
+    "真实业务场景优先把 popover 挂到 body 或统一 overlay root，再基于触发元素 getBoundingClientRect() 计算 fixed 坐标；宿主浮层（如 dialog/modal）关闭时，关联的 popover 也要同步关闭",
+    "与 popmenu 的区别：popmenu 是紧凑白色菜单（action/select 模式，无深色变体、无输入变体、无横向多排布局）；popover 是更广义的气泡，承担引导提示与表单内快捷录入职责",
+    "与 toast 的区别：toast 是居中悬浮的瞬时告知浮层，不锚定目标元素；popover 锚定目标元素，箭头指向目标",
+    "与 actionsheet 的区别：actionsheet 是底部弹层（通栏、带取消按钮、slide-up）；popover 是锚定目标的紧凑气泡"
+  ],
+  "doNotInvent": [
+    "不要在 popover 内放置多字段表单、副标题、推荐标签等复杂内容（那是 modal/actionsheet 的职责）",
+    "action 变体不要超过 6 个操作项，超过时考虑用 actionsheet 或专门的操作页",
+    "不要给 normal/action 变体使用白色背景或给 input 变体使用深色背景：normal 和 action 固定深色背景 + 白色文字/图标，input 固定白色背景 + 灰色文字",
+    "不要在 action 变体中混用 icon 模式和 text-only 模式；text-only 模式仅支持单行，不可用于 multi-row",
+    "不要省略箭头 .popover__arrow，气泡必须始终指向目标元素",
+    "不要持久化 popover 状态到 localStorage",
+    "不要用大于 4px 的默认锚点间距，也不要只依赖固定 left/top 让气泡脱离触发元素",
+    "不要把交互态 popover 直接挂在会裁剪内容的局部容器里，再试图只靠 z-index 解决遮挡或裁切",
+    "不要为了留在视口内而把气泡压到或盖住触发元素；四侧都放不下时不要强行显示",
+    "不要给 normal 变体设置超过 5000ms 的自动关闭时长，也不要给 action/input 设置自动关闭（除非业务明确需要）",
+    "不要在 action 变体中手动控制换行，有图标模式由 flex-wrap 根据 .popover--action 的 max-width 300px 自动换行，一行默认 5 个；每行 item 数量由可用宽度决定，无需强制一致",
+    "不要自定义气泡颜色，仅允许三种类型的固定配色",
+    "不要在 input 变体中使用实际输入框，input 变体仅展示提示文本和可选图片，实际输入由宿主表单承载"
+  ],
+  "domAnatomy": {
+    "root": ".popover",
+    "requiredChildren": [
+      ".popover__arrow",
+      ".popover__body"
+    ],
+    "optionalChildren": [
+      ".popover__text",
+      ".popover__icon--left",
+      ".popover__icon--close",
+      ".popover__image",
+      ".popover__action-list",
+      ".popover__action-item",
+      ".popover__action-icon",
+      ".popover__action-text"
+    ],
+    "modifiers": [
+      ".popover--normal",
+      ".popover--action",
+      ".popover--input",
+      "[data-placement=\"bottom\"]",
+      "[data-placement=\"top\"]",
+      "[data-placement=\"right\"]",
+      "[data-placement=\"left\"]",
+      "[data-align=\"start\"]",
+      "[data-align=\"center\"]",
+      "[data-align=\"end\"]",
+      "[data-state=\"open\"]",
+      "[data-state=\"closed\"]",
+      ".popover--has-left-icon",
+      ".popover--has-close-icon",
+      ".popover--has-image",
+      ".popover--action-text-only"
+    ],
+    "alternatives": []
+  },
+  "provenance": {
+    "preview": "preview/component-popover.html",
+    "cssSource": "preview/component-popover.html",
+    "embedded": false,
+    "hostComponent": null,
+    "externalSources": [
+      {
+        "name": "Figma 设计稿：气泡提示 Popover",
+        "url": "https://www.figma.com/design/gPGzasBhEboOcHM1b6TUsN/%F0%9F%93%98-wegoo-%E7%BB%84%E4%BB%B6%E5%BA%93?node-id=199-774"
+      },
+      {
+        "name": "Kuikly PopOver 组件文档",
+        "sourceFile": "docs/kuikly_components/PopOver.md"
+      }
+    ]
+  },
+  "unknowns": [],
+  "ruleRefs": [
+    "colors_and_type.css#popover",
+    "components.css#popover",
+    "preview/component-popover.html"
+  ],
+  "runtimeTokens": [
+    "--bg-subtle",
+    "--bg-surface",
+    "--body-md-font-family",
+    "--body-md-font-size",
+    "--body-md-line-height",
+    "--body-sm-font-family",
+    "--body-sm-font-size",
+    "--body-sm-line-height",
+    "--border-neutral-l2",
+    "--border-toast",
+    "--duration-fast",
+    "--duration-normal",
+    "--ease-enter",
+    "--font-weight-regular",
+    "--radius-4",
+    "--radius-8",
+    "--shadow-sm",
+    "--size-16",
+    "--size-20",
+    "--spacer-12",
+    "--spacer-4",
+    "--spacer-8",
+    "--stroke-hairline",
+    "--text-inverse",
+    "--text-secondary",
+    "--z-popover"
+  ],
+  "previewOnlyTokens": [
+    "--bg-brand-surface-l1",
+    "--bg-brand-surface-l2",
+    "--bg-page",
+    "--border-brand",
+    "--border-neutral-l1",
+    "--body-xs-font-size",
+    "--spacer-16",
+    "--spacer-24",
+    "--text-brand",
+    "--text-tertiary"
+  ],
+  "localTokens": [
+    "--popover-action-item-height",
+    "--popover-action-item-size",
+    "--popover-action-item-gap",
+    "--popover-action-list-padding",
+    "--popover-action-pressed-bg",
+    "--popover-action-text-item-height",
+    "--popover-action-max-width",
+    "--popover-action-divider",
+    "--popover-arrow-radius",
+    "--popover-arrow-size",
+    "--popover-bg-dark",
+    "--popover-max-width"
+  ]
+}

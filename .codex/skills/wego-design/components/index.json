@@ -178,6 +178,13 @@
       "preview": "preview/component-popmenu.html"
     },
     {
+      "slug": "popover",
+      "name": "气泡提示",
+      "category": "feedback",
+      "status": "stable",
+      "preview": "preview/component-popover.html"
+    },
+    {
       "slug": "metric",
       "name": "数值展示",
       "category": "display",
