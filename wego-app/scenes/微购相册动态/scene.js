@@ -13,7 +13,7 @@
     "source": "library-consumption.json#/appRuntime/presentationTypes"
   },
   "prompt_contract": {
-    "design_system_version": 451,
+    "design_system_version": 462,
     "token_bindings": [
       {
         "selector": ".album-feed__top-stack",
@@ -562,6 +562,108 @@
         "token": "var(--body-xs-line-height)"
       },
       {
+        "selector": ".album-feed__content-type",
+        "content_role": "内容类型标签顶部偏移",
+        "css_property": "top",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".album-feed__content-type",
+        "content_role": "内容类型标签左侧偏移",
+        "css_property": "left",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".album-feed__content-type",
+        "content_role": "内容类型标签阴影",
+        "css_property": "box-shadow",
+        "token": "var(--shadow-sm)"
+      },
+      {
+        "selector": ".album-feed__live-tag",
+        "content_role": "直播状态标签背景",
+        "css_property": "background",
+        "token": "var(--bg-brand-surface-l1)"
+      },
+      {
+        "selector": ".album-feed__live-tag",
+        "content_role": "直播状态标签文字色",
+        "css_property": "color",
+        "token": "var(--status-danger-default)"
+      },
+      {
+        "selector": ".album-feed__live-tag",
+        "content_role": "直播状态标签字号",
+        "css_property": "font-size",
+        "token": "var(--body-xs-font-size)"
+      },
+      {
+        "selector": ".album-feed__live-tag",
+        "content_role": "直播状态标签行高",
+        "css_property": "line-height",
+        "token": "var(--body-xs-line-height)"
+      },
+      {
+        "selector": ".album-feed__live-tag",
+        "content_role": "直播状态标签字重",
+        "css_property": "font-weight",
+        "token": "var(--font-weight-medium)"
+      },
+      {
+        "selector": ".album-feed__live-tag",
+        "content_role": "直播状态标签圆角",
+        "css_property": "border-radius",
+        "token": "var(--radius-4)"
+      },
+      {
+        "selector": ".album-feed__live-tag",
+        "content_role": "直播状态标签图标文字间距",
+        "css_property": "gap",
+        "token": "var(--spacer-2)"
+      },
+      {
+        "selector": ".album-feed__live-tag",
+        "content_role": "直播状态标签纵向内边距",
+        "css_property": "padding-block",
+        "token": "var(--spacer-0)"
+      },
+      {
+        "selector": ".album-feed__live-tag",
+        "content_role": "直播状态标签横向内边距",
+        "css_property": "padding-inline",
+        "token": "var(--spacer-4)"
+      },
+      {
+        "selector": ".album-feed__live-icon",
+        "content_role": "直播图标字号",
+        "css_property": "font-size",
+        "token": "var(--size-16)"
+      },
+      {
+        "selector": ".album-feed__live-icon",
+        "content_role": "直播图标行高",
+        "css_property": "line-height",
+        "token": "var(--body-xs-line-height)"
+      },
+      {
+        "selector": ".album-feed__starred-icon",
+        "content_role": "重点商家图标颜色",
+        "css_property": "color",
+        "token": "var(--text-brand)"
+      },
+      {
+        "selector": ".album-feed__starred-icon",
+        "content_role": "重点商家图标字号",
+        "css_property": "font-size",
+        "token": "var(--size-16)"
+      },
+      {
+        "selector": ".album-feed__starred-icon",
+        "content_role": "重点商家图标行高",
+        "css_property": "line-height",
+        "token": "var(--body-xs-line-height)"
+      },
+      {
         "selector": ".album-feed__summary",
         "content_role": ".album-feed__summary 的 color",
         "css_property": "color",
@@ -626,6 +728,12 @@
         "content_role": "空结果横向内边距",
         "css_property": "padding-inline",
         "token": "var(--spacer-16)"
+      },
+      {
+        "selector": ".album-feed__empty-illust",
+        "content_role": "空状态插画底部间距",
+        "css_property": "margin-bottom",
+        "token": "var(--spacer-4)"
       },
       {
         "selector": ".album-feed__empty-title",
@@ -728,12 +836,6 @@
         "content_role": ".album-feed__action-buttons 的 gap",
         "css_property": "gap",
         "token": "var(--spacer-6)"
-      },
-      {
-        "selector": ".album-feed__select-action.is-added",
-        "content_role": ".album-feed__select-action.is-added 的 color",
-        "css_property": "color",
-        "token": "var(--text-brand)"
       },
       {
         "selector": ".album-feed__selection-guide",
@@ -844,42 +946,6 @@
         "token": "var(--size-20)"
       },
       {
-        "selector": ".album-feed__cart-guide",
-        "content_role": ".album-feed__cart-guide 的 border-radius",
-        "css_property": "border-radius",
-        "token": "var(--radius-8)"
-      },
-      {
-        "selector": ".album-feed__cart-guide",
-        "content_role": ".album-feed__cart-guide 的 background",
-        "css_property": "background",
-        "token": "var(--bg-surface)"
-      },
-      {
-        "selector": ".album-feed__cart-guide",
-        "content_role": ".album-feed__cart-guide 的 box-shadow",
-        "css_property": "box-shadow",
-        "token": "var(--shadow-lg)"
-      },
-      {
-        "selector": ".album-feed__cart-guide",
-        "content_role": ".album-feed__cart-guide 的 color",
-        "css_property": "color",
-        "token": "var(--text-default)"
-      },
-      {
-        "selector": ".album-feed__cart-guide",
-        "content_role": ".album-feed__cart-guide 的 font-size",
-        "css_property": "font-size",
-        "token": "var(--body-sm-font-size)"
-      },
-      {
-        "selector": ".album-feed__cart-guide",
-        "content_role": ".album-feed__cart-guide 的 line-height",
-        "css_property": "line-height",
-        "token": "var(--body-sm-line-height)"
-      },
-      {
         "selector": ".cart-panel__title .navbar",
         "content_role": ".cart-panel__title .navbar 的 background",
         "css_property": "background",
@@ -970,28 +1036,22 @@
         "token": "var(--body-sm-line-height)"
       },
       {
-        "selector": ".cart-panel__remove",
-        "content_role": ".cart-panel__remove 的 background",
-        "css_property": "background",
-        "token": "var(--transparent)"
-      },
-      {
-        "selector": ".cart-panel__remove",
-        "content_role": ".cart-panel__remove 的 color",
-        "css_property": "color",
-        "token": "var(--text-brand)"
-      },
-      {
-        "selector": ".cart-panel__remove",
-        "content_role": ".cart-panel__remove 的 font-size",
-        "css_property": "font-size",
-        "token": "var(--body-sm-font-size)"
+        "selector": ".cart-panel__item-actions",
+        "content_role": "购物车条目操作区间距",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
       },
       {
         "selector": ".cart-panel__empty",
         "content_role": ".cart-panel__empty 的 color",
         "css_property": "color",
         "token": "var(--text-secondary)"
+      },
+      {
+        "selector": ".cart-panel__empty-illust",
+        "content_role": "购物车空状态插画底部间距",
+        "css_property": "margin-bottom",
+        "token": "var(--spacer-12)"
       },
       {
         "selector": ".cart-panel__empty h3",
@@ -1036,42 +1096,6 @@
         "token": "var(--body-md-line-height)"
       },
       {
-        "selector": ".cart-panel__actions",
-        "content_role": ".cart-panel__actions 的 gap",
-        "css_property": "gap",
-        "token": "var(--spacer-8)"
-      },
-      {
-        "selector": ".cart-panel__actions",
-        "content_role": ".cart-panel__actions 的 background",
-        "css_property": "background",
-        "token": "var(--bg-surface)"
-      },
-      {
-        "selector": ".album-feed__cart-guide",
-        "content_role": ".album-feed__cart-guide 的 padding-top",
-        "css_property": "padding-top",
-        "token": "var(--spacer-8)"
-      },
-      {
-        "selector": ".album-feed__cart-guide",
-        "content_role": ".album-feed__cart-guide 的 padding-right",
-        "css_property": "padding-right",
-        "token": "var(--spacer-12)"
-      },
-      {
-        "selector": ".album-feed__cart-guide",
-        "content_role": ".album-feed__cart-guide 的 padding-bottom",
-        "css_property": "padding-bottom",
-        "token": "var(--spacer-8)"
-      },
-      {
-        "selector": ".album-feed__cart-guide",
-        "content_role": ".album-feed__cart-guide 的 padding-left",
-        "css_property": "padding-left",
-        "token": "var(--spacer-12)"
-      },
-      {
         "selector": ".cart-panel__body",
         "content_role": ".cart-panel__body 的 padding-top",
         "css_property": "padding-top",
@@ -1112,30 +1136,6 @@
         "content_role": ".cart-panel__empty 的 padding-left",
         "css_property": "padding-left",
         "token": "var(--spacer-16)"
-      },
-      {
-        "selector": ".cart-panel__actions",
-        "content_role": ".cart-panel__actions 的 padding-top",
-        "css_property": "padding-top",
-        "token": "var(--spacer-12)"
-      },
-      {
-        "selector": ".cart-panel__actions",
-        "content_role": ".cart-panel__actions 的 padding-right",
-        "css_property": "padding-right",
-        "token": "var(--spacer-16)"
-      },
-      {
-        "selector": ".cart-panel__actions",
-        "content_role": ".cart-panel__actions 的 padding-left",
-        "css_property": "padding-left",
-        "token": "var(--spacer-16)"
-      },
-      {
-        "selector": ".cart-panel__actions",
-        "content_role": ".cart-panel__actions 的 padding-bottom",
-        "css_property": "padding-bottom",
-        "token": "var(--safe-area-bottom-content)"
       }
     ],
     "component_bindings": [
@@ -1252,6 +1252,17 @@
         "variant_dimensions": {
           "type": "image",
           "size": "24"
+        }
+      },
+      {
+        "binding_id": "feed-content-type-tag",
+        "slug": "tag",
+        "reason": "封面左上角内容类型标签，区分产品与笔记",
+        "variant_dimensions": {
+          "size": "20",
+          "theme": "white",
+          "state": "normal",
+          "affordance": "display-only"
         }
       },
       {
@@ -1408,29 +1419,7 @@
         "slug": "button",
         "reason": "选品车统一转发操作",
         "variant_dimensions": {
-          "emphasis": "medium",
-          "size": "md",
-          "iconMode": "text-only",
-          "state": "default"
-        }
-      },
-      {
-        "binding_id": "feed-cart-selection-share",
-        "slug": "button",
-        "reason": "选品车统一分享操作",
-        "variant_dimensions": {
-          "emphasis": "weak",
-          "size": "md",
-          "iconMode": "text-only",
-          "state": "default"
-        }
-      },
-      {
-        "binding_id": "feed-cart-selection-download",
-        "slug": "button",
-        "reason": "选品车统一下载图片操作",
-        "variant_dimensions": {
-          "emphasis": "weak",
+          "emphasis": "strong",
           "size": "md",
           "iconMode": "text-only",
           "state": "default"
@@ -1444,6 +1433,60 @@
           "emphasis": "strong",
           "size": "md",
           "iconMode": "text-only",
+          "state": "default"
+        }
+      },
+      {
+        "binding_id": "feed-cart-guide",
+        "slug": "popover",
+        "reason": "首次加入选品车后指向浮动购物车入口的引导气泡，复用 normal 变体深色背景白色文字",
+        "variant_dimensions": {
+          "variant": "normal",
+          "placement": "top",
+          "align": "end",
+          "iconMode": "none",
+          "state": "open"
+        }
+      },
+      {
+        "binding_id": "feed-cart-selection-bar",
+        "slug": "bottom-action-bar",
+        "reason": "选品车全屏面板底部主次操作栏，左侧分享/下载可折叠进更多，右侧统一转发主操作",
+        "variant_dimensions": {
+          "type": "primary-secondary-actions",
+          "iconMode": "text-only",
+          "state": "default",
+          "overflow": "expanded"
+        }
+      },
+      {
+        "binding_id": "feed-cart-goods-bar",
+        "slug": "bottom-action-bar",
+        "reason": "购物车全屏面板底部主操作栏，仅右侧结算入口",
+        "variant_dimensions": {
+          "type": "primary-secondary-actions",
+          "iconMode": "text-only",
+          "state": "default",
+          "overflow": "expanded"
+        }
+      },
+      {
+        "binding_id": "feed-cart-view-link",
+        "slug": "link",
+        "reason": "购物车条目查看操作，跳转动态详情或商品详情",
+        "variant_dimensions": {
+          "mode": "standalone",
+          "size": "14",
+          "state": "default"
+        }
+      },
+      {
+        "binding_id": "feed-cart-remove-link",
+        "slug": "link",
+        "reason": "购物车条目移除操作，轻量文字链接",
+        "variant_dimensions": {
+          "mode": "standalone",
+          "size": "14",
           "state": "default"
         }
       }
@@ -1700,8 +1743,8 @@
       375,
       393
     ],
-    "checked_at": "2026-07-24T03:03:45.000Z",
-    "scope": "动态列表加入选品车、首次引导、浮动购物车入口、全屏选品车/购物车 tabs、选品车统一转发/分享/下载操作；移动端预览验证图片右上角仅保留分享、入口不遮挡、首次加入后数量与引导同步、全屏面板顶部无单独标题。",
+    "checked_at": "2026-07-24T10:30:00.000Z",
+    "scope": "动态列表加入选品车、首次引导气泡（popover normal 变体指向 cart-fab）、浮动购物车入口、全屏选品车/购物车 tabs（tab 标签带数量显示）、选品车底部操作栏（bottom-action-bar primary-secondary 左侧分享/下载可折叠进更多、右侧统一转发主操作）、购物车底部操作栏（右侧结算入口）、卡片封面左上角内容类型标签（tag--20 white 区分产品/笔记）、发布者状态图标（直播中红色标签、认证品牌色、重点商家品牌色）、购物车条目查看/移除操作（link standalone 14 文字链接）、动态列表与购物车面板空状态插画（中性色 SVG）；移动端预览验证图片右上角仅保留分享、左上角内容类型不遮挡、发布者状态图标与名字同行不溢出、tab 数量与实际条目同步、查看入口可跳转详情、查看与移除链接热区不重叠、空状态插画居中且不喧宾夺主、首次加入后数量与引导同步、全屏面板顶部无单独标题、底部操作栏主操作右对齐且左侧溢出收纳。",
     "checks": {
       "horizontal_overflow": true,
       "overlap": true,
@@ -1792,7 +1835,10 @@
       return '<article class="cart-panel__item" data-selection-id="' + item.dynamic_id + '">'
         + '<img class="cart-panel__thumb" src="' + cartItemImage(item) + '" alt="">'
         + '<div class="cart-panel__copy"><h3 class="cart-panel__name">' + escapeHtml(cartItemTitle(item)) + '</h3><p class="cart-panel__meta">' + escapeHtml(getPublisher(item.publisher_id).publisher_name) + ' · ' + escapeHtml(item.published_at) + '</p></div>'
-        + '<button type="button" class="cart-panel__remove" data-dom-id="cart-remove-selection-' + item.dynamic_id + '">移除</button>'
+        + '<div class="cart-panel__item-actions">'
+        + '<button type="button" class="link" data-dd-id="cart-view-selection-' + item.dynamic_id + '" data-component-slug="link" data-component-binding="feed-cart-view-link" data-dom-id="cart-view-selection-' + item.dynamic_id + '">查看</button>'
+        + '<button type="button" class="link" data-dd-id="cart-remove-selection-' + item.dynamic_id + '" data-component-slug="link" data-component-binding="feed-cart-remove-link" data-dom-id="cart-remove-selection-' + item.dynamic_id + '">移除</button>'
+        + '</div>'
         + '</article>';
     }
     function goodsRow(item) {
@@ -1800,28 +1846,55 @@
       return '<article class="cart-panel__item" data-goods-id="' + item.product_id + '">'
         + '<img class="cart-panel__thumb" src="' + image + '" alt="">'
         + '<div class="cart-panel__copy"><h3 class="cart-panel__name">' + escapeHtml(item.title || item.name) + '</h3><p class="cart-panel__meta">¥' + escapeHtml(item.price) + ' · 1 件</p></div>'
-        + '<button type="button" class="cart-panel__remove" data-dom-id="cart-remove-goods-' + item.product_id + '">移除</button>'
+        + '<div class="cart-panel__item-actions">'
+        + '<button type="button" class="link" data-dd-id="cart-view-goods-' + item.product_id + '" data-component-slug="link" data-component-binding="feed-cart-view-link" data-dom-id="cart-view-goods-' + item.product_id + '">查看</button>'
+        + '<button type="button" class="link" data-dd-id="cart-remove-goods-' + item.product_id + '" data-component-slug="link" data-component-binding="feed-cart-remove-link" data-dom-id="cart-remove-goods-' + item.product_id + '">移除</button>'
+        + '</div>'
         + '</article>';
     }
     function emptyCopy(type) {
-      return '<div class="cart-panel__empty"><h3>' + (type === 'selection' ? '还没有加入选品车的产品' : '还没有加入购物车的商品') + '</h3><p>' + (type === 'selection' ? '浏览产品时点击加入选品车，可以在这里统一转发、分享或下载图片。' : '从商品详情点击加入购物车后，会在这里展示加购商品。') + '</p></div>';
+      var illust = type === 'selection'
+        ? '<svg class="cart-panel__empty-illust" width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="20" y="30" width="56" height="44" rx="6" fill="var(--bg-subtle)"/><rect x="20" y="30" width="56" height="12" rx="6" fill="var(--bg-fill-strong)"/><path d="M36 30V24a4 4 0 014-4h16a4 4 0 014 4v6" stroke="var(--bg-fill-strong)" stroke-width="2.4" stroke-linecap="round"/><circle cx="38" cy="56" r="3" fill="var(--bg-surface)"/><circle cx="58" cy="56" r="3" fill="var(--bg-surface)"/></svg>'
+        : '<svg class="cart-panel__empty-illust" width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M30 34h36l-4 30a6 6 0 01-6 5H40a6 6 0 01-6-5L30 34z" fill="var(--bg-subtle)"/><path d="M30 34h36" stroke="var(--bg-fill-strong)" stroke-width="2.4" stroke-linecap="round"/><circle cx="40" cy="72" r="4" fill="var(--bg-fill-strong)"/><circle cx="56" cy="72" r="4" fill="var(--bg-fill-strong)"/><path d="M38 46l4 12M58 46l-4 12" stroke="var(--bg-surface)" stroke-width="2" stroke-linecap="round"/></svg>';
+      return '<div class="cart-panel__empty">' + illust + '<h3>' + (type === 'selection' ? '还没有加入选品车的产品' : '还没有加入购物车的商品') + '</h3><p>' + (type === 'selection' ? '浏览产品时点击加入选品车，可以在这里统一转发、分享或下载图片。' : '从商品详情点击加入购物车后，会在这里展示加购商品。') + '</p></div>';
     }
     return ''
-      + '<div class="modal modal--fullscreen" role="dialog" aria-modal="true" data-state="closed" data-dd-id="feed-cart-modal" data-component-slug="modal" data-component-binding="feed-cart-modal">'
+      + '<div class="modal modal--fullscreen modal--has-actions" role="dialog" aria-modal="true" data-state="closed" data-dd-id="feed-cart-modal" data-component-slug="modal" data-component-binding="feed-cart-modal">'
       + '<div class="modal__panel cart-panel">'
       + '<div class="modal__title modal__title--default cart-panel__title">'
       + '<div class="navbar" data-dd-id="feed-cart-navbar" data-component-slug="navbar" data-component-binding="feed-cart-navbar">'
       + '<div class="navbar__body">'
       + '<div class="navbar__left"><button type="button" class="navbar__left-btn navbar__left-btn--circle" aria-label="关闭购物车" data-dom-id="cart-close"><i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button></div>'
-      + '<div class="navbar__center cart-panel__tabs-center"><div class="wg-tabs wg-tabs--standard wg-tabs--divide cart-panel__tabs" role="tablist" data-dd-id="feed-cart-tabs" data-component-slug="tabs" data-component-binding="feed-cart-tabs"><div class="wg-tabs__scroll"><button class="wg-tabs__item" role="tab" aria-selected="' + (selectedTab === 'selection' ? 'true' : 'false') + '" type="button" data-cart-tab="selection" data-dom-id="cart-tab-selection"><span class="wg-tabs__content"><span class="wg-tabs__label">选品车</span></span></button><button class="wg-tabs__item" role="tab" aria-selected="' + (selectedTab === 'goods' ? 'true' : 'false') + '" type="button" data-cart-tab="goods" data-dom-id="cart-tab-goods"><span class="wg-tabs__content"><span class="wg-tabs__label">购物车</span></span></button><span class="wg-tabs__active-indicator" aria-hidden="true"></span></div></div></div>'
+      + '<div class="navbar__center cart-panel__tabs-center"><div class="wg-tabs wg-tabs--standard wg-tabs--divide cart-panel__tabs" role="tablist" data-dd-id="feed-cart-tabs" data-component-slug="tabs" data-component-binding="feed-cart-tabs"><div class="wg-tabs__scroll"><button class="wg-tabs__item" role="tab" aria-selected="' + (selectedTab === 'selection' ? 'true' : 'false') + '" type="button" data-cart-tab="selection" data-dom-id="cart-tab-selection"><span class="wg-tabs__content"><span class="wg-tabs__label">选品车' + (selectionItems.length ? ' ' + selectionItems.length : '') + '</span></span></button><button class="wg-tabs__item" role="tab" aria-selected="' + (selectedTab === 'goods' ? 'true' : 'false') + '" type="button" data-cart-tab="goods" data-dom-id="cart-tab-goods"><span class="wg-tabs__content"><span class="wg-tabs__label">购物车' + (goodsItems.length ? ' ' + goodsItems.length : '') + '</span></span></button><span class="wg-tabs__active-indicator" aria-hidden="true"></span></div></div></div>'
       + '<div class="navbar__right"></div>'
       + '</div></div></div>'
-      + '<div class="modal__body modal__body--safe-bottom cart-panel__body">'
+      + '<div class="modal__body cart-panel__body">'
       + '<section class="cart-panel__view' + (selectedTab === 'selection' ? ' is-active' : '') + '" data-cart-view="selection">' + (selectionItems.length ? selectionItems.map(selectionRow).join('') : emptyCopy('selection')) + '</section>'
       + '<section class="cart-panel__view' + (selectedTab === 'goods' ? ' is-active' : '') + '" data-cart-view="goods">' + (goodsItems.length ? goodsItems.map(goodsRow).join('') : emptyCopy('goods')) + '</section>'
       + '</div>'
-      + '<div class="cart-panel__actions" data-cart-actions="selection" ' + (selectedTab === 'selection' ? '' : 'hidden') + '><button type="button" class="btn btn--medium btn--md" data-dom-id="cart-selection-forward" data-dd-id="feed-cart-selection-forward" data-component-slug="button" data-component-binding="feed-cart-selection-forward">统一转发</button><button type="button" class="btn btn--weak btn--md" data-dom-id="cart-selection-share" data-dd-id="feed-cart-selection-share" data-component-slug="button" data-component-binding="feed-cart-selection-share">分享</button><button type="button" class="btn btn--weak btn--md" data-dom-id="cart-selection-download" data-dd-id="feed-cart-selection-download" data-component-slug="button" data-component-binding="feed-cart-selection-download">下载图片</button></div>'
-      + '<div class="cart-panel__actions" data-cart-actions="goods" ' + (selectedTab === 'goods' ? '' : 'hidden') + '><button type="button" class="btn btn--strong btn--md" data-dom-id="cart-goods-checkout" data-dd-id="feed-cart-goods-checkout" data-component-slug="button" data-component-binding="feed-cart-goods-checkout">去结算</button></div>'
+      + '<div class="cart-panel__action-bar" data-cart-actions="selection" ' + (selectedTab === 'selection' ? '' : 'hidden') + '>'
+      + '<div class="bottom-action-bar bottom-action-bar--primary-secondary js-overflow-bar" data-dd-id="feed-cart-selection-bar" data-component-slug="bottom-action-bar" data-component-binding="feed-cart-selection-bar">'
+      + '<div class="bottom-action-bar__inner">'
+      + '<div class="bottom-action-bar__leading">'
+      + '<button class="bottom-action-bar__more" type="button" aria-label="更多操作"><i class="wego-iconfont-s icon-sandian16"></i><span class="bottom-action-bar__more-label">更多</span></button>'
+      + '<button class="bottom-action-bar__action" type="button" data-dom-id="cart-selection-share" data-menu-label="分享"><span class="bottom-action-bar__action-label">分享</span></button>'
+      + '<button class="bottom-action-bar__action" type="button" data-dom-id="cart-selection-download" data-menu-label="下载图片"><span class="bottom-action-bar__action-label">下载图片</span></button>'
+      + '</div>'
+      + '<div class="bottom-action-bar__trailing">'
+      + '<button type="button" class="btn btn--strong btn--md" data-dom-id="cart-selection-forward" data-dd-id="feed-cart-selection-forward" data-component-slug="button" data-component-binding="feed-cart-selection-forward">统一转发</button>'
+      + '</div>'
+      + '</div>'
+      + '</div>'
+      + '</div>'
+      + '<div class="cart-panel__action-bar" data-cart-actions="goods" ' + (selectedTab === 'goods' ? '' : 'hidden') + '>'
+      + '<div class="bottom-action-bar bottom-action-bar--primary-secondary" data-dd-id="feed-cart-goods-bar" data-component-slug="bottom-action-bar" data-component-binding="feed-cart-goods-bar">'
+      + '<div class="bottom-action-bar__inner">'
+      + '<div class="bottom-action-bar__trailing">'
+      + '<button type="button" class="btn btn--strong btn--md" data-dom-id="cart-goods-checkout" data-dd-id="feed-cart-goods-checkout" data-component-slug="button" data-component-binding="feed-cart-goods-checkout">去结算</button>'
+      + '</div>'
+      + '</div>'
+      + '</div>'
+      + '</div>'
       + '</div></div>';
   }
 
@@ -1856,6 +1929,11 @@
             actions.hidden = actions.dataset.cartActions !== tab;
           });
           syncCartTabs(api.root);
+          requestAnimationFrame(function() {
+            if (window.WegoApp && typeof window.WegoApp.layoutAllBottomActionBars === 'function') {
+              window.WegoApp.layoutAllBottomActionBars(api.root);
+            }
+          });
         }
         api.root.querySelector('[data-dom-id="cart-close"]').addEventListener('click', function() {
           api.close();
@@ -1879,11 +1957,37 @@
             openCartPanel(ctx, 'goods', afterClose);
           });
         });
+        api.root.querySelectorAll('[data-dom-id^="cart-view-selection-"]').forEach(function(button) {
+          button.addEventListener('click', function() {
+            var id = button.dataset.domId.replace('cart-view-selection-', '');
+            var item = dynamics.find(function(dynamic) { return dynamic.dynamic_id === id; });
+            if (!item) return;
+            api.close();
+            ctx.state.scrollPosition = scroll.scrollTop;
+            ctx.appState.dynamicFeedPayload = { dynamic: item, publisher: getPublisher(item.publisher_id), products: item.related_product_ids ? item.related_product_ids.map(getProduct) : [], source_route: 'album-product-feed' };
+            ctx.navigate('dynamic-detail');
+          });
+        });
+        api.root.querySelectorAll('[data-dom-id^="cart-view-goods-"]').forEach(function(button) {
+          button.addEventListener('click', function() {
+            var id = button.dataset.domId.replace('cart-view-goods-', '');
+            var item = products.find(function(product) { return product.product_id === id; });
+            if (!item) return;
+            api.close();
+            ctx.appState.productDetailPayload = { product: item, publisher: getPublisher(dynamics.find(function(d) { return d.related_product_ids && d.related_product_ids.indexOf(id) !== -1; }).publisher_id), source_route: 'album-product-feed' };
+            ctx.navigate('product-detail');
+          });
+        });
         api.root.querySelector('[data-dom-id="cart-selection-forward"]').addEventListener('click', function() { api.toast('已转发 ' + cart.selectionIds.length + ' 个产品'); });
         api.root.querySelector('[data-dom-id="cart-selection-share"]').addEventListener('click', function() { api.toast('已分享 ' + cart.selectionIds.length + ' 个产品'); });
         api.root.querySelector('[data-dom-id="cart-selection-download"]').addEventListener('click', function() { api.toast('已下载 ' + cart.selectionIds.length + ' 个产品的图片'); });
         api.root.querySelector('[data-dom-id="cart-goods-checkout"]').addEventListener('click', function() { api.toast('结算能力本期暂未开放'); });
-        requestAnimationFrame(function() { syncCartTabs(api.root); });
+        requestAnimationFrame(function() {
+          syncCartTabs(api.root);
+          if (window.WegoApp && typeof window.WegoApp.layoutAllBottomActionBars === 'function') {
+            window.WegoApp.layoutAllBottomActionBars(api.root);
+          }
+        });
       }
     });
   }
@@ -1893,9 +1997,24 @@
     return '<i class="wego-iconfont-s icon-renzheng album-feed__verified-icon" aria-label="已认证"></i>';
   }
 
+  function publisherLiveTemplate(publisher) {
+    if (!hasPublisherStatus(publisher, 'live')) return '';
+    return '<span class="album-feed__live-tag" aria-label="直播中"><i class="wego-iconfont-s icon-zhibozhong album-feed__live-icon" aria-hidden="true"></i>直播</span>';
+  }
+
+  function publisherStarredTemplate(publisher) {
+    if (!hasPublisherStatus(publisher, 'starred')) return '';
+    return '<i class="wego-iconfont-s icon-shoucang album-feed__starred-icon" aria-label="重点商家"></i>';
+  }
+
   function publisherNewDotTemplate(publisher) {
     if (!hasPublisherStatus(publisher, 'new')) return '';
     return '<span class="album-feed__new-dot" aria-label="上新"></span>';
+  }
+
+  function contentTypeTagTemplate(item) {
+    var label = item.content_type === 'product' ? '产品' : '笔记';
+    return '<div class="tag tag--20 tag--white album-feed__content-type" data-dd-id="feed-content-type-' + item.dynamic_id + '" data-component-slug="tag" data-component-binding="feed-content-type-tag"><span class="tag__label">' + escapeHtml(label) + '</span></div>';
   }
 
   function publishMenuTemplate() {
@@ -1925,6 +2044,7 @@
       +       '<div class="wg-image album-feed__cover" data-dd-id="feed-cover-' + item.dynamic_id + '" data-component-slug="image" data-component-binding="feed-cover-image">'
       +         '<img class="wg-image__src is-loaded" src="' + cover.poster_or_src + '" alt="">'
       +       '</div>'
+      +       contentTypeTagTemplate(item)
       +       '<button type="button" class="btn btn--weak btn--sm btn--icon-only album-feed__share-action" aria-label="分享当前产品" data-dd-id="feed-share-' + item.dynamic_id + '" data-component-slug="button" data-component-binding="feed-share-action" data-dom-id="share-' + item.dynamic_id + '"><i class="btn__icon icon-fenxiang" aria-hidden="true"></i></button>'
       +       videoMark
       +     '</div>'
@@ -1935,7 +2055,9 @@
       +           publisherNewDotTemplate(publisher)
       +         '</div>'
       +         '<span class="album-feed__publisher-name">' + escapeHtml(publisher.publisher_name) + '</span>'
+      +         publisherLiveTemplate(publisher)
       +         publisherVerifiedTemplate(publisher)
+      +         publisherStarredTemplate(publisher)
       +       '</div>'
       +       '<p class="album-feed__summary">' + escapeHtml(item.text_content) + '</p>'
       +     '</div>'
@@ -1945,7 +2067,7 @@
       +         '<span class="album-feed__publisher-meta">' + escapeHtml(item.published_at) + '</span>'
       +         '<div class="album-feed__action-buttons">'
       +           '<button type="button" class="btn btn--medium btn--sm album-feed__forward-link" data-dd-id="feed-forward-' + item.dynamic_id + '" data-component-slug="button" data-component-binding="feed-forward-button" data-dom-id="forward-' + item.dynamic_id + '">一键转发</button>'
-      +           '<button type="button" class="btn btn--weak btn--sm album-feed__select-action' + (added ? ' is-added' : '') + '" data-dd-id="feed-select-' + item.dynamic_id + '" data-component-slug="button" data-component-binding="feed-select-button" data-dom-id="select-cart-' + item.dynamic_id + '" aria-pressed="' + (added ? 'true' : 'false') + '"><i class="btn__icon ' + (added ? 'icon-gou16' : 'icon-gouwuche') + '" aria-hidden="true"></i>' + (added ? '已加入' : '加入选品车') + '</button>'
+      +           '<button type="button" class="btn btn--weak btn--sm album-feed__select-action" data-dd-id="feed-select-' + item.dynamic_id + '" data-component-slug="button" data-component-binding="feed-select-button" data-dom-id="select-cart-' + item.dynamic_id + '" aria-pressed="' + (added ? 'true' : 'false') + '"><i class="btn__icon ' + (added ? 'icon-gou16' : 'icon-gouwuche') + '" aria-hidden="true"></i>' + (added ? '已加入' : '加入选品车') + '</button>'
       +         '</div>'
       +       '</div>'
       +     '</div>'
@@ -1955,6 +2077,7 @@
 
   function emptyTemplate() {
     return '<div class="album-feed__empty">'
+      + '<svg class="album-feed__empty-illust" width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="42" cy="42" r="22" stroke="var(--bg-fill-strong)" stroke-width="2.4"/><path d="M58 58l14 14" stroke="var(--bg-fill-strong)" stroke-width="2.4" stroke-linecap="round"/><path d="M34 42h16M42 34v16" stroke="var(--bg-subtle)" stroke-width="2.4" stroke-linecap="round"/></svg>'
       + '<p class="album-feed__empty-title">没有匹配的动态</p>'
       + '<p class="album-feed__empty-text">可以清除当前条件，继续浏览推荐内容。</p>'
       + '<button type="button" class="btn btn--medium btn--md" data-dd-id="feed-empty-action" data-component-slug="button" data-component-binding="feed-empty-action" data-dom-id="empty-clear">清除筛选</button>'
@@ -2105,8 +2228,11 @@
           <i class="wego-iconfont-s icon-gouwuche album-feed__cart-fab-icon" aria-hidden="true"></i>
           <span class="album-feed__cart-fab-count" data-cart-count>0</span>
         </button>
-        <div class="album-feed__cart-guide" data-dom-id="first-add-guide" hidden>
-          <span>已加入选品车，可从这里统一转发/下载</span>
+        <div class="popover popover--normal album-feed__cart-guide" role="tooltip" data-variant="normal" data-placement="top" data-align="end" data-state="closed" data-dom-id="first-add-guide" data-dd-id="feed-cart-guide" data-component-slug="popover" data-component-binding="feed-cart-guide" hidden>
+          <div class="popover__arrow"></div>
+          <div class="popover__body">
+            <span class="popover__text">已加入选品车，可从这里统一转发/下载</span>
+          </div>
         </div>
         <div class="album-feed__contract-seed" hidden aria-hidden="true">
           <div class="navbar" data-dd-id="feed-filter-navbar-seed" data-component-slug="navbar" data-component-binding="feed-filter-navbar"><div class="navbar__body"><div class="navbar__left"><button type="button" class="navbar__left-btn navbar__left-btn--circle" aria-label="关闭"><i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button></div><div class="navbar__center"><span class="navbar__title">筛选动态</span></div><div class="navbar__right"></div></div></div>
@@ -2115,7 +2241,12 @@
           <button type="button" class="btn btn--medium btn--sm" data-dd-id="feed-forward-button-seed" data-component-slug="button" data-component-binding="feed-forward-button">一键转发</button>
           <button type="button" class="btn btn--weak btn--sm" data-dd-id="feed-select-button-seed" data-component-slug="button" data-component-binding="feed-select-button"><i class="btn__icon icon-gouwuche" aria-hidden="true"></i>加入选品车</button>
           <button type="button" class="btn btn--weak btn--sm btn--icon-only" aria-label="分享当前产品" data-dd-id="feed-share-action-seed" data-component-slug="button" data-component-binding="feed-share-action"><i class="btn__icon icon-fenxiang" aria-hidden="true"></i></button>
+          <div class="tag tag--20 tag--white" data-dd-id="feed-content-type-tag-seed" data-component-slug="tag" data-component-binding="feed-content-type-tag"><span class="tag__label">产品</span></div>
           <div class="modal modal--fullscreen" role="dialog" aria-modal="true" data-state="open" data-dd-id="feed-cart-modal-seed" data-component-slug="modal" data-component-binding="feed-cart-modal"><div class="modal__panel"><div class="modal__title modal__title--default"><div class="navbar" data-dd-id="feed-cart-navbar-seed" data-component-slug="navbar" data-component-binding="feed-cart-navbar"><div class="navbar__body"><div class="navbar__left"><button type="button" class="navbar__left-btn navbar__left-btn--circle" aria-label="关闭"><i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button></div><div class="navbar__center"><div class="wg-tabs wg-tabs--standard wg-tabs--divide" role="tablist" data-dd-id="feed-cart-tabs-seed" data-component-slug="tabs" data-component-binding="feed-cart-tabs"><div class="wg-tabs__scroll"><button class="wg-tabs__item" role="tab" aria-selected="true" type="button"><span class="wg-tabs__content"><span class="wg-tabs__label">选品车</span></span></button><button class="wg-tabs__item" role="tab" aria-selected="false" type="button"><span class="wg-tabs__content"><span class="wg-tabs__label">购物车</span></span></button><span class="wg-tabs__active-indicator" aria-hidden="true"></span></div></div></div><div class="navbar__right"></div></div></div></div><div class="modal__body modal__body--safe-bottom"></div></div></div>
+          <div class="bottom-action-bar bottom-action-bar--primary-secondary js-overflow-bar" data-dd-id="feed-cart-selection-bar-seed" data-component-slug="bottom-action-bar" data-component-binding="feed-cart-selection-bar"><div class="bottom-action-bar__inner"><div class="bottom-action-bar__leading"><button class="bottom-action-bar__more" type="button" aria-label="更多操作"><i class="wego-iconfont-s icon-sandian16"></i><span class="bottom-action-bar__more-label">更多</span></button><button class="bottom-action-bar__action" type="button"><span class="bottom-action-bar__action-label">分享</span></button><button class="bottom-action-bar__action" type="button"><span class="bottom-action-bar__action-label">下载图片</span></button></div><div class="bottom-action-bar__trailing"><button type="button" class="btn btn--strong btn--md" data-dd-id="feed-cart-selection-forward-seed" data-component-slug="button" data-component-binding="feed-cart-selection-forward">统一转发</button></div></div></div>
+          <div class="bottom-action-bar bottom-action-bar--primary-secondary" data-dd-id="feed-cart-goods-bar-seed" data-component-slug="bottom-action-bar" data-component-binding="feed-cart-goods-bar"><div class="bottom-action-bar__inner"><div class="bottom-action-bar__trailing"><button type="button" class="btn btn--strong btn--md" data-dd-id="feed-cart-goods-checkout-seed" data-component-slug="button" data-component-binding="feed-cart-goods-checkout">去结算</button></div></div></div>
+          <button type="button" class="link" data-dd-id="feed-cart-view-link-seed" data-component-slug="link" data-component-binding="feed-cart-view-link">查看</button>
+          <button type="button" class="link" data-dd-id="feed-cart-remove-link-seed" data-component-slug="link" data-component-binding="feed-cart-remove-link">移除</button>
           <div class="popmenu popmenu--action popmenu--has-icon" role="menu" data-state="open" data-placement="bottom" data-align="end" data-dd-id="feed-publish-popmenu-seed" data-component-slug="popmenu" data-component-binding="feed-publish-popmenu">
             <div class="popmenu__list">
               <div class="popmenu__item" role="menuitem"><i class="wego-iconfont-s icon-fabushangpin popmenu__item-icon"></i><span class="popmenu__item-text">发产品</span></div>
@@ -2393,10 +2524,16 @@
         var cart = ensureCartState(ctx);
         if (!firstAddGuide || cart.firstAddGuideDismissed) return;
         firstAddGuide.hidden = false;
+        requestAnimationFrame(function() {
+          if (firstAddGuide) firstAddGuide.setAttribute('data-state', 'open');
+        });
         window.clearTimeout(ctx.state.firstAddGuideTimer);
         ctx.state.firstAddGuideTimer = window.setTimeout(function() {
           cart.firstAddGuideDismissed = true;
-          if (firstAddGuide) firstAddGuide.hidden = true;
+          if (firstAddGuide) {
+            firstAddGuide.setAttribute('data-state', 'closed');
+            firstAddGuide.hidden = true;
+          }
         }, 3200);
       }
 

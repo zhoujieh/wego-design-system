@@ -553,6 +553,15 @@
   box-shadow: var(--shadow-lg);
 }
 
+/* 内容类型标签：封面左上角，区分产品/笔记 */
+.album-feed__content-type {
+  position: absolute;
+  top: var(--spacer-8);
+  left: var(--spacer-8);
+  z-index: 1;
+  box-shadow: var(--shadow-sm);
+}
+
 .album-feed__card-content {
   display: flex;
   flex-direction: column;
@@ -560,7 +569,7 @@
   padding: var(--spacer-8);
 }
 
-/* 发布者区：头像 + 名字 + 认证图标 */
+/* 发布者区：头像 + 名字 + 直播 + 认证 + 重点商家图标 */
 .album-feed__publisher-row {
   display: flex;
   align-items: center;
@@ -621,6 +630,40 @@
   line-height: var(--body-xs-line-height);
 }
 
+/* 直播中状态：红色文字+图标，表达实时动态 */
+.album-feed__live-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacer-2);
+  flex-shrink: 0;
+  padding-block: var(--spacer-0);
+  padding-inline: var(--spacer-4);
+  border-radius: var(--radius-4);
+  background: var(--bg-brand-surface-l1);
+  color: var(--status-danger-default);
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+  font-weight: var(--font-weight-medium);
+}
+
+.album-feed__live-icon {
+  font-size: var(--size-16);
+  line-height: var(--body-xs-line-height);
+}
+
+/* 重点商家状态：品牌色收藏图标，与认证图标同级 */
+.album-feed__starred-icon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  justify-content: center;
+  width: var(--size-16);
+  height: var(--size-16);
+  color: var(--text-brand);
+  font-size: var(--size-16);
+  line-height: var(--body-xs-line-height);
+}
+
 .album-feed__publisher-meta {
   min-width: 0;
   overflow: hidden;
@@ -651,33 +694,31 @@
   padding-bottom: var(--spacer-8);
 }
 
-/* 操作行：一键转发为核心快捷操作，加入选品车作为相邻次级操作。 */
+/* 操作行：左侧发布时间，右侧一键转发 + 加入选品车并排。
+   一键转发为最高优先级快捷操作（button medium 灰底黑字回退，设计系统缺口见 design-decisions.json）。
+   选品按钮通过图标+文案变化表达已加入状态，颜色变体缺口见 design-decisions.json。 */
 .album-feed__actions {
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
+  flex-direction: row;
+  align-items: center;
   gap: var(--spacer-8);
   min-width: 0;
 }
 
 .album-feed__actions .album-feed__publisher-meta {
   flex: 1 1 auto;
+  min-width: 0;
 }
 
 .album-feed__action-buttons {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
   gap: var(--spacer-6);
 }
 
-.album-feed__forward-link,
-.album-feed__select-action {
-  width: 100%;
-  max-width: none;
-}
-
-.album-feed__select-action.is-added {
-  color: var(--text-brand);
+.album-feed__action-buttons .btn {
+  flex: 0 0 auto;
 }
 
 .album-feed__selection-guide {
@@ -734,22 +775,14 @@
   text-align: center;
 }
 
+/* 浮动购物车引导气泡：消费 popover normal 变体，场景只承担位置定位，视觉样式由 popover 组件提供。
+   placement=top 让箭头落在气泡底部指向 cart-fab；位置与 cart-fab 上方对齐。 */
 .album-feed__cart-guide {
   position: absolute;
   right: calc(var(--spacer-16) + var(--size-48) + var(--spacer-8));
   bottom: calc(var(--safe-area-bottom-content) + var(--spacer-16) + var(--size-56) + var(--spacer-20));
   z-index: 3;
   max-width: 196px;
-  padding-top: var(--spacer-8);
-  padding-right: var(--spacer-12);
-  padding-bottom: var(--spacer-8);
-  padding-left: var(--spacer-12);
-  border-radius: var(--radius-8);
-  background: var(--bg-surface);
-  box-shadow: var(--shadow-lg);
-  color: var(--text-default);
-  font-size: var(--body-sm-font-size);
-  line-height: var(--body-sm-line-height);
 }
 
 .album-feed__cart-guide[hidden] {
@@ -842,11 +875,11 @@
   white-space: nowrap;
 }
 
-.cart-panel__remove {
-  border: 0;
-  background: var(--transparent);
-  color: var(--text-brand);
-  font-size: var(--body-sm-font-size);
+.cart-panel__item-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-8);
+  flex-shrink: 0;
 }
 
 .cart-panel__empty {
@@ -856,6 +889,10 @@
   padding-left: var(--spacer-16);
   color: var(--text-secondary);
   text-align: center;
+}
+
+.cart-panel__empty-illust {
+  margin-bottom: var(--spacer-12);
 }
 
 .cart-panel__empty h3 {
@@ -871,18 +908,13 @@
   line-height: var(--body-md-line-height);
 }
 
-.cart-panel__actions {
-  display: flex;
+/* 购物车面板底部操作栏容器：消费 bottom-action-bar primary-secondary 变体，
+   场景只承担 flex-shrink:0 固定底部，视觉样式与 safe-area 由组件承担。 */
+.cart-panel__action-bar {
   flex-shrink: 0;
-  gap: var(--spacer-8);
-  padding-top: var(--spacer-12);
-  padding-right: var(--spacer-16);
-  padding-bottom: var(--safe-area-bottom-content);
-  padding-left: var(--spacer-16);
-  background: var(--bg-surface);
 }
 
-.cart-panel__actions[hidden] {
+.cart-panel__action-bar[hidden] {
   display: none;
 }
 
@@ -894,6 +926,10 @@
   padding-block: var(--spacer-16);
   padding-inline: var(--spacer-16);
   text-align: center;
+}
+
+.album-feed__empty-illust {
+  margin-bottom: var(--spacer-4);
 }
 
 .album-feed__empty-title {
