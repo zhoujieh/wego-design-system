@@ -138,7 +138,7 @@
       },
       {
         "selector": ".album-feed__publish-fab",
-        "content_role": "右下角悬浮发布入口高度",
+        "content_role": "右下角悬浮发布入口最小高度",
         "css_property": "height",
         "token": "var(--size-56)"
       },
@@ -185,10 +185,148 @@
         "token": "var(--size-24)"
       },
       {
-        "selector": ".album-feed__publish-scrim",
-        "content_role": "发布菜单打开时的弱化遮罩",
+        "selector": ".album-feed__publish-focus",
+        "content_role": "发布托盘打开时的局部弱化层",
         "css_property": "background",
         "token": "var(--text-default)"
+      },
+      {
+        "selector": ".album-feed__publish-dock-surface",
+        "content_role": "发布托盘背景",
+        "css_property": "background",
+        "token": "var(--bg-surface)"
+      },
+      {
+        "selector": ".album-feed__publish-dock-surface",
+        "content_role": "发布托盘圆角",
+        "css_property": "border-radius",
+        "token": "var(--radius-16)"
+      },
+      {
+        "selector": ".album-feed__publish-dock-surface",
+        "content_role": "发布托盘阴影",
+        "css_property": "box-shadow",
+        "token": "var(--shadow-lg)"
+      },
+      {
+        "selector": ".album-feed__publish-dock-surface",
+        "content_role": "发布托盘内边距",
+        "css_property": "padding",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".album-feed__publish-dock-surface",
+        "content_role": "发布托盘分组间距",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".album-feed__publish-primary-row",
+        "content_role": "发布主类型横向间距",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".album-feed__publish-secondary-row",
+        "content_role": "发布次类型横向间距",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".album-feed__publish-primary",
+        "content_role": "发布主类型按钮内图文间距",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".album-feed__publish-primary",
+        "content_role": "发布主类型按钮纵向内边距",
+        "css_property": "padding-block",
+        "token": "var(--spacer-0)"
+      },
+      {
+        "selector": ".album-feed__publish-primary",
+        "content_role": "发布主类型按钮横向内边距",
+        "css_property": "padding-inline",
+        "token": "var(--spacer-12)"
+      },
+      {
+        "selector": ".album-feed__publish-primary",
+        "content_role": "发布主类型按钮背景",
+        "css_property": "background",
+        "token": "var(--bg-brand)"
+      },
+      {
+        "selector": ".album-feed__publish-primary",
+        "content_role": "发布主类型按钮文字色",
+        "css_property": "color",
+        "token": "var(--text-inverse)"
+      },
+      {
+        "selector": ".album-feed__publish-primary",
+        "content_role": "发布主类型按钮圆角",
+        "css_property": "border-radius",
+        "token": "var(--radius-12)"
+      },
+      {
+        "selector": ".album-feed__publish-secondary",
+        "content_role": "发布次类型按钮内图文间距",
+        "css_property": "gap",
+        "token": "var(--spacer-4)"
+      },
+      {
+        "selector": ".album-feed__publish-secondary",
+        "content_role": "发布次类型按钮纵向内边距",
+        "css_property": "padding-block",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".album-feed__publish-secondary",
+        "content_role": "发布次类型按钮横向内边距",
+        "css_property": "padding-inline",
+        "token": "var(--spacer-4)"
+      },
+      {
+        "selector": ".album-feed__publish-secondary",
+        "content_role": "发布次类型按钮背景",
+        "css_property": "background",
+        "token": "var(--bg-subtle)"
+      },
+      {
+        "selector": ".album-feed__publish-secondary",
+        "content_role": "发布次类型按钮文字色",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".album-feed__publish-secondary",
+        "content_role": "发布次类型按钮圆角",
+        "css_property": "border-radius",
+        "token": "var(--radius-8)"
+      },
+      {
+        "selector": ".album-feed__publish-choice-icon",
+        "content_role": "发布类型图标字号",
+        "css_property": "font-size",
+        "token": "var(--size-20)"
+      },
+      {
+        "selector": ".album-feed__publish-choice-text",
+        "content_role": "发布类型文字字体",
+        "css_property": "font-family",
+        "token": "var(--body-md-font-family)"
+      },
+      {
+        "selector": ".album-feed__publish-choice-text",
+        "content_role": "发布类型文字字号",
+        "css_property": "font-size",
+        "token": "var(--body-sm-font-size)"
+      },
+      {
+        "selector": ".album-feed__publish-choice-text",
+        "content_role": "发布类型文字字重",
+        "css_property": "font-weight",
+        "token": "var(--font-weight-medium)"
       },
       {
         "selector": ".album-feed__people-name",
@@ -811,7 +949,7 @@
         "target": "state:publish-menu-open"
       },
       {
-        "dom_id": "publish-scrim",
+        "dom_id": "publish-focus",
         "target": "state:publish-menu-open"
       },
       {
@@ -916,7 +1054,7 @@
         "state_id": "publish-menu-open",
         "initial": false,
         "trigger": "点击导航栏右侧发布入口或右下角悬浮发布入口",
-        "visible_result": "右上角入口保持原有加号旋转；右下角悬浮入口在拇指区展开同一组发布操作，菜单从入口位置向上错层浮出并轻微弱化背景",
+        "visible_result": "右上角入口保持原有加号旋转；右下角扩展发布入口在支持设备上触发短震动，并从按钮右下角原点形变展开为无标题发布类型托盘",
         "fallback": "点击页面其他位置、滚动或选择菜单项后关闭菜单并恢复发布入口默认状态",
         "persistence": "memory"
       },
@@ -1079,7 +1217,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/微购相册动态/scene.js",
     "scene_css": "wego-app/scenes/微购相册动态/scene.css",
-    "source_sha256": "14cdd6cf81e09c34c6a0e20d34a1f9342d30c9eb7559f420c11458ed9cd27ce4",
+    "source_sha256": "790538d96ae2b05fc842ac59926069b62824d6c101de179621da4a9374295796",
     "dom_ids": [
       "page-tab-following",
       "page-tab-recommended",
@@ -1095,13 +1233,13 @@
       "filter-tag-live",
       "open-filter",
       "feed-open-dynamic",
-      "publish-scrim",
-      "open-publish-menu-floating",
+      "publish-focus",
       "publish-action-product",
       "publish-action-note",
       "publish-action-live",
       "publish-action-import",
-      "publish-action-scan"
+      "publish-action-scan",
+      "open-publish-menu-floating"
     ],
     "component_count": 16,
     "visualCheck": {
@@ -1110,8 +1248,8 @@
         375,
         393
       ],
-      "checked_at": "2026-07-23T16:22:09.000Z",
-      "scope": "顶部 page-tabs 居中且左右预留对称栏位，右上角发布入口保持原有 popmenu；右下角新增悬浮发布入口，点击后同一组发布操作在按钮上方错层浮出并显示弱化遮罩。375/393px 验证菜单在视口内、不与按钮重叠、无横向溢出，点击发笔记后菜单关闭并出现未开放 toast。",
+      "checked_at": "2026-07-24T00:54:14.000Z",
+      "scope": "顶部 page-tabs 居中且左右预留对称栏位，右上角发布入口保持原有 popmenu；右下角悬浮入口保持纯加号，点击时触发短震动并从按钮右下角原点形变展开无标题发布类型托盘。375/393px 验证托盘在视口内、不压加号、不覆盖底部 Tab、无横向溢出，点击发产品后托盘关闭并出现未开放 toast。",
       "checks": {
         "horizontal_overflow": true,
         "overlap": true,

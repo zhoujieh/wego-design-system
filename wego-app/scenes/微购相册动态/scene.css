@@ -139,19 +139,139 @@
   transform: translate(-50%, -50%) rotate(45deg);
 }
 
-.album-feed__publish-scrim {
+.album-feed__publish-focus {
   position: absolute;
   inset: 0;
   z-index: 1;
   background: var(--text-default);
   opacity: 0;
   pointer-events: none;
-  transition: opacity var(--duration-normal) var(--ease-enter);
+  transition: opacity var(--duration-fast) var(--ease-enter);
 }
 
-.album-feed__publish-scrim.is-visible {
-  opacity: 0.12;
+.album-feed__publish-focus.is-visible {
+  opacity: 0.06;
   pointer-events: auto;
+}
+
+.album-feed__publish-dock {
+  position: absolute;
+  left: var(--spacer-16);
+  right: var(--spacer-16);
+  bottom: calc(var(--safe-area-bottom-content) + var(--size-56) + var(--spacer-24));
+  z-index: 3;
+  display: flex;
+  justify-content: flex-end;
+  pointer-events: none;
+}
+
+.album-feed__publish-dock-surface {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-8);
+  width: 100%;
+  max-width: calc(var(--size-104) + var(--size-104) + var(--size-64));
+  padding: var(--spacer-8);
+  border-radius: var(--radius-16);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(var(--spacer-16), var(--spacer-20), 0) scale(0.72, 0.18);
+  transform-origin: bottom right;
+  transition: opacity var(--duration-fast) var(--ease-enter),
+              transform var(--duration-normal) var(--ease-emphasized);
+  will-change: transform, opacity;
+}
+
+.album-feed__publish-dock[data-state="open"] .album-feed__publish-dock-surface {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.album-feed__publish-primary-row,
+.album-feed__publish-secondary-row {
+  display: grid;
+  gap: var(--spacer-8);
+}
+
+.album-feed__publish-primary-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.album-feed__publish-secondary-row {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.album-feed__publish-choice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  border: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  opacity: 0;
+  transform: translate3d(var(--spacer-8), var(--spacer-12), 0) scale(0.96);
+  transition: opacity var(--duration-normal) var(--ease-enter),
+              transform var(--duration-normal) var(--ease-emphasized),
+              background var(--duration-fast) var(--ease-enter);
+  will-change: transform, opacity;
+}
+
+.album-feed__publish-dock[data-state="open"] .album-feed__publish-choice {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.album-feed__publish-primary {
+  flex-direction: row;
+  gap: var(--spacer-8);
+  min-height: var(--size-56);
+  padding-block: var(--spacer-0);
+  padding-inline: var(--spacer-12);
+  border-radius: var(--radius-12);
+  background: var(--bg-brand);
+  color: var(--text-inverse);
+}
+
+.album-feed__publish-secondary {
+  flex-direction: column;
+  gap: var(--spacer-4);
+  min-height: var(--size-64);
+  padding-block: var(--spacer-8);
+  padding-inline: var(--spacer-4);
+  border-radius: var(--radius-8);
+  background: var(--bg-subtle);
+  color: var(--text-default);
+}
+
+.album-feed__publish-choice:active,
+.album-feed__publish-choice.is-pressed {
+  transform: scale(0.96);
+}
+
+.album-feed__publish-dock[data-state="open"] .album-feed__publish-primary:nth-child(1) { transition-delay: 20ms; }
+.album-feed__publish-dock[data-state="open"] .album-feed__publish-primary:nth-child(2) { transition-delay: 50ms; }
+.album-feed__publish-dock[data-state="open"] .album-feed__publish-secondary:nth-child(1) { transition-delay: 80ms; }
+.album-feed__publish-dock[data-state="open"] .album-feed__publish-secondary:nth-child(2) { transition-delay: 110ms; }
+.album-feed__publish-dock[data-state="open"] .album-feed__publish-secondary:nth-child(3) { transition-delay: 140ms; }
+
+.album-feed__publish-choice-icon {
+  flex-shrink: 0;
+  font-size: var(--size-20);
+  color: currentColor;
+}
+
+.album-feed__publish-choice-text {
+  min-width: 0;
+  color: currentColor;
+  font-family: var(--body-md-font-family);
+  font-size: var(--body-sm-font-size);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
 }
 
 .album-feed__publish-fab {
@@ -174,6 +294,7 @@
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   transition: transform var(--duration-normal) var(--ease-emphasized), box-shadow var(--duration-normal) var(--ease-enter);
+  will-change: transform;
 }
 
 .album-feed__publish-fab:active,
@@ -553,33 +674,6 @@
 .album-feed__publish-menu {
   position: fixed;
   z-index: var(--z-popover);
-}
-
-.album-feed__publish-menu--floating {
-  transform-origin: bottom right;
-}
-
-.album-feed__publish-menu--floating[data-state="closed"] {
-  opacity: 0;
-  transform: translateY(var(--spacer-16)) scale(0.9);
-}
-
-.album-feed__publish-menu--floating .popmenu__item {
-  opacity: 0;
-  transition: opacity var(--duration-normal) var(--ease-enter),
-              transform var(--duration-normal) var(--ease-emphasized),
-              background var(--duration-fast) var(--ease-enter);
-}
-
-.album-feed__publish-menu--floating .popmenu__item:nth-child(1) { transform: translate(var(--spacer-16), var(--spacer-16)) scale(0.96); transition-delay: 0ms; }
-.album-feed__publish-menu--floating .popmenu__item:nth-child(2) { transform: translate(var(--spacer-12), var(--spacer-16)) scale(0.96); transition-delay: 30ms; }
-.album-feed__publish-menu--floating .popmenu__item:nth-child(3) { transform: translate(var(--spacer-8), var(--spacer-16)) scale(0.96); transition-delay: 60ms; }
-.album-feed__publish-menu--floating .popmenu__item:nth-child(4) { transform: translate(var(--spacer-4), var(--spacer-16)) scale(0.96); transition-delay: 90ms; }
-.album-feed__publish-menu--floating .popmenu__item:nth-child(5) { transform: translate(var(--spacer-0), var(--spacer-16)) scale(0.96); transition-delay: 120ms; }
-
-.album-feed__publish-menu--floating[data-state="open"] .popmenu__item {
-  opacity: 1;
-  transform: translate(0, 0) scale(1);
 }
 
 .album-feed__empty {

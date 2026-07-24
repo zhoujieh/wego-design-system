@@ -137,7 +137,7 @@
       },
       {
         "selector": ".album-feed__publish-fab",
-        "content_role": "右下角悬浮发布入口高度",
+        "content_role": "右下角悬浮发布入口最小高度",
         "css_property": "height",
         "token": "var(--size-56)"
       },
@@ -184,10 +184,148 @@
         "token": "var(--size-24)"
       },
       {
-        "selector": ".album-feed__publish-scrim",
-        "content_role": "发布菜单打开时的弱化遮罩",
+        "selector": ".album-feed__publish-focus",
+        "content_role": "发布托盘打开时的局部弱化层",
         "css_property": "background",
         "token": "var(--text-default)"
+      },
+      {
+        "selector": ".album-feed__publish-dock-surface",
+        "content_role": "发布托盘背景",
+        "css_property": "background",
+        "token": "var(--bg-surface)"
+      },
+      {
+        "selector": ".album-feed__publish-dock-surface",
+        "content_role": "发布托盘圆角",
+        "css_property": "border-radius",
+        "token": "var(--radius-16)"
+      },
+      {
+        "selector": ".album-feed__publish-dock-surface",
+        "content_role": "发布托盘阴影",
+        "css_property": "box-shadow",
+        "token": "var(--shadow-lg)"
+      },
+      {
+        "selector": ".album-feed__publish-dock-surface",
+        "content_role": "发布托盘内边距",
+        "css_property": "padding",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".album-feed__publish-dock-surface",
+        "content_role": "发布托盘分组间距",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".album-feed__publish-primary-row",
+        "content_role": "发布主类型横向间距",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".album-feed__publish-secondary-row",
+        "content_role": "发布次类型横向间距",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".album-feed__publish-primary",
+        "content_role": "发布主类型按钮内图文间距",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".album-feed__publish-primary",
+        "content_role": "发布主类型按钮纵向内边距",
+        "css_property": "padding-block",
+        "token": "var(--spacer-0)"
+      },
+      {
+        "selector": ".album-feed__publish-primary",
+        "content_role": "发布主类型按钮横向内边距",
+        "css_property": "padding-inline",
+        "token": "var(--spacer-12)"
+      },
+      {
+        "selector": ".album-feed__publish-primary",
+        "content_role": "发布主类型按钮背景",
+        "css_property": "background",
+        "token": "var(--bg-brand)"
+      },
+      {
+        "selector": ".album-feed__publish-primary",
+        "content_role": "发布主类型按钮文字色",
+        "css_property": "color",
+        "token": "var(--text-inverse)"
+      },
+      {
+        "selector": ".album-feed__publish-primary",
+        "content_role": "发布主类型按钮圆角",
+        "css_property": "border-radius",
+        "token": "var(--radius-12)"
+      },
+      {
+        "selector": ".album-feed__publish-secondary",
+        "content_role": "发布次类型按钮内图文间距",
+        "css_property": "gap",
+        "token": "var(--spacer-4)"
+      },
+      {
+        "selector": ".album-feed__publish-secondary",
+        "content_role": "发布次类型按钮纵向内边距",
+        "css_property": "padding-block",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".album-feed__publish-secondary",
+        "content_role": "发布次类型按钮横向内边距",
+        "css_property": "padding-inline",
+        "token": "var(--spacer-4)"
+      },
+      {
+        "selector": ".album-feed__publish-secondary",
+        "content_role": "发布次类型按钮背景",
+        "css_property": "background",
+        "token": "var(--bg-subtle)"
+      },
+      {
+        "selector": ".album-feed__publish-secondary",
+        "content_role": "发布次类型按钮文字色",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".album-feed__publish-secondary",
+        "content_role": "发布次类型按钮圆角",
+        "css_property": "border-radius",
+        "token": "var(--radius-8)"
+      },
+      {
+        "selector": ".album-feed__publish-choice-icon",
+        "content_role": "发布类型图标字号",
+        "css_property": "font-size",
+        "token": "var(--size-20)"
+      },
+      {
+        "selector": ".album-feed__publish-choice-text",
+        "content_role": "发布类型文字字体",
+        "css_property": "font-family",
+        "token": "var(--body-md-font-family)"
+      },
+      {
+        "selector": ".album-feed__publish-choice-text",
+        "content_role": "发布类型文字字号",
+        "css_property": "font-size",
+        "token": "var(--body-sm-font-size)"
+      },
+      {
+        "selector": ".album-feed__publish-choice-text",
+        "content_role": "发布类型文字字重",
+        "css_property": "font-weight",
+        "token": "var(--font-weight-medium)"
       },
       {
         "selector": ".album-feed__people-name",
@@ -810,7 +948,7 @@
         "target": "state:publish-menu-open"
       },
       {
-        "dom_id": "publish-scrim",
+        "dom_id": "publish-focus",
         "target": "state:publish-menu-open"
       },
       {
@@ -915,7 +1053,7 @@
         "state_id": "publish-menu-open",
         "initial": false,
         "trigger": "点击导航栏右侧发布入口或右下角悬浮发布入口",
-        "visible_result": "右上角入口保持原有加号旋转；右下角悬浮入口在拇指区展开同一组发布操作，菜单从入口位置向上错层浮出并轻微弱化背景",
+        "visible_result": "右上角入口保持原有加号旋转；右下角扩展发布入口在支持设备上触发短震动，并从按钮右下角原点形变展开为无标题发布类型托盘",
         "fallback": "点击页面其他位置、滚动或选择菜单项后关闭菜单并恢复发布入口默认状态",
         "persistence": "memory"
       },
@@ -999,8 +1137,8 @@
       375,
       393
     ],
-    "checked_at": "2026-07-23T16:22:09.000Z",
-    "scope": "顶部 page-tabs 居中且左右预留对称栏位，右上角发布入口保持原有 popmenu；右下角新增悬浮发布入口，点击后同一组发布操作在按钮上方错层浮出并显示弱化遮罩。375/393px 验证菜单在视口内、不与按钮重叠、无横向溢出，点击发笔记后菜单关闭并出现未开放 toast。",
+    "checked_at": "2026-07-24T00:54:14.000Z",
+    "scope": "顶部 page-tabs 居中且左右预留对称栏位，右上角发布入口保持原有 popmenu；右下角悬浮入口保持纯加号，点击时触发短震动并从按钮右下角原点形变展开无标题发布类型托盘。375/393px 验证托盘在视口内、不压加号、不覆盖底部 Tab、无横向溢出，点击发产品后托盘关闭并出现未开放 toast。",
     "checks": {
       "horizontal_overflow": true,
       "overlap": true,
@@ -1214,7 +1352,35 @@
         </div>
         <main class="album-feed__grid" data-region="feed-grid" data-dom-id="feed-open-dynamic"></main>
         <div data-region="empty-host" hidden></div>
-        <div class="album-feed__publish-scrim" data-dom-id="publish-scrim" aria-hidden="true"></div>
+        <div class="album-feed__publish-focus" data-dom-id="publish-focus" aria-hidden="true"></div>
+        <div class="album-feed__publish-dock" data-region="publish-dock" data-state="closed" aria-hidden="true">
+          <div class="album-feed__publish-dock-surface">
+            <div class="album-feed__publish-primary-row">
+              <button type="button" class="album-feed__publish-choice album-feed__publish-primary" data-dom-id="publish-action-product">
+                <i class="wego-iconfont-s icon-fabushangpin album-feed__publish-choice-icon" aria-hidden="true"></i>
+                <span class="album-feed__publish-choice-text">发产品</span>
+              </button>
+              <button type="button" class="album-feed__publish-choice album-feed__publish-primary" data-dom-id="publish-action-note">
+                <i class="wego-iconfont-s icon-fabubiji album-feed__publish-choice-icon" aria-hidden="true"></i>
+                <span class="album-feed__publish-choice-text">发笔记</span>
+              </button>
+            </div>
+            <div class="album-feed__publish-secondary-row">
+              <button type="button" class="album-feed__publish-choice album-feed__publish-secondary" data-dom-id="publish-action-live">
+                <i class="wego-iconfont-s icon-zhibo album-feed__publish-choice-icon" aria-hidden="true"></i>
+                <span class="album-feed__publish-choice-text">开直播</span>
+              </button>
+              <button type="button" class="album-feed__publish-choice album-feed__publish-secondary" data-dom-id="publish-action-import">
+                <i class="wego-iconfont-s icon-piliangdaoru album-feed__publish-choice-icon" aria-hidden="true"></i>
+                <span class="album-feed__publish-choice-text">批量导入</span>
+              </button>
+              <button type="button" class="album-feed__publish-choice album-feed__publish-secondary" data-dom-id="publish-action-scan">
+                <i class="wego-iconfont-s icon-saoyisao album-feed__publish-choice-icon" aria-hidden="true"></i>
+                <span class="album-feed__publish-choice-text">扫一扫</span>
+              </button>
+            </div>
+          </div>
+        </div>
         <button type="button" class="album-feed__publish-fab" aria-label="发布动态" aria-haspopup="menu" aria-expanded="false" data-dom-id="open-publish-menu-floating">
           <span class="album-feed__publish-fab-ripple" aria-hidden="true"></span>
           <i class="wego-iconfont-s icon-jia album-feed__publish-fab-icon" aria-hidden="true"></i>
@@ -1226,11 +1392,11 @@
           <button type="button" class="link link--12" data-dd-id="feed-forward-link-seed" data-component-slug="link" data-component-binding="feed-forward-link">一键转发</button>
           <div class="popmenu popmenu--action popmenu--has-icon" role="menu" data-state="open" data-placement="bottom" data-align="end" data-dd-id="feed-publish-popmenu-seed" data-component-slug="popmenu" data-component-binding="feed-publish-popmenu">
             <div class="popmenu__list">
-              <div class="popmenu__item" role="menuitem" data-dom-id="publish-action-product"><i class="wego-iconfont-s icon-fabushangpin popmenu__item-icon"></i><span class="popmenu__item-text">发产品</span></div>
-              <div class="popmenu__item" role="menuitem" data-dom-id="publish-action-note"><i class="wego-iconfont-s icon-fabubiji popmenu__item-icon"></i><span class="popmenu__item-text">发笔记</span></div>
-              <div class="popmenu__item" role="menuitem" data-dom-id="publish-action-live"><i class="wego-iconfont-s icon-zhibo popmenu__item-icon"></i><span class="popmenu__item-text">开直播</span></div>
-              <div class="popmenu__item" role="menuitem" data-dom-id="publish-action-import"><i class="wego-iconfont-s icon-piliangdaoru popmenu__item-icon"></i><span class="popmenu__item-text">批量导入</span></div>
-              <div class="popmenu__item" role="menuitem" data-dom-id="publish-action-scan"><i class="wego-iconfont-s icon-saoyisao popmenu__item-icon"></i><span class="popmenu__item-text">扫一扫</span></div>
+              <div class="popmenu__item" role="menuitem"><i class="wego-iconfont-s icon-fabushangpin popmenu__item-icon"></i><span class="popmenu__item-text">发产品</span></div>
+              <div class="popmenu__item" role="menuitem"><i class="wego-iconfont-s icon-fabubiji popmenu__item-icon"></i><span class="popmenu__item-text">发笔记</span></div>
+              <div class="popmenu__item" role="menuitem"><i class="wego-iconfont-s icon-zhibo popmenu__item-icon"></i><span class="popmenu__item-text">开直播</span></div>
+              <div class="popmenu__item" role="menuitem"><i class="wego-iconfont-s icon-piliangdaoru popmenu__item-icon"></i><span class="popmenu__item-text">批量导入</span></div>
+              <div class="popmenu__item" role="menuitem"><i class="wego-iconfont-s icon-saoyisao popmenu__item-icon"></i><span class="popmenu__item-text">扫一扫</span></div>
             </div>
           </div>
         </div>
@@ -1250,7 +1416,8 @@
       var filterTags = root.querySelector('[data-region="filter-tags"]');
       var publishTrigger = root.querySelector('[data-dom-id="open-publish-menu"]');
       var floatingPublishTrigger = root.querySelector('[data-dom-id="open-publish-menu-floating"]');
-      var publishScrim = root.querySelector('[data-dom-id="publish-scrim"]');
+      var publishFocus = root.querySelector('[data-dom-id="publish-focus"]');
+      var publishDock = root.querySelector('[data-region="publish-dock"]');
       var activePublishTrigger = publishTrigger;
       var publishMenu = null;
       var removePublishListeners = null;
@@ -1300,11 +1467,40 @@
           floatingPublishTrigger.classList.remove('is-open');
           floatingPublishTrigger.setAttribute('aria-expanded', 'false');
         }
-        if (publishScrim) publishScrim.classList.remove('is-visible');
+        if (publishFocus) publishFocus.classList.remove('is-visible');
+        if (publishDock) {
+          publishDock.setAttribute('data-state', 'closed');
+          publishDock.setAttribute('aria-hidden', 'true');
+        }
         ctx.state['publish-menu-open'] = false;
         if (removePublishListeners) {
           removePublishListeners();
           removePublishListeners = null;
+        }
+      }
+
+      function bindDismissListeners() {
+        var onOutsidePointer = function(event) {
+          if ((publishTrigger && publishTrigger.contains(event.target))
+            || (floatingPublishTrigger && floatingPublishTrigger.contains(event.target))
+            || (publishMenu && publishMenu.contains(event.target))
+            || (publishDock && publishDock.contains(event.target))) return;
+          closePublishMenu();
+        };
+        var onDismiss = function() { closePublishMenu(); };
+        document.addEventListener('pointerdown', onOutsidePointer, true);
+        window.addEventListener('resize', onDismiss);
+        scroll.addEventListener('scroll', onDismiss, { once: true });
+        removePublishListeners = function() {
+          document.removeEventListener('pointerdown', onOutsidePointer, true);
+          window.removeEventListener('resize', onDismiss);
+          scroll.removeEventListener('scroll', onDismiss);
+        };
+      }
+
+      function vibratePublishTrigger() {
+        if (window.navigator && typeof window.navigator.vibrate === 'function') {
+          window.navigator.vibrate(10);
         }
       }
 
@@ -1341,6 +1537,17 @@
       function openPublishMenu() {
         closePublishMenu();
         if (!activePublishTrigger) return;
+        if (activePublishTrigger === floatingPublishTrigger) {
+          if (!publishDock) return;
+          floatingPublishTrigger.classList.add('is-open');
+          floatingPublishTrigger.setAttribute('aria-expanded', 'true');
+          if (publishFocus) publishFocus.classList.add('is-visible');
+          publishDock.setAttribute('data-state', 'open');
+          publishDock.setAttribute('aria-hidden', 'false');
+          ctx.state['publish-menu-open'] = true;
+          bindDismissListeners();
+          return;
+        }
         publishMenu = document.createElement('div');
         publishMenu.innerHTML = publishMenuTemplate();
         publishMenu = publishMenu.firstElementChild;
@@ -1352,32 +1559,24 @@
         }
         activePublishTrigger.classList.add('is-open');
         activePublishTrigger.setAttribute('aria-expanded', 'true');
-        if (publishScrim && activePublishTrigger === floatingPublishTrigger) publishScrim.classList.add('is-visible');
         ctx.state['publish-menu-open'] = true;
         publishMenu.querySelector('[data-dom-id="publish-action-product"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); ctx.toast('发产品能力本期暂未开放'); });
         publishMenu.querySelector('[data-dom-id="publish-action-note"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); ctx.toast('发笔记能力本期暂未开放'); });
         publishMenu.querySelector('[data-dom-id="publish-action-live"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); ctx.toast('开直播能力本期暂未开放'); });
         publishMenu.querySelector('[data-dom-id="publish-action-import"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); ctx.toast('批量导入能力本期暂未开放'); });
         publishMenu.querySelector('[data-dom-id="publish-action-scan"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); ctx.toast('扫一扫能力本期暂未开放'); });
-        var onOutsidePointer = function(event) {
-          if ((publishTrigger && publishTrigger.contains(event.target)) || (floatingPublishTrigger && floatingPublishTrigger.contains(event.target)) || (publishMenu && publishMenu.contains(event.target))) return;
-          closePublishMenu();
-        };
-        var onDismiss = function() { closePublishMenu(); };
-        document.addEventListener('pointerdown', onOutsidePointer, true);
-        window.addEventListener('resize', onDismiss);
-        scroll.addEventListener('scroll', onDismiss, { once: true });
-        removePublishListeners = function() {
-          document.removeEventListener('pointerdown', onOutsidePointer, true);
-          window.removeEventListener('resize', onDismiss);
-          scroll.removeEventListener('scroll', onDismiss);
-        };
+        bindDismissListeners();
       }
 
       function togglePublishMenu(event) {
         event.stopPropagation();
         var requestedTrigger = event.currentTarget;
+        if (requestedTrigger === floatingPublishTrigger) vibratePublishTrigger();
         if (publishMenu && activePublishTrigger === requestedTrigger) {
+          closePublishMenu();
+          return;
+        }
+        if (publishDock && publishDock.getAttribute('data-state') === 'open' && activePublishTrigger === requestedTrigger) {
           closePublishMenu();
           return;
         }
@@ -1629,7 +1828,14 @@
       });
       if (publishTrigger) publishTrigger.addEventListener('click', togglePublishMenu);
       if (floatingPublishTrigger) floatingPublishTrigger.addEventListener('click', togglePublishMenu);
-      if (publishScrim) publishScrim.addEventListener('click', closePublishMenu);
+      if (publishFocus) publishFocus.addEventListener('click', closePublishMenu);
+      if (publishDock) {
+        publishDock.querySelector('[data-dom-id="publish-action-product"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); ctx.toast('发产品能力本期暂未开放'); });
+        publishDock.querySelector('[data-dom-id="publish-action-note"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); ctx.toast('发笔记能力本期暂未开放'); });
+        publishDock.querySelector('[data-dom-id="publish-action-live"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); ctx.toast('开直播能力本期暂未开放'); });
+        publishDock.querySelector('[data-dom-id="publish-action-import"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); ctx.toast('批量导入能力本期暂未开放'); });
+        publishDock.querySelector('[data-dom-id="publish-action-scan"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); ctx.toast('扫一扫能力本期暂未开放'); });
+      }
       root.querySelector('[data-dom-id="open-filter"]').addEventListener('click', openFilterModal);
       root.querySelector('[data-dom-id="feed-open-dynamic"]').addEventListener('click', function(event) {
         if (event.target.closest('button, a')) return;
