@@ -553,23 +553,7 @@
   box-shadow: var(--shadow-lg);
 }
 
-/* 内容类型标签：封面左上角，区分产品/笔记 */
-.album-feed__content-type {
-  position: absolute;
-  top: var(--spacer-8);
-  left: var(--spacer-8);
-  z-index: 1;
-  box-shadow: var(--shadow-sm);
-}
-
-.album-feed__card-content {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacer-4);
-  padding: var(--spacer-8);
-}
-
-/* 发布者区：头像 + 名字 + 直播 + 认证 + 重点商家图标 */
+/* 发布者区：头像 + 名字 + 重点商家图标；直播状态以头像左上角胶囊覆盖形式表达 */
 .album-feed__publisher-row {
   display: flex;
   align-items: center;
@@ -598,60 +582,46 @@
   box-sizing: border-box;
 }
 
-.album-feed__publisher-name {
-  min-width: 0;
-  overflow: hidden;
-  color: var(--text-default);
-  font-size: var(--body-sm-font-size);
-  font-weight: var(--font-weight-medium);
-  line-height: var(--body-sm-line-height);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Meta 行：保留发布时间样式，位置下沉到底部操作栏左侧 */
-.album-feed__meta-row {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--spacer-4);
-  min-width: 0;
-}
-
-.album-feed__verified-icon {
-  display: inline-flex;
-  align-items: center;
-  flex-shrink: 0;
-  justify-content: center;
-  width: var(--size-16);
-  height: var(--size-16);
-  color: var(--text-brand);
-  font-size: var(--size-16);
-  line-height: var(--body-xs-line-height);
-}
-
-/* 直播中状态：红色文字+图标，表达实时动态 */
-.album-feed__live-tag {
+/* 直播中胶囊：覆盖在头像左上角，营销色背景 + 白色文字图标 + 图标呼吸动画。
+   头像 wrapper 是场景层装饰容器，未扩展 avatar 组件本身。 */
+.album-feed__live-badge {
+  position: absolute;
+  top: calc(var(--spacer-2) * -1);
+  left: calc(var(--spacer-2) * -1);
   display: inline-flex;
   align-items: center;
   gap: var(--spacer-2);
-  flex-shrink: 0;
-  padding-block: var(--spacer-0);
+  padding-block: 0;
   padding-inline: var(--spacer-4);
-  border-radius: var(--radius-4);
-  background: var(--bg-brand-surface-l1);
-  color: var(--status-danger-default);
+  border-radius: var(--radius-full);
+  background: var(--bg-brand);
+  color: var(--text-inverse);
   font-size: var(--body-xs-font-size);
   line-height: var(--body-xs-line-height);
   font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  box-shadow: var(--shadow-sm);
+  z-index: 1;
 }
 
-.album-feed__live-icon {
-  font-size: var(--size-16);
+.album-feed__live-badge-icon {
+  font-size: var(--size-12);
   line-height: var(--body-xs-line-height);
+  color: var(--text-inverse);
+  animation: album-feed-live-pulse 1.4s var(--ease-enter) infinite;
 }
 
-/* 重点商家状态：品牌色收藏图标，与认证图标同级 */
+.album-feed__live-badge-text {
+  display: inline-block;
+  transform: translateY(0.5px);
+}
+
+@keyframes album-feed-live-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(0.92); }
+}
+
+/* 重点商家状态：品牌色收藏图标，与名字同级 */
 .album-feed__starred-icon {
   display: inline-flex;
   align-items: center;
@@ -672,6 +642,20 @@
   line-height: var(--body-xs-line-height);
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.album-feed__card-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-4);
+  padding: var(--spacer-8);
+}
+
+.album-feed__publisher-name {
+  color: var(--text-default);
+  font-size: var(--body-sm-font-size);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--body-sm-line-height);
 }
 
 .album-feed__summary {
@@ -715,20 +699,24 @@
   flex: 0 0 auto;
   align-items: center;
   gap: var(--spacer-6);
+  position: relative;
 }
 
 .album-feed__action-buttons .btn {
   flex: 0 0 auto;
 }
 
-.album-feed__selection-guide {
-  position: relative;
-  padding: var(--spacer-8);
-  border-radius: var(--radius-8);
-  background: var(--bg-brand-surface-l1);
-  color: var(--text-brand);
-  font-size: var(--body-xs-font-size);
-  line-height: var(--body-xs-line-height);
+/* 第一条产品卡片选品引导气泡：消费 popover normal 变体，指向“加入选品车”按钮。
+   action-buttons 设为 position: relative 作为定位上下文；
+   placement=bottom + align=start 让箭头落在气泡顶部左侧（left:16px），刚好指向 select-action 按钮中心；
+   top 落在 action-buttons 底部下方 4px，箭头尖（向上延伸 4px）与按钮底部保留 4px 视觉间距；
+   left:0 让气泡左缘与 action-buttons 左缘对齐，气泡向右展开。 */
+.album-feed__first-card-guide {
+  top: calc(100% + var(--spacer-4));
+  left: 0;
+  right: auto;
+  z-index: 2;
+  max-width: 196px;
 }
 
 .album-feed__cart-fab {
@@ -746,7 +734,7 @@
   border-radius: var(--radius-full);
   background: var(--bg-surface);
   box-shadow: var(--shadow-lg);
-  color: var(--text-brand);
+  color: var(--text-default);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
@@ -760,27 +748,13 @@
   font-size: var(--size-24);
 }
 
-.album-feed__cart-fab-count {
-  position: absolute;
-  top: calc(var(--spacer-4) * -1);
-  right: calc(var(--spacer-4) * -1);
-  min-width: var(--size-20);
-  height: var(--size-20);
-  padding-inline: var(--spacer-4);
-  border-radius: var(--radius-full);
-  background: var(--bg-brand);
-  color: var(--text-inverse);
-  font-size: var(--body-xs-font-size);
-  line-height: var(--size-20);
-  text-align: center;
-}
-
 /* 浮动购物车引导气泡：消费 popover normal 变体，场景只承担位置定位，视觉样式由 popover 组件提供。
-   placement=top 让箭头落在气泡底部指向 cart-fab；位置与 cart-fab 上方对齐。 */
+   placement=top 让箭头落在气泡底部指向 cart-fab。
+   right 与 cart-fab 对齐（同 spacer-16），让 align=end 的箭头落在 cart-fab 右半区；
+   bottom 落在 cart-fab 顶部，箭头尖（向下延伸 4px）与 cart-fab 顶部保留 4px 视觉间距。 */
 .album-feed__cart-guide {
-  position: absolute;
-  right: calc(var(--spacer-16) + var(--size-48) + var(--spacer-8));
-  bottom: calc(var(--safe-area-bottom-content) + var(--spacer-16) + var(--size-56) + var(--spacer-20));
+  right: var(--spacer-16);
+  bottom: calc(var(--safe-area-bottom-content) + var(--spacer-16) + var(--size-56) + var(--spacer-12) + var(--size-48));
   z-index: 3;
   max-width: 196px;
 }
