@@ -74,6 +74,7 @@ wego-app/scenes/{中文业务场景}/design-decisions.json
         "binding_id": "primary-action",
         "slug": "button",
         "reason": "承载唯一保存操作",
+        "principle_refs": ["wego-efficiency-primary-action-right"],
         "variant_dimensions": {
           "emphasis": "strong",
           "size": "md",
@@ -87,6 +88,7 @@ wego-app/scenes/{中文业务场景}/design-decisions.json
       "source": "uikit-plan.json#/pagePatterns/biz-rule-config",
       "selection_reason": "页面以统一保存为主，并采用通栏内容边距",
       "page_edge_mode": "M0",
+      "principle_refs": ["wego-clarity-single-primary-task"],
       "mutable_regions": [".settings-edit__content"]
     },
     "interaction_contract": [
@@ -115,11 +117,24 @@ wego-app/scenes/{中文业务场景}/design-decisions.json
       "primary_focus": true,
       "state_feedback": true
     }
-  }
+  },
+  "principle_alignment": [
+    {
+      "rule_id": "wego-efficiency-primary-action-right",
+      "applies": true,
+      "evidence": "保存按钮在 modal__actions 固定区域，不随内容滚动"
+    }
+  ]
 }
 ```
 
 约束：
+
+<!-- rule-id: principle-refs-and-alignment -->
+
+- `principle_refs` 是可选字段，记录决策依据的顶层原则 `rule_id`（来源 `.codex/skills/shared/references/design-decisions.md` 中的 `<!-- rule-id: xxx -->` 标记）。只在决策确实依据某条原则时填写，不强制每项都填。
+- `principle_alignment` 在收尾时记录本场景涉及的关键原则和对齐证据，是自我声明而非守门判定。`applies: true` 时 `evidence` 不得为空，需写清原则在场景中的具体体现位置。
+- 守卫只检查 `principle_refs` 和 `principle_alignment` 引用的 `rule_id` 在设计决策原则文档中真实存在，不强制必须引用某条原则。
 
 <!-- rule-id: scene-version-snapshot-not-pinned -->
 

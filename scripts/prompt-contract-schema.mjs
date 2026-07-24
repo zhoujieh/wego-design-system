@@ -34,9 +34,10 @@ export function validatePromptContractShape(prompt) {
   asArray(prompt.component_bindings).forEach((binding, index) => {
     const prefix = `prompt_contract.component_bindings[${index}]`;
     if (!isPlainObject(binding)) return add(prefix, '必须是对象');
-    const allowed = new Set(['binding_id', 'slug', 'reason', 'variant_dimensions']);
+    const allowed = new Set(['binding_id', 'slug', 'reason', 'principle_refs', 'variant_dimensions']);
     for (const field of Object.keys(binding)) if (!allowed.has(field)) add(`${prefix}.${field}`, '不是当前 Schema 字段');
     for (const field of ['binding_id', 'slug', 'reason']) if (!isNonEmptyString(binding[field])) add(`${prefix}.${field}`, '必须是非空字符串');
+    if (binding.principle_refs !== undefined && !Array.isArray(binding.principle_refs)) add(`${prefix}.principle_refs`, '必须是数组');
     if (!isPlainObject(binding.variant_dimensions) || !Object.keys(binding.variant_dimensions || {}).length) add(`${prefix}.variant_dimensions`, '必须是非空对象');
     if (isNonEmptyString(binding.binding_id)) {
       if (!/^[a-z][a-z0-9-]*$/.test(binding.binding_id)) add(`${prefix}.binding_id`, '必须是稳定 kebab-case');
@@ -48,10 +49,11 @@ export function validatePromptContractShape(prompt) {
   const layout = prompt.layout_contract;
   if (!isPlainObject(layout)) add('prompt_contract.layout_contract', '必须是对象');
   else {
-    const allowed = new Set(['mode', 'source', 'selection_reason', 'page_edge_mode', 'mutable_regions']);
+    const allowed = new Set(['mode', 'source', 'selection_reason', 'page_edge_mode', 'principle_refs', 'mutable_regions']);
     for (const field of Object.keys(layout)) if (!allowed.has(field)) add(`prompt_contract.layout_contract.${field}`, '不是当前 Schema 字段');
     if (!['pattern', 'composed'].includes(layout.mode)) add('prompt_contract.layout_contract.mode', '必须是 pattern 或 composed');
     for (const field of ['source', 'selection_reason', 'page_edge_mode']) if (!isNonEmptyString(layout[field])) add(`prompt_contract.layout_contract.${field}`, '必须是非空字符串');
+    if (layout.principle_refs !== undefined && !Array.isArray(layout.principle_refs)) add('prompt_contract.layout_contract.principle_refs', '必须是数组');
     if (isNonEmptyString(layout.page_edge_mode) && !['M0', 'M8', 'M32'].includes(layout.page_edge_mode)) add('prompt_contract.layout_contract.page_edge_mode', '只能使用 M0、M8 或 M32');
     if (!Array.isArray(layout.mutable_regions) || !layout.mutable_regions.length) add('prompt_contract.layout_contract.mutable_regions', '必须是非空数组');
     else {

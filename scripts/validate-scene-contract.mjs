@@ -1090,6 +1090,30 @@ if (decision) {
   }
 }
 
+// 原则 rule_id 引用完整性检查：扫描 design-decisions.md 提取所有 rule_id，
+// 校验场景中 principle_refs 和 principle_alignment 引用的 rule_id 真实存在，
+// 且 principle_alignment.applies=true 时 evidence 非空。
+if (fs.existsSync(sharedDesignDecisionsFile)) {
+  const principlesContent = fs.readFileSync(sharedDesignDecisionsFile, 'utf8');
+  const validRuleIds = new Set([...principlesContent.matchAll(/<!--\s*rule-id:\s*([a-z0-9-]+)/g)].map(match => match[1]));
+  const prompt = decision.prompt_contract || {};
+  const referencedRefs = [];
+  for (const binding of prompt.component_bindings || []) {
+    for (const ref of binding.principle_refs || []) referencedRefs.push({ ref, source: `component_bindings.${binding.binding_id}.principle_refs` });
+  }
+  if (Array.isArray(prompt.layout_contract?.principle_refs)) {
+    for (const ref of prompt.layout_contract.principle_refs) referencedRefs.push({ ref, source: 'layout_contract.principle_refs' });
+  }
+  for (const item of referencedRefs) {
+    if (!validRuleIds.has(item.ref)) add('scene.principle_ref_unknown', `${item.source} 引用了未知原则 rule_id：${item.ref}`, decisionsFile);
+  }
+  for (const entry of decision.principle_alignment || []) {
+    if (!entry.rule_id) add('scene.principle_alignment_missing_id', 'principle_alignment 项缺少 rule_id', decisionsFile);
+    else if (!validRuleIds.has(entry.rule_id)) add('scene.principle_alignment_unknown', `principle_alignment 引用了未知原则 rule_id：${entry.rule_id}`, decisionsFile);
+    if (entry.applies === true && !String(entry.evidence || '').trim()) add('scene.principle_alignment_empty_evidence', `principle_alignment ${entry.rule_id} applies=true 但 evidence 为空`, decisionsFile);
+  }
+}
+
 const report = { ok: errors.length === 0, errors, warnings, metrics: { scene: path.basename(sceneRoot) } };
 if (jsonOutput) console.log(JSON.stringify(report, null, 2));
 else {
