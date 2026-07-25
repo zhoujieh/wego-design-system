@@ -4,3 +4,5 @@
 .playwright-cli/
 .trae/documents/
 .vercel
+node_modules/
+package-lock.json

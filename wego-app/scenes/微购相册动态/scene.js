@@ -2186,6 +2186,48 @@
     </section>
   `,
     presentation: { type: 'host-tab', transition: 'none', dismissAction: 'tab-switch', overlayLevel: 'inline', coversTabBar: false },
+    skeletonMode: 'explicit',
+    // SKELETON-TEMPLATE-START
+  skeletonTemplate: `
+<div class="wg-skeleton wg-skeleton--circle" style="position:absolute;top:23.197%;left:4.278%;width:10.695%;height:5.658%;border-radius:999px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:29.420%;left:2.139%;width:14.973%;height:1.980%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--circle" style="position:absolute;top:23.197%;left:22.460%;width:10.695%;height:5.658%;border-radius:999px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:29.420%;left:20.321%;width:14.973%;height:1.980%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--circle" style="position:absolute;top:23.197%;left:40.642%;width:10.695%;height:5.658%;border-radius:999px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:29.420%;left:38.503%;width:14.973%;height:1.980%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--circle" style="position:absolute;top:23.197%;left:58.021%;width:10.695%;height:5.658%;border-radius:999px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:29.420%;left:56.684%;width:13.369%;height:1.980%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--circle" style="position:absolute;top:23.197%;left:75.401%;width:10.695%;height:5.658%;border-radius:999px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:29.420%;left:73.262%;width:14.973%;height:1.980%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--circle" style="position:absolute;top:23.197%;left:93.583%;width:10.695%;height:5.658%;border-radius:999px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:29.420%;left:91.444%;width:14.973%;height:1.980%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:34.229%;left:5.615%;width:6.417%;height:1.697%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:34.229%;left:21.123%;width:6.417%;height:1.697%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:34.229%;left:36.631%;width:6.417%;height:1.697%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:34.229%;left:52.139%;width:6.417%;height:1.697%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:34.229%;left:67.647%;width:6.417%;height:1.697%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:34.229%;left:83.155%;width:6.417%;height:1.697%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:34.229%;left:87.968%;width:6.417%;height:1.697%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:38.755%;left:2.139%;width:46.791%;height:32.178%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:40.170%;left:9.626%;width:5.348%;height:1.980%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:67.256%;left:38.006%;width:8.786%;height:2.546%;border-radius:4px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--circle" style="position:absolute;top:72.065%;left:4.278%;width:6.417%;height:3.395%;border-radius:999px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:72.489%;left:11.765%;width:19.251%;height:2.546%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:76.025%;left:4.278%;width:42.513%;height:6.223%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:84.653%;left:4.278%;width:8.824%;height:1.980%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:83.380%;left:25.401%;width:21.390%;height:4.526%;border-radius:6px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:78.430%;left:-2.139%;width:45.455%;height:3.112%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:90.170%;left:2.139%;width:46.791%;height:24.752%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:38.755%;left:51.070%;width:46.791%;height:24.752%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:59.830%;left:86.936%;width:8.786%;height:2.546%;border-radius:4px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--circle" style="position:absolute;top:64.639%;left:53.209%;width:6.417%;height:3.395%;border-radius:999px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:65.064%;left:60.695%;width:16.043%;height:2.546%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:68.600%;left:53.209%;width:42.513%;height:6.223%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:77.228%;left:53.209%;width:8.824%;height:1.980%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:75.955%;left:74.332%;width:21.390%;height:4.526%;border-radius:6px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:82.744%;left:51.070%;width:46.791%;height:31.590%;box-sizing:border-box" aria-hidden="true"></div>
+  `,
+  // SKELETON-TEMPLATE-END
     init: function initAlbumProductFeed(ctx) {
       var root = ctx.root;
       var scroll = root.querySelector('.album-feed__scroll');

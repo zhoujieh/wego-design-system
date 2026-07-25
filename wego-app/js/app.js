@@ -477,42 +477,18 @@
   }
 
   // ── 场景骨架屏 ──────────────────────────────────────────────
-  // scene.skeleton: true（自动从 template 提取）/ string（显式HTML）/ { regions: {...} } / false（关闭）
-  // 自动提取扫描 template 中初始为空的 [data-region]，按 region 名生成骨架块
+  // 骨架屏分两种模式:
+  // 1. explicit(显式 1:1 模板):scene.skeletonMode='explicit' + scene.skeletonTemplate
+  //    模板由 scripts/generate-scene-skeleton.mjs 通过 Playwright 采样真实渲染后的 DOM 生成,
+  //    扁平 div 色块(position:fixed + 视口百分比定位),复用 .wg-skeleton 基类的 shimmer 动画。
+  // 2. auto(最小通用兜底):scene.skeleton=true 或未提供 skeletonMode
+  //    每个 [data-region] 注入 3 行文本骨架,不按 region 名猜结构。
+  // 3. 关闭:scene.skeleton=false 或 scene.skeletonMode='none'
   function skeletonBlockText(width) {
     return '<span class="wg-skeleton wg-skeleton--text" style="width:' + width + '"></span>';
   }
-  function skeletonBlockRect(w, h, radius) {
-    var r = radius ? ';border-radius:' + radius : '';
-    return '<span class="wg-skeleton wg-skeleton--rect sk__block" style="width:' + w + ';height:' + h + r + '"></span>';
-  }
-  function skeletonCard() {
-    return '<div class="sk__card">'
-      + '<span class="wg-skeleton wg-skeleton--rect" style="width:64px;height:64px;flex-shrink:0"></span>'
-      + '<div class="sk__card-body">'
-      + skeletonBlockText('60%') + skeletonBlockText('90%') + skeletonBlockText('40%')
-      + '</div></div>';
-  }
-  function skeletonForRegion(name) {
-    var lower = String(name || '').toLowerCase();
-    if (/(grid|list|feed)/.test(lower)) {
-      return '<div class="sk sk--tight">' + skeletonCard() + skeletonCard() + skeletonCard() + '</div>';
-    }
-    if (/(content|detail|main)/.test(lower)) {
-      return '<div class="sk">'
-        + skeletonBlockRect('100%', '240px', '0')
-        + skeletonBlockRect('30%', '24px')
-        + skeletonBlockText('90%') + skeletonBlockText('75%')
-        + skeletonBlockRect('100%', '80px')
-        + '</div>';
-    }
-    if (/(tag|filter)/.test(lower)) {
-      return '<div class="sk sk--row sk--tight">'
-        + '<span class="wg-skeleton sk__pill" style="width:48px"></span>'
-        + '<span class="wg-skeleton sk__pill" style="width:60px"></span>'
-        + '<span class="wg-skeleton sk__pill" style="width:56px"></span>'
-        + '</div>';
-    }
+  // 最小通用兜底骨架:3 行文本,不按 region 名猜结构
+  function skeletonMinimal() {
     return '<div class="sk sk--tight">'
       + skeletonBlockText('100%') + skeletonBlockText('80%') + skeletonBlockText('60%')
       + '</div>';
@@ -523,12 +499,28 @@
     var regions = {};
     Array.prototype.forEach.call(temp.querySelectorAll('[data-region]'), function (el) {
       if (el.children.length > 0 || el.textContent.trim()) return;
-      regions[el.getAttribute('data-region')] = skeletonForRegion(el.getAttribute('data-region'));
+      regions[el.getAttribute('data-region')] = skeletonMinimal();
     });
     return regions;
   }
   function injectSkeleton(panel, scene) {
-    if (!scene || scene.skeleton === false || scene.skeleton == null) return [];
+    if (!scene) return [];
+    // 显式关闭
+    if (scene.skeleton === false || scene.skeletonMode === 'none') return [];
+
+    // explicit 模式:用采样好的扁平色块模板覆盖整个 panel
+    // 模板是 position:fixed 的色块堆叠,不需要 region 容器
+    if (scene.skeletonMode === 'explicit' && scene.skeletonTemplate) {
+      var overlay = document.createElement('div');
+      overlay.className = 'sk-overlay';
+      overlay.setAttribute('data-skeleton', 'active');
+      overlay.setAttribute('aria-hidden', 'true');
+      overlay.innerHTML = scene.skeletonTemplate;
+      panel.appendChild(overlay);
+      return [overlay];
+    }
+
+    // auto 模式:每个空 [data-region] 注入最小通用骨架
     var regions = null;
     if (scene.skeleton === true) {
       regions = extractSkeletonRegions(scene.template || '');
@@ -556,6 +548,20 @@
   }
   function fadeRegionContent(panel) {
     Array.prototype.forEach.call(panel.querySelectorAll('[data-skeleton="active"]'), function (region) {
+      // explicit 模式的 overlay:检查任意 region 是否已被填充真实内容
+      // init 同步 innerHTML 填充 region 时,overlay 应被移除让真实内容显示
+      if (region.classList.contains('sk-overlay')) {
+        var anyRegionFilled = false;
+        Array.prototype.forEach.call(panel.querySelectorAll('[data-region]'), function (r) {
+          if (r.children.length > 0 && !r.querySelector('.wg-skeleton')) {
+            anyRegionFilled = true;
+          }
+        });
+        if (anyRegionFilled) {
+          region.remove();
+        }
+        return;
+      }
       // 仍是骨架说明 init 异步未填充，跳过；由后续 ctx.setRegion 自行处理淡入
       if (region.querySelector('.wg-skeleton')) return;
       region.removeAttribute('data-skeleton');
@@ -625,6 +631,9 @@
       // 同步调用：替代直接 innerHTML，由框架接管骨架清除与过渡
       // 异步调用（Promise/setTimeout 后）：init 返回后骨架仍在，本方法清除骨架并淡入新内容
       setRegion: function (name, html) {
+        // explicit 模式下,首次 setRegion 移除 overlay(骨架色块层)
+        var overlay = host.querySelector('.sk-overlay[data-skeleton="active"]');
+        if (overlay) overlay.remove();
         var el = host.querySelector('[data-region="' + name + '"]');
         if (!el) return;
         el.removeAttribute('data-skeleton');
