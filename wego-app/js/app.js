@@ -476,6 +476,128 @@
     target.innerHTML = String(template || '');
   }
 
+  // ── 场景骨架屏 ──────────────────────────────────────────────
+  // scene.skeleton: true（自动从 template 提取）/ string（显式HTML）/ { regions: {...} } / false（关闭）
+  // 自动提取扫描 template 中初始为空的 [data-region]，按 region 名生成骨架块
+  function skeletonBlockText(width) {
+    return '<span class="wg-skeleton wg-skeleton--text" style="width:' + width + '"></span>';
+  }
+  function skeletonBlockRect(w, h, radius) {
+    var r = radius ? ';border-radius:' + radius : '';
+    return '<span class="wg-skeleton wg-skeleton--rect sk__block" style="width:' + w + ';height:' + h + r + '"></span>';
+  }
+  function skeletonCard() {
+    return '<div class="sk__card">'
+      + '<span class="wg-skeleton wg-skeleton--rect" style="width:64px;height:64px;flex-shrink:0"></span>'
+      + '<div class="sk__card-body">'
+      + skeletonBlockText('60%') + skeletonBlockText('90%') + skeletonBlockText('40%')
+      + '</div></div>';
+  }
+  function skeletonForRegion(name) {
+    var lower = String(name || '').toLowerCase();
+    if (/(grid|list|feed)/.test(lower)) {
+      return '<div class="sk sk--tight">' + skeletonCard() + skeletonCard() + skeletonCard() + '</div>';
+    }
+    if (/(content|detail|main)/.test(lower)) {
+      return '<div class="sk">'
+        + skeletonBlockRect('100%', '240px', '0')
+        + skeletonBlockRect('30%', '24px')
+        + skeletonBlockText('90%') + skeletonBlockText('75%')
+        + skeletonBlockRect('100%', '80px')
+        + '</div>';
+    }
+    if (/(tag|filter)/.test(lower)) {
+      return '<div class="sk sk--row sk--tight">'
+        + '<span class="wg-skeleton sk__pill" style="width:48px"></span>'
+        + '<span class="wg-skeleton sk__pill" style="width:60px"></span>'
+        + '<span class="wg-skeleton sk__pill" style="width:56px"></span>'
+        + '</div>';
+    }
+    return '<div class="sk sk--tight">'
+      + skeletonBlockText('100%') + skeletonBlockText('80%') + skeletonBlockText('60%')
+      + '</div>';
+  }
+  function extractSkeletonRegions(template) {
+    var temp = document.createElement('div');
+    temp.innerHTML = String(template || '');
+    var regions = {};
+    Array.prototype.forEach.call(temp.querySelectorAll('[data-region]'), function (el) {
+      if (el.children.length > 0 || el.textContent.trim()) return;
+      regions[el.getAttribute('data-region')] = skeletonForRegion(el.getAttribute('data-region'));
+    });
+    return regions;
+  }
+  function injectSkeleton(panel, scene) {
+    if (!scene || scene.skeleton === false || scene.skeleton == null) return [];
+    var regions = null;
+    if (scene.skeleton === true) {
+      regions = extractSkeletonRegions(scene.template || '');
+    } else if (typeof scene.skeleton === 'string') {
+      regions = {};
+      Array.prototype.forEach.call(panel.querySelectorAll('[data-region]'), function (el) {
+        if (el.children.length === 0 && !el.textContent.trim()) {
+          regions[el.getAttribute('data-region')] = scene.skeleton;
+        }
+      });
+    } else if (scene.skeleton && typeof scene.skeleton === 'object') {
+      regions = scene.skeleton.regions || scene.skeleton;
+    }
+    if (!regions) return [];
+    var injected = [];
+    Object.keys(regions).forEach(function (name) {
+      var el = panel.querySelector('[data-region="' + name + '"]');
+      if (el && el.children.length === 0 && !el.textContent.trim()) {
+        el.innerHTML = regions[name];
+        el.setAttribute('data-skeleton', 'active');
+        injected.push(el);
+      }
+    });
+    return injected;
+  }
+  function fadeRegionContent(panel) {
+    Array.prototype.forEach.call(panel.querySelectorAll('[data-skeleton="active"]'), function (region) {
+      // 仍是骨架说明 init 异步未填充，跳过；由后续 ctx.setRegion 自行处理淡入
+      if (region.querySelector('.wg-skeleton')) return;
+      region.removeAttribute('data-skeleton');
+      Array.prototype.forEach.call(region.children, function (child) {
+        child.classList.add('scene-fade-in');
+      });
+    });
+  }
+  // 骨架最小展示时长：避免 init 极快时骨架一闪而过更难看
+  // 仅在注入了骨架时生效；可通过 scene.skeleton.minDisplay 覆盖，设 0 禁用
+  var SKELETON_MIN_DISPLAY = 200;
+  // 带骨架的场景 init：注入骨架 → rAF 让骨架 paint → 延迟最小展示时长 → init → rAF 触发内容淡入
+  // 浏览器在 JS 任务结束后才 paint，init 填充与加 class 同步完成，
+  // paint 时子元素已是 .scene-fade-in 起始状态（opacity:0），无闪烁
+  // 若 init 异步未填充 region，fadeRegionContent 会跳过，由 ctx.setRegion 接管淡入
+  function mountSceneInit(panel, scene, ctx, afterInit) {
+    var injected = injectSkeleton(panel, scene);
+    var minDisplay = injected.length > 0 ? SKELETON_MIN_DISPLAY : 0;
+    if (scene.skeleton && typeof scene.skeleton === 'object' && scene.skeleton.minDisplay != null) {
+      minDisplay = scene.skeleton.minDisplay;
+    }
+    var runInit = function () {
+      if (typeof scene.init === 'function') {
+        try { scene.init(ctx); } catch (e) { console.warn('[wego-app] scene.init error:', e); }
+      }
+      if (typeof afterInit === 'function') {
+        try { afterInit(); } catch (e) { console.warn('[wego-app] afterInit error:', e); }
+      }
+      requestAnimationFrame(function () {
+        fadeRegionContent(panel);
+      });
+    };
+    if (minDisplay > 0) {
+      // 先 rAF 让骨架 paint 一帧，再延迟到最小展示时长后执行 init
+      requestAnimationFrame(function () {
+        setTimeout(runInit, minDisplay);
+      });
+    } else {
+      requestAnimationFrame(runInit);
+    }
+  }
+
   function sceneContext(scene, host) {
     var routeId = scene.routeId;
     if (!appState.sceneState[routeId]) appState.sceneState[routeId] = Object.create(null);
@@ -499,6 +621,18 @@
       toast: toast,
       dialog: dialog,
       updateEntrySummary: updateEntrySummary,
+      // 填充指定 region：清除骨架 → 写入内容 → 自动加 scene-fade-in 触发淡入
+      // 同步调用：替代直接 innerHTML，由框架接管骨架清除与过渡
+      // 异步调用（Promise/setTimeout 后）：init 返回后骨架仍在，本方法清除骨架并淡入新内容
+      setRegion: function (name, html) {
+        var el = host.querySelector('[data-region="' + name + '"]');
+        if (!el) return;
+        el.removeAttribute('data-skeleton');
+        el.innerHTML = html;
+        Array.prototype.forEach.call(el.children, function (child) {
+          child.classList.add('scene-fade-in');
+        });
+      },
       // 注册场景销毁时执行的清理回调（如 removeEventListener、observer.disconnect()）
       onDestroy: function (fn) {
         if (typeof fn === 'function') destroyCallbacks.push(fn);
@@ -543,9 +677,10 @@
       renderTemplate(panel, scene.template);
       panel.classList.remove('host-shell-page__panel--blank');
       panel.dataset.hostSceneRouteId = config.routeId;
-      if (typeof scene.init === 'function') scene.init(sceneContext(scene, panel));
-      WegoApp.layoutAllBottomActionBars(panel);
-      bindRouteEntries(panel);
+      mountSceneInit(panel, scene, sceneContext(scene, panel), function () {
+        WegoApp.layoutAllBottomActionBars(panel);
+        bindRouteEntries(panel);
+      });
     }).catch(function () {
       toast('场景脚本加载失败');
     });
@@ -579,8 +714,9 @@
 
     sceneStack.push({ routeId: scene.routeId, host: panel, scene: scene });
     appState.currentRouteId = scene.routeId;
-    if (typeof scene.init === 'function') scene.init(sceneContext(scene, panel));
-    WegoApp.layoutAllBottomActionBars(panel);
+    mountSceneInit(panel, scene, sceneContext(scene, panel), function () {
+      WegoApp.layoutAllBottomActionBars(panel);
+    });
   }
 
   // overlay 栈：bottom-to-top 顺序，每个 entry = { type, componentRoot, historyPushed, closing }

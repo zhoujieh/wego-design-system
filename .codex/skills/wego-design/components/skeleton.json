@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 4,
+  "slug": "skeleton",
+  "name": "骨架屏",
+  "category": "feedback",
+  "status": "stable",
+  "sourceKind": "inferred",
+  "confidence": "high",
+  "description": "页面级骨架占位组件，按页面真实结构组合文本行、矩形、圆形原子块，在内容渲染到位前提供与最终结构一致的灰块占位；默认 shimmer 动画与 image 组件节奏一致（1.2s ease-in-out），支持静态模式用于截图或减少动效场景。",
+  "semanticTypeCandidates": [
+    "skeleton",
+    "placeholder",
+    "loading-block"
+  ],
+  "variantDimensions": {
+    "shape": [
+      "text",
+      "rect",
+      "circle"
+    ],
+    "size": [
+      "sm",
+      "md",
+      "lg",
+      "custom"
+    ],
+    "animation": [
+      "shimmer",
+      "static"
+    ]
+  },
+  "representativeVariants": [
+    {
+      "shape": "text",
+      "size": "custom",
+      "animation": "shimmer"
+    },
+    {
+      "shape": "rect",
+      "size": "md",
+      "animation": "shimmer"
+    },
+    {
+      "shape": "circle",
+      "size": "md",
+      "animation": "shimmer"
+    },
+    {
+      "shape": "rect",
+      "size": "lg",
+      "animation": "static"
+    }
+  ],
+  "anatomy": [
+    {
+      "name": "root",
+      "selector": ".wg-skeleton",
+      "role": "骨架占位根节点"
+    }
+  ],
+  "structurePatterns": [
+    "形状、尺寸、动画全部由修饰类叠加在同一根节点上，不额外发明宿主层级。",
+    "文本行使用 .wg-skeleton--text，默认 14px 高、4px 圆角，宽度由宿主 width 或外层布局决定。",
+    "矩形区域使用 .wg-skeleton--rect，圆角 8px，宽高由宿主或 size 修饰类决定。",
+    "圆形头像使用 .wg-skeleton--circle，配合 size 修饰类或宿主尺寸。",
+    "多行文本骨架由多个 .wg-skeleton--text 块垂直堆叠组成，最后一行可通过更窄 width 模拟自然段落收尾，禁止为此发明容器组件。",
+    "shimmer 动画节奏与 image 组件 .wg-image--loading 完全一致（1.2s ease-in-out infinite），保证整页骨架节奏统一。"
+  ],
+  "behavior": {
+    "shimmer": "默认动画。通过 ::after 伪元素承载 transparent→高光→transparent 渐变，background-size 200% 配合 background-position 位移动画形成扫光效果。",
+    "static": "追加 .wg-skeleton--static 关闭 ::after 动画与高光，仅保留底色，用于截图、减少动效偏好或静态文档场景。",
+    "composition": "骨架本身是原子块，无内部子元素；页面级骨架由消费方按真实结构组合多个 .wg-skeleton 块，不由组件自身承载布局容器。"
+  },
+  "accessibility": {
+    "contentRule": "骨架块为纯视觉占位，不承载语义内容；可访问性由消费方在内容到位后通过 aria-live 或焦点管理告知，骨架本身保持 aria-hidden。",
+    "motionRule": "遵循 prefers-reduced-motion 时消费方应追加 .wg-skeleton--static，组件自身不强制监听，避免与全局减动效策略冲突。"
+  },
+  "usageHints": [
+    "文本段落骨架：用多个 .wg-skeleton--text 堆叠，行间距由外层 gap 控制，末行 width 收窄模拟自然换行。",
+    "图片/卡片区域骨架：用 .wg-skeleton--rect 配合容器尺寸，或直接用 .wg-skeleton--lg 等预设尺寸。",
+    "头像骨架：用 .wg-skeleton--circle 配合 .wg-skeleton--sm 或 .wg-skeleton--md。",
+    "页面级骨架结构应与真实内容结构一一对应：navbar、卡片、列表项、底部操作栏各自映射对应骨架块，避免随意堆砌。",
+    "image 组件已有自带 .wg-image--loading 骨架，页面级骨架不得再包裹 image，应让 image 自行处理其加载态。",
+    "需要最小展示时长控制时由消费方（场景框架）接管，组件自身不内置时长逻辑。"
+  ],
+  "doNotInvent": [
+    "不要把 skeleton 扩成进度条、spinner 或加载百分比组件。",
+    "不要在骨架块上承载真实交互、文字或图标。",
+    "不要给骨架加边框、阴影或非中性色，避免与最终内容视觉冲突。",
+    "不要新发明动画曲线或时长，必须复用 image 组件 shimmer 节奏。",
+    "不要把骨架当作空状态或错误占位，那是 empty/error 组件的职责。"
+  ],
+  "domAnatomy": {
+    "root": ".wg-skeleton",
+    "modifiers": [
+      ".wg-skeleton--text",
+      ".wg-skeleton--rect",
+      ".wg-skeleton--circle",
+      ".wg-skeleton--sm",
+      ".wg-skeleton--md",
+      ".wg-skeleton--lg",
+      ".wg-skeleton--static"
+    ],
+    "alternatives": []
+  },
+  "provenance": {
+    "preview": "preview/component-skeleton.html",
+    "cssSource": "preview/component-skeleton.html",
+    "embedded": false,
+    "hostComponent": null,
+    "externalSources": []
+  },
+  "unknowns": [],
+  "ruleRefs": [
+    "colors_and_type.css#skeleton",
+    "components.css#skeleton",
+    "preview/component-skeleton.html"
+  ],
+  "runtimeTokens": [
+    "--bg-skeleton",
+    "--palette-neutral-100",
+    "--radius-4",
+    "--radius-6",
+    "--radius-8",
+    "--radius-full",
+    "--size-104",
+    "--size-32",
+    "--size-64"
+  ],
+  "previewOnlyTokens": [
+    "--bg-page",
+    "--bg-surface",
+    "--body-md-font-size",
+    "--body-xs-font-size",
+    "--border-neutral-l2",
+    "--font-weight-medium",
+    "--palette-neutral-700",
+    "--radius-12",
+    "--spacer-12",
+    "--spacer-16",
+    "--spacer-8",
+    "--text-secondary"
+  ],
+  "localTokens": [
+    "--wg-skeleton-bg",
+    "--wg-skeleton-highlight"
+  ]
+}

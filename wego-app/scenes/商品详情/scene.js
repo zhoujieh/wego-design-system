@@ -754,6 +754,7 @@
     </section>
   `,
     presentation: { type: 'push', transition: 'slide-left-enter, slide-right-exit', dismissAction: 'back-button', overlayLevel: 'inline', coversTabBar: true },
+    skeleton: true,
     init: function initProductDetail(ctx) {
       var payload = ctx.appState.productDetailPayload || fallbackPayload();
       var product = payload.product;
@@ -765,10 +766,10 @@
       var specs = listItems(productSpecs(product));
       var attributes = listItems(productAttributes(product));
       var details = product.detail_sections.map(function(section) { return '<p>' + escapeHtml(section) + '</p>'; }).join('');
-      var content = ctx.root.querySelector('[data-region="product-content"]');
-      content.innerHTML = ''
-        + '<div class="product-detail__hero"><div class="wg-image product-detail__image" data-dd-id="product-detail-image" data-component-slug="image" data-component-binding="product-detail-image"><img class="wg-image__src is-loaded" src="' + productImage + '" alt="' + escapeHtml(productName) + '"></div></div>'
-        + '<div class="product-detail__body">'
+
+      // 渲染分帧：首屏 hero 先填充并淡入，body 下一帧追加，减少单帧阻塞
+      var heroHtml = '<div class="product-detail__hero"><div class="wg-image product-detail__image" data-dd-id="product-detail-image" data-component-slug="image" data-component-binding="product-detail-image"><img class="wg-image__src is-loaded" src="' + productImage + '" alt="' + escapeHtml(productName) + '"></div></div>';
+      var bodyHtml = '<div class="product-detail__body">'
         +   '<section class="card card--surface product-detail__card" data-dd-id="product-detail-card-main" data-component-slug="card" data-component-binding="product-detail-card"><div class="card__content product-detail__card-content"><div class="card__header product-detail__price">¥' + escapeHtml(product.price) + '</div><div class="card__body"><h1 class="product-detail__name">' + escapeHtml(productName) + '</h1><div class="product-detail__points">' + sellingPoints + '</div></div></div></section>'
         +   cardTemplate('spec', '规格选择', '<ul class="product-detail__list">' + specs + '</ul>')
         +   cardTemplate('attributes', '商品属性', '<ul class="product-detail__list">' + attributes + '</ul>')
@@ -776,6 +777,10 @@
         +   '<section class="card card--surface product-detail__card" data-dd-id="product-detail-card-seller" data-component-slug="card" data-component-binding="product-detail-card"><div class="card__content product-detail__card-content"><h2 class="card__header product-detail__section-title">卖家信息</h2><div class="card__body product-detail__seller"><div class="avatar avatar--40 avatar--image" data-dd-id="product-detail-avatar" data-component-slug="avatar" data-component-binding="product-detail-avatar"><img src="' + publisher.publisher_avatar + '" alt="' + escapeHtml(publisher.publisher_name) + '"></div><div class="product-detail__seller-copy"><div class="product-detail__seller-name">' + escapeHtml(publisher.publisher_name) + '</div><div class="product-detail__seller-type">' + (publisher.publisher_type === 'shop' ? '店铺发布者' : '个人发布者') + '</div><div class="product-detail__seller-status">' + sellerStatuses + '</div></div></div></div></section>'
         + '</div>';
 
+      // 第一帧：填充首屏 hero，骨架被替换并淡入
+      ctx.setRegion('product-content', heroHtml);
+
+      // 按钮都在 template 里（navbar/bottom-action-bar），不受 region 填充影响，立即绑定
       ctx.root.querySelector('[data-dom-id="product-detail-back"]').addEventListener('click', function() {
         ctx.back();
         if (payload.source_route) window.history.replaceState('', document.title, '#/' + payload.source_route);
@@ -789,7 +794,15 @@
         openCartPanel(ctx, 'goods');
       });
       ctx.root.querySelector('[data-dom-id="product-buy"]').addEventListener('click', function() { ctx.toast('购买能力本期暂未开放'); });
-      ctx.state['product-detail-ready'] = true;
+
+      // 下一帧：追加 body（滚动后才可见），分帧减少首帧阻塞并触发淡入
+      requestAnimationFrame(function() {
+        var content = ctx.root.querySelector('[data-region="product-content"]');
+        content.insertAdjacentHTML('beforeend', bodyHtml);
+        var body = content.querySelector('.product-detail__body');
+        if (body) body.classList.add('scene-fade-in');
+        ctx.state['product-detail-ready'] = true;
+      });
     }
   });
 })();
