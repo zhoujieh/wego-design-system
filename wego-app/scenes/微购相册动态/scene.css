@@ -181,13 +181,13 @@
   transform-origin: bottom right;
   transition: opacity var(--duration-fast) var(--ease-enter),
               transform var(--duration-normal) var(--ease-emphasized);
-  will-change: transform, opacity;
 }
 
 .album-feed__publish-dock[data-state="open"] .album-feed__publish-dock-surface {
   opacity: 1;
   pointer-events: auto;
   transform: translate3d(0, 0, 0) scale(1);
+  will-change: transform, opacity;
 }
 
 .album-feed__publish-list {
@@ -217,12 +217,12 @@
   transition: opacity var(--duration-normal) var(--ease-enter),
               transform var(--duration-normal) var(--ease-emphasized),
               background var(--duration-fast) var(--ease-enter);
-  will-change: transform, opacity;
 }
 
 .album-feed__publish-dock[data-state="open"] .album-feed__publish-choice {
   opacity: 1;
   transform: translate3d(0, 0, 0) scale(1);
+  will-change: transform, opacity;
 }
 
 .album-feed__publish-choice:active,
@@ -283,7 +283,6 @@
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   transition: transform var(--duration-normal) var(--ease-emphasized), box-shadow var(--duration-normal) var(--ease-enter);
-  will-change: transform;
 }
 
 .album-feed__publish-fab:active,
@@ -609,6 +608,11 @@
   line-height: var(--body-xs-line-height);
   color: var(--text-inverse);
   animation: album-feed-live-pulse 1.4s var(--ease-enter) infinite;
+}
+
+/* 直播图标离屏暂停动画，减少不可见区域的合成层压力 */
+.album-feed__live-badge-icon.is-offscreen {
+  animation-play-state: paused;
 }
 
 .album-feed__live-badge-text {

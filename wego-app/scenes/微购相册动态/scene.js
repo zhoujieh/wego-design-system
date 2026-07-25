@@ -1687,6 +1687,10 @@
 
   window.WEGO_DYNAMIC_CATALOG = { publishers: publishers, products: products, dynamics: dynamics, currentUser: currentUser, source: 'WEGO_PROTOTYPE_DB' };
 
+  /* dynamic_id → item 哈希，供事件委托 O(1) 查找，避免 dynamics.find O(N) */
+  var dynamicMap = Object.create(null);
+  dynamics.forEach(function(dynamic) { dynamicMap[dynamic.dynamic_id] = dynamic; });
+
   function escapeHtml(value) {
     var map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
     return String(value == null ? '' : value).split('').map(function(char) { return map[char] || char; }).join('');
@@ -1958,7 +1962,7 @@
       +   '<div class="card__content">'
       +     '<div class="card__header album-feed__cover-host">'
       +       '<div class="wg-image album-feed__cover" data-dd-id="feed-cover-' + item.dynamic_id + '" data-component-slug="image" data-component-binding="feed-cover-image">'
-      +         '<img class="wg-image__src is-loaded" src="' + cover.poster_or_src + '" alt="">'
+      +         '<img class="wg-image__src is-loaded" src="' + cover.poster_or_src + '" alt="" loading="lazy" decoding="async">'
       +       '</div>'
       +       '<button type="button" class="btn btn--weak btn--sm btn--icon-only album-feed__share-action" aria-label="分享当前产品" data-dd-id="feed-share-' + item.dynamic_id + '" data-component-slug="button" data-component-binding="feed-share-action" data-dom-id="share-' + item.dynamic_id + '"><i class="btn__icon icon-fenxiang" aria-hidden="true"></i></button>'
       +       videoMark
@@ -2391,6 +2395,7 @@
         if (selfName) selfName.textContent = merchantName;
       }
 
+      /* 逐项绑定人维度头像事件（守卫要求 querySelector 绑定 listener） */
       function bindPeopleEvents() {
         publishers.forEach(function(publisher) {
           var peopleItem = root.querySelector('[data-dom-id="people-' + publisher.publisher_id + '"]');
@@ -2452,6 +2457,28 @@
         }, 3200);
       }
 
+      /* 局部 patch 单张卡片的选品状态，避免整片 innerHTML 重写 */
+      function patchCardSelection(item) {
+        var card = grid.querySelector('[data-dynamic-id="' + item.dynamic_id + '"]');
+        if (!card) return;
+        var cart = ensureCartState(ctx);
+        var added = cart.selectionIds.indexOf(item.dynamic_id) !== -1;
+        var selectBtn = card.querySelector('[data-dom-id="select-cart-' + item.dynamic_id + '"]');
+        if (selectBtn) {
+          selectBtn.setAttribute('aria-pressed', added ? 'true' : 'false');
+          var icon = selectBtn.querySelector('.btn__icon');
+          if (icon) icon.className = 'btn__icon ' + (added ? 'icon-gou16' : 'icon-gouwuche');
+        }
+      }
+      /* 购物车关闭后同步所有卡片选品状态 */
+      function patchAllCardSelections() {
+        grid.querySelectorAll('[data-dynamic-id]').forEach(function(card) {
+          var id = card.dataset.dynamicId;
+          var item = dynamicMap[id];
+          if (item) patchCardSelection(item);
+        });
+      }
+
       function toggleSelectionItem(item) {
         var cart = ensureCartState(ctx);
         var index = cart.selectionIds.indexOf(item.dynamic_id);
@@ -2468,7 +2495,14 @@
         }
         ctx.state['first-card-guide-dismissed'] = true;
         syncCartFloatingEntry();
-        render();
+        /* 局部 patch，不重渲染整片 grid */
+        patchCardSelection(item);
+        /* 关闭卡片内 first-card-guide（如有），不重渲染 */
+        var guide = grid.querySelector('[data-dom-id="first-card-guide"]');
+        if (guide) {
+          guide.setAttribute('data-state', 'closed');
+          window.setTimeout(function() { if (guide.parentNode) guide.remove(); }, 200);
+        }
       }
 
       function openDynamic(item) {
@@ -2477,9 +2511,11 @@
         ctx.navigate('dynamic-detail');
       }
 
+      /* 逐项绑定卡片事件（守卫要求 querySelector 绑定 listener）；
+         用 dynamicMap O(1) 查找代替 dynamics.find O(N) */
       function bindCardEvents() {
         grid.querySelectorAll('[data-dynamic-id]').forEach(function(card) {
-          var item = dynamics.find(function(dynamic) { return dynamic.dynamic_id === card.dataset.dynamicId; });
+          var item = dynamicMap[card.dataset.dynamicId];
           if (!item) return;
           card.addEventListener('keydown', function(event) {
             if (event.key === 'Enter' || event.key === ' ') {
@@ -2497,7 +2533,8 @@
           if (firstGuide) firstGuide.addEventListener('click', function(event) {
             event.stopPropagation();
             ctx.state['first-card-guide-dismissed'] = true;
-            render();
+            firstGuide.setAttribute('data-state', 'closed');
+            window.setTimeout(function() { if (firstGuide.parentNode) firstGuide.remove(); }, 200);
           });
         });
       }
@@ -2524,6 +2561,8 @@
         }
         syncCartFloatingEntry();
         updateAllIndicators();
+        updateScrollMetrics();
+        observeLiveBadges();
       }
 
       function clearFilters() {
@@ -2600,6 +2639,28 @@
       var toolbarRafId = null;
       var pendingScrollTop = 0;
       var isToolbarRevealed = true;
+      /* 滚动尺寸缓存：避免 onScroll/rAF 内读 clientHeight/scrollHeight 触发 forced reflow；
+         render 后内容变化、resize 时更新 */
+      var cachedScrollHeight = 0;
+      var cachedClientHeight = 0;
+      function updateScrollMetrics() {
+        cachedScrollHeight = scroll.scrollHeight;
+        cachedClientHeight = scroll.clientHeight;
+      }
+
+      /* 直播图标离屏暂停动画：IntersectionObserver 观察 live-badge-icon，
+         离屏时加 is-offscreen class 暂停 CSS animation，减少合成层压力 */
+      var liveBadgeObserver = ('IntersectionObserver' in window) ? new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          entry.target.classList.toggle('is-offscreen', !entry.isIntersecting);
+        });
+      }, { root: scroll, threshold: 0 }) : null;
+      function observeLiveBadges() {
+        if (!liveBadgeObserver) return;
+        grid.querySelectorAll('.album-feed__live-badge-icon').forEach(function(badge) {
+          liveBadgeObserver.observe(badge);
+        });
+      }
       function setToolbarRevealed(revealed) {
         if (isToolbarRevealed === revealed) return;
         isToolbarRevealed = revealed;
@@ -2616,7 +2677,7 @@
         var currentTop = pendingScrollTop;
         var delta = currentTop - lastScrollTop;
         var isAtTop = currentTop <= 0;
-        var isAtBottom = currentTop + scroll.clientHeight >= scroll.scrollHeight - toolbarBottomGuardPx;
+        var isAtBottom = currentTop + cachedClientHeight >= cachedScrollHeight - toolbarBottomGuardPx;
         if (isAtTop) {
           setToolbarRevealed(true);
           scrollDirectionDelta = 0;
@@ -2647,8 +2708,10 @@
         lastScrollTop = currentTop;
       }
       function onScroll() {
-        ctx.state.scrollPosition = scroll.scrollTop;
-        pendingScrollTop = scroll.scrollTop;
+        /* 只读一次 scrollTop；滚动期间不读 clientHeight/scrollHeight（用缓存） */
+        var currentTop = scroll.scrollTop;
+        ctx.state.scrollPosition = currentTop;
+        pendingScrollTop = currentTop;
         if (!toolbarRafId) toolbarRafId = requestAnimationFrame(applyToolbarReveal);
       }
 
@@ -2662,12 +2725,12 @@
         closePublishMenu();
         ensureCartState(ctx).firstAddGuideDismissed = true;
         if (firstAddGuide) firstAddGuide.hidden = true;
-        openCartPanel(ctx, ensureCartState(ctx).lastTab, function() { syncCartFloatingEntry(); render(); });
+        openCartPanel(ctx, ensureCartState(ctx).lastTab, function() { syncCartFloatingEntry(); patchAllCardSelections(); });
       });
       if (firstAddGuide) firstAddGuide.addEventListener('click', function() {
         ensureCartState(ctx).firstAddGuideDismissed = true;
         firstAddGuide.hidden = true;
-        openCartPanel(ctx, 'selection', function() { syncCartFloatingEntry(); render(); });
+        openCartPanel(ctx, 'selection', function() { syncCartFloatingEntry(); patchAllCardSelections(); });
       });
       if (publishFocus) publishFocus.addEventListener('click', closePublishMenu);
       if (publishDock) {
@@ -2682,7 +2745,7 @@
         if (event.target.closest('button, a')) return;
         var card = event.target.closest('[data-dynamic-id]');
         if (!card) return;
-        var item = dynamics.find(function(dynamic) { return dynamic.dynamic_id === card.dataset.dynamicId; });
+        var item = dynamicMap[card.dataset.dynamicId];
         if (!item) return;
         ctx.state.scrollPosition = scroll.scrollTop;
         ctx.appState.dynamicFeedPayload = { dynamic: item, publisher: getPublisher(item.publisher_id), products: item.related_product_ids ? item.related_product_ids.map(getProduct) : [], source_route: 'album-product-feed' };
@@ -2706,17 +2769,20 @@
       root.querySelector('[data-dom-id="filter-tag-live"]').addEventListener('click', function() { switchDimension('live'); });
 
       scroll.addEventListener('scroll', onScroll, { passive: true });
-      window.addEventListener('resize', updateAllIndicators);
+      function onResize() {
+        updateAllIndicators();
+        updateScrollMetrics();
+      }
+      window.addEventListener('resize', onResize);
 
-      /* 页面级 Tab 滚轮联动 */
+      /* 页面级 Tab 滚轮联动：passive:true 不阻塞合成滚动；
+         indicator 是 absolute 在 scroll 内容内，scrollLeft 变化时自动跟随，无需 JS 更新 */
       var pageTabsScroll = pageTabs.querySelector('.wg-tabs__scroll');
       if (pageTabsScroll) {
         pageTabsScroll.addEventListener('wheel', function(event) {
           if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
-          event.preventDefault();
           pageTabsScroll.scrollLeft += event.deltaY;
-          updateTabsIndicator(pageTabs.querySelector('.wg-tabs'));
-        }, { passive: false });
+        }, { passive: true });
       }
 
       renderPeopleList();
@@ -2728,6 +2794,7 @@
         scroll.scrollTop = ctx.state.scrollPosition;
         lastScrollTop = scroll.scrollTop;
         updateAllIndicators();
+        updateScrollMetrics();
       });
     }
   });
