@@ -134,13 +134,13 @@
         "selector": ".album-feed__publish-fab",
         "content_role": "右下角悬浮发布入口宽度",
         "css_property": "width",
-        "token": "var(--size-56)"
+        "token": "var(--size-48)"
       },
       {
         "selector": ".album-feed__publish-fab",
         "content_role": "右下角悬浮发布入口最小高度",
         "css_property": "height",
-        "token": "var(--size-56)"
+        "token": "var(--size-48)"
       },
       {
         "selector": ".album-feed__publish-fab",
@@ -159,18 +159,6 @@
         "content_role": "右下角悬浮发布入口文字色",
         "css_property": "color",
         "token": "var(--text-default)"
-      },
-      {
-        "selector": ".album-feed__publish-fab-ripple",
-        "content_role": "右下角悬浮发布入口波纹背景",
-        "css_property": "background",
-        "token": "var(--bg-subtle)"
-      },
-      {
-        "selector": ".album-feed__publish-fab-ripple",
-        "content_role": "右下角悬浮发布入口波纹圆角",
-        "css_property": "border-radius",
-        "token": "var(--radius-full)"
       },
       {
         "selector": ".album-feed__publish-fab-icon",
@@ -320,7 +308,7 @@
         "selector": ".album-feed__publish-choice-text",
         "content_role": "发布类型文字字号",
         "css_property": "font-size",
-        "token": "var(--body-sm-font-size)"
+        "token": "var(--body-md-font-size)"
       },
       {
         "selector": ".album-feed__publish-choice-text",
@@ -540,74 +528,86 @@
       },
       {
         "selector": ".album-feed__live-badge",
-        "content_role": "头像左上角直播胶囊背景",
+        "content_role": "封面图左上角直播胶囊背景",
         "css_property": "background",
-        "token": "var(--bg-brand)"
+        "token": "var(--status-promotion-default)"
       },
       {
         "selector": ".album-feed__live-badge",
-        "content_role": "头像左上角直播胶囊文字色",
+        "content_role": "封面图左上角直播胶囊文字色",
         "css_property": "color",
         "token": "var(--text-inverse)"
       },
       {
         "selector": ".album-feed__live-badge",
-        "content_role": "头像左上角直播胶囊字号",
+        "content_role": "封面图左上角直播胶囊字号",
         "css_property": "font-size",
         "token": "var(--body-xs-font-size)"
       },
       {
         "selector": ".album-feed__live-badge",
-        "content_role": "头像左上角直播胶囊行高",
+        "content_role": "封面图左上角直播胶囊行高",
         "css_property": "line-height",
         "token": "var(--body-xs-line-height)"
       },
       {
         "selector": ".album-feed__live-badge",
-        "content_role": "头像左上角直播胶囊字重",
+        "content_role": "封面图左上角直播胶囊字重",
         "css_property": "font-weight",
         "token": "var(--font-weight-medium)"
       },
       {
         "selector": ".album-feed__live-badge",
-        "content_role": "头像左上角直播胶囊圆角",
+        "content_role": "封面图左上角直播胶囊圆角",
         "css_property": "border-radius",
         "token": "var(--radius-full)"
       },
       {
         "selector": ".album-feed__live-badge",
-        "content_role": "头像左上角直播胶囊横向内边距",
+        "content_role": "封面图左上角直播胶囊横向内边距",
         "css_property": "padding-inline",
-        "token": "var(--spacer-4)"
+        "token": "var(--spacer-6)"
       },
       {
         "selector": ".album-feed__live-badge",
-        "content_role": "头像左上角直播胶囊阴影",
+        "content_role": "封面图左上角直播胶囊纵向内边距",
+        "css_property": "padding-block",
+        "token": "var(--spacer-2)"
+      },
+      {
+        "selector": ".album-feed__live-badge",
+        "content_role": "封面图左上角直播胶囊阴影",
         "css_property": "box-shadow",
         "token": "var(--shadow-sm)"
       },
       {
         "selector": ".album-feed__live-badge",
-        "content_role": "头像左上角直播胶囊图标与文字间距",
+        "content_role": "封面图左上角直播胶囊声波条与文字间距",
+        "css_property": "gap",
+        "token": "var(--spacer-4)"
+      },
+      {
+        "selector": ".album-feed__live-badge-bars",
+        "content_role": "直播胶囊声波条容器高度",
+        "css_property": "height",
+        "token": "var(--size-12)"
+      },
+      {
+        "selector": ".album-feed__live-badge-bars",
+        "content_role": "直播胶囊声波条之间间距",
         "css_property": "gap",
         "token": "var(--spacer-2)"
       },
       {
-        "selector": ".album-feed__live-badge-icon",
-        "content_role": "直播胶囊图标字号",
-        "css_property": "font-size",
-        "token": "var(--size-12)"
+        "selector": ".album-feed__live-badge-bar",
+        "content_role": "直播胶囊声波单线宽度",
+        "css_property": "width",
+        "token": "var(--spacer-2)"
       },
       {
-        "selector": ".album-feed__live-badge-icon",
-        "content_role": "直播胶囊图标行高",
-        "css_property": "line-height",
-        "token": "var(--body-xs-line-height)"
-      },
-      {
-        "selector": ".album-feed__live-badge-icon",
-        "content_role": "直播胶囊图标颜色",
-        "css_property": "color",
+        "selector": ".album-feed__live-badge-bar",
+        "content_role": "直播胶囊声波单线背景",
+        "css_property": "background",
         "token": "var(--text-inverse)"
       },
       {
@@ -841,7 +841,7 @@
       {
         "selector": ".album-feed__first-card-guide",
         "content_role": "第一条选品引导气泡相对按钮的垂直间距",
-        "css_property": "top",
+        "css_property": "bottom",
         "token": "var(--spacer-4)"
       },
       {
@@ -1818,7 +1818,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/微购相册动态/scene.js",
     "scene_css": "wego-app/scenes/微购相册动态/scene.css",
-    "source_sha256": "2b883f26cb1551cb5033a956844fa87b0b572543463352c2d6980a676bd0d168",
+    "source_sha256": "612f51f9845dbe5c486453b57a7bb24ec0286b458db083c12444090881965458",
     "dom_ids": [
       "page-tab-following",
       "page-tab-recommended",

@@ -405,6 +405,10 @@
       padding: 0 4px;
       border-radius: 8px 8px 8px 1px;
     }
+    .badge--text-promotion {
+      --badge-text-bg: var(--status-promotion-default);
+      --badge-text-color: var(--text-inverse);
+    }
     .badge--remove {
       width: 16px;
       min-width: 16px;

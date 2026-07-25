@@ -177,6 +177,10 @@
       padding: 0 4px;
       border-radius: 8px 8px 8px 1px;
     }
+    .badge--text-promotion {
+      --badge-text-bg: var(--status-promotion-default);
+      --badge-text-color: var(--text-inverse);
+    }
     .badge--remove {
       width: 16px;
       min-width: 16px;
@@ -306,6 +310,9 @@
         <div class="demo-host demo-host--card">
           <span class="badge badge--corner badge--text demo-badge-red"><span class="badge__text">文字</span></span>
         </div>
+        <div class="demo-host demo-host--card">
+          <span class="badge badge--corner badge--text badge--text-promotion"><span class="badge__text">直播</span></span>
+        </div>
       </div>
     </div>
 
@@ -346,6 +353,7 @@
       <div class="demo-inline-actions">
         <span class="demo-inline-button">立即领取</span>
         <span class="badge badge--inline badge--text demo-badge-orange"><span class="badge__text">文字</span></span>
+        <span class="badge badge--inline badge--text badge--text-promotion"><span class="badge__text">直播</span></span>
       </div>
     </div>
 

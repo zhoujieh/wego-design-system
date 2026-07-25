@@ -6,7 +6,7 @@
   "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "轻量状态角标，收敛为红点、数字、文字、移除四类；默认附着在宿主右上角，文字类默认绿色并支持用 CSS 变量自定义颜色。",
+  "description": "轻量状态角标，收敛为红点、数字、文字、移除四类；默认附着在宿主右上角，文字类默认绿色并支持用 CSS 变量自定义颜色；营销场景（直播、帮卖、补贴等）可通过 --badge-text-bg: var(--status-promotion-default) 使用营销橙背景。",
   "semanticTypeCandidates": [
     "badge",
     "notification-dot",
@@ -27,6 +27,10 @@
     "overflow": [
       "default",
       "scrollable"
+    ],
+    "color": [
+      "default",
+      "promotion"
     ]
   },
   "representativeVariants": [
@@ -46,6 +50,11 @@
       "type": "text",
       "placement": "inline",
       "overflow": "scrollable"
+    },
+    {
+      "type": "text",
+      "placement": "inline",
+      "color": "promotion"
     }
   ],
   "anatomy": [
@@ -73,12 +82,13 @@
   "structurePatterns": [
     "默认业务挂载使用 corner，Badge 绝对定位在宿主右上角，宿主需提供 position: relative。",
     "dot 在 corner 下使用更贴边的偏移规则，与宿主形成约 1-2px 的轻微重叠。",
-    "文字类在 corner 下直接使用左上、右上、右下 8px 与左下 1px 的圆角轮廓，在 inline 下固定为跑道圆胶囊形。"
+    "文字类在 corner 下直接使用左上、右上、右下 8px 与左下 1px 的圆角轮廓，在 inline 下固定为跑道圆胶囊形。",
+    "营销场景（直播、帮卖、补贴等）追加 badge--text-promotion 修饰类即可使用营销橙背景 + 白色文字预设；该修饰类仅适用于 text 类型，与 placement/overflow 维度正交。"
   ],
   "behavior": {
     "defaultPlacement": "未显式指定时按 corner 语义处理，默认显示在宿主右上角。",
     "inlineRule": "inline 模式不使用绝对定位，只与文字、按钮或列表内容并排展示。",
-    "textColorModel": "文字类默认背景色为 var(--accent-green)，可通过 --badge-text-bg 和 --badge-text-color 覆盖任意颜色。",
+    "textColorModel": "文字类默认背景色为 var(--accent-green)，可通过 --badge-text-bg 和 --badge-text-color 覆盖任意颜色；营销场景（直播、帮卖、补贴等）可直接追加 badge--text-promotion 修饰类使用营销橙预设 var(--status-promotion-default) + 白色文字。",
     "scrollable": "仅文字类支持 scrollable，默认宽度 32px，可通过 --badge-scroll-width 覆盖；交互为双轨道拼接的持续向左无缝循环轮播。"
   },
   "accessibility": {
@@ -100,6 +110,7 @@
       ".badge--number",
       ".badge--number-multi",
       ".badge--text",
+      ".badge--text-promotion",
       ".badge--remove",
       ".badge--corner",
       ".badge--inline",
@@ -138,6 +149,7 @@
     "--radius-full",
     "--size-32",
     "--status-danger-default",
+    "--status-promotion-default",
     "--text-inverse"
   ],
   "previewOnlyTokens": [

@@ -133,13 +133,13 @@
         "selector": ".album-feed__publish-fab",
         "content_role": "右下角悬浮发布入口宽度",
         "css_property": "width",
-        "token": "var(--size-56)"
+        "token": "var(--size-48)"
       },
       {
         "selector": ".album-feed__publish-fab",
         "content_role": "右下角悬浮发布入口最小高度",
         "css_property": "height",
-        "token": "var(--size-56)"
+        "token": "var(--size-48)"
       },
       {
         "selector": ".album-feed__publish-fab",
@@ -158,18 +158,6 @@
         "content_role": "右下角悬浮发布入口文字色",
         "css_property": "color",
         "token": "var(--text-default)"
-      },
-      {
-        "selector": ".album-feed__publish-fab-ripple",
-        "content_role": "右下角悬浮发布入口波纹背景",
-        "css_property": "background",
-        "token": "var(--bg-subtle)"
-      },
-      {
-        "selector": ".album-feed__publish-fab-ripple",
-        "content_role": "右下角悬浮发布入口波纹圆角",
-        "css_property": "border-radius",
-        "token": "var(--radius-full)"
       },
       {
         "selector": ".album-feed__publish-fab-icon",
@@ -319,7 +307,7 @@
         "selector": ".album-feed__publish-choice-text",
         "content_role": "发布类型文字字号",
         "css_property": "font-size",
-        "token": "var(--body-sm-font-size)"
+        "token": "var(--body-md-font-size)"
       },
       {
         "selector": ".album-feed__publish-choice-text",
@@ -539,74 +527,86 @@
       },
       {
         "selector": ".album-feed__live-badge",
-        "content_role": "头像左上角直播胶囊背景",
+        "content_role": "封面图左上角直播胶囊背景",
         "css_property": "background",
-        "token": "var(--bg-brand)"
+        "token": "var(--status-promotion-default)"
       },
       {
         "selector": ".album-feed__live-badge",
-        "content_role": "头像左上角直播胶囊文字色",
+        "content_role": "封面图左上角直播胶囊文字色",
         "css_property": "color",
         "token": "var(--text-inverse)"
       },
       {
         "selector": ".album-feed__live-badge",
-        "content_role": "头像左上角直播胶囊字号",
+        "content_role": "封面图左上角直播胶囊字号",
         "css_property": "font-size",
         "token": "var(--body-xs-font-size)"
       },
       {
         "selector": ".album-feed__live-badge",
-        "content_role": "头像左上角直播胶囊行高",
+        "content_role": "封面图左上角直播胶囊行高",
         "css_property": "line-height",
         "token": "var(--body-xs-line-height)"
       },
       {
         "selector": ".album-feed__live-badge",
-        "content_role": "头像左上角直播胶囊字重",
+        "content_role": "封面图左上角直播胶囊字重",
         "css_property": "font-weight",
         "token": "var(--font-weight-medium)"
       },
       {
         "selector": ".album-feed__live-badge",
-        "content_role": "头像左上角直播胶囊圆角",
+        "content_role": "封面图左上角直播胶囊圆角",
         "css_property": "border-radius",
         "token": "var(--radius-full)"
       },
       {
         "selector": ".album-feed__live-badge",
-        "content_role": "头像左上角直播胶囊横向内边距",
+        "content_role": "封面图左上角直播胶囊横向内边距",
         "css_property": "padding-inline",
-        "token": "var(--spacer-4)"
+        "token": "var(--spacer-6)"
       },
       {
         "selector": ".album-feed__live-badge",
-        "content_role": "头像左上角直播胶囊阴影",
+        "content_role": "封面图左上角直播胶囊纵向内边距",
+        "css_property": "padding-block",
+        "token": "var(--spacer-2)"
+      },
+      {
+        "selector": ".album-feed__live-badge",
+        "content_role": "封面图左上角直播胶囊阴影",
         "css_property": "box-shadow",
         "token": "var(--shadow-sm)"
       },
       {
         "selector": ".album-feed__live-badge",
-        "content_role": "头像左上角直播胶囊图标与文字间距",
+        "content_role": "封面图左上角直播胶囊声波条与文字间距",
+        "css_property": "gap",
+        "token": "var(--spacer-4)"
+      },
+      {
+        "selector": ".album-feed__live-badge-bars",
+        "content_role": "直播胶囊声波条容器高度",
+        "css_property": "height",
+        "token": "var(--size-12)"
+      },
+      {
+        "selector": ".album-feed__live-badge-bars",
+        "content_role": "直播胶囊声波条之间间距",
         "css_property": "gap",
         "token": "var(--spacer-2)"
       },
       {
-        "selector": ".album-feed__live-badge-icon",
-        "content_role": "直播胶囊图标字号",
-        "css_property": "font-size",
-        "token": "var(--size-12)"
+        "selector": ".album-feed__live-badge-bar",
+        "content_role": "直播胶囊声波单线宽度",
+        "css_property": "width",
+        "token": "var(--spacer-2)"
       },
       {
-        "selector": ".album-feed__live-badge-icon",
-        "content_role": "直播胶囊图标行高",
-        "css_property": "line-height",
-        "token": "var(--body-xs-line-height)"
-      },
-      {
-        "selector": ".album-feed__live-badge-icon",
-        "content_role": "直播胶囊图标颜色",
-        "css_property": "color",
+        "selector": ".album-feed__live-badge-bar",
+        "content_role": "直播胶囊声波单线背景",
+        "css_property": "background",
         "token": "var(--text-inverse)"
       },
       {
@@ -840,7 +840,7 @@
       {
         "selector": ".album-feed__first-card-guide",
         "content_role": "第一条选品引导气泡相对按钮的垂直间距",
-        "css_property": "top",
+        "css_property": "bottom",
         "token": "var(--spacer-4)"
       },
       {
@@ -1917,7 +1917,14 @@
 
   function publisherLiveBadgeTemplate(publisher) {
     if (!hasPublisherStatus(publisher, 'live')) return '';
-    return '<span class="album-feed__live-badge" aria-label="直播中"><i class="wego-iconfont-s icon-zhibozhong album-feed__live-badge-icon" aria-hidden="true"></i><span class="album-feed__live-badge-text">直播</span></span>';
+    return '<span class="album-feed__live-badge" aria-label="直播中">'
+      + '<span class="album-feed__live-badge-bars" aria-hidden="true">'
+      + '<span class="album-feed__live-badge-bar"></span>'
+      + '<span class="album-feed__live-badge-bar"></span>'
+      + '<span class="album-feed__live-badge-bar"></span>'
+      + '</span>'
+      + '<span class="album-feed__live-badge-text">直播</span>'
+      + '</span>';
   }
 
   function publisherStarredTemplate(publisher) {
@@ -1931,7 +1938,7 @@
   }
 
   function firstCardGuideTemplate() {
-    return '<div class="popover popover--normal album-feed__first-card-guide" role="tooltip" data-variant="normal" data-placement="bottom" data-align="start" data-state="open" data-dom-id="first-card-guide" data-dd-id="feed-first-card-guide" data-component-slug="popover" data-component-binding="feed-first-card-guide">'
+    return '<div class="popover popover--normal album-feed__first-card-guide" role="tooltip" data-variant="normal" data-placement="top" data-align="end" data-state="open" data-dom-id="first-card-guide" data-dd-id="feed-first-card-guide" data-component-slug="popover" data-component-binding="feed-first-card-guide">'
       + '<div class="popover__arrow"></div>'
       + '<div class="popover__body"><span class="popover__text">加入选品车后可统一转发/下载</span></div>'
       + '</div>';
@@ -1964,6 +1971,7 @@
       +       '<div class="wg-image album-feed__cover" data-dd-id="feed-cover-' + item.dynamic_id + '" data-component-slug="image" data-component-binding="feed-cover-image">'
       +         '<img class="wg-image__src is-loaded" src="' + cover.poster_or_src + '" alt="" loading="lazy" decoding="async">'
       +       '</div>'
+      +       publisherLiveBadgeTemplate(publisher)
       +       '<button type="button" class="btn btn--weak btn--sm btn--icon-only album-feed__share-action" aria-label="分享当前产品" data-dd-id="feed-share-' + item.dynamic_id + '" data-component-slug="button" data-component-binding="feed-share-action" data-dom-id="share-' + item.dynamic_id + '"><i class="btn__icon icon-fenxiang" aria-hidden="true"></i></button>'
       +       videoMark
       +     '</div>'
@@ -1971,7 +1979,6 @@
       +       '<div class="album-feed__publisher-row">'
       +         '<div class="avatar avatar--24 avatar--image album-feed__publisher-avatar" data-dd-id="feed-avatar-' + item.dynamic_id + '" data-component-slug="avatar" data-component-binding="feed-publisher-avatar">'
       +           '<img src="' + publisher.publisher_avatar + '" alt="' + escapeHtml(publisher.publisher_name) + '">'
-      +           publisherLiveBadgeTemplate(publisher)
       +           publisherNewDotTemplate(publisher)
       +         '</div>'
       +         '<span class="album-feed__publisher-name">' + escapeHtml(publisher.publisher_name) + '</span>'
@@ -2139,14 +2146,13 @@
           </div>
         </div>
         <button type="button" class="album-feed__publish-fab" aria-label="发布动态" aria-haspopup="menu" aria-expanded="false" data-dom-id="open-publish-menu-floating">
-          <span class="album-feed__publish-fab-ripple" aria-hidden="true"></span>
           <i class="wego-iconfont-s icon-jia album-feed__publish-fab-icon" aria-hidden="true"></i>
         </button>
         <button type="button" class="album-feed__cart-fab" aria-label="打开购物车" data-dom-id="open-cart-panel" hidden>
           <i class="wego-iconfont-s icon-gouwuche album-feed__cart-fab-icon" aria-hidden="true"></i>
           <span class="badge badge--number badge--corner album-feed__cart-fab-badge" data-cart-count data-dd-id="feed-cart-badge" data-component-slug="badge" data-component-binding="feed-cart-badge">0</span>
         </button>
-        <div class="popover popover--normal album-feed__cart-guide" role="tooltip" data-variant="normal" data-placement="top" data-align="end" data-state="closed" data-dom-id="first-add-guide" data-dd-id="feed-cart-guide" data-component-slug="popover" data-component-binding="feed-cart-guide" hidden>
+        <div class="popover popover--normal album-feed__cart-guide" role="tooltip" data-variant="normal" data-placement="left" data-align="center" data-state="closed" data-dom-id="first-add-guide" data-dd-id="feed-cart-guide" data-component-slug="popover" data-component-binding="feed-cart-guide" hidden>
           <div class="popover__arrow"></div>
           <div class="popover__body">
             <span class="popover__text">已加入选品车，可从这里统一转发/下载</span>
@@ -2487,8 +2493,11 @@
           cart.selectionIds.push(item.dynamic_id);
           cart.lastTab = 'selection';
           ctx.state['selection-item-added'] = true;
+          /* 首次加车且气泡引导未 dismiss 时只显示气泡，避免与 toast 重复；
+             气泡 dismiss 后再加保持 toast 提示 */
+          var guideShown = !cart.firstAddGuideDismissed && !!firstAddGuide;
           showFirstAddGuide();
-          ctx.toast('已加入选品车');
+          if (!guideShown) ctx.toast('已加入选品车');
         } else {
           cart.selectionIds.splice(index, 1);
           ctx.toast('已移出选品车');
@@ -2648,7 +2657,7 @@
         cachedClientHeight = scroll.clientHeight;
       }
 
-      /* 直播图标离屏暂停动画：IntersectionObserver 观察 live-badge-icon，
+      /* 直播声波条离屏暂停动画：IntersectionObserver 观察 live-badge-bars，
          离屏时加 is-offscreen class 暂停 CSS animation，减少合成层压力 */
       var liveBadgeObserver = ('IntersectionObserver' in window) ? new IntersectionObserver(function(entries) {
         entries.forEach(function(entry) {
@@ -2657,8 +2666,8 @@
       }, { root: scroll, threshold: 0 }) : null;
       function observeLiveBadges() {
         if (!liveBadgeObserver) return;
-        grid.querySelectorAll('.album-feed__live-badge-icon').forEach(function(badge) {
-          liveBadgeObserver.observe(badge);
+        grid.querySelectorAll('.album-feed__live-badge-bars').forEach(function(bars) {
+          liveBadgeObserver.observe(bars);
         });
       }
       function setToolbarRevealed(revealed) {
@@ -2795,6 +2804,24 @@
         lastScrollTop = scroll.scrollTop;
         updateAllIndicators();
         updateScrollMetrics();
+      });
+
+      // 场景销毁时清理监听器和 Observer，避免内存泄漏
+      ctx.onDestroy(function () {
+        if (liveBadgeObserver) {
+          liveBadgeObserver.disconnect();
+        }
+        window.removeEventListener('resize', onResize);
+        scroll.removeEventListener('scroll', onScroll);
+        // publish menu 若处于打开状态，清理其监听器
+        if (removePublishListeners) {
+          removePublishListeners();
+        }
+        // 取消待执行的 toolbar raf
+        if (toolbarRafId) {
+          cancelAnimationFrame(toolbarRafId);
+          toolbarRafId = null;
+        }
       });
     }
   });
