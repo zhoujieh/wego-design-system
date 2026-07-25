@@ -190,6 +190,13 @@
       "category": "display",
       "status": "stable",
       "preview": "preview/component-metric.html"
+    },
+    {
+      "slug": "skeleton",
+      "name": "骨架屏",
+      "category": "feedback",
+      "status": "stable",
+      "preview": "preview/component-skeleton.html"
     }
   ],
   "componentContractSchemaVersion": 4

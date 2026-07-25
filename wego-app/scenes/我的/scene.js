@@ -506,12 +506,23 @@ window.WegoApp.registerScene({
       }
 
       requestAnimationFrame(updateMainAppCapacity);
+      var gridObserver = null;
       if (typeof ResizeObserver === 'function') {
-        var gridObserver = new ResizeObserver(updateMainAppCapacity);
+        gridObserver = new ResizeObserver(updateMainAppCapacity);
         gridObserver.observe(mainGrid);
       } else {
         window.addEventListener('resize', updateMainAppCapacity);
       }
+
+      // 场景销毁时清理 ResizeObserver 和 window resize 监听器，避免内存泄漏
+      ctx.onDestroy(function () {
+        if (gridObserver) {
+          gridObserver.disconnect();
+          gridObserver = null;
+        } else {
+          window.removeEventListener('resize', updateMainAppCapacity);
+        }
+      });
 
       mainGrid.addEventListener('click', function (event) {
         var entry = event.target.closest('[data-app-name]');

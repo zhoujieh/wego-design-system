@@ -394,6 +394,8 @@
       return;
     }
     clearAllPressStates();
+    // 退场前调用场景 destroy 钩子，清理 window/document 监听器、Observer 等
+    runSceneDestroy(top.scene, top.host);
 
     if (animated === false) {
       // 无动画：直接移除 panel（用于 hashchange/侧滑返回，系统动画已完成）
@@ -446,12 +448,24 @@
       overlayLayer.replaceChildren();
       overlayClosing = false;
     }
-    sceneStack.forEach(function (entry) { entry.host.remove(); });
+    // 调用每个 push 场景的 destroy 钩子，清理监听器/Observer
+    sceneStack.forEach(function (entry) {
+      runSceneDestroy(entry.scene, entry.host);
+      entry.host.remove();
+    });
     sceneStack = [];
     sceneLayer.hidden = true;
     sceneLayer.className = 'app-scene-layer';
     sceneLayer.replaceChildren();
     appState.currentRouteId = '';
+    // 清空 hash 和 history state：防止切 tab 后残留 #/routeId，
+    // 导致用户侧滑触发 history.back 时误以为"返回 tab"实际只是消费了残留 hash
+    if (window.location.hash) {
+      try { history.replaceState(null, document.title, window.location.pathname + window.location.search); } catch (e) {}
+    }
+    // 清空脚本加载锁：防止加载中的 .then(runScene) 在切 tab 后仍执行，
+    // 导致场景被错误 push 到已清空的栈上（竞态修复）
+    if (loadingRouteIds) loadingRouteIds.clear();
   }
 
   function renderTemplate(target, template) {
@@ -465,6 +479,12 @@
   function sceneContext(scene, host) {
     var routeId = scene.routeId;
     if (!appState.sceneState[routeId]) appState.sceneState[routeId] = Object.create(null);
+    // 场景销毁钩子队列：场景可通过 ctx.onDestroy(fn) 注册多个清理回调，
+    // 框架在 popSceneLayer/clearSceneLayer/finalizeCloseOverlayEntry 时统一调用
+    if (!appState.sceneState[routeId].__destroyCallbacks) {
+      appState.sceneState[routeId].__destroyCallbacks = [];
+    }
+    var destroyCallbacks = appState.sceneState[routeId].__destroyCallbacks;
     return {
       routeId: routeId,
       root: host,
@@ -478,8 +498,33 @@
       closeOverlay: closeOverlay,
       toast: toast,
       dialog: dialog,
-      updateEntrySummary: updateEntrySummary
+      updateEntrySummary: updateEntrySummary,
+      // 注册场景销毁时执行的清理回调（如 removeEventListener、observer.disconnect()）
+      onDestroy: function (fn) {
+        if (typeof fn === 'function') destroyCallbacks.push(fn);
+      }
     };
+  }
+
+  // 调用场景的 destroy 钩子：先执行 scene.destroy(ctx)，再执行 ctx.onDestroy 注册的回调
+  // 调用后清空 __destroyCallbacks，避免重复执行；sceneState 本身保留（host-tab 状态需持久）
+  function runSceneDestroy(scene, host) {
+    if (!scene) return;
+    var routeId = scene.routeId;
+    var state = appState.sceneState[routeId];
+    var ctx = sceneContext(scene, host);
+    // 1. 场景声明的 destroy 钩子（registerScene 时声明）
+    if (typeof scene.destroy === 'function') {
+      try { scene.destroy(ctx); } catch (e) { console.warn('[wego-app] scene.destroy error:', e); }
+    }
+    // 2. ctx.onDestroy 注册的回调
+    var callbacks = state && state.__destroyCallbacks;
+    if (callbacks && callbacks.length) {
+      state.__destroyCallbacks = [];
+      callbacks.forEach(function (fn) {
+        try { fn(); } catch (e) { console.warn('[wego-app] onDestroy callback error:', e); }
+      });
+    }
   }
 
   function mountHostTabScene(tab) {
@@ -507,6 +552,9 @@
   }
 
   function openPushScene(scene) {
+    // 栈顶去重：栈顶已是该 routeId 时不再 push（防止 navigate→openRoute 重复触发）
+    var topEntry = sceneStack[sceneStack.length - 1];
+    if (topEntry && topEntry.routeId === scene.routeId) return;
     // 保存 pressedEl 引用，clearAllPressStates 会清空它
     var entryEl = pressedEl;
     clearAllPressStates();
@@ -621,7 +669,7 @@
     }
     componentRoot.classList.add('is-overlay-top');
 
-    var entry = { type: type, componentRoot: componentRoot, historyPushed: false, closing: false };
+    var entry = { type: type, componentRoot: componentRoot, historyPushed: false, closing: false, onDestroy: options.onDestroy || null };
     overlayStack.push(entry);
 
     // 栈式 history：每层独立 push 一条，侧滑返回逐层关闭
@@ -728,6 +776,11 @@
       entry.componentRoot.parentNode.removeChild(entry.componentRoot);
     }
     entry.closing = false;
+    // 调用 overlay 场景的 destroy 回调，清理监听器/Observer
+    if (typeof entry.onDestroy === 'function') {
+      try { entry.onDestroy(); } catch (e) { console.warn('[wego-app] overlay onDestroy error:', e); }
+      entry.onDestroy = null;
+    }
     if (overlayStack.length === 0) {
       overlayLayer.hidden = true;
       overlayLayer.className = 'app-overlay-layer';
@@ -1135,18 +1188,33 @@
       if (typeof scene.init === 'function') scene.init(sceneContext(scene, ctx.root));
       WegoApp.layoutAllBottomActionBars(ctx.root);
     };
-    openOverlay(presentation.type, template, { label: scene.title, init: init });
+    // overlay 场景销毁时调用 runSceneDestroy，清理场景注册的 onDestroy 回调
+    // host 传 null：场景 destroy 回调一般只需清理监听器/Observer，不需要 ctx.root
+    var onDestroy = function () { runSceneDestroy(scene, null); };
+    openOverlay(presentation.type, template, { label: scene.title, init: init, onDestroy: onDestroy });
   }
+
+  // 正在加载脚本的 routeId 集合：防止连点时同一 routeId 重复注册 .then(runScene)
+  var loadingRouteIds = new Set();
 
   function openRoute(routeId) {
     if (!routeId) return;
+    // 并发锁：脚本加载中直接忽略后续点击，避免连点打开多个相同场景
+    if (loadingRouteIds.has(routeId)) return;
     dismissToasts({ immediate: true });
     var config = routeConfigs.get(routeId);
     if (config) {
       ensureStyle(config.style);
+      // 首次加载：标记 loading，加载完成后清除标记并 runScene
+      if (!scenes.has(routeId)) loadingRouteIds.add(routeId);
       ensureScript(routeId, config.script).then(function () {
+        loadingRouteIds.delete(routeId);
+        // 竞态防御：加载期间用户若已切 tab 或切换到其他场景，hash 不再指向该 routeId，
+        // 放弃 runScene，避免场景被错误 push 到已清空的栈上
+        if (window.location.hash !== '#/' + routeId) return;
         runScene(routeId);
       }).catch(function () {
+        loadingRouteIds.delete(routeId);
         toast('场景脚本加载失败');
       });
       return;

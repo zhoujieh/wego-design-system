@@ -2851,6 +2851,59 @@
   opacity: 0.6;
 }
 
+/* ── Skeleton ──────────────────────────────────────────────── */
+/* @anatomy
+   <span class="label">文本行</span> <div class="demo-block" style="width:240px"> <div class="demo-line-row"> <span class="wg-skeleton wg-skeleton--text" style="width:100%"></span> <span class="wg-skeleton wg-skeleton--text" style="width:80%"></span> <span class="wg-skeleton wg-skeleton--text" style="width:60%"></span>
+*/
+.wg-skeleton {
+      --wg-skeleton-bg: var(--bg-skeleton);
+      --wg-skeleton-highlight: var(--palette-neutral-100);
+      display: block;
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: var(--wg-skeleton-bg);
+      border-radius: var(--radius-6);
+    }
+    .wg-skeleton::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent 0%, var(--wg-skeleton-highlight) 50%, transparent 100%);
+      background-size: 200% 100%;
+      animation: wg-skeleton-shimmer 1.2s ease-in-out infinite;
+    }
+    .wg-skeleton--text {
+      height: 14px;
+      border-radius: var(--radius-4);
+    }
+    .wg-skeleton--rect {
+      border-radius: var(--radius-8);
+    }
+    .wg-skeleton--circle {
+      border-radius: var(--radius-full);
+    }
+    .wg-skeleton--sm {
+      width: var(--size-32);
+      height: var(--size-32);
+    }
+    .wg-skeleton--md {
+      width: var(--size-64);
+      height: var(--size-64);
+    }
+    .wg-skeleton--lg {
+      width: var(--size-104);
+      height: var(--size-104);
+    }
+    .wg-skeleton--static::after {
+      animation: none;
+      opacity: 0;
+    }
+    @keyframes wg-skeleton-shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
 /* ── Stack ─────────────────────────────────────────────────── */
 /* @anatomy
    <span class="label">未选中</span> <div class="stack"> <div class="stack__bg"> <span class="stack__label">选项</span> <span class="stack__check-corner" aria-hidden="true"> <i class="wego-iconfont-s icon-gou16 stack__check-icon"></i> </span>

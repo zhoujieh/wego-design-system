@@ -463,12 +463,23 @@ window.WegoApp.registerScene({
       });
     }
     requestAnimationFrame(refillAppCenterPlaceholders);
+    var gridObserver = null;
     if (typeof ResizeObserver === 'function') {
-      var gridObserver = new ResizeObserver(refillAppCenterPlaceholders);
+      gridObserver = new ResizeObserver(refillAppCenterPlaceholders);
       appGrids.forEach(function(grid) { gridObserver.observe(grid); });
     } else {
       window.addEventListener('resize', refillAppCenterPlaceholders);
     }
+
+    // 场景销毁时清理 ResizeObserver 和 window resize 监听器，避免内存泄漏
+    ctx.onDestroy(function() {
+      if (gridObserver) {
+        gridObserver.disconnect();
+        gridObserver = null;
+      } else {
+        window.removeEventListener('resize', refillAppCenterPlaceholders);
+      }
+    });
 
     // 初始化 tabs indicator
     requestAnimationFrame(function() {

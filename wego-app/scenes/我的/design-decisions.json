@@ -666,7 +666,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/我的/scene.js",
     "scene_css": "wego-app/scenes/我的/scene.css",
-    "source_sha256": "d2e66999c2722f7528f66d1c726604864752c931824784840b4b90f466a79ef7",
+    "source_sha256": "dc7ca31e9d458a8c9eb2708cb3efafec5e1b314c6f2a77004b74cf3018fa2db9",
     "dom_ids": [
       "renew-vip",
       "manage-storage",
