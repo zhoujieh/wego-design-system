@@ -628,6 +628,24 @@
         "token": "var(--body-xs-line-height)"
       },
       {
+        "selector": ".album-feed__verified-icon",
+        "content_role": "认证商家图标颜色",
+        "css_property": "color",
+        "token": "var(--text-brand)"
+      },
+      {
+        "selector": ".album-feed__verified-icon",
+        "content_role": "认证商家图标字号",
+        "css_property": "font-size",
+        "token": "var(--size-16)"
+      },
+      {
+        "selector": ".album-feed__verified-icon",
+        "content_role": "认证商家图标行高",
+        "css_property": "line-height",
+        "token": "var(--body-xs-line-height)"
+      },
+      {
         "selector": ".album-feed__summary",
         "content_role": ".album-feed__summary 的 color",
         "css_property": "color",
@@ -838,10 +856,16 @@
         "token": "var(--size-24)"
       },
       {
-        "selector": ".album-feed__first-card-guide",
-        "content_role": "第一条选品引导气泡相对按钮的垂直间距",
-        "css_property": "bottom",
-        "token": "var(--spacer-4)"
+        "selector": ".album-feed__cart-fab-badge",
+        "content_role": "购物车角标贴近图标的顶部偏移",
+        "css_property": "top",
+        "token": "var(--spacer-12)"
+      },
+      {
+        "selector": ".album-feed__cart-fab-badge",
+        "content_role": "购物车角标贴近图标的右侧偏移",
+        "css_property": "right",
+        "token": "var(--spacer-12)"
       },
       {
         "selector": ".cart-panel__title .navbar",
@@ -1664,7 +1688,7 @@
       393
     ],
     "checked_at": "2026-07-24T10:30:00.000Z",
-    "scope": "动态列表加入选品车、首次加入引导气泡（popover normal 变体指向 cart-fab 顶部，placement=top align=end，气泡右缘与 cart-fab 右缘对齐，箭头落在 cart-fab 右半区）、第一条产品卡片引导气泡（popover normal 变体指向加入选品车按钮，placement=bottom align=start，箭头落在气泡顶部左侧指向 select-action 按钮中心）、浮动购物车入口（中性色图标 --text-default，badge number corner 红色数量徽标）、全屏选品车/购物车 tabs（tab 标签带数量显示）、选品车底部操作栏（bottom-action-bar primary-secondary 左侧分享/下载可折叠进更多、右侧统一转发主操作）、购物车底部操作栏（右侧结算入口）、卡片封面右上角仅分享图标（移除产品/笔记内容类型标签）、发布者头像左上角营销色直播胶囊（图标带呼吸动画，复用场景层 wrapper 不扩展 avatar 组件）、移除认证图标保留重点商家图标、购物车条目查看/移除操作（link standalone 14 文字链接）、动态列表与购物车面板空状态插画（中性色 SVG）；移动端预览验证图片右上角仅保留分享、直播胶囊不遮挡头像主体、发布者名字与重点商家图标同行不溢出、tab 数量与实际条目同步、查看入口可跳转详情、查看与移除链接热区不重叠、空状态插画居中且不喧宾夺主、首次加入后数量徽标与引导气泡同步、全屏面板顶部无单独标题、底部操作栏主操作右对齐且左侧溢出收纳。",
+    "scope": "动态列表加入选品车、首次加入引导气泡（popover normal 变体指向 cart-fab 顶部，placement=top align=end，气泡右缘与 cart-fab 右缘对齐，箭头落在 cart-fab 右半区）、第一条产品卡片引导气泡（popover normal 变体指向加入选品车按钮，placement=bottom align=start，箭头落在气泡顶部左侧指向 select-action 按钮中心）、浮动购物车入口（中性色图标 --text-default，badge number corner 红色数量徽标贴近图标右上角）、全屏选品车/购物车 tabs（tab 标签带数量显示）、选品车底部操作栏（bottom-action-bar primary-secondary 左侧分享/下载可折叠进更多、右侧统一转发主操作）、购物车底部操作栏（右侧结算入口）、卡片封面右上角仅分享图标（移除产品/笔记内容类型标签）、发布者头像左上角营销色直播胶囊（图标带呼吸动画，复用场景层 wrapper 不扩展 avatar 组件）、发布者名字后认证图标与重点商家图标并存、购物车条目查看/移除操作（link standalone 14 文字链接）、动态列表与购物车面板空状态插画（中性色 SVG）；移动端预览验证图片右上角仅保留分享、直播胶囊不遮挡头像主体、发布者名字与认证/重点商家图标同行不溢出、tab 数量与实际条目同步、查看入口可跳转详情、查看与移除链接热区不重叠、空状态插画居中且不喧宾夺主、首次加入后数量徽标与引导气泡同步、全屏面板顶部无单独标题、底部操作栏主操作右对齐且左侧溢出收纳、悬浮入口距底部导航 32px 且列表底部预留足够间距避免遮挡。",
     "checks": {
       "horizontal_overflow": true,
       "overlap": true,
@@ -1932,15 +1956,20 @@
     return '<i class="wego-iconfont-s icon-shoucang album-feed__starred-icon" aria-label="重点商家"></i>';
   }
 
+  function publisherVerifiedTemplate(publisher) {
+    if (!hasPublisherStatus(publisher, 'verified')) return '';
+    return '<i class="wego-iconfont-s icon-renzheng album-feed__verified-icon" aria-label="已认证"></i>';
+  }
+
   function publisherNewDotTemplate(publisher) {
     if (!hasPublisherStatus(publisher, 'new')) return '';
     return '<span class="album-feed__new-dot" aria-label="上新"></span>';
   }
 
   function firstCardGuideTemplate() {
-    return '<div class="popover popover--normal album-feed__first-card-guide" role="tooltip" data-variant="normal" data-placement="top" data-align="end" data-state="open" data-dom-id="first-card-guide" data-dd-id="feed-first-card-guide" data-component-slug="popover" data-component-binding="feed-first-card-guide">'
+    return '<div class="popover popover--normal album-feed__first-card-guide" role="tooltip" data-variant="normal" data-placement="top" data-align="end" data-state="open" data-dom-id="first-card-guide" data-dd-id="feed-first-card-guide" data-component-slug="popover" data-component-binding="feed-first-card-guide" hidden>'
       + '<div class="popover__arrow"></div>'
-      + '<div class="popover__body"><span class="popover__text">加入选品车后可统一转发/下载</span></div>'
+      + '<div class="popover__body"><span class="popover__text">加入选品车，统一转发/下载</span></div>'
       + '</div>';
   }
 
@@ -1960,7 +1989,6 @@
     var publisher = getPublisher(item.publisher_id);
     var cover = item.media_list[0];
     var added = selectionHas(ctx, item.dynamic_id);
-    var showGuide = index === 0 && !ctx.state['first-card-guide-dismissed'];
     var videoMark = cover.media_type === 'video'
       ? '<span class="album-feed__duration">' + escapeHtml(cover.duration_label) + '</span>'
       : '';
@@ -1982,6 +2010,7 @@
       +           publisherNewDotTemplate(publisher)
       +         '</div>'
       +         '<span class="album-feed__publisher-name">' + escapeHtml(publisher.publisher_name) + '</span>'
+      +         publisherVerifiedTemplate(publisher)
       +         publisherStarredTemplate(publisher)
       +       '</div>'
       +       '<p class="album-feed__summary">' + escapeHtml(item.text_content) + '</p>'
@@ -1989,10 +2018,9 @@
       +     '<div class="card__footer album-feed__card-footer">'
       +       '<div class="album-feed__actions">'
       +         '<span class="album-feed__publisher-meta">' + escapeHtml(item.published_at) + '</span>'
-      +         '<div class="album-feed__action-buttons">'
+      +         '<div class="album-feed__action-buttons" data-action-buttons>'
       +           '<button type="button" class="btn btn--weak btn--sm btn--icon-only album-feed__select-action" aria-label="加入选品车" data-dd-id="feed-select-' + item.dynamic_id + '" data-component-slug="button" data-component-binding="feed-select-button" data-dom-id="select-cart-' + item.dynamic_id + '" aria-pressed="' + (added ? 'true' : 'false') + '"><i class="btn__icon ' + (added ? 'icon-gou16' : 'icon-gouwuche') + '" aria-hidden="true"></i></button>'
       +           '<button type="button" class="btn btn--medium btn--sm album-feed__forward-link" data-dd-id="feed-forward-' + item.dynamic_id + '" data-component-slug="button" data-component-binding="feed-forward-button" data-dom-id="forward-' + item.dynamic_id + '">一键转发</button>'
-      +           (showGuide ? firstCardGuideTemplate() : '')
       +         '</div>'
       +       '</div>'
       +     '</div>'
@@ -2118,6 +2146,7 @@
         </div>
         <main class="album-feed__grid" data-region="feed-grid" data-dom-id="feed-open-dynamic"></main>
         <div data-region="empty-host" hidden></div>
+        <div class="popover popover--normal album-feed__first-card-guide" role="tooltip" data-variant="normal" data-placement="top" data-align="end" data-state="open" data-dom-id="first-card-guide" data-dd-id="feed-first-card-guide" data-component-slug="popover" data-component-binding="feed-first-card-guide" hidden><div class="popover__arrow"></div><div class="popover__body"><span class="popover__text">加入选品车，统一转发/下载</span></div></div>
         <div class="album-feed__publish-focus" data-dom-id="publish-focus" aria-hidden="true"></div>
         <div class="album-feed__publish-dock" data-region="publish-dock" data-state="closed" aria-hidden="true">
           <div class="album-feed__publish-dock-surface">
@@ -2242,6 +2271,7 @@
       var floatingPublishTrigger = root.querySelector('[data-dom-id="open-publish-menu-floating"]');
       var floatingCartTrigger = root.querySelector('[data-dom-id="open-cart-panel"]');
       var firstAddGuide = root.querySelector('[data-dom-id="first-add-guide"]');
+      var firstCardGuide = root.querySelector('[data-dom-id="first-card-guide"]');
       var publishFocus = root.querySelector('[data-dom-id="publish-focus"]');
       var publishDock = root.querySelector('[data-region="publish-dock"]');
       var activePublishTrigger = publishTrigger;
@@ -2548,12 +2578,42 @@
         syncCartFloatingEntry();
         /* 局部 patch，不重渲染整片 grid */
         patchCardSelection(item);
-        /* 关闭卡片内 first-card-guide（如有），不重渲染 */
-        var guide = grid.querySelector('[data-dom-id="first-card-guide"]');
-        if (guide) {
-          guide.setAttribute('data-state', 'closed');
-          window.setTimeout(function() { if (guide.parentNode) guide.remove(); }, 200);
+        /* 关闭 first-card-guide（DOM 在 grid 外，由 positionFirstCardGuide 管理） */
+        dismissFirstCardGuide();
+      }
+
+      function dismissFirstCardGuide() {
+        if (!firstCardGuide) return;
+        ctx.state['first-card-guide-dismissed'] = true;
+        firstCardGuide.setAttribute('data-state', 'closed');
+        firstCardGuide.hidden = true;
+      }
+
+      /* 计算第一张卡片 action-buttons 位置，定位 first-card-guide 气泡
+         气泡 DOM 在 .album-feed__scroll 顶层（grid 之外），避免被 .card--surface overflow:hidden 裁剪；
+         position: absolute 相对 .album-feed 定位，top/left 由本函数基于 action-buttons 视口位置计算；
+         气泡右缘与 action-buttons 右缘对齐，气泡底部落在 action-buttons 顶部上方 4px，箭头指向按钮 */
+      function positionFirstCardGuide() {
+        if (!firstCardGuide) return;
+        if (ctx.state['first-card-guide-dismissed']) {
+          firstCardGuide.hidden = true;
+          return;
         }
+        var firstCard = grid.querySelector('[data-dynamic-id]');
+        if (!firstCard) { firstCardGuide.hidden = true; return; }
+        var actionButtons = firstCard.querySelector('[data-action-buttons]');
+        if (!actionButtons) { firstCardGuide.hidden = true; return; }
+        /* 先显示气泡才能获取 offsetHeight；hidden 时 offsetHeight 为 0 */
+        firstCardGuide.hidden = false;
+        firstCardGuide.setAttribute('data-state', 'open');
+        var feedRect = root.getBoundingClientRect();
+        var buttonsRect = actionButtons.getBoundingClientRect();
+        /* 气泡右缘与 action-buttons 右缘对齐（向左展开）；底部落在 action-buttons 顶部上方 4px */
+        var rightOffset = feedRect.right - buttonsRect.right;
+        var topOffset = buttonsRect.top - feedRect.top - firstCardGuide.offsetHeight - 4;
+        firstCardGuide.style.top = topOffset + 'px';
+        firstCardGuide.style.right = rightOffset + 'px';
+        firstCardGuide.style.left = 'auto';
       }
 
       function openDynamic(item) {
@@ -2580,13 +2640,6 @@
           if (share) share.addEventListener('click', function(event) { event.stopPropagation(); ctx.toast('分享能力本期暂未开放'); });
           var select = card.querySelector('[data-dom-id="select-cart-' + item.dynamic_id + '"]');
           if (select) select.addEventListener('click', function(event) { event.stopPropagation(); toggleSelectionItem(item); });
-          var firstGuide = card.querySelector('[data-dom-id="first-card-guide"]');
-          if (firstGuide) firstGuide.addEventListener('click', function(event) {
-            event.stopPropagation();
-            ctx.state['first-card-guide-dismissed'] = true;
-            firstGuide.setAttribute('data-state', 'closed');
-            window.setTimeout(function() { if (firstGuide.parentNode) firstGuide.remove(); }, 200);
-          });
         });
       }
 
@@ -2614,6 +2667,8 @@
         updateAllIndicators();
         updateScrollMetrics();
         observeLiveBadges();
+        /* render 后定位第一条引导气泡，用 rAF 等待布局稳定再计算位置 */
+        requestAnimationFrame(positionFirstCardGuide);
       }
 
       function clearFilters() {
@@ -2681,11 +2736,11 @@
       }
 
       /* 工具栏显隐：默认显示，上滑（内容向下）收起、下滑（内容向上）重现，滚到顶部恢复显示
-         使用 requestAnimationFrame 与累积方向阈值，避免抖动与误触发；
+         基于方向变化触发：用户上滑转下滑时立即显示搜索框，下滑转上滑时立即收起；
          顶部边界强制显示，底部边界抑制下滑手势重现，避免橡皮筋回弹误触发 */
       var lastScrollTop = 0;
-      var scrollDirectionDelta = 0;
-      var toolbarRevealThreshold = 12;
+      var lastDirection = 0;
+      var toolbarDirectionThreshold = 4;
       var toolbarBottomGuardPx = 8;
       var toolbarRafId = null;
       var pendingScrollTop = 0;
@@ -2727,35 +2782,25 @@
         toolbarRafId = null;
         var currentTop = pendingScrollTop;
         var delta = currentTop - lastScrollTop;
+        if (Math.abs(delta) < 1) return;
+        var direction = delta > 0 ? 1 : -1;
         var isAtTop = currentTop <= 0;
         var isAtBottom = currentTop + cachedClientHeight >= cachedScrollHeight - toolbarBottomGuardPx;
         if (isAtTop) {
           setToolbarRevealed(true);
-          scrollDirectionDelta = 0;
         } else if (isAtBottom) {
-          /* 底部边界：抑制下滑手势（delta < 0）重现搜索框，避免橡皮筋回弹误触发；
+          /* 底部边界：抑制下滑手势（direction < 0）重现搜索框，避免橡皮筋回弹误触发；
              保留上滑手势收起逻辑以维持状态一致，用户脱离底部后恢复正常响应 */
-          if (delta > 0) {
-            scrollDirectionDelta += delta;
-            if (scrollDirectionDelta > toolbarRevealThreshold) {
-              setToolbarRevealed(false);
-              scrollDirectionDelta = 0;
-            }
-          } else {
-            scrollDirectionDelta = 0;
-          }
-        } else {
-          scrollDirectionDelta += delta;
-          if (scrollDirectionDelta > toolbarRevealThreshold) {
-            /* 上滑手势：内容向下滚动，收起工具栏 */
+          if (direction > 0) setToolbarRevealed(false);
+        } else if (direction !== lastDirection) {
+          /* 中间区域：方向变化时立即触发，避免慢速滚动累积不到阈值导致下滑无法重现 */
+          if (direction > 0 && delta > toolbarDirectionThreshold) {
             setToolbarRevealed(false);
-            scrollDirectionDelta = 0;
-          } else if (scrollDirectionDelta < -toolbarRevealThreshold) {
-            /* 下滑手势：内容向上滚动，重现工具栏 */
+          } else if (direction < 0 && delta < -toolbarDirectionThreshold) {
             setToolbarRevealed(true);
-            scrollDirectionDelta = 0;
           }
         }
+        lastDirection = direction;
         lastScrollTop = currentTop;
       }
       function onScroll() {
@@ -2764,6 +2809,10 @@
         ctx.state.scrollPosition = currentTop;
         pendingScrollTop = currentTop;
         if (!toolbarRafId) toolbarRafId = requestAnimationFrame(applyToolbarReveal);
+        /* 用户主动滚动距离超过 32px 后 dismiss 第一条引导气泡，避免气泡跟随错位 */
+        if (firstCardGuide && !firstCardGuide.hidden && !ctx.state['first-card-guide-dismissed'] && Math.abs(currentTop) > 32) {
+          dismissFirstCardGuide();
+        }
       }
 
       root.querySelector('[data-dom-id="open-global-search"]').addEventListener('click', function() { ctx.toast('全局搜索能力本期暂未开放'); });
@@ -2782,6 +2831,10 @@
         ensureCartState(ctx).firstAddGuideDismissed = true;
         firstAddGuide.hidden = true;
         openCartPanel(ctx, 'selection', function() { syncCartFloatingEntry(); patchAllCardSelections(); });
+      });
+      /* 第一条引导气泡点击后 dismiss，避免遮挡卡片操作 */
+      if (firstCardGuide) firstCardGuide.addEventListener('click', function() {
+        dismissFirstCardGuide();
       });
       if (publishFocus) publishFocus.addEventListener('click', closePublishMenu);
       if (publishDock) {
@@ -2823,6 +2876,8 @@
       function onResize() {
         updateAllIndicators();
         updateScrollMetrics();
+        /* 尺寸变化后重新计算第一条引导气泡位置 */
+        requestAnimationFrame(positionFirstCardGuide);
       }
       window.addEventListener('resize', onResize);
 

@@ -25,7 +25,9 @@
   z-index: -1;
 }
 
-/* 滚动容器：承担瀑布流、人维度、筛选标签；底部预留 40px + safe-area-bottom，避免内容被 bottom-nav 遮挡 */
+/* 滚动容器：承担瀑布流、人维度、筛选标签；底部预留 safe-area-bottom-content 避免内容被 bottom-nav 遮挡。
+   额外的悬浮入口栈高度通过 ::after 伪元素预留（height 非视觉绑定属性，可使用多 Token calc），
+   确保悬浮入口（含购物车入口）不遮挡最后一条内容。 */
 .album-feed__scroll {
   display: flex;
   flex: 1 1 auto;
@@ -34,6 +36,14 @@
   gap: var(--spacer-12);
   padding-bottom: var(--safe-area-bottom-content);
   overflow-y: auto;
+}
+
+/* 悬浮入口栈底部占位：publish-fab 32px 间距 + 48px 高 + 12px 间距 + cart-fab 48px 高 + 16px 缓冲 */
+.album-feed__scroll::after {
+  content: '';
+  display: block;
+  flex-shrink: 0;
+  height: calc(var(--spacer-32) + var(--size-48) + var(--spacer-12) + var(--size-48) + var(--spacer-16));
 }
 
 /* 顶部吸顶栈：page-tabs + 搜索栏整体 sticky 吸顶，背景跟随顶部白色 */
@@ -158,7 +168,7 @@
   position: absolute;
   left: var(--spacer-16);
   right: var(--spacer-16);
-  bottom: calc(var(--safe-area-bottom-content) + var(--size-48) + var(--spacer-24));
+  bottom: calc(var(--safe-area-bottom-content) + var(--size-48) + var(--spacer-40));
   z-index: 3;
   display: flex;
   justify-content: flex-end;
@@ -266,7 +276,7 @@
 .album-feed__publish-fab {
   position: absolute;
   right: var(--spacer-16);
-  bottom: calc(var(--safe-area-bottom-content) + var(--spacer-16));
+  bottom: calc(var(--safe-area-bottom-content) + var(--spacer-32));
   z-index: 2;
   display: inline-flex;
   align-items: center;
@@ -319,7 +329,7 @@
 /* 搜索栏：占文档流，默认显示；上滑手势收起（max-height 精确到搜索框实际高度，避免无效动画区间），
    下滑手势或滚回顶部重现；层级低于 page-tabs，收起时被 tabs 遮挡；
    contain:content 隔离重排到本容器，子元素 transform 走合成层提升丝滑度；
-   cubic-bezier(0.32,0.72,0,1) ease-out 适合收起动画，开始快结束慢 */
+   linear 线性动画符合需求：隐藏和显示无加速度 */
 .album-feed__floating-toolbar {
   position: relative;
   z-index: 1;
@@ -327,7 +337,7 @@
   background: transparent;
   opacity: 1;
   overflow: hidden;
-  transition: max-height 0.25s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.2s ease;
+  transition: max-height 0.25s linear, opacity 0.2s linear;
   box-sizing: border-box;
   contain: content;
 }
@@ -340,7 +350,7 @@
 
 /* 搜索栏动效只作用于场景包装层，Search 组件的 search-toolbar 保持 Preview 原样。 */
 .album-feed__toolbar-motion {
-  transition: transform 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+  transition: transform 0.25s linear;
 }
 
 .album-feed__floating-toolbar.is-hidden .album-feed__toolbar-motion {
@@ -537,7 +547,7 @@
   box-shadow: var(--shadow-lg);
 }
 
-/* 发布者区：头像 + 名字 + 重点商家图标；直播状态以头像左上角胶囊覆盖形式表达 */
+/* 发布者区：头像 + 名字 + 认证图标 + 重点商家图标；直播状态以头像左上角胶囊覆盖形式表达 */
 .album-feed__publisher-row {
   display: flex;
   align-items: center;
@@ -634,6 +644,19 @@
   line-height: var(--body-xs-line-height);
 }
 
+/* 认证状态：品牌色认证图标，与名字同级，位于名字后、重点商家前 */
+.album-feed__verified-icon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  justify-content: center;
+  width: var(--size-16);
+  height: var(--size-16);
+  color: var(--text-brand);
+  font-size: var(--size-16);
+  line-height: var(--body-xs-line-height);
+}
+
 .album-feed__publisher-meta {
   min-width: 0;
   overflow: hidden;
@@ -706,24 +729,27 @@
   flex: 0 0 auto;
 }
 
-/* 第一条产品卡片选品引导气泡：消费 popover normal 变体，指向“加入选品车”按钮。
-   action-buttons 设为 position: relative 作为定位上下文；
-   placement=top + align=end 让箭头落在气泡底部右侧（right:16px），指向 action-buttons 右半区；
-   bottom 落在 action-buttons 顶部上方 4px，箭头尖（向下延伸 4px）与按钮顶部保留 4px 视觉间距；
-   right:0 让气泡右缘与 action-buttons 右缘对齐，气泡向左展开，避免被 card overflow:hidden 裁剪。 */
+/* 第一条产品卡片选品引导气泡：消费 popover normal 变体，指向"加入选品车"按钮。
+   气泡 DOM 放在 .album-feed__scroll 顶层（grid 之外），避免被 .card--surface 的 overflow:hidden 裁剪；
+   position: absolute 相对 .album-feed 定位，top/left 由 JS 在 render 后基于第一张卡片 action-buttons 位置计算；
+   z-index 设为顶层，确保气泡显示在卡片之上不被遮挡；
+   气泡默认 hidden，由 JS 移除 hidden 并设置位置后显示。 */
 .album-feed__first-card-guide {
-  bottom: calc(100% + var(--spacer-4));
-  top: auto;
-  right: 0;
-  left: auto;
-  z-index: 2;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: var(--z-popover);
   max-width: 196px;
+}
+
+.album-feed__first-card-guide[hidden] {
+  display: none;
 }
 
 .album-feed__cart-fab {
   position: absolute;
   right: var(--spacer-16);
-  bottom: calc(var(--safe-area-bottom-content) + var(--spacer-16) + var(--size-48) + var(--spacer-12));
+  bottom: calc(var(--safe-area-bottom-content) + var(--spacer-32) + var(--size-48) + var(--spacer-12));
   z-index: 2;
   display: inline-flex;
   align-items: center;
@@ -755,13 +781,20 @@
   font-size: var(--size-24);
 }
 
+/* 购物车角标贴近图标内容：cart-fab 是 48px，图标 24px 居中，图标边缘距按钮边缘 12px。
+   覆盖 badge--corner 的 top:0/right:0，改为 top/right:12px，让角标落在图标右上角而非按钮右上角。 */
+.album-feed__cart-fab-badge {
+  top: var(--spacer-12);
+  right: var(--spacer-12);
+}
+
 /* 浮动购物车引导气泡：消费 popover normal 变体，场景只承担位置定位，视觉样式由 popover 组件提供。
    placement=left 让气泡位于 cart-fab 左侧，箭头落在气泡右边缘垂直居中指向 cart-fab。
    right 落在 cart-fab 左缘外侧 4px（spacer-16 + size-48 + spacer-4）；
    bottom 落在 cart-fab 底部上方 4px，让气泡垂直中部对齐 cart-fab 中心，箭头水平指向 cart-fab。 */
 .album-feed__cart-guide {
   right: calc(var(--spacer-16) + var(--size-48) + var(--spacer-4));
-  bottom: calc(var(--safe-area-bottom-content) + var(--spacer-16) + var(--size-48) + var(--spacer-12) + var(--spacer-4));
+  bottom: calc(var(--safe-area-bottom-content) + var(--spacer-32) + var(--size-48) + var(--spacer-12) + var(--spacer-4));
   z-index: 3;
   max-width: 196px;
 }
