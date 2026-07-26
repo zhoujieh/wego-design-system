@@ -2736,17 +2736,18 @@
       }
 
       /* 工具栏显隐：默认显示，上滑（内容向下）收起、下滑（内容向上）重现，滚到顶部恢复显示
-         基于方向累积位移触发：沿当前方向累积位移超过阈值即触发显隐，方向变化时从当前帧重新累积；
-         顶部边界强制显示，底部边界抑制下滑手势重现（保留上滑收起），避免橡皮筋回弹误触发 */
+         基于方向累积位移触发：沿当前方向累积位移超过阈值即触发显隐，触发后与方向变化时立即重置累积；
+         顶部边界强制显示，底部边界抑制下滑手势重现（保留上滑收起），避免橡皮筋回弹误触发；
+         判断逻辑在 onScroll 内用缓存完成（不触发 reflow），rAF 只负责应用 DOM 类，避免丢帧失真 */
       var lastScrollTop = 0;
       var accumulatedDelta = 0;
       var currentDirection = 0;
       var toolbarDirectionThreshold = 4;
       var toolbarBottomGuardPx = 8;
       var toolbarRafId = null;
-      var pendingApply = null;
+      var pendingRevealAction = null;
       var isToolbarRevealed = true;
-      /* 滚动尺寸缓存：避免 onScroll/rAF 内读 clientHeight/scrollHeight 触发 forced reflow；
+      /* 滚动尺寸缓存：避免 onScroll 内读 clientHeight/scrollHeight 触发 forced reflow；
          render 后内容变化、resize 时更新 */
       var cachedScrollHeight = 0;
       var cachedClientHeight = 0;
@@ -2781,39 +2782,10 @@
       }
       function applyToolbarReveal() {
         toolbarRafId = null;
-        if (!pendingApply) return;
-        var snapshot = pendingApply;
-        pendingApply = null;
-        var isAtTop = snapshot.top <= 0;
-        var isAtBottom = snapshot.top + cachedClientHeight >= cachedScrollHeight - toolbarBottomGuardPx;
-        if (isAtTop) {
-          setToolbarRevealed(true);
-          accumulatedDelta = 0;
-          currentDirection = 0;
-        } else if (isAtBottom) {
-          /* 底部边界：抑制下滑手势（direction < 0）重现搜索框，避免橡皮筋回弹误触发；
-             保留上滑手势收起逻辑以维持状态一致，用户脱离底部后恢复正常响应 */
-          if (snapshot.direction > 0) setToolbarRevealed(false);
-          accumulatedDelta = 0;
-          currentDirection = 0;
-        } else if (snapshot.direction === currentDirection) {
-          /* 沿当前方向继续累积位移；超过阈值即触发显隐，慢速滚动也能逐步累积到阈值 */
-          accumulatedDelta += snapshot.delta;
-          if (accumulatedDelta > toolbarDirectionThreshold) {
-            setToolbarRevealed(false);
-          } else if (accumulatedDelta < -toolbarDirectionThreshold) {
-            setToolbarRevealed(true);
-          }
-        } else {
-          /* 方向变化：从当前帧位移重新累积，避免旧方向累积导致响应迟钝 */
-          accumulatedDelta = snapshot.delta;
-          currentDirection = snapshot.direction;
-          if (accumulatedDelta > toolbarDirectionThreshold) {
-            setToolbarRevealed(false);
-          } else if (accumulatedDelta < -toolbarDirectionThreshold) {
-            setToolbarRevealed(true);
-          }
-        }
+        if (!pendingRevealAction) return;
+        var action = pendingRevealAction;
+        pendingRevealAction = null;
+        setToolbarRevealed(action === 'show');
       }
       function onScroll() {
         /* 只读一次 scrollTop；滚动期间不读 clientHeight/scrollHeight（用缓存） */
@@ -2822,10 +2794,39 @@
         var delta = currentTop - lastScrollTop;
         lastScrollTop = currentTop;
         if (Math.abs(delta) >= 1) {
-          /* 立即累积方向与位移，rAF 只负责应用 DOM 变化，避免合并丢帧导致慢速滚动响应失真 */
           var direction = delta > 0 ? 1 : -1;
-          pendingApply = { top: currentTop, delta: delta, direction: direction };
-          if (!toolbarRafId) toolbarRafId = requestAnimationFrame(applyToolbarReveal);
+          var isAtTop = currentTop <= 0;
+          var isAtBottom = currentTop + cachedClientHeight >= cachedScrollHeight - toolbarBottomGuardPx;
+          if (isAtTop) {
+            /* 顶部边界强制显示，重置累积状态 */
+            pendingRevealAction = 'show';
+            accumulatedDelta = 0;
+            currentDirection = 0;
+          } else if (isAtBottom) {
+            /* 底部边界：抑制下滑手势（direction < 0）重现搜索框，避免橡皮筋回弹误触发；
+               保留上滑手势收起逻辑以维持状态一致，用户脱离底部后恢复正常响应 */
+            if (direction > 0) pendingRevealAction = 'hide';
+            accumulatedDelta = 0;
+            currentDirection = 0;
+          } else {
+            /* 方向变化：重置累积，避免旧方向长距离累积导致反向唤回需要滑过同等距离 */
+            if (direction !== currentDirection) {
+              accumulatedDelta = 0;
+              currentDirection = direction;
+            }
+            accumulatedDelta += delta;
+            if (accumulatedDelta > toolbarDirectionThreshold) {
+              pendingRevealAction = 'hide';
+              /* 触发后立即重置累积，避免持续上滑累积成大正值后下滑需滑过同等距离才能唤回 */
+              accumulatedDelta = 0;
+            } else if (accumulatedDelta < -toolbarDirectionThreshold) {
+              pendingRevealAction = 'show';
+              accumulatedDelta = 0;
+            }
+          }
+          if (pendingRevealAction && !toolbarRafId) {
+            toolbarRafId = requestAnimationFrame(applyToolbarReveal);
+          }
         }
         /* 用户主动滚动距离超过 32px 后 dismiss 第一条引导气泡，避免气泡跟随错位 */
         if (firstCardGuide && !firstCardGuide.hidden && !ctx.state['first-card-guide-dismissed'] && Math.abs(currentTop) > 32) {
