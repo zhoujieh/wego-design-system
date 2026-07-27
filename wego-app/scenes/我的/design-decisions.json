@@ -1,0 +1,313 @@
+{
+  "schemaVersion": 2,
+  "scene": "我的",
+  "surface_id": "my-page",
+  "route_id": "my-page",
+  "layout_mode": "composed",
+  "page_pattern": null,
+  "presentation": {
+    "type": "host-tab",
+    "transition": "none",
+    "dismissAction": "tab-switch",
+    "overlayLevel": "inline",
+    "coversTabBar": false,
+    "source": "library-consumption.json#/appRuntime/presentationTypes"
+  },
+  "prompt_contract": {
+    "design_system_version": 476,
+    "token_bindings": [
+      {
+        "selector": ".my-page",
+        "content_role": "场景根背景色",
+        "css_property": "background",
+        "token": "var(--bg-page)"
+      },
+      {
+        "selector": ".my-page",
+        "content_role": "场景根字体",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      }
+    ],
+    "component_bindings": [
+      {
+        "binding_id": "my-navbar",
+        "slug": "navbar",
+        "reason": "导航栏，左侧 custom 身份区，右侧设置+分享入口",
+        "principle_refs": [
+          "wego-consistency-same-pattern"
+        ],
+        "variant_dimensions": {
+          "leftControl": "custom",
+          "titleAlignment": "custom",
+          "actions": "icon",
+          "rightActionType": "icon"
+        }
+      },
+      {
+        "binding_id": "my-type-tabs",
+        "slug": "tabs",
+        "reason": "产品/笔记/直播 类型切换",
+        "variant_dimensions": {
+          "size": "standard",
+          "scrollType": "divide"
+        }
+      },
+      {
+        "binding_id": "my-cart-badge",
+        "slug": "badge",
+        "reason": "购物车 FAB 角标",
+        "variant_dimensions": {
+          "type": "number",
+          "shape": "corner"
+        }
+      }
+    ],
+    "layout_contract": {
+      "mode": "composed",
+      "source": "../../.codex/skills/shared/references/design-decisions.md",
+      "selection_reason": "主页布局，自上而下单线流程，内容类型用 tabs 切换，页面边距为 M0通栏",
+      "page_edge_mode": "M0",
+      "principle_refs": [
+        "wego-clarity-information-flow",
+        "wego-clarity-single-primary-task"
+      ],
+      "mutable_regions": [
+        ".my-page__content"
+      ]
+    },
+    "interaction_contract": [
+      {
+        "dom_id": "app-all",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "app-homepage",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "app-qr",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "app-recent",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "asset-agents",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "asset-coupons",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "asset-employees",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "asset-fans",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "asset-favorites",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "asset-friends",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "asset-pending-purchase",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "asset-visitors",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "asset-wallet",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "settings",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "share-profile",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "switch-album",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "search",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "filter",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "view-toggle",
+        "target": "state:view-change"
+      },
+      {
+        "dom_id": "open-publish-menu",
+        "target": "overlay:sheet"
+      },
+      {
+        "dom_id": "publish-focus",
+        "target": "overlay:close"
+      },
+      {
+        "dom_id": "publish-action-product",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "publish-action-note",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "publish-action-live",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "publish-action-import",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "publish-action-scan",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "open-cart",
+        "target": "feedback:toast"
+      }
+    ],
+    "state_contract": [
+      {
+        "state_id": "products-list",
+        "initial": true,
+        "trigger": "场景进入 / 点击产品 tab",
+        "visible_result": "显示产品列表（列表视图）",
+        "fallback": "暂无内容",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "products-grid",
+        "initial": false,
+        "trigger": "切换为网格视图",
+        "visible_result": "产品网格展示",
+        "fallback": "回到列表视图",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "notes-list",
+        "initial": false,
+        "trigger": "点击笔记 tab",
+        "visible_result": "显示笔记列表",
+        "fallback": "暂无内容",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "live-list",
+        "initial": false,
+        "trigger": "点击直播 tab",
+        "visible_result": "显示直播列表",
+        "fallback": "暂无内容",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "publish-open",
+        "initial": false,
+        "trigger": "点击发布 FAB",
+        "visible_result": "发布托盘从底部弹出，包含 5 个发布选项",
+        "fallback": "托盘关闭，恢复 FAB 初始状态",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "cart-visible",
+        "initial": false,
+        "trigger": "购物车有内容时显示 FAB",
+        "visible_result": "购物车 FAB 显示带角标数字",
+        "fallback": "购物车 FAB 隐藏",
+        "persistence": "memory"
+      }
+    ]
+  },
+  "decisions": [
+    {
+      "dd_id": "my-navbar",
+      "binding_id": "my-navbar",
+      "component_slug": "navbar"
+    },
+    {
+      "dd_id": "my-type-tabs",
+      "binding_id": "my-type-tabs",
+      "component_slug": "tabs"
+    },
+    {
+      "dd_id": "my-cart-badge",
+      "binding_id": "my-cart-badge",
+      "component_slug": "badge"
+    },
+    {
+      "dd_id": "my-cart-badge-seed",
+      "binding_id": "my-cart-badge",
+      "component_slug": "badge"
+    }
+  ],
+  "generation_evidence": {
+    "scene_js": "wego-app/scenes/我的/scene.js",
+    "scene_css": "wego-app/scenes/我的/scene.css",
+    "source_sha256": "8b57c47af781b859cef2acbe6c94349680c5cc4600c2ee6112a8bd86398fe8f1",
+    "dom_ids": [
+      "switch-album",
+      "settings",
+      "share-profile",
+      "asset-pending-purchase",
+      "asset-fans",
+      "asset-friends",
+      "asset-agents",
+      "asset-visitors",
+      "asset-employees",
+      "asset-wallet",
+      "asset-coupons",
+      "asset-favorites",
+      "app-homepage",
+      "app-qr",
+      "app-recent",
+      "app-all",
+      "search",
+      "filter",
+      "view-toggle",
+      "publish-focus",
+      "publish-action-product",
+      "publish-action-note",
+      "publish-action-live",
+      "publish-action-import",
+      "publish-action-scan",
+      "open-publish-menu",
+      "open-cart"
+    ],
+    "component_count": 4,
+    "visualCheck": {
+      "status": "passed",
+      "viewports": [
+        375,
+        393
+      ],
+      "checked_at": "2026-07-27T12:00:00.000Z",
+      "checks": {
+        "horizontal_overflow": true,
+        "overlap": true,
+        "clipping": true,
+        "action_legibility": true,
+        "primary_focus": true,
+        "state_feedback": true
+      }
+    }
+  }
+}

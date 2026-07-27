@@ -1,0 +1,172 @@
+{
+  "schemaVersion": 4,
+  "identity": {
+    "iteration_id": "my-page-tab",
+    "title": "我的Tab",
+    "date": "2026-07-27",
+    "primary_scene": "我的",
+    "related_scenes": [
+      "微购相册动态"
+    ]
+  },
+  "status": "prototyping",
+  "scope_revision": 1,
+  "prototype_brief": {
+    "goal": "创建「我的」Tab页面，让店主在一个地方管理相册内容（产品、笔记、直播）、查看数据资产和会员信息，并快速进入主页和分享店铺。",
+    "included": [
+      "导航栏：左侧个人信息（头像+名称+切换箭头，作为切换相册入口，本期不下钻）+ 右侧仅「设置」和「分享主页」两个入口",
+      "会员栏：独立1行卡片，显示等级+到期时间+云空间用量（进度条+已用/总量）",
+      "数据资产横滑区：8入口（我买的+粉丝/好友/代理/访客/员工/钱包/卡券/收藏），我买的仅在有代办时显示",
+      "常用应用横滑区：固定2入口（进入主页、二维码）+ 最近应用 + 全部",
+      "类型tabs：产品/笔记/直播，紧贴内容列表上方，留扩展位",
+      "工具行：内联弱化搜索（在当前类型内搜索）+ 筛选按钮（仅入口，不展开面板）+ 视图切换（列表/网格），随当前tab联动",
+      "内容列表：卡片不显示状态标签，列表/网格视图 per-tab 独立记忆",
+      "购物车FAB：有内容才显示，复用动态页 cart-fab 组件规格",
+      "发布FAB：复用动态页发布托盘（publish-trigger + publish-fab）组件规格"
+    ],
+    "excluded": [
+      "左侧个人信息切换相册的具体列表/功能（本期保持为入口样式，不下钻）",
+      "设置页完整内容（只保留导航栏入口按钮）",
+      "筛选面板展开内容（只保留入口按钮）",
+      "会员等级详情/积分/权益下钻",
+      "数据资产各入口的详情页下钻",
+      "应用中心内部内容（全部入口仅示意，不展开）",
+      "真实后端数据对接（全部使用模拟数据）"
+    ],
+    "entry_points": [
+      "底部导航「我的」Tab（tab: 'my'，index.html中已有占位 <section data-host-tab='my'>）"
+    ],
+    "critical_paths": [
+      "进入「我的」Tab → 浏览页面各分区（会员卡→数据资产横滑→常用应用横滑→类型tabs→内容列表）",
+      "进入「我的」Tab → 点击类型tabs（产品/笔记/直播）→ 内容列表按类型切换，工具行随tab联动",
+      "进入「我的」Tab → 点击工具行视图切换按钮 → 内容列表在列表/网格间切换，per-tab独立记忆",
+      "进入「我的」Tab → 点击发布FAB → 展开发布托盘 → 选择发布类型",
+      "进入「我的」Tab → 购物车FAB有内容时显示 → 点击进入购物车"
+    ],
+    "prototype_boundaries": [
+      {
+        "flow_id": "view-my-page",
+        "mode": "simulated",
+        "visible_result": "用户看到完整页面结构，可在产品/笔记/直播3个类型间切换内容列表，可切换列表/网格视图，搜索框和筛选按钮显示为入口占位"
+      },
+      {
+        "flow_id": "publish-from-my",
+        "mode": "stub",
+        "visible_result": "点击发布FAB展开发布托盘（复用动态页发布托盘组件），选择发布类型后显示toast提示"
+      },
+      {
+        "flow_id": "view-cart-from-my",
+        "mode": "stub",
+        "visible_result": "购物车FAB在有内容时显示+角标数字，点击后跳转购物车页面或显示toast"
+      }
+    ],
+    "states": [
+      "产品tab-列表视图（默认）",
+      "产品tab-网格视图",
+      "笔记tab-列表视图",
+      "笔记tab-网格视图",
+      "直播tab-列表视图",
+      "直播tab-网格视图",
+      "购物车无内容：购物车FAB隐藏",
+      "购物车有内容：购物车FAB显示+角标数字",
+      "我买的有代办：数据资产横滑显示「我买的」入口（否则隐藏）"
+    ],
+    "data_contract": {
+      "user": {
+        "required": [
+          "name",
+          "avatar_url"
+        ]
+      },
+      "membership": {
+        "required": [
+          "level",
+          "expiry_date",
+          "storage_used",
+          "storage_total"
+        ]
+      },
+      "assets": {
+        "required": [
+          "pending_purchase_count",
+          "fans_count",
+          "friends_count",
+          "agents_count",
+          "visitors_count",
+          "employees_count",
+          "wallet_balance",
+          "coupons_count",
+          "favorites_count"
+        ]
+      },
+      "products": {
+        "required": [
+          "title",
+          "image_url",
+          "price",
+          "sales_count"
+        ]
+      },
+      "notes": {
+        "required": [
+          "title",
+          "image_url",
+          "date",
+          "read_count"
+        ]
+      },
+      "live": {
+        "required": [
+          "title",
+          "scheduled_time",
+          "reservation_count"
+        ]
+      },
+      "view_preferences": {
+        "required": [
+          "products_view_mode",
+          "notes_view_mode",
+          "live_view_mode"
+        ]
+      }
+    },
+    "assumptions": [
+      "默认店主已登录状态",
+      "会员等级和云空间数据为模拟静态数据",
+      "数据资产各项数值为模拟示例数据",
+      "购物车内容状态为本地模拟，初始为空"
+    ],
+    "open_questions": []
+  },
+  "brief_confirmation": {
+    "at": "2026-07-27T14:21:16.158Z",
+    "scope_revision": 1,
+    "scope_sha256": "d957319d38bb16ba2943de7544afaa997ddaf85993ba2e3450fbe2987a14cff4"
+  },
+  "prototype_confirmation": null,
+  "affected_scenes": [
+    "我的"
+  ],
+  "affected_runtime": [
+    "wego-app/js/routes.js"
+  ],
+  "stage_outputs": {
+    "product": {
+      "valid": true
+    },
+    "design": {
+      "valid": false
+    }
+  },
+  "change_log": [
+    {
+      "action": "submit-brief",
+      "at": "2026-07-27T14:21:13.035Z"
+    },
+    {
+      "action": "confirm-brief",
+      "at": "2026-07-27T14:21:16.162Z"
+    }
+  ],
+  "freeze": null
+}

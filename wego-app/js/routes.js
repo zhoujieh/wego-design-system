@@ -38,5 +38,16 @@ window.WEGO_APP_ROUTES = [
     scene: '应用中心',
     script: 'scenes/应用中心/scene.js',
     style: 'scenes/应用中心/scene.css'
+  },
+  {
+    routeId: 'my-page',
+    scene: '我的',
+    script: 'scenes/我的/scene.js',
+    style: 'scenes/我的/scene.css',
+    entry: {
+      type: 'host-tab',
+      tab: 'my',
+      label: '我的'
+    }
   }
 ];
