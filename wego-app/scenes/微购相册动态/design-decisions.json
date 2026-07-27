@@ -1076,7 +1076,7 @@
       {
         "binding_id": "feed-search-toolbar",
         "slug": "search",
-        "reason": "下滑手势浮现的工具栏使用 search 组件的标准强调搜索结构，作为全局搜索入口；图搜复用正式小号主按钮，不添加场景私有皮肤",
+        "reason": "随滚动方向稳定显示的工具栏使用 search 组件的标准强调搜索结构，作为全局搜索入口；图搜复用正式小号主按钮，不添加场景私有皮肤",
         "variant_dimensions": {
           "size": "md",
           "surface": "accent-outline",
@@ -1627,9 +1627,17 @@
       {
         "state_id": "toolbar-revealed",
         "initial": false,
-        "trigger": "下滑手势或滚回顶部",
-        "visible_result": "搜索栏在吸顶栈中展开占据文档流，上滑手势后收起让出可视区域",
-        "fallback": "滚回顶部恢复显示",
+        "trigger": "内容向上回拉超过方向阈值或滚回顶部",
+        "visible_result": "搜索栏在吸顶栈中展开占据文档流；顶部与边界回弹保持当前可预期状态",
+        "fallback": "无有效方向位移时不切换；滚回顶部保持显示",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "toolbar-hidden",
+        "initial": false,
+        "trigger": "内容向下浏览超过方向阈值",
+        "visible_result": "搜索栏收起并让出可视区域，微小反向位移或底部回弹不会使其闪烁显示",
+        "fallback": "内容向上回拉超过方向阈值后恢复显示",
         "persistence": "memory"
       },
       {
@@ -1847,7 +1855,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/微购相册动态/scene.js",
     "scene_css": "wego-app/scenes/微购相册动态/scene.css",
-    "source_sha256": "0eee1d9ddbe0287076b99a7a6c2e0328603097d402b4ac2c5e6c6b0a61b6ec90",
+    "source_sha256": "1da109fbc6c51e847dcebad489f9c529384d0df3319fe59354685e387f612d6d",
     "dom_ids": [
       "page-tab-following",
       "page-tab-recommended",

@@ -1075,7 +1075,7 @@
       {
         "binding_id": "feed-search-toolbar",
         "slug": "search",
-        "reason": "下滑手势浮现的工具栏使用 search 组件的标准强调搜索结构，作为全局搜索入口；图搜复用正式小号主按钮，不添加场景私有皮肤",
+        "reason": "随滚动方向稳定显示的工具栏使用 search 组件的标准强调搜索结构，作为全局搜索入口；图搜复用正式小号主按钮，不添加场景私有皮肤",
         "variant_dimensions": {
           "size": "md",
           "surface": "accent-outline",
@@ -1626,9 +1626,17 @@
       {
         "state_id": "toolbar-revealed",
         "initial": false,
-        "trigger": "下滑手势或滚回顶部",
-        "visible_result": "搜索栏在吸顶栈中展开占据文档流，上滑手势后收起让出可视区域",
-        "fallback": "滚回顶部恢复显示",
+        "trigger": "内容向上回拉超过方向阈值或滚回顶部",
+        "visible_result": "搜索栏在吸顶栈中展开占据文档流；顶部与边界回弹保持当前可预期状态",
+        "fallback": "无有效方向位移时不切换；滚回顶部保持显示",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "toolbar-hidden",
+        "initial": false,
+        "trigger": "内容向下浏览超过方向阈值",
+        "visible_result": "搜索栏收起并让出可视区域，微小反向位移或底部回弹不会使其闪烁显示",
+        "fallback": "内容向上回拉超过方向阈值后恢复显示",
         "persistence": "memory"
       },
       {
@@ -2735,14 +2743,12 @@
         });
       }
 
-      /* 工具栏显隐：默认显示，上滑（内容向下）收起、下滑（内容向上）重现，滚到顶部恢复显示
-         使用 requestAnimationFrame 与累积方向阈值，避免抖动与误触发；
-         顶部边界强制显示，底部边界抑制下滑手势重现，避免橡皮筋回弹误触发；
-         onScroll 缓存滚动尺寸（render 后更新）避免 forced reflow */
+      /* 工具栏显隐：默认显示；内容向下浏览后收起，向上回拉后显示。
+         只消费被钳制在真实滚动范围内的位置：顶部强制显示，橡皮筋回弹不会产生方向变化。 */
       var lastScrollTop = 0;
-      var scrollDirectionDelta = 0;
-      var toolbarRevealThreshold = 12;
-      var toolbarBottomGuardPx = 8;
+      var toolbarDirectionDistance = 0;
+      var toolbarDirection = 0;
+      var toolbarToggleThreshold = 16;
       var toolbarRafId = null;
       var pendingScrollTop = 0;
       var isToolbarRevealed = true;
@@ -2769,7 +2775,6 @@
         });
       }
       function setToolbarRevealed(revealed) {
-        console.log('[toolbar] setToolbarRevealed', revealed, '当前已隐藏:', floatingToolbar.classList.contains('is-hidden'));
         if (isToolbarRevealed === revealed) return;
         isToolbarRevealed = revealed;
         if (revealed) {
@@ -2782,36 +2787,33 @@
       }
       function applyToolbarReveal() {
         toolbarRafId = null;
-        var currentTop = pendingScrollTop;
+        var maxScrollTop = Math.max(0, cachedScrollHeight - cachedClientHeight);
+        var currentTop = Math.min(maxScrollTop, Math.max(0, pendingScrollTop));
         var delta = currentTop - lastScrollTop;
         var isAtTop = currentTop <= 0;
-        var isAtBottom = currentTop + cachedClientHeight >= cachedScrollHeight - toolbarBottomGuardPx;
-        console.log('[toolbar] rAF', { currentTop: currentTop, lastScrollTop: lastScrollTop, delta: delta, acc: scrollDirectionDelta, isAtTop: isAtTop, isAtBottom: isAtBottom, cachedClientHeight: cachedClientHeight, cachedScrollHeight: cachedScrollHeight, isHidden: floatingToolbar.classList.contains('is-hidden') });
         if (isAtTop) {
           setToolbarRevealed(true);
-          scrollDirectionDelta = 0;
-        } else if (isAtBottom) {
-          /* 底部边界：抑制下滑手势（delta < 0）重现搜索框，避免橡皮筋回弹误触发；
-             保留上滑手势收起逻辑以维持状态一致，用户脱离底部后恢复正常响应 */
-          if (delta > 0) {
-            scrollDirectionDelta += delta;
-            if (scrollDirectionDelta > toolbarRevealThreshold) {
-              setToolbarRevealed(false);
-              scrollDirectionDelta = 0;
-            }
-          } else {
-            scrollDirectionDelta = 0;
-          }
+          toolbarDirectionDistance = 0;
+          toolbarDirection = 0;
+        } else if (!delta) {
+          /* 已钳制的位置不变表示边界回弹或无有效滚动，不改变搜索栏状态。 */
+          toolbarDirectionDistance = 0;
+          toolbarDirection = 0;
         } else {
-          scrollDirectionDelta += delta;
-          if (scrollDirectionDelta > toolbarRevealThreshold) {
-            /* 上滑手势：内容向下滚动，收起工具栏 */
-            setToolbarRevealed(false);
-            scrollDirectionDelta = 0;
-          } else if (scrollDirectionDelta < -toolbarRevealThreshold) {
-            /* 下滑手势：内容向上滚动，重现工具栏 */
-            setToolbarRevealed(true);
-            scrollDirectionDelta = 0;
+          var nextDirection = delta > 0 ? 1 : -1;
+          if (toolbarDirection !== nextDirection) {
+            toolbarDirection = nextDirection;
+            toolbarDirectionDistance = 0;
+          }
+          toolbarDirectionDistance += Math.abs(delta);
+          if (toolbarDirectionDistance >= toolbarToggleThreshold) {
+            /* 正向滚动代表内容向下浏览，反向滚动代表内容向上回拉。 */
+            if (nextDirection > 0) {
+              setToolbarRevealed(false);
+            } else {
+              setToolbarRevealed(true);
+            }
+            toolbarDirectionDistance = 0;
           }
         }
         lastScrollTop = currentTop;
@@ -2821,7 +2823,6 @@
         var currentTop = scroll.scrollTop;
         ctx.state.scrollPosition = currentTop;
         pendingScrollTop = currentTop;
-        console.log('[toolbar] onScroll', currentTop, 'rAF已调度:', !!toolbarRafId);
         if (!toolbarRafId) toolbarRafId = requestAnimationFrame(applyToolbarReveal);
         /* 用户主动滚动距离超过 32px 后 dismiss 第一条引导气泡，避免气泡跟随错位 */
         if (firstCardGuide && !firstCardGuide.hidden && !ctx.state['first-card-guide-dismissed'] && Math.abs(currentTop) > 32) {
