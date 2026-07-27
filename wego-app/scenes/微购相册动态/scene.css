@@ -46,40 +46,27 @@
   height: calc(var(--spacer-32) + var(--size-48) + var(--spacer-12) + var(--size-48) + var(--spacer-16));
 }
 
-/* 顶部吸顶栈：page-tabs + 搜索栏整体 sticky 吸顶，背景跟随顶部白色 */
-.album-feed__top-stack {
-  position: sticky;
-  top: 0;
-  z-index: var(--z-sticky);
+/* host-tab 主页 navbar：直接作为 section 通栏子元素，flex 布局固定在顶部，不依赖滚动容器定位。
+   背景为 bg-surface（白色），与原 top-stack 视觉一致；safe-area-top 由 navbar 组件内部 padding-top 承担。 */
+.album-feed__navbar {
   flex-shrink: 0;
-  padding-top: var(--safe-area-top);
   background: var(--bg-surface);
 }
 
-/* 页面级 tabs：相对定位，层级高于搜索栏，避免搜索栏收起时遮挡 */
-.album-feed__page-tabs {
-  position: relative;
-  z-index: 2;
-  background: transparent;
-}
-
-.album-feed__nav-row {
-  display: grid;
-  grid-template-columns: 44px minmax(0, 1fr) 44px;
-  align-items: center;
-  min-height: var(--size-56);
-}
-
+/* navbar__left/right 在本场景作为 44px 占位槽，保持触发器与 tabs 居中对齐 */
 .album-feed__nav-left,
 .album-feed__nav-right {
   display: flex;
   align-items: center;
   justify-content: center;
   min-width: 0;
+  width: 44px;
+  height: 100%;
 }
 
 .album-feed__nav-tabs {
   min-width: 0;
+  width: 100%;
 }
 
 .album-feed__nav-tabs .wg-tabs {
@@ -317,24 +304,17 @@
   transform: rotate(45deg);
 }
 
-.album-feed__page-tabs .wg-tabs__scroll {
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-
-.album-feed__page-tabs .wg-tabs__scroll::-webkit-scrollbar {
-  display: none;
-}
-
-/* 搜索栏：占文档流，默认显示；上滑手势收起（max-height 精确到搜索框实际高度，避免无效动画区间），
-   下滑手势或滚回顶部重现；层级低于 page-tabs，收起时被 tabs 遮挡；
+/* 搜索栏：sticky 吸顶在 scroll 容器顶部（navbar 下方），默认显示；
+   上滑手势收起（max-height 精确到搜索框实际高度，避免无效动画区间），下滑手势或滚回顶部重现；
+   背景为 bg-surface（白色），与 navbar 视觉连续；
    contain:content 隔离重排到本容器，子元素 transform 走合成层提升丝滑度；
    linear 线性动画符合需求：隐藏和显示无加速度 */
 .album-feed__floating-toolbar {
-  position: relative;
+  position: sticky;
+  top: 0;
   z-index: 1;
   max-height: calc(var(--size-36) + var(--spacer-8) + var(--spacer-8));
-  background: transparent;
+  background: var(--bg-surface);
   opacity: 1;
   overflow: hidden;
   transition: max-height 0.25s linear, opacity 0.2s linear;

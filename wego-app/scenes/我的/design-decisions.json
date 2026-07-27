@@ -14,7 +14,7 @@
     "source": "library-consumption.json#/appRuntime/presentationTypes"
   },
   "prompt_contract": {
-    "design_system_version": 465,
+    "design_system_version": 468,
     "token_bindings": [
       {
         "selector": ".my-page",
@@ -41,184 +41,112 @@
         "token": "var(--body-md-font-family)"
       },
       {
-        "selector": ".my-page__topbar",
-        "content_role": "顶部吸顶栈节奏",
-        "css_property": "gap",
-        "token": "var(--spacer-8)"
-      },
-      {
-        "selector": ".my-page__topbar",
-        "content_role": "顶部吸顶栈最小高度",
-        "css_property": "min-height",
-        "token": "var(--size-56)"
-      },
-      {
-        "selector": ".my-page__topbar",
-        "content_role": "顶部吸顶栈底部留白",
-        "css_property": "padding-bottom",
-        "token": "var(--spacer-8)"
-      },
-      {
-        "selector": ".my-page__topbar",
+        "selector": ".my-page__navbar",
         "content_role": "顶部安全区让位",
         "css_property": "padding-top",
         "token": "var(--safe-area-top)"
       },
       {
-        "selector": ".my-page__topbar",
-        "content_role": "顶部吸顶栈水平留白",
-        "css_property": "padding-inline",
-        "token": "var(--spacer-4)"
-      },
-      {
-        "selector": ".my-page__topbar",
+        "selector": ".my-page__navbar",
         "content_role": "顶部吸顶栈背景",
         "css_property": "background",
         "token": "var(--bg-page)"
       },
       {
-        "selector": ".my-page__topbar-identity",
+        "selector": ".my-page__identity",
         "content_role": "身份区节奏",
         "css_property": "gap",
         "token": "var(--spacer-8)"
       },
       {
-        "selector": ".my-page__topbar-identity",
+        "selector": ".my-page__identity",
         "content_role": "身份区垂直内边距",
         "css_property": "padding-block",
         "token": "var(--spacer-4)"
       },
       {
-        "selector": ".my-page__topbar-identity",
+        "selector": ".my-page__identity",
         "content_role": "身份区水平内边距",
         "css_property": "padding-inline",
         "token": "var(--spacer-8)"
       },
       {
-        "selector": ".my-page__topbar-identity",
+        "selector": ".my-page__identity",
         "content_role": "身份区底色",
         "css_property": "background",
         "token": "var(--transparent)"
       },
       {
-        "selector": ".my-page__topbar-identity",
+        "selector": ".my-page__identity",
         "content_role": "身份区圆角",
         "css_property": "border-radius",
         "token": "var(--radius-full)"
       },
       {
-        "selector": ".my-page__topbar-identity:active",
+        "selector": ".my-page__identity:active",
         "content_role": "身份区按压反馈",
         "css_property": "background",
         "token": "var(--bg-subtle)"
       },
       {
-        "selector": ".my-page__topbar-name",
+        "selector": ".my-page__identity-name",
         "content_role": "用户名文字",
         "css_property": "color",
         "token": "var(--text-default)"
       },
       {
-        "selector": ".my-page__topbar-name",
+        "selector": ".my-page__identity-name",
         "content_role": "用户名层级",
         "css_property": "font-size",
         "token": "var(--heading-sm-font-size)"
       },
       {
-        "selector": ".my-page__topbar-name",
+        "selector": ".my-page__identity-name",
         "content_role": "用户名层级",
         "css_property": "font-weight",
         "token": "var(--font-weight-medium)"
       },
       {
-        "selector": ".my-page__topbar-name",
+        "selector": ".my-page__identity-name",
         "content_role": "用户名层级",
         "css_property": "line-height",
         "token": "var(--heading-sm-line-height)"
       },
       {
-        "selector": ".my-page__topbar-verified",
+        "selector": ".my-page__identity-verified",
         "content_role": "认证图标颜色",
         "css_property": "color",
         "token": "var(--text-brand)"
       },
       {
-        "selector": ".my-page__topbar-verified",
+        "selector": ".my-page__identity-verified",
         "content_role": "认证图标尺寸",
         "css_property": "font-size",
         "token": "var(--size-16)"
       },
       {
-        "selector": ".my-page__topbar-verified",
+        "selector": ".my-page__identity-verified",
         "content_role": "认证图标行高",
         "css_property": "line-height",
         "token": "var(--body-xs-line-height)"
       },
       {
-        "selector": ".my-page__topbar-caret",
+        "selector": ".my-page__identity-caret",
         "content_role": "切换指示颜色",
         "css_property": "color",
-        "token": "var(--text-secondary)"
+        "token": "var(--text-default)"
       },
       {
-        "selector": ".my-page__topbar-caret",
+        "selector": ".my-page__identity-caret",
         "content_role": "切换指示尺寸",
         "css_property": "font-size",
         "token": "var(--size-16)"
       },
       {
-        "selector": ".my-page__topbar-caret",
+        "selector": ".my-page__identity-caret",
         "content_role": "切换指示行高",
         "css_property": "line-height",
         "token": "var(--body-xs-line-height)"
-      },
-      {
-        "selector": ".my-page__topbar-actions",
-        "content_role": "顶部图标按钮组节奏",
-        "css_property": "gap",
-        "token": "var(--spacer-4)"
-      },
-      {
-        "selector": ".my-page__topbar-action",
-        "content_role": "顶部图标按钮尺寸",
-        "css_property": "width",
-        "token": "var(--size-40)"
-      },
-      {
-        "selector": ".my-page__topbar-action",
-        "content_role": "顶部图标按钮尺寸",
-        "css_property": "height",
-        "token": "var(--size-40)"
-      },
-      {
-        "selector": ".my-page__topbar-action",
-        "content_role": "顶部图标按钮圆角",
-        "css_property": "border-radius",
-        "token": "var(--radius-full)"
-      },
-      {
-        "selector": ".my-page__topbar-action",
-        "content_role": "顶部图标按钮底色",
-        "css_property": "background",
-        "token": "var(--transparent)"
-      },
-      {
-        "selector": ".my-page__topbar-action:active",
-        "content_role": "顶部图标按钮按压反馈",
-        "css_property": "background",
-        "token": "var(--bg-subtle)"
-      },
-      {
-        "selector": ".my-page__topbar-action .btn__icon",
-        "content_role": "顶部图标按钮图标尺寸",
-        "css_property": "font-size",
-        "token": "var(--size-24)"
-      },
-      {
-        "selector": ".my-page__topbar-action .btn__icon",
-        "content_role": "顶部图标按钮图标颜色",
-        "css_property": "color",
-        "token": "var(--text-default)"
       },
       {
         "selector": ".my-page__scroll",
@@ -389,6 +317,12 @@
         "token": "var(--bg-brand)"
       },
       {
+        "selector": ".my-page__progress-value",
+        "content_role": "空间已用进度过渡",
+        "css_property": "transition",
+        "token": "var(--duration-fast)"
+      },
+      {
         "selector": ".my-page__assets",
         "content_role": "数据资产横滑间距",
         "css_property": "gap",
@@ -437,10 +371,46 @@
         "token": "var(--bg-subtle)"
       },
       {
+        "selector": ".my-page__asset-icon-host",
+        "content_role": "数据资产图标承载尺寸",
+        "css_property": "width",
+        "token": "var(--size-40)"
+      },
+      {
+        "selector": ".my-page__asset-icon-host",
+        "content_role": "数据资产图标承载尺寸",
+        "css_property": "height",
+        "token": "var(--size-40)"
+      },
+      {
+        "selector": ".my-page__asset-icon-host",
+        "content_role": "数据资产图标承载边界",
+        "css_property": "border-radius",
+        "token": "var(--radius-12)"
+      },
+      {
+        "selector": ".my-page__asset-icon-host",
+        "content_role": "数据资产图标承载底色",
+        "css_property": "background",
+        "token": "var(--bg-subtle)"
+      },
+      {
+        "selector": ".my-page__asset-icon-host",
+        "content_role": "数据资产图标承载文字颜色",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".my-page__asset-entry--brand .my-page__asset-icon-host",
+        "content_role": "我买的图标承载品牌色淡底",
+        "css_property": "background",
+        "token": "var(--bg-brand-surface-l1)"
+      },
+      {
         "selector": ".my-page__asset-icon",
         "content_role": "数据资产图标颜色",
         "css_property": "color",
-        "token": "var(--text-secondary)"
+        "token": "var(--text-default)"
       },
       {
         "selector": ".my-page__asset-icon",
@@ -557,6 +527,12 @@
         "token": "var(--radius-12)"
       },
       {
+        "selector": ".my-page__app-icon-host",
+        "content_role": "应用图标承载底色",
+        "css_property": "background",
+        "token": "var(--bg-subtle)"
+      },
+      {
         "selector": ".my-page__app-icon",
         "content_role": "应用图标颜色",
         "css_property": "color",
@@ -644,7 +620,7 @@
         "selector": ".my-page__card",
         "content_role": "内容卡片节奏",
         "css_property": "gap",
-        "token": "var(--spacer-12)"
+        "token": "var(--spacer-8)"
       },
       {
         "selector": ".my-page__card",
@@ -680,7 +656,7 @@
         "selector": ".my-page__card-cover-wrap",
         "content_role": "内容卡片封面尺寸",
         "css_property": "width",
-        "token": "var(--size-72)"
+        "token": "var(--size-64)"
       },
       {
         "selector": ".my-page__card-cover-wrap",
@@ -720,19 +696,37 @@
       },
       {
         "selector": ".my-page__card-meta",
-        "content_role": "内容卡片辅助信息",
+        "content_role": "内容卡片发布时间",
         "css_property": "color",
         "token": "var(--text-tertiary)"
       },
       {
         "selector": ".my-page__card-meta",
-        "content_role": "内容卡片辅助信息",
+        "content_role": "内容卡片发布时间",
         "css_property": "font-size",
         "token": "var(--body-xs-font-size)"
       },
       {
         "selector": ".my-page__card-meta",
-        "content_role": "内容卡片辅助信息",
+        "content_role": "内容卡片发布时间",
+        "css_property": "line-height",
+        "token": "var(--body-xs-line-height)"
+      },
+      {
+        "selector": ".my-page__card-stats",
+        "content_role": "内容卡片统计数据",
+        "css_property": "color",
+        "token": "var(--text-tertiary)"
+      },
+      {
+        "selector": ".my-page__card-stats",
+        "content_role": "内容卡片统计数据",
+        "css_property": "font-size",
+        "token": "var(--body-xs-font-size)"
+      },
+      {
+        "selector": ".my-page__card-stats",
+        "content_role": "内容卡片统计数据",
         "css_property": "line-height",
         "token": "var(--body-xs-line-height)"
       },
@@ -1115,31 +1109,24 @@
       {
         "binding_id": "membership-card",
         "slug": "card",
-        "reason": "会员中心独立卡片承载等级、到期时间与云空间用量",
+        "reason": "会员中心独立卡片承载等级、到期时间与云空间用量；整卡单入口进入会员中心",
         "variant_dimensions": {
           "base": "auto",
           "surface": "surface"
         }
       },
       {
-        "binding_id": "storage-action",
-        "slug": "link",
-        "reason": "云空间信息旁的轻量管理入口",
+        "binding_id": "my-page-navbar",
+        "slug": "navbar",
+        "reason": "host-tab 主页顶部吸顶栈：custom slot 承载左侧身份区与右侧设置/分享图标操作",
         "variant_dimensions": {
-          "mode": "standalone",
-          "size": "12",
-          "state": "default"
-        }
-      },
-      {
-        "binding_id": "topbar-action",
-        "slug": "button",
-        "reason": "顶部栏右侧设置和分享两个图标按钮入口",
-        "variant_dimensions": {
-          "emphasis": "weak",
-          "size": "sm",
-          "iconMode": "icon-only",
-          "state": "default"
+          "leftControl": "custom",
+          "titleAlignment": "custom",
+          "actions": "icon",
+          "rightActionType": "icon",
+          "spacing": "default",
+          "pageTransition": "push",
+          "position": "sticky"
         }
       },
       {
@@ -1173,6 +1160,15 @@
         }
       },
       {
+        "binding_id": "orders-badge",
+        "slug": "badge",
+        "reason": "我买的入口订单待办数量角标，与品牌色淡底承载组合显性表达待办状态",
+        "variant_dimensions": {
+          "type": "number",
+          "placement": "corner"
+        }
+      },
+      {
         "binding_id": "asset-metric",
         "slug": "metric",
         "reason": "数据资产横滑各项数量/余额展示",
@@ -1193,7 +1189,7 @@
       {
         "binding_id": "card-cover-image",
         "slug": "image",
-        "reason": "内容列表卡片封面图（产品/笔记/直播缩略图），尺寸 72px 自定义矩形",
+        "reason": "内容列表卡片封面图（产品/笔记/直播缩略图），list 视图 64px 方形、grid 视图 1:1 方形",
         "variant_dimensions": {
           "fit": "cover",
           "size": "custom-rect",
@@ -1245,10 +1241,6 @@
       },
       {
         "dom_id": "enter-membership",
-        "target": "feedback:toast"
-      },
-      {
-        "dom_id": "manage-storage",
         "target": "feedback:toast"
       },
       {
@@ -1405,6 +1397,11 @@
   },
   "decisions": [
     {
+      "dd_id": "my-page-navbar",
+      "binding_id": "my-page-navbar",
+      "component_slug": "navbar"
+    },
+    {
       "dd_id": "profile-avatar",
       "binding_id": "profile-avatar",
       "component_slug": "avatar"
@@ -1415,24 +1412,14 @@
       "component_slug": "tag"
     },
     {
-      "dd_id": "settings-button",
-      "binding_id": "topbar-action",
-      "component_slug": "button"
-    },
-    {
-      "dd_id": "share-button",
-      "binding_id": "topbar-action",
-      "component_slug": "button"
-    },
-    {
       "dd_id": "membership-card",
       "binding_id": "membership-card",
       "component_slug": "card"
     },
     {
-      "dd_id": "storage-action",
-      "binding_id": "storage-action",
-      "component_slug": "link"
+      "dd_id": "orders-badge",
+      "binding_id": "orders-badge",
+      "component_slug": "badge"
     },
     {
       "dd_id": "orders-metric",
@@ -1498,13 +1485,12 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/我的/scene.js",
     "scene_css": "wego-app/scenes/我的/scene.css",
-    "source_sha256": "42c62d7b8ef59cd6c1cffb1848feb8eb9197af3850cc30c807130b6f45d08829",
+    "source_sha256": "7248536676667c710e8be383ee02ed3bd7a56d6fbc869376cab725c6d4b8a73c",
     "dom_ids": [
       "switch-album",
       "open-settings",
       "share-homepage",
       "enter-membership",
-      "manage-storage",
       "open-orders",
       "open-fans",
       "open-friends",
@@ -1532,7 +1518,7 @@
       "open-publish-menu",
       "open-cart"
     ],
-    "component_count": 18,
+    "component_count": 17,
     "visualCheck": {
       "status": "passed",
       "viewports": [

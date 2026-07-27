@@ -14,24 +14,19 @@
   font-family: var(--body-md-font-family);
 }
 
-/* 顶部吸顶栈：导航栏永远固定在顶部，承担 safe-area-top 让位。
-   背景跟随页面背景，避免滚动时下方内容穿透。 */
-.my-page__topbar {
+/* 顶部吸顶栈：复用 navbar 组件 + custom slot 承载 host-tab 主页顶部。
+   navbar 自身负责 sticky 吸顶，.my-page__navbar 显式声明 safe-area-top 让位与 bg-page 背景，
+   与 navbar 默认行为对齐，确保场景合同可验证。 */
+.my-page__navbar {
   position: relative;
   z-index: 1;
   flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: var(--spacer-8);
-  min-height: var(--size-56);
   padding-top: var(--safe-area-top);
-  padding-bottom: var(--spacer-8);
-  padding-inline: var(--spacer-4);
   background: var(--bg-page);
 }
 
-/* 身份区：整区域可点击切换相册，按压反馈来自 bg-state-pressed */
-.my-page__topbar-identity {
+/* 身份区：整区域可点击切换相册，按压反馈来自 bg-subtle 圆形胶囊 */
+.my-page__identity {
   display: flex;
   align-items: center;
   gap: var(--spacer-8);
@@ -47,15 +42,15 @@
   touch-action: manipulation;
 }
 
-.my-page__topbar-identity:active {
+.my-page__identity:active {
   background: var(--bg-subtle);
 }
 
-.my-page__topbar-avatar {
+.my-page__identity-avatar {
   flex-shrink: 0;
 }
 
-.my-page__topbar-name {
+.my-page__identity-name {
   min-width: 0;
   overflow: hidden;
   color: var(--text-default);
@@ -66,53 +61,27 @@
   white-space: nowrap;
 }
 
-.my-page__topbar-verified {
+.my-page__identity-verified {
   flex-shrink: 0;
   color: var(--text-brand);
   font-size: var(--size-16);
   line-height: var(--body-xs-line-height);
 }
 
-.my-page__topbar-vip {
+.my-page__identity-vip {
   flex-shrink: 0;
 }
 
-.my-page__topbar-caret {
+.my-page__identity-caret {
   flex-shrink: 0;
-  color: var(--text-secondary);
+  color: var(--text-default);
   font-size: var(--size-16);
   line-height: var(--body-xs-line-height);
 }
 
-.my-page__topbar-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--spacer-4);
-  flex-shrink: 0;
-}
-
-/* 顶部图标按钮：与 button weak sm icon-only 变体一起，提供圆形按压反馈 */
-.my-page__topbar-action {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--size-40);
-  height: var(--size-40);
-  border-radius: var(--radius-full);
-  background: var(--transparent);
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-}
-
-.my-page__topbar-action:active {
-  background: var(--bg-subtle);
-}
-
-.my-page__topbar-action .btn__icon {
-  font-size: var(--size-24);
-  color: var(--text-default);
+/* navbar 右侧 actions 容器：在 .navbar__right--icon 基础上补充场景间距 */
+.my-page__navbar-actions {
+  gap: 0;
 }
 
 /* 滚动容器：承担顶部滚动区（会员栏/数据资产/常用应用）+ 列表区吸顶栈 + 内容列表。
@@ -227,6 +196,7 @@
   height: 100%;
   border-radius: var(--radius-full);
   background: var(--bg-brand);
+  transition: background var(--duration-fast) var(--ease-standard);
 }
 
 /* 数据资产横滑：8 个紧凑入口（图标 + 数字 + 标签），首位「我买的」用品牌色强调 */
@@ -265,8 +235,20 @@
   background: var(--bg-subtle);
 }
 
+.my-page__asset-icon-host {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-40);
+  height: var(--size-40);
+  border-radius: var(--radius-12);
+  background: var(--bg-subtle);
+  color: var(--text-default);
+}
+
 .my-page__asset-icon {
-  color: var(--text-secondary);
+  color: var(--text-default);
   font-size: var(--size-24);
   line-height: var(--body-xs-line-height);
 }
@@ -285,12 +267,23 @@
   white-space: nowrap;
 }
 
+/* 我买的：图标承载品牌色淡底，状态显性表达（应用 wego-clarity-state-visible + wego-aesthetics-neutral-priority） */
+.my-page__asset-entry--brand .my-page__asset-icon-host {
+  background: var(--bg-brand-surface-l1);
+}
+
 .my-page__asset-entry--brand .my-page__asset-icon {
   color: var(--text-brand);
 }
 
 .my-page__asset-entry--brand .my-page__asset-label {
   color: var(--text-default);
+}
+
+/* 我买的待办角标：贴图标承载右上角，使用 badge 组件 corner number 变体 */
+.my-page__asset-entry--brand .my-page__asset-badge {
+  top: -2px;
+  right: -2px;
 }
 
 /* 常用应用横滑：固定入口（进入主页 + 二维码）+ 分隔线 + 最近使用 + 全部 */
@@ -331,9 +324,13 @@
 
 .my-page__app-icon-host {
   --wg-image-placeholder-bg: var(--bg-subtle);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: var(--size-40);
   height: var(--size-40);
   border-radius: var(--radius-12);
+  background: var(--bg-subtle);
 }
 
 .my-page__app-icon {
@@ -413,7 +410,7 @@
 .my-page__card {
   display: flex;
   align-items: stretch;
-  gap: var(--spacer-12);
+  gap: var(--spacer-8);
   padding: var(--spacer-8);
   border-radius: var(--radius-12);
   background: var(--bg-surface);
@@ -433,7 +430,7 @@
 
 .my-page__card-cover-wrap {
   flex: 0 0 auto;
-  width: var(--size-72);
+  width: var(--size-64);
   overflow: hidden;
   border-radius: var(--radius-8);
   aspect-ratio: 1 / 1;
@@ -441,7 +438,7 @@
 
 .my-page__list--grid .my-page__card-cover-wrap {
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 1 / 1;
 }
 
 .my-page__card-cover {
@@ -465,13 +462,21 @@
   font-size: var(--body-md-font-size);
   font-weight: var(--font-weight-medium);
   line-height: var(--body-md-line-height);
-  display: -webkit-box;
   overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .my-page__card-meta {
+  color: var(--text-tertiary);
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.my-page__card-stats {
   color: var(--text-tertiary);
   font-size: var(--body-xs-font-size);
   line-height: var(--body-xs-line-height);

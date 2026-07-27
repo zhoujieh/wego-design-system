@@ -556,7 +556,7 @@ body[data-viewport-mode="native"] .phone-screen {
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
   --safe-area-left: env(safe-area-inset-left, 0px);
   --safe-area-right: env(safe-area-inset-right, 0px);
-  --navbar-body-height: 56px;
+  --navbar-body-height: 44px;
   min-height: var(--standalone-full-height, 100dvh);
   border-radius: 0;
   padding-left: var(--safe-area-left);

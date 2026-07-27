@@ -107,7 +107,8 @@
     "每个标签必须使用 button.wg-tabs__item[role='tab']，选中态只通过 aria-selected='true' 表达。",
     "每个 item 内必须保留 .wg-tabs__content，活动指示条依赖该内容容器计算文本或图标组合的宽度与位置。",
     "每组 tabs 只能有一个 .wg-tabs__active-indicator，并放在 .wg-tabs__scroll 内，与所有 item 同级。",
-    "mini 尺寸默认用于 scroll 布局；首个 mini item 可加 .wg-tabs__item--first 保持左侧起始留白。"
+    "mini 尺寸默认用于 scroll 布局；首个 mini item 可加 .wg-tabs__item--first 保持左侧起始留白。",
+    "item 高度跟随容器：.wg-tabs 根节点 height: 100%，item height: 100%；.wg-tabs--standard / .wg-tabs--mini 通过根节点 min-height 提供独立使用时的默认高度（56px / 48px）。嵌入 navbar 等固定高度容器时，navbar 组件会移除 tabs 的 min-height 让其完全跟随容器。"
   ],
   "behavior": {
     "selection": "点击标签时，宿主把当前 item 的 aria-selected 设为 true，并把同组其他 item 设为 false。",
@@ -120,8 +121,9 @@
     "keyboardRule": "宿主若实现键盘切换，应同步更新 aria-selected 与活动指示条。"
   },
   "usageHints": [
-    "standard 尺寸：item 高 56px，label 使用 16px，indicator 高 3px。",
-    "mini 尺寸：item 高 48px，label 使用 14px，indicator 高 2px。",
+    "standard 尺寸：默认 min-height 56px，label 使用 16px，indicator 高 3px；item 高度跟随容器（height: 100%），独立使用时由 .wg-tabs--standard 的 min-height 提供 56px 默认值。",
+    "mini 尺寸：默认 min-height 48px，label 使用 14px，indicator 高 2px；item 高度跟随容器（height: 100%），独立使用时由 .wg-tabs--mini 的 min-height 提供 48px 默认值。",
+    "tabs 嵌入 navbar 等固定高度容器时，navbar 组件已通过 .navbar__center--custom .wg-tabs { min-height: 0 } 移除默认 min-height，tabs 会完全跟随容器高度，不再冲出。",
     "选中态文字和图标使用 --text-default，未选态使用 --text-secondary，指示条固定使用 --bg-brand。",
     "图标只使用 .wg-tabs__icon，放在 label 左侧或右侧，颜色跟随当前标签状态。",
     "左侧图标尺寸随 tabs 尺寸变化：standard 为 20px，mini 为 16px。",

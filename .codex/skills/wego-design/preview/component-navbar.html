@@ -42,11 +42,17 @@
    - 白色页面（data-bg="surface"）：背景 var(--bg-surface)，白色
    - 深色场景可使用 transparent，由宿主另行处理
    - 宽度默认 100%，由外层容器约束最大宽度
+
+   host-tab 主页 custom 槽位规则：
+   - leftControl=custom：加 .navbar__left--custom 修饰类，移除默认 padding-left 与 gap，由场景在 .navbar__left 内自由填充身份区、logo 等
+   - titleAlignment=custom：加 .navbar__center--custom 修饰类，移除 min-width 与 overflow 限制，允许在中间放 tabs、搜索框等非标题内容
+   - actions=custom：加 .navbar__right--custom 修饰类，移除默认 padding-right 与 gap，由场景在 .navbar__right 内自由填充发布触发器、品牌入口等
+   - custom 模式下 .navbar__title 不再必需，场景填充内容须自行承担布局、按压反馈与可访问性名称
 */
 .navbar { width: 100%; padding-top: var(--safe-area-top, 0px); background: var(--bg-page); flex-shrink: 0; position: sticky; top: 0; z-index: var(--z-sticky, 10); }
 [data-bg="surface"] .navbar { background: var(--bg-surface); }
-/* Body — 默认 56px；桌面手机壳内显示 phone-status 时可覆盖为 44px */
-.navbar__body { height: var(--navbar-body-height, 56px); display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); align-items: center; }
+/* Body — 默认 44px */
+.navbar__body { height: var(--navbar-body-height, 44px); display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); align-items: center; }
 /* Left area — col 1-3，统一左侧间距 16px */
 .navbar__left { grid-column: 1 / 4; display: flex; align-items: center; padding-left: 16px; gap: 4px; height: 100%; }
 .navbar__left-btn { display: flex; align-items: center; justify-content: center; width: auto; height: 44px; cursor: pointer; flex-shrink: 0; position: relative; -webkit-tap-highlight-color: transparent; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
@@ -83,6 +89,12 @@
 .navbar__body--spaced .navbar__right { padding-right: 16px; }
 .navbar__body--spaced .navbar__right--icon { padding-right: 4px; }
 .navbar__right--gap { gap: 12px; }
+/* Custom slot variants — host-tab 主页使用：移除默认内边距与节奏限制，由场景自由填充 */
+.navbar__left--custom { padding-left: 0; gap: 0; }
+.navbar__center--custom { min-width: 0; overflow: visible; padding: 0; gap: 0; height: 100%; }
+.navbar__right--custom { padding-right: 0; gap: 0; }
+/* navbar 内嵌 tabs 时移除 tabs 默认 min-height，让 tabs 完全跟随 navbar 主体高度 */
+.navbar__center--custom .wg-tabs { min-height: 0; }
 /* Action button items */
 .navbar__action { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 44px; min-height: 44px; cursor: pointer; position: relative; flex-shrink: 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
 .navbar__action:active,
@@ -152,7 +164,7 @@
 }
 .navbar-demo-dark-bg .demo-content {
   padding: var(--spacer-16);
-  padding-top: calc(var(--navbar-body-height, 56px) + var(--safe-area-top, 0px) + var(--spacer-16)); /* 为 fixed navbar + 安全区让位 */
+  padding-top: calc(var(--navbar-body-height, 44px) + var(--safe-area-top, 0px) + var(--spacer-16)); /* 为 fixed navbar + 安全区让位 */
   color: rgba(255, 255, 255, 0.85);
   font-size: var(--body-md-font-size);
   line-height: 1.6;
@@ -366,10 +378,74 @@
       </div>
       <div class="demo-content">
         <p>navbar 透明背景 + 文字/图标用 --text-inverse 反白，透过导航栏可以看到深色或图片背景。</p>
-        <p>注意：fixed-transparent 模式下 navbar 脱离文档流，page-body 需加 padding-top: calc(var(--navbar-body-height, 56px) + var(--safe-area-top, 0px)) 为 navbar 与顶部安全区让位（此演示容器额外补了 16px 内容留白）。</p>
+        <p>注意：fixed-transparent 模式下 navbar 脱离文档流，page-body 需加 padding-top: calc(var(--navbar-body-height, 44px) + var(--safe-area-top, 0px)) 为 navbar 与顶部安全区让位（此演示容器额外补了 16px 内容留白）。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="preview-phone navbar-demo">
+    <div class="label">host-tab 主页 custom 槽 — 左身份区 + 右图标操作（如「我的」tab）</div>
+    <div class="navbar">
+      <div class="navbar__body">
+        <div class="navbar__left navbar__left--custom">
+          <button type="button" class="navbar-demo-identity" aria-label="切换相册">
+            <div class="avatar avatar--40 avatar--image"><img src="../assets/image/avatar/avatar_083.jpg" alt=""></div>
+            <span class="navbar-demo-identity-name">微购优选商行</span>
+            <i class="wego-iconfont-s icon-renzheng navbar-demo-identity-verified" aria-label="已认证"></i>
+            <span class="tag tag--20 tag--brand-stroke"><span class="tag__label">VIP</span></span>
+            <i class="wego-iconfont-s icon-xiajiantou16 navbar-demo-identity-caret" aria-hidden="true"></i>
+          </button>
+        </div>
+        <div class="navbar__center navbar__center--custom"></div>
+        <div class="navbar__right navbar__right--icon">
+          <div class="navbar__action">
+            <div class="navbar__action-icon"><i class="wego-iconfont-s icon-shezhi"></i></div>
+            <span class="navbar__action-label">设置</span>
+          </div>
+          <div class="navbar__action">
+            <div class="navbar__action-icon"><i class="wego-iconfont-s icon-fenxiang"></i></div>
+            <span class="navbar__action-label">分享</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="preview-phone navbar-demo">
+    <div class="label">host-tab 主页 custom 槽 — 中间 tabs + 右自定义触发器（如「微购相册动态」tab）</div>
+    <div class="navbar">
+      <div class="navbar__body">
+        <div class="navbar__left navbar__left--custom"></div>
+        <div class="navbar__center navbar__center--custom">
+          <div class="wg-tabs wg-tabs--standard wg-tabs--scroll navbar-demo-tabs" role="tablist">
+            <div class="wg-tabs__scroll">
+              <button class="wg-tabs__item" role="tab" aria-selected="true" type="button"><span class="wg-tabs__content"><span class="wg-tabs__label">关注</span></span></button>
+              <button class="wg-tabs__item" role="tab" aria-selected="false" type="button"><span class="wg-tabs__content"><span class="wg-tabs__label">推荐</span></span></button>
+              <button class="wg-tabs__item" role="tab" aria-selected="false" type="button"><span class="wg-tabs__content"><span class="wg-tabs__label">上新</span></span></button>
+              <span class="wg-tabs__active-indicator" aria-hidden="true"></span>
+            </div>
+          </div>
+        </div>
+        <div class="navbar__right navbar__right--custom">
+          <button type="button" class="navbar-demo-publish" aria-label="发布动态">
+            <span class="navbar-demo-publish-bg" aria-hidden="true">+</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
 </div>
+<style>
+  /* host-tab demo 局部样式 — 仅用于 Preview 演示，不在 components.css 中提取 */
+  .navbar-demo-identity { display: flex; align-items: center; gap: var(--spacer-8); padding: var(--spacer-4) var(--spacer-8); background: transparent; border: 0; cursor: pointer; flex-shrink: 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  .navbar-demo-identity:active { background: var(--bg-subtle); border-radius: var(--radius-full); }
+  .navbar-demo-identity-name { font-size: var(--heading-sm-font-size); font-weight: var(--font-weight-medium); color: var(--text-default); line-height: var(--heading-sm-line-height); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
+  .navbar-demo-identity-verified { font-size: 16px; color: var(--text-brand); line-height: var(--body-xs-line-height); }
+  .navbar-demo-identity-caret { font-size: 16px; color: var(--text-default); line-height: var(--body-xs-line-height); }
+  .navbar-demo-tabs { width: 100%; }
+  .navbar-demo-publish { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 0; background: transparent; cursor: pointer; flex-shrink: 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  .navbar-demo-publish:active { opacity: 0.6; }
+  .navbar-demo-publish-bg { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: var(--radius-full); background: var(--bg-brand); color: var(--text-inverse); font-size: 20px; line-height: 1; }
+</style>
 </body>
 </html>

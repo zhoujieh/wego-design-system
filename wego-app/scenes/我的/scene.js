@@ -13,42 +13,30 @@
     "source": "library-consumption.json#/appRuntime/presentationTypes"
   },
   "prompt_contract": {
-    "design_system_version": 465,
+    "design_system_version": 468,
     "token_bindings": [
       { "selector": ".my-page", "content_role": "页面边距", "css_property": "padding-inline", "token": "var(--layout-page-margin-m8)" },
       { "selector": ".my-page", "content_role": "页面背景", "css_property": "background", "token": "var(--bg-page)" },
       { "selector": ".my-page", "content_role": "页面默认文字", "css_property": "color", "token": "var(--text-default)" },
       { "selector": ".my-page", "content_role": "页面基础字体", "css_property": "font-family", "token": "var(--body-md-font-family)" },
-      { "selector": ".my-page__topbar", "content_role": "顶部吸顶栈节奏", "css_property": "gap", "token": "var(--spacer-8)" },
-      { "selector": ".my-page__topbar", "content_role": "顶部吸顶栈最小高度", "css_property": "min-height", "token": "var(--size-56)" },
-      { "selector": ".my-page__topbar", "content_role": "顶部吸顶栈底部留白", "css_property": "padding-bottom", "token": "var(--spacer-8)" },
-      { "selector": ".my-page__topbar", "content_role": "顶部安全区让位", "css_property": "padding-top", "token": "var(--safe-area-top)" },
-      { "selector": ".my-page__topbar", "content_role": "顶部吸顶栈水平留白", "css_property": "padding-inline", "token": "var(--spacer-4)" },
-      { "selector": ".my-page__topbar", "content_role": "顶部吸顶栈背景", "css_property": "background", "token": "var(--bg-page)" },
-      { "selector": ".my-page__topbar-identity", "content_role": "身份区节奏", "css_property": "gap", "token": "var(--spacer-8)" },
-      { "selector": ".my-page__topbar-identity", "content_role": "身份区垂直内边距", "css_property": "padding-block", "token": "var(--spacer-4)" },
-      { "selector": ".my-page__topbar-identity", "content_role": "身份区水平内边距", "css_property": "padding-inline", "token": "var(--spacer-8)" },
-      { "selector": ".my-page__topbar-identity", "content_role": "身份区底色", "css_property": "background", "token": "var(--transparent)" },
-      { "selector": ".my-page__topbar-identity", "content_role": "身份区圆角", "css_property": "border-radius", "token": "var(--radius-full)" },
-      { "selector": ".my-page__topbar-identity:active", "content_role": "身份区按压反馈", "css_property": "background", "token": "var(--bg-subtle)" },
-      { "selector": ".my-page__topbar-name", "content_role": "用户名文字", "css_property": "color", "token": "var(--text-default)" },
-      { "selector": ".my-page__topbar-name", "content_role": "用户名层级", "css_property": "font-size", "token": "var(--heading-sm-font-size)" },
-      { "selector": ".my-page__topbar-name", "content_role": "用户名层级", "css_property": "font-weight", "token": "var(--font-weight-medium)" },
-      { "selector": ".my-page__topbar-name", "content_role": "用户名层级", "css_property": "line-height", "token": "var(--heading-sm-line-height)" },
-      { "selector": ".my-page__topbar-verified", "content_role": "认证图标颜色", "css_property": "color", "token": "var(--text-brand)" },
-      { "selector": ".my-page__topbar-verified", "content_role": "认证图标尺寸", "css_property": "font-size", "token": "var(--size-16)" },
-      { "selector": ".my-page__topbar-verified", "content_role": "认证图标行高", "css_property": "line-height", "token": "var(--body-xs-line-height)" },
-      { "selector": ".my-page__topbar-caret", "content_role": "切换指示颜色", "css_property": "color", "token": "var(--text-secondary)" },
-      { "selector": ".my-page__topbar-caret", "content_role": "切换指示尺寸", "css_property": "font-size", "token": "var(--size-16)" },
-      { "selector": ".my-page__topbar-caret", "content_role": "切换指示行高", "css_property": "line-height", "token": "var(--body-xs-line-height)" },
-      { "selector": ".my-page__topbar-actions", "content_role": "顶部图标按钮组节奏", "css_property": "gap", "token": "var(--spacer-4)" },
-      { "selector": ".my-page__topbar-action", "content_role": "顶部图标按钮尺寸", "css_property": "width", "token": "var(--size-40)" },
-      { "selector": ".my-page__topbar-action", "content_role": "顶部图标按钮尺寸", "css_property": "height", "token": "var(--size-40)" },
-      { "selector": ".my-page__topbar-action", "content_role": "顶部图标按钮圆角", "css_property": "border-radius", "token": "var(--radius-full)" },
-      { "selector": ".my-page__topbar-action", "content_role": "顶部图标按钮底色", "css_property": "background", "token": "var(--transparent)" },
-      { "selector": ".my-page__topbar-action:active", "content_role": "顶部图标按钮按压反馈", "css_property": "background", "token": "var(--bg-subtle)" },
-      { "selector": ".my-page__topbar-action .btn__icon", "content_role": "顶部图标按钮图标尺寸", "css_property": "font-size", "token": "var(--size-24)" },
-      { "selector": ".my-page__topbar-action .btn__icon", "content_role": "顶部图标按钮图标颜色", "css_property": "color", "token": "var(--text-default)" },
+      { "selector": ".my-page__navbar", "content_role": "顶部安全区让位", "css_property": "padding-top", "token": "var(--safe-area-top)" },
+      { "selector": ".my-page__navbar", "content_role": "顶部吸顶栈背景", "css_property": "background", "token": "var(--bg-page)" },
+      { "selector": ".my-page__identity", "content_role": "身份区节奏", "css_property": "gap", "token": "var(--spacer-8)" },
+      { "selector": ".my-page__identity", "content_role": "身份区垂直内边距", "css_property": "padding-block", "token": "var(--spacer-4)" },
+      { "selector": ".my-page__identity", "content_role": "身份区水平内边距", "css_property": "padding-inline", "token": "var(--spacer-8)" },
+      { "selector": ".my-page__identity", "content_role": "身份区底色", "css_property": "background", "token": "var(--transparent)" },
+      { "selector": ".my-page__identity", "content_role": "身份区圆角", "css_property": "border-radius", "token": "var(--radius-full)" },
+      { "selector": ".my-page__identity:active", "content_role": "身份区按压反馈", "css_property": "background", "token": "var(--bg-subtle)" },
+      { "selector": ".my-page__identity-name", "content_role": "用户名文字", "css_property": "color", "token": "var(--text-default)" },
+      { "selector": ".my-page__identity-name", "content_role": "用户名层级", "css_property": "font-size", "token": "var(--heading-sm-font-size)" },
+      { "selector": ".my-page__identity-name", "content_role": "用户名层级", "css_property": "font-weight", "token": "var(--font-weight-medium)" },
+      { "selector": ".my-page__identity-name", "content_role": "用户名层级", "css_property": "line-height", "token": "var(--heading-sm-line-height)" },
+      { "selector": ".my-page__identity-verified", "content_role": "认证图标颜色", "css_property": "color", "token": "var(--text-brand)" },
+      { "selector": ".my-page__identity-verified", "content_role": "认证图标尺寸", "css_property": "font-size", "token": "var(--size-16)" },
+      { "selector": ".my-page__identity-verified", "content_role": "认证图标行高", "css_property": "line-height", "token": "var(--body-xs-line-height)" },
+      { "selector": ".my-page__identity-caret", "content_role": "切换指示颜色", "css_property": "color", "token": "var(--text-default)" },
+      { "selector": ".my-page__identity-caret", "content_role": "切换指示尺寸", "css_property": "font-size", "token": "var(--size-16)" },
+      { "selector": ".my-page__identity-caret", "content_role": "切换指示行高", "css_property": "line-height", "token": "var(--body-xs-line-height)" },
       { "selector": ".my-page__scroll", "content_role": "滚动区底部留白", "css_property": "padding-bottom", "token": "var(--safe-area-bottom-content)" },
       { "selector": ".my-page__hero", "content_role": "顶部滚动区节奏", "css_property": "gap", "token": "var(--spacer-12)" },
       { "selector": ".my-page__hero", "content_role": "顶部滚动区垂直留白", "css_property": "padding-block", "token": "var(--spacer-12)" },
@@ -77,6 +65,7 @@
       { "selector": ".my-page__progress", "content_role": "空间进度轨道背景", "css_property": "background", "token": "var(--bg-subtle)" },
       { "selector": ".my-page__progress-value", "content_role": "空间已用进度圆角", "css_property": "border-radius", "token": "var(--radius-full)" },
       { "selector": ".my-page__progress-value", "content_role": "空间已用进度背景", "css_property": "background", "token": "var(--bg-brand)" },
+      { "selector": ".my-page__progress-value", "content_role": "空间已用进度过渡", "css_property": "transition", "token": "var(--duration-fast)" },
       { "selector": ".my-page__assets", "content_role": "数据资产横滑间距", "css_property": "gap", "token": "var(--spacer-12)" },
       { "selector": ".my-page__assets", "content_role": "数据资产横滑垂直留白", "css_property": "padding-block", "token": "var(--spacer-4)" },
       { "selector": ".my-page__asset-entry", "content_role": "数据资产入口节奏", "css_property": "gap", "token": "var(--spacer-4)" },
@@ -85,7 +74,13 @@
       { "selector": ".my-page__asset-entry", "content_role": "数据资产入口圆角", "css_property": "border-radius", "token": "var(--radius-8)" },
       { "selector": ".my-page__asset-entry", "content_role": "数据资产入口底色", "css_property": "background", "token": "var(--transparent)" },
       { "selector": ".my-page__asset-entry:active", "content_role": "数据资产入口按压反馈", "css_property": "background", "token": "var(--bg-subtle)" },
-      { "selector": ".my-page__asset-icon", "content_role": "数据资产图标颜色", "css_property": "color", "token": "var(--text-secondary)" },
+      { "selector": ".my-page__asset-icon-host", "content_role": "数据资产图标承载尺寸", "css_property": "width", "token": "var(--size-40)" },
+      { "selector": ".my-page__asset-icon-host", "content_role": "数据资产图标承载尺寸", "css_property": "height", "token": "var(--size-40)" },
+      { "selector": ".my-page__asset-icon-host", "content_role": "数据资产图标承载边界", "css_property": "border-radius", "token": "var(--radius-12)" },
+      { "selector": ".my-page__asset-icon-host", "content_role": "数据资产图标承载底色", "css_property": "background", "token": "var(--bg-subtle)" },
+      { "selector": ".my-page__asset-icon-host", "content_role": "数据资产图标承载文字颜色", "css_property": "color", "token": "var(--text-default)" },
+      { "selector": ".my-page__asset-entry--brand .my-page__asset-icon-host", "content_role": "我买的图标承载品牌色淡底", "css_property": "background", "token": "var(--bg-brand-surface-l1)" },
+      { "selector": ".my-page__asset-icon", "content_role": "数据资产图标颜色", "css_property": "color", "token": "var(--text-default)" },
       { "selector": ".my-page__asset-icon", "content_role": "数据资产图标尺寸", "css_property": "font-size", "token": "var(--size-24)" },
       { "selector": ".my-page__asset-icon", "content_role": "数据资产图标行高", "css_property": "line-height", "token": "var(--body-xs-line-height)" },
       { "selector": ".my-page__asset-value", "content_role": "数据资产数值最小高度", "css_property": "min-height", "token": "var(--size-20)" },
@@ -105,6 +100,7 @@
       { "selector": ".my-page__app-icon-host", "content_role": "应用图标承载尺寸", "css_property": "width", "token": "var(--size-40)" },
       { "selector": ".my-page__app-icon-host", "content_role": "应用图标承载尺寸", "css_property": "height", "token": "var(--size-40)" },
       { "selector": ".my-page__app-icon-host", "content_role": "应用图标承载边界", "css_property": "border-radius", "token": "var(--radius-12)" },
+      { "selector": ".my-page__app-icon-host", "content_role": "应用图标承载底色", "css_property": "background", "token": "var(--bg-subtle)" },
       { "selector": ".my-page__app-icon", "content_role": "应用图标颜色", "css_property": "color", "token": "var(--text-default)" },
       { "selector": ".my-page__app-icon", "content_role": "应用图标尺寸", "css_property": "font-size", "token": "var(--size-24)" },
       { "selector": ".my-page__app-icon", "content_role": "应用图标行高", "css_property": "line-height", "token": "var(--body-xs-line-height)" },
@@ -119,22 +115,25 @@
       { "selector": ".my-page__list", "content_role": "内容列表节奏", "css_property": "gap", "token": "var(--spacer-12)" },
       { "selector": ".my-page__list", "content_role": "内容列表底部留白", "css_property": "padding-bottom", "token": "var(--spacer-32)" },
       { "selector": ".my-page__list--grid", "content_role": "网格视图节奏", "css_property": "gap", "token": "var(--spacer-12)" },
-      { "selector": ".my-page__card", "content_role": "内容卡片节奏", "css_property": "gap", "token": "var(--spacer-12)" },
+      { "selector": ".my-page__card", "content_role": "内容卡片节奏", "css_property": "gap", "token": "var(--spacer-8)" },
       { "selector": ".my-page__card", "content_role": "内容卡片留白", "css_property": "padding", "token": "var(--spacer-8)" },
       { "selector": ".my-page__card", "content_role": "内容卡片边界", "css_property": "border-radius", "token": "var(--radius-12)" },
       { "selector": ".my-page__card", "content_role": "内容卡片背景", "css_property": "background", "token": "var(--bg-surface)" },
       { "selector": ".my-page__list--grid .my-page__card", "content_role": "网格视图卡片节奏", "css_property": "gap", "token": "var(--spacer-8)" },
       { "selector": ".my-page__card:active", "content_role": "内容卡片按压反馈", "css_property": "background", "token": "var(--bg-subtle)" },
-      { "selector": ".my-page__card-cover-wrap", "content_role": "内容卡片封面尺寸", "css_property": "width", "token": "var(--size-72)" },
+      { "selector": ".my-page__card-cover-wrap", "content_role": "内容卡片封面尺寸", "css_property": "width", "token": "var(--size-64)" },
       { "selector": ".my-page__card-cover-wrap", "content_role": "内容卡片封面圆角", "css_property": "border-radius", "token": "var(--radius-8)" },
       { "selector": ".my-page__card-body", "content_role": "内容卡片正文节奏", "css_property": "gap", "token": "var(--spacer-4)" },
       { "selector": ".my-page__card-title", "content_role": "内容卡片标题", "css_property": "color", "token": "var(--text-default)" },
       { "selector": ".my-page__card-title", "content_role": "内容卡片标题", "css_property": "font-size", "token": "var(--body-md-font-size)" },
       { "selector": ".my-page__card-title", "content_role": "内容卡片标题", "css_property": "font-weight", "token": "var(--font-weight-medium)" },
       { "selector": ".my-page__card-title", "content_role": "内容卡片标题", "css_property": "line-height", "token": "var(--body-md-line-height)" },
-      { "selector": ".my-page__card-meta", "content_role": "内容卡片辅助信息", "css_property": "color", "token": "var(--text-tertiary)" },
-      { "selector": ".my-page__card-meta", "content_role": "内容卡片辅助信息", "css_property": "font-size", "token": "var(--body-xs-font-size)" },
-      { "selector": ".my-page__card-meta", "content_role": "内容卡片辅助信息", "css_property": "line-height", "token": "var(--body-xs-line-height)" },
+      { "selector": ".my-page__card-meta", "content_role": "内容卡片发布时间", "css_property": "color", "token": "var(--text-tertiary)" },
+      { "selector": ".my-page__card-meta", "content_role": "内容卡片发布时间", "css_property": "font-size", "token": "var(--body-xs-font-size)" },
+      { "selector": ".my-page__card-meta", "content_role": "内容卡片发布时间", "css_property": "line-height", "token": "var(--body-xs-line-height)" },
+      { "selector": ".my-page__card-stats", "content_role": "内容卡片统计数据", "css_property": "color", "token": "var(--text-tertiary)" },
+      { "selector": ".my-page__card-stats", "content_role": "内容卡片统计数据", "css_property": "font-size", "token": "var(--body-xs-font-size)" },
+      { "selector": ".my-page__card-stats", "content_role": "内容卡片统计数据", "css_property": "line-height", "token": "var(--body-xs-line-height)" },
       { "selector": ".my-page__empty", "content_role": "空态垂直留白", "css_property": "padding-block", "token": "var(--spacer-32)" },
       { "selector": ".my-page__empty", "content_role": "空态文字", "css_property": "color", "token": "var(--text-tertiary)" },
       { "selector": ".my-page__empty", "content_role": "空态文字", "css_property": "font-size", "token": "var(--body-md-font-size)" },
@@ -219,31 +218,24 @@
       {
         "binding_id": "membership-card",
         "slug": "card",
-        "reason": "会员中心独立卡片承载等级、到期时间与云空间用量",
+        "reason": "会员中心独立卡片承载等级、到期时间与云空间用量；整卡单入口进入会员中心",
         "variant_dimensions": {
           "base": "auto",
           "surface": "surface"
         }
       },
       {
-        "binding_id": "storage-action",
-        "slug": "link",
-        "reason": "云空间信息旁的轻量管理入口",
+        "binding_id": "my-page-navbar",
+        "slug": "navbar",
+        "reason": "host-tab 主页顶部吸顶栈：custom slot 承载左侧身份区与右侧设置/分享图标操作",
         "variant_dimensions": {
-          "mode": "standalone",
-          "size": "12",
-          "state": "default"
-        }
-      },
-      {
-        "binding_id": "topbar-action",
-        "slug": "button",
-        "reason": "顶部栏右侧设置和分享两个图标按钮入口",
-        "variant_dimensions": {
-          "emphasis": "weak",
-          "size": "sm",
-          "iconMode": "icon-only",
-          "state": "default"
+          "leftControl": "custom",
+          "titleAlignment": "custom",
+          "actions": "icon",
+          "rightActionType": "icon",
+          "spacing": "default",
+          "pageTransition": "push",
+          "position": "sticky"
         }
       },
       {
@@ -277,6 +269,15 @@
         }
       },
       {
+        "binding_id": "orders-badge",
+        "slug": "badge",
+        "reason": "我买的入口订单待办数量角标，与品牌色淡底承载组合显性表达待办状态",
+        "variant_dimensions": {
+          "type": "number",
+          "placement": "corner"
+        }
+      },
+      {
         "binding_id": "asset-metric",
         "slug": "metric",
         "reason": "数据资产横滑各项数量/余额展示",
@@ -297,7 +298,7 @@
       {
         "binding_id": "card-cover-image",
         "slug": "image",
-        "reason": "内容列表卡片封面图（产品/笔记/直播缩略图），尺寸 72px 自定义矩形",
+        "reason": "内容列表卡片封面图（产品/笔记/直播缩略图），list 视图 64px 方形、grid 视图 1:1 方形",
         "variant_dimensions": {
           "fit": "cover",
           "size": "custom-rect",
@@ -336,7 +337,6 @@
       { "dom_id": "open-settings", "target": "feedback:toast" },
       { "dom_id": "share-homepage", "target": "feedback:toast" },
       { "dom_id": "enter-membership", "target": "feedback:toast" },
-      { "dom_id": "manage-storage", "target": "feedback:toast" },
       { "dom_id": "open-orders", "target": "feedback:toast" },
       { "dom_id": "open-fans", "target": "feedback:toast" },
       { "dom_id": "open-friends", "target": "feedback:toast" },
@@ -582,25 +582,32 @@ function createMySceneRecentAppEntry(app, index) {
 
 const mySceneTemplate = `
     <section class="my-page" data-surface-id="my-home" data-route-id="my" data-route-bound="true" data-layout-mode="composed" data-page-edge-mode="M8" data-bg="page">
-      <header class="my-page__topbar" data-topbar>
-        <button type="button" class="my-page__topbar-identity" data-dom-id="switch-album" aria-label="切换相册">
-          <div class="avatar avatar--40 avatar--image my-page__topbar-avatar" data-dd-id="profile-avatar" data-component-slug="avatar" data-component-binding="profile-avatar">
-            <img src="./lib/assets/image/avatar/avatar_083.jpg" alt="我的头像" data-current-merchant-avatar>
+      <div class="navbar my-page__navbar" data-topbar data-dd-id="my-page-navbar" data-component-slug="navbar" data-component-binding="my-page-navbar">
+        <div class="navbar__body">
+          <div class="navbar__left navbar__left--custom">
+            <button type="button" class="my-page__identity" data-dom-id="switch-album" aria-label="切换相册">
+              <div class="avatar avatar--40 avatar--image my-page__identity-avatar" data-dd-id="profile-avatar" data-component-slug="avatar" data-component-binding="profile-avatar">
+                <img src="./lib/assets/image/avatar/avatar_083.jpg" alt="我的头像" data-current-merchant-avatar>
+              </div>
+              <span class="my-page__identity-name" data-current-merchant-name>微购优选商行</span>
+              <i class="wego-iconfont-s icon-renzheng my-page__identity-verified" aria-label="已认证"></i>
+              <span class="tag tag--20 tag--brand-stroke my-page__identity-vip" data-dd-id="vip-tag" data-component-slug="tag" data-component-binding="vip-tag"><span class="tag__label">VIP</span></span>
+              <i class="wego-iconfont-s icon-xiajiantou16 my-page__identity-caret" aria-hidden="true"></i>
+            </button>
           </div>
-          <span class="my-page__topbar-name" data-current-merchant-name>微购优选商行</span>
-          <i class="wego-iconfont-s icon-renzheng my-page__topbar-verified" aria-label="已认证"></i>
-          <span class="tag tag--20 tag--brand-stroke my-page__topbar-vip" data-dd-id="vip-tag" data-component-slug="tag" data-component-binding="vip-tag"><span class="tag__label">VIP</span></span>
-          <i class="wego-iconfont-s icon-xiajiantou16 my-page__topbar-caret" aria-hidden="true"></i>
-        </button>
-        <div class="my-page__topbar-actions">
-          <button type="button" class="btn btn--weak btn--sm btn--icon-only my-page__topbar-action" aria-label="设置" data-dom-id="open-settings" data-dd-id="settings-button" data-component-slug="button" data-component-binding="topbar-action">
-            <i class="btn__icon icon-shezhi"></i>
-          </button>
-          <button type="button" class="btn btn--weak btn--sm btn--icon-only my-page__topbar-action" aria-label="分享主页" data-dom-id="share-homepage" data-dd-id="share-button" data-component-slug="button" data-component-binding="topbar-action">
-            <i class="btn__icon icon-fenxiang"></i>
-          </button>
+          <div class="navbar__center navbar__center--custom"></div>
+          <div class="navbar__right navbar__right--icon my-page__navbar-actions">
+            <div class="navbar__action" data-dom-id="open-settings" role="button" tabindex="0" aria-label="设置">
+              <div class="navbar__action-icon"><i class="wego-iconfont-s icon-shezhi"></i></div>
+              <span class="navbar__action-label">设置</span>
+            </div>
+            <div class="navbar__action" data-dom-id="share-homepage" role="button" tabindex="0" aria-label="分享主页">
+              <div class="navbar__action-icon"><i class="wego-iconfont-s icon-fenxiang"></i></div>
+              <span class="navbar__action-label">分享</span>
+            </div>
+          </div>
         </div>
-      </header>
+      </div>
 
       <div class="my-page__scroll" data-scroll>
         <div class="my-page__hero">
@@ -618,9 +625,8 @@ const mySceneTemplate = `
               <div class="my-page__storage">
                 <div class="my-page__storage-row">
                   <p class="my-page__storage-value">117.29G / 360G</p>
-                  <button type="button" class="link link--12" data-dd-id="storage-action" data-component-slug="link" data-component-binding="storage-action" data-dom-id="manage-storage">管理</button>
                 </div>
-                <div class="my-page__progress" role="progressbar" aria-label="空间使用进度" aria-valuemin="0" aria-valuemax="360" aria-valuenow="117.29" aria-valuetext="已使用117.29G，共360G">
+                <div class="my-page__progress" data-storage-progress role="progressbar" aria-label="空间使用进度" aria-valuemin="0" aria-valuemax="360" aria-valuenow="117.29" aria-valuetext="已使用117.29G，共360G">
                   <span class="my-page__progress-value"></span>
                 </div>
               </div>
@@ -629,47 +635,50 @@ const mySceneTemplate = `
 
           <div class="my-page__assets" data-assets-scroll>
             <button type="button" class="my-page__asset-entry my-page__asset-entry--brand" data-asset-key="orders" data-dom-id="open-orders">
-              <i class="wego-iconfont-s icon-dingdan my-page__asset-icon" aria-hidden="true"></i>
+              <span class="my-page__asset-icon-host">
+                <i class="wego-iconfont-s icon-dingdan my-page__asset-icon" aria-hidden="true"></i>
+                <span class="badge badge--corner badge--number my-page__asset-badge" data-dd-id="orders-badge" data-component-slug="badge" data-component-binding="orders-badge">3</span>
+              </span>
               <span class="metric metric--16 metric--black my-page__asset-value" data-dd-id="orders-metric" data-component-slug="metric" data-component-binding="orders-metric"><span class="metric__main"><span class="metric__value"><span class="metric__integer">3</span></span></span></span>
               <span class="my-page__asset-label">我买的</span>
             </button>
             <button type="button" class="my-page__asset-entry" data-asset-key="fans" data-dom-id="open-fans">
-              <i class="wego-iconfont-s icon-fensi my-page__asset-icon" aria-hidden="true"></i>
+              <span class="my-page__asset-icon-host"><i class="wego-iconfont-s icon-fensi my-page__asset-icon" aria-hidden="true"></i></span>
               <span class="metric metric--16 metric--black my-page__asset-value" data-dd-id="asset-metric-fans" data-component-slug="metric" data-component-binding="asset-metric"><span class="metric__main"><span class="metric__value"><span class="metric__integer">1.2</span><span class="metric__unit">万</span></span></span></span>
               <span class="my-page__asset-label">粉丝</span>
             </button>
             <button type="button" class="my-page__asset-entry" data-asset-key="friends" data-dom-id="open-friends">
-              <i class="wego-iconfont-s icon-fensihuiyuanka my-page__asset-icon" aria-hidden="true"></i>
+              <span class="my-page__asset-icon-host"><i class="wego-iconfont-s icon-fensihuiyuanka my-page__asset-icon" aria-hidden="true"></i></span>
               <span class="metric metric--16 metric--black my-page__asset-value" data-dd-id="asset-metric-friends" data-component-slug="metric" data-component-binding="asset-metric"><span class="metric__main"><span class="metric__value"><span class="metric__integer">328</span></span></span></span>
               <span class="my-page__asset-label">好友</span>
             </button>
             <button type="button" class="my-page__asset-entry" data-asset-key="agents" data-dom-id="open-agents">
-              <i class="wego-iconfont-s icon-fenxiangzhuan my-page__asset-icon" aria-hidden="true"></i>
+              <span class="my-page__asset-icon-host"><i class="wego-iconfont-s icon-fenxiangzhuan my-page__asset-icon" aria-hidden="true"></i></span>
               <span class="metric metric--16 metric--black my-page__asset-value" data-dd-id="asset-metric-agents" data-component-slug="metric" data-component-binding="asset-metric"><span class="metric__main"><span class="metric__value"><span class="metric__integer">46</span></span></span></span>
               <span class="my-page__asset-label">代理</span>
             </button>
             <button type="button" class="my-page__asset-entry" data-asset-key="visitors" data-dom-id="open-visitors">
-              <i class="wego-iconfont-s icon-fangkejilu my-page__asset-icon" aria-hidden="true"></i>
+              <span class="my-page__asset-icon-host"><i class="wego-iconfont-s icon-fangkejilu my-page__asset-icon" aria-hidden="true"></i></span>
               <span class="metric metric--16 metric--black my-page__asset-value" data-dd-id="asset-metric-visitors" data-component-slug="metric" data-component-binding="asset-metric"><span class="metric__main"><span class="metric__value"><span class="metric__integer">892</span></span></span></span>
               <span class="my-page__asset-label">访客</span>
             </button>
             <button type="button" class="my-page__asset-entry" data-asset-key="staff" data-dom-id="open-staff">
-              <i class="wego-iconfont-s icon-tuiguangyuan my-page__asset-icon" aria-hidden="true"></i>
+              <span class="my-page__asset-icon-host"><i class="wego-iconfont-s icon-tuiguangyuan my-page__asset-icon" aria-hidden="true"></i></span>
               <span class="metric metric--16 metric--black my-page__asset-value" data-dd-id="asset-metric-staff" data-component-slug="metric" data-component-binding="asset-metric"><span class="metric__main"><span class="metric__value"><span class="metric__integer">12</span></span></span></span>
               <span class="my-page__asset-label">员工</span>
             </button>
             <button type="button" class="my-page__asset-entry" data-asset-key="wallet" data-dom-id="open-wallet">
-              <i class="wego-iconfont-s icon-qianbao my-page__asset-icon" aria-hidden="true"></i>
+              <span class="my-page__asset-icon-host"><i class="wego-iconfont-s icon-qianbao my-page__asset-icon" aria-hidden="true"></i></span>
               <span class="metric metric--16 metric--black my-page__asset-value" data-dd-id="asset-metric-wallet" data-component-slug="metric" data-component-binding="asset-metric"><span class="metric__main"><span class="metric__value"><span class="metric__integer">2,580</span></span></span></span>
               <span class="my-page__asset-label">钱包</span>
             </button>
             <button type="button" class="my-page__asset-entry" data-asset-key="coupons" data-dom-id="open-coupons">
-              <i class="wego-iconfont-s icon-quan my-page__asset-icon" aria-hidden="true"></i>
+              <span class="my-page__asset-icon-host"><i class="wego-iconfont-s icon-quan my-page__asset-icon" aria-hidden="true"></i></span>
               <span class="metric metric--16 metric--black my-page__asset-value" data-dd-id="asset-metric-coupons" data-component-slug="metric" data-component-binding="asset-metric"><span class="metric__main"><span class="metric__value"><span class="metric__integer">18</span></span></span></span>
               <span class="my-page__asset-label">卡券</span>
             </button>
             <button type="button" class="my-page__asset-entry" data-asset-key="favorites" data-dom-id="open-favorites">
-              <i class="wego-iconfont-s icon-shoucang my-page__asset-icon" aria-hidden="true"></i>
+              <span class="my-page__asset-icon-host"><i class="wego-iconfont-s icon-shoucang my-page__asset-icon" aria-hidden="true"></i></span>
               <span class="metric metric--16 metric--black my-page__asset-value" data-dd-id="asset-metric-favorites" data-component-slug="metric" data-component-binding="asset-metric"><span class="metric__main"><span class="metric__value"><span class="metric__integer">256</span></span></span></span>
               <span class="my-page__asset-label">收藏</span>
             </button>
@@ -801,7 +810,8 @@ function renderMySceneList(ctx, root) {
       +   '</div>'
       +   '<div class="my-page__card-body">'
       +     '<p class="my-page__card-title">' + item.title + '</p>'
-      +     '<p class="my-page__card-meta">' + item.published_at + ' · ' + item.stats + '</p>'
+      +     '<p class="my-page__card-meta">' + item.published_at + '</p>'
+      +     '<p class="my-page__card-stats">' + item.stats + '</p>'
       +   '</div>'
       + '</article>';
     var wrapper = document.createElement('div');
@@ -977,13 +987,9 @@ window.WegoApp.registerScene({
         ctx.toast('已触发分享主页');
       });
 
-      // 会员卡入口
-      root.querySelector('[data-dom-id="enter-membership"]').addEventListener('click', function (event) {
-        if (event.target.closest('[data-dom-id="manage-storage"]')) return;
+      // 会员卡入口（整卡单入口，移除 storage-row 独立管理入口）
+      root.querySelector('[data-dom-id="enter-membership"]').addEventListener('click', function () {
         ctx.toast('已进入会员中心');
-      });
-      root.querySelector('[data-dom-id="manage-storage"]').addEventListener('click', function () {
-        ctx.toast('已进入空间管理入口');
       });
 
       // 数据资产入口

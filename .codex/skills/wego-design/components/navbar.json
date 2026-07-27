@@ -17,18 +17,21 @@
       "back-icon",
       "close-icon",
       "text-cancel",
-      "none"
+      "none",
+      "custom"
     ],
     "titleAlignment": [
       "center",
-      "left-wide"
+      "left-wide",
+      "custom"
     ],
     "actions": [
       "none",
       "icon",
       "text",
       "button",
-      "mixed"
+      "mixed",
+      "custom"
     ],
     "spacing": [
       "default",
@@ -37,7 +40,8 @@
     "rightActionType": [
       "icon",
       "text",
-      "button"
+      "button",
+      "custom"
     ],
     "pageTransition": [
       "push",
@@ -110,6 +114,26 @@
       "spacing": "default",
       "pageTransition": "push",
       "position": "fixed-transparent"
+    },
+    {
+      "leftControl": "custom",
+      "titleAlignment": "custom",
+      "actions": "icon",
+      "rightActionType": "icon",
+      "spacing": "default",
+      "pageTransition": "push",
+      "position": "sticky",
+      "note": "host-tab 主页：左侧自定义身份区，中间留空或自定义，右侧图标操作（如「我的」tab）"
+    },
+    {
+      "leftControl": "none",
+      "titleAlignment": "custom",
+      "actions": "custom",
+      "rightActionType": "custom",
+      "spacing": "default",
+      "pageTransition": "push",
+      "position": "sticky",
+      "note": "host-tab 主页：左侧空，中间放 tabs，右侧自定义触发器（如「微购相册动态」tab）"
     }
   ],
   "anatomy": [
@@ -136,14 +160,15 @@
     {
       "name": "title",
       "selector": ".navbar__title",
-      "role": "标题文本，必须放在 .navbar__center 内部，字号为 heading-sm(18px) medium"
+      "role": "标题文本，放在 .navbar__center 内部，字号为 heading-sm(18px) medium；当 titleAlignment=custom 时可省略，由场景在 .navbar__center--custom 内自由填充"
     }
   ],
   "structurePatterns": [
     "body 固定为三栏网格，不拆成桌面工具栏模式。",
     "右侧操作按文本、图标、图文、按钮等场景罗列，直接作为 navbar 内部样式场景维护，不再注册为独立组件。",
     "按钮式右侧操作复用已注册 button 组件的小尺寸按钮。",
-    "无按钮模式只影响 left 与 center 布局；默认导航主体高度为 56px，桌面手机壳显示 phone-status 时可覆盖为 44px。"
+    "无按钮模式只影响 left 与 center 布局；默认导航主体高度为 44px。",
+    "host-tab 主页（无返回/关闭按钮的底部 Tab 直挂页面）使用 custom 槽位：leftControl=custom 时配合 .navbar__left--custom 修饰类移除默认 padding-left 与 gap，由场景自定义左侧内容（如身份区、logo）；titleAlignment=custom 时配合 .navbar__center--custom 修饰类移除 min-width/overflow 限制，允许场景在中间放 tabs、搜索框或任意非标题内容；actions=custom 时配合 .navbar__right--custom 修饰类移除默认 padding-right 与 gap，由场景自定义右侧内容（如发布触发器、品牌入口）。custom 模式下 .navbar__title 不再必需，但场景填充内容须自行承担布局与按压反馈。"
   ],
   "behavior": {
     "pressFeedback": "移动端按压态由 :active 与 .is-pressed 共同承载。宿主 App 通过 wego-app/js/app.js 在触控设备上自动为 .navbar__left-btn、.navbar__action 等可点击元素添加/移除 .is-pressed；桌面端继续由 :active 兜底。同时设置 -webkit-user-select: none / user-select: none 以禁用长按文本选择和拖杆控件。",
@@ -153,7 +178,7 @@
     "pageTransitionRule": "左侧为返回图标 (back-icon) 对应 push 转场（右侧滑入，普通二级页）；左侧为关闭/叉 (close-icon) 或取消文本 (text-cancel) 对应 present 转场（底部滑入，弹出式页面）。",
     "fullscreenModalPatterns": "全屏模态页面有且仅有两种固定导航模式，不要自由组合：模式 A（取消文本 + 实心按钮）用于表单/设置类底部弹出页；模式 B（关闭叉图标 + 图标操作）用于浏览/选择类底部弹出页。",
     "backgroundRule": "导航栏必须显式设置背景色，与页面 data-bg 声明的背景色保持一致；默认 var(--bg-page)（灰色），data-bg=\"surface\" 时为 var(--bg-surface)（白色）；深色或图片背景场景使用 fixed-transparent 模式，navbar background: transparent，文字/图标用 --text-inverse 反白，确保透过导航栏看到背景内容。fixed-transparent 与 data-bg 互斥：navbar--fixed-transparent 不得声明在 data-bg=\"page\" 或 data-bg=\"surface\" 的容器内；fixed-transparent 模式下 navbar 背景必须为 transparent，由页面根容器提供深色或图片背景（如 --bg-inverse）。",
-    "positionRule": "navbar 默认 sticky 吸顶（components.css 已配置 position: sticky; top: 0; z-index: var(--z-sticky)），保留文档流，宿主无需额外处理；顶部安全区由 navbar 组件内部通过 padding-top: var(--safe-area-top, 0px) 处理：.phone-screen 内定义 44px 模拟值时，导航主体会自动落在安全区下方，未定义时 fallback 为 0px，移动端 @media 重置 Token 为 0 后导航顶到最上方；导航主体高度由 --navbar-body-height 控制，默认 56px，桌面手机壳显示 phone-status 时可覆盖为 44px；深色或图片背景场景使用 fixed-transparent 模式，navbar position: fixed 透明背景、文字/图标反白，此时 page-body 需加 padding-top: calc(var(--navbar-body-height, 56px) + var(--safe-area-top, 0px)) 为 navbar 与顶部安全区让位。"
+    "positionRule": "navbar 默认 sticky 吸顶（components.css 已配置 position: sticky; top: 0; z-index: var(--z-sticky)），保留文档流，宿主无需额外处理；顶部安全区由 navbar 组件内部通过 padding-top: var(--safe-area-top, 0px) 处理：.phone-screen 内定义 44px 模拟值时，导航主体会自动落在安全区下方，未定义时 fallback 为 0px，移动端 @media 重置 Token 为 0 后导航顶到最上方；导航主体高度由 --navbar-body-height 控制，默认 44px；深色或图片背景场景使用 fixed-transparent 模式，navbar position: fixed 透明背景、文字/图标反白，此时 page-body 需加 padding-top: calc(var(--navbar-body-height, 44px) + var(--safe-area-top, 0px)) 为 navbar 与顶部安全区让位。"
   },
   "accessibility": {
     "landmark": "作为页面顶部导航语义区域使用。",
@@ -171,8 +196,9 @@
     "全屏模态页面直接调用固定模式，不要自由组合：模式 A（取消+按钮）用于表单/设置类；模式 B（叉+图标）用于浏览/选择类。",
     "导航栏必须显式设置背景色，与页面 data-bg 声明的背景色一致；不要使用 transparent（深色/图片背景场景除外，此时用 fixed-transparent 模式）。",
     "navbar 宽度默认 100%，由页面外层容器约束最大宽度（768px）；不需要在项目中覆盖宽度。",
-    "navbar 默认 sticky 吸顶，宿主无需额外配置（components.css 已配置 position: sticky; top: 0; z-index: var(--z-sticky)）；顶部安全区由组件内部通过 padding-top: var(--safe-area-top, 0px) 处理；导航主体高度默认 56px，桌面手机壳显示 phone-status 时可把 --navbar-body-height 覆盖为 44px；深色/图片背景场景加 .navbar--fixed-transparent 修饰类，切换为 fixed 透明反白模式，此时 page-body 需加 padding-top: calc(var(--navbar-body-height, 56px) + var(--safe-area-top, 0px)) 为 navbar 与顶部安全区让位。",
-    "标题文本必须使用 .navbar__title 并放在 .navbar__center 内部，不得在 .navbar__center 中直接写纯文本；.navbar__title 提供 heading-sm(18px) medium 样式。"
+    "navbar 默认 sticky 吸顶，宿主无需额外配置（components.css 已配置 position: sticky; top: 0; z-index: var(--z-sticky)）；顶部安全区由组件内部通过 padding-top: var(--safe-area-top, 0px) 处理；导航主体高度默认 44px；深色/图片背景场景加 .navbar--fixed-transparent 修饰类，切换为 fixed 透明反白模式，此时 page-body 需加 padding-top: calc(var(--navbar-body-height, 44px) + var(--safe-area-top, 0px)) 为 navbar 与顶部安全区让位。",
+    "标题文本必须使用 .navbar__title 并放在 .navbar__center 内部，不得在 .navbar__center 中直接写纯文本；.navbar__title 提供 heading-sm(18px) medium 样式。",
+    "host-tab 主页（底部 Tab 直挂页面，无返回/关闭按钮）使用 custom 槽位：leftControl=custom 时加 .navbar__left--custom 修饰类移除默认 padding-left 与 gap，由场景在 .navbar__left 内自由填充身份区、logo 等内容；titleAlignment=custom 时加 .navbar__center--custom 修饰类移除 min-width 与 overflow 限制，允许在中间放 tabs、搜索框等非标题内容；actions=custom 时加 .navbar__right--custom 修饰类移除默认 padding-right 与 gap，由场景在 .navbar__right 内自由填充发布触发器、品牌入口等。custom 模式下 .navbar__title 不再必需，但场景填充内容须自行承担布局、按压反馈与可访问性名称。"
   ],
   "doNotInvent": [
     "不要把 navbar 扩成桌面多行标题栏、营销大顶栏或搜索综合头部。",
@@ -189,7 +215,8 @@
       ".navbar__center",
       ".navbar__right"
     ],
-    "centerChildren": [
+    "centerChildren": [],
+    "optionalChildren": [
       ".navbar__title"
     ],
     "optionalActionClasses": [
@@ -200,6 +227,9 @@
       ".navbar__right--text",
       ".navbar__right--button",
       ".navbar__right--gap",
+      ".navbar__left--custom",
+      ".navbar__center--custom",
+      ".navbar__right--custom",
       ".navbar--fixed-transparent"
     ],
     "alternatives": []
@@ -235,11 +265,18 @@
     "--z-sticky"
   ],
   "previewOnlyTokens": [
+    "--bg-brand",
+    "--bg-subtle",
     "--body-md-font-size",
+    "--body-xs-line-height",
     "--border-neutral-l2",
+    "--heading-sm-line-height",
+    "--radius-full",
     "--spacer-12",
     "--spacer-16",
-    "--spacer-8"
+    "--spacer-4",
+    "--spacer-8",
+    "--text-brand"
   ],
   "localTokens": []
 }

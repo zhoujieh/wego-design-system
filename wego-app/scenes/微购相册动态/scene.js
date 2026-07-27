@@ -13,14 +13,8 @@
     "source": "library-consumption.json#/appRuntime/presentationTypes"
   },
   "prompt_contract": {
-    "design_system_version": 462,
+    "design_system_version": 468,
     "token_bindings": [
-      {
-        "selector": ".album-feed__top-stack",
-        "content_role": ".album-feed__top-stack 的 padding-top",
-        "css_property": "padding-top",
-        "token": "var(--safe-area-top)"
-      },
       {
         "selector": ".album-feed",
         "content_role": ".album-feed 的 padding-inline",
@@ -64,8 +58,14 @@
         "token": "var(--safe-area-bottom-content)"
       },
       {
-        "selector": ".album-feed__top-stack",
-        "content_role": ".album-feed__top-stack 的 background",
+        "selector": ".album-feed__navbar",
+        "content_role": ".album-feed__navbar 的 background",
+        "css_property": "background",
+        "token": "var(--bg-surface)"
+      },
+      {
+        "selector": ".album-feed__floating-toolbar",
+        "content_role": "搜索栏吸顶背景与 navbar 视觉连续",
         "css_property": "background",
         "token": "var(--bg-surface)"
       },
@@ -1061,6 +1061,20 @@
       }
     ],
     "component_bindings": [
+      {
+        "binding_id": "feed-page-navbar",
+        "slug": "navbar",
+        "reason": "host-tab 主页顶部吸顶栈：custom slot 承载中间页面级 tabs 与右侧发布触发器",
+        "variant_dimensions": {
+          "leftControl": "none",
+          "titleAlignment": "custom",
+          "actions": "custom",
+          "rightActionType": "custom",
+          "spacing": "default",
+          "pageTransition": "push",
+          "position": "sticky"
+        }
+      },
       {
         "binding_id": "feed-page-tabs",
         "slug": "tabs",
@@ -2093,28 +2107,28 @@
     title: '动态',
     template: `
     <section class="album-feed" data-surface-id="album-product-feed" data-route-id="album-product-feed" data-route-bound="true" data-layout-mode="composed" data-page-edge-mode="M8" data-bg="page">
-      <div class="album-feed__top-stack" data-top-stack>
-        <div class="album-feed__page-tabs" data-page-tabs>
-          <div class="album-feed__nav-row">
-            <div class="album-feed__nav-left" aria-hidden="true"></div>
-            <div class="album-feed__nav-tabs">
-              <div class="wg-tabs wg-tabs--standard wg-tabs--scroll" role="tablist" data-dd-id="feed-page-tabs" data-component-slug="tabs" data-component-binding="feed-page-tabs">
-                <div class="wg-tabs__scroll">
-                  <button class="wg-tabs__item" role="tab" aria-selected="true" type="button" data-page-tab="following" data-dom-id="page-tab-following"><span class="wg-tabs__content"><span class="wg-tabs__label">关注</span></span></button>
-                  <button class="wg-tabs__item" role="tab" aria-selected="false" type="button" data-page-tab="recommended" data-dom-id="page-tab-recommended"><span class="wg-tabs__content"><span class="wg-tabs__label">推荐</span></span></button>
-                  <button class="wg-tabs__item" role="tab" aria-selected="false" type="button" data-page-tab="new" data-dom-id="page-tab-new"><span class="wg-tabs__content"><span class="wg-tabs__label">上新</span></span></button>
-                  <span class="wg-tabs__active-indicator" aria-hidden="true"></span>
-                </div>
+      <div class="navbar album-feed__navbar" data-dd-id="feed-page-navbar" data-component-slug="navbar" data-component-binding="feed-page-navbar">
+        <div class="navbar__body">
+          <div class="navbar__left navbar__left--custom album-feed__nav-left" aria-hidden="true"></div>
+          <div class="navbar__center navbar__center--custom album-feed__nav-tabs">
+            <div class="wg-tabs wg-tabs--standard wg-tabs--scroll" role="tablist" data-dd-id="feed-page-tabs" data-component-slug="tabs" data-component-binding="feed-page-tabs">
+              <div class="wg-tabs__scroll">
+                <button class="wg-tabs__item" role="tab" aria-selected="true" type="button" data-page-tab="following" data-dom-id="page-tab-following"><span class="wg-tabs__content"><span class="wg-tabs__label">关注</span></span></button>
+                <button class="wg-tabs__item" role="tab" aria-selected="false" type="button" data-page-tab="recommended" data-dom-id="page-tab-recommended"><span class="wg-tabs__content"><span class="wg-tabs__label">推荐</span></span></button>
+                <button class="wg-tabs__item" role="tab" aria-selected="false" type="button" data-page-tab="new" data-dom-id="page-tab-new"><span class="wg-tabs__content"><span class="wg-tabs__label">上新</span></span></button>
+                <span class="wg-tabs__active-indicator" aria-hidden="true"></span>
               </div>
             </div>
-            <div class="album-feed__nav-right">
-              <button type="button" class="album-feed__publish-trigger" aria-label="发布动态" aria-haspopup="menu" aria-expanded="false" data-dom-id="open-publish-menu">
-                <span class="album-feed__publish-trigger-bg" aria-hidden="true"><img src="./lib/assets/icons/dongtai-add-bg.svg" alt=""></span>
-                <span class="album-feed__publish-trigger-plus" aria-hidden="true"><img src="./lib/assets/icons/dongtai-add-plus.svg" alt=""></span>
-              </button>
-            </div>
+          </div>
+          <div class="navbar__right navbar__right--custom album-feed__nav-right">
+            <button type="button" class="album-feed__publish-trigger" aria-label="发布动态" aria-haspopup="menu" aria-expanded="false" data-dom-id="open-publish-menu">
+              <span class="album-feed__publish-trigger-bg" aria-hidden="true"><img src="./lib/assets/icons/dongtai-add-bg.svg" alt=""></span>
+              <span class="album-feed__publish-trigger-plus" aria-hidden="true"><img src="./lib/assets/icons/dongtai-add-plus.svg" alt=""></span>
+            </button>
           </div>
         </div>
+      </div>
+      <div class="album-feed__scroll" data-tab-scroll>
         <div class="album-feed__floating-toolbar" data-toolbar-floating aria-hidden="false">
           <div class="album-feed__toolbar-motion">
             <div class="search-toolbar">
@@ -2126,8 +2140,6 @@
             </div>
           </div>
         </div>
-      </div>
-      <div class="album-feed__scroll" data-tab-scroll>
         <div class="album-feed__people-wrap" data-region="people-wrap">
           <div class="album-feed__people-scroll" data-region="people-scroll">
             <div class="album-feed__people-list" data-region="people-list"></div>
@@ -2268,7 +2280,7 @@
     init: function initAlbumProductFeed(ctx) {
       var root = ctx.root;
       var scroll = root.querySelector('.album-feed__scroll');
-      var pageTabs = root.querySelector('[data-page-tabs]');
+      var pageTabs = root.querySelector('.album-feed__nav-tabs');
       var floatingToolbar = root.querySelector('[data-toolbar-floating]');
       var grid = root.querySelector('[data-region="feed-grid"]');
       var emptyHost = root.querySelector('[data-region="empty-host"]');

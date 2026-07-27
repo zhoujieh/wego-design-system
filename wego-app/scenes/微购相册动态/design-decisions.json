@@ -14,14 +14,8 @@
     "source": "library-consumption.json#/appRuntime/presentationTypes"
   },
   "prompt_contract": {
-    "design_system_version": 462,
+    "design_system_version": 468,
     "token_bindings": [
-      {
-        "selector": ".album-feed__top-stack",
-        "content_role": ".album-feed__top-stack 的 padding-top",
-        "css_property": "padding-top",
-        "token": "var(--safe-area-top)"
-      },
       {
         "selector": ".album-feed",
         "content_role": ".album-feed 的 padding-inline",
@@ -65,8 +59,14 @@
         "token": "var(--safe-area-bottom-content)"
       },
       {
-        "selector": ".album-feed__top-stack",
-        "content_role": ".album-feed__top-stack 的 background",
+        "selector": ".album-feed__navbar",
+        "content_role": ".album-feed__navbar 的 background",
+        "css_property": "background",
+        "token": "var(--bg-surface)"
+      },
+      {
+        "selector": ".album-feed__floating-toolbar",
+        "content_role": "搜索栏吸顶背景与 navbar 视觉连续",
         "css_property": "background",
         "token": "var(--bg-surface)"
       },
@@ -1063,6 +1063,20 @@
     ],
     "component_bindings": [
       {
+        "binding_id": "feed-page-navbar",
+        "slug": "navbar",
+        "reason": "host-tab 主页顶部吸顶栈：custom slot 承载中间页面级 tabs 与右侧发布触发器",
+        "variant_dimensions": {
+          "leftControl": "none",
+          "titleAlignment": "custom",
+          "actions": "custom",
+          "rightActionType": "custom",
+          "spacing": "default",
+          "pageTransition": "push",
+          "position": "sticky"
+        }
+      },
+      {
         "binding_id": "feed-page-tabs",
         "slug": "tabs",
         "reason": "关注/推荐/上新页面级内容视图切换",
@@ -1692,6 +1706,11 @@
   },
   "decisions": [
     {
+      "dd_id": "feed-page-navbar",
+      "binding_id": "feed-page-navbar",
+      "component_slug": "navbar"
+    },
+    {
       "dd_id": "feed-page-tabs",
       "binding_id": "feed-page-tabs",
       "component_slug": "tabs"
@@ -1855,7 +1874,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/微购相册动态/scene.js",
     "scene_css": "wego-app/scenes/微购相册动态/scene.css",
-    "source_sha256": "b79a109f6309e214767fe4eb1eb52814aa71b08a5a2ed1038a8625a633476856",
+    "source_sha256": "f6d52584e4cd5ab73da9a875616307537d362a0c16318a4ab9996e80ef591954",
     "dom_ids": [
       "page-tab-following",
       "page-tab-recommended",
@@ -1882,7 +1901,7 @@
       "open-cart-panel",
       "first-add-guide"
     ],
-    "component_count": 32,
+    "component_count": 33,
     "visualCheck": {
       "status": "passed",
       "viewports": [
