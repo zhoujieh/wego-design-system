@@ -2132,9 +2132,9 @@
   flex-shrink: 1;
   flex-basis: auto;
   min-width: 0;
-  font-size: var(--body-md-font-size);
-  line-height: var(--body-md-line-height);
-  font-family: var(--body-md-font-family);
+  font-size: var(--body-lg-font-size);
+  line-height: var(--body-lg-line-height);
+  font-family: var(--body-lg-font-family);
   font-weight: var(--font-weight-regular);
   color: var(--text-default);
   white-space: nowrap;

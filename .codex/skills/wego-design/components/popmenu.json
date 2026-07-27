@@ -80,7 +80,7 @@
     {
       "name": "itemText",
       "selector": ".popmenu__item-text",
-      "role": "选项文本，14px var(--text-default)；select 模式选中时加粗 var(--font-weight-medium)；单行不换行，超出 max-width 时尾部省略号"
+      "role": "选项文本，16px var(--text-default)；select 模式选中时加粗 var(--font-weight-medium)；单行不换行，超出 max-width 时尾部省略号"
     },
     {
       "name": "itemCheck",
@@ -191,9 +191,9 @@
   "runtimeTokens": [
     "--bg-state-hover",
     "--bg-surface",
-    "--body-md-font-family",
-    "--body-md-font-size",
-    "--body-md-line-height",
+    "--body-lg-font-family",
+    "--body-lg-font-size",
+    "--body-lg-line-height",
     "--border-neutral-l2",
     "--duration-fast",
     "--duration-normal",
@@ -216,6 +216,7 @@
     "--bg-brand-surface-l1",
     "--bg-brand-surface-l2",
     "--bg-page",
+    "--body-md-font-family",
     "--body-sm-font-size",
     "--body-xs-font-size",
     "--border-brand",
