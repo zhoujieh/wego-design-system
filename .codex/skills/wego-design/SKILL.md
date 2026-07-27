@@ -16,6 +16,7 @@ description: 基于已确认原型简报消费微购设计系统，在一次任�
 固定为：有效迭代与已确认 `prototype_brief` → 共享[设计决策原则](../shared/references/design-decisions.md) → `library-consumption.json` → `uikit-plan.json` → `components/index.json` → 本页命中的 Preview → 对应组件契约 → `colors_and_type.css` → [场景合同](./references/scene-contract.md)。
 
 - 设计决策原则是所有设计输出不可绕过的顶层权威
+- 产品阶段临时线框不进入设计输入链；即使仍存在于同一会话上下文，也只能通过用户确认后的 `prototype_brief` 消费其业务结论，不得机械照搬或从线框补造事实、组件和视觉规格
 - `design-decisions.json` 仅是场景输出与已有场景修改时的辅助对照，不得作为设计前输入
 - 资产按 [资产地图](./references/library-map.md) 定位
 - 只接受当前 Schema，旧输入直接失败

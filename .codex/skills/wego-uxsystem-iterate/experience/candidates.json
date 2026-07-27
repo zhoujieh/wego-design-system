@@ -880,6 +880,47 @@
       "updated_at": "2026-07-12T00:00:00Z"
     },
     {
+      "id": "exp-product-conversation-wireframe",
+      "normalized_key": "product-conversation-wireframe",
+      "title": "产品阶段用会话线框辅助需求探索",
+      "status": "promoted",
+      "occurrence_count": 1,
+      "threshold": 1,
+      "primary_owner": "wego-product",
+      "secondary_owners": [
+        "wego-design"
+      ],
+      "ownership_reason": "线框触发、临时模型和简报归纳属于产品方法，设计阶段只需要遵守已确认简报的输入边界。",
+      "rule_ownership": {
+        "category": "shared-principle",
+        "canonical": {
+          "file": ".codex/skills/shared/references/design-decisions.md",
+          "locator": "rule-id: wego-product-conversation-wireframe-reference",
+          "rule_id": "wego-product-conversation-wireframe-reference"
+        }
+      },
+      "runtime_reachability": {
+        "consumer_skill": "wego-product",
+        "output_field": "prototype_brief",
+        "downstream_consumer": "wego-design",
+        "acceptance_check": "validate-skill-entry-boundary"
+      },
+      "evidence": [
+        "用户确认产品阶段生成的线框全部作为需求探索参考，不能等同正式设计，也不能被设计阶段机械照搬。",
+        "用户确认线框讨论的最终结论归纳进现有 prototype_brief，不保存临时线框模型、线框合同或独立确认状态。"
+      ],
+      "created_at": "2026-07-27T00:00:00Z",
+      "updated_at": "2026-07-27T00:00:00Z",
+      "promoted_at": "2026-07-27T00:00:00Z",
+      "promotion_landing": {
+        "file": ".codex/skills/shared/references/design-decisions.md",
+        "locator": "rule-id: wego-product-conversation-wireframe-reference",
+        "rule_id": "wego-product-conversation-wireframe-reference",
+        "constraint_area": "产品线框与设计输入边界",
+        "description": "会话线框只作为需求探索参考；业务结论只归纳到用户确认的现有 prototype_brief，设计阶段不得补造事实或机械复制线框。"
+      }
+    },
+    {
       "id": "exp-sync-script-path-must-match-css-reference",
       "normalized_key": "sync-path-css-reference-consistency",
       "title": "同步脚本目录映射与 CSS 引用路径一致",

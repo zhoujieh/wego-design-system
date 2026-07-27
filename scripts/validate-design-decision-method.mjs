@@ -86,9 +86,14 @@ for (const rule of rules) {
 const requiredRules = [
   'wego-scene-decision-scope', 'wego-page-pattern-layout-contract',
   'wego-content-role-typography',
-  'wego-state-interaction-contract', 'wego-design-system-gap-boundary'
+  'wego-state-interaction-contract', 'wego-design-system-gap-boundary',
+  'wego-product-conversation-wireframe-reference'
 ];
 for (const id of requiredRules) if (!ruleIds.has(id)) add('rule.required_missing', `缺少必需 rule_id：${id}`);
+const productWireframeRule = rules.find(rule => rule.id === 'wego-product-conversation-wireframe-reference');
+if (productWireframeRule && productWireframeRule.source !== '../../wego-product/references/conversation-wireframe.md') {
+  add('rule.product_wireframe_source', '产品会话线框规则必须指向 wego-product 的唯一业务方法');
+}
 
 if (!fs.existsSync(candidateFile)) add('candidate.missing', '缺少经验候选池', candidateFile);
 else {

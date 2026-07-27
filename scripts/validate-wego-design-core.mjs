@@ -42,6 +42,9 @@ function cssVars(source) { return new Set([...source.matchAll(/(--[\w-]+)\s*:/g)
 function checkRequiredFiles() {
   const required = [
     '.codex/skills/wego-product/SKILL.md',
+    '.codex/skills/wego-product/references/conversation-wireframe.md',
+    '.codex/skills/wego-product/references/conversation-wireframe-trae.md',
+    '.codex/skills/wego-product/references/conversation-wireframe-codex.md',
     '.codex/skills/wego-design/SKILL.md',
     '.codex/skills/wego-uxsystem-iterate/SKILL.md',
     '.codex/skills/wego-design/colors_and_type.css',
@@ -236,7 +239,11 @@ function checkSkillEntryBoundary() {
 
 function checkMetadataVersion() {
   const changed = changedFiles();
-  const systemChanged = changed.some(file => file.startsWith('.codex/skills/wego-design/') && !file.startsWith('.codex/skills/wego-design/preview/index.html'));
+  const workflowOnlyFiles = new Set([
+    '.codex/skills/wego-design/SKILL.md',
+    '.codex/skills/wego-design/preview/index.html'
+  ]);
+  const systemChanged = changed.some(file => file.startsWith('.codex/skills/wego-design/') && !workflowOnlyFiles.has(file));
   if (systemChanged && !changed.includes('.codex/skills/wego-design/metadata.json')) add('error', 'metadata.version_required', '设计系统源有变更时必须递增 metadata.version', path.join(libraryRoot, 'metadata.json'));
 }
 

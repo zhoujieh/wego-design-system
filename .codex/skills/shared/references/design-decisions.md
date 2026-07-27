@@ -9,6 +9,7 @@ principleAuthority:
 authoritySources:
   - "../../wego-product/references/iteration-workflow.md"
   - "../../wego-product/references/scope-and-boundaries.md"
+  - "../../wego-product/references/conversation-wireframe.md"
   - "../../wego-uxsystem-iterate/references/workflow.md"
   - "../../wego-design/library-consumption.json"
   - "../../wego-design/colors_and_type.css"
@@ -186,6 +187,12 @@ authoritySources:
 `wego-design` 只依据有效迭代和已确认 `prototype_brief` 中的目标、范围、入口、关键路径、状态、数据、原型边界以及产品阶段定义的交互视觉描述进行设计。`wego-design` 必须严格遵循产品阶段的交互视觉描述（布局位置、控件类型、视觉强调、打开方式倾向等），不得自行替换或偏离；唯一例外是组件不支持或设计系统规范不允许，此时设计系统优先，冲突项记录到场景决策证据并退回 `wego-product` 重新确认。缺少会改变页面结构或结果的业务事实时退回 `wego-product`，不得从组件、UI Kit、历史场景或图片补造事实和文案。
 
 `design-decisions.json` 不是设计前权威输入；新场景不得以它代替本文和正式设计系统来源，已有场景修改时也只能辅助对照。
+
+<!-- rule-id: wego-product-conversation-wireframe-reference; source-ref: ../../wego-product/references/conversation-wireframe.md -->
+
+产品阶段会话线框只用于需求探索和帮助确认页面范围、入口、关键路径、状态与可见结果，不是正式设计输入。`wego-design` 的唯一业务输入仍是有效迭代中用户已确认的 `prototype_brief`；即使临时线框仍存在于同一会话上下文，也不得从线框补造业务事实、自动提取组件或机械复制线框外观。
+
+设计阶段可以依据共享原则和正式设计系统重新组织具体组件、布局尺度与视觉表达，但不得改变已确认简报中的范围、入口、路径、状态和结果。用户对线框中某项视觉要求的确认只有在写入并确认 `prototype_brief` 后才具有约束力。
 
 <!-- rule-id: wego-page-pattern-layout-contract; source-ref: ../../wego-design/uikit-plan.json -->
 

@@ -633,6 +633,11 @@ function test() {
   const legacyBriefField = clone(sample);
   legacyBriefField.prototype_brief.readiness = { ready: true };
   assert(has(legacyBriefField, 'schemaVersion 4 未定义字段：readiness'), '业务迭代 Schema 未拦截 prototype_brief 遗留字段');
+  for (const field of ['wireframe', 'wireframe_model', 'wireframe_confirmation']) {
+    const wireframeBriefField = clone(sample);
+    wireframeBriefField.prototype_brief[field] = {};
+    assert(has(wireframeBriefField, `schemaVersion 4 未定义字段：${field}`), `业务迭代 Schema 未拦截 prototype_brief.${field}`);
+  }
 
   const unexpectedBriefConfirmation = clone(sample);
   unexpectedBriefConfirmation.brief_confirmation = createBriefConfirmation(unexpectedBriefConfirmation);

@@ -61,6 +61,88 @@ export function validatePromotedRuleTargets(root, pool) {
   return errors;
 }
 
+export function validateProductWireframeContract(root = process.cwd()) {
+  const errors = [];
+  const productRoot = '.codex/skills/wego-product';
+  const relativeFiles = {
+    skill: `${productRoot}/SKILL.md`,
+    method: `${productRoot}/references/conversation-wireframe.md`,
+    trae: `${productRoot}/references/conversation-wireframe-trae.md`,
+    codex: `${productRoot}/references/conversation-wireframe-codex.md`
+  };
+  const contents = {};
+  for (const [name, relative] of Object.entries(relativeFiles)) {
+    const file = path.join(root, relative);
+    if (!fs.existsSync(file)) {
+      errors.push(`产品线框合同缺少文件：${relative}`);
+      contents[name] = '';
+    } else {
+      contents[name] = fs.readFileSync(file, 'utf8');
+    }
+  }
+
+  for (const reference of ['conversation-wireframe.md', 'conversation-wireframe-trae.md', 'conversation-wireframe-codex.md']) {
+    if (!contents.skill.includes(`](./references/${reference})`)) errors.push(`wego-product/SKILL.md 必须直接链接 ${reference}`);
+  }
+
+  const requireAll = (name, content, requirements) => {
+    for (const [label, tokens] of requirements) {
+      if (!tokens.every(token => content.includes(token))) errors.push(`${name} 缺少${label}合同`);
+    }
+  };
+
+  requireAll('产品线框方法', contents.method, [
+    ['触发与跳过门禁', ['用户明确不要线框', '用户明确要求线框', '用户可见结构变化', '纯文案', '后端逻辑', '设计系统变化']],
+    ['最小业务事实', ['用户目标', '业务入口', '页面首要任务', '主要操作', '用户可见结果', '必要状态']],
+    ['临时模型', ['只存在于当前产品阶段上下文', '"schema_version": 1', '"flow_id"', '"control"', '"frames"']],
+    ['单一控制概念', ['只能是 `stepper`、`tabs` 或 `toggle` 之一', '必须使用且只使用一个控制概念', '不组合 stepper、tabs']],
+    ['拆帧边界', ['2–6 个', '超过 6 帧', '`target_frame_id` 必须引用当前模型中的帧']],
+    ['更新门禁', ['线框失效', '`submit-brief` 前', '不得增加“线框已确认”']],
+    ['双宿主', ['Trae 宿主', 'Codex 宿主', '共享本文件定义的临时模型']],
+    ['无渲染器降级', ['没有可用渲染器', '不提示安装插件', '紧凑文本分镜', '[1/3 商品列表·默认]']],
+    ['简报交接', ['`included` / `excluded`', '`entry_points`', '`critical_paths`', '`prototype_boundaries`', '`states`', '`data_contract`', '`assumptions`', '`open_questions`']],
+    ['参考边界', ['需求探索参考', '不得机械照搬', '只有更新后的 Markdown `prototype_brief` 经用户明确确认后']]
+  ]);
+
+  requireAll('Trae 适配', contents.trae, [
+    ['能力检测', ['`dynamic-ui`', '`PureShowWidget`', '`micro-interaction`', '`visual-tokens`']],
+    ['静态骨架与交互', ['`explanation-panel`', 'JavaScript 执行前', '一个脚本', '宿主主题合同', '键盘可操作']],
+    ['单一控制概念', ['只使用一种控制概念', 'stepper', 'tabs', 'toggle']],
+    ['运行边界', ['多页 router', '调用接口', '持久化状态', '不得把 Trae 模板、Token']],
+    ['可选能力', ['不是 `wego-product` 的硬依赖', '退回文本分镜']]
+  ]);
+
+  requireAll('Codex 适配', contents.codex, [
+    ['能力检测', ['`visualize`', 'HTML fragment', 'visualization 目录', '`::codex-inline-vis`']],
+    ['画布与可访问性', ['一个当前页面画布', '只使用一种控制概念', '320–736px', '键盘操作']],
+    ['本地交互边界', ['本地临时状态', '`fetch`', 'XHR', '真正路由', '持久化']],
+    ['可选能力', ['不是 `wego-product` 的硬依赖', '退回文本分镜']],
+    ['双宿主一致性', ['业务帧、操作和可见结果语义一致', '不要求像素一致']]
+  ]);
+
+  const combined = Object.values(contents).join('\n');
+  if (/\/Users\/[^/\s]+\//mu.test(combined)) {
+    errors.push('产品线框合同不得包含本机绝对路径');
+  }
+  for (const line of combined.split(/\r?\n/)) {
+    const mentionsRendererDependency = /(?:PureShowWidget|dynamic-ui|visualize)/iu.test(line) && /(?:必须安装|硬依赖|required dependency)/iu.test(line);
+    if (mentionsRendererDependency && !/(?:不是|不得|禁止)/u.test(line)) {
+      errors.push('PureShowWidget、dynamic-ui 或 visualize 不得声明为硬依赖');
+    }
+    if (/线框[^\n]{0,40}直接(?:运行\s*)?`?confirm-brief`?/u.test(line) && !/(?:不得|不能|禁止)/u.test(line)) {
+      errors.push('线框不得直接确认 brief，必须继续现有 submit-brief → confirm-brief 门禁');
+    }
+  }
+  for (const forbidden of ['prototype_brief.wireframe', 'prototype_brief.wireframe_model', 'prototype_brief.wireframe_confirmation']) {
+    if (combined.includes(forbidden)) errors.push(`产品线框合同不得扩展正式 Schema：${forbidden}`);
+  }
+  if (/(?:_iterations|iteration\.json)\/?[^\n`]*wireframe/iu.test(combined)) errors.push('产品线框合同不得新增迭代持久化路径');
+  if (!/不得保存临时线框模型、HTML、CSS、JavaScript/u.test(contents.method)) errors.push('产品线框方法必须明确临时模型和运行时内容不持久化');
+  if (!/线框不是正式产物或确认状态/u.test(contents.skill)) errors.push('wego-product/SKILL.md 必须明确线框仅为参考且不是正式确认状态');
+
+  return errors;
+}
+
 export function validateSkillEntryBoundary(root = process.cwd()) {
   const errors = [];
   const skillsRoot = path.join(root, '.codex/skills');
@@ -85,6 +167,7 @@ export function validateSkillEntryBoundary(root = process.cwd()) {
   }
   const productSkill = read(root, '.codex/skills/wego-product/SKILL.md', errors);
   const designSkill = read(root, '.codex/skills/wego-design/SKILL.md', errors);
+  errors.push(...validateProductWireframeContract(root));
   if (!productSkill.includes('../shared/references/design-decisions.md')) errors.push('wego-product/SKILL.md 必须直接引用共享设计决策原则');
   if (!designSkill.includes('../shared/references/design-decisions.md')) errors.push('wego-design/SKILL.md 必须直接引用共享设计决策原则');
   if (fs.existsSync(path.join(root, '.codex/skills/wego-design/references/design-decisions.md'))) errors.push('设计决策原则不得保留在 wego-design 私有 references 下');
