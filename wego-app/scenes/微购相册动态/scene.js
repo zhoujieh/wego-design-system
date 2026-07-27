@@ -2769,6 +2769,7 @@
         });
       }
       function setToolbarRevealed(revealed) {
+        console.log('[toolbar] setToolbarRevealed', revealed, '当前已隐藏:', floatingToolbar.classList.contains('is-hidden'));
         if (isToolbarRevealed === revealed) return;
         isToolbarRevealed = revealed;
         if (revealed) {
@@ -2785,6 +2786,7 @@
         var delta = currentTop - lastScrollTop;
         var isAtTop = currentTop <= 0;
         var isAtBottom = currentTop + cachedClientHeight >= cachedScrollHeight - toolbarBottomGuardPx;
+        console.log('[toolbar] rAF', { currentTop: currentTop, lastScrollTop: lastScrollTop, delta: delta, acc: scrollDirectionDelta, isAtTop: isAtTop, isAtBottom: isAtBottom, cachedClientHeight: cachedClientHeight, cachedScrollHeight: cachedScrollHeight, isHidden: floatingToolbar.classList.contains('is-hidden') });
         if (isAtTop) {
           setToolbarRevealed(true);
           scrollDirectionDelta = 0;
@@ -2819,6 +2821,7 @@
         var currentTop = scroll.scrollTop;
         ctx.state.scrollPosition = currentTop;
         pendingScrollTop = currentTop;
+        console.log('[toolbar] onScroll', currentTop, 'rAF已调度:', !!toolbarRafId);
         if (!toolbarRafId) toolbarRafId = requestAnimationFrame(applyToolbarReveal);
         /* 用户主动滚动距离超过 32px 后 dismiss 第一条引导气泡，避免气泡跟随错位 */
         if (firstCardGuide && !firstCardGuide.hidden && !ctx.state['first-card-guide-dismissed'] && Math.abs(currentTop) > 32) {
