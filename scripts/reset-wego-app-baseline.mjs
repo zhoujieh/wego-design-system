@@ -11,9 +11,20 @@ const specRoot = path.join(wegoAppRoot, '_spec');
 const keepSceneFile = path.join(scenesRoot, '.gitkeep');
 const routesBaseline = 'window.WEGO_APP_ROUTES = [];\n';
 
-const args = new Set(process.argv.slice(2));
-const checkOnly = args.has('--check');
-const jsonOutput = args.has('--json');
+// ---- arg parsing ----
+const allArgs = process.argv.slice(2);
+const flags = new Set();
+let targetScene = null;
+for (let i = 0; i < allArgs.length; i++) {
+  if (allArgs[i] === '--scene' && i + 1 < allArgs.length) {
+    targetScene = allArgs[++i];
+  } else {
+    flags.add(allArgs[i]);
+  }
+}
+const checkOnly = flags.has('--check');
+const jsonOutput = flags.has('--json');
+const isSceneMode = targetScene !== null;
 
 const report = {
   mode: checkOnly ? 'check' : 'apply',
@@ -51,6 +62,10 @@ function plan(target, detail) {
   record('planned', target, detail);
 }
 
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function resetRoutesFile() {
   assertWithinScope(routesFile, [routesFile]);
   const current = fs.existsSync(routesFile) ? fs.readFileSync(routesFile, 'utf8') : '';
@@ -64,6 +79,25 @@ function resetRoutesFile() {
     fs.writeFileSync(routesFile, routesBaseline);
   }
   record('updated', routesFile, 'reset routes to empty baseline');
+}
+
+function removeRouteEntry(sceneName) {
+  const escapedName = escapeRegex(sceneName);
+  // Match a route object block containing `scene: '场景名'` from `  {` to `  },` or `  }`
+  const regex = new RegExp(
+    `\\s*\\{\\s*\\n[\\s\\S]*?scene:\\s*'${escapedName}'[\\s\\S]*?\\},\\s*\\n`,
+  );
+  const current = fs.existsSync(routesFile) ? fs.readFileSync(routesFile, 'utf8') : '';
+  if (!regex.test(current)) {
+    record('kept', routesFile, `no route entry found for scene "${sceneName}"`);
+    return;
+  }
+  const updated = current.replace(regex, '\n');
+  plan(routesFile, `remove route entry for scene "${sceneName}"`);
+  if (!checkOnly) {
+    fs.writeFileSync(routesFile, updated);
+  }
+  record('updated', routesFile, `removed route entry for scene "${sceneName}"`);
 }
 
 function listSceneEntries() {
@@ -109,6 +143,24 @@ function cleanScenes() {
   }
 }
 
+function cleanSceneByName(sceneName) {
+  assertWithinScope(scenesRoot, [scenesRoot]);
+  const sceneDir = path.join(scenesRoot, sceneName);
+  if (!fs.existsSync(sceneDir)) {
+    record('kept', sceneDir, `scene "${sceneName}" not found`);
+    return;
+  }
+  assertWithinScope(sceneDir, [scenesRoot]);
+
+  plan(sceneDir, `remove scene "${sceneName}" artifact`);
+  if (!checkOnly) {
+    fs.rmSync(sceneDir, { recursive: true, force: true });
+  }
+  record('removed', sceneDir, `remove scene "${sceneName}" artifact`);
+
+  removeRouteEntry(sceneName);
+}
+
 function cleanSpec() {
   if (!fs.existsSync(specRoot)) {
     record('kept', specRoot, 'no _spec task artifacts');
@@ -145,9 +197,15 @@ function run() {
 
   try {
     validateProtectedTargets();
-    resetRoutesFile();
-    cleanScenes();
-    cleanSpec();
+    if (isSceneMode) {
+      // --scene mode: only clean the specified scene and its route entry
+      cleanSceneByName(targetScene);
+    } else {
+      // Full baseline reset
+      resetRoutesFile();
+      cleanScenes();
+      cleanSpec();
+    }
   } catch (error) {
     report.errors.push(error instanceof Error ? error.message : String(error));
     finish(1);
@@ -163,7 +221,8 @@ function finish(code) {
     process.exit(code);
   }
 
-  console.log(checkOnly ? '\nwego-app 空白基线检查完成' : '\nwego-app 空白基线重置完成');
+  const actionLabel = isSceneMode ? `场景清理（${targetScene}）` : '空白基线重置';
+  console.log(checkOnly ? `\nwego-app ${actionLabel}检查完成` : `\nwego-app ${actionLabel}完成`);
 
   if (report.planned.length > 0) {
     console.log('\n计划处理：');
@@ -173,7 +232,7 @@ function finish(code) {
   }
 
   if (report.updated.length > 0) {
-    console.log('\n已重置：');
+    console.log('\n已更新：');
     for (const item of report.updated) {
       console.log(`- ${item.target}：${item.detail}`);
     }
