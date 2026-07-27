@@ -784,12 +784,12 @@
 <!-- 交互演示 -->
 <div class="pv-section">
   <div class="pv-section__title">交互演示 Interactive Demo</div>
-  <div class="pv-section__sub">点击触发按钮显示气泡；定位算法优先 placement 指定方向，空间不足按 bottom→top→right→left 回退；与触发元素固定间隔 4px，绝不遮挡触发元素。交互态示例使用顶层 fixed 挂载，避免局部容器裁剪。</div>
+  <div class="pv-section__sub">点击触发按钮显示气泡；normal/action 默认 placement=top，fallback 顺序 top→bottom→right→left；input 变体默认 placement=right，fallback 顺序 right→left→top→bottom；与触发元素固定间隔 4px，绝不遮挡触发元素。交互态示例使用顶层 fixed 挂载，避免局部容器裁剪。</div>
 
   <div class="demo-stage demo-stage--col" style="min-height: 200px; align-items: flex-start;">
     <div class="demo-trigger-row">
       <button class="demo-btn" id="js-trigger-normal" data-placement="top">引导型气泡（默认 top）</button>
-      <button class="demo-btn" id="js-trigger-action">操作型气泡（默认 bottom）</button>
+      <button class="demo-btn" id="js-trigger-action">操作型气泡（默认 top）</button>
       <button class="demo-btn" id="js-trigger-input">输入型气泡（默认 right）</button>
     </div>
     <div class="demo-hint">宿主建议：挂载到 body 或统一 overlay root，避免放进带 overflow / transform 的小容器里。</div>
@@ -837,6 +837,9 @@
     var viewportHeight = window.innerHeight;
     var menuRect = measureOpenRect(popover);
     var canFitWidth = menuRect.width <= viewportWidth - gap * 2;
+    // input 变体默认 placement=right（横向优先），normal/action 默认 top（纵向优先）
+    var variant = popover.getAttribute('data-variant');
+    var defaultPlacement = variant === 'input' ? 'right' : 'top';
 
     function alignForHorizontal(triggerCenter, viewportWidth) {
       if (triggerCenter < viewportWidth * 0.33) return 'start';
@@ -894,12 +897,16 @@
       return place('left', triggerRect.left - gap - menuRect.width, top, 'center');
     }
 
+    // 不同 variant 的默认 fallback 链：normal/action 纵向优先（top→bottom→right→left），input 横向优先（right→left→top→bottom）
+    var defaultOrder = variant === 'input'
+      ? [tryRight, tryLeft, tryBottom, tryTop]
+      : [tryTop, tryBottom, tryRight, tryLeft];
     var order = {
       bottom: [tryBottom, tryTop, tryRight, tryLeft],
       top: [tryTop, tryBottom, tryRight, tryLeft],
       right: [tryRight, tryLeft, tryBottom, tryTop],
       left: [tryLeft, tryRight, tryBottom, tryTop]
-    }[preferredPlacement] || [tryBottom, tryTop, tryRight, tryLeft];
+    }[preferredPlacement || defaultPlacement] || defaultOrder;
 
     for (var i = 0; i < order.length; i++) {
       if (order[i]()) return true;
@@ -941,7 +948,7 @@
   );
 
   var popoverAction = createFloatingPopover(
-    '<div class="popover popover--action" role="menu" data-variant="action" data-placement="bottom" data-align="center" data-state="closed">' +
+    '<div class="popover popover--action" role="menu" data-variant="action" data-placement="top" data-align="center" data-state="closed">' +
       '<div class="popover__arrow"></div>' +
       '<div class="popover__body">' +
         '<div class="popover__action-list">' +
@@ -991,7 +998,7 @@
   });
   triggerAction.addEventListener('click', function(e) {
     e.stopPropagation();
-    toggle(popoverAction, triggerAction, 'bottom');
+    toggle(popoverAction, triggerAction, 'top');
   });
   triggerInput.addEventListener('click', function(e) {
     e.stopPropagation();
