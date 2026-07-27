@@ -1626,8 +1626,8 @@
       {
         "state_id": "toolbar-revealed",
         "initial": false,
-        "trigger": "内容向上回拉超过方向阈值或滚回顶部",
-        "visible_result": "搜索栏在吸顶栈中展开占据文档流；顶部与边界回弹保持当前可预期状态",
+        "trigger": "内容向上回拉超过方向阈值、滚回顶部或重新进入动态主 tab",
+        "visible_result": "搜索栏在吸顶栈中展开占据文档流；顶部、主 tab 重入与边界回弹保持当前可预期状态",
         "fallback": "无有效方向位移时不切换；滚回顶部保持显示",
         "persistence": "memory"
       },
@@ -1635,7 +1635,7 @@
         "state_id": "toolbar-hidden",
         "initial": false,
         "trigger": "内容向下浏览超过方向阈值",
-        "visible_result": "搜索栏收起并让出可视区域，微小反向位移或底部回弹不会使其闪烁显示",
+        "visible_result": "搜索栏收起并让出可视区域；显隐动画引起的滚动区尺寸校正只重设基线，不作为反向手势，微小反向位移或底部回弹不会使其闪烁显示",
         "fallback": "内容向上回拉超过方向阈值后恢复显示",
         "persistence": "memory"
       },
@@ -1695,8 +1695,8 @@
       375,
       393
     ],
-    "checked_at": "2026-07-24T10:30:00.000Z",
-    "scope": "动态列表加入选品车、首次加入引导气泡（popover normal 变体指向 cart-fab 顶部，placement=top align=end，气泡右缘与 cart-fab 右缘对齐，箭头落在 cart-fab 右半区）、第一条产品卡片引导气泡（popover normal 变体指向加入选品车按钮，placement=bottom align=start，箭头落在气泡顶部左侧指向 select-action 按钮中心）、浮动购物车入口（中性色图标 --text-default，badge number corner 红色数量徽标贴近图标右上角）、全屏选品车/购物车 tabs（tab 标签带数量显示）、选品车底部操作栏（bottom-action-bar primary-secondary 左侧分享/下载可折叠进更多、右侧统一转发主操作）、购物车底部操作栏（右侧结算入口）、卡片封面右上角仅分享图标（移除产品/笔记内容类型标签）、发布者头像左上角营销色直播胶囊（图标带呼吸动画，复用场景层 wrapper 不扩展 avatar 组件）、发布者名字后认证图标与重点商家图标并存、购物车条目查看/移除操作（link standalone 14 文字链接）、动态列表与购物车面板空状态插画（中性色 SVG）；移动端预览验证图片右上角仅保留分享、直播胶囊不遮挡头像主体、发布者名字与认证/重点商家图标同行不溢出、tab 数量与实际条目同步、查看入口可跳转详情、查看与移除链接热区不重叠、空状态插画居中且不喧宾夺主、首次加入后数量徽标与引导气泡同步、全屏面板顶部无单独标题、底部操作栏主操作右对齐且左侧溢出收纳、悬浮入口距底部导航 32px 且列表底部预留足够间距避免遮挡。",
+    "checked_at": "2026-07-27T02:27:59.000Z",
+    "scope": "动态列表加入选品车、首次加入引导气泡（popover normal 变体指向 cart-fab 顶部，placement=top align=end，气泡右缘与 cart-fab 右缘对齐，箭头落在 cart-fab 右半区）、第一条产品卡片引导气泡（popover normal 变体指向加入选品车按钮，placement=bottom align=start，箭头落在气泡顶部左侧指向 select-action 按钮中心）、浮动购物车入口（中性色图标 --text-default，badge number corner 红色数量徽标贴近图标右上角）、全屏选品车/购物车 tabs（tab 标签带数量显示）、选品车底部操作栏（bottom-action-bar primary-secondary 左侧分享/下载可折叠进更多、右侧统一转发主操作）、购物车底部操作栏（右侧结算入口）、卡片封面右上角仅分享图标（移除产品/笔记内容类型标签）、发布者头像左上角营销色直播胶囊（图标带呼吸动画，复用场景层 wrapper 不扩展 avatar 组件）、发布者名字后认证图标与重点商家图标并存、购物车条目查看/移除操作（link standalone 14 文字链接）、动态列表与购物车面板空状态插画（中性色 SVG）；移动端预览验证图片右上角仅保留分享、直播胶囊不遮挡头像主体、发布者名字与认证/重点商家图标同行不溢出、tab 数量与实际条目同步、查看入口可跳转详情、查看与移除链接热区不重叠、空状态插画居中且不喧宾夺主、首次加入后数量徽标与引导气泡同步、全屏面板顶部无单独标题、底部操作栏主操作右对齐且左侧溢出收纳、悬浮入口距底部导航 32px 且列表底部预留足够间距避免遮挡；375px 与 393px 视口验证搜索栏首次进入和回到顶部显示、向下浏览隐藏、向上回拉显示、底部布局校正不反向闪烁、主 tab 重入后回顶显示。",
     "checks": {
       "horizontal_overflow": true,
       "overlap": true,
@@ -2752,13 +2752,23 @@
       var toolbarRafId = null;
       var pendingScrollTop = 0;
       var isToolbarRevealed = true;
-      /* 滚动尺寸缓存：避免 onScroll/rAF 内读 clientHeight/scrollHeight 触发 forced reflow；
-         render 后内容变化、resize 时更新 */
-      var cachedScrollHeight = 0;
-      var cachedClientHeight = 0;
+      var lastMaxScrollTop = 0;
+      var isToolbarLayoutTransitioning = false;
+      var toolbarBoundaryTolerance = 1;
+      function maxScrollTop() {
+        return Math.max(0, scroll.scrollHeight - scroll.clientHeight);
+      }
+      function resetToolbarDirection() {
+        toolbarDirectionDistance = 0;
+        toolbarDirection = 0;
+      }
       function updateScrollMetrics() {
-        cachedScrollHeight = scroll.scrollHeight;
-        cachedClientHeight = scroll.clientHeight;
+        var currentMaxScrollTop = maxScrollTop();
+        var currentTop = Math.min(currentMaxScrollTop, Math.max(0, scroll.scrollTop));
+        lastScrollTop = currentTop;
+        lastMaxScrollTop = currentMaxScrollTop;
+        pendingScrollTop = scroll.scrollTop;
+        resetToolbarDirection();
       }
 
       /* 直播声波条离屏暂停动画：IntersectionObserver 观察 live-badge-bars，
@@ -2777,6 +2787,7 @@
       function setToolbarRevealed(revealed) {
         if (isToolbarRevealed === revealed) return;
         isToolbarRevealed = revealed;
+        isToolbarLayoutTransitioning = true;
         if (revealed) {
           floatingToolbar.classList.remove('is-hidden');
           floatingToolbar.setAttribute('aria-hidden', 'false');
@@ -2785,20 +2796,31 @@
           floatingToolbar.setAttribute('aria-hidden', 'true');
         }
       }
+      function onToolbarTransitionEnd(event) {
+        if (event.target !== floatingToolbar || event.propertyName !== 'max-height') return;
+        isToolbarLayoutTransitioning = false;
+        updateScrollMetrics();
+      }
       function applyToolbarReveal() {
         toolbarRafId = null;
-        var maxScrollTop = Math.max(0, cachedScrollHeight - cachedClientHeight);
-        var currentTop = Math.min(maxScrollTop, Math.max(0, pendingScrollTop));
+        var currentMaxScrollTop = maxScrollTop();
+        var currentTop = Math.min(currentMaxScrollTop, Math.max(0, pendingScrollTop));
         var delta = currentTop - lastScrollTop;
+        var maxScrollDelta = currentMaxScrollTop - lastMaxScrollTop;
+        var wasAtBottom = Math.abs(lastMaxScrollTop - lastScrollTop) <= toolbarBoundaryTolerance;
+        /* max-height 动画会改变滚动区 clientHeight。用户停在底部时，浏览器会让
+           scrollTop 跟随最大滚动位置自动回退；减去同帧的 maxScrollDelta，只保留
+           用户真实位移，避免搜索栏自己的布局变化被误判成反向手势。 */
+        if (isToolbarLayoutTransitioning && wasAtBottom) {
+          delta -= maxScrollDelta;
+        }
         var isAtTop = currentTop <= 0;
         if (isAtTop) {
           setToolbarRevealed(true);
-          toolbarDirectionDistance = 0;
-          toolbarDirection = 0;
-        } else if (!delta) {
-          /* 已钳制的位置不变表示边界回弹或无有效滚动，不改变搜索栏状态。 */
-          toolbarDirectionDistance = 0;
-          toolbarDirection = 0;
+          resetToolbarDirection();
+        } else if (Math.abs(delta) <= toolbarBoundaryTolerance) {
+          /* 边界回弹、布局校正或无有效滚动只更新基线，不改变搜索栏状态。 */
+          resetToolbarDirection();
         } else {
           var nextDirection = delta > 0 ? 1 : -1;
           if (toolbarDirection !== nextDirection) {
@@ -2817,9 +2839,10 @@
           }
         }
         lastScrollTop = currentTop;
+        lastMaxScrollTop = currentMaxScrollTop;
       }
       function onScroll() {
-        /* 只读一次 scrollTop；滚动期间不读 clientHeight/scrollHeight（用缓存） */
+        /* scroll 事件只记录最新位置；尺寸与方向统一在 rAF 中读取和裁决。 */
         var currentTop = scroll.scrollTop;
         ctx.state.scrollPosition = currentTop;
         pendingScrollTop = currentTop;
@@ -2829,6 +2852,12 @@
           dismissFirstCardGuide();
         }
       }
+      var hostTabPanel = root.closest('[data-host-tab]');
+      var hostTabObserver = ('MutationObserver' in window && hostTabPanel) ? new MutationObserver(function() {
+        if (hostTabPanel.hidden) return;
+        if (scroll.scrollTop <= toolbarBoundaryTolerance) setToolbarRevealed(true);
+        updateScrollMetrics();
+      }) : null;
 
       root.querySelector('[data-dom-id="open-global-search"]').addEventListener('click', function() { ctx.toast('全局搜索能力本期暂未开放'); });
       root.querySelector('[data-dom-id="open-global-search"]').addEventListener('keydown', function(event) {
@@ -2888,6 +2917,8 @@
       root.querySelector('[data-dom-id="filter-tag-live"]').addEventListener('click', function() { switchDimension('live'); });
 
       scroll.addEventListener('scroll', onScroll, { passive: true });
+      floatingToolbar.addEventListener('transitionend', onToolbarTransitionEnd);
+      if (hostTabObserver) hostTabObserver.observe(hostTabPanel, { attributes: true, attributeFilter: ['hidden', 'class'] });
       function onResize() {
         updateAllIndicators();
         updateScrollMetrics();
@@ -2913,7 +2944,6 @@
       render();
       requestAnimationFrame(function() {
         scroll.scrollTop = ctx.state.scrollPosition;
-        lastScrollTop = scroll.scrollTop;
         updateAllIndicators();
         updateScrollMetrics();
       });
@@ -2925,6 +2955,8 @@
         }
         window.removeEventListener('resize', onResize);
         scroll.removeEventListener('scroll', onScroll);
+        floatingToolbar.removeEventListener('transitionend', onToolbarTransitionEnd);
+        if (hostTabObserver) hostTabObserver.disconnect();
         // publish menu 若处于打开状态，清理其监听器
         if (removePublishListeners) {
           removePublishListeners();
