@@ -14,11 +14,20 @@
 /* ── NavBar (导航栏) ── */
 
 /* @anatomy
+   三段式（左 / 中 / 右）：
    <div class="navbar">
      <div class="navbar__body [navbar__body--spaced]">
        <div class="navbar__left">...</div>
        <div class="navbar__center">...</div>
        <div class="navbar__right [navbar__right--icon|navbar__right--text|navbar__right--button]">...</div>
+     </div>
+   </div>
+
+   两段式（左 / 右）：
+   <div class="navbar">
+     <div class="navbar__body navbar__body--split">
+       <div class="navbar__left">...</div>
+       <div class="navbar__right">...</div>
      </div>
    </div>
 
@@ -51,10 +60,18 @@
 */
 .navbar { width: 100%; padding-top: var(--safe-area-top, 0px); background: var(--bg-page); flex-shrink: 0; position: sticky; top: 0; z-index: var(--z-sticky, 10); }
 [data-bg="surface"] .navbar { background: var(--bg-surface); }
-/* Body — 默认 44px */
-.navbar__body { height: var(--navbar-body-height, 44px); display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); align-items: center; }
-/* Left area — col 1-3，统一左侧间距 16px */
-.navbar__left { grid-column: 1 / 4; display: flex; align-items: center; padding-left: 16px; gap: 4px; height: 100%; }
+/* Body — 默认三段式 3:4:3；--split 切换为左侧自适应 + 右侧内容宽度 */
+.navbar__body { height: var(--navbar-body-height, 44px); display: flex; align-items: center; }
+.navbar__left,
+.navbar__center,
+.navbar__right { box-sizing: border-box; }
+.navbar__left,
+.navbar__right { flex: 0 1 30%; min-width: 0; }
+.navbar__center { flex: 0 1 40%; min-width: 0; }
+.navbar__body--split .navbar__left { flex: 1 1 auto; }
+.navbar__body--split .navbar__right { flex: 0 0 auto; }
+/* Left area — 统一左侧间距 16px */
+.navbar__left { display: flex; align-items: center; padding-left: 16px; gap: 4px; height: 100%; }
 .navbar__left-btn { display: flex; align-items: center; justify-content: center; width: auto; height: 44px; cursor: pointer; flex-shrink: 0; position: relative; -webkit-tap-highlight-color: transparent; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
 .navbar__left-btn::before { content: ""; position: absolute; top: 50%; left: 50%; width: 48px; height: 48px; transform: translate(-50%, -50%); }
 .navbar__left-btn:active,
@@ -69,16 +86,14 @@
 .navbar__left-text::before { content: ""; position: absolute; top: 50%; left: 50%; width: 48px; height: 48px; transform: translate(-50%, -50%); }
 .navbar__left-text:active,
 .navbar__left-text.is-pressed { opacity: 0.6; }
-/* Center area — col 4-7 (standard) */
-.navbar__center { grid-column: 4 / 8; display: flex; align-items: center; justify-content: center; gap: 4px; min-width: 120px; overflow: hidden; padding: 0 8px; }
-.navbar__center--wide { grid-column: 1 / 6; justify-content: flex-start; padding-left: 16px; }
+/* Center area — 仅三段式使用 */
+.navbar__center { display: flex; align-items: center; justify-content: center; gap: 4px; overflow: hidden; padding: 0 8px; }
 .navbar__title { font-size: var(--heading-sm-font-size); font-weight: var(--font-weight-medium); color: var(--text-default); line-height: 1.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-/* Right area — col 8-10 (standard)
+/* Right area
    图标操作场景（默认）：padding-right 4px，gap 0
    文本/按钮操作场景：padding-right 16px，使用 .navbar__right--text / .navbar__right--button
 */
-.navbar__right { grid-column: 8 / 11; display: flex; align-items: center; justify-content: flex-end; gap: 0; padding-right: 4px; height: 100%; }
-.navbar__right--wide { grid-column: 6 / 11; padding-right: 4px; }
+.navbar__right { display: flex; align-items: center; justify-content: flex-end; gap: 0; padding-right: 4px; height: 100%; }
 /* 图标操作场景（默认）：右侧间距 4px，gap 0 */
 .navbar__right--icon { gap: 0; }
 /* 文本操作场景：右侧间距 16px，最多1个按钮 */
@@ -89,11 +104,18 @@
 .navbar__body--spaced .navbar__right { padding-right: 16px; }
 .navbar__body--spaced .navbar__right--icon { padding-right: 4px; }
 .navbar__right--gap { gap: 12px; }
+/* 旧两段式兼容：新增消费必须改用 .navbar__body--split 并只保留 left / right */
+.navbar__body:has(.navbar__center--wide) .navbar__left { display: none; }
+.navbar__center--wide,
+.navbar__right--wide { flex-basis: 50%; }
+.navbar__center--wide { justify-content: flex-start; padding-left: 16px; }
+.navbar__right--wide { padding-right: 4px; }
 /* Custom slot variants — host-tab 主页使用：移除默认内边距与节奏限制，由场景自由填充 */
 .navbar__left--custom { padding-left: 0; gap: 0; }
 .navbar__center--custom { min-width: 0; overflow: visible; padding: 0; gap: 0; height: 100%; }
 .navbar__right--custom { padding-right: 0; gap: 0; }
 /* navbar 内嵌 tabs 时移除 tabs 默认 min-height，让 tabs 完全跟随 navbar 主体高度 */
+.navbar__left--custom .wg-tabs,
 .navbar__center--custom .wg-tabs { min-height: 0; }
 /* Action button items */
 .navbar__action { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 44px; min-height: 44px; cursor: pointer; position: relative; flex-shrink: 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
@@ -133,6 +155,9 @@
   padding: var(--spacer-12) var(--spacer-16) var(--spacer-8);
   margin: 0;
   text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
   background: var(--bg-surface);
   border-bottom: 1px solid var(--border-neutral-l2);
 }
@@ -176,7 +201,7 @@
 </style>
 </head>
 <body>
-<div class="pv-header"><h1>导航栏</h1><p>顶部导航，支持返回/关闭、居中/左对齐标题、右侧操作区。</p></div>
+<div class="pv-header"><h1>导航栏</h1><p>顶部导航，只提供左中右三段式与左右两段式两类布局。</p></div>
 <div class="navbar-preview-grid">
   <div class="preview-phone navbar-demo">
     <div class="label">标准 — 返回 + 标题</div>
@@ -255,12 +280,11 @@
   </div>
 
   <div class="preview-phone navbar-demo">
-    <div class="label">无按钮 — 标题左对齐 + 图标操作（右侧间距4px）</div>
+    <div class="label">两段式 — 左标题自适应 + 右图标操作按内容宽度</div>
     <div class="navbar">
-      <div class="navbar__body">
-        <div class="navbar__left"></div>
-        <div class="navbar__center navbar__center--wide"><span class="navbar__title">页面标题</span></div>
-        <div class="navbar__right navbar__right--wide navbar__right--icon">
+      <div class="navbar__body navbar__body--split">
+        <div class="navbar__left"><span class="navbar__title">页面标题</span></div>
+        <div class="navbar__right navbar__right--icon">
           <div class="navbar__action">
             <div class="navbar__action-icon"><i class="wego-iconfont-s icon-yuanjia"></i></div>
             <span class="navbar__action-label">圆加</span>
@@ -383,10 +407,10 @@
     </div>
   </div>
 
-  <div class="preview-phone navbar-demo">
+  <div class="preview-phone navbar-demo" data-bg="page">
     <div class="label">host-tab 主页 custom 槽 — 左身份区 + 右图标操作（如「我的」tab）</div>
     <div class="navbar">
-      <div class="navbar__body">
+      <div class="navbar__body navbar__body--split">
         <div class="navbar__left navbar__left--custom">
           <button type="button" class="navbar-demo-identity" aria-label="切换相册">
             <div class="avatar avatar--40 avatar--image"><img src="../assets/image/avatar/avatar_083.jpg" alt=""></div>
@@ -396,7 +420,6 @@
             <i class="wego-iconfont-s icon-xiajiantou16 navbar-demo-identity-caret" aria-hidden="true"></i>
           </button>
         </div>
-        <div class="navbar__center navbar__center--custom"></div>
         <div class="navbar__right navbar__right--icon">
           <div class="navbar__action">
             <div class="navbar__action-icon"><i class="wego-iconfont-s icon-shezhi"></i></div>
@@ -411,7 +434,7 @@
     </div>
   </div>
 
-  <div class="preview-phone navbar-demo">
+  <div class="preview-phone navbar-demo" data-bg="surface">
     <div class="label">host-tab 主页 custom 槽 — 中间 tabs + 右自定义触发器（如「微购相册动态」tab）</div>
     <div class="navbar">
       <div class="navbar__body">
@@ -437,15 +460,58 @@
 </div>
 <style>
   /* host-tab demo 局部样式 — 仅用于 Preview 演示，不在 components.css 中提取 */
-  .navbar-demo-identity { display: flex; align-items: center; gap: var(--spacer-8); padding: var(--spacer-4) var(--spacer-8); background: transparent; border: 0; cursor: pointer; flex-shrink: 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-  .navbar-demo-identity:active { background: var(--bg-subtle); border-radius: var(--radius-full); }
-  .navbar-demo-identity-name { font-size: var(--heading-sm-font-size); font-weight: var(--font-weight-medium); color: var(--text-default); line-height: var(--heading-sm-line-height); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
-  .navbar-demo-identity-verified { font-size: 16px; color: var(--text-brand); line-height: var(--body-xs-line-height); }
-  .navbar-demo-identity-caret { font-size: 16px; color: var(--text-default); line-height: var(--body-xs-line-height); }
-  .navbar-demo-tabs { width: 100%; }
+  .navbar-demo-identity { display: flex; align-items: center; gap: var(--spacer-8); width: 100%; min-width: 0; padding: var(--spacer-4) var(--spacer-8); border: 0; background: transparent; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  .navbar-demo-identity:active { opacity: 0.6; }
+  .navbar-demo-identity .avatar,
+  .navbar-demo-identity .tag { flex-shrink: 0; }
+  .navbar-demo-identity-name { flex: 1 1 auto; min-width: 0; font-size: var(--heading-sm-font-size); font-weight: var(--font-weight-medium); color: var(--text-default); line-height: var(--heading-sm-line-height); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .navbar-demo-identity-verified { flex-shrink: 0; font-size: 16px; color: var(--text-brand); line-height: var(--body-xs-line-height); }
+  .navbar-demo-identity-caret { flex-shrink: 0; font-size: 16px; color: var(--text-default); line-height: var(--body-xs-line-height); }
+  .navbar-demo-tabs { width: 100%; background: transparent; }
+  .navbar-demo-tabs .wg-tabs__scroll { justify-content: center; }
+  .navbar-demo-tabs.wg-tabs--standard .wg-tabs__item { padding-inline: var(--spacer-8); }
   .navbar-demo-publish { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 0; background: transparent; cursor: pointer; flex-shrink: 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
   .navbar-demo-publish:active { opacity: 0.6; }
   .navbar-demo-publish-bg { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: var(--radius-full); background: var(--bg-brand); color: var(--text-inverse); font-size: 20px; line-height: 1; }
 </style>
+<script>
+(function() {
+  function updateTabsIndicator(tabs) {
+    var scroll = tabs.querySelector(".wg-tabs__scroll");
+    var indicator = tabs.querySelector(".wg-tabs__active-indicator");
+    var selected = tabs.querySelector(".wg-tabs__item[aria-selected=\"true\"] .wg-tabs__content");
+
+    if (!scroll || !indicator || !selected) {
+      return;
+    }
+
+    var scrollRect = scroll.getBoundingClientRect();
+    var selectedRect = selected.getBoundingClientRect();
+    indicator.style.setProperty("--_tabs-indicator-x", (selectedRect.left - scrollRect.left + scroll.scrollLeft) + "px");
+    indicator.style.setProperty("--_tabs-indicator-width", selectedRect.width + "px");
+  }
+
+  document.querySelectorAll(".navbar-demo-tabs").forEach(function(tabs) {
+    var items = Array.from(tabs.querySelectorAll(".wg-tabs__item"));
+
+    requestAnimationFrame(function() {
+      updateTabsIndicator(tabs);
+    });
+
+    items.forEach(function(item) {
+      item.addEventListener("click", function() {
+        items.forEach(function(candidate) {
+          candidate.setAttribute("aria-selected", String(candidate === item));
+        });
+        updateTabsIndicator(tabs);
+      });
+    });
+  });
+
+  window.addEventListener("resize", function() {
+    document.querySelectorAll(".navbar-demo-tabs").forEach(updateTabsIndicator);
+  });
+})();
+</script>
 </body>
 </html>

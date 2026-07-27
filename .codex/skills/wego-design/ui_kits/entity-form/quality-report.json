@@ -1,9 +1,9 @@
 {
   "schemaVersion": 4,
-  "designSystemVersion": 433,
+  "designSystemVersion": 476,
   "designSystemParity": {
     "status": "passed",
-    "checked_at": "2026-07-22T00:00:00+08:00",
+    "checked_at": "2026-07-27T00:00:00+08:00",
     "checks": [
       "组件均已注册且允许使用",
       "组件契约与 Preview 一致性守卫通过",
@@ -11,6 +11,7 @@
       "UI Kit 仅作为明确页面范式证据",
       "与 biz-rule-config 的 appliesWhen/excludeWhen 互斥明确",
       "fullscreen NavBar 仅允许 3 种固定模式（模式 A/B/C），右侧只支持 button 与 icon-text 入口",
+      "NavBar 布局仅使用左中右三段式或 navbar__body--split 左右两段式",
       "全屏模态消费 modal 组件 fullscreen 变体，无自定义 .uikit-modal-screen 私有层"
     ]
   },

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 4,
-  "designSystemVersion": 422,
+  "designSystemVersion": 476,
   "designSystemParity": {
     "status": "passed",
-    "checked_at": "2026-07-21T00:00:00+08:00",
-    "checks": ["组件均已注册且允许使用", "组件契约与 Preview 一致性守卫通过", "不存在生成规则文档或已删除技能引用", "UI Kit 仅作为明确页面范式证据", "全屏模态消费 modal 组件 fullscreen 变体，无自定义 .uikit-modal-screen 私有层"]
+    "checked_at": "2026-07-27T00:00:00+08:00",
+    "checks": ["组件均已注册且允许使用", "组件契约与 Preview 一致性守卫通过", "不存在生成规则文档或已删除技能引用", "UI Kit 仅作为明确页面范式证据", "NavBar 布局仅使用左中右三段式或 navbar__body--split 左右两段式", "全屏模态消费 modal 组件 fullscreen 变体，无自定义 .uikit-modal-screen 私有层"]
   },
   "kitType": "biz-rule-config",
   "presentation": "full-screen-modal",

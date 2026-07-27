@@ -123,7 +123,7 @@
   "usageHints": [
     "standard 尺寸：默认 min-height 56px，label 使用 16px，indicator 高 3px；item 高度跟随容器（height: 100%），独立使用时由 .wg-tabs--standard 的 min-height 提供 56px 默认值。",
     "mini 尺寸：默认 min-height 48px，label 使用 14px，indicator 高 2px；item 高度跟随容器（height: 100%），独立使用时由 .wg-tabs--mini 的 min-height 提供 48px 默认值。",
-    "tabs 嵌入 navbar 等固定高度容器时，navbar 组件已通过 .navbar__center--custom .wg-tabs { min-height: 0 } 移除默认 min-height，tabs 会完全跟随容器高度，不再冲出。",
+    "tabs 嵌入 navbar 等固定高度容器时，navbar 组件已通过 custom 槽位内的 .wg-tabs { min-height: 0 } 移除默认 min-height；host-tab 的中间 tabs 使用三段式 .navbar__center--custom，左右槽继续承担占位与页面级操作。",
     "选中态文字和图标使用 --text-default，未选态使用 --text-secondary，指示条固定使用 --bg-brand。",
     "图标只使用 .wg-tabs__icon，放在 label 左侧或右侧，颜色跟随当前标签状态。",
     "左侧图标尺寸随 tabs 尺寸变化：standard 为 20px，mini 为 16px。",
