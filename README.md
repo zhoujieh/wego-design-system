@@ -11,7 +11,7 @@
 - 路由：稳定 kebab-case `route_id`，通过 `#/route-id` 访问
 - 电脑端：手机壳预览
 - 移动端：同链接铺满真实 viewport
-- 部署预览：Vercel 固定链接，同时支持本地直接打开
+- 部署预览：[GitHub Pages 固定链接](https://zhoujieh.github.io/wego-design-system/)，同时支持本地直接打开
 
 ## 技能闭环
 
@@ -56,6 +56,8 @@ node scripts/validate-wego-design.mjs --scope=full --strict
 `validate-wego-design.mjs` 会先检查组件契约一致性，再执行设计系统、场景和 App 守门。
 
 `scripts/` 中并非每个文件都需要手工运行；入口、按需工具、内部模块和自动回归测试的分类见 `scripts/README.md`。
+
+`main` 分支中 `.github/workflows/pages.yml`、`scripts/build-pages-artifact.mjs` 或 `wego-app/` 发生变化后，GitHub Actions 会验证并发布正式 App 到 GitHub Pages。临时会话线框仍由 Trae 和 Codex 各自的宿主渲染器展示，不进入 Pages 产物。
 
 `iteration-record.mjs` 负责业务迭代状态机、范围确认、原型失效和冻结。验收期反馈复用当前未冻结迭代；只有用户明确指定并要求冻结后才允许生成不可修改的冻结快照。历史场景无需补录，后续再次修改时必须进入有效迭代。
 

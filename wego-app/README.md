@@ -11,7 +11,7 @@
 - 正式迭代：`scenes/{主业务场景}/_iterations/{日期}-{iteration_id}-{标题}/`
 - 资源：`lib/` 为设计系统部署副本
 
-业务场景通过 `window.WegoApp.registerScene()` 注册，不运行时读取本地 HTML 片段。项目可部署到 Vercel，也可本地直接打开 `index.html` 预览。
+业务场景通过 `window.WegoApp.registerScene()` 注册，不运行时读取本地 HTML 片段。项目由 GitHub Actions 部署到 [GitHub Pages](https://zhoujieh.github.io/wego-design-system/)，也可本地直接打开 `index.html` 预览。
 
 需要商品、素材、发布者或动态内容的场景统一从 `window.WEGO_PROTOTYPE_DB` 读取对应数据。此类场景不得在 `scene.js` 里临时维护独立商品库；新增鞋子、包袋等品类先补 `data/prototype-db.js`，再由场景按 `product_id` 或 `asset_id` 引用。
 

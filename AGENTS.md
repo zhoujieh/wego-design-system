@@ -13,7 +13,7 @@
 - 路由使用稳定 kebab-case `route_id`，访问地址使用 `#/route-id`；目录名不是 route\_id。
 - 新场景必须增量维护 `wego-app/js/routes.js`、场景 `scene.js` 和 `scene.css`。模板、presentation、交互通过 `window.WegoApp.registerScene` 注册。
 - 电脑端显示手机预览外壳，移动端同链接铺满真实 viewport。
-- 预览以 Vercel 固定链接为主，同时支持本地直接打开 `wego-app/index.html`。
+- 预览以 GitHub Pages 固定链接 `https://zhoujieh.github.io/wego-design-system/` 为主，同时支持本地直接打开 `wego-app/index.html`。
 - `wego-app/lib/` 是设计系统部署副本，禁止直接编辑；先改 `.codex/skills/wego-design/` 源文件，再运行 `node scripts/sync-wego-app-lib.mjs`。
 
 ## 沟通要求

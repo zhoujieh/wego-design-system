@@ -15,60 +15,8 @@
   <link rel="stylesheet" href="./css/safe-area.css" />
   <link rel="stylesheet" href="./css/host-tab-content.css" />
   <link rel="stylesheet" href="./css/scene-skeleton.css" />
-  <link rel="stylesheet" href="./css/wireframe-preview.css" />
 </head>
 <body data-bg="page" data-host-shell="true">
-  <main class="wireframe-preview" data-wireframe-preview hidden aria-label="临时线框预览">
-    <div class="wireframe-preview__meta">
-      <span class="wireframe-preview__badge">会话临时线框</span>
-      <span>最小 GitHub Pages 测试</span>
-    </div>
-
-    <nav class="wireframe-preview__steps" aria-label="线框步骤">
-      <button type="button" class="wireframe-preview__step is-active" data-wireframe-target="list" aria-selected="true">1 商品列表</button>
-      <button type="button" class="wireframe-preview__step" data-wireframe-target="detail" aria-selected="false">2 商品详情</button>
-    </nav>
-
-    <section class="wireframe-preview__phone" data-wireframe-frame="list" aria-label="商品列表线框">
-      <header class="wireframe-preview__header">
-        <span aria-hidden="true">‹</span>
-        <strong>选择商品</strong>
-        <span></span>
-      </header>
-      <div class="wireframe-preview__search">搜索商品</div>
-      <div class="wireframe-preview__list" aria-label="商品列表">
-        <div class="wireframe-preview__row">
-          <span class="wireframe-preview__thumb" aria-hidden="true"></span>
-          <span><strong>春季新品外套</strong><small>库存 18 件</small></span>
-        </div>
-        <div class="wireframe-preview__row">
-          <span class="wireframe-preview__thumb" aria-hidden="true"></span>
-          <span><strong>轻便休闲鞋</strong><small>库存 26 件</small></span>
-        </div>
-      </div>
-      <div class="wireframe-preview__action">
-        <button type="button" data-wireframe-target="detail">打开第一个商品</button>
-      </div>
-    </section>
-
-    <section class="wireframe-preview__phone" data-wireframe-frame="detail" aria-label="商品详情线框" hidden>
-      <header class="wireframe-preview__header">
-        <button type="button" class="wireframe-preview__back" data-wireframe-target="list" aria-label="返回商品列表">‹</button>
-        <strong>商品详情</strong>
-        <span></span>
-      </header>
-      <div class="wireframe-preview__media" aria-label="商品图片占位"></div>
-      <div class="wireframe-preview__group">
-        <strong>春季新品外套</strong>
-        <span>¥199 · 库存 18 件</span>
-      </div>
-      <div class="wireframe-preview__group">
-        <small>可见结果</small>
-        <span>进入所选商品详情，可以继续查看或编辑商品。</span>
-      </div>
-    </section>
-  </main>
-
   <div class="preview-shell">
     <div class="phone-frame">
       <div class="phone-screen" data-phone-screen>
@@ -122,7 +70,6 @@
 
   <script src="./js/routes.js"></script>
   <script src="./data/prototype-db.js"></script>
-  <script src="./js/wireframe-preview.js"></script>
   <script src="./js/app.js"></script>
   <script src="./js/tab-scroll-reset.js"></script>
 </body>

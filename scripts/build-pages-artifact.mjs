@@ -85,7 +85,7 @@ function collect(directory) {
 }
 collect(destination);
 
-for (const forbidden of ['design-decisions.json', 'iteration.json', 'freeze.json', 'vercel.json']) {
+for (const forbidden of ['design-decisions.json', 'iteration.json', 'freeze.json']) {
   if (publishedFiles.some(file => file.endsWith(forbidden))) {
     throw new Error(`Pages 产物包含禁止公开的文件：${forbidden}`);
   }
