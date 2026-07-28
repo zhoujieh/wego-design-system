@@ -31,7 +31,7 @@ const contract = {
     modalVariant: 'fullscreen',
     modalTitle: 'default',
     consumesModalComponent: true,
-    modalBindingNote: '通过 modal 组件 fullscreen 变体（.modal.modal--fullscreen[data-state] + .modal__panel > .modal__title--default > .navbar + .modal__body）消费，蒙层与 slide-up/slide-down 过渡由组件自身 data-state 状态机承担；不允许再维护 .uikit-modal-screen 私有 transform 状态机；fullscreen NavBar 仅允许 3 种固定模式：模式 A=text-cancel+button（取消+保存，本页取此）、模式 B=down-arrow+icon-text（无明确操作时的浏览/跳转）、模式 C=back-arrow+button（Modal 内二级页面）；右侧只支持 button（明确操作）与 icon-text（跳转/浏览）两种入口样式，纯文字入口已删除',
+    modalBindingNote: '通过 modal 组件 fullscreen 变体（.modal.modal--fullscreen[data-state] + .modal__panel > .modal__title--default > .navbar + .modal__body.modal__body--safe-bottom）消费；本页无底部 action/cancel，由 modal__body--safe-bottom 直接承担底部基础避让；蒙层与 slide-up/slide-down 过渡由组件自身 data-state 状态机承担；不允许再维护 .uikit-modal-screen 私有 transform 状态机；fullscreen NavBar 仅允许 3 种固定模式：模式 A=text-cancel+button（取消+保存，本页取此）、模式 B=down-arrow+icon-text（无明确操作时的浏览/跳转）、模式 C=back-arrow+button（Modal 内二级页面）；右侧只支持 button（明确操作）与 icon-text（跳转/浏览）两种入口样式，纯文字入口已删除',
     transition: 'slide-up-enter, slide-down-exit',
     dismissAction: 'page-level-save',
     overlayLevel: 'overlay',
@@ -42,6 +42,7 @@ const contract = {
     design_system_version: metadata.version,
     token_bindings: [
       { selector: '.contract-fixture', content_role: 'fixture-action', css_property: 'color', token: 'var(--text-default)' },
+      { selector: '.contract-fixture__scroll', content_role: '主滚动内容底部基础避让', css_property: 'padding-bottom', token: 'var(--safe-area-bottom-content)' },
       { selector: '.contract-fixture__content', content_role: 'fixture 内容组横向留白', css_property: 'padding-inline', token: 'var(--spacer-16)' }
     ],
     component_bindings: [
@@ -110,7 +111,7 @@ window.WegoApp.registerScene({
 
 function writeScene(currentContract = contract, options = {}) {
   fs.writeFileSync(path.join(sceneRoot, 'scene.js'), renderScene(currentContract, options));
-  const validCss = '.contract-fixture { position: absolute; inset: 0; overflow: hidden; color: var(--text-default); }\n.contract-fixture__scroll { height: 100%; overflow-y: auto; }\n.contract-fixture__content { padding-inline: var(--spacer-16); }\n';
+  const validCss = '.contract-fixture { position: absolute; inset: 0; overflow: hidden; color: var(--text-default); }\n.contract-fixture__scroll { height: 100%; overflow-y: auto; padding-bottom: var(--safe-area-bottom-content); }\n.contract-fixture__content { padding-inline: var(--spacer-16); }\n';
   fs.writeFileSync(path.join(sceneRoot, 'scene.css'), options.replaceCss ? options.css : `${validCss}${options.css || ''}`);
 }
 
@@ -180,6 +181,22 @@ try {
 
   writeScene(contract, { css: '.contract-fixture { position: absolute; inset: 0; color: var(--text-default); }\n.contract-fixture__scroll { height: 100%; overflow-y: auto; }\n.contract-fixture__content { padding-inline: var(--spacer-12); }\n' });
   extract('内容组 Token 错误提取'); assertFailureCode(validate(), 'scene.layout_group_runtime', '内容组必须落实声明的间距 Token');
+
+  writeScene(contract, { replaceCss: true, css: '.contract-fixture { position: absolute; inset: 0; overflow: hidden; color: var(--text-default); }\n.contract-fixture__scroll { height: 100%; overflow-y: auto; }\n.contract-fixture__content { padding-inline: var(--spacer-16); }\n' });
+  extract('主滚动区缺少底部基础避让提取'); assertFailureCode(validate(), 'scene.scroll_bottom_clearance', '版本 482 起主滚动区必须保留 40px + 安全区');
+
+  const unregisteredFloating = structuredClone(contract);
+  unregisteredFloating.prompt_contract.layout_contract.page_layers.push({
+    region_id: 'fixture-floating-action',
+    selector: '.contract-fixture__floating-action',
+    scope: 'page-local',
+    role: 'raised'
+  });
+  writeScene(unregisteredFloating, {
+    template: baseTemplate.replace('</section>', '<aside class="contract-fixture__floating-action">悬浮操作</aside></section>'),
+    css: '.contract-fixture__floating-action { position: absolute; right: var(--spacer-16); bottom: var(--spacer-16); }\n'
+  });
+  extract('未登记底部悬浮区域提取'); assertFailureCode(validate(), 'scene.bottom_obstruction_unregistered', '底部悬浮区域必须进入 fixed_regions');
 
   writeScene(contract, { handler: `const ignoredAuditText = '#fff rgb(0, 0, 0) var(--not-a-token) --text-default: .setProperty("--text-default")';
       // #abc var(--also-not-a-token) --text-default: setProperty('--text-default')
@@ -400,6 +417,7 @@ window.WEGO_APP_ROUTES = [{ routeId: 'contract-fixture', script: 'scenes/其他�
     { selector: '.contract-fixture', content_role: 'font-size', css_property: 'font-size', token: 'var(--body-md-font-size)' },
     { selector: '.contract-fixture', content_role: 'line-height', css_property: 'line-height', token: 'var(--body-md-line-height)' },
     { selector: '.contract-fixture', content_role: 'font-weight', css_property: 'font-weight', token: 'var(--font-weight-regular)' },
+    { selector: '.contract-fixture__scroll', content_role: '主滚动内容底部基础避让', css_property: 'padding-bottom', token: 'var(--safe-area-bottom-content)' },
     { selector: '.contract-fixture__content', content_role: 'fixture 内容组横向留白', css_property: 'padding-inline', token: 'var(--spacer-16)' }
   ];
   const visualCss = '.contract-fixture { color: var(--text-default); background: var(--bg-surface); border-color: var(--border-neutral-l2); fill: var(--text-default); stroke: var(--text-secondary); font-size: var(--body-md-font-size); line-height: var(--body-md-line-height); font-weight: var(--font-weight-regular); }\n';

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 4,
-  "designSystemVersion": 479,
+  "designSystemVersion": 484,
   "designSystemParity": {
     "status": "passed",
-    "checked_at": "2026-07-28T17:09:37+08:00",
-    "checks": ["组件均已注册且允许使用", "组件契约与 Preview 一致性守卫通过", "不存在生成规则文档或已删除技能引用", "UI Kit 仅作为明确页面范式证据", "NavBar 布局仅使用左中右三段式或 navbar__body--split 左右两段式", "共享 Showcase 宿主只渲染一份状态栏与手势条，push 页与底页共用系统外壳"]
+    "checked_at": "2026-07-28T20:08:08+08:00",
+    "checks": ["组件均已注册且允许使用", "组件契约与 Preview 一致性守卫通过", "不存在生成规则文档或已删除技能引用", "UI Kit 仅作为明确页面范式证据", "NavBar 布局仅使用左中右三段式或 navbar__body--split 左右两段式", "HostScreen 与 push 页的主纵向滚动区均直接承担 safe-area-bottom-content 基础避让", "共享 Showcase 宿主只渲染一份状态栏与手势条，push 页与底页共用系统外壳"]
   },
   "kitType": "system-settings",
   "presentation": "push",
@@ -40,14 +40,15 @@
       "violations": []
     },
     "spacingCompliance": {
-      "description": "页面纵向节奏由 phone-body 的 8px 组间距、group 标题和 cell 分组自身承担;HostScreen 与 SystemSettingsScreen 均用通栏模式 M0(phone-body 0px 横向 padding + cell-group__content 无 --card)。",
+      "description": "页面纵向节奏由 phone-body 的 8px 组间距、group 标题和 cell 分组自身承担；HostScreen 与 SystemSettingsScreen 均用通栏模式 M0（phone-body 0px 横向 padding + cell-group__content 无 --card），且每个 phone-body 直接声明 safe-area-bottom-content 基础避让。",
       "checked": true,
       "checklist": [
         "phone-body 的组间距、group 标题和列表分组之间是否已形成稳定纵向节奏",
         "HostScreen 用通栏模式 M0(phone-body 0px 横向 padding + cell-group__content 无 --card)",
         "SystemSettingsScreen 用通栏模式 M0(phone-body 0px 横向 padding + cell-group__content 无 --card)",
         "整行点击只保留给带箭头、会进入下一层的入口行",
-        "页面级主操作统一收口到 navbar 返回按钮"
+        "页面级主操作统一收口到 navbar 返回按钮",
+        "HostScreen 与 SystemSettingsScreen 的 phone-body 是否都直接声明 padding-bottom: var(--safe-area-bottom-content)"
       ],
       "violations": []
     },
@@ -76,6 +77,7 @@
     "#root 是 phone-screen 内的页面栈挂载区；phone-status / phone-indicator 是它的静态兄弟节点，不进入 React 页面树。",
     "phone-status / phone-indicator 默认绝对定位悬浮且不占文档流,并保持预览层级最高;桌面手机壳模拟 44px / 34px,移动端同链接隐藏。",
     "push 页首屏展示以稳定落点为准:默认直接展示打开后的最终态,避免自动入场动画让截图停在半开中间态。",
+    "HostScreen 与 SystemSettingsScreen 的主纵向滚动区均直接使用 phone-body 的 safe-area-bottom-content 基础避让，即使没有底部遮挡也不得省略或下沉到最后一个内容组。",
     "真实项目中应保持单一页面级主操作(返回),不在页面内容区或底部重复放操作按钮。",
     "iconfont 图标用于跳转指示器(icon-youjiantou16)和返回按钮(icon-fanhui)。",
     "入口点击反馈使用正式 toast 组件挂在 Showcase 宿主层，不回退为 .uikit-toast 自定义气泡。"

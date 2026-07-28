@@ -60,11 +60,11 @@ UI Kit 只证明某个明确页面范式如何组合正式能力，不负责替 
 读取 `page-layers.json` 后，必须在 `layout_contract` 中同时完成四部分：
 
 - `page_layers`：每个页面区域属于哪个 scope/role，页面内导航、吸顶与固定操作统一使用 `page-local/navigation`。
-- `scroll_architecture`：唯一主滚动区、必要的嵌套滚动区、固定区域及其安全区/内容避让责任。页面根与主滚动区必须通栏。
+- `scroll_architecture`：唯一主滚动区、必要的嵌套滚动区、固定区域及其安全区/内容避让责任。页面根与主滚动区必须通栏；滚动底部避让统一消费 `library-consumption.json#/layoutContract/scrollBottomRule`。
 - `layout_groups`：按内容语义成组声明横向边距和垂直节奏，同一组只有一个 `spacing_owner`；不得按组件类型分组，也不得用页面根统一设置内容边距。
 - `sticky_regions`：登记吸附边缘、显隐策略、层级、不透明背景、底部间距和滚动避让方式。navbar、保存、结算和高优先级告警不得使用自动隐藏策略。
 
-Sticky surface 和 bottom action surface 必须通栏并有明确背景；其内部控件留白由组件内层承担。顶部吸顶区使用动态实测高度维护 `scroll-padding-top`，底部固定区按实测高度、安全区和额外间距维护内容 clearance 与 `scroll-padding-bottom`，确保首尾内容不被遮挡。
+Sticky surface 和 bottom action surface 必须通栏并有明确背景；其内部控件留白由组件内层承担。顶部吸顶区使用动态实测高度维护 `scroll-padding-top`；底部避让按 `scrollBottomRule` 登记、实现和验证，不在本方法中维护第二份数值或公式。
 
 ## 5. 复杂页面才生成两个结构候选
 

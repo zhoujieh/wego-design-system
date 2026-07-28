@@ -17,6 +17,10 @@
     return Number.isFinite(Number(value)) ? Number(value) : fallback;
   }
 
+  function composeBottomClearance(base, obstruction) {
+    return Math.max(0, number(base, 0)) + Math.max(0, number(obstruction, 0));
+  }
+
   function decideDirectionReveal(snapshot) {
     var currentTop = clamp(snapshot.currentTop, 0, snapshot.currentMax);
     var delta = currentTop - snapshot.lastTop;
@@ -71,6 +75,7 @@
     var initialComputedStyle = getComputedStyle(scrollRoot);
     var basePaddingTop = parseFloat(initialComputedStyle.paddingTop) || 0;
     var basePaddingBottom = parseFloat(initialComputedStyle.paddingBottom) || 0;
+    var baseScrollPaddingBottom = parseFloat(initialComputedStyle.scrollPaddingBottom) || 0;
 
     var regions = (options.regions || []).map(function (config, index) {
       var element = resolveElement(scopeRoot, config.element || config.selector, 'sticky 区域');
@@ -137,7 +142,6 @@
       var top = 0;
       var bottom = 0;
       var fixedTop = 0;
-      var fixedBottom = 0;
       regions.slice().sort(function (a, b) { return a.stackOrder - b.stackOrder; }).forEach(function (region) {
         var offset = region.edge === 'bottom' ? bottom : top;
         region.element.style.setProperty('--sticky-region-offset', offset + 'px');
@@ -147,12 +151,12 @@
       fixedRegions.forEach(function (region) {
         var size = Math.ceil(region.element.getBoundingClientRect().height) + region.gap;
         if (region.edge === 'top') { top += size; fixedTop += size; }
-        else { bottom += size; fixedBottom += size; }
+        else bottom += size;
       });
       scrollRoot.style.scrollPaddingTop = top + 'px';
-      scrollRoot.style.scrollPaddingBottom = bottom + 'px';
+      scrollRoot.style.scrollPaddingBottom = composeBottomClearance(Math.max(basePaddingBottom, baseScrollPaddingBottom), bottom) + 'px';
       if (fixedTop > 0) scrollRoot.style.paddingTop = basePaddingTop + fixedTop + 'px';
-      if (fixedBottom > 0) scrollRoot.style.paddingBottom = basePaddingBottom + fixedBottom + 'px';
+      scrollRoot.style.paddingBottom = composeBottomClearance(basePaddingBottom, bottom) + 'px';
       scrollRoot.style.setProperty('--scroll-layout-top-occlusion', top + 'px');
       scrollRoot.style.setProperty('--scroll-layout-bottom-clearance', bottom + 'px');
     }
@@ -266,6 +270,7 @@
 
   window.WegoScrollLayout = {
     bind: bind,
-    decideDirectionReveal: decideDirectionReveal
+    decideDirectionReveal: decideDirectionReveal,
+    composeBottomClearance: composeBottomClearance
   };
 })();

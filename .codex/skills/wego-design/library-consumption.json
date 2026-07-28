@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 6,
+  "schemaVersion": 7,
   "library": "wego-design",
   "tokenCss": "colors_and_type.css",
   "componentsCss": "components.css",
@@ -60,7 +60,14 @@
     "rootRule": "页面根和主滚动区始终通栏，不得声明业务内容 padding-inline。",
     "groupRule": "横向间距按语义内容组声明；相同边距的连续内容应形成同一组，每组只有一个 spacing_owner，inline_inset_token 使用正式页面边距或 spacer Token。",
     "stickyRule": "sticky surface 通栏、使用不透明背景与 page-local/navigation 层级；内部留白由组件内层承担；动态高度必须驱动主滚动区 scroll-padding。",
-    "fixedRule": "bottom fixed surface 通栏；内容 clearance 等于实测高度、安全区和额外间距，主滚动区同步维护 scroll-padding-bottom。"
+    "scrollBottomRule": {
+      "enforcedFromVersion": 482,
+      "baseToken": "var(--safe-area-bottom-content)",
+      "baseFormula": "40px + var(--safe-area-bottom)",
+      "rule": "每个页面的主纵向滚动区必须直接声明 padding-bottom: var(--safe-area-bottom-content)；没有底部遮挡也不得省略。",
+      "obstructionRule": "底部 fixed、sticky 或 floating 元素必须进入 fixed_regions/sticky_regions；其占用高度和额外间距叠加在基础空间之上，动态尺寸使用 WegoScrollLayout 实测，并同步维护 scroll-padding-bottom。"
+    },
+    "fixedRule": "bottom fixed surface 通栏；内容避让遵循 scrollBottomRule.obstructionRule。"
   },
   "actualTokenNameReference": {
     "source": "colors_and_type.css:root",

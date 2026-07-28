@@ -100,7 +100,7 @@ function checkLibrarySchema() {
   const tokenStructure = readJson('.codex/skills/wego-design/css.json');
   if (!index || !plan || !consumption || !pageLayers || !metadata || !tokenStructure) return;
   if (index.schemaVersion !== 4 || index.componentContractSchemaVersion !== 4) add('error', 'library.component_schema', '组件索引必须使用 schemaVersion 4', path.join(libraryRoot, 'components/index.json'));
-  if (plan.schemaVersion !== 5 || consumption.schemaVersion !== 6) add('error', 'library.schema', 'UI Kit 必须使用 schemaVersion 5，消费契约必须使用 schemaVersion 6', libraryRoot);
+  if (plan.schemaVersion !== 5 || consumption.schemaVersion !== 7) add('error', 'library.schema', 'UI Kit 必须使用 schemaVersion 5，消费契约必须使用 schemaVersion 7', libraryRoot);
   if (pageLayers.schemaVersion !== 1 || consumption.pageLayers !== 'page-layers.json' || !pageLayers.scopes?.['page-local'] || !pageLayers.scopes?.['app-global'] || !pageLayers.scopes?.['overlay-local']) add('error', 'library.page_layers', '页面层级模型必须使用 schemaVersion 1，并由消费契约唯一引用三个正式 scope', path.join(libraryRoot, 'page-layers.json'));
   if (!Number.isInteger(metadata.version) || metadata.version < 1) add('error', 'library.version', 'metadata.version 必须为正整数', path.join(libraryRoot, 'metadata.json'));
   if (consumption.tokenCss !== 'colors_and_type.css' || Object.hasOwn(consumption, 'tokenSource') || consumption.actualTokenNameReference?.source !== 'colors_and_type.css:root') add('error', 'library.token_authority', '实际 Token 名必须且只能以 colors_and_type.css:root 为权威；css.json 仅作结构索引', path.join(libraryRoot, 'library-consumption.json'));

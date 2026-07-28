@@ -107,12 +107,15 @@ export function validatePromptContractShape(prompt) {
       asArray(scroll.fixed_regions).forEach((region, index) => {
         const itemPrefix = `${prefix}.fixed_regions[${index}]`;
         if (!isPlainObject(region)) return add(itemPrefix, '必须是对象');
-        const itemFields = new Set(['region_id', 'selector', 'edge', 'safe_area_owner', 'clearance']);
+        const itemFields = new Set(['region_id', 'selector', 'edge', 'safe_area_owner', 'clearance', 'after_gap_token']);
         for (const field of Object.keys(region)) if (!itemFields.has(field)) add(`${itemPrefix}.${field}`, '不是当前 Schema 字段');
-        for (const field of itemFields) if (!isNonEmptyString(region[field])) add(`${itemPrefix}.${field}`, '必须是非空字符串');
+        const requiredFields = ['region_id', 'selector', 'edge', 'safe_area_owner', 'clearance'];
+        if (Number(prompt.design_system_version) >= 482 && region.edge === 'bottom') requiredFields.push('after_gap_token');
+        for (const field of requiredFields) if (!isNonEmptyString(region[field])) add(`${itemPrefix}.${field}`, '必须是非空字符串');
         if (!['top', 'bottom'].includes(region.edge)) add(`${itemPrefix}.edge`, '必须是 top 或 bottom');
         if (!['component', 'region', 'host'].includes(region.safe_area_owner)) add(`${itemPrefix}.safe_area_owner`, '必须是 component、region 或 host');
         if (!['dynamic-measured', 'flow-reserved'].includes(region.clearance)) add(`${itemPrefix}.clearance`, '必须是 dynamic-measured 或 flow-reserved');
+        if (region.after_gap_token !== undefined && !/^var\(--spacer-(?:0|2|4|6|8|12|16|20|24|32|40|48|56|64|72|80)\)$/.test(region.after_gap_token)) add(`${itemPrefix}.after_gap_token`, '必须使用正式 spacer Token');
       });
     }
 

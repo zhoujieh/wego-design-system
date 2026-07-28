@@ -158,7 +158,7 @@
     {
       "name": "bodySafeBottom",
       "selector": ".modal__body--safe-bottom",
-      "role": "无底部 action/cancel 时，由 body 自己预留末尾安全区：padding-bottom: 40px + safe-area-bottom"
+      "role": "无底部 action/cancel 时，由 body 直接消费页面滚动底部基础避让 Token：padding-bottom: var(--safe-area-bottom-content)"
     },
     {
       "name": "actions",
@@ -215,7 +215,7 @@
     "title 区：info 模式为大标题+可选辅助说明（padding 32px 32px 0，gap 8px），仅用于引导性内容展示场景（通常搭配图片或说明性文字）；default 模式为完整 navbar 组件，是 frame/frame-x 的默认标题模式；frame/frame-x 非全屏模态下 default title 强制 --safe-area-top: 0px（不预留顶部状态栏高度），fullscreen 全屏模态下恢复 safe-area-top。",
     "default title 左侧图标默认规则：frame/frame-x 变体默认使用下箭头（icon-xiajiantou16）并带圆形背景（.navbar__left-btn--circle），关闭叉（icon-guanbi）仅在用户明确指定的场景使用；fullscreen 变体有 3 种固定组合：模式 A=text-cancel+button（文本按钮，无背景）、模式 B=down-arrow+icon-text（带背景圆框 .navbar__left-btn--circle + icon-xiajiantou16）、模式 C=back-arrow+button（带背景圆框 .navbar__left-btn--circle + icon-zuojiantou16）。",
     "title、body、actions 和 fullscreen 最底层背景色都跟随 panel（--modal-panel-bg），默认 bg-surface；业务可覆盖为 bg-page（灰色），灰底页面必须让最底层容器也使用同一个灰色背景，避免白底宿主层、灰底内容层叠出多个背景层级。",
-    "body 区：无默认 padding，flex:1 1 auto + min-height:0 + overflow-y:auto；modal 根节点带 .modal--has-actions 时 body 自动补 padding-bottom: spacer-40（仅防 40px 渐变蒙层遮盖，不含安全区）；无 action/cancel 时必须在 .modal__body 上加 .modal__body--safe-bottom，由 body 自己预留 40px + safe-area-bottom。",
+    "body 区：无默认 padding，flex:1 1 auto + min-height:0 + overflow-y:auto；modal 根节点带 .modal--has-actions 时 body 自动补 padding-bottom: spacer-40（仅防 40px 渐变蒙层遮盖，不含安全区）；无 action/cancel 时必须在 .modal__body 上加 .modal__body--safe-bottom，由 body 直接消费 var(--safe-area-bottom-content)。",
     "action 区：flex-shrink:0 固定底部；默认 padding-bottom: 32px + safe-area-bottom；包含 .modal__links 或 .modal__cancel 时 padding-bottom 仅保留 safe-area-bottom（链接/取消栏自身高度已足够）；安全区由 action 区内部处理，body 不再重复承担。上方有 40px 渐变蒙层（linear-gradient transparent → panel-bg）；支持 6 种布局：double-h/single-h/single-v/single-v-links/cancel/none。",
     "操作区按钮必须使用已注册 button 组件 .btn--lg；链接必须使用已注册 link 组件。禁止发明按钮/链接/标题栏类。",
     "fullscreen 变体只允许 3 种 NavBar 固定组合：text-cancel+button（模式 A，表单类，左侧文本取消无背景）、down-arrow+icon-text（模式 B，浏览/查看默认，左侧下箭头带圆形背景）、back-arrow+button（模式 C，Modal 内 push 二级页面，左侧返回箭头带圆形背景）；禁止任何其他 leftControl/rightControl 自由组合。",
@@ -338,6 +338,7 @@
     "--heading-sm-font-size",
     "--radius-16",
     "--safe-area-bottom",
+    "--safe-area-bottom-content",
     "--safe-area-top",
     "--spacer-12",
     "--spacer-16",

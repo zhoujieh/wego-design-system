@@ -110,8 +110,25 @@ if (index?.schemaVersion !== 4 || index?.componentContractSchemaVersion !== 4) {
 }
 if (Object.hasOwn(index || {}, 'uiKits')) fail('index.duplicate_uikits', 'components/index.json 不得重复维护 UI Kit；唯一来源是 uikit-plan.json', 'components/index.json');
 if (uiKit?.schemaVersion !== 5 || !Array.isArray(uiKit?.pagePatterns)) fail('uikit.schema', 'uikit-plan.json 必须使用 schemaVersion 5 且包含 pagePatterns', 'uikit-plan.json');
-if (library?.schemaVersion !== 6) fail('library.schema', 'library-consumption.json 必须使用 schemaVersion 6', 'library-consumption.json');
+if (library?.schemaVersion !== 7) fail('library.schema', 'library-consumption.json 必须使用 schemaVersion 7', 'library-consumption.json');
 if (pageLayers?.schemaVersion !== 1 || !pageLayers?.scopes) fail('layers.schema', 'page-layers.json 必须使用 schemaVersion 1 并声明 scopes', 'page-layers.json');
+const scrollBottomRule = library?.layoutContract?.scrollBottomRule;
+if (scrollBottomRule?.enforcedFromVersion !== 482
+  || scrollBottomRule?.baseToken !== 'var(--safe-area-bottom-content)'
+  || !String(scrollBottomRule?.baseFormula || '').includes('40px')
+  || !String(scrollBottomRule?.obstructionRule || '').includes('WegoScrollLayout')) {
+  fail('library.scroll_bottom_rule', '消费契约必须定义从版本 482 生效的 40px + 底部安全区基础空间，并要求悬浮遮挡叠加实测 clearance', 'library-consumption.json');
+}
+for (const [relative, content] of [
+  ['../../../AGENTS.md', read('../../../AGENTS.md')],
+  ['../shared/references/design-decisions.md', read('../shared/references/design-decisions.md')],
+  ['page-layers.json', JSON.stringify(pageLayers || {})],
+  ['preview/layout-layers.html', read('preview/layout-layers.html')]
+]) {
+  if (content.includes('scrollBottomRule') || (content.includes('--safe-area-bottom-content') && content.includes('40px'))) {
+    fail('library.scroll_bottom_authority_duplicate', `${relative} 不得复制滚动底部避让的 Token、公式或权威规则；唯一来源是 library-consumption.json#/layoutContract/scrollBottomRule`, relative);
+  }
+}
 if (!/\.phone-screen\s*\{[\s\S]*?transform:\s*translateZ\(0\)\s*;/.test(scaffold)) {
   fail('uikit.showcase_fixed_containment', 'scaffold.css 的 phone-screen 必须为 fixed 浮层建立手机屏幕 containing block', 'scaffold.css');
 }
@@ -150,6 +167,11 @@ for (const pattern of uiKit?.pagePatterns || []) {
       const normal = `assets/icons/tab-${tab}.svg`;
       const active = `assets/icons/tab-active-${tab}.svg`;
       if (!fileExists(normal) && !fileExists(active)) fail('uikit.asset_missing', `${entryRelative} 引用了不存在的 Tab 图标：${tab}`, entryRelative);
+    }
+    if (pattern.id === 'entity-form') {
+      if (/className=["']form-body[^"']*form-body--vertical/.test(entry)) {
+        fail('uikit.entity_form_default_layout', `${entryRelative} 是 entity-form 标准母版，默认全部 form 字段必须保持左右布局，不得使用 form-body--vertical`, entryRelative);
+      }
     }
   }
 }

@@ -1,9 +1,9 @@
 {
   "schemaVersion": 4,
-  "designSystemVersion": 479,
+  "designSystemVersion": 484,
   "designSystemParity": {
     "status": "passed",
-    "checked_at": "2026-07-28T17:09:37+08:00",
+    "checked_at": "2026-07-28T20:08:08+08:00",
     "checks": [
       "组件均已注册且允许使用",
       "组件契约与 Preview 一致性守卫通过",
@@ -13,6 +13,7 @@
       "fullscreen NavBar 仅允许 3 种固定模式（模式 A/B/C），右侧只支持 button 与 icon-text 入口",
       "NavBar 布局仅使用左中右三段式或 navbar__body--split 左右两段式",
       "全屏模态消费 modal 组件 fullscreen 变体，无自定义 .uikit-modal-screen 私有层",
+      "所有主纵向滚动区直接承担 safe-area-bottom-content 基础避让",
       "共享 Showcase 宿主只渲染一份状态栏与手势条，fixed 浮层受 phone-screen 约束且底页 NavBar 不越层",
       "所有 Tab 图标资源均存在"
     ]
@@ -26,7 +27,7 @@
   "coreComponentsUsed": ["navbar", "form", "actionsheet", "modal"],
   "supportComponentsUsed": ["cell", "avatar", "toast", "tag"],
   "previewClassReuseRate": 0.94,
-  "reuseAssessment": "主体内容收敛为实体信息录入母版，基本信息（头像 upload + 昵称 input + 手机号 phone 前缀）、归属与标签（分组 clickable select + 标签 input）、来源与备注（来源 clickable select + 备注 input + 验证消息 textarea）三组 form-group 全部复用已注册 form 组件结构与 vertical/clickable/fixed-height/label--required 修饰类；主骨架使用 navbar（fullscreen 变体 3 种固定模式之一：模式 A=text-cancel+button，本页取此模式；模式 B=down-arrow+icon-text，适用于无明确保存操作的浏览/跳转场景；模式 C=back-arrow+button，适用于 Modal 内二级页面）、form、actionsheet（选择模式）、modal 组件（fullscreen 变体）；辅助入口使用 cell，保存反馈复用正式 toast 宿主层；分组与来源字段使用 form-body--clickable + form-body__select 由整行点击触发 actionsheet，actionsheet 自身承担选项交互热区，避免双重热区；必填字段使用 form-body__label--required + form-body__required 表达红色星号，不自造标记或写死颜色；手机号区号使用 form-body__phone + form-body__phone-prefix + form-body__phone-divider 三段式结构；头像位使用 form-body__upload 不自造上传组件；页面级主操作只在 navbar 右侧 btn--strong btn--sm 收口，不在页面底部或内容区重复放保存按钮；section 标题与分组内容都回收为 form-group 正式 group 能力；UI Kit 演示双层结构（HostScreen + 全屏 Modal），模态消费 modal 组件 fullscreen 变体（.modal.modal--fullscreen[data-state] + .modal__panel > .modal__title--default > .navbar + .modal__body），蒙层、slide-up/slide-down 过渡、safe-area-top 继承全部由组件自身承担，UI Kit 不再维护 .uikit-modal-screen 私有 transform 状态机，让 AI 能学到 full-screen-modal 页面在 modal 组件层的标准打开方式。",
+  "reuseAssessment": "主体内容收敛为实体信息录入母版，基本信息（头像 upload + 昵称 input + 手机号 phone 前缀）、归属与标签（分组 clickable select + 标签 input）、来源与备注（来源 clickable select + 备注 input + 验证消息 textarea）三组 form-group 全部复用已注册 form 组件结构与 clickable/fixed-height/label--required/preserve-content-align 修饰类；entity-form 标准母版内所有字段都遵循 form 默认左右布局，头像上传走 form-body__right-btn，验证消息 textarea 保持左右字段行；主骨架使用 navbar（fullscreen 变体 3 种固定模式之一：模式 A=text-cancel+button，本页取此模式；模式 B=down-arrow+icon-text，适用于无明确保存操作的浏览/跳转场景；模式 C=back-arrow+button，适用于 Modal 内二级页面）、form、actionsheet（选择模式）、modal 组件（fullscreen 变体）；辅助入口使用 cell，保存反馈复用正式 toast 宿主层；分组与来源字段使用 form-body--clickable + form-body__select 由整行点击触发 actionsheet，actionsheet 自身承担选项交互热区，避免双重热区；必填字段使用 form-body__label--required + form-body__required 表达红色星号，不自造标记或写死颜色；手机号区号使用 form-body__phone + form-body__phone-prefix + form-body__phone-divider 三段式结构，并在字段行使用 form-body--preserve-content-align 保持左对齐基线；头像位使用 form-body__upload 不自造上传组件；页面级主操作只在 navbar 右侧 btn--strong btn--sm 收口，不在页面底部或内容区重复放保存按钮；section 标题与分组内容都回收为 form-group 正式 group 能力；UI Kit 演示双层结构（HostScreen + 全屏 Modal），模态消费 modal 组件 fullscreen 变体（.modal.modal--fullscreen[data-state] + .modal__panel > .modal__title--default > .navbar + .modal__body），蒙层、slide-up/slide-down 过渡、safe-area-top 继承全部由组件自身承担，UI Kit 不再维护 .uikit-modal-screen 私有 transform 状态机，让 AI 能学到 full-screen-modal 页面在 modal 组件层的标准打开方式。",
   "a11yFixes": [
     "可点击 cell、actionsheet 选项和导航操作补齐 role、tabIndex 与键盘触发",
     "actionsheet 根节点补齐 role=dialog aria-modal=true，关闭后焦点返回触发元素",
@@ -39,7 +40,7 @@
   "mockDataDensity": {
     "formGroups": 3,
     "formRows": 8,
-    "verticalRows": 5,
+    "verticalRows": 0,
     "clickableSelectRows": 2,
     "requiredRows": 3,
     "phonePrefixRows": 1,
@@ -55,16 +56,17 @@
       "violations": []
     },
     "spacingCompliance": {
-      "description": "页面纵向节奏由 phone-body 的 8px 组间距、form-group 标题和 form-body 分组自身承担；连续 form-body--vertical 字段使用通栏白底不加 --card（M0 场景）；模态内容区 phone-body 可纵向滚动，底部预留 safe-area-bottom-content。",
+      "description": "页面纵向节奏由 phone-body 的 8px 组间距、form-group 标题和 form-body 分组自身承担；entity-form 标准母版内所有字段保持 form 默认左右布局，只有用户明确要求上下布局时才允许 form-body--vertical；主滚动区直接承担 safe-area-bottom-content 基础避让，全屏 Modal 无底部 action/cancel 时使用 modal__body--safe-bottom。",
       "checked": true,
       "checklist": [
         "phone-body 的组间距、form-group 标题和表单分组之间是否已形成稳定纵向节奏",
-        "连续 form-body--vertical 字段是否保持通栏白底而不加 --card",
-        "头像、长文本字段是否使用 form-body--vertical 而非硬塞横向行",
+        "所有字段是否保持 form 默认左右布局",
+        "头像上传是否放入 form-body__right-btn 而非自动改成上下布局",
         "必填字段是否使用 form-body__label--required + form-body__required 表达红色星号，且不自造标记或写死颜色",
         "手机号区号是否使用 form-body__phone + form-body__phone-prefix + form-body__phone-divider 三段式",
         "单选枚举字段是否使用 form-body--clickable + form-body__select + actionsheet 选择模式",
-        "页面级主操作是否只在 navbar 右侧 btn--strong btn--sm 收口，不重复放底部保存按钮"
+        "页面级主操作是否只在 navbar 右侧 btn--strong btn--sm 收口，不重复放底部保存按钮",
+        "phone-body 是否直接声明 padding-bottom: var(--safe-area-bottom-content)，modal__body 是否使用 modal__body--safe-bottom 且未在表单内容内层重复补间距"
       ],
       "violations": []
     },
@@ -81,12 +83,12 @@
       "violations": []
     },
     "showcaseStructureCompliance": {
-      "description": "UI Kit 必须演示双层结构（HostScreen + 全屏 Modal），模态直接消费 modal 组件 fullscreen 变体（.modal.modal--fullscreen[data-state] + .modal__panel > .modal__title--default > .navbar + .modal__body），蒙层与 slide-up/slide-down 过渡由组件自身承担，UI Kit 不再维护自定义 .uikit-modal-screen transform 状态机",
+      "description": "UI Kit 必须演示双层结构（HostScreen + 全屏 Modal），模态直接消费 modal 组件 fullscreen 变体（.modal.modal--fullscreen[data-state] + .modal__panel > .modal__title--default > .navbar + .modal__body.modal__body--safe-bottom），蒙层与 slide-up/slide-down 过渡由组件自身承担，UI Kit 不再维护自定义 .uikit-modal-screen transform 状态机",
       "checked": true,
       "checklist": [
         "HostScreen 包含 navbar + phone-body + 入口 cell-group + BottomNav",
         "全屏 Modal 直接挂 .modal.modal--fullscreen[data-state] 而非 .uikit-modal-screen",
-        "模态结构为 .modal__panel > .modal__title--default > .navbar + .modal__body",
+        "模态结构为 .modal__panel > .modal__title--default > .navbar + .modal__body.modal__body--safe-bottom",
         "打开动画由组件自身 data-state 状态机驱动（requestAnimationFrame 双 rAF 触发）",
         "通过 React 状态控制挂载与 open/closed 切换，data-state 必走双 rAF 让浏览器先布局 closed 初始态",
         "phone-status 与 phone-indicator 各只在 phone-screen 静态宿主渲染一次，不进入 React 页面树",
@@ -103,14 +105,15 @@
     "phone-status 与 phone-indicator 都属于 scaffold.css 管理的全局 Showcase 外壳，每个 phone-screen 只渲染一份，页面、Modal 与 actionsheet 不重复创建。",
     "navbar 通过组件自身的 padding-top: var(--safe-area-top, 0px) + sticky top: 0 避让状态栏，UI Kit 演示层不要再额外给页面容器补顶部 safe-area。",
     "页面纵向节奏应由 phone-body 的 8px 组间距和各 form-group 自身的 title + content 结构承担，不再插入 .uikit-section-gap 这类纯占位元素。",
-    "连续 form-body--vertical 字段应优先使用 form-group 的 title + content 正式结构；本范式默认通栏模式 M0，form-group__content 不加 --card 修饰类。",
-    "头像位、长文本、备注、验证消息等富输入字段统一使用 form-body--vertical；普通文本和带前缀字段也建议保持 vertical 以确保整组基线一致。",
+    "连续 form-body 字段应优先使用 form-group 的 title + content 正式结构；本范式默认通栏模式 M0，form-group__content 不加 --card 修饰类。",
+    "entity-form 标准母版内头像位、验证消息、普通文本、手机号前缀、标签、单行备注等字段全部保持 form 默认左右布局；只有用户明确要求上下布局时才使用 form-body--vertical。",
     "必填字段统一使用 form-body__label--required + form-body__required（文案固定为 *）表达红色星号，不自造标记或写死颜色；手机号区号、货币符号等只读前缀统一使用 form-body__phone-prefix 等正式前缀结构。",
     "分组、来源等单选枚举字段统一使用 form-body--clickable + form-body__select + actionsheet 选择模式联动；选中后回填 select-text 并加 has-value 类，不在 form-body 内嵌入原生 select。",
     "#root 是 phone-screen 内的页面与浮层挂载区；phone-status / phone-indicator 是它的静态兄弟节点，不进入 React 页面树。",
     "phone-screen 为 fixed 浮层建立 containing block，full-screen-modal 与嵌套 actionsheet 必须被限制在手机壳内；底页形成 base stacking context，sticky NavBar 不得越过浮层。",
     "phone-status / phone-indicator 默认绝对定位悬浮且不占文档流，并保持预览层级最高；桌面手机壳模拟 44px / 34px，移动端同链接隐藏。",
     "模态页首屏展示以稳定落点为准：默认直接展示打开后的最终态，避免自动入场动画让截图停在半开中间态。",
+    "主纵向滚动区必须直接承担底部基础避让；本页底页使用 phone-body 的 safe-area-bottom-content，全屏 Modal 无底部 action/cancel，使用 modal__body--safe-bottom，不在 friend-add-form__body 内重复补固定间距。",
     "真实项目中应保持单一页面级主操作，只在 navbar 右侧 btn--strong btn--sm 收口，不在页面内容区或底部重复放保存按钮。",
     "iconfont 图标用于头像上传加号（icon-jia16）、选择下拉箭头（icon-xiajiantou16）、actionsheet 选中对勾（icon-gou-jiacu）；fullscreen 变体左侧仅允许 .navbar__left-text（模式 A 取消）、.navbar__left-btn 配 icon-xiajiantou16（模式 B 下箭头）、.navbar__left-btn 配 icon-zuojiantou16（模式 C 返回）三种入口，禁止使用关闭叉。",
     "保存后关闭全屏模态时，反馈使用正式 toast 组件挂在 Showcase 宿主层，不回退为 .uikit-toast 自定义气泡。",

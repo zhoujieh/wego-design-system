@@ -227,19 +227,22 @@ function EntityFormContent({
       <div className="form-group">
         <div className="form-group__title">基本信息</div>
         <div className="form-group__content">
-          <div className="form-body form-body--vertical">
+          <div className="form-body form-body--preserve-content-align">
             <div className="form-body__label form-body__label--required">
               <span className="form-body__label-text">头像</span>
               <span className="form-body__required">*</span>
             </div>
             <div className="form-body__action">
+              <span className="form-body__value form-body__value--placeholder">未上传</span>
+            </div>
+            <div className="form-body__right-btn">
               <div className="form-body__upload" onClick={onUploadAvatar}>
                 <div className="form-body__upload-icon wego-iconfont-s icon-jia16"></div>
                 <span className="form-body__upload-text">上传</span>
               </div>
             </div>
           </div>
-          <div className="form-body form-body--vertical">
+          <div className="form-body">
             <div className="form-body__label form-body__label--required">
               <span className="form-body__label-text">昵称</span>
               <span className="form-body__required">*</span>
@@ -254,7 +257,7 @@ function EntityFormContent({
               />
             </div>
           </div>
-          <div className="form-body form-body--vertical">
+          <div className="form-body form-body--preserve-content-align">
             <div className="form-body__label form-body__label--required">
               <span className="form-body__label-text">账号/手机号</span>
               <span className="form-body__required">*</span>
@@ -262,7 +265,7 @@ function EntityFormContent({
             <div className="form-body__action">
               <div className="form-body__phone">
                 <span className="form-body__phone-prefix">+86</span>
-                <span className="form-body__phone-divider"></span>
+                <div className="form-body__phone-divider"></div>
                 <input
                   className="form-body__phone-input"
                   type="tel"
@@ -296,7 +299,7 @@ function EntityFormContent({
               </div>
             </div>
           </div>
-          <div className="form-body form-body--vertical">
+          <div className="form-body">
             <div className="form-body__label">标签</div>
             <div className="form-body__action">
               <input
@@ -330,7 +333,7 @@ function EntityFormContent({
               </div>
             </div>
           </div>
-          <div className="form-body form-body--vertical">
+          <div className="form-body">
             <div className="form-body__label">备注</div>
             <div className="form-body__action">
               <input
@@ -342,7 +345,7 @@ function EntityFormContent({
               />
             </div>
           </div>
-          <div className="form-body form-body--vertical form-body--fixed-height">
+          <div className="form-body form-body--fixed-height">
             <div className="form-body__label">验证消息</div>
             <div className="form-body__action">
               <textarea
@@ -404,8 +407,8 @@ function EntityFormModal({
             </div>
           </div>
         </div>
-        <div className="modal__body">
-          <div className="friend-add-form__body" style={{ paddingBottom: 'var(--spacer-24)' }}>
+        <div className="modal__body modal__body--safe-bottom">
+          <div className="friend-add-form__body">
             <EntityFormContent
               nickname={nickname}
               setNickname={setNickname}

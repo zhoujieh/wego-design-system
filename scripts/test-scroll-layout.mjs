@@ -8,6 +8,8 @@ const context = { window: {} };
 vm.runInNewContext(source, context);
 const decide = context.window.WegoScrollLayout?.decideDirectionReveal;
 if (typeof decide !== 'function') throw new Error('滚动运行时必须暴露纯方向裁决函数');
+const composeBottomClearance = context.window.WegoScrollLayout?.composeBottomClearance;
+if (typeof composeBottomClearance !== 'function') throw new Error('滚动运行时必须暴露底部避让合成函数');
 
 const base = {
   currentTop: 0,
@@ -40,5 +42,8 @@ expect('底部布局校正不反向闪烁', {
   layoutTransitioning: true
 }, { state: null, direction: 0, distance: 0 });
 expect('回弹位置钳制', { currentTop: -12, lastTop: 0 }, { state: 'visible', top: 0 });
+if (composeBottomClearance(74, 0) !== 74) throw new Error('无底部遮挡时必须保留 40px + 安全区基础空间');
+if (composeBottomClearance(74, 60) !== 134) throw new Error('底部遮挡必须叠加在基础空间之上');
+if (composeBottomClearance(74, -10) !== 74) throw new Error('负遮挡高度不得侵蚀基础空间');
 
 console.log('滚动布局运行时测试通过。');

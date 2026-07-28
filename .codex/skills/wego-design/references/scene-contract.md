@@ -63,6 +63,12 @@ wego-app/scenes/{中文业务场景}/design-decisions.json
         "token": "var(--text-default)"
       },
       {
+        "selector": ".settings-edit__content",
+        "content_role": "主滚动内容底部基础避让",
+        "css_property": "padding-bottom",
+        "token": "var(--safe-area-bottom-content)"
+      },
+      {
         "selector": ".settings-edit",
         "content_role": "页面边距",
         "css_property": "padding-inline",
@@ -100,7 +106,7 @@ wego-app/scenes/{中文业务场景}/design-decisions.json
         "document_scroll": false,
         "nested_scroll_regions": [],
         "fixed_regions": [
-          { "region_id": "settings-actions", "selector": ".settings-edit__actions", "edge": "bottom", "safe_area_owner": "component", "clearance": "dynamic-measured" }
+          { "region_id": "settings-actions", "selector": ".settings-edit__actions", "edge": "bottom", "safe_area_owner": "component", "clearance": "dynamic-measured", "after_gap_token": "var(--spacer-8)" }
         ]
       },
       "layout_groups": [
@@ -194,8 +200,9 @@ wego-app/scenes/{中文业务场景}/design-decisions.json
 
 - 禁止硬编码颜色、间距、圆角和组件内部视觉值；语义内容组横向边距使用 `--layout-page-margin-*` Token，其余场景间距使用 `var(--spacer-*)`。
 - 页面滚动容器使用实际可滚动行为；`overflow:hidden` 只用于明确的组件裁切边界，不得用来禁用页面滚动。
+- 主纵向滚动区必须满足 `library-consumption.json#/layoutContract/scrollBottomRule`；从该规则声明的 `enforcedFromVersion` 起由场景合同守卫强制检查。
 - sticky surface 必须通栏、显式使用不透明背景和 `page-local/navigation` 层级；底部保留合同声明的间距。动态显隐只允许尺寸与位移变化，不得改变 opacity。
-- 固定操作栏由正式组件处理安全区；主滚动内容按实测操作栏高度、安全区和额外间距预留 bottom clearance，最后一项必须能够完整滚出遮挡区。
+- 固定操作栏由正式组件处理自身安全区；底部固定或悬浮遮挡的登记、间距与动态实测均以 `scrollBottomRule.obstructionRule` 为唯一规则来源。
 
 <!-- rule-id: safe-area-top-single-owner -->
 

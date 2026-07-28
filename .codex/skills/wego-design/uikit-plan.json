@@ -25,7 +25,7 @@
         "modalVariant": "fullscreen",
         "modalTitle": "default",
         "consumesModalComponent": true,
-        "modalBindingNote": "通过 modal 组件 fullscreen 变体（.modal.modal--fullscreen[data-state] + .modal__panel > .modal__title--default > .navbar + .modal__body）消费，蒙层与 slide-up/slide-down 过渡由组件自身 data-state 状态机承担；不允许再维护 .uikit-modal-screen 私有 transform 状态机；fullscreen NavBar 仅允许 3 种固定模式：模式 A=text-cancel+button（取消+保存，本页取此）、模式 B=down-arrow+icon-text（无明确操作时的浏览/跳转）、模式 C=back-arrow+button（Modal 内二级页面）；右侧只支持 button（明确操作）与 icon-text（跳转/浏览）两种入口样式，纯文字入口已删除",
+        "modalBindingNote": "通过 modal 组件 fullscreen 变体（.modal.modal--fullscreen[data-state] + .modal__panel > .modal__title--default > .navbar + .modal__body.modal__body--safe-bottom）消费；本页无底部 action/cancel，由 modal__body--safe-bottom 直接承担底部基础避让；蒙层与 slide-up/slide-down 过渡由组件自身 data-state 状态机承担；不允许再维护 .uikit-modal-screen 私有 transform 状态机；fullscreen NavBar 仅允许 3 种固定模式：模式 A=text-cancel+button（取消+保存，本页取此）、模式 B=down-arrow+icon-text（无明确操作时的浏览/跳转）、模式 C=back-arrow+button（Modal 内二级页面）；右侧只支持 button（明确操作）与 icon-text（跳转/浏览）两种入口样式，纯文字入口已删除",
         "transition": "slide-up-enter, slide-down-exit",
         "dismissAction": "page-level-save",
         "overlayLevel": "overlay",
@@ -62,6 +62,12 @@
           "trigger": "互斥选项较多或选项文案较长",
           "use": "选择能纵向承载选项的正式 cell 与 radio 组合",
           "avoid": "在窄屏中强行压缩同一行的多项选择"
+        },
+        {
+          "id": "config-scroll-bottom-clearance",
+          "trigger": "页面或全屏 Modal 存在主纵向滚动区",
+          "use": "主滚动区直接声明 padding-bottom: var(--safe-area-bottom-content)；无底部 action/cancel 的 modal__body 使用 modal__body--safe-bottom",
+          "avoid": "在内容内层用固定 spacer 代替主滚动区底部基础避让，或重复叠加安全区"
         }
       ]
     },
@@ -113,6 +119,12 @@
           "trigger": "设置项进入下一层或展开选择",
           "use": "保留整行点击与按压反馈",
           "avoid": "把独立 switch、radio 或 checkbox 行也设为整行点击"
+        },
+        {
+          "id": "settings-scroll-bottom-clearance",
+          "trigger": "HostScreen 或 push 页面存在主纵向滚动区",
+          "use": "每个 phone-body 直接声明 padding-bottom: var(--safe-area-bottom-content)",
+          "avoid": "因页面没有底部遮挡而省略基础避让，或把间距放到最后一个内容组"
         }
       ]
     },
@@ -138,7 +150,7 @@
         "modalVariant": "fullscreen",
         "modalTitle": "default",
         "consumesModalComponent": true,
-        "modalBindingNote": "通过 modal 组件 fullscreen 变体（.modal.modal--fullscreen[data-state] + .modal__panel > .modal__title--default > .navbar + .modal__body）消费，蒙层与 slide-up/slide-down 过渡由组件自身 data-state 状态机承担；不允许再维护 .uikit-modal-screen 私有 transform 状态机；fullscreen NavBar 仅允许 3 种固定模式：模式 A=text-cancel+button（取消+保存，本页取此）、模式 B=down-arrow+icon-text（无明确操作时的浏览/跳转）、模式 C=back-arrow+button（Modal 内二级页面）；右侧只支持 button（明确操作）与 icon-text（跳转/浏览）两种入口样式，纯文字入口已删除",
+        "modalBindingNote": "通过 modal 组件 fullscreen 变体（.modal.modal--fullscreen[data-state] + .modal__panel > .modal__title--default > .navbar + .modal__body.modal__body--safe-bottom）消费；本页无底部 action/cancel，由 modal__body--safe-bottom 直接承担底部基础避让；蒙层与 slide-up/slide-down 过渡由组件自身 data-state 状态机承担；不允许再维护 .uikit-modal-screen 私有 transform 状态机；fullscreen NavBar 仅允许 3 种固定模式：模式 A=text-cancel+button（取消+保存，本页取此）、模式 B=down-arrow+icon-text（无明确操作时的浏览/跳转）、模式 C=back-arrow+button（Modal 内二级页面）；右侧只支持 button（明确操作）与 icon-text（跳转/浏览）两种入口样式，纯文字入口已删除",
         "transition": "slide-up-enter, slide-down-exit",
         "dismissAction": "page-level-save",
         "overlayLevel": "overlay",
@@ -165,9 +177,9 @@
         },
         {
           "id": "entity-form-vertical-for-rich-input",
-          "trigger": "字段为头像上传、长文本（验证消息、备注、说明）或多行内容",
-          "use": "使用 form-body--vertical + 对应 inputType（textarea/custom/upload），头像位使用 form-body__upload",
-          "avoid": "把头像或长文本硬塞进横向行，或自造上传/textarea 包装层"
+          "trigger": "用户或已确认原型简报明确要求该字段使用上下布局",
+          "use": "仅在明确要求上下布局时使用 form-body--vertical + 对应 inputType；默认头像上传、textarea、说明和普通输入都保持左右布局",
+          "avoid": "按字段类型自动把头像、长文本、textarea 或上传字段改成纵向布局，或自造上传/textarea 包装层"
         },
         {
           "id": "entity-form-required-and-prefix",
@@ -186,6 +198,12 @@
           "trigger": "页面级保存",
           "use": "主操作只在 navbar 右侧按钮区收口，使用 btn--strong btn--sm",
           "avoid": "在页面底部或内容区重复放保存按钮"
+        },
+        {
+          "id": "entity-form-scroll-bottom-clearance",
+          "trigger": "页面或全屏 Modal 存在主纵向滚动区",
+          "use": "主滚动区直接声明 padding-bottom: var(--safe-area-bottom-content)；无底部 action/cancel 的 modal__body 使用 modal__body--safe-bottom",
+          "avoid": "在表单内容内层用固定 spacer 代替主滚动区底部基础避让，或重复叠加安全区"
         }
       ]
     }

@@ -3,7 +3,7 @@
 import { validatePromptContractShape } from './prompt-contract-schema.mjs';
 
 const valid = {
-  design_system_version: 411,
+  design_system_version: 482,
   token_bindings: [{ selector: '.fixture__title', content_role: '标题', css_property: 'color', token: 'var(--text-default)' }],
   component_bindings: [
     { binding_id: 'primary-action', slug: 'button', reason: '承载确认操作', variant_dimensions: { emphasis: 'strong' } },
@@ -15,7 +15,15 @@ const valid = {
     selection_reason: '以层级入口为主，连续列表由语义内容组承担横向边距',
     mutable_regions: ['.fixture__content'],
     page_layers: [{ region_id: 'fixture-content', selector: '.fixture__content', scope: 'page-local', role: 'content' }],
-    scroll_architecture: { viewport_selector: '.fixture', primary_scroll_selector: '.fixture__scroll', document_scroll: false, nested_scroll_regions: [], fixed_regions: [] },
+    scroll_architecture: {
+      viewport_selector: '.fixture',
+      primary_scroll_selector: '.fixture__scroll',
+      document_scroll: false,
+      nested_scroll_regions: [],
+      fixed_regions: [
+        { region_id: 'fixture-actions', selector: '.fixture__actions', edge: 'bottom', safe_area_owner: 'component', clearance: 'dynamic-measured', after_gap_token: 'var(--spacer-16)' }
+      ]
+    },
     layout_groups: [{ group_id: 'fixture-content-group', selector: '.fixture__content', content_role: '主要内容', inline_inset_token: 'var(--spacer-16)', spacing_owner: 'scene', gap_token: 'var(--spacer-12)' }],
     sticky_regions: []
   },
@@ -47,6 +55,8 @@ expectError(value => { value.layout_contract.page_edge_mode = 'M8'; }, 'prompt_c
 expectError(value => { value.layout_contract.page_layers = []; }, 'prompt_contract.layout_contract.page_layers');
 expectError(value => { value.layout_contract.page_layers[0].role = 'floating-whatever'; }, 'prompt_contract.layout_contract.page_layers[0].role');
 expectError(value => { value.layout_contract.scroll_architecture.document_scroll = true; }, 'prompt_contract.layout_contract.scroll_architecture.document_scroll');
+expectError(value => { delete value.layout_contract.scroll_architecture.fixed_regions[0].after_gap_token; }, 'prompt_contract.layout_contract.scroll_architecture.fixed_regions[0].after_gap_token');
+expectError(value => { value.layout_contract.scroll_architecture.fixed_regions[0].after_gap_token = '16px'; }, 'prompt_contract.layout_contract.scroll_architecture.fixed_regions[0].after_gap_token');
 expectError(value => { value.layout_contract.layout_groups[0].inline_inset_token = '16px'; }, 'prompt_contract.layout_contract.layout_groups[0].inline_inset_token');
 expectError(value => { value.layout_contract.layout_groups[0].spacing_owner = 'root'; }, 'prompt_contract.layout_contract.layout_groups[0].spacing_owner');
 expectError(value => { value.layout_contract.sticky_regions = {}; }, 'prompt_contract.layout_contract.sticky_regions');

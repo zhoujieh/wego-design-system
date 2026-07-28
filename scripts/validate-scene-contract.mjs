@@ -748,7 +748,7 @@ if (decision) {
   const indexedComponents = new Map((index?.components || []).map(component => [component.slug, component]));
   const pagePatterns = Array.isArray(plan?.pagePatterns) ? plan.pagePatterns : [];
   if (decision.schemaVersion !== 2 || decision.scene !== path.basename(sceneRoot)) add('scene.decisions_schema', 'design-decisions.json 必须使用 schemaVersion 2 且 scene 与目录一致', decisionsFile);
-  if (consumption?.schemaVersion !== 6) add('scene.consumption_schema', 'library-consumption.json 必须使用 schemaVersion 6', consumptionFile);
+  if (consumption?.schemaVersion !== 7) add('scene.consumption_schema', 'library-consumption.json 必须使用 schemaVersion 7', consumptionFile);
   if (plan?.schemaVersion !== 5 || !Array.isArray(plan?.pagePatterns)) add('scene.uikit_schema', 'uikit-plan.json 必须使用 schemaVersion 5 且包含 pagePatterns', uikitPlanFile);
 
   const layout = prompt.layout_contract || {};
@@ -785,6 +785,9 @@ if (decision) {
   }
 
   const primaryScrollSelector = layout.scroll_architecture?.primary_scroll_selector;
+  const bottomRule = consumption?.layoutContract?.scrollBottomRule;
+  const enforceBottomClearance = Number.isInteger(bottomRule?.enforcedFromVersion)
+    && Number(prompt.design_system_version) >= bottomRule.enforcedFromVersion;
   if (!selectorExistsInScope(surfaceRoot, layout.scroll_architecture?.viewport_selector)) add('scene.scroll_viewport', 'scroll_architecture.viewport_selector 未命中实际 DOM', decisionsFile);
   if (!selectorExistsInScope(surfaceRoot, primaryScrollSelector)) add('scene.primary_scroll_selector', 'primary_scroll_selector 未命中实际 DOM', decisionsFile);
   else {
@@ -793,12 +796,43 @@ if (decision) {
     if (!overflowValues.some(value => /\b(?:auto|scroll)\b/.test(value))) add('scene.primary_scroll_runtime', '主滚动区必须实际声明纵向 overflow: auto/scroll', sceneCss);
     const primaryHorizontalPadding = primaryRules.flatMap(rule => rule.declarations).some(declaration => ['padding', 'padding-inline', 'padding-left', 'padding-right', 'padding-inline-start', 'padding-inline-end'].includes(declaration.property));
     if (primaryHorizontalPadding) add('scene.primary_scroll_inset', '主滚动区必须通栏，不得承担横向内容边距', sceneCss);
+    if (enforceBottomClearance) {
+      const directPrimaryRules = primaryRules.filter(rule => rule.atRules.length === 0);
+      const bottomPadding = directPrimaryRules
+        .flatMap(rule => rule.declarations)
+        .filter(declaration => ['padding-bottom', 'padding-block', 'padding-block-end'].includes(declaration.property));
+      if (!bottomPadding.some(declaration => cssVariables(declaration.value).includes(bottomRule.baseToken))) {
+        add('scene.scroll_bottom_clearance', `主纵向滚动区必须直接使用 ${bottomRule.baseToken} 保留 40px + 底部安全区`, sceneCss);
+      }
+    }
   }
   for (const region of layout.scroll_architecture?.nested_scroll_regions || []) {
     if (!selectorExistsInScope(surfaceRoot, region.selector)) add('scene.nested_scroll_selector', `嵌套滚动区未命中实际 DOM：${region.selector}`, decisionsFile);
   }
   for (const region of layout.scroll_architecture?.fixed_regions || []) {
     if (!selectorExistsInScope(surfaceRoot, region.selector)) add('scene.fixed_region_selector', `固定区域未命中实际 DOM：${region.selector}`, decisionsFile);
+    if (enforceBottomClearance && region.edge === 'bottom' && region.clearance === 'dynamic-measured') {
+      const maskedScrollRuntime = maskJavaScript(runtimeJs);
+      if (!/\bbindScrollLayout\s*\(/.test(maskedScrollRuntime) || !/\bfixedRegions\s*:/.test(maskedScrollRuntime)) {
+        add('scene.bottom_obstruction_measurement', `底部动态遮挡 ${region.region_id} 必须通过 bindScrollLayout.fixedRegions 实测并叠加 clearance`, sceneJs);
+      }
+    }
+  }
+  if (enforceBottomClearance) {
+    const bottomFixedSelectors = new Set((layout.scroll_architecture?.fixed_regions || [])
+      .filter(region => region.edge === 'bottom')
+      .map(region => normalizeCssSelector(region.selector)));
+    for (const layer of layout.page_layers || []) {
+      if (layer.scope !== 'page-local' || layer.role !== 'raised') continue;
+      const declarations = cssRules
+        .filter(rule => rule.selectors.some(selector => normalizeCssSelector(selector) === normalizeCssSelector(layer.selector)))
+        .flatMap(rule => rule.declarations);
+      const isPositioned = declarations.some(declaration => declaration.property === 'position' && ['absolute', 'fixed'].includes(declaration.value));
+      const isBottomAnchored = declarations.some(declaration => ['bottom', 'inset-block-end'].includes(declaration.property));
+      if (isPositioned && isBottomAnchored && !bottomFixedSelectors.has(normalizeCssSelector(layer.selector))) {
+        add('scene.bottom_obstruction_unregistered', `底部悬浮区域 ${layer.region_id} 必须登记为 scroll_architecture.fixed_regions 并声明避让策略`, decisionsFile);
+      }
+    }
   }
 
   for (const group of layout.layout_groups || []) {

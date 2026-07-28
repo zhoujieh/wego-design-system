@@ -1,10 +1,10 @@
 {
   "schemaVersion": 4,
-  "designSystemVersion": 479,
+  "designSystemVersion": 484,
   "designSystemParity": {
     "status": "passed",
-    "checked_at": "2026-07-28T17:09:37+08:00",
-    "checks": ["组件均已注册且允许使用", "组件契约与 Preview 一致性守卫通过", "不存在生成规则文档或已删除技能引用", "UI Kit 仅作为明确页面范式证据", "NavBar 布局仅使用左中右三段式或 navbar__body--split 左右两段式", "全屏模态消费 modal 组件 fullscreen 变体，无自定义 .uikit-modal-screen 私有层", "共享 Showcase 宿主只渲染一份状态栏与手势条，fixed 浮层受 phone-screen 约束且底页 NavBar 不越层"]
+    "checked_at": "2026-07-28T20:08:08+08:00",
+    "checks": ["组件均已注册且允许使用", "组件契约与 Preview 一致性守卫通过", "不存在生成规则文档或已删除技能引用", "UI Kit 仅作为明确页面范式证据", "NavBar 布局仅使用左中右三段式或 navbar__body--split 左右两段式", "全屏模态消费 modal 组件 fullscreen 变体，无自定义 .uikit-modal-screen 私有层", "所有主纵向滚动区直接承担 safe-area-bottom-content 基础避让", "共享 Showcase 宿主只渲染一份状态栏与手势条，fixed 浮层受 phone-screen 约束且底页 NavBar 不越层"]
   },
   "kitType": "biz-rule-config",
   "presentation": "full-screen-modal",
@@ -39,24 +39,26 @@
       "violations": []
     },
     "spacingCompliance": {
-      "description": "页面纵向节奏由 phone-body 的 8px 组间距、group 标题和列表/表单分组自身承担；当前示例宿主层不提供横向留白，因此连续分组保持通栏白底，不额外插入默认 helper 说明栏充当布局收口。",
+      "description": "页面纵向节奏由 phone-body 的 8px 组间距、group 标题和列表/表单分组自身承担；主滚动区直接承担 safe-area-bottom-content 基础避让，全屏 Modal 无底部 action/cancel 时使用 modal__body--safe-bottom；当前示例宿主层不提供横向留白，因此连续分组保持通栏白底，不额外插入默认 helper 说明栏充当布局收口。",
       "checked": true,
       "checklist": [
         "phone-body 的组间距、group 标题和列表分组之间是否已形成稳定纵向节奏",
         "宿主层未提供横向留白时，连续 cell/form 分组是否保持通栏白底而不加 --card",
         "规则开关是否只由 switch 本体承担交互，而不是整行点击",
         "是否删除默认 helper 说明栏，避免 AI 误把说明文案当页面必需内容",
-        "页面级主操作是否仍只在导航操作区收口"
+        "页面级主操作是否仍只在导航操作区收口",
+        "phone-body 是否直接声明 padding-bottom: var(--safe-area-bottom-content)，modal__body 是否使用 modal__body--safe-bottom 且未在内容内层重复补间距"
       ],
       "violations": []
     },
     "showcaseStructureCompliance": {
-      "description": "UI Kit 必须使用共享 phone-screen 宿主承载唯一状态栏、React 页面/浮层挂载区和唯一手势条；全屏 Modal 与底页分别进入 overlay/base stacking context。",
+      "description": "UI Kit 必须使用共享 phone-screen 宿主承载唯一状态栏、React 页面/浮层挂载区和唯一手势条；全屏 Modal 与底页分别进入 overlay/base stacking context；无底部 action/cancel 的 modal__body 使用 modal__body--safe-bottom。",
       "checked": true,
       "checklist": [
         "phone-status 与 phone-indicator 是否各只在 phone-screen 静态宿主渲染一次",
         "#root 是否只承载页面和浮层，不再兼任 phone-screen",
         "全屏 Modal 的边界是否与手机屏幕边界一致",
+        "全屏 Modal 的主滚动区是否逐字消费 modal__body modal__body--safe-bottom",
         "底页 sticky NavBar 是否被限制在 base stacking context，不覆盖 Modal 标题栏"
       ],
       "violations": []
@@ -74,6 +76,7 @@
     "phone-screen 为 fixed 浮层建立 containing block，full-screen-modal 与嵌套 sheet 必须被限制在手机壳内；底页形成 base stacking context，sticky NavBar 不得越过浮层。",
     "phone-status / phone-indicator 默认绝对定位悬浮且不占文档流，并保持预览层级最高；桌面手机壳模拟 44px / 34px，移动端同链接隐藏，由内容层和固定栏自行预留安全高度。",
     "模态页首屏展示以稳定落点为准：默认直接展示打开后的最终态，避免自动入场动画让截图停在半开中间态。",
+    "主纵向滚动区必须直接承担底部基础避让；本页底页使用 phone-body 的 safe-area-bottom-content，全屏 Modal 无底部 action/cancel，使用 modal__body--safe-bottom，不在 friend-add-form__body 内重复补固定间距。",
     "真实项目中应保持单一页面级主操作，不在页面内容区或底部重复放保存按钮，也不要默认补一栏 helper 说明文案。",
     "iconfont 图标用于跳转指示器（icon-youjiantou16）。",
     "form-body 中嵌入 radio-group 时必须使用 .form-body--preserve-content-align + .form-body__right-btn + .radio-field-group 结构，不得发明 .form-body__radio-item 等自定义包装层。",
