@@ -2260,14 +2260,13 @@
           <div class="album-feed__people-scroll" data-region="people-scroll">
             <div class="album-feed__people-list" data-region="people-list"></div>
             <div class="album-feed__people-self" data-dom-id="people-self">
-              <img class="album-feed__sticky-fade album-feed__sticky-fade--people" src="./lib/assets/icons/sticky-fade-16.svg" alt="" aria-hidden="true">
-              <img class="album-feed__sticky-fade album-feed__sticky-fade--people-right" src="./lib/assets/icons/sticky-fade-16-right.svg" alt="" aria-hidden="true">
               <div class="album-feed__people-item">
                 <div class="avatar avatar--40 avatar--image album-feed__people-avatar" data-dd-id="feed-people-avatar-self" data-component-slug="avatar" data-component-binding="feed-people-avatar-self"><img src="./lib/assets/image/avatar/avatar_083.jpg" alt="我的商家"></div>
                 <span class="album-feed__people-name">我的商家</span>
               </div>
             </div>
           </div>
+          <img class="album-feed__sticky-fade album-feed__sticky-fade--people-right" src="./lib/assets/icons/sticky-fade-16-right.svg" alt="" aria-hidden="true">
         </div>
         <div class="album-feed__filter-tags" data-region="filter-tags" role="group" aria-label="多维度筛选">
           <button type="button" class="tag tag--28 tag--brand tag--selected" data-filter-dimension="all" data-dom-id="filter-tag-all" data-dd-id="feed-filter-tag-all" data-component-slug="tag" data-component-binding="feed-filter-tag"><span class="tag__label">全部</span></button>
@@ -2277,10 +2276,10 @@
           <button type="button" class="tag tag--28 tag--white tag--normal" data-filter-dimension="presale" data-dom-id="filter-tag-presale" data-dd-id="feed-filter-tag-presale" data-component-slug="tag" data-component-binding="feed-filter-tag"><span class="tag__label">预售</span></button>
           <button type="button" class="tag tag--28 tag--white tag--normal" data-filter-dimension="live" data-dom-id="filter-tag-live" data-dd-id="feed-filter-tag-live" data-component-slug="tag" data-component-binding="feed-filter-tag"><span class="tag__label">直播</span></button>
           <div class="album-feed__filter-open-host">
-            <img class="album-feed__sticky-fade album-feed__sticky-fade--filter" src="./lib/assets/icons/sticky-fade-16.svg" alt="" aria-hidden="true">
-            <img class="album-feed__sticky-fade album-feed__sticky-fade--filter-right" src="./lib/assets/icons/sticky-fade-16.svg" alt="" aria-hidden="true">
             <button type="button" class="tag tag--28 tag--white tag--normal album-feed__filter-open" data-dom-id="open-filter" data-dd-id="feed-filter-open" data-component-slug="tag" data-component-binding="feed-filter-open-tag"><span class="tag__label">筛选</span></button>
           </div>
+          <img class="album-feed__sticky-fade album-feed__sticky-fade--filter" src="./lib/assets/icons/sticky-fade-16.svg" alt="" aria-hidden="true">
+          <img class="album-feed__sticky-fade album-feed__sticky-fade--filter-right" src="./lib/assets/icons/sticky-fade-16-right.svg" alt="" aria-hidden="true">
         </div>
           <main class="album-feed__grid" data-region="feed-grid" data-dom-id="feed-open-dynamic"></main>
         </div>
@@ -2561,7 +2560,7 @@
           ctx.state['has-published'] = true;
           render();
         }
-        publishMenu.querySelector('[data-dom-id="publish-action-product"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); onPublishAction(); ctx.toast('发产品能力本期暂未开放'); });
+        publishMenu.querySelector('[data-dom-id="publish-action-product"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); onPublishAction(); ctx.push('publish-product'); });
         publishMenu.querySelector('[data-dom-id="publish-action-note"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); onPublishAction(); ctx.toast('发笔记能力本期暂未开放'); });
         publishMenu.querySelector('[data-dom-id="publish-action-live"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); onPublishAction(); ctx.toast('开直播能力本期暂未开放'); });
         publishMenu.querySelector('[data-dom-id="publish-action-import"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); onPublishAction(); ctx.toast('批量导入能力本期暂未开放'); });
@@ -2941,7 +2940,7 @@
           ctx.state['has-published'] = true;
           render();
         }
-        publishDock.querySelector('[data-dom-id="publish-action-product"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); onPublishAction(); ctx.toast('发产品能力本期暂未开放'); });
+        publishDock.querySelector('[data-dom-id="publish-action-product"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); onPublishAction(); ctx.push('publish-product'); });
         publishDock.querySelector('[data-dom-id="publish-action-note"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); onPublishAction(); ctx.toast('发笔记能力本期暂未开放'); });
         publishDock.querySelector('[data-dom-id="publish-action-live"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); onPublishAction(); ctx.toast('开直播能力本期暂未开放'); });
         publishDock.querySelector('[data-dom-id="publish-action-import"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); onPublishAction(); ctx.toast('批量导入能力本期暂未开放'); });
