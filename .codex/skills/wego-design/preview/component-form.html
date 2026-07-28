@@ -91,6 +91,7 @@
 .form-body--label-w80 .form-body__label{width:80px}
 .form-body--label-w120 .form-body__label{width:120px}
 .form-body--preserve-content-align .form-body__action{justify-content:flex-start}
+.form-body--align-top{align-items:flex-start}
 
 .icon-text-btn{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:44px;min-width:44px;height:44px;padding:0;border:none;border-radius:var(--radius-6);background:transparent;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;-webkit-user-select:none;user-select:none;opacity:1;transition:opacity var(--duration-fast) var(--ease-standard)}
 .icon-text-btn:active,.icon-text-btn.is-pressed{opacity:.6}
@@ -133,11 +134,11 @@
 </style>
 </head>
 <body>
-<div class="pv-header"><h1>表单容器</h1><p>表单字段容器，支持水平/垂直布局、多输入类型、错误与计数共用消息槽位，并在输入恢复合法后自动回到默认态。默认通栏白底，宿主层有横向留白（M8）时才开启 card 圆角修饰。</p></div>
+<div class="pv-header"><h1>表单容器</h1><p>表单字段容器默认使用左右布局，支持多输入类型、错误与计数共用消息槽位，并在输入恢复合法后自动回到默认态。只有用户或原型简报明确要求上下布局时才使用垂直布局；默认通栏白底，宿主层有横向留白（M8）时才开启 card 圆角修饰。</p></div>
 <div class="page">
 
 <div class="pv-demo-note">
-  <strong>使用规则：</strong>页面边距 M0（通栏）时，<code>.form-group__content</code> 不加 <code>--card</code> 修饰；页面边距 M8 时，才加 <code>--card</code> 圆角修饰。
+  <strong>使用规则：</strong>所有字段默认左右布局；只有明确要求上下布局时才使用 <code>.form-body--vertical</code>。页面边距 M0（通栏）时，<code>.form-group__content</code> 不加 <code>--card</code> 修饰；页面边距 M8 时，才加 <code>--card</code> 圆角修饰。
 </div>
 
 <div class="form-group">
@@ -245,7 +246,7 @@
       <div class="form-body__label">方案名称</div>
       <div class="form-body__action"><input type="text" value="门店盘点规则"></div>
     </div>
-    <div class="form-body">
+    <div class="form-body form-body--align-top">
       <div class="form-body__label">组样式</div>
       <div class="form-body__action"><span class="form-body__value">宿主层有横向留白，圆角只作用于内容区</span></div>
     </div>
@@ -328,7 +329,7 @@
 <div class="section-gap"></div>
 
 <div class="form-group">
-  <div class="form-group__title">多行文本与计数 [M8 / card]</div>
+  <div class="form-group__title">明确上下布局 - 多行文本与计数 [M8 / card]</div>
   <div class="form-group__content form-group__content--card">
   <div class="form-body form-body--vertical" data-validate="textarea-counter">
     <div class="form-body__label">备注</div>
@@ -550,6 +551,31 @@
 </div>
 <div class="section-gap"></div>
 
+<div class="form-group">
+  <div class="form-group__title">多行文本 / label 顶部对齐 [M8 / card]</div>
+  <div class="form-group__content form-group__content--card">
+  <div class="form-body form-body--align-top">
+    <div class="form-body__label">验证消息</div>
+    <div class="form-body__action">
+      <textarea rows="3" placeholder="发送给好友的验证消息">这是一条比较长的验证消息内容，用于展示多行文本时左侧 label 顶部对齐的效果。当右侧内容有多行时，使用 .form-body--align-top 让 label 从顶部开始对齐。</textarea>
+    </div>
+  </div>
+  <div class="form-body form-body--align-top">
+    <div class="form-body__label">备注</div>
+    <div class="form-body__action">
+      <textarea rows="2" placeholder="请输入备注">短文本示例</textarea>
+    </div>
+  </div>
+  <div class="form-body">
+    <div class="form-body__label">简单字段</div>
+    <div class="form-body__action">
+      <input type="text" placeholder="单行输入时视觉居中">
+    </div>
+  </div>
+  </div>
+</div>
+<div class="section-gap"></div>
+
 <div class="form-group" data-demo-form="transfer-left">
   <div class="form-group__title">完整业务表单 / 转账场景 [M8 / card]</div>
   <div class="form-group__content form-group__content--card">
@@ -605,7 +631,7 @@
       </div>
     </div>
   </div>
-  <div class="form-body form-body--vertical" data-validate="textarea-counter">
+  <div class="form-body form-body--align-top" data-validate="textarea-counter">
     <div class="form-body__label">备注</div>
     <div class="form-body__action">
       <textarea rows="2" maxlength="50">选填，最多 50 字</textarea>

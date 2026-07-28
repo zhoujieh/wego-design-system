@@ -1345,7 +1345,7 @@
 
 /* ── Form ──────────────────────────────────────────────────── */
 /* @anatomy
-   <div class="pv-header"><h1>表单容器</h1><p>表单字段容器，支持水平/垂直布局、多输入类型、错误与计数共用消息槽位，并在输入恢复合法后自动回到默认态。默认通栏白底，宿主层有横向留白（M8）时才开启 card 圆角修饰。</p></div>
+   <div class="pv-header"><h1>表单容器</h1><p>表单字段容器默认使用左右布局，支持多输入类型、错误与计数共用消息槽位，并在输入恢复合法后自动回到默认态。只有用户或原型简报明确要求上下布局时才使用垂直布局；默认通栏白底，宿主层有横向留白（M8）时才开启 card 圆角修饰。</p></div>
 */
 :is(.form-group,.form-group__content){width:100%}
 .form-group{display:flex;flex-direction:column}
@@ -1421,6 +1421,7 @@
 .form-body--label-w80 .form-body__label{width:80px}
 .form-body--label-w120 .form-body__label{width:120px}
 .form-body--preserve-content-align .form-body__action{justify-content:flex-start}
+.form-body--align-top{align-items:flex-start}
 
 .icon-text-btn{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:44px;min-width:44px;height:44px;padding:0;border:none;border-radius:var(--radius-6);background:transparent;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;-webkit-user-select:none;user-select:none;opacity:1;transition:opacity var(--duration-fast) var(--ease-standard)}
 .icon-text-btn:active,.icon-text-btn.is-pressed{opacity:.6}
@@ -1770,12 +1771,12 @@
 /* 安全高度职责边界：
    - 底部有 action/cancel 时，modal 根节点必须带 .modal--has-actions；此时 body 仅预留 40px
      防渐变蒙层遮盖，safe-area-bottom 由 .modal__actions 自身 padding-bottom 承担。
-   - 底部无 action/cancel 时，body 必须加 .modal__body--safe-bottom，自行预留 40px + safe-area-bottom。 */
+   - 底部无 action/cancel 时，body 必须加 .modal__body--safe-bottom，直接消费页面滚动底部基础避让 Token。 */
 .modal--has-actions .modal__body {
   padding-bottom: var(--spacer-40);
 }
 .modal__body--safe-bottom {
-  padding-bottom: calc(var(--spacer-40) + var(--safe-area-bottom));
+  padding-bottom: var(--safe-area-bottom-content);
 }
 
 /* ========== action 区 ========== */
