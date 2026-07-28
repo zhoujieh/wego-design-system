@@ -4,7 +4,6 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
-  padding-inline: var(--layout-page-margin-m0);
   overflow: hidden;
   background: var(--bg-page);
   color: var(--text-default);
@@ -24,7 +23,8 @@
   width: 100%;
   max-width: 768px;
   margin-inline: auto;
-  padding: var(--spacer-16);
+  padding-block: var(--spacer-16);
+  padding-inline: var(--spacer-16);
 }
 
 .dynamic-detail__publisher,

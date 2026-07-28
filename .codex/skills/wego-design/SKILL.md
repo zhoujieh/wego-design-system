@@ -13,11 +13,11 @@ description: 基于已确认原型简报消费微购设计系统，在一次任�
 
 ### 读取顺序
 
-固定为：有效迭代与已确认 `prototype_brief` → 共享[设计决策原则](../shared/references/design-decisions.md) → [交互原型设计方法](./references/interaction-prototype-design.md) → `library-consumption.json` 与 `uikit-plan.json` → 先完成设计意图、精确范式/自主组合裁决和语义区域树 → `components/index.json` → 本页命中的 Preview → 对应组件契约 → `colors_and_type.css` → [场景合同](./references/scene-contract.md)。
+固定为：有效迭代与已确认 `prototype_brief` → 共享[设计决策原则](../shared/references/design-decisions.md) → [交互原型设计方法](./references/interaction-prototype-design.md) → `library-consumption.json`、`page-layers.json` 与 `uikit-plan.json` → 先完成设计意图、精确范式/自主组合裁决、语义区域树、页面层级、滚动架构、内容分组与吸顶区域合同 → `components/index.json` → 本页命中的 Preview → 对应组件契约 → `colors_and_type.css` → [场景合同](./references/scene-contract.md)。
 
 - 设计决策原则是所有设计输出不可绕过的顶层权威
 - 已确认 `prototype_brief` 即本轮设计与实现授权；范围内的信息分组、布局、组件、Token、反馈和 overlay 形式由 `wego-design` 决定，不重复向用户确认
-- 具体组件只在页面结构确定后读取；禁止从组件清单反推布局、选择“最接近”的 UI Kit 或拼接多个 UI Kit
+- 具体组件只在页面层级、滚动边界、内容分组、间距归属和 sticky/fixed 区域确定后读取；禁止从组件清单反推布局、选择“最接近”的 UI Kit 或拼接多个 UI Kit
 - 产品阶段临时线框不进入设计输入链；即使仍存在于同一会话上下文，也只能通过用户确认后的 `prototype_brief` 消费其业务结论，不得机械照搬或从线框补造事实、组件和视觉规格
 - `design-decisions.json` 仅是场景输出与已有场景修改时的辅助对照，不得作为设计前输入
 - 资产按 [资产地图](./references/library-map.md) 定位

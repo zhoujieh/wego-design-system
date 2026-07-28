@@ -191,5 +191,11 @@
     "--toast-edge-gap",
     "--toast-enter-offset-y",
     "--toast-guide-max-width"
-  ]
+  ],
+  "layerContract": {
+    "scope": "app-global",
+    "role": "feedback",
+    "mountHost": "app-host",
+    "zToken": "--z-toast"
+  }
 }

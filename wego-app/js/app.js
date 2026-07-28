@@ -627,6 +627,12 @@
       toast: toast,
       dialog: dialog,
       updateEntrySummary: updateEntrySummary,
+      bindScrollLayout: function (options) {
+        if (!window.WegoScrollLayout) throw new Error('[wego-app] WegoScrollLayout 未加载');
+        var controller = window.WegoScrollLayout.bind(Object.assign({ root: host }, options || {}));
+        destroyCallbacks.push(function () { controller.destroy(); });
+        return controller;
+      },
       // 填充指定 region：清除骨架 → 写入内容 → 自动加 scene-fade-in 触发淡入
       // 同步调用：替代直接 innerHTML，由框架接管骨架清除与过渡
       // 异步调用（Promise/setTimeout 后）：init 返回后骨架仍在，本方法清除骨架并淡入新内容

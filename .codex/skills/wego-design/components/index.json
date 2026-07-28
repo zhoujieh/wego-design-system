@@ -143,6 +143,13 @@
       "preview": "preview/component-navbar.html"
     },
     {
+      "slug": "sticky-region",
+      "name": "动态吸顶区域",
+      "category": "layout",
+      "status": "stable",
+      "preview": "preview/component-sticky-region.html"
+    },
+    {
       "slug": "toast",
       "name": "提示",
       "category": "feedback",

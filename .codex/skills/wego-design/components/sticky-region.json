@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 4,
+  "slug": "sticky-region",
+  "name": "动态吸顶区域",
+  "category": "layout",
+  "status": "stable",
+  "sourceKind": "inferred",
+  "confidence": "high",
+  "description": "通栏 sticky surface，提供 always、direction-reveal、compact-on-scroll、pin-after-threshold 与 elevate-after-scroll 的统一状态载体；不负责业务内容，不使用 opacity 显隐。",
+  "semanticTypeCandidates": ["sticky-region", "scroll-aware-header", "pinned-toolbar"],
+  "variantDimensions": {
+    "edge": ["top", "bottom"],
+    "visibility": ["always", "direction-reveal", "compact-on-scroll", "pin-after-threshold", "elevate-after-scroll"],
+    "state": ["visible", "hidden", "compact", "pinned"]
+  },
+  "representativeVariants": [
+    { "edge": "top", "visibility": "always", "state": "visible" },
+    { "edge": "top", "visibility": "direction-reveal", "state": "visible" },
+    { "edge": "top", "visibility": "compact-on-scroll", "state": "compact" },
+    { "edge": "top", "visibility": "pin-after-threshold", "state": "pinned" },
+    { "edge": "bottom", "visibility": "direction-reveal", "state": "visible" }
+  ],
+  "anatomy": [
+    { "name": "root", "selector": ".sticky-region", "role": "通栏不透明吸顶 surface；承载 edge、visibility、state 和 elevated 状态" },
+    { "name": "motion", "selector": ".sticky-region__motion", "role": "只执行位移的动效层" },
+    { "name": "inner", "selector": ".sticky-region__inner", "role": "承载内部控件的组件级横向留白" }
+  ],
+  "structurePatterns": [
+    "固定结构为 .sticky-region > .sticky-region__motion > .sticky-region__inner > 业务内容。",
+    "root 必须通栏并显式使用不透明背景；禁止把 root 放进带横向边距的内容组。",
+    "运行时实测 motion 内容尺寸后设置 --sticky-region-expanded-size，并按策略写入 data-state。",
+    "显隐只改变 max-height 与 transform，不得改变 opacity。",
+    "首要导航、保存、结算和高优先级告警只能使用 always、compact-on-scroll、pin-after-threshold 或 elevate-after-scroll，不得 direction-reveal。"
+  ],
+  "behavior": {
+    "measurement": "由 WegoScrollLayout 使用 ResizeObserver 实测展开尺寸、维护 sticky 栈偏移和主滚动区 scroll-padding。",
+    "directionReveal": "累计同方向有效滚动超过阈值后切换；顶部强制显示，底部布局校正、尺寸变化和回弹不触发反向切换。",
+    "compact": "越过阈值后切换 compact 状态，max-height 使用实测或配置的 compact size。",
+    "pin": "越过阈值后切换 pinned；不改变文档滚动所有权。",
+    "elevation": "越过阈值后只设置 data-elevated，不改变尺寸或 opacity。"
+  },
+  "accessibility": {
+    "hiddenState": "hidden 状态同步 aria-hidden=true 且禁用指针事件；重新显示时恢复。",
+    "focus": "运行时不得在焦点位于区域内部时自动隐藏。"
+  },
+  "usageHints": [
+    "用于搜索栏、筛选栏、二级工具栏和可压缩摘要；navbar 仍直接消费 navbar 组件。",
+    "先在 layout_contract.sticky_regions 登记，再绑定 WegoScrollLayout。",
+    "多个区域按 stack_order 排序，运行时以实测高度计算 offset。",
+    "内部横向留白通过 --sticky-region-inline-inset 配置为正式 page margin Token。"
+  ],
+  "doNotInvent": [
+    "不要在业务场景复制滚动方向状态机。",
+    "不要用 opacity、visibility 或 display 动画替代尺寸与位移动画。",
+    "不要让 sticky surface 继承页面内容组横向边距。"
+  ],
+  "domAnatomy": {
+    "root": ".sticky-region",
+    "requiredChildren": [".sticky-region__motion", ".sticky-region__inner"],
+    "bodyChildren": [],
+    "optionalChildren": [],
+    "modifierClasses": [],
+    "alternatives": [],
+    "variantRules": {
+      "edge": {
+        "required": true,
+        "exclusive": true,
+        "values": {
+          "top": { "rootAllOf": ["[data-edge=\"top\"]"], "rootNoneOf": ["[data-edge=\"bottom\"]"] },
+          "bottom": { "rootAllOf": ["[data-edge=\"bottom\"]"], "rootNoneOf": ["[data-edge=\"top\"]"] }
+        }
+      },
+      "visibility": {
+        "required": true,
+        "exclusive": true,
+        "values": {
+          "always": { "rootAllOf": ["[data-visibility=\"always\"]"] },
+          "direction-reveal": { "rootAllOf": ["[data-visibility=\"direction-reveal\"]"] },
+          "compact-on-scroll": { "rootAllOf": ["[data-visibility=\"compact-on-scroll\"]"] },
+          "pin-after-threshold": { "rootAllOf": ["[data-visibility=\"pin-after-threshold\"]"] },
+          "elevate-after-scroll": { "rootAllOf": ["[data-visibility=\"elevate-after-scroll\"]"] }
+        }
+      },
+      "state": {
+        "required": true,
+        "exclusive": true,
+        "values": {
+          "visible": { "rootAllOf": ["[data-state=\"visible\"]"] },
+          "hidden": { "rootAllOf": ["[data-state=\"hidden\"]"] },
+          "compact": { "rootAllOf": ["[data-state=\"compact\"]"] },
+          "pinned": { "rootAllOf": ["[data-state=\"pinned\"]"] }
+        }
+      }
+    }
+  },
+  "layerContract": {
+    "scope": "page-local",
+    "role": "navigation",
+    "mountHost": "scene-root",
+    "zToken": "--z-sticky"
+  },
+  "provenance": {
+    "preview": "preview/component-sticky-region.html",
+    "cssSource": "preview/component-sticky-region.html",
+    "embedded": false,
+    "hostComponent": null,
+    "externalSources": []
+  },
+  "unknowns": [],
+  "ruleRefs": [
+    "page-layers.json",
+    "references/interaction-prototype-design.md#4-建立语义区域树与页面布局合同",
+    "preview/component-sticky-region.html"
+  ],
+  "runtimeTokens": [
+    "--bg-surface",
+    "--border-neutral-l2",
+    "--duration-normal",
+    "--ease-emphasized",
+    "--layout-page-margin-m0",
+    "--spacer-0",
+    "--z-sticky"
+  ],
+  "previewOnlyTokens": [],
+  "localTokens": [
+    "--sticky-region-after-gap",
+    "--sticky-region-compact-size",
+    "--sticky-region-duration",
+    "--sticky-region-expanded-size",
+    "--sticky-region-inline-inset",
+    "--sticky-region-offset"
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "name": "微购页面层级与滚动架构",
+  "description": "页面结构阶段的权威层级模型；先于组件选择使用，不属于 UI Kit。",
+  "scopes": {
+    "page-local": {
+      "mountHost": "scene-root",
+      "roles": {
+        "content": { "zToken": "--z-base", "purpose": "普通内容与主滚动内容" },
+        "raised": { "zToken": "--z-raised", "purpose": "页面内局部抬升内容" },
+        "navigation": { "zToken": "--z-sticky", "purpose": "导航栏、吸顶栏与固定页面操作" },
+        "anchored-popout": { "zToken": "--z-popover", "purpose": "锚定页面元素的菜单、气泡与引导" }
+      }
+    },
+    "app-global": {
+      "mountHost": "app-host",
+      "roles": {
+        "host": { "zToken": "--z-base", "purpose": "宿主页与底部导航" },
+        "scene": { "zToken": "--z-scene", "purpose": "push 场景栈" },
+        "overlay": { "zToken": "--z-overlay", "purpose": "sheet、modal 与全屏模态宿主" },
+        "dialog": { "zToken": "--z-modal", "purpose": "对话框" },
+        "feedback": { "zToken": "--z-toast", "purpose": "Toast 等全局反馈" },
+        "critical": { "zToken": "--z-critical", "purpose": "必须覆盖所有普通交互的系统级状态" }
+      }
+    },
+    "overlay-local": {
+      "mountHost": "overlay-root",
+      "roles": {
+        "mask": { "zToken": "--z-base", "purpose": "当前 overlay 的遮罩" },
+        "surface": { "zToken": "--z-raised", "purpose": "当前 overlay 的内容面板" },
+        "nested-popout": { "zToken": "--z-popover", "purpose": "overlay 内的菜单与气泡" }
+      }
+    }
+  },
+  "rules": [
+    "页面根与主滚动区始终通栏，不承担业务内容横向边距。",
+    "内容间距按语义内容组声明；同一组只有一个 spacing owner。",
+    "navbar、sticky region 与 bottom action bar 使用通栏 surface，内部留白由组件或明确的 inner 容器承担。",
+    "所有 sticky、fixed、scroll 与 overlay 区域必须在 layout_contract 中登记并绑定层级角色。",
+    "页面内 z-index 不得越过 page-local 范围；跨场景覆盖必须挂载到对应 app-global 或 overlay-local host。"
+  ]
+}

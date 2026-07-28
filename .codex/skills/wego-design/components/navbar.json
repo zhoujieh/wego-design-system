@@ -305,5 +305,11 @@
     "--spacer-8",
     "--text-brand"
   ],
-  "localTokens": []
+  "localTokens": [],
+  "layerContract": {
+    "scope": "page-local",
+    "role": "navigation",
+    "mountHost": "scene-root",
+    "zToken": "--z-sticky"
+  }
 }

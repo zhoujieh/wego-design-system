@@ -231,5 +231,11 @@
   "localTokens": [
     "--bottom-action-bar-action-max-width",
     "--bottom-action-bar-action-min-width"
-  ]
+  ],
+  "layerContract": {
+    "scope": "page-local",
+    "role": "navigation",
+    "mountHost": "scene-root",
+    "zToken": "--z-sticky"
+  }
 }

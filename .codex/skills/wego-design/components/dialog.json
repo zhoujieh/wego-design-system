@@ -319,5 +319,11 @@
   "localTokens": [
     "--dialog-enter-scale",
     "--dialog-width"
-  ]
+  ],
+  "layerContract": {
+    "scope": "app-global",
+    "role": "dialog",
+    "mountHost": "app-host",
+    "zToken": "--z-modal"
+  }
 }

@@ -102,13 +102,15 @@ const index = json('components/index.json');
 const uiKit = json('uikit-plan.json');
 const library = json('library-consumption.json');
 const metadata = json('metadata.json');
+const pageLayers = json('page-layers.json');
 
 if (index?.schemaVersion !== 4 || index?.componentContractSchemaVersion !== 4) {
   fail('index.schema', 'components/index.json 必须使用 schemaVersion 4 与 componentContractSchemaVersion 4', 'components/index.json');
 }
 if (Object.hasOwn(index || {}, 'uiKits')) fail('index.duplicate_uikits', 'components/index.json 不得重复维护 UI Kit；唯一来源是 uikit-plan.json', 'components/index.json');
 if (uiKit?.schemaVersion !== 5 || !Array.isArray(uiKit?.pagePatterns)) fail('uikit.schema', 'uikit-plan.json 必须使用 schemaVersion 5 且包含 pagePatterns', 'uikit-plan.json');
-if (library?.schemaVersion !== 5) fail('library.schema', 'library-consumption.json 必须使用 schemaVersion 5', 'library-consumption.json');
+if (library?.schemaVersion !== 6) fail('library.schema', 'library-consumption.json 必须使用 schemaVersion 6', 'library-consumption.json');
+if (pageLayers?.schemaVersion !== 1 || !pageLayers?.scopes) fail('layers.schema', 'page-layers.json 必须使用 schemaVersion 1 并声明 scopes', 'page-layers.json');
 
 const registered = new Set((index?.components || []).map(item => item.slug));
 const patternIds = new Set();
@@ -164,6 +166,17 @@ for (const item of index?.components || []) {
   }
   if (contract.provenance?.preview !== previewRelative || contract.provenance?.cssSource !== previewRelative) {
     fail('component.provenance', `${contractRelative}.provenance 必须指向索引中的 Preview`, contractRelative);
+  }
+  if (contract.layerContract !== undefined) {
+    const layer = contract.layerContract;
+    const authoritative = pageLayers?.scopes?.[layer?.scope];
+    const role = authoritative?.roles?.[layer?.role];
+    if (!authoritative || !role || layer.mountHost !== authoritative.mountHost || layer.zToken !== role.zToken) {
+      fail('component.layer_contract', `${contractRelative}.layerContract 必须精确映射 page-layers.json 的 scope、role、mountHost 与 zToken`, contractRelative);
+    }
+  }
+  if (['navbar', 'bottom-action-bar', 'sticky-region', 'actionsheet', 'modal', 'dialog', 'toast', 'popover', 'popmenu'].includes(slug) && !contract.layerContract) {
+    fail('component.layer_contract_missing', `${contractRelative} 是层级组件，必须声明 layerContract`, contractRelative);
   }
   for (const source of contract.provenance?.externalSources || []) {
     if (!source?.name || (!source.url && !source.version && !source.sourceFile)) fail('component.external_source', `${contractRelative} 的 externalSources 必须有名称和 URL、版本或 sourceFile`, contractRelative);

@@ -1,8 +1,8 @@
 .app-center-page {
-  height: 100%;
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
-  padding-inline: var(--layout-page-margin-m0);
   background: var(--bg-page);
   color: var(--text-default);
   font-family: var(--body-md-font-family);
@@ -17,7 +17,7 @@
   flex-shrink: 0;
   position: sticky;
   top: 0;
-  z-index: 1;
+  z-index: var(--z-sticky);
   background: var(--bg-page);
   margin-bottom: var(--spacer-8);
 }
@@ -27,6 +27,9 @@
   min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+}
+
+.app-center-page__content-group {
   display: flex;
   flex-direction: column;
   gap: var(--spacer-8);

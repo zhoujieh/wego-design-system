@@ -18,12 +18,6 @@
     "token_bindings": [
       {
         "selector": ".dynamic-detail",
-        "content_role": ".dynamic-detail 的 padding-inline",
-        "css_property": "padding-inline",
-        "token": "var(--layout-page-margin-m0)"
-      },
-      {
-        "selector": ".dynamic-detail",
         "content_role": ".dynamic-detail 的 background",
         "css_property": "background",
         "token": "var(--bg-page)"
@@ -48,8 +42,8 @@
       },
       {
         "selector": ".dynamic-detail__content",
-        "content_role": ".dynamic-detail__content 的 padding",
-        "css_property": "padding",
+        "content_role": "动态正文内容组的上下留白",
+        "css_property": "padding-block",
         "token": "var(--spacer-16)"
       },
       {
@@ -327,6 +321,12 @@
         "content_role": ".dynamic-detail__select-cart.is-added .bottom-action-bar__action-label 的 color",
         "css_property": "color",
         "token": "var(--text-brand)"
+      },
+      {
+        "selector": ".dynamic-detail__content",
+        "content_role": "动态正文内容组的横向留白",
+        "css_property": "padding-inline",
+        "token": "var(--spacer-16)"
       }
     ],
     "component_bindings": [
@@ -422,13 +422,77 @@
     "layout_contract": {
       "mode": "composed",
       "source": "references/design-decisions.md",
-      "selection_reason": "详情是普通 Push 二级页；采用 M0 让导航栏和底部操作栏通栏，正文在内部使用内容留白，首要任务是阅读完整动态。",
-      "page_edge_mode": "M0",
+      "selection_reason": "详情是普通 Push 二级页；根与主滚动区通栏，navbar 和底部操作栏保持同栏，正文作为单一语义内容组承担 16px 横向留白与垂直节奏。底部操作栏在滚动区之外按流式预留空间，最后内容不被遮挡。",
       "mutable_regions": [
         ".dynamic-detail__content",
         ".dynamic-detail__media-list",
         ".dynamic-detail__product-host"
-      ]
+      ],
+      "principle_refs": [
+        "wego-clarity-page-architecture-before-components"
+      ],
+      "page_layers": [
+        {
+          "region_id": "dynamic-detail-navbar",
+          "selector": ".dynamic-detail__navbar",
+          "scope": "page-local",
+          "role": "navigation"
+        },
+        {
+          "region_id": "dynamic-detail-scroll",
+          "selector": ".dynamic-detail__scroll",
+          "scope": "page-local",
+          "role": "content"
+        },
+        {
+          "region_id": "dynamic-detail-actions",
+          "selector": ".dynamic-detail__actions",
+          "scope": "page-local",
+          "role": "navigation"
+        }
+      ],
+      "scroll_architecture": {
+        "viewport_selector": ".dynamic-detail",
+        "primary_scroll_selector": ".dynamic-detail__scroll",
+        "document_scroll": false,
+        "nested_scroll_regions": [],
+        "fixed_regions": [
+          {
+            "region_id": "dynamic-detail-actions",
+            "selector": ".dynamic-detail__actions",
+            "edge": "bottom",
+            "safe_area_owner": "component",
+            "clearance": "flow-reserved"
+          }
+        ]
+      },
+      "layout_groups": [
+        {
+          "group_id": "dynamic-detail-navbar-group",
+          "selector": ".dynamic-detail__navbar",
+          "content_role": "详情导航通栏 surface",
+          "inline_inset_token": "var(--layout-page-margin-m0)",
+          "spacing_owner": "component",
+          "gap_token": "var(--spacer-0)"
+        },
+        {
+          "group_id": "dynamic-detail-content-group",
+          "selector": ".dynamic-detail__content",
+          "content_role": "动态正文与关联商品内容组",
+          "inline_inset_token": "var(--spacer-16)",
+          "spacing_owner": "scene",
+          "gap_token": "var(--spacer-16)"
+        },
+        {
+          "group_id": "dynamic-detail-actions-group",
+          "selector": ".dynamic-detail__actions",
+          "content_role": "详情操作通栏 surface",
+          "inline_inset_token": "var(--layout-page-margin-m0)",
+          "spacing_owner": "component",
+          "gap_token": "var(--spacer-0)"
+        }
+      ],
+      "sticky_regions": []
     },
     "interaction_contract": [
       {
@@ -544,7 +608,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/动态详情/scene.js",
     "scene_css": "wego-app/scenes/动态详情/scene.css",
-    "source_sha256": "a035f3c278e42beb4f384c6228bb7212bcf81e3665d509015229a8f201fb22cd",
+    "source_sha256": "236fc14d5aeab8546ed10509c4a8b6563c821d32fba481249a81b109d16bf478",
     "dom_ids": [
       "dynamic-detail-back",
       "dynamic-detail-download",
@@ -564,7 +628,7 @@
         375,
         393
       ],
-      "checked_at": "2026-07-24T03:03:45.000Z",
+      "checked_at": "2026-07-28T16:18:00+08:00",
       "scope": "动态详情独立页面的加入选品车入口、列表已选状态同步、关联商品入口；移动端预览验证详情底部操作栏不遮挡内容并保持可查看产品细节。",
       "checks": {
         "horizontal_overflow": true,

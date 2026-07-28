@@ -19,7 +19,7 @@ wego-app/scenes/{中文业务场景}/design-decisions.json
 
 - 通过 `window.WegoApp.registerScene` 注册 `routeId`、template、presentation 和 `init`。
 - `routes.js` 必须且只能对 `window.WEGO_APP_ROUTES` 静态赋值一次；数组直接包含静态路由对象，`routeId` 全局唯一。入口的 `entry.type` 只能是 `host-tab`、`grid-entry`、`cell-entry`，必须声明所属 `entry.tab`；`host-tab` 的 tab 全局唯一。
-- template 根节点必须且只能有一处同时声明 `data-surface-id`、`data-route-id`、`data-layout-mode`、`data-page-edge-mode`；边距标注必须等于 `layout_contract.page_edge_mode`。`pattern` 模式额外声明 `data-page-pattern`；`composed` 模式不得声明页面范式。
+- template 根节点必须且只能有一处同时声明 `data-surface-id`、`data-route-id`、`data-layout-mode`；根节点和主滚动层保持通栏，不再声明页面级边距。内容间距由 `layout_contract.layout_groups` 中的语义分组分别持有。`pattern` 模式额外声明 `data-page-pattern`；`composed` 模式不得声明页面范式。
 - 每个正式组件实例必须声明唯一 `data-dd-id`、`data-component-slug` 和 `data-component-binding`；binding 必须对应 `prompt_contract.component_bindings[].binding_id`。
 - 所有交互触发器使用唯一 `data-dom-id`，并进入 `interaction_contract`。
 
@@ -86,10 +86,30 @@ wego-app/scenes/{中文业务场景}/design-decisions.json
     "layout_contract": {
       "mode": "pattern",
       "source": "uikit-plan.json#/pagePatterns/biz-rule-config",
-      "selection_reason": "页面以统一保存为主，并采用通栏内容边距",
-      "page_edge_mode": "M0",
+      "selection_reason": "页面以统一保存为主；导航与底部操作通栏，表单内容按语义组持有横向间距",
       "principle_refs": ["wego-clarity-single-primary-task"],
-      "mutable_regions": [".settings-edit__content"]
+      "mutable_regions": [".settings-edit__content"],
+      "page_layers": [
+        { "region_id": "settings-content", "selector": ".settings-edit__content", "role": "content", "scope": "page-local" },
+        { "region_id": "settings-navbar", "selector": ".settings-edit__navbar", "role": "navigation", "scope": "page-local" },
+        { "region_id": "settings-actions", "selector": ".settings-edit__actions", "role": "navigation", "scope": "page-local" }
+      ],
+      "scroll_architecture": {
+        "viewport_selector": ".settings-edit",
+        "primary_scroll_selector": ".settings-edit__content",
+        "document_scroll": false,
+        "nested_scroll_regions": [],
+        "fixed_regions": [
+          { "region_id": "settings-actions", "selector": ".settings-edit__actions", "edge": "bottom", "safe_area_owner": "component", "clearance": "dynamic-measured" }
+        ]
+      },
+      "layout_groups": [
+        { "group_id": "settings-form", "selector": ".settings-edit__form-group", "content_role": "设置表单内容组", "inline_inset_token": "var(--layout-page-margin-m8)", "spacing_owner": "scene", "gap_token": "var(--spacer-8)" }
+      ],
+      "sticky_regions": [
+        { "region_id": "settings-navbar", "selector": ".settings-edit__navbar", "scroll_selector": ".settings-edit__content", "edge": "top", "stack_order": 0, "visibility": "always", "background_token": "var(--bg-page)", "layer_role": "navigation", "after_gap_token": "var(--spacer-0)", "scroll_padding": "flow-reserved", "essential": true },
+        { "region_id": "settings-actions", "selector": ".settings-edit__actions", "scroll_selector": ".settings-edit__content", "edge": "bottom", "stack_order": 0, "visibility": "always", "background_token": "var(--bg-page)", "layer_role": "navigation", "after_gap_token": "var(--spacer-8)", "scroll_padding": "dynamic-measured", "essential": true }
+      ]
     },
     "interaction_contract": [
       { "dom_id": "save-settings", "target": "feedback:toast" }
@@ -143,8 +163,9 @@ wego-app/scenes/{中文业务场景}/design-decisions.json
 - `variant_dimensions` 使用组件契约的实际维度和值，不写 Preview、契约路径、根 class 或必需子节点。守卫检查所有值是否合法；契约已声明 `domAnatomy.variantRules` 的维度还会核对实际 DOM。未映射维度仍必须按 Preview 对照，不得宣称已自动验证。
 <!-- rule-id: design-decisions-css-token-binding-precision -->
 
-- `token_bindings` 只记录场景自己声明的视觉语义，包括排版、颜色、页面边距等。组件内部样式由正式组件负责；允许 Token 由当前组件 `runtimeTokens` 与场景基础策略自动计算。
-- `layout_contract.source`：pattern 指向精确命中的范式；composed 指向 `references/design-decisions.md`。`selection_reason` 使用现有字段记录最终首要任务、区域层级以及信息显隐、滚动或固定操作的关键取舍，边距理由一并写入；不得只写“参考某 UI Kit”或笼统的“按规范设计”。
+- `token_bindings` 只记录场景自己声明的视觉语义，包括排版、颜色和语义内容组间距。组件内部样式由正式组件负责；允许 Token 由当前组件 `runtimeTokens` 与场景基础策略自动计算。
+- `layout_contract.source`：pattern 指向精确命中的范式；composed 指向 `references/design-decisions.md`。`selection_reason` 使用现有字段记录最终首要任务、区域层级以及信息显隐、滚动或固定操作的关键取舍；不得只写“参考某 UI Kit”或笼统的“按规范设计”。
+- `layout_contract` 必须包含 `page_layers`、`scroll_architecture`、`layout_groups` 与 `sticky_regions`。页面根和主滚动区通栏；内容组按语义共享间距并声明唯一 `spacing_owner`；sticky/fixed 区域登记层级、背景、间距、实测避让和显隐策略。
 - `token_bindings.content_role` 必须说明选择器承载的真实内容角色或区域语义，例如“对象名称”“辅助元数据”“持续主行动区域”；不得使用“页面样式”“普通文字”等无法解释视觉层级的泛化描述。
 - 非空 `state_contract` 必须且只能有一个初始状态。仅实现简报和真实操作需要的状态；刷新后保留必须有明确需求。
 - `interaction_contract.target` 只使用实际存在的 `route:*`、`state:*`、`overlay:modal|sheet|full-screen-modal|close`、`feedback:toast|dialog` 或 `navigation:back`。
@@ -167,13 +188,14 @@ wego-app/scenes/{中文业务场景}/design-decisions.json
 
 - 业务状态必须由场景自有选择器限定，例如 `.feed-item__forward-btn.is-forwarded`；不得单独使用通用状态类，也不得把业务状态发明成正式组件 modifier。
 - 只写场景根作用域下的布局、区域关系和业务胶水。
-- 场景根用 `padding-inline` 和对应的 `var(--layout-page-margin-m0)`、`var(--layout-page-margin-m8)` 或 `var(--layout-page-margin-m32)` 实际落实 `M0/M8/M32`；合同、根标注和 Token 必须一致。
+- 场景根必须 `position: absolute; inset: 0` 且保持通栏，禁止承担 `padding-inline`。`M0/M8/M32` 只能由 `layout_groups` 中的语义内容组落实；导航、sticky surface、bottom action surface 不得继承内容组缩进。
 
 <!-- rule-id: spacing-must-use-spacer-token -->
 
-- 禁止硬编码颜色、间距、圆角和组件内部视觉值；页面边距使用上述三个 `--layout-page-margin-*` Token，其余场景间距使用 `var(--spacer-*)`。
+- 禁止硬编码颜色、间距、圆角和组件内部视觉值；语义内容组横向边距使用 `--layout-page-margin-*` Token，其余场景间距使用 `var(--spacer-*)`。
 - 页面滚动容器使用实际可滚动行为；`overflow:hidden` 只用于明确的组件裁切边界，不得用来禁用页面滚动。
-- 固定操作栏由正式组件处理安全区；无固定栏的滚动内容按宿主规则预留底部安全区。
+- sticky surface 必须通栏、显式使用不透明背景和 `page-local/navigation` 层级；底部保留合同声明的间距。动态显隐只允许尺寸与位移变化，不得改变 opacity。
+- 固定操作栏由正式组件处理安全区；主滚动内容按实测操作栏高度、安全区和额外间距预留 bottom clearance，最后一项必须能够完整滚出遮挡区。
 
 <!-- rule-id: safe-area-top-single-owner -->
 

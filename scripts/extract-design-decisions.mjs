@@ -57,7 +57,7 @@ const rootNode = templateTree.root;
 if (rootNode.attrs['data-surface-id'] !== contract.surface_id || rootNode.attrs['data-route-id'] !== contract.route_id || rootNode.attrs['data-layout-mode'] !== contract.layout_mode) {
   fail('template 根节点的 data-surface-id、data-route-id、data-layout-mode 必须与 wego-design-contract 一致');
 }
-if (rootNode.attrs['data-page-edge-mode'] !== prompt.layout_contract.page_edge_mode) fail('template 根节点的 data-page-edge-mode 必须与 layout_contract.page_edge_mode 一致');
+if (Object.hasOwn(rootNode.attrs, 'data-page-edge-mode')) fail('template 根节点不得声明 data-page-edge-mode；横向边距必须归属 layout_groups 语义内容组');
 if (contract.layout_mode === 'pattern' && rootNode.attrs['data-page-pattern'] !== contract.page_pattern) fail('pattern 模式根节点的 data-page-pattern 必须与 wego-design-contract 一致');
 if (contract.layout_mode === 'composed' && Object.hasOwn(rootNode.attrs, 'data-page-pattern')) fail('composed 模式根节点不得声明 data-page-pattern');
 const componentNodes = templateTree.nodes

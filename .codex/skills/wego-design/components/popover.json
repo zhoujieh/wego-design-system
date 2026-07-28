@@ -320,5 +320,11 @@
     "--popover-arrow-size",
     "--popover-bg-dark",
     "--popover-max-width"
-  ]
+  ],
+  "layerContract": {
+    "scope": "page-local",
+    "role": "anchored-popout",
+    "mountHost": "scene-root",
+    "zToken": "--z-popover"
+  }
 }

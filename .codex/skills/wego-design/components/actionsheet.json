@@ -331,7 +331,7 @@
     "--text-default",
     "--text-secondary",
     "--text-tertiary",
-    "--z-modal"
+    "--z-raised"
   ],
   "previewOnlyTokens": [
     "--bg-brand-surface-l1",
@@ -348,5 +348,11 @@
     "--actionsheet-item-divider-color",
     "--actionsheet-item-font-weight",
     "--actionsheet-panel-width"
-  ]
+  ],
+  "layerContract": {
+    "scope": "overlay-local",
+    "role": "surface",
+    "mountHost": "overlay-root",
+    "zToken": "--z-raised"
+  }
 }

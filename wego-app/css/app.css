@@ -429,7 +429,6 @@ input, textarea,
 .app-overlay-layer {
   position: absolute;
   inset: 0;
-  z-index: var(--z-overlay, 500);
   display: flex;
   flex-direction: column;
   transform: translateX(0);
@@ -437,10 +436,12 @@ input, textarea,
 
 /* sceneLayer 容器本身透明：栈式 push 时新 panel slide-in 需要透出底层宿主页/上级场景 */
 .app-scene-layer {
+  z-index: var(--z-scene);
   background: transparent;
 }
 
 .app-overlay-layer {
+  z-index: var(--z-overlay);
   background: transparent;
 }
 

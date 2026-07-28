@@ -35,12 +35,6 @@
         "token": "var(--body-md-font-family)"
       },
       {
-        "selector": ".friend-list",
-        "content_role": "页面边距",
-        "css_property": "padding-inline",
-        "token": "var(--layout-page-margin-m0)"
-      },
-      {
         "selector": ".friend-list__navbar",
         "content_role": "导航栏背景",
         "css_property": "background",
@@ -359,13 +353,75 @@
     "layout_contract": {
       "mode": "composed",
       "source": "references/design-decisions.md",
-      "selection_reason": "好友列表以连续浏览为主，采用通栏白底行减少阅读中断；搜索固定在顶部，索引固定悬浮在右侧中间。新建好友全屏模态内部走 entity-form 范式（M0 通栏白底、form-group__title 与 form-body 共享 16px 起点节奏、不挂 --card）。",
-      "page_edge_mode": "M0",
+      "selection_reason": "好友列表以连续浏览为主；页面根与主滚动区通栏，navbar 与搜索作为始终可见的通栏导航区域，搜索控件由语义搜索组承担 16px 内边距，连续好友行由组件自身承担内部留白，右侧索引处于页面 navigation 层。",
       "mutable_regions": [
         ".friend-list__scroll",
         ".friend-list__group",
         ".friend-list__index"
-      ]
+      ],
+      "principle_refs": [
+        "wego-clarity-page-architecture-before-components"
+      ],
+      "page_layers": [
+        {
+          "region_id": "friend-navbar",
+          "selector": ".friend-list__navbar",
+          "scope": "page-local",
+          "role": "navigation"
+        },
+        {
+          "region_id": "friend-search",
+          "selector": ".friend-list__search",
+          "scope": "page-local",
+          "role": "navigation"
+        },
+        {
+          "region_id": "friend-list-content",
+          "selector": ".friend-list__scroll",
+          "scope": "page-local",
+          "role": "content"
+        },
+        {
+          "region_id": "friend-index",
+          "selector": ".friend-list__index",
+          "scope": "page-local",
+          "role": "navigation"
+        }
+      ],
+      "scroll_architecture": {
+        "viewport_selector": ".friend-list",
+        "primary_scroll_selector": ".friend-list__scroll",
+        "document_scroll": false,
+        "nested_scroll_regions": [],
+        "fixed_regions": []
+      },
+      "layout_groups": [
+        {
+          "group_id": "friend-navbar-group",
+          "selector": ".friend-list__navbar",
+          "content_role": "页面导航通栏 surface",
+          "inline_inset_token": "var(--layout-page-margin-m0)",
+          "spacing_owner": "component",
+          "gap_token": "var(--spacer-0)"
+        },
+        {
+          "group_id": "friend-search-group",
+          "selector": ".friend-list__search",
+          "content_role": "好友搜索内容组",
+          "inline_inset_token": "var(--spacer-16)",
+          "spacing_owner": "scene",
+          "gap_token": "var(--spacer-0)"
+        },
+        {
+          "group_id": "friend-list-group",
+          "selector": ".friend-list__scroll",
+          "content_role": "连续好友内容组，行内留白由 cell 组件承担",
+          "inline_inset_token": "var(--layout-page-margin-m0)",
+          "spacing_owner": "component",
+          "gap_token": "var(--spacer-0)"
+        }
+      ],
+      "sticky_regions": []
     },
     "interaction_contract": [
       {
@@ -467,7 +523,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/好友列表/scene.js",
     "scene_css": "wego-app/scenes/好友列表/scene.css",
-    "source_sha256": "b28f669f1dd6d8e34460c6a17192901cbfa621e051cf8039681bc8c223455414",
+    "source_sha256": "41ae72a07e5792a9d1b7a7a187f70f2c9c4ff867cdb803505caa86cfa27e1c26",
     "dom_ids": [
       "add-friend-entry",
       "sort-toggle",
@@ -480,7 +536,7 @@
         375,
         393
       ],
-      "checked_at": "2026-07-21T08:00:00.000Z",
+      "checked_at": "2026-07-28T16:18:00+08:00",
       "scope": "好友列表主页 + 新建好友全屏模态表单层（modal fullscreen safe-area-top 恢复 inherit、modal__body 默认 padding 移除、entity-form 范式 M0 通栏白底无 --card）",
       "checks": {
         "horizontal_overflow": true,

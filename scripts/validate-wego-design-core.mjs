@@ -51,6 +51,8 @@ function checkRequiredFiles() {
     '.codex/skills/wego-design/components.css',
     '.codex/skills/wego-design/components/index.json',
     '.codex/skills/wego-design/library-consumption.json',
+    '.codex/skills/wego-design/page-layers.json',
+    '.codex/skills/wego-design/preview/layout-layers.html',
     '.codex/skills/wego-design/uikit-plan.json',
     'wego-app/index.html',
     'wego-app/js/app.js',
@@ -67,6 +69,7 @@ function checkRequiredFiles() {
     'scripts/test-prompt-contract-schema.mjs',
     'scripts/test-uikit-plan-schema.mjs',
     'scripts/test-scene-contract-tools.mjs',
+    'scripts/test-scroll-layout.mjs',
     'scripts/validate-design-decision-method.mjs',
     'scripts/test-design-decision-method.mjs',
     'scripts/test-sync-wego-app-lib.mjs'
@@ -92,17 +95,19 @@ function checkLibrarySchema() {
   const index = readJson('.codex/skills/wego-design/components/index.json');
   const plan = readJson('.codex/skills/wego-design/uikit-plan.json');
   const consumption = readJson('.codex/skills/wego-design/library-consumption.json');
+  const pageLayers = readJson('.codex/skills/wego-design/page-layers.json');
   const metadata = readJson('.codex/skills/wego-design/metadata.json');
   const tokenStructure = readJson('.codex/skills/wego-design/css.json');
-  if (!index || !plan || !consumption || !metadata || !tokenStructure) return;
+  if (!index || !plan || !consumption || !pageLayers || !metadata || !tokenStructure) return;
   if (index.schemaVersion !== 4 || index.componentContractSchemaVersion !== 4) add('error', 'library.component_schema', '组件索引必须使用 schemaVersion 4', path.join(libraryRoot, 'components/index.json'));
-  if (plan.schemaVersion !== 5 || consumption.schemaVersion !== 5) add('error', 'library.schema', 'UI Kit 与消费契约必须使用 schemaVersion 5', libraryRoot);
+  if (plan.schemaVersion !== 5 || consumption.schemaVersion !== 6) add('error', 'library.schema', 'UI Kit 必须使用 schemaVersion 5，消费契约必须使用 schemaVersion 6', libraryRoot);
+  if (pageLayers.schemaVersion !== 1 || consumption.pageLayers !== 'page-layers.json' || !pageLayers.scopes?.['page-local'] || !pageLayers.scopes?.['app-global'] || !pageLayers.scopes?.['overlay-local']) add('error', 'library.page_layers', '页面层级模型必须使用 schemaVersion 1，并由消费契约唯一引用三个正式 scope', path.join(libraryRoot, 'page-layers.json'));
   if (!Number.isInteger(metadata.version) || metadata.version < 1) add('error', 'library.version', 'metadata.version 必须为正整数', path.join(libraryRoot, 'metadata.json'));
   if (consumption.tokenCss !== 'colors_and_type.css' || Object.hasOwn(consumption, 'tokenSource') || consumption.actualTokenNameReference?.source !== 'colors_and_type.css:root') add('error', 'library.token_authority', '实际 Token 名必须且只能以 colors_and_type.css:root 为权威；css.json 仅作结构索引', path.join(libraryRoot, 'library-consumption.json'));
   if (Object.hasOwn(consumption, 'recommendedReadOrder')) add('error', 'library.read_order_duplicate', '消费契约不得重复维护技能读取顺序', path.join(libraryRoot, 'library-consumption.json'));
   const designSkill = read('.codex/skills/wego-design/SKILL.md');
   if (designSkill.includes('`AGENTS.md`')) add('error', 'library.read_order_agents', 'wego-design 不得重复读取仓库级 AGENTS.md', path.join(libraryRoot, 'SKILL.md'));
-  const readMarkers = ['有效迭代与已确认 `prototype_brief`', '[设计决策原则]', '`library-consumption.json`', '`uikit-plan.json`', '`components/index.json`', '本页命中的 Preview', '对应组件契约', '`colors_and_type.css`', '[场景合同]'];
+  const readMarkers = ['有效迭代与已确认 `prototype_brief`', '[设计决策原则]', '`library-consumption.json`', '`page-layers.json`', '`uikit-plan.json`', '`components/index.json`', '本页命中的 Preview', '对应组件契约', '`colors_and_type.css`', '[场景合同]'];
   let previous = -1;
   for (const marker of readMarkers) {
     const position = designSkill.indexOf(marker);
@@ -183,7 +188,7 @@ function checkAppHost(includeBusinessScenes = true) {
   if (!routes.includes('window.WEGO_APP_ROUTES')) add('error', 'app.routes_missing', 'routes.js 必须初始化 window.WEGO_APP_ROUTES', path.join(appRoot, 'js/routes.js'));
   if (!includeBusinessScenes) return;
   const scenesPath = path.join(appRoot, 'scenes');
-  const scenes = fs.existsSync(scenesPath) ? fs.readdirSync(scenesPath, { withFileTypes: true }).filter(entry => entry.isDirectory() && !entry.name.startsWith('_')).map(entry => entry.name) : [];
+  const scenes = fs.existsSync(scenesPath) ? fs.readdirSync(scenesPath, { withFileTypes: true }).filter(entry => entry.isDirectory() && !entry.name.startsWith('_') && fs.existsSync(path.join(scenesPath, entry.name, 'scene.js'))).map(entry => entry.name) : [];
   report.metrics.scenes = scenes.length;
   for (const scene of scenes) {
     const dir = path.join(scenesPath, scene);
@@ -222,6 +227,8 @@ function checkSceneContractTools() {
   if (schemaTests.status !== 0) add('error', 'prompt_contract_schema.test', (schemaTests.stderr || schemaTests.stdout || 'prompt_contract Schema 测试失败').trim(), path.join(root, 'scripts/test-prompt-contract-schema.mjs'));
   const tests = spawnSync(process.execPath, ['scripts/test-scene-contract-tools.mjs'], { cwd: root, encoding: 'utf8' });
   if (tests.status !== 0) add('error', 'scene_contract.test', (tests.stderr || tests.stdout || '场景合同工具测试失败').trim(), path.join(root, 'scripts/test-scene-contract-tools.mjs'));
+  const scrollTests = spawnSync(process.execPath, ['scripts/test-scroll-layout.mjs'], { cwd: root, encoding: 'utf8' });
+  if (scrollTests.status !== 0) add('error', 'scroll_layout.test', (scrollTests.stderr || scrollTests.stdout || '滚动布局运行时测试失败').trim(), path.join(root, 'scripts/test-scroll-layout.mjs'));
 }
 
 function checkDesignDecisionPrinciples() {

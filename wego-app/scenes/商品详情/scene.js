@@ -1,5 +1,4 @@
-/* wego-design-contract:
-{
+/* wego-design-contract: {
   "surface_id": "product-detail",
   "route_id": "product-detail",
   "layout_mode": "composed",
@@ -15,12 +14,6 @@
   "prompt_contract": {
     "design_system_version": 451,
     "token_bindings": [
-      {
-        "selector": ".product-detail",
-        "content_role": ".product-detail 的 padding-inline",
-        "css_property": "padding-inline",
-        "token": "var(--layout-page-margin-m0)"
-      },
       {
         "selector": ".product-detail",
         "content_role": ".product-detail 的 background",
@@ -546,13 +539,85 @@
     "layout_contract": {
       "mode": "composed",
       "source": "references/design-decisions.md",
-      "selection_reason": "商品详情是次级普通 Push 页面；采用 M0 通栏主图、内部信息分组与固定底部双操作，遵循传统电商阅读顺序。",
-      "page_edge_mode": "M0",
+      "selection_reason": "商品详情是普通 Push 页面；页面根和主滚动区通栏，主图保持 M0 通栏，商品信息 body 作为语义内容组承担 16px 横向留白，navbar 与底部操作栏同栏并由组件管理内部间距和安全区。",
       "mutable_regions": [
         ".product-detail__hero",
         ".product-detail__body",
         ".product-detail__seller"
-      ]
+      ],
+      "principle_refs": [
+        "wego-clarity-page-architecture-before-components"
+      ],
+      "page_layers": [
+        {
+          "region_id": "product-detail-navbar",
+          "selector": ".product-detail__navbar",
+          "scope": "page-local",
+          "role": "navigation"
+        },
+        {
+          "region_id": "product-detail-scroll",
+          "selector": ".product-detail__scroll",
+          "scope": "page-local",
+          "role": "content"
+        },
+        {
+          "region_id": "product-detail-actions",
+          "selector": ".product-detail__actions",
+          "scope": "page-local",
+          "role": "navigation"
+        }
+      ],
+      "scroll_architecture": {
+        "viewport_selector": ".product-detail",
+        "primary_scroll_selector": ".product-detail__scroll",
+        "document_scroll": false,
+        "nested_scroll_regions": [],
+        "fixed_regions": [
+          {
+            "region_id": "product-detail-actions",
+            "selector": ".product-detail__actions",
+            "edge": "bottom",
+            "safe_area_owner": "component",
+            "clearance": "flow-reserved"
+          }
+        ]
+      },
+      "layout_groups": [
+        {
+          "group_id": "product-detail-navbar-group",
+          "selector": ".product-detail__navbar",
+          "content_role": "商品详情导航通栏 surface",
+          "inline_inset_token": "var(--layout-page-margin-m0)",
+          "spacing_owner": "component",
+          "gap_token": "var(--spacer-0)"
+        },
+        {
+          "group_id": "product-detail-hero-group",
+          "selector": ".product-detail__hero",
+          "content_role": "商品主图通栏内容组",
+          "inline_inset_token": "var(--layout-page-margin-m0)",
+          "spacing_owner": "component",
+          "gap_token": "var(--spacer-0)"
+        },
+        {
+          "group_id": "product-detail-body-group",
+          "selector": ".product-detail__body",
+          "content_role": "商品信息内容组",
+          "inline_inset_token": "var(--spacer-16)",
+          "spacing_owner": "scene",
+          "gap_token": "var(--spacer-8)"
+        },
+        {
+          "group_id": "product-detail-actions-group",
+          "selector": ".product-detail__actions",
+          "content_role": "商品操作通栏 surface",
+          "inline_inset_token": "var(--layout-page-margin-m0)",
+          "spacing_owner": "component",
+          "gap_token": "var(--spacer-0)"
+        }
+      ],
+      "sticky_regions": []
     },
     "interaction_contract": [
       {
@@ -605,7 +670,7 @@
       375,
       393
     ],
-    "checked_at": "2026-07-24T03:03:45.000Z",
+    "checked_at": "2026-07-28T16:18:00+08:00",
     "scope": "商品详情独立页面的加入购物车入口、全屏购物车面板默认购物车 tab、选品车和购物车分区展示；移动端预览验证底部交易入口、全屏面板和结算反馈。",
     "checks": {
       "horizontal_overflow": true,
@@ -617,8 +682,7 @@
     },
     "checked": true
   }
-}
-*/
+} */
 
 (function registerProductDetail() {
   var fallbackImage = './lib/assets/image/clothing/clothing_1/clothing_1_1.jpg';
@@ -731,8 +795,8 @@
     routeId: 'product-detail',
     title: '商品详情',
     template: `
-    <section class="product-detail" data-surface-id="product-detail" data-route-id="product-detail" data-route-bound="true" data-layout-mode="composed" data-page-edge-mode="M0" data-bg="page">
-      <div class="navbar" data-dd-id="product-detail-navbar" data-component-slug="navbar" data-component-binding="product-detail-navbar">
+    <section class="product-detail" data-surface-id="product-detail" data-route-id="product-detail" data-route-bound="true" data-layout-mode="composed" data-bg="page">
+      <div class="navbar product-detail__navbar" data-dd-id="product-detail-navbar" data-component-slug="navbar" data-component-binding="product-detail-navbar">
         <div class="navbar__body">
           <div class="navbar__left"><button type="button" class="navbar__left-btn" aria-label="返回" data-dom-id="product-detail-back"><i class="wego-iconfont-s icon-fanhui" aria-hidden="true"></i></button></div>
           <div class="navbar__center"><span class="navbar__title">商品详情</span></div>
@@ -740,7 +804,7 @@
         </div>
       </div>
       <main class="product-detail__scroll"><div data-region="product-content"></div><span class="tag tag--20 tag--gray" hidden aria-hidden="true" data-dd-id="product-detail-tag-seed" data-component-slug="tag" data-component-binding="product-detail-tag"><span class="tag__label">认证</span></span></main>
-      <div class="bottom-action-bar bottom-action-bar--primary-secondary" role="toolbar" aria-label="商品操作" data-dd-id="product-detail-actions" data-component-slug="bottom-action-bar" data-component-binding="product-detail-actions">
+      <div class="bottom-action-bar bottom-action-bar--primary-secondary product-detail__actions" role="toolbar" aria-label="商品操作" data-dd-id="product-detail-actions" data-component-slug="bottom-action-bar" data-component-binding="product-detail-actions">
         <div class="bottom-action-bar__inner">
           <div class="bottom-action-bar__leading">
             <button class="bottom-action-bar__action" type="button" data-dom-id="product-contact" data-menu-label="联系卖家"><span class="bottom-action-bar__action-label">联系卖家</span></button>

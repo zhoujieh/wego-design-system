@@ -18,12 +18,6 @@
     "token_bindings": [
       {
         "selector": ".album-feed",
-        "content_role": ".album-feed 的 padding-inline",
-        "css_property": "padding-inline",
-        "token": "var(--layout-page-margin-m8)"
-      },
-      {
-        "selector": ".album-feed",
         "content_role": ".album-feed 的 background",
         "css_property": "background",
         "token": "var(--bg-page)"
@@ -48,9 +42,9 @@
       },
       {
         "selector": ".album-feed__scroll",
-        "content_role": ".album-feed__scroll 的 gap",
+        "content_role": "主滚动区仅组织通栏区域，不承担内容缩进",
         "css_property": "gap",
-        "token": "var(--spacer-12)"
+        "token": "var(--spacer-0)"
       },
       {
         "selector": ".album-feed__scroll",
@@ -69,12 +63,6 @@
         "content_role": "搜索栏吸顶背景与 navbar 视觉连续",
         "css_property": "background",
         "token": "var(--bg-surface)"
-      },
-      {
-        "selector": ".album-feed__people-wrap",
-        "content_role": ".album-feed__people-wrap 的 margin-top",
-        "css_property": "margin-top",
-        "token": "var(--spacer-12)"
       },
       {
         "selector": ".album-feed__people-scroll",
@@ -1059,6 +1047,18 @@
         "content_role": ".cart-panel__empty 的 padding-left",
         "css_property": "padding-left",
         "token": "var(--spacer-16)"
+      },
+      {
+        "selector": ".album-feed__content-group",
+        "content_role": "人维度、筛选和瀑布流浏览内容组的横向留白",
+        "css_property": "padding-inline",
+        "token": "var(--layout-page-margin-m8)"
+      },
+      {
+        "selector": ".album-feed__content-group",
+        "content_role": "浏览内容组内的垂直节奏",
+        "css_property": "gap",
+        "token": "var(--spacer-12)"
       }
     ],
     "component_bindings": [
@@ -1085,6 +1085,19 @@
           "layout": "scroll",
           "icon": "none",
           "state": "default"
+        }
+      },
+      {
+        "binding_id": "feed-search-sticky",
+        "slug": "sticky-region",
+        "reason": "为搜索工具栏提供通栏不透明吸顶 surface、navigation 层级和无 opacity 的方向显隐状态",
+        "principle_refs": [
+          "wego-clarity-page-architecture-before-components"
+        ],
+        "variant_dimensions": {
+          "edge": "top",
+          "visibility": "direction-reveal",
+          "state": "visible"
         }
       },
       {
@@ -1441,14 +1454,109 @@
     "layout_contract": {
       "mode": "composed",
       "source": "references/design-decisions.md",
-      "selection_reason": "页面首要任务是发现并进入动态详情；顶部 page-tabs 与搜索栏共同吸顶，搜索栏使用 Search 组件 Preview 的标准强调结构（白底、品牌描边、右侧正式小号主按钮），场景包装层只承担收起动画。人维度栏支持横滑且「我的商家」与筛选入口固定在右侧，并用渐变蒙层隔开滚动内容；瀑布流在手机壳和窄容器中固定双列，在场景自身可用宽度增大后按 168px 目标列宽自动增列并居中，避免根据桌面窗口宽度误把手机壳拉成单列。卡片信息紧凑，发布时间下沉到操作栏左侧，与一键转发形成稳定底部信息带；发布操作保留右上角入口，同时新增右下角拇指区悬浮入口，复用同一组 popmenu 动作并从触发点向上浮出，降低单手操作距离；场景根由 host-shell-page__panel 约束，并预留底部导航安全区。",
-      "page_edge_mode": "M8",
+      "selection_reason": "页面首要任务是发现并进入动态详情。navbar 与动态搜索吸顶区保持通栏，搜索内部使用 M8 留白；人维度、筛选和瀑布流作为同一浏览内容组共享 M8 横向间距与 12px 垂直节奏。主滚动区只负责滚动，搜索显隐由 Sticky Region 与统一滚动运行时按方向阈值、边界回弹和动态测高裁决，全程不改变 opacity。",
       "mutable_regions": [
         ".album-feed__floating-toolbar",
         ".album-feed__grid",
         ".album-feed__card-content",
         ".album-feed__empty",
         ".album-feed__publish-fab"
+      ],
+      "principle_refs": [
+        "wego-clarity-page-architecture-before-components"
+      ],
+      "page_layers": [
+        {
+          "region_id": "feed-scroll-content",
+          "selector": ".album-feed__scroll",
+          "scope": "page-local",
+          "role": "content"
+        },
+        {
+          "region_id": "feed-navbar",
+          "selector": ".album-feed__navbar",
+          "scope": "page-local",
+          "role": "navigation"
+        },
+        {
+          "region_id": "feed-search-sticky",
+          "selector": ".album-feed__floating-toolbar",
+          "scope": "page-local",
+          "role": "navigation"
+        },
+        {
+          "region_id": "feed-floating-actions",
+          "selector": ".album-feed__publish-fab",
+          "scope": "page-local",
+          "role": "raised"
+        }
+      ],
+      "scroll_architecture": {
+        "viewport_selector": ".album-feed",
+        "primary_scroll_selector": ".album-feed__scroll",
+        "document_scroll": false,
+        "nested_scroll_regions": [
+          {
+            "region_id": "feed-page-tabs-scroll",
+            "selector": ".album-feed__page-tabs-scroll",
+            "axis": "x",
+            "parent_selector": ".album-feed"
+          },
+          {
+            "region_id": "feed-people-scroll",
+            "selector": ".album-feed__people-scroll",
+            "axis": "x",
+            "parent_selector": ".album-feed__scroll"
+          },
+          {
+            "region_id": "feed-filter-scroll",
+            "selector": ".album-feed__filter-tags",
+            "axis": "x",
+            "parent_selector": ".album-feed__scroll"
+          }
+        ],
+        "fixed_regions": []
+      },
+      "layout_groups": [
+        {
+          "group_id": "feed-navbar-group",
+          "selector": ".album-feed__navbar",
+          "content_role": "页面级导航通栏 surface",
+          "inline_inset_token": "var(--layout-page-margin-m0)",
+          "spacing_owner": "component",
+          "gap_token": "var(--spacer-0)"
+        },
+        {
+          "group_id": "feed-search-group",
+          "selector": ".album-feed__floating-toolbar",
+          "content_role": "通栏吸顶搜索与组件内 M8 留白",
+          "inline_inset_token": "var(--layout-page-margin-m8)",
+          "spacing_owner": "component",
+          "gap_token": "var(--spacer-0)"
+        },
+        {
+          "group_id": "feed-browse-group",
+          "selector": ".album-feed__content-group",
+          "content_role": "人维度、筛选和瀑布流浏览内容",
+          "inline_inset_token": "var(--layout-page-margin-m8)",
+          "spacing_owner": "scene",
+          "gap_token": "var(--spacer-12)"
+        }
+      ],
+      "sticky_regions": [
+        {
+          "region_id": "feed-search-sticky",
+          "selector": ".album-feed__floating-toolbar",
+          "scroll_selector": ".album-feed__scroll",
+          "edge": "top",
+          "stack_order": 0,
+          "visibility": "direction-reveal",
+          "background_token": "var(--bg-surface)",
+          "layer_role": "navigation",
+          "after_gap_token": "var(--spacer-12)",
+          "scroll_padding": "dynamic-measured",
+          "essential": false
+        }
       ]
     },
     "interaction_contract": [
@@ -1716,6 +1824,11 @@
       "component_slug": "tabs"
     },
     {
+      "dd_id": "feed-search-sticky",
+      "binding_id": "feed-search-sticky",
+      "component_slug": "sticky-region"
+    },
+    {
       "dd_id": "feed-search-toolbar",
       "binding_id": "feed-search-toolbar",
       "component_slug": "search"
@@ -1874,7 +1987,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/微购相册动态/scene.js",
     "scene_css": "wego-app/scenes/微购相册动态/scene.css",
-    "source_sha256": "fdde55fde8223f1cce9235ef4259d9e38214ba8def6ee2a7e5e4a751b5683581",
+    "source_sha256": "9c7e47698dd677273feb68a14ef5b0205aeb6e771c145dd44cd449e862604ca1",
     "dom_ids": [
       "page-tab-following",
       "page-tab-recommended",
@@ -1901,15 +2014,15 @@
       "open-cart-panel",
       "first-add-guide"
     ],
-    "component_count": 33,
+    "component_count": 34,
     "visualCheck": {
       "status": "passed",
       "viewports": [
         375,
         393
       ],
-      "checked_at": "2026-07-27T11:41:30.000Z",
-      "scope": "动态列表加入选品车、首次加入引导气泡（popover normal 变体指向 cart-fab 顶部，placement=top align=end，气泡右缘与 cart-fab 右缘对齐，箭头落在 cart-fab 右半区）、第一条产品卡片引导气泡（popover normal 变体指向加入选品车按钮，placement=bottom align=start，箭头落在气泡顶部左侧指向 select-action 按钮中心）、浮动购物车入口（中性色图标 --text-default，badge number corner 红色数量徽标贴近图标右上角）、全屏选品车/购物车 tabs（tab 标签带数量显示）、选品车底部操作栏（bottom-action-bar primary-secondary 左侧分享/下载可折叠进更多、右侧统一转发主操作）、购物车底部操作栏（右侧结算入口）、卡片封面右上角仅分享图标（移除产品/笔记内容类型标签）、发布者头像左上角营销色直播胶囊（图标带呼吸动画，复用场景层 wrapper 不扩展 avatar 组件）、发布者名字后认证图标与重点商家图标并存、购物车条目查看/移除操作（link standalone 14 文字链接）、动态列表与购物车面板空状态插画（中性色 SVG）；移动端预览验证图片右上角仅保留分享、直播胶囊不遮挡头像主体、发布者名字与认证/重点商家图标同行不溢出、tab 数量与实际条目同步、查看入口可跳转详情、查看与移除链接热区不重叠、空状态插画居中且不喧宾夺主、首次加入后数量徽标与引导气泡同步、全屏面板顶部无单独标题、底部操作栏主操作右对齐且左侧溢出收纳、悬浮入口距底部导航 32px 且列表底部预留足够间距避免遮挡；375px 与 393px 视口验证搜索栏首次进入和回到顶部显示、向下浏览隐藏、向上回拉显示、底部布局校正不反向闪烁、主 tab 重入后回顶显示。",
+      "checked_at": "2026-07-28T16:18:00+08:00",
+      "scope": "动态列表加入选品车、首次加入引导气泡（popover normal 变体指向 cart-fab 顶部，placement=top align=end，气泡右缘与 cart-fab 右缘对齐，箭头落在 cart-fab 右半区）、第一条产品卡片引导气泡（popover normal 变体指向加入选品车按钮，placement=bottom align=start，箭头落在气泡顶部左侧指向 select-action 按钮中心）、浮动购物车入口（中性色图标 --text-default，badge number corner 红色数量徽标贴近图标右上角）、全屏选品车/购物车 tabs（tab 标签带数量显示）、选品车底部操作栏（bottom-action-bar primary-secondary 左侧分享/下载可折叠进更多、右侧统一转发主操作）、购物车底部操作栏（右侧结算入口）、卡片封面右上角仅分享图标（移除产品/笔记内容类型标签）、发布者头像左上角营销色直播胶囊（图标带呼吸动画，复用场景层 wrapper 不扩展 avatar 组件）、发布者名字后认证图标与重点商家图标并存、购物车条目查看/移除操作（link standalone 14 文字链接）、动态列表与购物车面板空状态插画（中性色 SVG）；移动端预览验证图片右上角仅保留分享、直播胶囊不遮挡头像主体、发布者名字与认证/重点商家图标同行不溢出、tab 数量与实际条目同步、查看入口可跳转详情、查看与移除链接热区不重叠、空状态插画居中且不喧宾夺主、首次加入后数量徽标与引导气泡同步、全屏面板顶部无单独标题、底部操作栏主操作右对齐且左侧溢出收纳、悬浮入口距底部导航 32px 且列表底部预留足够间距避免遮挡；375px 与 393px 视口验证搜索栏首次进入和回到顶部显示、向下浏览隐藏、向上回拉显示、底部布局校正不反向闪烁、主 tab 重入后回顶显示、搜索栏覆盖滚入其下的直播与分享浮层、显隐全程不改变不透明度。",
       "checks": {
         "horizontal_overflow": true,
         "overlap": true,

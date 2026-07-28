@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 5,
+  "schemaVersion": 6,
   "library": "wego-design",
   "tokenCss": "colors_and_type.css",
   "componentsCss": "components.css",
@@ -7,6 +7,7 @@
   "componentContractDir": "components",
   "previewDir": "preview",
   "uikitPlan": "uikit-plan.json",
+  "pageLayers": "page-layers.json",
   "uiKitsDir": "ui_kits",
   "iconFontCss": "iconfont.css",
   "consumptionLayers": {
@@ -14,6 +15,11 @@
       "files": ["colors_and_type.css", "css.json"],
       "purpose": "colors_and_type.css 的 :root 是实际变量名唯一来源；css.json 仅用于理解 Token 结构。",
       "copyable": true
+    },
+    "pageArchitecture": {
+      "files": ["page-layers.json", "preview/layout-layers.html"],
+      "purpose": "在组件选择前确定页面层级、滚动架构、语义内容组、间距 owner 与 sticky/fixed 区域。",
+      "copyable": false
     },
     "components": {
       "files": ["components/index.json", "components/{slug}.json", "preview/component-{slug}.html", "components.css"],
@@ -48,6 +54,13 @@
     "M0": "--layout-page-margin-m0",
     "M8": "--layout-page-margin-m8",
     "M32": "--layout-page-margin-m32"
+  },
+  "layoutContract": {
+    "requiredFields": ["page_layers", "scroll_architecture", "layout_groups", "sticky_regions"],
+    "rootRule": "页面根和主滚动区始终通栏，不得声明业务内容 padding-inline。",
+    "groupRule": "横向间距按语义内容组声明；相同边距的连续内容应形成同一组，每组只有一个 spacing_owner，inline_inset_token 使用正式页面边距或 spacer Token。",
+    "stickyRule": "sticky surface 通栏、使用不透明背景与 page-local/navigation 层级；内部留白由组件内层承担；动态高度必须驱动主滚动区 scroll-padding。",
+    "fixedRule": "bottom fixed surface 通栏；内容 clearance 等于实测高度、安全区和额外间距，主滚动区同步维护 scroll-padding-bottom。"
   },
   "actualTokenNameReference": {
     "source": "colors_and_type.css:root",
@@ -99,18 +112,18 @@
       "业务模板只能来自 scene.js 注册，不得通过 fetch/XHR 加载本地 HTML。",
       "电脑端显示预览壳，移动端同链接铺满真实 viewport。",
       "不得重画 index.html 宿主、复制第二套外壳或直接编辑 wego-app/lib。",
-      "页面根节点保持 position: absolute; inset: 0，禁止用 padding-top 预留顶部安全区。顶部安全区只承担一次：有 navbar 时由 navbar 内置 padding-top: var(--safe-area-top) 处理；无 navbar 但有固定/吸顶顶部元素时由该元素自身处理；两者都没有时由滚动内容层处理。禁止用 JS 读取 --safe-area-top 再设置 padding。"
+      "页面根节点保持 position: absolute; inset: 0 且通栏，禁止设置业务内容 padding-inline 或用 padding-top 预留顶部安全区。顶部安全区只承担一次：有 navbar 时由 navbar 内置 padding-top: var(--safe-area-top) 处理；无 navbar 但有固定/吸顶顶部元素时由该元素自身处理；两者都没有时由滚动内容层处理。禁止用 JS 读取 --safe-area-top 再设置 padding。"
     ]
   },
   "globalConsumptionRules": {
     "previewFirst": "每个命中组件先读 Preview，再读契约；Preview 决定实现结构，契约决定语义和边界。",
     "contractImplementationCheck": "消费稳定变体时必须确认 Preview 与 components.css 已实现对应 DOM、class、状态和样式；契约声明但 CSS 不可达时按设计系统缺口处理，不在 scene.css 内补组件内部样式。",
     "variantApplicability": "只使用适合当前容器和响应式需求的稳定变体；固定尺寸或固定结构变体不适合时，先选择其他正式能力或提交缺口，不把不适合的变体写入合同。",
-    "componentBoundary": "语义区域、滚动边界、固定操作和显隐关系确定后再映射组件，稳定变体优先。视觉用途命中已注册组件时必须直接消费正式组件，例如标签用 tag、角标用 badge、操作按钮用 button、列表行用 cell、头像用 avatar、文本操作用 link。业务 class 只承担场景区域布局，不能替代正式组件结构或覆盖组件内部样式；组件约束使原结构不可成立时回到区域结构调整。",
+    "componentBoundary": "页面层级、语义区域、主滚动区、内容分组、间距归属、固定操作和显隐关系确定后再映射组件，稳定变体优先。视觉用途命中已注册组件时必须直接消费正式组件，例如标签用 tag、角标用 badge、操作按钮用 button、列表行用 cell、头像用 avatar、文本操作用 link。业务 class 只承担场景区域布局，不能替代正式组件结构或覆盖组件内部样式；组件约束使原结构不可成立时回到区域结构调整。",
     "semanticTokenUsage": "颜色、字号、字重、行高、间距和圆角只使用实际语义 Token。中性色承载内容，品牌绿色承担主行动，状态色只表达对应状态且不大面积铺底；不得根据外观猜变量名或直接写视觉值。",
     "uikitBoundary": "UI Kit 只用于完整满足 pagePattern.appliesWhen 且不命中 excludeWhen 的明确范式。未精确命中时使用 composed，不选择最接近的 UI Kit、不拼接多个 UI Kit；始终禁止复制 .uikit-shell、.phone-frame、.phone-screen、biz-*、演示布局或演示业务内容。",
     "assetSemantics": "身份、应用、内容和功能资产必须按语义使用，禁止互相冒充。功能入口优先选择已交付且语义匹配的 app-center SVG；无匹配资产时才使用已查证的 iconfont 或文字。禁止为图标临时发明多套彩色底板。",
-    "groupStructure": "连续列表和表单优先使用 .cell-group/.form-group 的正式 title 和 content 结构，不额外发明白底壳、圆角壳或 section title；页面边距为 M0（通栏）时，group__content 默认不加 --card 修饰；页面边距为 M8 时，才给 group__content 加 --card 圆角修饰。",
+    "groupStructure": "连续列表和表单优先使用 .cell-group/.form-group 的正式 title 和 content 结构，不额外发明白底壳、圆角壳或 section title；同一语义内容组共享横向间距和垂直节奏，每组只有一个 spacing owner。M0 内容组默认不加 --card 修饰；M8 内容组才可按语义需要使用 --card 圆角修饰。",
     "appHostBoundary": "唯一宿主是 wego-app/index.html；场景通过 routes.js、scene.js、scene.css 增量接入。",
     "noGeneratedSpecs": "不存在自动生成 specs 规则目录；所有运行时规则必须回到当前权威源。"
   },

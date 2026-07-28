@@ -18,12 +18,6 @@
     "token_bindings": [
       {
         "selector": ".product-detail",
-        "content_role": ".product-detail 的 padding-inline",
-        "css_property": "padding-inline",
-        "token": "var(--layout-page-margin-m0)"
-      },
-      {
-        "selector": ".product-detail",
         "content_role": ".product-detail 的 background",
         "css_property": "background",
         "token": "var(--bg-page)"
@@ -547,13 +541,85 @@
     "layout_contract": {
       "mode": "composed",
       "source": "references/design-decisions.md",
-      "selection_reason": "商品详情是次级普通 Push 页面；采用 M0 通栏主图、内部信息分组与固定底部双操作，遵循传统电商阅读顺序。",
-      "page_edge_mode": "M0",
+      "selection_reason": "商品详情是普通 Push 页面；页面根和主滚动区通栏，主图保持 M0 通栏，商品信息 body 作为语义内容组承担 16px 横向留白，navbar 与底部操作栏同栏并由组件管理内部间距和安全区。",
       "mutable_regions": [
         ".product-detail__hero",
         ".product-detail__body",
         ".product-detail__seller"
-      ]
+      ],
+      "principle_refs": [
+        "wego-clarity-page-architecture-before-components"
+      ],
+      "page_layers": [
+        {
+          "region_id": "product-detail-navbar",
+          "selector": ".product-detail__navbar",
+          "scope": "page-local",
+          "role": "navigation"
+        },
+        {
+          "region_id": "product-detail-scroll",
+          "selector": ".product-detail__scroll",
+          "scope": "page-local",
+          "role": "content"
+        },
+        {
+          "region_id": "product-detail-actions",
+          "selector": ".product-detail__actions",
+          "scope": "page-local",
+          "role": "navigation"
+        }
+      ],
+      "scroll_architecture": {
+        "viewport_selector": ".product-detail",
+        "primary_scroll_selector": ".product-detail__scroll",
+        "document_scroll": false,
+        "nested_scroll_regions": [],
+        "fixed_regions": [
+          {
+            "region_id": "product-detail-actions",
+            "selector": ".product-detail__actions",
+            "edge": "bottom",
+            "safe_area_owner": "component",
+            "clearance": "flow-reserved"
+          }
+        ]
+      },
+      "layout_groups": [
+        {
+          "group_id": "product-detail-navbar-group",
+          "selector": ".product-detail__navbar",
+          "content_role": "商品详情导航通栏 surface",
+          "inline_inset_token": "var(--layout-page-margin-m0)",
+          "spacing_owner": "component",
+          "gap_token": "var(--spacer-0)"
+        },
+        {
+          "group_id": "product-detail-hero-group",
+          "selector": ".product-detail__hero",
+          "content_role": "商品主图通栏内容组",
+          "inline_inset_token": "var(--layout-page-margin-m0)",
+          "spacing_owner": "component",
+          "gap_token": "var(--spacer-0)"
+        },
+        {
+          "group_id": "product-detail-body-group",
+          "selector": ".product-detail__body",
+          "content_role": "商品信息内容组",
+          "inline_inset_token": "var(--spacer-16)",
+          "spacing_owner": "scene",
+          "gap_token": "var(--spacer-8)"
+        },
+        {
+          "group_id": "product-detail-actions-group",
+          "selector": ".product-detail__actions",
+          "content_role": "商品操作通栏 surface",
+          "inline_inset_token": "var(--layout-page-margin-m0)",
+          "spacing_owner": "component",
+          "gap_token": "var(--spacer-0)"
+        }
+      ],
+      "sticky_regions": []
     },
     "interaction_contract": [
       {
@@ -630,7 +696,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/商品详情/scene.js",
     "scene_css": "wego-app/scenes/商品详情/scene.css",
-    "source_sha256": "1b4844809dd3728b940e3084cc0b0f87639b6e96acbd7ea34794c197eadbda22",
+    "source_sha256": "d5e3acb0ec15b7d6518514b32afe5066eabc89e62344822e7d260de3f93aa88a",
     "dom_ids": [
       "product-detail-back",
       "product-contact",
@@ -644,7 +710,7 @@
         375,
         393
       ],
-      "checked_at": "2026-07-24T03:03:45.000Z",
+      "checked_at": "2026-07-28T16:18:00+08:00",
       "scope": "商品详情独立页面的加入购物车入口、全屏购物车面板默认购物车 tab、选品车和购物车分区展示；移动端预览验证底部交易入口、全屏面板和结算反馈。",
       "checks": {
         "horizontal_overflow": true,

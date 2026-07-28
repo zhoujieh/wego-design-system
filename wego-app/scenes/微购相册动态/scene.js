@@ -1,5 +1,4 @@
-/* wego-design-contract:
-{
+/* wego-design-contract: {
   "surface_id": "album-product-feed",
   "route_id": "album-product-feed",
   "layout_mode": "composed",
@@ -15,12 +14,6 @@
   "prompt_contract": {
     "design_system_version": 468,
     "token_bindings": [
-      {
-        "selector": ".album-feed",
-        "content_role": ".album-feed 的 padding-inline",
-        "css_property": "padding-inline",
-        "token": "var(--layout-page-margin-m8)"
-      },
       {
         "selector": ".album-feed",
         "content_role": ".album-feed 的 background",
@@ -47,9 +40,9 @@
       },
       {
         "selector": ".album-feed__scroll",
-        "content_role": ".album-feed__scroll 的 gap",
+        "content_role": "主滚动区仅组织通栏区域，不承担内容缩进",
         "css_property": "gap",
-        "token": "var(--spacer-12)"
+        "token": "var(--spacer-0)"
       },
       {
         "selector": ".album-feed__scroll",
@@ -68,12 +61,6 @@
         "content_role": "搜索栏吸顶背景与 navbar 视觉连续",
         "css_property": "background",
         "token": "var(--bg-surface)"
-      },
-      {
-        "selector": ".album-feed__people-wrap",
-        "content_role": ".album-feed__people-wrap 的 margin-top",
-        "css_property": "margin-top",
-        "token": "var(--spacer-12)"
       },
       {
         "selector": ".album-feed__people-scroll",
@@ -1058,6 +1045,18 @@
         "content_role": ".cart-panel__empty 的 padding-left",
         "css_property": "padding-left",
         "token": "var(--spacer-16)"
+      },
+      {
+        "selector": ".album-feed__content-group",
+        "content_role": "人维度、筛选和瀑布流浏览内容组的横向留白",
+        "css_property": "padding-inline",
+        "token": "var(--layout-page-margin-m8)"
+      },
+      {
+        "selector": ".album-feed__content-group",
+        "content_role": "浏览内容组内的垂直节奏",
+        "css_property": "gap",
+        "token": "var(--spacer-12)"
       }
     ],
     "component_bindings": [
@@ -1084,6 +1083,19 @@
           "layout": "scroll",
           "icon": "none",
           "state": "default"
+        }
+      },
+      {
+        "binding_id": "feed-search-sticky",
+        "slug": "sticky-region",
+        "reason": "为搜索工具栏提供通栏不透明吸顶 surface、navigation 层级和无 opacity 的方向显隐状态",
+        "principle_refs": [
+          "wego-clarity-page-architecture-before-components"
+        ],
+        "variant_dimensions": {
+          "edge": "top",
+          "visibility": "direction-reveal",
+          "state": "visible"
         }
       },
       {
@@ -1440,14 +1452,109 @@
     "layout_contract": {
       "mode": "composed",
       "source": "references/design-decisions.md",
-      "selection_reason": "页面首要任务是发现并进入动态详情；顶部 page-tabs 与搜索栏共同吸顶，搜索栏使用 Search 组件 Preview 的标准强调结构（白底、品牌描边、右侧正式小号主按钮），场景包装层只承担收起动画。人维度栏支持横滑且「我的商家」与筛选入口固定在右侧，并用渐变蒙层隔开滚动内容；瀑布流在手机壳和窄容器中固定双列，在场景自身可用宽度增大后按 168px 目标列宽自动增列并居中，避免根据桌面窗口宽度误把手机壳拉成单列。卡片信息紧凑，发布时间下沉到操作栏左侧，与一键转发形成稳定底部信息带；发布操作保留右上角入口，同时新增右下角拇指区悬浮入口，复用同一组 popmenu 动作并从触发点向上浮出，降低单手操作距离；场景根由 host-shell-page__panel 约束，并预留底部导航安全区。",
-      "page_edge_mode": "M8",
+      "selection_reason": "页面首要任务是发现并进入动态详情。navbar 与动态搜索吸顶区保持通栏，搜索内部使用 M8 留白；人维度、筛选和瀑布流作为同一浏览内容组共享 M8 横向间距与 12px 垂直节奏。主滚动区只负责滚动，搜索显隐由 Sticky Region 与统一滚动运行时按方向阈值、边界回弹和动态测高裁决，全程不改变 opacity。",
       "mutable_regions": [
         ".album-feed__floating-toolbar",
         ".album-feed__grid",
         ".album-feed__card-content",
         ".album-feed__empty",
         ".album-feed__publish-fab"
+      ],
+      "principle_refs": [
+        "wego-clarity-page-architecture-before-components"
+      ],
+      "page_layers": [
+        {
+          "region_id": "feed-scroll-content",
+          "selector": ".album-feed__scroll",
+          "scope": "page-local",
+          "role": "content"
+        },
+        {
+          "region_id": "feed-navbar",
+          "selector": ".album-feed__navbar",
+          "scope": "page-local",
+          "role": "navigation"
+        },
+        {
+          "region_id": "feed-search-sticky",
+          "selector": ".album-feed__floating-toolbar",
+          "scope": "page-local",
+          "role": "navigation"
+        },
+        {
+          "region_id": "feed-floating-actions",
+          "selector": ".album-feed__publish-fab",
+          "scope": "page-local",
+          "role": "raised"
+        }
+      ],
+      "scroll_architecture": {
+        "viewport_selector": ".album-feed",
+        "primary_scroll_selector": ".album-feed__scroll",
+        "document_scroll": false,
+        "nested_scroll_regions": [
+          {
+            "region_id": "feed-page-tabs-scroll",
+            "selector": ".album-feed__page-tabs-scroll",
+            "axis": "x",
+            "parent_selector": ".album-feed"
+          },
+          {
+            "region_id": "feed-people-scroll",
+            "selector": ".album-feed__people-scroll",
+            "axis": "x",
+            "parent_selector": ".album-feed__scroll"
+          },
+          {
+            "region_id": "feed-filter-scroll",
+            "selector": ".album-feed__filter-tags",
+            "axis": "x",
+            "parent_selector": ".album-feed__scroll"
+          }
+        ],
+        "fixed_regions": []
+      },
+      "layout_groups": [
+        {
+          "group_id": "feed-navbar-group",
+          "selector": ".album-feed__navbar",
+          "content_role": "页面级导航通栏 surface",
+          "inline_inset_token": "var(--layout-page-margin-m0)",
+          "spacing_owner": "component",
+          "gap_token": "var(--spacer-0)"
+        },
+        {
+          "group_id": "feed-search-group",
+          "selector": ".album-feed__floating-toolbar",
+          "content_role": "通栏吸顶搜索与组件内 M8 留白",
+          "inline_inset_token": "var(--layout-page-margin-m8)",
+          "spacing_owner": "component",
+          "gap_token": "var(--spacer-0)"
+        },
+        {
+          "group_id": "feed-browse-group",
+          "selector": ".album-feed__content-group",
+          "content_role": "人维度、筛选和瀑布流浏览内容",
+          "inline_inset_token": "var(--layout-page-margin-m8)",
+          "spacing_owner": "scene",
+          "gap_token": "var(--spacer-12)"
+        }
+      ],
+      "sticky_regions": [
+        {
+          "region_id": "feed-search-sticky",
+          "selector": ".album-feed__floating-toolbar",
+          "scroll_selector": ".album-feed__scroll",
+          "edge": "top",
+          "stack_order": 0,
+          "visibility": "direction-reveal",
+          "background_token": "var(--bg-surface)",
+          "layer_role": "navigation",
+          "after_gap_token": "var(--spacer-12)",
+          "scroll_padding": "dynamic-measured",
+          "essential": false
+        }
       ]
     },
     "interaction_contract": [
@@ -1709,8 +1816,8 @@
       375,
       393
     ],
-    "checked_at": "2026-07-27T11:41:30.000Z",
-    "scope": "动态列表加入选品车、首次加入引导气泡（popover normal 变体指向 cart-fab 顶部，placement=top align=end，气泡右缘与 cart-fab 右缘对齐，箭头落在 cart-fab 右半区）、第一条产品卡片引导气泡（popover normal 变体指向加入选品车按钮，placement=bottom align=start，箭头落在气泡顶部左侧指向 select-action 按钮中心）、浮动购物车入口（中性色图标 --text-default，badge number corner 红色数量徽标贴近图标右上角）、全屏选品车/购物车 tabs（tab 标签带数量显示）、选品车底部操作栏（bottom-action-bar primary-secondary 左侧分享/下载可折叠进更多、右侧统一转发主操作）、购物车底部操作栏（右侧结算入口）、卡片封面右上角仅分享图标（移除产品/笔记内容类型标签）、发布者头像左上角营销色直播胶囊（图标带呼吸动画，复用场景层 wrapper 不扩展 avatar 组件）、发布者名字后认证图标与重点商家图标并存、购物车条目查看/移除操作（link standalone 14 文字链接）、动态列表与购物车面板空状态插画（中性色 SVG）；移动端预览验证图片右上角仅保留分享、直播胶囊不遮挡头像主体、发布者名字与认证/重点商家图标同行不溢出、tab 数量与实际条目同步、查看入口可跳转详情、查看与移除链接热区不重叠、空状态插画居中且不喧宾夺主、首次加入后数量徽标与引导气泡同步、全屏面板顶部无单独标题、底部操作栏主操作右对齐且左侧溢出收纳、悬浮入口距底部导航 32px 且列表底部预留足够间距避免遮挡；375px 与 393px 视口验证搜索栏首次进入和回到顶部显示、向下浏览隐藏、向上回拉显示、底部布局校正不反向闪烁、主 tab 重入后回顶显示。",
+    "checked_at": "2026-07-28T16:18:00+08:00",
+    "scope": "动态列表加入选品车、首次加入引导气泡（popover normal 变体指向 cart-fab 顶部，placement=top align=end，气泡右缘与 cart-fab 右缘对齐，箭头落在 cart-fab 右半区）、第一条产品卡片引导气泡（popover normal 变体指向加入选品车按钮，placement=bottom align=start，箭头落在气泡顶部左侧指向 select-action 按钮中心）、浮动购物车入口（中性色图标 --text-default，badge number corner 红色数量徽标贴近图标右上角）、全屏选品车/购物车 tabs（tab 标签带数量显示）、选品车底部操作栏（bottom-action-bar primary-secondary 左侧分享/下载可折叠进更多、右侧统一转发主操作）、购物车底部操作栏（右侧结算入口）、卡片封面右上角仅分享图标（移除产品/笔记内容类型标签）、发布者头像左上角营销色直播胶囊（图标带呼吸动画，复用场景层 wrapper 不扩展 avatar 组件）、发布者名字后认证图标与重点商家图标并存、购物车条目查看/移除操作（link standalone 14 文字链接）、动态列表与购物车面板空状态插画（中性色 SVG）；移动端预览验证图片右上角仅保留分享、直播胶囊不遮挡头像主体、发布者名字与认证/重点商家图标同行不溢出、tab 数量与实际条目同步、查看入口可跳转详情、查看与移除链接热区不重叠、空状态插画居中且不喧宾夺主、首次加入后数量徽标与引导气泡同步、全屏面板顶部无单独标题、底部操作栏主操作右对齐且左侧溢出收纳、悬浮入口距底部导航 32px 且列表底部预留足够间距避免遮挡；375px 与 393px 视口验证搜索栏首次进入和回到顶部显示、向下浏览隐藏、向上回拉显示、底部布局校正不反向闪烁、主 tab 重入后回顶显示、搜索栏覆盖滚入其下的直播与分享浮层、显隐全程不改变不透明度。",
     "checks": {
       "horizontal_overflow": true,
       "overlap": true,
@@ -1721,8 +1828,7 @@
     },
     "checked": true
   }
-}
-*/
+} */
 
 (function registerAlbumProductFeed() {
   var db = window.WEGO_PROTOTYPE_DB || {};
@@ -2106,13 +2212,13 @@
     routeId: 'album-product-feed',
     title: '动态',
     template: `
-    <section class="album-feed" data-surface-id="album-product-feed" data-route-id="album-product-feed" data-route-bound="true" data-layout-mode="composed" data-page-edge-mode="M8" data-bg="page">
+    <section class="album-feed" data-surface-id="album-product-feed" data-route-id="album-product-feed" data-route-bound="true" data-layout-mode="composed" data-bg="page">
       <div class="navbar album-feed__navbar" data-dd-id="feed-page-navbar" data-component-slug="navbar" data-component-binding="feed-page-navbar">
         <div class="navbar__body">
           <div class="navbar__left navbar__left--custom album-feed__nav-left" aria-hidden="true"></div>
           <div class="navbar__center navbar__center--custom album-feed__nav-tabs">
             <div class="wg-tabs wg-tabs--standard wg-tabs--scroll" role="tablist" data-dd-id="feed-page-tabs" data-component-slug="tabs" data-component-binding="feed-page-tabs">
-              <div class="wg-tabs__scroll">
+              <div class="wg-tabs__scroll album-feed__page-tabs-scroll">
                 <button class="wg-tabs__item" role="tab" aria-selected="true" type="button" data-page-tab="following" data-dom-id="page-tab-following"><span class="wg-tabs__content"><span class="wg-tabs__label">关注</span></span></button>
                 <button class="wg-tabs__item" role="tab" aria-selected="false" type="button" data-page-tab="recommended" data-dom-id="page-tab-recommended"><span class="wg-tabs__content"><span class="wg-tabs__label">推荐</span></span></button>
                 <button class="wg-tabs__item" role="tab" aria-selected="false" type="button" data-page-tab="new" data-dom-id="page-tab-new"><span class="wg-tabs__content"><span class="wg-tabs__label">上新</span></span></button>
@@ -2129,18 +2235,21 @@
         </div>
       </div>
       <div class="album-feed__scroll" data-tab-scroll>
-        <div class="album-feed__floating-toolbar" data-toolbar-floating aria-hidden="false">
-          <div class="album-feed__toolbar-motion">
-            <div class="search-toolbar">
-              <div class="searchbox searchbox--md searchbox--white searchbox--accent" role="button" tabindex="0" aria-label="打开全局搜索" data-dom-id="open-global-search" data-dd-id="feed-search-toolbar" data-component-slug="search" data-component-binding="feed-search-toolbar">
-                <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
-                <div class="searchbox__input"><span class="searchbox__placeholder">搜索全局内容</span></div>
-                <div class="searchbox__actions"><button class="btn btn--strong btn--sm" type="button" aria-label="图搜" data-dd-id="feed-search-image" data-component-slug="button" data-component-binding="feed-search-image">图搜</button></div>
+        <div class="sticky-region album-feed__floating-toolbar" data-edge="top" data-visibility="direction-reveal" data-state="visible" data-toolbar-floating aria-hidden="false" data-dd-id="feed-search-sticky" data-component-slug="sticky-region" data-component-binding="feed-search-sticky">
+          <div class="sticky-region__motion album-feed__toolbar-motion">
+            <div class="sticky-region__inner">
+              <div class="search-toolbar">
+                <div class="searchbox searchbox--md searchbox--white searchbox--accent" role="button" tabindex="0" aria-label="打开全局搜索" data-dom-id="open-global-search" data-dd-id="feed-search-toolbar" data-component-slug="search" data-component-binding="feed-search-toolbar">
+                  <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
+                  <div class="searchbox__input"><span class="searchbox__placeholder">搜索全局内容</span></div>
+                  <div class="searchbox__actions"><button class="btn btn--strong btn--sm" type="button" aria-label="图搜" data-dd-id="feed-search-image" data-component-slug="button" data-component-binding="feed-search-image">图搜</button></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-        <div class="album-feed__people-wrap" data-region="people-wrap">
+        <div class="album-feed__content-group">
+          <div class="album-feed__people-wrap" data-region="people-wrap">
           <div class="album-feed__people-scroll" data-region="people-scroll">
             <div class="album-feed__people-list" data-region="people-list"></div>
             <div class="album-feed__people-self" data-dom-id="people-self">
@@ -2164,7 +2273,8 @@
             <button type="button" class="tag tag--28 tag--white tag--normal album-feed__filter-open" data-dom-id="open-filter" data-dd-id="feed-filter-open" data-component-slug="tag" data-component-binding="feed-filter-open-tag"><span class="tag__label">筛选</span></button>
           </div>
         </div>
-        <main class="album-feed__grid" data-region="feed-grid" data-dom-id="feed-open-dynamic"></main>
+          <main class="album-feed__grid" data-region="feed-grid" data-dom-id="feed-open-dynamic"></main>
+        </div>
         <div data-region="empty-host" hidden></div>
         <div class="popover popover--normal album-feed__first-card-guide" role="tooltip" data-variant="normal" data-placement="top" data-align="end" data-state="open" data-dom-id="first-card-guide" data-dd-id="feed-first-card-guide" data-component-slug="popover" data-component-binding="feed-first-card-guide" hidden><div class="popover__arrow"></div><div class="popover__body"><span class="popover__text">加入选品车，统一转发/下载</span></div></div>
         <div class="album-feed__publish-focus" data-dom-id="publish-focus" aria-hidden="true"></div>
@@ -2685,7 +2795,7 @@
         }
         syncCartFloatingEntry();
         updateAllIndicators();
-        updateScrollMetrics();
+        if (scrollLayout) scrollLayout.measure();
         observeLiveBadges();
         /* render 后定位第一条引导气泡，用 rAF 等待布局稳定再计算位置 */
         requestAnimationFrame(positionFirstCardGuide);
@@ -2755,34 +2865,6 @@
         });
       }
 
-      /* 工具栏显隐：默认显示；内容向下浏览后收起，向上回拉后显示。
-         只消费被钳制在真实滚动范围内的位置：顶部强制显示，橡皮筋回弹不会产生方向变化。 */
-      var lastScrollTop = 0;
-      var toolbarDirectionDistance = 0;
-      var toolbarDirection = 0;
-      var toolbarToggleThreshold = 16;
-      var toolbarRafId = null;
-      var pendingScrollTop = 0;
-      var isToolbarRevealed = true;
-      var lastMaxScrollTop = 0;
-      var isToolbarLayoutTransitioning = false;
-      var toolbarBoundaryTolerance = 1;
-      function maxScrollTop() {
-        return Math.max(0, scroll.scrollHeight - scroll.clientHeight);
-      }
-      function resetToolbarDirection() {
-        toolbarDirectionDistance = 0;
-        toolbarDirection = 0;
-      }
-      function updateScrollMetrics() {
-        var currentMaxScrollTop = maxScrollTop();
-        var currentTop = Math.min(currentMaxScrollTop, Math.max(0, scroll.scrollTop));
-        lastScrollTop = currentTop;
-        lastMaxScrollTop = currentMaxScrollTop;
-        pendingScrollTop = scroll.scrollTop;
-        resetToolbarDirection();
-      }
-
       /* 直播声波条离屏暂停动画：IntersectionObserver 观察 live-badge-bars，
          离屏时加 is-offscreen class 暂停 CSS animation，减少合成层压力 */
       var liveBadgeObserver = ('IntersectionObserver' in window) ? new IntersectionObserver(function(entries) {
@@ -2796,80 +2878,26 @@
           liveBadgeObserver.observe(bars);
         });
       }
-      function setToolbarRevealed(revealed) {
-        if (isToolbarRevealed === revealed) return;
-        isToolbarRevealed = revealed;
-        isToolbarLayoutTransitioning = true;
-        if (revealed) {
-          floatingToolbar.classList.remove('is-hidden');
-          floatingToolbar.setAttribute('aria-hidden', 'false');
-        } else {
-          floatingToolbar.classList.add('is-hidden');
-          floatingToolbar.setAttribute('aria-hidden', 'true');
-        }
-      }
-      function onToolbarTransitionEnd(event) {
-        if (event.target !== floatingToolbar || event.propertyName !== 'max-height') return;
-        isToolbarLayoutTransitioning = false;
-        updateScrollMetrics();
-      }
-      function applyToolbarReveal() {
-        toolbarRafId = null;
-        var currentMaxScrollTop = maxScrollTop();
-        var currentTop = Math.min(currentMaxScrollTop, Math.max(0, pendingScrollTop));
-        var delta = currentTop - lastScrollTop;
-        var maxScrollDelta = currentMaxScrollTop - lastMaxScrollTop;
-        var wasAtBottom = Math.abs(lastMaxScrollTop - lastScrollTop) <= toolbarBoundaryTolerance;
-        /* max-height 动画会改变滚动区 clientHeight。用户停在底部时，浏览器会让
-           scrollTop 跟随最大滚动位置自动回退；减去同帧的 maxScrollDelta，只保留
-           用户真实位移，避免搜索栏自己的布局变化被误判成反向手势。 */
-        if (isToolbarLayoutTransitioning && wasAtBottom) {
-          delta -= maxScrollDelta;
-        }
-        var isAtTop = currentTop <= 0;
-        if (isAtTop) {
-          setToolbarRevealed(true);
-          resetToolbarDirection();
-        } else if (Math.abs(delta) <= toolbarBoundaryTolerance) {
-          /* 边界回弹、布局校正或无有效滚动只更新基线，不改变搜索栏状态。 */
-          resetToolbarDirection();
-        } else {
-          var nextDirection = delta > 0 ? 1 : -1;
-          if (toolbarDirection !== nextDirection) {
-            toolbarDirection = nextDirection;
-            toolbarDirectionDistance = 0;
-          }
-          toolbarDirectionDistance += Math.abs(delta);
-          if (toolbarDirectionDistance >= toolbarToggleThreshold) {
-            /* 正向滚动代表内容向下浏览，反向滚动代表内容向上回拉。 */
-            if (nextDirection > 0) {
-              setToolbarRevealed(false);
-            } else {
-              setToolbarRevealed(true);
-            }
-            toolbarDirectionDistance = 0;
-          }
-        }
-        lastScrollTop = currentTop;
-        lastMaxScrollTop = currentMaxScrollTop;
-      }
-      function onScroll() {
-        /* scroll 事件只记录最新位置；尺寸与方向统一在 rAF 中读取和裁决。 */
-        var currentTop = scroll.scrollTop;
-        ctx.state.scrollPosition = currentTop;
-        pendingScrollTop = currentTop;
-        if (!toolbarRafId) toolbarRafId = requestAnimationFrame(applyToolbarReveal);
-        /* 用户主动滚动距离超过 32px 后 dismiss 第一条引导气泡，避免气泡跟随错位 */
-        if (firstCardGuide && !firstCardGuide.hidden && !ctx.state['first-card-guide-dismissed'] && Math.abs(currentTop) > 32) {
-          dismissFirstCardGuide();
-        }
-      }
       var hostTabPanel = root.closest('[data-host-tab]');
-      var hostTabObserver = ('MutationObserver' in window && hostTabPanel) ? new MutationObserver(function() {
-        if (hostTabPanel.hidden) return;
-        if (scroll.scrollTop <= toolbarBoundaryTolerance) setToolbarRevealed(true);
-        updateScrollMetrics();
-      }) : null;
+      var scrollLayout = ctx.bindScrollLayout({
+        scrollRoot: scroll,
+        activationRoot: hostTabPanel || null,
+        directionThreshold: 16,
+        boundaryTolerance: 1,
+        regions: [{
+          element: floatingToolbar,
+          edge: 'top',
+          policy: 'direction-reveal',
+          stackOrder: 0,
+          essential: false
+        }],
+        onScroll: function(currentTop) {
+        ctx.state.scrollPosition = currentTop;
+          if (firstCardGuide && !firstCardGuide.hidden && !ctx.state['first-card-guide-dismissed'] && Math.abs(currentTop) > 32) {
+            dismissFirstCardGuide();
+          }
+        }
+      });
 
       root.querySelector('[data-dom-id="open-global-search"]').addEventListener('click', function() { ctx.toast('全局搜索能力本期暂未开放'); });
       root.querySelector('[data-dom-id="open-global-search"]').addEventListener('keydown', function(event) {
@@ -2928,12 +2956,9 @@
       root.querySelector('[data-dom-id="filter-tag-presale"]').addEventListener('click', function() { switchDimension('presale'); });
       root.querySelector('[data-dom-id="filter-tag-live"]').addEventListener('click', function() { switchDimension('live'); });
 
-      scroll.addEventListener('scroll', onScroll, { passive: true });
-      floatingToolbar.addEventListener('transitionend', onToolbarTransitionEnd);
-      if (hostTabObserver) hostTabObserver.observe(hostTabPanel, { attributes: true, attributeFilter: ['hidden', 'class'] });
       function onResize() {
         updateAllIndicators();
-        updateScrollMetrics();
+        scrollLayout.measure();
         /* 尺寸变化后重新计算第一条引导气泡位置 */
         requestAnimationFrame(positionFirstCardGuide);
       }
@@ -2957,7 +2982,7 @@
       requestAnimationFrame(function() {
         scroll.scrollTop = ctx.state.scrollPosition;
         updateAllIndicators();
-        updateScrollMetrics();
+        scrollLayout.reset();
       });
 
       // 场景销毁时清理监听器和 Observer，避免内存泄漏
@@ -2966,17 +2991,9 @@
           liveBadgeObserver.disconnect();
         }
         window.removeEventListener('resize', onResize);
-        scroll.removeEventListener('scroll', onScroll);
-        floatingToolbar.removeEventListener('transitionend', onToolbarTransitionEnd);
-        if (hostTabObserver) hostTabObserver.disconnect();
         // publish menu 若处于打开状态，清理其监听器
         if (removePublishListeners) {
           removePublishListeners();
-        }
-        // 取消待执行的 toolbar raf
-        if (toolbarRafId) {
-          cancelAnimationFrame(toolbarRafId);
-          toolbarRafId = null;
         }
       });
     }

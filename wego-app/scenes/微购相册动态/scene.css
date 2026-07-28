@@ -5,7 +5,6 @@
   flex-direction: column;
   min-height: 0;
   container-type: inline-size;
-  padding-inline: var(--layout-page-margin-m8);
   overflow: hidden;
   isolation: isolate;
   background: var(--bg-page);
@@ -33,7 +32,7 @@
   flex: 1 1 auto;
   flex-direction: column;
   min-height: 0;
-  gap: var(--spacer-12);
+  gap: var(--spacer-0);
   padding-bottom: var(--safe-area-bottom-content);
   overflow-y: auto;
 }
@@ -304,43 +303,20 @@
   transform: rotate(45deg);
 }
 
-/* 搜索栏：sticky 吸顶在 scroll 容器顶部（navbar 下方），默认显示；
-   上滑手势收起（max-height 精确到搜索框实际高度，避免无效动画区间），下滑手势或滚回顶部重现；
-   背景为 bg-surface（白色），与 navbar 视觉连续；
-   contain:content 隔离重排到本容器，子元素 transform 走合成层提升丝滑度；
-   linear 线性动画符合需求：隐藏和显示无加速度 */
+/* 搜索吸顶 surface 始终通栏；内部 M8 留白、显隐状态与动态测高由
+   Sticky Region + WegoScrollLayout 共同承担，不改变 opacity。 */
 .album-feed__floating-toolbar {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  flex-shrink: 0;
-  max-height: calc(var(--size-36) + var(--spacer-8) + var(--spacer-8));
+  --sticky-region-inline-inset: var(--layout-page-margin-m8);
+  --sticky-region-after-gap: var(--spacer-12);
   background: var(--bg-surface);
-  opacity: 1;
-  overflow: hidden;
-  transition: max-height 0.25s linear, opacity 0.2s linear;
-  box-sizing: border-box;
-  contain: content;
 }
 
-.album-feed__floating-toolbar.is-hidden {
-  max-height: 0;
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* 搜索栏动效只作用于场景包装层，Search 组件的 search-toolbar 保持 Preview 原样。 */
-.album-feed__toolbar-motion {
-  transition: transform 0.25s linear;
-}
-
-.album-feed__floating-toolbar.is-hidden .album-feed__toolbar-motion {
-  transform: translateY(-100%);
-}
-
-/* 人维度横滑区：与顶部吸顶栈保留间距，避免拥挤 */
-.album-feed__people-wrap {
-  margin-top: var(--spacer-12);
+/* 人维度、筛选和瀑布流属于同一浏览内容组，共享 M8 横向间距与 12px 垂直节奏。 */
+.album-feed__content-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-12);
+  padding-inline: var(--layout-page-margin-m8);
 }
 
 .album-feed__people-scroll {

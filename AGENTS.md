@@ -70,6 +70,9 @@
 ## 页面安全区与电池栏
 
 - 页面根节点（scene root）必须保持 `position: absolute; inset: 0` 全屏撑满，禁止在根节点上通过 `padding-top` 预留电池栏（status bar）高度。
+- 页面根节点与主滚动区必须保持通栏，禁止用最外层 `padding-inline` 给全页内容一刀切设置左右边距。横向留白按语义内容组成组声明，同一组只有一个 spacing owner；导航栏、sticky surface 和底部操作栏始终通栏，内部留白由组件承担。
+- 开始组件选择前必须先完成页面级 `page_layers`、`scroll_architecture`、`layout_groups` 与 `sticky_regions`。所有 sticky/fixed/scroll 区域都要登记滚动所有权、层级、背景和内容避让方式。
+- Sticky surface 必须有不透明背景和 navigation 层级；动态显隐只改变尺寸与位移，不改变 opacity。顶部按实测高度维护 `scroll-padding-top`；底部固定内容按实测高度、安全区和额外间距维护 clearance 与 `scroll-padding-bottom`，确保首尾内容可完整滚出遮挡区。
 - 有 NavBar 的页面：由 NavBar 组件内部通过 `padding-top: var(--safe-area-top)` 处理顶部安全区。
 - 无 NavBar 但顶部有固定/吸顶元素（tabs、header 等）的页面：由该固定元素自身内部通过 `padding-top: var(--safe-area-top)` 让位。
 - 无 NavBar 且无固定顶部元素的页面：由滚动内容层通过 `padding-top: var(--safe-area-top)` 让位。

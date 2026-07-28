@@ -346,7 +346,7 @@
     "--spacer-8",
     "--text-default",
     "--text-secondary",
-    "--z-modal"
+    "--z-raised"
   ],
   "previewOnlyTokens": [
     "--bg-brand-surface-l1",
@@ -367,5 +367,11 @@
     "--modal-frame-x-height",
     "--modal-panel-bg",
     "--modal-panel-width"
-  ]
+  ],
+  "layerContract": {
+    "scope": "overlay-local",
+    "role": "surface",
+    "mountHost": "overlay-root",
+    "zToken": "--z-raised"
+  }
 }

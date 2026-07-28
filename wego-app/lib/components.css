@@ -19,7 +19,7 @@
   align-items: flex-end;
   justify-content: center;
   background: transparent;
-  z-index: var(--z-modal);
+  z-index: var(--z-raised);
   pointer-events: auto;
   visibility: visible;
 }
@@ -1636,7 +1636,7 @@
   align-items: flex-end;
   justify-content: center;
   background: transparent;
-  z-index: var(--z-modal);
+  z-index: var(--z-raised);
   pointer-events: auto;
   visibility: visible;
 }
@@ -2951,6 +2951,85 @@
 .stack__check-icon{font-size:10px;line-height:1}
 .stack__label{font-family:var(--body-md-font-family);font-size:var(--body-md-font-size);font-weight:var(--font-weight-regular);line-height:var(--body-md-line-height);color:var(--text-secondary);text-align:center;font-feature-settings:"zero";transition:color var(--duration-fast) var(--ease-standard)}
 .stack--selected .stack__label{font-weight:var(--font-weight-medium);color:var(--text-brand)}
+
+/* ── Sticky Region ─────────────────────────────────────────── */
+/* @anatomy
+   <div class="sticky-demo"> <div class="sticky-region" data-edge="top" data-visibility="direction-reveal" data-state="visible" style="--sticky-region-expanded-size:52px;--sticky-region-inline-inset:8px;--sticky-region-after-gap:12px"> <div class="sticky-region__motion"> <div class="sticky-region__inner"> <div class="sticky-demo__bar">通栏吸顶区域；内部内容按组件留白</div>
+*/
+/* Sticky Region 只承担通栏吸附 surface、状态动效与内部留白。
+   滚动方向、阈值、动态测量和 scroll-padding 由宿主滚动运行时负责。 */
+.sticky-region {
+  --sticky-region-expanded-size: 0px;
+  --sticky-region-compact-size: 0px;
+  --sticky-region-offset: 0px;
+  --sticky-region-after-gap: var(--spacer-0);
+  --sticky-region-inline-inset: var(--layout-page-margin-m0);
+  --sticky-region-duration: var(--duration-normal);
+  position: sticky;
+  top: var(--sticky-region-offset);
+  z-index: var(--z-sticky);
+  display: block;
+  flex-shrink: 0;
+  width: 100%;
+  max-height: var(--sticky-region-expanded-size);
+  margin-block-end: var(--sticky-region-after-gap);
+  overflow: hidden;
+  isolation: isolate;
+  box-sizing: border-box;
+  background: var(--bg-surface);
+  transition: max-height var(--sticky-region-duration) var(--ease-emphasized);
+}
+
+.sticky-region[data-edge="bottom"] {
+  top: auto;
+  bottom: var(--sticky-region-offset);
+}
+
+.sticky-region__motion {
+  width: 100%;
+  transform: translateY(0);
+  transition: transform var(--sticky-region-duration) var(--ease-emphasized);
+}
+
+.sticky-region__inner {
+  width: 100%;
+  padding-inline: var(--sticky-region-inline-inset);
+  box-sizing: border-box;
+}
+
+.sticky-region[data-state="hidden"] {
+  max-height: 0;
+  pointer-events: none;
+}
+
+.sticky-region[data-edge="top"][data-state="hidden"] .sticky-region__motion {
+  transform: translateY(-100%);
+}
+
+.sticky-region[data-edge="bottom"][data-state="hidden"] .sticky-region__motion {
+  transform: translateY(100%);
+}
+
+.sticky-region[data-state="compact"] {
+  max-height: var(--sticky-region-compact-size);
+}
+
+.sticky-region[data-visibility="always"] {
+  transition: none;
+}
+
+.sticky-region[data-visibility="direction-reveal"],
+.sticky-region[data-visibility="compact-on-scroll"],
+.sticky-region[data-visibility="pin-after-threshold"],
+.sticky-region[data-visibility="elevate-after-scroll"],
+.sticky-region[data-state="visible"],
+.sticky-region[data-state="pinned"] {
+  box-sizing: border-box;
+}
+
+.sticky-region[data-elevated="true"] {
+  border-bottom: 1px solid var(--border-neutral-l2);
+}
 
 /* ── Switch ────────────────────────────────────────────────── */
 /* @anatomy

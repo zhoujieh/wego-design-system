@@ -12,6 +12,7 @@ authoritySources:
   - "../../wego-product/references/conversation-wireframe.md"
   - "../../wego-uxsystem-iterate/references/workflow.md"
   - "../../wego-design/library-consumption.json"
+  - "../../wego-design/page-layers.json"
   - "../../wego-design/colors_and_type.css"
   - "../../wego-design/uikit-plan.json"
   - "../../wego-design/references/interaction-prototype-design.md"
@@ -52,6 +53,12 @@ authoritySources:
 - **信息按任务和语义分组，优先采用自上而下、从左到右的单线流程**。
   - **Do**：同类信息聚合成块、块与块之间留白分隔
   - **Don't**：不同类型信息交叉排列、打破单线阅读顺序的跳跃式布局
+
+<!-- rule-id: wego-clarity-page-architecture-before-components; source-ref: ../../wego-design/page-layers.json -->
+
+- **先确定页面架构，再选择组件**：页面必须先明确层级、主滚动区、语义内容组、间距归属、吸顶和固定区域；页面根与主滚动区保持通栏，不能用最外层统一边距替代内容分组。
+  - **Do**：同一语义组共享边距与节奏、导航和固定操作通栏、每组只有一个间距 owner
+  - **Don't**：页面根统一加左右边距、把 navbar/sticky/bottom bar 包进内容缩进、按组件类型零散设置间距
 
 <!-- rule-id: wego-clarity-contextual-function; source-ref: design-decisions.md -->
 
@@ -238,6 +245,7 @@ authoritySources:
 | wego-clarity-single-primary-task | 页面只保留一个首要任务 | 一页一个主任务，次要功能折叠或下沉 | 同页并列两个同等强制的主动作 |
 | wego-clarity-state-visible | 状态和下一步直接可懂 | 状态用颜色+图标+文字三重表达 | 状态只靠文字、需回忆上文 |
 | wego-clarity-information-flow | 信息按语义单线分组 | 同类信息聚合成块、留白分隔 | 不同类型信息交叉排列 |
+| wego-clarity-page-architecture-before-components | 先确定页面架构再选组件 | 声明层级、滚动、内容组与间距 owner | 根容器统一加边距、固定区随内容缩进 |
 | wego-clarity-contextual-function | 功能在正确场景自然出现 | 功能入口贴近触发场景 | 功能藏在非直觉位置、用 tutorial 引导 |
 | wego-clarity-delete-redundant | 删除无用元素 | 每加元素先问"解决什么问题" | 保留"以防万一"的元素 |
 | wego-clarity-reversible-action-visible | 反向操作可发现 | 返回/取消在左上角固定位置 | 退出操作藏在菜单深处 |

@@ -49,12 +49,11 @@ export function validatePromptContractShape(prompt) {
   const layout = prompt.layout_contract;
   if (!isPlainObject(layout)) add('prompt_contract.layout_contract', '必须是对象');
   else {
-    const allowed = new Set(['mode', 'source', 'selection_reason', 'page_edge_mode', 'principle_refs', 'mutable_regions']);
+    const allowed = new Set(['mode', 'source', 'selection_reason', 'principle_refs', 'mutable_regions', 'page_layers', 'scroll_architecture', 'layout_groups', 'sticky_regions']);
     for (const field of Object.keys(layout)) if (!allowed.has(field)) add(`prompt_contract.layout_contract.${field}`, '不是当前 Schema 字段');
     if (!['pattern', 'composed'].includes(layout.mode)) add('prompt_contract.layout_contract.mode', '必须是 pattern 或 composed');
-    for (const field of ['source', 'selection_reason', 'page_edge_mode']) if (!isNonEmptyString(layout[field])) add(`prompt_contract.layout_contract.${field}`, '必须是非空字符串');
+    for (const field of ['source', 'selection_reason']) if (!isNonEmptyString(layout[field])) add(`prompt_contract.layout_contract.${field}`, '必须是非空字符串');
     if (layout.principle_refs !== undefined && !Array.isArray(layout.principle_refs)) add('prompt_contract.layout_contract.principle_refs', '必须是数组');
-    if (isNonEmptyString(layout.page_edge_mode) && !['M0', 'M8', 'M32'].includes(layout.page_edge_mode)) add('prompt_contract.layout_contract.page_edge_mode', '只能使用 M0、M8 或 M32');
     if (!Array.isArray(layout.mutable_regions) || !layout.mutable_regions.length) add('prompt_contract.layout_contract.mutable_regions', '必须是非空数组');
     else {
       const regions = new Set();
@@ -64,6 +63,105 @@ export function validatePromptContractShape(prompt) {
         regions.add(value);
       });
     }
+
+    const layerIds = new Set();
+    if (!Array.isArray(layout.page_layers) || !layout.page_layers.length) add('prompt_contract.layout_contract.page_layers', '必须是非空数组');
+    asArray(layout.page_layers).forEach((layer, index) => {
+      const prefix = `prompt_contract.layout_contract.page_layers[${index}]`;
+      if (!isPlainObject(layer)) return add(prefix, '必须是对象');
+      const fields = new Set(['region_id', 'selector', 'scope', 'role']);
+      for (const field of Object.keys(layer)) if (!fields.has(field)) add(`${prefix}.${field}`, '不是当前 Schema 字段');
+      for (const field of fields) if (!isNonEmptyString(layer[field])) add(`${prefix}.${field}`, '必须是非空字符串');
+      if (isNonEmptyString(layer.region_id)) {
+        if (!/^[a-z][a-z0-9-]*$/.test(layer.region_id)) add(`${prefix}.region_id`, '必须是稳定 kebab-case');
+        if (layerIds.has(layer.region_id)) add(`${prefix}.region_id`, '不得重复');
+        layerIds.add(layer.region_id);
+      }
+      if (!['page-local', 'app-global', 'overlay-local'].includes(layer.scope)) add(`${prefix}.scope`, '必须是 page-local、app-global 或 overlay-local');
+      const roles = {
+        'page-local': ['content', 'raised', 'navigation', 'anchored-popout'],
+        'app-global': ['host', 'scene', 'overlay', 'dialog', 'feedback', 'critical'],
+        'overlay-local': ['mask', 'surface', 'nested-popout']
+      };
+      if (roles[layer.scope] && !roles[layer.scope].includes(layer.role)) add(`${prefix}.role`, '不是该 scope 支持的层级角色');
+    });
+
+    const scroll = layout.scroll_architecture;
+    if (!isPlainObject(scroll)) add('prompt_contract.layout_contract.scroll_architecture', '必须是对象');
+    else {
+      const prefix = 'prompt_contract.layout_contract.scroll_architecture';
+      const fields = new Set(['viewport_selector', 'primary_scroll_selector', 'document_scroll', 'nested_scroll_regions', 'fixed_regions']);
+      for (const field of Object.keys(scroll)) if (!fields.has(field)) add(`${prefix}.${field}`, '不是当前 Schema 字段');
+      for (const field of ['viewport_selector', 'primary_scroll_selector']) if (!isNonEmptyString(scroll[field])) add(`${prefix}.${field}`, '必须是非空字符串');
+      if (typeof scroll.document_scroll !== 'boolean' || scroll.document_scroll) add(`${prefix}.document_scroll`, '必须为 false，App 场景禁止 document scroll');
+      if (!Array.isArray(scroll.nested_scroll_regions)) add(`${prefix}.nested_scroll_regions`, '必须是数组');
+      asArray(scroll.nested_scroll_regions).forEach((region, index) => {
+        const itemPrefix = `${prefix}.nested_scroll_regions[${index}]`;
+        if (!isPlainObject(region)) return add(itemPrefix, '必须是对象');
+        const itemFields = new Set(['region_id', 'selector', 'axis', 'parent_selector']);
+        for (const field of Object.keys(region)) if (!itemFields.has(field)) add(`${itemPrefix}.${field}`, '不是当前 Schema 字段');
+        for (const field of itemFields) if (!isNonEmptyString(region[field])) add(`${itemPrefix}.${field}`, '必须是非空字符串');
+        if (!['x', 'y', 'both'].includes(region.axis)) add(`${itemPrefix}.axis`, '必须是 x、y 或 both');
+      });
+      if (!Array.isArray(scroll.fixed_regions)) add(`${prefix}.fixed_regions`, '必须是数组');
+      asArray(scroll.fixed_regions).forEach((region, index) => {
+        const itemPrefix = `${prefix}.fixed_regions[${index}]`;
+        if (!isPlainObject(region)) return add(itemPrefix, '必须是对象');
+        const itemFields = new Set(['region_id', 'selector', 'edge', 'safe_area_owner', 'clearance']);
+        for (const field of Object.keys(region)) if (!itemFields.has(field)) add(`${itemPrefix}.${field}`, '不是当前 Schema 字段');
+        for (const field of itemFields) if (!isNonEmptyString(region[field])) add(`${itemPrefix}.${field}`, '必须是非空字符串');
+        if (!['top', 'bottom'].includes(region.edge)) add(`${itemPrefix}.edge`, '必须是 top 或 bottom');
+        if (!['component', 'region', 'host'].includes(region.safe_area_owner)) add(`${itemPrefix}.safe_area_owner`, '必须是 component、region 或 host');
+        if (!['dynamic-measured', 'flow-reserved'].includes(region.clearance)) add(`${itemPrefix}.clearance`, '必须是 dynamic-measured 或 flow-reserved');
+      });
+    }
+
+    const groupIds = new Set();
+    const groupSelectors = new Set();
+    if (!Array.isArray(layout.layout_groups) || !layout.layout_groups.length) add('prompt_contract.layout_contract.layout_groups', '必须是非空数组');
+    asArray(layout.layout_groups).forEach((group, index) => {
+      const prefix = `prompt_contract.layout_contract.layout_groups[${index}]`;
+      if (!isPlainObject(group)) return add(prefix, '必须是对象');
+      const fields = new Set(['group_id', 'selector', 'content_role', 'inline_inset_token', 'spacing_owner', 'gap_token']);
+      for (const field of Object.keys(group)) if (!fields.has(field)) add(`${prefix}.${field}`, '不是当前 Schema 字段');
+      for (const field of fields) if (!isNonEmptyString(group[field])) add(`${prefix}.${field}`, '必须是非空字符串');
+      if (isNonEmptyString(group.group_id)) {
+        if (!/^[a-z][a-z0-9-]*$/.test(group.group_id)) add(`${prefix}.group_id`, '必须是稳定 kebab-case');
+        if (groupIds.has(group.group_id)) add(`${prefix}.group_id`, '不得重复');
+        groupIds.add(group.group_id);
+      }
+      if (isNonEmptyString(group.selector)) {
+        if (groupSelectors.has(group.selector)) add(`${prefix}.selector`, '同一内容组 selector 只能有一个 spacing owner');
+        groupSelectors.add(group.selector);
+      }
+      if (isNonEmptyString(group.inline_inset_token) && !/^var\(--(?:layout-page-margin-m(?:0|8|32)|spacer-(?:0|2|4|6|8|12|16|20|24|32|40|48|56|64|72|80))\)$/.test(group.inline_inset_token)) add(`${prefix}.inline_inset_token`, '必须使用正式页面边距或 spacer Token');
+      if (!['scene', 'component', 'host'].includes(group.spacing_owner)) add(`${prefix}.spacing_owner`, '必须是 scene、component 或 host');
+      if (isNonEmptyString(group.gap_token) && !/^var\(--spacer-(?:0|2|4|6|8|12|16|20|24|32|40|48|56|64|72|80)\)$/.test(group.gap_token)) add(`${prefix}.gap_token`, '必须使用正式 spacer Token');
+    });
+
+    const stickyIds = new Set();
+    if (!Array.isArray(layout.sticky_regions)) add('prompt_contract.layout_contract.sticky_regions', '必须是数组');
+    asArray(layout.sticky_regions).forEach((region, index) => {
+      const prefix = `prompt_contract.layout_contract.sticky_regions[${index}]`;
+      if (!isPlainObject(region)) return add(prefix, '必须是对象');
+      const fields = new Set(['region_id', 'selector', 'scroll_selector', 'edge', 'stack_order', 'visibility', 'background_token', 'layer_role', 'after_gap_token', 'scroll_padding', 'essential']);
+      for (const field of Object.keys(region)) if (!fields.has(field)) add(`${prefix}.${field}`, '不是当前 Schema 字段');
+      for (const field of ['region_id', 'selector', 'scroll_selector', 'edge', 'visibility', 'background_token', 'layer_role', 'after_gap_token', 'scroll_padding']) if (!isNonEmptyString(region[field])) add(`${prefix}.${field}`, '必须是非空字符串');
+      if (isNonEmptyString(region.region_id)) {
+        if (!/^[a-z][a-z0-9-]*$/.test(region.region_id)) add(`${prefix}.region_id`, '必须是稳定 kebab-case');
+        if (stickyIds.has(region.region_id)) add(`${prefix}.region_id`, '不得重复');
+        stickyIds.add(region.region_id);
+      }
+      if (!['top', 'bottom'].includes(region.edge)) add(`${prefix}.edge`, '必须是 top 或 bottom');
+      if (!Number.isInteger(region.stack_order) || region.stack_order < 0) add(`${prefix}.stack_order`, '必须是非负整数');
+      if (!['always', 'direction-reveal', 'compact-on-scroll', 'pin-after-threshold', 'elevate-after-scroll'].includes(region.visibility)) add(`${prefix}.visibility`, '不是受支持的 sticky 策略');
+      if (region.layer_role !== 'navigation') add(`${prefix}.layer_role`, 'sticky 区域必须使用 navigation');
+      if (!/^var\(--bg-[\w-]+\)$/.test(region.background_token)) add(`${prefix}.background_token`, '必须使用不透明背景 Token');
+      if (!/^var\(--spacer-(?:0|2|4|6|8|12|16|20|24|32|40|48|56|64|72|80)\)$/.test(region.after_gap_token)) add(`${prefix}.after_gap_token`, '必须使用正式 spacer Token');
+      if (!['dynamic-measured', 'flow-reserved'].includes(region.scroll_padding)) add(`${prefix}.scroll_padding`, '必须是 dynamic-measured 或 flow-reserved');
+      if (typeof region.essential !== 'boolean') add(`${prefix}.essential`, '必须是布尔值');
+      if (region.essential === true && region.visibility === 'direction-reveal') add(`${prefix}.visibility`, '首要导航、保存、结算或高优先级告警不得自动隐藏');
+    });
   }
 
   const interactionIds = new Set();

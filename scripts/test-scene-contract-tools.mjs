@@ -42,14 +42,33 @@ const contract = {
     design_system_version: metadata.version,
     token_bindings: [
       { selector: '.contract-fixture', content_role: 'fixture-action', css_property: 'color', token: 'var(--text-default)' },
-      { selector: '.contract-fixture', content_role: 'page-edge', css_property: 'padding-inline', token: 'var(--layout-page-margin-m0)' }
+      { selector: '.contract-fixture__content', content_role: 'fixture 内容组横向留白', css_property: 'padding-inline', token: 'var(--spacer-16)' }
     ],
     component_bindings: [
       { binding_id: 'settings-row', slug: 'cell', reason: '承载设置内容', variant_dimensions: { density: 'single', interaction: 'static' } },
       { binding_id: 'primary-action', slug: 'button', reason: '承载确认操作', variant_dimensions: { emphasis: 'strong', size: 'md', iconMode: 'text-only', state: 'default' } },
       { binding_id: 'secondary-action', slug: 'button', reason: '承载次要操作', variant_dimensions: { emphasis: 'weak', size: 'md', iconMode: 'text-only', state: 'default' } }
     ],
-    layout_contract: { mode: 'pattern', source: 'uikit-plan.json#/pagePatterns/biz-rule-config', selection_reason: '页面以编辑与统一保存为主，采用通栏内容边距', page_edge_mode: 'M0', mutable_regions: ['.contract-fixture'] },
+    layout_contract: {
+      mode: 'pattern',
+      source: 'uikit-plan.json#/pagePatterns/biz-rule-config',
+      selection_reason: '页面根与主滚动区通栏，编辑内容作为独立语义组承担横向留白',
+      mutable_regions: ['.contract-fixture__content'],
+      page_layers: [
+        { region_id: 'fixture-content', selector: '.contract-fixture__content', scope: 'page-local', role: 'content' }
+      ],
+      scroll_architecture: {
+        viewport_selector: '.contract-fixture',
+        primary_scroll_selector: '.contract-fixture__scroll',
+        document_scroll: false,
+        nested_scroll_regions: [],
+        fixed_regions: []
+      },
+      layout_groups: [
+        { group_id: 'fixture-content-group', selector: '.contract-fixture__content', content_role: '编辑内容组', inline_inset_token: 'var(--spacer-16)', spacing_owner: 'scene', gap_token: 'var(--spacer-0)' }
+      ],
+      sticky_regions: []
+    },
     interaction_contract: [{ dom_id: 'fixture-confirm', target: 'feedback:toast' }],
     state_contract: [{ state_id: 'initial', initial: true, trigger: '场景进入', visible_result: '显示确认按钮', fallback: '保留当前内容', persistence: 'memory' }]
   },
@@ -61,10 +80,14 @@ const contract = {
   }
 };
 
-const baseTemplate = `<section class="contract-fixture" data-surface-id="contract-fixture" data-route-id="contract-fixture" data-layout-mode="pattern" data-page-edge-mode="M0" data-page-pattern="biz-rule-config">
+const baseTemplate = `<section class="contract-fixture" data-surface-id="contract-fixture" data-route-id="contract-fixture" data-layout-mode="pattern" data-page-pattern="biz-rule-config">
+  <div class="contract-fixture__scroll">
+  <div class="contract-fixture__content">
   <div class="cell cell--single" data-dd-id="fixture-cell" data-component-binding="settings-row" data-component-slug="cell"><div class="cell__body"><div class="cell__content"><span class="cell__title">设置</span></div></div></div>
   <button class="btn btn--strong btn--md" data-dd-id="fixture-button" data-component-binding="primary-action" data-component-slug="button" data-dom-id="fixture-confirm">确认</button>
   <button class="btn btn--weak btn--md" data-dd-id="fixture-secondary" data-component-binding="secondary-action" data-component-slug="button">取消</button>
+  </div>
+  </div>
 </section>`;
 
 function renderScene(currentContract = contract, options = {}) {
@@ -87,16 +110,8 @@ window.WegoApp.registerScene({
 
 function writeScene(currentContract = contract, options = {}) {
   fs.writeFileSync(path.join(sceneRoot, 'scene.js'), renderScene(currentContract, options));
-  const edgeMode = options.edgeMode || currentContract.prompt_contract.layout_contract.page_edge_mode;
-  const edgeRule = options.omitEdgeCss ? '' : `.contract-fixture { padding-inline: var(--layout-page-margin-${edgeMode.toLowerCase()}); }\n`;
-  fs.writeFileSync(path.join(sceneRoot, 'scene.css'), `${options.css || '.contract-fixture { color: var(--text-default); }\n'}${edgeRule}`);
-}
-
-function withEdgeMode(mode) {
-  const current = structuredClone(contract);
-  current.prompt_contract.layout_contract.page_edge_mode = mode;
-  current.prompt_contract.token_bindings.find(binding => binding.css_property === 'padding-inline').token = `var(--layout-page-margin-${mode.toLowerCase()})`;
-  return current;
+  const validCss = '.contract-fixture { position: absolute; inset: 0; overflow: hidden; color: var(--text-default); }\n.contract-fixture__scroll { height: 100%; overflow-y: auto; }\n.contract-fixture__content { padding-inline: var(--spacer-16); }\n';
+  fs.writeFileSync(path.join(sceneRoot, 'scene.css'), options.replaceCss ? options.css : `${validCss}${options.css || ''}`);
 }
 
 function extract(label = '设计决策提取') { assertSuccess(run('scripts/extract-design-decisions.mjs', [sceneRoot]), label); }
@@ -151,44 +166,20 @@ try {
   });
   extract('注册对象外 init 提取'); assertFailureCode(validate(), 'scene.interaction_handler', '注册对象外 init 不得冒充实际 init');
 
-  for (const mode of ['M8', 'M32']) {
-    const edgeContract = withEdgeMode(mode);
-    const edgeTemplate = baseTemplate.replace('data-page-edge-mode="M0"', `data-page-edge-mode="${mode}"`);
-    writeScene(edgeContract, { template: edgeTemplate }); extract(`${mode} 页面边距提取`); assertSuccess(validate(), `${mode} 页面边距合同`);
-  }
+  writeScene(contract, { template: baseTemplate.replace('data-page-pattern="biz-rule-config"', 'data-page-pattern="biz-rule-config" data-page-edge-mode="M8"') });
+  assertFailure(run('scripts/extract-design-decisions.mjs', [sceneRoot]), '页面根不得保留旧边距标注');
 
-  writeScene(); extract('恢复 M0 页面边距');
-  writeScene(contract, { template: baseTemplate.replace('data-page-edge-mode="M0"', 'data-page-edge-mode="M8"') });
-  assertFailureCode(validate(), 'scene.page_edge_annotation', '页面边距根标注不一致');
+  writeScene(contract, { css: '.contract-fixture { position: absolute; inset: 0; padding-inline: var(--spacer-16); color: var(--text-default); }\n.contract-fixture__scroll { height: 100%; overflow-y: auto; }\n.contract-fixture__content { padding-inline: var(--spacer-16); }\n' });
+  extract('根错误承担内容边距提取'); assertFailureCode(validate(), 'scene.layout_root_inset', '页面根不得承担内容边距');
 
-  const m8Contract = withEdgeMode('M8');
-  writeScene(m8Contract, { template: baseTemplate.replace('data-page-edge-mode="M0"', 'data-page-edge-mode="M8"'), edgeMode: 'M0' });
-  extract('错误 M8 CSS 提取'); assertFailureCode(validate(), 'scene.page_edge_runtime', '页面边距 CSS Token 不一致');
+  writeScene(contract, { replaceCss: true, css: '.contract-fixture { position: relative; inset: 0; color: var(--text-default); }\n.contract-fixture__scroll { height: 100%; overflow-y: auto; }\n.contract-fixture__content { padding-inline: var(--spacer-16); }\n' });
+  extract('根定位错误提取'); assertFailureCode(validate(), 'scene.layout_root_position', '页面根必须绝对定位');
 
-  for (const [label, css] of [
-    ['超宽 media', '@media (min-width: 9999px) { .contract-fixture { padding-inline: var(--layout-page-margin-m0); } }'],
-    ['supports', '@supports (display: grid) { .contract-fixture { padding-inline: var(--layout-page-margin-m0); } }'],
-    ['hover', '.contract-fixture:hover { padding-inline: var(--layout-page-margin-m0); }'],
-    ['不匹配属性', '.contract-fixture[data-page-edge-mode="M8"] { padding-inline: var(--layout-page-margin-m0); }']
-  ]) {
-    writeScene(contract, { css: `.contract-fixture { color: var(--text-default); } ${css}\n`, omitEdgeCss: true });
-    extract(`${label} 页面边距提取`); assertFailureCode(validate(), 'scene.page_edge_runtime', `${label} 不得冒充无条件页面边距`);
-  }
+  writeScene(contract, { css: '.contract-fixture { position: absolute; inset: 0; color: var(--text-default); }\n.contract-fixture__scroll { height: 100%; overflow-y: auto; padding-inline: var(--spacer-16); }\n.contract-fixture__content { padding-inline: var(--spacer-16); }\n' });
+  extract('主滚动区错误承担内容边距提取'); assertFailureCode(validate(), 'scene.primary_scroll_inset', '主滚动区不得承担内容边距');
 
-  const m8Template = baseTemplate.replace('data-page-edge-mode="M0"', 'data-page-edge-mode="M8"');
-  for (const property of ['padding', 'padding-left', 'padding-right', 'padding-inline-start', 'padding-inline-end']) {
-    writeScene(m8Contract, { template: m8Template, css: `.contract-fixture { color: var(--text-default); ${property}: 0; }\n` });
-    extract(`覆盖页面边距 ${property} 提取`); assertFailureCode(validate(), 'scene.page_edge_override', `根 ${property} 不得覆盖页面边距`);
-  }
-  writeScene(m8Contract, { template: m8Template, css: '.contract-fixture { color: var(--text-default); } @media (max-width: 500px) { .contract-fixture { padding-inline: var(--layout-page-margin-m32); } }\n' });
-  extract('条件规则覆盖页面边距提取'); assertFailureCode(validate(), 'scene.page_edge_override', '条件规则不得覆盖页面边距');
-
-  writeScene(contract, { css: '.contract-fixture { color: var(--text-default); } .other { padding-inline: var(--layout-page-margin-m16); }\n' });
-  extract('M16 页面边距 Token 提取'); assertFailureCode(validate(), 'scene.page_edge_token', '场景不得使用 M16 页面边距 Token');
-
-  const m16Contract = withEdgeMode('M16');
-  writeScene(m16Contract, { template: baseTemplate.replace('data-page-edge-mode="M0"', 'data-page-edge-mode="M16"') });
-  assertFailure(run('scripts/extract-design-decisions.mjs', [sceneRoot]), 'M16 页面边距模式');
+  writeScene(contract, { css: '.contract-fixture { position: absolute; inset: 0; color: var(--text-default); }\n.contract-fixture__scroll { height: 100%; overflow-y: auto; }\n.contract-fixture__content { padding-inline: var(--spacer-12); }\n' });
+  extract('内容组 Token 错误提取'); assertFailureCode(validate(), 'scene.layout_group_runtime', '内容组必须落实声明的间距 Token');
 
   writeScene(contract, { handler: `const ignoredAuditText = '#fff rgb(0, 0, 0) var(--not-a-token) --text-default: .setProperty("--text-default")';
       // #abc var(--also-not-a-token) --text-default: setProperty('--text-default')
@@ -349,8 +340,13 @@ window.WEGO_APP_ROUTES = [{ routeId: 'contract-fixture', script: 'scenes/其他�
   const composed = structuredClone(contract);
   composed.layout_mode = 'composed'; composed.page_pattern = null;
   composed.presentation = { type: 'push', transition: 'slide-left-enter, slide-right-exit', dismissAction: 'back-button', overlayLevel: 'inline', coversTabBar: true, source: 'library-consumption.json#/appRuntime/presentationTypes' };
-  composed.prompt_contract.layout_contract = { mode: 'composed', source: 'references/design-decisions.md', selection_reason: '未命中明确范式，按任务层级自主组合并采用通栏边距', page_edge_mode: 'M0', mutable_regions: ['.contract-fixture'] };
-  writeScene(composed, { template: baseTemplate.replace('data-layout-mode="pattern" data-page-edge-mode="M0" data-page-pattern="biz-rule-config"', 'data-layout-mode="composed" data-page-edge-mode="M0"') });
+  composed.prompt_contract.layout_contract = {
+    ...structuredClone(contract.prompt_contract.layout_contract),
+    mode: 'composed',
+    source: 'references/design-decisions.md',
+    selection_reason: '未命中明确范式，先确定通栏根、主滚动区和语义内容组后自主组合'
+  };
+  writeScene(composed, { template: baseTemplate.replace('data-layout-mode="pattern" data-page-pattern="biz-rule-config"', 'data-layout-mode="composed"') });
   extract('自主组合提取'); assertSuccess(validate(), '自主组合场景合同');
 
   const groupedBindings = structuredClone(contract);
@@ -404,7 +400,7 @@ window.WEGO_APP_ROUTES = [{ routeId: 'contract-fixture', script: 'scenes/其他�
     { selector: '.contract-fixture', content_role: 'font-size', css_property: 'font-size', token: 'var(--body-md-font-size)' },
     { selector: '.contract-fixture', content_role: 'line-height', css_property: 'line-height', token: 'var(--body-md-line-height)' },
     { selector: '.contract-fixture', content_role: 'font-weight', css_property: 'font-weight', token: 'var(--font-weight-regular)' },
-    { selector: '.contract-fixture', content_role: 'page-edge', css_property: 'padding-inline', token: 'var(--layout-page-margin-m0)' }
+    { selector: '.contract-fixture__content', content_role: 'fixture 内容组横向留白', css_property: 'padding-inline', token: 'var(--spacer-16)' }
   ];
   const visualCss = '.contract-fixture { color: var(--text-default); background: var(--bg-surface); border-color: var(--border-neutral-l2); fill: var(--text-default); stroke: var(--text-secondary); font-size: var(--body-md-font-size); line-height: var(--body-md-line-height); font-weight: var(--font-weight-regular); }\n';
   writeScene(visualBindings, { css: visualCss }); extract('完整视觉绑定提取'); assertSuccess(validate(), '完整视觉 Token 绑定');
@@ -501,7 +497,7 @@ window.WEGO_APP_ROUTES = [{ routeId: 'contract-fixture', script: 'scenes/其他�
   for (const fixture of anatomyFixtures) {
     const fixtureContract = structuredClone(composed);
     fixtureContract.prompt_contract.component_bindings.push({ binding_id: fixture.bindingId, slug: fixture.slug, reason: `验证 ${fixture.slug} 契约结构`, variant_dimensions: fixture.variants });
-    const fixtureTemplate = baseTemplate.replace('data-layout-mode="pattern" data-page-edge-mode="M0" data-page-pattern="biz-rule-config"', 'data-layout-mode="composed" data-page-edge-mode="M0"').replace('</section>', `${fixture.html}</section>`);
+    const fixtureTemplate = baseTemplate.replace('data-layout-mode="pattern" data-page-pattern="biz-rule-config"', 'data-layout-mode="composed"').replace('</section>', `${fixture.html}</section>`);
     writeScene(fixtureContract, { template: fixtureTemplate }); extract(`${fixture.slug} anatomy 提取`); assertSuccess(validate(), `${fixture.slug} anatomy 完整结构`);
     writeScene(fixtureContract, { template: fixtureTemplate.replace(fixture.remove, '') }); extract(`${fixture.slug} anatomy 缺失提取`); assertFailureCode(validate(), 'scene.component_anatomy', `${fixture.slug} anatomy 缺失结构`);
   }
@@ -572,7 +568,7 @@ window.WEGO_APP_ROUTES = [{ routeId: 'contract-fixture', script: 'scenes/其他�
 
   const metricContract = structuredClone(composed);
   metricContract.prompt_contract.component_bindings.push({ binding_id: 'summary-metric', slug: 'metric', reason: '展示关键统计值', variant_dimensions: { size: '16', theme: 'black' } });
-  const composedTemplate = baseTemplate.replace('data-layout-mode="pattern" data-page-edge-mode="M0" data-page-pattern="biz-rule-config"', 'data-layout-mode="composed" data-page-edge-mode="M0"');
+  const composedTemplate = baseTemplate.replace('data-layout-mode="pattern" data-page-pattern="biz-rule-config"', 'data-layout-mode="composed"');
   const metricTemplate = composedTemplate.replace('</section>', '<div class="metric metric--16 metric--black" data-dd-id="fixture-metric" data-component-binding="summary-metric" data-component-slug="metric"><span class="metric__main"><span class="metric__value"><span class="metric__integer">12</span></span></span></div></section>');
   writeScene(metricContract, { template: metricTemplate }); extract('metric anatomy 提取'); assertSuccess(validate(), 'metric 必需子节点');
   writeScene(metricContract, { template: metricTemplate.replace('<span class="metric__main"><span class="metric__value"><span class="metric__integer">12</span></span></span>', '<span class="metric__integer">12</span>') });

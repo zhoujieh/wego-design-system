@@ -7,7 +7,7 @@
     "primary_scene": "微购相册动态",
     "related_scenes": []
   },
-  "status": "awaiting-prototype-confirmation",
+  "status": "prototype-confirmed",
   "scope_revision": 1,
   "prototype_brief": {
     "goal": "让用户浏览动态内容时，顶部搜索栏的显示与隐藏始终符合明确、可预期的滚动方向规则，不因边界回弹或微小滚动产生闪烁。",
@@ -71,7 +71,19 @@
     "scope_revision": 1,
     "scope_sha256": "5c18c206bda20f7e0220a393b1a3e933723bcbdf1300a8e4a45a1154d49b3259"
   },
-  "prototype_confirmation": null,
+  "prototype_confirmation": {
+    "at": "2026-07-28T08:18:46.097Z",
+    "scope_revision": 1,
+    "affected_scenes": [
+      "微购相册动态"
+    ],
+    "fingerprints": {
+      "@route-entry/%E5%BE%AE%E8%B4%AD%E7%9B%B8%E5%86%8C%E5%8A%A8%E6%80%81": "79c0590810ca2dbf402f2643741513085b5d1b712678c74aede4afb6a6c44701",
+      "wego-app/scenes/微购相册动态/design-decisions.json": "d04e43663e7b1dd970f9aaed4d8246284ed3c6c4c64df5f4f996789a0d67e710",
+      "wego-app/scenes/微购相册动态/scene.css": "b45d50edf150cbab0532d01d6ddd2d45942bedafc4c67152bb587b1a129e7609",
+      "wego-app/scenes/微购相册动态/scene.js": "1868da6a5f133269d570ce33e57db64e16777d2281fa511f85d8abf65706738d"
+    }
+  },
   "affected_scenes": [
     "微购相册动态"
   ],
@@ -116,6 +128,18 @@
     {
       "action": "submit-prototype",
       "at": "2026-07-27T11:43:13.809Z"
+    },
+    {
+      "action": "invalidate",
+      "at": "2026-07-28T06:27:36.748Z"
+    },
+    {
+      "action": "submit-prototype",
+      "at": "2026-07-28T06:34:51.617Z"
+    },
+    {
+      "action": "confirm-prototype",
+      "at": "2026-07-28T08:18:46.111Z"
     }
   ],
   "freeze": null

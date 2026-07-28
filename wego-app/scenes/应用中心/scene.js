@@ -1,5 +1,4 @@
-/* wego-design-contract:
-{
+/* wego-design-contract: {
   "surface_id": "app-center",
   "route_id": "app-center",
   "layout_mode": "composed",
@@ -15,32 +14,156 @@
   "prompt_contract": {
     "design_system_version": 417,
     "token_bindings": [
-      { "selector": ".app-center-page", "content_role": "页面边距", "css_property": "padding-inline", "token": "var(--layout-page-margin-m0)" },
-      { "selector": ".app-center-page", "content_role": "页面背景", "css_property": "background", "token": "var(--bg-page)" },
-      { "selector": ".app-center-page", "content_role": "页面默认文字", "css_property": "color", "token": "var(--text-default)" },
-      { "selector": ".app-center-page", "content_role": "页面基础字体", "css_property": "font-family", "token": "var(--body-md-font-family)" },
-      { "selector": ".app-center-page__tabs", "content_role": "标签栏背景", "css_property": "background", "token": "var(--bg-page)" },
-      { "selector": ".app-center-page__tabs", "content_role": "标签栏与内容间距", "css_property": "margin-bottom", "token": "var(--spacer-8)" },
-      { "selector": ".app-center-page__body", "content_role": "内容区横向边距", "css_property": "padding-inline", "token": "var(--layout-page-margin-m8)" },
-      { "selector": ".app-center-page__body", "content_role": "内容区底部安全区", "css_property": "padding-bottom", "token": "var(--spacer-72)" },
-      { "selector": ".app-center-page__body", "content_role": "内容区分组间距", "css_property": "gap", "token": "var(--spacer-8)" },
-      { "selector": ".app-center-page__category-content", "content_role": "卡片内容节奏", "css_property": "gap", "token": "var(--spacer-12)" },
-      { "selector": ".app-center-page__category-content", "content_role": "卡片内容留白", "css_property": "padding", "token": "var(--spacer-12)" },
-      { "selector": ".app-center-page__category-title", "content_role": "分类标题文字", "css_property": "color", "token": "var(--text-default)" },
-      { "selector": ".app-center-page__category-title", "content_role": "分类标题层级", "css_property": "font-size", "token": "var(--heading-xs-font-size)" },
-      { "selector": ".app-center-page__category-title", "content_role": "分类标题层级", "css_property": "font-weight", "token": "var(--heading-xs-font-weight)" },
-      { "selector": ".app-center-page__category-title", "content_role": "分类标题层级", "css_property": "line-height", "token": "var(--heading-xs-line-height)" },
-      { "selector": ".app-center-page__app-grid", "content_role": "应用入口间距", "css_property": "gap", "token": "var(--spacer-4)" },
-      { "selector": ".app-center-page__app-entry", "content_role": "应用入口圆角", "css_property": "border-radius", "token": "var(--radius-8)" },
-      { "selector": ".app-center-page__app-entry", "content_role": "应用图标与名称间距", "css_property": "gap", "token": "var(--spacer-4)" },
-      { "selector": ".app-center-page__app-entry", "content_role": "应用入口热区", "css_property": "padding-block", "token": "var(--spacer-8)" },
-      { "selector": ".app-center-page__app-entry:active", "content_role": "应用入口按压圆角", "css_property": "border-radius", "token": "var(--radius-8)" },
-      { "selector": ".app-center-page__app-entry:active", "content_role": "应用入口按压反馈", "css_property": "background", "token": "var(--bg-state-pressed)" },
-      { "selector": ".app-center-page__app-placeholder", "content_role": "占位元素间距", "css_property": "gap", "token": "var(--spacer-4)" },
-      { "selector": ".app-center-page__app-placeholder", "content_role": "占位元素热区", "css_property": "padding-block", "token": "var(--spacer-8)" },
-      { "selector": ".app-center-page__app-label", "content_role": "应用名称", "css_property": "color", "token": "var(--text-secondary)" },
-      { "selector": ".app-center-page__app-label", "content_role": "应用名称", "css_property": "font-size", "token": "var(--body-sm-font-size)" },
-      { "selector": ".app-center-page__app-label", "content_role": "应用名称", "css_property": "line-height", "token": "var(--body-sm-line-height)" }
+      {
+        "selector": ".app-center-page",
+        "content_role": "页面背景",
+        "css_property": "background",
+        "token": "var(--bg-page)"
+      },
+      {
+        "selector": ".app-center-page",
+        "content_role": "页面默认文字",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".app-center-page",
+        "content_role": "页面基础字体",
+        "css_property": "font-family",
+        "token": "var(--body-md-font-family)"
+      },
+      {
+        "selector": ".app-center-page__tabs",
+        "content_role": "标签栏背景",
+        "css_property": "background",
+        "token": "var(--bg-page)"
+      },
+      {
+        "selector": ".app-center-page__tabs",
+        "content_role": "标签栏与内容间距",
+        "css_property": "margin-bottom",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".app-center-page__content-group",
+        "content_role": "内容区横向边距",
+        "css_property": "padding-inline",
+        "token": "var(--layout-page-margin-m8)"
+      },
+      {
+        "selector": ".app-center-page__content-group",
+        "content_role": "内容区底部安全区",
+        "css_property": "padding-bottom",
+        "token": "var(--spacer-72)"
+      },
+      {
+        "selector": ".app-center-page__content-group",
+        "content_role": "内容区分组间距",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".app-center-page__category-content",
+        "content_role": "卡片内容节奏",
+        "css_property": "gap",
+        "token": "var(--spacer-12)"
+      },
+      {
+        "selector": ".app-center-page__category-content",
+        "content_role": "卡片内容留白",
+        "css_property": "padding",
+        "token": "var(--spacer-12)"
+      },
+      {
+        "selector": ".app-center-page__category-title",
+        "content_role": "分类标题文字",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".app-center-page__category-title",
+        "content_role": "分类标题层级",
+        "css_property": "font-size",
+        "token": "var(--heading-xs-font-size)"
+      },
+      {
+        "selector": ".app-center-page__category-title",
+        "content_role": "分类标题层级",
+        "css_property": "font-weight",
+        "token": "var(--heading-xs-font-weight)"
+      },
+      {
+        "selector": ".app-center-page__category-title",
+        "content_role": "分类标题层级",
+        "css_property": "line-height",
+        "token": "var(--heading-xs-line-height)"
+      },
+      {
+        "selector": ".app-center-page__app-grid",
+        "content_role": "应用入口间距",
+        "css_property": "gap",
+        "token": "var(--spacer-4)"
+      },
+      {
+        "selector": ".app-center-page__app-entry",
+        "content_role": "应用入口圆角",
+        "css_property": "border-radius",
+        "token": "var(--radius-8)"
+      },
+      {
+        "selector": ".app-center-page__app-entry",
+        "content_role": "应用图标与名称间距",
+        "css_property": "gap",
+        "token": "var(--spacer-4)"
+      },
+      {
+        "selector": ".app-center-page__app-entry",
+        "content_role": "应用入口热区",
+        "css_property": "padding-block",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".app-center-page__app-entry:active",
+        "content_role": "应用入口按压圆角",
+        "css_property": "border-radius",
+        "token": "var(--radius-8)"
+      },
+      {
+        "selector": ".app-center-page__app-entry:active",
+        "content_role": "应用入口按压反馈",
+        "css_property": "background",
+        "token": "var(--bg-state-pressed)"
+      },
+      {
+        "selector": ".app-center-page__app-placeholder",
+        "content_role": "占位元素间距",
+        "css_property": "gap",
+        "token": "var(--spacer-4)"
+      },
+      {
+        "selector": ".app-center-page__app-placeholder",
+        "content_role": "占位元素热区",
+        "css_property": "padding-block",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".app-center-page__app-label",
+        "content_role": "应用名称",
+        "css_property": "color",
+        "token": "var(--text-secondary)"
+      },
+      {
+        "selector": ".app-center-page__app-label",
+        "content_role": "应用名称",
+        "css_property": "font-size",
+        "token": "var(--body-sm-font-size)"
+      },
+      {
+        "selector": ".app-center-page__app-label",
+        "content_role": "应用名称",
+        "css_property": "line-height",
+        "token": "var(--body-sm-line-height)"
+      }
     ],
     "component_bindings": [
       {
@@ -80,15 +203,98 @@
     "layout_contract": {
       "mode": "composed",
       "source": "references/design-decisions.md",
-      "selection_reason": "应用中心是二级页面，使用 tabs 做分类切换，card 做内容分组",
-      "page_edge_mode": "M0",
+      "selection_reason": "应用中心是二级页面；页面根与主滚动区通栏，navbar 与分类 tabs 处于 navigation 层并保持通栏，应用分类内容作为单一语义组承担 M8 横向留白与 8px 垂直节奏。",
       "mutable_regions": [
         ".app-center-page__body"
+      ],
+      "principle_refs": [
+        "wego-clarity-page-architecture-before-components"
+      ],
+      "page_layers": [
+        {
+          "region_id": "app-center-navbar",
+          "selector": ".app-center-page__navbar",
+          "scope": "page-local",
+          "role": "navigation"
+        },
+        {
+          "region_id": "app-center-tabs",
+          "selector": ".app-center-page__tabs",
+          "scope": "page-local",
+          "role": "navigation"
+        },
+        {
+          "region_id": "app-center-content",
+          "selector": ".app-center-page__content-group",
+          "scope": "page-local",
+          "role": "content"
+        }
+      ],
+      "scroll_architecture": {
+        "viewport_selector": ".app-center-page",
+        "primary_scroll_selector": ".app-center-page__body",
+        "document_scroll": false,
+        "nested_scroll_regions": [
+          {
+            "region_id": "app-center-tabs-scroll",
+            "selector": ".app-center-page__tabs-scroll",
+            "axis": "x",
+            "parent_selector": ".app-center-page"
+          }
+        ],
+        "fixed_regions": []
+      },
+      "layout_groups": [
+        {
+          "group_id": "app-center-navbar-group",
+          "selector": ".app-center-page__navbar",
+          "content_role": "应用中心导航通栏 surface",
+          "inline_inset_token": "var(--layout-page-margin-m0)",
+          "spacing_owner": "component",
+          "gap_token": "var(--spacer-0)"
+        },
+        {
+          "group_id": "app-center-tabs-group",
+          "selector": ".app-center-page__tabs",
+          "content_role": "分类导航通栏 surface",
+          "inline_inset_token": "var(--layout-page-margin-m0)",
+          "spacing_owner": "component",
+          "gap_token": "var(--spacer-8)"
+        },
+        {
+          "group_id": "app-center-content-group",
+          "selector": ".app-center-page__content-group",
+          "content_role": "应用分类内容组",
+          "inline_inset_token": "var(--layout-page-margin-m8)",
+          "spacing_owner": "scene",
+          "gap_token": "var(--spacer-8)"
+        }
+      ],
+      "sticky_regions": [
+        {
+          "region_id": "app-center-tabs",
+          "selector": ".app-center-page__tabs",
+          "scroll_selector": ".app-center-page__body",
+          "edge": "top",
+          "stack_order": 0,
+          "visibility": "always",
+          "background_token": "var(--bg-page)",
+          "layer_role": "navigation",
+          "after_gap_token": "var(--spacer-8)",
+          "scroll_padding": "flow-reserved",
+          "essential": true
+        }
       ]
     },
     "interaction_contract": [
-      { "dom_id": "app-center-back", "target": "navigation:back" },
-      { "dom_id": "app-center-body", "target": "feedback:toast" }
+      {
+        "dom_id": "app-center-back",
+        "target": "navigation:back"
+      },
+      {
+        "dom_id": "app-center-body",
+        "target": "feedback:toast"
+      }
     ],
     "state_contract": [
       {
@@ -111,8 +317,11 @@
   },
   "visual_check": {
     "status": "passed",
-    "viewports": [375, 393],
-    "checked_at": "2026-07-16T02:50:00.000Z",
+    "viewports": [
+      375,
+      393
+    ],
+    "checked_at": "2026-07-28T16:18:00+08:00",
     "checks": {
       "horizontal_overflow": true,
       "overlap": true,
@@ -122,8 +331,7 @@
       "state_feedback": true
     }
   }
-}
-*/
+} */
 
 var appCenterCategories = [
   {
@@ -377,8 +585,8 @@ function updateTabsIndicator(tabs) {
 }
 
 const appCenterTemplate = `
-  <section class="app-center-page" data-surface-id="app-center" data-route-id="app-center" data-route-bound="true" data-layout-mode="composed" data-page-edge-mode="M0" data-bg="page">
-    <div class="navbar" data-dd-id="app-center-navbar" data-component-slug="navbar" data-component-binding="app-center-navbar">
+  <section class="app-center-page" data-surface-id="app-center" data-route-id="app-center" data-route-bound="true" data-layout-mode="composed" data-bg="page">
+    <div class="navbar app-center-page__navbar" data-dd-id="app-center-navbar" data-component-slug="navbar" data-component-binding="app-center-navbar">
       <div class="navbar__body">
         <div class="navbar__left"><button type="button" class="navbar__left-btn" data-dom-id="app-center-back" aria-label="返回"><i class="wego-iconfont-s icon-fanhui"></i></button></div>
         <div class="navbar__center"><span class="navbar__title">应用中心</span></div>
@@ -386,18 +594,20 @@ const appCenterTemplate = `
       </div>
     </div>
     <div class="wg-tabs wg-tabs--mini wg-tabs--scroll app-center-page__tabs" data-dd-id="app-center-tabs" data-component-slug="tabs" data-component-binding="app-center-tabs" role="tablist">
-      <div class="wg-tabs__scroll">
+      <div class="wg-tabs__scroll app-center-page__tabs-scroll">
         <button class="wg-tabs__item wg-tabs__item--first" role="tab" aria-selected="true" type="button"><span class="wg-tabs__content"><span class="wg-tabs__label">店铺管理</span></span></button>
         <span class="wg-tabs__active-indicator" aria-hidden="true"></span>
       </div>
     </div>
     <div class="app-center-page__body" data-dom-id="app-center-body">
-      <section class="card card--surface app-center-page__category" data-dd-id="category-card" data-component-slug="card" data-component-binding="category-card" data-category-id="store-manage">
-        <div class="card__content app-center-page__category-content">
-          <h2 class="app-center-page__category-title">店铺管理</h2>
-          <div class="app-center-page__app-grid"></div>
-        </div>
-      </section>
+      <div class="app-center-page__content-group">
+        <section class="card card--surface app-center-page__category" data-dd-id="category-card" data-component-slug="card" data-component-binding="category-card" data-category-id="store-manage">
+          <div class="card__content app-center-page__category-content">
+            <h2 class="app-center-page__category-title">店铺管理</h2>
+            <div class="app-center-page__app-grid"></div>
+          </div>
+        </section>
+      </div>
     </div>
   </section>
 `;
@@ -418,6 +628,7 @@ window.WegoApp.registerScene({
     var tabsContainer = ctx.root.querySelector('.app-center-page__tabs');
     var tabsScroll = tabsContainer.querySelector('.wg-tabs__scroll');
     var bodyContainer = ctx.root.querySelector('[data-dom-id="app-center-body"]');
+    var contentGroup = bodyContainer.querySelector('.app-center-page__content-group');
 
     // 绑定返回按钮
     backButton.addEventListener('click', function() {
@@ -450,13 +661,13 @@ window.WegoApp.registerScene({
     tabsScroll.appendChild(indicator);
 
     // 清空模板预写的第一个 card，重建全部分类
-    bodyContainer.innerHTML = '';
+    contentGroup.innerHTML = '';
     appCenterCategories.forEach(function(category) {
-      bodyContainer.appendChild(buildAppCenterCategory(category));
+      contentGroup.appendChild(buildAppCenterCategory(category));
     });
 
     // 统一补齐网格空白占位，保持每行列宽一致
-    var appGrids = bodyContainer.querySelectorAll('.app-center-page__app-grid');
+    var appGrids = contentGroup.querySelectorAll('.app-center-page__app-grid');
     function refillAppCenterPlaceholders() {
       appGrids.forEach(function(grid) {
         fillAppGridPlaceholders(grid, 'app-center-page__app-placeholder');

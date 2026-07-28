@@ -31,6 +31,7 @@ const routesFile = routesFlag >= 0 ? path.resolve(root, args[routesFlag + 1]) : 
 const tokenCssFile = path.join(libraryRoot, 'colors_and_type.css');
 const metadataFile = path.join(libraryRoot, 'metadata.json');
 const consumptionFile = path.join(libraryRoot, 'library-consumption.json');
+const pageLayersFile = path.join(libraryRoot, 'page-layers.json');
 const componentIndexFile = path.join(libraryRoot, 'components/index.json');
 const uikitPlanFile = path.join(libraryRoot, 'uikit-plan.json');
 const errors = [];
@@ -40,11 +41,12 @@ const escapeRegex = value => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'
 const readJson = file => JSON.parse(fs.readFileSync(file, 'utf8'));
 
 function flatten(node, out = []) {
+  if (!node) return out;
   for (const child of node.children || []) { out.push(child); flatten(child, out); }
   return out;
 }
 
-function classSet(node) { return new Set(String(node.attrs.class || '').split(/\s+/).filter(Boolean)); }
+function classSet(node) { return new Set(String(node?.attrs?.class || '').split(/\s+/).filter(Boolean)); }
 function isPlainObject(value) { return Boolean(value) && typeof value === 'object' && !Array.isArray(value); }
 function selectorMatchesNode(selector, node) {
   const value = String(selector || '').trim();
@@ -87,11 +89,13 @@ function selectorTargetsNode(selector, node) {
 }
 
 function selectorExistsInScope(rootNode, selector) {
+  if (!rootNode) return false;
   const scope = [rootNode, ...flatten(rootNode, [])];
   return String(selector || '').split('|').map(value => value.trim()).filter(Boolean).some(value => scope.some(node => selectorMatchesNode(value, node)));
 }
 
 function selectorNodesInScope(rootNode, selector) {
+  if (!rootNode) return [];
   const scope = [rootNode, ...flatten(rootNode, [])];
   return scope.filter(node => String(selector || '').split('|').map(value => value.trim()).filter(Boolean).some(value => selectorMatchesNode(value, node)));
 }
@@ -735,14 +739,16 @@ if (decision) {
   let consumption = null;
   let index = null;
   let plan = null;
+  let pageLayers = null;
   try { metadata = readJson(metadataFile); } catch (error) { add('scene.metadata', `无法读取设计系统版本：${error.message}`, metadataFile); }
   try { consumption = readJson(consumptionFile); } catch (error) { add('scene.consumption_source', `无法读取消费契约：${error.message}`, consumptionFile); }
   try { index = readJson(componentIndexFile); } catch (error) { add('scene.component_index', `无法读取组件索引：${error.message}`, componentIndexFile); }
   try { plan = readJson(uikitPlanFile); } catch (error) { add('scene.uikit_source', `无法读取 UI Kit 计划：${error.message}`, uikitPlanFile); }
+  try { pageLayers = readJson(pageLayersFile); } catch (error) { add('scene.page_layers_source', `无法读取页面层级模型：${error.message}`, pageLayersFile); }
   const indexedComponents = new Map((index?.components || []).map(component => [component.slug, component]));
   const pagePatterns = Array.isArray(plan?.pagePatterns) ? plan.pagePatterns : [];
   if (decision.schemaVersion !== 2 || decision.scene !== path.basename(sceneRoot)) add('scene.decisions_schema', 'design-decisions.json 必须使用 schemaVersion 2 且 scene 与目录一致', decisionsFile);
-  if (consumption?.schemaVersion !== 5) add('scene.consumption_schema', 'library-consumption.json 必须使用 schemaVersion 5', consumptionFile);
+  if (consumption?.schemaVersion !== 6) add('scene.consumption_schema', 'library-consumption.json 必须使用 schemaVersion 6', consumptionFile);
   if (plan?.schemaVersion !== 5 || !Array.isArray(plan?.pagePatterns)) add('scene.uikit_schema', 'uikit-plan.json 必须使用 schemaVersion 5 且包含 pagePatterns', uikitPlanFile);
 
   const layout = prompt.layout_contract || {};
@@ -753,28 +759,72 @@ if (decision) {
   for (const selector of layout.mutable_regions || []) {
     if (!domNodes.some(node => selectorMatchesNode(selector, node)) && !css.includes(selector)) add('scene.mutable_region', `mutable_regions 未命中实际 DOM 或 CSS：${selector}`, decisionsFile);
   }
-  const pageEdgeToken = consumption?.pageEdgeTokens?.[layout.page_edge_mode];
   const surfaceRoot = templateTree?.root || null;
-  if (!surfaceRoot || surfaceRoot.attrs['data-surface-id'] !== decision.surface_id) add('scene.page_edge_root', 'template 唯一顶层根必须匹配 surface_id', sceneJs);
+  if (!surfaceRoot || surfaceRoot.attrs['data-surface-id'] !== decision.surface_id) add('scene.layout_root', 'template 唯一顶层根必须匹配 surface_id', sceneJs);
   else {
-    if (surfaceRoot.attrs['data-page-edge-mode'] !== layout.page_edge_mode) add('scene.page_edge_annotation', '根节点 data-page-edge-mode 必须与 layout_contract.page_edge_mode 一致', sceneJs);
-    if (typeof pageEdgeToken !== 'string' || !/^--layout-page-margin-[\w-]+$/.test(pageEdgeToken)) add('scene.page_edge_source', `页面边距模式 ${layout.page_edge_mode || '未声明'} 未映射正式 Token`, consumptionFile);
-    else {
-      const expectedValue = `var(${pageEdgeToken})`;
-      const edgeDeclarations = cssRules
-        .filter(rule => rule.atRules.length === 0 && rule.selectors.some(selector => strictSimpleSelectorMatchesNode(selector, surfaceRoot)))
-        .flatMap(rule => rule.declarations.filter(declaration => declaration.property === 'padding-inline'));
-      const expectedPattern = new RegExp(`^var\\(\\s*${escapeRegex(pageEdgeToken)}\\s*\\)$`);
-      const edgeApplied = edgeDeclarations.length > 0 && edgeDeclarations.every(declaration => expectedPattern.test(declaration.value.replace(/\s*!important\s*$/i, '').trim()));
-      if (!edgeApplied) add('scene.page_edge_runtime', `场景根 padding-inline 必须直接使用 ${expectedValue}`, sceneCss);
-      const horizontalOverrides = new Set(['padding', 'padding-left', 'padding-right', 'padding-inline-start', 'padding-inline-end']);
-      const hasHorizontalOverride = cssRules.some(rule => rule.selectors.some(selector => selectorTargetsNode(selector, surfaceRoot)) && rule.declarations.some(declaration => {
-        if (horizontalOverrides.has(declaration.property)) return true;
-        if (declaration.property !== 'padding-inline') return false;
-        return !expectedPattern.test(declaration.value.replace(/\s*!important\s*$/i, '').trim());
-      }));
-      if (hasHorizontalOverride) add('scene.page_edge_override', '场景根不得用 padding 简写或横向长属性覆盖页面边距 Token', sceneCss);
+    if (Object.hasOwn(surfaceRoot.attrs, 'data-page-edge-mode')) add('scene.layout_root_annotation', '根节点不得再声明 data-page-edge-mode；边距属于语义内容组', sceneJs);
+    const rootRules = cssRules.filter(rule => rule.selectors.some(selector => selectorTargetsNode(selector, surfaceRoot)));
+    const rootDeclarations = rootRules.flatMap(rule => rule.declarations);
+    const rootHorizontalPadding = new Set(['padding', 'padding-inline', 'padding-left', 'padding-right', 'padding-inline-start', 'padding-inline-end']);
+    if (rootDeclarations.some(declaration => rootHorizontalPadding.has(declaration.property))) add('scene.layout_root_inset', '页面根必须通栏，不得承担横向内容边距', sceneCss);
+    const directRootRules = cssRules.filter(rule => rule.atRules.length === 0 && rule.selectors.some(selector => strictSimpleSelectorMatchesNode(selector, surfaceRoot)));
+    const directRootDeclarations = directRootRules.flatMap(rule => rule.declarations);
+    if (!directRootDeclarations.some(declaration => declaration.property === 'position' && declaration.value === 'absolute')) add('scene.layout_root_position', '页面根必须直接声明 position: absolute', sceneCss);
+    const hasInsetZero = directRootDeclarations.some(declaration => declaration.property === 'inset' && declaration.value === '0');
+    const hasFourEdges = ['top', 'right', 'bottom', 'left'].every(property => directRootDeclarations.some(declaration => declaration.property === property && declaration.value === '0'));
+    if (!hasInsetZero && !hasFourEdges) add('scene.layout_root_inset_runtime', '页面根必须直接声明 inset: 0', sceneCss);
+  }
+
+  const layerRoleMap = new Map();
+  for (const [scope, scopeConfig] of Object.entries(pageLayers?.scopes || {})) {
+    for (const [role, roleConfig] of Object.entries(scopeConfig.roles || {})) layerRoleMap.set(`${scope}/${role}`, roleConfig);
+  }
+  for (const layer of layout.page_layers || []) {
+    if (!layerRoleMap.has(`${layer.scope}/${layer.role}`)) add('scene.page_layer_role', `页面区域 ${layer.region_id} 使用未登记层级：${layer.scope}/${layer.role}`, decisionsFile);
+    if (!selectorExistsInScope(surfaceRoot, layer.selector)) add('scene.page_layer_selector', `页面层级区域未命中实际 DOM：${layer.selector}`, decisionsFile);
+  }
+
+  const primaryScrollSelector = layout.scroll_architecture?.primary_scroll_selector;
+  if (!selectorExistsInScope(surfaceRoot, layout.scroll_architecture?.viewport_selector)) add('scene.scroll_viewport', 'scroll_architecture.viewport_selector 未命中实际 DOM', decisionsFile);
+  if (!selectorExistsInScope(surfaceRoot, primaryScrollSelector)) add('scene.primary_scroll_selector', 'primary_scroll_selector 未命中实际 DOM', decisionsFile);
+  else {
+    const primaryRules = cssRules.filter(rule => rule.selectors.some(selector => normalizeCssSelector(selector) === normalizeCssSelector(primaryScrollSelector)));
+    const overflowValues = primaryRules.flatMap(rule => rule.declarations).filter(declaration => ['overflow', 'overflow-y'].includes(declaration.property)).map(declaration => declaration.value);
+    if (!overflowValues.some(value => /\b(?:auto|scroll)\b/.test(value))) add('scene.primary_scroll_runtime', '主滚动区必须实际声明纵向 overflow: auto/scroll', sceneCss);
+    const primaryHorizontalPadding = primaryRules.flatMap(rule => rule.declarations).some(declaration => ['padding', 'padding-inline', 'padding-left', 'padding-right', 'padding-inline-start', 'padding-inline-end'].includes(declaration.property));
+    if (primaryHorizontalPadding) add('scene.primary_scroll_inset', '主滚动区必须通栏，不得承担横向内容边距', sceneCss);
+  }
+  for (const region of layout.scroll_architecture?.nested_scroll_regions || []) {
+    if (!selectorExistsInScope(surfaceRoot, region.selector)) add('scene.nested_scroll_selector', `嵌套滚动区未命中实际 DOM：${region.selector}`, decisionsFile);
+  }
+  for (const region of layout.scroll_architecture?.fixed_regions || []) {
+    if (!selectorExistsInScope(surfaceRoot, region.selector)) add('scene.fixed_region_selector', `固定区域未命中实际 DOM：${region.selector}`, decisionsFile);
+  }
+
+  for (const group of layout.layout_groups || []) {
+    if (!selectorExistsInScope(surfaceRoot, group.selector) && !cleanCss.includes(group.selector) && !runtimeJs.includes(group.selector.replace(/^\./, ''))) {
+      add('scene.layout_group_selector', `内容组未命中实际 DOM：${group.selector}`, decisionsFile);
+      continue;
     }
+    if (group.selector === `.${[...classSet(surfaceRoot)][0]}` || selectorMatchesNode(group.selector, surfaceRoot)) add('scene.layout_group_root', '内容组不得使用页面根作为间距 owner', decisionsFile);
+    if (group.spacing_owner !== 'scene' || group.inline_inset_token === 'var(--layout-page-margin-m0)' || group.inline_inset_token === 'var(--spacer-0)') continue;
+    const expected = group.inline_inset_token;
+    const declarations = cssRules
+      .filter(rule => rule.atRules.length === 0 && rule.selectors.some(selector => normalizeCssSelector(selector) === normalizeCssSelector(group.selector)))
+      .flatMap(rule => rule.declarations.filter(declaration => declaration.property === 'padding-inline'));
+    if (!declarations.length || declarations.some(declaration => declaration.value !== expected)) add('scene.layout_group_runtime', `内容组 ${group.group_id} 必须由自身直接使用 ${expected}`, sceneCss);
+  }
+
+  for (const region of layout.sticky_regions || []) {
+    if (!selectorExistsInScope(surfaceRoot, region.selector)) {
+      add('scene.sticky_region_selector', `sticky 区域未命中实际 DOM：${region.selector}`, decisionsFile);
+      continue;
+    }
+    if (region.visibility !== 'always' && !selectorExistsInScope(surfaceRoot, `${region.selector}.sticky-region`) && !selectorNodesInScope(surfaceRoot, region.selector).some(node => classSet(node).has('sticky-region'))) add('scene.sticky_region_component', `动态 sticky 区域必须消费 sticky-region 组件：${region.selector}`, sceneJs);
+    const stickyRules = cssRules.filter(rule => rule.selectors.some(selector => normalizeCssSelector(selector) === normalizeCssSelector(region.selector)));
+    const stickyDeclarations = stickyRules.flatMap(rule => rule.declarations);
+    if (!stickyDeclarations.some(declaration => declaration.property === 'background' && declaration.value === region.background_token)) add('scene.sticky_region_background', `sticky 区域必须显式使用不透明背景 ${region.background_token}`, sceneCss);
+    if (stickyDeclarations.some(declaration => declaration.property === 'opacity' || declaration.value.includes('opacity'))) add('scene.sticky_region_opacity', 'sticky 显隐不得改变 opacity', sceneCss);
   }
 
   const presentation = decision.presentation || {};

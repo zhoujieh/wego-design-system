@@ -1,5 +1,4 @@
-/* wego-design-contract:
-{
+/* wego-design-contract: {
   "surface_id": "dynamic-detail",
   "route_id": "dynamic-detail",
   "layout_mode": "composed",
@@ -15,12 +14,6 @@
   "prompt_contract": {
     "design_system_version": 451,
     "token_bindings": [
-      {
-        "selector": ".dynamic-detail",
-        "content_role": ".dynamic-detail 的 padding-inline",
-        "css_property": "padding-inline",
-        "token": "var(--layout-page-margin-m0)"
-      },
       {
         "selector": ".dynamic-detail",
         "content_role": ".dynamic-detail 的 background",
@@ -47,8 +40,8 @@
       },
       {
         "selector": ".dynamic-detail__content",
-        "content_role": ".dynamic-detail__content 的 padding",
-        "css_property": "padding",
+        "content_role": "动态正文内容组的上下留白",
+        "css_property": "padding-block",
         "token": "var(--spacer-16)"
       },
       {
@@ -326,6 +319,12 @@
         "content_role": ".dynamic-detail__select-cart.is-added .bottom-action-bar__action-label 的 color",
         "css_property": "color",
         "token": "var(--text-brand)"
+      },
+      {
+        "selector": ".dynamic-detail__content",
+        "content_role": "动态正文内容组的横向留白",
+        "css_property": "padding-inline",
+        "token": "var(--spacer-16)"
       }
     ],
     "component_bindings": [
@@ -421,13 +420,77 @@
     "layout_contract": {
       "mode": "composed",
       "source": "references/design-decisions.md",
-      "selection_reason": "详情是普通 Push 二级页；采用 M0 让导航栏和底部操作栏通栏，正文在内部使用内容留白，首要任务是阅读完整动态。",
-      "page_edge_mode": "M0",
+      "selection_reason": "详情是普通 Push 二级页；根与主滚动区通栏，navbar 和底部操作栏保持同栏，正文作为单一语义内容组承担 16px 横向留白与垂直节奏。底部操作栏在滚动区之外按流式预留空间，最后内容不被遮挡。",
       "mutable_regions": [
         ".dynamic-detail__content",
         ".dynamic-detail__media-list",
         ".dynamic-detail__product-host"
-      ]
+      ],
+      "principle_refs": [
+        "wego-clarity-page-architecture-before-components"
+      ],
+      "page_layers": [
+        {
+          "region_id": "dynamic-detail-navbar",
+          "selector": ".dynamic-detail__navbar",
+          "scope": "page-local",
+          "role": "navigation"
+        },
+        {
+          "region_id": "dynamic-detail-scroll",
+          "selector": ".dynamic-detail__scroll",
+          "scope": "page-local",
+          "role": "content"
+        },
+        {
+          "region_id": "dynamic-detail-actions",
+          "selector": ".dynamic-detail__actions",
+          "scope": "page-local",
+          "role": "navigation"
+        }
+      ],
+      "scroll_architecture": {
+        "viewport_selector": ".dynamic-detail",
+        "primary_scroll_selector": ".dynamic-detail__scroll",
+        "document_scroll": false,
+        "nested_scroll_regions": [],
+        "fixed_regions": [
+          {
+            "region_id": "dynamic-detail-actions",
+            "selector": ".dynamic-detail__actions",
+            "edge": "bottom",
+            "safe_area_owner": "component",
+            "clearance": "flow-reserved"
+          }
+        ]
+      },
+      "layout_groups": [
+        {
+          "group_id": "dynamic-detail-navbar-group",
+          "selector": ".dynamic-detail__navbar",
+          "content_role": "详情导航通栏 surface",
+          "inline_inset_token": "var(--layout-page-margin-m0)",
+          "spacing_owner": "component",
+          "gap_token": "var(--spacer-0)"
+        },
+        {
+          "group_id": "dynamic-detail-content-group",
+          "selector": ".dynamic-detail__content",
+          "content_role": "动态正文与关联商品内容组",
+          "inline_inset_token": "var(--spacer-16)",
+          "spacing_owner": "scene",
+          "gap_token": "var(--spacer-16)"
+        },
+        {
+          "group_id": "dynamic-detail-actions-group",
+          "selector": ".dynamic-detail__actions",
+          "content_role": "详情操作通栏 surface",
+          "inline_inset_token": "var(--layout-page-margin-m0)",
+          "spacing_owner": "component",
+          "gap_token": "var(--spacer-0)"
+        }
+      ],
+      "sticky_regions": []
     },
     "interaction_contract": [
       {
@@ -524,7 +587,7 @@
       375,
       393
     ],
-    "checked_at": "2026-07-24T03:03:45.000Z",
+    "checked_at": "2026-07-28T16:18:00+08:00",
     "scope": "动态详情独立页面的加入选品车入口、列表已选状态同步、关联商品入口；移动端预览验证详情底部操作栏不遮挡内容并保持可查看产品细节。",
     "checks": {
       "horizontal_overflow": true,
@@ -536,8 +599,7 @@
     },
     "checked": true
   }
-}
-*/
+} */
 
 (function registerDynamicDetail() {
   var fallbackImage = './lib/assets/image/clothing/clothing_1/clothing_1_1.jpg';
@@ -596,8 +658,8 @@
     routeId: 'dynamic-detail',
     title: '动态详情',
     template: `
-    <section class="dynamic-detail" data-surface-id="dynamic-detail" data-route-id="dynamic-detail" data-route-bound="true" data-layout-mode="composed" data-page-edge-mode="M0" data-bg="surface">
-      <div class="navbar" data-dd-id="dynamic-detail-navbar" data-component-slug="navbar" data-component-binding="dynamic-detail-navbar">
+    <section class="dynamic-detail" data-surface-id="dynamic-detail" data-route-id="dynamic-detail" data-route-bound="true" data-layout-mode="composed" data-bg="surface">
+      <div class="navbar dynamic-detail__navbar" data-dd-id="dynamic-detail-navbar" data-component-slug="navbar" data-component-binding="dynamic-detail-navbar">
         <div class="navbar__body">
           <div class="navbar__left"><button type="button" class="navbar__left-btn" aria-label="返回" data-dom-id="dynamic-detail-back"><i class="wego-iconfont-s icon-fanhui" aria-hidden="true"></i></button></div>
           <div class="navbar__center"><span class="navbar__title">动态详情</span></div>
@@ -608,7 +670,7 @@
         <article class="dynamic-detail__content" data-region="dynamic-content"></article>
         <span class="tag tag--20 tag--gray" hidden aria-hidden="true" data-dd-id="dynamic-detail-tag-seed" data-component-slug="tag" data-component-binding="dynamic-detail-tag"><span class="tag__label">产品</span></span>
       </main>
-      <div class="bottom-action-bar bottom-action-bar--primary-secondary bottom-action-bar--icon-text js-overflow-bar" role="toolbar" aria-label="动态操作" data-dd-id="dynamic-detail-actions" data-component-slug="bottom-action-bar" data-component-binding="dynamic-detail-actions">
+      <div class="bottom-action-bar bottom-action-bar--primary-secondary bottom-action-bar--icon-text js-overflow-bar dynamic-detail__actions" role="toolbar" aria-label="动态操作" data-dd-id="dynamic-detail-actions" data-component-slug="bottom-action-bar" data-component-binding="dynamic-detail-actions">
         <div class="bottom-action-bar__inner">
           <div class="bottom-action-bar__leading">
             <button class="bottom-action-bar__more" type="button" aria-label="更多操作"><i class="wego-iconfont-s icon-sandian16"></i><span class="bottom-action-bar__more-label">更多</span></button>

@@ -18,12 +18,6 @@
     "token_bindings": [
       {
         "selector": ".app-center-page",
-        "content_role": "页面边距",
-        "css_property": "padding-inline",
-        "token": "var(--layout-page-margin-m0)"
-      },
-      {
-        "selector": ".app-center-page",
         "content_role": "页面背景",
         "css_property": "background",
         "token": "var(--bg-page)"
@@ -53,19 +47,19 @@
         "token": "var(--spacer-8)"
       },
       {
-        "selector": ".app-center-page__body",
+        "selector": ".app-center-page__content-group",
         "content_role": "内容区横向边距",
         "css_property": "padding-inline",
         "token": "var(--layout-page-margin-m8)"
       },
       {
-        "selector": ".app-center-page__body",
+        "selector": ".app-center-page__content-group",
         "content_role": "内容区底部安全区",
         "css_property": "padding-bottom",
         "token": "var(--spacer-72)"
       },
       {
-        "selector": ".app-center-page__body",
+        "selector": ".app-center-page__content-group",
         "content_role": "内容区分组间距",
         "css_property": "gap",
         "token": "var(--spacer-8)"
@@ -211,10 +205,87 @@
     "layout_contract": {
       "mode": "composed",
       "source": "references/design-decisions.md",
-      "selection_reason": "应用中心是二级页面，使用 tabs 做分类切换，card 做内容分组",
-      "page_edge_mode": "M0",
+      "selection_reason": "应用中心是二级页面；页面根与主滚动区通栏，navbar 与分类 tabs 处于 navigation 层并保持通栏，应用分类内容作为单一语义组承担 M8 横向留白与 8px 垂直节奏。",
       "mutable_regions": [
         ".app-center-page__body"
+      ],
+      "principle_refs": [
+        "wego-clarity-page-architecture-before-components"
+      ],
+      "page_layers": [
+        {
+          "region_id": "app-center-navbar",
+          "selector": ".app-center-page__navbar",
+          "scope": "page-local",
+          "role": "navigation"
+        },
+        {
+          "region_id": "app-center-tabs",
+          "selector": ".app-center-page__tabs",
+          "scope": "page-local",
+          "role": "navigation"
+        },
+        {
+          "region_id": "app-center-content",
+          "selector": ".app-center-page__content-group",
+          "scope": "page-local",
+          "role": "content"
+        }
+      ],
+      "scroll_architecture": {
+        "viewport_selector": ".app-center-page",
+        "primary_scroll_selector": ".app-center-page__body",
+        "document_scroll": false,
+        "nested_scroll_regions": [
+          {
+            "region_id": "app-center-tabs-scroll",
+            "selector": ".app-center-page__tabs-scroll",
+            "axis": "x",
+            "parent_selector": ".app-center-page"
+          }
+        ],
+        "fixed_regions": []
+      },
+      "layout_groups": [
+        {
+          "group_id": "app-center-navbar-group",
+          "selector": ".app-center-page__navbar",
+          "content_role": "应用中心导航通栏 surface",
+          "inline_inset_token": "var(--layout-page-margin-m0)",
+          "spacing_owner": "component",
+          "gap_token": "var(--spacer-0)"
+        },
+        {
+          "group_id": "app-center-tabs-group",
+          "selector": ".app-center-page__tabs",
+          "content_role": "分类导航通栏 surface",
+          "inline_inset_token": "var(--layout-page-margin-m0)",
+          "spacing_owner": "component",
+          "gap_token": "var(--spacer-8)"
+        },
+        {
+          "group_id": "app-center-content-group",
+          "selector": ".app-center-page__content-group",
+          "content_role": "应用分类内容组",
+          "inline_inset_token": "var(--layout-page-margin-m8)",
+          "spacing_owner": "scene",
+          "gap_token": "var(--spacer-8)"
+        }
+      ],
+      "sticky_regions": [
+        {
+          "region_id": "app-center-tabs",
+          "selector": ".app-center-page__tabs",
+          "scroll_selector": ".app-center-page__body",
+          "edge": "top",
+          "stack_order": 0,
+          "visibility": "always",
+          "background_token": "var(--bg-page)",
+          "layer_role": "navigation",
+          "after_gap_token": "var(--spacer-8)",
+          "scroll_padding": "flow-reserved",
+          "essential": true
+        }
       ]
     },
     "interaction_contract": [
@@ -266,7 +337,7 @@
   "generation_evidence": {
     "scene_js": "wego-app/scenes/应用中心/scene.js",
     "scene_css": "wego-app/scenes/应用中心/scene.css",
-    "source_sha256": "e346f6379dd23b5d93632afa8038c8f328a95bf88ace413282927b6432eb820d",
+    "source_sha256": "5b4d6a7e6cc824ac3e661510401ce8fc5676df264d31106cb7e5ca73b4c7a495",
     "dom_ids": [
       "app-center-back",
       "app-center-body"
@@ -278,7 +349,7 @@
         375,
         393
       ],
-      "checked_at": "2026-07-16T02:50:00.000Z",
+      "checked_at": "2026-07-28T16:18:00+08:00",
       "checks": {
         "horizontal_overflow": true,
         "overlap": true,
