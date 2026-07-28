@@ -103,6 +103,7 @@ const uiKit = json('uikit-plan.json');
 const library = json('library-consumption.json');
 const metadata = json('metadata.json');
 const pageLayers = json('page-layers.json');
+const scaffold = read('scaffold.css');
 
 if (index?.schemaVersion !== 4 || index?.componentContractSchemaVersion !== 4) {
   fail('index.schema', 'components/index.json 必须使用 schemaVersion 4 与 componentContractSchemaVersion 4', 'components/index.json');
@@ -111,6 +112,12 @@ if (Object.hasOwn(index || {}, 'uiKits')) fail('index.duplicate_uikits', 'compon
 if (uiKit?.schemaVersion !== 5 || !Array.isArray(uiKit?.pagePatterns)) fail('uikit.schema', 'uikit-plan.json 必须使用 schemaVersion 5 且包含 pagePatterns', 'uikit-plan.json');
 if (library?.schemaVersion !== 6) fail('library.schema', 'library-consumption.json 必须使用 schemaVersion 6', 'library-consumption.json');
 if (pageLayers?.schemaVersion !== 1 || !pageLayers?.scopes) fail('layers.schema', 'page-layers.json 必须使用 schemaVersion 1 并声明 scopes', 'page-layers.json');
+if (!/\.phone-screen\s*\{[\s\S]*?transform:\s*translateZ\(0\)\s*;/.test(scaffold)) {
+  fail('uikit.showcase_fixed_containment', 'scaffold.css 的 phone-screen 必须为 fixed 浮层建立手机屏幕 containing block', 'scaffold.css');
+}
+if (!/\.phone-screen\s+\.uikit-host-screen\s*\{[^}]*z-index:\s*var\(--z-base\)\s*;/.test(scaffold)) {
+  fail('uikit.showcase_base_layer', 'scaffold.css 的底页必须形成 base stacking context，避免 sticky NavBar 越过 modal/sheet', 'scaffold.css');
+}
 
 const registered = new Set((index?.components || []).map(item => item.slug));
 const patternIds = new Set();
@@ -121,6 +128,30 @@ for (const pattern of uiKit?.pagePatterns || []) {
   for (const slug of pattern.componentCandidates || []) if (!registered.has(slug)) fail('uikit.pattern_component', `页面范式 ${pattern.id} 使用未注册组件：${slug}`, 'uikit-plan.json');
   for (const field of ['entry', 'qualityReport']) if (!pattern.uiKit?.[field] || !fileExists(pattern.uiKit[field])) fail('uikit.pattern_asset', `页面范式 ${pattern.id} 缺少有效 UI Kit ${field}`, pattern.uiKit?.[field] || 'uikit-plan.json');
   if (!pattern.presentation || !['type', 'transition', 'dismissAction', 'overlayLevel'].every(field => typeof pattern.presentation[field] === 'string' && pattern.presentation[field]) || typeof pattern.presentation.coversTabBar !== 'boolean') fail('uikit.pattern_presentation', `页面范式 ${pattern.id} 缺少完整 presentation`, 'uikit-plan.json');
+  const entryRelative = pattern.uiKit?.entry;
+  if (entryRelative && fileExists(entryRelative)) {
+    const entry = read(entryRelative);
+    const phoneScreens = [...entry.matchAll(/\bclass=["']phone-screen["']/g)].length;
+    const statusBars = [...entry.matchAll(/\bclass=["']phone-status["']/g)].length;
+    const homeIndicators = [...entry.matchAll(/\bclass=["']phone-indicator["']/g)].length;
+    const reactChrome = /\bclassName=["']phone-(?:status|indicator)["']/.test(entry);
+    const screenIndex = entry.indexOf('<div class="phone-screen">');
+    const statusIndex = entry.indexOf('<div class="phone-status"');
+    const rootIndex = entry.indexOf('<div id="root"></div>');
+    const indicatorIndex = entry.indexOf('<div class="phone-indicator"');
+    if (phoneScreens !== 1 || statusBars !== 1 || homeIndicators !== 1 || reactChrome) {
+      fail('uikit.showcase_global_chrome', `${entryRelative} 必须只在静态 phone-screen 宿主中各保留一份 phone-status 与 phone-indicator，React 页面不得重复渲染`, entryRelative);
+    }
+    if (!(screenIndex >= 0 && screenIndex < statusIndex && statusIndex < rootIndex && rootIndex < indicatorIndex)) {
+      fail('uikit.showcase_shell_order', `${entryRelative} 的共享宿主顺序必须是 phone-screen > phone-status + #root + phone-indicator`, entryRelative);
+    }
+    for (const match of entry.matchAll(/iconSrc\(\s*["']([^"']+)["']\s*\)/g)) {
+      const tab = match[1];
+      const normal = `assets/icons/tab-${tab}.svg`;
+      const active = `assets/icons/tab-active-${tab}.svg`;
+      if (!fileExists(normal) && !fileExists(active)) fail('uikit.asset_missing', `${entryRelative} 引用了不存在的 Tab 图标：${tab}`, entryRelative);
+    }
+  }
 }
 for (const pattern of uiKit?.pagePatterns || []) {
   const relative = pattern.uiKit?.qualityReport;
@@ -131,6 +162,7 @@ for (const pattern of uiKit?.pagePatterns || []) {
   const quality = json(relative);
   if (!quality) continue;
   if (quality.schemaVersion !== 4 || !Number.isInteger(quality.designSystemVersion) || quality.designSystemVersion < 1 || quality.kitType !== pattern.id) fail('uikit.quality_report_schema', `${relative} 必须记录 schemaVersion、designSystemVersion（正整数）与 kitType`, relative);
+  if (quality.designSystemVersion !== metadata?.version) fail('uikit.quality_report_version', `${relative}.designSystemVersion 必须等于当前设计系统版本 ${metadata?.version}`, relative);
   if (quality.designSystemParity?.status !== 'passed' || !quality.designSystemParity?.checked_at || !Array.isArray(quality.designSystemParity?.checks) || !quality.designSystemParity.checks.length) fail('uikit.quality_report_parity', `${relative} 必须记录已通过的设计系统一致性检查`, relative);
   const used = [...(quality.coreComponentsUsed || []), ...(quality.supportComponentsUsed || [])];
   for (const slug of used) if (!registered.has(slug)) fail('uikit.quality_report_component', `${relative} 使用未注册组件：${slug}`, relative);

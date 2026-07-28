@@ -1,9 +1,9 @@
 {
   "schemaVersion": 4,
-  "designSystemVersion": 476,
+  "designSystemVersion": 479,
   "designSystemParity": {
     "status": "passed",
-    "checked_at": "2026-07-27T00:00:00+08:00",
+    "checked_at": "2026-07-28T17:09:37+08:00",
     "checks": [
       "组件均已注册且允许使用",
       "组件契约与 Preview 一致性守卫通过",
@@ -12,7 +12,9 @@
       "与 biz-rule-config 的 appliesWhen/excludeWhen 互斥明确",
       "fullscreen NavBar 仅允许 3 种固定模式（模式 A/B/C），右侧只支持 button 与 icon-text 入口",
       "NavBar 布局仅使用左中右三段式或 navbar__body--split 左右两段式",
-      "全屏模态消费 modal 组件 fullscreen 变体，无自定义 .uikit-modal-screen 私有层"
+      "全屏模态消费 modal 组件 fullscreen 变体，无自定义 .uikit-modal-screen 私有层",
+      "共享 Showcase 宿主只渲染一份状态栏与手势条，fixed 浮层受 phone-screen 约束且底页 NavBar 不越层",
+      "所有 Tab 图标资源均存在"
     ]
   },
   "kitType": "entity-form",
@@ -87,7 +89,9 @@
         "模态结构为 .modal__panel > .modal__title--default > .navbar + .modal__body",
         "打开动画由组件自身 data-state 状态机驱动（requestAnimationFrame 双 rAF 触发）",
         "通过 React 状态控制挂载与 open/closed 切换，data-state 必走双 rAF 让浏览器先布局 closed 初始态",
-        "phone-status 在 phone-screen 顶层，不在模态内部再画一份",
+        "phone-status 与 phone-indicator 各只在 phone-screen 静态宿主渲染一次，不进入 React 页面树",
+        "全屏 Modal 与嵌套 actionsheet 的边界均与 phone-screen 一致",
+        "底页 sticky NavBar 处于 base stacking context，不覆盖 Modal 标题栏",
         "默认展示打开后的稳定态，避免自动入场动画让截图停在半开中间态"
       ],
       "violations": []
@@ -96,15 +100,16 @@
   "warnings": [
     "本 UI Kit 展示的是从底部 slide-up 进入、落稳后全屏覆盖的实体信息录入模态页。",
     "全屏模态统一消费 modal 组件 fullscreen 变体（.modal.modal--fullscreen[data-state] + .modal__panel > .modal__title--default > .navbar + .modal__body），蒙层与 slide-up/slide-down 过渡由组件自身承担，UI Kit 不再维护 .uikit-modal-screen 私有 transform 状态机。",
-    "phone-status 为当前页面状态栏展示样式；phone-indicator 等通用 Showcase 外壳由 scaffold.css 提供，非通用组件。",
+    "phone-status 与 phone-indicator 都属于 scaffold.css 管理的全局 Showcase 外壳，每个 phone-screen 只渲染一份，页面、Modal 与 actionsheet 不重复创建。",
     "navbar 通过组件自身的 padding-top: var(--safe-area-top, 0px) + sticky top: 0 避让状态栏，UI Kit 演示层不要再额外给页面容器补顶部 safe-area。",
     "页面纵向节奏应由 phone-body 的 8px 组间距和各 form-group 自身的 title + content 结构承担，不再插入 .uikit-section-gap 这类纯占位元素。",
     "连续 form-body--vertical 字段应优先使用 form-group 的 title + content 正式结构；本范式默认通栏模式 M0，form-group__content 不加 --card 修饰类。",
     "头像位、长文本、备注、验证消息等富输入字段统一使用 form-body--vertical；普通文本和带前缀字段也建议保持 vertical 以确保整组基线一致。",
     "必填字段统一使用 form-body__label--required + form-body__required（文案固定为 *）表达红色星号，不自造标记或写死颜色；手机号区号、货币符号等只读前缀统一使用 form-body__phone-prefix 等正式前缀结构。",
     "分组、来源等单选枚举字段统一使用 form-body--clickable + form-body__select + actionsheet 选择模式联动；选中后回填 select-text 并加 has-value 类，不在 form-body 内嵌入原生 select。",
-    "根节点 #root 已经是 .phone-screen，React 内容层不要再嵌套第二层 .phone-screen。",
-    "phone-status / phone-indicator 默认绝对定位悬浮且不占文档流，并保持预览层级最高；桌面手机壳写死模拟 44px / 34px，移动端同链接隐藏。",
+    "#root 是 phone-screen 内的页面与浮层挂载区；phone-status / phone-indicator 是它的静态兄弟节点，不进入 React 页面树。",
+    "phone-screen 为 fixed 浮层建立 containing block，full-screen-modal 与嵌套 actionsheet 必须被限制在手机壳内；底页形成 base stacking context，sticky NavBar 不得越过浮层。",
+    "phone-status / phone-indicator 默认绝对定位悬浮且不占文档流，并保持预览层级最高；桌面手机壳模拟 44px / 34px，移动端同链接隐藏。",
     "模态页首屏展示以稳定落点为准：默认直接展示打开后的最终态，避免自动入场动画让截图停在半开中间态。",
     "真实项目中应保持单一页面级主操作，只在 navbar 右侧 btn--strong btn--sm 收口，不在页面内容区或底部重复放保存按钮。",
     "iconfont 图标用于头像上传加号（icon-jia16）、选择下拉箭头（icon-xiajiantou16）、actionsheet 选中对勾（icon-gou-jiacu）；fullscreen 变体左侧仅允许 .navbar__left-text（模式 A 取消）、.navbar__left-btn 配 icon-xiajiantou16（模式 B 下箭头）、.navbar__left-btn 配 icon-zuojiantou16（模式 C 返回）三种入口，禁止使用关闭叉。",

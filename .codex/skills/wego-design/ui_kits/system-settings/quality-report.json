@@ -1,10 +1,10 @@
 {
   "schemaVersion": 4,
-  "designSystemVersion": 476,
+  "designSystemVersion": 479,
   "designSystemParity": {
     "status": "passed",
-    "checked_at": "2026-07-27T00:00:00+08:00",
-    "checks": ["组件均已注册且允许使用", "组件契约与 Preview 一致性守卫通过", "不存在生成规则文档或已删除技能引用", "UI Kit 仅作为明确页面范式证据", "NavBar 布局仅使用左中右三段式或 navbar__body--split 左右两段式"]
+    "checked_at": "2026-07-28T17:09:37+08:00",
+    "checks": ["组件均已注册且允许使用", "组件契约与 Preview 一致性守卫通过", "不存在生成规则文档或已删除技能引用", "UI Kit 仅作为明确页面范式证据", "NavBar 布局仅使用左中右三段式或 navbar__body--split 左右两段式", "共享 Showcase 宿主只渲染一份状态栏与手势条，push 页与底页共用系统外壳"]
   },
   "kitType": "system-settings",
   "presentation": "push",
@@ -59,6 +59,8 @@
         "SystemSettingsScreen 包含 navbar + phone-body + 内容 + 打开/关闭动画",
         "打开动画通过 transform + transition 实现(push 用 translateX)",
         "通过 React 状态控制挂载与打开/关闭状态切换",
+        "phone-status 与 phone-indicator 各只在 phone-screen 静态宿主渲染一次，不进入 HostScreen 或 SystemSettingsScreen",
+        "push 页边界与 phone-screen 一致，底页状态栏和手势条不会随页面栈重复",
         "默认展示打开后的稳定态,避免自动入场动画让截图停在半开中间态"
       ],
       "violations": []
@@ -66,13 +68,13 @@
   },
   "warnings": [
     "本 UI Kit 展示的是从右侧 push 进入、覆盖当前页的系统设置层级导航页。",
-    "phone-status 为当前页面状态栏展示样式;phone-indicator 等通用 Showcase 外壳由 scaffold.css 提供,非通用组件。",
+    "phone-status 与 phone-indicator 都属于 scaffold.css 管理的全局 Showcase 外壳，每个 phone-screen 只渲染一份，HostScreen 与 push 页不重复创建。",
     "navbar 通过组件自身的 padding-top: var(--safe-area-top, 0px) + sticky top: 0 避让状态栏,UI Kit 演示层不要再额外给页面容器补顶部 safe-area。",
     "页面纵向节奏应由 phone-body 的 8px 组间距和各组自身的 group 结构承担,不再插入纯占位元素。",
     "连续 cell 分组应优先使用 cell-group 的 title + content 正式结构;HostScreen 与 SystemSettingsScreen 均用通栏模式 M0。",
     "整行点击只保留给带箭头、会进入下一层的入口行;右侧是 switch、radio-group、checkbox-group 等独立控件时由控件自身承担交互。",
-    "根节点 #root 已经是 .phone-screen,React 内容层不要再嵌套第二层 .phone-screen。",
-    "phone-status / phone-indicator 默认绝对定位悬浮且不占文档流,并保持预览层级最高;桌面手机壳写死模拟 44px / 34px,移动端同链接隐藏。",
+    "#root 是 phone-screen 内的页面栈挂载区；phone-status / phone-indicator 是它的静态兄弟节点，不进入 React 页面树。",
+    "phone-status / phone-indicator 默认绝对定位悬浮且不占文档流,并保持预览层级最高;桌面手机壳模拟 44px / 34px,移动端同链接隐藏。",
     "push 页首屏展示以稳定落点为准:默认直接展示打开后的最终态,避免自动入场动画让截图停在半开中间态。",
     "真实项目中应保持单一页面级主操作(返回),不在页面内容区或底部重复放操作按钮。",
     "iconfont 图标用于跳转指示器(icon-youjiantou16)和返回按钮(icon-fanhui)。",
