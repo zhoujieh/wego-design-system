@@ -55,6 +55,7 @@ function checkRequiredFiles() {
     'wego-app/index.html',
     'wego-app/js/app.js',
     'wego-app/js/routes.js',
+    'scripts/cleanup-task-artifacts.mjs',
     'scripts/iteration-record.mjs',
     'scripts/validate-component-contract-parity.mjs',
     'scripts/validate-skill-entry-boundary.mjs',
@@ -237,6 +238,13 @@ function checkSkillEntryBoundary() {
   if (tests.status !== 0) add('error', 'skill_entry.test', (tests.stderr || tests.stdout || '技能入口追溯测试失败').trim(), path.join(root, 'scripts/test-skill-entry-boundary.mjs'));
 }
 
+function checkTaskArtifacts() {
+  const tests = spawnSync(process.execPath, ['scripts/cleanup-task-artifacts.mjs', 'test', '--json'], { cwd: root, encoding: 'utf8' });
+  if (tests.status !== 0) add('error', 'task_artifacts.test', (tests.stderr || tests.stdout || '任务产物清理测试失败').trim(), path.join(root, 'scripts/cleanup-task-artifacts.mjs'));
+  const stale = spawnSync(process.execPath, ['scripts/cleanup-task-artifacts.mjs', 'check', '--json'], { cwd: root, encoding: 'utf8' });
+  if (stale.status !== 0) add('error', 'task_artifacts.stale', '存在超过 24 小时的任务产物；请运行 node scripts/cleanup-task-artifacts.mjs clean', path.join(root, 'scripts/cleanup-task-artifacts.mjs'));
+}
+
 function checkMetadataVersion() {
   const changed = changedFiles();
   const workflowOnlyFiles = new Set([
@@ -261,6 +269,7 @@ function main() {
     checkSceneContractTools();
     checkDesignDecisionPrinciples();
     checkSkillEntryBoundary();
+    checkTaskArtifacts();
     checkMetadataVersion();
   }
   report.metrics.changedFiles = changedFiles().length;

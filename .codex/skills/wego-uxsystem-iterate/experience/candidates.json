@@ -1564,6 +1564,64 @@
       ],
       "created_at": "2026-07-21T00:00:00Z",
       "updated_at": "2026-07-21T00:00:00Z"
+    },
+    {
+      "id": "exp-design-before-component-consumption",
+      "normalized_key": "design-before-component-consumption",
+      "title": "交互原型先完成页面设计再映射组件",
+      "status": "promoted",
+      "occurrence_count": 1,
+      "threshold": 1,
+      "primary_owner": "wego-design",
+      "secondary_owners": [
+        "wego-uxsystem-iterate"
+      ],
+      "ownership_reason": "设计意图、页面结构、范式裁决、组件映射顺序和实现后自审属于业务场景设计生成方法；组件与 UI Kit 本体保持不变。",
+      "applies_when": [
+        "有效迭代中已有用户确认的 prototype_brief",
+        "需要新建或修改用户可见业务场景"
+      ],
+      "avoid_when": [
+        "仅修改组件、Token、Preview、UI Kit、守卫或设计系统源",
+        "业务目标、范围、入口、关键路径、状态或结果尚未确认"
+      ],
+      "exceptions": [
+        "已确认 prototype_brief 中的产品阶段交互视觉描述是强约束",
+        "设计选择会改变业务结果、不可逆风险或已确认产品指令时退回 wego-product"
+      ],
+      "fallback": [
+        "精确命中 pagePattern 时使用 pattern",
+        "未命中时使用 composed 语义区域流程",
+        "正式组件能力不足时采用正式回退并提交最小缺口说明"
+      ],
+      "rule_ownership": {
+        "category": "skill-runtime-flow",
+        "canonical": {
+          "file": ".codex/skills/wego-design/references/interaction-prototype-design.md",
+          "locator": "rule-id: design-before-component-consumption",
+          "rule_id": "design-before-component-consumption"
+        }
+      },
+      "runtime_reachability": {
+        "consumer_skill": "wego-design",
+        "output_field": "scene.js/scene.css/design-decisions.json",
+        "downstream_consumer": "wego-design",
+        "acceptance_check": "wego-design"
+      },
+      "evidence": [
+        "用户指出即使所有页面补齐 UI Kit，若 AI 只是套模板和拼组件，仍没有完成真正的设计。",
+        "用户确认第一阶段应只优化工作流本身：先形成设计意图与页面结构，再精确命中范式或自主组合，之后 Preview-first 映射组件并完成一轮设计自审；本阶段不扩展合同、数据采集和测试门禁。"
+      ],
+      "created_at": "2026-07-28T00:00:00Z",
+      "updated_at": "2026-07-28T00:00:00Z",
+      "promoted_at": "2026-07-28T00:00:00Z",
+      "promotion_landing": {
+        "file": ".codex/skills/wego-design/references/interaction-prototype-design.md",
+        "locator": "rule-id: design-before-component-consumption",
+        "rule_id": "design-before-component-consumption",
+        "constraint_area": "交互原型设计生成顺序与设计授权",
+        "description": "已确认简报授权 AI 先形成设计意图、语义区域和精确范式/自主组合方案，页面结构确定后再 Preview-first 映射组件，实现后完成一轮设计自审。"
+      }
     }
   ]
 }

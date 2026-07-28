@@ -28,7 +28,7 @@
 1. UI Kit 仅展示页面组合，不得成为 App 宿主、通用组件或业务场景模板。
 2. 每个 UI Kit 只能使用已注册组件与业务区域胶水；不得使用旧技能路径、自动生成规则文档、未注册 class 或自造组件。
 3. 更新明确 pagePattern、范式候选组件、presentation、组合约束和质量报告；报告必须使用当前 schema 和设计系统版本，记录通过的组件一致性检查与非空质量门禁。
-4. 未命中明确范式时，场景先按共享设计决策原则裁决首要任务、信息层级和布局取舍，再按 `library-consumption.json` 与场景合同执行组件、Token、presentation 和交互落地；只有组件、变体或 presentation 无法覆盖时才提交最小缺口说明，禁止因缺口在 UI Kit 或场景临时造组件。
+4. 场景设计统一使用 `../../wego-design/references/interaction-prototype-design.md`：先形成设计意图和语义区域，精确命中范式时读取对应 UI Kit，未命中时走 composed；页面结构确定后再按 `library-consumption.json` Preview-first 映射组件。只有组件、变体或 presentation 无法覆盖时才提交最小缺口说明，禁止选择近似 UI Kit、拼接多个 UI Kit，或因缺口在 UI Kit/场景临时造组件。
 
 ## 4. 必跑守卫
 

@@ -1,6 +1,6 @@
 # 场景合同
 
-> 角色：场景产物、决策标注和完成门禁的唯一说明。创建或修改业务场景时，在设计原则和命中组件之后读取。
+> 角色：场景产物、决策标注和完成门禁的唯一说明。创建或修改业务场景时，在交互原型设计方法完成页面结构、并命中具体组件之后读取。
 
 ## 唯一场景产物
 
@@ -144,7 +144,8 @@ wego-app/scenes/{中文业务场景}/design-decisions.json
 <!-- rule-id: design-decisions-css-token-binding-precision -->
 
 - `token_bindings` 只记录场景自己声明的视觉语义，包括排版、颜色、页面边距等。组件内部样式由正式组件负责；允许 Token 由当前组件 `runtimeTokens` 与场景基础策略自动计算。
-- `layout_contract.source`：pattern 指向命中范式；composed 指向 `references/design-decisions.md`。边距理由并入 `selection_reason`。
+- `layout_contract.source`：pattern 指向精确命中的范式；composed 指向 `references/design-decisions.md`。`selection_reason` 使用现有字段记录最终首要任务、区域层级以及信息显隐、滚动或固定操作的关键取舍，边距理由一并写入；不得只写“参考某 UI Kit”或笼统的“按规范设计”。
+- `token_bindings.content_role` 必须说明选择器承载的真实内容角色或区域语义，例如“对象名称”“辅助元数据”“持续主行动区域”；不得使用“页面样式”“普通文字”等无法解释视觉层级的泛化描述。
 - 非空 `state_contract` 必须且只能有一个初始状态。仅实现简报和真实操作需要的状态；刷新后保留必须有明确需求。
 - `interaction_contract.target` 只使用实际存在的 `route:*`、`state:*`、`overlay:modal|sheet|full-screen-modal|close`、`feedback:toast|dialog` 或 `navigation:back`。
 
@@ -176,7 +177,7 @@ wego-app/scenes/{中文业务场景}/design-decisions.json
 
 <!-- rule-id: safe-area-top-single-owner -->
 
-- 顶部安全区由页面首个固定元素承担且只承担一次：有 navbar 的场景由 navbar 组件内置 `padding-top: var(--safe-area-top)` 处理，`host-shell-page` 和场景容器不得再重复加安全区；无 navbar 的场景由场景根容器或滚动区通过 `var(--safe-area-top)` 自行承担。
+- 页面根节点保持 `position: absolute; inset: 0`，禁止用 `padding-top` 预留顶部安全区。顶部安全区只承担一次：有 navbar 时由 navbar 组件内置 `padding-top: var(--safe-area-top)` 处理；无 navbar 但有固定/吸顶顶部元素时由该元素自身处理；两者都没有时由滚动内容层处理。
 - 禁止用 JS 读取 `--safe-area-top` 再设置 padding；安全区必须通过 CSS 变量声明。
 
 ## 提取与完成门禁

@@ -1,6 +1,8 @@
 .DS_Store
 **/.DS_Store
+# 本地任务输入与浏览器诊断产物，由 cleanup-task-artifacts.mjs 定期清理
 .uploads/
+output/
 .playwright-cli/
 .trae/documents/
 .vercel

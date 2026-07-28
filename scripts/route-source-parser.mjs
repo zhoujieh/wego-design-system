@@ -185,7 +185,7 @@ function arrayItemRanges(masked, start, end) {
   return ranges;
 }
 
-export function parseRouteRegistrySource(source) {
+function parseRouteRegistry(source) {
   const input = String(source || '');
   const masked = maskJavaScript(input);
   const pattern = /(?<![\w$.])\bwindow\s*\.\s*WEGO_APP_ROUTES\s*=\s*\[/g;
@@ -196,7 +196,7 @@ export function parseRouteRegistrySource(source) {
   if (arrayClose < 0) throw new Error('window.WEGO_APP_ROUTES 缺少数组闭合符号');
   const residual = `${masked.slice(0, assignments[0].index)}${' '.repeat(arrayClose + 1 - assignments[0].index)}${masked.slice(arrayClose + 1)}`;
   if (/(?<![\w$.])\bwindow\s*\.\s*WEGO_APP_ROUTES\b/.test(residual)) throw new Error('routes.js 不得在静态赋值之外再次读取或修改 WEGO_APP_ROUTES');
-  const records = [];
+  const items = [];
   const ranges = arrayItemRanges(masked, arrayOpen + 1, arrayClose);
   const arrayBody = masked.slice(arrayOpen + 1, arrayClose).trim();
   for (const [rangeIndex, [start, end]] of ranges.entries()) {
@@ -209,8 +209,12 @@ export function parseRouteRegistrySource(source) {
     }
     const itemSource = input.slice(start, end).trim();
     if (!itemMasked.startsWith('{')) throw new Error('window.WEGO_APP_ROUTES 只允许直接包含静态路由对象');
-    records.push(parseRouteObject(itemSource, records.length));
+    items.push({
+      record: parseRouteObject(itemSource, items.length),
+      source: itemSource,
+    });
   }
+  const records = items.map(item => item.record);
   const routeIds = records.map(record => record.routeId);
   const duplicateRouteId = routeIds.find((routeId, index) => routeIds.indexOf(routeId) !== index);
   if (duplicateRouteId) throw new Error(`routes.js 的 routeId 必须全局唯一：${duplicateRouteId}`);
@@ -218,5 +222,37 @@ export function parseRouteRegistrySource(source) {
   const tabs = hostTabs.map(record => record.entry.tab);
   const duplicateTab = tabs.find((tab, index) => tabs.indexOf(tab) !== index);
   if (duplicateTab) throw new Error(`routes.js 的 host-tab entry.tab 必须全局唯一：${duplicateTab}`);
-  return records;
+  return { input, arrayOpen, arrayClose, items, records };
+}
+
+export function parseRouteRegistrySource(source) {
+  return parseRouteRegistry(source).records;
+}
+
+export function filterRouteRegistrySource(source, shouldRemove) {
+  if (typeof shouldRemove !== 'function') throw new Error('routes.js 过滤器必须是函数');
+  const registry = parseRouteRegistry(source);
+  const classified = registry.items.map(item => ({
+    ...item,
+    remove: Boolean(shouldRemove(item.record)),
+  }));
+  const removed = classified.filter(item => item.remove);
+  if (removed.length === 0) {
+    return {
+      source: registry.input,
+      records: registry.records,
+      removed: [],
+    };
+  }
+
+  const kept = classified.filter(item => !item.remove);
+  const body = kept.length > 0
+    ? `\n${kept.map(item => `  ${item.source}`).join(',\n')}\n`
+    : '';
+  const updated = `${registry.input.slice(0, registry.arrayOpen + 1)}${body}${registry.input.slice(registry.arrayClose)}`;
+  return {
+    source: updated,
+    records: kept.map(item => item.record),
+    removed: removed.map(item => item.record),
+  };
 }

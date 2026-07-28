@@ -13,9 +13,11 @@ description: 基于已确认原型简报消费微购设计系统，在一次任�
 
 ### 读取顺序
 
-固定为：有效迭代与已确认 `prototype_brief` → 共享[设计决策原则](../shared/references/design-decisions.md) → `library-consumption.json` → `uikit-plan.json` → `components/index.json` → 本页命中的 Preview → 对应组件契约 → `colors_and_type.css` → [场景合同](./references/scene-contract.md)。
+固定为：有效迭代与已确认 `prototype_brief` → 共享[设计决策原则](../shared/references/design-decisions.md) → [交互原型设计方法](./references/interaction-prototype-design.md) → `library-consumption.json` 与 `uikit-plan.json` → 先完成设计意图、精确范式/自主组合裁决和语义区域树 → `components/index.json` → 本页命中的 Preview → 对应组件契约 → `colors_and_type.css` → [场景合同](./references/scene-contract.md)。
 
 - 设计决策原则是所有设计输出不可绕过的顶层权威
+- 已确认 `prototype_brief` 即本轮设计与实现授权；范围内的信息分组、布局、组件、Token、反馈和 overlay 形式由 `wego-design` 决定，不重复向用户确认
+- 具体组件只在页面结构确定后读取；禁止从组件清单反推布局、选择“最接近”的 UI Kit 或拼接多个 UI Kit
 - 产品阶段临时线框不进入设计输入链；即使仍存在于同一会话上下文，也只能通过用户确认后的 `prototype_brief` 消费其业务结论，不得机械照搬或从线框补造事实、组件和视觉规格
 - `design-decisions.json` 仅是场景输出与已有场景修改时的辅助对照，不得作为设计前输入
 - 资产按 [资产地图](./references/library-map.md) 定位
@@ -25,20 +27,22 @@ description: 基于已确认原型简报消费微购设计系统，在一次任�
 
 - 场景代码中的组件 DOM 结构必须**逐字复制** Preview 中对应变体的 HTML，包括节点层级、class 组合、修饰类顺序和可选子元素位置
 - 禁止"理解大意后自己写"
-- 变体选择以 Preview 中 `representativeVariants` 命中的示例为准，未命中的变体不得自行拼凑结构，必须退回确认或选择已有变体
+- 变体选择以 Preview 中 `representativeVariants` 命中的示例为准；未命中时先选择能够满足任务的已有变体，不得自行拼凑结构。正式能力仍无法覆盖时按最小缺口处理；只有替代方案会改变已确认业务结果或产品指令时才退回 `wego-product`
 
-### 需求确认
+### 澄清边界
 
-- 开始交互视觉设计前，必须先完全理解用户需求并与用户确认，禁止不做确认就直接改代码，即使只改一个颜色也要确认
+- 仅当缺失或冲突的业务事实会改变目标、范围、入口、关键路径、状态、数据含义或完成结果时，退回 `wego-product`
+- 设计系统无法支持已确认的产品阶段交互视觉描述时，记录冲突与正式回退，再退回 `wego-product` 确认业务替代方案
+- 颜色、间距、信息分组、组件变体和其他设计细节不得形成第二次确认门禁
 
 ### Overlay 组件消费
 
-- brief 中提到"反馈/操作面板/弹层/底部面板/弹窗"等模糊措辞时，必须先与用户确认具体控件类型（actionsheet / dialog / modal / full-screen-modal / sheet）
+- brief 未指定具体 overlay 类型时，由 `wego-design` 按任务语义、内容量、风险、流程连续性和关闭方式选择；只有选择会改变业务结果、不可逆风险或已确认产品指令时才退回 `wego-product`
 - 把对应组件作为 `component_bindings` 登记、把对应交互作为 `interaction_contract`（`overlay:sheet|modal|full-screen-modal|close`）登记后，才能调用 `ctx.openSheet` / `ctx.openModal` / `ctx.openFullScreenModal`
 - 守卫会逆向扫描 scene.js 中的这些 API 调用，未登记即 fail
 - overlay 类组件的默认关闭行为（如 actionsheet 的 `closeByMask`、`closeByCancel` 默认 true）必须在 init 中实际实现，不能只绑主操作项而漏掉 cancel 与 mask
-- 提供给 overlay API 的 HTML 必须遵守组件契约 `structurePatterns`（如 actionsheet 在 overlay 架构下只渲染 `.actionsheet__panel`，不再渲染 `.actionsheet` 根节点，避免双重遮罩与动画错位）
+- 提供给 overlay API 的 HTML 必须遵守组件契约 `structurePatterns`，渲染完整组件根节点、面板及子内容；遮罩视觉与动画由组件自身承担，宿主 overlay 层保持透明
 
 ## 输出契约与跨技能交接
 
-输出或更新 `wego-app/js/routes.js`、`wego-app/scenes/{中文业务场景}/scene.js`、`scene.css` 与 `design-decisions.json`；场景合同必须记录设计系统版本、组件/Token 绑定、真实状态、交互与视觉证据。完成提取、场景合同、交互和视觉检查后交付原型；设计系统缺口由 `wego-uxsystem-iterate` 收敛。
+输出或更新 `wego-app/js/routes.js`、`wego-app/scenes/{中文业务场景}/scene.js`、`scene.css` 与 `design-decisions.json`；场景合同必须记录设计系统版本、组件/Token 绑定、真实状态、交互与视觉证据。实现后按交互原型设计方法完成一轮设计自审，再完成既有提取、场景合同、交互和视觉检查后交付原型；设计系统缺口由 `wego-uxsystem-iterate` 收敛。

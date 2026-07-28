@@ -14,6 +14,7 @@ authoritySources:
   - "../../wego-design/library-consumption.json"
   - "../../wego-design/colors_and_type.css"
   - "../../wego-design/uikit-plan.json"
+  - "../../wego-design/references/interaction-prototype-design.md"
   - "../../wego-design/components/index.json"
   - "../../wego-design/preview/component-{slug}.html"
   - "../../wego-design/components/{slug}.json"
@@ -184,7 +185,7 @@ authoritySources:
 
 `wego-product` 必须先用本文约束 `prototype_brief` 的首要任务、入口、关键路径、状态、信息层级和交互视觉描述，避免把低效、混乱或违反设计系统的方向交给设计阶段。
 
-`wego-design` 只依据有效迭代和已确认 `prototype_brief` 中的目标、范围、入口、关键路径、状态、数据、原型边界以及产品阶段定义的交互视觉描述进行设计。`wego-design` 必须严格遵循产品阶段的交互视觉描述（布局位置、控件类型、视觉强调、打开方式倾向等），不得自行替换或偏离；唯一例外是组件不支持或设计系统规范不允许，此时设计系统优先，冲突项记录到场景决策证据并退回 `wego-product` 重新确认。缺少会改变页面结构或结果的业务事实时退回 `wego-product`，不得从组件、UI Kit、历史场景或图片补造事实和文案。
+`wego-design` 只依据有效迭代和已确认 `prototype_brief` 中的目标、范围、入口、关键路径、状态、数据、原型边界以及产品阶段定义的交互视觉描述进行设计。已确认简报即设计与实现授权；未被产品阶段明确约束的信息分组、页面结构、组件、Token、反馈和 overlay 形式由 `wego-design` 按正式设计方法自主裁决，不建立第二次确认门禁。`wego-design` 必须严格遵循产品阶段的交互视觉描述（布局位置、控件类型、视觉强调、打开方式倾向等），不得自行替换或偏离；唯一例外是组件不支持或设计系统规范不允许，此时设计系统优先，冲突项记录到场景决策证据并退回 `wego-product` 重新确认。缺少会改变页面结构或结果的业务事实时退回 `wego-product`，不得从组件、UI Kit、历史场景或图片补造事实和文案。
 
 `design-decisions.json` 不是设计前权威输入；新场景不得以它代替本文和正式设计系统来源，已有场景修改时也只能辅助对照。
 
@@ -194,9 +195,9 @@ authoritySources:
 
 设计阶段可以依据共享原则和正式设计系统重新组织具体组件、布局尺度与视觉表达，但不得改变已确认简报中的范围、入口、路径、状态和结果。用户对线框中某项视觉要求的确认只有在写入并确认 `prototype_brief` 后才具有约束力。
 
-<!-- rule-id: wego-page-pattern-layout-contract; source-ref: ../../wego-design/uikit-plan.json -->
+<!-- rule-id: wego-page-pattern-layout-contract; source-ref: ../../wego-design/references/interaction-prototype-design.md -->
 
-先按业务任务、surface 角色和状态匹配明确 `pagePatterns`。命中时使用对应范式；未命中时采用 `composed`，按首要任务、信息层级、状态和正式组件能力自主组合，不伪造页面范式，也不复制 UI Kit 宿主、演示文案或私有 class。
+先形成设计意图和语义区域，再按业务任务、surface 角色、状态形态和交互模式精确匹配 `pagePatterns`。完整满足范式条件时使用对应 `pattern`；未命中时采用 `composed`，按首要任务、信息层级和状态自主组织区域后再匹配正式组件。禁止选择“最接近”的 UI Kit、拼接多个 UI Kit、伪造页面范式，或复制 UI Kit 宿主、演示布局、业务文案和私有 class。
 
 页面边距、presentation 和布局合同的具体可选值由设计消费源与场景合同决定；本文只裁决是否需要通栏、卡片化或沉浸式表达，不为视觉变化发明中间层级。
 
@@ -210,7 +211,7 @@ authoritySources:
 
 ## 组件消费
 
-页面应优先复用正式设计系统能力。组件选择先服从业务任务和信息层级，再由设计消费源决定 Preview-first 顺序、合法变体、DOM、class、Token 和资产用法。组件、变体或 presentation 确实无法覆盖时，不在场景内自造替代组件。
+页面应优先复用正式设计系统能力，但组件不是页面结构的起点。先依据业务任务和信息层级确定语义区域、滚动边界、固定操作与显隐关系，再由设计消费源决定 Preview-first 顺序、合法变体、DOM、class、Token 和资产用法。组件约束使原结构不可成立时应回到区域结构调整；组件、变体或 presentation 确实无法覆盖时，不在场景内自造替代组件。
 
 ## 状态与交互
 

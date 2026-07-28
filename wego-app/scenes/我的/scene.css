@@ -1,7 +1,0 @@
-/* ── 「我的」Tab 完全空白基线 ── */
-
-.my-page {
-  position: absolute;
-  inset: 0;
-  background: var(--bg-page);
-}

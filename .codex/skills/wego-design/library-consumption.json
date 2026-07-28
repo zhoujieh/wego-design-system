@@ -17,12 +17,12 @@
     },
     "components": {
       "files": ["components/index.json", "components/{slug}.json", "preview/component-{slug}.html", "components.css"],
-      "purpose": "Preview-first 的组件 DOM、class、Token、变体、状态和聚合样式。",
+      "purpose": "页面语义区域确定后，用于 Preview-first 映射组件 DOM、class、Token、变体、状态和聚合样式。",
       "copyable": true
     },
     "uiKit": {
       "files": ["uikit-plan.json", "ui_kits/*/index.html"],
-      "purpose": "已验证页面范式、组合约束与范式 presentation 的参考；未命中范式时按设计决策原则自主组合，不是业务宿主模板。",
+      "purpose": "仅供精确命中的页面范式使用，用于读取组合约束与范式 presentation；未命中时不选择近似 UI Kit，改走 composed 语义区域流程。",
       "copyable": false
     },
     "icons": {
@@ -36,9 +36,11 @@
     "previewFirst": true,
     "forbidden": [
       "未读 Preview 即使用组件",
+      "页面语义区域未确定时从组件索引反推布局",
       "命中稳定组件后重写等价结构",
       "扫描全量组件索引代替页面组件计划",
-      "声明契约未实现或不适合当前容器的变体后在场景内补样式"
+      "声明契约未实现或不适合当前容器的变体后在场景内补样式",
+      "选择最接近的 UI Kit 或拼接多个 UI Kit 代替页面设计"
     ]
   },
   "pageEdgeModes": ["M0", "M8", "M32"],
@@ -97,16 +99,16 @@
       "业务模板只能来自 scene.js 注册，不得通过 fetch/XHR 加载本地 HTML。",
       "电脑端显示预览壳，移动端同链接铺满真实 viewport。",
       "不得重画 index.html 宿主、复制第二套外壳或直接编辑 wego-app/lib。",
-      "顶部安全区由页面首个固定元素承担且只承担一次：有 navbar 的场景由 navbar 组件内置 padding-top: var(--safe-area-top) 处理，host-shell-page 和场景容器不得再重复加安全区；无 navbar 的场景由场景根容器或滚动区通过 var(--safe-area-top) 自行承担。禁止用 JS 读取 --safe-area-top 再设置 padding。"
+      "页面根节点保持 position: absolute; inset: 0，禁止用 padding-top 预留顶部安全区。顶部安全区只承担一次：有 navbar 时由 navbar 内置 padding-top: var(--safe-area-top) 处理；无 navbar 但有固定/吸顶顶部元素时由该元素自身处理；两者都没有时由滚动内容层处理。禁止用 JS 读取 --safe-area-top 再设置 padding。"
     ]
   },
   "globalConsumptionRules": {
     "previewFirst": "每个命中组件先读 Preview，再读契约；Preview 决定实现结构，契约决定语义和边界。",
     "contractImplementationCheck": "消费稳定变体时必须确认 Preview 与 components.css 已实现对应 DOM、class、状态和样式；契约声明但 CSS 不可达时按设计系统缺口处理，不在 scene.css 内补组件内部样式。",
     "variantApplicability": "只使用适合当前容器和响应式需求的稳定变体；固定尺寸或固定结构变体不适合时，先选择其他正式能力或提交缺口，不把不适合的变体写入合同。",
-    "componentBoundary": "稳定变体优先。视觉用途命中已注册组件时必须直接消费正式组件，例如标签用 tag、角标用 badge、操作按钮用 button、列表行用 cell、头像用 avatar、文本操作用 link。业务 class 只承担场景区域布局，不能替代正式组件结构或覆盖组件内部样式。",
+    "componentBoundary": "语义区域、滚动边界、固定操作和显隐关系确定后再映射组件，稳定变体优先。视觉用途命中已注册组件时必须直接消费正式组件，例如标签用 tag、角标用 badge、操作按钮用 button、列表行用 cell、头像用 avatar、文本操作用 link。业务 class 只承担场景区域布局，不能替代正式组件结构或覆盖组件内部样式；组件约束使原结构不可成立时回到区域结构调整。",
     "semanticTokenUsage": "颜色、字号、字重、行高、间距和圆角只使用实际语义 Token。中性色承载内容，品牌绿色承担主行动，状态色只表达对应状态且不大面积铺底；不得根据外观猜变量名或直接写视觉值。",
-    "uikitBoundary": "UI Kit 只用于页面结构和组件组合；禁止复制 .uikit-shell、.phone-frame、.phone-screen、biz-* 或演示业务内容。",
+    "uikitBoundary": "UI Kit 只用于完整满足 pagePattern.appliesWhen 且不命中 excludeWhen 的明确范式。未精确命中时使用 composed，不选择最接近的 UI Kit、不拼接多个 UI Kit；始终禁止复制 .uikit-shell、.phone-frame、.phone-screen、biz-*、演示布局或演示业务内容。",
     "assetSemantics": "身份、应用、内容和功能资产必须按语义使用，禁止互相冒充。功能入口优先选择已交付且语义匹配的 app-center SVG；无匹配资产时才使用已查证的 iconfont 或文字。禁止为图标临时发明多套彩色底板。",
     "groupStructure": "连续列表和表单优先使用 .cell-group/.form-group 的正式 title 和 content 结构，不额外发明白底壳、圆角壳或 section title；页面边距为 M0（通栏）时，group__content 默认不加 --card 修饰；页面边距为 M8 时，才给 group__content 加 --card 圆角修饰。",
     "appHostBoundary": "唯一宿主是 wego-app/index.html；场景通过 routes.js、scene.js、scene.css 增量接入。",

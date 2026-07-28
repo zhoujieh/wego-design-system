@@ -1,7 +1,14 @@
 #!/usr/bin/env node
 
+/**
+ * 无 --scene：清空全部业务场景、路由注册与 _spec，恢复 wego-app 空白基线。
+ * 有 --scene <中文业务场景>：只删除该场景整个目录及其全部路由注册，不影响其他场景与 _spec。
+ * --check：只输出计划，不写文件。--json：输出结构化报告。
+ */
+
 import fs from 'node:fs';
 import path from 'node:path';
+import { filterRouteRegistrySource } from './route-source-parser.mjs';
 
 const repoRoot = path.resolve(process.cwd());
 const wegoAppRoot = path.join(repoRoot, 'wego-app');
@@ -14,12 +21,27 @@ const routesBaseline = 'window.WEGO_APP_ROUTES = [];\n';
 // ---- arg parsing ----
 const allArgs = process.argv.slice(2);
 const flags = new Set();
+const argumentErrors = [];
+const supportedFlags = new Set(['--check', '--json']);
 let targetScene = null;
 for (let i = 0; i < allArgs.length; i++) {
-  if (allArgs[i] === '--scene' && i + 1 < allArgs.length) {
-    targetScene = allArgs[++i];
+  const argument = allArgs[i];
+  if (argument === '--scene') {
+    if (targetScene !== null) {
+      argumentErrors.push('--scene 只能声明一次');
+      continue;
+    }
+    const value = allArgs[i + 1];
+    if (value === undefined || value.startsWith('--')) {
+      argumentErrors.push('--scene 必须指定单层中文业务场景目录名');
+      continue;
+    }
+    targetScene = value;
+    i += 1;
+  } else if (supportedFlags.has(argument)) {
+    flags.add(argument);
   } else {
-    flags.add(allArgs[i]);
+    argumentErrors.push(`未知参数：${argument}`);
   }
 }
 const checkOnly = flags.has('--check');
@@ -62,8 +84,16 @@ function plan(target, detail) {
   record('planned', target, detail);
 }
 
-function escapeRegex(str) {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function isSafeSceneName(sceneName) {
+  return typeof sceneName === 'string'
+    && sceneName.length > 0
+    && sceneName === sceneName.trim()
+    && sceneName !== '.'
+    && sceneName !== '..'
+    && sceneName !== '.gitkeep'
+    && !sceneName.includes('/')
+    && !sceneName.includes('\\')
+    && !sceneName.includes('\0');
 }
 
 function resetRoutesFile() {
@@ -81,23 +111,26 @@ function resetRoutesFile() {
   record('updated', routesFile, 'reset routes to empty baseline');
 }
 
-function removeRouteEntry(sceneName) {
-  const escapedName = escapeRegex(sceneName);
-  // Match a route object block containing `scene: '场景名'` from `  {` to `  },` or `  }`
-  const regex = new RegExp(
-    `\\s*\\{\\s*\\n[\\s\\S]*?scene:\\s*'${escapedName}'[\\s\\S]*?\\},\\s*\\n`,
+function routeScene(record) {
+  if (record.scene) return record.scene;
+  return /^scenes\/([^/\\]+)\/scene\.js$/.exec(record.script)?.[1] || null;
+}
+
+function routeRemovalPlan(sceneName) {
+  if (!fs.existsSync(routesFile)) {
+    return { updated: '', removed: [] };
+  }
+  const current = fs.readFileSync(routesFile, 'utf8');
+  const filtered = filterRouteRegistrySource(
+    current,
+    record => routeScene(record) === sceneName,
   );
-  const current = fs.existsSync(routesFile) ? fs.readFileSync(routesFile, 'utf8') : '';
-  if (!regex.test(current)) {
-    record('kept', routesFile, `no route entry found for scene "${sceneName}"`);
-    return;
-  }
-  const updated = current.replace(regex, '\n');
-  plan(routesFile, `remove route entry for scene "${sceneName}"`);
-  if (!checkOnly) {
-    fs.writeFileSync(routesFile, updated);
-  }
-  record('updated', routesFile, `removed route entry for scene "${sceneName}"`);
+  return {
+    updated: filtered.records.length === 0 && filtered.removed.length > 0
+      ? routesBaseline
+      : filtered.source,
+    removed: filtered.removed,
+  };
 }
 
 function listSceneEntries() {
@@ -144,21 +177,42 @@ function cleanScenes() {
 }
 
 function cleanSceneByName(sceneName) {
-  assertWithinScope(scenesRoot, [scenesRoot]);
+  if (!isSafeSceneName(sceneName)) {
+    throw new Error(`--scene 不是安全的单层业务场景目录名：${JSON.stringify(sceneName)}`);
+  }
   const sceneDir = path.join(scenesRoot, sceneName);
-  if (!fs.existsSync(sceneDir)) {
-    record('kept', sceneDir, `scene "${sceneName}" not found`);
-    return;
-  }
   assertWithinScope(sceneDir, [scenesRoot]);
+  const sceneExists = fs.existsSync(sceneDir);
+  const routePlan = routeRemovalPlan(sceneName);
 
-  plan(sceneDir, `remove scene "${sceneName}" artifact`);
-  if (!checkOnly) {
-    fs.rmSync(sceneDir, { recursive: true, force: true });
+  if (!sceneExists) {
+    record('kept', sceneDir, `scene "${sceneName}" not found`);
+  } else {
+    plan(sceneDir, `remove scene "${sceneName}" artifact`);
   }
-  record('removed', sceneDir, `remove scene "${sceneName}" artifact`);
 
-  removeRouteEntry(sceneName);
+  if (routePlan.removed.length === 0) {
+    record('kept', routesFile, `no route entries found for scene "${sceneName}"`);
+  } else {
+    const routeIds = routePlan.removed.map(record => record.routeId).join(', ');
+    plan(routesFile, `remove ${routePlan.removed.length} route entries for scene "${sceneName}": ${routeIds}`);
+  }
+
+  const otherSceneEntries = listSceneEntries()
+    .filter(entry => entry !== sceneDir && entry !== keepSceneFile);
+  const restoreKeepFile = otherSceneEntries.length === 0 && !fs.existsSync(keepSceneFile);
+  if (restoreKeepFile) plan(keepSceneFile, 'restore scenes/.gitkeep after removing the final scene');
+
+  if (!checkOnly) {
+    if (sceneExists) fs.rmSync(sceneDir, { recursive: true, force: true });
+    if (routePlan.removed.length > 0) fs.writeFileSync(routesFile, routePlan.updated);
+    if (restoreKeepFile) fs.writeFileSync(keepSceneFile, '');
+    if (sceneExists) record('removed', sceneDir, `remove scene "${sceneName}" artifact`);
+    if (routePlan.removed.length > 0) {
+      record('updated', routesFile, `removed all ${routePlan.removed.length} route entries for scene "${sceneName}"`);
+    }
+    if (restoreKeepFile) record('updated', keepSceneFile, 'restore scenes/.gitkeep');
+  }
 }
 
 function cleanSpec() {
@@ -192,6 +246,11 @@ function run() {
   if (!fs.existsSync(wegoAppRoot)) {
     report.errors.push('未找到 wego-app 目录，脚本已停止');
     finish(1);
+    return;
+  }
+  if (argumentErrors.length > 0) {
+    report.errors.push(...argumentErrors);
+    finish(2);
     return;
   }
 

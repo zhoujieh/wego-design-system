@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { filterRouteRegistrySource, parseRouteRegistrySource } from './route-source-parser.mjs';
 
 const root = process.cwd();
 const temporaryRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'wego-scene-contract-'));
@@ -235,6 +236,20 @@ window.WEGO_APP_ROUTES = [{ routeId: 'contract-fixture', script: 'scenes/其他�
     { routeId: 'other-route', script: 'scenes/其他场景/scene.js', style: 'scenes/其他场景/scene.css', entry: { type: 'host-tab', tab: 'my' } }
   ];\n`);
   assertFailureCode(validate(), 'scene.host_tab_duplicate', 'host-tab 的 tab 必须全局唯一');
+
+  const keptRouteSource = "{ routeId: 'other-route', scene: '其他场景', script: 'scenes/其他场景/scene.js', style: 'scenes/其他场景/scene.css' }";
+  const routeFilterFixture = `window.WEGO_APP_ROUTES = [
+  { routeId: 'target-main', scene: '目标场景', script: 'scenes/目标场景/scene.js', style: 'scenes/目标场景/scene.css' },
+  ${keptRouteSource},
+  { routeId: 'target-detail', scene: '目标场景', script: 'scenes/目标场景/scene.js', style: 'scenes/目标场景/scene.css' }
+];\n`;
+  const filteredRoutes = filterRouteRegistrySource(routeFilterFixture, record => record.scene === '目标场景');
+  if (filteredRoutes.removed.length !== 2) throw new Error('指定场景路由过滤必须移除该场景的全部路由');
+  const remainingRoutes = parseRouteRegistrySource(filteredRoutes.source);
+  if (remainingRoutes.length !== 1 || remainingRoutes[0].routeId !== 'other-route') throw new Error('指定场景路由过滤不得影响其他场景');
+  if (!filteredRoutes.source.includes(keptRouteSource)) throw new Error('指定场景路由过滤不得改写其他路由对象');
+  const unchangedRoutes = filterRouteRegistrySource(routeFilterFixture, record => record.scene === '不存在');
+  if (unchangedRoutes.source !== routeFilterFixture) throw new Error('无匹配场景时 routes.js 必须逐字节保持不变');
 
   fs.writeFileSync(routes, `${validRoutesSource}window.WEGO_APP_ROUTES = [];\n`);
   assertFailureCode(validate(), 'scene.routes_registration', 'routes.js 不得真实赋值两次');

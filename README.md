@@ -16,7 +16,7 @@
 ## 技能闭环
 
 1. `wego-product`：创建业务迭代，确认范围、原型边界与 `prototype_brief`。
-2. `wego-design`：先遵循唯一设计决策原则，再 Preview-first 地消费设计系统并实现、验证场景。
+2. `wego-design`：把已确认简报作为设计授权，先完成设计意图与语义区域，再 Preview-first 映射正式组件并实现、自审场景。
 3. `wego-uxsystem-iterate`：负责组件、UI Kit、Token、设计系统缺口、工作流迭代和审查。
 
 统一技能路由见 `.codex/skills/README.md`，仓库级约束见 `AGENTS.md`。
@@ -25,10 +25,11 @@
 
 ## 设计系统权威来源
 
-- 设计决策原则：`.codex/skills/wego-design/references/design-decisions.md`
+- 设计决策原则：`.codex/skills/shared/references/design-decisions.md`
+- 交互原型设计方法：`.codex/skills/wego-design/references/interaction-prototype-design.md`
 - Token：`.codex/skills/wego-design/colors_and_type.css`、`.codex/skills/wego-design/css.json`
 - 组件：`.codex/skills/wego-design/components/index.json`、`.codex/skills/wego-design/components/{slug}.json`、`.codex/skills/wego-design/preview/component-{slug}.html`
-- 明确页面范式：`.codex/skills/wego-design/uikit-plan.json`（未命中时按设计决策原则自主组合）
+- 明确页面范式：`.codex/skills/wego-design/uikit-plan.json`（只使用精确命中项；未命中时走 composed 语义区域流程）
 - 消费边界：`.codex/skills/wego-design/library-consumption.json`
 - 技能职责和交接：各技能 `SKILL.md` 与其直接引用的 `references/`
 - 仓库级硬约束：`AGENTS.md`
@@ -54,6 +55,18 @@ node scripts/validate-wego-design.mjs --scope=full --strict
 
 `validate-wego-design.mjs` 会先检查组件契约一致性，再执行设计系统、场景和 App 守门。
 
+`scripts/` 中并非每个文件都需要手工运行；入口、按需工具、内部模块和自动回归测试的分类见 `scripts/README.md`。
+
 `iteration-record.mjs` 负责业务迭代状态机、范围确认、原型失效和冻结。验收期反馈复用当前未冻结迭代；只有用户明确指定并要求冻结后才允许生成不可修改的冻结快照。历史场景无需补录，后续再次修改时必须进入有效迭代。
 
 只修改设计系统或工作流本体时，可使用 `node scripts/validate-wego-design.mjs --scope=system --strict`；该范围跳过业务场景产物，`--strict` 会把警告视为失败。涉及设计系统部署资源时，再运行 `node scripts/sync-wego-app-lib.mjs --check`。
+
+## 临时任务产物
+
+`.uploads/`、`output/` 和 `.playwright-cli/` 都是本地任务输入或诊断缓存，不是项目正式产物，也不会提交。日常任务开始与结束运行：
+
+```bash
+node scripts/cleanup-task-artifacts.mjs clean
+```
+
+该命令默认只删除超过 24 小时的文件，避免影响并行任务；确认工作区空闲并需要彻底清理时使用 `node scripts/cleanup-task-artifacts.mjs clean --all`。检查但不删除可使用 `node scripts/cleanup-task-artifacts.mjs check`。
