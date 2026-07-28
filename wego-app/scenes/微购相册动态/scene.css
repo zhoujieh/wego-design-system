@@ -12,16 +12,21 @@
   font-family: var(--body-md-font-family);
 }
 
-/* 背景渐变层：白色覆盖层 + mask 渐变，让顶部白色平滑过渡到页面灰色，过渡完成点在瀑布流往下一点位置 */
-.album-feed::before {
+/* 头像栏渐变层：白色覆盖层 + mask 渐变，仅覆盖头像栏区域，让顶部白色平滑过渡到页面灰色，
+   避免外层容器渐变导致下拉时搜索栏与内容区割裂 */
+.album-feed__people-wrap {
+  position: relative;
+}
+
+.album-feed__people-wrap::before {
   content: '';
   position: absolute;
   inset: 0;
   background: var(--bg-surface);
-  -webkit-mask-image: linear-gradient(to bottom, black 0, black 220px, transparent 380px);
-  mask-image: linear-gradient(to bottom, black 0, black 220px, transparent 380px);
+  -webkit-mask-image: linear-gradient(to bottom, black 0, black 50px, transparent 100px);
+  mask-image: linear-gradient(to bottom, black 0, black 50px, transparent 100px);
   pointer-events: none;
-  z-index: -1;
+  z-index: 0;
 }
 
 /* 滚动容器：承担瀑布流、人维度、筛选标签；底部预留 safe-area-bottom-content 避免内容被 bottom-nav 遮挡。
@@ -320,6 +325,8 @@
 }
 
 .album-feed__people-scroll {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: flex-start;
   gap: var(--spacer-12);
@@ -352,18 +359,37 @@
 
 .album-feed__sticky-fade {
   position: absolute;
-  left: calc(var(--spacer-16) * -1);
   width: var(--spacer-16);
   pointer-events: none;
 }
 
+/* 头像栏左侧渐变：整行高度，从左侧边缘向内渐隐 */
 .album-feed__sticky-fade--people {
+  left: calc(var(--spacer-16) * -1);
   top: 0;
   bottom: 0;
   height: 100%;
 }
 
+/* 头像栏右侧渐变：整行高度，从 sticky 按钮左侧向内渐隐 */
+.album-feed__sticky-fade--people-right {
+  right: 0;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+}
+
+/* 筛选栏左侧渐变：与标签行等高，从左侧边缘向内渐隐 */
 .album-feed__sticky-fade--filter {
+  left: calc(var(--spacer-16) * -1);
+  top: 50%;
+  height: var(--size-28);
+  transform: translateY(-50%);
+}
+
+/* 筛选栏右侧渐变：与标签行等高，从 sticky 按钮左侧向内渐隐 */
+.album-feed__sticky-fade--filter-right {
+  right: 0;
   top: 50%;
   height: var(--size-28);
   transform: translateY(-50%);

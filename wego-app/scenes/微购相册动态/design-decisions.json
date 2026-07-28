@@ -23,8 +23,8 @@
         "token": "var(--bg-page)"
       },
       {
-        "selector": ".album-feed::before",
-        "content_role": "背景渐变白色覆盖层",
+        "selector": ".album-feed__people-wrap::before",
+        "content_role": "头像栏渐变白色覆盖层",
         "css_property": "background",
         "token": "var(--bg-surface)"
       },

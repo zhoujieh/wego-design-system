@@ -21,8 +21,8 @@
         "token": "var(--bg-page)"
       },
       {
-        "selector": ".album-feed::before",
-        "content_role": "背景渐变白色覆盖层",
+        "selector": ".album-feed__people-wrap::before",
+        "content_role": "头像栏渐变白色覆盖层",
         "css_property": "background",
         "token": "var(--bg-surface)"
       },
@@ -2156,7 +2156,14 @@
       + '</div>';
   }
 
-  function emptyTemplate() {
+  function emptyTemplate(hasPublished) {
+    if (!hasPublished) {
+      return '<div class="album-feed__empty">'
+        + '<svg class="album-feed__empty-illust" width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="48" cy="48" r="28" stroke="var(--bg-fill-strong)" stroke-width="2.4"/><path d="M48 34v28M34 48h28" stroke="var(--bg-subtle)" stroke-width="2.4" stroke-linecap="round"/></svg>'
+        + '<p class="album-feed__empty-title">还没有发布过动态</p>'
+        + '<p class="album-feed__empty-text">点击右下角 + 发布第一条动态，开始展示你的商品。</p>'
+        + '</div>';
+    }
     return '<div class="album-feed__empty">'
       + '<svg class="album-feed__empty-illust" width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="42" cy="42" r="22" stroke="var(--bg-fill-strong)" stroke-width="2.4"/><path d="M58 58l14 14" stroke="var(--bg-fill-strong)" stroke-width="2.4" stroke-linecap="round"/><path d="M34 42h16M42 34v16" stroke="var(--bg-subtle)" stroke-width="2.4" stroke-linecap="round"/></svg>'
       + '<p class="album-feed__empty-title">没有匹配的动态</p>'
@@ -2254,6 +2261,7 @@
             <div class="album-feed__people-list" data-region="people-list"></div>
             <div class="album-feed__people-self" data-dom-id="people-self">
               <img class="album-feed__sticky-fade album-feed__sticky-fade--people" src="./lib/assets/icons/sticky-fade-16.svg" alt="" aria-hidden="true">
+              <img class="album-feed__sticky-fade album-feed__sticky-fade--people-right" src="./lib/assets/icons/sticky-fade-16-right.svg" alt="" aria-hidden="true">
               <div class="album-feed__people-item">
                 <div class="avatar avatar--40 avatar--image album-feed__people-avatar" data-dd-id="feed-people-avatar-self" data-component-slug="avatar" data-component-binding="feed-people-avatar-self"><img src="./lib/assets/image/avatar/avatar_083.jpg" alt="我的商家"></div>
                 <span class="album-feed__people-name">我的商家</span>
@@ -2270,6 +2278,7 @@
           <button type="button" class="tag tag--28 tag--white tag--normal" data-filter-dimension="live" data-dom-id="filter-tag-live" data-dd-id="feed-filter-tag-live" data-component-slug="tag" data-component-binding="feed-filter-tag"><span class="tag__label">直播</span></button>
           <div class="album-feed__filter-open-host">
             <img class="album-feed__sticky-fade album-feed__sticky-fade--filter" src="./lib/assets/icons/sticky-fade-16.svg" alt="" aria-hidden="true">
+            <img class="album-feed__sticky-fade album-feed__sticky-fade--filter-right" src="./lib/assets/icons/sticky-fade-16.svg" alt="" aria-hidden="true">
             <button type="button" class="tag tag--28 tag--white tag--normal album-feed__filter-open" data-dom-id="open-filter" data-dd-id="feed-filter-open" data-component-slug="tag" data-component-binding="feed-filter-open-tag"><span class="tag__label">筛选</span></button>
           </div>
         </div>
@@ -2420,6 +2429,7 @@
       if (!ctx.state.pageTab) ctx.state.pageTab = 'following';
       if (!ctx.state.filters) ctx.state.filters = { content: 'all', publisher: 'all', category: 'all', dimension: 'all' };
       if (typeof ctx.state.scrollPosition !== 'number') ctx.state.scrollPosition = 0;
+      if (typeof ctx.state['has-published'] !== 'boolean') ctx.state['has-published'] = false;
       ensureCartState(ctx);
 
       function updateTabsIndicator(tabs) {
@@ -2547,11 +2557,15 @@
         activePublishTrigger.classList.add('is-open');
         activePublishTrigger.setAttribute('aria-expanded', 'true');
         ctx.state['publish-menu-open'] = true;
-        publishMenu.querySelector('[data-dom-id="publish-action-product"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); ctx.toast('发产品能力本期暂未开放'); });
-        publishMenu.querySelector('[data-dom-id="publish-action-note"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); ctx.toast('发笔记能力本期暂未开放'); });
-        publishMenu.querySelector('[data-dom-id="publish-action-live"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); ctx.toast('开直播能力本期暂未开放'); });
-        publishMenu.querySelector('[data-dom-id="publish-action-import"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); ctx.toast('批量导入能力本期暂未开放'); });
-        publishMenu.querySelector('[data-dom-id="publish-action-scan"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); ctx.toast('扫一扫能力本期暂未开放'); });
+        function onPublishAction() {
+          ctx.state['has-published'] = true;
+          render();
+        }
+        publishMenu.querySelector('[data-dom-id="publish-action-product"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); onPublishAction(); ctx.toast('发产品能力本期暂未开放'); });
+        publishMenu.querySelector('[data-dom-id="publish-action-note"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); onPublishAction(); ctx.toast('发笔记能力本期暂未开放'); });
+        publishMenu.querySelector('[data-dom-id="publish-action-live"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); onPublishAction(); ctx.toast('开直播能力本期暂未开放'); });
+        publishMenu.querySelector('[data-dom-id="publish-action-import"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); onPublishAction(); ctx.toast('批量导入能力本期暂未开放'); });
+        publishMenu.querySelector('[data-dom-id="publish-action-scan"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); onPublishAction(); ctx.toast('扫一扫能力本期暂未开放'); });
         bindDismissListeners();
       }
 
@@ -2781,10 +2795,11 @@
           var filterLabel = filterOpenTag.querySelector('.tag__label');
           if (filterLabel) filterLabel.textContent = hasFilters() ? '筛选·已选' : '筛选';
         }
-        if (items.length === 0) {
+        /* 未发布过任何内容时，始终显示空状态 */
+        if (!ctx.state['has-published'] || items.length === 0) {
           grid.innerHTML = '';
           emptyHost.hidden = false;
-          emptyHost.innerHTML = emptyTemplate();
+          emptyHost.innerHTML = emptyTemplate(ctx.state['has-published']);
           var emptyAction = emptyHost.querySelector('[data-dom-id="empty-clear"]');
           if (emptyAction) emptyAction.addEventListener('click', clearFilters);
         } else {
@@ -2922,11 +2937,15 @@
       });
       if (publishFocus) publishFocus.addEventListener('click', closePublishMenu);
       if (publishDock) {
-        publishDock.querySelector('[data-dom-id="publish-action-product"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); ctx.toast('发产品能力本期暂未开放'); });
-        publishDock.querySelector('[data-dom-id="publish-action-note"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); ctx.toast('发笔记能力本期暂未开放'); });
-        publishDock.querySelector('[data-dom-id="publish-action-live"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); ctx.toast('开直播能力本期暂未开放'); });
-        publishDock.querySelector('[data-dom-id="publish-action-import"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); ctx.toast('批量导入能力本期暂未开放'); });
-        publishDock.querySelector('[data-dom-id="publish-action-scan"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); ctx.toast('扫一扫能力本期暂未开放'); });
+        function onPublishAction() {
+          ctx.state['has-published'] = true;
+          render();
+        }
+        publishDock.querySelector('[data-dom-id="publish-action-product"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); onPublishAction(); ctx.toast('发产品能力本期暂未开放'); });
+        publishDock.querySelector('[data-dom-id="publish-action-note"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); onPublishAction(); ctx.toast('发笔记能力本期暂未开放'); });
+        publishDock.querySelector('[data-dom-id="publish-action-live"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); onPublishAction(); ctx.toast('开直播能力本期暂未开放'); });
+        publishDock.querySelector('[data-dom-id="publish-action-import"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); onPublishAction(); ctx.toast('批量导入能力本期暂未开放'); });
+        publishDock.querySelector('[data-dom-id="publish-action-scan"]').addEventListener('click', function(event) { event.stopPropagation(); closePublishMenu(); onPublishAction(); ctx.toast('扫一扫能力本期暂未开放'); });
       }
       root.querySelector('[data-dom-id="open-filter"]').addEventListener('click', openFilterModal);
       root.querySelector('[data-dom-id="feed-open-dynamic"]').addEventListener('click', function(event) {
