@@ -32,7 +32,6 @@
   --_tabs-label-mini-max: calc(var(--body-md-font-size) * 4);
   display: flex;
   width: 100%;
-  height: 100%;
   background: var(--bg-surface);
   box-sizing: border-box;
 }
@@ -40,6 +39,7 @@
 .wg-tabs__scroll {
   position: relative;
   display: flex;
+  align-items: stretch;
   width: 100%;
   box-sizing: border-box;
 }
@@ -89,7 +89,7 @@
   align-items: center;
   justify-content: center;
   min-width: 0;
-  height: 100%;
+  height: auto;
   gap: var(--spacer-4);
   box-sizing: border-box;
 }
@@ -109,20 +109,18 @@
 }
 
 .wg-tabs--standard {
-  min-height: var(--size-56);
+  height: var(--size-56);
 }
 
 .wg-tabs--standard .wg-tabs__item {
-  height: 100%;
   padding-inline: var(--spacer-16);
 }
 
 .wg-tabs--mini {
-  min-height: var(--size-48);
+  height: var(--size-48);
 }
 
 .wg-tabs--mini .wg-tabs__item {
-  height: 100%;
   padding-inline: var(--spacer-8);
 }
 

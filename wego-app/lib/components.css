@@ -2028,9 +2028,9 @@
 .navbar__left--custom { padding-left: 0; gap: 0; }
 .navbar__center--custom { min-width: 0; overflow: visible; padding: 0; gap: 0; height: 100%; }
 .navbar__right--custom { padding-right: 0; gap: 0; }
-/* navbar 内嵌 tabs 时移除 tabs 默认 min-height，让 tabs 完全跟随 navbar 主体高度 */
+/* navbar 内嵌 tabs 时，tabs 高度跟随 navbar 主体高度 */
 .navbar__left--custom .wg-tabs,
-.navbar__center--custom .wg-tabs { min-height: 0; }
+.navbar__center--custom .wg-tabs { height: 100%; }
 /* Action button items */
 .navbar__action { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 44px; min-height: 44px; cursor: pointer; position: relative; flex-shrink: 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
 .navbar__action:active,
@@ -3064,7 +3064,6 @@
   --_tabs-label-mini-max: calc(var(--body-md-font-size) * 4);
   display: flex;
   width: 100%;
-  height: 100%;
   background: var(--bg-surface);
   box-sizing: border-box;
 }
@@ -3072,6 +3071,7 @@
 .wg-tabs__scroll {
   position: relative;
   display: flex;
+  align-items: stretch;
   width: 100%;
   box-sizing: border-box;
 }
@@ -3121,7 +3121,7 @@
   align-items: center;
   justify-content: center;
   min-width: 0;
-  height: 100%;
+  height: auto;
   gap: var(--spacer-4);
   box-sizing: border-box;
 }
@@ -3141,20 +3141,18 @@
 }
 
 .wg-tabs--standard {
-  min-height: var(--size-56);
+  height: var(--size-56);
 }
 
 .wg-tabs--standard .wg-tabs__item {
-  height: 100%;
   padding-inline: var(--spacer-16);
 }
 
 .wg-tabs--mini {
-  min-height: var(--size-48);
+  height: var(--size-48);
 }
 
 .wg-tabs--mini .wg-tabs__item {
-  height: 100%;
   padding-inline: var(--spacer-8);
 }
 

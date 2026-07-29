@@ -114,9 +114,9 @@
 .navbar__left--custom { padding-left: 0; gap: 0; }
 .navbar__center--custom { min-width: 0; overflow: visible; padding: 0; gap: 0; height: 100%; }
 .navbar__right--custom { padding-right: 0; gap: 0; }
-/* navbar 内嵌 tabs 时移除 tabs 默认 min-height，让 tabs 完全跟随 navbar 主体高度 */
+/* navbar 内嵌 tabs 时，tabs 高度跟随 navbar 主体高度 */
 .navbar__left--custom .wg-tabs,
-.navbar__center--custom .wg-tabs { min-height: 0; }
+.navbar__center--custom .wg-tabs { height: 100%; }
 /* Action button items */
 .navbar__action { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 44px; min-height: 44px; cursor: pointer; position: relative; flex-shrink: 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
 .navbar__action:active,
