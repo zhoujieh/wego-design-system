@@ -58,7 +58,7 @@
    - actions=custom：加 .navbar__right--custom 修饰类，移除默认 padding-right 与 gap，由场景在 .navbar__right 内自由填充发布触发器、品牌入口等
    - custom 模式下 .navbar__title 不再必需，场景填充内容须自行承担布局、按压反馈与可访问性名称
 */
-.navbar { width: 100%; padding-top: var(--safe-area-top, 0px); background: var(--bg-page); flex-shrink: 0; position: sticky; top: 0; z-index: var(--z-sticky, 10); }
+.navbar { width: 100%; padding-top: var(--safe-area-top, 0px); background: var(--bg-page); flex-shrink: 0; position: sticky; top: 0; z-index: var(--z-sticky, 10); --navbar-subtitle-color: var(--text-secondary); }
 [data-bg="surface"] .navbar { background: var(--bg-surface); }
 /* Body — 默认三段式 3:4:3；--split 切换为左侧自适应 + 右侧内容宽度 */
 .navbar__body { height: var(--navbar-body-height, 44px); display: flex; align-items: center; }
@@ -89,6 +89,9 @@
 /* Center area — 仅三段式使用 */
 .navbar__center { display: flex; align-items: center; justify-content: center; gap: 4px; overflow: hidden; padding: 0 8px; }
 .navbar__title { font-size: var(--heading-sm-font-size); font-weight: var(--font-weight-medium); color: var(--text-default); line-height: 1.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* 标题+副标题上下排列 */
+.navbar__title-group { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; overflow: hidden; }
+.navbar__subtitle { font-size: var(--body-xs-font-size); color: var(--navbar-subtitle-color, var(--text-secondary)); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* Right area
    图标操作场景（默认）：padding-right 4px，gap 0
    文本/按钮操作场景：padding-right 16px，使用 .navbar__right--text / .navbar__right--button
@@ -203,8 +206,10 @@
 <body>
 <div class="pv-header"><h1>导航栏</h1><p>顶部导航，只提供左中右三段式与左右两段式两类布局。</p></div>
 <div class="navbar-preview-grid">
+
+  <!-- 标准三段式 -->
   <div class="preview-phone navbar-demo">
-    <div class="label">标准 — 返回 + 标题</div>
+    <div class="label">标准三段式 — 返回 + 标题</div>
     <div class="navbar">
       <div class="navbar__body">
         <div class="navbar__left">
@@ -217,7 +222,25 @@
   </div>
 
   <div class="preview-phone navbar-demo">
-    <div class="label">标准 — 返回 + 标题 + 图标操作（右侧间距4px）</div>
+    <div class="label">标准三段式 — 返回 + 标题 + 副标题</div>
+    <div class="navbar">
+      <div class="navbar__body">
+        <div class="navbar__left">
+          <div class="navbar__left-btn"><i class="wego-iconfont-s icon-fanhui"></i></div>
+        </div>
+        <div class="navbar__center">
+          <div class="navbar__title-group">
+            <span class="navbar__title">页面标题</span>
+            <span class="navbar__subtitle">副标题说明</span>
+          </div>
+        </div>
+        <div class="navbar__right"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="preview-phone navbar-demo">
+    <div class="label">标准三段式 — 返回 + 标题 + 图标操作</div>
     <div class="navbar">
       <div class="navbar__body">
         <div class="navbar__left">
@@ -239,7 +262,7 @@
   </div>
 
   <div class="preview-phone navbar-demo">
-    <div class="label">标准 — 返回 + 标题 + 文本操作（最多1个按钮）</div>
+    <div class="label">标准三段式 — 返回 + 标题 + 文本操作</div>
     <div class="navbar">
       <div class="navbar__body navbar__body--spaced">
         <div class="navbar__left">
@@ -254,7 +277,35 @@
   </div>
 
   <div class="preview-phone navbar-demo">
-    <div class="label">全屏模态模式 A — 取消 + 标题 + 按钮（底部弹出页，表单/设置类）</div>
+    <div class="label">标准三段式 — 无按钮，仅标题居中</div>
+    <div class="navbar">
+      <div class="navbar__body">
+        <div class="navbar__left"></div>
+        <div class="navbar__center"><span class="navbar__title">页面标题</span></div>
+        <div class="navbar__right"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 两段式 -->
+  <div class="preview-phone navbar-demo">
+    <div class="label">两段式 — 左标题自适应 + 右图标操作</div>
+    <div class="navbar">
+      <div class="navbar__body navbar__body--split">
+        <div class="navbar__left"><span class="navbar__title">页面标题</span></div>
+        <div class="navbar__right navbar__right--icon">
+          <div class="navbar__action">
+            <div class="navbar__action-icon"><i class="wego-iconfont-s icon-yuanjia"></i></div>
+            <span class="navbar__action-label">圆加</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 全屏模态 -->
+  <div class="preview-phone navbar-demo">
+    <div class="label">全屏模态 A — 取消 + 标题 + 保存按钮</div>
     <div class="navbar">
       <div class="navbar__body navbar__body--spaced">
         <div class="navbar__left"><span class="navbar__left-text">取消</span></div>
@@ -269,33 +320,7 @@
   </div>
 
   <div class="preview-phone navbar-demo">
-    <div class="label">无按钮 — 仅标题居中</div>
-    <div class="navbar">
-      <div class="navbar__body">
-        <div class="navbar__left"></div>
-        <div class="navbar__center"><span class="navbar__title">页面标题</span></div>
-        <div class="navbar__right"></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="preview-phone navbar-demo">
-    <div class="label">两段式 — 左标题自适应 + 右图标操作按内容宽度</div>
-    <div class="navbar">
-      <div class="navbar__body navbar__body--split">
-        <div class="navbar__left"><span class="navbar__title">页面标题</span></div>
-        <div class="navbar__right navbar__right--icon">
-          <div class="navbar__action">
-            <div class="navbar__action-icon"><i class="wego-iconfont-s icon-yuanjia"></i></div>
-            <span class="navbar__action-label">圆加</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="preview-phone navbar-demo">
-    <div class="label">全屏模态模式 B — 关闭 + 标题 + 图标（底部弹出页，浏览/选择类）</div>
+    <div class="label">全屏模态 B — 关闭 + 标题 + 图标操作</div>
     <div class="navbar">
       <div class="navbar__body">
         <div class="navbar__left">
@@ -304,7 +329,7 @@
         <div class="navbar__center"><span class="navbar__title">主题区</span></div>
         <div class="navbar__right navbar__right--icon">
           <div class="navbar__action">
-            <div class="navbar__action-icon"><i class="wego-iconfont-s icon-sandian16"></i></div>
+            <div class="navbar__action-icon"><i class="wego-iconfont-s icon-yuansandian"></i></div>
             <span class="navbar__action-label">更多</span>
           </div>
           <div class="navbar__action">
@@ -320,6 +345,7 @@
     </div>
   </div>
 
+  <!-- 圆形按钮 -->
   <div class="preview-phone navbar-demo">
     <div class="label">圆形按钮 — 返回（左箭头）</div>
     <div class="navbar">
@@ -346,21 +372,9 @@
     </div>
   </div>
 
+  <!-- 位置与背景模式 -->
   <div class="preview-phone navbar-demo">
-    <div class="label">圆形按钮 — 关闭（叉）</div>
-    <div class="navbar">
-      <div class="navbar__body">
-        <div class="navbar__left">
-          <div class="navbar__left-btn navbar__left-btn--circle"><i class="wego-iconfont-s icon-cha16"></i></div>
-        </div>
-        <div class="navbar__center"><span class="navbar__title">关闭</span></div>
-        <div class="navbar__right"></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="preview-phone navbar-demo">
-    <div class="label">sticky 吸顶（默认）— 滚动下方内容查看 navbar 粘在容器顶部</div>
+    <div class="label">sticky 吸顶 — 滚动查看 navbar 粘在容器顶部</div>
     <div class="navbar-demo-sticky-scroll">
       <div class="navbar">
         <div class="navbar__body">
@@ -368,8 +382,11 @@
             <div class="navbar__left-btn"><i class="wego-iconfont-s icon-fanhui"></i></div>
           </div>
           <div class="navbar__center"><span class="navbar__title">设置</span></div>
-          <div class="navbar__right navbar__right--text">
-            <div class="navbar__action navbar__action--text"><span class="navbar__action-label">保存</span></div>
+          <div class="navbar__right navbar__right--icon">
+            <div class="navbar__action">
+              <div class="navbar__action-icon"><i class="wego-iconfont-s icon-shezhi"></i></div>
+              <span class="navbar__action-label">设置</span>
+            </div>
           </div>
         </div>
       </div>
@@ -384,7 +401,7 @@
   </div>
 
   <div class="preview-phone navbar-demo">
-    <div class="label">fixed 透明反白（深色/图片背景场景）— navbar 透明 + 文字图标反白，透过 navbar 可见背景</div>
+    <div class="label">fixed 透明反白 — 深色/图片背景场景</div>
     <div class="navbar-demo-dark-bg">
       <div class="navbar navbar--fixed-transparent">
         <div class="navbar__body navbar__body--spaced">
@@ -407,17 +424,14 @@
     </div>
   </div>
 
+  <!-- Custom 槽位 -->
   <div class="preview-phone navbar-demo" data-bg="page">
-    <div class="label">host-tab 主页 custom 槽 — 左身份区 + 右图标操作（如「我的」tab）</div>
+    <div class="label">custom 槽 — 左自定义区 + 右图标操作</div>
     <div class="navbar">
       <div class="navbar__body navbar__body--split">
         <div class="navbar__left navbar__left--custom">
-          <button type="button" class="navbar-demo-identity" aria-label="切换相册">
-            <div class="avatar avatar--40 avatar--image"><img src="../assets/image/avatar/avatar_083.jpg" alt=""></div>
-            <span class="navbar-demo-identity-name">微购优选商行</span>
-            <i class="wego-iconfont-s icon-renzheng navbar-demo-identity-verified" aria-label="已认证"></i>
-            <span class="tag tag--20 tag--brand-stroke"><span class="tag__label">VIP</span></span>
-            <i class="wego-iconfont-s icon-xiajiantou16 navbar-demo-identity-caret" aria-hidden="true"></i>
+          <button type="button" class="navbar-demo-identity" aria-label="自定义内容">
+            <span class="navbar-demo-identity-name">自定义内容</span>
           </button>
         </div>
         <div class="navbar__right navbar__right--icon">
@@ -435,7 +449,7 @@
   </div>
 
   <div class="preview-phone navbar-demo" data-bg="surface">
-    <div class="label">host-tab 主页 custom 槽 — 中间 tabs + 右自定义触发器（如「微购相册动态」tab）</div>
+    <div class="label">custom 槽 — 中间 tabs + 右自定义触发器</div>
     <div class="navbar">
       <div class="navbar__body">
         <div class="navbar__left navbar__left--custom"></div>
@@ -457,16 +471,14 @@
       </div>
     </div>
   </div>
+
 </div>
 <style>
   /* host-tab demo 局部样式 — 仅用于 Preview 演示，不在 components.css 中提取 */
-  .navbar-demo-identity { display: flex; align-items: center; gap: var(--spacer-8); width: 100%; min-width: 0; padding: var(--spacer-4) var(--spacer-8); border: 0; background: transparent; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-  .navbar-demo-identity:active { opacity: 0.6; }
-  .navbar-demo-identity .avatar,
-  .navbar-demo-identity .tag { flex-shrink: 0; }
+  .navbar-demo-identity { display: flex; align-items: center; width: 100%; min-width: 0; padding: 0 var(--spacer-16); border: 0; background: transparent; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
+  .navbar-demo-identity:active,
+  .navbar-demo-identity.is-pressed { opacity: 0.6; }
   .navbar-demo-identity-name { flex: 1 1 auto; min-width: 0; font-size: var(--heading-sm-font-size); font-weight: var(--font-weight-medium); color: var(--text-default); line-height: var(--heading-sm-line-height); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .navbar-demo-identity-verified { flex-shrink: 0; font-size: 16px; color: var(--text-brand); line-height: var(--body-xs-line-height); }
-  .navbar-demo-identity-caret { flex-shrink: 0; font-size: 16px; color: var(--text-default); line-height: var(--body-xs-line-height); }
   .navbar-demo-tabs { width: 100%; background: transparent; }
   .navbar-demo-tabs .wg-tabs__scroll { justify-content: center; }
   .navbar-demo-tabs.wg-tabs--standard .wg-tabs__item { padding-inline: var(--spacer-8); }

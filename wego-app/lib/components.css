@@ -1976,7 +1976,7 @@
    - actions=custom：加 .navbar__right--custom 修饰类，移除默认 padding-right 与 gap，由场景在 .navbar__right 内自由填充发布触发器、品牌入口等
    - custom 模式下 .navbar__title 不再必需，场景填充内容须自行承担布局、按压反馈与可访问性名称
 */
-.navbar { width: 100%; padding-top: var(--safe-area-top, 0px); background: var(--bg-page); flex-shrink: 0; position: sticky; top: 0; z-index: var(--z-sticky, 10); }
+.navbar { width: 100%; padding-top: var(--safe-area-top, 0px); background: var(--bg-page); flex-shrink: 0; position: sticky; top: 0; z-index: var(--z-sticky, 10); --navbar-subtitle-color: var(--text-secondary); }
 [data-bg="surface"] .navbar { background: var(--bg-surface); }
 /* Body — 默认三段式 3:4:3；--split 切换为左侧自适应 + 右侧内容宽度 */
 .navbar__body { height: var(--navbar-body-height, 44px); display: flex; align-items: center; }
@@ -2007,6 +2007,9 @@
 /* Center area — 仅三段式使用 */
 .navbar__center { display: flex; align-items: center; justify-content: center; gap: 4px; overflow: hidden; padding: 0 8px; }
 .navbar__title { font-size: var(--heading-sm-font-size); font-weight: var(--font-weight-medium); color: var(--text-default); line-height: 1.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* 标题+副标题上下排列 */
+.navbar__title-group { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; overflow: hidden; }
+.navbar__subtitle { font-size: var(--body-xs-font-size); color: var(--navbar-subtitle-color, var(--text-secondary)); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* Right area
    图标操作场景（默认）：padding-right 4px，gap 0
    文本/按钮操作场景：padding-right 16px，使用 .navbar__right--text / .navbar__right--button

@@ -71,6 +71,16 @@
       "layout": "three-part",
       "leftControl": "back-icon",
       "titleAlignment": "center",
+      "actions": "none",
+      "spacing": "default",
+      "pageTransition": "push",
+      "position": "sticky",
+      "note": "三段式中心区域使用 .navbar__title-group 上下排列标题+副标题"
+    },
+    {
+      "layout": "three-part",
+      "leftControl": "back-icon",
+      "titleAlignment": "center",
       "actions": "icon",
       "rightActionType": "icon",
       "spacing": "default",
@@ -175,6 +185,16 @@
       "name": "title",
       "selector": ".navbar__title",
       "role": "标题文本，三段式放在 .navbar__center，二段式放在 .navbar__left；字号为 heading-sm(18px) medium；当 titleAlignment=custom 时可省略"
+    },
+    {
+      "name": "subtitle",
+      "selector": ".navbar__subtitle",
+      "role": "副标题文本，可选，放在 .navbar__title-group 内与标题上下排列；字号 body-xs(10px)，颜色 --text-secondary"
+    },
+    {
+      "name": "titleGroup",
+      "selector": ".navbar__title-group",
+      "role": "标题+副标题的垂直堆叠容器，flex-direction: column 居中对齐；放在 .navbar__center 内替代直接放 .navbar__title"
     }
   ],
   "structurePatterns": [
@@ -229,7 +249,9 @@
     "bodyChildren": [],
     "centerChildren": [],
     "optionalChildren": [
-      ".navbar__title"
+      ".navbar__title",
+      ".navbar__subtitle",
+      ".navbar__title-group"
     ],
     "optionalActionClasses": [
       ".navbar__body--spaced",
@@ -295,17 +317,16 @@
   "previewOnlyTokens": [
     "--bg-brand",
     "--body-md-font-size",
-    "--body-xs-line-height",
     "--border-neutral-l2",
     "--heading-sm-line-height",
     "--radius-full",
     "--spacer-12",
     "--spacer-16",
-    "--spacer-4",
-    "--spacer-8",
-    "--text-brand"
+    "--spacer-8"
   ],
-  "localTokens": [],
+  "localTokens": [
+    "--navbar-subtitle-color"
+  ],
   "layerContract": {
     "scope": "page-local",
     "role": "navigation",
