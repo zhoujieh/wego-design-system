@@ -580,7 +580,7 @@ body[data-viewport-mode="native"] .bottom-nav {
 }
 
 @media (max-width: 375px) {
-  .host-shell-grid {
+  body[data-viewport-mode="native"] .host-shell-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
