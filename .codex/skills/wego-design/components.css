@@ -1753,6 +1753,10 @@
 .modal__title--default {
   --safe-area-top: 0px;
 }
+.modal--frame .modal__title--default,
+.modal--frame-x .modal__title--default {
+  --navbar-body-height: 64px;
+}
 .modal__title--default .navbar {
   background: var(--modal-panel-bg, var(--bg-surface));
 }

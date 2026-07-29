@@ -154,7 +154,7 @@
     {
       "name": "body",
       "selector": ".navbar__body",
-      "role": "导航主体；默认三段式，.navbar__body--split 为两段式"
+      "role": "导航主体；默认三段式，.navbar__body--split 为两段式；高度由 --navbar-body-height 控制，默认 44px，允许 Modal frame/frame-x 在自身作用域内覆盖为 64px"
     },
     {
       "name": "left",
@@ -181,7 +181,7 @@
     "body 只提供两类移动端结构：默认三段式（left / center / right，宽度比例 3:4:3）与 .navbar__body--split 两段式（left 自适应剩余空间 / right 按内容宽度）；不再使用 10 等分栅格。",
     "右侧操作按文本、图标、图文、按钮等场景罗列，直接作为 navbar 内部样式场景维护，不再注册为独立组件。",
     "按钮式右侧操作复用已注册 button 组件的小尺寸按钮。",
-    "默认导航主体高度为 44px；居中标题与中间 tabs 使用三段式，左对齐标题或左身份区 + 右操作使用两段式。",
+    "默认导航主体高度为 44px；Modal frame/frame-x 可在自身 default title 作用域内覆盖 --navbar-body-height: 64px，fullscreen 不覆盖并继续使用 navbar 自身高度；居中标题与中间 tabs 使用三段式，左对齐标题或左身份区 + 右操作使用两段式。",
     "host-tab 主页按内容位置选择结构：左身份区 + 右操作使用 .navbar__body--split 两段式；中间 tabs + 右操作使用默认三段式，保留空的 .navbar__left，把 tabs 放进 .navbar__center--custom，把触发器放进 .navbar__right--custom。custom 模式下 .navbar__title 不再必需，但场景填充内容须自行承担布局与按压反馈。",
     ".navbar__center--wide 与 .navbar__right--wide 仅用于兼容未迁移的旧场景，新增消费禁止使用。"
   ],
@@ -211,7 +211,7 @@
     "全屏模态页面直接调用固定模式，不要自由组合：模式 A（取消+按钮）用于表单/设置类；模式 B（叉+图标）用于浏览/选择类。",
     "导航栏必须显式设置背景色，与页面 data-bg 声明的背景色一致；不要使用 transparent（深色/图片背景场景除外，此时用 fixed-transparent 模式）。",
     "navbar 宽度默认 100%，由页面外层容器约束最大宽度（768px）；不需要在项目中覆盖宽度。",
-    "navbar 默认 sticky 吸顶，宿主无需额外配置（components.css 已配置 position: sticky; top: 0; z-index: var(--z-sticky)）；顶部安全区由组件内部通过 padding-top: var(--safe-area-top, 0px) 处理；导航主体高度默认 44px；深色/图片背景场景加 .navbar--fixed-transparent 修饰类，切换为 fixed 透明反白模式，此时 page-body 需加 padding-top: calc(var(--navbar-body-height, 44px) + var(--safe-area-top, 0px)) 为 navbar 与顶部安全区让位。",
+    "navbar 默认 sticky 吸顶，宿主无需额外配置（components.css 已配置 position: sticky; top: 0; z-index: var(--z-sticky)）；顶部安全区由组件内部通过 padding-top: var(--safe-area-top, 0px) 处理；导航主体高度默认 44px；Modal frame/frame-x 仅在自身 default title 内局部覆盖 --navbar-body-height: 64px，fullscreen 不覆盖该变量并沿用 navbar 自身高度；深色/图片背景场景加 .navbar--fixed-transparent 修饰类，切换为 fixed 透明反白模式，此时 page-body 需加 padding-top: calc(var(--navbar-body-height, 44px) + var(--safe-area-top, 0px)) 为 navbar 与顶部安全区让位。",
     "标题文本必须使用 .navbar__title：三段式放在 .navbar__center，二段式放在 .navbar__left；不得在槽位中直接写纯文本；.navbar__title 提供 heading-sm(18px) medium 样式。",
     "host-tab 主页按内容位置选择结构：左身份区 + 右操作使用 .navbar__body--split，两侧分别使用 .navbar__left--custom / .navbar__right--custom；中间 tabs + 右操作使用默认三段式，保留空 left，tabs 放在 .navbar__center--custom，触发器放在 .navbar__right--custom。custom 模式下 .navbar__title 不再必需，但场景填充内容须自行承担布局、按压反馈与可访问性名称。",
     ".navbar__center--wide 与 .navbar__right--wide 仅为旧场景兼容入口；新增或修改消费必须改用 .navbar__body--split。"
