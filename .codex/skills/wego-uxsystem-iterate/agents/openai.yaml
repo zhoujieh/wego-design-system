@@ -1,7 +1,7 @@
 interface:
   display_name: "Wego UX 系统迭代"
-  short_description: "审查并迭代微购设计系统、五技能包结构守门与经验规则自循环升级闭环"
-  default_prompt: "Use $wego-uxsystem-iterate to review or evolve the Wego design system and five-skill workflow with controlled rule promotion and full verification."
+  short_description: "审查并迭代微购设计系统、三技能主链路守门与经验规则升级闭环"
+  default_prompt: "Use $wego-uxsystem-iterate to review or evolve the Wego design system and three-skill workflow with controlled rule promotion and full verification."
 
 policy:
   allow_implicit_invocation: true

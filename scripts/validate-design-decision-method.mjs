@@ -105,7 +105,12 @@ else {
     const pointsToDocument = canonical?.file === canonicalPath || landing?.file === canonicalPath;
     if (canonical?.file === canonicalPath && candidate.rule_ownership?.category !== 'shared-principle') add('candidate.wrong_category', `指向设计决策原则的候选必须使用 shared-principle 归属：${candidate.id}`, candidateFile);
     if (canonical?.file === canonicalPath && candidate.status !== 'promoted') add('candidate.unpromoted_document', `未晋升候选不得指向设计决策原则文档：${candidate.id}`, candidateFile);
-    if (pointsToDocument && candidate.status === 'promoted' && !ruleIds.has((landing || canonical).rule_id)) add('candidate.rule_missing', `已晋升候选缺少文档 rule_id：${candidate.id}`, candidateFile);
+    if (candidate.status === 'promoted' && canonical?.file === canonicalPath && !ruleIds.has(canonical.rule_id)) add('candidate.rule_missing', `已晋升候选 canonical 缺少文档 rule_id：${candidate.id}`, candidateFile);
+    if (candidate.status === 'promoted' && landing?.file === canonicalPath && !ruleIds.has(landing.rule_id)) add('candidate.rule_missing', `已晋升候选 promotion_landing 缺少文档 rule_id：${candidate.id}`, candidateFile);
+    if (pointsToDocument && candidate.status === 'promoted' && canonical?.file === canonicalPath && landing?.file === canonicalPath
+      && (canonical.rule_id !== landing.rule_id || canonical.locator !== landing.locator)) {
+      add('candidate.landing_mismatch', `已晋升候选的 canonical 与 promotion_landing 必须一致：${candidate.id}`, candidateFile);
+    }
   }
 }
 

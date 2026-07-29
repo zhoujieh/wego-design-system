@@ -16,11 +16,11 @@
 ## 2. 组件迭代步骤
 
 1. 读取组件契约、Preview、`components.css`、索引、引用该组件的 UI Kit 和受影响场景。
-2. 修改 Preview 与契约的唯一当前 Schema；不得只改其中一个，不得直接修改 `components.css` 或 `wego-app/lib/`。
+2. DOM、变体、状态、Token 或交互行为变化时必须同时修改 Preview 与契约的唯一当前 Schema；只调整不改变实现表面的消费提示时可仅改契约，但必须复核 Preview 和聚合 CSS 仍满足新语义。不得直接修改 `components.css` 或 `wego-app/lib/`。
 3. 组件 CSS 中的全局变量写入 `runtimeTokens`，内部参数写入 `localTokens`，展示页专属变量写入 `previewOnlyTokens`。
 4. root、必需节点、alternatives、modifier 必须都在 Preview 和聚合 CSS 中可达。新增或修改变体维度时，每个新增或修改值至少要有一个 Preview 示例和对应 `representativeVariants` 证据；替代结构使用结构化 `alternatives`，不得保留不可解析的复杂 selector 字符串。
 5. 数值组件必须把可缩放的数值语义拆到正式子节点：整数、小数、货币符号、单位和区间两端不得混入同一个文本节点。纯整数省略小数节点，不创建空节点。
-6. 更新组件索引、引用该组件的明确范式和 Preview 导航；新增或删除组件时必须同步这些权威来源。
+6. 按同步矩阵条件更新消费者：注册、Preview 路径或代表变体变化时更新组件索引；组件可用范围变化时更新引用该组件的明确范式；新增或删除组件时同步索引、明确范式和 Preview 导航。不得为未受影响项制造机械改动。
 7. 运行 CSS 提取、组件一致性守卫、资源同步和受影响场景回归。
 
 ## 3. UI Kit 迭代步骤

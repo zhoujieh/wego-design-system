@@ -18,7 +18,7 @@
 
 候选只写 `experience/candidates.json`。同类问题累计证据；达到阈值后变为 `awaiting-confirmation`，用户确认前不得修改正式规则。
 
-确认后必须写清 `applies_when`、`avoid_when`、`exceptions`、`fallback`、唯一落点、运行时消费者和验证守卫。顶层页面判断可落入 `.codex/skills/shared/references/design-decisions.md` 的前提是：它跨场景复用、直接约束产品阶段 `prototype_brief` 或设计阶段 `prompt_contract`，且不属于业务事实、组件内部结构、页面范式、运行时实现、资源消费、场景合同字段或测试方法。组件、Token、资产、UI Kit、宿主运行和守卫类规则必须落到对应权威源，设计原则只保留必要裁决语义。规则升级后更新候选状态为 `promoted`，并运行：
+确认后必须在目标权威源的原生 Schema 中表达与 `applies_when`、`avoid_when`、`exceptions`、`fallback` 等价的适用、禁用、例外和回退语义：Markdown 方法规则可直接使用这些字段或紧邻 `rule-id` 的明确条款；组件、Token、资产、UI Kit 和消费 JSON 必须使用自身的 `usageHints`、`doNotInvent`、`behavior`、`appliesWhen`、`excludeWhen`、消费规则等原生字段，不得为了经验升级发明平行字段。候选记录必须写清唯一精确落点、简短约束摘要、运行时消费者和可执行验证守卫。顶层页面判断可落入 `.codex/skills/shared/references/design-decisions.md` 的前提是：它跨场景复用、直接约束产品阶段 `prototype_brief` 或设计阶段 `prompt_contract`，且不属于业务事实、组件内部结构、页面范式、运行时实现、资源消费、场景合同字段或测试方法。组件、Token、资产、UI Kit、宿主运行和守卫类规则必须落到对应权威源，设计原则只保留必要裁决语义。规则升级后更新候选状态为 `promoted`，并运行：
 
 ```bash
 node scripts/validate-component-contract-parity.mjs

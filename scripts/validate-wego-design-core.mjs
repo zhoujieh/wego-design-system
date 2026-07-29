@@ -68,6 +68,7 @@ function checkRequiredFiles() {
     'scripts/prompt-contract-schema.mjs',
     'scripts/test-prompt-contract-schema.mjs',
     'scripts/test-uikit-plan-schema.mjs',
+    'scripts/test-quality-report-version-snapshot.mjs',
     'scripts/test-scene-contract-tools.mjs',
     'scripts/test-scroll-layout.mjs',
     'scripts/validate-design-decision-method.mjs',
@@ -223,6 +224,8 @@ function checkIteration(includeBusinessRecords = true) {
 function checkSceneContractTools() {
   const uikitTests = spawnSync(process.execPath, ['scripts/test-uikit-plan-schema.mjs'], { cwd: root, encoding: 'utf8' });
   if (uikitTests.status !== 0) add('error', 'uikit_schema.test', (uikitTests.stderr || uikitTests.stdout || 'UI Kit schema 测试失败').trim(), path.join(root, 'scripts/test-uikit-plan-schema.mjs'));
+  const qualityVersionTests = spawnSync(process.execPath, ['scripts/test-quality-report-version-snapshot.mjs'], { cwd: root, encoding: 'utf8' });
+  if (qualityVersionTests.status !== 0) add('error', 'uikit_quality_version.test', (qualityVersionTests.stderr || qualityVersionTests.stdout || 'UI Kit 质量报告版本快照测试失败').trim(), path.join(root, 'scripts/test-quality-report-version-snapshot.mjs'));
   const schemaTests = spawnSync(process.execPath, ['scripts/test-prompt-contract-schema.mjs'], { cwd: root, encoding: 'utf8' });
   if (schemaTests.status !== 0) add('error', 'prompt_contract_schema.test', (schemaTests.stderr || schemaTests.stdout || 'prompt_contract Schema 测试失败').trim(), path.join(root, 'scripts/test-prompt-contract-schema.mjs'));
   const tests = spawnSync(process.execPath, ['scripts/test-scene-contract-tools.mjs'], { cwd: root, encoding: 'utf8' });

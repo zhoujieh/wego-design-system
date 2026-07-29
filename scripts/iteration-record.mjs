@@ -30,6 +30,8 @@ const prototypeBriefKeys = ['goal', 'included', 'excluded', 'entry_points', 'cri
 const prototypeBriefKeySet = new Set(prototypeBriefKeys);
 const prototypeBriefArrayFields = ['included', 'excluded', 'entry_points', 'critical_paths', 'states', 'assumptions', 'open_questions'];
 const requiredBriefArrayFields = new Set(['included', 'entry_points', 'critical_paths', 'states']);
+const iterationKeys = ['schemaVersion', 'identity', 'status', 'scope_revision', 'prototype_brief', 'brief_submission', 'brief_confirmation', 'prototype_confirmation', 'affected_scenes', 'affected_runtime', 'stage_outputs', 'change_log', 'freeze'];
+const identityKeys = ['iteration_id', 'title', 'date', 'primary_scene', 'related_scenes'];
 const routesRelativePath = 'wego-app/js/routes.js';
 const routeFingerprintPrefix = '@route-entry/';
 const expectedStageValidity = new Map([
@@ -41,12 +43,12 @@ const expectedStageValidity = new Map([
   ['frozen', [true, true]]
 ]);
 const expectedConfirmations = new Map([
-  ['draft', [false, false]],
-  ['awaiting-brief-confirmation', [false, false]],
-  ['prototyping', [true, false]],
-  ['awaiting-prototype-confirmation', [true, false]],
-  ['prototype-confirmed', [true, true]],
-  ['frozen', [true, true]]
+  ['draft', [false, false, false]],
+  ['awaiting-brief-confirmation', [true, false, false]],
+  ['prototyping', [true, true, false]],
+  ['awaiting-prototype-confirmation', [true, true, false]],
+  ['prototype-confirmed', [true, true, true]],
+  ['frozen', [true, true, true]]
 ]);
 const invalidateSources = {
   brief: new Set(['awaiting-brief-confirmation', 'prototyping', 'awaiting-prototype-confirmation', 'prototype-confirmed']),
@@ -202,7 +204,11 @@ function affectedRuntimeErrors(record, file) {
   return errors;
 }
 function stageOutputErrors(record, file) {
-  const errors = [];
+  const errors = [
+    ...exactKeysErrors(record.stage_outputs, ['product', 'design'], `${file}: stage_outputs`),
+    ...exactKeysErrors(record.stage_outputs?.product, ['valid'], `${file}: stage_outputs.product`),
+    ...exactKeysErrors(record.stage_outputs?.design, ['valid'], `${file}: stage_outputs.design`)
+  ];
   const productValid = record.stage_outputs?.product?.valid;
   const designValid = record.stage_outputs?.design?.valid;
   if (typeof productValid !== 'boolean') errors.push(`${file}: stage_outputs.product.valid 必须为布尔值`);
@@ -316,15 +322,28 @@ function confirmationErrors(record, file, repositoryRoot) {
   const errors = [];
   if (record.status === 'superseded') return errors;
   const expected = expectedConfirmations.get(record.status);
+  const submissionPresent = record.brief_submission !== null && record.brief_submission !== undefined;
   const briefPresent = record.brief_confirmation !== null && record.brief_confirmation !== undefined;
   const prototypePresent = record.prototype_confirmation !== null && record.prototype_confirmation !== undefined;
   if (expected) {
-    const briefMatches = expected[0] ? briefPresent : record.brief_confirmation === null;
-    const prototypeMatches = expected[1] ? prototypePresent : record.prototype_confirmation === null;
-    if (!briefMatches) errors.push(`${file}: 状态 ${record.status} 的 brief_confirmation 必须为 ${expected[0] ? '已确认对象' : 'null'}`);
-    if (!prototypeMatches) errors.push(`${file}: 状态 ${record.status} 的 prototype_confirmation 必须为 ${expected[1] ? '已确认对象' : 'null'}`);
+    const submissionMatches = expected[0] ? submissionPresent : record.brief_submission === null;
+    const briefMatches = expected[1] ? briefPresent : record.brief_confirmation === null;
+    const prototypeMatches = expected[2] ? prototypePresent : record.prototype_confirmation === null;
+    if (!submissionMatches) errors.push(`${file}: 状态 ${record.status} 的 brief_submission 必须为 ${expected[0] ? '已提交对象' : 'null'}`);
+    if (!briefMatches) errors.push(`${file}: 状态 ${record.status} 的 brief_confirmation 必须为 ${expected[1] ? '已确认对象' : 'null'}`);
+    if (!prototypeMatches) errors.push(`${file}: 状态 ${record.status} 的 prototype_confirmation 必须为 ${expected[2] ? '已确认对象' : 'null'}`);
   } else if (prototypePresent && !briefPresent) {
     errors.push(`${file}: prototype_confirmation 存在时 brief_confirmation 也必须存在`);
+  }
+  if (briefPresent && !submissionPresent) errors.push(`${file}: brief_confirmation 存在时 brief_submission 也必须存在`);
+  if (submissionPresent) {
+    errors.push(...exactKeysErrors(record.brief_submission, ['at', 'scope_revision', 'scope_sha256'], `${file}: brief_submission`));
+    if (isPlainObject(record.brief_submission)) {
+      if (!isIsoTimestamp(record.brief_submission.at)) errors.push(`${file}: brief_submission.at 必须为 ISO 时间`);
+      if (record.brief_submission.scope_revision !== record.scope_revision) errors.push(`${file}: brief_submission 必须绑定当前 scope_revision`);
+      if (typeof record.brief_submission.scope_sha256 !== 'string' || !/^[a-f0-9]{64}$/.test(record.brief_submission.scope_sha256)) errors.push(`${file}: brief_submission.scope_sha256 必须是 SHA-256`);
+      else if (record.brief_submission.scope_sha256 !== scopeSha256(record)) errors.push(`${file}: brief_submission.scope_sha256 与当前范围不一致（线框展示并提交后范围已漂移）`);
+    }
   }
   if (briefPresent) {
     errors.push(...exactKeysErrors(record.brief_confirmation, ['at', 'scope_revision', 'scope_sha256'], `${file}: brief_confirmation`));
@@ -375,12 +394,25 @@ function validate(record, file, repositoryRoot = root) {
   const errors = [];
   if (!isPlainObject(record)) return [`${file}: 迭代记录必须为普通对象`];
   if (path.isAbsolute(file)) errors.push(...iterationFilePathErrors(file, record.identity?.primary_scene ?? null, repositoryRoot));
-  for (const key of ['brief_confirmation', 'prototype_confirmation', 'affected_scenes', 'affected_runtime', 'stage_outputs', 'freeze']) {
-    if (!Object.hasOwn(record, key)) errors.push(`${file}: 迭代记录缺少 ${key}`);
+  const unexpectedKeys = Object.keys(record).filter(key => !iterationKeys.includes(key));
+  const missingKeys = iterationKeys.filter(key => !Object.hasOwn(record, key));
+  if (unexpectedKeys.length) errors.push(`${file}: 迭代记录含 schemaVersion 5 未定义顶层字段：${unexpectedKeys.join('、')}`);
+  if (missingKeys.length) {
+    errors.push(`${file}: 迭代记录缺少字段：${missingKeys.join('、')}`);
   }
-  if (record.schemaVersion !== 4) errors.push(`${file}: schemaVersion 必须为 4`);
-  if (!record.identity?.iteration_id || !record.identity?.title || !record.identity?.primary_scene) errors.push(`${file}: identity 缺少 iteration_id/title/primary_scene`);
-  else if (!isSafeSceneName(record.identity.primary_scene)) errors.push(`${file}: identity.primary_scene 必须是单层安全场景名`);
+  if (record.schemaVersion !== 5) errors.push(`${file}: schemaVersion 必须为 5`);
+  errors.push(...exactKeysErrors(record.identity, identityKeys, `${file}: identity`));
+  if (isPlainObject(record.identity)) {
+    for (const key of ['iteration_id', 'title']) {
+      if (typeof record.identity[key] !== 'string' || !record.identity[key].trim()) errors.push(`${file}: identity.${key} 必须为非空字符串`);
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(record.identity.date ?? '')) errors.push(`${file}: identity.date 必须为 YYYY-MM-DD`);
+    if (!isSafeSceneName(record.identity.primary_scene)) errors.push(`${file}: identity.primary_scene 必须是单层安全场景名`);
+    errors.push(...stringArrayErrors(record.identity.related_scenes, `${file}: identity.related_scenes`));
+    if (Array.isArray(record.identity.related_scenes)) record.identity.related_scenes.forEach((scene, index) => {
+      if (typeof scene === 'string' && scene.trim() && !isSafeSceneName(scene)) errors.push(`${file}: identity.related_scenes[${index}] 必须是单层安全场景名`);
+    });
+  }
   if (!statuses.has(record.status)) errors.push(`${file}: status 非法：${record.status}`);
   if (!Number.isInteger(record.scope_revision) || record.scope_revision < 1) errors.push(`${file}: scope_revision 必须为正整数`);
   const brief = record.prototype_brief;
@@ -388,7 +420,7 @@ function validate(record, file, repositoryRoot = root) {
   for (const key of prototypeBriefKeys) if (!briefIsObject || !(key in brief)) errors.push(`${file}: prototype_brief 缺少 ${key}`);
   if (briefIsObject) {
     const unexpectedBriefKeys = Object.keys(brief).filter(key => !prototypeBriefKeySet.has(key));
-    if (unexpectedBriefKeys.length) errors.push(`${file}: prototype_brief 含 schemaVersion 4 未定义字段：${unexpectedBriefKeys.join('、')}`);
+    if (unexpectedBriefKeys.length) errors.push(`${file}: prototype_brief 含 schemaVersion 5 未定义字段：${unexpectedBriefKeys.join('、')}`);
     errors.push(...prototypeBriefArrayErrors(brief, `${file}: `));
     if (!Array.isArray(brief.prototype_boundaries)) errors.push(`${file}: prototype_brief.prototype_boundaries 必须为数组`);
     else errors.push(...prototypeBoundaryErrors(brief, `${file}: `, false));
@@ -436,7 +468,7 @@ function init() {
   if (!isSafeSceneName(scene)) fail('--scene 必须是单层安全场景名');
   const file = requireFile(scene);
   if (fs.existsSync(file)) fail(`${file} 已存在`);
-  const record = { schemaVersion: 4, identity: { iteration_id: id, title, date: new Date().toISOString().slice(0, 10), primary_scene: scene, related_scenes: [] }, status: 'draft', scope_revision: 1, prototype_brief: { goal: '', included: [], excluded: [], entry_points: [], critical_paths: [], prototype_boundaries: [], states: [], data_contract: {}, assumptions: [], open_questions: [] }, brief_confirmation: null, prototype_confirmation: null, affected_scenes: [scene], affected_runtime: [], stage_outputs: { product: { valid: false }, design: { valid: false } }, change_log: [], freeze: null };
+  const record = { schemaVersion: 5, identity: { iteration_id: id, title, date: new Date().toISOString().slice(0, 10), primary_scene: scene, related_scenes: [] }, status: 'draft', scope_revision: 1, prototype_brief: { goal: '', included: [], excluded: [], entry_points: [], critical_paths: [], prototype_boundaries: [], states: [], data_contract: {}, assumptions: [], open_questions: [] }, brief_submission: null, brief_confirmation: null, prototype_confirmation: null, affected_scenes: [scene], affected_runtime: [], stage_outputs: { product: { valid: false }, design: { valid: false } }, change_log: [], freeze: null };
   const errors = validate(record, file);
   if (errors.length) fail(errors.join('\n'));
   fs.mkdirSync(path.dirname(file), { recursive: true });
@@ -513,6 +545,9 @@ function collectFingerprints(record, repositoryRoot = root) {
 function createBriefConfirmation(record) {
   return { at: new Date().toISOString(), scope_revision: record.scope_revision, scope_sha256: scopeSha256(record) };
 }
+function createBriefSubmission(record) {
+  return { at: new Date().toISOString(), scope_revision: record.scope_revision, scope_sha256: scopeSha256(record) };
+}
 function createPrototypeConfirmation(record, repositoryRoot = root) {
   return {
     at: new Date().toISOString(),
@@ -530,6 +565,7 @@ function applyInvalidation(record, stage) {
   record.status = stage === 'brief' ? 'draft' : 'prototyping';
   if (stage === 'brief') {
     record.scope_revision += 1;
+    record.brief_submission = null;
     record.brief_confirmation = null;
     record.prototype_confirmation = null;
     record.stage_outputs = { product: { valid: false }, design: { valid: false } };
@@ -589,7 +625,7 @@ function test() {
     assumptions: [],
     open_questions: []
   });
-  const sample = { schemaVersion: 4, identity: { iteration_id: 'test', title: '测试', primary_scene: '测试场景' }, status: 'draft', scope_revision: 1, prototype_brief: { goal: '', included: [], excluded: [], entry_points: [], critical_paths: [], prototype_boundaries: [], states: [], data_contract: {}, assumptions: [], open_questions: [] }, brief_confirmation: null, prototype_confirmation: null, affected_scenes: ['测试场景'], affected_runtime: [], stage_outputs: { product: { valid: false }, design: { valid: false } }, change_log: [], freeze: null };
+  const sample = { schemaVersion: 5, identity: { iteration_id: 'test', title: '测试', date: '2026-07-15', primary_scene: '测试场景', related_scenes: [] }, status: 'draft', scope_revision: 1, prototype_brief: { goal: '', included: [], excluded: [], entry_points: [], critical_paths: [], prototype_boundaries: [], states: [], data_contract: {}, assumptions: [], open_questions: [] }, brief_submission: null, brief_confirmation: null, prototype_confirmation: null, affected_scenes: ['测试场景'], affected_runtime: [], stage_outputs: { product: { valid: false }, design: { valid: false } }, change_log: [], freeze: null };
 
   assert(!validate(sample, 'sample').length, '业务迭代 Schema 错误拦截合法 draft');
   const emptyScenes = clone(sample);
@@ -632,12 +668,15 @@ function test() {
   assert(briefSubmissionErrors(duplicateCriticalPaths).some(error => error.includes('critical_paths 不得包含重复项')), '业务迭代状态机未拦截重复关键路径');
   const legacyBriefField = clone(sample);
   legacyBriefField.prototype_brief.readiness = { ready: true };
-  assert(has(legacyBriefField, 'schemaVersion 4 未定义字段：readiness'), '业务迭代 Schema 未拦截 prototype_brief 遗留字段');
+  assert(has(legacyBriefField, 'schemaVersion 5 未定义字段：readiness'), '业务迭代 Schema 未拦截 prototype_brief 遗留字段');
   for (const field of ['wireframe', 'wireframe_model', 'wireframe_confirmation']) {
     const wireframeBriefField = clone(sample);
     wireframeBriefField.prototype_brief[field] = {};
-    assert(has(wireframeBriefField, `schemaVersion 4 未定义字段：${field}`), `业务迭代 Schema 未拦截 prototype_brief.${field}`);
+    assert(has(wireframeBriefField, `schemaVersion 5 未定义字段：${field}`), `业务迭代 Schema 未拦截 prototype_brief.${field}`);
   }
+  const wireframeTopLevel = clone(sample);
+  wireframeTopLevel.wireframe_confirmation = {};
+  assert(has(wireframeTopLevel, 'schemaVersion 5 未定义顶层字段：wireframe_confirmation'), '业务迭代 Schema 未拦截未定义顶层字段');
 
   const unexpectedBriefConfirmation = clone(sample);
   unexpectedBriefConfirmation.brief_confirmation = createBriefConfirmation(unexpectedBriefConfirmation);
@@ -645,6 +684,7 @@ function test() {
   const prototyping = clone(sample);
   prototyping.status = 'prototyping';
   prototyping.stage_outputs.product.valid = true;
+  prototyping.brief_submission = createBriefSubmission(prototyping);
   assert(has(prototyping, '状态 prototyping 的 brief_confirmation 必须为 已确认对象'), '确认矩阵未要求 prototyping 的 brief_confirmation');
   prototyping.brief_confirmation = createBriefConfirmation(prototyping);
   prototyping.brief_confirmation.scope_revision = 2;
@@ -663,6 +703,7 @@ function test() {
   const awaitingBrief = clone(sample);
   awaitingBrief.status = 'awaiting-brief-confirmation';
   awaitingBrief.stage_outputs.product.valid = true;
+  awaitingBrief.brief_submission = createBriefSubmission(awaitingBrief);
   assert(!validate(awaitingBrief, 'sample').length, '确认矩阵错误拦截合法 awaiting-brief-confirmation 状态');
   const awaitingPrototype = clone(prototyping);
   awaitingPrototype.status = 'awaiting-prototype-confirmation';
@@ -675,6 +716,10 @@ function test() {
   prototypeInvalidation.stage_outputs.design.valid = true;
   applyInvalidation(prototypeInvalidation, 'prototype');
   assert(prototypeInvalidation.scope_revision === 1 && !validate(prototypeInvalidation, 'sample').length, 'prototype 失效不应破坏已确认的 scope_revision');
+  const briefInvalidation = clone(prototyping);
+  applyInvalidation(briefInvalidation, 'brief');
+  assert(briefInvalidation.scope_revision === 2 && briefInvalidation.brief_submission === null && briefInvalidation.brief_confirmation === null, 'brief 失效必须递增版本并清除提交与确认快照');
+  assert(!validate(briefInvalidation, 'sample').length, 'brief 失效后的 draft 必须继续符合 Schema');
   assert(flagValue(['--stage', 'brief'], '--stage') === 'brief', '命令参数未支持 --flag value');
   assert(flagValue(['--stage=prototype'], '--stage') === 'prototype', '命令参数未支持 --flag=value');
 
@@ -709,6 +754,7 @@ function test() {
       record.status = 'prototype-confirmed';
       record.affected_runtime = [routesRelativePath];
       record.stage_outputs = { product: { valid: true }, design: { valid: true } };
+      record.brief_submission = createBriefSubmission(record);
       record.brief_confirmation = createBriefConfirmation(record);
       record.prototype_confirmation = createPrototypeConfirmation(record, fixtureRoot);
       return record;
@@ -734,10 +780,31 @@ function test() {
     const linkedInit = run(['init', '--file', linkedArgument, '--iteration-id', 'link', '--title', '链接', '--scene', linkedScene]);
     assert(linkedInit.status !== 0 && (linkedInit.stderr || '').includes('符号链接'), 'init 未拦截符号链接迭代路径');
 
+    fs.writeFileSync(iterationFile, `${JSON.stringify(sample, null, 2)}\n`);
+    const missingWireframeProof = run(['submit-brief', '--file', iterationArgument]);
+    assert(missingWireframeProof.status !== 0 && (missingWireframeProof.stderr || '').includes('--wireframe-generated-for-revision 1'), 'submit-brief 未要求当前版本线框生成凭据');
+    assert(JSON.parse(fs.readFileSync(iterationFile, 'utf8')).status === 'draft', '缺少线框生成凭据时不得提交简报');
+    const wrongWireframeProof = run(['submit-brief', '--file', iterationArgument, '--wireframe-generated-for-revision', '2']);
+    assert(wrongWireframeProof.status !== 0 && (wrongWireframeProof.stderr || '').includes('--wireframe-generated-for-revision 1'), 'submit-brief 未拦截错误的线框版本');
+    const submittedBrief = run(['submit-brief', '--file', iterationArgument, '--wireframe-generated-for-revision=1']);
+    assert(submittedBrief.status === 0, `合法 submit-brief 失败：${(submittedBrief.stderr || submittedBrief.stdout).trim()}`);
+    const submittedRecord = JSON.parse(fs.readFileSync(iterationFile, 'utf8'));
+    assert(submittedRecord.status === 'awaiting-brief-confirmation' && submittedRecord.brief_submission?.scope_sha256 === scopeSha256(submittedRecord), 'submit-brief 未写入当前范围提交快照');
+    submittedRecord.prototype_brief.goal = '提交后未重新生成线框就修改';
+    fs.writeFileSync(iterationFile, `${JSON.stringify(submittedRecord, null, 2)}\n`);
+    const driftedBriefConfirmation = run(['confirm-brief', '--file', iterationArgument]);
+    assert(driftedBriefConfirmation.status !== 0 && (driftedBriefConfirmation.stderr || '').includes('线框展示并提交后范围已漂移'), 'confirm-brief 未拦截提交后的简报漂移');
+    submittedRecord.prototype_brief.goal = sample.prototype_brief.goal;
+    fs.writeFileSync(iterationFile, `${JSON.stringify(submittedRecord, null, 2)}\n`);
+    const validBriefConfirmation = run(['confirm-brief', '--file', iterationArgument]);
+    assert(validBriefConfirmation.status === 0, `合法 confirm-brief 失败：${(validBriefConfirmation.stderr || validBriefConfirmation.stdout).trim()}`);
+    assert(JSON.parse(fs.readFileSync(iterationFile, 'utf8')).status === 'prototyping', 'confirm-brief 未进入 prototyping');
+
     const awaitingConfirmation = clone(sample);
     awaitingConfirmation.status = 'awaiting-prototype-confirmation';
     awaitingConfirmation.affected_runtime = [routesRelativePath];
     awaitingConfirmation.stage_outputs = { product: { valid: true }, design: { valid: true } };
+    awaitingConfirmation.brief_submission = createBriefSubmission(awaitingConfirmation);
     awaitingConfirmation.brief_confirmation = createBriefConfirmation(awaitingConfirmation);
     fs.writeFileSync(iterationFile, `${JSON.stringify(awaitingConfirmation, null, 2)}\n`);
     fs.writeFileSync(path.join(sceneRoot, 'scene.js'), 'INVALID_SCENE\n');
@@ -838,6 +905,11 @@ switch (command) {
   case 'submit-brief': transition(['draft'], 'awaiting-brief-confirmation', record => {
     const errors = briefSubmissionErrors(record);
     if (errors.length) fail(errors.join('\n'));
+    const wireframeRevision = value('--wireframe-generated-for-revision');
+    if (wireframeRevision !== String(record.scope_revision)) {
+      fail(`submit-brief 需要 --wireframe-generated-for-revision ${record.scope_revision}，用于确认当前 scope_revision 的参考线框已生成并即将与简报共同展示`);
+    }
+    record.brief_submission = createBriefSubmission(record);
     record.stage_outputs.product.valid = true;
   }); break;
   case 'confirm-brief': transition(['awaiting-brief-confirmation'], 'prototyping', record => { record.brief_confirmation = createBriefConfirmation(record); }); break;
@@ -867,5 +939,5 @@ switch (command) {
   }
   case 'check': check(); break;
   case 'test': test(); break;
-  default: fail('用法：init|submit-brief|confirm-brief|submit-prototype|confirm-prototype|invalidate|freeze --user-confirmed-freeze <iteration_id>|check|test');
+  default: fail('用法：init|submit-brief --wireframe-generated-for-revision <scope_revision>|confirm-brief|submit-prototype|confirm-prototype|invalidate|freeze --user-confirmed-freeze <iteration_id>|check|test');
 }

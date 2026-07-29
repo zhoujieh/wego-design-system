@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "mode": "fast-iteration",
   "threshold": 1,
   "standard_threshold": 3,
@@ -11,7 +11,7 @@
       "status": "promoted",
       "occurrence_count": 1,
       "threshold": 1,
-      "primary_owner": "wego-design",
+      "primary_owner": "wego-uxsystem-iterate",
       "secondary_owners": [
         "wego-design"
       ],
@@ -20,7 +20,7 @@
         "category": "component-contract",
         "canonical": {
           "file": ".codex/skills/wego-design/components/modal.json",
-          "locator": "/runtimeTokens",
+          "locator": "/behavior/animation",
           "rule_id": "modal-mask-opacity-independent-layer"
         }
       },
@@ -28,13 +28,21 @@
         "consumer_skill": "wego-design",
         "output_field": "component_mapping",
         "downstream_consumer": "wego-design",
-        "acceptance_check": "wego-design"
+        "acceptance_check": "scripts/validate-component-contract-parity.mjs"
       },
       "evidence": [
         "modal 组件已验证"
       ],
       "created_at": "2026-07-10T00:00:00Z",
-      "updated_at": "2026-07-10T00:00:00Z"
+      "updated_at": "2026-07-10T00:00:00Z",
+      "promoted_at": "2026-07-10T00:00:00Z",
+      "promotion_landing": {
+        "file": ".codex/skills/wego-design/components/modal.json",
+        "locator": "/behavior/animation",
+        "rule_id": "modal-mask-opacity-independent-layer",
+        "constraint_area": "遮罩与面板动画分层",
+        "description": "遮罩与面板动画分层；以该精确落点的原生规则为准。"
+      }
     },
     {
       "id": "exp-nested-component-bg-css-variable-chain",
@@ -43,8 +51,10 @@
       "status": "awaiting-confirmation",
       "occurrence_count": 1,
       "threshold": 1,
-      "primary_owner": "wego-design",
-      "secondary_owners": [],
+      "primary_owner": "wego-uxsystem-iterate",
+      "secondary_owners": [
+        "wego-design"
+      ],
       "ownership_reason": "背景继承属于组件契约。",
       "rule_ownership": {
         "category": "component-contract",
@@ -73,9 +83,9 @@
       "status": "awaiting-confirmation",
       "occurrence_count": 1,
       "threshold": 1,
-      "primary_owner": "wego-product",
+      "primary_owner": "wego-uxsystem-iterate",
       "secondary_owners": [
-        "wego-uxsystem-iterate"
+        "wego-product"
       ],
       "ownership_reason": "跨技能运行边界属于仓库硬约束。",
       "rule_ownership": {
@@ -105,14 +115,16 @@
       "status": "promoted",
       "occurrence_count": 1,
       "threshold": 1,
-      "primary_owner": "wego-design",
-      "secondary_owners": [],
+      "primary_owner": "wego-uxsystem-iterate",
+      "secondary_owners": [
+        "wego-design"
+      ],
       "ownership_reason": "页面范式由 UI Kit 定义。",
       "rule_ownership": {
         "category": "ui-kit",
         "canonical": {
           "file": ".codex/skills/wego-design/uikit-plan.json",
-          "locator": "/pagePatterns",
+          "locator": "/pagePatterns/0",
           "rule_id": "paradigm-selection-by-interaction-mode"
         }
       },
@@ -120,13 +132,21 @@
         "consumer_skill": "wego-design",
         "output_field": "page_presentation",
         "downstream_consumer": "wego-design",
-        "acceptance_check": "wego-design"
+        "acceptance_check": "scripts/validate-wego-design.mjs"
       },
       "evidence": [
         "设置页范式已落地"
       ],
       "created_at": "2026-07-08T00:00:00Z",
-      "updated_at": "2026-07-08T00:00:00Z"
+      "updated_at": "2026-07-08T00:00:00Z",
+      "promoted_at": "2026-07-08T00:00:00Z",
+      "promotion_landing": {
+        "file": ".codex/skills/wego-design/uikit-plan.json",
+        "locator": "/pagePatterns/0",
+        "rule_id": "paradigm-selection-by-interaction-mode",
+        "constraint_area": "设置页按交互模式选范式",
+        "description": "设置页按交互模式选范式；以该精确落点的原生规则为准。"
+      }
     },
     {
       "id": "exp-browser-layout-validation-required",
@@ -135,11 +155,13 @@
       "status": "awaiting-confirmation",
       "occurrence_count": 1,
       "threshold": 1,
-      "primary_owner": "wego-design",
-      "secondary_owners": [],
+      "primary_owner": "wego-uxsystem-iterate",
+      "secondary_owners": [
+        "wego-design"
+      ],
       "ownership_reason": "布局验收属于测试方法。",
       "rule_ownership": {
-        "category": "test",
+        "category": "script",
         "canonical": {
           "file": "scripts/validate-scene-contract.mjs",
           "locator": "validate",
@@ -169,7 +191,7 @@
       "secondary_owners": [],
       "ownership_reason": "宿主接入是运行时实现方法。",
       "rule_ownership": {
-        "category": "skill-runtime-flow",
+        "category": "scene-contract",
         "canonical": {
           "file": ".codex/skills/wego-design/references/scene-contract.md",
           "locator": "场景合同",
@@ -199,7 +221,7 @@
       "secondary_owners": [],
       "ownership_reason": "浮层清理由运行时方法定义。",
       "rule_ownership": {
-        "category": "skill-runtime-flow",
+        "category": "scene-contract",
         "canonical": {
           "file": ".codex/skills/wego-design/references/scene-contract.md",
           "locator": "场景合同",
@@ -284,7 +306,7 @@
       "id": "exp-shared-interaction-helper-for-component-composition",
       "normalized_key": "shared-component-interaction-helper",
       "title": "组合组件复用交互 helper",
-      "status": "promoted",
+      "status": "superseded",
       "occurrence_count": 1,
       "threshold": 1,
       "primary_owner": "wego-uxsystem-iterate",
@@ -308,7 +330,8 @@
         "组合交互已验证"
       ],
       "created_at": "2026-07-10T00:00:00Z",
-      "updated_at": "2026-07-10T00:00:00Z"
+      "updated_at": "2026-07-29T00:00:00Z",
+      "supersession_reason": "未找到可证明已落地的唯一共享 helper 规则；原记录只指向工作流标题，不能作为正式升级证据。"
     },
     {
       "id": "exp-local-server-must-auto-exit",
@@ -317,7 +340,7 @@
       "status": "promoted",
       "occurrence_count": 1,
       "threshold": 1,
-      "primary_owner": "wego-design",
+      "primary_owner": "wego-uxsystem-iterate",
       "secondary_owners": [
         "wego-design"
       ],
@@ -326,7 +349,7 @@
         "category": "agents",
         "canonical": {
           "file": "AGENTS.md",
-          "locator": "组件与 UI Kit 一致性",
+          "locator": "rule-id: local-server-must-auto-exit",
           "rule_id": "local-server-must-auto-exit"
         }
       },
@@ -334,13 +357,21 @@
         "consumer_skill": "wego-design",
         "output_field": "verification",
         "downstream_consumer": "wego-design",
-        "acceptance_check": "AGENTS-check"
+        "acceptance_check": "scripts/validate-skill-entry-boundary.mjs"
       },
       "evidence": [
         "本地服务清理已落地"
       ],
       "created_at": "2026-07-10T00:00:00Z",
-      "updated_at": "2026-07-10T00:00:00Z"
+      "updated_at": "2026-07-10T00:00:00Z",
+      "promoted_at": "2026-07-10T00:00:00Z",
+      "promotion_landing": {
+        "file": "AGENTS.md",
+        "locator": "rule-id: local-server-must-auto-exit",
+        "rule_id": "local-server-must-auto-exit",
+        "constraint_area": "本地验证服务自动退出",
+        "description": "本地验证服务自动退出；以该精确落点的原生规则为准。"
+      }
     },
     {
       "id": "exp-tests-layout-check-multilevel-visual-validation",
@@ -349,14 +380,16 @@
       "status": "promoted",
       "occurrence_count": 1,
       "threshold": 1,
-      "primary_owner": "wego-design",
-      "secondary_owners": [],
+      "primary_owner": "wego-uxsystem-iterate",
+      "secondary_owners": [
+        "wego-design"
+      ],
       "ownership_reason": "验收覆盖属于测试方法。",
       "rule_ownership": {
         "category": "script",
         "canonical": {
           "file": "scripts/validate-scene-contract.mjs",
-          "locator": "validate",
+          "locator": "const requiredChecks =",
           "rule_id": "tests-layout-check-multilevel-visual-validation"
         }
       },
@@ -364,13 +397,21 @@
         "consumer_skill": "wego-design",
         "output_field": "design-decisions.json.generation_evidence.visualCheck.checks",
         "downstream_consumer": "validate-scene-contract",
-        "acceptance_check": "validate-scene-contract"
+        "acceptance_check": "scripts/validate-scene-contract.mjs"
       },
       "evidence": [
         "多层级验收已落地"
       ],
       "created_at": "2026-07-10T00:00:00Z",
-      "updated_at": "2026-07-10T00:00:00Z"
+      "updated_at": "2026-07-10T00:00:00Z",
+      "promoted_at": "2026-07-10T00:00:00Z",
+      "promotion_landing": {
+        "file": "scripts/validate-scene-contract.mjs",
+        "locator": "const requiredChecks =",
+        "rule_id": "tests-layout-check-multilevel-visual-validation",
+        "constraint_area": "多层级布局验收",
+        "description": "多层级布局验收；以该精确落点的原生规则为准。"
+      }
     },
     {
       "id": "exp-text-action-must-consume-link-component",
@@ -379,11 +420,13 @@
       "status": "awaiting-confirmation",
       "occurrence_count": 1,
       "threshold": 1,
-      "primary_owner": "wego-design",
-      "secondary_owners": [],
+      "primary_owner": "wego-uxsystem-iterate",
+      "secondary_owners": [
+        "wego-design"
+      ],
       "ownership_reason": "组件消费边界属于消费配置。",
       "rule_ownership": {
-        "category": "library-consumption",
+        "category": "design-consumption",
         "canonical": {
           "file": ".codex/skills/wego-design/library-consumption.json",
           "locator": "/globalConsumptionRules",
@@ -413,7 +456,7 @@
       "secondary_owners": [],
       "ownership_reason": "旧多路由计划字段已由当前场景注册合同取代。",
       "rule_ownership": {
-        "category": "skill-runtime-flow",
+        "category": "scene-contract",
         "canonical": {
           "file": ".codex/skills/wego-design/references/scene-contract.md",
           "locator": "rule-id: scene-registration-contract",
@@ -424,13 +467,21 @@
         "consumer_skill": "wego-design",
         "output_field": "scene.js.presentation",
         "downstream_consumer": "wego-design",
-        "acceptance_check": "wego-design"
+        "acceptance_check": "scripts/validate-scene-contract.mjs"
       },
       "evidence": [
         "多路由计划已落地"
       ],
       "created_at": "2026-07-11T00:30:00Z",
-      "updated_at": "2026-07-11T00:30:00Z"
+      "updated_at": "2026-07-11T00:30:00Z",
+      "promoted_at": "2026-07-11T00:30:00Z",
+      "promotion_landing": {
+        "file": ".codex/skills/wego-design/references/scene-contract.md",
+        "locator": "rule-id: scene-registration-contract",
+        "rule_id": "scene-registration-contract",
+        "constraint_area": "场景按 route 注册 presentation",
+        "description": "场景按 route 注册 presentation；以该精确落点的原生规则为准。"
+      }
     },
     {
       "id": "exp-skill-packages-progressive-disclosure-and-structural-guardrails",
@@ -445,8 +496,8 @@
       "rule_ownership": {
         "category": "script",
         "canonical": {
-          "file": "scripts/validate-scene-contract.mjs",
-          "locator": "validate",
+          "file": "scripts/validate-skill-entry-boundary.mjs",
+          "locator": "const expectedSkills =",
           "rule_id": "skill-packages-progressive-disclosure-and-structural-guardrails"
         }
       },
@@ -454,13 +505,21 @@
         "consumer_skill": "wego-uxsystem-iterate",
         "output_field": "skill_structure",
         "downstream_consumer": "all-skills",
-        "acceptance_check": "validate-skill-entry-boundary"
+        "acceptance_check": "scripts/test-skill-entry-boundary.mjs"
       },
       "evidence": [
         "技能包守门已落地"
       ],
       "created_at": "2026-07-11T10:33:15Z",
-      "updated_at": "2026-07-11T10:33:15Z"
+      "updated_at": "2026-07-11T10:33:15Z",
+      "promoted_at": "2026-07-11T10:33:15Z",
+      "promotion_landing": {
+        "file": "scripts/validate-skill-entry-boundary.mjs",
+        "locator": "const expectedSkills =",
+        "rule_id": "skill-packages-progressive-disclosure-and-structural-guardrails",
+        "constraint_area": "技能包渐进披露与守门",
+        "description": "技能包渐进披露与守门；以该精确落点的原生规则为准。"
+      }
     },
     {
       "id": "exp-business-iteration-contract-and-stage-guardrails",
@@ -471,16 +530,14 @@
       "threshold": 1,
       "primary_owner": "wego-product",
       "secondary_owners": [
-        "wego-design",
-        "wego-design",
         "wego-design"
       ],
       "ownership_reason": "迭代状态机由产品流程定义。",
       "rule_ownership": {
-        "category": "skill-runtime-flow",
+        "category": "product-workflow",
         "canonical": {
           "file": ".codex/skills/wego-product/references/iteration-workflow.md",
-          "locator": "业务迭代契约",
+          "locator": "rule-id: business-iteration-prototype-first-stage-guardrails",
           "rule_id": "business-iteration-prototype-first-stage-guardrails"
         }
       },
@@ -488,13 +545,21 @@
         "consumer_skill": "wego-product",
         "output_field": "iteration.json",
         "downstream_consumer": "wego-design",
-        "acceptance_check": "iteration-record"
+        "acceptance_check": "scripts/iteration-record.mjs"
       },
       "evidence": [
         "阶段门禁已落地"
       ],
       "created_at": "2026-07-11T18:00:00Z",
-      "updated_at": "2026-07-11T18:00:00Z"
+      "updated_at": "2026-07-11T18:00:00Z",
+      "promoted_at": "2026-07-11T18:00:00Z",
+      "promotion_landing": {
+        "file": ".codex/skills/wego-product/references/iteration-workflow.md",
+        "locator": "rule-id: business-iteration-prototype-first-stage-guardrails",
+        "rule_id": "business-iteration-prototype-first-stage-guardrails",
+        "constraint_area": "业务迭代阶段门禁",
+        "description": "业务迭代阶段门禁；以该精确落点的原生规则为准。"
+      }
     },
     {
       "id": "exp-image-dynamic-usage-must-add-is-loaded",
@@ -503,7 +568,7 @@
       "status": "promoted",
       "occurrence_count": 1,
       "threshold": 1,
-      "primary_owner": "wego-design",
+      "primary_owner": "wego-uxsystem-iterate",
       "secondary_owners": [
         "wego-design"
       ],
@@ -512,7 +577,7 @@
         "category": "component-contract",
         "canonical": {
           "file": ".codex/skills/wego-design/components/image.json",
-          "locator": "/runtimeTokens",
+          "locator": "/usageHints/5",
           "rule_id": "image-dynamic-is-loaded"
         }
       },
@@ -520,13 +585,21 @@
         "consumer_skill": "wego-design",
         "output_field": "component_mapping",
         "downstream_consumer": "wego-design",
-        "acceptance_check": "wego-design"
+        "acceptance_check": "scripts/validate-component-contract-parity.mjs"
       },
       "evidence": [
         "components.css 中 wg-image__src 默认 opacity:0，必须加 is-loaded 才可见，但 usageHints 原本只描述视觉变体，AI 动态生成图片时漏掉 is-loaded 导致图片不显示。"
       ],
       "created_at": "2026-07-12T00:00:00Z",
-      "updated_at": "2026-07-12T00:00:00Z"
+      "updated_at": "2026-07-12T00:00:00Z",
+      "promoted_at": "2026-07-12T00:00:00Z",
+      "promotion_landing": {
+        "file": ".codex/skills/wego-design/components/image.json",
+        "locator": "/usageHints/5",
+        "rule_id": "image-dynamic-is-loaded",
+        "constraint_area": "动态生成 wg-image 必须补 is-loaded",
+        "description": "动态生成 wg-image 必须补 is-loaded；以该精确落点的原生规则为准。"
+      }
     },
     {
       "id": "exp-metric-domAnatomy-must-mark-main-required",
@@ -535,14 +608,16 @@
       "status": "promoted",
       "occurrence_count": 1,
       "threshold": 1,
-      "primary_owner": "wego-design",
-      "secondary_owners": [],
+      "primary_owner": "wego-uxsystem-iterate",
+      "secondary_owners": [
+        "wego-design"
+      ],
       "ownership_reason": "组件 DOM 结构层级属于组件契约。",
       "rule_ownership": {
         "category": "component-contract",
         "canonical": {
           "file": ".codex/skills/wego-design/components/metric.json",
-          "locator": "/runtimeTokens",
+          "locator": "/domAnatomy/requiredChildren",
           "rule_id": "metric-main-required-children"
         }
       },
@@ -550,13 +625,21 @@
         "consumer_skill": "wego-design",
         "output_field": "component_mapping",
         "downstream_consumer": "wego-design",
-        "acceptance_check": "wego-design"
+        "acceptance_check": "scripts/validate-component-contract-parity.mjs"
       },
       "evidence": [
         "components.css 中 .metric__main 是 inline-flex 的必要包装层，但原 domAnatomy 将其放在 optionalChildren，导致 AI 生成 metric 时漏掉主结构层。"
       ],
       "created_at": "2026-07-12T00:00:00Z",
-      "updated_at": "2026-07-12T00:00:00Z"
+      "updated_at": "2026-07-12T00:00:00Z",
+      "promoted_at": "2026-07-12T00:00:00Z",
+      "promotion_landing": {
+        "file": ".codex/skills/wego-design/components/metric.json",
+        "locator": "/domAnatomy/requiredChildren",
+        "rule_id": "metric-main-required-children",
+        "constraint_area": "metric__main 必须为 requiredChildren",
+        "description": "metric__main 必须为 requiredChildren；以该精确落点的原生规则为准。"
+      }
     },
     {
       "id": "exp-navbar-fixed-transparent-must-not-coexist-with-data-bg",
@@ -565,7 +648,7 @@
       "status": "promoted",
       "occurrence_count": 1,
       "threshold": 1,
-      "primary_owner": "wego-design",
+      "primary_owner": "wego-uxsystem-iterate",
       "secondary_owners": [
         "wego-design"
       ],
@@ -574,7 +657,7 @@
         "category": "component-contract",
         "canonical": {
           "file": ".codex/skills/wego-design/components/navbar.json",
-          "locator": "/runtimeTokens",
+          "locator": "/behavior/backgroundRule",
           "rule_id": "navbar-fixed-transparent-data-bg-mutex"
         }
       },
@@ -582,13 +665,21 @@
         "consumer_skill": "wego-design",
         "output_field": "component_mapping",
         "downstream_consumer": "wego-design",
-        "acceptance_check": "wego-design"
+        "acceptance_check": "scripts/validate-component-contract-parity.mjs"
       },
       "evidence": [
         "CSS 优先级 [data-bg=page] .navbar（0,2,0）> .navbar--fixed-transparent（0,1,0），导致 transparent 不生效；契约需明确两者互斥。"
       ],
       "created_at": "2026-07-12T00:00:00Z",
-      "updated_at": "2026-07-12T00:00:00Z"
+      "updated_at": "2026-07-12T00:00:00Z",
+      "promoted_at": "2026-07-12T00:00:00Z",
+      "promotion_landing": {
+        "file": ".codex/skills/wego-design/components/navbar.json",
+        "locator": "/behavior/backgroundRule",
+        "rule_id": "navbar-fixed-transparent-data-bg-mutex",
+        "constraint_area": "navbar fixed-transparent 与 data-bg 互斥",
+        "description": "navbar fixed-transparent 与 data-bg 互斥；以该精确落点的原生规则为准。"
+      }
     },
     {
       "id": "exp-scene-cross-route-data-handoff-must-use-appstate",
@@ -598,12 +689,10 @@
       "occurrence_count": 1,
       "threshold": 1,
       "primary_owner": "wego-design",
-      "secondary_owners": [
-        "wego-design"
-      ],
+      "secondary_owners": [],
       "ownership_reason": "跨场景数据交接属于运行时方法。",
       "rule_ownership": {
-        "category": "skill-runtime-flow",
+        "category": "scene-contract",
         "canonical": {
           "file": ".codex/skills/wego-design/references/scene-contract.md",
           "locator": "rule-id: cross-route-data-handoff-appstate",
@@ -614,13 +703,21 @@
         "consumer_skill": "wego-design",
         "output_field": "scene.js",
         "downstream_consumer": "wego-design",
-        "acceptance_check": "runtime-check"
+        "acceptance_check": "scripts/validate-scene-contract.mjs"
       },
       "evidence": [
         "AI 在跨 route 传参时挂 window.__xxx 全局变量，无命名空间、无清理保证、无规则约束；需明确 ctx.state 按 routeId 隔离 + ctx.appState 读取的正式交接方式。"
       ],
       "created_at": "2026-07-12T00:00:00Z",
-      "updated_at": "2026-07-12T00:00:00Z"
+      "updated_at": "2026-07-12T00:00:00Z",
+      "promoted_at": "2026-07-12T00:00:00Z",
+      "promotion_landing": {
+        "file": ".codex/skills/wego-design/references/scene-contract.md",
+        "locator": "rule-id: cross-route-data-handoff-appstate",
+        "rule_id": "cross-route-data-handoff-appstate",
+        "constraint_area": "跨 route 数据交接走 appState",
+        "description": "跨 route 数据交接走 appState；以该精确落点的原生规则为准。"
+      }
     },
     {
       "id": "exp-routes-subpage-must-not-declare-entry",
@@ -630,12 +727,10 @@
       "occurrence_count": 1,
       "threshold": 1,
       "primary_owner": "wego-design",
-      "secondary_owners": [
-        "wego-design"
-      ],
+      "secondary_owners": [],
       "ownership_reason": "路由注册结构属于运行时方法。",
       "rule_ownership": {
-        "category": "skill-runtime-flow",
+        "category": "scene-contract",
         "canonical": {
           "file": ".codex/skills/wego-design/references/scene-contract.md",
           "locator": "rule-id: routes-subpage-no-entry",
@@ -646,13 +741,21 @@
         "consumer_skill": "wego-design",
         "output_field": "scene.js",
         "downstream_consumer": "wego-design",
-        "acceptance_check": "runtime-check"
+        "acceptance_check": "scripts/validate-scene-contract.mjs"
       },
       "evidence": [
         "AI 在 push/modal/sheet 下钻页 route 上声明 entry.type，导致宿主入口列表出现非预期项；entry.type 仅用于宿主入口列表生成，打开方式由 presentation.type 决定。"
       ],
       "created_at": "2026-07-12T00:00:00Z",
-      "updated_at": "2026-07-12T00:00:00Z"
+      "updated_at": "2026-07-12T00:00:00Z",
+      "promoted_at": "2026-07-12T00:00:00Z",
+      "promotion_landing": {
+        "file": ".codex/skills/wego-design/references/scene-contract.md",
+        "locator": "rule-id: routes-subpage-no-entry",
+        "rule_id": "routes-subpage-no-entry",
+        "constraint_area": "routes 子页面不得声明 entry",
+        "description": "routes 子页面不得声明 entry；以该精确落点的原生规则为准。"
+      }
     },
     {
       "id": "exp-bottom-action-bar-alignment-rule",
@@ -662,29 +765,35 @@
       "occurrence_count": 1,
       "threshold": 1,
       "primary_owner": "wego-design",
-      "secondary_owners": [
-        "wego-design"
-      ],
+      "secondary_owners": [],
       "ownership_reason": "页面级组合约束属于消费配置。",
       "rule_ownership": {
-        "category": "library-consumption",
+        "category": "shared-principle",
         "canonical": {
-          "file": ".codex/skills/wego-design/library-consumption.json",
-          "locator": "/globalConsumptionRules",
-          "rule_id": "bottom-action-bar-alignment"
+          "file": ".codex/skills/shared/references/design-decisions.md",
+          "locator": "rule-id: wego-efficiency-primary-action-right",
+          "rule_id": "wego-efficiency-primary-action-right"
         }
       },
       "runtime_reachability": {
         "consumer_skill": "wego-design",
         "output_field": "component_mapping",
         "downstream_consumer": "wego-design",
-        "acceptance_check": "wego-design"
+        "acceptance_check": "scripts/validate-design-decision-method.mjs"
       },
       "evidence": [
         "AI 在详情页底部操作栏主按钮靠左对齐，与移动端单手操作习惯不符；单按钮需 width:100% 占满，多按钮主操作靠右、次操作靠左。"
       ],
       "created_at": "2026-07-12T00:00:00Z",
-      "updated_at": "2026-07-12T00:00:00Z"
+      "updated_at": "2026-07-12T00:00:00Z",
+      "promoted_at": "2026-07-12T00:00:00Z",
+      "promotion_landing": {
+        "file": ".codex/skills/shared/references/design-decisions.md",
+        "locator": "rule-id: wego-efficiency-primary-action-right",
+        "rule_id": "wego-efficiency-primary-action-right",
+        "constraint_area": "底部固定操作栏按钮对齐规则",
+        "description": "底部固定操作栏按钮对齐规则；以该精确落点的原生规则为准。"
+      }
     },
     {
       "id": "exp-icon-name-must-come-from-iconfont-css",
@@ -693,16 +802,16 @@
       "status": "promoted",
       "occurrence_count": 1,
       "threshold": 1,
-      "primary_owner": "wego-design",
+      "primary_owner": "wego-uxsystem-iterate",
       "secondary_owners": [
         "wego-design"
       ],
       "ownership_reason": "组件消费边界属于消费配置。",
       "rule_ownership": {
-        "category": "library-consumption",
+        "category": "design-consumption",
         "canonical": {
           "file": ".codex/skills/wego-design/library-consumption.json",
-          "locator": "/globalConsumptionRules",
+          "locator": "/iconUsage/rule",
           "rule_id": "icon-name-from-iconfont-css"
         }
       },
@@ -710,13 +819,21 @@
         "consumer_skill": "wego-design",
         "output_field": "component_mapping",
         "downstream_consumer": "wego-design",
-        "acceptance_check": "wego-design"
+        "acceptance_check": "scripts/validate-wego-design.mjs"
       },
       "evidence": [
         "AI 从语义推测发明 .icon-xxx 类名（如 icon-arrow-left-2），但 iconfont.css 中不存在，导致图标显示为空；图标名必须从已注册 iconfont.css 中引用。"
       ],
       "created_at": "2026-07-12T00:00:00Z",
-      "updated_at": "2026-07-12T00:00:00Z"
+      "updated_at": "2026-07-12T00:00:00Z",
+      "promoted_at": "2026-07-12T00:00:00Z",
+      "promotion_landing": {
+        "file": ".codex/skills/wego-design/library-consumption.json",
+        "locator": "/iconUsage/rule",
+        "rule_id": "icon-name-from-iconfont-css",
+        "constraint_area": "图标名必须从 iconfont.css 引用",
+        "description": "图标名必须从 iconfont.css 引用；以该精确落点的原生规则为准。"
+      }
     },
     {
       "id": "exp-product-stage-must-not-carry-ui-assumptions",
@@ -731,7 +848,7 @@
       ],
       "ownership_reason": "产品阶段字段边界属于产品流程方法。",
       "rule_ownership": {
-        "category": "skill-runtime-flow",
+        "category": "product-workflow",
         "canonical": {
           "file": ".codex/skills/wego-product/references/iteration-workflow.md",
           "locator": "业务迭代契约",
@@ -765,10 +882,10 @@
       ],
       "ownership_reason": "入口业务归属是产品决策，不是设计决策。",
       "rule_ownership": {
-        "category": "skill-runtime-flow",
+        "category": "product-workflow",
         "canonical": {
-          "file": ".codex/skills/wego-product/references/iteration-workflow.md",
-          "locator": "业务迭代契约",
+          "file": ".codex/skills/wego-product/references/scope-and-boundaries.md",
+          "locator": "rule-id: entry-points-business-ownership",
           "rule_id": "entry-points-business-ownership"
         }
       },
@@ -776,13 +893,21 @@
         "consumer_skill": "wego-product",
         "output_field": "prototype_brief.entry_points",
         "downstream_consumer": "wego-design",
-        "acceptance_check": "wego-design"
+        "acceptance_check": "scripts/validate-skill-entry-boundary.mjs"
       },
       "evidence": [
         "AI 把'入口在主 tab 还是 tab 下页面'的决策推给 wego-design，导致用户需要回头纠正'功能入口在哪里要由 product 技能决定'；原规则没有区分'业务入口归属'（product 决定）和'打开方式'（design 决定），SKILL.md 中'不决定布局、打开方式'被误读为入口位置也不能由 product 决定。"
       ],
       "created_at": "2026-07-12T00:00:00Z",
-      "updated_at": "2026-07-12T00:00:00Z"
+      "updated_at": "2026-07-12T00:00:00Z",
+      "promoted_at": "2026-07-12T00:00:00Z",
+      "promotion_landing": {
+        "file": ".codex/skills/wego-product/references/scope-and-boundaries.md",
+        "locator": "rule-id: entry-points-business-ownership",
+        "rule_id": "entry-points-business-ownership",
+        "constraint_area": "功能入口业务归属由 product 决定",
+        "description": "功能入口业务归属由 product 决定；以该精确落点的原生规则为准。"
+      }
     },
     {
       "id": "exp-business-state-class-must-use-scoped-prefix",
@@ -792,12 +917,10 @@
       "occurrence_count": 1,
       "threshold": 1,
       "primary_owner": "wego-design",
-      "secondary_owners": [
-        "wego-design"
-      ],
+      "secondary_owners": [],
       "ownership_reason": "业务 class 与正式组件 class 的边界属于实现方法。",
       "rule_ownership": {
-        "category": "skill-runtime-flow",
+        "category": "scene-contract",
         "canonical": {
           "file": ".codex/skills/wego-design/references/scene-contract.md",
           "locator": "rule-id: business-state-class-scoped-prefix",
@@ -808,13 +931,21 @@
         "consumer_skill": "wego-design",
         "output_field": "scene.js",
         "downstream_consumer": "wego-design",
-        "acceptance_check": "wego-design"
+        "acceptance_check": "scripts/validate-scene-contract.mjs"
       },
       "evidence": [
         "AI 在 btn--weak 上直接发明 is-forwarded 状态类，污染组件命名空间；应使用业务作用域 class 如 feed-item__forward-btn.is-forwarded 承载业务状态。"
       ],
       "created_at": "2026-07-12T00:00:00Z",
-      "updated_at": "2026-07-12T00:00:00Z"
+      "updated_at": "2026-07-12T00:00:00Z",
+      "promoted_at": "2026-07-12T00:00:00Z",
+      "promotion_landing": {
+        "file": ".codex/skills/wego-design/references/scene-contract.md",
+        "locator": "rule-id: business-state-class-scoped-prefix",
+        "rule_id": "business-state-class-scoped-prefix",
+        "constraint_area": "业务状态类必须用业务作用域限定",
+        "description": "业务状态类必须用业务作用域限定；以该精确落点的原生规则为准。"
+      }
     },
     {
       "id": "exp-overlay-component-must-open-via-ctx-api",
@@ -824,12 +955,10 @@
       "occurrence_count": 1,
       "threshold": 1,
       "primary_owner": "wego-design",
-      "secondary_owners": [
-        "wego-design"
-      ],
+      "secondary_owners": [],
       "ownership_reason": "浮层接入方式属于运行时方法。",
       "rule_ownership": {
-        "category": "skill-runtime-flow",
+        "category": "scene-contract",
         "canonical": {
           "file": ".codex/skills/wego-design/references/scene-contract.md",
           "locator": "rule-id: overlay-host-runtime-integration",
@@ -840,13 +969,21 @@
         "consumer_skill": "wego-design",
         "output_field": "scene.js",
         "downstream_consumer": "wego-design",
-        "acceptance_check": "runtime-check"
+        "acceptance_check": "scripts/validate-scene-contract.mjs"
       },
       "evidence": [
         "AI 直接把 actionsheet 插入场景 DOM 并覆盖 position:fixed 为 absolute，导致双重遮罩、无法盖住 bottom-nav；actionsheet/modal/sheet 必须通过 ctx.openSheet()/ctx.openModal() 打开，由 app-overlay-layer 提供统一遮罩、定位和 z-index 层级。"
       ],
       "created_at": "2026-07-12T00:00:00Z",
-      "updated_at": "2026-07-12T00:00:00Z"
+      "updated_at": "2026-07-12T00:00:00Z",
+      "promoted_at": "2026-07-12T00:00:00Z",
+      "promotion_landing": {
+        "file": ".codex/skills/wego-design/references/scene-contract.md",
+        "locator": "rule-id: overlay-host-runtime-integration",
+        "rule_id": "overlay-host-runtime-integration",
+        "constraint_area": "overlay 组件必须通过 ctx API 打开",
+        "description": "overlay 组件必须通过 ctx API 打开；以该精确落点的原生规则为准。"
+      }
     },
     {
       "id": "exp-font-size-weight-decision-by-content-role",
@@ -870,27 +1007,35 @@
         "consumer_skill": "wego-design",
         "output_field": "component_mapping",
         "downstream_consumer": "wego-design",
-        "acceptance_check": "wego-design"
+        "acceptance_check": "scripts/validate-design-decision-method.mjs"
       },
       "evidence": [
         "AI 在连续内容流中用 body-lg(16px/400) 作为发布者名称（识别信息），字号不够突出；且多处使用 semibold(600) 导致没有焦点。字号应由内容角色驱动，加粗应克制——一页一加粗，识别信息不默认加粗 600。",
         "AI 在连续内容流中将产品名称（对象名称）用 body-md(14px) 正文字号，未识别为识别信息；已有规则列举了识别信息类型但缺少判断标准，导致模型无法自行推理哪些内容属于识别信息，补充'如果用正文字号用户是否还能快速区分'的判断标准。"
       ],
       "created_at": "2026-07-12T00:00:00Z",
-      "updated_at": "2026-07-12T00:00:00Z"
+      "updated_at": "2026-07-12T00:00:00Z",
+      "promoted_at": "2026-07-12T00:00:00Z",
+      "promotion_landing": {
+        "file": ".codex/skills/shared/references/design-decisions.md",
+        "locator": "rule-id: wego-content-role-typography",
+        "rule_id": "wego-content-role-typography",
+        "constraint_area": "字号字重按内容角色决策",
+        "description": "字号字重按内容角色决策；以该精确落点的原生规则为准。"
+      }
     },
     {
       "id": "exp-product-conversation-wireframe",
       "normalized_key": "product-conversation-wireframe",
-      "title": "产品阶段用会话线框辅助需求探索",
+      "title": "产品阶段在简报后用必需线框辅助确认",
       "status": "promoted",
-      "occurrence_count": 1,
+      "occurrence_count": 2,
       "threshold": 1,
       "primary_owner": "wego-product",
       "secondary_owners": [
         "wego-design"
       ],
-      "ownership_reason": "线框触发、临时模型和简报归纳属于产品方法，设计阶段只需要遵守已确认简报的输入边界。",
+      "ownership_reason": "简报后必生成门禁、临时模型和简报确认属于产品方法，设计阶段只需要遵守已确认简报的输入边界。",
       "rule_ownership": {
         "category": "shared-principle",
         "canonical": {
@@ -903,21 +1048,22 @@
         "consumer_skill": "wego-product",
         "output_field": "prototype_brief",
         "downstream_consumer": "wego-design",
-        "acceptance_check": "validate-skill-entry-boundary"
+        "acceptance_check": "scripts/test-skill-entry-boundary.mjs"
       },
       "evidence": [
-        "用户确认产品阶段生成的线框全部作为需求探索参考，不能等同正式设计，也不能被设计阶段机械照搬。",
-        "用户确认线框讨论的最终结论归纳进现有 prototype_brief，不保存临时线框模型、线框合同或独立确认状态。"
+        "用户确认产品阶段生成的线框全部作为简报确认参考，不能等同正式设计，也不能被设计阶段机械照搬。",
+        "用户确认先生成完整 prototype_brief，再必须生成对应线框并共同展示供确认；线框不保存临时模型、线框合同或独立确认状态。",
+        "用户确认简报影响页面、入口、路径、状态或可见结果时先更新简报再重新生成线框；无渲染器时以文本分镜完成，不能跳过。"
       ],
       "created_at": "2026-07-27T00:00:00Z",
-      "updated_at": "2026-07-27T00:00:00Z",
+      "updated_at": "2026-07-29T00:00:00Z",
       "promoted_at": "2026-07-27T00:00:00Z",
       "promotion_landing": {
         "file": ".codex/skills/shared/references/design-decisions.md",
         "locator": "rule-id: wego-product-conversation-wireframe-reference",
         "rule_id": "wego-product-conversation-wireframe-reference",
         "constraint_area": "产品线框与设计输入边界",
-        "description": "会话线框只作为需求探索参考；业务结论只归纳到用户确认的现有 prototype_brief，设计阶段不得补造事实或机械复制线框。"
+        "description": "先形成完整 prototype_brief，再必须生成对应会话线框供用户共同确认；设计阶段只消费已确认简报，不得从线框补造事实或机械复制外观。"
       }
     },
     {
@@ -933,22 +1079,30 @@
       "rule_ownership": {
         "category": "script",
         "canonical": {
-          "file": "scripts/validate-scene-contract.mjs",
-          "locator": "validate",
-          "rule_id": "sync-path-css-reference-consistency"
+          "file": "scripts/sync-wego-app-lib.mjs",
+          "locator": "const SYNC_MAP =",
+          "rule_id": "sync-script-path-must-match-css-reference"
         }
       },
       "runtime_reachability": {
         "consumer_skill": "wego-uxsystem-iterate",
         "output_field": "sync-wego-app-lib",
         "downstream_consumer": "wego-design",
-        "acceptance_check": "validate-wego-design"
+        "acceptance_check": "scripts/test-sync-wego-app-lib.mjs"
       },
       "evidence": [
         "SYNC_MAP 把 assets/fonts 映射到 fonts，但 CSS 文件引用 url('assets/fonts/...') 未同步修改，导致所有字体 404；同步脚本的目录映射必须与 CSS 内部引用路径一致。"
       ],
       "created_at": "2026-07-12T00:00:00Z",
-      "updated_at": "2026-07-12T00:00:00Z"
+      "updated_at": "2026-07-12T00:00:00Z",
+      "promoted_at": "2026-07-12T00:00:00Z",
+      "promotion_landing": {
+        "file": "scripts/sync-wego-app-lib.mjs",
+        "locator": "const SYNC_MAP =",
+        "rule_id": "sync-script-path-must-match-css-reference",
+        "constraint_area": "同步脚本目录映射与 CSS 引用路径一致",
+        "description": "同步脚本目录映射与 CSS 引用路径一致；以该精确落点的原生规则为准。"
+      }
     },
     {
       "id": "exp-design-must-check-contract-vs-css-implementation",
@@ -957,30 +1111,38 @@
       "status": "promoted",
       "occurrence_count": 1,
       "threshold": 1,
-      "primary_owner": "wego-design",
+      "primary_owner": "wego-uxsystem-iterate",
       "secondary_owners": [
-        "wego-uxsystem-iterate"
+        "wego-design"
       ],
       "ownership_reason": "组件消费时的 gap 检测属于设计消费规则。",
       "rule_ownership": {
         "category": "design-consumption",
         "canonical": {
           "file": ".codex/skills/wego-design/library-consumption.json",
-          "locator": "/globalConsumptionRules",
-          "rule_id": "contract-css-implementation-check"
+          "locator": "/globalConsumptionRules/contractImplementationCheck",
+          "rule_id": "design-contract-css-implementation-check"
         }
       },
       "runtime_reachability": {
         "consumer_skill": "wego-design",
         "output_field": "component_mapping",
         "downstream_consumer": "wego-design",
-        "acceptance_check": "wego-design"
+        "acceptance_check": "scripts/validate-wego-design.mjs"
       },
       "evidence": [
         "tag.json 声明 promotion 主题但 components.css 未实现，AI 在 scene.css 内补样式违反 contractFirst；消费组件稳定变体时必须检查 CSS 是否实现，未实现时标记 gap 并转交 wego-designsystem-iterate。"
       ],
       "created_at": "2026-07-12T00:00:00Z",
-      "updated_at": "2026-07-12T00:00:00Z"
+      "updated_at": "2026-07-12T00:00:00Z",
+      "promoted_at": "2026-07-12T00:00:00Z",
+      "promotion_landing": {
+        "file": ".codex/skills/wego-design/library-consumption.json",
+        "locator": "/globalConsumptionRules/contractImplementationCheck",
+        "rule_id": "design-contract-css-implementation-check",
+        "constraint_area": "消费组件时检测契约声明与 CSS 实现",
+        "description": "消费组件时检测契约声明与 CSS 实现；以该精确落点的原生规则为准。"
+      }
     },
     {
       "id": "exp-overlay-component-css-variable-and-safe-area-context",
@@ -995,7 +1157,7 @@
       ],
       "ownership_reason": "overlay 层与组件的集成方式属于运行时方法。",
       "rule_ownership": {
-        "category": "skill-runtime-flow",
+        "category": "scene-contract",
         "canonical": {
           "file": ".codex/skills/wego-design/references/scene-contract.md",
           "locator": "rule-id: overlay-host-runtime-integration",
@@ -1006,13 +1168,21 @@
         "consumer_skill": "wego-design",
         "output_field": "scene.js",
         "downstream_consumer": "wego-design",
-        "acceptance_check": "runtime-check"
+        "acceptance_check": "scripts/validate-scene-contract.mjs"
       },
       "evidence": [
         "actionsheet 的 --actionsheet-item-divider-color 定义在 .actionsheet 上，但 overlay 层用 .app-overlay-panel 作为容器，CSS 变量无法继承导致分割线失效；actionsheet__cancel 自带安全区又与 overlay 层 padding-bottom 双重叠加。"
       ],
       "created_at": "2026-07-12T00:00:00Z",
-      "updated_at": "2026-07-12T00:00:00Z"
+      "updated_at": "2026-07-12T00:00:00Z",
+      "promoted_at": "2026-07-12T00:00:00Z",
+      "promotion_landing": {
+        "file": ".codex/skills/wego-design/references/scene-contract.md",
+        "locator": "rule-id: overlay-host-runtime-integration",
+        "rule_id": "overlay-host-runtime-integration",
+        "constraint_area": "overlay 层与组件 CSS 变量和安全区集成",
+        "description": "overlay 层与组件 CSS 变量和安全区集成；以该精确落点的原生规则为准。"
+      }
     },
     {
       "id": "exp-color-token-semantic-usage",
@@ -1021,28 +1191,38 @@
       "status": "promoted",
       "occurrence_count": 1,
       "threshold": 1,
-      "primary_owner": "wego-design",
-      "secondary_owners": [],
+      "primary_owner": "wego-uxsystem-iterate",
+      "secondary_owners": [
+        "wego-design"
+      ],
       "ownership_reason": "颜色 Token 语义判断属于设计消费规则。",
       "rule_ownership": {
         "category": "design-consumption",
         "canonical": {
           "file": ".codex/skills/wego-design/library-consumption.json",
-          "locator": "/globalConsumptionRules",
-          "rule_id": "semantic-token-usage"
+          "locator": "/globalConsumptionRules/semanticTokenUsage",
+          "rule_id": "color-token-semantic-usage"
         }
       },
       "runtime_reachability": {
         "consumer_skill": "wego-design",
         "output_field": "component_mapping",
         "downstream_consumer": "wego-design",
-        "acceptance_check": "wego-design"
+        "acceptance_check": "scripts/validate-wego-design.mjs"
       },
       "evidence": [
         "AI 在详情页已收藏状态使用 --status-promotion-default（红橙色），但红色仅用于促销/错误场景；收藏等正面交互状态应使用品牌色。"
       ],
       "created_at": "2026-07-12T00:00:00Z",
-      "updated_at": "2026-07-12T00:00:00Z"
+      "updated_at": "2026-07-12T00:00:00Z",
+      "promoted_at": "2026-07-12T00:00:00Z",
+      "promotion_landing": {
+        "file": ".codex/skills/wego-design/library-consumption.json",
+        "locator": "/globalConsumptionRules/semanticTokenUsage",
+        "rule_id": "color-token-semantic-usage",
+        "constraint_area": "状态色 Token 按语义场景使用",
+        "description": "状态色 Token 按语义场景使用；以该精确落点的原生规则为准。"
+      }
     },
     {
       "id": "exp-component-variant-applicability-check",
@@ -1051,28 +1231,38 @@
       "status": "promoted",
       "occurrence_count": 1,
       "threshold": 1,
-      "primary_owner": "wego-design",
-      "secondary_owners": [],
+      "primary_owner": "wego-uxsystem-iterate",
+      "secondary_owners": [
+        "wego-design"
+      ],
       "ownership_reason": "变体适用性判断属于设计消费规则。",
       "rule_ownership": {
         "category": "design-consumption",
         "canonical": {
           "file": ".codex/skills/wego-design/library-consumption.json",
-          "locator": "/globalConsumptionRules",
-          "rule_id": "component-variant-applicability"
+          "locator": "/globalConsumptionRules/variantApplicability",
+          "rule_id": "component-variant-applicability-check"
         }
       },
       "runtime_reachability": {
         "consumer_skill": "wego-design",
         "output_field": "component_mapping",
         "downstream_consumer": "wego-design",
-        "acceptance_check": "wego-design"
+        "acceptance_check": "scripts/validate-wego-design.mjs"
       },
       "evidence": [
         "AI 声明 wg-image--custom-rect/custom-wide 变体，但这些变体是固定尺寸(180x120/260x160)，不适合响应式图片网格；声明后无法落地导致 wego-design 自造完整图片容器。"
       ],
       "created_at": "2026-07-12T00:00:00Z",
-      "updated_at": "2026-07-12T00:00:00Z"
+      "updated_at": "2026-07-12T00:00:00Z",
+      "promoted_at": "2026-07-12T00:00:00Z",
+      "promotion_landing": {
+        "file": ".codex/skills/wego-design/library-consumption.json",
+        "locator": "/globalConsumptionRules/variantApplicability",
+        "rule_id": "component-variant-applicability-check",
+        "constraint_area": "组件变体参数适用性验证",
+        "description": "组件变体参数适用性验证；以该精确落点的原生规则为准。"
+      }
     },
     {
       "id": "exp-metric-price-integer-decimal-must-separate",
@@ -1081,7 +1271,7 @@
       "status": "promoted",
       "occurrence_count": 1,
       "threshold": 1,
-      "primary_owner": "wego-design",
+      "primary_owner": "wego-uxsystem-iterate",
       "secondary_owners": [
         "wego-design"
       ],
@@ -1098,7 +1288,7 @@
         "consumer_skill": "wego-design",
         "output_field": "component_mapping",
         "downstream_consumer": "wego-design",
-        "acceptance_check": "wego-design"
+        "acceptance_check": "scripts/validate-component-contract-parity.mjs"
       },
       "evidence": [
         "动态商品流 Benchmark 中 AI 将完整金额字符串（如 128.00）整个塞进 .metric__integer，没有用 .metric__decimal 分离小数部分，导致 metric--16 下小数部分应为 12px 但实际继承 integer 的 16px；模型自造 formatPrice 函数返回字符串而非按 domAnatomy 分离渲染。",
@@ -1122,13 +1312,13 @@
       "status": "awaiting-confirmation",
       "occurrence_count": 1,
       "threshold": 1,
-      "primary_owner": "wego-design",
+      "primary_owner": "wego-uxsystem-iterate",
       "secondary_owners": [
         "wego-design"
       ],
       "ownership_reason": "图标基础类消费边界属于消费配置。",
       "rule_ownership": {
-        "category": "library-consumption",
+        "category": "design-consumption",
         "canonical": {
           "file": ".codex/skills/wego-design/library-consumption.json",
           "locator": "/globalConsumptionRules",
@@ -1155,12 +1345,10 @@
       "occurrence_count": 1,
       "threshold": 1,
       "primary_owner": "wego-design",
-      "secondary_owners": [
-        "wego-design"
-      ],
+      "secondary_owners": [],
       "ownership_reason": "设计约束写作规则属于设计判断方法。",
       "rule_ownership": {
-        "category": "skill-runtime-flow",
+        "category": "scene-contract",
         "canonical": {
           "file": ".codex/skills/wego-design/references/scene-contract.md",
           "locator": "场景合同",
@@ -1187,12 +1375,10 @@
       "occurrence_count": 1,
       "threshold": 1,
       "primary_owner": "wego-design",
-      "secondary_owners": [
-        "wego-design"
-      ],
+      "secondary_owners": [],
       "ownership_reason": "跨场景数据交接属于运行时方法。",
       "rule_ownership": {
-        "category": "skill-runtime-flow",
+        "category": "scene-contract",
         "canonical": {
           "file": ".codex/skills/wego-design/references/scene-contract.md",
           "locator": "场景合同",
@@ -1219,12 +1405,10 @@
       "occurrence_count": 1,
       "threshold": 1,
       "primary_owner": "wego-design",
-      "secondary_owners": [
-        "wego-design"
-      ],
+      "secondary_owners": [],
       "ownership_reason": "设计计划输出格式精度不足导致下游被迫重新推理，属于设计判断方法。",
       "rule_ownership": {
-        "category": "skill-runtime-flow",
+        "category": "scene-contract",
         "canonical": {
           "file": ".codex/skills/wego-design/references/scene-contract.md",
           "locator": "rule-id: design-decisions-css-token-binding-precision",
@@ -1235,7 +1419,7 @@
         "consumer_skill": "wego-design",
         "output_field": "design-decisions.json.prompt_contract.token_bindings",
         "downstream_consumer": "wego-design",
-        "acceptance_check": "wego-design"
+        "acceptance_check": "scripts/validate-scene-contract.mjs"
       },
       "evidence": [
         "动态首页 Benchmark 中发现字号违规（发布者名称用 14px 而非 16px heading-xs）、Token 语义误用（对象名称用 body-lg 而非 heading-xs）——这些在 design-decisions.md 已有明确规则，但在 wego-design 实现阶段未被遵循，因为 design-decisions 只输出了语义约束（'发布者名称用 heading-xs'）而非具体 CSS 绑定（'.feed-item__author-name → --heading-xs-font-size'），wego-design 在实现时跳过规则做了独立推理。"
@@ -1258,7 +1442,7 @@
       "status": "promoted",
       "occurrence_count": 1,
       "threshold": 1,
-      "primary_owner": "wego-design",
+      "primary_owner": "wego-uxsystem-iterate",
       "secondary_owners": [
         "wego-design"
       ],
@@ -1267,7 +1451,7 @@
         "category": "design-consumption",
         "canonical": {
           "file": ".codex/skills/wego-design/library-consumption.json",
-          "locator": "/globalConsumptionRules",
+          "locator": "/globalConsumptionRules/componentBoundary",
           "rule_id": "component-visual-usage-consume-registered"
         }
       },
@@ -1275,7 +1459,7 @@
         "consumer_skill": "wego-design",
         "output_field": "component_mapping",
         "downstream_consumer": "wego-design",
-        "acceptance_check": "wego-design"
+        "acceptance_check": "scripts/validate-wego-design.mjs"
       },
       "evidence": [
         "我的页面 Benchmark 中 AI 对标签用 tag 组件但对角色标签手写 .my-profile__tag，对角标用 badge 组件但对小程序角标手写 .my-grid__badge，对提现区不用 cell 而手写 card+button 组合，badge 绝对定位参照系错误导致角标偏移到卡片右上角。"
@@ -1285,7 +1469,7 @@
       "promoted_at": "2026-07-13T00:00:00Z",
       "promotion_landing": {
         "file": ".codex/skills/wego-design/library-consumption.json",
-        "locator": "/globalConsumptionRules",
+        "locator": "/globalConsumptionRules/componentBoundary",
         "rule_id": "component-visual-usage-consume-registered",
         "constraint_area": "组件消费优先级",
         "description": "视觉用途命中已注册组件时必须直接消费正式组件；业务 class 只承担区域关系和业务胶水，不复刻组件视觉或覆盖组件内部样式。"
@@ -1298,7 +1482,7 @@
       "status": "promoted",
       "occurrence_count": 1,
       "threshold": 1,
-      "primary_owner": "wego-design",
+      "primary_owner": "wego-uxsystem-iterate",
       "secondary_owners": [
         "wego-design"
       ],
@@ -1307,7 +1491,7 @@
         "category": "design-consumption",
         "canonical": {
           "file": ".codex/skills/wego-design/library-consumption.json",
-          "locator": "/globalConsumptionRules",
+          "locator": "/globalConsumptionRules/assetSemantics",
           "rule_id": "asset-semantic-usage"
         }
       },
@@ -1315,7 +1499,7 @@
         "consumer_skill": "wego-design",
         "output_field": "component_mapping",
         "downstream_consumer": "wego-design",
-        "acceptance_check": "wego-design"
+        "acceptance_check": "scripts/validate-wego-design.mjs"
       },
       "evidence": [
         "我的页面 Benchmark 中 AI 对用户信息区用 linear-gradient 渐变背景，会员区用 --status-promotion-surface-l1 大面积橙底，6 个图标背景手写彩色修饰类系统；同时 9 个 iconfont 图标名不存在导致渲染为空白，而 assets/icons/app-center/ 下有 84 个业务 SVG 资源闲置未用。"
@@ -1325,7 +1509,7 @@
       "promoted_at": "2026-07-13T00:00:00Z",
       "promotion_landing": {
         "file": ".codex/skills/wego-design/library-consumption.json",
-        "locator": "/globalConsumptionRules",
+        "locator": "/globalConsumptionRules/assetSemantics",
         "rule_id": "asset-semantic-usage",
         "constraint_area": "大面积彩色背景禁止与 app-center SVG 优先",
         "description": "禁止大面积彩色/渐变背景，状态色 Token 只用于点缀。功能入口图标优先使用 assets/icons/app-center/ SVG 资源，无对应 SVG 时才用 iconfont 并查证类名。"
@@ -1339,12 +1523,10 @@
       "occurrence_count": 1,
       "threshold": 1,
       "primary_owner": "wego-design",
-      "secondary_owners": [
-        "wego-design"
-      ],
+      "secondary_owners": [],
       "ownership_reason": "间距 Token 一致性属于场景合同约束。",
       "rule_ownership": {
-        "category": "skill-runtime-flow",
+        "category": "scene-contract",
         "canonical": {
           "file": ".codex/skills/wego-design/references/scene-contract.md",
           "locator": "rule-id: spacing-must-use-spacer-token",
@@ -1355,7 +1537,7 @@
         "consumer_skill": "wego-design",
         "output_field": "scene.css",
         "downstream_consumer": "wego-design",
-        "acceptance_check": "wego-design"
+        "acceptance_check": "scripts/validate-scene-contract.mjs"
       },
       "evidence": [
         "我的页面 Benchmark 中 scene.css 同一文件内 gap: var(--spacer-4) 和 gap: 4px 混用，3 处使用裸像素值，其他位置正确使用 spacer Token。"
@@ -1385,7 +1567,7 @@
       ],
       "ownership_reason": "冻结时机、验收期迭代复用和失效路径属于业务迭代状态机。",
       "rule_ownership": {
-        "category": "skill-runtime-flow",
+        "category": "product-workflow",
         "canonical": {
           "file": ".codex/skills/wego-product/references/iteration-workflow.md",
           "locator": "rule-id: business-iteration-explicit-user-freeze",
@@ -1396,7 +1578,7 @@
         "consumer_skill": "wego-product",
         "output_field": "iteration.json.status/freeze",
         "downstream_consumer": "wego-design",
-        "acceptance_check": "iteration-record"
+        "acceptance_check": "scripts/iteration-record.mjs"
       },
       "evidence": [
         "tab-scroll-isolation 迭代在 confirm-prototype 后约 64 毫秒即执行 freeze，说明原流程会把原型确认误当为冻结授权。",
@@ -1426,7 +1608,7 @@
       ],
       "ownership_reason": "产品阶段字段边界与跨技能职责转移属于产品流程方法。",
       "rule_ownership": {
-        "category": "skill-runtime-flow",
+        "category": "product-workflow",
         "canonical": {
           "file": ".codex/skills/wego-product/references/scope-and-boundaries.md",
           "locator": "rule-id: product-stage-ui-directive-allowed",
@@ -1437,7 +1619,7 @@
         "consumer_skill": "wego-product",
         "output_field": "prototype_brief",
         "downstream_consumer": "wego-design",
-        "acceptance_check": "wego-design"
+        "acceptance_check": "scripts/test-skill-entry-boundary.mjs"
       },
       "evidence": [
         "用户明确要求反转 exp-product-stage-must-not-carry-ui-assumptions：去掉产品阶段禁止 UI 假设的限制，允许产品阶段在 prototype_brief 字段中描述交互视觉（布局位置、控件类型、视觉强调、打开方式倾向等），设计阶段严格遵循；唯一例外是组件不支持或设计系统规范不允许，此时设计系统优先并退回 product 重新确认。原禁止清单导致产品意图丢失，设计阶段无法获取完整视觉约束。"
@@ -1450,7 +1632,7 @@
         "locator": "rule-id: product-stage-ui-directive-allowed",
         "rule_id": "product-stage-ui-directive-allowed",
         "constraint_area": "产品阶段交互视觉描述与设计阶段遵循边界",
-        "description": "产品阶段可在 prototype_brief 字段中附带交互视觉描述作为 wego-design 的强约束输入；设计阶段严格遵循，除非组件不支持或设计系统规范不允许，此时设计系统优先并退回 product 重新确认。"
+        "description": "产品阶段可在 prototype_brief 字段中附带交互视觉描述；正式回退若改变已确认指令或结果，须先退回 product 更新简报并重新确认，未改变时由 design 自主采用。"
       },
       "supersedes": "exp-product-stage-must-not-carry-ui-assumptions"
     },
@@ -1465,7 +1647,7 @@
       "secondary_owners": [],
       "ownership_reason": "场景合同与 UI Kit 质量报告的版本号语义属于设计系统消费规则。",
       "rule_ownership": {
-        "category": "skill-runtime-flow",
+        "category": "scene-contract",
         "canonical": {
           "file": ".codex/skills/wego-design/references/scene-contract.md",
           "locator": "rule-id: scene-version-snapshot-not-pinned",
@@ -1476,7 +1658,7 @@
         "consumer_skill": "wego-design",
         "output_field": "prompt_contract.design_system_version",
         "downstream_consumer": "wego-design",
-        "acceptance_check": "wego-design"
+        "acceptance_check": "scripts/validate-wego-design.mjs"
       },
       "evidence": [
         "用户质疑场景 design_system_version 每次设计系统升级都要连锁改的必要性。分析发现：旧规则要求场景 prompt_contract.design_system_version 与 UI Kit quality-report.designSystemVersion 必须等于当前 metadata.version，叠加 metadata.version 在任何设计系统源变更（含头像压缩等纯资源）时都强制递增，导致每次升级都要连锁改所有场景与 UI Kit 的版本号——但版本号相等本身不提供实际适配保障，真正的保障来自 components.css 提取校验、组件契约一致性、source_sha256 和 visual_check。用户明确要求移除该规则。"
@@ -1506,7 +1688,7 @@
         "category": "skill-entry",
         "canonical": {
           "file": ".codex/skills/wego-design/SKILL.md",
-          "locator": "必要输入与运行时入口",
+          "locator": "rule-id: scene-dom-copy-preview-verbatim",
           "rule_id": "scene-dom-copy-preview-verbatim"
         }
       },
@@ -1514,7 +1696,7 @@
         "consumer_skill": "wego-design",
         "output_field": "scene.js",
         "downstream_consumer": "wego-design",
-        "acceptance_check": "validate-wego-design"
+        "acceptance_check": "scripts/test-skill-entry-boundary.mjs"
       },
       "evidence": [
         "好友列表场景 actionsheet select 模式：分组 actionsheet 的 .actionsheet__item-check-slot 放在了 .actionsheet__item-row 外面，.actionsheet__item-check 放在了 row 里面。契约和 Preview 都明确 check-slot 必须在 row 内与 main 形成 flex 布局。",
@@ -1526,11 +1708,12 @@
       "promoted_at": "2026-07-21T00:00:00Z",
       "promotion_landing": {
         "file": ".codex/skills/wego-design/SKILL.md",
-        "locator": "必要输入与运行时入口",
+        "locator": "rule-id: scene-dom-copy-preview-verbatim",
         "rule_id": "scene-dom-copy-preview-verbatim",
         "constraint_area": "组件 DOM 结构生成约束",
         "description": "场景代码中的组件 DOM 结构必须逐字复制 Preview 中对应变体的 HTML，包括节点层级、class 组合、修饰类顺序和可选子元素位置；禁止理解大意后自己写。"
-      }
+      },
+      "entry_scope": "input"
     },
     {
       "id": "exp-search-component-native-decoration-and-host-order",
@@ -1545,7 +1728,7 @@
       ],
       "ownership_reason": "问题在业务场景交付时暴露，但根因同时落在搜索组件实现和宿主接入顺序，需先由场景消费校验，再由系统规则收敛。",
       "rule_ownership": {
-        "category": "skill-runtime-flow",
+        "category": "scene-contract",
         "canonical": {
           "file": ".codex/skills/wego-design/references/scene-contract.md",
           "locator": "场景合同",
@@ -1606,7 +1789,7 @@
         "consumer_skill": "wego-design",
         "output_field": "scene.js/scene.css/design-decisions.json",
         "downstream_consumer": "wego-design",
-        "acceptance_check": "wego-design"
+        "acceptance_check": "scripts/validate-wego-design.mjs"
       },
       "evidence": [
         "用户指出即使所有页面补齐 UI Kit，若 AI 只是套模板和拼组件，仍没有完成真正的设计。",
