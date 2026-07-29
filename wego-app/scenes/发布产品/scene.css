@@ -9,6 +9,7 @@
   font-family: var(--body-md-font-family);
   display: flex;
   flex-direction: column;
+  z-index: 100;
 }
 
 /* navbar */
