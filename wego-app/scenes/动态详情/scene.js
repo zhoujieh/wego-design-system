@@ -742,7 +742,27 @@
       });
       ctx.root.querySelector('[data-dom-id="dynamic-detail-favorite"]').addEventListener('click', function() { ctx.toast('收藏成功'); });
       ctx.root.querySelector('[data-dom-id="dynamic-detail-copy-text"]').addEventListener('click', function() { ctx.toast('文案已复制（原型演示）'); });
-      ctx.root.querySelector('[data-dom-id="dynamic-detail-edit"]').addEventListener('click', function() { ctx.toast('编辑能力本期暂未开放'); });
+      ctx.root.querySelector('[data-dom-id="dynamic-detail-edit"]').addEventListener('click', function() {
+        var dynamic = ctx.appState.dynamicFeedList.find(function(d) { return d.dynamic_id === ctx.params.dynamicId; });
+        if (dynamic && dynamic.publisher_id === 'self') {
+          ctx.appState.publishProductEditData = {
+            text: dynamic.text_content || '',
+            images: (dynamic.media_list || []).filter(function(m) { return m.media_type === 'image'; }).map(function(m) { return m.poster_or_src; }),
+            tag: (dynamic.tags || [])[0] || null,
+            source: dynamic.source || null,
+            visibility: dynamic.visibility || null,
+            price: (dynamic.product && dynamic.product.price) || '',
+            itemNumber: (dynamic.product && dynamic.product.item_number) || '',
+            specs: (dynamic.product && dynamic.product.specs) || [],
+            colors: (dynamic.product && dynamic.product.colors) || [],
+            weight: (dynamic.product && dynamic.product.weight) || '',
+            stock: (dynamic.product && dynamic.product.stock) || ''
+          };
+          ctx.push('publish-product');
+        } else {
+          ctx.toast('只能编辑自己发布的动态');
+        }
+      });
       ctx.root.querySelector('[data-dom-id="dynamic-detail-copy-dynamic"]').addEventListener('click', function() { ctx.toast('动态已复制（原型演示）'); });
       ctx.root.querySelector('[data-dom-id="dynamic-detail-view-image"]').addEventListener('click', function() { ctx.toast('查看大图能力本期暂未开放'); });
       ctx.root.querySelector('[data-dom-id="dynamic-detail-forward"]').addEventListener('click', function() { ctx.toast('动态已转发'); });

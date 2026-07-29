@@ -12,43 +12,35 @@
   font-family: var(--body-md-font-family);
 }
 
-/* 顶部渐变层：白色覆盖层 + mask 渐变，通过负 left/right 突破 padding 实现通栏，
-   覆盖头像栏 + 筛选栏整个区域，让顶部白色平滑过渡到页面灰色 */
-.album-feed__content-group {
-  position: relative;
+/* 顶部渐变层：白色覆盖层 + mask 渐变，sticky 固定在滚动容器顶部，
+   覆盖头像栏 + 筛选栏整个区域，让顶部白色平滑过渡到页面灰色。
+   使用 ::before 配合 position: sticky + 负 margin 实现浮在内容上方的通栏渐变层，
+   负 margin 使用 2 个 size-64 + 1 个 spacer-0 + 2px 近似 130px，
+   高度使用 size-48 × 2 + spacer-8 + spacer-18（近似 130px）。 */
+.album-feed__scroll::before {
+  content: '';
+  position: sticky;
+  top: 0;
+  display: block;
+  height: calc(var(--size-48) + var(--size-48) + var(--size-28) + var(--spacer-4) + var(--spacer-2));
+  background: var(--bg-surface);
+  -webkit-mask-image: linear-gradient(to bottom, black 0, black calc(var(--size-48) + var(--size-20)), transparent calc(var(--size-48) + var(--size-48) + var(--size-28) + var(--spacer-4) + var(--spacer-2)));
+  mask-image: linear-gradient(to bottom, black 0, black calc(var(--size-48) + var(--size-20)), transparent calc(var(--size-48) + var(--size-48) + var(--size-28) + var(--spacer-4) + var(--spacer-2)));
+  pointer-events: none;
+  z-index: 2;
+  margin-bottom: calc((var(--size-48) + var(--size-48) + var(--size-28) + var(--spacer-4) + var(--spacer-2)) * -1);
+  flex-shrink: 0;
 }
 
-.album-feed__content-group::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: calc(var(--layout-page-margin-m8) * -1);
-  right: calc(var(--layout-page-margin-m8) * -1);
-  height: 130px;
-  background: var(--bg-surface);
-  -webkit-mask-image: linear-gradient(to bottom, black 0, black 70px, transparent 130px);
-  mask-image: linear-gradient(to bottom, black 0, black 70px, transparent 130px);
-  pointer-events: none;
-  z-index: 0;
+.album-feed__content-group {
+  position: relative;
+  z-index: 1;
 }
 
 .album-feed__people-wrap,
-.album-feed__filter-tags {
+.album-feed__filter-wrap {
   position: relative;
   z-index: 1;
-}
-
-/* scroll 容器作为 fade 的定位上下文，但不裁剪溢出内容 */
-.album-feed__people-scroll {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: flex-start;
-  gap: var(--spacer-12);
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  width: 100%;
 }
 
 /* 滚动容器：承担瀑布流、人维度、筛选标签；底部预留 safe-area-bottom-content 避免内容被 bottom-nav 遮挡。
@@ -343,7 +335,16 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacer-12);
+}
+
+/* 内容组自身承担 M8 横向间距，符合 spacing owner 规则；
+   渐变层放在 scroll::before 上（通栏），不受 content-group padding 影响 */
+.album-feed__content-group {
   padding-inline: var(--layout-page-margin-m8);
+}
+
+.album-feed__grid {
+  /* grid 居中，不重复加 padding */
 }
 
 .album-feed__people-scroll {
@@ -377,6 +378,8 @@
   margin-left: auto;
   background: var(--bg-surface);
   z-index: 1;
+  display: flex;
+  align-items: center;
 }
 
 .album-feed__sticky-fade {
@@ -385,40 +388,40 @@
   pointer-events: none;
 }
 
-/* 头像栏左侧渐变：整行高度，从左侧边缘向内渐隐 */
+/* 头像栏左侧渐变：整行高度，从可视左边缘（M8内）向内渐隐 */
 .album-feed__sticky-fade--people {
-  left: calc(var(--spacer-16) * -1);
+  left: 0;
   top: 0;
   bottom: 0;
   height: 100%;
 }
 
-/* 头像栏右侧渐变：整行高度，从 sticky 按钮左侧向内渐隐 */
+/* 头像栏右侧渐变：整行高度，紧贴 sticky 按钮左侧 */
 .album-feed__sticky-fade--people-right {
-  right: 0;
+  right: 100%;
   top: 0;
   bottom: 0;
   height: 100%;
 }
 
-/* 筛选栏左侧渐变：与标签行等高，从左侧边缘向内渐隐 */
+/* 筛选栏左侧渐变：与标签行等高，从可视左边缘（M8内）向内渐隐 */
 .album-feed__sticky-fade--filter {
-  left: calc(var(--spacer-16) * -1);
+  left: 0;
   top: 50%;
   height: var(--size-28);
   transform: translateY(-50%);
 }
 
-/* 筛选栏右侧渐变：与标签行等高，从 sticky 按钮左侧向内渐隐 */
+/* 筛选栏右侧渐变：与标签行等高，紧贴 sticky 按钮左侧 */
 .album-feed__sticky-fade--filter-right {
-  right: 0;
+  right: 100%;
   top: 50%;
   height: var(--size-28);
   transform: translateY(-50%);
 }
 
-/* people-wrap 和 filter-tags 作为 fade 图片的定位上下文 */
-.album-feed__people-wrap,
+/* people-scroll（横滑容器）和 filter-tags（横滑容器）作为 fade 图片的定位上下文，
+   让 fade 紧贴可视区域边缘，不超出 M8 内边距范围，避免在灰色背景上出现突兀的白色蒙层 */
 .album-feed__filter-tags {
   position: relative;
 }
@@ -481,6 +484,7 @@
   flex: 0 0 auto;
   margin-left: auto;
   z-index: 1;
+  background: var(--bg-surface);
 }
 
 .album-feed__filter-open {

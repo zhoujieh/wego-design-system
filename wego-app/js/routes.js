@@ -38,5 +38,11 @@ window.WEGO_APP_ROUTES = [
     scene: '应用中心',
     script: 'scenes/应用中心/scene.js',
     style: 'scenes/应用中心/scene.css'
+  },
+  {
+    routeId: 'publish-product',
+    scene: '发布产品',
+    script: 'scenes/发布产品/scene.js',
+    style: 'scenes/发布产品/scene.css'
   }
 ];

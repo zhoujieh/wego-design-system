@@ -1,0 +1,455 @@
+{
+  "schemaVersion": 2,
+  "scene": "发布产品",
+  "surface_id": "publish-product",
+  "route_id": "publish-product",
+  "layout_mode": "composed",
+  "page_pattern": null,
+  "presentation": {
+    "type": "push",
+    "transition": "slide-left-enter, slide-right-exit",
+    "dismissAction": "back-button",
+    "overlayLevel": "inline",
+    "coversTabBar": true,
+    "source": "library-consumption.json#/appRuntime/presentationTypes"
+  },
+  "prompt_contract": {
+    "design_system_version": 484,
+    "token_bindings": [
+      {
+        "selector": ".publish-product",
+        "content_role": "页面背景",
+        "css_property": "background",
+        "token": "var(--bg-page)"
+      },
+      {
+        "selector": ".publish-product__scroll",
+        "content_role": "主滚动区底部基础避让",
+        "css_property": "padding-bottom",
+        "token": "var(--safe-area-bottom-content)"
+      },
+      {
+        "selector": ".publish-product__moments",
+        "content_role": "类朋友圈图文区横向留白",
+        "css_property": "padding-inline",
+        "token": "var(--spacer-16)"
+      },
+      {
+        "selector": ".publish-product__moments",
+        "content_role": "类朋友圈图文区纵向留白",
+        "css_property": "padding-block",
+        "token": "var(--spacer-16)"
+      },
+      {
+        "selector": ".publish-product__textarea",
+        "content_role": "文案输入框文字颜色",
+        "css_property": "color",
+        "token": "var(--text-default)"
+      },
+      {
+        "selector": ".publish-product__textarea",
+        "content_role": "文案输入框字号",
+        "css_property": "font-size",
+        "token": "var(--body-lg-font-size)"
+      },
+      {
+        "selector": ".publish-product__textarea",
+        "content_role": "文案输入框行高",
+        "css_property": "line-height",
+        "token": "var(--body-lg-line-height)"
+      },
+      {
+        "selector": ".publish-product__textarea::placeholder",
+        "content_role": "文案输入框占位符颜色",
+        "css_property": "color",
+        "token": "var(--text-placeholder)"
+      },
+      {
+        "selector": ".publish-product__image-grid",
+        "content_role": "图片网格间距",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".publish-product__image-item",
+        "content_role": "图片项圆角",
+        "css_property": "border-radius",
+        "token": "var(--radius-8)"
+      },
+      {
+        "selector": ".publish-product__image-add",
+        "content_role": "添加图片按钮边框颜色",
+        "css_property": "border-color",
+        "token": "var(--border-neutral-l2)"
+      },
+      {
+        "selector": ".publish-product__image-add",
+        "content_role": "添加图片按钮圆角",
+        "css_property": "border-radius",
+        "token": "var(--radius-8)"
+      },
+      {
+        "selector": ".publish-product__capsule-bar",
+        "content_role": "横向胶囊条横向留白",
+        "css_property": "padding-inline",
+        "token": "var(--spacer-16)"
+      },
+      {
+        "selector": ".publish-product__capsule-bar",
+        "content_role": "横向胶囊条纵向留白",
+        "css_property": "padding-block",
+        "token": "var(--spacer-12)"
+      },
+      {
+        "selector": ".publish-product__capsule-bar",
+        "content_role": "横向胶囊条背景",
+        "css_property": "background",
+        "token": "var(--bg-surface)"
+      },
+      {
+        "selector": ".publish-product__capsule-list",
+        "content_role": "胶囊列表间距",
+        "css_property": "gap",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".publish-product__capsule-item",
+        "content_role": "胶囊项背景",
+        "css_property": "background",
+        "token": "var(--bg-subtle)"
+      },
+      {
+        "selector": ".publish-product__capsule-item",
+        "content_role": "胶囊项圆角",
+        "css_property": "border-radius",
+        "token": "var(--radius-full)"
+      },
+      {
+        "selector": ".publish-product__capsule-item",
+        "content_role": "胶囊项横向留白",
+        "css_property": "padding-inline",
+        "token": "var(--spacer-12)"
+      },
+      {
+        "selector": ".publish-product__capsule-item",
+        "content_role": "胶囊项纵向留白",
+        "css_property": "padding-block",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".publish-product__capsule-item",
+        "content_role": "胶囊项文字颜色",
+        "css_property": "color",
+        "token": "var(--text-secondary)"
+      },
+      {
+        "selector": ".publish-product__capsule-item",
+        "content_role": "胶囊项文字字号",
+        "css_property": "font-size",
+        "token": "var(--body-sm-font-size)"
+      },
+      {
+        "selector": ".publish-product__capsule-item.has-value",
+        "content_role": "已选中胶囊项背景",
+        "css_property": "background",
+        "token": "var(--bg-brand-surface-l1)"
+      },
+      {
+        "selector": ".publish-product__capsule-item.has-value",
+        "content_role": "已选中胶囊项文字颜色",
+        "css_property": "color",
+        "token": "var(--text-brand)"
+      },
+      {
+        "selector": ".publish-product__capsule-label",
+        "content_role": "胶囊标签颜色",
+        "css_property": "color",
+        "token": "var(--text-tertiary)"
+      },
+      {
+        "selector": ".publish-product__capsule-label",
+        "content_role": "胶囊标签字号",
+        "css_property": "font-size",
+        "token": "var(--body-sm-font-size)"
+      },
+      {
+        "selector": ".publish-product__form-group",
+        "content_role": "表单组标题颜色",
+        "css_property": "color",
+        "token": "var(--text-tertiary)"
+      },
+      {
+        "selector": ".publish-product__form-group",
+        "content_role": "表单组标题字号",
+        "css_property": "font-size",
+        "token": "var(--body-sm-font-size)"
+      },
+      {
+        "selector": ".publish-product__form-group",
+        "content_role": "表单组标题纵向留白",
+        "css_property": "padding-block",
+        "token": "var(--spacer-8)"
+      },
+      {
+        "selector": ".publish-product__form-group",
+        "content_role": "表单组标题横向留白",
+        "css_property": "padding-inline",
+        "token": "var(--spacer-16)"
+      },
+      {
+        "selector": ".publish-product__bottom-bar",
+        "content_role": "底部操作栏背景",
+        "css_property": "background",
+        "token": "var(--bg-surface)"
+      },
+      {
+        "selector": ".publish-product__bottom-bar",
+        "content_role": "底部操作栏横向留白",
+        "css_property": "padding-inline",
+        "token": "var(--spacer-16)"
+      },
+      {
+        "selector": ".publish-product__bottom-bar",
+        "content_role": "底部操作栏纵向留白",
+        "css_property": "padding-block",
+        "token": "var(--spacer-12)"
+      }
+    ],
+    "component_bindings": [
+      {
+        "binding_id": "publish-product-navbar",
+        "slug": "navbar",
+        "reason": "普通二级页面使用返回箭头和居中标题",
+        "variant_dimensions": {
+          "leftControl": "back-icon",
+          "titleAlignment": "center",
+          "actions": "none",
+          "spacing": "default",
+          "pageTransition": "push",
+          "position": "sticky"
+        }
+      },
+      {
+        "binding_id": "publish-product-form-group",
+        "slug": "form",
+        "reason": "表单区使用 form-group 组织字段分组",
+        "variant_dimensions": {
+          "layout": "vertical",
+          "surface": "default"
+        }
+      },
+      {
+        "binding_id": "publish-product-form-body",
+        "slug": "form",
+        "reason": "表单字段使用 form-body 承载",
+        "variant_dimensions": {
+          "layout": "horizontal",
+          "surface": "default"
+        }
+      },
+      {
+        "binding_id": "publish-product-button",
+        "slug": "button",
+        "reason": "底部发布按钮使用强调按钮",
+        "variant_dimensions": {
+          "emphasis": "strong",
+          "size": "lg",
+          "iconMode": "text-only",
+          "state": "default"
+        }
+      },
+      {
+        "binding_id": "publish-product-actionsheet",
+        "slug": "actionsheet",
+        "reason": "选择标签、来源、可见性、规格、颜色等使用底部操作表单",
+        "variant_dimensions": {
+          "mode": "select",
+          "header": "none",
+          "state": "open"
+        }
+      },
+      {
+        "binding_id": "publish-product-toast",
+        "slug": "toast",
+        "reason": "类朋友圈区域缺失时使用 toast 提示",
+        "variant_dimensions": {
+          "variant": "default",
+          "state": "visible"
+        }
+      }
+    ],
+    "layout_contract": {
+      "mode": "composed",
+      "source": "references/design-decisions.md",
+      "selection_reason": "发布产品是普通 Push 二级页；根与主滚动区通栏，navbar 和底部操作栏保持通栏，类朋友圈图文区、横向胶囊条和表单区作为语义内容组承担各自留白。底部操作栏在滚动区之外按流式预留空间。",
+      "mutable_regions": [
+        ".publish-product__scroll",
+        ".publish-product__image-grid",
+        ".publish-product__capsule-list"
+      ],
+      "principle_refs": [
+        "wego-clarity-page-architecture-before-components",
+        "wego-efficiency-primary-action-right"
+      ],
+      "page_layers": [
+        {
+          "region_id": "publish-product-navbar",
+          "selector": ".publish-product__navbar",
+          "scope": "page-local",
+          "role": "navigation"
+        },
+        {
+          "region_id": "publish-product-scroll",
+          "selector": ".publish-product__scroll",
+          "scope": "page-local",
+          "role": "content"
+        },
+        {
+          "region_id": "publish-product-bottom-bar",
+          "selector": ".publish-product__bottom-bar",
+          "scope": "page-local",
+          "role": "navigation"
+        }
+      ],
+      "scroll_architecture": {
+        "viewport_selector": ".publish-product",
+        "primary_scroll_selector": ".publish-product__scroll",
+        "document_scroll": false,
+        "nested_scroll_regions": [],
+        "fixed_regions": [
+          {
+            "region_id": "publish-product-bottom-bar",
+            "selector": ".publish-product__bottom-bar",
+            "edge": "bottom",
+            "safe_area_owner": "component",
+            "clearance": "flow-reserved"
+          }
+        ]
+      },
+      "layout_groups": [
+        {
+          "group_id": "publish-product-navbar-group",
+          "selector": ".publish-product__navbar",
+          "content_role": "导航通栏 surface",
+          "inline_inset_token": "var(--layout-page-margin-m0)",
+          "spacing_owner": "component",
+          "gap_token": "var(--spacer-0)"
+        },
+        {
+          "group_id": "publish-product-moments-group",
+          "selector": ".publish-product__moments",
+          "content_role": "类朋友圈图文内容组",
+          "inline_inset_token": "var(--spacer-16)",
+          "spacing_owner": "scene",
+          "gap_token": "var(--spacer-16)"
+        },
+        {
+          "group_id": "publish-product-capsule-group",
+          "selector": ".publish-product__capsule-bar",
+          "content_role": "横向胶囊条内容组",
+          "inline_inset_token": "var(--spacer-16)",
+          "spacing_owner": "scene",
+          "gap_token": "var(--spacer-12)"
+        },
+        {
+          "group_id": "publish-product-form-group",
+          "selector": ".publish-product__form-group",
+          "content_role": "表单内容组",
+          "inline_inset_token": "var(--layout-page-margin-m0)",
+          "spacing_owner": "component",
+          "gap_token": "var(--spacer-0)"
+        },
+        {
+          "group_id": "publish-product-bottom-group",
+          "selector": ".publish-product__bottom-bar",
+          "content_role": "底部操作通栏 surface",
+          "inline_inset_token": "var(--layout-page-margin-m0)",
+          "spacing_owner": "component",
+          "gap_token": "var(--spacer-0)"
+        }
+      ],
+      "sticky_regions": []
+    },
+    "interaction_contract": [
+      {
+        "dom_id": "publish-product-back",
+        "target": "navigation:back"
+      },
+      {
+        "dom_id": "publish-product-add-image",
+        "target": "feedback:toast"
+      },
+      {
+        "dom_id": "publish-product-select-tag",
+        "target": "overlay:sheet"
+      },
+      {
+        "dom_id": "publish-product-select-source",
+        "target": "overlay:sheet"
+      },
+      {
+        "dom_id": "publish-product-select-visibility",
+        "target": "overlay:sheet"
+      },
+      {
+        "dom_id": "publish-product-select-spec",
+        "target": "overlay:sheet"
+      },
+      {
+        "dom_id": "publish-product-select-color",
+        "target": "overlay:sheet"
+      },
+      {
+        "dom_id": "publish-product-submit",
+        "target": "feedback:toast"
+      }
+    ],
+    "state_contract": [
+      {
+        "state_id": "publish-product-initial",
+        "initial": true,
+        "trigger": "场景进入",
+        "visible_result": "展示空白发布表单或回填编辑数据",
+        "fallback": "使用空白表单",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "publish-product-publishing",
+        "initial": false,
+        "trigger": "点击发布按钮",
+        "visible_result": "显示发布中状态",
+        "fallback": "停留当前页面",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "publish-product-published",
+        "initial": false,
+        "trigger": "发布成功",
+        "visible_result": "Toast 提示发布成功并返回动态页",
+        "fallback": "停留当前页面",
+        "persistence": "memory"
+      },
+      {
+        "state_id": "publish-product-validation-error",
+        "initial": false,
+        "trigger": "校验失败",
+        "visible_result": "类朋友圈区域缺失用 toast 提示，售价缺失就地显示红色错误",
+        "fallback": "停留当前页面",
+        "persistence": "memory"
+      }
+    ]
+  },
+  "visual_check": {
+    "status": "pending",
+    "viewports": [375, 393],
+    "checked_at": null,
+    "checks": {
+      "horizontal_overflow": false,
+      "overlap": false,
+      "clipping": false,
+      "action_legibility": false,
+      "primary_focus": false,
+      "state_feedback": false
+    }
+  }
+}

@@ -2257,29 +2257,32 @@
         </div>
         <div class="album-feed__content-group">
           <div class="album-feed__people-wrap" data-region="people-wrap">
-          <div class="album-feed__people-scroll" data-region="people-scroll">
-            <div class="album-feed__people-list" data-region="people-list"></div>
-            <div class="album-feed__people-self" data-dom-id="people-self">
-              <div class="album-feed__people-item">
-                <div class="avatar avatar--40 avatar--image album-feed__people-avatar" data-dd-id="feed-people-avatar-self" data-component-slug="avatar" data-component-binding="feed-people-avatar-self"><img src="./lib/assets/image/avatar/avatar_083.jpg" alt="我的商家"></div>
-                <span class="album-feed__people-name">我的商家</span>
+            <div class="album-feed__people-scroll" data-region="people-scroll">
+              <img class="album-feed__sticky-fade album-feed__sticky-fade--people" src="./lib/assets/icons/sticky-fade-16.svg" alt="" aria-hidden="true">
+              <div class="album-feed__people-list" data-region="people-list"></div>
+              <div class="album-feed__people-self" data-dom-id="people-self">
+                <img class="album-feed__sticky-fade album-feed__sticky-fade--people-right" src="./lib/assets/icons/sticky-fade-16-right.svg" alt="" aria-hidden="true">
+                <div class="album-feed__people-item">
+                  <div class="avatar avatar--40 avatar--image album-feed__people-avatar" data-dd-id="feed-people-avatar-self" data-component-slug="avatar" data-component-binding="feed-people-avatar-self"><img src="./lib/assets/image/avatar/avatar_083.jpg" alt="我的商家"></div>
+                  <span class="album-feed__people-name">我的商家</span>
+                </div>
               </div>
             </div>
           </div>
-          <img class="album-feed__sticky-fade album-feed__sticky-fade--people-right" src="./lib/assets/icons/sticky-fade-16-right.svg" alt="" aria-hidden="true">
-        </div>
-        <div class="album-feed__filter-tags" data-region="filter-tags" role="group" aria-label="多维度筛选">
-          <button type="button" class="tag tag--28 tag--brand tag--selected" data-filter-dimension="all" data-dom-id="filter-tag-all" data-dd-id="feed-filter-tag-all" data-component-slug="tag" data-component-binding="feed-filter-tag"><span class="tag__label">全部</span></button>
-          <button type="button" class="tag tag--28 tag--white tag--normal" data-filter-dimension="new" data-dom-id="filter-tag-new" data-dd-id="feed-filter-tag-new" data-component-slug="tag" data-component-binding="feed-filter-tag"><span class="tag__label">上新</span></button>
-          <button type="button" class="tag tag--28 tag--white tag--normal" data-filter-dimension="starred" data-dom-id="filter-tag-starred" data-dd-id="feed-filter-tag-starred" data-component-slug="tag" data-component-binding="feed-filter-tag"><span class="tag__label">星标</span></button>
-          <button type="button" class="tag tag--28 tag--white tag--normal" data-filter-dimension="collection" data-dom-id="filter-tag-collection" data-dd-id="feed-filter-tag-collection" data-component-slug="tag" data-component-binding="feed-filter-tag"><span class="tag__label">合集</span></button>
-          <button type="button" class="tag tag--28 tag--white tag--normal" data-filter-dimension="presale" data-dom-id="filter-tag-presale" data-dd-id="feed-filter-tag-presale" data-component-slug="tag" data-component-binding="feed-filter-tag"><span class="tag__label">预售</span></button>
-          <button type="button" class="tag tag--28 tag--white tag--normal" data-filter-dimension="live" data-dom-id="filter-tag-live" data-dd-id="feed-filter-tag-live" data-component-slug="tag" data-component-binding="feed-filter-tag"><span class="tag__label">直播</span></button>
-          <div class="album-feed__filter-open-host">
-            <button type="button" class="tag tag--28 tag--white tag--normal album-feed__filter-open" data-dom-id="open-filter" data-dd-id="feed-filter-open" data-component-slug="tag" data-component-binding="feed-filter-open-tag"><span class="tag__label">筛选</span></button>
+        <div class="album-feed__filter-wrap">
+          <div class="album-feed__filter-tags" data-region="filter-tags" role="group" aria-label="多维度筛选">
+            <img class="album-feed__sticky-fade album-feed__sticky-fade--filter" src="./lib/assets/icons/sticky-fade-16.svg" alt="" aria-hidden="true">
+            <button type="button" class="tag tag--28 tag--brand tag--selected" data-filter-dimension="all" data-dom-id="filter-tag-all" data-dd-id="feed-filter-tag-all" data-component-slug="tag" data-component-binding="feed-filter-tag"><span class="tag__label">全部</span></button>
+            <button type="button" class="tag tag--28 tag--white tag--normal" data-filter-dimension="new" data-dom-id="filter-tag-new" data-dd-id="feed-filter-tag-new" data-component-slug="tag" data-component-binding="feed-filter-tag"><span class="tag__label">上新</span></button>
+            <button type="button" class="tag tag--28 tag--white tag--normal" data-filter-dimension="starred" data-dom-id="filter-tag-starred" data-dd-id="feed-filter-tag-starred" data-component-slug="tag" data-component-binding="feed-filter-tag"><span class="tag__label">星标</span></button>
+            <button type="button" class="tag tag--28 tag--white tag--normal" data-filter-dimension="collection" data-dom-id="filter-tag-collection" data-dd-id="feed-filter-tag-collection" data-component-slug="tag" data-component-binding="feed-filter-tag"><span class="tag__label">合集</span></button>
+            <button type="button" class="tag tag--28 tag--white tag--normal" data-filter-dimension="presale" data-dom-id="filter-tag-presale" data-dd-id="feed-filter-tag-presale" data-component-slug="tag" data-component-binding="feed-filter-tag"><span class="tag__label">预售</span></button>
+            <button type="button" class="tag tag--28 tag--white tag--normal" data-filter-dimension="live" data-dom-id="filter-tag-live" data-dd-id="feed-filter-tag-live" data-component-slug="tag" data-component-binding="feed-filter-tag"><span class="tag__label">直播</span></button>
+            <div class="album-feed__filter-open-host">
+              <img class="album-feed__sticky-fade album-feed__sticky-fade--filter-right" src="./lib/assets/icons/sticky-fade-16-right.svg" alt="" aria-hidden="true">
+              <button type="button" class="tag tag--28 tag--white tag--normal album-feed__filter-open" data-dom-id="open-filter" data-dd-id="feed-filter-open" data-component-slug="tag" data-component-binding="feed-filter-open-tag"><span class="tag__label">筛选</span></button>
+            </div>
           </div>
-          <img class="album-feed__sticky-fade album-feed__sticky-fade--filter" src="./lib/assets/icons/sticky-fade-16.svg" alt="" aria-hidden="true">
-          <img class="album-feed__sticky-fade album-feed__sticky-fade--filter-right" src="./lib/assets/icons/sticky-fade-16-right.svg" alt="" aria-hidden="true">
         </div>
           <main class="album-feed__grid" data-region="feed-grid" data-dom-id="feed-open-dynamic"></main>
         </div>
