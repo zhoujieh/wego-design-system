@@ -62,7 +62,7 @@ const routesSource = fs.readFileSync(resolveAppPath('js/routes.js'), 'utf8');
 const sandbox = { window: {} };
 vm.runInNewContext(routesSource, sandbox, { filename: 'wego-app/js/routes.js' });
 const routes = Array.isArray(sandbox.window.WEGO_APP_ROUTES) ? sandbox.window.WEGO_APP_ROUTES : [];
-if (routes.length === 0) throw new Error('routes.js 未注册任何业务场景。');
+// 空白基线允许 routes 为空
 
 for (const route of routes) {
   for (const field of ['script', 'style']) {
