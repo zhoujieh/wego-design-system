@@ -342,7 +342,7 @@ function confirmationErrors(record, file, repositoryRoot) {
       if (!isIsoTimestamp(record.brief_submission.at)) errors.push(`${file}: brief_submission.at 必须为 ISO 时间`);
       if (record.brief_submission.scope_revision !== record.scope_revision) errors.push(`${file}: brief_submission 必须绑定当前 scope_revision`);
       if (typeof record.brief_submission.scope_sha256 !== 'string' || !/^[a-f0-9]{64}$/.test(record.brief_submission.scope_sha256)) errors.push(`${file}: brief_submission.scope_sha256 必须是 SHA-256`);
-      else if (record.brief_submission.scope_sha256 !== scopeSha256(record)) errors.push(`${file}: brief_submission.scope_sha256 与当前范围不一致（线框展示并提交后范围已漂移）`);
+      else if (record.brief_submission.scope_sha256 !== scopeSha256(record)) errors.push(`${file}: brief_submission.scope_sha256 与当前范围不一致（简报提交后范围已漂移）`);
     }
   }
   if (briefPresent) {
@@ -669,15 +669,6 @@ function test() {
   const legacyBriefField = clone(sample);
   legacyBriefField.prototype_brief.readiness = { ready: true };
   assert(has(legacyBriefField, 'schemaVersion 5 未定义字段：readiness'), '业务迭代 Schema 未拦截 prototype_brief 遗留字段');
-  for (const field of ['wireframe', 'wireframe_model', 'wireframe_confirmation']) {
-    const wireframeBriefField = clone(sample);
-    wireframeBriefField.prototype_brief[field] = {};
-    assert(has(wireframeBriefField, `schemaVersion 5 未定义字段：${field}`), `业务迭代 Schema 未拦截 prototype_brief.${field}`);
-  }
-  const wireframeTopLevel = clone(sample);
-  wireframeTopLevel.wireframe_confirmation = {};
-  assert(has(wireframeTopLevel, 'schemaVersion 5 未定义顶层字段：wireframe_confirmation'), '业务迭代 Schema 未拦截未定义顶层字段');
-
   const unexpectedBriefConfirmation = clone(sample);
   unexpectedBriefConfirmation.brief_confirmation = createBriefConfirmation(unexpectedBriefConfirmation);
   assert(has(unexpectedBriefConfirmation, '状态 draft 的 brief_confirmation 必须为 null'), '确认矩阵未拦截 draft 中的 brief_confirmation');
@@ -781,19 +772,14 @@ function test() {
     assert(linkedInit.status !== 0 && (linkedInit.stderr || '').includes('符号链接'), 'init 未拦截符号链接迭代路径');
 
     fs.writeFileSync(iterationFile, `${JSON.stringify(sample, null, 2)}\n`);
-    const missingWireframeProof = run(['submit-brief', '--file', iterationArgument]);
-    assert(missingWireframeProof.status !== 0 && (missingWireframeProof.stderr || '').includes('--wireframe-generated-for-revision 1'), 'submit-brief 未要求当前版本线框生成凭据');
-    assert(JSON.parse(fs.readFileSync(iterationFile, 'utf8')).status === 'draft', '缺少线框生成凭据时不得提交简报');
-    const wrongWireframeProof = run(['submit-brief', '--file', iterationArgument, '--wireframe-generated-for-revision', '2']);
-    assert(wrongWireframeProof.status !== 0 && (wrongWireframeProof.stderr || '').includes('--wireframe-generated-for-revision 1'), 'submit-brief 未拦截错误的线框版本');
-    const submittedBrief = run(['submit-brief', '--file', iterationArgument, '--wireframe-generated-for-revision=1']);
+    const submittedBrief = run(['submit-brief', '--file', iterationArgument]);
     assert(submittedBrief.status === 0, `合法 submit-brief 失败：${(submittedBrief.stderr || submittedBrief.stdout).trim()}`);
     const submittedRecord = JSON.parse(fs.readFileSync(iterationFile, 'utf8'));
     assert(submittedRecord.status === 'awaiting-brief-confirmation' && submittedRecord.brief_submission?.scope_sha256 === scopeSha256(submittedRecord), 'submit-brief 未写入当前范围提交快照');
-    submittedRecord.prototype_brief.goal = '提交后未重新生成线框就修改';
+    submittedRecord.prototype_brief.goal = '提交后擅自修改简报';
     fs.writeFileSync(iterationFile, `${JSON.stringify(submittedRecord, null, 2)}\n`);
     const driftedBriefConfirmation = run(['confirm-brief', '--file', iterationArgument]);
-    assert(driftedBriefConfirmation.status !== 0 && (driftedBriefConfirmation.stderr || '').includes('线框展示并提交后范围已漂移'), 'confirm-brief 未拦截提交后的简报漂移');
+    assert(driftedBriefConfirmation.status !== 0 && (driftedBriefConfirmation.stderr || '').includes('简报提交后范围已漂移'), 'confirm-brief 未拦截提交后的简报漂移');
     submittedRecord.prototype_brief.goal = sample.prototype_brief.goal;
     fs.writeFileSync(iterationFile, `${JSON.stringify(submittedRecord, null, 2)}\n`);
     const validBriefConfirmation = run(['confirm-brief', '--file', iterationArgument]);
@@ -905,10 +891,6 @@ switch (command) {
   case 'submit-brief': transition(['draft'], 'awaiting-brief-confirmation', record => {
     const errors = briefSubmissionErrors(record);
     if (errors.length) fail(errors.join('\n'));
-    const wireframeRevision = value('--wireframe-generated-for-revision');
-    if (wireframeRevision !== String(record.scope_revision)) {
-      fail(`submit-brief 需要 --wireframe-generated-for-revision ${record.scope_revision}，用于确认当前 scope_revision 的参考线框已生成并即将与简报共同展示`);
-    }
     record.brief_submission = createBriefSubmission(record);
     record.stage_outputs.product.valid = true;
   }); break;
@@ -939,5 +921,5 @@ switch (command) {
   }
   case 'check': check(); break;
   case 'test': test(); break;
-  default: fail('用法：init|submit-brief --wireframe-generated-for-revision <scope_revision>|confirm-brief|submit-prototype|confirm-prototype|invalidate|freeze --user-confirmed-freeze <iteration_id>|check|test');
+  default: fail('用法：init|submit-brief|confirm-brief|submit-prototype|confirm-prototype|invalidate|freeze --user-confirmed-freeze <iteration_id>|check|test');
 }

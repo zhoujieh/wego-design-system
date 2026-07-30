@@ -1,7 +1,7 @@
 interface:
   display_name: "Wego Product"
-  short_description: "先形成简报，再用必需线框确认原型范围"
-  default_prompt: "Use $wego-product to clarify the business iteration and form a complete prototype brief first. Then always render a reference conversation wireframe for that exact brief before presenting both to the user for confirmation and handing the confirmed scope to $wego-design. If the brief changes, regenerate the wireframe. Use the current host renderer when available and otherwise continue with a text storyboard."
+  short_description: "形成文字简报并确认原型范围"
+  default_prompt: "Use $wego-product to clarify the business iteration and form a complete prototype brief. Submit the current scope, present a concise text summary to the user for explicit confirmation, and hand the confirmed scope to $wego-design. If the brief changes, invalidate the current submission, update it, and confirm the new scope again. Do not generate a wireframe or text storyboard."
 
 policy:
   allow_implicit_invocation: true

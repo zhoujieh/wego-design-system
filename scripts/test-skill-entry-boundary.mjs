@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { validateExperienceRegistry, validateProductWireframeContract, validatePromotedRuleTargets, validateUxIterationContract } from './validate-skill-entry-boundary.mjs';
+import { validateExperienceRegistry, validateProductGenerationInputContract, validatePromotedRuleTargets, validateUxIterationContract } from './validate-skill-entry-boundary.mjs';
 
 const repositoryRoot = process.cwd();
 const root = fs.mkdtempSync(path.join(os.tmpdir(), 'wego-skill-entry-'));
@@ -124,87 +124,64 @@ resetUxContractFixture();
 mutateUxContractFixture(uxContractFiles[3], content => content.replace('原生 Schema', '统一扩展字段'));
 assert.match(validateUxIterationContract(uxContractRoot).join('\n'), /经验升级方法 合同漂移/, '经验升级要求平行字段应失败');
 
-const wireframeRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'wego-product-wireframe-'));
-const wireframeFiles = [
+const generationInputRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'wego-generation-input-'));
+const generationInputFiles = [
   '.codex/skills/wego-product/SKILL.md',
-  '.codex/skills/wego-product/references/conversation-wireframe.md',
-  '.codex/skills/wego-product/references/conversation-wireframe-trae.md',
-  '.codex/skills/wego-product/references/conversation-wireframe-codex.md',
+  '.codex/skills/wego-product/agents/openai.yaml',
   '.codex/skills/wego-product/references/iteration-workflow.md',
   '.codex/skills/wego-product/references/scope-and-boundaries.md',
+  '.codex/skills/wego-design/SKILL.md',
+  '.codex/skills/wego-design/references/interaction-prototype-design.md',
   '.codex/skills/shared/references/design-decisions.md',
+  'docs/ai-design-input-and-generation-workflow.md',
   'scripts/iteration-record.mjs',
   'AGENTS.md',
-  '.codex/skills/README.md',
-  '.codex/skills/wego-product/agents/openai.yaml'
+  '.codex/skills/README.md'
 ];
-function resetWireframeFixture() {
-  for (const relative of wireframeFiles) {
-    const target = path.join(wireframeRoot, relative);
+function resetGenerationInputFixture() {
+  fs.rmSync(generationInputRoot, { recursive: true, force: true });
+  fs.mkdirSync(generationInputRoot, { recursive: true });
+  for (const relative of generationInputFiles) {
+    const target = path.join(generationInputRoot, relative);
     fs.mkdirSync(path.dirname(target), { recursive: true });
     fs.copyFileSync(path.join(repositoryRoot, relative), target);
   }
 }
-function mutateWireframeFixture(relative, transform) {
-  const file = path.join(wireframeRoot, relative);
+function mutateGenerationInputFixture(relative, transform) {
+  const file = path.join(generationInputRoot, relative);
   fs.writeFileSync(file, transform(fs.readFileSync(file, 'utf8')));
 }
 
-resetWireframeFixture();
-assert.deepEqual(validateProductWireframeContract(wireframeRoot), [], '完整产品线框合同应通过');
+resetGenerationInputFixture();
+assert.deepEqual(validateProductGenerationInputContract(generationInputRoot), [], '完整多来源生成输入合同应通过');
 
-fs.rmSync(path.join(wireframeRoot, wireframeFiles[2]));
-assert.match(validateProductWireframeContract(wireframeRoot).join('\n'), /缺少文件.*conversation-wireframe-trae\.md/, '缺少 Trae 适配应失败');
+const removedWireframeFile = '.codex/skills/wego-product/references/conversation-wireframe.md';
+const removedWireframeTarget = path.join(generationInputRoot, removedWireframeFile);
+fs.mkdirSync(path.dirname(removedWireframeTarget), { recursive: true });
+fs.writeFileSync(removedWireframeTarget, '# 已删除的系统线框流程\n');
+assert.match(validateProductGenerationInputContract(generationInputRoot).join('\n'), /已删除文件仍存在/, '恢复系统线框文件应失败');
 
-resetWireframeFixture();
-fs.rmSync(path.join(wireframeRoot, wireframeFiles[3]));
-assert.match(validateProductWireframeContract(wireframeRoot).join('\n'), /缺少文件.*conversation-wireframe-codex\.md/, '缺少 Codex 适配应失败');
+resetGenerationInputFixture();
+mutateGenerationInputFixture('.codex/skills/wego-design/references/interaction-prototype-design.md', content => content.replaceAll('generation_packet', 'generation_input'));
+assert.match(validateProductGenerationInputContract(generationInputRoot).join('\n'), /交互原型设计方法\s+缺少规则落点合同/, '设计方法移除 generation_packet 应失败');
 
-resetWireframeFixture();
-mutateWireframeFixture(wireframeFiles[1], content => content.replace('没有可用渲染器', '没有可用展示能力'));
-assert.match(validateProductWireframeContract(wireframeRoot).join('\n'), /无渲染器降级合同/, '缺少无渲染器回退应失败');
+resetGenerationInputFixture();
+mutateGenerationInputFixture('.codex/skills/wego-design/references/interaction-prototype-design.md', content => content.replace('用户主动提供的线框图只形成 `structure_profile`', '用户线框图可自由参考'));
+assert.match(validateProductGenerationInputContract(generationInputRoot).join('\n'), /交互原型设计方法\s+缺少线框职责合同/, '用户线框职责漂移应失败');
 
-resetWireframeFixture();
-mutateWireframeFixture(wireframeFiles[2], content => `${content}\n来源：/Users/dk/.trae-cn/builtin/global/skills/dynamic-ui\n`);
-assert.match(validateProductWireframeContract(wireframeRoot).join('\n'), /不得包含本机.*绝对路径/, '机器绝对路径应失败');
+resetGenerationInputFixture();
+mutateGenerationInputFixture('scripts/iteration-record.mjs', content => `${content}\n// --wireframe-generated-for-revision\n`);
+assert.match(validateProductGenerationInputContract(generationInputRoot).join('\n'), /仍包含旧系统线框口径/, '恢复旧线框参数应失败');
 
-resetWireframeFixture();
-mutateWireframeFixture(wireframeFiles[1], content => `${content}\n将模型保存到 prototype_brief.wireframe。\n`);
-assert.match(validateProductWireframeContract(wireframeRoot).join('\n'), /不得扩展正式 Schema/, '写入正式 brief Schema 应失败');
+resetGenerationInputFixture();
+mutateGenerationInputFixture('scripts/iteration-record.mjs', content => content.replaceAll('record.brief_submission = createBriefSubmission(record);', 'record.brief_submission = null;'));
+assert.match(validateProductGenerationInputContract(generationInputRoot).join('\n'), /业务迭代状态机实现\s+缺少简报提交快照合同/, '状态机实现移除简报提交快照应失败');
 
-resetWireframeFixture();
-mutateWireframeFixture(wireframeFiles[1], content => `${content}\n线框展示后直接运行 \`confirm-brief\`。\n`);
-assert.match(validateProductWireframeContract(wireframeRoot).join('\n'), /不得直接确认 brief/, '线框直接确认 brief 应失败');
-
-resetWireframeFixture();
-mutateWireframeFixture(wireframeFiles[1], content => content.replace('每个进入 `submit-brief → confirm-brief` 的简报版本都必须生成，不得跳过', '页面变化较大时可以生成'));
-assert.match(validateProductWireframeContract(wireframeRoot).join('\n'), /简报后必生成门禁/, '线框降级为可选流程应失败');
-
-resetWireframeFixture();
-mutateWireframeFixture(wireframeFiles[1], content => `${content}\n用户明确不要线框时可以跳过。\n`);
-assert.match(validateProductWireframeContract(wireframeRoot).join('\n'), /不得保留按需触发或跳过线框/, '恢复用户跳过线框门禁应失败');
-
-resetWireframeFixture();
-mutateWireframeFixture(wireframeFiles[1], content => content.replace('再从当前简报生成对应线框', '随后生成对应线框'));
-assert.match(validateProductWireframeContract(wireframeRoot).join('\n'), /必须先形成完整 prototype_brief/, '缺少 brief 先于线框的顺序合同应失败');
-
-resetWireframeFixture();
-mutateWireframeFixture(wireframeFiles[9], content => content.replace('→ 必须生成会话线框', '→ 必要时生成会话线框'));
-assert.match(validateProductWireframeContract(wireframeRoot).join('\n'), /技能路由线框规则\s+缺少简报后必生成合同/, '技能路由恢复可选线框应失败');
-
-resetWireframeFixture();
-mutateWireframeFixture(wireframeFiles[4], content => content.replace('--wireframe-generated-for-revision <scope_revision>', '--wireframe-ready'));
-assert.match(validateProductWireframeContract(wireframeRoot).join('\n'), /业务迭代线框状态机文档\s+缺少提交快照合同/, '状态机文档丢失线框版本凭据应失败');
-
-resetWireframeFixture();
-mutateWireframeFixture(wireframeFiles[5], content => content.replaceAll('必须停止实现', '先按设计系统能力实现'));
-assert.match(validateProductWireframeContract(wireframeRoot).join('\n'), /产品范围边界\s+缺少设计系统冲突回退合同/, '产品边界恢复先实现后确认应失败');
-
-resetWireframeFixture();
-mutateWireframeFixture(wireframeFiles[7], content => content.replaceAll('record.brief_submission = createBriefSubmission(record);', 'record.brief_submission = null;'));
-assert.match(validateProductWireframeContract(wireframeRoot).join('\n'), /业务迭代状态机实现\s+缺少线框提交凭据合同/, '状态机实现移除简报提交快照应失败');
+resetGenerationInputFixture();
+mutateGenerationInputFixture('.codex/skills/wego-product/references/scope-and-boundaries.md', content => content.replaceAll('必须停止实现', '先按设计系统能力实现'));
+assert.match(validateProductGenerationInputContract(generationInputRoot).join('\n'), /产品范围边界\s+缺少设计系统冲突回退合同/, '产品边界恢复先实现后确认应失败');
 
 fs.rmSync(root, { recursive: true, force: true });
 fs.rmSync(uxContractRoot, { recursive: true, force: true });
-fs.rmSync(wireframeRoot, { recursive: true, force: true });
-console.log('Skill 入口、产品线框合同与经验规则追溯测试通过。');
+fs.rmSync(generationInputRoot, { recursive: true, force: true });
+console.log('Skill 入口、多来源生成输入合同与经验规则追溯测试通过。');

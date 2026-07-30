@@ -1,6 +1,6 @@
 # 微购 App 原型与设计系统
 
-这是一个由 AI 工作流驱动的中文移动端原型仓库。复制仓库后，可以直接向 Codex 或 Trae 描述业务需求，由仓库内置技能完成需求确认、参考线框、设计系统消费、交互实现和验证。
+这是一个由 AI 工作流驱动的中文移动端原型仓库。复制仓库后，可以直接向 Codex 或 Trae 描述业务需求，由仓库内置技能完成需求确认、生成输入编译、设计系统消费、交互实现和验证。
 
 [查看当前线上原型](https://zhoujieh.github.io/wego-design-system/)
 
@@ -48,8 +48,8 @@ python3 -m http.server 8080
 仓库会按固定链路工作：
 
 1. `wego-product` 澄清业务事实并形成 `prototype_brief`。
-2. AI 根据当前简报生成参考线框，与简报一起交给你确认。
-3. 你明确确认简报后，`wego-design` 才开始设计和实现。
+2. AI 提交当前简报范围，并用文字摘要交给你确认。
+3. 你明确确认简报后，`wego-design` 把自然语言和可选的参考图、用户线框图或高保真 Figma 编译为统一生成输入，再开始设计和实现。
 4. AI 更新场景、路由、设计决策证据并运行守卫。
 5. 你打开 `wego-app/index.html#/route-id` 验收交互；反馈继续复用当前未冻结迭代。
 
@@ -104,4 +104,4 @@ node scripts/validate-wego-design.mjs --scope=full --strict
 
 仓库已配置 GitHub Pages 工作流。把副本推送到 GitHub，并为该仓库启用 GitHub Pages 后，`main` 分支中的 `wego-app/` 或部署配置发生变化时会自动验证和发布；实际访问地址以工作流显示的 deployment URL 为准。
 
-产品阶段的参考线框只在当前 AI 会话中用于确认，不会进入仓库或 GitHub Pages。
+系统不会在产品阶段自动生成线框图。用户主动提供的参考图、线框图或高保真 Figma 只按各自职责参与设计输入，不替代已确认的业务简报。

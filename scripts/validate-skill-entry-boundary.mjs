@@ -133,7 +133,9 @@ export function validateExperienceRegistry(root, registry, pool) {
     if (canonical.file === '.codex/skills/shared/references/design-decisions.md' && ownership.category !== 'shared-principle') errors.push(`候选 ${candidate.id} 指向设计原则时必须使用 shared-principle 归属`);
     if (ownership.category === 'shared-principle' && canonical.file !== '.codex/skills/shared/references/design-decisions.md') errors.push(`候选 ${candidate.id} 的 shared-principle 归属只能落到共享设计原则`);
     const target = path.join(root, canonical.file);
-    if (!fs.existsSync(target) || !locatorExists(root, canonical.file, canonical.locator)) errors.push(`候选 ${candidate.id} 的 canonical 定位无效：${canonical.file}#${canonical.locator}`);
+    if (candidate.status !== 'superseded' && (!fs.existsSync(target) || !locatorExists(root, canonical.file, canonical.locator))) {
+      errors.push(`候选 ${candidate.id} 的 canonical 定位无效：${canonical.file}#${canonical.locator}`);
+    }
     if (registry.categories[ownership.category]?.requiresEntryScope && !registry.entryWhitelist.includes(candidate.entry_scope)) errors.push(`候选 ${candidate.id} 的 skill-entry 归属缺少合法 entry_scope`);
     if (/wego-ux(?!system-iterate)|wego-tests|specs\/|interaction[_-]spec|design[_-]plan|design-decisions\.surface_designs|acceptance_report|acceptance-checks|browser-verification/.test(JSON.stringify(candidate))) errors.push(`候选 ${candidate.id} 仍引用已删除的工作流或规则字段`);
 
@@ -181,35 +183,39 @@ export function validateUxIterationContract(root = process.cwd()) {
   return errors;
 }
 
-export function validateProductWireframeContract(root = process.cwd()) {
+export function validateProductGenerationInputContract(root = process.cwd()) {
   const errors = [];
-  const productRoot = '.codex/skills/wego-product';
   const relativeFiles = {
     repository: 'AGENTS.md',
     routing: '.codex/skills/README.md',
-    skill: `${productRoot}/SKILL.md`,
-    agent: `${productRoot}/agents/openai.yaml`,
-    workflow: `${productRoot}/references/iteration-workflow.md`,
-    scope: `${productRoot}/references/scope-and-boundaries.md`,
-    method: `${productRoot}/references/conversation-wireframe.md`,
-    trae: `${productRoot}/references/conversation-wireframe-trae.md`,
-    codex: `${productRoot}/references/conversation-wireframe-codex.md`,
+    productSkill: '.codex/skills/wego-product/SKILL.md',
+    productAgent: '.codex/skills/wego-product/agents/openai.yaml',
+    workflow: '.codex/skills/wego-product/references/iteration-workflow.md',
+    scope: '.codex/skills/wego-product/references/scope-and-boundaries.md',
+    designSkill: '.codex/skills/wego-design/SKILL.md',
+    designMethod: '.codex/skills/wego-design/references/interaction-prototype-design.md',
     principles: '.codex/skills/shared/references/design-decisions.md',
+    guide: 'docs/ai-design-input-and-generation-workflow.md',
     stateMachine: 'scripts/iteration-record.mjs'
   };
   const contents = {};
   for (const [name, relative] of Object.entries(relativeFiles)) {
     const file = path.join(root, relative);
     if (!fs.existsSync(file)) {
-      errors.push(`产品线框合同缺少文件：${relative}`);
+      errors.push(`多来源生成输入合同缺少文件：${relative}`);
       contents[name] = '';
     } else {
       contents[name] = fs.readFileSync(file, 'utf8');
     }
   }
 
-  for (const reference of ['conversation-wireframe.md', 'conversation-wireframe-trae.md', 'conversation-wireframe-codex.md']) {
-    if (!contents.skill.includes(`](./references/${reference})`)) errors.push(`wego-product/SKILL.md 必须直接链接 ${reference}`);
+  const removedWireframeFiles = [
+    '.codex/skills/wego-product/references/conversation-wireframe.md',
+    '.codex/skills/wego-product/references/conversation-wireframe-trae.md',
+    '.codex/skills/wego-product/references/conversation-wireframe-codex.md'
+  ];
+  for (const relative of removedWireframeFiles) {
+    if (fs.existsSync(path.join(root, relative))) errors.push(`系统生成线框的已删除文件仍存在：${relative}`);
   }
 
   const requireAll = (name, content, requirements) => {
@@ -218,97 +224,73 @@ export function validateProductWireframeContract(root = process.cwd()) {
     }
   };
 
-  requireAll('产品线框方法', contents.method, [
-    ['简报后必生成门禁', ['简报后必生成门禁', '形成完整的 `prototype_brief` 草案', '解决全部 `open_questions`', '每个进入 `submit-brief → confirm-brief` 的简报版本都必须生成', '不得跳过', 'submit-brief --wireframe-generated-for-revision <scope_revision>']],
-    ['最小业务事实', ['用户目标', '业务入口', '页面首要任务', '主要操作', '用户可见结果', '必要状态']],
-    ['临时模型', ['只存在于当前产品阶段上下文', '"schema_version": 1', '"flow_id"', '"control"', '"frames"']],
-    ['单一控制概念', ['只能是 `stepper`、`tabs` 或 `toggle` 之一', '必须使用且只使用一个控制概念', '不组合 stepper、tabs']],
-    ['拆帧边界', ['2–6 个', '超过 6 帧', '`target_frame_id` 必须引用当前模型中的帧']],
-    ['更新门禁', ['线框失效', '先更新简报', '重新生成', '`submit-brief` 前和用户确认时', '不得增加“线框已确认”', '--wireframe-generated-for-revision <scope_revision>', '`invalidate --stage=brief`']],
-    ['双宿主', ['Trae 宿主', 'Codex 宿主', '共享本文件定义的临时模型']],
-    ['无渲染器降级', ['没有可用渲染器', '不提示安装插件', '紧凑文本分镜', '[1/3 商品列表·默认]']],
-    ['简报确认交接', ['`included` / `excluded`', '`entry_points`', '`critical_paths`', '`prototype_boundaries`', '`states`', '`data_contract`', '`assumptions`', '`open_questions`', '共同展示简报摘要和对应线框', '用户明确确认后才能运行 `confirm-brief`']],
-    ['参考边界', ['简报确认参考', '不得机械照搬', '正式确认对象仍绑定 `prototype_brief`']]
+  requireAll('仓库主链路', contents.repository, [
+    ['文字简报确认', ['`submit-brief → confirm-brief`', '展示文字摘要', '用户明确确认']],
+    ['线框边界', ['系统不生成线框图或文本分镜', '用户主动提供的线框图只作为设计阶段的结构输入']],
+    ['生成输入', ['临时 `generation_packet`', '精确范式/自主组合裁决']]
   ]);
-  requireAll('仓库主链路线框规则', contents.repository, [
-    ['简报后必生成', ['完成 `prototype_brief` 草案后', '必须生成参考线框', '共同展示简报与线框']],
-    ['更新与确认', ['简报修改都会使线框失效', '必须重新生成后再提交确认', '不新增线框确认状态']]
+  requireAll('技能路由', contents.routing, [
+    ['文字简报确认', ['submit-brief 绑定当前范围', '展示文字简报摘要', '用户确认 prototype_brief']],
+    ['线框边界', ['系统不生成线框图或文本分镜', '用户主动提供的参考图、线框图或高保真 Figma']],
+    ['生成输入', ['wego-design 编译 generation_packet', '临时 `generation_packet`']]
   ]);
-  requireAll('技能路由线框规则', contents.routing, [
-    ['简报后必生成', ['→ prototype_brief 草案', '→ 必须生成会话线框', '→ 共同展示简报与线框', '→ 用户确认 prototype_brief']],
-    ['反馈更新', ['反馈先更新简报，再重新生成线框']]
+  requireAll('产品技能入口', contents.productSkill, [
+    ['文字简报确认', ['展示文字摘要', '`submit-brief`', '`confirm-brief`', '`open_questions` 清空']],
+    ['视觉输入边界', ['参考图、用户线框图和高保真 Figma', '不作为产品阶段补造业务事实的来源']]
   ]);
-  requireAll('产品 Agent 线框规则', contents.agent, [
-    ['简报后必生成', ['form a complete prototype brief first', 'always render a reference conversation wireframe', 'presenting both to the user for confirmation', 'regenerate the wireframe']]
+  requireAll('产品 Agent', contents.productAgent, [
+    ['文字简报确认', ['present a concise text summary', 'explicit confirmation']],
+    ['线框边界', ['Do not generate a wireframe or text storyboard']]
   ]);
-  requireAll('业务迭代线框状态机文档', contents.workflow, [
+  requireAll('业务迭代状态机文档', contents.workflow, [
     ['当前 Schema', ['`schemaVersion: 5`', '"brief_submission": null', '未知字段']],
-    ['提交快照', ['--wireframe-generated-for-revision <scope_revision>', '`brief_submission.scope_sha256`', '提交后修改简报']],
-    ['失效语义', ['清空简报提交、简报确认和原型确认']]
+    ['提交快照', ['`submit-brief`', '`brief_submission.scope_sha256`', '当前范围写入 `brief_submission` 快照', '文字摘要']],
+    ['失效语义', ['清空简报提交、简报确认和原型确认']],
+    ['生成输入交接', ['可选参考图、用户线框图或高保真 Figma', '临时生成输入']]
   ]);
   requireAll('产品范围边界', contents.scope, [
-    ['提交快照', ['submit-brief --wireframe-generated-for-revision <scope_revision>', '`invalidate --stage=brief`', '提交后任何范围内容变化都会使快照失效']],
-    ['设计系统冲突回退', ['必须停止实现', '更新简报、重新生成线框并确认后才能实现', '回退不改变已确认指令和结果时']]
+    ['提交快照', ['`submit-brief`', '`invalidate --stage=brief`', '提交后任何范围内容变化都会使快照失效', '简短文字摘要']],
+    ['线框职责', ['用户提供的线框图可在设计阶段作为结构输入', '不能自动升级为产品指令']],
+    ['设计系统冲突回退', ['必须停止实现', '更新并重新确认简报后才能实现', '回退不改变已确认指令和结果时']]
+  ]);
+  requireAll('设计技能入口', contents.designSkill, [
+    ['生成输入', ['临时 `generation_packet`', '参考图、线框图或高保真 Figma']],
+    ['线框职责', ['系统不生成线框图或文本分镜', '用户主动提供的线框图只作为结构输入']]
+  ]);
+  requireAll('交互原型设计方法', contents.designMethod, [
+    ['规则落点', ['rule-id: multi-source-generation-input-authority', '临时 `generation_packet`']],
+    ['输入职责', ['自然语言中的业务事实', '参考图', '用户主动提供的线框图', '高保真 Figma']],
+    ['线框职责', ['只形成 `structure_profile`', '系统不主动生成线框图或文本分镜']],
+    ['冲突优先级', ['业务事实以 `prototype_brief` 为准', '高保真 Figma、用户线框图、参考图、微购系统基线依次降级']],
+    ['保证边界', ['只能保证显式约束一致', '不得宣称能够命中用户未表达的审美答案']]
   ]);
   requireAll('共享设计决策', contents.principles, [
-    ['设计系统冲突回退', ['回退若改变已确认产品指令或用户可见结果', '必须停止实现并退回 `wego-product`', '线框重生成与确认后再实现']]
+    ['多来源边界', ['rule-id: wego-multi-source-generation-input-boundary', '系统不生成线框图或文本分镜', '临时 `generation_packet`']],
+    ['输入职责', ['参考图只约束视觉方向', '用户线框图只约束结构', '高保真 Figma 约束指定 Frame 的结构视觉']],
+    ['保证边界', ['只能承诺显式约束一致', '不得宣称能够命中用户未表达的审美答案']]
+  ]);
+  requireAll('工作流说明文档', contents.guide, [
+    ['输入场景', ['自然语言', '参考图', '用户线框图', '高保真 Figma']],
+    ['生成输入', ['`generation_packet`', '`business_contract`', '`structure_contract`', '`visual_contract`', '`component_plan`', '`layout_contract`']],
+    ['线框边界', ['系统不主动生成线框图或文本分镜', '用户主动提供的线框图仍是合法结构输入']],
+    ['保证边界', ['能够保证', '不能保证', '不能推断用户尚未表达的审美答案']],
+    ['UI Kit 边界', ['UI Kit 继续只用于参考明确页面范式如何组合正式能力', '不因本流程改变职责']]
   ]);
   requireAll('业务迭代状态机实现', contents.stateMachine, [
     ['Schema v5', ['record.schemaVersion !== 5', 'schemaVersion: 5', 'brief_submission']],
-    ['线框提交凭据', ["value('--wireframe-generated-for-revision')", 'record.brief_submission = createBriefSubmission(record)', '线框展示并提交后范围已漂移']],
+    ['简报提交快照', ['record.brief_submission = createBriefSubmission(record)', '简报提交后范围已漂移']],
     ['失效清理', ['record.brief_submission = null']]
   ]);
 
-  requireAll('Trae 适配', contents.trae, [
-    ['能力检测', ['`dynamic-ui`', '`PureShowWidget`', '`micro-interaction`', '`visual-tokens`']],
-    ['静态骨架与交互', ['`explanation-panel`', 'JavaScript 执行前', '一个脚本', '宿主主题合同', '键盘可操作']],
-    ['单一控制概念', ['只使用一种控制概念', 'stepper', 'tabs', 'toggle']],
-    ['运行边界', ['多页 router', '调用接口', '持久化状态', '不得把 Trae 模板、Token']],
-    ['可选能力', ['不是 `wego-product` 的硬依赖', '退回文本分镜']]
-  ]);
-
-  requireAll('Codex 适配', contents.codex, [
-    ['能力检测', ['`visualize`', 'HTML fragment', 'visualization 目录', '`::codex-inline-vis`']],
-    ['画布与可访问性', ['一个当前页面画布', '只使用一种控制概念', '320–736px', '键盘操作']],
-    ['本地交互边界', ['本地临时状态', '`fetch`', 'XHR', '真正路由', '持久化']],
-    ['可选能力', ['不是 `wego-product` 的硬依赖', '退回文本分镜']],
-    ['双宿主一致性', ['业务帧、操作和可见结果语义一致', '不要求像素一致']]
-  ]);
-
   const combined = Object.values(contents).join('\n');
-  if (/\/Users\/[^/\s]+\//mu.test(combined)) {
-    errors.push('产品线框合同不得包含本机绝对路径');
-  }
-  if (/用户明确不要线框|用户明确要求线框|用户未明确要求|触发与跳过门禁/u.test(combined)) {
-    errors.push('产品线框合同不得保留按需触发或跳过线框的旧门禁');
-  }
-  const briefFirst = contents.method.indexOf('形成完整的 `prototype_brief` 草案');
-  const wireframeAfter = contents.method.indexOf('再从当前简报生成对应线框');
-  if (briefFirst < 0 || wireframeAfter < 0 || briefFirst >= wireframeAfter) {
-    errors.push('产品线框合同必须先形成完整 prototype_brief，再生成对应线框');
-  }
-  const routingBrief = contents.routing.indexOf('→ prototype_brief 草案');
-  const routingWireframe = contents.routing.indexOf('→ 必须生成会话线框');
-  if (routingBrief < 0 || routingWireframe < 0 || routingBrief >= routingWireframe) {
-    errors.push('技能路由必须先生成 prototype_brief，再生成必需线框');
-  }
-  for (const line of combined.split(/\r?\n/)) {
-    const mentionsRendererDependency = /(?:PureShowWidget|dynamic-ui|visualize)/iu.test(line) && /(?:必须安装|硬依赖|required dependency)/iu.test(line);
-    if (mentionsRendererDependency && !/(?:不是|不得|禁止)/u.test(line)) {
-      errors.push('PureShowWidget、dynamic-ui 或 visualize 不得声明为硬依赖');
-    }
-    if (/线框[^\n]{0,40}直接(?:运行\s*)?`?confirm-brief`?/u.test(line) && !/(?:不得|不能|禁止)/u.test(line)) {
-      errors.push('线框不得直接确认 brief，必须继续现有 submit-brief → confirm-brief 门禁');
-    }
-  }
-  for (const forbidden of ['prototype_brief.wireframe', 'prototype_brief.wireframe_model', 'prototype_brief.wireframe_confirmation']) {
-    if (combined.includes(forbidden)) errors.push(`产品线框合同不得扩展正式 Schema：${forbidden}`);
-  }
-  if (/(?:_iterations|iteration\.json)\/?[^\n`]*wireframe/iu.test(combined)) errors.push('产品线框合同不得新增迭代持久化路径');
-  if (!/不得保存临时线框模型、HTML、CSS、JavaScript/u.test(contents.method)) errors.push('产品线框方法必须明确临时模型和运行时内容不持久化');
-  if (!/线框不是正式产物或确认状态/u.test(contents.skill)) errors.push('wego-product/SKILL.md 必须明确线框仅为参考且不是正式确认状态');
-  if (!/完整 `prototype_brief` 草案形成后必须读取/u.test(contents.skill) || !/不得跳过线框/u.test(contents.skill)) {
-    errors.push('wego-product/SKILL.md 必须声明简报形成后必生成线框');
+  for (const forbidden of [
+    '--wireframe-generated-for-revision',
+    '必须生成会话线框',
+    '必须生成参考线框',
+    '共同展示简报与线框',
+    '文本分镜降级'
+  ]) {
+    if (combined.includes(forbidden)) errors.push(`多来源生成输入合同仍包含旧系统线框口径：${forbidden}`);
   }
 
   return errors;
@@ -338,12 +320,12 @@ export function validateSkillEntryBoundary(root = process.cwd()) {
   }
   const productSkill = read(root, '.codex/skills/wego-product/SKILL.md', errors);
   const designSkill = read(root, '.codex/skills/wego-design/SKILL.md', errors);
-  errors.push(...validateProductWireframeContract(root));
+  errors.push(...validateProductGenerationInputContract(root));
   errors.push(...validateUxIterationContract(root));
   if (!productSkill.includes('../shared/references/design-decisions.md')) errors.push('wego-product/SKILL.md 必须直接引用共享设计决策原则');
   if (!designSkill.includes('../shared/references/design-decisions.md')) errors.push('wego-design/SKILL.md 必须直接引用共享设计决策原则');
-  if (!designSkill.includes('产品阶段临时线框由 `prototype_brief` 派生') || !designSkill.includes('只用于用户确认，不进入设计输入链')) {
-    errors.push('wego-design/SKILL.md 必须明确线框由 brief 派生且不是设计输入');
+  if (!designSkill.includes('临时 `generation_packet`') || !designSkill.includes('系统不生成线框图或文本分镜') || !designSkill.includes('用户主动提供的线框图只作为结构输入')) {
+    errors.push('wego-design/SKILL.md 必须明确多来源生成输入和用户线框职责');
   }
   if (fs.existsSync(path.join(root, '.codex/skills/wego-design/references/design-decisions.md'))) errors.push('设计决策原则不得保留在 wego-design 私有 references 下');
   if (fs.existsSync(path.join(root, '.codex/skills/wego-uxsystem-iterate/references/high-fidelity-prototype-baseline.md'))) errors.push('重复的原型基线 reference 必须删除');

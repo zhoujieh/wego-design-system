@@ -1028,7 +1028,7 @@
       "id": "exp-product-conversation-wireframe",
       "normalized_key": "product-conversation-wireframe",
       "title": "产品阶段在简报后用必需线框辅助确认",
-      "status": "promoted",
+      "status": "superseded",
       "occurrence_count": 2,
       "threshold": 1,
       "primary_owner": "wego-product",
@@ -1056,14 +1056,58 @@
         "用户确认简报影响页面、入口、路径、状态或可见结果时先更新简报再重新生成线框；无渲染器时以文本分镜完成，不能跳过。"
       ],
       "created_at": "2026-07-27T00:00:00Z",
-      "updated_at": "2026-07-29T00:00:00Z",
+      "updated_at": "2026-07-30T00:40:14Z",
       "promoted_at": "2026-07-27T00:00:00Z",
+      "superseded_by": "exp-multi-source-generation-input-boundary",
+      "supersession_reason": "用户确认移除系统强制生成线框图与文本分镜的流程，改为文字简报直接确认；用户主动提供的线框图仅作为设计阶段结构输入。",
       "promotion_landing": {
         "file": ".codex/skills/shared/references/design-decisions.md",
         "locator": "rule-id: wego-product-conversation-wireframe-reference",
         "rule_id": "wego-product-conversation-wireframe-reference",
         "constraint_area": "产品线框与设计输入边界",
         "description": "先形成完整 prototype_brief，再必须生成对应会话线框供用户共同确认；设计阶段只消费已确认简报，不得从线框补造事实或机械复制外观。"
+      }
+    },
+    {
+      "id": "exp-multi-source-generation-input-boundary",
+      "normalized_key": "multi-source-generation-input-boundary",
+      "title": "多种页面输入按职责统一编译后再生成",
+      "status": "promoted",
+      "occurrence_count": 1,
+      "threshold": 1,
+      "primary_owner": "wego-design",
+      "secondary_owners": [
+        "wego-product"
+      ],
+      "ownership_reason": "自然语言、参考图、用户线框图和高保真 Figma 的输入职责、保证边界与实现前编译属于跨产品确认和页面设计的顶层输入裁决。",
+      "rule_ownership": {
+        "category": "shared-principle",
+        "canonical": {
+          "file": ".codex/skills/shared/references/design-decisions.md",
+          "locator": "rule-id: wego-multi-source-generation-input-boundary",
+          "rule_id": "wego-multi-source-generation-input-boundary"
+        }
+      },
+      "runtime_reachability": {
+        "consumer_skill": "wego-design",
+        "output_field": "generation_packet",
+        "downstream_consumer": "wego-design",
+        "acceptance_check": "scripts/validate-design-decision-method.mjs"
+      },
+      "evidence": [
+        "用户确认系统应同时接受自然语言、参考图、用户线框图和高保真 Figma，并按业务、结构、视觉和实现职责统一编译后再生成页面。",
+        "用户确认系统不再强制生成线框图或文本分镜；用户主动提供的线框图仍可作为结构输入。",
+        "用户确认没有最终高保真目标时只能保证显式约束一致，不能承诺命中未表达的审美答案。"
+      ],
+      "created_at": "2026-07-30T00:40:14Z",
+      "updated_at": "2026-07-30T00:40:14Z",
+      "promoted_at": "2026-07-30T00:40:14Z",
+      "promotion_landing": {
+        "file": ".codex/skills/shared/references/design-decisions.md",
+        "locator": "rule-id: wego-multi-source-generation-input-boundary",
+        "rule_id": "wego-multi-source-generation-input-boundary",
+        "constraint_area": "多种设计输入的职责、统一编译与保证边界",
+        "description": "自然语言、参考图、用户线框图和高保真 Figma 按职责形成临时 generation_packet；业务事实仍以已确认简报为准，系统不主动生成线框图。"
       }
     },
     {

@@ -9,7 +9,6 @@ principleAuthority:
 authoritySources:
   - "../../wego-product/references/iteration-workflow.md"
   - "../../wego-product/references/scope-and-boundaries.md"
-  - "../../wego-product/references/conversation-wireframe.md"
   - "../../wego-uxsystem-iterate/references/workflow.md"
   - "../../wego-design/library-consumption.json"
   - "../../wego-design/page-layers.json"
@@ -192,15 +191,15 @@ authoritySources:
 
 `wego-product` 必须先用本文约束 `prototype_brief` 的首要任务、入口、关键路径、状态、信息层级和交互视觉描述，避免把低效、混乱或违反设计系统的方向交给设计阶段。
 
-`wego-design` 只依据有效迭代和已确认 `prototype_brief` 中的目标、范围、入口、关键路径、状态、数据、原型边界以及产品阶段定义的交互视觉描述进行设计。已确认简报即设计与实现授权；未被产品阶段明确约束的信息分组、页面结构、组件、Token、反馈和 overlay 形式由 `wego-design` 按正式设计方法自主裁决，不建立第二次确认门禁。`wego-design` 必须严格遵循产品阶段的交互视觉描述（布局位置、控件类型、视觉强调、打开方式倾向等），不得自行替换或偏离。组件不支持或设计系统规范不允许时设计系统优先：先选择正式回退并记录最小缺口；回退若改变已确认产品指令或用户可见结果，必须停止实现并退回 `wego-product`，待简报更新、线框重生成与确认后再实现；回退不改变指令和结果时由设计阶段自主采用并记录到场景决策证据。缺少会改变页面结构或结果的业务事实时退回 `wego-product`，不得从组件、UI Kit、历史场景或图片补造事实和文案。
+`wego-design` 只依据有效迭代和已确认 `prototype_brief` 中的目标、范围、入口、关键路径、状态、数据、原型边界以及产品阶段定义的交互视觉描述进行设计。已确认简报即设计与实现授权；未被产品阶段明确约束的信息分组、页面结构、组件、Token、反馈和 overlay 形式由 `wego-design` 按正式设计方法自主裁决，不建立第二次确认门禁。`wego-design` 必须严格遵循产品阶段的交互视觉描述（布局位置、控件类型、视觉强调、打开方式倾向等），不得自行替换或偏离。组件不支持或设计系统规范不允许时设计系统优先：先选择正式回退并记录最小缺口；回退若改变已确认产品指令或用户可见结果，必须停止实现并退回 `wego-product`，待简报更新与确认后再实现；回退不改变指令和结果时由设计阶段自主采用并记录到场景决策证据。缺少会改变页面结构或结果的业务事实时退回 `wego-product`，不得从组件、UI Kit、历史场景或图片补造事实和文案。
 
 `design-decisions.json` 不是设计前权威输入；新场景不得以它代替本文和正式设计系统来源，已有场景修改时也只能辅助对照。
 
-<!-- rule-id: wego-product-conversation-wireframe-reference; source-ref: ../../wego-product/references/conversation-wireframe.md -->
+<!-- rule-id: wego-multi-source-generation-input-boundary; source-ref: ../../wego-design/references/interaction-prototype-design.md -->
 
-`wego-product` 必须先完成当前版本的 `prototype_brief` 草案并清空 `open_questions`，再基于该简报生成会话线框；每个进入 `submit-brief → confirm-brief` 的简报版本都必须生成，不能按用户是否主动要求或页面变化大小跳过。没有可用渲染器时以文本分镜完成。用户确认时共同查看简报摘要与对应线框，反馈先写回简报，影响页面、入口、路径、状态或可见结果时必须重新生成线框。
+`wego-product` 只确认 `prototype_brief` 中的业务事实和产品阶段交互视觉要求；系统不生成线框图或文本分镜。`wego-design` 在实现前把自然语言和用户实际提供的参考图、线框图或高保真 Figma 按职责形成临时 `generation_packet`：参考图只约束视觉方向，用户线框图只约束结构，高保真 Figma 约束指定 Frame 的结构视觉；所有视觉材料都不得替代已确认简报、补造业务事实或绕过正式设计系统。
 
-会话线框只用于帮助确认页面范围、入口、关键路径、状态与可见结果，不是正式设计输入，也不形成独立确认状态。`wego-design` 的唯一业务输入仍是有效迭代中用户已确认的 `prototype_brief`；即使临时线框仍存在于同一会话上下文，也不得从线框补造业务事实、自动提取组件或机械复制线框外观。设计阶段可以依据共享原则和正式设计系统重新组织具体组件、布局尺度与视觉表达，但不得改变已确认简报中的范围、入口、路径、状态和结果。用户对线框中某项视觉要求的确认只有在写入并确认 `prototype_brief` 后才具有约束力。
+输入冲突时，业务事实以 `prototype_brief` 为准，结构视觉按高保真 Figma、用户线框图、参考图、微购系统基线依次降级，实现规格以设计决策原则、Preview、组件契约和 Token 为准。没有最终高保真目标时，只能承诺显式约束一致，不得宣称能够命中用户未表达的审美答案。
 
 <!-- rule-id: wego-page-pattern-layout-contract; source-ref: ../../wego-design/references/interaction-prototype-design.md -->
 

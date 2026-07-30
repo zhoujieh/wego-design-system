@@ -87,12 +87,12 @@ const requiredRules = [
   'wego-scene-decision-scope', 'wego-page-pattern-layout-contract',
   'wego-content-role-typography',
   'wego-state-interaction-contract', 'wego-design-system-gap-boundary',
-  'wego-product-conversation-wireframe-reference'
+  'wego-multi-source-generation-input-boundary'
 ];
 for (const id of requiredRules) if (!ruleIds.has(id)) add('rule.required_missing', `缺少必需 rule_id：${id}`);
-const productWireframeRule = rules.find(rule => rule.id === 'wego-product-conversation-wireframe-reference');
-if (productWireframeRule && productWireframeRule.source !== '../../wego-product/references/conversation-wireframe.md') {
-  add('rule.product_wireframe_source', '产品会话线框规则必须指向 wego-product 的唯一业务方法');
+const generationInputRule = rules.find(rule => rule.id === 'wego-multi-source-generation-input-boundary');
+if (generationInputRule && generationInputRule.source !== '../../wego-design/references/interaction-prototype-design.md') {
+  add('rule.generation_input_source', '多输入生成边界必须指向 wego-design 的交互原型设计方法');
 }
 
 if (!fs.existsSync(candidateFile)) add('candidate.missing', '缺少经验候选池', candidateFile);
@@ -104,7 +104,7 @@ else {
     const landing = candidate.promotion_landing;
     const pointsToDocument = canonical?.file === canonicalPath || landing?.file === canonicalPath;
     if (canonical?.file === canonicalPath && candidate.rule_ownership?.category !== 'shared-principle') add('candidate.wrong_category', `指向设计决策原则的候选必须使用 shared-principle 归属：${candidate.id}`, candidateFile);
-    if (canonical?.file === canonicalPath && candidate.status !== 'promoted') add('candidate.unpromoted_document', `未晋升候选不得指向设计决策原则文档：${candidate.id}`, candidateFile);
+    if (canonical?.file === canonicalPath && candidate.status === 'awaiting-confirmation') add('candidate.unpromoted_document', `待确认候选不得指向设计决策原则文档：${candidate.id}`, candidateFile);
     if (candidate.status === 'promoted' && canonical?.file === canonicalPath && !ruleIds.has(canonical.rule_id)) add('candidate.rule_missing', `已晋升候选 canonical 缺少文档 rule_id：${candidate.id}`, candidateFile);
     if (candidate.status === 'promoted' && landing?.file === canonicalPath && !ruleIds.has(landing.rule_id)) add('candidate.rule_missing', `已晋升候选 promotion_landing 缺少文档 rule_id：${candidate.id}`, candidateFile);
     if (pointsToDocument && candidate.status === 'promoted' && canonical?.file === canonicalPath && landing?.file === canonicalPath

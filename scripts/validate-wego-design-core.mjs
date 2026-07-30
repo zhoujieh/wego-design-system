@@ -42,9 +42,6 @@ function cssVars(source) { return new Set([...source.matchAll(/(--[\w-]+)\s*:/g)
 function checkRequiredFiles() {
   const required = [
     '.codex/skills/wego-product/SKILL.md',
-    '.codex/skills/wego-product/references/conversation-wireframe.md',
-    '.codex/skills/wego-product/references/conversation-wireframe-trae.md',
-    '.codex/skills/wego-product/references/conversation-wireframe-codex.md',
     '.codex/skills/wego-design/SKILL.md',
     '.codex/skills/wego-uxsystem-iterate/SKILL.md',
     '.codex/skills/wego-design/colors_and_type.css',
@@ -58,6 +55,7 @@ function checkRequiredFiles() {
     'wego-app/js/app.js',
     'wego-app/js/routes.js',
     'scripts/cleanup-task-artifacts.mjs',
+    'docs/ai-design-input-and-generation-workflow.md',
     'scripts/iteration-record.mjs',
     'scripts/validate-component-contract-parity.mjs',
     'scripts/validate-skill-entry-boundary.mjs',
