@@ -1,0 +1,4 @@
+# 认领目录：每个 Agent 开工前写入 claims/<agent-id>.json 声明自己负责的场景。
+# 形如：{ "agentId": "alice", "owner": "Alice", "scene": "动态商品流", "routeId": "dongtai-feed", "branch": "feature/alice-dongtai", "status": "working", "claimedAt": "2026-07-30T10:00:00+08:00" }
+# status 可选：working | paused | released | done。released/done 不计入冲突。
+# 运行 node scripts/validate-claims.mjs 检查是否有重复认领。

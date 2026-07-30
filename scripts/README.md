@@ -12,6 +12,8 @@
 | `iteration-record.mjs` | 创建、提交、确认、失效、冻结或检查业务迭代 |
 | `validate-component-contract-parity.mjs` | 验证组件契约、Preview、索引与生成 CSS 一致性 |
 | `sync-wego-app-lib.mjs` | 设计系统源变化后同步部署副本 |
+| `build-routes.mjs` | 由各场景 `route.json` 汇总生成 `wego-app/js/routes.js`；`--check` 校验一致性 |
+| `validate-claims.mjs` | 校验 `claims/` 下场景认领无冲突，多 Agent 并发防重叠修改 |
 | `build-pages-artifact.mjs` | 构建 GitHub Pages 发布产物 |
 
 场景源码变化后直接运行静态和运行时守卫，无需生成中间证据文件；浏览器证据不写回场景。
