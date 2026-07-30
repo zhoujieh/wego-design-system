@@ -2,6 +2,14 @@
 
 微购中文移动端原型与设计系统仓库。业务原型固定经过需求确认、设计实现、自动验证和用户验收；精简文档或守卫不得绕过这条链路。
 
+## 沟通要求
+
+- 必须用中文进行沟通。
+- 禁止没有跟用户确认需求细节就开始改代码。
+- 禁止输出一大堆过程内容和多个方案让用户进行决策，应该直接给出最佳方案让用户确认。
+- 禁止输出技术专用的一些技术细节，应该输出业务场景和用户需求与用户进行沟通。
+
+
 ## 权威入口
 
 - 技能路由：`.codex/skills/README.md`
@@ -23,6 +31,9 @@
 - 新需求或业务范围变化：`wego-product` 形成并确认 `prototype_brief`。
 - 已确认范围内的页面设计与实现：`wego-design`。
 - 组件、Token、Preview、UI Kit、消费规则、守卫和工作流维护：`wego-uxsystem-iterate`。
+
+<!-- rule-id: requirement-input-must-create-iteration-first -->
+无论用户给的是自然语言需求、参考图还是 Figma 设计稿，均视为业务需求，必须先经 `wego-product` **创建迭代并确认 `prototype_brief`**，不得跳过直接做页面。Figma 与参考图只是实现参考，不代替需求确认、不用于补造业务事实。
 
 业务需求必须属于有效迭代。简报提交、确认、失效和明确冻结的规则以 `.codex/skills/wego-product/references/iteration-workflow.md` 为唯一权威；确认、测试、交付、提交或时间经过均不等于冻结。
 

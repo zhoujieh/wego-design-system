@@ -6,9 +6,19 @@
 | 已确认范围内的页面设计与实现 | `wego-design` |
 | 组件、Token、Preview、UI Kit、消费规则、守卫或工作流维护 | `wego-uxsystem-iterate` |
 
+## 输入形态一律先走产品技能
+
+无论用户以哪种形态提出需求，都视为**业务需求**，必须先由 `wego-product` **创建迭代并确认 `prototype_brief`**，再进入 `wego-design` 实现。不得跳过产品技能直接做页面：
+
+- **自然语言需求**：用户用语言描述要做什么。
+- **参考图（截图/草图）**：仅作风格参考；图中缺失的业务逻辑、状态、数据须由对话补全。
+- **Figma 设计稿**：仅作视觉/组件参考，**不代表需求已确认**；流程、状态、数据来源与边界仍须在简报中确认。
+
+> 迭代必须先创建并确认简报。`Figma` 与参考图不用于补造业务事实。
+
 ```text
-需求
-  → wego-product 确认 prototype_brief
+需求（自然语言 / 参考图 / Figma）
+  → wego-product 创建迭代并确认 prototype_brief
   → wego-design 设计并实现
   → 自动验证
   → 用户验收

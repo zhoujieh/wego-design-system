@@ -392,6 +392,9 @@ function runChangedScope() {
   validateScenes(targetScenes, {
     runtimeAll: changedSet.has('scripts/validate-scene-runtime.mjs')
   });
+  if (targetScenes.length) {
+    runNode('scripts/validate-scene-iteration-binding.mjs', [...targetScenes, '--json'], 'scene.iteration_unbound');
+  }
 
   const explicitIterationFiles = changed.filter(file => /\/_iterations\/[^/]+\/iteration\.json$/.test(file));
   const iterationImplementationChanged = changedSet.has('scripts/iteration-record.mjs') || changedSet.has('scripts/route-source-parser.mjs');
@@ -413,6 +416,7 @@ function runFullScope() {
   checkLibrarySync();
   checkAppHost(true);
   validateScenes(sceneDirectories(), { runtimeAll: true });
+  runNode('scripts/validate-scene-iteration-binding.mjs', ['--all', '--json'], 'scene.iteration_unbound');
   checkIterations({ all: true });
 }
 
