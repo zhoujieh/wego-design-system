@@ -1,223 +1,76 @@
 # 场景合同
 
-> 角色：场景产物、决策标注和完成门禁的唯一说明。创建或修改业务场景时，在交互原型设计方法完成页面结构、并命中具体组件之后读取。
+> 创建或修改业务场景时按命中章节读取。本文只保留源码和运行结果能够验证的要求，不要求人工合同或设计自证。
 
-## 唯一场景产物
+## 固定产物
 
 ```text
 wego-app/js/routes.js
 wego-app/scenes/{中文业务场景}/scene.js
 wego-app/scenes/{中文业务场景}/scene.css
-wego-app/scenes/{中文业务场景}/design-decisions.json
 ```
 
-禁止创建独立场景 HTML、第二个宿主、`style.css`、以 route_id 命名的场景目录或运行时 `fetch/XHR`。
+禁止创建独立场景 HTML、第二个宿主、`style.css`、以 route_id 命名的目录或运行时 `fetch/XHR`。
 
-## scene.js
+## 路由与 scene.js
 
 <!-- rule-id: scene-registration-contract -->
 
 - 通过 `window.WegoApp.registerScene` 注册 `routeId`、template、presentation 和 `init`。
-- `routes.js` 必须且只能对 `window.WEGO_APP_ROUTES` 静态赋值一次；数组直接包含静态路由对象，`routeId` 全局唯一。入口的 `entry.type` 只能是 `host-tab`、`grid-entry`、`cell-entry`，必须声明所属 `entry.tab`；`host-tab` 的 tab 全局唯一。
-- template 根节点必须且只能有一处同时声明 `data-surface-id`、`data-route-id`、`data-layout-mode`；根节点和主滚动层保持通栏，不再声明页面级边距。内容间距由 `layout_contract.layout_groups` 中的语义分组分别持有。`pattern` 模式额外声明 `data-page-pattern`；`composed` 模式不得声明页面范式。
-- 每个正式组件实例必须声明唯一 `data-dd-id`、`data-component-slug` 和 `data-component-binding`；binding 必须对应 `prompt_contract.component_bindings[].binding_id`。
-- 所有交互触发器使用唯一 `data-dom-id`，并进入 `interaction_contract`。
+- `routes.js` 只对 `window.WEGO_APP_ROUTES` 静态赋值一次；`routeId` 全局唯一。
+- 入口 `entry.type` 只能是 `host-tab`、`grid-entry` 或 `cell-entry`，并声明 `entry.tab`；`host-tab` 的 tab 全局唯一。
+- template 根节点唯一声明 `data-surface-id`、`data-route-id` 和 `data-layout-mode`。`pattern` 额外声明 `data-page-pattern`，`composed` 不声明页面范式。
+- 正式组件实例声明正确的 `data-component-slug`；守卫直接根据源码、组件索引、Preview 和契约验证实例，不要求额外 binding 或人工实例编号。
+- 交互触发器使用稳定且唯一的 `data-dom-id`，并在 `init` 或对应渲染逻辑中实际绑定。
 
 <!-- rule-id: routes-subpage-no-entry -->
-
-- 只有宿主入口声明 `entry`；下钻页由 `presentation.type` 决定打开方式，不声明 `entry`，宿主也不得把无 `entry` 的路由自动挂到入口列表。
+只有宿主入口声明 `entry`；下钻页由 `presentation.type` 决定打开方式，不声明 `entry`。
 
 <!-- rule-id: cross-route-data-handoff-appstate -->
-
-- 状态只写当前场景 `ctx.state`、明确共享的 `ctx.appState` 或需求明确要求的持久化位置，不直接写其他场景状态。
-
-<!-- rule-id: overlay-host-runtime-integration -->
-
-- 浮层通过对应 `ctx` API 交给宿主 overlay 层打开；场景不重复实现遮罩、固定定位或安全区。
-
-## 当前 `wego-design-contract`
-
-以下模板是唯一当前格式；生成时必须把版本占位替换成 `metadata.json.version` 的整数值。`prompt_contract` 只记录不能从组件索引、契约和源码推导的设计判断。
-
-```jsonc
-{
-  "surface_id": "settings-edit",
-  "route_id": "settings-edit",
-  "layout_mode": "pattern",
-  "page_pattern": "biz-rule-config",
-  "presentation": {
-    "type": "full-screen-modal",
-    "transition": "slide-up-enter, slide-down-exit",
-    "dismissAction": "page-level-save",
-    "overlayLevel": "overlay",
-    "coversTabBar": true,
-    "source": "uikit-plan.json#/pagePatterns/biz-rule-config/presentation"
-  },
-  "prompt_contract": {
-    "design_system_version": "<场景创建时基于的 metadata.version 快照>",
-    "token_bindings": [
-      {
-        "selector": ".settings-edit__title",
-        "content_role": "页面标题",
-        "css_property": "color",
-        "token": "var(--text-default)"
-      },
-      {
-        "selector": ".settings-edit__content",
-        "content_role": "主滚动内容底部基础避让",
-        "css_property": "padding-bottom",
-        "token": "var(--safe-area-bottom-content)"
-      },
-      {
-        "selector": ".settings-edit",
-        "content_role": "页面边距",
-        "css_property": "padding-inline",
-        "token": "var(--layout-page-margin-m0)"
-      }
-    ],
-    "component_bindings": [
-      {
-        "binding_id": "primary-action",
-        "slug": "button",
-        "reason": "承载唯一保存操作",
-        "principle_refs": ["wego-efficiency-primary-action-right"],
-        "variant_dimensions": {
-          "emphasis": "strong",
-          "size": "md",
-          "iconMode": "text-only",
-          "state": "default"
-        }
-      }
-    ],
-    "layout_contract": {
-      "mode": "pattern",
-      "source": "uikit-plan.json#/pagePatterns/biz-rule-config",
-      "selection_reason": "页面以统一保存为主；导航与底部操作通栏，表单内容按语义组持有横向间距",
-      "principle_refs": ["wego-clarity-single-primary-task"],
-      "mutable_regions": [".settings-edit__content"],
-      "page_layers": [
-        { "region_id": "settings-content", "selector": ".settings-edit__content", "role": "content", "scope": "page-local" },
-        { "region_id": "settings-navbar", "selector": ".settings-edit__navbar", "role": "navigation", "scope": "page-local" },
-        { "region_id": "settings-actions", "selector": ".settings-edit__actions", "role": "navigation", "scope": "page-local" }
-      ],
-      "scroll_architecture": {
-        "viewport_selector": ".settings-edit",
-        "primary_scroll_selector": ".settings-edit__content",
-        "document_scroll": false,
-        "nested_scroll_regions": [],
-        "fixed_regions": [
-          { "region_id": "settings-actions", "selector": ".settings-edit__actions", "edge": "bottom", "safe_area_owner": "component", "clearance": "dynamic-measured", "after_gap_token": "var(--spacer-8)" }
-        ]
-      },
-      "layout_groups": [
-        { "group_id": "settings-form", "selector": ".settings-edit__form-group", "content_role": "设置表单内容组", "inline_inset_token": "var(--layout-page-margin-m8)", "spacing_owner": "scene", "gap_token": "var(--spacer-8)" }
-      ],
-      "sticky_regions": [
-        { "region_id": "settings-navbar", "selector": ".settings-edit__navbar", "scroll_selector": ".settings-edit__content", "edge": "top", "stack_order": 0, "visibility": "always", "background_token": "var(--bg-page)", "layer_role": "navigation", "after_gap_token": "var(--spacer-0)", "scroll_padding": "flow-reserved", "essential": true },
-        { "region_id": "settings-actions", "selector": ".settings-edit__actions", "scroll_selector": ".settings-edit__content", "edge": "bottom", "stack_order": 0, "visibility": "always", "background_token": "var(--bg-page)", "layer_role": "navigation", "after_gap_token": "var(--spacer-8)", "scroll_padding": "dynamic-measured", "essential": true }
-      ]
-    },
-    "interaction_contract": [
-      { "dom_id": "save-settings", "target": "feedback:toast" }
-    ],
-    "state_contract": [
-      {
-        "state_id": "initial",
-        "initial": true,
-        "trigger": "场景进入",
-        "visible_result": "展示当前设置值和保存操作",
-        "fallback": "保留当前有效值",
-        "persistence": "memory"
-      }
-    ]
-  },
-  "visual_check": {
-    "status": "passed",
-    "viewports": [375, 393],
-    "checked_at": "ISO 时间",
-    "checks": {
-      "horizontal_overflow": true,
-      "overlap": true,
-      "clipping": true,
-      "action_legibility": true,
-      "primary_focus": true,
-      "state_feedback": true
-    }
-  },
-  "principle_alignment": [
-    {
-      "rule_id": "wego-efficiency-primary-action-right",
-      "applies": true,
-      "evidence": "保存按钮在 modal__actions 固定区域，不随内容滚动"
-    }
-  ]
-}
-```
-
-约束：
-
-<!-- rule-id: principle-refs-and-alignment -->
-
-- `principle_refs` 是可选字段，记录决策依据的顶层原则 `rule_id`（来源 `.codex/skills/shared/references/design-decisions.md` 中的 `<!-- rule-id: xxx -->` 标记）。只在决策确实依据某条原则时填写，不强制每项都填。
-- `principle_alignment` 在收尾时记录本场景涉及的关键原则和对齐证据，是自我声明而非守门判定。`applies: true` 时 `evidence` 不得为空，需写清原则在场景中的具体体现位置。
-- 守卫只检查 `principle_refs` 和 `principle_alignment` 引用的 `rule_id` 在设计决策原则文档中真实存在，不强制必须引用某条原则。
-
-<!-- rule-id: scene-version-snapshot-not-pinned -->
-
-- `design_system_version` 是场景创建时基于的 `metadata.json.version` 快照（正整数），不要求随设计系统升级而连锁更新；场景适配由 `components.css` 提取校验、组件契约一致性、`source_sha256` 和 `visual_check` 守护。
-- 同一组件可有多个 binding，但 `binding_id` 唯一且每项必须被实际 DOM 使用。
-- `variant_dimensions` 使用组件契约的实际维度和值，不写 Preview、契约路径、根 class 或必需子节点。守卫检查所有值是否合法；契约已声明 `domAnatomy.variantRules` 的维度还会核对实际 DOM。未映射维度仍必须按 Preview 对照，不得宣称已自动验证。
-<!-- rule-id: design-decisions-css-token-binding-precision -->
-
-- `token_bindings` 只记录场景自己声明的视觉语义，包括排版、颜色和语义内容组间距。组件内部样式由正式组件负责；允许 Token 由当前组件 `runtimeTokens` 与场景基础策略自动计算。
-- `layout_contract.source`：pattern 指向精确命中的范式；composed 指向 `references/design-decisions.md`。`selection_reason` 使用现有字段记录最终首要任务、区域层级以及信息显隐、滚动或固定操作的关键取舍；不得只写“参考某 UI Kit”或笼统的“按规范设计”。
-- `layout_contract` 必须包含 `page_layers`、`scroll_architecture`、`layout_groups` 与 `sticky_regions`。页面根和主滚动区通栏；内容组按语义共享间距并声明唯一 `spacing_owner`；sticky/fixed 区域登记层级、背景、间距、实测避让和显隐策略。
-- `token_bindings.content_role` 必须说明选择器承载的真实内容角色或区域语义，例如“对象名称”“辅助元数据”“持续主行动区域”；不得使用“页面样式”“普通文字”等无法解释视觉层级的泛化描述。
-- 非空 `state_contract` 必须且只能有一个初始状态。仅实现简报和真实操作需要的状态；刷新后保留必须有明确需求。
-- `interaction_contract.target` 只使用实际存在的 `route:*`、`state:*`、`overlay:modal|sheet|full-screen-modal|close`、`feedback:toast|dialog` 或 `navigation:back`。
+状态只写当前 `ctx.state`、明确共享的 `ctx.appState` 或需求明确要求的持久化位置，不直接改写其他场景状态。
 
 <!-- rule-id: interaction-dom-id-placeholder -->
+动态列表项可以在渲染时生成稳定 `data-dom-id`；插值键必须来自真实数据，事件委托或批量绑定必须覆盖实际生成的节点。
 
-- `interaction_contract.dom_id` 必须与 template DOM 中的 `data-dom-id` 一一对应。
-- 动态列表项的 dom_id 在运行时由列表渲染函数拼接（如 `data-dom-id="more-${post_id}"`），无法在静态 template DOM 中预先声明。此类交互在 `interaction_contract` 中使用占位符语法 `more-{post_id}`：`{}` 内为占位符变量名，与 scene.js 模板拼接中的 `${...}` 对应。守卫会把占位符模式转成正则匹配 scene.js 源码，确认对应模板拼接确实存在；handler 校验放宽至允许通过 `querySelectorAll('[data-dom-id^="prefix-"]')` 等模式批量绑定 listener。
-- 占位符 dom_id 在提取器 `extract-design-decisions.mjs` 中会归一化为 `prefix-{placeholder}suffix` 写入 `generation_evidence.dom_ids`，与 `interaction_contract` 中的占位符声明对照。
+<!-- rule-id: overlay-host-runtime-integration -->
+浮层通过对应 `ctx` API 打开，场景不重复实现宿主遮罩、固定定位或安全区。
 
 <!-- rule-id: overlay-component-consumption-binding -->
-
-- 通过 `ctx.openSheet`、`ctx.openModal`、`ctx.openFullScreenModal` 消费 overlay 类组件（actionsheet、dialog、modal 等）前，必须先把组件作为 `component_bindings` 登记并补 `interaction_contract`（`overlay:sheet|modal|full-screen-modal`）。守卫会逆向扫描 scene.js 中的 `ctx.openSheet` 等调用，未登记即 fail。
-- overlay 类组件的默认关闭行为（如 actionsheet 的 `closeByMask`、`closeByCancel` 默认 true）必须在场景 init 中实际实现：mask click 与 cancel click 必须调用 `ctx.closeOverlay()` 或对应关闭 API；不能只给 `.actionsheet__item` 绑 click 而漏掉 cancel 与 mask。
-- 场景提供给 overlay API 的 HTML 必须遵守组件契约 `structurePatterns`：overlay 类组件（actionsheet、modal 等）必须渲染完整组件根节点（如 `.actionsheet`、`.modal`，含 `data-state='open'/'closed'`）+ 面板节点及子内容，蒙层视觉与动画均由组件自身承担，宿主层 `.app-overlay-layer` 透明，与 dialog 行为一致；禁止只渲染面板节点，避免蒙层缺失与动画错位。
+传给 overlay API 的 HTML 必须使用对应 Preview 的完整组件根、面板和子内容；默认允许 mask/cancel 关闭的组件必须实际调用关闭 API。守卫直接检查 API、组件 DOM 和关闭逻辑，不要求另写交互或组件绑定清单。
 
 ## scene.css
 
 <!-- rule-id: business-state-class-scoped-prefix -->
 
-- 业务状态必须由场景自有选择器限定，例如 `.feed-item__forward-btn.is-forwarded`；不得单独使用通用状态类，也不得把业务状态发明成正式组件 modifier。
-- 只写场景根作用域下的布局、区域关系和业务胶水。
-- 场景根必须 `position: absolute; inset: 0` 且保持通栏，禁止承担 `padding-inline`。`M0/M8/M32` 只能由 `layout_groups` 中的语义内容组落实；导航、sticky surface、bottom action surface 不得继承内容组缩进。
+- 业务状态类必须由场景选择器限定，不单独使用通用状态类，也不把业务状态发明成组件 modifier。
+- 场景样式只负责根作用域内的区域关系、语义分组、滚动和业务胶水。
+- 页面根使用 `position: absolute; inset: 0` 并保持通栏；主滚动区不承担统一内容边距。
 
 <!-- rule-id: spacing-must-use-spacer-token -->
 
-- 禁止硬编码颜色、间距、圆角和组件内部视觉值；语义内容组横向边距使用 `--layout-page-margin-*` Token，其余场景间距使用 `var(--spacer-*)`。
-- 页面滚动容器使用实际可滚动行为；`overflow:hidden` 只用于明确的组件裁切边界，不得用来禁用页面滚动。
-- 主纵向滚动区必须满足 `library-consumption.json#/layoutContract/scrollBottomRule`；从该规则声明的 `enforcedFromVersion` 起由场景合同守卫强制检查。
-- sticky surface 必须通栏、显式使用不透明背景和 `page-local/navigation` 层级；底部保留合同声明的间距。动态显隐只允许尺寸与位移变化，不得改变 opacity。
-- 固定操作栏由正式组件处理自身安全区；底部固定或悬浮遮挡的登记、间距与动态实测均以 `scrollBottomRule.obstructionRule` 为唯一规则来源。
+- 禁止硬编码颜色、间距、圆角和组件内部视觉值；内容边距使用 `--layout-page-margin-*`，其余间距使用 `var(--spacer-*)`。
+- 页面必须存在真实主滚动行为；`overflow:hidden` 只用于明确的裁切边界。
+- sticky/fixed 区域必须有不透明背景、正确层级和实际内容避让；底部遮挡按 `library-consumption.json#/layoutContract/scrollBottomRule` 验证。
 
 <!-- rule-id: safe-area-top-single-owner -->
+顶部安全区只能由 navbar、顶部固定元素或滚动内容层之一承担；禁止页面根重复预留，也禁止用 JS 读取安全区变量后再写 padding。
 
-- 页面根节点保持 `position: absolute; inset: 0`，禁止用 `padding-top` 预留顶部安全区。顶部安全区只承担一次：有 navbar 时由 navbar 组件内置 `padding-top: var(--safe-area-top)` 处理；无 navbar 但有固定/吸顶顶部元素时由该元素自身处理；两者都没有时由滚动内容层处理。
-- 禁止用 JS 读取 `--safe-area-top` 再设置 padding；安全区必须通过 CSS 变量声明。
+## 可选设计说明
 
-## 提取与完成门禁
+只有存在不直观的结构取舍或正式能力回退时，才在 `scene.js` 相邻代码处保留 1–3 句说明：
 
-每次 scene.js 或 scene.css 变化后必须按以下顺序执行：
+- `Layout`：解释关键区域、信息降级或 sticky/fixed/overlay 的业务原因。
+- `Exception`：说明正式能力缺口和采用的回退。
+
+说明不是合同，不要求固定格式，守卫不解析措辞；可从简报或源码直接看出的内容不重复记录。
+
+## 完成门禁
+
+源码守卫直接提取并验证路由、根属性、组件实例、Token、交互触发器、overlay 调用、滚动和 sticky/fixed 关系：
 
 ```bash
-node scripts/extract-design-decisions.mjs wego-app/scenes/{中文业务场景}
 node scripts/validate-scene-contract.mjs wego-app/scenes/{中文业务场景}
+node scripts/validate-scene-runtime.mjs wego-app/scenes/{中文业务场景}
 ```
 
-`design-decisions.json` 由提取器生成，包含场景身份、布局、presentation、精简 `prompt_contract`、实际组件绑定和源码哈希；禁止手写。视觉检查必须覆盖 375px、393px 和六项固定检查，任一失败都不得标记完成。
-
-组件、变体或 presentation 确实无法覆盖时，向 `wego-uxsystem-iterate` 交接缺失能力、受影响 surface、是否阻断和可用正式回退；实现错误必须直接修复。
+运行时守卫自动启动并清理本地服务，在真实浏览器的 375px 和 393px 视口检查控制台与资源错误、横向溢出、运行时组件结构和变体、交互 listener，以及可发现的 overlay 打开/关闭。主行动、必要状态反馈和核心路径仍需结合实际页面验收。证据保留在运行结果中，不写回场景。

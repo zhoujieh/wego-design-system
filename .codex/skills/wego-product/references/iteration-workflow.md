@@ -1,136 +1,117 @@
-# 业务迭代契约
+# 业务迭代工作流
 
-> 角色：业务范围确认与原型冻结的唯一状态机。读取条件：创建、确认、失效或冻结业务迭代；不承载组件、UI Kit 或场景实现规则。
+> 创建、提交、确认、失效或冻结迭代时只读对应章节。状态与指纹由 `scripts/iteration-record.mjs` 维护，不手写内部治理字段。
 
-## 1. 当前 Schema
-
-迭代固定使用 `schemaVersion: 5`。顶层字段、`identity`、`prototype_brief`、提交/确认对象和阶段输出都只接受当前定义；旧 Schema、未知字段、旧命令、废弃设计计划文件、实现追踪、验收报告和自动生成规则文档均不是当前输入，发现后必须停止并显式迁移。
-
-```json
-{
-  "schemaVersion": 5,
-  "identity": {
-    "iteration_id": "shop001",
-    "title": "快捷发布",
-    "date": "2026-07-12",
-    "primary_scene": "快捷发布产品",
-    "related_scenes": []
-  },
-  "status": "draft",
-  "scope_revision": 1,
-  "prototype_brief": {
-    "goal": "",
-    "included": [],
-    "excluded": [],
-    "entry_points": [],
-    "critical_paths": [],
-    "prototype_boundaries": [
-      {
-        "flow_id": "publish-product",
-        "mode": "functional",
-        "visible_result": "用户完成发布并看到成功结果"
-      }
-    ],
-    "states": [],
-    "data_contract": {
-      "product": { "required": ["title"] }
-    },
-    "assumptions": [],
-    "open_questions": []
-  },
-  "brief_submission": null,
-  "brief_confirmation": null,
-  "prototype_confirmation": null,
-  "affected_scenes": ["快捷发布产品"],
-  "affected_runtime": [],
-  "stage_outputs": {
-    "product": { "valid": false },
-    "design": { "valid": false }
-  },
-  "change_log": [],
-  "freeze": null
-}
-```
-
-`prototype_brief` 只允许上例中的 10 个字段；`readiness` 或其他旧字段必须删除或显式迁移，不得作为兼容输入继续流转。字段内容可附带交互视觉描述（布局位置、控件类型、视觉强调、打开方式倾向等），但提交前必须先符合共享设计决策原则；由 `wego-design` 严格遵循。具体组件名、CSS 类、Token、动画名等正式规格仍由设计阶段在设计系统范围内决定。`brief_submission` 只记录当前范围版本提交展示的时间、`scope_revision` 与范围哈希，不记录会话输入、视觉材料或独立确认状态。
-
-<!-- rule-id: business-iteration-prototype-first-stage-guardrails -->
-## 2. 状态机
-
-```text
-draft（完整 brief）→ awaiting-brief-confirmation → prototyping → awaiting-prototype-confirmation → prototype-confirmed
-验收反馈：awaiting-prototype-confirmation | prototype-confirmed → invalidate → prototyping
-冻结：prototype-confirmed → 用户明确指定迭代并要求冻结 → frozen
-```
-
-暂停或终止状态：`blocked | cancelled | superseded`。
-
-- `submit-brief`：产品提交非空的目标、范围、入口、关键路径、原型边界、状态和数据合同；`data_contract` 必须是至少包含一个键的普通对象，此时不得遗留 `open_questions`。命令把当前范围写入 `brief_submission` 快照；随后必须向用户展示当前简报的文字摘要。
-- `confirm-brief`：用户在查看当前简报摘要后明确确认范围；命令先验证当前范围仍等于 `brief_submission.scope_sha256`，再让确认对象绑定同一 `scope_revision` 和范围哈希。提交后修改简报、主场景、受影响场景或运行时都会失败，必须先 `invalidate --stage=brief`、更新简报并再次提交确认，随后交给 `wego-design`。
-- `submit-prototype`：场景、决策证据和守卫均已完成；命令会实际运行每个受影响场景的场景合同，全部通过后才可等待用户定稿。
-- `confirm-prototype`：先重新运行受影响场景合同，再让确认对象绑定当前 `scope_revision`、`affected_scenes`、场景源码、场景自身路由条目、决策证据和 `affected_runtime` 的 SHA-256。该状态仍可失效后继续验收修改，不代表冻结。
-- `freeze`：仅在用户明确指定当前迭代并要求“冻结”后执行；命令必须携带 `--user-confirmed-freeze <iteration_id>`。命令会先确认原型确认后的文件没有漂移，再在 `iteration.json.freeze` 与同目录 `freeze.json` 同时记录设计系统版本、当前范围版本和完整指纹；已有 `freeze.json` 禁止覆盖。冻结完成后，该迭代作为历史快照保留，后续全量检查只校验冻结记录格式、指纹键集合和 `freeze.json` 一致性，不再要求当前源码继续等于冻结时源码。
-- `invalidate --stage=brief|prototype`：在对应产物修改前失效确认；命令同时支持 `--stage prototype` 与 `--stage=prototype`，其他带值参数同理。
-
-<!-- rule-id: business-iteration-explicit-user-freeze -->
-### 显式冻结与验收复用
-
-- `applies_when`：同一需求仍在验收和反馈修改中，且当前迭代未冻结。必须复用该迭代；业务目标、范围、入口、关键路径、状态或数据变化时失效 brief，视觉、交互或实现变化时失效 prototype，完成后再次提交验收。
-- `avoid_when`：用户没有明确说“冻结”时不得执行 `freeze`。“验收通过”、“没问题”、“完成”、原型确认、守卫通过、交付、提交、部署和时间经过均不得推断为冻结意图。
-- `exceptions`：`cancelled` 和 `superseded` 是终止状态，不得代替冻结或伪造冻结快照。已冻结迭代仍不得解冻、覆盖或失效。
-- `fallback`：无法确定用户是否要求冻结或目标迭代不明时，保持当前非 `frozen` 状态并向用户确认，不得代为执行 `freeze`。
-
-主链路状态的提交与确认矩阵固定如下，不允许提前写入或漏写：
-
-| 状态 | `brief_submission` | `brief_confirmation` | `prototype_confirmation` |
-| --- | --- | --- | --- |
-| `draft` | `null` | `null` | `null` |
-| `awaiting-brief-confirmation` | 当前 `scope_revision` 的提交对象 | `null` | `null` |
-| `prototyping` | 当前 `scope_revision` 的提交对象 | 当前 `scope_revision` 的确认对象 | `null` |
-| `awaiting-prototype-confirmation` | 当前 `scope_revision` 的提交对象 | 当前 `scope_revision` 的确认对象 | `null` |
-| `prototype-confirmed` | 当前 `scope_revision` 的提交对象 | 当前 `scope_revision` 的确认对象 | 当前源码指纹确认对象 |
-| `frozen` | 当前 `scope_revision` 的提交对象 | 当前 `scope_revision` 的确认对象 | 当前源码指纹确认对象 |
-
-范围哈希 `scope_sha256` 稳定覆盖 `identity.primary_scene`、`prototype_brief`、`affected_scenes` 和 `affected_runtime`。`invalidate --stage=brief` 会递增 `scope_revision` 并清空简报提交、简报确认和原型确认；`invalidate --stage=prototype` 只清空原型确认，不改变已经确认的业务范围版本。两类失效都在原迭代内形成新的验收轮次，不自动新建迭代。直接修改范围版本、提交/确认后的范围内容或原型确认后的指纹目标，会在下一次命令或检查中被拦截。
-
-## 3. 所有权
-
-- `wego-product`：创建迭代、维护 `prototype_brief` 和业务事实，在简报完成后提交当前范围并展示文字摘要以确认。
-- `wego-design`：消费已确认简报，把可选参考图、用户线框图或高保真 Figma 按职责编译为临时生成输入，在同一任务中实现已登记场景、生成决策证据、场景合同和视觉检查。
-- `wego-uxsystem-iterate`：只处理设计系统缺口和系统规则；不实现业务场景。
-
-## 4. 原型边界
-
-`prototype_boundaries` 必须是非空数组，每个纳入原型的流程写一项：
-
-```json
-{
-  "flow_id": "publish-product",
-  "mode": "functional",
-  "visible_result": "用户完成发布并看到成功结果"
-}
-```
-
-- `flow_id`：稳定且非空的业务流程标识，同一简报内不得重复。
-- `mode`：只能是 `functional`、`simulated` 或 `stub`。
-- `visible_result`：用户在原型中实际可见的结果，可包含交互视觉描述（如"用户完成转发并看到成功提示，转发按钮高亮"）。
-- `excluded` 中的事项不得再次写入 `prototype_boundaries`；排除范围不实现，也不使用 `stub` 占位。
-
-## 5. 目录与冻结
+## 迭代位置
 
 ```text
 wego-app/scenes/{主业务场景}/_iterations/{YYYYMMDD}-{iteration_id}-{title}/
 ├── iteration.json
 ├── {iteration_id}-{title}-范围确认.md
-└── freeze.json
+└── freeze.json   # 仅明确冻结后存在
 ```
 
-活动迭代的 `affected_scenes` 必须是非空、去重的单层场景名并包含 `identity.primary_scene`，禁止 `/`、`\`、`.` 和 `..`。`affected_runtime` 的每一项必须是非空、去重的仓库相对安全路径，禁止绝对路径、反斜杠以及 `.`、`..` 路径段。所有命令的 `--file` 必须固定指向 `wego-app/scenes/{identity.primary_scene}/_iterations/{迭代目录}/iteration.json`，禁止仓库外路径、错场景目录、非 `_iterations` 位置和符号链接跳转。
+同一需求在验收和反馈期间复用当前未冻结迭代。只有原迭代已冻结、已终止或用户明确开始独立需求时新建。
 
-冻结记录必须完整包含 `at`、`design_system_version`、`scope_revision` 和非空 `fingerprints`。冻结时的指纹键集合必须恰好等于 `affected_runtime`、每个场景的 `scene.js`、`scene.css`、`design-decisions.json` 和该场景的虚拟路由条目键。路由指纹只计算真实全局 `window.WEGO_APP_ROUTES` 注册中属于本场景的完整路由集合；该全局变量必须且只能静态赋值一次，数组直接包含静态路由对象。指纹覆盖运行时消费的 `routeId`、`scene`、`script`、`style` 以及 `entry.type/tab/group/label/icon/parentEntry`，同场景多条路由按完整语义稳定排序。整个真实路由数组中的 `routeId` 必须非空且全局唯一；`host-tab` 必须声明非空 `entry.tab`，同一 tab 只能注册一次，避免宿主 `Map` 被后项静默覆盖。即使 `affected_runtime` 显式包含 `wego-app/js/routes.js`，也只使用分场景路由指纹，不冻结整个路由文件。其余文件会在冻结时确认存在并重算 SHA-256。`freeze.json` 必须与 `iteration.json.freeze` 一致。迭代进入 `frozen` 后视为历史快照，后续源码、路由或设计决策变化不再回放为冻结漂移；新变化必须进入新迭代或当前未冻结迭代，不得覆盖旧冻结记录。同一需求在迭代已冻结或终止后再变化时建立新迭代；用户明确开始独立需求时也可建立新迭代；验收期反馈复用当前未冻结迭代。设计系统迭代不建立业务迭代。
+## AI 维护的内容
 
-## 6. 修改边界
+`iteration.json` 使用 `schemaVersion: 5`。AI 只直接维护：
 
-- 目标、范围、入口、关键路径、状态或数据变化：失效 brief，回到 `wego-product`；更新简报后重新提交用户确认。
-- 组件、布局、presentation、Token、路由或场景交互变化：失效 prototype，回到 `wego-design`。
-- 组件、Preview、UI Kit、Token 或消费规则缺口：记录缺失能力、受影响 surface、是否阻断和正式回退，转交 `wego-uxsystem-iterate`；最小缺口说明不可替代业务范围确认。
+- `identity` 中的迭代标识、标题、主场景和关联场景。
+- `prototype_brief`。
+- `affected_scenes`。
+- 确有场景外运行时改动时维护 `affected_runtime`。
+
+`brief_submission`、`brief_confirmation`、`prototype_confirmation`、`stage_outputs`、`change_log`、`freeze`、范围哈希和文件指纹全部由脚本维护，不直接编辑。
+
+`prototype_brief` 只允许以下字段：
+
+```json
+{
+  "goal": "",
+  "included": [],
+  "excluded": [],
+  "entry_points": [],
+  "critical_paths": [],
+  "prototype_boundaries": [
+    {
+      "flow_id": "publish-product",
+      "mode": "functional",
+      "visible_result": "用户完成发布并看到成功结果"
+    }
+  ],
+  "states": [],
+  "data_contract": {},
+  "assumptions": [],
+  "open_questions": []
+}
+```
+
+提交前，目标、纳入范围、入口、关键路径、原型边界和状态必须非空，`data_contract` 必须是非空对象，`open_questions` 必须为空。`flow_id` 使用唯一 kebab-case；`mode` 只能是 `functional`、`simulated` 或 `stub`。
+
+## 命令与状态
+
+```text
+draft
+  → submit-brief
+awaiting-brief-confirmation
+  → 用户明确确认 → confirm-brief
+prototyping
+  → submit-prototype
+awaiting-prototype-confirmation
+  → 用户验收 → confirm-prototype
+prototype-confirmed
+  → 用户明确要求冻结 → freeze
+frozen
+```
+
+暂停或终止状态为 `blocked | cancelled | superseded`。
+
+所有命令都通过统一脚本执行：
+
+```bash
+node scripts/iteration-record.mjs init \
+  --file wego-app/scenes/{场景}/_iterations/{迭代}/iteration.json \
+  --iteration-id {id} --title {标题} --scene {场景}
+
+node scripts/iteration-record.mjs submit-brief --file {iteration.json}
+node scripts/iteration-record.mjs confirm-brief --file {iteration.json}
+node scripts/iteration-record.mjs submit-prototype --file {iteration.json}
+node scripts/iteration-record.mjs confirm-prototype --file {iteration.json}
+node scripts/iteration-record.mjs invalidate --stage=brief --file {iteration.json}
+node scripts/iteration-record.mjs invalidate --stage=prototype --file {iteration.json}
+node scripts/iteration-record.mjs check --file {iteration.json}
+```
+
+- `submit-brief` 固定当前范围；随后向用户展示简短文字摘要。
+- `confirm-brief` 只能在用户看过当前摘要并明确确认后执行。
+- `submit-prototype` 和 `confirm-prototype` 会重新验证受影响场景；浏览器或源码验证失败时不得进入下一状态。
+- `confirm-prototype` 表示当前原型已验收，不代表冻结。
+
+## 失效
+
+- 目标、范围、入口、关键路径、状态、数据或可见结果变化：先 `invalidate --stage=brief`，更新简报，再重新提交和确认。
+- 已确认范围内的视觉、布局、组件、Token、路由或交互变化：先 `invalidate --stage=prototype`，修改后重新提交验收。
+
+失效在原迭代中继续，不自动新建迭代。冻结迭代不得失效或覆盖。
+
+## 冻结
+
+<!-- rule-id: business-iteration-explicit-user-freeze -->
+只有用户明确指定迭代并要求“冻结”时执行：
+
+```bash
+node scripts/iteration-record.mjs freeze \
+  --file {iteration.json} \
+  --user-confirmed-freeze {iteration_id}
+```
+
+确认、测试、验收、交付、提交、部署或时间经过都不能推断冻结意图。目标迭代不明确时保持 `prototype-confirmed` 并询问用户。
+
+冻结指纹由脚本自动覆盖：
+
+- 每个受影响场景的 `scene.js` 和 `scene.css`。
+- 该场景在 `routes.js` 中的实际路由语义。
+- `affected_runtime` 中确有必要的文件。
+
+脚本生成 `freeze.json` 并禁止覆盖。冻结后的记录是历史快照；后续变化进入新的或仍有效的未冻结迭代。

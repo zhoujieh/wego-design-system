@@ -1,15 +1,13 @@
 # 设计系统同步矩阵
 
-| 改动 | 必改来源 | 必同步 | 必验收 |
+| 改动 | 权威来源 | 仅在受影响时同步 | 验证 |
 | --- | --- | --- | --- |
-| 组件契约语义或消费提示 | `components/{slug}.json` | DOM、变体、状态、Token 或行为变化时同步 Preview；注册、Preview 路径或代表变体变化时同步索引；组件可用范围变化时才同步引用该组件的明确范式 | 组件一致性守卫 |
-| Preview 或组件样式 | 对应 Preview | 重新生成 `components.css`、部署副本 | 提取脚本、组件一致性、资源同步 |
-| Token | `colors_and_type.css`、`css.json` | 受影响契约、Preview、UI Kit、部署副本 | 组件一致性、全量设计系统验证 |
-| 图标或资产 | `assets/`、`iconfont.css` | Preview、UI Kit、部署副本 | 资源同步、链接检查 |
-| UI Kit 或明确页面范式 | `uikit-plan.json`、`ui_kits/*` | 范式候选组件、质量报告；只有合同语义受影响时才更新对应场景合同 | 组件一致性、受影响场景回归 |
-| 消费规则 | `library-consumption.json` | wego-design、系统迭代入口和守卫 | 全量验证 |
-| 宿主运行规则 | `wego-app/*` 与消费契约 | 场景合同、路由、资源副本 | 场景合同、交互与视觉检查 |
+| 组件结构、变体、状态或消费语义 | `components/{slug}.json`、目标 Preview | 索引项、生成 CSS、明确引用的 UI Kit 和场景 | 组件一致性、受影响场景 |
+| Preview 或组件样式 | 目标 Preview | `components.css`、部署副本 | CSS 提取、组件一致性、资源同步 |
+| Token | `colors_and_type.css`、`css.json` | 使用该 Token 的契约、Preview、UI Kit 和部署副本 | 未知 Token、组件一致性、受影响视图 |
+| 图标或资产 | `assets/`、`iconfont.css` | 使用该资源的 Preview、UI Kit 和部署副本 | 资源与链接 |
+| UI Kit 或页面范式 | `uikit-plan.json`、`ui_kits/*` | 受影响的读取提示和消费者 | 正式组件存在、实际页面回归 |
+| 消费规则 | `library-consumption.json` | 直接消费者和守卫 | 严格系统验证 |
+| 宿主能力 | `wego-app/*` 与消费契约 | 路由、场景合同和部署副本 | 源码、交互和浏览器检查 |
 
-宿主运行规则只在维护宿主能力、消费契约或守卫时进入 UX 系统迭代；普通业务场景的路由、交互、状态和视觉实现仍归 `wego-design`。
-
-每次正式设计系统源变化都必须递增 metadata 版本，运行 CSS 提取、组件一致性、同步与严格系统验证。同步遵循上表的条件列，不因任一类型变化机械改写全部索引、范式或质量报告。自动生成规则文档和旧技能不是同步对象。
+正式设计系统源变化必须递增 metadata 版本；同步只覆盖受影响项，UI Kit 正确性由正式组件一致性和实际页面验证。

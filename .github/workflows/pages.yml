@@ -30,12 +30,16 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
 
       - name: Validate deployable app
-        run: |
-          node .codex/skills/wego-design/scripts/extract-components-css.mjs .codex/skills/wego-design --check
-          node scripts/validate-component-contract-parity.mjs
-          node scripts/validate-wego-design.mjs --scope=system --strict
+        run: node scripts/validate-wego-design.mjs --scope=full --strict
 
       - name: Build Pages artifact
         run: node scripts/build-pages-artifact.mjs "$RUNNER_TEMP/wego-pages"

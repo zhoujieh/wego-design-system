@@ -3,286 +3,432 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { parseRouteRegistrySource } from './route-source-parser.mjs';
 
 const root = process.cwd();
 const args = process.argv.slice(2);
 const jsonOutput = args.includes('--json');
-const requestedScope = (args.find(arg => arg.startsWith('--scope=')) || '--scope=changed').slice('--scope='.length);
 const strict = args.includes('--strict');
-const libraryRoot = path.join(root, '.codex/skills/wego-design');
+const requestedScope = (args.find(arg => arg.startsWith('--scope=')) || '--scope=changed').slice('--scope='.length);
 const appRoot = path.join(root, 'wego-app');
-const report = { root: '.codex/skills/wego-design', mode: strict ? 'strict' : 'baseline', scope: requestedScope, errors: [], warnings: [], info: [], metrics: {} };
+const libraryRoot = path.join(root, '.codex/skills/wego-design');
+const report = {
+  root: '.',
+  mode: strict ? 'strict' : 'baseline',
+  scope: requestedScope,
+  errors: [],
+  warnings: [],
+  info: [],
+  metrics: {
+    changedFiles: 0,
+    validatedScenes: 0,
+    validatedIterations: 0,
+    conditionalToolTests: 0
+  }
+};
 
 function add(severity, code, message, file = null) {
-  report[severity === 'warning' ? 'warnings' : severity === 'info' ? 'info' : 'errors'].push({ code, message, file: file ? path.relative(root, file).replaceAll(path.sep, '/') : null });
+  const bucket = severity === 'warning' ? 'warnings' : severity === 'info' ? 'info' : 'errors';
+  report[bucket].push({
+    code,
+    message,
+    file: file ? path.relative(root, file).replaceAll(path.sep, '/') : null
+  });
 }
 
-function exists(relative) { return fs.existsSync(path.join(root, relative)); }
-function read(relative) { return fs.readFileSync(path.join(root, relative), 'utf8'); }
-function readJson(relative) {
-  try { return JSON.parse(read(relative)); }
-  catch (error) { add('error', 'json.invalid', `${relative} 无法解析：${error.message}`, path.join(root, relative)); return null; }
+function relative(file) {
+  return path.relative(root, file).replaceAll(path.sep, '/');
 }
-function listFiles(directory) {
-  if (!fs.existsSync(directory)) return [];
-  const files = [];
-  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
-    const target = path.join(directory, entry.name);
-    if (entry.isDirectory()) files.push(...listFiles(target));
-    else if (entry.isFile()) files.push(target);
+
+function exists(relativePath) {
+  return fs.existsSync(path.join(root, relativePath));
+}
+
+function requireFiles(files) {
+  for (const file of files) {
+    if (!exists(file)) add('error', 'required.missing', `缺少运行所需文件：${file}`, path.join(root, file));
   }
-  return files;
 }
+
+function gitNames(args) {
+  const result = spawnSync('git', ['-c', 'core.quotepath=false', ...args], { cwd: root, encoding: 'utf8' });
+  if (result.status !== 0) {
+    add('error', 'git.diff_failed', (result.stderr || result.stdout || '无法读取 Git 变更').trim());
+    return [];
+  }
+  return (result.stdout || '').split('\n').map(item => item.trim()).filter(Boolean);
+}
+
 function changedFiles() {
-  const tracked = spawnSync('git', ['diff', '--name-only'], { cwd: root, encoding: 'utf8' });
-  const untracked = spawnSync('git', ['ls-files', '--others', '--exclude-standard'], { cwd: root, encoding: 'utf8' });
-  return [...new Set(`${tracked.stdout || ''}\n${untracked.stdout || ''}`.split('\n').map(item => item.trim()).filter(Boolean))];
+  return [...new Set([
+    ...gitNames(['diff', '--name-only']),
+    ...gitNames(['diff', '--cached', '--name-only']),
+    ...gitNames(['ls-files', '--others', '--exclude-standard'])
+  ])].sort();
 }
-function cssVars(source) { return new Set([...source.matchAll(/(--[\w-]+)\s*:/g)].map(match => match[1])); }
-function checkRequiredFiles() {
-  const required = [
+
+const changed = changedFiles();
+const changedSet = new Set(changed);
+report.metrics.changedFiles = changed.length;
+
+function changedSome(predicate) {
+  return changed.some(predicate);
+}
+
+function runNode(script, scriptArgs, code, file = script) {
+  if (!exists(script)) {
+    add('error', 'required.missing', `缺少运行所需文件：${script}`, path.join(root, script));
+    return false;
+  }
+  const result = spawnSync(process.execPath, [script, ...scriptArgs], { cwd: root, encoding: 'utf8' });
+  if (result.status === 0) return true;
+  const output = (result.stderr || result.stdout || `${script} 执行失败`).trim();
+  add('error', code, output, path.join(root, file));
+  return false;
+}
+
+function readJson(relativePath) {
+  try {
+    return JSON.parse(fs.readFileSync(path.join(root, relativePath), 'utf8'));
+  } catch (error) {
+    add('error', 'json.invalid', `${relativePath} 无法解析：${error.message}`, path.join(root, relativePath));
+    return null;
+  }
+}
+
+function checkSkillFlow() {
+  requireFiles([
     '.codex/skills/wego-product/SKILL.md',
     '.codex/skills/wego-design/SKILL.md',
-    '.codex/skills/wego-uxsystem-iterate/SKILL.md',
+    '.codex/skills/wego-uxsystem-iterate/SKILL.md'
+  ]);
+}
+
+const systemRuntimePrefixes = [
+  '.codex/skills/wego-design/assets/',
+  '.codex/skills/wego-design/components/',
+  '.codex/skills/wego-design/preview/',
+  '.codex/skills/wego-design/ui_kits/'
+];
+const systemRuntimeFiles = new Set([
+  '.codex/skills/wego-design/colors_and_type.css',
+  '.codex/skills/wego-design/components.css',
+  '.codex/skills/wego-design/css.json',
+  '.codex/skills/wego-design/iconfont.css',
+  '.codex/skills/wego-design/library-consumption.json',
+  '.codex/skills/wego-design/metadata.json',
+  '.codex/skills/wego-design/page-layers.json',
+  '.codex/skills/wego-design/scaffold.css',
+  '.codex/skills/wego-design/uikit-plan.json'
+]);
+const isSystemRuntimeFile = file => systemRuntimeFiles.has(file) || systemRuntimePrefixes.some(prefix => file.startsWith(prefix));
+const systemRuntimeChanged = changedSome(isSystemRuntimeFile);
+const isDeployLibraryFile = file => (
+  file.startsWith('.codex/skills/wego-design/assets/')
+  || [
     '.codex/skills/wego-design/colors_and_type.css',
     '.codex/skills/wego-design/components.css',
-    '.codex/skills/wego-design/components/index.json',
-    '.codex/skills/wego-design/library-consumption.json',
-    '.codex/skills/wego-design/page-layers.json',
-    '.codex/skills/wego-design/preview/layout-layers.html',
-    '.codex/skills/wego-design/uikit-plan.json',
-    'wego-app/index.html',
-    'wego-app/js/app.js',
-    'wego-app/js/routes.js',
-    'scripts/cleanup-task-artifacts.mjs',
-    'docs/ai-design-input-and-generation-workflow.md',
-    'scripts/iteration-record.mjs',
-    'scripts/validate-component-contract-parity.mjs',
-    'scripts/validate-skill-entry-boundary.mjs',
-    'scripts/test-skill-entry-boundary.mjs',
-    'scripts/route-source-parser.mjs',
-    'scripts/validate-scene-contract.mjs',
-    'scripts/extract-design-decisions.mjs',
-    'scripts/prompt-contract-schema.mjs',
-    'scripts/test-prompt-contract-schema.mjs',
-    'scripts/test-uikit-plan-schema.mjs',
-    'scripts/test-quality-report-version-snapshot.mjs',
-    'scripts/test-scene-contract-tools.mjs',
-    'scripts/test-scroll-layout.mjs',
-    'scripts/validate-design-decision-method.mjs',
-    'scripts/test-design-decision-method.mjs',
-    'scripts/test-sync-wego-app-lib.mjs'
-  ];
-  for (const relative of required) if (!exists(relative)) add('error', 'required.missing', `缺少当前工作流必需文件：${relative}`, path.join(root, relative));
-  for (const removed of [
-    '.codex/skills/wego-ux',
-    '.codex/skills/wego-tests',
-    '.codex/skills/wego-design/specs',
-    'docs/specs',
-    'docs/DESIGN.md',
-    'docs/plans/wego-design-implementation-spec.md',
-    'docs/plans/wego-design-workflow-final-plan.md',
-    'docs/plans/wego-design-workflow-optimization-plan.md',
-    'scripts/specs.mjs',
-    'scripts/specs-core.mjs'
-  ]) {
-    if (exists(removed)) add('error', 'legacy.path_present', `已删除路径仍存在：${removed}`, path.join(root, removed));
-  }
-}
+    '.codex/skills/wego-design/iconfont.css'
+  ].includes(file)
+);
 
-function checkLibrarySchema() {
-  const index = readJson('.codex/skills/wego-design/components/index.json');
-  const plan = readJson('.codex/skills/wego-design/uikit-plan.json');
-  const consumption = readJson('.codex/skills/wego-design/library-consumption.json');
-  const pageLayers = readJson('.codex/skills/wego-design/page-layers.json');
+function checkSystemMetadata() {
+  requireFiles(['.codex/skills/wego-design/metadata.json']);
+  if (!exists('.codex/skills/wego-design/metadata.json')) return;
   const metadata = readJson('.codex/skills/wego-design/metadata.json');
-  const tokenStructure = readJson('.codex/skills/wego-design/css.json');
-  if (!index || !plan || !consumption || !pageLayers || !metadata || !tokenStructure) return;
-  if (index.schemaVersion !== 4 || index.componentContractSchemaVersion !== 4) add('error', 'library.component_schema', '组件索引必须使用 schemaVersion 4', path.join(libraryRoot, 'components/index.json'));
-  if (plan.schemaVersion !== 5 || consumption.schemaVersion !== 7) add('error', 'library.schema', 'UI Kit 必须使用 schemaVersion 5，消费契约必须使用 schemaVersion 7', libraryRoot);
-  if (pageLayers.schemaVersion !== 1 || consumption.pageLayers !== 'page-layers.json' || !pageLayers.scopes?.['page-local'] || !pageLayers.scopes?.['app-global'] || !pageLayers.scopes?.['overlay-local']) add('error', 'library.page_layers', '页面层级模型必须使用 schemaVersion 1，并由消费契约唯一引用三个正式 scope', path.join(libraryRoot, 'page-layers.json'));
-  if (!Number.isInteger(metadata.version) || metadata.version < 1) add('error', 'library.version', 'metadata.version 必须为正整数', path.join(libraryRoot, 'metadata.json'));
-  if (consumption.tokenCss !== 'colors_and_type.css' || Object.hasOwn(consumption, 'tokenSource') || consumption.actualTokenNameReference?.source !== 'colors_and_type.css:root') add('error', 'library.token_authority', '实际 Token 名必须且只能以 colors_and_type.css:root 为权威；css.json 仅作结构索引', path.join(libraryRoot, 'library-consumption.json'));
-  if (Object.hasOwn(consumption, 'recommendedReadOrder')) add('error', 'library.read_order_duplicate', '消费契约不得重复维护技能读取顺序', path.join(libraryRoot, 'library-consumption.json'));
-  const designSkill = read('.codex/skills/wego-design/SKILL.md');
-  if (designSkill.includes('`AGENTS.md`')) add('error', 'library.read_order_agents', 'wego-design 不得重复读取仓库级 AGENTS.md', path.join(libraryRoot, 'SKILL.md'));
-  const readMarkers = ['有效迭代与已确认 `prototype_brief`', '[设计决策原则]', '`library-consumption.json`', '`page-layers.json`', '`uikit-plan.json`', '`components/index.json`', '本页命中的 Preview', '对应组件契约', '`colors_and_type.css`', '[场景合同]'];
-  let previous = -1;
-  for (const marker of readMarkers) {
-    const position = designSkill.indexOf(marker);
-    if (position < 0 || position <= previous) add('error', 'library.read_order', `wego-design 固定读取顺序缺失或错序：${marker}`, path.join(libraryRoot, 'SKILL.md'));
-    previous = position;
+  if (metadata && (!Number.isInteger(metadata.version) || metadata.version < 1)) {
+    add('error', 'metadata.version', 'metadata.version 必须为正整数', path.join(libraryRoot, 'metadata.json'));
   }
-  const libraryMap = read('.codex/skills/wego-design/references/library-map.md');
-  const libraryMapRoot = path.join(libraryRoot, 'references');
-  for (const [marker, target] of [['../../../../wego-app/index.html', '../../../../wego-app/index.html'], ['../../../../wego-app/js/routes.js', '../../../../wego-app/js/routes.js'], ['../../../../scripts/*.mjs', '../../../../scripts']]) {
-    if (!libraryMap.includes(`\`${marker}\``) || !fs.existsSync(path.resolve(libraryMapRoot, target))) add('error', 'library.asset_map_path', `资产地图路径不存在或未使用正确相对层级：${marker}`, path.join(libraryMapRoot, 'library-map.md'));
-  }
-  const expectedComponentPlanFields = ['binding_id', 'slug', 'reason', 'variant_dimensions'];
-  if (Object.hasOwn(consumption.componentPlan || {}, 'min') || Object.hasOwn(consumption.componentPlan || {}, 'max') || JSON.stringify(consumption.componentPlan?.requiredFields) !== JSON.stringify(expectedComponentPlanFields)) add('error', 'library.component_plan', '组件计划不得限制数量，且只记录不可推导的设计判断', path.join(libraryRoot, 'library-consumption.json'));
-  if (JSON.stringify(consumption.pageEdgeModes) !== JSON.stringify(['M0', 'M8', 'M32'])) add('error', 'library.page_edge_modes', '页面边距模式必须且只能为 M0、M8、M32', path.join(libraryRoot, 'library-consumption.json'));
-  const expectedPageEdgeTokens = { M0: '--layout-page-margin-m0', M8: '--layout-page-margin-m8', M32: '--layout-page-margin-m32' };
-  if (JSON.stringify(consumption.pageEdgeTokens) !== JSON.stringify(expectedPageEdgeTokens)) add('error', 'library.page_edge_tokens', '页面边距模式必须精确映射到 M0、M8、M32 对应 Token', path.join(libraryRoot, 'library-consumption.json'));
-  const declaredPageEdgeTokens = [...cssVars(read('.codex/skills/wego-design/colors_and_type.css'))].filter(token => token.startsWith('--layout-page-margin-')).sort();
-  const expectedDeclaredPageEdgeTokens = Object.values(expectedPageEdgeTokens).sort();
-  if (JSON.stringify(declaredPageEdgeTokens) !== JSON.stringify(expectedDeclaredPageEdgeTokens)) add('error', 'library.page_edge_token_source', 'Token 源中的页面边距必须且只能为 M0、M8、M32', path.join(libraryRoot, 'colors_and_type.css'));
-  const structuredPageEdgeTokens = Object.keys(tokenStructure.layout || {}).filter(token => token.startsWith('layout-page-margin-')).sort();
-  if (JSON.stringify(structuredPageEdgeTokens) !== JSON.stringify(expectedDeclaredPageEdgeTokens.map(token => token.slice(2)).sort())) add('error', 'library.page_edge_token_structure', 'Token 结构中的页面边距必须且只能为 M0、M8、M32', path.join(libraryRoot, 'css.json'));
-  const slugs = new Set((index.components || []).map(item => item.slug));
-  report.metrics.registeredComponents = slugs.size;
-  for (const component of index.components || []) {
-    const contract = path.join(libraryRoot, 'components', `${component.slug}.json`);
-    const preview = path.join(libraryRoot, component.preview || '');
-    if (!fs.existsSync(contract)) add('error', 'component.contract_missing', `缺少组件契约：${component.slug}`, contract);
-    if (!fs.existsSync(preview)) add('error', 'component.preview_missing', `缺少组件 Preview：${component.slug}`, preview);
-  }
-  for (const pattern of plan.pagePatterns || []) {
-    for (const relative of [pattern.uiKit?.entry, pattern.uiKit?.qualityReport]) if (!relative || !fs.existsSync(path.join(libraryRoot, relative))) add('error', 'uikit.file_missing', `UI Kit 文件缺失：${relative}`, path.join(libraryRoot, relative || ''));
-  }
-}
-
-function checkNoLegacyRuntimeReferences() {
-  const roots = [path.join(root, 'AGENTS.md'), path.join(root, 'README.md'), path.join(root, '.codex/skills'), path.join(root, 'scripts')];
-  const files = roots.flatMap(target => fs.existsSync(target) && fs.statSync(target).isDirectory() ? listFiles(target) : fs.existsSync(target) ? [target] : []);
-  const runtime = files.filter(file => /\.(?:md|json|mjs|js|ya?ml|css|html)$/.test(file));
-  const guardFiles = new Set([
-    path.join(root, 'scripts/validate-wego-design-core.mjs'),
-    path.join(root, 'scripts/validate-component-contract-parity.mjs'),
-    path.join(root, 'scripts/validate-skill-entry-boundary.mjs')
-  ]);
-  const checks = [
-    { code: 'legacy.skill_reference', pattern: /wego-ux(?!system-iterate)|wego-tests/ },
-    { code: 'legacy.spec_reference', pattern: /(?:^|["'`])(?:docs\/)?specs\/|scripts\/specs(?:-core)?\.mjs|specs\.mjs/ },
-    { code: 'legacy.design_plan', pattern: /design_plan(?:\.json)?/ },
-    { code: 'legacy.interaction_spec', pattern: /interaction[_-]spec(?:\.json)?/ },
-    { code: 'legacy.scene_html', pattern: /scenes\/\{route_id\}\/index\.html|scene\.html 若存在/ },
-    { code: 'legacy.ddr', pattern: /\bDDR\b/ }
-  ];
-  for (const file of runtime) {
-    if (guardFiles.has(file)) continue;
-    const content = fs.readFileSync(file, 'utf8');
-    for (const check of checks) if (check.pattern.test(content)) add('error', check.code, '存在已删除的运行时规则或路径', file);
-  }
-}
-
-function checkHistoricalPlanMarkers() {
-  const plans = path.join(root, 'docs/plans');
-  if (!fs.existsSync(plans)) return;
-  const stalePattern = /design[_-]plan|wego-ux(?!system-iterate)|wego-tests|specs(?:\/|\.mjs)|acceptance_report/;
-  const files = listFiles(plans).filter(file => file.endsWith('.md'));
-  for (const target of files) {
-    const file = path.relative(plans, target).replaceAll(path.sep, '/');
-    const content = fs.readFileSync(target, 'utf8');
-    if (stalePattern.test(content) && !content.slice(0, 600).includes('历史归档文档')) add('error', 'history.plan_unmarked', `旧工作流计划必须明确标记为历史归档：${file}`, target);
-  }
-}
-
-function checkAppHost(includeBusinessScenes = true) {
-  const index = read('wego-app/index.html');
-  const app = read('wego-app/js/app.js');
-  const routes = read('wego-app/js/routes.js');
-  for (const required of ['data-host-shell="true"', 'data-scene-layer', 'data-overlay-layer']) if (!index.includes(required)) add('error', 'app.host_missing', `唯一宿主缺少 ${required}`, path.join(appRoot, 'index.html'));
-  if (!app.includes('window.WegoApp') || !app.includes('registerScene')) add('error', 'app.registration_missing', 'App 宿主必须提供 window.WegoApp.registerScene', path.join(appRoot, 'js/app.js'));
-  if (!app.includes('if (!route.entry) return;')) add('error', 'app.route_entry_boundary', '宿主不得把无 entry 的下钻路由自动挂到入口列表', path.join(appRoot, 'js/app.js'));
-  if (!routes.includes('window.WEGO_APP_ROUTES')) add('error', 'app.routes_missing', 'routes.js 必须初始化 window.WEGO_APP_ROUTES', path.join(appRoot, 'js/routes.js'));
-  if (!includeBusinessScenes) return;
-  const scenesPath = path.join(appRoot, 'scenes');
-  const scenes = fs.existsSync(scenesPath) ? fs.readdirSync(scenesPath, { withFileTypes: true }).filter(entry => entry.isDirectory() && !entry.name.startsWith('_') && fs.existsSync(path.join(scenesPath, entry.name, 'scene.js'))).map(entry => entry.name) : [];
-  report.metrics.scenes = scenes.length;
-  for (const scene of scenes) {
-    const dir = path.join(scenesPath, scene);
-    for (const file of ['scene.js', 'scene.css', 'design-decisions.json']) if (!fs.existsSync(path.join(dir, file))) add('error', 'scene.file_missing', `场景 ${scene} 缺少 ${file}`, path.join(dir, file));
-    if (!fs.existsSync(path.join(dir, 'scene.js')) || !fs.existsSync(path.join(dir, 'scene.css'))) continue;
-    const validation = spawnSync(process.execPath, ['scripts/validate-scene-contract.mjs', path.relative(root, dir), '--json'], { cwd: root, encoding: 'utf8' });
-    if (validation.status !== 0) {
-      let details;
-      try { details = JSON.parse(validation.stdout || '{}'); }
-      catch { details = { errors: [{ message: validation.stderr || validation.stdout || '场景合同检查失败' }] }; }
-      add('error', 'scene.contract_failed', `场景 ${scene} 未通过场景合同：${(details.errors || []).map(item => item.message).join('；')}`, dir);
-    }
+  if (systemRuntimeChanged && !changedSet.has('.codex/skills/wego-design/metadata.json')) {
+    add('error', 'metadata.version_required', '设计系统运行时源变化时必须同步递增 metadata.version', path.join(libraryRoot, 'metadata.json'));
   }
 }
 
 function checkLibrarySync() {
-  const tests = spawnSync(process.execPath, ['scripts/test-sync-wego-app-lib.mjs'], { cwd: root, encoding: 'utf8' });
-  if (tests.status !== 0) add('error', 'app.lib_sync_test', (tests.stderr || tests.stdout || '资源同步脚本测试失败').trim(), path.join(root, 'scripts/test-sync-wego-app-lib.mjs'));
-  const check = spawnSync(process.execPath, ['scripts/sync-wego-app-lib.mjs', '--check', '--json'], { cwd: root, encoding: 'utf8' });
-  if (check.status !== 0) add('error', 'app.lib_out_of_sync', (check.stderr || check.stdout || 'wego-app/lib 与设计系统源不同步').trim(), path.join(appRoot, 'lib'));
+  runNode('scripts/sync-wego-app-lib.mjs', ['--check', '--json'], 'app.lib_out_of_sync', 'wego-app/lib');
 }
 
-function checkIteration(includeBusinessRecords = true) {
-  if (includeBusinessRecords) {
-    const result = spawnSync(process.execPath, ['scripts/iteration-record.mjs', 'check'], { cwd: root, encoding: 'utf8' });
-    if (result.status !== 0) add('error', 'iteration.check', (result.stderr || result.stdout || '迭代检查失败').trim(), path.join(root, 'scripts/iteration-record.mjs'));
+function appRoutes() {
+  const routesFile = path.join(appRoot, 'js/routes.js');
+  if (!fs.existsSync(routesFile)) {
+    add('error', 'required.missing', '缺少 wego-app/js/routes.js', routesFile);
+    return [];
   }
-  const tests = spawnSync(process.execPath, ['scripts/iteration-record.mjs', 'test'], { cwd: root, encoding: 'utf8' });
-  if (tests.status !== 0) add('error', 'iteration.test', (tests.stderr || tests.stdout || '迭代脚本测试失败').trim(), path.join(root, 'scripts/iteration-record.mjs'));
+  try {
+    return parseRouteRegistrySource(fs.readFileSync(routesFile, 'utf8'));
+  } catch (error) {
+    add('error', 'app.routes_invalid', error.message, routesFile);
+    return [];
+  }
 }
 
-function checkSceneContractTools() {
-  const uikitTests = spawnSync(process.execPath, ['scripts/test-uikit-plan-schema.mjs'], { cwd: root, encoding: 'utf8' });
-  if (uikitTests.status !== 0) add('error', 'uikit_schema.test', (uikitTests.stderr || uikitTests.stdout || 'UI Kit schema 测试失败').trim(), path.join(root, 'scripts/test-uikit-plan-schema.mjs'));
-  const qualityVersionTests = spawnSync(process.execPath, ['scripts/test-quality-report-version-snapshot.mjs'], { cwd: root, encoding: 'utf8' });
-  if (qualityVersionTests.status !== 0) add('error', 'uikit_quality_version.test', (qualityVersionTests.stderr || qualityVersionTests.stdout || 'UI Kit 质量报告版本快照测试失败').trim(), path.join(root, 'scripts/test-quality-report-version-snapshot.mjs'));
-  const schemaTests = spawnSync(process.execPath, ['scripts/test-prompt-contract-schema.mjs'], { cwd: root, encoding: 'utf8' });
-  if (schemaTests.status !== 0) add('error', 'prompt_contract_schema.test', (schemaTests.stderr || schemaTests.stdout || 'prompt_contract Schema 测试失败').trim(), path.join(root, 'scripts/test-prompt-contract-schema.mjs'));
-  const tests = spawnSync(process.execPath, ['scripts/test-scene-contract-tools.mjs'], { cwd: root, encoding: 'utf8' });
-  if (tests.status !== 0) add('error', 'scene_contract.test', (tests.stderr || tests.stdout || '场景合同工具测试失败').trim(), path.join(root, 'scripts/test-scene-contract-tools.mjs'));
-  const scrollTests = spawnSync(process.execPath, ['scripts/test-scroll-layout.mjs'], { cwd: root, encoding: 'utf8' });
-  if (scrollTests.status !== 0) add('error', 'scroll_layout.test', (scrollTests.stderr || scrollTests.stdout || '滚动布局运行时测试失败').trim(), path.join(root, 'scripts/test-scroll-layout.mjs'));
+function sceneNameFromRoute(record) {
+  return record.scene || /^scenes\/([^/]+)\/scene\.js$/.exec(record.script || '')?.[1] || null;
 }
 
-function checkDesignDecisionPrinciples() {
-  const validation = spawnSync(process.execPath, ['scripts/validate-design-decision-method.mjs', '--json'], { cwd: root, encoding: 'utf8' });
-  if (validation.status !== 0) add('error', 'design_decision_principles.validation', (validation.stderr || validation.stdout || '设计决策原则守卫失败').trim(), path.join(root, '.codex/skills/shared/references/design-decisions.md'));
-  const tests = spawnSync(process.execPath, ['scripts/test-design-decision-method.mjs'], { cwd: root, encoding: 'utf8' });
-  if (tests.status !== 0) add('error', 'design_decision_principles.test', (tests.stderr || tests.stdout || '设计决策原则守卫测试失败').trim(), path.join(root, 'scripts/test-design-decision-method.mjs'));
+function sceneDirectories() {
+  const scenesRoot = path.join(appRoot, 'scenes');
+  if (!fs.existsSync(scenesRoot)) return [];
+  return fs.readdirSync(scenesRoot, { withFileTypes: true })
+    .filter(entry => entry.isDirectory() && !entry.name.startsWith('_'))
+    .map(entry => entry.name)
+    .filter(scene => ['scene.js', 'scene.css'].some(file => fs.existsSync(path.join(scenesRoot, scene, file))))
+    .sort();
 }
 
-function checkSkillEntryBoundary() {
-  const result = spawnSync(process.execPath, ['scripts/validate-skill-entry-boundary.mjs'], { cwd: root, encoding: 'utf8' });
-  if (result.status !== 0) add('error', 'skill_entry.check', (result.stderr || result.stdout || '技能入口校验失败').trim(), path.join(root, 'scripts/validate-skill-entry-boundary.mjs'));
-  const tests = spawnSync(process.execPath, ['scripts/test-skill-entry-boundary.mjs'], { cwd: root, encoding: 'utf8' });
-  if (tests.status !== 0) add('error', 'skill_entry.test', (tests.stderr || tests.stdout || '技能入口追溯测试失败').trim(), path.join(root, 'scripts/test-skill-entry-boundary.mjs'));
+function checkAppHost(requireSceneCoverage = false) {
+  requireFiles(['wego-app/index.html', 'wego-app/js/app.js', 'wego-app/js/routes.js']);
+  if (!exists('wego-app/index.html') || !exists('wego-app/js/app.js') || !exists('wego-app/js/routes.js')) return [];
+  const index = fs.readFileSync(path.join(appRoot, 'index.html'), 'utf8');
+  const app = fs.readFileSync(path.join(appRoot, 'js/app.js'), 'utf8');
+  for (const marker of ['data-host-shell="true"', 'data-scene-layer', 'data-overlay-layer']) {
+    if (!index.includes(marker)) add('error', 'app.host_missing', `唯一宿主缺少 ${marker}`, path.join(appRoot, 'index.html'));
+  }
+  if (!app.includes('window.WegoApp') || !app.includes('registerScene')) {
+    add('error', 'app.registration_missing', 'App 宿主必须提供 window.WegoApp.registerScene', path.join(appRoot, 'js/app.js'));
+  }
+  const routes = appRoutes();
+  const routedScenes = new Set();
+  for (const route of routes) {
+    const scene = sceneNameFromRoute(route);
+    if (scene) routedScenes.add(scene);
+    for (const asset of [route.script, route.style, route.entry?.icon].filter(Boolean)) {
+      const target = path.join(appRoot, asset);
+      if (!fs.existsSync(target) || !fs.statSync(target).isFile()) {
+        add('error', 'app.route_asset_missing', `路由 ${route.routeId} 引用了不存在的资源：${asset}`, target);
+      }
+    }
+  }
+  if (requireSceneCoverage) {
+    for (const scene of sceneDirectories()) {
+      if (!routedScenes.has(scene)) add('error', 'app.scene_unrouted', `场景 ${scene} 没有 routes.js 路由`, path.join(appRoot, 'scenes', scene));
+    }
+  }
+  return [...routedScenes].sort();
 }
 
-function checkTaskArtifacts() {
-  const tests = spawnSync(process.execPath, ['scripts/cleanup-task-artifacts.mjs', 'test', '--json'], { cwd: root, encoding: 'utf8' });
-  if (tests.status !== 0) add('error', 'task_artifacts.test', (tests.stderr || tests.stdout || '任务产物清理测试失败').trim(), path.join(root, 'scripts/cleanup-task-artifacts.mjs'));
-  const stale = spawnSync(process.execPath, ['scripts/cleanup-task-artifacts.mjs', 'check', '--json'], { cwd: root, encoding: 'utf8' });
-  if (stale.status !== 0) add('error', 'task_artifacts.stale', '存在超过 24 小时的任务产物；请运行 node scripts/cleanup-task-artifacts.mjs clean', path.join(root, 'scripts/cleanup-task-artifacts.mjs'));
+function sceneFromChangedPath(file) {
+  const match = /^wego-app\/scenes\/([^/]+)\/(.+)$/.exec(file);
+  if (!match || match[2].startsWith('_iterations/')) return null;
+  return match[1];
 }
 
-function checkMetadataVersion() {
-  const changed = changedFiles();
-  const workflowOnlyFiles = new Set([
-    '.codex/skills/wego-design/SKILL.md',
-    '.codex/skills/wego-design/preview/index.html'
-  ]);
-  const systemChanged = changed.some(file => file.startsWith('.codex/skills/wego-design/') && !workflowOnlyFiles.has(file));
-  if (systemChanged && !changed.includes('.codex/skills/wego-design/metadata.json')) add('error', 'metadata.version_required', '设计系统源有变更时必须递增 metadata.version', path.join(libraryRoot, 'metadata.json'));
+function recordSceneValidatorResult(result, { code, label, scene = null, file = null }) {
+  let details = null;
+  try { details = JSON.parse(result.stdout || '{}'); } catch { /* 使用原始输出。 */ }
+  for (const warning of details?.warnings || []) {
+    add(
+      'warning',
+      warning.code || 'scene.warning',
+      `${warning.scene ? `场景 ${warning.scene}：` : scene ? `场景 ${scene}：` : ''}${warning.message || '验证建议'}`,
+      warning.file ? path.resolve(root, warning.file) : file
+    );
+  }
+  if (result.status === 0) return details;
+  const messages = (details?.errors || []).map(item => (
+    `${item.scene ? `${item.scene}：` : ''}${item.message || ''}`
+  )).filter(Boolean);
+  add(
+    'error',
+    code,
+    `${scene ? `场景 ${scene} ` : ''}未通过${label}验证：${messages.join('；') || (result.stderr || result.stdout || '未知错误').trim()}`,
+    file
+  );
+  return details;
+}
+
+function validateScenes(scenes, { runtimeAll = false } = {}) {
+  requireFiles(['scripts/validate-scene-contract.mjs', 'scripts/validate-scene-runtime.mjs']);
+  const staticAvailable = exists('scripts/validate-scene-contract.mjs');
+  const runtimeAvailable = exists('scripts/validate-scene-runtime.mjs');
+  const targets = [...new Set(scenes)].sort();
+  for (const scene of targets) {
+    const directory = path.join(appRoot, 'scenes', scene);
+    if (!fs.existsSync(directory)) continue;
+    const missing = ['scene.js', 'scene.css'].filter(file => !fs.existsSync(path.join(directory, file)));
+    if (missing.length) {
+      add('error', 'scene.file_missing', `场景 ${scene} 缺少 ${missing.join('、')}`, directory);
+      continue;
+    }
+    report.metrics.validatedScenes += 1;
+    if (staticAvailable) {
+      const contract = spawnSync(process.execPath, [
+        'scripts/validate-scene-contract.mjs',
+        relative(directory),
+        '--json'
+      ], { cwd: root, encoding: 'utf8' });
+      recordSceneValidatorResult(contract, {
+        code: 'scene.contract_failed',
+        label: '静态',
+        scene,
+        file: directory
+      });
+    }
+    if (!runtimeAll && runtimeAvailable) {
+      const runtime = spawnSync(process.execPath, [
+        'scripts/validate-scene-runtime.mjs',
+        relative(directory),
+        '--json'
+      ], { cwd: root, encoding: 'utf8' });
+      recordSceneValidatorResult(runtime, {
+        code: 'scene.runtime_failed',
+        label: '运行时',
+        scene,
+        file: directory
+      });
+    }
+  }
+  if (runtimeAll && runtimeAvailable) {
+    const runtime = spawnSync(process.execPath, [
+      'scripts/validate-scene-runtime.mjs',
+      '--all',
+      '--json'
+    ], { cwd: root, encoding: 'utf8' });
+    const details = recordSceneValidatorResult(runtime, {
+      code: 'scene.runtime_failed',
+      label: '全量运行时',
+      file: path.join(appRoot, 'scenes')
+    });
+    report.metrics.runtime = details?.metrics || {};
+  }
+}
+
+function iterationFilesForScenes(scenes) {
+  const records = [];
+  for (const scene of scenes) {
+    const iterationsRoot = path.join(appRoot, 'scenes', scene, '_iterations');
+    if (!fs.existsSync(iterationsRoot)) continue;
+    const visit = directory => {
+      for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+        const target = path.join(directory, entry.name);
+        if (entry.isDirectory()) visit(target);
+        else if (entry.isFile() && entry.name === 'iteration.json') records.push(relative(target));
+      }
+    };
+    visit(iterationsRoot);
+  }
+  return records;
+}
+
+function checkIterations({ all = false, scenes = [], explicitFiles = [] } = {}) {
+  if (all) {
+    if (runNode('scripts/iteration-record.mjs', ['check'], 'iteration.check')) {
+      const recordsRoot = path.join(appRoot, 'scenes');
+      const count = fs.existsSync(recordsRoot)
+        ? sceneDirectories().flatMap(scene => iterationFilesForScenes([scene])).length
+        : 0;
+      report.metrics.validatedIterations += count;
+    }
+    return;
+  }
+  const records = [...new Set([
+    ...explicitFiles.filter(file => exists(file)),
+    ...iterationFilesForScenes(scenes)
+  ])].sort();
+  for (const file of records) {
+    if (runNode('scripts/iteration-record.mjs', ['check', '--file', file], 'iteration.check', file)) {
+      report.metrics.validatedIterations += 1;
+    }
+  }
+}
+
+function conditionalToolTests() {
+  const mappings = [
+    {
+      matches: file => ['scripts/iteration-record.mjs', 'scripts/route-source-parser.mjs'].includes(file),
+      script: 'scripts/iteration-record.mjs',
+      args: ['test'],
+      code: 'iteration.test'
+    },
+    {
+      matches: file => ['scripts/sync-wego-app-lib.mjs', 'scripts/test-sync-wego-app-lib.mjs'].includes(file),
+      script: 'scripts/test-sync-wego-app-lib.mjs',
+      args: [],
+      code: 'sync.test'
+    },
+    {
+      matches: file => ['scripts/validate-scene-contract.mjs', 'scripts/scene-source-parser.mjs', 'scripts/test-scene-contract-tools.mjs'].includes(file),
+      script: 'scripts/test-scene-contract-tools.mjs',
+      args: [],
+      code: 'scene_contract.test'
+    },
+    {
+      matches: file => ['wego-app/js/scroll-layout.js', 'scripts/test-scroll-layout.mjs'].includes(file),
+      script: 'scripts/test-scroll-layout.mjs',
+      args: [],
+      code: 'scroll_layout.test'
+    },
+    {
+      matches: file => file === 'scripts/cleanup-task-artifacts.mjs',
+      script: 'scripts/cleanup-task-artifacts.mjs',
+      args: ['test', '--json'],
+      code: 'cleanup.test'
+    }
+  ];
+  for (const mapping of mappings) {
+    if (!changedSome(mapping.matches)) continue;
+    report.metrics.conditionalToolTests += 1;
+    runNode(mapping.script, mapping.args, mapping.code);
+  }
+}
+
+function runChangedScope() {
+  const syncChanged = changedSome(file => (
+    isDeployLibraryFile(file)
+    || file.startsWith('wego-app/lib/')
+    || file === 'scripts/sync-wego-app-lib.mjs'
+  ));
+  if (systemRuntimeChanged) checkSystemMetadata();
+  if (syncChanged) checkLibrarySync();
+
+  const hostChanged = changedSome(file => ['wego-app/index.html', 'wego-app/js/app.js', 'wego-app/js/routes.js'].includes(file));
+  let routedScenes = [];
+  if (hostChanged) routedScenes = checkAppHost(changedSet.has('wego-app/js/routes.js'));
+
+  const changedScenes = changed.map(sceneFromChangedPath).filter(Boolean);
+  const targetScenes = changedSet.has('wego-app/js/routes.js')
+    ? [...new Set([...changedScenes, ...routedScenes])]
+    : changedScenes;
+  validateScenes(targetScenes, {
+    runtimeAll: changedSet.has('scripts/validate-scene-runtime.mjs')
+  });
+
+  const explicitIterationFiles = changed.filter(file => /\/_iterations\/[^/]+\/iteration\.json$/.test(file));
+  const iterationImplementationChanged = changedSet.has('scripts/iteration-record.mjs') || changedSet.has('scripts/route-source-parser.mjs');
+  checkIterations({
+    all: changedSet.has('wego-app/js/routes.js') || iterationImplementationChanged,
+    scenes: targetScenes,
+    explicitFiles: explicitIterationFiles
+  });
+  conditionalToolTests();
+}
+
+function runSystemScope() {
+  checkSystemMetadata();
+  checkLibrarySync();
+}
+
+function runFullScope() {
+  checkSystemMetadata();
+  checkLibrarySync();
+  checkAppHost(true);
+  validateScenes(sceneDirectories(), { runtimeAll: true });
+  checkIterations({ all: true });
 }
 
 function main() {
-  if (!['changed', 'system', 'full'].includes(requestedScope)) add('error', 'args.scope', `未知范围：${requestedScope}`);
-  checkRequiredFiles();
-  if (report.errors.length === 0) {
-    const includeBusinessArtifacts = requestedScope !== 'system';
-    checkLibrarySchema();
-    checkNoLegacyRuntimeReferences();
-    checkHistoricalPlanMarkers();
-    checkAppHost(includeBusinessArtifacts);
-    checkLibrarySync();
-    checkIteration(includeBusinessArtifacts);
-    checkSceneContractTools();
-    checkDesignDecisionPrinciples();
-    checkSkillEntryBoundary();
-    checkTaskArtifacts();
-    checkMetadataVersion();
+  if (!['changed', 'system', 'full'].includes(requestedScope)) {
+    add('error', 'args.scope', `未知范围：${requestedScope}`);
+  } else {
+    checkSkillFlow();
+    if (requestedScope === 'changed') runChangedScope();
+    else if (requestedScope === 'system') runSystemScope();
+    else runFullScope();
   }
-  report.metrics.changedFiles = changedFiles().length;
-  if (jsonOutput) console.log(JSON.stringify(report, null, 2));
-  else {
+
+  if (jsonOutput) {
+    console.log(JSON.stringify({ ...report, ok: report.errors.length === 0 }, null, 2));
+  } else {
     console.log(report.errors.length ? 'wego-design 守门验证失败' : 'wego-design 守门验证通过');
     for (const item of report.errors) console.error(`- [${item.code}] ${item.file || ''} ${item.message}`);
     for (const item of report.warnings) console.warn(`- [${item.code}] ${item.file || ''} ${item.message}`);

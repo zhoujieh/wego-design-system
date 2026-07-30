@@ -36,7 +36,7 @@
     "页面根与主滚动区始终通栏，不承担业务内容横向边距。",
     "内容间距按语义内容组声明；同一组只有一个 spacing owner。",
     "navbar、sticky region 与 bottom action bar 使用通栏 surface，内部留白由组件或明确的 inner 容器承担。",
-    "所有 sticky、fixed、scroll 与 overlay 区域必须在 layout_contract 中登记并绑定层级角色。",
+    "sticky、fixed、scroll 与 overlay 的层级和遮挡关系由实际 DOM、CSS 与运行时验证，不再要求场景重复登记清单。",
     "页面内 z-index 不得越过 page-local 范围；跨场景覆盖必须挂载到对应 app-global 或 overlay-local host。"
   ]
 }

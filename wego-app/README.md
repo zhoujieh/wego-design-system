@@ -6,7 +6,6 @@
 - 路由：hash route，例如 `#/my-permission-management`
 - 场景：`scenes/{中文业务场景}/scene.js`
 - 样式：`scenes/{中文业务场景}/scene.css`
-- 设计决策：`scenes/{中文业务场景}/design-decisions.json`
 - 统一原型数据库：`data/prototype-db.js`
 - 正式迭代：`scenes/{主业务场景}/_iterations/{日期}-{iteration_id}-{标题}/`
 - 资源：`lib/` 为设计系统部署副本
@@ -15,4 +14,4 @@
 
 需要商品、素材、发布者或动态内容的场景统一从 `window.WEGO_PROTOTYPE_DB` 读取对应数据。此类场景不得在 `scene.js` 里临时维护独立商品库；新增鞋子、包袋等品类先补 `data/prototype-db.js`，再由场景按 `product_id` 或 `asset_id` 引用。
 
-主 App 的 `scene.js`、`scene.css` 与提取生成的 `design-decisions.json` 始终表示当前最新状态；`_iterations/` 保存正式业务迭代的范围确认、阶段记录，以及仅在用户明确要求冻结时生成的交付快照。一次迭代只归档在唯一主业务场景下，关联场景不重复保存同一迭代。
+主 App 的 `scene.js` 与 `scene.css` 始终表示当前最新状态；设计系统消费、交互、滚动和视觉结果由验证脚本直接从源码与浏览器取得，不维护场景镜像合同。`_iterations/` 保存正式业务迭代的范围确认、阶段记录，以及仅在用户明确要求冻结时生成的交付快照。一次迭代只归档在唯一主业务场景下，关联场景不重复保存同一迭代。

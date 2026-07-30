@@ -225,21 +225,15 @@ function stageOutputErrors(record, file) {
 function sceneRouteSemantic(scene, repositoryRoot) {
   const routesFile = path.join(repositoryRoot, routesRelativePath);
   if (!fs.existsSync(routesFile) || !fs.statSync(routesFile).isFile()) return { error: `${routesRelativePath} 不存在` };
-  let routeId = null;
-  try {
-    const decision = JSON.parse(fs.readFileSync(path.join(repositoryRoot, `wego-app/scenes/${scene}/design-decisions.json`), 'utf8'));
-    routeId = typeof decision.route_id === 'string' && decision.route_id ? decision.route_id : null;
-  } catch { /* 决策文件由独立文件指纹报告错误，路由仍可按资源路径定位。 */ }
   const expectedScript = `scenes/${scene}/scene.js`;
   const expectedStyle = `scenes/${scene}/scene.css`;
   let records;
   try { records = parseRouteRegistrySource(fs.readFileSync(routesFile, 'utf8')); }
   catch (error) { return { error: error.message }; }
   const candidates = records.filter(record => (
-    record.scene === scene || record.script === expectedScript || record.style === expectedStyle || (routeId && record.routeId === routeId)
+    record.scene === scene || record.script === expectedScript || record.style === expectedStyle
   ));
   if (!candidates.length) return { error: `场景 ${scene} 的路由条目不存在` };
-  if (routeId && !candidates.some(record => record.routeId === routeId)) return { error: `场景 ${scene} 缺少合同 route_id：${routeId}` };
   if (candidates.some(record => record.script !== expectedScript || record.style !== expectedStyle)) return { error: `场景 ${scene} 存在未绑定本场景 scene.js/scene.css 的路由条目` };
   return { value: candidates.sort((left, right) => {
     const leftKey = stableJson(left);
@@ -256,7 +250,7 @@ function expectedFingerprintDescriptors(record) {
   }
   if (Array.isArray(record.affected_scenes)) {
     for (const scene of record.affected_scenes.filter(isSafeSceneName)) {
-      for (const file of ['scene.js', 'scene.css', 'design-decisions.json']) {
+      for (const file of ['scene.js', 'scene.css']) {
         const relative = `wego-app/scenes/${scene}/${file}`;
         targets.push({ key: relative, kind: 'file', relative });
       }
@@ -475,7 +469,7 @@ function init() {
   save(file, record, 'init');
 }
 function check() {
-  const records = files(path.join(root, 'wego-app/scenes'));
+  const records = fileArg ? [requireFile()] : files(path.join(root, 'wego-app/scenes'));
   const errors = records.flatMap(file => validate(load(file), file));
   if (errors.length) fail(errors.join('\n'));
   console.log(`${records.length} 个迭代通过检查`);
@@ -523,8 +517,10 @@ function validatePrototypeScenes(record) {
   if (!Array.isArray(record.affected_scenes) || !record.affected_scenes.length) fail('submit-prototype 要求 affected_scenes 为非空数组');
   for (const scene of record.affected_scenes) {
     const sceneDirectory = `wego-app/scenes/${scene}`;
-    const result = spawnSync(process.execPath, ['scripts/validate-scene-contract.mjs', sceneDirectory, '--json'], { cwd: root, encoding: 'utf8' });
-    if (result.status !== 0) fail(`${sceneDirectory} 未通过场景合同：${(result.stderr || result.stdout || '未知错误').trim()}`);
+    for (const validator of ['scripts/validate-scene-contract.mjs', 'scripts/validate-scene-runtime.mjs']) {
+      const result = spawnSync(process.execPath, [validator, sceneDirectory, '--json'], { cwd: root, encoding: 'utf8' });
+      if (result.status !== 0) fail(`${sceneDirectory} 未通过场景验证：${(result.stderr || result.stdout || '未知错误').trim()}`);
+    }
   }
 }
 function collectFingerprints(record, repositoryRoot = root) {
@@ -724,7 +720,6 @@ function test() {
     fs.mkdirSync(path.join(fixtureRoot, 'scripts'), { recursive: true });
     fs.writeFileSync(path.join(sceneRoot, 'scene.js'), 'window.testScene = true;\n');
     fs.writeFileSync(path.join(sceneRoot, 'scene.css'), '.test { color: var(--color-text); }\n');
-    fs.writeFileSync(path.join(sceneRoot, 'design-decisions.json'), '{"route_id":"test-route"}\n');
     const currentRoute = `{ routeId: 'test-route', scene: '${scene}', entry: { type: 'host-tab', tab: 'my', label: '测试' }, script: 'scenes/${scene}/scene.js', style: 'scenes/${scene}/scene.css' }`;
     const detailRoute = `{ routeId: 'test-route-detail', scene: '${scene}', script: './scenes/${scene}/scene.js', style: './scenes/${scene}/scene.css' }`;
     const unrelatedRoute = "{ routeId: 'other-route', script: 'scenes/其他场景/scene.js', style: 'scenes/其他场景/scene.css' }";
@@ -735,6 +730,7 @@ function test() {
     fs.writeFileSync(routesFile, `window.WEGO_APP_ROUTES = [${currentRoute}, ${detailRoute}];\n`);
     fs.writeFileSync(path.join(fixtureRoot, '.codex/skills/wego-design/metadata.json'), '{"version":411}\n');
     fs.writeFileSync(path.join(fixtureRoot, 'scripts/validate-scene-contract.mjs'), `import fs from 'node:fs';\nimport path from 'node:path';\nconst source = fs.readFileSync(path.join(process.argv[2], 'scene.js'), 'utf8');\nif (source.includes('INVALID_SCENE')) { console.error('场景合同失败'); process.exit(1); }\n`);
+    fs.writeFileSync(path.join(fixtureRoot, 'scripts/validate-scene-runtime.mjs'), `import fs from 'node:fs';\nimport path from 'node:path';\nconst source = fs.readFileSync(path.join(process.argv[2], 'scene.js'), 'utf8');\nif (source.includes('INVALID_RUNTIME')) { console.error('场景运行时失败'); process.exit(1); }\n`);
     const iterationDirectory = path.join(sceneRoot, '_iterations/20260715-test-测试');
     const iterationFile = path.join(iterationDirectory, 'iteration.json');
     const iterationArgument = path.relative(fixtureRoot, iterationFile).split(path.sep).join('/');
@@ -795,8 +791,12 @@ function test() {
     fs.writeFileSync(iterationFile, `${JSON.stringify(awaitingConfirmation, null, 2)}\n`);
     fs.writeFileSync(path.join(sceneRoot, 'scene.js'), 'INVALID_SCENE\n');
     const invalidConfirmation = run(['confirm-prototype', `--file=${iterationArgument}`]);
-    assert(invalidConfirmation.status !== 0 && (invalidConfirmation.stderr || '').includes('场景合同'), 'confirm-prototype 未重新运行场景合同');
-    assert(JSON.parse(fs.readFileSync(iterationFile, 'utf8')).status === 'awaiting-prototype-confirmation', '场景合同失败后不应写入原型确认');
+    assert(invalidConfirmation.status !== 0 && (invalidConfirmation.stderr || '').includes('场景验证'), 'confirm-prototype 未重新运行静态场景验证');
+    assert(JSON.parse(fs.readFileSync(iterationFile, 'utf8')).status === 'awaiting-prototype-confirmation', '静态场景验证失败后不应写入原型确认');
+    fs.writeFileSync(path.join(sceneRoot, 'scene.js'), 'INVALID_RUNTIME\n');
+    const invalidRuntimeConfirmation = run(['confirm-prototype', `--file=${iterationArgument}`]);
+    assert(invalidRuntimeConfirmation.status !== 0 && (invalidRuntimeConfirmation.stderr || '').includes('场景验证'), 'confirm-prototype 未运行真实页面验证');
+    assert(JSON.parse(fs.readFileSync(iterationFile, 'utf8')).status === 'awaiting-prototype-confirmation', '运行时场景验证失败后不应写入原型确认');
     fs.writeFileSync(path.join(sceneRoot, 'scene.js'), 'window.testScene = true;\n');
     const validConfirmation = run(['confirm-prototype', '--file', iterationArgument]);
     assert(validConfirmation.status === 0, `合法 confirm-prototype 失败：${(validConfirmation.stderr || validConfirmation.stdout).trim()}`);

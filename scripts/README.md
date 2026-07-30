@@ -1,17 +1,20 @@
 # scripts 目录说明
 
-不是每个脚本都需要在每次任务中运行。该目录按职责分为四类；统一验证优先使用 `validate-wego-design.mjs`，不要手工串行执行所有测试。
+统一验证优先使用 `validate-wego-design.mjs`。普通任务不手工串行运行全部脚本，工具与回归测试按改动范围触发。
 
-## 工作流入口
+## 常用入口
 
 | 脚本 | 使用时机 |
 | --- | --- |
-| `validate-wego-design.mjs` | 统一验证入口；内部组合组件一致性与核心守卫 |
-| `iteration-record.mjs` | 创建、确认、失效、冻结或检查业务迭代 |
-| `extract-design-decisions.mjs` | 场景源码变化后重新提取 `design-decisions.json` |
-| `validate-scene-contract.mjs` | 验证单个业务场景 |
-| `sync-wego-app-lib.mjs` | 设计系统源变化后同步部署副本 |
+| `validate-wego-design.mjs` | 仓库统一验证；默认 `changed`，支持 `--scope=changed|system|full` 和 `--strict` |
+| `validate-scene-contract.mjs` | 从源码验证单个场景的路由、组件、Token、交互和布局硬约束 |
+| `validate-scene-runtime.mjs` | 自动启动临时服务，用 Playwright 检查单场景或 `--all` 场景的 375/393 运行结果 |
+| `iteration-record.mjs` | 创建、提交、确认、失效、冻结或检查业务迭代 |
 | `validate-component-contract-parity.mjs` | 验证组件契约、Preview、索引与生成 CSS 一致性 |
+| `sync-wego-app-lib.mjs` | 设计系统源变化后同步部署副本 |
+| `build-pages-artifact.mjs` | 构建 GitHub Pages 发布产物 |
+
+场景源码变化后直接运行静态和运行时守卫，无需生成中间证据文件；浏览器证据不写回场景。
 
 ## 按需维护工具
 
@@ -21,21 +24,15 @@
 | `cleanup-task-artifacts.mjs` | 清理 `.uploads/`、`output/`、`.playwright-cli/` 临时产物 |
 | `generate-scene-skeleton.mjs` | 仅在需要重新采样显式骨架模板时运行 |
 
-这些脚本不是每次业务迭代的固定步骤。
+## 内部模块与定向回归
 
-## 内部模块
+`route-source-parser.mjs`、`scene-source-parser.mjs` 和 `validate-wego-design-core.mjs` 由入口脚本调用，不作为普通人工命令。
 
-- `prompt-contract-schema.mjs`
-- `route-source-parser.mjs`
-- `scene-source-parser.mjs`
-- `validate-wego-design-core.mjs`
+以下回归测试只在对应实现变化时运行，不进入普通、system 或 full 验证的无条件主链：
 
-它们被入口脚本导入或编排，不作为普通人工命令。
+- `test-scene-contract-tools.mjs`
+- `test-sync-wego-app-lib.mjs`
+- `test-scroll-layout.mjs`
+- `iteration-record.mjs test`
 
-## 自动守卫与回归测试
-
-- `validate-design-decision-method.mjs`
-- `validate-skill-entry-boundary.mjs`
-- 所有 `test-*.mjs`
-
-这些文件由 `validate-wego-design.mjs` 自动调用，用于防止 Schema、解析器、同步和技能边界回退；不要求每次手工逐个运行，但属于当前工作流必需的可执行守卫。
+守卫只验证 Schema、源码或真实运行结果，不检查文档标题、固定句子、引用顺序或人工自证字段。

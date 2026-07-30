@@ -81,12 +81,6 @@ function fileExists(relative) {
   return fs.existsSync(path.join(libraryRoot, relative));
 }
 
-function validRuleRef(ref) {
-  const [relative] = String(ref).split('#');
-  if (!relative || /(?:^|\/)specs(?:\/|$)|wego-ux|wego-tests/.test(relative)) return false;
-  return fileExists(relative);
-}
-
 function textNodesByClass(html, className) {
   const escaped = className.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   return [...html.matchAll(new RegExp(`<[^>]+class=["'][^"']*\\b${escaped}\\b[^"']*["'][^>]*>([^<]*)<\\/`, 'g'))].map(match => match[1].trim());
@@ -112,21 +106,12 @@ if (uiKit?.schemaVersion !== 5 || !Array.isArray(uiKit?.pagePatterns)) fail('uik
 if (library?.schemaVersion !== 7) fail('library.schema', 'library-consumption.json 必须使用 schemaVersion 7', 'library-consumption.json');
 if (pageLayers?.schemaVersion !== 1 || !pageLayers?.scopes) fail('layers.schema', 'page-layers.json 必须使用 schemaVersion 1 并声明 scopes', 'page-layers.json');
 const scrollBottomRule = library?.layoutContract?.scrollBottomRule;
-if (scrollBottomRule?.enforcedFromVersion !== 482
-  || scrollBottomRule?.baseToken !== 'var(--safe-area-bottom-content)'
-  || !String(scrollBottomRule?.baseFormula || '').includes('40px')
-  || !String(scrollBottomRule?.obstructionRule || '').includes('WegoScrollLayout')) {
-  fail('library.scroll_bottom_rule', '消费契约必须定义从版本 482 生效的 40px + 底部安全区基础空间，并要求悬浮遮挡叠加实测 clearance', 'library-consumption.json');
-}
-for (const [relative, content] of [
-  ['../../../AGENTS.md', read('../../../AGENTS.md')],
-  ['../shared/references/design-decisions.md', read('../shared/references/design-decisions.md')],
-  ['page-layers.json', JSON.stringify(pageLayers || {})],
-  ['preview/layout-layers.html', read('preview/layout-layers.html')]
-]) {
-  if (content.includes('scrollBottomRule') || (content.includes('--safe-area-bottom-content') && content.includes('40px'))) {
-    fail('library.scroll_bottom_authority_duplicate', `${relative} 不得复制滚动底部避让的 Token、公式或权威规则；唯一来源是 library-consumption.json#/layoutContract/scrollBottomRule`, relative);
-  }
+const scrollBottomTokens = vars(String(scrollBottomRule?.baseToken || ''));
+if (!Number.isInteger(scrollBottomRule?.enforcedFromVersion)
+  || scrollBottomRule.enforcedFromVersion < 1
+  || scrollBottomTokens.length !== 1
+  || !declaredTokens.has(scrollBottomTokens[0])) {
+  fail('library.scroll_bottom_rule', '滚动底部避让必须声明生效版本与一个现存基础 Token', 'library-consumption.json');
 }
 if (!/\.phone-screen\s*\{[\s\S]*?transform:\s*translateZ\(0\)\s*;/.test(scaffold)) {
   fail('uikit.showcase_fixed_containment', 'scaffold.css 的 phone-screen 必须为 fixed 浮层建立手机屏幕 containing block', 'scaffold.css');
@@ -140,9 +125,13 @@ const patternIds = new Set();
 for (const pattern of uiKit?.pagePatterns || []) {
   if (!pattern?.id || patternIds.has(pattern.id)) fail('uikit.pattern_id', `页面范式 id 缺失或重复：${pattern?.id || '未声明'}`, 'uikit-plan.json');
   patternIds.add(pattern.id);
-  if (!Array.isArray(pattern.componentCandidates) || !pattern.componentCandidates.length) fail('uikit.pattern_candidates', `页面范式 ${pattern.id} 必须声明非空 componentCandidates`, 'uikit-plan.json');
-  for (const slug of pattern.componentCandidates || []) if (!registered.has(slug)) fail('uikit.pattern_component', `页面范式 ${pattern.id} 使用未注册组件：${slug}`, 'uikit-plan.json');
-  for (const field of ['entry', 'qualityReport']) if (!pattern.uiKit?.[field] || !fileExists(pattern.uiKit[field])) fail('uikit.pattern_asset', `页面范式 ${pattern.id} 缺少有效 UI Kit ${field}`, pattern.uiKit?.[field] || 'uikit-plan.json');
+  if (pattern.componentCandidates !== undefined && !Array.isArray(pattern.componentCandidates)) {
+    fail('uikit.pattern_candidates', `页面范式 ${pattern.id} 的 componentCandidates 必须是可选数组`, 'uikit-plan.json');
+  }
+  for (const slug of Array.isArray(pattern.componentCandidates) ? pattern.componentCandidates : []) {
+    if (!registered.has(slug)) fail('uikit.pattern_component', `页面范式 ${pattern.id} 的组件读取提示未注册：${slug}`, 'uikit-plan.json');
+  }
+  if (!pattern.uiKit?.entry || !fileExists(pattern.uiKit.entry)) fail('uikit.pattern_asset', `页面范式 ${pattern.id} 缺少有效 UI Kit entry`, pattern.uiKit?.entry || 'uikit-plan.json');
   if (!pattern.presentation || !['type', 'transition', 'dismissAction', 'overlayLevel'].every(field => typeof pattern.presentation[field] === 'string' && pattern.presentation[field]) || typeof pattern.presentation.coversTabBar !== 'boolean') fail('uikit.pattern_presentation', `页面范式 ${pattern.id} 缺少完整 presentation`, 'uikit-plan.json');
   const entryRelative = pattern.uiKit?.entry;
   if (entryRelative && fileExists(entryRelative)) {
@@ -167,31 +156,7 @@ for (const pattern of uiKit?.pagePatterns || []) {
       const active = `assets/icons/tab-active-${tab}.svg`;
       if (!fileExists(normal) && !fileExists(active)) fail('uikit.asset_missing', `${entryRelative} 引用了不存在的 Tab 图标：${tab}`, entryRelative);
     }
-    if (pattern.id === 'entity-form') {
-      if (/className=["']form-body[^"']*form-body--vertical/.test(entry)) {
-        fail('uikit.entity_form_default_layout', `${entryRelative} 是 entity-form 标准母版，默认全部 form 字段必须保持左右布局，不得使用 form-body--vertical`, entryRelative);
-      }
-    }
   }
-}
-for (const pattern of uiKit?.pagePatterns || []) {
-  const relative = pattern.uiKit?.qualityReport;
-  if (!relative || !fileExists(relative)) {
-    fail('uikit.quality_report_missing', `页面范式 ${pattern.id || '未命名'} 缺少质量报告`, relative || 'uikit-plan.json');
-    continue;
-  }
-  const quality = json(relative);
-  if (!quality) continue;
-  if (quality.schemaVersion !== 4 || !Number.isInteger(quality.designSystemVersion) || quality.designSystemVersion < 1 || quality.kitType !== pattern.id) fail('uikit.quality_report_schema', `${relative} 必须记录 schemaVersion、designSystemVersion（正整数）与 kitType`, relative);
-  if (quality.designSystemParity?.status !== 'passed' || !quality.designSystemParity?.checked_at || !Array.isArray(quality.designSystemParity?.checks) || !quality.designSystemParity.checks.length) fail('uikit.quality_report_parity', `${relative} 必须记录已通过的设计系统一致性检查`, relative);
-  const used = [...(quality.coreComponentsUsed || []), ...(quality.supportComponentsUsed || [])];
-  for (const slug of used) if (!registered.has(slug)) fail('uikit.quality_report_component', `${relative} 使用未注册组件：${slug}`, relative);
-  if (!Array.isArray(quality.inventedComponents) || quality.inventedComponents.length) fail('uikit.quality_report_invented', `${relative} 不得记录自造组件`, relative);
-  if (!quality.qualityGates || !Object.keys(quality.qualityGates).length) fail('uikit.quality_gate_missing', `${relative} 必须至少声明一个质量门禁`, relative);
-  for (const [gate, result] of Object.entries(quality.qualityGates || {})) {
-    if (result?.checked !== true || !Array.isArray(result?.violations) || result.violations.length) fail('uikit.quality_gate', `${relative} 的质量门禁未通过：${gate}`, relative);
-  }
-  if (JSON.stringify(quality).match(/(?:^|["/])specs\/(?:[^"\s]+)|wego-ux(?!system-iterate)|wego-tests/)) fail('uikit.quality_report_legacy', `${relative} 不得引用已删除规则或技能`, relative);
 }
 
 for (const item of index?.components || []) {
@@ -209,13 +174,6 @@ for (const item of index?.components || []) {
   const contract = json(contractRelative);
   if (!contract) continue;
   if (contract.schemaVersion !== 4 || contract.slug !== slug) fail('component.schema', `${contractRelative} 必须使用 schemaVersion 4 且 slug 与索引一致`, contractRelative);
-  if (['tokensConsumed', 'specRefs', 'cssCustomProperties', 'designTokens'].some(field => Object.hasOwn(contract, field))) fail('component.legacy_field', `${contractRelative} 不得保留重复 Token、生成规则或隐式业务覆盖字段`, contractRelative);
-  if (JSON.stringify(contract).includes('specs/') || /wego-ux(?!system-iterate)|wego-tests/.test(JSON.stringify(contract))) {
-    fail('component.legacy_reference', `${contractRelative} 不得引用 specs、wego-ux 或 wego-tests`, contractRelative);
-  }
-  if (!Array.isArray(contract.ruleRefs) || !contract.ruleRefs.length || contract.ruleRefs.some(ref => !validRuleRef(ref))) {
-    fail('component.rule_refs', `${contractRelative}.ruleRefs 必须全部指向现存权威来源，且不得指向 specs 或旧技能`, contractRelative);
-  }
   if (contract.provenance?.preview !== previewRelative || contract.provenance?.cssSource !== previewRelative) {
     fail('component.provenance', `${contractRelative}.provenance 必须指向索引中的 Preview`, contractRelative);
   }
@@ -229,10 +187,6 @@ for (const item of index?.components || []) {
   }
   if (['navbar', 'bottom-action-bar', 'sticky-region', 'actionsheet', 'modal', 'dialog', 'toast', 'popover', 'popmenu'].includes(slug) && !contract.layerContract) {
     fail('component.layer_contract_missing', `${contractRelative} 是层级组件，必须声明 layerContract`, contractRelative);
-  }
-  for (const source of contract.provenance?.externalSources || []) {
-    if (!source?.name || (!source.url && !source.version && !source.sourceFile)) fail('component.external_source', `${contractRelative} 的 externalSources 必须有名称和 URL、版本或 sourceFile`, contractRelative);
-    if (source.sourceFile && !fs.existsSync(path.join(root, source.sourceFile))) fail('component.external_source_missing', `${contractRelative} 的 sourceFile 不存在：${source.sourceFile}`, contractRelative);
   }
   const preview = read(previewRelative);
   const block = markerBlock(preview, previewRelative);
@@ -356,14 +310,6 @@ for (const item of index?.components || []) {
     if (!textNodesByClass(preview, 'metric__decimal').some(value => /^\.\d+$/.test(value))) fail('metric.decimal_example', `${previewRelative} 必须展示独立的小数节点`, previewRelative);
   }
 }
-
-for (const relative of ['library-consumption.json', 'uikit-plan.json', 'components/index.json']) {
-  const content = read(relative);
-  if (/(?:^|["/])specs\/(?:[^"\s]+)|wego-ux(?!system-iterate)|wego-tests/.test(content)) fail('library.legacy_reference', `${relative} 不得引用 specs 路径或旧技能`, relative);
-}
-
-const previewIndex = read('preview/index.html');
-for (const slug of registered) if (!previewIndex.includes(`data-slug="${slug}"`)) warnings.push({ code: 'preview.index_missing', message: `preview/index.html 未列出 ${slug}`, file: 'preview/index.html' });
 
 const report = { ok: errors.length === 0, errors, warnings, metrics: { registeredComponents: registered.size, declaredTokens: declaredTokens.size } };
 if (process.argv.includes('--json')) console.log(JSON.stringify(report, null, 2));

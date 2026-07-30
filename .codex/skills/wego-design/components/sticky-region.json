@@ -45,7 +45,7 @@
   },
   "usageHints": [
     "用于搜索栏、筛选栏、二级工具栏和可压缩摘要；navbar 仍直接消费 navbar 组件。",
-    "先在 layout_contract.sticky_regions 登记，再绑定 WegoScrollLayout。",
+    "存在动态吸顶或底部遮挡时绑定 WegoScrollLayout，并以实际尺寸验证滚动避让。",
     "多个区域按 stack_order 排序，运行时以实测高度计算 offset。",
     "内部横向留白通过 --sticky-region-inline-inset 配置为正式 page margin Token。"
   ],

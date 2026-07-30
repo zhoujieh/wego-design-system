@@ -1,32 +1,29 @@
 # 工作流迭代与经验沉淀
 
-> 角色：用户明确要求时的经验候选与正式规则升级流程。
+> 仅在用户明确要求沉淀经验、补充规则或优化工作流时读取。普通页面设计、修复和验收不进入本流程。
 
-## 1. 入口门禁
+## 入口与归属
 
-只有用户明确要求审查并沉淀经验、补充规则、复盘形成经验或优化工作流，才允许更新候选池。普通修复只修改权威源和守卫，不自动沉淀经验。
+经验先判断“问题首次产生在哪里、哪个技能应做正确决定、唯一权威源和实际消费者是什么”：
 
-## 2. 归属
+- 业务目标、范围、入口、状态和数据：`wego-product`
+- 页面设计、组件消费、交互和视觉：`wego-design`
+- 组件、Preview、Token、UI Kit、消费规则和守卫：`wego-uxsystem-iterate`
 
-按“问题首次产生 → 应做正确决定的技能 → 唯一权威源 → 运行时消费者 → 验收守卫”判断。正式升级前必须先对比目标权威源和相邻消费者；已有同义规则时只合并、补齐或修正追溯，不新增平行表述。
+已有同义规则时只修正唯一权威源，不新增平行表述。
 
-- 业务目标、范围、状态、入口：wego-product。
-- 场景设计消费、组件计划、路由、交互、状态、视觉：wego-design。
-- 组件、Preview、Token、UI Kit、设计系统缺口、消费规则与守卫：wego-uxsystem-iterate。
+## 候选与升级
 
-## 3. 候选与升级
+只有用户明确要求沉淀时，候选才写入 `experience/candidates.json`。同类问题累计到确认阈值后进入 `awaiting-confirmation`；用户确认前不得修改正式规则。
 
-候选只写 `experience/candidates.json`。同类问题累计证据；达到阈值后变为 `awaiting-confirmation`，用户确认前不得修改正式规则。
+升级时使用目标来源已有的表达方式：原则保留稳定 `rule-id`，组件和结构化资源使用自身 Schema。只同步直接消费者；不生成规则投影、场景合同镜像或措辞检查。只有能够从源码或运行结果客观验证的要求才增加守卫。
 
-确认后必须在目标权威源的原生 Schema 中表达与 `applies_when`、`avoid_when`、`exceptions`、`fallback` 等价的适用、禁用、例外和回退语义：Markdown 方法规则可直接使用这些字段或紧邻 `rule-id` 的明确条款；组件、Token、资产、UI Kit 和消费 JSON 必须使用自身的 `usageHints`、`doNotInvent`、`behavior`、`appliesWhen`、`excludeWhen`、消费规则等原生字段，不得为了经验升级发明平行字段。候选记录必须写清唯一精确落点、简短约束摘要、运行时消费者和可执行验证守卫。顶层页面判断可落入 `.codex/skills/shared/references/design-decisions.md` 的前提是：它跨场景复用、直接约束产品阶段 `prototype_brief` 或设计阶段 `prompt_contract`，且不属于业务事实、组件内部结构、页面范式、运行时实现、资源消费、场景合同字段或测试方法。组件、Token、资产、UI Kit、宿主运行和守卫类规则必须落到对应权威源，设计原则只保留必要裁决语义。规则升级后更新候选状态为 `promoted`，并运行：
+完成后删除已落地候选；正式规则和 Git 历史承担追踪，候选池只保留尚待确认的事项。然后运行：
 
 ```bash
-node scripts/validate-component-contract-parity.mjs
-node scripts/validate-design-decision-method.mjs
-node scripts/validate-skill-entry-boundary.mjs
-node scripts/validate-wego-design.mjs
+node scripts/validate-wego-design.mjs --scope=system --strict
 ```
 
-## 4. scenarioTypeRegistry
+## scenarioTypeRegistry
 
-仅登记成熟且被运行时消费的类型。候选、历史技能职责、次数和单场景特例不得进入注册表。
+只登记成熟且被运行时消费的类型。候选、历史技能职责、次数和单场景特例不得进入注册表。

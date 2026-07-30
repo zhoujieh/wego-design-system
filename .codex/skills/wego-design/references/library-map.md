@@ -4,7 +4,7 @@
 
 | 领域 | 权威来源 | 使用方式 |
 | --- | --- | --- |
-| 设计决策原则 | `../../shared/references/design-decisions.md` | 产品范围确认和设计输出共用，先据此裁决清晰、高效、一致与美观。 |
+| 设计原则 | `../../shared/references/design-principles.md` | 产品范围确认和设计输出共用，先据此裁决清晰、高效、一致与美观。 |
 | 交互原型设计方法 | `./interaction-prototype-design.md` | 已确认简报后先形成设计意图、语义区域和精确范式/自主组合方案，再进入组件映射。 |
 | 实际 CSS 变量 | `../colors_and_type.css` | `:root` 中已声明的变量名是唯一可用 Token 名称。 |
 | Token 结构 | `../css.json` | 仅用于理解 palette、语义和层级，不推导 CSS 变量名。 |
@@ -13,10 +13,10 @@
 | 组件实现参考 | `../preview/component-{slug}.html` | Preview-first 的 DOM、class、Token、间距与状态依据。 |
 | 聚合组件样式 | `../components.css` | 从 Preview 生成；只读，禁止手工修改。 |
 | 明确页面范式 | `../uikit-plan.json`、`../ui_kits/*/index.html` | 仅在完整满足 pagePattern 条件时读取对应范式、presentation 与候选组件；未命中不读近似 UI Kit，使用 composed 语义区域流程。 |
-| 设计库消费边界 | `../library-consumption.json` | 组件计划、页面边距模式与 Token 映射、Token 允许范围、宿主和部署副本规则；不重复维护技能读取顺序。 |
+| 设计库消费边界 | `../library-consumption.json` | 按需读取入口、页面边距与 Token 允许范围、宿主和部署副本规则。 |
 | 图标、字体、图片 | `../assets/*`、`../iconfont.css` | 仅使用已交付资产和已注册图标。 |
 | 场景宿主 | `../../../../wego-app/index.html`、`../../../../wego-app/js/routes.js` | 唯一宿主和 hash route 注册。 |
 | 场景模块 | `../../../../wego-app/scenes/{中文业务场景}/scene.js`、`scene.css` | 场景模板、交互和业务布局。 |
-| 可执行守卫 | `../../../../scripts/*.mjs` | 组件一致性、场景合同、同步和全量验证。 |
+| 可执行守卫 | `../../../../scripts/*.mjs` | 组件一致性、场景源码、真实浏览器、同步和全量验证。 |
 
 不得建立、读取或引用自动生成规则文档；运行时只读取本表中的权威来源。
