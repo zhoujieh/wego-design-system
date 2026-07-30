@@ -66,7 +66,7 @@
 <!-- rule-id: wego-consistency-reuse-component -->
 **正式组件优先**：优先复用正式组件及稳定变体，新形式必须有明确、可验证的收益。
 
-## 克制与可用
+## 美观
 
 <!-- rule-id: wego-aesthetics-minimal-professional -->
 **简洁可信**：视觉专业、安全、有温度，美观不能覆盖可用性。
