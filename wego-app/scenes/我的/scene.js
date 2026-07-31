@@ -1,4 +1,5 @@
-window.WegoApp.registerScene('my', {
+window.WegoApp.registerScene({
+  routeId: 'my',
   title: '我的',
   mount: function (container) {
     container.innerHTML = `
