@@ -66,7 +66,8 @@
 
 - **分支与 PR**：每人/每需求使用 `feature/<owner>-<scene>` 分支；用户要求推送后，通过 PR 自动合并到 `main`。
 - **开工前先拉取**：每次新会话/新任务开始前执行 `git pull --rebase origin main`，确保基于最新 `main`；创建 PR 前再次 rebase 到最新 `main` 并解决冲突。
-- **场景认领（防冲突核心）**：并发修改时，开工前在 `claims/<agent-id>.json` 写入自己负责的场景，并运行 `node scripts/validate-claims.mjs` 确认无他人重复认领；完成后把 `status` 改为 `released`/`done`。不要两个 Agent 改同一场景目录。
+<!-- rule-id: scene-must-claim-before-edit -->
+- **场景认领（强制前置）**：开工前必须在 `claims/<agent-id>.json` 认领本次负责的场景目录，并运行 `node scripts/validate-claims.mjs` 确认无冲突；不判断是否并发，单人开发也必须认领。认领期间场景目录由该 Agent 独占，他人不得修改。完成后把 `status` 改为 `released`/`done` 释放。
 - **路由生成式**：新增或修改场景路由时只编辑其目录下的 `route.json`，再运行 `node scripts/build-routes.mjs` 重新生成 `wego-app/js/routes.js`；**不要手改 `routes.js`**，CI 以 `build-routes.mjs --check` 校验一致性。
 - **设计系统单写**：`wego-app/lib/` 与 `components.css` 是生成物；仅执行 `wego-uxsystem-iterate` 任务的 Agent 可改 `.codex/skills/wego-design/` 权威源并运行 `sync-wego-app-lib.mjs`，其它 Agent 只读消费，不得改源。
 - 普通改动运行 `node scripts/validate-wego-design.mjs`。
