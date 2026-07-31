@@ -37,12 +37,13 @@
   "usageHints": [
     "layout-scroll 放在 layout-page__body 内，作为页面唯一主滚动区。",
     "横向滚动必须使用 layout-scroll-row，不得在 layout-scroll 上开启横向滚动。",
-    "modal/dialog/actionsheet/overlay 内部滚动不计入本约束，由各浮层组件自行约定。"
+    "modal/dialog/actionsheet/overlay 等浮层组件的 body/list 自带 overflow-y:auto，不使用 layout-scroll；浮层内部的信息分区仍可用 layout-section 等嵌入级 Layout 组件。"
   ],
   "doNotInvent": [
     "不要在场景内创建第二个 layout-scroll 或第二个纵向滚动容器。",
     "不要给 layout-scroll 设置横向 overflow:auto。",
-    "不要让 layout-scroll 承担业务内容横向边距。"
+    "不要让 layout-scroll 承担业务内容横向边距。",
+    "不要把 layout-scroll 放进 modal__body / actionsheet__list 等自带 overflow-y 的浮层滚动容器内部；浮层内部直接用 layout-section 等嵌入级组件。"
   ],
   "domAnatomy": {
     "root": ".layout-scroll",

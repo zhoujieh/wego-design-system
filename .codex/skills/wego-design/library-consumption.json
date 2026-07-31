@@ -23,7 +23,7 @@
     },
     "layout": {
       "files": ["components/index.json (layout 类别)", "components/layout-*.json", "preview/component-layout-*.html"],
-      "purpose": "页面结构形成时先用正式 Layout 组件搭建 2–3 层信息框架（layout-page → layout-scroll → layout-section/sticky-region → section 内部排列），再定位业务组件；命中 UI Kit 时继承其登记的 Layout 树。",
+      "purpose": "页面结构形成时先用正式 Layout 组件搭建 2–3 层信息框架。页面级（layout-page + layout-scroll）用于场景主页面，提供唯一主滚动；嵌入级（layout-section/flow/split/grid/scroll-row）可嵌入任何滚动容器（包括 modal__body、actionsheet__list 等浮层），提供信息分区与排列。命中 UI Kit 时继承其登记的 Layout 树。",
       "copyable": true
     },
     "components": {
