@@ -1,7 +1,4 @@
 {
-  "schemaVersion": 3,
-  "mode": "fast-iteration",
-  "threshold": 1,
-  "standard_threshold": 3,
+  "schemaVersion": 1,
   "candidates": []
 }
