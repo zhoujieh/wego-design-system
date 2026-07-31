@@ -10,6 +10,14 @@
 - 禁止输出技术专用的一些技术细节，应该输出业务场景和用户需求与用户进行沟通。
 - 每次任务完成并给出结果后，询问用户是否需要总结并登记本次任务的经验教训；用户未明确同意时不得进入经验沉淀流程。
 
+## AI 执行约束
+
+<!-- rule-id: agent-must-read-host-code-before-asking -->
+- 提问前必须查看宿主代码了解现状，基于事实提问，不得让用户替 Agent 完成现状确认。
+
+<!-- rule-id: agent-must-use-structured-questions -->
+- 向用户提问必须使用 AskUserQuestion 工具提供结构化选项，不得用纯文本泛泛而问。
+
 ## 权威入口
 
 - 技能路由：`.codex/skills/README.md`
@@ -32,7 +40,9 @@
 - 新需求或业务范围变化：`wego-product` 形成并确认 `prototype_brief`。
 - 已确认范围内的页面设计与实现：`wego-design`。
 - 组件、Token、Preview、UI Kit、消费规则、守卫和工作流维护：`wego-uxsystem-iterate`。
-- 复盘和经验沉淀：`wego-uxsystem-iterate`。
+
+<!-- rule-id: retrospect-must-use-uxsystem-iterate-skill -->
+- 复盘和经验沉淀统一由 `wego-uxsystem-iterate` 技能承担，主对话或其它技能不得直接修改正式权威源。
 
 <!-- rule-id: requirement-input-must-create-iteration-first -->
 无论用户给的是自然语言需求、参考图还是 Figma 设计稿，均视为业务需求，必须先经 `wego-product` **创建迭代并确认 `prototype_brief`**，不得跳过直接做页面。Figma 与参考图只是实现参考，不代替需求确认、不用于补造业务事实。
@@ -56,7 +66,8 @@
 
 - **分支与 PR**：每人/每需求使用 `feature/<owner>-<scene>` 分支；用户要求推送后，通过 PR 自动合并到 `main`。
 - **开工前先拉取**：每次新会话/新任务开始前执行 `git pull --rebase origin main`，确保基于最新 `main`；创建 PR 前再次 rebase 到最新 `main` 并解决冲突。
-- **场景认领（防冲突核心）**：并发修改时，开工前在 `claims/<agent-id>.json` 写入自己负责的场景，并运行 `node scripts/validate-claims.mjs` 确认无他人重复认领；完成后把 `status` 改为 `released`/`done`。不要两个 Agent 改同一场景目录。
+<!-- rule-id: scene-must-claim-before-edit -->
+- **场景认领（强制前置）**：开工前必须在 `claims/<agent-id>.json` 认领本次负责的场景目录，并运行 `node scripts/validate-claims.mjs` 确认无冲突；不判断是否并发，单人开发也必须认领。认领期间场景目录由该 Agent 独占，他人不得修改。完成后把 `status` 改为 `released`/`done` 释放。
 - **路由生成式**：新增或修改场景路由时只编辑其目录下的 `route.json`，再运行 `node scripts/build-routes.mjs` 重新生成 `wego-app/js/routes.js`；**不要手改 `routes.js`**，CI 以 `build-routes.mjs --check` 校验一致性。
 - **设计系统单写**：`wego-app/lib/` 与 `components.css` 是生成物；仅执行 `wego-uxsystem-iterate` 任务的 Agent 可改 `.codex/skills/wego-design/` 权威源并运行 `sync-wego-app-lib.mjs`，其它 Agent 只读消费，不得改源。
 - 普通改动运行 `node scripts/validate-wego-design.mjs`。
