@@ -9,8 +9,6 @@
 - 禁止输出一大堆过程内容和多个方案让用户进行决策，应该直接给出最佳方案让用户确认。
 - 禁止输出技术专用的一些技术细节，应该输出业务场景和用户需求与用户进行沟通。
 - 每次任务完成并给出结果后，询问用户是否需要总结并登记本次任务的经验教训；用户未明确同意时不得进入经验沉淀流程。
-- 每次任务完成后，把部署链接发给用户，让用户确认是否可以正常访问。
-
 
 ## 权威入口
 
@@ -23,8 +21,9 @@
 ## 固定产物与边界
 
 - `wego-app/index.html` 是唯一 App 入口和预览宿主；桌面端显示手机预览壳，移动端铺满 viewport。
-- 业务场景位于 `wego-app/scenes/{中文业务场景}/`，通过稳定 kebab-case `#/route-id` 访问；路由由各场景目录下的 `route.json` 经 `scripts/build-routes.mjs` 生成（`wego-app/js/routes.js` 为生成物，**禁止手改**）。
-- 场景只维护 `scene.js` 和 `scene.css`，通过 `window.WegoApp.registerScene` 注册；原型产物不得散落到仓库根目录。
+- 业务场景位于 `wego-app/scenes/{中文业务场景}/`，通过稳定 kebab-case `#/route-id` 访问。
+- 每个场景只直接维护 `route.json`、`scene.js` 和 `scene.css`；`route.json` 声明路由，场景通过 `window.WegoApp.registerScene` 注册，原型产物不得散落到仓库根目录。
+- 路由由各场景目录下的 `route.json` 经 `scripts/build-routes.mjs` 生成；`wego-app/js/routes.js` 是生成物，**禁止手改**。
 - `wego-app/lib/` 和生成的 `components.css` 禁止直接编辑。先修改 `.codex/skills/wego-design/` 权威源，再运行同步或生成脚本。
 - `.trae/skills/*` 是 `.codex/skills/*` 的符号链接，不作为独立副本维护。
 
@@ -43,20 +42,22 @@
 
 ## Git、临时产物与验证
 
-- 单人单 Agent 开发时默认在 `main` 直接提交；**多人/多 Agent 并发协作时**必须遵守下方「多人多 Agent 并发协作」。
+- 所有开发任务默认使用独立分支，禁止直接提交 `main`。
 - 只暂存本次任务的显式路径，不执行 `git add -A`，不强推已有远端分支。
-- 禁止在仓库根目录放任何临时产物，如有必须，请在 `.uploads/` 下放置，并清理时按需执行 `node scripts/cleanup-task-artifacts.mjs clean`。put/` 和 `.playwright-cli/`。
+- 只有用户明确要求推送时，才提交并推送当前分支；推送成功后创建或更新 PR，在验证通过且无未解决冲突时自动合并到 `main`。
+- PR 自动合并不得绕过分支保护、必要检查或冲突处理；合并失败时停止并修复问题。
+- 允许的短期临时目录为 `.uploads/`、`.tasks/`、`output/` 和 `.playwright-cli/`；临时产物不得提交，任务结束前清理无用文件，需长期保留的资源必须迁移到正式目录。
+- 按需执行 `node scripts/cleanup-task-artifacts.mjs clean` 清理任务临时产物。
 
 ### 多人多 Agent 并发协作
 
 多个人各自驱动自己的 Agent 会话、并发迭代同一仓库。Agent 之间不对话，协调只发生在仓库层面：谁的 Agent 碰了什么，由仓库状态体现，别的 Agent 来读。
 
-- **分支与 PR**：每人/每需求开 `feature/<owner>-<scene>` 分支，通过 PR 合并；**禁止多个 Agent 直接提交 `main`**。
+- **分支与 PR**：每人/每需求使用 `feature/<owner>-<scene>` 分支；用户要求推送后，通过 PR 自动合并到 `main`。
 - **开工前先拉取**：每次新会话/新任务开始前执行 `git pull --rebase origin main`，确保基于最新 `main`；创建 PR 前再次 rebase 到最新 `main` 并解决冲突。
-- **场景认领（防冲突核心）**：开工前在 `claims/<agent-id>.json` 写入自己负责的场景，并运行 `node scripts/validate-claims.mjs` 确认无他人重复认领；完成后把 `status` 改为 `released`/`done`。不要两个 Agent 改同一场景目录。
-- **路由生成式**：新增场景只在其目录写 `route.json`（声明 `routeId` 与 `entry`），再运行 `node scripts/build-routes.mjs` 重新生成 `wego-app/js/routes.js`；**不要手改 `routes.js`**（CI 以 `build-routes.mjs --check` 校验一致性）。
+- **场景认领（防冲突核心）**：并发修改时，开工前在 `claims/<agent-id>.json` 写入自己负责的场景，并运行 `node scripts/validate-claims.mjs` 确认无他人重复认领；完成后把 `status` 改为 `released`/`done`。不要两个 Agent 改同一场景目录。
+- **路由生成式**：新增或修改场景路由时只编辑其目录下的 `route.json`，再运行 `node scripts/build-routes.mjs` 重新生成 `wego-app/js/routes.js`；**不要手改 `routes.js`**，CI 以 `build-routes.mjs --check` 校验一致性。
 - **设计系统单写**：`wego-app/lib/` 与 `components.css` 是生成物；仅执行 `wego-uxsystem-iterate` 任务的 Agent 可改 `.codex/skills/wego-design/` 权威源并运行 `sync-wego-app-lib.mjs`，其它 Agent 只读消费，不得改源。
-- `.uploads/`、`output/` 和 `.playwright-cli/` 只用于短期输入或诊断，不提交；按需使用 `node scripts/cleanup-task-artifacts.mjs clean`。
 - 普通改动运行 `node scripts/validate-wego-design.mjs`。
 - 设计系统或工作流改动运行 `node scripts/validate-wego-design.mjs --scope=system --strict`。
 - 正式合并前按需运行 `node scripts/validate-wego-design.mjs --scope=full --strict`。
