@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 5,
+  "identity": {
+    "iteration_id": "my-tab-v2",
+    "title": "my-tab",
+    "date": "2026-07-31",
+    "primary_scene": "我的",
+    "related_scenes": []
+  },
+  "status": "awaiting-prototype-confirmation",
+  "scope_revision": 1,
+  "prototype_brief": {
+    "goal": "为微购相册用户提供\"我的\"个人中心Tab，聚合个人信息、会员权益、数据资产、常用应用入口，并支持管理浏览自己的内容（产品/笔记/直播）及通过右下角悬浮FAB发布新内容",
+    "included": [
+      "导航栏：左侧个人信息（含切换相册入口，本期不下钻）；右侧设置入口、分享主页入口（共2个）",
+      "会员栏：独立1行卡片，展示会员等级+到期时间+云空间用量",
+      "数据资产横滑：9入口（我买的/粉丝/好友/代理/访客/员工/钱包/卡券/收藏），我买的带待办角标",
+      "常用应用横滑：固定2入口（进入主页、二维码）+购物车（带数量角标）+最近应用+全部",
+      "类型tabs：产品/笔记/直播三个tab，紧贴列表，支持后续扩展",
+      "工具行：内联弱化搜索+筛选按钮（仅入口）+视图切换，随tab联动",
+      "内容列表：卡片不显示状态标签，列表/网格视图 per-tab 独立记忆",
+      "发布FAB：右下角悬浮入口，核心功能，functional 支持发布产品/笔记/直播"
+    ],
+    "excluded": [
+      "个人信息切换相册的下钻流程",
+      "设置、分享主页的下钻页面（stub仅入口反馈）",
+      "会员栏点击下钻（stub）",
+      "数据资产9入口的下钻页面（stub仅入口反馈）",
+      "常用应用各入口的下钻页面（stub仅入口反馈）",
+      "筛选按钮的下钻筛选面板",
+      "内联搜索的真实搜索功能"
+    ],
+    "entry_points": [
+      "[host-tab-my|宿主底部Tab栏第5位|我的] 始终可见，点击切换到我的Tab",
+      "[nav-avatar-album|导航栏左侧个人信息|切换相册入口] 始终可见，stub反馈不下钻",
+      "[nav-settings|导航栏右侧|设置] 始终可见，stub反馈",
+      "[nav-share|导航栏右侧|分享主页] 始终可见，stub反馈",
+      "[asset-purchased|数据资产横滑|我买的] 始终可见，有待办时显示角标，stub反馈",
+      "[asset-fans|数据资产横滑|粉丝] 始终可见，stub反馈",
+      "[asset-friends|数据资产横滑|好友] 始终可见，stub反馈",
+      "[asset-agents|数据资产横滑|代理] 始终可见，stub反馈",
+      "[asset-visitors|数据资产横滑|访客] 始终可见，stub反馈",
+      "[asset-staff|数据资产横滑|员工] 始终可见，stub反馈",
+      "[asset-wallet|数据资产横滑|钱包] 始终可见，stub反馈",
+      "[asset-coupons|数据资产横滑|卡券] 始终可见，stub反馈",
+      "[asset-favorites|数据资产横滑|收藏] 始终可见，stub反馈",
+      "[app-home|常用应用横滑|进入主页] 始终可见，stub反馈",
+      "[app-qrcode|常用应用横滑|二维码] 始终可见，stub反馈",
+      "[app-cart|常用应用横滑|购物车] 始终可见，有内容时显示数量角标，stub反馈",
+      "[app-recent|常用应用横滑|最近应用] 始终可见，stub反馈",
+      "[app-all|常用应用横滑|全部] 始终可见，stub反馈",
+      "[fab-publish|页面右下角悬浮|发布] 始终可见，核心功能，functional进入发布流程"
+    ],
+    "critical_paths": [
+      "publish-product: 点击发布FAB → 选择发布产品 → 填写产品信息 → 提交 → 看到发布成功 → 新产品出现在产品tab列表",
+      "publish-note: 点击发布FAB → 选择发布笔记 → 填写笔记内容 → 提交 → 看到发布成功 → 新笔记出现在笔记tab列表",
+      "publish-live: 点击发布FAB → 选择发布直播 → 填写直播信息 → 提交 → 看到发布成功 → 新直播出现在直播tab列表",
+      "browse-content: 切换类型tab（产品/笔记/直播） → 工具行联动 → 查看对应列表 → 切换列表/网格视图（per-tab独立记忆）"
+    ],
+    "prototype_boundaries": [
+      {
+        "flow_id": "publish-product",
+        "mode": "functional",
+        "visible_result": "用户完成产品发布并看到成功提示，新产品出现在产品tab列表中"
+      },
+      {
+        "flow_id": "publish-note",
+        "mode": "functional",
+        "visible_result": "用户完成笔记发布并看到成功提示，新笔记出现在笔记tab列表中"
+      },
+      {
+        "flow_id": "publish-live",
+        "mode": "functional",
+        "visible_result": "用户完成直播创建并看到成功提示，新直播出现在直播tab列表中"
+      },
+      {
+        "flow_id": "browse-content",
+        "mode": "functional",
+        "visible_result": "用户切换类型tab和视图模式，浏览对应内容列表，视图选择per-tab独立记忆"
+      },
+      {
+        "flow_id": "entry-stubs",
+        "mode": "stub",
+        "visible_result": "各stub入口点击后给出轻量反馈（如toast），不跳转下钻页面"
+      }
+    ],
+    "states": [
+      "active-type-tab: 当前选中的类型tab（产品/笔记/直播），影响工具行联动、内容列表数据",
+      "view-mode-per-tab: 每个类型tab独立记忆的视图模式（列表/网格），影响内容列表呈现方式",
+      "purchased-todo-badge: 我买的入口有待办时显示角标，影响我买的入口角标显隐",
+      "cart-count-badge: 购物车有内容时显示数量角标，影响购物车入口角标显隐与数值",
+      "publish-success: 发布成功后新内容插入对应tab列表，影响对应类型tab列表数据"
+    ],
+    "data_contract": {
+      "user_profile": "头像、昵称、相册名（导航栏左侧个人信息区）",
+      "membership": "会员等级、到期时间、云空间已用量/总量",
+      "data_assets": "9入口对应数值：我买的待办数、粉丝数、好友数、代理数、访客数、员工数、钱包余额、卡券数、收藏数",
+      "frequent_apps": "固定入口（主页、二维码）、购物车数量、最近应用占位列表",
+      "content_lists": "产品/笔记/直播三个列表，卡片不含状态标签，含标题/封面/关键信息",
+      "publish_forms": "产品/笔记/直播各自发布表单必要字段"
+    },
+    "assumptions": [
+      "数据从 prototype-db.js 读取或页面内 mock，无真实后端",
+      "最近应用本期固定展示若干占位应用入口，不下钻",
+      "会员权益、云空间数据为静态展示",
+      "stub入口点击后给轻量反馈（如toast）不跳转下钻页面",
+      "发布表单字段为原型必要字段，非完整生产字段"
+    ],
+    "open_questions": []
+  },
+  "brief_submission": {
+    "at": "2026-07-31T16:01:59.766Z",
+    "scope_revision": 1,
+    "scope_sha256": "f90f47647924b4304fe6af1bfd6baf898bdfb82e97672a1807bf1edb77c26dc3"
+  },
+  "brief_confirmation": {
+    "at": "2026-07-31T16:03:54.172Z",
+    "scope_revision": 1,
+    "scope_sha256": "f90f47647924b4304fe6af1bfd6baf898bdfb82e97672a1807bf1edb77c26dc3"
+  },
+  "prototype_confirmation": null,
+  "affected_scenes": [
+    "我的"
+  ],
+  "affected_runtime": [],
+  "stage_outputs": {
+    "product": {
+      "valid": true
+    },
+    "design": {
+      "valid": true
+    }
+  },
+  "change_log": [
+    {
+      "action": "init",
+      "at": "2026-07-31T16:00:18.971Z"
+    },
+    {
+      "action": "submit-brief",
+      "at": "2026-07-31T16:01:59.769Z"
+    },
+    {
+      "action": "confirm-brief",
+      "at": "2026-07-31T16:03:54.172Z"
+    },
+    {
+      "action": "submit-prototype",
+      "at": "2026-07-31T16:29:56.017Z"
+    }
+  ],
+  "freeze": null
+}
