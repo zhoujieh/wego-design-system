@@ -1,0 +1,11 @@
+{
+  "routeId": "my",
+  "title": "我的",
+  "presentation": {
+    "type": "host-tab"
+  },
+  "entry": {
+    "type": "host-tab",
+    "tab": "my"
+  }
+}
