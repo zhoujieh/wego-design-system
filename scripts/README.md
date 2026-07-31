@@ -23,7 +23,7 @@
 | 脚本 | 使用时机 |
 | --- | --- |
 | `reset-wego-app-baseline.mjs` | 清空全部业务场景，或通过 `--scene` 清理指定场景 |
-| `cleanup-task-artifacts.mjs` | 清理 `.uploads/`、`output/`、`.playwright-cli/` 临时产物 |
+| `cleanup-task-artifacts.mjs` | 清理 `.uploads/`、`output/`、`.tasks/`、`.playwright-cli/` 临时产物 |
 | `generate-scene-skeleton.mjs` | 仅在需要重新采样显式骨架模板时运行 |
 
 ## 内部模块与定向回归

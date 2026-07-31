@@ -18,7 +18,7 @@ import os from 'node:os';
 import path from 'node:path';
 
 const repositoryRoot = path.resolve(process.cwd());
-const artifactRoots = ['.uploads', 'output', '.playwright-cli'];
+const artifactRoots = ['.uploads', 'output', '.tasks', '.playwright-cli'];
 const defaultOlderThanHours = 24;
 
 function parseArgs(argv) {

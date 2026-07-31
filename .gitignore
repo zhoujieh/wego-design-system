@@ -3,8 +3,9 @@
 # 本地任务输入与浏览器诊断产物，由 cleanup-task-artifacts.mjs 定期清理
 .uploads/
 output/
+.tasks/
 .playwright-cli/
 .trae/documents/
 .vercel
 node_modules/
-package-lock.json
+# 注意：package-lock.json 已纳入提交以锁定依赖版本，确保多人协作一致；请勿重新忽略

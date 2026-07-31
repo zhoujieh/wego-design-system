@@ -44,6 +44,7 @@
 
 - 单人单 Agent 开发时默认在 `main` 直接提交；**多人/多 Agent 并发协作时**必须遵守下方「多人多 Agent 并发协作」。
 - 只暂存本次任务的显式路径，不执行 `git add -A`，不强推已有远端分支。
+- 禁止在仓库根目录放任何临时产物，如有必须，请在 `.uploads/` 下放置，并清理时按需执行 `node scripts/cleanup-task-artifacts.mjs clean`。put/` 和 `.playwright-cli/`。
 
 ### 多人多 Agent 并发协作
 

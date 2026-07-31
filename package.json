@@ -2,6 +2,9 @@
   "name": "wego-design-system",
   "private": true,
   "version": "0.0.0",
+  "engines": {
+    "node": ">=18"
+  },
   "description": "微购设计系统与静态原型仓库(开发工具依赖)",
   "devDependencies": {
     "playwright": "^1.48.0"
