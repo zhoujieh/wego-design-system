@@ -20,4 +20,12 @@ description: 基于已确认原型简报消费微购设计系统，在一次任�
 
 ## 输出与交接
 
-输出或更新 `wego-app/js/routes.js`、场景 `scene.js` 和 `scene.css`。在已确认范围内自主完成信息分组、布局、组件、Token、反馈和 overlay，不建立第二次确认门禁。完成后运行源码守卫和真实浏览器检查，再交给用户验收；除场景合同允许的简短例外说明外，不新增设计证明文件。
+只输出或更新场景目录中的 `route.json`、`scene.js` 和 `scene.css`。路由发生新增或变化时运行 `node scripts/build-routes.mjs` 生成 `wego-app/js/routes.js`；`routes.js` 是生成物，禁止直接编辑。
+
+在已确认范围内自主完成信息分组、布局、组件、Token、反馈和 overlay，不建立第二次确认门禁。完成实现后运行源码守卫和真实浏览器检查；验证通过后执行 `submit-prototype`，将迭代推进到 `awaiting-prototype-confirmation` 并交给用户验收。
+
+- 用户明确验收通过后执行 `confirm-prototype`。
+- 用户在已确认范围内要求调整视觉、布局、组件、Token、路由或交互时，先执行 `invalidate --stage=prototype`，修改、验证并重新 `submit-prototype`。
+- 用户反馈改变目标、范围、入口、关键路径、状态、数据或可见结果时，退回 `wego-product` 按简报失效流程处理。
+
+除场景合同允许的简短例外说明外，不新增设计证明文件。
