@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 4,
+  "slug": "layout-scroll-row",
+  "name": "横向滚动区",
+  "category": "layout",
+  "status": "stable",
+  "sourceKind": "specification",
+  "confidence": "high",
+  "description": "页面内部的横向滚动信息区，提供横向滚动、触控惯性与 Scroll Snap，保持页面纵向主滚动所有权。适用于分类、卡片预览、媒体条目等同类信息，不用于必须一次看全的核心数据。",
+  "semanticTypeCandidates": [
+    "scroll-row",
+    "horizontal-carousel",
+    "layout-scroll-row"
+  ],
+  "variantDimensions": {
+    "item-size": ["auto", "compact", "medium", "wide"],
+    "snap": ["none", "start"],
+    "peek": ["none", "next"]
+  },
+  "representativeVariants": [
+    { "item-size": "auto", "snap": "none", "peek": "none" },
+    { "item-size": "medium", "snap": "start", "peek": "next" },
+    { "item-size": "compact", "snap": "start", "peek": "none" }
+  ],
+  "anatomy": [
+    {
+      "name": "root",
+      "selector": ".layout-scroll-row",
+      "role": "横向滚动容器；提供 overflow-x，保持纵向主滚动所有权"
+    }
+  ],
+  "structurePatterns": [
+    "固定结构为 .layout-scroll-row > 同类横向子项；overflow-x:auto，overflow-y:hidden。",
+    "item-size 控制子项宽度比例：auto 自然宽度、compact 25%、medium 40%、wide 60%。",
+    "snap=start 启用横向吸附；peek=next 在尾部预留下一项可见空间。",
+    "gap 通过局部变量 --layout-scroll-row-gap 接收正式 Spacer Token。"
+  ],
+  "behavior": {
+    "scroll": "overflow-x:auto；overscroll-behavior-x:contain 防止横向滚动链影响纵向主滚动。",
+    "snap": "data-snap=start 启用 scroll-snap-type:x mandatory，子项 scroll-snap-align:start。",
+    "peek": "data-peek=next 在容器尾部预留 spacer-12 空间露出下一项。"
+  },
+  "accessibility": {
+    "scroll": "保持原生横向滚动语义，不抢占纵向滚动。"
+  },
+  "usageHints": [
+    "用于分类、卡片预览、媒体条目等同类信息的横向浏览。",
+    "必须一次看全的核心数据不要放进 layout-scroll-row。",
+    "横向滚动不得开启纵向 overflow:auto，纵向主滚动归 layout-scroll。"
+  ],
+  "doNotInvent": [
+    "不要在 layout-scroll-row 上声明 overflow-y:auto。",
+    "不要用 layout-scroll-row 替代 layout-scroll 承载纵向内容。",
+    "不要开放任意 item-size 比例；只支持 auto/compact/medium/wide。"
+  ],
+  "domAnatomy": {
+    "root": ".layout-scroll-row",
+    "requiredChildren": [],
+    "bodyChildren": [],
+    "optionalChildren": [],
+    "modifierClasses": [],
+    "alternatives": []
+  },
+  "provenance": {
+    "preview": "preview/component-layout-scroll-row.html",
+    "cssSource": "preview/component-layout-scroll-row.html",
+    "embedded": false,
+    "hostComponent": null,
+    "externalSources": []
+  },
+  "unknowns": [],
+  "ruleRefs": [
+    "page-layers.json"
+  ],
+  "runtimeTokens": [
+    "--spacer-0",
+    "--spacer-12"
+  ],
+  "previewOnlyTokens": [
+    "--bg-page",
+    "--bg-surface",
+    "--border-neutral-l2",
+    "--radius-8",
+    "--spacer-8",
+    "--text-default",
+    "--text-secondary"
+  ],
+  "localTokens": [
+    "--layout-scroll-row-gap"
+  ],
+  "layerContract": {
+    "scope": "page-local",
+    "role": "content",
+    "mountHost": "scene-root",
+    "zToken": "--z-base"
+  }
+}

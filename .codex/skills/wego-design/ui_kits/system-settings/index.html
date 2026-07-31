@@ -14,22 +14,8 @@ html, body { min-height: auto; }
 
 .uikit-host-screen {
   height: 100%;
-  display: flex;
-  flex-direction: column;
   background: var(--bg-page);
   position: relative;
-}
-
-.phone-body {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacer-8);
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding-top: var(--spacer-8);
-  padding-bottom: var(--safe-area-bottom-content);
 }
 
 .bottom-nav {
@@ -45,8 +31,6 @@ html, body { min-height: auto; }
   position: absolute;
   inset: 0;
   z-index: var(--z-overlay);
-  display: flex;
-  flex-direction: column;
   background: var(--bg-page);
   transform: translateX(100%);
   transition: transform var(--duration-normal) var(--ease-exit);
@@ -61,16 +45,6 @@ html, body { min-height: auto; }
 .uikit-settings-screen.is-hidden {
   visibility: hidden;
   pointer-events: none;
-}
-
-.uikit-settings-screen .navbar {
-  width: 100%;
-  flex-shrink: 0;
-}
-
-.uikit-settings-screen .phone-body {
-  padding-top: var(--spacer-8);
-  padding-bottom: var(--safe-area-bottom-content);
 }
 
 .uikit-toast-host {
@@ -146,163 +120,169 @@ function BottomNav() {
 function SystemSettingsContent({ onPreviewAction }) {
   return (
     <>
-      <div className="cell-group">
-        <div className="cell-group__title">账号</div>
-        <div className="cell-group__content">
-          <div
-            data-component="cell"
-            className="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable"
-            role="button"
-            tabIndex={0}
-            onClick={() => onPreviewAction('手机号登录设置待接入')}
-            onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('手机号登录设置待接入'))}
-          >
-            <div className="cell__body">
-              <div className="cell__content">
-                <div className="cell__title-row"><span className="cell__title">手机号登录</span></div>
-                <div className="cell__subtitle">通过手机号和密码实现多人同时登录</div>
-              </div>
-              <div className="cell__action">
-                <span className="cell__action-text">去设置</span>
-                <i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
+      <div className="layout-section" data-component-slug="layout-section" data-edge="M0" style={{ '--layout-section-gap-before': 'var(--spacer-8)', '--layout-section-gap-after': 'var(--spacer-8)' }}>
+        <div className="cell-group">
+          <div className="cell-group__title">账号</div>
+          <div className="cell-group__content">
+            <div
+              data-component="cell"
+              className="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable"
+              role="button"
+              tabIndex={0}
+              onClick={() => onPreviewAction('手机号登录设置待接入')}
+              onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('手机号登录设置待接入'))}
+            >
+              <div className="cell__body">
+                <div className="cell__content">
+                  <div className="cell__title-row"><span className="cell__title">手机号登录</span></div>
+                  <div className="cell__subtitle">通过手机号和密码实现多人同时登录</div>
+                </div>
+                <div className="cell__action">
+                  <span className="cell__action-text">去设置</span>
+                  <i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="cell-group">
-        <div className="cell-group__title">业务</div>
-        <div className="cell-group__content">
-          <div
-            data-component="cell"
-            className="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable"
-            role="button"
-            tabIndex={0}
-            onClick={() => onPreviewAction('产品与笔记待接入')}
-            onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('产品与笔记待接入'))}
-          >
-            <div className="cell__body">
-              <div className="cell__content">
-                <div className="cell__title-row"><span className="cell__title">产品与笔记</span></div>
-                <div className="cell__subtitle">标签管理、批量上下架、产品清理等</div>
-              </div>
-              <div className="cell__action">
-                <span className="badge badge--inline badge--dot" aria-hidden="true"></span>
-                <i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
-              </div>
-            </div>
-          </div>
-          <div
-            data-component="cell"
-            className="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable"
-            role="button"
-            tabIndex={0}
-            onClick={() => onPreviewAction('搜索与分享待接入')}
-            onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('搜索与分享待接入'))}
-          >
-            <div className="cell__body">
-              <div className="cell__content">
-                <div className="cell__title-row"><span className="cell__title">搜索与分享</span></div>
-                <div className="cell__subtitle">分享设置、以图搜图、开启搜索码等</div>
-              </div>
-              <div className="cell__action">
-                <i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
+      <div className="layout-section" data-component-slug="layout-section" data-edge="M0" style={{ '--layout-section-gap-after': 'var(--spacer-8)' }}>
+        <div className="cell-group">
+          <div className="cell-group__title">业务</div>
+          <div className="cell-group__content">
+            <div
+              data-component="cell"
+              className="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable"
+              role="button"
+              tabIndex={0}
+              onClick={() => onPreviewAction('产品与笔记待接入')}
+              onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('产品与笔记待接入'))}
+            >
+              <div className="cell__body">
+                <div className="cell__content">
+                  <div className="cell__title-row"><span className="cell__title">产品与笔记</span></div>
+                  <div className="cell__subtitle">标签管理、批量上下架、产品清理等</div>
+                </div>
+                <div className="cell__action">
+                  <span className="badge badge--inline badge--dot" aria-hidden="true"></span>
+                  <i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
+                </div>
               </div>
             </div>
-          </div>
-          <div
-            data-component="cell"
-            className="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable"
-            role="button"
-            tabIndex={0}
-            onClick={() => onPreviewAction('粉丝设置待接入')}
-            onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('粉丝设置待接入'))}
-          >
-            <div className="cell__body">
-              <div className="cell__content">
-                <div className="cell__title-row"><span className="cell__title">粉丝设置</span></div>
-                <div className="cell__subtitle">设置粉丝资料、生命周期、标签等</div>
-              </div>
-              <div className="cell__action">
-                <i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
-              </div>
-            </div>
-          </div>
-          <div
-            data-component="cell"
-            className="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable"
-            role="button"
-            tabIndex={0}
-            onClick={() => onPreviewAction('团队与员工待接入')}
-            onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('团队与员工待接入'))}
-          >
-            <div className="cell__body">
-              <div className="cell__content">
-                <div className="cell__title-row"><span className="cell__title">团队与员工</span></div>
-                <div className="cell__subtitle">员工业绩归属模式</div>
-              </div>
-              <div className="cell__action">
-                <i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
+            <div
+              data-component="cell"
+              className="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable"
+              role="button"
+              tabIndex={0}
+              onClick={() => onPreviewAction('搜索与分享待接入')}
+              onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('搜索与分享待接入'))}
+            >
+              <div className="cell__body">
+                <div className="cell__content">
+                  <div className="cell__title-row"><span className="cell__title">搜索与分享</span></div>
+                  <div className="cell__subtitle">分享设置、以图搜图、开启搜索码等</div>
+                </div>
+                <div className="cell__action">
+                  <i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
+                </div>
               </div>
             </div>
-          </div>
-          <div
-            data-component="cell"
-            className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
-            role="button"
-            tabIndex={0}
-            onClick={() => onPreviewAction('交易设置待接入')}
-            onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('交易设置待接入'))}
-          >
-            <div className="cell__body">
-              <div className="cell__content"><div className="cell__title-row"><span className="cell__title">交易设置</span></div></div>
-              <div className="cell__action"><i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+            <div
+              data-component="cell"
+              className="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable"
+              role="button"
+              tabIndex={0}
+              onClick={() => onPreviewAction('粉丝设置待接入')}
+              onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('粉丝设置待接入'))}
+            >
+              <div className="cell__body">
+                <div className="cell__content">
+                  <div className="cell__title-row"><span className="cell__title">粉丝设置</span></div>
+                  <div className="cell__subtitle">设置粉丝资料、生命周期、标签等</div>
+                </div>
+                <div className="cell__action">
+                  <i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
+                </div>
+              </div>
             </div>
-          </div>
-          <div
-            data-component="cell"
-            className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
-            role="button"
-            tabIndex={0}
-            onClick={() => onPreviewAction('聊天与通知待接入')}
-            onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('聊天与通知待接入'))}
-          >
-            <div className="cell__body">
-              <div className="cell__content"><div className="cell__title-row"><span className="cell__title">聊天与通知</span></div></div>
-              <div className="cell__action"><i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+            <div
+              data-component="cell"
+              className="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable"
+              role="button"
+              tabIndex={0}
+              onClick={() => onPreviewAction('团队与员工待接入')}
+              onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('团队与员工待接入'))}
+            >
+              <div className="cell__body">
+                <div className="cell__content">
+                  <div className="cell__title-row"><span className="cell__title">团队与员工</span></div>
+                  <div className="cell__subtitle">员工业绩归属模式</div>
+                </div>
+                <div className="cell__action">
+                  <i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
+                </div>
+              </div>
+            </div>
+            <div
+              data-component="cell"
+              className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+              role="button"
+              tabIndex={0}
+              onClick={() => onPreviewAction('交易设置待接入')}
+              onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('交易设置待接入'))}
+            >
+              <div className="cell__body">
+                <div className="cell__content"><div className="cell__title-row"><span className="cell__title">交易设置</span></div></div>
+                <div className="cell__action"><i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+              </div>
+            </div>
+            <div
+              data-component="cell"
+              className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+              role="button"
+              tabIndex={0}
+              onClick={() => onPreviewAction('聊天与通知待接入')}
+              onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('聊天与通知待接入'))}
+            >
+              <div className="cell__body">
+                <div className="cell__content"><div className="cell__title-row"><span className="cell__title">聊天与通知</span></div></div>
+                <div className="cell__action"><i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="cell-group">
-        <div className="cell-group__title">系统</div>
-        <div className="cell-group__content">
-          <div
-            data-component="cell"
-            className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
-            role="button"
-            tabIndex={0}
-            onClick={() => onPreviewAction('安全中心待接入')}
-            onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('安全中心待接入'))}
-          >
-            <div className="cell__body">
-              <div className="cell__content"><div className="cell__title-row"><span className="cell__title">安全中心</span></div></div>
-              <div className="cell__action"><i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+      <div className="layout-section" data-component-slug="layout-section" data-edge="M0">
+        <div className="cell-group">
+          <div className="cell-group__title">系统</div>
+          <div className="cell-group__content">
+            <div
+              data-component="cell"
+              className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+              role="button"
+              tabIndex={0}
+              onClick={() => onPreviewAction('安全中心待接入')}
+              onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('安全中心待接入'))}
+            >
+              <div className="cell__body">
+                <div className="cell__content"><div className="cell__title-row"><span className="cell__title">安全中心</span></div></div>
+                <div className="cell__action"><i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+              </div>
             </div>
-          </div>
-          <div
-            data-component="cell"
-            className="cell cell--single cell--bg-white cell--clickable"
-            role="button"
-            tabIndex={0}
-            onClick={() => onPreviewAction('关于待接入')}
-            onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('关于待接入'))}
-          >
-            <div className="cell__body">
-              <div className="cell__content"><div className="cell__title-row"><span className="cell__title">关于</span></div></div>
-              <div className="cell__action"><i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+            <div
+              data-component="cell"
+              className="cell cell--single cell--bg-white cell--clickable"
+              role="button"
+              tabIndex={0}
+              onClick={() => onPreviewAction('关于待接入')}
+              onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('关于待接入'))}
+            >
+              <div className="cell__body">
+                <div className="cell__content"><div className="cell__title-row"><span className="cell__title">关于</span></div></div>
+                <div className="cell__action"><i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+              </div>
             </div>
           </div>
         </div>
@@ -314,28 +294,32 @@ function SystemSettingsContent({ onPreviewAction }) {
 function SystemSettingsScreen({ isOpen, onClose, onPreviewAction }) {
   return (
     <div className={`uikit-settings-screen${isOpen ? ' is-open' : ''}`} aria-hidden={!isOpen}>
-      <div data-component="navbar" className="navbar">
-        <div className="navbar__body">
-          <div className="navbar__left">
-            <div
-              className="navbar__left-btn"
-              role="button"
-              aria-label="返回"
-              tabIndex={0}
-              onClick={onClose}
-              onKeyDown={(event) => handleActionKeyDown(event, onClose)}
-            >
-              <i className="wego-iconfont-s icon-fanhui"></i>
+      <div className="layout-page" data-component-slug="layout-page">
+        <div className="layout-page__top">
+          <div data-component="navbar" className="navbar">
+            <div className="navbar__body">
+              <div className="navbar__left">
+                <div
+                  className="navbar__left-btn"
+                  role="button"
+                  aria-label="返回"
+                  tabIndex={0}
+                  onClick={onClose}
+                  onKeyDown={(event) => handleActionKeyDown(event, onClose)}
+                >
+                  <i className="wego-iconfont-s icon-fanhui"></i>
+                </div>
+              </div>
+              <div className="navbar__center">
+                <span className="navbar__title">设置</span>
+              </div>
+              <div className="navbar__right"></div>
             </div>
           </div>
-          <div className="navbar__center">
-            <span className="navbar__title">设置</span>
-          </div>
-          <div className="navbar__right"></div>
         </div>
-      </div>
-      <div className="phone-body">
-        <SystemSettingsContent onPreviewAction={onPreviewAction} />
+        <div className="layout-scroll" data-component-slug="layout-scroll">
+          <SystemSettingsContent onPreviewAction={onPreviewAction} />
+        </div>
       </div>
     </div>
   );
@@ -344,35 +328,43 @@ function SystemSettingsScreen({ isOpen, onClose, onPreviewAction }) {
 function HostScreen({ onOpen }) {
   return (
     <div className="uikit-host-screen">
-      <div data-component="navbar" className="navbar">
-        <div className="navbar__body navbar__body--split">
-          <div className="navbar__left">
-            <span className="navbar__title">我的</span>
+      <div className="layout-page" data-component-slug="layout-page">
+        <div className="layout-page__top">
+          <div data-component="navbar" className="navbar">
+            <div className="navbar__body navbar__body--split">
+              <div className="navbar__left">
+                <span className="navbar__title">我的</span>
+              </div>
+              <div className="navbar__right"></div>
+            </div>
           </div>
-          <div className="navbar__right"></div>
         </div>
-      </div>
-      <div className="phone-body">
-        <div className="cell-group">
-          <div className="cell-group__title">设置入口</div>
-          <div className="cell-group__content">
-            <div
-              data-component="cell"
-              className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
-              role="button"
-              tabIndex={0}
-              onClick={onOpen}
-              onKeyDown={(event) => handleActionKeyDown(event, onOpen)}
-            >
-              <div className="cell__body">
-                <div className="cell__content"><div className="cell__title-row"><span className="cell__title">系统设置</span></div></div>
-                <div className="cell__action"><i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+        <div className="layout-scroll" data-component-slug="layout-scroll">
+          <div className="layout-section" data-component-slug="layout-section" data-edge="M0" style={{ '--layout-section-gap-before': 'var(--spacer-8)' }}>
+            <div className="cell-group">
+              <div className="cell-group__title">设置入口</div>
+              <div className="cell-group__content">
+                <div
+                  data-component="cell"
+                  className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+                  role="button"
+                  tabIndex={0}
+                  onClick={onOpen}
+                  onKeyDown={(event) => handleActionKeyDown(event, onOpen)}
+                >
+                  <div className="cell__body">
+                    <div className="cell__content"><div className="cell__title-row"><span className="cell__title">系统设置</span></div></div>
+                    <div className="cell__action"><i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
+        <div className="layout-page__bottom">
+          <BottomNav />
+        </div>
       </div>
-      <BottomNav />
     </div>
   );
 }

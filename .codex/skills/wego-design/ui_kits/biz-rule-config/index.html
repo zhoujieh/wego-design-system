@@ -15,22 +15,8 @@ html, body { min-height: auto; }
 
 .uikit-host-screen {
   height: 100%;
-  display: flex;
-  flex-direction: column;
   background: var(--bg-page);
   position: relative;
-}
-
-.phone-body {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacer-8);
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding-top: var(--spacer-8);
-  padding-bottom: var(--safe-area-bottom-content);
 }
 
 .bottom-nav {
@@ -143,82 +129,84 @@ function BizSettingsContent({ onPreviewAction }) {
 
   return (
     <>
-      <div className="form-group">
-        <div className="form-group__title">基础信息</div>
-        <div className="form-group__content">
-          <div className="form-body">
-            <div className="form-body__label">方案名称</div>
-            <div className="form-body__action">
-              <input
-                type="text"
-                value={planName}
-                onChange={(event) => setPlanName(event.target.value)}
-                placeholder="请输入方案名称"
-              />
-            </div>
-          </div>
-          <div
-            className="form-body form-body--clickable"
-            role="button"
-            tabIndex={0}
-            onClick={() => onPreviewAction('负责人选择面板待接入')}
-            onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('负责人选择面板待接入'))}
-          >
-            <div className="form-body__label">负责人</div>
-            <div className="form-body__action">
-              <div className="form-body__select">
-                <span className="form-body__select-text has-value">商品运营组</span>
-                <i className="form-body__select-arrow wego-iconfont-s icon-youjiantou16"></i>
+      <div className="layout-section" data-component-slug="layout-section" data-edge="M0" style={{ '--layout-section-gap-before': 'var(--spacer-8)', '--layout-section-gap-after': 'var(--spacer-8)' }}>
+        <div className="form-group">
+          <div className="form-group__title">基础信息</div>
+          <div className="form-group__content">
+            <div className="form-body">
+              <div className="form-body__label">方案名称</div>
+              <div className="form-body__action">
+                <input
+                  type="text"
+                  value={planName}
+                  onChange={(event) => setPlanName(event.target.value)}
+                  placeholder="请输入方案名称"
+                />
               </div>
             </div>
-          </div>
-          <div
-            className="form-body form-body--clickable"
-            role="button"
-            tabIndex={0}
-            onClick={() => onPreviewAction('同步频率选择面板待接入')}
-            onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('同步频率选择面板待接入'))}
-          >
-            <div className="form-body__label">同步频率</div>
-            <div className="form-body__action">
-              <div className="form-body__select">
-                <span className="form-body__select-text has-value">每30分钟</span>
-                <i className="form-body__select-arrow wego-iconfont-s icon-youjiantou16"></i>
-              </div>
-            </div>
-          </div>
-          <div className="form-body form-body--preserve-content-align">
-            <div className="form-body__label">统计口径</div>
-            <div className="form-body__action" aria-hidden="true"></div>
-            <div className="form-body__right-btn">
-              <div className="radio-field-group" role="radiogroup" aria-label="统计口径">
-                <div
-                  className="radio-field"
-                  role="radio"
-                  aria-checked={reportCycle === 'all'}
-                  tabIndex={0}
-                  onClick={() => setReportCycle('all')}
-                  onKeyDown={(event) => handleActionKeyDown(event, () => setReportCycle('all'))}
-                >
-                  <div className={`radio radio--sm${reportCycle === 'all' ? ' radio--checked' : ''}`}>
-                    <div className="radio__inner"></div>
-                    <div className="radio__dot"></div>
-                  </div>
-                  <span className="radio-field__text">全店汇总</span>
+            <div
+              className="form-body form-body--clickable"
+              role="button"
+              tabIndex={0}
+              onClick={() => onPreviewAction('负责人选择面板待接入')}
+              onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('负责人选择面板待接入'))}
+            >
+              <div className="form-body__label">负责人</div>
+              <div className="form-body__action">
+                <div className="form-body__select">
+                  <span className="form-body__select-text has-value">商品运营组</span>
+                  <i className="form-body__select-arrow wego-iconfont-s icon-youjiantou16"></i>
                 </div>
-                <div
-                  className="radio-field"
-                  role="radio"
-                  aria-checked={reportCycle === 'shop'}
-                  tabIndex={0}
-                  onClick={() => setReportCycle('shop')}
-                  onKeyDown={(event) => handleActionKeyDown(event, () => setReportCycle('shop'))}
-                >
-                  <div className={`radio radio--sm${reportCycle === 'shop' ? ' radio--checked' : ''}`}>
-                    <div className="radio__inner"></div>
-                    <div className="radio__dot"></div>
+              </div>
+            </div>
+            <div
+              className="form-body form-body--clickable"
+              role="button"
+              tabIndex={0}
+              onClick={() => onPreviewAction('同步频率选择面板待接入')}
+              onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('同步频率选择面板待接入'))}
+            >
+              <div className="form-body__label">同步频率</div>
+              <div className="form-body__action">
+                <div className="form-body__select">
+                  <span className="form-body__select-text has-value">每30分钟</span>
+                  <i className="form-body__select-arrow wego-iconfont-s icon-youjiantou16"></i>
+                </div>
+              </div>
+            </div>
+            <div className="form-body form-body--preserve-content-align">
+              <div className="form-body__label">统计口径</div>
+              <div className="form-body__action" aria-hidden="true"></div>
+              <div className="form-body__right-btn">
+                <div className="radio-field-group" role="radiogroup" aria-label="统计口径">
+                  <div
+                    className="radio-field"
+                    role="radio"
+                    aria-checked={reportCycle === 'all'}
+                    tabIndex={0}
+                    onClick={() => setReportCycle('all')}
+                    onKeyDown={(event) => handleActionKeyDown(event, () => setReportCycle('all'))}
+                  >
+                    <div className={`radio radio--sm${reportCycle === 'all' ? ' radio--checked' : ''}`}>
+                      <div className="radio__inner"></div>
+                      <div className="radio__dot"></div>
+                    </div>
+                    <span className="radio-field__text">全店汇总</span>
                   </div>
-                  <span className="radio-field__text">按门店</span>
+                  <div
+                    className="radio-field"
+                    role="radio"
+                    aria-checked={reportCycle === 'shop'}
+                    tabIndex={0}
+                    onClick={() => setReportCycle('shop')}
+                    onKeyDown={(event) => handleActionKeyDown(event, () => setReportCycle('shop'))}
+                  >
+                    <div className={`radio radio--sm${reportCycle === 'shop' ? ' radio--checked' : ''}`}>
+                      <div className="radio__inner"></div>
+                      <div className="radio__dot"></div>
+                    </div>
+                    <span className="radio-field__text">按门店</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -226,156 +214,160 @@ function BizSettingsContent({ onPreviewAction }) {
         </div>
       </div>
 
-      <div className="cell-group">
-        <div className="cell-group__title">规则与提醒</div>
-        <div className="cell-group__content">
-        <div
-          className="cell cell--double cell--divider-right-edge cell--bg-white"
-        >
-          <div className="cell__body">
-            <div className="cell__content">
-              <div className="cell__title-row"><span className="cell__title">自动同步业务数据</span></div>
-              <div className="cell__subtitle">保存后按同步频率自动刷新库存、价格和成员归属。</div>
-            </div>
-            <div className="cell__action">
-              <div
-                className={`switch${switches.autoSync ? ' switch--on' : ' switch--off'}`}
-                role="switch"
-                aria-checked={switches.autoSync}
-                tabIndex={0}
-                onClick={() => toggleSwitch('autoSync')}
-                onKeyDown={(event) => handleActionKeyDown(event, () => toggleSwitch('autoSync'))}
-              ><div className="switch__thumb"></div></div>
-            </div>
-          </div>
-        </div>
-        <div
-          className="cell cell--single cell--divider-right-edge cell--bg-white"
-        >
-          <div className="cell__body">
-            <div className="cell__content"><div className="cell__title-row"><span className="cell__title">库存异常预警</span></div></div>
-            <div className="cell__action">
-              <div
-                className={`switch${switches.stockAlert ? ' switch--on' : ' switch--off'}`}
-                role="switch"
-                aria-checked={switches.stockAlert}
-                tabIndex={0}
-                onClick={() => toggleSwitch('stockAlert')}
-                onKeyDown={(event) => handleActionKeyDown(event, () => toggleSwitch('stockAlert'))}
-              ><div className="switch__thumb"></div></div>
+      <div className="layout-section" data-component-slug="layout-section" data-edge="M0" style={{ '--layout-section-gap-after': 'var(--spacer-8)' }}>
+        <div className="cell-group">
+          <div className="cell-group__title">规则与提醒</div>
+          <div className="cell-group__content">
+          <div
+            className="cell cell--double cell--divider-right-edge cell--bg-white"
+          >
+            <div className="cell__body">
+              <div className="cell__content">
+                <div className="cell__title-row"><span className="cell__title">自动同步业务数据</span></div>
+                <div className="cell__subtitle">保存后按同步频率自动刷新库存、价格和成员归属。</div>
+              </div>
+              <div className="cell__action">
+                <div
+                  className={`switch${switches.autoSync ? ' switch--on' : ' switch--off'}`}
+                  role="switch"
+                  aria-checked={switches.autoSync}
+                  tabIndex={0}
+                  onClick={() => toggleSwitch('autoSync')}
+                  onKeyDown={(event) => handleActionKeyDown(event, () => toggleSwitch('autoSync'))}
+                ><div className="switch__thumb"></div></div>
+              </div>
             </div>
           </div>
-        </div>
-        <div
-          className="cell cell--single cell--divider-right-edge cell--bg-white"
-        >
-          <div className="cell__body">
-            <div className="cell__content"><div className="cell__title-row"><span className="cell__title">短信提醒负责人</span></div></div>
-            <div className="cell__action">
-              <div
-                className={`switch${switches.smsNotify ? ' switch--on' : ' switch--off'}`}
-                role="switch"
-                aria-checked={switches.smsNotify}
-                tabIndex={0}
-                onClick={() => toggleSwitch('smsNotify')}
-                onKeyDown={(event) => handleActionKeyDown(event, () => toggleSwitch('smsNotify'))}
-              ><div className="switch__thumb"></div></div>
+          <div
+            className="cell cell--single cell--divider-right-edge cell--bg-white"
+          >
+            <div className="cell__body">
+              <div className="cell__content"><div className="cell__title-row"><span className="cell__title">库存异常预警</span></div></div>
+              <div className="cell__action">
+                <div
+                  className={`switch${switches.stockAlert ? ' switch--on' : ' switch--off'}`}
+                  role="switch"
+                  aria-checked={switches.stockAlert}
+                  tabIndex={0}
+                  onClick={() => toggleSwitch('stockAlert')}
+                  onKeyDown={(event) => handleActionKeyDown(event, () => toggleSwitch('stockAlert'))}
+                ><div className="switch__thumb"></div></div>
+              </div>
             </div>
           </div>
-        </div>
+          <div
+            className="cell cell--single cell--divider-right-edge cell--bg-white"
+          >
+            <div className="cell__body">
+              <div className="cell__content"><div className="cell__title-row"><span className="cell__title">短信提醒负责人</span></div></div>
+              <div className="cell__action">
+                <div
+                  className={`switch${switches.smsNotify ? ' switch--on' : ' switch--off'}`}
+                  role="switch"
+                  aria-checked={switches.smsNotify}
+                  tabIndex={0}
+                  onClick={() => toggleSwitch('smsNotify')}
+                  onKeyDown={(event) => handleActionKeyDown(event, () => toggleSwitch('smsNotify'))}
+                ><div className="switch__thumb"></div></div>
+              </div>
+            </div>
+          </div>
+          </div>
         </div>
       </div>
 
-      <div className="cell-group">
-        <div className="cell-group__title">适用范围</div>
-        <div className="cell-group__content">
-        <div
-          className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
-          role="button"
-          tabIndex={0}
-          onClick={() => onPreviewAction('可见范围选择面板待接入')}
-          onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('可见范围选择面板待接入'))}
-        >
-          <div className="cell__body">
-            <div className="cell__content"><div className="cell__title-row"><span className="cell__title">可见范围</span></div></div>
-            <div className="cell__action">
-              <span className="cell__action-text">全部导购</span>
-              <i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
+      <div className="layout-section" data-component-slug="layout-section" data-edge="M0">
+        <div className="cell-group">
+          <div className="cell-group__title">适用范围</div>
+          <div className="cell-group__content">
+          <div
+            className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+            role="button"
+            tabIndex={0}
+            onClick={() => onPreviewAction('可见范围选择面板待接入')}
+            onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('可见范围选择面板待接入'))}
+          >
+            <div className="cell__body">
+              <div className="cell__content"><div className="cell__title-row"><span className="cell__title">可见范围</span></div></div>
+              <div className="cell__action">
+                <span className="cell__action-text">全部导购</span>
+                <i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
+              </div>
             </div>
           </div>
-        </div>
-        <div
-          className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
-          role="button"
-          tabIndex={0}
-          onClick={() => onPreviewAction('默认处理人选择面板待接入')}
-          onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('默认处理人选择面板待接入'))}
-        >
-          <div className="cell__body">
-            <div className="cell__content"><div className="cell__title-row"><span className="cell__title">默认处理人</span></div></div>
-            <div className="cell__action">
-              <span className="cell__action-text">当前负责人</span>
-              <i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
+          <div
+            className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+            role="button"
+            tabIndex={0}
+            onClick={() => onPreviewAction('默认处理人选择面板待接入')}
+            onKeyDown={(event) => handleActionKeyDown(event, () => onPreviewAction('默认处理人选择面板待接入'))}
+          >
+            <div className="cell__body">
+              <div className="cell__content"><div className="cell__title-row"><span className="cell__title">默认处理人</span></div></div>
+              <div className="cell__action">
+                <span className="cell__action-text">当前负责人</span>
+                <i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
+              </div>
             </div>
           </div>
-        </div>
-        <div
-          className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
-          role="checkbox"
-          aria-checked={permissions.exportData}
-          tabIndex={0}
-          onClick={() => togglePermission('exportData')}
-          onKeyDown={(event) => handleActionKeyDown(event, () => togglePermission('exportData'))}
-        >
-          <div className="cell__select">
-            <div className={`checkbox${permissions.exportData ? ' checkbox--checked' : ''}`}>
-              <div className="checkbox__inner"></div>
-              {permissions.exportData && <div className="checkbox__icon"><CheckIcon /></div>}
+          <div
+            className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+            role="checkbox"
+            aria-checked={permissions.exportData}
+            tabIndex={0}
+            onClick={() => togglePermission('exportData')}
+            onKeyDown={(event) => handleActionKeyDown(event, () => togglePermission('exportData'))}
+          >
+            <div className="cell__select">
+              <div className={`checkbox${permissions.exportData ? ' checkbox--checked' : ''}`}>
+                <div className="checkbox__inner"></div>
+                {permissions.exportData && <div className="checkbox__icon"><CheckIcon /></div>}
+              </div>
+            </div>
+            <div className="cell__body">
+              <div className="cell__content"><div className="cell__title-row"><span className="cell__title">允许成员导出数据</span></div></div>
             </div>
           </div>
-          <div className="cell__body">
-            <div className="cell__content"><div className="cell__title-row"><span className="cell__title">允许成员导出数据</span></div></div>
-          </div>
-        </div>
-        <div
-          className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
-          role="checkbox"
-          aria-checked={permissions.editPrice}
-          tabIndex={0}
-          onClick={() => togglePermission('editPrice')}
-          onKeyDown={(event) => handleActionKeyDown(event, () => togglePermission('editPrice'))}
-        >
-          <div className="cell__select">
-            <div className={`checkbox${permissions.editPrice ? ' checkbox--checked' : ''}`}>
-              <div className="checkbox__inner"></div>
-              {permissions.editPrice && <div className="checkbox__icon"><CheckIcon /></div>}
+          <div
+            className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+            role="checkbox"
+            aria-checked={permissions.editPrice}
+            tabIndex={0}
+            onClick={() => togglePermission('editPrice')}
+            onKeyDown={(event) => handleActionKeyDown(event, () => togglePermission('editPrice'))}
+          >
+            <div className="cell__select">
+              <div className={`checkbox${permissions.editPrice ? ' checkbox--checked' : ''}`}>
+                <div className="checkbox__inner"></div>
+                {permissions.editPrice && <div className="checkbox__icon"><CheckIcon /></div>}
+              </div>
+            </div>
+            <div className="cell__body">
+              <div className="cell__content"><div className="cell__title-row"><span className="cell__title">允许修改售价</span></div></div>
             </div>
           </div>
-          <div className="cell__body">
-            <div className="cell__content"><div className="cell__title-row"><span className="cell__title">允许修改售价</span></div></div>
-          </div>
-        </div>
-        <div
-          className="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable"
-          role="checkbox"
-          aria-checked={permissions.notifyMembers}
-          tabIndex={0}
-          onClick={() => togglePermission('notifyMembers')}
-          onKeyDown={(event) => handleActionKeyDown(event, () => togglePermission('notifyMembers'))}
-        >
-          <div className="cell__select">
-            <div className={`checkbox${permissions.notifyMembers ? ' checkbox--checked' : ''}`}>
-              <div className="checkbox__inner"></div>
-              {permissions.notifyMembers && <div className="checkbox__icon"><CheckIcon /></div>}
+          <div
+            className="cell cell--double cell--divider-right-edge cell--bg-white cell--clickable"
+            role="checkbox"
+            aria-checked={permissions.notifyMembers}
+            tabIndex={0}
+            onClick={() => togglePermission('notifyMembers')}
+            onKeyDown={(event) => handleActionKeyDown(event, () => togglePermission('notifyMembers'))}
+          >
+            <div className="cell__select">
+              <div className={`checkbox${permissions.notifyMembers ? ' checkbox--checked' : ''}`}>
+                <div className="checkbox__inner"></div>
+                {permissions.notifyMembers && <div className="checkbox__icon"><CheckIcon /></div>}
+              </div>
+            </div>
+            <div className="cell__body">
+              <div className="cell__content">
+                <div className="cell__title-row"><span className="cell__title">保存后通知相关成员</span></div>
+                <div className="cell__subtitle">保存生效后，通过站内消息通知受影响成员。</div>
+              </div>
             </div>
           </div>
-          <div className="cell__body">
-            <div className="cell__content">
-              <div className="cell__title-row"><span className="cell__title">保存后通知相关成员</span></div>
-              <div className="cell__subtitle">保存生效后，通过站内消息通知受影响成员。</div>
-            </div>
           </div>
-        </div>
         </div>
       </div>
     </>
@@ -383,7 +375,8 @@ function BizSettingsContent({ onPreviewAction }) {
 }
 
 /* 消费 modal 组件 fullscreen 变体：双层结构、蒙层、动画由组件自身 data-state 承担；
-   业务只需在 open/closed 切换时同步 data-state，组件 CSS 负责 slide-up/down + 蒙层淡入淡出 */
+   业务只需在 open/closed 切换时同步 data-state，组件 CSS 负责 slide-up/down + 蒙层淡入淡出。
+   modal__body 内部用 layout-scroll 承载滚动，按计划 4.2 不计入场景主页面唯一 layout-scroll 约束。 */
 function BizSettingsModal({ dataState, onCancel, onSave, onPreviewAction }) {
   return (
     <div className="modal modal--fullscreen" data-state={dataState} role="dialog" aria-modal="true">
@@ -406,9 +399,7 @@ function BizSettingsModal({ dataState, onCancel, onSave, onPreviewAction }) {
           </div>
         </div>
         <div className="modal__body modal__body--safe-bottom">
-          <div className="friend-add-form__body">
-            <BizSettingsContent onPreviewAction={onPreviewAction} />
-          </div>
+          <BizSettingsContent onPreviewAction={onPreviewAction} />
         </div>
       </div>
     </div>
@@ -418,35 +409,43 @@ function BizSettingsModal({ dataState, onCancel, onSave, onPreviewAction }) {
 function BaseScreen({ onOpen }) {
   return (
     <div className="uikit-host-screen">
-      <div data-component="navbar" className="navbar">
-        <div className="navbar__body navbar__body--split">
-          <div className="navbar__left">
-            <span className="navbar__title">我的</span>
-          </div>
-          <div className="navbar__right"></div>
-        </div>
-      </div>
-      <div className="phone-body">
-        <div className="cell-group">
-          <div className="cell-group__title">设置入口</div>
-          <div className="cell-group__content">
-          <div
-            data-component="cell"
-            className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
-            role="button"
-            tabIndex={0}
-            onClick={onOpen}
-            onKeyDown={(event) => handleActionKeyDown(event, onOpen)}
-          >
-            <div className="cell__body">
-              <div className="cell__content"><div className="cell__title-row"><span className="cell__title">业务规则配置</span></div></div>
-              <div className="cell__action"><i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+      <div className="layout-page" data-component-slug="layout-page">
+        <div className="layout-page__top">
+          <div data-component="navbar" className="navbar">
+            <div className="navbar__body navbar__body--split">
+              <div className="navbar__left">
+                <span className="navbar__title">我的</span>
+              </div>
+              <div className="navbar__right"></div>
             </div>
           </div>
+        </div>
+        <div className="layout-scroll" data-component-slug="layout-scroll">
+          <div className="layout-section" data-component-slug="layout-section" data-edge="M0" style={{ '--layout-section-gap-before': 'var(--spacer-8)' }}>
+            <div className="cell-group">
+              <div className="cell-group__title">设置入口</div>
+              <div className="cell-group__content">
+              <div
+                data-component="cell"
+                className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+                role="button"
+                tabIndex={0}
+                onClick={onOpen}
+                onKeyDown={(event) => handleActionKeyDown(event, onOpen)}
+              >
+                <div className="cell__body">
+                  <div className="cell__content"><div className="cell__title-row"><span className="cell__title">业务规则配置</span></div></div>
+                  <div className="cell__action"><i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i></div>
+                </div>
+              </div>
+              </div>
+            </div>
           </div>
         </div>
+        <div className="layout-page__bottom">
+          <BottomNav />
+        </div>
       </div>
-      <BottomNav />
     </div>
   );
 }

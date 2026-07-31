@@ -15,22 +15,8 @@ html, body { min-height: auto; }
 
 .uikit-host-screen {
   height: 100%;
-  display: flex;
-  flex-direction: column;
   background: var(--bg-page);
   position: relative;
-}
-
-.phone-body {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacer-8);
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding-top: var(--spacer-8);
-  padding-bottom: var(--safe-area-bottom-content);
 }
 
 .bottom-nav {
@@ -224,8 +210,9 @@ function EntityFormContent({
 }) {
   return (
     <>
-      <div className="form-group">
-        <div className="form-group__title">基本信息</div>
+      <div className="layout-section" data-component-slug="layout-section" data-edge="M0" style={{ '--layout-section-gap-before': 'var(--spacer-8)', '--layout-section-gap-after': 'var(--spacer-8)' }}>
+        <div className="form-group">
+          <div className="form-group__title">基本信息</div>
         <div className="form-group__content">
           <div className="form-body form-body--preserve-content-align">
             <div className="form-body__label form-body__label--required">
@@ -278,9 +265,11 @@ function EntityFormContent({
           </div>
         </div>
       </div>
+      </div>
 
-      <div className="form-group">
-        <div className="form-group__title">归属与标签</div>
+      <div className="layout-section" data-component-slug="layout-section" data-edge="M0" style={{ '--layout-section-gap-after': 'var(--spacer-8)' }}>
+        <div className="form-group">
+          <div className="form-group__title">归属与标签</div>
         <div className="form-group__content">
           <div
             className="form-body form-body--clickable"
@@ -312,9 +301,11 @@ function EntityFormContent({
           </div>
         </div>
       </div>
+      </div>
 
-      <div className="form-group">
-        <div className="form-group__title">来源与备注</div>
+      <div className="layout-section" data-component-slug="layout-section" data-edge="M0">
+        <div className="form-group">
+          <div className="form-group__title">来源与备注</div>
         <div className="form-group__content">
           <div
             className="form-body form-body--clickable"
@@ -357,6 +348,7 @@ function EntityFormContent({
             </div>
           </div>
         </div>
+      </div>
       </div>
     </>
   );
@@ -408,25 +400,23 @@ function EntityFormModal({
           </div>
         </div>
         <div className="modal__body modal__body--safe-bottom">
-          <div className="friend-add-form__body">
-            <EntityFormContent
-              nickname={nickname}
-              setNickname={setNickname}
-              account={account}
-              setAccount={setAccount}
-              groupName={groupName}
-              sourceName={sourceName}
-              tags={tags}
-              setTags={setTags}
-              remark={remark}
-              setRemark={setRemark}
-              verifyMessage={verifyMessage}
-              setVerifyMessage={setVerifyMessage}
-              onOpenGroupSheet={onOpenGroupSheet}
-              onOpenSourceSheet={onOpenSourceSheet}
-              onUploadAvatar={onUploadAvatar}
-            />
-          </div>
+          <EntityFormContent
+            nickname={nickname}
+            setNickname={setNickname}
+            account={account}
+            setAccount={setAccount}
+            groupName={groupName}
+            sourceName={sourceName}
+            tags={tags}
+            setTags={setTags}
+            remark={remark}
+            setRemark={setRemark}
+            verifyMessage={verifyMessage}
+            setVerifyMessage={setVerifyMessage}
+            onOpenGroupSheet={onOpenGroupSheet}
+            onOpenSourceSheet={onOpenSourceSheet}
+            onUploadAvatar={onUploadAvatar}
+          />
         </div>
       </div>
       <GroupSheet
@@ -448,39 +438,47 @@ function EntityFormModal({
 function BaseScreen({ onOpen }) {
   return (
     <div className="uikit-host-screen">
-      <div data-component="navbar" className="navbar">
-        <div className="navbar__body navbar__body--split">
-          <div className="navbar__left">
-            <span className="navbar__title">好友</span>
+      <div className="layout-page" data-component-slug="layout-page">
+        <div className="layout-page__top">
+          <div data-component="navbar" className="navbar">
+            <div className="navbar__body navbar__body--split">
+              <div className="navbar__left">
+                <span className="navbar__title">好友</span>
+              </div>
+              <div className="navbar__right"></div>
+            </div>
           </div>
-          <div className="navbar__right"></div>
         </div>
-      </div>
-      <div className="phone-body">
-        <div className="cell-group">
-          <div className="cell-group__title">好友管理</div>
-          <div className="cell-group__content">
-            <div
-              data-component="cell"
-              className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
-              role="button"
-              tabIndex={0}
-              onClick={onOpen}
-              onKeyDown={(e) => handleActionKeyDown(e, onOpen)}
-            >
-              <div className="cell__body">
-                <div className="cell__content">
-                  <div className="cell__title-row"><span className="cell__title">新建好友</span></div>
-                </div>
-                <div className="cell__action">
-                  <i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
+        <div className="layout-scroll" data-component-slug="layout-scroll">
+          <div className="layout-section" data-component-slug="layout-section" data-edge="M0" style={{ '--layout-section-gap-before': 'var(--spacer-8)' }}>
+            <div className="cell-group">
+              <div className="cell-group__title">好友管理</div>
+              <div className="cell-group__content">
+                <div
+                  data-component="cell"
+                  className="cell cell--single cell--divider-right-edge cell--bg-white cell--clickable"
+                  role="button"
+                  tabIndex={0}
+                  onClick={onOpen}
+                  onKeyDown={(e) => handleActionKeyDown(e, onOpen)}
+                >
+                  <div className="cell__body">
+                    <div className="cell__content">
+                      <div className="cell__title-row"><span className="cell__title">新建好友</span></div>
+                    </div>
+                    <div className="cell__action">
+                      <i className="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
+        <div className="layout-page__bottom">
+          <BottomNav />
+        </div>
       </div>
-      <BottomNav />
     </div>
   );
 }

@@ -56,7 +56,10 @@
   function bind(options) {
     options = options || {};
     var scopeRoot = options.root && options.root.nodeType === 1 ? options.root : document;
-    var scrollRoot = resolveElement(scopeRoot, options.scrollRoot, '主滚动区');
+    var scrollRoot = options.scrollRoot
+      ? resolveElement(scopeRoot, options.scrollRoot, '主滚动区')
+      : scopeRoot.querySelector('.layout-scroll');
+    if (!scrollRoot) throw new Error('[WegoScrollLayout] 未找到主滚动区：未声明 scrollRoot 且未发现 .layout-scroll');
     var tolerance = number(options.boundaryTolerance, 1);
     var threshold = number(options.directionThreshold, 16);
     var activationRoot = options.activationRoot ? resolveElement(scopeRoot, options.activationRoot, '激活区域') : null;
@@ -77,7 +80,12 @@
     var basePaddingBottom = parseFloat(initialComputedStyle.paddingBottom) || 0;
     var baseScrollPaddingBottom = parseFloat(initialComputedStyle.scrollPaddingBottom) || 0;
 
-    var regions = (options.regions || []).map(function (config, index) {
+    var regionConfigs = options.regions && options.regions.length
+      ? options.regions
+      : Array.prototype.map.call(scopeRoot.querySelectorAll('.sticky-region'), function (el) {
+          return { element: el };
+        });
+    var regions = regionConfigs.map(function (config, index) {
       var element = resolveElement(scopeRoot, config.element || config.selector, 'sticky 区域');
       var motion = element.querySelector('.sticky-region__motion') || element;
       var policy = config.policy || element.dataset.visibility || 'always';

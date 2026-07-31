@@ -921,17 +921,41 @@ for (const node of domNodes) {
 }
 
 if (surfaceRoot) {
+  const layoutPageNodes = domNodes.filter(node => node.attrs['data-component-slug'] === 'layout-page');
+  const layoutScrollNodes = domNodes.filter(node => node.attrs['data-component-slug'] === 'layout-scroll');
+  const hasLayoutPage = layoutPageNodes.length > 0;
+
+  if (hasLayoutPage && layoutPageNodes.length > 1) {
+    add('scene.layout_page_unique', '页面只能存在一个 layout-page', sceneJs);
+  }
+
+  const overlaySlugsForScroll = new Set(['actionsheet', 'dialog', 'modal', 'popover', 'popmenu']);
+  const scrollNodesInOverlay = layoutScrollNodes.filter(node => {
+    let parent = node.parent;
+    while (parent) {
+      if (parent.attrs['data-component-slug'] && overlaySlugsForScroll.has(parent.attrs['data-component-slug'])) return true;
+      parent = parent.parent;
+    }
+    return false;
+  });
+  const primaryLayoutScrollNodes = layoutScrollNodes.filter(node => !scrollNodesInOverlay.includes(node));
+  if (hasLayoutPage && primaryLayoutScrollNodes.length !== 1) {
+    add('scene.layout_scroll_unique', `使用 layout-page 的页面必须存在且只存在一个主 layout-scroll（modal/overlay 内部豁免），当前为 ${primaryLayoutScrollNodes.length}`, sceneJs);
+  }
+
   const directRootRules = cssRules.filter(rule => rule.atRules.length === 0
     && rule.selectors.some(selector => strictSimpleSelectorMatchesNode(selector, surfaceRoot)));
   const rootDeclarations = directRootRules.flatMap(rule => rule.declarations);
-  if (!rootDeclarations.some(declaration => declaration.property === 'position' && declaration.value === 'absolute')) {
-    add('scene.layout_root_position', '页面根必须直接声明 position: absolute', sceneCss);
+  if (!hasLayoutPage) {
+    if (!rootDeclarations.some(declaration => declaration.property === 'position' && declaration.value === 'absolute')) {
+      add('scene.layout_root_position', '页面根必须直接声明 position: absolute 或使用 layout-page', sceneCss);
+    }
+    const insetZero = rootDeclarations.some(declaration => declaration.property === 'inset' && declaration.value === '0');
+    const fourEdges = ['top', 'right', 'bottom', 'left'].every(property => {
+      return rootDeclarations.some(declaration => declaration.property === property && declaration.value === '0');
+    });
+    if (!insetZero && !fourEdges) add('scene.layout_root_inset', '页面根必须直接声明 inset: 0 或使用 layout-page', sceneCss);
   }
-  const insetZero = rootDeclarations.some(declaration => declaration.property === 'inset' && declaration.value === '0');
-  const fourEdges = ['top', 'right', 'bottom', 'left'].every(property => {
-    return rootDeclarations.some(declaration => declaration.property === property && declaration.value === '0');
-  });
-  if (!insetZero && !fourEdges) add('scene.layout_root_inset', '页面根必须直接声明 inset: 0', sceneCss);
   const horizontalPadding = new Set(['padding', 'padding-inline', 'padding-left', 'padding-right', 'padding-inline-start', 'padding-inline-end']);
   if (rootDeclarations.some(declaration => horizontalPadding.has(declaration.property))) {
     add('scene.layout_root_padding', '页面根必须通栏，不得承担内容横向边距', sceneCss);
@@ -978,13 +1002,15 @@ if (surfaceRoot) {
 
   const maskedJs = maskJavaScript(js);
   const bindCalls = contextCallArguments(js, 'bindScrollLayout').flat().join('\n');
+  const hasBindScrollLayout = /\bbindScrollLayout\s*\(/.test(maskedJs);
+  const hasExplicitRegions = /\bregions\s*:/.test(bindCalls);
   for (const node of domNodes.filter(item => item.attrs['data-component-slug'] === 'sticky-region')) {
     const sceneClass = [...classSet(node)].find(className => className !== 'sticky-region');
     const selector = sceneClass ? `.${sceneClass}` : '.sticky-region';
-    if (!/\bbindScrollLayout\s*\(/.test(maskedJs)
-      || !/\bregions\s*:/.test(bindCalls)
-      || !new RegExp(`selector\\s*:\\s*["']${escapeRegex(selector)}["']`).test(bindCalls)) {
-      add('scene.sticky_binding', `sticky-region 必须进入 bindScrollLayout.regions：${selector}`, sceneJs);
+    if (!hasBindScrollLayout) {
+      add('scene.sticky_binding', `sticky-region 必须进入 bindScrollLayout：${selector}`, sceneJs);
+    } else if (hasExplicitRegions && !new RegExp(`selector\\s*:\\s*["']${escapeRegex(selector)}["']`).test(bindCalls)) {
+      add('scene.sticky_binding', `sticky-region 已显式声明 regions 但未包含：${selector}`, sceneJs);
     }
   }
 

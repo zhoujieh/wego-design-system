@@ -204,6 +204,55 @@
       "category": "feedback",
       "status": "stable",
       "preview": "preview/component-skeleton.html"
+    },
+    {
+      "slug": "layout-page",
+      "name": "页面总框架",
+      "category": "layout",
+      "status": "stable",
+      "preview": "preview/component-layout-page.html"
+    },
+    {
+      "slug": "layout-scroll",
+      "name": "主纵向滚动区",
+      "category": "layout",
+      "status": "stable",
+      "preview": "preview/component-layout-scroll.html"
+    },
+    {
+      "slug": "layout-section",
+      "name": "大型信息分区",
+      "category": "layout",
+      "status": "stable",
+      "preview": "preview/component-layout-section.html"
+    },
+    {
+      "slug": "layout-flow",
+      "name": "线性排列",
+      "category": "layout",
+      "status": "stable",
+      "preview": "preview/component-layout-flow.html"
+    },
+    {
+      "slug": "layout-split",
+      "name": "双区主次分栏",
+      "category": "layout",
+      "status": "stable",
+      "preview": "preview/component-layout-split.html"
+    },
+    {
+      "slug": "layout-grid",
+      "name": "多栏网格",
+      "category": "layout",
+      "status": "stable",
+      "preview": "preview/component-layout-grid.html"
+    },
+    {
+      "slug": "layout-scroll-row",
+      "name": "横向滚动区",
+      "category": "layout",
+      "status": "stable",
+      "preview": "preview/component-layout-scroll-row.html"
     }
   ],
   "componentContractSchemaVersion": 4

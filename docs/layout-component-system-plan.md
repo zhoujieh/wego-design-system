@@ -15,6 +15,10 @@
 
 本次改造的目标不是增加抽象规则，而是让 AI 在填入业务内容和组件前，先通过正式 Layout 组件搭建一棵 2–3 层的页面信息框架。
 
+#### 缺口证据（迭代工作流要求）
+
+按 `wego-uxsystem-iterate`「收到设计系统缺口时先验证缺口，再采用正式能力」，本次新增 7 个组件应基于可观察的缺口证据，而非预判。阶段 1 启动前需补充：至少 2 个现有场景中因场景 CSS 临时实现页面布局导致返工或验收失败的具体案例（场景名、失败现象、根因），作为正式升级的触发证据，避免单场景特例或预判被泛化为全局组件。
+
 ---
 
 ## 2. 改造目标
@@ -101,10 +105,34 @@ Layout 规划只允许拆分 2–3 层：
 #### 职责
 
 - 提供顶部、正文、底部三个槽位；
-- 占满当前 `scene-root`；
+- 占满当前场景挂载面板；
 - 正文自适应剩余高度；
 - 禁止产生第二个页面外层滚动；
 - 统一顶部和底部区域与正文的空间关系。
+
+#### 与 App 宿主的 DOM 边界
+
+真实场景挂载点是宿主提供的面板，不是抽象的 `scene-root`：
+
+- push 场景挂载于 `.app-scene-layer__panel`；
+- host-tab 场景挂载于 `.host-shell-page__panel`；
+- 两者当前自带 `overflow-y: auto`（见 `wego-app/css/app.css`）。
+
+`layout-page` 与面板的滚动权归属规则（实施前已定死）：
+
+1. `layout-page` 只做骨架，不自带 `overflow-y`；
+2. 主纵向滚动由 `layout-scroll` 承担，唯一一个；
+3. 面板（`.app-scene-layer__panel` / `.host-shell-page__panel`）在接入 `layout-scroll` 后必须关闭自身 `overflow-y`（改为 `overflow: hidden`），把滚动权交给 `layout-scroll`，禁止双层滚动；
+4. `layout-page` 不接管全局路由、Overlay 和底部导航，只存在于场景面板内部。
+
+#### 与现有 `scene-contract.md` 的冲突与重写
+
+现有 `scene-contract.md` 的两条 `rule-id` 规则与本计划直接冲突，必须同步重写，不能只新增 Layout 规则而保留旧约束：
+
+- 现有「场景样式只负责根作用域内的区域关系、语义分组、滚动和业务胶水」→ 改为「场景样式只负责业务状态类、非结构性内容表现、Layout 组件公开变量和少量业务胶水」，区域关系/滚动职责移交 Layout 组件；
+- 现有「页面根使用 `position: absolute; inset: 0` 并保持通栏」→ `layout-page` 替代该根约束：`layout-page` 作为场景面板内第一个子级铺满面板，原 `position:absolute;inset:0` 由 `layout-page` 的铺满样式承担，场景根不再单独声明绝对定位。
+
+`page-layers.json` 和组件契约中的 `mountHost: "scene-root"` 只是抽象挂载标识，守卫与契约引用时必须映射到上述真实面板选择器，不得引用不存在的 `.scene-root` 类。
 
 #### 建议结构
 
@@ -139,6 +167,14 @@ Layout 规划只允许拆分 2–3 层：
 - 场景不得自行创建第二个纵向滚动容器；
 - 横向滚动必须使用 `layout-scroll-row`；
 - 主滚动区保持通栏，不承担统一业务内容边距。
+
+#### modal 与 overlay 的滚动豁免
+
+唯一 `layout-scroll` 约束只针对场景主页面。`full-screen-modal`（如 `biz-rule-config`、`entity-form`）和其它 overlay 内部承载的是独立的模态层，不属于场景主页面：
+
+- `layout-scroll` 唯一性约束的范围是单个场景面板内部；
+- modal 组件内部若需要滚动，由 modal 组件自身约定，不计入"第二个 `layout-scroll`"；
+- 守卫判断 `layout-scroll` 数量时，必须排除处于 `modal`、`dialog`、`actionsheet`、`overlay` 宿主内部的节点。
 
 ---
 
@@ -187,6 +223,14 @@ Layout 规划只允许拆分 2–3 层：
 - `wrap`: `nowrap | wrap`
 
 不得使用 `stack` 命名，因为当前仓库中的 `stack` 已经是方块式选择组件。
+
+#### 与 `form` 组件的边界
+
+`form` 组件已承载表单字段的纵向分组与排列，`layout-flow direction="vertical"` 会与之职责重叠。边界约定：
+
+- 表单字段的分组排列用 `form`，不使用 `layout-flow`；
+- 非表单信息（说明区、操作区、多卡片堆叠等）的纵向排列用 `layout-flow`；
+- 一个 Section 内部不应同时出现 `form` 与 `layout-flow` 重复承担纵向分组。
 
 ---
 
@@ -337,10 +381,26 @@ AI 将 `layout-scroll` 从上到下拆分为 2–6 个大型 `layout-section`，
 - 单向连续排列：`layout-flow`；
 - 双区主次排列：`layout-split`；
 - 多个同类区域：`layout-grid`；
-- 横向浏览区域：`layout-scroll-row`；
-- 滚动后需持续可见：`sticky-region`。
+- 横向浏览区域：`layout-scroll-row`。
 
 完成第三层后停止拆分，再将业务信息和正式组件填入槽位。
+
+### 6.4 `sticky-region` 与 Section 的嵌套关系
+
+`sticky-region` 不属于 Section 内部排列，而是 `layout-scroll` 内部、Section 之间的同级通栏元素：
+
+- `sticky-region` 必须通栏（见 `sticky-region.json`），禁止放进带横向边距的 Section；
+- 正确位置：`layout-scroll` 的直接子级，位于两个 `layout-section` 之间；
+- `layout-section` 的 `edge=M8/M32` 边距只作用于业务内容，不包裹 `sticky-region`；
+- `layout-scroll` 内部允许出现的直接子级只有：`layout-section` 与 `sticky-region` 两类。
+
+```text
+layout-scroll
+├── layout-section
+├── sticky-region        ← 通栏，与 section 同级
+├── layout-section
+└── sticky-region
+```
 
 ---
 
@@ -443,6 +503,10 @@ UI Kit 负责沉淀已验证的页面范式和布局经验；Layout 组件负责
 - `layout-grid`
 - `layout-scroll-row`
 
+#### Spacer Token 白名单
+
+计划中所有 `gap`、`column-gap`、`row-gap`、`gap-before`、`gap-after` 值只能取自 `colors_and_type.css` 中实际声明的 `--spacer-*` Token。阶段 1 合同必须列出可用枚举（如 `--spacer-0`、`--spacer-4`、`--spacer-8`、`--spacer-12`、`--spacer-16`、`--spacer-24`、`--spacer-32`），AI 不得按名称猜测或自造数值。
+
 ### 9.2 更新索引与消费规则
 
 需要修改：
@@ -455,6 +519,16 @@ UI Kit 负责沉淀已验证的页面范式和布局经验；Layout 组件负责
 - `.codex/skills/wego-design/page-layers.json`（仅补充与 Layout 组件的职责映射，不改变层级模型）
 - `.codex/skills/wego-design/SKILL.md`
 
+#### 版本递增（同步矩阵要求）
+
+按 `sync-matrix.runtime.md`「正式设计系统源变化必须递增 metadata 版本」，本次改动必须递增受影响资源的 `schemaVersion`：
+
+- `components/index.json`（当前 4）
+- `components/index.json` 的 `componentContractSchemaVersion`（当前 4，若组件契约 Schema 未变则不动）
+- `uikit-plan.json`（当前 5，新增 `layoutTree` 字段）
+- `library-consumption.json`（当前 7，新增 Layout 组件消费层与守卫规则）
+- `page-layers.json` 仅补充职责映射，若不改 Schema 可不递增，但需在变更说明中标注。
+
 ### 9.3 更新验证脚本
 
 重点涉及：
@@ -463,6 +537,15 @@ UI Kit 负责沉淀已验证的页面范式和布局经验；Layout 组件负责
 - `scripts/validate-scene-runtime.mjs`
 - 组件索引、Preview 和契约相关测试脚本
 - `WegoScrollLayout` 相关测试
+
+#### 同步脚本文档与定向回归测试
+
+按 `sync-matrix.md`「工作流守卫调整 | 实际执行脚本 | 统一验证入口与脚本文档 | 对应回归测试」，除主守卫外还必须同步：
+
+- `scripts/README.md`：登记新增的 Layout 守卫与运行时机；
+- `scripts/test-scroll-layout.mjs`：`layout-scroll` 接入 `WegoScrollLayout` 后补回归；
+- `scripts/test-scene-contract-tools.mjs`：场景守卫新增 `layout-page` 唯一、`layout-scroll` 唯一、CSS 禁止项后补回归；
+- `scripts/test-sync-wego-app-lib.mjs`：新增 7 个组件交付副本同步后补回归。
 
 ### 9.4 迁移现有资产
 
@@ -489,7 +572,7 @@ UI Kit 负责沉淀已验证的页面范式和布局经验；Layout 组件负责
 
 ### 10.2 场景 CSS 禁止项
 
-对业务场景自行创建的容器，禁止直接声明：
+守卫只拦截**场景根直接子级、且未声明任何 `data-component-slug` 的容器**。对这类场景级容器，禁止直接声明：
 
 ```css
 display: flex;
@@ -505,7 +588,19 @@ overflow-x: auto;
 overflow-y: auto;
 ```
 
-正式业务组件内部 CSS 和 Layout 组件自身 CSS 不受此限制。
+判断边界与豁免：
+
+- 已声明 `data-component-slug` 的正式组件（包括业务组件与 Layout 组件）内部 CSS 不受此限制；
+- 挂载在 `modal`、`dialog`、`actionsheet`、`overlay` 宿主内部的容器按各自组件约定，不计入场景级容器；
+- 守卫按 DOM 所属的 `data-component-slug` 判定边界，不靠选择器名称猜测，避免误伤卡片内部、cell 行内等合法局部 flex。
+
+#### 守卫落地方式
+
+现有 `validate-scene-contract.mjs` 是「CSS 文本扫描 + HTML 模板解析」混合，已有扫描 `overflow`/`sticky` 声明的先例，但**无法从 CSS 选择器文本反推该规则是否落在已声明 `data-component-slug` 的组件 DOM 内部**（CSS 选择器不携带组件边界信息）。因此 10.2 守卫落地退化为：
+
+- 只拦截「场景根模板直接子级容器」对应的 CSS 选择器（即 scene.css 中作用于模板根直接子级的规则）；
+- 不尝试按 slug 反查组件内部 CSS 边界；
+- 正式组件自身的 CSS 由 `validate-component-contract-parity.mjs` 在组件层校验，不归场景守卫。
 
 ### 10.3 场景 CSS 保留职责
 
@@ -540,7 +635,8 @@ overflow-y: auto;
 - 创建 Preview、契约和 CSS；
 - 加入组件索引；
 - 更新交付副本；
-- 为 Layout 组件补齐 DOM 和变体验证。
+- 为 Layout 组件补齐 DOM 和变体验证；
+- **先落地守卫基础版**：至少实现「场景根必须使用 `layout-page`」和「页面只能存在一个 `layout-scroll`」两条红灯，迁移前先有约束。
 
 #### 完成标准
 
@@ -680,7 +776,7 @@ AI 不得在该阶段继续拆解标题、图标、按钮和文案细节。
 
 风险：`layout-page` 与 `host-shell-page`、`scene-root` 职责重叠。
 
-控制：`layout-page` 只存在于场景内部，不创建第二个宿主，不接管全局路由和 Overlay；实施前必须明确三者 DOM 边界。
+控制（已定结论）：`layout-page` 只存在于场景面板内部，不创建第二个宿主，不接管全局路由和 Overlay。真实边界见 4.1「与 App 宿主的 DOM 边界」：`layout-page` 套在 `.app-scene-layer__panel` / `.host-shell-page__panel` 内，面板关闭自身 `overflow-y`，滚动权交给唯一 `layout-scroll`。三者 DOM 边界为：宿主 shell → 场景面板（承载 + 滚动权移交）→ `layout-page`（骨架）→ `layout-scroll`（主滚动）。
 
 ### 13.5 UI Kit 迁移后过度固化
 
@@ -700,12 +796,16 @@ AI 不得在该阶段继续拆解标题、图标、按钮和文案细节。
 - [ ] 更新 `library-consumption.json`；
 - [ ] 更新 `interaction-prototype-design.md`；
 - [ ] 更新 `SKILL.md`；
-- [ ] 更新 `scene-contract.md`；
-- [ ] 为 `uikit-plan.json` 增加 `layoutTree`；
+- [ ] 更新 `scene-contract.md`（重写区域关系/滚动职责与场景根定位规则）；
+- [ ] 递增 `index.json`/`uikit-plan.json`/`library-consumption.json` 的 `schemaVersion`；
+- [ ] 补充至少 2 个场景布局缺口证据；
+- [ ] 更新 `scripts/README.md` 与三个定向回归测试；
+- [ ] 列出 Layout 组件可用的 Spacer Token 白名单；
+- [ ] 守卫基础版（layout-page 唯一、layout-scroll 唯一）随阶段 2 落地；
 - [ ] 迁移三个现有 UI Kit；
 - [ ] 扫描并迁移现有场景布局；
-- [ ] 增加非法布局 CSS 守卫；
-- [ ] 增加唯一主滚动区守卫；
+- [ ] 增加非法布局 CSS 守卫（仅拦截未声明 `data-component-slug` 的场景级容器）；
+- [ ] 增加唯一主滚动区守卫（排除 modal/overlay 内部）；
 - [ ] 增加 UI Kit Layout Tree 一致性守卫；
 - [ ] 增加 375px、393px 浏览器验证；
 - [ ] 使用复杂信息首页完成未命中 UI Kit 压力测试；
@@ -722,4 +822,5 @@ AI 不得在该阶段继续拆解标题、图标、按钮和文案细节。
 3. UI Kit 和自主布局使用同一套 Layout 实现语言；
 4. 场景 CSS 不再承担页面布局结构；
 5. 页面滚动、固定、吸顶、安全区和遮挡避让能够通过统一合同与守卫验证；
-6. 新增复杂页面时，不需要再次自由发明页面骨架。
+6. 新增复杂页面时，不需要再次自由发明页面骨架；
+7. 场景面板自身不再保留 `overflow-y`，滚动权唯一归属于 `layout-scroll`。

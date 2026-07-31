@@ -61,7 +61,23 @@
           "use": "选择能纵向承载选项的正式 cell 与 radio 组合",
           "avoid": "在窄屏中强行压缩同一行的多项选择"
         }
-      ]
+      ],
+      "layoutTree": {
+        "component": "modal--fullscreen",
+        "children": [
+          { "component": "navbar", "slot": "title" },
+          {
+            "component": "modal__body",
+            "slot": "body",
+            "note": "modal__body 自带 overflow-y:auto，不使用 layout-scroll，按计划 4.2 modal 内部滚动豁免",
+            "children": [
+              { "component": "layout-section", "variant": { "edge": "M0" } },
+              { "component": "layout-section", "variant": { "edge": "M0" } },
+              { "component": "layout-section", "variant": { "edge": "M0" } }
+            ]
+          }
+        ]
+      }
     },
     {
       "id": "system-settings",
@@ -111,7 +127,21 @@
           "use": "保留整行点击与按压反馈",
           "avoid": "把独立 switch、radio 或 checkbox 行也设为整行点击"
         }
-      ]
+      ],
+      "layoutTree": {
+        "component": "layout-page",
+        "children": [
+          { "component": "navbar", "slot": "top" },
+          {
+            "component": "layout-scroll",
+            "children": [
+              { "component": "layout-section", "variant": { "edge": "M0" } },
+              { "component": "layout-section", "variant": { "edge": "M0" } },
+              { "component": "layout-section", "variant": { "edge": "M0" } }
+            ]
+          }
+        ]
+      }
     },
     {
       "id": "entity-form",
@@ -182,7 +212,23 @@
           "use": "主操作只在 navbar 右侧以正式强操作按钮收口",
           "avoid": "在页面底部或内容区重复放保存按钮"
         }
-      ]
+      ],
+      "layoutTree": {
+        "component": "modal--fullscreen",
+        "children": [
+          { "component": "navbar", "slot": "title" },
+          {
+            "component": "modal__body",
+            "slot": "body",
+            "note": "modal__body 自带 overflow-y:auto，不使用 layout-scroll，按计划 4.2 modal 内部滚动豁免",
+            "children": [
+              { "component": "layout-section", "variant": { "edge": "M0" } },
+              { "component": "layout-section", "variant": { "edge": "M0" } },
+              { "component": "layout-section", "variant": { "edge": "M0" } }
+            ]
+          }
+        ]
+      }
     }
   ]
 }

@@ -26,9 +26,10 @@
 3. 建立语义区域顺序，删除、合并或降级不能服务首要任务的内容。
 4. 确定首屏、主滚动区、固定区域、overlay 和返回关系。
 5. 精确匹配页面范式；未命中则自主组合。
-6. 只读取命中的正式组件、Preview 和契约。
-7. 分配视觉层级与 Token，实现交互和反馈。
-8. 在真实页面上自审并运行源码与浏览器验证。
+6. 命中 UI Kit 时继承其登记的 Layout 组件树；未命中时用正式 Layout 组件搭建 2–3 层页面信息框架（`layout-page` → `layout-scroll` → `layout-section`/`sticky-region` → section 内部 `layout-flow`/`layout-split`/`layout-grid`/`layout-scroll-row`），并将页面信息分配到布局槽位；到第三层后停止拆解，不再继续拆分标题、图标、按钮等业务组件内部。
+7. 只读取命中的正式组件、Preview 和契约。
+8. 分配视觉层级与 Token，实现交互和反馈。
+9. 在真实页面上自审并运行源码与浏览器验证。
 
 <!-- rule-id: design-before-component-consumption -->
 设计时只需在当前上下文形成一个短暂的 design frame：首要任务、核心对象、必要状态、区域顺序，以及滚动、固定和 overlay 决定。它不写入文件，不重复简报，也不产生组件计划、Token 清单或原则引用。

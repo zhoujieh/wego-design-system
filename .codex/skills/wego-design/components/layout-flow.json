@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 4,
+  "slug": "layout-flow",
+  "name": "线性排列",
+  "category": "layout",
+  "status": "stable",
+  "sourceKind": "specification",
+  "confidence": "high",
+  "description": "同一区域中的线性排列组件，承载纵向或横向排列、子项对齐、间距、换行与主轴分布。非表单信息的线性排列使用 layout-flow；表单字段分组使用 form 组件，不使用 layout-flow。",
+  "semanticTypeCandidates": [
+    "flow",
+    "stack-layout",
+    "linear-arrangement"
+  ],
+  "variantDimensions": {
+    "direction": ["vertical", "horizontal"],
+    "align": ["start", "center", "end", "stretch"],
+    "justify": ["start", "center", "end", "between"],
+    "wrap": ["nowrap", "wrap"]
+  },
+  "representativeVariants": [
+    { "direction": "vertical", "align": "stretch", "justify": "start", "wrap": "nowrap" },
+    { "direction": "horizontal", "align": "center", "justify": "start", "wrap": "nowrap" },
+    { "direction": "horizontal", "align": "stretch", "justify": "between", "wrap": "nowrap" }
+  ],
+  "anatomy": [
+    {
+      "name": "root",
+      "selector": ".layout-flow",
+      "role": "线性排列容器；按 direction 决定主轴，承载子项间距与对齐"
+    }
+  ],
+  "structurePatterns": [
+    "固定结构为 .layout-flow > 任意业务子项；通过 data-direction 决定纵向或横向。",
+    "gap 通过局部变量 --layout-flow-gap 接收正式 --spacer-* Token。",
+    "不得使用 stack 命名（stack 已是方块式选择组件）。"
+  ],
+  "behavior": {
+    "direction": "data-direction=vertical 为 flex-direction:column；horizontal 为 row。",
+    "alignment": "data-align 控制交叉轴对齐，data-justify 控制主轴分布，data-wrap 控制是否换行。",
+    "gap": "子项间距通过 --layout-flow-gap 接收正式 Spacer Token，默认 0。"
+  },
+  "accessibility": {
+    "layout": "保持 flex 语义，不破坏子项原生可访问性。"
+  },
+  "usageHints": [
+    "非表单信息的纵向或横向排列使用 layout-flow。",
+    "表单字段分组用 form，不要用 layout-flow 重复承担纵向分组。",
+    "一个 section 内部不应同时出现 form 与 layout-flow 重复承担纵向分组。"
+  ],
+  "doNotInvent": [
+    "不要用 layout-flow 替代 form 承载表单字段分组。",
+    "不要在 layout-flow 上声明 overflow:auto；横向滚动用 layout-scroll-row。",
+    "不要开放任意 CSS 式属性；只使用受支持的正式枚举。"
+  ],
+  "domAnatomy": {
+    "root": ".layout-flow",
+    "requiredChildren": [],
+    "bodyChildren": [],
+    "optionalChildren": [],
+    "modifierClasses": [],
+    "alternatives": []
+  },
+  "provenance": {
+    "preview": "preview/component-layout-flow.html",
+    "cssSource": "preview/component-layout-flow.html",
+    "embedded": false,
+    "hostComponent": null,
+    "externalSources": []
+  },
+  "unknowns": [],
+  "ruleRefs": [
+    "page-layers.json"
+  ],
+  "runtimeTokens": [
+    "--spacer-0"
+  ],
+  "previewOnlyTokens": [
+    "--bg-page",
+    "--bg-surface",
+    "--border-neutral-l2",
+    "--radius-8",
+    "--spacer-12",
+    "--spacer-8",
+    "--text-default",
+    "--text-secondary"
+  ],
+  "localTokens": [
+    "--layout-flow-gap"
+  ],
+  "layerContract": {
+    "scope": "page-local",
+    "role": "content",
+    "mountHost": "scene-root",
+    "zToken": "--z-base"
+  }
+}

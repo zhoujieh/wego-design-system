@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 4,
+  "slug": "layout-split",
+  "name": "双区主次分栏",
+  "category": "layout",
+  "status": "stable",
+  "sourceKind": "specification",
+  "confidence": "high",
+  "description": "具有明确主次关系的双区分栏，表达左右双区与主次比例，管理双区间距与对齐，在小空间下按正式规则转为上下排列。第一阶段只开放 1-1、2-1、1-2 三种比例，不开放任意比例。",
+  "semanticTypeCandidates": [
+    "split",
+    "two-column",
+    "main-aside"
+  ],
+  "variantDimensions": {
+    "ratio": ["1-1", "2-1", "1-2"],
+    "align": ["start", "center", "end", "stretch"],
+    "collapse": ["none", "vertical"]
+  },
+  "representativeVariants": [
+    { "ratio": "2-1", "align": "stretch", "collapse": "none" },
+    { "ratio": "1-1", "align": "start", "collapse": "none" },
+    { "ratio": "1-2", "align": "center", "collapse": "vertical" }
+  ],
+  "anatomy": [
+    {
+      "name": "root",
+      "selector": ".layout-split",
+      "role": "双区分栏根；按 ratio 分配主次区宽度，collapse=vertical 时转为上下排列"
+    },
+    {
+      "name": "main",
+      "selector": ".layout-split__main",
+      "role": "主区；按 ratio 占主比例"
+    },
+    {
+      "name": "aside",
+      "selector": ".layout-split__aside",
+      "role": "次区；按 ratio 占次比例"
+    }
+  ],
+  "structurePatterns": [
+    "固定结构为 .layout-split > (.layout-split__main + .layout-split__aside)，主次区均必需。",
+    "ratio 控制主次比例：1-1 等分、2-1 主区占双份、1-2 次区占双份。",
+    "collapse=vertical 时转为 flex-direction:column，主区在上、次区在下。",
+    "gap 通过局部变量 --layout-split-gap 接收正式 Spacer Token。"
+  ],
+  "behavior": {
+    "ratio": "通过 data-ratio 切换主次 flex 比例，第一阶段不开放任意比例。",
+    "collapse": "data-collapse=vertical 转为纵向排列，子项占满宽度。"
+  },
+  "accessibility": {
+    "layout": "保持双区语义，主区在前。"
+  },
+  "usageHints": [
+    "用于明确主次关系的左右双区，如内容 + 操作、摘要 + 详情。",
+    "需要等分时用 ratio=1-1。",
+    "窄屏空间不足时用 collapse=vertical 转上下排列。"
+  ],
+  "doNotInvent": [
+    "不要开放任意比例；只支持 1-1、2-1、1-2。",
+    "不要在 layout-split 上声明 overflow:auto。",
+    "不要省略 main 或 aside 任一槽位。"
+  ],
+  "domAnatomy": {
+    "root": ".layout-split",
+    "requiredChildren": [".layout-split__main", ".layout-split__aside"],
+    "bodyChildren": [],
+    "optionalChildren": [],
+    "modifierClasses": [],
+    "alternatives": []
+  },
+  "provenance": {
+    "preview": "preview/component-layout-split.html",
+    "cssSource": "preview/component-layout-split.html",
+    "embedded": false,
+    "hostComponent": null,
+    "externalSources": []
+  },
+  "unknowns": [],
+  "ruleRefs": [
+    "page-layers.json"
+  ],
+  "runtimeTokens": [
+    "--spacer-0"
+  ],
+  "previewOnlyTokens": [
+    "--bg-page",
+    "--bg-surface",
+    "--border-neutral-l2",
+    "--radius-8",
+    "--spacer-12",
+    "--spacer-8",
+    "--text-default",
+    "--text-secondary"
+  ],
+  "localTokens": [
+    "--layout-split-gap"
+  ],
+  "layerContract": {
+    "scope": "page-local",
+    "role": "content",
+    "mountHost": "scene-root",
+    "zToken": "--z-base"
+  }
+}

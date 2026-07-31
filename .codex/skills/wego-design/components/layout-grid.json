@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 4,
+  "slug": "layout-grid",
+  "name": "多栏网格",
+  "category": "layout",
+  "status": "stable",
+  "sourceKind": "specification",
+  "confidence": "high",
+  "description": "多个同类信息区域的多栏布局，支持等宽 2、3、4 栏，管理行列间距与子项对齐。第一阶段不开放任意 grid-template-columns、跨栏和自由列宽。",
+  "semanticTypeCandidates": [
+    "grid",
+    "multi-column",
+    "tile-grid"
+  ],
+  "variantDimensions": {
+    "columns": ["2", "3", "4"],
+    "align": ["start", "center", "stretch"]
+  },
+  "representativeVariants": [
+    { "columns": "2", "align": "stretch" },
+    { "columns": "3", "align": "stretch" },
+    { "columns": "4", "align": "center" }
+  ],
+  "anatomy": [
+    {
+      "name": "root",
+      "selector": ".layout-grid",
+      "role": "多栏网格根；按 columns 生成等宽列，行列间距通过局部变量接收正式 Spacer Token"
+    }
+  ],
+  "structurePatterns": [
+    "固定结构为 .layout-grid > 同类子项；通过 data-columns 决定 2/3/4 等宽列。",
+    "column-gap 与 row-gap 通过局部变量 --layout-grid-column-gap/row-gap 接收正式 --spacer-* Token。",
+    "第一阶段不开放任意 grid-template-columns、跨栏和自由列宽。"
+  ],
+  "behavior": {
+    "columns": "data-columns=2/3/4 生成等宽 minmax(0,1fr) 列。",
+    "alignment": "data-align 控制子项纵向对齐。"
+  },
+  "accessibility": {
+    "layout": "保持网格语义，子项保持原生可访问性。"
+  },
+  "usageHints": [
+    "用于多个同类信息区域（卡片、入口、指标）的等宽排列。",
+    "窄屏列数过多时优先减少 columns，不要自由压缩列宽。",
+    "gap 只接收正式 Spacer Token，不得硬编码数值。"
+  ],
+  "doNotInvent": [
+    "不要开放任意 grid-template-columns、跨栏或自由列宽。",
+    "不要在 layout-grid 上声明 overflow:auto。",
+    "不要把不同类信息混入同一 grid。"
+  ],
+  "domAnatomy": {
+    "root": ".layout-grid",
+    "requiredChildren": [],
+    "bodyChildren": [],
+    "optionalChildren": [],
+    "modifierClasses": [],
+    "alternatives": []
+  },
+  "provenance": {
+    "preview": "preview/component-layout-grid.html",
+    "cssSource": "preview/component-layout-grid.html",
+    "embedded": false,
+    "hostComponent": null,
+    "externalSources": []
+  },
+  "unknowns": [],
+  "ruleRefs": [
+    "page-layers.json"
+  ],
+  "runtimeTokens": [
+    "--spacer-0"
+  ],
+  "previewOnlyTokens": [
+    "--bg-page",
+    "--bg-surface",
+    "--border-neutral-l2",
+    "--radius-8",
+    "--spacer-12",
+    "--spacer-8",
+    "--text-default",
+    "--text-secondary"
+  ],
+  "localTokens": [
+    "--layout-grid-column-gap",
+    "--layout-grid-row-gap"
+  ],
+  "layerContract": {
+    "scope": "page-local",
+    "role": "content",
+    "mountHost": "scene-root",
+    "zToken": "--z-base"
+  }
+}

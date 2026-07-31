@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 4,
+  "slug": "layout-scroll",
+  "name": "主纵向滚动区",
+  "category": "layout",
+  "status": "stable",
+  "sourceKind": "specification",
+  "confidence": "high",
+  "description": "页面唯一主纵向滚动区域，提供主 overflow-y，禁止横向溢出，隔离滚动链；接收 sticky 与 fixed 区域的实际遮挡补偿，并通过 padding-block-end 预留基础底部安全空间。一个页面只能存在一个 layout-scroll。",
+  "semanticTypeCandidates": [
+    "main-scroll",
+    "page-scroll",
+    "layout-scroll"
+  ],
+  "variantDimensions": {},
+  "representativeVariants": [],
+  "anatomy": [
+    {
+      "name": "root",
+      "selector": ".layout-scroll",
+      "role": "主纵向滚动容器；承载 layout-section 与 sticky-region 两类直接子级"
+    }
+  ],
+  "structurePatterns": [
+    "直接子级只能是 layout-section 或 sticky-region 两类；不得直接放业务组件或自由容器。",
+    "一个页面只能存在一个 layout-scroll；场景不得自行创建第二个纵向滚动容器。",
+    "主滚动区保持通栏，不承担统一业务内容边距；边距由 layout-section 承担。"
+  ],
+  "behavior": {
+    "scroll": "overflow-y:auto；overflow-x:hidden 防止横向溢出；overscroll-behavior:contain 隔离滚动链。",
+    "bottomClearance": "padding-block-end 使用 var(--safe-area-bottom-content) 预留基础底部空间；底部 fixed/sticky 遮挡由 WegoScrollLayout 实测并叠加到 scroll-padding。",
+    "runtimeBinding": "存在 sticky 或底部遮挡时由 WegoScrollLayout 绑定并维护 sticky 栈偏移与 scroll-padding。"
+  },
+  "accessibility": {
+    "scroll": "保持原生滚动语义，不拦截键盘滚动。"
+  },
+  "usageHints": [
+    "layout-scroll 放在 layout-page__body 内，作为页面唯一主滚动区。",
+    "横向滚动必须使用 layout-scroll-row，不得在 layout-scroll 上开启横向滚动。",
+    "modal/dialog/actionsheet/overlay 内部滚动不计入本约束，由各浮层组件自行约定。"
+  ],
+  "doNotInvent": [
+    "不要在场景内创建第二个 layout-scroll 或第二个纵向滚动容器。",
+    "不要给 layout-scroll 设置横向 overflow:auto。",
+    "不要让 layout-scroll 承担业务内容横向边距。"
+  ],
+  "domAnatomy": {
+    "root": ".layout-scroll",
+    "requiredChildren": [],
+    "bodyChildren": [],
+    "optionalChildren": [],
+    "modifierClasses": [],
+    "alternatives": []
+  },
+  "provenance": {
+    "preview": "preview/component-layout-scroll.html",
+    "cssSource": "preview/component-layout-scroll.html",
+    "embedded": false,
+    "hostComponent": null,
+    "externalSources": []
+  },
+  "unknowns": [],
+  "ruleRefs": [
+    "page-layers.json",
+    "library-consumption.json#layoutContract/scrollBottomRule"
+  ],
+  "runtimeTokens": [
+    "--safe-area-bottom-content"
+  ],
+  "previewOnlyTokens": [
+    "--bg-page",
+    "--bg-surface",
+    "--border-neutral-l2",
+    "--spacer-12",
+    "--spacer-8",
+    "--text-default",
+    "--text-secondary"
+  ],
+  "localTokens": [],
+  "layerContract": {
+    "scope": "page-local",
+    "role": "content",
+    "mountHost": "scene-root",
+    "zToken": "--z-base"
+  }
+}

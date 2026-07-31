@@ -7,7 +7,7 @@
 | 脚本 | 使用时机 |
 | --- | --- |
 | `validate-wego-design.mjs` | 仓库统一验证；默认 `changed`，支持 `--scope=changed|system|full` 和 `--strict` |
-| `validate-scene-contract.mjs` | 从源码验证单个场景的路由、组件、Token、交互和布局硬约束 |
+| `validate-scene-contract.mjs` | 从源码验证单个场景的路由、组件、Token、交互和布局硬约束；含 `layout-page` 唯一、`layout-scroll` 唯一（modal/overlay 内部豁免）、`position:absolute` 兼容 `layout-page` 等 Layout 守卫 |
 | `validate-scene-runtime.mjs` | 自动启动临时服务，用 Playwright 检查单场景或 `--all` 场景的 375/393 运行结果 |
 | `iteration-record.mjs` | 创建、提交、确认、失效、冻结或检查业务迭代 |
 | `validate-component-contract-parity.mjs` | 验证组件契约、Preview、索引与生成 CSS 一致性 |

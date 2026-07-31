@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 4,
+  "slug": "layout-section",
+  "name": "大型信息分区",
+  "category": "layout",
+  "status": "stable",
+  "sourceKind": "specification",
+  "confidence": "high",
+  "description": "主滚动区中的大型信息分区，表达一整段信息区域边界，管理页面边距模式与 Section 前后间距，表达通栏或内容宽度，为内部 Layout 或业务组件提供槽位。是 layout-scroll 的直接子级，与 sticky-region 同级。",
+  "semanticTypeCandidates": [
+    "content-section",
+    "page-section",
+    "layout-section"
+  ],
+  "variantDimensions": {
+    "edge": ["M0", "M8", "M32"],
+    "width": ["full", "content"]
+  },
+  "representativeVariants": [
+    { "edge": "M0", "width": "full" },
+    { "edge": "M8", "width": "content" },
+    { "edge": "M32", "width": "full" }
+  ],
+  "anatomy": [
+    {
+      "name": "root",
+      "selector": ".layout-section",
+      "role": "信息分区根；管理横向边距（edge）与前后间距（gap-before/gap-after），内部承载 layout-flow/split/grid 或业务组件"
+    }
+  ],
+  "structurePatterns": [
+    "layout-section 是 layout-scroll 的直接子级，与 sticky-region 同级；不得嵌套在带横向边距的容器内。",
+    "edge 控制横向页面边距：M0 通栏、M8 窄边距、M32 宽边距，沿用现有 --layout-page-margin-* Token。",
+    "gap-before/gap-after 通过局部变量 --layout-section-gap-before/after 接收正式 Spacer Token，默认 0。",
+    "sticky-region 不属于 section 内部排列，必须与 section 同级。"
+  ],
+  "behavior": {
+    "edge": "通过 --layout-section-edge 控制横向 padding-inline，默认 M0 通栏。",
+    "spacing": "前后间距通过 --layout-section-gap-before/after 控制，接收正式 --spacer-* Token。"
+  },
+  "accessibility": {
+    "landmark": "可作为内容分区语义边界，承载同类信息组。"
+  },
+  "usageHints": [
+    "主滚动区从上到下拆为 2–6 个 layout-section。",
+    "需要通栏背景但内容有边距时，section 自身背景通栏，内部再嵌 layout-flow 承载内容。",
+    "gap-before/gap-after 只接收正式 Spacer Token，不得硬编码数值。"
+  ],
+  "doNotInvent": [
+    "不要把 sticky-region 放进 layout-section 内部；sticky-region 必须与 section 同级。",
+    "不要在 section 上声明 overflow:auto 或 position:sticky/fixed。",
+    "不要让 section 承担业务组件内部布局。"
+  ],
+  "domAnatomy": {
+    "root": ".layout-section",
+    "requiredChildren": [],
+    "bodyChildren": [],
+    "optionalChildren": [],
+    "modifierClasses": [],
+    "alternatives": []
+  },
+  "provenance": {
+    "preview": "preview/component-layout-section.html",
+    "cssSource": "preview/component-layout-section.html",
+    "embedded": false,
+    "hostComponent": null,
+    "externalSources": []
+  },
+  "unknowns": [],
+  "ruleRefs": [
+    "page-layers.json",
+    "library-consumption.json#pageEdgeTokens"
+  ],
+  "runtimeTokens": [
+    "--layout-page-margin-m0",
+    "--layout-page-margin-m32",
+    "--layout-page-margin-m8",
+    "--spacer-0"
+  ],
+  "previewOnlyTokens": [
+    "--bg-page",
+    "--bg-surface",
+    "--border-neutral-l2",
+    "--spacer-12",
+    "--text-default",
+    "--text-secondary"
+  ],
+  "localTokens": [
+    "--layout-section-edge",
+    "--layout-section-gap-after",
+    "--layout-section-gap-before"
+  ],
+  "layerContract": {
+    "scope": "page-local",
+    "role": "content",
+    "mountHost": "scene-root",
+    "zToken": "--z-base"
+  }
+}

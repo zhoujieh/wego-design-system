@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 4,
+  "slug": "layout-page",
+  "name": "页面总框架",
+  "category": "layout",
+  "status": "stable",
+  "sourceKind": "specification",
+  "confidence": "high",
+  "description": "场景面板内的页面总框架，提供顶部、正文、底部三个槽位；占满场景挂载面板，正文自适应剩余高度，自身不产生纵向滚动，滚动权交给唯一的 layout-scroll。替代旧场景根 position:absolute;inset:0 的铺满约束。",
+  "semanticTypeCandidates": [
+    "page-frame",
+    "page-shell",
+    "layout-page"
+  ],
+  "variantDimensions": {},
+  "representativeVariants": [],
+  "anatomy": [
+    {
+      "name": "root",
+      "selector": ".layout-page",
+      "role": "页面总框架根；占满场景面板，纵向排列 top/body/bottom，自身 overflow:hidden 不产生滚动"
+    },
+    {
+      "name": "top",
+      "selector": ".layout-page__top",
+      "role": "顶部槽位，承载 navbar 或顶部工具区；可选"
+    },
+    {
+      "name": "body",
+      "selector": ".layout-page__body",
+      "role": "正文槽位，flex:1 自适应剩余高度，内部承载 layout-scroll；必需"
+    },
+    {
+      "name": "bottom",
+      "selector": ".layout-page__bottom",
+      "role": "底部槽位，承载 bottom-nav 或 bottom-action-bar；可选"
+    }
+  ],
+  "structurePatterns": [
+    "固定结构为 .layout-page > (.layout-page__top? + .layout-page__body + .layout-page__bottom?)，body 必需，top/bottom 可选。",
+    "layout-page 是场景面板（.app-scene-layer__panel / .host-shell-page__panel）内的第一个子级，铺满面板；面板接入后关闭自身 overflow-y，滚动权交给 layout-scroll。",
+    "layout-page 不接管全局路由、Overlay 和底部导航，不创建第二个宿主。"
+  ],
+  "behavior": {
+    "sizing": "根占满父级（width/height:100%），纵向 flex 列布局；body 为 flex:1 且 min-height:0 以让出滚动权。",
+    "overflow": "根 overflow:hidden，禁止产生第二个页面外层滚动；主滚动由 layout-scroll 承担。"
+  },
+  "accessibility": {
+    "landmark": "作为页面主体语义容器使用，内部正文区承载主滚动内容。"
+  },
+  "usageHints": [
+    "每个场景根必须以 layout-page 起始，再分配 top/body/bottom 槽位。",
+    "layout-page 只做骨架，不承担业务内容边距与视觉装饰。",
+    "top/bottom 留空时省略对应槽位，不要放空 div 占位。"
+  ],
+  "doNotInvent": [
+    "不要把 layout-page 扩成宿主 shell 或接管路由与 Overlay。",
+    "不要在 layout-page 上声明 overflow-y:auto；纵向滚动只能由 layout-scroll 承担。",
+    "不要嵌套第二个 layout-page。"
+  ],
+  "domAnatomy": {
+    "root": ".layout-page",
+    "requiredChildren": [".layout-page__body"],
+    "bodyChildren": [],
+    "optionalChildren": [".layout-page__top", ".layout-page__bottom"],
+    "modifierClasses": [],
+    "alternatives": []
+  },
+  "provenance": {
+    "preview": "preview/component-layout-page.html",
+    "cssSource": "preview/component-layout-page.html",
+    "embedded": false,
+    "hostComponent": null,
+    "externalSources": []
+  },
+  "unknowns": [],
+  "ruleRefs": [
+    "page-layers.json",
+    "references/interaction-prototype-design.md"
+  ],
+  "runtimeTokens": [],
+  "previewOnlyTokens": [
+    "--bg-page",
+    "--bg-panel",
+    "--bg-surface",
+    "--border-neutral-l2",
+    "--heading-sm-font-size",
+    "--spacer-16",
+    "--spacer-8",
+    "--text-default",
+    "--text-secondary"
+  ],
+  "localTokens": [],
+  "layerContract": {
+    "scope": "page-local",
+    "role": "content",
+    "mountHost": "scene-root",
+    "zToken": "--z-base"
+  }
+}

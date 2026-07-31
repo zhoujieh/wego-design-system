@@ -21,6 +21,11 @@
       "purpose": "只在页面出现 sticky、fixed、overlay 或层级冲突时读取。",
       "copyable": false
     },
+    "layout": {
+      "files": ["components/index.json (layout 类别)", "components/layout-*.json", "preview/component-layout-*.html"],
+      "purpose": "页面结构形成时先用正式 Layout 组件搭建 2–3 层信息框架（layout-page → layout-scroll → layout-section/sticky-region → section 内部排列），再定位业务组件；命中 UI Kit 时继承其登记的 Layout 树。",
+      "copyable": true
+    },
     "components": {
       "files": ["components/index.json", "components/{slug}.json", "preview/component-{slug}.html"],
       "purpose": "结构确定后只读取命中组件的 Preview 与契约。",
@@ -108,7 +113,7 @@
     ]
   },
   "globalConsumptionRules": {
-    "designBeforeComponents": "先确定首要任务、语义区域、滚动和固定关系，再定位组件。",
+    "designBeforeComponents": "先确定首要任务、语义区域、滚动和固定关系，再用正式 Layout 组件搭建 2–3 层页面信息框架并分配信息到布局槽位，最后定位业务组件。",
     "previewFirst": "命中组件后只读取该组件 Preview 与契约；实际 DOM 必须满足正式 anatomy 和变体。",
     "tokenUsage": "场景视觉声明只使用现存语义 Token，不写裸颜色、间距、圆角或字体值。",
     "uikitBoundary": "UI Kit 只在 pagePattern 精确命中时提供组合参考；componentCandidates 不是组件白名单。",

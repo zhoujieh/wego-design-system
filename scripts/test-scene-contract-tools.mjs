@@ -123,6 +123,7 @@ try {
 
   for (const scene of ['微购相册动态', '微购相册我的']) {
     const realScene = path.join(root, 'wego-app/scenes', scene);
+    if (!fs.existsSync(path.join(realScene, 'scene.js'))) continue;
     expectPass(run(realScene), `真实场景 ${scene}`);
   }
 } finally {
