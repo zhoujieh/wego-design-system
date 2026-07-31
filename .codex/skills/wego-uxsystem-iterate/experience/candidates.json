@@ -1,4 +1,42 @@
 {
   "schemaVersion": 1,
-  "candidates": []
+  "candidates": [
+    {
+      "id": "exp-20260731-007",
+      "normalizedKey": "scroll-row-entry-region-visual-container-pattern-missing",
+      "category": "system",
+      "type": "page-pattern-gap",
+      "ownerSkill": "wego-uxsystem-iterate",
+      "problem": "「我的」Tab 的数据资产横滑（my-assets）和常用应用横滑（my-apps）直接使用裸 layout-scroll-row，background:transparent，没有卡片背景，与同页会员卡（card--surface）、内容列表（card--surface）、sticky 工具区（bg-surface）的视觉风格割裂。根因是缺少「图标入口横滑区」的页面范式：layout-scroll-row 组件契约的 variantDimensions 只有 item-size/snap/peek，不提供背景变体，modifierClasses 为空；Agent 设计时把它仅当布局组件用，未用 card--surface 包裹或补背景。同类「图标入口横滑」（数据栏、应用栏、商品横滑等）是微购 App 高频模式，应有统一视觉容器规范，当前由场景自行决定导致风格不搭。",
+      "resolution": "待确认升级方向。拟补「图标入口横滑区」页面范式或消费规则：1) 在 uikit-plan.json 或场景合同补「横滑入口区应使用 card--surface 或 surface 背景容器，与同页其他内容区视觉一致」；2) 或在 layout-scroll-row 组件契约补 surface 变体/modifierClass；3) 或在设计原则补「同页并列内容区视觉容器一致性」规则。具体落点待用户确认升级时确定。",
+      "targetAuthority": ".codex/skills/wego-design/uikit-plan.json 或 references/scene-contract.md 或 components/layout-scroll-row.json（待定落点）",
+      "evidence": [
+        {
+          "scene": "我的",
+          "fact": "用户反馈：「数据栏和应用栏都用了没有背景色，然后整个是透明的，和整体的页面不搭，风格不搭」"
+        },
+        {
+          "scene": "我的",
+          "fact": "scene.css 第88-90行 .my-assets、第91-108行 .my-asset background:transparent；第135-137行 .my-apps、第138-154行 .my-app background:transparent"
+        },
+        {
+          "scene": "我的",
+          "fact": "scene.js 第65、117行 数据栏和应用栏直接用 layout-scroll-row，外层 layout-section 未包 card--surface"
+        },
+        {
+          "scene": "我的",
+          "fact": "对比：会员卡（scene.js 第41行 card--surface）、内容列表（第184、201、218、241、258行 card--surface）、sticky 工具区（scene.css 第179行 bg-surface）都有背景"
+        },
+        {
+          "scene": "我的",
+          "fact": "layout-scroll-row.json variantDimensions 只有 item-size/snap/peek，无背景变体；modifierClasses 为空数组；previewOnlyTokens 含 --bg-surface 但非契约变体"
+        }
+      ],
+      "scenes": ["我的"],
+      "occurrenceCount": 1,
+      "status": "observing",
+      "createdAt": "2026-07-31",
+      "updatedAt": "2026-07-31"
+    }
+  ]
 }
