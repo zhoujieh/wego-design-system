@@ -19,6 +19,5 @@ description: 创建或变更业务迭代；形成并确认完整 prototype_brief
 
 ## 执行约束
 
+<!-- rule-id: confirm-brief-must-wait-affirmation -->
 - submit-brief 后必须明确询问"是否确认？"并等待用户回复肯定词才能执行 confirm-brief。
-- 提问前必须查看宿主代码了解现状，基于事实提问。
-- 提问必须使用 AskUserQuestion 工具提供结构化选项。
