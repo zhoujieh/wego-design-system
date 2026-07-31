@@ -7,7 +7,7 @@
     "related_scenes": [],
     "title": "我的tab页"
   },
-  "status": "prototyping",
+  "status": "awaiting-prototype-confirmation",
   "scope_revision": 3,
   "brief_submission": {
     "at": "2026-07-31T11:35:46.581Z",
@@ -29,7 +29,7 @@
       "valid": true
     },
     "design": {
-      "valid": false
+      "valid": true
     }
   },
   "change_log": [
@@ -52,6 +52,10 @@
     {
       "action": "confirm-brief",
       "at": "2026-07-31T11:35:52.107Z"
+    },
+    {
+      "action": "submit-prototype",
+      "at": "2026-07-31T13:47:31.697Z"
     }
   ],
   "freeze": null,
