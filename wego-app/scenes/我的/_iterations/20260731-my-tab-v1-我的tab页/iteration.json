@@ -1,0 +1,231 @@
+{
+  "schemaVersion": 5,
+  "identity": {
+    "date": "2026-07-31",
+    "iteration_id": "my-tab-v1",
+    "primary_scene": "我的",
+    "related_scenes": [],
+    "title": "我的tab页"
+  },
+  "status": "prototyping",
+  "scope_revision": 3,
+  "brief_submission": {
+    "at": "2026-07-31T11:35:46.581Z",
+    "scope_revision": 3,
+    "scope_sha256": "3d494feef7dcf86cae6a1ad8922efd9f913b0c140255dc4fee22385513fd498a"
+  },
+  "brief_confirmation": {
+    "at": "2026-07-31T11:35:52.106Z",
+    "scope_revision": 3,
+    "scope_sha256": "3d494feef7dcf86cae6a1ad8922efd9f913b0c140255dc4fee22385513fd498a"
+  },
+  "prototype_confirmation": null,
+  "affected_scenes": [
+    "我的"
+  ],
+  "affected_runtime": [],
+  "stage_outputs": {
+    "product": {
+      "valid": true
+    },
+    "design": {
+      "valid": false
+    }
+  },
+  "change_log": [
+    {
+      "action": "submit-brief",
+      "at": "2026-07-31T11:20:16.963Z"
+    },
+    {
+      "action": "submit-brief",
+      "at": "2026-07-31T11:28:01.831Z"
+    },
+    {
+      "action": "confirm-brief",
+      "at": "2026-07-31T11:28:07.190Z"
+    },
+    {
+      "action": "submit-brief",
+      "at": "2026-07-31T11:35:46.592Z"
+    },
+    {
+      "action": "confirm-brief",
+      "at": "2026-07-31T11:35:52.107Z"
+    }
+  ],
+  "freeze": null,
+  "prototype_brief": {
+    "goal": "商家/店主从底部Tab栏第5个Tab进入，首要任务是管理店铺/相册内容（产品、笔记、直播），通过内容列表快速查看和操作已发布内容，辅助功能包括查看个人信息、会员状态、数据资产和常用应用入口。",
+    "included": [
+      "导航栏：左侧显示头像、相册名称、角色信息（默认超级管理员），右侧设置和分享主页两个入口",
+      "会员栏：独立卡片，显示会员等级、到期时间、云空间用量",
+      "数据资产横滑：9个入口（我买的、粉丝、好友、代理、访客、员工、钱包、卡券、收藏），我买的始终显示且有待办时加角标，点击后toast提示\"即将上线\"",
+      "常用应用横滑：固定入口（进入主页、二维码）+ 最近应用（动态适配数量，最新使用靠前）+ 全部（跳转应用中心）",
+      "类型tabs：产品/笔记/直播，紧贴列表，支持后续扩展",
+      "工具行：搜索框 + 筛选按钮入口 + 视图切换，随tab联动",
+      "内容列表：产品/笔记各有独立卡片结构（含分享、编辑、下载、刷新操作，分享为主），直播用纯图片宫格3:4比例，不显示状态标签，列表/网格视图per-tab独立记忆",
+      "发布FAB：右下角悬浮按钮，点击后提示\"即将上线\""
+    ],
+    "excluded": [
+      "导航栏左侧个人信息不跳转到相册详情页（本期不下钻）",
+      "内容列表卡片不显示状态标签",
+      "发布FAB不实现实际发布功能，仅做入口提示",
+      "筛选按钮只作为入口，不实现筛选逻辑"
+    ],
+    "entry_points": [
+      "底部Tab栏\"我的\"入口：底部导航栏，点击\"我的\"Tab进入",
+      "数据资产入口：数据资产横滑区域，点击对应资产入口进入",
+      "常用应用入口：常用应用横滑区域，点击应用图标进入对应功能",
+      "发布FAB：页面右下角悬浮，点击后显示\"即将上线\"提示"
+    ],
+    "critical_paths": [
+      "查看个人信息与会员状态：进入\"我的\"页面 → 查看导航栏头像、相册名称、角色信息 → 查看会员卡片等级、到期时间、云空间用量",
+      "浏览数据资产：横向滑动数据资产区域 → 查看9个资产入口 → 点击入口进入对应资产页面",
+      "使用常用应用：查看常用应用横滑区域 → 点击固定入口（进入主页、二维码）→ 查看最近使用的应用 → 点击\"全部\"进入应用中心",
+      "浏览内容列表：切换类型Tab（产品/笔记/直播）→ 使用工具行搜索、筛选、视图切换 → 查看对应类型的内容卡片 → 列表/网格视图模式per-tab独立记忆"
+    ],
+    "prototype_boundaries": [
+      {
+        "flow_id": "view-profile",
+        "mode": "simulated",
+        "visible_result": "用户看到导航栏个人信息和会员卡片，点击相册入口无跳转"
+      },
+      {
+        "flow_id": "browse-data-assets",
+        "mode": "simulated",
+        "visible_result": "用户横向滑动查看9个数据资产入口，点击后模拟跳转或提示"
+      },
+      {
+        "flow_id": "use-common-apps",
+        "mode": "simulated",
+        "visible_result": "用户查看常用应用，点击固定入口或最近应用，点击\"全部\"跳转应用中心"
+      },
+      {
+        "flow_id": "browse-content-list",
+        "mode": "functional",
+        "visible_result": "用户切换类型Tab，查看不同类型的内容卡片，切换列表/网格视图，视图模式per-tab独立记忆"
+      },
+      {
+        "flow_id": "publish-fab",
+        "mode": "stub",
+        "visible_result": "用户点击发布FAB，显示\"即将上线\"提示"
+      }
+    ],
+    "states": [
+      "我买的待办状态：用户有未完成订单时，我买的入口显示角标提示",
+      "购物车有内容：购物车中存在商品时，常用应用区域显示购物车入口",
+      "视图模式记忆：用户切换视图模式后，该类型Tab记住偏好并下次恢复"
+    ],
+    "data_contract": {
+      "user_profile": {
+        "avatar": "头像URL",
+        "album_name": "相册名称",
+        "role": "角色信息（默认超级管理员）"
+      },
+      "membership": {
+        "level": "会员等级",
+        "expire_date": "到期时间",
+        "cloud_usage": "云空间用量"
+      },
+      "data_assets": [
+        {
+          "id": "purchased",
+          "name": "我买的",
+          "has_todo": false
+        },
+        {
+          "id": "followers",
+          "name": "粉丝",
+          "count": 0
+        },
+        {
+          "id": "friends",
+          "name": "好友",
+          "count": 0
+        },
+        {
+          "id": "agents",
+          "name": "代理",
+          "count": 0
+        },
+        {
+          "id": "visitors",
+          "name": "访客",
+          "count": 0
+        },
+        {
+          "id": "employees",
+          "name": "员工",
+          "count": 0
+        },
+        {
+          "id": "wallet",
+          "name": "钱包",
+          "balance": 0
+        },
+        {
+          "id": "coupons",
+          "name": "卡券",
+          "count": 0
+        },
+        {
+          "id": "favorites",
+          "name": "收藏",
+          "count": 0
+        }
+      ],
+      "common_apps": {
+        "fixed": [
+          "进入主页",
+          "二维码"
+        ],
+        "cart_visible": false,
+        "recent": [],
+        "all_link": "应用中心"
+      },
+      "content_tabs": [
+        "产品",
+        "笔记",
+        "直播"
+      ],
+      "content_list": {
+        "type": "当前Tab类型",
+        "view_mode": "列表/网格",
+        "items": [],
+        "product_card": {
+          "image": "产品图片",
+          "title": "标题",
+          "actions": [
+            "分享",
+            "编辑",
+            "下载",
+            "刷新"
+          ]
+        },
+        "note_card": {
+          "cover": "封面图",
+          "title": "标题",
+          "author": "作者",
+          "actions": [
+            "分享",
+            "编辑",
+            "下载",
+            "刷新"
+          ]
+        },
+        "live_card": {
+          "cover": "封面图",
+          "aspect_ratio": "3:4",
+          "grid_mode": "纯图片宫格"
+        }
+      }
+    },
+    "assumptions": [
+      "数据资产入口点击后跳转到对应页面，具体页面实现不在本次迭代范围",
+      "常用应用的\"全部\"入口跳转到应用中心页面，具体页面不在本次迭代范围",
+      "内容列表的数据通过模拟数据展示，真实数据接口不在本次迭代范围"
+    ],
+    "open_questions": []
+  }
+}
