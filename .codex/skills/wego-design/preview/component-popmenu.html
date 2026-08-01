@@ -499,7 +499,7 @@
   </div>
 </div>
 
-<script src="popmenu-positioning.js"></script>
+<script src="../runtime/popmenu.js"></script>
 <script>
 (function() {
   var triggerSelect = document.getElementById('js-trigger-select');
@@ -515,7 +515,7 @@
     var isOpen = popmenu.getAttribute('data-state') === 'open';
     closeAll();
     if (!isOpen) {
-      if (!window.WegoPreviewPopmenu.position(popmenu, trigger)) return;
+      if (!window.WegoPopmenu.position(popmenu, trigger)) return;
       requestAnimationFrame(function() {
         popmenu.setAttribute('data-state', 'open');
       });

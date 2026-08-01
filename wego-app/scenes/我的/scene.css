@@ -103,9 +103,14 @@
   background: var(--bg-brand);
 }
 
+/* 横滑区域外层 card */
+.my-section-card {
+  margin-inline: var(--layout-page-margin-m8);
+}
+
 /* 数据资产横滑 */
 .my-assets {
-  padding-inline: var(--layout-page-margin-m8);
+  padding-inline: var(--spacer-12);
 }
 
 .my-asset-item {
@@ -114,10 +119,9 @@
   flex-direction: column;
   align-items: center;
   gap: var(--spacer-4);
-  padding: var(--spacer-12) var(--spacer-16);
-  background: var(--bg-surface);
+  padding: var(--spacer-12) var(--spacer-8);
+  background: transparent;
   border: none;
-  border-radius: var(--radius-0);
   min-width: var(--spacer-40);
   flex-shrink: 0;
 }
@@ -142,7 +146,7 @@
 
 /* 常用应用横滑 */
 .my-apps {
-  padding-inline: var(--layout-page-margin-m8);
+  padding-inline: var(--spacer-12);
 }
 
 .my-app-item {
@@ -151,10 +155,9 @@
   flex-direction: column;
   align-items: center;
   gap: var(--spacer-8);
-  padding: var(--spacer-12) var(--spacer-16);
-  background: var(--bg-surface);
+  padding: var(--spacer-12) var(--spacer-8);
+  background: transparent;
   border: none;
-  border-radius: var(--radius-0);
   min-width: var(--spacer-40);
   flex-shrink: 0;
 }
@@ -261,23 +264,15 @@
   color: var(--text-tertiary);
 }
 
-/* 内容卡片 */
-.my-content-card {
-  background: var(--bg-surface);
-  border-radius: var(--radius-8);
-  overflow: hidden;
-}
-
+/* 内容卡片：card 组件提供 background/border-radius/overflow 和 flex 方向 */
 .my-content-card--list {
-  display: flex;
   align-items: stretch;
   gap: var(--spacer-12);
   padding: var(--spacer-12);
 }
 
 .my-content-card--grid {
-  display: flex;
-  flex-direction: column;
+  /* card--vertical 提供 flex-direction:column */
 }
 
 .my-content-card__cover {

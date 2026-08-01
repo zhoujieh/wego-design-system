@@ -427,7 +427,7 @@
 </div>
 
 <script src="../runtime/tabs.js"></script>
-<script src="popmenu-positioning.js"></script>
+<script src="../runtime/popmenu.js"></script>
 <script>
 // 演示用：popmenu 联动与全局 dismiss；指示条与 wheel 滚动由 runtime/tabs.js 承担。
 (function() {
@@ -448,7 +448,7 @@
       return;
     }
 
-    if (!window.WegoPreviewPopmenu.position(popmenu, anchor)) {
+    if (!window.WegoPopmenu.position(popmenu, anchor)) {
       closeTabsPopmenu(popmenu);
       return;
     }

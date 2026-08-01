@@ -1589,7 +1589,7 @@
         return true;
       }
 
-      // 优先底部，再顶部，最后左右侧；与 popmenu-positioning.js 的 position 函数对齐
+      // 优先底部，再顶部，最后左右侧；与 runtime/popmenu.js 的 position 函数对齐
       if (canFitWidth && triggerRect.bottom + gap + menuRect.height <= viewportHeight - gap) {
         return place('bottom', left, triggerRect.bottom + gap, align);
       }

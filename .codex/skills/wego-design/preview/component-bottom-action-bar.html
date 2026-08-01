@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="../scaffold.css">
 <link rel="stylesheet" href="../iconfont.css">
 <link rel="stylesheet" href="../components.css">
-<script src="popmenu-positioning.js"></script>
+<script src="../runtime/popmenu.js"></script>
 <style>
 /* @component-css-start */
 /* ── Bottom Action Bar ── */
@@ -1097,7 +1097,7 @@
       }
       // 同屏仅展示一个 popmenu：打开前关闭其他
       closeAllOverflowMenus(popmenu);
-      if (!window.WegoPreviewPopmenu || !window.WegoPreviewPopmenu.position(popmenu, moreBtn)) {
+      if (!window.WegoPopmenu || !window.WegoPopmenu.position(popmenu, moreBtn)) {
         popmenu.remove();
         bar._overflowPopmenu = null;
         return;
@@ -1296,7 +1296,7 @@
       menu.appendChild(list);
     }
     root.appendChild(menu);
-    if (!window.WegoPreviewPopmenu || !window.WegoPreviewPopmenu.position(menu, trigger)) {
+    if (!window.WegoPopmenu || !window.WegoPopmenu.position(menu, trigger)) {
       menu.remove();
       return null;
     }
