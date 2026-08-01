@@ -6,6 +6,8 @@
 
 - 经验沉淀由用户触发，不自动执行。
 - 沉淀必须由 `wego-uxsystem-iterate` 技能执行，不得在主对话直接修改正式规则、组件、Token、Preview、守卫或工作流权威源。
+- 经验文件必须位于 `.codex/skills/wego-uxsystem-iterate/` 内，唯一候选数据源为 `.codex/skills/wego-uxsystem-iterate/experience/candidates.json`。
+- 禁止在仓库根目录或其它技能下创建 `experience/`、`candidates.json`、经验记录或任何候选池副本；相对路径不得作为写入目标。
 - 用户要求总结本次任务经验时，先基于本次任务事实提取问题，再分类、去重并写入候选池。
 - 用户确认升级前，不得修改正式规则、组件、Token、Preview、守卫或工作流权威源。
 - 已有同义规则时只修正唯一权威源，不新增平行表述。
@@ -91,7 +93,7 @@
 4. 登记候选前必须回溯已落地规则：检查问题是否与已升级的正式规则相关。若相关，归因到 `rule-execution-failure`（规则未被执行），不得重新归因到"缺规则"。
 5. 直接询问用户选择：`直接升级` 或 `沉淀继续观察`。
 6. 用户选择 `直接升级`：登记候选为 `proposed`，执行正式升级，修改唯一权威源，验证通过后从候选池删除。
-7. 用户选择 `沉淀继续观察`：读取 `experience/candidates.json`，按 `normalizedKey` 去重。命中已有候选时 `occurrenceCount +1` 并合并证据和场景；新候选 `occurrenceCount` 初始为 1。当 `occurrenceCount` 达到 3 时，状态自动改为 `proposed`；本次总结输出时必须明确告知用户该候选已达到升级阈值，并询问是否升级。将新增或更新后的候选写回唯一数据源。
+7. 用户选择 `沉淀继续观察`：读取 `.codex/skills/wego-uxsystem-iterate/experience/candidates.json`，按 `normalizedKey` 去重。命中已有候选时 `occurrenceCount +1` 并合并证据和场景；新候选 `occurrenceCount` 初始为 1。当 `occurrenceCount` 达到 3 时，状态自动改为 `proposed`；本次总结输出时必须明确告知用户该候选已达到升级阈值，并询问是否升级。将新增或更新后的候选写回唯一数据源。
 
 "全部升级"等批量指令必须逐条按本流程处理，不构成跳过分类与候选池的快捷路径。
 
@@ -107,7 +109,7 @@
 
 ## 候选数据要求
 
-唯一数据源为 `experience/candidates.json`。每条候选必须包含：
+唯一数据源为 `.codex/skills/wego-uxsystem-iterate/experience/candidates.json`。每条候选必须包含：
 
 - 稳定唯一的 `id`
 - 用于去重的 `normalizedKey`
@@ -146,6 +148,7 @@ node scripts/validate-wego-design.mjs --scope=system --strict
 
 升级后必须自检：
 
+- 候选池路径：只存在 `.codex/skills/wego-uxsystem-iterate/experience/candidates.json`，仓库根目录和其它技能不存在经验副本。
 - 候选池 diff：已升级候选已删除，无残留。
 - 分类一致性：升级规则的 `rule-id` 与候选 evidence 留痕一致。
 - 归属合理性：规则落点符合「问题归属」章节判断，跨技能通用规则未错放到专有技能 SKILL.md。
