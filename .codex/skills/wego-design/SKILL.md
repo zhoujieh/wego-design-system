@@ -19,6 +19,11 @@ description: 基于已确认原型简报消费微购设计系统，在一次任�
 <!-- rule-id: scene-dom-copy-preview-verbatim -->
 正式组件必须使用目标 Preview 变体的完整 DOM、class 和可选节点位置；不得凭组件名自行重写结构，页面结构也不得从组件或 UI Kit 反推。
 
+## 执行约束
+
+<!-- rule-id: agent-must-pull-before-task-start -->
+- 新会话/新任务开场先执行 `git pull --rebase origin main` 同步最新 `main`，再进入简报消费或场景实现（规则见 `AGENTS.md`「多人多 Agent 并发协作」）。
+
 ## 输出与交接
 
 只输出或更新场景目录中的 `route.json`、`scene.js` 和 `scene.css`。路由发生新增或变化时运行 `node scripts/build-routes.mjs` 生成 `wego-app/js/routes.js`；`routes.js` 是生成物，禁止直接编辑。

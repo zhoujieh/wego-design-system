@@ -54,6 +54,8 @@
 ## Git、预览、临时产物与验证
 
 - 所有开发任务默认使用独立分支，禁止直接提交 `main`。
+<!-- rule-id: workflow-maintenance-commits-directly-to-main -->
+- **工作流维护例外**：由 `wego-uxsystem-iterate` 技能执行的 AGENTS.md、SKILL.md、`references/` 和 `experience/` 等权威源维护，可直接提交到 `main`，无需独立分支；提交前仍需运行 `node scripts/validate-wego-design.mjs --scope=system --strict`。
 - 只暂存本次任务的显式路径，不执行 `git add -A`，不强推已有远端分支。
 - 原型实现和自动验证完成后，默认提交并推送当前功能分支，创建或更新 PR，并提供当前 PR 的独立验收链接。
 - PR 预览链接用于验收当前任务；`main` 的 GitHub Pages 链接只展示已经验收并合并的稳定版本。
@@ -68,6 +70,7 @@
 多个人各自驱动自己的 Agent 会话、并发迭代同一仓库。Agent 之间不对话，协调只发生在仓库层面：谁的 Agent 碰了什么，由仓库状态体现，别的 Agent 来读。
 
 - **分支与 PR**：每人/每需求使用 `feature/<owner>-<scene>` 分支；实现和验证完成后提交并推送当前分支、创建或更新 PR，通过独立 PR 预览链接验收；只有用户明确验收通过后才合并到 `main`。
+<!-- rule-id: agent-must-pull-before-task-start -->
 - **开工前先拉取**：每次新会话/新任务开始前执行 `git pull --rebase origin main`，确保基于最新 `main`；创建 PR 前再次 rebase 到最新 `main` 并解决冲突。
 <!-- rule-id: scene-must-claim-before-edit -->
 - **场景认领（强制前置）**：开工前必须在 `claims/<agent-id>.json` 认领本次负责的场景目录，并运行 `node scripts/validate-claims.mjs` 确认无冲突；不判断是否并发，单人开发也必须认领。认领期间场景目录由该 Agent 独占，他人不得修改。完成后把 `status` 改为 `released`/`done` 释放。
