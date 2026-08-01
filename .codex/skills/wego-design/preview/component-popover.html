@@ -797,134 +797,10 @@
   </div>
 </div>
 
+<script src="../runtime/popover.js"></script>
 <script>
+// 演示用：创建三个浮层气泡并绑定触发按钮；定位、切换与关闭逻辑由 runtime/popover.js 承担。
 (function() {
-  // 定位工具：基于 popmenu-positioning.js 思路，扩展为支持 placement/align 的 popover 版本
-  function measureOpenRect(popover) {
-    var previousState = popover.getAttribute('data-state');
-    var previousVisibility = popover.style.visibility;
-    var previousPointerEvents = popover.style.pointerEvents;
-    var previousTransition = popover.style.transition;
-    var previousTransform = popover.style.transform;
-
-    popover.setAttribute('data-state', 'open');
-    popover.style.visibility = 'hidden';
-    popover.style.pointerEvents = 'none';
-    popover.style.transition = 'none';
-    popover.style.transform = 'scale(1)';
-
-    var rect = popover.getBoundingClientRect();
-
-    popover.setAttribute('data-state', previousState || 'closed');
-    popover.style.visibility = previousVisibility;
-    popover.style.pointerEvents = previousPointerEvents;
-    popover.style.transition = previousTransition;
-    popover.style.transform = previousTransform;
-
-    return rect;
-  }
-
-  function getGap(popover) {
-    return parseFloat(getComputedStyle(popover).getPropertyValue('--popover-gap')) || 4;
-  }
-
-  function position(popover, trigger, preferredPlacement) {
-    if (!popover || !trigger) return false;
-
-    var triggerRect = trigger.getBoundingClientRect();
-    var gap = getGap(popover);
-    var viewportWidth = window.innerWidth;
-    var viewportHeight = window.innerHeight;
-    var menuRect = measureOpenRect(popover);
-    var canFitWidth = menuRect.width <= viewportWidth - gap * 2;
-    // input 变体默认 placement=right（横向优先），normal/action 默认 top（纵向优先）
-    var variant = popover.getAttribute('data-variant');
-    var defaultPlacement = variant === 'input' ? 'right' : 'top';
-
-    function alignForHorizontal(triggerCenter, viewportWidth) {
-      if (triggerCenter < viewportWidth * 0.33) return 'start';
-      if (triggerCenter > viewportWidth * 0.67) return 'end';
-      return 'center';
-    }
-
-    function place(placement, x, y, align) {
-      popover.setAttribute('data-placement', placement);
-      popover.setAttribute('data-align', align || 'center');
-      popover.style.left = x + 'px';
-      popover.style.top = y + 'px';
-      return true;
-    }
-
-    function tryBottom() {
-      if (!canFitWidth) return false;
-      if (triggerRect.bottom + gap + menuRect.height > viewportHeight - gap) return false;
-      var align = alignForHorizontal(triggerRect.left + triggerRect.width / 2, viewportWidth);
-      var left;
-      if (align === 'start') left = triggerRect.left;
-      else if (align === 'end') left = triggerRect.right - menuRect.width;
-      else left = triggerRect.left + triggerRect.width / 2 - menuRect.width / 2;
-      left = Math.max(gap, Math.min(left, viewportWidth - menuRect.width - gap));
-      return place('bottom', left, triggerRect.bottom + gap, align);
-    }
-
-    function tryTop() {
-      if (!canFitWidth) return false;
-      if (triggerRect.top - gap - menuRect.height < gap) return false;
-      var align = alignForHorizontal(triggerRect.left + triggerRect.width / 2, viewportWidth);
-      var left;
-      if (align === 'start') left = triggerRect.left;
-      else if (align === 'end') left = triggerRect.right - menuRect.width;
-      else left = triggerRect.left + triggerRect.width / 2 - menuRect.width / 2;
-      left = Math.max(gap, Math.min(left, viewportWidth - menuRect.width - gap));
-      return place('top', left, triggerRect.top - gap - menuRect.height, align);
-    }
-
-    function tryRight() {
-      if (triggerRect.right + gap + menuRect.width > viewportWidth - gap) return false;
-      var top = Math.max(gap, Math.min(
-        triggerRect.top + triggerRect.height / 2 - menuRect.height / 2,
-        viewportHeight - menuRect.height - gap
-      ));
-      return place('right', triggerRect.right + gap, top, 'center');
-    }
-
-    function tryLeft() {
-      if (triggerRect.left - gap - menuRect.width < gap) return false;
-      var top = Math.max(gap, Math.min(
-        triggerRect.top + triggerRect.height / 2 - menuRect.height / 2,
-        viewportHeight - menuRect.height - gap
-      ));
-      return place('left', triggerRect.left - gap - menuRect.width, top, 'center');
-    }
-
-    // 不同 variant 的默认 fallback 链：normal/action 纵向优先（top→bottom→right→left），input 横向优先（right→left→top→bottom）
-    var defaultOrder = variant === 'input'
-      ? [tryRight, tryLeft, tryBottom, tryTop]
-      : [tryTop, tryBottom, tryRight, tryLeft];
-    var order = {
-      bottom: [tryBottom, tryTop, tryRight, tryLeft],
-      top: [tryTop, tryBottom, tryRight, tryLeft],
-      right: [tryRight, tryLeft, tryBottom, tryTop],
-      left: [tryLeft, tryRight, tryBottom, tryTop]
-    }[preferredPlacement || defaultPlacement] || defaultOrder;
-
-    for (var i = 0; i < order.length; i++) {
-      if (order[i]()) return true;
-    }
-    return false;
-  }
-
-  window.WegoPreviewPopover = {
-    measureOpenRect: measureOpenRect,
-    position: position
-  };
-
-  // 交互演示
-  var triggerNormal = document.getElementById('js-trigger-normal');
-  var triggerAction = document.getElementById('js-trigger-action');
-  var triggerInput = document.getElementById('js-trigger-input');
-
-  // 创建三个浮层气泡
   function createFloatingPopover(html, id) {
     var div = document.createElement('div');
     div.innerHTML = html;
@@ -974,66 +850,28 @@
     'js-popover-input'
   );
 
-  var allPopovers = [popoverNormal, popoverAction, popoverInput];
-  var allTriggers = [triggerNormal, triggerAction, triggerInput];
-
-  function closeAll() {
-    allPopovers.forEach(function(p) { p.setAttribute('data-state', 'closed'); });
+  // 同屏仅展示一个 popover：show 前关闭其它已绑定的气泡
+  var handles = [null, null, null];
+  function makeBeforeShow(idx) {
+    return function() {
+      for (var i = 0; i < handles.length; i++) {
+        if (i !== idx && handles[i]) handles[i].hide();
+      }
+    };
   }
 
-  function toggle(popover, trigger, preferredPlacement) {
-    var isOpen = popover.getAttribute('data-state') === 'open';
-    closeAll();
-    if (!isOpen) {
-      if (!position(popover, trigger, preferredPlacement)) return;
-      requestAnimationFrame(function() {
-        popover.setAttribute('data-state', 'open');
-      });
-    }
-  }
-
-  triggerNormal.addEventListener('click', function(e) {
-    e.stopPropagation();
-    toggle(popoverNormal, triggerNormal, 'top');
+  handles[0] = WegoPopover.bind(document.getElementById('js-trigger-normal'), popoverNormal, {
+    preferredPlacement: 'top',
+    beforeShow: makeBeforeShow(0)
   });
-  triggerAction.addEventListener('click', function(e) {
-    e.stopPropagation();
-    toggle(popoverAction, triggerAction, 'top');
+  handles[1] = WegoPopover.bind(document.getElementById('js-trigger-action'), popoverAction, {
+    preferredPlacement: 'top',
+    beforeShow: makeBeforeShow(1)
   });
-  triggerInput.addEventListener('click', function(e) {
-    e.stopPropagation();
-    toggle(popoverInput, triggerInput, 'right');
+  handles[2] = WegoPopover.bind(document.getElementById('js-trigger-input'), popoverInput, {
+    preferredPlacement: 'right',
+    beforeShow: makeBeforeShow(2)
   });
-
-  // normal 关闭图标点击
-  popoverNormal.querySelector('.popover__icon--close').addEventListener('click', function(e) {
-    e.stopPropagation();
-    closeAll();
-  });
-
-  // action 操作项点击
-  popoverAction.querySelectorAll('.popover__action-item').forEach(function(item) {
-    item.addEventListener('click', function(e) {
-      e.stopPropagation();
-      setTimeout(closeAll, 150);
-    });
-  });
-
-  document.addEventListener('pointerdown', function(e) {
-    var isTrigger = allTriggers.indexOf(e.target) !== -1;
-    var isInsidePopover = e.target.closest('.popover');
-    if (!isTrigger && !isInsidePopover) closeAll();
-  }, true);
-
-  document.addEventListener('focusin', function(e) {
-    var isTrigger = allTriggers.indexOf(e.target) !== -1;
-    var isInsidePopover = e.target.closest('.popover');
-    if (!isTrigger && !isInsidePopover) closeAll();
-  });
-
-  document.addEventListener('scroll', closeAll, true);
-  window.addEventListener('scroll', closeAll, { passive: true });
-  window.addEventListener('resize', closeAll);
 })();
 </script>
 </body>

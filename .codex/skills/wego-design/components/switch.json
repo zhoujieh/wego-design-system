@@ -62,7 +62,7 @@
     "开启与关闭共用 44x24px 视觉尺寸，仅切换背景和滑块位置。"
   ],
   "behavior": {
-    "toggle": "点击在 on 与 off 之间切换。",
+    "toggle": "点击在 on 与 off 之间切换；运行时位于 runtime/switch.js，场景通过 WegoSwitch.bind(root) 初始化，handle.destroy() 卸载。",
     "motion": "轨道背景与滑块位置使用轻量过渡，不做回弹动画。",
     "disabled": "禁用态保留当前值但禁止切换。"
   },

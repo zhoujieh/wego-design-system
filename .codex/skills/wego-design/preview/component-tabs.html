@@ -426,26 +426,11 @@
   </div>
 </div>
 
+<script src="../runtime/tabs.js"></script>
 <script src="popmenu-positioning.js"></script>
 <script>
+// 演示用：popmenu 联动与全局 dismiss；指示条与 wheel 滚动由 runtime/tabs.js 承担。
 (function() {
-  function updateTabsIndicator(tabs) {
-    var scroll = tabs.querySelector(".wg-tabs__scroll");
-    var indicator = tabs.querySelector(".wg-tabs__active-indicator");
-    var selected = tabs.querySelector(".wg-tabs__item[aria-selected=\"true\"] .wg-tabs__content");
-
-    if (!scroll || !indicator || !selected) {
-      return;
-    }
-
-    var scrollRect = scroll.getBoundingClientRect();
-    var selectedRect = selected.getBoundingClientRect();
-    var x = selectedRect.left - scrollRect.left + scroll.scrollLeft;
-
-    indicator.style.setProperty("--_tabs-indicator-x", x + "px");
-    indicator.style.setProperty("--_tabs-indicator-width", selectedRect.width + "px");
-  }
-
   function closeTabsPopmenu(popmenu) {
     if (!popmenu) {
       return;
@@ -474,14 +459,11 @@
     });
   }
 
+  var tabsHandle = window.WegoTabs.bind();
+
   document.querySelectorAll(".wg-tabs").forEach(function(tabs) {
     var items = Array.from(tabs.querySelectorAll(".wg-tabs__item"));
-    var scroll = tabs.querySelector(".wg-tabs__scroll");
     var popmenu = document.querySelector(".tabs-popmenu-demo");
-
-    requestAnimationFrame(function() {
-      updateTabsIndicator(tabs);
-    });
 
     items.forEach(function(item) {
       item.addEventListener("click", function(event) {
@@ -492,7 +474,7 @@
           candidate.setAttribute("aria-selected", String(candidate === item));
         });
 
-        updateTabsIndicator(tabs);
+        window.WegoTabs.updateIndicator(tabs);
 
         if (shouldOpenPopmenu) {
           event.stopPropagation();
@@ -523,22 +505,9 @@
         closeTabsPopmenu(popmenu);
       });
     }
-
-    if (scroll && tabs.classList.contains("wg-tabs--scroll")) {
-      scroll.addEventListener("wheel", function(event) {
-        if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) {
-          return;
-        }
-
-        event.preventDefault();
-        scroll.scrollLeft += event.deltaY;
-        updateTabsIndicator(tabs);
-      }, { passive: false });
-    }
   });
 
   window.addEventListener("resize", function() {
-    document.querySelectorAll(".wg-tabs").forEach(updateTabsIndicator);
     document.querySelectorAll(".tabs-popmenu-demo").forEach(closeTabsPopmenu);
   });
 

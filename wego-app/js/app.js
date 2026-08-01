@@ -633,6 +633,25 @@
         destroyCallbacks.push(function () { controller.destroy(); });
         return controller;
       },
+      // 绑定 tabs 运行时：自动维护指示条位置（--_tabs-indicator-x / --_tabs-indicator-width）
+      // 场景切换 aria-selected 后调用 ctx.updateTabsIndicator() 或由 resize/scroll 自动维护
+      bindTabs: function (options) {
+        if (!window.WegoTabs) throw new Error('[wego-app] WegoTabs 未加载');
+        var controller = window.WegoTabs.bind(Object.assign({ root: host }, options || {}));
+        destroyCallbacks.push(function () { controller.destroy(); });
+        return controller;
+      },
+      // 更新指定 tabs 根节点的指示条（未传则更新场景内全部 tabs）
+      updateTabsIndicator: function (tabs) {
+        if (!window.WegoTabs) return;
+        if (tabs) {
+          window.WegoTabs.updateIndicator(tabs);
+        } else {
+          Array.prototype.forEach.call(host.querySelectorAll('.wg-tabs'), function (el) {
+            window.WegoTabs.updateIndicator(el);
+          });
+        }
+      },
       // 填充指定 region：清除骨架 → 写入内容 → 自动加 scene-fade-in 触发淡入
       // 同步调用：替代直接 innerHTML，由框架接管骨架清除与过渡
       // 异步调用（Promise/setTimeout 后）：init 返回后骨架仍在，本方法清除骨架并淡入新内容

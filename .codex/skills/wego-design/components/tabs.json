@@ -111,9 +111,9 @@
     "尺寸修饰类提供确定高度：.wg-tabs--standard 固定 height: 56px，.wg-tabs--mini 固定 height: 48px；item 与 content 使用 height: auto，通过 .wg-tabs__scroll 的 align-items: stretch 垂直对齐。嵌入 navbar 等固定高度容器时，navbar custom 槽位内的 .wg-tabs 被覆盖为 height: 100% 以跟随容器高度。"
   ],
   "behavior": {
-    "selection": "点击标签时，宿主把当前 item 的 aria-selected 设为 true，并把同组其他 item 设为 false。",
-    "indicator": "切换后按选中项 .wg-tabs__content 的 x 坐标和宽度更新 --_tabs-indicator-x 与 --_tabs-indicator-width。",
-    "scroll": "scroll 布局可横向滚动，选中项应滚动到可视区域中间附近。"
+    "selection": "点击标签时，场景把当前 item 的 aria-selected 设为 true，并把同组其他 item 设为 false。",
+    "indicator": "切换后按选中项 .wg-tabs__content 的 x 坐标和宽度更新 --_tabs-indicator-x 与 --_tabs-indicator-width；运行时位于 runtime/tabs.js，场景通过 WegoTabs.bind(root) 初始化、handle.update() 刷新。",
+    "scroll": "scroll 布局可横向滚动，运行时自动将纵向 wheel 转换为横向滚动并同步指示条；选中项应滚动到可视区域中间附近。"
   },
   "accessibility": {
     "role": "根节点使用 role='tablist'，item 使用 role='tab'。",

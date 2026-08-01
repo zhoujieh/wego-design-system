@@ -117,7 +117,7 @@
     "暗色模式按 radio 的预览处理方式提升未选态边框可见性，不作为独立新场景。"
   ],
   "behavior": {
-    "toggle": "单个项点击在未选与已选之间切换。",
+    "toggle": "单个项点击在未选与已选之间切换；运行时位于 runtime/checkbox.js，场景通过 WegoCheckbox.bind(root) 初始化，handle.update() 重新计算父级状态、handle.destroy() 卸载。",
     "group": "父级根据子项自动计算全选、半选或未选。",
     "disabled": "禁用态忽略点击与分组联动。"
   },

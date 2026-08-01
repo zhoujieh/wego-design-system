@@ -122,20 +122,17 @@
   <span class="interactive-text">服饰鞋包</span>
 </div>
 
+<script src="../runtime/stack.js"></script>
 <script>
+// 演示用：行点击委托给 .stack；选中态切换由 runtime/stack.js 承担。
 (function() {
-  document.querySelectorAll('.interactive-row').forEach(function(row) {
-    row.addEventListener('click', function() {
-      var stack = row.querySelector('.stack');
-      var isSelected = stack.getAttribute('data-selected') === 'true';
+  window.WegoStack.bind();
 
-      if (isSelected) {
-        stack.classList.remove('stack--selected');
-        stack.setAttribute('data-selected', 'false');
-      } else {
-        stack.classList.add('stack--selected');
-        stack.setAttribute('data-selected', 'true');
-      }
+  document.querySelectorAll('.interactive-row').forEach(function(row) {
+    row.addEventListener('click', function(event) {
+      if (event.target.closest('.stack')) return;
+      var stack = row.querySelector('.stack');
+      if (stack) stack.click();
     });
   });
 })();

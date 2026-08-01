@@ -648,173 +648,46 @@
 <div style="height:48px"></div>
 </div>
 
+<script src="../runtime/counter.js"></script>
+<script src="../runtime/form.js"></script>
 <script>
-function sanitizeValue(input) {
-  const type = input.dataset.sanitize;
-  if (!type) return input.value;
-  if (type === 'digits' || type === 'phone') return input.value.replace(/\D/g, '');
-  if (type === 'money') return input.value.replace(/[^\d.]/g, '').replace(/(\..*?)\..*/g, '$1');
-  return input.value;
-}
+// 演示用：初始化表单字段校验、计数与货币符号；字段校验与清洗逻辑由 runtime/form.js 承担，counter 复用 runtime/counter.js。
+WegoForm.bind();
 
-function validateFormBody(body, force = false) {
-  const rule = body.dataset.validate;
-  if (!rule) return true;
-  if (!force && body.dataset.touched !== 'true' && !body.classList.contains('form-body--error')) {
-    updateCounter(body);
-    return true;
-  }
-  const textInput = body.querySelector('.form-body__action > input:not(.form-body__phone-input):not(.form-body__money-input)');
-  const textarea = body.querySelector('textarea');
-  const phoneInput = body.querySelector('.form-body__phone-input');
-  const moneyInput = body.querySelector('.form-body__money-input');
-  let valid = true;
-
-  if (rule === 'text-required' && textInput) valid = textInput.value.trim().length > 0;
-  if (rule === 'number-required' && textInput) valid = textInput.value.trim().length > 0 && Number(textInput.value) > 0;
-  if (rule === 'phone' && phoneInput) valid = /^\d{11}$/.test(phoneInput.value.trim());
-  if (rule === 'money-range' && moneyInput) {
-    const value = Number.parseFloat(moneyInput.value);
-    valid = moneyInput.value.trim().length > 0 && !Number.isNaN(value) && value > 0 && value <= 50000;
-  }
-  if (rule === 'textarea-counter' && textarea) {
-    const maxLength = Number.parseInt(textarea.getAttribute('maxlength') || '0', 10);
-    const valueLength = textarea.value.trim().length;
-    valid = valueLength > 0 && (maxLength === 0 || valueLength <= maxLength);
-  }
-
-  body.classList.toggle('form-body--error', !valid);
-  updateCounter(body);
-  return valid;
-}
-
-function updateMoneySymbol(input) {
-  const symbol = input.closest('.form-body__money').querySelector('.form-body__money-symbol');
-  symbol.classList.toggle('has-value', input.value.trim().length > 0);
-}
-
-function updateCounter(body) {
-  const textarea = body.querySelector('textarea[maxlength]');
-  const counter = body.querySelector('.form-body__counter');
-  if (!textarea || !counter) return;
-  const maxLength = Number.parseInt(textarea.getAttribute('maxlength') || '0', 10);
-  counter.textContent = `${textarea.value.length}/${maxLength}`;
-}
-
-document.querySelectorAll('[data-sanitize]').forEach(input => {
-  input.addEventListener('input', () => {
-    const sanitized = sanitizeValue(input);
-    if (sanitized !== input.value) input.value = sanitized;
-    const body = input.closest('.form-body');
-    if (input.classList.contains('form-body__money-input')) updateMoneySymbol(input);
-    if (body) validateFormBody(body);
-  });
-  input.addEventListener('blur', () => {
-    const body = input.closest('.form-body');
-    if (body) {
-      body.dataset.touched = 'true';
-      validateFormBody(body, true);
-    }
-  });
-});
-
-document.querySelectorAll('.form-body textarea').forEach(textarea => {
-  textarea.addEventListener('input', () => {
-    const body = textarea.closest('.form-body');
-    updateCounter(body);
-    validateFormBody(body);
-  });
-  textarea.addEventListener('blur', () => {
-    const body = textarea.closest('.form-body');
-    body.dataset.touched = 'true';
-    validateFormBody(body, true);
-  });
-  updateCounter(textarea.closest('.form-body'));
-});
-
-document.querySelectorAll('.form-body__money-input').forEach(updateMoneySymbol);
-
-document.querySelectorAll('[data-counter]').forEach(counter => {
-  const valueEl = counter.querySelector('.counter__value');
-  const minusBtn = counter.querySelector('.counter__btn--minus');
-  const plusBtn = counter.querySelector('.counter__btn--plus');
-  const max = Number.parseInt(counter.dataset.counterMax, 10) || Infinity;
-  const min = Number.parseInt(counter.dataset.counterMin, 10) || -Infinity;
-
-  function getValue() {
-    const raw = valueEl.value.replace(/\D/g, '');
-    return raw === '' ? 0 : Number.parseInt(raw, 10);
-  }
-
-  function setValue(value) {
-    valueEl.value = String(value);
-  }
-
-  function normalizeCounterValue() {
-    const value = getValue();
-    if (value < min) {
-      setValue(min);
-      return;
-    }
-    if (value > max) {
-      setValue(max);
-    }
-  }
-
-  valueEl.addEventListener('input', () => {
-    let raw = valueEl.value.replace(/\D/g, '');
-    if (raw.length > 7) raw = raw.slice(0, 7);
-    valueEl.value = raw;
-  });
-  valueEl.addEventListener('blur', normalizeCounterValue);
-  valueEl.addEventListener('keydown', event => {
-    if (event.key === 'Enter') valueEl.blur();
-  });
-
-  minusBtn.addEventListener('click', () => {
-    const value = getValue();
-    if (value > min) setValue(value - 1);
-  });
-
-  plusBtn.addEventListener('click', () => {
-    const value = getValue();
-    if (value < max) setValue(value + 1);
-  });
-});
-
-document.querySelectorAll('[data-demo-form]').forEach(form => {
-  const typeSelect = form.querySelector('[data-transfer-type-select]');
+// 演示用：转账场景类型选择、全部填充、提交校验
+document.querySelectorAll('[data-demo-form]').forEach(function(form) {
+  var typeSelect = form.querySelector('[data-transfer-type-select]');
   if (typeSelect) {
-    typeSelect.addEventListener('click', () => {
-      const text = typeSelect.querySelector('.form-body__select-text');
+    typeSelect.addEventListener('click', function() {
+      var text = typeSelect.querySelector('.form-body__select-text');
       text.textContent = '即时到账';
       text.classList.add('has-value');
     });
   }
 
-  const fillAllTrigger = form.querySelector('[data-fill-all]');
+  var fillAllTrigger = form.querySelector('[data-fill-all]');
   if (fillAllTrigger) {
-    fillAllTrigger.addEventListener('click', event => {
+    fillAllTrigger.addEventListener('click', function(event) {
       event.preventDefault();
-      const amount = form.querySelector('.form-body__money-input');
+      var amount = form.querySelector('.form-body__money-input');
       if (!amount) return;
       amount.value = '50000.00';
-      updateMoneySymbol(amount);
-      const body = amount.closest('.form-body');
-      body.dataset.touched = 'true';
-      validateFormBody(body, true);
+      WegoForm.updateMoneySymbol(amount);
+      var body = amount.closest('.form-body');
+      body.setAttribute('data-touched', 'true');
+      WegoForm.validateFormBody(body, true);
     });
   }
 });
 
-document.querySelectorAll('[data-submit-form]').forEach(button => {
-  button.addEventListener('click', () => {
-    const formKey = button.dataset.submitForm;
-    const form = document.querySelector(`[data-demo-form="${formKey}"]`);
+document.querySelectorAll('[data-submit-form]').forEach(function(button) {
+  button.addEventListener('click', function() {
+    var formKey = button.getAttribute('data-submit-form');
+    var form = document.querySelector('[data-demo-form="' + formKey + '"]');
     if (!form) return;
-    form.querySelectorAll('[data-validate]').forEach(body => {
-      body.dataset.touched = 'true';
-      validateFormBody(body, true);
+    form.querySelectorAll('[data-validate]').forEach(function(body) {
+      body.setAttribute('data-touched', 'true');
+      WegoForm.validateFormBody(body, true);
     });
   });
 });

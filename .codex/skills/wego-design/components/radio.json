@@ -100,7 +100,7 @@
     "同组通过 data-group 归类，始终成组出现。"
   ],
   "behavior": {
-    "group": "同一 data-group 内互斥，点击新项时清空同组其他选中态。",
+    "group": "同一 data-group 内互斥，点击新项时清空同组其他选中态；运行时位于 runtime/radio.js，场景通过 WegoRadio.bind(root) 初始化，handle.update() 同步 aria-checked、handle.destroy() 卸载。",
     "cannotDeselect": "点击已选中项不取消当前选择。",
     "disabled": "禁用态忽略点击。"
   },

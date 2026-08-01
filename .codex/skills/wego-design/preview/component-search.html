@@ -654,100 +654,10 @@
   </section>
 </div>
 
+<script src="../runtime/search.js"></script>
 <script>
-(function () {
-  function initSearchBox(box) {
-    var field = box.querySelector(".searchbox__field");
-    var actions = box.querySelector(".searchbox__actions");
-    if (!field || !actions) return;
-
-    var hasImageToken = box.querySelector(".searchbox__image-token") !== null;
-    var initialClear = actions.querySelector(".searchbox__clear");
-    var initialClearVisible = !!initialClear;
-
-    function ensureClear() {
-      var existing = actions.querySelector(".searchbox__clear");
-      if (existing) return existing;
-      var clear = document.createElement("button");
-      clear.className = "searchbox__action searchbox__clear wego-iconfont-s icon-yuancha-mian";
-      clear.type = "button";
-      clear.setAttribute("aria-label", "清除");
-      clear.addEventListener("click", function () {
-        field.value = "";
-        box.querySelectorAll(".searchbox__image-token").forEach((token) => token.remove());
-        hasImageToken = false;
-        renderActions();
-        field.focus();
-      });
-      actions.insertBefore(clear, actions.firstChild);
-      return clear;
-    }
-
-    function removeClear() {
-      var existing = actions.querySelector(".searchbox__clear");
-      if (existing) existing.remove();
-    }
-
-    function renderActions() {
-      var value = field.value.trim();
-      if (value || hasImageToken) {
-        ensureClear();
-      } else {
-        removeClear();
-      }
-
-      if (box.dataset.stateTag !== undefined) {
-        var stateTag = document.querySelector("[data-state-tag]");
-        if (stateTag) {
-          if (document.activeElement === field && value) {
-            stateTag.textContent = "inputting 输入中";
-            box.classList.remove("is-text-result");
-            box.classList.add("is-inputting");
-          } else if (value) {
-            stateTag.textContent = "text-result 文搜结果态";
-            box.classList.remove("is-inputting");
-            box.classList.add("is-text-result");
-          } else {
-            stateTag.textContent = "empty 空态";
-            box.classList.remove("is-inputting", "is-text-result");
-          }
-        }
-      }
-    }
-
-    // 输入时：保留图搜 token，仅更新 clear 显隐与状态
-    field.addEventListener("input", renderActions);
-    field.addEventListener("focus", renderActions);
-
-    // 失焦（执行搜索）：若有文搜内容，移除图搜 token 切回文搜结果
-    field.addEventListener("blur", function () {
-      var value = field.value.trim();
-      if (value && hasImageToken) {
-        box.querySelectorAll(".searchbox__image-token").forEach((token) => token.remove());
-        hasImageToken = false;
-      }
-      renderActions();
-    });
-
-    // 绑定静态 clear 按钮
-    actions.querySelectorAll(".searchbox__action.searchbox__clear").forEach(function (action) {
-      action.addEventListener("click", function () {
-        field.value = "";
-        box.querySelectorAll(".searchbox__image-token").forEach((token) => token.remove());
-        hasImageToken = false;
-        renderActions();
-        field.focus();
-      });
-    });
-
-    // 初始渲染：保持静态展示的 clear 显隐状态，避免误移除图搜 token
-    if (!initialClearVisible) {
-      removeClear();
-    }
-  }
-
-  document.querySelectorAll(".searchbox").forEach(initSearchBox);
-})();
+// 演示用：初始化搜索框状态流转、clear 显隐与图搜互斥；交互逻辑由 runtime/search.js 承担。
+window.WegoSearch.bind();
 </script>
 </body>
 </html>

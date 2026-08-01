@@ -121,13 +121,17 @@ const sceneTemplate = `<div class="my-page layout-page" data-component-slug="lay
     }).join('');
   }
 
-  function setActiveTab(root, tab) {
+  function setActiveTab(root, tab, ctx) {
     var tabs = root.querySelectorAll('.wg-tabs__item');
     tabs.forEach(function (t) {
       var domId = t.getAttribute('data-dom-id');
       var isActive = domId === 'tab-' + tab;
       t.setAttribute('aria-selected', isActive ? 'true' : 'false');
     });
+    if (ctx && ctx.updateTabsIndicator) {
+      var tabsRoot = root.querySelector('.wg-tabs');
+      if (tabsRoot) ctx.updateTabsIndicator(tabsRoot);
+    }
   }
 
   function updateViewIcon(root, state) {
@@ -211,7 +215,7 @@ const sceneTemplate = `<div class="my-page layout-page" data-component-slug="lay
     state.activeTab = type;
     ctx.closeOverlay();
     ctx.toast('发布成功');
-    setActiveTab(ctx.root, type);
+    setActiveTab(ctx.root, type, ctx);
     renderContent(ctx.root, state);
     updateViewIcon(ctx.root, state);
   }
@@ -238,28 +242,33 @@ const sceneTemplate = `<div class="my-page layout-page" data-component-slug="lay
       renderAssets(root);
       renderApps(root);
       renderContent(root, state);
-      setActiveTab(root, state.activeTab);
+      setActiveTab(root, state.activeTab, ctx);
       updateViewIcon(root, state);
+
+      // 绑定 tabs 运行时（指示条自动跟随选中项 + resize/scroll 维护）
+      if (ctx.bindTabs) {
+        ctx.bindTabs();
+      }
 
       // 类型 tab 绑定
       var tabProductBtn = root.querySelector('[data-dom-id="tab-product"]');
       if (tabProductBtn) tabProductBtn.addEventListener('click', function () {
         state.activeTab = 'product';
-        setActiveTab(root, 'product');
+        setActiveTab(root, 'product', ctx);
         renderContent(root, state);
         updateViewIcon(root, state);
       });
       var tabNoteBtn = root.querySelector('[data-dom-id="tab-note"]');
       if (tabNoteBtn) tabNoteBtn.addEventListener('click', function () {
         state.activeTab = 'note';
-        setActiveTab(root, 'note');
+        setActiveTab(root, 'note', ctx);
         renderContent(root, state);
         updateViewIcon(root, state);
       });
       var tabLiveBtn = root.querySelector('[data-dom-id="tab-live"]');
       if (tabLiveBtn) tabLiveBtn.addEventListener('click', function () {
         state.activeTab = 'live';
-        setActiveTab(root, 'live');
+        setActiveTab(root, 'live', ctx);
         renderContent(root, state);
         updateViewIcon(root, state);
       });

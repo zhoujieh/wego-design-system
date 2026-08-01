@@ -185,50 +185,10 @@
   </div>
 </div>
 
+<script src="../runtime/radio.js"></script>
 <script>
-(function() {
-  function bindPress(node, handler) {
-    node.addEventListener('click', handler);
-    node.addEventListener('keydown', function(event) {
-      if (event.key === ' ' || event.key === 'Enter') {
-        event.preventDefault();
-        handler();
-      }
-    });
-  }
-
-  function syncGroup(groupName) {
-    var fields = document.querySelectorAll('[data-radio-group="' + groupName + '"] .radio-field');
-    fields.forEach(function(field) {
-      var radio = field.querySelector('.radio');
-      field.setAttribute('aria-checked', radio.classList.contains('radio--checked') ? 'true' : 'false');
-    });
-  }
-
-  function selectRadio(target) {
-    if (!target || target.classList.contains('radio--disabled')) return;
-    if (target.classList.contains('radio--checked')) return;
-    var group = target.getAttribute('data-group');
-    if (group) {
-      var siblings = document.querySelectorAll('.radio[data-group="' + group + '"]');
-      for (var i = 0; i < siblings.length; i++) {
-        siblings[i].classList.remove('radio--checked');
-      }
-      target.classList.add('radio--checked');
-      syncGroup(group);
-    }
-  }
-
-  document.querySelectorAll('[data-radio-group] .radio-field').forEach(function(field) {
-    bindPress(field, function() {
-      selectRadio(field.querySelector('.radio'));
-    });
-  });
-
-  document.querySelectorAll('[data-radio-group]').forEach(function(group) {
-    syncGroup(group.getAttribute('data-radio-group'));
-  });
-})();
+// 演示用：初始化 radio 互斥与无障碍同步；交互逻辑由 runtime/radio.js 承担。
+window.WegoRadio.bind();
 </script>
 </body>
 </html>
