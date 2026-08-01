@@ -21,6 +21,14 @@
       "surface",
       "outlined",
       "filled"
+    ],
+    "radius": [
+      "default",
+      "flush"
+    ],
+    "orientation": [
+      "horizontal",
+      "vertical"
     ]
   },
   "representativeVariants": [
@@ -35,6 +43,21 @@
     {
       "base": "auto",
       "surface": "outlined"
+    },
+    {
+      "base": "auto",
+      "surface": "surface",
+      "radius": "flush"
+    },
+    {
+      "base": "auto",
+      "surface": "surface",
+      "orientation": "horizontal"
+    },
+    {
+      "base": "auto",
+      "surface": "surface",
+      "orientation": "vertical"
     }
   ],
   "anatomy": [
@@ -79,7 +102,12 @@
     "outlined 只提供白底、描边和圆角，适合说明类或弱分组。",
     "filled 只提供弱底色和圆角，适合低强调容器。",
     "需要卡片内 12px/16px 留白时，在业务作用域样式中写 padding，不要依赖基础 card 默认值。",
-    "需要固定图片比例、价格、标签或双列排布时，不要临时扩展基础 card；应沉淀商品卡片、笔记卡片等业务场景卡片。"
+    "需要固定图片比例、价格、标签或双列排布时，不要临时扩展基础 card；应沉淀商品卡片、笔记卡片等业务场景卡片。",
+    "圆角上限为 --radius-8，不引入更大圆角；当 card 在通栏场景（铺满视口宽度、edge=M0 直接承载、无左右边距）使用时，必须叠加 .card--flush 修饰类把圆角归零，避免圆角与屏幕边产生视觉断裂。",
+    "非通栏（edge=M8/M32 或宿主内容层提供横向留白）场景保持默认 card 圆角 --radius-8，不要叠加 .card--flush。",
+    "页面布局统一套用 card 承担内容分组与表面承载，保证圆角使用一致性；与 cell-group__content--card 形成对称的通栏/留白圆角规则。",
+    "布局方向默认横向（flex-direction:row），适合横排内容（如封面在左、信息在右的列表卡片、横滑区域外层包裹）；需要纵向堆叠（如封面上、信息下的网格卡片、标题+正文+底部的信息块）时叠加 .card--vertical。",
+    "通过 .card__content 承载内容时，.card__content 自身是纵向 flex，不受 card 方向影响；card 的方向仅影响直接子元素的排列。"
   ],
   "doNotInvent": [
     "不要在基础 card 中新增 .card__media、.card__price、.card__tag 等业务子元素。",
@@ -97,7 +125,9 @@
     "modifierClasses": [
       ".card--surface",
       ".card--outlined",
-      ".card--filled"
+      ".card--filled",
+      ".card--flush",
+      ".card--vertical"
     ],
     "alternatives": []
   },
@@ -125,15 +155,19 @@
     "--body-sm-font-size",
     "--border-neutral-l2",
     "--font-weight-semibold",
+    "--radius-0",
     "--radius-8",
     "--text-default",
     "--text-secondary",
     "--text-tertiary"
   ],
   "previewOnlyTokens": [
+    "--font-weight-medium",
+    "--size-48",
     "--spacer-12",
     "--spacer-16",
     "--spacer-4",
+    "--spacer-40",
     "--spacer-8"
   ],
   "localTokens": []
