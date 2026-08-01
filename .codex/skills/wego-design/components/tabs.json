@@ -131,6 +131,7 @@
     "icon-right 场景默认只在选中的 tab 上显示右侧箭头；未选中项不显示箭头。",
     "icon-right 场景箭头与文字间距为 0；该规则只作用于右箭头与文本的组合，不影响 icon-left 场景图标与文字的 4px 间距。",
     "icon-right 呼出的 popmenu 层级使用 --z-popover，必须挂载到页面顶层浮层容器，避免被局部 overflow 裁剪。",
+    "tab item 上不要挂 badge--corner；wg-tabs--scroll 的 .wg-tabs__scroll 使用 overflow-x:auto 会裁剪角标伸出的部分，需要未读提醒时改用 badge--inline 紧贴 label。",
     "右侧箭头可作为下拉筛选入口：第一次点击未选中项只切换选中态，已选中后再次点击才打开锚定当前 tab 的 popmenu。",
     "pressed 状态只降低 opacity，不添加背景色变化。",
     "根元素背景固定为 --bg-surface，不随页面背景变化。",
