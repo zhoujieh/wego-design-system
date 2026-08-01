@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 5,
+  "identity": {
+    "iteration_id": "my-tab",
+    "title": "我的tab页",
+    "date": "2026-08-01",
+    "primary_scene": "我的",
+    "related_scenes": []
+  },
+  "status": "awaiting-prototype-confirmation",
+  "scope_revision": 1,
+  "prototype_brief": {
+    "goal": "我的Tab 个人中心，聚合个人信息、会员、数据资产、常用应用入口，管理浏览自己的内容（产品/笔记/直播），并通过右下角悬浮FAB提供发布入口。",
+    "included": [
+      "导航栏：左侧个人信息（作为切换相册入口，不下钻，stub 反馈）；右侧设置+分享主页（stub 反馈）",
+      "会员栏：1行卡片展示等级+到期时间+云空间用量（纯展示）",
+      "数据资产横滑：9入口（我买的/粉丝/好友/代理/访客/员工/钱包/卡券/收藏），\"我买的\"带待办角标，全部 stub",
+      "常用应用横滑：进入主页+二维码（固定）+购物车（带数量角标）+最近应用+全部，全部 stub",
+      "类型 tabs：产品/笔记/直播，紧贴列表，可扩展，functional 切换",
+      "工具行：内联弱化搜索（stub）+筛选入口（stub）+视图切换（functional，列表/网格）",
+      "内容列表：卡片无状态标签，列表/网格视图 per-tab 独立记忆，产品/笔记/直播复用产品数据展示",
+      "发布 FAB：右下角悬浮，点击弹出发布类型选择（发产品/发笔记/开直播），选择后 stub 反馈"
+    ],
+    "excluded": [
+      "相册切换的具体流程（不下钻）",
+      "数据资产9入口、常用应用入口的跳转页面",
+      "设置、分享的具体页面",
+      "搜索、筛选的真实过滤流程",
+      "发布表单和发布后的内容插入"
+    ],
+    "entry_points": [
+      "宿主底部 Tab「我的」（data-host-tab=\"my\"），点击切换到个人中心页面"
+    ],
+    "critical_paths": [
+      "浏览内容：进入我的 Tab → 浏览个人信息/会员/数据资产/常用应用 → 切换类型 tabs（产品/笔记/直播）→ 切换视图（列表/网格）→ 浏览内容卡片",
+      "发布入口：点击右下角 FAB → 弹出发布类型选择 → 选择类型（发产品/发笔记/开直播）→ toast 反馈"
+    ],
+    "prototype_boundaries": [
+      {
+        "flow_id": "browse-content",
+        "mode": "functional",
+        "visible_result": "用户切换类型 tab 和视图模式，列表内容随之变化，三个 tab 的视图状态独立记忆"
+      },
+      {
+        "flow_id": "publish-entry",
+        "mode": "stub",
+        "visible_result": "点击 FAB 弹出发布类型选择菜单，选择某类型后 toast 反馈「即将进入发布」"
+      }
+    ],
+    "states": [
+      "当前激活类型 tab：产品/笔记/直播（默认产品），切换后列表内容跟随变化",
+      "当前列表视图：列表/网格（per-tab 独立记忆，默认列表），切换 tab 后回到该 tab 上次的视图",
+      "FAB 发布菜单：收起/展开，点击 FAB 展开，选择类型或点击遮罩后收起"
+    ],
+    "data_contract": {
+      "user_profile": {
+        "avatar": "mock 头像图片",
+        "nickname": "mock 昵称",
+        "bio": "mock 个人简介"
+      },
+      "membership": {
+        "level": "mock 会员等级",
+        "expire_date": "mock 到期时间",
+        "cloud_usage": "mock 云空间用量（已用/总量）"
+      },
+      "data_assets": {
+        "entries": [
+          "我买的",
+          "粉丝",
+          "好友",
+          "代理",
+          "访客",
+          "员工",
+          "钱包",
+          "卡券",
+          "收藏"
+        ],
+        "badge": "「我买的」带待办角标（mock 数值）"
+      },
+      "quick_apps": {
+        "entries": [
+          "进入主页",
+          "二维码",
+          "购物车",
+          "最近应用",
+          "全部"
+        ],
+        "badge": "购物车带数量角标（mock 数值）"
+      },
+      "content_list": {
+        "source": "复用 prototype-db.js 产品数据",
+        "tabs": "产品/笔记/直播三个 tab 展示同一批数据，笔记以图文卡片呈现，直播以直播卡片呈现",
+        "card_style": "卡片无状态标签"
+      }
+    },
+    "assumptions": [
+      "相册切换入口点击仅 toast 反馈，不进入相册选择流程",
+      "会员栏为纯展示，无交互",
+      "数据资产和常用应用入口点击统一 stub（toast 反馈）",
+      "搜索和筛选入口点击仅 toast 反馈，不进入真实搜索/筛选流程",
+      "发布 FAB 选择类型后仅 toast 反馈，不进入发布表单",
+      "笔记和直播复用产品数据，以不同卡片样式呈现（笔记=图文卡片，直播=直播卡片）",
+      "「我买的」待办角标和购物车数量角标使用 mock 具体数值"
+    ],
+    "open_questions": []
+  },
+  "brief_submission": {
+    "at": "2026-08-01T13:18:49.587Z",
+    "scope_revision": 1,
+    "scope_sha256": "caf3f727a6c0511bd80e03e9ca883f27f0e0027ac77ea43b6a828588b6589db1"
+  },
+  "brief_confirmation": {
+    "at": "2026-08-01T13:22:59.383Z",
+    "scope_revision": 1,
+    "scope_sha256": "caf3f727a6c0511bd80e03e9ca883f27f0e0027ac77ea43b6a828588b6589db1"
+  },
+  "prototype_confirmation": null,
+  "affected_scenes": [
+    "我的"
+  ],
+  "affected_runtime": [],
+  "stage_outputs": {
+    "product": {
+      "valid": true
+    },
+    "design": {
+      "valid": true
+    }
+  },
+  "change_log": [
+    {
+      "action": "init",
+      "at": "2026-08-01T13:18:19.741Z"
+    },
+    {
+      "action": "submit-brief",
+      "at": "2026-08-01T13:18:49.590Z"
+    },
+    {
+      "action": "confirm-brief",
+      "at": "2026-08-01T13:22:59.384Z"
+    },
+    {
+      "action": "submit-prototype",
+      "at": "2026-08-01T14:11:23.611Z"
+    }
+  ],
+  "freeze": null
+}
