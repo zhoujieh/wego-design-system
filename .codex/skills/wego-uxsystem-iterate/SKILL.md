@@ -11,11 +11,14 @@ description: 审查或迭代微购设计系统、组件、Preview、UI Kit、消
 
 经验沉淀不自动触发。只有用户明确要求总结、登记、升级或清理经验时，才进入经验流程；普通任务过程中不得持续扫描、分类或写入经验候选。
 
+<!-- rule-id: experience-must-stay-inside-uxsystem-iterate -->
+经验文件只能维护在本技能目录内。唯一候选数据源固定为 `.codex/skills/wego-uxsystem-iterate/experience/candidates.json`；禁止在仓库根目录或其它技能下创建 `experience/`、`candidates.json`、经验记录或其副本。写入前必须使用完整仓库路径确认目标位置，发现根目录旧副本时先合并有效内容，再删除旧副本并清理引用。
+
 ## 按需读取
 
 - 组件、Token、Preview 或 UI Kit：读[组件与 UI Kit 迭代](./references/workflow.md)、[资源同步矩阵](./references/sync-matrix.runtime.md)及受影响的权威源和消费者。
 - 消费规则、守卫或系统缺口：只读直接受影响的规则、源码和运行时消费者。
-- 用户明确要求总结、登记、升级或清理经验：读[工作流迭代](./references/workflow-iteration.md)、[工作流同步矩阵](./references/sync-matrix.md)和唯一候选数据源 `experience/candidates.json`。
+- 用户明确要求总结、登记、升级或清理经验：读[工作流迭代](./references/workflow-iteration.md)、[工作流同步矩阵](./references/sync-matrix.md)和唯一候选数据源 `.codex/skills/wego-uxsystem-iterate/experience/candidates.json`。
 
 ## 输出与交接
 
