@@ -7,7 +7,7 @@ description: 基于已确认原型简报消费微购设计系统，在一次任�
 
 ## 触发与边界
 
-用于已确认范围内的新场景、已有场景修改和原型定稿前的交互实现。缺少会改变目标、范围、路径、状态、数据或结果的业务事实时退回 `wego-product`；正式组件、Token、Preview、UI Kit 或宿主能力确有缺口时，记录最小说明并交给 `wego-uxsystem-iterate`。
+用于已确认范围内的新场景、已有场景修改和原型定稿前的交互实现。缺少会改变目标、范围、路径、状态、数据或结果的业务事实时退回 `wego-product`。设计阶段只在现有设计系统能力内完成当前页面的最佳实现，不判断或登记设计系统缺口；组件、规范或系统问题由用户在原型验收时提出，再交给 `wego-uxsystem-iterate`。
 
 ## 按需读取
 
@@ -23,10 +23,10 @@ description: 基于已确认原型简报消费微购设计系统，在一次任�
 
 只输出或更新场景目录中的 `route.json`、`scene.js` 和 `scene.css`。路由发生新增或变化时运行 `node scripts/build-routes.mjs` 生成 `wego-app/js/routes.js`；`routes.js` 是生成物，禁止直接编辑。
 
-在已确认范围内自主完成信息分组、布局、组件、Token、反馈和 overlay，不建立第二次确认门禁。完成实现后运行源码守卫和真实浏览器检查；验证通过后执行 `submit-prototype`，将迭代推进到 `awaiting-prototype-confirmation` 并交给用户验收。
+在已确认范围内自主完成信息分组、布局、组件、Token、反馈和 overlay，不建立第二次确认门禁。完成实现后运行源码守卫和真实浏览器检查；验证通过后执行 `submit-prototype`，提交并推送当前功能分支，创建或更新 PR，并将迭代推进到 `awaiting-prototype-confirmation`。交付时提供当前 PR 的独立预览链接供用户验收。
 
-- 用户明确验收通过后执行 `confirm-prototype`。
-- 用户在已确认范围内要求调整视觉、布局、组件、Token、路由或交互时，先执行 `invalidate --stage=prototype`，修改、验证并重新 `submit-prototype`。
+- 用户明确验收通过后执行 `confirm-prototype`，重新同步最新 `main`、解决冲突并完成验证，再合并到 `main`。
+- 用户在已确认范围内要求调整视觉、布局、组件、Token、路由或交互时，先执行 `invalidate --stage=prototype`，修改、验证并重新 `submit-prototype`；原 PR 预览链接保持不变并自动更新。
 - 用户反馈改变目标、范围、入口、关键路径、状态、数据或可见结果时，退回 `wego-product` 按简报失效流程处理。
 
 除场景合同允许的简短例外说明外，不新增设计证明文件。
