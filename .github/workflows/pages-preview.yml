@@ -1,0 +1,119 @@
+name: Pages Preview
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: pages-preview
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build current Pages artifact
+        if: github.event_name == 'push' || github.event.action != 'closed'
+        run: |
+          rm -rf /tmp/wego-pages-current
+          mkdir -p /tmp/wego-pages-current
+          node scripts/build-pages-artifact.mjs /tmp/wego-pages-current
+
+      - name: Checkout Pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: pages
+          fetch-depth: 0
+        continue-on-error: true
+
+      - name: Prepare Pages branch
+        run: |
+          if [ ! -d pages/.git ]; then
+            rm -rf pages
+            mkdir pages
+            cd pages
+            git init
+            git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+            git checkout --orphan gh-pages
+          fi
+
+      - name: Publish production
+        if: github.event_name == 'push'
+        run: |
+          find pages -mindepth 1 -maxdepth 1 ! -name .git ! -name previews -exec rm -rf {} +
+          cp -a /tmp/wego-pages-current/. pages/
+
+      - name: Publish PR preview
+        if: github.event_name == 'pull_request' && github.event.action != 'closed'
+        run: |
+          target="pages/previews/pr-${{ github.event.pull_request.number }}"
+          rm -rf "$target"
+          mkdir -p "$target"
+          cp -a /tmp/wego-pages-current/. "$target/"
+
+      - name: Remove closed PR preview
+        if: github.event_name == 'pull_request' && github.event.action == 'closed'
+        run: |
+          rm -rf "pages/previews/pr-${{ github.event.pull_request.number }}"
+
+      - name: Commit Pages branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "deploy pages for ${GITHUB_EVENT_NAME} ${GITHUB_SHA}"
+          git push origin HEAD:gh-pages
+
+      - name: Comment preview URL
+        if: github.event_name == 'pull_request' && github.event.action != 'closed'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const marker = '<!-- wego-pages-preview -->';
+            const url = `https://${context.repo.owner}.github.io/${context.repo.repo}/previews/pr-${context.issue.number}/`;
+            const body = `${marker}\n当前 PR 验收链接：${url}`;
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(comment => comment.body?.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
