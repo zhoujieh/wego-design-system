@@ -1,8 +1,16 @@
-const sceneTemplate = `<div class="my-page layout-page" data-component-slug="layout-page" data-surface-id="my" data-route-id="my" data-layout-mode="composed"><div class="layout-page__top"><div class="navbar" data-component-slug="navbar"><div class="navbar__body navbar__body--split"><div class="navbar__left navbar__left--custom"><div class="my-nav-profile" data-dom-id="nav-profile"><div class="avatar avatar--40 avatar--image" data-component-slug="avatar"><img alt=""></div><div class="my-nav-profile__info"><div class="my-nav-profile__name"></div><div class="my-nav-profile__album"></div></div><i class="wego-iconfont-s icon-youjiantou-mian16 my-nav-profile__arrow"></i></div></div><div class="navbar__right navbar__right--icon"><div class="navbar__action" data-dom-id="nav-settings"><div class="navbar__action-icon"><i class="wego-iconfont-s icon-shezhi"></i></div><span class="navbar__action-label">设置</span></div><div class="navbar__action" data-dom-id="nav-share"><div class="navbar__action-icon"><i class="wego-iconfont-s icon-fenxiang-mian"></i></div><span class="navbar__action-label">分享</span></div></div></div></div></div><div class="layout-page__body"><div class="layout-scroll" data-component-slug="layout-scroll"><div class="layout-section" data-component-slug="layout-section" data-edge="M8" style="--layout-section-gap-before:var(--spacer-12);--layout-section-gap-after:var(--spacer-0)"><div class="card card--surface" data-component-slug="card"><div class="card__content my-membership" data-dom-id="membership"><div class="my-membership__row"><span class="my-membership__level">VIP 会员</span><span class="my-membership__expire">2026.12.31 到期</span></div><div class="my-membership__storage"><div class="my-membership__storage-head"><span class="my-membership__storage-label">云空间</span><span class="my-membership__storage-text">12.5GB / 50GB</span></div><div class="my-membership__storage-bar"><div class="my-membership__storage-used" style="width:25%"></div></div></div></div></div></div><div class="layout-section" data-component-slug="layout-section" data-edge="M0" style="--layout-section-gap-before:var(--spacer-12);--layout-section-gap-after:var(--spacer-0)"><div class="card card--surface my-section-card" data-component-slug="card"><div class="layout-scroll-row my-assets" data-component-slug="layout-scroll-row" data-item-size="auto" data-snap="none" data-peek="next" style="--layout-scroll-row-gap:var(--spacer-0)" data-region="assets"></div></div></div><div class="layout-section" data-component-slug="layout-section" data-edge="M0" style="--layout-section-gap-before:var(--spacer-12);--layout-section-gap-after:var(--spacer-0)"><div class="card card--surface my-section-card" data-component-slug="card"><div class="layout-scroll-row my-apps" data-component-slug="layout-scroll-row" data-item-size="auto" data-snap="none" data-peek="next" style="--layout-scroll-row-gap:var(--spacer-0)" data-region="apps"></div></div></div><div class="sticky-region" data-component-slug="sticky-region" data-edge="top" data-visibility="always" data-state="visible" style="--sticky-region-expanded-size:120px;--sticky-region-inline-inset:0px"><div class="sticky-region__motion"><div class="sticky-region__inner"><div class="wg-tabs wg-tabs--standard wg-tabs--divide" data-component-slug="tabs" role="tablist"><div class="wg-tabs__scroll"><button class="wg-tabs__item" role="tab" aria-selected="true" type="button" data-dom-id="tab-product"><span class="wg-tabs__content"><span class="wg-tabs__label">产品</span></span></button><button class="wg-tabs__item" role="tab" aria-selected="false" type="button" data-dom-id="tab-note"><span class="wg-tabs__content"><span class="wg-tabs__label">笔记</span></span></button><button class="wg-tabs__item" role="tab" aria-selected="false" type="button" data-dom-id="tab-live"><span class="wg-tabs__content"><span class="wg-tabs__label">直播</span></span></button><span class="wg-tabs__active-indicator" aria-hidden="true"></span></div></div><div class="my-toolbar"><div class="my-toolbar__search" data-dom-id="toolbar-search"><i class="wego-iconfont-s icon-sousuo"></i><span class="my-toolbar__search-text">搜索</span></div><div class="my-toolbar__actions"><div class="my-toolbar__btn" data-dom-id="toolbar-filter"><i class="wego-iconfont-s icon-shaixuan"></i><span>筛选</span></div><div class="my-toolbar__btn my-toolbar__btn--view" data-dom-id="toolbar-view"><i class="wego-iconfont-s icon-liebiao"></i></div></div></div></div></div></div><div class="layout-section" data-component-slug="layout-section" data-edge="M8" style="--layout-section-gap-before:var(--spacer-0);--layout-section-gap-after:var(--spacer-0)"><div class="my-content" data-region="content"></div></div></div></div><button class="my-fab" type="button" data-dom-id="fab-publish" aria-label="发布"><i class="wego-iconfont-s icon-jia"></i></button></div>`;
+const sceneTemplate = `<div class="my-page layout-page" data-component-slug="layout-page" data-surface-id="personal-center" data-route-id="personal-center" data-layout-mode="composed"><div class="layout-page__top"><div class="navbar" data-component-slug="navbar"><div class="navbar__body navbar__body--split"><div class="navbar__left navbar__left--custom"><div class="my-nav-profile" data-dom-id="nav-profile"><div class="avatar avatar--40 avatar--image" data-component-slug="avatar"><img alt=""></div><div class="my-nav-profile__info"><div class="my-nav-profile__name"></div><div class="my-nav-profile__album"></div></div><i class="wego-iconfont-s icon-youjiantou-mian16 my-nav-profile__arrow"></i></div></div><div class="navbar__right navbar__right--icon"><div class="navbar__action" data-dom-id="nav-settings"><div class="navbar__action-icon"><i class="wego-iconfont-s icon-shezhi"></i></div><span class="navbar__action-label">设置</span></div><div class="navbar__action" data-dom-id="nav-share"><div class="navbar__action-icon"><i class="wego-iconfont-s icon-fenxiang-mian"></i></div><span class="navbar__action-label">分享</span></div></div></div></div></div><div class="layout-page__body"><div class="layout-scroll" data-component-slug="layout-scroll"><div class="layout-section" data-component-slug="layout-section" data-edge="M8" style="--layout-section-gap-before:var(--spacer-12);--layout-section-gap-after:var(--spacer-0)"><div class="card card--surface" data-component-slug="card"><div class="card__content my-membership" data-dom-id="membership"><div class="my-membership__row"><span class="my-membership__level">VIP 会员</span><span class="my-membership__expire">2026.12.31 到期</span></div><div class="my-membership__storage"><div class="my-membership__storage-head"><span class="my-membership__storage-label">云空间</span><span class="my-membership__storage-text">12.5GB / 50GB</span></div><div class="my-membership__storage-bar"><div class="my-membership__storage-used" style="width:25%"></div></div></div></div></div></div><div class="layout-section" data-component-slug="layout-section" data-edge="M0" style="--layout-section-gap-before:var(--spacer-12);--layout-section-gap-after:var(--spacer-0)"><div class="card card--surface my-section-card" data-component-slug="card"><div class="layout-scroll-row my-assets" data-component-slug="layout-scroll-row" data-item-size="auto" data-snap="none" data-peek="next" style="--layout-scroll-row-gap:var(--spacer-0)" data-region="assets"></div></div></div><div class="layout-section" data-component-slug="layout-section" data-edge="M0" style="--layout-section-gap-before:var(--spacer-12);--layout-section-gap-after:var(--spacer-0)"><div class="card card--surface my-section-card" data-component-slug="card"><div class="layout-scroll-row my-apps" data-component-slug="layout-scroll-row" data-item-size="auto" data-snap="none" data-peek="next" style="--layout-scroll-row-gap:var(--spacer-0)" data-region="apps"></div></div></div><div class="sticky-region" data-component-slug="sticky-region" data-edge="top" data-visibility="always" data-state="visible" style="--sticky-region-expanded-size:56px;--sticky-region-inline-inset:0px"><div class="sticky-region__motion"><div class="sticky-region__inner"><div class="wg-tabs wg-tabs--standard wg-tabs--divide" data-component-slug="tabs" role="tablist"><div class="wg-tabs__scroll"><button class="wg-tabs__item" role="tab" aria-selected="true" type="button" data-dom-id="tab-product"><span class="wg-tabs__content"><span class="wg-tabs__label">产品</span></span></button><button class="wg-tabs__item" role="tab" aria-selected="false" type="button" data-dom-id="tab-note"><span class="wg-tabs__content"><span class="wg-tabs__label">笔记</span></span></button><button class="wg-tabs__item" role="tab" aria-selected="false" type="button" data-dom-id="tab-live"><span class="wg-tabs__content"><span class="wg-tabs__label">直播</span></span></button><span class="wg-tabs__active-indicator" aria-hidden="true"></span></div></div></div></div></div><div class="layout-section" data-component-slug="layout-section" data-edge="M8" style="--layout-section-gap-before:var(--spacer-0);--layout-section-gap-after:var(--spacer-0)"><div class="my-content" data-region="content"></div></div></div></div><button class="my-fab" type="button" data-dom-id="fab-publish" aria-label="发布"><i class="wego-iconfont-s icon-jia"></i></button></div>`;
 
 (function () {
-  // Layout: 顶部 navbar（个人信息+设置+分享）→ 主滚动区（会员栏→数据资产横滑→常用应用横滑→sticky 类型 tabs+工具行→内容列表）→ 右下角发布 FAB。
-  // 列表区 functional（tab 切换、视图 per-tab 独立记忆、发布插入），其余入口 stub 反馈。
+  // Layout: 顶部 navbar（个人信息+设置+分享）→ 主滚动区（会员栏→数据资产横滑→常用应用横滑→sticky 类型 tabs→内容列表）→ 右下角发布 FAB。
+  // 列表区 functional（tab 切换、发布插入），相册切换 functional，其余入口 stub 反馈。
+
+  function getAlbums() {
+    return [
+      { id: 'album-all', name: '全部相册' },
+      { id: 'album-clothing', name: '服装相册' },
+      { id: 'album-shoes', name: '鞋包相册' }
+    ];
+  }
 
   function getAssetItems() {
     return [
@@ -53,13 +61,14 @@ const sceneTemplate = `<div class="my-page layout-page" data-component-slug="lay
     ];
   }
 
-  function renderNavProfile(root, currentUser) {
+  function renderNavProfile(root, currentUser, state) {
     var avatarImg = root.querySelector('.my-nav-profile .avatar img');
     var nameEl = root.querySelector('.my-nav-profile__name');
     var albumEl = root.querySelector('.my-nav-profile__album');
     if (avatarImg && currentUser.avatar) avatarImg.src = currentUser.avatar;
     if (nameEl && currentUser.merchant_name) nameEl.textContent = currentUser.merchant_name;
-    if (albumEl && currentUser.main_categories) albumEl.textContent = currentUser.main_categories.join('·') + '相册';
+    var currentAlbum = state.albums.find(function (a) { return a.id === state.currentAlbumId; });
+    if (albumEl && currentAlbum) albumEl.textContent = currentAlbum.name;
   }
 
   function renderAssets(root) {
@@ -84,7 +93,7 @@ const sceneTemplate = `<div class="my-page layout-page" data-component-slug="lay
     }).join('');
   }
 
-  function buildPriceMetric(price) {
+  function buildPriceMetrics(price) {
     var intPart = String(Math.floor(price));
     var decimal = String(price).split('.')[1];
     var decimalHtml = decimal ? '<span class="metric__decimal">.' + decimal + '</span>' : '';
@@ -95,9 +104,8 @@ const sceneTemplate = `<div class="my-page layout-page" data-component-slug="lay
     var container = root.querySelector('[data-region="content"]');
     if (!container) return;
     var tab = state.activeTab;
-    var mode = state.viewModes[tab];
     var list = state.lists[tab] || [];
-    container.className = 'my-content my-content--' + mode + ' my-content--' + tab;
+    container.className = 'my-content my-content--grid my-content--' + tab;
     if (list.length === 0) {
       container.innerHTML = '<div class="my-content__empty">暂无内容，点击右下角发布</div>';
       return;
@@ -105,19 +113,13 @@ const sceneTemplate = `<div class="my-page layout-page" data-component-slug="lay
     container.innerHTML = list.map(function (item) {
       var cover = item.cover || '';
       if (tab === 'product') {
-        var priceHtml = buildPriceMetric(item.price);
-        return mode === 'grid'
-          ? '<div class="card card--surface card--vertical my-content-card my-content-card--grid"><div class="my-content-card__cover"><img src="' + cover + '" alt=""></div><div class="my-content-card__body"><div class="my-content-card__title">' + item.title + '</div><div class="my-content-card__info">' + priceHtml + '</div></div></div>'
-          : '<div class="card card--surface my-content-card my-content-card--list"><div class="my-content-card__cover"><img src="' + cover + '" alt=""></div><div class="my-content-card__body"><div class="my-content-card__title">' + item.title + '</div><div class="my-content-card__info">' + priceHtml + '</div></div></div>';
+        var priceHtml = buildPriceMetrics(item.price);
+        return '<div class="card card--surface card--vertical my-content-card my-content-card--grid" role="button" data-dom-id="item-' + item.id + '"><div class="my-content-card__cover"><img src="' + cover + '" alt=""></div><div class="my-content-card__body"><div class="my-content-card__title">' + item.title + '</div><div class="my-content-card__info">' + priceHtml + '</div></div></div>';
       }
       if (tab === 'note') {
-        return mode === 'grid'
-          ? '<div class="card card--surface card--vertical my-content-card my-content-card--grid"><div class="my-content-card__cover"><img src="' + cover + '" alt=""></div><div class="my-content-card__body"><div class="my-content-card__title">' + item.title + '</div></div></div>'
-          : '<div class="card card--surface my-content-card my-content-card--list"><div class="my-content-card__cover"><img src="' + cover + '" alt=""></div><div class="my-content-card__body"><div class="my-content-card__title">' + item.title + '</div></div></div>';
+        return '<div class="card card--surface card--vertical my-content-card my-content-card--grid" role="button" data-dom-id="item-' + item.id + '"><div class="my-content-card__cover"><img src="' + cover + '" alt=""></div><div class="my-content-card__body"><div class="my-content-card__title">' + item.title + '</div></div></div>';
       }
-      return mode === 'grid'
-        ? '<div class="card card--surface card--vertical my-content-card my-content-card--grid my-content-card--live"><div class="my-content-card__cover"><img src="' + cover + '" alt=""><span class="my-content-card__live-badge my-content-card__live-badge--' + item.status + '">' + item.status + '</span></div><div class="my-content-card__body"><div class="my-content-card__title">' + item.title + '</div></div></div>'
-        : '<div class="card card--surface my-content-card my-content-card--list my-content-card--live"><div class="my-content-card__cover"><img src="' + cover + '" alt=""></div><div class="my-content-card__body"><div class="my-content-card__title">' + item.title + '</div><div class="my-content-card__info"><span class="my-content-card__live-status my-content-card__live-status--' + item.status + '">' + item.status + '</span><span class="my-content-card__live-viewers">' + item.viewers + '人观看</span></div></div></div>';
+      return '<div class="card card--surface card--vertical my-content-card my-content-card--grid my-content-card--live" role="button" data-dom-id="item-' + item.id + '"><div class="my-content-card__cover"><img src="' + cover + '" alt=""><span class="my-content-card__live-badge my-content-card__live-badge--' + item.status + '">' + item.status + '</span></div><div class="my-content-card__body"><div class="my-content-card__title">' + item.title + '</div><div class="my-content-card__info"><span class="my-content-card__live-viewers">' + item.viewers + '人观看</span></div></div></div>';
     }).join('');
   }
 
@@ -134,11 +136,38 @@ const sceneTemplate = `<div class="my-page layout-page" data-component-slug="lay
     }
   }
 
-  function updateViewIcon(root, state) {
-    var btn = root.querySelector('[data-dom-id="toolbar-view"] i');
-    if (!btn) return;
-    var mode = state.viewModes[state.activeTab];
-    btn.className = 'wego-iconfont-s ' + (mode === 'list' ? 'icon-sanlie' : 'icon-liebiao');
+  function buildAlbumSheetTemplate(state) {
+    var albums = state.albums;
+    var currentAlbumId = state.currentAlbumId;
+    var items = albums.map(function (album) {
+      var selected = album.id === currentAlbumId;
+      return '<div class="actionsheet__item' + (selected ? ' actionsheet__item--selected' : '') + '" data-album-id="' + album.id + '"><div class="actionsheet__item-row"><div class="actionsheet__item-main"><div class="actionsheet__item-title">' + album.name + '</div></div><div class="actionsheet__item-check-slot"><i class="wego-iconfont-s icon-gou-jiacu actionsheet__item-check"></i></div></div></div>';
+    }).join('');
+    return '<div class="actionsheet actionsheet--select" role="dialog" aria-modal="true" data-state="closed"><div class="actionsheet__panel"><div class="actionsheet__header actionsheet__header--text"><div class="actionsheet__header-text">切换相册</div></div><div class="actionsheet__list">' + items + '</div><div class="actionsheet__cancel-gap"></div><div class="actionsheet__cancel">取消</div></div></div>';
+  }
+
+  function openAlbumSheet(ctx, state) {
+    ctx.openSheet(buildAlbumSheetTemplate(state), {
+      init: function (overlayCtx) {
+        var overlayRoot = overlayCtx.root;
+        var cancelBtn = overlayRoot.querySelector('.actionsheet__cancel');
+        if (cancelBtn) cancelBtn.addEventListener('click', function () { overlayCtx.close(); });
+        var items = overlayRoot.querySelectorAll('.actionsheet__item');
+        items.forEach(function (item) {
+          item.addEventListener('click', function () {
+            var albumId = item.getAttribute('data-album-id');
+            var album = state.albums.find(function (a) { return a.id === albumId; });
+            if (album) {
+              state.currentAlbumId = album.id;
+              var albumEl = ctx.root.querySelector('.my-nav-profile__album');
+              if (albumEl) albumEl.textContent = album.name;
+              ctx.toast('已切换到 ' + album.name);
+            }
+            overlayCtx.close();
+          });
+        });
+      }
+    });
   }
 
   function buildPublishModalTemplate() {
@@ -217,11 +246,10 @@ const sceneTemplate = `<div class="my-page layout-page" data-component-slug="lay
     ctx.toast('发布成功');
     setActiveTab(ctx.root, type, ctx);
     renderContent(ctx.root, state);
-    updateViewIcon(ctx.root, state);
   }
 
   window.WegoApp.registerScene({
-    routeId: 'my',
+    routeId: 'personal-center',
     template: sceneTemplate,
     presentation: { type: 'host-tab' },
     init(ctx) {
@@ -230,7 +258,8 @@ const sceneTemplate = `<div class="my-page layout-page" data-component-slug="lay
       var db = window.WEGO_PROTOTYPE_DB || {};
       var currentUser = db.currentUser || {};
 
-      state.viewModes = state.viewModes || { product: 'list', note: 'list', live: 'list' };
+      state.albums = state.albums || getAlbums();
+      state.currentAlbumId = state.currentAlbumId || 'album-all';
       state.activeTab = state.activeTab || 'product';
       state.lists = state.lists || {
         product: collectProducts(db),
@@ -238,12 +267,11 @@ const sceneTemplate = `<div class="my-page layout-page" data-component-slug="lay
         live: collectLives(db)
       };
 
-      renderNavProfile(root, currentUser);
+      renderNavProfile(root, currentUser, state);
       renderAssets(root);
       renderApps(root);
       renderContent(root, state);
       setActiveTab(root, state.activeTab, ctx);
-      updateViewIcon(root, state);
 
       // 绑定 tabs 运行时（指示条自动跟随选中项 + resize/scroll 维护）
       if (ctx.bindTabs) {
@@ -256,31 +284,23 @@ const sceneTemplate = `<div class="my-page layout-page" data-component-slug="lay
         state.activeTab = 'product';
         setActiveTab(root, 'product', ctx);
         renderContent(root, state);
-        updateViewIcon(root, state);
       });
       var tabNoteBtn = root.querySelector('[data-dom-id="tab-note"]');
       if (tabNoteBtn) tabNoteBtn.addEventListener('click', function () {
         state.activeTab = 'note';
         setActiveTab(root, 'note', ctx);
         renderContent(root, state);
-        updateViewIcon(root, state);
       });
       var tabLiveBtn = root.querySelector('[data-dom-id="tab-live"]');
       if (tabLiveBtn) tabLiveBtn.addEventListener('click', function () {
         state.activeTab = 'live';
         setActiveTab(root, 'live', ctx);
         renderContent(root, state);
-        updateViewIcon(root, state);
       });
 
-      // 工具行绑定
-      var viewBtn = root.querySelector('[data-dom-id="toolbar-view"]');
-      if (viewBtn) viewBtn.addEventListener('click', function () {
-        var current = state.viewModes[state.activeTab];
-        state.viewModes[state.activeTab] = current === 'list' ? 'grid' : 'list';
-        renderContent(root, state);
-        updateViewIcon(root, state);
-      });
+      // 个人信息相册切换入口
+      var navProfileEl = root.querySelector('[data-dom-id="nav-profile"]');
+      if (navProfileEl) navProfileEl.addEventListener('click', function () { openAlbumSheet(ctx, state); });
 
       // FAB 发布绑定
       var fab = root.querySelector('[data-dom-id="fab-publish"]');
@@ -294,46 +314,29 @@ const sceneTemplate = `<div class="my-page layout-page" data-component-slug="lay
       });
 
       // stub 入口绑定
-      var navProfileEl = root.querySelector('[data-dom-id="nav-profile"]');
-      if (navProfileEl) navProfileEl.addEventListener('click', function () { ctx.toast('功能开发中'); });
       var navSettingsEl = root.querySelector('[data-dom-id="nav-settings"]');
       if (navSettingsEl) navSettingsEl.addEventListener('click', function () { ctx.toast('功能开发中'); });
       var navShareEl = root.querySelector('[data-dom-id="nav-share"]');
       if (navShareEl) navShareEl.addEventListener('click', function () { ctx.toast('功能开发中'); });
       var membershipEl = root.querySelector('[data-dom-id="membership"]');
       if (membershipEl) membershipEl.addEventListener('click', function () { ctx.toast('功能开发中'); });
-      var toolbarSearchEl = root.querySelector('[data-dom-id="toolbar-search"]');
-      if (toolbarSearchEl) toolbarSearchEl.addEventListener('click', function () { ctx.toast('功能开发中'); });
-      var toolbarFilterEl = root.querySelector('[data-dom-id="toolbar-filter"]');
-      if (toolbarFilterEl) toolbarFilterEl.addEventListener('click', function () { ctx.toast('功能开发中'); });
-      var assetPurchasedEl = root.querySelector('[data-dom-id="asset-purchased"]');
-      if (assetPurchasedEl) assetPurchasedEl.addEventListener('click', function () { ctx.toast('功能开发中'); });
-      var assetFansEl = root.querySelector('[data-dom-id="asset-fans"]');
-      if (assetFansEl) assetFansEl.addEventListener('click', function () { ctx.toast('功能开发中'); });
-      var assetFriendsEl = root.querySelector('[data-dom-id="asset-friends"]');
-      if (assetFriendsEl) assetFriendsEl.addEventListener('click', function () { ctx.toast('功能开发中'); });
-      var assetAgentsEl = root.querySelector('[data-dom-id="asset-agents"]');
-      if (assetAgentsEl) assetAgentsEl.addEventListener('click', function () { ctx.toast('功能开发中'); });
-      var assetVisitorsEl = root.querySelector('[data-dom-id="asset-visitors"]');
-      if (assetVisitorsEl) assetVisitorsEl.addEventListener('click', function () { ctx.toast('功能开发中'); });
-      var assetStaffEl = root.querySelector('[data-dom-id="asset-staff"]');
-      if (assetStaffEl) assetStaffEl.addEventListener('click', function () { ctx.toast('功能开发中'); });
-      var assetWalletEl = root.querySelector('[data-dom-id="asset-wallet"]');
-      if (assetWalletEl) assetWalletEl.addEventListener('click', function () { ctx.toast('功能开发中'); });
-      var assetCouponsEl = root.querySelector('[data-dom-id="asset-coupons"]');
-      if (assetCouponsEl) assetCouponsEl.addEventListener('click', function () { ctx.toast('功能开发中'); });
-      var assetFavoritesEl = root.querySelector('[data-dom-id="asset-favorites"]');
-      if (assetFavoritesEl) assetFavoritesEl.addEventListener('click', function () { ctx.toast('功能开发中'); });
-      var appHomeEl = root.querySelector('[data-dom-id="app-home"]');
-      if (appHomeEl) appHomeEl.addEventListener('click', function () { ctx.toast('功能开发中'); });
-      var appQrcodeEl = root.querySelector('[data-dom-id="app-qrcode"]');
-      if (appQrcodeEl) appQrcodeEl.addEventListener('click', function () { ctx.toast('功能开发中'); });
-      var appCartEl = root.querySelector('[data-dom-id="app-cart"]');
-      if (appCartEl) appCartEl.addEventListener('click', function () { ctx.toast('功能开发中'); });
-      var appRecentEl = root.querySelector('[data-dom-id="app-recent"]');
-      if (appRecentEl) appRecentEl.addEventListener('click', function () { ctx.toast('功能开发中'); });
-      var appAllEl = root.querySelector('[data-dom-id="app-all"]');
-      if (appAllEl) appAllEl.addEventListener('click', function () { ctx.toast('功能开发中'); });
+
+      // 数据资产 9 入口 stub
+      getAssetItems().forEach(function (item) {
+        var el = root.querySelector('[data-dom-id="' + item.id + '"]');
+        if (el) el.addEventListener('click', function () { ctx.toast('功能开发中'); });
+      });
+
+      // 常用应用入口 stub
+      getAppItems().forEach(function (item) {
+        var el = root.querySelector('[data-dom-id="' + item.id + '"]');
+        if (el) el.addEventListener('click', function () { ctx.toast('功能开发中'); });
+      });
+
+      // 列表项点击可见反馈（stub，不下钻）
+      root.querySelectorAll('.my-content-card').forEach(function (card) {
+        card.addEventListener('click', function () { ctx.toast('查看内容'); });
+      });
 
       // 滚动布局绑定（FAB 进入 fixedRegions）
       if (ctx.bindScrollLayout) {

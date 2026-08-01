@@ -1,0 +1,8 @@
+{
+  "agent": "trae-personal-center",
+  "scene": "个人中心",
+  "routeId": "personal-center",
+  "status": "active",
+  "claimedAt": "2026-08-01T00:00:00.000Z",
+  "note": "个人中心 Tab 原型迭代"
+}

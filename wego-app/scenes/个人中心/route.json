@@ -1,5 +1,5 @@
 {
-  "routeId": "my",
+  "routeId": "personal-center",
   "entry": {
     "type": "host-tab",
     "tab": "my"

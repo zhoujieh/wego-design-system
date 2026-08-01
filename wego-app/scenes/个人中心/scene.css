@@ -173,72 +173,9 @@
   color: var(--text-secondary);
 }
 
-/* sticky 区域内 tabs + 工具行 */
+/* sticky 区域内 tabs */
 .my-page .sticky-region__inner {
   background: var(--bg-page);
-}
-
-.my-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--spacer-8) var(--layout-page-margin-m8);
-  gap: var(--spacer-12);
-}
-
-.my-toolbar__search {
-  display: flex;
-  align-items: center;
-  gap: var(--spacer-8);
-  flex: 1 1 auto;
-  min-width: 0;
-  height: var(--size-32);
-  padding: 0 var(--spacer-12);
-  border-radius: var(--radius-full);
-  background: var(--bg-subtle);
-}
-
-.my-toolbar__search i {
-  font-size: var(--size-16);
-  color: var(--text-tertiary);
-}
-
-.my-toolbar__search-text {
-  font-size: var(--body-sm-font-size);
-  color: var(--text-tertiary);
-}
-
-.my-toolbar__actions {
-  display: flex;
-  align-items: center;
-  gap: var(--spacer-4);
-  flex-shrink: 0;
-}
-
-.my-toolbar__btn {
-  display: flex;
-  align-items: center;
-  gap: var(--spacer-4);
-  height: var(--size-32);
-  padding: 0 var(--spacer-12);
-  border-radius: var(--radius-full);
-  background: var(--bg-subtle);
-}
-
-.my-toolbar__btn i {
-  font-size: var(--size-16);
-  color: var(--text-secondary);
-}
-
-.my-toolbar__btn span {
-  font-size: var(--body-sm-font-size);
-  color: var(--text-secondary);
-}
-
-.my-toolbar__btn--view {
-  padding: 0;
-  width: var(--size-32);
-  justify-content: center;
 }
 
 /* 内容列表 */
@@ -253,10 +190,6 @@
   gap: var(--spacer-12);
 }
 
-.my-content--list {
-  gap: var(--spacer-12);
-}
-
 .my-content__empty {
   padding: var(--spacer-40) var(--spacer-16);
   text-align: center;
@@ -265,14 +198,13 @@
 }
 
 /* 内容卡片：card 组件提供 background/border-radius/overflow 和 flex 方向 */
-.my-content-card--list {
-  align-items: stretch;
-  gap: var(--spacer-12);
-  padding: var(--spacer-12);
+.my-content-card--grid {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.my-content-card--grid {
-  /* card--vertical 提供 flex-direction:column */
+.my-content-card--grid:active {
+  opacity: 0.85;
 }
 
 .my-content-card__cover {
@@ -281,14 +213,6 @@
   overflow: hidden;
   border-radius: var(--radius-8);
   background: var(--bg-subtle);
-}
-
-.my-content-card--list .my-content-card__cover {
-  width: calc(var(--spacer-40) * 2);
-  aspect-ratio: 1 / 1;
-}
-
-.my-content-card--grid .my-content-card__cover {
   width: 100%;
   aspect-ratio: 1 / 1;
 }
@@ -305,10 +229,6 @@
   justify-content: center;
   gap: var(--spacer-8);
   min-width: 0;
-  padding: var(--spacer-8) var(--spacer-4);
-}
-
-.my-content-card--grid .my-content-card__body {
   padding: var(--spacer-8) var(--spacer-12) var(--spacer-12);
 }
 
@@ -327,27 +247,6 @@
   display: flex;
   align-items: center;
   gap: var(--spacer-8);
-}
-
-.my-content-card__live-status {
-  font-size: var(--body-xs-font-size);
-  padding: var(--spacer-2) var(--spacer-8);
-  border-radius: var(--radius-full);
-}
-
-.my-content-card__live-status--直播中 {
-  background: var(--status-danger-default);
-  color: var(--text-inverse);
-}
-
-.my-content-card__live-status--预告 {
-  background: var(--bg-subtle);
-  color: var(--text-secondary);
-}
-
-.my-content-card__live-status--回放 {
-  background: var(--bg-subtle);
-  color: var(--text-secondary);
 }
 
 .my-content-card__live-viewers {
