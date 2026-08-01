@@ -168,8 +168,8 @@
     "autoClose": "normal 变体默认 duration=3000ms 自动关闭；action/input 不自动关闭",
     "persistence": "交互式常驻（action/input）或瞬时（normal duration）；不持久化到 localStorage",
     "conflicting": "同屏仅展示一个 popover，新 popover 出现时立即替换旧；同屏也不与 popmenu 共存",
-    "position": "锚定目标元素。默认 placement：normal/action 变体为 top（气泡在目标上方，箭头朝下），fallback 顺序 top→bottom→right→left；left/right 仅在用户显式指定或 top/bottom 均无法容纳时进入。input 变体例外：默认 placement=right（气泡在目标右侧，箭头朝左），fallback 顺序 right→left→top→bottom；top/bottom 仅在用户显式指定或 left/right 均无法容纳时进入。目标在屏幕左右位置选择 start/center/end 对齐。气泡距目标固定 4px；定位计算必须基于关闭动画与缩放临时禁用后的真实尺寸；四侧均无法完整容纳时不打开，由宿主改用其他承载方式，不能以夹紧坐标盖住目标",
-    "dismiss": "action/input：页面任意非气泡点击、焦点切换、滚动或视口尺寸变化时立即关闭；关闭行为不得阻断原页面事件、滚动或焦点操作。normal：duration 到期或点击关闭图标时关闭",
+    "position": "锚定目标元素。默认 placement：normal/action 变体为 top（气泡在目标上方，箭头朝下），fallback 顺序 top→bottom→right→left；left/right 仅在用户显式指定或 top/bottom 均无法容纳时进入。input 变体例外：默认 placement=right（气泡在目标右侧，箭头朝左），fallback 顺序 right→left→top→bottom；top/bottom 仅在用户显式指定或 left/right 均无法容纳时进入。目标在屏幕左右位置选择 start/center/end 对齐。气泡距目标固定 4px；定位计算必须基于关闭动画与缩放临时禁用后的真实尺寸；四侧均无法完整容纳时不打开，由宿主改用其他承载方式，不能以夹紧坐标盖住目标；运行时位于 runtime/popover.js，场景通过 WegoPopover.bind(trigger, popover, options) 初始化（options.preferredPlacement 指定偏好方向，options.beforeShow 在打开前关闭同屏其它气泡），handle.show()/hide()/toggle() 控制显隐、handle.destroy() 卸载，也可单独调用 WegoPopover.position(popover, trigger, placement) 仅做定位",
+    "dismiss": "action/input：页面任意非气泡点击、焦点切换、滚动或视口尺寸变化时立即关闭；关闭行为不得阻断原页面事件、滚动或焦点操作。normal：duration 到期或点击关闭图标时关闭；运行时由 WegoPopover.bind 自动挂载外部点击、焦点、滚动和视口变化的关闭监听，可通过 options.dismissOnOutsideClick/dismissOnScroll/dismissOnResize 关闭对应通道，options.onActionItemClick/onCloseIconClick 接管操作项与关闭图标回调",
     "animation": "仅入场使用 opacity 0→1 + scale 0.9→1 淡入缩放，时长 var(--duration-normal)（250ms），缓动 var(--ease-enter)；关闭时不做退场动画，立即隐藏",
     "zIndex": "var(--z-popover)=300，与 popmenu 一致，高于 dropdown(200)，低于 overlay(500)、modal(600)、toast(700)",
     "scrollable": "action 变体 action-list max-height 限制为 2 行（2×item-height + 2×padding）；操作项超过 2 行（即 11+ 项，按一行 5 个计算）时列表内部纵向滚动并隐藏滚动条。doNotInvent 限制 6 个以内，scrollable 仅作为兜底"

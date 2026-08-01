@@ -128,20 +128,12 @@
 
 <div class="demo-toast" id="toast"></div>
 
+<script src="../runtime/switch.js"></script>
 <script>
+// 演示用：行点击委托给 .switch，并在切换后显示 toast；开关切换由 runtime/switch.js 承担。
 (function() {
-  document.querySelectorAll('[data-toggle-row]').forEach(function(row) {
-    row.addEventListener('click', function() {
-      var sw = row.querySelector('.switch[data-toggle]');
-      if (!sw) return;
-      if (sw.classList.contains('switch--disabled')) return;
-      var isOn = sw.classList.contains('switch--on');
-      var name = sw.getAttribute('data-toggle');
-      if (isOn) { sw.classList.remove('switch--on'); sw.classList.add('switch--off'); }
-      else { sw.classList.remove('switch--off'); sw.classList.add('switch--on'); }
-      showToast(name, !isOn);
-    });
-  });
+  window.WegoSwitch.bind();
+
   var toastTimer = null;
   var labels = { notifications:'消息通知', darkmode:'深色模式', autoplay:'自动播放', location:'定位服务', dnd:'免打扰模式' };
   function showToast(key, isOn) {
@@ -152,6 +144,23 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function() { el.classList.remove('show'); }, 1500);
   }
+
+  // 行点击委托：点击行内非开关区域时，触发对应 .switch 的点击，由 runtime 完成切换
+  document.querySelectorAll('[data-toggle-row]').forEach(function(row) {
+    row.addEventListener('click', function(event) {
+      if (event.target.closest('.switch')) return;
+      var sw = row.querySelector('.switch[data-toggle]');
+      if (sw) sw.click();
+    });
+  });
+
+  // 切换后展示 toast（runtime 已完成类切换，此处读取最新状态）
+  document.querySelectorAll('.switch[data-toggle]').forEach(function(sw) {
+    sw.addEventListener('click', function() {
+      if (sw.classList.contains('switch--disabled')) return;
+      showToast(sw.getAttribute('data-toggle'), sw.classList.contains('switch--on'));
+    });
+  });
 })();
 </script>
 </body>

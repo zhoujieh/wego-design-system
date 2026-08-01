@@ -247,8 +247,8 @@
   "behavior": {
     "pressFeedback": "仅 .form-body--clickable、.form-body__upload、.form-body__icon-action、.form-body__right-btn 等容器级节点允许响应 :active 与 .is-pressed；.form-body__select / .form-body__select-text / .form-body__select-arrow 等内层结构件强制 pointer-events:none + background:transparent（!important），禁止任何形式的背景色与按压态响应；宿主 App 仅对容器级节点加入 .is-pressed。iOS WebKit 误把可点击 div 标记为 selected 灰色态，强制透明与不可交互彻底关闭该路径；同时设置 -webkit-user-select: none / user-select: none 以禁用长按文本选择和拖杆控件。",
     "click": ".form-body--clickable 只用于 select / dropdown 这类会打开选择面板或展开内容的字段行；其按压态使用与 cell 一致的 pressed 背景色。右侧是 switch、radio-group、checkbox-group、upload、button、icon actions 时，不提供整行按压反馈，交互由具体控件承担。click handler 始终挂在外层 .form-body 行上，禁止挂在 .form-body__select / .form-body__select-text 等内层节点——内层节点 pointer-events:none，挂在它们身上的 handler 无法触发。",
-    "validation": "错误态优先显示错误文案并覆盖计数提示；当输入值重新满足当前字段校验条件时，自动移除错误态并恢复默认显示。",
-    "inputSanitizing": "数字输入仅保留 0-9，手机号仅保留数字并受长度限制，金额仅保留数字和单个小数点；手机号区号前缀为只读文本，不参与输入清洗。",
+    "validation": "错误态优先显示错误文案并覆盖计数提示；当输入值重新满足当前字段校验条件时，自动移除错误态并恢复默认显示。运行时位于 runtime/form.js，场景通过 WegoForm.bind(root) 初始化（自动绑定 data-sanitize 清洗、data-validate 校验、textarea 计数与货币符号切换），handle.update() 重新校验已触碰字段、handle.destroy() 卸载；提交或强制校验可直接调用 WegoForm.validateFormBody(body, true)，刷新货币符号调用 WegoForm.updateMoneySymbol(input)。",
+    "inputSanitizing": "数字输入仅保留 0-9，手机号仅保留数字并受长度限制，金额仅保留数字和单个小数点；手机号区号前缀为只读文本，不参与输入清洗。嵌入的 counter 复用 runtime/counter.js（场景需先加载），由 WegoForm.bind 内部调用 WegoCounter.bind 承担步进与输入清洗，form 另在失焦时把值夹紧到 data-counter-min/max 范围。",
     "layout": "默认使用 align-items: center，label 与右侧内容垂直居中；多行文本（textarea）等需要顶部对齐的场景，使用 .form-body--align-top 修饰类切换为 align-items: flex-start；label 宽度修饰类只改变简单字段内容块在 action 区中的摆放位置；前缀字段和所有需要保留中段内容顺序的场景统一使用 preserve-content-align，保持中段内容原始顺序和左对齐基线；金额的货币符号与手机号区号一样，都跟随内容组一起处理；带箭头的选择内容若需要和右侧操作共存，也归入 preserve-content-align；选项类控件（stack-group、radio-group、checkbox-group、switch）统一放在 action 区左对齐，由控件自身承担交互。",
     "stackSwitch": "stack-group 用于同一字段下的子级内容切换或模式切换，是否互斥由宿主业务决定。"
   },

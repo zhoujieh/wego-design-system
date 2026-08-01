@@ -6,6 +6,7 @@ output/
 .tasks/
 .playwright-cli/
 .trae/documents/
+.codebuddy/memory/
 .vercel
 node_modules/
 # 注意：package-lock.json 已纳入提交以锁定依赖版本，确保多人协作一致；请勿重新忽略

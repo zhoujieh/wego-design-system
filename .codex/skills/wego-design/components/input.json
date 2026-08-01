@@ -127,7 +127,7 @@
     "error": "错误态同时作用于边框、输入文字、后缀和清除图标颜色，并在输入框下方显示绝对定位的单一消息槽位；长文案单行省略，输入值重新满足校验条件后自动移除错误态并恢复默认显示。",
     "disabled": "禁用态弱化标签与输入区，阻止交互，隐藏清除按钮；数字输入不使用整体透明度，而是单独弱化底色、描边和文字。",
     "clear": "标准文本输入框有内容时显示清除按钮（icon-yuancha-mian，16px，默认占位文字色），点击后清空内容并聚焦。数字输入框和 textarea 不显示清除按钮。",
-    "numberSanitizing": "数字输入示例脚本仅保留数字和单个小数点，避免预览页示例把非法字符当成有效值。"
+    "numberSanitizing": "数字输入示例脚本仅保留数字和单个小数点，避免预览页示例把非法字符当成有效值；运行时位于 runtime/input.js，场景通过 WegoInput.bind(root) 初始化，handle.update() 重新刷新显隐与校验、handle.destroy() 卸载。"
   },
   "accessibility": {
     "labelAssociation": "标签需通过 for/id 或包裹关系关联具体输入控件；数字输入至少补 aria-label。",

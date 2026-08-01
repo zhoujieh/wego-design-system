@@ -165,83 +165,10 @@
 </div>
 </div>
 </div>
+<script src="../runtime/input.js"></script>
 <script>
-// ── Number Input: focus state ──
-document.querySelectorAll('[data-number-input]').forEach(wrapper => {
-  const field = wrapper.querySelector('.number-input__field');
-  field.addEventListener('focus', () => wrapper.classList.add('is-focus'));
-  field.addEventListener('blur', () => wrapper.classList.remove('is-focus'));
-  function updateNumberErrorState() {
-    wrapper.classList.toggle('is-error', field.value.trim().length === 0);
-  }
-  field.addEventListener('input', () => {
-    const sanitized = field.value
-      .replace(/[^\d.]/g, '')
-      .replace(/(\..*?)\..*/g, '$1');
-    if (sanitized !== field.value) {
-      field.value = sanitized;
-    }
-    updateNumberErrorState();
-  });
-  field.addEventListener('blur', updateNumberErrorState);
-});
-
-// ── Text Input: clear button visibility ──
-document.querySelectorAll('.input-group input[type="text"]').forEach(input => {
-  const clearBtn = input.parentElement.querySelector('.input-clear');
-  const group = input.closest('.input-group');
-  const errorMessage = group ? group.querySelector('.field-error') : null;
-  if (!clearBtn) return;
-
-  function isPhoneValid(value) {
-    return /^1\d{10}$/.test(value.trim());
-  }
-
-  function updateErrorState() {
-    if (!group || group.dataset.validate !== 'phone') return;
-    if (input.value && isPhoneValid(input.value)) {
-      group.classList.remove('is-error');
-      input.removeAttribute('aria-invalid');
-      if (errorMessage) {
-        input.removeAttribute('aria-describedby');
-      }
-      return;
-    }
-    group.classList.add('is-error');
-    input.setAttribute('aria-invalid', 'true');
-    if (errorMessage?.id) {
-      input.setAttribute('aria-describedby', errorMessage.id);
-    }
-  }
-
-  function updateClear() {
-    if (input.disabled) {
-      clearBtn.style.display = 'none';
-    } else {
-      clearBtn.style.display = input.value ? 'block' : 'none';
-    }
-  }
-
-  input.addEventListener('input', () => {
-    updateClear();
-    updateErrorState();
-  });
-  input.addEventListener('focus', updateClear);
-  input.addEventListener('blur', () => {
-    updateClear();
-    updateErrorState();
-  });
-
-  clearBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    input.value = '';
-    updateClear();
-    input.focus();
-  });
-
-  updateClear();
-  updateErrorState();
-});
+// 演示用：初始化数字输入 focus/error 与文本输入 clear/校验；交互逻辑由 runtime/input.js 承担。
+window.WegoInput.bind();
 </script>
 </body>
 </html>

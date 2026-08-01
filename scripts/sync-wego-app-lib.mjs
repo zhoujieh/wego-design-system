@@ -35,6 +35,7 @@ const SYNC_MAP = [
   { src: 'colors_and_type.css', dest: 'colors_and_type.css', type: 'file' },
   { src: 'components.css', dest: 'components.css', type: 'file' },
   { src: 'iconfont.css', dest: 'iconfont.css', type: 'file' },
+  { src: 'runtime', dest: 'js', type: 'dir' },
   { src: 'assets/fonts', dest: 'assets/fonts', type: 'dir' },
   { src: 'assets/icons', dest: 'assets/icons', type: 'dir' },
   { src: 'assets/image', dest: 'assets/image', type: 'dir' },
@@ -44,6 +45,7 @@ const ALLOWED_LIB_ROOT_ENTRIES = new Set([
   'colors_and_type.css',
   'components.css',
   'iconfont.css',
+  'js',
   'assets',
 ]);
 const ALLOWED_ASSETS_ROOT_ENTRIES = new Set(['fonts', 'icons', 'image']);

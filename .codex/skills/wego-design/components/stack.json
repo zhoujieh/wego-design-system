@@ -63,7 +63,7 @@
     "选中态通过右上角切角勾标和品牌绿描边表达，不再叠加额外徽章。"
   ],
   "behavior": {
-    "selection": "点击切换当前项选中状态，是否互斥由宿主业务决定。",
+    "selection": "点击切换当前项选中状态，是否互斥由宿主业务决定；运行时位于 runtime/stack.js，场景通过 WegoStack.bind(root) 初始化，handle.destroy() 卸载。",
     "feedback": "选中态和未选态通过统一过渡切换。"
   },
   "accessibility": {

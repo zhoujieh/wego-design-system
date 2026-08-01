@@ -135,70 +135,10 @@
   </div>
 </div>
 </div>
+<script src="../runtime/counter.js"></script>
 <script>
-document.querySelectorAll('[data-counter]').forEach(counter => {
-  const valueEl = counter.querySelector('.counter__value');
-  const minusBtn = counter.querySelector('.counter__btn--minus');
-  const plusBtn = counter.querySelector('.counter__btn--plus');
-  const hintEl = counter.querySelector('.counter__hint');
-  const errorEl = counter.querySelector('.counter__error');
-  const max = Number.parseInt(counter.dataset.counterMax, 10) || Infinity;
-  const min = Number.parseInt(counter.dataset.counterMin, 10) || -Infinity;
-  const errorText = counter.dataset.counterErrortext || '';
-  const hintText = counter.dataset.counterHinttext || '';
-
-  function getValue() {
-    const raw = valueEl.value.replace(/\D/g, '');
-    return raw === '' ? 0 : Number.parseInt(raw, 10);
-  }
-
-  function setValue(value) {
-    valueEl.value = value;
-  }
-
-  function validate() {
-    const value = getValue();
-    if (errorText && value > max) {
-      counter.classList.add('is-error');
-      counter.classList.remove('is-hint');
-      errorEl.textContent = errorText;
-    } else if (hintText) {
-      counter.classList.remove('is-error');
-      counter.classList.add('is-hint');
-      hintEl.textContent = hintText;
-    } else {
-      counter.classList.remove('is-error');
-      counter.classList.remove('is-hint');
-    }
-  }
-
-  valueEl.addEventListener('input', () => {
-    let raw = valueEl.value.replace(/\D/g, '');
-    if (raw.length > 7) raw = raw.slice(0, 7);
-    valueEl.value = raw;
-  });
-
-  valueEl.addEventListener('blur', validate);
-  valueEl.addEventListener('keydown', event => {
-    if (event.key === 'Enter') valueEl.blur();
-  });
-
-  minusBtn.addEventListener('click', () => {
-    const value = getValue();
-    if (value > min) {
-      setValue(value - 1);
-      validate();
-    }
-  });
-
-  plusBtn.addEventListener('click', () => {
-    const value = getValue();
-    if (value < max) {
-      setValue(value + 1);
-      validate();
-    }
-  });
-});
+// 演示用：初始化计数器增减与校验；交互逻辑由 runtime/counter.js 承担。
+window.WegoCounter.bind();
 </script>
 </body>
 </html>
