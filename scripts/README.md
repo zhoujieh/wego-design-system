@@ -13,7 +13,7 @@
 | `validate-component-contract-parity.mjs` | 验证组件契约、Preview、索引与生成 CSS 一致性 |
 | `sync-wego-app-lib.mjs` | 设计系统源变化后同步部署副本 |
 | `build-routes.mjs` | 由各场景 `route.json` 汇总生成 `wego-app/js/routes.js`；`--check` 校验一致性 |
-| `validate-claims.mjs` | 校验 `claims/` 下场景认领无冲突，多 Agent 并发防重叠修改 |
+| `validate-claims.mjs` | 校验 `claims/` 下场景认领无冲突；CI 结合 PR base/head 与 branch 强制每个场景目录变更都有对应认领 |
 | `build-pages-artifact.mjs` | 构建 GitHub Pages 发布产物 |
 
 场景源码变化后直接运行静态和运行时守卫，无需生成中间证据文件；浏览器证据不写回场景。
@@ -37,5 +37,7 @@
 - `test-sync-wego-app-lib.mjs`
 - `test-scroll-layout.mjs`
 - `iteration-record.mjs test`
+- `validate-scene-iteration-binding.mjs test`
+- `validate-claims.mjs test`
 
 守卫只验证 Schema、源码或真实运行结果，不检查文档标题、固定句子、引用顺序或人工自证字段。

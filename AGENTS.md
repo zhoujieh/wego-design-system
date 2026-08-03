@@ -33,7 +33,7 @@
 - 每个场景只直接维护 `route.json`、`scene.js` 和 `scene.css`；`route.json` 声明路由，场景通过 `window.WegoApp.registerScene` 注册，原型产物不得散落到仓库根目录。
 - 路由由各场景目录下的 `route.json` 经 `scripts/build-routes.mjs` 生成；`wego-app/js/routes.js` 是生成物，**禁止手改**。
 - `wego-app/lib/` 和生成的 `components.css` 禁止直接编辑。先修改 `.codex/skills/wego-design/` 权威源，再运行同步或生成脚本。
-- `.trae/skills/*` 是 `.codex/skills/*` 的符号链接，不作为独立副本维护。
+- `.trae/skills/*` 与 `.codebuddy/skills/*` 都必须是 `.codex/skills/*` 的符号链接，不作为独立副本维护。
 
 ## 三技能主链路
 
@@ -54,8 +54,10 @@
 ## Git、预览、临时产物与验证
 
 - 所有开发任务默认使用独立分支，禁止直接提交 `main`。
-<!-- rule-id: workflow-maintenance-commits-directly-to-main -->
-- **工作流维护例外**：由 `wego-uxsystem-iterate` 技能执行的 AGENTS.md、SKILL.md、`references/` 和 `experience/` 等权威源维护，可直接提交到 `main`，无需独立分支；提交前仍需运行 `node scripts/validate-wego-design.mjs --scope=system --strict`。
+<!-- rule-id: workflow-maintenance-enters-main-via-pr -->
+- **工作流维护例外**：由 `wego-uxsystem-iterate` 技能执行的 AGENTS.md、SKILL.md、`references/` 和 `experience/` 等权威源维护，免于业务迭代与验收链路，可直接以 `main` 为目标交付；因仓库分支保护，实际通过短周期 PR 合入，必要检查通过后合并，无需用户业务验收；提交前仍需运行 `node scripts/validate-wego-design.mjs --scope=system --strict`。
+<!-- rule-id: delivery-ops-must-enter-github-delivery-skill -->
+- 分支、PR、预览和清理由 `wego-github-delivery` 执行；出现推送、创建或更新 PR、合并、分支清理等交付操作意图时，必须先进入该技能再执行，读过其规则文件不等于已进入技能；新建对话不等于新分支，同一交付单元必须复用同一开放 PR。
 - 只暂存本次任务的显式路径，不执行 `git add -A`，不强推已有远端分支。
 - 原型实现和自动验证完成后，默认提交并推送当前功能分支，创建或更新 PR，并提供当前 PR 的独立验收链接。
 - PR 预览链接用于验收当前任务；`main` 的 GitHub Pages 链接只展示已经验收并合并的稳定版本。
@@ -69,11 +71,11 @@
 
 多个人各自驱动自己的 Agent 会话、并发迭代同一仓库。Agent 之间不对话，协调只发生在仓库层面：谁的 Agent 碰了什么，由仓库状态体现，别的 Agent 来读。
 
-- **分支与 PR**：每人/每需求使用 `feature/<owner>-<scene>` 分支；实现和验证完成后提交并推送当前分支、创建或更新 PR，通过独立 PR 预览链接验收；只有用户明确验收通过后才合并到 `main`。
+- **分支与 PR**：一个可验收交付单元对应一个开放 PR 和 `feature/<owner>-<task>` 分支；新会话先检查同一交付单元的开放 PR 与场景认领，命中即复用原分支。实现和验证完成后提交并推送当前分支、创建或更新 PR，通过独立 PR 预览链接验收；只有用户明确验收通过后才合并到 `main`。PR 合并或关闭后默认删除本地和远端分支，只有 `keep-branch` 标签可例外保留。
 <!-- rule-id: agent-must-pull-before-task-start -->
-- **开工前先拉取**：每次新会话/新任务开始前执行 `git pull --rebase origin main`，确保基于最新 `main`；创建 PR 前再次 rebase 到最新 `main` 并解决冲突。
+- **开工前先拉取**：每次新会话/新任务开始前执行 `git pull --rebase origin main`，确保基于最新 `main`；首次创建 PR 前再次 rebase 到最新 `main` 并解决冲突。已有开放 PR 的分支同步 `main` 改用 merge，不用 rebase（详见 `wego-github-delivery` 交付规则）。
 <!-- rule-id: scene-must-claim-before-edit -->
-- **场景认领（强制前置）**：开工前必须在 `claims/<agent-id>.json` 认领本次负责的场景目录，并运行 `node scripts/validate-claims.mjs` 确认无冲突；不判断是否并发，单人开发也必须认领。认领期间场景目录由该 Agent 独占，他人不得修改。完成后把 `status` 改为 `released`/`done` 释放。
+- **场景认领（强制前置）**：开工前必须在 `claims/<agent-id>.json` 认领本次负责的场景目录并记录当前 `branch`，再运行 `node scripts/validate-claims.mjs` 确认无冲突；不判断是否并发，单人开发也必须认领。认领期间场景目录由该 Agent 独占，他人不得修改。完成后把 `status` 改为 `released`/`done` 释放；CI 按 PR 分支核对所有场景目录变更均有对应认领。
 - **路由生成式**：新增或修改场景路由时只编辑其目录下的 `route.json`，再运行 `node scripts/build-routes.mjs` 重新生成 `wego-app/js/routes.js`；**不要手改 `routes.js`**，CI 以 `build-routes.mjs --check` 校验一致性。
 - **设计系统单写**：`wego-app/lib/` 与 `components.css` 是生成物；仅执行 `wego-uxsystem-iterate` 任务的 Agent 可改 `.codex/skills/wego-design/` 权威源并运行 `sync-wego-app-lib.mjs`，其它 Agent 只读消费，不得改源。
 - 普通改动运行 `node scripts/validate-wego-design.mjs`。

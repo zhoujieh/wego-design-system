@@ -254,12 +254,12 @@
 <body>
   <div class="pv-header">
     <h1>角标</h1>
-    <p>文字角标默认使用绿色，可通过 CSS 变量自定义颜色；滚动宽度默认 32px，也支持覆盖。</p>
+    <p>默认附着在宿主右上角，只表达未读、待处理、新增等提醒状态；行内模式仅用于明确要求并排展示或受限容器例外。</p>
   </div>
 
   <div class="pv-section">
     <div class="pv-section__title">默认挂载：右上角角标</div>
-    <div class="pv-section__sub">业务未额外指定时，Badge 默认附着在宿主右上角。红点会比其它类型更贴边，和宿主形成 1-2px 的轻微重叠。</div>
+    <div class="pv-section__sub">业务未额外指定时，Badge 默认附着在宿主右上角。红点会比其它类型更贴边，和宿主形成 1-2px 的轻微重叠；数字只表示提醒数量，不重复主数据。</div>
 
     <div class="row">
       <span class="label">图标宿主</span>
@@ -331,11 +331,27 @@
         </div>
       </div>
     </div>
+
+    <div class="row">
+      <span class="label">资产入口</span>
+      <div class="demo-host-row">
+        <div class="demo-host demo-host--nav">
+          <i class="wego-iconfont-s icon-shangpin"></i>
+          <span>售后</span>
+          <span class="badge badge--corner badge--number">3</span>
+        </div>
+        <div class="demo-host demo-host--nav">
+          <i class="wego-iconfont-s icon-gouwuche"></i>
+          <span>购物车</span>
+          <span class="badge badge--corner badge--dot"></span>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="pv-section">
-    <div class="pv-section__title">行内挂载：参与正常文档流</div>
-    <div class="pv-section__sub">行内模式不使用绝对定位。默认文字角标为绿色，也可以通过 CSS 变量覆盖成其它业务色。</div>
+    <div class="pv-section__title">行内挂载：明确要求或受限容器例外</div>
+    <div class="pv-section__sub">行内模式不使用绝对定位，只参与正常文档流。只有用户明确要求并排展示，或角标无法安全挂到右上角时使用；不要用行内模式再绝对定位成右上角。</div>
 
     <div class="row">
       <span class="label">文本旁</span>
@@ -364,6 +380,16 @@
         <span class="demo-inline-actions">
           <span class="badge badge--inline badge--text demo-badge-red"><span class="badge__text">文字</span></span>
           <span class="badge badge--inline badge--number">5</span>
+        </span>
+      </div>
+    </div>
+
+    <div class="row">
+      <span class="label">数据栏提醒</span>
+      <div class="demo-inline-cell">
+        <span class="demo-inline-cell__text">我买的 12 件</span>
+        <span class="demo-inline-actions">
+          <span class="badge badge--inline badge--dot"></span>
         </span>
       </div>
     </div>

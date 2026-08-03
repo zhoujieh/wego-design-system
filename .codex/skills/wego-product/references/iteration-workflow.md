@@ -15,14 +15,14 @@ wego-app/scenes/{主业务场景}/_iterations/{YYYYMMDD}-{iteration_id}-{title}/
 
 ## AI 维护的内容
 
-`iteration.json` 使用 `schemaVersion: 5`。AI 只直接维护：
+`iteration.json` 使用 `schemaVersion: 6`。AI 只直接维护：
 
 - `identity` 中的迭代标识、标题、主场景和关联场景。
 - `prototype_brief`。
 - `affected_scenes`。
 - 确有场景外运行时改动时维护 `affected_runtime`。
 
-`brief_submission`、`brief_confirmation`、`prototype_confirmation`、`stage_outputs`、`change_log`、`freeze`、范围哈希和文件指纹全部由脚本维护，不直接编辑。
+`brief_submission`、`brief_confirmation`、`prototype_submission`、`prototype_confirmation`、`stage_outputs`、`change_log`、`freeze`、范围哈希和文件指纹全部由脚本维护，不直接编辑。
 
 `prototype_brief` 只允许以下字段：
 
@@ -75,17 +75,22 @@ node scripts/iteration-record.mjs init \
   --iteration-id {id} --title {标题} --scene {场景}
 
 node scripts/iteration-record.mjs submit-brief --file {iteration.json}
-node scripts/iteration-record.mjs confirm-brief --file {iteration.json}
+node scripts/iteration-record.mjs confirm-brief --file {iteration.json} \
+  --user-confirmed-brief {iteration_id}
 node scripts/iteration-record.mjs submit-prototype --file {iteration.json}
-node scripts/iteration-record.mjs confirm-prototype --file {iteration.json}
+node scripts/iteration-record.mjs confirm-prototype --file {iteration.json} \
+  --user-confirmed-prototype {iteration_id}
+node scripts/iteration-record.mjs migrate --file {iteration.json}
 node scripts/iteration-record.mjs invalidate --stage=brief --file {iteration.json}
 node scripts/iteration-record.mjs invalidate --stage=prototype --file {iteration.json}
 node scripts/iteration-record.mjs check --file {iteration.json}
 ```
 
 - `submit-brief` 固定当前范围；随后向用户展示简短文字摘要。
-- `confirm-brief` 只能在用户看过当前摘要并明确确认后执行。
-- `submit-prototype` 和 `confirm-prototype` 会重新验证受影响场景；浏览器或源码验证失败时不得进入下一状态。
+- `confirm-brief` 只能在用户看过当前摘要并明确确认后执行，命令中的迭代 ID 必须与当前记录一致。
+- `submit-prototype` 会重新验证受影响场景并固定待验收源码、样式和路由指纹；浏览器或源码验证失败时不得进入下一状态。
+- `confirm-prototype` 只能在用户验收当前提交后执行，命令中的迭代 ID 必须一致，且当前原型指纹必须与提交验收时完全相同；发生漂移必须先失效并重新提交验收。
+- `migrate` 只迁移 schemaVersion 5 的历史记录。旧的待验收原型因没有提交指纹会回到 `prototyping`，必须重新提交后再请求用户验收；不得借迁移伪造验收。
 - `confirm-prototype` 表示当前原型已验收，不代表冻结。
 
 ## 失效
@@ -114,4 +119,4 @@ node scripts/iteration-record.mjs freeze \
 - 该场景在 `routes.js` 中的实际路由语义。
 - `affected_runtime` 中确有必要的文件。
 
-脚本生成 `freeze.json` 并禁止覆盖。冻结后的记录是历史快照；后续变化进入新的或仍有效的未冻结迭代。
+脚本生成 `freeze.json` 并禁止覆盖。冻结后的记录是历史快照，不再为场景修改提供有效迭代绑定；后续变化必须进入新的或仍有效的未冻结迭代。

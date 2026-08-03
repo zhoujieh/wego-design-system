@@ -97,11 +97,90 @@ function readJson(relativePath) {
 }
 
 function checkSkillFlow() {
-  requireFiles([
+  const workflowFiles = [
+    'AGENTS.md',
+    '.codex/skills/README.md',
     '.codex/skills/wego-product/SKILL.md',
+    '.codex/skills/wego-product/references/iteration-workflow.md',
+    '.codex/skills/wego-product/references/scope-and-boundaries.md',
     '.codex/skills/wego-design/SKILL.md',
-    '.codex/skills/wego-uxsystem-iterate/SKILL.md'
-  ]);
+    '.codex/skills/wego-design/references/interaction-prototype-design.md',
+    '.codex/skills/wego-design/references/library-map.md',
+    '.codex/skills/wego-design/references/scene-contract.md',
+    '.codex/skills/wego-uxsystem-iterate/SKILL.md',
+    '.codex/skills/wego-uxsystem-iterate/references/sync-matrix.md',
+    '.codex/skills/wego-github-delivery/SKILL.md',
+    '.codex/skills/wego-github-delivery/references/github-delivery-rules.md'
+  ];
+  requireFiles(workflowFiles);
+  for (const file of workflowFiles.filter(exists)) {
+    const source = fs.readFileSync(path.join(root, file), 'utf8');
+    for (const match of source.matchAll(/\[[^\]]+\]\(([^)]+)\)/g)) {
+      const link = match[1].trim();
+      if (!link || /^(?:[a-z]+:|#|\/)/i.test(link)) continue;
+      const target = path.resolve(path.dirname(path.join(root, file)), link.split('#')[0]);
+      if (!fs.existsSync(target)) add('error', 'workflow.link_missing', `工作流引用不存在：${link}`, path.join(root, file));
+    }
+  }
+}
+
+function checkSkillAdapters() {
+  const sourceRoot = path.join(root, '.codex/skills');
+  const adapters = ['.trae/skills', '.codebuddy/skills'];
+  if (!fs.existsSync(sourceRoot)) {
+    add('error', 'skills.source_missing', '缺少技能权威源目录：.codex/skills', sourceRoot);
+    return;
+  }
+
+  const sourceSkills = fs.readdirSync(sourceRoot, { withFileTypes: true })
+    .filter(entry => entry.isDirectory())
+    .map(entry => entry.name)
+    .sort();
+
+  for (const adapter of adapters) {
+    const adapterRoot = path.join(root, adapter);
+    if (!fs.existsSync(adapterRoot)) {
+      add('error', 'skills.adapter_missing', `缺少技能适配器目录：${adapter}`, adapterRoot);
+      continue;
+    }
+
+    const adapterEntries = new Set(fs.readdirSync(adapterRoot));
+    for (const skill of sourceSkills) {
+      const source = path.join(sourceRoot, skill);
+      const target = path.join(adapterRoot, skill);
+      let stat;
+      try {
+        stat = fs.lstatSync(target);
+      } catch {
+        add('error', 'skills.adapter_link_missing', `${adapter} 未链接权威技能：${skill}`, target);
+        continue;
+      }
+      if (!stat.isSymbolicLink()) {
+        add('error', 'skills.adapter_not_link', `${adapter}/${skill} 必须是指向权威源的符号链接`, target);
+        continue;
+      }
+      try {
+        if (fs.realpathSync(target) !== fs.realpathSync(source)) {
+          add('error', 'skills.adapter_target', `${adapter}/${skill} 未指向 .codex/skills/${skill}`, target);
+        }
+      } catch {
+        add('error', 'skills.adapter_target', `${adapter}/${skill} 的符号链接无效`, target);
+      }
+    }
+
+    for (const entry of adapterEntries) {
+      if (!sourceSkills.includes(entry)) {
+        add('error', 'skills.adapter_extra', `${adapter} 存在不属于 .codex/skills 的额外资源：${entry}`, path.join(adapterRoot, entry));
+      }
+    }
+  }
+}
+
+function checkWorkflowContracts() {
+  runNode('scripts/iteration-record.mjs', ['test'], 'workflow.iteration_test');
+  runNode('scripts/validate-scene-iteration-binding.mjs', ['test'], 'workflow.iteration_binding_test');
+  runNode('scripts/validate-claims.mjs', ['test'], 'workflow.claim_test');
+  runNode('scripts/build-routes.mjs', ['--check'], 'workflow.routes_check');
 }
 
 const systemRuntimePrefixes = [
@@ -341,6 +420,18 @@ function conditionalToolTests() {
       code: 'iteration.test'
     },
     {
+      matches: file => file === 'scripts/validate-scene-iteration-binding.mjs',
+      script: 'scripts/validate-scene-iteration-binding.mjs',
+      args: ['test'],
+      code: 'iteration_binding.test'
+    },
+    {
+      matches: file => file === 'scripts/validate-claims.mjs',
+      script: 'scripts/validate-claims.mjs',
+      args: ['test'],
+      code: 'claims.test'
+    },
+    {
       matches: file => ['scripts/sync-wego-app-lib.mjs', 'scripts/test-sync-wego-app-lib.mjs'].includes(file),
       script: 'scripts/test-sync-wego-app-lib.mjs',
       args: [],
@@ -409,11 +500,13 @@ function runChangedScope() {
 function runSystemScope() {
   checkSystemMetadata();
   checkLibrarySync();
+  checkWorkflowContracts();
 }
 
 function runFullScope() {
   checkSystemMetadata();
   checkLibrarySync();
+  checkWorkflowContracts();
   checkAppHost(true);
   validateScenes(sceneDirectories(), { runtimeAll: true });
   runNode('scripts/validate-scene-iteration-binding.mjs', ['--all', '--json'], 'scene.iteration_unbound');
@@ -425,6 +518,7 @@ function main() {
     add('error', 'args.scope', `未知范围：${requestedScope}`);
   } else {
     checkSkillFlow();
+    checkSkillAdapters();
     if (requestedScope === 'changed') runChangedScope();
     else if (requestedScope === 'system') runSystemScope();
     else runFullScope();
