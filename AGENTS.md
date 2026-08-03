@@ -54,9 +54,10 @@
 ## Git、预览、临时产物与验证
 
 - 所有开发任务默认使用独立分支，禁止直接提交 `main`。
-<!-- rule-id: workflow-maintenance-commits-directly-to-main -->
-- **工作流维护例外**：由 `wego-uxsystem-iterate` 技能执行的 AGENTS.md、SKILL.md、`references/` 和 `experience/` 等权威源维护，可直接提交到 `main`，无需独立分支；提交前仍需运行 `node scripts/validate-wego-design.mjs --scope=system --strict`。
-- 分支、PR、预览和清理由 `wego-github-delivery` 执行；新建对话不等于新分支，同一交付单元必须复用同一开放 PR。
+<!-- rule-id: workflow-maintenance-enters-main-via-pr -->
+- **工作流维护例外**：由 `wego-uxsystem-iterate` 技能执行的 AGENTS.md、SKILL.md、`references/` 和 `experience/` 等权威源维护，免于业务迭代与验收链路，可直接以 `main` 为目标交付；因仓库分支保护，实际通过短周期 PR 合入，必要检查通过后合并，无需用户业务验收；提交前仍需运行 `node scripts/validate-wego-design.mjs --scope=system --strict`。
+<!-- rule-id: delivery-ops-must-enter-github-delivery-skill -->
+- 分支、PR、预览和清理由 `wego-github-delivery` 执行；出现推送、创建或更新 PR、合并、分支清理等交付操作意图时，必须先进入该技能再执行，读过其规则文件不等于已进入技能；新建对话不等于新分支，同一交付单元必须复用同一开放 PR。
 - 只暂存本次任务的显式路径，不执行 `git add -A`，不强推已有远端分支。
 - 原型实现和自动验证完成后，默认提交并推送当前功能分支，创建或更新 PR，并提供当前 PR 的独立验收链接。
 - PR 预览链接用于验收当前任务；`main` 的 GitHub Pages 链接只展示已经验收并合并的稳定版本。
