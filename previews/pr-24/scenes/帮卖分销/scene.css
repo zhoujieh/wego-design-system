@@ -66,140 +66,90 @@
 }
 
 /* ── 帮卖弹窗 ── */
+/* 高度适应内容,最大 70vh */
+.modal--frame .modal__panel {
+  max-height: 70vh;
+}
 .resale-popup__body {
   padding: 0;
 }
-.resale-product {
-  display: flex;
-  gap: var(--spacer-12);
+
+/* 标题问号图标 */
+.navbar__title-help {
+  margin-left: var(--spacer-4);
+  font-size: var(--size-20);
+  color: var(--text-secondary);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 价格展示区:售价 + 佣金 一行 */
+.resale-price {
   padding: var(--spacer-16);
-  border-bottom: 0.5px solid var(--border-neutral-l2);
 }
-.resale-product__image {
-  width: var(--size-72);
-  height: var(--size-72);
-  border-radius: var(--radius-8);
-  background: var(--bg-placeholder);
-  object-fit: cover;
-  flex-shrink: 0;
+.resale-price__field-row {
+  display: flex;
+  align-items: stretch;
+  gap: var(--spacer-12);
 }
-.resale-product__info {
+.resale-price__field {
   flex: 1;
-  min-width: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   gap: var(--spacer-4);
+  padding: var(--spacer-12);
+  background: var(--bg-subtle);
+  border-radius: var(--radius-8);
 }
-.resale-product__title {
-  font-size: var(--body-md-font-size);
-  font-weight: var(--font-weight-medium);
-  color: var(--text-default);
-  line-height: var(--body-md-line-height);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+.resale-price__field--editable {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
-.resale-product__supply {
+.resale-price__field--editable:active {
+  background: var(--bg-state-pressed);
+}
+.resale-price__field-label {
   font-size: var(--body-sm-font-size);
   color: var(--text-tertiary);
 }
-.resale-product__supply-value {
-  color: var(--text-secondary);
-}
-
-/* 价格展示区 */
-.resale-price {
-  padding: var(--spacer-16);
-  border-bottom: 0.5px solid var(--border-neutral-l2);
-}
-.resale-price__row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--spacer-4) 0;
-}
-.resale-price__label {
-  font-size: var(--body-md-font-size);
-  color: var(--text-secondary);
-}
-.resale-price__value {
-  font-size: var(--body-lg-font-size);
+.resale-price__field-value {
+  font-size: var(--heading-sm-font-size);
   font-weight: var(--font-weight-medium);
   color: var(--text-default);
   font-feature-settings: "zero";
+  line-height: var(--heading-sm-line-height);
 }
-.resale-price__value--commission {
+.resale-price__field-value--commission {
   color: var(--status-danger-default);
 }
-.resale-price__value--readonly {
+.resale-price__field-value--readonly {
   font-size: var(--heading-sm-font-size);
 }
-.resale-price__hint {
-  margin-top: var(--spacer-8);
-  padding: var(--spacer-8) var(--spacer-12);
-  background: var(--bg-subtle);
-  border-radius: var(--radius-6);
-  font-size: var(--body-xs-font-size);
-  color: var(--text-tertiary);
-  line-height: var(--body-sm-line-height);
-}
-.resale-price__hint-icon {
+.resale-price__field-suffix {
+  font-size: var(--body-md-font-size);
+  font-weight: var(--font-weight-regular);
   color: var(--text-secondary);
-  margin-right: var(--spacer-4);
+  margin-left: var(--spacer-2);
 }
 
-/* 改售价输入框(单一价格) */
-.resale-price__edit-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--spacer-4) 0;
-}
-.resale-price__edit-label {
-  font-size: var(--body-md-font-size);
-  color: var(--text-secondary);
-}
-.resale-price__edit-input {
-  display: flex;
-  align-items: center;
-  gap: var(--spacer-4);
-}
-.resale-price__edit-value {
-  font-size: var(--heading-sm-font-size);
-  font-weight: var(--font-weight-medium);
-  color: var(--text-default);
-  font-feature-settings: "zero";
-  cursor: pointer;
-  padding: var(--spacer-4) var(--spacer-8);
-  margin: calc(-1 * var(--spacer-4)) calc(-1 * var(--spacer-8));
-  border-radius: var(--radius-4);
-  -webkit-tap-highlight-color: transparent;
-}
-.resale-price__edit-value:active {
-  background: var(--bg-state-pressed);
-}
-.resale-price__edit-suffix {
-  font-size: var(--body-md-font-size);
-  color: var(--text-secondary);
-}
-
-/* 快捷加价标签区 */
+/* 快捷加价标签区:标题在左,标签在右,间距8 */
 .resale-tags {
   padding: var(--spacer-16);
-  border-bottom: 0.5px solid var(--border-neutral-l2);
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-8);
 }
 .resale-tags__title {
+  flex-shrink: 0;
   font-size: var(--body-md-font-size);
   font-weight: var(--font-weight-medium);
   color: var(--text-default);
-  margin: 0 0 var(--spacer-12);
 }
 .resale-tags__list {
   display: flex;
   flex-wrap: wrap;
   gap: var(--spacer-8);
+  align-items: center;
 }
 .resale-tags__item {
   cursor: pointer;
@@ -212,8 +162,17 @@
   opacity: 0.7;
 }
 .resale-tags__manual {
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+}
+
+/* 底部佣金保密提示 */
+.resale-hint-bottom {
+  margin-bottom: var(--spacer-16);
+  padding: 0 var(--spacer-16);
+  text-align: center;
+  font-size: var(--body-xs-font-size);
+  color: var(--text-tertiary);
+  line-height: var(--body-sm-line-height);
 }
 
 /* 首次编辑气泡引导 */
@@ -239,45 +198,87 @@
   border-bottom: var(--spacer-6) solid var(--bg-brand-surface-l1);
 }
 
+/* ── 加价卖说明页 ── */
+.resale-help__body {
+  padding: var(--spacer-16);
+}
+.resale-help__section {
+  margin-bottom: var(--spacer-20);
+}
+.resale-help__section:last-child {
+  margin-bottom: 0;
+}
+.resale-help__title {
+  margin: 0 0 var(--spacer-8);
+  font-size: var(--body-md-font-size);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-default);
+}
+.resale-help__text {
+  margin: 0;
+  font-size: var(--body-sm-font-size);
+  color: var(--text-secondary);
+  line-height: var(--body-sm-line-height);
+}
+
 /* ── 数字键盘 ── */
+/* 去掉蒙层 */
+.modal--no-mask::before {
+  display: none;
+}
 .keypad {
   background: var(--bg-surface);
   border-radius: var(--radius-16) var(--radius-16) 0 0;
   display: flex;
   flex-direction: column;
 }
-.keypad__header {
+
+/* 分段切换控件 */
+.keypad__segmented {
+  position: relative;
+  display: flex;
+  margin: var(--spacer-16) var(--spacer-16) var(--spacer-12);
+  padding: var(--spacer-2);
+  background: var(--bg-subtle);
+  border-radius: var(--radius-8);
+}
+.keypad__segmented-thumb {
+  position: absolute;
+  top: var(--spacer-2);
+  left: var(--spacer-2);
+  width: calc(50% - var(--spacer-2));
+  height: calc(100% - var(--spacer-4));
+  background: var(--bg-surface);
+  border-radius: var(--radius-6);
+  box-shadow: var(--shadow-xs);
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+.keypad__segmented.is-amount .keypad__segmented-thumb {
+  transform: translateX(0);
+}
+.keypad__segmented.is-rate .keypad__segmented-thumb {
+  transform: translateX(100%);
+}
+.keypad__segmented-item {
+  position: relative;
+  z-index: 1;
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--spacer-24);
-  padding: var(--spacer-16) var(--spacer-16) var(--spacer-12);
-  border-bottom: 0.5px solid var(--border-neutral-l2);
-}
-.keypad__tab {
-  position: relative;
-  padding: var(--spacer-4) 0;
+  padding: var(--spacer-8) 0;
   font-size: var(--body-md-font-size);
   font-weight: var(--font-weight-medium);
   color: var(--text-tertiary);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+  transition: color var(--duration-fast) var(--ease-standard);
 }
-.keypad__tab.is-active {
+.keypad__segmented-item.is-active {
   color: var(--text-default);
 }
-.keypad__tab.is-active::after {
-  content: "";
-  position: absolute;
-  bottom: calc(-1 * var(--spacer-4) - var(--spacer-2));
-  left: 50%;
-  transform: translateX(-50%);
-  width: var(--spacer-24);
-  height: var(--spacer-2);
-  background: var(--bg-brand);
-  border-radius: var(--radius-4);
-}
+
 .keypad__display {
   padding: var(--spacer-16);
   text-align: center;
@@ -306,7 +307,15 @@
   color: var(--text-secondary);
   margin-left: var(--spacer-4);
 }
+
+/* 键盘主体:数字左侧 + 删除/确定右侧 */
+.keypad__body {
+  display: flex;
+  align-items: stretch;
+  padding-bottom: var(--safe-area-bottom);
+}
 .keypad__keys {
+  flex: 1;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
 }
@@ -328,30 +337,43 @@
   border-left: 0.5px solid var(--border-neutral-l1);
   transition: background var(--duration-fast) var(--ease-standard);
 }
-.keypad__key:nth-child(3n) {
+.keypad__keys .keypad__key:nth-child(3n) {
   border-right: 0.5px solid var(--border-neutral-l1);
 }
 .keypad__key:active,
 .keypad__key.is-pressed {
   background: var(--bg-state-pressed);
 }
-.keypad__key--delete {
+.keypad__key--zero {
+  grid-column: span 2;
+}
+.keypad__side {
+  display: flex;
+  flex-direction: column;
+  width: 28%;
+  flex-shrink: 0;
+  border-left: 0.5px solid var(--border-neutral-l1);
+}
+.keypad__side .keypad__key--delete {
+  border-top: 0.5px solid var(--border-neutral-l1);
+  border-left: none;
   background: var(--bg-subtle);
 }
-.keypad__key--delete:active,
-.keypad__key--delete.is-pressed {
+.keypad__side .keypad__key--delete:active,
+.keypad__side .keypad__key--delete.is-pressed {
   background: var(--bg-state-hover);
 }
-.keypad__key--delete .wego-iconfont-s {
+.keypad__side .keypad__key--delete .wego-iconfont-s {
   font-size: var(--heading-sm-font-size);
   color: var(--text-secondary);
 }
-.keypad__confirm {
-  padding: var(--spacer-12) var(--spacer-16);
-  padding-bottom: calc(var(--spacer-12) + var(--safe-area-bottom));
-}
-.keypad__confirm .btn {
-  width: 100%;
+.keypad__side-confirm {
+  flex: 1;
+  border: none;
+  border-radius: 0;
+  font-size: var(--body-md-font-size);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
 }
 
 /* ── 异常模态框 ── */

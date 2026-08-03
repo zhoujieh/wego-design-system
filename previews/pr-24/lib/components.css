@@ -3096,7 +3096,7 @@
       overflow: hidden;
       flex-shrink: 0;
       background: var(--wg-skeleton-bg);
-      border-radius: var(--radius-6);
+      border-radius: var(--radius-4);
     }
     .wg-skeleton::after {
       content: "";
@@ -3111,7 +3111,7 @@
       border-radius: var(--radius-4);
     }
     .wg-skeleton--rect {
-      border-radius: var(--radius-8);
+      border-radius: var(--radius-4);
     }
     .wg-skeleton--circle {
       border-radius: var(--radius-full);
@@ -3250,7 +3250,7 @@
 
 /* ── Tabs ──────────────────────────────────────────────────── */
 /* @anatomy
-   <div class="pv-header"> <h1>标签栏 Tabs</h1> <p>同一页面层级内的内容分类切换，支持均分、横向滚动、紧凑尺寸和可选图标。</p> </div>
+   <div class="pv-header"> <h1>标签栏 Tabs</h1> <p>同一页面层级内的内容分类切换，支持均分、横向滚动、紧凑尺寸和可选图标；个人中心和内容分区优先使用 mini。</p> </div>
 */
 .wg-tabs {
   --_tabs-indicator-standard-height: 3px;
