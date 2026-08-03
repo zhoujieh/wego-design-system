@@ -1,0 +1,10 @@
+{
+  "agent": "codex-my-tab",
+  "scene": "我的",
+  "routeId": "my",
+  "status": "released",
+  "claimedAt": "2026-08-03T03:58:57.000Z",
+  "note": "我的 Tab 个人经营与内容管理场景迭代",
+  "releasedAt": "2026-08-03T05:23:55.000Z",
+  "releaseReason": "prototype-submitted"
+}

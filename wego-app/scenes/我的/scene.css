@@ -1,0 +1,460 @@
+.my-tab-page {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  background: var(--bg-page);
+  color: var(--text-default);
+}
+
+.my-tab-navbar {
+  background: var(--bg-page);
+}
+
+.my-tab-scroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-block-end: var(--safe-area-bottom-content);
+  scroll-behavior: smooth;
+}
+
+.my-tab-identity {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  height: 100%;
+  gap: var(--spacer-8);
+  padding-inline-start: var(--spacer-8);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.my-tab-identity:active,
+.my-tab-identity.is-pressed {
+  opacity: 0.6;
+}
+
+.my-tab-identity .avatar {
+  flex: 0 0 auto;
+}
+
+.my-tab-identity .avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.my-tab-identity__copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  align-items: flex-start;
+}
+
+.my-tab-identity__name {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--text-default);
+  font-size: var(--body-md-font-size);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--body-md-line-height);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.my-tab-identity__album {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  gap: var(--spacer-2);
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+  white-space: nowrap;
+}
+
+.my-tab-identity__album > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.my-tab-identity__album .wego-iconfont-s {
+  flex: 0 0 auto;
+  font-size: var(--size-12);
+}
+
+.my-tab-section {
+  --layout-section-gap-after: var(--spacer-8);
+}
+
+.my-tab-section--membership {
+  --layout-section-gap-before: var(--spacer-8);
+}
+
+.my-membership-card__content,
+.my-entry-card__content {
+  width: 100%;
+}
+
+.my-membership-card__content {
+  gap: var(--spacer-8);
+  padding: var(--spacer-12) var(--spacer-16);
+}
+
+.my-membership-card__header,
+.my-membership-card__body,
+.my-product-card__footer,
+.my-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacer-8);
+}
+
+.my-membership-card__level {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacer-6);
+  color: var(--text-default);
+  font-size: var(--body-lg-font-size);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--body-lg-line-height);
+}
+
+.my-membership-card__level .wego-iconfont-s {
+  color: var(--icon-brand);
+  font-size: var(--size-20);
+}
+
+.my-membership-card__expiry,
+.my-membership-card__body {
+  color: var(--text-secondary);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+}
+
+.my-membership-card__usage {
+  color: var(--text-default);
+  font-family: var(--number-md-font-family);
+  font-weight: var(--font-weight-medium);
+}
+
+.my-membership-card__progress {
+  width: 100%;
+  height: var(--spacer-4);
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--bg-subtle);
+}
+
+.my-membership-card__progress-value {
+  display: block;
+  width: 37%;
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--bg-brand);
+}
+
+.my-entry-card__content {
+  gap: var(--spacer-8);
+  padding-block: var(--spacer-12);
+}
+
+.my-section-heading {
+  padding-inline: var(--spacer-12);
+}
+
+.my-section-heading h2 {
+  font-size: var(--heading-xs-font-size);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--heading-xs-line-height);
+}
+
+.my-section-heading > span {
+  color: var(--text-tertiary);
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+}
+
+.my-asset-row,
+.my-app-row {
+  --layout-scroll-row-gap: var(--spacer-0);
+  padding-inline-start: var(--spacer-4);
+}
+
+.my-asset-entry,
+.my-app-entry {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: var(--size-76);
+  gap: var(--spacer-4);
+  padding: var(--spacer-6) var(--spacer-4);
+  border-radius: var(--radius-8);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.my-asset-entry:active,
+.my-app-entry:active,
+.my-asset-entry.is-pressed,
+.my-app-entry.is-pressed {
+  background: var(--bg-state-pressed);
+}
+
+.my-entry-icon,
+.my-app-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-40);
+  height: var(--size-40);
+  flex: 0 0 auto;
+  overflow: hidden;
+  border-radius: var(--radius-12);
+  background: var(--bg-subtle);
+}
+
+.my-entry-icon .wego-iconfont-s {
+  color: var(--icon-brand);
+  font-size: var(--size-24);
+}
+
+.my-app-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.my-entry-label,
+.my-app-label {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  gap: var(--spacer-2);
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.my-asset-entry .metric {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.my-app-entry__badge {
+  margin-inline-start: var(--spacer-2);
+}
+
+.my-content-sticky {
+  --sticky-region-inline-inset: var(--layout-page-margin-m8);
+  --sticky-region-after-gap: var(--spacer-0);
+  background: var(--bg-surface);
+}
+
+.my-content-sticky .sticky-region__inner {
+  display: flex;
+  flex-direction: column;
+}
+
+.my-content-tabs {
+  border-bottom: var(--stroke-hairline) solid var(--border-neutral-l2);
+}
+
+.my-content-toolbar {
+  min-width: 0;
+}
+
+.my-content-toolbar .searchbox {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.my-content-toolbar .searchbox__clear[hidden] {
+  display: none;
+}
+
+.my-content-section {
+  --layout-section-gap-before: var(--spacer-0);
+  --layout-section-gap-after: var(--spacer-0);
+}
+
+.my-content-list--grid {
+  --layout-grid-column-gap: var(--spacer-8);
+  --layout-grid-row-gap: var(--spacer-8);
+  padding-block: var(--spacer-8);
+}
+
+.my-content-list--list {
+  --layout-flow-gap: var(--spacer-8);
+  padding-block: var(--spacer-8);
+}
+
+.my-content-card {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.my-content-card__content {
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: var(--spacer-6);
+  padding: var(--spacer-12);
+}
+
+.my-content-card__title {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--text-default);
+  font-size: var(--body-md-font-size);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--body-md-line-height);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.my-content-card__meta {
+  color: var(--text-tertiary);
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+}
+
+.my-product-card__media,
+.my-note-card__media,
+.my-live-card__media {
+  background: var(--bg-subtle);
+}
+
+.my-product-card--grid .my-product-card__media {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1;
+}
+
+.my-product-card--list .my-product-card__media {
+  width: var(--size-96);
+  height: var(--size-96);
+}
+
+.my-product-card__footer {
+  margin-top: auto;
+  color: var(--text-tertiary);
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+}
+
+.my-product-card__footer .metric {
+  flex: 0 0 auto;
+}
+
+.my-note-card--grid .my-note-card__media {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 5;
+}
+
+.my-note-card--list .my-note-card__media {
+  width: var(--size-104);
+  height: var(--size-104);
+}
+
+.my-note-card__summary {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.my-note-card--grid .my-note-card__summary {
+  -webkit-line-clamp: 3;
+}
+
+.my-live-card__media {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+}
+
+.my-live-card__details {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacer-8);
+  color: var(--text-secondary);
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+}
+
+.my-live-card__details span {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  gap: var(--spacer-4);
+}
+
+.my-live-card__details .wego-iconfont-s {
+  flex: 0 0 auto;
+  color: var(--icon-secondary);
+  font-size: var(--size-16);
+}
+
+.my-live-card--grid .my-live-card__details {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.my-content-empty {
+  grid-column: 1 / -1;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--size-104);
+  gap: var(--spacer-6);
+  padding: var(--spacer-24);
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.my-content-empty .wego-iconfont-s {
+  color: var(--icon-tertiary);
+  font-size: var(--size-24);
+}
+
+.my-content-empty strong {
+  color: var(--text-default);
+  font-size: var(--body-md-font-size);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--body-md-line-height);
+}
+
+.my-content-empty span {
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+}
+
+.my-tab-fab {
+  position: absolute;
+  right: var(--spacer-16);
+  bottom: var(--spacer-16);
+  z-index: var(--z-sticky);
+}
+
+@media (max-width: 360px) {
+  .my-tab-identity__album {
+    display: none;
+  }
+
+  .my-content-toolbar {
+    gap: var(--spacer-4);
+  }
+
+  .my-content-toolbar .search-toolbar__actions {
+    gap: var(--spacer-4);
+  }
+}
