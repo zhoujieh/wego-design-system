@@ -120,9 +120,8 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
       </div>
     </div>
 
-    <button class="btn btn--strong btn--md my-tab-fab" data-component-slug="button" data-dom-id="open-publish-sheet" type="button" aria-label="发布内容">
+    <button class="btn btn--strong btn--lg btn--icon-only my-tab-fab" data-component-slug="button" data-dom-id="open-publish-sheet" type="button" aria-label="发布内容">
       <i class="btn__icon icon-jia16" aria-hidden="true"></i>
-      发布
     </button>
   </div>`;
 
@@ -172,7 +171,71 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
     routeId: 'my',
     presentation: { type: 'host-tab' },
     template: myTabTemplate,
-    skeleton: true,
+    skeletonMode: 'explicit',
+    // SKELETON-TEMPLATE-START
+    skeletonTemplate: `
+<div class="my-tab-skeleton-surface" aria-hidden="true"></div>
+<div class="my-tab-skeleton-panel" style="top:14.254%;left:2.139%;width:95.722%;height:12.769%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="my-tab-skeleton-panel" style="top:28.211%;left:2.139%;width:95.722%;height:22.866%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="my-tab-skeleton-panel" style="top:52.264%;left:2.139%;width:95.722%;height:17.817%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="my-tab-skeleton-panel" style="top:71.269%;left:0.000%;width:100.000%;height:16.927%;border-radius:0px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="my-tab-skeleton-panel" style="top:89.384%;left:2.139%;width:46.791%;height:37.268%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="my-tab-skeleton-panel" style="top:89.384%;left:51.070%;width:46.791%;height:37.268%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--circle" style="position:absolute;top:6.830%;left:2.139%;width:10.695%;height:5.939%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:7.127%;left:14.973%;width:22.460%;height:3.267%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:10.393%;left:14.973%;width:16.043%;height:2.079%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:7.275%;left:78.610%;width:5.348%;height:2.970%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:10.245%;left:78.610%;width:5.348%;height:2.079%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:7.275%;left:90.374%;width:5.348%;height:2.970%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:10.245%;left:90.374%;width:5.348%;height:2.079%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:16.333%;left:6.417%;width:5.348%;height:2.970%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:16.036%;left:13.369%;width:13.498%;height:3.563%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:16.481%;left:67.574%;width:26.009%;height:2.673%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:20.787%;left:6.417%;width:9.626%;height:2.673%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:20.787%;left:69.233%;width:24.350%;height:2.673%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:24.647%;left:6.417%;width:87.166%;height:0.594%;border-radius:999px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:29.993%;left:5.348%;width:17.112%;height:3.563%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:30.735%;left:78.610%;width:16.043%;height:2.079%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:35.635%;left:8.222%;width:10.695%;height:5.939%;border-radius:12px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:42.168%;left:12.285%;width:2.567%;height:3.267%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:46.028%;left:15.681%;width:4.332%;height:2.376%;border-radius:999px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:35.783%;left:31.083%;width:10.695%;height:5.939%;border-radius:12px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:42.316%;left:32.271%;width:2.567%;height:3.267%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:42.984%;left:34.839%;width:2.542%;height:2.376%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:42.984%;left:37.381%;width:3.209%;height:2.376%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:46.177%;left:33.757%;width:5.348%;height:2.079%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:35.783%;left:53.944%;width:10.695%;height:5.939%;border-radius:12px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:42.316%;left:55.696%;width:7.188%;height:3.267%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:46.177%;left:56.618%;width:5.348%;height:2.079%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:35.783%;left:76.805%;width:10.695%;height:5.939%;border-radius:12px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:42.316%;left:79.713%;width:4.878%;height:3.267%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:46.177%;left:79.479%;width:5.348%;height:2.079%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:35.783%;left:99.666%;width:10.695%;height:5.939%;border-radius:12px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:42.316%;left:99.622%;width:10.781%;height:3.267%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:54.046%;left:5.348%;width:17.112%;height:3.563%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:54.788%;left:75.936%;width:18.717%;height:2.079%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:59.837%;left:9.291%;width:8.556%;height:4.751%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:65.182%;left:8.222%;width:10.695%;height:2.079%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:59.837%;left:32.152%;width:8.556%;height:4.751%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:65.182%;left:32.420%;width:8.021%;height:2.079%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:59.688%;left:55.013%;width:8.556%;height:4.751%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:65.033%;left:61.671%;width:4.332%;height:2.376%;border-radius:999px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:59.837%;left:77.874%;width:8.556%;height:4.751%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:65.182%;left:76.805%;width:10.695%;height:2.079%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:65.182%;left:99.666%;width:10.695%;height:2.079%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:73.608%;left:13.814%;width:8.556%;height:3.563%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:73.608%;left:45.722%;width:8.556%;height:3.563%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:73.608%;left:77.630%;width:8.556%;height:3.563%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:81.514%;left:2.139%;width:8.556%;height:4.751%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:81.514%;left:10.695%;width:61.230%;height:4.751%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:81.366%;left:77.005%;width:5.348%;height:2.970%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:81.366%;left:89.840%;width:5.348%;height:2.970%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:84.336%;left:89.840%;width:5.348%;height:2.079%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:89.384%;left:2.139%;width:46.791%;height:25.984%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:89.384%;left:51.070%;width:46.791%;height:25.984%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--circle" style="position:absolute;top:90.497%;left:82.888%;width:12.834%;height:7.127%;box-sizing:border-box" aria-hidden="true"></div>
+    `,
+    // SKELETON-TEMPLATE-END
     init: function init(ctx) {
       var root = ctx.root.querySelector('[data-route-id="my"]');
       var db = window.WEGO_PROTOTYPE_DB || {};
