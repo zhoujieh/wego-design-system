@@ -27,16 +27,12 @@
 4. 确定首屏、主滚动区、固定区域、overlay 和返回关系。
 5. 精确匹配页面范式；未命中则自主组合。
 6. 命中 UI Kit 时继承其登记的 Layout 组件树；未命中时用正式 Layout 组件搭建 2–3 层页面信息框架（`layout-page` → `layout-scroll` → `layout-section`/`sticky-region` → section 内部 `layout-flow`/`layout-split`/`layout-grid`/`layout-scroll-row`），并将页面信息分配到布局槽位；到第三层后停止拆解，不再继续拆分标题、图标、按钮等业务组件内部。
-7. 逐区域组件映射：为每个业务区域（第三层之后的 section/cell 内容）显式列出 区域 → 候选组件 → 命中正式组件或设计系统缺口。命中正式组件的进入第 8 步读取 Preview；设计系统缺口按 `wego-design-system-gap-boundary` 记录最小缺口（受影响 surface、是否阻断、可用正式回退）并交接 `wego-uxsystem-iterate`，不得直接自造业务结构。
-8. 只读取命中的正式组件、Preview 和契约。
-9. 分配视觉层级与 Token，实现交互和反馈。
-10. 在真实页面上自审并运行源码与浏览器验证。
+7. 只读取当前页面实际需要的正式组件、Preview 和契约，并在现有设计系统能力内完成页面。
+8. 分配视觉层级与 Token，实现交互和反馈。
+9. 在真实页面上自审并运行源码与浏览器验证。
 
 <!-- rule-id: design-before-component-consumption -->
 设计时只需在当前上下文形成一个短暂的 design frame：首要任务、核心对象、必要状态、区域顺序，以及滚动、固定和 overlay 决定。它不写入文件，不重复简报，也不产生组件计划、Token 清单或原则引用。
-
-<!-- rule-id: per-region-component-mapping-required -->
-逐区域组件映射是 design frame 内的工作记忆检查，不写入文件，但必须为每个业务区域显式完成「区域 → 候选组件 → 命中正式组件/设计系统缺口」判断后才能进入 Preview 读取。自造业务结构必须有明确依据：正式组件无法覆盖且已记录缺口。
 
 ## 3. 页面范式与结构
 
@@ -73,6 +69,5 @@
 - 是否出现因“库里有”而加入的元素。
 - 视觉层级、密度和间距是否稳定。
 - 必要状态和错误恢复是否真实可用。
-- 每个业务区域是否已尝试映射正式组件；自造结构是否有正式组件可替代或已按 `wego-design-system-gap-boundary` 记录缺口交接。
 
 发现问题就继续修正，直到源码守卫、真实浏览器视口和核心交互验证通过；不限制修订轮数，也不产出人工自证字段。

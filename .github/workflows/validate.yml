@@ -10,21 +10,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 24
       - run: npm ci
+      - name: 安装浏览器验证运行时
+        run: npx playwright install --with-deps chromium
       # 以下为硬门禁：均为仓库内新增的协作一致性检查，必须全部通过。
       - name: 认领冲突检查
         run: node scripts/validate-claims.mjs
+      - name: 场景修改认领检查
+        if: github.event_name == 'pull_request'
+        run: >-
+          node scripts/validate-claims.mjs
+          --check-changed
+          --base "${{ github.event.pull_request.base.sha }}"
+          --head "${{ github.event.pull_request.head.sha }}"
+          --branch "${{ github.head_ref }}"
       - name: 路由生成一致性
         run: node scripts/build-routes.mjs --check
       - name: 设计系统同步一致性
         run: node scripts/sync-wego-app-lib.mjs --check
-      # 设计系统守门验证（场景契约 / 运行时）。
-      # 注意：当前 动态商品流 场景存在一个预存的验证器误报（脱敏逻辑将该场景的
-      # registerScene 调用误判为 0 次），属验证器脆弱性而非场景语法错误。
-      # 在修复该误报前，本步骤设为非阻塞，仅作报告；修复后应改为硬门禁。
-      - name: 设计系统守门验证（报告项）
-        continue-on-error: true
-        run: node scripts/validate-wego-design.mjs --scope=changed --strict
+      - name: 设计系统与业务工作流完整守门验证
+        run: node scripts/validate-wego-design.mjs --scope=full --strict

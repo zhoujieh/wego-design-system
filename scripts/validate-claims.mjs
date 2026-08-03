@@ -19,26 +19,69 @@
  * Usage:
  *   node scripts/validate-claims.mjs
  *   node scripts/validate-claims.mjs --check-scene 我的 --agent <agent-id>
+ *   node scripts/validate-claims.mjs --check-changed --base <sha> --head <sha> --branch <branch>
+ *   node scripts/validate-claims.mjs test
  */
 
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 
 const repoRoot = process.cwd();
 const claimsDir = path.join(repoRoot, 'claims');
-const scenesDir = path.join(repoRoot, 'wego-app', 'scenes');
-
 const args = process.argv.slice(2);
 function argValue(name) {
   const i = args.indexOf(name);
-  return i >= 0 ? args[i + 1] : null;
+  if (i >= 0) return args[i + 1] ?? null;
+  const inline = args.find(arg => arg.startsWith(`${name}=`));
+  return inline ? inline.slice(name.length + 1) : null;
 }
 const checkScene = argValue('--check-scene');
 const checkAgent = argValue('--agent');
+const checkChanged = args.includes('--check-changed');
+const testing = args.includes('test');
+const baseRef = argValue('--base');
+const headRef = argValue('--head');
+const branch = argValue('--branch');
+
+if (testing) {
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'wego-claims-'));
+  const runGit = gitArgs => spawnSync('git', gitArgs, { cwd: fixture, encoding: 'utf8' });
+  try {
+    fs.mkdirSync(path.join(fixture, 'claims'), { recursive: true });
+    fs.mkdirSync(path.join(fixture, 'wego-app/scenes/测试场景'), { recursive: true });
+    fs.writeFileSync(path.join(fixture, 'wego-app/scenes/测试场景/scene.js'), 'window.test = 1;\n');
+    runGit(['init']);
+    runGit(['config', 'user.name', 'Workflow Test']);
+    runGit(['config', 'user.email', 'workflow-test@example.com']);
+    runGit(['add', 'wego-app/scenes/测试场景/scene.js']);
+    runGit(['commit', '-m', 'base']);
+    const base = runGit(['rev-parse', 'HEAD']).stdout.trim();
+    fs.writeFileSync(path.join(fixture, 'wego-app/scenes/测试场景/scene.js'), 'window.test = 2;\n');
+    runGit(['add', 'wego-app/scenes/测试场景/scene.js']);
+    runGit(['commit', '-m', 'change']);
+    const head = runGit(['rev-parse', 'HEAD']).stdout.trim();
+    const script = fs.realpathSync(path.resolve(repoRoot, process.argv[1]));
+    const run = () => spawnSync(process.execPath, [script, '--check-changed', '--base', base, '--head', head, '--branch', 'feature/test'], { cwd: fixture, encoding: 'utf8' });
+    const missing = run();
+    if (missing.status === 0 || !(missing.stderr || '').includes('未认领场景')) throw new Error('场景变更缺少分支认领时必须失败');
+    fs.writeFileSync(path.join(fixture, 'claims/test.json'), `${JSON.stringify({ agent: 'test', scene: '测试场景', branch: 'feature/other', status: 'released' }, null, 2)}\n`);
+    const wrongBranch = run();
+    if (wrongBranch.status === 0) throw new Error('其它分支的历史认领不得授权当前 PR');
+    fs.writeFileSync(path.join(fixture, 'claims/test.json'), `${JSON.stringify({ agent: 'test', scene: '测试场景', branch: 'feature/test', status: 'released' }, null, 2)}\n`);
+    const covered = run();
+    if (covered.status !== 0) throw new Error(`当前分支的场景认领应通过：${covered.stderr || covered.stdout}`);
+  } finally {
+    fs.rmSync(fixture, { recursive: true, force: true });
+  }
+  console.log('场景认领测试通过');
+  process.exit(0);
+}
 
 if (!fs.existsSync(claimsDir)) {
-  if (checkScene) {
-    console.error(`[validate-claims] 场景 "${checkScene}" 未被认领（claims 目录不存在）`);
+  if (checkScene || checkChanged) {
+    console.error(`[validate-claims] ${checkScene ? `场景 "${checkScene}" 未被认领` : '无法核对场景变更认领'}（claims 目录不存在）`);
     console.error('  开工前请在 claims/<agent-id>.json 认领该场景');
     process.exit(1);
   }
@@ -51,10 +94,46 @@ const active = [];
 const all = [];
 
 for (const file of files) {
-  const claim = JSON.parse(fs.readFileSync(path.join(claimsDir, file), 'utf8'));
+  let claim;
+  try {
+    claim = JSON.parse(fs.readFileSync(path.join(claimsDir, file), 'utf8'));
+  } catch (error) {
+    console.error(`[validate-claims] ${file} 无法解析：${error.message}`);
+    process.exit(1);
+  }
   all.push({ file, claim });
   if (claim.status === 'released' || claim.status === 'done') continue;
   active.push({ file, claim });
+}
+
+if (checkChanged) {
+  if (!baseRef || !headRef || !branch) {
+    console.error('[validate-claims] --check-changed 必须同时提供 --base、--head 和 --branch');
+    process.exit(1);
+  }
+  const diff = spawnSync('git', ['-c', 'core.quotepath=false', 'diff', '--name-only', `${baseRef}...${headRef}`, '--'], {
+    cwd: repoRoot,
+    encoding: 'utf8'
+  });
+  if (diff.status !== 0) {
+    console.error(`[validate-claims] 无法读取场景变更：${(diff.stderr || diff.stdout || 'git diff 失败').trim()}`);
+    process.exit(1);
+  }
+  const changedScenes = [...new Set((diff.stdout || '')
+    .split('\n')
+    .map(file => /^wego-app\/scenes\/([^/]+)\//.exec(file.trim())?.[1] ?? null)
+    .filter(Boolean))]
+    .sort();
+  const uncovered = changedScenes.filter(scene => !all.some(({ claim }) => (
+    claim.scene === scene
+    && claim.branch === branch
+    && ['active', 'released', 'done'].includes(claim.status)
+  )));
+  if (uncovered.length) {
+    console.error(`[validate-claims] 分支 ${branch} 修改了未认领场景：${uncovered.join('、')}`);
+    console.error('  认领记录必须声明相同 scene、branch，状态为 active/released/done');
+    process.exit(1);
+  }
 }
 
 const byScene = new Map();
