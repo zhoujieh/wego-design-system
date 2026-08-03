@@ -242,19 +242,27 @@
     {
       "action": "submit-prototype",
       "at": "2026-08-03T11:04:06.058Z"
+    },
+    {
+      "action": "invalidate",
+      "at": "2026-08-03T11:22:20.959Z"
+    },
+    {
+      "action": "submit-prototype",
+      "at": "2026-08-03T11:40:20.390Z"
     }
   ],
   "freeze": null,
   "prototype_submission": {
-    "at": "2026-08-03T11:04:06.035Z",
+    "at": "2026-08-03T11:40:20.367Z",
     "scope_revision": 1,
     "affected_scenes": [
       "我的"
     ],
     "fingerprints": {
       "@route-entry/%E6%88%91%E7%9A%84": "cd0611ebe77c2c1ba558f5f7796281411766236f4e163a96ce8d8538ac0f9c69",
-      "wego-app/scenes/我的/scene.css": "3efd906a84591b3fb6e1ad203f32881a739029be1839d9e22207604a5f81f84c",
-      "wego-app/scenes/我的/scene.js": "e4e7db5931ebd17a2d4a79760f10e6b183388a381668cec83af03cbb3a3adf38"
+      "wego-app/scenes/我的/scene.css": "4d3d98f9d411a9881830184ba1a6da37b437f5b4e84a6eb45e0d14014f65e8bd",
+      "wego-app/scenes/我的/scene.js": "5a124588c4fe71d771c153bc9d6669b0b4c8d1fae5b6ac19a15a1a6861c87a8d"
     }
   }
 }

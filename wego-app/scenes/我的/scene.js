@@ -40,11 +40,11 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
                 <span class="my-membership-card__expiry">2027-08-31 到期</span>
               </div>
               <div class="card__body my-membership-card__body">
-                <span>云空间</span>
-                <span class="my-membership-card__usage">36.8 GB / 100 GB</span>
-              </div>
-              <div class="my-membership-card__progress" aria-label="云空间已使用百分之三十七">
-                <span class="my-membership-card__progress-value"></span>
+                <span class="my-membership-card__cloud">云空间</span>
+                <span class="my-membership-card__progress" role="progressbar" aria-valuenow="37" aria-valuemin="0" aria-valuemax="100" aria-label="云空间已使用百分之三十七">
+                  <span class="my-membership-card__progress-value"></span>
+                </span>
+                <span class="my-membership-card__usage">36.8 / 100 GB</span>
               </div>
             </div>
           </div>
@@ -55,7 +55,6 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
             <div class="card__content my-entry-card__content">
               <div class="card__header my-section-heading">
                 <h2>数据资产</h2>
-                <span>横滑查看更多</span>
               </div>
               <div class="card__body" data-region="assets"></div>
             </div>
@@ -67,7 +66,6 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
             <div class="card__content my-entry-card__content">
               <div class="card__header my-section-heading">
                 <h2>常用应用</h2>
-                <span>按最近使用排序</span>
               </div>
               <div class="card__body" data-region="apps"></div>
             </div>
@@ -175,65 +173,42 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
     // SKELETON-TEMPLATE-START
     skeletonTemplate: `
 <div class="my-tab-skeleton-surface" aria-hidden="true"></div>
-<div class="my-tab-skeleton-panel" style="top:14.254%;left:2.139%;width:95.722%;height:12.769%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="my-tab-skeleton-panel" style="top:28.211%;left:2.139%;width:95.722%;height:22.866%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="my-tab-skeleton-panel" style="top:52.264%;left:2.139%;width:95.722%;height:17.817%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="my-tab-skeleton-panel" style="top:71.269%;left:0.000%;width:100.000%;height:16.927%;border-radius:0px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="my-tab-skeleton-panel" style="top:89.384%;left:2.139%;width:46.791%;height:37.268%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="my-tab-skeleton-panel" style="top:89.384%;left:51.070%;width:46.791%;height:37.268%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--circle" style="position:absolute;top:6.830%;left:2.139%;width:10.695%;height:5.939%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:7.127%;left:14.973%;width:22.460%;height:3.267%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:10.393%;left:14.973%;width:16.043%;height:2.079%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:7.275%;left:78.610%;width:5.348%;height:2.970%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:10.245%;left:78.610%;width:5.348%;height:2.079%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:7.275%;left:90.374%;width:5.348%;height:2.970%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:10.245%;left:90.374%;width:5.348%;height:2.079%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:16.333%;left:6.417%;width:5.348%;height:2.970%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:16.036%;left:13.369%;width:13.498%;height:3.563%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:16.481%;left:67.574%;width:26.009%;height:2.673%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:20.787%;left:6.417%;width:9.626%;height:2.673%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:20.787%;left:69.233%;width:24.350%;height:2.673%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:24.647%;left:6.417%;width:87.166%;height:0.594%;border-radius:999px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:29.993%;left:5.348%;width:17.112%;height:3.563%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:30.735%;left:78.610%;width:16.043%;height:2.079%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:35.635%;left:8.222%;width:10.695%;height:5.939%;border-radius:12px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:42.168%;left:12.285%;width:2.567%;height:3.267%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:46.028%;left:15.681%;width:4.332%;height:2.376%;border-radius:999px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:35.783%;left:31.083%;width:10.695%;height:5.939%;border-radius:12px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:42.316%;left:32.271%;width:2.567%;height:3.267%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:42.984%;left:34.839%;width:2.542%;height:2.376%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:42.984%;left:37.381%;width:3.209%;height:2.376%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:46.177%;left:33.757%;width:5.348%;height:2.079%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:35.783%;left:53.944%;width:10.695%;height:5.939%;border-radius:12px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:42.316%;left:55.696%;width:7.188%;height:3.267%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:46.177%;left:56.618%;width:5.348%;height:2.079%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:35.783%;left:76.805%;width:10.695%;height:5.939%;border-radius:12px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:42.316%;left:79.713%;width:4.878%;height:3.267%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:46.177%;left:79.479%;width:5.348%;height:2.079%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:35.783%;left:99.666%;width:10.695%;height:5.939%;border-radius:12px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:42.316%;left:99.622%;width:10.781%;height:3.267%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:54.046%;left:5.348%;width:17.112%;height:3.563%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:54.788%;left:75.936%;width:18.717%;height:2.079%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:59.837%;left:9.291%;width:8.556%;height:4.751%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:65.182%;left:8.222%;width:10.695%;height:2.079%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:59.837%;left:32.152%;width:8.556%;height:4.751%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:65.182%;left:32.420%;width:8.021%;height:2.079%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:59.688%;left:55.013%;width:8.556%;height:4.751%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:65.033%;left:61.671%;width:4.332%;height:2.376%;border-radius:999px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:59.837%;left:77.874%;width:8.556%;height:4.751%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:65.182%;left:76.805%;width:10.695%;height:2.079%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:65.182%;left:99.666%;width:10.695%;height:2.079%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:73.608%;left:13.814%;width:8.556%;height:3.563%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:73.608%;left:45.722%;width:8.556%;height:3.563%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:73.608%;left:77.630%;width:8.556%;height:3.563%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:81.514%;left:2.139%;width:8.556%;height:4.751%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:81.514%;left:10.695%;width:61.230%;height:4.751%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:81.366%;left:77.005%;width:5.348%;height:2.970%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:81.366%;left:89.840%;width:5.348%;height:2.970%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:84.336%;left:89.840%;width:5.348%;height:2.079%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:89.384%;left:2.139%;width:46.791%;height:25.984%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:89.384%;left:51.070%;width:46.791%;height:25.984%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--circle" style="position:absolute;top:90.497%;left:82.888%;width:12.834%;height:7.127%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="my-tab-skeleton-panel" style="top:14.264%;left:2.139%;width:95.722%;height:8.618%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="my-tab-skeleton-panel" style="top:24.071%;left:2.139%;width:95.722%;height:13.670%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="my-tab-skeleton-panel" style="top:38.930%;left:2.139%;width:95.722%;height:13.967%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="my-tab-skeleton-panel" style="top:54.086%;left:0.000%;width:100.000%;height:16.939%;border-radius:0px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="my-tab-skeleton-panel" style="top:72.214%;left:2.139%;width:46.791%;height:37.296%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="my-tab-skeleton-panel" style="top:72.214%;left:51.070%;width:46.791%;height:37.296%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--circle" style="position:absolute;top:6.835%;left:2.139%;width:10.695%;height:5.944%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:7.132%;left:14.973%;width:22.460%;height:3.269%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:10.401%;left:14.973%;width:19.786%;height:2.080%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:6.538%;left:75.401%;width:11.765%;height:6.538%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:6.538%;left:87.166%;width:11.765%;height:6.538%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:15.453%;left:5.348%;width:17.158%;height:3.269%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:16.048%;left:72.978%;width:21.674%;height:2.080%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:19.614%;left:5.348%;width:89.305%;height:2.080%;border-radius:999px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:25.260%;left:2.139%;width:95.722%;height:3.566%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:40.119%;left:2.139%;width:95.722%;height:3.566%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:30.015%;left:9.571%;width:2.569%;height:3.269%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:33.581%;left:4.278%;width:13.156%;height:2.377%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:30.163%;left:22.782%;width:8.322%;height:3.269%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:33.730%;left:24.269%;width:5.348%;height:2.080%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:30.163%;left:36.451%;width:7.190%;height:3.269%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:33.730%;left:37.370%;width:5.348%;height:2.080%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:30.163%;left:49.223%;width:4.880%;height:3.269%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:33.730%;left:48.989%;width:5.348%;height:2.080%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:45.022%;left:6.417%;width:6.417%;height:3.566%;border-radius:6px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:48.886%;left:4.278%;width:10.695%;height:2.080%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:45.022%;left:21.123%;width:6.417%;height:3.566%;border-radius:6px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:48.886%;left:20.321%;width:8.021%;height:2.080%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:44.874%;left:37.325%;width:6.417%;height:3.566%;border-radius:6px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:48.737%;left:33.690%;width:13.691%;height:2.377%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:45.022%;left:54.867%;width:6.417%;height:3.566%;border-radius:6px;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:48.886%;left:52.728%;width:10.695%;height:2.080%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:54.086%;left:2.139%;width:31.906%;height:8.172%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:54.086%;left:34.045%;width:31.910%;height:8.172%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:54.086%;left:65.955%;width:31.906%;height:8.172%;box-sizing:border-box" aria-hidden="true"></div>
+<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:62.407%;left:2.139%;width:95.722%;height:8.618%;box-sizing:border-box" aria-hidden="true"></div>
     `,
     // SKELETON-TEMPLATE-END
     init: function init(ctx) {
@@ -267,15 +242,15 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
       state.recentApps = Array.isArray(savedRecent) ? savedRecent.filter(function (id) { return Boolean(recentCatalog[id]); }) : [];
 
       var assetEntries = [
-        { id: 'purchases', label: '我买的', icon: 'icon-dingdan', metric: { integer: String(state.purchaseTodoCount) }, conditional: state.purchaseTodoCount > 0, todo: true },
-        { id: 'fans', label: '粉丝', icon: 'icon-fensi', metric: { integer: '1', decimal: '.2', unit: '万' }, conditional: true },
-        { id: 'friends', label: '好友', icon: 'icon-duoren', metric: { integer: '386' }, conditional: true },
-        { id: 'agents', label: '代理', icon: 'icon-tuiguangyuan', metric: { integer: '28' }, conditional: true },
-        { id: 'visitors', label: '访客', icon: 'icon-fangkejilu', metric: { integer: '1,280' }, conditional: true },
-        { id: 'employees', label: '员工', icon: 'icon-qiye', metric: { integer: '12' }, conditional: true },
-        { id: 'wallet', label: '钱包', icon: 'icon-qianbao', metric: { symbol: '¥', integer: '8,420' }, conditional: true },
-        { id: 'coupons', label: '卡券', icon: 'icon-quan', metric: { integer: '6' }, conditional: true },
-        { id: 'favorites', label: '收藏', icon: 'icon-shoucang', metric: { integer: '324' }, conditional: true }
+        { id: 'purchases', label: '我买的', metric: { integer: String(state.purchaseTodoCount) }, conditional: state.purchaseTodoCount > 0, todo: true },
+        { id: 'fans', label: '粉丝', metric: { integer: '1', decimal: '.2', unit: '万' }, conditional: true },
+        { id: 'friends', label: '好友', metric: { integer: '386' }, conditional: true },
+        { id: 'agents', label: '代理', metric: { integer: '28' }, conditional: true },
+        { id: 'visitors', label: '访客', metric: { integer: '1,280' }, conditional: true },
+        { id: 'employees', label: '员工', metric: { integer: '12' }, conditional: true },
+        { id: 'wallet', label: '钱包', metric: { symbol: '¥', integer: '8,420' }, conditional: true },
+        { id: 'coupons', label: '卡券', metric: { integer: '6' }, conditional: true },
+        { id: 'favorites', label: '收藏', metric: { integer: '324' }, conditional: true }
       ];
 
       function productById(id) {
@@ -353,10 +328,9 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
       }
 
       function renderAssets() {
-        var html = '<div class="layout-scroll-row my-asset-row" data-component-slug="layout-scroll-row" data-item-size="compact" data-snap="start" data-peek="next">';
+        var html = '<div class="layout-scroll-row my-asset-row" data-component-slug="layout-scroll-row" data-item-size="auto" data-snap="start" data-peek="next">';
         assetEntries.filter(function (item) { return item.conditional; }).forEach(function (item) {
           html += '<button type="button" class="my-asset-entry" data-asset-id="' + item.id + '">'
-            + '<span class="my-entry-icon"><i class="wego-iconfont-s ' + item.icon + '" aria-hidden="true"></i></span>'
             + metricHtml(item.metric, { size: '16', theme: 'black' })
             + '<span class="my-entry-label">' + escapeHtml(item.label);
           if (item.todo) html += '<span class="badge badge--inline badge--number" data-component-slug="badge">' + state.purchaseTodoCount + '</span>';
@@ -380,7 +354,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         state.recentApps.forEach(function (id) { appItems.push(recentCatalog[id]); });
         appItems.push({ id: 'all_apps', label: '全部', icon: './lib/assets/icons/app-center/全部应用.svg', fixed: true });
 
-        var html = '<div class="layout-scroll-row my-app-row" data-component-slug="layout-scroll-row" data-item-size="compact" data-snap="start" data-peek="next">';
+        var html = '<div class="layout-scroll-row my-app-row" data-component-slug="layout-scroll-row" data-item-size="auto" data-snap="start" data-peek="next">';
         appItems.forEach(function (item) {
           if (!item) return;
           html += '<button type="button" class="my-app-entry" data-app-id="' + item.id + '">' + appIcon(item.icon, item.label, item.count) + '</button>';
