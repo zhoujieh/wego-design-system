@@ -80,6 +80,7 @@ node scripts/iteration-record.mjs confirm-brief --file {iteration.json} \
 node scripts/iteration-record.mjs submit-prototype --file {iteration.json}
 node scripts/iteration-record.mjs confirm-prototype --file {iteration.json} \
   --user-confirmed-prototype {iteration_id}
+node scripts/iteration-record.mjs migrate --file {iteration.json}
 node scripts/iteration-record.mjs invalidate --stage=brief --file {iteration.json}
 node scripts/iteration-record.mjs invalidate --stage=prototype --file {iteration.json}
 node scripts/iteration-record.mjs check --file {iteration.json}
@@ -89,6 +90,7 @@ node scripts/iteration-record.mjs check --file {iteration.json}
 - `confirm-brief` 只能在用户看过当前摘要并明确确认后执行，命令中的迭代 ID 必须与当前记录一致。
 - `submit-prototype` 会重新验证受影响场景并固定待验收源码、样式和路由指纹；浏览器或源码验证失败时不得进入下一状态。
 - `confirm-prototype` 只能在用户验收当前提交后执行，命令中的迭代 ID 必须一致，且当前原型指纹必须与提交验收时完全相同；发生漂移必须先失效并重新提交验收。
+- `migrate` 只迁移 schemaVersion 5 的历史记录。旧的待验收原型因没有提交指纹会回到 `prototyping`，必须重新提交后再请求用户验收；不得借迁移伪造验收。
 - `confirm-prototype` 表示当前原型已验收，不代表冻结。
 
 ## 失效
