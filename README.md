@@ -41,7 +41,7 @@
 
 - 各人开 `feature/<你>-<场景>` 分支，不要直接提交 `main`。
 - 每次开工前先 `git pull --rebase origin main` 基于最新代码。
-- 开工前在 `claims/<你>.json` 认领场景并跑 `node scripts/validate-claims.mjs`，避免两人改同一场景。
+- 开工前在 `claims/<你>.json` 认领场景、记录当前 `branch`，并跑 `node scripts/validate-claims.mjs`，避免两人改同一场景；CI 会核对场景变更与分支认领一致。
 - 实现和验证完成后提交并推送当前分支，创建或更新 PR。
 - 每个 PR 自动获得独立验收链接：`https://zhoujieh.github.io/wego-design-system/previews/pr-{PR编号}/`。
 - PR 更新后原验收链接自动更新；用户明确验收通过后才合并到 `main`。

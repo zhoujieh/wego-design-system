@@ -13,20 +13,22 @@
  */
 
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 
 const root = process.cwd();
 const args = process.argv.slice(2);
 const jsonOutput = args.includes('--json');
 const all = args.includes('--all');
+const testing = args.includes('test');
 const scenes = args.filter(arg => !arg.startsWith('--'));
 
 // 简报已确认 = 进入 prototyping 及之后状态;对应 iteration-record.mjs 的确认矩阵。
 const confirmedBriefStatuses = new Set([
   'prototyping',
   'awaiting-prototype-confirmation',
-  'prototype-confirmed',
-  'frozen'
+  'prototype-confirmed'
 ]);
 
 const scenesRoot = path.join(root, 'wego-app/scenes');
@@ -112,4 +114,36 @@ function main() {
   process.exit(report.ok ? 0 : 1);
 }
 
-main();
+function test() {
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'wego-iteration-binding-'));
+  try {
+    const scene = '测试场景';
+    const sceneRoot = path.join(fixture, 'wego-app/scenes', scene);
+    const iterationRoot = path.join(sceneRoot, '_iterations/20260803-test-测试');
+    fs.mkdirSync(iterationRoot, { recursive: true });
+    fs.writeFileSync(path.join(sceneRoot, 'scene.js'), 'window.test = true;\n');
+    const record = {
+      status: 'frozen',
+      identity: { primary_scene: scene },
+      affected_scenes: [scene],
+      brief_confirmation: { at: new Date().toISOString() }
+    };
+    const recordFile = path.join(iterationRoot, 'iteration.json');
+    fs.writeFileSync(recordFile, `${JSON.stringify(record, null, 2)}\n`);
+    const script = fs.realpathSync(path.resolve(root, process.argv[1]));
+    const frozen = spawnSync(process.execPath, [script, '--all', '--json'], { cwd: fixture, encoding: 'utf8' });
+    if (frozen.status === 0 || !(frozen.stdout || '').includes('scene.iteration_unbound')) {
+      throw new Error('冻结历史迭代不得继续绑定当前场景修改');
+    }
+    record.status = 'prototyping';
+    fs.writeFileSync(recordFile, `${JSON.stringify(record, null, 2)}\n`);
+    const active = spawnSync(process.execPath, [script, '--all', '--json'], { cwd: fixture, encoding: 'utf8' });
+    if (active.status !== 0) throw new Error(`已确认且未冻结的活动迭代应绑定场景：${active.stderr || active.stdout}`);
+  } finally {
+    fs.rmSync(fixture, { recursive: true, force: true });
+  }
+  console.log('场景-迭代绑定测试通过');
+}
+
+if (testing) test();
+else main();
