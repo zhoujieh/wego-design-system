@@ -22,7 +22,7 @@
 
 | 脚本 | 使用时机 |
 | --- | --- |
-| `reset-wego-app-baseline.mjs` | 清空全部业务场景，或通过 `--scene` 清理指定场景 |
+| `reset-wego-app-baseline.mjs` | 清空全部业务场景、释放活跃场景认领并重建空白路由；支持 `--check` 与 `--dry-run` |
 | `cleanup-task-artifacts.mjs` | 清理 `.uploads/`、`output/`、`.tasks/`、`.playwright-cli/` 临时产物 |
 | `generate-scene-skeleton.mjs` | 仅在需要重新采样显式骨架模板时运行 |
 
@@ -33,6 +33,7 @@
 以下回归测试只在对应实现变化时运行，不进入普通、system 或 full 验证的无条件主链：
 
 - `test-scene-contract-tools.mjs`
+- `test-reset-wego-app-baseline.mjs`
 - `test-sync-wego-app-lib.mjs`
 - `test-scroll-layout.mjs`
 - `iteration-record.mjs test`
