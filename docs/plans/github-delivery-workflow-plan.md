@@ -109,6 +109,7 @@
 - `.codex/skills/wego-uxsystem-iterate/references/sync-matrix.md`
 - `AGENTS.md`
 - `scripts/validate-wego-design-core.mjs`
+- `.trae/skills/*` 与 `.codebuddy/skills/*` 的符号链接
 
 其中 `scripts/validate-wego-design-core.mjs` 需要把 `wego-github-delivery` 的入口和直接规则纳入检查；它是交付技能，不改变三条业务主链。
 
@@ -130,6 +131,7 @@ node scripts/validate-wego-design.mjs --scope=system --strict
 - 新建对话会复用同一交付单元的开放 PR，而不会重复建分支。
 - PR 合并或关闭后默认删除本地和远端分支，`keep-branch` 为唯一例外。
 - 业务 PR 不夹带经验候选池。
+- Trae 与 CodeBuddy 均完整复用 `.codex/skills`，不存在独立技能副本。
 
 ## 当前仓库收口建议
 

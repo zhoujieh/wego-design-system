@@ -124,6 +124,58 @@ function checkSkillFlow() {
   }
 }
 
+function checkSkillAdapters() {
+  const sourceRoot = path.join(root, '.codex/skills');
+  const adapters = ['.trae/skills', '.codebuddy/skills'];
+  if (!fs.existsSync(sourceRoot)) {
+    add('error', 'skills.source_missing', '缺少技能权威源目录：.codex/skills', sourceRoot);
+    return;
+  }
+
+  const sourceSkills = fs.readdirSync(sourceRoot, { withFileTypes: true })
+    .filter(entry => entry.isDirectory())
+    .map(entry => entry.name)
+    .sort();
+
+  for (const adapter of adapters) {
+    const adapterRoot = path.join(root, adapter);
+    if (!fs.existsSync(adapterRoot)) {
+      add('error', 'skills.adapter_missing', `缺少技能适配器目录：${adapter}`, adapterRoot);
+      continue;
+    }
+
+    const adapterEntries = new Set(fs.readdirSync(adapterRoot));
+    for (const skill of sourceSkills) {
+      const source = path.join(sourceRoot, skill);
+      const target = path.join(adapterRoot, skill);
+      let stat;
+      try {
+        stat = fs.lstatSync(target);
+      } catch {
+        add('error', 'skills.adapter_link_missing', `${adapter} 未链接权威技能：${skill}`, target);
+        continue;
+      }
+      if (!stat.isSymbolicLink()) {
+        add('error', 'skills.adapter_not_link', `${adapter}/${skill} 必须是指向权威源的符号链接`, target);
+        continue;
+      }
+      try {
+        if (fs.realpathSync(target) !== fs.realpathSync(source)) {
+          add('error', 'skills.adapter_target', `${adapter}/${skill} 未指向 .codex/skills/${skill}`, target);
+        }
+      } catch {
+        add('error', 'skills.adapter_target', `${adapter}/${skill} 的符号链接无效`, target);
+      }
+    }
+
+    for (const entry of adapterEntries) {
+      if (!sourceSkills.includes(entry)) {
+        add('error', 'skills.adapter_extra', `${adapter} 存在不属于 .codex/skills 的额外资源：${entry}`, path.join(adapterRoot, entry));
+      }
+    }
+  }
+}
+
 function checkWorkflowContracts() {
   runNode('scripts/iteration-record.mjs', ['test'], 'workflow.iteration_test');
   runNode('scripts/validate-scene-iteration-binding.mjs', ['test'], 'workflow.iteration_binding_test');
@@ -466,6 +518,7 @@ function main() {
     add('error', 'args.scope', `未知范围：${requestedScope}`);
   } else {
     checkSkillFlow();
+    checkSkillAdapters();
     if (requestedScope === 'changed') runChangedScope();
     else if (requestedScope === 'system') runSystemScope();
     else runFullScope();

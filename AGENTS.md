@@ -33,7 +33,7 @@
 - 每个场景只直接维护 `route.json`、`scene.js` 和 `scene.css`；`route.json` 声明路由，场景通过 `window.WegoApp.registerScene` 注册，原型产物不得散落到仓库根目录。
 - 路由由各场景目录下的 `route.json` 经 `scripts/build-routes.mjs` 生成；`wego-app/js/routes.js` 是生成物，**禁止手改**。
 - `wego-app/lib/` 和生成的 `components.css` 禁止直接编辑。先修改 `.codex/skills/wego-design/` 权威源，再运行同步或生成脚本。
-- `.trae/skills/*` 是 `.codex/skills/*` 的符号链接，不作为独立副本维护。
+- `.trae/skills/*` 与 `.codebuddy/skills/*` 都必须是 `.codex/skills/*` 的符号链接，不作为独立副本维护。
 
 ## 三技能主链路
 
