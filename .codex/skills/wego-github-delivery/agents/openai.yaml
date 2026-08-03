@@ -1,0 +1,4 @@
+interface:
+  display_name: "Wego GitHub Delivery"
+  short_description: "Manage branches, PRs, previews, and delivery cleanup"
+  default_prompt: "Use $wego-github-delivery to resume the right PR or clean up completed delivery branches."
