@@ -1,0 +1,232 @@
+{
+  "schemaVersion": 5,
+  "identity": {
+    "iteration_id": "my-tab-management",
+    "title": "经营与内容管理",
+    "date": "2026-08-03",
+    "primary_scene": "我的",
+    "related_scenes": []
+  },
+  "status": "awaiting-prototype-confirmation",
+  "scope_revision": 1,
+  "prototype_brief": {
+    "goal": "将「我的」Tab 建设为个人经营与内容管理首页，让用户快速查看账户与会员资产、访问常用能力、分别管理产品/笔记/直播，并通过突出的发布入口完成快捷发布。",
+    "included": [
+      "导航栏左侧展示头像、名称和当前相册，作为切换相册入口；右侧只保留设置和分享主页两个入口",
+      "独立会员卡展示会员等级、到期时间、云空间已用容量、总容量和使用进度",
+      "数据资产横滑展示我买的、粉丝、好友、代理、访客、员工、钱包、卡券、收藏共 9 项；我买的仅在存在待办时显示",
+      "常用应用横滑固定展示进入主页和二维码，购物车有内容时显示，随后展示动态最近应用，全部始终位于末尾",
+      "最近应用按实际使用时间倒序、自动去重，排除固定入口/购物车/全部，点击应用后更新顺序并在刷新后保留",
+      "产品、笔记、直播类型 Tab 紧贴内容区域并允许后续扩展",
+      "工具行随类型联动，支持当前类型内搜索、筛选入口和列表/网格视图切换",
+      "每个类型独立记忆搜索内容与列表/网格视图，刷新后保留视图偏好",
+      "产品、笔记、直播分别采用符合类型特征的最佳卡片结构，列表和网格也分别优化，不共用通用卡片简单换数据",
+      "内容卡片不显示业务状态标签",
+      "右下角发布 FAB 全程突出，支持选择产品/笔记/直播并完成模拟发布闭环，新内容进入对应类型顶部"
+    ],
+    "excluded": [
+      "切换相册的后续页面",
+      "设置详情和完整主页分享流程",
+      "数据资产、常用应用、全部应用和购物车的下游业务页面",
+      "筛选条件面板",
+      "会员续费、升级和云空间管理",
+      "内容详情页",
+      "正式内容编辑器、素材上传、审核和真实服务端发布",
+      "后端数据同步与跨设备最近应用、视图偏好同步"
+    ],
+    "entry_points": [
+      "底部导航「我的」进入本页面",
+      "导航栏左侧个人信息区进入切换相册边界；右侧只提供设置和分享主页",
+      "会员栏独立展示会员与云空间信息，不作为本期下钻入口",
+      "数据资产入口横向排列，其中「我买的」仅在待办数量大于 0 时出现",
+      "常用应用依次为进入主页、二维码、条件购物车、动态最近应用和末尾的全部",
+      "产品/笔记/直播 Tab 进入对应类型内容区，工具行与内容列表随之联动",
+      "右下角发布 FAB 在所有内容类型下持续可见并进入发布类型选择"
+    ],
+    "critical_paths": [
+      "用户进入「我的」后查看个人身份、会员权益、云空间和经营入口",
+      "用户横滑访问数据资产或常用应用，使用应用后最近应用顺序即时更新",
+      "用户切换产品、笔记、直播并看到符合各类型特征的不同内容呈现",
+      "用户在当前类型中搜索内容并看到结果或对应空结果",
+      "用户分别切换各类型的列表/网格视图，离开并返回后恢复各自选择",
+      "用户点击发布 FAB、选择内容类型、完成模拟发布，并在对应类型顶部看到采用专属结构的新内容"
+    ],
+    "prototype_boundaries": [
+      {
+        "flow_id": "view-my-dashboard",
+        "mode": "functional",
+        "visible_result": "用户进入我的 Tab 后看到个人信息、会员栏、条件数据资产、常用应用和内容管理区域"
+      },
+      {
+        "flow_id": "use-recent-apps",
+        "mode": "functional",
+        "visible_result": "用户点击最近应用后该应用移动到首位、保持去重，并在刷新后保留"
+      },
+      {
+        "flow_id": "browse-content-types",
+        "mode": "functional",
+        "visible_result": "用户切换产品、笔记、直播后看到类型专属的列表或网格展示和联动工具行"
+      },
+      {
+        "flow_id": "search-current-content",
+        "mode": "functional",
+        "visible_result": "用户搜索当前类型后看到实时匹配内容或该类型的空结果"
+      },
+      {
+        "flow_id": "remember-tab-view",
+        "mode": "functional",
+        "visible_result": "每个类型分别恢复用户上次选择的列表或网格视图"
+      },
+      {
+        "flow_id": "publish-content",
+        "mode": "simulated",
+        "visible_result": "用户选择发布产品、笔记或直播，看到发布成功，并在对应类型顶部看到新增内容"
+      },
+      {
+        "flow_id": "open-boundary-entries",
+        "mode": "stub",
+        "visible_result": "用户点击相册切换、设置、分享、数据资产、应用、全部或筛选入口时获得明确可见反馈"
+      }
+    ],
+    "states": [
+      "我买的存在待办时显示、无待办时隐藏",
+      "购物车有商品时显示、为空时隐藏",
+      "最近应用有记录时按最近使用排序、无记录时不展示动态项",
+      "当前内容类型为产品、笔记或直播",
+      "每个内容类型分别处于列表视图或网格视图",
+      "当前类型处于默认内容、搜索结果或无结果状态",
+      "发布流程处于类型选择、发布处理中或发布成功状态",
+      "会员有效并展示等级、到期时间和云空间用量"
+    ],
+    "data_contract": {
+      "profile": {
+        "fields": [
+          "avatar",
+          "display_name",
+          "current_album"
+        ]
+      },
+      "membership": {
+        "fields": [
+          "level",
+          "expires_at",
+          "cloud_used",
+          "cloud_total"
+        ]
+      },
+      "data_assets": {
+        "entries": [
+          "purchases",
+          "fans",
+          "friends",
+          "agents",
+          "visitors",
+          "employees",
+          "wallet",
+          "coupons",
+          "favorites"
+        ],
+        "purchase_visibility": "purchase_todo_count > 0"
+      },
+      "common_apps": {
+        "fixed_order": [
+          "homepage",
+          "qr_code"
+        ],
+        "cart_visibility": "cart_item_count > 0",
+        "recent_rule": "按 last_used_at 倒序并按 app_id 去重，排除 homepage、qr_code、cart、all_apps",
+        "tail_entry": "all_apps"
+      },
+      "content": {
+        "product_fields": [
+          "id",
+          "cover",
+          "name",
+          "price",
+          "updated_at"
+        ],
+        "note_fields": [
+          "id",
+          "cover",
+          "title",
+          "summary",
+          "updated_at"
+        ],
+        "live_fields": [
+          "id",
+          "cover",
+          "topic",
+          "host",
+          "time"
+        ],
+        "render_constraint": "三种类型使用各自最佳卡片结构，列表和网格分别优化，任何卡片不显示状态标签"
+      },
+      "publish": {
+        "types": [
+          "product",
+          "note",
+          "live"
+        ],
+        "result": "生成对应类型的演示内容并插入该类型顶部"
+      },
+      "persistence": {
+        "local": [
+          "recent_apps",
+          "per_tab_view",
+          "per_tab_search"
+        ],
+        "cross_device": false
+      }
+    },
+    "assumptions": [
+      "需求文字中的「8入口」按用户列出的 9 个数据资产入口执行",
+      "原型默认提供购买待办和非空购物车，用于直接展示条件入口，同时保留隐藏逻辑",
+      "原型预置少量最近应用，便于直接验收排序、去重和持久化",
+      "会员、容量、数量、金额和内容均使用演示数据，不代表真实账户",
+      "所有不下钻入口使用可见反馈表达边界，不补造下游业务事实"
+    ],
+    "open_questions": []
+  },
+  "brief_submission": {
+    "at": "2026-08-03T04:00:28.731Z",
+    "scope_revision": 1,
+    "scope_sha256": "4e1fa8871749a4a8a2abd10b48f75c8d0689b42053c2c66f9a5988ce0e52bd01"
+  },
+  "brief_confirmation": {
+    "at": "2026-08-03T04:55:46.537Z",
+    "scope_revision": 1,
+    "scope_sha256": "4e1fa8871749a4a8a2abd10b48f75c8d0689b42053c2c66f9a5988ce0e52bd01"
+  },
+  "prototype_confirmation": null,
+  "affected_scenes": [
+    "我的"
+  ],
+  "affected_runtime": [],
+  "stage_outputs": {
+    "product": {
+      "valid": true
+    },
+    "design": {
+      "valid": true
+    }
+  },
+  "change_log": [
+    {
+      "action": "init",
+      "at": "2026-08-03T03:59:24.077Z"
+    },
+    {
+      "action": "submit-brief",
+      "at": "2026-08-03T04:00:28.736Z"
+    },
+    {
+      "action": "confirm-brief",
+      "at": "2026-08-03T04:55:46.538Z"
+    },
+    {
+      "action": "submit-prototype",
+      "at": "2026-08-03T05:23:10.229Z"
+    }
+  ],
+  "freeze": null
+}
