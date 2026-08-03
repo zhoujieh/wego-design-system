@@ -258,7 +258,8 @@
 
   // ── 帮卖弹窗模板 ──
   function buildPopupTemplate(sample) {
-    var title = isFixedRebate(sample) ? '赚佣金' : (sample.my_item ? '加价卖' : '帮卖');
+    var isFixed = isFixedRebate(sample);
+    var title = isFixed ? '赚佣金' : '加价卖';
     var isLive = isLiveRoom(sample);
 
     // 异常场景:价格隐藏
@@ -270,33 +271,22 @@
     }
 
     var isRange = isRangePrice(sample);
-    var isFixed = isFixedRebate(sample);
-    var productTitle = getProductTitle(sample.product_id);
-    var productImage = getProductImage(sample.product_id);
 
-    // 商品信息
-    var productHtml = ''
-      + '<div class="resale-product">'
-      +   '<div class="resale-product__image" style="background-image:url(' + productImage + ')"></div>'
-      +   '<div class="resale-product__info">'
-      +     '<div class="resale-product__title">' + productTitle + '</div>'
-      +     '<div class="resale-product__supply">供货价:<span class="resale-product__supply-value">' + (isRange ? formatPriceRange(sample.supply_price[0], sample.supply_price[1]) : formatPrice(sample.supply_price)) + '元</span></div>'
-      +   '</div>'
-      + '</div>';
-
-    // 价格展示
+    // 价格展示:售价 + 佣金 一行
     var priceHtml = '';
     if (isFixed) {
       // 固定佣金:只读展示
       priceHtml = ''
         + '<div class="resale-price">'
-        +   '<div class="resale-price__row">'
-        +     '<span class="resale-price__label">我的售价</span>'
-        +     '<span class="resale-price__value resale-price__value--readonly" data-display-price>' + formatPrice(sample.current_price) + '元</span>'
-        +   '</div>'
-        +   '<div class="resale-price__row">'
-        +     '<span class="resale-price__label">赚佣金</span>'
-        +     '<span class="resale-price__value resale-price__value--commission resale-price__value--readonly" data-display-commission>' + formatPrice(sample.commission) + '元</span>'
+        +   '<div class="resale-price__field-row">'
+        +     '<div class="resale-price__field">'
+        +       '<span class="resale-price__field-label">我的售价</span>'
+        +       '<div class="resale-price__field-value resale-price__field-value--readonly" data-display-price>' + formatPrice(sample.current_price) + '<span class="resale-price__field-suffix">元</span></div>'
+        +     '</div>'
+        +     '<div class="resale-price__field">'
+        +       '<span class="resale-price__field-label">佣金</span>'
+        +       '<div class="resale-price__field-value resale-price__field-value--commission resale-price__field-value--readonly" data-display-commission>' + formatPrice(sample.commission) + '<span class="resale-price__field-suffix">元</span></div>'
+        +     '</div>'
         +   '</div>'
         + '</div>';
     } else if (isRange) {
@@ -311,21 +301,19 @@
 
       priceHtml = ''
         + '<div class="resale-price">'
-        +   '<div class="resale-price__row">'
-        +     '<span class="resale-price__label">供货价区间</span>'
-        +     '<span class="resale-price__value">' + formatPriceRange(minSupply, maxSupply) + '元</span>'
-        +   '</div>'
-        +   '<div class="resale-price__row">'
-        +     '<span class="resale-price__label">我的售价</span>'
-        +     '<span class="resale-price__value" data-display-price>' + formatPriceRange(minPrice, maxPrice) + '元</span>'
-        +   '</div>'
-        +   '<div class="resale-price__row">'
-        +     '<span class="resale-price__label">赚佣金</span>'
-        +     '<span class="resale-price__value resale-price__value--commission" data-display-commission>' + formatPriceRange(minAdd, maxAdd) + '元</span>'
+        +   '<div class="resale-price__field-row">'
+        +     '<div class="resale-price__field">'
+        +       '<span class="resale-price__field-label">我的售价</span>'
+        +       '<div class="resale-price__field-value" data-display-price>' + formatPriceRange(minPrice, maxPrice) + '<span class="resale-price__field-suffix">元</span></div>'
+        +     '</div>'
+        +     '<div class="resale-price__field">'
+        +       '<span class="resale-price__field-label">佣金</span>'
+        +       '<div class="resale-price__field-value resale-price__field-value--commission" data-display-commission>' + formatPriceRange(minAdd, maxAdd) + '<span class="resale-price__field-suffix">元</span></div>'
+        +     '</div>'
         +   '</div>'
         + '</div>';
     } else {
-      // 单一价格:显示输入框可改售价
+      // 单一价格:售价可编辑
       var supplyPrice = sample.supply_price;
       var currentAdd = sample.my_item
         ? { type: sample.current_add_price_type, value: sample.current_add_price_value, rate: sample.current_add_price_rate }
@@ -339,25 +327,20 @@
 
       priceHtml = ''
         + '<div class="resale-price">'
-        +   '<div class="resale-price__row">'
-        +     '<span class="resale-price__label">供货价</span>'
-        +     '<span class="resale-price__value">' + formatPrice(supplyPrice) + '元</span>'
-        +   '</div>'
-        +   '<div class="resale-price__edit-row">'
-        +     '<span class="resale-price__edit-label">我的售价</span>'
-        +     '<div class="resale-price__edit-input">'
-        +       '<span class="resale-price__edit-value" data-price-edit>' + formatPrice(defaultPrice) + '</span>'
-        +       '<span class="resale-price__edit-suffix">元</span>'
+        +   '<div class="resale-price__field-row">'
+        +     '<div class="resale-price__field resale-price__field--editable">'
+        +       '<span class="resale-price__field-label">我的售价</span>'
+        +       '<div class="resale-price__field-value" data-price-edit>' + formatPrice(defaultPrice) + '<span class="resale-price__field-suffix">元</span></div>'
         +     '</div>'
-        +   '</div>'
-        +   '<div class="resale-price__row">'
-        +     '<span class="resale-price__label">赚佣金</span>'
-        +     '<span class="resale-price__value resale-price__value--commission" data-display-commission>' + formatPrice(defaultAdd) + '元</span>'
+        +     '<div class="resale-price__field">'
+        +       '<span class="resale-price__field-label">佣金</span>'
+        +       '<div class="resale-price__field-value resale-price__field-value--commission" data-display-commission>' + formatPrice(defaultAdd) + '<span class="resale-price__field-suffix">元</span></div>'
+        +     '</div>'
         +   '</div>'
         + '</div>';
     }
 
-    // 快捷加价标签区(仅自由定价显示)
+    // 快捷加价标签区(仅自由定价显示):标题在左,标签在右,间距8
     var tagsHtml = '';
     if (!isFixed) {
       var currentAdd = sample.my_item
@@ -373,22 +356,18 @@
 
       tagsHtml = ''
         + '<div class="resale-tags">'
-        +   '<div class="resale-tags__title">快捷加价</div>'
+        +   '<span class="resale-tags__title">快捷加价</span>'
         +   '<div class="resale-tags__list">'
         +     tagsItems
-        +     '<div class="resale-tags__manual tag tag--28 tag--white tag--normal" data-manual-input><span class="tag__label">手动输入</span></div>'
+        +     '<a class="link resale-tags__manual" data-manual-input>手动输入</a>'
         +   '</div>'
         + '</div>';
     }
 
-    // 佣金保密提示(非直播间 + 自由定价)
+    // 佣金保密提示(非直播间 + 自由定价),放底部按钮上方
     var hintHtml = '';
     if (!isLive && !isFixed) {
-      hintHtml = ''
-        + '<div class="resale-price__hint">'
-        +   '<i class="wego-iconfont-s icon-tanhao resale-price__hint-icon"></i>'
-        +   '佣金金额仅你自己可见,买家无法查看'
-        + '</div>';
+      hintHtml = '<div class="resale-hint-bottom">*帮卖分佣仅自己可见,可放心分享</div>';
     }
 
     // 首次编辑气泡引导
@@ -427,8 +406,14 @@
         + '</div>';
     }
 
+    // 标题:自由定价加问号图标
+    var titleHelp = '';
+    if (!isFixed) {
+      titleHelp = '<i class="wego-iconfont-s icon-wenhao navbar__title-help" data-resale-help></i>';
+    }
+
     return ''
-      + '<div class="modal modal--frame-x modal--has-actions" role="dialog" aria-modal="true" data-state="closed" data-component-slug="modal">'
+      + '<div class="modal modal--frame modal--has-actions" role="dialog" aria-modal="true" data-state="closed" data-component-slug="modal">'
       +   '<div class="modal__panel">'
       +     '<div class="modal__title modal__title--default">'
       +       '<div class="navbar">'
@@ -436,20 +421,19 @@
       +           '<div class="navbar__left">'
       +             '<div class="navbar__left-btn navbar__left-btn--circle" data-popup-close><i class="wego-iconfont-s icon-xiajiantou16"></i></div>'
       +           '</div>'
-      +           '<div class="navbar__center"><span class="navbar__title">' + title + '</span></div>'
+      +           '<div class="navbar__center"><span class="navbar__title" data-resale-title>' + title + '</span>' + titleHelp + '</div>'
       +           '<div class="navbar__right"></div>'
       +         '</div>'
       +       '</div>'
       +     '</div>'
       +     '<div class="modal__body resale-popup__body">'
-      +       productHtml
       +       priceHtml
       +       tagsHtml
-      +       hintHtml
       +       bubbleHtml
       +     '</div>'
       +     '<div class="modal__actions">'
       +       '<div class="modal__action-gradient"></div>'
+      +       hintHtml
       +       actionsHtml
       +     '</div>'
       +   '</div>'
@@ -501,14 +485,16 @@
   function buildKeypadTemplate(mode, initialValue) {
     var displayValue = initialValue ? String(initialValue) : '';
     var isAmount = mode === 'amount';
+    var segClass = isAmount ? 'is-amount' : 'is-rate';
 
     return ''
-      + '<div class="modal modal--frame" role="dialog" aria-modal="true" data-state="closed" data-keypad-overlay data-component-slug="modal">'
+      + '<div class="modal modal--frame modal--no-mask" role="dialog" aria-modal="true" data-state="closed" data-keypad-overlay data-component-slug="modal">'
       +   '<div class="modal__panel">'
       +     '<div class="keypad">'
-      +       '<div class="keypad__header">'
-      +         '<div class="keypad__tab ' + (isAmount ? 'is-active' : '') + '" data-keypad-tab="amount">按金额</div>'
-      +         '<div class="keypad__tab ' + (!isAmount ? 'is-active' : '') + '" data-keypad-tab="rate">按比例</div>'
+      +       '<div class="keypad__segmented ' + segClass + '" data-keypad-segmented>'
+      +         '<div class="keypad__segmented-thumb"></div>'
+      +         '<div class="keypad__segmented-item ' + (isAmount ? 'is-active' : '') + '" data-keypad-tab="amount">加价金额</div>'
+      +         '<div class="keypad__segmented-item ' + (!isAmount ? 'is-active' : '') + '" data-keypad-tab="rate">加价比例</div>'
       +       '</div>'
       +       '<div class="keypad__display">'
       +         '<div class="keypad__display-label" data-keypad-label>' + (isAmount ? '加价金额' : '加价比例') + '</div>'
@@ -516,22 +502,62 @@
       +           (displayValue || '请输入') + '<span class="keypad__display-suffix">' + (isAmount ? '元' : '%') + '</span>'
       +         '</div>'
       +       '</div>'
-      +       '<div class="keypad__keys">'
-      +         '<div class="keypad__key" data-key="1">1</div>'
-      +         '<div class="keypad__key" data-key="2">2</div>'
-      +         '<div class="keypad__key" data-key="3">3</div>'
-      +         '<div class="keypad__key" data-key="4">4</div>'
-      +         '<div class="keypad__key" data-key="5">5</div>'
-      +         '<div class="keypad__key" data-key="6">6</div>'
-      +         '<div class="keypad__key" data-key="7">7</div>'
-      +         '<div class="keypad__key" data-key="8">8</div>'
-      +         '<div class="keypad__key" data-key="9">9</div>'
-      +         '<div class="keypad__key" data-key=".">.</div>'
-      +         '<div class="keypad__key" data-key="0">0</div>'
-      +         '<div class="keypad__key keypad__key--delete" data-key="delete"><i class="wego-iconfont-s icon-shanchu"></i></div>'
+      +       '<div class="keypad__body">'
+      +         '<div class="keypad__keys">'
+      +           '<div class="keypad__key" data-key="1">1</div>'
+      +           '<div class="keypad__key" data-key="2">2</div>'
+      +           '<div class="keypad__key" data-key="3">3</div>'
+      +           '<div class="keypad__key" data-key="4">4</div>'
+      +           '<div class="keypad__key" data-key="5">5</div>'
+      +           '<div class="keypad__key" data-key="6">6</div>'
+      +           '<div class="keypad__key" data-key="7">7</div>'
+      +           '<div class="keypad__key" data-key="8">8</div>'
+      +           '<div class="keypad__key" data-key="9">9</div>'
+      +           '<div class="keypad__key keypad__key--zero" data-key="0">0</div>'
+      +           '<div class="keypad__key" data-key=".">.</div>'
+      +         '</div>'
+      +         '<div class="keypad__side">'
+      +           '<div class="keypad__key keypad__key--delete" data-key="delete"><i class="wego-iconfont-s icon-shanchu"></i></div>'
+      +           '<button class="btn btn--strong keypad__side-confirm" data-keypad-confirm>确定</button>'
+      +         '</div>'
       +       '</div>'
-      +       '<div class="keypad__confirm">'
-      +         '<button class="btn btn--strong btn--lg" data-keypad-confirm>确定</button>'
+      +     '</div>'
+      +   '</div>'
+      + '</div>';
+  }
+
+  // ── 加价卖说明页模板(基于已确认简报组织) ──
+  function buildHelpTemplate() {
+    return ''
+      + '<div class="modal modal--fullscreen" role="dialog" aria-modal="true" data-state="closed" data-component-slug="modal">'
+      +   '<div class="modal__panel">'
+      +     '<div class="modal__title modal__title--default">'
+      +       '<div class="navbar">'
+      +         '<div class="navbar__body">'
+      +           '<div class="navbar__left">'
+      +             '<div class="navbar__left-btn navbar__left-btn--circle" data-help-close><i class="wego-iconfont-s icon-xiajiantou16"></i></div>'
+      +           '</div>'
+      +           '<div class="navbar__center"><span class="navbar__title">加价卖说明</span></div>'
+      +           '<div class="navbar__right"></div>'
+      +         '</div>'
+      +       '</div>'
+      +     '</div>'
+      +     '<div class="modal__body modal__body--safe-bottom resale-help__body">'
+      +       '<div class="resale-help__section">'
+      +         '<h3 class="resale-help__title">什么是加价卖</h3>'
+      +         '<p class="resale-help__text">在供货价基础上加价出售,加价部分即你的佣金收益。可按金额或按比例设置加价。</p>'
+      +       '</div>'
+      +       '<div class="resale-help__section">'
+      +         '<h3 class="resale-help__title">价格计算</h3>'
+      +         '<p class="resale-help__text">我的售价 = 供货价 + 加价;佣金 = 加价金额。按金额与按比例可互转,金额保留 2 位小数。</p>'
+      +       '</div>'
+      +       '<div class="resale-help__section">'
+      +         '<h3 class="resale-help__title">加价范围</h3>'
+      +         '<p class="resale-help__text">加价比例需在 1%-300% 之间,按金额加价时会自动换算为比例校验。</p>'
+      +       '</div>'
+      +       '<div class="resale-help__section">'
+      +         '<h3 class="resale-help__title">佣金保密</h3>'
+      +         '<p class="resale-help__text">帮卖分佣仅自己可见,买家无法查看,可放心分享。</p>'
       +       '</div>'
       +     '</div>'
       +   '</div>'
@@ -541,12 +567,6 @@
   // ── 挂载场景选择页 ──
   function mountSelection(ctx) {
     var root = ctx.root;
-
-    // 返回按钮
-    var backBtn = root.querySelector('[data-back-btn]');
-    if (backBtn) {
-      backBtn.addEventListener('click', function () { ctx.back(); });
-    }
 
     // 场景卡片点击
     var cards = root.querySelectorAll('[data-scene-key]');
@@ -564,7 +584,7 @@
   function openResalePopup(ctx, sample) {
     var template = buildPopupTemplate(sample);
 
-    ctx.openModal(template, {
+    ctx.openSheet(template, {
       label: '帮卖弹窗',
       init: function (overlayCtx) {
         var root = overlayCtx.root;
@@ -573,6 +593,16 @@
         var closeBtn = root.querySelector('[data-popup-close]');
         if (closeBtn) {
           closeBtn.addEventListener('click', function () { ctx.closeOverlay(); });
+        }
+
+        // 标题/问号点击打开说明页(自由定价)
+        var resaleTitle = root.querySelector('[data-resale-title]');
+        var resaleHelp = root.querySelector('[data-resale-help]');
+        if (resaleTitle) {
+          resaleTitle.addEventListener('click', function () { openHelp(ctx); });
+        }
+        if (resaleHelp) {
+          resaleHelp.addEventListener('click', function (e) { e.stopPropagation(); openHelp(ctx); });
         }
 
         // 异常场景按钮
@@ -683,10 +713,30 @@
     });
   }
 
+  // ── 打开加价卖说明页 ──
+  function openHelp(ctx) {
+    ctx.openFullScreenModal(buildHelpTemplate(), {
+      label: '加价卖说明',
+      init: function (overlayCtx) {
+        var root = overlayCtx.root;
+        var closeBtn = root.querySelector('[data-help-close]');
+        if (closeBtn) {
+          closeBtn.addEventListener('click', function () { ctx.closeOverlay(); });
+        }
+      }
+    });
+  }
+
   // 获取用于计算的供货价(区间价取最小值)
   function getSupplyPriceForCalc(sample) {
     if (isRangePrice(sample)) return sample.supply_price[0];
     return sample.supply_price;
+  }
+
+  // 设置字段值(数字 + "元"后缀)
+  function setFieldValue(el, text) {
+    if (!el) return;
+    el.innerHTML = text + '<span class="resale-price__field-suffix">元</span>';
   }
 
   // 更新弹窗价格显示
@@ -709,20 +759,14 @@
       var minPrice = computePrice(minSupply, minAdd);
       var maxPrice = computePrice(maxSupply, maxAdd);
 
-      var priceEl = root.querySelector('[data-display-price]');
-      var commissionEl = root.querySelector('[data-display-commission]');
-
-      if (priceEl) priceEl.textContent = formatPriceRange(minPrice, maxPrice) + '元';
-      if (commissionEl) commissionEl.textContent = formatPriceRange(minAdd, maxAdd) + '元';
+      setFieldValue(root.querySelector('[data-display-price]'), formatPriceRange(minPrice, maxPrice));
+      setFieldValue(root.querySelector('[data-display-commission]'), formatPriceRange(minAdd, maxAdd));
     } else {
       var supplyPrice = sample.supply_price;
       var newPrice = computePrice(supplyPrice, addPrice);
 
-      var priceEl = root.querySelector('[data-price-edit]');
-      var commissionEl = root.querySelector('[data-display-commission]');
-
-      if (priceEl) priceEl.textContent = formatPrice(newPrice);
-      if (commissionEl) commissionEl.textContent = formatPrice(addPrice) + '元';
+      setFieldValue(root.querySelector('[data-price-edit]'), formatPrice(newPrice));
+      setFieldValue(root.querySelector('[data-display-commission]'), formatPrice(addPrice));
     }
   }
 
@@ -732,7 +776,7 @@
     var cleanedValue = initialValue ? String(initialValue).replace(/[^0-9.]/g, '') : '';
     var template = buildKeypadTemplate(keypadMode, cleanedValue);
 
-    ctx.openModal(template, {
+    ctx.openSheet(template, {
       label: '数字键盘',
       init: function (overlayCtx) {
         var root = overlayCtx.root;
@@ -759,7 +803,8 @@
           }
         }
 
-        // Tab 切换
+        // 分段切换控件
+        var segmented = root.querySelector('[data-keypad-segmented]');
         var tabs = root.querySelectorAll('[data-keypad-tab]');
         tabs.forEach(function (tab) {
           tab.addEventListener('click', function () {
@@ -780,6 +825,11 @@
             currentMode = newMode;
             tabs.forEach(function (t) { t.classList.remove('is-active'); });
             tab.classList.add('is-active');
+            // 同步滑动 thumb 位置
+            if (segmented) {
+              segmented.classList.toggle('is-amount', currentMode === 'amount');
+              segmented.classList.toggle('is-rate', currentMode === 'rate');
+            }
             updateDisplay();
           });
         });
@@ -924,9 +974,7 @@
   <div class="layout-page__top">
     <div class="navbar" data-component-slug="navbar">
       <div class="navbar__body navbar__body--spaced">
-        <div class="navbar__left">
-          <div class="navbar__left-btn" data-back-btn><i class="wego-iconfont-s icon-fanhui"></i></div>
-        </div>
+        <div class="navbar__left"></div>
         <div class="navbar__center"><span class="navbar__title">代理商帮卖弹窗</span></div>
         <div class="navbar__right"></div>
       </div>
@@ -1073,7 +1121,7 @@
     </div>
   </div>
 </div>`,
-    presentation: { type: 'push' },
+    presentation: { type: 'push', coversTabBar: true },
     init: function (ctx) {
       mountSelection(ctx);
     }
