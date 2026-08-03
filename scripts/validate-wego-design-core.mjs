@@ -100,7 +100,9 @@ function checkSkillFlow() {
   requireFiles([
     '.codex/skills/wego-product/SKILL.md',
     '.codex/skills/wego-design/SKILL.md',
-    '.codex/skills/wego-uxsystem-iterate/SKILL.md'
+    '.codex/skills/wego-uxsystem-iterate/SKILL.md',
+    '.codex/skills/wego-github-delivery/SKILL.md',
+    '.codex/skills/wego-github-delivery/references/github-delivery-rules.md'
   ]);
 }
 
