@@ -6,7 +6,7 @@
   "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "轻量状态角标，收敛为红点、数字、文字、移除四类；默认附着在宿主右上角，文字类默认绿色并支持用 CSS 变量自定义颜色；营销场景（直播、帮卖、补贴等）可通过 --badge-text-bg: var(--status-promotion-default) 使用营销橙背景。",
+  "description": "轻量状态角标，收敛为红点、数字、文字、移除四类；默认附着在宿主右上角，只表达提醒状态，不承载主业务数据；文字类默认绿色并支持用 CSS 变量自定义颜色；营销场景（直播、帮卖、补贴等）可通过 --badge-text-bg: var(--status-promotion-default) 使用营销橙背景。",
   "semanticTypeCandidates": [
     "badge",
     "notification-dot",
@@ -82,30 +82,37 @@
   "structurePatterns": [
     "默认业务挂载使用 corner，Badge 绝对定位在宿主右上角，宿主需提供 position: relative。",
     "corner 模式通过 transform 让角标向右上溢出宿主边界，宿主及其祖先链的 overflow 必须保持 visible；任何 overflow 非 visible 的祖先（如 layout-scroll-row、wg-tabs--scroll、card、cell、avatar 等）都会裁剪角标，且 z-index 无法跨越 overflow 裁剪边界。",
-    "若宿主位于滚动或裁剪容器内，应改用 inline 模式，或将 badge 挂到溢出容器之外的祖先上；不要通过提高 z-index 或调小 transform 偏移来「绕过」裁剪。",
+    "inline 只用于用户明确要求与文字并排行内展示，或真实滚动/裁剪容器无法安全承载 corner 且角标不能外移挂载的例外场景；默认不要主动选择 inline。",
+    "若宿主位于滚动或裁剪容器内，优先将 badge 挂到溢出容器之外的可见祖先上；只有无法外移且业务接受行内提醒时才改用 inline；不要通过提高 z-index 或调小 transform 偏移来「绕过」裁剪。",
+    "不要使用 badge--inline 再由业务 CSS 绝对定位到右上角；需要右上角视觉时必须使用 badge--corner。",
+    "数字 badge 只表示未读、待处理、新增等提醒数量；数据栏、资产栏、统计项已经展示主数量时，不要再叠加相同业务含义的数字 badge。",
     "dot 在 corner 下使用更贴边的偏移规则，与宿主形成约 1-2px 的轻微重叠。",
     "文字类在 corner 下直接使用左上、右上、右下 8px 与左下 1px 的圆角轮廓，在 inline 下固定为跑道圆胶囊形。",
     "营销场景（直播、帮卖、补贴等）追加 badge--text-promotion 修饰类即可使用营销橙背景 + 白色文字预设；该修饰类仅适用于 text 类型，与 placement/overflow 维度正交。"
   ],
   "behavior": {
     "defaultPlacement": "未显式指定时按 corner 语义处理，默认显示在宿主右上角。",
-    "hostOverflowRule": "corner 模式要求宿主及所有祖先 overflow 为 visible；宿主或祖先为 overflow:hidden/auto/scroll 时角标会被裁剪，此时必须改用 inline 模式或将 badge 挂到溢出容器之外的祖先上。",
-    "inlineRule": "inline 模式不使用绝对定位，只与文字、按钮或列表内容并排展示；是受限容器（横滑、滚动标签栏、card、cell、avatar 等）内唯一可用的 badge 模式。",
+    "hostOverflowRule": "corner 模式要求宿主及所有祖先 overflow 为 visible；宿主或祖先为 overflow:hidden/auto/scroll 时角标会被裁剪，此时优先将 badge 挂到溢出容器之外的祖先上，无法外移且业务接受行内提醒时才使用 inline。",
+    "inlineRule": "inline 模式不使用绝对定位，只与文字、按钮或列表内容并排展示；仅在用户明确要求行内展示，或受限容器无法安全承载 corner 且不能外移挂载时使用。",
+    "dataRule": "badge 只表达附加提醒状态，不承载主业务数据；同一个数据含义已经在数据栏、资产栏或统计项中展示时，不要再用数字 badge 重复展示。",
     "textColorModel": "文字类默认背景色为 var(--accent-green)，可通过 --badge-text-bg 和 --badge-text-color 覆盖任意颜色；营销场景（直播、帮卖、补贴等）可直接追加 badge--text-promotion 修饰类使用营销橙预设 var(--status-promotion-default) + 白色文字。",
     "scrollable": "仅文字类支持 scrollable，默认宽度 32px，可通过 --badge-scroll-width 覆盖；交互为双轨道拼接的持续向左无缝循环轮播。"
   },
   "accessibility": {
     "hostRule": "corner 模式依附宿主元素展示，不单独承担可点击主操作语义。",
-    "contentRule": "数字类优先用于未读数和数量提醒，文字类保持短词短句，自定义颜色时需保证文本对比度。"
+    "contentRule": "数字类优先用于未读、待处理、新增等提醒数量，不用于重复展示主业务数据；文字类保持短词短句，自定义颜色时需保证文本对比度。"
   },
   "usageHints": [
-    "dot 用于轻提醒，number 用于未读或数量，text 用于新品、热卖、补贴等短标签，remove 用于可移除标记。",
-    "在导航、头像、图片卡片上优先使用 corner；在文本旁、按钮旁、列表操作区优先使用 inline。",
-    "在 layout-scroll-row、wg-tabs--scroll、card、cell、avatar 等 overflow 受限容器或其内部元素上不要使用 badge--corner；这类场景应改用 badge--inline 紧贴 label 或图标，或将 badge 挂到溢出容器之外的祖先上。"
+    "dot 用于轻提醒，number 用于未读、待处理、新增等提醒数量，text 用于新品、热卖、补贴等短标签，remove 用于可移除标记。",
+    "在导航、头像、图片卡片、资产入口图标上默认使用 corner；只有明确需要跟文字并排时才使用 inline。",
+    "数据栏、资产栏、统计项已经展示主数量时，不要再使用数字 badge 展示同一个数量，避免用户看到重复数据。",
+    "在 layout-scroll-row、wg-tabs--scroll、card、cell、avatar 等 overflow 受限容器或其内部元素上不要使用 badge--corner；优先外移挂载到可见祖先，只有无法外移且业务接受行内提醒时才使用 badge--inline。"
   ],
   "doNotInvent": [
     "不要把 badge 扩成长句横幅、统计面板或多行提示气泡。",
     "不要在 inline 模式叠加角标定位类，也不要用 remove 替代真正的关闭按钮。",
+    "不要用 badge--inline 再通过业务 CSS 绝对定位成右上角角标。",
+    "不要用数字 badge 重复承载数据栏、资产栏、统计项已经展示过的主业务数据。",
     "不要把 badge--corner 挂在 overflow 非 visible 的容器或其内部元素上，也不要通过提高 z-index 或调小 transform 偏移来绕过裁剪。"
   ],
   "domAnatomy": {

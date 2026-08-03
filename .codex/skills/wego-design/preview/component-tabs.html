@@ -219,7 +219,7 @@
 <body>
 <div class="pv-header">
   <h1>标签栏 Tabs</h1>
-  <p>同一页面层级内的内容分类切换，支持均分、横向滚动、紧凑尺寸和可选图标。</p>
+  <p>同一页面层级内的内容分类切换，支持均分、横向滚动、紧凑尺寸和可选图标；个人中心和内容分区优先使用 mini。</p>
 </div>
 
 <div class="pv-section__title">standard + divide</div>
@@ -292,6 +292,24 @@
       </button>
       <button class="wg-tabs__item" role="tab" aria-selected="false" type="button">
         <span class="wg-tabs__content"><span class="wg-tabs__label">直播专场</span></span>
+      </button>
+      <span class="wg-tabs__active-indicator" aria-hidden="true"></span>
+    </div>
+  </div>
+</div>
+
+<div class="pv-section__title">mini + divide（内容分区默认）</div>
+<div class="variant-card variant-card--flush">
+  <div class="wg-tabs wg-tabs--mini wg-tabs--divide" role="tablist">
+    <div class="wg-tabs__scroll">
+      <button class="wg-tabs__item" role="tab" aria-selected="true" type="button">
+        <span class="wg-tabs__content"><span class="wg-tabs__label">产品</span></span>
+      </button>
+      <button class="wg-tabs__item" role="tab" aria-selected="false" type="button">
+        <span class="wg-tabs__content"><span class="wg-tabs__label">笔记</span></span>
+      </button>
+      <button class="wg-tabs__item" role="tab" aria-selected="false" type="button">
+        <span class="wg-tabs__content"><span class="wg-tabs__label">直播</span></span>
       </button>
       <span class="wg-tabs__active-indicator" aria-hidden="true"></span>
     </div>

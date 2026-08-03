@@ -45,6 +45,11 @@
     },
     {
       "size": "mini",
+      "layout": "divide",
+      "icon": "none"
+    },
+    {
+      "size": "mini",
       "layout": "scroll",
       "icon": "none"
     },
@@ -107,7 +112,8 @@
     "每个标签必须使用 button.wg-tabs__item[role='tab']，选中态只通过 aria-selected='true' 表达。",
     "每个 item 内必须保留 .wg-tabs__content，活动指示条依赖该内容容器计算文本或图标组合的宽度与位置。",
     "每组 tabs 只能有一个 .wg-tabs__active-indicator，并放在 .wg-tabs__scroll 内，与所有 item 同级。",
-    "mini 尺寸默认用于 scroll 布局；首个 mini item 可加 .wg-tabs__item--first 保持左侧起始留白。",
+    "mini 尺寸默认用于个人中心、工具区下方、内容区分组等轻量分类；可与 divide 或 scroll 布局组合，scroll 下首个 mini item 可加 .wg-tabs__item--first 保持左侧起始留白。",
+    "standard 尺寸只用于更强页面层级或主内容切换；不要把 standard 当作普通内容分区的默认尺寸。",
     "尺寸修饰类提供确定高度：.wg-tabs--standard 固定 height: 56px，.wg-tabs--mini 固定 height: 48px；item 与 content 使用 height: auto，通过 .wg-tabs__scroll 的 align-items: stretch 垂直对齐。嵌入 navbar 等固定高度容器时，navbar custom 槽位内的 .wg-tabs 被覆盖为 height: 100% 以跟随容器高度。"
   ],
   "behavior": {
@@ -121,8 +127,9 @@
     "keyboardRule": "宿主若实现键盘切换，应同步更新 aria-selected 与活动指示条。"
   },
   "usageHints": [
-    "standard 尺寸：默认高度 56px，label 使用 16px，indicator 高 3px；item 与 content 使用 height: auto，通过 scroll 的 align-items: stretch 垂直对齐到 56px。",
-    "mini 尺寸：默认高度 48px，label 使用 14px，indicator 高 2px；item 与 content 使用 height: auto，通过 scroll 的 align-items: stretch 垂直对齐到 48px。",
+    "standard 尺寸：默认高度 56px，label 使用 16px，indicator 高 3px；只用于更强页面层级或主内容切换。",
+    "mini 尺寸：默认高度 48px，label 使用 14px，indicator 高 2px；个人中心、工具区下方、内容区分组等轻量分类优先使用 mini。",
+    "我的 Tab 这类个人中心内容区内的「产品/笔记/直播」分类应使用 mini；若只有 2-5 个短标签可用 mini + divide，标签更多或需要横滑时用 mini + scroll。",
     "tabs 嵌入 navbar 等固定高度容器时，navbar custom 槽位内的 .wg-tabs 被覆盖为 height: 100% 以跟随容器高度；host-tab 的中间 tabs 使用三段式 .navbar__center--custom，左右槽继续承担占位与页面级操作。",
     "选中态文字和图标使用 --text-default，未选态使用 --text-secondary，指示条固定使用 --bg-brand。",
     "图标只使用 .wg-tabs__icon，放在 label 左侧或右侧，颜色跟随当前标签状态。",
@@ -151,6 +158,7 @@
     "不要在 scroll 模式下给 item 设置固定宽度。",
     "不要修改 label 的单行截断策略。",
     "不要为了右箭头贴近文字而改变 icon-left 场景的图标与文字间距。",
+    "不要在个人中心、工具区下方、内容区分组等轻量分类中默认使用 standard 尺寸。",
     "不要把 tabs 当作底部主导航或方块选择项使用。",
     "不要把 tabs 用作数据筛选、排序条件或列表过滤开关；行内筛选请使用 tag，方块选项请使用 stack，下拉筛选请使用 popmenu。"
   ],

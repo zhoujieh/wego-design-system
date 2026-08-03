@@ -20,7 +20,11 @@
       flex-direction: column;
       gap: var(--spacer-8);
     }
-    .demo-stack--tight { gap: var(--spacer-12); }
+    .demo-stack--media {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacer-12);
+    }
     .demo-card {
       width: 100%;
       max-width: 320px;
@@ -59,7 +63,7 @@
       overflow: hidden;
       flex-shrink: 0;
       background: var(--wg-skeleton-bg);
-      border-radius: var(--radius-6);
+      border-radius: var(--radius-4);
     }
     .wg-skeleton::after {
       content: "";
@@ -74,7 +78,7 @@
       border-radius: var(--radius-4);
     }
     .wg-skeleton--rect {
-      border-radius: var(--radius-8);
+      border-radius: var(--radius-4);
     }
     .wg-skeleton--circle {
       border-radius: var(--radius-full);
@@ -192,6 +196,20 @@
           <span class="wg-skeleton wg-skeleton--text" style="width:40%"></span>
           <span class="wg-skeleton wg-skeleton--text" style="width:100%"></span>
           <span class="wg-skeleton wg-skeleton--text" style="width:75%"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <span class="label">上下排版</span>
+      <div class="demo-card">
+        <div class="demo-stack--media">
+          <span class="wg-skeleton wg-skeleton--rect" style="width:100%;height:120px"></span>
+          <div class="demo-stack">
+            <span class="wg-skeleton wg-skeleton--text" style="width:72%;height:18px"></span>
+            <span class="wg-skeleton wg-skeleton--text" style="width:96%"></span>
+            <span class="wg-skeleton wg-skeleton--text" style="width:64%"></span>
+          </div>
         </div>
       </div>
     </div>

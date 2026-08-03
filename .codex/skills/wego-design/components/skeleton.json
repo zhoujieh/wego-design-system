@@ -61,9 +61,10 @@
   "structurePatterns": [
     "形状、尺寸、动画全部由修饰类叠加在同一根节点上，不额外发明宿主层级。",
     "文本行使用 .wg-skeleton--text，默认 14px 高、4px 圆角，宽度由宿主 width 或外层布局决定。",
-    "矩形区域使用 .wg-skeleton--rect，圆角 8px，宽高由宿主或 size 修饰类决定。",
+    "矩形区域使用 .wg-skeleton--rect，圆角 4px，宽高由宿主或 size 修饰类决定。",
     "圆形头像使用 .wg-skeleton--circle，配合 size 修饰类或宿主尺寸。",
-    "多行文本骨架由多个 .wg-skeleton--text 块垂直堆叠组成，最后一行可通过更窄 width 模拟自然段落收尾，禁止为此发明容器组件。",
+    "多行文本骨架由多个 .wg-skeleton--text 块垂直堆叠组成，最后一行可通过更窄 width 模拟自然段落收尾，行与行之间必须由外层 gap 预留稳定间距，禁止为此发明容器组件。",
+    "上下排版骨架中，图片/矩形骨架与下方文本骨架之间必须由外层 gap 或 padding 预留间距，不要让两个骨架块直接贴合。",
     "shimmer 动画节奏与 image 组件 .wg-image--loading 完全一致（1.2s ease-in-out infinite），保证整页骨架节奏统一。"
   ],
   "behavior": {
@@ -78,6 +79,7 @@
   "usageHints": [
     "文本段落骨架：用多个 .wg-skeleton--text 堆叠，行间距由外层 gap 控制，末行 width 收窄模拟自然换行。",
     "图片/卡片区域骨架：用 .wg-skeleton--rect 配合容器尺寸，或直接用 .wg-skeleton--lg 等预设尺寸。",
+    "上下排版骨架：图片/矩形块与文本组之间至少使用外层 gap 或 padding 分隔，文本组内部也使用 gap 分隔每一行。",
     "头像骨架：用 .wg-skeleton--circle 配合 .wg-skeleton--sm 或 .wg-skeleton--md。",
     "页面级骨架结构应与真实内容结构一一对应：navbar、卡片、列表项、底部操作栏各自映射对应骨架块，避免随意堆砌。",
     "image 组件已有自带 .wg-image--loading 骨架，页面级骨架不得再包裹 image，应让 image 自行处理其加载态。",
@@ -87,6 +89,7 @@
     "不要把 skeleton 扩成进度条、spinner 或加载百分比组件。",
     "不要在骨架块上承载真实交互、文字或图标。",
     "不要给骨架加边框、阴影或非中性色，避免与最终内容视觉冲突。",
+    "不要让上下排版的骨架块直接贴在一起，必须通过外层布局留出稳定间距。",
     "不要新发明动画曲线或时长，必须复用 image 组件 shimmer 节奏。",
     "不要把骨架当作空状态或错误占位，那是 empty/error 组件的职责。"
   ],
@@ -120,8 +123,6 @@
     "--bg-skeleton",
     "--palette-neutral-100",
     "--radius-4",
-    "--radius-6",
-    "--radius-8",
     "--radius-full",
     "--size-104",
     "--size-32",
