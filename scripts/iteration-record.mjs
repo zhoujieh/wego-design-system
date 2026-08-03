@@ -615,6 +615,31 @@ function applyInvalidation(record, stage) {
     record.stage_outputs.design.valid = false;
   }
 }
+function migrateLegacyRecord(record) {
+  if (record.schemaVersion !== 5) fail('migrate 只支持 schemaVersion 5 的迭代记录');
+  record.schemaVersion = 6;
+  if (!Object.hasOwn(record, 'prototype_submission')) record.prototype_submission = null;
+  if (record.status === 'awaiting-prototype-confirmation') {
+    // 旧记录没有提交指纹，不能将其视为已经验收；回到可重新提交状态。
+    record.status = 'prototyping';
+    record.prototype_submission = null;
+    record.prototype_confirmation = null;
+    record.stage_outputs.design.valid = false;
+  } else if (['prototype-confirmed', 'frozen'].includes(record.status)) {
+    if (!isPlainObject(record.prototype_confirmation)) {
+      fail('已确认或冻结的旧迭代缺少 prototype_confirmation，无法安全迁移');
+    }
+    record.prototype_submission = { ...record.prototype_confirmation, fingerprints: { ...record.prototype_confirmation.fingerprints } };
+  }
+}
+function migrate() {
+  const file = requireFile();
+  const record = load(file);
+  migrateLegacyRecord(record);
+  const errors = validate(record, file);
+  if (errors.length) fail(`migrate 后记录非法，未写入文件：\n${errors.join('\n')}`);
+  save(file, record, 'migrate');
+}
 function freeze() {
   const file = requireFile();
   const record = load(file);
@@ -748,6 +773,11 @@ function test() {
   prototypeInvalidation.stage_outputs.design.valid = true;
   applyInvalidation(prototypeInvalidation, 'prototype');
   assert(prototypeInvalidation.scope_revision === 1 && prototypeInvalidation.prototype_submission === null && !validate(prototypeInvalidation, 'sample').length, 'prototype 失效必须清除提交快照且不破坏已确认的 scope_revision');
+  const legacyAwaitingPrototype = clone(awaitingPrototype);
+  legacyAwaitingPrototype.schemaVersion = 5;
+  delete legacyAwaitingPrototype.prototype_submission;
+  migrateLegacyRecord(legacyAwaitingPrototype);
+  assert(legacyAwaitingPrototype.status === 'prototyping' && legacyAwaitingPrototype.schemaVersion === 6 && legacyAwaitingPrototype.prototype_submission === null && !validate(legacyAwaitingPrototype, 'sample').length, '旧待验收迭代迁移后必须回到可重新提交状态');
   const briefInvalidation = clone(prototyping);
   applyInvalidation(briefInvalidation, 'brief');
   assert(briefInvalidation.scope_revision === 2 && briefInvalidation.brief_submission === null && briefInvalidation.brief_confirmation === null, 'brief 失效必须递增版本并清除提交与确认快照');
@@ -960,6 +990,7 @@ switch (command) {
     record.prototype_confirmation = createPrototypeConfirmation(record);
   }); break;
   case 'freeze': freeze(); break;
+  case 'migrate': migrate(); break;
   case 'invalidate': {
     const stage = value('--stage');
     if (!['brief', 'prototype'].includes(stage)) fail('invalidate 需要 --stage brief|prototype 或 --stage=brief|prototype');
@@ -977,5 +1008,5 @@ switch (command) {
   }
   case 'check': check(); break;
   case 'test': test(); break;
-  default: fail('用法：init|submit-brief|confirm-brief --user-confirmed-brief <iteration_id>|submit-prototype|confirm-prototype --user-confirmed-prototype <iteration_id>|invalidate|freeze --user-confirmed-freeze <iteration_id>|check|test');
+  default: fail('用法：init|submit-brief|confirm-brief --user-confirmed-brief <iteration_id>|submit-prototype|confirm-prototype --user-confirmed-prototype <iteration_id>|invalidate|migrate|freeze --user-confirmed-freeze <iteration_id>|check|test');
 }
