@@ -17,7 +17,7 @@ description: 审查或迭代微购设计系统、组件、Preview、UI Kit、消
 ## 按需读取
 
 - 组件、Token、Preview 或 UI Kit：读[组件与 UI Kit 迭代](./references/workflow.md)、[资源同步矩阵](./references/sync-matrix.runtime.md)及受影响的权威源和消费者。
-- 消费规则、守卫或系统缺口：只读直接受影响的规则、源码和运行时消费者。
+- 消费规则、守卫或系统缺口：只读直接受影响的规则、源码和运行时消费者。涉及分支、PR、预览或交付收口时，同步读取 `wego-github-delivery` 的交付规则。
 - 用户明确要求总结、登记、升级或清理经验：读[工作流迭代](./references/workflow-iteration.md)、[工作流同步矩阵](./references/sync-matrix.md)和唯一候选数据源 `.codex/skills/wego-uxsystem-iterate/experience/candidates.json`。
 
 ## 输出与交接

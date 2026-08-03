@@ -56,6 +56,7 @@
 - 所有开发任务默认使用独立分支，禁止直接提交 `main`。
 <!-- rule-id: workflow-maintenance-commits-directly-to-main -->
 - **工作流维护例外**：由 `wego-uxsystem-iterate` 技能执行的 AGENTS.md、SKILL.md、`references/` 和 `experience/` 等权威源维护，可直接提交到 `main`，无需独立分支；提交前仍需运行 `node scripts/validate-wego-design.mjs --scope=system --strict`。
+- 分支、PR、预览和清理由 `wego-github-delivery` 执行；新建对话不等于新分支，同一交付单元必须复用同一开放 PR。
 - 只暂存本次任务的显式路径，不执行 `git add -A`，不强推已有远端分支。
 - 原型实现和自动验证完成后，默认提交并推送当前功能分支，创建或更新 PR，并提供当前 PR 的独立验收链接。
 - PR 预览链接用于验收当前任务；`main` 的 GitHub Pages 链接只展示已经验收并合并的稳定版本。
@@ -69,11 +70,11 @@
 
 多个人各自驱动自己的 Agent 会话、并发迭代同一仓库。Agent 之间不对话，协调只发生在仓库层面：谁的 Agent 碰了什么，由仓库状态体现，别的 Agent 来读。
 
-- **分支与 PR**：每人/每需求使用 `feature/<owner>-<scene>` 分支；实现和验证完成后提交并推送当前分支、创建或更新 PR，通过独立 PR 预览链接验收；只有用户明确验收通过后才合并到 `main`。
+- **分支与 PR**：一个可验收交付单元对应一个开放 PR 和 `feature/<owner>-<task>` 分支；新会话先检查同一交付单元的开放 PR 与场景认领，命中即复用原分支。实现和验证完成后提交并推送当前分支、创建或更新 PR，通过独立 PR 预览链接验收；只有用户明确验收通过后才合并到 `main`。PR 合并或关闭后默认删除本地和远端分支，只有 `keep-branch` 标签可例外保留。
 <!-- rule-id: agent-must-pull-before-task-start -->
 - **开工前先拉取**：每次新会话/新任务开始前执行 `git pull --rebase origin main`，确保基于最新 `main`；创建 PR 前再次 rebase 到最新 `main` 并解决冲突。
 <!-- rule-id: scene-must-claim-before-edit -->
-- **场景认领（强制前置）**：开工前必须在 `claims/<agent-id>.json` 认领本次负责的场景目录，记录当前 `branch`，并运行 `node scripts/validate-claims.mjs` 确认无冲突；不判断是否并发，单人开发也必须认领。认领期间场景目录由该 Agent 独占，他人不得修改。完成后把 `status` 改为 `released`/`done` 释放；CI 按 PR 分支核对所有场景目录变更均有对应认领。
+- **场景认领（强制前置）**：开工前必须在 `claims/<agent-id>.json` 认领本次负责的场景目录并记录当前 `branch`，再运行 `node scripts/validate-claims.mjs` 确认无冲突；不判断是否并发，单人开发也必须认领。认领期间场景目录由该 Agent 独占，他人不得修改。完成后把 `status` 改为 `released`/`done` 释放；CI 按 PR 分支核对所有场景目录变更均有对应认领。
 - **路由生成式**：新增或修改场景路由时只编辑其目录下的 `route.json`，再运行 `node scripts/build-routes.mjs` 重新生成 `wego-app/js/routes.js`；**不要手改 `routes.js`**，CI 以 `build-routes.mjs --check` 校验一致性。
 - **设计系统单写**：`wego-app/lib/` 与 `components.css` 是生成物；仅执行 `wego-uxsystem-iterate` 任务的 Agent 可改 `.codex/skills/wego-design/` 权威源并运行 `sync-wego-app-lib.mjs`，其它 Agent 只读消费，不得改源。
 - 普通改动运行 `node scripts/validate-wego-design.mjs`。

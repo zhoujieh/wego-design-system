@@ -9,6 +9,8 @@
 - 经验文件必须位于 `.codex/skills/wego-uxsystem-iterate/` 内，唯一候选数据源为 `.codex/skills/wego-uxsystem-iterate/experience/candidates.json`。
 - 禁止在仓库根目录或其它技能下创建 `experience/`、`candidates.json`、经验记录或任何候选池副本；相对路径不得作为写入目标。
 - 用户要求总结本次任务经验时，先基于本次任务事实提取问题，再分类、去重并写入候选池。
+<!-- rule-id: experience-summary-must-default-observe -->
+- 用户只要求总结、登记或沉淀经验时，默认将有效候选登记为 `observing`，不得询问是否直接升级；只有候选达到升级阈值时才提示用户确认是否升级。用户主动明确要求立即升级时，按正式升级流程处理。
 - 用户确认升级前，不得修改正式规则、组件、Token、Preview、守卫或工作流权威源。
 - 已有同义规则时只修正唯一权威源，不新增平行表述。
 - 单场景特例、普通代码错误、无复用价值的局部调整不得进入候选池。
@@ -91,9 +93,9 @@
 2. 排除普通代码错误、需求临时变化、单次视觉微调和没有证据的 AI 自审判断。
 3. 为每个有效问题确定 `category`、`type`、归属技能、拟落点和证据。**分类为沉淀流程的强制产物，不得跳过。**
 4. 登记候选前必须回溯已落地规则：检查问题是否与已升级的正式规则相关。若相关，归因到 `rule-execution-failure`（规则未被执行），不得重新归因到"缺规则"。
-5. 直接询问用户选择：`直接升级` 或 `沉淀继续观察`。
-6. 用户选择 `直接升级`：登记候选为 `proposed`，执行正式升级，修改唯一权威源，验证通过后从候选池删除。
-7. 用户选择 `沉淀继续观察`：读取 `.codex/skills/wego-uxsystem-iterate/experience/candidates.json`，按 `normalizedKey` 去重。命中已有候选时 `occurrenceCount +1` 并合并证据和场景；新候选 `occurrenceCount` 初始为 1。当 `occurrenceCount` 达到 3 时，状态自动改为 `proposed`；本次总结输出时必须明确告知用户该候选已达到升级阈值，并询问是否升级。将新增或更新后的候选写回唯一数据源。
+5. 用户只要求总结、登记或沉淀时，直接读取 `.codex/skills/wego-uxsystem-iterate/experience/candidates.json`，按 `normalizedKey` 去重并沉淀，不再询问是否直接升级。
+6. 命中已有候选时 `occurrenceCount +1` 并合并证据和场景；新候选 `occurrenceCount` 初始为 1，默认状态为 `observing`。将新增或更新后的候选写回唯一数据源。
+7. 当 `occurrenceCount` 达到 3 时，状态自动改为 `proposed`；本次总结输出时必须明确告知用户该候选已达到升级阈值，并询问是否升级。用户主动明确要求立即升级时，登记候选为 `proposed`，执行正式升级，修改唯一权威源，验证通过后从候选池删除。
 
 "全部升级"等批量指令必须逐条按本流程处理，不构成跳过分类与候选池的快捷路径。
 
@@ -102,10 +104,11 @@
 - `observing`：已登记，继续收集证据。
 - `proposed`：证据和影响范围清楚，建议用户确认升级。
 
-用户选择：
+处理方式：
 
-- `直接升级`：登记候选为 `proposed`，更新唯一权威源和直接消费者，能客观验证时补守卫，验证通过后从候选池删除。
-- `沉淀继续观察`：登记候选为 `observing`，保留候选并继续收集证据；`occurrenceCount` 达到 3 时自动改为 `proposed` 并提醒用户是否升级。
+- 默认沉淀：用户只要求总结、登记或沉淀时，登记候选为 `observing`，保留候选并继续收集证据，不询问是否直接升级。
+- 达到阈值：`occurrenceCount` 达到 3 时自动改为 `proposed`，并提醒用户确认是否升级。
+- 明确升级：用户主动要求立即升级时，登记候选为 `proposed`，更新唯一权威源和直接消费者，能客观验证时补守卫，验证通过后从候选池删除。
 
 ## 候选数据要求
 

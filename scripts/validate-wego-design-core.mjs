@@ -108,7 +108,9 @@ function checkSkillFlow() {
     '.codex/skills/wego-design/references/library-map.md',
     '.codex/skills/wego-design/references/scene-contract.md',
     '.codex/skills/wego-uxsystem-iterate/SKILL.md',
-    '.codex/skills/wego-uxsystem-iterate/references/sync-matrix.md'
+    '.codex/skills/wego-uxsystem-iterate/references/sync-matrix.md',
+    '.codex/skills/wego-github-delivery/SKILL.md',
+    '.codex/skills/wego-github-delivery/references/github-delivery-rules.md'
   ];
   requireFiles(workflowFiles);
   for (const file of workflowFiles.filter(exists)) {
