@@ -64,6 +64,105 @@
       "status": "observing",
       "createdAt": "2026-07-31T13:00:00.000Z",
       "updatedAt": "2026-07-31T13:00:00.000Z"
+    },
+    {
+      "id": "exp-20260803-001",
+      "normalizedKey": "brand-color-neutral-priority-rule-execution-failure",
+      "category": "execution",
+      "type": "rule-execution-failure",
+      "ownerSkill": "wego-design",
+      "problem": "「我的」Tab 初版在会员信息、云空间进度和数据资产入口中重复使用品牌绿，导致品牌色从核心行动扩散为普通装饰，削弱了发布入口与选中态的视觉优先级。",
+      "rootCause": "正式规则 wego-aesthetics-neutral-priority 已明确品牌色只强化主行动，但页面实现和验收时未按该规则检查品牌色覆盖范围。",
+      "resolution": "当前场景已将会员信息改为会员金、普通资产入口改为中性色，仅在选中态和核心发布操作保留品牌绿；继续观察其他场景是否存在同类规则执行问题。",
+      "targetAuthority": ".codex/skills/shared/references/design-principles.md#wego-aesthetics-neutral-priority",
+      "evidence": [
+        {
+          "scene": "我的",
+          "fact": "用户反馈：品牌绿色滥用。"
+        },
+        {
+          "scene": "我的",
+          "fact": "初版会员图标、云空间进度和数据资产图标同时使用品牌色；修正后会员语义改用金色、普通入口改用中性色，品牌绿只保留给核心行动和选中态。"
+        },
+        {
+          "scene": "我的",
+          "fact": "现有设计原则已规定中性表面优先、品牌色只强化主行动，因此本问题属于正式规则未被执行，而非缺少新规则。"
+        }
+      ],
+      "relatedRuleId": "wego-aesthetics-neutral-priority",
+      "scenes": [
+        "我的"
+      ],
+      "occurrenceCount": 1,
+      "status": "observing",
+      "createdAt": "2026-08-03T08:11:16.000Z",
+      "updatedAt": "2026-08-03T08:11:16.000Z"
+    },
+    {
+      "id": "exp-20260803-002",
+      "normalizedKey": "floating-primary-publish-action-pattern-missing",
+      "category": "design",
+      "type": "interaction-pattern-gap",
+      "ownerSkill": "wego-uxsystem-iterate",
+      "problem": "设计系统没有明确的移动端悬浮主行动范式。「我的」Tab 初版将发布入口实现为右下角长条绿色「+ 发布」按钮，虽然醒目，但用户难以按常规悬浮发布入口识别其行为。",
+      "resolution": "当前场景已复用正式按钮能力，将入口调整为右下角 48px 圆形纯图标发布 FAB；继续观察是否需要把位置、尺寸、图标、避让和反馈统一为正式范式。",
+      "targetAuthority": ".codex/skills/wego-design/components/button.json、preview/component-button.html 或 uikit-plan.json（待升级时确定唯一落点）",
+      "evidence": [
+        {
+          "scene": "我的",
+          "fact": "用户反馈：发布悬浮入口不符合常规认知。"
+        },
+        {
+          "scene": "我的",
+          "fact": "初版使用右下角长条绿色文字按钮；修正后采用圆形纯图标悬浮入口，并保留其核心发布操作的最高视觉优先级。"
+        },
+        {
+          "scene": "我的",
+          "fact": "现有 button 组件提供纯图标能力，但未定义移动端悬浮主行动的形态、位置和避让规则，场景仍需自行组合。"
+        }
+      ],
+      "scenes": [
+        "我的"
+      ],
+      "occurrenceCount": 1,
+      "status": "observing",
+      "createdAt": "2026-08-03T08:11:16.000Z",
+      "updatedAt": "2026-08-03T08:11:16.000Z"
+    },
+    {
+      "id": "exp-20260803-003",
+      "normalizedKey": "scene-skeleton-real-dom-coverage-validation-missing",
+      "category": "validation",
+      "type": "validation-coverage-gap",
+      "ownerSkill": "wego-uxsystem-iterate",
+      "problem": "场景骨架屏可以在只覆盖部分动态区域、结构与真实 DOM 明显不一致的情况下通过现有验证。「我的」Tab 刷新时导航、会员栏、类型 Tab 和工具区等区域缺少对应占位，导致内容加载前后发生页面跳动。",
+      "resolution": "当前场景已按真实页面可见 DOM 生成显式一比一骨架，并在 375px 与 393px 视口检查稳定性；继续观察是否需要扩展生成器覆盖范围和运行时守卫。",
+      "targetAuthority": ".codex/skills/wego-design/references/scene-contract.md、scripts/generate-scene-skeleton.mjs 与 scripts/validate-scene-runtime.mjs（待升级时确定唯一落点）",
+      "evidence": [
+        {
+          "scene": "我的",
+          "fact": "用户反馈：骨架屏没有按照真实 DOM 结构生成，只有部分内容有骨架，刷新时页面会跳动不稳定。"
+        },
+        {
+          "scene": "我的",
+          "fact": "原通用骨架只向动态区域写入三行文本占位，未覆盖导航、会员、类型 Tab、工具区和首屏内容卡片等真实结构。"
+        },
+        {
+          "scene": "我的",
+          "fact": "现有源码和运行时校验在该问题修正前仍能通过，说明验证没有覆盖骨架与真实 DOM 的结构一致性及加载前后布局稳定性。"
+        },
+        {
+          "scene": "我的",
+          "fact": "修正后显式骨架由 375px 视口下的 60 个可见真实 DOM 节点采样生成，并补充 393px 视口检查。"
+        }
+      ],
+      "scenes": [
+        "我的"
+      ],
+      "occurrenceCount": 1,
+      "status": "observing",
+      "createdAt": "2026-08-03T08:11:16.000Z",
+      "updatedAt": "2026-08-03T08:11:16.000Z"
     }
   ]
 }
