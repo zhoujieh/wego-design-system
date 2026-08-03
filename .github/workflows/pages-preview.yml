@@ -35,6 +35,7 @@ jobs:
           rm -rf /tmp/wego-pages-current
           mkdir -p /tmp/wego-pages-current
           node scripts/build-pages-artifact.mjs /tmp/wego-pages-current
+          printf '%s' "$GITHUB_SHA" > /tmp/wego-pages-current/.wego-deployment-sha
 
       - name: Checkout Pages branch
         uses: actions/checkout@v4
@@ -87,6 +88,29 @@ jobs:
           fi
           git commit -m "deploy pages for ${GITHUB_EVENT_NAME} ${GITHUB_SHA}"
           git push origin HEAD:gh-pages
+
+      - name: Verify published URL
+        if: github.event_name == 'push' || github.event.action != 'closed'
+        env:
+          BASE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            deployment_url="$BASE_URL/previews/pr-$PR_NUMBER"
+          else
+            deployment_url="$BASE_URL"
+          fi
+          for attempt in $(seq 1 18); do
+            published_sha=$(curl --fail --silent --show-error "$deployment_url/.wego-deployment-sha" || true)
+            if [ "$published_sha" = "$GITHUB_SHA" ]; then
+              echo "Pages deployment verified: $deployment_url/"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Pages deployment is not reachable or does not match $GITHUB_SHA: $deployment_url/" >&2
+          echo "Confirm repository Pages uses the gh-pages branch root as its source." >&2
+          exit 1
 
       - name: Comment preview URL
         if: github.event_name == 'pull_request' && github.event.action != 'closed'
