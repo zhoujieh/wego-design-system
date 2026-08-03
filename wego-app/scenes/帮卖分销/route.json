@@ -1,0 +1,9 @@
+{
+  "routeId": "agent-resale",
+  "entry": {
+    "type": "cell-entry",
+    "label": "代理商帮卖弹窗",
+    "group": "workspace-tools",
+    "tab": "workspace"
+  }
+}
