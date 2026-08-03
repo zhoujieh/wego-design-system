@@ -6,6 +6,21 @@
   color: var(--text-default);
 }
 
+.my-tab-skeleton-surface {
+  position: absolute;
+  inset: 0;
+  background: var(--bg-page);
+}
+
+.my-tab-skeleton-panel {
+  position: absolute;
+  background: var(--bg-surface);
+}
+
+.my-tab-page ~ .sk-overlay {
+  z-index: calc(var(--z-sticky) + 1);
+}
+
 .my-tab-navbar {
   background: var(--bg-page);
 }
@@ -121,7 +136,7 @@
 }
 
 .my-membership-card__level .wego-iconfont-s {
-  color: var(--icon-brand);
+  color: var(--accent-gold);
   font-size: var(--size-20);
 }
 
@@ -151,7 +166,7 @@
   width: 37%;
   height: 100%;
   border-radius: var(--radius-full);
-  background: var(--bg-brand);
+  background: var(--accent-gold);
 }
 
 .my-entry-card__content {
@@ -189,11 +204,18 @@
   align-items: center;
   justify-content: center;
   min-width: 0;
-  min-height: var(--size-76);
   gap: var(--spacer-4);
   padding: var(--spacer-6) var(--spacer-4);
   border-radius: var(--radius-8);
   -webkit-tap-highlight-color: transparent;
+}
+
+.my-asset-entry {
+  min-height: var(--size-76);
+}
+
+.my-app-entry {
+  min-height: var(--size-64);
 }
 
 .my-asset-entry:active,
@@ -203,8 +225,7 @@
   background: var(--bg-state-pressed);
 }
 
-.my-entry-icon,
-.my-app-icon {
+.my-entry-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -213,12 +234,23 @@
   flex: 0 0 auto;
   overflow: hidden;
   border-radius: var(--radius-12);
-  background: var(--bg-subtle);
+  background: var(--bg-overlay-l1);
 }
 
 .my-entry-icon .wego-iconfont-s {
-  color: var(--icon-brand);
+  color: var(--icon-secondary);
   font-size: var(--size-24);
+}
+
+.my-app-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-32);
+  height: var(--size-32);
+  flex: 0 0 auto;
+  overflow: hidden;
+  border-radius: var(--radius-8);
 }
 
 .my-app-icon img {
@@ -442,6 +474,12 @@
   position: absolute;
   right: var(--spacer-16);
   bottom: var(--spacer-16);
+  width: var(--size-48);
+  min-width: var(--size-48);
+  max-width: var(--size-48);
+  padding: var(--spacer-0);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-lg);
   z-index: var(--z-sticky);
 }
 
