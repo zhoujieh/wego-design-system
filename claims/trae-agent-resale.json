@@ -1,0 +1,9 @@
+{
+  "agent": "trae-agent-resale",
+  "scene": "帮卖分销",
+  "routeId": "agent-resale",
+  "status": "done",
+  "claimedAt": "2026-08-03T07:00:00.000Z",
+  "releasedAt": "2026-08-03T09:30:00.000Z",
+  "note": "代理商帮卖弹窗原型迭代（场景选择页 + 帮卖弹窗 + 数字键盘）"
+}
