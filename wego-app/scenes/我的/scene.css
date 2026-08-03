@@ -111,12 +111,11 @@
 }
 
 .my-membership-card__content {
-  gap: var(--spacer-8);
-  padding: var(--spacer-12) var(--spacer-16);
+  gap: var(--spacer-6);
+  padding: var(--spacer-8) var(--spacer-12);
 }
 
 .my-membership-card__header,
-.my-membership-card__body,
 .my-product-card__footer,
 .my-section-heading {
   display: flex;
@@ -125,36 +124,46 @@
   gap: var(--spacer-8);
 }
 
+.my-membership-card__body {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-8);
+}
+
 .my-membership-card__level {
   display: inline-flex;
   align-items: center;
-  gap: var(--spacer-6);
+  gap: var(--spacer-4);
   color: var(--text-default);
-  font-size: var(--body-lg-font-size);
+  font-size: var(--body-md-font-size);
   font-weight: var(--font-weight-semibold);
-  line-height: var(--body-lg-line-height);
+  line-height: var(--body-md-line-height);
 }
 
 .my-membership-card__level .wego-iconfont-s {
   color: var(--accent-gold);
-  font-size: var(--size-20);
+  font-size: var(--size-16);
 }
 
 .my-membership-card__expiry,
-.my-membership-card__body {
+.my-membership-card__cloud {
   color: var(--text-secondary);
-  font-size: var(--body-sm-font-size);
-  line-height: var(--body-sm-line-height);
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
 }
 
 .my-membership-card__usage {
+  flex: 0 0 auto;
   color: var(--text-default);
   font-family: var(--number-md-font-family);
+  font-size: var(--body-xs-font-size);
   font-weight: var(--font-weight-medium);
+  line-height: var(--body-xs-line-height);
 }
 
 .my-membership-card__progress {
-  width: 100%;
+  flex: 1 1 auto;
+  min-width: 0;
   height: var(--spacer-4);
   overflow: hidden;
   border-radius: var(--radius-full);
@@ -170,8 +179,8 @@
 }
 
 .my-entry-card__content {
-  gap: var(--spacer-8);
-  padding-block: var(--spacer-12);
+  gap: var(--spacer-4);
+  padding-block: var(--spacer-8);
 }
 
 .my-section-heading {
@@ -192,8 +201,13 @@
 
 .my-asset-row,
 .my-app-row {
-  --layout-scroll-row-gap: var(--spacer-0);
-  padding-inline-start: var(--spacer-4);
+  --layout-scroll-row-gap: var(--spacer-4);
+  padding-inline: var(--spacer-12);
+}
+
+.my-asset-row > *,
+.my-app-row > * {
+  flex: 0 0 auto;
 }
 
 .my-asset-entry,
@@ -204,18 +218,10 @@
   align-items: center;
   justify-content: center;
   min-width: 0;
-  gap: var(--spacer-4);
-  padding: var(--spacer-6) var(--spacer-4);
+  gap: var(--spacer-2);
+  padding: var(--spacer-4) var(--spacer-8);
   border-radius: var(--radius-8);
   -webkit-tap-highlight-color: transparent;
-}
-
-.my-asset-entry {
-  min-height: var(--size-76);
-}
-
-.my-app-entry {
-  min-height: var(--size-64);
 }
 
 .my-asset-entry:active,
@@ -225,32 +231,15 @@
   background: var(--bg-state-pressed);
 }
 
-.my-entry-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--size-40);
-  height: var(--size-40);
-  flex: 0 0 auto;
-  overflow: hidden;
-  border-radius: var(--radius-12);
-  background: var(--bg-overlay-l1);
-}
-
-.my-entry-icon .wego-iconfont-s {
-  color: var(--icon-secondary);
-  font-size: var(--size-24);
-}
-
 .my-app-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--size-32);
-  height: var(--size-32);
+  width: var(--size-24);
+  height: var(--size-24);
   flex: 0 0 auto;
   overflow: hidden;
-  border-radius: var(--radius-8);
+  border-radius: var(--radius-6);
 }
 
 .my-app-icon img {
