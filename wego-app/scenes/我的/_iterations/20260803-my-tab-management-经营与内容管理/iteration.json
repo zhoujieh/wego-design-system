@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 5,
+  "schemaVersion": 6,
   "identity": {
     "iteration_id": "my-tab-management",
     "title": "经营与内容管理",
@@ -234,7 +234,27 @@
     {
       "action": "submit-prototype",
       "at": "2026-08-03T06:54:03.360Z"
+    },
+    {
+      "action": "migrate",
+      "at": "2026-08-03T11:04:01.516Z"
+    },
+    {
+      "action": "submit-prototype",
+      "at": "2026-08-03T11:04:06.058Z"
     }
   ],
-  "freeze": null
+  "freeze": null,
+  "prototype_submission": {
+    "at": "2026-08-03T11:04:06.035Z",
+    "scope_revision": 1,
+    "affected_scenes": [
+      "我的"
+    ],
+    "fingerprints": {
+      "@route-entry/%E6%88%91%E7%9A%84": "cd0611ebe77c2c1ba558f5f7796281411766236f4e163a96ce8d8538ac0f9c69",
+      "wego-app/scenes/我的/scene.css": "3efd906a84591b3fb6e1ad203f32881a739029be1839d9e22207604a5f81f84c",
+      "wego-app/scenes/我的/scene.js": "e4e7db5931ebd17a2d4a79760f10e6b183388a381668cec83af03cbb3a3adf38"
+    }
+  }
 }
