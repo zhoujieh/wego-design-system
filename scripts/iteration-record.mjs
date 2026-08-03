@@ -30,7 +30,7 @@ const prototypeBriefKeys = ['goal', 'included', 'excluded', 'entry_points', 'cri
 const prototypeBriefKeySet = new Set(prototypeBriefKeys);
 const prototypeBriefArrayFields = ['included', 'excluded', 'entry_points', 'critical_paths', 'states', 'assumptions', 'open_questions'];
 const requiredBriefArrayFields = new Set(['included', 'entry_points', 'critical_paths', 'states']);
-const iterationKeys = ['schemaVersion', 'identity', 'status', 'scope_revision', 'prototype_brief', 'brief_submission', 'brief_confirmation', 'prototype_confirmation', 'affected_scenes', 'affected_runtime', 'stage_outputs', 'change_log', 'freeze'];
+const iterationKeys = ['schemaVersion', 'identity', 'status', 'scope_revision', 'prototype_brief', 'brief_submission', 'brief_confirmation', 'prototype_submission', 'prototype_confirmation', 'affected_scenes', 'affected_runtime', 'stage_outputs', 'change_log', 'freeze'];
 const identityKeys = ['iteration_id', 'title', 'date', 'primary_scene', 'related_scenes'];
 const routesRelativePath = 'wego-app/js/routes.js';
 const routeFingerprintPrefix = '@route-entry/';
@@ -49,6 +49,14 @@ const expectedConfirmations = new Map([
   ['awaiting-prototype-confirmation', [true, true, false]],
   ['prototype-confirmed', [true, true, true]],
   ['frozen', [true, true, true]]
+]);
+const expectedPrototypeSubmissions = new Map([
+  ['draft', false],
+  ['awaiting-brief-confirmation', false],
+  ['prototyping', false],
+  ['awaiting-prototype-confirmation', true],
+  ['prototype-confirmed', true],
+  ['frozen', true]
 ]);
 const invalidateSources = {
   brief: new Set(['awaiting-brief-confirmation', 'prototyping', 'awaiting-prototype-confirmation', 'prototype-confirmed']),
@@ -318,6 +326,7 @@ function confirmationErrors(record, file, repositoryRoot) {
   const expected = expectedConfirmations.get(record.status);
   const submissionPresent = record.brief_submission !== null && record.brief_submission !== undefined;
   const briefPresent = record.brief_confirmation !== null && record.brief_confirmation !== undefined;
+  const prototypeSubmissionPresent = record.prototype_submission !== null && record.prototype_submission !== undefined;
   const prototypePresent = record.prototype_confirmation !== null && record.prototype_confirmation !== undefined;
   if (expected) {
     const submissionMatches = expected[0] ? submissionPresent : record.brief_submission === null;
@@ -329,6 +338,11 @@ function confirmationErrors(record, file, repositoryRoot) {
   } else if (prototypePresent && !briefPresent) {
     errors.push(`${file}: prototype_confirmation 存在时 brief_confirmation 也必须存在`);
   }
+  const expectedPrototypeSubmission = expectedPrototypeSubmissions.get(record.status);
+  if (expectedPrototypeSubmission !== undefined && prototypeSubmissionPresent !== expectedPrototypeSubmission) {
+    errors.push(`${file}: 状态 ${record.status} 的 prototype_submission 必须为 ${expectedPrototypeSubmission ? '已提交对象' : 'null'}`);
+  }
+  if (prototypePresent && !prototypeSubmissionPresent) errors.push(`${file}: prototype_confirmation 存在时 prototype_submission 也必须存在`);
   if (briefPresent && !submissionPresent) errors.push(`${file}: brief_confirmation 存在时 brief_submission 也必须存在`);
   if (submissionPresent) {
     errors.push(...exactKeysErrors(record.brief_submission, ['at', 'scope_revision', 'scope_sha256'], `${file}: brief_submission`));
@@ -348,6 +362,16 @@ function confirmationErrors(record, file, repositoryRoot) {
       else if (record.brief_confirmation.scope_sha256 !== scopeSha256(record)) errors.push(`${file}: brief_confirmation.scope_sha256 与当前范围不一致（范围确认后已漂移）`);
     }
   }
+  if (prototypeSubmissionPresent) {
+    errors.push(...exactKeysErrors(record.prototype_submission, ['at', 'scope_revision', 'affected_scenes', 'fingerprints'], `${file}: prototype_submission`));
+    if (isPlainObject(record.prototype_submission)) {
+      if (!isIsoTimestamp(record.prototype_submission.at)) errors.push(`${file}: prototype_submission.at 必须为 ISO 时间`);
+      if (record.prototype_submission.scope_revision !== record.scope_revision) errors.push(`${file}: prototype_submission 必须绑定当前 scope_revision`);
+      if (stableJson(record.prototype_submission.affected_scenes) !== stableJson(record.affected_scenes)) errors.push(`${file}: prototype_submission.affected_scenes 必须等于当前 affected_scenes`);
+      const fingerprintCheck = record.status === 'frozen' ? fingerprintShapeErrors : fingerprintErrors;
+      errors.push(...fingerprintCheck(record.prototype_submission.fingerprints, record, `${file}: prototype_submission`, repositoryRoot, '原型提交后已漂移'));
+    }
+  }
   if (prototypePresent) {
     errors.push(...exactKeysErrors(record.prototype_confirmation, ['at', 'scope_revision', 'affected_scenes', 'fingerprints'], `${file}: prototype_confirmation`));
     if (isPlainObject(record.prototype_confirmation)) {
@@ -356,6 +380,9 @@ function confirmationErrors(record, file, repositoryRoot) {
       if (stableJson(record.prototype_confirmation.affected_scenes) !== stableJson(record.affected_scenes)) errors.push(`${file}: prototype_confirmation.affected_scenes 必须等于当前 affected_scenes`);
       const fingerprintCheck = record.status === 'frozen' ? fingerprintShapeErrors : fingerprintErrors;
       errors.push(...fingerprintCheck(record.prototype_confirmation.fingerprints, record, `${file}: prototype_confirmation`, repositoryRoot, '原型确认后已漂移'));
+      if (isPlainObject(record.prototype_submission) && stableJson(record.prototype_confirmation.fingerprints) !== stableJson(record.prototype_submission.fingerprints)) {
+        errors.push(`${file}: prototype_confirmation.fingerprints 必须等于用户验收的 prototype_submission.fingerprints`);
+      }
     }
   }
   return errors;
@@ -390,11 +417,11 @@ function validate(record, file, repositoryRoot = root) {
   if (path.isAbsolute(file)) errors.push(...iterationFilePathErrors(file, record.identity?.primary_scene ?? null, repositoryRoot));
   const unexpectedKeys = Object.keys(record).filter(key => !iterationKeys.includes(key));
   const missingKeys = iterationKeys.filter(key => !Object.hasOwn(record, key));
-  if (unexpectedKeys.length) errors.push(`${file}: 迭代记录含 schemaVersion 5 未定义顶层字段：${unexpectedKeys.join('、')}`);
+  if (unexpectedKeys.length) errors.push(`${file}: 迭代记录含 schemaVersion 6 未定义顶层字段：${unexpectedKeys.join('、')}`);
   if (missingKeys.length) {
     errors.push(`${file}: 迭代记录缺少字段：${missingKeys.join('、')}`);
   }
-  if (record.schemaVersion !== 5) errors.push(`${file}: schemaVersion 必须为 5`);
+  if (record.schemaVersion !== 6) errors.push(`${file}: schemaVersion 必须为 6`);
   errors.push(...exactKeysErrors(record.identity, identityKeys, `${file}: identity`));
   if (isPlainObject(record.identity)) {
     for (const key of ['iteration_id', 'title']) {
@@ -414,7 +441,7 @@ function validate(record, file, repositoryRoot = root) {
   for (const key of prototypeBriefKeys) if (!briefIsObject || !(key in brief)) errors.push(`${file}: prototype_brief 缺少 ${key}`);
   if (briefIsObject) {
     const unexpectedBriefKeys = Object.keys(brief).filter(key => !prototypeBriefKeySet.has(key));
-    if (unexpectedBriefKeys.length) errors.push(`${file}: prototype_brief 含 schemaVersion 5 未定义字段：${unexpectedBriefKeys.join('、')}`);
+    if (unexpectedBriefKeys.length) errors.push(`${file}: prototype_brief 含 schemaVersion 6 未定义字段：${unexpectedBriefKeys.join('、')}`);
     errors.push(...prototypeBriefArrayErrors(brief, `${file}: `));
     if (!Array.isArray(brief.prototype_boundaries)) errors.push(`${file}: prototype_brief.prototype_boundaries 必须为数组`);
     else errors.push(...prototypeBoundaryErrors(brief, `${file}: `, false));
@@ -462,7 +489,7 @@ function init() {
   if (!isSafeSceneName(scene)) fail('--scene 必须是单层安全场景名');
   const file = requireFile(scene);
   if (fs.existsSync(file)) fail(`${file} 已存在`);
-  const record = { schemaVersion: 5, identity: { iteration_id: id, title, date: new Date().toISOString().slice(0, 10), primary_scene: scene, related_scenes: [] }, status: 'draft', scope_revision: 1, prototype_brief: { goal: '', included: [], excluded: [], entry_points: [], critical_paths: [], prototype_boundaries: [], states: [], data_contract: {}, assumptions: [], open_questions: [] }, brief_submission: null, brief_confirmation: null, prototype_confirmation: null, affected_scenes: [scene], affected_runtime: [], stage_outputs: { product: { valid: false }, design: { valid: false } }, change_log: [], freeze: null };
+  const record = { schemaVersion: 6, identity: { iteration_id: id, title, date: new Date().toISOString().slice(0, 10), primary_scene: scene, related_scenes: [] }, status: 'draft', scope_revision: 1, prototype_brief: { goal: '', included: [], excluded: [], entry_points: [], critical_paths: [], prototype_boundaries: [], states: [], data_contract: {}, assumptions: [], open_questions: [] }, brief_submission: null, brief_confirmation: null, prototype_submission: null, prototype_confirmation: null, affected_scenes: [scene], affected_runtime: [], stage_outputs: { product: { valid: false }, design: { valid: false } }, change_log: [], freeze: null };
   const errors = validate(record, file);
   if (errors.length) fail(errors.join('\n'));
   fs.mkdirSync(path.dirname(file), { recursive: true });
@@ -544,13 +571,29 @@ function createBriefConfirmation(record) {
 function createBriefSubmission(record) {
   return { at: new Date().toISOString(), scope_revision: record.scope_revision, scope_sha256: scopeSha256(record) };
 }
-function createPrototypeConfirmation(record, repositoryRoot = root) {
+function createPrototypeConfirmation(record) {
+  if (!isPlainObject(record.prototype_submission)) fail('confirm-prototype 要求先存在 prototype_submission');
+  return {
+    at: new Date().toISOString(),
+    scope_revision: record.scope_revision,
+    affected_scenes: [...record.affected_scenes],
+    fingerprints: { ...record.prototype_submission.fingerprints }
+  };
+}
+function createPrototypeSubmission(record, repositoryRoot = root) {
   return {
     at: new Date().toISOString(),
     scope_revision: record.scope_revision,
     affected_scenes: [...record.affected_scenes],
     fingerprints: collectFingerprints(record, repositoryRoot)
   };
+}
+function requireUserConfirmation(record, flag, label) {
+  const confirmedIterationId = value(flag);
+  if (!confirmedIterationId) fail(`${label} 只能在用户明确确认后执行；请传 ${flag} <iteration_id>`);
+  if (confirmedIterationId !== record.identity?.iteration_id) {
+    fail(`${flag} 必须等于当前 iteration_id：${record.identity?.iteration_id ?? '未定义'}`);
+  }
 }
 function invalidationSourceError(record, stage) {
   if (record.status === 'frozen') return '冻结迭代不得失效；请新建迭代';
@@ -563,9 +606,11 @@ function applyInvalidation(record, stage) {
     record.scope_revision += 1;
     record.brief_submission = null;
     record.brief_confirmation = null;
+    record.prototype_submission = null;
     record.prototype_confirmation = null;
     record.stage_outputs = { product: { valid: false }, design: { valid: false } };
   } else {
+    record.prototype_submission = null;
     record.prototype_confirmation = null;
     record.stage_outputs.design.valid = false;
   }
@@ -621,7 +666,7 @@ function test() {
     assumptions: [],
     open_questions: []
   });
-  const sample = { schemaVersion: 5, identity: { iteration_id: 'test', title: '测试', date: '2026-07-15', primary_scene: '测试场景', related_scenes: [] }, status: 'draft', scope_revision: 1, prototype_brief: { goal: '', included: [], excluded: [], entry_points: [], critical_paths: [], prototype_boundaries: [], states: [], data_contract: {}, assumptions: [], open_questions: [] }, brief_submission: null, brief_confirmation: null, prototype_confirmation: null, affected_scenes: ['测试场景'], affected_runtime: [], stage_outputs: { product: { valid: false }, design: { valid: false } }, change_log: [], freeze: null };
+  const sample = { schemaVersion: 6, identity: { iteration_id: 'test', title: '测试', date: '2026-07-15', primary_scene: '测试场景', related_scenes: [] }, status: 'draft', scope_revision: 1, prototype_brief: { goal: '', included: [], excluded: [], entry_points: [], critical_paths: [], prototype_boundaries: [], states: [], data_contract: {}, assumptions: [], open_questions: [] }, brief_submission: null, brief_confirmation: null, prototype_submission: null, prototype_confirmation: null, affected_scenes: ['测试场景'], affected_runtime: [], stage_outputs: { product: { valid: false }, design: { valid: false } }, change_log: [], freeze: null };
 
   assert(!validate(sample, 'sample').length, '业务迭代 Schema 错误拦截合法 draft');
   const emptyScenes = clone(sample);
@@ -664,7 +709,7 @@ function test() {
   assert(briefSubmissionErrors(duplicateCriticalPaths).some(error => error.includes('critical_paths 不得包含重复项')), '业务迭代状态机未拦截重复关键路径');
   const legacyBriefField = clone(sample);
   legacyBriefField.prototype_brief.readiness = { ready: true };
-  assert(has(legacyBriefField, 'schemaVersion 5 未定义字段：readiness'), '业务迭代 Schema 未拦截 prototype_brief 遗留字段');
+  assert(has(legacyBriefField, 'schemaVersion 6 未定义字段：readiness'), '业务迭代 Schema 未拦截 prototype_brief 遗留字段');
   const unexpectedBriefConfirmation = clone(sample);
   unexpectedBriefConfirmation.brief_confirmation = createBriefConfirmation(unexpectedBriefConfirmation);
   assert(has(unexpectedBriefConfirmation, '状态 draft 的 brief_confirmation 必须为 null'), '确认矩阵未拦截 draft 中的 brief_confirmation');
@@ -695,14 +740,14 @@ function test() {
   const awaitingPrototype = clone(prototyping);
   awaitingPrototype.status = 'awaiting-prototype-confirmation';
   awaitingPrototype.stage_outputs.design.valid = true;
-  assert(!validate(awaitingPrototype, 'sample').length, '确认矩阵错误拦截合法 awaiting-prototype-confirmation 状态');
+  assert(has(awaitingPrototype, '状态 awaiting-prototype-confirmation 的 prototype_submission 必须为 已提交对象'), '确认矩阵未要求 awaiting-prototype-confirmation 存在原型提交快照');
   awaitingPrototype.prototype_confirmation = {};
   assert(has(awaitingPrototype, '状态 awaiting-prototype-confirmation 的 prototype_confirmation 必须为 null'), '确认矩阵未拦截提前写入的 prototype_confirmation');
   const prototypeInvalidation = clone(prototyping);
   prototypeInvalidation.status = 'awaiting-prototype-confirmation';
   prototypeInvalidation.stage_outputs.design.valid = true;
   applyInvalidation(prototypeInvalidation, 'prototype');
-  assert(prototypeInvalidation.scope_revision === 1 && !validate(prototypeInvalidation, 'sample').length, 'prototype 失效不应破坏已确认的 scope_revision');
+  assert(prototypeInvalidation.scope_revision === 1 && prototypeInvalidation.prototype_submission === null && !validate(prototypeInvalidation, 'sample').length, 'prototype 失效必须清除提交快照且不破坏已确认的 scope_revision');
   const briefInvalidation = clone(prototyping);
   applyInvalidation(briefInvalidation, 'brief');
   assert(briefInvalidation.scope_revision === 2 && briefInvalidation.brief_submission === null && briefInvalidation.brief_confirmation === null, 'brief 失效必须递增版本并清除提交与确认快照');
@@ -743,7 +788,8 @@ function test() {
       record.stage_outputs = { product: { valid: true }, design: { valid: true } };
       record.brief_submission = createBriefSubmission(record);
       record.brief_confirmation = createBriefConfirmation(record);
-      record.prototype_confirmation = createPrototypeConfirmation(record, fixtureRoot);
+      record.prototype_submission = createPrototypeSubmission(record, fixtureRoot);
+      record.prototype_confirmation = createPrototypeConfirmation(record);
       return record;
     };
     const scriptFile = fs.realpathSync(path.resolve(root, process.argv[1]));
@@ -778,27 +824,32 @@ function test() {
     assert(driftedBriefConfirmation.status !== 0 && (driftedBriefConfirmation.stderr || '').includes('简报提交后范围已漂移'), 'confirm-brief 未拦截提交后的简报漂移');
     submittedRecord.prototype_brief.goal = sample.prototype_brief.goal;
     fs.writeFileSync(iterationFile, `${JSON.stringify(submittedRecord, null, 2)}\n`);
-    const validBriefConfirmation = run(['confirm-brief', '--file', iterationArgument]);
+    const unapprovedBriefConfirmation = run(['confirm-brief', '--file', iterationArgument]);
+    assert(unapprovedBriefConfirmation.status !== 0 && (unapprovedBriefConfirmation.stderr || '').includes('用户明确确认'), 'confirm-brief 未拦截缺少用户明确授权的请求');
+    const validBriefConfirmation = run(['confirm-brief', '--file', iterationArgument, '--user-confirmed-brief', 'test']);
     assert(validBriefConfirmation.status === 0, `合法 confirm-brief 失败：${(validBriefConfirmation.stderr || validBriefConfirmation.stdout).trim()}`);
     assert(JSON.parse(fs.readFileSync(iterationFile, 'utf8')).status === 'prototyping', 'confirm-brief 未进入 prototyping');
 
-    const awaitingConfirmation = clone(sample);
-    awaitingConfirmation.status = 'awaiting-prototype-confirmation';
-    awaitingConfirmation.affected_runtime = [routesRelativePath];
-    awaitingConfirmation.stage_outputs = { product: { valid: true }, design: { valid: true } };
-    awaitingConfirmation.brief_submission = createBriefSubmission(awaitingConfirmation);
-    awaitingConfirmation.brief_confirmation = createBriefConfirmation(awaitingConfirmation);
-    fs.writeFileSync(iterationFile, `${JSON.stringify(awaitingConfirmation, null, 2)}\n`);
     fs.writeFileSync(path.join(sceneRoot, 'scene.js'), 'INVALID_SCENE\n');
-    const invalidConfirmation = run(['confirm-prototype', `--file=${iterationArgument}`]);
-    assert(invalidConfirmation.status !== 0 && (invalidConfirmation.stderr || '').includes('场景验证'), 'confirm-prototype 未重新运行静态场景验证');
-    assert(JSON.parse(fs.readFileSync(iterationFile, 'utf8')).status === 'awaiting-prototype-confirmation', '静态场景验证失败后不应写入原型确认');
+    const invalidSubmission = run(['submit-prototype', `--file=${iterationArgument}`]);
+    assert(invalidSubmission.status !== 0 && (invalidSubmission.stderr || '').includes('场景验证'), 'submit-prototype 未运行静态场景验证');
+    assert(JSON.parse(fs.readFileSync(iterationFile, 'utf8')).status === 'prototyping', '静态场景验证失败后不应写入原型提交');
     fs.writeFileSync(path.join(sceneRoot, 'scene.js'), 'INVALID_RUNTIME\n');
-    const invalidRuntimeConfirmation = run(['confirm-prototype', `--file=${iterationArgument}`]);
-    assert(invalidRuntimeConfirmation.status !== 0 && (invalidRuntimeConfirmation.stderr || '').includes('场景验证'), 'confirm-prototype 未运行真实页面验证');
-    assert(JSON.parse(fs.readFileSync(iterationFile, 'utf8')).status === 'awaiting-prototype-confirmation', '运行时场景验证失败后不应写入原型确认');
+    const invalidRuntimeSubmission = run(['submit-prototype', `--file=${iterationArgument}`]);
+    assert(invalidRuntimeSubmission.status !== 0 && (invalidRuntimeSubmission.stderr || '').includes('场景验证'), 'submit-prototype 未运行真实页面验证');
+    assert(JSON.parse(fs.readFileSync(iterationFile, 'utf8')).status === 'prototyping', '运行时场景验证失败后不应写入原型提交');
     fs.writeFileSync(path.join(sceneRoot, 'scene.js'), 'window.testScene = true;\n');
-    const validConfirmation = run(['confirm-prototype', '--file', iterationArgument]);
+    const validSubmission = run(['submit-prototype', '--file', iterationArgument]);
+    assert(validSubmission.status === 0, `合法 submit-prototype 失败：${(validSubmission.stderr || validSubmission.stdout).trim()}`);
+    const submittedPrototype = JSON.parse(fs.readFileSync(iterationFile, 'utf8'));
+    assert(submittedPrototype.status === 'awaiting-prototype-confirmation' && Object.keys(submittedPrototype.prototype_submission?.fingerprints || {}).length > 0, 'submit-prototype 未写入待验收原型指纹');
+    const unapprovedPrototypeConfirmation = run(['confirm-prototype', '--file', iterationArgument]);
+    assert(unapprovedPrototypeConfirmation.status !== 0 && (unapprovedPrototypeConfirmation.stderr || '').includes('用户明确确认'), 'confirm-prototype 未拦截缺少用户明确授权的请求');
+    fs.writeFileSync(path.join(sceneRoot, 'scene.js'), 'window.testScene = "drift-before-confirmation";\n');
+    const driftedPrototypeConfirmation = run(['confirm-prototype', '--file', iterationArgument, '--user-confirmed-prototype', 'test']);
+    assert(driftedPrototypeConfirmation.status !== 0 && (driftedPrototypeConfirmation.stderr || '').includes('原型提交后已漂移'), 'confirm-prototype 未拦截用户验收后的源码漂移');
+    fs.writeFileSync(path.join(sceneRoot, 'scene.js'), 'window.testScene = true;\n');
+    const validConfirmation = run(['confirm-prototype', '--file', iterationArgument, '--user-confirmed-prototype', 'test']);
     assert(validConfirmation.status === 0, `合法 confirm-prototype 失败：${(validConfirmation.stderr || validConfirmation.stdout).trim()}`);
     assert(JSON.parse(fs.readFileSync(iterationFile, 'utf8')).status === 'prototype-confirmed', 'confirm-prototype 只能确认原型，不得自动冻结');
     assert(!fs.existsSync(freezeFile), 'confirm-prototype 不得生成 freeze.json');
@@ -894,12 +945,17 @@ switch (command) {
     record.brief_submission = createBriefSubmission(record);
     record.stage_outputs.product.valid = true;
   }); break;
-  case 'confirm-brief': transition(['awaiting-brief-confirmation'], 'prototyping', record => { record.brief_confirmation = createBriefConfirmation(record); }); break;
+  case 'confirm-brief': transition(['awaiting-brief-confirmation'], 'prototyping', record => {
+    requireUserConfirmation(record, '--user-confirmed-brief', 'confirm-brief');
+    record.brief_confirmation = createBriefConfirmation(record);
+  }); break;
   case 'submit-prototype': transition(['prototyping'], 'awaiting-prototype-confirmation', record => {
     validatePrototypeScenes(record);
+    record.prototype_submission = createPrototypeSubmission(record);
     record.stage_outputs.design.valid = true;
   }); break;
   case 'confirm-prototype': transition(['awaiting-prototype-confirmation'], 'prototype-confirmed', record => {
+    requireUserConfirmation(record, '--user-confirmed-prototype', 'confirm-prototype');
     validatePrototypeScenes(record);
     record.prototype_confirmation = createPrototypeConfirmation(record);
   }); break;
@@ -921,5 +977,5 @@ switch (command) {
   }
   case 'check': check(); break;
   case 'test': test(); break;
-  default: fail('用法：init|submit-brief|confirm-brief|submit-prototype|confirm-prototype|invalidate|freeze --user-confirmed-freeze <iteration_id>|check|test');
+  default: fail('用法：init|submit-brief|confirm-brief --user-confirmed-brief <iteration_id>|submit-prototype|confirm-prototype --user-confirmed-prototype <iteration_id>|invalidate|freeze --user-confirmed-freeze <iteration_id>|check|test');
 }

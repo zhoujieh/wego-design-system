@@ -97,11 +97,36 @@ function readJson(relativePath) {
 }
 
 function checkSkillFlow() {
-  requireFiles([
+  const workflowFiles = [
+    'AGENTS.md',
+    '.codex/skills/README.md',
     '.codex/skills/wego-product/SKILL.md',
+    '.codex/skills/wego-product/references/iteration-workflow.md',
+    '.codex/skills/wego-product/references/scope-and-boundaries.md',
     '.codex/skills/wego-design/SKILL.md',
-    '.codex/skills/wego-uxsystem-iterate/SKILL.md'
-  ]);
+    '.codex/skills/wego-design/references/interaction-prototype-design.md',
+    '.codex/skills/wego-design/references/library-map.md',
+    '.codex/skills/wego-design/references/scene-contract.md',
+    '.codex/skills/wego-uxsystem-iterate/SKILL.md',
+    '.codex/skills/wego-uxsystem-iterate/references/sync-matrix.md'
+  ];
+  requireFiles(workflowFiles);
+  for (const file of workflowFiles.filter(exists)) {
+    const source = fs.readFileSync(path.join(root, file), 'utf8');
+    for (const match of source.matchAll(/\[[^\]]+\]\(([^)]+)\)/g)) {
+      const link = match[1].trim();
+      if (!link || /^(?:[a-z]+:|#|\/)/i.test(link)) continue;
+      const target = path.resolve(path.dirname(path.join(root, file)), link.split('#')[0]);
+      if (!fs.existsSync(target)) add('error', 'workflow.link_missing', `工作流引用不存在：${link}`, path.join(root, file));
+    }
+  }
+}
+
+function checkWorkflowContracts() {
+  runNode('scripts/iteration-record.mjs', ['test'], 'workflow.iteration_test');
+  runNode('scripts/validate-scene-iteration-binding.mjs', ['test'], 'workflow.iteration_binding_test');
+  runNode('scripts/validate-claims.mjs', ['test'], 'workflow.claim_test');
+  runNode('scripts/build-routes.mjs', ['--check'], 'workflow.routes_check');
 }
 
 const systemRuntimePrefixes = [
@@ -341,6 +366,18 @@ function conditionalToolTests() {
       code: 'iteration.test'
     },
     {
+      matches: file => file === 'scripts/validate-scene-iteration-binding.mjs',
+      script: 'scripts/validate-scene-iteration-binding.mjs',
+      args: ['test'],
+      code: 'iteration_binding.test'
+    },
+    {
+      matches: file => file === 'scripts/validate-claims.mjs',
+      script: 'scripts/validate-claims.mjs',
+      args: ['test'],
+      code: 'claims.test'
+    },
+    {
       matches: file => ['scripts/sync-wego-app-lib.mjs', 'scripts/test-sync-wego-app-lib.mjs'].includes(file),
       script: 'scripts/test-sync-wego-app-lib.mjs',
       args: [],
@@ -409,11 +446,13 @@ function runChangedScope() {
 function runSystemScope() {
   checkSystemMetadata();
   checkLibrarySync();
+  checkWorkflowContracts();
 }
 
 function runFullScope() {
   checkSystemMetadata();
   checkLibrarySync();
+  checkWorkflowContracts();
   checkAppHost(true);
   validateScenes(sceneDirectories(), { runtimeAll: true });
   runNode('scripts/validate-scene-iteration-binding.mjs', ['--all', '--json'], 'scene.iteration_unbound');
