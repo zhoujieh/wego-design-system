@@ -16,6 +16,10 @@
 - 一个交付单元只能有一个开放 PR。接手任务必须 checkout 该 PR 的远端分支并更新原 PR。
 - 场景改动先认领，并在认领中记录当前分支；完成、废弃或关闭对应 PR 时释放认领。
 - PR 预览用于当前任务验收；合并或关闭后由 Pages 工作流删除预览。
+<!-- rule-id: open-pr-branch-sync-uses-merge -->
+- 已有开放 PR 的分支同步最新 `main` 时使用 `git merge origin/main`，不用 rebase；rebase 会改写已推送历史并导致非快进。确需 rebase 时必须先向用户说明历史重写后果并获得明确同意，再 `git push --force-with-lease`。
+<!-- rule-id: preview-url-must-be-verified-before-delivery -->
+- 交付 PR 预览链接前必须实际请求核实再发给用户：Pages 产物根即应用入口（`previews/pr-<编号>/`，无 `wego-app/` 前缀），确认 HTTP 200 且目标产物已包含本次改动；禁止凭路径规律拼接未核实的链接。
 
 ## 合并与清理
 

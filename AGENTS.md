@@ -72,7 +72,7 @@
 
 - **分支与 PR**：一个可验收交付单元对应一个开放 PR 和 `feature/<owner>-<task>` 分支；新会话先检查同一交付单元的开放 PR 与场景认领，命中即复用原分支。实现和验证完成后提交并推送当前分支、创建或更新 PR，通过独立 PR 预览链接验收；只有用户明确验收通过后才合并到 `main`。PR 合并或关闭后默认删除本地和远端分支，只有 `keep-branch` 标签可例外保留。
 <!-- rule-id: agent-must-pull-before-task-start -->
-- **开工前先拉取**：每次新会话/新任务开始前执行 `git pull --rebase origin main`，确保基于最新 `main`；创建 PR 前再次 rebase 到最新 `main` 并解决冲突。
+- **开工前先拉取**：每次新会话/新任务开始前执行 `git pull --rebase origin main`，确保基于最新 `main`；首次创建 PR 前再次 rebase 到最新 `main` 并解决冲突。已有开放 PR 的分支同步 `main` 改用 merge，不用 rebase（详见 `wego-github-delivery` 交付规则）。
 <!-- rule-id: scene-must-claim-before-edit -->
 - **场景认领（强制前置）**：开工前必须在 `claims/<agent-id>.json` 认领本次负责的场景目录并记录当前 `branch`，再运行 `node scripts/validate-claims.mjs` 确认无冲突；不判断是否并发，单人开发也必须认领。认领期间场景目录由该 Agent 独占，他人不得修改。完成后把 `status` 改为 `released`/`done` 释放；CI 按 PR 分支核对所有场景目录变更均有对应认领。
 - **路由生成式**：新增或修改场景路由时只编辑其目录下的 `route.json`，再运行 `node scripts/build-routes.mjs` 重新生成 `wego-app/js/routes.js`；**不要手改 `routes.js`**，CI 以 `build-routes.mjs --check` 校验一致性。
