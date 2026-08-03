@@ -4,9 +4,9 @@
 
 | 改动 | 必改 | 仅在受影响时同步 | 验证 |
 | --- | --- | --- | --- |
-| 用户触发总结并登记候选 | `.codex/skills/wego-uxsystem-iterate/experience/candidates.json` | 无 | 分类、去重、归属、证据、拟落点、状态及唯一存放路径 |
-| 用户确认正式升级 | 唯一权威源，并从候选池移除已解决项 | 直接读取该规则的技能或消费者 | 可观察行为；无可执行行为时只做链接检查 |
-| 用户选择继续观察 | `.codex/skills/wego-uxsystem-iterate/experience/candidates.json` | 无 | 保留证据并确认状态为 `observing` |
+| 用户触发总结并登记候选 | `.codex/skills/wego-uxsystem-iterate/experience/candidates.json` | 无 | 分类、去重、归属、证据、拟落点、状态及唯一存放路径；默认 `observing`，不询问是否直接升级 |
+| 候选达到升级阈值 | `.codex/skills/wego-uxsystem-iterate/experience/candidates.json` | 无 | 状态自动改为 `proposed`，并提示用户确认是否升级 |
+| 用户明确要求正式升级 | 唯一权威源，并从候选池移除已解决项 | 直接读取该规则的技能或消费者 | 可观察行为；无可执行行为时只做链接检查 |
 | 技能入口调整 | 目标 `SKILL.md` | 直接引用的 reference | 三技能存在、入口唯一、链接有效 |
 | 工作流守卫调整 | 实际执行脚本 | 统一验证入口与脚本文档 | 对应回归测试 |
 
@@ -14,7 +14,7 @@
 
 `SKILL.md` 只保留触发、职责、按需读取、输出和交接。守卫不得依赖固定标题、固定句子、引用顺序或同义词扫描；删除文件时必须清理真实入口和链接。
 
-经验候选通过 `occurrenceCount` 累计同类问题出现次数，达到 3 次后状态自动改为 `proposed` 并在下次总结时提醒用户是否升级。只有用户明确要求总结时才登记，只有用户明确选择升级时才修改正式规则。
+经验候选通过 `occurrenceCount` 累计同类问题出现次数。用户要求总结、登记或沉淀时默认直接写入 `observing`，不询问是否升级；达到 3 次后状态自动改为 `proposed`，并在本次总结时提醒用户确认是否升级。只有用户明确选择升级时才修改正式规则。
 
 经验候选只能存在于 `.codex/skills/wego-uxsystem-iterate/experience/candidates.json`。不得在仓库根目录或其它技能创建同名目录、文件或副本；发现旧副本时必须先合并有效内容，再删除旧副本并清理全部旧路径引用。
 
