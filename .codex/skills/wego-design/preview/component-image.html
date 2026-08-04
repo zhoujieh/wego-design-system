@@ -8,11 +8,6 @@
 <link rel="stylesheet" href="../scaffold.css">
 <link rel="stylesheet" href="../iconfont.css">
 <style>
-    .demo-img-1 { background: linear-gradient(135deg, #03C160, #00C777); }
-    .demo-img-2 { background: linear-gradient(135deg, #FA9D3B, #FFC300); }
-    .demo-img-3 { background: linear-gradient(135deg, #208BF1, #6367F0); }
-    .demo-img-4 { background: linear-gradient(135deg, #FA5051, #FF6045); }
-    .demo-img-5 { background: linear-gradient(135deg, #C79A56, #FA9D3B); }
     .demo-img-checker { background: repeating-conic-gradient(#ccc 0% 25%, #fff 0% 50%) 50% / 12px 12px; }
     /* @component-css-start */
     .wg-image { --wg-image-placeholder-bg:var(--bg-page); position:relative; display:block; overflow:hidden; flex-shrink:0; background:var(--wg-image-placeholder-bg); box-sizing:border-box; isolation:isolate; }
@@ -45,6 +40,11 @@
     .wg-image--loading { background:var(--wg-image-placeholder-bg); }
     .wg-image--custom-rect { width: 180px; height: 120px; }
     .wg-image--custom-wide { width: 260px; height: 160px; }
+    .wg-image-grid { display:grid; box-sizing:border-box; }
+    .wg-image-grid__item { width:100%; min-width:0; aspect-ratio:1; }
+    .wg-image-grid--dynamic { --wg-image-grid-cell-radius:2px; width:100%; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:var(--spacer-4); overflow:hidden; border-radius:var(--radius-8); }
+    .wg-image-grid--dynamic .wg-image-grid__item { border-radius:var(--wg-image-grid-cell-radius); }
+    .wg-image-grid--product { --wg-image-product-grid-min-width:80px; --wg-image-product-grid-max-width:160px; width:clamp(var(--wg-image-product-grid-min-width), 100%, var(--wg-image-product-grid-max-width)); grid-template-columns:repeat(2, minmax(0, 1fr)); gap:var(--spacer-2); overflow:hidden; border-radius:var(--radius-4); }
     @keyframes wg-image-skeleton {
       0% { background-position: 200% 0; }
       100% { background-position: -200% 0; }
@@ -60,26 +60,49 @@
   <div class="pv-section">
     <div class="pv-section__title">基础规格</div>
     <div class="pv-section__sub">保留常用正方形和业务矩形示例，避免预览页堆太多重复场景。</div>
-    <div class="row"><span class="label">常用尺寸</span><div class="wg-image wg-image--sm demo-img-1"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt=""></div><div class="wg-image wg-image--md demo-img-2"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt=""></div><div class="wg-image wg-image--lg demo-img-4"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt=""></div></div>
-    <div class="row"><span class="label">业务矩形</span><div class="wg-image wg-image--custom-rect wg-image--rounded-md demo-img-3"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt=""></div><div class="wg-image wg-image--custom-wide wg-image--rounded-md demo-img-5"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt=""></div></div>
+    <div class="row"><span class="label">常用尺寸</span><div class="wg-image wg-image--sm"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_1/clothing_1_1.jpg" alt="方领上衣"></div><div class="wg-image wg-image--md"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_2/clothing_2_1.jpg.jpg" alt="玫红短袖西装外套"></div><div class="wg-image wg-image--lg"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_3/1663740989357_27184.jpg" alt="蓝色格纹衬衫"></div></div>
+    <div class="row"><span class="label">业务矩形</span><div class="wg-image wg-image--custom-rect wg-image--rounded-md"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_4/1663741015639_25492.jpg" alt="卡其工装套装"></div><div class="wg-image wg-image--custom-wide wg-image--rounded-md"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_5/1663741055068_1251.jpg" alt="撞色短外套"></div></div>
   </div>
   <div class="pv-section">
     <div class="pv-section__title">形状与填充</div>
     <div class="pv-section__sub">保留圆角、圆形和 contain 两类最常用差异。</div>
-    <div class="row"><span class="label">圆角 / 圆形</span><div class="wg-image wg-image--md wg-image--rounded-sm demo-img-2"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt=""></div><div class="wg-image wg-image--md wg-image--circle demo-img-3"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt=""></div></div>
-    <div class="row"><span class="label">contain</span><div class="wg-image wg-image--md wg-image--rounded-md wg-image--contain demo-img-checker"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt=""></div></div>
+    <div class="row"><span class="label">圆角 / 圆形</span><div class="wg-image wg-image--md wg-image--rounded-sm"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_6/img_1708defc_20240216_i1708092817_2182_1.jpg.jpg" alt="藏蓝短袖西装外套"></div><div class="wg-image wg-image--md wg-image--circle"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_7/1663741042720_27285.jpg" alt="金扣西装外套"></div></div>
+    <div class="row"><span class="label">contain</span><div class="wg-image wg-image--md wg-image--rounded-md wg-image--contain demo-img-checker"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_8/img_1708defc_20240216_i1708092817_8695_6.jpg.jpg" alt="亚麻感短袖西装"></div></div>
+  </div>
+  <div class="pv-section">
+    <div class="pv-section__title">多图展示</div>
+    <div class="pv-section__sub">动态九宫格随父级内容区自适应，外层圆角为 8px；商品四宫格保持 80px 至 160px 的可用宽度，外层圆角为 4px。</div>
+    <div class="row"><span class="label">产品动态九宫格</span></div>
+    <div class="wg-image-grid wg-image-grid--dynamic">
+      <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_1/clothing_1_1.jpg" alt="方领上衣"></div>
+      <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_2/clothing_2_1.jpg.jpg" alt="玫红短袖西装外套"></div>
+      <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_3/1663740989357_27184.jpg" alt="蓝色格纹衬衫"></div>
+      <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_4/1663741015639_25492.jpg" alt="卡其工装套装"></div>
+      <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_5/1663741055068_1251.jpg" alt="撞色短外套"></div>
+      <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_6/img_1708defc_20240216_i1708092817_2182_1.jpg.jpg" alt="藏蓝短袖西装外套"></div>
+      <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_7/1663741042720_27285.jpg" alt="金扣西装外套"></div>
+      <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_8/img_1708defc_20240216_i1708092817_8695_6.jpg.jpg" alt="亚麻感短袖西装"></div>
+      <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_9/1663740558494_61057.jpg" alt="运动感宽松上衣"></div>
+    </div>
+    <div class="row"><span class="label">产品多图四宫格</span></div>
+    <div class="wg-image-grid wg-image-grid--product">
+      <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_10/1663740458796_1630.jpg" alt="基础针织上衣"></div>
+      <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_11/1663741015635_49035.jpg" alt="粉色休闲衬衫"></div>
+      <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_12/1663741493015_827.jpg" alt="千鸟格针织套装"></div>
+      <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_13/1664276865081_87837.jpg" alt="彩色涂鸦套装"></div>
+    </div>
   </div>
   <div class="pv-section">
     <div class="pv-section__title">加载与结果</div>
     <div class="pv-section__sub">默认是页面底色骨架动画，图片到位后快速渐显。</div>
     <div class="row"><span class="label">加载中</span><div class="wg-image wg-image--md wg-image--rounded-md wg-image--loading"><div class="wg-image__src"></div></div><div class="wg-image wg-image--custom-rect wg-image--rounded-md wg-image--loading"><div class="wg-image__src"></div></div></div>
-    <div class="row"><span class="label">已加载</span><div class="wg-image wg-image--md wg-image--rounded-md demo-img-1"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt=""></div><div class="wg-image wg-image--custom-rect wg-image--rounded-md demo-img-4"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt=""></div></div>
+    <div class="row"><span class="label">已加载</span><div class="wg-image wg-image--md wg-image--rounded-md"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_14/1664276960204_98573.jpg" alt="绿色格纹套装"></div><div class="wg-image wg-image--custom-rect wg-image--rounded-md"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_15/1664277250601_83668.jpg" alt="米色宽松卫衣"></div></div>
   </div>
   <div class="pv-section">
     <div class="pv-section__title">加载失败</div>
     <div class="pv-section__sub">失败时显示默认 `default-diagram.svg`，logo 按容器宽度约 40% 等比缩放，最大不超过 40px。</div>
     <div class="row"><span class="label">错误状态</span><div class="wg-image wg-image--sm wg-image--error"><div class="wg-image__src"></div><div class="wg-image__placeholder"><img class="wg-image__placeholder-icon" src="../assets/icons/default-diagram.svg" alt=""></div></div><div class="wg-image wg-image--md wg-image--rounded-md wg-image--error"><div class="wg-image__src"></div><div class="wg-image__placeholder"><img class="wg-image__placeholder-icon" src="../assets/icons/default-diagram.svg" alt=""></div></div><div class="wg-image wg-image--custom-rect wg-image--rounded-md wg-image--error"><div class="wg-image__src"></div><div class="wg-image__placeholder"><img class="wg-image__placeholder-icon" src="../assets/icons/default-diagram.svg" alt=""></div></div></div>
-    <div class="row"><span class="label">可点击</span><div class="wg-image wg-image--md wg-image--rounded-md wg-image--clickable demo-img-1"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt=""><div class="wg-image__overlay"></div></div></div>
+    <div class="row"><span class="label">可点击</span><div class="wg-image wg-image--md wg-image--rounded-md wg-image--clickable"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_1/clothing_1_1.jpg" alt="方领上衣"><div class="wg-image__overlay"></div></div></div>
   </div>
 </body>
 </html>

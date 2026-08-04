@@ -6,12 +6,13 @@
   "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "图片展示组件，默认使用页面底色骨架加载，图片到位后快速渐显，失败时显示默认占位图。",
+  "description": "图片展示组件，覆盖单图、动态九宫格与商品多图缩略展示；默认使用页面底色骨架加载，图片到位后快速渐显，失败时显示默认占位图。",
   "semanticTypeCandidates": [
     "image",
     "media",
     "thumbnail",
-    "product-image"
+    "product-image",
+    "media-grid"
   ],
   "variantDimensions": {
     "fit": [
@@ -25,7 +26,8 @@
       "lg",
       "xl",
       "custom-rect",
-      "custom-wide"
+      "custom-wide",
+      "responsive"
     ],
     "radius": [
       "none",
@@ -43,6 +45,11 @@
       "static",
       "clickable",
       "transparent"
+    ],
+    "composition": [
+      "single",
+      "dynamic-grid",
+      "product-grid"
     ]
   },
   "representativeVariants": [
@@ -73,6 +80,22 @@
       "radius": "circle",
       "state": "loaded",
       "interaction": "clickable"
+    },
+    {
+      "fit": "cover",
+      "size": "responsive",
+      "radius": "rounded-sm",
+      "state": "loaded",
+      "interaction": "static",
+      "composition": "dynamic-grid"
+    },
+    {
+      "fit": "cover",
+      "size": "responsive",
+      "radius": "rounded-sm",
+      "state": "loaded",
+      "interaction": "static",
+      "composition": "product-grid"
     }
   ],
   "anatomy": [
@@ -95,19 +118,28 @@
       "name": "overlay",
       "selector": ".wg-image__overlay",
       "role": "按压覆盖层"
+    },
+    {
+      "name": "grid",
+      "selector": ".wg-image-grid",
+      "role": "多图展示容器；内部仅放置同类 .wg-image 图片项"
     }
   ],
   "structurePatterns": [
     "尺寸、圆角、填充模式全部由修饰类叠加在同一根节点上。",
     "loading 使用根节点骨架动画，不额外发明新的宿主层级。",
     "error 通过占位层承载 default-diagram.svg，logo 按容器宽度约 40% 等比缩放，最大不超过 40px。",
-    "clickable 仅补按压覆盖层，不扩展成轮播或缩放组件。"
+    "clickable 仅补按压覆盖层，不扩展成轮播或缩放组件。",
+    "动态九宫格使用 .wg-image-grid--dynamic：三列等宽，容器宽度随父级自适应，图片项保持正方形，外层裁切圆角为 8px。",
+    "商品多图使用 .wg-image-grid--product：两列等宽，容器宽度在 80px 至 160px 间随父级自适应，外层裁切圆角为 4px。"
   ],
   "behavior": {
     "pressFeedback": "移动端按压态由 :active 与 .is-pressed 共同承载。宿主 App 通过 wego-app/js/app.js 在触控设备上自动为 .wg-image--clickable 等可点击元素添加/移除 .is-pressed；桌面端继续由 :active 兜底。同时设置 -webkit-user-select: none / user-select: none 以禁用长按文本选择和拖杆控件。",
     "loading": "默认加载态使用 .wg-image--loading，在根节点显示浅灰骨架动画。",
     "loaded": "图片元素添加 .is-loaded 后以 0.2s 渐显。",
-    "error": "失败态使用 .wg-image--error，并在 .wg-image__placeholder 内放置 default-diagram.svg。"
+    "error": "失败态使用 .wg-image--error，并在 .wg-image__placeholder 内放置 default-diagram.svg。",
+    "dynamicGrid": "动态九宫格固定三列，使用 4px 间距与 8px 外层裁切圆角；不设固定容器宽高，图片项通过 aspect-ratio 保持正方形。",
+    "productGrid": "商品四宫格固定两列，使用 2px 间距与 4px 外层裁切圆角；容器宽度使用 clamp(80px, 100%, 160px)，图片项保持正方形。"
   },
   "accessibility": {},
   "usageHints": [
@@ -116,13 +148,16 @@
     "contain 适合完整展示 logo、海报缩略或比例敏感资产。",
     "错误占位图使用 assets/icons/default-diagram.svg，图形按容器宽度约 40% 等比缩放，最大尺寸限制为 40px。",
     "error 占位只做兜底提示，不替代正式空状态组件。",
-    "动态生成 wg-image 时，必须在 img 元素上监听 load 事件并添加 is-loaded class；wg-image__src 默认 opacity:0，只有 is-loaded 才可见。静态 HTML 可直接在 img 上写 is-loaded。"
+    "动态生成 wg-image 时，必须在 img 元素上监听 load 事件并添加 is-loaded class；wg-image__src 默认 opacity:0，只有 is-loaded 才可见。静态 HTML 可直接在 img 上写 is-loaded。",
+    "产品动态列表优先使用 dynamic-grid；九宫格宽度交由其父级内容区决定，不在组件内写死。",
+    "产品多图列表优先使用 product-grid；容器可随列表列宽缩放，但不得小于 80px 或大于 160px。"
   ],
   "doNotInvent": [
     "不要把 image 扩成轮播、视频播放器或带复杂编辑能力的媒体组件。",
     "不要新增重毛玻璃、渐变遮罩或夸张 loading 动画。",
     "不要在对象管理列表中用大面积高饱和渐变插画冒充真实业务图片；真实图片缺失时使用克制占位或默认占位资产。",
-    "不要让失败占位 logo 随容器无限放大。"
+    "不要让失败占位 logo 随容器无限放大。",
+    "不要把多图展示扩展成轮播、瀑布流或支持跨格的拼贴布局。"
   ],
   "domAnatomy": {
     "root": ".wg-image",
@@ -142,7 +177,9 @@
       ".wg-image--error",
       ".wg-image--loading",
       ".wg-image--clickable",
-      ".wg-image--transparent"
+      ".wg-image--transparent",
+      ".wg-image-grid--dynamic",
+      ".wg-image-grid--product"
     ],
     "alternatives": []
   },
@@ -166,6 +203,7 @@
     "--ease-standard",
     "--palette-neutral-100",
     "--radius-12",
+    "--radius-4",
     "--radius-6",
     "--radius-8",
     "--radius-full",
@@ -176,15 +214,19 @@
     "--size-64",
     "--size-72",
     "--spacer-12",
+    "--spacer-2",
+    "--spacer-4",
     "--spacer-6"
   ],
   "previewOnlyTokens": [
     "--bg-surface",
     "--shadow-xs",
-    "--spacer-16",
-    "--spacer-4"
+    "--spacer-16"
   ],
   "localTokens": [
-    "--wg-image-placeholder-bg"
+    "--wg-image-placeholder-bg",
+    "--wg-image-grid-cell-radius",
+    "--wg-image-product-grid-min-width",
+    "--wg-image-product-grid-max-width"
   ]
 }
