@@ -26,7 +26,8 @@
       "lg",
       "xl",
       "custom-rect",
-      "custom-wide"
+      "custom-wide",
+      "responsive"
     ],
     "radius": [
       "none",
@@ -82,7 +83,7 @@
     },
     {
       "fit": "cover",
-      "size": "custom",
+      "size": "responsive",
       "radius": "rounded-sm",
       "state": "loaded",
       "interaction": "static",
@@ -90,7 +91,7 @@
     },
     {
       "fit": "cover",
-      "size": "custom",
+      "size": "responsive",
       "radius": "rounded-sm",
       "state": "loaded",
       "interaction": "static",
