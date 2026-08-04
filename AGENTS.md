@@ -64,6 +64,8 @@
 <!-- rule-id: design-system-preview-delivery-uses-local-address -->
 - 原型实现和自动验证完成后，默认提交并推送当前功能分支并创建或更新 PR。业务原型提供已核实的当前 PR 独立预览链接；设计系统组件、Token、Preview 或 UI Kit 更新提供与改动对应的本地预览绝对路径，不返回 GitHub Pages 预览链接。
 - GitHub Pages 的 PR 预览只用于业务原型验收；设计系统预览不在 Pages 产物中时，直接以本地预览文件验收。`main` 的 GitHub Pages 链接只展示已经验收并合并的稳定业务版本。
+<!-- rule-id: local-preview-branch-must-match-open-pr -->
+- 交付未合并设计系统 PR 的本地预览前，必须核对当前主工作目录分支与该 PR 的 head 分支一致，并确认所给预览文件存在且包含本次改动；不一致时不得返回本地地址。交付后主工作目录保持该预览分支，直到用户验收或关闭 PR；无关任务使用短期独立 worktree，避免切换后让本地预览回退。
 - 用户明确验收通过后，重新同步最新 `main`、解决冲突并完成验证，再合并到 `main`；不得根据“推送”或“创建 PR”推断用户已经同意合并。
 - PR 合并不得绕过分支保护、必要检查或冲突处理；合并失败时停止并修复问题。
 - PR 创建或更新后，GitHub Actions 将业务原型分支发布到 `previews/pr-{PR编号}/`；PR 后续更新覆盖同一预览地址，PR 关闭或合并后清理对应预览目录。设计系统变更可继续触发该动作，但不得将它作为组件或 UI Kit 的验收入口。
