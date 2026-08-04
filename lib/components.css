@@ -2008,7 +2008,8 @@
   gap: var(--spacer-12);
 }
 .modal__buttons .btn {
-  flex: 1;
+  flex: 0 0 140px;
+  width: 140px;
 }
 
 /* 链接容器（横向排列，最多3个，gap 12px，0.5px 竖向分割线） */
