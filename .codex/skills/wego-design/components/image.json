@@ -129,16 +129,16 @@
     "loading 使用根节点骨架动画，不额外发明新的宿主层级。",
     "error 通过占位层承载 default-diagram.svg，logo 按容器宽度约 40% 等比缩放，最大不超过 40px。",
     "clickable 仅补按压覆盖层，不扩展成轮播或缩放组件。",
-    "动态九宫格使用 .wg-image-grid--dynamic：三列等宽，容器宽度随父级自适应，图片项保持正方形。",
-    "商品多图使用 .wg-image-grid--product：两列等宽，容器宽度在 80px 至 160px 间随父级自适应，外层裁切圆角。"
+    "动态九宫格使用 .wg-image-grid--dynamic：三列等宽，容器宽度随父级自适应，图片项保持正方形，外层裁切圆角为 8px。",
+    "商品多图使用 .wg-image-grid--product：两列等宽，容器宽度在 80px 至 160px 间随父级自适应，外层裁切圆角为 4px。"
   ],
   "behavior": {
     "pressFeedback": "移动端按压态由 :active 与 .is-pressed 共同承载。宿主 App 通过 wego-app/js/app.js 在触控设备上自动为 .wg-image--clickable 等可点击元素添加/移除 .is-pressed；桌面端继续由 :active 兜底。同时设置 -webkit-user-select: none / user-select: none 以禁用长按文本选择和拖杆控件。",
     "loading": "默认加载态使用 .wg-image--loading，在根节点显示浅灰骨架动画。",
     "loaded": "图片元素添加 .is-loaded 后以 0.2s 渐显。",
     "error": "失败态使用 .wg-image--error，并在 .wg-image__placeholder 内放置 default-diagram.svg。",
-    "dynamicGrid": "动态九宫格固定三列，使用 4px 间距；不设固定容器宽高，图片项通过 aspect-ratio 保持正方形。",
-    "productGrid": "商品四宫格固定两列，使用 2px 间距；容器宽度使用 clamp(80px, 100%, 160px)，图片项保持正方形。"
+    "dynamicGrid": "动态九宫格固定三列，使用 4px 间距与 8px 外层裁切圆角；不设固定容器宽高，图片项通过 aspect-ratio 保持正方形。",
+    "productGrid": "商品四宫格固定两列，使用 2px 间距与 4px 外层裁切圆角；容器宽度使用 clamp(80px, 100%, 160px)，图片项保持正方形。"
   },
   "accessibility": {},
   "usageHints": [
