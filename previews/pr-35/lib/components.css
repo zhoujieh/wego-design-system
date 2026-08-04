@@ -1494,7 +1494,7 @@
     .wg-image--custom-wide { width: 260px; height: 160px; }
     .wg-image-grid { display:grid; box-sizing:border-box; }
     .wg-image-grid__item { width:100%; min-width:0; aspect-ratio:1; }
-    .wg-image-grid--dynamic { --wg-image-grid-cell-radius:2px; width:100%; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:var(--spacer-4); }
+    .wg-image-grid--dynamic { --wg-image-grid-cell-radius:2px; width:100%; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:var(--spacer-4); overflow:hidden; border-radius:var(--radius-8); }
     .wg-image-grid--dynamic .wg-image-grid__item { border-radius:var(--wg-image-grid-cell-radius); }
     .wg-image-grid--product { --wg-image-product-grid-min-width:80px; --wg-image-product-grid-max-width:160px; width:clamp(var(--wg-image-product-grid-min-width), 100%, var(--wg-image-product-grid-max-width)); grid-template-columns:repeat(2, minmax(0, 1fr)); gap:var(--spacer-2); overflow:hidden; border-radius:var(--radius-4); }
     @keyframes wg-image-skeleton {
