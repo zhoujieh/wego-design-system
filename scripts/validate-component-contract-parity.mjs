@@ -121,6 +121,32 @@ if (!/\.phone-screen\s+\.uikit-host-screen\s*\{[^}]*z-index:\s*var\(--z-base\)\s
 }
 
 const registered = new Set((index?.components || []).map(item => item.slug));
+const overviewRelative = 'preview/index.html';
+const overview = read(overviewRelative);
+const overviewEntries = [...overview.matchAll(/<button\b([^>]*)>/g)].map(match => {
+  const attributes = match[1];
+  const slug = attributes.match(/\bdata-slug=["']([^"']+)["']/)?.[1];
+  const src = attributes.match(/\bdata-src=["']([^"']+)["']/)?.[1];
+  return { slug, src };
+}).filter(entry => entry.slug);
+const overviewBySlug = new Map();
+for (const entry of overviewEntries) {
+  if (overviewBySlug.has(entry.slug)) {
+    fail('preview.overview_duplicate', `preview/index.html 不得重复关联组件：${entry.slug}`, overviewRelative);
+    continue;
+  }
+  overviewBySlug.set(entry.slug, entry.src);
+  if (!registered.has(entry.slug)) fail('preview.overview_unknown', `preview/index.html 关联了未注册组件：${entry.slug}`, overviewRelative);
+}
+for (const item of index?.components || []) {
+  const expectedSrc = `./${path.basename(item.preview)}`;
+  const actualSrc = overviewBySlug.get(item.slug);
+  if (!actualSrc) {
+    fail('preview.overview_missing', `已注册组件必须关联到 preview/index.html：${item.slug}`, overviewRelative);
+  } else if (actualSrc !== expectedSrc) {
+    fail('preview.overview_source', `preview/index.html 的 ${item.slug} 必须关联 ${expectedSrc}`, overviewRelative);
+  }
+}
 const patternIds = new Set();
 for (const pattern of uiKit?.pagePatterns || []) {
   if (!pattern?.id || patternIds.has(pattern.id)) fail('uikit.pattern_id', `页面范式 id 缺失或重复：${pattern?.id || '未声明'}`, 'uikit-plan.json');
