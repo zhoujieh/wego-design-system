@@ -113,17 +113,17 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
               <div class="my-content-management" data-role="content-management">
                 <span class="my-content-management__count" data-role="content-count">共 0 条</span>
                 <div class="my-content-management__actions">
-                  <button type="button" data-management-action="sort">排序</button>
-                  <button type="button" data-management-action="category">分类</button>
-                  <button type="button" data-management-action="batch">批量</button>
-                  <button type="button" data-management-action="collection" hidden>合集</button>
+                  <a class="link link--12" data-component-slug="link" href="javascript:void(0)" role="button" data-management-action="sort">排序</a>
+                  <a class="link link--12" data-component-slug="link" href="javascript:void(0)" role="button" data-management-action="category">分类</a>
+                  <a class="link link--12" data-component-slug="link" href="javascript:void(0)" role="button" data-management-action="batch">批量</a>
+                  <a class="link link--12" data-component-slug="link" href="javascript:void(0)" role="button" data-management-action="collection" hidden>合集</a>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <section class="layout-section my-content-section" data-component-slug="layout-section" data-edge="M8" data-region="content"></section>
+        <section class="layout-section my-content-section" data-component-slug="layout-section" data-edge="M0" data-region="content"></section>
       </div>
     </div>
 
