@@ -350,7 +350,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
       }
 
       function renderAssets() {
-        var html = '<div class="layout-scroll-row my-asset-row" data-component-slug="layout-scroll-row" data-item-size="compact" data-snap="start" data-peek="next">';
+        var html = '<div class="layout-scroll-row my-asset-row" data-component-slug="layout-scroll-row" data-item-size="auto" data-snap="start" data-peek="next">';
         assetEntries.filter(function (item) { return item.conditional; }).forEach(function (item) {
           html += '<button type="button" class="my-asset-entry" data-asset-id="' + item.id + '">'
             + '<span class="my-entry-metric">' + metricHtml(item.metric, { size: '14', theme: 'black' });
@@ -375,7 +375,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         state.recentApps.forEach(function (id) { appItems.push(recentCatalog[id]); });
         appItems.push({ id: 'all_apps', label: '全部', icon: './lib/assets/icons/app-center/全部应用.svg', fixed: true });
 
-        var html = '<div class="layout-scroll-row my-app-row" data-component-slug="layout-scroll-row" data-item-size="compact" data-snap="start" data-peek="next">';
+        var html = '<div class="layout-scroll-row my-app-row" data-component-slug="layout-scroll-row" data-item-size="auto" data-snap="start" data-peek="next">';
         appItems.forEach(function (item) {
           if (!item) return;
           html += '<button type="button" class="my-app-entry" data-app-id="' + item.id + '">' + appIcon(item.icon, item.label, item.count) + '</button>';
