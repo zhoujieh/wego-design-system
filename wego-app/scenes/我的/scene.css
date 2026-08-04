@@ -48,7 +48,10 @@
 }
 
 .my-tab-identity .avatar {
-  flex: 0 0 auto;
+  flex: 0 1 auto;
+  align-self: auto;
+  width: var(--size-32);
+  height: var(--size-32);
 }
 
 .my-tab-identity .avatar img {
@@ -145,20 +148,25 @@
   font-size: var(--size-16);
 }
 
-.my-membership-card__expiry,
-.my-membership-card__cloud {
+.my-membership-card__expiry {
   color: var(--text-secondary);
   font-size: var(--body-xs-font-size);
   line-height: var(--body-xs-line-height);
+}
+
+.my-membership-card__cloud {
+  color: var(--text-secondary);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
 }
 
 .my-membership-card__usage {
   flex: 0 0 auto;
   color: var(--text-default);
   font-family: var(--number-md-font-family);
-  font-size: var(--body-xs-font-size);
+  font-size: var(--body-sm-font-size);
   font-weight: var(--font-weight-medium);
-  line-height: var(--body-xs-line-height);
+  line-height: var(--body-sm-line-height);
 }
 
 .my-membership-card__progress {
@@ -202,12 +210,7 @@
 .my-asset-row,
 .my-app-row {
   --layout-scroll-row-gap: var(--spacer-4);
-  padding-inline: var(--spacer-12);
-}
-
-.my-asset-row > *,
-.my-app-row > * {
-  flex: 0 0 auto;
+  padding-inline: var(--spacer-8);
 }
 
 .my-asset-entry,
@@ -219,7 +222,7 @@
   justify-content: center;
   min-width: 0;
   gap: var(--spacer-2);
-  padding: var(--spacer-4) var(--spacer-8);
+  padding: var(--spacer-8);
   border-radius: var(--radius-8);
   -webkit-tap-highlight-color: transparent;
 }
@@ -248,6 +251,13 @@
   object-fit: contain;
 }
 
+.my-entry-metric,
+.my-app-icon-wrap {
+  position: relative;
+  display: inline-flex;
+  overflow: visible;
+}
+
 .my-entry-label,
 .my-app-label {
   display: inline-flex;
@@ -265,10 +275,6 @@
 .my-asset-entry .metric {
   max-width: 100%;
   overflow: hidden;
-}
-
-.my-app-entry__badge {
-  margin-inline-start: var(--spacer-2);
 }
 
 .my-content-sticky {
@@ -333,8 +339,7 @@
 
 .my-content-management__actions button,
 .my-content-date-group__heading button,
-.my-product-card__attributes,
-.my-content-action {
+.my-product-card__attributes {
   padding: var(--spacer-0);
   border: 0;
   background: transparent;
@@ -366,7 +371,7 @@
 }
 
 .my-content-date-group {
-  padding-inline: var(--spacer-8);
+  padding-inline: var(--spacer-0);
 }
 
 .my-content-date-group__heading {
@@ -374,6 +379,7 @@
   align-items: center;
   justify-content: space-between;
   min-height: var(--size-40);
+  padding-inline: var(--spacer-8);
   color: var(--text-default);
   font-size: var(--heading-xs-font-size);
   font-weight: var(--font-weight-semibold);
@@ -500,25 +506,36 @@
   container-type: inline-size;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   width: 100%;
   min-width: 0;
   gap: var(--spacer-12);
 }
 
-.my-content-action--share {
+.my-content-actions__leading,
+.my-content-actions__trailing {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: var(--spacer-8);
+}
+
+.my-content-actions__leading {
+  overflow: hidden;
+}
+
+.my-content-actions__trailing {
   flex: 0 0 auto;
-  min-width: var(--size-48);
-  min-height: var(--size-28);
-  padding-inline: var(--spacer-8);
-  border: var(--stroke-hairline) solid var(--border-brand);
-  border-radius: var(--radius-6);
 }
 
 .my-content-action--more {
   flex: 0 0 auto;
   min-width: var(--size-24);
+  padding: var(--spacer-0);
+  border: 0;
+  background: transparent;
   color: var(--text-brand);
+  font-family: var(--body-md-font-family);
   font-size: var(--body-md-font-size);
   letter-spacing: var(--spacer-2);
 }
@@ -528,19 +545,19 @@
 }
 
 @container (max-width: 216px) {
-  .my-content-action--delete {
+  .my-content-actions__leading .my-content-action--delete {
     display: none;
   }
 }
 
 @container (max-width: 192px) {
-  .my-content-action--download {
+  .my-content-actions__leading .my-content-action--download {
     display: none;
   }
 }
 
 @container (max-width: 168px) {
-  .my-content-action--refresh {
+  .my-content-actions__leading .my-content-action--refresh {
     display: none;
   }
 }
