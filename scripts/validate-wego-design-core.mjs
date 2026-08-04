@@ -180,6 +180,7 @@ function checkWorkflowContracts() {
   runNode('scripts/iteration-record.mjs', ['test'], 'workflow.iteration_test');
   runNode('scripts/validate-scene-iteration-binding.mjs', ['test'], 'workflow.iteration_binding_test');
   runNode('scripts/validate-claims.mjs', ['test'], 'workflow.claim_test');
+  runNode('scripts/resolve-delivery-unit.mjs', ['test'], 'workflow.delivery_intake_test');
   runNode('scripts/build-routes.mjs', ['--check'], 'workflow.routes_check');
 }
 

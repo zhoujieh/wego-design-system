@@ -11,13 +11,16 @@ description: 创建或变更业务迭代；形成并确认完整 prototype_brief
 
 ## 按需读取
 
-默认读取 `AGENTS.md`、当前需求、当前活动迭代和[边界方法](./references/scope-and-boundaries.md)。创建或更新简报时读取[业务迭代契约](./references/iteration-workflow.md)的 brief Schema；执行提交、确认、失效或冻结时只读取同文件对应操作。参考图、线框图和 Figma 不用于补造业务事实。
+默认先读取 `AGENTS.md` 和 `wego-github-delivery` 的交付单元核对结果，再读取当前需求、当前活动迭代和[边界方法](./references/scope-and-boundaries.md)。创建或更新简报时读取[业务迭代契约](./references/iteration-workflow.md)的 brief Schema；执行提交、确认、失效或冻结时只读取同文件对应操作。参考图、线框图和 Figma 不用于补造业务事实。
 
 ## 输出与交接
 
 形成 `open_questions` 已清空的 `prototype_brief`，通过 `submit-brief` 绑定当前范围并展示文字摘要；用户明确确认后运行带当前迭代 ID 的 `confirm-brief --user-confirmed-brief`，再交给 `wego-design`。反馈改变已确认业务事实时，在原迭代中失效、更新、重新提交并确认，不静默修改范围。
 
 ## 执行约束
+
+<!-- rule-id: product-must-require-delivery-intake -->
+- 创建、查看或更新业务迭代前，必须先完成 `wego-github-delivery` 的交付单元核对。命中现有交付单元时，先接手对应分支、worktree 和 PR；已确认范围内的验收反馈不得新建简报，按原迭代的失效与重新提交规则处理。
 
 <!-- rule-id: confirm-brief-must-wait-affirmation -->
 - submit-brief 后必须明确询问"是否确认？"并等待用户回复肯定词，且将当前迭代 ID 作为明确授权参数后才能执行 confirm-brief。
