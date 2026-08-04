@@ -8,7 +8,7 @@
 | 候选达到升级阈值 | `.codex/skills/wego-uxsystem-iterate/experience/candidates.json` | 无 | 状态自动改为 `proposed`，并提示用户确认是否升级 |
 | 用户明确要求正式升级 | 唯一权威源，并从候选池移除已解决项 | 直接读取该规则的技能或消费者 | 可观察行为；无可执行行为时只做链接检查 |
 | 技能入口调整 | 目标 `SKILL.md` | 直接引用的 reference、`.codex/skills/README.md` | 三条业务主链技能与交付技能存在、入口唯一、链接有效 |
-| GitHub 交付规则调整 | `wego-github-delivery` 规则、`AGENTS.md` | 技能路由、实际验证入口 | 同一交付单元复用开放 PR；合并或关闭后默认收口分支 |
+| GitHub 交付规则调整 | `wego-github-delivery` 规则、`AGENTS.md` | 直接消费者技能、技能路由、实际验证入口 | 先核对全部 worktree、开放 PR、认领和未冻结迭代；同一交付单元复用开放 PR；合并或关闭后默认收口分支 |
 | 技能适配器调整 | `.trae/skills/*`、`.codebuddy/skills/*` 符号链接 | `AGENTS.md`、实际验证入口 | 两个适配器完整且逐项指向 `.codex/skills/*`，不保留副本或额外技能目录 |
 | 工作流守卫调整 | 实际执行脚本 | 统一验证入口与脚本文档 | `--scope=system --strict` 必须运行对应回归测试并校验工作流引用 |
 

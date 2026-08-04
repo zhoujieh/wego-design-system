@@ -27,12 +27,13 @@ const REPO_ROOT = path.resolve(__dirname, '..');
 
 // ── CLI 参数解析 ────────────────────────────────────────────
 function parseArgs(argv) {
-  const args = { route: null, baseUrl: null, write: false, outFile: null };
+  const args = { route: null, baseUrl: null, write: false, outFile: null, regions: null };
   for (const item of argv.slice(2)) {
     if (item === '--write') args.write = true;
     else if (item.startsWith('--route=')) args.route = item.slice(8);
     else if (item.startsWith('--base-url=')) args.baseUrl = item.slice(11);
     else if (item.startsWith('--out=')) args.outFile = item.slice(6);
+    else if (item.startsWith('--regions=')) args.regions = item.slice(10).split(',').map(s => s.trim()).filter(Boolean);
     else if (item === '-h' || item === '--help') {
       printHelp();
       process.exit(0);
@@ -53,7 +54,8 @@ function printHelp() {
 参数:
   --route=<id>       必填,路由 ID(对应 routes.js 中的 routeId,如 album-product-feed)
   --base-url=<url>   本地预览基地址,默认 http://localhost:8080/wego-app/
-  --write            直接写入 scene.js 的 skeletonTemplate 字段(需有标记注释)
+  --regions=a,b,c    指定采样的 data-region 名称;缺省时自动采样页面中全部 [data-region]
+  --write            直接写入该路由 scene.js 的 skeletonTemplate 字段(需有标记注释)
   --out=<file>       写入指定文件(默认 stdout)
   -h, --help         显示帮助
 
@@ -64,6 +66,25 @@ function printHelp() {
   \`,
   // SKELETON-TEMPLATE-END
 `);
+}
+
+// ── 路由解析:从 routes.js 找到目标路由的场景脚本路径 ──────
+async function resolveRouteScript(routeId) {
+  const routesPath = path.join(REPO_ROOT, 'wego-app', 'js', 'routes.js');
+  const source = await fs.readFile(routesPath, 'utf8');
+  const sandbox = { window: {} };
+  const { default: vm } = await import('node:vm');
+  vm.runInNewContext(source, sandbox, { filename: routesPath });
+  const routes = Array.isArray(sandbox.window.WEGO_APP_ROUTES) ? sandbox.window.WEGO_APP_ROUTES : [];
+  const route = routes.find(item => item && item.routeId === routeId);
+  if (!route) throw new Error(`routes.js 中不存在路由: ${routeId}`);
+  if (typeof route.script !== 'string' || !route.script) throw new Error(`路由 ${routeId} 缺少 script 字段`);
+  const normalized = route.script.replace(/^\.?\//, '');
+  const scenePath = path.join(REPO_ROOT, 'wego-app', normalized);
+  if (!scenePath.startsWith(path.join(REPO_ROOT, 'wego-app') + path.sep)) {
+    throw new Error(`路由 ${routeId} 的 script 路径越界: ${route.script}`);
+  }
+  return scenePath;
 }
 
 // ── evalDOM:在浏览器内执行,扫描 DOM 生成扁平色块 ──────────
@@ -222,10 +243,8 @@ async function main() {
   try {
     await page.goto(targetUrl, { waitUntil: 'networkidle0', timeout: 30000 });
 
-    // 等场景 init 完成:feed-grid 有内容或等待 8s 兜底
+    // 等场景 init 完成:任一 [data-region] 有内容,或等待 8s 兜底
     await page.waitForFunction(() => {
-      const grid = document.querySelector('[data-region="feed-grid"]');
-      if (grid && grid.children.length > 0) return true;
       const regions = document.querySelectorAll('[data-region]');
       for (const r of regions) {
         if (r.children.length > 0 && !r.hasAttribute('hidden')) return true;
@@ -244,15 +263,18 @@ async function main() {
     // 额外等待 500ms 确保布局稳定(图片加载、动画结束、滚动归位)
     await page.waitForTimeout(500);
 
-    // 只采样初始为空、由 init 填充的 region
-    // publish-dock / empty-host 不采样(初始 hidden 或不参与骨架)
-    const SAMPLE_REGIONS = ['people-list', 'filter-tags', 'feed-grid'];
+    // 采样区域:--regions 显式指定;缺省自动采样页面中全部 [data-region]
+    // 模板中已预填内容的 region 请通过 --regions 排除
+    const sampleRegions = args.regions || await page.evaluate(() =>
+      Array.from(document.querySelectorAll('[data-region]')).map(el => el.getAttribute('data-region')).filter(Boolean)
+    );
+    if (!sampleRegions.length) throw new Error('页面中未找到任何 [data-region],请检查路由或显式传 --regions');
 
-    const skeleton = await page.evaluate(evalDOMInPage, SAMPLE_REGIONS);
+    const skeleton = await page.evaluate(evalDOMInPage, sampleRegions);
 
     // 组装最终 HTML(扁平色块堆叠)
     const htmlParts = [];
-    for (const name of SAMPLE_REGIONS) {
+    for (const name of sampleRegions) {
       if (skeleton[name]) {
         htmlParts.push(skeleton[name]);
       }
@@ -263,7 +285,7 @@ async function main() {
       await fs.writeFile(args.outFile, skeletonHtml, 'utf-8');
       console.log('[info] 骨架模板已写入:', args.outFile);
     } else if (args.write) {
-      const scenePath = path.join(REPO_ROOT, 'wego-app', 'scenes', '微购相册动态', 'scene.js');
+      const scenePath = await resolveRouteScript(args.route);
       await writeSkeletonToScene(scenePath, skeletonHtml);
       console.log('[info] 骨架模板已写入:', scenePath);
     } else {
