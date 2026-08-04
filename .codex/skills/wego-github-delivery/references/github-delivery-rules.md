@@ -30,6 +30,8 @@
 - PR 预览用于当前任务验收；合并或关闭后由 Pages 工作流删除预览。
 <!-- rule-id: open-pr-branch-sync-uses-merge -->
 - 已有开放 PR 的分支同步最新 `main` 时使用 `git merge origin/main`，不用 rebase；rebase 会改写已推送历史并导致非快进。确需 rebase 时必须先向用户说明历史重写后果并获得明确同意，再 `git push --force-with-lease`。
+<!-- rule-id: open-pr-branch-divergence-must-merge-remote -->
+- 开放 PR 的本地分支与同名远端分支分叉时，必须先核对双方各自新增的提交；默认 `git merge origin/<branch>` 保留远端提交、解决冲突并完成验证后正常推送。禁止以 `--force` 或 `--force-with-lease` 覆盖远端提交；仅当用户已知悉将改写远端历史并明确同意时，才可作为例外执行。
 <!-- rule-id: preview-url-must-be-verified-before-delivery -->
 - 交付 PR 预览链接前必须实际请求核实再发给用户：Pages 产物根即应用入口（`previews/pr-<编号>/`，无 `wego-app/` 前缀），确认 HTTP 200 且目标产物已包含本次改动；禁止凭路径规律拼接未核实的链接。
 
