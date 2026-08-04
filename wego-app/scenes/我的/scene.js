@@ -72,7 +72,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
           </div>
         </section>
 
-        <div class="sticky-region my-content-sticky" data-component-slug="sticky-region" data-edge="top" data-visibility="elevate-after-scroll" data-state="visible">
+        <div class="sticky-region my-content-tabs-sticky" data-component-slug="sticky-region" data-edge="top" data-visibility="elevate-after-scroll" data-state="visible">
           <div class="sticky-region__motion">
             <div class="sticky-region__inner">
               <div class="wg-tabs wg-tabs--mini wg-tabs--divide my-content-tabs" data-component-slug="tabs" role="tablist" aria-label="内容类型">
@@ -89,6 +89,13 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
                   <span class="wg-tabs__active-indicator" aria-hidden="true"></span>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sticky-region my-content-search-sticky" data-component-slug="sticky-region" data-edge="top" data-visibility="direction-reveal" data-state="visible">
+          <div class="sticky-region__motion">
+            <div class="sticky-region__inner">
               <div class="search-toolbar my-content-toolbar">
                 <div class="searchbox searchbox--sm searchbox--gray" data-component-slug="search">
                   <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
@@ -110,6 +117,11 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <section class="layout-section my-content-management-section" data-component-slug="layout-section" data-edge="M0">
               <div class="my-content-management" data-role="content-management">
                 <span class="my-content-management__count" data-role="content-count">共 0 条</span>
                 <div class="my-content-management__actions">
@@ -119,9 +131,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
                   <a class="link link--12" data-component-slug="link" href="javascript:void(0)" role="button" data-management-action="collection" hidden>合集</a>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
+        </section>
 
         <section class="layout-section my-content-section" data-component-slug="layout-section" data-edge="M0" data-region="content"></section>
       </div>
@@ -761,7 +771,10 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
       ctx.bindTabs({ root: root });
       ctx.bindScrollLayout({
         scrollRoot: '.my-tab-scroll',
-        regions: [{ selector: '.my-content-sticky', policy: 'elevate-after-scroll', edge: 'top', essential: true, threshold: 8 }],
+        regions: [
+          { selector: '.my-content-tabs-sticky', policy: 'elevate-after-scroll', edge: 'top', essential: true, threshold: 8 },
+          { selector: '.my-content-search-sticky', policy: 'direction-reveal', edge: 'top', essential: false, threshold: 8 }
+        ],
         fixedRegions: [{ selector: '.my-tab-fab', edge: 'bottom', gap: 8 }]
       });
 
