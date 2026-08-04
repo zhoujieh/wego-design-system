@@ -163,6 +163,38 @@
       "status": "observing",
       "createdAt": "2026-08-03T08:11:16.000Z",
       "updatedAt": "2026-08-03T08:11:16.000Z"
+    },
+    {
+      "id": "exp-20260804-001",
+      "normalizedKey": "requirement-feedback-must-invalidate-confirmed-brief-before-review",
+      "category": "execution",
+      "type": "rule-execution-failure",
+      "ownerSkill": "wego-product",
+      "problem": "“我的”Tab 在验收时先沿用旧版简报判断实现偏差，没有把用户对直播展示、视图切换和发布后位置的纠正立即识别为业务事实变更，导致验收结论与用户真实要求短暂不一致。",
+      "rootCause": "现有 wego-product 流程已经规定业务事实变化必须让原迭代简报失效、更新、重新提交并确认，但验收反馈没有在输出偏差结论前回流该流程。",
+      "resolution": "本次已在原迭代中执行 brief 失效、更新、重新提交和用户确认；后续继续观察验收反馈是否能在结论前稳定进入同一流程。",
+      "targetAuthority": ".codex/skills/wego-product/SKILL.md",
+      "evidence": [
+        {
+          "scene": "我的",
+          "fact": "旧版简报要求三类内容均可切换列表或网格，并要求发布后在对应类型顶部看到新内容。"
+        },
+        {
+          "scene": "我的",
+          "fact": "用户在验收中明确更正：直播只显示封面、无需视图切换，发布后保持当前滚动位置。"
+        },
+        {
+          "scene": "我的",
+          "fact": "已将原迭代 scope_revision 从 1 升至 2，重新提交并确认新版 prototype_brief。"
+        }
+      ],
+      "scenes": [
+        "我的"
+      ],
+      "occurrenceCount": 1,
+      "status": "observing",
+      "createdAt": "2026-08-04T13:52:00.000Z",
+      "updatedAt": "2026-08-04T13:52:00.000Z"
     }
   ]
 }
