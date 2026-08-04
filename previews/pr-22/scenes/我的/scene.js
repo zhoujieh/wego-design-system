@@ -340,21 +340,20 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
       }
 
       function renderAssets() {
-        var html = '<div class="layout-scroll-row my-asset-row" data-component-slug="layout-scroll-row" data-item-size="auto" data-snap="start" data-peek="next">';
+        var html = '<div class="layout-scroll-row my-asset-row" data-component-slug="layout-scroll-row" data-item-size="compact" data-snap="start" data-peek="next">';
         assetEntries.filter(function (item) { return item.conditional; }).forEach(function (item) {
           html += '<button type="button" class="my-asset-entry" data-asset-id="' + item.id + '">'
-            + metricHtml(item.metric, { size: '16', theme: 'black' })
-            + '<span class="my-entry-label">' + escapeHtml(item.label);
-          if (item.todo) html += '<span class="badge badge--inline badge--number" data-component-slug="badge">' + state.purchaseTodoCount + '</span>';
-          html += '</span></button>';
+            + '<span class="my-entry-metric">' + metricHtml(item.metric, { size: '14', theme: 'black' });
+          if (item.todo) html += '<span class="badge badge--corner badge--number" data-component-slug="badge">' + state.purchaseTodoCount + '</span>';
+          html += '</span><span class="my-entry-label">' + escapeHtml(item.label) + '</span></button>';
         });
         html += '</div>';
         ctx.setRegion('assets', html);
       }
 
       function appIcon(icon, label, count) {
-        var badge = count ? '<span class="badge badge--inline badge--number my-app-entry__badge" data-component-slug="badge">' + count + '</span>' : '';
-        return '<span class="my-app-icon"><img src="' + escapeHtml(icon) + '" alt=""></span><span class="my-app-label">' + escapeHtml(label) + badge + '</span>';
+        var badge = count ? '<span class="badge badge--corner badge--number" data-component-slug="badge">' + count + '</span>' : '';
+        return '<span class="my-app-icon-wrap"><span class="my-app-icon"><img src="' + escapeHtml(icon) + '" alt=""></span>' + badge + '</span><span class="my-app-label">' + escapeHtml(label) + '</span>';
       }
 
       function renderApps() {
@@ -366,7 +365,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         state.recentApps.forEach(function (id) { appItems.push(recentCatalog[id]); });
         appItems.push({ id: 'all_apps', label: '全部', icon: './lib/assets/icons/app-center/全部应用.svg', fixed: true });
 
-        var html = '<div class="layout-scroll-row my-app-row" data-component-slug="layout-scroll-row" data-item-size="auto" data-snap="start" data-peek="next">';
+        var html = '<div class="layout-scroll-row my-app-row" data-component-slug="layout-scroll-row" data-item-size="compact" data-snap="start" data-peek="next">';
         appItems.forEach(function (item) {
           if (!item) return;
           html += '<button type="button" class="my-app-entry" data-app-id="' + item.id + '">' + appIcon(item.icon, item.label, item.count) + '</button>';
@@ -381,17 +380,20 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
       }
 
       function actionButton(item, action, label) {
-        return '<button class="my-content-action my-content-action--' + action + '" type="button" data-content-operation="' + action + '" data-content-id="' + escapeHtml(item.id) + '" data-content-type="' + escapeHtml(item.type) + '">' + label + '</button>';
+        return '<a class="link my-content-action my-content-action--' + action + '" data-component-slug="link" href="javascript:void(0)" role="button" data-content-operation="' + action + '" data-content-id="' + escapeHtml(item.id) + '" data-content-type="' + escapeHtml(item.type) + '">' + label + '</a>';
       }
 
       function contentActions(item) {
         return '<div class="my-content-actions" data-content-actions>'
+          + '<div class="my-content-actions__leading">'
           + actionButton(item, 'delete', '删除')
           + actionButton(item, 'download', '下载')
           + actionButton(item, 'refresh', '刷新')
           + actionButton(item, 'edit', '编辑')
+          + '</div><div class="my-content-actions__trailing">'
           + '<button class="my-content-action my-content-action--more" type="button" data-content-more data-content-id="' + escapeHtml(item.id) + '" data-content-type="' + escapeHtml(item.type) + '" aria-label="更多操作">•••</button>'
-          + actionButton(item, 'share', '分享')
+          + '<button class="btn btn--weak btn--sm my-content-action--share" data-component-slug="button" type="button" data-content-operation="share" data-content-id="' + escapeHtml(item.id) + '" data-content-type="' + escapeHtml(item.type) + '">分享</button>'
+          + '</div>'
           + '</div>';
       }
 
