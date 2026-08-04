@@ -61,11 +61,12 @@
 <!-- rule-id: delivery-intake-must-precede-business-workflow -->
 - 收到业务页面的新建、优化、修复、验收反馈或复用请求时，进入 `wego-product` 或 `wego-design` 前必须先进入 `wego-github-delivery` 完成交付单元核对。核对必须覆盖全部 worktree、开放 PR、有效场景认领和未冻结迭代；不得只依据当前分支或 `main` 判断页面、场景或交付单元不存在。命中已有单元时必须接手其分支、worktree 和 PR；只有查无匹配且无冲突时才能新建迭代或分支。
 - 只暂存本次任务的显式路径，不执行 `git add -A`，不强推已有远端分支。
-- 原型实现和自动验证完成后，默认提交并推送当前功能分支，创建或更新 PR，并提供当前 PR 的独立验收链接。
-- PR 预览链接用于验收当前任务；`main` 的 GitHub Pages 链接只展示已经验收并合并的稳定版本。
+<!-- rule-id: design-system-preview-delivery-uses-local-address -->
+- 原型实现和自动验证完成后，默认提交并推送当前功能分支并创建或更新 PR。业务原型提供已核实的当前 PR 独立预览链接；设计系统组件、Token、Preview 或 UI Kit 更新提供与改动对应的本地预览绝对路径，不返回 GitHub Pages 预览链接。
+- GitHub Pages 的 PR 预览只用于业务原型验收；设计系统预览不在 Pages 产物中时，直接以本地预览文件验收。`main` 的 GitHub Pages 链接只展示已经验收并合并的稳定业务版本。
 - 用户明确验收通过后，重新同步最新 `main`、解决冲突并完成验证，再合并到 `main`；不得根据“推送”或“创建 PR”推断用户已经同意合并。
 - PR 合并不得绕过分支保护、必要检查或冲突处理；合并失败时停止并修复问题。
-- PR 创建或更新后，GitHub Actions 将当前分支发布到 `previews/pr-{PR编号}/`；PR 后续更新覆盖同一预览地址，PR 关闭或合并后清理对应预览目录。
+- PR 创建或更新后，GitHub Actions 将业务原型分支发布到 `previews/pr-{PR编号}/`；PR 后续更新覆盖同一预览地址，PR 关闭或合并后清理对应预览目录。设计系统变更可继续触发该动作，但不得将它作为组件或 UI Kit 的验收入口。
 - 允许的短期临时目录为 `.uploads/`、`.tasks/`、`output/` 和 `.playwright-cli/`；临时产物不得提交，任务结束前清理无用文件，需长期保留的资源必须迁移到正式目录。
 - 按需执行 `node scripts/cleanup-task-artifacts.mjs clean` 清理任务临时产物。
 
@@ -73,7 +74,7 @@
 
 多个人各自驱动自己的 Agent 会话、并发迭代同一仓库。Agent 之间不对话，协调只发生在仓库层面：谁的 Agent 碰了什么，由仓库状态体现，别的 Agent 来读。
 
-- **分支与 PR**：一个可验收交付单元对应一个开放 PR 和 `feature/<owner>-<task>` 分支；新会话先检查同一交付单元的开放 PR 与场景认领，命中即复用原分支。实现和验证完成后提交并推送当前分支、创建或更新 PR，通过独立 PR 预览链接验收；只有用户明确验收通过后才合并到 `main`。PR 合并或关闭后默认删除本地和远端分支，只有 `keep-branch` 标签可例外保留。
+- **分支与 PR**：一个可验收交付单元对应一个开放 PR 和 `feature/<owner>-<task>` 分支；新会话先检查同一交付单元的开放 PR 与场景认领，命中即复用原分支。实现和验证完成后提交并推送当前分支、创建或更新 PR：业务原型通过独立 PR 预览验收，设计系统组件、Token、Preview 或 UI Kit 通过对应本地预览文件验收；只有用户明确验收通过后才合并到 `main`。PR 合并或关闭后默认删除本地和远端分支，只有 `keep-branch` 标签可例外保留。
 <!-- rule-id: agent-must-pull-before-task-start -->
 - **开工前先拉取**：每次新会话/新任务开始前执行 `git pull --rebase origin main`，确保基于最新 `main`；首次创建 PR 前再次 rebase 到最新 `main` 并解决冲突。已有开放 PR 的分支同步 `main` 改用 merge，不用 rebase（详见 `wego-github-delivery` 交付规则）。
 <!-- rule-id: open-pr-branch-divergence-must-merge-remote -->
