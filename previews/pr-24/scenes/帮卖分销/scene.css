@@ -132,6 +132,79 @@
   margin-left: var(--spacer-2);
 }
 
+/* 固定佣金价格卡片(Figma 赚佣金样式:灰底卡片 + ¥符号 + 赚徽标) */
+.resale-price--fixed {
+  padding: var(--spacer-16) var(--spacer-16) var(--spacer-32);
+}
+.resale-price__card {
+  background: var(--bg-subtle);
+  border: 0.5px solid var(--border-neutral-l2);
+  border-radius: var(--radius-8);
+  padding: var(--spacer-16);
+}
+.resale-price__row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-8);
+}
+.resale-price__label {
+  font-size: var(--heading-sm-font-size);
+  font-weight: var(--font-weight-regular);
+  color: var(--text-default);
+  flex-shrink: 0;
+  line-height: var(--heading-sm-line-height);
+}
+.resale-price__value-wrap {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacer-8);
+}
+.resale-price__currency {
+  font-size: var(--body-md-font-size);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-default);
+  line-height: var(--body-md-line-height);
+}
+.resale-price__amount {
+  font-size: var(--heading-sm-font-size);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-default);
+  font-feature-settings: "zero";
+  line-height: var(--heading-sm-line-height);
+}
+.resale-price__commission {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-4);
+}
+.resale-price__earn-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-16);
+  height: var(--size-16);
+  background: var(--status-danger-default);
+  color: var(--text-inverse);
+  font-size: var(--body-sm-font-size);
+  font-weight: var(--font-weight-regular);
+  border-radius: var(--radius-4);
+  line-height: var(--body-sm-line-height);
+}
+.resale-price__commission-currency {
+  font-size: var(--body-sm-font-size);
+  font-weight: var(--font-weight-medium);
+  color: var(--status-danger-default);
+  line-height: var(--body-sm-line-height);
+}
+.resale-price__commission-amount {
+  font-size: var(--heading-sm-font-size);
+  font-weight: var(--font-weight-medium);
+  color: var(--status-danger-default);
+  font-feature-settings: "zero";
+  line-height: var(--heading-sm-line-height);
+}
+
 /* 快捷加价标签区:标题在左,标签在右,间距8 */
 .resale-tags {
   padding: var(--spacer-16);

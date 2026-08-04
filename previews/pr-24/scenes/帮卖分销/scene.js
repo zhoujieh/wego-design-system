@@ -58,15 +58,15 @@
       label: '编辑 · 固定佣金',
       group: '编辑',
       badge: { text: '固定佣金', type: 'fixed' },
-      desc: '售价200 · 佣金100 · 只读',
+      desc: '售价208.5 · 佣金30 · 只读',
       product_id: 'prod-clothing-005',
       distribution_type: 2,
       supply_price: 100,
       skus: [{ id: 'sku-1', supply_price: 100 }],
       distribution_config: { amountType: 1, value: 100 },
       my_item: true,
-      current_price: 200,
-      commission: 100,
+      current_price: 208.5,
+      commission: 30,
       from_page: 'normal'
     },
     {
@@ -275,17 +275,21 @@
     // 价格展示:售价 + 佣金 一行
     var priceHtml = '';
     if (isFixed) {
-      // 固定佣金:只读展示
+      // 固定佣金:只读展示(Figma 赚佣金样式:灰底卡片 + ¥符号 + 赚徽标)
       priceHtml = ''
-        + '<div class="resale-price">'
-        +   '<div class="resale-price__field-row">'
-        +     '<div class="resale-price__field">'
-        +       '<span class="resale-price__field-label">我的售价</span>'
-        +       '<div class="resale-price__field-value resale-price__field-value--readonly" data-display-price>' + formatPrice(sample.current_price) + '<span class="resale-price__field-suffix">元</span></div>'
-        +     '</div>'
-        +     '<div class="resale-price__field">'
-        +       '<span class="resale-price__field-label">佣金</span>'
-        +       '<div class="resale-price__field-value resale-price__field-value--commission resale-price__field-value--readonly" data-display-commission>' + formatPrice(sample.commission) + '<span class="resale-price__field-suffix">元</span></div>'
+        + '<div class="resale-price resale-price--fixed">'
+        +   '<div class="resale-price__card">'
+        +     '<div class="resale-price__row">'
+        +       '<span class="resale-price__label">我的售价：</span>'
+        +       '<div class="resale-price__value-wrap">'
+        +         '<span class="resale-price__currency">¥</span>'
+        +         '<span class="resale-price__amount" data-display-price>' + formatPrice(sample.current_price) + '</span>'
+        +         '<div class="resale-price__commission">'
+        +           '<span class="resale-price__earn-badge">赚</span>'
+        +           '<span class="resale-price__commission-currency">¥</span>'
+        +           '<span class="resale-price__commission-amount" data-display-commission>' + formatPrice(sample.commission) + '</span>'
+        +         '</div>'
+        +       '</div>'
         +     '</div>'
         +   '</div>'
         + '</div>';
@@ -351,7 +355,7 @@
       var tagsItems = tags.map(function (tag, idx) {
         var isSelected = idx === 0 && sample.my_item;
         var tagClass = isSelected ? 'tag--28 tag--brand tag--selected' : 'tag--28 tag--gray tag--normal';
-        return '<div class="resale-tags__item tag ' + tagClass + '" data-tag-amounttype="' + tag.amountType + '" data-tag-value="' + (tag.value || '') + '" data-tag-rate="' + (tag.rate || '') + '"><span class="tag__label">' + tag.label + '</span></div>';
+        return '<div data-component-slug="tag" class="resale-tags__item tag ' + tagClass + '" data-tag-amounttype="' + tag.amountType + '" data-tag-value="' + (tag.value || '') + '" data-tag-rate="' + (tag.rate || '') + '"><span class="tag__label">' + tag.label + '</span></div>';
       }).join('');
 
       tagsHtml = ''
@@ -359,14 +363,14 @@
         +   '<span class="resale-tags__title">快捷加价</span>'
         +   '<div class="resale-tags__list">'
         +     tagsItems
-        +     '<a class="link resale-tags__manual" data-manual-input>手动输入</a>'
+        +     '<a data-component-slug="link" class="link resale-tags__manual" data-manual-input>手动输入</a>'
         +   '</div>'
         + '</div>';
     }
 
-    // 佣金保密提示(非直播间 + 自由定价),放底部按钮上方
+    // 佣金保密提示(非直播间均显示,含固定佣金)
     var hintHtml = '';
-    if (!isLive && !isFixed) {
+    if (!isLive) {
       hintHtml = '<div class="resale-hint-bottom">*帮卖分佣仅自己可见,可放心分享</div>';
     }
 
@@ -383,32 +387,40 @@
       if (isFixed) {
         actionsHtml = ''
           + '<div class="modal__action--single-h">'
-          +   '<button class="btn btn--strong btn--lg" data-action="confirm">我知道了</button>'
+          +   '<button data-component-slug="button" class="btn btn--strong btn--lg" data-action="confirm">我知道了</button>'
           + '</div>';
       } else {
         actionsHtml = ''
           + '<div class="modal__action--single-h">'
-          +   '<button class="btn btn--strong btn--lg" data-action="save">保存</button>'
+          +   '<button data-component-slug="button" class="btn btn--strong btn--lg" data-action="save">保存</button>'
           + '</div>';
       }
     } else if (sample.my_item) {
-      // 编辑场景:【保存】+【分享】
-      actionsHtml = ''
-        + '<div class="modal__buttons">'
-        +   '<button class="btn btn--weak btn--lg" data-action="share">分享</button>'
-        +   '<button class="btn btn--strong btn--lg" data-action="save">保存</button>'
-        + '</div>';
+      if (isFixed) {
+        // 编辑固定佣金:仅【分享】
+        actionsHtml = ''
+          + '<div class="modal__action--single-h">'
+          +   '<button data-component-slug="button" class="btn btn--strong btn--lg" data-action="share">分享</button>'
+          + '</div>';
+      } else {
+        // 编辑自由定价:【保存】+【分享】
+        actionsHtml = ''
+          + '<div class="modal__buttons">'
+          +   '<button data-component-slug="button" class="btn btn--weak btn--lg" data-action="share">分享</button>'
+          +   '<button data-component-slug="button" class="btn btn--strong btn--lg" data-action="save">保存</button>'
+          + '</div>';
+      }
     } else {
       // 初次帮卖:【帮卖并分享】
       actionsHtml = ''
         + '<div class="modal__action--single-h">'
-        +   '<button class="btn btn--strong btn--lg" data-action="resale-share">帮卖并分享</button>'
+        +   '<button data-component-slug="button" class="btn btn--strong btn--lg" data-action="resale-share">帮卖并分享</button>'
         + '</div>';
     }
 
-    // 标题:自由定价加问号图标
+    // 标题:问号图标(非直播间固定佣金也显示)
     var titleHelp = '';
-    if (!isFixed) {
+    if (!isLive || !isFixed) {
       titleHelp = '<i class="wego-iconfont-s icon-wenhao navbar__title-help" data-resale-help></i>';
     }
 
@@ -416,10 +428,10 @@
       + '<div class="modal modal--frame modal--has-actions" role="dialog" aria-modal="true" data-state="closed" data-component-slug="modal">'
       +   '<div class="modal__panel">'
       +     '<div class="modal__title modal__title--default">'
-      +       '<div class="navbar">'
+      +       '<div class="navbar" data-component-slug="navbar">'
       +         '<div class="navbar__body">'
       +           '<div class="navbar__left">'
-      +             '<div class="navbar__left-btn navbar__left-btn--circle" data-popup-close><i class="wego-iconfont-s icon-xiajiantou16"></i></div>'
+      +             '<div class="navbar__left-btn navbar__left-btn--circle" data-dom-id="popup-close" data-popup-close><i class="wego-iconfont-s icon-xiajiantou16"></i></div>'
       +           '</div>'
       +           '<div class="navbar__center"><span class="navbar__title" data-resale-title>' + title + '</span>' + titleHelp + '</div>'
       +           '<div class="navbar__right"></div>'
@@ -453,8 +465,8 @@
       +     '<div class="modal__actions">'
       +       '<div class="modal__action-gradient"></div>'
       +       '<div class="modal__buttons">'
-      +         '<button class="btn btn--weak btn--lg" data-action="close-popup">取消</button>'
-      +         '<button class="btn btn--strong btn--lg" data-action="confirm-wholesale">确认</button>'
+      +         '<button data-component-slug="button" class="btn btn--weak btn--lg" data-action="close-popup">取消</button>'
+      +         '<button data-component-slug="button" class="btn btn--strong btn--lg" data-action="confirm-wholesale">确认</button>'
       +       '</div>'
       +     '</div>'
       +   '</div>'
@@ -474,7 +486,7 @@
       +     '<div class="modal__actions">'
       +       '<div class="modal__action-gradient"></div>'
       +       '<div class="modal__action--single-h">'
-      +         '<button class="btn btn--strong btn--lg" data-action="go-price-settings">确认</button>'
+      +         '<button data-component-slug="button" class="btn btn--strong btn--lg" data-action="go-price-settings">确认</button>'
       +       '</div>'
       +     '</div>'
       +   '</div>'
@@ -518,7 +530,7 @@
       +         '</div>'
       +         '<div class="keypad__side">'
       +           '<div class="keypad__key keypad__key--delete" data-key="delete"><i class="wego-iconfont-s icon-shanchu"></i></div>'
-      +           '<button class="btn btn--strong keypad__side-confirm" data-keypad-confirm>确定</button>'
+      +           '<button data-component-slug="button" class="btn btn--strong keypad__side-confirm" data-keypad-confirm>确定</button>'
       +         '</div>'
       +       '</div>'
       +     '</div>'
@@ -526,18 +538,51 @@
       + '</div>';
   }
 
-  // ── 加价卖说明页模板(基于已确认简报组织) ──
-  function buildHelpTemplate() {
+  // ── 加价卖/赚佣金说明页模板(基于已确认简报组织) ──
+  function buildHelpTemplate(isFixed) {
+    var title = isFixed ? '赚佣金说明' : '加价卖说明';
+    if (isFixed) {
+      return ''
+        + '<div class="modal modal--fullscreen" role="dialog" aria-modal="true" data-state="closed" data-component-slug="modal">'
+        +   '<div class="modal__panel">'
+        +     '<div class="modal__title modal__title--default">'
+        +       '<div class="navbar" data-component-slug="navbar">'
+        +         '<div class="navbar__body">'
+        +           '<div class="navbar__left">'
+        +             '<div class="navbar__left-btn navbar__left-btn--circle" data-help-close><i class="wego-iconfont-s icon-xiajiantou16"></i></div>'
+        +           '</div>'
+        +           '<div class="navbar__center"><span class="navbar__title">' + title + '</span></div>'
+        +           '<div class="navbar__right"></div>'
+        +         '</div>'
+        +       '</div>'
+        +     '</div>'
+        +     '<div class="modal__body modal__body--safe-bottom resale-help__body">'
+        +       '<div class="resale-help__section">'
+        +         '<h3 class="resale-help__title">什么是赚佣金</h3>'
+        +         '<p class="resale-help__text">供应商设定了固定佣金,你无需改价即可帮卖商品,佣金由供应商统一配置。</p>'
+        +       '</div>'
+        +       '<div class="resale-help__section">'
+        +         '<h3 class="resale-help__title">售价与佣金</h3>'
+        +         '<p class="resale-help__text">售价和佣金均为只读展示,不可修改;佣金已由供应商固定。</p>'
+        +       '</div>'
+        +       '<div class="resale-help__section">'
+        +         '<h3 class="resale-help__title">佣金保密</h3>'
+        +         '<p class="resale-help__text">帮卖分佣仅自己可见,买家无法查看,可放心分享。</p>'
+        +       '</div>'
+        +     '</div>'
+        +   '</div>'
+        + '</div>';
+    }
     return ''
       + '<div class="modal modal--fullscreen" role="dialog" aria-modal="true" data-state="closed" data-component-slug="modal">'
       +   '<div class="modal__panel">'
       +     '<div class="modal__title modal__title--default">'
-      +       '<div class="navbar">'
+      +       '<div class="navbar" data-component-slug="navbar">'
       +         '<div class="navbar__body">'
       +           '<div class="navbar__left">'
       +             '<div class="navbar__left-btn navbar__left-btn--circle" data-help-close><i class="wego-iconfont-s icon-xiajiantou16"></i></div>'
       +           '</div>'
-      +           '<div class="navbar__center"><span class="navbar__title">加价卖说明</span></div>'
+      +           '<div class="navbar__center"><span class="navbar__title">' + title + '</span></div>'
       +           '<div class="navbar__right"></div>'
       +         '</div>'
       +       '</div>'
@@ -568,8 +613,8 @@
   function mountSelection(ctx) {
     var root = ctx.root;
 
-    // 场景卡片点击
-    var cards = root.querySelectorAll('[data-scene-key]');
+    // 场景卡片点击（跳过已通过 data-dom-id 绑定的入口卡片）
+    var cards = root.querySelectorAll('[data-scene-key]:not([data-dom-id])');
     cards.forEach(function (card) {
       card.addEventListener('click', function () {
         var key = card.getAttribute('data-scene-key');
@@ -595,14 +640,14 @@
           closeBtn.addEventListener('click', function () { ctx.closeOverlay(); });
         }
 
-        // 标题/问号点击打开说明页(自由定价)
+        // 标题/问号点击打开说明页
         var resaleTitle = root.querySelector('[data-resale-title]');
         var resaleHelp = root.querySelector('[data-resale-help]');
         if (resaleTitle) {
-          resaleTitle.addEventListener('click', function () { openHelp(ctx); });
+          resaleTitle.addEventListener('click', function () { openHelp(ctx, isFixed); });
         }
         if (resaleHelp) {
-          resaleHelp.addEventListener('click', function (e) { e.stopPropagation(); openHelp(ctx); });
+          resaleHelp.addEventListener('click', function (e) { e.stopPropagation(); openHelp(ctx, isFixed); });
         }
 
         // 异常场景按钮
@@ -637,6 +682,10 @@
         if (shareBtn) {
           shareBtn.addEventListener('click', function () {
             ctx.toast('分享面板已拉起');
+            // 固定佣金编辑场景:分享后关闭弹窗
+            if (isFixed) {
+              ctx.closeOverlay();
+            }
           });
         }
         var resaleShareBtn = root.querySelector('[data-action="resale-share"]');
@@ -713,10 +762,10 @@
     });
   }
 
-  // ── 打开加价卖说明页 ──
-  function openHelp(ctx) {
-    ctx.openFullScreenModal(buildHelpTemplate(), {
-      label: '加价卖说明',
+  // ── 打开加价卖/赚佣金说明页 ──
+  function openHelp(ctx, isFixed) {
+    ctx.openFullScreenModal(buildHelpTemplate(isFixed), {
+      label: isFixed ? '赚佣金说明' : '加价卖说明',
       init: function (overlayCtx) {
         var root = overlayCtx.root;
         var closeBtn = root.querySelector('[data-help-close]');
@@ -989,7 +1038,7 @@
       <div class="agent-resale-scene__group">
         <div class="agent-resale-scene__group-title">自由定价</div>
         <div class="cell-group__content">
-          <div class="cell cell--double cell--bg-white cell--clickable cell--divider-center" data-component-slug="cell" data-scene-key="first-resale-free-single">
+          <div class="cell cell--double cell--bg-white cell--clickable cell--divider-center" data-component-slug="cell" data-dom-id="open-resale-popup" data-scene-key="first-resale-free-single">
             <div class="cell__body">
               <div class="cell__content">
                 <div class="cell__title-row">
@@ -1042,7 +1091,7 @@
                 <div class="cell__title-row">
                   <span class="cell__title">编辑 · 固定佣金</span>
                 </div>
-                <div class="cell__subtitle">售价200 · 佣金100 · 只读</div>
+                <div class="cell__subtitle">售价208.5 · 佣金30 · 只读</div>
               </div>
               <div class="cell__action">
                 <span class="agent-resale-scene__card-badge agent-resale-scene__card-badge--fixed">固定佣金</span>
@@ -1123,6 +1172,14 @@
 </div>`,
     presentation: { type: 'push', coversTabBar: true },
     init: function (ctx) {
+      var root = ctx.root;
+      var entryCard = root.querySelector('[data-dom-id="open-resale-popup"]');
+      if (entryCard) {
+        entryCard.addEventListener('click', function () {
+          var sample = SCENE_SAMPLES.find(function (s) { return s.key === 'first-resale-free-single'; });
+          if (sample) openResalePopup(ctx, sample);
+        });
+      }
       mountSelection(ctx);
     }
   });

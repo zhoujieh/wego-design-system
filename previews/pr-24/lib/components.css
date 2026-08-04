@@ -1460,7 +1460,7 @@
 
 /* ── Image ─────────────────────────────────────────────────── */
 /* @anatomy
-   <span class="label">常用尺寸</span><div class="wg-image wg-image--sm demo-img-1"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt="">
+   <span class="label">常用尺寸</span><div class="wg-image wg-image--sm"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_1/clothing_1_1.jpg" alt="方领上衣">
 */
 .wg-image { --wg-image-placeholder-bg:var(--bg-page); position:relative; display:block; overflow:hidden; flex-shrink:0; background:var(--wg-image-placeholder-bg); box-sizing:border-box; isolation:isolate; }
     .wg-image--xs { width:var(--size-16); height:var(--size-16); }
@@ -1492,6 +1492,11 @@
     .wg-image--loading { background:var(--wg-image-placeholder-bg); }
     .wg-image--custom-rect { width: 180px; height: 120px; }
     .wg-image--custom-wide { width: 260px; height: 160px; }
+    .wg-image-grid { display:grid; box-sizing:border-box; }
+    .wg-image-grid__item { width:100%; min-width:0; aspect-ratio:1; }
+    .wg-image-grid--dynamic { --wg-image-grid-cell-radius:2px; width:100%; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:var(--spacer-4); overflow:hidden; border-radius:var(--radius-8); }
+    .wg-image-grid--dynamic .wg-image-grid__item { border-radius:var(--wg-image-grid-cell-radius); }
+    .wg-image-grid--product { --wg-image-product-grid-min-width:80px; --wg-image-product-grid-max-width:160px; width:clamp(var(--wg-image-product-grid-min-width), 100%, var(--wg-image-product-grid-max-width)); grid-template-columns:repeat(2, minmax(0, 1fr)); gap:var(--spacer-2); overflow:hidden; border-radius:var(--radius-4); }
     @keyframes wg-image-skeleton {
       0% { background-position: 200% 0; }
       100% { background-position: -200% 0; }
@@ -2008,7 +2013,8 @@
   gap: var(--spacer-12);
 }
 .modal__buttons .btn {
-  flex: 1;
+  flex: 0 0 140px;
+  width: 140px;
 }
 
 /* 链接容器（横向排列，最多3个，gap 12px，0.5px 竖向分割线） */
