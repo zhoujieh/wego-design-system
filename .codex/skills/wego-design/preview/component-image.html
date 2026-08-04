@@ -45,6 +45,11 @@
     .wg-image--loading { background:var(--wg-image-placeholder-bg); }
     .wg-image--custom-rect { width: 180px; height: 120px; }
     .wg-image--custom-wide { width: 260px; height: 160px; }
+    .wg-image-grid { display:grid; box-sizing:border-box; }
+    .wg-image-grid__item { width:100%; min-width:0; aspect-ratio:1; }
+    .wg-image-grid--dynamic { --wg-image-grid-cell-radius:2px; width:100%; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:var(--spacer-4); }
+    .wg-image-grid--dynamic .wg-image-grid__item { border-radius:var(--wg-image-grid-cell-radius); }
+    .wg-image-grid--product { --wg-image-product-grid-min-width:80px; --wg-image-product-grid-max-width:160px; width:clamp(var(--wg-image-product-grid-min-width), 100%, var(--wg-image-product-grid-max-width)); grid-template-columns:repeat(2, minmax(0, 1fr)); gap:var(--spacer-2); overflow:hidden; border-radius:var(--radius-4); }
     @keyframes wg-image-skeleton {
       0% { background-position: 200% 0; }
       100% { background-position: -200% 0; }
@@ -68,6 +73,29 @@
     <div class="pv-section__sub">保留圆角、圆形和 contain 两类最常用差异。</div>
     <div class="row"><span class="label">圆角 / 圆形</span><div class="wg-image wg-image--md wg-image--rounded-sm demo-img-2"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt=""></div><div class="wg-image wg-image--md wg-image--circle demo-img-3"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt=""></div></div>
     <div class="row"><span class="label">contain</span><div class="wg-image wg-image--md wg-image--rounded-md wg-image--contain demo-img-checker"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt=""></div></div>
+  </div>
+  <div class="pv-section">
+    <div class="pv-section__title">多图展示</div>
+    <div class="pv-section__sub">动态九宫格随父级内容区自适应；商品四宫格保持 80px 至 160px 的可用宽度。</div>
+    <div class="row"><span class="label">产品动态九宫格</span></div>
+    <div class="wg-image-grid wg-image-grid--dynamic">
+      <div class="wg-image wg-image-grid__item demo-img-1"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt="动态图片 1"></div>
+      <div class="wg-image wg-image-grid__item demo-img-2"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt="动态图片 2"></div>
+      <div class="wg-image wg-image-grid__item demo-img-3"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt="动态图片 3"></div>
+      <div class="wg-image wg-image-grid__item demo-img-4"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt="动态图片 4"></div>
+      <div class="wg-image wg-image-grid__item demo-img-5"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt="动态图片 5"></div>
+      <div class="wg-image wg-image-grid__item demo-img-3"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt="动态图片 6"></div>
+      <div class="wg-image wg-image-grid__item demo-img-2"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt="动态图片 7"></div>
+      <div class="wg-image wg-image-grid__item demo-img-4"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt="动态图片 8"></div>
+      <div class="wg-image wg-image-grid__item demo-img-1"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt="动态图片 9"></div>
+    </div>
+    <div class="row"><span class="label">产品多图四宫格</span></div>
+    <div class="wg-image-grid wg-image-grid--product">
+      <div class="wg-image wg-image-grid__item demo-img-4"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt="商品图片 1"></div>
+      <div class="wg-image wg-image-grid__item demo-img-5"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt="商品图片 2"></div>
+      <div class="wg-image wg-image-grid__item demo-img-1"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt="商品图片 3"></div>
+      <div class="wg-image wg-image-grid__item demo-img-3"><img class="wg-image__src is-loaded" src="../assets/image/avatar-defult.png" alt="商品图片 4"></div>
+    </div>
   </div>
   <div class="pv-section">
     <div class="pv-section__title">加载与结果</div>
