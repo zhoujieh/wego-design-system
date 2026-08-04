@@ -75,7 +75,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         <div class="sticky-region my-content-sticky" data-component-slug="sticky-region" data-edge="top" data-visibility="elevate-after-scroll" data-state="visible">
           <div class="sticky-region__motion">
             <div class="sticky-region__inner">
-              <div class="wg-tabs wg-tabs--standard wg-tabs--divide my-content-tabs" data-component-slug="tabs" role="tablist" aria-label="内容类型">
+              <div class="wg-tabs wg-tabs--mini wg-tabs--divide my-content-tabs" data-component-slug="tabs" role="tablist" aria-label="内容类型">
                 <div class="wg-tabs__scroll">
                   <button class="wg-tabs__item" type="button" role="tab" aria-selected="true" data-content-type="product">
                     <span class="wg-tabs__content"><span class="wg-tabs__label">产品</span></span>
@@ -100,14 +100,23 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
                   </div>
                 </div>
                 <div class="search-toolbar__actions">
-                  <button class="search-toolbar__action" data-action="filter" type="button">
-                    <span class="search-toolbar__action-icon wego-iconfont-s icon-shaixuan" aria-hidden="true"></span>
-                    筛选
-                  </button>
                   <button class="search-toolbar__action" data-action="view-toggle" type="button">
                     <span class="search-toolbar__action-icon wego-iconfont-s icon-liebiao" data-role="view-icon" aria-hidden="true"></span>
                     <span data-role="view-label">列表</span>
                   </button>
+                  <button class="search-toolbar__action" data-action="filter" type="button">
+                    <span class="search-toolbar__action-icon wego-iconfont-s icon-shaixuan" aria-hidden="true"></span>
+                    筛选
+                  </button>
+                </div>
+              </div>
+              <div class="my-content-management" data-role="content-management">
+                <span class="my-content-management__count" data-role="content-count">共 0 条</span>
+                <div class="my-content-management__actions">
+                  <button type="button" data-management-action="sort">排序</button>
+                  <button type="button" data-management-action="category">分类</button>
+                  <button type="button" data-management-action="batch">批量</button>
+                  <button type="button" data-management-action="collection" hidden>合集</button>
                 </div>
               </div>
             </div>
@@ -223,13 +232,16 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
       var recentStorageKey = 'wego-my-recent-apps';
       var destroyed = false;
       var publishTimer = 0;
+      var popoverHandles = [];
 
       state.activeType = state.activeType || 'product';
-      state.viewByType = Object.assign({ product: 'grid', note: 'grid', live: 'list' }, safeRead(viewStorageKey, {}), state.viewByType || {});
+      state.viewByType = Object.assign({ product: 'list', note: 'list', live: 'grid' }, safeRead(viewStorageKey, {}), state.viewByType || {});
       state.searchByType = Object.assign({ product: '', note: '', live: '' }, safeRead(searchStorageKey, {}), state.searchByType || {});
       state.purchaseTodoCount = Number.isFinite(state.purchaseTodoCount) ? state.purchaseTodoCount : 2;
       state.cartItemCount = Number.isFinite(state.cartItemCount) ? state.cartItemCount : 3;
       state.published = state.published || { product: [], note: [], live: [] };
+      state.removedContentIds = state.removedContentIds || [];
+      state.pinnedContentIds = state.pinnedContentIds || [];
 
       var recentCatalog = {
         product_manager: { id: 'product_manager', label: '商品管理', icon: './lib/assets/icons/app-center/商品管理.svg' },
@@ -271,7 +283,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
             id: product.product_id,
             type: 'product',
             title: product.name,
-            cover: product.image_list && product.image_list[0],
+            images: (product.image_list || []).slice(0, 4),
             price: product.price,
             updatedAt: dynamic ? dynamic.published_at : '近期更新',
             order: index
@@ -368,40 +380,60 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         return metricHtml({ symbol: '¥', integer: parts[0], decimal: parts[1] ? '.' + parts[1] : '' }, { size: '18', theme: 'marketing' });
       }
 
+      function actionButton(item, action, label) {
+        return '<button class="my-content-action my-content-action--' + action + '" type="button" data-content-operation="' + action + '" data-content-id="' + escapeHtml(item.id) + '" data-content-type="' + escapeHtml(item.type) + '">' + label + '</button>';
+      }
+
+      function contentActions(item) {
+        return '<div class="my-content-actions" data-content-actions>'
+          + actionButton(item, 'delete', '删除')
+          + actionButton(item, 'download', '下载')
+          + actionButton(item, 'refresh', '刷新')
+          + actionButton(item, 'edit', '编辑')
+          + '<button class="my-content-action my-content-action--more" type="button" data-content-more data-content-id="' + escapeHtml(item.id) + '" data-content-type="' + escapeHtml(item.type) + '" aria-label="更多操作">•••</button>'
+          + actionButton(item, 'share', '分享')
+          + '</div>';
+      }
+
+      function productMedia(item) {
+        var images = (item.images || []).filter(Boolean).slice(0, 4);
+        if (!images.length) images = ['./lib/assets/icons/default-diagram.svg'];
+        return '<div class="my-product-card__media my-product-card__media--count-' + images.length + '">'
+          + images.map(function (src, index) { return imageHtml(src, item.title + '图片 ' + (index + 1), 'my-product-card__image'); }).join('')
+          + '</div>';
+      }
+
       function productCard(item, view) {
-        var grid = view === 'grid';
-        return '<article class="card card--surface ' + (grid ? 'card--vertical ' : '') + 'my-content-card my-product-card my-product-card--' + view + '" data-component-slug="card">'
-          + imageHtml(item.cover, item.title, 'my-product-card__media')
+        return '<article class="card card--surface card--vertical my-content-card my-product-card my-product-card--' + view + '" data-component-slug="card">'
           + '<div class="card__content my-content-card__content">'
-          + '<h3 class="card__header my-content-card__title">' + escapeHtml(item.title) + '</h3>'
-          + '<div class="card__footer my-product-card__footer">' + priceMetric(item.price) + '<span>' + escapeHtml(item.updatedAt) + '</span></div>'
+          + '<div class="my-product-card__main">' + productMedia(item)
+          + '<div class="my-product-card__details"><h3 class="my-content-card__title">' + escapeHtml(item.title) + '</h3>'
+          + '<div class="my-product-card__footer">' + priceMetric(item.price) + '</div></div></div>'
+          + '<button class="my-product-card__attributes" type="button" data-content-operation="attributes" data-content-id="' + escapeHtml(item.id) + '" data-content-type="product">▸ 商品属性</button>'
+          + '<div class="card__footer my-content-card__operation-row">' + contentActions(item) + '</div>'
           + '</div></article>';
       }
 
       function noteCard(item, view) {
-        var grid = view === 'grid';
-        return '<article class="card card--surface ' + (grid ? 'card--vertical ' : '') + 'my-content-card my-note-card my-note-card--' + view + '" data-component-slug="card">'
-          + imageHtml(item.cover, item.title, 'my-note-card__media')
+        var image = item.cover ? imageHtml(item.cover, item.title, 'my-note-card__media') : '';
+        return '<article class="card card--surface card--vertical my-content-card my-note-card my-note-card--' + view + (image ? '' : ' my-note-card--no-image') + '" data-component-slug="card">'
           + '<div class="card__content my-content-card__content">'
-          + '<h3 class="card__header my-content-card__title">' + escapeHtml(item.title) + '</h3>'
-          + '<p class="card__body my-note-card__summary">' + escapeHtml(item.summary) + '</p>'
-          + '<span class="card__footer my-content-card__meta">' + escapeHtml(item.updatedAt) + '</span>'
+          + '<div class="my-note-card__main"><div class="my-note-card__copy"><h3 class="my-content-card__title">' + escapeHtml(item.title) + '</h3>'
+          + '<p class="my-note-card__summary">' + escapeHtml(item.summary) + '</p></div>' + image + '</div>'
+          + '<div class="card__footer my-content-card__operation-row">' + contentActions(item) + '</div>'
           + '</div></article>';
       }
 
-      function liveCard(item, view) {
-        var grid = view === 'grid';
-        return '<article class="card card--surface card--vertical my-content-card my-live-card my-live-card--' + view + '" data-component-slug="card">'
-          + imageHtml(item.cover, item.title, 'my-live-card__media')
-          + '<div class="card__content my-content-card__content">'
-          + '<h3 class="card__header my-content-card__title">' + escapeHtml(item.title) + '</h3>'
-          + '<div class="card__body my-live-card__details"><span><i class="wego-iconfont-s icon-ren" aria-hidden="true"></i>' + escapeHtml(item.host) + '</span><span><i class="wego-iconfont-s icon-shijian" aria-hidden="true"></i>' + escapeHtml(item.time) + '</span></div>'
-          + '</div></article>';
+      function liveCard(item) {
+        return '<article class="my-live-card">' + imageHtml(item.cover, item.title, 'my-live-card__media') + '</article>';
       }
 
       function contentFor(type) {
         var defaults = type === 'product' ? productContent() : type === 'note' ? noteContent() : liveContent();
-        return (state.published[type] || []).concat(defaults);
+        var items = (state.published[type] || []).concat(defaults).filter(function (item) { return !state.removedContentIds.includes(item.id); });
+        return items.sort(function (left, right) {
+          return Number(state.pinnedContentIds.includes(right.id)) - Number(state.pinnedContentIds.includes(left.id));
+        });
       }
 
       function matchesSearch(item, query) {
@@ -410,32 +442,105 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         return source.includes(query.toLowerCase());
       }
 
+      function dateLabel(value) {
+        if (/刚刚|分钟|今天/.test(value || '')) return '今天';
+        if (/昨天/.test(value || '')) return '昨天';
+        return '更早';
+      }
+
+      function groupItemsByDate(items) {
+        return items.reduce(function (groups, item) {
+          var label = dateLabel(item.updatedAt);
+          var group = groups.find(function (entry) { return entry.label === label; });
+          if (!group) { group = { label: label, items: [] }; groups.push(group); }
+          group.items.push(item);
+          return groups;
+        }, []);
+      }
+
+      function destroyContentPopovers() {
+        popoverHandles.forEach(function (entry) {
+          entry.handle.destroy();
+          entry.popover.remove();
+        });
+        popoverHandles = [];
+      }
+
+      function operationMeta(action) {
+        return {
+          delete: { label: '删除', icon: 'icon-shanchu' },
+          download: { label: '下载', icon: 'icon-xiazai' },
+          refresh: { label: '刷新', icon: 'icon-shuaxin' },
+          edit: { label: '编辑', icon: 'icon-bianji' },
+          pin: { label: '置顶', icon: 'icon-zhiding' },
+          copy: { label: '复制', icon: 'icon-fuzhi' }
+        }[action];
+      }
+
+      function bindContentPopovers() {
+        if (!window.WegoPopover) return;
+        root.querySelectorAll('[data-content-more]').forEach(function (trigger) {
+          var actionRoot = trigger.closest('[data-content-actions]');
+          var hiddenActions = ['delete', 'download', 'refresh', 'edit'].filter(function (action) {
+            var button = actionRoot.querySelector('[data-content-operation="' + action + '"]');
+            return button && window.getComputedStyle(button).display === 'none';
+          });
+          var actions = hiddenActions.concat(['pin', 'copy']);
+          var popover = document.createElement('div');
+          popover.className = 'popover popover--action my-content-popover';
+          popover.setAttribute('role', 'menu');
+          popover.setAttribute('data-variant', 'action');
+          popover.setAttribute('data-placement', 'top');
+          popover.setAttribute('data-align', 'end');
+          popover.setAttribute('data-state', 'closed');
+          popover.innerHTML = '<div class="popover__arrow"></div><div class="popover__body"><div class="popover__action-list">'
+            + actions.map(function (action) {
+              var meta = operationMeta(action);
+              return '<button class="popover__action-item" type="button" data-content-operation="' + action + '" data-content-id="' + escapeHtml(trigger.dataset.contentId) + '" data-content-type="' + escapeHtml(trigger.dataset.contentType) + '"><i class="wego-iconfont-s ' + meta.icon + ' popover__action-icon" aria-hidden="true"></i><span class="popover__action-text">' + meta.label + '</span></button>';
+            }).join('') + '</div></div>';
+          document.body.appendChild(popover);
+          var handle = window.WegoPopover.bind(trigger, popover, {
+            preferredPlacement: 'top',
+            beforeShow: function () { popoverHandles.forEach(function (entry) { entry.handle.hide(); }); },
+            onActionItemClick: function (item) { handleContentOperation(item.dataset.contentOperation, item.dataset.contentId, item.dataset.contentType); }
+          });
+          popoverHandles.push({ popover: popover, handle: handle });
+        });
+      }
+
       function renderContent() {
+        destroyContentPopovers();
         var type = state.activeType;
-        var view = state.viewByType[type];
+        var view = type === 'live' ? 'grid' : state.viewByType[type];
         var query = state.searchByType[type] || '';
         var items = contentFor(type).filter(function (item) { return matchesSearch(item, query); });
         var containerClass = view === 'grid' ? 'layout-grid' : 'layout-flow';
         var componentSlug = view === 'grid' ? 'layout-grid' : 'layout-flow';
-        var attributes = view === 'grid'
-          ? ' data-columns="2" data-align="stretch"'
-          : ' data-direction="vertical" data-align="stretch"';
-        var html = '<div class="' + containerClass + ' my-content-list my-content-list--' + view + ' my-content-list--' + type + '" data-component-slug="' + componentSlug + '"' + attributes + '>';
+        var attributes = view === 'grid' ? ' data-columns="' + (type === 'live' ? '3' : '2') + '" data-align="stretch"' : ' data-direction="vertical" data-align="stretch"';
+        var html = '';
 
         if (!items.length) {
           var typeLabel = type === 'product' ? '产品' : type === 'note' ? '笔记' : '直播';
-          html += '<div class="card card--filled card--vertical my-content-empty" data-component-slug="card">'
+          html += '<div class="' + containerClass + ' my-content-list my-content-list--' + view + '" data-component-slug="' + componentSlug + '"' + attributes + '><div class="card card--filled card--vertical my-content-empty" data-component-slug="card">'
             + '<i class="wego-iconfont-s icon-sousuo" aria-hidden="true"></i>'
             + '<strong>没有找到相关' + typeLabel + '</strong>'
             + '<span>换个关键词试试</span></div>';
+          html += '</div>';
+        } else if (type === 'live') {
+          html += '<div class="' + containerClass + ' my-content-list my-content-list--grid my-content-list--live" data-component-slug="' + componentSlug + '"' + attributes + '>';
+          items.forEach(function (item) { html += liveCard(item); });
+          html += '</div>';
         } else {
-          items.forEach(function (item) {
-            html += type === 'product' ? productCard(item, view) : type === 'note' ? noteCard(item, view) : liveCard(item, view);
+          groupItemsByDate(items).forEach(function (group) {
+            html += '<section class="my-content-date-group"><div class="my-content-date-group__heading"><span>' + group.label + ' ›</span><button type="button" data-date-more="' + group.label + '" aria-label="' + group.label + '更多操作">•••</button></div>';
+            html += '<div class="' + containerClass + ' my-content-list my-content-list--' + view + ' my-content-list--' + type + '" data-component-slug="' + componentSlug + '"' + attributes + '>';
+            group.items.forEach(function (item) { html += type === 'product' ? productCard(item, view) : noteCard(item, view); });
+            html += '</div></section>';
           });
         }
-        html += '</div>';
         ctx.setRegion('content', html);
         activateImages(root.querySelector('[data-region="content"]'));
+        window.requestAnimationFrame(bindContentPopovers);
       }
 
       function syncControls() {
@@ -446,6 +551,9 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         var clear = root.querySelector('[data-action="clear-search"]');
         var viewIcon = root.querySelector('[data-role="view-icon"]');
         var viewLabel = root.querySelector('[data-role="view-label"]');
+        var viewButton = root.querySelector('[data-action="view-toggle"]');
+        var management = root.querySelector('[data-role="content-management"]');
+        var count = root.querySelector('[data-role="content-count"]');
         var currentView = state.viewByType[type];
 
         root.querySelectorAll('[data-content-type]').forEach(function (tab) {
@@ -458,7 +566,14 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         search.closest('.searchbox').classList.toggle('is-inputting', Boolean(search.value));
         viewIcon.className = 'search-toolbar__action-icon wego-iconfont-s ' + (currentView === 'grid' ? 'icon-liebiao' : 'icon-datu');
         viewLabel.textContent = currentView === 'grid' ? '列表' : '网格';
-        root.querySelector('[data-action="view-toggle"]').setAttribute('aria-label', currentView === 'grid' ? '切换为列表视图' : '切换为网格视图');
+        viewButton.setAttribute('aria-label', currentView === 'grid' ? '切换为列表视图' : '切换为网格视图');
+        viewButton.hidden = type === 'live';
+        management.hidden = type === 'live';
+        count.textContent = '共 ' + contentFor(type).length + (type === 'note' ? ' 篇' : type === 'live' ? ' 场' : ' 条');
+        root.querySelector('[data-management-action="sort"]').hidden = type !== 'product';
+        root.querySelector('[data-management-action="category"]').hidden = type !== 'product';
+        root.querySelector('[data-management-action="batch"]').hidden = type !== 'product';
+        root.querySelector('[data-management-action="collection"]').hidden = type !== 'note';
         ctx.updateTabsIndicator(root.querySelector('.my-content-tabs'));
       }
 
@@ -482,7 +597,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         var noteDynamic = dynamics.find(function (item) { return item.content_type === 'note'; });
         var next = type === 'product' ? {
           id: 'published-product-' + Date.now(), type: type, title: sourceProduct.name,
-          cover: sourceProduct.image_list && sourceProduct.image_list[0], price: sourceProduct.price, updatedAt: '刚刚'
+          images: (sourceProduct.image_list || []).slice(0, 4), price: sourceProduct.price, updatedAt: '刚刚'
         } : type === 'note' ? {
           id: 'published-note-' + Date.now(), type: type, title: sourceProduct.name,
           cover: sourceProduct.image_list && sourceProduct.image_list[0], summary: noteDynamic ? noteDynamic.text_content : sourceProduct.feed_text, updatedAt: '刚刚'
@@ -503,6 +618,32 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
           if (scroll && content) scroll.scrollTo({ top: content.offsetTop, behavior: 'smooth' });
           ctx.toast({ variant: 'guide', text: '发布成功，已加入' + (type === 'product' ? '产品' : type === 'note' ? '笔记' : '直播'), action: { label: '查看', mode: 'strong' } });
         }, 600);
+      }
+
+      function handleContentOperation(action, itemId, type) {
+        var labels = { delete: '删除', download: '下载', refresh: '刷新', edit: '编辑', share: '分享', pin: '置顶', copy: '复制', attributes: '商品属性' };
+        if (action === 'delete') {
+          if (!state.removedContentIds.includes(itemId)) state.removedContentIds.push(itemId);
+          syncControls();
+          renderContent();
+          ctx.toast('已删除' + (type === 'note' ? '笔记' : '产品'));
+          return;
+        }
+        if (action === 'pin') {
+          state.pinnedContentIds = [itemId].concat(state.pinnedContentIds.filter(function (id) { return id !== itemId; }));
+          renderContent();
+          ctx.toast('已置顶');
+          return;
+        }
+        if (action === 'copy') {
+          ctx.toast('已复制内容信息');
+          return;
+        }
+        if (action === 'attributes') {
+          ctx.toast('商品属性已在当前页展开');
+          return;
+        }
+        ctx.toast((labels[action] || '操作') + '已完成');
       }
 
       function openPublishSheet() {
@@ -537,6 +678,12 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
       }
 
       function onRootClick(event) {
+        var contentOperation = event.target.closest('[data-content-operation]');
+        if (contentOperation) {
+          handleContentOperation(contentOperation.dataset.contentOperation, contentOperation.dataset.contentId, contentOperation.dataset.contentType);
+          return;
+        }
+
         var tab = event.target.closest('[data-content-type]');
         if (tab) { switchType(tab.dataset.contentType); return; }
 
@@ -566,8 +713,20 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
           ctx.toast(typeNames[state.activeType] + '筛选入口，本期暂不展开');
           return;
         }
+        var managementAction = event.target.closest('[data-management-action]');
+        if (managementAction) {
+          var labels = { sort: '排序', category: '分类', batch: '批量', collection: '合集' };
+          ctx.toast((labels[managementAction.dataset.managementAction] || '管理') + '入口，本期暂不展开');
+          return;
+        }
+        var dateMore = event.target.closest('[data-date-more]');
+        if (dateMore) {
+          ctx.toast(dateMore.dataset.dateMore + '内容操作入口，本期暂不展开');
+          return;
+        }
         if (event.target.closest('[data-action="view-toggle"]')) {
           var type = state.activeType;
+          if (type === 'live') return;
           state.viewByType[type] = state.viewByType[type] === 'grid' ? 'list' : 'grid';
           safeWrite(viewStorageKey, state.viewByType);
           syncControls();
@@ -611,6 +770,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
       ctx.onDestroy(function () {
         destroyed = true;
         if (publishTimer) window.clearTimeout(publishTimer);
+        destroyContentPopovers();
         publishButton.removeEventListener('click', openPublishSheet);
         root.removeEventListener('click', onRootClick);
         root.removeEventListener('input', onSearchInput);
