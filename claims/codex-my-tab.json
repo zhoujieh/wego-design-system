@@ -3,7 +3,7 @@
   "scene": "我的",
   "routeId": "my",
   "branch": "feature/codex-my-tab",
-  "status": "active",
+  "status": "done",
   "claimedAt": "2026-08-03T12:20:00.000Z",
-  "note": "我的 Tab 验收反馈：压缩会员卡、数据资产去图标、应用栏图标与横向分布优化"
+  "note": "我的 Tab 内容管理视觉与就地操作优化已提交验收"
 }
