@@ -50,8 +50,8 @@
 .my-tab-identity .avatar {
   flex: 0 1 auto;
   align-self: auto;
-  width: var(--size-32);
-  height: var(--size-32);
+  width: var(--size-36);
+  height: var(--size-36);
 }
 
 .my-tab-identity .avatar img {
@@ -65,15 +65,16 @@
   flex-direction: column;
   min-width: 0;
   align-items: flex-start;
+  gap: var(--spacer-2);
 }
 
 .my-tab-identity__name {
   max-width: 100%;
   overflow: hidden;
   color: var(--text-default);
-  font-size: var(--body-md-font-size);
+  font-size: var(--heading-sm-font-size);
   font-weight: var(--font-weight-semibold);
-  line-height: var(--body-md-line-height);
+  line-height: var(--heading-sm-line-height);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -144,8 +145,12 @@
 }
 
 .my-membership-card__level .wego-iconfont-s {
+  flex: 0 1 auto;
+  align-self: auto;
+  width: var(--size-20);
+  height: var(--size-20);
   color: var(--accent-gold);
-  font-size: var(--size-16);
+  font-size: var(--size-20);
 }
 
 .my-membership-card__expiry {
@@ -189,10 +194,12 @@
 .my-entry-card__content {
   gap: var(--spacer-4);
   padding-block: var(--spacer-8);
+  padding-inline-start: var(--spacer-8);
 }
 
 .my-section-heading {
-  padding-inline: var(--spacer-12);
+  padding-inline: var(--spacer-0);
+  padding-inline-start: var(--spacer-4);
 }
 
 .my-section-heading h2 {
@@ -209,12 +216,15 @@
 
 .my-asset-row,
 .my-app-row {
-  --layout-scroll-row-gap: var(--spacer-4);
-  padding-inline: var(--spacer-8);
+  --layout-scroll-row-gap: var(--spacer-0);
+  padding-inline: var(--spacer-0);
 }
 
 .my-asset-entry,
 .my-app-entry {
+  flex: 0 1 auto;
+  width: 86px;
+  min-width: 86px;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -337,7 +347,6 @@
   gap: var(--spacer-12);
 }
 
-.my-content-management__actions button,
 .my-content-date-group__heading button,
 .my-product-card__attributes {
   padding: var(--spacer-0);
@@ -350,13 +359,18 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.my-content-management__actions button[hidden] {
+.my-content-management__actions .link[hidden] {
   display: none;
 }
 
 .my-content-section {
   --layout-section-gap-before: var(--spacer-0);
   --layout-section-gap-after: var(--spacer-0);
+  background: var(--bg-surface);
+}
+
+.my-content-list {
+  min-block-size: calc(100dvh - var(--safe-area-bottom-content) - var(--size-48) - var(--spacer-16));
 }
 
 .my-content-list--grid {
@@ -602,7 +616,6 @@
 .my-content-list--live {
   --layout-grid-column-gap: 1px;
   --layout-grid-row-gap: 1px;
-  margin-inline: calc(-1 * var(--layout-page-margin-m8));
   padding-block: var(--spacer-0);
 }
 
