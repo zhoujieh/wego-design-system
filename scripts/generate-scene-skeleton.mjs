@@ -3,12 +3,24 @@
  * 场景骨架屏采样脚本
  *
  * 用 Playwright 启动本地预览,导航到指定路由,等场景 init 渲染完成,
- * 递归扫描 [data-region] 真实子树,生成扁平 div 色块骨架模板(复用 .wg-skeleton 基类)。
+ * 递归扫描 [data-surface-id] 真实子树,生成扁平 div 色块骨架模板(复用 .wg-skeleton 基类)。
+ *
+ * 通用规则(P1-P7 节点处理优先级):
+ *   P1 隐藏节点        → 跳过
+ *   P2 装饰元素        → 跳过(叶子+纯背景色+高度≤4px或宽高比≥10)
+ *   P3 叶子内容        → 画色块(文本/IMG/SVG/INPUT/图标≥16px)
+ *   P4 横滚容器子元素  → 画整体(父级 overflow-x:scroll/auto + 水平排列)
+ *   P5 有交互后代      → 穿透递归(子树含 button/a/INPUT/[data-component-slug])
+ *   P6 无交互+水平排列 → 画整体
+ *   P7 无交互+垂直堆叠 → 穿透递归
+ *
+ * 色块四周收缩 1px 产生间距,裁剪到场景根可见区域。
  *
  * 用法:
  *   node scripts/generate-scene-skeleton.mjs --route=album-product-feed
  *   node scripts/generate-scene-skeleton.mjs --route=album-product-feed --base-url=http://localhost:8080/wego-app/
  *   node scripts/generate-scene-skeleton.mjs --route=album-product-feed --write
+ *   node scripts/generate-scene-skeleton.mjs --route=album-product-feed --regions=assets,apps
  *
  * 输出:
  *   - 默认打印到 stdout(便于人工 review)
@@ -54,7 +66,7 @@ function printHelp() {
 参数:
   --route=<id>       必填,路由 ID(对应 routes.js 中的 routeId,如 album-product-feed)
   --base-url=<url>   本地预览基地址,默认 http://localhost:8080/wego-app/
-  --regions=a,b,c    指定采样的 data-region 名称;缺省时自动采样页面中全部 [data-region]
+  --regions=a,b,c    指定采样的 data-region 名称;缺省时采样整个 [data-surface-id] 场景根
   --write            直接写入该路由 scene.js 的 skeletonTemplate 字段(需有标记注释)
   --out=<file>       写入指定文件(默认 stdout)
   -h, --help         显示帮助
@@ -88,13 +100,6 @@ async function resolveRouteScript(routeId) {
 }
 
 // ── evalDOM:在浏览器内执行,扫描 DOM 生成扁平色块 ──────────
-// 借鉴 draw-page-structure (famanoder/dps) 的核心思路:
-// 递归遍历可见节点 → getBoundingClientRect 取真实盒模型 → 换算百分比 → 生成 div 色块
-// 与 dps 的差异:
-// 1. 复用 .wg-skeleton 基类(shimmer 动画与 image 组件一致),不造新 class
-// 2. 坐标相对于 scene root([data-surface-id])而非视口,适配桌面预览壳(手机预览区域非全屏视口)
-// 3. 色块用 position:absolute 而非 fixed,由 overlay 容器(absolute inset:0)承载
-//
 // 此函数会被序列化注入浏览器执行,不能用闭包变量,所有依赖必须在函数内定义
 async function evalDOMInPage(regions) {
   // 找 scene root 作为坐标参考(桌面预览壳里手机预览区域不是整个视口)
@@ -102,13 +107,12 @@ async function evalDOMInPage(regions) {
   const rootRect = root.getBoundingClientRect();
   const rw = rootRect.width;
   const rh = rootRect.height;
-  if (rw === 0 || rh === 0) return {};
+  if (rw === 0 || rh === 0) return '';
 
-  // 过滤规则:不可见 / 装饰 / 非内容
+  // P1: 过滤不可见节点
   function isHidden(node) {
     if (!node || node.nodeType !== 1) return true;
     if (node.hasAttribute('hidden')) return true;
-    if (node.getAttribute('aria-hidden') === 'true') return true;
     const cs = getComputedStyle(node);
     if (cs.display === 'none' || cs.visibility === 'hidden') return true;
     if (parseFloat(cs.opacity) === 0) return true;
@@ -117,11 +121,32 @@ async function evalDOMInPage(regions) {
     // 完全在 scene root 外
     if (rect.bottom < rootRect.top || rect.top > rootRect.bottom) return true;
     if (rect.right < rootRect.left || rect.left > rootRect.right) return true;
+    // 悬浮元素(FAB 等):fixed 或 absolute+高 z-index
+    if (cs.position === 'fixed') return true;
+    if (cs.position === 'absolute' && parseInt(cs.zIndex, 10) >= 100) return true;
     return false;
   }
 
-  // 判断是否为叶子内容节点(不再递归,直接生成色块)
+  // P2: 装饰元素(叶子 + 纯背景色 + 高度≤4px 或 宽高比≥10)
+  function isDecorative(node) {
+    if (node.children.length > 0) return false;
+    const hasText = (node.textContent || '').trim();
+    if (hasText) return false;
+    if (node.tagName === 'IMG' || node.tagName === 'SVG') return false;
+    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(node.tagName)) return false;
+    const cs = getComputedStyle(node);
+    if (cs.backgroundImage && cs.backgroundImage !== 'none') return false;
+    const hasBg = cs.backgroundColor && cs.backgroundColor !== 'rgba(0, 0, 0, 0)' && cs.backgroundColor !== 'transparent';
+    if (!hasBg) return false;
+    const rect = node.getBoundingClientRect();
+    if (rect.height <= 4) return true;
+    if (rect.width > 0 && rect.height > 0 && rect.width / rect.height >= 10) return true;
+    return false;
+  }
+
+  // P3: 叶子内容节点(不再递归,直接生成色块)
   function isLeafContent(node) {
+    if (node.tagName === 'SVG') return true;
     if (node.children.length === 0) {
       const text = (node.textContent || '').trim();
       if (text) return true;
@@ -129,10 +154,58 @@ async function evalDOMInPage(regions) {
       if (node.tagName === 'IMG') return true;
       if (cs.backgroundImage && cs.backgroundImage !== 'none') return true;
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(node.tagName)) return true;
+      // 无子元素 + 有背景色 + 尺寸 > 4px 且 宽高比 < 10(如进度条填充值)
+      if (cs.backgroundColor && cs.backgroundColor !== 'rgba(0, 0, 0, 0)' && cs.backgroundColor !== 'transparent') {
+        const rect = node.getBoundingClientRect();
+        if (rect.height > 4 && rect.width > 0 && rect.height > 0 && rect.width / rect.height < 10) return true;
+      }
+      // 图标字体 <i> 标签,尺寸 ≥ 16px 才画(< 16px 的箭头等跳过)
+      if (node.tagName === 'I') {
+        const rect = node.getBoundingClientRect();
+        if (rect.width >= 16 && rect.height >= 16) return true;
+      }
       return false;
     }
-    if (node.tagName === 'SVG') return true;
     if (node.children.length === 1 && node.firstElementChild.tagName === 'IMG') return true;
+    return false;
+  }
+
+  // P4: 横滚容器直接子元素(父级 overflow-x:scroll/auto + 水平排列)
+  function isHorizontalScrollChild(node) {
+    const parent = node.parentElement;
+    if (!parent || parent === root) return false;
+    const pcs = getComputedStyle(parent);
+    if (pcs.overflowX !== 'scroll' && pcs.overflowX !== 'auto') return false;
+    const isRow = pcs.flexDirection === 'row' || pcs.flexDirection === 'row-reverse';
+    const isInline = pcs.display === 'inline' || pcs.display === 'inline-block';
+    return isRow || isInline;
+  }
+
+  // P5: 有交互后代(子树含 button/a/INPUT 或 [data-component-slug])
+  function hasInteractiveDescendant(node) {
+    const interactive = node.querySelectorAll('button, a, input, textarea, select');
+    for (const el of interactive) {
+      if (!isHidden(el)) return true;
+    }
+    const components = node.querySelectorAll('[data-component-slug]');
+    for (const el of components) {
+      if (!isHidden(el)) return true;
+    }
+    return false;
+  }
+
+  // P6: 无交互后代 + 子元素水平排列
+  function isHorizontalLayout(node) {
+    if (node.children.length < 2) return false;
+    const cs = getComputedStyle(node);
+    if (cs.flexDirection === 'row' || cs.flexDirection === 'row-reverse') return true;
+    if (cs.display === 'inline' || cs.display === 'inline-block') return true;
+    // 检查前两个可见子元素的 y 坐标是否重叠(水平排列)
+    const visibleChildren = Array.from(node.children).filter(c => !isHidden(c));
+    if (visibleChildren.length < 2) return false;
+    const r1 = visibleChildren[0].getBoundingClientRect();
+    const r2 = visibleChildren[1].getBoundingClientRect();
+    if (r1.top < r2.bottom && r2.top < r1.bottom) return true;
     return false;
   }
 
@@ -149,24 +222,43 @@ async function evalDOMInPage(regions) {
     return false;
   }
 
+  // 裁剪 rect 到 bounds 范围
+  function clampRect(rect, bounds) {
+    const top = Math.max(rect.top, bounds.top);
+    const bottom = Math.min(rect.bottom, bounds.bottom);
+    const left = Math.max(rect.left, bounds.left);
+    const right = Math.min(rect.right, bounds.right);
+    return { top, left, width: Math.max(0, right - left), height: Math.max(0, bottom - top) };
+  }
+
   // 取真实盒模型,换算为相对于 scene root 的百分比
   function drawBlock(node, sink) {
-    const rect = node.getBoundingClientRect();
+    const rawRect = node.getBoundingClientRect();
+    if (rawRect.width <= 1 || rawRect.height <= 1) return;
+
+    // 裁剪到场景根可见区域
+    const rect = clampRect(rawRect, rootRect);
     if (rect.width <= 1 || rect.height <= 1) return;
+
+    // 四周收缩 1px 产生间距
+    const sTop = rect.top + 1;
+    const sLeft = rect.left + 1;
+    const sWidth = rect.width - 2;
+    const sHeight = rect.height - 2;
+    if (sWidth <= 0 || sHeight <= 0) return;
 
     const cs = getComputedStyle(node);
     let radius = cs.borderRadius;
     if (radius && radius.endsWith('%')) {
       const pct = parseFloat(radius) / 100;
-      radius = Math.round(Math.min(rect.width, rect.height) * pct) + 'px';
+      radius = Math.round(Math.min(rawRect.width, rawRect.height) * pct) + 'px';
     }
     if (radius === '0px') radius = '';
 
-    // 相对于 scene root 的百分比,position:absolute 由 overlay 容器承载
-    const top = ((rect.top - rootRect.top) / rh * 100).toFixed(3);
-    const left = ((rect.left - rootRect.left) / rw * 100).toFixed(3);
-    const width = (rect.width / rw * 100).toFixed(3);
-    const height = (rect.height / rh * 100).toFixed(3);
+    const top = ((sTop - rootRect.top) / rh * 100).toFixed(3);
+    const left = ((sLeft - rootRect.left) / rw * 100).toFixed(3);
+    const width = (sWidth / rw * 100).toFixed(3);
+    const height = (sHeight / rh * 100).toFixed(3);
 
     const circleCls = isCircle(node) ? ' wg-skeleton--circle' : ' wg-skeleton--rect';
     const style = [
@@ -182,36 +274,46 @@ async function evalDOMInPage(regions) {
     sink.push('<div class="wg-skeleton' + circleCls + '" style="' + style + '" aria-hidden="true"></div>');
   }
 
+  // walk:按 P1-P7 优先级处理
   function walk(node, sink) {
-    if (isHidden(node)) return;
-    if (isLeafContent(node)) {
+    if (isHidden(node)) return;           // P1
+    if (isDecorative(node)) return;       // P2
+    if (isLeafContent(node)) {            // P3
       drawBlock(node, sink);
       return;
     }
-    let hasVisibleChild = false;
-    for (const child of node.children) {
-      if (!isHidden(child)) {
-        hasVisibleChild = true;
+    if (isHorizontalScrollChild(node)) {  // P4
+      drawBlock(node, sink);
+      return;
+    }
+    if (hasInteractiveDescendant(node)) { // P5
+      for (const child of node.children) {
         walk(child, sink);
       }
+      return;
     }
-    if (!hasVisibleChild) {
-      const cs = getComputedStyle(node);
-      if (cs.backgroundImage && cs.backgroundImage !== 'none') {
-        drawBlock(node, sink);
-      }
+    if (isHorizontalLayout(node)) {       // P6
+      drawBlock(node, sink);
+      return;
+    }
+    // P7: 无交互后代 + 垂直堆叠 → 穿透递归
+    for (const child of node.children) {
+      walk(child, sink);
     }
   }
 
-  const result = {};
-  for (const name of regions) {
-    const el = document.querySelector('[data-region="' + name + '"]');
-    if (!el) continue;
-    const sink = [];
-    walk(el, sink);
-    result[name] = sink.join('\n');
+  const sink = [];
+  if (!regions || regions.length === 0) {
+    // 全页面采样:遍历场景根
+    walk(root, sink);
+  } else {
+    // 局部采样:只遍历指定 region
+    for (const name of regions) {
+      const el = document.querySelector('[data-region="' + name + '"]');
+      if (el) walk(el, sink);
+    }
   }
-  return result;
+  return sink.join('\n');
 }
 
 // ── 主流程 ─────────────────────────────────────────────────
@@ -243,8 +345,10 @@ async function main() {
   try {
     await page.goto(targetUrl, { waitUntil: 'networkidle0', timeout: 30000 });
 
-    // 等场景 init 完成:任一 [data-region] 有内容,或等待 8s 兜底
+    // 等场景 init 完成:[data-surface-id] 有内容,或任一 [data-region] 有内容,或等待 8s 兜底
     await page.waitForFunction(() => {
+      const root = document.querySelector('[data-surface-id]');
+      if (root && root.children.length > 0) return true;
       const regions = document.querySelectorAll('[data-region]');
       for (const r of regions) {
         if (r.children.length > 0 && !r.hasAttribute('hidden')) return true;
@@ -254,7 +358,7 @@ async function main() {
       console.warn('[warn] 等待场景 init 超时,按当前状态采样');
     });
 
-    // 滚动到顶部,确保采样的是首屏状态(避免采到滚动后的位置)
+    // 滚动到顶部,确保采样的是首屏状态
     await page.evaluate(() => {
       const scroll = document.querySelector('[data-tab-scroll]') || document.querySelector('.album-feed__scroll');
       if (scroll) scroll.scrollTop = 0;
@@ -263,23 +367,12 @@ async function main() {
     // 额外等待 500ms 确保布局稳定(图片加载、动画结束、滚动归位)
     await page.waitForTimeout(500);
 
-    // 采样区域:--regions 显式指定;缺省自动采样页面中全部 [data-region]
-    // 模板中已预填内容的 region 请通过 --regions 排除
-    const sampleRegions = args.regions || await page.evaluate(() =>
-      Array.from(document.querySelectorAll('[data-region]')).map(el => el.getAttribute('data-region')).filter(Boolean)
-    );
-    if (!sampleRegions.length) throw new Error('页面中未找到任何 [data-region],请检查路由或显式传 --regions');
+    // 采样:--regions 指定局部采样;缺省采样整个 [data-surface-id] 场景根
+    const skeletonHtml = await page.evaluate(evalDOMInPage, args.regions);
 
-    const skeleton = await page.evaluate(evalDOMInPage, sampleRegions);
-
-    // 组装最终 HTML(扁平色块堆叠)
-    const htmlParts = [];
-    for (const name of sampleRegions) {
-      if (skeleton[name]) {
-        htmlParts.push(skeleton[name]);
-      }
+    if (!skeletonHtml.trim()) {
+      throw new Error('生成的骨架模板为空,请检查页面是否正常渲染');
     }
-    const skeletonHtml = htmlParts.join('\n');
 
     if (args.outFile) {
       await fs.writeFile(args.outFile, skeletonHtml, 'utf-8');
