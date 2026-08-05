@@ -162,6 +162,20 @@
       min-width: 22px;
       padding: 0 4px;
     }
+    .badge--number-plain {
+      min-width: auto;
+      height: auto;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      color: var(--status-danger-default);
+      font-family: var(--number-md-font-family);
+      font-size: 10px;
+      font-weight: var(--font-weight-medium);
+      line-height: 1;
+      bottom: auto;
+    }
     .badge--text {
       --badge-text-bg: var(--accent-green);
       --badge-text-color: var(--text-inverse);
@@ -344,6 +358,22 @@
           <i class="wego-iconfont-s icon-gouwuche"></i>
           <span>购物车</span>
           <span class="badge badge--corner badge--dot"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <span class="label">数据资产</span>
+      <div class="demo-host-row">
+        <div class="demo-host demo-host--nav">
+          <span style="font-family:var(--number-md-font-family);font-size:14px;font-weight:var(--font-weight-medium);">386</span>
+          <span>好友</span>
+          <span class="badge badge--corner badge--number-plain">+2</span>
+        </div>
+        <div class="demo-host demo-host--nav">
+          <span style="font-family:var(--number-md-font-family);font-size:14px;font-weight:var(--font-weight-medium);">1.2万</span>
+          <span>粉丝</span>
+          <span class="badge badge--corner badge--number-plain">+5</span>
         </div>
       </div>
     </div>

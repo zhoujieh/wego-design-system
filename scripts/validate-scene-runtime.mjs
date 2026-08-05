@@ -330,6 +330,7 @@ async function inspectLayout(page, routeId) {
       if (!visible(node)) return false;
       const style = getComputedStyle(node);
       if (style.position === 'sticky' || style.position === 'fixed') return true;
+      if (node.getAttribute('data-component-slug') === 'badge') return false;
       return style.position === 'absolute'
         && style.bottom !== 'auto'
         && (node.parentElement === rootNode || node.hasAttribute('data-component-slug'));
