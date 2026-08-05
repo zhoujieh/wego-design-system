@@ -9,12 +9,12 @@
       label: '初次帮卖 · 自由定价 · 单一价格',
       group: '自由定价',
       badge: { text: '自由定价', type: 'free' },
-      desc: '供货价100 · 默认加价+100 · 单一价格',
+      desc: '供货价178.5 · 默认加价+30 · 售价208.5',
       product_id: 'prod-clothing-001',
       distribution_type: 1,
-      supply_price: 100,
-      skus: [{ id: 'sku-1', supply_price: 100 }],
-      distribution_config: { amountType: 1, value: 100 },
+      supply_price: 178.5,
+      skus: [{ id: 'sku-1', supply_price: 178.5 }],
+      distribution_config: { amountType: 1, value: 30 },
       my_item: false,
       from_page: 'normal'
     },
@@ -147,13 +147,13 @@
     return (product && product.title) || '商品标题';
   }
 
-  // 格式化价格:整数不显示小数点,否则保留2位小数
+  // 格式化价格:整数不显示小数点,否则保留有效小数(去除尾零)
   function formatPrice(value) {
     if (value === null || value === undefined || value === '') return '--';
     var num = Number(value);
     if (isNaN(num)) return '--';
     if (Math.abs(num - Math.round(num)) < 0.001) return String(Math.round(num));
-    return num.toFixed(2);
+    return String(parseFloat(num.toFixed(2)));
   }
 
   // 格式化百分比:0.3 -> 30%
@@ -201,12 +201,15 @@
   }
 
   // 获取快捷加价标签(优先级:当前加价>店铺设置>前端缓存>兜底30%/20%/10%)
+  // 兜底标签按供应商配置类型展示:金额模式展示+30元/+20元/+10元,比例模式展示+30%/+20%/+10%
   function getQuickTags(sample, currentAdd) {
     var tags = [];
     var customStr = getStorage(STORAGE_KEYS.customAddPrice);
     var custom = customStr ? JSON.parse(customStr) : null;
 
-    // 兜底标签
+    // 兜底标签:金额模式用固定金额,比例模式用百分比
+    var isAmountMode = sample.distribution_config && sample.distribution_config.amountType === 1;
+    var fallbackAmounts = [30, 20, 10];
     var fallbackRates = [0.3, 0.2, 0.1];
 
     // 如果有当前加价,优先放入
@@ -229,12 +232,22 @@
 
     // 补充兜底标签(最多3个)
     for (var i = 0; i < fallbackRates.length && tags.length < 3; i++) {
-      var rate = fallbackRates[i];
-      var exists = tags.some(function (t) {
-        return t.amountType === 2 && Math.abs(t.rate - rate) < 0.001;
-      });
-      if (!exists) {
-        tags.push({ amountType: 2, rate: rate, label: '+' + formatRate(rate) });
+      if (isAmountMode) {
+        var amount = fallbackAmounts[i];
+        var existsAmount = tags.some(function (t) {
+          return t.amountType === 1 && Math.abs(t.value - amount) < 0.001;
+        });
+        if (!existsAmount) {
+          tags.push({ amountType: 1, value: amount, label: '+' + formatPrice(amount) + '元' });
+        }
+      } else {
+        var rate = fallbackRates[i];
+        var existsRate = tags.some(function (t) {
+          return t.amountType === 2 && Math.abs(t.rate - rate) < 0.001;
+        });
+        if (!existsRate) {
+          tags.push({ amountType: 2, rate: rate, label: '+' + formatRate(rate) });
+        }
       }
     }
 
@@ -254,6 +267,43 @@
   // 判断是否为直播间来源
   function isLiveRoom(sample) {
     return sample.from_page === 'live';
+  }
+
+  // ── 快捷加价标签 HTML(inline=true 内联到售价卡片;false 独立区块) ──
+  function buildTagsHtml(sample, inline) {
+    var currentAdd = sample.my_item
+      ? { type: sample.current_add_price_type, value: sample.current_add_price_value, rate: sample.current_add_price_rate }
+      : null;
+    var tags = getQuickTags(sample, currentAdd);
+    var defaultAddType = sample.my_item
+      ? sample.current_add_price_type
+      : (sample.distribution_config ? sample.distribution_config.amountType : null);
+    var defaultAddVal = sample.my_item
+      ? (sample.current_add_price_type === 1 ? sample.current_add_price_value : sample.current_add_price_rate)
+      : (sample.distribution_config
+          ? (sample.distribution_config.amountType === 1 ? sample.distribution_config.value : sample.distribution_config.rate)
+          : null);
+
+    var tagsItems = tags.map(function (tag) {
+      var isSelected = false;
+      if (tag.amountType === 1 && defaultAddType === 1 && defaultAddVal) {
+        isSelected = Math.abs(tag.value - Number(defaultAddVal)) < 0.001;
+      } else if (tag.amountType === 2 && defaultAddType === 2 && defaultAddVal) {
+        isSelected = Math.abs(tag.rate - Number(defaultAddVal)) < 0.001;
+      }
+      var tagClass = isSelected ? 'tag--28 tag--brand tag--selected' : 'tag--28 tag--white tag--normal';
+      return '<div data-component-slug="tag" class="resale-tags__item tag ' + tagClass + '" data-tag-amounttype="' + tag.amountType + '" data-tag-value="' + (tag.value || '') + '" data-tag-rate="' + (tag.rate || '') + '"><span class="tag__label">' + tag.label + '</span></div>';
+    }).join('');
+
+    var wrapperClass = inline ? 'resale-tags resale-tags--inline' : 'resale-tags';
+    return ''
+      + '<div class="' + wrapperClass + '">'
+      +   '<span class="resale-tags__title">快捷加价</span>'
+      +   '<div class="resale-tags__list">'
+      +     tagsItems
+      +     '<a data-component-slug="link" class="link resale-tags__manual" data-manual-input>手动输入</a>'
+      +   '</div>'
+      + '</div>';
   }
 
   // ── 帮卖弹窗模板 ──
@@ -317,7 +367,7 @@
         +   '</div>'
         + '</div>';
     } else {
-      // 单一价格:售价可编辑
+      // 单一价格:售价可编辑(Figma 加价卖样式:灰底卡片 + 白底绿框输入行 + 赚徽标佣金 + 内联快捷加价)
       var supplyPrice = sample.supply_price;
       var currentAdd = sample.my_item
         ? { type: sample.current_add_price_type, value: sample.current_add_price_value, rate: sample.current_add_price_rate }
@@ -330,48 +380,35 @@
       var defaultPrice = computePrice(supplyPrice, defaultAdd);
 
       priceHtml = ''
-        + '<div class="resale-price">'
-        +   '<div class="resale-price__field-row">'
-        +     '<div class="resale-price__field resale-price__field--editable">'
-        +       '<span class="resale-price__field-label">我的售价</span>'
-        +       '<div class="resale-price__field-value" data-price-edit>' + formatPrice(defaultPrice) + '<span class="resale-price__field-suffix">元</span></div>'
+        + '<div class="resale-price resale-price--editable">'
+        +   '<div class="resale-price__card">'
+        +     '<div class="resale-price__card-title">我的售价：</div>'
+        +     '<div class="resale-price__input-row" data-price-edit>'
+        +       '<div class="resale-price__input-left">'
+        +         '<span class="resale-price__currency">¥</span>'
+        +         '<span class="resale-price__amount" data-display-price>' + formatPrice(defaultPrice) + '</span>'
+        +       '</div>'
+        +       '<div class="resale-price__commission">'
+        +         '<span class="resale-price__earn-badge">赚</span>'
+        +         '<span class="resale-price__commission-currency">¥</span>'
+        +         '<span class="resale-price__commission-amount" data-display-commission>' + formatPrice(defaultAdd) + '</span>'
+        +       '</div>'
         +     '</div>'
-        +     '<div class="resale-price__field">'
-        +       '<span class="resale-price__field-label">佣金</span>'
-        +       '<div class="resale-price__field-value resale-price__field-value--commission" data-display-commission>' + formatPrice(defaultAdd) + '<span class="resale-price__field-suffix">元</span></div>'
-        +     '</div>'
+        +     buildTagsHtml(sample, true)
         +   '</div>'
         + '</div>';
     }
 
-    // 快捷加价标签区(仅自由定价显示):标题在左,标签在右,间距8
+    // 快捷加价标签区(区间价格场景独立显示;单一价格已内联到售价卡片)
     var tagsHtml = '';
-    if (!isFixed) {
-      var currentAdd = sample.my_item
-        ? { type: sample.current_add_price_type, value: sample.current_add_price_value, rate: sample.current_add_price_rate }
-        : null;
-      var tags = getQuickTags(sample, currentAdd);
-
-      var tagsItems = tags.map(function (tag, idx) {
-        var isSelected = idx === 0 && sample.my_item;
-        var tagClass = isSelected ? 'tag--28 tag--brand tag--selected' : 'tag--28 tag--gray tag--normal';
-        return '<div data-component-slug="tag" class="resale-tags__item tag ' + tagClass + '" data-tag-amounttype="' + tag.amountType + '" data-tag-value="' + (tag.value || '') + '" data-tag-rate="' + (tag.rate || '') + '"><span class="tag__label">' + tag.label + '</span></div>';
-      }).join('');
-
-      tagsHtml = ''
-        + '<div class="resale-tags">'
-        +   '<span class="resale-tags__title">快捷加价</span>'
-        +   '<div class="resale-tags__list">'
-        +     tagsItems
-        +     '<a data-component-slug="link" class="link resale-tags__manual" data-manual-input>手动输入</a>'
-        +   '</div>'
-        + '</div>';
+    if (!isFixed && isRange) {
+      tagsHtml = buildTagsHtml(sample, false);
     }
 
     // 佣金保密提示(非直播间均显示,含固定佣金)
     var hintHtml = '';
     if (!isLive) {
-      hintHtml = '<div class="resale-hint-bottom">*帮卖分佣仅自己可见,可放心分享</div>';
+      hintHtml = '<div class="resale-hint-bottom">*帮卖分佣仅自己可见，可放心分享</div>';
     }
 
     // 首次编辑气泡引导
@@ -493,7 +530,7 @@
       + '</div>';
   }
 
-  // ── 数字键盘模板 ──
+  // ── 数字键盘模板(Figma: 顶部加价控件行 + 4列4行 grid 键盘) ──
   function buildKeypadTemplate(mode, initialValue) {
     var displayValue = initialValue ? String(initialValue) : '';
     var isAmount = mode === 'amount';
@@ -502,36 +539,37 @@
     return ''
       + '<div class="modal modal--frame modal--no-mask" role="dialog" aria-modal="true" data-state="closed" data-keypad-overlay data-component-slug="modal">'
       +   '<div class="modal__panel">'
-      +     '<div class="keypad">'
-      +       '<div class="keypad__segmented ' + segClass + '" data-keypad-segmented>'
-      +         '<div class="keypad__segmented-thumb"></div>'
-      +         '<div class="keypad__segmented-item ' + (isAmount ? 'is-active' : '') + '" data-keypad-tab="amount">加价金额</div>'
-      +         '<div class="keypad__segmented-item ' + (!isAmount ? 'is-active' : '') + '" data-keypad-tab="rate">加价比例</div>'
-      +       '</div>'
-      +       '<div class="keypad__display">'
-      +         '<div class="keypad__display-label" data-keypad-label>' + (isAmount ? '加价金额' : '加价比例') + '</div>'
-      +         '<div class="keypad__display-value ' + (displayValue ? '' : 'keypad__display-value--placeholder') + '" data-keypad-display>'
-      +           (displayValue || '请输入') + '<span class="keypad__display-suffix">' + (isAmount ? '元' : '%') + '</span>'
+      +     '<div class="keypad ' + segClass + '">'
+            // 加价控件行:[加价(元)] [光标 + 显示值] [金额/比例 Seg_32]
+      +       '<div class="keypad__header" data-keypad-segmented>'
+      +         '<span class="keypad__header-label" data-keypad-label>加价(元)</span>'
+      +         '<div class="keypad__header-value">'
+      +           '<span class="keypad__cursor"></span>'
+      +           '<span class="keypad__header-amount ' + (displayValue ? '' : 'is-placeholder') + '" data-keypad-display>'
+      +             (displayValue || '0.00')
+      +           '</span>'
+      +         '</div>'
+      +         '<div class="keypad__seg ' + segClass + '">'
+      +           '<div class="keypad__seg-thumb"></div>'
+      +           '<div class="keypad__seg-item ' + (isAmount ? 'is-active' : '') + '" data-keypad-tab="amount">金额</div>'
+      +           '<div class="keypad__seg-item ' + (!isAmount ? 'is-active' : '') + '" data-keypad-tab="rate">比例</div>'
       +         '</div>'
       +       '</div>'
-      +       '<div class="keypad__body">'
-      +         '<div class="keypad__keys">'
-      +           '<div class="keypad__key" data-key="1">1</div>'
-      +           '<div class="keypad__key" data-key="2">2</div>'
-      +           '<div class="keypad__key" data-key="3">3</div>'
-      +           '<div class="keypad__key" data-key="4">4</div>'
-      +           '<div class="keypad__key" data-key="5">5</div>'
-      +           '<div class="keypad__key" data-key="6">6</div>'
-      +           '<div class="keypad__key" data-key="7">7</div>'
-      +           '<div class="keypad__key" data-key="8">8</div>'
-      +           '<div class="keypad__key" data-key="9">9</div>'
-      +           '<div class="keypad__key keypad__key--zero" data-key="0">0</div>'
-      +           '<div class="keypad__key" data-key=".">.</div>'
-      +         '</div>'
-      +         '<div class="keypad__side">'
-      +           '<div class="keypad__key keypad__key--delete" data-key="delete"><i class="wego-iconfont-s icon-shanchu"></i></div>'
-      +           '<button data-component-slug="button" class="btn btn--strong keypad__side-confirm" data-keypad-confirm>确定</button>'
-      +         '</div>'
+            // 键盘主体:4列×4行 grid,第4列跨前3行放回删+确定
+      +       '<div class="keypad__keys">'
+      +         '<div class="keypad__key" data-key="1">1</div>'
+      +         '<div class="keypad__key" data-key="2">2</div>'
+      +         '<div class="keypad__key" data-key="3">3</div>'
+      +         '<div class="keypad__key keypad__key--delete" data-key="delete"><i class="wego-iconfont-s icon-huitui"></i></div>'
+      +         '<div class="keypad__key" data-key="4">4</div>'
+      +         '<div class="keypad__key" data-key="5">5</div>'
+      +         '<div class="keypad__key" data-key="6">6</div>'
+      +         '<button data-component-slug="button" class="keypad__key keypad__key--confirm" data-keypad-confirm>确定</button>'
+      +         '<div class="keypad__key" data-key="7">7</div>'
+      +         '<div class="keypad__key" data-key="8">8</div>'
+      +         '<div class="keypad__key" data-key="9">9</div>'
+      +         '<div class="keypad__key keypad__key--zero" data-key="0">0</div>'
+      +         '<div class="keypad__key" data-key=".">.</div>'
       +       '</div>'
       +     '</div>'
       +   '</div>'
@@ -754,7 +792,8 @@
         var priceEdit = root.querySelector('[data-price-edit]');
         if (priceEdit) {
           priceEdit.addEventListener('click', function () {
-            var currentPrice = priceEdit.textContent;
+            var priceEl = root.querySelector('[data-display-price]');
+            var currentPrice = priceEl ? priceEl.textContent : '';
             openKeypad(ctx, root, sample, 'price', currentPrice);
           });
         }
@@ -814,8 +853,10 @@
       var supplyPrice = sample.supply_price;
       var newPrice = computePrice(supplyPrice, addPrice);
 
-      setFieldValue(root.querySelector('[data-price-edit]'), formatPrice(newPrice));
-      setFieldValue(root.querySelector('[data-display-commission]'), formatPrice(addPrice));
+      var priceEl = root.querySelector('[data-display-price]');
+      var commissionEl = root.querySelector('[data-display-commission]');
+      if (priceEl) priceEl.textContent = formatPrice(newPrice);
+      if (commissionEl) commissionEl.textContent = formatPrice(addPrice);
     }
   }
 
@@ -837,23 +878,23 @@
 
         function updateDisplay() {
           var isAmount = currentMode === 'amount';
-          var suffix = isAmount ? '元' : '%';
-          var label = isAmount ? '加价金额' : '加价比例';
+          var labelText = isAmount ? '加价(元)' : '加价(%)';
 
-          if (labelEl) labelEl.textContent = label;
+          if (labelEl) labelEl.textContent = labelText;
           if (displayEl) {
             if (currentValue) {
-              displayEl.classList.remove('keypad__display-value--placeholder');
-              displayEl.innerHTML = currentValue + '<span class="keypad__display-suffix">' + suffix + '</span>';
+              displayEl.classList.remove('is-placeholder');
+              displayEl.textContent = currentValue;
             } else {
-              displayEl.classList.add('keypad__display-value--placeholder');
-              displayEl.innerHTML = '请输入<span class="keypad__display-suffix">' + suffix + '</span>';
+              displayEl.classList.add('is-placeholder');
+              displayEl.textContent = '0.00';
             }
           }
         }
 
-        // 分段切换控件
-        var segmented = root.querySelector('[data-keypad-segmented]');
+        // Seg_32 分段切换(金额/比例)
+        var seg = root.querySelector('.keypad__seg');
+        var keypadRoot = root.querySelector('.keypad');
         var tabs = root.querySelectorAll('[data-keypad-tab]');
         tabs.forEach(function (tab) {
           tab.addEventListener('click', function () {
@@ -874,10 +915,14 @@
             currentMode = newMode;
             tabs.forEach(function (t) { t.classList.remove('is-active'); });
             tab.classList.add('is-active');
-            // 同步滑动 thumb 位置
-            if (segmented) {
-              segmented.classList.toggle('is-amount', currentMode === 'amount');
-              segmented.classList.toggle('is-rate', currentMode === 'rate');
+            // 同步滑动 thumb 位置(在 .keypad__seg 和 .keypad 上同时切换 class)
+            if (seg) {
+              seg.classList.toggle('is-amount', currentMode === 'amount');
+              seg.classList.toggle('is-rate', currentMode === 'rate');
+            }
+            if (keypadRoot) {
+              keypadRoot.classList.toggle('is-amount', currentMode === 'amount');
+              keypadRoot.classList.toggle('is-rate', currentMode === 'rate');
             }
             updateDisplay();
           });
@@ -1044,7 +1089,7 @@
                 <div class="cell__title-row">
                   <span class="cell__title">初次帮卖 · 自由定价 · 单一价格</span>
                 </div>
-                <div class="cell__subtitle">供货价100 · 默认加价+100 · 单一价格</div>
+                <div class="cell__subtitle">供货价178.5 · 默认加价+30 · 售价208.5</div>
               </div>
               <div class="cell__action">
                 <span class="agent-resale-scene__card-badge agent-resale-scene__card-badge--free">自由定价</span>
