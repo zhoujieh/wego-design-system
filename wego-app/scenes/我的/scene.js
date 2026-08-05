@@ -72,7 +72,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
           </div>
         </section>
 
-        <div class="sticky-region my-content-sticky" data-component-slug="sticky-region" data-edge="top" data-visibility="elevate-after-scroll" data-state="visible">
+        <div class="sticky-region my-content-tabs-sticky" data-component-slug="sticky-region" data-edge="top" data-visibility="elevate-after-scroll" data-state="visible">
           <div class="sticky-region__motion">
             <div class="sticky-region__inner">
               <div class="wg-tabs wg-tabs--mini wg-tabs--divide my-content-tabs" data-component-slug="tabs" role="tablist" aria-label="内容类型">
@@ -89,6 +89,13 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
                   <span class="wg-tabs__active-indicator" aria-hidden="true"></span>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sticky-region my-content-search-sticky" data-component-slug="sticky-region" data-edge="top" data-visibility="direction-reveal" data-state="visible">
+          <div class="sticky-region__motion">
+            <div class="sticky-region__inner">
               <div class="search-toolbar my-content-toolbar">
                 <div class="searchbox searchbox--sm searchbox--gray" data-component-slug="search">
                   <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
@@ -110,18 +117,21 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
                   </button>
                 </div>
               </div>
-              <div class="my-content-management" data-role="content-management">
-                <span class="my-content-management__count" data-role="content-count">共 0 条</span>
-                <div class="my-content-management__actions">
-                  <button type="button" data-management-action="sort">排序</button>
-                  <button type="button" data-management-action="category">分类</button>
-                  <button type="button" data-management-action="batch">批量</button>
-                  <button type="button" data-management-action="collection" hidden>合集</button>
-                </div>
-              </div>
             </div>
           </div>
         </div>
+
+        <section class="layout-section my-content-management-section" data-component-slug="layout-section" data-edge="M0">
+          <div class="my-content-management" data-role="content-management">
+            <span class="my-content-management__count" data-role="content-count">共 0 条</span>
+            <div class="my-content-management__actions">
+              <a class="link link--12" data-component-slug="link" href="javascript:void(0)" role="button" data-management-action="sort">排序</a>
+              <a class="link link--12" data-component-slug="link" href="javascript:void(0)" role="button" data-management-action="category">分类</a>
+              <a class="link link--12" data-component-slug="link" href="javascript:void(0)" role="button" data-management-action="batch">批量</a>
+              <a class="link link--12" data-component-slug="link" href="javascript:void(0)" role="button" data-management-action="collection" hidden>合集</a>
+            </div>
+          </div>
+        </section>
 
         <section class="layout-section my-content-section" data-component-slug="layout-section" data-edge="M8" data-region="content"></section>
       </div>
@@ -374,18 +384,17 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         var html = '<div class="layout-scroll-row my-asset-row" data-component-slug="layout-scroll-row" data-item-size="auto" data-snap="start" data-peek="next">';
         assetEntries.filter(function (item) { return item.conditional; }).forEach(function (item) {
           html += '<button type="button" class="my-asset-entry" data-asset-id="' + item.id + '">'
-            + metricHtml(item.metric, { size: '16', theme: 'black' })
-            + '<span class="my-entry-label">' + escapeHtml(item.label);
-          if (item.todo) html += '<span class="badge badge--inline badge--number" data-component-slug="badge">' + state.purchaseTodoCount + '</span>';
-          html += '</span></button>';
+            + '<span class="my-entry-metric">' + metricHtml(item.metric, { size: '14', theme: 'black' });
+          if (item.todo) html += '<span class="badge badge--corner badge--number-plain" data-component-slug="badge">+' + state.purchaseTodoCount + '</span>';
+          html += '</span><span class="my-entry-label">' + escapeHtml(item.label) + '</span></button>';
         });
         html += '</div>';
         ctx.setRegion('assets', html);
       }
 
       function appIcon(icon, label, count) {
-        var badge = count ? '<span class="badge badge--inline badge--number my-app-entry__badge" data-component-slug="badge">' + count + '</span>' : '';
-        return '<span class="my-app-icon"><img src="' + escapeHtml(icon) + '" alt=""></span><span class="my-app-label">' + escapeHtml(label) + badge + '</span>';
+        var badge = count ? '<span class="badge badge--corner badge--number" data-component-slug="badge">' + count + '</span>' : '';
+        return '<span class="my-app-icon-wrap"><span class="my-app-icon"><img src="' + escapeHtml(icon) + '" alt=""></span>' + badge + '</span><span class="my-app-label">' + escapeHtml(label) + '</span>';
       }
 
       function renderApps() {
@@ -742,7 +751,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
           safeWrite(searchStorageKey, state.searchByType);
           switchType(type);
           var scroll = root.querySelector('.my-tab-scroll');
-          var content = root.querySelector('.my-content-sticky');
+          var content = root.querySelector('.my-content-tabs-sticky');
           if (scroll && content) scroll.scrollTo({ top: content.offsetTop, behavior: 'smooth' });
           ctx.toast({ variant: 'guide', text: '发布成功，已加入' + (type === 'product' ? '产品' : type === 'note' ? '笔记' : '直播'), action: { label: '查看', mode: 'strong' } });
         }, 600);
@@ -925,7 +934,10 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
       ctx.bindTabs({ root: root });
       ctx.bindScrollLayout({
         scrollRoot: '.my-tab-scroll',
-        regions: [{ selector: '.my-content-sticky', policy: 'elevate-after-scroll', edge: 'top', essential: true, threshold: 8 }],
+        regions: [
+          { selector: '.my-content-tabs-sticky', policy: 'elevate-after-scroll', edge: 'top', essential: true, threshold: 8 },
+          { selector: '.my-content-search-sticky', policy: 'direction-reveal', edge: 'top', essential: false, threshold: 8 }
+        ],
         fixedRegions: [{ selector: '.my-tab-fab', edge: 'bottom', gap: 8 }]
       });
 
