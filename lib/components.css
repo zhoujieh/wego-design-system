@@ -390,6 +390,21 @@
       min-width: 22px;
       padding: 0 4px;
     }
+    .badge--number-plain {
+      min-width: auto;
+      height: auto;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      color: var(--status-danger-default);
+      font-family: var(--number-md-font-family);
+      font-size: var(--body-xs-font-size);
+      font-weight: var(--font-weight-medium);
+      line-height: 1;
+      bottom: auto;
+      transform: translate(calc(100% - 1px), calc(-100% + 3px));
+    }
     .badge--text {
       --badge-text-bg: var(--accent-green);
       --badge-text-color: var(--text-inverse);
