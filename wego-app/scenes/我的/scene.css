@@ -229,7 +229,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--spacer-2);
+  gap: var(--spacer-4);
   padding: var(--spacer-8);
   border-radius: var(--radius-8);
   -webkit-tap-highlight-color: transparent;
@@ -259,6 +259,11 @@
   object-fit: contain;
 }
 
+.my-app-icon .wego-iconfont-s {
+  font-size: var(--size-20);
+  color: var(--text-default);
+}
+
 .my-entry-metric,
 .my-app-icon-wrap {
   position: relative;
@@ -274,8 +279,8 @@
   gap: var(--spacer-2);
   overflow: hidden;
   color: var(--text-secondary);
-  font-size: var(--body-xs-font-size);
-  line-height: var(--body-xs-line-height);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
   text-overflow: ellipsis;
   white-space: nowrap;
 }

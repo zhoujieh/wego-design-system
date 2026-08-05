@@ -354,22 +354,25 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         assetEntries.filter(function (item) { return item.conditional; }).forEach(function (item) {
           html += '<button type="button" class="my-asset-entry" data-asset-id="' + item.id + '">'
             + '<span class="my-entry-metric">' + metricHtml(item.metric, { size: '14', theme: 'black' });
-          if (item.todo) html += '<span class="badge badge--corner badge--number" data-component-slug="badge">' + state.purchaseTodoCount + '</span>';
+          if (item.todo) html += '<span class="badge badge--corner badge--number-plain" data-component-slug="badge">+' + state.purchaseTodoCount + '</span>';
           html += '</span><span class="my-entry-label">' + escapeHtml(item.label) + '</span></button>';
         });
         html += '</div>';
         ctx.setRegion('assets', html);
       }
 
-      function appIcon(icon, label, count) {
+      function appIcon(item, count) {
         var badge = count ? '<span class="badge badge--corner badge--number" data-component-slug="badge">' + count + '</span>' : '';
-        return '<span class="my-app-icon-wrap"><span class="my-app-icon"><img src="' + escapeHtml(icon) + '" alt=""></span>' + badge + '</span><span class="my-app-label">' + escapeHtml(label) + '</span>';
+        var iconHtml = item.iconFont
+          ? '<i class="wego-iconfont-s ' + escapeHtml(item.iconFont) + '" aria-hidden="true"></i>'
+          : '<img src="' + escapeHtml(item.icon) + '" alt="">';
+        return '<span class="my-app-icon-wrap"><span class="my-app-icon">' + iconHtml + '</span>' + badge + '</span><span class="my-app-label">' + escapeHtml(item.label) + '</span>';
       }
 
       function renderApps() {
         var appItems = [
-          { id: 'homepage', label: '进入主页', icon: './lib/assets/icons/app-center/我的小店.svg', fixed: true },
-          { id: 'qr_code', label: '二维码', icon: './lib/assets/icons/app-center/相册网址.svg', fixed: true }
+          { id: 'homepage', label: '进入主页', iconFont: 'icon-shouye', fixed: true },
+          { id: 'qr_code', label: '二维码', iconFont: 'icon-erweima', fixed: true }
         ];
         if (state.cartItemCount > 0) appItems.push({ id: 'cart', label: '购物车', icon: './lib/assets/icons/app-center/采购单.svg', fixed: true, count: state.cartItemCount });
         state.recentApps.forEach(function (id) { appItems.push(recentCatalog[id]); });
@@ -378,7 +381,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         var html = '<div class="layout-scroll-row my-app-row" data-component-slug="layout-scroll-row" data-item-size="auto" data-snap="start" data-peek="next">';
         appItems.forEach(function (item) {
           if (!item) return;
-          html += '<button type="button" class="my-app-entry" data-app-id="' + item.id + '">' + appIcon(item.icon, item.label, item.count) + '</button>';
+          html += '<button type="button" class="my-app-entry" data-app-id="' + item.id + '">' + appIcon(item, item.count) + '</button>';
         });
         html += '</div>';
         ctx.setRegion('apps', html);
