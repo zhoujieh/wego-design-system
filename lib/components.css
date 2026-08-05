@@ -2769,7 +2769,7 @@
   --searchbox-radius: var(--radius-8);
   --searchbox-icon-slot: var(--size-36);
   --searchbox-icon-size: var(--size-20);
-  --searchbox-font-size: var(--body-lg-font-size);
+  --searchbox-font-size: var(--body-md-font-size);
   --searchbox-bg: var(--bg-subtle);
   --searchbox-color: var(--text-default);
   --searchbox-placeholder-color: var(--text-placeholder);
@@ -2791,7 +2791,7 @@
   --searchbox-radius: var(--radius-8);
   --searchbox-icon-slot: var(--size-36);
   --searchbox-icon-size: var(--size-20);
-  --searchbox-font-size: var(--body-lg-font-size);
+  --searchbox-font-size: var(--body-md-font-size);
 }
 
 .searchbox--sm {
@@ -2799,7 +2799,7 @@
   --searchbox-radius: var(--radius-6);
   --searchbox-icon-slot: var(--size-32);
   --searchbox-icon-size: var(--size-20);
-  --searchbox-font-size: var(--body-lg-font-size);
+  --searchbox-font-size: var(--body-md-font-size);
 }
 
 .searchbox--gray { --searchbox-bg: var(--bg-subtle); }
@@ -2891,7 +2891,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: var(--searchbox-font-size);
-  line-height: var(--body-lg-line-height);
+  line-height: var(--body-md-line-height);
 }
 
 .searchbox__keyword { color: var(--text-default); }
