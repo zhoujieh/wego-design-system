@@ -28,10 +28,10 @@ description: 基于已确认原型简报消费微购设计系统，在一次任�
 
 业务实现只输出或更新场景目录中的 `route.json`、`scene.js` 和 `scene.css`；迭代记录、场景认领和生成路由按工作流同步维护。路由发生新增或变化时运行 `node scripts/build-routes.mjs` 生成 `wego-app/js/routes.js`；`routes.js` 是生成物，禁止直接编辑。
 
-在已确认范围内自主完成信息分组、布局、组件、Token、反馈和 overlay，不建立第二次确认门禁。完成实现后运行源码守卫和真实浏览器检查；验证通过后执行 `submit-prototype`，提交并推送当前功能分支，创建或更新 PR，并将迭代推进到 `awaiting-prototype-confirmation`。交付时提供当前 PR 的独立预览链接供用户验收。
+在已确认范围内自主完成信息分组、布局、组件、Token、反馈和 overlay，不建立第二次确认门禁。完成实现后运行源码守卫和真实浏览器检查；验证通过后执行 `submit-prototype`，提交并推送当前功能分支，创建或更新 PR，并将迭代推进到 `awaiting-prototype-confirmation`。交付时同时提供本次任务同一 routeId 或目标入口的两个链接供用户验收：从当前 PR head 分支 worktree 启动并已核实的本地 HTTP 预览链接，以及已核实的当前 PR 独立在线预览链接。任一链接未确认包含本次改动时不得宣称交付完成。本地验收服务在等待用户验收期间保持运行，不因当前回复结束而关闭。
 
-- 用户明确验收通过后执行带当前迭代 ID 的 `confirm-prototype --user-confirmed-prototype`；若验收提交发生任何漂移，必须重新提交验收。确认成功后重新同步最新 `main`、解决冲突并完成验证，再合并到 `main`。
-- 用户在已确认范围内要求调整视觉、布局、组件、Token、路由或交互时，先执行 `invalidate --stage=prototype`，修改、验证并重新 `submit-prototype`；原 PR 预览链接保持不变并自动更新。
+- 用户明确验收通过后执行带当前迭代 ID 的 `confirm-prototype --user-confirmed-prototype`；若验收提交发生任何漂移，必须重新提交验收。确认成功后先停止对应本地验收服务并删除服务记录，再重新同步最新 `main`、解决冲突并完成验证，最后合并到 `main`。
+- 用户在已确认范围内要求调整视觉、布局、组件、Token、路由或交互时，先执行 `invalidate --stage=prototype`，修改、验证并重新 `submit-prototype`；同一 worktree、分支和端口下复用原本地服务并重新验证内容，在线地址保持不变并自动更新。
 - 用户反馈改变目标、范围、入口、关键路径、状态、数据或可见结果时，退回 `wego-product` 按简报失效流程处理。
 
 除场景合同允许的简短例外说明外，不新增设计证明文件。
