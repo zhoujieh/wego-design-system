@@ -54,10 +54,15 @@ function parse(result, name) {
     if (result.status !== 0 && !(parsed.errors || []).length) {
       parsed.errors = [{ code: `${name}.failed`, message: result.stderr || `${name} 执行失败` }];
     }
+    const normalize = (items, severity) => (items || []).map(item => (
+      typeof item === 'string'
+        ? { code: `${name}.${severity}`, message: item }
+        : item
+    ));
     return {
-      errors: parsed.errors || [],
-      warnings: parsed.warnings || [],
-      info: parsed.info || [],
+      errors: normalize(parsed.errors, 'error'),
+      warnings: normalize(parsed.warnings, 'warning'),
+      info: normalize(parsed.info, 'info'),
       metrics: parsed.metrics || {}
     };
   } catch {
