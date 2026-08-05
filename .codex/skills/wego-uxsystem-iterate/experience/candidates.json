@@ -109,21 +109,22 @@
       "category": "validation",
       "type": "validation-coverage-gap",
       "ownerSkill": "wego-uxsystem-iterate",
-      "problem": "骨架屏与真实 DOM 明显不一致时仍能通过验证，加载前后出现布局跳动。",
-      "rootCause": "现有运行时验证没有覆盖骨架与真实可见 DOM 的结构一致性和加载前后布局稳定性。",
-      "resolution": "当前场景已按真实 DOM 生成骨架；继续观察跨场景复现，达到阈值后优先强化运行时验证。",
+      "problem": "骨架屏与真实 DOM 不一致或覆盖严重不足时仍被接受，加载前后出现布局跳动或大片空白。",
+      "rootCause": "骨架屏生成/验证未保证覆盖真实 DOM 全貌：生成脚本只采样首屏可见区域，滚动容器内内容主体被过滤，写入前也没有覆盖完整性核对或运行时验证拦截。",
+      "resolution": "骨架屏生成后需先核对覆盖完整性与真实 DOM 全貌（含滚动内容区）再落地，必要时先展示给用户确认；继续观察跨场景复现，达到阈值后优先强化运行时验证。",
       "targetAuthority": {
         "path": "scripts/validate-scene-runtime.mjs",
         "anchor": null
       },
       "relatedRuleId": null,
       "evidenceRefs": [
-        "evt-20260803-003"
+        "evt-20260803-003",
+        "evt-20260805-001"
       ],
       "scenes": [
         "我的"
       ],
-      "occurrenceCount": 1,
+      "occurrenceCount": 2,
       "status": "observing",
       "proposalReason": null,
       "upgradeHistory": [],
@@ -155,6 +156,30 @@
       "proposalReason": null,
       "upgradeHistory": [],
       "createdAt": "2026-08-04T13:52:00.000Z",
+      "updatedAt": "2026-08-05"
+    },
+    {
+      "id": "exp-20260805-001",
+      "normalizedKey": "scene-version-baseline-switch-missing-diff-audit",
+      "category": "execution",
+      "type": "workflow-gap",
+      "ownerSkill": "wego-uxsystem-iterate",
+      "problem": "同一场景存在多版本并存、确认新基准版本接管时未核对新旧版本差异，导致旧版本已验收修复丢失。",
+      "rootCause": "切换或接管场景版本基准时，没有先 diff 新旧版本实现差异并核对已验收的功能与修复是否保留，直接以新版本为准接管。",
+      "resolution": "本次已从分支历史逐个找回 7 处丢失修复；后续接管版本基准时先做新旧版本差异核对，确认已验收修复无遗漏再落地。",
+      "targetAuthority": null,
+      "relatedRuleId": null,
+      "evidenceRefs": [
+        "evt-20260805-002"
+      ],
+      "scenes": [
+        "我的"
+      ],
+      "occurrenceCount": 1,
+      "status": "observing",
+      "proposalReason": null,
+      "upgradeHistory": [],
+      "createdAt": "2026-08-05",
       "updatedAt": "2026-08-05"
     }
   ]
