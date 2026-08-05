@@ -27,15 +27,20 @@
 - 新分支统一命名为 `feature/<owner>-<task>`，基于最新 `origin/main`；不再新建 `codex/*` 或 `agent/*`。
 - 一个交付单元只能有一个开放 PR。接手任务必须 checkout 该 PR 的远端分支并更新原 PR。
 - 场景改动先认领，并在认领中记录当前分支；完成、废弃或关闭对应 PR 时释放认领。
-- 业务原型的 PR 预览用于当前任务验收；合并或关闭后由 Pages 工作流删除预览。设计系统组件、Token、Preview 或 UI Kit 的视觉验收使用对应本地预览文件的绝对路径，不返回或等待 GitHub Pages 预览。
+- 业务原型交付时必须同时返回本地与在线两个验收链接；设计系统组件、Token、Preview 或 UI Kit 的视觉验收仍只使用对应本地预览文件的绝对路径，不返回或等待 GitHub Pages 预览。
+<!-- rule-id: business-preview-links-must-be-paired -->
+- 业务原型的两个链接必须指向本次任务对应的同一 routeId 或目标入口，并包含本次改动：
+  - 本地预览：先读取 PR head 分支，确认主工作目录当前分支一致，再确认 `wego-app/index.html`、目标路由和场景产物存在；使用当前工作目录下 `wego-app/index.html` 加目标 hash 的 `file://` 绝对 URL，不依赖常驻本地服务。
+  - 在线预览：使用 `https://<owner>.github.io/<repo>/previews/pr-<编号>/` 加与本地一致的目标 hash；必须实际请求核实 HTTP 200、部署 SHA 与当前 PR 提交一致，并确认目标产物包含本次改动。
+  - 任一链接无法核实都必须说明阻塞，不得只返回另一个链接并声称交付完整。
 <!-- rule-id: local-preview-branch-must-match-open-pr -->
-- 交付未合并设计系统 PR 的本地预览时，先读取该 PR 的 head 分支并核对主工作目录当前分支一致，再核对预览文件存在且已包含本次改动；任一核对失败时不得给出本地地址。交付后保留主工作目录在该预览分支；处理无关任务时使用短期独立 worktree，避免本地预览因分支切换而回退。
+- 交付任何未合并 PR 的本地预览时，先读取该 PR 的 head 分支并核对主工作目录当前分支一致，再核对预览文件和目标入口已包含本次改动；任一核对失败时不得给出本地地址。交付后保留主工作目录在该预览分支；处理无关任务时使用短期独立 worktree，避免本地预览因分支切换而回退。
 <!-- rule-id: open-pr-branch-sync-uses-merge -->
 - 已有开放 PR 的分支同步最新 `main` 时使用 `git merge origin/main`，不用 rebase；rebase 会改写已推送历史并导致非快进。确需 rebase 时必须先向用户说明历史重写后果并获得明确同意，再 `git push --force-with-lease`。
 <!-- rule-id: open-pr-branch-divergence-must-merge-remote -->
 - 开放 PR 的本地分支与同名远端分支分叉时，必须先核对双方各自新增的提交；默认 `git merge origin/<branch>` 保留远端提交、解决冲突并完成验证后正常推送。禁止以 `--force` 或 `--force-with-lease` 覆盖远端提交；仅当用户已知悉将改写远端历史并明确同意时，才可作为例外执行。
 <!-- rule-id: business-preview-url-must-be-verified-before-delivery -->
-- 交付业务原型 PR 预览链接前必须实际请求核实再发给用户：Pages 产物根即应用入口（`previews/pr-<编号>/`，无 `wego-app/` 前缀），确认 HTTP 200 且目标产物已包含本次改动；禁止凭路径规律拼接未核实的链接。设计系统组件、Token、Preview 或 UI Kit 不等待此步骤，改为返回与改动一致的本地预览绝对路径。
+- GitHub Pages 产物根即应用入口（`previews/pr-<编号>/`，无 `wego-app/` 前缀）。交付在线预览前必须实际请求核实，禁止只凭路径规律拼接未核实的链接。设计系统组件、Token、Preview 或 UI Kit 不等待此步骤，仍只返回与改动一致的本地预览绝对路径。
 
 ## 合并与清理
 
