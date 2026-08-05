@@ -264,10 +264,21 @@
   color: var(--text-default);
 }
 
-.my-entry-metric,
+.my-entry-metric {
+  position: relative;
+  display: inline-block;
+  line-height: 0;
+  max-width: 100%;
+  overflow: visible;
+}
+
 .my-app-icon-wrap {
   position: relative;
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: max-content;
+  max-width: 100%;
   overflow: visible;
 }
 
@@ -686,4 +697,18 @@
   .my-content-toolbar .search-toolbar__actions {
     gap: var(--spacer-4);
   }
+}
+
+/* 覆盖框架 scene-skeleton.css 默认过渡：去掉 translateY 位移，真实内容在骨架色块原位淡入 */
+@keyframes my-tab-scene-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.my-tab-page .scene-fade-in {
+  animation-name: my-tab-scene-fade-in;
 }
