@@ -200,10 +200,12 @@
 .my-entry-card__content {
   gap: var(--spacer-4);
   padding-block: var(--spacer-8);
+  padding-inline-start: var(--spacer-8);
 }
 
 .my-section-heading {
-  padding-inline: var(--spacer-12);
+  padding-inline: var(--spacer-0);
+  padding-inline-start: var(--spacer-4);
 }
 
 .my-section-heading h2 {
