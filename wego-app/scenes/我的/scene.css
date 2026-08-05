@@ -175,9 +175,9 @@
   flex: 0 0 auto;
   color: var(--text-default);
   font-family: var(--number-md-font-family);
-  font-size: var(--body-xs-font-size);
+  font-size: var(--body-sm-font-size);
   font-weight: var(--font-weight-medium);
-  line-height: var(--body-xs-line-height);
+  line-height: var(--body-sm-line-height);
 }
 
 .my-membership-card__progress {
