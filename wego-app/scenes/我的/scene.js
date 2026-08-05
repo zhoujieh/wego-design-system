@@ -72,7 +72,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
           </div>
         </section>
 
-        <div class="sticky-region my-content-tabs-sticky" data-component-slug="sticky-region" data-edge="top" data-visibility="elevate-after-scroll" data-state="visible">
+        <div class="sticky-region my-content-sticky" data-component-slug="sticky-region" data-edge="top" data-visibility="elevate-after-scroll" data-state="visible">
           <div class="sticky-region__motion">
             <div class="sticky-region__inner">
               <div class="wg-tabs wg-tabs--mini wg-tabs--divide my-content-tabs" data-component-slug="tabs" role="tablist" aria-label="内容类型">
@@ -89,13 +89,6 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
                   <span class="wg-tabs__active-indicator" aria-hidden="true"></span>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="sticky-region my-content-search-sticky" data-component-slug="sticky-region" data-edge="top" data-visibility="direction-reveal" data-state="visible">
-          <div class="sticky-region__motion">
-            <div class="sticky-region__inner">
               <div class="search-toolbar my-content-toolbar">
                 <div class="searchbox searchbox--sm searchbox--gray" data-component-slug="search">
                   <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
@@ -117,23 +110,20 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
                   </button>
                 </div>
               </div>
+              <div class="my-content-management" data-role="content-management">
+                <span class="my-content-management__count" data-role="content-count">共 0 条</span>
+                <div class="my-content-management__actions">
+                  <button type="button" data-management-action="sort">排序</button>
+                  <button type="button" data-management-action="category">分类</button>
+                  <button type="button" data-management-action="batch">批量</button>
+                  <button type="button" data-management-action="collection" hidden>合集</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <section class="layout-section my-content-management-section" data-component-slug="layout-section" data-edge="M0">
-              <div class="my-content-management" data-role="content-management">
-                <span class="my-content-management__count" data-role="content-count">共 0 条</span>
-                <div class="my-content-management__actions">
-                  <a class="link link--12" data-component-slug="link" href="javascript:void(0)" role="button" data-management-action="sort">排序</a>
-                  <a class="link link--12" data-component-slug="link" href="javascript:void(0)" role="button" data-management-action="category">分类</a>
-                  <a class="link link--12" data-component-slug="link" href="javascript:void(0)" role="button" data-management-action="batch">批量</a>
-                  <a class="link link--12" data-component-slug="link" href="javascript:void(0)" role="button" data-management-action="collection" hidden>合集</a>
-                </div>
-              </div>
-        </section>
-
-        <section class="layout-section my-content-section" data-component-slug="layout-section" data-edge="M0" data-region="content"></section>
+        <section class="layout-section my-content-section" data-component-slug="layout-section" data-edge="M8" data-region="content"></section>
       </div>
     </div>
 
@@ -284,18 +274,48 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         return productById(id);
       }
 
+      var PROMO_POOL = [
+        ['5元券', '第二件半价', '满100减10元'],
+        ['满500减50元'],
+        [],
+        ['10元券', '包邮']
+      ];
+
+      function buildAttrsText(product) {
+        var parts = [];
+        var attributes = product.attributes || {};
+        var specs = product.specs || {};
+        if (attributes.color) parts.push('颜色 ' + [].concat(attributes.color).join('/'));
+        if (attributes.style) parts.push('风格 ' + [].concat(attributes.style).join('/'));
+        if (attributes.material_note) parts.push(String(attributes.material_note));
+        if (specs.sizes) parts.push('尺码 ' + [].concat(specs.sizes).join('/'));
+        if (specs.care) parts.push(String(specs.care));
+        return parts.slice(0, 4).join(' · ');
+      }
+
+      function shareLabelOf(updatedAt) {
+        if (/刚刚|分钟|今天/.test(updatedAt || '')) return '今天分享';
+        if (/昨天/.test(updatedAt || '')) return '昨天分享';
+        return '近期分享';
+      }
+
       function productContent() {
         return products.slice(0, 8).map(function (product, index) {
           var dynamic = dynamics.find(function (item) {
             return Array.isArray(item.related_product_ids) && item.related_product_ids.includes(product.product_id);
           });
+          var updatedAt = dynamic ? dynamic.published_at : '近期更新';
           return {
             id: product.product_id,
             type: 'product',
             title: product.name,
             images: (product.image_list || []).slice(0, 4),
             price: product.price,
-            updatedAt: dynamic ? dynamic.published_at : '近期更新',
+            promos: PROMO_POOL[index % PROMO_POOL.length],
+            seckill: index === 3,
+            attrs: buildAttrsText(product),
+            shareLabel: shareLabelOf(updatedAt),
+            updatedAt: updatedAt,
             order: index
           };
         });
@@ -311,6 +331,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
             title: product.name || '穿搭笔记',
             summary: dynamic.text_content,
             cover: media ? media.poster_or_src : (product.image_list && product.image_list[0]),
+            published: index % 3 !== 2,
             updatedAt: dynamic.published_at,
             order: index
           };
@@ -353,26 +374,24 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         var html = '<div class="layout-scroll-row my-asset-row" data-component-slug="layout-scroll-row" data-item-size="auto" data-snap="start" data-peek="next">';
         assetEntries.filter(function (item) { return item.conditional; }).forEach(function (item) {
           html += '<button type="button" class="my-asset-entry" data-asset-id="' + item.id + '">'
-            + '<span class="my-entry-metric">' + metricHtml(item.metric, { size: '14', theme: 'black' });
-          if (item.todo) html += '<span class="badge badge--corner badge--number-plain" data-component-slug="badge">+' + state.purchaseTodoCount + '</span>';
-          html += '</span><span class="my-entry-label">' + escapeHtml(item.label) + '</span></button>';
+            + metricHtml(item.metric, { size: '16', theme: 'black' })
+            + '<span class="my-entry-label">' + escapeHtml(item.label);
+          if (item.todo) html += '<span class="badge badge--inline badge--number" data-component-slug="badge">' + state.purchaseTodoCount + '</span>';
+          html += '</span></button>';
         });
         html += '</div>';
         ctx.setRegion('assets', html);
       }
 
-      function appIcon(item, count) {
-        var badge = count ? '<span class="badge badge--corner badge--number" data-component-slug="badge">' + count + '</span>' : '';
-        var iconHtml = item.iconFont
-          ? '<i class="wego-iconfont-s ' + escapeHtml(item.iconFont) + '" aria-hidden="true"></i>'
-          : '<img src="' + escapeHtml(item.icon) + '" alt="">';
-        return '<span class="my-app-icon-wrap"><span class="my-app-icon">' + iconHtml + '</span>' + badge + '</span><span class="my-app-label">' + escapeHtml(item.label) + '</span>';
+      function appIcon(icon, label, count) {
+        var badge = count ? '<span class="badge badge--inline badge--number my-app-entry__badge" data-component-slug="badge">' + count + '</span>' : '';
+        return '<span class="my-app-icon"><img src="' + escapeHtml(icon) + '" alt=""></span><span class="my-app-label">' + escapeHtml(label) + badge + '</span>';
       }
 
       function renderApps() {
         var appItems = [
-          { id: 'homepage', label: '进入主页', iconFont: 'icon-shouye', fixed: true },
-          { id: 'qr_code', label: '二维码', iconFont: 'icon-erweima', fixed: true }
+          { id: 'homepage', label: '进入主页', icon: './lib/assets/icons/app-center/我的小店.svg', fixed: true },
+          { id: 'qr_code', label: '二维码', icon: './lib/assets/icons/app-center/相册网址.svg', fixed: true }
         ];
         if (state.cartItemCount > 0) appItems.push({ id: 'cart', label: '购物车', icon: './lib/assets/icons/app-center/采购单.svg', fixed: true, count: state.cartItemCount });
         state.recentApps.forEach(function (id) { appItems.push(recentCatalog[id]); });
@@ -381,7 +400,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         var html = '<div class="layout-scroll-row my-app-row" data-component-slug="layout-scroll-row" data-item-size="auto" data-snap="start" data-peek="next">';
         appItems.forEach(function (item) {
           if (!item) return;
-          html += '<button type="button" class="my-app-entry" data-app-id="' + item.id + '">' + appIcon(item, item.count) + '</button>';
+          html += '<button type="button" class="my-app-entry" data-app-id="' + item.id + '">' + appIcon(item.icon, item.label, item.count) + '</button>';
         });
         html += '</div>';
         ctx.setRegion('apps', html);
@@ -393,20 +412,17 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
       }
 
       function actionButton(item, action, label) {
-        return '<a class="link my-content-action my-content-action--' + action + '" data-component-slug="link" href="javascript:void(0)" role="button" data-content-operation="' + action + '" data-content-id="' + escapeHtml(item.id) + '" data-content-type="' + escapeHtml(item.type) + '">' + label + '</a>';
+        return '<button class="my-content-action my-content-action--' + action + '" type="button" data-content-operation="' + action + '" data-content-id="' + escapeHtml(item.id) + '" data-content-type="' + escapeHtml(item.type) + '">' + label + '</button>';
       }
 
       function contentActions(item) {
         return '<div class="my-content-actions" data-content-actions>'
-          + '<div class="my-content-actions__leading">'
           + actionButton(item, 'delete', '删除')
           + actionButton(item, 'download', '下载')
           + actionButton(item, 'refresh', '刷新')
           + actionButton(item, 'edit', '编辑')
-          + '</div><div class="my-content-actions__trailing">'
           + '<button class="my-content-action my-content-action--more" type="button" data-content-more data-content-id="' + escapeHtml(item.id) + '" data-content-type="' + escapeHtml(item.type) + '" aria-label="更多操作">•••</button>'
-          + '<button class="btn btn--weak btn--sm my-content-action--share" data-component-slug="button" type="button" data-content-operation="share" data-content-id="' + escapeHtml(item.id) + '" data-content-type="' + escapeHtml(item.type) + '">分享</button>'
-          + '</div>'
+          + actionButton(item, 'share', '分享')
           + '</div>';
       }
 
@@ -418,8 +434,8 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
           + '</div>';
       }
 
-      function productCard(item, view) {
-        return '<article class="card card--surface card--vertical my-content-card my-product-card my-product-card--' + view + '" data-component-slug="card">'
+      function productCardGrid(item) {
+        return '<article class="card card--surface card--vertical my-content-card my-product-card my-product-card--grid" data-component-slug="card">'
           + '<div class="card__content my-content-card__content">'
           + '<div class="my-product-card__main">' + productMedia(item)
           + '<div class="my-product-card__details"><h3 class="my-content-card__title">' + escapeHtml(item.title) + '</h3>'
@@ -429,13 +445,71 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
           + '</div></article>';
       }
 
+      function goodsAction(item, action, label) {
+        return '<button class="link link--12 my-content-action--' + action + '" type="button" data-component-slug="link" data-content-operation="' + action + '" data-content-id="' + escapeHtml(item.id) + '" data-content-type="' + escapeHtml(item.type) + '">' + label + '</button>';
+      }
+
+      function goodsMedia(item) {
+        var src = (item.images || [])[0] || './lib/assets/icons/default-diagram.svg';
+        return '<div class="my-goods-item__media">' + imageHtml(src, item.title, 'my-goods-item__image') + '</div>';
+      }
+
+      function priceMetricBlack(price) {
+        var parts = String(price).split('.');
+        return metricHtml({ symbol: '¥', integer: parts[0], decimal: parts[1] ? '.' + parts[1] : '' }, { size: '16', theme: 'black' });
+      }
+
+      function productCard(item, view) {
+        if (view === 'grid') return productCardGrid(item);
+        var promos = item.promos || [];
+        var metaParts = ['<span class="my-goods-item__share-time">' + escapeHtml(item.shareLabel) + '</span>']
+          .concat(promos.map(function (text) { return '<span class="my-goods-item__promo">' + escapeHtml(text) + '</span>'; }));
+        return '<article class="my-goods-item" data-content-id="' + escapeHtml(item.id) + '">'
+          + goodsMedia(item)
+          + '<div class="my-goods-item__info">'
+          + '<h3 class="my-goods-item__title">' + (item.seckill ? '<span class="my-goods-item__seckill">秒杀</span>' : '') + escapeHtml(item.title) + '</h3>'
+          + '<div class="my-goods-item__price">' + priceMetricBlack(item.price) + '</div>'
+          + '<div class="my-goods-item__meta">' + metaParts.join('<i class="my-goods-item__meta-divider" aria-hidden="true"></i>') + '</div>'
+          + '<div class="my-goods-item__ops" data-content-actions>'
+          + goodsAction(item, 'delete', '删除')
+          + goodsAction(item, 'download', '下载')
+          + goodsAction(item, 'refresh', '刷新')
+          + goodsAction(item, 'edit', '编辑')
+          + '<button class="my-goods-item__more" type="button" data-content-more data-content-id="' + escapeHtml(item.id) + '" data-content-type="product" aria-label="更多操作"><i class="wego-iconfont-s icon-sandian16" aria-hidden="true"></i></button>'
+          + '<button class="my-goods-item__cart" type="button" data-content-operation="cart" data-content-id="' + escapeHtml(item.id) + '" data-content-type="product" aria-label="加入采购单"><i class="wego-iconfont-s icon-jiagou" aria-hidden="true"></i></button>'
+          + '<button class="my-goods-item__share" type="button" data-content-operation="share" data-content-id="' + escapeHtml(item.id) + '" data-content-type="product">分享</button>'
+          + '</div></div></article>'
+          + '<div class="my-goods-attrs">'
+          + '<button class="my-goods-attrs__toggle" type="button" data-attrs-toggle="' + escapeHtml(item.id) + '" aria-expanded="false"><i class="wego-iconfont-s icon-youjiantou16" aria-hidden="true"></i>商品属性</button>'
+          + '<div class="my-goods-attrs__body" data-attrs-body="' + escapeHtml(item.id) + '" hidden>' + escapeHtml(item.attrs || '暂无属性信息') + '</div>'
+          + '</div>';
+      }
+
       function noteCard(item, view) {
-        var image = item.cover ? imageHtml(item.cover, item.title, 'my-note-card__media') : '';
-        return '<article class="card card--surface card--vertical my-content-card my-note-card my-note-card--' + view + (image ? '' : ' my-note-card--no-image') + '" data-component-slug="card">'
-          + '<div class="card__content my-content-card__content">'
-          + '<div class="my-note-card__main"><div class="my-note-card__copy"><h3 class="my-content-card__title">' + escapeHtml(item.title) + '</h3>'
-          + '<p class="my-note-card__summary">' + escapeHtml(item.summary) + '</p></div>' + image + '</div>'
-          + '<div class="card__footer my-content-card__operation-row">' + contentActions(item) + '</div>'
+        if (view === 'grid') {
+          var gridImage = item.cover ? imageHtml(item.cover, item.title, 'my-note-card__media') : '';
+          return '<article class="card card--surface card--vertical my-content-card my-note-card my-note-card--grid' + (gridImage ? '' : ' my-note-card--no-image') + '" data-component-slug="card">'
+            + '<div class="card__content my-content-card__content">'
+            + '<div class="my-note-card__main"><div class="my-note-card__copy"><h3 class="my-content-card__title">' + escapeHtml(item.title) + '</h3>'
+            + '<p class="my-note-card__summary">' + escapeHtml(item.summary) + '</p></div>' + gridImage + '</div>'
+            + '<div class="card__footer my-content-card__operation-row">' + contentActions(item) + '</div>'
+            + '</div></article>';
+        }
+        var listImage = item.cover ? imageHtml(item.cover, item.title, 'my-note-item__image') : '';
+        return '<article class="my-note-item" data-content-id="' + escapeHtml(item.id) + '">'
+          + '<div class="my-note-item__main">'
+          + '<div class="my-note-item__copy"><h3 class="my-note-item__title">' + escapeHtml(item.title) + '</h3>'
+          + '<p class="my-note-item__summary">' + escapeHtml(item.summary) + '</p></div>'
+          + (listImage ? '<div class="my-note-item__media">' + listImage + (item.published ? '<span class="my-note-item__status" aria-label="已发布"><i class="wego-iconfont-s icon-gou16" aria-hidden="true"></i></span>' : '') + '</div>' : '')
+          + '</div>'
+          + '<div class="my-note-item__divider" aria-hidden="true"></div>'
+          + '<div class="my-note-item__ops" data-content-actions>'
+          + goodsAction(item, 'delete', '删除')
+          + goodsAction(item, 'download', '下载')
+          + goodsAction(item, 'refresh', '刷新')
+          + goodsAction(item, 'edit', '编辑')
+          + '<button class="link link--12" type="button" data-component-slug="link" data-content-more data-content-id="' + escapeHtml(item.id) + '" data-content-type="note">更多</button>'
+          + '<button class="my-note-item__share" type="button" data-content-operation="share" data-content-id="' + escapeHtml(item.id) + '" data-content-type="note">分享</button>'
           + '</div></article>';
       }
 
@@ -523,6 +597,29 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         });
       }
 
+      function dateGroupHeading(label, muted) {
+        return '<div class="my-content-date-group__heading' + (muted ? ' my-content-date-group__heading--muted' : '') + '">'
+          + '<button type="button" class="my-content-date-group__toggle" data-group-toggle aria-expanded="true">'
+          + '<span>' + escapeHtml(label) + '</span><i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button>'
+          + '<button type="button" class="my-content-date-group__more" data-date-more="' + escapeHtml(label) + '" aria-label="' + escapeHtml(label) + '更多操作"><i class="wego-iconfont-s icon-sandian16" aria-hidden="true"></i></button>'
+          + '</div>';
+      }
+
+      function pinRow(items) {
+        var pinned = items.slice(0, 4);
+        return '<div class="my-pin-row">'
+          + '<span class="my-pin-row__label">置顶</span>'
+          + '<div class="my-pin-row__thumbs">'
+          + pinned.map(function (item) {
+            return '<button type="button" class="my-pin-row__thumb" data-pin-scroll="' + escapeHtml(item.id) + '" aria-label="' + escapeHtml(item.title) + '">'
+              + imageHtml((item.images || [])[0] || './lib/assets/icons/default-diagram.svg', item.title, 'my-pin-row__image')
+              + '</button>';
+          }).join('')
+          + '</div>'
+          + '<button type="button" class="my-pin-row__more" data-pin-more="' + pinned.length + '" aria-label="查看置顶商品"><i class="wego-iconfont-s icon-youjiantou16" aria-hidden="true"></i></button>'
+          + '</div>';
+      }
+
       function renderContent() {
         destroyContentPopovers();
         var type = state.activeType;
@@ -545,13 +642,29 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
           html += '<div class="' + containerClass + ' my-content-list my-content-list--grid my-content-list--live" data-component-slug="' + componentSlug + '"' + attributes + '>';
           items.forEach(function (item) { html += liveCard(item); });
           html += '</div>';
-        } else {
+        } else if (view === 'grid') {
+          html += '<div class="' + containerClass + ' my-content-list my-content-list--grid my-content-list--' + type + '" data-component-slug="' + componentSlug + '"' + attributes + '>';
+          items.forEach(function (item) { html += type === 'product' ? productCard(item, view) : noteCard(item, view); });
+          html += '</div>';
+        } else if (type === 'product') {
+          html += '<div class="my-goods-surface">';
+          if (!query) html += pinRow(items);
           groupItemsByDate(items).forEach(function (group) {
-            html += '<section class="my-content-date-group"><div class="my-content-date-group__heading"><span>' + group.label + ' ›</span><button type="button" data-date-more="' + group.label + '" aria-label="' + group.label + '更多操作">•••</button></div>';
-            html += '<div class="' + containerClass + ' my-content-list my-content-list--' + view + ' my-content-list--' + type + '" data-component-slug="' + componentSlug + '"' + attributes + '>';
-            group.items.forEach(function (item) { html += type === 'product' ? productCard(item, view) : noteCard(item, view); });
+            html += '<section class="my-content-date-group my-goods-group">' + dateGroupHeading(group.label, group.label === '更早');
+            html += '<div class="my-goods-group__items">';
+            group.items.forEach(function (item) { html += productCard(item, view); });
             html += '</div></section>';
           });
+          html += '<div class="my-goods-footer">共 ' + items.length + ' 件商品</div></div>';
+        } else {
+          html += '<div class="my-notes-flow">';
+          groupItemsByDate(items).forEach(function (group) {
+            html += '<section class="my-content-date-group my-note-group">' + dateGroupHeading(group.label, group.label === '更早');
+            html += '<div class="my-note-group__items">';
+            group.items.forEach(function (item) { html += noteCard(item, view); });
+            html += '</div></section>';
+          });
+          html += '<div class="my-note-footer">共 ' + items.length + ' 篇笔记</div></div>';
         }
         ctx.setRegion('content', html);
         activateImages(root.querySelector('[data-region="content"]'));
@@ -561,7 +674,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
       function syncControls() {
         var type = state.activeType;
         var typeNames = { product: '产品', note: '笔记', live: '直播' };
-        var placeholders = { product: '搜索产品名称', note: '搜索笔记内容', live: '搜索直播主题' };
+        var placeholders = { product: '搜索我的转发', note: '搜索笔记内容', live: '搜索直播主题' };
         var search = root.querySelector('[data-role="content-search"]');
         var clear = root.querySelector('[data-action="clear-search"]');
         var viewIcon = root.querySelector('[data-role="view-icon"]');
@@ -658,6 +771,12 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
           ctx.toast('商品属性已在当前页展开');
           return;
         }
+        if (action === 'cart') {
+          state.cartItemCount += 1;
+          renderApps();
+          ctx.toast('已加入采购单');
+          return;
+        }
         ctx.toast((labels[action] || '操作') + '已完成');
       }
 
@@ -693,6 +812,38 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
       }
 
       function onRootClick(event) {
+        var groupToggle = event.target.closest('[data-group-toggle]');
+        if (groupToggle) {
+          var groupSection = groupToggle.closest('.my-content-date-group');
+          var collapsed = groupSection.classList.toggle('is-collapsed');
+          groupToggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+          return;
+        }
+
+        var attrsToggle = event.target.closest('[data-attrs-toggle]');
+        if (attrsToggle) {
+          var attrsBody = root.querySelector('[data-attrs-body="' + attrsToggle.dataset.attrsToggle + '"]');
+          if (attrsBody) {
+            var expanded = attrsToggle.getAttribute('aria-expanded') === 'true';
+            attrsToggle.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+            attrsBody.hidden = expanded;
+          }
+          return;
+        }
+
+        var pinScroll = event.target.closest('[data-pin-scroll]');
+        if (pinScroll) {
+          var targetCard = root.querySelector('.my-goods-item[data-content-id="' + pinScroll.dataset.pinScroll + '"]');
+          if (targetCard) targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          return;
+        }
+
+        var pinMore = event.target.closest('[data-pin-more]');
+        if (pinMore) {
+          ctx.toast('共 ' + pinMore.dataset.pinMore + ' 件置顶商品');
+          return;
+        }
+
         var contentOperation = event.target.closest('[data-content-operation]');
         if (contentOperation) {
           handleContentOperation(contentOperation.dataset.contentOperation, contentOperation.dataset.contentId, contentOperation.dataset.contentType);
@@ -774,10 +925,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
       ctx.bindTabs({ root: root });
       ctx.bindScrollLayout({
         scrollRoot: '.my-tab-scroll',
-        regions: [
-          { selector: '.my-content-tabs-sticky', policy: 'elevate-after-scroll', edge: 'top', essential: true, threshold: 8 },
-          { selector: '.my-content-search-sticky', policy: 'direction-reveal', edge: 'top', essential: false, threshold: 8 }
-        ],
+        regions: [{ selector: '.my-content-sticky', policy: 'elevate-after-scroll', edge: 'top', essential: true, threshold: 8 }],
         fixedRegions: [{ selector: '.my-tab-fab', edge: 'bottom', gap: 8 }]
       });
 
