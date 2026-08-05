@@ -101,7 +101,7 @@
     "hostOverflowRule": "corner 模式要求宿主及所有祖先 overflow 为 visible；宿主或祖先为 overflow:hidden/auto/scroll 时角标会被裁剪，此时优先将 badge 挂到溢出容器之外的祖先上，无法外移且业务接受行内提醒时才使用 inline。",
     "inlineRule": "inline 模式不使用绝对定位，只与文字、按钮或列表内容并排展示；仅在用户明确要求行内展示，或受限容器无法安全承载 corner 且不能外移挂载时使用。",
     "dataRule": "badge 只表达附加提醒状态，不承载主业务数据；同一个数据含义已经在数据栏、资产栏或统计项中展示时，不要再用数字 badge 重复展示。",
-    "numberPlainRule": "纯数字变体（number-plain）无背景无边框，字号 10px，使用数字字体和红色文字；仅用于数据展示场景标识新增数据提示，显示格式为 +n（如 +2 表示新增 2 条）。挂载时 badge 必须作为数字容器的子元素，数字容器需设置 position:relative 且 display:inline-block，使 corner 定位锚定到数字本身右上角而非整个外层容器；由于无背景不会遮挡宿主数字内容。",
+    "numberPlainRule": "纯数字变体（number-plain）无背景无边框，字号 var(--body-xs-font-size)（10px），使用数字字体和红色文字；仅用于数据展示场景标识新增数据提示，显示格式为 +n（如 +2 表示新增 2 条）。挂载时 badge 必须作为数字容器的子元素，数字容器需设置 position:relative 且 display:inline-block，使 corner 定位锚定到数字本身右上角而非整个外层容器；由于无背景不会遮挡宿主数字内容。",
     "textColorModel": "文字类默认背景色为 var(--accent-green)，可通过 --badge-text-bg 和 --badge-text-color 覆盖任意颜色；营销场景（直播、帮卖、补贴等）可直接追加 badge--text-promotion 修饰类使用营销橙预设 var(--status-promotion-default) + 白色文字。",
     "scrollable": "仅文字类支持 scrollable，默认宽度 32px，可通过 --badge-scroll-width 覆盖；交互为双轨道拼接的持续向左无缝循环轮播。"
   },

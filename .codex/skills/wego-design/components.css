@@ -399,7 +399,7 @@
       background: transparent;
       color: var(--status-danger-default);
       font-family: var(--number-md-font-family);
-      font-size: 10px;
+      font-size: var(--body-xs-font-size);
       font-weight: var(--font-weight-medium);
       line-height: 1;
       bottom: auto;
