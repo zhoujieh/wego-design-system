@@ -54,10 +54,15 @@ function parse(result, name) {
     if (result.status !== 0 && !(parsed.errors || []).length) {
       parsed.errors = [{ code: `${name}.failed`, message: result.stderr || `${name} 执行失败` }];
     }
+    const normalize = (items, severity) => (items || []).map(item => (
+      typeof item === 'string'
+        ? { code: `${name}.${severity}`, message: item }
+        : item
+    ));
     return {
-      errors: parsed.errors || [],
-      warnings: parsed.warnings || [],
-      info: parsed.info || [],
+      errors: normalize(parsed.errors, 'error'),
+      warnings: normalize(parsed.warnings, 'warning'),
+      info: normalize(parsed.info, 'info'),
       metrics: parsed.metrics || {}
     };
   } catch {
@@ -75,6 +80,7 @@ function parse(result, name) {
 
 const coreArgs = args.filter(arg => arg !== '--json');
 const coreReport = parse(run('scripts/validate-wego-design-core.mjs', coreArgs), 'core');
+const experienceReport = parse(run('scripts/validate-experience-records.mjs', []), 'experience');
 const runParity = ['system', 'full'].includes(requestedScope)
   || (requestedScope === 'changed' && changedFiles().some(affectsComponentParity));
 const parityReport = runParity
@@ -82,13 +88,14 @@ const parityReport = runParity
   : { errors: [], warnings: [], info: [], metrics: { skipped: true } };
 
 const report = {
-  ok: parityReport.errors.length + coreReport.errors.length === 0,
+  ok: experienceReport.errors.length + parityReport.errors.length + coreReport.errors.length === 0,
   scope: requestedScope,
-  errors: [...parityReport.errors, ...coreReport.errors],
-  warnings: [...parityReport.warnings, ...coreReport.warnings],
-  info: [...parityReport.info, ...coreReport.info],
+  errors: [...experienceReport.errors, ...parityReport.errors, ...coreReport.errors],
+  warnings: [...experienceReport.warnings, ...parityReport.warnings, ...coreReport.warnings],
+  info: [...experienceReport.info, ...parityReport.info, ...coreReport.info],
   metrics: {
     ...coreReport.metrics,
+    experience: experienceReport.metrics,
     componentParity: parityReport.metrics
   }
 };
