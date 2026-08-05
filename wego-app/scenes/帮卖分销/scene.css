@@ -179,7 +179,7 @@
 .resale-price__commission {
   display: flex;
   align-items: center;
-  gap: var(--spacer-4);
+  gap: 0;
 }
 .resale-price__earn-badge {
   display: flex;
@@ -187,6 +187,7 @@
   justify-content: center;
   width: var(--size-16);
   height: var(--size-16);
+  margin-right: var(--spacer-4);
   background: var(--status-danger-default);
   color: var(--text-inverse);
   font-size: var(--body-sm-font-size);
@@ -253,10 +254,10 @@
   align-items: center;
   gap: var(--spacer-8);
 }
-/* 内联到售价卡片内部:无外层 padding,顶部留间距 */
+/* 内联到售价卡片内部:无外层 padding,顶部留间距(Figma: padding-top 8px) */
 .resale-tags--inline {
   padding: 0;
-  margin-top: var(--spacer-12);
+  margin-top: var(--spacer-8);
 }
 .resale-tags__title {
   flex-shrink: 0;
@@ -294,10 +295,10 @@
   background: var(--bg-brand-surface-l1);
   color: var(--text-brand);
 }
-/* 未选中标签:白底(在灰底售价卡片上形成对比) */
+/* 未选中标签:白底 + 灰字(Figma: #FFFFFF 底 + #6E7382 文字) */
 .resale-tags__item.tag--white {
   background: var(--bg-surface);
-  color: var(--text-default);
+  color: var(--text-secondary);
   font-weight: var(--font-weight-regular);
 }
 .resale-tags__manual {
@@ -309,9 +310,10 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-/* 底部佣金保密提示 */
+/* 底部佣金保密提示(Figma: 与按钮间距 12px,抵消 modal__actions gap 16px) */
 .resale-hint-bottom {
-  padding: var(--spacer-12) var(--spacer-16);
+  padding: var(--spacer-12) var(--spacer-16) 0;
+  margin-bottom: calc(var(--spacer-12) - var(--spacer-16));
   text-align: center;
   font-size: var(--body-sm-font-size);
   color: var(--text-secondary);
@@ -386,6 +388,10 @@
   padding: 0 var(--spacer-16);
   background: var(--bg-subtle);
   border-bottom: 0.5px solid var(--border-neutral-l2);
+}
+/* 售价模式:无金额/比例切换,右侧无额外元素 */
+.keypad__header--price {
+  gap: 0;
 }
 .keypad__header-label {
   flex-shrink: 0;
