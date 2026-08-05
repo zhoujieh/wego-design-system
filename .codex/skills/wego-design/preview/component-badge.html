@@ -175,6 +175,7 @@
       font-weight: var(--font-weight-medium);
       line-height: 1;
       bottom: auto;
+      transform: translate(calc(100% - 1px), calc(-100% + 3px));
     }
     .badge--text {
       --badge-text-bg: var(--accent-green);
@@ -366,14 +367,12 @@
       <span class="label">数据资产</span>
       <div class="demo-host-row">
         <div class="demo-host demo-host--nav">
-          <span style="font-family:var(--number-md-font-family);font-size:14px;font-weight:var(--font-weight-medium);">386</span>
+          <span class="demo-metric" style="position:relative; display:inline-block; font-family:var(--number-md-font-family);font-size:14px;font-weight:var(--font-weight-medium);">386<span class="badge badge--corner badge--number-plain">+2</span></span>
           <span>好友</span>
-          <span class="badge badge--corner badge--number-plain">+2</span>
         </div>
         <div class="demo-host demo-host--nav">
-          <span style="font-family:var(--number-md-font-family);font-size:14px;font-weight:var(--font-weight-medium);">1.2万</span>
+          <span class="demo-metric" style="position:relative; display:inline-block; font-family:var(--number-md-font-family);font-size:14px;font-weight:var(--font-weight-medium);">1.2万<span class="badge badge--corner badge--number-plain">+5</span></span>
           <span>粉丝</span>
-          <span class="badge badge--corner badge--number-plain">+5</span>
         </div>
       </div>
     </div>

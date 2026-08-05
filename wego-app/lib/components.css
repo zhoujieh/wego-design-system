@@ -403,6 +403,7 @@
       font-weight: var(--font-weight-medium);
       line-height: 1;
       bottom: auto;
+      transform: translate(calc(100% - 1px), calc(-100% + 3px));
     }
     .badge--text {
       --badge-text-bg: var(--accent-green);
