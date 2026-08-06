@@ -227,7 +227,7 @@
   height: var(--size-48);
   padding: 0 var(--spacer-12);
   background: var(--bg-surface);
-  border: 1px solid var(--border-neutral-l2);
+  border: 1px solid transparent;
   border-radius: var(--radius-8);
   -webkit-tap-highlight-color: transparent;
 }
