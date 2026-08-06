@@ -238,6 +238,21 @@
 .resale-price__input-row[data-price-edit]:active {
   background: var(--bg-state-pressed);
 }
+/* 编辑态:售价数字后显示闪烁光标 */
+.resale-price__input-row.is-editing .resale-price__amount::after {
+  content: '';
+  display: inline-block;
+  width: 1px;
+  height: 1em;
+  margin-left: var(--spacer-2);
+  background: var(--border-brand);
+  vertical-align: middle;
+  animation: resale-cursor-blink 1s step-end infinite;
+}
+@keyframes resale-cursor-blink {
+  0%, 50% { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
+}
 .resale-price__input-left {
   display: flex;
   align-items: baseline;

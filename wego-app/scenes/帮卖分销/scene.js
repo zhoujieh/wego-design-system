@@ -876,8 +876,17 @@
     var cleanedValue = initialValue ? String(initialValue).replace(/[^0-9.]/g, '') : '';
     var template = buildKeypadTemplate(keypadMode, cleanedValue);
 
+    // 售价模式:实时更新弹窗中的售价显示
+    var popupPriceEl = isPriceMode ? popupRoot.querySelector('[data-display-price]') : null;
+    var priceInputRow = isPriceMode ? popupRoot.querySelector('[data-price-edit]') : null;
+
     ctx.openSheet(template, {
       label: '数字键盘',
+      onDestroy: function () {
+        if (priceInputRow) {
+          priceInputRow.classList.remove('is-editing');
+        }
+      },
       init: function (overlayCtx) {
         var root = overlayCtx.root;
 
@@ -885,14 +894,15 @@
         var currentValue = cleanedValue;
         var displayEl = root.querySelector('[data-keypad-display]');
         var labelEl = root.querySelector('[data-keypad-label]');
-        // 售价模式:实时更新弹窗中的售价显示
-        var popupPriceEl = isPriceMode ? popupRoot.querySelector('[data-display-price]') : null;
 
         function updateDisplay() {
           if (isPriceMode) {
             // 售价模式:无键盘头部,直接更新弹窗中的售价显示
             if (popupPriceEl) {
               popupPriceEl.textContent = currentValue || '0';
+            }
+            if (priceInputRow) {
+              priceInputRow.classList.add('is-editing');
             }
           } else {
             var isAmount = currentMode === 'amount';
