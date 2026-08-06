@@ -78,15 +78,10 @@
   align-items: flex-start;
 }
 
-.my-tab-identity__name {
-  max-width: 100%;
-  overflow: hidden;
-  color: var(--text-default);
-  font-size: var(--body-md-font-size);
-  font-weight: var(--font-weight-semibold);
-  line-height: var(--body-md-line-height);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.my-tab-identity__avatar {
+  flex: 0 0 auto;
+  width: var(--size-36);
+  height: var(--size-36);
 }
 
 .my-tab-identity__album {
@@ -95,9 +90,10 @@
   max-width: 100%;
   gap: var(--spacer-2);
   overflow: hidden;
-  color: var(--text-secondary);
-  font-size: var(--body-xs-font-size);
-  line-height: var(--body-xs-line-height);
+  color: var(--text-default);
+  font-size: var(--body-xl-font-size);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--body-xl-line-height);
   white-space: nowrap;
 }
 
@@ -106,9 +102,40 @@
   text-overflow: ellipsis;
 }
 
-.my-tab-identity__album .wego-iconfont-s {
+.my-tab-identity__switch {
   flex: 0 0 auto;
   font-size: var(--size-12);
+  color: var(--text-tertiary);
+}
+
+.my-tab-identity__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-2);
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.my-tab-identity__name {
+  flex: 0 0 auto;
+  color: var(--text-default);
+  font-size: var(--body-md-font-size);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--body-md-line-height);
+  white-space: nowrap;
+}
+
+.my-tab-identity__role {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 var(--spacer-2);
+  border-radius: var(--radius-4);
+  background: var(--bg-subtle);
+  color: var(--text-tertiary);
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-sm-line-height);
+  white-space: nowrap;
 }
 
 .my-tab-section {

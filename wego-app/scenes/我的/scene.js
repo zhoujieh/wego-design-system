@@ -4,12 +4,15 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         <div class="navbar__body navbar__body--split">
           <div class="navbar__left navbar__left--custom">
             <button type="button" class="my-tab-identity" data-action="album-switch" aria-label="切换相册">
-              <div class="avatar avatar--40 avatar--image" data-component-slug="avatar">
+              <div class="avatar avatar--image my-tab-identity__avatar" data-component-slug="avatar">
                 <img data-role="profile-avatar" alt="">
               </div>
               <span class="my-tab-identity__copy">
-                <span class="my-tab-identity__name" data-role="profile-name"></span>
-                <span class="my-tab-identity__album"><span data-role="profile-album"></span><i class="wego-iconfont-s icon-shangxiajiantou16" aria-hidden="true"></i></span>
+                <span class="my-tab-identity__album"><span data-role="profile-album"></span><i class="wego-iconfont-s icon-shangxiajiantou16 my-tab-identity__switch" aria-hidden="true"></i></span>
+                <span class="my-tab-identity__meta">
+                  <span class="my-tab-identity__name" data-role="profile-name"></span>
+                  <span class="my-tab-identity__role" data-role="profile-role"></span>
+                </span>
               </span>
             </button>
           </div>
@@ -378,9 +381,11 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         var avatar = root.querySelector('[data-role="profile-avatar"]');
         var name = root.querySelector('[data-role="profile-name"]');
         var album = root.querySelector('[data-role="profile-album"]');
+        var role = root.querySelector('[data-role="profile-role"]');
         if (avatar) avatar.src = currentUser.avatar || './lib/assets/image/avatar-defult.png';
-        if (name) name.textContent = currentUser.display_name || currentUser.merchant_name || '我的相册';
+        if (name) name.textContent = currentUser.display_name || currentUser.merchant_name || '阿杰';
         if (album) album.textContent = '春夏新品相册';
+        if (role) role.textContent = currentUser.role || '';
       }
 
       function renderAssets() {
