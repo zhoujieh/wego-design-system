@@ -533,34 +533,41 @@
   // ── 数字键盘模板(Figma: 顶部加价控件行 + 4列4行 grid 键盘) ──
   function buildKeypadTemplate(mode, initialValue) {
     var displayValue = initialValue ? String(initialValue) : '';
+    var isPrice = mode === 'price';
     var isAmount = mode === 'amount';
     var segClass = isAmount ? 'is-amount' : 'is-rate';
+    var labelText = isPrice ? '售价(元)' : (isAmount ? '加价(元)' : '加价(%)');
+
+    var headerHtml = '';
+    if (!isPrice) {
+      headerHtml = ''
+      + '<div class="keypad__header" data-keypad-segmented>'
+      +   '<span class="keypad__header-label" data-keypad-label>' + labelText + '</span>'
+      +   '<div class="keypad__header-value">'
+      +     '<span class="keypad__cursor"></span>'
+      +     '<span class="keypad__header-amount ' + (displayValue ? '' : 'is-placeholder') + '" data-keypad-display>'
+      +       (displayValue || '0.00')
+      +     '</span>'
+      +   '</div>'
+      +   '<div class="keypad__seg ' + segClass + '">'
+      +     '<div class="keypad__seg-thumb"></div>'
+      +     '<div class="keypad__seg-item ' + (isAmount ? 'is-active' : '') + '" data-keypad-tab="amount">金额</div>'
+      +     '<div class="keypad__seg-item ' + (!isAmount ? 'is-active' : '') + '" data-keypad-tab="rate">比例</div>'
+      +   '</div>'
+      + '</div>';
+    }
 
     return ''
       + '<div class="modal modal--frame modal--no-mask" role="dialog" aria-modal="true" data-state="closed" data-keypad-overlay data-component-slug="modal">'
       +   '<div class="modal__panel">'
-      +     '<div class="keypad ' + segClass + '">'
-            // 加价控件行:[加价(元)] [光标 + 显示值] [金额/比例 Seg_32]
-      +       '<div class="keypad__header" data-keypad-segmented>'
-      +         '<span class="keypad__header-label" data-keypad-label>加价(元)</span>'
-      +         '<div class="keypad__header-value">'
-      +           '<span class="keypad__cursor"></span>'
-      +           '<span class="keypad__header-amount ' + (displayValue ? '' : 'is-placeholder') + '" data-keypad-display>'
-      +             (displayValue || '0.00')
-      +           '</span>'
-      +         '</div>'
-      +         '<div class="keypad__seg ' + segClass + '">'
-      +           '<div class="keypad__seg-thumb"></div>'
-      +           '<div class="keypad__seg-item ' + (isAmount ? 'is-active' : '') + '" data-keypad-tab="amount">金额</div>'
-      +           '<div class="keypad__seg-item ' + (!isAmount ? 'is-active' : '') + '" data-keypad-tab="rate">比例</div>'
-      +         '</div>'
-      +       '</div>'
+      +     '<div class="keypad ' + (isPrice ? 'is-price' : segClass) + '">'
+      +       headerHtml
             // 键盘主体:4列×4行 grid,第4列跨前3行放回删+确定
       +       '<div class="keypad__keys">'
       +         '<div class="keypad__key" data-key="1">1</div>'
       +         '<div class="keypad__key" data-key="2">2</div>'
       +         '<div class="keypad__key" data-key="3">3</div>'
-      +         '<div class="keypad__key keypad__key--delete" data-key="delete"><i class="wego-iconfont-s icon-huitui"></i></div>'
+      +         '<div class="keypad__key keypad__key--delete" data-key="delete"><i class="wego-iconfont-s icon-tuige"></i></div>'
       +         '<div class="keypad__key" data-key="4">4</div>'
       +         '<div class="keypad__key" data-key="5">5</div>'
       +         '<div class="keypad__key" data-key="6">6</div>'
@@ -764,9 +771,9 @@
             // 更新选中态
             tagItems.forEach(function (t) {
               t.classList.remove('tag--brand', 'tag--selected');
-              t.classList.add('tag--gray', 'tag--normal');
+              t.classList.add('tag--white', 'tag--normal');
             });
-            tag.classList.remove('tag--gray', 'tag--normal');
+            tag.classList.remove('tag--white', 'tag--normal');
             tag.classList.add('tag--brand', 'tag--selected');
 
             // 计算新价格
@@ -862,7 +869,8 @@
 
   // ── 打开数字键盘 ──
   function openKeypad(ctx, popupRoot, sample, mode, initialValue) {
-    var keypadMode = mode === 'price' ? 'amount' : mode; // price 模式也是按金额
+    var isPriceMode = mode === 'price';
+    var keypadMode = isPriceMode ? 'price' : mode;
     var cleanedValue = initialValue ? String(initialValue).replace(/[^0-9.]/g, '') : '';
     var template = buildKeypadTemplate(keypadMode, cleanedValue);
 
@@ -871,23 +879,31 @@
       init: function (overlayCtx) {
         var root = overlayCtx.root;
 
-        var currentMode = keypadMode;
+        var currentMode = isPriceMode ? 'amount' : keypadMode;
         var currentValue = cleanedValue;
         var displayEl = root.querySelector('[data-keypad-display]');
         var labelEl = root.querySelector('[data-keypad-label]');
+        // 售价模式:实时更新弹窗中的售价显示
+        var popupPriceEl = isPriceMode ? popupRoot.querySelector('[data-display-price]') : null;
 
         function updateDisplay() {
-          var isAmount = currentMode === 'amount';
-          var labelText = isAmount ? '加价(元)' : '加价(%)';
-
-          if (labelEl) labelEl.textContent = labelText;
-          if (displayEl) {
-            if (currentValue) {
-              displayEl.classList.remove('is-placeholder');
-              displayEl.textContent = currentValue;
-            } else {
-              displayEl.classList.add('is-placeholder');
-              displayEl.textContent = '0.00';
+          if (isPriceMode) {
+            // 售价模式:无键盘头部,直接更新弹窗中的售价显示
+            if (popupPriceEl) {
+              popupPriceEl.textContent = currentValue || '0';
+            }
+          } else {
+            var isAmount = currentMode === 'amount';
+            var labelText = isAmount ? '加价(元)' : '加价(%)';
+            if (labelEl) labelEl.textContent = labelText;
+            if (displayEl) {
+              if (currentValue) {
+                displayEl.classList.remove('is-placeholder');
+                displayEl.textContent = currentValue;
+              } else {
+                displayEl.classList.add('is-placeholder');
+                displayEl.textContent = '0.00';
+              }
             }
           }
         }
@@ -995,59 +1011,73 @@
         if (confirmBtn) {
           confirmBtn.addEventListener('click', function () {
             if (!currentValue) {
-              ctx.toast('请输入加价');
+              ctx.toast(isPriceMode ? '请输入售价' : '请输入加价');
               return;
             }
 
             var numValue = parseFloat(currentValue);
             if (isNaN(numValue) || numValue <= 0) {
-              ctx.toast('请输入正确的加价');
+              ctx.toast(isPriceMode ? '请输入正确的售价' : '请输入正确的加价');
               return;
             }
 
-            // 校验加价比例 1%-300%
             var supplyPrice = getSupplyPriceForCalc(sample);
-            var rate;
-            if (currentMode === 'amount') {
-              rate = amountToRate(numValue, supplyPrice);
+
+            if (isPriceMode) {
+              // 售价模式:加价 = 售价 - 供货价
+              var addPrice = numValue - supplyPrice;
+              if (addPrice <= 0) {
+                ctx.toast('售价需大于供货价¥' + formatPrice(supplyPrice));
+                return;
+              }
+              var rate = amountToRate(addPrice, supplyPrice);
+              if (!validateRate(rate)) {
+                ctx.toast('加价比例需在1%-300%之间');
+                return;
+              }
+              updatePopupPrice(popupRoot, sample, addPrice, 1, String(addPrice));
             } else {
-              rate = numValue; // 按比例模式直接是比例值(小数)
+              // 加价模式:直接用加价值
+              var rate;
+              if (currentMode === 'amount') {
+                rate = amountToRate(numValue, supplyPrice);
+              } else {
+                rate = numValue;
+              }
+
+              if (!validateRate(rate)) {
+                ctx.toast('加价比例需在1%-300%之间');
+                return;
+              }
+
+              var addPrice;
+              var addType;
+              var addValue;
+
+              if (currentMode === 'amount') {
+                addPrice = numValue;
+                addType = 1;
+                addValue = String(numValue);
+              } else {
+                addPrice = rateToAmount(numValue, supplyPrice);
+                addType = 2;
+                addValue = String(numValue);
+              }
+
+              // 缓存自定义加价
+              var cacheData = currentMode === 'amount'
+                ? { type: 1, value: numValue }
+                : { type: 2, rate: numValue };
+              setStorage(STORAGE_KEYS.customAddPrice, JSON.stringify(cacheData));
+
+              updatePopupPrice(popupRoot, sample, addPrice, addType, addValue);
             }
-
-            if (!validateRate(rate)) {
-              ctx.toast('加价比例需在1%-300%之间');
-              return;
-            }
-
-            // 计算最终加价金额
-            var addPrice;
-            var addType;
-            var addValue;
-
-            if (currentMode === 'amount') {
-              addPrice = numValue;
-              addType = 1;
-              addValue = String(numValue);
-            } else {
-              addPrice = rateToAmount(numValue, supplyPrice);
-              addType = 2;
-              addValue = String(numValue);
-            }
-
-            // 缓存自定义加价
-            var cacheData = currentMode === 'amount'
-              ? { type: 1, value: numValue }
-              : { type: 2, rate: numValue };
-            setStorage(STORAGE_KEYS.customAddPrice, JSON.stringify(cacheData));
-
-            // 更新弹窗价格
-            updatePopupPrice(popupRoot, sample, addPrice, addType, addValue);
 
             // 更新快捷标签选中态(全部取消选中)
             var tagItems = popupRoot.querySelectorAll('.resale-tags__item');
             tagItems.forEach(function (t) {
               t.classList.remove('tag--brand', 'tag--selected');
-              t.classList.add('tag--gray', 'tag--normal');
+              t.classList.add('tag--white', 'tag--normal');
             });
 
             ctx.closeOverlay();

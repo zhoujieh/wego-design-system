@@ -390,6 +390,21 @@
       min-width: 22px;
       padding: 0 4px;
     }
+    .badge--number-plain {
+      min-width: auto;
+      height: auto;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      color: var(--status-danger-default);
+      font-family: var(--number-md-font-family);
+      font-size: var(--body-xs-font-size);
+      font-weight: var(--font-weight-medium);
+      line-height: 1;
+      bottom: auto;
+      transform: translate(calc(100% - 1px), calc(-100% + 3px));
+    }
     .badge--text {
       --badge-text-bg: var(--accent-green);
       --badge-text-color: var(--text-inverse);
@@ -2754,7 +2769,7 @@
   --searchbox-radius: var(--radius-8);
   --searchbox-icon-slot: var(--size-36);
   --searchbox-icon-size: var(--size-20);
-  --searchbox-font-size: var(--body-lg-font-size);
+  --searchbox-font-size: var(--body-md-font-size);
   --searchbox-bg: var(--bg-subtle);
   --searchbox-color: var(--text-default);
   --searchbox-placeholder-color: var(--text-placeholder);
@@ -2776,7 +2791,7 @@
   --searchbox-radius: var(--radius-8);
   --searchbox-icon-slot: var(--size-36);
   --searchbox-icon-size: var(--size-20);
-  --searchbox-font-size: var(--body-lg-font-size);
+  --searchbox-font-size: var(--body-md-font-size);
 }
 
 .searchbox--sm {
@@ -2784,7 +2799,7 @@
   --searchbox-radius: var(--radius-6);
   --searchbox-icon-slot: var(--size-32);
   --searchbox-icon-size: var(--size-20);
-  --searchbox-font-size: var(--body-lg-font-size);
+  --searchbox-font-size: var(--body-md-font-size);
 }
 
 .searchbox--gray { --searchbox-bg: var(--bg-subtle); }
@@ -2876,7 +2891,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: var(--searchbox-font-size);
-  line-height: var(--body-lg-line-height);
+  line-height: var(--body-md-line-height);
 }
 
 .searchbox__keyword { color: var(--text-default); }
