@@ -354,16 +354,21 @@
       var maxPrice = computePrice(maxSupply, maxAdd);
 
       priceHtml = ''
-        + '<div class="resale-price">'
-        +   '<div class="resale-price__field-row">'
-        +     '<div class="resale-price__field">'
-        +       '<span class="resale-price__field-label">我的售价</span>'
-        +       '<div class="resale-price__field-value" data-display-price>' + formatPriceRange(minPrice, maxPrice) + '<span class="resale-price__field-suffix">元</span></div>'
+        + '<div class="resale-price resale-price--editable">'
+        +   '<div class="resale-price__card">'
+        +     '<div class="resale-price__card-title">我的售价：</div>'
+        +     '<div class="resale-price__input-row">'
+        +       '<div class="resale-price__input-left">'
+        +         '<span class="resale-price__currency">¥</span>'
+        +         '<span class="resale-price__amount" data-display-price>' + formatPriceRange(minPrice, maxPrice) + '</span>'
+        +       '</div>'
+        +       '<div class="resale-price__commission">'
+        +         '<span class="resale-price__earn-badge">赚</span>'
+        +         '<span class="resale-price__commission-currency">¥</span>'
+        +         '<span class="resale-price__commission-amount" data-display-commission>' + formatPriceRange(minAdd, maxAdd) + '</span>'
+        +       '</div>'
         +     '</div>'
-        +     '<div class="resale-price__field">'
-        +       '<span class="resale-price__field-label">佣金</span>'
-        +       '<div class="resale-price__field-value resale-price__field-value--commission" data-display-commission>' + formatPriceRange(minAdd, maxAdd) + '<span class="resale-price__field-suffix">元</span></div>'
-        +     '</div>'
+        +     buildTagsHtml(sample, true)
         +   '</div>'
         + '</div>';
     } else {
@@ -399,11 +404,8 @@
         + '</div>';
     }
 
-    // 快捷加价标签区(区间价格场景独立显示;单一价格已内联到售价卡片)
+    // 快捷加价标签区(固定佣金不显示;单一价格和区间价格均已内联到售价卡片)
     var tagsHtml = '';
-    if (!isFixed && isRange) {
-      tagsHtml = buildTagsHtml(sample, false);
-    }
 
     // 佣金保密提示(非直播间均显示,含固定佣金)
     var hintHtml = '';
