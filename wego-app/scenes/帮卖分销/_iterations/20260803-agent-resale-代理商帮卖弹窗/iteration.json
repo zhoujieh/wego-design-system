@@ -224,19 +224,23 @@
     {
       "action": "submit-prototype",
       "at": "2026-08-05T03:08:30.153Z"
+    },
+    {
+      "action": "submit-prototype",
+      "at": "2026-08-06T02:01:19.934Z"
     }
   ],
   "freeze": null,
   "prototype_submission": {
-    "at": "2026-08-05T03:08:30.136Z",
+    "at": "2026-08-06T02:01:19.917Z",
     "scope_revision": 2,
     "affected_scenes": [
       "帮卖分销"
     ],
     "fingerprints": {
       "@route-entry/%E5%B8%AE%E5%8D%96%E5%88%86%E9%94%80": "52b95157957b76c932e2b9c36ab3e97657e2822155e6541cfbd045e68fabb178",
-      "wego-app/scenes/帮卖分销/scene.css": "51eb7adae6369949af4f55b880a547e50933ddc47d3db8b42b3c0057f8013424",
-      "wego-app/scenes/帮卖分销/scene.js": "08de9ae3ebe615f520d02fccf6ca9f63c851a9fcce1c8500e89a834ef14ac659"
+      "wego-app/scenes/帮卖分销/scene.css": "e819d03a00ac6932535497a3a7ebe9c261b24c485310d367871bffb149aa831e",
+      "wego-app/scenes/帮卖分销/scene.js": "ba287dde9a534ad2b035e029b9a10ab6298bb27e2a7d01e2c2c27292d0952bb5"
     }
   }
 }
