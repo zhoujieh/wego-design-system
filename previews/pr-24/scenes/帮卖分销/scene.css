@@ -76,7 +76,7 @@
 
 /* 标题问号图标 */
 .navbar__title-help {
-  margin-left: var(--spacer-4);
+  margin-left: 0;
   font-size: var(--size-20);
   color: var(--text-secondary);
   cursor: pointer;
@@ -227,12 +227,15 @@
   height: var(--size-48);
   padding: 0 var(--spacer-12);
   background: var(--bg-surface);
-  border: 1px solid var(--border-brand);
+  border: 1px solid var(--border-neutral-l2);
   border-radius: var(--radius-8);
-  cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-.resale-price__input-row:active {
+.resale-price__input-row[data-price-edit] {
+  border-color: var(--border-brand);
+  cursor: pointer;
+}
+.resale-price__input-row[data-price-edit]:active {
   background: var(--bg-state-pressed);
 }
 .resale-price__input-left {
