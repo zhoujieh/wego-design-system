@@ -7,7 +7,7 @@
     "primary_scene": "我的",
     "related_scenes": []
   },
-  "status": "prototyping",
+  "status": "awaiting-prototype-confirmation",
   "scope_revision": 1,
   "prototype_brief": {
     "goal": "将「我的」Tab 建设为个人经营与内容管理首页，让用户快速查看账户与会员资产、访问常用能力、分别管理产品/笔记/直播，并通过突出的发布入口完成快捷发布。",
@@ -207,7 +207,7 @@
       "valid": true
     },
     "design": {
-      "valid": false
+      "valid": true
     }
   },
   "change_log": [
@@ -262,8 +262,23 @@
     {
       "action": "invalidate",
       "at": "2026-08-04T05:32:06.474Z"
+    },
+    {
+      "action": "submit-prototype",
+      "at": "2026-08-11T00:22:34.073Z"
     }
   ],
   "freeze": null,
-  "prototype_submission": null
+  "prototype_submission": {
+    "at": "2026-08-11T00:22:34.055Z",
+    "scope_revision": 1,
+    "affected_scenes": [
+      "我的"
+    ],
+    "fingerprints": {
+      "@route-entry/%E6%88%91%E7%9A%84": "cd0611ebe77c2c1ba558f5f7796281411766236f4e163a96ce8d8538ac0f9c69",
+      "wego-app/scenes/我的/scene.css": "3e1ffda9c4344eba95497b88870ee2db65265e483246bea08d6cf85fddde403a",
+      "wego-app/scenes/我的/scene.js": "bcb81070f3d0a0d4a6714827855f9bdba02a7cd2a61a691a2f9b8d10e3a6c873"
+    }
+  }
 }
