@@ -271,7 +271,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
 
       var assetEntries = [
         { id: 'purchases', label: '我买的', metric: { integer: String(state.purchaseTodoCount) }, conditional: state.purchaseTodoCount > 0, todo: true },
-        { id: 'fans', label: '粉丝', metric: { integer: '1', decimal: '.2', unit: '万' }, conditional: true },
+        { id: 'fans', label: '粉丝', metric: { integer: '1', decimal: '.2', unit: '万' }, size: '16', conditional: true },
         { id: 'friends', label: '好友', metric: { integer: '386' }, conditional: true },
         { id: 'agents', label: '代理', metric: { integer: '28' }, conditional: true },
         { id: 'visitors', label: '访客', metric: { integer: '1,280' }, conditional: true },
@@ -392,7 +392,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         var html = '<div class="layout-scroll-row my-asset-row" data-component-slug="layout-scroll-row" data-item-size="auto" data-snap="start" data-peek="next">';
         assetEntries.filter(function (item) { return item.conditional; }).forEach(function (item) {
           html += '<button type="button" class="my-asset-entry" data-asset-id="' + item.id + '">'
-            + '<span class="my-entry-metric">' + metricHtml(item.metric, { size: '14', theme: 'black' });
+            + '<span class="my-entry-metric">' + metricHtml(item.metric, { size: item.size || '14', theme: 'black' });
           if (item.todo) html += '<span class="badge badge--corner badge--number-plain" data-component-slug="badge">+' + state.purchaseTodoCount + '</span>';
           html += '</span><span class="my-entry-label">' + escapeHtml(item.label) + '</span></button>';
         });
