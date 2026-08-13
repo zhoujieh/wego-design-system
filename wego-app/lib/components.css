@@ -214,25 +214,10 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.actionsheet__item-recommend {
-  position: absolute;
-  top: 50%;
-  left: 100%;
-  margin-left: var(--spacer-4);
-  transform: translateY(-50%);
-  font-family: var(--font-family-system);
-  font-size: var(--body-sm-font-size);
-  color: var(--status-success-default);
-  background: var(--status-success-surface-l1);
-  padding: 2px var(--spacer-8);
-  border-radius: var(--radius-4);
-  white-space: nowrap;
-}
-/* 当 main 内有徽标时，main 收缩到标题宽度，让徽标相对标题定位 */
-.actionsheet__item-main:has(.actionsheet__item-recommend) {
-  flex: 0 0 auto;
-  position: relative;
-}
+/* 推荐徽标复用 badge 组件的 badge--text badge--inline：
+   作为 .actionsheet__item-main 内与 title 同级的行内 flex 子项，垂直居中、正常占位；
+   视觉与配色由 badge 提供（亮绿底 --accent-green + 白字 --text-inverse），
+   此处仅保留 .actionsheet__item-recommend 作为标记类供 :has 选择器使用。 */
 /* 操作模式无图标有徽标：item 居中 main */
 .actionsheet--action .actionsheet__item:has(.actionsheet__item-recommend):not(:has(.actionsheet__item-icon)) {
   justify-content: center;
