@@ -146,7 +146,7 @@
     {
       "name": "itemMain",
       "selector": ".actionsheet__item-main",
-      "role": "选项主文本区，含 title + subtitle + recommend；操作模式 flex 1 / 选择模式 flex 1 + gap 4px"
+      "role": "选项主文本区，含 title + subtitle + recommend；操作模式 flex 1 / 选择模式 flex 1 + gap 2px（与副标题垂直间距一致）"
     },
     {
       "name": "itemTitle",
@@ -219,7 +219,7 @@
     "conflicting": "宿主 overlay 栈内仅展示一个栈顶 actionsheet；栈式支持已有 sheet / full-screen-modal 之上再开新 sheet（深度上限 3），旧 sheet 自动变为非栈顶",
     "position": "底部贴底悬浮，面板从屏幕底部边缘上移到完整显示",
     "animation": "遮罩视觉层（.actionsheet::before）与面板同步由 data-state='open'/'closed' 驱动：入场遮罩 opacity 0→1、面板 translateY(100%)→0；出场反向；时长 var(--duration-normal)（250ms），缓动 var(--ease-enter)/var(--ease-exit)；.actionsheet 根节点不得设置 opacity；面板（.actionsheet__panel）只能使用 translateY 位移动画，打开和关闭时都不得设置 opacity 或 opacity transition；与 dialog 行为一致，宿主层 .app-overlay-layer 透明不承担蒙层视觉职责；栈式场景下底层 sheet 蒙层被 .is-overlay-under 修饰类降透明度，新 sheet 入场时底层保持可见但视觉让位",
-    "zIndex": "var(--z-modal)=600，与 dialog 同层，低于 toast(700)；栈式多 overlay 时栈顶节点在 DOM 中最后插入，paint 顺序自然在上",
+    "zIndex": "var(--z-raised)=10（overlay-local 浮层基础层），低于 dialog(var(--z-modal)=600) 与 toast(700)；与 layerContract.zToken 一致；栈式多 overlay 时栈顶节点在 DOM 中最后插入，paint 顺序自然在上",
     "scrollable": "选项列表超过屏幕高度时，.actionsheet__list 内部纵向滚动，头部和取消按钮固定"
   },
   "accessibility": {
@@ -307,7 +307,6 @@
     "--body-lg-font-size",
     "--body-md-font-size",
     "--body-sm-font-size",
-    "--body-xs-font-size",
     "--border-neutral-l2",
     "--duration-normal",
     "--ease-enter",
@@ -331,6 +330,7 @@
     "--text-default",
     "--text-secondary",
     "--text-tertiary",
+    "--icon-default",
     "--z-raised"
   ],
   "previewOnlyTokens": [
@@ -338,6 +338,7 @@
     "--bg-brand-surface-l2",
     "--bg-page",
     "--body-md-font-family",
+    "--body-xs-font-size",
     "--border-brand",
     "--border-neutral-l1",
     "--radius-8",
