@@ -238,12 +238,12 @@
 .resale-price__input-row[data-price-edit]:active {
   background: var(--bg-state-pressed);
 }
-/* 编辑态:售价数字后显示闪烁光标 */
+/* 编辑态:售价数字后显示闪烁光标(上下居中) */
 .resale-price__input-row.is-editing .resale-price__amount::after {
   content: '';
   display: inline-block;
   width: 1px;
-  height: 1em;
+  height: var(--body-lg-line-height);
   margin-left: var(--spacer-2);
   background: var(--border-brand);
   vertical-align: middle;
@@ -391,13 +391,14 @@
 }
 .keypad {
   background: var(--bg-subtle);
-  border-radius: var(--radius-16) var(--radius-16) 0 0;
+  border-radius: 0;
+  border-top: 0.5px solid var(--border-neutral-l2);
   display: flex;
   flex-direction: column;
   padding-bottom: var(--safe-area-bottom);
 }
 
-/* 加价控件行(顶部,高56px,灰底,底部0.5px边框) */
+/* 加价控件行(顶部,高56px,灰底,无分割线) */
 .keypad__header {
   display: flex;
   align-items: center;
@@ -405,7 +406,6 @@
   height: var(--size-56);
   padding: 0 var(--spacer-16);
   background: var(--bg-subtle);
-  border-bottom: 0.5px solid var(--border-neutral-l2);
 }
 /* 售价模式:无金额/比例切换,右侧无额外元素 */
 .keypad__header--price {
@@ -437,6 +437,9 @@
   50% { opacity: 0; }
 }
 .keypad__header-amount {
+  display: inline-flex;
+  align-items: center;
+  line-height: var(--body-lg-line-height);
   font-size: var(--body-lg-font-size);
   font-weight: var(--font-weight-medium);
   color: var(--text-default);
@@ -452,7 +455,7 @@
   display: flex;
   align-items: center;
   height: var(--size-32);
-  padding: 0 var(--spacer-4);
+  padding: 0 var(--spacer-2);
   background: var(--bg-overlay-l1);
   border-radius: var(--radius-6);
   flex-shrink: 0;
@@ -460,8 +463,8 @@
 .keypad__seg-thumb {
   position: absolute;
   top: var(--spacer-2);
-  left: var(--spacer-4);
-  width: calc(50% - var(--spacer-4));
+  left: var(--spacer-2);
+  width: calc(50% - var(--spacer-2));
   height: var(--size-28);
   background: var(--bg-surface);
   border-radius: var(--radius-4);
