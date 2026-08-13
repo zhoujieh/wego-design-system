@@ -546,7 +546,6 @@
       + '<div class="keypad__header" data-keypad-segmented>'
       +   '<span class="keypad__header-label" data-keypad-label>' + labelText + '</span>'
       +   '<div class="keypad__header-value">'
-      +     '<span class="keypad__cursor"></span>'
       +     '<span class="keypad__header-amount ' + (displayValue ? '' : 'is-placeholder') + '" data-keypad-display>'
       +       (displayValue || '0.00')
       +     '</span>'
@@ -909,18 +908,21 @@
             var labelText = isAmount ? '加价(元)' : '加价(%)';
             if (labelEl) labelEl.textContent = labelText;
             if (displayEl) {
-              if (currentValue) {
+              // 不显示单位符号,光标跟随输入文本移动(文本 + 闪烁光标)
+              var text = currentValue || '';
+              var placeholder = isAmount ? '0.00' : '0';
+              if (text) {
                 displayEl.classList.remove('is-placeholder');
-                displayEl.textContent = currentValue;
+                displayEl.innerHTML = '<span class="keypad__display-text">' + text + '</span><span class="keypad__cursor" data-keypad-cursor></span>';
               } else {
                 displayEl.classList.add('is-placeholder');
-                displayEl.textContent = '0.00';
+                displayEl.innerHTML = '<span class="keypad__display-text">' + placeholder + '</span><span class="keypad__cursor" data-keypad-cursor></span>';
               }
             }
           }
         }
 
-        // Seg_32 分段切换(金额/比例)
+        // Seg_32 分段切换(金额/比例):切换时清空输入
         var seg = root.querySelector('.keypad__seg');
         var keypadRoot = root.querySelector('.keypad');
         var tabs = root.querySelectorAll('[data-keypad-tab]');
@@ -929,17 +931,8 @@
             var newMode = tab.getAttribute('data-keypad-tab');
             if (newMode === currentMode) return;
 
-            // 切换时尝试转换值
-            var oldVal = parseFloat(currentValue) || 0;
-            var supplyPrice = getSupplyPriceForCalc(sample);
-            if (currentMode === 'amount' && newMode === 'rate') {
-              // 金额转比例
-              currentValue = supplyPrice ? String((oldVal / supplyPrice).toFixed(4)) : '';
-            } else if (currentMode === 'rate' && newMode === 'amount') {
-              // 比例转金额
-              currentValue = String((oldVal * supplyPrice).toFixed(2));
-            }
-
+            // 切换时清空输入
+            currentValue = '';
             currentMode = newMode;
             tabs.forEach(function (t) { t.classList.remove('is-active'); });
             tab.classList.add('is-active');
@@ -1049,16 +1042,20 @@
               }
               updatePopupPrice(popupRoot, sample, addPrice, 1, String(addPrice));
             } else {
-              // 加价模式:直接用加价值
+              // 加价模式:金额模式直接用金额,比例模式用户输入百分比需转小数
               var rate;
               if (currentMode === 'amount') {
                 rate = amountToRate(numValue, supplyPrice);
               } else {
-                rate = numValue;
+                rate = numValue / 100;
               }
 
               if (!validateRate(rate)) {
-                ctx.toast('加价比例需在1%-300%之间');
+                if (currentMode === 'amount') {
+                  ctx.toast('加价金额需在¥' + formatPrice(supplyPrice * 0.01) + '~' + formatPrice(supplyPrice * 3) + '之间');
+                } else {
+                  ctx.toast('加价比例需在1%~300%之间');
+                }
                 return;
               }
 
@@ -1071,15 +1068,15 @@
                 addType = 1;
                 addValue = String(numValue);
               } else {
-                addPrice = rateToAmount(numValue, supplyPrice);
+                addPrice = rateToAmount(rate, supplyPrice);
                 addType = 2;
-                addValue = String(numValue);
+                addValue = String(rate);
               }
 
-              // 缓存自定义加价
+              // 缓存自定义加价(比例存小数)
               var cacheData = currentMode === 'amount'
                 ? { type: 1, value: numValue }
-                : { type: 2, rate: numValue };
+                : { type: 2, rate: rate };
               setStorage(STORAGE_KEYS.customAddPrice, JSON.stringify(cacheData));
 
               updatePopupPrice(popupRoot, sample, addPrice, addType, addValue);

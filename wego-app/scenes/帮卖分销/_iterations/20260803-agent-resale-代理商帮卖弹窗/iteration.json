@@ -239,8 +239,8 @@
     ],
     "fingerprints": {
       "@route-entry/%E5%B8%AE%E5%8D%96%E5%88%86%E9%94%80": "52b95157957b76c932e2b9c36ab3e97657e2822155e6541cfbd045e68fabb178",
-      "wego-app/scenes/帮卖分销/scene.css": "e819d03a00ac6932535497a3a7ebe9c261b24c485310d367871bffb149aa831e",
-      "wego-app/scenes/帮卖分销/scene.js": "ba287dde9a534ad2b035e029b9a10ab6298bb27e2a7d01e2c2c27292d0952bb5"
+      "wego-app/scenes/帮卖分销/scene.css": "cb619a93805ff482e0c5d8940c1202a1595978f5224ef60937e6b8f2325444f5",
+      "wego-app/scenes/帮卖分销/scene.js": "ae98e2c06e4773a800641e1975576002eb971409bdfb156b2f5dc83c90610712"
     }
   }
 }
