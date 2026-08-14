@@ -678,6 +678,13 @@
       init: function (overlayCtx) {
         var root = overlayCtx.root;
 
+        // 点击蒙层(弹窗 panel 之外的空白区)关闭弹窗
+        root.addEventListener('click', function (e) {
+          if (!e.target.closest('.modal__panel')) {
+            ctx.closeOverlay();
+          }
+        });
+
         // 关闭按钮
         var closeBtn = root.querySelector('[data-popup-close]');
         if (closeBtn) {
