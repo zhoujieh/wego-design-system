@@ -100,6 +100,9 @@
 .actionsheet__header--text-link .actionsheet__header-text { text-align: left; }
 .actionsheet__header-link {
   flex-shrink: 0;
+  /* 兜底字号：契约规定 14px text-link，颜色/交互由复用 .link 组件提供；
+     即使未挂 .link 也保持可读字号，避免退化为浏览器默认 */
+  font-size: var(--body-md-font-size);
 }
 .actionsheet__list {
   display: flex;
@@ -163,7 +166,14 @@
   justify-content: center;
   font-size: var(--size-20);
   line-height: 1;
+  color: var(--icon-default);
   overflow: hidden;
+}
+/* 容错：业务若用 <span class="actionsheet__item-icon"><i class="wego-iconfont-s ..."></i></span>
+   包裹写法，图标继承 20px 字号与默认色，避免悄悄退化为 16px / 纯黑 */
+.actionsheet__item-icon i {
+  font-size: inherit;
+  color: inherit;
 }
 .actionsheet__item-main {
   flex: 1;
@@ -184,6 +194,8 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  position: relative;
+  padding-right: var(--spacer-12);
 }
 /* 操作模式：无图标时 main 内容居中 */
 .actionsheet--action .actionsheet__item-main { justify-content: center; }
@@ -204,28 +216,15 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* 徽标槽位：绝对定位容器（不占布局），锚定在 .actionsheet__item-title 右上角、跟随文案宽度；
+   容器内放内联 badge--dot 红点（视觉与尺寸由 badge 组件提供）。
+   .actionsheet__item-title 已设 position:relative 作为容器定位上下文、padding-right 为红点留位。 */
 .actionsheet__item-recommend {
   position: absolute;
   top: 50%;
-  left: 100%;
-  margin-left: var(--spacer-4);
+  right: 0;
   transform: translateY(-50%);
-  font-family: var(--font-family-system);
-  font-size: var(--body-xs-font-size);
-  color: var(--status-success-default);
-  background: var(--status-success-surface-l1);
-  padding: 2px var(--spacer-8);
-  border-radius: var(--radius-4);
-  white-space: nowrap;
-}
-/* 当 main 内有徽标时，main 收缩到标题宽度，让徽标相对标题定位 */
-.actionsheet__item-main:has(.actionsheet__item-recommend) {
-  flex: 0 0 auto;
-  position: relative;
-}
-/* 操作模式无图标有徽标：item 居中 main */
-.actionsheet--action .actionsheet__item:has(.actionsheet__item-recommend):not(:has(.actionsheet__item-icon)) {
-  justify-content: center;
+  pointer-events: none;
 }
 /* === 双行布局（副标题）=== */
 /* 操作模式无图标双行：item 改为 column 居中堆叠 */
