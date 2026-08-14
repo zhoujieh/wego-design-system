@@ -546,9 +546,7 @@
       + '<div class="keypad__header" data-keypad-segmented>'
       +   '<span class="keypad__header-label" data-keypad-label>' + labelText + '</span>'
       +   '<div class="keypad__header-value">'
-      +     '<span class="keypad__header-amount" data-keypad-display>'
-      +       '<span class="keypad__cursor" data-keypad-cursor></span>'
-      +     '</span>'
+      +     '<input class="keypad__header-amount" data-keypad-display type="text" inputmode="decimal" readonly aria-label="加价金额输入">'
       +   '</div>'
       +   '<div class="keypad__seg ' + segClass + '">'
       +     '<div class="keypad__seg-thumb"></div>'
@@ -908,15 +906,8 @@
             var labelText = isAmount ? '加价(元)' : '加价(%)';
             if (labelEl) labelEl.textContent = labelText;
             if (displayEl) {
-              // 不显示占位文本,空输入时只显示光标
-              var text = currentValue || '';
-              if (text) {
-                displayEl.classList.remove('is-placeholder');
-                displayEl.innerHTML = '<span class="keypad__display-text">' + text + '</span><span class="keypad__cursor" data-keypad-cursor></span>';
-              } else {
-                displayEl.classList.remove('is-placeholder');
-                displayEl.innerHTML = '<span class="keypad__cursor" data-keypad-cursor></span>';
-              }
+              // 原生 input 展示,值由自定义键盘控制(不显示占位文本)
+              displayEl.value = currentValue || '';
             }
           }
         }
