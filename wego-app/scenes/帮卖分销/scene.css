@@ -393,6 +393,10 @@
 [data-keypad-overlay] .modal__panel {
   border-radius: 0;
 }
+/* 激活键盘时,加价卖半屏蒙层保持不变(键盘已去掉自身蒙层,底层蒙层不再降透明度) */
+.app-overlay-layer:has([data-keypad-overlay].is-overlay-top) > .modal.is-overlay-under::before {
+  opacity: 1;
+}
 .keypad {
   background: var(--bg-subtle);
   border-radius: 0;
