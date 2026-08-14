@@ -449,6 +449,10 @@
   font-feature-settings: "zero";
   caret-color: var(--bg-brand);
 }
+.keypad__header-amount::placeholder {
+  color: var(--text-placeholder);
+  font-weight: var(--font-weight-regular);
+}
 
 /* Seg_32 分段控制器(金额/比例) */
 .keypad__seg {
