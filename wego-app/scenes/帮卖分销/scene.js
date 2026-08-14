@@ -546,8 +546,8 @@
       + '<div class="keypad__header" data-keypad-segmented>'
       +   '<span class="keypad__header-label" data-keypad-label>' + labelText + '</span>'
       +   '<div class="keypad__header-value">'
-      +     '<span class="keypad__header-amount ' + (displayValue ? '' : 'is-placeholder') + '" data-keypad-display>'
-      +       (displayValue || '0.00')
+      +     '<span class="keypad__header-amount" data-keypad-display>'
+      +       '<span class="keypad__cursor" data-keypad-cursor></span>'
       +     '</span>'
       +   '</div>'
       +   '<div class="keypad__seg ' + segClass + '">'
@@ -908,15 +908,14 @@
             var labelText = isAmount ? '加价(元)' : '加价(%)';
             if (labelEl) labelEl.textContent = labelText;
             if (displayEl) {
-              // 不显示单位符号,光标跟随输入文本移动(文本 + 闪烁光标)
+              // 不显示占位文本,空输入时只显示光标
               var text = currentValue || '';
-              var placeholder = isAmount ? '0.00' : '0';
               if (text) {
                 displayEl.classList.remove('is-placeholder');
                 displayEl.innerHTML = '<span class="keypad__display-text">' + text + '</span><span class="keypad__cursor" data-keypad-cursor></span>';
               } else {
-                displayEl.classList.add('is-placeholder');
-                displayEl.innerHTML = '<span class="keypad__display-text">' + placeholder + '</span><span class="keypad__cursor" data-keypad-cursor></span>';
+                displayEl.classList.remove('is-placeholder');
+                displayEl.innerHTML = '<span class="keypad__cursor" data-keypad-cursor></span>';
               }
             }
           }
