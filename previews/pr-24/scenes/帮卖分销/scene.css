@@ -389,6 +389,14 @@
 .modal--no-mask::before {
   display: none;
 }
+/* 数字键盘弹窗:面板顶部圆角改为0 */
+[data-keypad-overlay] .modal__panel {
+  border-radius: 0;
+}
+/* 激活键盘时,加价卖半屏蒙层保持不变(键盘已去掉自身蒙层,底层蒙层不再降透明度) */
+.app-overlay-layer:has([data-keypad-overlay].is-overlay-top) > .modal.is-overlay-under::before {
+  opacity: 1;
+}
 .keypad {
   background: var(--bg-subtle);
   border-radius: 0;
@@ -424,29 +432,26 @@
   gap: var(--spacer-4);
   min-width: 0;
 }
-.keypad__cursor {
-  display: inline-block;
-  width: 2px;
-  height: var(--size-20);
-  background: var(--bg-brand);
-  border-radius: var(--radius-full);
-  flex-shrink: 0;
-  animation: keypad-cursor-blink 1s steps(2, end) infinite;
-}
-@keyframes keypad-cursor-blink {
-  50% { opacity: 0; }
-}
+/* 加价金额展示改用原生 input(参考 number-input__field 字段样式,去边框) */
 .keypad__header-amount {
-  display: inline-flex;
-  align-items: center;
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  text-align: left;
+  font-family: var(--number-md-font-family);
   line-height: var(--body-lg-line-height);
   font-size: var(--body-lg-font-size);
   font-weight: var(--font-weight-medium);
   color: var(--text-default);
+  padding: 0;
   font-feature-settings: "zero";
+  caret-color: var(--bg-brand);
 }
-.keypad__header-amount.is-placeholder {
+.keypad__header-amount::placeholder {
   color: var(--text-placeholder);
+  font-weight: var(--font-weight-regular);
 }
 
 /* Seg_32 分段控制器(金额/比例) */

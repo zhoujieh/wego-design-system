@@ -546,9 +546,7 @@
       + '<div class="keypad__header" data-keypad-segmented>'
       +   '<span class="keypad__header-label" data-keypad-label>' + labelText + '</span>'
       +   '<div class="keypad__header-value">'
-      +     '<span class="keypad__header-amount ' + (displayValue ? '' : 'is-placeholder') + '" data-keypad-display>'
-      +       (displayValue || '0.00')
-      +     '</span>'
+      +     '<input class="keypad__header-amount" data-keypad-display type="text" inputmode="none" placeholder="0.00" aria-label="加价金额输入">'
       +   '</div>'
       +   '<div class="keypad__seg ' + segClass + '">'
       +     '<div class="keypad__seg-thumb"></div>'
@@ -908,17 +906,31 @@
             var labelText = isAmount ? '加价(元)' : '加价(%)';
             if (labelEl) labelEl.textContent = labelText;
             if (displayEl) {
-              // 不显示单位符号,光标跟随输入文本移动(文本 + 闪烁光标)
-              var text = currentValue || '';
-              var placeholder = isAmount ? '0.00' : '0';
-              if (text) {
-                displayEl.classList.remove('is-placeholder');
-                displayEl.innerHTML = '<span class="keypad__display-text">' + text + '</span><span class="keypad__cursor" data-keypad-cursor></span>';
-              } else {
-                displayEl.classList.add('is-placeholder');
-                displayEl.innerHTML = '<span class="keypad__display-text">' + placeholder + '</span><span class="keypad__cursor" data-keypad-cursor></span>';
-              }
+              // 原生 input 展示,值由自定义键盘控制;空输入显示占位文本(金额0.00/比例0)
+              displayEl.value = currentValue || '';
+              displayEl.placeholder = isAmount ? '0.00' : '0';
             }
+          }
+        }
+
+        // input 接管:阻止物理键盘实际输入(值由自定义键盘控制),仅保留原生 caret 展示
+        if (displayEl && !isPriceMode) {
+          displayEl.addEventListener('beforeinput', function (e) { e.preventDefault(); });
+          displayEl.addEventListener('input', function (e) { e.preventDefault(); });
+          // 键盘拉起后激活 input 显示光标:overlay 入场 open 后(visibility 变 visible)再聚焦
+          var overlayRoot = displayEl.closest('.modal');
+          if (overlayRoot) {
+            var focusOnce = function () {
+              if (overlayRoot.getAttribute('data-state') === 'open') {
+                displayEl.focus({ preventScroll: true });
+                obs.disconnect();
+              }
+            };
+            var obs = new MutationObserver(focusOnce);
+            obs.observe(overlayRoot, { attributes: true, attributeFilter: ['data-state'] });
+            focusOnce();
+          } else {
+            setTimeout(function () { displayEl.focus(); }, 0);
           }
         }
 
@@ -1002,6 +1014,10 @@
             currentValue += k;
           }
           updateDisplay();
+          // 自定义键盘点击会让 input 失焦,重新聚焦保持光标显示
+          if (displayEl && document.activeElement !== displayEl) {
+            displayEl.focus({ preventScroll: true });
+          }
         }
 
         // 点击键盘外丢弃未确认值
@@ -1082,11 +1098,25 @@
               updatePopupPrice(popupRoot, sample, addPrice, addType, addValue);
             }
 
-            // 更新快捷标签选中态(全部取消选中)
+            // 手动输入完成后,把输入值替换到第三个快捷标签并高亮该标签
             var tagItems = popupRoot.querySelectorAll('.resale-tags__item');
-            tagItems.forEach(function (t) {
-              t.classList.remove('tag--brand', 'tag--selected');
-              t.classList.add('tag--white', 'tag--normal');
+            tagItems.forEach(function (t, idx) {
+              if (idx === tagItems.length - 1) {
+                // 第三个标签:替换为手动输入值并高亮
+                var labelText = addType === 1
+                  ? '+' + formatPrice(addPrice) + '元'
+                  : '+' + formatRate(Number(addValue));
+                t.setAttribute('data-tag-amounttype', addType);
+                t.setAttribute('data-tag-value', addType === 1 ? addValue : '');
+                t.setAttribute('data-tag-rate', addType === 2 ? addValue : '');
+                t.querySelector('.tag__label').textContent = labelText;
+                t.classList.remove('tag--white', 'tag--normal');
+                t.classList.add('tag--brand', 'tag--selected');
+              } else {
+                // 其余标签取消高亮
+                t.classList.remove('tag--brand', 'tag--selected');
+                t.classList.add('tag--white', 'tag--normal');
+              }
             });
 
             ctx.closeOverlay();
