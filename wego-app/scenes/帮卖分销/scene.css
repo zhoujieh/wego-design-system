@@ -76,12 +76,18 @@
 }
 
 /* 标题问号图标 */
+.navbar__center {
+  gap: 0;
+}
 .navbar__title-help {
   margin-left: 0;
   font-size: var(--size-20);
   color: var(--text-secondary);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+}
+.navbar__title {
+  margin-left: var(--spacer-8);
 }
 
 /* 价格展示区:售价 + 佣金 一行 */
@@ -154,7 +160,7 @@
 .resale-price__row {
   display: flex;
   align-items: center;
-  gap: var(--spacer-8);
+  gap: 0;
 }
 .resale-price__label {
   font-size: var(--heading-sm-font-size);
@@ -165,28 +171,40 @@
 }
 .resale-price__value-wrap {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   flex-wrap: wrap;
+  gap: 0;
+}
+/* 售价 ¥+数字 一组,底对齐 */
+.resale-price__price-group {
+  display: inline-flex;
+  align-items: baseline;
   gap: 0;
 }
 .resale-price__currency {
   font-size: var(--body-md-font-size);
   font-weight: var(--font-weight-medium);
   color: var(--text-default);
-  line-height: var(--body-md-line-height);
+  line-height: var(--body-lg-line-height);
 }
 .resale-price__amount {
   font-size: var(--heading-lg-font-size);
   font-weight: var(--font-weight-medium);
   color: var(--text-default);
   font-feature-settings: "zero";
-  line-height: var(--heading-lg-line-height);
+  line-height: var(--body-lg-line-height);
 }
 .resale-price__commission {
   display: flex;
-  align-items: flex-end;
-  gap: 0;
+  align-items: center;
+  gap: var(--spacer-4);
   margin-left: var(--spacer-8);
+}
+/* 佣金 ¥+数字 一组,底对齐 */
+.resale-price__commission-group {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0;
 }
 .resale-price__earn-badge {
   display: flex;
@@ -194,7 +212,6 @@
   justify-content: center;
   width: var(--size-16);
   height: var(--size-16);
-  margin-right: var(--spacer-4);
   background: var(--status-danger-default);
   color: var(--text-inverse);
   font-size: var(--body-sm-font-size);
@@ -206,14 +223,14 @@
   font-size: var(--body-sm-font-size);
   font-weight: var(--font-weight-medium);
   color: var(--status-danger-default);
-  line-height: var(--body-sm-line-height);
+  line-height: var(--body-xs-line-height);
 }
 .resale-price__commission-amount {
   font-size: var(--number-lg2-font-size);
   font-weight: var(--font-weight-medium);
   color: var(--status-danger-default);
   font-feature-settings: "zero";
-  line-height: var(--number-lg2-line-height);
+  line-height: var(--number-md-line-height);
 }
 
 /* 可编辑价格卡片(Figma 加价卖样式:灰底卡片 + 白底绿框输入行) */
@@ -261,15 +278,9 @@
   50.01%, 100% { opacity: 0; }
 }
 .resale-price__input-left {
-  display: flex;
+  display: inline-flex;
   align-items: baseline;
-}
-.resale-price__input-left .resale-price__currency {
-  align-self: stretch;
-  display: flex;
-  align-items: flex-start;
-  padding-top: var(--spacer-10);
-  padding-right: var(--spacer-4);
+  gap: 0;
 }
 
 /* 快捷加价标签区:标题在左,标签在右,间距8 */
@@ -597,39 +608,74 @@
   color: var(--status-warning-default);
 }
 
-/* ── loading 骨架 ── */
-.resale-loading {
-  padding: var(--spacer-32) var(--spacer-16);
-  text-align: center;
-  color: var(--text-tertiary);
-  font-size: var(--body-md-font-size);
+/* ── 加载中/加载失败 半屏弹窗状态(Figma 7207-2474 / 7207-23599) ── */
+/* 内容区:垂直水平居中,撑满弹窗 body */
+.modal--state-loading .modal__body,
+.modal--state-load-failed .modal__body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
 }
-.resale-loading__spinner {
+.resale-state__body {
+  flex: 1;
+  min-height: 0;
+}
+
+/* 加载中:居中 24x24 旋转图标(Figma icon/加载) */
+.resale-state__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+.resale-state__loading-icon {
   display: inline-block;
-  width: var(--size-32);
-  height: var(--size-32);
-  margin-bottom: var(--spacer-12);
-  border: var(--spacer-2) solid var(--border-neutral-l2);
+  width: var(--size-24);
+  height: var(--size-24);
+  border: 2px solid var(--border-neutral-l2);
   border-top-color: var(--bg-brand);
   border-radius: var(--radius-full);
-  animation: resale-spin 0.8s linear infinite;
+  animation: resale-state-spin 0.8s linear infinite;
 }
-@keyframes resale-spin {
+@keyframes resale-state-spin {
   to { transform: rotate(360deg); }
 }
 
-/* ── 加载失败 ── */
-.resale-failed {
-  padding: var(--spacer-32) var(--spacer-16);
+/* 加载失败:Result_60 信息组(叹号图标 60x60 橙色 + 标题) */
+.resale-state__failed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacer-24);
+  padding: 0 var(--spacer-32);
+  width: 100%;
   text-align: center;
 }
-.resale-failed__text {
-  font-size: var(--body-md-font-size);
-  color: var(--text-secondary);
-  margin: 0 0 var(--spacer-16);
-}
-.resale-failed__actions {
+.resale-state__failed-icon {
   display: flex;
-  gap: var(--spacer-12);
+  align-items: center;
   justify-content: center;
+  width: var(--size-56);
+  height: var(--size-56);
+}
+.resale-state__failed-icon .wego-iconfont-s {
+  font-size: var(--size-56);
+  line-height: var(--size-56);
+  color: var(--status-warning-default);
+}
+.resale-state__failed-title {
+  font-size: var(--heading-sm-font-size);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-default);
+  line-height: var(--heading-sm-line-height);
+  text-align: center;
+}
+.resale-state__failed-link {
+  color: var(--text-brand);
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }

@@ -122,6 +122,36 @@
       supply_price: null,
       error_code: 'all_price_hidden',
       from_page: 'normal'
+    },
+    {
+      key: 'loading-state',
+      label: '加载中',
+      group: '异常',
+      badge: { text: '异常', type: 'error' },
+      desc: '弹窗加载中 · 居中加载图标',
+      product_id: 'prod-clothing-001',
+      distribution_type: 1,
+      supply_price: 100,
+      skus: [{ id: 'sku-1', supply_price: 100 }],
+      distribution_config: { amountType: 1, value: 100 },
+      my_item: false,
+      state: 'loading',
+      from_page: 'normal'
+    },
+    {
+      key: 'load-failed-state',
+      label: '加载失败',
+      group: '异常',
+      badge: { text: '异常', type: 'error' },
+      desc: '获取帮卖信息失败 · 点击请重试',
+      product_id: 'prod-clothing-001',
+      distribution_type: 1,
+      supply_price: 100,
+      skus: [{ id: 'sku-1', supply_price: 100 }],
+      distribution_config: { amountType: 1, value: 100 },
+      my_item: false,
+      state: 'load-failed',
+      from_page: 'normal'
     }
   ];
 
@@ -324,12 +354,16 @@
         +     '<div class="resale-price__row">'
         +       '<span class="resale-price__label">我的售价：</span>'
         +       '<div class="resale-price__value-wrap">'
-        +         '<span class="resale-price__currency">¥</span>'
-        +         '<span class="resale-price__amount" data-display-price>' + formatPrice(sample.current_price) + '</span>'
+        +         '<span class="resale-price__price-group">'
+        +           '<span class="resale-price__currency">¥</span>'
+        +           '<span class="resale-price__amount" data-display-price>' + formatPrice(sample.current_price) + '</span>'
+        +         '</span>'
         +         '<div class="resale-price__commission">'
         +           '<span class="resale-price__earn-badge">赚</span>'
-        +           '<span class="resale-price__commission-currency">¥</span>'
-        +           '<span class="resale-price__commission-amount" data-display-commission>' + formatPrice(sample.commission) + '</span>'
+        +           '<span class="resale-price__commission-group">'
+        +             '<span class="resale-price__commission-currency">¥</span>'
+        +             '<span class="resale-price__commission-amount" data-display-commission>' + formatPrice(sample.commission) + '</span>'
+        +           '</span>'
         +         '</div>'
         +       '</div>'
         +     '</div>'
@@ -356,8 +390,10 @@
         +       '</div>'
         +       '<div class="resale-price__commission">'
         +         '<span class="resale-price__earn-badge">赚</span>'
-        +         '<span class="resale-price__commission-currency">¥</span>'
-        +         '<span class="resale-price__commission-amount" data-display-commission>' + formatPriceRange(minAdd, maxAdd) + '</span>'
+        +         '<span class="resale-price__commission-group">'
+        +           '<span class="resale-price__commission-currency">¥</span>'
+        +           '<span class="resale-price__commission-amount" data-display-commission>' + formatPriceRange(minAdd, maxAdd) + '</span>'
+        +         '</span>'
         +       '</div>'
         +     '</div>'
         +     buildTagsHtml(sample, true)
@@ -387,8 +423,10 @@
         +       '</div>'
         +       '<div class="resale-price__commission">'
         +         '<span class="resale-price__earn-badge">赚</span>'
-        +         '<span class="resale-price__commission-currency">¥</span>'
-        +         '<span class="resale-price__commission-amount" data-display-commission>' + formatPrice(defaultAdd) + '</span>'
+        +         '<span class="resale-price__commission-group">'
+        +           '<span class="resale-price__commission-currency">¥</span>'
+        +           '<span class="resale-price__commission-amount" data-display-commission>' + formatPrice(defaultAdd) + '</span>'
+        +         '</span>'
         +       '</div>'
         +     '</div>'
         +     buildTagsHtml(sample, true)
@@ -604,6 +642,61 @@
       + '</div>';
   }
 
+  // ── 加载中状态模板(Figma 7207-2474) ──
+  // 半屏弹窗 + 顶部下箭头收起 + 内容区居中加载图标 + 底部 home indicator
+  function buildLoadingTemplate() {
+    return ''
+      + '<div class="modal modal--frame modal--state-loading" role="dialog" aria-modal="true" data-state="closed" data-component-slug="modal">'
+      +   '<div class="modal__panel">'
+      +     '<div class="modal__title modal__title--default">'
+      +       '<div class="navbar" data-component-slug="navbar">'
+      +         '<div class="navbar__body">'
+      +           '<div class="navbar__left">'
+      +             '<div class="navbar__left-btn navbar__left-btn--circle" data-popup-close><i class="wego-iconfont-s icon-xiajiantou16"></i></div>'
+      +           '</div>'
+      +           '<div class="navbar__center"></div>'
+      +           '<div class="navbar__right"></div>'
+      +         '</div>'
+      +       '</div>'
+      +     '</div>'
+      +     '<div class="modal__body resale-state__body">'
+      +       '<div class="resale-state__loading">'
+      +         '<span class="resale-state__loading-icon" aria-label="加载中"></span>'
+      +       '</div>'
+      +     '</div>'
+      +   '</div>'
+      + '</div>';
+  }
+
+  // ── 加载失败状态模板(Figma 7207-23599) ──
+  // 半屏弹窗 + 顶部下箭头收起 + Result_60 信息组(叹号图标 + 标题) + 底部 home indicator
+  function buildLoadFailedTemplate() {
+    return ''
+      + '<div class="modal modal--frame modal--state-load-failed" role="dialog" aria-modal="true" data-state="closed" data-component-slug="modal">'
+      +   '<div class="modal__panel">'
+      +     '<div class="modal__title modal__title--default">'
+      +       '<div class="navbar" data-component-slug="navbar">'
+      +         '<div class="navbar__body">'
+      +           '<div class="navbar__left">'
+      +             '<div class="navbar__left-btn navbar__left-btn--circle" data-popup-close><i class="wego-iconfont-s icon-xiajiantou16"></i></div>'
+      +           '</div>'
+      +           '<div class="navbar__center"></div>'
+      +           '<div class="navbar__right"></div>'
+      +         '</div>'
+      +       '</div>'
+      +     '</div>'
+      +     '<div class="modal__body resale-state__body">'
+      +       '<div class="resale-state__failed">'
+      +         '<div class="resale-state__failed-icon" aria-hidden="true">'
+      +           '<i class="wego-iconfont-s icon-tanhao-mian"></i>'
+      +         '</div>'
+      +         '<div class="resale-state__failed-title">获取帮卖信息失败，<a class="resale-state__failed-link" data-action="retry">请重试</a></div>'
+      +       '</div>'
+      +     '</div>'
+      +   '</div>'
+      + '</div>';
+  }
+
   // ── 挂载场景选择页 ──
   function mountSelection(ctx) {
     var root = ctx.root;
@@ -622,6 +715,50 @@
 
   // ── 打开帮卖弹窗 ──
   function openResalePopup(ctx, sample) {
+    // 异常状态:加载中(Figma 7207-2474 半屏弹窗 + 居中加载图标)
+    if (sample.state === 'loading') {
+      ctx.openSheet(buildLoadingTemplate(), {
+        label: '帮卖弹窗-加载中',
+        init: function (overlayCtx) {
+          var root = overlayCtx.root;
+          root.addEventListener('click', function (e) {
+            if (!e.target.closest('.modal__panel')) ctx.closeOverlay();
+          });
+          var closeBtn = root.querySelector('[data-popup-close]');
+          if (closeBtn) {
+            closeBtn.addEventListener('click', function () { ctx.closeOverlay(); });
+          }
+        }
+      });
+      return;
+    }
+
+    // 异常状态:加载失败(Figma 7207-23599 半屏弹窗 + Result_60 信息组)
+    if (sample.state === 'load-failed') {
+      ctx.openSheet(buildLoadFailedTemplate(), {
+        label: '帮卖弹窗-加载失败',
+        init: function (overlayCtx) {
+          var root = overlayCtx.root;
+          root.addEventListener('click', function (e) {
+            if (!e.target.closest('.modal__panel')) ctx.closeOverlay();
+          });
+          var closeBtn = root.querySelector('[data-popup-close]');
+          if (closeBtn) {
+            closeBtn.addEventListener('click', function () { ctx.closeOverlay(); });
+          }
+          // 点击"请重试"链接:toast 反馈并保持弹窗(原型模拟重试)
+          var retryLink = root.querySelector('[data-action="retry"]');
+          if (retryLink) {
+            retryLink.addEventListener('click', function (e) {
+              e.stopPropagation();
+              ctx.toast('正在重试，请稍候');
+            });
+          }
+        }
+      });
+      return;
+    }
+
     // 异常场景:价格隐藏,改用 Dialog_Text 居中对话框
     if (sample.error_code === 'wholesale_hidden') {
       ctx.dialog({
@@ -1240,6 +1377,34 @@
                   <span class="cell__title">所有价格隐藏</span>
                 </div>
                 <div class="cell__subtitle">所有价格被隐藏 · 引导跳转价格管理</div>
+              </div>
+              <div class="cell__action">
+                <span class="agent-resale-scene__card-badge agent-resale-scene__card-badge--error">异常</span>
+                <i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
+              </div>
+            </div>
+          </div>
+          <div class="cell cell--double cell--bg-white cell--clickable cell--divider-center" data-component-slug="cell" data-scene-key="loading-state">
+            <div class="cell__body">
+              <div class="cell__content">
+                <div class="cell__title-row">
+                  <span class="cell__title">加载中</span>
+                </div>
+                <div class="cell__subtitle">弹窗加载中 · 居中加载图标</div>
+              </div>
+              <div class="cell__action">
+                <span class="agent-resale-scene__card-badge agent-resale-scene__card-badge--error">异常</span>
+                <i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i>
+              </div>
+            </div>
+          </div>
+          <div class="cell cell--double cell--bg-white cell--clickable cell--divider-center" data-component-slug="cell" data-scene-key="load-failed-state">
+            <div class="cell__body">
+              <div class="cell__content">
+                <div class="cell__title-row">
+                  <span class="cell__title">加载失败</span>
+                </div>
+                <div class="cell__subtitle">获取帮卖信息失败 · 点击请重试</div>
               </div>
               <div class="cell__action">
                 <span class="agent-resale-scene__card-badge agent-resale-scene__card-badge--error">异常</span>
