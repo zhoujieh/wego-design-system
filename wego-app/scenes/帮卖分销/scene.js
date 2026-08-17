@@ -643,7 +643,7 @@
   }
 
   // ── 加载中状态模板(Figma 7207-2474) ──
-  // 半屏弹窗 + 顶部下箭头收起 + 内容区居中加载图标 + 底部 home indicator
+  // 半屏弹窗 + 顶部下箭头收起 + 内容区居中 loading 组件 + 底部 home indicator
   function buildLoadingTemplate() {
     return ''
       + '<div class="modal modal--frame modal--state-loading" role="dialog" aria-modal="true" data-state="closed" data-component-slug="modal">'
@@ -659,17 +659,15 @@
       +         '</div>'
       +       '</div>'
       +     '</div>'
-      +     '<div class="modal__body resale-state__body">'
-      +       '<div class="resale-state__loading">'
-      +         '<span class="resale-state__loading-icon" aria-label="加载中"></span>'
-      +       '</div>'
+      +     '<div class="modal__body">'
+      +       '<span class="loading" role="status" aria-label="加载中" data-component-slug="loading"></span>'
       +     '</div>'
       +   '</div>'
       + '</div>';
   }
 
   // ── 加载失败状态模板(Figma 7207-23599) ──
-  // 半屏弹窗 + 顶部下箭头收起 + Result_60 信息组(叹号图标 + 标题) + 底部 home indicator
+  // 半屏弹窗 + 顶部下箭头收起 + result 组件(叹号图标 + 标题内联 link) + 底部 home indicator
   function buildLoadFailedTemplate() {
     return ''
       + '<div class="modal modal--frame modal--state-load-failed" role="dialog" aria-modal="true" data-state="closed" data-component-slug="modal">'
@@ -685,12 +683,12 @@
       +         '</div>'
       +       '</div>'
       +     '</div>'
-      +     '<div class="modal__body resale-state__body">'
-      +       '<div class="resale-state__failed">'
-      +         '<div class="resale-state__failed-icon" aria-hidden="true">'
+      +     '<div class="modal__body">'
+      +       '<div class="result" data-component-slug="result">'
+      +         '<div class="result__icon" aria-hidden="true">'
       +           '<i class="wego-iconfont-s icon-tanhao-mian"></i>'
       +         '</div>'
-      +         '<div class="resale-state__failed-title">获取帮卖信息失败，<a class="resale-state__failed-link" data-action="retry">请重试</a></div>'
+      +         '<div class="result__title">获取帮卖信息失败，<a class="link link--inline" href="javascript:void(0)" data-action="retry">请重试</a></div>'
       +       '</div>'
       +     '</div>'
       +   '</div>'

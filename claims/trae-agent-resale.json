@@ -2,10 +2,10 @@
   "agent": "trae-agent-resale",
   "scene": "帮卖分销",
   "routeId": "agent-resale",
-  "branch": "feature/agent-resale-popup",
-  "status": "done",
+  "branch": "feature/agent-resale-result-loading",
+  "status": "active",
   "claimedAt": "2026-08-03T10:00:00.000Z",
-  "releasedAt": "2026-08-17T23:30:00.000Z",
-  "releaseReason": "PR #24 合并至 main,原型验收完成",
-  "note": "代理商帮卖弹窗原型迭代 - 修复帮卖弹窗 UI 问题（场景选择页/自由定价/赚佣金/手动输入键盘）"
+  "releasedAt": "",
+  "releaseReason": "",
+  "note": "帮卖分销加载中/加载失败状态改用 result+loading+link 标准组件"
 }
