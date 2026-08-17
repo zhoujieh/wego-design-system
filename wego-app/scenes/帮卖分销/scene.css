@@ -66,8 +66,9 @@
 }
 
 /* ── 帮卖弹窗 ── */
-/* 高度适应内容,最大 70vh */
+/* 半屏固定高度:视口高度 70% */
 .modal--frame .modal__panel {
+  height: 70vh;
   max-height: 70vh;
 }
 .resale-popup__body {
@@ -159,9 +160,9 @@
 }
 .resale-price__value-wrap {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   flex-wrap: wrap;
-  gap: var(--spacer-8);
+  gap: 0;
 }
 .resale-price__currency {
   font-size: var(--body-md-font-size);
@@ -178,8 +179,9 @@
 }
 .resale-price__commission {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 0;
+  margin-left: var(--spacer-8);
 }
 .resale-price__earn-badge {
   display: flex;
@@ -238,12 +240,12 @@
 .resale-price__input-row[data-price-edit]:active {
   background: var(--bg-state-pressed);
 }
-/* 编辑态:售价数字后显示闪烁光标(上下居中) */
+/* 编辑态:售价数字后显示闪烁光标(与数字上下居中) */
 .resale-price__input-row.is-editing .resale-price__amount::after {
   content: '';
   display: inline-block;
   width: 1px;
-  height: var(--body-lg-line-height);
+  height: var(--heading-lg-line-height);
   margin-left: var(--spacer-2);
   background: var(--border-brand);
   vertical-align: middle;
@@ -276,6 +278,7 @@
 .resale-tags--inline {
   padding: 0;
   margin-top: var(--spacer-8);
+  align-items: flex-start;
 }
 .resale-tags__title {
   flex-shrink: 0;
@@ -421,6 +424,9 @@
 }
 .keypad__header-label {
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
   font-size: var(--body-lg-font-size);
   font-weight: var(--font-weight-regular);
   color: var(--text-default);

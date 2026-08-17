@@ -312,14 +312,6 @@
     var title = isFixed ? '赚佣金' : '加价卖';
     var isLive = isLiveRoom(sample);
 
-    // 异常场景:价格隐藏
-    if (sample.error_code === 'wholesale_hidden') {
-      return buildWholesaleHiddenTemplate();
-    }
-    if (sample.error_code === 'all_price_hidden') {
-      return buildAllPriceHiddenTemplate();
-    }
-
     var isRange = isRangePrice(sample);
 
     // 价格展示:售价 + 佣金 一行
@@ -426,7 +418,7 @@
       if (isFixed) {
         actionsHtml = ''
           + '<div class="modal__action--single-h">'
-          +   '<button data-component-slug="button" class="btn btn--strong btn--lg" data-action="confirm">我知道了</button>'
+          +   '<button data-component-slug="button" class="btn btn--weak btn--lg" data-action="confirm">我知道了</button>'
           + '</div>';
       } else {
         actionsHtml = ''
@@ -486,47 +478,6 @@
       +       '<div class="modal__action-gradient"></div>'
       +       hintHtml
       +       actionsHtml
-      +     '</div>'
-      +   '</div>'
-      + '</div>';
-  }
-
-  // ── 批发价隐藏模板 ──
-  function buildWholesaleHiddenTemplate() {
-    return ''
-      + '<div class="modal modal--frame modal--has-actions" role="dialog" aria-modal="true" data-state="closed" data-component-slug="modal">'
-      +   '<div class="modal__panel">'
-      +     '<div class="modal__title modal__title--info">'
-      +       '<div class="modal__title-text">批发价被隐藏不支持帮卖</div>'
-      +       '<div class="modal__subtitle">确认后,将自动公开批发价支持帮卖</div>'
-      +     '</div>'
-      +     '<div class="modal__body"></div>'
-      +     '<div class="modal__actions">'
-      +       '<div class="modal__action-gradient"></div>'
-      +       '<div class="modal__buttons">'
-      +         '<button data-component-slug="button" class="btn btn--weak btn--lg" data-action="close-popup">取消</button>'
-      +         '<button data-component-slug="button" class="btn btn--strong btn--lg" data-action="confirm-wholesale">确认</button>'
-      +       '</div>'
-      +     '</div>'
-      +   '</div>'
-      + '</div>';
-  }
-
-  // ── 所有价格隐藏模板 ──
-  function buildAllPriceHiddenTemplate() {
-    return ''
-      + '<div class="modal modal--frame modal--has-actions" role="dialog" aria-modal="true" data-state="closed" data-component-slug="modal">'
-      +   '<div class="modal__panel">'
-      +     '<div class="modal__title modal__title--info">'
-      +       '<div class="modal__title-text">所有价格被隐藏</div>'
-      +       '<div class="modal__subtitle">你店铺所有价格被隐藏,不支持帮卖,请前往价格管理设置</div>'
-      +     '</div>'
-      +     '<div class="modal__body"></div>'
-      +     '<div class="modal__actions">'
-      +       '<div class="modal__action-gradient"></div>'
-      +       '<div class="modal__action--single-h">'
-      +         '<button data-component-slug="button" class="btn btn--strong btn--lg" data-action="go-price-settings">确认</button>'
-      +       '</div>'
       +     '</div>'
       +   '</div>'
       + '</div>';
@@ -671,6 +622,32 @@
 
   // ── 打开帮卖弹窗 ──
   function openResalePopup(ctx, sample) {
+    // 异常场景:价格隐藏,改用 Dialog_Text 居中对话框
+    if (sample.error_code === 'wholesale_hidden') {
+      ctx.dialog({
+        variant: 'text',
+        title: '批发价被隐藏不支持帮卖',
+        content: '确认后，将自动公开批发价支持帮卖',
+        buttons: [
+          { label: '取消', tone: 'dismiss' },
+          { label: '确定', tone: 'confirm', onClick: function () { ctx.toast('批发价已设置为公开'); } }
+        ]
+      });
+      return;
+    }
+    if (sample.error_code === 'all_price_hidden') {
+      ctx.dialog({
+        variant: 'text',
+        title: '价格被隐藏不支持帮卖',
+        content: '你店铺所有价格被隐藏，不支持帮卖，请前往价格管理设置',
+        buttons: [
+          { label: '取消', tone: 'dismiss' },
+          { label: '前往设置', tone: 'confirm', onClick: function () { ctx.toast('跳转价格管理设置页'); } }
+        ]
+      });
+      return;
+    }
+
     var template = buildPopupTemplate(sample);
 
     ctx.openSheet(template, {
@@ -699,26 +676,6 @@
         }
         if (resaleHelp) {
           resaleHelp.addEventListener('click', function (e) { e.stopPropagation(); openHelp(ctx, isFixed); });
-        }
-
-        // 异常场景按钮
-        var confirmWholesaleBtn = root.querySelector('[data-action="confirm-wholesale"]');
-        if (confirmWholesaleBtn) {
-          confirmWholesaleBtn.addEventListener('click', function () {
-            ctx.toast('批发价已设置为公开');
-            ctx.closeOverlay();
-          });
-        }
-        var goPriceSettingsBtn = root.querySelector('[data-action="go-price-settings"]');
-        if (goPriceSettingsBtn) {
-          goPriceSettingsBtn.addEventListener('click', function () {
-            ctx.toast('跳转价格管理设置页');
-            ctx.closeOverlay();
-          });
-        }
-        var closePopupBtn = root.querySelector('[data-action="close-popup"]');
-        if (closePopupBtn) {
-          closePopupBtn.addEventListener('click', function () { ctx.closeOverlay(); });
         }
 
         // 正常场景按钮
@@ -965,6 +922,10 @@
               keypadRoot.classList.toggle('is-rate', currentMode === 'rate');
             }
             updateDisplay();
+            // 切换金额/比例后重新激活 input 显示光标
+            if (displayEl && document.activeElement !== displayEl) {
+              displayEl.focus({ preventScroll: true });
+            }
           });
         });
 
