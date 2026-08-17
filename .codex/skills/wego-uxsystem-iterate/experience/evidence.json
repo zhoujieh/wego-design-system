@@ -130,6 +130,22 @@
         "确认以版本 B 为基准后，未先 diff B 与 A 的实现差异核对已验收修复是否保留。",
         "后续从分支历史逐个找回 7 处：资产/应用角标 badge、管理入口 link 组件、管理栏不吸顶、搜索栏 direction-reveal、数据栏数字 14/中文 body-sm、会员栏云空间与用量字号、骨架屏原位淡入过渡。"
       ]
+    },
+    {
+      "id": "evt-20260817-001",
+      "experienceId": "exp-20260817-001",
+      "occurredAt": "2026-08-05",
+      "taskRef": "我的 Tab 经验登记",
+      "scenes": [],
+      "fact": "2026-08-05 执行经验登记任务时，直接在本地 main 分支创建提交 83659ef7（docs(experience): 登记我的 Tab 多版本处置与骨架屏复盘经验），未走 PR 流程，导致本地 main 与远端 main 分叉，违反「禁止直接提交 main」规则。",
+      "evidence": [
+        "git log 显示 83659ef7 由 zhoujieh 于 2026-08-05 20:03:46 直接提交在 main 分支",
+        "提交内容为 wego-uxsystem-iterate experience 权威源（candidates.json + evidence.json）",
+        "AGENTS.md 明确规定 workflow-maintenance-enters-main-via-pr：工作流维护通过短周期 PR 合入 main，免业务验收但仍遵守提交授权门禁",
+        "AGENTS.md delivery-must-require-explicit-submission 也要求所有提交默认处于独立分支，禁止直接提交 main",
+        "本地 main 与 origin/main 分叉：本地多 1 个提交（83659ef7），远端多 3 个提交（含 PR #45/#24/#46）",
+        "处理方式：将 83659ef7 移到 chore/experience-log-20260805 分支，重置本地 main 到 origin/main，通过 PR #47 合规合入"
+      ]
     }
   ]
 }
