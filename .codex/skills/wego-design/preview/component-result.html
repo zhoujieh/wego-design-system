@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Result 结果 — 微购设计系统</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../scaffold.css">
+<link rel="stylesheet" href="../iconfont.css">
+<link rel="stylesheet" href="../components.css">
+<style>
+
+/* @component-css-start */
+/* ── Result 结果信息组 ── */
+.result { --result-icon-size:60px; --result-gap:var(--spacer-24); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:var(--result-gap); padding:0 var(--spacer-32); text-align:center; }
+.result__icon { display:flex; align-items:center; justify-content:center; width:var(--result-icon-size); height:var(--result-icon-size); }
+.result__icon .wego-iconfont-s { font-size:var(--result-icon-size); line-height:var(--result-icon-size); color:var(--status-warning-default); }
+.result__title { font-size:var(--heading-md-font-size); font-weight:var(--font-weight-medium); color:var(--text-default); line-height:var(--heading-md-line-height); text-align:center; }
+/* @component-css-end */
+
+.result-demo-stage { display:flex; align-items:center; justify-content:center; width:100%; height:240px; background:var(--bg-subtle); border-radius:var(--radius-8); }
+.result-demo-note { font-size:var(--body-sm-font-size); color:var(--text-tertiary); max-width:400px; line-height:1.6; }
+</style>
+</head>
+<body>
+<div class="pv-header"><h1>结果</h1><p>结果信息组，用于空状态、加载失败、错误提示等结果页场景。</p></div>
+
+<div class="pv-section__title">Warning — 加载失败</div>
+<div class="result-demo-stage">
+  <div class="result">
+    <div class="result__icon" aria-hidden="true"><i class="wego-iconfont-s icon-tanhao-mian"></i></div>
+    <div class="result__title">获取帮卖信息失败，<a class="link link--inline" href="javascript:void(0)" data-action="retry">请重试</a></div>
+  </div>
+</div>
+
+<div class="pv-section__title">交互提示</div>
+<div class="result-demo-note">
+  60px 叹号橙色状态图标 + 18px Medium 居中标题，间距 24px；标题内重试等操作用 link--inline 内联，不破坏标题行高；承载于弹窗或页面内容区时由宿主用 flex 居中。
+</div>
+
+</body>
+</html>

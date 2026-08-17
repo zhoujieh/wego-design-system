@@ -206,6 +206,20 @@
       "preview": "preview/component-skeleton.html"
     },
     {
+      "slug": "loading",
+      "name": "加载",
+      "category": "feedback",
+      "status": "stable",
+      "preview": "preview/component-loading.html"
+    },
+    {
+      "slug": "result",
+      "name": "结果",
+      "category": "feedback",
+      "status": "stable",
+      "preview": "preview/component-result.html"
+    },
+    {
       "slug": "layout-page",
       "name": "页面总框架",
       "category": "layout",

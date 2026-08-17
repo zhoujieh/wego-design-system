@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loading 加载 — 微购设计系统</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../scaffold.css">
+<link rel="stylesheet" href="../iconfont.css">
+<style>
+
+/* @component-css-start */
+/* ── Loading 旋转加载指示器 ── */
+.loading { --loading-size:var(--size-24); display:inline-block; width:var(--loading-size); height:var(--loading-size); border:2px solid var(--border-neutral-l2); border-top-color:var(--bg-brand); border-radius:var(--radius-full); animation:loading-spin 0.8s linear infinite; }
+.loading--16 { --loading-size:var(--size-16); border-width:1.5px; }
+.loading--32 { --loading-size:var(--size-32); border-width:3px; }
+@keyframes loading-spin { to { transform:rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .loading { animation:loading-pulse 1.4s ease-in-out infinite; }
+  @keyframes loading-pulse { 0%,100% { opacity:0.4; } 50% { opacity:1; } }
+}
+/* @component-css-end */
+
+.loading-demo-center { display:flex; align-items:center; justify-content:center; width:100%; height:120px; background:var(--bg-subtle); border-radius:var(--radius-8); }
+.loading-demo-note { font-size:var(--body-sm-font-size); color:var(--text-tertiary); max-width:400px; line-height:1.6; }
+.loading-demo-row { display:flex; align-items:center; gap:var(--spacer-12); }
+</style>
+</head>
+<body>
+<div class="pv-header"><h1>加载</h1><p>居中旋转加载指示器，用于内容区或弹窗等待态。</p></div>
+
+<div class="pv-section__title">尺寸 24 — 默认</div>
+<div class="loading-demo-center">
+  <span class="loading" role="status" aria-label="加载中"></span>
+</div>
+
+<div class="pv-section__title">尺寸 16 — 按钮内</div>
+<div class="loading-demo-row">
+  <span class="label">16px</span>
+  <span class="loading loading--16" role="status" aria-label="加载中"></span>
+</div>
+
+<div class="pv-section__title">尺寸 32 — 大区域</div>
+<div class="loading-demo-center">
+  <span class="loading loading--32" role="status" aria-label="加载中"></span>
+</div>
+
+<div class="pv-section__title">交互提示</div>
+<div class="loading-demo-note">
+  默认 24px 边框旋转图标，上边框品牌色，0.8s 线性无限旋转；支持 16/32 尺寸；prefers-reduced-motion 时降级为脉冲。不内置文案，需提示文案时由宿主以 result 或文本节点组合。
+</div>
+
+</body>
+</html>
