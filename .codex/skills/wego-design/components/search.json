@@ -166,7 +166,7 @@
     "基础搜索框始终使用 .searchbox > .searchbox__icon + .searchbox__input + .searchbox__actions 三段式结构。",
     "左侧搜索图标区 .searchbox__icon 必须直接承载 iconfont 类（如 <span class=\"searchbox__icon wego-iconfont-s icon-sousuo\">），不得在 .searchbox__icon 内部嵌套 <i> 元素；嵌套会导致 iconfont 默认字号覆盖 .searchbox__icon 的图标尺寸（md 为 20px，内嵌 <i> 退化回 16px）。",
     ".searchbox__actions 只承载搜索框内部动作，包括清除、选图和扫码；筛选、搜索、发布、更多等业务操作必须放在外层 host pattern 的 actions 槽。",
-    "md 与 sm 两种尺寸的图标（20px）和文字（body-lg）大小完全一致，仅高度不同（md 36px / sm 32px）；sm 仅用于工具栏、局部筛选等紧凑容器，不用于页面主搜索。",
+    "md 与 sm 两种尺寸的图标（20px）和文字（body-md 14px）大小完全一致，仅高度不同（md 36px / sm 32px）；sm 仅用于工具栏、局部筛选等紧凑容器，不用于页面主搜索。",
     "36 高度为默认尺寸，根节点宽度不得写死 Figma 示例宽度，必须使用 width: 100% 或作为 flex 子项占满父容器剩余空间。",
     "32 高度用于页面局部嵌入，可由宿主容器或 --searchbox-width 自定义宽度。",
     "灰底页面（bg-page、bg-subtle）默认使用 .searchbox--white 形成对比；白底内容区（bg-surface）内部使用 .searchbox--gray 弱化边界。",
@@ -275,7 +275,7 @@
       "仓库原型只沉淀结构、样式和交互语义，不实现真实原生输入 API。",
       "右侧业务操作作为 host pattern 插槽，不污染基础搜索框的内部 actions。",
       "可编辑 inline 搜索的 clear 显隐、清空回焦与灰底白底优先级属于组件默认规则，不再由单个宿主各自决定。",
-      "md 与 sm 尺寸的图标和文字大小归一化（20px / body-lg），仅高度不同；sm 严格限定局部场景。",
+      "md 与 sm 尺寸的图标和文字大小归一化（20px / body-md 14px），仅高度不同；sm 严格限定局部场景。",
       "强调搜索（.searchbox--accent）简化为仅品牌色边框差异，不覆盖圆角、字号、背景或图标颜色；图搜入口复用 button 组件 strong + sm 变体（文字「图搜」），不自造搜索框内部按钮样式。",
       "筛选入口统一为纵向图标+文字布局，无背景阴影；所有可点击入口统一 :active opacity:0.6 点击态。"
     ],

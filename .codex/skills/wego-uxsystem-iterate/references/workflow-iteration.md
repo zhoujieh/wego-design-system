@@ -6,32 +6,42 @@
 
 - 经验沉淀由用户触发，不自动执行。
 - 沉淀必须由 `wego-uxsystem-iterate` 技能执行，不得在主对话直接修改正式规则、组件、Token、Preview、守卫或工作流权威源。
-- 经验文件必须位于 `.codex/skills/wego-uxsystem-iterate/` 内，唯一候选数据源为 `.codex/skills/wego-uxsystem-iterate/experience/candidates.json`。
-- 禁止在仓库根目录或其它技能下创建 `experience/`、`candidates.json`、经验记录或任何候选池副本；相对路径不得作为写入目标。
-- 用户要求总结本次任务经验时，先基于本次任务事实提取问题，再分类、去重并写入候选池。
+- 经验数据必须位于 `.codex/skills/wego-uxsystem-iterate/experience/`：`evidence.json` 保存事实事件和证明材料，`candidates.json` 保存经验归纳和处理状态。
+- 禁止在仓库根目录或其它技能下创建 `experience/`、`evidence.json`、`candidates.json` 或其副本；相对路径不得作为写入目标。
+- 用户要求总结本次任务经验时，先记录本次任务已发生的事实事件，再分类、归属、去重并关联经验。
 <!-- rule-id: experience-summary-must-default-observe -->
-- 用户只要求总结、登记或沉淀经验时，默认将有效候选登记为 `observing`，不得询问是否直接升级；只有候选达到升级阈值时才提示用户确认是否升级。用户主动明确要求立即升级时，按正式升级流程处理。
+- 用户只要求总结、登记或沉淀经验时，默认将有效经验登记为 `observing`，不得询问是否直接升级；只有首次达到升级阈值时才提示用户确认是否升级。用户主动明确要求立即升级时，按正式升级流程处理。
 - 用户确认升级前，不得修改正式规则、组件、Token、Preview、守卫或工作流权威源。
 - 已有同义规则时只修正唯一权威源，不新增平行表述。
-- 单场景特例、普通代码错误、无复用价值的局部调整不得进入候选池。
-- 候选池只保存尚未处理的经验；正式规则和 Git 历史承担落地追踪。已升级落地的经验不回填候选池。
+- 单场景特例、普通代码错误、无复用价值的局部调整不得进入经验数据。
+<!-- rule-id: experience-evidence-must-remain-traceable -->
+- 事实事件、累计次数和升级历史长期保留。升级只改变状态和正式落点，不删除经验，不中断历史累计。
 
 ## 沉淀技能入口
 
-- 复盘和经验沉淀统一由 `wego-uxsystem-iterate` 技能承担，主对话或其它技能不得直接修改正式权威源。
-- 进入本流程后必须读取本文件，按"用户触发后的处理流程"和"正式升级"两章执行，不得跳过分类与候选池环节直接改正式规则。
-- "全部升级"等批量指令不构成快捷路径，必须逐条按规范处理。
+- 复盘和经验沉淀统一由 `wego-uxsystem-iterate` 承担，主对话或其它技能不得直接修改正式权威源。
+- 进入本流程后必须读取本文件、`evidence.json` 和 `candidates.json`，不得跳过事实登记、分类和归属直接修改正式规则。
+- “全部升级”等批量指令不构成快捷路径，必须逐条按规范处理。
 
-## 问题归属
+## 分类与归属判断
 
-经验先判断问题首次产生在哪里、哪个技能应做正确决定、唯一权威源和实际消费者是什么：
+<!-- rule-id: experience-classification-must-start-from-existing-authority -->
+分类前先检查正式权威源：
+
+1. 正式规则已经直接覆盖且可执行，但本次没有被读取、执行、同步或拦截：归 `execution / rule-execution-failure`，不得重新归为“缺规则”。
+2. 正式规则存在，但规则本身重复、冲突、过时、过度泛化或不可执行：归 `governance` 对应类型。
+3. 没有正式规则覆盖时，才按问题首次产生的根因层级分类；不得按最终修改文件、用户用词或错误表象分类。
+
+<!-- rule-id: experience-owner-must-be-earliest-preventer -->
+`ownerSkill` 指向正常工作流中本应最先阻止问题的技能：
 
 - 业务目标、范围、入口、状态和数据：`wego-product`
-- 页面设计、组件消费、交互和视觉：`wego-design`
+- 页面结构、组件消费、交互、视觉和结果自审：`wego-design`
 - 组件、Preview、Token、UI Kit、资源、消费规则、守卫和工作流：`wego-uxsystem-iterate`
-- 跨技能通用规则（如 AI 执行约束、提问方式、复盘职责）：按语义归 `AGENTS.md` 对应章节，不限定到「沟通要求」；只有真正关于"如何与用户对话"的规则才归「沟通要求」。
 
-本技能可以登记所有分类，但只负责升级属于设计系统与工作流维护范围的正式能力。涉及业务或页面设计权威源时，必须明确目标归属后再修改对应唯一来源。跨技能通用规则归属 `AGENTS.md` 时，由本技能统一修订。
+跨技能通用规则的唯一权威源可落到 `AGENTS.md`，但 `ownerSkill` 仍填写最早应做正确决定的业务技能。最终修复文件不决定 `ownerSkill`。
+
+`targetAuthority` 表示本次经验若升级最可能修改的唯一权威位置。`observing` 阶段无法确定时可为 `null`；进入 `proposed` 或 `upgraded` 前必须收敛为一个结构化路径，不得并列多个备选位置。
 
 ## 经验分类
 
@@ -62,7 +72,7 @@
 
 ### execution
 
-- `rule-execution-failure`：正式规则已存在，但因入口、顺序、表达或门禁问题未被执行。
+- `rule-execution-failure`：正式规则已存在，但因入口、顺序、表达、消费或门禁问题未被执行。
 - `workflow-gap`：需求确认、设计决策、组件检索、影响分析、同步或验证链路缺步骤。
 - `ownership-drift`：规则、数据或职责放错技能或权威源。
 - `sync-gap`：权威源更新后直接消费者、索引、生成物或引用未同步。
@@ -89,72 +99,91 @@
 
 当用户要求总结本次任务经验教训时：
 
-1. 只读取本次任务中已经发生的事实、用户纠正、返工原因、能力缺口、临时回退和验证结果。
+1. 只读取本次任务已经发生的事实、用户纠正、返工原因、能力缺口、临时回退和验证结果。
 2. 排除普通代码错误、需求临时变化、单次视觉微调和没有证据的 AI 自审判断。
-3. 为每个有效问题确定 `category`、`type`、归属技能、拟落点和证据。**分类为沉淀流程的强制产物，不得跳过。**
-4. 登记候选前必须回溯已落地规则：检查问题是否与已升级的正式规则相关。若相关，归因到 `rule-execution-failure`（规则未被执行），不得重新归因到"缺规则"。
-5. 用户只要求总结、登记或沉淀时，直接读取 `.codex/skills/wego-uxsystem-iterate/experience/candidates.json`，按 `normalizedKey` 去重并沉淀，不再询问是否直接升级。
-6. 命中已有候选时 `occurrenceCount +1` 并合并证据和场景；新候选 `occurrenceCount` 初始为 1，默认状态为 `observing`。将新增或更新后的候选写回唯一数据源。
-7. 当 `occurrenceCount` 达到 3 时，状态自动改为 `proposed`；本次总结输出时必须明确告知用户该候选已达到升级阈值，并询问是否升级。用户主动明确要求立即升级时，登记候选为 `proposed`，执行正式升级，修改唯一权威源，验证通过后从候选池删除。
+3. 在 `evidence.json` 新增一个独立事实事件。一次任务、迭代或验收中的同根因多个表现只登记一个事件，在该事件内追加多条证明材料。
+4. 按“先查已有正式规则，再定位首次根因”的顺序确定 `category`、`type`、`ownerSkill`、`rootCause` 和唯一拟落点。
+<!-- rule-id: experience-deduplication-must-follow-root-cause -->
+5. 按 `relatedRuleId → rootCause → ownerSkill → normalizedKey` 的顺序查找同一经验。页面、组件、字段和错误位置不同，只要正式规则、根因和归属相同，就必须归并。
+6. 命中已有经验时，追加 `evidenceRefs`、合并场景，`occurrenceCount +1`；新经验初始次数为 1、状态为 `observing`。`occurrenceCount` 按独立事实事件计数，不按事件内证明材料数量计数。
+7. 可验证的历史任务、提交、用户反馈或验收记录可以补登记为独立事件；无法追溯的主观记忆不得补计次数。
+8. 首次 `occurrenceCount` 达到 3 时，状态自动改为 `proposed`，`proposalReason` 设为 `threshold`，并提示用户确认是否升级。
+9. 用户主动明确要求立即升级时，状态改为 `proposed`，`proposalReason` 设为 `explicit-upgrade`，再进入正式升级。
+10. 已经 `upgraded` 的经验出现新的同类事实事件时，次数继续累计并立即回到 `proposed`，`proposalReason` 设为 `post-upgrade-recurrence`；不得重新等待 3 次。此时必须复查上次分类、归属、落点和修复内容。
 
-"全部升级"等批量指令必须逐条按本流程处理，不构成跳过分类与候选池的快捷路径。
+“全部升级”等批量指令必须逐条按本流程处理，不构成跳过分类、证据或归属判断的快捷路径。
 
-## 候选状态
+## 经验状态
 
-- `observing`：已登记，继续收集证据。
-- `proposed`：证据和影响范围清楚，建议用户确认升级。
+- `observing`：已登记，继续收集事实事件；首次累计达到 3 次前保持此状态。
+- `proposed`：达到首次阈值、用户明确要求立即升级，或升级后再次复发，需要用户确认或重新调整。
+- `upgraded`：正式修复已完成、验证通过且升级历史已记录；继续接受后续事实事件。
 
-处理方式：
+`occurrenceCount` 是从首次发现至今的累计总次数，只增不减。升级后再次出现不清零，也不创建新的同义经验。
 
-- 默认沉淀：用户只要求总结、登记或沉淀时，登记候选为 `observing`，保留候选并继续收集证据，不询问是否直接升级。
-- 达到阈值：`occurrenceCount` 达到 3 时自动改为 `proposed`，并提醒用户确认是否升级。
-- 明确升级：用户主动要求立即升级时，登记候选为 `proposed`，更新唯一权威源和直接消费者，能客观验证时补守卫，验证通过后从候选池删除。
+## 数据要求
 
-## 候选数据要求
+### evidence.json
 
-唯一数据源为 `.codex/skills/wego-uxsystem-iterate/experience/candidates.json`。每条候选必须包含：
+`.codex/skills/wego-uxsystem-iterate/experience/evidence.json` 是事实事件账本。每条事件必须包含：
 
 - 稳定唯一的 `id`
-- 用于去重的 `normalizedKey`
+- 关联经验 `experienceId`
+- `occurredAt`
+- 可追溯的 `taskRef`
+- `scenes`
+- 本次事件事实 `fact`
+- 支撑该事实的 `evidence`
+
+事件只追加或纠正明确的数据错误，不因经验升级而删除。一个事件只能计入一个经验的一次出现。
+
+### candidates.json
+
+`.codex/skills/wego-uxsystem-iterate/experience/candidates.json` 保存经验归纳。每条经验必须包含：
+
+- 稳定唯一的 `id` 与 `normalizedKey`
 - `category` 与 `type`
 - `ownerSkill`
-- 问题事实 `problem`
-- 本次或历史处理方式 `resolution`
-- 拟修改的唯一来源 `targetAuthority`
-- 证据列表 `evidence`
-- 出现场景 `scenes`
-- `occurrenceCount`：同类问题出现次数，初始为 1，命中已有候选时 +1
-- `status`
+- `problem`、`rootCause` 与当前 `resolution`
+- 唯一结构化 `targetAuthority`，观察阶段未确定时为 `null`
+- 已有正式规则时填写 `relatedRuleId`
+- `evidenceRefs` 与 `scenes`
+- `occurrenceCount`
+- `status` 与 `proposalReason`
+- 持续追加的 `upgradeHistory`
 - `createdAt` 与 `updatedAt`
 
-候选不得复制完整正式规则正文，不保存迁移字段、已落地规则或第二份权威内容。
+经验不得复制完整正式规则正文。`occurrenceCount` 必须等于关联的独立事实事件数量。
 
 ## 正式升级
 
-升级对象必须来自候选池。若用户直接要求升级但候选尚未登记，必须先回填候选、确定分类、由用户确认后再升级，不得跳过候选池直接改正式规则。
+升级对象必须来自 `candidates.json`。若用户直接要求升级但经验尚未登记，必须先补记事实事件、经验归纳和分类，由用户确认后再升级。
 
-升级时使用目标来源已有的表达方式：
+升级时：
 
-- 原则和规则必须带稳定 `rule-id`，命名规范 `<领域>-<语义>-<动词>`，如 `confirm-brief-must-wait-affirmation`、`agent-must-read-host-code-before-asking`。`rule-id` 为强制要求，无 `rule-id` 的新增规则视为升级不完整。
-- 组件和结构化资源使用自身 Schema。
-- 只同步直接消费者；不生成规则投影、场景合同镜像或措辞检查。
-- 只有能够从源码或运行结果客观验证的要求才增加守卫。
-- 升级时在候选 `evidence` 留痕 `category`、`type`、`rule-id`，便于后续追溯。
+1. 重新核对已有正式规则、真实根因、`ownerSkill` 和唯一 `targetAuthority`。
+2. 优先修复真实断点。已有规则已经覆盖时，先检查执行入口、消费者、同步和验证，不得默认再增加同义规则。
+3. 原则和规则必须使用目标来源已有表达方式并保留稳定 `rule-id`；组件和结构化资源使用自身 Schema。
+4. 只同步直接消费者；只有能够从源码或运行结果客观验证的要求才增加守卫。
+5. 验证通过后向 `upgradeHistory` 追加一条记录，包含：顺序版本、升级时间、依据的 `evidenceRefs`、唯一 `targetAuthority`、相关 `ruleIds`、改动摘要和实际规则改动提交 `commitSha`。
+6. 为避免提交 SHA 自引用，先提交正式修复，再用后续追踪提交写入该修复提交的 SHA；写入完成后状态才改为 `upgraded`，`proposalReason` 清空。
+7. 升级记录和事实事件均不得删除。后续复发时保留全部历史，并直接进入重新调整。
 
-跨技能通用规则的归属判断：按规则语义归 `AGENTS.md` 对应章节，不限定到「沟通要求」。AI 执行约束（如"先查后问"、"结构化提问"）归独立章节或对应执行约束章节；只有真正关于"如何与用户对话"的规则才归「沟通要求」。
-
-完成后删除已落地候选，然后运行：
+完成后运行：
 
 ```bash
+node scripts/validate-experience-records.mjs test
 node scripts/validate-wego-design.mjs --scope=system --strict
 ```
 
 升级后必须自检：
 
-- 候选池路径：只存在 `.codex/skills/wego-uxsystem-iterate/experience/candidates.json`，仓库根目录和其它技能不存在经验副本。
-- 候选池 diff：已升级候选已删除，无残留。
-- 分类一致性：升级规则的 `rule-id` 与候选 evidence 留痕一致。
-- 归属合理性：规则落点符合「问题归属」章节判断，跨技能通用规则未错放到专有技能 SKILL.md。
+- 经验数据只存在于本技能的 `experience/evidence.json` 与 `experience/candidates.json`。
+- 分类与类型匹配，`ownerSkill` 是最早应阻止问题的技能。
+- `evidenceRefs` 全部存在，`occurrenceCount` 与独立事实事件数量一致。
+- `proposed` 或 `upgraded` 的 `targetAuthority` 已收敛为唯一位置。
+- `upgradeHistory` 能通过 `commitSha` 追溯实际修复内容。
+- 升级后的新事实事件会立即使经验回到 `proposed`。
 
 ## scenarioTypeRegistry
 

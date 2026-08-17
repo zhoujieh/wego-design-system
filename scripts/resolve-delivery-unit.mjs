@@ -4,7 +4,8 @@
  * 交付单元核对器。
  *
  * 在进入产品或设计流程前，从全部 Git worktree 中查找与场景或 routeId 匹配的
- * 活跃认领、未冻结迭代，并与开放 PR 的 head 分支关联。
+ * 活跃认领、未冻结迭代，并关联可选的开放 PR。
+ * 本地迭代阶段允许交付单元尚未创建 PR。
  *
  * 用法：
  *   node scripts/resolve-delivery-unit.mjs --scene 我的 [--route-id my] [--json]
@@ -99,9 +100,7 @@ function classify(candidates) {
   if (!candidates.length) return { outcome: 'new', candidates: [] };
   const branches = [...new Set(candidates.map(candidate => candidate.branch))];
   if (branches.length !== 1) return { outcome: 'conflict', candidates };
-  const candidate = candidates[0];
-  if (!candidate.pullRequest) return { outcome: 'conflict', candidates };
-  return { outcome: 'matched', candidates: [candidate] };
+  return { outcome: 'matched', candidates: [candidates[0]] };
 }
 
 function resolve(scene, routeId, { listWorktrees = worktrees, listPullRequests = openPullRequests } = {}) {
@@ -116,6 +115,7 @@ function resolve(scene, routeId, { listWorktrees = worktrees, listPullRequests =
       branch: worktree.branch,
       worktree: worktree.path,
       pullRequest,
+      stage: pullRequest ? 'formal-review' : 'local-iteration',
       claims: claims.map(({ file, claim }) => ({ file, agent: claim.agent, scene: claim.scene, routeId: claim.routeId, status: claim.status })),
       iterations
     }];
@@ -126,15 +126,18 @@ function resolve(scene, routeId, { listWorktrees = worktrees, listPullRequests =
 function test() {
   const none = classify([]);
   if (none.outcome !== 'new') throw new Error('无候选时必须允许创建新交付单元');
-  const matched = classify([{ branch: 'feature/my', pullRequest: { number: 22 } }]);
-  if (matched.outcome !== 'matched') throw new Error('单一且关联开放 PR 的候选必须要求接手');
-  const missingPr = classify([{ branch: 'feature/my', pullRequest: null }]);
-  if (missingPr.outcome !== 'conflict') throw new Error('活跃候选缺少开放 PR 时必须阻断');
+
+  const formalReview = classify([{ branch: 'feature/my', pullRequest: { number: 22 } }]);
+  if (formalReview.outcome !== 'matched') throw new Error('单一且关联开放 PR 的候选必须要求接手');
+
+  const localIteration = classify([{ branch: 'feature/my', pullRequest: null }]);
+  if (localIteration.outcome !== 'matched') throw new Error('单一且尚未创建 PR 的本地迭代候选必须要求接手');
+
   const ambiguous = classify([
     { branch: 'feature/one', pullRequest: { number: 1 } },
-    { branch: 'feature/two', pullRequest: { number: 2 } }
+    { branch: 'feature/two', pullRequest: null }
   ]);
-  if (ambiguous.outcome !== 'conflict') throw new Error('多个候选时必须阻断');
+  if (ambiguous.outcome !== 'conflict') throw new Error('多个分支候选时必须阻断');
   console.log('交付单元核对测试通过');
 }
 
@@ -150,7 +153,10 @@ try {
   else {
     console.log(`交付单元核对结果：${report.outcome}`);
     for (const candidate of report.candidates) {
-      console.log(`- ${candidate.branch}：${candidate.worktree}${candidate.pullRequest ? `，PR #${candidate.pullRequest.number}` : '，缺少开放 PR'}`);
+      const stage = candidate.pullRequest
+        ? `正式验收中，PR #${candidate.pullRequest.number}`
+        : '本地迭代中，尚未创建 PR';
+      console.log(`- ${candidate.branch}：${candidate.worktree}，${stage}`);
     }
   }
   process.exit(report.outcome === 'conflict' ? 2 : 0);

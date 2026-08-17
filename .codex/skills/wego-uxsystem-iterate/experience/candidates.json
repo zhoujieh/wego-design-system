@@ -1,69 +1,56 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "candidates": [
     {
       "id": "exp-20260731-007",
-      "normalizedKey": "scroll-row-entry-region-visual-container-pattern-missing",
-      "category": "system",
-      "type": "page-pattern-gap",
-      "ownerSkill": "wego-uxsystem-iterate",
-      "problem": "「我的」Tab 的数据资产横滑（my-assets）和常用应用横滑（my-apps）直接使用裸 layout-scroll-row，background:transparent，没有卡片背景，与同页会员卡（card--surface）、内容列表（card--surface）、sticky 工具区（bg-surface）的视觉风格割裂。根因是缺少「图标入口横滑区」的页面范式：layout-scroll-row 组件契约的 variantDimensions 只有 item-size/snap/peek，不提供背景变体，modifierClasses 为空；Agent 设计时把它仅当布局组件用，未用 card--surface 包裹或补背景。同类「图标入口横滑」（数据栏、应用栏、商品横滑等）是微购 App 高频模式，应有统一视觉容器规范，当前由场景自行决定导致风格不搭。",
-      "resolution": "待确认升级方向。拟补「图标入口横滑区」页面范式或消费规则：1) 在 uikit-plan.json 或场景合同补「横滑入口区应使用 card--surface 或 surface 背景容器，与同页其他内容区视觉一致」；2) 或在 layout-scroll-row 组件契约补 surface 变体/modifierClass；3) 或在设计原则补「同页并列内容区视觉容器一致性」规则。具体落点待用户确认升级时确定。",
-      "targetAuthority": ".codex/skills/wego-design/uikit-plan.json 或 references/scene-contract.md 或 components/layout-scroll-row.json（待定落点）",
-      "evidence": [
-        {
-          "scene": "我的",
-          "fact": "用户反馈：「数据栏和应用栏都用了没有背景色，然后整个是透明的，和整体的页面不搭，风格不搭」"
-        },
-        {
-          "scene": "我的",
-          "fact": "scene.css 第88-90行 .my-assets、第91-108行 .my-asset background:transparent；第135-137行 .my-apps、第138-154行 .my-app background:transparent"
-        },
-        {
-          "scene": "我的",
-          "fact": "scene.js 第65、117行 数据栏和应用栏直接用 layout-scroll-row，外层 layout-section 未包 card--surface"
-        },
-        {
-          "scene": "我的",
-          "fact": "对比：会员卡（scene.js 第41行 card--surface）、内容列表（第184、201、218、241、258行 card--surface）、sticky 工具区（scene.css 第179行 bg-surface）都有背景"
-        },
-        {
-          "scene": "我的",
-          "fact": "layout-scroll-row.json variantDimensions 只有 item-size/snap/peek，无背景变体；modifierClasses 为空数组；previewOnlyTokens 含 --bg-surface 但非契约变体"
-        }
+      "normalizedKey": "same-page-surface-consistency-rule-execution-failure",
+      "category": "execution",
+      "type": "rule-execution-failure",
+      "ownerSkill": "wego-design",
+      "problem": "同页并列内容区使用了不一致的视觉容器，导致页面风格割裂。",
+      "rootCause": "正式原则已要求同类问题使用同一方案，且现有 card--surface 能力足以完成设计；页面组织和结果自审时未检查并列内容区的视觉容器一致性。",
+      "resolution": "当前场景已使用一致的 surface 容器；后续同类证据继续归并到本经验，达到阈值后再决定是否强化设计自审入口。",
+      "targetAuthority": {
+        "path": ".codex/skills/wego-design/references/interaction-prototype-design.md",
+        "anchor": "prototype-design-self-review"
+      },
+      "relatedRuleId": "wego-consistency-same-pattern",
+      "evidenceRefs": [
+        "evt-20260731-007"
       ],
       "scenes": [
         "我的"
       ],
       "occurrenceCount": 1,
       "status": "observing",
+      "proposalReason": null,
+      "upgradeHistory": [],
       "createdAt": "2026-07-31",
-      "updatedAt": "2026-07-31"
+      "updatedAt": "2026-08-05"
     },
     {
       "id": "exp-20260731-005",
       "normalizedKey": "agent-must-read-host-code-before-asking-execution-failure",
       "category": "execution",
       "type": "rule-execution-failure",
-      "ownerSkill": "wego-uxsystem-iterate",
-      "problem": "scene.js 使用了错误的场景注册方式 registerScene('my', {...})，导致场景没有被注册",
-      "rootCause": "已升级的 AGENTS.md「agent-must-read-host-code-before-asking」规则未被执行：实现 scene.js 前未查看 app.js 中 registerScene 的实际签名，凭假设写代码导致注册失败",
-      "resolution": "在 wego-design/SKILL.md 中补充场景注册必须使用对象参数格式 registerScene({routeId, ...}) 的契约说明，并在执行时强制先查看宿主代码",
-      "targetAuthority": ".codex/skills/wego-design/SKILL.md",
-      "evidence": [
-        "scene.js 使用了 registerScene('my', {...}) 两个参数",
-        "app.js 中 registerScene 函数期望接收一个包含 routeId 的对象",
-        "导致场景没有被注册，显示'功能开发中'",
-        "AGENTS.md 已存在 agent-must-read-host-code-before-asking 规则，但实现时未执行"
-      ],
+      "ownerSkill": "wego-design",
+      "problem": "场景实现使用了错误的宿主注册签名，导致场景未注册。",
+      "rootCause": "已存在的 agent-must-read-host-code-before-asking 规则未执行：实现 scene.js 前没有读取 app.js 的 registerScene 实际签名。",
+      "resolution": "不重复增加宿主签名文案；后续同类证据优先检查设计执行入口和可客观验证的注册守卫。",
+      "targetAuthority": null,
       "relatedRuleId": "agent-must-read-host-code-before-asking",
+      "evidenceRefs": [
+        "evt-20260731-005"
+      ],
       "scenes": [
         "wego-app/scenes/我的"
       ],
       "occurrenceCount": 1,
       "status": "observing",
+      "proposalReason": null,
+      "upgradeHistory": [],
       "createdAt": "2026-07-31T13:00:00.000Z",
-      "updatedAt": "2026-07-31T13:00:00.000Z"
+      "updatedAt": "2026-08-05"
     },
     {
       "id": "exp-20260803-001",
@@ -71,32 +58,26 @@
       "category": "execution",
       "type": "rule-execution-failure",
       "ownerSkill": "wego-design",
-      "problem": "「我的」Tab 初版在会员信息、云空间进度和数据资产入口中重复使用品牌绿，导致品牌色从核心行动扩散为普通装饰，削弱了发布入口与选中态的视觉优先级。",
-      "rootCause": "正式规则 wego-aesthetics-neutral-priority 已明确品牌色只强化主行动，但页面实现和验收时未按该规则检查品牌色覆盖范围。",
-      "resolution": "当前场景已将会员信息改为会员金、普通资产入口改为中性色，仅在选中态和核心发布操作保留品牌绿；继续观察其他场景是否存在同类规则执行问题。",
-      "targetAuthority": ".codex/skills/shared/references/design-principles.md#wego-aesthetics-neutral-priority",
-      "evidence": [
-        {
-          "scene": "我的",
-          "fact": "用户反馈：品牌绿色滥用。"
-        },
-        {
-          "scene": "我的",
-          "fact": "初版会员图标、云空间进度和数据资产图标同时使用品牌色；修正后会员语义改用金色、普通入口改用中性色，品牌绿只保留给核心行动和选中态。"
-        },
-        {
-          "scene": "我的",
-          "fact": "现有设计原则已规定中性表面优先、品牌色只强化主行动，因此本问题属于正式规则未被执行，而非缺少新规则。"
-        }
-      ],
+      "problem": "品牌色被用于普通信息和装饰，削弱了主行动与选中态的视觉优先级。",
+      "rootCause": "wego-aesthetics-neutral-priority 已明确品牌色只强化主行动，但页面实现和结果自审没有检查品牌色覆盖范围。",
+      "resolution": "当前场景已恢复中性色优先；后续所有同根因的品牌色滥用继续归并到本经验。",
+      "targetAuthority": {
+        "path": ".codex/skills/wego-design/references/interaction-prototype-design.md",
+        "anchor": "prototype-design-self-review"
+      },
       "relatedRuleId": "wego-aesthetics-neutral-priority",
+      "evidenceRefs": [
+        "evt-20260803-001"
+      ],
       "scenes": [
         "我的"
       ],
       "occurrenceCount": 1,
       "status": "observing",
+      "proposalReason": null,
+      "upgradeHistory": [],
       "createdAt": "2026-08-03T08:11:16.000Z",
-      "updatedAt": "2026-08-03T08:11:16.000Z"
+      "updatedAt": "2026-08-05"
     },
     {
       "id": "exp-20260803-002",
@@ -104,30 +85,23 @@
       "category": "design",
       "type": "interaction-pattern-gap",
       "ownerSkill": "wego-uxsystem-iterate",
-      "problem": "设计系统没有明确的移动端悬浮主行动范式。「我的」Tab 初版将发布入口实现为右下角长条绿色「+ 发布」按钮，虽然醒目，但用户难以按常规悬浮发布入口识别其行为。",
-      "resolution": "当前场景已复用正式按钮能力，将入口调整为右下角 48px 圆形纯图标发布 FAB；继续观察是否需要把位置、尺寸、图标、避让和反馈统一为正式范式。",
-      "targetAuthority": ".codex/skills/wego-design/components/button.json、preview/component-button.html 或 uikit-plan.json（待升级时确定唯一落点）",
-      "evidence": [
-        {
-          "scene": "我的",
-          "fact": "用户反馈：发布悬浮入口不符合常规认知。"
-        },
-        {
-          "scene": "我的",
-          "fact": "初版使用右下角长条绿色文字按钮；修正后采用圆形纯图标悬浮入口，并保留其核心发布操作的最高视觉优先级。"
-        },
-        {
-          "scene": "我的",
-          "fact": "现有 button 组件提供纯图标能力，但未定义移动端悬浮主行动的形态、位置和避让规则，场景仍需自行组合。"
-        }
+      "problem": "现有系统没有稳定定义移动端悬浮主行动的形态、位置和避让方式。",
+      "rootCause": "正式按钮组件提供纯图标能力，但页面模式和消费规则未形成可复用的移动端悬浮主行动范式，导致场景自行组合。",
+      "resolution": "当前场景已采用圆形纯图标 FAB；继续收集跨场景证据，达到阈值前不新增正式范式。",
+      "targetAuthority": null,
+      "relatedRuleId": null,
+      "evidenceRefs": [
+        "evt-20260803-002"
       ],
       "scenes": [
         "我的"
       ],
       "occurrenceCount": 1,
       "status": "observing",
+      "proposalReason": null,
+      "upgradeHistory": [],
       "createdAt": "2026-08-03T08:11:16.000Z",
-      "updatedAt": "2026-08-03T08:11:16.000Z"
+      "updatedAt": "2026-08-05"
     },
     {
       "id": "exp-20260803-003",
@@ -135,34 +109,53 @@
       "category": "validation",
       "type": "validation-coverage-gap",
       "ownerSkill": "wego-uxsystem-iterate",
-      "problem": "场景骨架屏可以在只覆盖部分动态区域、结构与真实 DOM 明显不一致的情况下通过现有验证。「我的」Tab 刷新时导航、会员栏、类型 Tab 和工具区等区域缺少对应占位，导致内容加载前后发生页面跳动。",
-      "resolution": "当前场景已按真实页面可见 DOM 生成显式一比一骨架，并在 375px 与 393px 视口检查稳定性；继续观察是否需要扩展生成器覆盖范围和运行时守卫。",
-      "targetAuthority": ".codex/skills/wego-design/references/scene-contract.md、scripts/generate-scene-skeleton.mjs 与 scripts/validate-scene-runtime.mjs（待升级时确定唯一落点）",
-      "evidence": [
-        {
-          "scene": "我的",
-          "fact": "用户反馈：骨架屏没有按照真实 DOM 结构生成，只有部分内容有骨架，刷新时页面会跳动不稳定。"
-        },
-        {
-          "scene": "我的",
-          "fact": "原通用骨架只向动态区域写入三行文本占位，未覆盖导航、会员、类型 Tab、工具区和首屏内容卡片等真实结构。"
-        },
-        {
-          "scene": "我的",
-          "fact": "现有源码和运行时校验在该问题修正前仍能通过，说明验证没有覆盖骨架与真实 DOM 的结构一致性及加载前后布局稳定性。"
-        },
-        {
-          "scene": "我的",
-          "fact": "修正后显式骨架由 375px 视口下的 60 个可见真实 DOM 节点采样生成，并补充 393px 视口检查。"
-        }
+      "problem": "骨架屏与真实 DOM 明显不一致时仍能通过验证，加载前后出现布局跳动。",
+      "rootCause": "现有运行时验证没有覆盖骨架与真实可见 DOM 的结构一致性和加载前后布局稳定性。",
+      "resolution": "当前场景已按真实 DOM 生成骨架；继续观察跨场景复现，达到阈值后优先强化运行时验证。",
+      "targetAuthority": {
+        "path": "scripts/validate-scene-runtime.mjs",
+        "anchor": null
+      },
+      "relatedRuleId": null,
+      "evidenceRefs": [
+        "evt-20260803-003"
       ],
       "scenes": [
         "我的"
       ],
       "occurrenceCount": 1,
       "status": "observing",
+      "proposalReason": null,
+      "upgradeHistory": [],
       "createdAt": "2026-08-03T08:11:16.000Z",
-      "updatedAt": "2026-08-03T08:11:16.000Z"
+      "updatedAt": "2026-08-05"
+    },
+    {
+      "id": "exp-20260804-001",
+      "normalizedKey": "requirement-feedback-brief-invalidation-rule-execution-failure",
+      "category": "execution",
+      "type": "rule-execution-failure",
+      "ownerSkill": "wego-product",
+      "problem": "验收反馈改变业务事实时，没有在输出偏差结论前先使旧简报失效并重新确认。",
+      "rootCause": "wego-product 已规定业务事实变化必须在原迭代中失效、更新、重新提交并确认，但验收反馈没有先回流该流程。",
+      "resolution": "本次已完成 brief 失效、更新、重新提交和确认；后续同类验收反馈继续归并到本经验。",
+      "targetAuthority": {
+        "path": ".codex/skills/wego-product/SKILL.md",
+        "anchor": null
+      },
+      "relatedRuleId": "product-must-require-delivery-intake",
+      "evidenceRefs": [
+        "evt-20260804-001"
+      ],
+      "scenes": [
+        "我的"
+      ],
+      "occurrenceCount": 1,
+      "status": "observing",
+      "proposalReason": null,
+      "upgradeHistory": [],
+      "createdAt": "2026-08-04T13:52:00.000Z",
+      "updatedAt": "2026-08-05"
     }
   ]
 }

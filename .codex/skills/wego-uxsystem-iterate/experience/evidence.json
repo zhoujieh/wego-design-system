@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "events": [
+    {
+      "id": "evt-20260731-007",
+      "experienceId": "exp-20260731-007",
+      "occurredAt": "2026-07-31",
+      "taskRef": "我的 Tab 原型设计与验收",
+      "scenes": [
+        "我的"
+      ],
+      "fact": "数据资产横滑区和常用应用横滑区使用透明容器，与同页其他内容区的 surface 表达不一致。",
+      "evidence": [
+        "用户反馈：数据栏和应用栏透明，与整体页面风格不搭。",
+        "scene.css 中 .my-assets、.my-asset、.my-apps、.my-app 使用 transparent 背景。",
+        "scene.js 中数据栏和应用栏直接使用 layout-scroll-row，外层未使用 card--surface。",
+        "同页会员卡、内容列表和 sticky 工具区均使用 surface 背景。",
+        "正式 layout-scroll-row 仅提供滚动布局能力，但现有 card--surface 已能完成一致的视觉容器。"
+      ]
+    },
+    {
+      "id": "evt-20260731-005",
+      "experienceId": "exp-20260731-005",
+      "occurredAt": "2026-07-31T13:00:00.000Z",
+      "taskRef": "我的 Tab 场景接入",
+      "scenes": [
+        "wego-app/scenes/我的"
+      ],
+      "fact": "scene.js 使用错误的 registerScene 调用方式，导致场景未注册。",
+      "evidence": [
+        "scene.js 使用 registerScene('my', {...}) 两个参数。",
+        "app.js 中 registerScene 期望接收包含 routeId 的单个对象。",
+        "运行结果显示场景未注册并进入“功能开发中”。",
+        "AGENTS.md 已有 agent-must-read-host-code-before-asking 规则，但实现前未读取宿主签名。"
+      ]
+    },
+    {
+      "id": "evt-20260803-001",
+      "experienceId": "exp-20260803-001",
+      "occurredAt": "2026-08-03T08:11:16.000Z",
+      "taskRef": "我的 Tab 视觉验收",
+      "scenes": [
+        "我的"
+      ],
+      "fact": "会员信息、云空间进度和普通数据入口重复使用品牌绿，削弱了主行动和选中态的优先级。",
+      "evidence": [
+        "用户反馈：品牌绿色滥用。",
+        "初版会员图标、云空间进度和数据资产图标同时使用品牌色。",
+        "修正后会员语义改用金色、普通入口改用中性色，品牌绿仅保留给核心行动和选中态。",
+        "wego-aesthetics-neutral-priority 已明确中性表面优先、品牌色只强化主行动。"
+      ]
+    },
+    {
+      "id": "evt-20260803-002",
+      "experienceId": "exp-20260803-002",
+      "occurredAt": "2026-08-03T08:11:16.000Z",
+      "taskRef": "我的 Tab 发布入口验收",
+      "scenes": [
+        "我的"
+      ],
+      "fact": "初版右下角长条绿色“+ 发布”按钮不符合用户对移动端悬浮发布入口的常规认知。",
+      "evidence": [
+        "用户反馈：发布悬浮入口不符合常规认知。",
+        "初版使用右下角长条绿色文字按钮。",
+        "修正后采用 48px 圆形纯图标悬浮入口。",
+        "现有 button 组件具备纯图标能力，但没有正式定义移动端悬浮主行动的位置、尺寸和避让模式。"
+      ]
+    },
+    {
+      "id": "evt-20260803-003",
+      "experienceId": "exp-20260803-003",
+      "occurredAt": "2026-08-03T08:11:16.000Z",
+      "taskRef": "我的 Tab 骨架屏验收",
+      "scenes": [
+        "我的"
+      ],
+      "fact": "骨架屏只覆盖部分动态区域，与真实 DOM 不一致，但现有验证仍然通过，刷新时出现布局跳动。",
+      "evidence": [
+        "用户反馈：骨架屏未按真实 DOM 生成，刷新时页面跳动。",
+        "原通用骨架只写入三行文本占位，未覆盖导航、会员、类型 Tab、工具区和首屏卡片。",
+        "问题修正前源码和运行时校验仍能通过。",
+        "修正后按 375px 视口下 60 个可见真实 DOM 节点生成显式骨架，并补充 393px 检查。"
+      ]
+    },
+    {
+      "id": "evt-20260804-001",
+      "experienceId": "exp-20260804-001",
+      "occurredAt": "2026-08-04T13:52:00.000Z",
+      "taskRef": "我的 Tab 需求反馈回流",
+      "scenes": [
+        "我的"
+      ],
+      "fact": "验收时先沿用旧版简报判断偏差，没有先把用户纠正识别为业务事实变更。",
+      "evidence": [
+        "旧版简报要求三类内容均可切换列表或网格，并要求发布后在对应类型顶部看到新内容。",
+        "用户在验收中更正：直播只显示封面、无需视图切换，发布后保持当前滚动位置。",
+        "原迭代 scope_revision 已从 1 升至 2，重新提交并确认新版 prototype_brief。",
+        "wego-product 已明确业务事实变化必须使原简报失效、更新、重新提交并确认。"
+      ]
+    }
+  ]
+}
