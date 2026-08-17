@@ -10,10 +10,10 @@
 <style>
 
 /* @component-css-start */
-/* ── Loading 旋转加载指示器 ── */
-.loading { --loading-size:var(--size-24); display:inline-block; width:var(--loading-size); height:var(--loading-size); border:2px solid var(--border-neutral-l2); border-top-color:var(--bg-brand); border-radius:var(--radius-full); animation:loading-spin 0.8s linear infinite; }
-.loading--16 { --loading-size:var(--size-16); border-width:1.5px; }
-.loading--32 { --loading-size:var(--size-32); border-width:3px; }
+/* ── Loading 加载指示器(Figma icon/加载 7207:13957) ── */
+.loading { --loading-size:var(--size-24); display:inline-block; width:var(--loading-size); height:var(--loading-size); background-image:url("data:image/svg+xml,%3Csvg%20width='24'%20height='24'%20viewBox='0%200%2024%2024'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle%20opacity='0.2'%20cx='5.6'%20cy='12'%20r='1.2'%20fill='%23B7BEC5'/%3E%3Ccircle%20opacity='0.5'%20cx='12'%20cy='12'%20r='1.6'%20fill='%23B7BEC5'/%3E%3Ccircle%20cx='18.4'%20cy='12'%20r='2'%20fill='%23B7BEC5'/%3E%3C/svg%3E"); background-position:center; background-size:contain; background-repeat:no-repeat; animation:loading-spin 0.8s linear infinite; }
+.loading--16 { --loading-size:var(--size-16); }
+.loading--32 { --loading-size:var(--size-32); }
 @keyframes loading-spin { to { transform:rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) {
   .loading { animation:loading-pulse 1.4s ease-in-out infinite; }

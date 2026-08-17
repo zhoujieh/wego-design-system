@@ -625,5 +625,6 @@
   align-items: stretch;
 }
 .modal--state-load-failed .result {
+  width: 100%;
   height: 60%;
 }

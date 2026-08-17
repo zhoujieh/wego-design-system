@@ -85,9 +85,6 @@
     "preview/component-loading.html"
   ],
   "runtimeTokens": [
-    "--bg-brand",
-    "--border-neutral-l2",
-    "--radius-full",
     "--size-16",
     "--size-24",
     "--size-32"
