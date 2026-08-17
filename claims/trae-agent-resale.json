@@ -1,0 +1,10 @@
+{
+  "agent": "trae-agent-resale",
+  "scene": "帮卖分销",
+  "routeId": "agent-resale",
+  "branch": "feature/agent-resale-popup",
+  "status": "active",
+  "claimedAt": "2026-08-03T10:00:00.000Z",
+  "releasedAt": "",
+  "note": "代理商帮卖弹窗原型迭代 - 修复帮卖弹窗 UI 问题（场景选择页/自由定价/赚佣金/手动输入键盘）"
+}
