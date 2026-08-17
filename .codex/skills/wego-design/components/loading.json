@@ -6,7 +6,7 @@
   "status": "stable",
   "sourceKind": "figma",
   "confidence": "high",
-  "description": "居中旋转加载指示器，用于内容区或弹窗内容区等待态；默认 24px 边框旋转图标，支持 16/32 尺寸；不承载文案，文案由宿主组合。",
+  "description": "三点依次脉冲加载指示器，用于内容区或弹窗内容区等待态；默认 24px 三圆点 opacity+scale 依次波浪脉冲，支持 16/24/32 尺寸按比例缩放；不承载文案，文案由宿主组合。",
   "semanticTypeCandidates": [
     "spinner",
     "loading-indicator",
@@ -34,22 +34,33 @@
     {
       "name": "root",
       "selector": ".loading",
-      "role": "旋转图标容器"
+      "role": "加载图标外层容器"
+    },
+    {
+      "name": "icon",
+      "selector": ".loading__icon",
+      "role": "三圆点 flex 容器，按比例分配点距与点径"
+    },
+    {
+      "name": "dot",
+      "selector": ".loading__dot",
+      "role": "脉冲圆点，--1/--2/--3 依次延迟脉冲"
     }
   ],
   "structurePatterns": [
-    "默认 24px 正方形边框 spinner，上边框品牌色、其余边框中性浅色，无限旋转。",
+    "纯 span+CSS 实现，无 SVG：root > icon > dot--1/dot--2/dot--3 三圆点。",
+    "默认 24px 正方形，icon 用 padding-inline:15% + space-between 排布三圆点，圆点 width:16.667% aspect-ratio:1 按比例缩放，尺寸随 --loading-size 等比例变化。",
     "居中于宿主内容区，不占满；宿主用 flex 居中承载。",
     "不内置文案，需要提示文案时由宿主以 result 或文本节点组合，不在 loading 内堆叠。"
   ],
   "behavior": {
-    "spin": "0.8s 线性无限旋转，prefers-reduced-motion 时降级为静态或脉冲。",
-    "centering": "loading 本身是 inline-block 正方形，由宿主用 flex 居中。"
+    "pulse": "0.8s ease-in-out 无限循环，三点 opacity+scale 波浪式依次脉冲（--1 delay 0s / --2 delay 0.27s / --3 delay 0.53s），prefers-reduced-motion 时降级为整体淡入淡出。",
+    "centering": "loading 本身是 inline-flex 正方形，由宿主用 flex 居中。"
   },
   "accessibility": {
     "role": "status",
     "ariaLabel": "加载中",
-    "focusName": "旋转图标应带 aria-label 或配 sr-only 文案"
+    "focusName": "图标应带 aria-label 或配 sr-only 文案"
   },
   "usageHints": [
     "半屏弹窗或页面内容区加载态优先居中单图标。",
@@ -66,7 +77,13 @@
       ".loading--16",
       ".loading--32"
     ],
-    "optionalChildren": [],
+    "optionalChildren": [
+      ".loading__icon",
+      ".loading__dot",
+      ".loading__dot--1",
+      ".loading__dot--2",
+      ".loading__dot--3"
+    ],
     "alternatives": []
   },
   "provenance": {

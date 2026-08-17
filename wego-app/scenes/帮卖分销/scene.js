@@ -660,7 +660,7 @@
       +       '</div>'
       +     '</div>'
       +     '<div class="modal__body">'
-      +       '<span class="loading" role="status" aria-label="加载中" data-component-slug="loading"></span>'
+      +       '<span class="loading" role="status" aria-label="加载中" data-component-slug="loading"><span class="loading__icon"><span class="loading__dot loading__dot--1"></span><span class="loading__dot loading__dot--2"></span><span class="loading__dot loading__dot--3"></span></span></span>'
       +     '</div>'
       +   '</div>'
       + '</div>';
