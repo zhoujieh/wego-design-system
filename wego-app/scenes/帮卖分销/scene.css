@@ -609,11 +609,21 @@
 }
 
 /* ── 加载中/加载失败 半屏弹窗状态(Figma 7207-2474 / 7207-23599) ── */
-/* 内容区:垂直水平居中,承载 loading/result 标准组件 */
+/* 内容区:承载 loading/result 标准组件 */
 .modal--state-loading .modal__body,
 .modal--state-load-failed .modal__body {
   display: flex;
-  align-items: center;
   justify-content: center;
   padding: 0;
+}
+/* 加载中:内容居中 */
+.modal--state-loading .modal__body {
+  align-items: center;
+}
+/* 加载失败:result 信息组占内容区 60% 高度,组内垂直居中 */
+.modal--state-load-failed .modal__body {
+  align-items: stretch;
+}
+.modal--state-load-failed .result {
+  height: 60%;
 }

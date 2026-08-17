@@ -89,11 +89,10 @@
   ],
   "runtimeTokens": [
     "--font-weight-medium",
-    "--heading-md-font-size",
-    "--heading-md-line-height",
+    "--heading-sm-font-size",
+    "--heading-sm-line-height",
     "--spacer-24",
     "--spacer-32",
-    "--status-warning-default",
     "--text-default"
   ],
   "previewOnlyTokens": [
