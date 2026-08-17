@@ -2,6 +2,7 @@
   "agent": "trae-agent-resale",
   "scene": "帮卖分销",
   "routeId": "agent-resale",
+  "branch": "feature/agent-resale-popup",
   "status": "active",
   "claimedAt": "2026-08-03T10:00:00.000Z",
   "releasedAt": "",
