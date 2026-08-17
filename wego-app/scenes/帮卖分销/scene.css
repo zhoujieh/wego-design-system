@@ -140,11 +140,16 @@
 .resale-price__card {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: var(--spacer-8);
   background: var(--bg-subtle);
   border: 0.5px solid var(--border-neutral-l2);
   border-radius: var(--radius-8);
   padding: var(--spacer-16);
+}
+/* 固定佣金场景:卡片固定高度 80px */
+.resale-price--fixed .resale-price__card {
+  height: 80px;
 }
 .resale-price__row {
   display: flex;
