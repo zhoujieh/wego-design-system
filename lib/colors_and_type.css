@@ -307,6 +307,14 @@
   --body-lg-strong-font-size: 16px;
   --body-lg-strong-font-weight: 500;
   --body-lg-strong-line-height: 24px;
+  --body-xl-font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --body-xl-font-size: 18px;
+  --body-xl-font-weight: 400;
+  --body-xl-line-height: 26px;
+  --body-xl-strong-font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --body-xl-strong-font-size: 18px;
+  --body-xl-strong-font-weight: 500;
+  --body-xl-strong-line-height: 26px;
 
   /* heading */
   --heading-xs-font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;

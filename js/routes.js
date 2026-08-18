@@ -9,5 +9,14 @@ window.WEGO_APP_ROUTES = [
   },
   style: './scenes/帮卖分销/scene.css',
   script: './scenes/帮卖分销/scene.js'
+},
+{
+  routeId: 'my',
+  entry: {
+    type: 'host-tab',
+    tab: 'my'
+  },
+  style: './scenes/我的/scene.css',
+  script: './scenes/我的/scene.js'
 }
 ];

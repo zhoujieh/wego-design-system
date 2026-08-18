@@ -96,7 +96,7 @@
     product('prod-clothing-015', 'clothing-beige-logo-pullover', '米色宽松字母卫衣', 169, { color: ['米色', '黑色'], style: ['街头', '舒适'], silhouette: '宽松套头', season: '秋冬', material_note: '卫衣感' }, { sizes: ['M', 'L', 'XL'], fit: '宽松', care: '反面洗涤' }, ['宽松舒适', '字母图案有识别度', '适合短裤和靴子搭配'], ['适合秋季轻外套内容。', '文案避免暗示真实品牌。'], '米色宽松卫衣搭黑色短裤和厚底靴，适合做舒适、街头和秋季轻外套内容。')
   ];
 
-  function user(id, merchantName, avatarFile, groupId, pyInitial, statuses, productTotal, newCount, merchantType, region, categories, isSelf) {
+  function user(id, merchantName, avatarFile, groupId, pyInitial, statuses, productTotal, newCount, merchantType, region, categories, role, isSelf) {
     return {
       user_id: id,
       merchant_id: 'merchant-' + id.replace(/^pub-/, '').replace(/^user-/, ''),
@@ -114,12 +114,13 @@
       new_count: newCount,
       region: region,
       main_categories: categories,
+      role: role || '',
       is_self: Boolean(isSelf)
     };
   }
 
   var users = [
-    user('user-self', '微购优选商行', 'avatar_083.jpg', 'g-self', 'W', ['verified', 'starred'], 128, 6, '综合买手商家', '杭州', ['服装', '鞋包'], true),
+    user('user-self', '微购优选商行', 'avatar_083.jpg', 'g-self', 'W', ['verified', 'starred'], 128, 6, '综合买手商家', '杭州', ['服装', '鞋包'], '超级管理员', true),
     user('pub-01', '云朵服饰商行', 'avatar_001.jpg', 'g-key', 'Y', ['live', 'verified'], 86, 5, '女装商家', '广州', ['服装'], false),
     user('pub-02', '青禾女装档口', 'avatar_008.jpg', 'g-key', 'Q', ['new', 'starred'], 64, 8, '女装档口', '广州十三行', ['服装'], false),
     user('pub-03', '漫川生活集合店', 'avatar_016.jpg', 'g-coop', 'M', ['new', 'verified'], 72, 4, '生活方式集合店', '杭州', ['服装', '配饰'], false),
