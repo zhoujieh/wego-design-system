@@ -56,7 +56,7 @@
 - 所有开发任务默认使用独立分支，禁止直接提交 `main`。
 
 <!-- rule-id: workflow-maintenance-enters-main-via-pr -->
-- **工作流维护例外**：由 `wego-uxsystem-iterate` 技能执行的 AGENTS.md、SKILL.md、`references/` 和 `experience/` 等权威源维护，免于业务迭代与业务验收链路，但仍遵守明确提交授权门禁。用户要求正式提交后，通过短周期 PR 合入 `main`，必要检查通过可自动合并；提交前必须运行 `node scripts/validate-wego-design.mjs --scope=system --strict`。
+- **工作流维护例外**：由 `wego-uxsystem-iterate` 技能执行的 AGENTS.md、SKILL.md、`references/` 和 `experience/` 等权威源维护，免于业务迭代与业务验收链路，也免于明确提交授权门禁。完成改动并运行 `node scripts/validate-wego-design.mjs --scope=system --strict` 通过后，直接推送创建短周期 PR，必要检查通过后自动合并到 `main` 并删除分支；CI 失败时停止并报告原因等用户处理。业务原型和设计系统组件、Token、Preview、UI Kit 变更不适用本例外，仍需用户明确验收授权后才能合并。
 
 <!-- rule-id: delivery-ops-must-enter-github-delivery-skill -->
 - 分支、worktree、PR、预览和清理由 `wego-github-delivery` 执行；出现推送、创建或更新 PR、合并、分支清理等交付操作意图时，必须先进入该技能再执行，读过其规则文件不等于已进入技能；新建对话不等于新分支，同一交付单元必须复用同一工作分支、worktree 和可选开放 PR。
