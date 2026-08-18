@@ -31,6 +31,9 @@ description: 审查或迭代微购设计系统、组件、Preview、UI Kit、消
 
 只有用户明确要求提交、推送、创建/更新 PR、发在线预览，或明确说明“这一轮改完了，可以验收”时，才进入**正式提交**：
 
+<!-- rule-id: workflow-maintenance-exempt-from-submission-authorization -->
+**工作流维护例外**：本技能执行的 AGENTS.md、SKILL.md、`references/` 和 `experience/` 等权威源维护，免明确提交授权门禁。完成改动并运行 `node scripts/validate-wego-design.mjs --scope=system --strict` 通过后，直接推送创建短周期 PR，必要检查通过后自动合并到 `main` 并删除分支；CI 失败时停止并报告原因等用户处理。组件、Token、Preview、UI Kit 变更不适用本例外，仍需用户明确验收授权后才能合并。
+
 1. 完成全部必要同步，并运行 `node scripts/validate-wego-design.mjs --scope=system --strict`。
 2. 集中提交、推送当前分支并创建或更新同一个 PR。
 3. 组件、Token、Preview 或 UI Kit 仍只交付本地 HTTP 预览；工作流和守卫维护不要求在线预览。
