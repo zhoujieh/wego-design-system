@@ -643,7 +643,7 @@
   }
 
   // ── 加载中状态模板(Figma 7207-2474) ──
-  // 半屏弹窗 + 顶部下箭头收起 + 内容区居中加载图标 + 底部 home indicator
+  // 半屏弹窗 + 顶部下箭头收起 + 内容区居中 loading 组件 + 底部 home indicator
   function buildLoadingTemplate() {
     return ''
       + '<div class="modal modal--frame modal--state-loading" role="dialog" aria-modal="true" data-state="closed" data-component-slug="modal">'
@@ -659,17 +659,15 @@
       +         '</div>'
       +       '</div>'
       +     '</div>'
-      +     '<div class="modal__body resale-state__body">'
-      +       '<div class="resale-state__loading">'
-      +         '<span class="resale-state__loading-icon" aria-label="加载中"></span>'
-      +       '</div>'
+      +     '<div class="modal__body">'
+      +       '<span class="loading" role="status" aria-label="加载中" data-component-slug="loading"><span class="loading__icon"><span class="loading__dot loading__dot--1"></span><span class="loading__dot loading__dot--2"></span><span class="loading__dot loading__dot--3"></span></span></span>'
       +     '</div>'
       +   '</div>'
       + '</div>';
   }
 
   // ── 加载失败状态模板(Figma 7207-23599) ──
-  // 半屏弹窗 + 顶部下箭头收起 + Result_60 信息组(叹号图标 + 标题) + 底部 home indicator
+  // 半屏弹窗 + 顶部下箭头收起 + result 组件(叹号图标 + 标题内联 link) + 底部 home indicator
   function buildLoadFailedTemplate() {
     return ''
       + '<div class="modal modal--frame modal--state-load-failed" role="dialog" aria-modal="true" data-state="closed" data-component-slug="modal">'
@@ -685,12 +683,12 @@
       +         '</div>'
       +       '</div>'
       +     '</div>'
-      +     '<div class="modal__body resale-state__body">'
-      +       '<div class="resale-state__failed">'
-      +         '<div class="resale-state__failed-icon" aria-hidden="true">'
+      +     '<div class="modal__body">'
+      +       '<div class="result" data-component-slug="result">'
+      +         '<div class="result__icon" aria-hidden="true">'
       +           '<i class="wego-iconfont-s icon-tanhao-mian"></i>'
       +         '</div>'
-      +         '<div class="resale-state__failed-title">获取帮卖信息失败，<a class="resale-state__failed-link" data-action="retry">请重试</a></div>'
+      +         '<div class="result__title">获取帮卖信息失败，<a class="link link--inline" href="javascript:void(0)" data-action="retry">请重试</a></div>'
       +       '</div>'
       +     '</div>'
       +   '</div>'
@@ -712,6 +710,98 @@
       });
     });
   }
+
+  // ── @debug-temp-start ─────────────────────────────────────────
+  // 临时调试入口:Loading 动画预览(对齐 wgoo LoadingIcon 16/24/32 三尺寸)
+  // 正式合并前删除从 @debug-temp-start 到 @debug-temp-end 的整段代码
+  function buildLoadingPreviewTemplate() {
+    var loadingSvg = ''
+      + '<span class="loading__icon">'
+      +   '<span class="loading__dot loading__dot--1"></span>'
+      +   '<span class="loading__dot loading__dot--2"></span>'
+      +   '<span class="loading__dot loading__dot--3"></span>'
+      + '</span>';
+    var loadingHtml = '<span class="loading" role="status" aria-label="加载中" data-component-slug="loading">' + loadingSvg + '</span>';
+    var loading16 = '<span class="loading loading--16" role="status" aria-label="加载中" data-component-slug="loading">' + loadingSvg + '</span>';
+    var loading32 = '<span class="loading loading--32" role="status" aria-label="加载中" data-component-slug="loading">' + loadingSvg + '</span>';
+
+    return ''
+      + '<div class="modal modal--fullscreen" role="dialog" aria-modal="true" data-state="closed" data-component-slug="modal">'
+      +   '<div class="modal__panel">'
+      +     '<div class="modal__title modal__title--default">'
+      +       '<div class="navbar" data-component-slug="navbar">'
+      +         '<div class="navbar__body">'
+      +           '<div class="navbar__left">'
+      +             '<div class="navbar__left-btn navbar__left-btn--circle" data-debug-close><i class="wego-iconfont-s icon-xiajiantou16"></i></div>'
+      +           '</div>'
+      +           '<div class="navbar__center"><span class="navbar__title">加载 · Loading</span></div>'
+      +           '<div class="navbar__right"></div>'
+      +         '</div>'
+      +       '</div>'
+      +     '</div>'
+      +     '<div class="modal__body modal__body--safe-bottom loading-preview__body">'
+      +       '<div class="loading-preview__header">'
+      +         '<h1 class="loading-preview__title">加载</h1>'
+      +         '<p class="loading-preview__desc">三点涟漪脉冲加载指示器，用于内容区或弹窗等待态。</p>'
+      +       '</div>'
+      +       '<div class="loading-preview__section-title">尺寸 24 — 默认</div>'
+      +       '<div class="loading-preview__stage">' + loadingHtml + '</div>'
+      +       '<div class="loading-preview__section-title">尺寸 16 — 按钮内</div>'
+      +       '<div class="loading-preview__row">'
+      +         '<span class="loading-preview__size-label">16px</span>'
+      +         loading16
+      +       '</div>'
+      +       '<div class="loading-preview__section-title">尺寸 32 — 大区域</div>'
+      +       '<div class="loading-preview__stage">' + loading32 + '</div>'
+      +       '<div class="loading-preview__note">默认 24px 三点涟漪脉冲加载图标(对齐 wgoo LoadingIcon)，两端点 1s ease-in-out 共用同一关键帧、第3点 delay:-1s 反相位；中间点 0.5s ease-out 短周期独立关键帧，形成三相位错落涟漪节奏；支持 16/24/32 尺寸按比例缩放；prefers-reduced-motion 时降级为整体淡入淡出。</div>'
+      +     '</div>'
+      +   '</div>'
+      + '</div>';
+  }
+
+  function mountDebugEntry(ctx) {
+    var root = ctx.root;
+    var scroll = root.querySelector('.layout-scroll');
+    if (!scroll) return;
+
+    var group = document.createElement('div');
+    group.className = 'agent-resale-scene__group agent-resale-scene__group--debug';
+    group.setAttribute('data-debug', '');
+    group.innerHTML = ''
+      + '<div class="agent-resale-scene__group-title">调试</div>'
+      + '<div class="cell-group__content">'
+      +   '<div class="cell cell--double cell--bg-white cell--clickable cell--divider-center" data-component-slug="cell" data-debug-entry>'
+      +     '<div class="cell__body">'
+      +       '<div class="cell__content">'
+      +         '<div class="cell__title-row">'
+      +           '<span class="cell__title">Loading 动画预览</span>'
+      +         '</div>'
+      +         '<div class="cell__subtitle">对齐 wgoo LoadingIcon · 16/24/32 三尺寸</div>'
+      +       '</div>'
+      +       '<div class="cell__action">'
+      +         '<span class="agent-resale-scene__card-badge agent-resale-scene__card-badge--debug">调试</span>'
+      +         '<i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i>'
+      +       '</div>'
+      +     '</div>'
+      +   '</div>'
+      + '</div>';
+
+    scroll.insertBefore(group, scroll.firstChild);
+
+    var entry = group.querySelector('[data-debug-entry]');
+    entry.addEventListener('click', function () {
+      ctx.openFullScreenModal(buildLoadingPreviewTemplate(), {
+        label: 'Loading 动画预览(调试)',
+        init: function (overlayCtx) {
+          var closeBtn = overlayCtx.root.querySelector('[data-debug-close]');
+          if (closeBtn) {
+            closeBtn.addEventListener('click', function () { ctx.closeOverlay(); });
+          }
+        }
+      });
+    });
+  }
+  // ── @debug-temp-end ───────────────────────────────────────────
 
   // ── 打开帮卖弹窗 ──
   function openResalePopup(ctx, sample) {
@@ -1428,6 +1518,7 @@
         });
       }
       mountSelection(ctx);
+      mountDebugEntry(ctx); // @debug-temp
     }
   });
 })();

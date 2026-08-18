@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 4,
+  "slug": "result",
+  "name": "结果",
+  "category": "feedback",
+  "status": "stable",
+  "sourceKind": "figma",
+  "confidence": "high",
+  "description": "结果信息组，用于空状态、加载失败、错误提示等结果页场景；由 60px 状态图标和标题文案组成，标题内可内联 link 链接承载重试等操作；默认叹号橙色图标，居中垂直排列。",
+  "semanticTypeCandidates": [
+    "empty-state",
+    "error-state",
+    "result-info"
+  ],
+  "variantDimensions": {
+    "iconType": [
+      "warning"
+    ]
+  },
+  "representativeVariants": [
+    {
+      "iconType": "warning"
+    }
+  ],
+  "anatomy": [
+    {
+      "name": "root",
+      "selector": ".result",
+      "role": "结果信息容器"
+    },
+    {
+      "name": "icon",
+      "selector": ".result__icon",
+      "role": "状态图标"
+    },
+    {
+      "name": "title",
+      "selector": ".result__title",
+      "role": "标题文案，可内联 link"
+    }
+  ],
+  "structurePatterns": [
+    "flex 列布局垂直居中，图标与标题间距 24px。",
+    "图标 60x60，默认叹号橙色，用 wego-iconfont-s 承载。",
+    "标题 18px Medium 居中，可内联 link--inline 承载重试等操作。",
+    "承载于弹窗内容区或页面内容区时由宿主用 flex 居中。"
+  ],
+  "behavior": {
+    "inlineAction": "标题内重试等操作用 link--inline 内联，不破坏标题行高。",
+    "centering": "result 本身是列布局块，由宿主用 flex 居中或 padding 控制。"
+  },
+  "accessibility": {
+    "role": "group",
+    "ariaLabel": "结果信息",
+    "focusName": "标题文案应可独立感知，内联 link 需可独立聚焦。"
+  },
+  "usageHints": [
+    "加载失败、空数据、错误提示等结果态优先用 result。",
+    "标题内重试操作用 link--inline，不用 button。",
+    "图标用 wego-iconfont-s 对应图标类，尺寸由组件固定 60px。"
+  ],
+  "doNotInvent": [
+    "不要在 result 内堆叠多个按钮或复杂操作区，主操作走底部按钮组。",
+    "不要给图标加自定义颜色变体，保持橙色默认。"
+  ],
+  "domAnatomy": {
+    "root": ".result",
+    "modifiers": [],
+    "optionalChildren": [
+      ".result__icon",
+      ".result__title"
+    ],
+    "alternatives": []
+  },
+  "provenance": {
+    "preview": "preview/component-result.html",
+    "cssSource": "preview/component-result.html",
+    "embedded": false,
+    "hostComponent": null,
+    "externalSources": [
+      "figma:Z4iltAbicAYQMEWhyAWjE0:7207:13764"
+    ]
+  },
+  "unknowns": [],
+  "ruleRefs": [
+    "colors_and_type.css#result",
+    "components.css#result",
+    "preview/component-result.html"
+  ],
+  "runtimeTokens": [
+    "--font-weight-medium",
+    "--heading-sm-font-size",
+    "--heading-sm-line-height",
+    "--spacer-24",
+    "--spacer-32",
+    "--text-default"
+  ],
+  "previewOnlyTokens": [
+    "--bg-subtle",
+    "--body-sm-font-size",
+    "--radius-8",
+    "--text-tertiary"
+  ],
+  "localTokens": [
+    "--result-icon-size",
+    "--result-gap"
+  ]
+}
