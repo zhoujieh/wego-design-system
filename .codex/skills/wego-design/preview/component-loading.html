@@ -10,19 +10,20 @@
 <style>
 
 /* @component-css-start */
-/* ── Loading 加载指示器(对齐 wgoo LoadingIcon 三点涟漪脉冲) ── */
+/* ── Loading 加载指示器(位置传递式循环:1→2→3→1 依次放大变亮) ── */
 .loading { --loading-size:var(--size-24); display:inline-flex; align-items:center; justify-content:center; width:var(--loading-size); height:var(--loading-size); }
 .loading--16 { --loading-size:var(--size-16); }
 .loading--32 { --loading-size:var(--size-32); }
 .loading__icon { display:flex; align-items:center; justify-content:space-between; width:100%; height:100%; padding-inline:6.25%; box-sizing:border-box; }
-.loading__dot { width:20.833%; aspect-ratio:1; border-radius:50%; background-color:#B7BEC5; transform-origin:center; }
-/* 两端点共用 loading-dot-a 关键帧,dot-3 用 animation-direction:reverse 形成反相位(实测 dot1+dot3 opacity 恒为 1.2) */
-.loading__dot--1 { animation:loading-dot-a 1s ease-in-out infinite; }
-.loading__dot--3 { animation:loading-dot-a 1s ease-in-out infinite reverse; }
-/* 中间点 loading-dot-b 关键帧 0.5s ease-out 短周期独立脉动 */
-.loading__dot--2 { animation:loading-dot-b 0.5s ease-out infinite; }
-@keyframes loading-dot-a { 0% { opacity:0.2; transform:scale(0.6); } 100% { opacity:1; transform:scale(1); } }
-@keyframes loading-dot-b { 0% { opacity:0.6; transform:scale(0.8); } 100% { opacity:1; transform:scale(1); } }
+.loading__dot { width:20.833%; aspect-ratio:1; border-radius:50%; background-color:#B7BEC5; transform-origin:center; animation:loading-dot 1.2s ease-in-out infinite; }
+/* 三点共用同一关键帧,delay 错峰 0/-0.4s/-0.8s 形成位置传递循环 */
+.loading__dot--1 { animation-delay:0s; }
+.loading__dot--2 { animation-delay:-0.4s; }
+.loading__dot--3 { animation-delay:-0.8s; }
+@keyframes loading-dot {
+  0%, 66.66%, 100% { opacity:0.2; transform:scale(0.6); }
+  33.33% { opacity:1; transform:scale(1); }
+}
 @media (prefers-reduced-motion: reduce) {
   .loading__dot { animation:loading-fade 1.4s ease-in-out infinite; }
   @keyframes loading-fade { 0%,100% { opacity:0.4; } 50% { opacity:1; } }
@@ -55,7 +56,7 @@
 
 <div class="pv-section__title">交互提示</div>
 <div class="loading-demo-note">
-  默认 24px 三点涟漪脉冲加载图标(对齐 wgoo LoadingIcon),两端点 dot--1/dot--3 共用 loading-dot-a 关键帧(opacity 0.2→1 / scale 0.6→1) 1s ease-in-out,dot--3 用 animation-direction:reverse 反向播放形成反相位(实测 dot1+dot3 opacity 恒为 1.2);中间点 dot--2 用 loading-dot-b 关键帧(opacity 0.6→1 / scale 0.8→1) 0.5s ease-out 短周期独立脉动;两端点交替呼吸,中间点叠加短周期形成涟漪节奏;纯 span+CSS 实现,支持 16/24/32 尺寸按比例缩放;prefers-reduced-motion 时降级为整体淡入淡出。不内置文案,需提示文案时由宿主以 result 或文本节点组合。
+  默认 24px 三点位置传递式循环加载图标,三点共用同一关键帧,通过 delay 0/-0.4s/-0.8s 错峰形成"亮点从点1→点2→点3→点1 依次放大变亮"的循环传递动画;1.2s ease-in-out infinite,0% 和 66.66% 处保持暗淡静止(0.2/0.6),33.33% 处达到峰值(opacity 1/scale 1),颜色和大小有 ease-in-out 过渡;纯 span+CSS 实现,支持 16/24/32 尺寸按比例缩放;prefers-reduced-motion 时降级为整体淡入淡出。不内置文案,需提示文案时由宿主以 result 或文本节点组合。
 </div>
 
 </body>
