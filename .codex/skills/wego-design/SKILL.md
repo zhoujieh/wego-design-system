@@ -22,7 +22,7 @@ description: 基于已确认原型简报消费微购设计系统，在一次任�
 ## 执行约束
 
 <!-- rule-id: agent-must-pull-before-task-start -->
-- 新会话/新任务开场先执行 `git pull --rebase origin main` 同步最新 `main`，再进入简报消费或场景实现（规则见 `AGENTS.md`「多人多 Agent 并发协作」）。
+- 新会话/新任务开场先执行 `git pull --rebase origin main` 同步最新 `main`，再进入简报消费或场景实现（交付细节见 `wego-github-delivery`）。
 
 ## 输出与交接
 

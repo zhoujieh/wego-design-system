@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 4,
+  "slug": "loading",
+  "name": "加载",
+  "category": "feedback",
+  "status": "stable",
+  "sourceKind": "figma",
+  "confidence": "high",
+  "description": "三点位置传递式循环加载指示器，用于内容区或弹窗内容区等待态；默认 24px,三点共用同一关键帧,通过 delay 错峰形成亮点从点1→点2→点3→点1 依次放大变亮的循环传递动画;支持 16/24/32 尺寸按比例缩放;不承载文案，文案由宿主组合。",
+  "semanticTypeCandidates": [
+    "spinner",
+    "loading-indicator",
+    "pending-state"
+  ],
+  "variantDimensions": {
+    "size": [
+      "16",
+      "24",
+      "32"
+    ]
+  },
+  "representativeVariants": [
+    {
+      "size": "24"
+    },
+    {
+      "size": "16"
+    },
+    {
+      "size": "32"
+    }
+  ],
+  "anatomy": [
+    {
+      "name": "root",
+      "selector": ".loading",
+      "role": "加载图标外层容器"
+    },
+    {
+      "name": "icon",
+      "selector": ".loading__icon",
+      "role": "三圆点 flex 容器，padding-inline:6.25% + space-between 按比例排布"
+    },
+    {
+      "name": "dot",
+      "selector": ".loading__dot",
+      "role": "脉冲圆点，--1/--2/--3 共用同一关键帧，delay -0.4s/-0.2s/0s 错峰形成位置传递循环，初始相位点1最小→点2中等→点3最大"
+    }
+  ],
+  "structurePatterns": [
+    "纯 span+CSS 实现，无 SVG：root > icon > dot--1/dot--2/dot--3 三圆点。",
+    "默认 24px 正方形，icon 用 padding-inline:6.25% + space-between 排布三圆点，圆点 width:20.833% aspect-ratio:1 按比例缩放，尺寸随 --loading-size 等比例变化。",
+    "居中于宿主内容区，不占满；宿主用 flex 居中承载。",
+    "不内置文案，需要提示文案时由宿主以 result 或文本节点组合，不在 loading 内堆叠。"
+  ],
+  "behavior": {
+    "pulse": "位置传递式循环:三点共用 loading-dot 关键帧 1.2s ease-out infinite,关键帧在 0% 和 66.66% 处保持暗淡静止(opacity 0.2 / scale 0.6),33.33% 处达到峰值(opacity 1 / scale 1.3),扩大 scale 峰值(1→1.3)让大小过渡更明显;delay -0.8s/-0.4s/0s 错峰,初始相位点1最小→点2中等→点3最大,传递顺序点1→点2→点3→点1 依次放大变亮循环,ease-out 让放大过程先快后慢;prefers-reduced-motion 时降级为整体淡入淡出。",
+    "centering": "loading 本身是 inline-flex 正方形，由宿主用 flex 居中。"
+  },
+  "accessibility": {
+    "role": "status",
+    "ariaLabel": "加载中",
+    "focusName": "图标应带 aria-label 或配 sr-only 文案"
+  },
+  "usageHints": [
+    "半屏弹窗或页面内容区加载态优先居中单图标。",
+    "按钮内加载用 16 尺寸，与按钮文字同行。",
+    "长时间加载搭配 result 失败态，不长期停留在 loading。"
+  ],
+  "doNotInvent": [
+    "不要把 loading 扩成进度条或骨架屏。",
+    "不要给 loading 加文案或图标变体，文案走 result 或宿主文本。"
+  ],
+  "domAnatomy": {
+    "root": ".loading",
+    "modifiers": [
+      ".loading--16",
+      ".loading--32"
+    ],
+    "optionalChildren": [
+      ".loading__icon",
+      ".loading__dot",
+      ".loading__dot--1",
+      ".loading__dot--2",
+      ".loading__dot--3"
+    ],
+    "alternatives": []
+  },
+  "provenance": {
+    "preview": "preview/component-loading.html",
+    "cssSource": "preview/component-loading.html",
+    "embedded": false,
+    "hostComponent": null,
+    "externalSources": [
+      "figma:Z4iltAbicAYQMEWhyAWjE0:7207:13957"
+    ]
+  },
+  "unknowns": [],
+  "ruleRefs": [
+    "colors_and_type.css#loading",
+    "components.css#loading",
+    "preview/component-loading.html"
+  ],
+  "runtimeTokens": [
+    "--size-16",
+    "--size-24",
+    "--size-32"
+  ],
+  "previewOnlyTokens": [
+    "--bg-subtle",
+    "--body-sm-font-size",
+    "--radius-8",
+    "--spacer-12",
+    "--text-tertiary"
+  ],
+  "localTokens": [
+    "--loading-size"
+  ]
+}
