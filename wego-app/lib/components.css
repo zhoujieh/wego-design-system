@@ -1784,11 +1784,11 @@
 .loading--16 { --loading-size:var(--size-16); }
 .loading--32 { --loading-size:var(--size-32); }
 .loading__icon { display:flex; align-items:center; justify-content:space-between; width:100%; height:100%; padding-inline:6.25%; box-sizing:border-box; }
-.loading__dot { width:20.833%; aspect-ratio:1; border-radius:50%; background-color:#B7BEC5; transform-origin:center; animation:loading-dot 1.2s ease-in-out infinite; }
-/* 三点共用同一关键帧,delay 错峰 -0.8s/-0.4s/0s 形成位置传递循环 */
+.loading__dot { width:20.833%; aspect-ratio:1; border-radius:50%; background-color:#B7BEC5; transform-origin:center; animation:loading-dot 0.6s ease-in-out infinite; }
+/* 三点共用同一关键帧,delay 错峰 -0.4s/-0.2s/0s 形成位置传递循环 */
 /* 初始相位:点1最小→点2中等→点3最大,传递顺序 1→2→3→1 */
-.loading__dot--1 { animation-delay:-0.8s; }
-.loading__dot--2 { animation-delay:-0.4s; }
+.loading__dot--1 { animation-delay:-0.4s; }
+.loading__dot--2 { animation-delay:-0.2s; }
 .loading__dot--3 { animation-delay:0s; }
 @keyframes loading-dot {
   0%, 66.66%, 100% { opacity:0.2; transform:scale(0.6); }
