@@ -26,4 +26,4 @@ description: 创建或变更业务迭代；形成并确认完整 prototype_brief
 - submit-brief 后必须明确询问"是否确认？"并等待用户回复肯定词，且将当前迭代 ID 作为明确授权参数后才能执行 confirm-brief。
 
 <!-- rule-id: agent-must-pull-before-task-start -->
-- 新会话/新任务开场先执行 `git pull --rebase origin main` 同步最新 `main`，再进入需求确认或迭代查看（规则见 `AGENTS.md`「多人多 Agent 并发协作」）。
+- 新会话/新任务开场先执行 `git pull --rebase origin main` 同步最新 `main`，再进入需求确认或迭代查看（交付细节见 `wego-github-delivery`）。
