@@ -1,0 +1,9 @@
+{
+  "agent": "codex-my-tab",
+  "scene": "我的",
+  "routeId": "my",
+  "branch": "feature/codex-my-tab",
+  "status": "done",
+  "claimedAt": "2026-08-04T17:05:00.000Z",
+  "note": "我的 Tab 需求简报更新：直播展示与发布位置"
+}
