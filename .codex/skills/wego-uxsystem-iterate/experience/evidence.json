@@ -146,6 +146,21 @@
         "本地 main 与 origin/main 分叉：本地多 1 个提交（83659ef7），远端多 3 个提交（含 PR #45/#24/#46）",
         "处理方式：将 83659ef7 移到 chore/experience-log-20260805 分支，重置本地 main 到 origin/main，通过 PR #47 合规合入"
       ]
+    },
+    {
+      "id": "evt-20260819-001",
+      "experienceId": "exp-20260819-001",
+      "occurredAt": "2026-08-19",
+      "taskRef": "帮卖遗留分支核查与 PR #22 合并收口",
+      "scenes": [],
+      "fact": "判断遗留分支是否有未合并内容时，仅凭 git log origin/main..branch 提交列表，将已 squash 合并交付单元的旧演进分支误判为含 19 个未合并提交并启动合并流程；实际其关联 PR #24 已于 2026-08-17 合并，分支头停在 08-06 旧位置，内容已全部被 main 的更新实现取代。",
+      "evidence": [
+        "git log origin/main..origin/feature/agent-resale-popup 列出 19 个提交，据此初判帮卖分支存在未合并内容。",
+        "gh pr view 24 确认 head 即 feature/agent-resale-popup，状态 MERGED（2026-08-17 squash 合并），但合并后分支未按规则删除而残留。",
+        "diff 92bd41c..1bc77fb 显示分支侧是旧演进线：售价光标用 span+CSS 方案（main 已改原生 input+caret）、异常弹窗用 modal 模板（main 已改标准组件），分支内容已被取代。",
+        "main 版 scene.css 已含 resale-cursor-blink 动画等分支'新'提交的等价或更新内容，最终确认无任何未合并内容并清理分支。",
+        "AGENTS.md delivery-intake-must-precede-business-workflow 的核对范围只覆盖开放 PR，未包含已合并 PR 的遗留分支状态与内容等价性核查。"
+      ]
     }
   ]
 }

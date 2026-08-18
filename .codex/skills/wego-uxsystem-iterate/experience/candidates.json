@@ -206,6 +206,28 @@
       "upgradeHistory": [],
       "createdAt": "2026-08-17",
       "updatedAt": "2026-08-17"
+    },
+    {
+      "id": "exp-20260819-001",
+      "normalizedKey": "stale-branch-merge-decision-requires-pr-state-and-content-equivalence",
+      "category": "execution",
+      "type": "workflow-gap",
+      "ownerSkill": "wego-uxsystem-iterate",
+      "problem": "判断遗留分支是否有未合并内容时仅凭提交列表，会把已 squash 合并交付单元的旧演进分支误判为有待合并提交，触发无意义的合并流程。",
+      "rootCause": "交付单元核对步骤只覆盖开放 PR，未包含'分支关联 PR 的合并状态与内容等价性'核查；squash 合并使提交 SHA 与 main 断连，git log 的未合并提交列表不能反映真实内容差异。",
+      "resolution": "本次已通过 PR 状态与文件内容等价核查确认无未合并内容并清理遗留分支；后续遇到疑似未合并分支先查关联 PR 状态与内容等价，再决定合并或清理。",
+      "targetAuthority": null,
+      "relatedRuleId": "delivery-intake-must-precede-business-workflow",
+      "evidenceRefs": [
+        "evt-20260819-001"
+      ],
+      "scenes": [],
+      "occurrenceCount": 1,
+      "status": "observing",
+      "proposalReason": null,
+      "upgradeHistory": [],
+      "createdAt": "2026-08-19",
+      "updatedAt": "2026-08-19"
     }
   ]
 }
