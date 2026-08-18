@@ -4,8 +4,8 @@ window.WEGO_APP_ROUTES = [
   entry: {
     type: 'cell-entry',
     label: '代理商帮卖弹窗',
-    group: 'workspace-tools',
-    tab: 'workspace'
+    group: 'dongtai-tools',
+    tab: 'dongtai'
   },
   style: './scenes/帮卖分销/scene.css',
   script: './scenes/帮卖分销/scene.js'

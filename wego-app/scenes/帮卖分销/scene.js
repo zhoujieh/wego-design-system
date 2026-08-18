@@ -1332,7 +1332,9 @@
   <div class="layout-page__top">
     <div class="navbar" data-component-slug="navbar">
       <div class="navbar__body navbar__body--spaced">
-        <div class="navbar__left"></div>
+        <div class="navbar__left">
+          <div class="navbar__left-btn navbar__left-btn--circle" data-back-btn><i class="wego-iconfont-s icon-zuojiantou16"></i></div>
+        </div>
         <div class="navbar__center"><span class="navbar__title">代理商帮卖弹窗</span></div>
         <div class="navbar__right"></div>
       </div>
@@ -1510,6 +1512,12 @@
     presentation: { type: 'push', coversTabBar: true },
     init: function (ctx) {
       var root = ctx.root;
+      var backBtn = root.querySelector('[data-back-btn]');
+      if (backBtn) {
+        backBtn.addEventListener('click', function () {
+          history.back();
+        });
+      }
       var entryCard = root.querySelector('[data-dom-id="open-resale-popup"]');
       if (entryCard) {
         entryCard.addEventListener('click', function () {
