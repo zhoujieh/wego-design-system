@@ -1775,6 +1775,30 @@
 .link--inline:active,
 .link--inline.is-pressed { background:var(--bg-overlay-l2); }
 
+/* ── Loading ───────────────────────────────────────────────── */
+/* @anatomy
+   <div class="pv-header"><h1>加载</h1><p>三点依次脉冲加载指示器，用于内容区或弹窗等待态。</p></div>
+*/
+/* ── Loading 加载指示器(位置传递式循环:1→2→3→1 依次放大变亮) ── */
+.loading { --loading-size:var(--size-24); display:inline-flex; align-items:center; justify-content:center; width:var(--loading-size); height:var(--loading-size); }
+.loading--16 { --loading-size:var(--size-16); }
+.loading--32 { --loading-size:var(--size-32); }
+.loading__icon { display:flex; align-items:center; justify-content:space-between; width:100%; height:100%; padding-inline:6.25%; box-sizing:border-box; }
+.loading__dot { width:20.833%; aspect-ratio:1; border-radius:50%; background-color:#B7BEC5; transform-origin:center; animation:loading-dot 1.2s ease-out infinite; }
+/* 三点共用同一关键帧,delay 错峰 -0.8s/-0.4s/0s 形成位置传递循环 */
+/* 初始相位:点1最小→点2中等→点3最大,传递顺序 1→2→3→1 */
+.loading__dot--1 { animation-delay:-0.8s; }
+.loading__dot--2 { animation-delay:-0.4s; }
+.loading__dot--3 { animation-delay:0s; }
+@keyframes loading-dot {
+  0%, 66.66%, 100% { opacity:0.2; transform:scale(0.6); }
+  33.33% { opacity:1; transform:scale(1.3); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loading__dot { animation:loading-fade 1.4s ease-in-out infinite; }
+  @keyframes loading-fade { 0%,100% { opacity:0.4; } 50% { opacity:1; } }
+}
+
 /* ── Metric ────────────────────────────────────────────────── */
 /* @anatomy
    <span class="row__label">14px</span><div class="row__content"><span class="metric metric--14 metric--marketing"><span class="metric__main"><span class="metric__symbol">¥</span><span class="metric__value"><span class="metric__integer">9</span><span class="metric__decimal">.9</span></span></span></span><span class="metric metric--14 metric--marketing"><span class="metric__main"><span class="metri...
@@ -2758,6 +2782,16 @@
 
 /* Dark mode overrides for .dark context */
 .dark .radio { --radio-surface:var(--bg-inverse-surface-l1); --radio-border:var(--border-inverse); --radio-disabled-surface:var(--bg-inverse-surface-disabled); --radio-disabled-border:var(--border-inverse-weak); --radio-disabled-dot:var(--icon-inverse-disabled); }
+
+/* ── Result ────────────────────────────────────────────────── */
+/* @anatomy
+   <div class="pv-header"><h1>结果</h1><p>结果信息组，用于空状态、加载失败、错误提示等结果页场景。</p></div>
+*/
+/* ── Result 结果信息组 ── */
+.result { --result-icon-size:60px; --result-gap:var(--spacer-24); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:var(--result-gap); padding:var(--spacer-32) var(--spacer-32); text-align:center; }
+.result__icon { display:flex; align-items:center; justify-content:center; width:var(--result-icon-size); height:var(--result-icon-size); }
+.result__icon .wego-iconfont-s { font-size:var(--result-icon-size); line-height:var(--result-icon-size); color:#FA9D3B; }
+.result__title { font-size:var(--heading-sm-font-size); font-weight:var(--font-weight-medium); color:var(--text-default); line-height:var(--heading-sm-line-height); text-align:center; }
 
 /* ── Search ────────────────────────────────────────────────── */
 /* @anatomy
