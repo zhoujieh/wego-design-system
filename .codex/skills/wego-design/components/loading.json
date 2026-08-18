@@ -54,7 +54,7 @@
     "不内置文案，需要提示文案时由宿主以 result 或文本节点组合，不在 loading 内堆叠。"
   ],
   "behavior": {
-    "pulse": "位置传递式循环:三点共用 loading-dot 关键帧 0.6s ease-in-out infinite,关键帧在 0% 和 66.66% 处保持暗淡静止(opacity 0.2 / scale 0.4),33.33% 处达到峰值(opacity 1 / scale 1.3),扩大 scale 范围(0.4→1.3)让大小过渡更明显;delay -0.4s/-0.2s/0s 错峰,初始相位点1最小→点2中等→点3最大,传递顺序点1→点2→点3→点1 依次放大变亮循环,ease-in-out 让颜色和大小有平滑过渡;prefers-reduced-motion 时降级为整体淡入淡出。",
+    "pulse": "位置传递式循环:三点共用 loading-dot 关键帧 0.6s ease-in-out infinite,关键帧在 0% 和 66.66% 处保持暗淡静止(opacity 0.2 / scale 0.6),33.33% 处达到峰值(opacity 1 / scale 1.3),扩大 scale 峰值(1→1.3)让大小过渡更明显;delay -0.4s/-0.2s/0s 错峰,初始相位点1最小→点2中等→点3最大,传递顺序点1→点2→点3→点1 依次放大变亮循环,ease-in-out 让颜色和大小有平滑过渡;prefers-reduced-motion 时降级为整体淡入淡出。",
     "centering": "loading 本身是 inline-flex 正方形，由宿主用 flex 居中。"
   },
   "accessibility": {
