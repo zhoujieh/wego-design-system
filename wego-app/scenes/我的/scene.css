@@ -76,6 +76,7 @@
   flex-direction: column;
   min-width: 0;
   align-items: flex-start;
+  height: 44px;
 }
 
 .my-tab-identity__avatar {
@@ -100,11 +101,12 @@
 .my-tab-identity__album > span {
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: 16px;
 }
 
 .my-tab-identity__switch {
   flex: 0 0 auto;
-  font-size: var(--size-12);
+  font-size: 14px;
   color: var(--text-tertiary);
 }
 
@@ -114,13 +116,14 @@
   gap: var(--spacer-2);
   max-width: 100%;
   overflow: hidden;
+  height: 18px;
 }
 
 .my-tab-identity__name {
   flex: 0 0 auto;
-  color: var(--text-default);
-  font-size: var(--body-md-font-size);
-  font-weight: var(--font-weight-semibold);
+  color: #6e7382;
+  font-size: 12px;
+  font-weight: 400;
   line-height: var(--body-md-line-height);
   white-space: nowrap;
 }
@@ -165,63 +168,69 @@
   gap: var(--spacer-8);
 }
 
-.my-membership-card__body {
+.my-membership-card__row {
   display: flex;
   align-items: center;
-  gap: var(--spacer-8);
+  justify-content: space-between;
+  width: 100%;
 }
 
-.my-membership-card__level {
+.my-membership-card__brand {
   display: inline-flex;
   align-items: center;
   gap: var(--spacer-4);
+  flex: 0 0 auto;
+  margin-right: var(--spacer-8);
   color: var(--text-default);
   font-size: var(--body-md-font-size);
   font-weight: var(--font-weight-semibold);
   line-height: var(--body-md-line-height);
 }
 
-.my-membership-card__level .wego-iconfont-s {
-  color: var(--accent-gold);
-  font-size: var(--size-16);
-}
-
-.my-membership-card__expiry {
-  color: var(--text-secondary);
-  font-size: var(--body-xs-font-size);
-  line-height: var(--body-xs-line-height);
-}
-
-.my-membership-card__cloud {
-  color: var(--text-secondary);
-  font-size: var(--body-sm-font-size);
-  line-height: var(--body-sm-line-height);
-}
-
-.my-membership-card__usage {
+.my-membership-card__vip {
   flex: 0 0 auto;
-  color: var(--text-default);
-  font-family: var(--number-md-font-family);
-  font-size: var(--body-sm-font-size);
-  font-weight: var(--font-weight-medium);
-  line-height: var(--body-sm-line-height);
+  width: 20px;
+  height: 16px;
+  display: block;
 }
 
-.my-membership-card__progress {
+.my-membership-card__arrow {
+  flex: 0 0 auto;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--text-tertiary);
+}
+
+.my-membership-card__ticker {
   flex: 1 1 auto;
   min-width: 0;
-  height: var(--spacer-4);
+  height: var(--body-md-line-height);
   overflow: hidden;
-  border-radius: var(--radius-full);
-  background: var(--bg-subtle);
+  text-align: right;
 }
 
-.my-membership-card__progress-value {
-  display: block;
-  width: 37%;
-  height: 100%;
-  border-radius: var(--radius-full);
-  background: var(--accent-gold);
+.my-membership-card__ticker-track {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  animation: my-membership-ticker 8s infinite var(--ease-standard, ease);
+}
+
+.my-membership-card__ticker-item {
+  flex: 0 0 auto;
+  height: var(--body-md-line-height);
+  color: var(--text-secondary);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-md-line-height);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@keyframes my-membership-ticker {
+  0%, 45% { transform: translateY(0); }
+  50%, 95% { transform: translateY(-25%); }
+  100% { transform: translateY(-50%); }
 }
 
 .my-entry-card__content {
@@ -340,6 +349,16 @@
   padding-inline: var(--spacer-0);
 }
 
+.sticky-region.my-content-tabs-sticky {
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  background: var(--bg-page);
+}
+
+.sticky-region.my-content-tabs-sticky .sticky-region__inner {
+  background: var(--bg-surface);
+}
+
 .my-content-tabs {
   border-bottom: var(--stroke-hairline) solid var(--border-neutral-l2);
 }
@@ -377,7 +396,6 @@
   min-height: var(--size-40);
   padding-block: var(--spacer-0);
   padding-inline: var(--spacer-12);
-  border-bottom: var(--stroke-hairline) solid var(--border-neutral-l2);
 }
 
 .my-content-management[hidden] {
@@ -496,7 +514,6 @@
   align-items: center;
   gap: var(--spacer-16);
   padding: var(--spacer-8) var(--spacer-12) var(--spacer-8) var(--spacer-16);
-  border-bottom: var(--stroke-hairline) solid var(--border-neutral-l2);
 }
 
 .my-pin-row__label {
