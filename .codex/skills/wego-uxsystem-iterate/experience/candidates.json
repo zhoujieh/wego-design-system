@@ -40,17 +40,19 @@
       "targetAuthority": null,
       "relatedRuleId": "agent-must-read-host-code-before-asking",
       "evidenceRefs": [
-        "evt-20260731-005"
+        "evt-20260731-005",
+        "evt-20260819-005"
       ],
       "scenes": [
-        "wego-app/scenes/我的"
+        "wego-app/scenes/我的",
+        "好友列表"
       ],
-      "occurrenceCount": 1,
+      "occurrenceCount": 2,
       "status": "observing",
       "proposalReason": null,
       "upgradeHistory": [],
       "createdAt": "2026-07-31T13:00:00.000Z",
-      "updatedAt": "2026-08-05"
+      "updatedAt": "2026-08-19"
     },
     {
       "id": "exp-20260803-001",
@@ -356,6 +358,114 @@
       "occurrenceCount": 1,
       "status": "proposed",
       "proposalReason": "explicit-upgrade",
+      "upgradeHistory": [],
+      "createdAt": "2026-08-19",
+      "updatedAt": "2026-08-19"
+    },
+    {
+      "id": "exp-20260819-005",
+      "normalizedKey": "component-contract-detail-not-checked-per-region",
+      "category": "execution",
+      "type": "rule-execution-failure",
+      "ownerSkill": "wego-design",
+      "problem": "表单通栏圆角、form 默认左右结构、搜索框 clear 交互等组件契约细节在实现时被遗漏或误用，用户多次纠正后才符合契约。",
+      "rootCause": "interaction-prototype-design.md 已有'逐区域组件映射'步骤要求核对 usageHints 和 doNotInvent，但实现时未逐项核对表单和搜索组件的契约细节（通栏圆角规则、默认水平结构、clear 交互能力、固定高度与自适应区分）。",
+      "resolution": "当前场景已全部修正；后续实现组件消费时需逐项核对契约的 usageHints、doNotInvent 和 behavior 章节，不依赖工作记忆。",
+      "targetAuthority": {
+        "path": ".codex/skills/wego-design/references/interaction-prototype-design.md",
+        "anchor": "逐区域组件映射"
+      },
+      "relatedRuleId": "design-before-component-consumption",
+      "evidenceRefs": [
+        "evt-20260819-006"
+      ],
+      "scenes": [
+        "好友列表"
+      ],
+      "occurrenceCount": 1,
+      "status": "observing",
+      "proposalReason": null,
+      "upgradeHistory": [],
+      "createdAt": "2026-08-19",
+      "updatedAt": "2026-08-19"
+    },
+    {
+      "id": "exp-20260819-006",
+      "normalizedKey": "scroll-layout-direction-reveal-jitter-when-content-short",
+      "category": "system",
+      "type": "component-state-gap",
+      "ownerSkill": "wego-uxsystem-iterate",
+      "problem": "scroll-layout.js 的 direction-reveal 策略在滚动内容不足一屏时触发搜索框显示/隐藏循环抖动。",
+      "rootCause": "decideDirectionReveal 缺少'内容不足以滚动时不应触发隐藏'的前置判断：内容不足一屏时 currentMax 为 0、currentTop 始终为 0，隐藏后 updateStacks 调整 scrollPaddingTop 导致布局变化，ResizeObserver 重新 measure 又强制恢复 visible，形成循环。",
+      "resolution": "当前未修复；待确认修复方案后在 scroll-layout.js 的 decideDirectionReveal 中增加 currentMax <= tolerance 时跳过隐藏判断。",
+      "targetAuthority": {
+        "path": "wego-app/js/scroll-layout.js",
+        "anchor": "decideDirectionReveal"
+      },
+      "relatedRuleId": null,
+      "evidenceRefs": [
+        "evt-20260819-007"
+      ],
+      "scenes": [
+        "好友列表"
+      ],
+      "occurrenceCount": 1,
+      "status": "observing",
+      "proposalReason": null,
+      "upgradeHistory": [],
+      "createdAt": "2026-08-19",
+      "updatedAt": "2026-08-19"
+    },
+    {
+      "id": "exp-20260819-007",
+      "normalizedKey": "runtime-guard-absolute-opacity-blocks-transparent-overlay",
+      "category": "validation",
+      "type": "guard-false-positive",
+      "ownerSkill": "wego-uxsystem-iterate",
+      "problem": "运行时守卫要求 absolute 定位的悬浮元素必须有不透明背景，与轻量悬浮控件（如字母索引）彻底透明的业务需求冲突。",
+      "rootCause": "validate-scene-runtime.mjs opaqueBackground 检查 alpha >= 0.98，设计意图是保证悬浮控件可读，但未区分'需要不透明底的交互控件'和'轻量辅助定位控件'，对后者产生误拦截。",
+      "resolution": "当前场景接受告警使用透明背景；待复盘后决定是否为轻量悬浮控件增加豁免标记或调整守卫判断逻辑。",
+      "targetAuthority": {
+        "path": "scripts/validate-scene-runtime.mjs",
+        "anchor": "opaqueBackground"
+      },
+      "relatedRuleId": null,
+      "evidenceRefs": [
+        "evt-20260819-008"
+      ],
+      "scenes": [
+        "好友列表"
+      ],
+      "occurrenceCount": 1,
+      "status": "observing",
+      "proposalReason": null,
+      "upgradeHistory": [],
+      "createdAt": "2026-08-19",
+      "updatedAt": "2026-08-19"
+    },
+    {
+      "id": "exp-20260819-008",
+      "normalizedKey": "body-user-select-none-blocks-cmd-a-select-all",
+      "category": "system",
+      "type": "component-state-gap",
+      "ownerSkill": "wego-uxsystem-iterate",
+      "problem": "输入框无法用 Cmd+A 全选内容，包括搜索框和表单输入框。",
+      "rootCause": "app.css 中 body 设置 user-select: none，input 单独设置 user-select: text，但 Cmd+A 全局全选行为仍受 body 的 user-select: none 影响，导致全选无法覆盖 input 内容。",
+      "resolution": "当前未修复；待确认根因后调整 app.css 的 user-select 策略或为 input 增加全选能力。",
+      "targetAuthority": {
+        "path": "wego-app/css/app.css",
+        "anchor": "user-select"
+      },
+      "relatedRuleId": null,
+      "evidenceRefs": [
+        "evt-20260819-009"
+      ],
+      "scenes": [
+        "好友列表"
+      ],
+      "occurrenceCount": 1,
+      "status": "observing",
+      "proposalReason": null,
       "upgradeHistory": [],
       "createdAt": "2026-08-19",
       "updatedAt": "2026-08-19"
