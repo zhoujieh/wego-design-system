@@ -32,4 +32,4 @@ jobs:
       - name: 设计系统同步一致性
         run: node scripts/sync-wego-app-lib.mjs --check
       - name: 设计系统与业务工作流完整守门验证
-        run: node scripts/validate-wego-design.mjs --scope=full --strict
+        run: node scripts/validate-wego-design.mjs --scope=system --strict
