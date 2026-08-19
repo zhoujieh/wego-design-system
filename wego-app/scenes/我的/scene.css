@@ -101,12 +101,12 @@
 .my-tab-identity__album > span {
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 16px;
+  font-size: var(--size-16);
 }
 
 .my-tab-identity__switch {
   flex: 0 0 auto;
-  font-size: 14px;
+  font-size: var(--body-md-font-size);
   color: var(--text-tertiary);
 }
 
@@ -121,9 +121,9 @@
 
 .my-tab-identity__name {
   flex: 0 0 auto;
-  color: #6e7382;
-  font-size: 12px;
-  font-weight: 400;
+  color: var(--text-secondary);
+  font-size: var(--body-sm-font-size);
+  font-weight: var(--font-weight-regular);
   line-height: var(--body-md-line-height);
   white-space: nowrap;
 }
@@ -196,8 +196,7 @@
 
 .my-membership-card__arrow {
   flex: 0 0 auto;
-  font-size: 14px;
-  line-height: 1;
+  font-size: var(--body-md-font-size);
   color: var(--text-tertiary);
 }
 
@@ -213,7 +212,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  animation: my-membership-ticker 8s infinite var(--ease-standard, ease);
+  animation: my-membership-ticker 8s infinite var(--ease-standard);
 }
 
 .my-membership-card__ticker-item {
@@ -350,8 +349,8 @@
 }
 
 .sticky-region.my-content-tabs-sticky {
-  border-top-left-radius: 12px;
-  border-top-right-radius: 12px;
+  border-top-left-radius: var(--radius-12);
+  border-top-right-radius: var(--radius-12);
   background: var(--bg-page);
 }
 

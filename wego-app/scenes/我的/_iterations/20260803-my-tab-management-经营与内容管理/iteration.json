@@ -270,15 +270,15 @@
   ],
   "freeze": null,
   "prototype_submission": {
-    "at": "2026-08-11T00:22:34.055Z",
+    "at": "2026-08-19T07:58:59.139Z",
     "scope_revision": 1,
     "affected_scenes": [
       "我的"
     ],
     "fingerprints": {
       "@route-entry/%E6%88%91%E7%9A%84": "cd0611ebe77c2c1ba558f5f7796281411766236f4e163a96ce8d8538ac0f9c69",
-      "wego-app/scenes/我的/scene.css": "3e1ffda9c4344eba95497b88870ee2db65265e483246bea08d6cf85fddde403a",
-      "wego-app/scenes/我的/scene.js": "bcb81070f3d0a0d4a6714827855f9bdba02a7cd2a61a691a2f9b8d10e3a6c873"
+      "wego-app/scenes/我的/scene.css": "727442e493b8b0f7a3f1584aa9f90c85f06dcd660295f12ca270e18b193c8b2f",
+      "wego-app/scenes/我的/scene.js": "a8e248ae2d9d84bf94a0ad030d776503d85a7e51a558856b527aca425795cf0c"
     }
   }
 }
