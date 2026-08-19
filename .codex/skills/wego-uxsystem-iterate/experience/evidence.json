@@ -161,6 +161,33 @@
         "main 版 scene.css 已含 resale-cursor-blink 动画等分支'新'提交的等价或更新内容，最终确认无任何未合并内容并清理分支。",
         "AGENTS.md delivery-intake-must-precede-business-workflow 的核对范围只覆盖开放 PR，未包含已合并 PR 的遗留分支状态与内容等价性核查。"
       ]
+    },
+    {
+      "id": "evt-20260819-002",
+      "experienceId": "exp-20260819-002",
+      "occurredAt": "2026-08-19",
+      "taskRef": "PR #22 长期等待验收后同步 main 复盘",
+      "scenes": [],
+      "fact": "PR #22 于 2026-08-11 提交原型验收后进入等待状态，期间无会话接触该交付单元；其他 Agent 于 08-17~08-18 合并 10 个 PR 进 main，导致分支静默落后 29 个提交，08-19 开工时需处理大量合并内容（含 routes.js 生成物冲突）。",
+      "evidence": [
+        "git log 确认 feature/codex-my-tab 落后 origin/main 29 个提交，其中 08-17~08-18 期间 main 合入 PR #45~#53 共 10 个 PR。",
+        "AGENTS.md agent-must-pull-before-task-start 仅要求开工前 pull，08-08/08-11/08-19 每次会话开工均执行了拉取，无执行违规。",
+        "等待验收的 8 天内没有任何会话接触 PR #22，同步规则从未触发，分叉在闲置期静默累积。",
+        "AGENTS.md 与 wego-github-delivery/SKILL.md 均无'开放 PR 分支落后 main 时主动同步'的规则，也无自动化同步机制。"
+      ]
+    },
+    {
+      "id": "evt-20260819-003",
+      "experienceId": "exp-20260819-003",
+      "occurredAt": "2026-08-19",
+      "taskRef": "PR #22 长期等待验收后同步 main 复盘",
+      "scenes": [],
+      "fact": "2026-08-08 验收会话结束时在 main 工作区遗留 5 个文件的未提交改动（认领信息、简报 v3、身份栏布局），后续无会话处理；08-19 开工 git pull 被未提交改动阻塞，需先 stash 才能同步。",
+      "evidence": [
+        "git stash 保留的遗留改动涉及 claims/trae-my-tab.json、iteration.json、scene.js、scene.css 等 5 个文件。",
+        "wego-github-delivery/SKILL.md 允许本地迭代期间创建 checkpoint commit，但无'会话/任务暂停结束前工作区必须清零未提交改动'的收尾规则。",
+        "遗留改动中身份栏布局等内容已被远端后续提交以更新实现取代，stash 最终确认无保留价值并丢弃。"
+      ]
     }
   ]
 }

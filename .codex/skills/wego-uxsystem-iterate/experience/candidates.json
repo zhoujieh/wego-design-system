@@ -216,15 +216,68 @@
       "problem": "判断遗留分支是否有未合并内容时仅凭提交列表，会把已 squash 合并交付单元的旧演进分支误判为有待合并提交，触发无意义的合并流程。",
       "rootCause": "交付单元核对步骤只覆盖开放 PR，未包含'分支关联 PR 的合并状态与内容等价性'核查；squash 合并使提交 SHA 与 main 断连，git log 的未合并提交列表不能反映真实内容差异。",
       "resolution": "本次已通过 PR 状态与文件内容等价核查确认无未合并内容并清理遗留分支；后续遇到疑似未合并分支先查关联 PR 状态与内容等价，再决定合并或清理。",
-      "targetAuthority": null,
+      "targetAuthority": {
+        "path": ".github/workflows/branch-cleanup.yml",
+        "anchor": null
+      },
       "relatedRuleId": "delivery-intake-must-precede-business-workflow",
       "evidenceRefs": [
         "evt-20260819-001"
       ],
       "scenes": [],
       "occurrenceCount": 1,
-      "status": "observing",
-      "proposalReason": null,
+      "status": "proposed",
+      "proposalReason": "explicit-upgrade",
+      "upgradeHistory": [],
+      "createdAt": "2026-08-19",
+      "updatedAt": "2026-08-19"
+    },
+    {
+      "id": "exp-20260819-002",
+      "normalizedKey": "open-pr-idle-divergence-requires-auto-sync",
+      "category": "execution",
+      "type": "workflow-gap",
+      "ownerSkill": "wego-uxsystem-iterate",
+      "problem": "开放 PR 等待验收期间无人接触，main 持续前进导致分支静默大幅落后，下次接手时集中面对大量合并冲突。",
+      "rootCause": "agent-must-pull-before-task-start 只约束'有会话开工'的时刻，不覆盖交付单元闲置期；无开放 PR 落后即同步的规则，也无 main 合并后自动同步开放 PR 的机制，分叉在等待验收期间无约束累积。",
+      "resolution": "新增 open-pr-must-sync-main-when-behind 硬约束与交付核对扩展（接手落后分支先 merge 同步）；新增 main 合并后自动对开放 PR 执行 merge main 的 CI（无冲突自动推送，冲突打 needs-sync 标签）。",
+      "targetAuthority": {
+        "path": ".codex/skills/wego-github-delivery/SKILL.md",
+        "anchor": "开始交付"
+      },
+      "relatedRuleId": "agent-must-pull-before-task-start",
+      "evidenceRefs": [
+        "evt-20260819-002"
+      ],
+      "scenes": [],
+      "occurrenceCount": 1,
+      "status": "proposed",
+      "proposalReason": "explicit-upgrade",
+      "upgradeHistory": [],
+      "createdAt": "2026-08-19",
+      "updatedAt": "2026-08-19"
+    },
+    {
+      "id": "exp-20260819-003",
+      "normalizedKey": "session-end-must-not-leave-uncommitted-changes",
+      "category": "execution",
+      "type": "workflow-gap",
+      "ownerSkill": "wego-uxsystem-iterate",
+      "problem": "会话结束遗留未提交改动，阻塞交付单元下次开工的 pull 与合并流程。",
+      "rootCause": "wego-github-delivery/SKILL.md 允许本地迭代期间创建 checkpoint commit，但缺少会话/任务暂停结束时的收尾要求，未提交改动跨会话存活无约束。",
+      "resolution": "新增收尾规则：回复结束、任务暂停或会话结束时，任务 worktree 不得遗留未提交改动，成组改动提交 checkpoint、零散改动还原或登记任务记录；AGENTS.md 同步新增 session-end-must-clean-worktree 摘要。",
+      "targetAuthority": {
+        "path": ".codex/skills/wego-github-delivery/SKILL.md",
+        "anchor": "两阶段状态"
+      },
+      "relatedRuleId": null,
+      "evidenceRefs": [
+        "evt-20260819-003"
+      ],
+      "scenes": [],
+      "occurrenceCount": 1,
+      "status": "proposed",
+      "proposalReason": "explicit-upgrade",
       "upgradeHistory": [],
       "createdAt": "2026-08-19",
       "updatedAt": "2026-08-19"
