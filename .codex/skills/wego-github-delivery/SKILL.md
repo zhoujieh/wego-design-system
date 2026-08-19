@@ -31,7 +31,12 @@ description: 负责微购仓库的分支、PR、本地迭代预览、正式验�
 
 进入正式验收后：
 
-1. 运行与范围相称的完整严格验证；业务原型同时执行 `submit-prototype`。
+1. 运行与范围相称的完整严格验证，**推送前必须本地全过**，禁止未验证直接 `git push`：
+   - `node scripts/validate-wego-design.mjs --scope=full --strict`（场景 Token 合规、源/副本同步、原型指纹、完整守门）
+   - `node scripts/build-routes.mjs --check`（路由生成一致性）
+   - `node scripts/sync-wego-app-lib.mjs --check`（设计系统 lib 副本与源一致）
+   - 业务原型同时执行 `submit-prototype` 更新原型指纹。
+   - 任意一项失败必须先修复再推送；未跑验证或验证未过直接推送视为跳过门禁。
 2. 集中提交尚未提交的改动，推送当前分支并创建或更新同一个 PR。
 3. 业务原型返回本地 HTTP 与 PR 独立在线预览两个链接；设计系统组件、Token、Preview 或 UI Kit 仍只返回本地 HTTP 预览。
 4. 每次结果必须标明：`当前状态：正式验收中（PR #<编号>）`。
