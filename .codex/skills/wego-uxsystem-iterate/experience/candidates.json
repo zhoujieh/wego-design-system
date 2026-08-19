@@ -332,6 +332,33 @@
       ],
       "createdAt": "2026-08-19",
       "updatedAt": "2026-08-19"
+    },
+    {
+      "id": "exp-20260819-004",
+      "normalizedKey": "pre-push-local-validation-gate-skipped",
+      "category": "execution",
+      "type": "rule-execution-failure",
+      "ownerSkill": "wego-uxsystem-iterate",
+      "problem": "推送前未在本地运行完整验证脚本，导致 Token 违规、指纹漂移、源/副本不一致等问题全部在 CI 暴露，多次推送修复引发 publish 并发冲突，CI 反复失败阻塞交付。",
+      "rootCause": "wego-github-delivery SKILL.md 已明确「进入正式验收后：运行与范围相称的完整严格验证」，但执行 git push 时把「推送」当单一动作，未将本地验证脚本（validate-wego-design.mjs / build-routes.mjs --check / sync-wego-app-lib.mjs --check / iteration-record.mjs check）作为 git push 的前置依赖，急于完成推送指令跳过验证门禁。",
+      "resolution": "本次已在本地运行 validate-wego-design.mjs --scope=full --strict 一次性发现全部问题并修复，CI gate 通过；后续推送前必须先在本地跑完整验证命令清单全过再执行 git push，禁止未验证直接推送。",
+      "targetAuthority": {
+        "path": ".codex/skills/wego-github-delivery/SKILL.md",
+        "anchor": "正式验收中"
+      },
+      "relatedRuleId": "delivery-must-run-local-validation-before-push",
+      "evidenceRefs": [
+        "evt-20260819-004"
+      ],
+      "scenes": [
+        "我的"
+      ],
+      "occurrenceCount": 1,
+      "status": "proposed",
+      "proposalReason": "explicit-upgrade",
+      "upgradeHistory": [],
+      "createdAt": "2026-08-19",
+      "updatedAt": "2026-08-19"
     }
   ]
 }
