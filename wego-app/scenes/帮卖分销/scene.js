@@ -1248,7 +1248,7 @@
               }
               var rate = amountToRate(addPrice, supplyPrice);
               if (!validateRate(rate)) {
-                ctx.toast('加价比例需在1%-300%之间');
+                ctx.toast('售价需在¥' + formatPrice(supplyPrice * 1.01) + '~¥' + formatPrice(supplyPrice * 4) + '之间');
                 return;
               }
               updatePopupPrice(popupRoot, sample, addPrice, 1, String(addPrice));

@@ -173,7 +173,7 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 0;
+  gap: var(--spacer-8);
 }
 /* 售价 ¥+数字 一组,底对齐 */
 .resale-price__price-group {
@@ -198,7 +198,10 @@
   display: flex;
   align-items: center;
   gap: var(--spacer-4);
-  margin-left: var(--spacer-8);
+}
+/* 可编辑行:佣金靠右,换行后落第二行 */
+.resale-price__input-row .resale-price__commission {
+  margin-left: auto;
 }
 /* 佣金 ¥+数字 一组,底对齐 */
 .resale-price__commission-group {
@@ -246,10 +249,10 @@
 .resale-price__input-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--spacer-4);
-  height: var(--size-48);
-  padding: 0 var(--spacer-12);
+  flex-wrap: wrap;
+  gap: var(--spacer-8);
+  min-height: var(--size-48);
+  padding: var(--spacer-8) var(--spacer-12);
   background: var(--bg-surface);
   border: 1px solid transparent;
   border-radius: var(--radius-8);
@@ -279,7 +282,7 @@
 }
 .resale-price__input-left {
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
   gap: 0;
 }
 
@@ -408,9 +411,11 @@
 .modal--no-mask::before {
   display: none;
 }
-/* 数字键盘弹窗:面板顶部圆角改为0 */
+/* 数字键盘弹窗:面板顶部圆角改为0,高度自适应内容(覆盖帮卖弹窗 70vh 固定高度) */
 [data-keypad-overlay] .modal__panel {
   border-radius: 0;
+  height: auto;
+  max-height: calc(100vh - 40px);
 }
 /* 激活键盘时,加价卖半屏蒙层保持不变(键盘已去掉自身蒙层,底层蒙层不再降透明度) */
 .app-overlay-layer:has([data-keypad-overlay].is-overlay-top) > .modal.is-overlay-under::before {
@@ -464,7 +469,7 @@
   text-align: left;
   font-family: var(--number-md-font-family);
   line-height: var(--body-lg-line-height);
-  font-size: var(--body-lg-font-size);
+  font-size: var(--heading-sm-font-size);
   font-weight: var(--font-weight-medium);
   color: var(--text-default);
   padding: 0;
