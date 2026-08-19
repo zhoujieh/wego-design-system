@@ -226,9 +226,26 @@
       ],
       "scenes": [],
       "occurrenceCount": 1,
-      "status": "proposed",
-      "proposalReason": "explicit-upgrade",
-      "upgradeHistory": [],
+      "status": "upgraded",
+      "proposalReason": null,
+      "upgradeHistory": [
+        {
+          "version": 1,
+          "upgradedAt": "2026-08-19",
+          "evidenceRefs": [
+            "evt-20260819-001"
+          ],
+          "targetAuthority": {
+            "path": ".github/workflows/branch-cleanup.yml",
+            "anchor": null
+          },
+          "ruleIds": [
+            "delivery-intake-must-precede-business-workflow"
+          ],
+          "summary": "新增 branch-cleanup.yml 每日自动清理已合并 PR 超 24 小时的遗留分支（keep-branch 标签例外），无 PR 归属的陈旧分支仅报告；消除靠人工记得删分支的执行漏洞。",
+          "commitSha": "c4dd687"
+        }
+      ],
       "createdAt": "2026-08-19",
       "updatedAt": "2026-08-19"
     },
@@ -251,9 +268,26 @@
       ],
       "scenes": [],
       "occurrenceCount": 1,
-      "status": "proposed",
-      "proposalReason": "explicit-upgrade",
-      "upgradeHistory": [],
+      "status": "upgraded",
+      "proposalReason": null,
+      "upgradeHistory": [
+        {
+          "version": 1,
+          "upgradedAt": "2026-08-19",
+          "evidenceRefs": [
+            "evt-20260819-002"
+          ],
+          "targetAuthority": {
+            "path": ".codex/skills/wego-github-delivery/SKILL.md",
+            "anchor": "开始交付"
+          },
+          "ruleIds": [
+            "open-pr-must-sync-main-when-behind"
+          ],
+          "summary": "AGENTS.md 新增 open-pr-must-sync-main-when-behind 硬约束；wego-github-delivery 交付核对扩展开放 PR 落后检查与 merge 同步步骤；新增 sync-open-prs.yml 在 main 前进后自动对开放 PR update-branch，冲突打 needs-sync 标签。",
+          "commitSha": "c4dd687"
+        }
+      ],
       "createdAt": "2026-08-19",
       "updatedAt": "2026-08-19"
     },
@@ -276,9 +310,26 @@
       ],
       "scenes": [],
       "occurrenceCount": 1,
-      "status": "proposed",
-      "proposalReason": "explicit-upgrade",
-      "upgradeHistory": [],
+      "status": "upgraded",
+      "proposalReason": null,
+      "upgradeHistory": [
+        {
+          "version": 1,
+          "upgradedAt": "2026-08-19",
+          "evidenceRefs": [
+            "evt-20260819-003"
+          ],
+          "targetAuthority": {
+            "path": ".codex/skills/wego-github-delivery/SKILL.md",
+            "anchor": "两阶段状态"
+          },
+          "ruleIds": [
+            "session-end-must-clean-worktree"
+          ],
+          "summary": "wego-github-delivery 两阶段状态新增会话收尾规则：回复结束、任务暂停或会话结束时任务 worktree 不得遗留未提交改动；AGENTS.md 同步新增 session-end-must-clean-worktree 摘要。",
+          "commitSha": "c4dd687"
+        }
+      ],
       "createdAt": "2026-08-19",
       "updatedAt": "2026-08-19"
     }
