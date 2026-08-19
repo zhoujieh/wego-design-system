@@ -1,0 +1,9 @@
+{
+  "agent": "trae-friends",
+  "scene": "好友列表",
+  "routeId": "friend-list",
+  "branch": "feature/trae-friends",
+  "status": "active",
+  "claimedAt": "2026-08-19T16:45:00.000Z",
+  "note": "恢复好友 tab：复用 7月16日完整好友列表场景代码（设计系统412契约），适配最新设计系统"
+}
