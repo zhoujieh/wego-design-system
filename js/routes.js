@@ -11,6 +11,15 @@ window.WEGO_APP_ROUTES = [
   script: './scenes/帮卖分销/scene.js'
 },
 {
+  routeId: 'friend-list',
+  entry: {
+    type: 'host-tab',
+    tab: 'haoyou'
+  },
+  style: './scenes/好友列表/scene.css',
+  script: './scenes/好友列表/scene.js'
+},
+{
   routeId: 'my',
   entry: {
     type: 'host-tab',

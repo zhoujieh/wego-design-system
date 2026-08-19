@@ -177,6 +177,7 @@
       region: item.region,
       main_categories: item.main_categories,
       account_type: item.account_type,
+      statuses: item.shop_statuses || [],
       relation_type: 'merchant_friend',
       relation_status: 'active'
     };
