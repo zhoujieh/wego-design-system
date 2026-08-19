@@ -205,6 +205,75 @@
         "连续 6 次推送（merge/routes/ci缓存/源同步/token合规/指纹）每次触发新 publish run，并发推 gh-pages 导致 publish 失败。",
         "本次问题与 2026-07-31「我的Tab页面开发」教训同属「急于推进任务跳过前置门禁」模式：那次跳过 confirm-brief 确认门禁，这次跳过推送前验证门禁。"
       ]
+    },
+    {
+      "id": "evt-20260819-005",
+      "experienceId": "exp-20260731-005",
+      "occurredAt": "2026-08-19",
+      "taskRef": "好友列表场景迭代",
+      "scenes": ["好友列表"],
+      "fact": "搜索框上滑隐藏/下滑显示先自造局部实现（监听 scrollEl 方向 + 自定义 hidden 类），后发现宿主已有 sticky-region 组件 + ctx.bindScrollLayout 通用能力（direction-reveal 策略），删除自造代码改用通用能力。",
+      "evidence": [
+        "初版在 scene.js 自造 scroll 方向监听 + searchHidden 变量 + friend-list__search--hidden 类实现上滑隐藏。",
+        "用户提问'搜索框上滑隐藏/下滑显示是用的通用能力吗？'后，才查看我的 tab 场景发现 sticky-region + data-visibility='direction-reveal' + ctx.bindScrollLayout 通用能力。",
+        "AGENTS.md agent-must-read-host-code-before-asking 已要求提问前先查看宿主代码，但实现交互能力前未先查看宿主是否已有通用能力。"
+      ]
+    },
+    {
+      "id": "evt-20260819-006",
+      "experienceId": "exp-20260819-005",
+      "occurredAt": "2026-08-19",
+      "taskRef": "好友列表场景迭代",
+      "scenes": ["好友列表"],
+      "fact": "添加好友表单的通栏圆角、form 默认左右结构、搜索框 clear 交互在初版实现中被遗漏或误用，用户多次纠正后才符合组件契约。",
+      "evidence": [
+        "用户反馈：通栏模式在分组的圆角应该是0px；uikit 和组件里明确要求 form 默认是左右结构的。",
+        "初版表单使用 form-group__content--card（通栏不应有圆角），头像上传和验证消息误用垂直结构。",
+        "验证消息先误用 form-body--fixed-height（固定高度），用户指出高度应自适应后移除。",
+        "搜索框缺少 clear 交互、输入内容不能 Cmd+A 全选、搜索结果未高亮关键词，均由用户逐项指出后才补齐。",
+        "interaction-prototype-design.md 已有'逐区域组件映射'步骤要求核对 usageHints 和 doNotInvent，但实现时未逐项核对表单和搜索组件的契约细节。"
+      ]
+    },
+    {
+      "id": "evt-20260819-007",
+      "experienceId": "exp-20260819-006",
+      "occurredAt": "2026-08-19",
+      "taskRef": "好友列表场景迭代",
+      "scenes": ["好友列表"],
+      "fact": "scroll-layout.js 的 direction-reveal 策略在滚动内容不足一屏时（maxScrollTop 为 0）会触发搜索框显示/隐藏循环抖动。",
+      "evidence": [
+        "用户反馈：如果列表高度不足1屏，搜索框会一直抖，显示隐藏显示隐藏。",
+        "scroll-layout.js decideDirectionReveal 在 currentTop <= tolerance 时强制返回 visible，但隐藏态触发后 updateStacks 调整 scrollPaddingTop 导致布局变化，ResizeObserver 重新 measure 又触发状态切换，形成循环。",
+        "内容不足一屏时 currentMax 为 0，currentTop 始终为 0，隐藏后立即被强制恢复 visible，造成抖动。",
+        "根因：direction-reveal 缺少'内容不足以滚动时不应触发隐藏'的前置判断。"
+      ]
+    },
+    {
+      "id": "evt-20260819-008",
+      "experienceId": "exp-20260819-007",
+      "occurredAt": "2026-08-19",
+      "taskRef": "好友列表场景迭代",
+      "scenes": ["好友列表"],
+      "fact": "运行时守卫要求 absolute 定位的悬浮元素必须有不透明背景（alpha >= 0.98），与业务需要彻底透明悬浮控件的需求冲突。",
+      "evidence": [
+        "用户多次要求右侧悬浮索引不要背景，但 background: transparent 触发 runtime.layout 守卫'absolute surface 背景不透明度不足'。",
+        "validate-scene-runtime.mjs opaqueBackground 检查 alpha >= 0.98 || backgroundImage !== 'none'，不允许透明背景。",
+        "用户确认选择'彻底透明（视觉优先）'，接受守卫告警留到复盘处理。",
+        "守卫设计意图是保证悬浮控件在滚动内容上可读，但右侧字母索引这类轻量控件不需要不透明底。"
+      ]
+    },
+    {
+      "id": "evt-20260819-009",
+      "experienceId": "exp-20260819-008",
+      "occurredAt": "2026-08-19",
+      "taskRef": "好友列表场景迭代",
+      "scenes": ["好友列表"],
+      "fact": "输入框无法用 Cmd+A 全选内容，包括搜索框和表单输入框，推测与 app.css 中 body { user-select: none } 影响全局全选行为有关。",
+      "evidence": [
+        "用户反馈：输入框内容不能用键盘全选；我试了下确实不能Cmd+A 全选内容，包括 form 组件里的输入框。",
+        "app.css 中 body 设置 user-select: none，input 单独设置 user-select: text，但 Cmd+A 全局全选仍受 body 影响。",
+        "用户决定先不登记，等后面一起复盘再处理。"
+      ]
     }
   ]
 }
