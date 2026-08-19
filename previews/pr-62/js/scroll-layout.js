@@ -179,7 +179,18 @@
     function applyPolicy(region, currentTop, directionDecision) {
       if (region.policy === 'always') return setState(region, 'visible');
       if (region.policy === 'direction-reveal') {
-        if (directionDecision.state) setState(region, directionDecision.state);
+        if (directionDecision.state) {
+          // 回顶恢复 visible 时不带过渡，避免 max-height 从 0 展开的动画
+          if (directionDecision.state === 'visible' && region.element.dataset.state === 'hidden') {
+            region.element.style.transition = 'none';
+            setState(region, 'visible');
+            requestAnimationFrame(function () {
+              region.element.style.removeProperty('transition');
+            });
+          } else {
+            setState(region, directionDecision.state);
+          }
+        }
         return;
       }
       if (region.policy === 'compact-on-scroll') return setState(region, currentTop > region.threshold ? 'compact' : 'visible');
