@@ -16,8 +16,6 @@ jobs:
         with:
           node-version: 24
       - run: npm ci
-      - name: 安装浏览器验证运行时
-        run: npx playwright install --with-deps chromium
       # 以下为硬门禁：均为仓库内新增的协作一致性检查，必须全部通过。
       - name: 认领冲突检查
         run: node scripts/validate-claims.mjs
