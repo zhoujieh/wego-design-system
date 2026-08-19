@@ -338,7 +338,9 @@ async function inspectLayout(page, routeId) {
     const failures = [];
     for (const region of regions) {
       const style = getComputedStyle(region);
-      if (!opaqueBackground(region)) failures.push(`${label(region)} 的 ${style.position} surface 背景不透明度不足`);
+      // 用户明确要求透明背景的悬浮控件跳过不透明度检查
+      const allowTransparent = region.hasAttribute('data-surface-transparent');
+      if (!allowTransparent && !opaqueBackground(region)) failures.push(`${label(region)} 的 ${style.position} surface 背景不透明度不足`);
       const isBottom = style.bottom !== 'auto' && (style.position === 'fixed' || style.position === 'absolute' || style.position === 'sticky');
       if (!isBottom) continue;
       const regionRect = region.getBoundingClientRect();
