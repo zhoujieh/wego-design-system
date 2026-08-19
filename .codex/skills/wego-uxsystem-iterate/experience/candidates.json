@@ -109,21 +109,22 @@
       "category": "validation",
       "type": "validation-coverage-gap",
       "ownerSkill": "wego-uxsystem-iterate",
-      "problem": "骨架屏与真实 DOM 明显不一致时仍能通过验证，加载前后出现布局跳动。",
-      "rootCause": "现有运行时验证没有覆盖骨架与真实可见 DOM 的结构一致性和加载前后布局稳定性。",
-      "resolution": "当前场景已按真实 DOM 生成骨架；继续观察跨场景复现，达到阈值后优先强化运行时验证。",
+      "problem": "骨架屏与真实 DOM 不一致或覆盖严重不足时仍被接受，加载前后出现布局跳动或大片空白。",
+      "rootCause": "骨架屏生成/验证未保证覆盖真实 DOM 全貌：生成脚本只采样首屏可见区域，滚动容器内内容主体被过滤，写入前也没有覆盖完整性核对或运行时验证拦截。",
+      "resolution": "骨架屏生成后需先核对覆盖完整性与真实 DOM 全貌（含滚动内容区）再落地，必要时先展示给用户确认；继续观察跨场景复现，达到阈值后优先强化运行时验证。",
       "targetAuthority": {
         "path": "scripts/validate-scene-runtime.mjs",
         "anchor": null
       },
       "relatedRuleId": null,
       "evidenceRefs": [
-        "evt-20260803-003"
+        "evt-20260803-003",
+        "evt-20260805-001"
       ],
       "scenes": [
         "我的"
       ],
-      "occurrenceCount": 1,
+      "occurrenceCount": 2,
       "status": "observing",
       "proposalReason": null,
       "upgradeHistory": [],
@@ -156,6 +157,181 @@
       "upgradeHistory": [],
       "createdAt": "2026-08-04T13:52:00.000Z",
       "updatedAt": "2026-08-05"
+    },
+    {
+      "id": "exp-20260805-001",
+      "normalizedKey": "scene-version-baseline-switch-missing-diff-audit",
+      "category": "execution",
+      "type": "workflow-gap",
+      "ownerSkill": "wego-uxsystem-iterate",
+      "problem": "同一场景存在多版本并存、确认新基准版本接管时未核对新旧版本差异，导致旧版本已验收修复丢失。",
+      "rootCause": "切换或接管场景版本基准时，没有先 diff 新旧版本实现差异并核对已验收的功能与修复是否保留，直接以新版本为准接管。",
+      "resolution": "本次已从分支历史逐个找回 7 处丢失修复；后续接管版本基准时先做新旧版本差异核对，确认已验收修复无遗漏再落地。",
+      "targetAuthority": null,
+      "relatedRuleId": null,
+      "evidenceRefs": [
+        "evt-20260805-002"
+      ],
+      "scenes": [
+        "我的"
+      ],
+      "occurrenceCount": 1,
+      "status": "observing",
+      "proposalReason": null,
+      "upgradeHistory": [],
+      "createdAt": "2026-08-05",
+      "updatedAt": "2026-08-05"
+    },
+    {
+      "id": "exp-20260817-001",
+      "normalizedKey": "workflow-authority-direct-commit-to-main-rule-execution-failure",
+      "category": "execution",
+      "type": "rule-execution-failure",
+      "ownerSkill": "wego-uxsystem-iterate",
+      "problem": "工作流权威源维护时直接在 main 分支提交，绕过 PR 流程，导致本地 main 与远端分叉。",
+      "rootCause": "AGENTS.md 已规定 workflow-maintenance-enters-main-via-pr 与 delivery-must-require-explicit-submission，工作流维护免业务验收但仍须通过短周期 PR 合入 main；执行经验登记等维护任务时直接在 main 上 commit，未先创建独立分支。",
+      "resolution": "本次已将违规提交移到新分支并通过 PR #47 合规合入；后续所有工作流维护任务必须先创建独立分支再提交，禁止直接在 main 上 commit。",
+      "targetAuthority": {
+        "path": ".codex/skills/wego-uxsystem-iterate/SKILL.md",
+        "anchor": null
+      },
+      "relatedRuleId": "workflow-maintenance-enters-main-via-pr",
+      "evidenceRefs": [
+        "evt-20260817-001"
+      ],
+      "scenes": [],
+      "occurrenceCount": 1,
+      "status": "observing",
+      "proposalReason": null,
+      "upgradeHistory": [],
+      "createdAt": "2026-08-17",
+      "updatedAt": "2026-08-17"
+    },
+    {
+      "id": "exp-20260819-001",
+      "normalizedKey": "stale-branch-merge-decision-requires-pr-state-and-content-equivalence",
+      "category": "execution",
+      "type": "workflow-gap",
+      "ownerSkill": "wego-uxsystem-iterate",
+      "problem": "判断遗留分支是否有未合并内容时仅凭提交列表，会把已 squash 合并交付单元的旧演进分支误判为有待合并提交，触发无意义的合并流程。",
+      "rootCause": "交付单元核对步骤只覆盖开放 PR，未包含'分支关联 PR 的合并状态与内容等价性'核查；squash 合并使提交 SHA 与 main 断连，git log 的未合并提交列表不能反映真实内容差异。",
+      "resolution": "本次已通过 PR 状态与文件内容等价核查确认无未合并内容并清理遗留分支；后续遇到疑似未合并分支先查关联 PR 状态与内容等价，再决定合并或清理。",
+      "targetAuthority": {
+        "path": ".github/workflows/branch-cleanup.yml",
+        "anchor": null
+      },
+      "relatedRuleId": "delivery-intake-must-precede-business-workflow",
+      "evidenceRefs": [
+        "evt-20260819-001"
+      ],
+      "scenes": [],
+      "occurrenceCount": 1,
+      "status": "upgraded",
+      "proposalReason": null,
+      "upgradeHistory": [
+        {
+          "version": 1,
+          "upgradedAt": "2026-08-19",
+          "evidenceRefs": [
+            "evt-20260819-001"
+          ],
+          "targetAuthority": {
+            "path": ".github/workflows/branch-cleanup.yml",
+            "anchor": null
+          },
+          "ruleIds": [
+            "delivery-intake-must-precede-business-workflow"
+          ],
+          "summary": "新增 branch-cleanup.yml 每日自动清理已合并 PR 超 24 小时的遗留分支（keep-branch 标签例外），无 PR 归属的陈旧分支仅报告；消除靠人工记得删分支的执行漏洞。",
+          "commitSha": "c4dd687"
+        }
+      ],
+      "createdAt": "2026-08-19",
+      "updatedAt": "2026-08-19"
+    },
+    {
+      "id": "exp-20260819-002",
+      "normalizedKey": "open-pr-idle-divergence-requires-auto-sync",
+      "category": "execution",
+      "type": "workflow-gap",
+      "ownerSkill": "wego-uxsystem-iterate",
+      "problem": "开放 PR 等待验收期间无人接触，main 持续前进导致分支静默大幅落后，下次接手时集中面对大量合并冲突。",
+      "rootCause": "agent-must-pull-before-task-start 只约束'有会话开工'的时刻，不覆盖交付单元闲置期；无开放 PR 落后即同步的规则，也无 main 合并后自动同步开放 PR 的机制，分叉在等待验收期间无约束累积。",
+      "resolution": "新增 open-pr-must-sync-main-when-behind 硬约束与交付核对扩展（接手落后分支先 merge 同步）；新增 main 合并后自动对开放 PR 执行 merge main 的 CI（无冲突自动推送，冲突打 needs-sync 标签）。",
+      "targetAuthority": {
+        "path": ".codex/skills/wego-github-delivery/SKILL.md",
+        "anchor": "开始交付"
+      },
+      "relatedRuleId": "agent-must-pull-before-task-start",
+      "evidenceRefs": [
+        "evt-20260819-002"
+      ],
+      "scenes": [],
+      "occurrenceCount": 1,
+      "status": "upgraded",
+      "proposalReason": null,
+      "upgradeHistory": [
+        {
+          "version": 1,
+          "upgradedAt": "2026-08-19",
+          "evidenceRefs": [
+            "evt-20260819-002"
+          ],
+          "targetAuthority": {
+            "path": ".codex/skills/wego-github-delivery/SKILL.md",
+            "anchor": "开始交付"
+          },
+          "ruleIds": [
+            "open-pr-must-sync-main-when-behind"
+          ],
+          "summary": "AGENTS.md 新增 open-pr-must-sync-main-when-behind 硬约束；wego-github-delivery 交付核对扩展开放 PR 落后检查与 merge 同步步骤；新增 sync-open-prs.yml 在 main 前进后自动对开放 PR update-branch，冲突打 needs-sync 标签。",
+          "commitSha": "c4dd687"
+        }
+      ],
+      "createdAt": "2026-08-19",
+      "updatedAt": "2026-08-19"
+    },
+    {
+      "id": "exp-20260819-003",
+      "normalizedKey": "session-end-must-not-leave-uncommitted-changes",
+      "category": "execution",
+      "type": "workflow-gap",
+      "ownerSkill": "wego-uxsystem-iterate",
+      "problem": "会话结束遗留未提交改动，阻塞交付单元下次开工的 pull 与合并流程。",
+      "rootCause": "wego-github-delivery/SKILL.md 允许本地迭代期间创建 checkpoint commit，但缺少会话/任务暂停结束时的收尾要求，未提交改动跨会话存活无约束。",
+      "resolution": "新增收尾规则：回复结束、任务暂停或会话结束时，任务 worktree 不得遗留未提交改动，成组改动提交 checkpoint、零散改动还原或登记任务记录；AGENTS.md 同步新增 session-end-must-clean-worktree 摘要。",
+      "targetAuthority": {
+        "path": ".codex/skills/wego-github-delivery/SKILL.md",
+        "anchor": "两阶段状态"
+      },
+      "relatedRuleId": null,
+      "evidenceRefs": [
+        "evt-20260819-003"
+      ],
+      "scenes": [],
+      "occurrenceCount": 1,
+      "status": "upgraded",
+      "proposalReason": null,
+      "upgradeHistory": [
+        {
+          "version": 1,
+          "upgradedAt": "2026-08-19",
+          "evidenceRefs": [
+            "evt-20260819-003"
+          ],
+          "targetAuthority": {
+            "path": ".codex/skills/wego-github-delivery/SKILL.md",
+            "anchor": "两阶段状态"
+          },
+          "ruleIds": [
+            "session-end-must-clean-worktree"
+          ],
+          "summary": "wego-github-delivery 两阶段状态新增会话收尾规则：回复结束、任务暂停或会话结束时任务 worktree 不得遗留未提交改动；AGENTS.md 同步新增 session-end-must-clean-worktree 摘要。",
+          "commitSha": "c4dd687"
+        }
+      ],
+      "createdAt": "2026-08-19",
+      "updatedAt": "2026-08-19"
     }
   ]
 }

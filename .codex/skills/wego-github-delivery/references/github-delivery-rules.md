@@ -51,6 +51,9 @@
 
 “改好了”“继续”“再调整一下”“先看看”等普通反馈，以及 Agent 自己判断“任务看起来已完成”，均不构成提交授权。没有明确授权时必须继续停留在本地迭代。
 
+<!-- rule-id: workflow-maintenance-exempt-from-submission-authorization -->
+**工作流维护例外**：由 `wego-uxsystem-iterate` 技能执行的 AGENTS.md、SKILL.md、`references/` 和 `experience/` 等权威源维护，免明确提交授权门禁。完成改动并运行 `node scripts/validate-wego-design.mjs --scope=system --strict` 通过后，直接推送创建短周期 PR，必要检查通过后自动合并到 `main` 并删除分支；CI 失败时停止并报告原因等用户处理。业务原型和设计系统组件、Token、Preview、UI Kit 变更不适用本例外，仍需用户明确验收授权后才能合并。
+
 多人或多 Agent 确有远端协调需要时，可仅推送用于暴露认领和分支的最小协调提交，但不得创建 PR、不得进入正式验收，也不得把后续本地小改动自动推送；执行前必须说明这是并发协调例外。
 
 ### 正式验收中

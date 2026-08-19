@@ -1,0 +1,11 @@
+{
+  "agent": "trae-agent-resale",
+  "scene": "帮卖分销",
+  "routeId": "agent-resale",
+  "branch": "feature/agent-resale-result-loading",
+  "status": "done",
+  "claimedAt": "2026-08-03T10:00:00.000Z",
+  "releasedAt": "2026-08-18T19:30:00.000Z",
+  "releaseReason": "PR #49 已合并到 main",
+  "note": "帮卖分销加载中/加载失败状态改用 result+loading+link 标准组件"
+}
