@@ -35,19 +35,20 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         <section class="layout-section my-tab-section my-tab-section--membership" data-component-slug="layout-section" data-edge="M8">
           <div class="card card--surface my-membership-card" data-component-slug="card">
             <div class="card__content my-membership-card__content">
-              <div class="card__header my-membership-card__header">
-                <div class="my-membership-card__level">
-                  <i class="wego-iconfont-s icon-dianpuhuiyuan" aria-hidden="true"></i>
-                  <span>SVIP 3</span>
+              <div class="my-membership-card__row">
+                <div class="my-membership-card__brand">
+                  <img class="my-membership-card__vip" src="./lib/assets/icons/vicon_vip.svg" alt="会员" aria-hidden="true">
+                  <span>会员中心</span>
                 </div>
-                <span class="my-membership-card__expiry">2027-08-31 到期</span>
-              </div>
-              <div class="card__body my-membership-card__body">
-                <span class="my-membership-card__cloud">云空间</span>
-                <span class="my-membership-card__progress" role="progressbar" aria-valuenow="37" aria-valuemin="0" aria-valuemax="100" aria-label="云空间已使用百分之三十七">
-                  <span class="my-membership-card__progress-value"></span>
-                </span>
-                <span class="my-membership-card__usage">36.8 / 100 GB</span>
+                <div class="my-membership-card__ticker" aria-live="polite">
+                  <div class="my-membership-card__ticker-track">
+                    <span class="my-membership-card__ticker-item">到期时间：2027/08/12</span>
+                    <span class="my-membership-card__ticker-item">云空间 22G/360G</span>
+                    <span class="my-membership-card__ticker-item" aria-hidden="true">到期时间：2027/08/12</span>
+                    <span class="my-membership-card__ticker-item" aria-hidden="true">云空间 22G/360G</span>
+                  </div>
+                </div>
+                <i class="wego-iconfont-s icon-youjiantou16 my-membership-card__arrow" aria-hidden="true"></i>
               </div>
             </div>
           </div>
@@ -392,7 +393,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         var html = '<div class="layout-scroll-row my-asset-row" data-component-slug="layout-scroll-row" data-item-size="auto" data-snap="start" data-peek="next">';
         assetEntries.filter(function (item) { return item.conditional; }).forEach(function (item) {
           html += '<button type="button" class="my-asset-entry" data-asset-id="' + item.id + '">'
-            + '<span class="my-entry-metric">' + metricHtml(item.metric, { size: '14', theme: 'black' });
+            + '<span class="my-entry-metric">' + metricHtml(item.metric, { size: '16', theme: 'black' });
           if (item.todo) html += '<span class="badge badge--corner badge--number-plain" data-component-slug="badge">+' + state.purchaseTodoCount + '</span>';
           html += '</span><span class="my-entry-label">' + escapeHtml(item.label) + '</span></button>';
         });
