@@ -188,6 +188,23 @@
         "wego-github-delivery/SKILL.md 允许本地迭代期间创建 checkpoint commit，但无'会话/任务暂停结束前工作区必须清零未提交改动'的收尾规则。",
         "遗留改动中身份栏布局等内容已被远端后续提交以更新实现取代，stash 最终确认无保留价值并丢弃。"
       ]
+    },
+    {
+      "id": "evt-20260819-004",
+      "experienceId": "exp-20260819-004",
+      "occurredAt": "2026-08-19",
+      "taskRef": "我的 Tab PR #57 合并",
+      "scenes": [
+        "我的"
+      ],
+      "fact": "推送 PR #57 前未在本地运行完整验证脚本（validate-wego-design.mjs --scope=full --strict），导致 Token 硬编码违规、var() fallback 违规、原型指纹漂移、设计系统源/副本不一致等问题全部在 CI 暴露，连续 6 次推送修复，每次推送触发新 publish run 并发推 gh-pages 导致 fatal error in commit_refs，CI 反复失败阻塞交付。",
+      "evidence": [
+        "wego-github-delivery SKILL.md 已明确「进入正式验收后：运行与范围相称的完整严格验证」，但执行 git push 时未将本地验证脚本作为前置步骤。",
+        "首次推送后 CI gate 失败：routes.js 与源不一致（merge --ours 引入）、设计系统同步一致性失败（vicon_vip.svg 源缺失）、场景 Token 硬编码（14px/12px/#6e7382/line-height:1/圆角12px）、var(--ease-standard, ease) fallback 违规、原型指纹漂移。",
+        "本地运行 validate-wego-design.mjs --scope=full --strict 后一次性发现全部问题，修复后 CI gate 通过。",
+        "连续 6 次推送（merge/routes/ci缓存/源同步/token合规/指纹）每次触发新 publish run，并发推 gh-pages 导致 publish 失败。",
+        "本次问题与 2026-07-31「我的Tab页面开发」教训同属「急于推进任务跳过前置门禁」模式：那次跳过 confirm-brief 确认门禁，这次跳过推送前验证门禁。"
+      ]
     }
   ]
 }
