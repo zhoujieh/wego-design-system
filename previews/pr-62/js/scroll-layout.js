@@ -238,9 +238,18 @@
     regions.forEach(function (region) { region.element.addEventListener('transitionend', onTransitionEnd); });
 
     var resizeObserver = typeof ResizeObserver === 'function' ? new ResizeObserver(function () {
+      // 布局变化时禁用过渡，避免 max-height 从 0 或旧值过渡到新值
+      regions.forEach(function (region) {
+        region.element.style.transition = 'none';
+      });
       layoutTransitioning = true;
       measure();
-      requestAnimationFrame(function () { layoutTransitioning = false; });
+      requestAnimationFrame(function () {
+        regions.forEach(function (region) {
+          region.element.style.removeProperty('transition');
+        });
+        layoutTransitioning = false;
+      });
     }) : null;
     if (resizeObserver) {
       regions.forEach(function (region) { resizeObserver.observe(region.motion); });
@@ -258,11 +267,9 @@
     });
     measure();
     requestAnimationFrame(function () {
-      // 第二帧恢复过渡
       regions.forEach(function (region) {
         region.element.style.removeProperty('transition');
       });
-      measure();
     });
 
     return {
