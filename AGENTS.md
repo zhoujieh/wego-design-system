@@ -62,5 +62,11 @@
 <!-- rule-id: agent-must-pull-before-task-start -->
 - 开工前先 `git pull --rebase origin main` 同步最新 `main`。
 
+<!-- rule-id: open-pr-must-sync-main-when-behind -->
+- 接手交付单元或更新开放 PR 前，其分支落后 `main` 时先 merge 最新 `main` 并解决冲突再继续；等待验收中的 PR 同样适用，闲置不是豁免理由。
+
+<!-- rule-id: session-end-must-clean-worktree -->
+- 回复结束、任务暂停或会话结束时，任务 worktree 不得遗留未提交改动：成组改动提交 checkpoint，零散改动还原或登记任务记录；禁止未提交改动跨会话存活。
+
 <!-- rule-id: local-server-must-auto-exit -->
 - 临时验证用本地服务必须自动退出；本地迭代与验收预览服务是唯一例外。

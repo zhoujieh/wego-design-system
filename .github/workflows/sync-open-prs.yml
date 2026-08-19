@@ -1,0 +1,38 @@
+name: Sync Open PRs from Main
+
+# main 每次前进后，自动对开放 PR 执行 merge main：
+# 无冲突自动推送同步；有冲突打 needs-sync 标签提醒认领人处理，不自动解决。
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 同步所有开放 PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -u
+          gh pr list --state open --json number --jq '.[].number' | while read -r number; do
+            echo "=== 同步 PR #$number ==="
+            result=$(gh api \
+              --method POST \
+              -H "Accept: application/vnd.github+json" \
+              "/repos/${GITHUB_REPOSITORY}/pulls/${number}/update-branch" 2>&1) || true
+            if echo "$result" | grep -q '"message": "merge_conflict"'; then
+              echo "PR #$number 存在冲突，打 needs-sync 标签"
+              gh pr edit "$number" --add-label needs-sync || true
+            elif echo "$result" | grep -q "Updating pull request branch"; then
+              echo "PR #$number 已自动同步"
+            else
+              echo "PR #$number 返回: $result"
+            fi
+          done
