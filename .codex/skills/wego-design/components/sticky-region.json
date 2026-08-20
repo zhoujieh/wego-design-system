@@ -121,7 +121,11 @@
     "--spacer-0",
     "--z-sticky"
   ],
-  "previewOnlyTokens": [],
+  "previewOnlyTokens": [
+    "--text-secondary",
+    "--text-tertiary",
+    "--bg-overlay-l1"
+  ],
   "localTokens": [
     "--sticky-region-after-gap",
     "--sticky-region-compact-size",
