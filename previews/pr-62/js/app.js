@@ -301,6 +301,15 @@
         scrollTarget.scrollTop = 0;
         scrollTarget.scrollLeft = 0;
       });
+      // 回顶时重置 sticky-region 为 visible，禁用过渡避免展开动画
+      panel.querySelectorAll('.sticky-region[data-visibility="direction-reveal"][data-state="hidden"]').forEach(function (region) {
+        region.style.transition = 'none';
+        region.dataset.state = 'visible';
+        region.setAttribute('aria-hidden', 'false');
+        requestAnimationFrame(function () {
+          region.style.removeProperty('transition');
+        });
+      });
     });
   }
 

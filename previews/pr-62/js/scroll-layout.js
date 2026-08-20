@@ -179,18 +179,7 @@
     function applyPolicy(region, currentTop, directionDecision) {
       if (region.policy === 'always') return setState(region, 'visible');
       if (region.policy === 'direction-reveal') {
-        if (directionDecision.state) {
-          // 回顶恢复 visible 时不带过渡，避免 max-height 从 0 展开的动画
-          if (directionDecision.state === 'visible' && region.element.dataset.state === 'hidden') {
-            region.element.style.transition = 'none';
-            setState(region, 'visible');
-            requestAnimationFrame(function () {
-              region.element.style.removeProperty('transition');
-            });
-          } else {
-            setState(region, directionDecision.state);
-          }
-        }
+        if (directionDecision.state) setState(region, directionDecision.state);
         return;
       }
       if (region.policy === 'compact-on-scroll') return setState(region, currentTop > region.threshold ? 'compact' : 'visible');
@@ -241,7 +230,20 @@
       pendingTop = clamp(scrollRoot.scrollTop, 0, maxScrollTop());
       direction = 0;
       directionDistance = 0;
-      if (pendingTop <= tolerance) regions.forEach(function (region) { setState(region, 'visible'); });
+      if (pendingTop <= tolerance) {
+        // 回顶恢复 visible 时禁用过渡，避免 max-height 从 0 展开的动画
+        regions.forEach(function (region) {
+          if (region.element.dataset.state === 'hidden') {
+            region.element.style.transition = 'none';
+            setState(region, 'visible');
+            requestAnimationFrame(function () {
+              region.element.style.removeProperty('transition');
+            });
+          } else {
+            setState(region, 'visible');
+          }
+        });
+      }
       measure();
     }
 
