@@ -231,7 +231,7 @@
         "初版表单使用 form-group__content--card（通栏不应有圆角），头像上传和验证消息误用垂直结构。",
         "验证消息先误用 form-body--fixed-height（固定高度），用户指出高度应自适应后移除。",
         "搜索框缺少 clear 交互、输入内容不能 Cmd+A 全选、搜索结果未高亮关键词，均由用户逐项指出后才补齐。",
-        "interaction-prototype-design.md 已有'逐区域组件映射'步骤要求核对 usageHints 和 doNotInvent，但实现时未逐项核对表单和搜索组件的契约细节。"
+        "interaction-prototype-design.md 第 2 章短设计链路原仅有'只读取当前页面实际需要的正式组件、Preview 和契约'步骤，未显式要求逐区域映射与契约核对，导致实现时依赖工作记忆，未逐项核对表单和搜索组件的契约细节（通栏圆角规则、默认水平结构、clear 交互能力、固定高度与自适应区分）。"
       ]
     },
     {
