@@ -540,6 +540,45 @@ function briefSubmissionErrors(record) {
   if (Array.isArray(brief.open_questions) && brief.open_questions.length) errors.push('prototype_brief.open_questions 必须在 submit-brief 前清空');
   return [...new Set(errors)];
 }
+
+/**
+ * 需求简报充分性守门（不改变 schema，仅约束既有字段内容）。
+ *
+ * 目标：要求简报"足够细"——state 覆盖加载/失败/空态等交互状态，数据有产生入口、
+ * 禁用静态种子降级。对应 wego-product/references/scope-and-boundaries.md「需求简报输出要求」。
+ */
+function briefSufficiencyErrors(brief) {
+  const errors = [];
+  if (!isPlainObject(brief)) return errors;
+
+  // A. states 必须覆盖加载态、失败态、空状态
+  const states = (brief.states || []).filter(item => typeof item === 'string');
+  const joinedStates = states.join(' ');
+  if (!states.length) return errors; // 空态已在 requiredBriefArrayFields 拦截
+  if (!/加载|loading/i.test(joinedStates)) errors.push('prototype_brief.states 必须包含加载态（如 loading，写明进入条件与即见结果）');
+  if (!/(失败|error|fault)/i.test(joinedStates)) errors.push('prototype_brief.states 必须包含失败态（如加载/保存失败，写明提示与重试/关闭）');
+  if (!/(空|empty|无数据|无结果)/.test(joinedStates)) errors.push('prototype_brief.states 必须包含空状态（列表空 / 搜索空结果，写明引导入口）');
+
+  // 每个 state 须写成「进入条件 → 可感知结果」，防止只写一个名词
+  const vague = states.filter(s => s === s.replace(/[：:→，,；;]/g, ''));
+  if (vague.length) errors.push(`prototype_brief.states 存在未写输入条件/可感知结果的粗糙状态：${vague.slice(0, 3).map(s => `「${s}」`).join('、')}（每个状态应为「标识：进入条件 → 可感知结果」）`);
+
+  // B. 禁止用静态种子/本地模拟代替真实数据产生入口
+  const forbidSeedWords = /种子|内置数据|预置|mock|模拟数据|seed/i;
+  const forbiddenText = [...(brief.assumptions || []), ...(brief.data_contract && typeof brief.data_contract === 'object' ? [String(brief.data_contract)] : [])].join(' ');
+  if (forbidSeedWords.test(forbiddenText)) {
+    errors.push('prototype_brief 不得用「内置种子/mock/预置模拟数据」代替数据产生入口；数据必须通过发布/新建流程写入（localStorage 可作为存储位置，但写入通道必须是真实交互流程）');
+  }
+
+  // C. 数据必须有产生入口：included(或 critical_paths) 应含新建/发布/录入/采购 之类动作，与数据展示首尾闭环
+  const createWords = /新建|添加|新增|发布|录入|上架|创建|导入|上传/;
+  const actionText = [...(brief.included || []), ...(brief.critical_paths || [])].join(' ');
+  if (!createWords.test(actionText)) {
+    errors.push('prototype_brief 缺少数据产生入口：included/critical_paths 必须含「新建/添加/发布/录入」等来源流程，使展示数据有真实创建通道（数据闭环）');
+  }
+
+  return errors;
+}
 function validatePrototypeScenes(record) {
   if (!Array.isArray(record.affected_scenes) || !record.affected_scenes.length) fail('submit-prototype 要求 affected_scenes 为非空数组');
   for (const scene of record.affected_scenes) {
@@ -686,7 +725,12 @@ function test() {
     entry_points: ['工作台商品管理'],
     critical_paths: ['进入发布 → 填写信息 → 完成发布'],
     prototype_boundaries: [{ flow_id: 'publish-product', mode: 'functional', visible_result: '用户完成发布并看到成功结果' }],
-    states: ['初始', '发布成功'],
+    states: [
+      'loading：发布页加载中 → 显示 loading 骨架',
+      '发布成功：提交完成 → 商品写入列表并展示',
+      'load-failed：加载接口失败 → 失败提示 + 重试/关闭',
+      'empty：无商品数据 → 空状态 + 引导新建'
+    ],
     data_contract: { product: { required: ['title'] } },
     assumptions: [],
     open_questions: []
@@ -784,6 +828,30 @@ function test() {
   assert(!validate(briefInvalidation, 'sample').length, 'brief 失效后的 draft 必须继续符合 Schema');
   assert(flagValue(['--stage', 'brief'], '--stage') === 'brief', '命令参数未支持 --flag value');
   assert(flagValue(['--stage=prototype'], '--stage') === 'prototype', '命令参数未支持 --flag=value');
+
+  // 需求简报充分性守门
+  const sufficiencyBase = clone(sample);
+  sufficiencyBase.prototype_brief = readyBrief();
+  assert(!briefSufficiencyErrors(sufficiencyBase.prototype_brief).length, '合规简报被充分性守门误拦截');
+  const missingLoading = clone(sufficiencyBase);
+  missingLoading.prototype_brief.states = ['发布成功：提交 → 列表展示', 'load-failed：读取失败 → 提示重试', 'empty：无数据 → 空态引导'];
+  assert(briefSufficiencyErrors(missingLoading.prototype_brief).some(e => e.includes('加载态')), '充分性守门未拦截缺加载态');
+  const missingFailure = clone(sufficiencyBase);
+  missingFailure.prototype_brief.states = ['loading：加载中 → loading 骨架', '发布成功：提交 → 列表展示', 'empty：无数据 → 空态引导'];
+  assert(briefSufficiencyErrors(missingFailure.prototype_brief).some(e => e.includes('失败态')), '充分性守门未拦截缺失败态');
+  const missingEmpty = clone(sufficiencyBase);
+  missingEmpty.prototype_brief.states = ['loading：加载中 → loading 骨架', '发布成功：提交 → 列表展示', 'load-failed：读取失败 → 提示重试'];
+  assert(briefSufficiencyErrors(missingEmpty.prototype_brief).some(e => e.includes('空状态')), '充分性守门未拦截缺空状态');
+  const vagueState = clone(sufficiencyBase);
+  vagueState.prototype_brief.states[0] = '仅名词无冒号';
+  assert(briefSufficiencyErrors(vagueState.prototype_brief).some(e => e.includes('粗糙状态')), '充分性守门未拦截粗糙状态(无输入条件/结果)');
+  const seededAssumptions = clone(sufficiencyBase);
+  seededAssumptions.prototype_brief.assumptions = ['使用内置种子数据 mock 展示'];
+  assert(briefSufficiencyErrors(seededAssumptions.prototype_brief).some(e => e.includes('种子')), '充分性守门未拦截静态种子降级');
+  const noCreateEntry = clone(sufficiencyBase);
+  noCreateEntry.prototype_brief.included = ['仅展示列表'];
+  noCreateEntry.prototype_brief.critical_paths = ['浏览列表'];
+  assert(briefSufficiencyErrors(noCreateEntry.prototype_brief).some(e => e.includes('数据产生入口')), '充分性守门未拦截缺数据产生入口');
 
   const fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'wego-iteration-record-'));
   try {
@@ -970,7 +1038,10 @@ function test() {
 switch (command) {
   case 'init': init(); break;
   case 'submit-brief': transition(['draft'], 'awaiting-brief-confirmation', record => {
-    const errors = briefSubmissionErrors(record);
+    const errors = [
+      ...briefSubmissionErrors(record),
+      ...briefSufficiencyErrors(record.prototype_brief)
+    ];
     if (errors.length) fail(errors.join('\n'));
     record.brief_submission = createBriefSubmission(record);
     record.stage_outputs.product.valid = true;
