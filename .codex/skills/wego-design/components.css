@@ -1938,7 +1938,7 @@
 }
 /* fullscreen 标题区恢复 safe-area-top：默认 .modal__title--default 强制 0（半屏弹窗紧贴面板顶部），
    fullscreen 需要 navbar 真正继承宿主 --safe-area-top，因此显式 inherit；initial 会把自定义属性
-   重置为"未定义"，var(--safe-area-top, 0px) 会回落到 0px，导致 phone-status 与 navbar 重叠 */
+   重置为"未定义"，var(--safe-area-top, 0px) 会回落到 0px，导致顶部安全区与 navbar 重叠 */
 .modal--fullscreen .modal__title--default {
   --safe-area-top: inherit;
 }
