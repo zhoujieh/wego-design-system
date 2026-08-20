@@ -18,60 +18,49 @@
 </head>
 <body data-bg="page" data-host-shell="true">
   <div class="preview-shell">
-    <div class="phone-frame">
-      <div class="phone-screen" data-phone-screen>
-        <div class="phone-status" aria-hidden="true">
-          <span>9:41</span>
-          <span>5G</span>
-        </div>
-
-        <main class="host-shell-page" data-host-content>
-          <section class="host-shell-page__panel host-shell-page__panel--active" data-host-tab="dongtai" aria-label="动态">
-            <div class="dongtai-temp-entries">
-              <div class="cell-group">
-                <div class="cell-group__title">临时入口</div>
-                <div class="cell-group__content" data-entry-group="dongtai-tools"></div>
-              </div>
+    <div class="phone-screen" data-phone-screen>
+      <main class="host-shell-page" data-host-content>
+        <section class="host-shell-page__panel host-shell-page__panel--active" data-host-tab="dongtai" aria-label="动态">
+          <div class="dongtai-temp-entries">
+            <div class="cell-group">
+              <div class="cell-group__title">临时入口</div>
+              <div class="cell-group__content" data-entry-group="dongtai-tools"></div>
             </div>
-          </section>
-          <section class="host-shell-page__panel host-shell-page__panel--blank" data-host-tab="haoyou" hidden aria-label="好友"></section>
-          <section class="host-shell-page__panel host-shell-page__panel--blank" data-host-tab="workspace" hidden aria-label="工作台"></section>
-          <section class="host-shell-page__panel host-shell-page__panel--blank" data-host-tab="xiaoxi" hidden aria-label="消息"></section>
-          <section class="host-shell-page__panel host-shell-page__panel--blank" data-host-tab="my" hidden aria-label="我的"></section>
-        </main>
+          </div>
+        </section>
+        <section class="host-shell-page__panel host-shell-page__panel--blank" data-host-tab="haoyou" hidden aria-label="好友"></section>
+        <section class="host-shell-page__panel host-shell-page__panel--blank" data-host-tab="workspace" hidden aria-label="工作台"></section>
+        <section class="host-shell-page__panel host-shell-page__panel--blank" data-host-tab="xiaoxi" hidden aria-label="消息"></section>
+        <section class="host-shell-page__panel host-shell-page__panel--blank" data-host-tab="my" hidden aria-label="我的"></section>
+      </main>
 
-        <div class="app-scene-layer" data-scene-layer hidden></div>
-        <div class="app-overlay-layer" data-overlay-layer hidden></div>
-        <div class="app-dialog-host" data-dialog-host role="region" aria-label="对话框浮层"></div>
-        <div class="app-toast-host" data-toast-host aria-live="polite" role="status"></div>
+      <div class="app-scene-layer" data-scene-layer hidden></div>
+      <div class="app-overlay-layer" data-overlay-layer hidden></div>
+      <div class="app-dialog-host" data-dialog-host role="region" aria-label="对话框浮层"></div>
+      <div class="app-toast-host" data-toast-host aria-live="polite" role="status"></div>
 
-        <nav class="bottom-nav" data-bottom-nav>
-          <button type="button" class="bottom-nav__item active" data-host-tab-trigger="dongtai">
-            <span class="bottom-nav__icon"><img src="./lib/assets/icons/tab-active-dongtai.svg" alt="" data-tab-icon="dongtai" /></span>
-            <span class="bottom-nav__label">动态</span>
-          </button>
-          <button type="button" class="bottom-nav__item" data-host-tab-trigger="haoyou">
-            <span class="bottom-nav__icon"><img src="./lib/assets/icons/tab-haoyou.svg" alt="" data-tab-icon="haoyou" /></span>
-            <span class="bottom-nav__label">好友</span>
-          </button>
-          <button type="button" class="bottom-nav__item" data-host-tab-trigger="workspace">
-            <span class="bottom-nav__icon"><img src="./lib/assets/icons/tab-gongzuotai.svg" alt="" data-tab-icon="gongzuotai" /></span>
-            <span class="bottom-nav__label">工作台</span>
-          </button>
-          <button type="button" class="bottom-nav__item" data-host-tab-trigger="xiaoxi">
-            <span class="bottom-nav__icon"><img src="./lib/assets/icons/tab-xiaoxi.svg" alt="" data-tab-icon="xiaoxi" /></span>
-            <span class="bottom-nav__label">消息</span>
-          </button>
-          <button type="button" class="bottom-nav__item" data-host-tab-trigger="my">
-            <span class="bottom-nav__icon"><img src="./lib/assets/icons/tab-wode.svg" alt="" data-tab-icon="wode" /></span>
-            <span class="bottom-nav__label">我的</span>
-          </button>
-        </nav>
-
-        <div class="phone-indicator" aria-hidden="true">
-          <div class="phone-indicator-bar"></div>
-        </div>
-      </div>
+      <nav class="bottom-nav" data-bottom-nav>
+        <button type="button" class="bottom-nav__item active" data-host-tab-trigger="dongtai">
+          <span class="bottom-nav__icon"><img src="./lib/assets/icons/tab-active-dongtai.svg" alt="" data-tab-icon="dongtai" /></span>
+          <span class="bottom-nav__label">动态</span>
+        </button>
+        <button type="button" class="bottom-nav__item" data-host-tab-trigger="haoyou">
+          <span class="bottom-nav__icon"><img src="./lib/assets/icons/tab-haoyou.svg" alt="" data-tab-icon="haoyou" /></span>
+          <span class="bottom-nav__label">好友</span>
+        </button>
+        <button type="button" class="bottom-nav__item" data-host-tab-trigger="workspace">
+          <span class="bottom-nav__icon"><img src="./lib/assets/icons/tab-gongzuotai.svg" alt="" data-tab-icon="gongzuotai" /></span>
+          <span class="bottom-nav__label">工作台</span>
+        </button>
+        <button type="button" class="bottom-nav__item" data-host-tab-trigger="xiaoxi">
+          <span class="bottom-nav__icon"><img src="./lib/assets/icons/tab-xiaoxi.svg" alt="" data-tab-icon="xiaoxi" /></span>
+          <span class="bottom-nav__label">消息</span>
+        </button>
+        <button type="button" class="bottom-nav__item" data-host-tab-trigger="my">
+          <span class="bottom-nav__icon"><img src="./lib/assets/icons/tab-wode.svg" alt="" data-tab-icon="wode" /></span>
+          <span class="bottom-nav__label">我的</span>
+        </button>
+      </nav>
     </div>
   </div>
 
