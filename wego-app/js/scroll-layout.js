@@ -23,11 +23,13 @@
 
   function decideDirectionReveal(snapshot) {
     var currentTop = clamp(snapshot.currentTop, 0, snapshot.currentMax);
-    var delta = currentTop - snapshot.lastTop;
-    var wasAtBottom = Math.abs(snapshot.lastMax - snapshot.lastTop) <= snapshot.tolerance;
-    if (snapshot.layoutTransitioning && wasAtBottom) {
-      delta -= snapshot.currentMax - snapshot.lastMax;
+    // 布局过渡期间（sticky-region 显隐导致 max-height 动画，maxScrollTop 持续变化）
+    // 不触发方向判断和状态切换，避免过渡中 max 变化产生异常 delta 引发抖动循环。
+    // 契约：底部布局校正、尺寸变化和回弹不触发反向切换。
+    if (snapshot.layoutTransitioning) {
+      return { state: null, direction: snapshot.direction, distance: snapshot.distance, top: currentTop, max: snapshot.currentMax };
     }
+    var delta = currentTop - snapshot.lastTop;
     if (currentTop <= snapshot.tolerance) {
       return { state: 'visible', direction: 0, distance: 0, top: currentTop, max: snapshot.currentMax };
     }

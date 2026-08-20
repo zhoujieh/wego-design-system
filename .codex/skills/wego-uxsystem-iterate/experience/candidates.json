@@ -398,9 +398,9 @@
       "category": "system",
       "type": "component-state-gap",
       "ownerSkill": "wego-uxsystem-iterate",
-      "problem": "scroll-layout.js 的 direction-reveal 策略在滚动内容不足一屏时触发搜索框显示/隐藏循环抖动。",
-      "rootCause": "decideDirectionReveal 缺少'内容不足以滚动时不应触发隐藏'的前置判断：内容不足一屏时 currentMax 为 0、currentTop 始终为 0，隐藏后 updateStacks 调整 scrollPaddingTop 导致布局变化，ResizeObserver 重新 measure 又强制恢复 visible，形成循环。",
-      "resolution": "当前未修复；待确认修复方案后在 scroll-layout.js 的 decideDirectionReveal 中增加 currentMax <= tolerance 时跳过隐藏判断。",
+      "problem": "scroll-layout.js 的 direction-reveal 策略在慢速滚动时触发搜索框显示/隐藏循环抖动（我的 tab 页，多 sticky-region 栈式叠加场景）。",
+      "rootCause": "sticky-region 显隐切换触发 max-height 过渡动画，过渡期间 maxScrollTop 持续变化（如 1218→1160），导致 decideDirectionReveal 的 delta 计算异常，在过渡中反复触发 hidden/visible 切换。原有 layoutTransitioning 修正仅覆盖 wasAtBottom 场景，不覆盖滚动中途过渡导致 max 变化的情况。",
+      "resolution": "已在 scroll-layout.js decideDirectionReveal 增加 layoutTransitioning 前置判断：过渡期间返回 null（不切换状态），保持当前状态直到过渡结束，避免过渡中 max 变化产生异常 delta 引发抖动循环。契约：底部布局校正、尺寸变化和回弹不触发反向切换。",
       "targetAuthority": {
         "path": "wego-app/js/scroll-layout.js",
         "anchor": "decideDirectionReveal"
@@ -410,14 +410,15 @@
         "evt-20260819-007"
       ],
       "scenes": [
-        "好友列表"
+        "好友列表",
+        "我的"
       ],
       "occurrenceCount": 1,
       "status": "observing",
       "proposalReason": null,
       "upgradeHistory": [],
       "createdAt": "2026-08-19",
-      "updatedAt": "2026-08-19"
+      "updatedAt": "2026-08-20"
     },
     {
       "id": "exp-20260819-007",
@@ -427,7 +428,7 @@
       "ownerSkill": "wego-uxsystem-iterate",
       "problem": "运行时守卫要求 absolute 定位的悬浮元素必须有不透明背景，与轻量悬浮控件（如字母索引）彻底透明的业务需求冲突。",
       "rootCause": "validate-scene-runtime.mjs opaqueBackground 检查 alpha >= 0.98，设计意图是保证悬浮控件可读，但未区分'需要不透明底的交互控件'和'轻量辅助定位控件'，对后者产生误拦截。",
-      "resolution": "当前场景接受告警使用透明背景；待复盘后决定是否为轻量悬浮控件增加豁免标记或调整守卫判断逻辑。",
+      "resolution": "已在 validate-scene-runtime.mjs 新增 data-surface-role='auxiliary' 声明式豁免，与 data-surface-transparent 等价跳过 opaqueBackground 检查；轻量辅助控件（字母索引、滚动指示器等）声明一次即不被拦截，无需每处手加 transparent 标记。",
       "targetAuthority": {
         "path": "scripts/validate-scene-runtime.mjs",
         "anchor": "opaqueBackground"
@@ -444,7 +445,7 @@
       "proposalReason": null,
       "upgradeHistory": [],
       "createdAt": "2026-08-19",
-      "updatedAt": "2026-08-19"
+      "updatedAt": "2026-08-20"
     },
     {
       "id": "exp-20260819-008",
@@ -454,7 +455,7 @@
       "ownerSkill": "wego-uxsystem-iterate",
       "problem": "输入框无法用 Cmd+A 全选内容，包括搜索框和表单输入框。",
       "rootCause": "app.css 中 body 设置 user-select: none，input 单独设置 user-select: text，但 Cmd+A 全局全选行为仍受 body 的 user-select: none 影响，导致全选无法覆盖 input 内容。",
-      "resolution": "当前未修复；待确认根因后调整 app.css 的 user-select 策略或为 input 增加全选能力。",
+      "resolution": "已在 app.css 将 body 的 user-select: none 改为 auto（保留 -webkit-touch-callout: none 防长按呼出菜单，交互组件自身 user-select: none 防选词），并在 app.js 加全局 keydown 兜底：Cmd+A/Ctrl+A 时对聚焦的 input/textarea 执行 select()，覆盖 Electron WebView（如 Trae 内置浏览器）不触发原生全选的缺陷。标准 Chrome/Safari 不受影响。",
       "targetAuthority": {
         "path": "wego-app/css/app.css",
         "anchor": "user-select"
@@ -471,7 +472,7 @@
       "proposalReason": null,
       "upgradeHistory": [],
       "createdAt": "2026-08-19",
-      "updatedAt": "2026-08-19"
+      "updatedAt": "2026-08-20"
     },
     {
       "id": "exp-20260820-001",
