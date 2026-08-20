@@ -88,55 +88,129 @@
 /* @component-css-end */
 
 body { margin: 0; background: #f5f5f5; }
+.sticky-demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; padding: 16px; align-items: start; }
+.sticky-case { min-width: 0; }
+.sticky-case__label { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; font-weight: 500; }
 .sticky-demo { height: 360px; overflow-y: auto; background: #f5f5f5; position: relative; }
-.sticky-demo__bar { min-height: 52px; display: flex; align-items: center; padding: 0 12px; }
+.sticky-demo__bar { min-height: 48px; display: flex; align-items: center; gap: 8px; }
+.sticky-demo__tag { display: inline-flex; align-items: center; justify-content: center; height: 32px; padding: 0 12px; border-radius: var(--radius-full); background: var(--bg-surface); border: 1px solid var(--border-neutral-l2); font-size: 13px; color: var(--text-default); white-space: nowrap; }
+.sticky-demo__search { padding: 8px 0; }
 .sticky-demo__content { height: 720px; padding: 16px; color: var(--text-secondary); }
 .sticky-demo__hint { padding: 12px 16px; background: var(--bg-overlay-l1); font-size: 12px; color: var(--text-secondary); }
 </style>
 </head>
 <body>
-<div class="sticky-demo" data-demo-scroll>
-  <!-- 栈式叠加：elevate-after-scroll + direction-reveal（复现多 sticky-region 场景） -->
-  <div class="sticky-region" data-edge="top" data-visibility="elevate-after-scroll" data-state="visible" style="--sticky-region-expanded-size:44px;--sticky-region-inline-inset:8px;--sticky-region-after-gap:0">
-    <div class="sticky-region__motion">
-      <div class="sticky-region__inner">
-        <div class="sticky-demo__bar" style="min-height:44px;font-size:14px;font-weight:600;">分类标签 · elevate</div>
+<div class="sticky-demo-grid">
+
+  <!-- 案例 1：非搜索框吸顶 -->
+  <div class="sticky-case">
+    <div class="sticky-case__label">非搜索框吸顶 · elevate-after-scroll 分类标签</div>
+    <div class="sticky-demo" data-demo-scroll>
+      <div class="sticky-region" data-edge="top" data-visibility="elevate-after-scroll" data-state="visible" data-elevated="false" style="--sticky-region-expanded-size:48px;--sticky-region-inline-inset:12px;--sticky-region-after-gap:0">
+        <div class="sticky-region__motion">
+          <div class="sticky-region__inner">
+            <div class="sticky-demo__bar">
+              <span class="sticky-demo__tag">全部</span>
+              <span class="sticky-demo__tag">在售</span>
+              <span class="sticky-demo__tag">已下架</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sticky-demo__content">
+        <p>向下滚动：越过阈值后分类标签吸顶并显示底部描边（data-elevated）。</p>
+        <p>返回顶部：描边消失，恢复普通通栏。</p>
       </div>
     </div>
   </div>
-  <div class="sticky-region" data-edge="top" data-visibility="direction-reveal" data-state="visible" style="--sticky-region-expanded-size:52px;--sticky-region-inline-inset:8px;--sticky-region-after-gap:12px">
-    <div class="sticky-region__motion">
-      <div class="sticky-region__inner">
-        <div class="sticky-demo__bar">搜索框 · direction-reveal</div>
+
+  <!-- 案例 2：搜索框吸顶 -->
+  <div class="sticky-case">
+    <div class="sticky-case__label">搜索框吸顶 · direction-reveal 真实 searchbox</div>
+    <div class="sticky-demo" data-demo-scroll>
+      <div class="sticky-region" data-edge="top" data-visibility="direction-reveal" data-state="visible" style="--sticky-region-expanded-size:52px;--sticky-region-inline-inset:12px;--sticky-region-after-gap:0">
+        <div class="sticky-region__motion">
+          <div class="sticky-region__inner">
+            <div class="sticky-demo__search">
+              <div class="searchbox searchbox--md searchbox--white">
+                <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
+                <div class="searchbox__input">
+                  <input class="searchbox__field" type="search" placeholder="搜索好友昵称" aria-label="搜索好友昵称">
+                </div>
+                <div class="searchbox__actions"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sticky-demo__content">
+        <p>向下滚动：累计同方向滚动超过阈值后搜索框隐藏（direction-reveal）。</p>
+        <p>向上滚动：累计反向滚动超过阈值后恢复显示。</p>
+        <p>慢速滚动不抖动（layoutTransitioning 期间不切换状态）。</p>
       </div>
     </div>
   </div>
-  <div class="sticky-demo__content">
-    <p>向下滚动：direction-reveal 区域累计同方向滚动超过阈值后隐藏。</p>
-    <p>向上滚动：累计反向滚动超过阈值后恢复显示。</p>
-    <p style="margin-top:24px;color:var(--text-tertiary);">慢速滚动不抖动（验证 layoutTransitioning 期间不切换状态）。</p>
+
+  <!-- 案例 3：栈式叠加 -->
+  <div class="sticky-case">
+    <div class="sticky-case__label">栈式叠加 · elevate 分类标签 + direction-reveal 搜索框（复现多吸顶区域）</div>
+    <div class="sticky-demo" data-demo-scroll>
+      <div class="sticky-region" data-edge="top" data-visibility="elevate-after-scroll" data-state="visible" data-elevated="false" style="--sticky-region-expanded-size:48px;--sticky-region-inline-inset:12px;--sticky-region-after-gap:0">
+        <div class="sticky-region__motion">
+          <div class="sticky-region__inner">
+            <div class="sticky-demo__bar">
+              <span class="sticky-demo__tag">全部</span>
+              <span class="sticky-demo__tag">在售</span>
+              <span class="sticky-demo__tag">已下架</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sticky-region" data-edge="top" data-visibility="direction-reveal" data-state="visible" style="--sticky-region-expanded-size:52px;--sticky-region-inline-inset:12px;--sticky-region-after-gap:0">
+        <div class="sticky-region__motion">
+          <div class="sticky-region__inner">
+            <div class="sticky-demo__search">
+              <div class="searchbox searchbox--md searchbox--white">
+                <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
+                <div class="searchbox__input">
+                  <input class="searchbox__field" type="search" placeholder="搜索好友昵称" aria-label="搜索好友昵称">
+                </div>
+                <div class="searchbox__actions"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sticky-demo__content">
+        <p>分类标签始终吸顶（elevate），搜索框随滚动方向隐藏/恢复（direction-reveal）。</p>
+        <p>多个 sticky-region 按 stack 顺序叠加，运行时以实测高度计算 offset。</p>
+        <p style="color:var(--text-tertiary);">慢速滚动不抖动（验证 layoutTransitioning 期间不切换状态）。</p>
+      </div>
+    </div>
   </div>
+
 </div>
-<div class="sticky-demo__hint">提示：在上方区域内慢速上下滚动，观察搜索框是否稳定隐藏/显示。</div>
+<div class="sticky-demo__hint">提示：在任意案例的可滚动区域内慢速上下滚动，观察吸顶/隐藏/描边是否稳定；搜索框案例使用真实 searchbox 组件。</div>
 <script src="../../../../wego-app/js/scroll-layout.js"></script>
 <script>
-// 演示用：绑定 WegoScrollLayout，让 direction-reveal 和 elevate-after-scroll 真实运行
+// 演示用：为每个案例容器绑定 WegoScrollLayout，让 direction-reveal / elevate-after-scroll 真实运行
 (function () {
-  var scrollRoot = document.querySelector('[data-demo-scroll]');
-  if (!scrollRoot || !window.WegoScrollLayout) return;
-  var regions = Array.prototype.map.call(
-    scrollRoot.querySelectorAll('.sticky-region'),
-    function (el, i) {
-      return {
-        element: el,
-        policy: el.dataset.visibility,
-        edge: el.dataset.edge || 'top',
-        essential: el.dataset.visibility === 'elevate-after-scroll',
-        threshold: 8
-      };
-    }
-  );
-  window.WegoScrollLayout.bind({ root: scrollRoot, scrollRoot: scrollRoot, regions: regions });
+  if (!window.WegoScrollLayout) return;
+  Array.prototype.forEach.call(document.querySelectorAll('[data-demo-scroll]'), function (scrollRoot) {
+    var regions = Array.prototype.map.call(
+      scrollRoot.querySelectorAll('.sticky-region'),
+      function (el) {
+        return {
+          element: el,
+          policy: el.dataset.visibility,
+          edge: el.dataset.edge || 'top',
+          essential: el.dataset.visibility === 'elevate-after-scroll',
+          threshold: 8
+        };
+      }
+    );
+    window.WegoScrollLayout.bind({ root: scrollRoot, scrollRoot: scrollRoot, regions: regions });
+  });
 })();
 </script>
 </body>

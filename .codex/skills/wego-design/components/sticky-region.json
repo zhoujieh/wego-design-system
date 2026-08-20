@@ -122,9 +122,11 @@
     "--z-sticky"
   ],
   "previewOnlyTokens": [
+    "--bg-overlay-l1",
+    "--radius-full",
+    "--text-default",
     "--text-secondary",
-    "--text-tertiary",
-    "--bg-overlay-l1"
+    "--text-tertiary"
   ],
   "localTokens": [
     "--sticky-region-after-gap",
