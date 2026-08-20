@@ -372,8 +372,8 @@
       "type": "rule-execution-failure",
       "ownerSkill": "wego-design",
       "problem": "表单通栏圆角、form 默认左右结构、搜索框 clear 交互等组件契约细节在实现时被遗漏或误用，用户多次纠正后才符合契约。",
-      "rootCause": "interaction-prototype-design.md 已有'逐区域组件映射'步骤要求核对 usageHints 和 doNotInvent，但实现时未逐项核对表单和搜索组件的契约细节（通栏圆角规则、默认水平结构、clear 交互能力、固定高度与自适应区分）。",
-      "resolution": "当前场景已全部修正；后续实现组件消费时需逐项核对契约的 usageHints、doNotInvent 和 behavior 章节，不依赖工作记忆。",
+      "rootCause": "interaction-prototype-design.md 第 2 章短设计链路原仅有'只读取当前页面实际需要的正式组件、Preview 和契约'步骤，未显式要求逐区域映射与契约核对，导致实现时依赖工作记忆，未逐项核对表单和搜索组件的契约细节（通栏圆角规则、默认水平结构、clear 交互能力、固定高度与自适应区分）。",
+      "resolution": "已在 interaction-prototype-design.md 第 2 章新增第 7 步'逐区域组件映射'（原 7-9 步顺延为 8-10），要求为每个业务区域显式列出区域→候选组件→命中正式组件/设计系统缺口，并逐项核对 usageHints 与 doNotInvent；第 5 节自审增加契约核对检查项。后续实现需按此步骤逐区域映射，不依赖工作记忆。",
       "targetAuthority": {
         "path": ".codex/skills/wego-design/references/interaction-prototype-design.md",
         "anchor": "逐区域组件映射"
@@ -390,7 +390,7 @@
       "proposalReason": null,
       "upgradeHistory": [],
       "createdAt": "2026-08-19",
-      "updatedAt": "2026-08-19"
+      "updatedAt": "2026-08-20"
     },
     {
       "id": "exp-20260819-006",
@@ -481,7 +481,7 @@
       "ownerSkill": "wego-uxsystem-iterate",
       "problem": "工作流维护提交（经验登记）与系统修复提交（代码修复）混在同一分支/PR，且分支创建时未同步 main，导致 PR 包含已在 main 上的重复内容，PR 边界混乱。",
       "rootCause": "wego-uxsystem-iterate/SKILL.md 工作流维护例外要求走独立短周期 PR，但未明确禁止与业务/系统修复混在同一分支；创建分支时未同步最新 main（违反 agent-must-pull-before-task-start），导致分支包含已合并到 main 的重复提交。",
-      "resolution": "当前 PR #62 仍开放，需拆分经验登记内容只保留系统修复；后续工作流维护和业务/系统修复必须分别创建独立分支和 PR，创建分支前先同步最新 main。",
+      "resolution": "PR #62 已拆分合并：丢弃已在 main 上的经验登记提交，只保留 scroll-layout 修复；后续工作流维护和业务/系统修复必须分别创建独立分支和 PR，创建分支前先同步最新 main。",
       "targetAuthority": null,
       "relatedRuleId": "workflow-maintenance-enters-main-via-pr",
       "evidenceRefs": [
