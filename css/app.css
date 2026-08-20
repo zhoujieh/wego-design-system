@@ -4,9 +4,11 @@ body[data-host-shell="true"] {
 }
 
 /* ── 移动预览全局交互约束 ──
-   禁用浏览器默认交互：外层滚动、长按选词/呼出菜单、双击放大、
-   点击高亮、橡皮筋、横屏字号放大。仅 input/textarea/contenteditable
-   保留文本选择能力。桌面端手机壳预览不受影响（桌面无 touch 行为）。 */
+   禁用浏览器默认交互：外层滚动、长按呼出菜单、双击放大、
+   点击高亮、橡皮筋、横屏字号放大。桌面端手机壳预览不受影响（桌面无 touch 行为）。
+   body 不再设 user-select: none：父级 user-select: none 会阻止 Cmd+A 在 input 内全选
+   （WebKit 已知行为，即使 input 显式恢复 user-select: text 也无效）。长按选词由
+   -webkit-touch-callout: none 与各交互组件自身的 user-select: none 承担。 */
 html, body {
   margin: 0;
   overflow: hidden;
@@ -16,8 +18,8 @@ html, body {
 }
 
 body {
-  -webkit-user-select: none;
-  user-select: none;
+  -webkit-user-select: auto;
+  user-select: auto;
   -webkit-touch-callout: none;
   touch-action: manipulation;
 }
@@ -27,7 +29,7 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* 输入类元素恢复文本选择与系统菜单（聚焦输入需要选词/复制） */
+/* 输入类元素显式声明文本选择与系统菜单（聚焦输入需要选词/复制、Cmd+A 全选） */
 input, textarea,
 [contenteditable="true"], [contenteditable=""] {
   -webkit-user-select: text;
