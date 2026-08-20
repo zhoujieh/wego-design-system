@@ -219,7 +219,7 @@
     "action 区：flex-shrink:0 固定底部；默认 padding-bottom: 32px + safe-area-bottom；包含 .modal__links 或 .modal__cancel 时 padding-bottom 仅保留 safe-area-bottom（链接/取消栏自身高度已足够）；安全区由 action 区内部处理，body 不再重复承担。上方有 40px 渐变蒙层（linear-gradient transparent → panel-bg）；横向双按钮（double-h）每个固定宽度 140px、间距 12px 并整体居中；支持 6 种布局：double-h/single-h/single-v/single-v-links/cancel/none。",
     "操作区按钮必须使用已注册 button 组件 .btn--lg；链接必须使用已注册 link 组件。禁止发明按钮/链接/标题栏类。",
     "fullscreen 变体只允许 3 种 NavBar 固定组合：text-cancel+button（模式 A，表单类，左侧文本取消无背景）、down-arrow+icon-text（模式 B，浏览/查看默认，左侧下箭头带圆形背景）、back-arrow+button（模式 C，Modal 内 push 二级页面，左侧返回箭头带圆形背景）；禁止任何其他 leftControl/rightControl 自由组合。",
-    "全屏 fullscreen 变体的遮罩为透明，手机状态栏通过高 z-index 穿透透明层显示；NavBar 正常避让 safe-area-top。",
+    "全屏 fullscreen 变体的遮罩为透明，顶部安全区（状态栏）仍可正常可见；NavBar 正常避让宿主 safe-area-top。",
     "嵌套 push 模式：modal 内可 push 多层面板（最多 3 层），新面板从右侧滑入（translateX），返回时逐层退出；所有层级共享同一遮罩；蒙层点击从最顶层开始逐层关闭。",
     "宿主栈式 overlay 支持：modal 可以在已有 full-screen-modal 或 sheet 之上再打开，底层 overlay 不销毁、滚动位置保留；宿主层给非栈顶的根节点加 .is-overlay-under 修饰类降低其 .modal::before 蒙层透明度，栈顶加 .is-overlay-top 维持默认蒙层；新 modal 从底部上滑覆盖下层，下层蒙层变淡让用户感知层级",
     "嵌套 overlay 场景下优先用 fullscreen 变体作为'二级页面'：fullscreen 自身不显示遮罩，叠加在 sheet 之上时不会重复遮挡下层内容；frame/frame-x 变体在嵌套时虽然蒙层被 .is-overlay-under 降透明度，但视觉上仍建议优先选 fullscreen",
@@ -238,7 +238,7 @@
     "zIndex": "var(--z-modal)=600；栈式多 overlay 时栈顶节点在 DOM 中最后插入，paint 顺序自然在上",
     "maxNestingDepth": 3,
     "frameX.enableDrag": "默认 true（向上拖扩展至全屏，H5 不生效；手势由宿主实现）",
-    "frameX.fullscreen.statusBar": "拖拽至 fullscreen 变体时移除非全屏的 --navbar-body-height: 64px 局部覆盖，沿用 navbar 自身高度，并恢复 --safe-area-top 以显示手机状态栏"
+    "frameX.fullscreen.statusBar": "拖拽至 fullscreen 变体时移除非全屏的 --navbar-body-height: 64px 局部覆盖，沿用 navbar 自身高度，并恢复宿主 --safe-area-top 以避让顶部安全区"
   },
   "accessibility": {
     "role": "role=\"dialog\" aria-modal=\"true\"",
@@ -254,7 +254,7 @@
     "frame/frame-x 变体默认使用 default 标题 + 下箭头（icon-xiajiantou16），下箭头按钮必须加 .navbar__left-btn--circle 圆形背景；关闭叉仅在用户明确指定场景时使用。",
     "fullscreen 变体 default 标题只允许 3 种固定组合：text-cancel+button（模式 A）、down-arrow+icon-text（模式 B，推荐默认，左侧下箭头必须加 .navbar__left-btn--circle）、back-arrow+button（模式 C，仅 Modal 内 push 二级页面，左侧返回箭头必须加 .navbar__left-btn--circle）。",
     "fullscreen 右侧入口只支持 button 与 icon-text 两种样式，纯文字入口已被删除；明确操作（保存/下一步/确认）用 button，浏览/跳转类入口优先用 icon-text。",
-    "frame/frame-x 非全屏模态的 default title 局部覆盖 --navbar-body-height: 64px，且不预留顶部状态栏高度（--safe-area-top: 0px），弹窗顶部直接显示 64px 导航主体；fullscreen 全屏模态不覆盖 --navbar-body-height，使用 navbar 自身高度，并恢复 safe-area-top 避让手机状态栏。",
+    "frame/frame-x 非全屏模态的 default title 局部覆盖 --navbar-body-height: 64px，且不预留顶部状态栏高度（--safe-area-top: 0px），弹窗顶部直接显示 64px 导航主体；fullscreen 全屏模态不覆盖 --navbar-body-height，使用 navbar 自身高度，并恢复宿主 safe-area-top 避让顶部安全区。",
     "action 区按钮复用 button 组件 .btn--lg，强调级别 strong/weak/danger；同面板仅 1 个 strong/danger 主按钮。",
     "链接按钮复用 link 组件 .link（standalone），放在 .modal__links 内。",
     "fullscreen 变体 NavBar 仅限 3 种固定模式：text-cancel+button、down-arrow+icon-text、back-arrow+button。",

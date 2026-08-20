@@ -10,3 +10,6 @@ output/
 .vercel
 node_modules/
 # 注意：package-lock.json 已纳入提交以锁定依赖版本，确保多人协作一致；请勿重新忽略
+# IDE 工具工作目录（Codex / Trae 临时产物，不进入仓库）
+.workbuddy/
+.trae-html-share-packages/
