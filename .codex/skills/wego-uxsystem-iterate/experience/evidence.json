@@ -239,13 +239,13 @@
       "experienceId": "exp-20260819-006",
       "occurredAt": "2026-08-19",
       "taskRef": "好友列表场景迭代",
-      "scenes": ["好友列表"],
-      "fact": "scroll-layout.js 的 direction-reveal 策略在滚动内容不足一屏时（maxScrollTop 为 0）会触发搜索框显示/隐藏循环抖动。",
+      "scenes": ["好友列表", "我的"],
+      "fact": "scroll-layout.js 的 direction-reveal 策略在慢速滚动时触发搜索框显示/隐藏循环抖动（我的 tab 页，多 sticky-region 栈式叠加场景）。",
       "evidence": [
-        "用户反馈：如果列表高度不足1屏，搜索框会一直抖，显示隐藏显示隐藏。",
-        "scroll-layout.js decideDirectionReveal 在 currentTop <= tolerance 时强制返回 visible，但隐藏态触发后 updateStacks 调整 scrollPaddingTop 导致布局变化，ResizeObserver 重新 measure 又触发状态切换，形成循环。",
-        "内容不足一屏时 currentMax 为 0，currentTop 始终为 0，隐藏后立即被强制恢复 visible，造成抖动。",
-        "根因：direction-reveal 缺少'内容不足以滚动时不应触发隐藏'的前置判断。"
+        "用户反馈：快速滑动页面没事，慢慢滑搜索框就会一直上下抖；好友列表页没问题，我的 tab 页搜索框会抖。",
+        "我的 tab 有两个 sticky-region 栈式叠加（elevate-after-scroll + direction-reveal），search hidden 后 updateStacks 调整 scrollPaddingTop 导致 maxScrollTop 持续变化（实测 1218→1160，差 58px）。",
+        "日志证据：trans=true 期间 max 持续变化，delta 计算异常，dist 在过渡中累积到 threshold 触发 visible，visible 后 max 又涨回，形成循环。",
+        "根因：原有 layoutTransitioning 修正仅覆盖 wasAtBottom 场景，不覆盖滚动中途过渡导致 max 变化的情况。"
       ]
     },
     {

@@ -398,9 +398,9 @@
       "category": "system",
       "type": "component-state-gap",
       "ownerSkill": "wego-uxsystem-iterate",
-      "problem": "scroll-layout.js 的 direction-reveal 策略在滚动内容不足一屏时触发搜索框显示/隐藏循环抖动。",
-      "rootCause": "decideDirectionReveal 缺少'内容不足以滚动时不应触发隐藏'的前置判断：内容不足一屏时 currentMax 为 0、currentTop 始终为 0，隐藏后 updateStacks 调整 scrollPaddingTop 导致布局变化，ResizeObserver 重新 measure 又强制恢复 visible，形成循环。",
-      "resolution": "已在 scroll-layout.js decideDirectionReveal 函数开头增加 currentMax <= tolerance 前置判断：内容不足一屏时（maxScrollTop 接近 0）直接返回 visible，不进入 delta 计算，中断'隐藏→updateStacks→ResizeObserver measure→恢复 visible'的抖动循环。",
+      "problem": "scroll-layout.js 的 direction-reveal 策略在慢速滚动时触发搜索框显示/隐藏循环抖动（我的 tab 页，多 sticky-region 栈式叠加场景）。",
+      "rootCause": "sticky-region 显隐切换触发 max-height 过渡动画，过渡期间 maxScrollTop 持续变化（如 1218→1160），导致 decideDirectionReveal 的 delta 计算异常，在过渡中反复触发 hidden/visible 切换。原有 layoutTransitioning 修正仅覆盖 wasAtBottom 场景，不覆盖滚动中途过渡导致 max 变化的情况。",
+      "resolution": "已在 scroll-layout.js decideDirectionReveal 增加 layoutTransitioning 前置判断：过渡期间返回 null（不切换状态），保持当前状态直到过渡结束，避免过渡中 max 变化产生异常 delta 引发抖动循环。契约：底部布局校正、尺寸变化和回弹不触发反向切换。",
       "targetAuthority": {
         "path": "wego-app/js/scroll-layout.js",
         "anchor": "decideDirectionReveal"
@@ -410,7 +410,8 @@
         "evt-20260819-007"
       ],
       "scenes": [
-        "好友列表"
+        "好友列表",
+        "我的"
       ],
       "occurrenceCount": 1,
       "status": "observing",
