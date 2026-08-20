@@ -184,6 +184,11 @@ input, textarea,
   flex: 1 1 auto;
 }
 
+/* @debug-temp 临时入口容器,正式合并前删除 */
+.dongtai-temp-entries {
+  padding: var(--spacer-16) var(--spacer-16) var(--spacer-24);
+}
+
 .host-shell-page__scroll {
   padding: var(--spacer-16) 0;
 }
