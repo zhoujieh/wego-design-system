@@ -1086,8 +1086,9 @@
         function updateDisplay() {
           if (isPriceMode) {
             // 售价模式:无键盘头部,直接更新弹窗中的售价显示
+            // 清空时 span 留空,由 CSS :empty::before 显示灰色占位符 0
             if (popupPriceEl) {
-              popupPriceEl.textContent = currentValue || '0';
+              popupPriceEl.textContent = currentValue || '';
             }
             if (priceInputRow) {
               priceInputRow.classList.add('is-editing');
@@ -1215,11 +1216,23 @@
           }
         }
 
-        // 点击键盘外丢弃未确认值
+        // 点击键盘外(蒙层区域)丢弃未确认值
+        // 售价模式:有输入但不合法时,toast 提示并阻止关闭,必须改到合法值
         root.addEventListener('click', function (e) {
-          if (e.target === root) {
-            ctx.closeOverlay();
+          // 点击在面板内(键盘本身)不处理
+          if (e.target.closest('.modal__panel')) return;
+          // 点击在面板外(蒙层区域)
+          if (isPriceMode && currentValue) {
+            var sp = getSupplyPriceForCalc(sample);
+            var num = parseFloat(currentValue);
+            var add = num - sp;
+            var r = amountToRate(add, sp);
+            if (isNaN(num) || num <= 0 || add <= 0 || !validateRate(r)) {
+              ctx.toast('售价需在¥' + formatPrice(sp * 1.01) + '~¥' + formatPrice(sp * 4) + '之间');
+              return;
+            }
           }
+          ctx.closeOverlay();
         });
 
         // 确定按钮
@@ -1239,9 +1252,14 @@
 
             var supplyPrice = getSupplyPriceForCalc(sample);
 
+            // addType / addValue / addPrice 在两个模式共用,统一声明避免后续标签替换取不到值
+            var addPrice;
+            var addType;
+            var addValue;
+
             if (isPriceMode) {
               // 售价模式:加价 = 售价 - 供货价
-              var addPrice = numValue - supplyPrice;
+              addPrice = numValue - supplyPrice;
               if (addPrice <= 0) {
                 ctx.toast('售价需大于供货价¥' + formatPrice(supplyPrice));
                 return;
@@ -1251,6 +1269,9 @@
                 ctx.toast('售价需在¥' + formatPrice(supplyPrice * 1.01) + '~¥' + formatPrice(supplyPrice * 4) + '之间');
                 return;
               }
+              // 售价模式换算成加价金额,供后续标签替换使用
+              addType = 1;
+              addValue = String(addPrice);
               updatePopupPrice(popupRoot, sample, addPrice, 1, String(addPrice));
             } else {
               // 加价模式:金额模式直接用金额,比例模式用户输入百分比需转小数
@@ -1269,10 +1290,6 @@
                 }
                 return;
               }
-
-              var addPrice;
-              var addType;
-              var addValue;
 
               if (currentMode === 'amount') {
                 addPrice = numValue;

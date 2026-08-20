@@ -175,11 +175,11 @@
   flex-wrap: wrap;
   gap: var(--spacer-8);
 }
-/* 售价 ¥+数字 一组,底对齐 */
+/* 售价 ¥+数字 一组,基线对齐 */
 .resale-price__price-group {
   display: inline-flex;
   align-items: baseline;
-  gap: 0;
+  gap: var(--spacer-4);
 }
 .resale-price__currency {
   font-size: var(--body-md-font-size);
@@ -193,6 +193,8 @@
   color: var(--text-default);
   font-feature-settings: "zero";
   line-height: var(--body-lg-line-height);
+  display: inline-block;
+  position: relative;
 }
 .resale-price__commission {
   display: flex;
@@ -203,11 +205,11 @@
 .resale-price__input-row .resale-price__commission {
   margin-left: auto;
 }
-/* 佣金 ¥+数字 一组,底对齐 */
+/* 佣金 ¥+数字 一组,基线对齐 */
 .resale-price__commission-group {
   display: inline-flex;
   align-items: baseline;
-  gap: 0;
+  gap: var(--spacer-4);
 }
 .resale-price__earn-badge {
   display: flex;
@@ -226,7 +228,7 @@
   font-size: var(--body-sm-font-size);
   font-weight: var(--font-weight-medium);
   color: var(--status-danger-default);
-  line-height: var(--body-xs-line-height);
+  line-height: var(--number-md-line-height);
 }
 .resale-price__commission-amount {
   font-size: var(--number-lg2-font-size);
@@ -265,16 +267,32 @@
 .resale-price__input-row[data-price-edit]:active {
   background: var(--bg-state-pressed);
 }
-/* 编辑态:售价数字后显示闪烁光标(与数字上下居中) */
-.resale-price__input-row.is-editing .resale-price__amount::after {
+/* 编辑态 - 有内容:光标在数字右侧(绝对定位,不撑大行框) */
+.resale-price__input-row.is-editing .resale-price__amount:not(:empty)::after {
   content: '';
-  display: inline-block;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: calc(-1 * var(--spacer-4));
   width: 1px;
-  height: var(--heading-lg-line-height);
-  margin-left: var(--spacer-2);
   background: var(--border-brand);
-  vertical-align: middle;
   animation: resale-cursor-blink 1s step-end infinite;
+}
+/* 编辑态 - 空内容:光标在占位符前(左移到 span 外侧 gap 中,不与 0 重叠) */
+.resale-price__input-row.is-editing .resale-price__amount:empty::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(-1 * var(--spacer-2));
+  width: 1px;
+  background: var(--border-brand);
+  animation: resale-cursor-blink 1s step-end infinite;
+}
+/* 售价清空时显示占位符 0(灰色) */
+.resale-price__amount:empty::after {
+  content: '0';
+  color: var(--text-placeholder);
 }
 @keyframes resale-cursor-blink {
   0%, 50% { opacity: 1; }
