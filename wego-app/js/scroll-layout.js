@@ -22,6 +22,12 @@
   }
 
   function decideDirectionReveal(snapshot) {
+    // 内容不足以滚动时（maxScrollTop 接近 0）强制保持可见，
+    // 避免 direction-reveal 隐藏后触发 updateStacks 布局变化与 ResizeObserver 重新 measure 形成抖动循环。
+    // 契约：顶部强制显示、底部布局校正与尺寸变化不触发反向切换。
+    if (snapshot.currentMax <= snapshot.tolerance) {
+      return { state: 'visible', direction: 0, distance: 0, top: 0, max: snapshot.currentMax };
+    }
     var currentTop = clamp(snapshot.currentTop, 0, snapshot.currentMax);
     var delta = currentTop - snapshot.lastTop;
     var wasAtBottom = Math.abs(snapshot.lastMax - snapshot.lastTop) <= snapshot.tolerance;

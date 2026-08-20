@@ -338,8 +338,11 @@ async function inspectLayout(page, routeId) {
     const failures = [];
     for (const region of regions) {
       const style = getComputedStyle(region);
-      // 用户明确要求透明背景的悬浮控件跳过不透明度检查
-      const allowTransparent = region.hasAttribute('data-surface-transparent');
+      // 声明式豁免:轻量辅助控件（字母索引、滚动指示器等，data-surface-role="auxiliary"）
+      // 或明确要求彻底透明背景的悬浮控件（data-surface-transparent）跳过不透明度检查。
+      // 守卫不强制要求这两类控件有不透明底，避免与"不要背景"的业务需求冲突。
+      const allowTransparent = region.hasAttribute('data-surface-transparent')
+        || region.getAttribute('data-surface-role') === 'auxiliary';
       if (!allowTransparent && !opaqueBackground(region)) failures.push(`${label(region)} 的 ${style.position} surface 背景不透明度不足`);
       const isBottom = style.bottom !== 'auto' && (style.position === 'fixed' || style.position === 'absolute' || style.position === 'sticky');
       if (!isBottom) continue;
