@@ -30,6 +30,14 @@
   syncHostViewportMode();
   window.addEventListener('resize', syncHostViewportMode);
 
+  // 电脑端宿主宽度：默认 670px 居中列；地址带 ?full=1 时铺满视口。
+  function syncHostWidthMode() {
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('full') === '1') body.setAttribute('data-host-width', 'full');
+    else body.removeAttribute('data-host-width');
+  }
+  syncHostWidthMode();
+
   // iOS standalone 收起键盘后可能把 100dvh 永久停在去掉状态栏后的短高度。
   // 外壳使用键盘前的完整高度；visualViewport 只用于识别键盘会话，
   // 不把键盘期间的瞬时高度、offsetTop 或 safe-area 写回布局。

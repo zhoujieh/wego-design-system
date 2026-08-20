@@ -5,7 +5,7 @@ body[data-host-shell="true"] {
 
 /* ── 移动预览全局交互约束 ──
    禁用浏览器默认交互：外层滚动、长按呼出菜单、双击放大、
-   点击高亮、橡皮筋、横屏字号放大。桌面端手机壳预览不受影响（桌面无 touch 行为）。
+   点击高亮、橡皮筋、横屏字号放大。桌面端宿主不受影响（桌面无 touch 行为）。
    body 不再设 user-select: none：父级 user-select: none 会阻止 Cmd+A 在 input 内全选
    （WebKit 已知行为，即使 input 显式恢复 user-select: text 也无效）。长按选词由
    -webkit-touch-callout: none 与各交互组件自身的 user-select: none 承担。 */
@@ -99,34 +99,23 @@ input, textarea,
 }
 
 .preview-shell {
-  min-height: 100vh;
-  min-height: 100dvh;
   width: 100%;
-  max-width: 1184px;
+  max-width: 670px;
+  height: 100vh;
+  height: 100dvh;
   margin: 0 auto;
-  padding: var(--spacer-16);
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
   overflow: hidden;
   background: var(--bg-page);
 }
 
-.phone-frame {
-  width: 390px;
-  height: 780px;
-  border: 8px solid var(--bg-inverse);
-  border-radius: 40px;
-  overflow: hidden;
-  position: relative;
-  box-shadow: var(--shadow-xl);
-  background: var(--bg-page);
-  flex-shrink: 0;
+/* 全屏宽度：地址带 ?full=1 时宿主开启，去掉上限铺满视口 */
+body[data-host-width="full"] .preview-shell {
+  max-width: none;
 }
 
 .phone-screen {
-  --safe-area-top: 44px;
-  --safe-area-bottom: 34px;
   --navbar-body-height: 44px;
   width: 100%;
   height: 100%;
@@ -134,27 +123,8 @@ input, textarea,
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border-radius: inherit;
   background: var(--bg-page);
   position: relative;
-}
-
-.phone-status {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: var(--safe-area-top);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 var(--spacer-16);
-  background: transparent;
-  font-size: var(--body-sm-font-size);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-default);
-  pointer-events: none;
-  z-index: calc(var(--z-overlay, 500) + 3);
 }
 
 .host-shell-page {
@@ -410,28 +380,6 @@ input, textarea,
   z-index: var(--z-sticky);
 }
 
-.phone-indicator {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: var(--safe-area-bottom);
-  background: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  z-index: var(--z-sticky);
-}
-
-.phone-indicator-bar {
-  width: 134px;
-  height: 5px;
-  background: var(--bg-inverse);
-  border-radius: var(--radius-full);
-  opacity: 0.2;
-}
-
 .app-scene-layer,
 .app-overlay-layer {
   position: absolute;
@@ -514,7 +462,7 @@ input, textarea,
   z-index: var(--z-toast);
 }
 
-/* phone-frame 预览中 toast 相对宿主定位而非视口 */
+/* 宿主内容层中 toast 相对宿主定位而非视口 */
 .app-toast-host .toast.is-floating {
   position: absolute;
 }
@@ -526,7 +474,7 @@ input, textarea,
   z-index: var(--z-modal);
 }
 
-/* phone-frame 预览中 dialog 相对宿主定位而非视口 */
+/* 宿主内容层中 dialog 相对宿主定位而非视口 */
 .app-dialog-host .dialog {
   position: absolute;
   pointer-events: auto;
@@ -542,21 +490,13 @@ input, textarea,
 }
 
 body[data-viewport-mode="native"] .preview-shell {
+  width: 100%;
+  max-width: none;
   min-height: var(--standalone-full-height, 100dvh);
   height: var(--standalone-full-height, 100dvh);
   align-items: stretch;
   padding: 0;
   background: var(--bg-page);
-}
-
-body[data-viewport-mode="native"] .phone-frame {
-  width: 100%;
-  height: 100%;
-  min-height: var(--standalone-full-height, 100dvh);
-  max-height: none;
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
 }
 
 body[data-viewport-mode="native"] .phone-screen {
@@ -566,14 +506,8 @@ body[data-viewport-mode="native"] .phone-screen {
   --safe-area-right: env(safe-area-inset-right, 0px);
   --navbar-body-height: 44px;
   min-height: var(--standalone-full-height, 100dvh);
-  border-radius: 0;
   padding-left: var(--safe-area-left);
   padding-right: var(--safe-area-right);
-}
-
-body[data-viewport-mode="native"] .phone-status,
-body[data-viewport-mode="native"] .phone-indicator {
-  display: none;
 }
 
 body[data-viewport-mode="native"] .host-shell-page {
