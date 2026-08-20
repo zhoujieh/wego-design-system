@@ -1957,4 +1957,16 @@
   setActiveTab('dongtai');
   var initialRoute = routeFromHash();
   if (initialRoute) openRoute(initialRoute);
+
+  // Electron WebView（如 Trae 内置浏览器）中 Cmd+A/Ctrl+A 在 input 内不触发原生全选，
+  // 这里兜底：监听全局 keydown，命中时对聚焦的 input/textarea 执行 select()。
+  // 标准 Chrome/Safari 不受影响（select() 重置选区到全选状态，行为一致）。
+  document.addEventListener('keydown', function (e) {
+    if (!(e.metaKey || e.ctrlKey)) return;
+    if (e.key !== 'a' && e.key !== 'A') return;
+    var el = document.activeElement;
+    if (!el || el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA') return;
+    if (el.readOnly || el.disabled) return;
+    el.select();
+  });
 })();
