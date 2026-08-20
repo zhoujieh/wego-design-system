@@ -3206,7 +3206,7 @@
 
 /* ── Sticky Region ─────────────────────────────────────────── */
 /* @anatomy
-   <div class="sticky-demo" data-demo-scroll> <!-- 栈式叠加：elevate-after-scroll + direction-reveal（复现多 sticky-region 场景） --> <div class="sticky-region" data-edge="top" data-visibility="elevate-after-scroll" data-state="visible" style="--sticky-region-expanded-size:44px;--sticky-region-inline-inset:8px;--sticky-region-after-gap:0"> <div class="sticky-region__motion"> <div class="sticky-region__inner">...
+   <div class="sticky-demo-grid"> <!-- 案例 1：非搜索框吸顶 --> <div class="sticky-case"> <div class="sticky-case__label">非搜索框吸顶 · elevate-after-scroll 分类标签</div>
 */
 /* Sticky Region 只承担通栏吸附 surface、状态动效与内部留白。
    滚动方向、阈值、动态测量和 scroll-padding 由宿主滚动运行时负责。 */
