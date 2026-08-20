@@ -1,0 +1,588 @@
+body[data-host-shell="true"] {
+  margin: 0;
+  background: var(--bg-page);
+}
+
+/* ── 移动预览全局交互约束 ──
+   禁用浏览器默认交互：外层滚动、长按呼出菜单、双击放大、
+   点击高亮、橡皮筋、横屏字号放大。桌面端手机壳预览不受影响（桌面无 touch 行为）。
+   body 不再设 user-select: none：父级 user-select: none 会阻止 Cmd+A 在 input 内全选
+   （WebKit 已知行为，即使 input 显式恢复 user-select: text 也无效）。长按选词由
+   -webkit-touch-callout: none 与各交互组件自身的 user-select: none 承担。 */
+html, body {
+  margin: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  -webkit-user-select: auto;
+  user-select: auto;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 输入类元素显式声明文本选择与系统菜单（聚焦输入需要选词/复制、Cmd+A 全选） */
+input, textarea,
+[contenteditable="true"], [contenteditable=""] {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+  touch-action: text;
+}
+
+/* 内部滚动容器：阻止滚动链到 document，防止触顶/触底带动外层 */
+.host-shell-page,
+.app-scene-layer__panel,
+.quick-publish__body {
+  overscroll-behavior: contain;
+}
+
+/* 触控设备上 :active 伪类可能在 touchend 后残留（移动端 Safari 已知行为），
+   导致按压态持续到页面切换。此处将 :active 的按压效果覆盖回各组件默认值
+   （特异性 (0,2,0)），同时为 .is-pressed 用重复类名提高特异性到 (0,3,0)，
+   确保触摸时 .is-pressed 存在则按压态正常显示，touchend 后 .is-pressed 移除
+   则 :active 被覆盖为默认值。桌面端（hover: hover）不受影响。 */
+@media (hover: none) {
+  /* :active 覆盖为默认值 */
+  .cell--clickable:active { background: var(--bg-surface); }
+  .form-body--clickable:active { background: var(--bg-surface); }
+  .btn--strong:active { background: var(--bg-brand); }
+  .btn--medium:active,
+  .btn--weak:active { background: var(--bg-overlay-l1); }
+  .btn--danger:active { background: var(--bg-overlay-l1); }
+  .counter__btn:active { background: var(--bg-surface); }
+  .link:active,
+  .link--inline:active { background: transparent; }
+  .link--disabled:active { background: transparent; }
+  .navbar__left-btn:active,
+  .navbar__left-text:active,
+  .navbar__action:active,
+  .bottom-nav__item:active,
+  .form-body__upload:active,
+  .form-body__icon-action:active,
+  .icon-text-btn:active,
+  .form-dropdown__item:active,
+  .host-shell-grid-entry:active,
+  .host-shell-link-button:active { opacity: 1; }
+
+  /* .is-pressed 用重复类名提高特异性到 (0,3,0)，确保按压态显示 */
+  .cell--clickable.cell--clickable.is-pressed { background: var(--bg-state-pressed); }
+  /* form-body--clickable 整行按压态：宿主 is-pressed 加在 form-body 行（不是内层 .form-body__select），
+     整行变灰；之前 .form-body__select.form-body__select.is-pressed 规则已删除避免视觉错位 */
+  .form-body--clickable.form-body--clickable.is-pressed { background: var(--bg-state-pressed); }
+  .btn--strong.btn--strong.is-pressed { background: var(--bg-brand-disabled); }
+  .btn--medium.btn--medium.is-pressed { background: var(--bg-state-selected); }
+  .btn--weak.btn--weak.is-pressed { background: var(--bg-state-selected); }
+  .btn--danger.btn--danger.is-pressed { background: var(--status-danger-surface-l2); }
+  .counter__btn.counter__btn.is-pressed { background: var(--bg-overlay-l2); }
+  .link.link.is-pressed,
+  .link--inline.link--inline.is-pressed { background: var(--bg-overlay-l2); }
+  .link--disabled.link--disabled.is-pressed { background: transparent; }
+  .navbar__left-btn.navbar__left-btn.is-pressed,
+  .navbar__left-text.navbar__left-text.is-pressed,
+  .navbar__action.navbar__action.is-pressed,
+  .bottom-nav__item.bottom-nav__item.is-pressed,
+  .form-body__upload.form-body__upload.is-pressed,
+  .form-body__icon-action.form-body__icon-action.is-pressed,
+  .icon-text-btn.icon-text-btn.is-pressed,
+  .form-dropdown__item.form-dropdown__item.is-pressed,
+  .host-shell-grid-entry.host-shell-grid-entry.is-pressed,
+  .host-shell-link-button.host-shell-link-button.is-pressed { opacity: 0.6; }
+}
+
+.preview-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  max-width: 1184px;
+  margin: 0 auto;
+  padding: var(--spacer-16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--bg-page);
+}
+
+.phone-frame {
+  width: 390px;
+  height: 780px;
+  border: 8px solid var(--bg-inverse);
+  border-radius: 40px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: var(--shadow-xl);
+  background: var(--bg-page);
+  flex-shrink: 0;
+}
+
+.phone-screen {
+  --safe-area-top: 44px;
+  --safe-area-bottom: 34px;
+  --navbar-body-height: 44px;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: inherit;
+  background: var(--bg-page);
+  position: relative;
+}
+
+.phone-status {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--safe-area-top);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spacer-16);
+  background: transparent;
+  font-size: var(--body-sm-font-size);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-default);
+  pointer-events: none;
+  z-index: calc(var(--z-overlay, 500) + 3);
+}
+
+.host-shell-page {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.host-shell-page__panel[hidden] {
+  display: none;
+}
+
+.host-shell-page__panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.host-shell-page__panel--blank {
+  flex: 1 1 auto;
+}
+
+.host-shell-page__scroll {
+  padding: var(--spacer-16) 0;
+}
+
+.host-shell-profile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-12);
+  padding: var(--spacer-16);
+}
+
+.host-shell-profile__main,
+.host-shell-membership__header,
+.host-shell-membership__body,
+.host-shell-profile__title-row,
+.host-shell-profile__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-8);
+}
+
+.host-shell-profile__main {
+  align-items: flex-start;
+}
+
+.host-shell-profile__meta {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-4);
+}
+
+.host-shell-profile__title-row {
+  min-width: 0;
+}
+
+.host-shell-profile__title {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-default);
+  font: var(--heading-sm-font-weight, 600) var(--heading-sm-font-size, 20px) / 1.4 var(--body-md-font-family);
+}
+
+.host-shell-profile__subtitle {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+}
+
+.host-shell-profile__badge {
+  --badge-text-bg: var(--status-warning-default);
+  --badge-text-color: var(--text-inverse);
+  flex-shrink: 0;
+}
+
+.host-shell-membership {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-8);
+  padding: var(--spacer-12);
+}
+
+.host-shell-membership-card {
+  background: linear-gradient(180deg, var(--status-warning-surface-l1) 0%, var(--bg-surface) 100%);
+}
+
+.host-shell-membership__header,
+.host-shell-membership__body {
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.host-shell-membership__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.host-shell-membership__usage {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacer-4);
+  color: var(--text-default);
+}
+
+.host-shell-membership__usage strong {
+  font-size: var(--title-sm-font-size, 24px);
+}
+
+.host-shell-link-button {
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.host-shell-link-button:active,
+.host-shell-link-button.is-pressed {
+  opacity: 0.6;
+}
+
+.host-shell-app-card__content,
+.host-shell-list-card__content {
+  padding: 0;
+}
+
+.host-shell-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--spacer-12);
+  padding: var(--spacer-16);
+}
+
+.host-shell-grid-entry {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacer-8);
+  min-height: 56px;
+  color: var(--text-default);
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+.host-shell-grid-entry:active,
+.host-shell-grid-entry.is-pressed {
+  opacity: 0.6;
+}
+
+.host-shell-grid-entry__icon {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+.host-shell-grid-entry__label {
+  text-align: center;
+  font-size: var(--body-sm-font-size, 13px);
+  line-height: 1.4;
+}
+
+.host-shell-list {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.host-shell-empty {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--body-sm-font-size, 13px);
+}
+
+/* 动态 Tab 导航栏 */
+.host-dongtai-navbar {
+  background: var(--bg-page);
+}
+
+.host-dongtai-navbar__vip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.host-dongtai-navbar__vip::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 48px;
+  height: 48px;
+  transform: translate(-50%, -50%);
+}
+
+.host-dongtai-navbar__vip:active,
+.host-dongtai-navbar__vip.is-pressed {
+  opacity: 0.6;
+}
+
+.host-dongtai-navbar__vip img {
+  display: block;
+}
+
+.host-dongtai-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacer-16);
+}
+
+.bottom-nav {
+  flex-shrink: 0;
+  z-index: var(--z-sticky);
+}
+
+.phone-indicator {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--safe-area-bottom);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: var(--z-sticky);
+}
+
+.phone-indicator-bar {
+  width: 134px;
+  height: 5px;
+  background: var(--bg-inverse);
+  border-radius: var(--radius-full);
+  opacity: 0.2;
+}
+
+.app-scene-layer,
+.app-overlay-layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(0);
+}
+
+/* sceneLayer 容器本身透明：栈式 push 时新 panel slide-in 需要透出底层宿主页/上级场景 */
+.app-scene-layer {
+  z-index: var(--z-scene);
+  background: transparent;
+}
+
+.app-overlay-layer {
+  z-index: var(--z-overlay);
+  background: transparent;
+}
+
+.app-scene-layer[hidden],
+.app-overlay-layer[hidden] {
+  display: none;
+}
+
+/* 不盖住 bottom-nav 的 push 场景层：底部留出 Tab 高度 */
+.app-scene-layer:not(.app-scene-layer--cover-tab) {
+  bottom: calc(56px + var(--safe-area-bottom));
+}
+
+/* 栈层 panel：每个 push 场景独立 panel，绝对定位层叠在 sceneLayer 内 */
+.app-scene-layer__panel {
+  position: absolute;
+  inset: 0;
+  background: var(--bg-page);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(0);
+}
+
+.app-scene-layer__panel--enter {
+  animation: wego-scene-enter var(--duration-normal, 250ms) var(--ease-enter, ease-out);
+}
+
+.app-scene-layer__panel--exit {
+  transition: transform var(--duration-normal, 250ms) var(--ease-exit, ease-in);
+  transform: translateX(100%);
+}
+
+/* overlay 层透明容器：蒙层视觉与动画均由组件自身承担（actionsheet / modal / dialog 行为一致）；
+   不再创建 .app-overlay-panel 包裹层，组件根节点直接挂载到本层 */
+.app-overlay-layer {
+  background: transparent;
+}
+
+/* overlay 层下组件根节点定位覆盖：组件 CSS 默认 position:fixed，但 overlayLayer 有 transform
+   会导致 fixed 失效，显式覆盖为 absolute 与 .app-dialog-host .dialog 行为一致 */
+.app-overlay-layer > .actionsheet,
+.app-overlay-layer > .modal {
+  position: absolute;
+  inset: 0;
+}
+
+/* 栈式 overlay：非栈顶的蒙层透明度降低，避免多层 mask 叠加后颜色过深；
+   栈顶由 JS 维护（openOverlay / closeOverlayEntry 重新计算），非栈顶加 .is-overlay-under */
+.app-overlay-layer > .actionsheet.is-overlay-under {
+  background: transparent;
+}
+.app-overlay-layer > .actionsheet.is-overlay-under::before {
+  opacity: 0.2;
+}
+.app-overlay-layer > .modal.is-overlay-under::before {
+  opacity: 0.2;
+}
+
+.app-toast-host {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: var(--z-toast);
+}
+
+/* phone-frame 预览中 toast 相对宿主定位而非视口 */
+.app-toast-host .toast.is-floating {
+  position: absolute;
+}
+
+.app-dialog-host {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: var(--z-modal);
+}
+
+/* phone-frame 预览中 dialog 相对宿主定位而非视口 */
+.app-dialog-host .dialog {
+  position: absolute;
+  pointer-events: auto;
+}
+
+@keyframes wego-scene-enter {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+body[data-viewport-mode="native"] .preview-shell {
+  min-height: var(--standalone-full-height, 100dvh);
+  height: var(--standalone-full-height, 100dvh);
+  align-items: stretch;
+  padding: 0;
+  background: var(--bg-page);
+}
+
+body[data-viewport-mode="native"] .phone-frame {
+  width: 100%;
+  height: 100%;
+  min-height: var(--standalone-full-height, 100dvh);
+  max-height: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+body[data-viewport-mode="native"] .phone-screen {
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+  --navbar-body-height: 44px;
+  min-height: var(--standalone-full-height, 100dvh);
+  border-radius: 0;
+  padding-left: var(--safe-area-left);
+  padding-right: var(--safe-area-right);
+}
+
+body[data-viewport-mode="native"] .phone-status,
+body[data-viewport-mode="native"] .phone-indicator {
+  display: none;
+}
+
+body[data-viewport-mode="native"] .host-shell-page {
+  padding-top: 0;
+  padding-bottom: calc(var(--spacer-40) + 56px);
+}
+
+body[data-viewport-mode="native"] .bottom-nav {
+  padding-left: max(var(--safe-area-left), var(--spacer-8));
+  padding-right: max(var(--safe-area-right), var(--spacer-8));
+}
+
+@media (max-width: 375px) {
+  body[data-viewport-mode="native"] .host-shell-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
