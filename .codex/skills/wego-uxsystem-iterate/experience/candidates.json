@@ -517,9 +517,26 @@
       ],
       "scenes": [],
       "occurrenceCount": 1,
-      "status": "proposed",
-      "proposalReason": "explicit-upgrade",
-      "upgradeHistory": [],
+      "status": "upgraded",
+      "proposalReason": null,
+      "upgradeHistory": [
+        {
+          "version": 1,
+          "upgradedAt": "2026-08-20",
+          "evidenceRefs": [
+            "evt-20260820-002"
+          ],
+          "targetAuthority": {
+            "path": ".codex/skills/wego-github-delivery/SKILL.md",
+            "anchor": "开始交付"
+          },
+          "ruleIds": [
+            "session-end-must-clean-worktree"
+          ],
+          "summary": "开始交付核对新增 git branch -vv 本地分支归属盘点：非 main、非当前任务、无开放 PR、无认领、无挂起登记的分支视为悬空交付单元，先报告并收口（推送创建 PR、登记挂起或确认废弃），不得静默跨会话保留；会话收尾要求已提交 checkpoint 但未推送创建 PR 的交付单元必须进入可见交付状态或登记挂起。",
+          "commitSha": "43ef7d90"
+        }
+      ],
       "createdAt": "2026-08-20",
       "updatedAt": "2026-08-20"
     }
