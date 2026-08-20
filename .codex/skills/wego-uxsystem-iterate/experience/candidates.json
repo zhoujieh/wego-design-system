@@ -199,15 +199,18 @@
       },
       "relatedRuleId": "workflow-maintenance-enters-main-via-pr",
       "evidenceRefs": [
-        "evt-20260817-001"
+        "evt-20260817-001",
+        "evt-20260819-010"
       ],
-      "scenes": [],
-      "occurrenceCount": 1,
+      "scenes": [
+        "好友列表"
+      ],
+      "occurrenceCount": 2,
       "status": "observing",
       "proposalReason": null,
       "upgradeHistory": [],
       "createdAt": "2026-08-17",
-      "updatedAt": "2026-08-17"
+      "updatedAt": "2026-08-19"
     },
     {
       "id": "exp-20260819-001",
@@ -469,6 +472,30 @@
       "upgradeHistory": [],
       "createdAt": "2026-08-19",
       "updatedAt": "2026-08-19"
+    },
+    {
+      "id": "exp-20260820-001",
+      "normalizedKey": "workflow-maintenance-and-system-fix-mixed-in-same-pr",
+      "category": "execution",
+      "type": "workflow-gap",
+      "ownerSkill": "wego-uxsystem-iterate",
+      "problem": "工作流维护提交（经验登记）与系统修复提交（代码修复）混在同一分支/PR，且分支创建时未同步 main，导致 PR 包含已在 main 上的重复内容，PR 边界混乱。",
+      "rootCause": "wego-uxsystem-iterate/SKILL.md 工作流维护例外要求走独立短周期 PR，但未明确禁止与业务/系统修复混在同一分支；创建分支时未同步最新 main（违反 agent-must-pull-before-task-start），导致分支包含已合并到 main 的重复提交。",
+      "resolution": "当前 PR #62 仍开放，需拆分经验登记内容只保留系统修复；后续工作流维护和业务/系统修复必须分别创建独立分支和 PR，创建分支前先同步最新 main。",
+      "targetAuthority": null,
+      "relatedRuleId": "workflow-maintenance-enters-main-via-pr",
+      "evidenceRefs": [
+        "evt-20260819-011"
+      ],
+      "scenes": [
+        "好友列表"
+      ],
+      "occurrenceCount": 1,
+      "status": "observing",
+      "proposalReason": null,
+      "upgradeHistory": [],
+      "createdAt": "2026-08-20",
+      "updatedAt": "2026-08-20"
     }
   ]
 }
