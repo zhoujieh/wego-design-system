@@ -1,0 +1,9 @@
+{
+  "agent": "codex-order-demo",
+  "scene": "开单",
+  "routeId": "workspace-order-create",
+  "branch": "feature/luhong-workspace-order-demo",
+  "status": "active",
+  "claimedAt": "2026-08-20T00:00:00.000Z",
+  "note": "迁移工作台与收银开单 demo 到团队仓库"
+}

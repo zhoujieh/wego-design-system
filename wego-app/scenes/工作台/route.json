@@ -1,0 +1,10 @@
+{
+  "routeId": "workspace",
+  "pattern": "composed",
+  "entry": {
+    "type": "host-tab",
+    "tab": "workspace"
+  },
+  "style": "scenes/工作台/scene.css",
+  "script": "scenes/工作台/scene.js"
+}
