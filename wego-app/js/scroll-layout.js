@@ -230,7 +230,20 @@
       pendingTop = clamp(scrollRoot.scrollTop, 0, maxScrollTop());
       direction = 0;
       directionDistance = 0;
-      if (pendingTop <= tolerance) regions.forEach(function (region) { setState(region, 'visible'); });
+      if (pendingTop <= tolerance) {
+        // 回顶恢复 visible 时禁用过渡，避免 max-height 从 0 展开的动画
+        regions.forEach(function (region) {
+          if (region.element.dataset.state === 'hidden') {
+            region.element.style.transition = 'none';
+            setState(region, 'visible');
+            requestAnimationFrame(function () {
+              region.element.style.removeProperty('transition');
+            });
+          } else {
+            setState(region, 'visible');
+          }
+        });
+      }
       measure();
     }
 
@@ -238,9 +251,18 @@
     regions.forEach(function (region) { region.element.addEventListener('transitionend', onTransitionEnd); });
 
     var resizeObserver = typeof ResizeObserver === 'function' ? new ResizeObserver(function () {
+      // 布局变化时禁用过渡，避免 max-height 从 0 或旧值过渡到新值
+      regions.forEach(function (region) {
+        region.element.style.transition = 'none';
+      });
       layoutTransitioning = true;
       measure();
-      requestAnimationFrame(function () { layoutTransitioning = false; });
+      requestAnimationFrame(function () {
+        regions.forEach(function (region) {
+          region.element.style.removeProperty('transition');
+        });
+        layoutTransitioning = false;
+      });
     }) : null;
     if (resizeObserver) {
       regions.forEach(function (region) { resizeObserver.observe(region.motion); });
@@ -252,8 +274,16 @@
     }) : null;
     if (activationObserver) activationObserver.observe(activationRoot, { attributes: true, attributeFilter: ['hidden', 'class'] });
 
+    // 初始测量前禁用过渡，避免 max-height 从 0 展开的动画
+    regions.forEach(function (region) {
+      region.element.style.transition = 'none';
+    });
     measure();
-    requestAnimationFrame(measure);
+    requestAnimationFrame(function () {
+      regions.forEach(function (region) {
+        region.element.style.removeProperty('transition');
+      });
+    });
 
     return {
       reset: reset,
