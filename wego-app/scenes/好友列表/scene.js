@@ -105,10 +105,39 @@
 
 /* 好友列表场景 */
 
-/* ── 数据源（取自原型数据库）── */
+/* ── 数据源（取自原型数据库 + localStorage 落盘）── */
 var PROTOTYPE_DB = window.WEGO_PROTOTYPE_DB || {};
 var FRIEND_GROUPS = (PROTOTYPE_DB.friendGroups || []).slice();
-var FRIENDS_DATA = (PROTOTYPE_DB.friends || []).slice();
+
+/* FriendStore：好友数据的 localStorage 持久层
+   首次无 localStorage 记录时，初始数据来源于 WEGO_PROTOTYPE_DB.friends；
+   此后新增/删除均写入 localStorage，刷新保留。 */
+var FRIEND_STORE_KEY = 'wego.friend-list.friends';
+var FriendStore = (function () {
+  function load() {
+    try {
+      var raw = window.localStorage.getItem(FRIEND_STORE_KEY);
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) { /* 解析失败回退初始数据 */ }
+    var initial = (PROTOTYPE_DB.friends || []).slice();
+    save(initial);
+    return initial;
+  }
+  function save(list) {
+    try {
+      window.localStorage.setItem(FRIEND_STORE_KEY, JSON.stringify(list));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  return { load: load, save: save };
+})();
+
+var FRIENDS_DATA = FriendStore.load();
 
 /* ── 工具函数 ── */
 function getGroupName(groupId) {
@@ -343,6 +372,27 @@ function addFriendFormTemplate() {
     + '</div>';
 }
 
+/* ── 长按删除操作面板 actionsheet 模板 ── */
+function friendActionSheetTemplate(friendName) {
+  return ''
+    + '<div class="actionsheet actionsheet--action" role="dialog" aria-modal="true" data-component-slug="actionsheet">'
+    +   '<div class="actionsheet__panel">'
+    +     '<div class="actionsheet__header actionsheet__header--text"><span class="actionsheet__header-text">' + escapeHtml(friendName) + '</span></div>'
+    +     '<div class="actionsheet__list">'
+    +       '<button type="button" class="actionsheet__item" data-component-slug="actionsheet-item" data-delete-friend>'
+    +         '<i class="wego-iconfont-s icon-shanchu actionsheet__item-icon" aria-hidden="true"></i>'
+    +         '<div class="actionsheet__item-main">'
+    +           '<div class="actionsheet__item-title">删除该好友</div>'
+    +           '<div class="actionsheet__item-subtitle">删除后无法恢复</div>'
+    +         '</div>'
+    +       '</button>'
+    +     '</div>'
+    +     '<div class="actionsheet__cancel-gap"></div>'
+    +     '<button type="button" class="actionsheet__cancel" data-close-action-sheet>取 消</button>'
+    +   '</div>'
+    + '</div>';
+}
+
 /* ── 分组选择 actionsheet 模板 ── */
 function groupSelectTemplate(selectedId) {
   var items = FRIEND_GROUPS.map(function (g) {
@@ -547,6 +597,156 @@ window.WegoApp.registerScene({
       renderList();
     }
 
+    /* ── 全局失败注入消费（读取运行时故障开关） ── */
+    function fault(key) {
+      return !!(window.WegoApp && window.WegoApp.faultInjection && window.WegoApp.faultInjection.isEnabled(key));
+    }
+
+    /* ── 加载态与加载失败 ── */
+    var LOAD_DEMO_DELAY = 600;
+    function loadingTemplate() {
+      var rows = '';
+      for (var i = 0; i < 6; i++) rows += '<div class="friend-list__skeleton-row"></div>';
+      return '<div class="friend-list__loading">' + rows + '</div>';
+    }
+    function loadFailedTemplate() {
+      return ''
+        + '<div class="friend-list__state">'
+        +   '<div class="result">'
+        +     '<div class="result__icon" aria-hidden="true"><i class="wego-iconfont-s icon-tanhao-mian"></i></div>'
+        +     '<div class="result__title">好友列表加载失败，<a class="link link--inline" href="javascript:void(0)" data-retry-load>请重试</a></div>'
+        +   '</div>'
+        + '</div>';
+    }
+    function renderLoading() {
+      scrollEl.innerHTML = loadingTemplate();
+      indexEl.hidden = true;
+    }
+    function renderLoadFailed() {
+      scrollEl.innerHTML = loadFailedTemplate();
+      indexEl.hidden = true;
+      var retry = scrollEl.querySelector('[data-retry-load]');
+      if (retry) retry.addEventListener('click', function () { startLoad(); });
+    }
+    function startLoad() {
+      if (fault('load')) {
+        renderLoadFailed();
+      } else {
+        renderLoading();
+        setTimeout(function () {
+          updateSortLabel();
+          renderList();
+        }, LOAD_DEMO_DELAY);
+      }
+    }
+
+    /* ── 删除好友（长按唤起） ── */
+    function persistFriends() {
+      return FriendStore.save(FRIENDS_DATA);
+    }
+
+    function removeFriendById(friendId) {
+      FRIENDS_DATA = FRIENDS_DATA.filter(function (f) { return f.friend_id !== friendId; });
+      persistFriends();
+    }
+
+    function findFriendById(friendId) {
+      for (var i = 0; i < FRIENDS_DATA.length; i++) {
+        if (FRIENDS_DATA[i].friend_id === friendId) return FRIENDS_DATA[i];
+      }
+      return null;
+    }
+
+    // 长按检测：按压超过长按阈值后触发，移动/松开阈值内取消
+    var LONG_PRESS_MS = 500;
+    var longPressTimer = null;
+    var longPressFired = false;
+    var longPressStart = { x: 0, y: 0 };
+    var MOVE_TOLERANCE = 10;
+
+    function clearLongPress() {
+      if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+      longPressFired = false;
+    }
+
+    function beginLongPress(cell, friendId, clientX, clientY) {
+      clearLongPress();
+      longPressStart.x = clientX;
+      longPressStart.y = clientY;
+      longPressFired = false;
+      longPressTimer = setTimeout(function () {
+        longPressFired = true;
+        longPressFiredOn = true;
+        cell.classList.add('is-nav-prepress');
+        var friend = findFriendById(friendId);
+        openFriendActionSheet(friend);
+      }, LONG_PRESS_MS);
+    }
+    var longPressFiredOn = false;
+
+    function cancelLongPress(cell) {
+      clearLongPress();
+      if (cell) cell.classList.remove('is-nav-prepress');
+    }
+
+    function openFriendActionSheet(friend) {
+      if (!friend) return;
+      ctx.openSheet(friendActionSheetTemplate(friend.nickname), {
+        label: '好友操作',
+        init: function (sheet) {
+          var sheetRoot = sheet.root;
+          var deleteBtn = sheetRoot.querySelector('[data-delete-friend]');
+          var closeBtn = sheetRoot.querySelector('[data-close-action-sheet]');
+          if (closeBtn) {
+            closeBtn.addEventListener('click', function () { sheet.close(); });
+          }
+          if (deleteBtn) {
+            deleteBtn.addEventListener('click', function () {
+              sheet.close();
+              confirmDeleteFriend(friend);
+            });
+          }
+        }
+      });
+    }
+
+    function confirmDeleteFriend(friend) {
+      ctx.dialog({
+        variant: 'text',
+        title: '删除好友',
+        content: '确定要删除 <strong>' + escapeHtml(friend.nickname) + '</strong> 吗？删除后无法恢复该好友关系。',
+        buttons: [
+          { label: '取 消', tone: 'dismiss' },
+          { label: '删除', tone: 'danger', onClick: function () { doDeleteFriend(friend); } }
+        ]
+      });
+    }
+
+    function doDeleteFriend(friend) {
+      if (fault('delete')) {
+        ctx.toast('删除失败，请稍后重试');
+        return;
+      }
+      var list = FRIENDS_DATA.map(function (f) { return f; });
+      var idx = -1;
+      for (var i = 0; i < list.length; i++) { if (list[i].friend_id === friend.friend_id) { idx = i; break; } }
+      if (idx === -1) {
+        ctx.toast('该好友已不在列表中');
+        renderList();
+        return;
+      }
+      var removed = list.splice(idx, 1)[0];
+      FRIENDS_DATA = list;
+      if (!persistFriends()) {
+        FRIENDS_DATA.push(removed);
+        ctx.toast('删除失败，请稍后重试');
+        renderList();
+        return;
+      }
+      renderList();
+      ctx.toast('已删除好友 ' + friend.nickname);
+    }
+
     /* ── 添加好友表单 ── */
     function openAddForm() {
       var formState = { groupId: '', groupName: '', source: '' };
@@ -623,6 +823,10 @@ window.WegoApp.registerScene({
               ctx.toast('请输入好友昵称');
               return;
             }
+            if (fault('save')) {
+              ctx.toast('保存失败，请稍后重试');
+              return;
+            }
             var newFriend = {
               friend_id: 'f' + Date.now(),
               nickname: nickname.value.trim(),
@@ -636,6 +840,10 @@ window.WegoApp.registerScene({
               newFriend.py_initial = '#';
             }
             FRIENDS_DATA.push(newFriend);
+            if (!persistFriends()) {
+              ctx.toast('保存失败，请稍后重试');
+              return;
+            }
             ctx.closeOverlay();
             ctx.toast('已添加好友 ' + newFriend.nickname);
             renderList();
@@ -682,6 +890,36 @@ window.WegoApp.registerScene({
       }, 80);
     });
 
+    /* 长按列表项唤起操作面板：事件委托，兼容触控与桌面指针 */
+    function pressStart(e) {
+      var cell = e.target && e.target.closest ? e.target.closest('[data-friend-id]') : null;
+      if (!cell) return;
+      var isMouse = typeof e.pointerType === 'string' && e.pointerType !== 'touch';
+      var pt = isMouse ? e : ((e.touches && e.touches[0]) || e);
+      beginLongPress(cell, cell.getAttribute('data-friend-id'), pt.clientX, pt.clientY);
+    }
+    function pressMove(e) {
+      if (longPressTimer === null) return;
+      var cell = e.target && e.target.closest ? e.target.closest('[data-friend-id]') : null;
+      var pt = (e.touches && e.touches[0]) || e;
+      if (Math.abs(pt.clientX - longPressStart.x) > MOVE_TOLERANCE ||
+          Math.abs(pt.clientY - longPressStart.y) > MOVE_TOLERANCE) {
+        cancelLongPress(cell);
+      }
+    }
+    function pressEnd(e) {
+      var cell = e.target && e.target.closest ? e.target.closest('[data-friend-id]') : null;
+      cancelLongPress(cell);
+    }
+    scrollEl.addEventListener('touchstart', pressStart, { passive: true });
+    scrollEl.addEventListener('touchmove', pressMove, { passive: true });
+    scrollEl.addEventListener('touchend', pressEnd, { passive: true });
+    scrollEl.addEventListener('touchcancel', pressEnd, { passive: true });
+    scrollEl.addEventListener('pointerdown', pressStart);
+    scrollEl.addEventListener('pointermove', pressMove, { passive: true });
+    scrollEl.addEventListener('pointerup', pressEnd);
+    scrollEl.addEventListener('pointercancel', pressEnd);
+
     /* 注册滚动布局：搜索框上滑隐藏/下滑显示 */
     ctx.bindScrollLayout({
       scrollRoot: '.friend-list__scroll',
@@ -690,8 +928,7 @@ window.WegoApp.registerScene({
       ]
     });
 
-    /* 初始化渲染 */
-    updateSortLabel();
-    renderList();
+    /* 初始化渲染：先呈现加载态（本地演示延迟），再渲染列表 */
+    startLoad();
   }
 });
