@@ -7,7 +7,7 @@
     "primary_scene": "好友列表",
     "related_scenes": []
   },
-  "status": "awaiting-prototype-confirmation",
+  "status": "prototyping",
   "scope_revision": 4,
   "prototype_brief": {
     "goal": "在已恢复到最新代码的好友tab基础上，按最新交互设计工作流补全交互闭环与必要状态：好友列表默认进入为真实空状态，数据完全通过添加好友表单的真实操作创建并写入 localStorage 落盘（不再首启预载种子数据、不再内存直 push 即丢）；新增好友表单的字段、分组、来源与数据来源和真实场景（window.WEGO_PROTOTYPE_DB 的 friendFromUser 结构与 friendGroups）完全统一，不编造字段；补齐列表加载态与存储失败态，完善空/搜索空结果引导，让单个好友列表场景的浏览、搜索、排序、增删体验完整可验收。",
@@ -106,18 +106,7 @@
     "scope_revision": 4,
     "scope_sha256": "9bc804d2de36fce11693b0ca35e8c61fc11dbe92d59508de297d83b124ad8e74"
   },
-  "prototype_submission": {
-    "at": "2026-08-21T11:59:54.456Z",
-    "scope_revision": 4,
-    "affected_scenes": [
-      "好友列表"
-    ],
-    "fingerprints": {
-      "@route-entry/%E5%A5%BD%E5%8F%8B%E5%88%97%E8%A1%A8": "af29f2f8ea49c1594e5b474ff6a6c2b8099eb79eecfd80bd97f2cb2f6326451b",
-      "wego-app/scenes/好友列表/scene.css": "575ebead4ee57dc1b315b1a66fca9a61bdff00b418549502856f12d7a928dd65",
-      "wego-app/scenes/好友列表/scene.js": "30b7bb831bc0c8e0f944b2c6459996c6ccb8ad747ecf2dcf74c4d5d355fa3f64"
-    }
-  },
+  "prototype_submission": null,
   "prototype_confirmation": null,
   "affected_scenes": [
     "好友列表"
@@ -128,7 +117,7 @@
       "valid": true
     },
     "design": {
-      "valid": true
+      "valid": false
     }
   },
   "change_log": [
@@ -175,6 +164,10 @@
     {
       "action": "submit-prototype",
       "at": "2026-08-21T11:59:54.475Z"
+    },
+    {
+      "action": "invalidate",
+      "at": "2026-08-21T12:38:50.930Z"
     }
   ],
   "freeze": null
