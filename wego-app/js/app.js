@@ -30,6 +30,14 @@
   syncHostViewportMode();
   window.addEventListener('resize', syncHostViewportMode);
 
+  // 电脑端宿主宽度：默认 670px 居中列；地址带 ?full=1 时铺满视口。
+  function syncHostWidthMode() {
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('full') === '1') body.setAttribute('data-host-width', 'full');
+    else body.removeAttribute('data-host-width');
+  }
+  syncHostWidthMode();
+
   // iOS standalone 收起键盘后可能把 100dvh 永久停在去掉状态栏后的短高度。
   // 外壳使用键盘前的完整高度；visualViewport 只用于识别键盘会话，
   // 不把键盘期间的瞬时高度、offsetTop 或 safe-area 写回布局。
@@ -722,6 +730,7 @@
       panel.dataset.hostSceneRouteId = config.routeId;
       mountSceneInit(panel, scene, sceneContext(scene, panel), function () {
         WegoApp.layoutAllBottomActionBars(panel);
+        WegoApp.layoutAllNavbars(panel);
         bindRouteEntries(panel);
       });
     }).catch(function () {
@@ -759,6 +768,7 @@
     appState.currentRouteId = scene.routeId;
     mountSceneInit(panel, scene, sceneContext(scene, panel), function () {
       WegoApp.layoutAllBottomActionBars(panel);
+      WegoApp.layoutAllNavbars(panel);
     });
   }
 
@@ -1366,6 +1376,7 @@
     var init = function (ctx) {
       if (typeof scene.init === 'function') scene.init(sceneContext(scene, ctx.root));
       WegoApp.layoutAllBottomActionBars(ctx.root);
+      WegoApp.layoutAllNavbars(ctx.root);
     };
     // overlay 场景销毁时调用 runSceneDestroy，清理场景注册的 onDestroy 回调
     // host 传 null：场景 destroy 回调一般只需清理监听器/Observer，不需要 ctx.root
@@ -1803,6 +1814,284 @@
     window.WegoApp.layoutAllBottomActionBars = layoutAll;
   })();
 
+  // ── Navbar right overflow runtime ──
+  // 与 bottom-action-bar 溢出运行时对齐：根节点加 .js-overflow-bar 启用，
+  // 测量 .navbar__right 可用宽度，操作数 > 3 时显示「更多」并把操作上限压到 2 个，
+  // 空间不足时从后往前折叠操作直到不溢出，最小可只剩「更多」按钮。
+  (function initNavbarOverflowRuntime() {
+    var throttleTimer = null;
+
+    function throttle(fn, wait) {
+      return function () {
+        clearTimeout(throttleTimer);
+        throttleTimer = setTimeout(fn, wait);
+      };
+    }
+
+    function measureOpenRect(popmenu) {
+      var previousState = popmenu.getAttribute('data-state');
+      var previousVisibility = popmenu.style.visibility;
+      var previousPointerEvents = popmenu.style.pointerEvents;
+      var previousTransition = popmenu.style.transition;
+      var previousTransform = popmenu.style.transform;
+
+      popmenu.setAttribute('data-state', 'open');
+      popmenu.style.visibility = 'hidden';
+      popmenu.style.pointerEvents = 'none';
+      popmenu.style.transition = 'none';
+      popmenu.style.transform = 'scale(1)';
+
+      var rect = popmenu.getBoundingClientRect();
+
+      popmenu.setAttribute('data-state', previousState || 'closed');
+      popmenu.style.visibility = previousVisibility;
+      popmenu.style.pointerEvents = previousPointerEvents;
+      popmenu.style.transition = previousTransition;
+      popmenu.style.transform = previousTransform;
+
+      return rect;
+    }
+
+    function positionPopmenu(popmenu, trigger) {
+      if (!popmenu || !trigger) return false;
+      var triggerRect = trigger.getBoundingClientRect();
+      var gap = 4;
+      var viewportWidth = window.innerWidth;
+      var viewportHeight = window.innerHeight;
+      var menuRect = measureOpenRect(popmenu);
+      var align = triggerRect.left + triggerRect.width / 2 > viewportWidth / 2 ? 'end' : 'start';
+      var left = align === 'end' ? triggerRect.right - menuRect.width : triggerRect.left;
+      var canFitWidth = menuRect.width <= viewportWidth - gap * 2;
+
+      if (align === 'start' && left + menuRect.width > viewportWidth - gap) {
+        align = 'end';
+        left = triggerRect.right - menuRect.width;
+      } else if (align === 'end' && left < gap) {
+        align = 'start';
+        left = triggerRect.left;
+      }
+      left = Math.max(gap, Math.min(left, viewportWidth - menuRect.width - gap));
+
+      function place(placement, x, y, nextAlign) {
+        popmenu.setAttribute('data-placement', placement);
+        popmenu.setAttribute('data-align', nextAlign || align);
+        popmenu.style.left = x + 'px';
+        popmenu.style.top = y + 'px';
+        return true;
+      }
+
+      // 优先底部，再顶部，最后左右侧
+      if (canFitWidth && triggerRect.bottom + gap + menuRect.height <= viewportHeight - gap) {
+        return place('bottom', left, triggerRect.bottom + gap, align);
+      }
+      if (canFitWidth && triggerRect.top - gap - menuRect.height >= gap) {
+        return place('top', left, triggerRect.top - gap - menuRect.height, align);
+      }
+      var top = Math.max(gap, Math.min(triggerRect.top, viewportHeight - menuRect.height - gap));
+      var preferRight = triggerRect.left + triggerRect.width / 2 <= viewportWidth / 2;
+      if (preferRight && triggerRect.right + gap + menuRect.width <= viewportWidth - gap) {
+        return place('right', triggerRect.right + gap, top, 'start');
+      }
+      if (triggerRect.left - gap - menuRect.width >= gap) {
+        return place('left', triggerRect.left - gap - menuRect.width, top, 'end');
+      }
+      if (triggerRect.right + gap + menuRect.width <= viewportWidth - gap) {
+        return place('right', triggerRect.right + gap, top, 'start');
+      }
+      return false;
+    }
+
+    function removeExistingMenu(navbar) {
+      var existing = navbar._overflowPopmenu || navbar.querySelector('.navbar__overflow-menu');
+      if (existing) existing.remove();
+      navbar._overflowPopmenu = null;
+    }
+
+    function buildPopmenu(navbar, collapsedItems) {
+      removeExistingMenu(navbar);
+
+      var hasIcon = collapsedItems.some(function (item) { return item.dataset.menuIcon; });
+      var popmenu = document.createElement('div');
+      popmenu.className = 'popmenu popmenu--action' + (hasIcon ? ' popmenu--has-icon' : '');
+      popmenu.setAttribute('role', 'menu');
+      popmenu.setAttribute('data-state', 'closed');
+      // 显式 fixed 定位：交互态 popmenu 以 fixed 跟随触发元素，避免随页面滚动偏离
+      popmenu.style.position = 'fixed';
+      popmenu.classList.add('navbar__overflow-menu');
+
+      var list = document.createElement('div');
+      list.className = 'popmenu__list';
+
+      collapsedItems.forEach(function (item) {
+        var labelEl = item.querySelector('.navbar__action-label');
+        var label = item.dataset.menuLabel || (labelEl ? labelEl.textContent : '');
+        var iconClass = item.dataset.menuIcon;
+        var menuItem = document.createElement('div');
+        menuItem.className = 'popmenu__item';
+        menuItem.setAttribute('role', 'menuitem');
+        if (iconClass) {
+          var icon = document.createElement('i');
+          icon.className = 'wego-iconfont-s ' + iconClass + ' popmenu__item-icon';
+          menuItem.appendChild(icon);
+        }
+        var text = document.createElement('span');
+        text.className = 'popmenu__item-text';
+        text.textContent = (label || '').trim();
+        menuItem.appendChild(text);
+        menuItem.addEventListener('click', function (e) {
+          e.stopPropagation();
+          item.click();
+          closePopmenu(popmenu);
+        });
+        list.appendChild(menuItem);
+      });
+
+      popmenu.appendChild(list);
+      document.body.appendChild(popmenu);
+      navbar._overflowPopmenu = popmenu;
+      return popmenu;
+    }
+
+    function closePopmenu(popmenu) {
+      if (!popmenu) return;
+      popmenu.setAttribute('data-state', 'closed');
+    }
+
+    function closeAllOverflowMenus(except) {
+      document.querySelectorAll('.navbar__overflow-menu[data-state="open"]').forEach(function (menu) {
+        if (menu !== except) closePopmenu(menu);
+      });
+    }
+
+    function bindMoreButton(moreBtn, navbar) {
+      if (moreBtn.dataset.navbarOverflowBound === 'true') return;
+      moreBtn.dataset.navbarOverflowBound = 'true';
+      moreBtn.addEventListener('click', function () {
+        // 不调用 stopPropagation：规范要求 dismiss 不得阻断原页面事件
+        // document click 监听器通过排除 more 按钮自身来避免立即关闭
+        var popmenu = navbar._overflowPopmenu;
+        if (!popmenu) return;
+        if (popmenu.getAttribute('data-state') === 'open') {
+          closePopmenu(popmenu);
+          return;
+        }
+        closeAllOverflowMenus(popmenu);
+        if (!positionPopmenu(popmenu, moreBtn)) {
+          popmenu.remove();
+          navbar._overflowPopmenu = null;
+          return;
+        }
+        requestAnimationFrame(function () {
+          popmenu.setAttribute('data-state', 'open');
+        });
+      });
+    }
+
+    function layoutNavbar(navbar) {
+      if (!navbar.classList.contains('js-overflow-bar')) return;
+      var right = navbar.querySelector('.navbar__right');
+      if (!right) return;
+      var moreBtn = right.querySelector('.navbar__action--more');
+      if (!moreBtn) return;
+
+      var actions = Array.prototype.filter.call(right.children, function (a) {
+        return a.classList && a.classList.contains('navbar__action') && a !== moreBtn;
+      });
+      if (!actions.length) {
+        moreBtn.style.display = 'none';
+        right.classList.remove('is-collapsed');
+        removeExistingMenu(navbar);
+        return;
+      }
+
+      // 重置：所有操作可见
+      actions.forEach(function (a) { a.classList.remove('navbar__action--collapsed'); });
+
+      // 操作数 ≤ 3：全部露出，隐藏更多
+      if (actions.length <= 3) {
+        moreBtn.style.display = 'none';
+        right.classList.remove('is-collapsed');
+        removeExistingMenu(navbar);
+        return;
+      }
+
+      // 操作数 > 3：显示更多，操作上限压到 2 个，再按空间从后往前折叠
+      moreBtn.style.display = 'flex';
+      right.classList.add('is-collapsed');
+
+      // 溢出检测：可见操作 + 更多 的总宽度 vs navbar body 剩余可用空间。
+      // js-overflow-bar 模式下 right 按内容展开（flex:0 0 auto），clientWidth 恒等于内容宽，
+      // 故用 body 宽度减去 left/center 实际占宽作为可用空间比较。
+      function isOverflowing() {
+        var bodyEl = navbar.querySelector('.navbar__body');
+        var leftEl = navbar.querySelector('.navbar__left');
+        var centerEl = navbar.querySelector('.navbar__center');
+        var available = bodyEl.getBoundingClientRect().width
+          - (leftEl ? leftEl.getBoundingClientRect().width : 0)
+          - (centerEl ? centerEl.getBoundingClientRect().width : 0);
+        var visible = actions.filter(function (a) {
+          return !a.classList.contains('navbar__action--collapsed');
+        });
+        var total = visible.reduce(function (sum, a) {
+          return sum + a.getBoundingClientRect().width;
+        }, 0) + moreBtn.getBoundingClientRect().width;
+        return total > available + 0.5;
+      }
+
+      // 先折叠第 3 个及以后（保留 2 个操作 + 更多）
+      for (var i = actions.length - 1; i >= 2; i--) {
+        actions[i].classList.add('navbar__action--collapsed');
+      }
+      // 再按空间从后往前折叠（可只剩更多）
+      for (var j = 1; j >= 0; j--) {
+        if (!isOverflowing()) break;
+        actions[j].classList.add('navbar__action--collapsed');
+      }
+
+      var collapsed = actions.filter(function (a) {
+        return a.classList.contains('navbar__action--collapsed');
+      });
+
+      if (collapsed.length === 0) {
+        moreBtn.style.display = 'none';
+        right.classList.remove('is-collapsed');
+        removeExistingMenu(navbar);
+      } else {
+        buildPopmenu(navbar, collapsed);
+        bindMoreButton(moreBtn, navbar);
+      }
+    }
+
+    function layoutAll(root) {
+      root = root || document;
+      root.querySelectorAll('.navbar.js-overflow-bar').forEach(layoutNavbar);
+    }
+
+    var throttledLayout = throttle(function () {
+      closeAllOverflowMenus();
+      layoutAll(document);
+    }, 100);
+    window.addEventListener('resize', throttledLayout);
+    window.addEventListener('orientationchange', throttledLayout);
+
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest) return;
+      if (e.target.closest('.navbar__overflow-menu')) return;
+      if (e.target.closest('.navbar__action--more')) return;
+      closeAllOverflowMenus();
+    });
+    document.addEventListener('focusin', function (e) {
+      if (!e.target.closest || !e.target.closest('.navbar__overflow-menu')) {
+        closeAllOverflowMenus();
+      }
+    });
+    window.addEventListener('scroll', closeAllOverflowMenus, true);
+
+    window.WegoApp = window.WegoApp || {};
+    window.WegoApp.layoutNavbar = layoutNavbar;
+    window.WegoApp.layoutAllNavbars = layoutAll;
+  })();
+
   window.WegoApp = {
     registerScene: function (scene) {
       if (!scene || !scene.routeId) return;
@@ -1817,6 +2106,8 @@
     setActiveTab: setActiveTab,
     layoutBottomActionBar: window.WegoApp.layoutBottomActionBar,
     layoutAllBottomActionBars: window.WegoApp.layoutAllBottomActionBars,
+    layoutNavbar: window.WegoApp.layoutNavbar,
+    layoutAllNavbars: window.WegoApp.layoutAllNavbars,
     getState: function () { return appState; }
   };
 

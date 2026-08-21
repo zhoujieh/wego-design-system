@@ -17,6 +17,9 @@ description: 创建或变更业务迭代；形成并确认完整 prototype_brief
 
 形成 `open_questions` 已清空的 `prototype_brief`，通过 `submit-brief` 绑定当前范围并展示文字摘要；用户明确确认后运行带当前迭代 ID 的 `confirm-brief --user-confirmed-brief`，再交给 `wego-design`。反馈改变已确认业务事实时，在原迭代中失效、更新、重新提交并确认，不静默修改范围。
 
+<!-- rule-id: brief-sufficiency-mandatory -->
+简报必须写"足够细"：`states` 覆盖加载态、失败态、空状态并写明「进入条件 → 可感知结果」；数据必须有产生入口且禁止静态种子降级；关键路径首尾闭环。具体清单见 [边界方法](./references/scope-and-boundaries.md) 的「需求简报输出要求」，`submit-brief` 会据此守门拒绝不合规简报。
+
 ## 执行约束
 
 <!-- rule-id: product-must-require-delivery-intake -->

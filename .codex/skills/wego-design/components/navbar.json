@@ -6,7 +6,23 @@
   "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "移动端页面顶部导航栏，只提供左中右三段式与左右两段式两类布局；navbar 在组件内部通过 padding-top: var(--safe-area-top, 0px) 处理顶部安全区，并以 sticky top: 0 吸顶。",
+  "description": "移动端页面顶部导航栏，只提供左中右三段式与左右两段式两类布局；navbar 在组件内部通过 padding-top: var(--safe-area-top, 0px) 处理顶部安全区，并以 sticky top: 0 吸顶。右侧操作支持运行时自适应折叠：操作数超过 3 时自动出现「更多」按钮，并按可用宽度从后往前折叠操作进 popmenu，空间再小可只剩「更多」。",
+  "runtime": {
+    "overflow": {
+      "enabledBy": "根节点存在 .js-overflow-bar",
+      "requiredElements": [
+        ".navbar__right",
+        ".navbar__action",
+        ".navbar__action--more"
+      ],
+      "requiredData": {
+        "data-menu-label": "每个可能被折叠的 .navbar__action 建议设置，用于折叠后 popmenu 项文案；未设置时回退到 .navbar__action-label 文本",
+        "data-menu-icon": "可选，值为 iconfont 类名（如 icon-fenxiang），带图标时 popmenu 需加 popmenu--has-icon"
+      },
+      "behavior": "操作数不超过 3 时全部直接露出、隐藏「更多」；超过 3 时显示「更多」并把操作上限压到 2 个（3 入口规则），随后按 .navbar__right 可用宽度从后往前折叠操作直到不溢出，最小可只剩「更多」按钮（全部操作收进 popmenu）。折叠项复用 popmenu action 模式生成菜单，点击更多展开、点外部/滚动/视口变化关闭。",
+      "helper": "宿主运行时提供 window.WegoApp.layoutNavbar(navbar) 与 window.WegoApp.layoutAllNavbars(root)，在场景挂载后调用 layoutAllNavbars。"
+    }
+  },
   "semanticTypeCandidates": [
     "navbar",
     "page-header",
@@ -36,6 +52,7 @@
       "text",
       "button",
       "mixed",
+      "more-overflow",
       "custom"
     ],
     "spacing": [
@@ -203,6 +220,7 @@
     "按钮式右侧操作复用已注册 button 组件的小尺寸按钮。",
     "默认导航主体高度为 44px；Modal frame/frame-x 可在自身 default title 作用域内覆盖 --navbar-body-height: 64px，fullscreen 不覆盖并继续使用 navbar 自身高度；居中标题与中间 tabs 使用三段式，左对齐标题或左身份区 + 右操作使用两段式。",
     "host-tab 主页按内容位置选择结构：左身份区 + 右操作使用 .navbar__body--split 两段式；中间 tabs + 右操作使用默认三段式，保留空的 .navbar__left，把 tabs 放进 .navbar__center--custom，把触发器放进 .navbar__right--custom。custom 模式下 .navbar__title 不再必需，但场景填充内容须自行承担布局与按压反馈。",
+    "右侧操作溢出折叠（more-overflow）：操作数不超过 3 时全部直接露出、不出现「更多」；超过 3 时「更多」按钮自动出现（置于右侧最右端），操作外露上限压到 2 个，其余低频动作收进「更多」弹出菜单。需要运行时自适应折叠时，根节点加 .js-overflow-bar，由宿主运行时按 .navbar__right 可用宽度从后往前折叠操作直到不溢出（最小可只剩「更多」）；高频与低频顺序由场景按业务优先级自行排列，契约不写死具体动作。",
     ".navbar__center--wide 与 .navbar__right--wide 仅用于兼容未迁移的旧场景，新增消费禁止使用。"
   ],
   "behavior": {
@@ -210,6 +228,7 @@
     "leftAction": "返回、关闭或取消属于左侧主导航操作，不与右侧按钮混用。",
     "title": "居中标题使用三段式 center，左对齐标题使用两段式 left；两者都保持单行省略。",
     "actionPress": "右侧操作以轻压暗或按钮背景变化反馈。",
+    "moreOverflow": "右侧操作溢出时启用更多折叠：「更多」使用 .navbar__action--more（圆三点 icon-yuansandian + 「更多」文字），置于右侧操作区最右端（DOM 顺序最后）。静态模式由场景按 3 入口规则（2 个高频操作 + 1 个「更多」）自行组织；需要运行时自适应时根节点加 .js-overflow-bar，宿主运行时测量 .navbar__right 可用宽度：操作数超过 3 才显示「更多」并把操作上限压到 2 个，空间不足时从后往前折叠操作（隐藏并加 .navbar__action--collapsed）直到不溢出，最小可只剩「更多」。点击「更多」从按钮下方弹出 popmenu（action 模式 + 左侧图标）列出被折叠动作，点击某项执行对应动作并关闭，点外部/滚动/视口变化关闭；弹出层复用 popmenu 组件并挂载到页面顶层浮层容器，避免被 navbar 或局部容器裁剪。",
     "pageTransitionRule": "左侧为返回图标 (back-icon) 对应 push 转场（右侧滑入，普通二级页）；左侧为关闭/叉 (close-icon) 或取消文本 (text-cancel) 对应 present 转场（底部滑入，弹出式页面）。",
     "fullscreenModalPatterns": "全屏模态页面有且仅有两种固定导航模式，不要自由组合：模式 A（取消文本 + 实心按钮）用于表单/设置类底部弹出页；模式 B（关闭叉图标 + 图标操作）用于浏览/选择类底部弹出页。",
     "backgroundRule": "导航栏必须显式设置背景色，与页面 data-bg 声明的背景色保持一致；默认 var(--bg-page)（灰色），data-bg=\"surface\" 时为 var(--bg-surface)（白色）；深色或图片背景场景使用 fixed-transparent 模式，navbar background: transparent，文字/图标用 --text-inverse 反白，确保透过导航栏看到背景内容。fixed-transparent 与 data-bg 互斥：navbar--fixed-transparent 不得声明在 data-bg=\"page\" 或 data-bg=\"surface\" 的容器内；fixed-transparent 模式下 navbar 背景必须为 transparent，由页面根容器提供深色或图片背景（如 --bg-inverse）。",
@@ -228,6 +247,9 @@
     "页面打开模式由左侧控件决定：返回图标 → 右侧滑入 (push)；关闭/叉/取消 → 底部滑入 (present / bottom-sheet)。",
     "所有左侧可交互内容点击热区通过伪元素扩大至 48px，不改变布局尺寸。",
     "右侧操作使用 navbar 内部 .navbar__action 结构；不要把它当独立组件消费。",
+    "右侧操作入口建议最多 3 个 = 2 个高频操作 + 1 个「更多」；操作数超过 3 时把低频动作折叠进「更多」按钮，点击弹出 popmenu 展示被折叠动作，不要平铺全部动作挤压标题。",
+    "「更多」按钮使用 .navbar__action--more（圆三点 icon-yuansandian + 「更多」文字），置于右侧操作区最右端（DOM 顺序最后），弹出层复用 popmenu 组件（action 模式 + 左侧图标）并挂载到顶层浮层容器。",
+    "需要右侧操作随屏幕宽度自适应折叠时，给 navbar 根节点加 .js-overflow-bar，并为每个可能被折叠的 .navbar__action 设置 data-menu-label（可选 data-menu-icon）；宿主运行时自动按可用宽度从后往前折叠，最小可只剩「更多」。",
     "全屏模态页面直接调用固定模式，不要自由组合：模式 A（取消+按钮）用于表单/设置类；模式 B（叉+图标）用于浏览/选择类。",
     "导航栏必须显式设置背景色，与页面 data-bg 声明的背景色一致；不要使用 transparent（深色/图片背景场景除外，此时用 fixed-transparent 模式）。",
     "navbar 宽度默认 100%，由页面外层容器约束最大宽度（768px）；不需要在项目中覆盖宽度。",
@@ -239,7 +261,13 @@
   "doNotInvent": [
     "不要把 navbar 扩成桌面多行标题栏、营销大顶栏或搜索综合头部。",
     "不要把状态栏、标题栏和筛选条硬拼成单一组件。",
-    "不要给 navbar 写死固定宽度（如 375px）；navbar 宽度默认 100%，由外层容器约束。"
+    "不要给 navbar 写死固定宽度（如 375px）；navbar 宽度默认 100%，由外层容器约束。",
+    "不要平铺所有动作到右侧操作区（超过 3 个入口时），优先折叠低频动作进「更多」按钮弹出 popmenu。",
+    "不要为运行时自适应手写每屏宽度的固定折叠分支，统一用 .js-overflow-bar + 宿主运行时测量折叠。",
+    "不要把 .navbar__action--more 折叠后的菜单内容直接平铺在导航栏下方，必须复用 popmenu 浮层。",
+    "不要用纯单图标做「更多」按钮，必须带「更多」文字（圆三点图标+文字）。",
+    "不要把「更多」按钮放在高频操作之前，必须置于右侧操作区最右端。",
+    "不要为「更多」弹出层自建气泡菜单，必须复用 popmenu 组件（action 模式 + 左侧图标）。"
   ],
   "domAnatomy": {
     "root": ".navbar",
@@ -265,7 +293,12 @@
       ".navbar__left--custom",
       ".navbar__center--custom",
       ".navbar__right--custom",
+      ".navbar__action--more",
+      ".navbar__action--collapsed",
       ".navbar--fixed-transparent"
+    ],
+    "stateClasses": [
+      ".is-collapsed"
     ],
     "alternatives": [
       {
@@ -316,13 +349,18 @@
   ],
   "previewOnlyTokens": [
     "--bg-brand",
+    "--bg-brand-surface-l1",
     "--body-md-font-size",
+    "--body-sm-font-size",
+    "--border-brand",
     "--border-neutral-l2",
     "--heading-sm-line-height",
     "--radius-full",
     "--spacer-12",
     "--spacer-16",
-    "--spacer-8"
+    "--spacer-8",
+    "--text-brand",
+    "--text-tertiary"
   ],
   "localTokens": [
     "--navbar-subtitle-color"

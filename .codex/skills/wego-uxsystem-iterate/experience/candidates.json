@@ -497,6 +497,48 @@
       "upgradeHistory": [],
       "createdAt": "2026-08-20",
       "updatedAt": "2026-08-20"
+    },
+    {
+      "id": "exp-20260820-002",
+      "normalizedKey": "completed-unpublished-delivery-unit-invisible-dangling-branch",
+      "category": "execution",
+      "type": "workflow-gap",
+      "ownerSkill": "wego-uxsystem-iterate",
+      "problem": "已完成实现的交付单元停留在本地分支（已提交 checkpoint 但未推送、未创建 PR），会话结束后无任何可见性与收口机制，改动从 main 与预览侧不可见，用户误以为改动丢失。",
+      "rootCause": "交付规则要求「完成一轮实现后自动推送远端分支并创建/更新 PR」，但执行依赖会话自觉且执行时仍停留在「本地迭代不推送」的旧习惯；交付链路缺少对「已提交未推送未建 PR」悬空本地分支的自动盘点与收口：session-end-must-clean-worktree 只清理未提交改动，branch-cleanup.yml 只清理已合并 PR 的遗留分支，中间地带无人管理，改动一旦脱离当前会话即失去可见性。",
+      "resolution": "本次已同步 main、解决冲突、创建 PR #72 并验收合并；后续所有交付单元完成一轮实现后必须进入可见交付状态（推送+PR）或显式登记为挂起任务，不得悬空跨会话；继续观察同类悬空交付单元，达到阈值后升级盘点与收口机制。",
+      "targetAuthority": {
+        "path": ".codex/skills/wego-github-delivery/SKILL.md",
+        "anchor": "开始交付"
+      },
+      "relatedRuleId": null,
+      "evidenceRefs": [
+        "evt-20260820-002"
+      ],
+      "scenes": [],
+      "occurrenceCount": 1,
+      "status": "upgraded",
+      "proposalReason": null,
+      "upgradeHistory": [
+        {
+          "version": 1,
+          "upgradedAt": "2026-08-20",
+          "evidenceRefs": [
+            "evt-20260820-002"
+          ],
+          "targetAuthority": {
+            "path": ".codex/skills/wego-github-delivery/SKILL.md",
+            "anchor": "开始交付"
+          },
+          "ruleIds": [
+            "session-end-must-clean-worktree"
+          ],
+          "summary": "开始交付核对新增 git branch -vv 本地分支归属盘点：非 main、非当前任务、无开放 PR、无认领、无挂起登记的分支视为悬空交付单元，先报告并收口（推送创建 PR、登记挂起或确认废弃），不得静默跨会话保留；会话收尾要求已提交 checkpoint 但未推送创建 PR 的交付单元必须进入可见交付状态或登记挂起。",
+          "commitSha": "43ef7d90"
+        }
+      ],
+      "createdAt": "2026-08-20",
+      "updatedAt": "2026-08-20"
     }
   ]
 }

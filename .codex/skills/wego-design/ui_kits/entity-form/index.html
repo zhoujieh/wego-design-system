@@ -41,7 +41,7 @@ html, body { min-height: auto; }
   z-index: var(--z-toast);
 }
 
-/* phone-frame 预览中 toast 相对宿主定位而非视口 */
+/* 宿主内容层中 toast 相对宿主定位而非视口 */
 .uikit-toast-host .toast.is-floating {
   position: absolute;
 }
@@ -50,17 +50,8 @@ html, body { min-height: auto; }
 </head>
 <body class="uikit-page">
 <div class="uikit-shell">
-  <div class="phone-frame">
-    <div class="phone-screen">
-      <div class="phone-status" aria-hidden="true">
-        <span>9:41</span>
-        <span>5G</span>
-      </div>
-      <div id="root"></div>
-      <div class="phone-indicator" aria-hidden="true">
-        <div class="phone-indicator-bar"></div>
-      </div>
-    </div>
+  <div class="phone-screen">
+    <div id="root"></div>
   </div>
 </div>
 <script src="https://unpkg.com/react@18/umd/react.development.js"></script>

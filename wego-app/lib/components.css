@@ -1938,7 +1938,7 @@
 }
 /* fullscreen 标题区恢复 safe-area-top：默认 .modal__title--default 强制 0（半屏弹窗紧贴面板顶部），
    fullscreen 需要 navbar 真正继承宿主 --safe-area-top，因此显式 inherit；initial 会把自定义属性
-   重置为"未定义"，var(--safe-area-top, 0px) 会回落到 0px，导致 phone-status 与 navbar 重叠 */
+   重置为"未定义"，var(--safe-area-top, 0px) 会回落到 0px，导致顶部安全区与 navbar 重叠 */
 .modal--fullscreen .modal__title--default {
   --safe-area-top: inherit;
 }
@@ -2285,6 +2285,17 @@
 /* Button action */
 .navbar__action--button { width: auto; padding: 0; }
 .navbar__action--button .btn { max-width: 120px; }
+/* More action — 右侧操作溢出折叠的「更多」触发器：复用 .navbar__action 图标+文字样式，
+   置于右侧操作区最右端（DOM 顺序最后），点击后由场景弹出 popmenu 展示低频动作 */
+.navbar__action--more { flex-shrink: 0; }
+/* 运行时自适应折叠态（根节点加 .js-overflow-bar 启用）：
+   - 默认隐藏「更多」，操作数超过 3 且需要折叠时加 .is-collapsed 才显示
+   - 被折叠的操作项加 .navbar__action--collapsed 隐藏 */
+.navbar.js-overflow-bar .navbar__action--more { display: none; }
+.navbar.js-overflow-bar .navbar__right.is-collapsed .navbar__action--more { display: flex; }
+/* 启用自适应折叠时 right 按内容宽度展开（不固定 30%），保证 2 个高频操作 + 「更多」能完整露出，再由运行时按空间折叠 */
+.navbar.js-overflow-bar .navbar__right { flex: 0 0 auto; min-width: 0; }
+.navbar__action--collapsed { display: none !important; }
 
 /* fixed 透明反白模式(深色/图片背景场景) */
 .navbar--fixed-transparent { position: fixed; top: 0; left: 0; right: 0; max-width: 768px; margin-inline: auto; background: transparent; }

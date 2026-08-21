@@ -5,11 +5,11 @@
  * 使用 var() 引用 Token，假设 colors_and_type.css 已通过 <link> 加载。
  */
 
-/* Phone-frame Showcase 下模拟安全区：仅 .phone-screen 内生效，不影响真机或其他场景 */
+/* Showcase 宿主内容层：桌面无状态栏/Home 条，安全区清零，不产生高度占位 */
 .phone-screen {
-  --safe-area-top: 44px;
-  --safe-area-bottom: 34px;
-  --safe-area-bottom-content: 74px;
+  --safe-area-top: 0px;
+  --safe-area-bottom: 0px;
+  --safe-area-bottom-content: 0px;
   --navbar-body-height: 44px;
 }
 
@@ -142,45 +142,30 @@ body.uikit-page {
 }
 .uikit-shell {
   width: 100%;
-  max-width: 1184px;
-  min-height: 100vh;
-  min-height: 100dvh;
+  max-width: 670px;
+  height: 100vh;
+  height: 100dvh;
   margin: 0 auto;
-  padding: var(--spacer-16);
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
   overflow: hidden;
 }
-.phone-frame {
-  width: 390px;
-  height: 780px;
-  border: 8px solid var(--bg-inverse);
-  border-radius: 40px;
-  overflow: hidden;
-  position: relative;
-  box-shadow: var(--shadow-xl);
-  background: var(--bg-page);
-  flex-shrink: 0;
-}
-.phone-frame > #root,
 .phone-screen > #root {
   width: 100%;
-  height: 100%;
+  flex: 1 1 auto;
   min-height: 0;
 }
 .phone-screen {
   width: 100%;
-  height: 100%;
+  flex: 1 1 auto;
   min-height: 0;
-  border-radius: inherit;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   background: var(--bg-page);
   position: relative;
   isolation: isolate;
-  /* Showcase 中的 fixed 组件必须以手机屏幕为 containing block，不能逃逸到浏览器 viewport。 */
+  /* 展示中的 fixed 浮层以宿主内容层为 containing block，不能逃逸到浏览器 viewport。 */
   transform: translateZ(0);
 }
 .phone-screen > #root {
@@ -189,21 +174,6 @@ body.uikit-page {
 /* 底页形成独立的 base stacking context，避免其 sticky NavBar 越过同级 modal/sheet。 */
 .phone-screen .uikit-host-screen {
   z-index: var(--z-base);
-}
-.phone-status {
-  position: absolute;
-  inset: 0 0 auto;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 var(--spacer-16);
-  background: transparent;
-  font-size: var(--body-sm-font-size);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-default);
-  pointer-events: none;
-  z-index: var(--z-critical);
 }
 .phone-screen .navbar {
   width: 100%;
@@ -226,26 +196,6 @@ body.uikit-page {
   padding-right: var(--spacer-32);
 }
 .phone-body::-webkit-scrollbar { display: none; }
-.phone-indicator {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 34px;
-  background: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  z-index: var(--z-critical);
-}
-.phone-indicator-bar {
-  width: 134px;
-  height: 5px;
-  background: var(--bg-inverse);
-  border-radius: var(--radius-full);
-  opacity: 0.2;
-}
 
 @media (max-width: 767px) {
   .phone-screen {
@@ -257,19 +207,6 @@ body.uikit-page {
   .uikit-shell {
     padding: 0;
     align-items: stretch;
-  }
-  .phone-frame {
-    width: 100%;
-    height: 100vh;
-    height: 100dvh;
-    max-height: 900px;
-    border: none;
-    border-radius: 0;
-    box-shadow: none;
-  }
-  .phone-status,
-  .phone-indicator {
-    display: none;
   }
 }
 

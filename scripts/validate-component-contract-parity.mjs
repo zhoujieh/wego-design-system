@@ -114,7 +114,7 @@ if (!Number.isInteger(scrollBottomRule?.enforcedFromVersion)
   fail('library.scroll_bottom_rule', '滚动底部避让必须声明生效版本与一个现存基础 Token', 'library-consumption.json');
 }
 if (!/\.phone-screen\s*\{[\s\S]*?transform:\s*translateZ\(0\)\s*;/.test(scaffold)) {
-  fail('uikit.showcase_fixed_containment', 'scaffold.css 的 phone-screen 必须为 fixed 浮层建立手机屏幕 containing block', 'scaffold.css');
+  fail('uikit.showcase_fixed_containment', 'scaffold.css 的 phone-screen 必须为 fixed 浮层建立宿主内容层 containing block', 'scaffold.css');
 }
 if (!/\.phone-screen\s+\.uikit-host-screen\s*\{[^}]*z-index:\s*var\(--z-base\)\s*;/.test(scaffold)) {
   fail('uikit.showcase_base_layer', 'scaffold.css 的底页必须形成 base stacking context，避免 sticky NavBar 越过 modal/sheet', 'scaffold.css');
@@ -163,18 +163,13 @@ for (const pattern of uiKit?.pagePatterns || []) {
   if (entryRelative && fileExists(entryRelative)) {
     const entry = read(entryRelative);
     const phoneScreens = [...entry.matchAll(/\bclass=["']phone-screen["']/g)].length;
-    const statusBars = [...entry.matchAll(/\bclass=["']phone-status["']/g)].length;
-    const homeIndicators = [...entry.matchAll(/\bclass=["']phone-indicator["']/g)].length;
-    const reactChrome = /\bclassName=["']phone-(?:status|indicator)["']/.test(entry);
-    const screenIndex = entry.indexOf('<div class="phone-screen">');
-    const statusIndex = entry.indexOf('<div class="phone-status"');
+    const phoneChrome = /\bclass=["']phone-(?:status|indicator|indicator-bar|frame)["']/.test(entry);
     const rootIndex = entry.indexOf('<div id="root"></div>');
-    const indicatorIndex = entry.indexOf('<div class="phone-indicator"');
-    if (phoneScreens !== 1 || statusBars !== 1 || homeIndicators !== 1 || reactChrome) {
-      fail('uikit.showcase_global_chrome', `${entryRelative} 必须只在静态 phone-screen 宿主中各保留一份 phone-status 与 phone-indicator，React 页面不得重复渲染`, entryRelative);
+    if (phoneScreens !== 1 || phoneChrome) {
+      fail('uikit.showcase_host', `${entryRelative} 必须恰好保留一个 phone-screen 宿主内容层且不得再出现手机壳（frame/status/indicator）`, entryRelative);
     }
-    if (!(screenIndex >= 0 && screenIndex < statusIndex && statusIndex < rootIndex && rootIndex < indicatorIndex)) {
-      fail('uikit.showcase_shell_order', `${entryRelative} 的共享宿主顺序必须是 phone-screen > phone-status + #root + phone-indicator`, entryRelative);
+    if (rootIndex < 0 || rootIndex < entry.indexOf('<div class="phone-screen">')) {
+      fail('uikit.showcase_host_root', `${entryRelative} 的 phone-screen 宿主内必须含唯一的挂载点 <div id="root"></div>`, entryRelative);
     }
     for (const match of entry.matchAll(/iconSrc\(\s*["']([^"']+)["']\s*\)/g)) {
       const tab = match[1];
