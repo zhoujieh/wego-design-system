@@ -292,3 +292,38 @@
 .modal--fullscreen {
   --modal-panel-bg: var(--bg-page);
 }
+
+/* 列表加载骨架 */
+.friend-list__loading {
+  padding-inline: var(--spacer-16);
+  padding-block: var(--spacer-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-8);
+}
+.friend-list__skeleton-row {
+  height: 56px;
+  border-radius: var(--radius-8);
+  background: var(--bg-subtle);
+  position: relative;
+  overflow: hidden;
+}
+.friend-list__skeleton-row::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  transform: translateX(-100%);
+  animation: friend-skeleton-shimmer 1.2s infinite ease-in-out;
+}
+@keyframes friend-skeleton-shimmer {
+  to { transform: translateX(100%); }
+}
+
+/* 列表加载态 / 失败态容器：垂直居中 */
+.friend-list__state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacer-24);
+}

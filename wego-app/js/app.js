@@ -2176,8 +2176,119 @@
     layoutAllBottomActionBars: window.WegoApp.layoutAllBottomActionBars,
     layoutNavbar: window.WegoApp.layoutNavbar,
     layoutAllNavbars: window.WegoApp.layoutAllNavbars,
-    getState: function () { return appState; }
+    getState: function () { return appState; },
+    faultInjection: null
   };
+
+  /* ── 失败注入试验开关（全局运行时试验能力）──
+     用于验收时对任意场景触发 加载/新增/删除 三类失败分支。
+     入口为全局悬浮开关，对任意场景生效、不落在某个迭代内；
+     体验稳定后由 wego-uxsystem-iterate 正式化为设计系统运行时能力。 */
+  (function mountFaultSwitch() {
+    var SWITCH_KEY = 'wego.fault-switch.enabled';
+    var state = { load: false, save: false, delete: false };
+
+    function persist() {
+      try { window.localStorage.setItem(SWITCH_KEY, JSON.stringify(state)); } catch (e) {}
+    }
+    function restore() {
+      try {
+        var raw = window.localStorage.getItem(SWITCH_KEY);
+        if (!raw) return;
+        var p2 = JSON.parse(raw);
+        state.load = !!p2.load;
+        state.save = !!p2.save;
+        state['delete'] = !!p2['delete'];
+      } catch (e) {}
+    }
+
+    window.WegoApp.faultInjection = {
+      isEnabled: function (key) { return !!state[key]; },
+      setEnabled: function (key, on) { state[key] = !!on; persist(); }
+    };
+
+    if (document.querySelector('#wgf-root')) return;
+    restore();
+
+    var CSS = ''
+      + '#wgf-root{position:fixed;right:12px;bottom:96px;z-index:9999;font-family:var(--body-md-font-family,sans-serif);-webkit-tap-highlight-color:transparent}'
+      + '#wgf-fab{display:flex;align-items:center;gap:6px;padding:10px 14px;border:0;border-radius:999px;background:var(--bg-surface,#fff);color:var(--text-default,#111);box-shadow:var(--shadow-md,0 4px 12px rgba(0,0,0,.12));font-size:var(--body-sm-font-size,13px);line-height:1;cursor:pointer}'
+      + '#wgf-fab .wgf-badge{width:6px;height:6px;border-radius:50%;background:var(--text-disabled,#bbb)}'
+      + '#wgf-fab.is-on .wgf-badge{background:#FA3B3B}'
+      + '.wgf-panel{position:absolute;right:0;bottom:calc(100% + 8px);width:176px;background:var(--bg-surface,#fff);border-radius:12px;box-shadow:var(--shadow-md,0 4px 12px rgba(0,0,0,.12));padding:8px;display:none}'
+      + '.wgf-panel.is-open{display:block}'
+      + '.wgf-panel__title{font-size:12px;color:var(--text-tertiary,#999);padding:4px 8px 8px}'
+      + '.wgf-toggle{display:flex;justify-content:space-between;align-items:center;width:100%;padding:9px 8px;border:0;border-radius:8px;background:transparent;font-size:13px;color:var(--text-default,#111);cursor:pointer}'
+      + '.wgf-toggle:active{background:var(--bg-state-pressed,rgba(0,0,0,.05))}'
+      + '.wgf-toggle .wgf-sw{width:34px;height:20px;border-radius:999px;background:var(--bg-disabled,#ddd);position:relative;transition:background .15s}'
+      + '.wgf-toggle .wgf-sw::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .15s}'
+      + '.wgf-toggle.is-on .wgf-sw{background:var(--text-brand,#0a6cff)}'
+      + '.wgf-toggle.is-on .wgf-sw::after{transform:translateX(14px)}'
+      + '.wgf-hint{font-size:11px;color:var(--text-tertiary,#999);padding:8px 8px 4px;line-height:1.5}';
+
+    var styleEl = document.createElement('style');
+    styleEl.textContent = CSS;
+    document.head.appendChild(styleEl);
+
+    var root = document.createElement('div');
+    root.id = 'wgf-root';
+    root.setAttribute('aria-label', '失败注入开关');
+
+    var fab = document.createElement('button');
+    fab.type = 'button';
+    fab.id = 'wgf-fab';
+    fab.setAttribute('aria-haspopup', 'true');
+    fab.innerHTML = '<span class="wgf-badge"></span>失败注入';
+    root.appendChild(fab);
+
+    var panel = document.createElement('div');
+    panel.className = 'wgf-panel';
+    var title = document.createElement('div');
+    title.className = 'wgf-panel__title';
+    title.textContent = '失败注入（试验）';
+    panel.appendChild(title);
+
+    function refreshFab() {
+      fab.classList.toggle('is-on', state.load || state.save || state.delete);
+    }
+
+    function toggleRow(key, label) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'wgf-toggle';
+      btn.innerHTML = '<span>' + label + '</span><span class="wgf-sw" aria-hidden="true"></span>';
+      var refresh = function () {
+        btn.classList.toggle('is-on', !!state[key]);
+        btn.setAttribute('aria-pressed', String(!!state[key]));
+        refreshFab();
+      };
+      btn.addEventListener('click', function () {
+        state[key] = !state[key];
+        persist();
+        refresh();
+      });
+      panel.appendChild(btn);
+      refresh();
+    }
+
+    toggleRow('load', '加载失败');
+    toggleRow('save', '新增保存失败');
+    toggleRow('delete', '删除失败');
+
+    var hint = document.createElement('div');
+    hint.className = 'wgf-hint';
+    hint.textContent = '开关打开后执行对应操作即走失败分支，数据保持原状';
+    panel.appendChild(hint);
+
+    fab.addEventListener('click', function () { panel.classList.toggle('is-open'); });
+    root.appendChild(panel);
+    document.body.appendChild(root);
+
+    document.addEventListener('touchstart', function (e) {
+      if (!e.target.closest || !e.target.closest('#wgf-root')) panel.classList.remove('is-open');
+    }, true);
+    refreshFab();
+  })();
 
   // 由 initTouchPressState 注入，用于侧滑返回后 / forward 导航时强制重绘 host 入口
   // 清除 iOS Safari 可能残留的 :active 合成层缓存
