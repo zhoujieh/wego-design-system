@@ -72,6 +72,8 @@ input, textarea,
   .form-dropdown__item:active,
   .host-shell-grid-entry:active,
   .host-shell-link-button:active { opacity: 1; }
+  /* 圆形背景按钮：:active 背景还原为默认，防 Safari :active 残留导致按压背景卡住 */
+  .navbar__left-btn--circle:active { background: var(--bg-placeholder); }
 
   /* .is-pressed 用重复类名提高特异性到 (0,3,0)，确保按压态显示 */
   .cell--clickable.cell--clickable.is-pressed { background: var(--bg-state-pressed); }
@@ -96,6 +98,8 @@ input, textarea,
   .form-dropdown__item.form-dropdown__item.is-pressed,
   .host-shell-grid-entry.host-shell-grid-entry.is-pressed,
   .host-shell-link-button.host-shell-link-button.is-pressed { opacity: 0.6; }
+  /* 圆形背景按钮：按压态 = 背景色变化（background 命中组件规则），不叠加整体变淡 */
+  .navbar__left-btn--circle.navbar__left-btn--circle.is-pressed { background: var(--bg-state-pressed); opacity: 1; }
 }
 
 .preview-shell {
