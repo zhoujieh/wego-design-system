@@ -316,12 +316,14 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
-  transform: translateX(-100%);
+  background: var(--bg-surface);
+  opacity: 0;
   animation: friend-skeleton-shimmer 1.2s infinite ease-in-out;
 }
 @keyframes friend-skeleton-shimmer {
-  to { transform: translateX(100%); }
+  0% { opacity: 0; }
+  50% { opacity: 0.6; }
+  100% { opacity: 0; }
 }
 
 /* 列表加载态 / 失败态容器：垂直居中 */

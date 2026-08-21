@@ -275,7 +275,7 @@ function emptyTemplate(text) {
     + '<div class="friend-list__empty">'
     +   '<div class="friend-list__empty-icon wego-iconfont-s icon-kongzhuangtai"></div>'
     +   '<p class="friend-list__empty-text">' + text + '</p>'
-    +   '<button type="button" class="btn btn--strong friend-list__empty-action" data-dom-id="empty-add-friend" data-component-slug="button">新建好友</button>'
+    +   '<button type="button" class="btn btn--strong btn--md friend-list__empty-action" data-dom-id="empty-add-friend" data-component-slug="button">新建好友</button>'
     + '</div>';
 }
 
@@ -378,7 +378,7 @@ function friendActionSheetTemplate(friendName) {
     +   '<div class="actionsheet__panel">'
     +     '<div class="actionsheet__header actionsheet__header--text"><span class="actionsheet__header-text">' + escapeHtml(friendName) + '</span></div>'
     +     '<div class="actionsheet__list">'
-    +       '<button type="button" class="actionsheet__item" data-component-slug="actionsheet-item" data-delete-friend>'
+    +       '<button type="button" class="actionsheet__item" data-delete-friend>'
     +         '<i class="wego-iconfont-s icon-shanchu actionsheet__item-icon" aria-hidden="true"></i>'
     +         '<div class="actionsheet__item-main">'
     +           '<div class="actionsheet__item-title">删除该好友</div>'
@@ -504,6 +504,10 @@ window.WegoApp.registerScene({
         var text = state.keyword ? '未找到匹配的好友' : '还没有好友';
         scrollEl.innerHTML = emptyTemplate(text);
         indexEl.hidden = true;
+        var emptyBtn = scrollEl.querySelector('[data-dom-id="empty-add-friend"]');
+        if (emptyBtn) {
+          emptyBtn.addEventListener('click', openAddForm);
+        }
         return;
       }
       if (state.keyword) {
@@ -880,12 +884,6 @@ window.WegoApp.registerScene({
     searchInput.addEventListener('input', handleSearch);
     addBtn.addEventListener('click', openAddForm);
     indexEl.addEventListener('click', handleIndexClick);
-    // 空态「新建好友」按钮经事件委托触发（renderList 动态渲染于 scrollEl）
-    scrollEl.addEventListener('click', function (e) {
-      if (e.target.closest && e.target.closest('[data-dom-id="empty-add-friend"]')) {
-        openAddForm();
-      }
-    });
 
     /* 滚动时更新索引激活态 */
     var scrollTimer = null;
