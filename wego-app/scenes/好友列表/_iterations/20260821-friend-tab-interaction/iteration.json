@@ -7,7 +7,7 @@
     "primary_scene": "好友列表",
     "related_scenes": []
   },
-  "status": "awaiting-brief-confirmation",
+  "status": "prototyping",
   "scope_revision": 3,
   "prototype_brief": {
     "goal": "在已恢复到最新代码的好友tab基础上，按最新交互设计工作流补全交互闭环与必要状态：好友新增与删除形成首尾闭环并以 localStorage 真实落盘（不再内存直 push 即丢），补齐列表加载态与存储失败态，完善空/搜索空结果引导，让单个好友列表场景的浏览、搜索、排序、增删体验完整可验收。",
@@ -91,7 +91,11 @@
     "scope_revision": 3,
     "scope_sha256": "1be0ca9e105b641833a5a37b33117acd239fe7608f12c224507a14f34f4a0c11"
   },
-  "brief_confirmation": null,
+  "brief_confirmation": {
+    "at": "2026-08-21T01:29:03.027Z",
+    "scope_revision": 3,
+    "scope_sha256": "1be0ca9e105b641833a5a37b33117acd239fe7608f12c224507a14f34f4a0c11"
+  },
   "prototype_submission": null,
   "prototype_confirmation": null,
   "affected_scenes": [
@@ -130,6 +134,10 @@
     {
       "action": "submit-brief",
       "at": "2026-08-21T01:28:12.977Z"
+    },
+    {
+      "action": "confirm-brief",
+      "at": "2026-08-21T01:29:03.028Z"
     }
   ],
   "freeze": null
