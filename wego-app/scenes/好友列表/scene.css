@@ -288,6 +288,10 @@
   color: var(--text-tertiary);
 }
 
+.friend-list__empty-action {
+  margin-top: var(--spacer-16);
+}
+
 /* 添加好友全屏表单：灰底页面 */
 .modal--fullscreen {
   --modal-panel-bg: var(--bg-page);

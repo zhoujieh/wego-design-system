@@ -8,46 +8,55 @@
     "related_scenes": []
   },
   "status": "prototyping",
-  "scope_revision": 3,
+  "scope_revision": 4,
   "prototype_brief": {
-    "goal": "在已恢复到最新代码的好友tab基础上，按最新交互设计工作流补全交互闭环与必要状态：好友新增与删除形成首尾闭环并以 localStorage 真实落盘（不再内存直 push 即丢），补齐列表加载态与存储失败态，完善空/搜索空结果引导，让单个好友列表场景的浏览、搜索、排序、增删体验完整可验收。",
+    "goal": "在已恢复到最新代码的好友tab基础上，按最新交互设计工作流补全交互闭环与必要状态：好友列表默认进入为真实空状态，数据完全通过添加好友表单的真实操作创建并写入 localStorage 落盘（不再首启预载种子数据、不再内存直 push 即丢）；新增好友表单的字段、分组、来源与数据来源和真实场景（window.WEGO_PROTOTYPE_DB 的 friendFromUser 结构与 friendGroups）完全统一，不编造字段；补齐列表加载态与存储失败态，完善空/搜索空结果引导，让单个好友列表场景的浏览、搜索、排序、增删体验完整可验收。",
     "included": [
-      "浏览好友列表：字母/分组两种排序 + 右侧悬浮索引定位",
+      "默认空状态：进入好友tab时若 localStorage 无数据，呈现列表空状态与“新建好友”引导入口，不预载任何种子好友数据",
+      "真实创建闭环：好友数据唯一来源为添加好友表单提交创建并写入 localStorage；刷新后仍保留，不依赖 prototype-db 预置",
+      "新增表单与真实场景统一：表单字段、分组、来源选项与数据来源对齐 window.WEGO_PROTOTYPE_DB 的 friendFromUser 结构与 friendGroups，不编造字段或分组",
+      "浏览好友列表：有数据后支持字母/分组两种排序 + 右侧悬浮索引定位",
       "切换排序：导航栏右侧入口在字母/分组排序间切换，索引随之更新",
       "搜索过滤：按昵称实时过滤，命中高亮，清空恢复列表",
-      "添加好友：全屏表单提交后写入 localStorage 持久化并刷新列表",
       "删除好友：长按列表项打开底部操作面板 → 选择删除 → 确认删除弹窗 → 删除后同步更新 localStorage 与列表",
       "空状态引导：列表空 / 搜索无结果均展示可感知的引导与返回入口",
       "加载态：进入 tab 时以本地演示延迟呈现列表加载表现",
       "失败态（迭代内试验能力）：全局悬浮失败开关打开后，可分别触发 加载失败 / 新增保存失败 / 删除失败 三类分支，各带失败提示与重试/关闭反馈"
     ],
     "excluded": [
+      "首启从 WEGO_PROTOTYPE_DB 预载初始好友列表（改为真实的空状态 + 操作创建）",
       "好友详情页与相册浏览",
       "后端持久化（仅 localStorage 本地存储）",
-      "扫码/名片/通讯录等无真实数据源的新增来源",
+      "无真实数据源的新增来源通道（表单仅采集与 friendFromUser 结构一致的字段，不为之假造数据）",
       "其他 tab 场景"
     ],
     "entry_points": [
       "底部导航栏「好友」tab（haoyou），点击进入好友列表主页面"
     ],
     "critical_paths": [
-      "[P1] 浏览与定位：进入好友tab → 初始加载呈现列表（默认字母排序）→ 右侧索引点击或滚动 → 定位到对应分组",
-      "[P1] 搜索：搜索框输入关键词 → 实时过滤匹配昵称并高亮 → 无结果展示空结果引导 → 清空恢复完整列表",
-      "[P1] 添加好友：导航栏右侧新建入口 → 全屏表单填写昵称/分组/来源 → 校验必填 → 提交写入 localStorage → toast 反馈 + 列表新增且刷新后仍保留",
+      "[P1] 默认空状态：进入好友tab → 无 localStorage 数据 → 呈现列表空状态与「新建好友」引导 → 不预载任何种子数据",
+      "[P1] 真实添加：导航栏右侧新建入口 → 全屏表单（字段与 friendFromUser 一致、分组来自 friendGroups）→ 校验必填 → 提交写入 localStorage → toast 反馈 + 列表新增且刷新后仍保留",
       "[P1] 删除好友：长按列表项 → 底部操作面板 → 选择删除 → 确认删除弹窗 → 确认删除 → 移除该项并更新 localStorage → 列表与索引同步刷新 + toast 反馈",
+      "浏览与定位：有数据后进入好友tab → 初始加载呈现列表（默认字母排序）→ 右侧索引点击或滚动 → 定位到对应分组",
+      "搜索：搜索框输入关键词 → 实时过滤匹配昵称并高亮 → 无结果展示空结果引导 → 清空恢复完整列表",
       "排序切换：导航栏右侧排序入口 → 字母/分组排序切换 → 列表与索引重新分组",
       "失败注入（试验开关）：打开全局悬浮失败开关 → 分别执行 加载 / 新增 / 删除 → 对应操作返回失败 → 呈现失败提示与重试/关闭，数据保持原状"
     ],
     "prototype_boundaries": [
       {
-        "flow_id": "friend-list-browse",
+        "flow_id": "friend-list-empty",
         "mode": "functional",
-        "visible_result": "用户进入好友tab看到列表，可切换排序、搜索、右侧索引定位，并看到初始加载表现"
+        "visible_result": "用户首次进入好友tab看到空状态引导，列表为空、不预载任何好友数据，仅保留新建入口"
       },
       {
         "flow_id": "friend-add",
         "mode": "functional",
-        "visible_result": "用户提交添加表单后看到成功 toast，列表新增好友，刷新页面后好友仍在（localStorage 落盘）"
+        "visible_result": "用户提交与真实场景一致的表单后看到成功 toast，列表新增该好友，刷新页面后好友仍在（localStorage 落盘）"
+      },
+      {
+        "flow_id": "friend-list-browse",
+        "mode": "functional",
+        "visible_result": "存在好友数据后用户可看到带加载表现的列表，可切换排序、搜索、右侧索引定位"
       },
       {
         "flow_id": "friend-delete",
@@ -56,14 +65,14 @@
       }
     ],
     "states": [
-      "loading：进入好友tab且数据读取中 → 呈现列表加载占位表现，读取完成过渡到浏览态",
-      "list-ready：数据就绪 → 默认字母排序展示好友列表 + 右侧悬浮索引，可滚动与定位",
+      "loading：进入好友tab且数据读取中 → 呈现列表加载占位表现，读取完成过渡到空态或浏览态",
+      "empty：进入好友tab且无 localStorage 数据 → 展示列表空状态与「新建好友」引导入口，仅保留新建操作",
+      "list-ready：数据就绪（存在好友数据）→ 默认字母排序展示好友列表 + 右侧悬浮索引，可滚动与定位",
       "sort-by-letter：切换至字母排序 → A-Z + # 分组，右侧索引显示字母",
-      "sort-by-group：切换至分组排序 → 按自定义分组聚合，右侧索引显示分组名",
+      "sort-by-group：切换至分组排序 → 按真实 friendGroups 聚合，右侧索引显示分组名",
       "searching：搜索框输入关键词 → 实时过滤匹配昵称并高亮，隐藏分组标题与索引",
       "search-empty：搜索无匹配结果 → 展示搜索无结果空状态与清空/返回引导",
-      "empty：好友列表为空 → 展示列表空状态并引导通过新建入口产生数据",
-      "add-form：打开添加好友全屏表单 → 填写昵称/分组/来源，必填校验，提交",
+      "add-form：打开添加好友全屏表单 → 字段与 friendFromUser 一致、分组来自 friendGroups，必填校验，提交",
       "confirm-delete：删除确认弹窗 → 强调显示好友昵称且提示删除后不可恢复 → 提供取消 / 删除两按钮，焦点默认在取消",
       "load-failed：全局失败开关打开且进入好友tab → 加载失败提示 +「重试/关闭」，重试走成功路径",
       "save-failed：全局失败开关打开且提交新增 → 保存失败提示 +「重试/关闭」，数据保持原状",
@@ -71,30 +80,31 @@
       "submit-success：添加/删除成功 → 关闭表单，toast 反馈，列表与索引同步刷新"
     ],
     "data_contract": {
-      "friend": "friend_id, nickname, py_initial(拼音首字母), group_id, new_count(上新数), product_total(总商品数), avatar",
-      "group": "group_id, group_name",
-      "produce_flow": "添加好友表单提交是唯一真实写入通道（写入 localStorage）；删除好友从 localStorage 移除",
-      "initial_source": "首次无 localStorage 数据时，初始数据来源于 window.WEGO_PROTOTYPE_DB 的 friends/friendGroups；此后新增与删除均以 localStorage 写入结果为准；不得在场景内随机生成昵称或另起分组",
+      "friend": "与 window.WEGO_PROTOTYPE_DB 的 friendFromUser 输出结构一致，含 friend_id, user_id, merchant_id, nickname, merchant_name, display_name, avatar, py_initial, group_id, new_count, product_total, merchant_type, region, main_categories, account_type, statuses, relation_type, relation_status",
+      "group": "取自 window.WEGO_PROTOTYPE_DB.friendGroups：group_id, group_name, description, sort_order",
+      "produce_flow": "添加好友表单提交（字段与真实结构一致）是唯一真实写入通道（写入 localStorage）；删除好友从 localStorage 移除",
+      "initial_source": "无初始预载：首次进入且 localStorage 无数据时呈现空状态，不预载任何好友数据；好友数据一律由添加表单真实创建后落 localStorage",
       "persistence": "localStorage 本地存储，无后端",
       "failure_fault_injection": "全局悬浮失败开关为本迭代内试验能力，仅用于验收时触发三类失败分支，不进入正式业务路径；本质为给真实读写流程提供可复现失败分支，非降级后门"
     },
     "assumptions": [
-      "数据初始来源于 window.WEGO_PROTOTYPE_DB 的 friends/friendGroups，仅在首次无 localStorage 记录时作为初始数据，之后新增/删除均落 localStorage",
-      "删除与新增均为真实交互流程，非初始来源依赖",
+      "好友列表默认进入为真实空状态，不预载任何好友数据，不依赖 prototype-db 作为初始数据；好友数据唯一来源为添加表单真实创建并落 localStorage",
+      "新增好友表单的字段、分组与来源选项对齐真实场景接口（friendFromUser 结构 + friendGroups），不在场景内编造字段或分组",
+      "删除与新增均为真实交互流程",
       "加载态通过本地演示延迟呈现，不引入真实后端",
       "失败注入开关先在本迭代试验验证；验证稳定后由 wego-uxsystem-iterate 升级为全局设计系统运行时能力，本迭代不动设计系统本体"
     ],
     "open_questions": []
   },
   "brief_submission": {
-    "at": "2026-08-21T01:28:12.975Z",
-    "scope_revision": 3,
-    "scope_sha256": "1be0ca9e105b641833a5a37b33117acd239fe7608f12c224507a14f34f4a0c11"
+    "at": "2026-08-21T03:00:31.585Z",
+    "scope_revision": 4,
+    "scope_sha256": "9bc804d2de36fce11693b0ca35e8c61fc11dbe92d59508de297d83b124ad8e74"
   },
   "brief_confirmation": {
-    "at": "2026-08-21T01:29:03.027Z",
-    "scope_revision": 3,
-    "scope_sha256": "1be0ca9e105b641833a5a37b33117acd239fe7608f12c224507a14f34f4a0c11"
+    "at": "2026-08-21T03:08:21.080Z",
+    "scope_revision": 4,
+    "scope_sha256": "9bc804d2de36fce11693b0ca35e8c61fc11dbe92d59508de297d83b124ad8e74"
   },
   "prototype_submission": null,
   "prototype_confirmation": null,
@@ -138,6 +148,18 @@
     {
       "action": "confirm-brief",
       "at": "2026-08-21T01:29:03.028Z"
+    },
+    {
+      "action": "invalidate",
+      "at": "2026-08-21T02:59:04.106Z"
+    },
+    {
+      "action": "submit-brief",
+      "at": "2026-08-21T03:00:31.587Z"
+    },
+    {
+      "action": "confirm-brief",
+      "at": "2026-08-21T03:08:21.081Z"
     }
   ],
   "freeze": null

@@ -110,8 +110,8 @@ var PROTOTYPE_DB = window.WEGO_PROTOTYPE_DB || {};
 var FRIEND_GROUPS = (PROTOTYPE_DB.friendGroups || []).slice();
 
 /* FriendStore：好友数据的 localStorage 持久层
-   首次无 localStorage 记录时，初始数据来源于 WEGO_PROTOTYPE_DB.friends；
-   此后新增/删除均写入 localStorage，刷新保留。 */
+   不预载任何初始好友数据：首次进入且无 localStorage 记录时为空列表，
+   进入默认空状态；好友数据一律由添加好友表单真实创建后写入 localStorage，刷新保留。 */
 var FRIEND_STORE_KEY = 'wego.friend-list.friends';
 var FriendStore = (function () {
   function load() {
@@ -121,10 +121,8 @@ var FriendStore = (function () {
         var parsed = JSON.parse(raw);
         if (Array.isArray(parsed)) return parsed;
       }
-    } catch (e) { /* 解析失败回退初始数据 */ }
-    var initial = (PROTOTYPE_DB.friends || []).slice();
-    save(initial);
-    return initial;
+    } catch (e) { /* 解析失败回退空列表 */ }
+    return [];
   }
   function save(list) {
     try {
@@ -277,6 +275,7 @@ function emptyTemplate(text) {
     + '<div class="friend-list__empty">'
     +   '<div class="friend-list__empty-icon wego-iconfont-s icon-kongzhuangtai"></div>'
     +   '<p class="friend-list__empty-text">' + text + '</p>'
+    +   '<button type="button" class="btn btn--strong friend-list__empty-action" data-dom-id="empty-add-friend" data-component-slug="button">新建好友</button>'
     + '</div>';
 }
 
@@ -827,18 +826,38 @@ window.WegoApp.registerScene({
               ctx.toast('保存失败，请稍后重试');
               return;
             }
+            var accountInput = formRoot.querySelector('[data-form-field="account_or_phone"]');
+            var tagsInput = formRoot.querySelector('[data-form-field="tags"]');
+            var remarkInput = formRoot.querySelector('[data-form-field="remark"]');
+            var verifyInput = formRoot.querySelector('[data-form-field="verify_message"]');
+            var nicknameVal = nickname.value.trim();
+            var pyInitial = nicknameVal.charAt(0).toUpperCase();
+            // 数据对齐真实场景 friendFromUser 结构：可采集字段取表单值，
+            // 表单不采集的商家维度字段给与真实结构一致的默认/空值，不编造假数据
             var newFriend = {
               friend_id: 'f' + Date.now(),
-              nickname: nickname.value.trim(),
-              py_initial: nickname.value.trim().charAt(0).toUpperCase(),
+              user_id: 'user-' + Date.now(),
+              merchant_id: 'merchant-' + Date.now(),
+              nickname: nicknameVal,
+              merchant_name: nicknameVal,
+              display_name: nicknameVal,
+              avatar: './lib/assets/image/avatar-defult.png',
+              py_initial: /[A-Z]/.test(pyInitial) ? pyInitial : '#',
               group_id: formState.groupId || 'g-follow',
               new_count: 0,
               product_total: 0,
-              avatar: './lib/assets/image/avatar-defult.png'
+              merchant_type: '',
+              region: '',
+              main_categories: [],
+              account_type: 'merchant',
+              statuses: [],
+              relation_type: 'merchant_friend',
+              relation_status: 'active',
+              account_or_phone: accountInput ? accountInput.value.trim() : '',
+              tags: tagsInput ? tagsInput.value.trim() : '',
+              remark: remarkInput ? remarkInput.value.trim() : '',
+              verify_message: verifyInput ? verifyInput.value.trim() : ''
             };
-            if (!/[A-Z]/.test(newFriend.py_initial)) {
-              newFriend.py_initial = '#';
-            }
             FRIENDS_DATA.push(newFriend);
             if (!persistFriends()) {
               ctx.toast('保存失败，请稍后重试');
@@ -861,6 +880,12 @@ window.WegoApp.registerScene({
     searchInput.addEventListener('input', handleSearch);
     addBtn.addEventListener('click', openAddForm);
     indexEl.addEventListener('click', handleIndexClick);
+    // 空态「新建好友」按钮经事件委托触发（renderList 动态渲染于 scrollEl）
+    scrollEl.addEventListener('click', function (e) {
+      if (e.target.closest && e.target.closest('[data-dom-id="empty-add-friend"]')) {
+        openAddForm();
+      }
+    });
 
     /* 滚动时更新索引激活态 */
     var scrollTimer = null;
