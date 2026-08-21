@@ -305,8 +305,9 @@ function addFriendFormTemplate() {
     +           '<div class="form-body__label form-body__label--required"><span class="form-body__label-text">头像</span><span class="form-body__required">*</span></div>'
     +           '<div class="form-body__action">'
     +             '<div class="form-body__upload" data-upload-avatar>'
-    +               '<div class="form-body__upload-icon wego-iconfont-s icon-jia16"></div>'
-    +               '<span class="form-body__upload-text">上传</span>'
+    +               '<img class="form-body__upload-preview" data-upload-avatar-preview hidden alt="头像预览" />'
+    +               '<div class="form-body__upload-icon wego-iconfont-s icon-jia16" data-upload-avatar-placeholder></div>'
+    +               '<span class="form-body__upload-text" data-upload-avatar-text>上传</span>'
     +             '</div>'
     +           '</div>'
     +         '</div>'
@@ -366,6 +367,46 @@ function addFriendFormTemplate() {
     +         '</div>'
     +       '</div>'
     +     '</div>'
+    +     '</div>'
+    +   '</div>'
+    + '</div>';
+}
+
+/* ── 模拟本地相册：内置素材选图页模板 ──
+   数据源取自 WEGO_PROTOTYPE_DB.friends 的商家头像素材（avatar_*.jpg），
+   模拟本地相册网格单选，选中后回填新增好友表单头像。 */
+function avatarPickerTemplate(selectedAvatar) {
+  var avatarList = (window.WEGO_PROTOTYPE_DB && window.WEGO_PROTOTYPE_DB.friends || [])
+    .map(function (f) { return f.avatar; })
+    .filter(Boolean);
+  if (avatarList.length === 0) {
+    avatarList = ['./lib/assets/image/avatar/avatar_001.jpg'];
+  }
+  var grid = avatarList.map(function (avatar, index) {
+    var selected = avatar === selectedAvatar ? ' avatar-picker__item--selected' : '';
+    return ''
+      + '<button type="button" class="avatar-picker__item' + selected + '" data-pick-avatar="' + index + '" data-avatar-url="' + avatar + '">'
+      +   '<img src="' + avatar + '" alt="头像素材 ' + (index + 1) + '" />'
+      + '</button>';
+  }).join('');
+  return ''
+    + '<div class="modal modal--fullscreen" data-component-slug="modal" data-state="open" role="dialog" aria-modal="true" aria-label="选择头像">'
+    +   '<div class="modal__panel">'
+    +     '<div class="modal__title modal__title--default">'
+    +       '<div class="navbar" data-component-slug="navbar">'
+    +         '<div class="navbar__body navbar__body--spaced">'
+    +           '<div class="navbar__left"><button type="button" class="navbar__left-text" data-dom-id="close-avatar-picker" data-close-avatar-picker>取消</button></div>'
+    +           '<div class="navbar__center"><span class="navbar__title">选择头像</span></div>'
+    +           '<div class="navbar__right navbar__right--button">'
+    +             '<div class="navbar__action navbar__action--button">'
+    +               '<button type="button" class="btn btn--strong btn--sm" data-component-slug="button" data-dom-id="confirm-avatar-pick">完成</button>'
+    +             '</div>'
+    +           '</div>'
+    +         '</div>'
+    +       '</div>'
+    +     '</div>'
+    +     '<div class="modal__body modal__body--safe-bottom">'
+    +       '<div class="avatar-picker__grid">' + grid + '</div>'
     +     '</div>'
     +   '</div>'
     + '</div>';
@@ -752,7 +793,7 @@ window.WegoApp.registerScene({
 
     /* ── 添加好友表单 ── */
     function openAddForm() {
-      var formState = { groupId: '', groupName: '', source: '' };
+      var formState = { groupId: '', groupName: '', source: '', avatar: '' };
       ctx.openFullScreenModal(addFriendFormTemplate(), {
         label: '添加好友',
         init: function (overlay) {
@@ -769,9 +810,52 @@ window.WegoApp.registerScene({
             closeBtn.addEventListener('click', function () { ctx.closeOverlay(); });
           }
 
+          function applyAvatar(avatarUrl) {
+            formState.avatar = avatarUrl;
+            var preview = formRoot.querySelector('[data-upload-avatar-preview]');
+            var placeholder = formRoot.querySelector('[data-upload-avatar-placeholder]');
+            var text = formRoot.querySelector('[data-upload-avatar-text]');
+            if (preview && placeholder && text) {
+              preview.src = avatarUrl;
+              preview.hidden = false;
+              placeholder.hidden = true;
+              text.textContent = '更换';
+            }
+          }
+
           if (uploadBtn) {
             uploadBtn.addEventListener('click', function () {
-              ctx.toast('已打开头像选择入口');
+              ctx.openFullScreenModal(avatarPickerTemplate(formState.avatar), {
+                label: '选择头像',
+                init: function (pickerOverlay) {
+                  var pickerRoot = pickerOverlay.root;
+                  var pickedAvatar = formState.avatar;
+                  var closeBtn = pickerRoot.querySelector('[data-close-avatar-picker]');
+                  var confirmBtn = pickerRoot.querySelector('[data-dom-id="confirm-avatar-pick"]');
+                  if (closeBtn) {
+                    closeBtn.addEventListener('click', function () { ctx.closeOverlay(); });
+                  }
+                  pickerRoot.querySelectorAll('[data-pick-avatar]').forEach(function (item) {
+                    item.addEventListener('click', function () {
+                      pickerRoot.querySelectorAll('[data-pick-avatar]').forEach(function (el) {
+                        el.classList.remove('avatar-picker__item--selected');
+                      });
+                      item.classList.add('avatar-picker__item--selected');
+                      pickedAvatar = item.getAttribute('data-avatar-url');
+                    });
+                  });
+                  if (confirmBtn) {
+                    confirmBtn.addEventListener('click', function () {
+                      if (pickedAvatar) {
+                        applyAvatar(pickedAvatar);
+                        ctx.closeOverlay();
+                      } else {
+                        ctx.toast('请先选择头像');
+                      }
+                    });
+                  }
+                }
+              });
             });
           }
 
@@ -845,7 +929,7 @@ window.WegoApp.registerScene({
               nickname: nicknameVal,
               merchant_name: nicknameVal,
               display_name: nicknameVal,
-              avatar: './lib/assets/image/avatar-defult.png',
+              avatar: formState.avatar || './lib/assets/image/avatar-defult.png',
               py_initial: /[A-Z]/.test(pyInitial) ? pyInitial : '#',
               group_id: formState.groupId || 'g-follow',
               new_count: 0,
