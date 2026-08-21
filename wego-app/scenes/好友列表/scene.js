@@ -105,10 +105,37 @@
 
 /* 好友列表场景 */
 
-/* ── 数据源（取自原型数据库）── */
+/* ── 数据源（取自原型数据库 + localStorage 落盘）── */
 var PROTOTYPE_DB = window.WEGO_PROTOTYPE_DB || {};
 var FRIEND_GROUPS = (PROTOTYPE_DB.friendGroups || []).slice();
-var FRIENDS_DATA = (PROTOTYPE_DB.friends || []).slice();
+
+/* FriendStore：好友数据的 localStorage 持久层
+   不预载任何初始好友数据：首次进入且无 localStorage 记录时为空列表，
+   进入默认空状态；好友数据一律由添加好友表单真实创建后写入 localStorage，刷新保留。 */
+var FRIEND_STORE_KEY = 'wego.friend-list.friends';
+var FriendStore = (function () {
+  function load() {
+    try {
+      var raw = window.localStorage.getItem(FRIEND_STORE_KEY);
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) { /* 解析失败回退空列表 */ }
+    return [];
+  }
+  function save(list) {
+    try {
+      window.localStorage.setItem(FRIEND_STORE_KEY, JSON.stringify(list));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  return { load: load, save: save };
+})();
+
+var FRIENDS_DATA = FriendStore.load();
 
 /* ── 工具函数 ── */
 function getGroupName(groupId) {
@@ -248,6 +275,7 @@ function emptyTemplate(text) {
     + '<div class="friend-list__empty">'
     +   '<div class="friend-list__empty-icon wego-iconfont-s icon-kongzhuangtai"></div>'
     +   '<p class="friend-list__empty-text">' + text + '</p>'
+    +   '<button type="button" class="btn btn--strong btn--md friend-list__empty-action" data-dom-id="empty-add-friend" data-component-slug="button">新建好友</button>'
     + '</div>';
 }
 
@@ -277,8 +305,9 @@ function addFriendFormTemplate() {
     +           '<div class="form-body__label form-body__label--required"><span class="form-body__label-text">头像</span><span class="form-body__required">*</span></div>'
     +           '<div class="form-body__action">'
     +             '<div class="form-body__upload" data-upload-avatar>'
-    +               '<div class="form-body__upload-icon wego-iconfont-s icon-jia16"></div>'
-    +               '<span class="form-body__upload-text">上传</span>'
+    +               '<img class="form-body__upload-preview" data-upload-avatar-preview hidden alt="头像预览" />'
+    +               '<div class="form-body__upload-icon wego-iconfont-s icon-jia16" data-upload-avatar-placeholder></div>'
+    +               '<span class="form-body__upload-text" data-upload-avatar-text>上传</span>'
     +             '</div>'
     +           '</div>'
     +         '</div>'
@@ -339,6 +368,67 @@ function addFriendFormTemplate() {
     +       '</div>'
     +     '</div>'
     +     '</div>'
+    +   '</div>'
+    + '</div>';
+}
+
+/* ── 模拟本地相册：内置素材选图页模板 ──
+   数据源取自 WEGO_PROTOTYPE_DB.friends 的商家头像素材（avatar_*.jpg），
+   模拟本地相册网格单选，选中后回填新增好友表单头像。 */
+function avatarPickerTemplate(selectedAvatar) {
+  var avatarList = (window.WEGO_PROTOTYPE_DB && window.WEGO_PROTOTYPE_DB.friends || [])
+    .map(function (f) { return f.avatar; })
+    .filter(Boolean);
+  if (avatarList.length === 0) {
+    avatarList = ['./lib/assets/image/avatar/avatar_001.jpg'];
+  }
+  var grid = avatarList.map(function (avatar, index) {
+    var selected = avatar === selectedAvatar ? ' avatar-picker__item--selected' : '';
+    return ''
+      + '<button type="button" class="avatar-picker__item' + selected + '" data-pick-avatar="' + index + '" data-avatar-url="' + avatar + '">'
+      +   '<img src="' + avatar + '" alt="头像素材 ' + (index + 1) + '" />'
+      + '</button>';
+  }).join('');
+  return ''
+    + '<div class="modal modal--fullscreen" data-component-slug="modal" data-state="open" role="dialog" aria-modal="true" aria-label="选择头像">'
+    +   '<div class="modal__panel">'
+    +     '<div class="modal__title modal__title--default">'
+    +       '<div class="navbar" data-component-slug="navbar">'
+    +         '<div class="navbar__body navbar__body--spaced">'
+    +           '<div class="navbar__left"><button type="button" class="navbar__left-text" data-dom-id="close-avatar-picker" data-close-avatar-picker>取消</button></div>'
+    +           '<div class="navbar__center"><span class="navbar__title">选择头像</span></div>'
+    +           '<div class="navbar__right navbar__right--button">'
+    +             '<div class="navbar__action navbar__action--button">'
+    +               '<button type="button" class="btn btn--strong btn--sm" data-component-slug="button" data-dom-id="confirm-avatar-pick">完成</button>'
+    +             '</div>'
+    +           '</div>'
+    +         '</div>'
+    +       '</div>'
+    +     '</div>'
+    +     '<div class="modal__body modal__body--safe-bottom">'
+    +       '<div class="avatar-picker__grid">' + grid + '</div>'
+    +     '</div>'
+    +   '</div>'
+    + '</div>';
+}
+
+/* ── 长按删除操作面板 actionsheet 模板 ── */
+function friendActionSheetTemplate(friendName) {
+  return ''
+    + '<div class="actionsheet actionsheet--action" role="dialog" aria-modal="true" data-component-slug="actionsheet">'
+    +   '<div class="actionsheet__panel">'
+    +     '<div class="actionsheet__header actionsheet__header--text"><span class="actionsheet__header-text">' + escapeHtml(friendName) + '</span></div>'
+    +     '<div class="actionsheet__list">'
+    +       '<button type="button" class="actionsheet__item" data-delete-friend>'
+    +         '<i class="wego-iconfont-s icon-shanchu actionsheet__item-icon" aria-hidden="true"></i>'
+    +         '<div class="actionsheet__item-main">'
+    +           '<div class="actionsheet__item-title">删除该好友</div>'
+    +           '<div class="actionsheet__item-subtitle">删除后无法恢复</div>'
+    +         '</div>'
+    +       '</button>'
+    +     '</div>'
+    +     '<div class="actionsheet__cancel-gap"></div>'
+    +     '<button type="button" class="actionsheet__cancel" data-close-action-sheet>取 消</button>'
     +   '</div>'
     + '</div>';
 }
@@ -455,6 +545,10 @@ window.WegoApp.registerScene({
         var text = state.keyword ? '未找到匹配的好友' : '还没有好友';
         scrollEl.innerHTML = emptyTemplate(text);
         indexEl.hidden = true;
+        var emptyBtn = scrollEl.querySelector('[data-dom-id="empty-add-friend"]');
+        if (emptyBtn) {
+          emptyBtn.addEventListener('click', openAddForm);
+        }
         return;
       }
       if (state.keyword) {
@@ -547,9 +641,159 @@ window.WegoApp.registerScene({
       renderList();
     }
 
+    /* ── 全局失败注入消费（读取运行时故障开关） ── */
+    function fault(key) {
+      return !!(window.WegoApp && window.WegoApp.faultInjection && window.WegoApp.faultInjection.isEnabled(key));
+    }
+
+    /* ── 加载态与加载失败 ── */
+    var LOAD_DEMO_DELAY = 600;
+    function loadingTemplate() {
+      var rows = '';
+      for (var i = 0; i < 6; i++) rows += '<div class="friend-list__skeleton-row"></div>';
+      return '<div class="friend-list__loading">' + rows + '</div>';
+    }
+    function loadFailedTemplate() {
+      return ''
+        + '<div class="friend-list__state">'
+        +   '<div class="result">'
+        +     '<div class="result__icon" aria-hidden="true"><i class="wego-iconfont-s icon-tanhao-mian"></i></div>'
+        +     '<div class="result__title">好友列表加载失败，<a class="link link--inline" href="javascript:void(0)" data-retry-load>请重试</a></div>'
+        +   '</div>'
+        + '</div>';
+    }
+    function renderLoading() {
+      scrollEl.innerHTML = loadingTemplate();
+      indexEl.hidden = true;
+    }
+    function renderLoadFailed() {
+      scrollEl.innerHTML = loadFailedTemplate();
+      indexEl.hidden = true;
+      var retry = scrollEl.querySelector('[data-retry-load]');
+      if (retry) retry.addEventListener('click', function () { startLoad(); });
+    }
+    function startLoad() {
+      if (fault('load')) {
+        renderLoadFailed();
+      } else {
+        renderLoading();
+        setTimeout(function () {
+          updateSortLabel();
+          renderList();
+        }, LOAD_DEMO_DELAY);
+      }
+    }
+
+    /* ── 删除好友（长按唤起） ── */
+    function persistFriends() {
+      return FriendStore.save(FRIENDS_DATA);
+    }
+
+    function removeFriendById(friendId) {
+      FRIENDS_DATA = FRIENDS_DATA.filter(function (f) { return f.friend_id !== friendId; });
+      persistFriends();
+    }
+
+    function findFriendById(friendId) {
+      for (var i = 0; i < FRIENDS_DATA.length; i++) {
+        if (FRIENDS_DATA[i].friend_id === friendId) return FRIENDS_DATA[i];
+      }
+      return null;
+    }
+
+    // 长按检测：按压超过长按阈值后触发，移动/松开阈值内取消
+    var LONG_PRESS_MS = 500;
+    var longPressTimer = null;
+    var longPressFired = false;
+    var longPressStart = { x: 0, y: 0 };
+    var MOVE_TOLERANCE = 10;
+
+    function clearLongPress() {
+      if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+      longPressFired = false;
+    }
+
+    function beginLongPress(cell, friendId, clientX, clientY) {
+      clearLongPress();
+      longPressStart.x = clientX;
+      longPressStart.y = clientY;
+      longPressFired = false;
+      longPressTimer = setTimeout(function () {
+        longPressFired = true;
+        longPressFiredOn = true;
+        cell.classList.add('is-nav-prepress');
+        var friend = findFriendById(friendId);
+        openFriendActionSheet(friend);
+      }, LONG_PRESS_MS);
+    }
+    var longPressFiredOn = false;
+
+    function cancelLongPress(cell) {
+      clearLongPress();
+      if (cell) cell.classList.remove('is-nav-prepress');
+    }
+
+    function openFriendActionSheet(friend) {
+      if (!friend) return;
+      ctx.openSheet(friendActionSheetTemplate(friend.nickname), {
+        label: '好友操作',
+        init: function (sheet) {
+          var sheetRoot = sheet.root;
+          var deleteBtn = sheetRoot.querySelector('[data-delete-friend]');
+          var closeBtn = sheetRoot.querySelector('[data-close-action-sheet]');
+          if (closeBtn) {
+            closeBtn.addEventListener('click', function () { sheet.close(); });
+          }
+          if (deleteBtn) {
+            deleteBtn.addEventListener('click', function () {
+              sheet.close();
+              confirmDeleteFriend(friend);
+            });
+          }
+        }
+      });
+    }
+
+    function confirmDeleteFriend(friend) {
+      ctx.dialog({
+        variant: 'text',
+        title: '删除好友',
+        content: '确定要删除 <strong>' + escapeHtml(friend.nickname) + '</strong> 吗？删除后无法恢复该好友关系。',
+        buttons: [
+          { label: '取 消', tone: 'dismiss' },
+          { label: '删除', tone: 'danger', onClick: function () { doDeleteFriend(friend); } }
+        ]
+      });
+    }
+
+    function doDeleteFriend(friend) {
+      if (fault('delete')) {
+        ctx.toast('删除失败，请稍后重试');
+        return;
+      }
+      var list = FRIENDS_DATA.map(function (f) { return f; });
+      var idx = -1;
+      for (var i = 0; i < list.length; i++) { if (list[i].friend_id === friend.friend_id) { idx = i; break; } }
+      if (idx === -1) {
+        ctx.toast('该好友已不在列表中');
+        renderList();
+        return;
+      }
+      var removed = list.splice(idx, 1)[0];
+      FRIENDS_DATA = list;
+      if (!persistFriends()) {
+        FRIENDS_DATA.push(removed);
+        ctx.toast('删除失败，请稍后重试');
+        renderList();
+        return;
+      }
+      renderList();
+      ctx.toast('已删除好友 ' + friend.nickname);
+    }
+
     /* ── 添加好友表单 ── */
     function openAddForm() {
-      var formState = { groupId: '', groupName: '', source: '' };
+      var formState = { groupId: '', groupName: '', source: '', avatar: '' };
       ctx.openFullScreenModal(addFriendFormTemplate(), {
         label: '添加好友',
         init: function (overlay) {
@@ -566,9 +810,52 @@ window.WegoApp.registerScene({
             closeBtn.addEventListener('click', function () { ctx.closeOverlay(); });
           }
 
+          function applyAvatar(avatarUrl) {
+            formState.avatar = avatarUrl;
+            var preview = formRoot.querySelector('[data-upload-avatar-preview]');
+            var placeholder = formRoot.querySelector('[data-upload-avatar-placeholder]');
+            var text = formRoot.querySelector('[data-upload-avatar-text]');
+            if (preview && placeholder && text) {
+              preview.src = avatarUrl;
+              preview.hidden = false;
+              placeholder.hidden = true;
+              text.textContent = '更换';
+            }
+          }
+
           if (uploadBtn) {
             uploadBtn.addEventListener('click', function () {
-              ctx.toast('已打开头像选择入口');
+              ctx.openFullScreenModal(avatarPickerTemplate(formState.avatar), {
+                label: '选择头像',
+                init: function (pickerOverlay) {
+                  var pickerRoot = pickerOverlay.root;
+                  var pickedAvatar = formState.avatar;
+                  var closeBtn = pickerRoot.querySelector('[data-close-avatar-picker]');
+                  var confirmBtn = pickerRoot.querySelector('[data-dom-id="confirm-avatar-pick"]');
+                  if (closeBtn) {
+                    closeBtn.addEventListener('click', function () { ctx.closeOverlay(); });
+                  }
+                  pickerRoot.querySelectorAll('[data-pick-avatar]').forEach(function (item) {
+                    item.addEventListener('click', function () {
+                      pickerRoot.querySelectorAll('[data-pick-avatar]').forEach(function (el) {
+                        el.classList.remove('avatar-picker__item--selected');
+                      });
+                      item.classList.add('avatar-picker__item--selected');
+                      pickedAvatar = item.getAttribute('data-avatar-url');
+                    });
+                  });
+                  if (confirmBtn) {
+                    confirmBtn.addEventListener('click', function () {
+                      if (pickedAvatar) {
+                        applyAvatar(pickedAvatar);
+                        ctx.closeOverlay();
+                      } else {
+                        ctx.toast('请先选择头像');
+                      }
+                    });
+                  }
+                }
+              });
             });
           }
 
@@ -623,19 +910,47 @@ window.WegoApp.registerScene({
               ctx.toast('请输入好友昵称');
               return;
             }
+            if (fault('save')) {
+              ctx.toast('保存失败，请稍后重试');
+              return;
+            }
+            var accountInput = formRoot.querySelector('[data-form-field="account_or_phone"]');
+            var tagsInput = formRoot.querySelector('[data-form-field="tags"]');
+            var remarkInput = formRoot.querySelector('[data-form-field="remark"]');
+            var verifyInput = formRoot.querySelector('[data-form-field="verify_message"]');
+            var nicknameVal = nickname.value.trim();
+            var pyInitial = nicknameVal.charAt(0).toUpperCase();
+            // 数据对齐真实场景 friendFromUser 结构：可采集字段取表单值，
+            // 表单不采集的商家维度字段给与真实结构一致的默认/空值，不编造假数据
             var newFriend = {
               friend_id: 'f' + Date.now(),
-              nickname: nickname.value.trim(),
-              py_initial: nickname.value.trim().charAt(0).toUpperCase(),
+              user_id: 'user-' + Date.now(),
+              merchant_id: 'merchant-' + Date.now(),
+              nickname: nicknameVal,
+              merchant_name: nicknameVal,
+              display_name: nicknameVal,
+              avatar: formState.avatar || './lib/assets/image/avatar-defult.png',
+              py_initial: /[A-Z]/.test(pyInitial) ? pyInitial : '#',
               group_id: formState.groupId || 'g-follow',
               new_count: 0,
               product_total: 0,
-              avatar: './lib/assets/image/avatar-defult.png'
+              merchant_type: '',
+              region: '',
+              main_categories: [],
+              account_type: 'merchant',
+              statuses: [],
+              relation_type: 'merchant_friend',
+              relation_status: 'active',
+              account_or_phone: accountInput ? accountInput.value.trim() : '',
+              tags: tagsInput ? tagsInput.value.trim() : '',
+              remark: remarkInput ? remarkInput.value.trim() : '',
+              verify_message: verifyInput ? verifyInput.value.trim() : ''
             };
-            if (!/[A-Z]/.test(newFriend.py_initial)) {
-              newFriend.py_initial = '#';
-            }
             FRIENDS_DATA.push(newFriend);
+            if (!persistFriends()) {
+              ctx.toast('保存失败，请稍后重试');
+              return;
+            }
             ctx.closeOverlay();
             ctx.toast('已添加好友 ' + newFriend.nickname);
             renderList();
@@ -682,6 +997,36 @@ window.WegoApp.registerScene({
       }, 80);
     });
 
+    /* 长按列表项唤起操作面板：事件委托，兼容触控与桌面指针 */
+    function pressStart(e) {
+      var cell = e.target && e.target.closest ? e.target.closest('[data-friend-id]') : null;
+      if (!cell) return;
+      var isMouse = typeof e.pointerType === 'string' && e.pointerType !== 'touch';
+      var pt = isMouse ? e : ((e.touches && e.touches[0]) || e);
+      beginLongPress(cell, cell.getAttribute('data-friend-id'), pt.clientX, pt.clientY);
+    }
+    function pressMove(e) {
+      if (longPressTimer === null) return;
+      var cell = e.target && e.target.closest ? e.target.closest('[data-friend-id]') : null;
+      var pt = (e.touches && e.touches[0]) || e;
+      if (Math.abs(pt.clientX - longPressStart.x) > MOVE_TOLERANCE ||
+          Math.abs(pt.clientY - longPressStart.y) > MOVE_TOLERANCE) {
+        cancelLongPress(cell);
+      }
+    }
+    function pressEnd(e) {
+      var cell = e.target && e.target.closest ? e.target.closest('[data-friend-id]') : null;
+      cancelLongPress(cell);
+    }
+    scrollEl.addEventListener('touchstart', pressStart, { passive: true });
+    scrollEl.addEventListener('touchmove', pressMove, { passive: true });
+    scrollEl.addEventListener('touchend', pressEnd, { passive: true });
+    scrollEl.addEventListener('touchcancel', pressEnd, { passive: true });
+    scrollEl.addEventListener('pointerdown', pressStart);
+    scrollEl.addEventListener('pointermove', pressMove, { passive: true });
+    scrollEl.addEventListener('pointerup', pressEnd);
+    scrollEl.addEventListener('pointercancel', pressEnd);
+
     /* 注册滚动布局：搜索框上滑隐藏/下滑显示 */
     ctx.bindScrollLayout({
       scrollRoot: '.friend-list__scroll',
@@ -690,8 +1035,7 @@ window.WegoApp.registerScene({
       ]
     });
 
-    /* 初始化渲染 */
-    updateSortLabel();
-    renderList();
+    /* 初始化渲染：先呈现加载态（本地演示延迟），再渲染列表 */
+    startLoad();
   }
 });

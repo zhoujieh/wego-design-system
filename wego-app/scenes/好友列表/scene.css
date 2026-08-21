@@ -288,7 +288,87 @@
   color: var(--text-tertiary);
 }
 
+.friend-list__empty-action {
+  margin-top: var(--spacer-16);
+}
+
 /* 添加好友全屏表单：灰底页面 */
 .modal--fullscreen {
   --modal-panel-bg: var(--bg-page);
+}
+
+/* 列表加载骨架 */
+.friend-list__loading {
+  padding-inline: var(--spacer-16);
+  padding-block: var(--spacer-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-8);
+}
+.friend-list__skeleton-row {
+  height: 56px;
+  border-radius: var(--radius-8);
+  background: var(--bg-subtle);
+  position: relative;
+  overflow: hidden;
+}
+.friend-list__skeleton-row::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--bg-surface);
+  opacity: 0;
+  animation: friend-skeleton-shimmer 1.2s infinite ease-in-out;
+}
+@keyframes friend-skeleton-shimmer {
+  0% { opacity: 0; }
+  50% { opacity: 0.6; }
+  100% { opacity: 0; }
+}
+
+/* 列表加载态 / 失败态容器：垂直居中 */
+.friend-list__state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacer-24);
+}
+
+/* 模拟本地相册：头像素材网格（单选） */
+.avatar-picker__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacer-8);
+  padding: var(--spacer-16);
+}
+.avatar-picker__item {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-12);
+  overflow: hidden;
+  border: 2px solid transparent;
+  padding: 0;
+  background: var(--bg-subtle);
+}
+.avatar-picker__item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.avatar-picker__item--selected {
+  border-color: var(--border-brand);
+}
+
+/* 新增好友表单：头像选中预览 */
+.form-body__upload-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius-12);
+  position: absolute;
+  inset: 0;
+}
+.form-body__upload {
+  position: relative;
 }
