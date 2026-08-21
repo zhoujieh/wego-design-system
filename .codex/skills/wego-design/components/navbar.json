@@ -224,7 +224,7 @@
     ".navbar__center--wide 与 .navbar__right--wide 仅用于兼容未迁移的旧场景，新增消费禁止使用。"
   ],
   "behavior": {
-    "pressFeedback": "移动端按压态由 :active 与 .is-pressed 共同承载，统一使用交互根节点整体 opacity: 0.6，不在 custom 身份区另造背景胶囊。宿主 App 通过 wego-app/js/app.js 在触控设备上自动为 .navbar__left-btn、.navbar__action 等可点击元素添加/移除 .is-pressed；custom 槽内的交互根节点由场景以相同规则承接。桌面端继续由 :active 兜底。同时设置 -webkit-user-select: none / user-select: none 以禁用长按文本选择和拖杆控件。",
+    "pressFeedback": "移动端按压态由 :active 与 .is-pressed 共同承载，无背景交互元素（.navbar__left-btn、.navbar__left-text、.navbar__action 等）按压为交互根节点整体 opacity: 0.6；背景色按钮（.navbar__left-btn--circle）按压为背景色变化 background: var(--bg-state-pressed)，不叠加整体变淡。不在 custom 身份区另造背景胶囊。宿主 App 通过 wego-app/js/app.js 在触控设备上自动为 .navbar__left-btn、.navbar__action 等可点击元素添加/移除 .is-pressed；custom 槽内的交互根节点由场景以相同规则承接。桌面端继续由 :active 兜底。同时设置 -webkit-user-select: none / user-select: none 以禁用长按文本选择和拖杆控件。",
     "leftAction": "返回、关闭或取消属于左侧主导航操作，不与右侧按钮混用。",
     "title": "居中标题使用三段式 center，左对齐标题使用两段式 left；两者都保持单行省略。",
     "actionPress": "右侧操作以轻压暗或按钮背景变化反馈。",
