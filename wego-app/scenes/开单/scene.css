@@ -3642,6 +3642,10 @@ body[data-order-layout="landscape"] .phone-indicator {
     padding: 0 var(--spacer-12) var(--spacer-8);
   }
 
+  .order-desktop__context--customer-open {
+    z-index: var(--z-modal);
+  }
+
   .order-desktop__context > button,
   .order-desktop-customer-anchor > button {
     display: flex;
@@ -5386,6 +5390,11 @@ body[data-order-layout="landscape"] .phone-indicator {
     height: var(--size-20);
     color: var(--text-default);
     font-size: var(--size-20);
+    transition: transform var(--duration-fast) var(--ease-standard);
+  }
+
+  .order-desktop-customer-select[aria-expanded="true"] .order-desktop-customer-entry > i {
+    transform: rotate(180deg);
   }
 
   .order-desktop-customer-entry > strong {

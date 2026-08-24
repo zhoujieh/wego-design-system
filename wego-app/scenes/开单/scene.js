@@ -1117,7 +1117,7 @@
     var checkoutBlocked = !state.products.length;
     return ''
       + '<main class="order-desktop__order">'
-      +   '<div class="order-desktop__context">'
+      +   '<div class="order-desktop__context' + (state.panel === 'customer' ? ' order-desktop__context--customer-open' : '') + '">'
       +     desktopCustomerAnchor()
       +     desktopDeliveryCard()
       +     (state.catalogCollapsed ? desktopProductSearch(false) : '')
