@@ -77,13 +77,64 @@
   min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
-  padding: 0 var(--spacer-16) var(--spacer-40);
+  padding: 0 var(--layout-page-margin-m8) var(--spacer-40);
 }
 
 .business-home__hero {
-  margin: 0 calc(var(--spacer-16) * -1);
-  padding: var(--spacer-4) var(--spacer-16) var(--spacer-16);
+  position: relative;
+  margin: 0 calc(var(--layout-page-margin-m8) * -1);
+  padding: var(--spacer-4) var(--layout-page-margin-m8) var(--spacer-16);
   background: var(--bg-inverse);
+  overflow: hidden;
+}
+
+/* hero 深色背景上的装饰光斑：四色模糊椭圆，只作视觉层次，不承载信息 */
+.business-home__hero-deco {
+  position: absolute;
+  pointer-events: none;
+  object-fit: contain;
+  opacity: 0.9;
+}
+
+.business-home__hero-deco--one {
+  top: -96px;
+  right: -60px;
+  width: 240px;
+  height: 240px;
+}
+
+.business-home__hero-deco--two {
+  top: 96px;
+  left: -72px;
+  width: 180px;
+  height: 180px;
+}
+
+.business-home__hero-deco--three {
+  top: -20px;
+  left: 44%;
+  width: 140px;
+  height: 140px;
+}
+
+.business-home__hero-deco--four {
+  bottom: -44px;
+  right: 20%;
+  width: 120px;
+  height: 120px;
+}
+
+.business-home__hero-deco--one,
+.business-home__hero-deco--two,
+.business-home__hero-deco--three,
+.business-home__hero-deco--four {
+  z-index: 0;
+}
+
+.business-home__hero .business-home__metrics,
+.business-home__hero .business-home__quick-card {
+  position: relative;
+  z-index: 1;
 }
 
 .business-home__metrics {
