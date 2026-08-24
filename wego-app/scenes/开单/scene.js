@@ -58,7 +58,9 @@
 
   var PICKUP_POINTS = [
     { id: 'pp1', name: '南山科技园自提点', address: '深圳市南山区科技园18号一楼', image: './scenes/开单/assets/pickup-store-1.png' },
-    { id: 'pp2', name: '福田中心自提点', address: '深圳市福田区福华一路88号', image: './scenes/开单/assets/pickup-store-2.png' }
+    { id: 'pp2', name: '福田中心自提点', address: '深圳市福田区福华一路88号', image: './scenes/开单/assets/pickup-store-2.png' },
+    { id: 'pp3', name: '湖南门店', address: '湖南省株洲市醴陵市来龙门街道15幢268室', image: './scenes/开单/assets/pickup-store-2.png' },
+    { id: 'pp4', name: '湖南门店', address: '湖南省株洲市醴陵市来龙门街道15幢268室', image: './scenes/开单/assets/pickup-store-2.png' }
   ];
 
   var PAYMENT_METHODS = [

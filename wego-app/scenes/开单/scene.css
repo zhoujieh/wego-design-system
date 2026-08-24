@@ -1202,8 +1202,6 @@ body[data-order-layout="landscape"] .phone-indicator {
 
 .order-pickup-point {
   position: relative;
-  min-height: calc(var(--size-64) + var(--size-16));
-  padding-left: var(--spacer-12);
   text-align: left;
   background: var(--bg-subtle);
   border: var(--stroke-hairline) solid transparent;
@@ -1215,26 +1213,9 @@ body[data-order-layout="landscape"] .phone-indicator {
   border-color: var(--border-brand);
 }
 
-.order-pickup-point .cell__avatar {
-  padding-right: var(--spacer-12);
-}
-
 .order-pickup-point .avatar,
 .order-pickup-point .avatar img {
   border-radius: var(--radius-4);
-}
-
-.order-pickup-point .cell__body {
-  min-height: calc(var(--size-64) + var(--size-16));
-  padding-right: var(--spacer-12);
-}
-
-.order-pickup-point .cell__subtitle {
-  display: -webkit-box;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  white-space: normal;
 }
 
 .order-pickup-point__check {
