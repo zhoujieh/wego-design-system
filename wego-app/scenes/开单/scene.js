@@ -207,6 +207,7 @@
     pickupContact: null,
     realNameInfo: null,
     deliveryRealNameAttention: false,
+    deliveryScrollSpacer: 0,
     senderMode: 'default',
     senderInfo: { name: '何小小', phone: '13690809124' },
     orderNoteMerchant: '',
@@ -470,6 +471,26 @@
     renderActive();
     var nextBody = root && root.querySelector ? root.querySelector(selector) : null;
     if (nextBody) nextBody.scrollTop = scrollTop;
+  }
+
+  function renderDeliveryPreservingScroll(root) {
+    var currentScroller = root && root.querySelector ? root.querySelector('.order-delivery-panel__scroll') : null;
+    var scrollTop = currentScroller ? currentScroller.scrollTop : 0;
+    state.deliveryScrollSpacer = 0;
+    renderActive();
+    var nextScroller = root && root.querySelector ? root.querySelector('.order-delivery-panel__scroll') : null;
+    if (!nextScroller) return;
+    for (var pass = 0; pass < 3; pass += 1) {
+      var heightCompensation = Math.max(0, scrollTop - (nextScroller.scrollHeight - nextScroller.clientHeight));
+      if (heightCompensation <= 0.5) break;
+      state.deliveryScrollSpacer += Math.ceil(heightCompensation);
+      renderActive();
+      nextScroller = root.querySelector('.order-delivery-panel__scroll');
+    }
+    nextScroller.scrollTop = scrollTop;
+    window.requestAnimationFrame(function () {
+      if (nextScroller.isConnected) nextScroller.scrollTop = scrollTop;
+    });
   }
 
   function focusDesktopProductSearch() {
@@ -1831,7 +1852,7 @@
     return ''
       + '<div class="order-side-panel__head"><strong>选择发货方式</strong><button class="link link--12" data-component-slug="link" data-close-panel>关闭</button></div>'
       + '<div class="order-delivery-panel">'
-      +   '<div class="order-delivery-panel__scroll">' + deliveryChoices() + detail + '</div>'
+      +   '<div class="order-delivery-panel__scroll">' + deliveryChoices() + detail + (state.deliveryScrollSpacer ? '<div class="order-delivery-scroll-spacer" style="height:' + state.deliveryScrollSpacer + 'px" aria-hidden="true"></div>' : '') + '</div>'
       +   '<div class="order-side-actions order-delivery-actions">' + button('取消', 'weak', 'md', 'data-close-panel') + button('确定', 'strong', 'md', 'data-save-delivery') + '</div>'
       + '</div>';
   }
@@ -2882,6 +2903,7 @@
         if (type === 'delivery') {
           state.deliveryDraft = deliveryDraftFromState();
           state.deliveryRealNameAttention = target.hasAttribute('data-real-name-pending');
+          state.deliveryScrollSpacer = 0;
         }
         openPanel(type);
         if (type === 'customer') {
@@ -2989,6 +3011,7 @@
       if (closingDelivery) {
         state.deliveryDraft = null;
         state.deliveryRealNameAttention = false;
+        state.deliveryScrollSpacer = 0;
       }
       state.panel = productEditReturnPanel || null;
       renderActive();
@@ -3289,12 +3312,12 @@
       var realNameDraft = activeDeliveryDraft();
       var nextRealNameMode = target.dataset.realNameMode;
       realNameDraft.realNameInfo = Object.assign({}, realNameDraft.realNameInfo || state.realNameInfo || {}, { mode: nextRealNameMode });
-      renderActive();
+      renderDeliveryPreservingScroll(root);
       return;
     }
     if (target.matches('[data-sender-mode]')) {
       activeDeliveryDraft().senderMode = target.dataset.senderMode;
-      renderActive();
+      renderDeliveryPreservingScroll(root);
       return;
     }
     if (target.matches('[data-history-address], [data-edit-sender], [data-add-pickup-point]')) {
