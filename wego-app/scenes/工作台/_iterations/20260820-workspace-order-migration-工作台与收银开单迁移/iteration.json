@@ -9,7 +9,7 @@
       "应用中心"
     ]
   },
-  "status": "prototyping",
+  "status": "prototype-confirmed",
   "scope_revision": 4,
   "prototype_brief": {
     "goal": "打磨工作台页面视觉布局，新增从工作台「常用应用-全部应用」进入的应用中心页面；打开开单页面时 URL 带 ?full=1 以全屏宽度展示，返回工作台时移除该参数恢复常规宽度。工作台、应用中心、开单均为独立业务场景。",
@@ -111,8 +111,56 @@
     "scope_revision": 4,
     "scope_sha256": "f983c235bbbe010cebbd24e4b185f3b2ce2cf7b321557bad053751b65d8d820c"
   },
-  "prototype_submission": null,
-  "prototype_confirmation": null,
+  "prototype_submission": {
+    "at": "2026-08-24T11:34:20.760Z",
+    "scope_revision": 4,
+    "affected_scenes": [
+      "工作台",
+      "应用中心",
+      "开单",
+      "我的"
+    ],
+    "fingerprints": {
+      "@route-entry/%E5%B7%A5%E4%BD%9C%E5%8F%B0": "1b3bed657b350575ea3fac9c8192db8cdfbbd552a3b8c24947833b2a044d25eb",
+      "@route-entry/%E5%BA%94%E7%94%A8%E4%B8%AD%E5%BF%83": "8bb803a9d152a53a3e84d9076825829996da6067faa506740bf0ea73e7be0e84",
+      "@route-entry/%E5%BC%80%E5%8D%95": "da8121671009954031a87dc9bce65691c3ce40d16f9516ababf6a0bd4c532eb3",
+      "@route-entry/%E6%88%91%E7%9A%84": "cd0611ebe77c2c1ba558f5f7796281411766236f4e163a96ce8d8538ac0f9c69",
+      "wego-app/js/app.js": "0e5ba26d4652ac3ef6f1a781c16daa4c3d635dfd01e507c2919a1db9303e2776",
+      "wego-app/scenes/工作台/scene.css": "b6a26e13e1543b01bdacf15ab655d6be490e039cb9e60f932d4e5e45bcb8d8db",
+      "wego-app/scenes/工作台/scene.js": "15dc8f926d12a734ee9b5b827ff36b9b50c64fb5abc48b60979fad97f87a0e65",
+      "wego-app/scenes/应用中心/scene.css": "a1a32f146d261cb33e1c5ac804b1c90ec774324fd3562d55a0f7f8957336e574",
+      "wego-app/scenes/应用中心/scene.js": "5aecc0bd20ab3ae104e053d716f5dd1e44c56bb8041af01c034be9bb3a3f23dd",
+      "wego-app/scenes/开单/scene.css": "75bcaf4724716113e1645cad3b95f8f930de5108622ec705d6a3dac1a2a29f4d",
+      "wego-app/scenes/开单/scene.js": "b272dbf0a8d87d3aaab2001d99bec9202c58566203214cfeee1c753443f9c9e1",
+      "wego-app/scenes/我的/scene.css": "727442e493b8b0f7a3f1584aa9f90c85f06dcd660295f12ca270e18b193c8b2f",
+      "wego-app/scenes/我的/scene.js": "7f049abc0a2cabb8f941ad6e13246ab49f16ac4f06048f6ab31baee7f4bfc905"
+    }
+  },
+  "prototype_confirmation": {
+    "at": "2026-08-24T11:34:48.842Z",
+    "scope_revision": 4,
+    "affected_scenes": [
+      "工作台",
+      "应用中心",
+      "开单",
+      "我的"
+    ],
+    "fingerprints": {
+      "@route-entry/%E5%B7%A5%E4%BD%9C%E5%8F%B0": "1b3bed657b350575ea3fac9c8192db8cdfbbd552a3b8c24947833b2a044d25eb",
+      "@route-entry/%E5%BA%94%E7%94%A8%E4%B8%AD%E5%BF%83": "8bb803a9d152a53a3e84d9076825829996da6067faa506740bf0ea73e7be0e84",
+      "@route-entry/%E5%BC%80%E5%8D%95": "da8121671009954031a87dc9bce65691c3ce40d16f9516ababf6a0bd4c532eb3",
+      "@route-entry/%E6%88%91%E7%9A%84": "cd0611ebe77c2c1ba558f5f7796281411766236f4e163a96ce8d8538ac0f9c69",
+      "wego-app/js/app.js": "0e5ba26d4652ac3ef6f1a781c16daa4c3d635dfd01e507c2919a1db9303e2776",
+      "wego-app/scenes/工作台/scene.css": "b6a26e13e1543b01bdacf15ab655d6be490e039cb9e60f932d4e5e45bcb8d8db",
+      "wego-app/scenes/工作台/scene.js": "15dc8f926d12a734ee9b5b827ff36b9b50c64fb5abc48b60979fad97f87a0e65",
+      "wego-app/scenes/应用中心/scene.css": "a1a32f146d261cb33e1c5ac804b1c90ec774324fd3562d55a0f7f8957336e574",
+      "wego-app/scenes/应用中心/scene.js": "5aecc0bd20ab3ae104e053d716f5dd1e44c56bb8041af01c034be9bb3a3f23dd",
+      "wego-app/scenes/开单/scene.css": "75bcaf4724716113e1645cad3b95f8f930de5108622ec705d6a3dac1a2a29f4d",
+      "wego-app/scenes/开单/scene.js": "b272dbf0a8d87d3aaab2001d99bec9202c58566203214cfeee1c753443f9c9e1",
+      "wego-app/scenes/我的/scene.css": "727442e493b8b0f7a3f1584aa9f90c85f06dcd660295f12ca270e18b193c8b2f",
+      "wego-app/scenes/我的/scene.js": "7f049abc0a2cabb8f941ad6e13246ab49f16ac4f06048f6ab31baee7f4bfc905"
+    }
+  },
   "affected_scenes": [
     "工作台",
     "应用中心",
@@ -127,7 +175,7 @@
       "valid": true
     },
     "design": {
-      "valid": false
+      "valid": true
     }
   },
   "change_log": [
@@ -174,6 +222,14 @@
     {
       "action": "confirm-brief",
       "at": "2026-08-21T14:20:32.170Z"
+    },
+    {
+      "action": "submit-prototype",
+      "at": "2026-08-24T11:34:20.787Z"
+    },
+    {
+      "action": "confirm-prototype",
+      "at": "2026-08-24T11:34:48.852Z"
     }
   ],
   "freeze": null
