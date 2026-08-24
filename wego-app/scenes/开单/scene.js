@@ -608,7 +608,8 @@
       return { label: label, primary: state.address.name + ' ' + state.address.phone, secondary: state.address.detail, meta: realNameText, realNamePending: requiresRealName && !realNameComplete(state.realNameInfo) };
     }
     if (state.delivery === 'express' || state.delivery === 'freight') {
-      return { label: label, primary: '', secondary: requiresRealName ? '暂无收货信息和实名信息' : '暂无收货信息', meta: realNameComplete(state.realNameInfo) ? realNameText : '', realNamePending: requiresRealName && !realNameComplete(state.realNameInfo) };
+      var missingRealName = requiresRealName && !realNameComplete(state.realNameInfo);
+      return { label: label, primary: '', secondary: missingRealName ? '暂无收货信息和实名信息' : '暂无收货信息', meta: requiresRealName ? realNameText : '', realNamePending: missingRealName };
     }
     if (state.delivery === 'pickup') {
       var pickupPoint = currentPickupPoint();
@@ -1234,7 +1235,7 @@
   }
 
   function desktopDeliveryControl() {
-    var needsInlineAddress = (state.delivery === 'express' || state.delivery === 'freight') && !state.address;
+    var needsInlineAddress = (state.delivery === 'express' || state.delivery === 'freight') && !state.address && !realNameComplete(state.realNameInfo);
     if (needsInlineAddress) {
       var inlineRequiresRealName = orderRequiresRealName();
       return ''
@@ -1257,7 +1258,7 @@
     var summary = deliverySummaryText();
     var summaryParts = deliverySummaryParts();
     var singleLine = !summaryParts.secondary && !summaryParts.meta && (!state.delivery || state.delivery === 'none');
-    var addressLine = (state.delivery === 'express' || state.delivery === 'freight') && state.address;
+    var addressLine = (state.delivery === 'express' || state.delivery === 'freight') && (state.address || realNameComplete(state.realNameInfo));
     var pickupLine = state.delivery === 'pickup' && summaryParts.meta;
     var emptyLine = !state.delivery;
     var deliveryIcon = state.delivery === 'pickup' ? 'icon-daohang' : 'icon-che';
@@ -1266,7 +1267,7 @@
       : '<i class="wego-iconfont-s ' + deliveryIcon + '" aria-hidden="true"></i>';
     var deliveryContent = singleLine
       ? '<small>' + deliveryIconMarkup + escapeHtml(summaryParts.label) + '</small><span class="order-desktop-delivery-tail"><strong>' + escapeHtml(summaryParts.primary) + '</strong><i class="wego-iconfont-s icon-youjiantou16" aria-hidden="true"></i></span>'
-      : '<small>' + deliveryIconMarkup + escapeHtml(summaryParts.label) + '</small><span class="order-desktop-delivery-summary"><strong>' + escapeHtml(summaryParts.primary) + '</strong>' + (summaryParts.secondary ? '<em title="' + escapeHtml(summaryParts.secondary) + '">' + escapeHtml(summaryParts.secondary) + '</em>' : '') + (summaryParts.meta ? '<b class="' + (summaryParts.realNamePending ? 'is-warning' : '') + '">' + escapeHtml(summaryParts.meta) + '</b>' : '') + '</span><i class="wego-iconfont-s icon-youjiantou16" aria-hidden="true"></i>';
+      : '<small>' + deliveryIconMarkup + escapeHtml(summaryParts.label) + '</small><span class="order-desktop-delivery-summary"><strong>' + escapeHtml(summaryParts.primary) + '</strong>' + (summaryParts.secondary ? '<em title="' + escapeHtml(summaryParts.secondary) + '">' + escapeHtml(summaryParts.secondary) + '</em>' : '') + (summaryParts.meta ? '<b class="' + (summaryParts.realNamePending ? 'is-warning' : '') + '">' + (summaryParts.realNamePending ? '<i class="wego-iconfont-s icon-tanhao" aria-hidden="true"></i>' : '') + escapeHtml(summaryParts.meta) + '</b>' : '') + '</span><i class="wego-iconfont-s icon-youjiantou16" aria-hidden="true"></i>';
     return ''
       + '<button type="button" class="order-desktop-customer-delivery ' + (singleLine ? 'order-desktop-customer-delivery--single' : '') + (addressLine ? ' order-desktop-customer-delivery--address' : '') + (pickupLine ? ' order-desktop-customer-delivery--pickup' : '') + (emptyLine ? ' order-desktop-customer-delivery--empty' : '') + '" data-open-panel="delivery" title="' + escapeHtml(summary) + '">'
       +   deliveryContent
@@ -2477,12 +2478,6 @@
       ctx.toast('请选择发货方式');
       return false;
     }
-    if ((state.delivery === 'express' || state.delivery === 'freight') && !state.address) {
-      state.panel = 'delivery';
-      renderActive();
-      ctx.toast('请填写收货地址');
-      return false;
-    }
     if ((state.delivery === 'express' || state.delivery === 'freight') && orderRequiresRealName() && !realNameComplete(state.realNameInfo)) {
       state.panel = 'delivery';
       renderActive();
@@ -3272,11 +3267,12 @@
         var name = deliveryScope.querySelector('[data-address-name]')?.value.trim();
         var phone = deliveryScope.querySelector('[data-address-phone]')?.value.trim();
         var detail = deliveryScope.querySelector('[data-address-detail]')?.value.trim();
-        if (!name || !phone || !detail) {
-          ctx.toast('请完整填写收货人、手机号和地址');
+        var hasAnyRecipientInfo = Boolean(name || phone || detail);
+        if (hasAnyRecipientInfo && (!name || !phone || !detail)) {
+          ctx.toast('请完整填写收货信息，或清空后保存');
           return;
         }
-        saveDraft.address = { name: name, phone: phone, detail: detail };
+        saveDraft.address = hasAnyRecipientInfo ? { name: name, phone: phone, detail: detail } : null;
         if (orderRequiresRealName()) {
           var realName = deliveryScope.querySelector('[data-real-name]')?.value.trim();
           var idCard = deliveryScope.querySelector('[data-id-card]')?.value.trim().toUpperCase();

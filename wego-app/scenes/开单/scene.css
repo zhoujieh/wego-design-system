@@ -5961,6 +5961,21 @@ body[data-order-layout="landscape"] .phone-indicator {
     color: var(--text-secondary);
   }
 
+  .order-desktop-customer-delivery--address .order-desktop-delivery-summary b.is-warning {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--spacer-4);
+  }
+
+  .order-desktop-customer-delivery--address .order-desktop-delivery-summary b.is-warning > i {
+    width: var(--spacer-14);
+    height: var(--spacer-14);
+    flex: 0 0 var(--spacer-14);
+    font-size: var(--spacer-14);
+    line-height: var(--spacer-14);
+  }
+
   .order-desktop-delivery-inline {
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-rows: 27px var(--size-36);
