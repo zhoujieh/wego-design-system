@@ -5425,8 +5425,11 @@ body[data-order-layout="landscape"] .phone-indicator {
   }
 
   .order-desktop__summary {
-    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1.65fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 4fr) minmax(0, 5fr) minmax(0, 3fr);
     flex: 0 0 calc(var(--size-104) + var(--size-72) + var(--spacer-2));
+    height: calc(var(--size-104) + var(--size-72) + var(--spacer-2));
+    min-height: calc(var(--size-104) + var(--size-72) + var(--spacer-2));
+    max-height: calc(var(--size-104) + var(--size-72) + var(--spacer-2));
     gap: var(--spacer-8);
     padding: var(--spacer-12);
     border-top: 0;
