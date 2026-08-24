@@ -7,7 +7,7 @@
     "primary_scene": "开单",
     "related_scenes": []
   },
-  "status": "awaiting-brief-confirmation",
+  "status": "prototyping",
   "scope_revision": 1,
   "prototype_brief": {
     "goal": "将现有收银开单页面调整为 Pad 横屏方案，并以指定 Figma 节点 103:9675 为唯一视觉基准完成样式还原，同时保持现有业务逻辑和交互结果不变。",
@@ -73,7 +73,11 @@
     "scope_revision": 1,
     "scope_sha256": "07621e4920cee840f77e8e5ba4e07126e714bb29318e6ee30719399371602b24"
   },
-  "brief_confirmation": null,
+  "brief_confirmation": {
+    "at": "2026-08-24T02:58:36.131Z",
+    "scope_revision": 1,
+    "scope_sha256": "07621e4920cee840f77e8e5ba4e07126e714bb29318e6ee30719399371602b24"
+  },
   "prototype_submission": null,
   "prototype_confirmation": null,
   "affected_scenes": [
@@ -96,6 +100,10 @@
     {
       "action": "submit-brief",
       "at": "2026-08-24T02:56:08.353Z"
+    },
+    {
+      "action": "confirm-brief",
+      "at": "2026-08-24T02:58:36.132Z"
     }
   ],
   "freeze": null
