@@ -6305,6 +6305,86 @@ body[data-order-layout="landscape"] .phone-indicator {
   }
 }
 
+@media (min-width: 768px) {
+  .order-desktop__table-title {
+    justify-content: space-between;
+  }
+
+  .order-desktop__table-title-main,
+  .order-desktop__table-actions,
+  .order-desktop__name-head {
+    display: flex;
+    align-items: center;
+  }
+
+  .order-desktop__table-title-main {
+    gap: var(--spacer-16);
+    min-width: 0;
+  }
+
+  .order-desktop__table-title-main > span {
+    color: var(--text-secondary);
+    font-size: var(--body-md-font-size);
+    white-space: nowrap;
+  }
+
+  .order-desktop__table-actions {
+    flex: 0 0 auto;
+    gap: var(--spacer-8);
+  }
+
+  .order-desktop__table-actions .btn__icon {
+    font-size: var(--size-16);
+  }
+
+  .order-desktop__name-head {
+    justify-content: flex-start;
+    gap: var(--spacer-12);
+    min-width: 0;
+  }
+
+  .order-desktop__name-head > span:first-child {
+    flex: 0 0 auto;
+  }
+
+  .order-desktop__name-head .order-display-switch {
+    flex: 0 0 auto;
+  }
+
+  .order-desktop__table.is-showing-images .order-desktop__table-head,
+  .order-desktop__table.is-showing-images .order-desktop-product-row {
+    grid-template-columns: minmax(0, 2.4fr) var(--size-64) minmax(0, 1.6fr) minmax(0, 1.1fr) minmax(0, 1.4fr) minmax(0, 1.4fr) minmax(0, 1.4fr);
+  }
+
+  .order-desktop__table.is-showing-images .order-desktop__table-head > :nth-child(2),
+  .order-desktop__table.is-showing-images .order-desktop-product-row > :nth-child(2) {
+    display: flex;
+  }
+
+  .order-desktop__workspace--order-fullscreen,
+  .order-desktop__workspace--order-fullscreen.order-desktop__workspace--with-resizer,
+  .order-desktop__workspace--order-fullscreen.order-desktop__workspace--catalog-collapsed {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .order-desktop__workspace--order-fullscreen .order-desktop__catalog-resizer,
+  .order-desktop__workspace--order-fullscreen .order-desktop__catalog,
+  .order-desktop__workspace--order-fullscreen .order-desktop__side,
+  .order-desktop__workspace--order-fullscreen .order-desktop__context,
+  .order-desktop__workspace--order-fullscreen .order-desktop__summary {
+    display: none;
+  }
+
+  .order-desktop__workspace--order-fullscreen .order-desktop__order {
+    grid-column: 1;
+    padding-right: 0;
+  }
+
+  .order-desktop__workspace--order-fullscreen .order-desktop__list-card {
+    margin: 0;
+  }
+}
+
 
 /* 开单场景：默认 toast 浮层在页面垂直居中 */
 .app-toast-host .toast.is-floating,

@@ -7,7 +7,7 @@
     "primary_scene": "开单",
     "related_scenes": []
   },
-  "status": "awaiting-brief-confirmation",
+  "status": "prototyping",
   "scope_revision": 7,
   "prototype_brief": {
     "goal": "将收银开单优化为按视口宽度切换的竖版与横版两套视觉：手机宽度保留竖版，Pad 横屏与桌面宽度采用指定 Figma 节点的横版样式，并在横版顶部导航展示当前开单员的今日订单汇总。",
@@ -131,7 +131,11 @@
     "scope_revision": 7,
     "scope_sha256": "e3073da51d1fa0005a75e7c0e86dab0ccf71a093c7bf6f8f559762246a16c4da"
   },
-  "brief_confirmation": null,
+  "brief_confirmation": {
+    "at": "2026-08-24T11:18:45.777Z",
+    "scope_revision": 7,
+    "scope_sha256": "e3073da51d1fa0005a75e7c0e86dab0ccf71a093c7bf6f8f559762246a16c4da"
+  },
   "prototype_submission": null,
   "prototype_confirmation": null,
   "affected_scenes": [
@@ -222,6 +226,10 @@
     {
       "action": "submit-brief",
       "at": "2026-08-24T11:17:30.965Z"
+    },
+    {
+      "action": "confirm-brief",
+      "at": "2026-08-24T11:18:45.777Z"
     }
   ],
   "freeze": null

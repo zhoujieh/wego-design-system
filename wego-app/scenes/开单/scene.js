@@ -217,6 +217,9 @@
     orderNoteOpen: false,
     selectedRow: null,
     displayMode: storedDisplayMode(),
+    desktopShowProductImages: false,
+    desktopOrderFullscreen: false,
+    desktopOrderScrollTop: 0,
     catalogCollapsed: storedCatalogCollapsed(),
     tabletCatalogAutoCollapsed: false,
     catalogWidth: null,
@@ -462,6 +465,17 @@
         isRendering = false;
       }
     }
+  }
+
+  function renderDesktopOrderPreservingScroll(root) {
+    var currentTable = root && root.querySelector ? root.querySelector('.order-desktop__table') : null;
+    var scrollTop = currentTable ? currentTable.scrollTop : state.desktopOrderScrollTop;
+    state.desktopOrderScrollTop = scrollTop;
+    renderActive();
+    window.requestAnimationFrame(function () {
+      var nextTable = root && root.querySelector ? root.querySelector('.order-desktop__table') : null;
+      if (nextTable) nextTable.scrollTop = state.desktopOrderScrollTop;
+    });
   }
 
   function renderPaymentPreservingScroll(root) {
@@ -1185,16 +1199,16 @@
     var t = totals();
     var checkoutBlocked = !state.products.length;
     return ''
-      + '<main class="order-desktop__order">'
+      + '<main class="order-desktop__order' + (state.desktopOrderFullscreen ? ' order-desktop__order--fullscreen' : '') + '">'
       +   '<div class="order-desktop__context' + (state.panel === 'customer' ? ' order-desktop__context--customer-open' : '') + '">'
       +     desktopCustomerAnchor()
       +     desktopDeliveryCard()
       +     (state.catalogCollapsed ? desktopProductSearch(false) : '')
       +   '</div>'
       +   '<section class="order-desktop__list-card" aria-labelledby="order-desktop-list-title">'
-      +     '<div class="order-desktop__table">'
-      +       '<div class="order-desktop__table-title"><strong id="order-desktop-list-title">已添加</strong><div class="order-display-switch"><button class="' + (state.displayMode === 'grouped' ? 'is-active' : '') + '" data-display="grouped">按商品</button><button class="' + (state.displayMode === 'flat' ? 'is-active' : '') + '" data-display="flat">按规格</button></div>' + (state.products.length ? '<button type="button" class="btn btn--weak btn--sm order-desktop-clear-order" data-component-slug="button" data-clear-order>清空整单</button>' : '') + '</div>'
-      +       '<div class="order-desktop__table-head"><span>货号／名称</span><span>商品图</span><span>颜色／规格</span><span>单价</span><span>数量</span><span>合计</span><span>备注</span><span aria-hidden="true"></span></div>'
+      +     '<div class="order-desktop__table' + (state.desktopShowProductImages ? ' is-showing-images' : '') + '">'
+      +       '<div class="order-desktop__table-title"><div class="order-desktop__table-title-main"><strong id="order-desktop-list-title">已添加</strong><span>显示商品图</span><button type="button" class="switch ' + (state.desktopShowProductImages ? 'switch--on' : 'switch--off') + '" role="switch" aria-checked="' + state.desktopShowProductImages + '" aria-label="显示商品图" data-component-slug="switch" data-toggle-product-images><span class="switch__thumb"></span></button></div><div class="order-desktop__table-actions">' + (state.products.length ? '<button type="button" class="btn btn--weak btn--sm order-desktop-clear-order" data-component-slug="button" data-clear-order><i class="btn__icon icon-shanchu" aria-hidden="true"></i>清空整单</button>' : '') + '<button type="button" class="btn btn--weak btn--sm order-desktop-fullscreen" data-component-slug="button" data-toggle-order-fullscreen><i class="btn__icon ' + (state.desktopOrderFullscreen ? 'icon-feiquanping16' : 'icon-quanping16') + '" aria-hidden="true"></i>' + (state.desktopOrderFullscreen ? '退出全屏' : '全屏') + '</button></div></div>'
+      +       '<div class="order-desktop__table-head"><span class="order-desktop__name-head"><span>货号／名称</span><span class="order-display-switch" aria-label="商品展示模式"><button type="button" class="' + (state.displayMode === 'grouped' ? 'is-active' : '') + '" data-display="grouped">按商品</button><button type="button" class="' + (state.displayMode === 'flat' ? 'is-active' : '') + '" data-display="flat">按规格</button></span></span><span>商品图</span><span>颜色／规格</span><span>单价</span><span>数量</span><span>合计</span><span>备注</span><span aria-hidden="true"></span></div>'
       +       '<div class="order-desktop__lines">' + (state.products.length ? desktopProductRows() : '<div class="order-empty"><strong>当前订单暂无商品</strong><span>从右侧商品库添加商品</span></div>') + orderNoteEntry() + '</div>'
       +     '</div>'
       +   '</section>'
@@ -2244,6 +2258,7 @@
       ? '<div class="order-desktop__catalog-resizer" role="separator" aria-orientation="vertical" aria-label="拖动调整商品库宽度" data-catalog-resizer></div>'
       : '';
     var modalBackgroundAttrs = state.panel === 'product-edit' || state.panel === 'product-create' || state.panel === 'product-temp-create' ? ' inert aria-hidden="true"' : '';
+    var orderFullscreenClass = state.desktopOrderFullscreen ? ' order-desktop__workspace--order-fullscreen' : '';
     return ''
       + '<section class="order-v2-desktop" aria-label="桌面端开单"' + modalBackgroundAttrs + '>'
       +   '<header class="order-desktop__header">'
@@ -2251,7 +2266,7 @@
       +     '<div class="order-desktop__header-center"></div>'
       +     '<div class="order-desktop__header-right"><div class="order-industry-switch"><button type="button" class="btn btn--weak btn--sm" data-component-slug="button" data-toggle-industry-menu aria-haspopup="menu" aria-expanded="' + state.industryMenuOpen + '">切换行业<i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button>' + (state.industryMenuOpen ? '<div class="order-industry-menu" role="menu" aria-label="切换行业"><button type="button" role="menuitemradio" aria-checked="' + (state.industry === 'clothing') + '" data-industry="clothing"><span>服装</span>' + (state.industry === 'clothing' ? '<i class="wego-iconfont-s icon-gou16" aria-hidden="true"></i>' : '') + '</button><button type="button" role="menuitemradio" aria-checked="' + (state.industry === 'phone') + '" data-industry="phone"><span>手机</span>' + (state.industry === 'phone' ? '<i class="wego-iconfont-s icon-gou16" aria-hidden="true"></i>' : '') + '</button></div>' : '') + '</div><button type="button" class="btn btn--weak btn--sm" data-component-slug="button" data-open-panel="drafts"><i class="btn__icon icon-caogaoxiang" aria-hidden="true"></i>草稿箱 (' + state.draftCount + ')</button><button type="button" class="btn btn--weak btn--sm order-desktop-history" data-component-slug="button"><i class="btn__icon icon-dingdan" aria-hidden="true"></i>历史订单</button><div class="order-desktop-guide-anchor"><button type="button" class="btn btn--weak btn--sm order-desktop-guide-selector" data-component-slug="button" data-toggle-guide aria-haspopup="dialog" aria-expanded="' + state.guidePickerOpen + '">导购员：' + escapeHtml(state.guide.name) + '<i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button>' + (state.guidePickerOpen ? '<div class="order-desktop-guide-menu" role="dialog" aria-label="选择导购员">' + GUIDES.map(function (guide) { return '<button type="button" class="btn btn--weak btn--sm" data-component-slug="button" data-guide-id="' + guide.id + '" aria-pressed="' + (state.guide.id === guide.id) + '">' + escapeHtml(guide.name) + '</button>'; }).join('') + '</div>' : '') + '</div><div class="order-desktop-clerk-summary"><span class="order-desktop-clerk">开单员：' + escapeHtml(CURRENT_CLERK.name) + '</span><span class="order-desktop-clerk-divider" aria-hidden="true"></span><span class="order-desktop-daily-total">今日合计：' + state.clerkDailyTotal.count + '单 ' + dailyTotalAmount(state.clerkDailyTotal.amount) + '元</span></div></div>'
       +   '</header>'
-      +   '<div class="order-desktop__workspace' + catalogCollapsedClass + catalogResizableClass + '"' + desktopWorkspaceStyle() + '>'
+      +   '<div class="order-desktop__workspace' + catalogCollapsedClass + catalogResizableClass + orderFullscreenClass + '"' + desktopWorkspaceStyle() + '>'
       +     desktopOrder()
       +     catalogResizeHandle
       +     desktopRightPanel()
@@ -3721,7 +3736,21 @@
       state.displayMode = target.dataset.display;
       state.selectedRow = null;
       try { window.localStorage.setItem('wego-order-display-mode', state.displayMode); } catch (error) {}
-      renderActive();
+      renderDesktopOrderPreservingScroll(root);
+      return;
+    }
+    if (target.matches('[data-toggle-product-images]')) {
+      state.desktopShowProductImages = !state.desktopShowProductImages;
+      var table = target.closest('.order-desktop__table');
+      target.classList.toggle('switch--on', state.desktopShowProductImages);
+      target.classList.toggle('switch--off', !state.desktopShowProductImages);
+      target.setAttribute('aria-checked', String(state.desktopShowProductImages));
+      if (table) table.classList.toggle('is-showing-images', state.desktopShowProductImages);
+      return;
+    }
+    if (target.matches('[data-toggle-order-fullscreen]')) {
+      state.desktopOrderFullscreen = !state.desktopOrderFullscreen;
+      renderDesktopOrderPreservingScroll(root);
       return;
     }
     if (target.matches('[data-open-checkout]')) {
