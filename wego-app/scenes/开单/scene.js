@@ -399,30 +399,8 @@
     }, 450);
   }
 
-  function isTabletPortrait() {
-    return window.innerWidth >= 768 && window.innerWidth < 900 && window.innerHeight >= 700;
-  }
-
   function isDesktopWorkbench() {
-    return window.innerWidth >= 900 || isTabletPortrait();
-  }
-
-  function isTabletLandscape() {
-    return window.innerWidth >= 900 && window.innerWidth <= 1180 && window.innerHeight <= 900;
-  }
-
-  function isTabletWorkbench() {
-    return isTabletPortrait() || isTabletLandscape();
-  }
-
-  function shouldForceTabletCatalogCollapsed() {
-    if (!isTabletPortrait()) {
-      state.tabletCatalogAutoCollapsed = false;
-      return false;
-    }
-    if (state.tabletCatalogAutoCollapsed) return false;
-    state.tabletCatalogAutoCollapsed = true;
-    return !state.catalogCollapsed;
+    return window.innerWidth >= 768;
   }
 
   var isRendering = false;
@@ -1962,8 +1940,7 @@
   }
 
   function desktopWorkspaceStyle() {
-    if (!desktopShowsCatalog() || state.catalogCollapsed || !state.catalogWidth) return '';
-    return ' style="grid-template-columns:minmax(0,1fr) var(--spacer-8) minmax(300px,' + Math.round(state.catalogWidth) + 'px)"';
+    return '';
   }
 
   function productEditField(label, field, value, options) {
@@ -2212,7 +2189,6 @@
   }
 
   function renderWorkbench(root, ctx) {
-    if (shouldForceTabletCatalogCollapsed()) state.catalogCollapsed = true;
     root.innerHTML = rootTemplate();
     updateInputClearButtons(root);
     syncCatalogCategoryTabs(root);
@@ -3833,7 +3809,7 @@
 
   function initWorkbench(root, ctx) {
     activeContext = { root: root, navigate: ctx.navigate, back: ctx.back, toast: ctx.toast, dialog: ctx.dialog };
-    document.body.dataset.orderLayout = isDesktopWorkbench() ? (isTabletPortrait() ? 'tablet-portrait' : 'landscape') : 'mobile';
+    document.body.dataset.orderLayout = isDesktopWorkbench() ? 'landscape' : 'mobile';
     renderWorkbench(root, ctx);
     root.addEventListener('pointerdown', function (event) {
       if (event.button !== 0) return;

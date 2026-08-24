@@ -5212,6 +5212,8 @@ body[data-order-layout="landscape"] .phone-indicator {
 
   .order-desktop__header {
     grid-template-columns: auto minmax(0, 1fr) auto;
+    flex: 0 0 var(--size-64);
+    height: var(--size-64);
     min-height: var(--size-64);
     padding: 0 var(--spacer-16);
     background: transparent;
@@ -5279,7 +5281,8 @@ body[data-order-layout="landscape"] .phone-indicator {
 
   .order-desktop__workspace,
   .order-desktop__workspace--with-resizer {
-    grid-template-columns: 70% 0 30%;
+    grid-template-columns: minmax(0, 7fr) 0 minmax(0, 3fr);
+    column-gap: 0;
     padding: 0 var(--spacer-8);
     background: transparent;
   }
