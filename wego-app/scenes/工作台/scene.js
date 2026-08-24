@@ -15,7 +15,7 @@
   ];
 
   var commonApps = [
-    { label: '销售单', icon: '销售单.svg' },
+    { label: '销售单', icon: '销售单.svg', routeId: 'workspace-order-create' },
     { label: '采购单', icon: '采购单.svg' },
     { label: '备货', icon: '备货.svg' },
     { label: '库存管理', icon: '库存管理.svg', routeId: 'my-inventory-management' },
@@ -24,7 +24,7 @@
     { label: '供应商管理', icon: '供应商.svg' },
     { label: '销售报表', icon: '销售报表.svg' },
     { label: '收支统计', icon: '数据中心.svg' },
-    { label: '全部应用', icon: '规则中心.svg' }
+    { label: '全部应用', icon: '全部应用.svg', routeId: 'app-center' }
   ];
 
   function esc(value) {
@@ -83,6 +83,10 @@
     +   '</div>'
     +   '<div class="business-home__body">'
     +     '<section class="business-home__hero" aria-label="今日经营数据">'
+    +       '<img class="business-home__hero-deco business-home__hero-deco--one" src="./scenes/工作台/assets/bg-ellipse-1523.svg" alt="" aria-hidden="true" />'
+    +       '<img class="business-home__hero-deco business-home__hero-deco--two" src="./scenes/工作台/assets/bg-ellipse-1524.svg" alt="" aria-hidden="true" />'
+    +       '<img class="business-home__hero-deco business-home__hero-deco--three" src="./scenes/工作台/assets/bg-ellipse-1525.svg" alt="" aria-hidden="true" />'
+    +       '<img class="business-home__hero-deco business-home__hero-deco--four" src="./scenes/工作台/assets/bg-ellipse-1526.svg" alt="" aria-hidden="true" />'
     +       '<div class="business-home__metrics">'
     +         metricMarkup('实收金额', '1680.00', '+10%', '昨日1230.00', 'is-up')
     +         metricMarkup('销售单数', '10', '+2%', '昨日9', 'is-up')

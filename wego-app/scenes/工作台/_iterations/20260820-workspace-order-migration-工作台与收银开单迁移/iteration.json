@@ -2,122 +2,174 @@
   "schemaVersion": 6,
   "identity": {
     "iteration_id": "workspace-order-migration",
-    "title": "工作台与收银开单迁移",
+    "title": "工作台 UI 优化与应用中心",
     "date": "2026-08-20",
     "primary_scene": "工作台",
     "related_scenes": [
-      "开单"
+      "应用中心"
     ]
   },
-  "status": "awaiting-prototype-confirmation",
-  "scope_revision": 1,
+  "status": "prototype-confirmed",
+  "scope_revision": 4,
   "prototype_brief": {
-    "goal": "将现有工作台与收银开单 demo 的当前效果迁移到团队设计系统仓库，供团队在同一仓库继续完善。",
+    "goal": "打磨工作台页面视觉布局，新增从工作台「常用应用-全部应用」进入的应用中心页面；打开开单页面时 URL 带 ?full=1 以全屏宽度展示，返回工作台时移除该参数恢复常规宽度。工作台、应用中心、开单均为独立业务场景。",
     "included": [
-      "迁移工作台主界面及销售开单入口",
-      "迁移收银开单主界面、开单成功页、手机行业切换、商品库、客户、发货、优惠、结算等现有交互",
-      "包含来源仓库当前尚未提交的开单 scene.js 与 scene.css 最新效果",
-      "保留手机、平板横屏与桌面宽屏适配",
-      "迁移场景专属图片与图标资源，并适配团队仓库的新资源路径和路由机制"
+      "工作台视觉打磨：统一区块间距与卡片质感，修复导航栏图标缺失，页面左右间距符合规范",
+      "工作台「常用应用-全部应用」入口跳转应用中心页面，图标统一为 app-center/全部应用.svg",
+      "迁移旧应用中心场景：按业务分组展示应用、顶部 mini tabs 切换分类、搜索框实时过滤、无结果空态",
+      "应用中心顶部标题为「全部应用」",
+      "打开开单页面（workspace-order-create）时 URL 带 ?full=1（宿主铺满视口全屏宽度），返回工作台时 URL 移除 ?full=1",
+      "应用中心应用点击：已接入路由的应用跳转，未接入的 toast 演示反馈",
+      "「我的」页面常用应用「全部应用」入口同步跳转应用中心"
     ],
     "excluded": [
       "不覆盖团队仓库现有 wego-app 宿主、公共组件库和设计系统资源",
-      "不迁移来源仓库旧版 _spec 与 archive 历史文件",
-      "不在本轮实现后续讨论中的实名认证新需求",
+      "不迁移旧版 _spec 与 archive 历史文件",
+      "不在本轮实现实名认证等后续需求",
+      "收银开单内部业务交互维持现状，仅调整打开方式的 URL 参数",
       "未经用户验收不合并到 main"
     ],
     "entry_points": [
       "底部导航工作台 Tab 打开工作台主界面",
-      "工作台的销售开单入口进入 workspace-order-create",
-      "支持通过 #/workspace-order-create 直接打开收银开单"
+      "工作台「常用应用-全部应用」入口打开应用中心",
+      "「我的」页面常用应用「全部应用」入口打开应用中心",
+      "工作台/应用中心销售单入口打开开单（URL 带 ?full=1）",
+      "支持通过 #/app-center 直接打开应用中心"
     ],
     "critical_paths": [
-      "进入工作台并从销售开单入口打开收银开单",
-      "在收银开单中选择客户和发货方式、添加商品、调整清单并进入结算",
-      "完成模拟结算后进入开单成功页并返回工作台"
+      "[P1] 工作台 → 常用应用「全部应用」→ 应用中心 → 切换分类/搜索 → 点击应用（跳转或 toast）→ 返回工作台",
+      "[P1] 工作台/应用中心 → 销售单入口 → 开单全屏打开（URL 带 ?full=1）→ 录入销售单 → 返回工作台（URL 移除 ?full=1）",
+      "[P1] 应用中心搜索：输入关键词实时过滤应用分组，无匹配时显示无结果空态",
+      "「我的」页面常用应用「全部应用」入口打开应用中心"
     ],
     "prototype_boundaries": [
       {
-        "flow_id": "open-workspace-and-order",
+        "flow_id": "open-app-center",
         "mode": "functional",
-        "visible_result": "用户可以进入工作台并从销售开单入口打开收银开单"
+        "visible_result": "从工作台「全部应用」打开应用中心，正常宽度展示分组与搜索"
       },
       {
-        "flow_id": "create-cashier-order",
-        "mode": "simulated",
-        "visible_result": "用户可以在静态演示数据上完成客户、发货、商品、优惠、结算与成功反馈操作"
+        "flow_id": "open-app-center-from-my",
+        "mode": "functional",
+        "visible_result": "从「我的」页面常用应用「全部应用」打开应用中心"
       },
       {
-        "flow_id": "responsive-order-experience",
+        "flow_id": "search-app-center",
         "mode": "functional",
-        "visible_result": "收银开单在手机、平板横屏和桌面宽屏下呈现对应布局"
+        "visible_result": "输入关键词实时过滤应用分组，无匹配时显示无结果空态"
+      },
+      {
+        "flow_id": "app-entry-feedback",
+        "mode": "functional",
+        "visible_result": "点击应用显示路由跳转或 toast 演示反馈"
+      },
+      {
+        "flow_id": "open-order-fullscreen",
+        "mode": "functional",
+        "visible_result": "从工作台/应用中心销售单入口打开开单，URL 带 ?full=1，宿主以全屏宽度展示"
+      },
+      {
+        "flow_id": "back-to-workspace-clear-full",
+        "mode": "functional",
+        "visible_result": "从开单返回工作台后，URL 不再带 ?full=1"
       }
     ],
     "states": [
-      "工作台默认状态及入口反馈",
-      "收银开单空清单与已添加商品状态",
-      "商品库展开、收起、大图、列表、搜索及行业切换状态",
-      "客户未选择、已选择和新建客户状态",
-      "发货方式无、快递、快运、自提和现场取货状态",
-      "草稿、优惠、结算与开单成功状态"
+      "工作台默认：进入工作台 → 展示指标、快捷操作、销售单、常用应用等区块及入口反馈",
+      "应用中心加载中：进入应用中心 → 分类与应用清单展示 loading/骨架屏",
+      "应用中心加载失败：应用清单读取失败 → 显示失败提示并提供重试/关闭",
+      "应用中心默认：分组展示全部应用 → 默认选中第一组，tabs 可切换分类",
+      "应用中心分类切换：点击 mini tabs → 定位并展示对应分组内容",
+      "应用中心搜索中：输入关键词 → 应用分组按名称实时过滤",
+      "应用中心搜索无结果：无匹配应用 → 显示无结果空态提示",
+      "应用点击：点击应用入口 → 已接入路由的应用跳转，未接入的 toast 演示反馈",
+      "开单打开：进入开单 → URL 带 ?full=1 全屏宽度展示",
+      "返回工作台：开单返回 → URL 移除 ?full=1，恢复常规宽度"
     ],
     "data_contract": {
-      "source_repository": "/Users/luhong/Documents/wego-order",
-      "source_scenes": [
-        "wego-app/scenes/生意云首页",
-        "wego-app/scenes/开单"
-      ],
-      "target_scenes": [
-        "wego-app/scenes/工作台",
-        "wego-app/scenes/开单"
-      ],
-      "route_ids": [
-        "workspace",
-        "workspace-order-create",
-        "workspace-order-success"
-      ],
-      "persistence": "仅保留现有 demo 的页面内模拟状态，不新增后端或跨设备持久化",
-      "assets": "复制场景专属资源；公共服装图片和公共图标改用团队仓库 wego-app/lib/assets 中的现有资源"
+      "app_groups": "沿用旧应用中心分类清单（店铺管理/商品运营/营销推广/引流获客/客户管理/订单交易/库存采购/团队工具/价格财务/硬件学习），图标取自 lib/assets/icons/app-center/",
+      "route_mapping": "已接入路由的应用（如销售单→workspace-order-create）跳转，其余 toast 演示",
+      "all_apps_entries": "工作台常用应用「全部应用」与「我的」页面常用应用「全部应用」均跳转应用中心，入口图标统一为 app-center/全部应用.svg",
+      "full_url": "开单路由（workspace-order-create）打开时 URL 附加 ?full=1，返回宿主时移除",
+      "persistence": "应用中心与开单为页面内模拟状态，不新增后端持久化"
     },
     "assumptions": [
-      "来源仓库当前工作区效果视为本次迁移基准",
-      "迁移只做团队仓库运行结构适配，不主动改变已确认的业务交互和视觉效果",
-      "工作台在团队仓库中按 host-tab 场景接入，开单按 push 场景接入"
+      "应用中心顶部标题采用「全部应用」而非「应用中心」",
+      "?full=1 沿用宿主现有全屏宽度约定（去掉 670px 上限铺满视口）",
+      "工作台「全部应用」入口图标由规则中心.svg 改为 app-center/全部应用.svg（统一图标）",
+      "搜索仅按应用名实时过滤"
     ],
     "open_questions": []
   },
   "brief_submission": {
-    "at": "2026-08-20T09:49:45.289Z",
-    "scope_revision": 1,
-    "scope_sha256": "6b1232137096e41faf37b4e2106c78dfa65929234a0f831c55dcb74eb81c3c93"
+    "at": "2026-08-21T14:19:37.060Z",
+    "scope_revision": 4,
+    "scope_sha256": "f983c235bbbe010cebbd24e4b185f3b2ce2cf7b321557bad053751b65d8d820c"
   },
   "brief_confirmation": {
-    "at": "2026-08-20T09:49:45.338Z",
-    "scope_revision": 1,
-    "scope_sha256": "6b1232137096e41faf37b4e2106c78dfa65929234a0f831c55dcb74eb81c3c93"
+    "at": "2026-08-21T14:20:32.168Z",
+    "scope_revision": 4,
+    "scope_sha256": "f983c235bbbe010cebbd24e4b185f3b2ce2cf7b321557bad053751b65d8d820c"
   },
   "prototype_submission": {
-    "at": "2026-08-20T17:02:18.168Z",
-    "scope_revision": 1,
+    "at": "2026-08-24T11:34:20.760Z",
+    "scope_revision": 4,
     "affected_scenes": [
       "工作台",
-      "开单"
+      "应用中心",
+      "开单",
+      "我的"
     ],
     "fingerprints": {
       "@route-entry/%E5%B7%A5%E4%BD%9C%E5%8F%B0": "1b3bed657b350575ea3fac9c8192db8cdfbbd552a3b8c24947833b2a044d25eb",
+      "@route-entry/%E5%BA%94%E7%94%A8%E4%B8%AD%E5%BF%83": "8bb803a9d152a53a3e84d9076825829996da6067faa506740bf0ea73e7be0e84",
       "@route-entry/%E5%BC%80%E5%8D%95": "da8121671009954031a87dc9bce65691c3ce40d16f9516ababf6a0bd4c532eb3",
-      "wego-app/scenes/工作台/scene.css": "e66c975619c24181be2e6e4350b78179c95ac1a8817c6a5e5a0121fa8c2cbbaf",
-      "wego-app/scenes/工作台/scene.js": "be6e2a7158175e35bdced2dbd94f55e3db320ebac6de8eac064be251208373bf",
+      "@route-entry/%E6%88%91%E7%9A%84": "cd0611ebe77c2c1ba558f5f7796281411766236f4e163a96ce8d8538ac0f9c69",
+      "wego-app/js/app.js": "0e5ba26d4652ac3ef6f1a781c16daa4c3d635dfd01e507c2919a1db9303e2776",
+      "wego-app/scenes/工作台/scene.css": "b6a26e13e1543b01bdacf15ab655d6be490e039cb9e60f932d4e5e45bcb8d8db",
+      "wego-app/scenes/工作台/scene.js": "15dc8f926d12a734ee9b5b827ff36b9b50c64fb5abc48b60979fad97f87a0e65",
+      "wego-app/scenes/应用中心/scene.css": "a1a32f146d261cb33e1c5ac804b1c90ec774324fd3562d55a0f7f8957336e574",
+      "wego-app/scenes/应用中心/scene.js": "5aecc0bd20ab3ae104e053d716f5dd1e44c56bb8041af01c034be9bb3a3f23dd",
       "wego-app/scenes/开单/scene.css": "75bcaf4724716113e1645cad3b95f8f930de5108622ec705d6a3dac1a2a29f4d",
-      "wego-app/scenes/开单/scene.js": "b272dbf0a8d87d3aaab2001d99bec9202c58566203214cfeee1c753443f9c9e1"
+      "wego-app/scenes/开单/scene.js": "b272dbf0a8d87d3aaab2001d99bec9202c58566203214cfeee1c753443f9c9e1",
+      "wego-app/scenes/我的/scene.css": "727442e493b8b0f7a3f1584aa9f90c85f06dcd660295f12ca270e18b193c8b2f",
+      "wego-app/scenes/我的/scene.js": "7f049abc0a2cabb8f941ad6e13246ab49f16ac4f06048f6ab31baee7f4bfc905"
     }
   },
-  "prototype_confirmation": null,
+  "prototype_confirmation": {
+    "at": "2026-08-24T11:34:48.842Z",
+    "scope_revision": 4,
+    "affected_scenes": [
+      "工作台",
+      "应用中心",
+      "开单",
+      "我的"
+    ],
+    "fingerprints": {
+      "@route-entry/%E5%B7%A5%E4%BD%9C%E5%8F%B0": "1b3bed657b350575ea3fac9c8192db8cdfbbd552a3b8c24947833b2a044d25eb",
+      "@route-entry/%E5%BA%94%E7%94%A8%E4%B8%AD%E5%BF%83": "8bb803a9d152a53a3e84d9076825829996da6067faa506740bf0ea73e7be0e84",
+      "@route-entry/%E5%BC%80%E5%8D%95": "da8121671009954031a87dc9bce65691c3ce40d16f9516ababf6a0bd4c532eb3",
+      "@route-entry/%E6%88%91%E7%9A%84": "cd0611ebe77c2c1ba558f5f7796281411766236f4e163a96ce8d8538ac0f9c69",
+      "wego-app/js/app.js": "0e5ba26d4652ac3ef6f1a781c16daa4c3d635dfd01e507c2919a1db9303e2776",
+      "wego-app/scenes/工作台/scene.css": "b6a26e13e1543b01bdacf15ab655d6be490e039cb9e60f932d4e5e45bcb8d8db",
+      "wego-app/scenes/工作台/scene.js": "15dc8f926d12a734ee9b5b827ff36b9b50c64fb5abc48b60979fad97f87a0e65",
+      "wego-app/scenes/应用中心/scene.css": "a1a32f146d261cb33e1c5ac804b1c90ec774324fd3562d55a0f7f8957336e574",
+      "wego-app/scenes/应用中心/scene.js": "5aecc0bd20ab3ae104e053d716f5dd1e44c56bb8041af01c034be9bb3a3f23dd",
+      "wego-app/scenes/开单/scene.css": "75bcaf4724716113e1645cad3b95f8f930de5108622ec705d6a3dac1a2a29f4d",
+      "wego-app/scenes/开单/scene.js": "b272dbf0a8d87d3aaab2001d99bec9202c58566203214cfeee1c753443f9c9e1",
+      "wego-app/scenes/我的/scene.css": "727442e493b8b0f7a3f1584aa9f90c85f06dcd660295f12ca270e18b193c8b2f",
+      "wego-app/scenes/我的/scene.js": "7f049abc0a2cabb8f941ad6e13246ab49f16ac4f06048f6ab31baee7f4bfc905"
+    }
+  },
   "affected_scenes": [
     "工作台",
-    "开单"
+    "应用中心",
+    "开单",
+    "我的"
   ],
-  "affected_runtime": [],
+  "affected_runtime": [
+    "wego-app/js/app.js"
+  ],
   "stage_outputs": {
     "product": {
       "valid": true
@@ -142,6 +194,42 @@
     {
       "action": "submit-prototype",
       "at": "2026-08-20T17:02:18.192Z"
+    },
+    {
+      "action": "invalidate",
+      "at": "2026-08-21T14:12:51.803Z"
+    },
+    {
+      "action": "submit-brief",
+      "at": "2026-08-21T14:15:30.692Z"
+    },
+    {
+      "action": "invalidate",
+      "at": "2026-08-21T14:17:31.561Z"
+    },
+    {
+      "action": "submit-brief",
+      "at": "2026-08-21T14:18:05.798Z"
+    },
+    {
+      "action": "invalidate",
+      "at": "2026-08-21T14:19:11.228Z"
+    },
+    {
+      "action": "submit-brief",
+      "at": "2026-08-21T14:19:37.062Z"
+    },
+    {
+      "action": "confirm-brief",
+      "at": "2026-08-21T14:20:32.170Z"
+    },
+    {
+      "action": "submit-prototype",
+      "at": "2026-08-24T11:34:20.787Z"
+    },
+    {
+      "action": "confirm-prototype",
+      "at": "2026-08-24T11:34:48.852Z"
     }
   ],
   "freeze": null

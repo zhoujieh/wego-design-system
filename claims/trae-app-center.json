@@ -1,0 +1,9 @@
+{
+  "agent": "trae-app-center",
+  "scene": "应用中心",
+  "routeId": "app-center",
+  "branch": "feature/trae-workspace-appcenter",
+  "status": "active",
+  "claimedAt": "2026-08-24T12:00:00.000Z",
+  "note": "实现应用中心场景及工作台 UI 优化"
+}
