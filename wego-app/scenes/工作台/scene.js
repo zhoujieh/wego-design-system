@@ -83,10 +83,10 @@
     +   '</div>'
     +   '<div class="business-home__body">'
     +     '<section class="business-home__hero" aria-label="今日经营数据">'
-    +       '<span class="business-home__hero-deco business-home__hero-deco--one" aria-hidden="true"></span>'
-    +       '<span class="business-home__hero-deco business-home__hero-deco--two" aria-hidden="true"></span>'
-    +       '<span class="business-home__hero-deco business-home__hero-deco--three" aria-hidden="true"></span>'
-    +       '<span class="business-home__hero-deco business-home__hero-deco--four" aria-hidden="true"></span>'
+    +       '<img class="business-home__hero-deco business-home__hero-deco--one" src="./scenes/工作台/assets/bg-ellipse-1523.svg" alt="" aria-hidden="true" />'
+    +       '<img class="business-home__hero-deco business-home__hero-deco--two" src="./scenes/工作台/assets/bg-ellipse-1524.svg" alt="" aria-hidden="true" />'
+    +       '<img class="business-home__hero-deco business-home__hero-deco--three" src="./scenes/工作台/assets/bg-ellipse-1525.svg" alt="" aria-hidden="true" />'
+    +       '<img class="business-home__hero-deco business-home__hero-deco--four" src="./scenes/工作台/assets/bg-ellipse-1526.svg" alt="" aria-hidden="true" />'
     +       '<div class="business-home__metrics">'
     +         metricMarkup('实收金额', '1680.00', '+10%', '昨日1230.00', 'is-up')
     +         metricMarkup('销售单数', '10', '+2%', '昨日9', 'is-up')

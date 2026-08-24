@@ -92,8 +92,7 @@
 .business-home__hero-deco {
   position: absolute;
   pointer-events: none;
-  background-repeat: no-repeat;
-  background-size: contain;
+  object-fit: contain;
   opacity: 0.9;
 }
 
@@ -102,7 +101,6 @@
   right: -60px;
   width: 240px;
   height: 240px;
-  background-image: url("./assets/bg-ellipse-1523.svg");
 }
 
 .business-home__hero-deco--two {
@@ -110,7 +108,6 @@
   left: -72px;
   width: 180px;
   height: 180px;
-  background-image: url("./assets/bg-ellipse-1524.svg");
 }
 
 .business-home__hero-deco--three {
@@ -118,7 +115,6 @@
   left: 44%;
   width: 140px;
   height: 140px;
-  background-image: url("./assets/bg-ellipse-1525.svg");
 }
 
 .business-home__hero-deco--four {
@@ -126,7 +122,6 @@
   right: 20%;
   width: 120px;
   height: 120px;
-  background-image: url("./assets/bg-ellipse-1526.svg");
 }
 
 .business-home__hero-deco--one,
