@@ -15,7 +15,7 @@
   ];
 
   var PRODUCTS = [
-    { id: 'p1', code: 'TS-2408', name: '韩版休闲T恤', category: '上衣', tags: ['T恤'], source: '微购相册', listPrice: 89, costPrice: 42.72, lastDiscountPrice: 80, image: './lib/assets/image/clothing/clothing_2/clothing_2_1.jpg.jpg', specs: ['白色/S', '白色/M', '白色/L', '白色/XL', '黑色/S', '黑色/M', '黑色/L', '黑色/XL'] },
+    { id: 'p1', code: 'TS-2408', name: '韩版休闲T恤', category: '上衣', tags: ['T恤'], source: '微购相册', listPrice: 89, costPrice: 42.72, lastDiscountPrice: 80, freightTemplate: { requiresRealName: true }, image: './lib/assets/image/clothing/clothing_2/clothing_2_1.jpg.jpg', specs: ['白色/S', '白色/M', '白色/L', '白色/XL', '黑色/S', '黑色/M', '黑色/L', '黑色/XL'] },
     { id: 'p2', code: 'JK-1082', name: '高腰牛仔短裤', category: '裤装', tags: ['牛仔'], source: '采购入库', listPrice: 129, image: './lib/assets/image/clothing/clothing_4/1663741015641_38566.jpg', specs: ['蓝色/27', '蓝色/28', '蓝色/29', '蓝色/30', '黑色/28', '黑色/30'] },
     { id: 'p3', code: 'DR-3610', name: '碎花连衣裙', category: '裙装', tags: ['连衣裙'], source: '微购相册', listPrice: 259, image: './lib/assets/image/clothing/clothing_5/1663741067252_48951.jpg', specs: ['粉色/S', '粉色/M', '粉色/L', '绿色/S', '绿色/M', '绿色/L'] },
     { id: 'p4', code: 'CT-2290', name: '羊毛针织开衫', category: '上衣', tags: ['针织'], source: '手动创建', listPrice: 199, image: './lib/assets/image/clothing/clothing_7/1663741042726_75173.jpg', specs: ['米白/M', '米白/L', '燕麦色/M', '燕麦色/L', '藏青/M', '藏青/L'] },
@@ -194,17 +194,18 @@
     industryMenuOpen: false,
     draftCount: 9,
     products: [],
-    delivery: null,
+    delivery: 'none',
     deliveryDraft: null,
     address: null,
     guestDeliveryPreference: {
-      delivery: null,
+      delivery: 'none',
       address: null,
       pickupPointId: PICKUP_POINTS[0] ? PICKUP_POINTS[0].id : null,
       pickupContact: null
     },
     pickupPointId: PICKUP_POINTS[0] ? PICKUP_POINTS[0].id : null,
     pickupContact: null,
+    realNameInfo: null,
     orderNoteMerchant: '',
     orderNoteBuyer: '',
     orderNoteOpen: false,
@@ -389,7 +390,7 @@
 
   function applyDeliveryPreference(preference) {
     preference = preference || {};
-    state.delivery = preference.delivery || null;
+    state.delivery = preference.delivery || 'none';
     state.address = preference.address ? Object.assign({}, preference.address) : null;
     state.pickupPointId = preference.pickupPointId || (PICKUP_POINTS[0] ? PICKUP_POINTS[0].id : null);
     state.pickupContact = preference.pickupContact ? Object.assign({}, preference.pickupContact) : null;
@@ -401,7 +402,7 @@
   }
 
   function customerDeliveryPreference(customer) {
-    if (!customer || !customer.lastDelivery) return guestDeliveryPreference();
+    if (!customer || !customer.lastDelivery) return { delivery: 'none', address: null, pickupPointId: PICKUP_POINTS[0] ? PICKUP_POINTS[0].id : null, pickupContact: null };
     var isAddressDelivery = customer.lastDelivery === 'express' || customer.lastDelivery === 'freight';
     return {
       delivery: customer.lastDelivery,
@@ -551,11 +552,17 @@
   }
 
   function pickupContactValues(contact) {
-    if (contact) return contact;
-    return {
-      name: state.customer ? (state.customer.contact || state.customer.name || '') : '',
-      phone: state.customer ? (state.customer.mobile || '') : ''
-    };
+    return contact || { name: '', phone: '' };
+  }
+
+  function orderRequiresRealName() {
+    return state.products.some(function (item) {
+      return item.freightTemplate && item.freightTemplate.requiresRealName;
+    });
+  }
+
+  function realNameComplete(info) {
+    return Boolean(info && info.name && /^[1-9]\d{5}(?:18|19|20)?\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])\d{3}[\dXx]$/.test(info.idCard));
   }
 
   function deliveryDraftFromState() {
@@ -563,7 +570,8 @@
       delivery: state.delivery || 'none',
       address: state.address ? Object.assign({}, state.address) : null,
       pickupPointId: state.pickupPointId,
-      pickupContact: state.pickupContact ? Object.assign({}, state.pickupContact) : null
+      pickupContact: state.pickupContact ? Object.assign({}, state.pickupContact) : null,
+      realNameInfo: state.realNameInfo ? Object.assign({}, state.realNameInfo) : null
     };
   }
 
@@ -590,24 +598,30 @@
 
   function deliverySummaryParts() {
     var label = ({ express: '快递', freight: '快运', pickup: '自提', none: '现场取货' })[state.delivery] || '发货方式';
+    var requiresRealName = orderRequiresRealName() && (state.delivery === 'express' || state.delivery === 'freight');
+    var realNameText = requiresRealName
+      ? (realNameComplete(state.realNameInfo)
+        ? '实名信息：' + (state.realNameInfo.mode === 'group' ? '拼邮' : state.realNameInfo.name + ' ' + state.realNameInfo.idCard)
+        : '实名信息待完善')
+      : '';
     if ((state.delivery === 'express' || state.delivery === 'freight') && state.address) {
-      return { label: label, primary: state.address.name + ' ' + state.address.phone, secondary: state.address.detail };
+      return { label: label, primary: state.address.name + ' ' + state.address.phone, secondary: state.address.detail, meta: realNameText, realNamePending: requiresRealName && !realNameComplete(state.realNameInfo) };
     }
     if (state.delivery === 'express' || state.delivery === 'freight') {
-      return { label: '发货方式', primary: label, secondary: '收货信息 无' };
+      return { label: label, primary: '', secondary: requiresRealName ? '暂无收货信息和实名信息' : '暂无收货信息', meta: realNameComplete(state.realNameInfo) ? realNameText : '', realNamePending: requiresRealName && !realNameComplete(state.realNameInfo) };
     }
     if (state.delivery === 'pickup') {
       var pickupPoint = currentPickupPoint();
       var pickupContact = pickupContactValues(state.pickupContact);
       var contactText = pickupContact.name && pickupContact.phone
         ? pickupContact.name + ' ' + pickupContact.phone
-        : '请填写提货人信息';
+        : '暂无提货人信息';
       return pickupPoint
-        ? { label: '自提', primary: pickupPoint.name, secondary: '', meta: contactText }
+        ? { label: '自提', primary: pickupPoint.name, secondary: '', meta: contactText, missingPickupContact: !pickupContact.name || !pickupContact.phone }
         : { label: '自提', primary: contactText, secondary: '' };
     }
     if (state.delivery === 'none') {
-      return { label: '发货方式', primary: '现场取货', secondary: '' };
+      return { label: '现场取货', primary: '', secondary: '' };
     }
     return { label: '发货方式', primary: '无', secondary: '' };
   }
@@ -1222,10 +1236,11 @@
   function desktopDeliveryControl() {
     var needsInlineAddress = (state.delivery === 'express' || state.delivery === 'freight') && !state.address;
     if (needsInlineAddress) {
+      var inlineRequiresRealName = orderRequiresRealName();
       return ''
         + '<div class="order-desktop-delivery-inline">'
-        +   '<button type="button" data-open-panel="delivery"><small>发货方式 ' + (state.delivery === 'express' ? '快递' : '快运') + '</small><strong>收货信息 无</strong><i class="wego-iconfont-s icon-youjiantou16" aria-hidden="true"></i></button>'
-        +   '<input type="text" aria-label="粘贴收件信息" placeholder="粘贴姓名、手机号和地址" data-inline-address-paste>'
+        +   '<button type="button" data-open-panel="delivery"><small><i class="wego-iconfont-s icon-che" aria-hidden="true"></i>' + (state.delivery === 'express' ? '快递' : '快运') + '</small><strong>' + (inlineRequiresRealName ? '暂无收货信息和实名信息' : '暂无收货信息') + '</strong><i class="wego-iconfont-s icon-youjiantou16" aria-hidden="true"></i></button>'
+        +   '<input type="text" aria-label="粘贴收件信息" placeholder="' + (inlineRequiresRealName ? '粘贴姓名、手机号、收件地址及身份证号' : '粘贴姓名、手机号及收件地址') + '" data-inline-address-paste>'
         +   '<button type="button" class="btn btn--medium btn--sm" data-component-slug="button" data-inline-recognize-address>识别</button>'
         + '</div>';
     }
@@ -1234,8 +1249,7 @@
       var desktopPickupPoint = currentPickupPoint();
       return ''
         + '<div class="order-desktop-delivery-inline order-desktop-delivery-inline--pickup">'
-        +   '<button type="button" data-open-panel="delivery"><small>自提' + (desktopPickupPoint ? ' · ' + escapeHtml(desktopPickupPoint.name) : '') + '</small><i class="wego-iconfont-s icon-youjiantou16" aria-hidden="true"></i></button>'
-        +   '<strong class="order-inline-pickup-label">填写提货人信息</strong>'
+        +   '<button type="button" data-open-panel="delivery"><small><i class="wego-iconfont-s icon-daohang" aria-hidden="true"></i>' + (desktopPickupPoint ? '自提点：' + escapeHtml(desktopPickupPoint.name) : '自提') + '</small><strong>暂无提货人信息</strong><i class="wego-iconfont-s icon-youjiantou16" aria-hidden="true"></i></button>'
         +   '<input type="text" aria-label="粘贴提货人信息" placeholder="粘贴姓名和手机号" data-inline-pickup-paste>'
         +   '<button type="button" class="btn btn--medium btn--sm" data-component-slug="button" data-inline-recognize-pickup>识别</button>'
         + '</div>';
@@ -1246,9 +1260,10 @@
     var addressLine = (state.delivery === 'express' || state.delivery === 'freight') && state.address;
     var pickupLine = state.delivery === 'pickup' && summaryParts.meta;
     var emptyLine = !state.delivery;
+    var deliveryIcon = state.delivery === 'pickup' ? 'icon-daohang' : (state.delivery === 'none' ? 'icon-huo-mian' : 'icon-che');
     var deliveryContent = singleLine
-      ? '<small>' + escapeHtml(summaryParts.label) + '</small><span class="order-desktop-delivery-tail"><strong>' + escapeHtml(summaryParts.primary) + '</strong><i class="wego-iconfont-s icon-youjiantou16" aria-hidden="true"></i></span>'
-      : '<small>' + escapeHtml(summaryParts.label) + '</small><span class="order-desktop-delivery-summary"><strong>' + escapeHtml(summaryParts.primary) + '</strong>' + (summaryParts.secondary ? '<em title="' + escapeHtml(summaryParts.secondary) + '">' + escapeHtml(summaryParts.secondary) + '</em>' : '') + (summaryParts.meta ? '<b>' + escapeHtml(summaryParts.meta) + '</b>' : '') + '</span><i class="wego-iconfont-s icon-youjiantou16" aria-hidden="true"></i>';
+      ? '<small><i class="wego-iconfont-s ' + deliveryIcon + '" aria-hidden="true"></i>' + escapeHtml(summaryParts.label) + '</small><span class="order-desktop-delivery-tail"><strong>' + escapeHtml(summaryParts.primary) + '</strong><i class="wego-iconfont-s icon-youjiantou16" aria-hidden="true"></i></span>'
+      : '<small><i class="wego-iconfont-s ' + deliveryIcon + '" aria-hidden="true"></i>' + escapeHtml(summaryParts.label) + '</small><span class="order-desktop-delivery-summary"><strong>' + escapeHtml(summaryParts.primary) + '</strong>' + (summaryParts.secondary ? '<em title="' + escapeHtml(summaryParts.secondary) + '">' + escapeHtml(summaryParts.secondary) + '</em>' : '') + (summaryParts.meta ? '<b class="' + (summaryParts.realNamePending ? 'is-warning' : '') + '">' + escapeHtml(summaryParts.meta) + '</b>' : '') + '</span><i class="wego-iconfont-s icon-youjiantou16" aria-hidden="true"></i>';
     return ''
       + '<button type="button" class="order-desktop-customer-delivery ' + (singleLine ? 'order-desktop-customer-delivery--single' : '') + (addressLine ? ' order-desktop-customer-delivery--address' : '') + (pickupLine ? ' order-desktop-customer-delivery--pickup' : '') + (emptyLine ? ' order-desktop-customer-delivery--empty' : '') + '" data-open-panel="delivery" title="' + escapeHtml(summary) + '">'
       +   deliveryContent
@@ -1640,7 +1655,7 @@
 
   function parseRecipientText(value) {
     var source = String(value || '').replace(/\r/g, '').trim();
-    if (!source) return { name: '', phone: '', detail: '' };
+    if (!source) return { name: '', phone: '', detail: '', idCard: '' };
 
     var phoneMatch = source.match(/(?:\+?86[\s-]?)?(1[3-9]\d{9})/);
     var phone = phoneMatch ? phoneMatch[1] : '';
@@ -1660,7 +1675,10 @@
       if (!detail && parts.length) detail = parts.join('');
     }
 
-    return { name: name, phone: phone, detail: detail };
+    var idCardMatch = source.match(/(?:身份证号?|证件号?)\s*[:：]?\s*([1-9]\d{5}(?:18|19|20)?\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])\d{3}[\dXx])/i)
+      || source.match(/\b([1-9]\d{5}(?:18|19|20)?\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])\d{3}[\dXx])\b/);
+    if (idCardMatch && detail) detail = cleanRecipientPart(detail.replace(idCardMatch[0], '').replace(/(?:身份证号?|证件号?)\s*[:：]?\s*/i, ''));
+    return { name: name, phone: phone, detail: detail, idCard: idCardMatch ? idCardMatch[1].toUpperCase() : '' };
   }
 
   function fillRecognizedAddress(scope, text, ctx) {
@@ -1675,6 +1693,10 @@
     if (nameInput) nameInput.value = parsed.name;
     if (phoneInput) phoneInput.value = parsed.phone;
     if (detailInput) detailInput.value = parsed.detail;
+    var realNameInput = scope.querySelector('[data-real-name]');
+    var idCardInput = scope.querySelector('[data-id-card]');
+    if (realNameInput && parsed.name) realNameInput.value = parsed.name;
+    if (idCardInput && parsed.idCard) idCardInput.value = parsed.idCard;
     updateInputClearButtons(scope);
     ctx.toast('已识别收件信息');
     return true;
@@ -1687,6 +1709,7 @@
       return false;
     }
     state.address = { name: parsed.name, phone: parsed.phone, detail: parsed.detail };
+    if (orderRequiresRealName() && parsed.idCard) state.realNameInfo = { name: parsed.name, idCard: parsed.idCard, mode: 'direct' };
     rememberCurrentDeliveryPreference();
     markDirty(ctx);
     ctx.toast('已识别收件信息');
@@ -1739,14 +1762,17 @@
   function addressForm() {
     var draft = activeDeliveryDraft();
     var address = draft.address;
+    var realName = draft.realNameInfo || state.realNameInfo;
+    var requiresRealName = orderRequiresRealName();
     return ''
       + '<div class="order-panel-form order-delivery-address-form">'
-      +   '<div class="order-address-paste"><label for="receiver-paste">快速粘贴收件信息</label><div class="order-address-paste__control"><textarea id="receiver-paste" rows="1" placeholder="粘贴姓名、手机号和详细地址，自动识别" data-address-paste></textarea><button type="button" class="btn btn--weak btn--sm" data-component-slug="button" data-recognize-address>识别</button></div></div>'
+      +   '<div class="order-address-paste"><label for="receiver-paste">快速粘贴收件信息</label><div class="order-address-paste__control"><textarea id="receiver-paste" rows="1" placeholder="' + (requiresRealName ? '粘贴姓名、手机号、收件地址及身份证号' : '粘贴姓名、手机号和详细地址，自动识别') + '" data-address-paste></textarea><button type="button" class="btn btn--weak btn--sm" data-component-slug="button" data-recognize-address>识别</button></div></div>'
       +   '<div class="order-delivery-address-fields">'
       +     '<div class="input-group input-group--surface-white" data-component-slug="input"><label class="field-label" for="receiver-name">收货人</label><div class="input-wrapper"><input id="receiver-name" type="text" value="' + escapeHtml(address ? address.name : '') + '" placeholder="请输入收货人姓名" data-address-name><button type="button" class="input-clear" aria-label="清空收货人"><i class="icon-yuancha-mian"></i></button></div></div>'
       +     '<div class="input-group input-group--surface-white" data-component-slug="input"><label class="field-label" for="receiver-phone">手机号</label><div class="input-wrapper"><input id="receiver-phone" type="text" inputmode="tel" value="' + escapeHtml(address ? address.phone : '') + '" placeholder="请输入手机号" data-address-phone><button type="button" class="input-clear" aria-label="清空手机号"><i class="icon-yuancha-mian"></i></button></div></div>'
       +   '</div>'
       +   '<div class="input-group input-group--surface-white order-delivery-address-detail" data-component-slug="input"><label class="field-label" for="receiver-address">详细地址</label><textarea id="receiver-address" rows="2" placeholder="省市区、街道及门牌号" data-address-detail>' + escapeHtml(address ? address.detail : '') + '</textarea></div>'
+      +   (requiresRealName ? '<section class="order-real-name-fields"><strong>实名信息 <em>必填</em></strong><div class="order-delivery-address-fields"><div class="input-group input-group--surface-white" data-component-slug="input"><label class="field-label" for="receiver-real-name">实名姓名</label><div class="input-wrapper"><input id="receiver-real-name" type="text" value="' + escapeHtml(realName ? realName.name : '') + '" placeholder="请输入实名姓名" data-real-name></div></div><div class="input-group input-group--surface-white" data-component-slug="input"><label class="field-label" for="receiver-id-card">身份证号</label><div class="input-wrapper"><input id="receiver-id-card" type="text" value="' + escapeHtml(realName ? realName.idCard : '') + '" placeholder="请输入身份证号" data-id-card></div></div></div></section>' : '')
       + '</div>';
   }
 
@@ -2403,6 +2429,7 @@
       price: unitPrice,
       priceMode: priceMode,
       image: product.image,
+      freightTemplate: product.freightTemplate ? Object.assign({}, product.freightTemplate) : { requiresRealName: false },
       qty: Object.keys(skuQty).reduce(function (sum, spec) { return sum + Number(skuQty[spec] || 0); }, 0),
       mode: mode,
       skuQty: Object.assign({}, skuQty),
@@ -2425,7 +2452,7 @@
     state.delivery = CUSTOMERS[0].lastDelivery;
     state.address = { name: '陈小姐', phone: '138****6688', detail: '浙江省杭州市上城区九堡街道新江花园12幢' };
     state.products = [
-      { id: 'p1', code: 'TS-2408', name: '韩版休闲T恤', listPrice: 89, price: 72.98, image: PRODUCTS[0].image, qty: 2, mode: 'single', skuQty: { '白色/M': 2 }, note: '白色优先' },
+      { id: 'p1', code: 'TS-2408', name: '韩版休闲T恤', listPrice: 89, price: 72.98, image: PRODUCTS[0].image, freightTemplate: Object.assign({}, PRODUCTS[0].freightTemplate), qty: 2, mode: 'single', skuQty: { '白色/M': 2 }, note: '白色优先' },
       { id: 'p2', code: 'JK-1082', name: '高腰牛仔短裤', listPrice: 129, price: 105.78, image: PRODUCTS[1].image, qty: 1, mode: 'batch', skuQty: { '蓝色/28': 1 }, note: '' }
     ];
     applyCustomer(CUSTOMERS[0]);
@@ -2451,6 +2478,12 @@
       state.panel = 'delivery';
       renderActive();
       ctx.toast('请填写收货地址');
+      return false;
+    }
+    if ((state.delivery === 'express' || state.delivery === 'freight') && orderRequiresRealName() && !realNameComplete(state.realNameInfo)) {
+      state.panel = 'delivery';
+      renderActive();
+      ctx.toast('请完善必填的实名信息');
       return false;
     }
     if (state.delivery === 'pickup' && (!state.pickupContact || !state.pickupContact.name || !state.pickupContact.phone)) {
@@ -3241,6 +3274,15 @@
           return;
         }
         saveDraft.address = { name: name, phone: phone, detail: detail };
+        if (orderRequiresRealName()) {
+          var realName = deliveryScope.querySelector('[data-real-name]')?.value.trim();
+          var idCard = deliveryScope.querySelector('[data-id-card]')?.value.trim().toUpperCase();
+          if (!realNameComplete({ name: realName, idCard: idCard })) {
+            ctx.toast('请填写正确的实名姓名和身份证号');
+            return;
+          }
+          saveDraft.realNameInfo = { name: realName, idCard: idCard, mode: 'direct' };
+        }
       }
       if (saveDraft.delivery === 'pickup') {
         var pickupName = deliveryScope.querySelector('[data-pickup-name]')?.value.trim();
@@ -3254,6 +3296,7 @@
       }
       state.delivery = saveDraft.delivery;
       if (saveDraft.delivery === 'express' || saveDraft.delivery === 'freight') state.address = saveDraft.address ? Object.assign({}, saveDraft.address) : null;
+      if (saveDraft.delivery === 'express' || saveDraft.delivery === 'freight') state.realNameInfo = saveDraft.realNameInfo ? Object.assign({}, saveDraft.realNameInfo) : state.realNameInfo;
       if (saveDraft.delivery === 'pickup') {
         state.pickupPointId = saveDraft.pickupPointId;
         state.pickupContact = saveDraft.pickupContact ? Object.assign({}, saveDraft.pickupContact) : null;
@@ -4124,6 +4167,7 @@
     applyCustomer(null);
     state.warehouse = WAREHOUSES[0];
     state.products = [];
+    state.realNameInfo = null;
     applyDeliveryPreference(guestDeliveryPreference());
     state.orderNoteMerchant = '';
     state.orderNoteBuyer = '';
