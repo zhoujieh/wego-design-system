@@ -206,6 +206,7 @@
     pickupPointId: PICKUP_POINTS[0] ? PICKUP_POINTS[0].id : null,
     pickupContact: null,
     realNameInfo: null,
+    deliveryRealNameAttention: false,
     senderMode: 'default',
     senderInfo: { name: '何小小', phone: '13690809124' },
     orderNoteMerchant: '',
@@ -565,6 +566,30 @@
 
   function realNameComplete(info) {
     return Boolean(info && (info.mode === 'group' || (info.name && /^[1-9]\d{5}(?:18|19|20)?\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])\d{3}[\dXx]$/.test(info.idCard))));
+  }
+
+  function realNameIdCardValid(value) {
+    return /^[1-9]\d{5}(?:18|19|20)?\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])\d{3}[\dXx]$/.test(String(value || '').trim());
+  }
+
+  function focusDeliveryRealName(root) {
+    if (!state.deliveryRealNameAttention || !root) return;
+    window.requestAnimationFrame(function () {
+      var section = root.querySelector('.order-desktop-modal--delivery .order-real-name-fields, .order-v2-modal .order-real-name-fields');
+      if (!section) return;
+      var scroller = section.closest('.order-delivery-panel__scroll');
+      if (scroller) {
+        var choices = scroller.querySelector('.order-delivery-choices');
+        scroller.scrollTo({
+          top: Math.max(0, section.offsetTop - (choices ? choices.offsetHeight : 0) - 8),
+          behavior: 'smooth'
+        });
+      } else {
+        section.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      }
+      var firstInvalid = section.querySelector('.form-body--error input');
+      if (firstInvalid) firstInvalid.focus({ preventScroll: true });
+    });
   }
 
   function deliveryDraftFromState() {
@@ -1244,7 +1269,7 @@
       var inlineRequiresRealName = orderRequiresRealName();
       return ''
         + '<div class="order-desktop-delivery-inline">'
-        +   '<button type="button" data-open-panel="delivery"><small><i class="wego-iconfont-s icon-che" aria-hidden="true"></i>' + (state.delivery === 'express' ? '快递' : '快运') + '</small><strong>' + (inlineRequiresRealName ? '暂无收货信息和实名信息' : '暂无收货信息') + '</strong><i class="wego-iconfont-s icon-youjiantou16" aria-hidden="true"></i></button>'
+        +   '<button type="button" data-open-panel="delivery"' + (inlineRequiresRealName ? ' data-real-name-pending' : '') + '><small><i class="wego-iconfont-s icon-che" aria-hidden="true"></i>' + (state.delivery === 'express' ? '快递' : '快运') + '</small><strong>' + (inlineRequiresRealName ? '暂无收货信息和实名信息' : '暂无收货信息') + '</strong><i class="wego-iconfont-s icon-youjiantou16" aria-hidden="true"></i></button>'
         +   '<div class="input-group order-desktop-delivery-inline__input" data-component-slug="input"><div class="input-wrapper"><input type="text" aria-label="粘贴收件信息" placeholder="' + (inlineRequiresRealName ? '粘贴姓名、手机号、收件地址及身份证号' : '粘贴姓名、手机号及收件地址') + '" data-inline-address-paste></div></div>'
         +   '<button type="button" class="btn btn--medium btn--sm btn--disabled" data-component-slug="button" data-inline-recognize-address disabled>识别</button>'
         + '</div>';
@@ -1273,7 +1298,7 @@
       ? '<small>' + deliveryIconMarkup + escapeHtml(summaryParts.label) + '</small><span class="order-desktop-delivery-tail"><strong>' + escapeHtml(summaryParts.primary) + '</strong><i class="wego-iconfont-s icon-youjiantou16" aria-hidden="true"></i></span>'
       : '<small>' + deliveryIconMarkup + escapeHtml(summaryParts.label) + '</small><span class="order-desktop-delivery-summary"><strong>' + escapeHtml(summaryParts.primary) + '</strong>' + (summaryParts.secondary ? '<em title="' + escapeHtml(summaryParts.secondary) + '">' + escapeHtml(summaryParts.secondary) + '</em>' : '') + (summaryParts.meta ? '<b class="' + (summaryParts.realNamePending ? 'is-warning' : '') + '">' + (summaryParts.realNamePending ? '<i class="wego-iconfont-s icon-tanhao" aria-hidden="true"></i>' : '') + escapeHtml(summaryParts.meta) + '</b>' : '') + '</span><i class="wego-iconfont-s icon-youjiantou16" aria-hidden="true"></i>';
     return ''
-      + '<button type="button" class="order-desktop-customer-delivery ' + (singleLine ? 'order-desktop-customer-delivery--single' : '') + (addressLine ? ' order-desktop-customer-delivery--address' : '') + (pickupLine ? ' order-desktop-customer-delivery--pickup' : '') + (emptyLine ? ' order-desktop-customer-delivery--empty' : '') + '" data-open-panel="delivery" title="' + escapeHtml(summary) + '">'
+      + '<button type="button" class="order-desktop-customer-delivery ' + (singleLine ? 'order-desktop-customer-delivery--single' : '') + (addressLine ? ' order-desktop-customer-delivery--address' : '') + (pickupLine ? ' order-desktop-customer-delivery--pickup' : '') + (emptyLine ? ' order-desktop-customer-delivery--empty' : '') + '" data-open-panel="delivery"' + (summaryParts.realNamePending ? ' data-real-name-pending' : '') + ' title="' + escapeHtml(summary) + '">'
       +   deliveryContent
       + '</button>';
   }
@@ -1773,6 +1798,11 @@
     var realName = draft.realNameInfo || state.realNameInfo;
     var requiresRealName = orderRequiresRealName();
     var realNameMode = realName && realName.mode === 'group' ? 'group' : 'direct';
+    var realNameValue = realName ? String(realName.name || '') : '';
+    var realNameIdCardValue = realName ? String(realName.idCard || '') : '';
+    var showRealNameError = state.deliveryRealNameAttention && realNameMode === 'direct';
+    var realNameErrorClass = showRealNameError && !realNameValue.trim() ? ' form-body--error' : '';
+    var idCardErrorClass = showRealNameError && !realNameIdCardValid(realNameIdCardValue) ? ' form-body--error' : '';
     var senderMode = draft.senderMode || 'default';
     var senderInfo = draft.senderInfo || state.senderInfo || {};
     return ''
@@ -1786,7 +1816,7 @@
       +     '<div class="form-body form-body--align-top" data-component-slug="form"><div class="form-body__label"><span class="form-body__label-text">详细地址</span></div><div class="form-body__action"><textarea id="receiver-address" rows="2" placeholder="小区楼栋/乡村名称" data-address-detail>' + escapeHtml(address ? address.detail : '') + '</textarea></div></div>'
       +   '</div>'
       +   '</section>'
-      +   (requiresRealName ? '<section class="order-real-name-fields"><header><strong>实名信息 <em>*</em></strong><div><button type="button" class="order-delivery-radio ' + (realNameMode === 'direct' ? 'is-selected' : '') + '" data-real-name-mode="direct"><i class="wego-iconfont-s icon-gou16" aria-hidden="true"></i>跨境直邮</button><button type="button" class="order-delivery-radio ' + (realNameMode === 'group' ? 'is-selected' : '') + '" data-real-name-mode="group"><i class="wego-iconfont-s icon-gou16" aria-hidden="true"></i>拼邮</button></div></header>' + (realNameMode === 'direct' ? '<div class="order-real-name-card"><div class="input-group input-group--surface-white" data-component-slug="input"><label class="field-label" for="receiver-real-name">姓名</label><div class="input-wrapper"><input id="receiver-real-name" type="text" value="' + escapeHtml(realName ? realName.name : '') + '" placeholder="请输入客户姓名" data-real-name></div></div><div class="input-group input-group--surface-white" data-component-slug="input"><label class="field-label" for="receiver-id-card">身份证号</label><div class="input-wrapper"><input id="receiver-id-card" type="text" value="' + escapeHtml(realName ? realName.idCard : '') + '" placeholder="请输入客户身份证号" data-id-card></div></div></div>' : '') + '</section>' : '')
+      +   (requiresRealName ? '<section class="order-real-name-fields"><header><strong>实名信息 <em>*</em></strong><div><button type="button" class="order-delivery-radio ' + (realNameMode === 'direct' ? 'is-selected' : '') + '" data-real-name-mode="direct"><i class="wego-iconfont-s icon-gou16" aria-hidden="true"></i>跨境直邮</button><button type="button" class="order-delivery-radio ' + (realNameMode === 'group' ? 'is-selected' : '') + '" data-real-name-mode="group"><i class="wego-iconfont-s icon-gou16" aria-hidden="true"></i>拼邮</button></div></header>' + (realNameMode === 'direct' ? '<div class="order-real-name-card form-group__content"><div class="form-body' + realNameErrorClass + '" data-component-slug="form"><label class="form-body__label" for="receiver-real-name">姓名</label><div class="form-body__action"><input id="receiver-real-name" type="text" value="' + escapeHtml(realNameValue) + '" placeholder="请输入客户姓名" data-real-name' + (realNameErrorClass ? ' aria-invalid="true" aria-describedby="receiver-real-name-error"' : '') + '><span id="receiver-real-name-error" class="form-body__error">请输入姓名</span></div></div><div class="form-body' + idCardErrorClass + '" data-component-slug="form"><label class="form-body__label" for="receiver-id-card">身份证号</label><div class="form-body__action"><input id="receiver-id-card" type="text" value="' + escapeHtml(realNameIdCardValue) + '" placeholder="请输入客户身份证号" data-id-card' + (idCardErrorClass ? ' aria-invalid="true" aria-describedby="receiver-id-card-error"' : '') + '><span id="receiver-id-card-error" class="form-body__error">请输入正确的身份证号</span></div></div></div>' : '') + '</section>' : '')
       +   '<section class="order-sender-fields"><header><strong>发件人</strong><div><button type="button" class="order-delivery-radio ' + (senderMode === 'default' ? 'is-selected' : '') + '" data-sender-mode="default"><i class="wego-iconfont-s icon-gou16" aria-hidden="true"></i>默认</button><button type="button" class="order-delivery-radio ' + (senderMode === 'proxy' ? 'is-selected' : '') + '" data-sender-mode="proxy"><i class="wego-iconfont-s icon-gou16" aria-hidden="true"></i>代发</button></div></header>' + (senderMode === 'proxy' ? '<div class="order-sender-card order-sender-card--proxy"><div class="input-group" data-component-slug="input"><label class="field-label" for="sender-name">姓名</label><div class="input-wrapper"><input id="sender-name" value="' + escapeHtml(senderInfo.name || '') + '" placeholder="请输入发件人姓名" data-sender-name></div></div><div class="input-group" data-component-slug="input"><label class="field-label" for="sender-phone">手机号</label><div class="input-wrapper"><input id="sender-phone" value="' + escapeHtml(senderInfo.phone || '') + '" placeholder="请输入手机号" data-sender-phone></div></div></div>' : '<div class="order-sender-card"><span><strong>' + escapeHtml(senderInfo.name || '何小小') + ' ' + escapeHtml(senderInfo.phone || '13690809124') + '</strong></span><button type="button" class="link link--14" data-component-slug="link" data-edit-sender>编辑</button></div>') + '</section>'
       + '</div>';
   }
@@ -2490,9 +2520,12 @@
       return false;
     }
     if ((state.delivery === 'express' || state.delivery === 'freight') && orderRequiresRealName() && !realNameComplete(state.realNameInfo)) {
+      state.deliveryRealNameAttention = true;
+      state.deliveryDraft = deliveryDraftFromState();
       state.panel = 'delivery';
       renderActive();
       ctx.toast('请完善必填的实名信息');
+      focusDeliveryRealName(activeContext && activeContext.root);
       return false;
     }
     if (state.delivery === 'pickup' && (!state.pickupContact || !state.pickupContact.name || !state.pickupContact.phone)) {
@@ -2846,7 +2879,10 @@
         }
       } else {
         if (type === 'quick') state.quickOp = target.dataset.quickOp || 'member';
-        if (type === 'delivery') state.deliveryDraft = deliveryDraftFromState();
+        if (type === 'delivery') {
+          state.deliveryDraft = deliveryDraftFromState();
+          state.deliveryRealNameAttention = target.hasAttribute('data-real-name-pending');
+        }
         openPanel(type);
         if (type === 'customer') {
           var customerSearch = root.querySelector(isDesktopWorkbench() ? '.order-desktop-customer-popover [data-customer-search]' : '.order-v2-modal--customer [data-customer-search]');
@@ -2860,6 +2896,8 @@
             anchoredQuickInput.focus({ preventScroll: true });
             anchoredQuickInput.select();
           }
+        } else if (type === 'delivery') {
+          focusDeliveryRealName(root);
         }
       }
       return;
@@ -2948,7 +2986,10 @@
         if (state.productCreateDraft && state.productCreateDraft.objectUrl && window.URL && window.URL.revokeObjectURL) window.URL.revokeObjectURL(state.productCreateDraft.objectUrl);
         state.productCreateDraft = null;
       }
-      if (closingDelivery) state.deliveryDraft = null;
+      if (closingDelivery) {
+        state.deliveryDraft = null;
+        state.deliveryRealNameAttention = false;
+      }
       state.panel = productEditReturnPanel || null;
       renderActive();
       if (closingAddPanel) focusDesktopProductSearch();
@@ -3312,7 +3353,13 @@
             var realName = deliveryScope.querySelector('[data-real-name]')?.value.trim();
             var idCard = deliveryScope.querySelector('[data-id-card]')?.value.trim().toUpperCase();
             if (!realNameComplete({ name: realName, idCard: idCard })) {
+              state.deliveryRealNameAttention = true;
+              var realNameBody = deliveryScope.querySelector('[data-real-name]')?.closest('.form-body');
+              var idCardBody = deliveryScope.querySelector('[data-id-card]')?.closest('.form-body');
+              if (realNameBody) realNameBody.classList.toggle('form-body--error', !realName);
+              if (idCardBody) idCardBody.classList.toggle('form-body--error', !realNameIdCardValid(idCard));
               ctx.toast('请填写正确的实名姓名和身份证号');
+              focusDeliveryRealName(root);
               return;
             }
             saveDraft.realNameInfo = { name: realName, idCard: idCard, mode: 'direct' };
@@ -3340,6 +3387,7 @@
         saveDraft.senderInfo = { name: senderName, phone: senderPhone };
       }
       state.delivery = saveDraft.delivery;
+      state.deliveryRealNameAttention = false;
       if (saveDraft.delivery === 'express' || saveDraft.delivery === 'freight') state.address = saveDraft.address ? Object.assign({}, saveDraft.address) : null;
       if (saveDraft.delivery === 'express' || saveDraft.delivery === 'freight') state.realNameInfo = saveDraft.realNameInfo ? Object.assign({}, saveDraft.realNameInfo) : state.realNameInfo;
       if (savesAddressDelivery) state.senderMode = saveDraft.senderMode || state.senderMode;
@@ -3754,6 +3802,14 @@
       inputRealNameDraft.realNameInfo = Object.assign({}, inputRealNameDraft.realNameInfo || { mode: 'direct' });
       if (target.matches('[data-real-name]')) inputRealNameDraft.realNameInfo.name = target.value;
       if (target.matches('[data-id-card]')) inputRealNameDraft.realNameInfo.idCard = target.value;
+      if (state.deliveryRealNameAttention) {
+        var realNameFieldBody = target.closest('.form-body');
+        var validRealNameField = target.matches('[data-real-name]')
+          ? Boolean(target.value.trim())
+          : realNameIdCardValid(target.value);
+        if (realNameFieldBody) realNameFieldBody.classList.toggle('form-body--error', !validRealNameField);
+        target.toggleAttribute('aria-invalid', !validRealNameField);
+      }
       return;
     }
     if (state.panel === 'delivery' && target.matches('[data-address-name], [data-address-phone], [data-address-detail]')) {
