@@ -6232,6 +6232,10 @@ body[data-order-layout="landscape"] .phone-indicator {
     gap: var(--spacer-2);
   }
 
+  .order-sender-card > span > strong {
+    font-weight: var(--font-weight-regular);
+  }
+
   .order-sender-card small {
     color: var(--text-secondary);
     font-size: var(--body-sm-font-size);
