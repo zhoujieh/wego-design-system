@@ -5895,7 +5895,7 @@ body[data-order-layout="landscape"] .phone-indicator {
   .order-desktop-delivery-card > .order-desktop-customer-delivery--pickup {
     grid-template-columns: auto minmax(0, 1fr) var(--size-16);
     grid-template-rows: minmax(0, 1fr);
-    gap: var(--spacer-24);
+    column-gap: var(--spacer-4);
     padding: 0 var(--spacer-12);
   }
 
@@ -5907,6 +5907,7 @@ body[data-order-layout="landscape"] .phone-indicator {
     font-size: var(--heading-sm-font-size);
     font-weight: var(--font-weight-medium);
     line-height: var(--heading-sm-line-height);
+    margin-right: var(--spacer-20);
     white-space: nowrap;
   }
 
@@ -5934,10 +5935,12 @@ body[data-order-layout="landscape"] .phone-indicator {
 
   .order-desktop-customer-delivery--address .order-desktop-delivery-summary strong,
   .order-desktop-customer-delivery--pickup .order-desktop-delivery-summary strong {
+    display: block;
     width: 100%;
     font-size: var(--body-lg-font-size);
     font-weight: var(--font-weight-medium);
     line-height: var(--body-lg-line-height);
+    text-align: right;
   }
 
   .order-desktop-customer-delivery--address .order-desktop-delivery-summary em,
