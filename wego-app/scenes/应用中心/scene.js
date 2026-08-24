@@ -1,3 +1,68 @@
+const appCenterTemplate = `
+  <section class="app-center-page" data-surface-id="app-center" data-route-id="app-center" data-layout-mode="composed" data-bg="page">
+    <div class="navbar app-center-page__navbar" data-component-slug="navbar">
+      <div class="navbar__body">
+        <div class="navbar__left"><button type="button" class="navbar__left-btn" data-dom-id="app-center-back" aria-label="返回"><i class="wego-iconfont-s icon-fanhui"></i></button></div>
+        <div class="navbar__center"><span class="navbar__title">全部应用</span></div>
+        <div class="navbar__right"></div>
+      </div>
+    </div>
+    <div class="app-center-page__search">
+      <div class="searchbox searchbox--md searchbox--white" data-component-slug="search" data-dom-id="app-center-search">
+        <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
+        <div class="searchbox__input">
+          <input class="searchbox__field" type="search" placeholder="搜索应用" aria-label="搜索应用" />
+        </div>
+        <div class="searchbox__actions"></div>
+      </div>
+    </div>
+    <div class="wg-tabs wg-tabs--mini wg-tabs--scroll app-center-page__tabs" data-component-slug="tabs" data-dom-id="app-center-tabs" role="tablist">
+      <div class="wg-tabs__scroll app-center-page__tabs-scroll">
+        <button class="wg-tabs__item wg-tabs__item--first" type="button" role="tab" aria-selected="true" data-category-id="store-manage">
+          <span class="wg-tabs__content"><span class="wg-tabs__label">店铺管理</span></span>
+        </button>
+        <button class="wg-tabs__item" type="button" role="tab" aria-selected="false" data-category-id="product-ops">
+          <span class="wg-tabs__content"><span class="wg-tabs__label">商品运营</span></span>
+        </button>
+        <button class="wg-tabs__item" type="button" role="tab" aria-selected="false" data-category-id="marketing">
+          <span class="wg-tabs__content"><span class="wg-tabs__label">营销推广</span></span>
+        </button>
+        <button class="wg-tabs__item" type="button" role="tab" aria-selected="false" data-category-id="traffic">
+          <span class="wg-tabs__content"><span class="wg-tabs__label">引流获客</span></span>
+        </button>
+        <button class="wg-tabs__item" type="button" role="tab" aria-selected="false" data-category-id="customer">
+          <span class="wg-tabs__content"><span class="wg-tabs__label">客户管理</span></span>
+        </button>
+        <button class="wg-tabs__item" type="button" role="tab" aria-selected="false" data-category-id="order-trade">
+          <span class="wg-tabs__content"><span class="wg-tabs__label">订单交易</span></span>
+        </button>
+        <button class="wg-tabs__item" type="button" role="tab" aria-selected="false" data-category-id="stock-supply">
+          <span class="wg-tabs__content"><span class="wg-tabs__label">库存采购</span></span>
+        </button>
+        <button class="wg-tabs__item" type="button" role="tab" aria-selected="false" data-category-id="team-tools">
+          <span class="wg-tabs__content"><span class="wg-tabs__label">团队工具</span></span>
+        </button>
+        <button class="wg-tabs__item" type="button" role="tab" aria-selected="false" data-category-id="price-finance">
+          <span class="wg-tabs__content"><span class="wg-tabs__label">价格财务</span></span>
+        </button>
+        <button class="wg-tabs__item" type="button" role="tab" aria-selected="false" data-category-id="hardware-learn">
+          <span class="wg-tabs__content"><span class="wg-tabs__label">硬件学习</span></span>
+        </button>
+        <span class="wg-tabs__active-indicator" aria-hidden="true"></span>
+      </div>
+    </div>
+    <div class="app-center-page__body" data-dom-id="app-center-body">
+      <div class="app-center-page__content-group" data-region="categories"></div>
+      <div class="app-center-page__empty">
+        <div class="result" data-component-slug="result" role="group" aria-label="无搜索结果">
+          <div class="result__icon" aria-hidden="true"><i class="wego-iconfont-s icon-tanhao-mian"></i></div>
+          <div class="result__title">没有找到相关应用</div>
+        </div>
+      </div>
+    </div>
+  </section>
+  `;
+
 (function () {
   // 应用中心分类与应用数据：沿用既有应用中心清单，图标取自 lib/assets/icons/app-center/
   var appCenterCategories = [
@@ -146,7 +211,7 @@
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/\x22/g, '&quot;')
-      .replace(/'/g, '&#39;');
+      .replace(/\x27/g, '&#39;');
   }
 
   function appIconPath(asset) {
@@ -185,39 +250,6 @@
     return section;
   }
 
-  var appCenterTemplate = `
-  <section class="app-center-page" data-surface-id="app-center" data-route-id="app-center" data-layout-mode="composed" data-bg="page">
-    <div class="navbar app-center-page__navbar" data-component-slug="navbar">
-      <div class="navbar__body">
-        <div class="navbar__left"><button type="button" class="navbar__left-btn" data-dom-id="app-center-back" aria-label="返回"><i class="wego-iconfont-s icon-fanhui"></i></button></div>
-        <div class="navbar__center"><span class="navbar__title">全部应用</span></div>
-        <div class="navbar__right"></div>
-      </div>
-    </div>
-    <div class="app-center-page__search">
-      <div class="searchbox searchbox--md searchbox--white" data-component-slug="search" data-dom-id="app-center-search">
-        <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
-        <div class="searchbox__input">
-          <input class="searchbox__field" type="search" placeholder="搜索应用" aria-label="搜索应用" />
-        </div>
-        <div class="searchbox__actions"></div>
-      </div>
-    </div>
-    <div class="wg-tabs wg-tabs--mini wg-tabs--scroll app-center-page__tabs" data-component-slug="tabs" data-dom-id="app-center-tabs" role="tablist">
-      <div class="wg-tabs__scroll app-center-page__tabs-scroll"></div>
-    </div>
-    <div class="app-center-page__body" data-dom-id="app-center-body">
-      <div class="app-center-page__content-group" data-region="categories"></div>
-      <div class="app-center-page__empty">
-        <div class="result" role="group" aria-label="无搜索结果">
-          <div class="result__icon" aria-hidden="true"><i class="wego-iconfont-s icon-tanhao-mian"></i></div>
-          <div class="result__title">没有找到相关应用</div>
-        </div>
-      </div>
-    </div>
-  </section>
-  `;
-
   window.WegoApp.registerScene({
     routeId: 'app-center',
     title: '全部应用',
@@ -231,33 +263,10 @@
       var bodyContainer = root.querySelector('[data-dom-id="app-center-body"]');
       var contentGroup = root.querySelector('[data-region="categories"]');
       var searchBox = root.querySelector('[data-dom-id="app-center-search"]');
-      var searchField = searchBox.querySelector('.searchbox__field');
+      var searchField = root.querySelector('[data-dom-id="app-center-search"] .searchbox__field');
 
       // 返回
       backButton.addEventListener('click', function () { ctx.back(); });
-
-      // 构建 tabs
-      appCenterCategories.forEach(function (category, index) {
-        var item = document.createElement('button');
-        item.type = 'button';
-        item.className = 'wg-tabs__item';
-        if (index === 0) item.classList.add('wg-tabs__item--first');
-        item.setAttribute('role', 'tab');
-        item.setAttribute('aria-selected', index === 0 ? 'true' : 'false');
-        item.dataset.categoryId = category.id;
-        var content = document.createElement('span');
-        content.className = 'wg-tabs__content';
-        var label = document.createElement('span');
-        label.className = 'wg-tabs__label';
-        label.textContent = category.name;
-        content.appendChild(label);
-        item.appendChild(content);
-        tabsScroll.appendChild(item);
-      });
-      var indicator = document.createElement('span');
-      indicator.className = 'wg-tabs__active-indicator';
-      indicator.setAttribute('aria-hidden', 'true');
-      tabsScroll.appendChild(indicator);
 
       // 构建全部分类
       appCenterCategories.forEach(function (category) {
@@ -345,7 +354,7 @@
         root.classList.toggle('app-center-page--empty', totalVisible === 0);
       }
 
-      searchField.addEventListener('input', applyFilter);
+      searchBox.addEventListener('input', applyFilter);
 
       // 应用点击：有路由跳转，无路由 toast
       bodyContainer.addEventListener('click', function (event) {
