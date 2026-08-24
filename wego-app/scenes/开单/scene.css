@@ -3998,7 +3998,7 @@ body[data-order-layout="landscape"] .phone-indicator {
     z-index: var(--z-popover);
     display: flex;
     flex-direction: column;
-    width: min(calc(var(--size-104) * 5.5), calc(100% - var(--spacer-48)));
+    width: 100%;
     height: min(calc(var(--size-104) * 5.5), calc(100vh - var(--size-104) - var(--spacer-24)));
     padding: var(--spacer-16);
     overflow: hidden;
@@ -4006,6 +4006,29 @@ body[data-order-layout="landscape"] .phone-indicator {
     border: var(--stroke-hairline) solid var(--border-neutral-l2);
     border-radius: var(--radius-12);
     box-shadow: var(--shadow-lg);
+    animation: order-customer-popover-enter var(--duration-normal) var(--ease-standard) both;
+  }
+
+  .order-desktop-customer-popover.is-closing {
+    pointer-events: none;
+    animation: order-customer-popover-exit var(--duration-fast) var(--ease-standard) both;
+  }
+
+  @keyframes order-customer-popover-enter {
+    from {
+      opacity: 0;
+      transform: translateY(calc(var(--spacer-20) * -1));
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes order-customer-popover-exit {
+    from { opacity: 1; }
+    to { opacity: 0; }
   }
 
   .order-desktop-customer-summary {

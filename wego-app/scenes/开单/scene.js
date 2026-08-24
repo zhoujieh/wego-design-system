@@ -234,6 +234,8 @@
     draftAvailable: true,
     panel: null,
     panelPayload: null,
+    customerPopoverClosing: false,
+    customerPopoverCloseTimer: null,
     catalogKeyword: '',
     desktopProductKeyword: '',
     desktopCatalogSearchActive: false,
@@ -1202,7 +1204,7 @@
     if (!state.customer) {
       return ''
         + '<div class="order-desktop-customer-empty">'
-        +   '<button type="button" class="order-desktop-customer-select" data-open-panel="customer" aria-haspopup="dialog" aria-expanded="' + (state.panel === 'customer') + '" aria-controls="order-desktop-customer-popover"><span class="avatar avatar--40 avatar--image" data-component-slug="avatar"><img src="./lib/assets/image/avatar-defult.png" alt="默认头像"></span><span class="order-desktop-customer-entry"><strong>选择客户</strong><i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></span></button>'
+        +   '<button type="button" class="order-desktop-customer-select" data-open-panel="customer" aria-haspopup="dialog" aria-expanded="' + (state.panel === 'customer' && !state.customerPopoverClosing) + '" aria-controls="order-desktop-customer-popover"><span class="avatar avatar--40 avatar--image" data-component-slug="avatar"><img src="./lib/assets/image/avatar-defult.png" alt="默认头像"></span><span class="order-desktop-customer-entry"><strong>选择客户</strong><i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></span></button>'
         +   '<button type="button" class="link order-desktop-customer-add" data-component-slug="link" data-open-panel="customer-create"><i class="wego-iconfont-s icon-yuanjia" aria-hidden="true"></i>新建客户</button>'
         + '</div>';
     }
@@ -1211,7 +1213,7 @@
       + '<div class="order-desktop-customer-summary">'
       +   '<div class="order-desktop-customer-summary__main">'
       +     '<span class="order-desktop-customer-avatar"><span class="avatar avatar--40 avatar--image" data-component-slug="avatar"><img src="' + state.customer.avatar + '" alt="' + escapeHtml(state.customer.name) + '"></span><span class="order-desktop-customer-number">' + escapeHtml(state.customer.number) + '</span></span>'
-      +     '<span class="order-desktop-customer-summary__content"><button type="button" class="order-desktop-customer-summary__top" data-open-panel="customer" aria-haspopup="dialog" aria-expanded="' + (state.panel === 'customer') + '" aria-controls="order-desktop-customer-popover"><strong>' + escapeHtml(state.customer.name) + '</strong><em class="order-customer-vip order-customer-vip--' + state.customer.level.toLowerCase() + '"><b>' + escapeHtml(state.customer.level) + '</b><span>' + escapeHtml(state.customer.priceType) + '</span></em><span class="order-desktop-customer-tags">' + escapeHtml(customerTags) + '</span></button><span class="order-desktop-customer-summary__bottom"><span class="order-desktop-customer-balance">余额：' + money(state.customer.balance) + '</span><button type="button" class="link" data-component-slug="link" data-recharge>充值</button><span class="order-desktop-customer-divider" aria-hidden="true"></span><span class="order-desktop-customer-points">积分：' + Number(state.customer.points || 0) + '</span></span></span>'
+      +     '<span class="order-desktop-customer-summary__content"><button type="button" class="order-desktop-customer-summary__top" data-open-panel="customer" aria-haspopup="dialog" aria-expanded="' + (state.panel === 'customer' && !state.customerPopoverClosing) + '" aria-controls="order-desktop-customer-popover"><strong>' + escapeHtml(state.customer.name) + '</strong><em class="order-customer-vip order-customer-vip--' + state.customer.level.toLowerCase() + '"><b>' + escapeHtml(state.customer.level) + '</b><span>' + escapeHtml(state.customer.priceType) + '</span></em><span class="order-desktop-customer-tags">' + escapeHtml(customerTags) + '</span></button><span class="order-desktop-customer-summary__bottom"><span class="order-desktop-customer-balance">余额：' + money(state.customer.balance) + '</span><button type="button" class="link" data-component-slug="link" data-recharge>充值</button><span class="order-desktop-customer-divider" aria-hidden="true"></span><span class="order-desktop-customer-points">积分：' + Number(state.customer.points || 0) + '</span></span></span>'
       +   '</div>'
       +   '<button type="button" class="btn btn--weak btn--sm btn--icon-only order-desktop-customer-clear" data-component-slug="button" data-clear-customer aria-label="移除已选客户"><i class="btn__icon icon-yuancha-mian" aria-hidden="true"></i></button>'
       + '</div>';
@@ -1257,7 +1259,7 @@
     return ''
       + '<div class="order-desktop-customer-anchor ' + (state.customer ? 'order-desktop-customer-anchor--selected' : 'order-desktop-customer-anchor--empty') + '">'
       +   desktopCustomerSummary()
-      +   (state.panel === 'customer' ? '<div id="order-desktop-customer-popover" class="order-desktop-customer-popover" role="dialog" aria-label="选择或新建客户">' + desktopCustomerModalContent() + '</div>' : '')
+      +   (state.panel === 'customer' ? '<div id="order-desktop-customer-popover" class="order-desktop-customer-popover' + (state.customerPopoverClosing ? ' is-closing' : '') + '" role="dialog" aria-label="选择或新建客户">' + desktopCustomerModalContent() + '</div>' : '')
       + '</div>';
   }
 
@@ -2314,9 +2316,26 @@
   }
 
   function openPanel(type, payload) {
+    if (type === 'customer') {
+      if (state.customerPopoverCloseTimer) window.clearTimeout(state.customerPopoverCloseTimer);
+      state.customerPopoverCloseTimer = null;
+      state.customerPopoverClosing = false;
+    }
     state.panel = type === 'products' ? 'catalog' : type;
     state.panelPayload = payload == null ? null : payload;
     renderActive();
+  }
+
+  function closeDesktopCustomerPopover() {
+    if (state.panel !== 'customer' || state.customerPopoverClosing) return;
+    state.customerPopoverClosing = true;
+    renderActive();
+    state.customerPopoverCloseTimer = window.setTimeout(function () {
+      state.customerPopoverCloseTimer = null;
+      state.customerPopoverClosing = false;
+      if (state.panel === 'customer') state.panel = null;
+      renderActive();
+    }, 150);
   }
 
   function panelScope(target, root) {
@@ -2768,6 +2787,10 @@
     }
     if (target.matches('[data-open-panel]')) {
       var type = target.dataset.openPanel;
+      if (type === 'customer' && isDesktopWorkbench() && state.panel === 'customer') {
+        closeDesktopCustomerPopover();
+        return;
+      }
       if (type === 'quick' && target.dataset.quickOp === 'points' && !state.customer) {
         ctx.toast('请先选择客户');
         return;
@@ -3926,8 +3949,7 @@
         && !event.target.closest('.order-row-context-menu');
       handleClick(event, root, ctx);
       if (shouldCloseCustomerPopover && state.panel === 'customer') {
-        state.panel = null;
-        renderActive();
+        closeDesktopCustomerPopover();
       } else if (shouldCloseFreightPopover && state.panel === 'quick' && state.quickOp === 'freight') {
         state.panel = null;
         renderActive();
