@@ -7,25 +7,27 @@
     "primary_scene": "开单",
     "related_scenes": []
   },
-  "status": "prototyping",
-  "scope_revision": 1,
+  "status": "awaiting-brief-confirmation",
+  "scope_revision": 2,
   "prototype_brief": {
-    "goal": "将现有收银开单页面调整为 Pad 横屏方案，并以指定 Figma 节点 103:9675 为唯一视觉基准完成样式还原，同时保持现有业务逻辑和交互结果不变。",
+    "goal": "将收银开单统一为唯一的 Pad 横屏视觉方案，并以指定 Figma 节点 103:9675 为唯一视觉基准完成样式还原，同时保持现有业务逻辑和交互结果不变。",
     "included": [
       "按 1280×768 Pad 横屏基准还原顶部开单信息栏、客户与发货区、订单商品区、底部优惠结算区、右侧商品库和商品库收起入口",
+      "收银开单所有入口统一呈现同一套 Pad 横屏结构，不再根据视口切换手机端或桌面端视觉",
       "还原 Figma 中订单无商品但商品库有可选商品的默认画面",
       "保留并适配现有选择客户、选择发货方式、添加商品、修改订单、优惠、结算、存草稿等交互状态",
       "Figma 未单独展示的现有弹层与后续状态统一适配 Pad 视觉，但不改变其业务步骤、字段含义和操作结果"
     ],
     "excluded": [
       "不新增、删除或改变任何业务逻辑、数据字段、校验规则和交互结果",
-      "不修改工作台场景、手机端方案、桌面端方案或公共设计系统",
+      "不保留收银开单的独立手机端和桌面端视觉方案",
+      "不修改工作台场景或公共设计系统",
       "不新增后端接口、数据持久化或新的业务流程",
       "不以 Figma 画面补造现有页面中不存在的业务能力"
     ],
     "entry_points": [
-      "用户从工作台的销售开单入口进入 workspace-order-create，Pad 横屏视口展示本轮还原后的收银开单页面",
-      "用户通过 #/workspace-order-create 直接进入时，Pad 横屏视口展示相同页面"
+      "用户从工作台的销售开单入口进入 workspace-order-create，统一展示本轮还原后的 Pad 横屏收银开单页面",
+      "用户通过 #/workspace-order-create 直接进入时，展示相同的 Pad 横屏页面"
     ],
     "critical_paths": [
       "[P1] 工作台销售开单入口或直达路由 → 进入 Pad 横屏收银开单 → 查看空订单、客户与发货信息、右侧商品库和底部结算区 → 页面结构与 Figma 节点一致",
@@ -63,21 +65,18 @@
     },
     "assumptions": [
       "1:1 还原以 1280×768 Pad 横屏视口为验收基准；其他 Pad 横屏宽度在不改变业务结构的前提下做等价适配",
+      "收银开单不再提供手机端或桌面端专属布局；非基准尺寸仍沿用同一套 Pad 横屏信息结构",
       "Figma 未展示的已有弹层和有数据状态沿用当前交互内容，只统一视觉语言与空间关系",
       "本轮仅允许修改开单场景的样式及为样式承载所必需、但不改变逻辑的页面结构标记"
     ],
     "open_questions": []
   },
   "brief_submission": {
-    "at": "2026-08-24T02:56:08.336Z",
-    "scope_revision": 1,
-    "scope_sha256": "07621e4920cee840f77e8e5ba4e07126e714bb29318e6ee30719399371602b24"
+    "at": "2026-08-24T03:29:09.887Z",
+    "scope_revision": 2,
+    "scope_sha256": "5a411d30bab1597c9b95f36c03e4d7f143359626e32b4d0cc897a024ce79b64e"
   },
-  "brief_confirmation": {
-    "at": "2026-08-24T02:58:36.131Z",
-    "scope_revision": 1,
-    "scope_sha256": "07621e4920cee840f77e8e5ba4e07126e714bb29318e6ee30719399371602b24"
-  },
+  "brief_confirmation": null,
   "prototype_submission": null,
   "prototype_confirmation": null,
   "affected_scenes": [
@@ -104,6 +103,14 @@
     {
       "action": "confirm-brief",
       "at": "2026-08-24T02:58:36.132Z"
+    },
+    {
+      "action": "invalidate",
+      "at": "2026-08-24T03:28:43.963Z"
+    },
+    {
+      "action": "submit-brief",
+      "at": "2026-08-24T03:29:09.896Z"
     }
   ],
   "freeze": null
