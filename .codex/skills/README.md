@@ -6,6 +6,9 @@
 | 已确认范围内的页面设计与实现 | `wego-design` |
 | 组件、Token、Preview、UI Kit、消费规则、守卫或工作流维护 | `wego-uxsystem-iterate` |
 | 分支、PR、本地迭代预览、正式验收、合并或交付分支清理 | `wego-github-delivery` |
+| 本地预览起服、hash 直达路由验收场景改动 | `wego-preview-acceptance` |
+| 审查 wego-app 路由与页内/浏览器返回一致性 | `wego-host-routing` |
+| 用户报告原型显示缺陷（裂图、错位、样式丢失） | `prototype-ui-defect-triage` |
 
 ## 输入形态一律先走产品技能
 
