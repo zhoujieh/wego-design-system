@@ -1260,10 +1260,13 @@
     var addressLine = (state.delivery === 'express' || state.delivery === 'freight') && state.address;
     var pickupLine = state.delivery === 'pickup' && summaryParts.meta;
     var emptyLine = !state.delivery;
-    var deliveryIcon = state.delivery === 'pickup' ? 'icon-daohang' : (state.delivery === 'none' ? 'icon-huo-mian' : 'icon-che');
+    var deliveryIcon = state.delivery === 'pickup' ? 'icon-daohang' : 'icon-che';
+    var deliveryIconMarkup = state.delivery === 'none'
+      ? '<img class="order-desktop-site-pickup-icon" src="./scenes/开单/assets/site-pickup.svg" alt="">'
+      : '<i class="wego-iconfont-s ' + deliveryIcon + '" aria-hidden="true"></i>';
     var deliveryContent = singleLine
-      ? '<small><i class="wego-iconfont-s ' + deliveryIcon + '" aria-hidden="true"></i>' + escapeHtml(summaryParts.label) + '</small><span class="order-desktop-delivery-tail"><strong>' + escapeHtml(summaryParts.primary) + '</strong><i class="wego-iconfont-s icon-youjiantou16" aria-hidden="true"></i></span>'
-      : '<small><i class="wego-iconfont-s ' + deliveryIcon + '" aria-hidden="true"></i>' + escapeHtml(summaryParts.label) + '</small><span class="order-desktop-delivery-summary"><strong>' + escapeHtml(summaryParts.primary) + '</strong>' + (summaryParts.secondary ? '<em title="' + escapeHtml(summaryParts.secondary) + '">' + escapeHtml(summaryParts.secondary) + '</em>' : '') + (summaryParts.meta ? '<b class="' + (summaryParts.realNamePending ? 'is-warning' : '') + '">' + escapeHtml(summaryParts.meta) + '</b>' : '') + '</span><i class="wego-iconfont-s icon-youjiantou16" aria-hidden="true"></i>';
+      ? '<small>' + deliveryIconMarkup + escapeHtml(summaryParts.label) + '</small><span class="order-desktop-delivery-tail"><strong>' + escapeHtml(summaryParts.primary) + '</strong><i class="wego-iconfont-s icon-youjiantou16" aria-hidden="true"></i></span>'
+      : '<small>' + deliveryIconMarkup + escapeHtml(summaryParts.label) + '</small><span class="order-desktop-delivery-summary"><strong>' + escapeHtml(summaryParts.primary) + '</strong>' + (summaryParts.secondary ? '<em title="' + escapeHtml(summaryParts.secondary) + '">' + escapeHtml(summaryParts.secondary) + '</em>' : '') + (summaryParts.meta ? '<b class="' + (summaryParts.realNamePending ? 'is-warning' : '') + '">' + escapeHtml(summaryParts.meta) + '</b>' : '') + '</span><i class="wego-iconfont-s icon-youjiantou16" aria-hidden="true"></i>';
     return ''
       + '<button type="button" class="order-desktop-customer-delivery ' + (singleLine ? 'order-desktop-customer-delivery--single' : '') + (addressLine ? ' order-desktop-customer-delivery--address' : '') + (pickupLine ? ' order-desktop-customer-delivery--pickup' : '') + (emptyLine ? ' order-desktop-customer-delivery--empty' : '') + '" data-open-panel="delivery" title="' + escapeHtml(summary) + '">'
       +   deliveryContent

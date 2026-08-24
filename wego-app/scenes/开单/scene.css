@@ -5870,6 +5870,89 @@ body[data-order-layout="landscape"] .phone-indicator {
   .order-desktop__summary-actions [data-save-draft] {
     font-size: var(--heading-sm-font-size);
   }
+
+  .order-desktop-delivery-card > .order-desktop-customer-delivery--single {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .order-desktop-delivery-card > .order-desktop-customer-delivery--single > small {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacer-8);
+    font-size: var(--heading-sm-font-size);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--heading-sm-line-height);
+  }
+
+  .order-desktop-site-pickup-icon {
+    display: block;
+    width: var(--size-20);
+    height: var(--size-20);
+    flex: 0 0 var(--size-20);
+  }
+
+  .order-desktop-delivery-card > .order-desktop-customer-delivery--address,
+  .order-desktop-delivery-card > .order-desktop-customer-delivery--pickup {
+    grid-template-columns: auto minmax(0, 1fr) var(--size-16);
+    grid-template-rows: minmax(0, 1fr);
+    gap: var(--spacer-24);
+    padding: 0 var(--spacer-12);
+  }
+
+  .order-desktop-delivery-card > .order-desktop-customer-delivery--address > small,
+  .order-desktop-delivery-card > .order-desktop-customer-delivery--pickup > small {
+    grid-column: 1;
+    grid-row: 1;
+    gap: var(--spacer-8);
+    font-size: var(--heading-sm-font-size);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--heading-sm-line-height);
+    white-space: nowrap;
+  }
+
+  .order-desktop-delivery-card > .order-desktop-customer-delivery--address > .order-desktop-delivery-summary,
+  .order-desktop-delivery-card > .order-desktop-customer-delivery--pickup > .order-desktop-delivery-summary {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    gap: var(--spacer-2);
+    min-width: 0;
+    width: 100%;
+  }
+
+  .order-desktop-delivery-card > .order-desktop-customer-delivery--address > i,
+  .order-desktop-delivery-card > .order-desktop-customer-delivery--pickup > i {
+    grid-column: 3;
+    grid-row: 1;
+    align-self: center;
+    width: var(--size-16);
+    height: var(--size-16);
+  }
+
+  .order-desktop-customer-delivery--address .order-desktop-delivery-summary strong,
+  .order-desktop-customer-delivery--pickup .order-desktop-delivery-summary strong {
+    width: 100%;
+    font-size: var(--body-lg-font-size);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--body-lg-line-height);
+  }
+
+  .order-desktop-customer-delivery--address .order-desktop-delivery-summary em,
+  .order-desktop-customer-delivery--address .order-desktop-delivery-summary b,
+  .order-desktop-customer-delivery--pickup .order-desktop-delivery-summary b {
+    width: 100%;
+    overflow: hidden;
+    font-size: var(--body-sm-font-size);
+    font-style: normal;
+    font-weight: var(--font-weight-regular);
+    line-height: var(--body-sm-line-height);
+    text-align: right;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 
