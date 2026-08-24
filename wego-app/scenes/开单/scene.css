@@ -6105,7 +6105,8 @@ body[data-order-layout="landscape"] .phone-indicator {
   .order-delivery-form-section > header,
   .order-real-name-fields > header,
   .order-sender-fields > header,
-  .order-pickup-points__head {
+  .order-pickup-points__head,
+  .order-pickup-contact > strong {
     display: flex;
     align-items: center;
     justify-content: space-between;
