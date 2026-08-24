@@ -6182,6 +6182,11 @@ body[data-order-layout="landscape"] .phone-indicator {
     border: 0;
   }
 
+  .order-desktop-modal--delivery .order-address-paste__control textarea:focus,
+  .order-desktop-modal--delivery .order-address-paste__control textarea:focus-visible {
+    outline: none;
+  }
+
   .order-desktop-modal--delivery .order-delivery-address-fields,
   .order-desktop-modal--delivery .order-real-name-card {
     display: grid;
