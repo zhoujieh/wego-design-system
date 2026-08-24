@@ -5331,14 +5331,14 @@ body[data-order-layout="landscape"] .phone-indicator {
 /* Pad 横屏版：以 Figma 1280×768 为基准，仅调整场景布局与视觉，不改变业务交互。 */
 @media (min-width: 900px) and (max-width: 1366px) and (orientation: landscape) {
   .order-v2-desktop {
-    background: var(--bg-page);
+    background: linear-gradient(to bottom right, rgba(231, 238, 246, 1), rgba(242, 245, 250, 1));
   }
 
   .order-desktop__header {
     grid-template-columns: auto minmax(0, 1fr) auto;
     min-height: var(--size-64);
     padding: 0 var(--spacer-16);
-    background: var(--bg-page);
+    background: transparent;
     border-bottom: 0;
   }
 
@@ -5405,7 +5405,7 @@ body[data-order-layout="landscape"] .phone-indicator {
   .order-desktop__workspace--with-resizer {
     grid-template-columns: 70% 0 30%;
     padding: 0 var(--spacer-8);
-    background: var(--bg-page);
+    background: transparent;
   }
 
   .order-desktop__workspace--catalog-collapsed {
@@ -5419,6 +5419,7 @@ body[data-order-layout="landscape"] .phone-indicator {
 
   .order-desktop__order {
     padding-right: var(--spacer-8);
+    background: transparent;
   }
 
   .order-desktop__context {
