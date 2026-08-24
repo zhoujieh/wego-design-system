@@ -2247,7 +2247,7 @@ body[data-order-layout="landscape"] .phone-indicator {
   padding-top: var(--spacer-4);
 }
 
-@media (min-width: 900px), (min-width: 768px) and (max-width: 899px) and (min-height: 700px) {
+@media (min-width: 768px) {
   .order-v2-mobile,
   .order-v2-modal {
     display: none;
@@ -5185,130 +5185,6 @@ body[data-order-layout="landscape"] .phone-indicator {
   }
 }
 
-@media (min-width: 768px) and (max-width: 899px) and (min-height: 700px) {
-  .order-desktop__header {
-    grid-template-columns: minmax(0, .8fr) auto minmax(0, .8fr);
-    padding: 0 var(--spacer-12);
-  }
-
-  .order-desktop__header-left > span,
-  .order-desktop-back,
-  .order-desktop-history,
-  .order-desktop__title-anchor .order-desktop-warehouse {
-    display: none;
-  }
-
-  .order-desktop__title {
-    font-size: var(--heading-sm-font-size);
-  }
-
-  .order-desktop__header > .order-desktop__header-right {
-    gap: var(--spacer-8);
-  }
-
-  .order-desktop__header-right > .btn,
-  .order-industry-switch > .btn {
-    padding: 0 var(--spacer-10);
-    font-size: var(--body-sm-font-size);
-  }
-
-  .order-desktop__workspace,
-  .order-desktop__workspace--with-resizer,
-  .order-desktop__workspace--catalog-collapsed {
-    display: block;
-    overflow: hidden;
-  }
-
-  .order-desktop__order {
-    height: 100%;
-  }
-
-  .order-desktop__context {
-    flex-wrap: wrap;
-    min-height: auto;
-    padding: var(--spacer-8) var(--spacer-10);
-  }
-
-  .order-desktop-customer-anchor,
-  .order-desktop-delivery-card {
-    flex: 1 1 calc(50% - var(--spacer-4));
-    height: var(--size-64);
-    min-width: 0;
-  }
-
-  .order-desktop-product-search {
-    flex: 1 1 100%;
-    min-width: 0;
-  }
-
-  .order-desktop__catalog-resizer {
-    display: none;
-  }
-
-  .order-desktop__catalog {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    z-index: calc(var(--z-popover) + 3);
-    width: min(420px, 76vw);
-    max-width: 100%;
-    border-left: var(--stroke-hairline) solid var(--border-neutral-l2);
-    box-shadow: var(--shadow-lg);
-  }
-
-  .order-desktop__catalog--collapsed {
-    width: 0;
-    border-left: 0;
-    box-shadow: none;
-  }
-
-  .order-desktop__summary {
-    grid-template-columns: minmax(260px, .9fr) minmax(220px, .8fr) minmax(172px, .65fr);
-    gap: var(--spacer-8);
-    padding: var(--spacer-8) var(--spacer-10);
-  }
-
-  .order-desktop__quick-ops {
-    gap: var(--spacer-4);
-  }
-
-  .order-quick-op {
-    min-height: var(--touch-default);
-    padding: var(--spacer-6);
-  }
-
-  .order-quick-op span {
-    font-size: var(--body-sm-font-size);
-  }
-
-  .order-desktop__summary-actions .btn {
-    min-height: var(--size-48);
-    height: var(--size-48);
-  }
-
-  .order-desktop__table-title,
-  .order-desktop__table-head,
-  .order-desktop-product-row,
-  .order-desktop__lines {
-    min-width: 760px;
-  }
-
-  .order-desktop__table-head,
-  .order-desktop-product-row {
-    grid-template-columns: minmax(132px, 1.2fr) var(--size-64) minmax(96px, .9fr) minmax(72px, .65fr) 112px minmax(88px, .75fr) minmax(88px, .75fr) var(--size-32);
-    gap: var(--spacer-8);
-  }
-
-  .order-desktop__table-head {
-    min-width: calc(760px - var(--spacer-16));
-  }
-
-  .order-desktop__lines .order-note-bar__note {
-    width: max(100%, 760px);
-  }
-}
-
 @media (max-width: 460px) {
   .order-v2__entry {
     grid-template-columns: 1fr;
@@ -5328,8 +5204,8 @@ body[data-order-layout="landscape"] .phone-indicator {
   }
 }
 
-/* Pad 横屏版：以 Figma 1280×768 为基准，仅调整场景布局与视觉，不改变业务交互。 */
-@media (min-width: 900px) and (max-width: 1366px) and (orientation: landscape) {
+/* 横版：768px 起由 Pad 横屏与桌面共用，以 Figma 1280×768 为视觉基准。 */
+@media (min-width: 768px) {
   .order-v2-desktop {
     background: linear-gradient(to bottom right, rgba(231, 238, 246, 1), rgba(242, 245, 250, 1));
   }
