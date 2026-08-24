@@ -137,6 +137,24 @@ var FriendStore = (function () {
 
 var FRIENDS_DATA = FriendStore.load();
 
+/* ── 中文昵称转拼音首字母 ──
+   利用 zh-Hans-CN 排序边界字表推断汉字的拼音首字母；
+   英文字母直接大写返回；其余（数字/符号等）归 '#'。 */
+var PINYIN_BOUNDARY = '八擦搭蛾发嘎哈击喀垃妈拿哦啪期然撒塌挖昔压匝';
+function toPyInitial(ch) {
+  if (/[a-zA-Z]/.test(ch)) return ch.toUpperCase();
+  var up = ch.toUpperCase();
+  if (/[\u4e00-\u9fa5]/.test(ch)) {
+    for (var i = 0; i < PINYIN_BOUNDARY.length; i++) {
+      if (ch.localeCompare(PINYIN_BOUNDARY[i], 'zh-Hans-CN') < 0) {
+        return String.fromCharCode(65 + i); // A..
+      }
+    }
+    return 'Z';
+  }
+  return '#';
+}
+
 /* ── 工具函数 ── */
 function getGroupName(groupId) {
   var g = FRIEND_GROUPS.find(function (x) { return x.group_id === groupId; });
@@ -373,12 +391,16 @@ function addFriendFormTemplate() {
 }
 
 /* ── 模拟本地相册：内置素材选图页模板 ──
-   数据源取自 WEGO_PROTOTYPE_DB.friends 的商家头像素材（avatar_*.jpg），
+   数据源为原型库全部头像素材（avatar_001~100），
    模拟本地相册网格单选，选中后回填新增好友表单头像。 */
 function avatarPickerTemplate(selectedAvatar) {
-  var avatarList = (window.WEGO_PROTOTYPE_DB && window.WEGO_PROTOTYPE_DB.friends || [])
-    .map(function (f) { return f.avatar; })
-    .filter(Boolean);
+  /* 数据源：原型库全部头像素材（avatar_001.jpg ~ avatar_100.jpg），全量罗列 */
+  var AVATAR_TOTAL = 100;
+  var avatarList = [];
+  for (var i = 1; i <= AVATAR_TOTAL; i++) {
+    var n = (i < 10 ? '00' + i : i < 100 ? '0' + i : '' + i);
+    avatarList.push('./lib/assets/image/avatar/avatar_' + n + '.jpg');
+  }
   if (avatarList.length === 0) {
     avatarList = ['./lib/assets/image/avatar/avatar_001.jpg'];
   }
@@ -906,6 +928,10 @@ window.WegoApp.registerScene({
 
           function submitForm() {
             var nickname = formRoot.querySelector('[data-form-field="nickname"]');
+            if (!formState.avatar) {
+              ctx.toast('请选择头像');
+              return;
+            }
             if (!nickname || !nickname.value.trim()) {
               ctx.toast('请输入好友昵称');
               return;
@@ -919,7 +945,7 @@ window.WegoApp.registerScene({
             var remarkInput = formRoot.querySelector('[data-form-field="remark"]');
             var verifyInput = formRoot.querySelector('[data-form-field="verify_message"]');
             var nicknameVal = nickname.value.trim();
-            var pyInitial = nicknameVal.charAt(0).toUpperCase();
+            var pyInitial = toPyInitial(nicknameVal.charAt(0));
             // 数据对齐真实场景 friendFromUser 结构：可采集字段取表单值，
             // 表单不采集的商家维度字段给与真实结构一致的默认/空值，不编造假数据
             var newFriend = {

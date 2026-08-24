@@ -369,6 +369,10 @@
   position: absolute;
   inset: 0;
 }
+/* 全局 img{display:block} 会覆盖 UA 的 [hidden] 默认隐藏，需显式声明 */
+.form-body__upload-preview[hidden] {
+  display: none;
+}
 .form-body__upload {
   position: relative;
 }
