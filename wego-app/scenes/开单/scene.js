@@ -57,8 +57,8 @@
   ];
 
   var PICKUP_POINTS = [
-    { id: 'pp1', name: '南山科技园自提点', address: '深圳市南山区科技园18号一楼' },
-    { id: 'pp2', name: '福田中心自提点', address: '深圳市福田区福华一路88号' }
+    { id: 'pp1', name: '南山科技园自提点', address: '深圳市南山区科技园18号一楼', image: './scenes/开单/assets/pickup-store-1.png' },
+    { id: 'pp2', name: '福田中心自提点', address: '深圳市福田区福华一路88号', image: './scenes/开单/assets/pickup-store-2.png' }
   ];
 
   var PAYMENT_METHODS = [
@@ -1803,12 +1803,12 @@
         + '<section class="order-pickup-points"><div class="order-pickup-points__head"><strong>选择提货点</strong><button type="button" class="link link--14" data-component-slug="link" data-add-pickup-point><i class="wego-iconfont-s icon-jia16" aria-hidden="true"></i>新增</button></div><div class="order-pickup-points__list">'
         +   PICKUP_POINTS.map(function (point) {
               var selected = selectedPoint && selectedPoint.id === point.id;
-              return '<button type="button" class="order-pickup-point ' + (selected ? 'is-selected' : '') + '" data-pickup-point-id="' + point.id + '" aria-pressed="' + selected + '"><span><b>' + escapeHtml(point.name) + '</b><small>' + escapeHtml(point.address) + '</small></span>' + (selected ? '<i class="wego-iconfont-s icon-gou16 order-delivery-option__check" aria-hidden="true"></i>' : '') + '</button>';
+              return '<button type="button" class="cell cell--double cell--bg-white order-pickup-point ' + (selected ? 'is-selected' : '') + '" data-component-slug="cell" data-pickup-point-id="' + point.id + '" aria-pressed="' + selected + '"><div class="cell__avatar"><div class="avatar avatar--40 avatar--image" data-component-slug="avatar"><img src="' + point.image + '" alt=""></div></div><div class="cell__body"><div class="cell__content"><div class="cell__title-row"><span class="cell__title">' + escapeHtml(point.name) + '</span></div><div class="cell__subtitle">' + escapeHtml(point.address) + '</div></div></div>' + (selected ? '<i class="wego-iconfont-s icon-gou16 order-pickup-point__check" aria-hidden="true"></i>' : '') + '</button>';
             }).join('')
         + '</div></section>' : '')
       +   '<section class="order-pickup-contact"><strong>提货人信息</strong><div class="order-delivery-address-fields">'
-      +     '<div class="input-group input-group--surface-white" data-component-slug="input"><label class="field-label" for="pickup-name">姓名</label><div class="input-wrapper"><input id="pickup-name" type="text" value="' + escapeHtml(contact.name) + '" placeholder="请输入提货人姓名" data-pickup-name></div></div>'
-      +     '<div class="input-group input-group--surface-white" data-component-slug="input"><label class="field-label" for="pickup-phone">手机号</label><div class="input-wrapper"><input id="pickup-phone" type="text" inputmode="tel" value="' + escapeHtml(contact.phone) + '" placeholder="请输入手机号" data-pickup-phone></div></div>'
+      +     '<div class="input-group" data-component-slug="input"><label class="field-label" for="pickup-name">姓名</label><div class="input-wrapper"><input id="pickup-name" type="text" value="' + escapeHtml(contact.name) + '" placeholder="请输入姓名" data-pickup-name></div></div>'
+      +     '<div class="input-group" data-component-slug="input"><label class="field-label" for="pickup-phone">手机号</label><div class="input-wrapper"><input id="pickup-phone" type="text" inputmode="tel" value="' + escapeHtml(contact.phone) + '" placeholder="请输入手机号" data-pickup-phone></div></div>'
       +   '</div></section>'
       + '</div>';
   }
