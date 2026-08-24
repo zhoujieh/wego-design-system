@@ -881,9 +881,13 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         var app = event.target.closest('[data-app-id]');
         if (app) {
           var appId = app.dataset.appId;
+          if (appId === 'all_apps') {
+            ctx.navigate('app-center');
+            return;
+          }
           if (recentCatalog[appId]) updateRecentApp(appId);
           else {
-            var fixedLabels = { homepage: '进入主页', qr_code: '二维码', cart: '购物车', all_apps: '全部应用' };
+            var fixedLabels = { homepage: '进入主页', qr_code: '二维码', cart: '购物车' };
             ctx.toast((fixedLabels[appId] || '应用') + '入口，本期暂不展开');
           }
           return;

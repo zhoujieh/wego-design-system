@@ -11,6 +11,18 @@ window.WEGO_APP_ROUTES = [
   script: './scenes/帮卖分销/scene.js'
 },
 {
+  routeId: 'app-center',
+  entry: {
+    type: 'grid-entry',
+    label: '全部应用',
+    group: 'workspace-tools',
+    tab: 'workspace',
+    icon: './lib/assets/icons/app-center/全部应用.svg'
+  },
+  style: './scenes/应用中心/scene.css',
+  script: './scenes/应用中心/scene.js'
+},
+{
   routeId: 'friend-list',
   entry: {
     type: 'host-tab',
