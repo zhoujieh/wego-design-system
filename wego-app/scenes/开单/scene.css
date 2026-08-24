@@ -6026,7 +6026,25 @@ body[data-order-layout="landscape"] .phone-indicator {
 
   .order-desktop-modal--delivery .order-desktop-modal__head {
     min-height: var(--size-56);
-    background: var(--bg-surface);
+    background: var(--bg-page);
+  }
+
+  .order-desktop-modal--delivery .order-desktop-modal__head > .btn {
+    width: var(--size-24);
+    min-width: var(--size-24);
+    height: var(--size-24);
+    min-height: var(--size-24);
+    padding: 0;
+    color: var(--text-secondary);
+    background: var(--bg-subtle);
+    border-radius: var(--radius-full);
+  }
+
+  .order-desktop-modal--delivery .order-desktop-modal__head > .btn .btn__icon {
+    width: var(--size-16);
+    height: var(--size-16);
+    color: var(--text-secondary);
+    font-size: var(--size-16);
   }
 
   .order-desktop-modal--delivery .order-desktop-modal__body {
@@ -6069,7 +6087,7 @@ body[data-order-layout="landscape"] .phone-indicator {
   }
 
   .order-desktop-modal--delivery .order-delivery-detail {
-    margin: 0;
+    margin: var(--spacer-8) 0 0;
     background: transparent;
     border-radius: 0;
   }
@@ -6170,6 +6188,22 @@ body[data-order-layout="landscape"] .phone-indicator {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--spacer-12);
     margin-top: var(--spacer-12);
+  }
+
+  .order-delivery-form-list {
+    margin: 0 calc(var(--spacer-16) * -1) calc(var(--spacer-16) * -1);
+  }
+
+  .order-delivery-form-list .form-body {
+    color: var(--text-default);
+    text-align: left;
+    background: var(--bg-surface);
+    border: 0;
+    border-radius: 0;
+  }
+
+  .order-delivery-form-list .form-body--align-top {
+    min-height: var(--size-72);
   }
 
   .order-desktop-modal--delivery .order-delivery-address-detail {
