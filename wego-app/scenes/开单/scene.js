@@ -206,6 +206,8 @@
     pickupPointId: PICKUP_POINTS[0] ? PICKUP_POINTS[0].id : null,
     pickupContact: null,
     realNameInfo: null,
+    senderMode: 'default',
+    senderInfo: { name: '何小小', phone: '13690809124' },
     orderNoteMerchant: '',
     orderNoteBuyer: '',
     orderNoteOpen: false,
@@ -562,7 +564,7 @@
   }
 
   function realNameComplete(info) {
-    return Boolean(info && info.name && /^[1-9]\d{5}(?:18|19|20)?\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])\d{3}[\dXx]$/.test(info.idCard));
+    return Boolean(info && (info.mode === 'group' || (info.name && /^[1-9]\d{5}(?:18|19|20)?\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])\d{3}[\dXx]$/.test(info.idCard))));
   }
 
   function deliveryDraftFromState() {
@@ -571,7 +573,9 @@
       address: state.address ? Object.assign({}, state.address) : null,
       pickupPointId: state.pickupPointId,
       pickupContact: state.pickupContact ? Object.assign({}, state.pickupContact) : null,
-      realNameInfo: state.realNameInfo ? Object.assign({}, state.realNameInfo) : null
+      realNameInfo: state.realNameInfo ? Object.assign({}, state.realNameInfo) : null,
+      senderMode: state.senderMode || 'default',
+      senderInfo: state.senderInfo ? Object.assign({}, state.senderInfo) : null
     };
   }
 
@@ -1750,13 +1754,13 @@
     return ''
       + '<div class="order-panel-form order-pickup-form">'
       +   (PICKUP_POINTS.length ? ''
-        + '<section class="order-pickup-points"><div class="order-pickup-points__head"><strong>' + (PICKUP_POINTS.length > 1 ? '选择自提点' : '自提点') + '</strong><button type="button" class="link link--14" data-component-slug="link" data-add-pickup-point><i class="wego-iconfont-s icon-jia16" aria-hidden="true"></i>新增</button></div><div class="order-pickup-points__list">'
+        + '<section class="order-pickup-points"><div class="order-pickup-points__head"><strong>选择提货点</strong><button type="button" class="link link--14" data-component-slug="link" data-add-pickup-point><i class="wego-iconfont-s icon-jia16" aria-hidden="true"></i>新增</button></div><div class="order-pickup-points__list">'
         +   PICKUP_POINTS.map(function (point) {
               var selected = selectedPoint && selectedPoint.id === point.id;
               return '<button type="button" class="order-pickup-point ' + (selected ? 'is-selected' : '') + '" data-pickup-point-id="' + point.id + '" aria-pressed="' + selected + '"><span><b>' + escapeHtml(point.name) + '</b><small>' + escapeHtml(point.address) + '</small></span>' + (selected ? '<i class="wego-iconfont-s icon-gou16 order-delivery-option__check" aria-hidden="true"></i>' : '') + '</button>';
             }).join('')
         + '</div></section>' : '')
-      +   '<section class="order-pickup-contact"><strong>填写提货人信息</strong><div class="order-delivery-address-fields">'
+      +   '<section class="order-pickup-contact"><strong>提货人信息</strong><div class="order-delivery-address-fields">'
       +     '<div class="input-group input-group--surface-white" data-component-slug="input"><label class="field-label" for="pickup-name">姓名</label><div class="input-wrapper"><input id="pickup-name" type="text" value="' + escapeHtml(contact.name) + '" placeholder="请输入提货人姓名" data-pickup-name></div></div>'
       +     '<div class="input-group input-group--surface-white" data-component-slug="input"><label class="field-label" for="pickup-phone">手机号</label><div class="input-wrapper"><input id="pickup-phone" type="text" inputmode="tel" value="' + escapeHtml(contact.phone) + '" placeholder="请输入手机号" data-pickup-phone></div></div>'
       +   '</div></section>'
@@ -1768,15 +1772,21 @@
     var address = draft.address;
     var realName = draft.realNameInfo || state.realNameInfo;
     var requiresRealName = orderRequiresRealName();
+    var realNameMode = realName && realName.mode === 'group' ? 'group' : 'direct';
+    var senderMode = draft.senderMode || 'default';
+    var senderInfo = draft.senderInfo || state.senderInfo || {};
     return ''
       + '<div class="order-panel-form order-delivery-address-form">'
-      +   '<div class="order-address-paste"><label for="receiver-paste">快速粘贴收件信息</label><div class="order-address-paste__control"><textarea id="receiver-paste" rows="1" placeholder="' + (requiresRealName ? '粘贴姓名、手机号、收件地址及身份证号' : '粘贴姓名、手机号和详细地址，自动识别') + '" data-address-paste></textarea><button type="button" class="btn btn--weak btn--sm" data-component-slug="button" data-recognize-address>识别</button></div></div>'
+      +   '<section class="order-delivery-form-section"><header><strong>收货信息</strong><button type="button" class="link link--14" data-component-slug="link" data-history-address>历史地址</button></header>'
+      +   '<div class="order-address-paste"><div class="order-address-paste__control"><textarea id="receiver-paste" rows="1" placeholder="粘贴地址，可自动识别并填入" data-address-paste></textarea><button type="button" class="link link--14" data-component-slug="link" data-recognize-address>粘贴并识别</button></div></div>'
       +   '<div class="order-delivery-address-fields">'
       +     '<div class="input-group input-group--surface-white" data-component-slug="input"><label class="field-label" for="receiver-name">收货人</label><div class="input-wrapper"><input id="receiver-name" type="text" value="' + escapeHtml(address ? address.name : '') + '" placeholder="请输入收货人姓名" data-address-name><button type="button" class="input-clear" aria-label="清空收货人"><i class="icon-yuancha-mian"></i></button></div></div>'
       +     '<div class="input-group input-group--surface-white" data-component-slug="input"><label class="field-label" for="receiver-phone">手机号</label><div class="input-wrapper"><input id="receiver-phone" type="text" inputmode="tel" value="' + escapeHtml(address ? address.phone : '') + '" placeholder="请输入手机号" data-address-phone><button type="button" class="input-clear" aria-label="清空手机号"><i class="icon-yuancha-mian"></i></button></div></div>'
       +   '</div>'
       +   '<div class="input-group input-group--surface-white order-delivery-address-detail" data-component-slug="input"><label class="field-label" for="receiver-address">详细地址</label><textarea id="receiver-address" rows="2" placeholder="省市区、街道及门牌号" data-address-detail>' + escapeHtml(address ? address.detail : '') + '</textarea></div>'
-      +   (requiresRealName ? '<section class="order-real-name-fields"><strong>实名信息 <em>必填</em></strong><div class="order-delivery-address-fields"><div class="input-group input-group--surface-white" data-component-slug="input"><label class="field-label" for="receiver-real-name">实名姓名</label><div class="input-wrapper"><input id="receiver-real-name" type="text" value="' + escapeHtml(realName ? realName.name : '') + '" placeholder="请输入实名姓名" data-real-name></div></div><div class="input-group input-group--surface-white" data-component-slug="input"><label class="field-label" for="receiver-id-card">身份证号</label><div class="input-wrapper"><input id="receiver-id-card" type="text" value="' + escapeHtml(realName ? realName.idCard : '') + '" placeholder="请输入身份证号" data-id-card></div></div></div></section>' : '')
+      +   '</section>'
+      +   (requiresRealName ? '<section class="order-real-name-fields"><header><strong>实名信息 <em>*</em></strong><div><button type="button" class="order-delivery-radio ' + (realNameMode === 'direct' ? 'is-selected' : '') + '" data-real-name-mode="direct"><i class="wego-iconfont-s icon-gou16" aria-hidden="true"></i>跨境直邮</button><button type="button" class="order-delivery-radio ' + (realNameMode === 'group' ? 'is-selected' : '') + '" data-real-name-mode="group"><i class="wego-iconfont-s icon-gou16" aria-hidden="true"></i>拼邮</button></div></header>' + (realNameMode === 'direct' ? '<div class="order-real-name-card"><div class="input-group input-group--surface-white" data-component-slug="input"><label class="field-label" for="receiver-real-name">姓名</label><div class="input-wrapper"><input id="receiver-real-name" type="text" value="' + escapeHtml(realName ? realName.name : '') + '" placeholder="请输入客户姓名" data-real-name></div></div><div class="input-group input-group--surface-white" data-component-slug="input"><label class="field-label" for="receiver-id-card">身份证号</label><div class="input-wrapper"><input id="receiver-id-card" type="text" value="' + escapeHtml(realName ? realName.idCard : '') + '" placeholder="请输入客户身份证号" data-id-card></div></div></div>' : '') + '</section>' : '')
+      +   '<section class="order-sender-fields"><header><strong>发件人</strong><div><button type="button" class="order-delivery-radio ' + (senderMode === 'default' ? 'is-selected' : '') + '" data-sender-mode="default"><i class="wego-iconfont-s icon-gou16" aria-hidden="true"></i>默认</button><button type="button" class="order-delivery-radio ' + (senderMode === 'proxy' ? 'is-selected' : '') + '" data-sender-mode="proxy"><i class="wego-iconfont-s icon-gou16" aria-hidden="true"></i>代发</button></div></header>' + (senderMode === 'proxy' ? '<div class="order-sender-card order-sender-card--proxy"><div class="input-group" data-component-slug="input"><label class="field-label" for="sender-name">姓名</label><div class="input-wrapper"><input id="sender-name" value="' + escapeHtml(senderInfo.name || '') + '" placeholder="请输入发件人姓名" data-sender-name></div></div><div class="input-group" data-component-slug="input"><label class="field-label" for="sender-phone">手机号</label><div class="input-wrapper"><input id="sender-phone" value="' + escapeHtml(senderInfo.phone || '') + '" placeholder="请输入手机号" data-sender-phone></div></div></div>' : '<div class="order-sender-card"><span><strong>' + escapeHtml(senderInfo.name || '何小小') + ' ' + escapeHtml(senderInfo.phone || '13690809124') + '</strong><small>默认发件人</small></span><button type="button" class="link link--14" data-component-slug="link" data-edit-sender>编辑</button></div>') + '</section>'
       + '</div>';
   }
 
@@ -3233,6 +3243,22 @@
       renderActive();
       return;
     }
+    if (target.matches('[data-real-name-mode]')) {
+      var realNameDraft = activeDeliveryDraft();
+      var nextRealNameMode = target.dataset.realNameMode;
+      realNameDraft.realNameInfo = Object.assign({}, realNameDraft.realNameInfo || state.realNameInfo || {}, { mode: nextRealNameMode });
+      renderActive();
+      return;
+    }
+    if (target.matches('[data-sender-mode]')) {
+      activeDeliveryDraft().senderMode = target.dataset.senderMode;
+      renderActive();
+      return;
+    }
+    if (target.matches('[data-history-address], [data-edit-sender], [data-add-pickup-point]')) {
+      ctx.toast('该入口已保留，本期暂不展开');
+      return;
+    }
     if (target.matches('[data-pickup-point-id]')) {
       activeDeliveryDraft().pickupPointId = target.dataset.pickupPointId;
       renderActive();
@@ -3274,13 +3300,18 @@
         }
         saveDraft.address = hasAnyRecipientInfo ? { name: name, phone: phone, detail: detail } : null;
         if (orderRequiresRealName()) {
-          var realName = deliveryScope.querySelector('[data-real-name]')?.value.trim();
-          var idCard = deliveryScope.querySelector('[data-id-card]')?.value.trim().toUpperCase();
-          if (!realNameComplete({ name: realName, idCard: idCard })) {
-            ctx.toast('请填写正确的实名姓名和身份证号');
-            return;
+          var selectedRealNameMode = saveDraft.realNameInfo && saveDraft.realNameInfo.mode === 'group' ? 'group' : 'direct';
+          if (selectedRealNameMode === 'group') {
+            saveDraft.realNameInfo = { name: '', idCard: '', mode: 'group' };
+          } else {
+            var realName = deliveryScope.querySelector('[data-real-name]')?.value.trim();
+            var idCard = deliveryScope.querySelector('[data-id-card]')?.value.trim().toUpperCase();
+            if (!realNameComplete({ name: realName, idCard: idCard })) {
+              ctx.toast('请填写正确的实名姓名和身份证号');
+              return;
+            }
+            saveDraft.realNameInfo = { name: realName, idCard: idCard, mode: 'direct' };
           }
-          saveDraft.realNameInfo = { name: realName, idCard: idCard, mode: 'direct' };
         }
       }
       if (saveDraft.delivery === 'pickup') {
@@ -3293,9 +3324,21 @@
         if (PICKUP_POINTS.length && !currentPickupPoint(saveDraft.pickupPointId)) saveDraft.pickupPointId = PICKUP_POINTS[0].id;
         saveDraft.pickupContact = { name: pickupName, phone: pickupPhone };
       }
+      var savesAddressDelivery = saveDraft.delivery === 'express' || saveDraft.delivery === 'freight';
+      if (savesAddressDelivery && saveDraft.senderMode === 'proxy') {
+        var senderName = deliveryScope.querySelector('[data-sender-name]')?.value.trim();
+        var senderPhone = deliveryScope.querySelector('[data-sender-phone]')?.value.trim();
+        if (!senderName || !senderPhone) {
+          ctx.toast('请完整填写代发人姓名和手机号');
+          return;
+        }
+        saveDraft.senderInfo = { name: senderName, phone: senderPhone };
+      }
       state.delivery = saveDraft.delivery;
       if (saveDraft.delivery === 'express' || saveDraft.delivery === 'freight') state.address = saveDraft.address ? Object.assign({}, saveDraft.address) : null;
       if (saveDraft.delivery === 'express' || saveDraft.delivery === 'freight') state.realNameInfo = saveDraft.realNameInfo ? Object.assign({}, saveDraft.realNameInfo) : state.realNameInfo;
+      if (savesAddressDelivery) state.senderMode = saveDraft.senderMode || state.senderMode;
+      if (savesAddressDelivery) state.senderInfo = saveDraft.senderInfo ? Object.assign({}, saveDraft.senderInfo) : state.senderInfo;
       if (saveDraft.delivery === 'pickup') {
         state.pickupPointId = saveDraft.pickupPointId;
         state.pickupContact = saveDraft.pickupContact ? Object.assign({}, saveDraft.pickupContact) : null;
@@ -3701,6 +3744,28 @@
 
   function handleInput(event, root, ctx) {
     var target = event.target;
+    if (state.panel === 'delivery' && target.matches('[data-real-name], [data-id-card]')) {
+      var inputRealNameDraft = activeDeliveryDraft();
+      inputRealNameDraft.realNameInfo = Object.assign({}, inputRealNameDraft.realNameInfo || { mode: 'direct' });
+      if (target.matches('[data-real-name]')) inputRealNameDraft.realNameInfo.name = target.value;
+      if (target.matches('[data-id-card]')) inputRealNameDraft.realNameInfo.idCard = target.value;
+      return;
+    }
+    if (state.panel === 'delivery' && target.matches('[data-address-name], [data-address-phone], [data-address-detail]')) {
+      var inputAddressDraft = activeDeliveryDraft();
+      inputAddressDraft.address = Object.assign({}, inputAddressDraft.address || {});
+      if (target.matches('[data-address-name]')) inputAddressDraft.address.name = target.value;
+      if (target.matches('[data-address-phone]')) inputAddressDraft.address.phone = target.value;
+      if (target.matches('[data-address-detail]')) inputAddressDraft.address.detail = target.value;
+      return;
+    }
+    if (state.panel === 'delivery' && target.matches('[data-sender-name], [data-sender-phone]')) {
+      var inputSenderDraft = activeDeliveryDraft();
+      inputSenderDraft.senderInfo = Object.assign({}, inputSenderDraft.senderInfo || {});
+      if (target.matches('[data-sender-name]')) inputSenderDraft.senderInfo.name = target.value;
+      if (target.matches('[data-sender-phone]')) inputSenderDraft.senderInfo.phone = target.value;
+      return;
+    }
     if (target.matches('[data-inline-address-paste], [data-inline-pickup-paste]')) {
       var inlineRecognizeButton = target.closest('.order-desktop-delivery-inline, .order-mobile-delivery-inline')?.querySelector('[data-inline-recognize-address], [data-inline-recognize-pickup]');
       if (inlineRecognizeButton) {

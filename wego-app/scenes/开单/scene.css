@@ -6016,6 +6016,230 @@ body[data-order-layout="landscape"] .phone-indicator {
     padding: 0 var(--spacer-8);
     align-self: center;
   }
+
+  .order-desktop-modal--delivery .order-desktop-modal__panel {
+    width: calc(var(--size-104) * 4 + var(--size-64));
+    height: calc(var(--size-104) * 5);
+    max-height: calc(100% - var(--spacer-48));
+    background: var(--bg-muted);
+  }
+
+  .order-desktop-modal--delivery .order-desktop-modal__head {
+    min-height: var(--size-56);
+    background: var(--bg-surface);
+  }
+
+  .order-desktop-modal--delivery .order-desktop-modal__body {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .order-desktop-modal--delivery .order-delivery-panel__scroll {
+    padding-bottom: 0;
+    background: var(--bg-muted);
+  }
+
+  .order-desktop-modal--delivery .order-delivery-choices {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
+    padding: var(--spacer-8) var(--spacer-16);
+    background: var(--bg-surface);
+  }
+
+  .order-desktop-modal--delivery .order-delivery-option,
+  .order-desktop-modal--delivery .order-delivery-option .cell__body {
+    min-height: var(--size-32);
+    height: var(--size-32);
+    border-radius: var(--radius-6);
+  }
+
+  .order-desktop-modal--delivery .order-delivery-option {
+    border-color: transparent;
+  }
+
+  .order-desktop-modal--delivery .order-delivery-option__check {
+    width: var(--spacer-14);
+    height: var(--spacer-14);
+    font-size: var(--spacer-10);
+    border-radius: 0 var(--radius-6) 0 var(--radius-6);
+  }
+
+  .order-desktop-modal--delivery .order-delivery-detail {
+    margin: 0;
+    background: transparent;
+    border-radius: 0;
+  }
+
+  .order-desktop-modal--delivery .order-delivery-detail::before {
+    display: none;
+  }
+
+  .order-desktop-modal--delivery .order-delivery-address-form,
+  .order-desktop-modal--delivery .order-pickup-form {
+    gap: var(--spacer-8);
+    padding: 0;
+  }
+
+  .order-delivery-form-section,
+  .order-real-name-fields,
+  .order-sender-fields,
+  .order-pickup-points,
+  .order-pickup-contact {
+    padding: 0 var(--spacer-16) var(--spacer-16);
+    background: var(--bg-surface);
+  }
+
+  .order-delivery-form-section > header,
+  .order-real-name-fields > header,
+  .order-sender-fields > header,
+  .order-pickup-points__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: var(--size-48);
+  }
+
+  .order-delivery-form-section > header > strong,
+  .order-real-name-fields > header > strong,
+  .order-sender-fields > header > strong,
+  .order-pickup-points__head > strong,
+  .order-pickup-contact > strong {
+    font-size: var(--body-lg-font-size);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .order-real-name-fields > header > strong > em {
+    color: var(--status-danger-default);
+    font-style: normal;
+  }
+
+  .order-real-name-fields > header > div,
+  .order-sender-fields > header > div {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-24);
+  }
+
+  .order-delivery-radio {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacer-2);
+    color: var(--text-default);
+    font-size: var(--body-lg-font-size);
+  }
+
+  .order-delivery-radio > i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--size-20);
+    height: var(--size-20);
+    color: transparent;
+    font-size: var(--size-12);
+    border: var(--stroke-strong) solid var(--border-neutral-l2);
+    border-radius: var(--radius-full);
+  }
+
+  .order-delivery-radio.is-selected > i {
+    color: var(--text-inverse);
+    background: var(--bg-brand);
+    border-color: var(--border-brand);
+  }
+
+  .order-desktop-modal--delivery .order-address-paste {
+    padding: var(--spacer-8);
+    background: var(--bg-subtle);
+  }
+
+  .order-desktop-modal--delivery .order-address-paste__control textarea {
+    min-height: var(--size-24);
+    height: var(--size-24);
+    padding: 0;
+    resize: none;
+    background: transparent;
+    border: 0;
+  }
+
+  .order-desktop-modal--delivery .order-delivery-address-fields,
+  .order-desktop-modal--delivery .order-real-name-card {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--spacer-12);
+    margin-top: var(--spacer-12);
+  }
+
+  .order-desktop-modal--delivery .order-delivery-address-detail {
+    margin-top: var(--spacer-12);
+  }
+
+  .order-real-name-card {
+    padding: var(--spacer-12);
+    background: var(--bg-subtle);
+    border-radius: var(--radius-8);
+  }
+
+  .order-sender-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: var(--size-56);
+    padding: var(--spacer-8) var(--spacer-12);
+    background: var(--bg-subtle);
+    border-radius: var(--radius-8);
+  }
+
+  .order-sender-card > span {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+  }
+
+  .order-sender-card small {
+    color: var(--text-secondary);
+    font-size: var(--body-sm-font-size);
+  }
+
+  .order-sender-card--proxy {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--spacer-12);
+  }
+
+  .order-sender-card--proxy .input-group {
+    min-width: 0;
+    max-width: none;
+  }
+
+  .order-desktop-modal--delivery .order-pickup-points,
+  .order-desktop-modal--delivery .order-pickup-contact {
+    gap: var(--spacer-8);
+  }
+
+  .order-desktop-modal--delivery .order-pickup-points__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .order-desktop-modal--delivery .order-delivery-actions {
+    justify-content: flex-end;
+    gap: var(--spacer-8);
+    min-height: var(--size-64);
+    padding: var(--spacer-12) var(--spacer-16);
+    background: var(--bg-panel);
+    border-top: var(--stroke-hairline) solid var(--border-neutral-l2);
+  }
+
+  .order-desktop-modal--delivery .order-delivery-actions .btn {
+    width: calc(var(--size-72) + var(--spacer-4));
+    min-width: calc(var(--size-72) + var(--spacer-4));
+    height: var(--size-40);
+    min-height: var(--size-40);
+    font-size: var(--body-lg-font-size);
+    border-radius: var(--radius-8);
+  }
 }
 
 
