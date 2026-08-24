@@ -6221,6 +6221,12 @@ body[data-order-layout="landscape"] .phone-indicator {
     border-radius: var(--radius-8);
   }
 
+  .order-real-name-card .form-body {
+    gap: var(--spacer-8);
+    padding-right: var(--spacer-8);
+    padding-left: var(--spacer-8);
+  }
+
   .order-sender-card {
     display: flex;
     align-items: center;
