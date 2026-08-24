@@ -1240,8 +1240,8 @@
       return ''
         + '<div class="order-desktop-delivery-inline">'
         +   '<button type="button" data-open-panel="delivery"><small><i class="wego-iconfont-s icon-che" aria-hidden="true"></i>' + (state.delivery === 'express' ? '快递' : '快运') + '</small><strong>' + (inlineRequiresRealName ? '暂无收货信息和实名信息' : '暂无收货信息') + '</strong><i class="wego-iconfont-s icon-youjiantou16" aria-hidden="true"></i></button>'
-        +   '<input type="text" aria-label="粘贴收件信息" placeholder="' + (inlineRequiresRealName ? '粘贴姓名、手机号、收件地址及身份证号' : '粘贴姓名、手机号及收件地址') + '" data-inline-address-paste>'
-        +   '<button type="button" class="btn btn--medium btn--sm" data-component-slug="button" data-inline-recognize-address>识别</button>'
+        +   '<div class="input-group order-desktop-delivery-inline__input" data-component-slug="input"><div class="input-wrapper"><input type="text" aria-label="粘贴收件信息" placeholder="' + (inlineRequiresRealName ? '粘贴姓名、手机号、收件地址及身份证号' : '粘贴姓名、手机号及收件地址') + '" data-inline-address-paste></div></div>'
+        +   '<button type="button" class="btn btn--medium btn--sm btn--disabled" data-component-slug="button" data-inline-recognize-address disabled>识别</button>'
         + '</div>';
     }
     var desktopPickupContact = pickupContactValues(state.pickupContact);
@@ -1250,8 +1250,8 @@
       return ''
         + '<div class="order-desktop-delivery-inline order-desktop-delivery-inline--pickup">'
         +   '<button type="button" data-open-panel="delivery"><small><i class="wego-iconfont-s icon-daohang" aria-hidden="true"></i>' + (desktopPickupPoint ? '自提点：' + escapeHtml(desktopPickupPoint.name) : '自提') + '</small><strong>暂无提货人信息</strong><i class="wego-iconfont-s icon-youjiantou16" aria-hidden="true"></i></button>'
-        +   '<input type="text" aria-label="粘贴提货人信息" placeholder="粘贴姓名和手机号" data-inline-pickup-paste>'
-        +   '<button type="button" class="btn btn--medium btn--sm" data-component-slug="button" data-inline-recognize-pickup>识别</button>'
+        +   '<div class="input-group order-desktop-delivery-inline__input" data-component-slug="input"><div class="input-wrapper"><input type="text" aria-label="粘贴提货人信息" placeholder="粘贴姓名和手机号" data-inline-pickup-paste></div></div>'
+        +   '<button type="button" class="btn btn--medium btn--sm btn--disabled" data-component-slug="button" data-inline-recognize-pickup disabled>识别</button>'
         + '</div>';
     }
     var summary = deliverySummaryText();
@@ -3705,6 +3705,15 @@
 
   function handleInput(event, root, ctx) {
     var target = event.target;
+    if (target.matches('[data-inline-address-paste], [data-inline-pickup-paste]')) {
+      var inlineRecognizeButton = target.closest('.order-desktop-delivery-inline, .order-mobile-delivery-inline')?.querySelector('[data-inline-recognize-address], [data-inline-recognize-pickup]');
+      if (inlineRecognizeButton) {
+        var inlineHasValue = Boolean(String(target.value || '').trim());
+        inlineRecognizeButton.disabled = !inlineHasValue;
+        inlineRecognizeButton.classList.toggle('btn--disabled', !inlineHasValue);
+      }
+      return;
+    }
     if (target.matches('[data-product-edit-field]') && state.productEditDraft) {
       state.productEditDraft[target.dataset.productEditField] = target.value;
       return;
