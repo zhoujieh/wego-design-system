@@ -269,6 +269,9 @@
   });
   var scenes = new Map();
   var loadingScripts = new Map();
+  // navigate() 置位：下一条 hashchange 对应的场景历史条目由 App 自己推入。
+  // openPushScene 消费该标记写入 entry.historyPushed，供 ctx.back 判断能否 history.back()
+  var pendingEntryPushed = false;
   var loadedStyles = new Set();
   // push 场景栈：bottom-to-top 顺序，每个 entry = { routeId, host, scene }
   // host 为承载该场景内容的 DOM 元素（.app-scene-layer__panel）
@@ -356,6 +359,9 @@
       openRoute(routeId);
       return;
     }
+    // 标记下一条入栈场景的历史条目由 App 推入：
+    // ctx.back() 据此决定消费历史（history.back）还是本地清理（直达链接无可回退条目）
+    pendingEntryPushed = true;
     window.location.hash = '#/' + routeId;
   }
 
@@ -433,8 +439,22 @@
     }
 
     top.host.classList.add('app-scene-layer__panel--exit');
+    poppingRouteIds.add(top.routeId);
+    var finished = false;
     var onTransitionEnd = function () {
+      if (finished) return;
+      finished = true;
+      clearTimeout(fallbackTimer);
       top.host.removeEventListener('transitionend', onTransitionEnd);
+      finalizePop();
+    };
+    // 兜底：transitionend 被打断/不触发时（元素不可见、系统动画抢占等），
+    // 按过渡时长定时收尾，防止 panel 永不移除导致后续导航全部错乱
+    // （与 closeOverlayEntry 的 setTimeout 兜底做法一致）
+    var POP_EXIT_REMOVE_DELAY = 280; // 250ms 过渡 + 30ms 缓冲
+    var fallbackTimer = setTimeout(onTransitionEnd, POP_EXIT_REMOVE_DELAY);
+    function finalizePop() {
+      poppingRouteIds.delete(top.routeId);
       top.host.remove();
       sceneStack.pop();
       if (sceneStack.length === 0) {
@@ -446,7 +466,7 @@
         appState.currentRouteId = newTop.routeId;
       }
       if (typeof afterCallback === 'function') afterCallback();
-    };
+    }
     top.host.addEventListener('transitionend', onTransitionEnd);
   }
 
@@ -471,6 +491,7 @@
       entry.host.remove();
     });
     sceneStack = [];
+    poppingRouteIds.clear();
     sceneLayer.hidden = true;
     sceneLayer.className = 'app-scene-layer';
     sceneLayer.replaceChildren();
@@ -764,7 +785,14 @@
       forceHostEntriesRepaint(entryEl);
     }
 
-    sceneStack.push({ routeId: scene.routeId, host: panel, scene: scene });
+    sceneStack.push({
+      routeId: scene.routeId,
+      host: panel,
+      scene: scene,
+      // 该场景的历史条目是否由 App navigate() 推入（直达链接进入时为 false）
+      historyPushed: pendingEntryPushed
+    });
+    pendingEntryPushed = false;
     appState.currentRouteId = scene.routeId;
     mountSceneInit(panel, scene, sceneContext(scene, panel), function () {
       WegoApp.layoutAllBottomActionBars(panel);
@@ -983,10 +1011,22 @@
       closeOverlay();
       return;
     }
-    // push 场景栈式返回：只弹顶层，下层自然显露
+    var top = sceneStack[sceneStack.length - 1];
+    // 统一返回语义：页面内返回与浏览器返回操作同一条历史。
+    // 先本地带动画弹出（桌面端保留滑出观感），再 history.back() 消费该场景的历史条目；
+    // hashchange 随后触发时栈已对齐（新栈顶匹配或栈空），handler 自然无操作，
+    // 不会出现"已关场景被幽灵历史条目复活"的问题。
+    if (top && top.historyPushed) {
+      top.historyPushed = false;
+      popSceneLayer(null, true);
+      try { history.back(); } catch (e) {}
+      return;
+    }
+    // 直达链接进入（无可回退的历史条目）：本地清理，不把用户甩出页面。
+    // pushState 抹掉当前 hash 而非留下幽灵条目，浏览器返回不会再"复活"已关场景。
     popSceneLayer(function () {
-      if (sceneStack.length === 0 && window.location.hash) {
-        history.pushState('', document.title, window.location.pathname + window.location.search);
+      if (window.location.hash) {
+        try { history.replaceState(null, document.title, window.location.pathname + window.location.search); } catch (e) {}
       }
     });
   }
@@ -1372,6 +1412,10 @@
       openPushScene(scene);
       return;
     }
+    // overlay 型场景（sheet / full-screen-modal）：
+    // openOverlay 会自己 push 一条 history（wegoOverlay state），不经过 hashchange，
+    // 需在这里消费 pendingEntryPushed，否则标记残留会让下一个 push 场景误判历史来源
+    pendingEntryPushed = false;
     var template = scene.template || '';
     var init = function (ctx) {
       if (typeof scene.init === 'function') scene.init(sceneContext(scene, ctx.root));
@@ -1471,6 +1515,11 @@
     entries.forEach(function (entry) {
       if (entry.dataset.routeBound === 'true') return;
       entry.dataset.routeBound = 'true';
+      // host-tab 型路由的容器（场景面板根节点常带 data-route-id 标识）不是入口：
+      // 绑定它会让面板内任何按钮的冒泡都触发 navigate(tab路由)，往历史里塞
+      // #/<tab> 幽灵条目，导致 push 场景 ctx.back() 消费历史时落到错误位置无法返回。
+      var config = routeConfigs.get(entry.dataset.routeId);
+      if (config && config.entry && config.entry.type === 'host-tab') return;
       entry.addEventListener('click', function (event) {
         event.preventDefault();
         var routeId = entry.dataset.routeId;
@@ -1498,19 +1547,32 @@
     return sceneStack.some(function (entry) { return entry.routeId === routeId; });
   }
 
+  // 正在退场动画中的 routeId 集合：ctx.back() 先本地弹出再 history.back()，
+  // hashchange 到达时条目还在栈里，靠此标记跳过、不重复弹层
+  var poppingRouteIds = new Set();
+
   // hashchange 处理：区分前进（navigate 触发）与后退（侧滑 / history.back 触发）
   // - 前进：routeId 不在栈中 → openRoute 打开新场景
   // - 后退到宿主：hash 变空 → 关闭顶层（overlay 或 push 场景）
   // - 后退到中间层级：routeId 在栈中但非栈顶 → popSceneLayer 弹一层，下层自然显露
-  // - 栈顶已匹配：无操作（避免重复打开）
-  window.addEventListener('hashchange', function () {
+  // - 栈顶已匹配 / 本次变化对应的场景已被本地弹出（ctx.back 先本地弹出再消费历史）：
+  //   无操作（避免重复弹出或"复活"已关场景）
+  window.addEventListener('hashchange', function (event) {
     var routeId = routeFromHash();
+    var prevRouteId = '';
+    var prevMatch = String(event.oldURL || '').match(/#\/([^/?#]+)/);
+    if (prevMatch) prevRouteId = decodeURIComponent(prevMatch[1]);
     // toast 由宿主全局管理，不跟随路由变化清理；保留给 toast 自身的 4s 自动关闭、
     // 互斥逻辑（toast 函数内部 dismissToasts）和下一次操作（dismissToastForPageAction）处理。
     // 前进导航（navigate）和切换 Tab（tabTriggers）仍会主动清理 toast。
 
     // hash 变空：返回到宿主（iOS 侧滑 / history.back 最常见场景）
     if (!routeId) {
+      // 跳过两类已被本地处理的返回：
+      // 1) ctx.back() 先本地带动画弹出再消费历史 —— 该场景正在退场，hashchange 到达时
+      //    条目尚未从栈中移除，需按退场标记跳过（否则会误弹下层）；
+      // 2) 无动画路径已完成弹出 —— 条目已不在栈中。
+      if (!prevRouteId || poppingRouteIds.has(prevRouteId) || !isRouteInStack(prevRouteId)) return;
       if (overlayStack.length > 0) {
         // hashchange 触发的关闭：iOS 侧滑返回时系统已完成页面过渡动画，
         // JS 不再叠加 CSS 退场动画，也不回退 history（state 已被消费）
