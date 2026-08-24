@@ -5497,12 +5497,17 @@ body[data-order-layout="landscape"] .phone-indicator {
   }
 
   .order-desktop-customer-summary .order-customer-vip {
+    display: inline-flex;
     flex: 0 0 auto;
     height: var(--size-24);
+    min-height: var(--size-24);
+    max-height: var(--size-24);
+    padding: 0;
     color: var(--palette-gold-700);
     background: var(--palette-gold-100);
     border: 0;
     border-radius: var(--radius-4);
+    overflow: hidden;
   }
 
   .order-desktop-customer-summary .order-customer-vip b,
@@ -5511,19 +5516,37 @@ body[data-order-layout="landscape"] .phone-indicator {
   .order-desktop-customer-summary .order-customer-vip--v3 span {
     display: inline-flex;
     align-items: center;
-    height: var(--spacer-12);
+    justify-content: center;
+    align-self: stretch;
+    height: var(--size-24);
     padding: 0 var(--spacer-4);
     color: var(--palette-gold-700);
     font-size: var(--body-md-font-size);
     font-weight: var(--font-weight-medium);
+    line-height: var(--size-24);
     background: transparent;
   }
 
   .order-desktop-customer-summary .order-customer-vip b {
-    border-right: var(--stroke-hairline) solid var(--palette-gold-300);
+    position: relative;
+    min-width: 30px;
   }
 
-  .order-desktop-customer-clear {
+  .order-desktop-customer-summary .order-customer-vip b::after {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    width: var(--stroke-hairline);
+    height: var(--spacer-12);
+    background: var(--palette-gold-300);
+    content: "";
+    transform: translateY(-50%);
+  }
+
+  .order-desktop-customer-summary .order-desktop-customer-clear,
+  .order-desktop-customer-summary .order-desktop-customer-clear:hover,
+  .order-desktop-customer-summary .order-desktop-customer-clear:active,
+  .order-desktop-customer-summary .order-desktop-customer-clear.is-pressed {
     align-self: stretch;
     width: var(--size-48);
     min-width: var(--size-48);
@@ -5533,6 +5556,7 @@ body[data-order-layout="landscape"] .phone-indicator {
     background: transparent;
     border: 0;
     border-radius: 0;
+    transition: none;
   }
 
   .order-desktop-customer-clear .btn__icon {
