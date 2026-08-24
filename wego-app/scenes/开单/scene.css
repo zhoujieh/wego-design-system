@@ -5225,6 +5225,10 @@ body[data-order-layout="landscape"] .phone-indicator {
     gap: var(--spacer-8);
   }
 
+  .order-desktop__header-right {
+    gap: var(--spacer-16);
+  }
+
   .order-desktop__header-center {
     min-width: 0;
   }
@@ -5272,11 +5276,26 @@ body[data-order-layout="landscape"] .phone-indicator {
     display: none;
   }
 
-  .order-desktop__header > .order-desktop__header-right > .order-desktop-clerk {
+  .order-desktop-clerk-summary {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacer-8);
+    min-height: var(--size-32);
+    white-space: nowrap;
+  }
+
+  .order-desktop-clerk,
+  .order-desktop-daily-total {
     color: var(--text-default);
-    font-size: var(--body-sm-font-size);
+    font-size: var(--body-md-font-size);
     opacity: 1;
     white-space: nowrap;
+  }
+
+  .order-desktop-clerk-divider {
+    width: var(--stroke-hairline);
+    height: var(--spacer-14);
+    background: var(--border-neutral-l2);
   }
 
   .order-desktop__workspace,

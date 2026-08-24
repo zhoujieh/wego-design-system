@@ -43,6 +43,7 @@
   var CATALOG_CATEGORIES = ['全部', '上衣', '裤装', '裙装', 'T恤', '牛仔', '针织', '连衣裙'];
 
   var USER_INDUSTRY = '服鞋箱包';
+  var CURRENT_CLERK = { id: 'clerk-xiaowei', name: '小微' };
   var GUIDES = [
     { id: 'g1', name: '小林' },
     { id: 'g2', name: '小周' },
@@ -148,6 +149,42 @@
     } catch (error) {}
   }
 
+  function localDateKey(date) {
+    date = date || new Date();
+    return [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(date.getDate()).padStart(2, '0')].join('-');
+  }
+
+  function clerkDailyTotalStorageKey(dateKey) {
+    return 'wego-order-clerk-daily-total:' + (dateKey || localDateKey()) + ':' + CURRENT_CLERK.id;
+  }
+
+  function storedClerkDailyTotal() {
+    try {
+      var saved = JSON.parse(window.localStorage.getItem(clerkDailyTotalStorageKey()) || 'null');
+      if (!saved || saved.date !== localDateKey() || saved.clerkId !== CURRENT_CLERK.id) return { count: 0, amount: 0 };
+      return { count: Math.max(0, Number(saved.count || 0)), amount: Math.max(0, Number(saved.amount || 0)) };
+    } catch (error) {
+      return { count: 0, amount: 0 };
+    }
+  }
+
+  function recordClerkDailyTotal(amount) {
+    var current = storedClerkDailyTotal();
+    var next = {
+      date: localDateKey(),
+      clerkId: CURRENT_CLERK.id,
+      count: current.count + 1,
+      amount: Math.round((current.amount + Math.max(0, Number(amount || 0))) * 100) / 100
+    };
+    try { window.localStorage.setItem(clerkDailyTotalStorageKey(next.date), JSON.stringify(next)); } catch (error) {}
+    state.clerkDailyTotal = { count: next.count, amount: next.amount };
+  }
+
+  function dailyTotalAmount(value) {
+    var amount = Math.max(0, Number(value || 0));
+    return Number.isInteger(amount) ? String(amount) : amount.toFixed(2);
+  }
+
   var state = {
     customer: null,
     warehouse: WAREHOUSES[0],
@@ -209,6 +246,8 @@
     paymentStatus: 'idle',
     orderNo: '',
     paymentSummary: '',
+    clerkDailyTotal: storedClerkDailyTotal(),
+    dailyTotalRecorded: false,
     previewImageIndex: null,
     confirmClearOrder: false,
     productEditDraft: null,
@@ -2101,6 +2140,7 @@
   }
 
   function desktopView() {
+    state.clerkDailyTotal = storedClerkDailyTotal();
     var catalogCollapsedClass = desktopShowsCatalog() && state.catalogCollapsed ? ' order-desktop__workspace--catalog-collapsed' : '';
     var catalogResizableClass = desktopShowsCatalog() && !state.catalogCollapsed ? ' order-desktop__workspace--with-resizer' : '';
     var catalogResizeHandle = desktopShowsCatalog() && !state.catalogCollapsed
@@ -2112,7 +2152,7 @@
       +   '<header class="order-desktop__header">'
       +     '<div class="order-desktop__header-left"><button type="button" class="btn btn--weak btn--sm order-desktop-back" data-component-slug="button" data-back><i class="btn__icon icon-zuojiantou16" aria-hidden="true"></i>返回</button><span class="order-desktop__title-anchor"><h1 class="order-desktop__title">收银开单</h1><button type="button" class="order-desktop-warehouse" data-open-panel="warehouse"><span>' + escapeHtml(state.warehouse.name) + '</span><i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button></span></div>'
       +     '<div class="order-desktop__header-center"></div>'
-      +     '<div class="order-desktop__header-right"><div class="order-industry-switch"><button type="button" class="btn btn--weak btn--sm" data-component-slug="button" data-toggle-industry-menu aria-haspopup="menu" aria-expanded="' + state.industryMenuOpen + '">切换行业<i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button>' + (state.industryMenuOpen ? '<div class="order-industry-menu" role="menu" aria-label="切换行业"><button type="button" role="menuitemradio" aria-checked="' + (state.industry === 'clothing') + '" data-industry="clothing"><span>服装</span>' + (state.industry === 'clothing' ? '<i class="wego-iconfont-s icon-gou16" aria-hidden="true"></i>' : '') + '</button><button type="button" role="menuitemradio" aria-checked="' + (state.industry === 'phone') + '" data-industry="phone"><span>手机</span>' + (state.industry === 'phone' ? '<i class="wego-iconfont-s icon-gou16" aria-hidden="true"></i>' : '') + '</button></div>' : '') + '</div><button type="button" class="btn btn--weak btn--sm" data-component-slug="button" data-open-panel="drafts">草稿箱（' + state.draftCount + '）</button><button type="button" class="btn btn--weak btn--sm order-desktop-history" data-component-slug="button">历史订单</button><div class="order-desktop-guide-anchor"><button type="button" class="btn btn--weak btn--sm order-desktop-guide-selector" data-component-slug="button" data-toggle-guide aria-haspopup="dialog" aria-expanded="' + state.guidePickerOpen + '">导购员：' + escapeHtml(state.guide.name) + '<i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button>' + (state.guidePickerOpen ? '<div class="order-desktop-guide-menu" role="dialog" aria-label="选择导购员">' + GUIDES.map(function (guide) { return '<button type="button" class="btn btn--weak btn--sm" data-component-slug="button" data-guide-id="' + guide.id + '" aria-pressed="' + (state.guide.id === guide.id) + '">' + escapeHtml(guide.name) + '</button>'; }).join('') + '</div>' : '') + '</div><span class="order-desktop-clerk">开单员：小微</span></div>'
+      +     '<div class="order-desktop__header-right"><div class="order-industry-switch"><button type="button" class="btn btn--weak btn--sm" data-component-slug="button" data-toggle-industry-menu aria-haspopup="menu" aria-expanded="' + state.industryMenuOpen + '">切换行业<i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button>' + (state.industryMenuOpen ? '<div class="order-industry-menu" role="menu" aria-label="切换行业"><button type="button" role="menuitemradio" aria-checked="' + (state.industry === 'clothing') + '" data-industry="clothing"><span>服装</span>' + (state.industry === 'clothing' ? '<i class="wego-iconfont-s icon-gou16" aria-hidden="true"></i>' : '') + '</button><button type="button" role="menuitemradio" aria-checked="' + (state.industry === 'phone') + '" data-industry="phone"><span>手机</span>' + (state.industry === 'phone' ? '<i class="wego-iconfont-s icon-gou16" aria-hidden="true"></i>' : '') + '</button></div>' : '') + '</div><button type="button" class="btn btn--weak btn--sm" data-component-slug="button" data-open-panel="drafts"><i class="btn__icon icon-caogaoxiang" aria-hidden="true"></i>草稿箱 (' + state.draftCount + ')</button><button type="button" class="btn btn--weak btn--sm order-desktop-history" data-component-slug="button"><i class="btn__icon icon-dingdan" aria-hidden="true"></i>历史订单</button><div class="order-desktop-guide-anchor"><button type="button" class="btn btn--weak btn--sm order-desktop-guide-selector" data-component-slug="button" data-toggle-guide aria-haspopup="dialog" aria-expanded="' + state.guidePickerOpen + '">导购员：' + escapeHtml(state.guide.name) + '<i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button>' + (state.guidePickerOpen ? '<div class="order-desktop-guide-menu" role="dialog" aria-label="选择导购员">' + GUIDES.map(function (guide) { return '<button type="button" class="btn btn--weak btn--sm" data-component-slug="button" data-guide-id="' + guide.id + '" aria-pressed="' + (state.guide.id === guide.id) + '">' + escapeHtml(guide.name) + '</button>'; }).join('') + '</div>' : '') + '</div><div class="order-desktop-clerk-summary"><span class="order-desktop-clerk">开单员：' + escapeHtml(CURRENT_CLERK.name) + '</span><span class="order-desktop-clerk-divider" aria-hidden="true"></span><span class="order-desktop-daily-total">今日合计：' + state.clerkDailyTotal.count + '单 ' + dailyTotalAmount(state.clerkDailyTotal.amount) + '元</span></div></div>'
       +   '</header>'
       +   '<div class="order-desktop__workspace' + catalogCollapsedClass + catalogResizableClass + '"' + desktopWorkspaceStyle() + '>'
       +     desktopOrder()
@@ -2538,6 +2578,11 @@
         : (state.paymentDraft && state.paymentDraft.shortage > 0
           ? '部分收款 · 欠款' + money(state.paymentDraft.shortage)
           : (state.paymentDraft && state.paymentDraft.mode === 'combo' ? '组合收款' : ((PAYMENT_METHODS.find(function (item) { return item.id === state.paymentDraft.method; }) || {}).label || '已收款'))));
+    if (!state.dailyTotalRecorded) {
+      var receivedAmount = paymentKind === 'private' ? Math.min(Number(state.paymentDraft && state.paymentDraft.receivedAmount || 0), totals().payable) : 0;
+      recordClerkDailyTotal(receivedAmount);
+      state.dailyTotalRecorded = true;
+    }
     state.panel = null;
     ctx.navigate('workspace-order-success');
   }
@@ -4068,6 +4113,7 @@
     state.orderNo = '';
     state.paymentStatus = 'idle';
     state.paymentDraft = null;
+    state.dailyTotalRecorded = false;
     state.saveStatus = '新订单';
   }
 
