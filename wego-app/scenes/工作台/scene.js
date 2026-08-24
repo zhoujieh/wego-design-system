@@ -15,7 +15,7 @@
   ];
 
   var commonApps = [
-    { label: '销售单', icon: '销售单.svg' },
+    { label: '销售单', icon: '销售单.svg', routeId: 'workspace-order-create' },
     { label: '采购单', icon: '采购单.svg' },
     { label: '备货', icon: '备货.svg' },
     { label: '库存管理', icon: '库存管理.svg', routeId: 'my-inventory-management' },
@@ -24,7 +24,7 @@
     { label: '供应商管理', icon: '供应商.svg' },
     { label: '销售报表', icon: '销售报表.svg' },
     { label: '收支统计', icon: '数据中心.svg' },
-    { label: '全部应用', icon: '规则中心.svg' }
+    { label: '全部应用', icon: '全部应用.svg', routeId: 'app-center' }
   ];
 
   function esc(value) {
@@ -83,6 +83,10 @@
     +   '</div>'
     +   '<div class="business-home__body">'
     +     '<section class="business-home__hero" aria-label="今日经营数据">'
+    +       '<span class="business-home__hero-deco business-home__hero-deco--one" aria-hidden="true"></span>'
+    +       '<span class="business-home__hero-deco business-home__hero-deco--two" aria-hidden="true"></span>'
+    +       '<span class="business-home__hero-deco business-home__hero-deco--three" aria-hidden="true"></span>'
+    +       '<span class="business-home__hero-deco business-home__hero-deco--four" aria-hidden="true"></span>'
     +       '<div class="business-home__metrics">'
     +         metricMarkup('实收金额', '1680.00', '+10%', '昨日1230.00', 'is-up')
     +         metricMarkup('销售单数', '10', '+2%', '昨日9', 'is-up')
