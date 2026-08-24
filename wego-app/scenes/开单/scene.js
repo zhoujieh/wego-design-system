@@ -1,8 +1,8 @@
 (function () {
   var CUSTOMERS = [
-    { id: 'c1', name: '玛尼轰', phone: '玛尼大吉', mobile: '13800138001', address: '广东省深圳市南山区科技园18号', tag: '老客 · 微信好友、回头客', priceType: '8.5折', factor: 0.85, lastDelivery: 'express', lastAddress: { name: '玛尼大吉', phone: '13800138001', detail: '广东省深圳市南山区科技园18号' }, avatar: './scenes/开单/assets/customer-picker/customer-mani.png', number: '99812', level: 'V3', balance: 4000, amount: '¥800.00', pieces: '2250', contact: '玛尼大吉', employee: '员工名称' },
-    { id: 'c2', name: 'HZP-广州', phone: '刘嘿嘿', mobile: '13600136002', address: '广东省广州市越秀区站西路57号', tag: '老客 · 微信好友、回头客', priceType: '9.5折', factor: 0.95, lastDelivery: 'pickup', lastAddress: null, avatar: './scenes/开单/assets/customer-picker/customer-mani.png', number: '12345', level: 'V1', balance: 0, amount: '¥0.00', pieces: '210', contact: '刘嘿嘿', employee: '员工名称' },
-    { id: 'c3', name: '3857-简静', phone: '旺仔小馒头', mobile: '13583084433', address: '浙江省杭州市余杭区财富大厦3楼', tag: '老客 · 微信好友、回头客', priceType: '9.5折', factor: 0.95, lastDelivery: 'freight', lastAddress: { name: '旺仔小馒头', phone: '13583084433', detail: '浙江省杭州市余杭区财富大厦3楼' }, avatar: './scenes/开单/assets/customer-picker/customer-flower.jpg', number: '3857', level: 'V1', balance: 50, amount: '¥50.00', pieces: '1030', contact: '旺仔小馒头', employee: '员工名称' }
+    { id: 'c1', name: '玛尼轰', phone: '玛尼大吉', mobile: '13800138001', address: '广东省深圳市南山区科技园18号', tag: '老客 · 微信好友、回头客', priceType: '8.5折', factor: 0.85, lastDelivery: 'express', lastAddress: { name: '玛尼大吉', phone: '13800138001', detail: '广东省深圳市南山区科技园18号' }, avatar: './scenes/开单/assets/customer-picker/customer-mani.png', number: '99812', level: 'V3', balance: 4000, points: 132, amount: '¥800.00', pieces: '2250', contact: '玛尼大吉', employee: '员工名称' },
+    { id: 'c2', name: 'HZP-广州', phone: '刘嘿嘿', mobile: '13600136002', address: '广东省广州市越秀区站西路57号', tag: '老客 · 微信好友、回头客', priceType: '9.5折', factor: 0.95, lastDelivery: 'pickup', lastAddress: null, avatar: './scenes/开单/assets/customer-picker/customer-mani.png', number: '12345', level: 'V1', balance: 0, points: 100, amount: '¥0.00', pieces: '210', contact: '刘嘿嘿', employee: '员工名称' },
+    { id: 'c3', name: '3857-简静', phone: '旺仔小馒头', mobile: '13583084433', address: '浙江省杭州市余杭区财富大厦3楼', tag: '老客 · 微信好友、回头客', priceType: '9.5折', factor: 0.95, lastDelivery: 'freight', lastAddress: { name: '旺仔小馒头', phone: '13583084433', detail: '浙江省杭州市余杭区财富大厦3楼' }, avatar: './scenes/开单/assets/customer-picker/customer-flower.jpg', number: '3857', level: 'V1', balance: 50, points: 100, amount: '¥50.00', pieces: '1030', contact: '旺仔小馒头', employee: '员工名称' }
   ];
 
   var RECENT_CUSTOMERS = [
@@ -1202,17 +1202,18 @@
     if (!state.customer) {
       return ''
         + '<div class="order-desktop-customer-empty">'
-        +   '<button type="button" class="order-desktop-customer-select" data-open-panel="customer" aria-haspopup="dialog" aria-expanded="' + (state.panel === 'customer') + '" aria-controls="order-desktop-customer-popover"><span class="order-desktop-customer-entry"><i class="wego-iconfont-s icon-dianpuhuiyuan" aria-hidden="true"></i><strong>选择客户</strong></span></button>'
-        +   '<button type="button" class="btn btn--weak btn--sm order-desktop-customer-add" data-component-slug="button" data-open-panel="customer-create"><i class="btn__icon icon-jia16" aria-hidden="true"></i>新建客户</button>'
+        +   '<button type="button" class="order-desktop-customer-select" data-open-panel="customer" aria-haspopup="dialog" aria-expanded="' + (state.panel === 'customer') + '" aria-controls="order-desktop-customer-popover"><span class="avatar avatar--40 avatar--image" data-component-slug="avatar"><img src="./lib/assets/image/avatar-defult.png" alt="默认头像"></span><span class="order-desktop-customer-entry"><strong>选择客户</strong><i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></span></button>'
+        +   '<button type="button" class="link order-desktop-customer-add" data-component-slug="link" data-open-panel="customer-create"><i class="wego-iconfont-s icon-yuanjia" aria-hidden="true"></i>新建客户</button>'
         + '</div>';
     }
+    var customerTags = String(state.customer.tag || '').replace(/\s*·\s*/g, '、');
     return ''
       + '<div class="order-desktop-customer-summary">'
       +   '<div class="order-desktop-customer-summary__main">'
-      +     '<span class="avatar avatar--40 avatar--image"><img src="' + state.customer.avatar + '" alt=""></span>'
-      +     '<span class="order-desktop-customer-summary__content"><button type="button" class="order-desktop-customer-summary__customer" data-open-panel="customer" aria-haspopup="dialog" aria-expanded="' + (state.panel === 'customer') + '" aria-controls="order-desktop-customer-popover"><strong>' + escapeHtml(state.customer.name) + '</strong><em class="order-customer-vip order-customer-vip--' + state.customer.level.toLowerCase() + '"><b>' + escapeHtml(state.customer.level) + '</b><span>' + escapeHtml(state.customer.priceType) + '</span></em></button><small>余额：' + money(state.customer.balance) + ' <button type="button" class="link link--12" data-component-slug="link" data-recharge>充值</button></small></span>'
+      +     '<span class="order-desktop-customer-avatar"><span class="avatar avatar--40 avatar--image" data-component-slug="avatar"><img src="' + state.customer.avatar + '" alt="' + escapeHtml(state.customer.name) + '"></span><span class="order-desktop-customer-number">' + escapeHtml(state.customer.number) + '</span></span>'
+      +     '<span class="order-desktop-customer-summary__content"><button type="button" class="order-desktop-customer-summary__top" data-open-panel="customer" aria-haspopup="dialog" aria-expanded="' + (state.panel === 'customer') + '" aria-controls="order-desktop-customer-popover"><strong>' + escapeHtml(state.customer.name) + '</strong><em class="order-customer-vip order-customer-vip--' + state.customer.level.toLowerCase() + '"><b>' + escapeHtml(state.customer.level) + '</b><span>' + escapeHtml(state.customer.priceType) + '</span></em><span class="order-desktop-customer-tags">' + escapeHtml(customerTags) + '</span></button><span class="order-desktop-customer-summary__bottom"><span class="order-desktop-customer-balance">余额：' + money(state.customer.balance) + '</span><button type="button" class="link" data-component-slug="link" data-recharge>充值</button><span class="order-desktop-customer-divider" aria-hidden="true"></span><span class="order-desktop-customer-points">积分：' + Number(state.customer.points || 0) + '</span></span></span>'
       +   '</div>'
-      +   '<button type="button" class="btn btn--weak btn--sm btn--icon-only order-desktop-customer-clear" data-component-slug="button" data-clear-customer aria-label="移除已选客户"><i class="btn__icon icon-cha16" aria-hidden="true"></i></button>'
+      +   '<button type="button" class="btn btn--weak btn--sm btn--icon-only order-desktop-customer-clear" data-component-slug="button" data-clear-customer aria-label="移除已选客户"><i class="btn__icon icon-yuancha-mian" aria-hidden="true"></i></button>'
       + '</div>';
   }
 
