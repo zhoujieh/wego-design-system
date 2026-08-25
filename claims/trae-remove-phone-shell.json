@@ -1,8 +1,0 @@
-{
-  "agent": "trae-remove-phone-shell",
-  "scene": "好友列表",
-  "branch": "feature/trae-remove-phone-shell",
-  "status": "done",
-  "claimedAt": "2026-08-20T15:50:00.000Z",
-  "note": "仅清理 scene.css 中已失效的手机壳/phone-frame 注释措辞，未改变场景交互"
-}

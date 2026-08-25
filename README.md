@@ -88,7 +88,7 @@ AI 会先和你**澄清需求细节并生成需求简报**，你确认简报后�
 
 - 各人开 `feature/<你>-<场景>` 分支，不要直接提交 `main`。
 - 每次开工前先 `git pull --rebase origin main` 基于最新代码。
-- 开工前在 `claims/<你>.json` 认领场景、记录当前 `branch`，并跑 `node scripts/validate-claims.mjs`，避免两人改同一场景；CI 会核对场景变更与分支认领一致。
+- 开工前用 `npm run claim -- --agent <你> --scene <场景>` 认领场景、记录当前 `branch`（同场景不同文件可声明 `files` 并行），并跑 `npm run claims:validate`，避免两人改同一场景；CI 会核对场景变更与分支认领一致。
 - 一个交付单元固定一个功能分支和 worktree；首次开始任务不自动创建 PR。
 - 本地迭代期间只更新当前 worktree 的本地预览。确有多人远端协调需要时，可以只推送最小认领提交暴露分支，但不创建 PR、不进入正式验收。
 - 获得明确提交授权后，集中提交并推送当前分支，创建或更新同一个 PR。

@@ -1,9 +1,0 @@
-{
-  "agent": "trae-my-scene",
-  "scene": "我的",
-  "routeId": "my",
-  "branch": "feature/trae-workspace-appcenter",
-  "status": "done",
-  "claimedAt": "2026-08-24T12:00:00.000Z",
-  "note": "添加全部应用入口跳转应用中心"
-}

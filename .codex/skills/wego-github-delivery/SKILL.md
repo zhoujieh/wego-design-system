@@ -66,7 +66,7 @@ PR 已存在时，用户继续提出小问题仍先回到本地迭代，累计�
 - 工作流权威源由 `wego-uxsystem-iterate` 维护，免业务验收与明确提交授权门禁；完成改动并运行 `node scripts/validate-wego-design.mjs --scope=system --strict` 通过后，直接推送创建短周期 PR，必要检查通过后自动合并到 `main` 并删除分支；CI 失败时停止并报告原因等用户处理。业务原型和设计系统组件、Token、Preview、UI Kit 变更不适用本例外。
 - PR 合并或关闭后，先停止对应本地预览服务并删除记录，再删除对应本地与远端分支及干净的关联 worktree；只有 PR 带 `keep-branch` 标签时才保留分支，但预览服务仍默认关闭。
 - 合并冲突涉及生成物（`wego-app/js/routes.js`、`wego-app/lib/`、`components.css`）时，不得手工编辑冲突标记：先取任一侧版本，运行对应生成脚本（`build-routes.mjs` / `sync-wego-app-lib.mjs`）重新生成后提交。
-- 没有 PR 的工作分支允许在本地迭代期间保持；用户明确废弃任务或确认不再继续时，停止服务、释放认领并删除分支/worktree。不得因单次回复结束而强制创建 PR 或删除仍在继续的任务。
+- 没有 PR 的工作分支允许在本地迭代期间保持；用户明确废弃任务或确认不再继续时，停止服务、释放认领（`npm run release-claim -- --agent <id>`）并删除分支/worktree。不得因单次回复结束而强制创建 PR 或删除仍在继续的任务。
 
 ## 边界
 

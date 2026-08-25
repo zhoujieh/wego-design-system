@@ -26,7 +26,7 @@ description: 基于已确认原型简报消费微购设计系统，在一次任�
 
 ## 输出与交接
 
-业务实现只输出或更新场景目录中的 `route.json`、`scene.js` 和 `scene.css`；迭代记录、场景认领和生成路由按工作流同步维护。路由发生新增或变化时运行 `node scripts/build-routes.mjs` 生成 `wego-app/js/routes.js`；`routes.js` 是生成物，禁止直接编辑。
+业务实现只输出或更新场景目录中的 `route.json`、`scene.js` 和 `scene.css`；迭代记录、场景认领（`npm run claim` / `npm run release-claim`）和生成路由按工作流同步维护。路由发生新增或变化时运行 `node scripts/build-routes.mjs` 生成 `wego-app/js/routes.js`；`routes.js` 是生成物，禁止直接编辑。
 
 在已确认范围内自主完成信息分组、布局、组件、Token、反馈和 overlay，不建立第二次确认门禁。实现过程默认处于**本地迭代中**：
 

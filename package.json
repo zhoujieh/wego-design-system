@@ -6,6 +6,14 @@
     "node": ">=18"
   },
   "description": "微购设计系统与静态原型仓库(开发工具依赖)",
+  "scripts": {
+    "claim": "node scripts/claim-scene.mjs",
+    "release-claim": "node scripts/release-claim.mjs",
+    "claims:validate": "node scripts/validate-claims.mjs",
+    "claims:stale": "node scripts/release-claim.mjs --sweep --dry-run",
+    "claims:sweep": "node scripts/release-claim.mjs --sweep",
+    "claims:test": "node scripts/validate-claims.mjs test"
+  },
   "devDependencies": {
     "playwright": "^1.48.0"
   }
