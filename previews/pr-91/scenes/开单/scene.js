@@ -828,7 +828,7 @@
       }).join('');
       return ''
         + '<article class="order-desktop-product-row order-desktop-product-row--grouped' + (isRowSelected(itemIndex, '') ? ' is-selected' : '') + '" data-item-index="' + itemIndex + '" data-row-select="' + itemIndex + '">'
-        +   '<div class="order-desktop-product-name"><strong>' + escapeHtml(item.code) + '</strong><span>' + escapeHtml(item.name) + '</span><small>' + specs.length + '个SKU</small></div>'
+        +   '<div class="order-desktop-product-name"><strong>' + escapeHtml(item.code) + '</strong><span>' + escapeHtml(item.name) + '</span></div>'
         +   clickableImage(item, 'order-desktop-product-image', 'data-preview-image="' + itemIndex + '"')
         +   '<div class="order-desktop-grouped-sku-stack order-desktop-grouped-sku-stack--spec">' + groupedSpecs + '</div>'
         +   '<div class="order-desktop-grouped-sku-stack order-desktop-grouped-sku-stack--price">' + groupedPrices + '</div>'
