@@ -1089,18 +1089,7 @@
   line-height: var(--body-sm-line-height);
 }
 
-.my-tab-fab {
-  position: absolute;
-  right: var(--spacer-16);
-  bottom: var(--spacer-16);
-  width: var(--size-48);
-  min-width: var(--size-48);
-  max-width: var(--size-48);
-  padding: var(--spacer-0);
-  border-radius: var(--radius-full);
-  box-shadow: var(--shadow-lg);
-  z-index: var(--z-sticky);
-}
+/* 悬浮发布入口样式已抽为公共组件 .wego-fab（见 css/app.css），本页不再重复定义 */
 
 @media (max-width: 360px) {
   .my-tab-identity__album {
