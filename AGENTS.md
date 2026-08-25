@@ -40,6 +40,9 @@
 
 - 禁止直接提交 `main`，所有任务默认使用独立分支。
 
+<!-- rule-id: delivery-unit-must-use-independent-worktree -->
+- 每个交付单元必须使用独立 worktree（`git worktree add ../<owner>-<task> -b <分支>`），不得与其它交付单元共享主 worktree；主 worktree 只保留 `main` 用于 `git pull` 同步。
+
 <!-- rule-id: workflow-maintenance-enters-main-via-pr -->
 - **工作流维护例外**：`wego-uxsystem-iterate` 权威源免业务验收和提交授权，验证通过直接走短周期 PR 合入 `main`；业务原型和设计系统组件/Token/Preview/UI Kit 变更不适用。
 
