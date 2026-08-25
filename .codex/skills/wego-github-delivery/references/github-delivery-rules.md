@@ -28,7 +28,7 @@
 
 - 新分支统一命名为 `feature/<owner>-<task>`，基于最新 `origin/main`；不再新建 `codex/*` 或 `agent/*`。
 - 一个交付单元固定一个工作分支和 worktree，同一需求固定复用同一个 PR，最多只有一个开放 PR；进入自动推进后即创建该 PR 并持续更新。
-- 场景改动先认领，并在认领中记录当前分支；完成、废弃或关闭对应交付单元时释放认领。
+- 场景改动先认领，并在认领中记录当前分支。认领用 `npm run claim -- --agent <agent-id> --scene <场景> [--route-id <id>] [--branch <分支>] [--files <文件范围>]`，不再手写 JSON；同场景不同文件可声明 `files` 范围并行，文件重叠或未声明 `files` 视为整场景独占。释放推迟到 PR 合并/关闭或交付单元确认废弃后，用 `npm run release-claim -- --agent <agent-id>` 统一释放（释放即删除认领文件，`claims/` 只保留活跃认领，不堆积历史文件）。
 
 ### 本地迭代中（自动推进，默认）
 

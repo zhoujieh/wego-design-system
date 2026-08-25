@@ -74,9 +74,8 @@ function activeClaims(worktree, scene, routeId) {
   const directory = path.join(worktree.path, 'claims');
   if (!fs.existsSync(directory)) return [];
   return fs.readdirSync(directory)
-    .filter(file => file.endsWith('.json'))
+    .filter(file => file.endsWith('.json') && file !== 'schema.json')
     .map(file => ({ file, claim: readJson(path.join(directory, file)) }))
-    .filter(({ claim }) => !['released', 'done'].includes(claim.status))
     .filter(({ claim }) => claim.scene === scene || (routeId && claim.routeId === routeId));
 }
 

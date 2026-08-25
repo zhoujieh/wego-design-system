@@ -72,25 +72,19 @@ function listClaims() {
 }
 
 function activeClaims(claims = listClaims()) {
-  return claims.filter(({ claim }) => claim.status !== 'released' && claim.status !== 'done');
+  // 文件存在即持有租约（无 status 字段），全部视为活跃认领
+  return claims;
 }
 
 function releaseClaims(claims) {
   if (claims.length === 0) {
-    console.log('[reset-baseline] 没有活跃场景认领需要释放');
+    console.log('[reset-baseline] 没有场景认领需要释放');
     return;
   }
 
-  const releasedAt = new Date().toISOString();
   for (const entry of claims) {
-    const updated = {
-      ...entry.claim,
-      status: 'released',
-      releasedAt,
-      releaseReason: 'wego-app-baseline-reset',
-    };
-    fs.writeFileSync(entry.file, `${JSON.stringify(updated, null, 2)}\n`, 'utf8');
-    console.log(`[reset-baseline] 已释放场景认领 claims/${entry.name}`);
+    fs.rmSync(entry.file, { force: true });
+    console.log(`[reset-baseline] 已释放场景认领 claims/${entry.name}（删除文件）`);
   }
 }
 

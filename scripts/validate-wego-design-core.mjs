@@ -439,7 +439,7 @@ function conditionalToolTests() {
       code: 'iteration_binding.test'
     },
     {
-      matches: file => file === 'scripts/validate-claims.mjs',
+      matches: file => ['scripts/validate-claims.mjs', 'scripts/claim-scene.mjs', 'scripts/release-claim.mjs', 'scripts/claims-lib.mjs'].includes(file),
       script: 'scripts/validate-claims.mjs',
       args: ['test'],
       code: 'claims.test'

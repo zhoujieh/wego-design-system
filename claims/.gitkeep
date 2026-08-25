@@ -1,4 +1,22 @@
-# 认领目录：每个 Agent 开工前写入 claims/<agent-id>.json 声明自己负责的场景。
-# 形如：{ "agentId": "alice", "owner": "Alice", "scene": "动态商品流", "routeId": "dongtai-feed", "branch": "feature/alice-dongtai", "status": "working", "claimedAt": "2026-07-30T10:00:00+08:00" }
-# status 可选：working | paused | released | done。released/done 不计入冲突。
-# 运行 node scripts/validate-claims.mjs 检查是否有重复认领。
+# 认领目录：每个 Agent 开工前认领自己负责的场景，形成「场景 × 分支」的独占租约。
+#
+# 核心约定：claims/<agent-id>.json 存在 = 持有租约；释放 = 删除该文件。
+# 本目录只保留活跃认领，绝不堆积历史文件（历史由 git 记录，无需在此归档）。
+#
+# 字段规范（权威声明见 claims/schema.json，运行时强校验见 scripts/validate-claims.mjs）：
+# {
+#   "agent": "alice",              # 必填，认领归属标识，必须等于文件名（去 .json）
+#   "scene": "动态商品流",           # 必填，场景目录名，对应 wego-app/scenes/<scene>
+#   "routeId": "dongtai-feed",      # 必填，须等于场景 route.json 的 routeId
+#   "branch": "feature/alice-feed", # 必填，交付分支名
+#   "claimedAt": "2026-07-30T10:00:00+08:00",  # 必填，ISO8601
+#   "files": ["scene.js", "scene.css"],        # 可选，声明改动文件范围（相对场景目录）
+#   "note": "..."                   # 可选备注
+# }
+#
+# 使用：
+#   - 认领：npm run claim -- --agent <id> --scene <场景> [--files <a,b,c>]
+#   - 释放：PR 合并/关闭后 npm run release-claim -- --agent <id>（删除文件）
+#   - 并行：同场景不同文件可并行，需双方都声明 files 且无交集。
+#
+# 校验：npm run claims:validate（冲突 + schema）；npm run claims:stale（预览孤儿认领）。
