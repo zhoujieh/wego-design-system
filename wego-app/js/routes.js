@@ -11,6 +11,15 @@ window.WEGO_APP_ROUTES = [
   script: './scenes/帮卖分销/scene.js'
 },
 {
+  routeId: 'album-product-feed',
+  entry: {
+    type: 'host-tab',
+    tab: 'dongtai'
+  },
+  style: './scenes/动态/scene.css',
+  script: './scenes/动态/scene.js'
+},
+{
   routeId: 'app-center',
   entry: {
     type: 'grid-entry',
@@ -39,6 +48,17 @@ window.WEGO_APP_ROUTES = [
   },
   style: './scenes/我的/scene.css',
   script: './scenes/我的/scene.js'
+},
+{
+  routeId: 'publish-product',
+  entry: {
+    type: 'cell-entry',
+    label: '发布产品',
+    group: 'dongtai-tools',
+    tab: 'dongtai'
+  },
+  style: './scenes/发布产品/scene.css',
+  script: './scenes/发布产品/scene.js'
 },
 {
   routeId: 'workspace',

@@ -1,0 +1,345 @@
+/* 动态商品流场景样式 */
+
+.album-feed {
+  background: var(--bg-page);
+  color: var(--text-default);
+  font-family: var(--body-md-font-family);
+}
+
+.album-feed__nav-title {
+  font-size: var(--heading-lg-font-size);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--heading-lg-line-height);
+  color: var(--text-default);
+}
+
+.album-feed__searchbar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-8);
+  padding: var(--spacer-8) var(--spacer-16);
+  background: var(--bg-page);
+}
+
+.album-feed__search-box {
+  padding: var(--spacer-8) var(--spacer-16);
+  background: var(--bg-page);
+}
+
+.album-feed__search-results {
+  overflow-x: hidden;
+  padding: var(--spacer-8) 0 var(--spacer-24);
+}
+
+.album-feed__search-cancel {
+  flex-shrink: 0;
+  margin-left: var(--spacer-8);
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--body-md-font-size);
+  font-family: var(--body-md-font-family);
+  cursor: pointer;
+}
+
+.album-feed__scroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: var(--safe-area-bottom-content);
+}
+
+.album-feed__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-8);
+  padding: var(--spacer-8) 0 var(--spacer-24);
+}
+
+/* ── 动态卡片 ── */
+.album-feed__card {
+  background: var(--bg-surface);
+  padding: var(--spacer-12) var(--spacer-16);
+  box-sizing: border-box;
+}
+
+.album-feed__head {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-8);
+}
+
+.album-feed__avatar {
+  flex-shrink: 0;
+}
+
+.album-feed__meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-2);
+  min-width: 0;
+  flex: 1;
+}
+
+.album-feed__publisher {
+  font-size: var(--body-md-font-size);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--body-md-line-height);
+  color: var(--text-default);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.album-feed__time {
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+  color: var(--text-tertiary);
+}
+
+.album-feed__more {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  padding: var(--spacer-4);
+  color: var(--text-tertiary);
+  cursor: pointer;
+}
+
+.album-feed__more .wego-iconfont-s {
+  font-size: var(--size-20);
+}
+
+.album-feed__text {
+  margin: var(--spacer-8) 0 0;
+  font-size: var(--body-md-font-size);
+  line-height: var(--body-md-line-height);
+  color: var(--text-default);
+  word-break: break-word;
+}
+
+/* ── 商品图片 ── */
+.album-feed__media {
+  display: block;
+  margin-top: var(--spacer-8);
+  padding: 0;
+  border: none;
+  background: var(--bg-subtle);
+  border-radius: var(--radius-8);
+  overflow: hidden;
+  cursor: pointer;
+  width: 100%;
+}
+
+.album-feed__media--single {
+  max-height: 280px;
+}
+
+.album-feed__media-img {
+  width: 100%;
+  height: auto;
+  max-height: 280px;
+  object-fit: cover;
+  display: block;
+}
+
+.album-feed__media--grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacer-4);
+  background: transparent;
+  border-radius: 0;
+  overflow: visible;
+  cursor: default;
+}
+
+.album-feed__media-cell {
+  padding: 0;
+  border: none;
+  background: var(--bg-subtle);
+  border-radius: var(--radius-6);
+  overflow: hidden;
+  cursor: pointer;
+  aspect-ratio: 1;
+}
+
+.album-feed__media-cell .album-feed__media-img {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  object-fit: cover;
+}
+
+/* ── 相关产品信息 ── */
+.album-feed__product {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-8);
+  margin-top: var(--spacer-8);
+  padding: var(--spacer-8);
+  border: none;
+  background: var(--bg-subtle);
+  border-radius: var(--radius-8);
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.album-feed__product-thumb {
+  width: var(--size-48);
+  height: var(--size-48);
+  border-radius: var(--radius-6);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.album-feed__product-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-2);
+  min-width: 0;
+  flex: 1;
+}
+
+.album-feed__product-name {
+  font-size: var(--body-md-font-size);
+  line-height: var(--body-md-line-height);
+  color: var(--text-default);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.album-feed__product-price {
+  font-size: var(--body-md-font-size);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--body-md-line-height);
+  color: var(--status-danger-default);
+}
+
+.album-feed__resale-badge {
+  flex-shrink: 0;
+}
+
+.album-feed__product-arrow {
+  flex-shrink: 0;
+  font-size: var(--size-16);
+  color: var(--text-tertiary);
+}
+
+/* ── 操作区 ── */
+.album-feed__actions {
+  margin-top: var(--spacer-8);
+}
+
+.album-feed__actions-row {
+  display: flex;
+  gap: var(--spacer-8);
+}
+
+.album-feed__primary {
+  flex: 1;
+}
+
+.album-feed__forward {
+  flex-shrink: 0;
+}
+
+/* ── 空态 / 加载 / 失败 ── */
+.album-feed__empty,
+.album-feed__failed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacer-8);
+  padding: var(--spacer-32) var(--spacer-24);
+}
+
+.album-feed__empty-icon {
+  font-size: var(--size-48);
+  color: var(--text-disabled);
+}
+
+.album-feed__empty-text {
+  font-size: var(--body-md-font-size);
+  line-height: var(--body-md-line-height);
+  color: var(--text-tertiary);
+}
+
+.album-feed__loading {
+  display: flex;
+  justify-content: center;
+  padding: var(--spacer-32);
+}
+
+/* ── 产品详情 ── */
+.album-feed__detail-body {
+  padding: var(--spacer-16);
+}
+
+.album-feed__detail-img {
+  width: 100%;
+  max-height: 360px;
+  object-fit: cover;
+  border-radius: var(--radius-8);
+  background: var(--bg-subtle);
+}
+
+.album-feed__detail-info {
+  margin-top: var(--spacer-12);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-4);
+}
+
+.album-feed__detail-price {
+  font-size: var(--heading-md-font-size);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--heading-md-line-height);
+  color: var(--status-danger-default);
+}
+
+.album-feed__detail-name {
+  font-size: var(--body-lg-font-size);
+  line-height: var(--body-lg-line-height);
+  color: var(--text-default);
+}
+
+.album-feed__detail-points {
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+  color: var(--text-secondary);
+}
+
+/* ── 图片看大图 ── */
+.album-feed__viewer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-inverse);
+}
+
+.album-feed__viewer-close {
+  position: absolute;
+  top: var(--safe-area-top);
+  right: var(--spacer-16);
+  border: none;
+  background: transparent;
+  color: var(--text-inverse);
+  cursor: pointer;
+  padding: var(--spacer-8);
+}
+
+.album-feed__viewer-close .wego-iconfont-s {
+  font-size: var(--size-24);
+}
+
+.album-feed__viewer-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
