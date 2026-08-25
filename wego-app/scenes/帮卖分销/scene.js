@@ -539,8 +539,8 @@
       +   '</div>'
       +   '<div class="keypad__seg ' + segClass + '">'
       +     '<div class="keypad__seg-thumb"></div>'
-      +     '<div class="keypad__seg-item ' + (isAmount ? 'is-active' : '') + '" data-keypad-tab="amount">金额</div>'
-      +     '<div class="keypad__seg-item ' + (!isAmount ? 'is-active' : '') + '" data-keypad-tab="rate">比例</div>'
+      +     '<div class="keypad__seg-item ' + (isAmount ? 'is-active' : '') + '" data-keypad-tab="amount">按金额</div>'
+      +     '<div class="keypad__seg-item ' + (!isAmount ? 'is-active' : '') + '" data-keypad-tab="rate">按比例</div>'
       +   '</div>'
       + '</div>';
     }
@@ -710,98 +710,6 @@
       });
     });
   }
-
-  // ── @debug-temp-start ─────────────────────────────────────────
-  // 临时调试入口:Loading 动画预览(对齐 wgoo LoadingIcon 16/24/32 三尺寸)
-  // 正式合并前删除从 @debug-temp-start 到 @debug-temp-end 的整段代码
-  function buildLoadingPreviewTemplate() {
-    var loadingSvg = ''
-      + '<span class="loading__icon">'
-      +   '<span class="loading__dot loading__dot--1"></span>'
-      +   '<span class="loading__dot loading__dot--2"></span>'
-      +   '<span class="loading__dot loading__dot--3"></span>'
-      + '</span>';
-    var loadingHtml = '<span class="loading" role="status" aria-label="加载中" data-component-slug="loading">' + loadingSvg + '</span>';
-    var loading16 = '<span class="loading loading--16" role="status" aria-label="加载中" data-component-slug="loading">' + loadingSvg + '</span>';
-    var loading32 = '<span class="loading loading--32" role="status" aria-label="加载中" data-component-slug="loading">' + loadingSvg + '</span>';
-
-    return ''
-      + '<div class="modal modal--fullscreen" role="dialog" aria-modal="true" data-state="closed" data-component-slug="modal">'
-      +   '<div class="modal__panel">'
-      +     '<div class="modal__title modal__title--default">'
-      +       '<div class="navbar" data-component-slug="navbar">'
-      +         '<div class="navbar__body">'
-      +           '<div class="navbar__left">'
-      +             '<div class="navbar__left-btn navbar__left-btn--circle" data-debug-close><i class="wego-iconfont-s icon-xiajiantou16"></i></div>'
-      +           '</div>'
-      +           '<div class="navbar__center"><span class="navbar__title">加载 · Loading</span></div>'
-      +           '<div class="navbar__right"></div>'
-      +         '</div>'
-      +       '</div>'
-      +     '</div>'
-      +     '<div class="modal__body modal__body--safe-bottom loading-preview__body">'
-      +       '<div class="loading-preview__header">'
-      +         '<h1 class="loading-preview__title">加载</h1>'
-      +         '<p class="loading-preview__desc">三点涟漪脉冲加载指示器，用于内容区或弹窗等待态。</p>'
-      +       '</div>'
-      +       '<div class="loading-preview__section-title">尺寸 24 — 默认</div>'
-      +       '<div class="loading-preview__stage">' + loadingHtml + '</div>'
-      +       '<div class="loading-preview__section-title">尺寸 16 — 按钮内</div>'
-      +       '<div class="loading-preview__row">'
-      +         '<span class="loading-preview__size-label">16px</span>'
-      +         loading16
-      +       '</div>'
-      +       '<div class="loading-preview__section-title">尺寸 32 — 大区域</div>'
-      +       '<div class="loading-preview__stage">' + loading32 + '</div>'
-      +       '<div class="loading-preview__note">默认 24px 三点涟漪脉冲加载图标(对齐 wgoo LoadingIcon)，两端点 1s ease-in-out 共用同一关键帧、第3点 delay:-1s 反相位；中间点 0.5s ease-out 短周期独立关键帧，形成三相位错落涟漪节奏；支持 16/24/32 尺寸按比例缩放；prefers-reduced-motion 时降级为整体淡入淡出。</div>'
-      +     '</div>'
-      +   '</div>'
-      + '</div>';
-  }
-
-  function mountDebugEntry(ctx) {
-    var root = ctx.root;
-    var scroll = root.querySelector('.layout-scroll');
-    if (!scroll) return;
-
-    var group = document.createElement('div');
-    group.className = 'agent-resale-scene__group agent-resale-scene__group--debug';
-    group.setAttribute('data-debug', '');
-    group.innerHTML = ''
-      + '<div class="agent-resale-scene__group-title">调试</div>'
-      + '<div class="cell-group__content">'
-      +   '<div class="cell cell--double cell--bg-white cell--clickable cell--divider-center" data-component-slug="cell" data-debug-entry>'
-      +     '<div class="cell__body">'
-      +       '<div class="cell__content">'
-      +         '<div class="cell__title-row">'
-      +           '<span class="cell__title">Loading 动画预览</span>'
-      +         '</div>'
-      +         '<div class="cell__subtitle">对齐 wgoo LoadingIcon · 16/24/32 三尺寸</div>'
-      +       '</div>'
-      +       '<div class="cell__action">'
-      +         '<span class="agent-resale-scene__card-badge agent-resale-scene__card-badge--debug">调试</span>'
-      +         '<i class="cell__arrow wego-iconfont-s icon-youjiantou16"></i>'
-      +       '</div>'
-      +     '</div>'
-      +   '</div>'
-      + '</div>';
-
-    scroll.insertBefore(group, scroll.firstChild);
-
-    var entry = group.querySelector('[data-debug-entry]');
-    entry.addEventListener('click', function () {
-      ctx.openFullScreenModal(buildLoadingPreviewTemplate(), {
-        label: 'Loading 动画预览(调试)',
-        init: function (overlayCtx) {
-          var closeBtn = overlayCtx.root.querySelector('[data-debug-close]');
-          if (closeBtn) {
-            closeBtn.addEventListener('click', function () { ctx.closeOverlay(); });
-          }
-        }
-      });
-    });
-  }
-  // ── @debug-temp-end ───────────────────────────────────────────
 
   // ── 打开帮卖弹窗 ──
   function openResalePopup(ctx, sample) {
@@ -1227,8 +1135,20 @@
             var num = parseFloat(currentValue);
             var add = num - sp;
             var r = amountToRate(add, sp);
-            if (isNaN(num) || num <= 0 || add <= 0 || !validateRate(r)) {
-              ctx.toast('售价需在¥' + formatPrice(sp * 1.01) + '~¥' + formatPrice(sp * 4) + '之间');
+            if (isNaN(num) || num <= 0) {
+              ctx.toast('请输入正确的售价');
+              return;
+            }
+            if (add <= 0) {
+              ctx.toast('售价需大于供货价' + formatPrice(sp) + '元');
+              return;
+            }
+            if (!validateRate(r)) {
+              if (r < 0.01) {
+                ctx.toast('金额不能小于' + formatPrice(sp * 1.01) + '元');
+              } else {
+                ctx.toast('金额不能大于' + formatPrice(sp * 4) + '元');
+              }
               return;
             }
           }
@@ -1261,12 +1181,16 @@
               // 售价模式:加价 = 售价 - 供货价
               addPrice = numValue - supplyPrice;
               if (addPrice <= 0) {
-                ctx.toast('售价需大于供货价¥' + formatPrice(supplyPrice));
+                ctx.toast('售价需大于供货价' + formatPrice(supplyPrice) + '元');
                 return;
               }
               var rate = amountToRate(addPrice, supplyPrice);
               if (!validateRate(rate)) {
-                ctx.toast('售价需在¥' + formatPrice(supplyPrice * 1.01) + '~¥' + formatPrice(supplyPrice * 4) + '之间');
+                if (rate < 0.01) {
+                  ctx.toast('金额不能小于' + formatPrice(supplyPrice * 1.01) + '元');
+                } else {
+                  ctx.toast('金额不能大于' + formatPrice(supplyPrice * 4) + '元');
+                }
                 return;
               }
               // 售价模式换算成加价金额,供后续标签替换使用
@@ -1284,9 +1208,17 @@
 
               if (!validateRate(rate)) {
                 if (currentMode === 'amount') {
-                  ctx.toast('加价金额需在¥' + formatPrice(supplyPrice * 0.01) + '~' + formatPrice(supplyPrice * 3) + '之间');
+                  if (rate < 0.01) {
+                    ctx.toast('佣金金额不能小于' + formatPrice(supplyPrice * 0.01) + '元');
+                  } else {
+                    ctx.toast('佣金金额不能大于' + formatPrice(supplyPrice * 3) + '元');
+                  }
                 } else {
-                  ctx.toast('加价比例需在1%~300%之间');
+                  if (rate < 0.01) {
+                    ctx.toast('佣金金额不能小于1%');
+                  } else {
+                    ctx.toast('佣金金额不能大于300%');
+                  }
                 }
                 return;
               }
@@ -1543,7 +1475,6 @@
         });
       }
       mountSelection(ctx);
-      mountDebugEntry(ctx); // @debug-temp
     }
   });
 })();
