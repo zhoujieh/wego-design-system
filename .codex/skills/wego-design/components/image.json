@@ -141,7 +141,7 @@
     "loaded": "图片元素添加 .is-loaded 后以 0.2s 渐显。",
     "error": "失败态使用 .wg-image--error，并在 .wg-image__placeholder 内放置 default-diagram.svg。",
     "dynamicGrid": "动态九宫格固定三列，使用 4px 间距与 8px 外层裁切圆角；不设固定容器宽高，图片项通过 aspect-ratio 保持正方形。",
-    "productGrid": "商品四宫格固定两列，使用 2px 间距与 4px 外层裁切圆角；容器宽度使用 clamp(80px, 100%, 160px)，图片项保持正方形。",
+    "productGrid": "商品多图固定两列栅格，使用 2px 间距与 4px 外层裁切圆角；容器宽度 clamp(80px, 100%, 180px)。按子项数量自适应：1 张子项时整列撑满容器（grid-column: 1 / -1，正方形，≤180×180）；2 张为两列等宽；3 张首项跨两行形成左 1 大 + 右 2 小（aspect-ratio: 2/1）；4 张回到 2×2。",
     "singleGrid": "单图变体固定 .wg-image-grid--single，由消费者按图片 naturalWidth/naturalHeight 比例补 --square(≈1:1) / --landscape(>1，4:3) / --portrait(<1，3:4)；尺寸封顶在 9 宫格左上 2×2，不铺满，外层圆角 8px。",
     "videoBadge": "视频媒体在单图根节点或多图首格 .wg-image-grid__item 内叠加 .wg-image-grid__play，绝对居中、24×24、pointer-events:none。"
   },
@@ -233,8 +233,12 @@
   ],
   "previewOnlyTokens": [
     "--bg-surface",
+    "--font-sans",
     "--shadow-xs",
-    "--spacer-16"
+    "--spacer-16",
+    "--spacer-8",
+    "--text-muted",
+    "--text-strong"
   ],
   "localTokens": [
     "--wg-image-placeholder-bg",

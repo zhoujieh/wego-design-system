@@ -44,7 +44,11 @@
     .wg-image-grid__item { position:relative; width:100%; min-width:0; aspect-ratio:1; }
     .wg-image-grid--dynamic { --wg-image-grid-cell-radius:2px; width:100%; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:var(--spacer-4); overflow:hidden; border-radius:var(--radius-8); }
     .wg-image-grid--dynamic .wg-image-grid__item { border-radius:var(--wg-image-grid-cell-radius); }
-    .wg-image-grid--product { --wg-image-product-grid-min-width:80px; --wg-image-product-grid-max-width:160px; width:clamp(var(--wg-image-product-grid-min-width), 100%, var(--wg-image-product-grid-max-width)); grid-template-columns:repeat(2, minmax(0, 1fr)); gap:var(--spacer-2); overflow:hidden; border-radius:var(--radius-4); }
+    /* 产品多图四宫格：固定两列；1 图撑满容器（最大 180×180）；2 图两列；3 图左 1 大 + 右 2 小；4 图 2×2 */
+    .wg-image-grid--product { --wg-image-product-grid-min-width:80px; --wg-image-product-grid-max-width:180px; width:clamp(var(--wg-image-product-grid-min-width), 100%, var(--wg-image-product-grid-max-width)); grid-template-columns:repeat(2, minmax(0, 1fr)); gap:var(--spacer-2); overflow:hidden; border-radius:var(--radius-4); }
+    .wg-image-grid--product .wg-image-grid__item:only-child { grid-column:1 / -1; }
+    .wg-image-grid--product:has(.wg-image-grid__item:nth-child(3):last-child) { aspect-ratio:2 / 1; grid-template-rows:1fr 1fr; }
+    .wg-image-grid--product .wg-image-grid__item:first-child:nth-last-child(3) { grid-row:span 2; }
     /* 单图三朝向：封顶在 9 宫格左上 2×2（≈2 个 3 列方格 + 1 间距，随父级宽自适应） */
     .wg-image-grid--single { --wg-single-2x2: calc((200% - var(--spacer-4)) / 3); display:block; width:100%; border-radius:var(--radius-8); overflow:hidden; }
     .wg-image-grid--single.wg-image-grid--square { width:var(--wg-single-2x2); aspect-ratio:1 / 1; }
@@ -68,6 +72,8 @@
     .variant-sub:first-of-type { margin-top:var(--spacer-4); }
     .label { display:inline-block; font-size:12px; color:var(--text-muted, #8a8f99); }
     .cell-no { position:absolute; top:4px; left:4px; z-index:3; min-width:16px; height:16px; padding:0 4px; border-radius:8px; background:rgba(0,0,0,.55); color:#fff; font-size:11px; line-height:16px; text-align:center; font-family:var(--font-sans, system-ui, sans-serif); }
+    .pv-product-strip { display:flex; flex-wrap:wrap; gap:var(--spacer-16); align-items:flex-start; margin-bottom:var(--spacer-12); }
+    .pv-product-cell { display:flex; flex-direction:column; gap:var(--spacer-4); }
   </style>
 </head>
 <body>
@@ -86,7 +92,7 @@
   </div>
   <div class="pv-section">
     <div class="pv-section__title">多图展示</div>
-    <div class="pv-section__sub">动态九宫格随父级内容区自适应，外层圆角为 8px；商品四宫格保持 80px 至 160px 的可用宽度，外层圆角为 4px。</div>
+    <div class="pv-section__sub">动态九宫格随父级内容区自适应，外层圆角为 8px；商品四宫格保持 80px 至 180px 的可用宽度，外层圆角为 4px。</div>
     <div class="row"><span class="label">产品动态九宫格</span></div>
     <div class="wg-image-grid wg-image-grid--dynamic">
       <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_1/clothing_1_1.jpg" alt="方领上衣"></div>
@@ -99,13 +105,13 @@
       <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_8/img_1708defc_20240216_i1708092817_8695_6.jpg.jpg" alt="亚麻感短袖西装"></div>
       <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_9/1663740558494_61057.jpg" alt="运动感宽松上衣"></div>
     </div>
-    <div class="row"><span class="label">产品多图四宫格</span></div>
-    <div class="wg-image-grid wg-image-grid--product">
-      <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_10/1663740458796_1630.jpg" alt="基础针织上衣"></div>
-      <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_11/1663741015635_49035.jpg" alt="粉色休闲衬衫"></div>
-      <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_12/1663741493015_827.jpg" alt="千鸟格针织套装"></div>
-      <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_13/1664276865081_87837.jpg" alt="彩色涂鸦套装"></div>
-    </div>
+      <div class="row"><span class="label">产品多图（1–4 张）：1 图撑满 ≤180 · 2 图两列 · 3 图左 1 大 + 右 2 小 · 4 图 2×2</span></div>
+      <div class="pv-product-strip">
+        <div class="pv-product-cell"><span class="label">1 图</span><div class="wg-image-grid wg-image-grid--product"><div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_10/1663740458796_1630.jpg" alt="基础针织上衣"></div></div></div>
+        <div class="pv-product-cell"><span class="label">2 图</span><div class="wg-image-grid wg-image-grid--product"><div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_10/1663740458796_1630.jpg" alt="基础针织上衣"></div><div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_11/1663741015635_49035.jpg" alt="粉色休闲衬衫"></div></div></div>
+        <div class="pv-product-cell"><span class="label">3 图</span><div class="wg-image-grid wg-image-grid--product"><div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_10/1663740458796_1630.jpg" alt="基础针织上衣"></div><div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_11/1663741015635_49035.jpg" alt="粉色休闲衬衫"></div><div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_12/1663741493015_827.jpg" alt="千鸟格针织套装"></div></div></div>
+        <div class="pv-product-cell"><span class="label">4 图</span><div class="wg-image-grid wg-image-grid--product"><div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_10/1663740458796_1630.jpg" alt="基础针织上衣"></div><div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_11/1663741015635_49035.jpg" alt="粉色休闲衬衫"></div><div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_12/1663741493015_827.jpg" alt="千鸟格针织套装"></div><div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_13/1664276865081_87837.jpg" alt="彩色涂鸦套装"></div></div></div>
+      </div>
   </div>
   <div class="pv-section">
     <div class="pv-section__title">动态图片栅格（1–9 张）</div>
