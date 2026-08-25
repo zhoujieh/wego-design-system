@@ -144,6 +144,18 @@ function checkSkillAdapters() {
       continue;
     }
 
+    // 整目录符号链接方案：适配器目录本身就是指向 .codex/skills 的符号链接，子项即权威源本体，逐项校验跳过。
+    if (fs.lstatSync(adapterRoot).isSymbolicLink()) {
+      try {
+        if (fs.realpathSync(adapterRoot) !== fs.realpathSync(sourceRoot)) {
+          add('error', 'skills.adapter_target', `${adapter} 整目录符号链接未指向 .codex/skills`, adapterRoot);
+        }
+      } catch {
+        add('error', 'skills.adapter_target', `${adapter} 的整目录符号链接无效`, adapterRoot);
+      }
+      continue;
+    }
+
     const adapterEntries = new Set(fs.readdirSync(adapterRoot));
     for (const skill of sourceSkills) {
       const source = path.join(sourceRoot, skill);
