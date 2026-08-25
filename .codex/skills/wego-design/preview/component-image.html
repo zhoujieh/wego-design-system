@@ -41,10 +41,30 @@
     .wg-image--custom-rect { width: 180px; height: 120px; }
     .wg-image--custom-wide { width: 260px; height: 160px; }
     .wg-image-grid { display:grid; box-sizing:border-box; }
-    .wg-image-grid__item { width:100%; min-width:0; aspect-ratio:1; }
+    .wg-image-grid__item { position:relative; width:100%; min-width:0; aspect-ratio:1; }
     .wg-image-grid--dynamic { --wg-image-grid-cell-radius:2px; width:100%; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:var(--spacer-4); overflow:hidden; border-radius:var(--radius-8); }
     .wg-image-grid--dynamic .wg-image-grid__item { border-radius:var(--wg-image-grid-cell-radius); }
-    .wg-image-grid--product { --wg-image-product-grid-min-width:80px; --wg-image-product-grid-max-width:160px; width:clamp(var(--wg-image-product-grid-min-width), 100%, var(--wg-image-product-grid-max-width)); grid-template-columns:repeat(2, minmax(0, 1fr)); gap:var(--spacer-2); overflow:hidden; border-radius:var(--radius-4); }
+    /* 动态九宫格：恰好 4 张图 → 占 9 宫格左上角 2×2 坑位（保持 3 列同尺寸，右列留空），不放大成整块 2×2 */
+    .wg-image-grid--dynamic:has(.wg-image-grid__item:nth-child(4):last-child) .wg-image-grid__item:nth-child(1) { grid-column:1; grid-row:1; }
+    .wg-image-grid--dynamic:has(.wg-image-grid__item:nth-child(4):last-child) .wg-image-grid__item:nth-child(2) { grid-column:2; grid-row:1; }
+    .wg-image-grid--dynamic:has(.wg-image-grid__item:nth-child(4):last-child) .wg-image-grid__item:nth-child(3) { grid-column:1; grid-row:2; }
+    .wg-image-grid--dynamic:has(.wg-image-grid__item:nth-child(4):last-child) .wg-image-grid__item:nth-child(4) { grid-column:2; grid-row:2; }
+    /* 产品多图四宫格：外层容器永远正方形（最大 180×180）；内部按 1/2/3/4 图划分 */
+    .wg-image-grid--product { --wg-image-product-grid-min-width:80px; --wg-image-product-grid-max-width:180px; width:clamp(var(--wg-image-product-grid-min-width), 100%, var(--wg-image-product-grid-max-width)); aspect-ratio:1 / 1; grid-template-columns:repeat(2, minmax(0, 1fr)); grid-template-rows:repeat(2, minmax(0, 1fr)); gap:var(--spacer-2); overflow:hidden; border-radius:var(--radius-4); }
+    .wg-image-grid--product .wg-image-grid__item { aspect-ratio:auto; }
+    .wg-image-grid--product .wg-image-grid__item:only-child { grid-column:1 / -1; grid-row:1 / -1; }
+    .wg-image-grid--product .wg-image-grid__item:first-child:nth-last-child(2),
+    .wg-image-grid--product .wg-image-grid__item:first-child:nth-last-child(2) ~ .wg-image-grid__item { grid-row:1 / -1; }
+    .wg-image-grid--product .wg-image-grid__item:first-child:nth-last-child(3) { grid-row:1 / -1; }
+    /* 单图三朝向：封顶在 9 宫格左上 2×2（≈2 个 3 列方格 + 1 间距，随父级宽自适应） */
+    .wg-image-grid--single { --wg-single-2x2: calc((200% - var(--spacer-4)) / 3); display:block; width:100%; border-radius:var(--radius-8); overflow:hidden; }
+    .wg-image-grid--single.wg-image-grid--square { width:var(--wg-single-2x2); aspect-ratio:1 / 1; }
+    .wg-image-grid--single.wg-image-grid--landscape { width:var(--wg-single-2x2); aspect-ratio:4 / 3; }
+    .wg-image-grid--single.wg-image-grid--portrait { width:calc(var(--wg-single-2x2) * 3 / 4); aspect-ratio:3 / 4; }
+    .wg-image-grid--single .wg-image-grid__single { display:block; position:relative; margin:0; padding:0; border:none; background:transparent; cursor:pointer; line-height:0; width:100%; height:100%; }
+    .wg-image-grid--single .wg-image-grid__single-img { display:block; width:100%; height:100%; object-fit:cover; border-radius:var(--radius-8); }
+    /* 视频播放角标（单图 / 多图首格） */
+    .wg-image-grid__play { position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:24px; height:24px; display:flex; align-items:center; justify-content:center; pointer-events:none; }
     @keyframes wg-image-skeleton {
       0% { background-position: 200% 0; }
       100% { background-position: -200% 0; }
@@ -53,6 +73,14 @@
     .pv-section { background:var(--bg-surface); border-radius:var(--radius-12); padding:var(--spacer-16); box-shadow:var(--shadow-xs); }
     .pv-section__sub:last-of-type { margin-bottom:var(--spacer-16); }
     .row { padding:var(--spacer-4) 0; }
+    .pv-grid-frame { width:340px; max-width:100%; }
+    .pv-grid-frame .wg-image-grid { margin-bottom:var(--spacer-12); }
+    .variant-sub { margin:var(--spacer-16) 0 var(--spacer-8); font-size:13px; font-weight:600; color:var(--text-strong, #1f2329); }
+    .variant-sub:first-of-type { margin-top:var(--spacer-4); }
+    .label { display:inline-block; font-size:12px; color:var(--text-muted, #8a8f99); }
+    .cell-no { position:absolute; top:4px; left:4px; z-index:3; min-width:16px; height:16px; padding:0 4px; border-radius:8px; background:rgba(0,0,0,.55); color:#fff; font-size:11px; line-height:16px; text-align:center; font-family:var(--font-sans, system-ui, sans-serif); }
+    .pv-product-strip { display:flex; flex-wrap:wrap; gap:var(--spacer-16); align-items:flex-start; margin-bottom:var(--spacer-12); }
+    .pv-product-cell { display:flex; flex-direction:column; gap:var(--spacer-4); }
   </style>
 </head>
 <body>
@@ -71,7 +99,7 @@
   </div>
   <div class="pv-section">
     <div class="pv-section__title">多图展示</div>
-    <div class="pv-section__sub">动态九宫格随父级内容区自适应，外层圆角为 8px；商品四宫格保持 80px 至 160px 的可用宽度，外层圆角为 4px。</div>
+    <div class="pv-section__sub">动态九宫格随父级内容区自适应，外层圆角为 8px（4 图占九宫格左上角 2×2，右列留空）；商品四宫格外层容器永远正方形（最大 180×180），内部按 1/2/3/4 图划分，外层圆角为 4px。</div>
     <div class="row"><span class="label">产品动态九宫格</span></div>
     <div class="wg-image-grid wg-image-grid--dynamic">
       <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_1/clothing_1_1.jpg" alt="方领上衣"></div>
@@ -84,12 +112,67 @@
       <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_8/img_1708defc_20240216_i1708092817_8695_6.jpg.jpg" alt="亚麻感短袖西装"></div>
       <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_9/1663740558494_61057.jpg" alt="运动感宽松上衣"></div>
     </div>
-    <div class="row"><span class="label">产品多图四宫格</span></div>
-    <div class="wg-image-grid wg-image-grid--product">
-      <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_10/1663740458796_1630.jpg" alt="基础针织上衣"></div>
-      <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_11/1663741015635_49035.jpg" alt="粉色休闲衬衫"></div>
-      <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_12/1663741493015_827.jpg" alt="千鸟格针织套装"></div>
-      <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_13/1664276865081_87837.jpg" alt="彩色涂鸦套装"></div>
+      <div class="row"><span class="label">产品四宫格（外层永远正方形 ≤180×180）：1 图撑满 · 2 图两列 · 3 图左 1 大 + 右 2 小 · 4 图 2×2</span></div>
+      <div class="pv-product-strip">
+        <div class="pv-product-cell"><span class="label">1 图</span><div class="wg-image-grid wg-image-grid--product"><div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_10/1663740458796_1630.jpg" alt="基础针织上衣"></div></div></div>
+        <div class="pv-product-cell"><span class="label">2 图</span><div class="wg-image-grid wg-image-grid--product"><div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_10/1663740458796_1630.jpg" alt="基础针织上衣"></div><div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_11/1663741015635_49035.jpg" alt="粉色休闲衬衫"></div></div></div>
+        <div class="pv-product-cell"><span class="label">3 图</span><div class="wg-image-grid wg-image-grid--product"><div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_10/1663740458796_1630.jpg" alt="基础针织上衣"></div><div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_11/1663741015635_49035.jpg" alt="粉色休闲衬衫"></div><div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_12/1663741493015_827.jpg" alt="千鸟格针织套装"></div></div></div>
+        <div class="pv-product-cell"><span class="label">4 图</span><div class="wg-image-grid wg-image-grid--product"><div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_10/1663740458796_1630.jpg" alt="基础针织上衣"></div><div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_11/1663741015635_49035.jpg" alt="粉色休闲衬衫"></div><div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_12/1663741493015_827.jpg" alt="千鸟格针织套装"></div><div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_13/1664276865081_87837.jpg" alt="彩色涂鸦套装"></div></div></div>
+      </div>
+  </div>
+  <div class="pv-section">
+    <div class="pv-section__title">动态图片栅格（1–9 张）</div>
+    <div class="pv-section__sub">单图按图片真实比例自动选用正方形 / 横版 4:3 / 竖版 3:4，最大只占 9 宫格左上 2×2；多图（2–9 张）统一三列、行数随数量 1/2/3 行，其中 4 图占 9 宫格左上角 2×2、右列留空；视频首格带居中播放角标。</div>
+    <div class="pv-grid-frame">
+      <div class="variant-sub">单图（1 张）· 三朝向 + 视频角标</div>
+      <div class="row"><span class="label">正方形 1:1 · 封顶 2×2 左上</span></div>
+      <div class="wg-image-grid wg-image-grid--single wg-image-grid--square">
+        <button class="wg-image-grid__single"><img class="wg-image-grid__single-img" src="../assets/image/clothing/clothing_1/clothing_1_1.jpg" alt="方领上衣"></button>
+      </div>
+      <div class="row"><span class="label">横版 4:3</span></div>
+      <div class="wg-image-grid wg-image-grid--single wg-image-grid--landscape">
+        <button class="wg-image-grid__single"><img class="wg-image-grid__single-img" src="../assets/image/clothing/clothing_2/clothing_2_1.jpg.jpg" alt="玫红短袖西装外套"></button>
+      </div>
+      <div class="row"><span class="label">竖版 3:4</span></div>
+      <div class="wg-image-grid wg-image-grid--single wg-image-grid--portrait">
+        <button class="wg-image-grid__single"><img class="wg-image-grid__single-img" src="../assets/image/clothing/clothing_3/1663740989357_27184.jpg" alt="蓝色格纹衬衫"></button>
+      </div>
+      <div class="row"><span class="label">视频（居中播放角标）</span></div>
+      <div class="wg-image-grid wg-image-grid--single wg-image-grid--portrait">
+        <button class="wg-image-grid__single"><img class="wg-image-grid__single-img" src="../assets/image/clothing/clothing_7/1663741042720_27285.jpg" alt="金扣西装外套"><span class="wg-image-grid__play"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="rgba(0,0,0,.45)"/><path d="M10 8.5l6 3.5-6 3.5z" fill="#fff"/></svg></span></button>
+      </div>
+
+      <div class="variant-sub">多图（2–9 张）· 统一三列</div>
+      <div class="row"><span class="label">2 图 · 三列 1 行</span></div>
+      <div class="wg-image-grid wg-image-grid--dynamic">
+        <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_1/clothing_1_1.jpg" alt=""></div>
+        <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_2/clothing_2_1.jpg.jpg" alt=""></div>
+      </div>
+      <div class="row"><span class="label">3 图 · 三列 1 行（满 3 格）</span></div>
+      <div class="wg-image-grid wg-image-grid--dynamic">
+        <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_1/clothing_1_1.jpg" alt=""></div>
+        <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_2/clothing_2_1.jpg.jpg" alt=""></div>
+        <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_3/1663740989357_27184.jpg" alt=""></div>
+      </div>
+      <div class="row"><span class="label">4 图 · 占 9 宫格左上角 2×2（3 列同尺寸，右列留空，格子 1–4）</span></div>
+      <div class="wg-image-grid wg-image-grid--dynamic">
+        <div class="wg-image wg-image-grid__item"><span class="cell-no">1</span><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_1/clothing_1_1.jpg" alt=""></div>
+        <div class="wg-image wg-image-grid__item"><span class="cell-no">2</span><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_2/clothing_2_1.jpg.jpg" alt=""></div>
+        <div class="wg-image wg-image-grid__item"><span class="cell-no">3</span><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_3/1663740989357_27184.jpg" alt=""></div>
+        <div class="wg-image wg-image-grid__item"><span class="cell-no">4</span><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_4/1663741015639_25492.jpg" alt=""></div>
+      </div>
+      <div class="row"><span class="label">9 图 · 三列 3 行（首格视频角标）</span></div>
+      <div class="wg-image-grid wg-image-grid--dynamic">
+        <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_1/clothing_1_1.jpg" alt=""><span class="wg-image-grid__play"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="rgba(0,0,0,.45)"/><path d="M10 8.5l6 3.5-6 3.5z" fill="#fff"/></svg></span></div>
+        <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_2/clothing_2_1.jpg.jpg" alt=""></div>
+        <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_3/1663740989357_27184.jpg" alt=""></div>
+        <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_4/1663741015639_25492.jpg" alt=""></div>
+        <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_5/1663741055068_1251.jpg" alt=""></div>
+        <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_6/img_1708defc_20240216_i1708092817_2182_1.jpg.jpg" alt=""></div>
+        <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_7/1663741042720_27285.jpg" alt=""></div>
+        <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_8/img_1708defc_20240216_i1708092817_8695_6.jpg.jpg" alt=""></div>
+        <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_9/1663740558494_61057.jpg" alt=""></div>
+      </div>
     </div>
   </div>
   <div class="pv-section">
