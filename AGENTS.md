@@ -21,7 +21,7 @@
 
 - `wego-app/index.html` 是唯一 App 入口；业务场景位于 `wego-app/scenes/{中文业务场景}/`，通过 `#/route-id` 访问；场景产物不得散落到仓库根目录。
 - `wego-app/js/routes.js`、`wego-app/lib/`、`components.css` 是生成物，禁止直接编辑；权威源在 `.codex/skills/wego-design/`，仅 `wego-uxsystem-iterate` 可改。
-- `.trae/skills/*` 与 `.codebuddy/skills/*` 必须是 `.codex/skills/*` 的符号链接。
+- `.trae/skills/*` 与 `.codebuddy/skills/*` 必须以逐项符号链接指向 `.codex/skills/*`，或以整目录符号链接指向 `.codex/skills`；不得保留副本。
 
 ## 三技能主链路
 
