@@ -1219,7 +1219,7 @@
       +   (!showingSearchResults && historyProducts.length ? '<section class="order-catalog-history" aria-label="最近成交商品"><div class="order-catalog-history__list layout-scroll-row" data-component-slug="layout-scroll-row" data-item-size="auto" data-snap="start" data-peek="none">' + catalogList(true, historyProducts, false) + '</div></section>' : '')
       +   '<section class="order-catalog-products">'
       +     (showingSearchResults ? '' : '<div class="order-catalog-toolbar">' + catalogCategoryTabs() + '</div>')
-      +     '<div class="order-catalog-products__body"><div class="order-desktop__catalog-list order-desktop__catalog-list--' + state.catalogViewMode + (state.catalogViewMode === 'grid' ? ' layout-grid' : '') + '"' + (state.catalogViewMode === 'grid' ? ' data-component-slug="layout-grid" data-columns="2" data-align="stretch"' : '') + '>' + catalogList(true, allProducts, true) + '</div></div>'
+      +     '<div class="order-catalog-products__body"><div class="order-desktop__catalog-list order-desktop__catalog-list--' + state.catalogViewMode + (state.catalogViewMode === 'grid' ? ' layout-grid' : '') + '"' + (state.catalogViewMode === 'grid' ? ' data-component-slug="layout-grid" data-columns="' + catalogGridColumnsForWidth(state.catalogWidth) + '" data-align="stretch"' : '') + '>' + catalogList(true, allProducts, true) + '</div></div>'
       +   '</section>'
       +   '</div>'
       + '</aside>';
@@ -2392,6 +2392,8 @@
 
   function renderWorkbench(root, ctx) {
     root.innerHTML = rootTemplate();
+    if (state.catalogWidth != null && !state.catalogCollapsed) applyCatalogWidth(root, state.catalogWidth);
+    else syncCatalogGridColumns(root);
     updateInputClearButtons(root);
     syncCatalogCategoryTabs(root);
     positionDesktopDisplayModeMenu(root);
@@ -2420,6 +2422,19 @@
     return { min: minCatalog, max: maxCatalog, workspaceWidth: workspaceWidth };
   }
 
+  function catalogGridColumnsForWidth(width) {
+    var availableWidth = Math.max(0, Number(width || 0) - 16);
+    return Math.min(4, Math.max(2, Math.floor(availableWidth / 160)));
+  }
+
+  function syncCatalogGridColumns(root, knownWidth) {
+    var catalog = root && root.querySelector ? root.querySelector('.order-desktop__catalog:not(.order-desktop__catalog--collapsed)') : null;
+    var grid = catalog ? catalog.querySelector('.order-desktop__catalog-list--grid.layout-grid') : null;
+    if (!catalog || !grid) return;
+    var width = Number(knownWidth || catalog.getBoundingClientRect().width);
+    grid.dataset.columns = String(catalogGridColumnsForWidth(width));
+  }
+
   function applyCatalogWidth(root, nextWidth) {
     var workspace = root && root.querySelector ? root.querySelector('.order-desktop__workspace') : null;
     if (!workspace) return;
@@ -2427,6 +2442,7 @@
     var clamped = Math.max(limits.min, Math.min(limits.max, Number(nextWidth || 0)));
     state.catalogWidth = clamped;
     workspace.style.gridTemplateColumns = 'minmax(0,1fr) var(--spacer-8) minmax(300px,' + Math.round(clamped) + 'px)';
+    syncCatalogGridColumns(root, clamped);
   }
 
   function beginCatalogResize(event, root) {
