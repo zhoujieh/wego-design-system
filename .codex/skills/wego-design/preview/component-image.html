@@ -44,8 +44,11 @@
     .wg-image-grid__item { position:relative; width:100%; min-width:0; aspect-ratio:1; }
     .wg-image-grid--dynamic { --wg-image-grid-cell-radius:2px; width:100%; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:var(--spacer-4); overflow:hidden; border-radius:var(--radius-8); }
     .wg-image-grid--dynamic .wg-image-grid__item { border-radius:var(--wg-image-grid-cell-radius); }
-    /* 动态九宫格：恰好 4 张图时改 2 列 → 2×2 正方形（与商品四宫格一致） */
-    .wg-image-grid--dynamic:has(.wg-image-grid__item:nth-child(4):last-child) { grid-template-columns:repeat(2, minmax(0, 1fr)); }
+    /* 动态九宫格：恰好 4 张图 → 占 9 宫格左上角 2×2 坑位（保持 3 列同尺寸，右列留空），不放大成整块 2×2 */
+    .wg-image-grid--dynamic:has(.wg-image-grid__item:nth-child(4):last-child) .wg-image-grid__item:nth-child(1) { grid-column:1; grid-row:1; }
+    .wg-image-grid--dynamic:has(.wg-image-grid__item:nth-child(4):last-child) .wg-image-grid__item:nth-child(2) { grid-column:2; grid-row:1; }
+    .wg-image-grid--dynamic:has(.wg-image-grid__item:nth-child(4):last-child) .wg-image-grid__item:nth-child(3) { grid-column:1; grid-row:2; }
+    .wg-image-grid--dynamic:has(.wg-image-grid__item:nth-child(4):last-child) .wg-image-grid__item:nth-child(4) { grid-column:2; grid-row:2; }
     /* 产品多图四宫格：外层容器永远正方形（最大 180×180）；内部按 1/2/3/4 图划分 */
     .wg-image-grid--product { --wg-image-product-grid-min-width:80px; --wg-image-product-grid-max-width:180px; width:clamp(var(--wg-image-product-grid-min-width), 100%, var(--wg-image-product-grid-max-width)); aspect-ratio:1 / 1; grid-template-columns:repeat(2, minmax(0, 1fr)); grid-template-rows:repeat(2, minmax(0, 1fr)); gap:var(--spacer-2); overflow:hidden; border-radius:var(--radius-4); }
     .wg-image-grid--product .wg-image-grid__item { aspect-ratio:auto; }
@@ -96,7 +99,7 @@
   </div>
   <div class="pv-section">
     <div class="pv-section__title">多图展示</div>
-    <div class="pv-section__sub">动态九宫格随父级内容区自适应，外层圆角为 8px；商品四宫格外层容器永远正方形（最大 180×180），内部按 1/2/3/4 图划分，外层圆角为 4px。</div>
+    <div class="pv-section__sub">动态九宫格随父级内容区自适应，外层圆角为 8px（4 图占九宫格左上角 2×2，右列留空）；商品四宫格外层容器永远正方形（最大 180×180），内部按 1/2/3/4 图划分，外层圆角为 4px。</div>
     <div class="row"><span class="label">产品动态九宫格</span></div>
     <div class="wg-image-grid wg-image-grid--dynamic">
       <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_1/clothing_1_1.jpg" alt="方领上衣"></div>
@@ -119,7 +122,7 @@
   </div>
   <div class="pv-section">
     <div class="pv-section__title">动态图片栅格（1–9 张）</div>
-    <div class="pv-section__sub">单图按图片真实比例自动选用正方形 / 横版 4:3 / 竖版 3:4，最大只占 9 宫格左上 2×2；多图（2–9 张）统一三列、行数随数量 1/2/3 行，视频首格带居中播放角标。</div>
+    <div class="pv-section__sub">单图按图片真实比例自动选用正方形 / 横版 4:3 / 竖版 3:4，最大只占 9 宫格左上 2×2；多图（2–9 张）统一三列、行数随数量 1/2/3 行，其中 4 图占 9 宫格左上角 2×2、右列留空；视频首格带居中播放角标。</div>
     <div class="pv-grid-frame">
       <div class="variant-sub">单图（1 张）· 三朝向 + 视频角标</div>
       <div class="row"><span class="label">正方形 1:1 · 封顶 2×2 左上</span></div>
@@ -151,7 +154,7 @@
         <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_2/clothing_2_1.jpg.jpg" alt=""></div>
         <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_3/1663740989357_27184.jpg" alt=""></div>
       </div>
-      <div class="row"><span class="label">4 图 · 2×2 正方形（格子 1–4）</span></div>
+      <div class="row"><span class="label">4 图 · 占 9 宫格左上角 2×2（3 列同尺寸，右列留空，格子 1–4）</span></div>
       <div class="wg-image-grid wg-image-grid--dynamic">
         <div class="wg-image wg-image-grid__item"><span class="cell-no">1</span><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_1/clothing_1_1.jpg" alt=""></div>
         <div class="wg-image wg-image-grid__item"><span class="cell-no">2</span><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_2/clothing_2_1.jpg.jpg" alt=""></div>
