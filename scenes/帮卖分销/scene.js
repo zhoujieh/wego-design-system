@@ -1464,7 +1464,8 @@
       var backBtn = root.querySelector('[data-back-btn]');
       if (backBtn) {
         backBtn.addEventListener('click', function () {
-          history.back();
+          // 统一走宿主返回：消费历史条目；直达链接无可回退条目时由宿主兜底本地清理
+          ctx.back();
         });
       }
       var entryCard = root.querySelector('[data-dom-id="open-resale-popup"]');
