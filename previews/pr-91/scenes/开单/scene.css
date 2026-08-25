@@ -5348,7 +5348,7 @@ body[data-order-layout="landscape"] .phone-indicator {
 /* 横版：768px 起由 Pad 横屏与桌面共用，以 Figma 1280×768 为视觉基准。 */
 @media (min-width: 768px) {
   .order-v2-desktop {
-    background: var(--palette-blue-100);
+    background: var(--bg-workbench);
   }
 
   .order-desktop__header {
