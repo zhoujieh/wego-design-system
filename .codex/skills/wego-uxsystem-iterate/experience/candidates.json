@@ -559,9 +559,26 @@
       ],
       "scenes": [],
       "occurrenceCount": 1,
-      "status": "observing",
+      "status": "upgraded",
       "proposalReason": null,
-      "upgradeHistory": [],
+      "upgradeHistory": [
+        {
+          "version": 1,
+          "upgradedAt": "2026-08-25",
+          "evidenceRefs": [
+            "evt-20260825-001"
+          ],
+          "targetAuthority": {
+            "path": ".codex/skills/wego-github-delivery/SKILL.md",
+            "anchor": "开始交付"
+          },
+          "ruleIds": [
+            "delivery-unit-must-use-independent-worktree"
+          ],
+          "summary": "交付规则与 AGENTS.md 新增 delivery-unit-must-use-independent-worktree 硬约束：每个交付单元必须用 git worktree add 创建独立目录，不得与其它交付单元共享主 worktree，主 worktree 只保留 main 同步；同步 wego-github-delivery SKILL.md「开始交付」、references「分支与两阶段状态」、AGENTS.md「Git 与交付硬约束」三处权威源。",
+          "commitSha": "7bf19dc719d45a8b012dc4ca81118b5f9745ff7a"
+        }
+      ],
       "createdAt": "2026-08-25",
       "updatedAt": "2026-08-25"
     }
