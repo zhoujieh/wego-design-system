@@ -583,10 +583,8 @@ function validatePrototypeScenes(record) {
   if (!Array.isArray(record.affected_scenes) || !record.affected_scenes.length) fail('submit-prototype 要求 affected_scenes 为非空数组');
   for (const scene of record.affected_scenes) {
     const sceneDirectory = `wego-app/scenes/${scene}`;
-    for (const validator of ['scripts/validate-scene-contract.mjs', 'scripts/validate-scene-runtime.mjs']) {
-      const result = spawnSync(process.execPath, [validator, sceneDirectory, '--json'], { cwd: root, encoding: 'utf8' });
-      if (result.status !== 0) fail(`${sceneDirectory} 未通过场景验证：${(result.stderr || result.stdout || '未知错误').trim()}`);
-    }
+    const result = spawnSync(process.execPath, ['scripts/validate-scene-contract.mjs', sceneDirectory, '--json'], { cwd: root, encoding: 'utf8' });
+    if (result.status !== 0) fail(`${sceneDirectory} 未通过场景验证：${(result.stderr || result.stdout || '未知错误').trim()}`);
   }
 }
 function collectFingerprints(record, repositoryRoot = root) {
@@ -873,7 +871,6 @@ function test() {
     fs.writeFileSync(routesFile, `window.WEGO_APP_ROUTES = [${currentRoute}, ${detailRoute}];\n`);
     fs.writeFileSync(path.join(fixtureRoot, '.codex/skills/wego-design/metadata.json'), '{"version":411}\n');
     fs.writeFileSync(path.join(fixtureRoot, 'scripts/validate-scene-contract.mjs'), `import fs from 'node:fs';\nimport path from 'node:path';\nconst source = fs.readFileSync(path.join(process.argv[2], 'scene.js'), 'utf8');\nif (source.includes('INVALID_SCENE')) { console.error('场景合同失败'); process.exit(1); }\n`);
-    fs.writeFileSync(path.join(fixtureRoot, 'scripts/validate-scene-runtime.mjs'), `import fs from 'node:fs';\nimport path from 'node:path';\nconst source = fs.readFileSync(path.join(process.argv[2], 'scene.js'), 'utf8');\nif (source.includes('INVALID_RUNTIME')) { console.error('场景运行时失败'); process.exit(1); }\n`);
     const iterationDirectory = path.join(sceneRoot, '_iterations/20260715-test-测试');
     const iterationFile = path.join(iterationDirectory, 'iteration.json');
     const iterationArgument = path.relative(fixtureRoot, iterationFile).split(path.sep).join('/');
@@ -932,10 +929,6 @@ function test() {
     const invalidSubmission = run(['submit-prototype', `--file=${iterationArgument}`]);
     assert(invalidSubmission.status !== 0 && (invalidSubmission.stderr || '').includes('场景验证'), 'submit-prototype 未运行静态场景验证');
     assert(JSON.parse(fs.readFileSync(iterationFile, 'utf8')).status === 'prototyping', '静态场景验证失败后不应写入原型提交');
-    fs.writeFileSync(path.join(sceneRoot, 'scene.js'), 'INVALID_RUNTIME\n');
-    const invalidRuntimeSubmission = run(['submit-prototype', `--file=${iterationArgument}`]);
-    assert(invalidRuntimeSubmission.status !== 0 && (invalidRuntimeSubmission.stderr || '').includes('场景验证'), 'submit-prototype 未运行真实页面验证');
-    assert(JSON.parse(fs.readFileSync(iterationFile, 'utf8')).status === 'prototyping', '运行时场景验证失败后不应写入原型提交');
     fs.writeFileSync(path.join(sceneRoot, 'scene.js'), 'window.testScene = true;\n');
     const validSubmission = run(['submit-prototype', '--file', iterationArgument]);
     assert(validSubmission.status === 0, `合法 submit-prototype 失败：${(validSubmission.stderr || validSubmission.stdout).trim()}`);

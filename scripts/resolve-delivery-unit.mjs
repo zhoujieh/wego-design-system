@@ -114,7 +114,7 @@ function resolve(scene, routeId, { listWorktrees = worktrees, listPullRequests =
       branch: worktree.branch,
       worktree: worktree.path,
       pullRequest,
-      stage: pullRequest ? 'formal-review' : 'local-iteration',
+      stage: 'local-iteration',
       claims: claims.map(({ file, claim }) => ({ file, agent: claim.agent, scene: claim.scene, routeId: claim.routeId, status: claim.status })),
       iterations
     }];
@@ -153,8 +153,8 @@ try {
     console.log(`交付单元核对结果：${report.outcome}`);
     for (const candidate of report.candidates) {
       const stage = candidate.pullRequest
-        ? `正式验收中，PR #${candidate.pullRequest.number}`
-        : '本地迭代中，尚未创建 PR';
+        ? `本地迭代中（已推送，PR #${candidate.pullRequest.number}）`
+        : '本地迭代中（未推送）';
       console.log(`- ${candidate.branch}：${candidate.worktree}，${stage}`);
     }
   }
