@@ -5464,7 +5464,7 @@ body[data-order-layout="landscape"] .phone-indicator {
   }
 
   .order-desktop__workspace--with-resizer {
-    grid-template-columns: minmax(0, 1fr) 0 min(calc(var(--size-104) * 3 + var(--size-56)), 34%);
+    grid-template-columns: minmax(0, 1fr) var(--spacer-8) min(calc(var(--size-104) * 3 + var(--size-56)), 34%);
     column-gap: 0;
     padding: 0 var(--spacer-8);
     background: transparent;
@@ -5475,8 +5475,8 @@ body[data-order-layout="landscape"] .phone-indicator {
   }
 
   .order-desktop__catalog-resizer {
-    width: 0;
-    min-width: 0;
+    width: var(--spacer-8);
+    min-width: var(--spacer-8);
   }
 
   .order-desktop__order {
@@ -5836,7 +5836,7 @@ body[data-order-layout="landscape"] .phone-indicator {
   }
 
   .order-desktop__catalog {
-    overflow: hidden;
+    overflow: visible;
     border-left: 0;
     border-radius: var(--radius-8) var(--radius-8) 0 0;
   }
