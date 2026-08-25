@@ -4575,7 +4575,7 @@ body[data-order-layout="landscape"] .phone-indicator {
 
   .order-desktop-grouped-sku-stack--spec .order-desktop-grouped-sku-line {
     overflow: hidden;
-    color: var(--text-secondary);
+    color: var(--text-default);
     font-family: var(--body-lg-font-family);
     font-size: var(--body-lg-font-size);
     line-height: var(--body-lg-line-height);
@@ -4613,7 +4613,7 @@ body[data-order-layout="landscape"] .phone-indicator {
     color: var(--text-link);
     font-family: var(--body-lg-strong-font-family);
     font-size: var(--body-lg-strong-font-size);
-    font-weight: var(--body-lg-strong-font-weight);
+    font-weight: var(--font-weight-semibold);
     line-height: var(--body-lg-strong-line-height);
   }
 
@@ -4672,16 +4672,18 @@ body[data-order-layout="landscape"] .phone-indicator {
   }
 
   .order-desktop-product-total--grouped small {
-    color: var(--text-secondary);
+    color: var(--text-default);
     font-family: var(--body-md-font-family);
-    font-size: var(--body-xs-font-size);
+    font-size: var(--body-md-font-size);
     font-weight: var(--font-weight-regular);
   }
 
   .order-desktop-product-total--grouped small > span {
-    font-family: var(--number-md-font-family);
-    font-size: var(--body-lg-font-size);
-    font-weight: var(--font-weight-medium);
+    color: var(--text-default);
+    font-family: var(--number-lg-font-family);
+    font-size: var(--number-lg-font-size);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--number-lg-line-height);
   }
 
   .order-desktop-product-note {
@@ -4691,10 +4693,16 @@ body[data-order-layout="landscape"] .phone-indicator {
     justify-self: start;
     max-width: 100%;
     color: var(--text-secondary);
+    font-weight: var(--font-weight-regular);
   }
 
   .order-desktop-product-note i {
-    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 var(--size-16);
+    width: var(--size-16);
+    height: var(--size-16);
     font-size: var(--size-16);
   }
 
@@ -6383,8 +6391,8 @@ body[data-order-layout="landscape"] .phone-indicator {
   }
 
   .order-desktop__table-title-main > .switch {
-    margin-right: calc(var(--spacer-24) * -1);
-    transform: scale(0.4545);
+    margin-right: calc(var(--spacer-8) * -1);
+    transform: scale(0.8333);
     transform-origin: left center;
   }
 
