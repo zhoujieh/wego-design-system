@@ -1512,11 +1512,13 @@
     .wg-image-grid--dynamic .wg-image-grid__item { border-radius:var(--wg-image-grid-cell-radius); }
     /* 动态九宫格：恰好 4 张图时改 2 列 → 2×2 正方形（与商品四宫格一致） */
     .wg-image-grid--dynamic:has(.wg-image-grid__item:nth-child(4):last-child) { grid-template-columns:repeat(2, minmax(0, 1fr)); }
-    /* 产品多图四宫格：固定两列；1 图撑满容器（最大 180×180）；2 图两列；3 图左 1 大 + 右 2 小；4 图 2×2 */
-    .wg-image-grid--product { --wg-image-product-grid-min-width:80px; --wg-image-product-grid-max-width:180px; width:clamp(var(--wg-image-product-grid-min-width), 100%, var(--wg-image-product-grid-max-width)); grid-template-columns:repeat(2, minmax(0, 1fr)); gap:var(--spacer-2); overflow:hidden; border-radius:var(--radius-4); }
-    .wg-image-grid--product .wg-image-grid__item:only-child { grid-column:1 / -1; }
-    .wg-image-grid--product:has(.wg-image-grid__item:nth-child(3):last-child) { aspect-ratio:2 / 1; grid-template-rows:1fr 1fr; }
-    .wg-image-grid--product .wg-image-grid__item:first-child:nth-last-child(3) { grid-row:span 2; }
+    /* 产品多图四宫格：外层容器永远正方形（最大 180×180）；内部按 1/2/3/4 图划分 */
+    .wg-image-grid--product { --wg-image-product-grid-min-width:80px; --wg-image-product-grid-max-width:180px; width:clamp(var(--wg-image-product-grid-min-width), 100%, var(--wg-image-product-grid-max-width)); aspect-ratio:1 / 1; grid-template-columns:repeat(2, minmax(0, 1fr)); grid-template-rows:repeat(2, minmax(0, 1fr)); gap:var(--spacer-2); overflow:hidden; border-radius:var(--radius-4); }
+    .wg-image-grid--product .wg-image-grid__item { aspect-ratio:auto; }
+    .wg-image-grid--product .wg-image-grid__item:only-child { grid-column:1 / -1; grid-row:1 / -1; }
+    .wg-image-grid--product .wg-image-grid__item:first-child:nth-last-child(2),
+    .wg-image-grid--product .wg-image-grid__item:first-child:nth-last-child(2) ~ .wg-image-grid__item { grid-row:1 / -1; }
+    .wg-image-grid--product .wg-image-grid__item:first-child:nth-last-child(3) { grid-row:1 / -1; }
     /* 单图三朝向：封顶在 9 宫格左上 2×2（≈2 个 3 列方格 + 1 间距，随父级宽自适应） */
     .wg-image-grid--single { --wg-single-2x2: calc((200% - var(--spacer-4)) / 3); display:block; width:100%; border-radius:var(--radius-8); overflow:hidden; }
     .wg-image-grid--single.wg-image-grid--square { width:var(--wg-single-2x2); aspect-ratio:1 / 1; }
