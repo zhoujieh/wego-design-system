@@ -539,6 +539,31 @@
       ],
       "createdAt": "2026-08-20",
       "updatedAt": "2026-08-20"
+    },
+    {
+      "id": "exp-20260825-001",
+      "normalizedKey": "parallel-delivery-units-share-main-worktree-branch-race",
+      "category": "execution",
+      "type": "workflow-gap",
+      "ownerSkill": "wego-uxsystem-iterate",
+      "problem": "多个交付单元并行时共享主 worktree，各会话互相 checkout 抢占分支，导致 commit 落错分支、推送的分支内容为空或缺失。",
+      "rootCause": "交付规则仅在「分支与预览一致性」章节顺带提「无关任务使用独立 worktree」，没有形成「每个交付单元开工前用 git worktree add 创建独立目录」的明确步骤或硬约束；多会话并行时默认都在主 worktree 操作，checkout 互相覆盖。",
+      "resolution": "本次已通过 git branch -f + push --force-with-lease + reset --hard 修正分支指向并恢复被抢占分支；后续并行交付单元必须用独立 worktree 隔离，避免 checkout 互相覆盖。",
+      "targetAuthority": {
+        "path": ".codex/skills/wego-github-delivery/SKILL.md",
+        "anchor": "开始交付"
+      },
+      "relatedRuleId": null,
+      "evidenceRefs": [
+        "evt-20260825-001"
+      ],
+      "scenes": [],
+      "occurrenceCount": 1,
+      "status": "observing",
+      "proposalReason": null,
+      "upgradeHistory": [],
+      "createdAt": "2026-08-25",
+      "updatedAt": "2026-08-25"
     }
   ]
 }

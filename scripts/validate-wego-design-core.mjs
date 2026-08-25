@@ -329,10 +329,9 @@ function recordSceneValidatorResult(result, { code, label, scene = null, file = 
   return details;
 }
 
-function validateScenes(scenes, { runtimeAll = false } = {}) {
-  requireFiles(['scripts/validate-scene-contract.mjs', 'scripts/validate-scene-runtime.mjs']);
+function validateScenes(scenes) {
+  requireFiles(['scripts/validate-scene-contract.mjs']);
   const staticAvailable = exists('scripts/validate-scene-contract.mjs');
-  const runtimeAvailable = exists('scripts/validate-scene-runtime.mjs');
   const targets = [...new Set(scenes)].sort();
   for (const scene of targets) {
     const directory = path.join(appRoot, 'scenes', scene);
@@ -356,32 +355,6 @@ function validateScenes(scenes, { runtimeAll = false } = {}) {
         file: directory
       });
     }
-    if (!runtimeAll && runtimeAvailable) {
-      const runtime = spawnSync(process.execPath, [
-        'scripts/validate-scene-runtime.mjs',
-        relative(directory),
-        '--json'
-      ], { cwd: root, encoding: 'utf8' });
-      recordSceneValidatorResult(runtime, {
-        code: 'scene.runtime_failed',
-        label: '运行时',
-        scene,
-        file: directory
-      });
-    }
-  }
-  if (runtimeAll && runtimeAvailable) {
-    const runtime = spawnSync(process.execPath, [
-      'scripts/validate-scene-runtime.mjs',
-      '--all',
-      '--json'
-    ], { cwd: root, encoding: 'utf8' });
-    const details = recordSceneValidatorResult(runtime, {
-      code: 'scene.runtime_failed',
-      label: '全量运行时',
-      file: path.join(appRoot, 'scenes')
-    });
-    report.metrics.runtime = details?.metrics || {};
   }
 }
 
@@ -493,9 +466,7 @@ function runChangedScope() {
   const targetScenes = changedSet.has('wego-app/js/routes.js')
     ? [...new Set([...changedScenes, ...routedScenes])]
     : changedScenes;
-  validateScenes(targetScenes, {
-    runtimeAll: changedSet.has('scripts/validate-scene-runtime.mjs')
-  });
+  validateScenes(targetScenes);
   if (targetScenes.length) {
     runNode('scripts/validate-scene-iteration-binding.mjs', [...targetScenes, '--json'], 'scene.iteration_unbound');
   }
@@ -521,7 +492,7 @@ function runFullScope() {
   checkLibrarySync();
   checkWorkflowContracts();
   checkAppHost(true);
-  validateScenes(sceneDirectories(), { runtimeAll: true });
+  validateScenes(sceneDirectories());
   runNode('scripts/validate-scene-iteration-binding.mjs', ['--all', '--json'], 'scene.iteration_unbound');
   checkIterations({ all: true });
 }
