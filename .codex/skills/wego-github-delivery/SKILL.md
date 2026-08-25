@@ -11,6 +11,9 @@ description: 负责微购仓库的分支、PR、本地迭代预览、合并和�
 
 ## 开始交付
 
+<!-- rule-id: delivery-unit-must-use-independent-worktree -->
+- 每个交付单元必须使用独立 worktree：开工前用 `git worktree add ../<owner>-<task> -b <分支>` 创建独立目录并在其中操作，不得与其它交付单元共享主 worktree；主 worktree 只保留 `main` 用于 `git pull` 同步。多个交付单元并行时尤其必须隔离，避免 checkout 互相覆盖导致 commit 落错分支。
+
 1. 先执行 `git pull --rebase origin main`。
 2. 运行交付单元核对，不得只检查当前目录或 `main`：
    - **范围**：覆盖全部 worktree、开放 PR、有效场景认领和未冻结迭代；业务任务用场景或 routeId 匹配，非业务任务用明确的改动范围。
