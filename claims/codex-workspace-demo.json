@@ -5,5 +5,7 @@
   "branch": "feature/luhong-workspace-order-demo",
   "status": "released",
   "claimedAt": "2026-08-20T00:00:00.000Z",
-  "note": "迁移工作台与收银开单 demo 到团队仓库；工作已由 feature/trae-workspace-appcenter 承接，释放认领"
+  "note": "迁移工作台与收银开单 demo 到团队仓库；工作已由 feature/trae-workspace-appcenter 承接，释放认领",
+  "releasedAt": "2026-08-24T00:00:00.000Z",
+  "releaseReason": "PR #76 已合并"
 }

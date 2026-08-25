@@ -2,10 +2,8 @@
   "agent": "codex-order-demo",
   "scene": "开单",
   "routeId": "workspace-order-create",
-  "branch": "feature/luhong-workspace-order-demo",
-  "status": "released",
-  "claimedAt": "2026-08-20T00:00:00.000Z",
-  "releasedAt": "2026-08-25T12:00:00.000Z",
-  "releaseReason": "工作台/开单 demo 迁移已由 feature/trae-workspace-appcenter（PR #81）承接并合并，分支已删除，收口释放",
-  "note": "迁移工作台与收银开单 demo 到团队仓库"
+  "branch": "feature/luhong-order-pad-figma",
+  "status": "active",
+  "claimedAt": "2026-08-24T00:00:00.000Z",
+  "note": "按 Figma 还原收银开单 Pad 横屏样式，不改业务逻辑"
 }
