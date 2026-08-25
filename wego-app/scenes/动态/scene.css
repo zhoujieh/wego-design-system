@@ -1,7 +1,8 @@
 /* 动态商品流场景样式 */
 
 .album-feed {
-  background: var(--bg-page);
+  position: relative;
+  background: var(--bg-surface);
   color: var(--text-default);
   font-family: var(--body-md-font-family);
 }
@@ -13,12 +14,20 @@
   color: var(--text-default);
 }
 
+/* 搜索栏：动态列表顶部独立元素（不进导航栏），视觉强调（accent 描边）。
+   上滑隐藏/下滑显示由公共 sticky-region[data-visibility="direction-reveal"] 宿主运行时接管，
+   navbar 默认一直显示，不参与滚动隐藏。 */
+.album-feed__search-sticky {
+  --sticky-region-expanded-size: 60px;
+}
+
 .album-feed__searchbar {
-  display: flex;
-  align-items: center;
-  gap: var(--spacer-8);
   padding: var(--spacer-8) var(--spacer-16);
-  background: var(--bg-page);
+  background: var(--bg-surface);
+}
+
+.album-feed__searchbar .searchbox {
+  width: 100%;
 }
 
 .album-feed__search-box {
@@ -52,14 +61,28 @@
 .album-feed__list {
   display: flex;
   flex-direction: column;
-  gap: var(--spacer-8);
-  padding: var(--spacer-8) 0 var(--spacer-24);
+  /* 去掉列表 gap：卡片之间改用分割线（见 .album-feed__card::before），不再用间距留白 */
+  padding: var(--spacer-8) 0 calc(var(--spacer-24) + var(--size-48) + var(--spacer-16) + var(--spacer-8));
 }
 
-/* ── 动态卡片 ── */
+/* ── 动态卡片间分割线 ──
+   每条动态（首条除外）上方用占位 ::before 画 0.5px 分割线：margin 上下各 8px 使线居中，
+   左起点对齐图片左侧（16 头像外距 + 40 头像 + 12 间距 = 68px），右到屏幕边缘；末条无尾随线。 */
 .album-feed__card {
+  position: relative;
   background: var(--bg-surface);
   box-sizing: border-box;
+}
+
+.album-feed__card:not(:first-child)::before {
+  content: "";
+  display: block;
+  /* 占位分割线（非绝对定位）：margin 上下各 8px 把 0.5px 线夹在正中，左起点对齐图片左侧（68px），右到屏幕边缘 */
+  margin-top: var(--spacer-8);
+  margin-bottom: var(--spacer-8);
+  margin-left: calc(var(--spacer-16) + var(--size-40) + var(--spacer-12));
+  margin-right: 0;
+  border-top: var(--stroke-hairline) solid var(--border-neutral-l2);
 }
 
 /* 内容区左缩进：对齐头像右缘 + 12px 间距（16 + 40 + 12 = 68） */
@@ -267,6 +290,21 @@
 .album-feed__skeleton {
   background: var(--bg-surface);
   padding: 0 var(--spacer-16) var(--spacer-16);
+}
+
+/* 2 个骨架 item：每个占满宽度、之间用分割线分隔（与真实卡片分割线一致） */
+.album-feed__skeleton-item {
+  position: relative;
+  padding-top: var(--spacer-8);
+}
+.album-feed__skeleton-item:not(:first-child)::before {
+  content: "";
+  display: block;
+  margin-top: var(--spacer-8);
+  margin-bottom: var(--spacer-8);
+  margin-left: calc(var(--spacer-16) + var(--size-40) + var(--spacer-12));
+  margin-right: 0;
+  border-top: var(--stroke-hairline) solid var(--border-neutral-l2);
 }
 
 .album-feed__skeleton-head {

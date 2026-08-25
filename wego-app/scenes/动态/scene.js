@@ -20,7 +20,7 @@
       { "selector": ".album-feed", "content_role": "页面字体", "css_property": "font-family", "token": "var(--body-md-font-family)" }
     ],
     "component_bindings": [
-      { "binding_id": "feed-navbar", "slug": "navbar", "reason": "动态 tab 顶部导航：左对齐大标题「动态」，右侧发布入口与搜索入口", "variant_dimensions": { "leftControl": "none", "titleAlignment": "left-wide", "actions": "icon", "rightActionType": "icon", "spacing": "default", "pageTransition": "push", "position": "sticky" } }
+      { "binding_id": "feed-navbar", "slug": "navbar", "reason": "动态 tab 顶部导航：左对齐大标题「动态」，右侧仅保留搜索入口；发布入口改为右下角悬浮按钮（与我的页共用公共组件）", "variant_dimensions": { "leftControl": "none", "titleAlignment": "left-wide", "actions": "icon", "rightActionType": "icon", "spacing": "default", "pageTransition": "push", "position": "sticky" } }
     ],
     "layout_contract": {
       "mode": "composed",
@@ -28,7 +28,7 @@
       "mutable_regions": [".album-feed__scroll", ".album-feed__list"]
     },
     "interaction_contract": [
-      { "dom_id": "publish-entry", "target": "route:publish-product" },
+      { "dom_id": "open-publish-sheet", "target": "overlay:sheet" },
       { "dom_id": "feed-search-input", "target": "state:searching" }
     ],
     "state_contract": [
@@ -59,10 +59,10 @@
      社区已有动态在原型数据库中不携带帮卖配置，此处以场景样例标记部分商品为「可帮卖」，
      用于演示帮卖卡片（主按钮「邀请帮卖」+「可帮卖」标识）与非帮卖卡片（主按钮「一键转发」）两种形态。 */
   var RESALE_MARK = {
-    'dyn-01': { distribution_type: 1, distribution_config: { amountType: 1, value: 30 } },
-    'dyn-03': { distribution_type: 1, distribution_config: { amountType: 2, rate: 0.3 } },
-    'dyn-05': { distribution_type: 2, distribution_config: { amountType: 1, value: 100 } },
-    'dyn-07': { distribution_type: 2, distribution_config: { amountType: 1, value: 100 } }
+    'dyn-01': { distribution_type: 1, distribution_config: { amountType: 1, value: 30 }, supply_price: 98 },
+    'dyn-03': { distribution_type: 1, distribution_config: { amountType: 2, rate: 0.3 }, supply_price: 112 },
+    'dyn-05': { distribution_type: 2, distribution_config: { amountType: 1, value: 100 }, supply_price: 139, current_price: 239, commission: 100 },
+    'dyn-07': { distribution_type: 2, distribution_config: { amountType: 1, value: 100 }, supply_price: 169, current_price: 269, commission: 100 }
   };
 
   function loadPublished() {
@@ -283,13 +283,13 @@
   }
 
   /* 骨架屏：与真实卡片结构一一对应（头部 / 文字 / 九宫格图 / 产品卡 / 操作区），
-     按设计稿骨架屏变体（componentId 9685:80044）组合 skeleton 原子块 */
-  function feedSkeletonTemplate() {
+     按设计稿骨架屏变体（componentId 9685:80044）组合 skeleton 原子块；列表展示 2 个 item */
+  function feedSkeletonItem() {
     var cells = '';
     for (var i = 0; i < 9; i++) {
       cells += '<span class="wg-skeleton wg-skeleton--rect"></span>';
     }
-    return '<div class="album-feed__skeleton" aria-hidden="true">'
+    return '<div class="album-feed__skeleton-item" aria-hidden="true">'
       + '<div class="album-feed__skeleton-head">'
       + '<span class="wg-skeleton wg-skeleton--circle" style="width:40px;height:40px"></span>'
       + '<div class="album-feed__skeleton-meta">'
@@ -320,6 +320,13 @@
       + '<span class="wg-skeleton wg-skeleton--rect" style="width:24px;height:16px"></span>'
       + '<span class="wg-skeleton wg-skeleton--rect" style="width:80px;height:32px;margin-left:auto"></span>'
       + '</div>'
+      + '</div>';
+  }
+
+  function feedSkeletonTemplate() {
+    return '<div class="album-feed__skeleton">'
+      + feedSkeletonItem()
+      + feedSkeletonItem()
       + '</div>';
   }
 
@@ -425,33 +432,40 @@
   window.WegoApp.registerScene({
     routeId: 'album-product-feed',
     template: `
-<div class="layout-page album-feed" data-surface-id="album-product-feed" data-route-id="album-product-feed" data-layout-mode="composed" data-bg="page" data-component-slug="layout-page">
+<div class="layout-page album-feed" data-surface-id="album-product-feed" data-route-id="album-product-feed" data-layout-mode="composed" data-bg="surface" data-component-slug="layout-page">
   <div class="layout-page__top">
     <div class="navbar album-feed__navbar" data-component-slug="navbar">
       <div class="navbar__body navbar__body--split">
-        <div class="navbar__left navbar__left--custom"><span class="navbar__title album-feed__nav-title">动态</span></div>
-        <div class="navbar__right navbar__right--icon">
-          <button type="button" class="navbar__action" data-dom-id="feed-search-entry" aria-label="搜索"><span class="navbar__action-icon"><i class="wego-iconfont-s icon-sousuo" aria-hidden="true"></i></span></button>
-          <button type="button" class="navbar__action" data-dom-id="publish-entry" aria-label="发布"><span class="navbar__action-icon"><i class="wego-iconfont-s icon-jia" aria-hidden="true"></i></span></button>
-        </div>
+        <div class="navbar__left"><span class="navbar__title album-feed__nav-title">动态</span></div>
       </div>
     </div>
   </div>
   <div class="layout-page__body">
     <div class="layout-scroll album-feed__scroll" data-component-slug="layout-scroll" data-tab-scroll>
+      <div class="sticky-region album-feed__search-sticky" data-component-slug="sticky-region" data-edge="top" data-visibility="direction-reveal" data-state="visible">
+        <div class="sticky-region__motion">
+          <div class="sticky-region__inner">
+            <div class="album-feed__searchbar">
+              <div class="searchbox searchbox--md searchbox--white searchbox--accent" data-component-slug="search" data-search-input-host><span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span><div class="searchbox__input"><input class="searchbox__field" type="search" placeholder="搜索商品动态" data-search-input /></div><div class="searchbox__actions"><button class="btn btn--strong btn--sm" type="button" data-action="select-image" aria-label="图搜">图搜</button></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="album-feed__list" data-feed-list></div>
     </div>
   </div>
+  <button class="btn btn--strong btn--lg btn--icon-only wego-fab" data-component-slug="button" data-dom-id="open-publish-sheet" type="button" aria-label="发布内容">
+    <i class="btn__icon icon-jia16" aria-hidden="true"></i>
+  </button>
 </div>`,
     presentation: { type: 'host-tab', transition: 'none', dismissAction: 'tab-switch', overlayLevel: 'inline', coversTabBar: false },
     init: function initAlbumFeed(ctx) {
       var root = ctx.root;
       var listEl = root.querySelector('[data-feed-list]');
-      var publishEntry = root.querySelector('[data-dom-id="publish-entry"]');
-      var searchEntry = root.querySelector('[data-dom-id="feed-search-entry"]');
+      var searchInput = root.querySelector('[data-search-input]');
 
       ctx.state.keyword = '';
-      /* 首次加载先展示骨架屏，短暂加载间隙后过渡到真实列表（本地数据无真实网络延迟） */
+      /* 首次加载先展示骨架屏（2 个 item），短暂加载间隙后过渡到真实列表（本地数据无真实网络延迟） */
       listEl.innerHTML = feedSkeletonTemplate();
       setTimeout(function () {
         renderList(ctx, listEl);
@@ -478,13 +492,36 @@
             if (product) openDetail(ctx, product);
           } else if (action === 'primary-action') {
             var resale = target.getAttribute('data-resale') === '1';
-            ctx.toast(resale ? '邀请帮卖入口（本轮为演示反馈）' : '已复制转发链接（演示）');
+            if (resale) {
+              var dyn = dynamicById(target.getAttribute('data-dyn-id'));
+              var product = dyn ? productOf(dyn) : null;
+              var cfg = resaleConfigOf(dyn) || { distribution_type: 1, distribution_config: { amountType: 1, value: 30 } };
+              var retailPrice = (product && product.price != null) ? Number(product.price) : 0;
+              // supply_price 取帮卖配置里的供货价（低于零售价）；未配置时回退零售价演示
+              var supplyPrice = (cfg && cfg.supply_price != null) ? Number(cfg.supply_price) : retailPrice;
+              var isFixed = cfg && cfg.distribution_type === 2;
+              window.WegoApp.openAgentResalePopup(ctx, {
+                sample: {
+                  product_id: product ? product.product_id : '',
+                  distribution_type: cfg.distribution_type,
+                  distribution_config: cfg.distribution_config,
+                  supply_price: supplyPrice,
+                  skus: [{ id: 'sku-1', supply_price: supplyPrice }],
+                  my_item: false,
+                  from_page: 'normal',
+                  current_price: isFixed ? (cfg.current_price != null ? Number(cfg.current_price) : retailPrice) : undefined,
+                  commission: isFixed ? (cfg.commission != null ? Number(cfg.commission) : 0) : undefined
+                }
+              });
+            } else {
+              ctx.toast('已复制转发链接（演示）');
+            }
           } else if (action === 'forward-action') {
             ctx.toast('转发入口（本轮为演示反馈）');
           } else if (action === 'more-actions') {
             openActionSheet(ctx);
           } else if (action === 'empty-publish') {
-            ctx.navigate('publish-product');
+            window.WegoApp.openPublishProductModal(ctx);
           } else if (action === 'retry-load') {
             renderList(ctx, listEl);
           }
@@ -492,17 +529,31 @@
       }
       bindDelegated();
 
-      if (publishEntry) {
-        publishEntry.addEventListener('click', function () {
-          ctx.navigate('publish-product');
-        });
-      }
+      var publishFab = window.WegoApp.createPublishFab(ctx, {
+        fabSelector: '[data-dom-id="open-publish-sheet"]',
+        onPublish: function (type) {
+          if (type === 'product') {
+            window.WegoApp.openPublishProductModal(ctx);
+          } else {
+            var typeLabel = type === 'note' ? '笔记' : '直播';
+            ctx.toast('发布' + typeLabel + '（演示）');
+          }
+        }
+      });
 
-      if (searchEntry) {
-        searchEntry.addEventListener('click', function () {
+      if (searchInput) {
+        searchInput.addEventListener('focus', function () {
           openSearchModal(ctx);
         });
       }
+
+      /* 注册滚动布局：搜索框上滑隐藏 / 下滑显示（公共 WegoScrollLayout 运行时接管） */
+      ctx.bindScrollLayout({
+        scrollRoot: '.album-feed__scroll',
+        regions: [
+          { selector: '.album-feed__search-sticky', policy: 'direction-reveal', edge: 'top', essential: false, threshold: 8 }
+        ]
+      });
 
       /* 发布完成 navigate 回 album-product-feed 时，host-tab 不会重跑 init，
          用 hashchange 监听回到动态流时重绘列表，让新发布的内容即时出现 */
@@ -513,6 +564,7 @@
       }
       window.addEventListener('hashchange', onReturnToFeed);
       ctx.onDestroy(function () {
+        publishFab.destroy();
         window.removeEventListener('hashchange', onReturnToFeed);
       });
     }
