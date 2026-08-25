@@ -5846,6 +5846,7 @@ body[data-order-layout="landscape"] .phone-indicator {
     min-height: var(--size-56);
     padding: 0 var(--spacer-12);
     border-bottom: 0;
+    border-radius: var(--radius-8) var(--radius-8) 0 0;
   }
 
   .order-catalog-header__title {
