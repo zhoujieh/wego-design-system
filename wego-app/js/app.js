@@ -269,6 +269,9 @@
   });
   var scenes = new Map();
   var loadingScripts = new Map();
+  // navigate() 置位：下一条 hashchange 对应的场景历史条目由 App 自己推入。
+  // openPushScene 消费该标记写入 entry.historyPushed，供 ctx.back 判断能否 history.back()
+  var pendingEntryPushed = false;
   var loadedStyles = new Set();
   // push 场景栈：bottom-to-top 顺序，每个 entry = { routeId, host, scene }
   // host 为承载该场景内容的 DOM 元素（.app-scene-layer__panel）
@@ -391,8 +394,9 @@
       openRoute(routeId);
       return;
     }
-    // 先切到目标 hash（不把 full 参数写进源条目的历史），
-    // 再在“当前（目标）条目”上同步 full 参数，源页面始终保留常规宽度
+    // 标记下一条入栈场景的历史条目由 App 推入：
+    // ctx.back() 据此决定消费历史（history.back）还是本地清理（直达链接无可回退条目）
+    pendingEntryPushed = true;
     window.location.hash = '#/' + routeId;
     applyFullParamForRoute(routeId);
   }
@@ -473,8 +477,22 @@
     }
 
     top.host.classList.add('app-scene-layer__panel--exit');
+    poppingRouteIds.add(top.routeId);
+    var finished = false;
     var onTransitionEnd = function () {
+      if (finished) return;
+      finished = true;
+      clearTimeout(fallbackTimer);
       top.host.removeEventListener('transitionend', onTransitionEnd);
+      finalizePop();
+    };
+    // 兜底：transitionend 被打断/不触发时（元素不可见、系统动画抢占等），
+    // 按过渡时长定时收尾，防止 panel 永不移除导致后续导航全部错乱
+    // （与 closeOverlayEntry 的 setTimeout 兜底做法一致）
+    var POP_EXIT_REMOVE_DELAY = 280; // 250ms 过渡 + 30ms 缓冲
+    var fallbackTimer = setTimeout(onTransitionEnd, POP_EXIT_REMOVE_DELAY);
+    function finalizePop() {
+      poppingRouteIds.delete(top.routeId);
       top.host.remove();
       sceneStack.pop();
       if (sceneStack.length === 0) {
@@ -486,7 +504,7 @@
         appState.currentRouteId = newTop.routeId;
       }
       if (typeof afterCallback === 'function') afterCallback();
-    };
+    }
     top.host.addEventListener('transitionend', onTransitionEnd);
   }
 
@@ -511,6 +529,7 @@
       entry.host.remove();
     });
     sceneStack = [];
+    poppingRouteIds.clear();
     sceneLayer.hidden = true;
     sceneLayer.className = 'app-scene-layer';
     sceneLayer.replaceChildren();
@@ -810,7 +829,14 @@
       forceHostEntriesRepaint(entryEl);
     }
 
-    sceneStack.push({ routeId: scene.routeId, host: panel, scene: scene });
+    sceneStack.push({
+      routeId: scene.routeId,
+      host: panel,
+      scene: scene,
+      // 该场景的历史条目是否由 App navigate() 推入（直达链接进入时为 false）
+      historyPushed: pendingEntryPushed
+    });
+    pendingEntryPushed = false;
     appState.currentRouteId = scene.routeId;
     mountSceneInit(panel, scene, sceneContext(scene, panel), function () {
       WegoApp.layoutAllBottomActionBars(panel);
@@ -1029,12 +1055,22 @@
       closeOverlay();
       return;
     }
-    // push 场景栈式返回：只弹顶层，下层自然显露
+    var top = sceneStack[sceneStack.length - 1];
+    // 统一返回语义：页面内返回与浏览器返回操作同一条历史。
+    // 先本地带动画弹出（桌面端保留滑出观感），再 history.back() 消费该场景的历史条目；
+    // hashchange 随后触发时栈已对齐（新栈顶匹配或栈空），handler 自然无操作，
+    // 不会出现"已关场景被幽灵历史条目复活"的问题。
+    if (top && top.historyPushed) {
+      top.historyPushed = false;
+      popSceneLayer(null, true);
+      try { history.back(); } catch (e) {}
+      return;
+    }
+    // 直达链接进入（无可回退的历史条目）：本地清理，不把用户甩出页面。
+    // pushState 抹掉当前 hash 而非留下幽灵条目，浏览器返回不会再"复活"已关场景。
     popSceneLayer(function () {
-      if (sceneStack.length === 0 && window.location.hash) {
-        // 返回宿主：移除全屏参数，恢复常规宽度
-        var cleanSearch = searchWithoutFullParam();
-        history.pushState('', document.title, window.location.pathname + cleanSearch);
+      if (window.location.hash) {
+        try { history.replaceState(null, document.title, window.location.pathname + searchWithoutFullParam()); } catch (e) {}
         syncHostFullWidth();
       }
     });
@@ -1421,6 +1457,10 @@
       openPushScene(scene);
       return;
     }
+    // overlay 型场景（sheet / full-screen-modal）：
+    // openOverlay 会自己 push 一条 history（wegoOverlay state），不经过 hashchange，
+    // 需在这里消费 pendingEntryPushed，否则标记残留会让下一个 push 场景误判历史来源
+    pendingEntryPushed = false;
     var template = scene.template || '';
     var init = function (ctx) {
       if (typeof scene.init === 'function') scene.init(sceneContext(scene, ctx.root));
@@ -1520,6 +1560,11 @@
     entries.forEach(function (entry) {
       if (entry.dataset.routeBound === 'true') return;
       entry.dataset.routeBound = 'true';
+      // host-tab 型路由的容器（场景面板根节点常带 data-route-id 标识）不是入口：
+      // 绑定它会让面板内任何按钮的冒泡都触发 navigate(tab路由)，往历史里塞
+      // #/<tab> 幽灵条目，导致 push 场景 ctx.back() 消费历史时落到错误位置无法返回。
+      var config = routeConfigs.get(entry.dataset.routeId);
+      if (config && config.entry && config.entry.type === 'host-tab') return;
       entry.addEventListener('click', function (event) {
         event.preventDefault();
         var routeId = entry.dataset.routeId;
@@ -1547,19 +1592,32 @@
     return sceneStack.some(function (entry) { return entry.routeId === routeId; });
   }
 
+  // 正在退场动画中的 routeId 集合：ctx.back() 先本地弹出再 history.back()，
+  // hashchange 到达时条目还在栈里，靠此标记跳过、不重复弹层
+  var poppingRouteIds = new Set();
+
   // hashchange 处理：区分前进（navigate 触发）与后退（侧滑 / history.back 触发）
   // - 前进：routeId 不在栈中 → openRoute 打开新场景
   // - 后退到宿主：hash 变空 → 关闭顶层（overlay 或 push 场景）
   // - 后退到中间层级：routeId 在栈中但非栈顶 → popSceneLayer 弹一层，下层自然显露
-  // - 栈顶已匹配：无操作（避免重复打开）
-  window.addEventListener('hashchange', function () {
+  // - 栈顶已匹配 / 本次变化对应的场景已被本地弹出（ctx.back 先本地弹出再消费历史）：
+  //   无操作（避免重复弹出或"复活"已关场景）
+  window.addEventListener('hashchange', function (event) {
     var routeId = routeFromHash();
+    var prevRouteId = '';
+    var prevMatch = String(event.oldURL || '').match(/#\/([^/?#]+)/);
+    if (prevMatch) prevRouteId = decodeURIComponent(prevMatch[1]);
     // toast 由宿主全局管理，不跟随路由变化清理；保留给 toast 自身的 4s 自动关闭、
     // 互斥逻辑（toast 函数内部 dismissToasts）和下一次操作（dismissToastForPageAction）处理。
     // 前进导航（navigate）和切换 Tab（tabTriggers）仍会主动清理 toast。
 
     // hash 变空：返回到宿主（iOS 侧滑 / history.back 最常见场景）
     if (!routeId) {
+      // 跳过两类已被本地处理的返回：
+      // 1) ctx.back() 先本地带动画弹出再消费历史 —— 该场景正在退场，hashchange 到达时
+      //    条目尚未从栈中移除，需按退场标记跳过（否则会误弹下层）；
+      // 2) 无动画路径已完成弹出 —— 条目已不在栈中。
+      if (!prevRouteId || poppingRouteIds.has(prevRouteId) || !isRouteInStack(prevRouteId)) return;
       // 返回宿主：清理残留的全屏参数，恢复常规宽度
       var fullParams = new URLSearchParams(window.location.search);
       if (fullParams.get('full') === '1') {
@@ -2176,8 +2234,119 @@
     layoutAllBottomActionBars: window.WegoApp.layoutAllBottomActionBars,
     layoutNavbar: window.WegoApp.layoutNavbar,
     layoutAllNavbars: window.WegoApp.layoutAllNavbars,
-    getState: function () { return appState; }
+    getState: function () { return appState; },
+    faultInjection: null
   };
+
+  /* ── 失败注入试验开关（全局运行时试验能力）──
+     用于验收时对任意场景触发 加载/新增/删除 三类失败分支。
+     入口为全局悬浮开关，对任意场景生效、不落在某个迭代内；
+     体验稳定后由 wego-uxsystem-iterate 正式化为设计系统运行时能力。 */
+  (function mountFaultSwitch() {
+    var SWITCH_KEY = 'wego.fault-switch.enabled';
+    var state = { load: false, save: false, delete: false };
+
+    function persist() {
+      try { window.localStorage.setItem(SWITCH_KEY, JSON.stringify(state)); } catch (e) {}
+    }
+    function restore() {
+      try {
+        var raw = window.localStorage.getItem(SWITCH_KEY);
+        if (!raw) return;
+        var p2 = JSON.parse(raw);
+        state.load = !!p2.load;
+        state.save = !!p2.save;
+        state['delete'] = !!p2['delete'];
+      } catch (e) {}
+    }
+
+    window.WegoApp.faultInjection = {
+      isEnabled: function (key) { return !!state[key]; },
+      setEnabled: function (key, on) { state[key] = !!on; persist(); }
+    };
+
+    if (document.querySelector('#wgf-root')) return;
+    restore();
+
+    var CSS = ''
+      + '#wgf-root{position:fixed;right:12px;bottom:96px;z-index:9999;font-family:var(--body-md-font-family,sans-serif);-webkit-tap-highlight-color:transparent}'
+      + '#wgf-fab{display:flex;align-items:center;gap:6px;padding:10px 14px;border:0;border-radius:999px;background:var(--bg-surface,#fff);color:var(--text-default,#111);box-shadow:var(--shadow-md,0 4px 12px rgba(0,0,0,.12));font-size:var(--body-sm-font-size,13px);line-height:1;cursor:pointer}'
+      + '#wgf-fab .wgf-badge{width:6px;height:6px;border-radius:50%;background:var(--text-disabled,#bbb)}'
+      + '#wgf-fab.is-on .wgf-badge{background:#FA3B3B}'
+      + '.wgf-panel{position:absolute;right:0;bottom:calc(100% + 8px);width:176px;background:var(--bg-surface,#fff);border-radius:12px;box-shadow:var(--shadow-md,0 4px 12px rgba(0,0,0,.12));padding:8px;display:none}'
+      + '.wgf-panel.is-open{display:block}'
+      + '.wgf-panel__title{font-size:12px;color:var(--text-tertiary,#999);padding:4px 8px 8px}'
+      + '.wgf-toggle{display:flex;justify-content:space-between;align-items:center;width:100%;padding:9px 8px;border:0;border-radius:8px;background:transparent;font-size:13px;color:var(--text-default,#111);cursor:pointer}'
+      + '.wgf-toggle:active{background:var(--bg-state-pressed,rgba(0,0,0,.05))}'
+      + '.wgf-toggle .wgf-sw{width:34px;height:20px;border-radius:999px;background:var(--bg-disabled,#ddd);position:relative;transition:background .15s}'
+      + '.wgf-toggle .wgf-sw::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .15s}'
+      + '.wgf-toggle.is-on .wgf-sw{background:var(--text-brand,#0a6cff)}'
+      + '.wgf-toggle.is-on .wgf-sw::after{transform:translateX(14px)}'
+      + '.wgf-hint{font-size:11px;color:var(--text-tertiary,#999);padding:8px 8px 4px;line-height:1.5}';
+
+    var styleEl = document.createElement('style');
+    styleEl.textContent = CSS;
+    document.head.appendChild(styleEl);
+
+    var root = document.createElement('div');
+    root.id = 'wgf-root';
+    root.setAttribute('aria-label', '失败注入开关');
+
+    var fab = document.createElement('button');
+    fab.type = 'button';
+    fab.id = 'wgf-fab';
+    fab.setAttribute('aria-haspopup', 'true');
+    fab.innerHTML = '<span class="wgf-badge"></span>失败注入';
+    root.appendChild(fab);
+
+    var panel = document.createElement('div');
+    panel.className = 'wgf-panel';
+    var title = document.createElement('div');
+    title.className = 'wgf-panel__title';
+    title.textContent = '失败注入（试验）';
+    panel.appendChild(title);
+
+    function refreshFab() {
+      fab.classList.toggle('is-on', state.load || state.save || state.delete);
+    }
+
+    function toggleRow(key, label) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'wgf-toggle';
+      btn.innerHTML = '<span>' + label + '</span><span class="wgf-sw" aria-hidden="true"></span>';
+      var refresh = function () {
+        btn.classList.toggle('is-on', !!state[key]);
+        btn.setAttribute('aria-pressed', String(!!state[key]));
+        refreshFab();
+      };
+      btn.addEventListener('click', function () {
+        state[key] = !state[key];
+        persist();
+        refresh();
+      });
+      panel.appendChild(btn);
+      refresh();
+    }
+
+    toggleRow('load', '加载失败');
+    toggleRow('save', '新增保存失败');
+    toggleRow('delete', '删除失败');
+
+    var hint = document.createElement('div');
+    hint.className = 'wgf-hint';
+    hint.textContent = '开关打开后执行对应操作即走失败分支，数据保持原状';
+    panel.appendChild(hint);
+
+    fab.addEventListener('click', function () { panel.classList.toggle('is-open'); });
+    root.appendChild(panel);
+    document.body.appendChild(root);
+
+    document.addEventListener('touchstart', function (e) {
+      if (!e.target.closest || !e.target.closest('#wgf-root')) panel.classList.remove('is-open');
+    }, true);
+    refreshFab();
+  })();
 
   // 由 initTouchPressState 注入，用于侧滑返回后 / forward 导航时强制重绘 host 入口
   // 清除 iOS Safari 可能残留的 :active 合成层缓存
