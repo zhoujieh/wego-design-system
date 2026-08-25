@@ -516,8 +516,6 @@
             } else {
               ctx.toast('已复制转发链接（演示）');
             }
-          } else if (action === 'select-image') {
-            ctx.toast('图搜（演示）');
           } else if (action === 'forward-action') {
             ctx.toast('转发入口（本轮为演示反馈）');
           } else if (action === 'more-actions') {
@@ -546,6 +544,15 @@
       if (searchInput) {
         searchInput.addEventListener('focus', function () {
           openSearchModal(ctx);
+        });
+      }
+
+      /* 图搜按钮在顶部 sticky 搜索栏内，不在数据列表委托范围内，单独绑定 */
+      var imageSearchBtn = root.querySelector('[data-action="select-image"]');
+      if (imageSearchBtn) {
+        imageSearchBtn.addEventListener('click', function (e) {
+          e.preventDefault();
+          ctx.toast('图搜（演示）');
         });
       }
 
