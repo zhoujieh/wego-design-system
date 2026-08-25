@@ -10,7 +10,7 @@
 | 用户明确要求正式升级 | 唯一权威源、直接消费者、`candidates.json.upgradeHistory` | 能客观验证时同步守卫 | 先提交正式修复，再记录修复提交 SHA；状态改为 `upgraded`，经验和事实不删除 |
 | 已升级经验再次出现 | `evidence.json`、`candidates.json` | 上次升级权威源和直接消费者 | 累计次数继续增加，立即改为 `proposed`，`proposalReason=post-upgrade-recurrence`，复查上次修复位置和内容，不重新等待 3 次 |
 | 技能入口调整 | 目标 `SKILL.md` | 直接引用的 reference、`.codex/skills/README.md` | 三条业务主链技能与交付技能存在、入口唯一、链接有效 |
-| GitHub 交付规则调整 | `wego-github-delivery` 规则、`AGENTS.md` | `wego-design`、`wego-uxsystem-iterate`、迭代工作流、技能路由、`README.md`、实际验证入口 | 先核对全部 worktree、开放 PR、认领、未冻结迭代和本地预览记录；同一交付单元复用分支/worktree；默认本地迭代，只有明确提交授权才创建或更新 PR；合并、关闭或废弃后收口服务与分支 |
+| GitHub 交付规则调整 | `wego-github-delivery` 规则、`AGENTS.md` | `wego-design`、`wego-uxsystem-iterate`、迭代工作流、技能路由、`README.md`、实际验证入口 | 先核对全部 worktree、开放 PR、认领、未冻结迭代和本地预览记录；同一交付单元复用分支/worktree；默认本地迭代，完成一轮实现并通过本地验证后自动推送并更新同一 PR，合并须用户验收通过；合并、关闭或废弃后收口服务与分支 |
 | 技能适配器调整 | `.trae/skills/*`、`.codebuddy/skills/*` 逐项符号链接或整目录符号链接 | `AGENTS.md`、实际验证入口 | 两个适配器以逐项符号链接或整目录符号链接指向 `.codex/skills/*`，不保留副本或额外技能目录 |
 | 工作流守卫调整 | 实际执行脚本 | 统一验证入口与脚本文档 | `--scope=system --strict` 必须运行对应回归测试并校验工作流引用 |
 
