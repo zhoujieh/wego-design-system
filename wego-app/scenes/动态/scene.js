@@ -516,6 +516,8 @@
             } else {
               ctx.toast('已复制转发链接（演示）');
             }
+          } else if (action === 'select-image') {
+            ctx.toast('图搜（演示）');
           } else if (action === 'forward-action') {
             ctx.toast('转发入口（本轮为演示反馈）');
           } else if (action === 'more-actions') {

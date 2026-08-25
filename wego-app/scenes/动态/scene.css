@@ -289,7 +289,7 @@
 /* ── 骨架屏 ── */
 .album-feed__skeleton {
   background: var(--bg-surface);
-  padding: 0 var(--spacer-16) var(--spacer-16);
+  padding: 0 0 var(--spacer-16);
 }
 
 /* 2 个骨架 item：每个占满宽度、之间用分割线分隔（与真实卡片分割线一致） */
@@ -311,13 +311,13 @@
   display: flex;
   align-items: center;
   gap: var(--spacer-12);
-  padding: var(--spacer-12) 0;
+  padding: var(--spacer-12) var(--spacer-16);
 }
 
 .album-feed__skeleton-meta {
   display: flex;
   flex-direction: column;
-  gap: var(--spacer-8);
+  gap: var(--spacer-4);
   flex: 1;
 }
 
@@ -325,7 +325,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacer-8);
-  padding: var(--spacer-8) 0 var(--spacer-8) calc(var(--spacer-16) + var(--size-40) + var(--spacer-12));
+  padding: var(--spacer-8) var(--spacer-16) var(--spacer-8) calc(var(--spacer-16) + var(--size-40) + var(--spacer-12));
 }
 
 .album-feed__skeleton-grid {
@@ -353,8 +353,8 @@
 .album-feed__skeleton-actions {
   display: flex;
   align-items: center;
-  gap: var(--spacer-16);
-  padding: var(--spacer-8) 0 var(--spacer-8) calc(var(--spacer-16) + var(--size-40) + var(--spacer-12));
+  gap: var(--spacer-8);
+  padding: var(--spacer-8) var(--spacer-16) var(--spacer-12) calc(var(--spacer-16) + var(--size-40) + var(--spacer-12));
 }
 
 /* ── 空态 / 加载 / 失败 ── */
@@ -415,12 +415,20 @@
   font-size: var(--body-lg-font-size);
   line-height: var(--body-lg-line-height);
   color: var(--text-default);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .album-feed__detail-points {
   font-size: var(--body-sm-font-size);
   line-height: var(--body-sm-line-height);
   color: var(--text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* ── 图片看大图 ── */
