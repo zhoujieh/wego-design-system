@@ -9,7 +9,7 @@
       "应用中心"
     ]
   },
-  "status": "awaiting-brief-confirmation",
+  "status": "prototyping",
   "scope_revision": 5,
   "prototype_brief": {
     "goal": "打磨工作台页面视觉布局，新增从工作台「常用应用-全部应用」进入的应用中心页面；开单页面以全屏宽度展示，并让已添加商品列表在按商品／按规格及显示／隐藏商品图的四种组合下都与 12 网格表头精确对齐。工作台、应用中心、开单均为独立业务场景。",
@@ -138,7 +138,11 @@
     "scope_revision": 5,
     "scope_sha256": "4c9bbb99c0900b1f6a9ca7ed2dfd4e1eba4e48af4c66b923a5d22ab977c6b715"
   },
-  "brief_confirmation": null,
+  "brief_confirmation": {
+    "at": "2026-08-25T01:59:20.672Z",
+    "scope_revision": 5,
+    "scope_sha256": "4c9bbb99c0900b1f6a9ca7ed2dfd4e1eba4e48af4c66b923a5d22ab977c6b715"
+  },
   "prototype_submission": null,
   "prototype_confirmation": null,
   "affected_scenes": [
@@ -218,6 +222,10 @@
     {
       "action": "submit-brief",
       "at": "2026-08-25T01:58:33.619Z"
+    },
+    {
+      "action": "confirm-brief",
+      "at": "2026-08-25T01:59:20.673Z"
     }
   ],
   "freeze": null

@@ -833,8 +833,8 @@
         +   '<div class="order-desktop-grouped-sku-stack order-desktop-grouped-sku-stack--spec">' + groupedSpecs + '</div>'
         +   '<div class="order-desktop-grouped-sku-stack order-desktop-grouped-sku-stack--price">' + groupedPrices + '</div>'
         +   '<div class="order-desktop-grouped-sku-stack order-desktop-grouped-sku-stack--qty">' + groupedQuantities + '</div>'
-        +   '<strong class="order-desktop-product-total order-desktop-product-total--grouped"><small>共' + item.qty + '件 · 金额合计</small><span data-product-total-value>' + money(item.price * item.qty) + '</span></strong>'
-        +   '<button type="button" class="link link--14 order-desktop-product-note ' + (item.note ? 'has-note' : '') + '" data-component-slug="link" data-edit-spu-note="' + itemIndex + '">' + escapeHtml(item.note || '添加备注') + '</button>'
+        +   '<strong class="order-desktop-product-total order-desktop-product-total--grouped"><small>销<span data-product-total-qty>' + item.qty + '</span></small><span data-product-total-value>' + money(item.price * item.qty) + '</span></strong>'
+        +   '<button type="button" class="link link--14 order-desktop-product-note ' + (item.note ? 'has-note' : '') + '" data-component-slug="link" data-edit-spu-note="' + itemIndex + '"><i class="wego-iconfont-s icon-bianji16" aria-hidden="true"></i><span>' + escapeHtml(item.note || '添加备注') + '</span></button>'
         +   '<button type="button" class="order-desktop-row-delete" data-delete-row="' + itemIndex + '" aria-label="删除' + escapeHtml(item.name) + '"><i class="wego-iconfont-s icon-cha16" aria-hidden="true"></i></button>'
         + '</article>';
     }
@@ -852,7 +852,7 @@
       +   '<button type="button" class="link link--14 order-desktop-product-price" data-component-slug="link" data-edit-price="' + itemIndex + '">' + money(item.price) + '</button>'
       +   '<div class="order-desktop-product-qty">' + desktopQuantityCounter(itemIndex, qty, specKey, hint) + '</div>'
       +   '<strong class="order-desktop-product-total"><span data-product-total-value>' + money(item.price * qty) + '</span></strong>'
-      +   '<button type="button" class="link link--14 order-desktop-product-note ' + (item.note ? 'has-note' : '') + '" data-component-slug="link" data-edit-spu-note="' + itemIndex + '">' + escapeHtml(item.note || '添加备注') + '</button>'
+      +   '<button type="button" class="link link--14 order-desktop-product-note ' + (item.note ? 'has-note' : '') + '" data-component-slug="link" data-edit-spu-note="' + itemIndex + '"><i class="wego-iconfont-s icon-bianji16" aria-hidden="true"></i><span>' + escapeHtml(item.note || '添加备注') + '</span></button>'
       +   '<button type="button" class="order-desktop-row-delete" data-delete-row="' + itemIndex + '" data-delete-row-spec="' + encodeURIComponent(specKey) + '" aria-label="删除' + escapeHtml(item.name) + '"><i class="wego-iconfont-s icon-cha16" aria-hidden="true"></i></button>'
       + '</article>';
   }
@@ -3995,6 +3995,8 @@
         var directProductRow = target.closest('.order-desktop-product-row');
         var directRowTotal = directProductRow?.querySelector('[data-product-total-value]');
         if (directRowTotal) directRowTotal.textContent = money(directItem.price * (directProductRow.classList.contains('order-desktop-product-row--grouped') ? directItem.qty : Number(rawQuantity)));
+        var directProductQty = directProductRow?.querySelector('[data-product-total-qty]');
+        if (directProductQty) directProductQty.textContent = directItem.qty;
         var liveTotals = totals();
         refreshDesktopSummary(root, liveTotals);
       }
