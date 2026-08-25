@@ -1,0 +1,11 @@
+{
+  "agent": "codebuddy-agent-resale",
+  "scene": "帮卖分销",
+  "routeId": "agent-resale",
+  "branch": "feature/agent-resale-remove-debug-entry",
+  "status": "done",
+  "claimedAt": "2026-08-20T07:12:00.000Z",
+  "releasedAt": "2026-08-25T12:00:00.000Z",
+  "releaseReason": "移除调试入口已随 PR #82 合并进 main，交付完成",
+  "note": "移除 Loading 动画预览临时调试入口(@debug-temp 段)"
+}
