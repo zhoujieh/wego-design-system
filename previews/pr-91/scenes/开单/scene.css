@@ -4595,7 +4595,7 @@ body[data-order-layout="landscape"] .phone-indicator {
   .order-desktop-product-name {
     display: flex;
     flex-direction: column;
-    gap: var(--spacer-4);
+    gap: 0;
     min-width: 0;
     padding: 0;
     text-align: left;
@@ -4699,9 +4699,12 @@ body[data-order-layout="landscape"] .phone-indicator {
   .order-desktop-product-note {
     display: inline-flex;
     align-items: center;
+    align-self: stretch;
     gap: var(--spacer-4);
     justify-self: start;
+    height: auto;
     max-width: 100%;
+    padding: var(--spacer-8) 0;
     color: var(--text-secondary);
     font-weight: var(--font-weight-regular);
   }
@@ -4735,6 +4738,13 @@ body[data-order-layout="landscape"] .phone-indicator {
     white-space: normal;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
+  }
+
+  .order-desktop-product-note-edit {
+    flex: 0 0 auto;
+    color: var(--text-link);
+    font-style: normal;
+    font-weight: var(--font-weight-regular);
   }
 
   .order-desktop__summary {

@@ -821,7 +821,8 @@
   function desktopProductNote(item, itemIndex) {
     var icon = '<i class="wego-iconfont-s icon-bianji16" aria-hidden="true"></i>';
     var text = '<span>' + escapeHtml(item.note || '添加备注') + '</span>';
-    return '<button type="button" class="link link--14 order-desktop-product-note ' + (item.note ? 'has-note' : '') + '" data-component-slug="link" data-edit-spu-note="' + itemIndex + '">' + (item.note ? text + icon : icon + text) + '</button>';
+    var editText = '<em class="order-desktop-product-note-edit">编辑</em>';
+    return '<button type="button" class="link link--14 order-desktop-product-note ' + (item.note ? 'has-note' : '') + '" data-component-slug="link" data-edit-spu-note="' + itemIndex + '">' + (item.note ? text + editText : icon + text) + '</button>';
   }
 
   function desktopProductRow(item, itemIndex, row, grouped) {
