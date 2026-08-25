@@ -235,6 +235,7 @@
     freight: 0,
     rounding: 0,
     freightEditOpen: false,
+    totalEditOpen: false,
     memberDiscount: 100,
     couponDiscount: 0,
     pointsUsed: 0,
@@ -1015,6 +1016,23 @@
       + '</div>';
   }
 
+  function totalEditModal() {
+    if (!state.totalEditOpen) return '';
+    return ''
+      + '<div class="order-note-modal order-total-edit-modal" role="dialog" aria-modal="true" aria-label="修改订单总价" data-state="open">'
+      +   '<div class="order-note-modal__panel">'
+      +     '<div class="order-note-modal__head"><strong>修改订单总价</strong></div>'
+      +     '<div class="order-note-modal__body">'
+      +       '<div class="input-group input-group--surface-white" data-component-slug="input"><label class="field-label" for="total-edit-value">订单总价</label><div class="number-input" data-component-slug="input"><input class="number-input__field" id="total-edit-value" type="text" inputmode="decimal" value="' + totals().payable.toFixed(2) + '" placeholder="请输入订单总价" data-total-edit-value><span class="number-input__suffix">元</span></div></div>'
+      +     '</div>'
+      +     '<div class="order-note-modal__actions">'
+      +       button('取消', 'weak', 'md', 'data-total-edit-cancel')
+      +       button('确定', 'strong', 'md', 'data-total-edit-confirm')
+      +     '</div>'
+      +   '</div>'
+      + '</div>';
+  }
+
   function catalogList(manualDesktop, sourceRows) {
     var editable = arguments.length > 2 ? Boolean(arguments[2]) : false;
     var keyword = manualDesktop ? '' : state.catalogKeyword.trim();
@@ -1279,7 +1297,7 @@
       +     '</span>'
       +   '</div>'
       +   (showFreight ? summaryDetailRow('运费', '<strong data-summary-freight>' + money(t.freight) + '</strong><button type="button" class="order-summary-row__edit" data-component-slug="button" data-edit-freight aria-label="编辑运费"><i class="wego-iconfont-s icon-bianji16" aria-hidden="true"></i></button>') : '')
-      +   summaryDetailRow('订单总价', '<strong data-summary-payable>' + money(t.payable) + '</strong>', 'order-summary-row--total')
+      +   summaryDetailRow('订单总价', '<strong data-summary-payable>' + money(t.payable) + '</strong><button type="button" class="order-summary-row__edit" data-edit-total aria-label="修改订单总价"><i class="wego-iconfont-s icon-bianji16" aria-hidden="true"></i></button>', 'order-summary-row--total')
       + '</div>';
   }
 
@@ -1433,23 +1451,32 @@
   }
 
   function quickOpButton(icon, label, op) {
-    var trigger = '<button type="button" class="order-quick-op' + (quickOpUsed(op) ? ' is-used' : '') + '" data-open-panel="quick" data-quick-op="' + op + '" aria-haspopup="dialog" aria-expanded="' + (state.panel === 'quick' && state.quickOp === op) + '"><i class="wego-iconfont-s ' + icon + '" aria-hidden="true"></i><span>' + label + '</span></button>';
+    var amount = quickOpAmount(op);
+    var trigger = '<button type="button" class="order-quick-op' + (amount > 0 ? ' is-used' : '') + '" data-open-panel="quick" data-quick-op="' + op + '" aria-haspopup="dialog" aria-expanded="' + (state.panel === 'quick' && state.quickOp === op) + '"><i class="wego-iconfont-s ' + icon + '" aria-hidden="true"></i><span>' + label + '</span>' + (amount > 0 ? '<strong>-' + compactMoney(amount) + '</strong>' : '') + '</button>';
     if (op === 'freight') return '<div class="order-quick-op-anchor order-quick-op-anchor--freight">' + trigger + (state.panel === 'quick' && state.quickOp === 'freight' ? freightPopover() : '') + '</div>';
     if (op === 'points') return '<div class="order-quick-op-anchor order-quick-op-anchor--points">' + trigger + (state.panel === 'quick' && state.quickOp === 'points' ? pointsPopover() : '') + '</div>';
     return trigger;
   }
 
   function quickOpUsed(op) {
+    return quickOpAmount(op) > 0;
+  }
+
+  function quickOpAmount(op) {
     var t = totals();
     return {
-      freight: t.freight > 0,
-      member: t.memberDiscountAmount > 0,
-      points: t.pointsAmount > 0,
-      coupon: t.couponAmount > 0,
-      promotion: t.promotionAmount > 0,
-      discount: t.discountAmount > 0,
-      rounding: t.roundingAmount > 0
-    }[op] || false;
+      freight: t.freight,
+      member: t.memberDiscountAmount,
+      points: t.pointsAmount,
+      coupon: t.couponAmount,
+      promotion: t.promotionAmount,
+      discount: t.discountAmount,
+      rounding: t.roundingAmount
+    }[op] || 0;
+  }
+
+  function compactMoney(amount) {
+    return money(amount).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1');
   }
 
   function quickOps() {
@@ -2360,7 +2387,7 @@
   }
 
   function rootTemplate() {
-    return '<div class="order-v2-page" data-bg="page">' + mobileView() + desktopView() + desktopModal() + mobileModal() + orderNoteModal() + freightEditModal() + productImagePreview() + orderRowContextMenu() + desktopDisplayModeMenu() + '</div>';
+    return '<div class="order-v2-page" data-bg="page">' + mobileView() + desktopView() + desktopModal() + mobileModal() + orderNoteModal() + freightEditModal() + totalEditModal() + productImagePreview() + orderRowContextMenu() + desktopDisplayModeMenu() + '</div>';
   }
 
   function renderWorkbench(root, ctx) {
@@ -3643,6 +3670,41 @@
       markDirty(ctx);
       renderActive();
       ctx.toast('运费已更新');
+      return;
+    }
+    if (target.matches('[data-edit-total]')) {
+      state.totalEditOpen = true;
+      renderActive();
+      var totalField = activeContext.root.querySelector('[data-total-edit-value]');
+      if (totalField) {
+        totalField.focus({ preventScroll: true });
+        totalField.select();
+      }
+      return;
+    }
+    if (target.matches('[data-total-edit-cancel]')) {
+      state.totalEditOpen = false;
+      renderActive();
+      return;
+    }
+    if (target.matches('[data-total-edit-confirm]')) {
+      var totalScope = target.closest('.order-total-edit-modal');
+      var totalInput = totalScope ? totalScope.querySelector('[data-total-edit-value]') : null;
+      var nextPayable = Math.round(Number(totalInput ? totalInput.value : totals().payable) * 100) / 100;
+      var currentTotals = totals();
+      var payableWithoutWholeDiscount = currentTotals.payable + currentTotals.discountAmount;
+      if (!Number.isFinite(nextPayable) || nextPayable < 0 || nextPayable > payableWithoutWholeDiscount) {
+        ctx.toast('订单总价请输入0至' + money(payableWithoutWholeDiscount) + '之间的金额');
+        return;
+      }
+      var nextDiscountAmount = payableWithoutWholeDiscount - nextPayable;
+      state.discount = currentTotals.memberAmount > 0
+        ? Math.min(100, Math.max(0, Math.round((100 - nextDiscountAmount / currentTotals.memberAmount * 100) * 10000) / 10000))
+        : 100;
+      state.totalEditOpen = false;
+      markDirty(ctx);
+      renderActive();
+      ctx.toast('订单总价已更新');
       return;
     }
     if (target.matches('[data-note-cancel]')) {
