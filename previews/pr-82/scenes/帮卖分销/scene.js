@@ -539,8 +539,8 @@
       +   '</div>'
       +   '<div class="keypad__seg ' + segClass + '">'
       +     '<div class="keypad__seg-thumb"></div>'
-      +     '<div class="keypad__seg-item ' + (isAmount ? 'is-active' : '') + '" data-keypad-tab="amount">金额</div>'
-      +     '<div class="keypad__seg-item ' + (!isAmount ? 'is-active' : '') + '" data-keypad-tab="rate">比例</div>'
+      +     '<div class="keypad__seg-item ' + (isAmount ? 'is-active' : '') + '" data-keypad-tab="amount">按金额</div>'
+      +     '<div class="keypad__seg-item ' + (!isAmount ? 'is-active' : '') + '" data-keypad-tab="rate">按比例</div>'
       +   '</div>'
       + '</div>';
     }
@@ -1135,8 +1135,20 @@
             var num = parseFloat(currentValue);
             var add = num - sp;
             var r = amountToRate(add, sp);
-            if (isNaN(num) || num <= 0 || add <= 0 || !validateRate(r)) {
-              ctx.toast('售价需在¥' + formatPrice(sp * 1.01) + '~¥' + formatPrice(sp * 4) + '之间');
+            if (isNaN(num) || num <= 0) {
+              ctx.toast('请输入正确的售价');
+              return;
+            }
+            if (add <= 0) {
+              ctx.toast('售价需大于供货价' + formatPrice(sp) + '元');
+              return;
+            }
+            if (!validateRate(r)) {
+              if (r < 0.01) {
+                ctx.toast('金额不能小于' + formatPrice(sp * 1.01) + '元');
+              } else {
+                ctx.toast('金额不能大于' + formatPrice(sp * 4) + '元');
+              }
               return;
             }
           }
@@ -1169,12 +1181,16 @@
               // 售价模式:加价 = 售价 - 供货价
               addPrice = numValue - supplyPrice;
               if (addPrice <= 0) {
-                ctx.toast('售价需大于供货价¥' + formatPrice(supplyPrice));
+                ctx.toast('售价需大于供货价' + formatPrice(supplyPrice) + '元');
                 return;
               }
               var rate = amountToRate(addPrice, supplyPrice);
               if (!validateRate(rate)) {
-                ctx.toast('售价需在¥' + formatPrice(supplyPrice * 1.01) + '~¥' + formatPrice(supplyPrice * 4) + '之间');
+                if (rate < 0.01) {
+                  ctx.toast('金额不能小于' + formatPrice(supplyPrice * 1.01) + '元');
+                } else {
+                  ctx.toast('金额不能大于' + formatPrice(supplyPrice * 4) + '元');
+                }
                 return;
               }
               // 售价模式换算成加价金额,供后续标签替换使用
@@ -1192,9 +1208,17 @@
 
               if (!validateRate(rate)) {
                 if (currentMode === 'amount') {
-                  ctx.toast('加价金额需在¥' + formatPrice(supplyPrice * 0.01) + '~' + formatPrice(supplyPrice * 3) + '之间');
+                  if (rate < 0.01) {
+                    ctx.toast('佣金金额不能小于' + formatPrice(supplyPrice * 0.01) + '元');
+                  } else {
+                    ctx.toast('佣金金额不能大于' + formatPrice(supplyPrice * 3) + '元');
+                  }
                 } else {
-                  ctx.toast('加价比例需在1%~300%之间');
+                  if (rate < 0.01) {
+                    ctx.toast('佣金金额不能小于1%');
+                  } else {
+                    ctx.toast('佣金金额不能大于300%');
+                  }
                 }
                 return;
               }
