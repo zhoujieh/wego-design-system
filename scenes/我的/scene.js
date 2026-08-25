@@ -141,7 +141,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
       </div>
     </div>
 
-    <button class="btn btn--strong btn--lg btn--icon-only my-tab-fab" data-component-slug="button" data-dom-id="open-publish-sheet" type="button" aria-label="发布内容">
+    <button class="btn btn--strong btn--lg btn--icon-only wego-fab" data-component-slug="button" data-dom-id="open-publish-sheet" type="button" aria-label="发布内容">
       <i class="btn__icon icon-jia16" aria-hidden="true"></i>
     </button>
   </div>`;
@@ -535,9 +535,32 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         return '<article class="my-live-card">' + imageHtml(item.cover, item.title, 'my-live-card__media') + '</article>';
       }
 
+      /* 真实发布的商品（publish-product 场景写入 wego.album-feed.published）回显到我的页产品 tab */
+      function realPublishedProducts() {
+        var raw = safeRead('wego.album-feed.published', []);
+        if (!Array.isArray(raw)) return [];
+        return raw.filter(function (d) { return d && d.content_type === 'product' && d._product; }).map(function (d) {
+          var p = d._product;
+          return {
+            id: d.dynamic_id || ('pub-' + (p.product_id || Date.now())),
+            type: 'product',
+            title: p.name || '未命名商品',
+            images: (p.image_list || []).slice(0, 4),
+            price: p.price,
+            shareLabel: d.published_at || '刚刚',
+            promos: [],
+            seckill: false,
+            attrs: (p.selling_points || []).join(' · ') || '暂无属性信息',
+            updatedAt: d.published_at || '刚刚'
+          };
+        });
+      }
+
       function contentFor(type) {
         var defaults = type === 'product' ? productContent() : type === 'note' ? noteContent() : liveContent();
-        var items = (state.published[type] || []).concat(defaults).filter(function (item) { return !state.removedContentIds.includes(item.id); });
+        var base = (state.published[type] || []).concat(defaults);
+        if (type === 'product') base = base.concat(realPublishedProducts());
+        var items = base.filter(function (item) { return !state.removedContentIds.includes(item.id); });
         return items.sort(function (left, right) {
           return Number(state.pinnedContentIds.includes(right.id)) - Number(state.pinnedContentIds.includes(left.id));
         });
@@ -739,12 +762,16 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
       }
 
       function publishItem(type) {
-        var sourceProduct = type === 'product' ? products[12] : type === 'note' ? products[10] : products[4];
+        /* 发布产品：作为 overlay 模态打开发布场景（与动态页一致，来源页保持挂载，
+           写入动态流 + 回写我的页产品 tab），不再内联演示 */
+        if (type === 'product') {
+          window.WegoApp.openPublishProductModal(ctx);
+          return;
+        }
+        /* 笔记 / 直播：内联演示，写入我的页内容管理 */
+        var sourceProduct = type === 'note' ? products[10] : products[4];
         var noteDynamic = dynamics.find(function (item) { return item.content_type === 'note'; });
-        var next = type === 'product' ? {
-          id: 'published-product-' + Date.now(), type: type, title: sourceProduct.name,
-          images: (sourceProduct.image_list || []).slice(0, 4), price: sourceProduct.price, updatedAt: '刚刚'
-        } : type === 'note' ? {
+        var next = type === 'note' ? {
           id: 'published-note-' + Date.now(), type: type, title: sourceProduct.name,
           cover: sourceProduct.image_list && sourceProduct.image_list[0], summary: noteDynamic ? noteDynamic.text_content : sourceProduct.feed_text, updatedAt: '刚刚'
         } : {
@@ -752,7 +779,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
           cover: sourceProduct.image_list && sourceProduct.image_list[0], host: currentUser.display_name || currentUser.merchant_name, time: '刚刚发布'
         };
 
-        ctx.toast('正在发布' + (type === 'product' ? '产品' : type === 'note' ? '笔记' : '直播') + '…');
+        ctx.toast('正在发布' + (type === 'note' ? '笔记' : '直播') + '…');
         publishTimer = window.setTimeout(function () {
           if (destroyed) return;
           state.published[type].unshift(next);
@@ -762,7 +789,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
           var scroll = root.querySelector('.my-tab-scroll');
           var content = root.querySelector('.my-content-tabs-sticky');
           if (scroll && content) scroll.scrollTo({ top: content.offsetTop, behavior: 'smooth' });
-          ctx.toast({ variant: 'guide', text: '发布成功，已加入' + (type === 'product' ? '产品' : type === 'note' ? '笔记' : '直播'), action: { label: '查看', mode: 'strong' } });
+          ctx.toast({ variant: 'guide', text: '发布成功，已加入' + (type === 'note' ? '笔记' : '直播'), action: { label: '查看', mode: 'strong' } });
         }, 600);
       }
 
@@ -798,36 +825,8 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         ctx.toast((labels[action] || '操作') + '已完成');
       }
 
-      function openPublishSheet() {
-        var sheetTemplate = '<div class="actionsheet actionsheet--action" data-component-slug="actionsheet" role="dialog" aria-modal="true" data-state="open">'
-          + '<div class="actionsheet__panel">'
-          + '<div class="actionsheet__header actionsheet__header--text"><span class="actionsheet__header-text">选择发布类型</span></div>'
-          + '<div class="actionsheet__list">'
-          + '<button class="actionsheet__item" type="button" data-publish-type="product"><span class="actionsheet__item-icon"><i class="wego-iconfont-s icon-fabushangpin" aria-hidden="true"></i></span><span class="actionsheet__item-main"><span class="actionsheet__item-title">发布产品</span></span></button>'
-          + '<button class="actionsheet__item" type="button" data-publish-type="note"><span class="actionsheet__item-icon"><i class="wego-iconfont-s icon-fabubiji" aria-hidden="true"></i></span><span class="actionsheet__item-main"><span class="actionsheet__item-title">发布笔记</span></span></button>'
-          + '<button class="actionsheet__item" type="button" data-publish-type="live"><span class="actionsheet__item-icon"><i class="wego-iconfont-s icon-shikuangLive-bofang" aria-hidden="true"></i></span><span class="actionsheet__item-main"><span class="actionsheet__item-title">发起直播</span></span></button>'
-          + '</div><div class="actionsheet__cancel-gap"></div><button class="actionsheet__cancel" type="button" data-dom-id="cancel-sheet">取消</button>'
-          + '</div></div>';
-
-        ctx.openSheet(sheetTemplate, {
-          label: '选择发布类型',
-          init: function (sheetCtx) {
-            var cancelButton = sheetCtx.root.querySelector('[data-dom-id="cancel-sheet"]');
-            function onSheetClick(event) {
-              var item = event.target.closest('[data-publish-type]');
-              if (item) {
-                var type = item.dataset.publishType;
-                ctx.closeOverlay();
-                publishItem(type);
-                return;
-              }
-              if (event.target === sheetCtx.root) ctx.closeOverlay();
-            }
-            cancelButton.addEventListener('click', ctx.closeOverlay);
-            sheetCtx.root.addEventListener('click', onSheetClick);
-          }
-        });
-      }
+      /* 发布面板与悬浮入口已抽为公共组件 WegoApp.createPublishFab（见 js/publish-fab.js），
+         此处仅通过 onPublish 注入我的页的发布落点（写入内容管理 state.published） */
 
       function onRootClick(event) {
         var groupToggle = event.target.closest('[data-group-toggle]');
@@ -951,20 +950,30 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
           { selector: '.my-content-tabs-sticky', policy: 'elevate-after-scroll', edge: 'top', essential: true, threshold: 8 },
           { selector: '.my-content-search-sticky', policy: 'direction-reveal', edge: 'top', essential: false, threshold: 8 }
         ],
-        fixedRegions: [{ selector: '.my-tab-fab', edge: 'bottom', gap: 8 }]
+        fixedRegions: [{ selector: '.wego-fab', edge: 'bottom', gap: 8 }]
       });
 
-      var publishButton = root.querySelector('[data-dom-id="open-publish-sheet"]');
-      publishButton.addEventListener('click', openPublishSheet);
+      var publishFab = window.WegoApp.createPublishFab(ctx, {
+        fabSelector: '[data-dom-id="open-publish-sheet"]',
+        onPublish: publishItem
+      });
       root.addEventListener('click', onRootClick);
       root.addEventListener('input', onSearchInput);
+      /* 真实发布商品后（publish-product 场景派发）刷新我的页产品 tab */
+      function onProductPublished() {
+        if (destroyed) return;
+        renderContent();
+        syncControls();
+      }
+      window.addEventListener('wego:product-published', onProductPublished);
       ctx.onDestroy(function () {
         destroyed = true;
         if (publishTimer) window.clearTimeout(publishTimer);
         destroyContentPopovers();
-        publishButton.removeEventListener('click', openPublishSheet);
+        publishFab.destroy();
         root.removeEventListener('click', onRootClick);
         root.removeEventListener('input', onSearchInput);
+        window.removeEventListener('wego:product-published', onProductPublished);
       });
     }
   });

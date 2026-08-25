@@ -414,6 +414,13 @@ body[data-host-width="full"] .preview-shell {
   bottom: calc(56px + var(--safe-area-bottom));
 }
 
+/* 发布产品底部 sheet：面板高度封顶，表单在 .modal__body 内独立滚动，
+   来源页（动态/我的）内容从面板上方露出（半透明遮罩后可见） */
+.modal.publish-product:not(.modal--fullscreen) .modal__panel {
+  max-height: 92dvh;
+  max-height: 92%;
+}
+
 /* 栈层 panel：每个 push 场景独立 panel，绝对定位层叠在 sceneLayer 内 */
 .app-scene-layer__panel {
   position: absolute;
@@ -528,4 +535,19 @@ body[data-viewport-mode="native"] .bottom-nav {
   body[data-viewport-mode="native"] .host-shell-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+}
+
+/* ── 公共悬浮发布入口（publish-fab，动态页 / 我的页共用）──
+   作为 .layout-page 直接子节点，position: absolute 锚定到场景根，悬浮于右下角、tab 栏之上 */
+.wego-fab {
+  position: absolute;
+  right: var(--spacer-16);
+  bottom: var(--spacer-32);
+  width: var(--size-48);
+  min-width: var(--size-48);
+  max-width: var(--size-48);
+  padding: var(--spacer-0);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-sticky);
 }
