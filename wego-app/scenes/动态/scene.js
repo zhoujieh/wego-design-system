@@ -125,6 +125,36 @@
     return images;
   }
 
+  /* 单图朝向：按图片真实宽高比判定（宽≈高→正方，宽>高→横版，宽<高→竖版） */
+  function classifyOrientation(w, h) {
+    if (!w || !h) return 'square';
+    var ratio = w / h;
+    if (ratio >= 0.95 && ratio <= 1.05) return 'square';
+    return ratio > 1 ? 'landscape' : 'portrait';
+  }
+
+  /* 渲染后按已加载图片的真实尺寸，回填单图朝向修饰类（已缓存图片无闪烁，未加载则监听 load 后修正） */
+  function applySingleImageOrientation(root) {
+    var imgs = root.querySelectorAll('.wg-image-grid__single-img[data-probe]');
+    Array.prototype.forEach.call(imgs, function (img) {
+      if (img.getAttribute('data-probed')) return;
+      function setOrientation(ori) {
+        var box = img.closest ? img.closest('.wg-image-grid--single') : null;
+        if (box) {
+          box.classList.remove('wg-image-grid--square', 'wg-image-grid--landscape', 'wg-image-grid--portrait');
+          box.classList.add('wg-image-grid--' + ori);
+        }
+        img.setAttribute('data-probed', '1');
+      }
+      if (img.complete && img.naturalWidth) {
+        setOrientation(classifyOrientation(img.naturalWidth, img.naturalHeight));
+      } else {
+        img.addEventListener('load', function () { setOrientation(classifyOrientation(img.naturalWidth, img.naturalHeight)); });
+        img.addEventListener('error', function () { setOrientation('square'); });
+      }
+    });
+  }
+
   function isResaleDynamic(dyn) {
     if (dyn.resale && dyn.resale.distribution_type) return true;
     return Boolean(RESALE_MARK[dyn.dynamic_id]);
@@ -151,24 +181,58 @@
     return '¥' + price;
   }
 
+  /* 价格拆分为「¥ 符号 + 整数 + 小数」，整数用数字字体放大，对齐设计稿 price 组件 */
+  function priceHtml(p) {
+    if (!p) return '';
+    var s = String(p.price);
+    var dot = s.indexOf('.');
+    var yuan = dot >= 0 ? s.slice(0, dot) : s;
+    var cents = dot >= 0 ? s.slice(dot) : '';
+    return '<span class="album-feed__product-price">'
+      + '<i class="album-feed__price-symbol">¥</i>'
+      + '<span class="album-feed__price-num">' + yuan + '</span>'
+      + (cents ? '<span class="album-feed__price-cents">' + cents + '</span>' : '')
+      + '</span>';
+  }
+
   /* ── 动态卡片模板 ── */
   function feedCardTemplate(dyn) {
     var pub = publisherById(dyn.publisher_id);
     var product = productOf(dyn);
-    var images = dynamicMediaImages(dyn.media_list);
+    /* 媒体项：保留 video / image 类型与播放时长，单图按真实尺寸判定朝向，多图统一 3 列行式填充 */
+    var items = (dyn.media_list || []).map(function (m) {
+      return { src: m.poster_or_src, type: m.media_type, duration: m.duration_label };
+    }).filter(function (m) { return !!m.src; });
     var resale = isResaleDynamic(dyn);
     var text = dyn.text_content || '';
 
     var mediaHtml = '';
-    if (images.length === 1) {
-      mediaHtml = '<button type="button" class="album-feed__media album-feed__media--single" data-action="view-image" data-img="' + images[0] + '">'
-        + '<img class="album-feed__media-img" src="' + images[0] + '" alt="" /></button>';
-    } else if (images.length > 1) {
-      mediaHtml = '<div class="album-feed__media album-feed__media--grid">';
-      images.slice(0, 9).forEach(function (src) {
-        mediaHtml += '<button type="button" class="album-feed__media-cell" data-action="view-image" data-img="' + src + '"><img class="album-feed__media-img" src="' + src + '" alt="" /></button>';
+    if (items.length === 1) {
+      /* 单图：正方形 / 横版(4:3) / 竖版(3:4) 三朝向由运行时按图片真实尺寸判定（默认正方，加载后修正）；
+         最大封顶在 9 宫格左上 2×2（≈192）盒内；首媒体为 video 时叠加播放角标 */
+      var single = items[0];
+      var singlePlay = single.type === 'video'
+        ? '<span class="wg-image-grid__play" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="12" fill="rgba(0,0,0,0.35)"/><path d="M10 8 L16 12 L10 16 Z" fill="#fff"/></svg></span>'
+        : '';
+      mediaHtml = '<div class="album-feed__media"><div class="wg-image-grid wg-image-grid--single wg-image-grid--square">'
+        + '<button type="button" class="wg-image-grid__single" data-action="view-image" data-img="' + single.src + '">'
+        + '<img class="wg-image-grid__single-img" src="' + single.src + '" alt="" data-probe />'
+        + singlePlay
+        + '</button></div></div>';
+    } else if (items.length > 1) {
+      /* 多图九宫格：统一消费设计系统组件 .wg-image-grid--dynamic（3 列，行数随数量 1/2/3 行，尾部空格，最多 9 张）；
+         外层 .album-feed__media 仅负责头像列缩进，不参与栅格；首媒体为 video 时首格叠加播放角标 */
+      mediaHtml = '<div class="album-feed__media"><div class="wg-image-grid wg-image-grid--dynamic">';
+      items.slice(0, 9).forEach(function (m, i) {
+        var playBadge = (i === 0 && m.type === 'video')
+          ? '<span class="wg-image-grid__play" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="12" fill="rgba(0,0,0,0.35)"/><path d="M10 8 L16 12 L10 16 Z" fill="#fff"/></svg></span>'
+          : '';
+        mediaHtml += '<button type="button" class="wg-image-grid__item" data-action="view-image" data-img="' + m.src + '">'
+          + '<img class="album-feed__media-img" src="' + m.src + '" alt="" />'
+          + playBadge
+          + '</button>';
       });
-      mediaHtml += '</div>';
+      mediaHtml += '</div></div>';
     }
 
     var badgeHtml = resale ? '<span class="badge album-feed__resale-badge" data-component-slug="badge">可帮卖</span>' : '';
@@ -176,13 +240,15 @@
     var productHtml = '';
     if (product) {
       productHtml = '<button type="button" class="album-feed__product" data-action="open-detail" data-product-id="' + product.product_id + '">'
+        + '<span class="album-feed__product-body">'
         + '<img class="album-feed__product-thumb" src="' + (product.image_list && product.image_list[0] ? product.image_list[0] : '') + '" alt="" />'
         + '<span class="album-feed__product-info">'
         + '<span class="album-feed__product-name">' + product.name + '</span>'
-        + '<span class="album-feed__product-price">' + priceText(product) + '</span>'
+        + priceHtml(product)
         + '</span>'
         + badgeHtml
         + '<i class="wego-iconfont-s icon-arrow-right album-feed__product-arrow" aria-hidden="true"></i>'
+        + '</span>'
         + '</button>';
     }
 
@@ -216,8 +282,45 @@
       + '</div>';
   }
 
-  function loadingTemplate() {
-    return '<div class="album-feed__loading"><div class="loading" data-component-slug="loading"></div></div>';
+  /* 骨架屏：与真实卡片结构一一对应（头部 / 文字 / 九宫格图 / 产品卡 / 操作区），
+     按设计稿骨架屏变体（componentId 9685:80044）组合 skeleton 原子块 */
+  function feedSkeletonTemplate() {
+    var cells = '';
+    for (var i = 0; i < 9; i++) {
+      cells += '<span class="wg-skeleton wg-skeleton--rect"></span>';
+    }
+    return '<div class="album-feed__skeleton" aria-hidden="true">'
+      + '<div class="album-feed__skeleton-head">'
+      + '<span class="wg-skeleton wg-skeleton--circle" style="width:40px;height:40px"></span>'
+      + '<div class="album-feed__skeleton-meta">'
+      + '<span class="wg-skeleton wg-skeleton--text" style="width:88px;height:20px"></span>'
+      + '<span class="wg-skeleton wg-skeleton--text" style="width:120px;height:14px"></span>'
+      + '</div>'
+      + '</div>'
+      + '<div class="album-feed__skeleton-block">'
+      + '<span class="wg-skeleton wg-skeleton--text" style="width:100%"></span>'
+      + '<span class="wg-skeleton wg-skeleton--text" style="width:60%"></span>'
+      + '</div>'
+      + '<div class="album-feed__skeleton-block">'
+      + '<div class="album-feed__skeleton-grid">' + cells + '</div>'
+      + '</div>'
+      + '<div class="album-feed__skeleton-block">'
+      + '<div class="album-feed__skeleton-product">'
+      + '<span class="wg-skeleton wg-skeleton--rect" style="width:48px;height:48px"></span>'
+      + '<div class="album-feed__skeleton-meta">'
+      + '<span class="wg-skeleton wg-skeleton--text" style="width:122px;height:14px"></span>'
+      + '<span class="wg-skeleton wg-skeleton--text" style="width:79px;height:14px"></span>'
+      + '</div>'
+      + '<span class="wg-skeleton wg-skeleton--rect" style="width:40px;height:20px"></span>'
+      + '</div>'
+      + '</div>'
+      + '<div class="album-feed__skeleton-actions">'
+      + '<span class="wg-skeleton wg-skeleton--rect" style="width:24px;height:16px"></span>'
+      + '<span class="wg-skeleton wg-skeleton--rect" style="width:24px;height:16px"></span>'
+      + '<span class="wg-skeleton wg-skeleton--rect" style="width:24px;height:16px"></span>'
+      + '<span class="wg-skeleton wg-skeleton--rect" style="width:80px;height:32px;margin-left:auto"></span>'
+      + '</div>'
+      + '</div>';
   }
 
   function loadFailedTemplate() {
@@ -316,6 +419,7 @@
       html += feedCardTemplate(dyn);
     });
     listEl.innerHTML = html;
+    applySingleImageOrientation(listEl);
   }
 
   window.WegoApp.registerScene({
@@ -347,7 +451,11 @@
       var searchEntry = root.querySelector('[data-dom-id="feed-search-entry"]');
 
       ctx.state.keyword = '';
-      renderList(ctx, listEl);
+      /* 首次加载先展示骨架屏，短暂加载间隙后过渡到真实列表（本地数据无真实网络延迟） */
+      listEl.innerHTML = feedSkeletonTemplate();
+      setTimeout(function () {
+        renderList(ctx, listEl);
+      }, 600);
 
       function bindDelegated() {
         listEl.addEventListener('click', function (e) {
@@ -454,6 +562,7 @@
           var html = '';
           dynamics.forEach(function (dyn) { html += feedCardTemplate(dyn); });
           results.innerHTML = html;
+          applySingleImageOrientation(results);
         }
 
         renderSearch('');

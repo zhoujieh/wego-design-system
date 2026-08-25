@@ -41,10 +41,19 @@
     .wg-image--custom-rect { width: 180px; height: 120px; }
     .wg-image--custom-wide { width: 260px; height: 160px; }
     .wg-image-grid { display:grid; box-sizing:border-box; }
-    .wg-image-grid__item { width:100%; min-width:0; aspect-ratio:1; }
+    .wg-image-grid__item { position:relative; width:100%; min-width:0; aspect-ratio:1; }
     .wg-image-grid--dynamic { --wg-image-grid-cell-radius:2px; width:100%; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:var(--spacer-4); overflow:hidden; border-radius:var(--radius-8); }
     .wg-image-grid--dynamic .wg-image-grid__item { border-radius:var(--wg-image-grid-cell-radius); }
     .wg-image-grid--product { --wg-image-product-grid-min-width:80px; --wg-image-product-grid-max-width:160px; width:clamp(var(--wg-image-product-grid-min-width), 100%, var(--wg-image-product-grid-max-width)); grid-template-columns:repeat(2, minmax(0, 1fr)); gap:var(--spacer-2); overflow:hidden; border-radius:var(--radius-4); }
+    /* 单图三朝向：封顶在 9 宫格左上 2×2（≈2 个 3 列方格 + 1 间距，随父级宽自适应） */
+    .wg-image-grid--single { --wg-single-2x2: calc((200% - var(--spacer-4)) / 3); display:block; width:100%; border-radius:var(--radius-8); overflow:hidden; }
+    .wg-image-grid--single.wg-image-grid--square { width:var(--wg-single-2x2); aspect-ratio:1 / 1; }
+    .wg-image-grid--single.wg-image-grid--landscape { width:var(--wg-single-2x2); aspect-ratio:4 / 3; }
+    .wg-image-grid--single.wg-image-grid--portrait { width:calc(var(--wg-single-2x2) * 3 / 4); aspect-ratio:3 / 4; }
+    .wg-image-grid--single .wg-image-grid__single { display:block; position:relative; margin:0; padding:0; border:none; background:transparent; cursor:pointer; line-height:0; width:100%; height:100%; }
+    .wg-image-grid--single .wg-image-grid__single-img { display:block; width:100%; height:100%; object-fit:cover; border-radius:var(--radius-8); }
+    /* 视频播放角标（单图 / 多图首格） */
+    .wg-image-grid__play { position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:24px; height:24px; display:flex; align-items:center; justify-content:center; pointer-events:none; }
     @keyframes wg-image-skeleton {
       0% { background-position: 200% 0; }
       100% { background-position: -200% 0; }
@@ -53,6 +62,8 @@
     .pv-section { background:var(--bg-surface); border-radius:var(--radius-12); padding:var(--spacer-16); box-shadow:var(--shadow-xs); }
     .pv-section__sub:last-of-type { margin-bottom:var(--spacer-16); }
     .row { padding:var(--spacer-4) 0; }
+    .pv-grid-frame { width:340px; max-width:100%; }
+    .pv-grid-frame .wg-image-grid { margin-bottom:var(--spacer-12); }
   </style>
 </head>
 <body>
@@ -90,6 +101,52 @@
       <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_11/1663741015635_49035.jpg" alt="粉色休闲衬衫"></div>
       <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_12/1663741493015_827.jpg" alt="千鸟格针织套装"></div>
       <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_13/1664276865081_87837.jpg" alt="彩色涂鸦套装"></div>
+    </div>
+  </div>
+  <div class="pv-section">
+    <div class="pv-section__title">动态多图与单图变体</div>
+    <div class="pv-section__sub">同一 340px 手机卡宽内：单图三朝向封顶在 9 宫格左上 2×2；视频首格带居中播放角标；2/4/9 图统一三列、行数随数量 1/2/3 行。</div>
+    <div class="pv-grid-frame">
+      <div class="row"><span class="label">单图 · 正方形</span></div>
+      <div class="wg-image-grid wg-image-grid--single wg-image-grid--square">
+        <button class="wg-image-grid__single"><img class="wg-image-grid__single-img" src="../assets/image/clothing/clothing_1/clothing_1_1.jpg" alt="方领上衣"></button>
+      </div>
+      <div class="row"><span class="label">单图 · 横版 4:3</span></div>
+      <div class="wg-image-grid wg-image-grid--single wg-image-grid--landscape">
+        <button class="wg-image-grid__single"><img class="wg-image-grid__single-img" src="../assets/image/clothing/clothing_2/clothing_2_1.jpg.jpg" alt="玫红短袖西装外套"></button>
+      </div>
+      <div class="row"><span class="label">单图 · 竖版 3:4</span></div>
+      <div class="wg-image-grid wg-image-grid--single wg-image-grid--portrait">
+        <button class="wg-image-grid__single"><img class="wg-image-grid__single-img" src="../assets/image/clothing/clothing_3/1663740989357_27184.jpg" alt="蓝色格纹衬衫"></button>
+      </div>
+      <div class="row"><span class="label">单图 · 视频（播放角标）</span></div>
+      <div class="wg-image-grid wg-image-grid--single wg-image-grid--portrait">
+        <button class="wg-image-grid__single"><img class="wg-image-grid__single-img" src="../assets/image/clothing/clothing_7/1663741042720_27285.jpg" alt="金扣西装外套"><span class="wg-image-grid__play"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="rgba(0,0,0,.45)"/><path d="M10 8.5l6 3.5-6 3.5z" fill="#fff"/></svg></span></button>
+      </div>
+      <div class="row"><span class="label">2 图 · 三列一行</span></div>
+      <div class="wg-image-grid wg-image-grid--dynamic">
+        <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_1/clothing_1_1.jpg" alt=""></div>
+        <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_2/clothing_2_1.jpg.jpg" alt=""></div>
+      </div>
+      <div class="row"><span class="label">4 图 · 三列两行</span></div>
+      <div class="wg-image-grid wg-image-grid--dynamic">
+        <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_1/clothing_1_1.jpg" alt=""></div>
+        <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_2/clothing_2_1.jpg.jpg" alt=""></div>
+        <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_3/1663740989357_27184.jpg" alt=""></div>
+        <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_4/1663741015639_25492.jpg" alt=""></div>
+      </div>
+      <div class="row"><span class="label">9 图 · 三列三行（首格视频角标）</span></div>
+      <div class="wg-image-grid wg-image-grid--dynamic">
+        <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_1/clothing_1_1.jpg" alt=""><span class="wg-image-grid__play"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="rgba(0,0,0,.45)"/><path d="M10 8.5l6 3.5-6 3.5z" fill="#fff"/></svg></span></div>
+        <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_2/clothing_2_1.jpg.jpg" alt=""></div>
+        <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_3/1663740989357_27184.jpg" alt=""></div>
+        <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_4/1663741015639_25492.jpg" alt=""></div>
+        <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_5/1663741055068_1251.jpg" alt=""></div>
+        <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_6/img_1708defc_20240216_i1708092817_2182_1.jpg.jpg" alt=""></div>
+        <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_7/1663741042720_27285.jpg" alt=""></div>
+        <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_8/img_1708defc_20240216_i1708092817_8695_6.jpg.jpg" alt=""></div>
+        <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_9/1663740558494_61057.jpg" alt=""></div>
+      </div>
     </div>
   </div>
   <div class="pv-section">

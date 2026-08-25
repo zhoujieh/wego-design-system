@@ -5,12 +5,15 @@
   "layout_mode": "composed",
   "page_pattern": null,
   "presentation": {
-    "type": "push",
-    "transition": "slide-left",
-    "dismissAction": "back",
-    "overlayLevel": "inline",
+    "type": "full-screen-modal",
+    "modalVariant": "fullscreen",
+    "modalTitle": "default",
+    "consumesModalComponent": true,
+    "transition": "slide-up-enter, slide-down-exit",
+    "dismissAction": "page-level-save",
+    "overlayLevel": "overlay",
     "coversTabBar": true,
-    "source": "library-consumption.json#/appRuntime/presentationTypes"
+    "source": "uikit-plan.json#/pagePatterns/entity-form"
   },
   "prompt_contract": {
     "design_system_version": 416,
@@ -20,7 +23,7 @@
       { "selector": ".publish-product", "content_role": "页面字体", "css_property": "font-family", "token": "var(--body-md-font-family)" }
     ],
     "component_bindings": [
-      { "binding_id": "publish-navbar", "slug": "navbar", "reason": "发布产品顶部导航：左侧返回、中间标题、右侧发布按钮", "variant_dimensions": { "leftControl": "back", "titleAlignment": "center", "actions": "button", "rightActionType": "button", "spacing": "default", "pageTransition": "push", "position": "sticky" } }
+      { "binding_id": "publish-navbar", "slug": "navbar", "reason": "发布产品顶部导航：左侧取消文本、中间标题、右侧发布强按钮（entity-form 全屏模态）", "variant_dimensions": { "leftControl": "cancel", "titleAlignment": "center", "actions": "button", "rightActionType": "button", "spacing": "default", "pageTransition": "present", "position": "sticky" } }
     ],
     "layout_contract": {
       "mode": "composed",
@@ -173,18 +176,22 @@
   window.WegoApp.registerScene({
     routeId: 'publish-product',
     template: `
-<div class="layout-page publish-product" data-surface-id="publish-product" data-route-id="publish-product" data-layout-mode="composed" data-bg="page" data-component-slug="layout-page">
-  <div class="layout-page__top">
-    <nav class="navbar publish-product__navbar" data-component-slug="navbar">
-      <div class="navbar__body">
-        <div class="navbar__left"><button type="button" class="navbar__left-btn" data-dom-id="publish-back" aria-label="返回"><i class="wego-iconfont-s icon-zuojiantou16" aria-hidden="true"></i></button></div>
-        <div class="navbar__center"><span class="navbar__title">发布产品</span></div>
-        <div class="navbar__right navbar__right--button"><button type="button" class="btn btn--strong btn--sm" data-component-slug="button" data-dom-id="publish-submit">发布</button></div>
+<div class="modal modal--fullscreen publish-product" data-surface-id="publish-product" data-route-id="publish-product" data-component-slug="modal" data-state="open" role="dialog" aria-modal="true" aria-label="发布产品" style="--modal-panel-bg: var(--bg-page)">
+  <div class="modal__panel">
+    <div class="modal__title modal__title--default">
+      <div class="navbar" data-component-slug="navbar">
+        <div class="navbar__body navbar__body--spaced">
+          <div class="navbar__left"><button type="button" class="navbar__left-text" data-dom-id="publish-cancel" aria-label="取消">取消</button></div>
+          <div class="navbar__center"><span class="navbar__title">发布产品</span></div>
+          <div class="navbar__right navbar__right--button">
+            <div class="navbar__action navbar__action--button">
+              <button type="button" class="btn btn--strong btn--sm" data-component-slug="button" data-dom-id="publish-submit">发布</button>
+            </div>
+          </div>
+        </div>
       </div>
-    </nav>
-  </div>
-  <div class="layout-page__body">
-    <div class="layout-scroll publish-product__scroll" data-component-slug="layout-scroll">
+    </div>
+    <div class="modal__body modal__body--safe-bottom publish-product__scroll" data-component-slug="layout-scroll">
 
       <div class="form-group">
         <div class="form-group__title">商品图片</div>
@@ -255,12 +262,12 @@
     </div>
   </div>
 </div>`,
-    presentation: { type: 'push', transition: 'slide-left', coversTabBar: true },
+    presentation: { type: 'full-screen-modal', transition: 'slide-left', coversTabBar: true },
     init: function initPublish(ctx) {
       var root = ctx.root;
       var scroll = root.querySelector('.publish-product__scroll');
 
-      var backBtn = root.querySelector('[data-dom-id="publish-back"]');
+      var backBtn = root.querySelector('[data-dom-id="publish-cancel"]');
       var submitBtn = root.querySelector('[data-dom-id="publish-submit"]');
       var autoSku = root.querySelector('[data-dom-id="auto-sku"]');
       var addImageBtn = root.querySelector('[data-dom-id="open-image-picker"]');
