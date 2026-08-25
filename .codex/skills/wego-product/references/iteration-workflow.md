@@ -57,9 +57,9 @@ draft
 awaiting-brief-confirmation
   → 用户明确确认 → confirm-brief
 prototyping
-  → 用户明确要求正式提交 → submit-prototype
+  → 用户明确验收通过 → submit-prototype + confirm-prototype
 awaiting-prototype-confirmation
-  → 用户验收 → confirm-prototype
+  → 连续确认 → confirm-prototype
 prototype-confirmed
   → 用户明确要求冻结 → freeze
 frozen
@@ -90,16 +90,16 @@ node scripts/iteration-record.mjs check --file {iteration.json}
 
 - `submit-brief` 固定当前范围；随后向用户展示简短文字摘要。
 - `confirm-brief` 只能在用户看过当前摘要并明确确认后执行，命令中的迭代 ID 必须与当前记录一致。
-- `submit-prototype` 只在用户明确提出验收意图（要求正式验收、发在线预览，或明确说明“这一轮改完了，可以验收”）后执行。它会重新验证受影响场景并固定待验收源码、样式和路由指纹；浏览器或源码验证失败时不得进入下一状态。
+- `submit-prototype` 在用户明确表达“验收通过”“确认合格”“可以合并”后，与 `confirm-prototype` 连续执行。它会重新验证受影响场景并固定待验收源码、样式和路由指纹；源码验证失败时不得进入下一状态。
 - Agent 不得因为实现完成、检查通过、用户查看了本地页面，或自己判断“可以交付”而执行 `submit-prototype`。
-- `confirm-prototype` 只能在用户验收当前正式提交后执行，命令中的迭代 ID 必须一致，且当前原型指纹必须与提交验收时完全相同；发生漂移必须先失效并重新提交验收。
+- `confirm-prototype` 只能在用户明确验收通过、且 `submit-prototype` 已固化待验收指纹后连续执行，命令中的迭代 ID 必须一致，且当前原型指纹必须与提交时完全相同；发生漂移必须先失效并重新提交。
 - `migrate` 只迁移 schemaVersion 5 的历史记录。旧的待验收原型因没有提交指纹会回到 `prototyping`，必须重新获得提交授权并提交后再请求用户验收；不得借迁移伪造验收。
 - `confirm-prototype` 表示当前原型已验收，不代表冻结。
 
 ## 本地迭代与验收反馈
 
 - 在 `prototyping` 中收到已确认范围内的视觉、布局、组件、Token、路由或交互调整，直接继续修改，不执行 `invalidate --stage=prototype`。
-- 在 `awaiting-prototype-confirmation` 中收到上述调整，先执行 `invalidate --stage=prototype` 回到 `prototyping`，在本地累计完成新一轮修改；只有用户再次明确表达验收意图（要求正式验收或重新验收）时，才执行新的 `submit-prototype`。
+- 在 `awaiting-prototype-confirmation` 中收到上述调整，先执行 `invalidate --stage=prototype` 回到 `prototyping`，在本地累计完成新一轮修改；只有用户再次明确表达“验收通过”时，才重新执行 `submit-prototype` 与 `confirm-prototype`。
 - 用户反馈改变目标、范围、入口、关键路径、状态、数据或可见结果时，无论当前处于哪个原型阶段，都先 `invalidate --stage=brief`，更新简报并重新确认。
 
 失效在原迭代中继续，不自动新建迭代。冻结迭代不得失效或覆盖。
