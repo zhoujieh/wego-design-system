@@ -1043,15 +1043,15 @@
     });
     if (!rows.length) return '<div class="order-catalog-empty">没有匹配商品</div>';
     return rows.map(function (item) {
+      var catalogPrice = (Math.round(customerPrice(item) * 100) / 100).toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1');
       var content = ''
-        +   '<span class="order-catalog-item__media">' + image(item, 'order-catalog-item__image') + '<span class="order-catalog-item__code">' + escapeHtml(item.code) + '</span></span>'
-        +   '<span class="order-catalog-item__detail"><strong>' + escapeHtml(item.name) + '</strong><small>' + escapeHtml(item.code) + (item.stock != null ? ' · 库存 ' + item.stock + ' 台' : ' · ' + item.specs.length + '个规格') + '</small><b>' + money(customerPrice(item)) + '</b></span>'
-        +   '<i class="wego-iconfont-s icon-jia16" aria-hidden="true"></i>';
+        +   '<span class="order-catalog-item__media">' + image(item, 'order-catalog-item__image') + '<span class="order-catalog-item__image-mark" aria-hidden="true"><i class="wego-iconfont-s icon-tupian"></i></span><span class="order-catalog-item__code">' + escapeHtml(item.code) + '</span><i class="wego-iconfont-s icon-jia16 order-catalog-item__add" aria-hidden="true"></i></span>'
+        +   '<span class="order-catalog-item__detail"><strong>' + escapeHtml(item.name) + '</strong><small>' + escapeHtml(item.code) + (item.stock != null ? ' · 库存 ' + item.stock + ' 台' : ' · ' + item.specs.length + '个规格') + '</small><b><span class="order-catalog-item__currency">¥</span><span class="order-catalog-item__amount">' + escapeHtml(catalogPrice) + '</span></b></span>';
       if (!editable) {
-        return '<button type="button" class="order-catalog-item' + (manualDesktop ? ' card card--surface' : '') + '"' + (manualDesktop ? ' data-component-slug="card"' : '') + ' data-product-id="' + item.id + '">' + content + '</button>';
+        return '<button type="button" class="order-catalog-item' + (manualDesktop ? ' card card--surface card--vertical' : '') + '"' + (manualDesktop ? ' data-component-slug="card"' : '') + ' data-product-id="' + item.id + '">' + content + '</button>';
       }
       return ''
-        + '<article class="order-catalog-item card card--surface order-catalog-item--editable" data-component-slug="card">'
+        + '<article class="order-catalog-item card card--surface card--vertical order-catalog-item--editable" data-component-slug="card">'
         +   '<button type="button" class="order-catalog-item__select" data-product-id="' + item.id + '" aria-label="添加' + escapeHtml(item.name) + '">' + content + '</button>'
         +   '<button type="button" class="order-catalog-item__edit" data-edit-catalog-product="' + item.id + '" aria-label="编辑' + escapeHtml(item.name) + '" title="编辑商品"><i class="wego-iconfont-s icon-bianji16" aria-hidden="true"></i></button>'
         + '</article>';
@@ -1067,7 +1067,7 @@
 
   function catalogCategoryTabs() {
     var categories = state.industry === 'phone' ? ['全部', 'Apple', 'HUAWEI', 'HONOR', 'Xiaomi', 'OPPO', 'vivo'] : CATALOG_CATEGORIES;
-    return '<div class="order-catalog-category-tabs" aria-label="商品标签分类">' + categories.map(function (category) {
+    return '<div class="order-catalog-category-tabs layout-scroll-row" data-component-slug="layout-scroll-row" data-item-size="auto" data-snap="none" data-peek="none" aria-label="商品标签分类">' + categories.map(function (category) {
       var selected = state.catalogCategory === category;
       return '<button type="button" class="tag tag--28 ' + (selected ? 'tag--brand tag--selected' : 'tag--white tag--normal') + '" data-component-slug="tag" aria-pressed="' + selected + '" data-catalog-category="' + escapeHtml(category) + '"><span class="tag__label">' + escapeHtml(category) + '</span></button>';
     }).join('') + '</div>';
@@ -1177,12 +1177,12 @@
 
   function desktopProductSearch(inCatalog) {
     var scannerConnectedClass = state.scannerConnected ? 'is-connected' : 'is-disconnected';
-    var sidebarFilterButton = '<div class="order-catalog-filter-anchor order-catalog-filter-anchor--search"><button type="button" class="btn btn--weak btn--sm" data-component-slug="button" data-toggle-sidebar-catalog-filter aria-haspopup="dialog" aria-expanded="' + state.catalogSidebarFilterOpen + '"><i class="btn__icon icon-shaixuan" aria-hidden="true"></i>筛选</button>' + catalogSidebarFilterMenu() + '</div>';
+    var sidebarFilterButton = '<div class="order-catalog-filter-anchor order-catalog-filter-anchor--search"><button type="button" class="btn btn--weak btn--sm btn--icon-only" data-component-slug="button" data-toggle-sidebar-catalog-filter aria-label="筛选" title="筛选" aria-haspopup="dialog" aria-expanded="' + state.catalogSidebarFilterOpen + '"><i class="btn__icon icon-shaixuan" aria-hidden="true"></i></button>' + catalogSidebarFilterMenu() + '</div>';
     return ''
       + '<div class="order-desktop-product-search' + (inCatalog ? ' order-desktop-product-search--catalog' : '') + '">'
       +   '<div class="order-desktop-product-search__row">'
       +     (inCatalog ? '' : '<div class="order-desktop-search-filter"><button type="button" class="btn btn--weak btn--sm" data-component-slug="button" data-toggle-catalog-filter aria-haspopup="dialog" aria-expanded="' + state.catalogFilterOpen + '"><span>' + escapeHtml(catalogScopeLabel()) + '</span><i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button>' + catalogFilterMenu() + '</div>')
-      +     '<div class="input-group input-group--surface-white order-desktop-context-search" data-component-slug="input"><label class="field-label" for="order-v2-context-search">搜索商品</label><div class="input-wrapper"><input id="order-v2-context-search" type="text" value="' + escapeHtml(state.desktopProductKeyword) + '" placeholder="使用扫码枪或搜索商品名称、货号" enterkeyhint="search" autocomplete="off" data-header-catalog-search><button type="button" class="input-clear" aria-label="清空搜索" data-clear-header-search><i class="icon-yuancha-mian" aria-hidden="true"></i></button><button type="button" class="order-desktop-inline-image-search" data-trigger-image-search aria-label="图搜" title="图搜"><i class="wego-iconfont-s icon-tupian" aria-hidden="true"></i></button></div></div>'
+      +     '<div class="input-group input-group--surface-white order-desktop-context-search" data-component-slug="input"><label class="field-label" for="order-v2-context-search">搜索商品</label><div class="input-wrapper"><input id="order-v2-context-search" type="text" value="' + escapeHtml(state.desktopProductKeyword) + '" placeholder="搜索商品名称、货号" enterkeyhint="search" autocomplete="off" data-header-catalog-search><button type="button" class="input-clear" aria-label="清空搜索" data-clear-header-search><i class="icon-yuancha-mian" aria-hidden="true"></i></button><button type="button" class="order-desktop-inline-image-search" data-trigger-image-search aria-label="图搜" title="图搜"><i class="wego-iconfont-s icon-tupian" aria-hidden="true"></i></button></div></div>'
       +     '<input type="file" accept="image/*" data-header-image-input hidden>'
       +     (inCatalog ? '' : '<button type="button" class="btn btn--medium btn--sm order-desktop-product-search__submit" data-component-slug="button" data-submit-header-search ' + (state.desktopProductKeyword.trim() ? '' : 'hidden') + '>搜索</button>')
       +     (inCatalog ? sidebarFilterButton : '')
@@ -1213,13 +1213,13 @@
     return ''
       + '<aside class="order-desktop__catalog">'
       +   '<button type="button" class="btn btn--weak btn--sm order-desktop-catalog-toggle order-desktop-catalog-toggle--collapse" data-component-slug="button" data-toggle-catalog aria-label="收起商品库"><i class="btn__icon icon-youjiantou16" aria-hidden="true"></i>收起商品库</button>'
-      +   '<header class="order-catalog-header"><div class="order-catalog-header__title"><strong>商品库</strong><div class="order-catalog-view-switch" aria-label="商品库显示模式"><button type="button" class="' + (state.catalogViewMode === 'grid' ? 'is-active' : '') + '" data-catalog-view="grid">大图</button><button type="button" class="' + (state.catalogViewMode === 'list' ? 'is-active' : '') + '" data-catalog-view="list">列表</button></div></div><div class="order-catalog-create-anchor"><button type="button" class="btn btn--weak btn--sm order-catalog-publish" data-component-slug="button" data-toggle-product-create-menu aria-haspopup="menu" aria-expanded="' + state.catalogCreateMenuOpen + '"><i class="btn__icon icon-jia16" aria-hidden="true"></i>创建</button>' + (state.catalogCreateMenuOpen ? '<div class="card card--surface order-catalog-create-menu" data-component-slug="card" role="menu" aria-label="功能选项面板"><button type="button" role="menuitem" data-create-product-type="product">创建商品</button><button type="button" role="menuitem" data-create-product-type="temporary">创建临时商品</button></div>' : '') + '</div></header>'
+      +   '<header class="order-catalog-header"><div class="order-catalog-header__title"><strong>商品库</strong><div class="order-catalog-view-switch" aria-label="商品库显示模式"><button type="button" class="' + (state.catalogViewMode === 'grid' ? 'is-active' : '') + '" data-catalog-view="grid">大图</button><button type="button" class="' + (state.catalogViewMode === 'list' ? 'is-active' : '') + '" data-catalog-view="list">列表</button></div></div><div class="order-catalog-create-anchor"><button type="button" class="btn btn--weak btn--sm order-catalog-publish" data-component-slug="button" data-toggle-product-create-menu aria-haspopup="menu" aria-expanded="' + state.catalogCreateMenuOpen + '"><i class="btn__icon icon-yuanjia" aria-hidden="true"></i>创建</button>' + (state.catalogCreateMenuOpen ? '<div class="card card--surface order-catalog-create-menu" data-component-slug="card" role="menu" aria-label="功能选项面板"><button type="button" role="menuitem" data-create-product-type="product">创建商品</button><button type="button" role="menuitem" data-create-product-type="temporary">创建临时商品</button></div>' : '') + '</div></header>'
       +   desktopProductSearch(true)
       +   '<div class="order-desktop__catalog-scroll">'
-      +   (!showingSearchResults && historyProducts.length ? '<section class="order-catalog-history" aria-label="最近成交商品"><div class="order-catalog-history__list">' + catalogList(true, historyProducts, false) + '</div><div class="order-catalog-history__actions"><button type="button" class="btn btn--weak btn--sm order-catalog-history__more" data-component-slug="button" data-scroll-history>更多</button></div></section>' : '')
+      +   (!showingSearchResults && historyProducts.length ? '<section class="order-catalog-history" aria-label="最近成交商品"><div class="order-catalog-history__list layout-scroll-row" data-component-slug="layout-scroll-row" data-item-size="auto" data-snap="start" data-peek="none">' + catalogList(true, historyProducts, false) + '</div></section>' : '')
       +   '<section class="order-catalog-products">'
       +     (showingSearchResults ? '' : '<div class="order-catalog-toolbar">' + catalogCategoryTabs() + '</div>')
-      +     '<div class="order-catalog-products__body"><div class="order-desktop__catalog-list order-desktop__catalog-list--' + state.catalogViewMode + '">' + catalogList(true, allProducts, true) + '</div></div>'
+      +     '<div class="order-catalog-products__body"><div class="order-desktop__catalog-list order-desktop__catalog-list--' + state.catalogViewMode + (state.catalogViewMode === 'grid' ? ' layout-grid' : '') + '"' + (state.catalogViewMode === 'grid' ? ' data-component-slug="layout-grid" data-columns="2" data-align="stretch"' : '') + '>' + catalogList(true, allProducts, true) + '</div></div>'
       +   '</section>'
       +   '</div>'
       + '</aside>';
