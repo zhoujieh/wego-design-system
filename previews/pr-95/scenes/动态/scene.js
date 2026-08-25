@@ -647,6 +647,10 @@
         });
         var cancel = sheetRoot.querySelector('[data-close-action-sheet]');
         if (cancel) cancel.addEventListener('click', function () { ctx.closeOverlay(); });
+        /* 蒙层点击关闭：点 actionsheet 组件根节点（遮罩空白区）关闭 */
+        sheetRoot.addEventListener('click', function (e) {
+          if (e.target === sheetCtx.root) ctx.closeOverlay();
+        });
       }
     });
   }
