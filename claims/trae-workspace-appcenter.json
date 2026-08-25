@@ -1,0 +1,9 @@
+{
+  "agent": "trae-workspace-appcenter",
+  "scene": "工作台",
+  "routeId": "workspace",
+  "branch": "feature/trae-workspace-appcenter",
+  "status": "active",
+  "claimedAt": "2026-08-21T14:30:00.000Z",
+  "note": "工作台 UI 打磨 + 应用中心场景迁移 + 开单 ?full=1 全屏逻辑 + 我的页全部应用入口"
+}

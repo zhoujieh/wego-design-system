@@ -349,14 +349,52 @@
     return match ? decodeURIComponent(match[1]) : '';
   }
 
+  // ── 全屏路由 URL 参数（?full=1） ──────────────────────────────
+  // 宿主读取 search 中 full=1 时铺满视口（去掉 670px 上限）。
+  // 打开开单等全屏业务路由时附加 ?full=1，返回宿主时移除，保持工作台常规宽度。
+  var FULL_WIDTH_ROUTES = new Set(['workspace-order-create', 'workspace-order-success']);
+
+  function searchWithoutFullParam() {
+    var params = new URLSearchParams(window.location.search);
+    params.delete('full');
+    var search = params.toString();
+    return search ? '?' + search : '';
+  }
+
+  function syncHostFullWidth() {
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('full') === '1') body.setAttribute('data-host-width', 'full');
+    else body.removeAttribute('data-host-width');
+  }
+
+  // 仅在“当前条目”上设置/移除 ?full=1（不改变 hash，不触碰源条目）。
+  // 实际可视宽度统一在 openPushScene（前进）与 pop 返回路径（后退）同步，
+  // 避免在跳转到全屏路由前就把源页面（如工作台）撑成全宽。
+  function applyFullParamForRoute(routeId) {
+    var params = new URLSearchParams(window.location.search);
+    var wantsFull = FULL_WIDTH_ROUTES.has(routeId);
+    var hasFull = params.get('full') === '1';
+    if (wantsFull === hasFull) return;
+    if (wantsFull) params.set('full', '1');
+    else params.delete('full');
+    var search = params.toString();
+    var url = window.location.pathname + (search ? '?' + search : '') + window.location.hash;
+    try { history.replaceState(null, '', url); } catch (e) {}
+  }
+
   function navigate(routeId) {
     if (!routeId) return;
     dismissToasts({ immediate: true });
     if (window.location.hash === '#/' + routeId) {
+      // 已在目标路由：仅确保 full 参数一致后直接打开
+      applyFullParamForRoute(routeId);
       openRoute(routeId);
       return;
     }
+    // 先切到目标 hash（不把 full 参数写进源条目的历史），
+    // 再在“当前（目标）条目”上同步 full 参数，源页面始终保留常规宽度
     window.location.hash = '#/' + routeId;
+    applyFullParamForRoute(routeId);
   }
 
   function normalizePresentation(scene) {
@@ -428,6 +466,8 @@
       // 侧滑返回后，host 页面重新可见，强制重绘入口
       // 清除 iOS Safari 可能残留的 :active 合成层缓存，避免按压态视觉残留
       forceHostEntriesRepaint();
+      // 返回至底层表面后，按当前 URL 的 ?full=1 恢复宿主宽度（后退回到常规宽度工作台）
+      syncHostFullWidth();
       if (typeof afterCallback === 'function') afterCallback();
       return;
     }
@@ -478,7 +518,9 @@
     // 清空 hash 和 history state：防止切 tab 后残留 #/routeId，
     // 导致用户侧滑触发 history.back 时误以为"返回 tab"实际只是消费了残留 hash
     if (window.location.hash) {
-      try { history.replaceState(null, document.title, window.location.pathname + window.location.search); } catch (e) {}
+      var cleanSearch = searchWithoutFullParam();
+      try { history.replaceState(null, document.title, window.location.pathname + cleanSearch); } catch (e) {}
+      syncHostFullWidth();
     }
     // 清空脚本加载锁：防止加载中的 .then(runScene) 在切 tab 后仍执行，
     // 导致场景被错误 push 到已清空的栈上（竞态修复）
@@ -757,6 +799,10 @@
     renderTemplate(panel, scene.template);
     sceneLayer.appendChild(panel);
 
+    // 新场景面板已覆盖底层宿主：此刻再依据 URL 的 ?full=1 同步宿主宽度，
+    // 切换（如工作台→开单）不会把源页面短暂撑成全宽
+    syncHostFullWidth();
+
     // scene panel 已覆盖 host，此时 host 不可见，对原入口强制重绘
     // 预防 iOS Safari :active 卡住导致的侧滑返回按压态残留
     // 此时 reflow 安全无闪烁（host 被 scene panel 遮挡）
@@ -986,7 +1032,10 @@
     // push 场景栈式返回：只弹顶层，下层自然显露
     popSceneLayer(function () {
       if (sceneStack.length === 0 && window.location.hash) {
-        history.pushState('', document.title, window.location.pathname + window.location.search);
+        // 返回宿主：移除全屏参数，恢复常规宽度
+        var cleanSearch = searchWithoutFullParam();
+        history.pushState('', document.title, window.location.pathname + cleanSearch);
+        syncHostFullWidth();
       }
     });
   }
@@ -1511,6 +1560,16 @@
 
     // hash 变空：返回到宿主（iOS 侧滑 / history.back 最常见场景）
     if (!routeId) {
+      // 返回宿主：清理残留的全屏参数，恢复常规宽度
+      var fullParams = new URLSearchParams(window.location.search);
+      if (fullParams.get('full') === '1') {
+        fullParams.delete('full');
+        var fullSearch = fullParams.toString();
+        try {
+          history.replaceState(null, '', window.location.pathname + (fullSearch ? '?' + fullSearch : ''));
+        } catch (e) {}
+        syncHostFullWidth();
+      }
       if (overlayStack.length > 0) {
         // hashchange 触发的关闭：iOS 侧滑返回时系统已完成页面过渡动画，
         // JS 不再叠加 CSS 退场动画，也不回退 history（state 已被消费）
@@ -1530,6 +1589,15 @@
       var topEntry = sceneStack[sceneStack.length - 1];
       if (topEntry.routeId === routeId) {
         // 栈顶已匹配，无需重复打开
+        return;
+      }
+      // routeId 对应宿主 tab（如返回落到 #/workspace）：收起 push 场景层回到该宿主，
+      // 抬起残留全屏参数并恢复常规宽度。避免把 host-tab 误当作新场景 openRoute，
+      // 导致开单等 push 层残留覆盖在宿主之上
+      var config = routeConfigs.get(routeId);
+      if (config && config.entry && config.entry.type === 'host-tab') {
+        clearSceneLayer();
+        setActiveTab(config.entry.tab);
         return;
       }
       if (isRouteInStack(routeId)) {

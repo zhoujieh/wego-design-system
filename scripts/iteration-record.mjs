@@ -320,7 +320,7 @@ function exactKeysErrors(value, expected, field) {
     ? []
     : [`${field} 字段必须且只能为 ${wanted.join('、')}`];
 }
-function confirmationErrors(record, file, repositoryRoot) {
+function confirmationErrors(record, file, repositoryRoot, options = {}) {
   const errors = [];
   if (record.status === 'superseded') return errors;
   const expected = expectedConfirmations.get(record.status);
@@ -350,7 +350,7 @@ function confirmationErrors(record, file, repositoryRoot) {
       if (!isIsoTimestamp(record.brief_submission.at)) errors.push(`${file}: brief_submission.at 必须为 ISO 时间`);
       if (record.brief_submission.scope_revision !== record.scope_revision) errors.push(`${file}: brief_submission 必须绑定当前 scope_revision`);
       if (typeof record.brief_submission.scope_sha256 !== 'string' || !/^[a-f0-9]{64}$/.test(record.brief_submission.scope_sha256)) errors.push(`${file}: brief_submission.scope_sha256 必须是 SHA-256`);
-      else if (record.brief_submission.scope_sha256 !== scopeSha256(record)) errors.push(`${file}: brief_submission.scope_sha256 与当前范围不一致（简报提交后范围已漂移）`);
+      else if (!options.skipDrift && record.brief_submission.scope_sha256 !== scopeSha256(record)) errors.push(`${file}: brief_submission.scope_sha256 与当前范围不一致（简报提交后范围已漂移）`);
     }
   }
   if (briefPresent) {
@@ -359,7 +359,7 @@ function confirmationErrors(record, file, repositoryRoot) {
       if (!isIsoTimestamp(record.brief_confirmation.at)) errors.push(`${file}: brief_confirmation.at 必须为 ISO 时间`);
       if (record.brief_confirmation.scope_revision !== record.scope_revision) errors.push(`${file}: brief_confirmation 必须绑定当前 scope_revision`);
       if (typeof record.brief_confirmation.scope_sha256 !== 'string' || !/^[a-f0-9]{64}$/.test(record.brief_confirmation.scope_sha256)) errors.push(`${file}: brief_confirmation.scope_sha256 必须是 SHA-256`);
-      else if (record.brief_confirmation.scope_sha256 !== scopeSha256(record)) errors.push(`${file}: brief_confirmation.scope_sha256 与当前范围不一致（范围确认后已漂移）`);
+      else if (!options.skipDrift && record.brief_confirmation.scope_sha256 !== scopeSha256(record)) errors.push(`${file}: brief_confirmation.scope_sha256 与当前范围不一致（范围确认后已漂移）`);
     }
   }
   if (prototypeSubmissionPresent) {
@@ -368,8 +368,8 @@ function confirmationErrors(record, file, repositoryRoot) {
       if (!isIsoTimestamp(record.prototype_submission.at)) errors.push(`${file}: prototype_submission.at 必须为 ISO 时间`);
       if (record.prototype_submission.scope_revision !== record.scope_revision) errors.push(`${file}: prototype_submission 必须绑定当前 scope_revision`);
       if (stableJson(record.prototype_submission.affected_scenes) !== stableJson(record.affected_scenes)) errors.push(`${file}: prototype_submission.affected_scenes 必须等于当前 affected_scenes`);
-      const fingerprintCheck = record.status === 'frozen' ? fingerprintShapeErrors : fingerprintErrors;
-      errors.push(...fingerprintCheck(record.prototype_submission.fingerprints, record, `${file}: prototype_submission`, repositoryRoot, '原型提交后已漂移'));
+      const prototypeSubmissionCheck = options.skipDrift ? fingerprintShapeErrors : (record.status === 'frozen' ? fingerprintShapeErrors : fingerprintErrors);
+      errors.push(...prototypeSubmissionCheck(record.prototype_submission.fingerprints, record, `${file}: prototype_submission`, repositoryRoot, '原型提交后已漂移'));
     }
   }
   if (prototypePresent) {
@@ -378,8 +378,8 @@ function confirmationErrors(record, file, repositoryRoot) {
       if (!isIsoTimestamp(record.prototype_confirmation.at)) errors.push(`${file}: prototype_confirmation.at 必须为 ISO 时间`);
       if (record.prototype_confirmation.scope_revision !== record.scope_revision) errors.push(`${file}: prototype_confirmation 必须绑定当前 scope_revision`);
       if (stableJson(record.prototype_confirmation.affected_scenes) !== stableJson(record.affected_scenes)) errors.push(`${file}: prototype_confirmation.affected_scenes 必须等于当前 affected_scenes`);
-      const fingerprintCheck = record.status === 'frozen' ? fingerprintShapeErrors : fingerprintErrors;
-      errors.push(...fingerprintCheck(record.prototype_confirmation.fingerprints, record, `${file}: prototype_confirmation`, repositoryRoot, '原型确认后已漂移'));
+      const prototypeConfirmationCheck = options.skipDrift ? fingerprintShapeErrors : (record.status === 'frozen' ? fingerprintShapeErrors : fingerprintErrors);
+      errors.push(...prototypeConfirmationCheck(record.prototype_confirmation.fingerprints, record, `${file}: prototype_confirmation`, repositoryRoot, '原型确认后已漂移'));
       if (isPlainObject(record.prototype_submission) && stableJson(record.prototype_confirmation.fingerprints) !== stableJson(record.prototype_submission.fingerprints)) {
         errors.push(`${file}: prototype_confirmation.fingerprints 必须等于用户验收的 prototype_submission.fingerprints`);
       }
@@ -411,7 +411,7 @@ function freezeErrors(record, file, repositoryRoot) {
   }
   return errors;
 }
-function validate(record, file, repositoryRoot = root) {
+function validate(record, file, repositoryRoot = root, options = {}) {
   const errors = [];
   if (!isPlainObject(record)) return [`${file}: 迭代记录必须为普通对象`];
   if (path.isAbsolute(file)) errors.push(...iterationFilePathErrors(file, record.identity?.primary_scene ?? null, repositoryRoot));
@@ -452,7 +452,7 @@ function validate(record, file, repositoryRoot = root) {
   errors.push(...affectedRuntimeErrors(record, file));
   if (!record.stage_outputs?.product || !record.stage_outputs?.design) errors.push(`${file}: stage_outputs 必须含 product/design`);
   errors.push(...stageOutputErrors(record, file));
-  errors.push(...confirmationErrors(record, file, repositoryRoot));
+  errors.push(...confirmationErrors(record, file, repositoryRoot, options));
   errors.push(...freezeErrors(record, file, repositoryRoot));
   return [...new Set(errors)];
 }
@@ -1067,7 +1067,7 @@ switch (command) {
     if (!['brief', 'prototype'].includes(stage)) fail('invalidate 需要 --stage brief|prototype 或 --stage=brief|prototype');
     const file = requireFile();
     const record = load(file);
-    const currentErrors = validate(record, file);
+    const currentErrors = validate(record, file, root, { skipDrift: true });
     if (currentErrors.length) fail(currentErrors.join('\n'));
     const sourceError = invalidationSourceError(record, stage);
     if (sourceError) fail(sourceError);
