@@ -179,6 +179,14 @@
   object-fit: cover;
 }
 
+/* 播放角标：语义为半透明遮罩 + 反白三角，颜色由设计系统 Token 提供，不在模板内联硬编码 */
+.album-feed__media .wg-image-grid__play svg circle {
+  fill: var(--bg-mask-light);
+}
+.album-feed__media .wg-image-grid__play svg path {
+  fill: var(--text-inverse);
+}
+
 /* ── 相关产品信息 ── */
 .album-feed__product {
   display: flex;

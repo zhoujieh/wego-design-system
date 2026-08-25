@@ -212,10 +212,10 @@
          最大封顶在 9 宫格左上 2×2（≈192）盒内；首媒体为 video 时叠加播放角标 */
       var single = items[0];
       var singlePlay = single.type === 'video'
-        ? '<span class="wg-image-grid__play" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="12" fill="rgba(0,0,0,0.35)"/><path d="M10 8 L16 12 L10 16 Z" fill="#fff"/></svg></span>'
+        ? '<span class="wg-image-grid__play" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="12"/><path d="M10 8 L16 12 L10 16 Z"/></svg></span>'
         : '';
       mediaHtml = '<div class="album-feed__media"><div class="wg-image-grid wg-image-grid--single wg-image-grid--square">'
-        + '<button type="button" class="wg-image-grid__single" data-action="view-image" data-img="' + single.src + '">'
+        + '<button type="button" class="wg-image-grid__single" data-component-slug="button" data-action="view-image" data-img="' + single.src + '">'
         + '<img class="wg-image-grid__single-img" src="' + single.src + '" alt="" data-probe />'
         + singlePlay
         + '</button></div></div>';
@@ -225,9 +225,9 @@
       mediaHtml = '<div class="album-feed__media"><div class="wg-image-grid wg-image-grid--dynamic">';
       items.slice(0, 9).forEach(function (m, i) {
         var playBadge = (i === 0 && m.type === 'video')
-          ? '<span class="wg-image-grid__play" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="12" fill="rgba(0,0,0,0.35)"/><path d="M10 8 L16 12 L10 16 Z" fill="#fff"/></svg></span>'
+          ? '<span class="wg-image-grid__play" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="12"/><path d="M10 8 L16 12 L10 16 Z"/></svg></span>'
           : '';
-        mediaHtml += '<button type="button" class="wg-image-grid__item" data-action="view-image" data-img="' + m.src + '">'
+        mediaHtml += '<button type="button" class="wg-image-grid__item" data-component-slug="button" data-action="view-image" data-img="' + m.src + '">'
           + '<img class="album-feed__media-img" src="' + m.src + '" alt="" />'
           + playBadge
           + '</button>';
@@ -239,7 +239,7 @@
 
     var productHtml = '';
     if (product) {
-      productHtml = '<button type="button" class="album-feed__product" data-action="open-detail" data-product-id="' + product.product_id + '">'
+      productHtml = '<button type="button" class="album-feed__product" data-component-slug="button" data-action="open-detail" data-product-id="' + product.product_id + '">'
         + '<span class="album-feed__product-body">'
         + '<img class="album-feed__product-thumb" src="' + (product.image_list && product.image_list[0] ? product.image_list[0] : '') + '" alt="" />'
         + '<span class="album-feed__product-info">'
@@ -263,7 +263,7 @@
       + '<span class="album-feed__publisher">' + pub.publisher_name + '</span>'
       + '<span class="album-feed__time">' + dyn.published_at + '</span>'
       + '</div>'
-      + '<button type="button" class="album-feed__more" data-action="more-actions" data-dyn-id="' + dyn.dynamic_id + '" aria-label="更多操作"><i class="wego-iconfont-s icon-sandian16" aria-hidden="true"></i></button>'
+      + '<button type="button" class="album-feed__more" data-component-slug="button" data-action="more-actions" data-dyn-id="' + dyn.dynamic_id + '" aria-label="更多操作"><i class="wego-iconfont-s icon-sandian16" aria-hidden="true"></i></button>'
       + '</header>'
       + (text ? '<p class="album-feed__text">' + text + '</p>' : '')
       + mediaHtml
@@ -353,13 +353,13 @@
     html += '<div class="actionsheet__panel">';
     html += '<div class="actionsheet__list">';
     items.forEach(function (label) {
-      html += '<button type="button" class="actionsheet__item" data-action-label="' + label + '">'
+      html += '<button type="button" class="actionsheet__item" data-component-slug="button" data-action-label="' + label + '">'
         + '<div class="actionsheet__item-main"><div class="actionsheet__item-title">' + label + '</div></div>'
         + '</button>';
     });
     html += '</div>';
     html += '<div class="actionsheet__cancel-gap"></div>';
-    html += '<button type="button" class="actionsheet__cancel" data-close-action-sheet>取 消</button>';
+    html += '<button type="button" class="actionsheet__cancel" data-component-slug="button" data-close-action-sheet>取 消</button>';
     html += '</div></div>';
     return html;
   }
@@ -390,7 +390,7 @@
     return '<div class="modal modal--fullscreen" data-component-slug="modal" data-state="open" role="dialog" aria-modal="true" aria-label="查看图片">'
       + '<div class="modal__panel">'
       + '<div class="album-feed__viewer">'
-      + '<button type="button" class="album-feed__viewer-close" data-dom-id="close-viewer" aria-label="关闭"><i class="wego-iconfont-s icon-guanbi" aria-hidden="true"></i></button>'
+      + '<button type="button" class="album-feed__viewer-close" data-component-slug="button" data-dom-id="close-viewer" aria-label="关闭"><i class="wego-iconfont-s icon-guanbi" aria-hidden="true"></i></button>'
       + '<img class="album-feed__viewer-img" src="' + src + '" alt="" />'
       + '</div>'
       + '</div>'
@@ -437,6 +437,7 @@
     <div class="navbar album-feed__navbar" data-component-slug="navbar">
       <div class="navbar__body navbar__body--split">
         <div class="navbar__left"><span class="navbar__title album-feed__nav-title">动态</span></div>
+        <div class="navbar__right"></div>
       </div>
     </div>
   </div>
@@ -446,7 +447,7 @@
         <div class="sticky-region__motion">
           <div class="sticky-region__inner">
             <div class="album-feed__searchbar">
-              <div class="searchbox searchbox--md searchbox--white searchbox--accent" data-component-slug="search" data-search-input-host><span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span><div class="searchbox__input"><input class="searchbox__field" type="search" placeholder="搜索商品动态" data-search-input /></div><div class="searchbox__actions"><button class="btn btn--strong btn--sm" type="button" data-action="select-image" aria-label="图搜">图搜</button></div></div>
+              <div class="searchbox searchbox--md searchbox--white searchbox--accent" data-component-slug="search" data-search-input-host><span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span><div class="searchbox__input"><input class="searchbox__field" type="search" placeholder="搜索商品动态" data-search-input /></div><div class="searchbox__actions"><button class="btn btn--strong btn--sm" type="button" data-component-slug="button" data-action="select-image" aria-label="图搜">图搜</button></div></div>
             </div>
           </div>
         </div>
