@@ -3081,6 +3081,7 @@ body[data-order-layout="landscape"] .phone-indicator {
     padding: 0 var(--spacer-16);
     background: var(--bg-surface);
     border-bottom: var(--stroke-hairline) solid var(--border-neutral-l2);
+    border-radius: var(--radius-8) var(--radius-8) 0 0;
   }
 
   .order-catalog-header__title {
@@ -5846,7 +5847,6 @@ body[data-order-layout="landscape"] .phone-indicator {
     min-height: var(--size-56);
     padding: 0 var(--spacer-12);
     border-bottom: 0;
-    border-radius: var(--radius-8) var(--radius-8) 0 0;
   }
 
   .order-catalog-header__title {
