@@ -319,6 +319,21 @@
         "用户反馈：明明改了但后面看没有了，组件预览页展示的仍是旧版导航栏。",
         "wego-github-delivery/SKILL.md 已规定完成一轮实现后自动推送远端分支并创建/更新 PR，但无对「已提交 checkpoint、未推送未建 PR」悬空本地分支的自动盘点与收口机制；session-end-must-clean-worktree 只约束未提交改动，branch-cleanup.yml 只清理已合并 PR 的遗留分支，中间地带无人管理。"
       ]
+    },
+    {
+      "id": "evt-20260825-001",
+      "experienceId": "exp-20260825-001",
+      "occurredAt": "2026-08-25",
+      "taskRef": "工作流验收简化（feature/workflow-acceptance-simplify，PR #89）",
+      "scenes": [],
+      "fact": "工作流验收简化任务与 zhoujieh 的「动态商品流+发布产品」业务任务共享同一主 worktree，两个会话互相 checkout 抢占分支：工作流任务的 commit 一度落在 zhoujieh 的 feature/zhoujieh-album-product-feed 分支，推送出去的 feature/workflow-acceptance-simplify 分支为空（停在 main 旧位置、不含任何改动）。",
+      "evidence": [
+        "git commit 输出显示提交落在 [feature/zhoujieh-album-product-feed bb8b4753]，而非预期的工作流分支。",
+        "git branch -vv 显示 feature/workflow-acceptance-simplify 停在 27e6666a（main 旧位置），未包含工作流改动。",
+        "git push 创建了远端 feature/workflow-acceptance-simplify 分支，但内容为空（27e6666a），PR 无从谈起。",
+        "github-delivery-rules.md 仅在「分支与预览一致性」章节顺带提「无关任务使用独立 worktree」，无独立 rule-id，也无「开工前 git worktree add 创建独立目录」的明确步骤或硬约束。",
+        "修复：git branch -f 把工作流分支指向 bb8b4753 → push --force-with-lease → reset --hard 恢复 zhoujieh 分支到 main，PR #89 正常合并。"
+      ]
     }
   ]
 }
