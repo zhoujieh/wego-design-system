@@ -63,6 +63,7 @@ const sandbox = { window: {} };
 vm.runInNewContext(routesSource, sandbox, { filename: 'wego-app/js/routes.js' });
 const routes = Array.isArray(sandbox.window.WEGO_APP_ROUTES) ? sandbox.window.WEGO_APP_ROUTES : [];
 // 空白基线允许 routes 为空
+const copiedSceneAssets = new Set();
 
 for (const route of routes) {
   for (const field of ['script', 'style']) {
@@ -70,6 +71,14 @@ for (const route of routes) {
       throw new Error(`路由 ${route.routeId || 'unknown'} 缺少 ${field}。`);
     }
     copyFile(route[field]);
+  }
+
+  const sceneDirectory = path.posix.dirname(route.script);
+  const assetsDirectory = path.posix.join(sceneDirectory, 'assets');
+  const assetsSource = path.resolve(appRoot, assetsDirectory);
+  if (!copiedSceneAssets.has(assetsDirectory) && fs.existsSync(assetsSource)) {
+    copyDirectory(assetsDirectory);
+    copiedSceneAssets.add(assetsDirectory);
   }
 }
 
