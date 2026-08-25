@@ -5450,7 +5450,13 @@ body[data-order-layout="landscape"] .phone-indicator {
     background: var(--border-neutral-l2);
   }
 
-  .order-desktop__workspace,
+  .order-desktop__workspace {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+    column-gap: 0;
+    padding: 0 var(--spacer-8);
+    background: transparent;
+  }
+
   .order-desktop__workspace--with-resizer {
     grid-template-columns: minmax(0, 7fr) 0 minmax(0, 3fr);
     column-gap: 0;
