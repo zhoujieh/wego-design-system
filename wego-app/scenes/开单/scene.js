@@ -814,6 +814,16 @@
       + '</div>';
   }
 
+  function desktopProductName(item) {
+    return '<button type="button" class="order-desktop-product-name" data-product-activity><strong>' + escapeHtml(item.code) + '</strong><span>' + escapeHtml(item.name) + '</span></button>';
+  }
+
+  function desktopProductNote(item, itemIndex) {
+    var icon = '<i class="wego-iconfont-s icon-bianji16" aria-hidden="true"></i>';
+    var text = '<span>' + escapeHtml(item.note || '添加备注') + '</span>';
+    return '<button type="button" class="link link--14 order-desktop-product-note ' + (item.note ? 'has-note' : '') + '" data-component-slug="link" data-edit-spu-note="' + itemIndex + '">' + (item.note ? text + icon : icon + text) + '</button>';
+  }
+
   function desktopProductRow(item, itemIndex, row, grouped) {
     var specs = itemSpecRows(item);
     if (grouped) {
@@ -828,13 +838,13 @@
       }).join('');
       return ''
         + '<article class="order-desktop-product-row order-desktop-product-row--grouped' + (isRowSelected(itemIndex, '') ? ' is-selected' : '') + '" data-item-index="' + itemIndex + '" data-row-select="' + itemIndex + '">'
-        +   '<div class="order-desktop-product-name"><strong>' + escapeHtml(item.code) + '</strong><span>' + escapeHtml(item.name) + '</span></div>'
+        +   desktopProductName(item)
         +   clickableImage(item, 'order-desktop-product-image', 'data-preview-image="' + itemIndex + '"')
         +   '<div class="order-desktop-grouped-sku-stack order-desktop-grouped-sku-stack--spec">' + groupedSpecs + '</div>'
         +   '<div class="order-desktop-grouped-sku-stack order-desktop-grouped-sku-stack--price">' + groupedPrices + '</div>'
         +   '<div class="order-desktop-grouped-sku-stack order-desktop-grouped-sku-stack--qty">' + groupedQuantities + '</div>'
         +   '<strong class="order-desktop-product-total order-desktop-product-total--grouped"><small>销<span data-product-total-qty>' + item.qty + '</span></small><span data-product-total-value>' + money(item.price * item.qty) + '</span></strong>'
-        +   '<button type="button" class="link link--14 order-desktop-product-note ' + (item.note ? 'has-note' : '') + '" data-component-slug="link" data-edit-spu-note="' + itemIndex + '"><i class="wego-iconfont-s icon-bianji16" aria-hidden="true"></i><span>' + escapeHtml(item.note || '添加备注') + '</span></button>'
+        +   desktopProductNote(item, itemIndex)
         +   '<button type="button" class="order-desktop-row-delete" data-delete-row="' + itemIndex + '" aria-label="删除' + escapeHtml(item.name) + '"><i class="wego-iconfont-s icon-cha16" aria-hidden="true"></i></button>'
         + '</article>';
     }
@@ -846,13 +856,13 @@
     var hint = grouped ? (specs.length + '个SKU · 共' + item.qty + '件') : ('库存' + row.stock);
     return ''
       + '<article class="order-desktop-product-row' + (isRowSelected(itemIndex, row.spec) ? ' is-selected' : '') + '" data-item-index="' + itemIndex + '" data-row-select="' + itemIndex + '" data-row-spec="' + encodeURIComponent(row.spec) + '">'
-      +   '<div class="order-desktop-product-name"><strong>' + escapeHtml(item.code) + '</strong><span>' + escapeHtml(item.name) + '</span></div>'
+      +   desktopProductName(item)
       +   clickableImage(item, 'order-desktop-product-image', 'data-preview-image="' + itemIndex + '"')
       +   '<span class="order-desktop-product-spec" title="' + escapeHtml(specText) + '">' + escapeHtml(specText) + '</span>'
       +   '<button type="button" class="link link--14 order-desktop-product-price" data-component-slug="link" data-edit-price="' + itemIndex + '">' + money(item.price) + '</button>'
       +   '<div class="order-desktop-product-qty">' + desktopQuantityCounter(itemIndex, qty, specKey, hint) + '</div>'
       +   '<strong class="order-desktop-product-total"><span data-product-total-value>' + money(item.price * qty) + '</span></strong>'
-      +   '<button type="button" class="link link--14 order-desktop-product-note ' + (item.note ? 'has-note' : '') + '" data-component-slug="link" data-edit-spu-note="' + itemIndex + '"><i class="wego-iconfont-s icon-bianji16" aria-hidden="true"></i><span>' + escapeHtml(item.note || '添加备注') + '</span></button>'
+      +   desktopProductNote(item, itemIndex)
       +   '<button type="button" class="order-desktop-row-delete" data-delete-row="' + itemIndex + '" data-delete-row-spec="' + encodeURIComponent(specKey) + '" aria-label="删除' + escapeHtml(item.name) + '"><i class="wego-iconfont-s icon-cha16" aria-hidden="true"></i></button>'
       + '</article>';
   }
@@ -2780,6 +2790,10 @@
     }
     if (target.matches('[data-order-settings]')) {
       ctx.toast('开单设置入口已保留，本期不展开');
+      return;
+    }
+    if (target.matches('[data-product-activity]')) {
+      ctx.toast('即将跳转到商品动态详情');
       return;
     }
     if (target.matches('[data-toggle-industry-menu]')) {
