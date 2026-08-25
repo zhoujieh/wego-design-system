@@ -64,6 +64,10 @@
     .row { padding:var(--spacer-4) 0; }
     .pv-grid-frame { width:340px; max-width:100%; }
     .pv-grid-frame .wg-image-grid { margin-bottom:var(--spacer-12); }
+    .variant-sub { margin:var(--spacer-16) 0 var(--spacer-8); font-size:13px; font-weight:600; color:var(--text-strong, #1f2329); }
+    .variant-sub:first-of-type { margin-top:var(--spacer-4); }
+    .label { display:inline-block; font-size:12px; color:var(--text-muted, #8a8f99); }
+    .cell-no { position:absolute; top:4px; left:4px; z-index:3; min-width:16px; height:16px; padding:0 4px; border-radius:8px; background:rgba(0,0,0,.55); color:#fff; font-size:11px; line-height:16px; text-align:center; font-family:var(--font-sans, system-ui, sans-serif); }
   </style>
 </head>
 <body>
@@ -104,38 +108,47 @@
     </div>
   </div>
   <div class="pv-section">
-    <div class="pv-section__title">动态多图与单图变体</div>
-    <div class="pv-section__sub">同一 340px 手机卡宽内：单图三朝向封顶在 9 宫格左上 2×2；视频首格带居中播放角标；2/4/9 图统一三列、行数随数量 1/2/3 行。</div>
+    <div class="pv-section__title">动态图片栅格（1–9 张）</div>
+    <div class="pv-section__sub">单图按图片真实比例自动选用正方形 / 横版 4:3 / 竖版 3:4，最大只占 9 宫格左上 2×2；多图（2–9 张）统一三列、行数随数量 1/2/3 行，视频首格带居中播放角标。</div>
     <div class="pv-grid-frame">
-      <div class="row"><span class="label">单图 · 正方形</span></div>
+      <div class="variant-sub">单图（1 张）· 三朝向 + 视频角标</div>
+      <div class="row"><span class="label">正方形 1:1 · 封顶 2×2 左上</span></div>
       <div class="wg-image-grid wg-image-grid--single wg-image-grid--square">
         <button class="wg-image-grid__single"><img class="wg-image-grid__single-img" src="../assets/image/clothing/clothing_1/clothing_1_1.jpg" alt="方领上衣"></button>
       </div>
-      <div class="row"><span class="label">单图 · 横版 4:3</span></div>
+      <div class="row"><span class="label">横版 4:3</span></div>
       <div class="wg-image-grid wg-image-grid--single wg-image-grid--landscape">
         <button class="wg-image-grid__single"><img class="wg-image-grid__single-img" src="../assets/image/clothing/clothing_2/clothing_2_1.jpg.jpg" alt="玫红短袖西装外套"></button>
       </div>
-      <div class="row"><span class="label">单图 · 竖版 3:4</span></div>
+      <div class="row"><span class="label">竖版 3:4</span></div>
       <div class="wg-image-grid wg-image-grid--single wg-image-grid--portrait">
         <button class="wg-image-grid__single"><img class="wg-image-grid__single-img" src="../assets/image/clothing/clothing_3/1663740989357_27184.jpg" alt="蓝色格纹衬衫"></button>
       </div>
-      <div class="row"><span class="label">单图 · 视频（播放角标）</span></div>
+      <div class="row"><span class="label">视频（居中播放角标）</span></div>
       <div class="wg-image-grid wg-image-grid--single wg-image-grid--portrait">
         <button class="wg-image-grid__single"><img class="wg-image-grid__single-img" src="../assets/image/clothing/clothing_7/1663741042720_27285.jpg" alt="金扣西装外套"><span class="wg-image-grid__play"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="rgba(0,0,0,.45)"/><path d="M10 8.5l6 3.5-6 3.5z" fill="#fff"/></svg></span></button>
       </div>
-      <div class="row"><span class="label">2 图 · 三列一行</span></div>
+
+      <div class="variant-sub">多图（2–9 张）· 统一三列</div>
+      <div class="row"><span class="label">2 图 · 三列 1 行</span></div>
       <div class="wg-image-grid wg-image-grid--dynamic">
         <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_1/clothing_1_1.jpg" alt=""></div>
         <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_2/clothing_2_1.jpg.jpg" alt=""></div>
       </div>
-      <div class="row"><span class="label">4 图 · 三列两行</span></div>
+      <div class="row"><span class="label">3 图 · 三列 1 行（满 3 格）</span></div>
       <div class="wg-image-grid wg-image-grid--dynamic">
         <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_1/clothing_1_1.jpg" alt=""></div>
         <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_2/clothing_2_1.jpg.jpg" alt=""></div>
         <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_3/1663740989357_27184.jpg" alt=""></div>
-        <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_4/1663741015639_25492.jpg" alt=""></div>
       </div>
-      <div class="row"><span class="label">9 图 · 三列三行（首格视频角标）</span></div>
+      <div class="row"><span class="label">4 图 · 三列 2 行（格子 1–4）</span></div>
+      <div class="wg-image-grid wg-image-grid--dynamic">
+        <div class="wg-image wg-image-grid__item"><span class="cell-no">1</span><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_1/clothing_1_1.jpg" alt=""></div>
+        <div class="wg-image wg-image-grid__item"><span class="cell-no">2</span><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_2/clothing_2_1.jpg.jpg" alt=""></div>
+        <div class="wg-image wg-image-grid__item"><span class="cell-no">3</span><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_3/1663740989357_27184.jpg" alt=""></div>
+        <div class="wg-image wg-image-grid__item"><span class="cell-no">4</span><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_4/1663741015639_25492.jpg" alt=""></div>
+      </div>
+      <div class="row"><span class="label">9 图 · 三列 3 行（首格视频角标）</span></div>
       <div class="wg-image-grid wg-image-grid--dynamic">
         <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_1/clothing_1_1.jpg" alt=""><span class="wg-image-grid__play"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="rgba(0,0,0,.45)"/><path d="M10 8.5l6 3.5-6 3.5z" fill="#fff"/></svg></span></div>
         <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_2/clothing_2_1.jpg.jpg" alt=""></div>
