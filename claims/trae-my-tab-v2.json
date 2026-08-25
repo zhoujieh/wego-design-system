@@ -3,7 +3,9 @@
   "scene": "我的",
   "routeId": "my",
   "branch": "feature/codex-my-tab",
-  "status": "active",
+  "status": "released",
   "claimedAt": "2026-08-05T11:30:00.000Z",
+  "releasedAt": "2026-08-25T12:00:00.000Z",
+  "releaseReason": "feature/codex-my-tab 分支已删除且无开放 PR，无挂起交付，收口释放；我的 Tab 后续由 feature/trae-workspace-appcenter（PR #81）承接",
   "note": "接管我的 Tab：以工作区版本 B 为基准（类型专属列表结构、置顶/折叠/促销属性等增量），在 PR #22 分支上本地演进"
 }
