@@ -44,6 +44,8 @@
     .wg-image-grid__item { position:relative; width:100%; min-width:0; aspect-ratio:1; }
     .wg-image-grid--dynamic { --wg-image-grid-cell-radius:2px; width:100%; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:var(--spacer-4); overflow:hidden; border-radius:var(--radius-8); }
     .wg-image-grid--dynamic .wg-image-grid__item { border-radius:var(--wg-image-grid-cell-radius); }
+    /* 动态九宫格：恰好 4 张图时改 2 列 → 2×2 正方形（与商品四宫格一致） */
+    .wg-image-grid--dynamic:has(.wg-image-grid__item:nth-child(4):last-child) { grid-template-columns:repeat(2, minmax(0, 1fr)); }
     /* 产品多图四宫格：固定两列；1 图撑满容器（最大 180×180）；2 图两列；3 图左 1 大 + 右 2 小；4 图 2×2 */
     .wg-image-grid--product { --wg-image-product-grid-min-width:80px; --wg-image-product-grid-max-width:180px; width:clamp(var(--wg-image-product-grid-min-width), 100%, var(--wg-image-product-grid-max-width)); grid-template-columns:repeat(2, minmax(0, 1fr)); gap:var(--spacer-2); overflow:hidden; border-radius:var(--radius-4); }
     .wg-image-grid--product .wg-image-grid__item:only-child { grid-column:1 / -1; }
@@ -147,7 +149,7 @@
         <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_2/clothing_2_1.jpg.jpg" alt=""></div>
         <div class="wg-image wg-image-grid__item"><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_3/1663740989357_27184.jpg" alt=""></div>
       </div>
-      <div class="row"><span class="label">4 图 · 三列 2 行（格子 1–4）</span></div>
+      <div class="row"><span class="label">4 图 · 2×2 正方形（格子 1–4）</span></div>
       <div class="wg-image-grid wg-image-grid--dynamic">
         <div class="wg-image wg-image-grid__item"><span class="cell-no">1</span><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_1/clothing_1_1.jpg" alt=""></div>
         <div class="wg-image wg-image-grid__item"><span class="cell-no">2</span><img class="wg-image__src is-loaded" src="../assets/image/clothing/clothing_2/clothing_2_1.jpg.jpg" alt=""></div>

@@ -130,7 +130,7 @@
     "loading 使用根节点骨架动画，不额外发明新的宿主层级。",
     "error 通过占位层承载 default-diagram.svg，logo 按容器宽度约 40% 等比缩放，最大不超过 40px。",
     "clickable 仅补按压覆盖层，不扩展成轮播或缩放组件。",
-    "动态九宫格使用 .wg-image-grid--dynamic：三列等宽，容器宽度随父级自适应，图片项保持正方形，外层裁切圆角为 8px。",
+    "动态九宫格使用 .wg-image-grid--dynamic：默认三列等宽，容器宽度随父级自适应，图片项保持正方形，外层裁切圆角为 8px；恰好 4 张图时通过 :has(:nth-child(4):last-child) 改 2 列，形成 2×2 正方形。",
     "商品多图使用 .wg-image-grid--product：两列等宽，容器宽度在 80px 至 160px 间随父级自适应，外层裁切圆角为 4px。",
     "单图使用 .wg-image-grid--single 配合 --square / --landscape / --portrait：按图片真实比例自动判定朝向，封顶在 9 宫格左上 2×2（≈2 个 3 列方格 + 1 间距，随父级宽自适应），不铺满。",
     "视频在单图根节点或多图首格叠加 .wg-image-grid__play 居中播放角标，pointer-events:none，不拦截点击。"
@@ -140,7 +140,7 @@
     "loading": "默认加载态使用 .wg-image--loading，在根节点显示浅灰骨架动画。",
     "loaded": "图片元素添加 .is-loaded 后以 0.2s 渐显。",
     "error": "失败态使用 .wg-image--error，并在 .wg-image__placeholder 内放置 default-diagram.svg。",
-    "dynamicGrid": "动态九宫格固定三列，使用 4px 间距与 8px 外层裁切圆角；不设固定容器宽高，图片项通过 aspect-ratio 保持正方形。",
+    "dynamicGrid": "动态九宫格默认三列，使用 4px 间距与 8px 外层裁切圆角；不设固定容器宽高，图片项通过 aspect-ratio 保持正方形；恰好 4 张图时改 2 列成 2×2 正方形（与商品四宫格一致）。",
     "productGrid": "商品多图固定两列栅格，使用 2px 间距与 4px 外层裁切圆角；容器宽度 clamp(80px, 100%, 180px)。按子项数量自适应：1 张子项时整列撑满容器（grid-column: 1 / -1，正方形，≤180×180）；2 张为两列等宽；3 张首项跨两行形成左 1 大 + 右 2 小（aspect-ratio: 2/1）；4 张回到 2×2。",
     "singleGrid": "单图变体固定 .wg-image-grid--single，由消费者按图片 naturalWidth/naturalHeight 比例补 --square(≈1:1) / --landscape(>1，4:3) / --portrait(<1，3:4)；尺寸封顶在 9 宫格左上 2×2，不铺满，外层圆角 8px。",
     "videoBadge": "视频媒体在单图根节点或多图首格 .wg-image-grid__item 内叠加 .wg-image-grid__play，绝对居中、24×24、pointer-events:none。"
