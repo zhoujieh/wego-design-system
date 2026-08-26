@@ -9,7 +9,7 @@
       "应用中心"
     ]
   },
-  "status": "awaiting-brief-confirmation",
+  "status": "prototype-confirmed",
   "scope_revision": 5,
   "prototype_brief": {
     "goal": "打磨工作台页面视觉布局，新增从工作台「常用应用-全部应用」进入的应用中心页面；开单页面以全屏宽度展示，并让已添加商品列表在按商品／按规格及显示／隐藏商品图的四种组合下都与 12 网格表头精确对齐。工作台、应用中心、开单均为独立业务场景。",
@@ -138,9 +138,61 @@
     "scope_revision": 5,
     "scope_sha256": "4c9bbb99c0900b1f6a9ca7ed2dfd4e1eba4e48af4c66b923a5d22ab977c6b715"
   },
-  "brief_confirmation": null,
-  "prototype_submission": null,
-  "prototype_confirmation": null,
+  "brief_confirmation": {
+    "at": "2026-08-25T01:59:20.672Z",
+    "scope_revision": 5,
+    "scope_sha256": "4c9bbb99c0900b1f6a9ca7ed2dfd4e1eba4e48af4c66b923a5d22ab977c6b715"
+  },
+  "prototype_submission": {
+    "at": "2026-08-26T08:02:08.269Z",
+    "scope_revision": 5,
+    "affected_scenes": [
+      "工作台",
+      "应用中心",
+      "开单",
+      "我的"
+    ],
+    "fingerprints": {
+      "@route-entry/%E5%B7%A5%E4%BD%9C%E5%8F%B0": "1b3bed657b350575ea3fac9c8192db8cdfbbd552a3b8c24947833b2a044d25eb",
+      "@route-entry/%E5%BA%94%E7%94%A8%E4%B8%AD%E5%BF%83": "8bb803a9d152a53a3e84d9076825829996da6067faa506740bf0ea73e7be0e84",
+      "@route-entry/%E5%BC%80%E5%8D%95": "da8121671009954031a87dc9bce65691c3ce40d16f9516ababf6a0bd4c532eb3",
+      "@route-entry/%E6%88%91%E7%9A%84": "cd0611ebe77c2c1ba558f5f7796281411766236f4e163a96ce8d8538ac0f9c69",
+      "wego-app/js/app.js": "32e1172af0cb24f788d9ec7a4b4b05365714232736c9383031a355fc7de7f4fa",
+      "wego-app/scenes/工作台/scene.css": "b6a26e13e1543b01bdacf15ab655d6be490e039cb9e60f932d4e5e45bcb8d8db",
+      "wego-app/scenes/工作台/scene.js": "15dc8f926d12a734ee9b5b827ff36b9b50c64fb5abc48b60979fad97f87a0e65",
+      "wego-app/scenes/应用中心/scene.css": "a1a32f146d261cb33e1c5ac804b1c90ec774324fd3562d55a0f7f8957336e574",
+      "wego-app/scenes/应用中心/scene.js": "5aecc0bd20ab3ae104e053d716f5dd1e44c56bb8041af01c034be9bb3a3f23dd",
+      "wego-app/scenes/开单/scene.css": "a48e08c88be77285bd4a2c3a1bb13283a1a5d8bddfc3ed28d48dfd4cd1b628e2",
+      "wego-app/scenes/开单/scene.js": "3cc34df2cd84d6281e01d0307cb27a7827fb5deb01d875262f7291c19dd6755b",
+      "wego-app/scenes/我的/scene.css": "6d8a7ace7ea5f504c7ea8155e2196e2bb822bc08ec14f98f65e9da76fcf70aed",
+      "wego-app/scenes/我的/scene.js": "cfbc1b37e14c654a7f3553e616f18b83ff5dd851a574d37146ba266562b9a358"
+    }
+  },
+  "prototype_confirmation": {
+    "at": "2026-08-26T08:02:11.056Z",
+    "scope_revision": 5,
+    "affected_scenes": [
+      "工作台",
+      "应用中心",
+      "开单",
+      "我的"
+    ],
+    "fingerprints": {
+      "@route-entry/%E5%B7%A5%E4%BD%9C%E5%8F%B0": "1b3bed657b350575ea3fac9c8192db8cdfbbd552a3b8c24947833b2a044d25eb",
+      "@route-entry/%E5%BA%94%E7%94%A8%E4%B8%AD%E5%BF%83": "8bb803a9d152a53a3e84d9076825829996da6067faa506740bf0ea73e7be0e84",
+      "@route-entry/%E5%BC%80%E5%8D%95": "da8121671009954031a87dc9bce65691c3ce40d16f9516ababf6a0bd4c532eb3",
+      "@route-entry/%E6%88%91%E7%9A%84": "cd0611ebe77c2c1ba558f5f7796281411766236f4e163a96ce8d8538ac0f9c69",
+      "wego-app/js/app.js": "32e1172af0cb24f788d9ec7a4b4b05365714232736c9383031a355fc7de7f4fa",
+      "wego-app/scenes/工作台/scene.css": "b6a26e13e1543b01bdacf15ab655d6be490e039cb9e60f932d4e5e45bcb8d8db",
+      "wego-app/scenes/工作台/scene.js": "15dc8f926d12a734ee9b5b827ff36b9b50c64fb5abc48b60979fad97f87a0e65",
+      "wego-app/scenes/应用中心/scene.css": "a1a32f146d261cb33e1c5ac804b1c90ec774324fd3562d55a0f7f8957336e574",
+      "wego-app/scenes/应用中心/scene.js": "5aecc0bd20ab3ae104e053d716f5dd1e44c56bb8041af01c034be9bb3a3f23dd",
+      "wego-app/scenes/开单/scene.css": "a48e08c88be77285bd4a2c3a1bb13283a1a5d8bddfc3ed28d48dfd4cd1b628e2",
+      "wego-app/scenes/开单/scene.js": "3cc34df2cd84d6281e01d0307cb27a7827fb5deb01d875262f7291c19dd6755b",
+      "wego-app/scenes/我的/scene.css": "6d8a7ace7ea5f504c7ea8155e2196e2bb822bc08ec14f98f65e9da76fcf70aed",
+      "wego-app/scenes/我的/scene.js": "cfbc1b37e14c654a7f3553e616f18b83ff5dd851a574d37146ba266562b9a358"
+    }
+  },
   "affected_scenes": [
     "工作台",
     "应用中心",
@@ -155,7 +207,7 @@
       "valid": true
     },
     "design": {
-      "valid": false
+      "valid": true
     }
   },
   "change_log": [
@@ -218,7 +270,20 @@
     {
       "action": "submit-brief",
       "at": "2026-08-25T01:58:33.619Z"
+    },
+    {
+      "action": "confirm-brief",
+      "at": "2026-08-25T01:59:20.673Z"
+    },
+    {
+      "action": "submit-prototype",
+      "at": "2026-08-26T08:02:08.286Z"
+    },
+    {
+      "action": "confirm-prototype",
+      "at": "2026-08-26T08:02:11.060Z"
     }
   ],
-  "freeze": null
+  "freeze": null,
+  "brief_file": "workspace-order-migration-工作台 UI 优化与应用中心-20260820.md"
 }

@@ -131,6 +131,9 @@
 
   /* bg */
   --bg-page: var(--palette-neutral-500);
+  --bg-workbench-start: rgb(231, 238, 246);
+  --bg-workbench-end: rgb(242, 245, 250);
+  --bg-workbench: linear-gradient(to bottom right, var(--bg-workbench-start), var(--bg-workbench-end));
   --bg-surface: var(--palette-neutral-100);
   --bg-panel: #f6f6f6;
   --bg-muted: var(--palette-neutral-300);

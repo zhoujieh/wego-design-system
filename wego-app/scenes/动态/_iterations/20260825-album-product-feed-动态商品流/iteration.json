@@ -7,7 +7,7 @@
     "primary_scene": "动态",
     "related_scenes": []
   },
-  "status": "awaiting-brief-confirmation",
+  "status": "prototyping",
   "scope_revision": 8,
   "prototype_brief": {
     "goal": "让用户在微购相册「动态」tab 连续浏览所有店主发布的商品动态（含帮卖与非帮卖商品），每条动态稳定呈现发布者、发布时间、商品内容、商品图片与相关产品信息，并支持进入产品详情或执行必要操作（帮卖商品主按钮「邀请帮卖」、非帮卖商品主按钮「一键转发」）；动态数据来自独立的「发布」场景，动态流通过「发布」入口进入该场景。",
@@ -98,7 +98,11 @@
     "scope_revision": 8,
     "scope_sha256": "9fb87789936e1870732d52d74aff074930eb1d26dded1083e496190398ee5ade"
   },
-  "brief_confirmation": null,
+  "brief_confirmation": {
+    "at": "2026-08-26T07:39:41.310Z",
+    "scope_revision": 8,
+    "scope_sha256": "9fb87789936e1870732d52d74aff074930eb1d26dded1083e496190398ee5ade"
+  },
   "prototype_submission": null,
   "prototype_confirmation": null,
   "affected_scenes": [
@@ -181,7 +185,12 @@
     {
       "action": "submit-brief",
       "at": "2026-08-25T13:26:31.972Z"
+    },
+    {
+      "action": "confirm-brief",
+      "at": "2026-08-26T07:39:41.311Z"
     }
   ],
-  "freeze": null
+  "freeze": null,
+  "brief_file": "album-product-feed-动态商品流-20260825.md"
 }

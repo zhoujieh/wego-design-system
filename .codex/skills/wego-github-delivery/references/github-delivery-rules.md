@@ -123,6 +123,19 @@ PR 已存在时，用户继续提出小问题，回到本地迭代累计修改�
 - 确需保留分支时，为 PR 添加 `keep-branch` 标签；标签是唯一 PR 分支保留例外，但不会自动保留本地预览服务。
 - 没有 PR 的分支可以在任务仍处于本地迭代时保留；用户明确废弃或任务确认结束且不提交时，先确认没有需要保留的改动，再停止服务、释放认领并删除分支/worktree。
 
+<!-- rule-id: delivery-closeout-checklist -->
+### 交付单元收口清单
+
+PR 合并、PR 关闭或交付单元确认废弃后，必须**逐项执行并确认**以下五步，不得遗漏任何一步：
+
+1. **停止本地预览服务并删除服务记录** — 确认 `.tasks/preview-servers/` 中对应记录已清除，进程已退出。
+2. **释放场景认领** — 执行 `npm run release-claim -- --agent <agent-id>`，确认 `claims/` 中对应文件已删除。
+3. **删除远端分支** — PR 合并时自动删除；手动关闭或废弃时执行 `git push origin --delete <branch>`。
+4. **删除本地 worktree** — 执行 `git worktree remove <path>`，确认 `git worktree list` 中已无该 worktree。
+5. **同步主 worktree 到最新 main** — 回到主 worktree 执行 `git pull --rebase origin main`。
+
+> 收口完成后可运行 `npm run worktrees:stale` 巡检是否有遗漏的孤儿 worktree；发现孤儿时用 `npm run worktrees:prune` 清理。有未提交改动的 worktree 不会被自动清理，需人工确认。
+
 ## 分支盘点
 
 - 保留：正在本地迭代、有开放 PR，或带 `keep-branch` 标签。

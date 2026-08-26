@@ -4,7 +4,7 @@
 
 ## 业务事实
 
-业务事实只能来自用户需求和明确确认，不从参考图、线框图、Figma、UI Kit、Preview 或同类页面补充。`prototype_brief` 只记录：
+业务事实只能来自用户需求和明确确认，不从参考图、线框图、Figma、UI Kit、Preview 或同类页面补充。需求规格说明 `spec.md` 是唯一需求源，包含以下业务字段（`prototype_brief` 是 `submit-brief` 时从 spec.md 解析生成的快照缓存，用户不手写）：
 
 - `goal`：目标和用户价值。
 - `included` / `excluded`：本次做与不做的范围。
@@ -30,7 +30,7 @@
 ## 需求简报输出要求（充分性守门）
 
 <!-- rule-id: brief-sufficiency-required -->
-每次新迭代的 `prototype_brief` 必须按以下要求写"足够细"，缺失项在 `submit-brief` 时被守门拒绝（见 `scripts/iteration-record.mjs` 的 `briefSufficiencyErrors`）。
+每次新迭代的 `spec.md` 必须按以下要求写"足够细"，缺失项在 `submit-brief` 时被守门拒绝（脚本从 spec.md 解析后校验，见 `scripts/iteration-record.mjs` 的 `briefSufficiencyErrors`）。
 
 ### A. `states` 状态覆盖
 
@@ -80,10 +80,10 @@
 
 ## 交接
 
-进入 `wego-design` 前必须满足：
+`submit-brief` 通过后进入 `in-development` 状态，简报开放开发：可随时修改 spec.md 后重新 `submit-brief` 更新快照，无需 invalidate/confirm 循环。此时即可交给 `wego-design` 开始实现，进入设计前必须满足：
 
 - 目标、范围、入口、关键路径、原型边界、必要状态和数据完整。
 - `open_questions` 为空。
-- 已通过 `submit-brief` 展示简短文字摘要，并由用户明确确认后执行 `confirm-brief`。
+- 已通过 `submit-brief` 校验并生成 prototype_brief 快照。
 
-已确认简报即设计授权。范围内未指定的信息分组、布局、组件、Token、反馈和 overlay 由设计阶段自主完成；只有会改变业务事实的缺失或冲突才退回产品阶段。
+验收统一收口：用户说"验收完成"时，由 `wego-design` 输出 5 维度一致性校验清单（范围/入口/关键路径/状态/数据契约），用户逐项确认后执行 `confirm-brief`。已确认简报即设计授权。范围内未指定的信息分组、布局、组件、Token、反馈和 overlay 由设计阶段自主完成；只有会改变业务事实的缺失或冲突才退回产品阶段。

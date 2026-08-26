@@ -99,6 +99,78 @@ body {
   line-height: var(--body-sm-line-height);
 }
 
+.overview-sidebar__search {
+  margin-top: 12px;
+}
+
+.overview-sidebar__search-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border-neutral-l2);
+  border-radius: var(--radius-8);
+  background: var(--bg-surface);
+  box-sizing: border-box;
+  transition: border-color var(--duration-fast) var(--ease-standard);
+}
+
+.overview-sidebar__search-input:focus-within {
+  border-color: var(--text-brand);
+}
+
+.overview-sidebar__search-input i {
+  flex-shrink: 0;
+  color: var(--text-tertiary);
+  font-size: 16px;
+  line-height: 1;
+}
+
+.overview-sidebar__search-input input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--text-default);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+  font-family: inherit;
+}
+
+.overview-sidebar__search-input input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.overview-sidebar__empty {
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--text-tertiary);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+}
+
+.overview-nav-item__name mark,
+.overview-nav-item__slug mark {
+  background: var(--status-warning-surface-l1, #fff7e6);
+  color: var(--status-warning-default, #d48806);
+  padding: 0 1px;
+  border-radius: 2px;
+}
+
+.overview-nav-item[hidden],
+.overview-nav-group[hidden] {
+  display: none !important;
+}
+
+.overview-search-results {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 8px;
+}
+
 .overview-nav-group + .overview-nav-group {
   margin-top: 16px;
 }
@@ -253,7 +325,15 @@ body {
     <div class="overview-sidebar__header">
       <h2 class="overview-sidebar__title">组件导航</h2>
       <div class="overview-sidebar__sub">左侧选组件，右侧查看对应单页预览。</div>
+      <div class="overview-sidebar__search">
+        <label class="overview-sidebar__search-input">
+          <i class="wego-iconfont-s icon-sousuo" aria-hidden="true"></i>
+          <input type="search" id="component-search" placeholder="搜索组件名称或 slug" aria-label="搜索组件" autocomplete="off" />
+        </label>
+      </div>
     </div>
+    <div class="overview-sidebar__empty" id="component-search-empty" hidden>未找到匹配的组件</div>
+    <div class="overview-search-results" id="search-results" hidden></div>
 
     <section class="overview-nav-group">
       <h3 class="overview-nav-group__title">操作类 Action</h3>
@@ -457,6 +537,13 @@ body {
           </span>
           <span class="overview-nav-item__status">stable</span>
         </button>
+        <button class="overview-nav-item" type="button" data-name="数字键盘" data-slug="numeric-keypad" data-status="stable" data-src="./component-numeric-keypad.html">
+          <span class="overview-nav-item__main">
+            <span class="overview-nav-item__name">数字键盘</span>
+            <span class="overview-nav-item__slug">numeric-keypad</span>
+          </span>
+          <span class="overview-nav-item__status">stable</span>
+        </button>
         <button class="overview-nav-item" type="button" data-name="复选框" data-slug="checkbox" data-status="stable" data-src="./component-checkbox.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">复选框</span>
@@ -567,7 +654,156 @@ body {
 
 <script>
 const navItems = Array.from(document.querySelectorAll(".overview-nav-item"));
+const navGroups = Array.from(document.querySelectorAll(".overview-nav-group"));
 const viewerFrame = document.getElementById("viewer-frame");
+const searchInput = document.getElementById("component-search");
+const searchEmpty = document.getElementById("component-search-empty");
+const searchResults = document.getElementById("search-results");
+const sidebar = document.querySelector(".overview-sidebar");
+
+navItems.forEach(function (item) {
+  var nameEl = item.querySelector(".overview-nav-item__name");
+  var slugEl = item.querySelector(".overview-nav-item__slug");
+  item._originalName = nameEl ? nameEl.textContent : "";
+  item._originalSlug = slugEl ? slugEl.textContent : "";
+});
+
+sidebar.addEventListener("click", function (e) {
+  var item = e.target.closest(".overview-nav-item");
+  if (item && item.dataset.slug) {
+    syncViewerBySlug(item.dataset.slug);
+  }
+});
+
+function highlightText(text, term) {
+  if (!term || !text) return text;
+  var lower = text.toLowerCase();
+  var idx = lower.indexOf(term);
+  if (idx === -1) return text;
+  var result = "";
+  var lastIdx = 0;
+  while (idx !== -1) {
+    result += text.substring(lastIdx, idx);
+    result += "<mark>" + text.substring(idx, idx + term.length) + "</mark>";
+    lastIdx = idx + term.length;
+    idx = lower.indexOf(term, lastIdx);
+  }
+  result += text.substring(lastIdx);
+  return result;
+}
+
+function applyHighlight(item, terms) {
+  var nameEl = item.querySelector(".overview-nav-item__name");
+  var slugEl = item.querySelector(".overview-nav-item__slug");
+  var name = item._originalName || "";
+  var slug = item._originalSlug || "";
+  terms.forEach(function (term) {
+    if (hasChinese(term)) {
+      name = highlightText(name, term);
+    } else {
+      slug = highlightText(slug, term);
+    }
+  });
+  if (nameEl) nameEl.innerHTML = name;
+  if (slugEl) slugEl.innerHTML = slug;
+}
+
+function clearHighlight(item) {
+  var nameEl = item.querySelector(".overview-nav-item__name");
+  var slugEl = item.querySelector(".overview-nav-item__slug");
+  if (nameEl) nameEl.textContent = item._originalName || "";
+  if (slugEl) slugEl.textContent = item._originalSlug || "";
+}
+
+function hasChinese(str) {
+  return /[\u4e00-\u9fa5]/.test(str);
+}
+
+function matchSlugWord(slug, term) {
+  var words = slug.split("-");
+  for (var i = 0; i < words.length; i++) {
+    if (words[i] === term || words[i].indexOf(term) === 0) return true;
+  }
+  return false;
+}
+
+function calcMatchScore(name, slug, terms) {
+  var score = 0;
+  terms.forEach(function (term) {
+    if (hasChinese(term)) {
+      if (name === term) score += 100;
+      else if (name.indexOf(term) === 0) score += 80;
+      else if (name.indexOf(term) !== -1) score += 60;
+    } else {
+      var words = slug.split("-");
+      words.forEach(function (w) {
+        if (w === term) score += 90;
+        else if (w.indexOf(term) === 0) score += 70;
+      });
+    }
+  });
+  return score;
+}
+
+function filterComponents(query) {
+  var raw = (query || "").trim().toLowerCase();
+  var terms = raw ? raw.split(/\s+/).filter(Boolean) : [];
+
+  searchResults.innerHTML = "";
+  navItems.forEach(function (item) {
+    clearHighlight(item);
+    item.hidden = false;
+  });
+  navGroups.forEach(function (group) {
+    group.hidden = false;
+  });
+
+  if (terms.length === 0) {
+    searchResults.hidden = true;
+    searchEmpty.hidden = true;
+    return;
+  }
+
+  var matched = [];
+  navItems.forEach(function (item) {
+    var name = (item.dataset.name || "").toLowerCase();
+    var slug = (item.dataset.slug || "").toLowerCase();
+    var isMatch = terms.every(function (term) {
+      if (hasChinese(term)) {
+        return name.indexOf(term) !== -1;
+      }
+      return matchSlugWord(slug, term);
+    });
+    if (isMatch) {
+      matched.push({ item: item, score: calcMatchScore(name, slug, terms) });
+    }
+  });
+
+  matched.sort(function (a, b) {
+    return b.score - a.score;
+  });
+
+  navGroups.forEach(function (group) {
+    group.hidden = true;
+  });
+
+  searchResults.hidden = matched.length === 0;
+  searchEmpty.hidden = matched.length > 0;
+
+  matched.forEach(function (entry) {
+    var clone = entry.item.cloneNode(true);
+    clone._originalName = entry.item._originalName;
+    clone._originalSlug = entry.item._originalSlug;
+    applyHighlight(clone, terms);
+    searchResults.appendChild(clone);
+  });
+}
+
+if (searchInput) {
+  searchInput.addEventListener("input", function () {
+    filterComponents(searchInput.value);
+  });
+}
 
 function syncViewerBySlug(slug) {
   const currentItem = navItems.find((item) => item.dataset.slug === slug) || navItems[0];
@@ -585,12 +821,6 @@ function syncViewerBySlug(slug) {
     history.replaceState(null, "", nextHash);
   }
 }
-
-navItems.forEach((item) => {
-  item.addEventListener("click", () => {
-    syncViewerBySlug(item.dataset.slug);
-  });
-});
 
 window.addEventListener("hashchange", () => {
   syncViewerBySlug(window.location.hash.replace("#", ""));
