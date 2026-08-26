@@ -4,27 +4,42 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         <div class="navbar__body navbar__body--split">
           <div class="navbar__left navbar__left--custom">
             <button type="button" class="my-tab-identity" data-action="album-switch" aria-label="切换相册">
-              <div class="avatar avatar--image my-tab-identity__avatar" data-component-slug="avatar">
-                <img data-role="profile-avatar" alt="">
-              </div>
-              <span class="my-tab-identity__copy">
-                <span class="my-tab-identity__album"><span data-role="profile-album"></span><i class="wego-iconfont-s icon-shangxiajiantou16 my-tab-identity__switch" aria-hidden="true"></i></span>
-                <span class="my-tab-identity__meta">
-                  <span class="my-tab-identity__name" data-role="profile-name"></span>
-                  <span class="my-tab-identity__role" data-role="profile-role"></span>
+              <div class="my-tab-identity__skeleton" data-role="profile-skeleton" aria-hidden="true">
+                <span class="wg-skeleton wg-skeleton--circle" data-component-slug="skeleton" style="width:36px;height:36px"></span>
+                <span class="my-tab-identity__skeleton-copy">
+                  <span class="wg-skeleton wg-skeleton--text" data-component-slug="skeleton" style="width:72px;height:14px"></span>
+                  <span class="wg-skeleton wg-skeleton--text" data-component-slug="skeleton" style="width:48px;height:12px"></span>
                 </span>
-              </span>
+              </div>
+              <div class="my-tab-identity__real" data-role="profile-real" hidden>
+                <div class="avatar avatar--image my-tab-identity__avatar" data-component-slug="avatar">
+                  <img data-role="profile-avatar" alt="">
+                </div>
+                <span class="my-tab-identity__copy">
+                  <span class="my-tab-identity__album"><span data-role="profile-album"></span><i class="wego-iconfont-s icon-shangxiajiantou16 my-tab-identity__switch" aria-hidden="true"></i></span>
+                  <span class="my-tab-identity__meta">
+                    <span class="my-tab-identity__name" data-role="profile-name"></span>
+                    <span class="my-tab-identity__role" data-role="profile-role"></span>
+                  </span>
+                </span>
+              </div>
             </button>
           </div>
           <div class="navbar__right navbar__right--icon">
-            <button type="button" class="navbar__action" data-action="settings" aria-label="设置">
-              <span class="navbar__action-icon"><i class="wego-iconfont-s icon-shezhi" aria-hidden="true"></i></span>
-              <span class="navbar__action-label">设置</span>
-            </button>
-            <button type="button" class="navbar__action" data-action="share-homepage" aria-label="分享主页">
-              <span class="navbar__action-icon"><i class="wego-iconfont-s icon-fenxiang" aria-hidden="true"></i></span>
-              <span class="navbar__action-label">分享</span>
-            </button>
+            <div class="my-tab-navbar__skeleton" data-role="navbar-actions-skeleton" aria-hidden="true">
+              <span class="wg-skeleton wg-skeleton--rect" data-component-slug="skeleton" style="width:40px;height:20px"></span>
+              <span class="wg-skeleton wg-skeleton--rect" data-component-slug="skeleton" style="width:40px;height:20px"></span>
+            </div>
+            <div class="my-tab-navbar__real" data-role="navbar-actions-real" hidden>
+              <button type="button" class="navbar__action" data-action="settings" aria-label="设置">
+                <span class="navbar__action-icon"><i class="wego-iconfont-s icon-shezhi" aria-hidden="true"></i></span>
+                <span class="navbar__action-label">设置</span>
+              </button>
+              <button type="button" class="navbar__action" data-action="share-homepage" aria-label="分享主页">
+                <span class="navbar__action-icon"><i class="wego-iconfont-s icon-fenxiang" aria-hidden="true"></i></span>
+                <span class="navbar__action-label">分享</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -382,7 +397,28 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         });
       }
 
+      /* 模拟『我的』页数据请求：返回 Promise，内部用 setTimeout 模拟网络延迟。
+         这是本场景的 mock 边界点——后续若要全局化，把此处实现替换为设计系统的统一 mockRequest 即可，
+         场景消费方（init 流程）无需变动。slow 开关开启时延迟拉长到约 9s，模拟弱网。 */
+      function fetchMyTabData() {
+        var slow = window.WegoApp && window.WegoApp.faultInjection && window.WegoApp.faultInjection.isEnabled('slow');
+        var delay = slow ? 9000 : 700;
+        return new Promise(function (resolve) {
+          window.setTimeout(function () {
+            resolve({
+              profile: currentUser,
+              products: products,
+              dynamics: dynamics
+            });
+          }, delay);
+        });
+      }
+
       function setProfile() {
+        var skeleton = root.querySelector('[data-role="profile-skeleton"]');
+        var real = root.querySelector('[data-role="profile-real"]');
+        var actionsSkeleton = root.querySelector('[data-role="navbar-actions-skeleton"]');
+        var actionsReal = root.querySelector('[data-role="navbar-actions-real"]');
         var avatar = root.querySelector('[data-role="profile-avatar"]');
         var name = root.querySelector('[data-role="profile-name"]');
         var album = root.querySelector('[data-role="profile-album"]');
@@ -391,6 +427,11 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         if (name) name.textContent = currentUser.display_name || currentUser.merchant_name || '阿杰';
         if (album) album.textContent = '春夏新品相册';
         if (role) role.textContent = currentUser.role || '';
+        /* 数据到位：隐藏 navbar 骨架，显示真实节点并淡入 */
+        if (skeleton) skeleton.hidden = true;
+        if (real) { real.hidden = false; real.classList.add('scene-fade-in'); }
+        if (actionsSkeleton) actionsSkeleton.hidden = true;
+        if (actionsReal) { actionsReal.hidden = false; actionsReal.classList.add('scene-fade-in'); }
       }
 
       function renderAssets() {
@@ -952,7 +993,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         renderContent();
       }
 
-      /* 挂载首帧：先填结构骨架（按真实区块绘制），随后 renderX 用 setRegion 淡入真实内容 */
+      /* 挂载首帧：整页结构骨架（navbar 模板已预置骨架；资产/应用/内容区填骨架） */
       var assetsRegion = root.querySelector('[data-region="assets"]');
       var appsRegion = root.querySelector('[data-region="apps"]');
       var contentRegion = root.querySelector('[data-region="content"]');
@@ -960,16 +1001,15 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
       if (appsRegion) appsRegion.innerHTML = skeletonApps();
       if (contentRegion) contentRegion.innerHTML = skeletonContent();
 
-      setProfile();
-      /* 挂载首帧已填结构骨架；延迟一帧让骨架先绘制，再渲染真实内容并淡入，符合『先骨架→内容渐显』 */
-      var firstPaintDelay = window.WegoApp && window.WegoApp.faultInjection && window.WegoApp.faultInjection.isEnabled('slow') ? 0 : 500;
-      window.setTimeout(function () {
+      /* 完整模拟链路：发起『数据请求』→ 期间整页骨架 → resolve 后统一填充并淡显 */
+      fetchMyTabData().then(function () {
         if (destroyed) return;
+        setProfile();
         renderAssets();
         renderApps();
         syncControls();
         renderContentNow();
-      }, firstPaintDelay);
+      });
       ctx.bindTabs({ root: root });
       ctx.bindScrollLayout({
         scrollRoot: '.my-tab-scroll',
