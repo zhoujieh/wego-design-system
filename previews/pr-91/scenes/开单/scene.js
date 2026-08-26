@@ -254,6 +254,9 @@
     desktopSearchResultsOpen: false,
     imageSearchFileName: '',
     scannerConnected: true,
+    scannerRequesting: false,
+    scannerOpen: false,
+    scannerMessage: '扫描商品条码',
     customerKeyword: '',
     addDraft: null,
     paymentDraft: null,
@@ -273,6 +276,12 @@
   };
 
   var activeContext = null;
+  var scannerStream = null;
+  var scannerDetector = null;
+  var scannerFrameId = null;
+  var scannerDetecting = false;
+  var scannerLastValue = '';
+  var scannerLastDetectedAt = 0;
 
   function activeCatalogProducts() {
     return state.industry === 'phone' ? PHONE_PRODUCTS : PRODUCTS;
@@ -1204,7 +1213,20 @@
       + '</div>';
   }
 
+  function desktopBarcodeScanner() {
+    return ''
+      + '<aside class="order-desktop__catalog order-desktop__catalog--scanner" aria-label="扫一扫">'
+      +   '<div class="order-barcode-scanner">'
+      +     '<video class="order-barcode-scanner__video" data-barcode-video autoplay muted playsinline aria-label="摄像头实时画面"></video>'
+      +     '<button type="button" class="btn btn--weak btn--sm btn--icon-only order-barcode-scanner__close" data-component-slug="button" data-close-barcode-scanner aria-label="返回商品库"><i class="btn__icon icon-cha16" aria-hidden="true"></i></button>'
+      +     '<div class="order-barcode-scanner__beam" aria-hidden="true"></div>'
+      +     '<p class="order-barcode-scanner__message" data-barcode-message>' + escapeHtml(state.scannerMessage) + '</p>'
+      +   '</div>'
+      + '</aside>';
+  }
+
   function desktopCatalog() {
+    if (state.scannerOpen) return desktopBarcodeScanner();
     if (state.catalogCollapsed) {
       return ''
         + '<aside class="order-desktop__catalog order-desktop__catalog--collapsed">'
@@ -2417,6 +2439,13 @@
 
   function renderWorkbench(root, ctx) {
     root.innerHTML = rootTemplate();
+    var scannerVideo = root.querySelector('[data-barcode-video]');
+    if (scannerVideo && scannerStream) {
+      scannerVideo.srcObject = scannerStream;
+      scannerVideo.play().catch(function () {
+        failBarcodeScanner(ctx);
+      });
+    }
     if (state.catalogWidth != null && !state.catalogCollapsed) applyCatalogWidth(root, state.catalogWidth);
     else syncCatalogGridColumns(root);
     updateInputClearButtons(root);
@@ -2619,6 +2648,130 @@
     markDirty(ctx);
     ctx.toast('已加入开单清单');
     return true;
+  }
+
+  function stopBarcodeScanner() {
+    if (scannerFrameId != null) window.cancelAnimationFrame(scannerFrameId);
+    scannerFrameId = null;
+    scannerDetecting = false;
+    scannerDetector = null;
+    if (scannerStream) {
+      scannerStream.getTracks().forEach(function (track) { track.stop(); });
+      scannerStream = null;
+    }
+  }
+
+  function closeBarcodeScanner(shouldRender) {
+    stopBarcodeScanner();
+    state.scannerOpen = false;
+    state.scannerRequesting = false;
+    state.scannerMessage = '扫描商品条码';
+    scannerLastValue = '';
+    scannerLastDetectedAt = 0;
+    if (shouldRender !== false) renderActive();
+  }
+
+  function failBarcodeScanner(ctx) {
+    closeBarcodeScanner(true);
+    ctx.toast('无法使用该功能');
+  }
+
+  function updateBarcodeScannerMessage(message) {
+    state.scannerMessage = message;
+    var messageNode = activeContext && activeContext.root && activeContext.root.querySelector('[data-barcode-message]');
+    if (messageNode) messageNode.textContent = message;
+  }
+
+  function barcodeProduct(value) {
+    var normalized = String(value || '').trim().toLowerCase();
+    return activeCatalogProducts().find(function (product) {
+      return String(product.code || '').trim().toLowerCase() === normalized;
+    });
+  }
+
+  function handleDetectedBarcode(value, ctx) {
+    var rawValue = String(value || '').trim();
+    if (!rawValue) return;
+    var now = Date.now();
+    if (rawValue === scannerLastValue && now - scannerLastDetectedAt < 1500) return;
+    scannerLastValue = rawValue;
+    scannerLastDetectedAt = now;
+    var product = barcodeProduct(rawValue);
+    if (!product) {
+      updateBarcodeScannerMessage('未找到商品，请继续扫描');
+      return;
+    }
+    stopBarcodeScanner();
+    state.scannerOpen = false;
+    state.scannerMessage = '扫描商品条码';
+    if (product.specs.length === 1) {
+      addSingleSpecProduct(product.id, ctx);
+    } else {
+      startAdd(product.id);
+    }
+  }
+
+  function scanBarcodeFrame(ctx) {
+    if (!state.scannerOpen || !scannerStream || !scannerDetector || !activeContext || !activeContext.root || !activeContext.root.isConnected) {
+      if (!activeContext || !activeContext.root || !activeContext.root.isConnected) closeBarcodeScanner(false);
+      return;
+    }
+    var video = activeContext.root.querySelector('[data-barcode-video]');
+    if (!video || video.readyState < 2 || scannerDetecting) {
+      scannerFrameId = window.requestAnimationFrame(function () { scanBarcodeFrame(ctx); });
+      return;
+    }
+    scannerDetecting = true;
+    scannerDetector.detect(video).then(function (barcodes) {
+      if (barcodes && barcodes.length) handleDetectedBarcode(barcodes[0].rawValue, ctx);
+    }).catch(function () {
+      updateBarcodeScannerMessage('暂未识别，请对准商品条码');
+    }).finally(function () {
+      scannerDetecting = false;
+      if (state.scannerOpen) scannerFrameId = window.requestAnimationFrame(function () { scanBarcodeFrame(ctx); });
+    });
+  }
+
+  async function openBarcodeScanner(ctx) {
+    if (state.scannerRequesting || state.scannerOpen) return;
+    if (!isDesktopWorkbench() || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.BarcodeDetector) {
+      ctx.toast('无法使用该功能');
+      return;
+    }
+    state.scannerRequesting = true;
+    var trigger = activeContext && activeContext.root && activeContext.root.querySelector('[data-scan]');
+    if (trigger) {
+      trigger.disabled = true;
+      trigger.setAttribute('aria-busy', 'true');
+    }
+    try {
+      var formats = typeof window.BarcodeDetector.getSupportedFormats === 'function'
+        ? await window.BarcodeDetector.getSupportedFormats()
+        : [];
+      var wantedFormats = ['code_128', 'code_39', 'code_93', 'ean_13', 'ean_8', 'upc_a', 'upc_e', 'itf'];
+      var supportedFormats = wantedFormats.filter(function (format) { return formats.indexOf(format) >= 0; });
+      scannerDetector = supportedFormats.length
+        ? new window.BarcodeDetector({ formats: supportedFormats })
+        : new window.BarcodeDetector();
+      scannerStream = await navigator.mediaDevices.getUserMedia({
+        audio: false,
+        video: { facingMode: { ideal: 'environment' } }
+      });
+      var probeVideo = document.createElement('video');
+      probeVideo.muted = true;
+      probeVideo.playsInline = true;
+      probeVideo.srcObject = scannerStream;
+      await probeVideo.play();
+      probeVideo.pause();
+      probeVideo.srcObject = null;
+      state.scannerRequesting = false;
+      state.scannerOpen = true;
+      state.scannerMessage = '扫描商品条码';
+      renderActive();
+      scanBarcodeFrame(ctx);
+    } catch (error) {
+      failBarcodeScanner(ctx);
+    }
   }
 
   function mergeProductIntoOrder(product, skuQty, mode, note, pricing) {
@@ -2881,6 +3034,7 @@
     if (!target || !root.contains(target)) return;
 
     if (target.matches('[data-back]')) {
+      if (state.scannerOpen || state.scannerRequesting) closeBarcodeScanner(false);
       delete document.body.dataset.orderLayout;
       ctx.back();
       return;
@@ -3034,7 +3188,11 @@
       return;
     }
     if (target.matches('[data-scan]')) {
-      ctx.toast(state.scannerConnected ? '扫码枪已连接' : '暂未连接扫码枪');
+      openBarcodeScanner(ctx);
+      return;
+    }
+    if (target.matches('[data-close-barcode-scanner]')) {
+      closeBarcodeScanner(true);
       return;
     }
     if (target.matches('[data-open-panel]')) {
@@ -4454,6 +4612,10 @@
       if (event.key === 'Escape' && state.rowContextMenu) {
         state.rowContextMenu = null;
         renderActive();
+        return;
+      }
+      if (event.key === 'Escape' && state.scannerOpen) {
+        closeBarcodeScanner(true);
         return;
       }
       var createMenuItem = event.target.closest && event.target.closest('.order-catalog-create-menu [role="option"]');
