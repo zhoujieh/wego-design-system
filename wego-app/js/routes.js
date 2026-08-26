@@ -32,6 +32,17 @@ window.WEGO_APP_ROUTES = [
   script: './scenes/应用中心/scene.js'
 },
 {
+  routeId: 'component-preview',
+  entry: {
+    type: 'cell-entry',
+    label: '组件预览',
+    group: 'workspace-tools',
+    tab: 'workspace'
+  },
+  style: './scenes/组件预览/scene.css',
+  script: './scenes/组件预览/scene.js'
+},
+{
   routeId: 'friend-list',
   entry: {
     type: 'host-tab',
