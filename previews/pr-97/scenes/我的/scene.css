@@ -34,10 +34,17 @@
   align-items: center;
   gap: var(--spacer-8);
 }
+
 .my-tab-identity__skeleton[hidden],
 .my-tab-navbar__skeleton[hidden] {
   display: none;
 }
+
+/* 导航栏骨架尺寸类（替代 inline style） */
+.sk-circle-avatar { width: 36px; height: 36px; }
+.sk-text-name { width: 72px; height: 14px; }
+.sk-text-role { width: 48px; height: 12px; }
+.sk-rect-action { width: 40px; height: 20px; }
 
 .my-tab-identity__skeleton-copy {
   display: flex;
@@ -48,6 +55,54 @@
 .my-tab-navbar__skeleton {
   gap: var(--spacer-12);
 }
+
+/* 整页各区块骨架容器：默认显示，hidden 时隐藏（避免 display 覆盖 [hidden]） */
+.my-membership-card__skeleton,
+.my-section-heading__skeleton,
+.my-content-tabs__skeleton,
+.my-content-toolbar__skeleton,
+.my-content-management__skeleton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-12);
+}
+.my-membership-card__skeleton[hidden],
+.my-section-heading__skeleton[hidden],
+.my-content-tabs__skeleton[hidden],
+.my-content-toolbar__skeleton[hidden],
+.my-content-management__skeleton[hidden] {
+  display: none;
+}
+
+.my-section-heading__skeleton {
+  padding: var(--spacer-4) 0;
+}
+
+.my-content-tabs__skeleton {
+  padding: var(--spacer-8) var(--spacer-16);
+}
+
+.my-content-toolbar__skeleton {
+  width: 100%;
+}
+
+.my-content-management__skeleton {
+  justify-content: flex-start;
+  padding: var(--spacer-8) 0;
+}
+
+/* 真实节点初始 hidden，reveal 时由 JS 移除并淡入 */
+
+/* 骨架占位尺寸工具类（替代 inline style，满足校验器） */
+.sk-rect-membership-brand { width: 96px; height: 16px; }
+.sk-text-membership-ticker { width: 120px; height: 12px; margin-left: auto; }
+.sk-text-title { width: 64px; height: 16px; }
+.sk-rect-tab { width: 48px; height: 24px; border-radius: var(--radius-full); }
+.sk-rect-search-field { width: 60%; height: 32px; border-radius: var(--radius-full); }
+.sk-rect-search-action { width: 56px; height: 32px; border-radius: var(--radius-8); }
+.sk-text-mgmt-count { width: 72px; height: 14px; }
+.sk-text-mgmt-action { width: 40px; height: 14px; }
+.sk-text-mgmt-action--push { margin-left: auto; }
 
 /* 内容区：按日期分组的商品列表骨架 */
 .my-tab-skeleton-surface {
