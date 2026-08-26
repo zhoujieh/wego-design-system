@@ -7,7 +7,7 @@
     "primary_scene": "我的",
     "related_scenes": []
   },
-  "status": "prototyping",
+  "status": "frozen",
   "scope_revision": 1,
   "brief_file": "my-tab-skeleton-优化我的页骨架屏-20260825.md",
   "prototype_brief": {
@@ -72,8 +72,30 @@
     "scope_revision": 1,
     "scope_sha256": "c1d8c6d9f1976c88f41c1c114f2f298517c61c458912f5babc0ed95afaa5d37a"
   },
-  "prototype_submission": null,
-  "prototype_confirmation": null,
+  "prototype_submission": {
+    "at": "2026-08-26T15:14:43.289Z",
+    "scope_revision": 1,
+    "affected_scenes": [
+      "我的"
+    ],
+    "fingerprints": {
+      "@route-entry/%E6%88%91%E7%9A%84": "cd0611ebe77c2c1ba558f5f7796281411766236f4e163a96ce8d8538ac0f9c69",
+      "wego-app/scenes/我的/scene.css": "edf222dadf34da5f66fa1a0258a9ebc85966281ba9d738e700f5e5e942748939",
+      "wego-app/scenes/我的/scene.js": "8b0ac532713ef360f381e0c1c804c82dec4420202745811bf92f4f11ee03c288"
+    }
+  },
+  "prototype_confirmation": {
+    "at": "2026-08-26T15:14:49.504Z",
+    "scope_revision": 1,
+    "affected_scenes": [
+      "我的"
+    ],
+    "fingerprints": {
+      "@route-entry/%E6%88%91%E7%9A%84": "cd0611ebe77c2c1ba558f5f7796281411766236f4e163a96ce8d8538ac0f9c69",
+      "wego-app/scenes/我的/scene.css": "edf222dadf34da5f66fa1a0258a9ebc85966281ba9d738e700f5e5e942748939",
+      "wego-app/scenes/我的/scene.js": "8b0ac532713ef360f381e0c1c804c82dec4420202745811bf92f4f11ee03c288"
+    }
+  },
   "affected_scenes": [
     "我的"
   ],
@@ -83,7 +105,7 @@
       "valid": true
     },
     "design": {
-      "valid": false
+      "valid": true
     }
   },
   "change_log": [
@@ -98,7 +120,28 @@
     {
       "action": "confirm-brief",
       "at": "2026-08-26T00:26:06.638Z"
+    },
+    {
+      "action": "submit-prototype",
+      "at": "2026-08-26T15:14:43.309Z"
+    },
+    {
+      "action": "confirm-prototype",
+      "at": "2026-08-26T15:14:49.507Z"
+    },
+    {
+      "action": "freeze",
+      "at": "2026-08-26T15:14:56.584Z"
     }
   ],
-  "freeze": null
+  "freeze": {
+    "at": "2026-08-26T15:14:56.578Z",
+    "design_system_version": 547,
+    "scope_revision": 1,
+    "fingerprints": {
+      "@route-entry/%E6%88%91%E7%9A%84": "cd0611ebe77c2c1ba558f5f7796281411766236f4e163a96ce8d8538ac0f9c69",
+      "wego-app/scenes/我的/scene.css": "edf222dadf34da5f66fa1a0258a9ebc85966281ba9d738e700f5e5e942748939",
+      "wego-app/scenes/我的/scene.js": "8b0ac532713ef360f381e0c1c804c82dec4420202745811bf92f4f11ee03c288"
+    }
+  }
 }
