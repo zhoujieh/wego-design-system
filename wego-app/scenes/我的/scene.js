@@ -5,10 +5,10 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
           <div class="navbar__left navbar__left--custom">
             <button type="button" class="my-tab-identity" data-action="album-switch" aria-label="切换相册">
               <div class="my-tab-identity__skeleton" data-role="profile-skeleton" aria-hidden="true">
-                <span class="wg-skeleton wg-skeleton--circle" data-component-slug="skeleton" style="width:36px;height:36px"></span>
+                <span class="wg-skeleton wg-skeleton--circle sk-circle-avatar" data-component-slug="skeleton"></span>
                 <span class="my-tab-identity__skeleton-copy">
-                  <span class="wg-skeleton wg-skeleton--text" data-component-slug="skeleton" style="width:72px;height:14px"></span>
-                  <span class="wg-skeleton wg-skeleton--text" data-component-slug="skeleton" style="width:48px;height:12px"></span>
+                  <span class="wg-skeleton wg-skeleton--text sk-text-name" data-component-slug="skeleton"></span>
+                  <span class="wg-skeleton wg-skeleton--text sk-text-role" data-component-slug="skeleton"></span>
                 </span>
               </div>
               <div class="my-tab-identity__real" data-role="profile-real" hidden>
@@ -27,8 +27,8 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
           </div>
           <div class="navbar__right navbar__right--icon">
             <div class="my-tab-navbar__skeleton" data-role="navbar-actions-skeleton" aria-hidden="true">
-              <span class="wg-skeleton wg-skeleton--rect" data-component-slug="skeleton" style="width:40px;height:20px"></span>
-              <span class="wg-skeleton wg-skeleton--rect" data-component-slug="skeleton" style="width:40px;height:20px"></span>
+              <span class="wg-skeleton wg-skeleton--rect sk-rect-action" data-component-slug="skeleton"></span>
+              <span class="wg-skeleton wg-skeleton--rect sk-rect-action" data-component-slug="skeleton"></span>
             </div>
             <div class="my-tab-navbar__real" data-role="navbar-actions-real" hidden>
               <button type="button" class="navbar__action" data-action="settings" aria-label="设置">
@@ -50,6 +50,11 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         <section class="layout-section my-tab-section my-tab-section--membership" data-component-slug="layout-section" data-edge="M8">
           <div class="card card--surface my-membership-card" data-component-slug="card">
             <div class="card__content my-membership-card__content">
+              <div class="my-membership-card__skeleton" data-role="membership-skeleton" aria-hidden="true">
+                <span class="wg-skeleton wg-skeleton--rect sk-rect-membership-brand" data-component-slug="skeleton"></span>
+                <span class="wg-skeleton wg-skeleton--text sk-text-membership-ticker" data-component-slug="skeleton"></span>
+              </div>
+              <div class="my-membership-card__real" data-role="membership-real" hidden>
               <div class="my-membership-card__row">
                 <div class="my-membership-card__brand">
                   <img class="my-membership-card__vip" src="./lib/assets/icons/vicon_vip.svg" alt="会员" aria-hidden="true">
@@ -65,6 +70,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
                 </div>
                 <i class="wego-iconfont-s icon-youjiantou16 my-membership-card__arrow" aria-hidden="true"></i>
               </div>
+              </div>
             </div>
           </div>
         </section>
@@ -73,7 +79,8 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
           <div class="card card--surface card--vertical my-entry-card" data-component-slug="card">
             <div class="card__content my-entry-card__content">
               <div class="card__header my-section-heading">
-                <h2>数据资产</h2>
+                <span class="my-section-heading__skeleton" data-role="assets-title-skeleton" aria-hidden="true"><span class="wg-skeleton wg-skeleton--text sk-text-title" data-component-slug="skeleton"></span></span>
+                <h2 data-role="assets-title-real" hidden>数据资产</h2>
               </div>
               <div class="card__body" data-region="assets"></div>
             </div>
@@ -84,7 +91,8 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
           <div class="card card--surface card--vertical my-entry-card" data-component-slug="card">
             <div class="card__content my-entry-card__content">
               <div class="card__header my-section-heading">
-                <h2>常用应用</h2>
+                <span class="my-section-heading__skeleton" data-role="apps-title-skeleton" aria-hidden="true"><span class="wg-skeleton wg-skeleton--text sk-text-title" data-component-slug="skeleton"></span></span>
+                <h2 data-role="apps-title-real" hidden>常用应用</h2>
               </div>
               <div class="card__body" data-region="apps"></div>
             </div>
@@ -95,6 +103,12 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
           <div class="sticky-region__motion">
             <div class="sticky-region__inner">
               <div class="wg-tabs wg-tabs--mini wg-tabs--divide my-content-tabs" data-component-slug="tabs" role="tablist" aria-label="内容类型">
+                <div class="my-content-tabs__skeleton" data-role="tabs-skeleton" aria-hidden="true">
+                  <span class="wg-skeleton wg-skeleton--rect sk-rect-tab" data-component-slug="skeleton"></span>
+                  <span class="wg-skeleton wg-skeleton--rect sk-rect-tab" data-component-slug="skeleton"></span>
+                  <span class="wg-skeleton wg-skeleton--rect sk-rect-tab" data-component-slug="skeleton"></span>
+                </div>
+                <div class="my-content-tabs__real" data-role="tabs-real" hidden>
                 <div class="wg-tabs__scroll">
                   <button class="wg-tabs__item" type="button" role="tab" aria-selected="true" data-content-type="product">
                     <span class="wg-tabs__content"><span class="wg-tabs__label">产品</span></span>
@@ -107,6 +121,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
                   </button>
                   <span class="wg-tabs__active-indicator" aria-hidden="true"></span>
                 </div>
+                </div>
               </div>
             </div>
           </div>
@@ -116,6 +131,12 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
           <div class="sticky-region__motion">
             <div class="sticky-region__inner">
               <div class="search-toolbar my-content-toolbar">
+                <div class="my-content-toolbar__skeleton" data-role="search-skeleton" aria-hidden="true">
+                  <span class="wg-skeleton wg-skeleton--rect sk-rect-search-field" data-component-slug="skeleton"></span>
+                  <span class="wg-skeleton wg-skeleton--rect sk-rect-search-action" data-component-slug="skeleton"></span>
+                  <span class="wg-skeleton wg-skeleton--rect sk-rect-search-action" data-component-slug="skeleton"></span>
+                </div>
+                <div class="my-content-toolbar__real" data-role="search-real" hidden>
                 <div class="searchbox searchbox--sm searchbox--gray" data-component-slug="search">
                   <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
                   <div class="searchbox__input">
@@ -135,6 +156,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
                     筛选
                   </button>
                 </div>
+                </div>
               </div>
             </div>
           </div>
@@ -142,12 +164,20 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
 
         <section class="layout-section my-content-management-section" data-component-slug="layout-section" data-edge="M0">
           <div class="my-content-management" data-role="content-management">
+            <div class="my-content-management__skeleton" data-role="mgmt-skeleton" aria-hidden="true">
+              <span class="wg-skeleton wg-skeleton--text sk-text-mgmt-count" data-component-slug="skeleton"></span>
+              <span class="wg-skeleton wg-skeleton--text sk-text-mgmt-action sk-text-mgmt-action--push" data-component-slug="skeleton"></span>
+              <span class="wg-skeleton wg-skeleton--text sk-text-mgmt-action" data-component-slug="skeleton"></span>
+              <span class="wg-skeleton wg-skeleton--text sk-text-mgmt-action" data-component-slug="skeleton"></span>
+            </div>
+            <div class="my-content-management__real" data-role="mgmt-real" hidden>
             <span class="my-content-management__count" data-role="content-count">共 0 条</span>
             <div class="my-content-management__actions">
               <a class="link link--12" data-component-slug="link" href="javascript:void(0)" role="button" data-management-action="sort">排序</a>
               <a class="link link--12" data-component-slug="link" href="javascript:void(0)" role="button" data-management-action="category">分类</a>
               <a class="link link--12" data-component-slug="link" href="javascript:void(0)" role="button" data-management-action="batch">批量</a>
               <a class="link link--12" data-component-slug="link" href="javascript:void(0)" role="button" data-management-action="collection" hidden>合集</a>
+            </div>
             </div>
           </div>
         </section>
@@ -414,11 +444,19 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         });
       }
 
+      /* 整页骨架→真实切换：隐藏所有 [data-role$="-skeleton"]，显示对应 [data-role$="-real"] 并淡入。
+         覆盖 navbar / 会员卡 / 卡标题 / tabs / 搜索栏 / 内容管理行 / 资产应用内容区。 */
+      function revealAllSkeletons() {
+        var skeletons = root.querySelectorAll('[data-role$="-skeleton"]');
+        var reals = root.querySelectorAll('[data-role$="-real"]');
+        skeletons.forEach(function (el) { el.hidden = true; });
+        reals.forEach(function (el) {
+          el.hidden = false;
+          el.classList.add('scene-fade-in');
+        });
+      }
+
       function setProfile() {
-        var skeleton = root.querySelector('[data-role="profile-skeleton"]');
-        var real = root.querySelector('[data-role="profile-real"]');
-        var actionsSkeleton = root.querySelector('[data-role="navbar-actions-skeleton"]');
-        var actionsReal = root.querySelector('[data-role="navbar-actions-real"]');
         var avatar = root.querySelector('[data-role="profile-avatar"]');
         var name = root.querySelector('[data-role="profile-name"]');
         var album = root.querySelector('[data-role="profile-album"]');
@@ -427,11 +465,6 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         if (name) name.textContent = currentUser.display_name || currentUser.merchant_name || '阿杰';
         if (album) album.textContent = '春夏新品相册';
         if (role) role.textContent = currentUser.role || '';
-        /* 数据到位：隐藏 navbar 骨架，显示真实节点并淡入 */
-        if (skeleton) skeleton.hidden = true;
-        if (real) { real.hidden = false; real.classList.add('scene-fade-in'); }
-        if (actionsSkeleton) actionsSkeleton.hidden = true;
-        if (actionsReal) { actionsReal.hidden = false; actionsReal.classList.add('scene-fade-in'); }
       }
 
       function renderAssets() {
@@ -1004,6 +1037,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
       /* 完整模拟链路：发起『数据请求』→ 期间整页骨架 → resolve 后统一填充并淡显 */
       fetchMyTabData().then(function () {
         if (destroyed) return;
+        revealAllSkeletons();
         setProfile();
         renderAssets();
         renderApps();
