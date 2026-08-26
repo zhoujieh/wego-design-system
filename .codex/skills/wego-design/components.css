@@ -1515,22 +1515,35 @@
     .wg-image-grid--dynamic:has(.wg-image-grid__item:nth-child(4):last-child) .wg-image-grid__item:nth-child(2) { grid-column:2; grid-row:1; }
     .wg-image-grid--dynamic:has(.wg-image-grid__item:nth-child(4):last-child) .wg-image-grid__item:nth-child(3) { grid-column:1; grid-row:2; }
     .wg-image-grid--dynamic:has(.wg-image-grid__item:nth-child(4):last-child) .wg-image-grid__item:nth-child(4) { grid-column:2; grid-row:2; }
-    /* 产品多图四宫格：外层容器永远正方形（最大 180×180）；内部按 1/2/3/4 图划分 */
-    .wg-image-grid--product { --wg-image-product-grid-min-width:80px; --wg-image-product-grid-max-width:180px; width:clamp(var(--wg-image-product-grid-min-width), 100%, var(--wg-image-product-grid-max-width)); aspect-ratio:1 / 1; grid-template-columns:repeat(2, minmax(0, 1fr)); grid-template-rows:repeat(2, minmax(0, 1fr)); gap:var(--spacer-2); overflow:hidden; border-radius:var(--radius-4); }
+    /* 动态九宫格圆角口径：8px 跟随实际图片集合构成的矩形的 4 个外角（≤4 图为不满九宫格的块，≥5 行满时由容器裁切）；格子间接触边一律直角 */
+    .wg-image-grid--dynamic:has(.wg-image-grid__item:first-child:nth-last-child(2)) .wg-image-grid__item:first-child { border-radius:var(--radius-8) 0 0 var(--radius-8); }
+    .wg-image-grid--dynamic:has(.wg-image-grid__item:first-child:nth-last-child(2)) .wg-image-grid__item:nth-child(2) { border-radius:0 var(--radius-8) var(--radius-8) 0; }
+    .wg-image-grid--dynamic:has(.wg-image-grid__item:nth-child(3):last-child) .wg-image-grid__item:first-child { border-top-left-radius:var(--radius-8); border-bottom-left-radius:var(--radius-8); }
+    .wg-image-grid--dynamic:has(.wg-image-grid__item:nth-child(3):last-child) .wg-image-grid__item:nth-child(2) { border-radius:0; }
+    .wg-image-grid--dynamic:has(.wg-image-grid__item:nth-child(3):last-child) .wg-image-grid__item:nth-child(3) { border-radius:0 var(--radius-8) var(--radius-8) 0; }
+    .wg-image-grid--dynamic:has(.wg-image-grid__item:nth-child(4):last-child) .wg-image-grid__item:nth-child(1) { border-top-left-radius:var(--radius-8); }
+    .wg-image-grid--dynamic:has(.wg-image-grid__item:nth-child(4):last-child) .wg-image-grid__item:nth-child(2) { border-top-right-radius:var(--radius-8); }
+    .wg-image-grid--dynamic:has(.wg-image-grid__item:nth-child(4):last-child) .wg-image-grid__item:nth-child(3) { border-bottom-left-radius:var(--radius-8); }
+    .wg-image-grid--dynamic:has(.wg-image-grid__item:nth-child(4):last-child) .wg-image-grid__item:nth-child(4) { border-bottom-right-radius:var(--radius-8); }
+    /* 产品多图四宫格：外层容器永远正方形（最大 160×160）；内部按 1/2/3/4 图划分 */
+    .wg-image-grid--product { --wg-image-product-grid-min-width:80px; --wg-image-product-grid-max-width:160px; width:clamp(var(--wg-image-product-grid-min-width), 100%, var(--wg-image-product-grid-max-width)); aspect-ratio:1 / 1; grid-template-columns:repeat(2, minmax(0, 1fr)); grid-template-rows:repeat(2, minmax(0, 1fr)); gap:var(--spacer-2); overflow:hidden; border-radius:var(--radius-4); }
     .wg-image-grid--product .wg-image-grid__item { aspect-ratio:auto; }
     .wg-image-grid--product .wg-image-grid__item:only-child { grid-column:1 / -1; grid-row:1 / -1; }
     .wg-image-grid--product .wg-image-grid__item:first-child:nth-last-child(2),
     .wg-image-grid--product .wg-image-grid__item:first-child:nth-last-child(2) ~ .wg-image-grid__item { grid-row:1 / -1; }
     .wg-image-grid--product .wg-image-grid__item:first-child:nth-last-child(3) { grid-row:1 / -1; }
     /* 单图三朝向：封顶在 9 宫格左上 2×2（≈2 个 3 列方格 + 1 间距，随父级宽自适应） */
-    .wg-image-grid--single { --wg-single-2x2: calc((200% - var(--spacer-4)) / 3); display:block; width:100%; border-radius:var(--radius-8); overflow:hidden; }
+    .wg-image-grid--single { --wg-single-base-width: calc((200% - var(--spacer-4)) / 3); --wg-single-2x2: var(--wg-single-base-width); display:block; width:var(--wg-single-2x2); border-radius:var(--radius-8); overflow:hidden; }
     .wg-image-grid--single.wg-image-grid--square { width:var(--wg-single-2x2); aspect-ratio:1 / 1; }
     .wg-image-grid--single.wg-image-grid--landscape { width:var(--wg-single-2x2); aspect-ratio:4 / 3; }
-    .wg-image-grid--single.wg-image-grid--portrait { width:calc(var(--wg-single-2x2) * 3 / 4); aspect-ratio:3 / 4; }
+    .wg-image-grid--single.wg-image-grid--portrait { width:var(--wg-single-2x2); aspect-ratio:3 / 4; }
     .wg-image-grid--single .wg-image-grid__single { display:block; position:relative; margin:0; padding:0; border:none; background:transparent; cursor:pointer; line-height:0; width:100%; height:100%; }
     .wg-image-grid--single .wg-image-grid__single-img { display:block; width:100%; height:100%; object-fit:cover; border-radius:var(--radius-8); }
+    .wg-image-grid--single .wg-image-grid__single:active .wg-image__overlay,
+    .wg-image-grid--single .wg-image-grid__single.is-pressed .wg-image__overlay { display:block; }
     /* 视频播放角标（单图 / 多图首格） */
-    .wg-image-grid__play { position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:24px; height:24px; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+    .wg-image-grid__play { position:absolute; z-index:2; top:50%; left:50%; transform:translate(-50%, -50%); width:clamp(24px, 25%, 56px); aspect-ratio:1 / 1; pointer-events:none; }
+    .wg-image-grid__play img, .wg-image-grid__play svg { display:block; width:100%; height:100%; }
     @keyframes wg-image-skeleton {
       0% { background-position: 200% 0; }
       100% { background-position: -200% 0; }
