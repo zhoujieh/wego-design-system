@@ -54,7 +54,7 @@
   function isWalkthroughElement(el) {
     if (!el) return false;
     // 检查 Light DOM 中的祖先
-    const lightTags = 'wego-walkthrough,wego-wt-banner,wego-wt-style-panel,wego-wt-overview-panel,wego-wt-color-picker,wego-wt-toast,wego-wt-overlay';
+    const lightTags = 'wego-walkthrough,wego-wt-style-panel,wego-wt-overview-panel,wego-wt-color-picker,wego-wt-toast,wego-wt-overlay';
     if (el.closest && el.closest(lightTags)) return true;
     // 检查 Shadow DOM：元素的根节点是否为走查工具的 shadowRoot
     try {
@@ -338,67 +338,6 @@
       `;
     }
   }
-
-  // ============================================================
-  // wego-wt-banner: 走查模式顶部横幅
-  // ============================================================
-  class WegoWtBanner extends HTMLElement {
-    constructor() {
-      super();
-      this._shadow = this.attachShadow({ mode: 'open' });
-    }
-    connectedCallback() {
-      this._render();
-    }
-    _render() {
-      this._shadow.innerHTML = `
-        <style>
-          :host {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 28px;
-            z-index: 9000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            background: var(--text-brand, #00b96b);
-            color: #fff;
-            font-size: 12px;
-            line-height: 1;
-            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", sans-serif;
-            font-weight: 500;
-          }
-          .close-btn {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 24px;
-            height: 24px;
-            border: none;
-            background: transparent;
-            color: #fff;
-            font-size: 16px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
-          }
-        </style>
-        <span>走查模式 · 触摸元素选中</span>
-        <button class="close-btn" type="button" aria-label="关闭走查模式">×</button>
-      `;
-      this._shadow.querySelector('.close-btn').addEventListener('click', () => {
-        bus.emit('walkthrough-mode-toggle', { enabled: false });
-      });
-    }
-  }
-
-
 
   // ============================================================
   // wego-wt-overlay: 覆盖层（元素信息气泡）
@@ -2188,7 +2127,6 @@
           </button>
         </div>
         <!-- 子组件（走查模式相关） -->
-        <wego-wt-banner hidden></wego-wt-banner>
         <wego-wt-overlay hidden></wego-wt-overlay>
         <wego-wt-style-panel hidden></wego-wt-style-panel>
         <wego-wt-color-picker hidden></wego-wt-color-picker>
@@ -2198,7 +2136,6 @@
     }
 
     _initComponents() {
-      this._components.banner = this._shadow.querySelector('wego-wt-banner');
       this._components.overlay = this._shadow.querySelector('wego-wt-overlay');
       this._components.stylePanel = this._shadow.querySelector('wego-wt-style-panel');
       this._components.colorPicker = this._shadow.querySelector('wego-wt-color-picker');
@@ -2550,7 +2487,6 @@
       if (enabled) {
         document.body.setAttribute('data-walkthrough-mode', 'true');
         this._bindTouchEvents();
-        this._showToast('走查模式已开启，点击元素编辑样式');
       } else {
         document.body.removeAttribute('data-walkthrough-mode');
         this._unbindTouchEvents();
@@ -2813,7 +2749,6 @@
 
   function register() {
     if (!customElements.get('wego-wt-toast')) customElements.define('wego-wt-toast', WegoWtToast);
-    if (!customElements.get('wego-wt-banner')) customElements.define('wego-wt-banner', WegoWtBanner);
     if (!customElements.get('wego-wt-overlay')) customElements.define('wego-wt-overlay', WegoWtOverlay);
     if (!customElements.get('wego-wt-style-panel')) customElements.define('wego-wt-style-panel', WegoWtStylePanel);
     if (!customElements.get('wego-wt-color-picker')) customElements.define('wego-wt-color-picker', WegoWtColorPicker);
