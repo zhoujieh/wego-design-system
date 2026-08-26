@@ -749,6 +749,17 @@ if (!fs.existsSync(sceneJs) || !fs.existsSync(sceneCss)) {
 if (fs.existsSync(sceneJs)) js = fs.readFileSync(sceneJs, 'utf8');
 if (fs.existsSync(sceneCss)) css = fs.readFileSync(sceneCss, 'utf8');
 
+// 解析 scene.js 开头的 wego-design-contract 注释，识别实现模式。
+// implementation: "global" 表示模板与交互逻辑均由外部全局模块（lib/js/*.js）提供，
+// scene.js 仅做路由注册与 init 转发；此时跳过依赖完整 init 字面逻辑的检查（页面根定位、交互绑定）。
+function parseContractAnnotation(source) {
+  const match = source.match(/\/\*\s*wego-design-contract\s*:\s*([\s\S]*?)\*\//);
+  if (!match) return {};
+  try { return JSON.parse(match[1]); } catch { return {}; }
+}
+const contractAnnotation = parseContractAnnotation(js);
+const globalImplementation = contractAnnotation.implementation === 'global';
+
 const cleanCss = stripCssComments(css);
 const cssRules = parseCssRules(css);
 const consumption = readJson(consumptionFile, 'scene.consumption_source', '消费契约');
@@ -946,7 +957,7 @@ if (surfaceRoot) {
   const directRootRules = cssRules.filter(rule => rule.atRules.length === 0
     && rule.selectors.some(selector => strictSimpleSelectorMatchesNode(selector, surfaceRoot)));
   const rootDeclarations = directRootRules.flatMap(rule => rule.declarations);
-  if (!hasLayoutPage) {
+  if (!hasLayoutPage && !globalImplementation) {
     if (!rootDeclarations.some(declaration => declaration.property === 'position' && declaration.value === 'absolute')) {
       add('scene.layout_root_position', '页面根必须直接声明 position: absolute 或使用 layout-page', sceneCss);
     }
@@ -1061,6 +1072,7 @@ if (registeredScene && staticDomIds.length) {
   const fabDomId = 'open-publish-sheet';
   for (const id of new Set(staticDomIds)) {
     if (id === fabDomId && usesPublishFab) continue;
+    if (globalImplementation) continue;
     if (!(handlers.get(id) || []).length) {
       add('scene.interaction_handler', `data-dom-id 未绑定实际 listener：${id}`, sceneJs);
     }
