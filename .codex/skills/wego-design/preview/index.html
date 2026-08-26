@@ -99,6 +99,58 @@ body {
   line-height: var(--body-sm-line-height);
 }
 
+.overview-sidebar__search {
+  margin-top: 12px;
+}
+
+.overview-sidebar__search-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border-neutral-l2);
+  border-radius: var(--radius-8);
+  background: var(--bg-surface);
+  box-sizing: border-box;
+  transition: border-color var(--duration-fast) var(--ease-standard);
+}
+
+.overview-sidebar__search-input:focus-within {
+  border-color: var(--text-brand);
+}
+
+.overview-sidebar__search-input i {
+  flex-shrink: 0;
+  color: var(--text-tertiary);
+  font-size: 16px;
+  line-height: 1;
+}
+
+.overview-sidebar__search-input input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--text-default);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+  font-family: inherit;
+}
+
+.overview-sidebar__search-input input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.overview-sidebar__empty {
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--text-tertiary);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+}
+
 .overview-nav-group + .overview-nav-group {
   margin-top: 16px;
 }
@@ -253,7 +305,14 @@ body {
     <div class="overview-sidebar__header">
       <h2 class="overview-sidebar__title">组件导航</h2>
       <div class="overview-sidebar__sub">左侧选组件，右侧查看对应单页预览。</div>
+      <div class="overview-sidebar__search">
+        <label class="overview-sidebar__search-input">
+          <i class="wego-iconfont-s icon-sousuo" aria-hidden="true"></i>
+          <input type="search" id="component-search" placeholder="搜索组件名称或 slug" aria-label="搜索组件" autocomplete="off" />
+        </label>
+      </div>
     </div>
+    <div class="overview-sidebar__empty" id="component-search-empty" hidden>未找到匹配的组件</div>
 
     <section class="overview-nav-group">
       <h3 class="overview-nav-group__title">操作类 Action</h3>
@@ -567,7 +626,36 @@ body {
 
 <script>
 const navItems = Array.from(document.querySelectorAll(".overview-nav-item"));
+const navGroups = Array.from(document.querySelectorAll(".overview-nav-group"));
 const viewerFrame = document.getElementById("viewer-frame");
+const searchInput = document.getElementById("component-search");
+const searchEmpty = document.getElementById("component-search-empty");
+
+function filterComponents(query) {
+  const keyword = (query || "").trim().toLowerCase();
+  let visibleCount = 0;
+
+  navItems.forEach((item) => {
+    const name = (item.dataset.name || "").toLowerCase();
+    const slug = (item.dataset.slug || "").toLowerCase();
+    const matched = !keyword || name.indexOf(keyword) !== -1 || slug.indexOf(keyword) !== -1;
+    item.hidden = !matched;
+    if (matched) visibleCount += 1;
+  });
+
+  navGroups.forEach((group) => {
+    const hasVisible = group.querySelector(".overview-nav-item:not([hidden])");
+    group.hidden = !hasVisible;
+  });
+
+  searchEmpty.hidden = visibleCount > 0;
+}
+
+if (searchInput) {
+  searchInput.addEventListener("input", function () {
+    filterComponents(searchInput.value);
+  });
+}
 
 function syncViewerBySlug(slug) {
   const currentItem = navItems.find((item) => item.dataset.slug === slug) || navItems[0];
