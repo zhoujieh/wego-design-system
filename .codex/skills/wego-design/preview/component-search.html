@@ -306,11 +306,16 @@
   flex: 0 0 auto;
   display: flex;
   align-items: center;
-  gap: var(--spacer-8);
 }
 
 .search-nav-bar__action {
-  padding: 0;
+  align-self: stretch;
+  min-width: var(--touch-default);
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--spacer-4);
   white-space: nowrap;
   cursor: pointer;
 }
@@ -324,16 +329,17 @@
   flex: 0 0 auto;
   display: flex;
   align-items: center;
-  gap: var(--spacer-8);
+  padding-right: var(--spacer-4);
 }
 
 .search-toolbar__action {
+  align-self: stretch;
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  min-width: var(--size-40);
-  min-height: var(--size-40);
-  padding: var(--spacer-4);
+  justify-content: center;
+  min-width: var(--touch-default);
+  padding: 0 var(--spacer-4);
   color: var(--text-default);
   font-size: var(--body-xs-font-size);
   line-height: var(--body-xs-line-height);
@@ -405,7 +411,7 @@
 
   <section class="pv-section">
     <h2>尺寸：md 默认 / sm 局部</h2>
-    <p class="search-demo__hint">两种尺寸的图标（20px）和文字（body-md 14px）大小一致，仅高度不同；sm 仅用于工具栏、局部筛选等紧凑场景。</p>
+    <p class="search-demo__hint">两种尺寸的图标（20px）和文字（body-md 14px）大小一致，仅高度不同；md 是默认尺寸，sm 仅用于极小空间场景。</p>
     <div class="search-demo__row">
       <div class="search-demo__surface search-demo__surface--page">
         <span class="search-demo__label">md（36px）— 页面主搜索默认尺寸</span>
@@ -584,9 +590,9 @@
           </div>
         </div>
         <span class="search-demo__label">页面内部筛选（content-search-filter）</span>
-        <span class="search-demo__hint">空态 — sm + white（灰底页面配白框）</span>
+        <span class="search-demo__hint">空态 — md + white（灰底页面配白框）</span>
         <div class="search-toolbar">
-          <div class="searchbox searchbox--sm searchbox--white">
+          <div class="searchbox searchbox--md searchbox--white">
             <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
             <div class="searchbox__input">
               <input class="searchbox__field" type="search" placeholder="搜索商品" aria-label="搜索商品">
@@ -606,9 +612,9 @@
             </button>
           </div>
         </div>
-        <span class="search-demo__hint">多图图搜结果态 — sm + gray（白底工具栏配灰框）</span>
+        <span class="search-demo__hint">多图图搜结果态 — md + gray（白底工具栏配灰框）</span>
         <div class="search-toolbar">
-          <div class="searchbox searchbox--sm searchbox--gray is-image-result">
+          <div class="searchbox searchbox--md searchbox--gray is-image-result">
             <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
             <div class="searchbox__input">
               <span class="searchbox__image-token searchbox__image-token--multi">
