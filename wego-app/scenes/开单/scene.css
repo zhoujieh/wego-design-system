@@ -6350,6 +6350,34 @@ body[data-order-layout="landscape"] .phone-indicator {
     background: var(--bg-mask-modal);
   }
 
+  .order-barcode-scanner__actions {
+    position: absolute;
+    top: var(--spacer-16);
+    right: var(--spacer-16);
+    z-index: var(--z-raised);
+    display: flex;
+    gap: var(--spacer-8);
+  }
+
+  .order-barcode-scanner__image-pick {
+    color: var(--text-inverse);
+    background: var(--bg-mask-modal);
+  }
+
+  .order-barcode-scanner__image-preview {
+    position: absolute;
+    inset: 0;
+    z-index: calc(var(--z-raised) - 1);
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: var(--bg-mask-strong);
+  }
+
+  .order-desktop__catalog--scanner.is-recognizing .order-barcode-scanner__beam {
+    display: none;
+  }
+
   .order-barcode-scanner__beam {
     position: absolute;
     top: 46%;
