@@ -172,6 +172,33 @@ function runTests() {
     writeClaim('b.json', { agent: 'b', scene: SCENE, routeId: ROUTE, branch: 'feature/b', claimedAt: T0 });
     if (run([]).status === 0) throw new Error('用例失败：一方未声明 files 应冲突');
 
+    // 清理前序测试的 b.json，避免冲突干扰后续 --check-changed 测试
+    fs.rmSync(path.join(fixture, 'claims', 'b.json'), { force: true });
+
+    // 构造只修改 scene.css 的提交对（baseCss=head, headCss=新增 scene.css）
+    fs.writeFileSync(path.join(fixture, 'wego-app/scenes', SCENE, 'scene.css'), 'body {}\n');
+    runGit(['add', 'wego-app/scenes/测试场景/scene.css']);
+    runGit(['commit', '-m', 'add css']);
+    const headCss = runGit(['rev-parse', 'HEAD']).stdout.trim();
+    const baseCss = head; // 第二次提交，diff 到 headCss 只有 scene.css 新增
+
+    // 9. --check-changed: files 范围覆盖改动 → 通过
+    writeClaim('a.json', { agent: 'a', scene: SCENE, routeId: ROUTE, branch: 'feature/test', claimedAt: T0, files: ['scene.css'] });
+    const scopedCovered = run(['--check-changed', '--base', baseCss, '--head', headCss, '--branch', 'feature/test']);
+    if (scopedCovered.status !== 0) throw new Error(`用例失败：files 范围覆盖改动应通过：${scopedCovered.stderr || scopedCovered.stdout}`);
+
+    // 10. --check-changed: files 范围未覆盖改动 → 失败
+    writeClaim('a.json', { agent: 'a', scene: SCENE, routeId: ROUTE, branch: 'feature/test', claimedAt: T0, files: ['scene.js'] });
+    const scopedUncovered = run(['--check-changed', '--base', baseCss, '--head', headCss, '--branch', 'feature/test']);
+    if (scopedUncovered.status === 0 || !(scopedUncovered.stderr || '').includes('超出认领 files 范围')) {
+      throw new Error('用例失败：files 范围未覆盖改动应失败');
+    }
+
+    // 11. --check-changed: 整场景独占（未声明 files）→ 任意改动都通过
+    writeClaim('a.json', { agent: 'a', scene: SCENE, routeId: ROUTE, branch: 'feature/test', claimedAt: T0 });
+    const fullCovered = run(['--check-changed', '--base', baseCss, '--head', headCss, '--branch', 'feature/test']);
+    if (fullCovered.status !== 0) throw new Error(`用例失败：整场景独占应通过：${fullCovered.stderr || fullCovered.stdout}`);
+
     console.log('场景认领测试通过');
   } finally {
     fs.rmSync(fixture, { recursive: true, force: true });
@@ -228,18 +255,43 @@ if (checkChanged) {
     console.error(`[validate-claims] 无法读取场景变更：${(diff.stderr || diff.stdout || 'git diff 失败').trim()}`);
     process.exit(1);
   }
-  const changedScenes = [...new Set((diff.stdout || '')
-    .split('\n')
-    .map((file) => /^wego-app\/scenes\/([^/]+)\//.exec(file.trim())?.[1] ?? null)
-    .filter(Boolean))]
-    .sort();
-  const uncovered = changedScenes.filter((scene) => !active.some(({ claim }) => (
-    claim.scene === scene && claim.branch === branch
-  )));
-  if (uncovered.length) {
-    console.error(`[validate-claims] 分支 ${branch} 修改了未认领场景：${uncovered.join('、')}`);
-    console.error('  认领记录必须声明相同 scene、branch');
-    process.exit(1);
+  // 按场景分组改动文件：{ scene: [相对场景目录的文件路径] }
+  const changedByScene = {};
+  (diff.stdout || '').split('\n').forEach((file) => {
+    const trimmed = file.trim();
+    const m = /^wego-app\/scenes\/([^/]+)\/(.+)$/.exec(trimmed);
+    if (!m) return;
+    const scene = m[1];
+    const relPath = m[2];
+    if (!changedByScene[scene]) changedByScene[scene] = [];
+    changedByScene[scene].push(relPath);
+  });
+  const changedScenes = Object.keys(changedByScene).sort();
+
+  for (const scene of changedScenes) {
+    const matchingClaims = active.filter(({ claim }) => (
+      claim.scene === scene && claim.branch === branch
+    ));
+    if (matchingClaims.length === 0) {
+      console.error(`[validate-claims] 分支 ${branch} 修改了未认领场景：${scene}`);
+      console.error('  认领记录必须声明相同 scene、branch');
+      process.exit(1);
+    }
+    // files 范围校验：所有匹配认领都声明了 files 时，改动文件必须被至少一个认领覆盖；
+    // 只要有一个认领未声明 files（整场景独占），该场景全部改动即被授权。
+    const allScoped = matchingClaims.every(({ claim }) => Array.isArray(claim.files) && claim.files.length > 0);
+    if (allScoped) {
+      const uncoveredFiles = changedByScene[scene].filter((file) => (
+        !matchingClaims.some(({ claim }) => claim.files.includes(file))
+      ));
+      if (uncoveredFiles.length > 0) {
+        const owners = matchingClaims.map(({ file: f, claim }) => `${f}(files: ${claim.files.join(',')})`).join('、');
+        console.error(`[validate-claims] 场景 "${scene}" 的改动超出认领 files 范围：${uncoveredFiles.join('、')}`);
+        console.error(`  当前认领：${owners}`);
+        console.error('  请扩大认领 files 范围，或使用整场景独占（不声明 files）');
+        process.exit(1);
+      }
+    }
   }
 }
 
@@ -299,7 +351,7 @@ if (conflict) {
 if (checkStale) {
   const orphans = active.filter(({ claim }) => isOrphan(claim, repoRoot));
   if (orphans.length) {
-    console.error(`[validate-claims] 发现 ${orphans.length} 个孤儿认领（分支已删 + 无开放 PR + 场景目录不存在）：`);
+    console.error(`[validate-claims] 发现 ${orphans.length} 个孤儿认领（分支已删 + 无开放 PR）：`);
     for (const { file, claim } of orphans) {
       console.error(`  - ${file}（scene: ${claim.scene}, branch: ${claim.branch}）`);
     }
