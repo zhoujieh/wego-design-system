@@ -6317,6 +6317,77 @@ body[data-order-layout="landscape"] .phone-indicator {
     filter: none;
   }
 
+  .order-desktop__catalog--scanner {
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-mask-strong);
+    animation: order-barcode-scanner-enter var(--duration-normal) var(--ease-enter) both;
+  }
+
+  .order-barcode-scanner,
+  .order-barcode-scanner__video {
+    width: 100%;
+    height: 100%;
+  }
+
+  .order-barcode-scanner {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-8);
+  }
+
+  .order-barcode-scanner__video {
+    display: block;
+    object-fit: cover;
+  }
+
+  .order-barcode-scanner__close {
+    position: absolute;
+    top: var(--spacer-16);
+    left: var(--spacer-16);
+    z-index: var(--z-raised);
+    color: var(--text-inverse);
+    background: var(--bg-mask-modal);
+  }
+
+  .order-barcode-scanner__beam {
+    position: absolute;
+    top: 46%;
+    right: 0;
+    left: 0;
+    height: var(--size-56);
+    pointer-events: none;
+    background: var(--status-success-surface-l3);
+  }
+
+  .order-barcode-scanner__beam::after {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    left: 0;
+    height: var(--stroke-hairline);
+    background: var(--status-success-default);
+    content: '';
+  }
+
+  .order-barcode-scanner__message {
+    position: absolute;
+    right: var(--spacer-16);
+    bottom: var(--size-48);
+    left: var(--spacer-16);
+    margin: 0;
+    color: var(--text-inverse);
+    font-family: var(--body-lg-font-family);
+    font-size: var(--body-lg-font-size);
+    line-height: var(--body-lg-line-height);
+    text-align: center;
+  }
+
+  @keyframes order-barcode-scanner-enter {
+    from { opacity: 0; transform: translateX(100%); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
   .order-catalog-item__detail b {
     display: inline-flex;
     align-items: flex-end;
