@@ -1912,9 +1912,9 @@
             backdrop-filter: blur(18px) saturate(145%);
             -webkit-backdrop-filter: blur(18px) saturate(145%);
             white-space: nowrap;
-            overflow: visible;
+            overflow: hidden;
             will-change: width;
-            transition: width 500ms var(--toolbar-spring);
+            transition: width 700ms var(--toolbar-spring);
             cursor: grab;
           }
           .toolbar-container.is-dragging {
@@ -1923,7 +1923,6 @@
           }
           .toolbar-container.is-collapsed {
             width: 48px;
-            padding: 0;
           }
           .toolbar-container.is-expanded {
             width: auto;
@@ -2397,26 +2396,74 @@
       const toolbar = this._components.toolbar;
       const main = this._components.toolbarMain;
       const fab = this._components.fabBtn;
+
       if (collapsed) {
+        // 收起：固定当前宽度后过渡到48px
+        const currentWidth = toolbar.offsetWidth;
+        toolbar.style.width = currentWidth + 'px';
+        // 强制重排
+        void toolbar.offsetWidth;
+        fab.style.display = 'inline-flex';
+        main.style.display = 'none';
+        toolbar.style.width = '48px';
         toolbar.classList.add('is-collapsed');
         toolbar.classList.remove('is-expanded');
-        main.style.display = 'none';
-        fab.style.display = 'inline-flex';
+        const onEnd = (e) => {
+          if (e.propertyName === 'width') {
+            toolbar.style.width = '';
+            toolbar.removeEventListener('transitionend', onEnd);
+          }
+        };
+        toolbar.addEventListener('transitionend', onEnd);
       } else {
-        toolbar.classList.remove('is-collapsed');
-        toolbar.classList.add('is-expanded');
+        // 展开：先显示内容测量宽度，再过渡
         fab.style.display = 'none';
         main.style.display = 'inline-flex';
-        // 根据位置调整展开方向（收起按钮在左或右）
+        // 动态计算展开方向
         const dir = this._getExpandDirection();
-        if (dir === 'left') {
-          main.style.flexDirection = 'row-reverse';
-        } else {
-          main.style.flexDirection = 'row';
-        }
+        main.style.flexDirection = dir === 'left' ? 'row-reverse' : 'row';
+        // 测量内容宽度（main宽度 + padding 8px）
+        const contentWidth = main.offsetWidth + 8;
+        // 先固定为收起宽度
+        toolbar.style.width = '48px';
+        toolbar.classList.remove('is-collapsed');
+        toolbar.classList.add('is-expanded');
+        // 强制重排
+        void toolbar.offsetWidth;
+        // 过渡到内容宽度
+        toolbar.style.width = contentWidth + 'px';
+        // 调整位置确保不超出屏幕
+        this._adjustPositionAfterExpand(contentWidth, dir);
         this._updateSubpanelPosition();
+        // 过渡结束后清理width（设为auto，由内容撑开）
+        const onEnd = (e) => {
+          if (e.propertyName === 'width') {
+            toolbar.style.width = '';
+            toolbar.removeEventListener('transitionend', onEnd);
+          }
+        };
+        toolbar.addEventListener('transitionend', onEnd);
       }
       this._updateToolbarState();
+    }
+
+    _adjustPositionAfterExpand(toolbarWidth, dir) {
+      const rect = this.getBoundingClientRect();
+      if (dir === 'right') {
+        // 向右展开，检查右侧是否超出
+        const rightEdge = rect.left + toolbarWidth;
+        const maxLeft = window.innerWidth - toolbarWidth - 8;
+        if (rightEdge > window.innerWidth - 8 && rect.left > maxLeft) {
+          this.style.left = Math.max(8, maxLeft) + 'px';
+          this.style.right = 'auto';
+        }
+      } else {
+        // 向左展开，检查左侧是否超出
+        if (rect.left < 8) {
+          this.style.left = '8px';
+          this.style.right = 'auto';
+        }
+      }
     }
 
     // ── 工具条按钮 ────────────────────────────────────────
@@ -2456,13 +2503,43 @@
 
     _updateSubpanelPosition() {
       const dir = this._getExpandDirection();
+      const toolbarRect = this._components.toolbar.getBoundingClientRect();
+
       this._shadow.querySelectorAll('[data-subpanel]').forEach(panel => {
+        // 左右定位
         if (dir === 'left') {
           panel.style.left = '0';
           panel.style.right = 'auto';
         } else {
           panel.style.left = 'auto';
           panel.style.right = '0';
+        }
+
+        // 上下定位：判断底部是否放得下
+        // 先临时显示以测量真实高度
+        const wasHidden = !panel.classList.contains('is-open');
+        if (wasHidden) {
+          panel.style.visibility = 'hidden';
+          panel.style.display = 'block';
+        }
+        const panelHeight = panel.offsetHeight || 180;
+        if (wasHidden) {
+          panel.style.display = '';
+          panel.style.visibility = '';
+        }
+
+        const gap = 8;
+        const spaceBelow = window.innerHeight - toolbarRect.bottom - gap;
+        const spaceAbove = toolbarRect.top - gap;
+
+        if (spaceBelow >= panelHeight || spaceBelow >= spaceAbove) {
+          // 下方显示
+          panel.style.top = 'calc(100% + 8px)';
+          panel.style.bottom = 'auto';
+        } else {
+          // 上方显示
+          panel.style.top = 'auto';
+          panel.style.bottom = 'calc(100% + 8px)';
         }
       });
     }
@@ -2472,11 +2549,10 @@
       this._walkthroughMode = enabled;
       if (enabled) {
         document.body.setAttribute('data-walkthrough-mode', 'true');
-        this._components.banner.removeAttribute('hidden');
         this._bindTouchEvents();
+        this._showToast('走查模式已开启，点击元素编辑样式');
       } else {
         document.body.removeAttribute('data-walkthrough-mode');
-        this._components.banner.setAttribute('hidden', '');
         this._unbindTouchEvents();
         this._clearSelection();
       }
