@@ -2244,7 +2244,7 @@
      体验稳定后由 wego-uxsystem-iterate 正式化为设计系统运行时能力。 */
   (function mountFaultSwitch() {
     var SWITCH_KEY = 'wego.fault-switch.enabled';
-    var state = { load: false, save: false, delete: false };
+    var state = { load: false, save: false, delete: false, slow: false };
 
     function persist() {
       try { window.localStorage.setItem(SWITCH_KEY, JSON.stringify(state)); } catch (e) {}
@@ -2316,7 +2316,7 @@
     panel.appendChild(title);
 
     function refreshFab() {
-      fab.classList.toggle('is-on', state.load || state.save || state.delete);
+      fab.classList.toggle('is-on', state.load || state.save || state.delete || state.slow);
     }
 
     function toggleRow(key, label) {
@@ -2341,10 +2341,11 @@
     toggleRow('load', '加载失败');
     toggleRow('save', '新增保存失败');
     toggleRow('delete', '删除失败');
+    toggleRow('slow', '慢加载(约9s)');
 
     var hint = document.createElement('div');
     hint.className = 'wgf-hint';
-    hint.textContent = '开关打开后执行对应操作即走失败分支，数据保持原状';
+    hint.textContent = '开关打开后执行对应操作即走失败/慢速分支，数据保持原状';
     panel.appendChild(hint);
 
     var sep = document.createElement('div');
