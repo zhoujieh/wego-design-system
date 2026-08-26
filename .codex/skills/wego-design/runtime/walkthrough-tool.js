@@ -1828,7 +1828,7 @@
             display: block;
             color: #fff;
             font-family: "PingFang SC", "SF Pro Text", "Segoe UI", sans-serif;
-            --toolbar-spring: cubic-bezier(0.78, 0, 0.22, 1);
+            --toolbar-spring: ease-out;
             overflow: visible;
             -webkit-tap-highlight-color: transparent;
             touch-action: none;
@@ -1853,7 +1853,7 @@
             white-space: nowrap;
             overflow: hidden;
             will-change: width;
-            transition: width 700ms var(--toolbar-spring);
+            transition: width 300ms var(--toolbar-spring);
             cursor: grab;
           }
           .toolbar-container.is-dragging {
@@ -2364,7 +2364,7 @@
       // 4. 从当前宽度开始
       toolbar.style.width = currentWidth + 'px';
       // 5. 设置过渡
-      toolbar.style.transition = 'width 700ms cubic-bezier(0.78, 0, 0.22, 1)';
+      toolbar.style.transition = 'width 300ms ease-out';
       // 6. 强制重排
       toolbar.getBoundingClientRect();
       // 7. 下一帧设置目标宽度，触发过渡
