@@ -1828,7 +1828,7 @@
             display: block;
             color: #fff;
             font-family: "PingFang SC", "SF Pro Text", "Segoe UI", sans-serif;
-            --toolbar-spring: cubic-bezier(0.16, 1, 0.3, 1);
+            --toolbar-spring: cubic-bezier(0.78, 0, 0.22, 1);
             overflow: visible;
             -webkit-tap-highlight-color: transparent;
             touch-action: none;
@@ -1853,7 +1853,7 @@
             white-space: nowrap;
             overflow: hidden;
             will-change: width;
-            transition: width 280ms var(--toolbar-spring);
+            transition: width 700ms var(--toolbar-spring);
             cursor: grab;
           }
           .toolbar-container.is-dragging {
@@ -1862,6 +1862,9 @@
           }
           .toolbar-container.is-collapsed {
             width: 48px;
+          }
+          .toolbar-container.is-expanded {
+            width: auto;
           }
 
           .toolbar-clip {
@@ -2326,42 +2329,65 @@
 
     // ── 展开收起 ──────────────────────────────────────────
     setCollapsed(collapsed) {
-      this._collapsed = collapsed;
       const toolbar = this._components.toolbar;
       const main = this._components.toolbarMain;
       const fab = this._components.fabBtn;
+      if (!toolbar || !main || !fab || this._collapsed === collapsed) return;
 
+      // 1. 获取当前宽度
+      const currentWidth = toolbar.getBoundingClientRect().width;
+
+      // 2. 切换状态和显示内容
+      this._collapsed = collapsed;
+      toolbar.classList.toggle('is-collapsed', collapsed);
+      toolbar.classList.toggle('is-expanded', !collapsed);
       if (collapsed) {
-        // 收起：固定当前宽度，下一帧过渡到48px
-        const currentWidth = toolbar.offsetWidth;
-        toolbar.style.width = currentWidth + 'px';
         fab.style.display = 'inline-flex';
         main.style.display = 'none';
-        toolbar.classList.add('is-collapsed');
-        toolbar.classList.remove('is-expanded');
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            toolbar.style.width = '48px';
-          });
-        });
       } else {
-        // 展开：先显示内容测量宽度，再过渡
         fab.style.display = 'none';
         main.style.display = 'inline-flex';
         const dir = this._getExpandDirection();
         main.style.flexDirection = dir === 'left' ? 'row-reverse' : 'row';
-        const contentWidth = main.offsetWidth + 8;
-        toolbar.style.width = '48px';
-        toolbar.classList.remove('is-collapsed');
-        toolbar.classList.add('is-expanded');
-        this._adjustPositionAfterExpand(contentWidth, dir);
-        this._updateSubpanelPosition();
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            toolbar.style.width = contentWidth + 'px';
-          });
-        });
       }
+
+      // 3. 计算目标宽度
+      //    收起时 48px，展开时 auto 状态下的实际宽度
+      const targetWidth = collapsed ? 48 : (() => {
+        const saved = toolbar.style.width;
+        toolbar.style.width = 'auto';
+        const w = toolbar.getBoundingClientRect().width;
+        toolbar.style.width = saved;
+        return w;
+      })();
+
+      // 4. 从当前宽度开始
+      toolbar.style.width = currentWidth + 'px';
+      // 5. 设置过渡
+      toolbar.style.transition = 'width 700ms cubic-bezier(0.78, 0, 0.22, 1)';
+      // 6. 强制重排
+      toolbar.getBoundingClientRect();
+      // 7. 下一帧设置目标宽度，触发过渡
+      requestAnimationFrame(() => {
+        toolbar.style.width = targetWidth + 'px';
+      });
+
+      // 展开时调整位置和子面板
+      if (!collapsed) {
+        this._adjustPositionAfterExpand(targetWidth, this._getExpandDirection());
+        this._updateSubpanelPosition();
+      }
+
+      // 8. 过渡结束后清理
+      const onEnd = (e) => {
+        if (e.target !== toolbar || e.propertyName !== 'width') return;
+        // 收起时保持 48px，展开时设为 auto
+        toolbar.style.width = collapsed ? targetWidth + 'px' : '';
+        toolbar.style.transition = '';
+        toolbar.removeEventListener('transitionend', onEnd);
+      };
+      toolbar.addEventListener('transitionend', onEnd);
+
       this._updateToolbarState();
     }
 
