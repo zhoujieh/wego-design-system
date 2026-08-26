@@ -66,6 +66,13 @@
       "preview": "preview/component-counter.html"
     },
     {
+      "slug": "numeric-keypad",
+      "name": "数字键盘",
+      "category": "form",
+      "status": "stable",
+      "preview": "preview/component-numeric-keypad.html"
+    },
+    {
       "slug": "badge",
       "name": "角标",
       "category": "display",
