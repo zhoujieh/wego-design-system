@@ -27,6 +27,24 @@
   flex: 0 0 auto;
 }
 
+/* 导航栏骨架：头像+昵称区、设置/分享区 */
+.my-tab-identity__skeleton,
+.my-tab-navbar__skeleton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-8);
+}
+
+.my-tab-identity__skeleton-copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-4);
+}
+
+.my-tab-navbar__skeleton {
+  gap: var(--spacer-12);
+}
+
 /* 内容区：按日期分组的商品列表骨架 */
 .my-tab-skeleton-surface {
   display: block;
