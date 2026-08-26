@@ -1082,6 +1082,13 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         renderApps();
         syncControls();
         renderContentNow();
+        /* 渐显动画结束后移除 .scene-fade-in，避免 host-tab 切换时 panel 从 display:none
+           恢复可见导致动画重播（闪烁）。首次加载的渐显保留，只执行一次。 */
+        root.querySelectorAll('.scene-fade-in').forEach(function (el) {
+          el.addEventListener('animationend', function () {
+            el.classList.remove('scene-fade-in');
+          }, { once: true });
+        });
       });
       ctx.bindTabs({ root: root });
       ctx.bindScrollLayout({
