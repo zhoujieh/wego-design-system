@@ -61,6 +61,17 @@ window.WEGO_APP_ROUTES = [
   script: './scenes/发布产品/scene.js'
 },
 {
+  routeId: 'scene-manager',
+  entry: {
+    type: 'cell-entry',
+    label: '场景管理',
+    group: 'workspace-tools',
+    tab: 'workspace'
+  },
+  style: './scenes/场景管理/scene.css',
+  script: './scenes/场景管理/scene.js'
+},
+{
   routeId: 'workspace',
   entry: {
     type: 'host-tab',

@@ -2282,6 +2282,10 @@
       + '.wgf-toggle .wgf-sw::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .15s}'
       + '.wgf-toggle.is-on .wgf-sw{background:var(--text-brand,#0a6cff)}'
       + '.wgf-toggle.is-on .wgf-sw::after{transform:translateX(14px)}'
+      + '.wgf-sep{height:1px;margin:6px 8px;background:var(--border-neutral-l1,rgba(0,0,0,.08))}'
+      + '.wgf-action{display:flex;justify-content:space-between;align-items:center;width:100%;padding:9px 8px;border:0;border-radius:8px;background:transparent;font-size:13px;color:var(--text-default,#111);cursor:pointer}'
+      + '.wgf-action:active{background:var(--bg-state-pressed,rgba(0,0,0,.05))}'
+      + '.wgf-action .wgf-arrow{color:var(--text-tertiary,#999);font-size:16px;line-height:1;margin-left:8px}'
       + '.wgf-hint{font-size:11px;color:var(--text-tertiary,#999);padding:8px 8px 4px;line-height:1.5}';
 
     var styleEl = document.createElement('style');
@@ -2290,20 +2294,20 @@
 
     var root = document.createElement('div');
     root.id = 'wgf-root';
-    root.setAttribute('aria-label', '失败注入开关');
+    root.setAttribute('aria-label', '走查');
 
     var fab = document.createElement('button');
     fab.type = 'button';
     fab.id = 'wgf-fab';
     fab.setAttribute('aria-haspopup', 'true');
-    fab.innerHTML = '<span class="wgf-badge"></span>失败注入';
+    fab.innerHTML = '<span class="wgf-badge"></span>走查';
     root.appendChild(fab);
 
     var panel = document.createElement('div');
     panel.className = 'wgf-panel';
     var title = document.createElement('div');
     title.className = 'wgf-panel__title';
-    title.textContent = '失败注入（试验）';
+    title.textContent = '走查';
     panel.appendChild(title);
 
     function refreshFab() {
@@ -2337,6 +2341,20 @@
     hint.className = 'wgf-hint';
     hint.textContent = '开关打开后执行对应操作即走失败分支，数据保持原状';
     panel.appendChild(hint);
+
+    var sep = document.createElement('div');
+    sep.className = 'wgf-sep';
+    panel.appendChild(sep);
+
+    var sceneBtn = document.createElement('button');
+    sceneBtn.type = 'button';
+    sceneBtn.className = 'wgf-action';
+    sceneBtn.innerHTML = '<span>场景管理</span><span class="wgf-arrow" aria-hidden="true">›</span>';
+    sceneBtn.addEventListener('click', function () {
+      panel.classList.remove('is-open');
+      navigate('scene-manager');
+    });
+    panel.appendChild(sceneBtn);
 
     fab.addEventListener('click', function () { panel.classList.toggle('is-open'); });
     root.appendChild(panel);
