@@ -3112,11 +3112,16 @@
   flex: 0 0 auto;
   display: flex;
   align-items: center;
-  gap: var(--spacer-8);
 }
 
 .search-nav-bar__action {
-  padding: 0;
+  align-self: stretch;
+  min-width: var(--touch-default);
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--spacer-4);
   white-space: nowrap;
   cursor: pointer;
 }
@@ -3130,16 +3135,17 @@
   flex: 0 0 auto;
   display: flex;
   align-items: center;
-  gap: var(--spacer-8);
+  padding-right: var(--spacer-4);
 }
 
 .search-toolbar__action {
+  align-self: stretch;
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  min-width: var(--size-40);
-  min-height: var(--size-40);
-  padding: var(--spacer-4);
+  justify-content: center;
+  min-width: var(--touch-default);
+  padding: 0 var(--spacer-4);
   color: var(--text-default);
   font-size: var(--body-xs-font-size);
   line-height: var(--body-xs-line-height);
