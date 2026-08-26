@@ -15,15 +15,9 @@ const sceneManagerTemplate = `
 `;
 
 (function () {
-  // 业务场景入口清单：仅列出已有需求迭代的业务场景
+  // 需走查的业务场景入口清单
   var scenes = [
-    { routeId: 'agent-resale', name: '帮卖弹窗', desc: '代理商帮卖分销弹窗' },
-    { routeId: 'album-product-feed', name: '动态', desc: '动态商品流' },
-    { routeId: 'publish-product', name: '发布产品', desc: '商品发布' },
-    { routeId: 'friend-list', name: '好友列表', desc: '好友通讯录' },
-    { routeId: 'workspace', name: '工作台', desc: '店铺工作台首页' },
-    { routeId: 'workspace-order-create', name: '收银开单', desc: '收银开单' },
-    { routeId: 'my', name: '我的', desc: '个人中心' }
+    { routeId: 'agent-resale', name: '帮卖弹窗', desc: '代理商帮卖分销弹窗' }
   ];
 
   function esc(value) {
