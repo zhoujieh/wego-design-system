@@ -85,16 +85,31 @@
 }
 
 .my-content-tabs__skeleton {
-  padding: var(--spacer-8) var(--spacer-16);
+  gap: var(--spacer-24);
+  padding: var(--spacer-4) var(--spacer-16);
+}
+.sk-tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacer-6);
+}
+.sk-tab-indicator {
+  width: 24px;
+  height: 3px;
+  border-radius: var(--radius-4);
+  background: var(--bg-skeleton);
 }
 
 .my-content-toolbar__skeleton {
   width: 100%;
+  padding-inline-start: var(--spacer-8);
+  padding-inline-end: var(--spacer-4);
 }
 
 .my-content-management__skeleton {
   justify-content: flex-start;
-  padding: var(--spacer-8) 0;
+  padding: var(--spacer-8) var(--spacer-12);
 }
 
 /* 真实节点初始 hidden，reveal 时由 JS 移除并淡入 */
@@ -104,8 +119,8 @@
 .sk-text-membership-ticker { width: 120px; height: 12px; margin-left: auto; }
 .sk-text-title { width: 64px; height: 16px; }
 .sk-rect-tab { width: 48px; height: 24px; border-radius: var(--radius-4); }
-.sk-rect-search-field { width: 60%; height: 32px; border-radius: var(--radius-4); }
-.sk-rect-search-action { width: 56px; height: 32px; border-radius: var(--radius-4); }
+.sk-rec...ield { flex: 1 1 auto; min-width: 0; height: 32px; border-radius: var(--radius-4); }
+.sk-rec...tion { width: 56px; height: 32px; border-radius: var(--radius-4); }
 .sk-text-mgmt-count { width: 72px; height: 14px; }
 .sk-text-mgmt-action { width: 40px; height: 14px; }
 .sk-text-mgmt-action--push { margin-left: auto; }
@@ -123,11 +138,27 @@
   display: block;
   margin: var(--spacer-8) 0;
 }
-
-.my-tab-skeleton-goods-card {
+.sk-date-head {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  padding-inline: var(--spacer-16) var(--spacer-8);
+}
+.sk-date-head .wg-skeleton--text {
+  margin: 0;
+}
+.my-goods-group__items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-8);
+}
+
+.my-tab-skeleton-goods-card {
+  display: grid;
+  grid-template-columns: var(--size-104) minmax(0, 1fr);
   gap: var(--spacer-12);
+  align-items: start;
   padding: var(--spacer-8);
   background: var(--bg-surface);
   border-radius: var(--radius-4);
@@ -135,7 +166,8 @@
 }
 
 .my-tab-skeleton-goods-card .wg-skeleton--rect {
-  flex: 0 0 auto;
+  width: var(--size-104);
+  height: var(--size-104);
 }
 
 .my-tab-skeleton-card__meta {
@@ -143,6 +175,14 @@
   flex-direction: column;
   gap: var(--spacer-6);
   flex: 1;
+  align-self: stretch;
+}
+
+.sk-goods-attr {
+  width: 96px;
+  height: 24px;
+  border-radius: var(--radius-4);
+  margin-top: auto;
 }
 
 .my-tab-navbar {

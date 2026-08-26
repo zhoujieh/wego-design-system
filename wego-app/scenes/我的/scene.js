@@ -98,9 +98,9 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
             <div class="sticky-region__inner">
               <div class="wg-tabs wg-tabs--mini wg-tabs--divide my-content-tabs" data-component-slug="tabs" role="tablist" aria-label="内容类型">
                 <div class="my-content-tabs__skeleton" data-role="tabs-skeleton" aria-hidden="true">
-                  <span class="wg-skeleton wg-skeleton--rect sk-rect-tab" data-component-slug="skeleton"></span>
-                  <span class="wg-skeleton wg-skeleton--rect sk-rect-tab" data-component-slug="skeleton"></span>
-                  <span class="wg-skeleton wg-skeleton--rect sk-rect-tab" data-component-slug="skeleton"></span>
+                  <div class="sk-tab-item"><span class="wg-skeleton wg-skeleton--rect sk-rect-tab" data-component-slug="skeleton"></span><span class="sk-tab-indicator"></span></div>
+                  <div class="sk-tab-item"><span class="wg-skeleton wg-skeleton--rect sk-rect-tab" data-component-slug="skeleton"></span></div>
+                  <div class="sk-tab-item"><span class="wg-skeleton wg-skeleton--rect sk-rect-tab" data-component-slug="skeleton"></span></div>
                 </div>
                 <div class="wg-tabs__scroll" data-skeleton-real>
                   <button class="wg-tabs__item" type="button" role="tab" aria-selected="true" data-content-type="product">
@@ -209,25 +209,26 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
 
   function skeletonProductCard() {
     return '<div class="my-tab-skeleton-goods-card">'
-      + '<span class="wg-skeleton wg-skeleton--rect" style="width:72px;height:72px;flex:0 0 auto"></span>'
+      + '<span class="wg-skeleton wg-skeleton--rect" data-component-slug="skeleton"></span>'
       + '<div class="my-tab-skeleton-card__meta">'
       + '<span class="wg-skeleton wg-skeleton--text" style="width:70%"></span>'
       + '<span class="wg-skeleton wg-skeleton--text" style="width:40%"></span>'
-      + '<span class="wg-skeleton wg-skeleton--text" style="width:30%"></span>'
+      + '<span class="sk-goods-attr wg-skeleton wg-skeleton--rect" data-component-slug="skeleton"></span>'
       + '</div></div>';
   }
 
   function skeletonDateGroup() {
-    return '<section class="my-tab-skeleton-date-group">'
-      + '<span class="wg-skeleton wg-skeleton--text" style="width:64px;height:12px"></span>'
+    return '<section class="my-content-date-group my-goods-group my-tab-skeleton-date-group">'
+      + '<div class="sk-date-head"><span class="wg-skeleton wg-skeleton--text" style="width:64px;height:12px"></span></div>'
+      + '<div class="my-goods-group__items">'
       + skeletonProductCard() + skeletonProductCard() + skeletonProductCard()
-      + '</section>';
+      + '</div></section>';
   }
 
   function skeletonContent() {
     return '<div class="my-goods-surface my-tab-skeleton-surface">'
       + skeletonDateGroup() + skeletonDateGroup()
-      + '<span class="wg-skeleton wg-skeleton--text" style="width:96px;height:12px;margin:8px 0"></span>'
+      + '<div class="my-goods-footer"><span class="wg-skeleton wg-skeleton--text" style="width:96px;height:12px"></span></div>'
       + '</div>';
   }
 
