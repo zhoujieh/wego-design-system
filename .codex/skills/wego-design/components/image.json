@@ -140,10 +140,10 @@
     "loading": "默认加载态使用 .wg-image--loading，在根节点显示浅灰骨架动画。",
     "loaded": "图片元素添加 .is-loaded 后以 0.2s 渐显。",
     "error": "失败态使用 .wg-image--error，并在 .wg-image__placeholder 内放置 default-diagram.svg。",
-    "dynamicGrid": "动态九宫格默认三列，使用 4px 间距与 8px 外层裁切圆角；不设固定容器宽高，图片项通过 aspect-ratio 保持正方形；恰好 4 张图时占 9 宫格左上角 2×2 坑位（grid-column/grid-row 定位），保持 3 列同尺寸、右列留空，不放大成整块 2×2。",
-    "productGrid": "商品多图固定两列栅格，使用 2px 间距与 4px 外层裁切圆角；容器宽度 clamp(80px, 100%, 180px)。按子项数量自适应：1 张子项时整列撑满容器（grid-column: 1 / -1，正方形，≤180×180）；2 张为两列等宽；3 张首项跨两行形成左 1 大 + 右 2 小（aspect-ratio: 2/1）；4 张回到 2×2。",
+    "dynamicGrid": "动态九宫格默认三列，使用 4px 间距；不设固定容器宽高，图片项通过 aspect-ratio 保持正方形。容器尺寸封顶在 9 宫格左上角 2×2 块：1 图整块一张（配合 --square/--landscape/--portrait 三朝向）；2 图占首行两格、3 图占首行三格；恰好 4 张图时占左上 2×2 坑位（grid-column/grid-row 定位），保持 3 列同尺寸、右列留空，不放大成整块 2×2；5–9 图按三列铺开，行数随数量。圆角统一口径：8px 跟随实际图片集合构成的矩形的 4 个外角——1 图四角 8（由容器/单图裁出）、2 图第 1 格左侧两角 8 + 第 2 格右侧两角 8、3 图第 1 格左侧两角 8 + 第 3 格右侧两角 8（中间格直角）、4 图 2×2 四格各持一个外角 8；5–9 图满行满列时由容器 border-radius + overflow:hidden 裁切外角。",
+    "productGrid": "商品多图固定两列栅格，使用 2px 间距与 4px 外层裁切圆角；容器宽度 clamp(80px, 100%, 160px)。统一口径：1/2/3/4 图共用同一上限，外层容器永远正方形、最大 160×160，不随子项数量变化。按子项数量自适应布局：1 张子项时整列撑满容器（grid-column: 1 / -1，正方形，≤160×160）；2 张为两列等宽；3 张首项跨两行形成左 1 大 + 右 2 小（aspect-ratio: 2/1）；4 张回到 2×2。",
     "singleGrid": "单图变体固定 .wg-image-grid--single，由消费者按图片 naturalWidth/naturalHeight 比例补 --square(≈1:1) / --landscape(>1，4:3) / --portrait(<1，3:4)；尺寸封顶在 9 宫格左上 2×2，不铺满，外层圆角 8px。",
-    "videoBadge": "视频媒体在单图根节点或多图首格 .wg-image-grid__item 内叠加 .wg-image-grid__play，绝对居中、24×24、pointer-events:none。"
+    "videoBadge": "视频媒体在单图根节点或多图首格 .wg-image-grid__item 内叠加 .wg-image-grid__play，绝对定位：1 图相对整个图片区域居中，多图相对左上角第一张图片居中；图标使用 assets/icons/play.svg，尺寸按容器宽度百分比自适应 clamp(24px, 25%, 56px)（最小 24、最大 56），pointer-events:none 不拦截点击。"
   },
   "accessibility": {},
   "usageHints": [
@@ -154,7 +154,7 @@
     "error 占位只做兜底提示，不替代正式空状态组件。",
     "动态生成 wg-image 时，必须在 img 元素上监听 load 事件并添加 is-loaded class；wg-image__src 默认 opacity:0，只有 is-loaded 才可见。静态 HTML 可直接在 img 上写 is-loaded。",
     "产品动态列表优先使用 dynamic-grid；九宫格宽度交由其父级内容区决定，不在组件内写死。",
-    "产品多图列表优先使用 product-grid；容器可随列表列宽缩放，但不得小于 80px 或大于 160px。",
+    "产品多图列表优先使用 product-grid；容器可随列表列宽缩放，但不得小于 80px 或大于 160px（1/2/3/4 图统一此上限，外层永远正方形）。",
     "单图场景使用 single-grid 并交由运行时按图片真实比例判定 --square / --landscape / --portrait，不要写死朝向。",
     "视频缩略在单图根节点或多图首格叠加 wg-image-grid__play 角标，角标本身不响应点击。"
   ],
@@ -241,10 +241,11 @@
     "--text-strong"
   ],
   "localTokens": [
-    "--wg-image-placeholder-bg",
-    "--wg-image-grid-cell-radius",
-    "--wg-image-product-grid-min-width",
-    "--wg-image-product-grid-max-width",
-    "--wg-single-2x2"
+  "--wg-image-placeholder-bg",
+  "--wg-image-grid-cell-radius",
+  "--wg-image-product-grid-min-width",
+  "--wg-image-product-grid-max-width",
+  "--wg-single-2x2",
+  "--wg-single-base-width"
   ]
 }
