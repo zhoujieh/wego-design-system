@@ -5,11 +5,13 @@
 ## 迭代位置
 
 ```text
-wego-app/scenes/{主业务场景}/_iterations/{YYYYMMDD}-{iteration_id}-{title}/
+wego-app/scenes/{主业务场景}/_iterations/{iteration_id}-{title}-{YYYYMMDD}/
 ├── iteration.json
-├── {iteration_id}-{title}-范围确认.md
+├── {iteration_id}-{title}-{YYYYMMDD}.md   # spec.md 需求规格说明（唯一需求源）
 └── freeze.json   # 仅明确冻结后存在
 ```
+
+迭代 ID 格式：`{分类}{3位数字}`（shop/bcg/customer/infras + 001 起），按分类内递增。
 
 同一需求在本地迭代、正式验收和反馈期间复用当前未冻结迭代。只有原迭代已冻结、已终止或用户明确开始独立需求时新建。
 
@@ -18,34 +20,27 @@ wego-app/scenes/{主业务场景}/_iterations/{YYYYMMDD}-{iteration_id}-{title}/
 `iteration.json` 使用 `schemaVersion: 6`。AI 只直接维护：
 
 - `identity` 中的迭代标识、标题、主场景和关联场景。
-- `prototype_brief`。
+- `brief_file`：指向 spec.md 的文件名。
 - `affected_scenes`。
 - 确有场景外运行时改动时维护 `affected_runtime`。
 
+`prototype_brief` 是 `submit-brief` 时从 spec.md 解析生成的**快照缓存**，用户不手写，用于漂移检测和校验。
+
 `brief_submission`、`brief_confirmation`、`prototype_submission`、`prototype_confirmation`、`stage_outputs`、`change_log`、`freeze`、范围哈希和文件指纹全部由脚本维护，不直接编辑。
 
-`prototype_brief` 只允许以下字段：
+## spec.md 字段
 
-```json
-{
-  "goal": "",
-  "included": [],
-  "excluded": [],
-  "entry_points": [],
-  "critical_paths": [],
-  "prototype_boundaries": [
-    {
-      "flow_id": "publish-product",
-      "mode": "functional",
-      "visible_result": "用户完成发布并看到成功结果"
-    }
-  ],
-  "states": [],
-  "data_contract": {},
-  "assumptions": [],
-  "open_questions": []
-}
-```
+spec.md 按[简报模板](./brief-template.md)填写，包含以下业务字段（标题中括号内为字段名）：
+
+- `goal`：目标和用户价值。
+- `included` / `excluded`：本次做与不做的范围。
+- `entry_points`：入口归属、位置和触发条件。
+- `critical_paths`：用户完成目标的关键路径。
+- `prototype_boundaries`：各流程的原型深度和可见结果（用 ### 子标题）。
+- `states`：必要业务状态、进入条件和用户可感知结果。
+- `data_contract`：必须展示、读取或修改的数据及约束（用 ### 子标题）。
+- `assumptions`：低风险、可逆且已写明影响的假设。
+- `open_questions`：提交前必须解决的问题。
 
 提交前，目标、纳入范围、入口、关键路径、原型边界和状态必须非空，`data_contract` 必须是非空对象，`open_questions` 必须为空。`flow_id` 使用唯一 kebab-case；`mode` 只能是 `functional`、`simulated` 或 `stub`。
 
@@ -53,21 +48,17 @@ wego-app/scenes/{主业务场景}/_iterations/{YYYYMMDD}-{iteration_id}-{title}/
 
 ```text
 draft
-  → submit-brief
-awaiting-brief-confirmation
-  → 用户明确确认 → confirm-brief
+  → 写好 spec.md → submit-brief（自动解析 MD、校验、算哈希）
+in-development（开发中，spec.md 可随时修改后重新 submit-brief）
+  → 用户说"验收完成" → 5 维度一致性校验 → 用户确认 → confirm-brief
 prototyping
-  → 用户明确验收通过 → submit-prototype + confirm-prototype
-awaiting-prototype-confirmation
-  → 连续确认 → confirm-prototype
-prototype-confirmed
-  → 用户明确要求冻结 → freeze
+  → submit-prototype + confirm-prototype → freeze（验收完成时连续执行）
 frozen
 ```
 
 暂停或终止状态为 `blocked | cancelled | superseded`。
 
-`prototyping` 同时承载首次实现和连续小问题的本地迭代。浏览本地预览、完成一次修改、通过轻量检查、创建本地 checkpoint commit，或用户说“改好了”“继续”“再调整一下”，都不改变状态，也不自动触发原型提交。
+`in-development` 承载简报开放开发：浏览本地预览、修改 spec.md、重新 submit-brief、完成一次修改、通过轻量检查，都不改变状态，也不触发 confirm。只有用户明确说"验收完成"并通过一致性校验后才执行 confirm-brief。
 
 所有命令都通过统一脚本执行：
 
@@ -82,32 +73,37 @@ node scripts/iteration-record.mjs confirm-brief --file {iteration.json} \
 node scripts/iteration-record.mjs submit-prototype --file {iteration.json}
 node scripts/iteration-record.mjs confirm-prototype --file {iteration.json} \
   --user-confirmed-prototype {iteration_id}
+node scripts/iteration-record.mjs freeze --file {iteration.json} \
+  --user-confirmed-freeze {iteration_id}
 node scripts/iteration-record.mjs migrate --file {iteration.json}
 node scripts/iteration-record.mjs invalidate --stage=brief --file {iteration.json}
 node scripts/iteration-record.mjs invalidate --stage=prototype --file {iteration.json}
 node scripts/iteration-record.mjs check --file {iteration.json}
 ```
 
-- `submit-brief` 固定当前范围；随后向用户展示简短文字摘要。
-- `confirm-brief` 只能在用户看过当前摘要并明确确认后执行，命令中的迭代 ID 必须与当前记录一致。
-- `submit-prototype` 在用户明确表达“验收通过”“确认合格”“可以合并”后，与 `confirm-prototype` 连续执行。它会重新验证受影响场景并固定待验收源码、样式和路由指纹；源码验证失败时不得进入下一状态。
-- Agent 不得因为实现完成、检查通过、用户查看了本地页面，或自己判断“可以交付”而执行 `submit-prototype`。
+- `init`：创建迭代，自动生成 spec.md 空模板和 iteration.json。
+- `submit-brief`：从 spec.md 解析 prototype_brief 快照，运行充分性守门，固定范围哈希；从 draft 或 in-development 状态均可执行。
+- `confirm-brief`：只能在用户明确表达"验收完成"且 5 维度一致性校验通过后执行，命令中的迭代 ID 必须与当前记录一致。
+- `submit-prototype` 在用户明确验收通过后，与 `confirm-prototype` 连续执行。它会重新验证受影响场景并固定待验收源码、样式和路由指纹；源码验证失败时不得进入下一状态。
+- Agent 不得因为实现完成、检查通过、用户查看了本地页面，或自己判断"可以交付"而执行 `submit-prototype`。
 - `confirm-prototype` 只能在用户明确验收通过、且 `submit-prototype` 已固化待验收指纹后连续执行，命令中的迭代 ID 必须一致，且当前原型指纹必须与提交时完全相同；发生漂移必须先失效并重新提交。
+- `freeze`：验收完成时与 confirm-prototype 连续执行，生成 freeze.json 快照。冻结后的记录是历史快照，不再为场景修改提供有效迭代绑定。
 - `migrate` 只迁移 schemaVersion 5 的历史记录。旧的待验收原型因没有提交指纹会回到 `prototyping`，必须重新获得提交授权并提交后再请求用户验收；不得借迁移伪造验收。
 - `confirm-prototype` 表示当前原型已验收，不代表冻结。
 
 ## 本地迭代与验收反馈
 
+- 在 `in-development` 中收到已确认范围内的视觉、布局、组件、Token、路由或交互调整，直接修改 spec.md 并重新 submit-brief，不执行 invalidate。
 - 在 `prototyping` 中收到已确认范围内的视觉、布局、组件、Token、路由或交互调整，直接继续修改，不执行 `invalidate --stage=prototype`。
-- 在 `awaiting-prototype-confirmation` 中收到上述调整，先执行 `invalidate --stage=prototype` 回到 `prototyping`，在本地累计完成新一轮修改；只有用户再次明确表达“验收通过”时，才重新执行 `submit-prototype` 与 `confirm-prototype`。
-- 用户反馈改变目标、范围、入口、关键路径、状态、数据或可见结果时，无论当前处于哪个原型阶段，都先 `invalidate --stage=brief`，更新简报并重新确认。
+- 在 `awaiting-prototype-confirmation` 中收到上述调整，先执行 `invalidate --stage=prototype` 回到 `prototyping`，在本地累计完成新一轮修改；只有用户再次明确表达"验收通过"时，才重新执行 `submit-prototype` 与 `confirm-prototype`。
+- 用户反馈改变目标、范围、入口、关键路径、状态、数据或可见结果时，无论当前处于哪个原型阶段，都先 `invalidate --stage=brief`，更新 spec.md 并重新提交确认。
 
 失效在原迭代中继续，不自动新建迭代。冻结迭代不得失效或覆盖。
 
 ## 冻结
 
 <!-- rule-id: business-iteration-explicit-user-freeze -->
-只有用户明确指定迭代并要求“冻结”时执行：
+验收完成时，`confirm-prototype` 后连续执行 `freeze`，最终状态为 `frozen`。
 
 ```bash
 node scripts/iteration-record.mjs freeze \
@@ -115,7 +111,7 @@ node scripts/iteration-record.mjs freeze \
   --user-confirmed-freeze {iteration_id}
 ```
 
-确认、测试、验收、交付、提交、部署或时间经过都不能推断冻结意图。目标迭代不明确时保持 `prototype-confirmed` 并询问用户。
+确认、测试、验收、交付、提交、部署或时间经过都不能单独推断冻结意图；冻结必须与验收收口连续执行。目标迭代不明确时保持 `prototype-confirmed` 并询问用户。
 
 冻结指纹由脚本自动覆盖：
 

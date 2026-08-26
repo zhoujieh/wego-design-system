@@ -263,6 +263,8 @@ if (checkChanged) {
     if (!m) return;
     const scene = m[1];
     const relPath = m[2];
+    // _iterations/ 下的迭代记录文件是工作流元数据，不属于场景实现，不受认领限制
+    if (relPath.startsWith('_iterations/')) return;
     if (!changedByScene[scene]) changedByScene[scene] = [];
     changedByScene[scene].push(relPath);
   });
