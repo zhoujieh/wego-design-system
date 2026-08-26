@@ -34,6 +34,10 @@
   align-items: center;
   gap: var(--spacer-8);
 }
+.my-tab-identity__skeleton[hidden],
+.my-tab-navbar__skeleton[hidden] {
+  display: none;
+}
 
 .my-tab-identity__skeleton-copy {
   display: flex;
