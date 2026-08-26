@@ -103,9 +103,9 @@
 .sk-rect-membership-brand { width: 96px; height: 16px; }
 .sk-text-membership-ticker { width: 120px; height: 12px; margin-left: auto; }
 .sk-text-title { width: 64px; height: 16px; }
-.sk-rect-tab { width: 48px; height: 24px; border-radius: var(--radius-full); }
-.sk-rect-search-field { width: 60%; height: 32px; border-radius: var(--radius-full); }
-.sk-rect-search-action { width: 56px; height: 32px; border-radius: var(--radius-8); }
+.sk-rect-tab { width: 48px; height: 24px; border-radius: var(--radius-4); }
+.sk-rect-search-field { width: 60%; height: 32px; border-radius: var(--radius-4); }
+.sk-rect-search-action { width: 56px; height: 32px; border-radius: var(--radius-4); }
 .sk-text-mgmt-count { width: 72px; height: 14px; }
 .sk-text-mgmt-action { width: 40px; height: 14px; }
 .sk-text-mgmt-action--push { margin-left: auto; }
@@ -130,7 +130,7 @@
   gap: var(--spacer-12);
   padding: var(--spacer-8);
   background: var(--bg-surface);
-  border-radius: var(--radius-8);
+  border-radius: var(--radius-4);
   margin-bottom: var(--spacer-8);
 }
 

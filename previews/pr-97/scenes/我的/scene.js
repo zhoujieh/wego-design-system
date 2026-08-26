@@ -202,14 +202,14 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
 
   function skeletonApps() {
     var entry = '<div class="my-tab-skeleton-entry">'
-      + '<span class="wg-skeleton wg-skeleton--rect" style="width:48px;height:48px;border-radius:12px"></span>'
+      + '<span class="wg-skeleton wg-skeleton--rect" style="width:48px;height:48px"></span>'
       + '<span class="wg-skeleton wg-skeleton--text" style="width:48px;height:12px"></span></div>';
     return skeletonScrollRow(entry, 5);
   }
 
   function skeletonProductCard() {
     return '<div class="my-tab-skeleton-goods-card">'
-      + '<span class="wg-skeleton wg-skeleton--rect" style="width:72px;height:72px;border-radius:8px;flex:0 0 auto"></span>'
+      + '<span class="wg-skeleton wg-skeleton--rect" style="width:72px;height:72px;flex:0 0 auto"></span>'
       + '<div class="my-tab-skeleton-card__meta">'
       + '<span class="wg-skeleton wg-skeleton--text" style="width:70%"></span>'
       + '<span class="wg-skeleton wg-skeleton--text" style="width:40%"></span>'
