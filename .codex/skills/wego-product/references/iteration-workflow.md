@@ -11,7 +11,9 @@ wego-app/scenes/{主业务场景}/_iterations/{iteration_id}-{title}-{YYYYMMDD}/
 └── freeze.json   # 仅明确冻结后存在
 ```
 
-迭代 ID 格式：`{分类}{3位数字}`（shop/bcg/customer/infras + 001 起），按分类内递增。
+迭代 ID 格式：`{分类}{3位数字}[-{修订号}]`，如 `shop001`、`bcg003-2`。分类代码：`shop`（相册云）、`bcg`（生意云）、`customer`（客户云）、`infras`（基础）。
+
+`init` 时 `--iteration-id` 可选：不传则根据场景自动判断分类并按分类内最大编号+1 自动生成（可用 `suggest-id --scene <场景>` 预查询）；用户主动指定时直接使用，支持 `-1`、`-2` 等修订号后缀。场景分类映射表维护在 `scripts/iteration-record.mjs` 的 `sceneCategoryMap`，新增场景时补充。
 
 同一需求在本地迭代、正式验收和反馈期间复用当前未冻结迭代。只有原迭代已冻结、已终止或用户明确开始独立需求时新建。
 
@@ -63,9 +65,11 @@ frozen
 所有命令都通过统一脚本执行：
 
 ```bash
+node scripts/iteration-record.mjs suggest-id --scene {场景}
+
 node scripts/iteration-record.mjs init \
   --file wego-app/scenes/{场景}/_iterations/{迭代}/iteration.json \
-  --iteration-id {id} --title {标题} --scene {场景}
+  --title {标题} --scene {场景} [--iteration-id {id}]
 
 node scripts/iteration-record.mjs submit-brief --file {iteration.json}
 node scripts/iteration-record.mjs confirm-brief --file {iteration.json} \
@@ -81,7 +85,8 @@ node scripts/iteration-record.mjs invalidate --stage=prototype --file {iteration
 node scripts/iteration-record.mjs check --file {iteration.json}
 ```
 
-- `init`：创建迭代，自动生成 spec.md 空模板和 iteration.json。
+- `suggest-id`：根据场景名预查询建议的迭代 ID（自动判断分类+递增编号），不创建任何文件。
+- `init`：创建迭代，自动生成 spec.md 空模板和 iteration.json。`--iteration-id` 可选，不传则自动生成；用户主动指定时直接使用，支持 `-1`、`-2` 等修订号后缀。
 - `submit-brief`：从 spec.md 解析 prototype_brief 快照，运行充分性守门，固定范围哈希；从 draft 或 in-development 状态均可执行。
 - `confirm-brief`：只能在用户明确表达"验收完成"且 5 维度一致性校验通过后执行，命令中的迭代 ID 必须与当前记录一致。
 - `submit-prototype` 在用户明确验收通过后，与 `confirm-prototype` 连续执行。它会重新验证受影响场景并固定待验收源码、样式和路由指纹；源码验证失败时不得进入下一状态。

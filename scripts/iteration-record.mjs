@@ -34,6 +34,27 @@ const iterationKeys = ['schemaVersion', 'identity', 'status', 'scope_revision', 
 const identityKeys = ['iteration_id', 'title', 'date', 'primary_scene', 'related_scenes'];
 const routesRelativePath = 'wego-app/js/routes.js';
 const routeFingerprintPrefix = '@route-entry/';
+
+// 迭代分类映射：场景名 → 分类代码。新增场景时在此补充。
+const sceneCategoryMap = new Map([
+  // shop 相册云：内容发布、商品展示
+  ['动态', 'shop'],
+  ['发布产品', 'shop'],
+  // bcg 生意云：生意经营、交易相关
+  ['帮卖分销', 'bcg'],
+  ['开单', 'bcg'],
+  // customer 客户云：客户关系、个人中心
+  ['好友列表', 'customer'],
+  ['我的', 'customer'],
+  // infras 基础：系统工具、基础能力
+  ['工作台', 'infras'],
+  ['场景管理', 'infras'],
+  ['组件预览', 'infras'],
+  ['应用中心', 'infras']
+]);
+const categoryCodes = ['shop', 'bcg', 'customer', 'infras'];
+// iteration_id 格式：{分类}{3位数字}[-{修订号}]，如 shop001、bcg003-2
+const iterationIdPattern = /^(shop|bcg|customer|infras)(\d{3,})(-\d+)?$/;
 const expectedStageValidity = new Map([
   ['draft', [false, false]],
   ['in-development', [true, false]],
@@ -706,12 +727,57 @@ function generateBriefTemplate(record) {
 `;
 }
 
+// 根据场景名判断分类代码，匹配不到时默认 infras
+function classifyScene(scene) {
+  return sceneCategoryMap.get(scene) || 'infras';
+}
+
+// 扫描所有迭代，计算指定分类的下一个编号（最大编号+1，格式化为3位）
+function nextIterationNumber(category) {
+  const scenesRoot = path.join(root, 'wego-app/scenes');
+  if (!fs.existsSync(scenesRoot)) return 1;
+  let maxNum = 0;
+  const visit = directory => {
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      const target = path.join(directory, entry.name);
+      if (entry.isDirectory()) visit(target);
+      else if (entry.isFile() && entry.name === 'iteration.json') {
+        try {
+          const record = JSON.parse(fs.readFileSync(target, 'utf8'));
+          const id = record.identity?.iteration_id || '';
+          const match = id.match(iterationIdPattern);
+          if (match && match[1] === category) {
+            const num = parseInt(match[2], 10);
+            if (num > maxNum) maxNum = num;
+          }
+        } catch { /* 忽略无法解析的记录 */ }
+      }
+    }
+  };
+  visit(scenesRoot);
+  return maxNum + 1;
+}
+
+// 生成建议的 iteration_id：{分类}{3位编号}
+function suggestIterationId(scene) {
+  const category = classifyScene(scene);
+  const num = nextIterationNumber(category);
+  return `${category}${String(num).padStart(3, '0')}`;
+}
+
 function init() {
-  const id = value('--iteration-id');
+  let id = value('--iteration-id');
   const title = value('--title');
   const scene = value('--scene');
-  if (!id || !title || !scene) fail('init 需要 --iteration-id、--title、--scene');
+  if (!title || !scene) fail('init 需要 --title、--scene（--iteration-id 可选，不传则自动生成）');
   if (!isSafeSceneName(scene)) fail('--scene 必须是单层安全场景名');
+  // 未传 --iteration-id 时自动生成：{分类}{3位编号}
+  if (!id) {
+    id = suggestIterationId(scene);
+    console.log(`自动生成迭代 ID：${id}（分类：${classifyScene(scene)}）`);
+  } else if (!iterationIdPattern.test(id)) {
+    console.warn(`警告：iteration_id "${id}" 不符合规范格式 {分类}{3位编号}[-修订号]（如 shop001、bcg003-2），仍将使用`);
+  }
   const file = requireFile(scene);
   if (fs.existsSync(file)) fail(`${file} 已存在`);
   const today = new Date().toISOString().slice(0, 10);
@@ -1319,6 +1385,15 @@ function test() {
 }
 
 switch (command) {
+  case 'suggest-id': {
+    const scene = value('--scene');
+    if (!scene) fail('suggest-id 需要 --scene');
+    if (!isSafeSceneName(scene)) fail('--scene 必须是单层安全场景名');
+    const id = suggestIterationId(scene);
+    console.log(`建议迭代 ID：${id}`);
+    console.log(`分类：${classifyScene(scene)}`);
+    break;
+  }
   case 'init': init(); break;
   case 'submit-brief': {
     // submit-brief 支持从 draft 和 in-development 状态执行
