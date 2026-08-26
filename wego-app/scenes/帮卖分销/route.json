@@ -5,7 +5,5 @@
     "label": "代理商帮卖弹窗",
     "group": "dongtai-tools",
     "tab": "dongtai"
-  },
-  "style": "scenes/帮卖分销/scene.css",
-  "script": "scenes/帮卖分销/scene.js"
+  }
 }
