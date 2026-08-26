@@ -1,0 +1,90 @@
+/* 场景骨架屏过渡动画与布局
+ * 由 wego-app/js/app.js 的 mountSceneInit 在场景挂载时驱动：
+ * 1. renderTemplate 后，injectSkeleton 向空 [data-region] 注入 .wg-skeleton 骨架块
+ *    或在 explicit 模式下,向 panel 注入 .sk-overlay 覆盖层(承载扁平色块)
+ * 2. rAF 延迟调用 scene.init，让骨架先绘制一帧
+ * 3. init 用 innerHTML 替换 region 内容（骨架被替换为真实内容）
+ * 4. init 返回后，框架给 region 直接子元素加 .scene-fade-in，触发淡入
+ *    explicit 模式下,overlay 由 fadeRegionContent 或 ctx.setRegion 移除
+ *
+ * 浏览器只在 JS 任务结束后 paint，init 填充与加 class 同步完成，
+ * paint 时子元素已是 .scene-fade-in 起始状态（opacity:0），无闪烁。
+ *
+ * 布局工具类（.sk*）仅由框架注入使用，不属于设计系统组件契约。
+ */
+
+@keyframes scene-content-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.scene-fade-in {
+  animation: scene-content-fade-in 200ms ease-out both;
+}
+
+/* explicit 模式骨架覆盖层
+ * 承载 position:absolute 的扁平色块,坐标相对于 scene root
+ * inset:0 覆盖整个 panel(scene root 撑满 panel)
+ * z-index 高于内容但允许点击穿透(骨架期间用户不该交互,由场景自行控制) */
+.sk-overlay {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 20;
+}
+
+/* 框架骨架布局工具类 */
+.sk {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-12);
+  padding: var(--spacer-16);
+}
+.sk--row {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacer-12);
+}
+.sk--tight {
+  gap: var(--spacer-8);
+}
+.sk__card {
+  display: flex;
+  gap: var(--spacer-12);
+  padding: var(--spacer-12);
+  background: var(--bg-surface);
+  border-radius: var(--radius-8);
+}
+.sk__card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-8);
+}
+.sk__block {
+  display: block;
+}
+.sk__pill {
+  display: inline-block;
+  height: 24px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+/* 减少动效偏好：关闭骨架 shimmer 与内容淡入 */
+@media (prefers-reduced-motion: reduce) {
+  .scene-fade-in {
+    animation: none;
+  }
+  .wg-skeleton::after {
+    animation: none;
+    opacity: 0;
+  }
+}
