@@ -95,3 +95,4 @@ AI 会先和你**澄清需求细节并生成需求简报**，你确认简报后�
 - 完整协作约定见 [`AGENTS.md`](AGENTS.md)；脚本与验证命令见 [`scripts/README.md`](scripts/README.md)。
 
 > 普通设计任务把设计系统当**只读**用，不要改 `wego-app/lib/` 和 `components.css`；只有做设计系统维护任务才改源。
+
