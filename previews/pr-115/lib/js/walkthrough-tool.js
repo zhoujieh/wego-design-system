@@ -1828,7 +1828,7 @@
             display: block;
             color: #fff;
             font-family: "PingFang SC", "SF Pro Text", "Segoe UI", sans-serif;
-            --toolbar-spring: cubic-bezier(0.78, 0, 0.22, 1);
+            --toolbar-spring: cubic-bezier(0.16, 1, 0.3, 1);
             overflow: visible;
             -webkit-tap-highlight-color: transparent;
             touch-action: none;
@@ -1853,7 +1853,7 @@
             white-space: nowrap;
             overflow: hidden;
             will-change: width;
-            transition: width 700ms var(--toolbar-spring);
+            transition: width 280ms var(--toolbar-spring);
             cursor: grab;
           }
           .toolbar-container.is-dragging {
@@ -1862,9 +1862,6 @@
           }
           .toolbar-container.is-collapsed {
             width: 48px;
-          }
-          .toolbar-container.is-expanded {
-            width: auto;
           }
 
           .toolbar-clip {
@@ -2335,51 +2332,35 @@
       const fab = this._components.fabBtn;
 
       if (collapsed) {
-        // 收起：固定当前宽度后过渡到48px
+        // 收起：固定当前宽度，下一帧过渡到48px
         const currentWidth = toolbar.offsetWidth;
         toolbar.style.width = currentWidth + 'px';
-        // 强制重排
-        void toolbar.offsetWidth;
         fab.style.display = 'inline-flex';
         main.style.display = 'none';
-        toolbar.style.width = '48px';
         toolbar.classList.add('is-collapsed');
         toolbar.classList.remove('is-expanded');
-        const onEnd = (e) => {
-          if (e.propertyName === 'width') {
-            toolbar.style.width = '';
-            toolbar.removeEventListener('transitionend', onEnd);
-          }
-        };
-        toolbar.addEventListener('transitionend', onEnd);
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            toolbar.style.width = '48px';
+          });
+        });
       } else {
         // 展开：先显示内容测量宽度，再过渡
         fab.style.display = 'none';
         main.style.display = 'inline-flex';
-        // 动态计算展开方向
         const dir = this._getExpandDirection();
         main.style.flexDirection = dir === 'left' ? 'row-reverse' : 'row';
-        // 测量内容宽度（main宽度 + padding 8px）
         const contentWidth = main.offsetWidth + 8;
-        // 先固定为收起宽度
         toolbar.style.width = '48px';
         toolbar.classList.remove('is-collapsed');
         toolbar.classList.add('is-expanded');
-        // 强制重排
-        void toolbar.offsetWidth;
-        // 过渡到内容宽度
-        toolbar.style.width = contentWidth + 'px';
-        // 调整位置确保不超出屏幕
         this._adjustPositionAfterExpand(contentWidth, dir);
         this._updateSubpanelPosition();
-        // 过渡结束后清理width（设为auto，由内容撑开）
-        const onEnd = (e) => {
-          if (e.propertyName === 'width') {
-            toolbar.style.width = '';
-            toolbar.removeEventListener('transitionend', onEnd);
-          }
-        };
-        toolbar.addEventListener('transitionend', onEnd);
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            toolbar.style.width = contentWidth + 'px';
+          });
+        });
       }
       this._updateToolbarState();
     }
