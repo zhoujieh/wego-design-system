@@ -1,7 +1,0 @@
-{
-  "agent": "codex-order-demo",
-  "scene": "开单",
-  "routeId": "workspace-order-create",
-  "branch": "feature/luhong-order-grid-followup",
-  "claimedAt": "2026-08-25T06:02:56.477Z"
-}
