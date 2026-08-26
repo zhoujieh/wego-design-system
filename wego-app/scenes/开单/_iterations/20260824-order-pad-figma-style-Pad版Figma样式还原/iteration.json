@@ -7,7 +7,7 @@
     "primary_scene": "开单",
     "related_scenes": []
   },
-  "status": "awaiting-brief-confirmation",
+  "status": "awaiting-prototype-confirmation",
   "scope_revision": 11,
   "prototype_brief": {
     "goal": "将收银开单优化为按视口宽度切换的竖版与横版两套视觉：手机宽度保留竖版，Pad 横屏与桌面宽度采用指定 Figma 节点的横版样式，横版右侧商品库按独立 Figma 节点精确还原，并在横版顶部导航展示当前开单员的今日订单汇总。",
@@ -155,8 +155,23 @@
     "scope_revision": 11,
     "scope_sha256": "2d12df445aa6252a0afb32899367e7d3b8978b6f2ffe85c6b78320feca8b7693"
   },
-  "brief_confirmation": null,
-  "prototype_submission": null,
+  "brief_confirmation": {
+    "at": "2026-08-26T02:45:16.323Z",
+    "scope_revision": 11,
+    "scope_sha256": "2d12df445aa6252a0afb32899367e7d3b8978b6f2ffe85c6b78320feca8b7693"
+  },
+  "prototype_submission": {
+    "at": "2026-08-26T02:51:41.609Z",
+    "scope_revision": 11,
+    "affected_scenes": [
+      "开单"
+    ],
+    "fingerprints": {
+      "@route-entry/%E5%BC%80%E5%8D%95": "da8121671009954031a87dc9bce65691c3ce40d16f9516ababf6a0bd4c532eb3",
+      "wego-app/scenes/开单/scene.css": "56397c6c8bf5e32db97c32f99b5f71c287e17a3e167698b83c3bd49a5871fb1f",
+      "wego-app/scenes/开单/scene.js": "d34d6c6e6bff86322bc6c85c504138520928561ef772ac4c64e31d9364ac384d"
+    }
+  },
   "prototype_confirmation": null,
   "affected_scenes": [
     "开单"
@@ -167,7 +182,7 @@
       "valid": true
     },
     "design": {
-      "valid": false
+      "valid": true
     }
   },
   "change_log": [
@@ -294,6 +309,14 @@
     {
       "action": "submit-brief",
       "at": "2026-08-26T02:44:19.707Z"
+    },
+    {
+      "action": "confirm-brief",
+      "at": "2026-08-26T02:45:16.324Z"
+    },
+    {
+      "action": "submit-prototype",
+      "at": "2026-08-26T02:51:41.622Z"
     }
   ],
   "freeze": null

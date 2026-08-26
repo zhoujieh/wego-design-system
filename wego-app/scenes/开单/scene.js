@@ -1044,9 +1044,15 @@
     if (!rows.length) return '<div class="order-catalog-empty">没有匹配商品</div>';
     return rows.map(function (item) {
       var catalogPrice = (Math.round(customerPrice(item) * 100) / 100).toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1');
+      var catalogInventory = item.inventory != null
+        ? Number(item.inventory)
+        : (item.stock != null
+          ? Number(item.stock)
+          : item.specs.reduce(function (total, spec) { return total + specStock(item, spec); }, 0));
       var priceMarkup = '<b><span class="order-catalog-item__currency">¥</span><span class="order-catalog-item__amount">' + escapeHtml(catalogPrice) + '</span></b>';
       var content = ''
         +   '<span class="order-catalog-item__media">' + image(item, 'order-catalog-item__image') + '<span class="order-catalog-item__code"><span class="order-catalog-item__code-copy"><span class="order-catalog-item__sku">' + escapeHtml(item.code) + '</span><span class="order-catalog-item__name">' + escapeHtml(item.name) + '</span></span></span><i class="wego-iconfont-s icon-jia16 order-catalog-item__add" aria-hidden="true"></i></span>'
+        +   '<span class="order-catalog-item__list-detail"><strong class="order-catalog-item__list-code">' + escapeHtml(item.code) + '</strong><span class="order-catalog-item__list-name">' + escapeHtml(item.name) + '</span></span>'
         +   '<span class="order-catalog-item__detail"><strong>' + escapeHtml(item.name) + '</strong><small>' + escapeHtml(item.code) + (item.stock != null ? ' · 库存 ' + item.stock + ' 台' : ' · ' + item.specs.length + '个规格') + '</small>' + priceMarkup + '</span>';
       if (!manualDesktop) {
         return '<button type="button" class="order-catalog-item" data-product-id="' + item.id + '">' + content + '</button>';
@@ -1055,7 +1061,7 @@
         + '<article class="order-catalog-item card card--surface card--vertical order-catalog-item--desktop' + (editable ? ' order-catalog-item--editable' : '') + '" data-component-slug="card">'
         +   '<button type="button" class="order-catalog-item__select" data-product-id="' + item.id + '" aria-label="添加' + escapeHtml(item.name) + '">' + content + '</button>'
         +   '<button type="button" class="order-catalog-item__image-mark" data-product-activity="' + item.id + '" aria-label="查看' + escapeHtml(item.name) + '详情" title="查看详情"><img src="./scenes/开单/assets/icon-view-detail.svg" width="17" height="19" alt="" aria-hidden="true"></button>'
-        +   (editable ? '<span class="order-catalog-item__actions"><span class="order-catalog-item__grid-price">' + priceMarkup + '</span><button type="button" class="order-catalog-item__edit" data-edit-catalog-product="' + item.id + '" aria-label="编辑' + escapeHtml(item.name) + '" title="编辑商品"><i class="wego-iconfont-s icon-bianji16" aria-hidden="true"></i></button></span>' : '')
+        +   (editable ? '<span class="order-catalog-item__actions"><span class="order-catalog-item__grid-price">' + priceMarkup + '</span><button type="button" class="order-catalog-item__edit" data-edit-catalog-product="' + item.id + '" aria-label="编辑' + escapeHtml(item.name) + '" title="编辑商品"><i class="wego-iconfont-s icon-bianji16" aria-hidden="true"></i></button><span class="order-catalog-item__list-stock">库存' + escapeHtml(String(catalogInventory)) + '</span></span>' : '')
         + '</article>';
     }).join('');
   }
