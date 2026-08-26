@@ -1109,16 +1109,8 @@
     });
   }
 
-  function desktopCodeMatches(keyword) {
-    var normalized = String(keyword || '').trim().toLowerCase();
-    if (!normalized) return [];
-    return activeCatalogProducts().filter(function (item) {
-      return item.code.toLowerCase().indexOf(normalized) >= 0;
-    });
-  }
-
   function desktopSearchResultDropdown() {
-    var matches = desktopCodeMatches(state.desktopProductKeyword);
+    var matches = desktopProductMatches(state.desktopProductKeyword);
     if (!state.desktopSearchResultsOpen || matches.length < 2) return '';
     return ''
       + '<div class="order-desktop-search-results card card--surface" role="listbox" aria-label="搜索商品结果">'
@@ -1135,17 +1127,26 @@
   }
 
   function applyDesktopSearch(keyword, ctx) {
-    var codeMatches = desktopCodeMatches(keyword);
-    if (codeMatches.length >= 2) {
+    var normalized = String(keyword || '').trim();
+    var matches = desktopProductMatches(normalized);
+    if (!normalized) return false;
+    if (matches.length >= 2) {
       state.desktopSearchResultsOpen = state.catalogCollapsed;
       state.desktopCatalogSearchActive = !state.catalogCollapsed;
       renderActive();
       focusDesktopProductSearch();
       return true;
     }
+    if (!matches.length && !state.catalogCollapsed) {
+      state.desktopSearchResultsOpen = false;
+      state.desktopCatalogSearchActive = true;
+      renderActive();
+      focusDesktopProductSearch();
+      return true;
+    }
     state.desktopSearchResultsOpen = false;
     state.desktopCatalogSearchActive = false;
-    if (!openDesktopSearchMatch(keyword, false, ctx)) return false;
+    if (!openDesktopSearchMatch(normalized, false, ctx)) return false;
     return true;
   }
 
@@ -1210,8 +1211,8 @@
         + '</aside>';
     }
     var historyProducts = merchantRecentProducts();
-    var searchMatches = desktopCodeMatches(state.desktopProductKeyword);
-    var showingSearchResults = state.desktopCatalogSearchActive && searchMatches.length >= 2;
+    var searchMatches = desktopProductMatches(state.desktopProductKeyword);
+    var showingSearchResults = state.desktopCatalogSearchActive && Boolean(state.desktopProductKeyword.trim());
     var allProducts = (showingSearchResults ? searchMatches : activeCatalogProducts()).filter(function (item) {
       if (showingSearchResults) return true;
       var categoryMatched = state.catalogCategory === '全部' || item.category === state.catalogCategory || (item.tags || []).indexOf(state.catalogCategory) >= 0;
@@ -1225,9 +1226,11 @@
       +   desktopProductSearch(true)
       +   '<div class="order-desktop__catalog-scroll">'
       +   (!showingSearchResults && historyProducts.length ? '<section class="order-catalog-history" aria-label="最近成交商品"><div class="order-catalog-history__list layout-scroll-row" data-component-slug="layout-scroll-row" data-item-size="auto" data-snap="start" data-peek="none">' + catalogList(true, historyProducts, false) + '</div></section>' : '')
-      +   '<section class="order-catalog-products">'
+      +   '<section class="order-catalog-products' + (showingSearchResults ? ' order-catalog-products--searching' : '') + '">'
       +     (showingSearchResults ? '' : '<div class="order-catalog-toolbar">' + catalogCategoryTabs() + '</div>')
-      +     '<div class="order-catalog-products__body"><div class="order-desktop__catalog-list order-desktop__catalog-list--' + state.catalogViewMode + (state.catalogViewMode === 'grid' ? ' layout-grid' : '') + '"' + (state.catalogViewMode === 'grid' ? ' data-component-slug="layout-grid" data-columns="' + catalogGridColumnsForWidth(state.catalogWidth) + '" data-align="stretch"' : '') + '>' + catalogList(true, allProducts, true) + '</div></div>'
+      +     '<div class="order-catalog-products__body">' + (showingSearchResults && !allProducts.length
+        ? '<div class="order-catalog-search-result-empty"><div class="result" data-component-slug="result" role="group" aria-label="搜索结果"><div class="result__icon" aria-hidden="true"><i class="wego-iconfont-s icon-tanhao-mian"></i></div><div class="result__title">未搜索到相关商品</div></div></div>'
+        : '<div class="order-desktop__catalog-list order-desktop__catalog-list--' + state.catalogViewMode + (state.catalogViewMode === 'grid' ? ' layout-grid' : '') + '"' + (state.catalogViewMode === 'grid' ? ' data-component-slug="layout-grid" data-columns="' + catalogGridColumnsForWidth(state.catalogWidth) + '" data-align="stretch"' : '') + '>' + catalogList(true, allProducts, true) + '</div>') + '</div>'
       +   '</section>'
       +   '</div>'
       + '</aside>';
@@ -4159,10 +4162,10 @@
     }
     if (target.matches('[data-header-catalog-search]')) {
       state.desktopProductKeyword = target.value;
-      var headerCodeMatches = desktopCodeMatches(target.value);
       var wasCatalogSearchActive = state.desktopCatalogSearchActive;
-      state.desktopSearchResultsOpen = state.catalogCollapsed && headerCodeMatches.length >= 2;
-      state.desktopCatalogSearchActive = !state.catalogCollapsed && headerCodeMatches.length >= 2;
+      var headerMatches = desktopProductMatches(target.value);
+      state.desktopSearchResultsOpen = state.catalogCollapsed && headerMatches.length >= 2;
+      state.desktopCatalogSearchActive = !state.catalogCollapsed && Boolean(target.value.trim());
       var headerClear = target.parentElement.querySelector('.input-clear');
       if (headerClear) headerClear.style.display = target.value ? 'block' : 'none';
       var headerSubmit = activeContext.root.querySelector('[data-submit-header-search]');

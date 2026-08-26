@@ -6195,6 +6195,20 @@ body[data-order-layout="landscape"] .phone-indicator {
     padding: 0 var(--spacer-12) var(--spacer-12);
   }
 
+  .order-catalog-products--searching,
+  .order-catalog-products--searching .order-catalog-products__body {
+    flex: 1 1 auto;
+  }
+
+  .order-catalog-search-result-empty {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: calc(var(--size-104) * 2);
+  }
+
   .order-desktop__catalog-list--grid .order-catalog-item {
     border: 0;
     border-radius: var(--radius-6);
