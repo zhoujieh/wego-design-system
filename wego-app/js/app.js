@@ -2367,7 +2367,7 @@
     componentBtn.innerHTML = '<span>查看组件</span><span class="wgf-arrow" aria-hidden="true">›</span>';
     componentBtn.addEventListener('click', function () {
       panel.classList.remove('is-open');
-      window.open('./.codex/skills/wego-design/preview/index.html', '_blank');
+      navigate('component-preview');
     });
     panel.appendChild(componentBtn);
 
