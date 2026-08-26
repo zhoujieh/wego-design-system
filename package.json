@@ -12,7 +12,10 @@
     "claims:validate": "node scripts/validate-claims.mjs",
     "claims:stale": "node scripts/release-claim.mjs --sweep --dry-run",
     "claims:sweep": "node scripts/release-claim.mjs --sweep",
-    "claims:test": "node scripts/validate-claims.mjs test"
+    "claims:test": "node scripts/validate-claims.mjs test",
+    "worktrees:stale": "node scripts/prune-worktrees.mjs",
+    "worktrees:prune": "node scripts/prune-worktrees.mjs --force",
+    "worktrees:test": "node scripts/prune-worktrees.mjs test"
   },
   "devDependencies": {
     "playwright": "^1.48.0"
