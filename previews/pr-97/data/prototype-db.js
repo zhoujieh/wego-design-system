@@ -2,9 +2,31 @@
   var imageBase = './lib/assets/image/';
   var avatarBase = imageBase + 'avatar/';
 
+  /* 各资产图库除主图外的前 3 张（与 lib/assets/image/clothing/ 实际文件一一对应），供商品多图 mock 使用 */
+  var GALLERY_IMAGES = {
+    '1': ['clothing_1_10.jpg', 'clothing_1_11.jpg', 'clothing_1_12.jpg'],
+    '2': ['clothing_2_10.jpg.jpg', 'clothing_2_2.jpg', 'clothing_2_3.jpg.jpg'],
+    '3': ['1663740989357_63074.jpg', '1663740989358_96529.jpg', '1663740989359_87304.jpg'],
+    '4': ['1663741015639_94460.jpg', '1663741015640_92584.jpg', '1663741015641_38566.jpg'],
+    '5': ['1663741055070_59070.jpg', '1663741055070_91047.jpg', '1663741055071_7270.jpg'],
+    '6': ['img_1708defc_20240216_i1708092817_7404_0.jpg.jpg', 'img_1708defc_20240216_i1708092817_7765_8.jpg.jpg', 'img_1708defc_20240216_i1708092843_3687_15.jpg.jpg'],
+    '7': ['1663741042721_39124.jpg', '1663741042721_59504.jpg', '1663741042722_16519.jpg'],
+    '8': ['img_1708defc_20240216_i1708092843_3910_9.jpg.jpg', 'img_1708defc_20240216_i1708092843_3991_3.jpg.jpg', 'img_1708defc_20240216_i1708092843_6586_19.jpg.jpg'],
+    '9': ['1663740558495_35610.jpg', '1663740558495_92279.jpg', '1663740558496_13156.jpg'],
+    '10': ['1663740458797_6679.jpg', '1663740458798_50060.jpg', '1663740458799_14048.jpg'],
+    '11': ['1663741015636_38129.jpg', '1663741015636_57550.jpg', '1663741015637_49500.jpg'],
+    '12': ['1663741493016_66391.jpg', '1663741493016_87658.jpg', '1663741493018_43485.jpg'],
+    '13': ['1664276865082_32786.jpg', '1664276865083_43086.jpg', '1664276865084_1284.jpg'],
+    '14': ['1664276960205_75960.jpg', '1664276960205_96017.jpg', '1664276960206_1641.jpg'],
+    '15': ['1664277250602_34448.jpg', '1664277250602_47629.jpg', '1664277250603_96773.jpg']
+  };
+
   function clothingDir(id) {
     return imageBase + 'clothing/clothing_' + id + '/';
   }
+
+  /* 商品序号计数器：用于轮转四宫格图片张数 */
+  var productSeq = 0;
 
   function asset(id, dirId, primaryImage, productType, visualTags, colorTags, seasonTags, galleryPattern, confidence, imageCount) {
     return {
@@ -25,6 +47,18 @@
 
   function product(id, assetId, title, price, attributes, specs, sellingPoints, detailSections, feedText) {
     var linkedAsset = assets.find(function (item) { return item.asset_id === assetId; });
+    var imageList = [];
+    if (linkedAsset) {
+      /* mock 数据按资产图库取 1–4 张，覆盖四宫格组件的全部分支：1 图撑满 / 2 图两列 / 3 图左大右小 / 4 图 2×2。
+         按商品序号轮转张数，保证列表里四种布局都有实例。 */
+      var dirIndex = linkedAsset.source_dir.replace(/.*clothing_(\d+)\/?$/, '$1');
+      var gallery = GALLERY_IMAGES[dirIndex] || [];
+      var seq = productSeq++;
+      var want = [1, 2, 3, 4][seq % 4];
+      imageList = [linkedAsset.primary_image].concat(gallery.map(function (f) { return linkedAsset.source_dir + f; }))
+        .filter(function (src, i, arr) { return arr.indexOf(src) === i; })
+        .slice(0, want);
+    }
     return {
       product_id: id,
       asset_id: assetId,
@@ -40,7 +74,7 @@
       selling_points: sellingPoints,
       detail_sections: detailSections,
       feed_text: feedText,
-      image_list: linkedAsset ? [linkedAsset.primary_image] : []
+      image_list: imageList
     };
   }
 
