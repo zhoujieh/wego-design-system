@@ -32,6 +32,17 @@ window.WEGO_APP_ROUTES = [
   script: './scenes/应用中心/scene.js'
 },
 {
+  routeId: 'component-preview',
+  entry: {
+    type: 'cell-entry',
+    label: '组件预览',
+    group: 'workspace-tools',
+    tab: 'workspace'
+  },
+  style: './scenes/组件预览/scene.css',
+  script: './scenes/组件预览/scene.js'
+},
+{
   routeId: 'friend-list',
   entry: {
     type: 'host-tab',
@@ -59,6 +70,17 @@ window.WEGO_APP_ROUTES = [
   },
   style: './scenes/发布产品/scene.css',
   script: './scenes/发布产品/scene.js'
+},
+{
+  routeId: 'scene-manager',
+  entry: {
+    type: 'cell-entry',
+    label: '场景管理',
+    group: 'workspace-tools',
+    tab: 'workspace'
+  },
+  style: './scenes/场景管理/scene.css',
+  script: './scenes/场景管理/scene.js'
 },
 {
   routeId: 'workspace',
