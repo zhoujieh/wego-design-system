@@ -148,6 +148,17 @@
 .sk-date-head .wg-skeleton--text {
   margin: 0;
 }
+.sk-date-toggle {
+  width: 48px;
+  height: 24px;
+  border-radius: var(--radius-4);
+}
+.sk-date-more {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-4);
+  margin-left: auto;
+}
 .my-goods-group__items {
   display: flex;
   flex-direction: column;
@@ -156,18 +167,16 @@
 
 .my-tab-skeleton-goods-card {
   display: grid;
-  grid-template-columns: var(--size-104) minmax(0, 1fr);
-  gap: var(--spacer-12);
+  grid-template-columns: var(--size-76) minmax(0, 1fr);
+  gap: var(--spacer-8);
   align-items: start;
-  padding: var(--spacer-8);
-  background: var(--bg-surface);
-  border-radius: var(--radius-4);
+  padding: var(--spacer-8) 0;
   margin-bottom: var(--spacer-8);
 }
 
 .my-tab-skeleton-goods-card .wg-skeleton--rect {
-  width: var(--size-104);
-  height: var(--size-104);
+  width: var(--size-76);
+  height: var(--size-76);
 }
 
 .my-tab-skeleton-card__meta {
@@ -178,8 +187,30 @@
   align-self: stretch;
 }
 
-.sk-goods-attr {
-  width: 96px;
+.sk-goods-price {
+  width: 56px;
+  height: 16px;
+  border-radius: var(--radius-4);
+}
+
+.sk-goods-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-4);
+}
+
+.sk-goods-meta .wg-skeleton--text {
+  width: 48px;
+  height: 12px;
+}
+
+.sk-goods-meta .wg-skeleton--rect {
+  width: 1px;
+  height: 10px;
+}
+
+.sk-goods-ops {
+  width: 64px;
   height: 24px;
   border-radius: var(--radius-4);
   margin-top: auto;
