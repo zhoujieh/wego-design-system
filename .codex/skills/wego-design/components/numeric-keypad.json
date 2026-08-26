@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 4,
+  "slug": "numeric-keypad",
+  "name": "数字键盘",
+  "category": "form",
+  "status": "stable",
+  "sourceKind": "extracted",
+  "confidence": "high",
+  "description": "底部弹出的自定义数字输入键盘，用于价格、加价金额和比例等数值输入；支持纯键盘模式与带分段切换的头部模式，小数点后最多两位，删除键支持长按连续删除。",
+  "semanticTypeCandidates": [
+    "numeric-keyboard",
+    "pin-pad",
+    "price-input"
+  ],
+  "variantDimensions": {
+    "mode": [
+      "price",
+      "amount",
+      "rate"
+    ]
+  },
+  "representativeVariants": [
+    { "mode": "price" },
+    { "mode": "amount" },
+    { "mode": "rate" }
+  ],
+  "anatomy": [
+    { "name": "root", "selector": ".numeric-keypad", "role": "键盘容器，灰底，顶部细线分割" },
+    { "name": "header", "selector": ".numeric-keypad__header", "role": "可选头部，含标签、输入框和金额/比例分段切换；price 模式不渲染" },
+    { "name": "headerLabel", "selector": ".numeric-keypad__label", "role": "头部左侧标签文本" },
+    { "name": "headerInput", "selector": ".numeric-keypad__input", "role": "头部中间只读输入框，展示当前输入值，inputmode=none 禁止系统键盘" },
+    { "name": "segmented", "selector": ".numeric-keypad__seg", "role": "金额/比例分段控制器，含滑块和两个选项" },
+    { "name": "keys", "selector": ".numeric-keypad__keys", "role": "键盘主体，4列×4行 grid 布局" },
+    { "name": "key", "selector": ".numeric-keypad__key", "role": "数字键或操作键，白底圆角，按压态灰底" },
+    { "name": "keyDelete", "selector": ".numeric-keypad__key--delete", "role": "删除键，位于第4列第1行，支持长按连续删除" },
+    { "name": "keyConfirm", "selector": ".numeric-keypad__key--confirm", "role": "确定按钮，跨第4列第2-4行，品牌色背景" },
+    { "name": "keyZero", "selector": ".numeric-keypad__key--zero", "role": "0键，跨第1-2列第4行" }
+  ],
+  "structurePatterns": [
+    "键盘主体固定为 4列×4行 grid：前三列为数字键(1-9,0,.)，第4列为删除键+确定按钮。",
+    "0键跨前两列右对齐，小数点自动占第3列。",
+    "确定按钮跨第4列第2-4行，品牌色填充。",
+    "amount/rate 模式渲染头部，含标签、输入框和分段切换；price 模式无头部，输入值由调用方回显到外部元素。",
+    "底部预留 safe-area-bottom 安全区。"
+  ],
+  "behavior": {
+    "input": "数字键追加到当前值；小数点仅允许一个且小数部分最多两位；空值时小数点不生效。",
+    "delete": "逐位删除；长按删除键 500ms 后以 100ms 间隔连续删除。",
+    "segmented": "amount/rate 模式下点击分段切换输入模式，切换时清空当前值并更新标签与占位符。",
+    "confirm": "点击确定按钮触发 onConfirm 回调，传入当前值和当前模式；空值或非法值由调用方校验。",
+    "pressFeedback": "数字键按压态由 :active 与 .is-pressed 共同承载；确定按钮按压态为品牌色加深。"
+  },
+  "accessibility": {
+    "inputMode": "none",
+    "keyLabels": ["0","1","2","3","4","5","6","7","8","9",".","删除","确定"],
+    "touchRule": "数字键视觉高度 48px，确定按钮跨 3 行约 160px 高，均满足 44px 最小热区。"
+  },
+  "usageHints": [
+    "用于商品售价、加价金额、加价比例等需要精确数值输入的场景，替代系统键盘以保持体验一致。",
+    "键盘本身不做业务校验（如价格范围、比例上限），校验由调用方在 onConfirm 中执行并通过 toast 反馈。",
+    "price 模式下键盘不自带输入展示区，调用方需将当前值回显到触发键盘的外部价格元素。",
+    "弹出与关闭由调用方通过宿主 overlay 系统（openSheet/closeOverlay）控制，组件只提供模板与交互初始化。"
+  ],
+  "doNotInvent": [
+    "不要在键盘内执行业务价格计算或范围校验。",
+    "不要把键盘扩成日期选择器、全字母键盘或带运算功能的计算器。",
+    "不要在组件内依赖特定业务场景的供货价或佣金逻辑。"
+  ],
+  "domAnatomy": {
+    "root": ".numeric-keypad",
+    "requiredChildren": [".numeric-keypad__keys"],
+    "bodyChildren": [
+      ".numeric-keypad__key[data-key='1']",
+      ".numeric-keypad__key[data-key='2']",
+      ".numeric-keypad__key[data-key='3']",
+      ".numeric-keypad__key--delete",
+      ".numeric-keypad__key[data-key='4']",
+      ".numeric-keypad__key[data-key='5']",
+      ".numeric-keypad__key[data-key='6']",
+      ".numeric-keypad__key--confirm",
+      ".numeric-keypad__key[data-key='7']",
+      ".numeric-keypad__key[data-key='8']",
+      ".numeric-keypad__key[data-key='9']",
+      ".numeric-keypad__key--zero",
+      ".numeric-keypad__key[data-key='.']"
+    ],
+    "stateClasses": [
+      ".numeric-keypad--price",
+      ".numeric-keypad--amount",
+      ".numeric-keypad--rate",
+      ".is-pressed"
+    ],
+    "alternatives": [
+      {
+        "allOf": [".numeric-keypad__header"],
+        "oneOf": [
+          [".numeric-keypad__seg.is-amount"],
+          [".numeric-keypad__seg.is-rate"]
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "preview": "preview/component-numeric-keypad.html",
+    "cssSource": "preview/component-numeric-keypad.html",
+    "embedded": false,
+    "hostComponent": null,
+    "externalSources": ["wego-app/lib/js/agent-resale-popup.js#buildKeypadTemplate", "wego-app/css/agent-resale-popup.css#keypad"]
+  },
+  "unknowns": [],
+  "ruleRefs": [
+    "components.css#numeric-keypad",
+    "preview/component-numeric-keypad.html",
+    "runtime/numeric-keypad.js"
+  ],
+  "runtimeTokens": [
+    "--bg-subtle",
+    "--bg-surface",
+    "--bg-overlay-l1",
+    "--bg-brand",
+    "--bg-brand-hover",
+    "--bg-state-pressed",
+    "--border-neutral-l2",
+    "--body-lg-font-size",
+    "--body-lg-line-height",
+    "--body-md-font-size",
+    "--heading-sm-font-size",
+    "--heading-lg-font-size",
+    "--number-lg-font-family",
+    "--font-family-system",
+    "--font-weight-medium",
+    "--font-weight-regular",
+    "--text-default",
+    "--text-secondary",
+    "--text-placeholder",
+    "--text-inverse",
+    "--radius-4",
+    "--radius-6",
+    "--radius-8",
+    "--size-32",
+    "--size-28",
+    "--size-48",
+    "--size-56",
+    "--spacer-2",
+    "--spacer-4",
+    "--spacer-8",
+    "--spacer-12",
+    "--spacer-16",
+    "--shadow-sm",
+    "--duration-fast",
+    "--ease-standard",
+    "--safe-area-bottom"
+  ],
+  "previewOnlyTokens": [
+    "--body-sm-font-size",
+    "--body-sm-line-height"
+  ],
+  "localTokens": []
+}

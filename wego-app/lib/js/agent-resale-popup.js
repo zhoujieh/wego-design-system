@@ -346,54 +346,6 @@
       + '</div>';
   }
 
-  function buildKeypadTemplate(mode, initialValue) {
-    var displayValue = initialValue ? String(initialValue) : '';
-    var isPrice = mode === 'price';
-    var isAmount = mode === 'amount';
-    var segClass = isAmount ? 'is-amount' : 'is-rate';
-    var labelText = isPrice ? '售价(元)' : (isAmount ? '加价(元)' : '加价(%)');
-
-    var headerHtml = '';
-    if (!isPrice) {
-      headerHtml = ''
-      + '<div class="keypad__header" data-keypad-segmented>'
-      +   '<span class="keypad__header-label" data-keypad-label>' + labelText + '</span>'
-      +   '<div class="keypad__header-value">'
-      +     '<input class="keypad__header-amount" data-keypad-display type="text" inputmode="none" placeholder="0.00" aria-label="加价金额输入">'
-      +   '</div>'
-      +   '<div class="keypad__seg ' + segClass + '">'
-      +     '<div class="keypad__seg-thumb"></div>'
-      +     '<div class="keypad__seg-item ' + (isAmount ? 'is-active' : '') + '" data-keypad-tab="amount">按金额</div>'
-      +     '<div class="keypad__seg-item ' + (!isAmount ? 'is-active' : '') + '" data-keypad-tab="rate">按比例</div>'
-      +   '</div>'
-      + '</div>';
-    }
-
-    return ''
-      + '<div class="modal modal--frame modal--no-mask" role="dialog" aria-modal="true" data-state="closed" data-keypad-overlay data-component-slug="modal">'
-      +   '<div class="modal__panel">'
-      +     '<div class="keypad ' + (isPrice ? 'is-price' : segClass) + '">'
-      +       headerHtml
-      +       '<div class="keypad__keys">'
-      +         '<div class="keypad__key" data-key="1">1</div>'
-      +         '<div class="keypad__key" data-key="2">2</div>'
-      +         '<div class="keypad__key" data-key="3">3</div>'
-      +         '<div class="keypad__key keypad__key--delete" data-key="delete"><i class="wego-iconfont-s icon-tuige"></i></div>'
-      +         '<div class="keypad__key" data-key="4">4</div>'
-      +         '<div class="keypad__key" data-key="5">5</div>'
-      +         '<div class="keypad__key" data-key="6">6</div>'
-      +         '<button data-component-slug="button" class="keypad__key keypad__key--confirm" data-keypad-confirm>确定</button>'
-      +         '<div class="keypad__key" data-key="7">7</div>'
-      +         '<div class="keypad__key" data-key="8">8</div>'
-      +         '<div class="keypad__key" data-key="9">9</div>'
-      +         '<div class="keypad__key keypad__key--zero" data-key="0">0</div>'
-      +         '<div class="keypad__key" data-key=".">.</div>'
-      +       '</div>'
-      +     '</div>'
-      +   '</div>'
-      + '</div>';
-  }
-
   function buildHelpTemplate(isFixed) {
     var title = isFixed ? '赚佣金说明' : '加价卖说明';
     if (isFixed) {
@@ -570,10 +522,108 @@
     var isPriceMode = mode === 'price';
     var keypadMode = isPriceMode ? 'price' : mode;
     var cleanedValue = initialValue ? String(initialValue).replace(/[^0-9.]/g, '') : '';
-    var template = buildKeypadTemplate(keypadMode, cleanedValue);
+    var template = WegoNumericKeypad.template(keypadMode);
 
     var popupPriceEl = isPriceMode ? popupRoot.querySelector('[data-display-price]') : null;
     var priceInputRow = isPriceMode ? popupRoot.querySelector('[data-price-edit]') : null;
+
+    function commitValue(value, inputMode) {
+      if (!value) {
+        ctx.toast(isPriceMode ? '请输入售价' : '请输入加价');
+        return false;
+      }
+      var numValue = parseFloat(value);
+      if (isNaN(numValue) || numValue <= 0) {
+        ctx.toast(isPriceMode ? '请输入正确的售价' : '请输入正确的加价');
+        return false;
+      }
+
+      var supplyPrice = getSupplyPriceForCalc(sample);
+      var addPrice, addType, addValue;
+
+      if (isPriceMode) {
+        addPrice = numValue - supplyPrice;
+        if (addPrice <= 0) {
+          ctx.toast('售价需大于供货价' + formatPrice(supplyPrice) + '元');
+          return false;
+        }
+        var rate = amountToRate(addPrice, supplyPrice);
+        if (!validateRate(rate)) {
+          if (rate < 0.01) {
+            ctx.toast('金额不能小于' + formatPrice(supplyPrice * 1.01) + '元');
+          } else {
+            ctx.toast('金额不能大于' + formatPrice(supplyPrice * 4) + '元');
+          }
+          return false;
+        }
+        addType = 1;
+        addValue = String(addPrice);
+        updatePopupPrice(popupRoot, sample, addPrice, 1, String(addPrice));
+        if (working) applyWorkingConfig(working, 1, addPrice);
+      } else {
+        var rate2;
+        if (inputMode === 'amount') {
+          rate2 = amountToRate(numValue, supplyPrice);
+        } else {
+          rate2 = numValue / 100;
+        }
+
+        if (!validateRate(rate2)) {
+          if (inputMode === 'amount') {
+            if (rate2 < 0.01) {
+              ctx.toast('佣金金额不能小于' + formatPrice(supplyPrice * 0.01) + '元');
+            } else {
+              ctx.toast('佣金金额不能大于' + formatPrice(supplyPrice * 3) + '元');
+            }
+          } else {
+            if (rate2 < 0.01) {
+              ctx.toast('佣金金额不能小于1%');
+            } else {
+              ctx.toast('佣金金额不能大于300%');
+            }
+          }
+          return false;
+        }
+
+        if (inputMode === 'amount') {
+          addPrice = numValue;
+          addType = 1;
+          addValue = String(numValue);
+        } else {
+          addPrice = rateToAmount(rate2, supplyPrice);
+          addType = 2;
+          addValue = String(rate2);
+        }
+
+        var cacheData = inputMode === 'amount'
+          ? { type: 1, value: numValue }
+          : { type: 2, rate: rate2 };
+        setStorage(STORAGE_KEYS.customAddPrice, JSON.stringify(cacheData));
+
+        updatePopupPrice(popupRoot, sample, addPrice, addType, addValue);
+        if (working) applyWorkingConfig(working, addType, addValue);
+      }
+
+      var tagItems = popupRoot.querySelectorAll('.resale-tags__item');
+      tagItems.forEach(function (t, idx) {
+        if (idx === tagItems.length - 1) {
+          var labelText = addType === 1
+            ? '+' + formatPrice(addPrice) + '元'
+            : '+' + formatRate(Number(addValue));
+          t.setAttribute('data-tag-amounttype', addType);
+          t.setAttribute('data-tag-value', addType === 1 ? addValue : '');
+          t.setAttribute('data-tag-rate', addType === 2 ? addValue : '');
+          t.querySelector('.tag__label').textContent = labelText;
+          t.classList.remove('tag--white', 'tag--normal');
+          t.classList.add('tag--brand', 'tag--selected');
+        } else {
+          t.classList.remove('tag--brand', 'tag--selected');
+          t.classList.add('tag--white', 'tag--normal');
+        }
+      });
+
+      return true;
+    }
 
     ctx.openSheet(template, {
       label: '数字键盘',
@@ -585,263 +635,54 @@
       init: function (overlayCtx) {
         var root = overlayCtx.root;
 
-        var currentMode = isPriceMode ? 'amount' : keypadMode;
-        var currentValue = cleanedValue;
-        var displayEl = root.querySelector('[data-keypad-display]');
-        var labelEl = root.querySelector('[data-keypad-label]');
-
-        function updateDisplay() {
-          if (isPriceMode) {
-            if (popupPriceEl) {
-              popupPriceEl.textContent = currentValue || '';
-            }
-            if (priceInputRow) {
-              priceInputRow.classList.add('is-editing');
-            }
-          } else {
-            var isAmount = currentMode === 'amount';
-            var labelText = isAmount ? '加价(元)' : '加价(%)';
-            if (labelEl) labelEl.textContent = labelText;
-            if (displayEl) {
-              displayEl.value = currentValue || '';
-              displayEl.placeholder = isAmount ? '0.00' : '0';
-            }
-          }
+        if (priceInputRow) {
+          priceInputRow.classList.add('is-editing');
         }
 
-        if (displayEl && !isPriceMode) {
-          displayEl.addEventListener('beforeinput', function (e) { e.preventDefault(); });
-          displayEl.addEventListener('input', function (e) { e.preventDefault(); });
-          var overlayRoot = displayEl.closest('.modal');
-          if (overlayRoot) {
-            var focusOnce = function () {
-              if (overlayRoot.getAttribute('data-state') === 'open') {
-                displayEl.focus({ preventScroll: true });
-                obs.disconnect();
-              }
-            };
-            var obs = new MutationObserver(focusOnce);
-            obs.observe(overlayRoot, { attributes: true, attributeFilter: ['data-state'] });
-            focusOnce();
-          } else {
-            setTimeout(function () { displayEl.focus(); }, 0);
-          }
-        }
-
-        var seg = root.querySelector('.keypad__seg');
-        var keypadRoot = root.querySelector('.keypad');
-        var tabs = root.querySelectorAll('[data-keypad-tab]');
-        tabs.forEach(function (tab) {
-          tab.addEventListener('click', function () {
-            var newMode = tab.getAttribute('data-keypad-tab');
-            if (newMode === currentMode) return;
-
-            currentValue = '';
-            currentMode = newMode;
-            tabs.forEach(function (t) { t.classList.remove('is-active'); });
-            tab.classList.add('is-active');
-            if (seg) {
-              seg.classList.toggle('is-amount', currentMode === 'amount');
-              seg.classList.toggle('is-rate', currentMode === 'rate');
+        var keypad = WegoNumericKeypad.init(root, {
+          mode: keypadMode,
+          initialValue: cleanedValue,
+          onChange: function (value) {
+            if (isPriceMode && popupPriceEl) {
+              popupPriceEl.textContent = value || '';
             }
-            if (keypadRoot) {
-              keypadRoot.classList.toggle('is-amount', currentMode === 'amount');
-              keypadRoot.classList.toggle('is-rate', currentMode === 'rate');
+          },
+          onConfirm: function (value, inputMode) {
+            if (commitValue(value, inputMode)) {
+              ctx.closeOverlay();
             }
-            updateDisplay();
-            if (displayEl && document.activeElement !== displayEl) {
-              displayEl.focus({ preventScroll: true });
-            }
-          });
-        });
-
-        var keys = root.querySelectorAll('[data-key]');
-        keys.forEach(function (key) {
-          key.addEventListener('click', function () {
-            var k = key.getAttribute('data-key');
-            handleKeyPress(k);
-          });
-
-          if (key.getAttribute('data-key') === 'delete') {
-            var pressTimer = null;
-            var intervalTimer = null;
-
-            var startPress = function (e) {
-              e.preventDefault();
-              pressTimer = setTimeout(function () {
-                intervalTimer = setInterval(function () {
-                  handleKeyPress('delete');
-                }, 100);
-              }, 500);
-            };
-
-            var endPress = function () {
-              if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
-              if (intervalTimer) { clearInterval(intervalTimer); intervalTimer = null; }
-            };
-
-            key.addEventListener('touchstart', startPress, { passive: false });
-            key.addEventListener('touchend', endPress);
-            key.addEventListener('touchcancel', endPress);
-            key.addEventListener('mousedown', startPress);
-            key.addEventListener('mouseup', endPress);
-            key.addEventListener('mouseleave', endPress);
           }
         });
-
-        function handleKeyPress(k) {
-          if (k === 'delete') {
-            currentValue = currentValue.slice(0, -1);
-          } else if (k === '.') {
-            if (currentValue.indexOf('.') === -1 && currentValue !== '') {
-              currentValue += '.';
-            }
-          } else {
-            var dotIndex = currentValue.indexOf('.');
-            if (dotIndex !== -1 && currentValue.length - dotIndex - 1 >= 2) {
-              return;
-            }
-            currentValue += k;
-          }
-          updateDisplay();
-          if (displayEl && document.activeElement !== displayEl) {
-            displayEl.focus({ preventScroll: true });
-          }
-        }
 
         root.addEventListener('click', function (e) {
           if (e.target.closest('.modal__panel')) return;
-          if (isPriceMode && currentValue) {
-            var sp = getSupplyPriceForCalc(sample);
-            var num = parseFloat(currentValue);
-            var add = num - sp;
-            var r = amountToRate(add, sp);
-            if (isNaN(num) || num <= 0) {
-              ctx.toast('请输入正确的售价');
-              return;
-            }
-            if (add <= 0) {
-              ctx.toast('售价需大于供货价' + formatPrice(sp) + '元');
-              return;
-            }
-            if (!validateRate(r)) {
-              if (r < 0.01) {
-                ctx.toast('金额不能小于' + formatPrice(sp * 1.01) + '元');
-              } else {
-                ctx.toast('金额不能大于' + formatPrice(sp * 4) + '元');
+          if (isPriceMode) {
+            var currentVal = keypad.getValue();
+            if (currentVal) {
+              var sp = getSupplyPriceForCalc(sample);
+              var num = parseFloat(currentVal);
+              var add = num - sp;
+              var r = amountToRate(add, sp);
+              if (isNaN(num) || num <= 0) {
+                ctx.toast('请输入正确的售价');
+                return;
               }
-              return;
+              if (add <= 0) {
+                ctx.toast('售价需大于供货价' + formatPrice(sp) + '元');
+                return;
+              }
+              if (!validateRate(r)) {
+                if (r < 0.01) {
+                  ctx.toast('金额不能小于' + formatPrice(sp * 1.01) + '元');
+                } else {
+                  ctx.toast('金额不能大于' + formatPrice(sp * 4) + '元');
+                }
+                return;
+              }
             }
           }
           ctx.closeOverlay();
         });
-
-        var confirmBtn = root.querySelector('[data-keypad-confirm]');
-        if (confirmBtn) {
-          confirmBtn.addEventListener('click', function () {
-            if (!currentValue) {
-              ctx.toast(isPriceMode ? '请输入售价' : '请输入加价');
-              return;
-            }
-
-            var numValue = parseFloat(currentValue);
-            if (isNaN(numValue) || numValue <= 0) {
-              ctx.toast(isPriceMode ? '请输入正确的售价' : '请输入正确的加价');
-              return;
-            }
-
-            var supplyPrice = getSupplyPriceForCalc(sample);
-
-            var addPrice;
-            var addType;
-            var addValue;
-
-            if (isPriceMode) {
-              addPrice = numValue - supplyPrice;
-              if (addPrice <= 0) {
-                ctx.toast('售价需大于供货价' + formatPrice(supplyPrice) + '元');
-                return;
-              }
-              var rate = amountToRate(addPrice, supplyPrice);
-              if (!validateRate(rate)) {
-                if (rate < 0.01) {
-                  ctx.toast('金额不能小于' + formatPrice(supplyPrice * 1.01) + '元');
-                } else {
-                  ctx.toast('金额不能大于' + formatPrice(supplyPrice * 4) + '元');
-                }
-                return;
-              }
-              addType = 1;
-              addValue = String(addPrice);
-              updatePopupPrice(popupRoot, sample, addPrice, 1, String(addPrice));
-              if (working) applyWorkingConfig(working, 1, addPrice);
-            } else {
-              var rate2;
-              if (currentMode === 'amount') {
-                rate2 = amountToRate(numValue, supplyPrice);
-              } else {
-                rate2 = numValue / 100;
-              }
-
-              if (!validateRate(rate2)) {
-                if (currentMode === 'amount') {
-                  if (rate2 < 0.01) {
-                    ctx.toast('佣金金额不能小于' + formatPrice(supplyPrice * 0.01) + '元');
-                  } else {
-                    ctx.toast('佣金金额不能大于' + formatPrice(supplyPrice * 3) + '元');
-                  }
-                } else {
-                  if (rate2 < 0.01) {
-                    ctx.toast('佣金金额不能小于1%');
-                  } else {
-                    ctx.toast('佣金金额不能大于300%');
-                  }
-                }
-                return;
-              }
-
-              if (currentMode === 'amount') {
-                addPrice = numValue;
-                addType = 1;
-                addValue = String(numValue);
-              } else {
-                addPrice = rateToAmount(rate2, supplyPrice);
-                addType = 2;
-                addValue = String(rate2);
-              }
-
-              var cacheData = currentMode === 'amount'
-                ? { type: 1, value: numValue }
-                : { type: 2, rate: rate2 };
-              setStorage(STORAGE_KEYS.customAddPrice, JSON.stringify(cacheData));
-
-              updatePopupPrice(popupRoot, sample, addPrice, addType, addValue);
-              if (working) applyWorkingConfig(working, addType, addValue);
-            }
-
-            var tagItems = popupRoot.querySelectorAll('.resale-tags__item');
-            tagItems.forEach(function (t, idx) {
-              if (idx === tagItems.length - 1) {
-                var labelText = addType === 1
-                  ? '+' + formatPrice(addPrice) + '元'
-                  : '+' + formatRate(Number(addValue));
-                t.setAttribute('data-tag-amounttype', addType);
-                t.setAttribute('data-tag-value', addType === 1 ? addValue : '');
-                t.setAttribute('data-tag-rate', addType === 2 ? addValue : '');
-                t.querySelector('.tag__label').textContent = labelText;
-                t.classList.remove('tag--white', 'tag--normal');
-                t.classList.add('tag--brand', 'tag--selected');
-              } else {
-                t.classList.remove('tag--brand', 'tag--selected');
-                t.classList.add('tag--white', 'tag--normal');
-              }
-            });
-
-            ctx.closeOverlay();
-          });
-        }
-
-        updateDisplay();
       }
     });
   }
