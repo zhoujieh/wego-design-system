@@ -65,7 +65,7 @@
       "hostPattern": "inline"
     },
     {
-      "size": "sm",
+      "size": "md",
       "surface": "gray",
       "mode": "image-multiple",
       "state": "image-result",
@@ -166,7 +166,7 @@
     "基础搜索框始终使用 .searchbox > .searchbox__icon + .searchbox__input + .searchbox__actions 三段式结构。",
     "左侧搜索图标区 .searchbox__icon 必须直接承载 iconfont 类（如 <span class=\"searchbox__icon wego-iconfont-s icon-sousuo\">），不得在 .searchbox__icon 内部嵌套 <i> 元素；嵌套会导致 iconfont 默认字号覆盖 .searchbox__icon 的图标尺寸（md 为 20px，内嵌 <i> 退化回 16px）。",
     ".searchbox__actions 只承载搜索框内部动作，包括清除、选图和扫码；筛选、搜索、发布、更多等业务操作必须放在外层 host pattern 的 actions 槽。",
-    "md 与 sm 两种尺寸的图标（20px）和文字（body-md 14px）大小完全一致，仅高度不同（md 36px / sm 32px）；sm 仅用于工具栏、局部筛选等紧凑容器，不用于页面主搜索。",
+    "md 是默认尺寸（36 高度）；sm（32 高度）仅用于极小空间的场景，不作为工具栏、页面内部筛选等常规场景的默认选择。",
     "36 高度为默认尺寸，根节点宽度不得写死 Figma 示例宽度，必须使用 width: 100% 或作为 flex 子项占满父容器剩余空间。",
     "32 高度用于页面局部嵌入，可由宿主容器或 --searchbox-width 自定义宽度。",
     "灰底页面（bg-page、bg-subtle）默认使用 .searchbox--white 形成对比；白底内容区（bg-surface）内部使用 .searchbox--gray 弱化边界。",
@@ -180,8 +180,8 @@
     "图搜结果态必须保留 clear，且仍允许继续输入文字；输入过程中保留图搜 token 不移除，仅当宿主确认执行文搜（回车/失焦触发搜索）后才移除图搜 token 并切回文搜结果。",
     "所有可点击入口（清除、选图、扫码、取消、返回、筛选、图搜小按钮、role=button 的搜索框本身）必须有 :active 点击态，按下时 opacity: 0.6。",
     "search-overlay-cancel 只用于点击搜索框后出现接近全屏搜索结果层的覆盖式搜索态，右侧取消用于关闭搜索态，不泛化到所有页面局部搜索；取消文字使用一级文本色（text-default）和 body-lg 字号（16px）。",
-    "navbar-search-back 用于导航栏搜索场景，左侧返回固定，右侧动作可配置，不强制绑定搜索文案。",
-    "content-search-filter 用于页面内部工具栏，筛选入口固定为纵向图标（20px）+ 文字（10px）布局，无背景无阴影；不出现返回按钮。",
+    "navbar-search-back 用于导航栏搜索场景，左侧返回固定，右侧动作可配置，不强制绑定搜索文案。右侧业务操作最小宽 44px（--touch-default）、水平 4px 内间距（--spacer-4），高度撑满导航栏，操作之间不设 gap。",
+    "content-search-filter 用于页面内部工具栏，筛选入口固定为纵向图标（20px）+ 文字（10px）布局，无背景无阴影；不出现返回按钮。筛选、扫一扫等工具栏业务入口最小宽 44px（--touch-default）、水平 4px 内间距（--spacer-4），高度随父容器撑满，入口之间不设 gap；工具栏右侧整体保留 4px 右侧间距（--spacer-4）。",
     "navbar-title-accent-search 用于导航标题区特别强调搜索入口，仅以品牌色边框区分，图搜入口复用 button 组件 strong + sm 变体（文字「图搜」）。"
   ],
   "behavior": {
@@ -202,7 +202,7 @@
     "列表、商品流、对象管理页需要搜索入口时优先使用 search，而不是把 input 临时扩展成搜索框。",
     "灰底页面（bg-page、bg-subtle）上的主搜索默认使用 .searchbox--white 形成对比；白底内容区（bg-surface）内部嵌入搜索框时使用 .searchbox--gray 弱化边界。",
     "好友搜索、名单搜索等纯文搜场景若无明确图搜需求，不显示图片入口，也不声明 select-image 动作。",
-    "md 与 sm 的图标和文字大小一致，仅高度不同；sm 仅用于工具栏、局部筛选等紧凑容器，不用于页面主搜索。",
+    "md 与 sm 的图标和文字大小一致，仅高度不同；md 为默认尺寸，sm 仅用于极小空间场景，不用于工具栏、页面内部筛选等常规场景。",
     "页面内部筛选场景使用 .search-toolbar，筛选入口为纵向图标+文字布局（无背景阴影），放在 .search-toolbar__actions，不放进 .searchbox__actions。",
     "导航搜索场景使用 .search-nav-bar，左侧返回固定，右侧动作由业务配置。",
     "覆盖式搜索结果层使用 .search-overlay-bar + 结果容器，取消只服务关闭搜索态。",
@@ -328,6 +328,7 @@
     "--text-inverse-secondary",
     "--text-placeholder",
     "--text-secondary",
+    "--touch-default",
     "--transparent"
   ],
   "previewOnlyTokens": [
