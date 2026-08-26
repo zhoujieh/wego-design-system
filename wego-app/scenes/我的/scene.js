@@ -149,7 +149,10 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
 (function registerMyTabScene() {
   'use strict';
 
-  /* 结构骨架：按真实 DOM 区块绘制（数据资产/常用应用横向行、内容卡片），
+  /* 结构骨架：严格按「我的」页真实 DOM 区块绘制
+     - 数据资产：横向滚动行，每项 = 数字 metric 块 + 下方标签
+     - 常用应用：横向滚动行，每项 = 圆角方块图标 + 下方标签
+     - 内容区（默认产品视图）：按日期分组的商品列表占位（组标题 + 商品卡 + 底部计数）
      复用设计系统 .wg-skeleton 原子块；挂载首帧同步填充 region，内容就绪后由 setRegion 淡入替换 */
   function skeletonScrollRow(entryHtml, count) {
     var items = '';
@@ -158,40 +161,41 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
   }
 
   function skeletonAssets() {
-    var entry = '<div class="my-tab-skeleton-entry"><span class="wg-skeleton wg-skeleton--circle" style="width:44px;height:44px"></span><span class="wg-skeleton wg-skeleton--text" style="width:48px;height:12px"></span></div>';
+    var entry = '<div class="my-tab-skeleton-entry">'
+      + '<span class="wg-skeleton wg-skeleton--rect" style="width:48px;height:28px"></span>'
+      + '<span class="wg-skeleton wg-skeleton--text" style="width:44px;height:12px"></span></div>';
     return skeletonScrollRow(entry, 4);
   }
 
   function skeletonApps() {
-    var entry = '<div class="my-tab-skeleton-entry"><span class="wg-skeleton wg-skeleton--rect" style="width:48px;height:48px;border-radius:12px"></span><span class="wg-skeleton wg-skeleton--text" style="width:48px;height:12px"></span></div>';
+    var entry = '<div class="my-tab-skeleton-entry">'
+      + '<span class="wg-skeleton wg-skeleton--rect" style="width:48px;height:48px;border-radius:12px"></span>'
+      + '<span class="wg-skeleton wg-skeleton--text" style="width:48px;height:12px"></span></div>';
     return skeletonScrollRow(entry, 5);
   }
 
-  function skeletonContentCard() {
-    var cells = '';
-    for (var i = 0; i < 9; i++) cells += '<span class="wg-skeleton wg-skeleton--rect"></span>';
-    return '<div class="my-tab-skeleton-card" aria-hidden="true">'
-      + '<div class="my-tab-skeleton-card__head">'
-      + '<span class="wg-skeleton wg-skeleton--circle" style="width:40px;height:40px"></span>'
-      + '<div class="my-tab-skeleton-card__meta"><span class="wg-skeleton wg-skeleton--text" style="width:88px;height:16px"></span><span class="wg-skeleton wg-skeleton--text" style="width:120px;height:12px"></span></div>'
-      + '</div>'
-      + '<div class="my-tab-skeleton-card__block"><span class="wg-skeleton wg-skeleton--text" style="width:100%"></span><span class="wg-skeleton wg-skeleton--text" style="width:60%"></span></div>'
-      + '<div class="my-tab-skeleton-card__block"><div class="my-tab-skeleton-grid">' + cells + '</div></div>'
-      + '<div class="my-tab-skeleton-card__block"><div class="my-tab-skeleton-product">'
-      + '<span class="wg-skeleton wg-skeleton--rect" style="width:48px;height:48px"></span>'
-      + '<div class="my-tab-skeleton-card__meta"><span class="wg-skeleton wg-skeleton--text" style="width:122px;height:12px"></span><span class="wg-skeleton wg-skeleton--text" style="width:79px;height:12px"></span></div>'
-      + '<span class="wg-skeleton wg-skeleton--rect" style="width:40px;height:20px"></span>'
-      + '</div></div>'
-      + '<div class="my-tab-skeleton-card__actions">'
-      + '<span class="wg-skeleton wg-skeleton--rect" style="width:24px;height:16px"></span>'
-      + '<span class="wg-skeleton wg-skeleton--rect" style="width:24px;height:16px"></span>'
-      + '<span class="wg-skeleton wg-skeleton--rect" style="width:24px;height:16px"></span>'
-      + '<span class="wg-skeleton wg-skeleton--rect" style="width:80px;height:32px;margin-left:auto"></span>'
+  function skeletonProductCard() {
+    return '<div class="my-tab-skeleton-goods-card">'
+      + '<span class="wg-skeleton wg-skeleton--rect" style="width:72px;height:72px;border-radius:8px;flex:0 0 auto"></span>'
+      + '<div class="my-tab-skeleton-card__meta">'
+      + '<span class="wg-skeleton wg-skeleton--text" style="width:70%"></span>'
+      + '<span class="wg-skeleton wg-skeleton--text" style="width:40%"></span>'
+      + '<span class="wg-skeleton wg-skeleton--text" style="width:30%"></span>'
       + '</div></div>';
   }
 
+  function skeletonDateGroup() {
+    return '<section class="my-tab-skeleton-date-group">'
+      + '<span class="wg-skeleton wg-skeleton--text" style="width:64px;height:12px"></span>'
+      + skeletonProductCard() + skeletonProductCard() + skeletonProductCard()
+      + '</section>';
+  }
+
   function skeletonContent() {
-    return skeletonContentCard() + skeletonContentCard();
+    return '<div class="my-goods-surface my-tab-skeleton-surface">'
+      + skeletonDateGroup() + skeletonDateGroup()
+      + '<span class="wg-skeleton wg-skeleton--text" style="width:96px;height:12px;margin:8px 0"></span>'
+      + '</div>';
   }
 
   function escapeHtml(value) {
@@ -957,10 +961,15 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
       if (contentRegion) contentRegion.innerHTML = skeletonContent();
 
       setProfile();
-      renderAssets();
-      renderApps();
-      syncControls();
-      renderContent();
+      /* 挂载首帧已填结构骨架；延迟一帧让骨架先绘制，再渲染真实内容并淡入，符合『先骨架→内容渐显』 */
+      var firstPaintDelay = window.WegoApp && window.WegoApp.faultInjection && window.WegoApp.faultInjection.isEnabled('slow') ? 0 : 500;
+      window.setTimeout(function () {
+        if (destroyed) return;
+        renderAssets();
+        renderApps();
+        syncControls();
+        renderContentNow();
+      }, firstPaintDelay);
       ctx.bindTabs({ root: root });
       ctx.bindScrollLayout({
         scrollRoot: '.my-tab-scroll',

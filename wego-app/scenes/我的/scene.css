@@ -6,7 +6,9 @@
   color: var(--text-default);
 }
 
-/* 结构骨架：按真实 DOM 区块绘制（数据资产/常用应用横向行、内容卡片），
+/* 结构骨架：严格按「我的」页真实 DOM 区块绘制
+   - 数据资产/常用应用：横向滚动行（.my-tab-skeleton-scroll / entry）
+   - 内容区（默认产品视图）：按日期分组的商品列表（.my-tab-skeleton-surface / date-group / goods-card）
    复用设计系统 .wg-skeleton 原子块，进入时由 setRegion 触发 scene-fade-in 渐显 */
 
 .my-tab-skeleton-scroll {
@@ -25,66 +27,39 @@
   flex: 0 0 auto;
 }
 
-.my-tab-skeleton-card {
-  background: var(--bg-surface);
-  border-radius: var(--radius-8);
-  padding: var(--spacer-12) var(--spacer-16);
+/* 内容区：按日期分组的商品列表骨架 */
+.my-tab-skeleton-surface {
+  display: block;
 }
 
-.my-tab-skeleton-card__head {
+.my-tab-skeleton-date-group {
+  margin-bottom: var(--spacer-8);
+}
+
+.my-tab-skeleton-date-group .wg-skeleton--text {
+  display: block;
+  margin: var(--spacer-8) 0;
+}
+
+.my-tab-skeleton-goods-card {
   display: flex;
   align-items: center;
   gap: var(--spacer-12);
-  padding: var(--spacer-8) 0;
+  padding: var(--spacer-8);
+  background: var(--bg-surface);
+  border-radius: var(--radius-8);
+  margin-bottom: var(--spacer-8);
+}
+
+.my-tab-skeleton-goods-card .wg-skeleton--rect {
+  flex: 0 0 auto;
 }
 
 .my-tab-skeleton-card__meta {
   display: flex;
   flex-direction: column;
-  gap: var(--spacer-4);
+  gap: var(--spacer-6);
   flex: 1;
-}
-
-.my-tab-skeleton-card__block {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacer-8);
-  padding: var(--spacer-8) 0;
-}
-
-.my-tab-skeleton-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--spacer-4);
-}
-
-.my-tab-skeleton-grid .wg-skeleton {
-  width: 100%;
-  height: auto;
-  aspect-ratio: 1;
-  border-radius: var(--radius-4);
-}
-
-.my-tab-skeleton-product {
-  display: flex;
-  align-items: center;
-  gap: var(--spacer-8);
-  padding: var(--spacer-8);
-  background: var(--bg-state-hover);
-  border-radius: var(--radius-8);
-}
-
-.my-tab-skeleton-card__actions {
-  display: flex;
-  align-items: center;
-  gap: var(--spacer-8);
-  padding: var(--spacer-8) 0 var(--spacer-4);
-}
-
-/* 内容区骨架卡之间用分割线（与真实卡片一致） */
-.my-tab-skeleton-card + .my-tab-skeleton-card {
-  margin-top: var(--spacer-8);
-  border-top: var(--stroke-hairline) solid var(--border-neutral-l2);
 }
 
 .my-tab-navbar {
