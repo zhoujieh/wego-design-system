@@ -6120,7 +6120,7 @@ body[data-order-layout="landscape"] .phone-indicator {
   .order-desktop-product-search--catalog .order-desktop-context-search input {
     height: var(--size-36);
     min-height: var(--size-36);
-    padding-left: var(--size-36);
+    padding-left: var(--size-32);
     background: transparent;
     border: 0;
   }
@@ -6130,12 +6130,24 @@ body[data-order-layout="landscape"] .phone-indicator {
   }
 
   .order-desktop-product-search--catalog .order-desktop-inline-image-search {
+    right: 0;
     width: var(--size-36);
     height: var(--size-36);
   }
 
+  .order-desktop-product-search--catalog .order-desktop-inline-image-search i,
+  .order-desktop-product-search--catalog .order-catalog-filter-anchor--search .btn__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--size-20);
+    height: var(--size-20);
+    font-size: var(--size-20);
+  }
+
   .order-desktop-product-search--catalog .order-catalog-filter-anchor--search > .btn,
   .order-desktop-product-search--catalog .order-desktop-barcode-search {
+    flex-basis: var(--size-36);
     width: var(--size-36);
     min-width: var(--size-36);
     height: var(--size-36);
