@@ -54,7 +54,7 @@
   function isWalkthroughElement(el) {
     if (!el) return false;
     // 检查 Light DOM 中的祖先
-    const lightTags = 'wego-walkthrough,wego-wt-fab,wego-wt-bottom-bar,wego-wt-banner,wego-wt-style-panel,wego-wt-overview-panel,wego-wt-color-picker,wego-wt-toast,wego-wt-overlay';
+    const lightTags = 'wego-walkthrough,wego-wt-banner,wego-wt-style-panel,wego-wt-overview-panel,wego-wt-color-picker,wego-wt-toast,wego-wt-overlay';
     if (el.closest && el.closest(lightTags)) return true;
     // 检查 Shadow DOM：元素的根节点是否为走查工具的 shadowRoot
     try {
@@ -398,262 +398,7 @@
     }
   }
 
-  // ============================================================
-  // wego-wt-bottom-bar: 底部工具条
-  // ============================================================
-  class WegoWtBottomBar extends HTMLElement {
-    constructor() {
-      super();
-      this._shadow = this.attachShadow({ mode: 'open' });
-      this._moreOpen = false;
-    }
-    connectedCallback() {
-      this._render();
-    }
-    setChangeCount(count) {
-      this._changeCount = count;
-      const badge = this._shadow.querySelector('.badge');
-      if (badge) {
-        badge.textContent = count > 99 ? '99+' : count;
-        badge.style.display = count > 0 ? 'flex' : 'none';
-      }
-    }
-    setWalkthroughMode(enabled) {
-      this._walkthroughMode = enabled;
-      const btn = this._shadow.querySelector('[data-action="walkthrough"]');
-      if (btn) {
-        btn.classList.toggle('active', enabled);
-        btn.querySelector('.btn-label').textContent = enabled ? '退出走查' : '走查模式';
-      }
-    }
-    _render() {
-      this._shadow.innerHTML = `
-        <style>
-          :host {
-            position: fixed;
-            right: 12px;
-            bottom: 156px;
-            z-index: 9400;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 8px;
-          }
-          .more-menu {
-            display: none;
-            flex-direction: column;
-            gap: 4px;
-            padding: 6px;
-            border-radius: 12px;
-            background: var(--bg-surface, #fff);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
-            border: 1px solid var(--border-color, rgba(0,0,0,0.08));
-            min-width: 120px;
-          }
-          .more-menu.open { display: flex; }
-          .more-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 12px;
-            border: none;
-            background: transparent;
-            border-radius: 8px;
-            font-size: 13px;
-            color: var(--text-default, #1a1a1a);
-            cursor: pointer;
-            text-align: left;
-            font-family: inherit;
-          }
-          .more-item:hover { background: rgba(0,0,0,0.05); }
-          .more-item.danger { color: var(--text-error, #e53935); }
-          .toolbar {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px;
-            border-radius: 14px;
-            background: var(--bg-surface, #fff);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
-            border: 1px solid var(--border-color, rgba(0,0,0,0.08));
-          }
-          .tool-btn {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 2px;
-            min-width: 56px;
-            height: 48px;
-            padding: 4px 8px;
-            border: none;
-            border-radius: 10px;
-            background: transparent;
-            color: var(--text-tertiary, #888);
-            font-size: 11px;
-            cursor: pointer;
-            font-family: inherit;
-          }
-          .tool-btn:hover { background: rgba(0,0,0,0.04); }
-          .tool-btn.active {
-            background: var(--text-brand, #00b96b);
-            color: #fff;
-          }
-          .tool-btn .icon { font-size: 18px; line-height: 1; }
-          .tool-btn .btn-label { font-size: 11px; line-height: 1.2; }
-          .badge {
-            position: absolute;
-            top: 2px;
-            right: 4px;
-            min-width: 16px;
-            height: 16px;
-            padding: 0 4px;
-            border-radius: 8px;
-            background: var(--text-error, #e53935);
-            color: #fff;
-            font-size: 10px;
-            line-height: 16px;
-            text-align: center;
-            display: none;
-            align-items: center;
-            justify-content: center;
-          }
-        </style>
-        <div class="more-menu" data-more-menu>
-          <button class="more-item danger" type="button" data-action="reset">重置修改</button>
-        </div>
-        <div class="toolbar">
-          <button class="tool-btn active" type="button" data-action="walkthrough">
-            <span class="icon">◎</span>
-            <span class="btn-label">走查模式</span>
-          </button>
-          <button class="tool-btn" type="button" data-action="overview">
-            <span class="icon">≡</span>
-            <span class="btn-label">配置列表</span>
-            <span class="badge">0</span>
-          </button>
-          <button class="tool-btn" type="button" data-action="more">
-            <span class="icon">⋯</span>
-            <span class="btn-label">更多</span>
-          </button>
-        </div>
-      `;
 
-      this._shadow.querySelector('[data-action="walkthrough"]').addEventListener('click', () => {
-        bus.emit('walkthrough-mode-toggle', { enabled: !state.walkthroughMode });
-      });
-      this._shadow.querySelector('[data-action="overview"]').addEventListener('click', () => {
-        bus.emit('open-overview');
-      });
-      this._shadow.querySelector('[data-action="more"]').addEventListener('click', (e) => {
-        e.stopPropagation();
-        this._moreOpen = !this._moreOpen;
-        this._shadow.querySelector('[data-more-menu]').classList.toggle('open', this._moreOpen);
-      });
-      this._shadow.querySelector('[data-action="reset"]').addEventListener('click', () => {
-        this._moreOpen = false;
-        this._shadow.querySelector('[data-more-menu]').classList.remove('open');
-        bus.emit('reset-changes');
-      });
-
-      // 点击外部关闭更多菜单
-      document.addEventListener('click', () => {
-        if (this._moreOpen) {
-          this._moreOpen = false;
-          this._shadow.querySelector('[data-more-menu]').classList.remove('open');
-        }
-      });
-    }
-  }
-
-  // ============================================================
-  // wego-wt-fab: 悬浮入口按钮
-  // ============================================================
-  class WegoWtFab extends HTMLElement {
-    constructor() {
-      super();
-      this._shadow = this.attachShadow({ mode: 'open' });
-      this._expanded = false;
-    }
-    connectedCallback() {
-      this._render();
-    }
-    setExpanded(expanded) {
-      this._expanded = expanded;
-      this._updateVisual();
-    }
-    setHasChanges(has) {
-      this._hasChanges = has;
-      const dot = this._shadow.querySelector('.dot');
-      if (dot) dot.style.display = has ? 'block' : 'none';
-    }
-    setWalkthroughMode(enabled) {
-      this._walkthroughMode = enabled;
-      const btn = this._shadow.querySelector('.fab');
-      if (btn) btn.classList.toggle('mode-active', enabled);
-    }
-    _updateVisual() {
-      const btn = this._shadow.querySelector('.fab');
-      const icon = this._shadow.querySelector('.fab-icon');
-      if (btn) btn.classList.toggle('expanded', this._expanded);
-      if (icon) icon.textContent = this._expanded ? '×' : '◎';
-    }
-    _render() {
-      this._shadow.innerHTML = `
-        <style>
-          :host {
-            position: fixed;
-            right: 12px;
-            bottom: 96px;
-            z-index: 9500;
-          }
-          .fab {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            border: none;
-            background: var(--bg-surface, #fff);
-            color: var(--text-brand, #00b96b);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-            border: 1px solid var(--border-color, rgba(0,0,0,0.08));
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            transition: transform 0.2s ease, background 0.2s ease;
-            padding: 0;
-          }
-          .fab:active { transform: scale(0.92); }
-          .fab.mode-active {
-            background: var(--text-brand, #00b96b);
-            color: #fff;
-          }
-          .fab.expanded { transform: rotate(45deg); }
-          .fab.expanded.mode-active { transform: rotate(45deg); }
-          .dot {
-            position: absolute;
-            top: 2px;
-            right: 2px;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: var(--text-error, #e53935);
-            border: 2px solid var(--bg-surface, #fff);
-            display: none;
-          }
-        </style>
-        <button class="fab" type="button" aria-label="走查工具">
-          <span class="fab-icon">◎</span>
-        </button>
-        <span class="dot"></span>
-      `;
-      this._shadow.querySelector('.fab').addEventListener('click', () => {
-        bus.emit('fab-toggle');
-      });
-    }
-  }
 
   // ============================================================
   // wego-wt-overlay: 覆盖层（元素信息气泡）
@@ -2095,45 +1840,361 @@
   // ============================================================
   // wego-walkthrough: 主应用根元素
   // ============================================================
+  // wego-walkthrough: 主应用根元素（统一入口）
+  // ============================================================
   class WegoWalkthrough extends HTMLElement {
     constructor() {
       super();
       this._shadow = this.attachShadow({ mode: 'open' });
+      this._collapsed = true;
+      this._drag = { active: false, moved: false, pointerId: null, startX: 0, startY: 0, origX: 0, origY: 0 };
+      this._walkthroughMode = false;
+      this._faultState = { load: false, save: false, delete: false };
+      this._subpanelOpen = null;
       this._components = {};
+      this._suppressClick = false;
     }
 
     connectedCallback() {
       this._render();
       this._initComponents();
       this._bindEvents();
+      this._restorePosition();
+      this._restoreFaultState();
       state.currentRoute = getCurrentRoute();
-      // 监听路由变化
       window.addEventListener('hashchange', () => {
         state.currentRoute = getCurrentRoute();
         this._loadChanges();
       });
       this._loadChanges();
+      // 暴露失败注入 API（兼容现有场景代码）
+      window.WegoApp = window.WegoApp || {};
+      window.WegoApp.faultInjection = {
+        isEnabled: (key) => !!this._faultState[key],
+        setEnabled: (key, on) => { this._faultState[key] = !!on; this._persistFaultState(); this._updateToolbarState(); },
+      };
     }
 
+    disconnectedCallback() {
+      this._cleanupDrag();
+    }
+
+    // ── 渲染 ──────────────────────────────────────────────
     _render() {
       this._shadow.innerHTML = `
         <style>
           :host {
             position: fixed;
-            inset: 0;
-            z-index: 8999;
-            pointer-events: none;
+            z-index: 9999;
+            display: block;
+            color: #fff;
+            font-family: "PingFang SC", "SF Pro Text", "Segoe UI", sans-serif;
+            --toolbar-spring: cubic-bezier(0.78, 0, 0.22, 1);
+            overflow: visible;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
           }
-          :host > * { pointer-events: auto; }
+          :host([hidden]) { display: none; }
+
+          .toolbar-container {
+            box-sizing: border-box;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 48px;
+            padding: 4px;
+            border-radius: 999px;
+            background: rgba(30, 30, 30, 0.76);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+            backdrop-filter: blur(18px) saturate(145%);
+            -webkit-backdrop-filter: blur(18px) saturate(145%);
+            white-space: nowrap;
+            overflow: visible;
+            will-change: width;
+            transition: width 500ms var(--toolbar-spring);
+            cursor: grab;
+          }
+          .toolbar-container.is-dragging {
+            cursor: grabbing;
+            transition: none;
+          }
+          .toolbar-container.is-collapsed {
+            width: 48px;
+            padding: 0;
+          }
+          .toolbar-container.is-expanded {
+            width: auto;
+          }
+
+          .toolbar-clip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 999px;
+          }
+
+          .collapse-btn {
+            width: 40px;
+            height: 40px;
+            border: 0;
+            border-radius: 999px;
+            background: transparent;
+            color: rgba(255,255,255,0.7);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            flex-shrink: 0;
+            transition: background-color 140ms ease, color 140ms ease;
+          }
+          .collapse-btn:hover { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.92); }
+
+          .toolbar-main {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            min-width: 0;
+            overflow: hidden;
+          }
+
+          .tool-btn {
+            width: 40px;
+            height: 40px;
+            border: 0;
+            border-radius: 999px;
+            background: transparent;
+            color: rgba(255,255,255,0.7);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            flex-shrink: 0;
+            transition: background-color 140ms ease, color 140ms ease, transform 140ms ease;
+            position: relative;
+          }
+          .tool-btn:hover { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.92); }
+          .tool-btn[data-active="true"] { background: rgba(255,255,255,0.1); color: #fff; }
+          .tool-btn .badge-dot {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ff383c;
+            border: 2px solid rgba(30,30,30,0.76);
+            display: none;
+          }
+          .tool-btn[data-has-changes="true"] .badge-dot { display: block; }
+
+          .count-btn {
+            min-width: 40px;
+            height: 40px;
+            padding: 0 10px;
+            border: 0;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            flex-shrink: 0;
+            transition: background-color 140ms ease;
+          }
+          .count-btn:hover { background: rgba(255,255,255,0.14); }
+          .count-btn .count-icon { font-size: 14px; }
+
+          .divider {
+            width: 1px;
+            height: 24px;
+            margin: 0 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 999px;
+            flex-shrink: 0;
+          }
+
+          /* 收起态的圆形按钮 */
+          .fab-btn {
+            width: 48px;
+            height: 48px;
+            border: 0;
+            border-radius: 50%;
+            background: transparent;
+            color: rgba(255,255,255,0.9);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            padding: 0;
+          }
+          .fab-btn .fab-dot {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ff383c;
+            display: none;
+          }
+          .fab-btn[data-has-indicator="true"] .fab-dot { display: block; }
+
+          /* 子面板 */
+          .subpanel {
+            position: absolute;
+            top: calc(100% + 8px);
+            width: 180px;
+            padding: 8px;
+            border-radius: 12px;
+            background: rgba(30, 30, 30, 0.82);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(18px) saturate(145%);
+            -webkit-backdrop-filter: blur(18px) saturate(145%);
+            display: none;
+            z-index: 10000;
+          }
+          .subpanel.is-open { display: block; }
+          .subpanel-title {
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
+            padding: 4px 8px 8px;
+            font-weight: 600;
+          }
+          .subpanel-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 9px 8px;
+            border: 0;
+            border-radius: 8px;
+            background: transparent;
+            font-size: 13px;
+            color: #fff;
+            cursor: pointer;
+            text-align: left;
+            font-family: inherit;
+          }
+          .subpanel-item:hover { background: rgba(255,255,255,0.06); }
+          .subpanel-item.is-disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+          }
+          .subpanel-item .item-label { display: flex; align-items: center; gap: 6px; }
+          .subpanel-item .dev-tag {
+            font-size: 10px;
+            padding: 1px 5px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.6);
+          }
+          .switch {
+            width: 34px;
+            height: 20px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.2);
+            position: relative;
+            transition: background 150ms ease;
+            flex-shrink: 0;
+          }
+          .switch::after {
+            content: "";
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #fff;
+            transition: transform 150ms ease;
+          }
+          .switch.is-on { background: #0088ff; }
+          .switch.is-on::after { transform: translateX(14px); }
+          .subpanel-sep { height: 1px; margin: 6px 8px; background: rgba(255,255,255,0.08); }
+          .subpanel-arrow { color: rgba(255,255,255,0.4); font-size: 14px; }
         </style>
+        <div class="toolbar-container is-collapsed" data-toolbar>
+          <div class="toolbar-clip">
+            <!-- 收起态：圆形按钮 -->
+            <button class="fab-btn" data-fab-btn data-has-indicator="false">
+              <span>◎</span>
+              <span class="fab-dot"></span>
+            </button>
+            <!-- 展开态：工具条内容 -->
+            <div class="toolbar-main" data-toolbar-main style="display:none;">
+              <button class="collapse-btn" data-collapse-btn title="收起">‹</button>
+              <button class="tool-btn" data-tool="walkthrough" data-active="false" title="走查模式">
+                <span>◆</span>
+              </button>
+              <button class="tool-btn" data-tool="datamock" data-active="false" title="数据模拟">
+                <span>⚠</span>
+                <span class="badge-dot"></span>
+              </button>
+              <div class="divider"></div>
+              <button class="count-btn" data-tool="overview" title="配置列表">
+                <span class="count-value" data-count-value>0</span>
+                <span class="count-icon">≡</span>
+              </button>
+              <button class="tool-btn" data-tool="more" title="更多">
+                <span>⋯</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- 数据模拟子面板 -->
+        <div class="subpanel" data-subpanel="datamock">
+          <div class="subpanel-title">数据模拟</div>
+          <button class="subpanel-item" data-fault="load">
+            <span>加载失败</span>
+            <span class="switch" data-fault-switch="load"></span>
+          </button>
+          <button class="subpanel-item" data-fault="save">
+            <span>新增保存失败</span>
+            <span class="switch" data-fault-switch="save"></span>
+          </button>
+          <button class="subpanel-item" data-fault="delete">
+            <span>删除失败</span>
+            <span class="switch" data-fault-switch="delete"></span>
+          </button>
+          <div class="subpanel-sep"></div>
+          <button class="subpanel-item is-disabled" data-slowload>
+            <span class="item-label">慢加载模式 <span class="dev-tag">开发中</span></span>
+            <span class="subpanel-arrow">›</span>
+          </button>
+        </div>
+        <!-- 更多菜单 -->
+        <div class="subpanel" data-subpanel="more">
+          <div class="subpanel-title">更多</div>
+          <button class="subpanel-item" data-nav="scene-manager">
+            <span>场景管理</span>
+            <span class="subpanel-arrow">›</span>
+          </button>
+          <button class="subpanel-item" data-nav="component-preview">
+            <span>组件库</span>
+            <span class="subpanel-arrow">›</span>
+          </button>
+        </div>
+        <!-- 子组件（走查模式相关） -->
         <wego-wt-banner hidden></wego-wt-banner>
         <wego-wt-overlay hidden></wego-wt-overlay>
         <wego-wt-style-panel hidden></wego-wt-style-panel>
         <wego-wt-color-picker hidden></wego-wt-color-picker>
         <wego-wt-overview-panel hidden></wego-wt-overview-panel>
         <wego-wt-toast></wego-wt-toast>
-        <wego-wt-bottom-bar hidden></wego-wt-bottom-bar>
-        <wego-wt-fab></wego-wt-fab>
       `;
     }
 
@@ -2144,113 +2205,424 @@
       this._components.colorPicker = this._shadow.querySelector('wego-wt-color-picker');
       this._components.overviewPanel = this._shadow.querySelector('wego-wt-overview-panel');
       this._components.toast = this._shadow.querySelector('wego-wt-toast');
-      this._components.bottomBar = this._shadow.querySelector('wego-wt-bottom-bar');
-      this._components.fab = this._shadow.querySelector('wego-wt-fab');
+      this._components.toolbar = this._shadow.querySelector('[data-toolbar]');
+      this._components.toolbarMain = this._shadow.querySelector('[data-toolbar-main]');
+      this._components.fabBtn = this._shadow.querySelector('[data-fab-btn]');
+      this._components.countValue = this._shadow.querySelector('[data-count-value]');
     }
 
     _bindEvents() {
-      // 悬浮按钮展开/收起
-      bus.on('fab-toggle', () => {
-        const bar = this._components.bottomBar;
-        const isHidden = bar.hasAttribute('hidden');
-        if (isHidden) {
-          bar.removeAttribute('hidden');
-          this._components.fab.setExpanded(true);
-        } else {
-          bar.setAttribute('hidden', '');
-          this._components.fab.setExpanded(false);
-        }
+      const toolbar = this._components.toolbar;
+      // 拖动
+      toolbar.addEventListener('pointerdown', (e) => this._startDrag(e, toolbar));
+      // 收起态按钮点击展开
+      this._components.fabBtn.addEventListener('click', (e) => {
+        if (this._suppressClick) { e.preventDefault(); e.stopPropagation(); this._suppressClick = false; return; }
+        this.setCollapsed(false);
       });
-
-      // 走查模式切换
-      bus.on('walkthrough-mode-toggle', ({ enabled }) => {
-        this._setWalkthroughMode(enabled);
+      // 收起按钮
+      this._shadow.querySelector('[data-collapse-btn]').addEventListener('click', (e) => {
+        if (this._suppressClick) { e.preventDefault(); e.stopPropagation(); this._suppressClick = false; return; }
+        this.setCollapsed(true);
+        this._closeSubpanels();
       });
-
-      // 重置修改
-      bus.on('reset-changes', () => {
-        this._resetChanges();
+      // 工具条按钮
+      this._shadow.querySelectorAll('[data-tool]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          if (this._suppressClick) { e.preventDefault(); e.stopPropagation(); this._suppressClick = false; return; }
+          e.stopPropagation();
+          this._onToolClick(btn.dataset.tool, btn);
+        });
       });
-
-      // 打开配置列表
-      bus.on('open-overview', () => {
-        this._components.overviewPanel.open(state.changes, state.currentRoute);
-        // 关闭样式面板（互斥）
-        this._clearSelection();
+      // 失败注入开关
+      this._shadow.querySelectorAll('[data-fault]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const key = btn.dataset.fault;
+          this._toggleFault(key);
+        });
       });
-
-      // 关闭配置列表
-      bus.on('close-overview', () => {
-        this._components.overviewPanel.close();
-      });
-
-      // 跳转到元素
-      bus.on('jump-to-element', ({ selector }) => {
-        try {
-          const el = document.querySelector(selector);
-          if (el) {
-            this._components.overviewPanel.close();
-            // 滚动到元素
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            // 延迟选中（等滚动完成）
-            setTimeout(() => {
-              if (state.walkthroughMode) {
-                this._selectElement(el);
-              }
-            }, 300);
+      // 导航
+      this._shadow.querySelectorAll('[data-nav]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const route = btn.dataset.nav;
+          this._closeSubpanels();
+          this.setCollapsed(true);
+          if (typeof window.WegoApp?.navigate === 'function') {
+            window.WegoApp.navigate(route);
+          } else if (typeof navigate === 'function') {
+            navigate(route);
+          } else {
+            window.location.hash = '#/' + route;
           }
-        } catch (e) { /* ignore */ }
+        });
       });
-
-      // 删除单条变更
-      bus.on('delete-change', ({ id }) => {
-        const change = state.changes.find(c => c.id === id);
-        if (change) {
-          // 恢复元素样式
-          try {
-            const el = document.querySelector(change.selector);
-            if (el) el.style[change.property] = '';
-          } catch (e) { /* ignore */ }
-          state.changes = state.changes.filter(c => c.id !== id);
-          this._saveChanges();
-          this._updateChangeCount();
-          this._components.overviewPanel.refresh(state.changes, state.currentRoute);
+      // 慢加载（禁用）
+      this._shadow.querySelector('[data-slowload]').addEventListener('click', (e) => {
+        e.stopPropagation();
+        this._showToast('慢加载模式开发中');
+      });
+      // 点击外部关闭子面板
+      document.addEventListener('pointerdown', (e) => {
+        if (!e.target.closest || !e.target.closest('wego-walkthrough')) {
+          this._closeSubpanels();
         }
-      });
+      }, true);
 
-      // Toast
-      bus.on('toast', ({ message }) => {
-        this._showToast(message);
-      });
-
-      // 元素选中 → 打开样式面板
-      bus.on('element-selected', ({ element, selector }) => {
-        this._components.stylePanel.openForElement(element, selector);
-      });
-
-      // 元素取消选中 → 关闭样式面板
-      bus.on('element-deselected', () => {
-        this._components.stylePanel.close();
-      });
-
-      // 关闭样式面板 → 取消选中
-      bus.on('close-style-panel', () => {
-        this._clearSelection();
-      });
-
-      // 样式变更 → 记录
-      bus.on('style-change', (change) => {
-        this._recordChange(change);
-      });
-
-      // 打开颜色选择器
+      // 事件总线
+      bus.on('style-change', (change) => this._recordChange(change));
       bus.on('open-color-picker', ({ trigger, hex, opacity, callback }) => {
         this._components.colorPicker.open(trigger, hex, opacity, callback);
       });
+      bus.on('close-style-panel', () => this._clearSelection());
+      bus.on('close-overview', () => this._components.overviewPanel.close());
+      bus.on('jump-to-element', ({ selector }) => this._jumpToElement(selector));
+      bus.on('delete-change', ({ id }) => this._deleteChange(id));
+      bus.on('reset-changes', () => this._resetChanges());
+      bus.on('toast', ({ message }) => this._showToast(message));
+      bus.on('element-selected', ({ element, selector }) => {
+        this._components.stylePanel.openForElement(element, selector);
+      });
+      bus.on('element-deselected', () => this._components.stylePanel.close());
     }
 
+    // ── 拖动 ──────────────────────────────────────────────
+    _startDrag(e, toolbar) {
+      if (e.button !== undefined && e.button !== 0) return;
+      // 点击按钮时不触发拖动（但工具条空白区域可以拖动）
+      if (e.target.closest && e.target.closest('button, [data-fault], [data-nav], .switch')) {
+        // 按钮点击不拖动，但允许在按钮上按下后拖动来移动整个工具条
+        // 这里简化：按钮上的点击不触发拖动
+      }
+      this._drag.active = true;
+      this._drag.moved = false;
+      this._drag.pointerId = e.pointerId;
+      this._drag.startX = e.clientX;
+      this._drag.startY = e.clientY;
+      const rect = this.getBoundingClientRect();
+      this._drag.origX = rect.left;
+      this._drag.origY = rect.top;
+      try { toolbar.setPointerCapture(e.pointerId); } catch (err) {}
+      this.style.transition = 'none';
+      toolbar.classList.add('is-dragging');
+
+      const onMove = (ev) => {
+        if (!this._drag.active || ev.pointerId !== this._drag.pointerId) return;
+        ev.stopPropagation();
+        const dx = ev.clientX - this._drag.startX;
+        const dy = ev.clientY - this._drag.startY;
+        if (!this._drag.moved && Math.hypot(dx, dy) > 4) {
+          this._drag.moved = true;
+          this._suppressClick = true;
+          this._closeSubpanels();
+        }
+        if (this._drag.moved) {
+          ev.preventDefault();
+          const x = Math.max(0, Math.min(this._drag.origX + dx, window.innerWidth - this.offsetWidth));
+          const y = Math.max(0, Math.min(this._drag.origY + dy, window.innerHeight - this.offsetHeight));
+          this.style.left = x + 'px';
+          this.style.top = y + 'px';
+          this.style.right = 'auto';
+          this.style.bottom = 'auto';
+          this._updateSubpanelPosition();
+        }
+      };
+      const onUp = (ev) => {
+        if (!this._drag.active || ev.pointerId !== this._drag.pointerId) return;
+        this._drag.active = false;
+        toolbar.classList.remove('is-dragging');
+        try { toolbar.releasePointerCapture(ev.pointerId); } catch (err) {}
+        toolbar.removeEventListener('pointermove', onMove);
+        toolbar.removeEventListener('pointerup', onUp);
+        toolbar.removeEventListener('pointercancel', onUp);
+        if (this._drag.moved) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          this._savePosition();
+          this.style.transition = '';
+          this.getBoundingClientRect();
+        } else {
+          this.style.transition = '';
+        }
+      };
+      toolbar.addEventListener('pointermove', onMove);
+      toolbar.addEventListener('pointerup', onUp);
+      toolbar.addEventListener('pointercancel', onUp);
+    }
+
+    _cleanupDrag() {
+      this._drag.active = false;
+    }
+
+    _savePosition() {
+      const rect = this.getBoundingClientRect();
+      try {
+        localStorage.setItem('wego.wgf-position', JSON.stringify({ x: rect.left, y: rect.top }));
+      } catch (e) {}
+    }
+
+    _restorePosition() {
+      try {
+        const raw = localStorage.getItem('wego.wgf-position');
+        if (raw) {
+          const p = JSON.parse(raw);
+          if (typeof p.x === 'number' && typeof p.y === 'number') {
+            const x = Math.max(0, Math.min(p.x, window.innerWidth - 48));
+            const y = Math.max(0, Math.min(p.y, window.innerHeight - 48));
+            this.style.left = x + 'px';
+            this.style.top = y + 'px';
+            this.style.right = 'auto';
+            this.style.bottom = 'auto';
+            return;
+          }
+        }
+      } catch (e) {}
+      // 默认位置：左下角
+      this.style.left = '12px';
+      this.style.bottom = '96px';
+      this.style.top = 'auto';
+      this.style.right = 'auto';
+    }
+
+    _getExpandDirection() {
+      const rect = this.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      return centerX < window.innerWidth / 2 ? 'right' : 'left';
+    }
+
+    // ── 展开收起 ──────────────────────────────────────────
+    setCollapsed(collapsed) {
+      this._collapsed = collapsed;
+      const toolbar = this._components.toolbar;
+      const main = this._components.toolbarMain;
+      const fab = this._components.fabBtn;
+      if (collapsed) {
+        toolbar.classList.add('is-collapsed');
+        toolbar.classList.remove('is-expanded');
+        main.style.display = 'none';
+        fab.style.display = 'inline-flex';
+      } else {
+        toolbar.classList.remove('is-collapsed');
+        toolbar.classList.add('is-expanded');
+        fab.style.display = 'none';
+        main.style.display = 'inline-flex';
+        // 根据位置调整展开方向（收起按钮在左或右）
+        const dir = this._getExpandDirection();
+        if (dir === 'left') {
+          main.style.flexDirection = 'row-reverse';
+        } else {
+          main.style.flexDirection = 'row';
+        }
+        this._updateSubpanelPosition();
+      }
+      this._updateToolbarState();
+    }
+
+    // ── 工具条按钮 ────────────────────────────────────────
+    _onToolClick(tool, btn) {
+      switch (tool) {
+        case 'walkthrough':
+          this._setWalkthroughMode(!this._walkthroughMode);
+          break;
+        case 'datamock':
+          this._toggleSubpanel('datamock');
+          break;
+        case 'overview':
+          this._openOverview();
+          break;
+        case 'more':
+          this._toggleSubpanel('more');
+          break;
+      }
+    }
+
+    _toggleSubpanel(name) {
+      const panel = this._shadow.querySelector(`[data-subpanel="${name}"]`);
+      if (!panel) return;
+      const isOpen = panel.classList.contains('is-open');
+      this._closeSubpanels();
+      if (!isOpen) {
+        panel.classList.add('is-open');
+        this._updateSubpanelPosition();
+        // 更新失败开关状态
+        if (name === 'datamock') this._updateFaultSwitches();
+      }
+    }
+
+    _closeSubpanels() {
+      this._shadow.querySelectorAll('[data-subpanel]').forEach(p => p.classList.remove('is-open'));
+    }
+
+    _updateSubpanelPosition() {
+      const dir = this._getExpandDirection();
+      this._shadow.querySelectorAll('[data-subpanel]').forEach(panel => {
+        if (dir === 'left') {
+          panel.style.left = '0';
+          panel.style.right = 'auto';
+        } else {
+          panel.style.left = 'auto';
+          panel.style.right = '0';
+        }
+      });
+    }
+
+    // ── 走查模式 ──────────────────────────────────────────
+    _setWalkthroughMode(enabled) {
+      this._walkthroughMode = enabled;
+      if (enabled) {
+        document.body.setAttribute('data-walkthrough-mode', 'true');
+        this._components.banner.removeAttribute('hidden');
+        this._bindTouchEvents();
+      } else {
+        document.body.removeAttribute('data-walkthrough-mode');
+        this._components.banner.setAttribute('hidden', '');
+        this._unbindTouchEvents();
+        this._clearSelection();
+      }
+      this._updateToolbarState();
+    }
+
+    _bindTouchEvents() {
+      this._touchStartX = 0;
+      this._touchStartY = 0;
+      this._touchStartTime = 0;
+      this._isSwiping = false;
+      document.addEventListener('touchstart', this._onTouchStart, { passive: true });
+      document.addEventListener('touchmove', this._onTouchMove, { passive: true });
+      document.addEventListener('touchend', this._onTouchEnd, { passive: false });
+      document.addEventListener('mousedown', this._onMouseDown, true);
+    }
+
+    _unbindTouchEvents() {
+      document.removeEventListener('touchstart', this._onTouchStart);
+      document.removeEventListener('touchmove', this._onTouchMove);
+      document.removeEventListener('touchend', this._onTouchEnd);
+      document.removeEventListener('mousedown', this._onMouseDown, true);
+    }
+
+    _onTouchStart = (e) => {
+      const touch = e.touches[0];
+      this._touchStartX = touch.clientX;
+      this._touchStartY = touch.clientY;
+      this._touchStartTime = Date.now();
+      this._isSwiping = false;
+    }
+    _onTouchMove = (e) => {
+      const touch = e.touches[0];
+      const dx = Math.abs(touch.clientX - this._touchStartX);
+      const dy = Math.abs(touch.clientY - this._touchStartY);
+      if (dx > 10 || dy > 10) this._isSwiping = true;
+    }
+    _onTouchEnd = (e) => {
+      if (this._isSwiping) return;
+      if (Date.now() - this._touchStartTime >= 500) return;
+      const touch = e.changedTouches[0];
+      this._handlePointSelection(touch.clientX, touch.clientY, e);
+    }
+    _onMouseDown = (e) => {
+      if (e.button !== 0) return;
+      const startX = e.clientX, startY = e.clientY;
+      const onUp = (ev) => {
+        document.removeEventListener('mouseup', onUp, true);
+        if (Math.abs(ev.clientX - startX) > 5 || Math.abs(ev.clientY - startY) > 5) return;
+        this._handlePointSelection(ev.clientX, ev.clientY, ev);
+      };
+      document.addEventListener('mouseup', onUp, true);
+    }
+
+    _handlePointSelection(clientX, clientY, event) {
+      const el = document.elementFromPoint(clientX, clientY);
+      if (!el) return;
+      if (isWalkthroughElement(el)) return;
+      if (el === document.body || el === document.documentElement) {
+        this._clearSelection();
+        return;
+      }
+      if (event && event.cancelable) event.preventDefault();
+      this._selectElement(el);
+    }
+
+    _selectElement(el) {
+      this._clearSelection();
+      state.selectedElement = el;
+      el.setAttribute('data-wt-selected', 'true');
+      this._components.overlay.removeAttribute('hidden');
+      this._components.overlay.showForElement(el);
+      state.selectedSelector = generateSelector(el);
+      bus.emit('element-selected', { element: el, selector: state.selectedSelector });
+    }
+
+    _clearSelection() {
+      if (state.selectedElement) {
+        state.selectedElement.removeAttribute('data-wt-selected');
+        state.selectedElement = null;
+      }
+      if (this._components.overlay) {
+        this._components.overlay.hide();
+        this._components.overlay.setAttribute('hidden', '');
+      }
+      state.selectedSelector = '';
+      bus.emit('element-deselected');
+    }
+
+    _jumpToElement(selector) {
+      try {
+        const el = document.querySelector(selector);
+        if (el) {
+          this._components.overviewPanel.close();
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setTimeout(() => {
+            if (this._walkthroughMode) this._selectElement(el);
+          }, 300);
+        }
+      } catch (e) {}
+    }
+
+    // ── 配置列表 ──────────────────────────────────────────
+    _openOverview() {
+      this._closeSubpanels();
+      this._components.overviewPanel.open(state.changes, state.currentRoute);
+      this._clearSelection();
+    }
+
+    // ── 失败注入 ──────────────────────────────────────────
+    _restoreFaultState() {
+      try {
+        const raw = localStorage.getItem('wego.fault-switch.enabled');
+        if (raw) {
+          const p = JSON.parse(raw);
+          this._faultState.load = !!p.load;
+          this._faultState.save = !!p.save;
+          this._faultState['delete'] = !!p['delete'];
+        }
+      } catch (e) {}
+      this._updateFaultSwitches();
+      this._updateToolbarState();
+    }
+
+    _persistFaultState() {
+      try {
+        localStorage.setItem('wego.fault-switch.enabled', JSON.stringify(this._faultState));
+      } catch (e) {}
+    }
+
+    _toggleFault(key) {
+      this._faultState[key] = !this._faultState[key];
+      this._persistFaultState();
+      this._updateFaultSwitches();
+      this._updateToolbarState();
+    }
+
+    _updateFaultSwitches() {
+      ['load', 'save', 'delete'].forEach(key => {
+        const sw = this._shadow.querySelector(`[data-fault-switch="${key}"]`);
+        if (sw) sw.classList.toggle('is-on', !!this._faultState[key]);
+      });
+    }
+
+    // ── 变更记录 ──────────────────────────────────────────
     _recordChange(change) {
-      // 同一元素同一属性的修改合并
       const existing = state.changes.find(c =>
         c.selector === change.selector && c.property === change.property
       );
@@ -2272,130 +2644,23 @@
       }
       this._saveChanges();
       this._updateChangeCount();
-      // 刷新配置面板（如果打开）
       if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
         this._components.overviewPanel.refresh(state.changes, state.currentRoute);
       }
     }
 
-    _setWalkthroughMode(enabled) {
-      state.walkthroughMode = enabled;
-      if (enabled) {
-        document.body.setAttribute('data-walkthrough-mode', 'true');
-        this._components.banner.removeAttribute('hidden');
-        this._bindTouchEvents();
-      } else {
-        document.body.removeAttribute('data-walkthrough-mode');
-        this._components.banner.setAttribute('hidden', '');
-        this._unbindTouchEvents();
-        // 取消选中
-        this._clearSelection();
+    _deleteChange(id) {
+      const change = state.changes.find(c => c.id === id);
+      if (change) {
+        try {
+          const el = document.querySelector(change.selector);
+          if (el) el.style[change.property] = '';
+        } catch (e) {}
+        state.changes = state.changes.filter(c => c.id !== id);
+        this._saveChanges();
+        this._updateChangeCount();
+        this._components.overviewPanel.refresh(state.changes, state.currentRoute);
       }
-      this._components.bottomBar.setWalkthroughMode(enabled);
-      this._components.fab.setWalkthroughMode(enabled);
-    }
-
-    _bindTouchEvents() {
-      this._touchStartX = 0;
-      this._touchStartY = 0;
-      this._touchStartTime = 0;
-      this._isSwiping = false;
-      document.addEventListener('touchstart', this._onTouchStart, { passive: true });
-      document.addEventListener('touchmove', this._onTouchMove, { passive: true });
-      document.addEventListener('touchend', this._onTouchEnd, { passive: false });
-      // 桌面端鼠标点击支持
-      document.addEventListener('mousedown', this._onMouseDown, true);
-    }
-
-    _unbindTouchEvents() {
-      document.removeEventListener('touchstart', this._onTouchStart);
-      document.removeEventListener('touchmove', this._onTouchMove);
-      document.removeEventListener('touchend', this._onTouchEnd);
-      document.removeEventListener('mousedown', this._onMouseDown, true);
-    }
-
-    _onTouchStart = (e) => {
-      const touch = e.touches[0];
-      this._touchStartX = touch.clientX;
-      this._touchStartY = touch.clientY;
-      this._touchStartTime = Date.now();
-      this._isSwiping = false;
-    }
-
-    _onTouchMove = (e) => {
-      const touch = e.touches[0];
-      const dx = Math.abs(touch.clientX - this._touchStartX);
-      const dy = Math.abs(touch.clientY - this._touchStartY);
-      if (dx > 10 || dy > 10) {
-        this._isSwiping = true;
-      }
-    }
-
-    _onTouchEnd = (e) => {
-      if (this._isSwiping) return;
-      const duration = Date.now() - this._touchStartTime;
-      if (duration >= 500) return; // 长按不处理（MVP）
-      const touch = e.changedTouches[0];
-      this._handlePointSelection(touch.clientX, touch.clientY, e);
-    }
-
-    _onMouseDown = (e) => {
-      // 桌面端：左键点击选中
-      if (e.button !== 0) return;
-      // 延迟到 mouseup 判断是否为点击（避免拖拽时选中）
-      this._mouseDownX = e.clientX;
-      this._mouseDownY = e.clientY;
-      const onMouseUp = (ev) => {
-        document.removeEventListener('mouseup', onMouseUp, true);
-        const dx = Math.abs(ev.clientX - this._mouseDownX);
-        const dy = Math.abs(ev.clientY - this._mouseDownY);
-        if (dx > 5 || dy > 5) return; // 拖拽，不选中
-        this._handlePointSelection(ev.clientX, ev.clientY, ev);
-      };
-      document.addEventListener('mouseup', onMouseUp, true);
-    }
-
-    _handlePointSelection(clientX, clientY, event) {
-      // 检查点击的是否是工具自身元素
-      const el = document.elementFromPoint(clientX, clientY);
-      if (!el) return;
-      if (isWalkthroughElement(el)) return;
-      // 点击空白处（body/html）取消选中
-      if (el === document.body || el === document.documentElement) {
-        this._clearSelection();
-        return;
-      }
-      // 阻止默认行为（避免链接跳转等）
-      if (event && event.cancelable) event.preventDefault();
-      this._selectElement(el);
-    }
-
-    _selectElement(el) {
-      // 取消之前的选中
-      this._clearSelection();
-      // 设置新选中
-      state.selectedElement = el;
-      el.setAttribute('data-wt-selected', 'true');
-      // 显示信息气泡
-      this._components.overlay.removeAttribute('hidden');
-      this._components.overlay.showForElement(el);
-      // 生成选择器（用于变更记录）
-      state.selectedSelector = generateSelector(el);
-      // 触发事件（M3 样式面板监听）
-      bus.emit('element-selected', { element: el, selector: state.selectedSelector });
-    }
-
-    _clearSelection() {
-      if (state.selectedElement) {
-        state.selectedElement.removeAttribute('data-wt-selected');
-        state.selectedElement = null;
-      }
-      if (this._components.overlay) {
-        this._components.overlay.hide();
-        this._components.overlay.setAttribute('hidden', '');
-      }
-      state.selectedSelector = '';
-      bus.emit('element-deselected');
     }
 
     _resetChanges() {
@@ -2403,7 +2668,6 @@
         this._showToast('当前没有修改');
         return;
       }
-      // 恢复所有元素样式
       const bySelector = {};
       state.changes.forEach(c => {
         if (!bySelector[c.selector]) bySelector[c.selector] = [];
@@ -2412,18 +2676,13 @@
       Object.keys(bySelector).forEach(selector => {
         try {
           const el = document.querySelector(selector);
-          if (el) {
-            bySelector[selector].forEach(c => {
-              el.style[c.property] = '';
-            });
-          }
-        } catch (e) { /* ignore */ }
+          if (el) bySelector[selector].forEach(c => { el.style[c.property] = ''; });
+        } catch (e) {}
       });
       state.changes = [];
       this._saveChanges();
       this._updateChangeCount();
       this._showToast('已重置所有修改');
-      // 刷新配置面板（如果打开）
       if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
         this._components.overviewPanel.refresh(state.changes, state.currentRoute);
       }
@@ -2433,46 +2692,49 @@
       try {
         const key = `wego.walkthrough.data.${state.currentRoute}`;
         const raw = localStorage.getItem(key);
-        if (raw) {
-          const data = JSON.parse(raw);
-          state.changes = data.changes || [];
-        } else {
-          state.changes = [];
-        }
+        state.changes = raw ? (JSON.parse(raw).changes || []) : [];
         this._updateChangeCount();
-      } catch (e) {
-        console.error('[Walkthrough] load changes error:', e);
-      }
+      } catch (e) {}
     }
 
     _saveChanges() {
       try {
         const key = `wego.walkthrough.data.${state.currentRoute}`;
-        const data = {
+        localStorage.setItem(key, JSON.stringify({
           sceneRoute: state.currentRoute,
           lastModified: Date.now(),
           changes: state.changes,
-        };
-        localStorage.setItem(key, JSON.stringify(data));
-      } catch (e) {
-        console.error('[Walkthrough] save changes error:', e);
-      }
+        }));
+      } catch (e) {}
     }
 
     _updateChangeCount() {
       const count = state.changes.length;
-      this._components.bottomBar.setChangeCount(count);
-      this._components.fab.setHasChanges(count > 0);
+      if (this._components.countValue) this._components.countValue.textContent = count > 99 ? '99+' : count;
+      // 收起态红点
+      const hasIndicator = count > 0 || this._walkthroughMode || this._faultState.load || this._faultState.save || this._faultState['delete'];
+      this._components.fabBtn.setAttribute('data-has-indicator', String(hasIndicator));
+      // 走查模式按钮激活态
+      const wtBtn = this._shadow.querySelector('[data-tool="walkthrough"]');
+      if (wtBtn) wtBtn.setAttribute('data-active', String(this._walkthroughMode));
+      // 数据模拟按钮激活态
+      const dmBtn = this._shadow.querySelector('[data-tool="datamock"]');
+      if (dmBtn) dmBtn.setAttribute('data-active', String(this._faultState.load || this._faultState.save || this._faultState['delete']));
+      // 配置列表按钮变更标记
+      const ovBtn = this._shadow.querySelector('[data-tool="overview"]');
+      if (ovBtn) ovBtn.setAttribute('data-has-changes', String(count > 0));
     }
 
-    _showToast(message, duration) {
-      this._components.toast.show(message, duration);
+    _updateToolbarState() {
+      this._updateChangeCount();
+    }
+
+    _showToast(message) {
+      this._components.toast.show(message);
     }
   }
 
-  // ============================================================
-  // 注册自定义元素
-  // ============================================================
+
   function register() {
     if (!customElements.get('wego-wt-toast')) customElements.define('wego-wt-toast', WegoWtToast);
     if (!customElements.get('wego-wt-banner')) customElements.define('wego-wt-banner', WegoWtBanner);
@@ -2480,8 +2742,6 @@
     if (!customElements.get('wego-wt-style-panel')) customElements.define('wego-wt-style-panel', WegoWtStylePanel);
     if (!customElements.get('wego-wt-color-picker')) customElements.define('wego-wt-color-picker', WegoWtColorPicker);
     if (!customElements.get('wego-wt-overview-panel')) customElements.define('wego-wt-overview-panel', WegoWtOverviewPanel);
-    if (!customElements.get('wego-wt-bottom-bar')) customElements.define('wego-wt-bottom-bar', WegoWtBottomBar);
-    if (!customElements.get('wego-wt-fab')) customElements.define('wego-wt-fab', WegoWtFab);
     if (!customElements.get('wego-walkthrough')) customElements.define('wego-walkthrough', WegoWalkthrough);
   }
 
