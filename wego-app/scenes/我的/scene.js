@@ -11,18 +11,16 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
                   <span class="wg-skeleton wg-skeleton--text sk-text-role" data-component-slug="skeleton"></span>
                 </span>
               </div>
-              <div class="my-tab-identity__real" data-role="profile-real" hidden>
-                <div class="avatar avatar--image my-tab-identity__avatar" data-component-slug="avatar">
-                  <img data-role="profile-avatar" alt="">
-                </div>
-                <span class="my-tab-identity__copy">
-                  <span class="my-tab-identity__album"><span data-role="profile-album"></span><i class="wego-iconfont-s icon-shangxiajiantou16 my-tab-identity__switch" aria-hidden="true"></i></span>
-                  <span class="my-tab-identity__meta">
-                    <span class="my-tab-identity__name" data-role="profile-name"></span>
-                    <span class="my-tab-identity__role" data-role="profile-role"></span>
-                  </span>
-                </span>
+              <div class="avatar avatar--image my-tab-identity__avatar" data-skeleton-real data-component-slug="avatar">
+                <img data-role="profile-avatar" alt="">
               </div>
+              <span class="my-tab-identity__copy" data-skeleton-real>
+                <span class="my-tab-identity__album"><span data-role="profile-album"></span><i class="wego-iconfont-s icon-shangxiajiantou16 my-tab-identity__switch" aria-hidden="true"></i></span>
+                <span class="my-tab-identity__meta">
+                  <span class="my-tab-identity__name" data-role="profile-name"></span>
+                  <span class="my-tab-identity__role" data-role="profile-role"></span>
+                </span>
+              </span>
             </button>
           </div>
           <div class="navbar__right navbar__right--icon">
@@ -30,16 +28,14 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
               <span class="wg-skeleton wg-skeleton--rect sk-rect-action" data-component-slug="skeleton"></span>
               <span class="wg-skeleton wg-skeleton--rect sk-rect-action" data-component-slug="skeleton"></span>
             </div>
-            <div class="my-tab-navbar__real" data-role="navbar-actions-real" hidden>
-              <button type="button" class="navbar__action" data-action="settings" aria-label="设置">
-                <span class="navbar__action-icon"><i class="wego-iconfont-s icon-shezhi" aria-hidden="true"></i></span>
-                <span class="navbar__action-label">设置</span>
-              </button>
-              <button type="button" class="navbar__action" data-action="share-homepage" aria-label="分享主页">
-                <span class="navbar__action-icon"><i class="wego-iconfont-s icon-fenxiang" aria-hidden="true"></i></span>
-                <span class="navbar__action-label">分享</span>
-              </button>
-            </div>
+            <button type="button" class="navbar__action" data-skeleton-real data-action="settings" aria-label="设置">
+              <span class="navbar__action-icon"><i class="wego-iconfont-s icon-shezhi" aria-hidden="true"></i></span>
+              <span class="navbar__action-label">设置</span>
+            </button>
+            <button type="button" class="navbar__action" data-skeleton-real data-action="share-homepage" aria-label="分享主页">
+              <span class="navbar__action-icon"><i class="wego-iconfont-s icon-fenxiang" aria-hidden="true"></i></span>
+              <span class="navbar__action-label">分享</span>
+            </button>
           </div>
         </div>
       </div>
@@ -54,8 +50,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
                 <span class="wg-skeleton wg-skeleton--rect sk-rect-membership-brand" data-component-slug="skeleton"></span>
                 <span class="wg-skeleton wg-skeleton--text sk-text-membership-ticker" data-component-slug="skeleton"></span>
               </div>
-              <div class="my-membership-card__real" data-role="membership-real" hidden>
-              <div class="my-membership-card__row">
+              <div class="my-membership-card__row" data-skeleton-real>
                 <div class="my-membership-card__brand">
                   <img class="my-membership-card__vip" src="./lib/assets/icons/vicon_vip.svg" alt="会员" aria-hidden="true">
                   <span>会员中心</span>
@@ -70,7 +65,6 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
                 </div>
                 <i class="wego-iconfont-s icon-youjiantou16 my-membership-card__arrow" aria-hidden="true"></i>
               </div>
-              </div>
             </div>
           </div>
         </section>
@@ -80,7 +74,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
             <div class="card__content my-entry-card__content">
               <div class="card__header my-section-heading">
                 <span class="my-section-heading__skeleton" data-role="assets-title-skeleton" aria-hidden="true"><span class="wg-skeleton wg-skeleton--text sk-text-title" data-component-slug="skeleton"></span></span>
-                <h2 data-role="assets-title-real" hidden>数据资产</h2>
+                <h2 data-skeleton-real>数据资产</h2>
               </div>
               <div class="card__body" data-region="assets"></div>
             </div>
@@ -92,7 +86,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
             <div class="card__content my-entry-card__content">
               <div class="card__header my-section-heading">
                 <span class="my-section-heading__skeleton" data-role="apps-title-skeleton" aria-hidden="true"><span class="wg-skeleton wg-skeleton--text sk-text-title" data-component-slug="skeleton"></span></span>
-                <h2 data-role="apps-title-real" hidden>常用应用</h2>
+                <h2 data-skeleton-real>常用应用</h2>
               </div>
               <div class="card__body" data-region="apps"></div>
             </div>
@@ -108,8 +102,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
                   <span class="wg-skeleton wg-skeleton--rect sk-rect-tab" data-component-slug="skeleton"></span>
                   <span class="wg-skeleton wg-skeleton--rect sk-rect-tab" data-component-slug="skeleton"></span>
                 </div>
-                <div class="my-content-tabs__real" data-role="tabs-real" hidden>
-                <div class="wg-tabs__scroll">
+                <div class="wg-tabs__scroll" data-skeleton-real>
                   <button class="wg-tabs__item" type="button" role="tab" aria-selected="true" data-content-type="product">
                     <span class="wg-tabs__content"><span class="wg-tabs__label">产品</span></span>
                   </button>
@@ -120,7 +113,6 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
                     <span class="wg-tabs__content"><span class="wg-tabs__label">直播</span></span>
                   </button>
                   <span class="wg-tabs__active-indicator" aria-hidden="true"></span>
-                </div>
                 </div>
               </div>
             </div>
@@ -136,8 +128,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
                   <span class="wg-skeleton wg-skeleton--rect sk-rect-search-action" data-component-slug="skeleton"></span>
                   <span class="wg-skeleton wg-skeleton--rect sk-rect-search-action" data-component-slug="skeleton"></span>
                 </div>
-                <div class="my-content-toolbar__real" data-role="search-real" hidden>
-                <div class="searchbox searchbox--sm searchbox--gray" data-component-slug="search">
+                <div class="searchbox searchbox--sm searchbox--gray" data-skeleton-real data-component-slug="search">
                   <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
                   <div class="searchbox__input">
                     <input class="searchbox__field" data-role="content-search" type="search" placeholder="搜索产品" aria-label="搜索产品">
@@ -146,7 +137,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
                     <button class="searchbox__action searchbox__clear wego-iconfont-s icon-yuancha-mian" data-action="clear-search" type="button" aria-label="清除搜索" hidden></button>
                   </div>
                 </div>
-                <div class="search-toolbar__actions">
+                <div class="search-toolbar__actions" data-skeleton-real>
                   <button class="search-toolbar__action" data-action="view-toggle" type="button">
                     <span class="search-toolbar__action-icon wego-iconfont-s icon-liebiao" data-role="view-icon" aria-hidden="true"></span>
                     <span data-role="view-label">列表</span>
@@ -155,7 +146,6 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
                     <span class="search-toolbar__action-icon wego-iconfont-s icon-shaixuan" aria-hidden="true"></span>
                     筛选
                   </button>
-                </div>
                 </div>
               </div>
             </div>
@@ -170,14 +160,12 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
               <span class="wg-skeleton wg-skeleton--text sk-text-mgmt-action" data-component-slug="skeleton"></span>
               <span class="wg-skeleton wg-skeleton--text sk-text-mgmt-action" data-component-slug="skeleton"></span>
             </div>
-            <div class="my-content-management__real" data-role="mgmt-real" hidden>
-            <span class="my-content-management__count" data-role="content-count">共 0 条</span>
-            <div class="my-content-management__actions">
+            <span class="my-content-management__count" data-skeleton-real data-role="content-count">共 0 条</span>
+            <div class="my-content-management__actions" data-skeleton-real>
               <a class="link link--12" data-component-slug="link" href="javascript:void(0)" role="button" data-management-action="sort">排序</a>
               <a class="link link--12" data-component-slug="link" href="javascript:void(0)" role="button" data-management-action="category">分类</a>
               <a class="link link--12" data-component-slug="link" href="javascript:void(0)" role="button" data-management-action="batch">批量</a>
               <a class="link link--12" data-component-slug="link" href="javascript:void(0)" role="button" data-management-action="collection" hidden>合集</a>
-            </div>
             </div>
           </div>
         </section>
@@ -444,11 +432,11 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         });
       }
 
-      /* 整页骨架→真实切换：隐藏所有 [data-role$="-skeleton"]，显示对应 [data-role$="-real"] 并淡入。
-         覆盖 navbar / 会员卡 / 卡标题 / tabs / 搜索栏 / 内容管理行 / 资产应用内容区。 */
+      /* 整页骨架→真实切换：隐藏所有 [data-role$="-skeleton"]，显示所有 [data-skeleton-real] 并淡入。
+         真实节点直接作为原父容器的子项（无包裹层），不破坏原有 flex/子选择器布局。 */
       function revealAllSkeletons() {
         var skeletons = root.querySelectorAll('[data-role$="-skeleton"]');
-        var reals = root.querySelectorAll('[data-role$="-real"]');
+        var reals = root.querySelectorAll('[data-skeleton-real]');
         skeletons.forEach(function (el) { el.hidden = true; });
         reals.forEach(function (el) {
           el.hidden = false;
@@ -1026,7 +1014,8 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         renderContent();
       }
 
-      /* 挂载首帧：整页结构骨架（navbar 模板已预置骨架；资产/应用/内容区填骨架） */
+      /* 挂载首帧：先隐藏所有真实节点，显示整页结构骨架（navbar 模板已预置骨架；资产/应用/内容区填骨架） */
+      root.querySelectorAll('[data-skeleton-real]').forEach(function (el) { el.hidden = true; });
       var assetsRegion = root.querySelector('[data-region="assets"]');
       var appsRegion = root.querySelector('[data-region="apps"]');
       var contentRegion = root.querySelector('[data-region="content"]');
