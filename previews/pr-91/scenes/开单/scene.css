@@ -3539,7 +3539,8 @@ body[data-order-layout="landscape"] .phone-indicator {
   .order-desktop__catalog-list--grid .order-catalog-item__actions {
     position: static;
     justify-content: flex-start;
-    gap: var(--spacer-4);
+    gap: 0;
+    width: 100%;
     min-width: 0;
     height: var(--size-32);
   }
@@ -6041,8 +6042,7 @@ body[data-order-layout="landscape"] .phone-indicator {
   }
 
   .order-desktop__catalog-list--grid .order-catalog-item__detail {
-    min-height: var(--size-32);
-    padding: var(--spacer-8) 0;
+    display: none;
   }
 
   .order-desktop__catalog-list--grid .order-catalog-item__detail b {
@@ -6051,12 +6051,16 @@ body[data-order-layout="landscape"] .phone-indicator {
 
   .order-desktop__catalog-list--grid .order-catalog-item__actions {
     position: static;
-    gap: var(--spacer-4);
+    gap: 0;
+    width: 100%;
+    height: var(--size-32);
   }
 
   .order-desktop__catalog-list--grid .order-catalog-item__edit {
-    width: var(--size-28);
+    flex: 0 0 var(--size-24);
+    width: var(--size-24);
     height: var(--size-32);
+    padding: 0 var(--spacer-4);
   }
 
   .order-desktop__catalog-list--grid .order-catalog-item__edit > i {
