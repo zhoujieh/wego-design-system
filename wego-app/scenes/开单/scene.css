@@ -3112,38 +3112,8 @@ body[data-order-layout="landscape"] .phone-indicator {
   }
 
   .order-catalog-create-menu {
-    position: absolute;
+    position: fixed;
     z-index: var(--z-popover);
-    top: calc(100% + var(--spacer-8));
-    right: 0;
-    width: calc(var(--size-104) * 2);
-    overflow: hidden;
-    padding: var(--spacer-4);
-    background: var(--bg-surface);
-    border: var(--stroke-hairline) solid var(--border-neutral-l2);
-    border-radius: var(--radius-8);
-    box-shadow: var(--shadow-md);
-  }
-
-  .order-catalog-create-menu > button {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    min-height: calc(var(--size-40) + var(--spacer-4));
-    padding: 0 var(--spacer-12);
-    color: var(--text-default);
-    font-size: var(--body-md-font-size);
-    text-align: left;
-    background: transparent;
-    border: 0;
-    border-radius: var(--radius-4);
-  }
-
-  .order-catalog-create-menu > button:hover,
-  .order-catalog-create-menu > button:focus-visible {
-    background: var(--bg-state-hover);
-    outline: var(--stroke-icon-strong) solid var(--border-brand);
-    outline-offset: calc(var(--stroke-icon-strong) * -1);
   }
 
   .order-row-context-menu {

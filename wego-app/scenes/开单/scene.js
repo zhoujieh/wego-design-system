@@ -268,6 +268,7 @@
     productEditReturnPanel: null,
     productCreateDraft: null,
     catalogCreateMenuOpen: false,
+    catalogCreateType: 'product',
     rowContextMenu: null,
     saveTimer: null
   };
@@ -533,7 +534,7 @@
 
   function focusCatalogCreateMenuItem(position) {
     if (!activeContext || !activeContext.root) return;
-    var items = activeContext.root.querySelectorAll('.order-catalog-create-menu [role="menuitem"]');
+    var items = activeContext.root.querySelectorAll('.order-catalog-create-menu [role="option"]');
     if (!items.length) return;
     items[position === 'last' ? items.length - 1 : 0].focus({ preventScroll: true });
   }
@@ -1221,7 +1222,7 @@
     return ''
       + '<aside class="order-desktop__catalog">'
       +   '<button type="button" class="btn btn--weak btn--sm order-desktop-catalog-toggle order-desktop-catalog-toggle--collapse" data-component-slug="button" data-toggle-catalog aria-label="收起商品库"><i class="btn__icon icon-youjiantou16" aria-hidden="true"></i>收起商品库</button>'
-      +   '<header class="order-catalog-header"><div class="order-catalog-header__title"><strong>商品库</strong><div class="order-catalog-view-switch" aria-label="商品库显示模式"><button type="button" class="' + (state.catalogViewMode === 'grid' ? 'is-active' : '') + '" data-catalog-view="grid">大图</button><button type="button" class="' + (state.catalogViewMode === 'list' ? 'is-active' : '') + '" data-catalog-view="list">列表</button></div></div><div class="order-catalog-create-anchor"><button type="button" class="btn btn--weak btn--sm order-catalog-publish" data-component-slug="button" data-toggle-product-create-menu aria-haspopup="menu" aria-expanded="' + state.catalogCreateMenuOpen + '"><i class="btn__icon icon-yuanjia" aria-hidden="true"></i>创建</button>' + (state.catalogCreateMenuOpen ? '<div class="card card--surface order-catalog-create-menu" data-component-slug="card" role="menu" aria-label="功能选项面板"><button type="button" role="menuitem" data-create-product-type="product">创建商品</button><button type="button" role="menuitem" data-create-product-type="temporary">创建临时商品</button></div>' : '') + '</div></header>'
+      +   '<header class="order-catalog-header"><div class="order-catalog-header__title"><strong>商品库</strong><div class="order-catalog-view-switch" aria-label="商品库显示模式"><button type="button" class="' + (state.catalogViewMode === 'grid' ? 'is-active' : '') + '" data-catalog-view="grid">大图</button><button type="button" class="' + (state.catalogViewMode === 'list' ? 'is-active' : '') + '" data-catalog-view="list">列表</button></div></div><div class="order-catalog-create-anchor"><button type="button" class="btn btn--weak btn--sm order-catalog-publish" data-component-slug="button" data-toggle-product-create-menu aria-haspopup="listbox" aria-controls="order-catalog-create-menu" aria-expanded="' + state.catalogCreateMenuOpen + '"><i class="btn__icon icon-yuanjia" aria-hidden="true"></i>创建</button></div></header>'
       +   desktopProductSearch(true)
       +   '<div class="order-desktop__catalog-scroll">'
       +   (!showingSearchResults && historyProducts.length ? '<section class="order-catalog-history" aria-label="最近成交商品"><div class="order-catalog-history__list layout-scroll-row" data-component-slug="layout-scroll-row" data-item-size="auto" data-snap="start" data-peek="none">' + catalogList(true, historyProducts, false) + '</div></section>' : '')
@@ -1265,6 +1266,17 @@
       +   '<div class="popmenu__list">'
       +     '<button type="button" class="popmenu__item' + (state.displayMode === 'grouped' ? ' popmenu__item--selected' : '') + '" role="option" aria-selected="' + (state.displayMode === 'grouped') + '" data-display="grouped"><span class="popmenu__item-text">按商品</span><i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check" aria-hidden="true"></i></button>'
       +     '<button type="button" class="popmenu__item' + (state.displayMode === 'flat' ? ' popmenu__item--selected' : '') + '" role="option" aria-selected="' + (state.displayMode === 'flat') + '" data-display="flat"><span class="popmenu__item-text">按规格</span><i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check" aria-hidden="true"></i></button>'
+      +   '</div>'
+      + '</div>';
+  }
+
+  function desktopCatalogCreateMenu() {
+    if (!state.catalogCreateMenuOpen || !isDesktopWorkbench()) return '';
+    return ''
+      + '<div class="popmenu popmenu--select order-catalog-create-menu" id="order-catalog-create-menu" data-component-slug="popmenu" role="listbox" aria-label="创建类型" data-placement="bottom" data-align="end" data-state="open">'
+      +   '<div class="popmenu__list">'
+      +     '<button type="button" class="popmenu__item' + (state.catalogCreateType === 'product' ? ' popmenu__item--selected' : '') + '" role="option" aria-selected="' + (state.catalogCreateType === 'product') + '" data-create-product-type="product"><span class="popmenu__item-text">创建商品</span><i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check" aria-hidden="true"></i></button>'
+      +     '<button type="button" class="popmenu__item' + (state.catalogCreateType === 'temporary' ? ' popmenu__item--selected' : '') + '" role="option" aria-selected="' + (state.catalogCreateType === 'temporary') + '" data-create-product-type="temporary"><span class="popmenu__item-text">创建临时商品</span><i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check" aria-hidden="true"></i></button>'
       +   '</div>'
       + '</div>';
   }
@@ -2230,6 +2242,7 @@
   function beginProductCreate(type) {
     var temporary = type === 'temporary';
     state.catalogCreateMenuOpen = false;
+    state.catalogCreateType = temporary ? 'temporary' : 'product';
     state.productCreateDraft = {
       type: temporary ? 'temporary' : 'product',
       image: '',
@@ -2395,7 +2408,7 @@
   }
 
   function rootTemplate() {
-    return '<div class="order-v2-page" data-bg="page">' + mobileView() + desktopView() + desktopModal() + mobileModal() + orderNoteModal() + freightEditModal() + totalEditModal() + productImagePreview() + orderRowContextMenu() + desktopDisplayModeMenu() + '</div>';
+    return '<div class="order-v2-page" data-bg="page">' + mobileView() + desktopView() + desktopModal() + mobileModal() + orderNoteModal() + freightEditModal() + totalEditModal() + productImagePreview() + orderRowContextMenu() + desktopDisplayModeMenu() + desktopCatalogCreateMenu() + '</div>';
   }
 
   function renderWorkbench(root, ctx) {
@@ -2405,6 +2418,7 @@
     updateInputClearButtons(root);
     syncCatalogCategoryTabs(root);
     positionDesktopDisplayModeMenu(root);
+    positionDesktopCatalogCreateMenu(root);
   }
 
   function positionDesktopDisplayModeMenu(root) {
@@ -2419,6 +2433,33 @@
       menu.style.left = Math.max(4, Math.min(valueBounds.left, window.innerWidth - menu.offsetWidth - 4)) + 'px';
       menu.style.top = (bounds.bottom + 4) + 'px';
     });
+  }
+
+  function positionDesktopCatalogCreateMenu(root) {
+    if (!state.catalogCreateMenuOpen) return;
+    var trigger = root.querySelector('[data-toggle-product-create-menu]');
+    var menu = root.querySelector('.order-catalog-create-menu');
+    if (!trigger || !menu) return;
+    var triggerBounds = trigger.getBoundingClientRect();
+    var menuBounds = menu.getBoundingClientRect();
+    var gap = parseFloat(window.getComputedStyle(menu).getPropertyValue('--popmenu-gap')) || 4;
+    var align = 'end';
+    var left = triggerBounds.right - menuBounds.width;
+    if (left < gap) {
+      align = 'start';
+      left = triggerBounds.left;
+    }
+    left = Math.max(gap, Math.min(left, window.innerWidth - menuBounds.width - gap));
+    var placement = 'bottom';
+    var top = triggerBounds.bottom + gap;
+    if (top + menuBounds.height > window.innerHeight - gap) {
+      placement = 'top';
+      top = triggerBounds.top - menuBounds.height - gap;
+    }
+    menu.setAttribute('data-placement', placement);
+    menu.setAttribute('data-align', align);
+    menu.style.left = left + 'px';
+    menu.style.top = top + 'px';
   }
 
   function catalogResizeLimits(workspace) {
@@ -2916,8 +2957,9 @@
       if (state.catalogCreateMenuOpen) focusCatalogCreateMenuItem('first');
       return;
     }
-    if (target.matches('[data-create-product-type]')) {
-      beginProductCreate(target.dataset.createProductType);
+    var createProductTypeTarget = target.closest && target.closest('[data-create-product-type]');
+    if (createProductTypeTarget) {
+      beginProductCreate(createProductTypeTarget.dataset.createProductType);
       return;
     }
     if (target.matches('[data-toggle-catalog]')) {
@@ -4310,7 +4352,7 @@
         && !event.target.closest('.order-desktop-guide-anchor');
       var shouldCloseProductCreateMenu = isDesktopWorkbench()
         && state.catalogCreateMenuOpen
-        && !event.target.closest('.order-catalog-create-anchor');
+        && !event.target.closest('[data-toggle-product-create-menu], .order-catalog-create-menu');
       var shouldCloseRowContextMenu = isDesktopWorkbench()
         && state.rowContextMenu
         && !event.target.closest('.order-row-context-menu');
@@ -4410,10 +4452,10 @@
         renderActive();
         return;
       }
-      var createMenuItem = event.target.closest && event.target.closest('.order-catalog-create-menu [role="menuitem"]');
+      var createMenuItem = event.target.closest && event.target.closest('.order-catalog-create-menu [role="option"]');
       if (createMenuItem && ['ArrowDown', 'ArrowUp', 'Home', 'End'].indexOf(event.key) >= 0) {
         event.preventDefault();
-        var createMenuItems = Array.from(root.querySelectorAll('.order-catalog-create-menu [role="menuitem"]'));
+        var createMenuItems = Array.from(root.querySelectorAll('.order-catalog-create-menu [role="option"]'));
         var currentCreateMenuIndex = createMenuItems.indexOf(createMenuItem);
         var nextCreateMenuIndex = event.key === 'Home'
           ? 0
@@ -4421,6 +4463,11 @@
             ? createMenuItems.length - 1
             : (currentCreateMenuIndex + (event.key === 'ArrowDown' ? 1 : -1) + createMenuItems.length) % createMenuItems.length);
         createMenuItems[nextCreateMenuIndex].focus();
+        return;
+      }
+      if (createMenuItem && (event.key === 'Enter' || event.key === ' ')) {
+        event.preventDefault();
+        createMenuItem.click();
         return;
       }
       if (event.key === 'Tab' && (state.panel === 'product-edit' || state.panel === 'product-create' || state.panel === 'product-temp-create')) {
