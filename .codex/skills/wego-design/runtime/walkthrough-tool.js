@@ -50,10 +50,18 @@
     return match ? match[1] : 'default';
   }
 
-  /** 判断元素是否属于走查工具自身 */
+  /** 判断元素是否属于走查工具自身（包括 Shadow DOM 内部） */
   function isWalkthroughElement(el) {
     if (!el) return false;
-    return !!(el.closest && el.closest('wego-walkthrough, wego-wt-fab, wego-wt-bottom-bar, wego-wt-banner, wego-wt-style-panel, wego-wt-overview-panel, wego-wt-color-picker, wego-wt-toast, wego-wt-overlay'));
+    // 检查 Light DOM 中的祖先
+    const lightTags = 'wego-walkthrough,wego-wt-fab,wego-wt-bottom-bar,wego-wt-banner,wego-wt-style-panel,wego-wt-overview-panel,wego-wt-color-picker,wego-wt-toast,wego-wt-overlay';
+    if (el.closest && el.closest(lightTags)) return true;
+    // 检查 Shadow DOM：元素的根节点是否为走查工具的 shadowRoot
+    try {
+      const root = el.getRootNode ? el.getRootNode() : null;
+      if (root && root.host && root.host.tagName === 'WEGO-WALKTHROUGH') return true;
+    } catch (e) { /* ignore */ }
+    return false;
   }
 
   /** 生成 CSS 选择器 */
@@ -479,6 +487,104 @@
   }
 
   // ============================================================
+  // wego-wt-overlay: 覆盖层（元素信息气泡）
+  // ============================================================
+  class WegoWtOverlay extends HTMLElement {
+    constructor() {
+      super();
+      this._shadow = this.attachShadow({ mode: 'open' });
+      this._targetEl = null;
+      this._rafId = null;
+    }
+    connectedCallback() {
+      this._render();
+    }
+    disconnectedCallback() {
+      this._stopTracking();
+    }
+    showForElement(el) {
+      this._targetEl = el;
+      this._updatePosition();
+      this._startTracking();
+    }
+    hide() {
+      this._targetEl = null;
+      this._stopTracking();
+      this.style.display = 'none';
+    }
+    _startTracking() {
+      this._stopTracking();
+      const update = () => {
+        if (this._targetEl) {
+          this._updatePosition();
+          this._rafId = requestAnimationFrame(update);
+        }
+      };
+      this._rafId = requestAnimationFrame(update);
+    }
+    _stopTracking() {
+      if (this._rafId) {
+        cancelAnimationFrame(this._rafId);
+        this._rafId = null;
+      }
+    }
+    _updatePosition() {
+      if (!this._targetEl) return;
+      const rect = this._targetEl.getBoundingClientRect();
+      const bubble = this._shadow.querySelector('.bubble');
+      if (!bubble) return;
+      // 更新内容
+      const tag = this._targetEl.tagName.toLowerCase();
+      const w = Math.round(rect.width);
+      const h = Math.round(rect.height);
+      bubble.querySelector('.bubble-text').textContent = `${tag} · ${w}×${h}`;
+      // 计算位置：优先在元素上方
+      const bubbleRect = bubble.getBoundingClientRect();
+      const bw = bubbleRect.width || 100;
+      const bh = bubbleRect.height || 24;
+      let top = rect.top - bh - 6;
+      let left = rect.left + rect.width / 2 - bw / 2;
+      // 元素靠近顶部，显示在下方
+      if (top < 40) {
+        top = rect.bottom + 6;
+      }
+      // 水平边界
+      left = Math.max(8, Math.min(left, window.innerWidth - bw - 8));
+      bubble.style.top = top + 'px';
+      bubble.style.left = left + 'px';
+      this.style.display = 'block';
+    }
+    _render() {
+      this._shadow.innerHTML = `
+        <style>
+          :host {
+            position: fixed;
+            inset: 0;
+            z-index: 9550;
+            pointer-events: none;
+            display: none;
+          }
+          .bubble {
+            position: absolute;
+            padding: 3px 8px;
+            border-radius: 6px;
+            background: rgba(30, 30, 30, 0.88);
+            color: #fff;
+            font-size: 11px;
+            line-height: 16px;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", sans-serif;
+            white-space: nowrap;
+            pointer-events: none;
+          }
+        </style>
+        <div class="bubble">
+          <span class="bubble-text"></span>
+        </div>
+      `;
+    }
+  }
+
+  // ============================================================
   // wego-walkthrough: 主应用根元素
   // ============================================================
   class WegoWalkthrough extends HTMLElement {
@@ -513,6 +619,7 @@
           :host > * { pointer-events: auto; }
         </style>
         <wego-wt-banner hidden></wego-wt-banner>
+        <wego-wt-overlay hidden></wego-wt-overlay>
         <wego-wt-toast></wego-wt-toast>
         <wego-wt-bottom-bar hidden></wego-wt-bottom-bar>
         <wego-wt-fab></wego-wt-fab>
@@ -521,6 +628,7 @@
 
     _initComponents() {
       this._components.banner = this._shadow.querySelector('wego-wt-banner');
+      this._components.overlay = this._shadow.querySelector('wego-wt-overlay');
       this._components.toast = this._shadow.querySelector('wego-wt-toast');
       this._components.bottomBar = this._shadow.querySelector('wego-wt-bottom-bar');
       this._components.fab = this._shadow.querySelector('wego-wt-fab');
@@ -561,9 +669,11 @@
       if (enabled) {
         document.body.setAttribute('data-walkthrough-mode', 'true');
         this._components.banner.removeAttribute('hidden');
+        this._bindTouchEvents();
       } else {
         document.body.removeAttribute('data-walkthrough-mode');
         this._components.banner.setAttribute('hidden', '');
+        this._unbindTouchEvents();
         // 取消选中
         this._clearSelection();
       }
@@ -571,11 +681,107 @@
       this._components.fab.setWalkthroughMode(enabled);
     }
 
+    _bindTouchEvents() {
+      this._touchStartX = 0;
+      this._touchStartY = 0;
+      this._touchStartTime = 0;
+      this._isSwiping = false;
+      document.addEventListener('touchstart', this._onTouchStart, { passive: true });
+      document.addEventListener('touchmove', this._onTouchMove, { passive: true });
+      document.addEventListener('touchend', this._onTouchEnd, { passive: false });
+      // 桌面端鼠标点击支持
+      document.addEventListener('mousedown', this._onMouseDown, true);
+    }
+
+    _unbindTouchEvents() {
+      document.removeEventListener('touchstart', this._onTouchStart);
+      document.removeEventListener('touchmove', this._onTouchMove);
+      document.removeEventListener('touchend', this._onTouchEnd);
+      document.removeEventListener('mousedown', this._onMouseDown, true);
+    }
+
+    _onTouchStart = (e) => {
+      const touch = e.touches[0];
+      this._touchStartX = touch.clientX;
+      this._touchStartY = touch.clientY;
+      this._touchStartTime = Date.now();
+      this._isSwiping = false;
+    }
+
+    _onTouchMove = (e) => {
+      const touch = e.touches[0];
+      const dx = Math.abs(touch.clientX - this._touchStartX);
+      const dy = Math.abs(touch.clientY - this._touchStartY);
+      if (dx > 10 || dy > 10) {
+        this._isSwiping = true;
+      }
+    }
+
+    _onTouchEnd = (e) => {
+      if (this._isSwiping) return;
+      const duration = Date.now() - this._touchStartTime;
+      if (duration >= 500) return; // 长按不处理（MVP）
+      const touch = e.changedTouches[0];
+      this._handlePointSelection(touch.clientX, touch.clientY, e);
+    }
+
+    _onMouseDown = (e) => {
+      // 桌面端：左键点击选中
+      if (e.button !== 0) return;
+      // 延迟到 mouseup 判断是否为点击（避免拖拽时选中）
+      this._mouseDownX = e.clientX;
+      this._mouseDownY = e.clientY;
+      const onMouseUp = (ev) => {
+        document.removeEventListener('mouseup', onMouseUp, true);
+        const dx = Math.abs(ev.clientX - this._mouseDownX);
+        const dy = Math.abs(ev.clientY - this._mouseDownY);
+        if (dx > 5 || dy > 5) return; // 拖拽，不选中
+        this._handlePointSelection(ev.clientX, ev.clientY, ev);
+      };
+      document.addEventListener('mouseup', onMouseUp, true);
+    }
+
+    _handlePointSelection(clientX, clientY, event) {
+      // 检查点击的是否是工具自身元素
+      const el = document.elementFromPoint(clientX, clientY);
+      if (!el) return;
+      if (isWalkthroughElement(el)) return;
+      // 点击空白处（body/html）取消选中
+      if (el === document.body || el === document.documentElement) {
+        this._clearSelection();
+        return;
+      }
+      // 阻止默认行为（避免链接跳转等）
+      if (event && event.cancelable) event.preventDefault();
+      this._selectElement(el);
+    }
+
+    _selectElement(el) {
+      // 取消之前的选中
+      this._clearSelection();
+      // 设置新选中
+      state.selectedElement = el;
+      el.setAttribute('data-wt-selected', 'true');
+      // 显示信息气泡
+      this._components.overlay.removeAttribute('hidden');
+      this._components.overlay.showForElement(el);
+      // 生成选择器（用于变更记录）
+      state.selectedSelector = generateSelector(el);
+      // 触发事件（M3 样式面板监听）
+      bus.emit('element-selected', { element: el, selector: state.selectedSelector });
+    }
+
     _clearSelection() {
       if (state.selectedElement) {
         state.selectedElement.removeAttribute('data-wt-selected');
         state.selectedElement = null;
       }
+      if (this._components.overlay) {
+        this._components.overlay.hide();
+        this._components.overlay.setAttribute('hidden', '');
+      }
+      state.selectedSelector = '';
+      bus.emit('element-deselected');
     }
 
     _resetChanges() {
@@ -652,6 +858,7 @@
   function register() {
     if (!customElements.get('wego-wt-toast')) customElements.define('wego-wt-toast', WegoWtToast);
     if (!customElements.get('wego-wt-banner')) customElements.define('wego-wt-banner', WegoWtBanner);
+    if (!customElements.get('wego-wt-overlay')) customElements.define('wego-wt-overlay', WegoWtOverlay);
     if (!customElements.get('wego-wt-bottom-bar')) customElements.define('wego-wt-bottom-bar', WegoWtBottomBar);
     if (!customElements.get('wego-wt-fab')) customElements.define('wego-wt-fab', WegoWtFab);
     if (!customElements.get('wego-walkthrough')) customElements.define('wego-walkthrough', WegoWalkthrough);
