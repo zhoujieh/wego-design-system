@@ -6,33 +6,85 @@
   color: var(--text-default);
 }
 
-.my-tab-skeleton-surface {
-  position: absolute;
-  inset: 0;
-  background: var(--bg-page);
+/* 结构骨架：按真实 DOM 区块绘制（数据资产/常用应用横向行、内容卡片），
+   复用设计系统 .wg-skeleton 原子块，进入时由 setRegion 触发 scene-fade-in 渐显 */
+
+.my-tab-skeleton-scroll {
+  display: flex;
+  flex-direction: row;
+  gap: var(--spacer-16);
+  overflow: hidden;
+  padding: var(--spacer-4) 0;
 }
 
-.my-tab-skeleton-panel {
-  position: absolute;
+.my-tab-skeleton-entry {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacer-8);
+  flex: 0 0 auto;
+}
+
+.my-tab-skeleton-card {
   background: var(--bg-surface);
+  border-radius: var(--radius-8);
+  padding: var(--spacer-12) var(--spacer-16);
 }
 
-/* 覆盖框架 scene-skeleton.css 默认过渡：去掉 translateY 位移，真实内容在骨架色块原位淡入 */
-@keyframes my-tab-scene-fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+.my-tab-skeleton-card__head {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-12);
+  padding: var(--spacer-8) 0;
 }
 
-.my-tab-page .scene-fade-in {
-  animation-name: my-tab-scene-fade-in;
+.my-tab-skeleton-card__meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-4);
+  flex: 1;
 }
 
-.my-tab-page ~ .sk-overlay {
-  z-index: calc(var(--z-sticky) + 1);
+.my-tab-skeleton-card__block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-8);
+  padding: var(--spacer-8) 0;
+}
+
+.my-tab-skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacer-4);
+}
+
+.my-tab-skeleton-grid .wg-skeleton {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  border-radius: var(--radius-4);
+}
+
+.my-tab-skeleton-product {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-8);
+  padding: var(--spacer-8);
+  background: var(--bg-state-hover);
+  border-radius: var(--radius-8);
+}
+
+.my-tab-skeleton-card__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-8);
+  padding: var(--spacer-8) 0 var(--spacer-4);
+}
+
+/* 内容区骨架卡之间用分割线（与真实卡片一致） */
+.my-tab-skeleton-card + .my-tab-skeleton-card {
+  margin-top: var(--spacer-8);
+  border-top: var(--stroke-hairline) solid var(--border-neutral-l2);
 }
 
 .my-tab-navbar {

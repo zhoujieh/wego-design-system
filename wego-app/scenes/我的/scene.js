@@ -149,6 +149,51 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
 (function registerMyTabScene() {
   'use strict';
 
+  /* 结构骨架：按真实 DOM 区块绘制（数据资产/常用应用横向行、内容卡片），
+     复用设计系统 .wg-skeleton 原子块；挂载首帧同步填充 region，内容就绪后由 setRegion 淡入替换 */
+  function skeletonScrollRow(entryHtml, count) {
+    var items = '';
+    for (var i = 0; i < count; i++) items += entryHtml;
+    return '<div class="my-tab-skeleton-scroll" aria-hidden="true">' + items + '</div>';
+  }
+
+  function skeletonAssets() {
+    var entry = '<div class="my-tab-skeleton-entry"><span class="wg-skeleton wg-skeleton--circle" style="width:44px;height:44px"></span><span class="wg-skeleton wg-skeleton--text" style="width:48px;height:12px"></span></div>';
+    return skeletonScrollRow(entry, 4);
+  }
+
+  function skeletonApps() {
+    var entry = '<div class="my-tab-skeleton-entry"><span class="wg-skeleton wg-skeleton--rect" style="width:48px;height:48px;border-radius:12px"></span><span class="wg-skeleton wg-skeleton--text" style="width:48px;height:12px"></span></div>';
+    return skeletonScrollRow(entry, 5);
+  }
+
+  function skeletonContentCard() {
+    var cells = '';
+    for (var i = 0; i < 9; i++) cells += '<span class="wg-skeleton wg-skeleton--rect"></span>';
+    return '<div class="my-tab-skeleton-card" aria-hidden="true">'
+      + '<div class="my-tab-skeleton-card__head">'
+      + '<span class="wg-skeleton wg-skeleton--circle" style="width:40px;height:40px"></span>'
+      + '<div class="my-tab-skeleton-card__meta"><span class="wg-skeleton wg-skeleton--text" style="width:88px;height:16px"></span><span class="wg-skeleton wg-skeleton--text" style="width:120px;height:12px"></span></div>'
+      + '</div>'
+      + '<div class="my-tab-skeleton-card__block"><span class="wg-skeleton wg-skeleton--text" style="width:100%"></span><span class="wg-skeleton wg-skeleton--text" style="width:60%"></span></div>'
+      + '<div class="my-tab-skeleton-card__block"><div class="my-tab-skeleton-grid">' + cells + '</div></div>'
+      + '<div class="my-tab-skeleton-card__block"><div class="my-tab-skeleton-product">'
+      + '<span class="wg-skeleton wg-skeleton--rect" style="width:48px;height:48px"></span>'
+      + '<div class="my-tab-skeleton-card__meta"><span class="wg-skeleton wg-skeleton--text" style="width:122px;height:12px"></span><span class="wg-skeleton wg-skeleton--text" style="width:79px;height:12px"></span></div>'
+      + '<span class="wg-skeleton wg-skeleton--rect" style="width:40px;height:20px"></span>'
+      + '</div></div>'
+      + '<div class="my-tab-skeleton-card__actions">'
+      + '<span class="wg-skeleton wg-skeleton--rect" style="width:24px;height:16px"></span>'
+      + '<span class="wg-skeleton wg-skeleton--rect" style="width:24px;height:16px"></span>'
+      + '<span class="wg-skeleton wg-skeleton--rect" style="width:24px;height:16px"></span>'
+      + '<span class="wg-skeleton wg-skeleton--rect" style="width:80px;height:32px;margin-left:auto"></span>'
+      + '</div></div>';
+  }
+
+  function skeletonContent() {
+    return skeletonContentCard() + skeletonContentCard();
+  }
+
   function escapeHtml(value) {
     return String(value == null ? '' : value)
       .split('&').join('&amp;')
@@ -192,51 +237,6 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
     routeId: 'my',
     presentation: { type: 'host-tab' },
     template: myTabTemplate,
-    skeletonMode: 'explicit',
-    // SKELETON-TEMPLATE-START
-  skeletonTemplate: `
-<div class="wg-skeleton wg-skeleton--circle" style="position:absolute;top:6.984%;left:2.406%;width:10.160%;height:5.646%;border-radius:999px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:7.281%;left:15.241%;width:21.925%;height:2.972%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:10.550%;left:15.241%;width:19.251%;height:1.783%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:7.429%;left:78.877%;width:4.813%;height:2.675%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:10.401%;left:78.877%;width:4.813%;height:1.783%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:7.429%;left:90.642%;width:4.813%;height:2.675%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:10.401%;left:90.642%;width:4.813%;height:1.783%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:15.602%;left:5.615%;width:88.770%;height:2.972%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:19.762%;left:5.615%;width:88.770%;height:2.377%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:26.003%;left:5.615%;width:16.578%;height:3.269%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:30.163%;left:2.406%;width:16.578%;height:8.321%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:30.163%;left:19.519%;width:16.578%;height:8.321%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:30.163%;left:36.631%;width:16.578%;height:8.321%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:30.163%;left:53.743%;width:16.578%;height:8.321%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:30.163%;left:70.856%;width:16.578%;height:8.321%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:30.163%;left:87.968%;width:11.765%;height:8.321%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:42.348%;left:5.615%;width:16.578%;height:3.269%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:46.508%;left:2.406%;width:16.578%;height:9.510%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:46.508%;left:19.519%;width:16.578%;height:9.510%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:46.508%;left:36.631%;width:16.578%;height:9.510%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:46.508%;left:53.743%;width:16.578%;height:9.510%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:46.508%;left:70.856%;width:16.578%;height:9.510%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:46.508%;left:87.968%;width:11.765%;height:9.510%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:60.550%;left:13.189%;width:6.952%;height:2.972%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:60.550%;left:46.524%;width:6.952%;height:2.972%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:60.550%;left:79.859%;width:6.952%;height:2.972%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:67.756%;left:10.963%;width:61.765%;height:4.458%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:70.579%;left:78.342%;width:4.813%;height:1.783%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:76.003%;left:3.476%;width:9.738%;height:2.377%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:75.854%;left:71.390%;width:5.882%;height:2.675%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:75.854%;left:81.016%;width:5.882%;height:2.675%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:75.854%;left:90.642%;width:5.882%;height:2.675%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:85.736%;left:4.545%;width:8.021%;height:3.269%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:81.575%;left:17.380%;width:20.856%;height:11.590%;border-radius:4px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:81.575%;left:40.909%;width:20.856%;height:11.590%;border-radius:4px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:81.575%;left:64.439%;width:20.856%;height:11.590%;border-radius:4px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:81.575%;left:87.968%;width:11.765%;height:11.590%;border-radius:4px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:86.330%;left:91.711%;width:3.743%;height:2.080%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:96.285%;left:4.545%;width:12.299%;height:3.269%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:96.880%;left:91.711%;width:3.743%;height:2.080%;box-sizing:border-box" aria-hidden="true"></div>
-  `,
-  // SKELETON-TEMPLATE-END
     init: function init(ctx) {
       var root = ctx.root.querySelector('[data-route-id="my"]');
       var db = window.WEGO_PROTOTYPE_DB || {};
@@ -937,6 +937,14 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         syncControls();
         renderContent();
       }
+
+      /* 挂载首帧：先填结构骨架（按真实区块绘制），随后 renderX 用 setRegion 淡入真实内容 */
+      var assetsRegion = root.querySelector('[data-region="assets"]');
+      var appsRegion = root.querySelector('[data-region="apps"]');
+      var contentRegion = root.querySelector('[data-region="content"]');
+      if (assetsRegion) assetsRegion.innerHTML = skeletonAssets();
+      if (appsRegion) appsRegion.innerHTML = skeletonApps();
+      if (contentRegion) contentRegion.innerHTML = skeletonContent();
 
       setProfile();
       renderAssets();
