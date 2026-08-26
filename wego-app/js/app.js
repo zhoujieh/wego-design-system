@@ -2361,6 +2361,16 @@
     });
     panel.appendChild(sceneBtn);
 
+    var componentBtn = document.createElement('button');
+    componentBtn.type = 'button';
+    componentBtn.className = 'wgf-action';
+    componentBtn.innerHTML = '<span>查看组件</span><span class="wgf-arrow" aria-hidden="true">›</span>';
+    componentBtn.addEventListener('click', function () {
+      panel.classList.remove('is-open');
+      window.open('./.codex/skills/wego-design/preview/index.html', '_blank');
+    });
+    panel.appendChild(componentBtn);
+
     root.appendChild(panel);
     document.body.appendChild(root);
 
