@@ -32,7 +32,8 @@ description: 审查或迭代微购设计系统、组件、Preview、UI Kit、消
 用户明确表达“验收通过”“确认合格”“可以合并”后，才进入合并；在此之前始终保持本地迭代：
 
 <!-- rule-id: workflow-maintenance-exempt-from-submission-authorization -->
-**工作流维护例外**：本技能执行的 AGENTS.md、SKILL.md、`references/` 和 `experience/` 等权威源维护，免明确提交授权门禁。完成改动并运行 `node scripts/validate-wego-design.mjs --scope=system --strict` 通过后，直接推送创建短周期 PR，必要检查通过后自动合并到 `main` 并删除分支；CI 失败时停止并报告原因等用户处理。组件、Token、Preview、UI Kit 变更不适用本例外，仍需用户明确验收授权后才能合并。
+<!-- rule-id: workflow-maintenance-must-cleanup-after-merge -->
+**工作流维护例外**：本技能执行的 AGENTS.md、SKILL.md、`references/` 和 `experience/` 等权威源维护，免明确提交授权门禁。完成改动并运行 `node scripts/validate-wego-design.mjs --scope=system --strict` 通过后，直接推送创建短周期 PR，必要检查通过后自动合并到 `main`，并立即由 `wego-github-delivery` 执行完整收口清理（停止对应预览服务并删除记录、删除本地与远端分支、删除干净的关联 worktree），不得只删分支而遗留 worktree；CI 失败时停止并报告原因等用户处理。组件、Token、Preview、UI Kit 变更不适用本例外，仍需用户明确验收授权后才能合并。
 
 1. 完成全部必要同步，并运行 `node scripts/validate-wego-design.mjs --scope=system --strict`。
 2. 确认自动推送的 PR 已包含全部本次改动；工作流权威源维护直接创建/更新短周期 PR。
