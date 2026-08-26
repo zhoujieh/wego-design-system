@@ -151,6 +151,14 @@ body {
   line-height: var(--body-sm-line-height);
 }
 
+.overview-nav-item__name mark,
+.overview-nav-item__slug mark {
+  background: var(--status-warning-surface-l1, #fff7e6);
+  color: var(--status-warning-default, #d48806);
+  padding: 0 1px;
+  border-radius: 2px;
+}
+
 .overview-nav-group + .overview-nav-group {
   margin-top: 16px;
 }
@@ -631,6 +639,53 @@ const viewerFrame = document.getElementById("viewer-frame");
 const searchInput = document.getElementById("component-search");
 const searchEmpty = document.getElementById("component-search-empty");
 
+navItems.forEach(function (item) {
+  var nameEl = item.querySelector(".overview-nav-item__name");
+  var slugEl = item.querySelector(".overview-nav-item__slug");
+  item._originalName = nameEl ? nameEl.textContent : "";
+  item._originalSlug = slugEl ? slugEl.textContent : "";
+});
+
+function highlightText(text, term) {
+  if (!term || !text) return text;
+  var lower = text.toLowerCase();
+  var idx = lower.indexOf(term);
+  if (idx === -1) return text;
+  var result = "";
+  var lastIdx = 0;
+  while (idx !== -1) {
+    result += text.substring(lastIdx, idx);
+    result += "<mark>" + text.substring(idx, idx + term.length) + "</mark>";
+    lastIdx = idx + term.length;
+    idx = lower.indexOf(term, lastIdx);
+  }
+  result += text.substring(lastIdx);
+  return result;
+}
+
+function applyHighlight(item, terms) {
+  var nameEl = item.querySelector(".overview-nav-item__name");
+  var slugEl = item.querySelector(".overview-nav-item__slug");
+  var name = item._originalName || "";
+  var slug = item._originalSlug || "";
+  terms.forEach(function (term) {
+    if (hasChinese(term)) {
+      name = highlightText(name, term);
+    } else {
+      slug = highlightText(slug, term);
+    }
+  });
+  if (nameEl) nameEl.innerHTML = name;
+  if (slugEl) slugEl.innerHTML = slug;
+}
+
+function clearHighlight(item) {
+  var nameEl = item.querySelector(".overview-nav-item__name");
+  var slugEl = item.querySelector(".overview-nav-item__slug");
+  if (nameEl) nameEl.textContent = item._originalName || "";
+  if (slugEl) slugEl.textContent = item._originalSlug || "";
+}
+
 function hasChinese(str) {
   return /[\u4e00-\u9fa5]/.test(str);
 }
@@ -663,7 +718,12 @@ function filterComponents(query) {
     }
 
     item.hidden = !matched;
-    if (matched) visibleCount += 1;
+    if (matched) {
+      visibleCount += 1;
+      if (terms.length > 0) applyHighlight(item, terms);
+    } else {
+      clearHighlight(item);
+    }
   });
 
   navGroups.forEach(function (group) {
