@@ -11,7 +11,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
                   <span class="wg-skeleton wg-skeleton--text sk-text-role" data-component-slug="skeleton"></span>
                 </span>
               </div>
-              <div class="avatar avatar--image my-tab-identity__avatar" data-skeleton-real data-component-slug="avatar">
+              <div class="avatar avatar--image avatar--40 my-tab-identity__avatar" data-skeleton-real data-component-slug="avatar">
                 <img data-role="profile-avatar" alt="">
               </div>
               <span class="my-tab-identity__copy" data-skeleton-real>
@@ -98,7 +98,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
             <div class="sticky-region__inner">
               <div class="wg-tabs wg-tabs--mini wg-tabs--divide my-content-tabs" data-component-slug="tabs" role="tablist" aria-label="内容类型">
                 <div class="my-content-tabs__skeleton" data-role="tabs-skeleton" aria-hidden="true">
-                  <div class="sk-tab-item"><span class="wg-skeleton wg-skeleton--rect sk-rect-tab" data-component-slug="skeleton"></span><span class="sk-tab-indicator"></span></div>
+                  <div class="sk-tab-item"><span class="wg-skeleton wg-skeleton--rect sk-rect-tab" data-component-slug="skeleton"></span></div>
                   <div class="sk-tab-item"><span class="wg-skeleton wg-skeleton--rect sk-rect-tab" data-component-slug="skeleton"></span></div>
                   <div class="sk-tab-item"><span class="wg-skeleton wg-skeleton--rect sk-rect-tab" data-component-slug="skeleton"></span></div>
                 </div>
@@ -124,11 +124,13 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
             <div class="sticky-region__inner">
               <div class="search-toolbar my-content-toolbar">
                 <div class="my-content-toolbar__skeleton" data-role="search-skeleton" aria-hidden="true">
-                  <span class="wg-skeleton wg-skeleton--rect sk-rect-search-field" data-component-slug="skeleton"></span>
-                  <span class="wg-skeleton wg-skeleton--rect sk-rect-search-action" data-component-slug="skeleton"></span>
-                  <span class="wg-skeleton wg-skeleton--rect sk-rect-search-action" data-component-slug="skeleton"></span>
+                  <div class="sk-search-field"><span class="wg-skeleton wg-skeleton--rect" data-component-slug="skeleton"></span></div>
+                  <div class="sk-search-actions">
+                    <span class="wg-skeleton wg-skeleton--rect" data-component-slug="skeleton"></span>
+                    <span class="wg-skeleton wg-skeleton--rect" data-component-slug="skeleton"></span>
+                  </div>
                 </div>
-                <div class="searchbox searchbox--sm searchbox--gray" data-skeleton-real data-component-slug="search">
+                <div class="searchbox searchbox--md searchbox--gray" data-skeleton-real data-component-slug="search">
                   <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
                   <div class="searchbox__input">
                     <input class="searchbox__field" data-role="content-search" type="search" placeholder="搜索产品" aria-label="搜索产品">
@@ -155,10 +157,12 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         <section class="layout-section my-content-management-section" data-component-slug="layout-section" data-edge="M0">
           <div class="my-content-management" data-role="content-management">
             <div class="my-content-management__skeleton" data-role="mgmt-skeleton" aria-hidden="true">
-              <span class="wg-skeleton wg-skeleton--text sk-text-mgmt-count" data-component-slug="skeleton"></span>
-              <span class="wg-skeleton wg-skeleton--text sk-text-mgmt-action sk-text-mgmt-action--push" data-component-slug="skeleton"></span>
-              <span class="wg-skeleton wg-skeleton--text sk-text-mgmt-action" data-component-slug="skeleton"></span>
-              <span class="wg-skeleton wg-skeleton--text sk-text-mgmt-action" data-component-slug="skeleton"></span>
+              <span class="wg-skeleton wg-skeleton--text sk-mgmt-count" data-component-slug="skeleton"></span>
+              <div class="my-content-management__skeleton-actions">
+                <span class="wg-skeleton wg-skeleton--text sk-mgmt-link" data-component-slug="skeleton"></span>
+                <span class="wg-skeleton wg-skeleton--text sk-mgmt-link" data-component-slug="skeleton"></span>
+                <span class="wg-skeleton wg-skeleton--text sk-mgmt-link" data-component-slug="skeleton"></span>
+              </div>
             </div>
             <span class="my-content-management__count" data-skeleton-real data-role="content-count">共 0 条</span>
             <div class="my-content-management__actions" data-skeleton-real>
@@ -209,19 +213,30 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
 
   function skeletonProductCard() {
     return '<div class="my-tab-skeleton-goods-card">'
-      + '<span class="wg-skeleton wg-skeleton--rect" data-component-slug="skeleton"></span>'
-      + '<div class="my-tab-skeleton-card__meta">'
-      + '<span class="wg-skeleton wg-skeleton--text" style="width:70%"></span>'
-      + '<span class="sk-goods-price wg-skeleton wg-skeleton--rect" data-component-slug="skeleton"></span>'
-      + '<span class="sk-goods-meta"><span class="wg-skeleton wg-skeleton--text"></span><span class="wg-skeleton wg-skeleton--rect"></span><span class="wg-skeleton wg-skeleton--text"></span></span>'
-      + '<span class="sk-goods-ops wg-skeleton wg-skeleton--rect" data-component-slug="skeleton"></span>'
-      + '</div></div>';
+      + '<span class="wg-skeleton wg-skeleton--rect sk-goods-media" data-component-slug="skeleton"></span>'
+      + '<div class="my-tab-skeleton-goods-card__info">'
+      + '<span class="wg-skeleton wg-skeleton--text sk-goods-title" data-component-slug="skeleton"></span>'
+      + '<span class="wg-skeleton wg-skeleton--rect sk-goods-price" data-component-slug="skeleton"></span>'
+      + '<div class="sk-goods-meta">'
+      + '<span class="wg-skeleton wg-skeleton--text sk-goods-meta-text" data-component-slug="skeleton"></span>'
+      + '<span class="wg-skeleton wg-skeleton--rect sk-goods-meta-divider" data-component-slug="skeleton"></span>'
+      + '<span class="wg-skeleton wg-skeleton--text sk-goods-meta-text" data-component-slug="skeleton"></span>'
+      + '</div>'
+      + '<div class="sk-goods-ops">'
+      + '<span class="wg-skeleton wg-skeleton--text sk-goods-op" data-component-slug="skeleton"></span>'
+      + '<span class="wg-skeleton wg-skeleton--text sk-goods-op" data-component-slug="skeleton"></span>'
+      + '<span class="wg-skeleton wg-skeleton--text sk-goods-op" data-component-slug="skeleton"></span>'
+      + '<span class="wg-skeleton wg-skeleton--text sk-goods-op" data-component-slug="skeleton"></span>'
+      + '<span class="wg-skeleton wg-skeleton--rect sk-goods-more" data-component-slug="skeleton"></span>'
+      + '<span class="wg-skeleton wg-skeleton--rect sk-goods-cart" data-component-slug="skeleton"></span>'
+      + '<span class="wg-skeleton wg-skeleton--rect sk-goods-share" data-component-slug="skeleton"></span>'
+      + '</div></div></div>';
   }
 
   function skeletonDateGroup() {
     return '<section class="my-content-date-group my-goods-group my-tab-skeleton-date-group">'
       + '<div class="my-content-date-group__heading sk-date-head">'
-      + '<span class="sk-date-toggle wg-skeleton wg-skeleton--rect" data-component-slug="skeleton"></span>'
+      + '<div class="sk-date-toggle"><span class="wg-skeleton wg-skeleton--text sk-date-label" data-component-slug="skeleton"></span><span class="wg-skeleton wg-skeleton--rect sk-date-arrow" data-component-slug="skeleton"></span></div>'
       + '<span class="sk-date-more wg-skeleton wg-skeleton--rect" data-component-slug="skeleton"></span>'
       + '</div>'
       + '<div class="my-goods-group__items">'
@@ -229,9 +244,18 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
       + '</div></section>';
   }
 
+  function skeletonPinRow() {
+    var thumb = '<span class="wg-skeleton wg-skeleton--rect sk-pin-thumb" data-component-slug="skeleton"></span>';
+    return '<div class="my-pin-row my-tab-skeleton-pin-row">'
+      + '<span class="wg-skeleton wg-skeleton--text sk-pin-label" data-component-slug="skeleton"></span>'
+      + '<div class="my-tab-skeleton-pin-thumbs">' + thumb + thumb + thumb + '</div>'
+      + '<span class="wg-skeleton wg-skeleton--rect sk-pin-more" data-component-slug="skeleton"></span>'
+      + '</div>';
+  }
+
   function skeletonContent() {
     return '<div class="my-goods-surface my-tab-skeleton-surface">'
-      + skeletonDateGroup() + skeletonDateGroup()
+      + skeletonPinRow() + skeletonDateGroup() + skeletonDateGroup()
       + '<div class="my-goods-footer"><span class="wg-skeleton wg-skeleton--text" style="width:96px;height:12px"></span></div>'
       + '</div>';
   }
@@ -390,6 +414,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
             title: product.name || '穿搭笔记',
             summary: dynamic.text_content,
             cover: media ? media.poster_or_src : (product.image_list && product.image_list[0]),
+            images: (product.image_list || []).slice(0, 4),
             published: index % 3 !== 2,
             updatedAt: dynamic.published_at,
             order: index
@@ -405,6 +430,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
             type: 'live',
             title: product.name + '专场',
             cover: product.image_list && product.image_list[0],
+            images: (product.image_list || []).slice(0, 4),
             host: currentUser.display_name || currentUser.merchant_name,
             time: schedule[index],
             order: index
@@ -515,12 +541,22 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
           + '</div>';
       }
 
+      /* 单图场景统一走 wg-image-grid--product 组件（1 图撑满分支），尺寸由消费方容器决定 */
+      function singleImageHtml(src, alt, className) {
+        return '<div class="wg-image-grid wg-image-grid--product ' + className + '" data-component-slug="image">'
+          + '<div class="wg-image wg-image-grid__item">'
+          + '<img class="wg-image__src" src="' + escapeHtml(src) + '" alt="' + escapeHtml(alt) + '">'
+          + '</div></div>';
+      }
+
       function productMedia(item) {
-        var images = (item.images || []).filter(Boolean).slice(0, 4);
-        if (!images.length) images = ['./lib/assets/icons/default-diagram.svg'];
-        return '<div class="my-product-card__media my-product-card__media--count-' + images.length + '">'
-          + images.map(function (src, index) { return imageHtml(src, item.title + '图片 ' + (index + 1), 'my-product-card__image'); }).join('')
-          + '</div>';
+        /* 网格视图只展示单图：取首图；多图仅在列出视图（goodsMedia）以四宫格呈现 */
+        var src = (item.images || [])[0] || './lib/assets/icons/default-diagram.svg';
+        return '<div class="my-product-card__media">'
+          + '<div class="wg-image-grid wg-image-grid--product" data-component-slug="image">'
+          + '<div class="wg-image wg-image-grid__item">'
+          + '<img class="wg-image__src" src="' + escapeHtml(src) + '" alt="' + escapeHtml(item.title) + '">'
+          + '</div></div></div>';
       }
 
       function productCardGrid(item) {
@@ -539,8 +575,17 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
       }
 
       function goodsMedia(item) {
-        var src = (item.images || [])[0] || './lib/assets/icons/default-diagram.svg';
-        return '<div class="my-goods-item__media">' + imageHtml(src, item.title, 'my-goods-item__image') + '</div>';
+        /* 列出视图采用四宫格：1 图撑满 / 2 图两列 / 3 图左大右小 / 4 图 2×2，布局由组件接管 */
+        var images = (item.images || []).filter(Boolean).slice(0, 4);
+        if (!images.length) images = ['./lib/assets/icons/default-diagram.svg'];
+        return '<div class="my-goods-item__media">'
+          + '<div class="wg-image-grid wg-image-grid--product" data-component-slug="image">'
+          + images.map(function (src, index) {
+              return '<div class="wg-image wg-image-grid__item">'
+                + '<img class="wg-image__src" src="' + escapeHtml(src) + '" alt="' + escapeHtml(item.title + '图片 ' + (index + 1)) + '">'
+                + '</div>';
+            }).join('')
+          + '</div></div>';
       }
 
       function priceMetricBlack(price) {
@@ -576,7 +621,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
 
       function noteCard(item, view) {
         if (view === 'grid') {
-          var gridImage = item.cover ? imageHtml(item.cover, item.title, 'my-note-card__media') : '';
+          var gridImage = item.cover ? singleImageHtml(item.cover, item.title, 'my-note-card__media') : '';
           return '<article class="card card--surface card--vertical my-content-card my-note-card my-note-card--grid' + (gridImage ? '' : ' my-note-card--no-image') + '" data-component-slug="card">'
             + '<div class="card__content my-content-card__content">'
             + '<div class="my-note-card__main"><div class="my-note-card__copy"><h3 class="my-content-card__title">' + escapeHtml(item.title) + '</h3>'
@@ -584,7 +629,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
             + '<div class="card__footer my-content-card__operation-row">' + contentActions(item) + '</div>'
             + '</div></article>';
         }
-        var listImage = item.cover ? imageHtml(item.cover, item.title, 'my-note-item__image') : '';
+        var listImage = item.cover ? singleImageHtml(item.cover, item.title, 'my-note-item__image') : '';
         return '<article class="my-note-item" data-content-id="' + escapeHtml(item.id) + '">'
           + '<div class="my-note-item__main">'
           + '<div class="my-note-item__copy"><h3 class="my-note-item__title">' + escapeHtml(item.title) + '</h3>'
@@ -603,7 +648,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
       }
 
       function liveCard(item) {
-        return '<article class="my-live-card">' + imageHtml(item.cover, item.title, 'my-live-card__media') + '</article>';
+        return '<article class="my-live-card">' + singleImageHtml(item.cover, item.title, 'my-live-card__media') + '</article>';
       }
 
       /* 真实发布的商品（publish-product 场景写入 wego.album-feed.published）回显到我的页产品 tab */
@@ -724,7 +769,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
           + '<div class="my-pin-row__thumbs">'
           + pinned.map(function (item) {
             return '<button type="button" class="my-pin-row__thumb" data-pin-scroll="' + escapeHtml(item.id) + '" aria-label="' + escapeHtml(item.title) + '">'
-              + imageHtml((item.images || [])[0] || './lib/assets/icons/default-diagram.svg', item.title, 'my-pin-row__image')
+              + goodsMedia(item)
               + '</button>';
           }).join('')
           + '</div>'

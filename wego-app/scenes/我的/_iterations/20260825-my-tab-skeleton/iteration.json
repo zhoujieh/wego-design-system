@@ -9,6 +9,7 @@
   },
   "status": "prototyping",
   "scope_revision": 1,
+  "brief_file": "my-tab-skeleton-优化我的页骨架屏-20260825.md",
   "prototype_brief": {
     "goal": "重构「我的」页骨架屏，使其符合常规加载范式：先显示与真实布局一一对应的骨架占位，内容就绪后原位渐显过渡；骨架按真实 DOM 结构语义化绘制，替换当前 41 个绝对定位百分比裸色块覆盖层。",
     "included": [
