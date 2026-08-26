@@ -3456,6 +3456,7 @@ body[data-order-layout="landscape"] .phone-indicator {
     border-bottom: var(--stroke-hairline) solid var(--border-neutral-l2);
   }
 
+  .order-catalog-item--desktop,
   .order-catalog-item--editable {
     position: relative;
     display: block;
@@ -3478,11 +3479,20 @@ body[data-order-layout="landscape"] .phone-indicator {
     border: 0;
   }
 
-  .order-catalog-item__edit {
+  .order-catalog-item__actions {
     position: absolute;
     z-index: 4;
     top: var(--spacer-2);
     left: calc(var(--spacer-8) + var(--size-56) - var(--size-32));
+    display: flex;
+    align-items: center;
+  }
+
+  .order-catalog-item__grid-price {
+    display: none;
+  }
+
+  .order-catalog-item__edit {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -3526,6 +3536,20 @@ body[data-order-layout="landscape"] .phone-indicator {
     padding: 0;
   }
 
+  .order-desktop__catalog-list--grid .order-catalog-item__actions {
+    position: static;
+    justify-content: flex-start;
+    gap: var(--spacer-4);
+    min-width: 0;
+    height: var(--size-32);
+  }
+
+  .order-desktop__catalog-list--grid .order-catalog-item__grid-price {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+  }
+
   .order-desktop__catalog-list--grid .order-catalog-item__edit {
     top: 0;
     right: 0;
@@ -3567,6 +3591,26 @@ body[data-order-layout="landscape"] .phone-indicator {
     text-overflow: ellipsis;
     white-space: nowrap;
     background: var(--bg-mask-press);
+  }
+
+  .order-catalog-item__code-copy {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-4);
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .order-catalog-item__sku {
+    flex: 0 0 auto;
+  }
+
+  .order-catalog-item__name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .order-catalog-item__detail {
@@ -5943,6 +5987,15 @@ body[data-order-layout="landscape"] .phone-indicator {
     border-radius: var(--radius-6);
   }
 
+  .order-catalog-history__list .order-catalog-item__select {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    min-height: 0;
+    padding: 0;
+  }
+
   .order-catalog-history__list .order-catalog-item__media,
   .order-catalog-history__list .order-catalog-item__image {
     height: auto;
@@ -5989,14 +6042,19 @@ body[data-order-layout="landscape"] .phone-indicator {
 
   .order-desktop__catalog-list--grid .order-catalog-item__detail {
     min-height: var(--size-32);
-    padding: var(--spacer-8) var(--size-32) var(--spacer-8) 0;
+    padding: var(--spacer-8) 0;
+  }
+
+  .order-desktop__catalog-list--grid .order-catalog-item__detail b {
+    display: none;
+  }
+
+  .order-desktop__catalog-list--grid .order-catalog-item__actions {
+    position: static;
+    gap: var(--spacer-4);
   }
 
   .order-desktop__catalog-list--grid .order-catalog-item__edit {
-    top: auto;
-    right: auto;
-    bottom: 0;
-    left: calc(var(--size-36) + var(--spacer-8));
     width: var(--size-28);
     height: var(--size-32);
   }
@@ -6016,7 +6074,7 @@ body[data-order-layout="landscape"] .phone-indicator {
     display: flex;
     align-items: center;
     height: var(--size-28);
-    padding: 0 var(--size-36) 0 var(--spacer-8);
+    padding: 0 calc(var(--size-28) + var(--spacer-4)) 0 var(--spacer-8);
     background: var(--bg-mask-press);
   }
 
@@ -6048,11 +6106,22 @@ body[data-order-layout="landscape"] .phone-indicator {
     justify-content: center;
     width: var(--size-24);
     height: var(--size-24);
+    padding: 0;
     color: var(--text-inverse);
+    background: transparent;
+    border: 0;
   }
 
-  .order-catalog-item__image-mark i {
-    font-size: var(--size-16);
+  .order-catalog-item__image-mark::before {
+    position: absolute;
+    inset: calc(-1 * var(--spacer-4));
+    content: '';
+  }
+
+  .order-catalog-item__image-mark img {
+    display: block;
+    width: auto;
+    height: auto;
   }
 
   .order-desktop-product-search--catalog .order-desktop-barcode-search.is-connected {
