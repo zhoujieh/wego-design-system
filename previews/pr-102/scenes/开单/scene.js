@@ -235,6 +235,7 @@
     freight: 0,
     rounding: 0,
     freightEditOpen: false,
+    totalEditOpen: false,
     memberDiscount: 100,
     couponDiscount: 0,
     pointsUsed: 0,
@@ -253,6 +254,9 @@
     desktopSearchResultsOpen: false,
     imageSearchFileName: '',
     scannerConnected: true,
+    scannerRequesting: false,
+    scannerOpen: false,
+    scannerMessage: '扫描商品条码',
     customerKeyword: '',
     addDraft: null,
     paymentDraft: null,
@@ -272,6 +276,12 @@
   };
 
   var activeContext = null;
+  var scannerStream = null;
+  var scannerDetector = null;
+  var scannerFrameId = null;
+  var scannerDetecting = false;
+  var scannerLastValue = '';
+  var scannerLastDetectedAt = 0;
 
   function activeCatalogProducts() {
     return state.industry === 'phone' ? PHONE_PRODUCTS : PRODUCTS;
@@ -532,7 +542,7 @@
 
   function focusCatalogCreateMenuItem(position) {
     if (!activeContext || !activeContext.root) return;
-    var items = activeContext.root.querySelectorAll('.order-catalog-create-menu [role="menuitem"]');
+    var items = activeContext.root.querySelectorAll('.order-catalog-create-menu [role="option"]');
     if (!items.length) return;
     items[position === 'last' ? items.length - 1 : 0].focus({ preventScroll: true });
   }
@@ -814,6 +824,17 @@
       + '</div>';
   }
 
+  function desktopProductName(item) {
+    return '<button type="button" class="order-desktop-product-name" data-product-activity><strong>' + escapeHtml(item.code) + '</strong><span>' + escapeHtml(item.name) + '</span></button>';
+  }
+
+  function desktopProductNote(item, itemIndex) {
+    var icon = '<i class="wego-iconfont-s icon-bianji16" aria-hidden="true"></i>';
+    var text = '<span>' + escapeHtml(item.note || '添加备注') + '</span>';
+    var editText = '<em class="order-desktop-product-note-edit">编辑</em>';
+    return '<button type="button" class="link link--14 order-desktop-product-note ' + (item.note ? 'has-note' : '') + '" data-component-slug="link" data-edit-spu-note="' + itemIndex + '">' + (item.note ? text + editText : icon + text) + '</button>';
+  }
+
   function desktopProductRow(item, itemIndex, row, grouped) {
     var specs = itemSpecRows(item);
     if (grouped) {
@@ -828,13 +849,13 @@
       }).join('');
       return ''
         + '<article class="order-desktop-product-row order-desktop-product-row--grouped' + (isRowSelected(itemIndex, '') ? ' is-selected' : '') + '" data-item-index="' + itemIndex + '" data-row-select="' + itemIndex + '">'
-        +   '<div class="order-desktop-product-name"><strong>' + escapeHtml(item.code) + '</strong><span>' + escapeHtml(item.name) + '</span><small>' + specs.length + '个SKU</small></div>'
+        +   desktopProductName(item)
         +   clickableImage(item, 'order-desktop-product-image', 'data-preview-image="' + itemIndex + '"')
         +   '<div class="order-desktop-grouped-sku-stack order-desktop-grouped-sku-stack--spec">' + groupedSpecs + '</div>'
         +   '<div class="order-desktop-grouped-sku-stack order-desktop-grouped-sku-stack--price">' + groupedPrices + '</div>'
         +   '<div class="order-desktop-grouped-sku-stack order-desktop-grouped-sku-stack--qty">' + groupedQuantities + '</div>'
-        +   '<strong class="order-desktop-product-total order-desktop-product-total--grouped"><small>共' + item.qty + '件 · 金额合计</small><span data-product-total-value>' + money(item.price * item.qty) + '</span></strong>'
-        +   '<button type="button" class="link link--14 order-desktop-product-note ' + (item.note ? 'has-note' : '') + '" data-component-slug="link" data-edit-spu-note="' + itemIndex + '">' + escapeHtml(item.note || '添加备注') + '</button>'
+        +   '<strong class="order-desktop-product-total order-desktop-product-total--grouped"><small>销<span data-product-total-qty>' + item.qty + '</span></small><span data-product-total-value>' + money(item.price * item.qty) + '</span></strong>'
+        +   desktopProductNote(item, itemIndex)
         +   '<button type="button" class="order-desktop-row-delete" data-delete-row="' + itemIndex + '" aria-label="删除' + escapeHtml(item.name) + '"><i class="wego-iconfont-s icon-cha16" aria-hidden="true"></i></button>'
         + '</article>';
     }
@@ -846,13 +867,13 @@
     var hint = grouped ? (specs.length + '个SKU · 共' + item.qty + '件') : ('库存' + row.stock);
     return ''
       + '<article class="order-desktop-product-row' + (isRowSelected(itemIndex, row.spec) ? ' is-selected' : '') + '" data-item-index="' + itemIndex + '" data-row-select="' + itemIndex + '" data-row-spec="' + encodeURIComponent(row.spec) + '">'
-      +   '<div class="order-desktop-product-name"><strong>' + escapeHtml(item.code) + '</strong><span>' + escapeHtml(item.name) + '</span></div>'
+      +   desktopProductName(item)
       +   clickableImage(item, 'order-desktop-product-image', 'data-preview-image="' + itemIndex + '"')
       +   '<span class="order-desktop-product-spec" title="' + escapeHtml(specText) + '">' + escapeHtml(specText) + '</span>'
       +   '<button type="button" class="link link--14 order-desktop-product-price" data-component-slug="link" data-edit-price="' + itemIndex + '">' + money(item.price) + '</button>'
       +   '<div class="order-desktop-product-qty">' + desktopQuantityCounter(itemIndex, qty, specKey, hint) + '</div>'
       +   '<strong class="order-desktop-product-total"><span data-product-total-value>' + money(item.price * qty) + '</span></strong>'
-      +   '<button type="button" class="link link--14 order-desktop-product-note ' + (item.note ? 'has-note' : '') + '" data-component-slug="link" data-edit-spu-note="' + itemIndex + '">' + escapeHtml(item.note || '添加备注') + '</button>'
+      +   desktopProductNote(item, itemIndex)
       +   '<button type="button" class="order-desktop-row-delete" data-delete-row="' + itemIndex + '" data-delete-row-spec="' + encodeURIComponent(specKey) + '" aria-label="删除' + escapeHtml(item.name) + '"><i class="wego-iconfont-s icon-cha16" aria-hidden="true"></i></button>'
       + '</article>';
   }
@@ -1004,6 +1025,23 @@
       + '</div>';
   }
 
+  function totalEditModal() {
+    if (!state.totalEditOpen) return '';
+    return ''
+      + '<div class="order-note-modal order-total-edit-modal" role="dialog" aria-modal="true" aria-label="修改订单总价" data-state="open">'
+      +   '<div class="order-note-modal__panel">'
+      +     '<div class="order-note-modal__head"><strong>修改订单总价</strong></div>'
+      +     '<div class="order-note-modal__body">'
+      +       '<div class="input-group input-group--surface-white" data-component-slug="input"><label class="field-label" for="total-edit-value">订单总价</label><div class="number-input" data-component-slug="input"><input class="number-input__field" id="total-edit-value" type="text" inputmode="decimal" value="' + totals().payable.toFixed(2) + '" placeholder="请输入订单总价" data-total-edit-value><span class="number-input__suffix">元</span></div></div>'
+      +     '</div>'
+      +     '<div class="order-note-modal__actions">'
+      +       button('取消', 'weak', 'md', 'data-total-edit-cancel')
+      +       button('确定', 'strong', 'md', 'data-total-edit-confirm')
+      +     '</div>'
+      +   '</div>'
+      + '</div>';
+  }
+
   function catalogList(manualDesktop, sourceRows) {
     var editable = arguments.length > 2 ? Boolean(arguments[2]) : false;
     var keyword = manualDesktop ? '' : state.catalogKeyword.trim();
@@ -1014,17 +1052,25 @@
     });
     if (!rows.length) return '<div class="order-catalog-empty">没有匹配商品</div>';
     return rows.map(function (item) {
+      var catalogPrice = (Math.round(customerPrice(item) * 100) / 100).toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1');
+      var catalogInventory = item.inventory != null
+        ? Number(item.inventory)
+        : (item.stock != null
+          ? Number(item.stock)
+          : item.specs.reduce(function (total, spec) { return total + specStock(item, spec); }, 0));
+      var priceMarkup = '<b><span class="order-catalog-item__currency">¥</span><span class="order-catalog-item__amount">' + escapeHtml(catalogPrice) + '</span></b>';
       var content = ''
-        +   '<span class="order-catalog-item__media">' + image(item, 'order-catalog-item__image') + '<span class="order-catalog-item__code">' + escapeHtml(item.code) + '</span></span>'
-        +   '<span class="order-catalog-item__detail"><strong>' + escapeHtml(item.name) + '</strong><small>' + escapeHtml(item.code) + (item.stock != null ? ' · 库存 ' + item.stock + ' 台' : ' · ' + item.specs.length + '个规格') + '</small><b>' + money(customerPrice(item)) + '</b></span>'
-        +   '<i class="wego-iconfont-s icon-jia16" aria-hidden="true"></i>';
-      if (!editable) {
-        return '<button type="button" class="order-catalog-item' + (manualDesktop ? ' card card--surface' : '') + '"' + (manualDesktop ? ' data-component-slug="card"' : '') + ' data-product-id="' + item.id + '">' + content + '</button>';
+        +   '<span class="order-catalog-item__media">' + image(item, 'order-catalog-item__image') + '<span class="order-catalog-item__code"><span class="order-catalog-item__code-copy"><span class="order-catalog-item__sku">' + escapeHtml(item.code) + '</span><span class="order-catalog-item__name">' + escapeHtml(item.name) + '</span></span></span><i class="wego-iconfont-s icon-jia16 order-catalog-item__add" aria-hidden="true"></i></span>'
+        +   '<span class="order-catalog-item__list-detail"><strong class="order-catalog-item__list-code">' + escapeHtml(item.code) + '</strong><span class="order-catalog-item__list-name">' + escapeHtml(item.name) + '</span></span>'
+        +   '<span class="order-catalog-item__detail"><strong>' + escapeHtml(item.name) + '</strong><small>' + escapeHtml(item.code) + (item.stock != null ? ' · 库存 ' + item.stock + ' 台' : ' · ' + item.specs.length + '个规格') + '</small>' + priceMarkup + '</span>';
+      if (!manualDesktop) {
+        return '<button type="button" class="order-catalog-item" data-product-id="' + item.id + '">' + content + '</button>';
       }
       return ''
-        + '<article class="order-catalog-item card card--surface order-catalog-item--editable" data-component-slug="card">'
+        + '<article class="order-catalog-item card card--surface card--vertical order-catalog-item--desktop' + (editable ? ' order-catalog-item--editable' : '') + '" data-component-slug="card">'
         +   '<button type="button" class="order-catalog-item__select" data-product-id="' + item.id + '" aria-label="添加' + escapeHtml(item.name) + '">' + content + '</button>'
-        +   '<button type="button" class="order-catalog-item__edit" data-edit-catalog-product="' + item.id + '" aria-label="编辑' + escapeHtml(item.name) + '" title="编辑商品"><i class="wego-iconfont-s icon-bianji16" aria-hidden="true"></i></button>'
+        +   '<button type="button" class="order-catalog-item__image-mark" data-product-activity="' + item.id + '" aria-label="查看' + escapeHtml(item.name) + '详情" title="查看详情"><img src="./scenes/开单/assets/icon-view-detail.svg" width="17" height="19" alt="" aria-hidden="true"></button>'
+        +   (editable ? '<span class="order-catalog-item__actions"><span class="order-catalog-item__grid-price">' + priceMarkup + '</span><button type="button" class="order-catalog-item__edit" data-edit-catalog-product="' + item.id + '" aria-label="编辑' + escapeHtml(item.name) + '" title="编辑商品"><i class="wego-iconfont-s icon-bianji16" aria-hidden="true"></i></button><span class="order-catalog-item__list-stock">库存' + escapeHtml(String(catalogInventory)) + '</span></span>' : '')
         + '</article>';
     }).join('');
   }
@@ -1038,7 +1084,7 @@
 
   function catalogCategoryTabs() {
     var categories = state.industry === 'phone' ? ['全部', 'Apple', 'HUAWEI', 'HONOR', 'Xiaomi', 'OPPO', 'vivo'] : CATALOG_CATEGORIES;
-    return '<div class="order-catalog-category-tabs" aria-label="商品标签分类">' + categories.map(function (category) {
+    return '<div class="order-catalog-category-tabs layout-scroll-row" data-component-slug="layout-scroll-row" data-item-size="auto" data-snap="none" data-peek="none" aria-label="商品标签分类">' + categories.map(function (category) {
       var selected = state.catalogCategory === category;
       return '<button type="button" class="tag tag--28 ' + (selected ? 'tag--brand tag--selected' : 'tag--white tag--normal') + '" data-component-slug="tag" aria-pressed="' + selected + '" data-catalog-category="' + escapeHtml(category) + '"><span class="tag__label">' + escapeHtml(category) + '</span></button>';
     }).join('') + '</div>';
@@ -1072,16 +1118,8 @@
     });
   }
 
-  function desktopCodeMatches(keyword) {
-    var normalized = String(keyword || '').trim().toLowerCase();
-    if (!normalized) return [];
-    return activeCatalogProducts().filter(function (item) {
-      return item.code.toLowerCase().indexOf(normalized) >= 0;
-    });
-  }
-
   function desktopSearchResultDropdown() {
-    var matches = desktopCodeMatches(state.desktopProductKeyword);
+    var matches = desktopProductMatches(state.desktopProductKeyword);
     if (!state.desktopSearchResultsOpen || matches.length < 2) return '';
     return ''
       + '<div class="order-desktop-search-results card card--surface" role="listbox" aria-label="搜索商品结果">'
@@ -1098,17 +1136,26 @@
   }
 
   function applyDesktopSearch(keyword, ctx) {
-    var codeMatches = desktopCodeMatches(keyword);
-    if (codeMatches.length >= 2) {
+    var normalized = String(keyword || '').trim();
+    var matches = desktopProductMatches(normalized);
+    if (!normalized) return false;
+    if (matches.length >= 2) {
       state.desktopSearchResultsOpen = state.catalogCollapsed;
       state.desktopCatalogSearchActive = !state.catalogCollapsed;
       renderActive();
       focusDesktopProductSearch();
       return true;
     }
+    if (!matches.length && !state.catalogCollapsed) {
+      state.desktopSearchResultsOpen = false;
+      state.desktopCatalogSearchActive = true;
+      renderActive();
+      focusDesktopProductSearch();
+      return true;
+    }
     state.desktopSearchResultsOpen = false;
     state.desktopCatalogSearchActive = false;
-    if (!openDesktopSearchMatch(keyword, false, ctx)) return false;
+    if (!openDesktopSearchMatch(normalized, false, ctx)) return false;
     return true;
   }
 
@@ -1148,12 +1195,15 @@
 
   function desktopProductSearch(inCatalog) {
     var scannerConnectedClass = state.scannerConnected ? 'is-connected' : 'is-disconnected';
-    var sidebarFilterButton = '<div class="order-catalog-filter-anchor order-catalog-filter-anchor--search"><button type="button" class="btn btn--weak btn--sm" data-component-slug="button" data-toggle-sidebar-catalog-filter aria-haspopup="dialog" aria-expanded="' + state.catalogSidebarFilterOpen + '"><i class="btn__icon icon-shaixuan" aria-hidden="true"></i>筛选</button>' + catalogSidebarFilterMenu() + '</div>';
+    var listSearchResultClass = inCatalog && state.catalogViewMode === 'list' && state.desktopCatalogSearchActive && state.desktopProductKeyword.trim()
+      ? ' order-desktop-product-search--list-results'
+      : '';
+    var sidebarFilterButton = '<div class="order-catalog-filter-anchor order-catalog-filter-anchor--search"><button type="button" class="btn btn--weak btn--sm btn--icon-only" data-component-slug="button" data-toggle-sidebar-catalog-filter aria-label="筛选" title="筛选" aria-haspopup="dialog" aria-expanded="' + state.catalogSidebarFilterOpen + '"><i class="btn__icon icon-shaixuan" aria-hidden="true"></i></button>' + catalogSidebarFilterMenu() + '</div>';
     return ''
-      + '<div class="order-desktop-product-search' + (inCatalog ? ' order-desktop-product-search--catalog' : '') + '">'
+      + '<div class="order-desktop-product-search' + (inCatalog ? ' order-desktop-product-search--catalog' : '') + listSearchResultClass + '">'
       +   '<div class="order-desktop-product-search__row">'
       +     (inCatalog ? '' : '<div class="order-desktop-search-filter"><button type="button" class="btn btn--weak btn--sm" data-component-slug="button" data-toggle-catalog-filter aria-haspopup="dialog" aria-expanded="' + state.catalogFilterOpen + '"><span>' + escapeHtml(catalogScopeLabel()) + '</span><i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button>' + catalogFilterMenu() + '</div>')
-      +     '<div class="input-group input-group--surface-white order-desktop-context-search" data-component-slug="input"><label class="field-label" for="order-v2-context-search">搜索商品</label><div class="input-wrapper"><input id="order-v2-context-search" type="text" value="' + escapeHtml(state.desktopProductKeyword) + '" placeholder="使用扫码枪或搜索商品名称、货号" enterkeyhint="search" autocomplete="off" data-header-catalog-search><button type="button" class="input-clear" aria-label="清空搜索" data-clear-header-search><i class="icon-yuancha-mian" aria-hidden="true"></i></button><button type="button" class="order-desktop-inline-image-search" data-trigger-image-search aria-label="图搜" title="图搜"><i class="wego-iconfont-s icon-tupian" aria-hidden="true"></i></button></div></div>'
+      +     '<div class="input-group input-group--surface-white order-desktop-context-search" data-component-slug="input"><label class="field-label" for="order-v2-context-search">搜索商品</label><div class="input-wrapper"><input id="order-v2-context-search" type="text" value="' + escapeHtml(state.desktopProductKeyword) + '" placeholder="搜索商品名称、货号" enterkeyhint="search" autocomplete="off" data-header-catalog-search><button type="button" class="input-clear" aria-label="清空搜索" data-clear-header-search><i class="icon-yuancha-mian" aria-hidden="true"></i></button><button type="button" class="order-desktop-inline-image-search" data-trigger-image-search aria-label="图搜" title="图搜"><i class="wego-iconfont-s icon-tupian" aria-hidden="true"></i></button></div></div>'
       +     '<input type="file" accept="image/*" data-header-image-input hidden>'
       +     (inCatalog ? '' : '<button type="button" class="btn btn--medium btn--sm order-desktop-product-search__submit" data-component-slug="button" data-submit-header-search ' + (state.desktopProductKeyword.trim() ? '' : 'hidden') + '>搜索</button>')
       +     (inCatalog ? sidebarFilterButton : '')
@@ -1163,7 +1213,20 @@
       + '</div>';
   }
 
+  function desktopBarcodeScanner() {
+    return ''
+      + '<aside class="order-desktop__catalog order-desktop__catalog--scanner" aria-label="扫一扫">'
+      +   '<div class="order-barcode-scanner">'
+      +     '<video class="order-barcode-scanner__video" data-barcode-video autoplay muted playsinline aria-label="摄像头实时画面"></video>'
+      +     '<button type="button" class="btn btn--weak btn--sm btn--icon-only order-barcode-scanner__close" data-component-slug="button" data-close-barcode-scanner aria-label="返回商品库"><i class="btn__icon icon-cha16" aria-hidden="true"></i></button>'
+      +     '<div class="order-barcode-scanner__beam" aria-hidden="true"></div>'
+      +     '<p class="order-barcode-scanner__message" data-barcode-message>' + escapeHtml(state.scannerMessage) + '</p>'
+      +   '</div>'
+      + '</aside>';
+  }
+
   function desktopCatalog() {
+    if (state.scannerOpen) return desktopBarcodeScanner();
     if (state.catalogCollapsed) {
       return ''
         + '<aside class="order-desktop__catalog order-desktop__catalog--collapsed">'
@@ -1173,8 +1236,8 @@
         + '</aside>';
     }
     var historyProducts = merchantRecentProducts();
-    var searchMatches = desktopCodeMatches(state.desktopProductKeyword);
-    var showingSearchResults = state.desktopCatalogSearchActive && searchMatches.length >= 2;
+    var searchMatches = desktopProductMatches(state.desktopProductKeyword);
+    var showingSearchResults = state.desktopCatalogSearchActive && Boolean(state.desktopProductKeyword.trim());
     var allProducts = (showingSearchResults ? searchMatches : activeCatalogProducts()).filter(function (item) {
       if (showingSearchResults) return true;
       var categoryMatched = state.catalogCategory === '全部' || item.category === state.catalogCategory || (item.tags || []).indexOf(state.catalogCategory) >= 0;
@@ -1184,13 +1247,15 @@
     return ''
       + '<aside class="order-desktop__catalog">'
       +   '<button type="button" class="btn btn--weak btn--sm order-desktop-catalog-toggle order-desktop-catalog-toggle--collapse" data-component-slug="button" data-toggle-catalog aria-label="收起商品库"><i class="btn__icon icon-youjiantou16" aria-hidden="true"></i>收起商品库</button>'
-      +   '<header class="order-catalog-header"><div class="order-catalog-header__title"><strong>商品库</strong><div class="order-catalog-view-switch" aria-label="商品库显示模式"><button type="button" class="' + (state.catalogViewMode === 'grid' ? 'is-active' : '') + '" data-catalog-view="grid">大图</button><button type="button" class="' + (state.catalogViewMode === 'list' ? 'is-active' : '') + '" data-catalog-view="list">列表</button></div></div><div class="order-catalog-create-anchor"><button type="button" class="btn btn--weak btn--sm order-catalog-publish" data-component-slug="button" data-toggle-product-create-menu aria-haspopup="menu" aria-expanded="' + state.catalogCreateMenuOpen + '"><i class="btn__icon icon-jia16" aria-hidden="true"></i>创建</button>' + (state.catalogCreateMenuOpen ? '<div class="card card--surface order-catalog-create-menu" data-component-slug="card" role="menu" aria-label="功能选项面板"><button type="button" role="menuitem" data-create-product-type="product">创建商品</button><button type="button" role="menuitem" data-create-product-type="temporary">创建临时商品</button></div>' : '') + '</div></header>'
+      +   '<header class="order-catalog-header"><div class="order-catalog-header__title"><strong>商品库</strong><div class="order-catalog-view-switch" aria-label="商品库显示模式"><button type="button" class="' + (state.catalogViewMode === 'grid' ? 'is-active' : '') + '" data-catalog-view="grid">大图</button><button type="button" class="' + (state.catalogViewMode === 'list' ? 'is-active' : '') + '" data-catalog-view="list">列表</button></div></div><div class="order-catalog-create-anchor"><button type="button" class="btn btn--weak btn--sm order-catalog-publish" data-component-slug="button" data-toggle-product-create-menu aria-haspopup="listbox" aria-controls="order-catalog-create-menu" aria-expanded="' + state.catalogCreateMenuOpen + '"><i class="btn__icon icon-yuanjia" aria-hidden="true"></i>创建</button></div></header>'
       +   desktopProductSearch(true)
       +   '<div class="order-desktop__catalog-scroll">'
-      +   (!showingSearchResults && historyProducts.length ? '<section class="order-catalog-history" aria-label="最近成交商品"><div class="order-catalog-history__list">' + catalogList(true, historyProducts, false) + '</div><div class="order-catalog-history__actions"><button type="button" class="btn btn--weak btn--sm order-catalog-history__more" data-component-slug="button" data-scroll-history>更多</button></div></section>' : '')
-      +   '<section class="order-catalog-products">'
+      +   (!showingSearchResults && historyProducts.length ? '<section class="order-catalog-history" aria-label="最近成交商品"><div class="order-catalog-history__list layout-scroll-row" data-component-slug="layout-scroll-row" data-item-size="auto" data-snap="start" data-peek="none">' + catalogList(true, historyProducts, false) + '</div></section>' : '')
+      +   '<section class="order-catalog-products' + (showingSearchResults ? ' order-catalog-products--searching' : '') + '">'
       +     (showingSearchResults ? '' : '<div class="order-catalog-toolbar">' + catalogCategoryTabs() + '</div>')
-      +     '<div class="order-catalog-products__body"><div class="order-desktop__catalog-list order-desktop__catalog-list--' + state.catalogViewMode + '">' + catalogList(true, allProducts, true) + '</div></div>'
+      +     '<div class="order-catalog-products__body">' + (showingSearchResults && !allProducts.length
+        ? '<div class="order-catalog-search-result-empty"><div class="result" data-component-slug="result" role="group" aria-label="搜索结果"><div class="result__icon" aria-hidden="true"><i class="wego-iconfont-s icon-tanhao-mian"></i></div><div class="result__title">未搜索到相关商品</div></div></div>'
+        : '<div class="order-desktop__catalog-list order-desktop__catalog-list--' + state.catalogViewMode + (state.catalogViewMode === 'grid' ? ' layout-grid' : '') + '"' + (state.catalogViewMode === 'grid' ? ' data-component-slug="layout-grid" data-columns="' + catalogGridColumnsForWidth(state.catalogWidth) + '" data-align="stretch"' : '') + '>' + catalogList(true, allProducts, true) + '</div>') + '</div>'
       +   '</section>'
       +   '</div>'
       + '</aside>';
@@ -1232,6 +1297,17 @@
       + '</div>';
   }
 
+  function desktopCatalogCreateMenu() {
+    if (!state.catalogCreateMenuOpen || !isDesktopWorkbench()) return '';
+    return ''
+      + '<div class="popmenu popmenu--select order-catalog-create-menu" id="order-catalog-create-menu" data-component-slug="popmenu" role="listbox" aria-label="创建类型" data-placement="bottom" data-align="end" data-state="open">'
+      +   '<div class="popmenu__list">'
+      +     '<button type="button" class="popmenu__item" role="option" aria-selected="false" data-create-product-type="product"><span class="popmenu__item-text">创建商品</span><i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check" aria-hidden="true"></i></button>'
+      +     '<button type="button" class="popmenu__item" role="option" aria-selected="false" data-create-product-type="temporary"><span class="popmenu__item-text">创建临时商品</span><i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check" aria-hidden="true"></i></button>'
+      +   '</div>'
+      + '</div>';
+  }
+
   function summaryDetailRow(label, valueHtml, className) {
     return '<div class="order-summary-row' + (className ? ' ' + className : '') + '"><span class="order-summary-row__label">' + label + '</span><span class="order-summary-row__value">' + valueHtml + '</span></div>';
   }
@@ -1268,7 +1344,7 @@
       +     '</span>'
       +   '</div>'
       +   (showFreight ? summaryDetailRow('运费', '<strong data-summary-freight>' + money(t.freight) + '</strong><button type="button" class="order-summary-row__edit" data-component-slug="button" data-edit-freight aria-label="编辑运费"><i class="wego-iconfont-s icon-bianji16" aria-hidden="true"></i></button>') : '')
-      +   summaryDetailRow('订单总价', '<strong data-summary-payable>' + money(t.payable) + '</strong>', 'order-summary-row--total')
+      +   summaryDetailRow('订单总价', '<strong data-summary-payable>' + money(t.payable) + '</strong><button type="button" class="order-summary-row__edit" data-edit-total aria-label="修改订单总价"><i class="wego-iconfont-s icon-bianji16" aria-hidden="true"></i></button>', 'order-summary-row--total')
       + '</div>';
   }
 
@@ -1422,23 +1498,32 @@
   }
 
   function quickOpButton(icon, label, op) {
-    var trigger = '<button type="button" class="order-quick-op' + (quickOpUsed(op) ? ' is-used' : '') + '" data-open-panel="quick" data-quick-op="' + op + '" aria-haspopup="dialog" aria-expanded="' + (state.panel === 'quick' && state.quickOp === op) + '"><i class="wego-iconfont-s ' + icon + '" aria-hidden="true"></i><span>' + label + '</span></button>';
+    var amount = quickOpAmount(op);
+    var trigger = '<button type="button" class="order-quick-op' + (amount > 0 ? ' is-used' : '') + '" data-open-panel="quick" data-quick-op="' + op + '" aria-haspopup="dialog" aria-expanded="' + (state.panel === 'quick' && state.quickOp === op) + '"><i class="wego-iconfont-s ' + icon + '" aria-hidden="true"></i><span>' + label + '</span>' + (amount > 0 ? '<strong>-' + compactMoney(amount) + '</strong>' : '') + '</button>';
     if (op === 'freight') return '<div class="order-quick-op-anchor order-quick-op-anchor--freight">' + trigger + (state.panel === 'quick' && state.quickOp === 'freight' ? freightPopover() : '') + '</div>';
     if (op === 'points') return '<div class="order-quick-op-anchor order-quick-op-anchor--points">' + trigger + (state.panel === 'quick' && state.quickOp === 'points' ? pointsPopover() : '') + '</div>';
     return trigger;
   }
 
   function quickOpUsed(op) {
+    return quickOpAmount(op) > 0;
+  }
+
+  function quickOpAmount(op) {
     var t = totals();
     return {
-      freight: t.freight > 0,
-      member: t.memberDiscountAmount > 0,
-      points: t.pointsAmount > 0,
-      coupon: t.couponAmount > 0,
-      promotion: t.promotionAmount > 0,
-      discount: t.discountAmount > 0,
-      rounding: t.roundingAmount > 0
-    }[op] || false;
+      freight: t.freight,
+      member: t.memberDiscountAmount,
+      points: t.pointsAmount,
+      coupon: t.couponAmount,
+      promotion: t.promotionAmount,
+      discount: t.discountAmount,
+      rounding: t.roundingAmount
+    }[op] || 0;
+  }
+
+  function compactMoney(amount) {
+    return money(amount).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1');
   }
 
   function quickOps() {
@@ -2349,14 +2434,24 @@
   }
 
   function rootTemplate() {
-    return '<div class="order-v2-page" data-bg="page">' + mobileView() + desktopView() + desktopModal() + mobileModal() + orderNoteModal() + freightEditModal() + productImagePreview() + orderRowContextMenu() + desktopDisplayModeMenu() + '</div>';
+    return '<div class="order-v2-page" data-bg="page">' + mobileView() + desktopView() + desktopModal() + mobileModal() + orderNoteModal() + freightEditModal() + totalEditModal() + productImagePreview() + orderRowContextMenu() + desktopDisplayModeMenu() + desktopCatalogCreateMenu() + '</div>';
   }
 
   function renderWorkbench(root, ctx) {
     root.innerHTML = rootTemplate();
+    var scannerVideo = root.querySelector('[data-barcode-video]');
+    if (scannerVideo && scannerStream) {
+      scannerVideo.srcObject = scannerStream;
+      scannerVideo.play().catch(function () {
+        failBarcodeScanner(ctx);
+      });
+    }
+    if (state.catalogWidth != null && !state.catalogCollapsed) applyCatalogWidth(root, state.catalogWidth);
+    else syncCatalogGridColumns(root);
     updateInputClearButtons(root);
     syncCatalogCategoryTabs(root);
     positionDesktopDisplayModeMenu(root);
+    positionDesktopCatalogCreateMenu(root);
   }
 
   function positionDesktopDisplayModeMenu(root) {
@@ -2373,6 +2468,33 @@
     });
   }
 
+  function positionDesktopCatalogCreateMenu(root) {
+    if (!state.catalogCreateMenuOpen) return;
+    var trigger = root.querySelector('[data-toggle-product-create-menu]');
+    var menu = root.querySelector('.order-catalog-create-menu');
+    if (!trigger || !menu) return;
+    var triggerBounds = trigger.getBoundingClientRect();
+    var menuBounds = menu.getBoundingClientRect();
+    var gap = parseFloat(window.getComputedStyle(menu).getPropertyValue('--popmenu-gap')) || 4;
+    var align = 'end';
+    var left = triggerBounds.right - menuBounds.width;
+    if (left < gap) {
+      align = 'start';
+      left = triggerBounds.left;
+    }
+    left = Math.max(gap, Math.min(left, window.innerWidth - menuBounds.width - gap));
+    var placement = 'bottom';
+    var top = triggerBounds.bottom + gap;
+    if (top + menuBounds.height > window.innerHeight - gap) {
+      placement = 'top';
+      top = triggerBounds.top - menuBounds.height - gap;
+    }
+    menu.setAttribute('data-placement', placement);
+    menu.setAttribute('data-align', align);
+    menu.style.left = left + 'px';
+    menu.style.top = top + 'px';
+  }
+
   function catalogResizeLimits(workspace) {
     var workspaceWidth = workspace ? workspace.getBoundingClientRect().width : window.innerWidth;
     var minCatalog = Math.min(360, Math.max(300, workspaceWidth * 0.26));
@@ -2382,6 +2504,19 @@
     return { min: minCatalog, max: maxCatalog, workspaceWidth: workspaceWidth };
   }
 
+  function catalogGridColumnsForWidth(width) {
+    var availableWidth = Math.max(0, Number(width || 0) - 16);
+    return Math.min(4, Math.max(2, Math.floor(availableWidth / 160)));
+  }
+
+  function syncCatalogGridColumns(root, knownWidth) {
+    var catalog = root && root.querySelector ? root.querySelector('.order-desktop__catalog:not(.order-desktop__catalog--collapsed)') : null;
+    var grid = catalog ? catalog.querySelector('.order-desktop__catalog-list--grid.layout-grid') : null;
+    if (!catalog || !grid) return;
+    var width = Number(knownWidth || catalog.getBoundingClientRect().width);
+    grid.dataset.columns = String(catalogGridColumnsForWidth(width));
+  }
+
   function applyCatalogWidth(root, nextWidth) {
     var workspace = root && root.querySelector ? root.querySelector('.order-desktop__workspace') : null;
     if (!workspace) return;
@@ -2389,6 +2524,7 @@
     var clamped = Math.max(limits.min, Math.min(limits.max, Number(nextWidth || 0)));
     state.catalogWidth = clamped;
     workspace.style.gridTemplateColumns = 'minmax(0,1fr) var(--spacer-8) minmax(300px,' + Math.round(clamped) + 'px)';
+    syncCatalogGridColumns(root, clamped);
   }
 
   function beginCatalogResize(event, root) {
@@ -2512,6 +2648,130 @@
     markDirty(ctx);
     ctx.toast('已加入开单清单');
     return true;
+  }
+
+  function stopBarcodeScanner() {
+    if (scannerFrameId != null) window.cancelAnimationFrame(scannerFrameId);
+    scannerFrameId = null;
+    scannerDetecting = false;
+    scannerDetector = null;
+    if (scannerStream) {
+      scannerStream.getTracks().forEach(function (track) { track.stop(); });
+      scannerStream = null;
+    }
+  }
+
+  function closeBarcodeScanner(shouldRender) {
+    stopBarcodeScanner();
+    state.scannerOpen = false;
+    state.scannerRequesting = false;
+    state.scannerMessage = '扫描商品条码';
+    scannerLastValue = '';
+    scannerLastDetectedAt = 0;
+    if (shouldRender !== false) renderActive();
+  }
+
+  function failBarcodeScanner(ctx) {
+    closeBarcodeScanner(true);
+    ctx.toast('无法使用该功能');
+  }
+
+  function updateBarcodeScannerMessage(message) {
+    state.scannerMessage = message;
+    var messageNode = activeContext && activeContext.root && activeContext.root.querySelector('[data-barcode-message]');
+    if (messageNode) messageNode.textContent = message;
+  }
+
+  function barcodeProduct(value) {
+    var normalized = String(value || '').trim().toLowerCase();
+    return activeCatalogProducts().find(function (product) {
+      return String(product.code || '').trim().toLowerCase() === normalized;
+    });
+  }
+
+  function handleDetectedBarcode(value, ctx) {
+    var rawValue = String(value || '').trim();
+    if (!rawValue) return;
+    var now = Date.now();
+    if (rawValue === scannerLastValue && now - scannerLastDetectedAt < 1500) return;
+    scannerLastValue = rawValue;
+    scannerLastDetectedAt = now;
+    var product = barcodeProduct(rawValue);
+    if (!product) {
+      updateBarcodeScannerMessage('未找到商品，请继续扫描');
+      return;
+    }
+    stopBarcodeScanner();
+    state.scannerOpen = false;
+    state.scannerMessage = '扫描商品条码';
+    if (product.specs.length === 1) {
+      addSingleSpecProduct(product.id, ctx);
+    } else {
+      startAdd(product.id);
+    }
+  }
+
+  function scanBarcodeFrame(ctx) {
+    if (!state.scannerOpen || !scannerStream || !scannerDetector || !activeContext || !activeContext.root || !activeContext.root.isConnected) {
+      if (!activeContext || !activeContext.root || !activeContext.root.isConnected) closeBarcodeScanner(false);
+      return;
+    }
+    var video = activeContext.root.querySelector('[data-barcode-video]');
+    if (!video || video.readyState < 2 || scannerDetecting) {
+      scannerFrameId = window.requestAnimationFrame(function () { scanBarcodeFrame(ctx); });
+      return;
+    }
+    scannerDetecting = true;
+    scannerDetector.detect(video).then(function (barcodes) {
+      if (barcodes && barcodes.length) handleDetectedBarcode(barcodes[0].rawValue, ctx);
+    }).catch(function () {
+      updateBarcodeScannerMessage('暂未识别，请对准商品条码');
+    }).finally(function () {
+      scannerDetecting = false;
+      if (state.scannerOpen) scannerFrameId = window.requestAnimationFrame(function () { scanBarcodeFrame(ctx); });
+    });
+  }
+
+  async function openBarcodeScanner(ctx) {
+    if (state.scannerRequesting || state.scannerOpen) return;
+    if (!isDesktopWorkbench() || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.BarcodeDetector) {
+      ctx.toast('无法使用该功能');
+      return;
+    }
+    state.scannerRequesting = true;
+    var trigger = activeContext && activeContext.root && activeContext.root.querySelector('[data-scan]');
+    if (trigger) {
+      trigger.disabled = true;
+      trigger.setAttribute('aria-busy', 'true');
+    }
+    try {
+      var formats = typeof window.BarcodeDetector.getSupportedFormats === 'function'
+        ? await window.BarcodeDetector.getSupportedFormats()
+        : [];
+      var wantedFormats = ['code_128', 'code_39', 'code_93', 'ean_13', 'ean_8', 'upc_a', 'upc_e', 'itf'];
+      var supportedFormats = wantedFormats.filter(function (format) { return formats.indexOf(format) >= 0; });
+      scannerDetector = supportedFormats.length
+        ? new window.BarcodeDetector({ formats: supportedFormats })
+        : new window.BarcodeDetector();
+      scannerStream = await navigator.mediaDevices.getUserMedia({
+        audio: false,
+        video: { facingMode: { ideal: 'environment' } }
+      });
+      var probeVideo = document.createElement('video');
+      probeVideo.muted = true;
+      probeVideo.playsInline = true;
+      probeVideo.srcObject = scannerStream;
+      await probeVideo.play();
+      probeVideo.pause();
+      probeVideo.srcObject = null;
+      state.scannerRequesting = false;
+      state.scannerOpen = true;
+      state.scannerMessage = '扫描商品条码';
+      renderActive();
+      scanBarcodeFrame(ctx);
+    } catch (error) {
+      failBarcodeScanner(ctx);
+    }
   }
 
   function mergeProductIntoOrder(product, skuQty, mode, note, pricing) {
@@ -2774,12 +3034,17 @@
     if (!target || !root.contains(target)) return;
 
     if (target.matches('[data-back]')) {
+      if (state.scannerOpen || state.scannerRequesting) closeBarcodeScanner(false);
       delete document.body.dataset.orderLayout;
       ctx.back();
       return;
     }
     if (target.matches('[data-order-settings]')) {
       ctx.toast('开单设置入口已保留，本期不展开');
+      return;
+    }
+    if (target.matches('[data-product-activity]')) {
+      ctx.toast('即将跳转到商品动态详情');
       return;
     }
     if (target.matches('[data-toggle-industry-menu]')) {
@@ -2850,8 +3115,9 @@
       if (state.catalogCreateMenuOpen) focusCatalogCreateMenuItem('first');
       return;
     }
-    if (target.matches('[data-create-product-type]')) {
-      beginProductCreate(target.dataset.createProductType);
+    var createProductTypeTarget = target.closest && target.closest('[data-create-product-type]');
+    if (createProductTypeTarget) {
+      beginProductCreate(createProductTypeTarget.dataset.createProductType);
       return;
     }
     if (target.matches('[data-toggle-catalog]')) {
@@ -2922,7 +3188,11 @@
       return;
     }
     if (target.matches('[data-scan]')) {
-      ctx.toast(state.scannerConnected ? '扫码枪已连接' : '暂未连接扫码枪');
+      openBarcodeScanner(ctx);
+      return;
+    }
+    if (target.matches('[data-close-barcode-scanner]')) {
+      closeBarcodeScanner(true);
       return;
     }
     if (target.matches('[data-open-panel]')) {
@@ -3630,6 +3900,41 @@
       ctx.toast('运费已更新');
       return;
     }
+    if (target.matches('[data-edit-total]')) {
+      state.totalEditOpen = true;
+      renderActive();
+      var totalField = activeContext.root.querySelector('[data-total-edit-value]');
+      if (totalField) {
+        totalField.focus({ preventScroll: true });
+        totalField.select();
+      }
+      return;
+    }
+    if (target.matches('[data-total-edit-cancel]')) {
+      state.totalEditOpen = false;
+      renderActive();
+      return;
+    }
+    if (target.matches('[data-total-edit-confirm]')) {
+      var totalScope = target.closest('.order-total-edit-modal');
+      var totalInput = totalScope ? totalScope.querySelector('[data-total-edit-value]') : null;
+      var nextPayable = Math.round(Number(totalInput ? totalInput.value : totals().payable) * 100) / 100;
+      var currentTotals = totals();
+      var payableWithoutWholeDiscount = currentTotals.payable + currentTotals.discountAmount;
+      if (!Number.isFinite(nextPayable) || nextPayable < 0 || nextPayable > payableWithoutWholeDiscount) {
+        ctx.toast('订单总价请输入0至' + money(payableWithoutWholeDiscount) + '之间的金额');
+        return;
+      }
+      var nextDiscountAmount = payableWithoutWholeDiscount - nextPayable;
+      state.discount = currentTotals.memberAmount > 0
+        ? Math.min(100, Math.max(0, Math.round((100 - nextDiscountAmount / currentTotals.memberAmount * 100) * 10000) / 10000))
+        : 100;
+      state.totalEditOpen = false;
+      markDirty(ctx);
+      renderActive();
+      ctx.toast('订单总价已更新');
+      return;
+    }
     if (target.matches('[data-note-cancel]')) {
       state.orderNoteOpen = false;
       renderActive();
@@ -3995,6 +4300,8 @@
         var directProductRow = target.closest('.order-desktop-product-row');
         var directRowTotal = directProductRow?.querySelector('[data-product-total-value]');
         if (directRowTotal) directRowTotal.textContent = money(directItem.price * (directProductRow.classList.contains('order-desktop-product-row--grouped') ? directItem.qty : Number(rawQuantity)));
+        var directProductQty = directProductRow?.querySelector('[data-product-total-qty]');
+        if (directProductQty) directProductQty.textContent = directItem.qty;
         var liveTotals = totals();
         refreshDesktopSummary(root, liveTotals);
       }
@@ -4016,10 +4323,10 @@
     }
     if (target.matches('[data-header-catalog-search]')) {
       state.desktopProductKeyword = target.value;
-      var headerCodeMatches = desktopCodeMatches(target.value);
       var wasCatalogSearchActive = state.desktopCatalogSearchActive;
-      state.desktopSearchResultsOpen = state.catalogCollapsed && headerCodeMatches.length >= 2;
-      state.desktopCatalogSearchActive = !state.catalogCollapsed && headerCodeMatches.length >= 2;
+      var headerMatches = desktopProductMatches(target.value);
+      state.desktopSearchResultsOpen = state.catalogCollapsed && headerMatches.length >= 2;
+      state.desktopCatalogSearchActive = !state.catalogCollapsed && Boolean(target.value.trim());
       var headerClear = target.parentElement.querySelector('.input-clear');
       if (headerClear) headerClear.style.display = target.value ? 'block' : 'none';
       var headerSubmit = activeContext.root.querySelector('[data-submit-header-search]');
@@ -4207,7 +4514,7 @@
         && !event.target.closest('.order-desktop-guide-anchor');
       var shouldCloseProductCreateMenu = isDesktopWorkbench()
         && state.catalogCreateMenuOpen
-        && !event.target.closest('.order-catalog-create-anchor');
+        && !event.target.closest('[data-toggle-product-create-menu], .order-catalog-create-menu');
       var shouldCloseRowContextMenu = isDesktopWorkbench()
         && state.rowContextMenu
         && !event.target.closest('.order-row-context-menu');
@@ -4307,10 +4614,14 @@
         renderActive();
         return;
       }
-      var createMenuItem = event.target.closest && event.target.closest('.order-catalog-create-menu [role="menuitem"]');
+      if (event.key === 'Escape' && state.scannerOpen) {
+        closeBarcodeScanner(true);
+        return;
+      }
+      var createMenuItem = event.target.closest && event.target.closest('.order-catalog-create-menu [role="option"]');
       if (createMenuItem && ['ArrowDown', 'ArrowUp', 'Home', 'End'].indexOf(event.key) >= 0) {
         event.preventDefault();
-        var createMenuItems = Array.from(root.querySelectorAll('.order-catalog-create-menu [role="menuitem"]'));
+        var createMenuItems = Array.from(root.querySelectorAll('.order-catalog-create-menu [role="option"]'));
         var currentCreateMenuIndex = createMenuItems.indexOf(createMenuItem);
         var nextCreateMenuIndex = event.key === 'Home'
           ? 0
@@ -4318,6 +4629,11 @@
             ? createMenuItems.length - 1
             : (currentCreateMenuIndex + (event.key === 'ArrowDown' ? 1 : -1) + createMenuItems.length) % createMenuItems.length);
         createMenuItems[nextCreateMenuIndex].focus();
+        return;
+      }
+      if (createMenuItem && (event.key === 'Enter' || event.key === ' ')) {
+        event.preventDefault();
+        createMenuItem.click();
         return;
       }
       if (event.key === 'Tab' && (state.panel === 'product-edit' || state.panel === 'product-create' || state.panel === 'product-temp-create')) {
