@@ -980,6 +980,433 @@
   }
 
   // ============================================================
+  // wego-wt-overview-panel: 配置列表面板
+  // ============================================================
+  class WegoWtOverviewPanel extends HTMLElement {
+    constructor() {
+      super();
+      this._shadow = this.attachShadow({ mode: 'open' });
+      this._changes = [];
+      this._route = '';
+      this._activeTab = 'all'; // all | config
+    }
+    connectedCallback() {
+      this._render();
+    }
+    open(changes, route) {
+      this._changes = changes || [];
+      this._route = route || '';
+      this._render();
+      this._bindEvents();
+      // 居中显示
+      const panelWidth = 340;
+      const left = Math.max(8, (window.innerWidth - panelWidth) / 2);
+      this.style.left = left + 'px';
+      this.style.top = '60px';
+      this.removeAttribute('hidden');
+    }
+    close() {
+      this.setAttribute('hidden', '');
+    }
+    _render() {
+      const changes = this._changes;
+      // 按选择器分组
+      const groups = {};
+      changes.forEach(c => {
+        if (!groups[c.selector]) {
+          groups[c.selector] = {
+            selector: c.selector,
+            elementTag: c.elementTag,
+            elementText: c.elementText,
+            changes: [],
+          };
+        }
+        groups[c.selector].changes.push(c);
+      });
+      const groupList = Object.values(groups);
+
+      this._shadow.innerHTML = `
+        <style>
+          :host {
+            position: fixed;
+            z-index: 9600;
+            width: 340px;
+            max-width: calc(100vw - 16px);
+            display: none;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", sans-serif;
+          }
+          :host(:not([hidden])) { display: block; }
+          .panel {
+            box-sizing: border-box;
+            width: 100%;
+            max-height: calc(100vh - 100px);
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            border-radius: 14px;
+            border: 1px solid var(--border-color, rgba(0,0,0,0.08));
+            background: var(--bg-surface, #fff);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+          }
+          .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+          }
+          .header-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-default, #1a1a1a);
+          }
+          .header-count {
+            font-size: 12px;
+            color: var(--text-tertiary, #888);
+            margin-left: 4px;
+          }
+          .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+          }
+          .copy-btn {
+            height: 30px;
+            padding: 0 12px;
+            border: none;
+            border-radius: 8px;
+            background: var(--text-brand, #00b96b);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+          }
+          .copy-btn:active { opacity: 0.8; }
+          .close-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-tertiary, #888);
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+          }
+          .close-btn:hover { background: rgba(0,0,0,0.05); }
+          .tabs {
+            display: flex;
+            gap: 4px;
+            padding: 3px;
+            border-radius: 9px;
+            background: rgba(0,0,0,0.04);
+          }
+          .tab {
+            flex: 1;
+            height: 30px;
+            border: none;
+            background: transparent;
+            border-radius: 7px;
+            font-size: 12px;
+            color: var(--text-tertiary, #888);
+            cursor: pointer;
+          }
+          .tab.active {
+            background: var(--bg-surface, #fff);
+            color: var(--text-brand, #00b96b);
+            font-weight: 500;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+          }
+          .list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow-y: auto;
+            max-height: calc(100vh - 260px);
+            padding-right: 4px;
+          }
+          .list::-webkit-scrollbar { width: 4px; }
+          .list::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 2px; }
+          .item {
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(0,0,0,0.02);
+            border: 1px solid rgba(0,0,0,0.04);
+          }
+          .item-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 6px;
+          }
+          .item-selector {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-default, #1a1a1a);
+            cursor: pointer;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+            min-width: 0;
+          }
+          .item-selector:hover { color: var(--text-brand, #00b96b); }
+          .item-text {
+            font-size: 11px;
+            color: var(--text-tertiary, #888);
+            margin-top: 2px;
+          }
+          .change-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 0;
+            font-size: 11px;
+          }
+          .change-prop {
+            color: var(--text-tertiary, #888);
+            flex-shrink: 0;
+            min-width: 70px;
+          }
+          .change-old {
+            color: var(--text-tertiary, #888);
+            text-decoration: line-through;
+            max-width: 60px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+          .change-arrow {
+            color: var(--text-tertiary, #666);
+            flex-shrink: 0;
+          }
+          .change-new {
+            color: var(--text-brand, #00b96b);
+            font-weight: 500;
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+          .change-delete {
+            width: 20px;
+            height: 20px;
+            border: none;
+            background: transparent;
+            color: var(--text-tertiary, #aaa);
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            flex-shrink: 0;
+            border-radius: 4px;
+          }
+          .change-delete:hover { color: var(--text-error, #e53935); background: rgba(0,0,0,0.04); }
+          .empty {
+            text-align: center;
+            padding: 32px 16px;
+            color: var(--text-tertiary, #888);
+            font-size: 12px;
+            line-height: 1.6;
+          }
+          .footer {
+            display: flex;
+            justify-content: flex-end;
+            padding-top: 4px;
+            border-top: 1px solid rgba(0,0,0,0.06);
+          }
+          .reset-btn {
+            height: 28px;
+            padding: 0 10px;
+            border: none;
+            background: transparent;
+            color: var(--text-error, #e53935);
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: 6px;
+          }
+          .reset-btn:hover { background: rgba(229,57,53,0.06); }
+        </style>
+        <div class="panel">
+          <div class="header">
+            <div>
+              <span class="header-title">配置列表</span>
+              <span class="header-count">${changes.length} 项变更</span>
+            </div>
+            <div class="header-actions">
+              <button class="copy-btn" type="button" data-action="copy">复制 Prompt</button>
+              <button class="close-btn" type="button" data-action="close">×</button>
+            </div>
+          </div>
+          <div class="tabs">
+            <button class="tab ${this._activeTab === 'all' ? 'active' : ''}" data-tab="all">全部</button>
+            <button class="tab ${this._activeTab === 'config' ? 'active' : ''}" data-tab="config">配置</button>
+          </div>
+          ${groupList.length === 0 ? `
+            <div class="empty">
+              当前还没有配置修改<br/>
+              选中元素后在样式面板中修改
+            </div>
+          ` : `
+            <div class="list">
+              ${groupList.map((g, gi) => `
+                <div class="item">
+                  <div class="item-top">
+                    <span class="item-selector" data-selector="${g.selector}" data-gi="${gi}">${g.elementTag}${g.elementText ? ' · ' + g.elementText : ''}</span>
+                  </div>
+                  ${g.changes.map((c, ci) => `
+                    <div class="change-row">
+                      <span class="change-prop">${c.property}</span>
+                      <span class="change-old" title="${c.oldValue}">${c.oldValue || '-'}</span>
+                      <span class="change-arrow">→</span>
+                      <span class="change-new" title="${c.newValue}">${c.newValue || '-'}</span>
+                      <button class="change-delete" type="button" data-delete="${c.id}" title="删除此变更">×</button>
+                    </div>
+                  `).join('')}
+                </div>
+              `).join('')}
+            </div>
+          `}
+          ${groupList.length > 0 ? `
+            <div class="footer">
+              <button class="reset-btn" type="button" data-action="reset">重置所有修改</button>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    _bindEvents() {
+      // 关闭
+      this._shadow.querySelector('[data-action="close"]').addEventListener('click', () => {
+        bus.emit('close-overview');
+      });
+      // 复制 Prompt
+      this._shadow.querySelector('[data-action="copy"]').addEventListener('click', () => {
+        this._copyPrompt();
+      });
+      // Tab 切换
+      this._shadow.querySelectorAll('[data-tab]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          this._activeTab = btn.dataset.tab;
+          this._render();
+          this._bindEvents();
+        });
+      });
+      // 点击元素选择器 → 跳转选中
+      this._shadow.querySelectorAll('[data-selector]').forEach(el => {
+        el.addEventListener('click', () => {
+          const selector = el.dataset.selector;
+          bus.emit('jump-to-element', { selector });
+        });
+      });
+      // 单条删除
+      this._shadow.querySelectorAll('[data-delete]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.delete;
+          bus.emit('delete-change', { id });
+        });
+      });
+      // 重置
+      const resetBtn = this._shadow.querySelector('[data-action="reset"]');
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+          bus.emit('reset-changes');
+        });
+      }
+    }
+
+    _copyPrompt() {
+      const prompt = this._buildPrompt();
+      // 复制到剪贴板
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(prompt).then(() => {
+          bus.emit('toast', { message: '已复制 Prompt' });
+        }).catch(() => {
+          this._fallbackCopy(prompt);
+        });
+      } else {
+        this._fallbackCopy(prompt);
+      }
+    }
+
+    _fallbackCopy(text) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      textarea.style.pointerEvents = 'none';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        bus.emit('toast', { message: '已复制 Prompt' });
+      } catch (e) {
+        bus.emit('toast', { message: '复制失败，请手动复制' });
+      }
+      document.body.removeChild(textarea);
+    }
+
+    _buildPrompt() {
+      const route = this._route || 'default';
+      const viewport = `${window.innerWidth}×${window.innerHeight}`;
+      const changes = this._changes;
+      if (changes.length === 0) {
+        return `## Page Feedback: ${route}\n**Viewport:** ${viewport}\n\n当前还没有记录到任何配置修改。`;
+      }
+      // 按选择器分组
+      const groups = {};
+      changes.forEach(c => {
+        if (!groups[c.selector]) {
+          groups[c.selector] = {
+            selector: c.selector,
+            elementTag: c.elementTag,
+            elementText: c.elementText,
+            changes: [],
+          };
+        }
+        groups[c.selector].changes.push(c);
+      });
+      const groupList = Object.values(groups);
+      const lines = [
+        `## Page Feedback: ${route}`,
+        `**Viewport:** ${viewport}`,
+        '',
+      ];
+      groupList.forEach((g, i) => {
+        const heading = `${g.elementTag}${g.elementText ? ' · ' + g.elementText : ''}`;
+        const source = `${g.elementTag}${g.elementText ? ' · ' + g.elementText : ''}`;
+        const feedback = g.changes.map(c => `${c.property}: ${c.oldValue || '-'} → ${c.newValue || '-'}`).join(' | ');
+        lines.push(`### ${i + 1}. ${heading}`);
+        lines.push(`**Location:** ${g.selector}`);
+        lines.push(`**Source:** ${source}`);
+        lines.push(`**Feedback:** ${feedback}`);
+        lines.push('');
+      });
+      return lines.join('\n');
+    }
+
+    refresh(changes, route) {
+      this._changes = changes || [];
+      this._route = route || '';
+      if (!this.hasAttribute('hidden')) {
+        this._render();
+        this._bindEvents();
+      }
+    }
+  }
+
+  // ============================================================
   // wego-wt-style-panel: 样式编辑浮动面板
   // ============================================================
   class WegoWtStylePanel extends HTMLElement {
@@ -1703,6 +2130,7 @@
         <wego-wt-overlay hidden></wego-wt-overlay>
         <wego-wt-style-panel hidden></wego-wt-style-panel>
         <wego-wt-color-picker hidden></wego-wt-color-picker>
+        <wego-wt-overview-panel hidden></wego-wt-overview-panel>
         <wego-wt-toast></wego-wt-toast>
         <wego-wt-bottom-bar hidden></wego-wt-bottom-bar>
         <wego-wt-fab></wego-wt-fab>
@@ -1714,6 +2142,7 @@
       this._components.overlay = this._shadow.querySelector('wego-wt-overlay');
       this._components.stylePanel = this._shadow.querySelector('wego-wt-style-panel');
       this._components.colorPicker = this._shadow.querySelector('wego-wt-color-picker');
+      this._components.overviewPanel = this._shadow.querySelector('wego-wt-overview-panel');
       this._components.toast = this._shadow.querySelector('wego-wt-toast');
       this._components.bottomBar = this._shadow.querySelector('wego-wt-bottom-bar');
       this._components.fab = this._shadow.querySelector('wego-wt-fab');
@@ -1743,9 +2172,55 @@
         this._resetChanges();
       });
 
-      // 打开配置列表（M5 实现）
+      // 打开配置列表
       bus.on('open-overview', () => {
-        this._showToast('配置列表功能开发中');
+        this._components.overviewPanel.open(state.changes, state.currentRoute);
+        // 关闭样式面板（互斥）
+        this._clearSelection();
+      });
+
+      // 关闭配置列表
+      bus.on('close-overview', () => {
+        this._components.overviewPanel.close();
+      });
+
+      // 跳转到元素
+      bus.on('jump-to-element', ({ selector }) => {
+        try {
+          const el = document.querySelector(selector);
+          if (el) {
+            this._components.overviewPanel.close();
+            // 滚动到元素
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // 延迟选中（等滚动完成）
+            setTimeout(() => {
+              if (state.walkthroughMode) {
+                this._selectElement(el);
+              }
+            }, 300);
+          }
+        } catch (e) { /* ignore */ }
+      });
+
+      // 删除单条变更
+      bus.on('delete-change', ({ id }) => {
+        const change = state.changes.find(c => c.id === id);
+        if (change) {
+          // 恢复元素样式
+          try {
+            const el = document.querySelector(change.selector);
+            if (el) el.style[change.property] = '';
+          } catch (e) { /* ignore */ }
+          state.changes = state.changes.filter(c => c.id !== id);
+          this._saveChanges();
+          this._updateChangeCount();
+          this._components.overviewPanel.refresh(state.changes, state.currentRoute);
+        }
+      });
+
+      // Toast
+      bus.on('toast', ({ message }) => {
+        this._showToast(message);
       });
 
       // 元素选中 → 打开样式面板
@@ -1797,6 +2272,10 @@
       }
       this._saveChanges();
       this._updateChangeCount();
+      // 刷新配置面板（如果打开）
+      if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
+        this._components.overviewPanel.refresh(state.changes, state.currentRoute);
+      }
     }
 
     _setWalkthroughMode(enabled) {
@@ -1944,6 +2423,10 @@
       this._saveChanges();
       this._updateChangeCount();
       this._showToast('已重置所有修改');
+      // 刷新配置面板（如果打开）
+      if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
+        this._components.overviewPanel.refresh(state.changes, state.currentRoute);
+      }
     }
 
     _loadChanges() {
@@ -1996,6 +2479,7 @@
     if (!customElements.get('wego-wt-overlay')) customElements.define('wego-wt-overlay', WegoWtOverlay);
     if (!customElements.get('wego-wt-style-panel')) customElements.define('wego-wt-style-panel', WegoWtStylePanel);
     if (!customElements.get('wego-wt-color-picker')) customElements.define('wego-wt-color-picker', WegoWtColorPicker);
+    if (!customElements.get('wego-wt-overview-panel')) customElements.define('wego-wt-overview-panel', WegoWtOverviewPanel);
     if (!customElements.get('wego-wt-bottom-bar')) customElements.define('wego-wt-bottom-bar', WegoWtBottomBar);
     if (!customElements.get('wego-wt-fab')) customElements.define('wego-wt-fab', WegoWtFab);
     if (!customElements.get('wego-walkthrough')) customElements.define('wego-walkthrough', WegoWalkthrough);
