@@ -100,11 +100,15 @@ try {
 
 const incoming = { agent, scene, routeId, branch, files };
 
-for (const { file: existingFile, claim: existing } of entries) {
-  if (existingFile === file) {
-    if (force) continue; // 允许覆盖自己的同名认领
-    fail(2, `已有认领 ${file}（scene=${existing.scene}），如需覆盖用 --force`);
-  }
+// --force 覆盖自己的同名认领时，先将其从冲突检查列表中移除，
+// 但仍需检查新认领与其他认领的场景冲突和 routeId 冲突。
+const selfEntry = entries.find(({ file: f }) => f === file);
+if (selfEntry && !force) {
+  fail(2, `已有认领 ${file}（scene=${selfEntry.claim.scene}），如需覆盖用 --force`);
+}
+const otherEntries = force ? entries.filter(({ file: f }) => f !== file) : entries;
+
+for (const { file: existingFile, claim: existing } of otherEntries) {
   if (existing.scene === scene && claimsConflict(existing, incoming)) {
     const overlap = (Array.isArray(existing.files) && files)
       ? files.filter((f) => existing.files.includes(f))

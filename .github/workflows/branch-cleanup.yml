@@ -1,8 +1,9 @@
 name: Branch Cleanup
 
-# 每日定时清理遗留分支：
+# 每日定时清理遗留分支与孤儿认领：
 # - 已合并 PR 的分支存活超 24 小时自动删除（keep-branch 标签例外）
 # - 无 PR 归属且 14 天无活动的分支只报告不删（可能在本地迭代中）
+# - 分支删除后自动 sweep 孤儿认领（分支已删 + 无开放 PR）并提交回 main
 
 on:
   schedule:
@@ -17,6 +18,14 @@ jobs:
   cleanup:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm ci
+
       - name: 清理已合并 PR 的遗留分支
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -33,6 +42,24 @@ jobs:
               git push origin --delete "$branch" 2>/dev/null || echo "远端分支 $branch 已不存在，跳过"
             fi
           done
+
+      - name: 清理孤儿认领并提交
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -u
+          echo "=== 扫描孤儿认领（分支已删 + 无开放 PR）==="
+          npm run claims:sweep
+          if [ -n "$(git status --short claims/)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add claims/
+            git commit -m "chore(claims): 自动清理孤儿认领"
+            git push origin main
+            echo "已提交并推送孤儿认领清理"
+          else
+            echo "无孤儿认领需要清理"
+          fi
 
       - name: 报告无归属的陈旧分支
         env:

@@ -73,14 +73,15 @@ export function hasOpenPR(branch, repoRoot) {
 }
 
 /**
- * 孤儿判定：三条「交付单元存活」证据（分支存在、开放 PR、场景目录存在）全部
- * 确认不成立时才判孤儿。PR 证据缺失（gh 不可用）时保守不判孤儿，避免误释放。
+ * 孤儿判定：交付单元存活 = 分支存在 或 有开放 PR；二者皆无则为孤儿。
+ * PR 证据缺失（gh 不可用）时保守不判孤儿，避免误释放。
+ * 场景目录是否存在不影响交付单元存活判定——正常合并后场景目录仍在 main 上，
+ * 若以「场景目录不存在」为必要条件，所有正常合并的认领都永远无法被 sweep 清理。
  */
 export function isOrphan(claim, repoRoot) {
   const branchAlive = branchExists(claim.branch, repoRoot);
   const hasPR = hasOpenPR(claim.branch, repoRoot);
-  const sceneAlive = fs.existsSync(path.join(repoRoot, 'wego-app', 'scenes', claim.scene || ''));
-  return !branchAlive && hasPR === false && !sceneAlive;
+  return !branchAlive && hasPR === false;
 }
 
 /**
