@@ -6068,9 +6068,9 @@ body[data-order-layout="landscape"] .phone-indicator {
   }
 
   .order-desktop-product-search--catalog {
-    height: var(--size-36);
-    min-height: var(--size-36);
-    padding: 0 var(--spacer-12);
+    height: calc(var(--size-36) + var(--spacer-12));
+    min-height: calc(var(--size-36) + var(--spacer-12));
+    padding: 0 var(--spacer-12) var(--spacer-12);
     border: 0;
   }
 
@@ -6127,7 +6127,7 @@ body[data-order-layout="landscape"] .phone-indicator {
 
   .order-catalog-history {
     display: block;
-    padding: var(--spacer-12) 0 0 var(--spacer-12);
+    padding: 0 0 0 var(--spacer-12);
     overflow: hidden;
     border-bottom: 0;
   }
