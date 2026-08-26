@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 6,
+  "identity": {
+    "iteration_id": "album-product-feed",
+    "title": "动态商品流",
+    "date": "2026-08-25",
+    "primary_scene": "动态",
+    "related_scenes": []
+  },
+  "status": "awaiting-brief-confirmation",
+  "scope_revision": 8,
+  "prototype_brief": {
+    "goal": "让用户在微购相册「动态」tab 连续浏览所有店主发布的商品动态（含帮卖与非帮卖商品），每条动态稳定呈现发布者、发布时间、商品内容、商品图片与相关产品信息，并支持进入产品详情或执行必要操作（帮卖商品主按钮「邀请帮卖」、非帮卖商品主按钮「一键转发」）；动态数据来自独立的「发布」场景，动态流通过「发布」入口进入该场景。",
+    "included": [
+      "动态商品流浏览：动态 tab 主页面连续浏览所有店主发布的商品动态（含其他店主与当前用户）",
+      "每条动态稳定呈现五要素：发布者（头像+名称）、发布时间、商品内容文字、商品图片、相关产品信息（产品卡片）",
+      "兼容两种动态形态（纯商品动态 / 图文动态）与文字为空、图片数量不同、产品信息较长时的稳定展示",
+      "进入产品详情入口：点击动态中的产品 / 相关产品信息进入产品详情页，可返回动态流",
+      "操作入口：复制文案、分享、收藏、下载图片、搜索、编辑、复制动态、图片点击看大图（次级入口，均以明确反馈呈现）",
+      "卡片主按钮按帮卖状态区分：非帮卖商品主按钮「一键转发」（核心操作）；帮卖商品主按钮「邀请帮卖」（核心操作）并显示「可帮卖」标识，转发降为次级",
+      "动态列表接入帮卖：帮卖商品动态卡片显示「可帮卖」标识、主按钮为「邀请帮卖」、转发为次级入口；帮卖规则字段与帮卖分销场景对齐（帮卖方式 distribution_type=1 自由定价 / 2 固定佣金，加价规则 distribution_config）",
+      "发布入口：动态流右下角悬浮「发布」按钮（wego-fab 公共组件，与我的页共用）点击进入独立发布场景（发布产品），发布完成的新商品出现在动态流"
+    ],
+    "excluded": [
+      "发布场景本身（发布表单、真实字段录入、帮卖分销设置弹窗）——独立发布场景，本场景不实现，仅提供入口",
+      "评论、点赞等社交互动",
+      "必要操作的具体功能实现（本轮只呈现入口与明确反馈，不下钻）",
+      "真实后端接口与远程持久化（仅 localStorage 本地存储）",
+      "视频动态的播放行为（media_list 中 video 类型按封面图呈现，不做播放）"
+    ],
+    "entry_points": [
+      "底部导航「动态」tab（dongtai）：作为动态 tab 主内容，打开 App 即默认进入动态商品流",
+      "动态流顶部「发布」入口：进入独立发布场景（发布产品）"
+    ],
+    "critical_paths": [
+      "[P1] 进入动态流：打开 App 默认进入动态 tab → 加载动态列表 → 连续浏览各条动态 → 点击产品 / 相关产品信息 → 进入产品详情 → 返回动态流继续浏览",
+      "[P1] 执行必要操作：浏览动态 → 点击操作入口（非帮卖商品主按钮一键转发；帮卖商品主按钮邀请帮卖；复制文案/分享/收藏/下载图片/编辑/复制动态）→ 看到明确反馈 → 回到动态流",
+      "[P1] 图片看大图：点击动态图片 → 全屏预览 → 关闭返回动态流",
+      "[P1] 帮卖商品操作：浏览已开启帮卖的商品动态 → 主按钮「邀请帮卖」→ 明确反馈（邀请帮卖，本轮 stub）；转发为次级入口",
+      "发布入口：动态流右下角悬浮「发布」按钮（wego-fab）→ 进入独立发布场景（发布产品）→ 发布完成 → 新商品出现在动态流（动态数据产生通道）",
+      "搜索动态：顶部搜索入口点击进入全屏搜索页 → 输入关键词 → 实时过滤动态 → 无结果展示空结果引导 → 返回动态流恢复完整列表（图搜入口提供 stub 反馈）"
+    ],
+    "prototype_boundaries": [
+      {
+        "flow_id": "feed-browse",
+        "mode": "functional",
+        "visible_result": "用户可连续浏览所有店主的商品动态，每条动态稳定呈现发布者/时间/文字/图片/产品信息，并可进入详情、看大图、搜索"
+      },
+      {
+        "flow_id": "product-detail",
+        "mode": "simulated",
+        "visible_result": "展示动态关联产品的基本信息（名称、价格、图片、卖点等），可返回动态流"
+      },
+      {
+        "flow_id": "feed-actions",
+        "mode": "stub",
+        "visible_result": "邀请帮卖/一键转发等必要操作入口可点击并给出明确反馈，不进入具体功能实现"
+      }
+    ],
+    "states": [
+      "feed-ready：进入动态 tab 且动态数据就绪 → 时间倒序展示所有店主的商品动态流，每条动态呈现发布者/时间/文字/图片/产品信息",
+      "loading：进入动态 tab 且动态数据读取中 → 呈现加载占位，读取完成过渡到 feed-ready",
+      "load-failed：动态数据读取失败 → 呈现失败提示与「重试/关闭」，重试走成功路径",
+      "empty：动态流无任何可展示动态 → 呈现空状态与「发布」引导入口（进入独立发布场景）",
+      "search-empty：搜索无匹配结果 → 呈现搜索空结果与清空/返回引导",
+      "resale-badge：动态卡片对应产品已开启帮卖 → 显示「可帮卖」标识，主按钮为「邀请帮卖」，转发降为次级",
+      "product-detail：点击动态产品信息 → 进入产品详情页展示基本产品信息 → 返回动态流",
+      "image-viewer：点击动态图片 → 全屏预览 → 关闭返回动态流",
+      "action-feedback：点击操作入口（邀请帮卖/一键转发/复制/分享/收藏/下载/编辑/复制动态）→ 呈现明确反馈 → 回到动态流"
+    ],
+    "data_contract": {
+      "dynamic": "与 window.WEGO_PROTOTYPE_DB.dynamics 结构一致：dynamic_id、publisher_id、published_at、published_order、content_type(product/note)、text_content、media_list、related_product_ids",
+      "publisher": "与 window.WEGO_PROTOTYPE_DB.publishers 一致：publisher_id、publisher_name、publisher_avatar、publisher_type、publisher_statuses、merchant_type、region、main_categories",
+      "product": "与 window.WEGO_PROTOTYPE_DB.products 一致：product_id、title/name、price、currency、unit、attributes、specs、selling_points、detail_sections、image_list、feed_text",
+      "media": "与 window.WEGO_PROTOTYPE_DB.dynamics.media_list 一致：media_id、media_type(image/video)、poster_or_src、duration_label",
+      "resale_card_source": "动态列表按产品是否携带帮卖配置（distribution_type 等）区分帮卖/非帮卖商品：帮卖商品卡片主按钮「邀请帮卖」+「可帮卖」标识，非帮卖商品主按钮「一键转发」",
+      "community_dynamics": "动态流展示所有店主发布的商品动态：其他店主发布的动态取自 window.WEGO_PROTOTYPE_DB.dynamics（发布者为 publishers 中非当前用户账号），当前用户发布的动态由独立发布场景产生后合并展示",
+      "data_produce_source": "动态数据的产生入口为独立的「发布」场景（发布产品）；本场景通过「发布」入口进入该场景，不内联实现发布流程",
+      "persistence": "localStorage 本地存储，无后端",
+      "failure_fault_injection": "加载失败分支由全局失败注入开关（window.WegoApp.faultInjection）触发，仅用于验收复现失败态，不进入正式业务路径"
+    },
+    "assumptions": [
+      "发布是独立的「发布产品」场景，动态流只提供「发布」入口进入，不在本场景内联实现发布表单与帮卖分销设置",
+      "动态流默认按发布时间倒序排列（published_order 从大到小）",
+      "搜索按动态文字、产品标题与卖点关键词实时过滤（对应 window.WEGO_PROTOTYPE_DB.dynamicCopy 的 search_keywords）",
+      "图片展示按 media_list 数量自适应：0 图不占位、1 图单张通栏、多图九宫格，点击任意图进全屏预览",
+      "media_list 中 video 类型按封面图（poster_or_src）呈现，本轮不做视频播放",
+      "发布者、商品、文案、头像全部取自 window.WEGO_PROTOTYPE_DB，不在场景内编造",
+      "帮卖规则的字段与取值范围完全对齐已有帮卖分销场景（distribution_type 与 distribution_config），用于动态列表识别帮卖商品与卡片主按钮展示，不在本场景另起一套帮卖规则",
+      "必要操作入口统一以明确反馈呈现（如 toast / 底部面板），不实现具体转发/邀请帮卖/分享/收藏/下载/编辑逻辑",
+      "卡片主按钮按帮卖状态区分：非帮卖商品主按钮「一键转发」最突出；帮卖商品主按钮「邀请帮卖」最突出、转发降为次级；其余操作为次级入口",
+      "社区已有动态的帮卖标记与帮卖分销场景对齐（帮卖商品携带 distribution_type 等配置），具体标记方式由设计阶段确定"
+    ],
+    "open_questions": []
+  },
+  "brief_submission": {
+    "at": "2026-08-25T13:26:31.971Z",
+    "scope_revision": 8,
+    "scope_sha256": "9fb87789936e1870732d52d74aff074930eb1d26dded1083e496190398ee5ade"
+  },
+  "brief_confirmation": null,
+  "prototype_submission": null,
+  "prototype_confirmation": null,
+  "affected_scenes": [
+    "动态"
+  ],
+  "affected_runtime": [],
+  "stage_outputs": {
+    "product": {
+      "valid": true
+    },
+    "design": {
+      "valid": false
+    }
+  },
+  "change_log": [
+    {
+      "action": "init",
+      "at": "2026-08-25T04:57:53.994Z"
+    },
+    {
+      "action": "submit-brief",
+      "at": "2026-08-25T04:59:06.388Z"
+    },
+    {
+      "action": "invalidate",
+      "at": "2026-08-25T05:06:03.225Z"
+    },
+    {
+      "action": "submit-brief",
+      "at": "2026-08-25T05:07:10.479Z"
+    },
+    {
+      "action": "invalidate",
+      "at": "2026-08-25T05:13:10.539Z"
+    },
+    {
+      "action": "submit-brief",
+      "at": "2026-08-25T05:13:54.982Z"
+    },
+    {
+      "action": "invalidate",
+      "at": "2026-08-25T05:26:24.450Z"
+    },
+    {
+      "action": "submit-brief",
+      "at": "2026-08-25T05:27:01.641Z"
+    },
+    {
+      "action": "invalidate",
+      "at": "2026-08-25T05:29:57.843Z"
+    },
+    {
+      "action": "submit-brief",
+      "at": "2026-08-25T05:31:29.708Z"
+    },
+    {
+      "action": "invalidate",
+      "at": "2026-08-25T05:36:38.600Z"
+    },
+    {
+      "action": "submit-brief",
+      "at": "2026-08-25T05:36:38.652Z"
+    },
+    {
+      "action": "invalidate",
+      "at": "2026-08-25T05:46:59.938Z"
+    },
+    {
+      "action": "submit-brief",
+      "at": "2026-08-25T05:47:29.025Z"
+    },
+    {
+      "action": "confirm-brief",
+      "at": "2026-08-25T05:49:00.838Z"
+    },
+    {
+      "action": "invalidate",
+      "at": "2026-08-25T13:26:31.936Z"
+    },
+    {
+      "action": "submit-brief",
+      "at": "2026-08-25T13:26:31.972Z"
+    }
+  ],
+  "freeze": null
+}

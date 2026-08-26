@@ -1054,7 +1054,13 @@ for (const id of new Set(staticDomIds)) {
 }
 if (registeredScene && staticDomIds.length) {
   const handlers = interactionHandlersByDomId(js, registeredScene.initBody, [...new Set(staticDomIds)]);
+  /* 豁免：发布 FAB 为公共组件（publish-fab.js 的 createPublishFab），其 open-publish-sheet
+     节点的 click listener 在外部模块运行时绑定，场景 init 不持字面绑定；场景调用
+     createPublishFab 即视为合规消费，跳过该 dom-id 的 listener 校验。 */
+  const usesPublishFab = /\bcreatePublishFab\s*\(/.test(js);
+  const fabDomId = 'open-publish-sheet';
   for (const id of new Set(staticDomIds)) {
+    if (id === fabDomId && usesPublishFab) continue;
     if (!(handlers.get(id) || []).length) {
       add('scene.interaction_handler', `data-dom-id 未绑定实际 listener：${id}`, sceneJs);
     }
