@@ -212,14 +212,18 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
       + '<span class="wg-skeleton wg-skeleton--rect" data-component-slug="skeleton"></span>'
       + '<div class="my-tab-skeleton-card__meta">'
       + '<span class="wg-skeleton wg-skeleton--text" style="width:70%"></span>'
-      + '<span class="wg-skeleton wg-skeleton--text" style="width:40%"></span>'
-      + '<span class="sk-goods-attr wg-skeleton wg-skeleton--rect" data-component-slug="skeleton"></span>'
+      + '<span class="sk-goods-price wg-skeleton wg-skeleton--rect" data-component-slug="skeleton"></span>'
+      + '<span class="sk-goods-meta"><span class="wg-skeleton wg-skeleton--text"></span><span class="wg-skeleton wg-skeleton--rect"></span><span class="wg-skeleton wg-skeleton--text"></span></span>'
+      + '<span class="sk-goods-ops wg-skeleton wg-skeleton--rect" data-component-slug="skeleton"></span>'
       + '</div></div>';
   }
 
   function skeletonDateGroup() {
     return '<section class="my-content-date-group my-goods-group my-tab-skeleton-date-group">'
-      + '<div class="sk-date-head"><span class="wg-skeleton wg-skeleton--text" style="width:64px;height:12px"></span></div>'
+      + '<div class="my-content-date-group__heading sk-date-head">'
+      + '<span class="sk-date-toggle wg-skeleton wg-skeleton--rect" data-component-slug="skeleton"></span>'
+      + '<span class="sk-date-more wg-skeleton wg-skeleton--rect" data-component-slug="skeleton"></span>'
+      + '</div>'
       + '<div class="my-goods-group__items">'
       + skeletonProductCard() + skeletonProductCard() + skeletonProductCard()
       + '</div></section>';
