@@ -35,16 +35,24 @@ description: 负责微购仓库的分支、PR、本地迭代预览、合并和�
 
 ### 合并阶段（用户验收通过后）
 
-用户明确表达"验收通过""确认合格""可以合并"后进入此阶段，一次性完成固化、验证与合并：
+用户明确表达"验收完成""验收通过""确认合格""可以合并"后进入此阶段，由 `wego-design` 先输出 5 维度一致性校验清单，用户逐项确认后，一次性完成固化、验证与合并：
 
-1. 运行与范围相称的完整静态验证，确认 PR 内包含全部本次改动且工作区已清零：
+1. 由 `wego-design` 连续执行迭代收口：
+   - `confirm-brief --user-confirmed-brief <iteration_id>`（简报确认）
+   - `submit-prototype`（固化待验收指纹）
+   - `confirm-prototype --user-confirmed-prototype <iteration_id>`（原型确认）
+   - `freeze --user-confirmed-freeze <iteration_id>`（冻结归档）
+2. 运行与范围相称的完整静态验证，确认 PR 内包含全部本次改动且工作区已清零：
    - `node scripts/validate-wego-design.mjs --scope=full --strict`（场景 Token 合规、源/副本同步、原型指纹、完整守门）
    - `node scripts/build-routes.mjs --check`（路由生成一致性）
    - `node scripts/sync-wego-app-lib.mjs --check`（设计系统 lib 副本与源一致）
-   - 业务原型连续执行 `submit-prototype` 固化待验收指纹，再 `confirm-prototype` 确认
    - 任意一项失败必须先修复再推送；未跑验证或验证未过直接推送视为跳过门禁
-2. 合并前再次同步 `main` 并复验，通过后合并 PR 进 `main` 并完成收口；未获用户明确验收通过绝不合并。
-3. 每次结果标明：`当前状态：已验收，合并中（PR #<编号>）`。
+3. **合并阶段问题分类**：全量门禁失败时，必须区分问题来源：
+   - **本 PR 引入的问题**：与本次改动场景/文件直接相关，必须修复后才能合并。
+   - **仓库级既有问题**：与本 PR 无关的场景（如其他场景模板契约不符、其他场景迭代绑定缺失），不阻塞本 PR 合并；记录问题并由对应交付单元单独修复，修复后独立走 PR 合入 `main`。
+   - 分类判断依据：问题场景是否在本 PR 的 affected_scenes 中，问题文件是否在本 PR 改动范围内。
+4. 合并前再次同步 `main` 并复验，通过后合并 PR 进 `main` 并完成收口；未获用户明确验收通过绝不合并。
+5. 每次结果标明：`当前状态：已验收，合并中（PR #<编号>）`。
 
 PR 已存在时，用户继续提出小问题仍先回到本地迭代，累计完成一轮后自动更新同一个 PR；只有用户明确验收通过才合并。
 

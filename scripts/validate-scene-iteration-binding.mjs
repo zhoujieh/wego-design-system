@@ -22,14 +22,15 @@ const args = process.argv.slice(2);
 const jsonOutput = args.includes('--json');
 const all = args.includes('--all');
 const testing = args.includes('test');
+const devMode = args.includes('--dev');
 const scenes = args.filter(arg => !arg.startsWith('--'));
 
 // 简报已确认 = 进入 prototyping 及之后状态;对应 iteration-record.mjs 的确认矩阵。
-const confirmedBriefStatuses = new Set([
-  'prototyping',
-  'awaiting-prototype-confirmation',
-  'prototype-confirmed'
-]);
+// --dev 开发模式下允许 in-development（简报已提交但未确认，开发中可修改）。
+const confirmedBriefStatuses = new Set(devMode
+  ? ['in-development', 'prototyping', 'awaiting-prototype-confirmation', 'prototype-confirmed']
+  : ['prototyping', 'awaiting-prototype-confirmation', 'prototype-confirmed']
+);
 
 const scenesRoot = path.join(root, 'wego-app/scenes');
 
@@ -66,7 +67,12 @@ function boundScenes() {
         const record = loadIteration(target);
         if (!isPlainObject(record)) continue;
         if (!confirmedBriefStatuses.has(record.status)) continue;
-        if (record.brief_confirmation === null || record.brief_confirmation === undefined) continue;
+        // in-development 状态只要求 brief_submission 存在（开发模式）
+        if (record.status === 'in-development') {
+          if (record.brief_submission === null || record.brief_submission === undefined) continue;
+        } else {
+          if (record.brief_confirmation === null || record.brief_confirmation === undefined) continue;
+        }
         const primary = record.identity?.primary_scene;
         if (isSafeSceneName(primary)) bound.add(primary);
         if (Array.isArray(record.affected_scenes)) {
@@ -139,6 +145,19 @@ function test() {
     fs.writeFileSync(recordFile, `${JSON.stringify(record, null, 2)}\n`);
     const active = spawnSync(process.execPath, [script, '--all', '--json'], { cwd: fixture, encoding: 'utf8' });
     if (active.status !== 0) throw new Error(`已确认且未冻结的活动迭代应绑定场景：${active.stderr || active.stdout}`);
+
+    // --dev 模式下 in-development 状态应绑定场景
+    record.status = 'in-development';
+    record.brief_confirmation = null;
+    record.brief_submission = { at: new Date().toISOString(), scope_revision: 1, scope_sha256: '0'.repeat(64) };
+    fs.writeFileSync(recordFile, `${JSON.stringify(record, null, 2)}\n`);
+    const devActive = spawnSync(process.execPath, [script, '--all', '--json', '--dev'], { cwd: fixture, encoding: 'utf8' });
+    if (devActive.status !== 0) throw new Error(`--dev 模式下 in-development 迭代应绑定场景：${devActive.stderr || devActive.stdout}`);
+    // 严格模式下 in-development 不应绑定场景
+    const strictInDev = spawnSync(process.execPath, [script, '--all', '--json'], { cwd: fixture, encoding: 'utf8' });
+    if (strictInDev.status === 0 || !(strictInDev.stdout || '').includes('scene.iteration_unbound')) {
+      throw new Error('严格模式下 in-development 迭代不应绑定场景');
+    }
   } finally {
     fs.rmSync(fixture, { recursive: true, force: true });
   }

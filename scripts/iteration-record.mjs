@@ -21,22 +21,22 @@ function flagValue(source, flag) {
 
 const value = flag => flagValue(args, flag);
 const fileArg = value('--file');
-const statuses = new Set(['draft', 'awaiting-brief-confirmation', 'prototyping', 'awaiting-prototype-confirmation', 'prototype-confirmed', 'frozen', 'blocked', 'cancelled', 'superseded']);
-const briefSubmittedStatuses = new Set(['awaiting-brief-confirmation', 'prototyping', 'awaiting-prototype-confirmation', 'prototype-confirmed', 'frozen']);
-const activeStatuses = new Set(['draft', 'awaiting-brief-confirmation', 'prototyping', 'awaiting-prototype-confirmation', 'prototype-confirmed', 'frozen', 'blocked']);
+const statuses = new Set(['draft', 'in-development', 'prototyping', 'awaiting-prototype-confirmation', 'prototype-confirmed', 'frozen', 'blocked', 'cancelled', 'superseded']);
+const briefSubmittedStatuses = new Set(['in-development', 'prototyping', 'awaiting-prototype-confirmation', 'prototype-confirmed', 'frozen']);
+const activeStatuses = new Set(['draft', 'in-development', 'prototyping', 'awaiting-prototype-confirmation', 'prototype-confirmed', 'frozen', 'blocked']);
 const prototypeModes = new Set(['functional', 'simulated', 'stub']);
 const prototypeBoundaryKeys = new Set(['flow_id', 'mode', 'visible_result']);
 const prototypeBriefKeys = ['goal', 'included', 'excluded', 'entry_points', 'critical_paths', 'prototype_boundaries', 'states', 'data_contract', 'assumptions', 'open_questions'];
 const prototypeBriefKeySet = new Set(prototypeBriefKeys);
 const prototypeBriefArrayFields = ['included', 'excluded', 'entry_points', 'critical_paths', 'states', 'assumptions', 'open_questions'];
 const requiredBriefArrayFields = new Set(['included', 'entry_points', 'critical_paths', 'states']);
-const iterationKeys = ['schemaVersion', 'identity', 'status', 'scope_revision', 'prototype_brief', 'brief_submission', 'brief_confirmation', 'prototype_submission', 'prototype_confirmation', 'affected_scenes', 'affected_runtime', 'stage_outputs', 'change_log', 'freeze'];
+const iterationKeys = ['schemaVersion', 'identity', 'status', 'scope_revision', 'brief_file', 'prototype_brief', 'brief_submission', 'brief_confirmation', 'prototype_submission', 'prototype_confirmation', 'affected_scenes', 'affected_runtime', 'stage_outputs', 'change_log', 'freeze'];
 const identityKeys = ['iteration_id', 'title', 'date', 'primary_scene', 'related_scenes'];
 const routesRelativePath = 'wego-app/js/routes.js';
 const routeFingerprintPrefix = '@route-entry/';
 const expectedStageValidity = new Map([
   ['draft', [false, false]],
-  ['awaiting-brief-confirmation', [true, false]],
+  ['in-development', [true, false]],
   ['prototyping', [true, false]],
   ['awaiting-prototype-confirmation', [true, true]],
   ['prototype-confirmed', [true, true]],
@@ -44,7 +44,7 @@ const expectedStageValidity = new Map([
 ]);
 const expectedConfirmations = new Map([
   ['draft', [false, false, false]],
-  ['awaiting-brief-confirmation', [true, false, false]],
+  ['in-development', [true, false, false]],
   ['prototyping', [true, true, false]],
   ['awaiting-prototype-confirmation', [true, true, false]],
   ['prototype-confirmed', [true, true, true]],
@@ -52,14 +52,14 @@ const expectedConfirmations = new Map([
 ]);
 const expectedPrototypeSubmissions = new Map([
   ['draft', false],
-  ['awaiting-brief-confirmation', false],
+  ['in-development', false],
   ['prototyping', false],
   ['awaiting-prototype-confirmation', true],
   ['prototype-confirmed', true],
   ['frozen', true]
 ]);
 const invalidateSources = {
-  brief: new Set(['awaiting-brief-confirmation', 'prototyping', 'awaiting-prototype-confirmation', 'prototype-confirmed']),
+  brief: new Set(['in-development', 'prototyping', 'awaiting-prototype-confirmation', 'prototype-confirmed']),
   prototype: new Set(['awaiting-prototype-confirmation', 'prototype-confirmed'])
 };
 
@@ -85,6 +85,103 @@ function scopeSha256(record) {
   };
   return crypto.createHash('sha256').update(stableJson(scope)).digest('hex');
 }
+
+/**
+ * 从 spec.md 解析 prototype_brief。
+ * 按 ## 标题分割，标题中括号内的字段名映射到 prototype_brief 字段。
+ * 列表字段解析为数组，prototype_boundaries 和 data_contract 用 ### 子标题解析。
+ */
+function parseBriefMarkdown(mdFile) {
+  if (!fs.existsSync(mdFile)) fail(`简报文件不存在：${mdFile}`);
+  const content = fs.readFileSync(mdFile, 'utf8');
+  const brief = {
+    goal: '',
+    included: [],
+    excluded: [],
+    entry_points: [],
+    critical_paths: [],
+    prototype_boundaries: [],
+    states: [],
+    data_contract: {},
+    assumptions: [],
+    open_questions: []
+  };
+
+  // 去掉 HTML 注释
+  const cleanContent = content.replace(/<!--[\s\S]*?-->/g, '');
+  // 按 ## 标题分割（排除 # 一级标题）
+  const sections = cleanContent.split(/^## /m).slice(1);
+
+  for (const section of sections) {
+    const lines = section.split('\n');
+    const header = lines[0].trim();
+    const body = lines.slice(1).join('\n').trim();
+
+    // 提取字段名（标题中的括号内容，如 "目标（goal）" → goal）
+    const fieldMatch = header.match(/[（(](\w+)[）)]/);
+    if (!fieldMatch) continue;
+    const field = fieldMatch[1];
+    if (!prototypeBriefKeySet.has(field)) continue;
+
+    if (field === 'goal') {
+      brief.goal = body.trim();
+    } else if (prototypeBriefArrayFields.includes(field)) {
+      const items = body.split('\n')
+        .filter(line => /^\s*-\s+/.test(line))
+        .map(line => line.replace(/^\s*-\s+/, '').trim())
+        .filter(Boolean);
+      brief[field] = items;
+    } else if (field === 'prototype_boundaries') {
+      const subsections = body.split(/^### /m).slice(1);
+      for (const sub of subsections) {
+        const subLines = sub.split('\n');
+        const flowId = subLines[0].trim();
+        const subBody = subLines.slice(1).join('\n');
+        const modeMatch = subBody.match(/mode:\s*(\w+)/);
+        const resultMatch = subBody.match(/visible_result:\s*(.+)/);
+        if (flowId && modeMatch && resultMatch) {
+          brief.prototype_boundaries.push({
+            flow_id: flowId,
+            mode: modeMatch[1].trim(),
+            visible_result: resultMatch[1].trim()
+          });
+        }
+      }
+    } else if (field === 'data_contract') {
+      const subsections = body.split(/^### /m).slice(1);
+      for (const sub of subsections) {
+        const subLines = sub.split('\n');
+        const entityName = subLines[0].trim();
+        const subBody = subLines.slice(1).join('\n');
+        const entity = {};
+        for (const line of subBody.split('\n')) {
+          const kvMatch = line.match(/^\s*-\s*([^：:]+)[：:]\s*(.+)/);
+          if (kvMatch) {
+            entity[kvMatch[1].trim()] = kvMatch[2].trim();
+          }
+        }
+        if (entityName) brief.data_contract[entityName] = entity;
+      }
+    }
+  }
+
+  return brief;
+}
+
+function findBriefFile(iterationFile) {
+  const dir = path.dirname(iterationFile);
+  // 优先用 brief_file 字段
+  // 否则在目录中查找 *.md（排除范围确认.md 等历史文件）
+  const entries = fs.readdirSync(dir).filter(f => f.endsWith('.md'));
+  // 优先找包含"需求规格"或"spec"的文件
+  const specFile = entries.find(f => /需求规格|spec/i.test(f));
+  if (specFile) return path.join(dir, specFile);
+  // 否则取第一个 md（排除范围确认文件）
+  const other = entries.find(f => !/范围确认/.test(f));
+  if (other) return path.join(dir, other);
+  return null;
+}
+
 function files(rootDir) {
   if (!fs.existsSync(rootDir)) return [];
   const output = [];
@@ -422,6 +519,11 @@ function validate(record, file, repositoryRoot = root, options = {}) {
     errors.push(`${file}: 迭代记录缺少字段：${missingKeys.join('、')}`);
   }
   if (record.schemaVersion !== 6) errors.push(`${file}: schemaVersion 必须为 6`);
+  // brief_file 校验：仅在 file 为真实路径且状态非 draft 时校验
+  if (record.status !== 'draft' && record.brief_file && fs.existsSync(file)) {
+    const briefPath = path.resolve(path.dirname(file), record.brief_file);
+    if (!fs.existsSync(briefPath)) errors.push(`${file}: brief_file 指向的文件不存在：${record.brief_file}`);
+  }
   errors.push(...exactKeysErrors(record.identity, identityKeys, `${file}: identity`));
   if (isPlainObject(record.identity)) {
     for (const key of ['iteration_id', 'title']) {
@@ -481,6 +583,129 @@ function transition(expected, next, mutate = () => {}) {
   save(file, record, command);
   return record;
 }
+
+function generateBriefTemplate(record) {
+  const id = record.identity.iteration_id;
+  const title = record.identity.title;
+  const date = record.identity.date;
+  const scene = record.identity.primary_scene;
+  return `# ${title} 需求规格说明
+
+## 元信息
+
+- **迭代 ID**：${id}
+- **主场景**：${scene}
+- **关联场景**：无
+- **创建日期**：${date}
+- **状态**：draft
+- **输入来源**：
+
+---
+
+## 目标（goal）
+
+<!-- 必填，字符串。说明这个迭代要解决什么问题、为谁创造什么价值。 -->
+
+---
+
+## 纳入范围（included）
+
+<!-- 必填，数组。每条写清本次做什么，禁止只写名词。 -->
+
+- {功能点 1：做什么 + 做到什么程度}
+
+---
+
+## 不纳入范围（excluded）
+
+<!-- 必填，数组。明确不做的事项，防止范围蔓延。 -->
+
+- {明确不做的事项}
+
+---
+
+## 入口（entry_points）
+
+<!-- 必填，数组。说明入口属于哪个宿主区域/页面/流程节点、何时可见、触发条件。 -->
+
+- {入口 1：位置 + 可见条件 + 触发方式}
+
+---
+
+## 关键路径（critical_paths）
+
+<!-- 必填，数组。每条 = 可独立测试的完整流程，写「起点 → 操作 → 中间态 → 结果」，首尾闭环。核心流程加 [P1] 前缀。 -->
+
+- [P1] {起点} → {操作} → {中间态} → {结果}
+
+---
+
+## 原型边界（prototype_boundaries）
+
+<!-- 必填，数组。每个流程用 ### 子标题，flow-id 为唯一 kebab-case。 -->
+
+### {flow-id-1}
+
+- mode: functional
+  <!-- functional：用户必须真实操作并看到状态变化 -->
+  <!-- simulated：无后端，但完整模拟体验和结果 -->
+  <!-- stub：只表达入口或边界，仍需提供可见反馈 -->
+- visible_result: {用户可见的明确结果}
+
+---
+
+## 状态（states）
+
+<!-- 必填，数组。每条写「标识：进入条件 → 可感知结果」，禁止只写名词。 -->
+<!-- 必须覆盖：默认主态、加载态、失败态、空状态（含数据产生入口引导）。 -->
+
+- 默认主态：{进入条件} → {可感知结果}
+- 加载态：{进入条件} → {可感知结果}
+- 失败态：{进入条件} → {可感知结果（失败提示 + 重试/关闭）}
+- 空状态：{进入条件} → {可感知结果（含数据产生入口引导）}
+
+---
+
+## 数据契约（data_contract）
+
+<!-- 必填，非空对象。每个数据实体用 ### 子标题。 -->
+<!-- 硬规则：数据必须有产生入口（发布/新建/录入流程），禁止静态种子降级。 -->
+
+### {数据实体 1}
+
+- 字段：{字段名、类型、约束}
+- 产生入口：{哪个流程写入（必须对应 included/critical_paths 中的发布/新建/录入流程）}
+- 展示位置：{在哪里展示}
+- 修改方式：{如何修改/删除}
+
+---
+
+## 假设（assumptions）
+
+<!-- 可选，数组。低风险、可逆、已写明影响的假设。 -->
+
+- {低风险、可逆、已写明影响的假设}
+
+---
+
+## 待确认问题（open_questions）
+
+<!-- 提交前必须清空。每个问题解决后写回对应业务字段。 -->
+
+- {待确认问题 1}
+
+---
+
+## 澄清记录（Clarifications）
+
+<!-- 可选。记录需求沟通中的问答，按日期分组。已确认的结论必须同步写回上方对应业务字段。 -->
+
+### Session {YYYY-MM-DD}
+
+- Q: {问题} → A: {回答}
+`;
+}
+
 function init() {
   const id = value('--iteration-id');
   const title = value('--title');
@@ -489,11 +714,34 @@ function init() {
   if (!isSafeSceneName(scene)) fail('--scene 必须是单层安全场景名');
   const file = requireFile(scene);
   if (fs.existsSync(file)) fail(`${file} 已存在`);
-  const record = { schemaVersion: 6, identity: { iteration_id: id, title, date: new Date().toISOString().slice(0, 10), primary_scene: scene, related_scenes: [] }, status: 'draft', scope_revision: 1, prototype_brief: { goal: '', included: [], excluded: [], entry_points: [], critical_paths: [], prototype_boundaries: [], states: [], data_contract: {}, assumptions: [], open_questions: [] }, brief_submission: null, brief_confirmation: null, prototype_submission: null, prototype_confirmation: null, affected_scenes: [scene], affected_runtime: [], stage_outputs: { product: { valid: false }, design: { valid: false } }, change_log: [], freeze: null };
+  const today = new Date().toISOString().slice(0, 10);
+  const briefFileName = `${id}-${title}-${today.replace(/-/g, '')}.md`;
+  const record = {
+    schemaVersion: 6,
+    identity: { iteration_id: id, title, date: today, primary_scene: scene, related_scenes: [] },
+    status: 'draft',
+    scope_revision: 1,
+    brief_file: briefFileName,
+    prototype_brief: { goal: '', included: [], excluded: [], entry_points: [], critical_paths: [], prototype_boundaries: [], states: [], data_contract: {}, assumptions: [], open_questions: [] },
+    brief_submission: null,
+    brief_confirmation: null,
+    prototype_submission: null,
+    prototype_confirmation: null,
+    affected_scenes: [scene],
+    affected_runtime: [],
+    stage_outputs: { product: { valid: false }, design: { valid: false } },
+    change_log: [],
+    freeze: null
+  };
   const errors = validate(record, file);
   if (errors.length) fail(errors.join('\n'));
   fs.mkdirSync(path.dirname(file), { recursive: true });
+  // 生成 spec.md 模板
+  const briefPath = path.join(path.dirname(file), briefFileName);
+  fs.writeFileSync(briefPath, generateBriefTemplate(record));
   save(file, record, 'init');
+  console.log(`已创建迭代：${id}`);
+  console.log(`简报文件：${briefFileName}`);
 }
 function check() {
   const records = fileArg ? [requireFile()] : files(path.join(root, 'wego-app/scenes'));
@@ -543,9 +791,6 @@ function briefSubmissionErrors(record) {
 
 /**
  * 需求简报充分性守门（不改变 schema，仅约束既有字段内容）。
- *
- * 目标：要求简报"足够细"——state 覆盖加载/失败/空态等交互状态，数据有产生入口、
- * 禁用静态种子降级。对应 wego-product/references/scope-and-boundaries.md「需求简报输出要求」。
  */
 function briefSufficiencyErrors(brief) {
   const errors = [];
@@ -554,12 +799,12 @@ function briefSufficiencyErrors(brief) {
   // A. states 必须覆盖加载态、失败态、空状态
   const states = (brief.states || []).filter(item => typeof item === 'string');
   const joinedStates = states.join(' ');
-  if (!states.length) return errors; // 空态已在 requiredBriefArrayFields 拦截
+  if (!states.length) return errors;
   if (!/加载|loading/i.test(joinedStates)) errors.push('prototype_brief.states 必须包含加载态（如 loading，写明进入条件与即见结果）');
   if (!/(失败|error|fault)/i.test(joinedStates)) errors.push('prototype_brief.states 必须包含失败态（如加载/保存失败，写明提示与重试/关闭）');
   if (!/(空|empty|无数据|无结果)/.test(joinedStates)) errors.push('prototype_brief.states 必须包含空状态（列表空 / 搜索空结果，写明引导入口）');
 
-  // 每个 state 须写成「进入条件 → 可感知结果」，防止只写一个名词
+  // 每个 state 须写成「进入条件 → 可感知结果」
   const vague = states.filter(s => s === s.replace(/[：:→，,；;]/g, ''));
   if (vague.length) errors.push(`prototype_brief.states 存在未写输入条件/可感知结果的粗糙状态：${vague.slice(0, 3).map(s => `「${s}」`).join('、')}（每个状态应为「标识：进入条件 → 可感知结果」）`);
 
@@ -570,7 +815,7 @@ function briefSufficiencyErrors(brief) {
     errors.push('prototype_brief 不得用「内置种子/mock/预置模拟数据」代替数据产生入口；数据必须通过发布/新建流程写入（localStorage 可作为存储位置，但写入通道必须是真实交互流程）');
   }
 
-  // C. 数据必须有产生入口：included(或 critical_paths) 应含新建/发布/录入/采购 之类动作，与数据展示首尾闭环
+  // C. 数据必须有产生入口
   const createWords = /新建|添加|新增|发布|录入|上架|创建|导入|上传/;
   const actionText = [...(brief.included || []), ...(brief.critical_paths || [])].join(' ');
   if (!createWords.test(actionText)) {
@@ -657,7 +902,6 @@ function migrateLegacyRecord(record) {
   record.schemaVersion = 6;
   if (!Object.hasOwn(record, 'prototype_submission')) record.prototype_submission = null;
   if (record.status === 'awaiting-prototype-confirmation') {
-    // 旧记录没有提交指纹，不能将其视为已经验收；回到可重新提交状态。
     record.status = 'prototyping';
     record.prototype_submission = null;
     record.prototype_confirmation = null;
@@ -733,7 +977,7 @@ function test() {
     assumptions: [],
     open_questions: []
   });
-  const sample = { schemaVersion: 6, identity: { iteration_id: 'test', title: '测试', date: '2026-07-15', primary_scene: '测试场景', related_scenes: [] }, status: 'draft', scope_revision: 1, prototype_brief: { goal: '', included: [], excluded: [], entry_points: [], critical_paths: [], prototype_boundaries: [], states: [], data_contract: {}, assumptions: [], open_questions: [] }, brief_submission: null, brief_confirmation: null, prototype_submission: null, prototype_confirmation: null, affected_scenes: ['测试场景'], affected_runtime: [], stage_outputs: { product: { valid: false }, design: { valid: false } }, change_log: [], freeze: null };
+  const sample = { schemaVersion: 6, identity: { iteration_id: 'test', title: '测试', date: '2026-07-15', primary_scene: '测试场景', related_scenes: [] }, status: 'draft', scope_revision: 1, brief_file: 'test-测试-20260715.md', prototype_brief: { goal: '', included: [], excluded: [], entry_points: [], critical_paths: [], prototype_boundaries: [], states: [], data_contract: {}, assumptions: [], open_questions: [] }, brief_submission: null, brief_confirmation: null, prototype_submission: null, prototype_confirmation: null, affected_scenes: ['测试场景'], affected_runtime: [], stage_outputs: { product: { valid: false }, design: { valid: false } }, change_log: [], freeze: null };
 
   assert(!validate(sample, 'sample').length, '业务迭代 Schema 错误拦截合法 draft');
   const emptyScenes = clone(sample);
@@ -799,11 +1043,11 @@ function test() {
   const changedRuntimeAfterConfirmation = clone(prototyping);
   changedRuntimeAfterConfirmation.affected_runtime.push('wego-app/js/runtime.js');
   assert(has(changedRuntimeAfterConfirmation, '范围确认后已漂移'), 'brief_confirmation 未拦截确认后修改 affected_runtime');
-  const awaitingBrief = clone(sample);
-  awaitingBrief.status = 'awaiting-brief-confirmation';
-  awaitingBrief.stage_outputs.product.valid = true;
-  awaitingBrief.brief_submission = createBriefSubmission(awaitingBrief);
-  assert(!validate(awaitingBrief, 'sample').length, '确认矩阵错误拦截合法 awaiting-brief-confirmation 状态');
+  const inDevelopment = clone(sample);
+  inDevelopment.status = 'in-development';
+  inDevelopment.stage_outputs.product.valid = true;
+  inDevelopment.brief_submission = createBriefSubmission(inDevelopment);
+  assert(!validate(inDevelopment, 'sample').length, '确认矩阵错误拦截合法 in-development 状态');
   const awaitingPrototype = clone(prototyping);
   awaitingPrototype.status = 'awaiting-prototype-confirmation';
   awaitingPrototype.stage_outputs.design.valid = true;
@@ -909,10 +1153,56 @@ function test() {
     assert(linkedInit.status !== 0 && (linkedInit.stderr || '').includes('符号链接'), 'init 未拦截符号链接迭代路径');
 
     fs.writeFileSync(iterationFile, `${JSON.stringify(sample, null, 2)}\n`);
+    // 创建有效的 spec.md 供 submit-brief 解析
+    const briefMdPath = path.join(iterationDirectory, 'test-测试-20260715.md');
+    fs.writeFileSync(briefMdPath, `# 测试 需求规格说明
+
+## 目标（goal）
+测试目标
+
+## 纳入范围（included）
+- 发布商品
+
+## 不纳入范围（excluded）
+- 不做的事项
+
+## 入口（entry_points）
+- 工作台商品管理
+
+## 关键路径（critical_paths）
+- [P1] 进入发布 → 填写信息 → 完成发布
+
+## 原型边界（prototype_boundaries）
+
+### publish-product
+- mode: functional
+- visible_result: 用户完成发布并看到成功结果
+
+## 状态（states）
+- 默认主态：页面加载完成 → 展示商品列表
+- 加载态：数据读取中 → 显示 loading 骨架
+- 失败态：加载接口失败 → 失败提示 + 重试/关闭
+- 空状态：无商品数据 → 空状态 + 引导新建
+
+## 数据契约（data_contract）
+
+### product
+- 字段：title 字符串、price 数字
+- 产生入口：发布商品表单提交
+- 展示位置：商品列表
+- 修改方式：编辑表单修改
+
+## 假设（assumptions）
+- 用户已登录
+
+## 待确认问题（open_questions）
+
+## 澄清记录（Clarifications）
+`);
     const submittedBrief = run(['submit-brief', '--file', iterationArgument]);
     assert(submittedBrief.status === 0, `合法 submit-brief 失败：${(submittedBrief.stderr || submittedBrief.stdout).trim()}`);
     const submittedRecord = JSON.parse(fs.readFileSync(iterationFile, 'utf8'));
-    assert(submittedRecord.status === 'awaiting-brief-confirmation' && submittedRecord.brief_submission?.scope_sha256 === scopeSha256(submittedRecord), 'submit-brief 未写入当前范围提交快照');
+    assert(submittedRecord.status === 'in-development' && submittedRecord.brief_submission?.scope_sha256 === scopeSha256(submittedRecord), 'submit-brief 未写入当前范围提交快照');
     submittedRecord.prototype_brief.goal = '提交后擅自修改简报';
     fs.writeFileSync(iterationFile, `${JSON.stringify(submittedRecord, null, 2)}\n`);
     const driftedBriefConfirmation = run(['confirm-brief', '--file', iterationArgument]);
@@ -1030,16 +1320,43 @@ function test() {
 
 switch (command) {
   case 'init': init(); break;
-  case 'submit-brief': transition(['draft'], 'awaiting-brief-confirmation', record => {
-    const errors = [
+  case 'submit-brief': {
+    // submit-brief 支持从 draft 和 in-development 状态执行
+    // 从 spec.md 读取简报，解析为 prototype_brief 快照
+    const file = requireFile();
+    const record = load(file);
+    const errors = validate(record, file);
+    if (errors.length) fail(errors.join('\n'));
+    if (!['draft', 'in-development'].includes(record.status)) fail(`${file}: 当前状态 ${record.status} 不能执行 submit-brief`);
+    // 找到 spec.md 文件
+    let briefFile;
+    if (record.brief_file) {
+      briefFile = path.resolve(path.dirname(file), record.brief_file);
+    } else {
+      briefFile = findBriefFile(file);
+    }
+    if (!briefFile || !fs.existsSync(briefFile)) fail('未找到 spec.md 简报文件，请先编写需求规格说明');
+    // 解析 spec.md
+    const parsedBrief = parseBriefMarkdown(briefFile);
+    record.prototype_brief = parsedBrief;
+    // 校验
+    const submissionErrors = [
       ...briefSubmissionErrors(record),
       ...briefSufficiencyErrors(record.prototype_brief)
     ];
-    if (errors.length) fail(errors.join('\n'));
+    if (submissionErrors.length) fail(submissionErrors.join('\n'));
+    // 更新 brief_submission 快照
     record.brief_submission = createBriefSubmission(record);
     record.stage_outputs.product.valid = true;
-  }); break;
-  case 'confirm-brief': transition(['awaiting-brief-confirmation'], 'prototyping', record => {
+    record.status = 'in-development';
+    const changedErrors = validate(record, file);
+    if (changedErrors.length) fail(`submit-brief 后记录非法，未写入文件：\n${changedErrors.join('\n')}`);
+    save(file, record, 'submit-brief');
+    console.log(`简报已提交，状态：in-development`);
+    console.log(`范围哈希：${record.brief_submission.scope_sha256}`);
+    break;
+  }
+  case 'confirm-brief': transition(['in-development'], 'prototyping', record => {
     requireUserConfirmation(record, '--user-confirmed-brief', 'confirm-brief');
     record.brief_confirmation = createBriefConfirmation(record);
   }); break;
