@@ -74,6 +74,27 @@
   display: none;
 }
 
+/* 真实节点包裹层：用 display:contents 让内部节点直接提升到父级 flex 布局，
+   避免多包一层 div 破坏原有子选择器/flex（如 navbar 横排、tabs__scroll、search-toolbar） */
+.my-membership-card__real,
+.my-section-heading__real,
+.my-content-tabs__real,
+.my-content-toolbar__real,
+.my-content-management__real,
+.my-tab-identity__real,
+.my-tab-navbar__real {
+  display: contents;
+}
+.my-membership-card__real[hidden],
+.my-section-heading__real[hidden],
+.my-content-tabs__real[hidden],
+.my-content-toolbar__real[hidden],
+.my-content-management__real[hidden],
+.my-tab-identity__real[hidden],
+.my-tab-navbar__real[hidden] {
+  display: none;
+}
+
 .my-section-heading__skeleton {
   padding: var(--spacer-4) 0;
 }
