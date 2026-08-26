@@ -23,6 +23,15 @@ wego-app/scenes/{中文业务场景}/scene.css
 - 正式组件实例声明正确的 `data-component-slug`；守卫直接根据源码、组件索引、Preview 和契约验证实例，不要求额外 binding 或人工实例编号。
 - 交互触发器使用稳定且唯一的 `data-dom-id`，并在 `init` 或对应渲染逻辑中实际绑定。
 
+<!-- rule-id: scene-global-implementation-mode -->
+**全局实现模式**：当场景的模板与交互逻辑均由外部全局模块（如 `lib/js/*.js`）提供时，在 `scene.js` 开头声明 `wego-design-contract` 注释：
+
+```js
+/* wego-design-contract: { "implementation": "global" } */
+```
+
+此时 `scene.js` 仅做路由注册与 `init` 转发，守卫跳过依赖完整 `init` 字面逻辑的检查（页面根定位、交互绑定等）。普通内联实现场景不得声明此模式。
+
 <!-- rule-id: routes-subpage-no-entry -->
 只有宿主入口声明 `entry`；下钻页由 `presentation.type` 决定打开方式，不声明 `entry`。
 
