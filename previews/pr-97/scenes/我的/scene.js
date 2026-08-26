@@ -662,6 +662,16 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
       }
 
       function renderContent() {
+        var slow = window.WegoApp && window.WegoApp.faultInjection && window.WegoApp.faultInjection.isEnabled('slow');
+        if (slow) {
+          /* 模拟弱网：保持当前骨架/加载态，约 9s 后再渲染真实内容 */
+          window.setTimeout(function () { renderContentNow(); }, 9000);
+          return;
+        }
+        renderContentNow();
+      }
+
+      function renderContentNow() {
         destroyContentPopovers();
         var type = state.activeType;
         var view = type === 'live' ? 'grid' : state.viewByType[type];
