@@ -754,6 +754,232 @@
   }
 
   // ============================================================
+  // wego-wt-color-picker: 颜色选择器
+  // ============================================================
+  class WegoWtColorPicker extends HTMLElement {
+    constructor() {
+      super();
+      this._shadow = this.attachShadow({ mode: 'open' });
+      this._callback = null;
+      this._hex = '#000000';
+      this._opacity = 100;
+    }
+    connectedCallback() {
+      this._render();
+    }
+    open(triggerEl, hex, opacity, callback) {
+      this._hex = hex || '#000000';
+      this._opacity = opacity !== undefined ? opacity : 100;
+      this._callback = callback;
+      this._render();
+      // 定位到触发按钮下方
+      const rect = triggerEl.getBoundingClientRect();
+      const pickerWidth = 260;
+      let left = rect.left;
+      let top = rect.bottom + 6;
+      if (left + pickerWidth > window.innerWidth - 8) {
+        left = window.innerWidth - pickerWidth - 8;
+      }
+      if (left < 8) left = 8;
+      if (top + 300 > window.innerHeight - 8) {
+        top = rect.top - 300 - 6;
+      }
+      this.style.left = left + 'px';
+      this.style.top = top + 'px';
+      this.removeAttribute('hidden');
+      // 点击外部关闭
+      this._outsideHandler = (e) => {
+        if (!this.contains(e.target) && e.target !== triggerEl && !triggerEl.contains(e.target)) {
+          this.close();
+        }
+      };
+      setTimeout(() => document.addEventListener('mousedown', this._outsideHandler, true), 0);
+      setTimeout(() => document.addEventListener('touchstart', this._outsideHandler, true), 0);
+    }
+    close() {
+      this.setAttribute('hidden', '');
+      if (this._outsideHandler) {
+        document.removeEventListener('mousedown', this._outsideHandler, true);
+        document.removeEventListener('touchstart', this._outsideHandler, true);
+        this._outsideHandler = null;
+      }
+    }
+    _render() {
+      this._shadow.innerHTML = `
+        <style>
+          :host {
+            position: fixed;
+            z-index: 9700;
+            width: 260px;
+            display: none;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", sans-serif;
+          }
+          :host(:not([hidden])) { display: block; }
+          .picker {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color, rgba(0,0,0,0.08));
+            background: var(--bg-surface, #fff);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+          }
+          .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+          }
+          .title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-default, #1a1a1a);
+          }
+          .close-btn {
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: transparent;
+            color: var(--text-tertiary, #888);
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+          }
+          .color-input-wrap {
+            width: 100%;
+            height: 120px;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+          }
+          .color-input-wrap input[type="color"] {
+            width: 100%;
+            height: 100%;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            background: none;
+          }
+          .color-input-wrap input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+          .color-input-wrap input[type="color"]::-webkit-color-swatch { border: none; border-radius: 8px; }
+          .row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          }
+          .hex-input {
+            flex: 1;
+            height: 32px;
+            padding: 0 10px;
+            border: 1px solid var(--border-color, rgba(0,0,0,0.1));
+            border-radius: 7px;
+            font-size: 12px;
+            color: var(--text-default, #1a1a1a);
+            background: var(--bg-surface, #fff);
+            outline: none;
+            text-transform: uppercase;
+            box-sizing: border-box;
+          }
+          .hex-input:focus { border-color: var(--text-brand, #00b96b); }
+          .opacity-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+          }
+          .opacity-label {
+            font-size: 11px;
+            color: var(--text-tertiary, #888);
+            display: flex;
+            justify-content: space-between;
+          }
+          .opacity-slider {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            border-radius: 3px;
+            background: linear-gradient(to right, transparent, ${this._hex});
+            outline: none;
+            cursor: pointer;
+          }
+          .opacity-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #fff;
+            border: 2px solid var(--text-brand, #00b96b);
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+          }
+        </style>
+        <div class="picker">
+          <div class="header">
+            <span class="title">颜色</span>
+            <button class="close-btn" type="button" data-action="close">×</button>
+          </div>
+          <div class="color-input-wrap">
+            <input type="color" value="${this._hex}" data-color-input />
+          </div>
+          <div class="row">
+            <input class="hex-input" type="text" value="${this._hex}" data-hex-input maxlength="7" />
+          </div>
+          <div class="opacity-wrap">
+            <div class="opacity-label">
+              <span>不透明度</span>
+              <span data-opacity-value>${this._opacity}%</span>
+            </div>
+            <input class="opacity-slider" type="range" min="0" max="100" value="${this._opacity}" data-opacity-input />
+          </div>
+        </div>
+      `;
+      // 绑定事件
+      this._shadow.querySelector('[data-action="close"]').addEventListener('click', () => this.close());
+      this._shadow.querySelector('[data-color-input]').addEventListener('input', (e) => {
+        this._hex = e.target.value.toUpperCase();
+        this._shadow.querySelector('[data-hex-input]').value = this._hex;
+        this._updateOpacityBg();
+        this._emitChange();
+      });
+      this._shadow.querySelector('[data-hex-input]').addEventListener('change', (e) => {
+        let val = e.target.value.trim();
+        if (!val.startsWith('#')) val = '#' + val;
+        if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+          this._hex = val.toUpperCase();
+          this._shadow.querySelector('[data-color-input]').value = this._hex;
+          this._updateOpacityBg();
+          this._emitChange();
+        } else {
+          e.target.value = this._hex;
+        }
+      });
+      this._shadow.querySelector('[data-opacity-input]').addEventListener('input', (e) => {
+        this._opacity = parseInt(e.target.value);
+        this._shadow.querySelector('[data-opacity-value]').textContent = this._opacity + '%';
+        this._emitChange();
+      });
+      this._updateOpacityBg();
+    }
+    _updateOpacityBg() {
+      const slider = this._shadow.querySelector('[data-opacity-input]');
+      if (slider) {
+        slider.style.background = `linear-gradient(to right, transparent, ${this._hex})`;
+      }
+    }
+    _emitChange() {
+      if (this._callback) {
+        this._callback(this._hex, this._opacity);
+      }
+    }
+  }
+
+  // ============================================================
   // wego-wt-style-panel: 样式编辑浮动面板
   // ============================================================
   class WegoWtStylePanel extends HTMLElement {
@@ -1139,6 +1365,64 @@
               <div class="field"><span class="field-icon">⌐</span><input class="text-input" type="text" value="${d.borderRadiusAll || ''}" data-field="borderRadiusAll" inputmode="numeric" placeholder="圆角" /></div>
             </div>
           </div>
+
+          <!-- 填充 -->
+          <div class="section">
+            <p class="section-title">填充</p>
+            <div class="field-row">
+              <button class="color-button" type="button" data-field="fillHex" data-color-trigger>
+                <span class="swatch" style="background:${hexOpacityToRgba(d.fillHex || '#FFFFFF', d.fillOpacity ?? 0)}"></span>
+              </button>
+              <input class="text-input" type="text" value="${d.fillHex || ''}" data-field="fillHex" />
+              <input class="text-input opacity-input" type="text" value="${d.fillOpacity ?? 0}" data-field="fillOpacity" inputmode="numeric" />
+            </div>
+          </div>
+
+          <!-- 描边 -->
+          <div class="section">
+            <p class="section-title">描边</p>
+            <div class="field-row">
+              <button class="color-button" type="button" data-field="strokeHex" data-color-trigger>
+                <span class="swatch" style="background:${hexOpacityToRgba(d.strokeHex || '#000000', d.strokeOpacity ?? 0)}"></span>
+              </button>
+              <input class="text-input" type="text" value="${d.strokeHex || ''}" data-field="strokeHex" />
+              <input class="text-input opacity-input" type="text" value="${d.strokeOpacity ?? 0}" data-field="strokeOpacity" inputmode="numeric" />
+            </div>
+            <div class="field-row two-col">
+              <div class="field"><span class="field-icon">▢</span><input class="text-input" type="text" value="${d.strokeWidth || ''}" data-field="strokeWidth" inputmode="numeric" placeholder="宽度" /></div>
+              <div class="field">
+                <select class="text-input" data-field="strokePosition">
+                  <option value="outside" ${d.strokePosition === 'outside' ? 'selected' : ''}>外描边</option>
+                  <option value="inside" ${d.strokePosition === 'inside' ? 'selected' : ''}>内描边</option>
+                  <option value="center" ${d.strokePosition === 'center' ? 'selected' : ''}>居中</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- 投影 -->
+          <div class="section">
+            <p class="section-title">投影</p>
+            <div class="field-row">
+              <button class="color-button" type="button" data-field="shadowHex" data-color-trigger>
+                <span class="swatch" style="background:${hexOpacityToRgba(d.shadowHex || '#000000', d.shadowOpacity ?? 0)}"></span>
+              </button>
+              <input class="text-input" type="text" value="${d.shadowHex || ''}" data-field="shadowHex" />
+              <input class="text-input opacity-input" type="text" value="${d.shadowOpacity ?? 0}" data-field="shadowOpacity" inputmode="numeric" />
+            </div>
+            <div class="field-row two-col">
+              <div class="field"><span class="field-icon">X</span><input class="text-input" type="text" value="${d.shadowX || ''}" data-field="shadowX" inputmode="numeric" placeholder="X" /></div>
+              <div class="field"><span class="field-icon">Y</span><input class="text-input" type="text" value="${d.shadowY || ''}" data-field="shadowY" inputmode="numeric" placeholder="Y" /></div>
+            </div>
+            <div class="field-row two-col">
+              <div class="field"><span class="field-icon">B</span><input class="text-input" type="text" value="${d.shadowBlur || ''}" data-field="shadowBlur" inputmode="numeric" placeholder="模糊" /></div>
+              <div class="field"><span class="field-icon">S</span><input class="text-input" type="text" value="${d.shadowSpread || ''}" data-field="shadowSpread" inputmode="numeric" placeholder="扩散" /></div>
+            </div>
+            <div class="btn-group">
+              <button data-field="shadowInset" data-value="false" class="${!d.shadowInset ? 'active' : ''}">外阴影</button>
+              <button data-field="shadowInset" data-value="true" class="${d.shadowInset ? 'active' : ''}">内阴影</button>
+            </div>
+          </div>
         </div>
       `;
     }
@@ -1190,25 +1474,23 @@
           this._onFieldChange('alignItems', ai);
         });
       });
-      // 颜色按钮（M3 先用原生 input color，M4 替换为自定义颜色选择器）
+      // 颜色按钮 → 打开自定义颜色选择器
       this._shadow.querySelectorAll('[data-color-trigger]').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
           const field = btn.dataset.field;
-          const currentHex = this._data[field] || '#000000';
-          const input = document.createElement('input');
-          input.type = 'color';
-          input.value = currentHex;
-          input.style.position = 'fixed';
-          input.style.opacity = '0';
-          input.style.pointerEvents = 'none';
-          document.body.appendChild(input);
-          input.addEventListener('input', () => {
-            this._onFieldChange(field, input.value.toUpperCase());
+          const opacityField = field.replace('Hex', 'Opacity');
+          const hex = this._data[field] || '#000000';
+          const opacity = this._data[opacityField] ?? 100;
+          bus.emit('open-color-picker', {
+            trigger: btn,
+            hex,
+            opacity,
+            callback: (newHex, newOpacity) => {
+              this._onFieldChange(field, newHex);
+              this._onFieldChange(opacityField, String(newOpacity));
+            },
           });
-          input.addEventListener('change', () => {
-            document.body.removeChild(input);
-          });
-          input.click();
         });
       });
     }
@@ -1294,6 +1576,58 @@
         case 'borderRadiusAll':
           el.style.borderRadius = isNaN(numVal) ? '' : numVal + 'px';
           return { property: 'border-radius', oldValue: getComputedStyle(el).borderRadius, newValue: isNaN(numVal) ? '' : numVal + 'px' };
+        case 'fillHex':
+        case 'fillOpacity': {
+          const hex = this._data.fillHex || '#FFFFFF';
+          const opacity = this._data.fillOpacity ?? 0;
+          const rgba = opacity > 0 ? hexOpacityToRgba(hex, opacity) : 'transparent';
+          el.style.backgroundColor = rgba;
+          return { property: 'background-color', oldValue: getComputedStyle(el).backgroundColor, newValue: rgba };
+        }
+        case 'strokeHex':
+        case 'strokeOpacity':
+        case 'strokeWidth': {
+          const hex = this._data.strokeHex || '#000000';
+          const opacity = this._data.strokeOpacity ?? 0;
+          const width = parseFloat(this._data.strokeWidth) || 0;
+          const color = opacity > 0 && width > 0 ? hexOpacityToRgba(hex, opacity) : 'transparent';
+          el.style.borderWidth = width > 0 ? width + 'px' : '';
+          el.style.borderStyle = width > 0 ? 'solid' : '';
+          el.style.borderColor = color;
+          return { property: 'border', oldValue: getComputedStyle(el).border, newValue: width > 0 ? `${width}px solid ${color}` : '' };
+        }
+        case 'strokePosition':
+          // CSS 不直接支持内/外描边位置，MVP 用 outline 模拟内描边
+          if (value === 'inside') {
+            el.style.boxShadow = 'inset 0 0 0 ' + (parseFloat(this._data.strokeWidth) || 1) + 'px ' + hexOpacityToRgba(this._data.strokeHex || '#000000', this._data.strokeOpacity ?? 100);
+          } else {
+            el.style.boxShadow = '';
+          }
+          return { property: 'box-shadow', oldValue: getComputedStyle(el).boxShadow, newValue: value === 'inside' ? el.style.boxShadow : '' };
+        case 'shadowHex':
+        case 'shadowOpacity':
+        case 'shadowX':
+        case 'shadowY':
+        case 'shadowBlur':
+        case 'shadowSpread':
+        case 'shadowInset': {
+          const hex = this._data.shadowHex || '#000000';
+          const opacity = this._data.shadowOpacity ?? 0;
+          const x = parseFloat(this._data.shadowX) || 0;
+          const y = parseFloat(this._data.shadowY) || 0;
+          const blur = parseFloat(this._data.shadowBlur) || 0;
+          const spread = parseFloat(this._data.shadowSpread) || 0;
+          const inset = this._data.shadowInset === true || this._data.shadowInset === 'true';
+          if (opacity > 0 && (blur > 0 || x !== 0 || y !== 0 || spread !== 0)) {
+            const color = hexOpacityToRgba(hex, opacity);
+            const shadowStr = `${inset ? 'inset ' : ''}${x}px ${y}px ${blur}px ${spread}px ${color}`;
+            el.style.boxShadow = shadowStr;
+            return { property: 'box-shadow', oldValue: getComputedStyle(el).boxShadow, newValue: shadowStr };
+          } else {
+            el.style.boxShadow = 'none';
+            return { property: 'box-shadow', oldValue: getComputedStyle(el).boxShadow, newValue: 'none' };
+          }
+        }
         default:
           return null;
       }
@@ -1308,6 +1642,11 @@
       // text align
       this._shadow.querySelectorAll('[data-field="textAlign"]').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.value === d.textAlign);
+      });
+      // shadow inset
+      this._shadow.querySelectorAll('[data-field="shadowInset"]').forEach(btn => {
+        const isActive = (btn.dataset.value === 'true') === (d.shadowInset === true || d.shadowInset === 'true');
+        btn.classList.toggle('active', isActive);
       });
       // 颜色色块更新
       this._shadow.querySelectorAll('[data-color-trigger]').forEach(btn => {
@@ -1363,6 +1702,7 @@
         <wego-wt-banner hidden></wego-wt-banner>
         <wego-wt-overlay hidden></wego-wt-overlay>
         <wego-wt-style-panel hidden></wego-wt-style-panel>
+        <wego-wt-color-picker hidden></wego-wt-color-picker>
         <wego-wt-toast></wego-wt-toast>
         <wego-wt-bottom-bar hidden></wego-wt-bottom-bar>
         <wego-wt-fab></wego-wt-fab>
@@ -1373,6 +1713,7 @@
       this._components.banner = this._shadow.querySelector('wego-wt-banner');
       this._components.overlay = this._shadow.querySelector('wego-wt-overlay');
       this._components.stylePanel = this._shadow.querySelector('wego-wt-style-panel');
+      this._components.colorPicker = this._shadow.querySelector('wego-wt-color-picker');
       this._components.toast = this._shadow.querySelector('wego-wt-toast');
       this._components.bottomBar = this._shadow.querySelector('wego-wt-bottom-bar');
       this._components.fab = this._shadow.querySelector('wego-wt-fab');
@@ -1425,6 +1766,11 @@
       // 样式变更 → 记录
       bus.on('style-change', (change) => {
         this._recordChange(change);
+      });
+
+      // 打开颜色选择器
+      bus.on('open-color-picker', ({ trigger, hex, opacity, callback }) => {
+        this._components.colorPicker.open(trigger, hex, opacity, callback);
       });
     }
 
@@ -1649,6 +1995,7 @@
     if (!customElements.get('wego-wt-banner')) customElements.define('wego-wt-banner', WegoWtBanner);
     if (!customElements.get('wego-wt-overlay')) customElements.define('wego-wt-overlay', WegoWtOverlay);
     if (!customElements.get('wego-wt-style-panel')) customElements.define('wego-wt-style-panel', WegoWtStylePanel);
+    if (!customElements.get('wego-wt-color-picker')) customElements.define('wego-wt-color-picker', WegoWtColorPicker);
     if (!customElements.get('wego-wt-bottom-bar')) customElements.define('wego-wt-bottom-bar', WegoWtBottomBar);
     if (!customElements.get('wego-wt-fab')) customElements.define('wego-wt-fab', WegoWtFab);
     if (!customElements.get('wego-walkthrough')) customElements.define('wego-walkthrough', WegoWalkthrough);
