@@ -2269,12 +2269,17 @@
     restore();
 
     var CSS = ''
-      + '#wgf-root{position:fixed;right:12px;bottom:96px;z-index:9999;font-family:var(--body-md-font-family,sans-serif);-webkit-tap-highlight-color:transparent}'
-      + '#wgf-fab{display:flex;align-items:center;gap:6px;padding:10px 14px;border:0;border-radius:999px;background:var(--bg-surface,#fff);color:var(--text-default,#111);box-shadow:var(--shadow-md,0 4px 12px rgba(0,0,0,.12));font-size:var(--body-sm-font-size,13px);line-height:1;cursor:pointer}'
-      + '#wgf-fab .wgf-badge{width:6px;height:6px;border-radius:50%;background:var(--text-disabled,#bbb)}'
+      + '#wgf-root{position:fixed;left:12px;bottom:96px;z-index:9999;font-family:var(--body-md-font-family,sans-serif);-webkit-tap-highlight-color:transparent;touch-action:none;user-select:none;-webkit-user-select:none}'
+      + '#wgf-fab{position:relative;display:flex;align-items:center;justify-content:center;width:48px;height:48px;border:0;border-radius:50%;background:var(--bg-surface,#fff);color:var(--text-default,#111);box-shadow:var(--shadow-lg,0 8px 24px rgba(0,0,0,.15));cursor:grab;padding:0;transition:transform .1s}'
+      + '#wgf-fab:active{transform:scale(.96)}'
+      + '#wgf-fab.is-dragging{cursor:grabbing;transition:none;transform:scale(1.05)}'
+      + '#wgf-fab .wgf-icon{font-family:"wego-iconfont-s" !important;font-size:20px;line-height:1;font-style:normal;-webkit-font-smoothing:antialiased}'
+      + '#wgf-fab .wgf-badge{position:absolute;top:5px;right:5px;width:8px;height:8px;border-radius:50%;background:var(--text-disabled,#bbb);border:2px solid var(--bg-surface,#fff);box-sizing:content-box}'
       + '#wgf-fab.is-on .wgf-badge{background:#FA3B3B}'
-      + '.wgf-panel{position:absolute;right:0;bottom:calc(100% + 8px);width:176px;background:var(--bg-surface,#fff);border-radius:12px;box-shadow:var(--shadow-md,0 4px 12px rgba(0,0,0,.12));padding:8px;display:none}'
+      + '.wgf-panel{position:absolute;bottom:calc(100% + 8px);width:176px;background:var(--bg-surface,#fff);border-radius:12px;box-shadow:var(--shadow-md,0 4px 12px rgba(0,0,0,.12));padding:8px;display:none}'
       + '.wgf-panel.is-open{display:block}'
+      + '.wgf-panel--right{right:0}'
+      + '.wgf-panel--left{left:0}'
       + '.wgf-panel__title{font-size:12px;color:var(--text-tertiary,#999);padding:4px 8px 8px}'
       + '.wgf-toggle{display:flex;justify-content:space-between;align-items:center;width:100%;padding:9px 8px;border:0;border-radius:8px;background:transparent;font-size:13px;color:var(--text-default,#111);cursor:pointer}'
       + '.wgf-toggle:active{background:var(--bg-state-pressed,rgba(0,0,0,.05))}'
@@ -2282,6 +2287,10 @@
       + '.wgf-toggle .wgf-sw::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .15s}'
       + '.wgf-toggle.is-on .wgf-sw{background:var(--text-brand,#0a6cff)}'
       + '.wgf-toggle.is-on .wgf-sw::after{transform:translateX(14px)}'
+      + '.wgf-sep{height:1px;margin:6px 8px;background:var(--border-neutral-l1,rgba(0,0,0,.08))}'
+      + '.wgf-action{display:flex;justify-content:space-between;align-items:center;width:100%;padding:9px 8px;border:0;border-radius:8px;background:transparent;font-size:13px;color:var(--text-default,#111);cursor:pointer}'
+      + '.wgf-action:active{background:var(--bg-state-pressed,rgba(0,0,0,.05))}'
+      + '.wgf-action .wgf-arrow{color:var(--text-tertiary,#999);font-size:16px;line-height:1;margin-left:8px}'
       + '.wgf-hint{font-size:11px;color:var(--text-tertiary,#999);padding:8px 8px 4px;line-height:1.5}';
 
     var styleEl = document.createElement('style');
@@ -2290,20 +2299,20 @@
 
     var root = document.createElement('div');
     root.id = 'wgf-root';
-    root.setAttribute('aria-label', '失败注入开关');
+    root.setAttribute('aria-label', '走查');
 
     var fab = document.createElement('button');
     fab.type = 'button';
     fab.id = 'wgf-fab';
     fab.setAttribute('aria-haspopup', 'true');
-    fab.innerHTML = '<span class="wgf-badge"></span>失败注入';
+    fab.innerHTML = '<i class="wgf-icon icon-sousuo" aria-hidden="true"></i><span class="wgf-badge" aria-hidden="true"></span>';
     root.appendChild(fab);
 
     var panel = document.createElement('div');
     panel.className = 'wgf-panel';
     var title = document.createElement('div');
     title.className = 'wgf-panel__title';
-    title.textContent = '失败注入（试验）';
+    title.textContent = '走查';
     panel.appendChild(title);
 
     function refreshFab() {
@@ -2338,11 +2347,138 @@
     hint.textContent = '开关打开后执行对应操作即走失败分支，数据保持原状';
     panel.appendChild(hint);
 
-    fab.addEventListener('click', function () { panel.classList.toggle('is-open'); });
+    var sep = document.createElement('div');
+    sep.className = 'wgf-sep';
+    panel.appendChild(sep);
+
+    var sceneBtn = document.createElement('button');
+    sceneBtn.type = 'button';
+    sceneBtn.className = 'wgf-action';
+    sceneBtn.innerHTML = '<span>场景管理</span><span class="wgf-arrow" aria-hidden="true">›</span>';
+    sceneBtn.addEventListener('click', function () {
+      panel.classList.remove('is-open');
+      navigate('scene-manager');
+    });
+    panel.appendChild(sceneBtn);
+
+    var componentBtn = document.createElement('button');
+    componentBtn.type = 'button';
+    componentBtn.className = 'wgf-action';
+    componentBtn.innerHTML = '<span>查看组件</span><span class="wgf-arrow" aria-hidden="true">›</span>';
+    componentBtn.addEventListener('click', function () {
+      panel.classList.remove('is-open');
+      window.open('./.codex/skills/wego-design/preview/index.html', '_blank');
+    });
+    panel.appendChild(componentBtn);
+
     root.appendChild(panel);
     document.body.appendChild(root);
 
+    /* ── 拖拽与位置持久化 ── */
+    var POS_KEY = 'wego.wgf-position';
+    var DRAG_THRESHOLD = 5;
+    var drag = { active: false, moved: false, startX: 0, startY: 0, origX: 0, origY: 0 };
+
+    function savePos(x, y) {
+      try { window.localStorage.setItem(POS_KEY, JSON.stringify({ x: x, y: y })); } catch (e) {}
+    }
+    function readPos() {
+      try {
+        var raw = window.localStorage.getItem(POS_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) { return null; }
+    }
+    function clampPos(x, y) {
+      var w = root.offsetWidth || 48;
+      var h = root.offsetHeight || 48;
+      x = Math.max(0, Math.min(x, window.innerWidth - w));
+      y = Math.max(0, Math.min(y, window.innerHeight - h));
+      return { x: x, y: y };
+    }
+    function updatePanelSide() {
+      var rect = root.getBoundingClientRect();
+      var centerX = rect.left + rect.width / 2;
+      var onLeft = centerX < window.innerWidth / 2;
+      panel.classList.toggle('wgf-panel--left', onLeft);
+      panel.classList.toggle('wgf-panel--right', !onLeft);
+    }
+    function applyPos(x, y) {
+      root.style.left = x + 'px';
+      root.style.top = y + 'px';
+      root.style.right = 'auto';
+      root.style.bottom = 'auto';
+      updatePanelSide();
+    }
+
+    // 恢复上次位置
+    var saved = readPos();
+    if (saved && typeof saved.x === 'number' && typeof saved.y === 'number') {
+      var p = clampPos(saved.x, saved.y);
+      applyPos(p.x, p.y);
+    } else {
+      updatePanelSide();
+    }
+
+    // 窗口尺寸变化时重新约束
+    window.addEventListener('resize', function () {
+      var rect = root.getBoundingClientRect();
+      var c = clampPos(rect.left, rect.top);
+      if (c.x !== rect.left || c.y !== rect.top) applyPos(c.x, c.y);
+    });
+
+    fab.addEventListener('pointerdown', function (e) {
+      if (e.button !== undefined && e.button !== 0) return;
+      drag.active = true;
+      drag.moved = false;
+      drag.startX = e.clientX;
+      drag.startY = e.clientY;
+      var rect = root.getBoundingClientRect();
+      drag.origX = rect.left;
+      drag.origY = rect.top;
+      try { fab.setPointerCapture(e.pointerId); } catch (err) {}
+    });
+
+    fab.addEventListener('pointermove', function (e) {
+      if (!drag.active) return;
+      var dx = e.clientX - drag.startX;
+      var dy = e.clientY - drag.startY;
+      if (!drag.moved) {
+        if (Math.abs(dx) < DRAG_THRESHOLD && Math.abs(dy) < DRAG_THRESHOLD) return;
+        drag.moved = true;
+        fab.classList.add('is-dragging');
+        panel.classList.remove('is-open');
+      }
+      var c = clampPos(drag.origX + dx, drag.origY + dy);
+      applyPos(c.x, c.y);
+    });
+
+    function endDrag() {
+      if (!drag.active) return;
+      drag.active = false;
+      fab.classList.remove('is-dragging');
+      if (drag.moved) {
+        var rect = root.getBoundingClientRect();
+        savePos(rect.left, rect.top);
+      }
+    }
+    fab.addEventListener('pointerup', endDrag);
+    fab.addEventListener('pointercancel', endDrag);
+
+    // 点击与拖动区分：拖动后抑制 click
+    fab.addEventListener('click', function (e) {
+      if (drag.moved) {
+        e.preventDefault();
+        e.stopPropagation();
+        drag.moved = false;
+        return;
+      }
+      panel.classList.toggle('is-open');
+    }, true);
+
     document.addEventListener('touchstart', function (e) {
+      if (!e.target.closest || !e.target.closest('#wgf-root')) panel.classList.remove('is-open');
+    }, true);
+    document.addEventListener('click', function (e) {
       if (!e.target.closest || !e.target.closest('#wgf-root')) panel.classList.remove('is-open');
     }, true);
     refreshFab();

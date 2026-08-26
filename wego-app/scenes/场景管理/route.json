@@ -1,0 +1,9 @@
+{
+  "routeId": "scene-manager",
+  "entry": {
+    "type": "cell-entry",
+    "label": "场景管理",
+    "group": "workspace-tools",
+    "tab": "workspace"
+  }
+}
