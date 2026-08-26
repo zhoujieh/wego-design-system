@@ -268,7 +268,6 @@
     productEditReturnPanel: null,
     productCreateDraft: null,
     catalogCreateMenuOpen: false,
-    catalogCreateType: 'product',
     rowContextMenu: null,
     saveTimer: null
   };
@@ -1275,8 +1274,8 @@
     return ''
       + '<div class="popmenu popmenu--select order-catalog-create-menu" id="order-catalog-create-menu" data-component-slug="popmenu" role="listbox" aria-label="创建类型" data-placement="bottom" data-align="end" data-state="open">'
       +   '<div class="popmenu__list">'
-      +     '<button type="button" class="popmenu__item' + (state.catalogCreateType === 'product' ? ' popmenu__item--selected' : '') + '" role="option" aria-selected="' + (state.catalogCreateType === 'product') + '" data-create-product-type="product"><span class="popmenu__item-text">创建商品</span><i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check" aria-hidden="true"></i></button>'
-      +     '<button type="button" class="popmenu__item' + (state.catalogCreateType === 'temporary' ? ' popmenu__item--selected' : '') + '" role="option" aria-selected="' + (state.catalogCreateType === 'temporary') + '" data-create-product-type="temporary"><span class="popmenu__item-text">创建临时商品</span><i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check" aria-hidden="true"></i></button>'
+      +     '<button type="button" class="popmenu__item" role="option" aria-selected="false" data-create-product-type="product"><span class="popmenu__item-text">创建商品</span><i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check" aria-hidden="true"></i></button>'
+      +     '<button type="button" class="popmenu__item" role="option" aria-selected="false" data-create-product-type="temporary"><span class="popmenu__item-text">创建临时商品</span><i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check" aria-hidden="true"></i></button>'
       +   '</div>'
       + '</div>';
   }
@@ -2242,7 +2241,6 @@
   function beginProductCreate(type) {
     var temporary = type === 'temporary';
     state.catalogCreateMenuOpen = false;
-    state.catalogCreateType = temporary ? 'temporary' : 'product';
     state.productCreateDraft = {
       type: temporary ? 'temporary' : 'product',
       image: '',
