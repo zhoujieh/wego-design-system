@@ -338,6 +338,8 @@
       width: cs.width,        // 保留原始字符串：px / 100% / auto / fit-content
       height: cs.height,
       display,
+      position: cs.position,
+      zIndex: parseNumeric(cs.zIndex),
       // 字体
       fontSize: parseNumeric(cs.fontSize),
       fontWeight: cs.fontWeight,
@@ -621,12 +623,16 @@
   // ============================================================
   // wego-wt-highlight: 视口级固定高亮框（替代 outline，避免祖先 overflow 裁切）
   // ============================================================
+  // wego-wt-highlight: 视口级固定高亮框（替代 outline，避免祖先 overflow 裁切）
+  // 支持 hover（虚线预览）与 selected（实线+8手柄）双模式，对齐 Liaison 视觉
+  // ============================================================
   class WegoWtHighlight extends HTMLElement {
     constructor() {
       super();
       this._shadow = this.attachShadow({ mode: 'open' });
       this._targetEl = null;
       this._label = '';
+      this._mode = 'selected'; // 'hover' | 'selected'
       this._rafId = null;
     }
     connectedCallback() {
@@ -634,6 +640,10 @@
     }
     disconnectedCallback() {
       this._stopTracking();
+    }
+    setMode(mode) {
+      this._mode = mode === 'hover' ? 'hover' : 'selected';
+      this._applyMode();
     }
     showForElement(el, label) {
       this._targetEl = el;
@@ -662,6 +672,20 @@
         this._rafId = null;
       }
     }
+    _applyMode() {
+      const box = this._shadow.querySelector('.box');
+      const handles = this._shadow.querySelector('.handles');
+      const labelEl = this._shadow.querySelector('.label');
+      if (!box) return;
+      box.classList.toggle('box--hover', this._mode === 'hover');
+      box.classList.toggle('box--selected', this._mode === 'selected');
+      if (handles) handles.style.display = this._mode === 'selected' ? 'block' : 'none';
+      if (labelEl) {
+        labelEl.style.background = this._mode === 'hover'
+          ? 'var(--wt-hover-color)'
+          : 'var(--wt-selected-color)';
+      }
+    }
     _update() {
       if (!this._targetEl) return;
       const rect = this._targetEl.getBoundingClientRect();
@@ -671,13 +695,22 @@
       box.style.left = rect.left + 'px';
       box.style.width = Math.max(0, rect.width) + 'px';
       box.style.height = Math.max(0, rect.height) + 'px';
+
+      // 标签：固定在左上角，空间不足时嵌入框内顶部
       const tag = this._targetEl.tagName.toLowerCase();
       const w = Math.round(rect.width);
       const h = Math.round(rect.height);
       const labelEl = this._shadow.querySelector('.label');
       if (labelEl) {
-        labelEl.textContent = `${this._label ? this._label + '  ' : ''}${tag} · ${w}×${h}`;
-        labelEl.style.top = (rect.top >= 18 ? rect.top - 16 : rect.top) + 'px';
+        labelEl.textContent = this._mode === 'hover'
+          ? `${w}×${h}`
+          : `${this._label ? this._label + '  ' : ''}${tag} · ${w}×${h}`;
+        const labelH = 18;
+        if (rect.top >= labelH + 2) {
+          labelEl.style.top = (rect.top - labelH) + 'px';
+        } else {
+          labelEl.style.top = rect.top + 'px';
+        }
         labelEl.style.left = rect.left + 'px';
       }
       this.style.display = 'block';
@@ -691,20 +724,50 @@
             z-index: 9540;
             pointer-events: none;
             display: none;
+            --wt-hover-color: hsl(267, 100%, 58%);
+            --wt-selected-color: #ff00ff;
+          }
+          @supports (color: color(display-p3 1 0 1)) {
+            :host { --wt-selected-color: color(display-p3 1 0 1); }
           }
           .box {
             position: absolute;
-            border: 2px solid var(--text-brand, #00b96b);
-            border-radius: 2px;
             box-sizing: border-box;
+            border-radius: 2px;
+          }
+          .box--hover {
+            border: 1px dashed var(--wt-hover-color);
+          }
+          .box--selected {
+            border: 2px solid var(--wt-selected-color);
             box-shadow: 0 0 0 1px rgba(0,0,0,0.12);
           }
+          .handles {
+            position: absolute;
+            inset: 0;
+            display: none;
+          }
+          .handle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #fff;
+            border: 1px solid var(--wt-selected-color);
+            border-radius: 1px;
+            box-sizing: border-box;
+          }
+          .handle--tl { top: -4px; left: -4px; cursor: nwse-resize; }
+          .handle--tc { top: -4px; left: 50%; transform: translateX(-50%); cursor: ns-resize; }
+          .handle--tr { top: -4px; right: -4px; cursor: nesw-resize; }
+          .handle--mr { top: 50%; right: -4px; transform: translateY(-50%); cursor: ew-resize; }
+          .handle--br { bottom: -4px; right: -4px; cursor: nwse-resize; }
+          .handle--bc { bottom: -4px; left: 50%; transform: translateX(-50%); cursor: ns-resize; }
+          .handle--bl { bottom: -4px; left: -4px; cursor: nesw-resize; }
+          .handle--ml { top: 50%; left: -4px; transform: translateY(-50%); cursor: ew-resize; }
           .label {
             position: absolute;
-            transform: translateY(-100%);
             padding: 1px 6px;
             border-radius: 4px;
-            background: var(--text-brand, #00b96b);
             color: #fff;
             font-size: 11px;
             line-height: 16px;
@@ -712,9 +775,21 @@
             white-space: nowrap;
           }
         </style>
-        <div class="box"></div>
+        <div class="box box--selected">
+          <div class="handles">
+            <div class="handle handle--tl"></div>
+            <div class="handle handle--tc"></div>
+            <div class="handle handle--tr"></div>
+            <div class="handle handle--mr"></div>
+            <div class="handle handle--br"></div>
+            <div class="handle handle--bc"></div>
+            <div class="handle handle--bl"></div>
+            <div class="handle handle--ml"></div>
+          </div>
+        </div>
         <div class="label"></div>
       `;
+      this._applyMode();
     }
   }
 
@@ -1457,6 +1532,8 @@
     }
 
     _updatePosition() {
+      // 用户手动拖拽面板后锁定位置（_dragLocks 置位），不再跟随元素
+      if (this._dragLocks) return;
       if (!this._targetEl) return;
       const rect = this._targetEl.getBoundingClientRect();
       const panelWidth = 300;
@@ -1482,6 +1559,34 @@
       this.style.top = top + 'px';
     }
 
+    /** 面板拖拽：header 按住拖动（对齐 Liaison 浮动面板可拖拽） */
+    _initPanelDrag() {
+      this._dragLocks = false;
+      const header = this._shadow.querySelector('.header');
+      if (!header) return;
+      header.addEventListener('pointerdown', (e) => {
+        if (e.target.closest('button, select, input')) return;
+        e.preventDefault();
+        const startX = e.clientX, startY = e.clientY;
+        const origLeft = parseInt(this.style.left, 10) || 0;
+        const origTop = parseInt(this.style.top, 10) || 0;
+        const move = (ev) => {
+          const dx = ev.clientX - startX, dy = ev.clientY - startY;
+          this.style.left = Math.max(0, Math.min(origLeft + dx, window.innerWidth - 40)) + 'px';
+          this.style.top = Math.max(0, Math.min(origTop + dy, window.innerHeight - 40)) + 'px';
+        };
+        const up = () => {
+          this._dragLocks = true;
+          header.classList.remove('is-dragging');
+          window.removeEventListener('pointermove', move);
+          window.removeEventListener('pointerup', up);
+        };
+        header.classList.add('is-dragging');
+        window.addEventListener('pointermove', move);
+        window.addEventListener('pointerup', up);
+      });
+    }
+
     _render() {
       const d = this._data || {};
       const tag = this._targetEl ? this._targetEl.tagName.toLowerCase() : '';
@@ -1498,39 +1603,70 @@
             max-width: calc(100vw - 16px);
             display: none;
             font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", sans-serif;
+            /* Liaison 暗色主题：面板内所有 var(--bg-surface) / 文字变量自动变暗 */
+            --bg-surface: rgba(30, 30, 30, 0.78);
+            --bg-subtle: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-default: #fff;
+            --text-secondary: rgba(255, 255, 255, 0.6);
+            --text-tertiary: rgba(255, 255, 255, 0.42);
+            --text-disabled: rgba(255, 255, 255, 0.35);
+            --text-brand: #00b96b;
+            color: #fff;
+            backdrop-filter: blur(18px) saturate(140%);
+            -webkit-backdrop-filter: blur(18px) saturate(140%);
           }
           :host(:not([hidden])) { display: block; }
           .panel {
             box-sizing: border-box;
             width: 100%;
             max-height: 70vh;
-            padding: 14px;
+            padding: 16px;
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 20px;
             overflow-y: auto;
             overflow-x: hidden;
-            border-radius: 14px;
-            border: 1px solid var(--border-color, rgba(0,0,0,0.08));
-            background: var(--bg-surface, #fff);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+            border-radius: 16px;
+            border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+            background: var(--bg-surface, rgba(30, 30, 30, 0.78));
+            box-shadow: 0 20px 100px rgba(0, 0, 0, 0.12);
           }
           .panel::-webkit-scrollbar { width: 4px; }
-          .panel::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 2px; }
+          .panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
           .header {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 8px;
+            cursor: grab;
+            user-select: none;
+            -webkit-user-select: none;
+            padding: 2px 0;
+            border-radius: 8px;
+          }
+          .header.is-dragging {
+            cursor: grabbing;
           }
           .header-info {
             flex: 1;
             min-width: 0;
           }
           .header-tag {
-            font-size: 12px;
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            font-size: 13px;
             font-weight: 600;
-            color: var(--text-default, #1a1a1a);
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+          .header-selector {
+            font-size: 11px;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.45);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -1566,11 +1702,9 @@
           }
           .section-title {
             margin: 0;
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--text-tertiary, #888);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #fff;
           }
           .sub-label {
             margin: 10px 0 4px;
@@ -1612,15 +1746,26 @@
           }
           .field-row.two-col {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(2, minmax(0, 130px));
+            gap: 8px;
+          }
+          .field-row.three-col {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 6px;
           }
           .field {
+            box-sizing: border-box;
+            min-width: 0;
+            min-height: 32px;
             display: flex;
             align-items: center;
             gap: 4px;
             flex: 1;
-            min-width: 0;
+            padding: 4px 12px 4px 4px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid transparent;
           }
           .field-icon {
             width: 20px;
@@ -1629,28 +1774,33 @@
             align-items: center;
             justify-content: center;
             font-size: 11px;
-            color: var(--text-tertiary, #888);
+            color: var(--text-tertiary, rgba(255,255,255,0.6));
             flex-shrink: 0;
           }
           .text-input {
+            all: unset;
             flex: 1;
             min-width: 0;
-            height: 30px;
-            padding: 0 8px;
-            border: 1px solid var(--border-color, rgba(0,0,0,0.1));
-            border-radius: 7px;
+            min-height: 20px;
+            font-family: inherit;
             font-size: 12px;
-            color: var(--text-default, #1a1a1a);
-            background: var(--bg-surface, #fff);
-            outline: none;
+            line-height: 20px;
+            font-weight: 400;
+            color: #fff;
             box-sizing: border-box;
           }
+          .text-input::placeholder {
+            color: rgba(255, 255, 255, 0.35);
+          }
           .text-input:focus {
-            border-color: var(--text-brand, #00b96b);
+            outline: 1px solid var(--text-brand, #00b96b);
+            outline-offset: -1px;
+            border-radius: 4px;
           }
           .text-input.opacity-input {
             flex: 0 0 48px;
             width: 48px;
+            text-align: right;
           }
           .layout-tabs {
             display: flex;
@@ -1750,6 +1900,42 @@
             color: var(--text-brand, #00b96b);
             box-shadow: 0 1px 2px rgba(0,0,0,0.08);
           }
+          .field.metric-field {
+            padding: 0 4px 0 0;
+          }
+          .field-select-wrap {
+            position: relative;
+            flex: 0 0 auto;
+            min-width: 28px;
+            height: 20px;
+            margin-left: 4px;
+            display: inline-flex;
+            align-items: center;
+            align-self: center;
+          }
+          .field-select-trigger {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            font-size: 12px;
+            line-height: 12px;
+            color: rgba(255, 255, 255, 0.72);
+            pointer-events: none;
+          }
+          .field-select {
+            appearance: none;
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+          }
+          .field-select option {
+            color: #111;
+          }
           select.text-input {
             appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23999'/%3E%3C/svg%3E");
@@ -1759,9 +1945,9 @@
           }
         </style>
         <div class="panel">
-          <div class="header">
+          <div class="header" title="按住可拖动面板">
             <div class="header-info">
-              <div class="header-tag">${tag}${this._selector ? ' · ' + this._selector.substring(0, 30) : ''}</div>
+              <div class="header-tag">${tag || '—'}${this._selector ? `<span class="header-selector">${this._selector.substring(0, 40)}</span>` : ''}</div>
               ${text ? `<div class="header-text">${text}</div>` : ''}
             </div>
             <button class="close-btn" type="button" data-action="close">×</button>
@@ -1774,6 +1960,16 @@
             <button type="button" data-target="after" ${hasAfter ? '' : 'disabled'} class="${t === 'after' ? 'active' : ''}">::after</button>
           </div>
           ` : ''}
+
+          <!-- 定位 -->
+          <div class="section">
+            <p class="section-title">定位</p>
+            <div class="field-row three-col">
+              <div class="field"><span class="field-icon">◈</span><input class="text-input" type="text" value="${d.display || ''}" data-field="display" placeholder="display" /></div>
+              <div class="field"><span class="field-icon">◎</span><input class="text-input" type="text" value="${d.position || ''}" data-field="position" placeholder="position" /></div>
+              <div class="field"><span class="field-icon">Z</span><input class="text-input" type="text" value="${d.zIndex || ''}" data-field="zIndex" inputmode="numeric" placeholder="z" /></div>
+            </div>
+          </div>
 
           <!-- 自动布局 -->
           <div class="section">
@@ -1814,24 +2010,30 @@
               <div class="field"><span class="field-icon">B</span><input class="text-input" type="text" value="${d.marginBottom || ''}" data-field="marginBottom" inputmode="numeric" placeholder="下" /></div>
             </div>
             <div class="field-row two-col">
-              <div class="field"><span class="field-icon">W</span>
-                <select class="text-input size-mode" data-size-field="width" data-size-input="width">
-                  <option value="px" ${!isSemanticWidth(d.width) ? 'selected' : ''}>px</option>
-                  <option value="100%" ${d.width === '100%' ? 'selected' : ''}>100%</option>
-                  <option value="auto" ${d.width === 'auto' ? 'selected' : ''}>auto</option>
-                  <option value="fit-content" ${d.width === 'fit-content' ? 'selected' : ''}>fit-content</option>
-                </select>
-                <input class="text-input" type="text" value="${isSemanticWidth(d.width) ? '' : String(d.width || '').replace(/px$/i, '')}" data-field="width" inputmode="numeric" placeholder="宽" ${isSemanticWidth(d.width) ? 'disabled' : ''} />
-              </div>
-              <div class="field"><span class="field-icon">H</span>
-                <select class="text-input size-mode" data-size-field="height" data-size-input="height">
-                  <option value="px" ${!isSemanticHeight(d.height) ? 'selected' : ''}>px</option>
-                  <option value="100%" ${d.height === '100%' ? 'selected' : ''}>100%</option>
-                  <option value="auto" ${d.height === 'auto' ? 'selected' : ''}>auto</option>
-                  <option value="fit-content" ${d.height === 'fit-content' ? 'selected' : ''}>fit-content</option>
-                </select>
-                <input class="text-input" type="text" value="${isSemanticHeight(d.height) ? '' : String(d.height || '').replace(/px$/i, '')}" data-field="height" inputmode="numeric" placeholder="高" ${isSemanticHeight(d.height) ? 'disabled' : ''} />
-              </div>
+              <label class="field metric-field">
+                <span class="field-icon">W</span>
+                <input class="text-input" type="text" value="${d.width || ''}" data-field="width" inputmode="numeric" placeholder="—" />
+                <span class="field-select-wrap" title="宽度模式">
+                  <span class="field-select-trigger">${d.widthMode === 'auto' ? '适应' : (d.widthMode === 'fill' ? '填充' : '固定')}</span>
+                  <select class="field-select" data-field="widthMode">
+                    <option value="fixed" ${d.widthMode !== 'auto' && d.widthMode !== 'fill' ? 'selected' : ''}>固定宽度</option>
+                    <option value="auto" ${d.widthMode === 'auto' ? 'selected' : ''}>自适应宽度</option>
+                    <option value="fill" ${d.widthMode === 'fill' ? 'selected' : ''}>填充</option>
+                  </select>
+                </span>
+              </label>
+              <label class="field metric-field">
+                <span class="field-icon">H</span>
+                <input class="text-input" type="text" value="${d.height || ''}" data-field="height" inputmode="numeric" placeholder="—" />
+                <span class="field-select-wrap" title="高度模式">
+                  <span class="field-select-trigger">${d.heightMode === 'auto' ? '适应' : (d.heightMode === 'fill' ? '填充' : '固定')}</span>
+                  <select class="field-select" data-field="heightMode">
+                    <option value="fixed" ${d.heightMode !== 'auto' && d.heightMode !== 'fill' ? 'selected' : ''}>固定高度</option>
+                    <option value="auto" ${d.heightMode === 'auto' ? 'selected' : ''}>自适应高度</option>
+                    <option value="fill" ${d.heightMode === 'fill' ? 'selected' : ''}>填充</option>
+                  </select>
+                </span>
+              </label>
             </div>
           </div>
 
@@ -1957,6 +2159,8 @@
     }
 
     _bindEvents() {
+      // 面板拖拽（header 按住移动）
+      this._initPanelDrag();
       // 关闭按钮
       const closeBtn = this._shadow.querySelector('[data-action="close"]');
       if (closeBtn) {
@@ -1991,61 +2195,57 @@
           });
         }
       });
-      // 宽高模式下拉：px/100%/auto/fit-content，选语义值时禁用数值输入
-      this._shadow.querySelectorAll('.size-mode').forEach(sel => {
-        sel.addEventListener('change', () => {
-          const field = sel.dataset.sizeField;
-          const val = sel.value;
-          if (!field) return;
-          const input = this._shadow.querySelector(`[data-field="${field}"]`);
-          const isPx = val === 'px';
-          if (input) {
-            input.disabled = !isPx;
-            if (isPx) {
-              // 切回 px：保留现有数值，若当前是语义值则清空让用户重填，并暂存原语义值便于回退
-              if (isSemanticSize(input.value)) {
-                input.dataset.prevSemantic = input.value;
-                input.value = '';
-              }
-              input.focus();
-            } else {
-              input.value = val;
-              input.dataset.prevSemantic = '';
-              this._onFieldChange(field, val);
-            }
+      // Liaison 式宽高交互：数值输入（blur/Enter 自动回 fixed 模式 + commit）+ 模式 select（commit）
+      const sizeFields = ['width', 'height'];
+      sizeFields.forEach(field => {
+        const input = this._shadow.querySelector(`[data-field="${field}"]`);
+        if (!input) return;
+        input.addEventListener('input', () => {
+          input.value = input.value.replace(/[^\d]/g, '');
+        });
+        const commit = () => {
+          // 输入数值 ⇒ 自动回 fixed 模式（对齐 Liaison ensureFixedSizeMode）
+          const modeSel = this._shadow.querySelector(`[data-field="${field}Mode"]`);
+          if (modeSel && modeSel.value !== 'fixed') {
+            modeSel.value = 'fixed';
+            this._updateSizeModeTrigger(field);
+            this._onFieldChange(field + 'Mode', 'fixed');
+          }
+          this._onFieldChange(field, input.value || '');
+        };
+        input.addEventListener('blur', commit);
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') { commit(); input.blur(); }
+        });
+        // 数值上下步进（对齐 Liaison stepper）
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+            e.preventDefault();
+            const cur = parseInt(input.value, 10) || 0;
+            const next = e.key === 'ArrowUp' ? cur + 1 : cur - 1;
+            input.value = String(Math.max(0, next));
+            commit();
           }
         });
       });
-      // 宽高输入数值后，模式下拉回到 px（与输入保持联动）；空输入时回退原语义值
-      this._shadow.querySelectorAll('input[data-field="width"], input[data-field="height"]').forEach(input => {
-        input.addEventListener('change', () => {
-          const field = input.dataset.field;
-          const sel = this._shadow.querySelector(`.size-mode[data-size-field="${field}"]`);
-          if (!sel) return;
-          if (input.value.trim() === '') {
-            if (input.dataset.prevSemantic) {
-              sel.value = input.dataset.prevSemantic;
-              this._onFieldChange(field, input.dataset.prevSemantic);
-              input.value = input.dataset.prevSemantic;
-              input.disabled = true;
-            }
-          } else {
-            sel.value = 'px';
-          }
-        });
-        input.addEventListener('blur', () => {
-          const field = input.dataset.field;
-          const sel = this._shadow.querySelector(`.size-mode[data-size-field="${field}"]`);
-          if (!sel) return;
-          if (input.value.trim() === '') {
-            if (input.dataset.prevSemantic) {
-              sel.value = input.dataset.prevSemantic;
-              this._onFieldChange(field, input.dataset.prevSemantic);
-              input.value = input.dataset.prevSemantic;
-              input.disabled = true;
-            }
-          } else {
-            sel.value = 'px';
+      // 模式 select change：根据模式直接改 width/height 的 CSS 值（fixed=保留数值 / auto=auto / fill=100%）
+      this._shadow.querySelectorAll('[data-field="widthMode"], [data-field="heightMode"]').forEach(sel => {
+        sel.addEventListener('change', () => {
+          const modeField = sel.dataset.field; // widthMode / heightMode
+          const axis = modeField.replace(/Mode$/, ''); // width / height
+          this._updateSizeModeTrigger(axis);
+          const mode = sel.value;
+          const input = this._shadow.querySelector(`[data-field="${axis}"]`);
+          if (mode === 'auto') {
+            this._onFieldChange(axis, 'auto');
+            if (input) input.value = 'auto';
+          } else if (mode === 'fill') {
+            this._onFieldChange(axis, '100%');
+            if (input) input.value = '100%';
+          } else if (input) {
+            // fixed：若之前是 auto/100%，清空让用户重填数值
+            const cur = String(input.value || '').trim();
+            if (/^(auto|100%)$/.test(cur)) input.value = '';
           }
         });
       });
@@ -2139,6 +2339,9 @@
         marginLeft: 'margin-left',
         width: 'width',
         height: 'height',
+        display: 'display',
+        position: 'position',
+        zIndex: 'z-index',
         fontSize: 'font-size',
         fontWeight: 'font-weight',
         colorHex: 'color',
@@ -2454,9 +2657,34 @@
             return { property: 'box-shadow', oldValue, newValue: 'none' };
           }
         }
+        case 'display': {
+          const oldValue = cs().display;
+          el.style.display = value || '';
+          return { property: 'display', oldValue, newValue: value || '' };
+        }
+        case 'position': {
+          const oldValue = cs().position;
+          el.style.position = value || '';
+          return { property: 'position', oldValue, newValue: value || '' };
+        }
+        case 'zIndex': {
+          const oldValue = cs().zIndex;
+          const out = isNaN(numVal) ? '' : String(Math.round(numVal));
+          el.style.zIndex = out;
+          return { property: 'z-index', oldValue, newValue: out };
+        }
         default:
           return null;
       }
+    }
+
+    /** 更新宽高模式 trigger 文字（固定/适应/填充） */
+    _updateSizeModeTrigger(axis) {
+      const sel = this._shadow.querySelector(`[data-field="${axis}Mode"]`);
+      const trigger = this._shadow.querySelector(`[data-field="${axis}"] + .field-select-wrap .field-select-trigger`);
+      if (!sel || !trigger) return;
+      const v = sel.value;
+      trigger.textContent = v === 'auto' ? '适应' : (v === 'fill' ? '填充' : '固定');
     }
 
     _updateActiveStates() {
@@ -2547,6 +2775,8 @@
             overflow: visible;
             -webkit-tap-highlight-color: transparent;
             touch-action: none;
+            /* Liaison 暗色风格：面板容器保持暗色，但强调色沿用设计系统绿色 */
+            --text-brand: #00b96b;
             user-select: none;
             -webkit-user-select: none;
           }
@@ -3224,6 +3454,7 @@
       this._ptStartTime = 0;
       this._isSwiping = false;
       this._pointerActive = false;
+      this._hoveredElement = null;
       document.addEventListener('pointerdown', this._onPointerDown, true);
       document.addEventListener('pointermove', this._onPointerMove, true);
       document.addEventListener('pointerup', this._onPointerUp, true);
@@ -3244,6 +3475,7 @@
       if (e.button !== undefined && e.button !== 0) return; // 仅主键
       if (isWalkthroughElement(e.target)) return;          // 工具自身 UI 放行
       e.stopPropagation();                                 // 阻断页面元素监听器
+      this._clearHover();
       this._pointerActive = true;
       this._ptStartX = e.clientX;
       this._ptStartY = e.clientY;
@@ -3251,10 +3483,15 @@
       this._isSwiping = false;
     };
     _onPointerMove = (e) => {
-      if (!this._pointerActive) return;
-      const dx = Math.abs(e.clientX - this._ptStartX);
-      const dy = Math.abs(e.clientY - this._ptStartY);
-      if (dx > 10 || dy > 10) this._isSwiping = true;
+      if (this._pointerActive) {
+        const dx = Math.abs(e.clientX - this._ptStartX);
+        const dy = Math.abs(e.clientY - this._ptStartY);
+        if (dx > 10 || dy > 10) this._isSwiping = true;
+        return;
+      }
+      // 非点击/滑动过程中：hover 预览元素布局（仅在无选中元素时生效）
+      if (state.selectedElement) return;
+      this._updateHover(e.clientX, e.clientY);
     };
     _onPointerUp = (e) => {
       if (!this._pointerActive) return;
@@ -3271,6 +3508,29 @@
       }
     };
 
+    _updateHover(clientX, clientY) {
+      const el = document.elementFromPoint(clientX, clientY);
+      if (!el || el === document.body || el === document.documentElement || isWalkthroughElement(el)) {
+        this._clearHover();
+        return;
+      }
+      if (this._hoveredElement === el) return;
+      this._hoveredElement = el;
+      this._components.highlight.setMode('hover');
+      this._components.highlight.removeAttribute('hidden');
+      this._components.highlight.showForElement(el);
+    }
+
+    _clearHover() {
+      if (this._hoveredElement) {
+        this._hoveredElement = null;
+        if (!state.selectedElement && this._components.highlight) {
+          this._components.highlight.hide();
+          this._components.highlight.setAttribute('hidden', '');
+        }
+      }
+    }
+
     _handlePointSelection(clientX, clientY, event) {
       const el = document.elementFromPoint(clientX, clientY);
       if (!el) return;
@@ -3285,6 +3545,7 @@
     _selectElement(el) {
       this._clearSelection();
       state.selectedElement = el;
+      this._components.highlight.setMode('selected');
       this._components.highlight.removeAttribute('hidden');
       this._components.highlight.showForElement(el);
       const selector = generateSelector(el);
@@ -3305,6 +3566,7 @@
       if (state.selectedElement) {
         state.selectedElement = null;
       }
+      this._hoveredElement = null;
       if (this._components.highlight) {
         this._components.highlight.hide();
         this._components.highlight.setAttribute('hidden', '');
