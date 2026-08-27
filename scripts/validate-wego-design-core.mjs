@@ -255,17 +255,36 @@ function appRoutes() {
 }
 
 function sceneNameFromRoute(record) {
-  return record.scene || /^scenes\/([^/]+)\/scene\.js$/.exec(record.script || '')?.[1] || null;
+  return record.scene || /^scenes\/[^/]+\/([^/]+)\/scene\.js$/.exec(record.script || '')?.[1] || null;
+}
+
+// 场景名 → 分类目录相对路径（如 '开单' → 'bcg/开单'），通过扫描目录解析
+function resolveSceneRelPath(scene) {
+  const scenesRoot = path.join(appRoot, 'scenes');
+  if (!fs.existsSync(scenesRoot)) return null;
+  for (const category of fs.readdirSync(scenesRoot, { withFileTypes: true })) {
+    if (!category.isDirectory()) continue;
+    const candidate = path.join(scenesRoot, category.name, scene);
+    if (fs.existsSync(candidate)) return `${category.name}/${scene}`;
+  }
+  return null;
 }
 
 function sceneDirectories() {
   const scenesRoot = path.join(appRoot, 'scenes');
   if (!fs.existsSync(scenesRoot)) return [];
-  return fs.readdirSync(scenesRoot, { withFileTypes: true })
-    .filter(entry => entry.isDirectory() && !entry.name.startsWith('_'))
-    .map(entry => entry.name)
-    .filter(scene => ['scene.js', 'scene.css'].some(file => fs.existsSync(path.join(scenesRoot, scene, file))))
-    .sort();
+  const scenes = [];
+  for (const category of fs.readdirSync(scenesRoot, { withFileTypes: true })) {
+    if (!category.isDirectory() || category.name.startsWith('_')) continue;
+    const categoryRoot = path.join(scenesRoot, category.name);
+    for (const entry of fs.readdirSync(categoryRoot, { withFileTypes: true })) {
+      if (!entry.isDirectory() || entry.name.startsWith('_')) continue;
+      if (['scene.js', 'scene.css'].some(file => fs.existsSync(path.join(categoryRoot, entry.name, file)))) {
+        scenes.push(entry.name);
+      }
+    }
+  }
+  return scenes.sort();
 }
 
 function checkAppHost(requireSceneCoverage = false) {
@@ -293,14 +312,15 @@ function checkAppHost(requireSceneCoverage = false) {
   }
   if (requireSceneCoverage) {
     for (const scene of sceneDirectories()) {
-      if (!routedScenes.has(scene)) add('error', 'app.scene_unrouted', `场景 ${scene} 没有 routes.js 路由`, path.join(appRoot, 'scenes', scene));
+      const rel = resolveSceneRelPath(scene);
+      if (!routedScenes.has(scene)) add('error', 'app.scene_unrouted', `场景 ${scene} 没有 routes.js 路由`, rel ? path.join(appRoot, rel) : path.join(appRoot, 'scenes', scene));
     }
   }
   return [...routedScenes].sort();
 }
 
 function sceneFromChangedPath(file) {
-  const match = /^wego-app\/scenes\/([^/]+)\/(.+)$/.exec(file);
+  const match = /^wego-app\/scenes\/[^/]+\/([^/]+)\/(.+)$/.exec(file);
   if (!match || match[2].startsWith('_iterations/')) return null;
   return match[1];
 }
@@ -334,7 +354,9 @@ function validateScenes(scenes) {
   const staticAvailable = exists('scripts/validate-scene-contract.mjs');
   const targets = [...new Set(scenes)].sort();
   for (const scene of targets) {
-    const directory = path.join(appRoot, 'scenes', scene);
+    const rel = resolveSceneRelPath(scene);
+    if (!rel) continue;
+    const directory = path.join(appRoot, rel);
     if (!fs.existsSync(directory)) continue;
     const missing = ['scene.js', 'scene.css'].filter(file => !fs.existsSync(path.join(directory, file)));
     if (missing.length) {
@@ -361,7 +383,9 @@ function validateScenes(scenes) {
 function iterationFilesForScenes(scenes) {
   const records = [];
   for (const scene of scenes) {
-    const iterationsRoot = path.join(appRoot, 'scenes', scene, '_iterations');
+    const rel = resolveSceneRelPath(scene);
+    if (!rel) continue;
+    const iterationsRoot = path.join(appRoot, rel, '_iterations');
     if (!fs.existsSync(iterationsRoot)) continue;
     const visit = directory => {
       for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {

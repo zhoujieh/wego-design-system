@@ -1,0 +1,10 @@
+{
+  "routeId": "my",
+  "pattern": "composed",
+  "entry": {
+    "type": "host-tab",
+    "tab": "my"
+  },
+  "style": "scenes/shop/我的/scene.css",
+  "script": "scenes/shop/我的/scene.js"
+}

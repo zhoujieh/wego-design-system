@@ -53,8 +53,14 @@ if (!scene) fail(3, '缺少 --scene');
 if (agent !== path.basename(agent)) fail(3, '--agent 不得包含路径分隔符');
 
 // ---- 场景目录 ----
-const sceneDir = path.join(repoRoot, 'wego-app', 'scenes', scene);
-if (!fs.existsSync(sceneDir)) fail(1, `场景目录 wego-app/scenes/${scene} 不存在`);
+const categoryCodes = ['shop', 'bcg', 'customer', 'infras'];
+let sceneDir = null;
+const scenesRoot = path.join(repoRoot, 'wego-app', 'scenes');
+for (const category of categoryCodes) {
+  const candidate = path.join(scenesRoot, category, scene);
+  if (fs.existsSync(candidate)) { sceneDir = candidate; break; }
+}
+if (!sceneDir) fail(1, `场景目录 wego-app/scenes/{分类}/${scene} 不存在`);
 
 // ---- routeId ----
 const routeFile = path.join(sceneDir, 'route.json');
@@ -68,7 +74,7 @@ if (fs.existsSync(routeFile)) {
 }
 let routeId = routeIdArg;
 if (!routeId) {
-  if (!route) fail(1, `未提供 --route-id 且 wego-app/scenes/${scene}/route.json 不存在`);
+  if (!route) fail(1, `未提供 --route-id 且场景 route.json 不存在`);
   routeId = route.routeId;
 } else if (route && route.routeId !== routeId) {
   fail(1, `routeId "${routeId}" 与 route.json（routeId: ${route.routeId}）不一致`);

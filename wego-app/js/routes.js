@@ -7,8 +7,8 @@ window.WEGO_APP_ROUTES = [
     group: 'dongtai-tools',
     tab: 'dongtai'
   },
-  style: './scenes/帮卖分销/scene.css',
-  script: './scenes/帮卖分销/scene.js'
+  style: './scenes/bcg/帮卖分销/scene.css',
+  script: './scenes/bcg/帮卖分销/scene.js'
 },
 {
   routeId: 'album-product-feed',
@@ -16,8 +16,8 @@ window.WEGO_APP_ROUTES = [
     type: 'host-tab',
     tab: 'dongtai'
   },
-  style: './scenes/动态/scene.css',
-  script: './scenes/动态/scene.js'
+  style: './scenes/shop/动态/scene.css',
+  script: './scenes/shop/动态/scene.js'
 },
 {
   routeId: 'app-center',
@@ -28,8 +28,8 @@ window.WEGO_APP_ROUTES = [
     tab: 'workspace',
     icon: './lib/assets/icons/app-center/全部应用.svg'
   },
-  style: './scenes/应用中心/scene.css',
-  script: './scenes/应用中心/scene.js'
+  style: './scenes/infras/应用中心/scene.css',
+  script: './scenes/infras/应用中心/scene.js'
 },
 {
   routeId: 'component-preview',
@@ -39,8 +39,8 @@ window.WEGO_APP_ROUTES = [
     group: 'workspace-tools',
     tab: 'workspace'
   },
-  style: './scenes/组件预览/scene.css',
-  script: './scenes/组件预览/scene.js'
+  style: './scenes/infras/组件预览/scene.css',
+  script: './scenes/infras/组件预览/scene.js'
 },
 {
   routeId: 'friend-list',
@@ -48,8 +48,8 @@ window.WEGO_APP_ROUTES = [
     type: 'host-tab',
     tab: 'haoyou'
   },
-  style: './scenes/好友列表/scene.css',
-  script: './scenes/好友列表/scene.js'
+  style: './scenes/customer/好友列表/scene.css',
+  script: './scenes/customer/好友列表/scene.js'
 },
 {
   routeId: 'my',
@@ -57,8 +57,8 @@ window.WEGO_APP_ROUTES = [
     type: 'host-tab',
     tab: 'my'
   },
-  style: './scenes/我的/scene.css',
-  script: './scenes/我的/scene.js'
+  style: './scenes/shop/我的/scene.css',
+  script: './scenes/shop/我的/scene.js'
 },
 {
   routeId: 'publish-product',
@@ -68,8 +68,8 @@ window.WEGO_APP_ROUTES = [
     group: 'dongtai-tools',
     tab: 'dongtai'
   },
-  style: './scenes/发布产品/scene.css',
-  script: './scenes/发布产品/scene.js'
+  style: './scenes/shop/发布产品/scene.css',
+  script: './scenes/shop/发布产品/scene.js'
 },
 {
   routeId: 'scene-manager',
@@ -79,8 +79,8 @@ window.WEGO_APP_ROUTES = [
     group: 'workspace-tools',
     tab: 'workspace'
   },
-  style: './scenes/场景管理/scene.css',
-  script: './scenes/场景管理/scene.js'
+  style: './scenes/infras/场景管理/scene.css',
+  script: './scenes/infras/场景管理/scene.js'
 },
 {
   routeId: 'workspace',
@@ -88,8 +88,8 @@ window.WEGO_APP_ROUTES = [
     type: 'host-tab',
     tab: 'workspace'
   },
-  style: './scenes/工作台/scene.css',
-  script: './scenes/工作台/scene.js'
+  style: './scenes/infras/工作台/scene.css',
+  script: './scenes/infras/工作台/scene.js'
 },
 {
   routeId: 'workspace-order-create',
@@ -100,7 +100,7 @@ window.WEGO_APP_ROUTES = [
     tab: 'workspace',
     icon: './lib/assets/icons/app-center/销售单.svg'
   },
-  style: './scenes/开单/scene.css',
-  script: './scenes/开单/scene.js'
+  style: './scenes/bcg/开单/scene.css',
+  script: './scenes/bcg/开单/scene.js'
 }
 ];

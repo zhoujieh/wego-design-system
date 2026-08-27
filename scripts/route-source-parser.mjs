@@ -139,10 +139,10 @@ function parseRouteObject(source, index) {
   const script = normalizeRoutePath(staticMemberString(members, 'script', label, true));
   const style = normalizeRoutePath(staticMemberString(members, 'style', label, true));
   const scene = staticMemberString(members, 'scene', label, false);
-  const scriptScene = /^scenes\/([^/\\]+)\/scene\.js$/.exec(script)?.[1] || null;
-  const styleScene = /^scenes\/([^/\\]+)\/scene\.css$/.exec(style)?.[1] || null;
+  const scriptScene = /^scenes\/[^/\\]+\/([^/\\]+)\/scene\.js$/.exec(script)?.[1] || null;
+  const styleScene = /^scenes\/[^/\\]+\/([^/\\]+)\/scene\.css$/.exec(style)?.[1] || null;
   const safeSceneSegment = value => Boolean(value) && value === value.trim() && value !== '.' && value !== '..' && !value.includes('\0');
-  if (!safeSceneSegment(scriptScene) || !safeSceneSegment(styleScene) || scriptScene !== styleScene) throw new Error(`${label}.script/style 必须指向同一单层场景目录下的 scene.js 与 scene.css`);
+  if (!safeSceneSegment(scriptScene) || !safeSceneSegment(styleScene) || scriptScene !== styleScene) throw new Error(`${label}.script/style 必须指向同一分类下场景目录的 scene.js 与 scene.css`);
   if (scene && scene !== scriptScene) throw new Error(`${label}.scene 必须与 script/style 场景目录一致`);
   const entry = {};
   if (members.has('entry')) {

@@ -1,0 +1,13 @@
+{
+  "routeId": "workspace-order-create",
+  "pattern": "composed",
+  "entry": {
+    "type": "grid-entry",
+    "label": "收银开单",
+    "group": "workspace-tools",
+    "tab": "workspace",
+    "icon": "./lib/assets/icons/app-center/销售单.svg"
+  },
+  "style": "scenes/bcg/开单/scene.css",
+  "script": "scenes/bcg/开单/scene.js"
+}

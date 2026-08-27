@@ -53,6 +53,18 @@ const sceneCategoryMap = new Map([
   ['应用中心', 'infras']
 ]);
 const categoryCodes = ['shop', 'bcg', 'customer', 'infras'];
+
+// 从文件系统解析场景名 → 分类/场景名 相对路径；目录不存在时回退到 sceneCategoryMap
+function resolveSceneRelPath(scene, repositoryRoot = root) {
+  const scenesRoot = path.join(repositoryRoot, 'wego-app/scenes');
+  if (fs.existsSync(scenesRoot)) {
+    for (const category of categoryCodes) {
+      if (fs.existsSync(path.join(scenesRoot, category, scene))) return `${category}/${scene}`;
+    }
+  }
+  const mapped = sceneCategoryMap.get(scene);
+  return mapped ? `${mapped}/${scene}` : null;
+}
 // iteration_id 格式：{分类}{3位数字}[-{修订号}]，如 shop001、bcg003-2
 const iterationIdPattern = /^(shop|bcg|customer|infras)(\d{3,})(-\d+)?$/;
 const expectedStageValidity = new Map([
@@ -268,18 +280,19 @@ function iterationFilePathErrors(file, expectedScene = null, repositoryRoot = ro
   if (!isInsideDirectory(target, repository)) return [...errors, '--file 必须位于当前仓库内'];
   const relative = path.relative(repository, target);
   const segments = relative.split(path.sep);
-  const canonical = segments.length === 6
+  const canonical = segments.length === 7
     && segments[0] === 'wego-app'
     && segments[1] === 'scenes'
-    && isSafeSceneName(segments[2])
-    && segments[3] === '_iterations'
-    && isSafeSceneName(segments[4])
-    && segments[5] === 'iteration.json';
+    && categoryCodes.includes(segments[2])
+    && isSafeSceneName(segments[3])
+    && segments[4] === '_iterations'
+    && isSafeSceneName(segments[5])
+    && segments[6] === 'iteration.json';
   if (!canonical) {
-    errors.push('--file 必须固定为 wego-app/scenes/{主业务场景}/_iterations/{迭代目录}/iteration.json');
+    errors.push('--file 必须固定为 wego-app/scenes/{分类}/{主业务场景}/_iterations/{迭代目录}/iteration.json');
     return errors;
   }
-  if (expectedScene !== null && segments[2] !== expectedScene) errors.push(`--file 所属主业务场景必须与 identity.primary_scene 一致：${expectedScene}`);
+  if (expectedScene !== null && segments[3] !== expectedScene) errors.push(`--file 所属主业务场景必须与 identity.primary_scene 一致：${expectedScene}`);
   let existing = target;
   while (!fs.existsSync(existing) && path.dirname(existing) !== existing) existing = path.dirname(existing);
   try {
@@ -345,8 +358,10 @@ function stageOutputErrors(record, file) {
 function sceneRouteSemantic(scene, repositoryRoot) {
   const routesFile = path.join(repositoryRoot, routesRelativePath);
   if (!fs.existsSync(routesFile) || !fs.statSync(routesFile).isFile()) return { error: `${routesRelativePath} 不存在` };
-  const expectedScript = `scenes/${scene}/scene.js`;
-  const expectedStyle = `scenes/${scene}/scene.css`;
+  const relPath = resolveSceneRelPath(scene, repositoryRoot);
+  if (!relPath) return { error: `场景 ${scene} 不属于任何已知分类` };
+  const expectedScript = `scenes/${relPath}/scene.js`;
+  const expectedStyle = `scenes/${relPath}/scene.css`;
   let records;
   try { records = parseRouteRegistrySource(fs.readFileSync(routesFile, 'utf8')); }
   catch (error) { return { error: error.message }; }
@@ -361,7 +376,7 @@ function sceneRouteSemantic(scene, repositoryRoot) {
     return leftKey < rightKey ? -1 : leftKey > rightKey ? 1 : 0;
   }) };
 }
-function expectedFingerprintDescriptors(record) {
+function expectedFingerprintDescriptors(record, repositoryRoot = root) {
   const targets = [];
   if (Array.isArray(record.affected_runtime)) {
     targets.push(...record.affected_runtime
@@ -370,8 +385,10 @@ function expectedFingerprintDescriptors(record) {
   }
   if (Array.isArray(record.affected_scenes)) {
     for (const scene of record.affected_scenes.filter(isSafeSceneName)) {
+      const relPath = resolveSceneRelPath(scene, repositoryRoot);
+      const scenePath = relPath || scene;
       for (const file of ['scene.js', 'scene.css']) {
-        const relative = `wego-app/scenes/${scene}/${file}`;
+        const relative = `wego-app/scenes/${scenePath}/${file}`;
         targets.push({ key: relative, kind: 'file', relative });
       }
       targets.push({ key: `${routeFingerprintPrefix}${encodeURIComponent(scene)}`, kind: 'route', scene });
@@ -379,12 +396,12 @@ function expectedFingerprintDescriptors(record) {
   }
   return [...new Map(targets.map(target => [target.key, target])).values()].sort((left, right) => left.key.localeCompare(right.key));
 }
-function expectedFingerprintTargets(record) {
-  return expectedFingerprintDescriptors(record).map(target => target.key);
+function expectedFingerprintTargets(record, repositoryRoot = root) {
+  return expectedFingerprintDescriptors(record, repositoryRoot).map(target => target.key);
 }
-function fingerprintShapeErrors(fingerprints, record, prefix) {
+function fingerprintShapeErrors(fingerprints, record, prefix, repositoryRoot = root) {
   const errors = [];
-  const descriptors = expectedFingerprintDescriptors(record);
+  const descriptors = expectedFingerprintDescriptors(record, repositoryRoot);
   const expected = descriptors.map(target => target.key);
   if (!isPlainObject(fingerprints)) return [`${prefix}.fingerprints 必须为普通对象`];
   const actual = Object.keys(fingerprints).sort();
@@ -401,9 +418,9 @@ function fingerprintShapeErrors(fingerprints, record, prefix) {
   return errors;
 }
 function fingerprintErrors(fingerprints, record, prefix, repositoryRoot, driftLabel) {
-  const errors = fingerprintShapeErrors(fingerprints, record, prefix);
+  const errors = fingerprintShapeErrors(fingerprints, record, prefix, repositoryRoot);
   if (errors.length) return errors;
-  const descriptors = expectedFingerprintDescriptors(record);
+  const descriptors = expectedFingerprintDescriptors(record, repositoryRoot);
   for (const descriptor of descriptors) {
     const fingerprint = fingerprints[descriptor.key];
     if (descriptor.kind === 'route') {
@@ -511,7 +528,7 @@ function freezeErrors(record, file, repositoryRoot) {
     if (!isIsoTimestamp(record.freeze.at)) errors.push(`${file}: freeze.at 必须为 ISO 时间`);
     if (!Number.isInteger(record.freeze.design_system_version) || record.freeze.design_system_version < 1) errors.push(`${file}: freeze.design_system_version 必须为正整数`);
     if (record.freeze.scope_revision !== record.scope_revision) errors.push(`${file}: freeze.scope_revision 必须等于当前 scope_revision`);
-    errors.push(...fingerprintShapeErrors(record.freeze.fingerprints, record, `${file}: freeze`));
+    errors.push(...fingerprintShapeErrors(record.freeze.fingerprints, record, `${file}: freeze`, repositoryRoot));
   }
   const freezeFile = path.join(path.dirname(file), 'freeze.json');
   if (!fs.existsSync(freezeFile)) errors.push(`${file}: frozen 状态要求同目录 freeze.json`);
@@ -721,8 +738,14 @@ function generateBriefTemplate(record) {
 `;
 }
 
-// 根据场景名判断分类代码，匹配不到时默认 infras
+// 根据场景名判断分类代码：优先从目录结构解析，回退到映射表，最后默认 infras
 function classifyScene(scene) {
+  const scenesRoot = path.join(root, 'wego-app/scenes');
+  if (fs.existsSync(scenesRoot)) {
+    for (const category of categoryCodes) {
+      if (fs.existsSync(path.join(scenesRoot, category, scene))) return category;
+    }
+  }
   return sceneCategoryMap.get(scene) || 'infras';
 }
 
@@ -887,14 +910,16 @@ function briefSufficiencyErrors(brief) {
 function validatePrototypeScenes(record) {
   if (!Array.isArray(record.affected_scenes) || !record.affected_scenes.length) fail('submit-prototype 要求 affected_scenes 为非空数组');
   for (const scene of record.affected_scenes) {
-    const sceneDirectory = `wego-app/scenes/${scene}`;
+    const relPath = resolveSceneRelPath(scene);
+    if (!relPath) fail(`场景 ${scene} 不属于任何已知分类`);
+    const sceneDirectory = `wego-app/scenes/${relPath}`;
     const result = spawnSync(process.execPath, ['scripts/validate-scene-contract.mjs', sceneDirectory, '--json'], { cwd: root, encoding: 'utf8' });
     if (result.status !== 0) fail(`${sceneDirectory} 未通过场景验证：${(result.stderr || result.stdout || '未知错误').trim()}`);
   }
 }
 function collectFingerprints(record, repositoryRoot = root) {
   const fingerprints = {};
-  for (const descriptor of expectedFingerprintDescriptors(record)) {
+  for (const descriptor of expectedFingerprintDescriptors(record, repositoryRoot)) {
     if (descriptor.kind === 'route') {
       const semantic = sceneRouteSemantic(descriptor.scene, repositoryRoot);
       if (semantic.error) fail(`无法生成路由指纹：${semantic.error}`);
@@ -1117,8 +1142,8 @@ function test() {
   const frozenForInvalidation = clone(prototyping);
   frozenForInvalidation.status = 'frozen';
   frozenForInvalidation.stage_outputs.design.valid = true;
-  frozenForInvalidation.prototype_submission = { at: new Date().toISOString(), scope_revision: 1, affected_scenes: ['测试场景'], fingerprints: { 'wego-app/scenes/测试场景/scene.js': 'abc' } };
-  frozenForInvalidation.prototype_confirmation = { at: new Date().toISOString(), scope_revision: 1, affected_scenes: ['测试场景'], fingerprints: { 'wego-app/scenes/测试场景/scene.js': 'abc' } };
+  frozenForInvalidation.prototype_submission = { at: new Date().toISOString(), scope_revision: 1, affected_scenes: ['测试场景'], fingerprints: { 'wego-app/scenes/infras/测试场景/scene.js': 'abc' } };
+  frozenForInvalidation.prototype_confirmation = { at: new Date().toISOString(), scope_revision: 1, affected_scenes: ['测试场景'], fingerprints: { 'wego-app/scenes/infras/测试场景/scene.js': 'abc' } };
   frozenForInvalidation.freeze = { at: new Date().toISOString(), design_system_version: 1, scope_revision: 1, fingerprints: {} };
   applyInvalidation(frozenForInvalidation, 'prototype');
   assert(frozenForInvalidation.status === 'prototyping' && frozenForInvalidation.scope_revision === 1 && frozenForInvalidation.prototype_submission === null && frozenForInvalidation.prototype_confirmation === null && frozenForInvalidation.freeze === null && !validate(frozenForInvalidation, 'sample').length, 'prototype 失效必须从 frozen 回到 prototyping 并清除提交、确认和冻结快照');
@@ -1164,19 +1189,19 @@ function test() {
   const fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'wego-iteration-record-'));
   try {
     const scene = '测试场景';
-    const sceneRoot = path.join(fixtureRoot, 'wego-app/scenes', scene);
+    const sceneRoot = path.join(fixtureRoot, 'wego-app/scenes/infras', scene);
     fs.mkdirSync(sceneRoot, { recursive: true });
     fs.mkdirSync(path.join(fixtureRoot, 'wego-app/js'), { recursive: true });
     fs.mkdirSync(path.join(fixtureRoot, '.codex/skills/wego-design'), { recursive: true });
     fs.mkdirSync(path.join(fixtureRoot, 'scripts'), { recursive: true });
     fs.writeFileSync(path.join(sceneRoot, 'scene.js'), 'window.testScene = true;\n');
     fs.writeFileSync(path.join(sceneRoot, 'scene.css'), '.test { color: var(--color-text); }\n');
-    const currentRoute = `{ routeId: 'test-route', scene: '${scene}', entry: { type: 'host-tab', tab: 'my', label: '测试' }, script: 'scenes/${scene}/scene.js', style: 'scenes/${scene}/scene.css' }`;
-    const detailRoute = `{ routeId: 'test-route-detail', scene: '${scene}', script: './scenes/${scene}/scene.js', style: './scenes/${scene}/scene.css' }`;
-    const unrelatedRoute = "{ routeId: 'other-route', script: 'scenes/其他场景/scene.js', style: 'scenes/其他场景/scene.css' }";
-    const duplicateRouteId = "{ routeId: 'test-route', scene: '其他场景', script: 'scenes/其他场景/scene.js', style: 'scenes/其他场景/scene.css' }";
-    const duplicateHostTab = "{ routeId: 'other-host-tab', scene: '其他场景', entry: { type: 'host-tab', tab: 'my' }, script: 'scenes/其他场景/scene.js', style: 'scenes/其他场景/scene.css' }";
-    const missingHostTab = "{ routeId: 'missing-host-tab', scene: '其他场景', entry: { type: 'host-tab' }, script: 'scenes/其他场景/scene.js', style: 'scenes/其他场景/scene.css' }";
+    const currentRoute = `{ routeId: 'test-route', scene: '${scene}', entry: { type: 'host-tab', tab: 'my', label: '测试' }, script: 'scenes/infras/${scene}/scene.js', style: 'scenes/infras/${scene}/scene.css' }`;
+    const detailRoute = `{ routeId: 'test-route-detail', scene: '${scene}', script: './scenes/infras/${scene}/scene.js', style: './scenes/infras/${scene}/scene.css' }`;
+    const unrelatedRoute = "{ routeId: 'other-route', script: 'scenes/shop/其他场景/scene.js', style: 'scenes/shop/其他场景/scene.css' }";
+    const duplicateRouteId = "{ routeId: 'test-route', scene: '其他场景', script: 'scenes/shop/其他场景/scene.js', style: 'scenes/shop/其他场景/scene.css' }";
+    const duplicateHostTab = "{ routeId: 'other-host-tab', scene: '其他场景', entry: { type: 'host-tab', tab: 'my' }, script: 'scenes/shop/其他场景/scene.js', style: 'scenes/shop/其他场景/scene.css' }";
+    const missingHostTab = "{ routeId: 'missing-host-tab', scene: '其他场景', entry: { type: 'host-tab' }, script: 'scenes/shop/其他场景/scene.js', style: 'scenes/shop/其他场景/scene.css' }";
     const routesFile = path.join(fixtureRoot, routesRelativePath);
     fs.writeFileSync(routesFile, `window.WEGO_APP_ROUTES = [${currentRoute}, ${detailRoute}];\n`);
     fs.writeFileSync(path.join(fixtureRoot, '.codex/skills/wego-design/metadata.json'), '{"version":411}\n');
@@ -1194,7 +1219,7 @@ function test() {
     assert(!fs.existsSync(outsideIteration), '非法 init 不得在标准目录外写入文件');
     const traversalInit = run(['init', '--file', '../wego-escape/iteration.json', '--iteration-id', 'traversal', '--title', '穿越', '--scene', scene]);
     assert(traversalInit.status !== 0 && (traversalInit.stderr || '').includes('..'), 'init 未拦截含 .. 的仓库逃逸路径');
-    const mismatchedArgument = 'wego-app/scenes/其他场景/_iterations/20260715-test-测试/iteration.json';
+    const mismatchedArgument = 'wego-app/scenes/shop/其他场景/_iterations/20260715-test-测试/iteration.json';
     const mismatchedIteration = path.join(fixtureRoot, mismatchedArgument);
     const mismatchedInit = run(['init', '--file', mismatchedArgument, '--iteration-id', 'mismatch', '--title', '错位', '--scene', scene]);
     assert(mismatchedInit.status !== 0 && (mismatchedInit.stderr || '').includes('identity.primary_scene'), 'init 未拦截 --file 与主业务场景错位');
@@ -1202,8 +1227,9 @@ function test() {
     const linkedScene = '链接场景';
     const linkedTarget = path.join(fixtureRoot, 'linked-scene-target');
     fs.mkdirSync(linkedTarget, { recursive: true });
-    fs.symlinkSync(linkedTarget, path.join(fixtureRoot, 'wego-app/scenes', linkedScene));
-    const linkedArgument = `wego-app/scenes/${linkedScene}/_iterations/20260715-link-链接/iteration.json`;
+    fs.mkdirSync(path.join(fixtureRoot, 'wego-app/scenes/infras'), { recursive: true });
+    fs.symlinkSync(linkedTarget, path.join(fixtureRoot, 'wego-app/scenes/infras', linkedScene));
+    const linkedArgument = `wego-app/scenes/infras/${linkedScene}/_iterations/20260715-link-链接/iteration.json`;
     const linkedInit = run(['init', '--file', linkedArgument, '--iteration-id', 'link', '--title', '链接', '--scene', linkedScene]);
     assert(linkedInit.status !== 0 && (linkedInit.stderr || '').includes('符号链接'), 'init 未拦截符号链接迭代路径');
 
@@ -1289,7 +1315,7 @@ function test() {
     assert(fs.existsSync(freezeFile), 'submit-prototype 应生成 freeze.json');
     assert(!validate(submittedPrototype, iterationFile, fixtureRoot).length, '合法 frozen 记录未通过复验');
     assert(Object.keys(submittedPrototype.freeze).sort().join(',') === 'at,design_system_version,fingerprints,scope_revision', 'freeze 对象字段不完整');
-    assert(Object.keys(submittedPrototype.freeze.fingerprints).length === expectedFingerprintTargets(submittedPrototype).length, 'freeze fingerprints 未覆盖全部预期目标');
+    assert(Object.keys(submittedPrototype.freeze.fingerprints).length === expectedFingerprintTargets(submittedPrototype, fixtureRoot).length, 'freeze fingerprints 未覆盖全部预期目标');
     assert(!Object.hasOwn(submittedPrototype.freeze.fingerprints, routesRelativePath), 'affected_runtime 中的 routes.js 不得退回整文件指纹');
     assert(Object.keys(submittedPrototype.freeze.fingerprints).some(key => key.startsWith(routeFingerprintPrefix)), 'freeze 缺少场景路由语义指纹');
 

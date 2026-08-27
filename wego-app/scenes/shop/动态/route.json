@@ -1,0 +1,10 @@
+{
+  "routeId": "album-product-feed",
+  "pattern": "composed",
+  "entry": {
+    "type": "host-tab",
+    "tab": "dongtai"
+  },
+  "style": "scenes/shop/动态/scene.css",
+  "script": "scenes/shop/动态/scene.js"
+}
