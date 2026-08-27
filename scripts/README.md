@@ -9,7 +9,7 @@
 | `validate-wego-design.mjs` | 仓库统一验证；默认 `changed`，支持 `--scope=changed|system|full` 和 `--strict` |
 | `validate-scene-contract.mjs` | 从源码验证单个场景的路由、组件、Token、交互和布局硬约束；含 `layout-page` 唯一、`layout-scroll` 唯一（modal/overlay 内部豁免）、`position:absolute` 兼容 `layout-page` 等 Layout 守卫 |
 | `validate-scene-runtime.mjs` | 用 Playwright 检查场景 375/393 运行结果；当前验证流程默认不调用，保留脚本备用 |
-| `iteration-record.mjs` | 创建、提交、确认、失效、冻结或检查业务迭代；`prototyping` 承载本地迭代，用户验收通过后连续执行 `submit-prototype` 与 `confirm-prototype` |
+| `iteration-record.mjs` | 创建、提交、确认、失效、冻结或检查业务迭代；`prototyping` 承载本地迭代，用户验收通过后执行 `submit-prototype` 一步完成确认与冻结 |
 | `resolve-delivery-unit.mjs` | 开工前从全部 worktree 核对场景认领、未冻结迭代和可选开放 PR；单一候选即接手，允许本地迭代阶段尚未创建 PR |
 | `validate-component-contract-parity.mjs` | 验证组件契约、Preview、索引与生成 CSS 一致性 |
 | `sync-wego-app-lib.mjs` | 设计系统源变化后同步部署副本 |

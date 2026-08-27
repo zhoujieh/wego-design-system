@@ -25,11 +25,11 @@ const testing = args.includes('test');
 const devMode = args.includes('--dev');
 const scenes = args.filter(arg => !arg.startsWith('--'));
 
-// 简报已确认 = 进入 prototyping 及之后状态;对应 iteration-record.mjs 的确认矩阵。
+// 简报已确认 = 进入 prototyping 状态（frozen 为历史快照，不绑定当前场景）;对应 iteration-record.mjs 的确认矩阵。
 // --dev 开发模式下允许 in-development（简报已提交但未确认，开发中可修改）。
 const confirmedBriefStatuses = new Set(devMode
-  ? ['in-development', 'prototyping', 'awaiting-prototype-confirmation', 'prototype-confirmed']
-  : ['prototyping', 'awaiting-prototype-confirmation', 'prototype-confirmed']
+  ? ['in-development', 'prototyping']
+  : ['prototyping']
 );
 
 const scenesRoot = path.join(root, 'wego-app/scenes');

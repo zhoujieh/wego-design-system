@@ -1,6 +1,6 @@
 ---
 name: "wego-product"
-description: 创建或变更业务迭代；以 spec.md 为唯一需求源形成并确认简报，最终产出可被场景技能直接消费的已确认迭代，不处理设计系统或场景实现。
+description: 创建或变更业务迭代；以需求规格说明为唯一需求源形成并确认简报，最终产出可被场景技能直接消费的已确认迭代，不处理设计系统或场景实现。
 ---
 
 # Wego Product
@@ -15,20 +15,20 @@ description: 创建或变更业务迭代；以 spec.md 为唯一需求源形成�
 
 ## 输出与交接
 
-需求阶段唯一产出是 `spec.md`（需求规格说明），按[简报模板](./references/brief-template.md)填写。`spec.md` 写好后通过 `submit-brief` 自动解析并校验，进入 `in-development` 状态。
+需求阶段唯一产出是需求规格说明（文件名为 `{iteration_id}-{title}-{YYYYMMDD}.md`），按[简报模板](./references/brief-template.md)填写。写好后通过 `submit-brief` 自动解析并校验，进入 `in-development` 状态。
 
-**简报开放开发**：`in-development` 期间可随时修改 `spec.md`，修改后重新 `submit-brief` 即可更新快照，无需 invalidate/confirm。
+**简报开放开发**：`in-development` 期间可随时修改需求规格说明，修改后重新 `submit-brief` 即可更新快照，无需 invalidate/confirm。
 
-**验收统一收口**：用户说"验收完成"时，由 `wego-design` 输出 5 维度一致性校验清单（范围/入口/关键路径/状态/数据契约），用户逐项确认后执行 `confirm-brief --user-confirmed-brief <iteration_id>`，进入 `prototyping`。
+**验收统一收口**：用户说"验收完成"时，由 `wego-design` 输出 5 维度一致性校验清单（范围/入口/关键路径/状态/数据契约），用户逐项确认后执行 `confirm-brief --user-confirmed-brief <iteration_id>`，进入 `prototyping`；随后由 `wego-design` 执行 `submit-prototype --user-confirmed-prototype <iteration_id>` 一步完成确认与冻结，进入 `frozen`。
 
-反馈改变已确认业务事实时，在原迭代中失效、更新 spec.md、重新提交并确认，不静默修改范围。
+反馈改变已确认业务事实时，在原迭代中失效、更新需求规格说明、重新提交并确认，不静默修改范围。
 
 <!-- rule-id: brief-sufficiency-mandatory -->
 简报必须写"足够细"：`states` 覆盖加载态、失败态、空状态并写明「进入条件 → 可感知结果」；数据必须有产生入口且禁止静态种子降级；关键路径首尾闭环。具体清单见 [边界方法](./references/scope-and-boundaries.md) 的「需求简报输出要求」，`submit-brief` 会据此守门拒绝不合规简报。
 
 ## 迭代命名规则
 
-迭代 ID 格式：`{分类}{3位数字}`，按分类内递增。
+迭代 ID 格式：`{分类}{3位数字}[-{修订号}]`，按分类内递增；修订号后缀如 `-1`、`-2` 用于同迭代的重大修订。
 
 | 分类代码 | 业务域 |
 |---------|--------|
@@ -37,7 +37,7 @@ description: 创建或变更业务迭代；以 spec.md 为唯一需求源形成�
 | `customer` | 客户云 |
 | `infras` | 基础 |
 
-目录名和 spec.md 文件名统一为：`{iteration_id}-{title}-{YYYYMMDD}`
+目录名和需求规格说明文件名统一为：`{iteration_id}-{title}-{YYYYMMDD}`
 
 示例：`shop001-发布优化-20260212`
 
