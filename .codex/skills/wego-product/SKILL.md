@@ -44,10 +44,7 @@ description: 创建或变更业务迭代；以需求规格说明为唯一需求�
 ## 执行约束
 
 <!-- rule-id: product-must-require-delivery-intake -->
-- 创建、查看或更新业务迭代前，必须先完成 `wego-github-delivery` 的交付单元核对。命中现有交付单元时，先接手对应分支、worktree 和 PR；已确认范围内的验收反馈不得新建简报，按原迭代的失效与重新提交规则处理。
+- 创建、查看或更新业务迭代前，必须先完成 `wego-github-delivery` 的交付单元核对（具体执行见 `wego-github-delivery/references/task-intake.md` 启动清单）。命中现有交付单元时，先接手对应分支、worktree 和 PR；已确认范围内的验收反馈不得新建简报，按原迭代的失效与重新提交规则处理。
 
 <!-- rule-id: confirm-brief-must-wait-affirmation -->
 - `confirm-brief` 只能在用户明确表达"验收完成"且 5 维度一致性校验清单逐项确认后执行，必须带当前迭代 ID 作为明确授权参数。
-
-<!-- rule-id: agent-must-pull-before-task-start -->
-- 新会话/新任务开场先执行 `git pull --rebase origin main` 同步最新 `main`，再进入需求确认或迭代查看（交付细节见 `wego-github-delivery`）。

@@ -40,6 +40,9 @@
 
 - 禁止直接提交 `main`，所有任务默认使用独立分支。
 
+<!-- rule-id: task-intake-must-follow-checklist -->
+- 新任务开工前必须按 `wego-github-delivery/references/task-intake.md` 执行启动清单；该清单统一定义会话上下文判断、完整/轻量启动分流、交付单元核对、需求确认和工作环境就绪的顺序，各技能不得自行另起启动步骤。
+
 <!-- rule-id: delivery-unit-must-use-independent-worktree -->
 - 每个交付单元必须使用独立 worktree（`git worktree add ../<owner>-<task> -b <分支>`），不得与其它交付单元共享主 worktree；主 worktree 只保留 `main` 用于 `git pull` 同步。
 
@@ -53,7 +56,7 @@
 - 业务页面请求进入 `wego-product` 或 `wego-design` 前必须先经 `wego-github-delivery` 完成交付单元核对。
 
 <!-- rule-id: agent-must-pull-before-task-start -->
-- 开工前先 `git pull --rebase origin main` 同步最新 `main`。
+- 开工前先 `git pull --rebase origin main` 同步最新 `main`；具体执行时机见启动清单（完整启动时执行，轻量启动时按需）。
 
 <!-- rule-id: open-pr-must-sync-main-when-behind -->
 - 接手交付单元或更新开放 PR 前，其分支落后 `main` 时先 merge 最新 `main` 并解决冲突再继续；等待合并的 PR 同样适用，闲置不是豁免理由。

@@ -21,9 +21,6 @@ description: 基于已确认原型简报消费微购设计系统，在一次任�
 
 ## 执行约束
 
-<!-- rule-id: agent-must-pull-before-task-start -->
-- 新会话/新任务开场先执行 `git pull --rebase origin main` 同步最新 `main`，再进入简报消费或场景实现（交付细节见 `wego-github-delivery`）。
-
 <!-- rule-id: scene-contract-precheck-mandatory -->
 - 每轮场景实现完成后，必须运行 `node scripts/validate-scene-contract.mjs <场景路径>` 做场景契约预检，通过后再推送 PR。场景契约问题不得留到合并阶段全量门禁才发现。
 

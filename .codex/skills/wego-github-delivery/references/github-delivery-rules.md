@@ -2,17 +2,21 @@
 
 ## 交付单元识别
 
-业务页面请求在进入 `wego-product` 或 `wego-design` 前，必须先完成交付单元核对。核对必须遍历全部 Git worktree，而不是只读取当前目录或 `main`，并同时读取：
+> 启动清单的完整顺序见 [`task-intake.md`](./task-intake.md)；本节只定义交付单元核对的详细规则。
 
-- 开放 PR 的 head 分支；
-- 每个 worktree 中未冻结的业务迭代；
-- `.tasks/preview-servers/` 中仍有效的本地迭代服务。
+业务页面请求在进入 `wego-product` 或 `wego-design` 前，必须先完成交付单元核对。核对使用 `node scripts/resolve-delivery-unit.mjs --scene {场景}`，该脚本遍历全部 Git worktree 中的未冻结业务迭代，并关联开放 PR。
 
-使用 `node scripts/resolve-delivery-unit.mjs --scene {场景}` 输出核对结果。结果只能按以下方式处理：
+结果只能按以下方式处理：
 
 - `matched`：接手结果指定的分支、worktree 和可选开放 PR。已确认简报范围内的视觉、布局、组件或交互反馈留在原迭代中处理；只有改变业务事实时才回到 `wego-product` 更新简报。
 - `new`：确认无匹配且无冲突后，才允许创建新迭代和新分支，并默认进入本地迭代。
 - `conflict`：多个候选或无法完成必要核对。必须停止并说明阻塞原因，不得自行选择候选。
+
+**人工兜底（必须执行）**：核对返回 `new` 后，再用 `git branch -vv` 扫一遍所有本地分支，检查是否有同场景或相关场景的悬空分支（无 worktree 但分支存在，或分支上有该场景的迭代但 worktree 已清理）。有则先确认是否为同一任务，是则恢复 worktree 而不是新建。
+
+**本地分支归属盘点**：用 `git branch -vv` 盘点全部本地分支；凡非 `main`、非当前任务、无开放 PR、无挂起登记的分支均为悬空交付单元，先向用户报告并收口（推送创建 PR、登记挂起任务或确认废弃删除），不得静默跨会话保留。
+
+**开放 PR 同步**：CI（`sync-open-prs.yml`）在 main 每次 push 后自动对所有开放 PR 执行 merge main；无需人工逐个检查落后情况。只需检查是否有带 `needs-sync` 标签的 PR（CI 同步冲突时会打此标签），有则先处理冲突。
 
 先用以下信息匹配已有交付单元：
 
