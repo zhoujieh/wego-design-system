@@ -191,7 +191,6 @@ function checkSkillAdapters() {
 function checkWorkflowContracts() {
   runNode('scripts/iteration-record.mjs', ['test'], 'workflow.iteration_test');
   runNode('scripts/validate-scene-iteration-binding.mjs', ['test'], 'workflow.iteration_binding_test');
-  runNode('scripts/validate-claims.mjs', ['test'], 'workflow.claim_test');
   runNode('scripts/resolve-delivery-unit.mjs', ['test'], 'workflow.delivery_intake_test');
   runNode('scripts/build-routes.mjs', ['--check'], 'workflow.routes_check');
 }
@@ -434,12 +433,6 @@ function conditionalToolTests() {
       script: 'scripts/validate-scene-iteration-binding.mjs',
       args: ['test'],
       code: 'iteration_binding.test'
-    },
-    {
-      matches: file => ['scripts/validate-claims.mjs', 'scripts/claim-scene.mjs', 'scripts/release-claim.mjs', 'scripts/claims-lib.mjs'].includes(file),
-      script: 'scripts/validate-claims.mjs',
-      args: ['test'],
-      code: 'claims.test'
     },
     {
       matches: file => ['scripts/sync-wego-app-lib.mjs', 'scripts/test-sync-wego-app-lib.mjs'].includes(file),

@@ -11,7 +11,7 @@ wego-app/scenes/{分类}/{中文业务场景}/scene.js
 wego-app/scenes/{分类}/{中文业务场景}/scene.css
 ```
 
-`route.json` 保存场景路由元数据（routeId、入口、展示方式等），被 `build-routes.mjs` 和场景认领脚本消费。
+`route.json` 保存场景路由元数据（routeId、入口、展示方式等），被 `build-routes.mjs` 消费。
 
 禁止创建独立场景 HTML、第二个宿主、`style.css`、以 route_id 命名的目录或运行时 `fetch/XHR`。
 

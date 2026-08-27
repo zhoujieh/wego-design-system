@@ -369,7 +369,6 @@ wego.walkthrough.data.{routeId}    // 其他场景
 ### 5.1 前置准备（0.5 个工作单元）
 
 - [ ] 交付单元核对：通过 `wego-github-delivery` 创建独立 worktree 和分支
-- [ ] 场景认领：运行 `npm run claim` 认领相关范围
 - [ ] 同步 main：`git pull --rebase origin main`
 - [ ] 技术验证：写一个最小原型验证元素选中 + 样式修改的核心链路可行性
 

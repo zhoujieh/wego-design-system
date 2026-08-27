@@ -7,12 +7,6 @@
   },
   "description": "微购设计系统与静态原型仓库(开发工具依赖)",
   "scripts": {
-    "claim": "node scripts/claim-scene.mjs",
-    "release-claim": "node scripts/release-claim.mjs",
-    "claims:validate": "node scripts/validate-claims.mjs",
-    "claims:stale": "node scripts/release-claim.mjs --sweep --dry-run",
-    "claims:sweep": "node scripts/release-claim.mjs --sweep",
-    "claims:test": "node scripts/validate-claims.mjs test",
     "worktrees:stale": "node scripts/prune-worktrees.mjs",
     "worktrees:prune": "node scripts/prune-worktrees.mjs --force",
     "worktrees:test": "node scripts/prune-worktrees.mjs test"
