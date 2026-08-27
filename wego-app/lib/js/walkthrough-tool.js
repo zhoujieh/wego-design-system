@@ -3291,7 +3291,12 @@
         this._collapsedTransitionEnd = null;
       }
 
-      // 切换内容显示与 class（先切 class 让测量时内容就位）
+      // 1. 记录起始态（切换内容前，确保拿到真实的起始宽度和位置）
+      const startHostRect = this.getBoundingClientRect();
+      const startWidth = toolbar.getBoundingClientRect().width;
+      const dir = this._getExpandDirection();
+
+      // 2. 切换内容显示与 class
       this._collapsed = collapsed;
       toolbar.classList.toggle('is-collapsed', collapsed);
       toolbar.classList.toggle('is-expanded', !collapsed);
@@ -3301,51 +3306,59 @@
       } else {
         fab.style.display = 'none';
         main.style.display = 'inline-flex';
-        const dir = this._getExpandDirection();
         main.style.flexDirection = dir === 'left' ? 'row-reverse' : 'row';
       }
 
-      // 起点：关闭过渡，测量 from → inline 写死起点；再开过渡；下一帧写终点
-      const startW = toolbar.getBoundingClientRect().width;
+      // 3. 测量目标态宽度（关闭过渡，切 auto 量实际渲染宽度）
       toolbar.style.transition = 'none';
-      toolbar.style.width = startW + 'px';
-      // 强制重排，确保起点被接受
+      toolbar.style.width = 'auto';
       void toolbar.offsetHeight;
+      const endWidth = toolbar.getBoundingClientRect().width || (collapsed ? 48 : 233);
 
-      // 计算终点（无过渡下切 auto 测实际渲染宽度）
-      let endW = 48;
-      if (!collapsed) {
-        toolbar.style.width = 'auto';
-        endW = toolbar.getBoundingClientRect().width || 233;
-        toolbar.style.width = startW + 'px';
-        void toolbar.offsetHeight;
+      // 4. 计算 left 起始/目标值
+      //    右侧(dir=left)：以起始态右边缘为锚点，展开向左扩展、收起向右收缩
+      //    左侧(dir=right)向右展开：边界检查，避免右侧超出视口
+      let startLeft = null, endLeft = null;
+      if (dir === 'left') {
+        const rightEdge = startHostRect.left + startWidth;
+        startLeft = rightEdge - startWidth;
+        endLeft = Math.max(8, rightEdge - endWidth);
+      } else if (!collapsed) {
+        const maxLeft = window.innerWidth - endWidth - 8;
+        if (startHostRect.left + endWidth > window.innerWidth - 8 && startHostRect.left > maxLeft) {
+          startLeft = Math.max(8, maxLeft);
+          endLeft = startLeft;
+        }
       }
 
-      // 开过渡 + 下一帧写终点
-      toolbar.style.transition = 'width 300ms ease-out';
-      // 向左展开时，left 同步过渡以锚定右边缘（右边缘不动，左边缘向左扩展）
-      let pendingLeft = null;
-      if (!collapsed && this._getExpandDirection() === 'left') {
-        const hostRect = this.getBoundingClientRect();
-        const rightEdge = hostRect.left + hostRect.width;
-        pendingLeft = Math.max(8, rightEdge - endW);
-        this.style.transition = 'left 300ms ease-out';
+      // 5. 设置起始态（关闭过渡，强制重排确保起点被接受）
+      toolbar.style.width = startWidth + 'px';
+      if (startLeft != null) {
+        this.style.transition = 'none';
+        this.style.left = startLeft + 'px';
         this.style.right = 'auto';
       }
+      void toolbar.offsetHeight;
+
+      // 6. 开过渡（带回弹缓冲，参考 Liaison/Figma 浮动工具条动效）
+      const easing = 'cubic-bezier(0.34, 1.56, 0.64, 1)';
+      toolbar.style.transition = `width 320ms ${easing}`;
+      if (startLeft != null) {
+        this.style.transition = `left 320ms ${easing}`;
+      }
+
+      // 7. 下一帧写目标态
       requestAnimationFrame(() => {
-        toolbar.style.width = endW + 'px';
-        if (pendingLeft != null) {
-          this.style.left = pendingLeft + 'px';
+        toolbar.style.width = endWidth + 'px';
+        if (endLeft != null) {
+          this.style.left = endLeft + 'px';
         }
       });
 
-      // 展开时调整位置和子面板
-      if (!collapsed) {
-        this._adjustPositionAfterExpand(endW, this._getExpandDirection());
-        this._updateSubpanelPosition();
-      }
+      // 8. 子面板位置
+      this._updateSubpanelPosition();
 
-      // 过渡结束清理
+      // 9. 过渡结束清理
       const onEnd = (e) => {
         if (e.target !== toolbar || e.propertyName !== 'width') return;
         toolbar.style.width = collapsed ? '48px' : '';
@@ -3361,21 +3374,6 @@
     }
 
 
-
-
-    _adjustPositionAfterExpand(toolbarWidth, dir) {
-      const rect = this.getBoundingClientRect();
-      if (dir === 'right') {
-        // 向右展开，检查右侧是否超出
-        const rightEdge = rect.left + toolbarWidth;
-        const maxLeft = window.innerWidth - toolbarWidth - 8;
-        if (rightEdge > window.innerWidth - 8 && rect.left > maxLeft) {
-          this.style.left = Math.max(8, maxLeft) + 'px';
-          this.style.right = 'auto';
-        }
-      }
-      // dir === 'left' 时，定位已由 setCollapsed 的 left 过渡处理（锚定右边缘向左扩展）
-    }
 
     // ── 工具条按钮 ────────────────────────────────────────
     _onToolClick(tool, btn) {
