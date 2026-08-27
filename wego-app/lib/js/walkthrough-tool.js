@@ -1961,7 +1961,7 @@
           </div>
           ` : ''}
 
-          <!-- 定位 -->
+          <!-- 定位栏暂屏蔽：display/position/zIndex 文本输入体验差，走查场景不常用，后续补全 top/right/bottom/left 后再恢复
           <div class="section">
             <p class="section-title">定位</p>
             <div class="field-row three-col">
@@ -1970,6 +1970,7 @@
               <div class="field"><span class="field-icon">Z</span><input class="text-input" type="text" value="${d.zIndex || ''}" data-field="zIndex" inputmode="numeric" placeholder="z" /></div>
             </div>
           </div>
+          -->
 
           <!-- 自动布局 -->
           <div class="section">
