@@ -33,36 +33,6 @@ body {
   margin-bottom: 0;
   padding-bottom: 0;
   border-bottom: 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-}
-
-.pv-header__main {
-  flex: 1;
-  min-width: 0;
-}
-
-.pv-header__back {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 12px;
-  border: 1px solid var(--border-neutral-l2);
-  border-radius: var(--radius-8);
-  background: var(--bg-surface);
-  color: var(--text-secondary);
-  font-size: var(--body-sm-font-size);
-  line-height: var(--body-sm-line-height);
-  cursor: pointer;
-  transition: border-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
-}
-
-.pv-header__back:hover {
-  border-color: var(--text-brand);
-  color: var(--text-brand);
 }
 
 .pv-header__intro {
@@ -343,17 +313,11 @@ body {
 <body>
 
 <div class="pv-header">
-  <div class="pv-header__main">
-    <h1>组件预览总览</h1>
-    <p>仅供人工验收查看的聚合入口。这里不复制组件内容，只关联现有单组件预览页，并在右侧按需切换显示。</p>
-    <div class="pv-header__intro">
-      <strong>维护规则：</strong> 每次新增已注册组件时，除了补 `components/{slug}.json`、`preview/component-{slug}.html`、注册表和聚合样式，也必须把新组件补到这个页面。
-    </div>
+  <h1>组件预览总览</h1>
+  <p>仅供人工验收查看的聚合入口。这里不复制组件内容，只关联现有单组件预览页，并在右侧按需切换显示。</p>
+  <div class="pv-header__intro">
+    <strong>维护规则：</strong> 每次新增已注册组件时，除了补 `components/{slug}.json`、`preview/component-{slug}.html`、注册表和聚合样式，也必须把新组件补到这个页面。
   </div>
-  <button type="button" class="pv-header__back" id="back-to-app" aria-label="返回 App 动态页">
-    <i class="wego-iconfont-s icon-fanhui" aria-hidden="true"></i>
-    <span>动态</span>
-  </button>
 </div>
 
 <div class="overview-layout">
@@ -696,22 +660,6 @@ const searchInput = document.getElementById("component-search");
 const searchEmpty = document.getElementById("component-search-empty");
 const searchResults = document.getElementById("search-results");
 const sidebar = document.querySelector(".overview-sidebar");
-const backToAppBtn = document.getElementById("back-to-app");
-
-if (backToAppBtn) {
-  backToAppBtn.addEventListener("click", function () {
-    var targetHash = "#/album-product-feed";
-    try {
-      if (window.parent && window.parent !== window) {
-        window.parent.location.hash = targetHash;
-        return;
-      }
-    } catch (e) {
-      // 跨域时降级为直接跳转
-    }
-    window.location.href = "../../../../wego-app/index.html" + targetHash;
-  });
-}
 
 navItems.forEach(function (item) {
   var nameEl = item.querySelector(".overview-nav-item__name");
