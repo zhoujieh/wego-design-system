@@ -38,10 +38,8 @@ description: 负责微购仓库的分支、PR、本地迭代预览、合并和�
 用户明确表达"验收完成""验收通过""确认合格""可以合并"后进入此阶段，由 `wego-design` 先输出 5 维度一致性校验清单，用户逐项确认后，一次性完成固化、验证与合并：
 
 1. 由 `wego-design` 连续执行迭代收口：
-   - `confirm-brief --user-confirmed-brief <iteration_id>`（简报确认）
-   - `submit-prototype`（固化待验收指纹）
-   - `confirm-prototype --user-confirmed-prototype <iteration_id>`（原型确认）
-   - `freeze --user-confirmed-freeze <iteration_id>`（冻结归档）
+   - `confirm-brief --user-confirmed-brief <iteration_id>`（简报确认，进入 prototyping）
+   - `submit-prototype --user-confirmed-prototype <iteration_id>`（场景验证 + 固化指纹 + 确认 + 冻结，一步到 frozen）
 2. 运行与范围相称的完整静态验证，确认 PR 内包含全部本次改动且工作区已清零：
    - `node scripts/validate-wego-design.mjs --scope=full --strict`（场景 Token 合规、源/副本同步、原型指纹、完整守门）
    - `node scripts/build-routes.mjs --check`（路由生成一致性）
@@ -72,7 +70,7 @@ PR 已存在时，用户继续提出小问题仍先回到本地迭代，累计�
 ## 合并与收口
 
 - 业务原型和设计系统变更只有在用户明确验收通过后才能合并；合并前再次同步 `main` 并完成相应验证。
-- 工作流权威源由 `wego-uxsystem-iterate` 维护，免业务验收与明确提交授权门禁；完成改动并运行 `node scripts/validate-wego-design.mjs --scope=system --strict` 通过后，直接推送创建短周期 PR，必要检查通过后自动合并到 `main`，并按下方收口规则完成完整清理（停止预览服务、删除本地与远端分支、删除干净的关联 worktree），不得只删分支而遗留 worktree；CI 失败时停止并报告原因等用户处理。业务原型和设计系统组件、Token、Preview、UI Kit 变更不适用本例外。
+- 工作流权威源维护例外见 `AGENTS.md`，由 `wego-uxsystem-iterate` 执行，免业务验收与明确提交授权，通过短周期 PR 自动合并并按下方收口规则完成完整清理；业务原型和设计系统组件/Token/Preview/UI Kit 变更不适用。
 - PR 合并或关闭后，先停止对应本地预览服务并删除记录，再删除对应本地与远端分支及干净的关联 worktree；只有 PR 带 `keep-branch` 标签时才保留分支，但预览服务仍默认关闭。
 - 合并冲突涉及生成物（`wego-app/js/routes.js`、`wego-app/lib/`、`components.css`）时，不得手工编辑冲突标记：先取任一侧版本，运行对应生成脚本（`build-routes.mjs` / `sync-wego-app-lib.mjs`）重新生成后提交。
 - 没有 PR 的工作分支允许在本地迭代期间保持；用户明确废弃任务或确认不再继续时，停止服务、释放认领（`npm run release-claim -- --agent <id>`）并删除分支/worktree。不得因单次回复结束而强制创建 PR 或删除仍在继续的任务。

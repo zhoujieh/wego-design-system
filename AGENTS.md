@@ -53,7 +53,7 @@
 - 业务页面请求进入 `wego-product` 或 `wego-design` 前必须先经 `wego-github-delivery` 完成交付单元核对。
 
 <!-- rule-id: scene-must-claim-before-edit -->
-- 场景认领强制前置：开工前用 `npm run claim -- --agent <agent-id> --scene <场景> [--files <文件范围>]` 认领场景目录并记录分支；同场景不同文件可声明 `files` 范围并行。释放推迟到 PR 合并/关闭后，用 `npm run release-claim` 统一释放（释放即删除认领文件，`claims/` 只保留活跃认领）；运行 `npm run claims:validate` 确认无冲突。
+- 场景认领强制前置：开工前用 `npm run claim -- --agent <agent-id> --scene <场景> [--route-id <id>] [--branch <分支>] [--files <文件范围>]` 认领场景目录并记录分支；同场景不同文件可声明 `files` 范围并行。释放推迟到 PR 合并/关闭后，用 `npm run release-claim` 统一释放（释放即删除认领文件，`claims/` 只保留活跃认领）；运行 `npm run claims:validate` 确认无冲突。
 
 <!-- rule-id: agent-must-pull-before-task-start -->
 - 开工前先 `git pull --rebase origin main` 同步最新 `main`。

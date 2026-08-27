@@ -35,7 +35,7 @@ description: 基于已确认原型简报消费微购设计系统，在一次任�
 
 - 完成每轮修改后运行场景契约预检和关键交互检查，通过后由 `wego-github-delivery` **自动推送远端分支并创建/更新同一 PR**；同一需求固定复用同一个 PR。
 - 从当前任务 worktree 启动或复用本地 HTTP 预览，确认目标 routeId 包含本次改动，同时返回本地与在线两个链接。
-- 保持迭代状态为 `in-development`；不主动执行 `confirm-brief` 或 `submit-prototype`，等用户明确验收通过后一次性收口。
+- 保持迭代状态为 `prototyping`；不主动执行 `submit-prototype`，等用户明确验收通过后一次性收口。
 - 每次结果标明：`当前状态：本地迭代中（已推送，PR #<编号>）`；尚未推送时标明`当前状态：本地迭代中（未推送）`。
 
 "改好了""继续""再调整一下"等普通反馈不构成验收授权。即使已有 PR，后续小问题仍先在本地累计修改，完成一轮验证后自动更新同一个 PR。
@@ -44,7 +44,7 @@ description: 基于已确认原型简报消费微购设计系统，在一次任�
 
 用户明确表达"验收完成""确认合格""可以合并"后，进入收口流程：
 
-1. **输出 5 维度一致性校验清单**，逐项对比 spec.md 与实际实现：
+1. **输出 5 维度一致性校验清单**，逐项对比需求规格说明与实际实现：
    - **范围**：included/excluded 是否与实现一致
    - **入口**：entry_points 是否全部实现且位置正确
    - **关键路径**：critical_paths 是否首尾闭环
@@ -53,15 +53,13 @@ description: 基于已确认原型简报消费微购设计系统，在一次任�
 2. 用户逐项确认后，连续执行：
    ```bash
    node scripts/iteration-record.mjs confirm-brief --file {iteration.json} --user-confirmed-brief {iteration_id}
-   node scripts/iteration-record.mjs submit-prototype --file {iteration.json}
-   node scripts/iteration-record.mjs confirm-prototype --file {iteration.json} --user-confirmed-prototype {iteration_id}
-   node scripts/iteration-record.mjs freeze --file {iteration.json} --user-confirmed-freeze {iteration_id}
+   node scripts/iteration-record.mjs submit-prototype --file {iteration.json} --user-confirmed-prototype {iteration_id}
    ```
 3. 运行与范围相称的完整静态验证，确认自动推送的 PR 已包含全部本次改动。
 4. 停止对应本地预览服务并删除服务记录，再同步最新 `main`、解决冲突并完成验证，最后合并到 `main`。
 5. 每次结果标明：`当前状态：已验收，合并中（PR #<编号>）`。
 
-- 用户在 `in-development` 或 `prototyping` 阶段要求调整视觉、布局、组件、Token、路由或交互时，直接在原迭代继续修改，不执行 `invalidate`。
+- 用户在 `prototyping` 阶段要求调整视觉、布局、组件、Token、路由或交互时，直接在原迭代继续修改，不执行 `invalidate`。
 - 用户反馈改变目标、范围、入口、关键路径、状态、数据或可见结果时，退回 `wego-product` 按简报失效流程处理。
 
 除场景合同允许的简短例外说明外，不新增设计证明文件。

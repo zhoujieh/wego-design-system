@@ -51,7 +51,7 @@
 - “改好了”“继续”“再调整一下”“先看看”等反馈、以及 Agent 自己判断“已经完成”，都不构成合并授权。没有明确授权时必须保持 PR 开放、继续本地推进。
 
 <!-- rule-id: workflow-maintenance-exempt-from-submission-authorization -->
-**工作流维护例外**：由 `wego-uxsystem-iterate` 技能执行的 AGENTS.md、SKILL.md、`references/` 和 `experience/` 等权威源维护，免明确提交授权门禁。完成改动并运行 `node scripts/validate-wego-design.mjs --scope=system --strict` 通过后，直接推送创建短周期 PR，必要检查通过后自动合并到 `main` 并删除分支；CI 失败时停止并报告原因等用户处理。业务原型和设计系统组件、Token、Preview、UI Kit 变更不适用本例外，仍需用户明确验收授权后才能合并。
+**工作流维护例外**：见 `AGENTS.md`，由 `wego-uxsystem-iterate` 执行的权威源维护免明确提交授权与业务验收，通过短周期 PR 自动合并；业务原型和设计系统组件/Token/Preview/UI Kit 变更不适用。
 
 多人或多 Agent 确有远端协调需要时，可仅推送用于暴露认领和分支的最小协调提交，但不得创建 PR，也不得把后续本地小改动自动推送；执行前必须说明这是并发协调例外。
 
@@ -59,7 +59,7 @@
 
 用户明确表达“验收通过”“确认合格”“可以合并”后进入此阶段，一次性完成固化、验证与合并：
 
-1. 执行与范围相称的完整静态验证；业务原型连续执行 `submit-prototype` 固定待验收指纹、再 `confirm-prototype` 确认；确认 PR 内包含全部本次改动且工作区已清零。
+1. 执行与范围相称的完整静态验证；业务原型连续执行 `confirm-brief` 确认简报、再 `submit-prototype --user-confirmed-prototype <iteration_id>` 一步完成确认与冻结；确认 PR 内包含全部本次改动且工作区已清零。
 2. 合并前再次同步 `main` 并复验，通过后合并 PR 进 `main` 并完成收口；未获用户明确验收通过绝不合并。
 3. 输出必须明确标记：`当前状态：已验收，合并中（PR #<编号>）`。
 

@@ -21,9 +21,9 @@ function flagValue(source, flag) {
 
 const value = flag => flagValue(args, flag);
 const fileArg = value('--file');
-const statuses = new Set(['draft', 'in-development', 'prototyping', 'awaiting-prototype-confirmation', 'prototype-confirmed', 'frozen', 'blocked', 'cancelled', 'superseded']);
-const briefSubmittedStatuses = new Set(['in-development', 'prototyping', 'awaiting-prototype-confirmation', 'prototype-confirmed', 'frozen']);
-const activeStatuses = new Set(['draft', 'in-development', 'prototyping', 'awaiting-prototype-confirmation', 'prototype-confirmed', 'frozen', 'blocked']);
+const statuses = new Set(['draft', 'in-development', 'prototyping', 'frozen', 'blocked', 'cancelled', 'superseded']);
+const briefSubmittedStatuses = new Set(['in-development', 'prototyping', 'frozen']);
+const activeStatuses = new Set(['draft', 'in-development', 'prototyping', 'frozen', 'blocked']);
 const prototypeModes = new Set(['functional', 'simulated', 'stub']);
 const prototypeBoundaryKeys = new Set(['flow_id', 'mode', 'visible_result']);
 const prototypeBriefKeys = ['goal', 'included', 'excluded', 'entry_points', 'critical_paths', 'prototype_boundaries', 'states', 'data_contract', 'assumptions', 'open_questions'];
@@ -59,29 +59,23 @@ const expectedStageValidity = new Map([
   ['draft', [false, false]],
   ['in-development', [true, false]],
   ['prototyping', [true, false]],
-  ['awaiting-prototype-confirmation', [true, true]],
-  ['prototype-confirmed', [true, true]],
   ['frozen', [true, true]]
 ]);
 const expectedConfirmations = new Map([
   ['draft', [false, false, false]],
   ['in-development', [true, false, false]],
   ['prototyping', [true, true, false]],
-  ['awaiting-prototype-confirmation', [true, true, false]],
-  ['prototype-confirmed', [true, true, true]],
   ['frozen', [true, true, true]]
 ]);
 const expectedPrototypeSubmissions = new Map([
   ['draft', false],
   ['in-development', false],
   ['prototyping', false],
-  ['awaiting-prototype-confirmation', true],
-  ['prototype-confirmed', true],
   ['frozen', true]
 ]);
 const invalidateSources = {
-  brief: new Set(['in-development', 'prototyping', 'awaiting-prototype-confirmation', 'prototype-confirmed']),
-  prototype: new Set(['awaiting-prototype-confirmation', 'prototype-confirmed'])
+  brief: new Set(['in-development', 'prototyping', 'frozen']),
+  prototype: new Set(['frozen'])
 };
 
 function fail(message) { console.error(message); process.exit(1); }
@@ -944,7 +938,6 @@ function requireUserConfirmation(record, flag, label) {
   }
 }
 function invalidationSourceError(record, stage) {
-  if (record.status === 'frozen') return '冻结迭代不得失效；请新建迭代';
   if (!invalidateSources[stage]?.has(record.status)) return `当前状态 ${record.status} 不能执行 invalidate --stage=${stage}`;
   return null;
 }
@@ -956,10 +949,12 @@ function applyInvalidation(record, stage) {
     record.brief_confirmation = null;
     record.prototype_submission = null;
     record.prototype_confirmation = null;
+    record.freeze = null;
     record.stage_outputs = { product: { valid: false }, design: { valid: false } };
   } else {
     record.prototype_submission = null;
     record.prototype_confirmation = null;
+    record.freeze = null;
     record.stage_outputs.design.valid = false;
   }
 }
@@ -967,14 +962,15 @@ function migrateLegacyRecord(record) {
   if (record.schemaVersion !== 5) fail('migrate 只支持 schemaVersion 5 的迭代记录');
   record.schemaVersion = 6;
   if (!Object.hasOwn(record, 'prototype_submission')) record.prototype_submission = null;
-  if (record.status === 'awaiting-prototype-confirmation') {
+  if (['awaiting-prototype-confirmation', 'prototype-confirmed'].includes(record.status)) {
+    // 旧中间态已取消，回到 prototyping 重新验收
     record.status = 'prototyping';
     record.prototype_submission = null;
     record.prototype_confirmation = null;
     record.stage_outputs.design.valid = false;
-  } else if (['prototype-confirmed', 'frozen'].includes(record.status)) {
+  } else if (record.status === 'frozen') {
     if (!isPlainObject(record.prototype_confirmation)) {
-      fail('已确认或冻结的旧迭代缺少 prototype_confirmation，无法安全迁移');
+      fail('已冻结的旧迭代缺少 prototype_confirmation，无法安全迁移');
     }
     record.prototype_submission = { ...record.prototype_confirmation, fingerprints: { ...record.prototype_confirmation.fingerprints } };
   }
@@ -987,19 +983,22 @@ function migrate() {
   if (errors.length) fail(`migrate 后记录非法，未写入文件：\n${errors.join('\n')}`);
   save(file, record, 'migrate');
 }
-function freeze() {
+function acceptAndFreeze() {
   const file = requireFile();
   const record = load(file);
-  const userConfirmedIterationId = value('--user-confirmed-freeze');
-  if (!userConfirmedIterationId) {
-    fail('freeze 只能在用户明确指定迭代并要求冻结后执行；请传 --user-confirmed-freeze <iteration_id>');
-  }
-  if (userConfirmedIterationId !== record.identity?.iteration_id) {
-    fail(`${file}: --user-confirmed-freeze 必须等于当前 iteration_id：${record.identity?.iteration_id ?? '未定义'}`);
-  }
+  // 用户授权
+  requireUserConfirmation(record, '--user-confirmed-prototype', 'submit-prototype');
   const errors = validate(record, file);
   if (errors.length) fail(errors.join('\n'));
-  if (record.status !== 'prototype-confirmed') fail(`${file}: 当前状态 ${record.status} 不能执行 freeze`);
+  if (record.status !== 'prototyping') fail(`${file}: 当前状态 ${record.status} 不能执行 submit-prototype`);
+  // 场景静态验证
+  validatePrototypeScenes(record);
+  // 固定原型提交指纹
+  record.prototype_submission = createPrototypeSubmission(record);
+  record.stage_outputs.design.valid = true;
+  // 原型确认（连续执行，确认指纹与提交一致）
+  record.prototype_confirmation = createPrototypeConfirmation(record);
+  // 冻结归档
   const freezeFile = path.join(path.dirname(file), 'freeze.json');
   if (fs.existsSync(freezeFile)) fail(`${freezeFile} 已存在，冻结记录禁止覆盖`);
   let metadata;
@@ -1017,9 +1016,10 @@ function freeze() {
   const changedErrors = validate(record, file);
   if (changedErrors.length) {
     fs.rmSync(freezeFile, { force: true });
-    fail(`freeze 后记录非法，未写入 iteration.json：\n${changedErrors.join('\n')}`);
+    fail(`submit-prototype 后记录非法，未写入 iteration.json：\n${changedErrors.join('\n')}`);
   }
-  save(file, record, 'freeze');
+  save(file, record, 'submit-prototype');
+  console.log(`原型已验收并冻结，状态：frozen`);
 }
 
 function test() {
@@ -1114,20 +1114,20 @@ function test() {
   inDevelopment.stage_outputs.product.valid = true;
   inDevelopment.brief_submission = createBriefSubmission(inDevelopment);
   assert(!validate(inDevelopment, 'sample').length, '确认矩阵错误拦截合法 in-development 状态');
-  const awaitingPrototype = clone(prototyping);
-  awaitingPrototype.status = 'awaiting-prototype-confirmation';
-  awaitingPrototype.stage_outputs.design.valid = true;
-  assert(has(awaitingPrototype, '状态 awaiting-prototype-confirmation 的 prototype_submission 必须为 已提交对象'), '确认矩阵未要求 awaiting-prototype-confirmation 存在原型提交快照');
-  awaitingPrototype.prototype_confirmation = {};
-  assert(has(awaitingPrototype, '状态 awaiting-prototype-confirmation 的 prototype_confirmation 必须为 null'), '确认矩阵未拦截提前写入的 prototype_confirmation');
-  const prototypeInvalidation = clone(prototyping);
-  prototypeInvalidation.status = 'awaiting-prototype-confirmation';
-  prototypeInvalidation.stage_outputs.design.valid = true;
-  applyInvalidation(prototypeInvalidation, 'prototype');
-  assert(prototypeInvalidation.scope_revision === 1 && prototypeInvalidation.prototype_submission === null && !validate(prototypeInvalidation, 'sample').length, 'prototype 失效必须清除提交快照且不破坏已确认的 scope_revision');
-  const legacyAwaitingPrototype = clone(awaitingPrototype);
+  const frozenForInvalidation = clone(prototyping);
+  frozenForInvalidation.status = 'frozen';
+  frozenForInvalidation.stage_outputs.design.valid = true;
+  frozenForInvalidation.prototype_submission = { at: new Date().toISOString(), scope_revision: 1, affected_scenes: ['测试场景'], fingerprints: { 'wego-app/scenes/测试场景/scene.js': 'abc' } };
+  frozenForInvalidation.prototype_confirmation = { at: new Date().toISOString(), scope_revision: 1, affected_scenes: ['测试场景'], fingerprints: { 'wego-app/scenes/测试场景/scene.js': 'abc' } };
+  frozenForInvalidation.freeze = { at: new Date().toISOString(), design_system_version: 1, scope_revision: 1, fingerprints: {} };
+  applyInvalidation(frozenForInvalidation, 'prototype');
+  assert(frozenForInvalidation.status === 'prototyping' && frozenForInvalidation.scope_revision === 1 && frozenForInvalidation.prototype_submission === null && frozenForInvalidation.prototype_confirmation === null && frozenForInvalidation.freeze === null && !validate(frozenForInvalidation, 'sample').length, 'prototype 失效必须从 frozen 回到 prototyping 并清除提交、确认和冻结快照');
+  const legacyAwaitingPrototype = clone(sample);
   legacyAwaitingPrototype.schemaVersion = 5;
-  delete legacyAwaitingPrototype.prototype_submission;
+  legacyAwaitingPrototype.status = 'awaiting-prototype-confirmation';
+  legacyAwaitingPrototype.stage_outputs = { product: { valid: true }, design: { valid: true } };
+  legacyAwaitingPrototype.brief_submission = createBriefSubmission(legacyAwaitingPrototype);
+  legacyAwaitingPrototype.brief_confirmation = createBriefConfirmation(legacyAwaitingPrototype);
   migrateLegacyRecord(legacyAwaitingPrototype);
   assert(legacyAwaitingPrototype.status === 'prototyping' && legacyAwaitingPrototype.schemaVersion === 6 && legacyAwaitingPrototype.prototype_submission === null && !validate(legacyAwaitingPrototype, 'sample').length, '旧待验收迭代迁移后必须回到可重新提交状态');
   const briefInvalidation = clone(prototyping);
@@ -1186,17 +1186,6 @@ function test() {
     const iterationArgument = path.relative(fixtureRoot, iterationFile).split(path.sep).join('/');
     const freezeFile = path.join(iterationDirectory, 'freeze.json');
     fs.mkdirSync(iterationDirectory, { recursive: true });
-    const makeConfirmed = () => {
-      const record = clone(sample);
-      record.status = 'prototype-confirmed';
-      record.affected_runtime = [routesRelativePath];
-      record.stage_outputs = { product: { valid: true }, design: { valid: true } };
-      record.brief_submission = createBriefSubmission(record);
-      record.brief_confirmation = createBriefConfirmation(record);
-      record.prototype_submission = createPrototypeSubmission(record, fixtureRoot);
-      record.prototype_confirmation = createPrototypeConfirmation(record);
-      return record;
-    };
     const scriptFile = fs.realpathSync(path.resolve(root, process.argv[1]));
     const run = cliArgs => spawnSync(process.execPath, [scriptFile, ...cliArgs], { cwd: fixtureRoot, encoding: 'utf8' });
     const outsideIteration = path.join(fixtureRoot, 'iteration.json');
@@ -1282,53 +1271,38 @@ function test() {
     assert(JSON.parse(fs.readFileSync(iterationFile, 'utf8')).status === 'prototyping', 'confirm-brief 未进入 prototyping');
 
     fs.writeFileSync(path.join(sceneRoot, 'scene.js'), 'INVALID_SCENE\n');
-    const invalidSubmission = run(['submit-prototype', `--file=${iterationArgument}`]);
+    const invalidSubmission = run(['submit-prototype', `--file=${iterationArgument}`, '--user-confirmed-prototype', 'test']);
     assert(invalidSubmission.status !== 0 && (invalidSubmission.stderr || '').includes('场景验证'), 'submit-prototype 未运行静态场景验证');
     assert(JSON.parse(fs.readFileSync(iterationFile, 'utf8')).status === 'prototyping', '静态场景验证失败后不应写入原型提交');
+    assert(!fs.existsSync(freezeFile), '场景验证失败后不应生成 freeze.json');
     fs.writeFileSync(path.join(sceneRoot, 'scene.js'), 'window.testScene = true;\n');
-    const validSubmission = run(['submit-prototype', '--file', iterationArgument]);
+    const unapprovedSubmission = run(['submit-prototype', '--file', iterationArgument]);
+    assert(unapprovedSubmission.status !== 0 && (unapprovedSubmission.stderr || '').includes('用户明确确认'), 'submit-prototype 未拦截缺少用户明确授权的请求');
+    assert(JSON.parse(fs.readFileSync(iterationFile, 'utf8')).status === 'prototyping', '无用户授权的 submit-prototype 不得改变状态');
+    assert(!fs.existsSync(freezeFile), '无用户授权的 submit-prototype 不得生成 freeze.json');
+    const wrongTargetSubmission = run(['submit-prototype', '--file', iterationArgument, '--user-confirmed-prototype', 'other-iteration']);
+    assert(wrongTargetSubmission.status !== 0 && (wrongTargetSubmission.stderr || '').includes('必须等于当前 iteration_id'), 'submit-prototype 未拦截用户授权与目标迭代不一致');
+    const validSubmission = run(['submit-prototype', '--file', iterationArgument, '--user-confirmed-prototype', 'test']);
     assert(validSubmission.status === 0, `合法 submit-prototype 失败：${(validSubmission.stderr || validSubmission.stdout).trim()}`);
     const submittedPrototype = JSON.parse(fs.readFileSync(iterationFile, 'utf8'));
-    assert(submittedPrototype.status === 'awaiting-prototype-confirmation' && Object.keys(submittedPrototype.prototype_submission?.fingerprints || {}).length > 0, 'submit-prototype 未写入待验收原型指纹');
-    const unapprovedPrototypeConfirmation = run(['confirm-prototype', '--file', iterationArgument]);
-    assert(unapprovedPrototypeConfirmation.status !== 0 && (unapprovedPrototypeConfirmation.stderr || '').includes('用户明确确认'), 'confirm-prototype 未拦截缺少用户明确授权的请求');
-    fs.writeFileSync(path.join(sceneRoot, 'scene.js'), 'window.testScene = "drift-before-confirmation";\n');
-    const driftedPrototypeConfirmation = run(['confirm-prototype', '--file', iterationArgument, '--user-confirmed-prototype', 'test']);
-    assert(driftedPrototypeConfirmation.status !== 0 && (driftedPrototypeConfirmation.stderr || '').includes('原型提交后已漂移'), 'confirm-prototype 未拦截用户验收后的源码漂移');
-    fs.writeFileSync(path.join(sceneRoot, 'scene.js'), 'window.testScene = true;\n');
-    const validConfirmation = run(['confirm-prototype', '--file', iterationArgument, '--user-confirmed-prototype', 'test']);
-    assert(validConfirmation.status === 0, `合法 confirm-prototype 失败：${(validConfirmation.stderr || validConfirmation.stdout).trim()}`);
-    assert(JSON.parse(fs.readFileSync(iterationFile, 'utf8')).status === 'prototype-confirmed', 'confirm-prototype 只能确认原型，不得自动冻结');
-    assert(!fs.existsSync(freezeFile), 'confirm-prototype 不得生成 freeze.json');
+    assert(submittedPrototype.status === 'frozen' && Object.keys(submittedPrototype.prototype_submission?.fingerprints || {}).length > 0, 'submit-prototype 未直接验收并冻结');
+    assert(fs.existsSync(freezeFile), 'submit-prototype 应生成 freeze.json');
+    assert(!validate(submittedPrototype, iterationFile, fixtureRoot).length, '合法 frozen 记录未通过复验');
+    assert(Object.keys(submittedPrototype.freeze).sort().join(',') === 'at,design_system_version,fingerprints,scope_revision', 'freeze 对象字段不完整');
+    assert(Object.keys(submittedPrototype.freeze.fingerprints).length === expectedFingerprintTargets(submittedPrototype).length, 'freeze fingerprints 未覆盖全部预期目标');
+    assert(!Object.hasOwn(submittedPrototype.freeze.fingerprints, routesRelativePath), 'affected_runtime 中的 routes.js 不得退回整文件指纹');
+    assert(Object.keys(submittedPrototype.freeze.fingerprints).some(key => key.startsWith(routeFingerprintPrefix)), 'freeze 缺少场景路由语义指纹');
 
     const equalFlagResult = run(['invalidate', `--file=${iterationArgument}`, '--stage=prototype']);
     assert(equalFlagResult.status === 0, `invalidate 未支持等号参数：${(equalFlagResult.stderr || equalFlagResult.stdout).trim()}`);
     const invalidated = JSON.parse(fs.readFileSync(iterationFile, 'utf8'));
-    assert(invalidated.status === 'prototyping' && invalidated.prototype_confirmation === null && invalidated.scope_revision === 1, 'invalidate --stage=prototype 状态迁移错误');
+    assert(invalidated.status === 'prototyping' && invalidated.prototype_confirmation === null && invalidated.prototype_submission === null && invalidated.freeze === null && invalidated.scope_revision === 1, 'invalidate --stage=prototype 状态迁移错误');
+    assert(!fs.existsSync(freezeFile), 'invalidate --stage=prototype 应删除 freeze.json');
 
-    const confirmed = makeConfirmed();
-    fs.writeFileSync(iterationFile, `${JSON.stringify(confirmed, null, 2)}\n`);
-    const unapprovedFreeze = run(['freeze', '--file', iterationArgument]);
-    assert(unapprovedFreeze.status !== 0 && (unapprovedFreeze.stderr || '').includes('用户明确指定迭代'), 'freeze 未拦截缺少用户明确授权的请求');
-    assert(JSON.parse(fs.readFileSync(iterationFile, 'utf8')).status === 'prototype-confirmed', '无用户授权的 freeze 不得改变迭代状态');
-    assert(!fs.existsSync(freezeFile), '无用户授权的 freeze 不得生成 freeze.json');
-    const wrongTargetFreeze = run(['freeze', '--file', iterationArgument, '--user-confirmed-freeze', 'other-iteration']);
-    assert(wrongTargetFreeze.status !== 0 && (wrongTargetFreeze.stderr || '').includes('必须等于当前 iteration_id'), 'freeze 未拦截用户授权与目标迭代不一致');
-    fs.writeFileSync(path.join(sceneRoot, 'scene.js'), 'window.testScene = "drift";\n');
-    const driftedFreeze = run(['freeze', '--file', iterationArgument, '--user-confirmed-freeze', 'test']);
-    assert(driftedFreeze.status !== 0 && (driftedFreeze.stderr || '').includes('原型确认后已漂移'), 'freeze 未拦截原型确认后的源码漂移');
-    assert(JSON.parse(fs.readFileSync(iterationFile, 'utf8')).status === 'prototype-confirmed', 'freeze 失败后不应写入 frozen 状态');
-    assert(!fs.existsSync(freezeFile), 'freeze 失败后不应遗留 freeze.json');
-
-    fs.writeFileSync(path.join(sceneRoot, 'scene.js'), 'window.testScene = true;\n');
-    const freezeResult = run(['freeze', `--file=${iterationArgument}`, '--user-confirmed-freeze=test']);
-    assert(freezeResult.status === 0, `合法 freeze 失败：${(freezeResult.stderr || freezeResult.stdout).trim()}`);
+    const resubmit = run(['submit-prototype', '--file', iterationArgument, '--user-confirmed-prototype=test']);
+    assert(resubmit.status === 0, `失效后重新 submit-prototype 失败：${(resubmit.stderr || resubmit.stdout).trim()}`);
     const frozen = JSON.parse(fs.readFileSync(iterationFile, 'utf8'));
-    assert(!validate(frozen, iterationFile, fixtureRoot).length, '合法 frozen 记录未通过复验');
-    assert(Object.keys(frozen.freeze).sort().join(',') === 'at,design_system_version,fingerprints,scope_revision', 'freeze 对象字段不完整');
-    assert(Object.keys(frozen.freeze.fingerprints).length === expectedFingerprintTargets(frozen).length, 'freeze fingerprints 未覆盖全部预期目标');
-    assert(!Object.hasOwn(frozen.freeze.fingerprints, routesRelativePath), 'affected_runtime 中的 routes.js 不得退回整文件指纹');
-    assert(Object.keys(frozen.freeze.fingerprints).some(key => key.startsWith(routeFingerprintPrefix)), 'freeze 缺少场景路由语义指纹');
+    assert(frozen.status === 'frozen', '失效后重新提交未回到 frozen');
 
     const emptyFingerprints = clone(frozen);
     emptyFingerprints.freeze.fingerprints = {};
@@ -1435,17 +1409,7 @@ switch (command) {
     requireUserConfirmation(record, '--user-confirmed-brief', 'confirm-brief');
     record.brief_confirmation = createBriefConfirmation(record);
   }); break;
-  case 'submit-prototype': transition(['prototyping'], 'awaiting-prototype-confirmation', record => {
-    validatePrototypeScenes(record);
-    record.prototype_submission = createPrototypeSubmission(record);
-    record.stage_outputs.design.valid = true;
-  }); break;
-  case 'confirm-prototype': transition(['awaiting-prototype-confirmation'], 'prototype-confirmed', record => {
-    requireUserConfirmation(record, '--user-confirmed-prototype', 'confirm-prototype');
-    validatePrototypeScenes(record);
-    record.prototype_confirmation = createPrototypeConfirmation(record);
-  }); break;
-  case 'freeze': freeze(); break;
+  case 'submit-prototype': acceptAndFreeze(); break;
   case 'migrate': migrate(); break;
   case 'invalidate': {
     const stage = value('--stage');
@@ -1457,6 +1421,11 @@ switch (command) {
     const sourceError = invalidationSourceError(record, stage);
     if (sourceError) fail(sourceError);
     applyInvalidation(record, stage);
+    // 失效原型时清理 freeze.json
+    if (stage === 'prototype') {
+      const freezeFile = path.join(path.dirname(file), 'freeze.json');
+      if (fs.existsSync(freezeFile)) fs.rmSync(freezeFile, { force: true });
+    }
     const changedErrors = validate(record, file);
     if (changedErrors.length) fail(`invalidate 后记录非法，未写入文件：\n${changedErrors.join('\n')}`);
     save(file, record, 'invalidate');
@@ -1464,5 +1433,5 @@ switch (command) {
   }
   case 'check': check(); break;
   case 'test': test(); break;
-  default: fail('用法：init|submit-brief|confirm-brief --user-confirmed-brief <iteration_id>|submit-prototype|confirm-prototype --user-confirmed-prototype <iteration_id>|invalidate|migrate|freeze --user-confirmed-freeze <iteration_id>|check|test');
+  default: fail('用法：init|submit-brief|confirm-brief --user-confirmed-brief <iteration_id>|submit-prototype --user-confirmed-prototype <iteration_id>|invalidate|migrate|check|test');
 }
