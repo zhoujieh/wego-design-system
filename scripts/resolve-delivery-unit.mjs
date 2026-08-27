@@ -3,12 +3,12 @@
 /**
  * 交付单元核对器。
  *
- * 在进入产品或设计流程前，从全部 Git worktree 中查找与场景或 routeId 匹配的
- * 活跃认领、未冻结迭代，并关联可选的开放 PR。
+ * 在进入产品或设计流程前，从全部 Git worktree 中查找与场景匹配的
+ * 未冻结迭代，并关联可选的开放 PR。
  * 本地迭代阶段允许交付单元尚未创建 PR。
  *
  * 用法：
- *   node scripts/resolve-delivery-unit.mjs --scene 我的 [--route-id my] [--json]
+ *   node scripts/resolve-delivery-unit.mjs --scene 我的 [--json]
  *   node scripts/resolve-delivery-unit.mjs test
  */
 
@@ -70,15 +70,6 @@ function readJson(file) {
   }
 }
 
-function activeClaims(worktree, scene, routeId) {
-  const directory = path.join(worktree.path, 'claims');
-  if (!fs.existsSync(directory)) return [];
-  return fs.readdirSync(directory)
-    .filter(file => file.endsWith('.json') && file !== 'schema.json')
-    .map(file => ({ file, claim: readJson(path.join(directory, file)) }))
-    .filter(({ claim }) => claim.scene === scene || (routeId && claim.routeId === routeId));
-}
-
 function activeIterations(worktree, scene) {
   const directory = path.join(worktree.path, 'wego-app', 'scenes', scene, '_iterations');
   if (!fs.existsSync(directory)) return [];
@@ -102,20 +93,18 @@ function classify(candidates) {
   return { outcome: 'matched', candidates: [candidates[0]] };
 }
 
-function resolve(scene, routeId, { listWorktrees = worktrees, listPullRequests = openPullRequests } = {}) {
+function resolve(scene, { listWorktrees = worktrees, listPullRequests = openPullRequests } = {}) {
   if (!scene) throw new Error('--scene 必填，必须使用已确认的场景名称');
   const pullRequests = listPullRequests();
   const candidates = listWorktrees().flatMap(worktree => {
-    const claims = activeClaims(worktree, scene, routeId);
     const iterations = activeIterations(worktree, scene);
-    if (!claims.length && !iterations.length) return [];
+    if (!iterations.length) return [];
     const pullRequest = pullRequests.find(item => item.headRefName === worktree.branch) || null;
     return [{
       branch: worktree.branch,
       worktree: worktree.path,
       pullRequest,
       stage: 'local-iteration',
-      claims: claims.map(({ file, claim }) => ({ file, agent: claim.agent, scene: claim.scene, routeId: claim.routeId, status: claim.status })),
       iterations
     }];
   });
@@ -146,7 +135,7 @@ if (testing) {
 }
 
 try {
-  const report = resolve(value('--scene'), value('--route-id'));
+  const report = resolve(value('--scene'));
   const payload = JSON.stringify(report, null, 2);
   if (jsonOutput) console.log(payload);
   else {
