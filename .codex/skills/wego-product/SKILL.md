@@ -11,7 +11,7 @@ description: 创建或变更业务迭代；以需求规格说明为唯一需求�
 
 ## 按需读取
 
-默认先读取 `AGENTS.md` 和 `wego-github-delivery` 的交付单元核对结果，再读取当前需求、当前活动迭代和[边界方法](./references/scope-and-boundaries.md)。创建或更新简报时读取[业务迭代契约](./references/iteration-workflow.md)和[简报模板](./references/brief-template.md)；执行提交、确认、失效或冻结时只读取同文件对应操作。参考图、线框图和 Figma 不用于补造业务事实。
+默认先读取 `AGENTS.md` 和 `wego-github-delivery` 的交付单元核对结果，再读取当前需求、当前活动迭代、[设计原则](../wego-design/references/design-principles.md)和[边界方法](./references/scope-and-boundaries.md)。创建或更新简报时读取[业务迭代契约](./references/iteration-workflow.md)和[简报模板](./references/brief-template.md)；执行提交、确认、失效或冻结时只读取同文件对应操作。参考图、线框图和 Figma 不用于补造业务事实。
 
 ## 输出与交接
 
