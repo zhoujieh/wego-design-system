@@ -1002,10 +1002,11 @@
           }
           .close-btn:hover { background: rgba(255,255,255,0.06); color: var(--text-default); }
 
-          /* SV 二维取色面板 — 不裁剪，选点可超出边缘 */
+          /* SV 二维取色面板 — 裁剪超出圆角的内容 */
           .sv-panel {
             position: relative; width: 100%; height: 150px;
             border-radius: 8px; cursor: crosshair;
+            overflow: hidden;
             user-select: none; -webkit-user-select: none;
             touch-action: none;
           }
@@ -3155,6 +3156,8 @@
 
     /** 输入守门：拦截会污染施工单的非法操作 */
     _validateFieldValue(field, value) {
+      // Token 值（var(--xxx)）跳过数值验证
+      if (isTokenValue(value)) return { ok: true };
       const el = this._targetEl;
       const numVal = parseFloat(value);
       const display = getComputedStyle(el).display;
