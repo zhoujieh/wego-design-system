@@ -829,7 +829,18 @@
       this._render();
     }
     open(triggerEl, hex, opacity, callback) {
-      this._hex = hex || '#000000';
+      // token 值（var(--xxx)）需要解析成实际 hex，否则原生 <input type="color"> 会报错
+      let resolvedHex = hex || '#000000';
+      if (isTokenValue(resolvedHex)) {
+        const rgb = resolveCssValue(resolvedHex, 'color');
+        const match = rgb && rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+        if (match) {
+          resolvedHex = '#' + [1, 2, 3].map(i => parseInt(match[i], 10).toString(16).padStart(2, '0')).join('');
+        } else {
+          resolvedHex = '#000000';
+        }
+      }
+      this._hex = resolvedHex;
       this._opacity = opacity !== undefined ? opacity : 100;
       this._callback = callback;
       this._render();
@@ -2847,9 +2858,11 @@
         case 'colorOpacity': {
           const oldValue = cs().color;
           const hex = this._data.colorHex || '#000000';
+          const isTok = isTokenValue(hex);
           // Token 模式：直接应用 var(--xxx)，忽略 opacity
-          if (isTokenValue(hex)) {
+          if (isTok) {
             el.style.color = hex;
+            const computedAfter = getComputedStyle(el).color;
             return { property: 'color', oldValue, newValue: hex };
           }
           const opacity = this._data.colorOpacity ?? 100;
@@ -3010,8 +3023,11 @@
       }
       // 颜色输入框值回显（统一同步，不依赖焦点状态）
       const colorInput = this._shadow.querySelector('[data-field="colorHex"]');
-      if (colorInput && colorInput.value !== colorVal) {
-        colorInput.value = colorVal;
+      if (colorInput) {
+        if (colorInput.value !== colorVal) {
+          colorInput.value = colorVal;
+        }
+      } else {
       }
       // 对齐矩阵
       this._shadow.querySelectorAll('[data-align-preset]').forEach(btn => {
@@ -3039,9 +3055,18 @@
       if (left < 8) left = 8;
       panel.style.left = left + 'px';
       panel.style.top = top + 'px';
-      // 点击外部关闭
+      // 阻止面板和触发按钮内部 mousedown/touchstart 冒泡，避免 shadow DOM 事件重定向导致外部关闭逻辑误关
+      this._tokenPanelStopProp = (e) => e.stopPropagation();
+      panel.addEventListener('mousedown', this._tokenPanelStopProp);
+      panel.addEventListener('touchstart', this._tokenPanelStopProp);
+      trigger.addEventListener('mousedown', this._tokenPanelStopProp);
+      trigger.addEventListener('touchstart', this._tokenPanelStopProp);
+      // 点击外部关闭（用 composedPath 穿透 shadow DOM 边界判断，避免事件重定向误判）
       this._tokenOutsideHandler = (e) => {
-        if (!panel.contains(e.target) && e.target !== trigger && !trigger.contains(e.target)) {
+        const path = e.composedPath ? e.composedPath() : [];
+        const inPanel = path.includes(panel);
+        const inTrigger = path.includes(trigger);
+        if (!inPanel && !inTrigger) {
           this._closeTokenPanel();
         }
       };
@@ -3052,6 +3077,16 @@
     _closeTokenPanel() {
       const panel = this._shadow.querySelector('[data-token-panel]');
       if (panel) panel.classList.remove('open');
+      // 移除阻止冒泡监听
+      if (this._tokenPanelStopProp) {
+        panel.removeEventListener('mousedown', this._tokenPanelStopProp);
+        panel.removeEventListener('touchstart', this._tokenPanelStopProp);
+        if (this._tokenPanel.trigger) {
+          this._tokenPanel.trigger.removeEventListener('mousedown', this._tokenPanelStopProp);
+          this._tokenPanel.trigger.removeEventListener('touchstart', this._tokenPanelStopProp);
+        }
+        this._tokenPanelStopProp = null;
+      }
       this._tokenPanel = { open: false, type: '', trigger: null };
       if (this._tokenOutsideHandler) {
         document.removeEventListener('mousedown', this._tokenOutsideHandler, true);
@@ -3088,6 +3123,7 @@
         item.addEventListener('click', (e) => {
           e.stopPropagation();
           const value = item.dataset.tokenValue;
+          const name = item.dataset.tokenName;
           if (this._tokenPanel.type === 'color') {
             this._onFieldChange('colorHex', value);
           }
@@ -3484,7 +3520,7 @@
       this._shadow.querySelector('[data-collapse-btn]').addEventListener('click', (e) => {
         if (this._suppressClick) { e.preventDefault(); e.stopPropagation(); this._suppressClick = false; return; }
         this.setCollapsed(true);
-        this._closeSubpanels();
+        this._closeAllPanels();
       });
       // 工具条按钮
       this._shadow.querySelectorAll('[data-tool]').forEach(btn => {
@@ -3767,6 +3803,7 @@
     _onToolClick(tool, btn) {
       switch (tool) {
         case 'walkthrough':
+          this._closeAllPanels();
           this._setWalkthroughMode(!this._walkthroughMode);
           break;
         case 'datamock':
@@ -3789,11 +3826,7 @@
       const panel = this._shadow.querySelector(`[data-subpanel="${name}"]`);
       if (!panel) return;
       const isOpen = panel.classList.contains('is-open');
-      this._closeSubpanels();
-      // 互斥：打开子面板时关闭配置列表
-      if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
-        this._components.overviewPanel.close();
-      }
+      this._closeAllPanels();
       if (!isOpen) {
         panel.classList.add('is-open');
         this._updateSubpanelPosition();
@@ -3804,6 +3837,13 @@
 
     _closeSubpanels() {
       this._shadow.querySelectorAll('[data-subpanel]').forEach(p => p.classList.remove('is-open'));
+    }
+
+    _closeAllPanels() {
+      this._closeSubpanels();
+      if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
+        this._components.overviewPanel.close();
+      }
     }
 
     _updateSubpanelPosition() {
