@@ -4,7 +4,7 @@
 
 | 领域 | 权威来源 | 使用方式 |
 | --- | --- | --- |
-| 设计原则 | `../../shared/references/design-principles.md` | 产品范围确认和设计输出共用，先据此裁决清晰、高效、一致与美观。 |
+| 设计原则 | `./design-principles.md` | 产品范围确认和设计输出共用，先据此裁决清晰、高效、一致与美观。 |
 | 交互原型设计方法 | `./interaction-prototype-design.md` | 已确认简报后先形成设计意图、语义区域和精确范式/自主组合方案，再进入组件映射。 |
 | 实际 CSS 变量 | `../colors_and_type.css` | `:root` 中已声明的变量名是唯一可用 Token 名称。 |
 | Token 结构 | `../css.json` | 仅用于理解 palette、语义和层级，不推导 CSS 变量名。 |

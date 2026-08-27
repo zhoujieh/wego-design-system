@@ -13,7 +13,7 @@
 ## 权威入口
 
 - 技能路由：`.codex/skills/README.md`
-- 设计原则：`.codex/skills/shared/references/design-principles.md`
+- 设计原则：`.codex/skills/wego-design/references/design-principles.md`
 - 各技能方法：对应技能 `references/`
 - 本文件只定义跨任务硬约束，不预读完整工作流。
 
