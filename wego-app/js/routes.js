@@ -88,8 +88,8 @@ window.WEGO_APP_ROUTES = [
     type: 'host-tab',
     tab: 'workspace'
   },
-  style: './scenes/infras/工作台/scene.css',
-  script: './scenes/infras/工作台/scene.js'
+  style: './scenes/bcg/工作台/scene.css',
+  script: './scenes/bcg/工作台/scene.js'
 },
 {
   routeId: 'workspace-order-create',

@@ -47,7 +47,7 @@ const sceneCategoryMap = new Map([
   // customer 客户云：客户关系、个人中心
   ['好友列表', 'customer'],
   // infras 基础：系统工具、基础能力
-  ['工作台', 'infras'],
+  ['工作台', 'bcg'],
   ['场景管理', 'infras'],
   ['组件预览', 'infras'],
   ['应用中心', 'infras']
