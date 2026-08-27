@@ -15,7 +15,11 @@
 - 技能路由：`.codex/skills/README.md`
 - 设计原则：`.codex/skills/wego-design/references/design-principles.md`
 - 各技能方法：对应技能 `references/`
+- 经验视图：`.codex/skills/wego-uxsystem-iterate/experience/EXPERIENCE.md`
 - 本文件只定义跨任务硬约束，不预读完整工作流。
+
+<!-- rule-id: agent-must-read-experience-before-task -->
+- 处理 wego 任务前，会话前置读取 `EXPERIENCE.md`，了解历史经验与踩坑教训。
 
 ## 固定产物与边界
 

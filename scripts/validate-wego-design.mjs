@@ -86,17 +86,22 @@ const runParity = ['system', 'full'].includes(requestedScope)
 const parityReport = runParity
   ? parse(run('scripts/validate-component-contract-parity.mjs', []), 'parity')
   : { errors: [], warnings: [], info: [], metrics: { skipped: true } };
+const runDocDrift = ['system', 'full'].includes(requestedScope) || args.includes('--strict');
+const docDriftReport = runDocDrift
+  ? parse(run('scripts/validate-doc-drift.mjs', []), 'doc-drift')
+  : { errors: [], warnings: [], info: [], metrics: { skipped: true } };
 
 const report = {
-  ok: experienceReport.errors.length + parityReport.errors.length + coreReport.errors.length === 0,
+  ok: experienceReport.errors.length + parityReport.errors.length + coreReport.errors.length + docDriftReport.errors.length === 0,
   scope: requestedScope,
-  errors: [...experienceReport.errors, ...parityReport.errors, ...coreReport.errors],
-  warnings: [...experienceReport.warnings, ...parityReport.warnings, ...coreReport.warnings],
-  info: [...experienceReport.info, ...parityReport.info, ...coreReport.info],
+  errors: [...experienceReport.errors, ...parityReport.errors, ...coreReport.errors, ...docDriftReport.errors],
+  warnings: [...experienceReport.warnings, ...parityReport.warnings, ...coreReport.warnings, ...docDriftReport.warnings],
+  info: [...experienceReport.info, ...parityReport.info, ...coreReport.info, ...docDriftReport.info],
   metrics: {
     ...coreReport.metrics,
     experience: experienceReport.metrics,
-    componentParity: parityReport.metrics
+    componentParity: parityReport.metrics,
+    docDrift: docDriftReport.metrics
   }
 };
 
