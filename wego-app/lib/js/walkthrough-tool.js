@@ -1328,6 +1328,8 @@
           .footer {
             display: flex;
             justify-content: flex-end;
+            align-items: center;
+            gap: 8px;
             padding-top: 4px;
             border-top: 1px solid rgba(255,255,255,0.06);
           }
@@ -1348,10 +1350,6 @@
             <div>
               <span class="header-title">配置列表</span>
               <span class="header-count">${changes.length} 项变更</span>
-            </div>
-            <div class="header-actions">
-              <button class="copy-btn" type="button" data-action="copy">复制 Prompt</button>
-              <button class="close-btn" type="button" data-action="close">×</button>
             </div>
           </div>
           <div class="tabs">
@@ -1385,6 +1383,7 @@
           `}
           ${groupList.length > 0 ? `
             <div class="footer">
+              <button class="copy-btn" type="button" data-action="copy">复制 Prompt</button>
               <button class="reset-btn" type="button" data-action="reset">重置所有修改</button>
             </div>
           ` : ''}
@@ -1393,10 +1392,6 @@
     }
 
     _bindEvents() {
-      // 关闭
-      this._shadow.querySelector('[data-action="close"]').addEventListener('click', () => {
-        bus.emit('close-overview');
-      });
       // 复制 Prompt
       this._shadow.querySelector('[data-action="copy"]').addEventListener('click', () => {
         this._copyPrompt();
@@ -3013,10 +3008,10 @@
       if (colorOpacityInput) {
         colorOpacityInput.disabled = isTokenValue(colorVal);
       }
-      // 颜色输入框值回显（非焦点状态下同步，避免打断用户输入）
+      // 颜色输入框值回显（统一同步，不依赖焦点状态）
       const colorInput = this._shadow.querySelector('[data-field="colorHex"]');
-      if (colorInput && document.activeElement !== colorInput) {
-        if (colorInput.value !== colorVal) colorInput.value = colorVal;
+      if (colorInput && colorInput.value !== colorVal) {
+        colorInput.value = colorVal;
       }
       // 对齐矩阵
       this._shadow.querySelectorAll('[data-align-preset]').forEach(btn => {
@@ -3097,9 +3092,6 @@
             this._onFieldChange('colorHex', value);
           }
           this._closeTokenPanel();
-          // 更新输入框显示
-          const input = this._shadow.querySelector('[data-field="colorHex"]');
-          if (input) input.value = value;
         });
       });
     }
@@ -3798,6 +3790,10 @@
       if (!panel) return;
       const isOpen = panel.classList.contains('is-open');
       this._closeSubpanels();
+      // 互斥：打开子面板时关闭配置列表
+      if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
+        this._components.overviewPanel.close();
+      }
       if (!isOpen) {
         panel.classList.add('is-open');
         this._updateSubpanelPosition();
