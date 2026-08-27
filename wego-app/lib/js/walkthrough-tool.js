@@ -2226,11 +2226,9 @@
     // ── 拖动 ──────────────────────────────────────────────
     _startDrag(e, toolbar) {
       if (e.button !== undefined && e.button !== 0) return;
-      // 点击按钮时不触发拖动（但工具条空白区域可以拖动）
-      if (e.target.closest && e.target.closest('button, [data-fault], [data-nav], .switch')) {
-        // 按钮点击不拖动，但允许在按钮上按下后拖动来移动整个工具条
-        // 这里简化：按钮上的点击不触发拖动
-      }
+      // 记录拖动起始状态。不在此处 setPointerCapture：
+      // setPointerCapture 会把后续 click 事件重定向到 toolbar，
+      // 导致 FAB 按钮/工具按钮的真实点击（pointer 序列）不派发到按钮本身，点击失效。
       this._drag.active = true;
       this._drag.moved = false;
       this._drag.pointerId = e.pointerId;
@@ -2239,7 +2237,6 @@
       const rect = this.getBoundingClientRect();
       this._drag.origX = rect.left;
       this._drag.origY = rect.top;
-      try { toolbar.setPointerCapture(e.pointerId); } catch (err) {}
       this.style.transition = 'none';
       toolbar.classList.add('is-dragging');
 
@@ -2268,10 +2265,9 @@
         if (!this._drag.active || ev.pointerId !== this._drag.pointerId) return;
         this._drag.active = false;
         toolbar.classList.remove('is-dragging');
-        try { toolbar.releasePointerCapture(ev.pointerId); } catch (err) {}
-        toolbar.removeEventListener('pointermove', onMove);
-        toolbar.removeEventListener('pointerup', onUp);
-        toolbar.removeEventListener('pointercancel', onUp);
+        document.removeEventListener('pointermove', onMove);
+        document.removeEventListener('pointerup', onUp);
+        document.removeEventListener('pointercancel', onUp);
         if (this._drag.moved) {
           ev.preventDefault();
           ev.stopPropagation();
@@ -2282,9 +2278,9 @@
           this.style.transition = '';
         }
       };
-      toolbar.addEventListener('pointermove', onMove);
-      toolbar.addEventListener('pointerup', onUp);
-      toolbar.addEventListener('pointercancel', onUp);
+      document.addEventListener('pointermove', onMove);
+      document.addEventListener('pointerup', onUp);
+      document.addEventListener('pointercancel', onUp);
     }
 
     _cleanupDrag() {
