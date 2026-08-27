@@ -824,12 +824,15 @@
       this._callback = null;
       this._hex = '#000000';
       this._opacity = 100;
+      this._hsl = { h: 0, s: 0, l: 0 };
+      this._format = 'hex'; // hex | rgb | hsl
+      this._dragType = null;
     }
     connectedCallback() {
       this._render();
     }
     open(triggerEl, hex, opacity, callback) {
-      // token 值（var(--xxx)）需要解析成实际 hex，否则原生 <input type="color"> 会报错
+      // token 值（var(--xxx)）需要解析成实际 hex
       let resolvedHex = hex || '#000000';
       if (isTokenValue(resolvedHex)) {
         const rgb = resolveCssValue(resolvedHex, 'color');
@@ -842,20 +845,19 @@
       }
       this._hex = resolvedHex;
       this._opacity = opacity !== undefined ? opacity : 100;
+      this._hsl = this._hexToHsl(this._hex);
       this._callback = callback;
       this._render();
-      // 定位到触发按钮下方
+      // 定位到触发按钮附近，优先下方，空间不足翻上方
       const rect = triggerEl.getBoundingClientRect();
-      const pickerWidth = 260;
+      const pickerWidth = 280;
+      const pickerHeight = 440;
       let left = rect.left;
       let top = rect.bottom + 6;
-      if (left + pickerWidth > window.innerWidth - 8) {
-        left = window.innerWidth - pickerWidth - 8;
-      }
+      if (left + pickerWidth > window.innerWidth - 8) left = window.innerWidth - pickerWidth - 8;
       if (left < 8) left = 8;
-      if (top + 300 > window.innerHeight - 8) {
-        top = rect.top - 300 - 6;
-      }
+      if (top + pickerHeight > window.innerHeight - 8) top = rect.top - pickerHeight - 6;
+      if (top < 8) top = 8;
       this.style.left = left + 'px';
       this.style.top = top + 'px';
       this.removeAttribute('hidden');
@@ -870,29 +872,103 @@
     }
     close() {
       this.setAttribute('hidden', '');
+      this._dragType = null;
       if (this._outsideHandler) {
         document.removeEventListener('mousedown', this._outsideHandler, true);
         document.removeEventListener('touchstart', this._outsideHandler, true);
         this._outsideHandler = null;
       }
     }
+
+    // ── 颜色转换 ──────────────────────────────────────────
+    _hexToHsl(hex) {
+      const r = parseInt(hex.slice(1, 3), 16) / 255;
+      const g = parseInt(hex.slice(3, 5), 16) / 255;
+      const b = parseInt(hex.slice(5, 7), 16) / 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      let h, s, l = (max + min) / 2;
+      if (max === min) { h = s = 0; }
+      else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+          case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+          case g: h = (b - r) / d + 2; break;
+          case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+      }
+      return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
+    }
+    _hslToHex(h, s, l) {
+      h /= 360; s /= 100; l /= 100;
+      let r, g, b;
+      if (s === 0) { r = g = b = l; }
+      else {
+        const hue2rgb = (p, q, t) => {
+          if (t < 0) t += 1;
+          if (t > 1) t -= 1;
+          if (t < 1 / 6) return p + (q - p) * 6 * t;
+          if (t < 1 / 2) return q;
+          if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+          return p;
+        };
+        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        const p = 2 * l - q;
+        r = hue2rgb(p, q, h + 1 / 3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1 / 3);
+      }
+      const toHex = x => {
+        const v = Math.round(x * 255).toString(16);
+        return v.length === 1 ? '0' + v : v;
+      };
+      return '#' + toHex(r) + toHex(g) + toHex(b);
+    }
+    _hexToRgb(hex) {
+      return {
+        r: parseInt(hex.slice(1, 3), 16),
+        g: parseInt(hex.slice(3, 5), 16),
+        b: parseInt(hex.slice(5, 7), 16),
+      };
+    }
+    _rgbToHex(r, g, b) {
+      const toHex = x => {
+        const v = Math.round(x).toString(16);
+        return v.length === 1 ? '0' + v : v;
+      };
+      return '#' + toHex(r) + toHex(g) + toHex(b);
+    }
+    _getFormatValue() {
+      const { h, s, l } = this._hsl;
+      const rgb = this._hexToRgb(this._hex);
+      switch (this._format) {
+        case 'rgb': return `${rgb.r}, ${rgb.g}, ${rgb.b}`;
+        case 'hsl': return `${h}, ${s}%, ${l}%`;
+        default: return this._hex.toUpperCase();
+      }
+    }
+
+    // ── 渲染 ──────────────────────────────────────────────
     _render() {
+      const { h } = this._hsl;
+      const formatValue = this._getFormatValue();
+      const hasEyedropper = typeof window !== 'undefined' && 'EyeDropper' in window;
+
       this._shadow.innerHTML = `
         <style>
           :host {
             position: fixed;
             z-index: 9700;
-            width: 260px;
+            width: 280px;
             display: none;
             font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", sans-serif;
-            /* 暗色毛玻璃主题，与其他面板统一 */
             --bg-surface: rgba(30, 30, 30, 0.82);
             --bg-subtle: rgba(255, 255, 255, 0.03);
             --border-color: rgba(255, 255, 255, 0.08);
             --text-default: #fff;
             --text-secondary: rgba(255, 255, 255, 0.6);
             --text-tertiary: rgba(255, 255, 255, 0.42);
-            --text-disabled: rgba(255, 255, 255, 0.35);
             --text-brand: #00b96b;
             color: #fff;
             backdrop-filter: blur(18px) saturate(140%);
@@ -903,10 +979,10 @@
             box-sizing: border-box;
             width: 100%;
             padding: 12px;
-            border-radius: 12px;
-            border: 1px solid var(--border-color, rgba(0,0,0,0.08));
-            background: var(--bg-surface, #fff);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-surface);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -916,144 +992,404 @@
             align-items: center;
             justify-content: space-between;
           }
-          .title {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-default, #1a1a1a);
-          }
+          .title { font-size: 13px; font-weight: 600; color: var(--text-default); }
           .close-btn {
-            width: 24px;
-            height: 24px;
-            border: none;
-            background: transparent;
-            color: var(--text-tertiary, #888);
-            font-size: 16px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
+            width: 24px; height: 24px; border: none; background: transparent;
+            color: var(--text-tertiary); font-size: 18px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; padding: 0;
+            border-radius: 6px;
           }
-          .color-input-wrap {
-            width: 100%;
-            height: 120px;
-            border-radius: 8px;
-            overflow: hidden;
-            position: relative;
+          .close-btn:hover { background: rgba(255,255,255,0.06); color: var(--text-default); }
+
+          /* 颜色预览 */
+          .preview {
+            width: 100%; height: 48px; border-radius: 8px;
+            position: relative; overflow: hidden;
+            border: 1px solid var(--border-color);
           }
-          .color-input-wrap input[type="color"] {
-            width: 100%;
-            height: 100%;
-            border: none;
-            padding: 0;
-            cursor: pointer;
-            background: none;
+          .preview-checker {
+            position: absolute; inset: 0;
+            background-image:
+              linear-gradient(45deg, #555 25%, transparent 25%),
+              linear-gradient(-45deg, #555 25%, transparent 25%),
+              linear-gradient(45deg, transparent 75%, #555 75%),
+              linear-gradient(-45deg, transparent 75%, #555 75%);
+            background-size: 10px 10px;
+            background-position: 0 0, 0 5px, 5px -5px, -5px 0;
           }
-          .color-input-wrap input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
-          .color-input-wrap input[type="color"]::-webkit-color-swatch { border: none; border-radius: 8px; }
-          .row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+          .preview-color {
+            position: absolute; inset: 0;
+            transition: background 0.05s linear;
           }
-          .hex-input {
-            flex: 1;
-            height: 32px;
-            padding: 0 10px;
-            border: 1px solid var(--border-color, rgba(0,0,0,0.1));
-            border-radius: 7px;
-            font-size: 12px;
-            color: var(--text-default, #1a1a1a);
-            background: var(--bg-surface, #fff);
-            outline: none;
-            text-transform: uppercase;
+
+          /* SV 取色面板 */
+          .sv-panel {
+            position: relative; width: 100%; height: 160px;
+            border-radius: 8px; overflow: hidden; cursor: crosshair;
+            user-select: none; -webkit-user-select: none;
+            touch-action: none;
+          }
+          .sv-layer { position: absolute; inset: 0; pointer-events: none; }
+          .sv-white { background: linear-gradient(to right, #fff, rgba(255,255,255,0)); }
+          .sv-black { background: linear-gradient(to top, #000, rgba(0,0,0,0)); }
+          .sv-cursor {
+            position: absolute; width: 16px; height: 16px;
+            border: 2px solid #fff; border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3);
+            pointer-events: none;
+          }
+
+          /* 色相条 */
+          .hue-slider {
+            position: relative; width: 100%; height: 12px;
+            border-radius: 6px; cursor: pointer;
+            background: linear-gradient(to right,
+              #ff0000 0%, #ffff00 17%, #00ff00 33%,
+              #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%);
+            user-select: none; -webkit-user-select: none;
+            touch-action: none;
+          }
+          .hue-cursor {
+            position: absolute; top: 50%; width: 16px; height: 16px;
+            border: 2px solid #fff; border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3);
+            pointer-events: none;
+          }
+
+          /* 不透明度 */
+          .opacity-wrap { display: flex; flex-direction: column; gap: 6px; }
+          .opacity-label {
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: 11px; color: var(--text-tertiary);
+          }
+          .opacity-num-wrap { display: flex; align-items: center; gap: 2px; }
+          .opacity-num {
+            width: 36px; height: 22px; padding: 0 4px;
+            border: 1px solid var(--border-color); border-radius: 5px;
+            background: var(--bg-subtle); color: var(--text-default);
+            font-size: 11px; text-align: center; outline: none;
             box-sizing: border-box;
           }
-          .hex-input:focus { border-color: var(--text-brand, #00b96b); }
-          .opacity-wrap {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-          }
-          .opacity-label {
-            font-size: 11px;
-            color: var(--text-tertiary, #888);
-            display: flex;
-            justify-content: space-between;
-          }
+          .opacity-num:focus { border-color: var(--text-brand); }
+          .opacity-unit { font-size: 11px; color: var(--text-tertiary); }
           .opacity-slider {
-            width: 100%;
-            height: 6px;
-            -webkit-appearance: none;
-            appearance: none;
-            border-radius: 3px;
-            background: linear-gradient(to right, transparent, ${this._hex});
-            outline: none;
-            cursor: pointer;
+            position: relative; width: 100%; height: 10px;
+            border-radius: 5px; cursor: pointer; overflow: hidden;
+            user-select: none; -webkit-user-select: none;
+            touch-action: none;
           }
-          .opacity-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: #fff;
-            border: 2px solid var(--text-brand, #00b96b);
-            cursor: pointer;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+          .opacity-checker {
+            position: absolute; inset: 0;
+            background-image:
+              linear-gradient(45deg, #555 25%, transparent 25%),
+              linear-gradient(-45deg, #555 25%, transparent 25%),
+              linear-gradient(45deg, transparent 75%, #555 75%),
+              linear-gradient(-45deg, transparent 75%, #555 75%);
+            background-size: 8px 8px;
+            background-position: 0 0, 0 4px, 4px -4px, -4px 0;
           }
+          .opacity-fill {
+            position: absolute; inset: 0; pointer-events: none;
+          }
+          .opacity-cursor {
+            position: absolute; top: 50%; width: 14px; height: 14px;
+            border: 2px solid #fff; border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3);
+            pointer-events: none;
+          }
+
+          /* 格式行 */
+          .format-row {
+            display: flex; align-items: center; gap: 6px;
+          }
+          .format-select-wrap { position: relative; flex-shrink: 0; }
+          .format-select {
+            height: 30px; padding: 0 24px 0 8px;
+            border: 1px solid var(--border-color); border-radius: 7px;
+            background: var(--bg-subtle); color: var(--text-default);
+            font-size: 11px; font-weight: 500; outline: none;
+            cursor: pointer; appearance: none; -webkit-appearance: none;
+          }
+          .format-select:focus { border-color: var(--text-brand); }
+          .format-select-wrap::after {
+            content: '▾'; position: absolute; right: 8px; top: 50%;
+            transform: translateY(-50%); font-size: 9px;
+            color: var(--text-tertiary); pointer-events: none;
+          }
+          .format-input {
+            flex: 1; height: 30px; padding: 0 8px;
+            border: 1px solid var(--border-color); border-radius: 7px;
+            background: var(--bg-subtle); color: var(--text-default);
+            font-size: 12px; font-family: "SF Mono", Menlo, monospace;
+            outline: none; text-transform: uppercase; box-sizing: border-box;
+            min-width: 0;
+          }
+          .format-input:focus { border-color: var(--text-brand); }
+          .eyedropper-btn {
+            width: 30px; height: 30px; flex-shrink: 0;
+            border: 1px solid var(--border-color); border-radius: 7px;
+            background: var(--bg-subtle); color: var(--text-secondary);
+            cursor: pointer; display: flex; align-items: center;
+            justify-content: center; padding: 0;
+          }
+          .eyedropper-btn:hover { background: rgba(255,255,255,0.06); color: var(--text-default); }
+          .eyedropper-btn:active { background: rgba(255,255,255,0.1); }
         </style>
         <div class="picker">
           <div class="header">
             <span class="title">颜色</span>
             <button class="close-btn" type="button" data-action="close">×</button>
           </div>
-          <div class="color-input-wrap">
-            <input type="color" value="${this._hex}" data-color-input />
+
+          <!-- 颜色预览 -->
+          <div class="preview">
+            <div class="preview-checker"></div>
+            <div class="preview-color" data-preview-color style="background:${this._hex};opacity:${this._opacity / 100};"></div>
           </div>
-          <div class="row">
-            <input class="hex-input" type="text" value="${this._hex}" data-hex-input maxlength="7" />
+
+          <!-- SV 二维取色面板 -->
+          <div class="sv-panel" data-sv-panel style="background:hsl(${h},100%,50%);">
+            <div class="sv-layer sv-white"></div>
+            <div class="sv-layer sv-black"></div>
+            <div class="sv-cursor" data-sv-cursor style="left:${this._hsl.s}%;top:${100 - this._hsl.l}%;"></div>
           </div>
+
+          <!-- 色相条 -->
+          <div class="hue-slider" data-hue-slider>
+            <div class="hue-cursor" data-hue-cursor style="left:${h / 360 * 100}%;"></div>
+          </div>
+
+          <!-- 不透明度 -->
           <div class="opacity-wrap">
             <div class="opacity-label">
               <span>不透明度</span>
-              <span data-opacity-value>${this._opacity}%</span>
+              <span class="opacity-num-wrap">
+                <input class="opacity-num" type="text" value="${this._opacity}" data-opacity-num inputmode="numeric" />
+                <span class="opacity-unit">%</span>
+              </span>
             </div>
-            <input class="opacity-slider" type="range" min="0" max="100" value="${this._opacity}" data-opacity-input />
+            <div class="opacity-slider" data-opacity-slider>
+              <div class="opacity-checker"></div>
+              <div class="opacity-fill" data-opacity-fill style="background:linear-gradient(to right, transparent, ${this._hex});"></div>
+              <div class="opacity-cursor" data-opacity-cursor style="left:${this._opacity}%;"></div>
+            </div>
+          </div>
+
+          <!-- 格式切换 + 输入 + 吸管 -->
+          <div class="format-row">
+            <div class="format-select-wrap">
+              <select class="format-select" data-format-select>
+                <option value="hex" ${this._format === 'hex' ? 'selected' : ''}>HEX</option>
+                <option value="rgb" ${this._format === 'rgb' ? 'selected' : ''}>RGB</option>
+                <option value="hsl" ${this._format === 'hsl' ? 'selected' : ''}>HSL</option>
+              </select>
+            </div>
+            <input class="format-input" type="text" value="${formatValue}" data-format-input spellcheck="false" />
+            ${hasEyedropper ? `
+            <button class="eyedropper-btn" type="button" data-eyedropper title="从页面取色">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 22l4-1 11-11-3-3L3 18l-1 4z"/>
+                <path d="M14 7l3 3"/>
+                <path d="M17 4l3 3"/>
+              </svg>
+            </button>` : ''}
           </div>
         </div>
       `;
-      // 绑定事件
-      this._shadow.querySelector('[data-action="close"]').addEventListener('click', () => this.close());
-      this._shadow.querySelector('[data-color-input]').addEventListener('input', (e) => {
-        this._hex = e.target.value.toUpperCase();
-        this._shadow.querySelector('[data-hex-input]').value = this._hex;
-        this._updateOpacityBg();
-        this._emitChange();
-      });
-      this._shadow.querySelector('[data-hex-input]').addEventListener('change', (e) => {
-        let val = e.target.value.trim();
-        if (!val.startsWith('#')) val = '#' + val;
-        if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
-          this._hex = val.toUpperCase();
-          this._shadow.querySelector('[data-color-input]').value = this._hex;
-          this._updateOpacityBg();
-          this._emitChange();
-        } else {
-          e.target.value = this._hex;
-        }
-      });
-      this._shadow.querySelector('[data-opacity-input]').addEventListener('input', (e) => {
-        this._opacity = parseInt(e.target.value);
-        this._shadow.querySelector('[data-opacity-value]').textContent = this._opacity + '%';
-        this._emitChange();
-      });
-      this._updateOpacityBg();
+      this._bindEvents();
     }
-    _updateOpacityBg() {
-      const slider = this._shadow.querySelector('[data-opacity-input]');
-      if (slider) {
-        slider.style.background = `linear-gradient(to right, transparent, ${this._hex})`;
+
+    // ── 事件绑定 ──────────────────────────────────────────
+    _bindEvents() {
+      this._shadow.querySelector('[data-action="close"]').addEventListener('click', () => this.close());
+
+      // SV 面板拖动
+      this._setupDrag(this._shadow.querySelector('[data-sv-panel]'), 'sv', (clientX, clientY, rect) => {
+        const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+        const y = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
+        this._hsl.s = Math.round(x * 100);
+        this._hsl.l = Math.round((1 - y) * 100);
+        this._hex = this._hslToHex(this._hsl.h, this._hsl.s, this._hsl.l);
+        this._syncFromHsl();
+        this._emitChange();
+      });
+
+      // 色相条拖动
+      this._setupDrag(this._shadow.querySelector('[data-hue-slider]'), 'hue', (clientX, clientY, rect) => {
+        const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+        this._hsl.h = Math.round(x * 360);
+        this._hex = this._hslToHex(this._hsl.h, this._hsl.s, this._hsl.l);
+        this._syncFromHsl();
+        this._emitChange();
+      });
+
+      // 不透明度拖动
+      this._setupDrag(this._shadow.querySelector('[data-opacity-slider]'), 'opacity', (clientX, clientY, rect) => {
+        const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+        this._opacity = Math.round(x * 100);
+        this._syncOpacity();
+        this._emitChange();
+      });
+
+      // 不透明度数值输入
+      const opacityNum = this._shadow.querySelector('[data-opacity-num]');
+      opacityNum.addEventListener('change', (e) => {
+        let val = parseInt(e.target.value, 10);
+        if (isNaN(val)) val = this._opacity;
+        val = Math.max(0, Math.min(100, val));
+        this._opacity = val;
+        this._syncOpacity();
+        this._emitChange();
+      });
+      opacityNum.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); }
+      });
+
+      // 格式切换
+      this._shadow.querySelector('[data-format-select]').addEventListener('change', (e) => {
+        this._format = e.target.value;
+        this._updateFormatInput();
+      });
+
+      // 格式输入
+      const formatInput = this._shadow.querySelector('[data-format-input]');
+      formatInput.addEventListener('change', (e) => this._parseFormatInput(e.target.value));
+      formatInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); }
+      });
+
+      // 吸管
+      const eyedropperBtn = this._shadow.querySelector('[data-eyedropper]');
+      if (eyedropperBtn) {
+        eyedropperBtn.addEventListener('click', async () => {
+          try {
+            const eyeDropper = new window.EyeDropper();
+            const result = await eyeDropper.open();
+            if (result && result.sRGBHex) {
+              this._hex = result.sRGBHex.toUpperCase();
+              this._hsl = this._hexToHsl(this._hex);
+              this._syncFromHsl();
+              this._emitChange();
+            }
+          } catch (err) { /* 用户取消取色 */ }
+        });
+      }
+    }
+
+    _setupDrag(el, type, onMove) {
+      const onPointerDown = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this._dragType = type;
+        const rect = el.getBoundingClientRect();
+        onMove(e.clientX, e.clientY, rect);
+        const onPointerMove = (ev) => {
+          if (this._dragType !== type) return;
+          ev.preventDefault();
+          onMove(ev.clientX, ev.clientY, rect);
+        };
+        const onPointerUp = () => {
+          if (this._dragType === type) this._dragType = null;
+          document.removeEventListener('pointermove', onPointerMove);
+          document.removeEventListener('pointerup', onPointerUp);
+          document.removeEventListener('pointercancel', onPointerUp);
+        };
+        document.addEventListener('pointermove', onPointerMove);
+        document.addEventListener('pointerup', onPointerUp);
+        document.addEventListener('pointercancel', onPointerUp);
+      };
+      el.addEventListener('pointerdown', onPointerDown);
+    }
+
+    // ── 格式输入解析 ──────────────────────────────────────
+    _parseFormatInput(val) {
+      val = (val || '').trim();
+      try {
+        if (this._format === 'hex') {
+          if (!val.startsWith('#')) val = '#' + val;
+          if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+            this._hex = val.toUpperCase();
+            this._hsl = this._hexToHsl(this._hex);
+            this._syncFromHsl();
+            this._emitChange();
+            return;
+          }
+        } else if (this._format === 'rgb') {
+          const m = val.match(/(\d+)\s*[, ]\s*(\d+)\s*[, ]\s*(\d+)/);
+          if (m) {
+            const r = Math.max(0, Math.min(255, parseInt(m[1], 10)));
+            const g = Math.max(0, Math.min(255, parseInt(m[2], 10)));
+            const b = Math.max(0, Math.min(255, parseInt(m[3], 10)));
+            this._hex = this._rgbToHex(r, g, b);
+            this._hsl = this._hexToHsl(this._hex);
+            this._syncFromHsl();
+            this._emitChange();
+            return;
+          }
+        } else if (this._format === 'hsl') {
+          const m = val.match(/(\d+)\s*[, ]\s*(\d+)%?\s*[, ]\s*(\d+)%?/);
+          if (m) {
+            const h = Math.max(0, Math.min(360, parseInt(m[1], 10)));
+            const s = Math.max(0, Math.min(100, parseInt(m[2], 10)));
+            const l = Math.max(0, Math.min(100, parseInt(m[3], 10)));
+            this._hsl = { h, s, l };
+            this._hex = this._hslToHex(h, s, l);
+            this._syncFromHsl();
+            this._emitChange();
+            return;
+          }
+        }
+      } catch (e) { /* ignore */ }
+      // 解析失败，恢复当前值
+      this._updateFormatInput();
+    }
+
+    // ── UI 同步 ───────────────────────────────────────────
+    _syncFromHsl() {
+      // SV 面板背景（色相）
+      const svPanel = this._shadow.querySelector('[data-sv-panel]');
+      if (svPanel) svPanel.style.background = `hsl(${this._hsl.h},100%,50%)`;
+      // SV 选点
+      const svCursor = this._shadow.querySelector('[data-sv-cursor]');
+      if (svCursor) {
+        svCursor.style.left = this._hsl.s + '%';
+        svCursor.style.top = (100 - this._hsl.l) + '%';
+      }
+      // 色相选点
+      const hueCursor = this._shadow.querySelector('[data-hue-cursor]');
+      if (hueCursor) hueCursor.style.left = (this._hsl.h / 360 * 100) + '%';
+      // 预览
+      this._updatePreview();
+      // 不透明度填充条颜色
+      this._updateOpacityFill();
+      // 格式输入
+      this._updateFormatInput();
+    }
+    _syncOpacity() {
+      const opacityCursor = this._shadow.querySelector('[data-opacity-cursor]');
+      if (opacityCursor) opacityCursor.style.left = this._opacity + '%';
+      const opacityNum = this._shadow.querySelector('[data-opacity-num]');
+      if (opacityNum) opacityNum.value = this._opacity;
+      this._updatePreview();
+    }
+    _updatePreview() {
+      const preview = this._shadow.querySelector('[data-preview-color]');
+      if (preview) {
+        preview.style.background = this._hex;
+        preview.style.opacity = this._opacity / 100;
+      }
+    }
+    _updateOpacityFill() {
+      const fill = this._shadow.querySelector('[data-opacity-fill]');
+      if (fill) fill.style.background = `linear-gradient(to right, transparent, ${this._hex})`;
+    }
+    _updateFormatInput() {
+      const input = this._shadow.querySelector('[data-format-input]');
+      if (input && document.activeElement !== input) {
+        input.value = this._getFormatValue();
       }
     }
     _emitChange() {
@@ -1562,56 +1898,56 @@
     {
       label: '文字色',
       tokens: [
-        { name: 'text-default', var: '--text-default', label: '默认' },
-        { name: 'text-secondary', var: '--text-secondary', label: '次要' },
-        { name: 'text-tertiary', var: '--text-tertiary', label: '三级' },
-        { name: 'text-disabled', var: '--text-disabled', label: '禁用' },
-        { name: 'text-inverse', var: '--text-inverse', label: '反白' },
-        { name: 'text-brand', var: '--text-brand', label: '品牌' },
-        { name: 'text-promotion', var: '--text-promotion', label: '促销' },
+        { name: 'text-default', var: '--text-default', label: '默认', desc: '主要正文文字' },
+        { name: 'text-secondary', var: '--text-secondary', label: '次要', desc: '次级说明文字' },
+        { name: 'text-tertiary', var: '--text-tertiary', label: '三级', desc: '辅助/占位文字' },
+        { name: 'text-disabled', var: '--text-disabled', label: '禁用', desc: '不可用状态文字' },
+        { name: 'text-inverse', var: '--text-inverse', label: '反白', desc: '深色背景上的文字' },
+        { name: 'text-brand', var: '--text-brand', label: '品牌', desc: '品牌色/可点击文字' },
+        { name: 'text-promotion', var: '--text-promotion', label: '促销', desc: '价格/促销强调文字' },
       ],
     },
     {
       label: '背景色',
       tokens: [
-        { name: 'bg-surface', var: '--bg-surface', label: '表面' },
-        { name: 'bg-panel', var: '--bg-panel', label: '面板' },
-        { name: 'bg-muted', var: '--bg-muted', label: '弱化' },
-        { name: 'bg-subtle', var: '--bg-subtle', label: '微弱' },
-        { name: 'bg-active', var: '--bg-active', label: '激活' },
-        { name: 'bg-inverse', var: '--bg-inverse', label: '反色' },
-        { name: 'bg-brand', var: '--bg-brand', label: '品牌' },
-        { name: 'bg-page', var: '--bg-page', label: '页面' },
+        { name: 'bg-surface', var: '--bg-surface', label: '表面', desc: '卡片/容器背景' },
+        { name: 'bg-panel', var: '--bg-panel', label: '面板', desc: '浮层/面板背景' },
+        { name: 'bg-muted', var: '--bg-muted', label: '弱化', desc: '次级区域背景' },
+        { name: 'bg-subtle', var: '--bg-subtle', label: '微弱', desc: '分割/微弱背景' },
+        { name: 'bg-active', var: '--bg-active', label: '激活', desc: '按下/选中背景' },
+        { name: 'bg-inverse', var: '--bg-inverse', label: '反色', desc: '深色背景' },
+        { name: 'bg-brand', var: '--bg-brand', label: '品牌', desc: '品牌色背景' },
+        { name: 'bg-page', var: '--bg-page', label: '页面', desc: '页面底色' },
       ],
     },
     {
       label: '边框色',
       tokens: [
-        { name: 'border-brand', var: '--border-brand', label: '品牌' },
-        { name: 'border-danger', var: '--border-danger', label: '危险' },
-        { name: 'border-info', var: '--border-info', label: '信息' },
-        { name: 'border-success', var: '--border-success', label: '成功' },
-        { name: 'border-warning', var: '--border-warning', label: '警告' },
-        { name: 'border-control', var: '--border-control', label: '控件' },
+        { name: 'border-brand', var: '--border-brand', label: '品牌', desc: '品牌色边框' },
+        { name: 'border-danger', var: '--border-danger', label: '危险', desc: '错误/危险边框' },
+        { name: 'border-info', var: '--border-info', label: '信息', desc: '信息提示边框' },
+        { name: 'border-success', var: '--border-success', label: '成功', desc: '成功状态边框' },
+        { name: 'border-warning', var: '--border-warning', label: '警告', desc: '警告状态边框' },
+        { name: 'border-control', var: '--border-control', label: '控件', desc: '输入框/控件边框' },
       ],
     },
     {
       label: '状态色',
       tokens: [
-        { name: 'status-success', var: '--status-success-default', label: '成功' },
-        { name: 'status-warning', var: '--status-warning-default', label: '警告' },
-        { name: 'status-danger', var: '--status-danger-default', label: '危险' },
-        { name: 'status-info', var: '--status-info-default', label: '信息' },
-        { name: 'status-promotion', var: '--status-promotion-default', label: '促销' },
+        { name: 'status-success', var: '--status-success-default', label: '成功', desc: '成功状态指示' },
+        { name: 'status-warning', var: '--status-warning-default', label: '警告', desc: '警告状态指示' },
+        { name: 'status-danger', var: '--status-danger-default', label: '危险', desc: '危险/错误状态' },
+        { name: 'status-info', var: '--status-info-default', label: '信息', desc: '信息状态指示' },
+        { name: 'status-promotion', var: '--status-promotion-default', label: '促销', desc: '促销活动色' },
       ],
     },
     {
       label: '强调色',
       tokens: [
-        { name: 'accent-yellow', var: '--accent-yellow', label: '黄' },
-        { name: 'accent-green', var: '--accent-green', label: '绿' },
-        { name: 'accent-purple', var: '--accent-purple', label: '紫' },
-        { name: 'accent-gold', var: '--accent-gold', label: '金' },
+        { name: 'accent-yellow', var: '--accent-yellow', label: '黄', desc: '黄色强调' },
+        { name: 'accent-green', var: '--accent-green', label: '绿', desc: '绿色强调' },
+        { name: 'accent-purple', var: '--accent-purple', label: '紫', desc: '紫色强调' },
+        { name: 'accent-gold', var: '--accent-gold', label: '金', desc: '金色强调' },
       ],
     },
   ];
@@ -1988,20 +2324,20 @@
             background: rgba(0,185,107,0.12);
             color: var(--text-brand, #00b96b);
           }
-          /* Token 选择弹出面板 */
+          /* Token 选择弹出面板 — 横向网格色板，毛玻璃与样式面板统一 */
           .token-panel {
             position: absolute;
             z-index: 9650;
-            width: 240px;
-            max-height: 320px;
+            width: 260px;
+            max-height: 340px;
             overflow-y: auto;
             padding: 12px;
-            border-radius: 16px;
+            border-radius: 14px;
             border: 1px solid rgba(255, 255, 255, 0.08);
-            background: rgba(30, 30, 30, 0.78);
-            backdrop-filter: blur(18px) saturate(140%);
-            -webkit-backdrop-filter: blur(18px) saturate(140%);
-            box-shadow: 0 20px 100px rgba(0, 0, 0, 0.12);
+            background: rgba(28, 28, 30, 0.68);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
             display: none;
           }
           .token-panel.open { display: block; }
@@ -2010,51 +2346,72 @@
             font-size: 10px;
             font-weight: 600;
             color: var(--text-tertiary, rgba(255,255,255,0.45));
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin: 8px 0 4px;
+            margin: 10px 0 6px;
+            letter-spacing: 0.3px;
           }
           .token-group-title:first-child { margin-top: 0; }
+          .token-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+          }
           .token-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            position: relative;
             width: 100%;
-            padding: 6px 8px;
-            border: none;
+            aspect-ratio: 1;
+            padding: 0;
+            border: 2px solid transparent;
             border-radius: 6px;
             background: transparent;
-            color: var(--text-default, #fff);
-            font-size: 11px;
-            font-family: inherit;
             cursor: pointer;
-            text-align: left;
-            transition: background 0.1s;
+            transition: border-color 0.12s, transform 0.12s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
           }
           .token-item:hover {
-            background: rgba(255,255,255,0.06);
+            transform: scale(1.12);
+            z-index: 2;
           }
           .token-item.selected {
-            background: rgba(0,185,107,0.15);
+            border-color: var(--text-brand, #00b96b);
           }
           .token-swatch {
-            width: 16px;
-            height: 16px;
+            width: 100%;
+            height: 100%;
             border-radius: 4px;
-            border: 1px solid rgba(255,255,255,0.15);
-            flex-shrink: 0;
+            border: 1px solid rgba(255,255,255,0.12);
           }
-          .token-label {
-            flex: 1;
-            min-width: 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
+          /* hover tooltip：变量名 + 语义 */
+          .token-tooltip {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            flex-direction: column;
+            gap: 2px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            background: rgba(20, 20, 20, 0.95);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
             white-space: nowrap;
+            z-index: 10;
+            pointer-events: none;
           }
-          .token-name {
+          .token-item:hover .token-tooltip {
+            display: flex;
+          }
+          .token-tooltip-name {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-default, #fff);
+            font-family: "SF Mono", Menlo, monospace;
+          }
+          .token-tooltip-desc {
             font-size: 10px;
-            color: var(--text-tertiary, rgba(255,255,255,0.4));
-            flex-shrink: 0;
+            color: var(--text-tertiary, rgba(255,255,255,0.5));
           }
           .layout-tabs {
             display: flex;
@@ -3051,7 +3408,7 @@
       const panelRect = this.getBoundingClientRect();
       let left = rect.left - panelRect.left;
       let top = rect.bottom - panelRect.top + 6;
-      const panelWidth = 240;
+      const panelWidth = 280;
       if (left + panelWidth > panelRect.width - 8) {
         left = panelRect.width - panelWidth - 8;
       }
@@ -3106,6 +3463,7 @@
       if (type === 'color') {
         COLOR_TOKEN_GROUPS.forEach(group => {
           html += `<div class="token-group-title">${group.label}</div>`;
+          html += `<div class="token-grid">`;
           group.tokens.forEach(token => {
             const varExpr = `var(${token.var})`;
             const selected = currentVal === varExpr;
@@ -3114,10 +3472,13 @@
               <button class="token-item ${selected ? 'selected' : ''}" type="button"
                 data-token-value="${varExpr}" data-token-name="${token.name}">
                 <span class="token-swatch" style="background:${color}"></span>
-                <span class="token-label">${token.label}</span>
-                <span class="token-name">${token.name}</span>
+                <span class="token-tooltip">
+                  <span class="token-tooltip-name">${token.var}</span>
+                  <span class="token-tooltip-desc">${token.label} · ${token.desc || ''}</span>
+                </span>
               </button>`;
           });
+          html += `</div>`;
         });
       }
       listEl.innerHTML = html;
