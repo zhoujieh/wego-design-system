@@ -1,24 +1,26 @@
 # 工作流与经验同步矩阵
 
-> 工作流规则和经验升级的按需同步范围。组件、Token 与 UI Kit 使用 `sync-matrix.runtime.md`。
+> 工作流规则和经验沉淀的按需同步范围。组件、Token 与 UI Kit 使用 `sync-matrix.runtime.md`。
 
 | 改动 | 必改 | 仅在受影响时同步 | 验证 |
 | --- | --- | --- | --- |
-| 用户触发总结并登记事实 | `.codex/skills/wego-uxsystem-iterate/experience/evidence.json` | `.codex/skills/wego-uxsystem-iterate/experience/candidates.json` | 独立事实事件、证明材料、任务引用、场景和经验关联；同一任务同根因只计一次 |
-| 新建或归并经验 | `.codex/skills/wego-uxsystem-iterate/experience/candidates.json` | `.codex/skills/wego-uxsystem-iterate/experience/evidence.json` | 先查已有规则；分类与类型匹配；归属为最早阻止问题的技能；按 relatedRuleId、rootCause、ownerSkill、normalizedKey 去重 |
-| 经验首次达到升级阈值 | `.codex/skills/wego-uxsystem-iterate/experience/candidates.json` | 无 | `occurrenceCount` 达到 3，状态改为 `proposed`，`proposalReason=threshold`，并提示用户确认是否升级 |
-| 用户明确要求正式升级 | 唯一权威源、直接消费者、`candidates.json.upgradeHistory` | 能客观验证时同步守卫 | 先提交正式修复，再记录修复提交 SHA；状态改为 `upgraded`，经验和事实不删除 |
-| 已升级经验再次出现 | `evidence.json`、`candidates.json` | 上次升级权威源和直接消费者 | 累计次数继续增加，立即改为 `proposed`，`proposalReason=post-upgrade-recurrence`，复查上次修复位置和内容，不重新等待 3 次 |
+| 信号触发沉淀事实 | `experience/evidence.json` | `experience/candidates.json` | 事实事件包含 date/summary/source；同一任务同根因只计一次 |
+| 新建或归并经验 | `experience/candidates.json` | `experience/evidence.json`、`experience/EXPERIENCE.md` | class 为 workflow-lesson 或 design-knowledge；ownerSkill 为最早阻止问题的技能；按 class+ownerSkill+核心问题去重；运行 refine-experience.mjs 更新视图 |
+| 用户确认升级 | 唯一权威源、直接消费者、`candidates.json.upgradeHistory` | 能客观验证时同步守卫 | 先提交正式修复，再记录修复提交 SHA；状态改为 upgraded；EXPERIENCE.md 删除对应条目 |
+| 已升级经验复发 | `evidence.json`、`candidates.json` | 上次升级权威源和直接消费者 | 累计次数继续增加，立即改为 proposed（post-upgrade-recurrence），复查上次修复，不重新等待阈值 |
+| 经验 90 天无新证据 | `candidates.json` 状态改为 stale | `EXPERIENCE.md` | stale 经验从视图过滤；出现新证据自动复活为 observing |
+| 场景下线或规则取代 | `candidates.json` 状态改为 obsolete | `EXPERIENCE.md` | obsolete 经验从视图过滤，不复活 |
 | 技能入口调整 | 目标 `SKILL.md` | 直接引用的 reference、`.codex/skills/README.md` | 三条业务主链技能与交付技能存在、入口唯一、链接有效 |
-| GitHub 交付规则调整 | `wego-github-delivery` 规则、`AGENTS.md` | `wego-design`、`wego-uxsystem-iterate`、迭代工作流、技能路由、`README.md`、实际验证入口 | 先核对全部 worktree、开放 PR、未冻结迭代和本地预览记录；同一交付单元复用分支/worktree；默认本地迭代，完成一轮实现并通过本地验证后自动推送并更新同一 PR，合并须用户验收通过；合并、关闭或废弃后收口服务与分支 |
-| 技能适配器调整 | `.trae/skills/*`、`.codebuddy/skills/*` 逐项符号链接或整目录符号链接 | `AGENTS.md`、实际验证入口 | 两个适配器以逐项符号链接或整目录符号链接指向 `.codex/skills/*`，不保留副本或额外技能目录 |
+| GitHub 交付规则调整 | `wego-github-delivery` 规则、`AGENTS.md` | `wego-design`、`wego-uxsystem-iterate`、迭代工作流、技能路由、`README.md`、实际验证入口 | 先核对全部 worktree、开放 PR、未冻结迭代和本地预览记录；同一交付单元复用分支/worktree |
+| 技能适配器调整 | `.trae/skills/*`、`.codebuddy/skills/*` 逐项符号链接或整目录符号链接 | `AGENTS.md`、实际验证入口 | 两个适配器以符号链接指向 `.codex/skills/*`，不保留副本 |
 | 工作流守卫调整 | 实际执行脚本 | 统一验证入口与脚本文档 | `--scope=system --strict` 必须运行对应回归测试并校验工作流引用 |
+| 文档漂移检查 | 按本表必改列逐项核对 | 引用的 rule-id、文件路径、命令示例 | rule-id 锚点存在、文件路径存在、验证命令可执行 |
 
-设计原则只承载跨场景的顶层判断，并保留稳定 `rule-id`。业务事实、组件结构、页面范式、运行实现、资源消费和测试方法留在各自权威源，不投影到原则文档。
+设计原则只承载跨场景的顶层判断，并保留稳定 `rule-id`。业务事实、组件结构、页面范式、运行实现、资源消费和测试方法留在各自权威源。
 
-`SKILL.md` 只保留触发、职责、按需读取、输出和交接。守卫不得依赖固定标题、固定句子、引用顺序或同义词扫描；结构化经验数据可以按 Schema 和引用关系验证。
+`SKILL.md` 只保留触发、职责、按需读取、输出和交接。守卫不得依赖固定标题、固定句子、引用顺序或同义词扫描；结构化经验数据按 Schema 和引用关系验证。
 
-`evidence.json` 保存不可因升级而删除的事实事件；`candidates.json` 保存经验归纳、累计次数、状态和升级历史。`occurrenceCount` 等于关联的独立事实事件数量，同一事件中的多条证明材料不重复计次。
+`evidence.json` 保存不可删除的事实事件；`candidates.json` 保存经验归纳、累计次数、状态和升级历史；`EXPERIENCE.md` 是从经验库自动提炼的视图，手动编辑会被覆盖。`occurrenceCount` 等于关联的独立事实事件数量。
 
 经验数据只能存在于 `.codex/skills/wego-uxsystem-iterate/experience/`。发现旧副本时必须先合并有效内容，再删除旧副本并清理全部旧路径引用。
 
