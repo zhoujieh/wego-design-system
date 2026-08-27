@@ -1,0 +1,7 @@
+{
+  "agent": "kiro-order-query",
+  "scene": "订单查询",
+  "routeId": "workspace-order-query",
+  "branch": "feature/kiro-order-query",
+  "claimedAt": "2026-08-27T01:12:06.828Z"
+}

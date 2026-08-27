@@ -155,7 +155,7 @@ const appCenterTemplate = `
       name: '订单交易',
       apps: [
         { name: '收款码', asset: '收款码' },
-        { name: '查订单-查快递', asset: '查订单-查快递' },
+        { name: '查订单-查快递', asset: '查订单-查快递', routeId: 'workspace-order-query' },
         { name: '售后', asset: '售后' },
         { name: '销售单', asset: '销售单', routeId: 'workspace-order-create' },
         { name: '销售报表', asset: '销售报表' }
