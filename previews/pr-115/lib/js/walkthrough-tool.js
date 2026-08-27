@@ -824,12 +824,15 @@
       this._callback = null;
       this._hex = '#000000';
       this._opacity = 100;
+      this._hsv = { h: 0, s: 0, v: 0 };
+      this._format = 'hex'; // hex | rgb | hsb
+      this._dragType = null;
     }
     connectedCallback() {
       this._render();
     }
     open(triggerEl, hex, opacity, callback) {
-      // token 值（var(--xxx)）需要解析成实际 hex，否则原生 <input type="color"> 会报错
+      // token 值（var(--xxx)）需要解析成实际 hex
       let resolvedHex = hex || '#000000';
       if (isTokenValue(resolvedHex)) {
         const rgb = resolveCssValue(resolvedHex, 'color');
@@ -842,26 +845,28 @@
       }
       this._hex = resolvedHex;
       this._opacity = opacity !== undefined ? opacity : 100;
+      this._hsv = this._hexToHsv(this._hex);
       this._callback = callback;
       this._render();
-      // 定位到触发按钮下方
+      // 先显示以测量实际尺寸，再定位到触发按钮附近，优先下方，空间不足翻上方
+      this.removeAttribute('hidden');
       const rect = triggerEl.getBoundingClientRect();
-      const pickerWidth = 260;
+      const pickerWidth = this.offsetWidth || 260;
+      const pickerHeight = this.offsetHeight || 300;
       let left = rect.left;
       let top = rect.bottom + 6;
-      if (left + pickerWidth > window.innerWidth - 8) {
-        left = window.innerWidth - pickerWidth - 8;
-      }
+      if (left + pickerWidth > window.innerWidth - 8) left = window.innerWidth - pickerWidth - 8;
       if (left < 8) left = 8;
-      if (top + 300 > window.innerHeight - 8) {
-        top = rect.top - 300 - 6;
-      }
+      if (top + pickerHeight > window.innerHeight - 8) top = rect.top - pickerHeight - 6;
+      if (top < 8) top = 8;
       this.style.left = left + 'px';
       this.style.top = top + 'px';
-      this.removeAttribute('hidden');
-      // 点击外部关闭
+      // 点击外部关闭（用 composedPath 穿透 shadow DOM 边界判断，避免事件重定向误判）
       this._outsideHandler = (e) => {
-        if (!this.contains(e.target) && e.target !== triggerEl && !triggerEl.contains(e.target)) {
+        const path = e.composedPath ? e.composedPath() : [];
+        const inPicker = path.includes(this);
+        const inTrigger = e.target === triggerEl || triggerEl.contains(e.target);
+        if (!inPicker && !inTrigger) {
           this.close();
         }
       };
@@ -870,13 +875,87 @@
     }
     close() {
       this.setAttribute('hidden', '');
+      this._dragType = null;
       if (this._outsideHandler) {
         document.removeEventListener('mousedown', this._outsideHandler, true);
         document.removeEventListener('touchstart', this._outsideHandler, true);
         this._outsideHandler = null;
       }
     }
+
+    // ── 颜色转换（HSV 模型） ─────────────────────────────
+    _hexToHsv(hex) {
+      const r = parseInt(hex.slice(1, 3), 16) / 255;
+      const g = parseInt(hex.slice(3, 5), 16) / 255;
+      const b = parseInt(hex.slice(5, 7), 16) / 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      const d = max - min;
+      let h, s, v = max;
+      s = max === 0 ? 0 : d / max;
+      if (max === min) {
+        h = 0;
+      } else {
+        switch (max) {
+          case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+          case g: h = (b - r) / d + 2; break;
+          case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+      }
+      return { h: Math.round(h * 360), s: Math.round(s * 100), v: Math.round(v * 100) };
+    }
+    _hsvToHex(h, s, v) {
+      h /= 360; s /= 100; v /= 100;
+      const i = Math.floor(h * 6);
+      const f = h * 6 - i;
+      const p = v * (1 - s);
+      const q = v * (1 - f * s);
+      const t = v * (1 - (1 - f) * s);
+      let r, g, b;
+      switch (i % 6) {
+        case 0: r = v; g = t; b = p; break;
+        case 1: r = q; g = v; b = p; break;
+        case 2: r = p; g = v; b = t; break;
+        case 3: r = p; g = q; b = v; break;
+        case 4: r = t; g = p; b = v; break;
+        case 5: r = v; g = p; b = q; break;
+      }
+      const toHex = x => {
+        const val = Math.round(x * 255).toString(16);
+        return val.length === 1 ? '0' + val : val;
+      };
+      return '#' + toHex(r) + toHex(g) + toHex(b);
+    }
+    _hexToRgb(hex) {
+      return {
+        r: parseInt(hex.slice(1, 3), 16),
+        g: parseInt(hex.slice(3, 5), 16),
+        b: parseInt(hex.slice(5, 7), 16),
+      };
+    }
+    _rgbToHex(r, g, b) {
+      const toHex = x => {
+        const val = Math.round(x).toString(16);
+        return val.length === 1 ? '0' + val : val;
+      };
+      return '#' + toHex(r) + toHex(g) + toHex(b);
+    }
+    _getFormatValue() {
+      const { h, s, v } = this._hsv;
+      const rgb = this._hexToRgb(this._hex);
+      switch (this._format) {
+        case 'rgb': return `${rgb.r}, ${rgb.g}, ${rgb.b}`;
+        case 'hsb': return `${h}, ${s}%, ${v}%`;
+        default: return this._hex.toUpperCase();
+      }
+    }
+
+    // ── 渲染 ──────────────────────────────────────────────
     _render() {
+      const { h } = this._hsv;
+      const formatValue = this._getFormatValue();
+      const hasEyedropper = typeof window !== 'undefined' && 'EyeDropper' in window;
+
       this._shadow.innerHTML = `
         <style>
           :host {
@@ -885,14 +964,12 @@
             width: 260px;
             display: none;
             font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", sans-serif;
-            /* 暗色毛玻璃主题，与其他面板统一 */
             --bg-surface: rgba(30, 30, 30, 0.82);
             --bg-subtle: rgba(255, 255, 255, 0.03);
             --border-color: rgba(255, 255, 255, 0.08);
             --text-default: #fff;
             --text-secondary: rgba(255, 255, 255, 0.6);
             --text-tertiary: rgba(255, 255, 255, 0.42);
-            --text-disabled: rgba(255, 255, 255, 0.35);
             --text-brand: #00b96b;
             color: #fff;
             backdrop-filter: blur(18px) saturate(140%);
@@ -902,158 +979,381 @@
           .picker {
             box-sizing: border-box;
             width: 100%;
-            padding: 12px;
+            padding: 10px 10px 8px;
             border-radius: 12px;
-            border: 1px solid var(--border-color, rgba(0,0,0,0.08));
-            background: var(--bg-surface, #fff);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            border: 1px solid var(--border-color);
+            background: var(--bg-surface);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
           }
           .header {
             display: flex;
             align-items: center;
             justify-content: space-between;
           }
-          .title {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-default, #1a1a1a);
-          }
+          .title { font-size: 13px; font-weight: 600; color: var(--text-default); }
           .close-btn {
-            width: 24px;
-            height: 24px;
-            border: none;
-            background: transparent;
-            color: var(--text-tertiary, #888);
-            font-size: 16px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
+            width: 24px; height: 24px; border: none; background: transparent;
+            color: var(--text-tertiary); font-size: 18px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; padding: 0;
+            border-radius: 6px;
           }
-          .color-input-wrap {
-            width: 100%;
-            height: 120px;
-            border-radius: 8px;
-            overflow: hidden;
-            position: relative;
+          .close-btn:hover { background: rgba(255,255,255,0.06); color: var(--text-default); }
+
+          /* SV 二维取色面板 — 不裁剪，选点可超出边缘 */
+          .sv-panel {
+            position: relative; width: 100%; height: 150px;
+            border-radius: 8px; cursor: crosshair;
+            user-select: none; -webkit-user-select: none;
+            touch-action: none;
           }
-          .color-input-wrap input[type="color"] {
-            width: 100%;
-            height: 100%;
-            border: none;
-            padding: 0;
-            cursor: pointer;
-            background: none;
+          .sv-layer { position: absolute; inset: 0; pointer-events: none; border-radius: 8px; }
+          .sv-white { background: linear-gradient(to right, #fff, rgba(255,255,255,0)); }
+          .sv-black { background: linear-gradient(to top, #000, rgba(0,0,0,0)); }
+          .sv-cursor {
+            position: absolute; width: 14px; height: 14px;
+            border: 2px solid #fff; border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3);
+            pointer-events: none;
           }
-          .color-input-wrap input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
-          .color-input-wrap input[type="color"]::-webkit-color-swatch { border: none; border-radius: 8px; }
-          .row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+
+          /* 色相条 — 不裁剪 */
+          .hue-slider {
+            position: relative; width: 100%; height: 10px;
+            border-radius: 5px; cursor: pointer;
+            background: linear-gradient(to right,
+              #ff0000 0%, #ffff00 17%, #00ff00 33%,
+              #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%);
+            user-select: none; -webkit-user-select: none;
+            touch-action: none;
           }
-          .hex-input {
-            flex: 1;
-            height: 32px;
-            padding: 0 10px;
-            border: 1px solid var(--border-color, rgba(0,0,0,0.1));
-            border-radius: 7px;
-            font-size: 12px;
-            color: var(--text-default, #1a1a1a);
-            background: var(--bg-surface, #fff);
-            outline: none;
-            text-transform: uppercase;
+          .hue-cursor {
+            position: absolute; top: 50%; width: 14px; height: 14px;
+            border: 2px solid #fff; border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3);
+            pointer-events: none;
+          }
+
+          /* 不透明度 — 不裁剪，选点可超出边缘 */
+          .opacity-wrap { display: flex; flex-direction: column; gap: 4px; }
+          .opacity-label {
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: 11px; color: var(--text-tertiary);
+          }
+          .opacity-num-wrap { display: flex; align-items: center; gap: 2px; }
+          .opacity-num {
+            width: 34px; height: 20px; padding: 0 4px;
+            border: 1px solid var(--border-color); border-radius: 5px;
+            background: var(--bg-subtle); color: var(--text-default);
+            font-size: 11px; text-align: center; outline: none;
             box-sizing: border-box;
           }
-          .hex-input:focus { border-color: var(--text-brand, #00b96b); }
-          .opacity-wrap {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-          }
-          .opacity-label {
-            font-size: 11px;
-            color: var(--text-tertiary, #888);
-            display: flex;
-            justify-content: space-between;
-          }
+          .opacity-num:focus { border-color: var(--text-brand); }
+          .opacity-unit { font-size: 11px; color: var(--text-tertiary); }
           .opacity-slider {
-            width: 100%;
-            height: 6px;
-            -webkit-appearance: none;
-            appearance: none;
-            border-radius: 3px;
-            background: linear-gradient(to right, transparent, ${this._hex});
-            outline: none;
-            cursor: pointer;
+            position: relative; width: 100%; height: 10px;
+            border-radius: 5px; cursor: pointer;
+            user-select: none; -webkit-user-select: none;
+            touch-action: none;
           }
-          .opacity-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: #fff;
-            border: 2px solid var(--text-brand, #00b96b);
-            cursor: pointer;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+          .opacity-checker {
+            position: absolute; inset: 0; border-radius: 5px;
+            background-image:
+              linear-gradient(45deg, #555 25%, transparent 25%),
+              linear-gradient(-45deg, #555 25%, transparent 25%),
+              linear-gradient(45deg, transparent 75%, #555 75%),
+              linear-gradient(-45deg, transparent 75%, #555 75%);
+            background-size: 8px 8px;
+            background-position: 0 0, 0 4px, 4px -4px, -4px 0;
           }
+          .opacity-fill {
+            position: absolute; inset: 0; border-radius: 5px; pointer-events: none;
+          }
+          .opacity-cursor {
+            position: absolute; top: 50%; width: 14px; height: 14px;
+            border: 2px solid #fff; border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3);
+            pointer-events: none;
+          }
+
+          /* 格式行 */
+          .format-row {
+            display: flex; align-items: center; gap: 6px;
+          }
+          .format-select-wrap { position: relative; flex-shrink: 0; }
+          .format-select {
+            height: 28px; padding: 0 22px 0 8px;
+            border: 1px solid var(--border-color); border-radius: 7px;
+            background: var(--bg-subtle); color: var(--text-default);
+            font-size: 11px; font-weight: 500; outline: none;
+            cursor: pointer; appearance: none; -webkit-appearance: none;
+          }
+          .format-select:focus { border-color: var(--text-brand); }
+          .format-select-wrap::after {
+            content: '▾'; position: absolute; right: 8px; top: 50%;
+            transform: translateY(-50%); font-size: 9px;
+            color: var(--text-tertiary); pointer-events: none;
+          }
+          .format-input {
+            flex: 1; height: 28px; padding: 0 8px;
+            border: 1px solid var(--border-color); border-radius: 7px;
+            background: var(--bg-subtle); color: var(--text-default);
+            font-size: 12px; font-family: "SF Mono", Menlo, monospace;
+            outline: none; text-transform: uppercase; box-sizing: border-box;
+            min-width: 0;
+          }
+          .format-input:focus { border-color: var(--text-brand); }
+          .eyedropper-btn {
+            width: 28px; height: 28px; flex-shrink: 0;
+            border: 1px solid var(--border-color); border-radius: 7px;
+            background: var(--bg-subtle); color: var(--text-secondary);
+            cursor: pointer; display: flex; align-items: center;
+            justify-content: center; padding: 0;
+          }
+          .eyedropper-btn:hover { background: rgba(255,255,255,0.06); color: var(--text-default); }
+          .eyedropper-btn:active { background: rgba(255,255,255,0.1); }
         </style>
         <div class="picker">
           <div class="header">
             <span class="title">颜色</span>
             <button class="close-btn" type="button" data-action="close">×</button>
           </div>
-          <div class="color-input-wrap">
-            <input type="color" value="${this._hex}" data-color-input />
+
+          <!-- SV 二维取色面板 -->
+          <div class="sv-panel" data-sv-panel style="background:hsl(${h},100%,50%);">
+            <div class="sv-layer sv-white"></div>
+            <div class="sv-layer sv-black"></div>
+            <div class="sv-cursor" data-sv-cursor style="left:${this._hsv.s}%;top:${100 - this._hsv.v}%;"></div>
           </div>
-          <div class="row">
-            <input class="hex-input" type="text" value="${this._hex}" data-hex-input maxlength="7" />
+
+          <!-- 色相条 -->
+          <div class="hue-slider" data-hue-slider>
+            <div class="hue-cursor" data-hue-cursor style="left:${h / 360 * 100}%;"></div>
           </div>
+
+          <!-- 不透明度 -->
           <div class="opacity-wrap">
             <div class="opacity-label">
               <span>不透明度</span>
-              <span data-opacity-value>${this._opacity}%</span>
+              <span class="opacity-num-wrap">
+                <input class="opacity-num" type="text" value="${this._opacity}" data-opacity-num inputmode="numeric" />
+                <span class="opacity-unit">%</span>
+              </span>
             </div>
-            <input class="opacity-slider" type="range" min="0" max="100" value="${this._opacity}" data-opacity-input />
+            <div class="opacity-slider" data-opacity-slider>
+              <div class="opacity-checker"></div>
+              <div class="opacity-fill" data-opacity-fill style="background:linear-gradient(to right, transparent, ${this._hex});"></div>
+              <div class="opacity-cursor" data-opacity-cursor style="left:${this._opacity}%;"></div>
+            </div>
+          </div>
+
+          <!-- 格式切换 + 输入 + 吸管 -->
+          <div class="format-row">
+            <div class="format-select-wrap">
+              <select class="format-select" data-format-select>
+                <option value="hex" ${this._format === 'hex' ? 'selected' : ''}>HEX</option>
+                <option value="rgb" ${this._format === 'rgb' ? 'selected' : ''}>RGB</option>
+                <option value="hsb" ${this._format === 'hsb' ? 'selected' : ''}>HSB</option>
+              </select>
+            </div>
+            <input class="format-input" type="text" value="${formatValue}" data-format-input spellcheck="false" />
+            ${hasEyedropper ? `
+            <button class="eyedropper-btn" type="button" data-eyedropper title="从页面取色">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 22l4-1 11-11-3-3L3 18l-1 4z"/>
+                <path d="M14 7l3 3"/>
+                <path d="M17 4l3 3"/>
+              </svg>
+            </button>` : ''}
           </div>
         </div>
       `;
-      // 绑定事件
-      this._shadow.querySelector('[data-action="close"]').addEventListener('click', () => this.close());
-      this._shadow.querySelector('[data-color-input]').addEventListener('input', (e) => {
-        this._hex = e.target.value.toUpperCase();
-        this._shadow.querySelector('[data-hex-input]').value = this._hex;
-        this._updateOpacityBg();
-        this._emitChange();
-      });
-      this._shadow.querySelector('[data-hex-input]').addEventListener('change', (e) => {
-        let val = e.target.value.trim();
-        if (!val.startsWith('#')) val = '#' + val;
-        if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
-          this._hex = val.toUpperCase();
-          this._shadow.querySelector('[data-color-input]').value = this._hex;
-          this._updateOpacityBg();
-          this._emitChange();
-        } else {
-          e.target.value = this._hex;
-        }
-      });
-      this._shadow.querySelector('[data-opacity-input]').addEventListener('input', (e) => {
-        this._opacity = parseInt(e.target.value);
-        this._shadow.querySelector('[data-opacity-value]').textContent = this._opacity + '%';
-        this._emitChange();
-      });
-      this._updateOpacityBg();
+      this._bindEvents();
     }
-    _updateOpacityBg() {
-      const slider = this._shadow.querySelector('[data-opacity-input]');
-      if (slider) {
-        slider.style.background = `linear-gradient(to right, transparent, ${this._hex})`;
+
+    // ── 事件绑定 ──────────────────────────────────────────
+    _bindEvents() {
+      this._shadow.querySelector('[data-action="close"]').addEventListener('click', () => this.close());
+
+      // SV 面板拖动
+      this._setupDrag(this._shadow.querySelector('[data-sv-panel]'), 'sv', (clientX, clientY, rect) => {
+        const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+        const y = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
+        this._hsv.s = Math.round(x * 100);
+        this._hsv.v = Math.round((1 - y) * 100);
+        this._hex = this._hsvToHex(this._hsv.h, this._hsv.s, this._hsv.v);
+        this._syncFromHsv();
+        this._emitChange();
+      });
+
+      // 色相条拖动
+      this._setupDrag(this._shadow.querySelector('[data-hue-slider]'), 'hue', (clientX, clientY, rect) => {
+        const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+        this._hsv.h = Math.round(x * 360);
+        this._hex = this._hsvToHex(this._hsv.h, this._hsv.s, this._hsv.v);
+        this._syncFromHsv();
+        this._emitChange();
+      });
+
+      // 不透明度拖动
+      this._setupDrag(this._shadow.querySelector('[data-opacity-slider]'), 'opacity', (clientX, clientY, rect) => {
+        const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+        this._opacity = Math.round(x * 100);
+        this._syncOpacity();
+        this._emitChange();
+      });
+
+      // 不透明度数值输入
+      const opacityNum = this._shadow.querySelector('[data-opacity-num]');
+      opacityNum.addEventListener('change', (e) => {
+        let val = parseInt(e.target.value, 10);
+        if (isNaN(val)) val = this._opacity;
+        val = Math.max(0, Math.min(100, val));
+        this._opacity = val;
+        this._syncOpacity();
+        this._emitChange();
+      });
+      opacityNum.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); }
+      });
+
+      // 格式切换
+      this._shadow.querySelector('[data-format-select]').addEventListener('change', (e) => {
+        this._format = e.target.value;
+        this._updateFormatInput();
+      });
+
+      // 格式输入
+      const formatInput = this._shadow.querySelector('[data-format-input]');
+      formatInput.addEventListener('change', (e) => this._parseFormatInput(e.target.value));
+      formatInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); }
+      });
+
+      // 吸管
+      const eyedropperBtn = this._shadow.querySelector('[data-eyedropper]');
+      if (eyedropperBtn) {
+        eyedropperBtn.addEventListener('click', async () => {
+          try {
+            const eyeDropper = new window.EyeDropper();
+            const result = await eyeDropper.open();
+            if (result && result.sRGBHex) {
+              this._hex = result.sRGBHex.toUpperCase();
+              this._hsv = this._hexToHsv(this._hex);
+              this._syncFromHsv();
+              this._emitChange();
+            }
+          } catch (err) { /* 用户取消取色 */ }
+        });
+      }
+    }
+
+    _setupDrag(el, type, onMove) {
+      const onPointerDown = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this._dragType = type;
+        const rect = el.getBoundingClientRect();
+        onMove(e.clientX, e.clientY, rect);
+        const onPointerMove = (ev) => {
+          if (this._dragType !== type) return;
+          ev.preventDefault();
+          onMove(ev.clientX, ev.clientY, rect);
+        };
+        const onPointerUp = () => {
+          if (this._dragType === type) this._dragType = null;
+          document.removeEventListener('pointermove', onPointerMove);
+          document.removeEventListener('pointerup', onPointerUp);
+          document.removeEventListener('pointercancel', onPointerUp);
+        };
+        document.addEventListener('pointermove', onPointerMove);
+        document.addEventListener('pointerup', onPointerUp);
+        document.addEventListener('pointercancel', onPointerUp);
+      };
+      el.addEventListener('pointerdown', onPointerDown);
+    }
+
+    // ── 格式输入解析 ──────────────────────────────────────
+    _parseFormatInput(val) {
+      val = (val || '').trim();
+      try {
+        if (this._format === 'hex') {
+          if (!val.startsWith('#')) val = '#' + val;
+          if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+            this._hex = val.toUpperCase();
+            this._hsv = this._hexToHsv(this._hex);
+            this._syncFromHsv();
+            this._emitChange();
+            return;
+          }
+        } else if (this._format === 'rgb') {
+          const m = val.match(/(\d+)\s*[, ]\s*(\d+)\s*[, ]\s*(\d+)/);
+          if (m) {
+            const r = Math.max(0, Math.min(255, parseInt(m[1], 10)));
+            const g = Math.max(0, Math.min(255, parseInt(m[2], 10)));
+            const b = Math.max(0, Math.min(255, parseInt(m[3], 10)));
+            this._hex = this._rgbToHex(r, g, b);
+            this._hsv = this._hexToHsv(this._hex);
+            this._syncFromHsv();
+            this._emitChange();
+            return;
+          }
+        } else if (this._format === 'hsb') {
+          const m = val.match(/(\d+)\s*[, ]\s*(\d+)%?\s*[, ]\s*(\d+)%?/);
+          if (m) {
+            const h = Math.max(0, Math.min(360, parseInt(m[1], 10)));
+            const s = Math.max(0, Math.min(100, parseInt(m[2], 10)));
+            const v = Math.max(0, Math.min(100, parseInt(m[3], 10)));
+            this._hsv = { h, s, v };
+            this._hex = this._hsvToHex(h, s, v);
+            this._syncFromHsv();
+            this._emitChange();
+            return;
+          }
+        }
+      } catch (e) { /* ignore */ }
+      // 解析失败，恢复当前值
+      this._updateFormatInput();
+    }
+
+    // ── UI 同步 ───────────────────────────────────────────
+    _syncFromHsv() {
+      // SV 面板背景（色相）
+      const svPanel = this._shadow.querySelector('[data-sv-panel]');
+      if (svPanel) svPanel.style.background = `hsl(${this._hsv.h},100%,50%)`;
+      // SV 选点 — X=饱和度, Y=100-明度
+      const svCursor = this._shadow.querySelector('[data-sv-cursor]');
+      if (svCursor) {
+        svCursor.style.left = this._hsv.s + '%';
+        svCursor.style.top = (100 - this._hsv.v) + '%';
+      }
+      // 色相选点
+      const hueCursor = this._shadow.querySelector('[data-hue-cursor]');
+      if (hueCursor) hueCursor.style.left = (this._hsv.h / 360 * 100) + '%';
+      // 不透明度填充条颜色
+      this._updateOpacityFill();
+      // 格式输入
+      this._updateFormatInput();
+    }
+    _syncOpacity() {
+      const opacityCursor = this._shadow.querySelector('[data-opacity-cursor]');
+      if (opacityCursor) opacityCursor.style.left = this._opacity + '%';
+      const opacityNum = this._shadow.querySelector('[data-opacity-num]');
+      if (opacityNum) opacityNum.value = this._opacity;
+    }
+    _updateOpacityFill() {
+      const fill = this._shadow.querySelector('[data-opacity-fill]');
+      if (fill) fill.style.background = `linear-gradient(to right, transparent, ${this._hex})`;
+    }
+    _updateFormatInput() {
+      const input = this._shadow.querySelector('[data-format-input]');
+      if (input && document.activeElement !== input) {
+        input.value = this._getFormatValue();
       }
     }
     _emitChange() {
@@ -1072,7 +1372,6 @@
       this._shadow = this.attachShadow({ mode: 'open' });
       this._changes = [];
       this._route = '';
-      this._activeTab = 'all'; // all | config
     }
     connectedCallback() {
       this._render();
@@ -1217,29 +1516,6 @@
             padding: 0;
           }
           .close-btn:hover { background: rgba(255,255,255,0.06); }
-          .tabs {
-            display: flex;
-            gap: 4px;
-            padding: 3px;
-            border-radius: 9px;
-            background: rgba(255,255,255,0.04);
-          }
-          .tab {
-            flex: 1;
-            height: 30px;
-            border: none;
-            background: transparent;
-            border-radius: 7px;
-            font-size: 12px;
-            color: var(--text-tertiary, rgba(255,255,255,0.42));
-            cursor: pointer;
-          }
-          .tab.active {
-            background: var(--bg-surface, rgba(30,30,30,0.82));
-            color: var(--text-brand, #00b96b);
-            font-weight: 500;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-          }
           .list {
             display: flex;
             flex-direction: column;
@@ -1363,10 +1639,6 @@
               <span class="header-count">${changes.length} 项变更</span>
             </div>
           </div>
-          <div class="tabs">
-            <button class="tab ${this._activeTab === 'all' ? 'active' : ''}" data-tab="all">全部</button>
-            <button class="tab ${this._activeTab === 'config' ? 'active' : ''}" data-tab="config">配置</button>
-          </div>
           ${groupList.length === 0 ? `
             <div class="empty">
               当前还没有配置修改<br/>
@@ -1410,14 +1682,6 @@
           this._copyPrompt();
         });
       }
-      // Tab 切换
-      this._shadow.querySelectorAll('[data-tab]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          this._activeTab = btn.dataset.tab;
-          this._render();
-          this._bindEvents();
-        });
-      });
       // 点击元素选择器 → 跳转选中
       this._shadow.querySelectorAll('[data-selector]').forEach(el => {
         el.addEventListener('click', () => {
@@ -1436,6 +1700,7 @@
       const resetBtn = this._shadow.querySelector('[data-action="reset"]');
       if (resetBtn) {
         resetBtn.addEventListener('click', () => {
+          this.close();
           bus.emit('reset-changes');
         });
       }
@@ -1562,59 +1827,112 @@
     {
       label: '文字色',
       tokens: [
-        { name: 'text-default', var: '--text-default', label: '默认' },
-        { name: 'text-secondary', var: '--text-secondary', label: '次要' },
-        { name: 'text-tertiary', var: '--text-tertiary', label: '三级' },
-        { name: 'text-disabled', var: '--text-disabled', label: '禁用' },
-        { name: 'text-inverse', var: '--text-inverse', label: '反白' },
-        { name: 'text-brand', var: '--text-brand', label: '品牌' },
-        { name: 'text-promotion', var: '--text-promotion', label: '促销' },
+        { name: 'text-default', var: '--text-default', label: '默认', desc: '主要正文文字' },
+        { name: 'text-secondary', var: '--text-secondary', label: '次要', desc: '次级说明文字' },
+        { name: 'text-tertiary', var: '--text-tertiary', label: '三级', desc: '辅助/占位文字' },
+        { name: 'text-disabled', var: '--text-disabled', label: '禁用', desc: '不可用状态文字' },
+        { name: 'text-inverse', var: '--text-inverse', label: '反白', desc: '深色背景上的文字' },
+        { name: 'text-brand', var: '--text-brand', label: '品牌', desc: '品牌色/可点击文字' },
+        { name: 'text-promotion', var: '--text-promotion', label: '促销', desc: '价格/促销强调文字' },
       ],
     },
     {
       label: '背景色',
       tokens: [
-        { name: 'bg-surface', var: '--bg-surface', label: '表面' },
-        { name: 'bg-panel', var: '--bg-panel', label: '面板' },
-        { name: 'bg-muted', var: '--bg-muted', label: '弱化' },
-        { name: 'bg-subtle', var: '--bg-subtle', label: '微弱' },
-        { name: 'bg-active', var: '--bg-active', label: '激活' },
-        { name: 'bg-inverse', var: '--bg-inverse', label: '反色' },
-        { name: 'bg-brand', var: '--bg-brand', label: '品牌' },
-        { name: 'bg-page', var: '--bg-page', label: '页面' },
+        { name: 'bg-surface', var: '--bg-surface', label: '表面', desc: '卡片/容器背景' },
+        { name: 'bg-panel', var: '--bg-panel', label: '面板', desc: '浮层/面板背景' },
+        { name: 'bg-muted', var: '--bg-muted', label: '弱化', desc: '次级区域背景' },
+        { name: 'bg-subtle', var: '--bg-subtle', label: '微弱', desc: '分割/微弱背景' },
+        { name: 'bg-active', var: '--bg-active', label: '激活', desc: '按下/选中背景' },
+        { name: 'bg-inverse', var: '--bg-inverse', label: '反色', desc: '深色背景' },
+        { name: 'bg-brand', var: '--bg-brand', label: '品牌', desc: '品牌色背景' },
+        { name: 'bg-page', var: '--bg-page', label: '页面', desc: '页面底色' },
       ],
     },
     {
       label: '边框色',
       tokens: [
-        { name: 'border-brand', var: '--border-brand', label: '品牌' },
-        { name: 'border-danger', var: '--border-danger', label: '危险' },
-        { name: 'border-info', var: '--border-info', label: '信息' },
-        { name: 'border-success', var: '--border-success', label: '成功' },
-        { name: 'border-warning', var: '--border-warning', label: '警告' },
-        { name: 'border-control', var: '--border-control', label: '控件' },
+        { name: 'border-brand', var: '--border-brand', label: '品牌', desc: '品牌色边框' },
+        { name: 'border-danger', var: '--border-danger', label: '危险', desc: '错误/危险边框' },
+        { name: 'border-info', var: '--border-info', label: '信息', desc: '信息提示边框' },
+        { name: 'border-success', var: '--border-success', label: '成功', desc: '成功状态边框' },
+        { name: 'border-warning', var: '--border-warning', label: '警告', desc: '警告状态边框' },
+        { name: 'border-control', var: '--border-control', label: '控件', desc: '输入框/控件边框' },
       ],
     },
     {
       label: '状态色',
       tokens: [
-        { name: 'status-success', var: '--status-success-default', label: '成功' },
-        { name: 'status-warning', var: '--status-warning-default', label: '警告' },
-        { name: 'status-danger', var: '--status-danger-default', label: '危险' },
-        { name: 'status-info', var: '--status-info-default', label: '信息' },
-        { name: 'status-promotion', var: '--status-promotion-default', label: '促销' },
+        { name: 'status-success', var: '--status-success-default', label: '成功', desc: '成功状态指示' },
+        { name: 'status-warning', var: '--status-warning-default', label: '警告', desc: '警告状态指示' },
+        { name: 'status-danger', var: '--status-danger-default', label: '危险', desc: '危险/错误状态' },
+        { name: 'status-info', var: '--status-info-default', label: '信息', desc: '信息状态指示' },
+        { name: 'status-promotion', var: '--status-promotion-default', label: '促销', desc: '促销活动色' },
       ],
     },
     {
       label: '强调色',
       tokens: [
-        { name: 'accent-yellow', var: '--accent-yellow', label: '黄' },
-        { name: 'accent-green', var: '--accent-green', label: '绿' },
-        { name: 'accent-purple', var: '--accent-purple', label: '紫' },
-        { name: 'accent-gold', var: '--accent-gold', label: '金' },
+        { name: 'accent-yellow', var: '--accent-yellow', label: '黄', desc: '黄色强调' },
+        { name: 'accent-green', var: '--accent-green', label: '绿', desc: '绿色强调' },
+        { name: 'accent-purple', var: '--accent-purple', label: '紫', desc: '紫色强调' },
+        { name: 'accent-gold', var: '--accent-gold', label: '金', desc: '金色强调' },
       ],
     },
   ];
+
+  // 字号 Token
+  const FONT_SIZE_TOKEN_GROUPS = [
+    {
+      label: '字号',
+      tokens: [
+        { name: 'font-size-xs', var: '--font-size-xs', label: 'XS', desc: '极小/辅助文字', value: '10px' },
+        { name: 'font-size-sm', var: '--font-size-sm', label: 'SM', desc: '小字/说明文字', value: '12px' },
+        { name: 'font-size-base', var: '--font-size-base', label: 'BASE', desc: '正文默认', value: '14px' },
+        { name: 'font-size-md', var: '--font-size-md', label: 'MD', desc: '小标题/强调', value: '16px' },
+        { name: 'font-size-lg', var: '--font-size-lg', label: 'LG', desc: '标题', value: '18px' },
+        { name: 'font-size-xl', var: '--font-size-xl', label: 'XL', desc: '大标题', value: '20px' },
+        { name: 'font-size-2xl', var: '--font-size-2xl', label: '2XL', desc: '特大标题', value: '24px' },
+        { name: 'font-size-3xl', var: '--font-size-3xl', label: '3XL', desc: '超大标题', value: '28px' },
+        { name: 'font-size-4xl', var: '--font-size-4xl', label: '4XL', desc: '巨型标题', value: '32px' },
+      ],
+    },
+  ];
+
+  // 字重 Token
+  const FONT_WEIGHT_TOKEN_GROUPS = [
+    {
+      label: '字重',
+      tokens: [
+        { name: 'font-weight-light', var: '--font-weight-light', label: 'Light', desc: '细体/轻盈', value: '300' },
+        { name: 'font-weight-regular', var: '--font-weight-regular', label: 'Regular', desc: '常规/正文', value: '400' },
+        { name: 'font-weight-medium', var: '--font-weight-medium', label: 'Medium', desc: '中等/强调', value: '500' },
+        { name: 'font-weight-semibold', var: '--font-weight-semibold', label: 'Semibold', desc: '半粗/小标题', value: '600' },
+        { name: 'font-weight-bold', var: '--font-weight-bold', label: 'Bold', desc: '粗体/标题', value: '700' },
+      ],
+    },
+  ];
+
+  // 行高 Token
+  const LINE_HEIGHT_TOKEN_GROUPS = [
+    {
+      label: '行高',
+      tokens: [
+        { name: 'line-height-tight', var: '--line-height-tight', label: 'Tight', desc: '紧凑/标题', value: '1.2' },
+        { name: 'line-height-normal', var: '--line-height-normal', label: 'Normal', desc: '常规/正文', value: '1.4' },
+        { name: 'line-height-relaxed', var: '--line-height-relaxed', label: 'Relaxed', desc: '宽松/阅读', value: '1.6' },
+        { name: 'line-height-loose', var: '--line-height-loose', label: 'Loose', desc: '疏松/大段', value: '1.8' },
+      ],
+    },
+  ];
+
+  // 类型 → Token 组映射
+  const TOKEN_GROUPS_MAP = {
+    color: COLOR_TOKEN_GROUPS,
+    fontSize: FONT_SIZE_TOKEN_GROUPS,
+    fontWeight: FONT_WEIGHT_TOKEN_GROUPS,
+    lineHeight: LINE_HEIGHT_TOKEN_GROUPS,
+  };
 
   // ============================================================
   // wego-wt-style-panel: 样式编辑浮动面板
@@ -1736,6 +2054,20 @@
       const colorSwatchBg = colorIsToken
         ? (resolveCssValue(d.colorHex, 'color') || 'transparent')
         : hexOpacityToRgba(d.colorHex || '#000000', d.colorOpacity ?? 100);
+      // 填充/描边/投影 token 模式判断
+      const fillIsToken = isTokenValue(d.fillHex);
+      const fillTokenName = fillIsToken ? d.fillHex.match(/var\((--[^)]+)\)/)[1].replace(/^--/, '') : '';
+      const strokeIsToken = isTokenValue(d.strokeHex);
+      const strokeTokenName = strokeIsToken ? d.strokeHex.match(/var\((--[^)]+)\)/)[1].replace(/^--/, '') : '';
+      const shadowIsToken = isTokenValue(d.shadowHex);
+      const shadowTokenName = shadowIsToken ? d.shadowHex.match(/var\((--[^)]+)\)/)[1].replace(/^--/, '') : '';
+      // 字号/字重/行高 token 模式判断
+      const fontSizeIsToken = isTokenValue(d.fontSize);
+      const fontSizeTokenName = fontSizeIsToken ? d.fontSize.match(/var\((--[^)]+)\)/)[1].replace(/^--/, '') : '';
+      const fontWeightIsToken = isTokenValue(d.fontWeight);
+      const fontWeightTokenName = fontWeightIsToken ? d.fontWeight.match(/var\((--[^)]+)\)/)[1].replace(/^--/, '') : '';
+      const lineHeightIsToken = isTokenValue(d.lineHeight);
+      const lineHeightTokenName = lineHeightIsToken ? d.lineHeight.match(/var\((--[^)]+)\)/)[1].replace(/^--/, '') : '';
       this._shadow.innerHTML = `
         <style>
           :host {
@@ -1988,73 +2320,116 @@
             background: rgba(0,185,107,0.12);
             color: var(--text-brand, #00b96b);
           }
-          /* Token 选择弹出面板 */
+          /* Token 选择弹出面板 — 分层毛玻璃（与主面板 :host+.panel 结构一致） */
           .token-panel {
             position: absolute;
             z-index: 9650;
-            width: 240px;
-            max-height: 320px;
-            overflow-y: auto;
-            padding: 12px;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            background: rgba(30, 30, 30, 0.78);
-            backdrop-filter: blur(18px) saturate(140%);
-            -webkit-backdrop-filter: blur(18px) saturate(140%);
-            box-shadow: 0 20px 100px rgba(0, 0, 0, 0.12);
+            width: 260px;
+            border-radius: 14px;
+            /* 外层只负责模糊，不设背景色 */
+            backdrop-filter: blur(20px) saturate(160%);
+            -webkit-backdrop-filter: blur(20px) saturate(160%);
             display: none;
           }
           .token-panel.open { display: block; }
-          .token-panel::-webkit-scrollbar { width: 0; }
+          .token-panel-inner {
+            max-height: 340px;
+            overflow-y: auto;
+            padding: 12px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            /* 内层负责半透明背景色 */
+            background: rgba(30, 30, 30, 0.78);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+          }
+          .token-panel-inner::-webkit-scrollbar { width: 0; }
           .token-group-title {
             font-size: 10px;
             font-weight: 600;
-            color: var(--text-tertiary, rgba(255,255,255,0.45));
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin: 8px 0 4px;
+            color: var(--text-tertiary, rgba(255,255,255,0.5));
+            margin: 10px 0 6px;
+            letter-spacing: 0.3px;
           }
           .token-group-title:first-child { margin-top: 0; }
+          .token-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            padding-right: 2px;
+          }
           .token-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            position: relative;
             width: 100%;
-            padding: 6px 8px;
-            border: none;
+            aspect-ratio: 1;
+            padding: 0;
+            border: 2px solid transparent;
             border-radius: 6px;
             background: transparent;
-            color: var(--text-default, #fff);
-            font-size: 11px;
-            font-family: inherit;
             cursor: pointer;
-            text-align: left;
-            transition: background 0.1s;
+            transition: border-color 0.12s, transform 0.12s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
           }
           .token-item:hover {
-            background: rgba(255,255,255,0.06);
+            transform: scale(1.12);
+            z-index: 2;
           }
           .token-item.selected {
-            background: rgba(0,185,107,0.15);
+            border-color: var(--text-brand, #00b96b);
           }
           .token-swatch {
-            width: 16px;
-            height: 16px;
+            width: 100%;
+            height: 100%;
             border-radius: 4px;
-            border: 1px solid rgba(255,255,255,0.15);
-            flex-shrink: 0;
+            border: 1px solid rgba(255,255,255,0.12);
           }
-          .token-label {
-            flex: 1;
-            min-width: 0;
+          /* 非颜色类型的数值预览（字号/字重/行高） */
+          .token-value {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 400;
+            color: var(--text-default, #fff);
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.04);
             overflow: hidden;
-            text-overflow: ellipsis;
             white-space: nowrap;
           }
-          .token-name {
+          /* 独立 tooltip 容器（在 token-panel 外部，不受 overflow 裁剪） */
+          .token-tooltip-root {
+            position: absolute;
+            z-index: 9700;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            background: rgba(18, 18, 20, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+            max-width: 200px;
+            pointer-events: none;
+          }
+          .token-tooltip-root[hidden] { display: none; }
+          .token-tooltip-name {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-default, #fff);
+            font-family: "SF Mono", Menlo, Consolas, monospace;
+            white-space: nowrap;
+          }
+          .token-tooltip-desc {
             font-size: 10px;
-            color: var(--text-tertiary, rgba(255,255,255,0.4));
-            flex-shrink: 0;
+            color: var(--text-tertiary, rgba(255,255,255,0.55));
+            line-height: 1.4;
+            word-break: break-word;
           }
           .layout-tabs {
             display: flex;
@@ -2296,19 +2671,27 @@
           <!-- 字体 -->
           <div class="section">
             <p class="section-title">字体</p>
-            <div class="field-row two-col">
-              <div class="field"><span class="field-icon">A</span><input class="text-input" type="text" value="${d.fontSize || ''}" data-field="fontSize" inputmode="numeric" placeholder="字号" /></div>
-              <div class="field">
-                <select class="text-input" data-field="fontWeight">
-                  <option value="normal" ${d.fontWeight === 'normal' ? 'selected' : ''}>normal</option>
-                  <option value="300" ${d.fontWeight === '300' ? 'selected' : ''}>300</option>
-                  <option value="400" ${d.fontWeight === '400' ? 'selected' : ''}>400</option>
-                  <option value="500" ${d.fontWeight === '500' ? 'selected' : ''}>500</option>
-                  <option value="600" ${d.fontWeight === '600' ? 'selected' : ''}>600</option>
-                  <option value="700" ${d.fontWeight === '700' ? 'selected' : ''}>700</option>
-                  <option value="bold" ${d.fontWeight === 'bold' ? 'selected' : ''}>bold</option>
-                </select>
-              </div>
+            <div class="field-row">
+              <span class="field-icon">A</span>
+              <input class="text-input" type="text" value="${d.fontSize || ''}" data-field="fontSize" inputmode="numeric" placeholder="字号" />
+              <button class="token-btn ${fontSizeIsToken ? 'active' : ''}" type="button" data-token-trigger="fontSize" data-field="fontSize" title="选择设计系统 Token">
+                ${fontSizeIsToken ? fontSizeTokenName : 'T'}
+              </button>
+            </div>
+            <div class="field-row">
+              <span class="field-icon">W</span>
+              <select class="text-input" data-field="fontWeight">
+                <option value="normal" ${d.fontWeight === 'normal' ? 'selected' : ''}>normal</option>
+                <option value="300" ${d.fontWeight === '300' ? 'selected' : ''}>300</option>
+                <option value="400" ${d.fontWeight === '400' ? 'selected' : ''}>400</option>
+                <option value="500" ${d.fontWeight === '500' ? 'selected' : ''}>500</option>
+                <option value="600" ${d.fontWeight === '600' ? 'selected' : ''}>600</option>
+                <option value="700" ${d.fontWeight === '700' ? 'selected' : ''}>700</option>
+                <option value="bold" ${d.fontWeight === 'bold' ? 'selected' : ''}>bold</option>
+              </select>
+              <button class="token-btn ${fontWeightIsToken ? 'active' : ''}" type="button" data-token-trigger="fontWeight" data-field="fontWeight" title="选择设计系统 Token">
+                ${fontWeightIsToken ? fontWeightTokenName : 'T'}
+              </button>
             </div>
             <div class="field-row">
               <button class="color-button" type="button" data-field="colorHex" data-color-trigger>
@@ -2316,12 +2699,18 @@
               </button>
               <input class="text-input" type="text" value="${d.colorHex || ''}" data-field="colorHex" />
               <input class="text-input opacity-input" type="text" value="${d.colorOpacity ?? 100}" data-field="colorOpacity" inputmode="numeric" ${colorIsToken ? 'disabled' : ''} />
-              <button class="token-btn ${colorIsToken ? 'active' : ''}" type="button" data-token-trigger="color" title="选择设计系统 Token">
+              <button class="token-btn ${colorIsToken ? 'active' : ''}" type="button" data-token-trigger="color" data-field="colorHex" title="选择设计系统 Token">
                 ${colorIsToken ? colorTokenName : 'T'}
               </button>
             </div>
+            <div class="field-row">
+              <span class="field-icon">LH</span>
+              <input class="text-input" type="text" value="${d.lineHeight || ''}" data-field="lineHeight" inputmode="decimal" placeholder="行高" />
+              <button class="token-btn ${lineHeightIsToken ? 'active' : ''}" type="button" data-token-trigger="lineHeight" data-field="lineHeight" title="选择设计系统 Token">
+                ${lineHeightIsToken ? lineHeightTokenName : 'T'}
+              </button>
+            </div>
             <div class="field-row two-col">
-              <div class="field"><span class="field-icon">LH</span><input class="text-input" type="text" value="${d.lineHeight || ''}" data-field="lineHeight" inputmode="decimal" placeholder="行高" /></div>
               <div class="btn-group">
                 <button data-field="textAlign" data-value="left" class="${d.textAlign === 'left' ? 'active' : ''}">左</button>
                 <button data-field="textAlign" data-value="center" class="${d.textAlign === 'center' ? 'active' : ''}">中</button>
@@ -2344,10 +2733,13 @@
             <p class="section-title">填充</p>
             <div class="field-row">
               <button class="color-button" type="button" data-field="fillHex" data-color-trigger>
-                <span class="swatch" style="background:${hexOpacityToRgba(d.fillHex || '#FFFFFF', d.fillOpacity ?? 0)}"></span>
+                <span class="swatch" style="background:${fillIsToken ? (resolveCssValue(d.fillHex, 'color') || 'transparent') : hexOpacityToRgba(d.fillHex || '#FFFFFF', d.fillOpacity ?? 0)}"></span>
               </button>
               <input class="text-input" type="text" value="${d.fillHex || ''}" data-field="fillHex" />
-              <input class="text-input opacity-input" type="text" value="${d.fillOpacity ?? 0}" data-field="fillOpacity" inputmode="numeric" />
+              <input class="text-input opacity-input" type="text" value="${d.fillOpacity ?? 0}" data-field="fillOpacity" inputmode="numeric" ${fillIsToken ? 'disabled' : ''} />
+              <button class="token-btn ${fillIsToken ? 'active' : ''}" type="button" data-token-trigger="color" data-field="fillHex" title="选择设计系统 Token">
+                ${fillIsToken ? fillTokenName : 'T'}
+              </button>
             </div>
           </div>
 
@@ -2356,10 +2748,13 @@
             <p class="section-title">描边</p>
             <div class="field-row">
               <button class="color-button" type="button" data-field="strokeHex" data-color-trigger>
-                <span class="swatch" style="background:${hexOpacityToRgba(d.strokeHex || '#000000', d.strokeOpacity ?? 0)}"></span>
+                <span class="swatch" style="background:${strokeIsToken ? (resolveCssValue(d.strokeHex, 'color') || 'transparent') : hexOpacityToRgba(d.strokeHex || '#000000', d.strokeOpacity ?? 0)}"></span>
               </button>
               <input class="text-input" type="text" value="${d.strokeHex || ''}" data-field="strokeHex" />
-              <input class="text-input opacity-input" type="text" value="${d.strokeOpacity ?? 0}" data-field="strokeOpacity" inputmode="numeric" />
+              <input class="text-input opacity-input" type="text" value="${d.strokeOpacity ?? 0}" data-field="strokeOpacity" inputmode="numeric" ${strokeIsToken ? 'disabled' : ''} />
+              <button class="token-btn ${strokeIsToken ? 'active' : ''}" type="button" data-token-trigger="color" data-field="strokeHex" title="选择设计系统 Token">
+                ${strokeIsToken ? strokeTokenName : 'T'}
+              </button>
             </div>
             <div class="field-row two-col">
               <div class="field"><span class="field-icon">▢</span><input class="text-input" type="text" value="${d.strokeWidth || ''}" data-field="strokeWidth" inputmode="numeric" placeholder="宽度" /></div>
@@ -2378,10 +2773,13 @@
             <p class="section-title">投影</p>
             <div class="field-row">
               <button class="color-button" type="button" data-field="shadowHex" data-color-trigger>
-                <span class="swatch" style="background:${hexOpacityToRgba(d.shadowHex || '#000000', d.shadowOpacity ?? 0)}"></span>
+                <span class="swatch" style="background:${shadowIsToken ? (resolveCssValue(d.shadowHex, 'color') || 'transparent') : hexOpacityToRgba(d.shadowHex || '#000000', d.shadowOpacity ?? 0)}"></span>
               </button>
               <input class="text-input" type="text" value="${d.shadowHex || ''}" data-field="shadowHex" />
-              <input class="text-input opacity-input" type="text" value="${d.shadowOpacity ?? 0}" data-field="shadowOpacity" inputmode="numeric" />
+              <input class="text-input opacity-input" type="text" value="${d.shadowOpacity ?? 0}" data-field="shadowOpacity" inputmode="numeric" ${shadowIsToken ? 'disabled' : ''} />
+              <button class="token-btn ${shadowIsToken ? 'active' : ''}" type="button" data-token-trigger="color" data-field="shadowHex" title="选择设计系统 Token">
+                ${shadowIsToken ? shadowTokenName : 'T'}
+              </button>
             </div>
             <div class="field-row two-col">
               <div class="field"><span class="field-icon">X</span><input class="text-input" type="text" value="${d.shadowX || ''}" data-field="shadowX" inputmode="numeric" placeholder="X" /></div>
@@ -2397,10 +2795,16 @@
             </div>
           </div>
           </div>
-          <!-- Token 选择弹出面板 -->
+          <!-- Token 选择弹出面板（分层毛玻璃：外层 backdrop-filter，内层背景色，与主面板一致） -->
           <div class="token-panel" data-token-panel>
-            <div class="token-group-title">设计系统 Token</div>
-            <div data-token-list></div>
+            <div class="token-panel-inner">
+              <div data-token-list></div>
+            </div>
+          </div>
+          <!-- Token tooltip（独立容器，避免被 token-panel overflow 裁剪） -->
+          <div class="token-tooltip-root" data-token-tooltip hidden>
+            <div class="token-tooltip-name"></div>
+            <div class="token-tooltip-desc"></div>
           </div>
         </div>
       `;
@@ -2426,10 +2830,13 @@
     _bindEvents() {
       // 面板拖拽（header 按住移动）
       this._initPanelDrag();
-      // 滚动样式面板时关闭 token 选择面板
+      // 滚动样式面板时关闭 token 选择面板和颜色选择器
       const panelBody = this._shadow.querySelector('.panel-body');
       if (panelBody) {
-        panelBody.addEventListener('scroll', () => this._closeTokenPanel());
+        panelBody.addEventListener('scroll', () => {
+          this._closeTokenPanel();
+          bus.emit('close-color-picker');
+        });
       }
       // 关闭按钮
       const closeBtn = this._shadow.querySelector('[data-action="close"]');
@@ -2551,10 +2958,11 @@
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
           const type = btn.dataset.tokenTrigger;
-          if (this._tokenPanel.open && this._tokenPanel.type === type) {
+          const field = btn.dataset.field;
+          if (this._tokenPanel.open && this._tokenPanel.field === field) {
             this._closeTokenPanel();
           } else {
-            this._openTokenPanel(btn, type);
+            this._openTokenPanel(btn, type, field);
           }
         });
       });
@@ -2673,6 +3081,7 @@
         case 'fillHex':
         case 'fillOpacity': {
           const hex = d.fillHex || '#FFFFFF';
+          if (isTokenValue(hex)) return hex;
           const op = d.fillOpacity ?? 0;
           return op > 0 ? hexOpacityToRgba(hex, op) : 'transparent';
         }
@@ -2682,6 +3091,7 @@
           const hex = d.strokeHex || '#000000';
           const op = d.strokeOpacity ?? 0;
           const w = num(d.strokeWidth);
+          if (isTokenValue(hex)) return w > 0 ? `${w}px solid ${hex}` : 'none';
           return op > 0 && w > 0 ? `${w}px solid ${hexOpacityToRgba(hex, op)}` : 'none';
         }
         case 'strokePosition':
@@ -2700,7 +3110,11 @@
           const blur = num(d.shadowBlur);
           const spread = num(d.shadowSpread);
           const inset = d.shadowInset === true || d.shadowInset === 'true';
-          if (op > 0 && (blur > 0 || x !== 0 || y !== 0 || spread !== 0)) {
+          const hasOffset = blur > 0 || x !== 0 || y !== 0 || spread !== 0;
+          if (isTokenValue(hex)) {
+            return hasOffset ? `${inset ? 'inset ' : ''}${x}px ${y}px ${blur}px ${spread}px ${hex}` : 'none';
+          }
+          if (op > 0 && hasOffset) {
             return `${inset ? 'inset ' : ''}${x}px ${y}px ${blur}px ${spread}px ${hexOpacityToRgba(hex, op)}`;
           }
           return 'none';
@@ -2718,6 +3132,7 @@
         case 'marginBottom':
         case 'borderRadiusAll':
         case 'layoutGap':
+          if (isTokenValue(d[field])) return d[field];
           return num(d[field]) ? num(d[field]) + 'px' : '';
         case 'layerOpacity':
           return d.layerOpacity != null ? (num(d.layerOpacity) / 100).toString() : '';
@@ -2849,6 +3264,10 @@
         }
         case 'fontSize': {
           const oldValue = cs().fontSize;
+          if (isTokenValue(value)) {
+            el.style.fontSize = value;
+            return { property: 'font-size', oldValue, newValue: value };
+          }
           el.style.fontSize = isNaN(numVal) ? '' : numVal + 'px';
           return { property: 'font-size', oldValue, newValue: isNaN(numVal) ? '' : numVal + 'px' };
         }
@@ -2877,8 +3296,7 @@
           const oldValue = cs().lineHeight;
           el.style.lineHeight = value || '';
           return { property: 'line-height', oldValue, newValue: value || '' };
-        }
-        case 'textAlign': {
+        }        case 'textAlign': {
           const oldValue = cs().textAlign;
           el.style.textAlign = value;
           return { property: 'text-align', oldValue, newValue: value };
@@ -2897,6 +3315,10 @@
         case 'fillOpacity': {
           const oldValue = cs().backgroundColor;
           const hex = this._data.fillHex || '#FFFFFF';
+          if (isTokenValue(hex)) {
+            el.style.backgroundColor = hex;
+            return { property: 'background-color', oldValue, newValue: hex };
+          }
           const opacity = this._data.fillOpacity ?? 0;
           const rgba = opacity > 0 ? hexOpacityToRgba(hex, opacity) : 'transparent';
           el.style.backgroundColor = rgba;
@@ -2907,8 +3329,14 @@
         case 'strokeWidth': {
           const oldValue = cs().border;
           const hex = this._data.strokeHex || '#000000';
-          const opacity = this._data.strokeOpacity ?? 0;
           const width = parseFloat(this._data.strokeWidth) || 0;
+          if (isTokenValue(hex)) {
+            el.style.borderWidth = width > 0 ? width + 'px' : '';
+            el.style.borderStyle = width > 0 ? 'solid' : '';
+            el.style.borderColor = hex;
+            return { property: 'border', oldValue, newValue: width > 0 ? `${width}px solid ${hex}` : '' };
+          }
+          const opacity = this._data.strokeOpacity ?? 0;
           const color = opacity > 0 && width > 0 ? hexOpacityToRgba(hex, opacity) : 'transparent';
           el.style.borderWidth = width > 0 ? width + 'px' : '';
           el.style.borderStyle = width > 0 ? 'solid' : '';
@@ -2933,12 +3361,23 @@
         case 'shadowInset': {
           const oldValue = cs().boxShadow;
           const hex = this._data.shadowHex || '#000000';
-          const opacity = this._data.shadowOpacity ?? 0;
           const x = parseFloat(this._data.shadowX) || 0;
           const y = parseFloat(this._data.shadowY) || 0;
           const blur = parseFloat(this._data.shadowBlur) || 0;
           const spread = parseFloat(this._data.shadowSpread) || 0;
           const inset = this._data.shadowInset === true || this._data.shadowInset === 'true';
+          // Token 模式：直接用 var(--xxx) 作为阴影颜色
+          if (isTokenValue(hex)) {
+            if (blur > 0 || x !== 0 || y !== 0 || spread !== 0) {
+              const shadowStr = `${inset ? 'inset ' : ''}${x}px ${y}px ${blur}px ${spread}px ${hex}`;
+              el.style.boxShadow = shadowStr;
+              return { property: 'box-shadow', oldValue, newValue: shadowStr };
+            } else {
+              el.style.boxShadow = 'none';
+              return { property: 'box-shadow', oldValue, newValue: 'none' };
+            }
+          }
+          const opacity = this._data.shadowOpacity ?? 0;
           if (opacity > 0 && (blur > 0 || x !== 0 || y !== 0 || spread !== 0)) {
             const color = hexOpacityToRgba(hex, opacity);
             const shadowStr = `${inset ? 'inset ' : ''}${x}px ${y}px ${blur}px ${spread}px ${color}`;
@@ -3007,31 +3446,58 @@
             : hexOpacityToRgba(val, opacity);
         }
       });
-      // 颜色 Token 按钮状态 + opacity 输入框联动
-      const colorTokenBtn = this._shadow.querySelector('[data-token-trigger="color"]');
-      const colorOpacityInput = this._shadow.querySelector('[data-field="colorOpacity"]');
-      const colorVal = d.colorHex || '';
-      if (colorTokenBtn) {
-        const isTok = isTokenValue(colorVal);
-        colorTokenBtn.classList.toggle('active', isTok);
-        if (isTok) {
-          const tokName = colorVal.match(/var\((--[^)]+)\)/)[1].replace(/^--/, '');
-          if (colorTokenBtn.textContent.trim() !== tokName) colorTokenBtn.textContent = tokName;
-        } else {
-          if (colorTokenBtn.textContent.trim() !== 'T') colorTokenBtn.textContent = 'T';
+      // 颜色 Token 按钮状态 + opacity 输入框联动 + 输入框回显（统一处理4个颜色字段）
+      const colorFields = ['colorHex', 'fillHex', 'strokeHex', 'shadowHex'];
+      colorFields.forEach(field => {
+        const opacityField = field.replace('Hex', 'Opacity');
+        const val = d[field] || '';
+        const isTok = isTokenValue(val);
+        // T 按钮状态
+        const tokenBtn = this._shadow.querySelector(`[data-token-trigger="color"][data-field="${field}"]`);
+        if (tokenBtn) {
+          tokenBtn.classList.toggle('active', isTok);
+          if (isTok) {
+            const tokName = val.match(/var\((--[^)]+)\)/)[1].replace(/^--/, '');
+            if (tokenBtn.textContent.trim() !== tokName) tokenBtn.textContent = tokName;
+          } else {
+            if (tokenBtn.textContent.trim() !== 'T') tokenBtn.textContent = 'T';
+          }
         }
-      }
-      if (colorOpacityInput) {
-        colorOpacityInput.disabled = isTokenValue(colorVal);
-      }
-      // 颜色输入框值回显（统一同步，不依赖焦点状态）
-      const colorInput = this._shadow.querySelector('[data-field="colorHex"]');
-      if (colorInput) {
-        if (colorInput.value !== colorVal) {
-          colorInput.value = colorVal;
+        // opacity 输入框禁用 + 值回显
+        const opacityInput = this._shadow.querySelector(`[data-field="${opacityField}"]`);
+        if (opacityInput) {
+          opacityInput.disabled = isTok;
+          const opacityVal = d[opacityField] ?? 100;
+          if (opacityInput.value !== String(opacityVal)) {
+            opacityInput.value = opacityVal;
+          }
         }
-      } else {
-      }
+        // hex 输入框值回显
+        const hexInput = this._shadow.querySelector(`[data-field="${field}"]`);
+        if (hexInput && hexInput.value !== val) {
+          hexInput.value = val;
+        }
+      });
+      // 字号/字重/行高 Token 按钮状态 + 输入框回显
+      const textFields = ['fontSize', 'fontWeight', 'lineHeight'];
+      textFields.forEach(field => {
+        const val = d[field] || '';
+        const isTok = isTokenValue(val);
+        const tokenBtn = this._shadow.querySelector(`[data-token-trigger="${field}"][data-field="${field}"]`);
+        if (tokenBtn) {
+          tokenBtn.classList.toggle('active', isTok);
+          if (isTok) {
+            const tokName = val.match(/var\((--[^)]+)\)/)[1].replace(/^--/, '');
+            if (tokenBtn.textContent.trim() !== tokName) tokenBtn.textContent = tokName;
+          } else {
+            if (tokenBtn.textContent.trim() !== 'T') tokenBtn.textContent = 'T';
+          }
+        }
+        const input = this._shadow.querySelector(`[data-field="${field}"]`);
+        if (input && input.value !== val) {
+          input.value = val;
+        }
+      });
       // 对齐矩阵
       this._shadow.querySelectorAll('[data-align-preset]').forEach(btn => {
         const [jc, ai] = btn.dataset.alignPreset.split('|');
@@ -3040,22 +3506,31 @@
     }
 
     // ── Token 选择面板 ──────────────────────────────────────
-    _openTokenPanel(trigger, type) {
+    _openTokenPanel(trigger, type, field) {
       const panel = this._shadow.querySelector('[data-token-panel]');
       if (!panel) return;
-      this._tokenPanel = { open: true, type, trigger };
+      this._tokenPanel = { open: true, type, field, trigger };
       this._renderTokenList(type);
       panel.classList.add('open');
-      // 定位到触发按钮下方
+      // 定位到触发按钮下方，下方空间不够时自动上翻
       const rect = trigger.getBoundingClientRect();
       const panelRect = this.getBoundingClientRect();
+      const panelWidth = 260;
+      const panelHeight = panel.offsetHeight || 200;
       let left = rect.left - panelRect.left;
-      let top = rect.bottom - panelRect.top + 6;
-      const panelWidth = 240;
+      // 水平方向：优先左对齐触发按钮，超出则右移
       if (left + panelWidth > panelRect.width - 8) {
         left = panelRect.width - panelWidth - 8;
       }
       if (left < 8) left = 8;
+      // 垂直方向：优先下方，下方空间不够则上方
+      const spaceBelow = window.innerHeight - rect.bottom - 8;
+      let top;
+      if (spaceBelow >= panelHeight) {
+        top = rect.bottom - panelRect.top + 6;
+      } else {
+        top = rect.top - panelRect.top - panelHeight - 6;
+      }
       panel.style.left = left + 'px';
       panel.style.top = top + 'px';
       // 阻止面板和触发按钮内部 mousedown/touchstart 冒泡，避免 shadow DOM 事件重定向导致外部关闭逻辑误关
@@ -3078,6 +3553,7 @@
     }
 
     _closeTokenPanel() {
+      this._hideTokenTooltip();
       const panel = this._shadow.querySelector('[data-token-panel]');
       if (panel) panel.classList.remove('open');
       // 移除阻止冒泡监听
@@ -3101,38 +3577,73 @@
     _renderTokenList(type) {
       const listEl = this._shadow.querySelector('[data-token-list]');
       if (!listEl) return;
-      const currentVal = this._data ? (this._data.colorHex || '') : '';
+      const field = this._tokenPanel.field || 'colorHex';
+      const currentVal = this._data ? (this._data[field] || '') : '';
+      const groups = TOKEN_GROUPS_MAP[type] || [];
       let html = '';
-      if (type === 'color') {
-        COLOR_TOKEN_GROUPS.forEach(group => {
-          html += `<div class="token-group-title">${group.label}</div>`;
-          group.tokens.forEach(token => {
-            const varExpr = `var(${token.var})`;
-            const selected = currentVal === varExpr;
+      groups.forEach(group => {
+        html += `<div class="token-group-title">${group.label}</div>`;
+        html += `<div class="token-grid">`;
+        group.tokens.forEach(token => {
+          const varExpr = `var(${token.var})`;
+          const selected = currentVal === varExpr;
+          // 颜色类型显示色块，其他类型显示数值预览
+          let previewHtml;
+          if (type === 'color') {
             const color = resolveCssValue(varExpr, 'color') || 'transparent';
-            html += `
-              <button class="token-item ${selected ? 'selected' : ''}" type="button"
-                data-token-value="${varExpr}" data-token-name="${token.name}">
-                <span class="token-swatch" style="background:${color}"></span>
-                <span class="token-label">${token.label}</span>
-                <span class="token-name">${token.name}</span>
-              </button>`;
-          });
+            previewHtml = `<span class="token-swatch" style="background:${color}"></span>`;
+          } else {
+            const previewStyle = type === 'fontSize' ? `font-size:${token.value}` : (type === 'fontWeight' ? `font-weight:${token.value}` : '');
+            previewHtml = `<span class="token-value" style="${previewStyle}">${token.label}</span>`;
+          }
+          html += `
+            <button class="token-item ${selected ? 'selected' : ''}" type="button"
+              data-token-value="${varExpr}" data-token-name="${token.name}"
+              data-token-var="${token.var}" data-token-desc="${token.label} · ${token.desc || ''}">
+              ${previewHtml}
+            </button>`;
         });
-      }
+        html += `</div>`;
+      });
       listEl.innerHTML = html;
-      // 绑定 token 项点击
+      // 绑定 token 项事件：click 选择 + mouseenter/mouseleave 显示 tooltip
       listEl.querySelectorAll('.token-item').forEach(item => {
         item.addEventListener('click', (e) => {
           e.stopPropagation();
           const value = item.dataset.tokenValue;
-          const name = item.dataset.tokenName;
-          if (this._tokenPanel.type === 'color') {
-            this._onFieldChange('colorHex', value);
-          }
+          this._onFieldChange(field, value);
+          this._hideTokenTooltip();
           this._closeTokenPanel();
         });
+        item.addEventListener('mouseenter', () => this._showTokenTooltip(item));
+        item.addEventListener('mouseleave', () => this._hideTokenTooltip());
       });
+    }
+
+    _showTokenTooltip(item) {
+      const tooltip = this._shadow.querySelector('[data-token-tooltip]');
+      if (!tooltip) return;
+      tooltip.querySelector('.token-tooltip-name').textContent = item.dataset.tokenVar || '';
+      tooltip.querySelector('.token-tooltip-desc').textContent = item.dataset.tokenDesc || '';
+      tooltip.hidden = false;
+      // 定位到色块上方居中
+      const itemRect = item.getBoundingClientRect();
+      const hostRect = this.getBoundingClientRect();
+      const tooltipRect = tooltip.getBoundingClientRect();
+      let left = itemRect.left - hostRect.left + itemRect.width / 2 - tooltipRect.width / 2;
+      let top = itemRect.top - hostRect.top - tooltipRect.height - 8;
+      // 边界保护：左侧不超出，右侧不超出
+      if (left < 4) left = 4;
+      if (left + tooltipRect.width > hostRect.width - 4) left = hostRect.width - tooltipRect.width - 4;
+      // 上方空间不够时显示在色块下方
+      if (top < 4) top = itemRect.bottom - hostRect.top + 8;
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+    }
+
+    _hideTokenTooltip() {
+      const tooltip = this._shadow.querySelector('[data-token-tooltip]');
+      if (tooltip) tooltip.hidden = true;
     }
   }
 
@@ -3573,6 +4084,9 @@
       bus.on('style-change', (change) => this._recordChange(change));
       bus.on('open-color-picker', ({ trigger, hex, opacity, callback }) => {
         this._components.colorPicker.open(trigger, hex, opacity, callback);
+      });
+      bus.on('close-color-picker', () => {
+        this._components.colorPicker.close();
       });
       bus.on('close-style-panel', () => this._clearSelection());
       bus.on('close-overview', () => this._components.overviewPanel.close());
