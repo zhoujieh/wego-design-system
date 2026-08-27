@@ -2083,7 +2083,7 @@
       +     (draft.noteOpen ? '<div class="input-group input-group--surface-white order-note-input" data-component-slug="input"><textarea id="product-note" placeholder="例如：单独打包、缺码先联系" data-add-note>' + escapeHtml(draft.note) + '</textarea></div>' : '')
       +   '</div>'
       + '</div>'
-      + '<div class="order-add-footer"><span>' + (desktop ? '<strong data-add-total-amount>' + money(total * unitPrice) + '</strong><small>共 <b data-add-total-qty>' + total + '</b> 件</small>' : '合计：<b data-add-total-qty>' + total + '</b> 件 <strong data-add-total-amount>' + money(total * unitPrice) + '</strong>') + '</span><div class="order-add-footer__actions">' + button('取消', 'weak', 'md', 'data-close-panel') + button('添加', 'strong', 'md', 'data-confirm-add') + '</div></div>';
+      + '<div class="order-add-footer"><span>' + (desktop ? '<strong data-add-total-amount>' + addProductPrice(total * unitPrice) + '</strong><small>共 <b data-add-total-qty>' + total + '</b> 件</small>' : '合计：<b data-add-total-qty>' + total + '</b> 件 <strong data-add-total-amount>' + money(total * unitPrice) + '</strong>') + '</span><div class="order-add-footer__actions">' + button('取消', 'weak', 'md', 'data-close-panel') + button('添加', 'strong', 'md', 'data-confirm-add') + '</div></div>';
   }
 
   function pricePanel() {
@@ -2885,7 +2885,11 @@
     if (!draft) return;
     var total = addDraftTotal(draft);
     root.querySelectorAll('[data-add-total-qty]').forEach(function (node) { node.textContent = total; });
-    root.querySelectorAll('[data-add-total-amount]').forEach(function (node) { node.textContent = money(total * addDraftUnitPrice(draft)); });
+    root.querySelectorAll('[data-add-total-amount]').forEach(function (node) {
+      var amount = total * addDraftUnitPrice(draft);
+      if (node.querySelector('.order-add-price__major')) node.innerHTML = addProductPrice(amount);
+      else node.textContent = money(amount);
+    });
   }
 
   function restoreDraft(ctx) {
