@@ -37,12 +37,12 @@ try {
   fs.copyFileSync(path.join(scriptDir, 'build-routes.mjs'), path.join(fixtureScriptDir, 'build-routes.mjs'));
 
   write('wego-app/scenes/.gitkeep', '');
-  write('wego-app/scenes/我的/route.json', JSON.stringify({
+  write('wego-app/scenes/shop/我的/route.json', JSON.stringify({
     routeId: 'my',
     entry: { type: 'host-tab', tab: 'my' },
   }));
-  write('wego-app/scenes/我的/scene.js', 'window.example = true;\n');
-  write('wego-app/scenes/我的/scene.css', '.example {}\n');
+  write('wego-app/scenes/shop/我的/scene.js', 'window.example = true;\n');
+  write('wego-app/scenes/shop/我的/scene.css', '.example {}\n');
   write('wego-app/js/routes.js', 'window.WEGO_APP_ROUTES = [{ routeId: \'my\' }];\n');
   write('claims/active.json', `${JSON.stringify({
     agent: 'active-agent',
@@ -63,13 +63,13 @@ try {
   write('claims/released.json', `${JSON.stringify(releasedClaim, null, 2)}\n`);
 
   const dryRunOutput = runReset(0, '--dry-run');
-  assert.match(dryRunOutput, /将删除场景：我的/);
+  assert.match(dryRunOutput, /将删除场景：shop\/我的/);
   assert.match(dryRunOutput, /将释放场景认领：active\.json/);
-  assert.ok(fs.existsSync(path.join(fixtureRoot, 'wego-app/scenes/我的')));
+  assert.ok(fs.existsSync(path.join(fixtureRoot, 'wego-app/scenes/shop/我的')));
   assert.equal(readJson('claims/active.json').status, 'active');
 
   runReset(0);
-  assert.ok(!fs.existsSync(path.join(fixtureRoot, 'wego-app/scenes/我的')));
+  assert.ok(!fs.existsSync(path.join(fixtureRoot, 'wego-app/scenes/shop/我的')));
   assert.equal(fs.readFileSync(path.join(fixtureRoot, 'wego-app/js/routes.js'), 'utf8'), 'window.WEGO_APP_ROUTES = [];\n');
 
   const activeClaim = readJson('claims/active.json');
@@ -91,10 +91,10 @@ try {
   assert.equal(readJson('claims/orphan.json').status, 'released');
   runReset(0, '--check');
 
-  write('wego-app/scenes/坏认领保护/route.json', '{}\n');
+  write('wego-app/scenes/infras/坏认领保护/route.json', '{}\n');
   write('claims/broken.json', '{ invalid json\n');
   assert.match(runReset(1), /认领文件无法解析 claims\/broken\.json/);
-  assert.ok(fs.existsSync(path.join(fixtureRoot, 'wego-app/scenes/坏认领保护')));
+  assert.ok(fs.existsSync(path.join(fixtureRoot, 'wego-app/scenes/infras/坏认领保护')));
 
   console.log('空白基线场景、路由与认领清理测试通过');
 } finally {

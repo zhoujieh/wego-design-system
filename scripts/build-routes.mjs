@@ -49,26 +49,34 @@ ${pad}script: ${jsValue(route.script, pad)}
 
 function buildRoutes() {
   if (!fs.existsSync(scenesRoot)) return [];
-  const dirs = fs
+  const categories = fs
     .readdirSync(scenesRoot, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name);
 
   const routes = [];
-  for (const dir of dirs) {
-    const metaPath = path.join(scenesRoot, dir, 'route.json');
-    if (!fs.existsSync(metaPath)) continue;
-    const meta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
-    if (!meta.routeId || !meta.entry) {
-      console.error(`[build-routes] 跳过 ${dir}/route.json：缺少 routeId 或 entry`);
-      continue;
+  for (const category of categories) {
+    const categoryRoot = path.join(scenesRoot, category);
+    const scenes = fs
+      .readdirSync(categoryRoot, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name);
+
+    for (const scene of scenes) {
+      const metaPath = path.join(categoryRoot, scene, 'route.json');
+      if (!fs.existsSync(metaPath)) continue;
+      const meta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
+      if (!meta.routeId || !meta.entry) {
+        console.error(`[build-routes] 跳过 ${category}/${scene}/route.json：缺少 routeId 或 entry`);
+        continue;
+      }
+      routes.push({
+        routeId: meta.routeId,
+        entry: meta.entry,
+        style: `./scenes/${category}/${scene}/scene.css`,
+        script: `./scenes/${category}/${scene}/scene.js`,
+      });
     }
-    routes.push({
-      routeId: meta.routeId,
-      entry: meta.entry,
-      style: `./scenes/${dir}/scene.css`,
-      script: `./scenes/${dir}/scene.js`,
-    });
   }
   routes.sort((a, b) => a.routeId.localeCompare(b.routeId));
   return routes;

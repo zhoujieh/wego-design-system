@@ -17,7 +17,7 @@
 | 图标、字体、图片 | `../assets/*`、`../iconfont.css` | 仅使用已交付资产和已注册图标。 |
 | 原型数据库 | `../../../../wego-app/data/README.md`、`../../../../wego-app/data/prototype-db.js` | 场景中出现的商品、素材图片、用户头像、发布者、好友和运营文案必须优先取自 `window.WEGO_PROTOTYPE_DB`，不在 `scene.js` 里临时编造或硬编码。System 级 `text_to_image` API 规则在本项目内不适用，图片以数据库 `assets` 与本地 `lib/assets/image/` 为准。 |
 | 场景宿主 | `../../../../wego-app/index.html`、`../../../../wego-app/js/routes.js` | 唯一宿主和 hash route 注册。 |
-| 场景模块 | `../../../../wego-app/scenes/{中文业务场景}/scene.js`、`scene.css` | 场景模板、交互和业务布局。 |
+| 场景模块 | `../../../../wego-app/scenes/{分类}/{中文业务场景}/scene.js`、`scene.css` | 场景模板、交互和业务布局。 |
 | 可执行守卫 | `../../../../scripts/*.mjs` | 组件一致性、场景源码、真实浏览器、同步和全量验证。 |
 
 不得建立、读取或引用自动生成规则文档；运行时只读取本表中的权威来源。

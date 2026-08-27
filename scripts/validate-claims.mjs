@@ -80,11 +80,20 @@ function validateClaimShape(claim, agentFromName) {
 /**
  * 语义校验：场景目录存在 + routeId 与 route.json 一致。
  */
+function resolveClaimSceneDir(sceneName) {
+  const scenesRoot = path.join(repoRoot, 'wego-app', 'scenes');
+  for (const category of ['shop', 'bcg', 'customer', 'infras']) {
+    const candidate = path.join(scenesRoot, category, sceneName);
+    if (fs.existsSync(candidate)) return candidate;
+  }
+  return null;
+}
+
 function validateActiveSemantics(claim) {
   const errors = [];
-  const sceneDir = path.join(repoRoot, 'wego-app', 'scenes', claim.scene);
-  if (!fs.existsSync(sceneDir)) {
-    errors.push(`场景目录 wego-app/scenes/${claim.scene} 不存在`);
+  const sceneDir = resolveClaimSceneDir(claim.scene);
+  if (!sceneDir) {
+    errors.push(`场景 ${claim.scene} 目录不存在（wego-app/scenes/{分类}/${claim.scene}）`);
     return errors;
   }
   const routeFile = path.join(sceneDir, 'route.json');
@@ -97,7 +106,7 @@ function validateActiveSemantics(claim) {
       return errors;
     }
     if (route.routeId !== claim.routeId) {
-      errors.push(`routeId "${claim.routeId}" 与 wego-app/scenes/${claim.scene}/route.json（routeId: ${route.routeId}）不一致`);
+      errors.push(`routeId "${claim.routeId}" 与场景 ${claim.scene} 的 route.json（routeId: ${route.routeId}）不一致`);
     }
   }
   return errors;
@@ -121,17 +130,17 @@ function runTests() {
   const ROUTE = 'test-route';
   try {
     fs.mkdirSync(path.join(fixture, 'claims'), { recursive: true });
-    fs.mkdirSync(path.join(fixture, 'wego-app/scenes', SCENE), { recursive: true });
-    fs.writeFileSync(path.join(fixture, 'wego-app/scenes', SCENE, 'scene.js'), 'window.test = 1;\n');
-    fs.writeFileSync(path.join(fixture, 'wego-app/scenes', SCENE, 'route.json'), JSON.stringify({ routeId: ROUTE }));
+    fs.mkdirSync(path.join(fixture, 'wego-app/scenes/infras', SCENE), { recursive: true });
+    fs.writeFileSync(path.join(fixture, 'wego-app/scenes/infras', SCENE, 'scene.js'), 'window.test = 1;\n');
+    fs.writeFileSync(path.join(fixture, 'wego-app/scenes/infras', SCENE, 'route.json'), JSON.stringify({ routeId: ROUTE }));
     runGit(['init']);
     runGit(['config', 'user.name', 'Workflow Test']);
     runGit(['config', 'user.email', 'workflow-test@example.com']);
     runGit(['add', '.']);
     runGit(['commit', '-m', 'base']);
     const base = runGit(['rev-parse', 'HEAD']).stdout.trim();
-    fs.writeFileSync(path.join(fixture, 'wego-app/scenes', SCENE, 'scene.js'), 'window.test = 2;\n');
-    runGit(['add', 'wego-app/scenes/测试场景/scene.js']);
+    fs.writeFileSync(path.join(fixture, 'wego-app/scenes/infras', SCENE, 'scene.js'), 'window.test = 2;\n');
+    runGit(['add', 'wego-app/scenes/infras/测试场景/scene.js']);
     runGit(['commit', '-m', 'change']);
     const head = runGit(['rev-parse', 'HEAD']).stdout.trim();
 
@@ -176,8 +185,8 @@ function runTests() {
     fs.rmSync(path.join(fixture, 'claims', 'b.json'), { force: true });
 
     // 构造只修改 scene.css 的提交对（baseCss=head, headCss=新增 scene.css）
-    fs.writeFileSync(path.join(fixture, 'wego-app/scenes', SCENE, 'scene.css'), 'body {}\n');
-    runGit(['add', 'wego-app/scenes/测试场景/scene.css']);
+    fs.writeFileSync(path.join(fixture, 'wego-app/scenes/infras', SCENE, 'scene.css'), 'body {}\n');
+    runGit(['add', 'wego-app/scenes/infras/测试场景/scene.css']);
     runGit(['commit', '-m', 'add css']);
     const headCss = runGit(['rev-parse', 'HEAD']).stdout.trim();
     const baseCss = head; // 第二次提交，diff 到 headCss 只有 scene.css 新增
@@ -259,7 +268,7 @@ if (checkChanged) {
   const changedByScene = {};
   (diff.stdout || '').split('\n').forEach((file) => {
     const trimmed = file.trim();
-    const m = /^wego-app\/scenes\/([^/]+)\/(.+)$/.exec(trimmed);
+    const m = /^wego-app\/scenes\/[^/]+\/([^/]+)\/(.+)$/.exec(trimmed);
     if (!m) return;
     const scene = m[1];
     const relPath = m[2];

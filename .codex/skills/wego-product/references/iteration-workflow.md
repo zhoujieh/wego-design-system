@@ -5,7 +5,7 @@
 ## 迭代位置
 
 ```text
-wego-app/scenes/{主业务场景}/_iterations/{iteration_id}-{title}-{YYYYMMDD}/
+wego-app/scenes/{分类}/{主业务场景}/_iterations/{iteration_id}-{title}-{YYYYMMDD}/
 ├── iteration.json
 ├── {iteration_id}-{title}-{YYYYMMDD}.md   # spec.md 需求规格说明（唯一需求源）
 └── freeze.json   # 仅明确冻结后存在
@@ -68,7 +68,7 @@ frozen
 node scripts/iteration-record.mjs suggest-id --scene {场景}
 
 node scripts/iteration-record.mjs init \
-  --file wego-app/scenes/{场景}/_iterations/{迭代}/iteration.json \
+  --file wego-app/scenes/{分类}/{场景}/_iterations/{迭代}/iteration.json \
   --title {标题} --scene {场景} [--iteration-id {id}]
 
 node scripts/iteration-record.mjs submit-brief --file {iteration.json}
