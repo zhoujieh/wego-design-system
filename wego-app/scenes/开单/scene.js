@@ -2079,8 +2079,12 @@
       +   (draft.discountOpen ? '<div class="order-add-discount-editor"><label for="order-add-discount-value">优惠后单价</label><input id="order-add-discount-value" type="text" inputmode="decimal" value="' + escapeHtml(draft.discountValue) + '" placeholder="请输入金额" data-add-discount-value><button type="button" data-apply-add-discount>应用</button></div>' : '')
       +   (desktop ? '' : '<div class="order-segment order-add-mode-switch"><button class="' + (draft.mode === 'single' ? 'is-active' : '') + '" data-add-mode="single">单买</button><button class="' + (draft.mode === 'batch' ? 'is-active' : '') + '" data-add-mode="batch">多买</button></div>')
       +   (draft.mode === 'batch' ? addBatchPicker(draft, desktop) : addSinglePicker(draft, desktop))
-      +   '<div class="order-add-note-entry"><button type="button" class="link link--14" data-component-slug="link" data-toggle-add-note>' + (draft.note ? '编辑备注' : '添加备注') + '</button>'
-      +     (draft.noteOpen ? '<div class="input-group input-group--surface-white order-note-input" data-component-slug="input"><textarea id="product-note" placeholder="例如：单独打包、缺码先联系" data-add-note>' + escapeHtml(draft.note) + '</textarea></div>' : '')
+      +   '<div class="order-add-note-entry' + (draft.noteOpen ? ' is-active' : '') + '">'
+      +     (draft.noteOpen
+              ? '<div class="input-group input-group--surface-white order-note-input" data-component-slug="input">' + (desktop
+                  ? '<input id="product-note" type="text" value="' + escapeHtml(draft.note) + '" placeholder="请输入备注" data-add-note>'
+                  : '<textarea id="product-note" placeholder="例如：单独打包、缺码先联系" data-add-note>' + escapeHtml(draft.note) + '</textarea>') + '</div>'
+              : '<button type="button" class="link link--14" data-component-slug="link" data-toggle-add-note>' + (draft.note ? '备注：' + escapeHtml(draft.note) + '<i class="wego-iconfont-s icon-bianji" aria-hidden="true"></i>' : '添加备注') + '</button>')
       +   '</div>'
       + '</div>'
       + '<div class="order-add-footer"><span>' + (desktop ? '<strong data-add-total-amount>' + addProductPrice(total * unitPrice) + '</strong><small>共 <b data-add-total-qty>' + total + '</b> 件</small>' : '合计：<b data-add-total-qty>' + total + '</b> 件 <strong data-add-total-amount>' + money(total * unitPrice) + '</strong>') + '</span><div class="order-add-footer__actions">' + button('取消', 'weak', 'md', 'data-close-panel') + button('添加', 'strong', 'md', 'data-confirm-add') + '</div></div>';
