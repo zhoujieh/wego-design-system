@@ -3,8 +3,8 @@
   "scene": "应用中心",
   "routeId": "app-center",
   "branch": "feature/kiro-order-query",
-  "claimedAt": "2026-08-27T01:12:07.044Z",
+  "claimedAt": "2026-08-27T02:03:51.721Z",
   "files": [
-    "wego-app/scenes/应用中心/scene.js"
+    "scene.js"
   ]
 }
