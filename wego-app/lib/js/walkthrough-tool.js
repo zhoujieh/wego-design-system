@@ -41,6 +41,7 @@
     selectedElement: null,
     changes: [],
     currentRoute: '',
+    originalStyles: {}, // selector -> { 'css-property': 原始计算值 }
   };
 
   /** 获取当前场景路由 */
@@ -86,8 +87,9 @@
     while (node && node.nodeType === 1 && node !== document.body) {
       let part = node.tagName.toLowerCase();
       if (node.className && typeof node.className === 'string') {
-        const classes = node.className.trim().split(/\s+/).filter(c => c && !c.startsWith('wt-') && !c.startsWith('wego-'));
-        if (classes.length) part += '.' + classes.slice(0, 2).join('.');
+        // 保留完整语义 class（最多取前 4 个，避免选择器过长），过滤工具自身注入类
+        const classes = node.className.trim().split(/\s+/).filter(c => c && !c.startsWith('wt-') && !c.startsWith('wego-') && !c.startsWith('data-wt'));
+        if (classes.length) part += '.' + classes.slice(0, 4).join('.');
       }
       // nth-child
       const parent = node.parentNode;
@@ -1056,6 +1058,7 @@
             selector: c.selector,
             elementTag: c.elementTag,
             elementText: c.elementText,
+            elementClass: c.elementClass || '',
             changes: [],
           };
         }
@@ -1070,10 +1073,12 @@
       groupList.forEach((g, i) => {
         const heading = `${g.elementTag}${g.elementText ? ' · ' + g.elementText : ''}`;
         const source = `${g.elementTag}${g.elementText ? ' · ' + g.elementText : ''}`;
+        const target = g.elementText || g.elementClass || g.elementTag;
         const feedback = g.changes.map(c => `${c.property}: ${c.oldValue || '-'} → ${c.newValue || '-'}`).join(' | ');
         lines.push(`### ${i + 1}. ${heading}`);
         lines.push(`**Location:** ${g.selector}`);
         lines.push(`**Source:** ${source}`);
+        lines.push(`**Targets:** ${target}`);
         lines.push(`**Feedback:** ${feedback}`);
         lines.push('');
       });
@@ -1617,6 +1622,9 @@
           selector: this._selector,
           elementTag: this._targetEl.tagName.toLowerCase(),
           elementText: (this._targetEl.textContent || '').trim().substring(0, 50),
+          elementClass: (this._targetEl.className && typeof this._targetEl.className === 'string')
+            ? this._targetEl.className.trim().split(/\s+/).filter(c => c && !c.startsWith('wt-') && !c.startsWith('wego-') && !c.startsWith('data-wt'))[0] || ''
+            : '',
           property: result.property,
           oldValue: result.oldValue,
           newValue: result.newValue,
@@ -1629,75 +1637,111 @@
     _applyField(field, value) {
       const el = this._targetEl;
       const numVal = parseFloat(value);
+      const cs = () => getComputedStyle(el);
       switch (field) {
-        case 'layoutMode':
+        case 'layoutMode': {
+          const oldValue = cs().flexDirection;
           el.style.display = 'flex';
           el.style.flexDirection = value;
-          return { property: 'flex-direction', oldValue: getComputedStyle(el).flexDirection, newValue: value };
-        case 'justifyContent':
+          return { property: 'flex-direction', oldValue, newValue: value };
+        }
+        case 'justifyContent': {
+          const oldValue = cs().justifyContent;
           el.style.justifyContent = value;
-          return { property: 'justify-content', oldValue: getComputedStyle(el).justifyContent, newValue: value };
-        case 'alignItems':
+          return { property: 'justify-content', oldValue, newValue: value };
+        }
+        case 'alignItems': {
+          const oldValue = cs().alignItems;
           el.style.alignItems = value;
-          return { property: 'align-items', oldValue: getComputedStyle(el).alignItems, newValue: value };
-        case 'layoutGap':
+          return { property: 'align-items', oldValue, newValue: value };
+        }
+        case 'layoutGap': {
+          const oldValue = cs().gap;
           el.style.gap = isNaN(numVal) ? '' : numVal + 'px';
-          return { property: 'gap', oldValue: getComputedStyle(el).gap, newValue: isNaN(numVal) ? '' : numVal + 'px' };
-        case 'paddingLeft':
+          return { property: 'gap', oldValue, newValue: isNaN(numVal) ? '' : numVal + 'px' };
+        }
+        case 'paddingLeft': {
+          const oldValue = cs().paddingLeft;
           el.style.paddingLeft = isNaN(numVal) ? '' : numVal + 'px';
-          return { property: 'padding-left', oldValue: getComputedStyle(el).paddingLeft, newValue: isNaN(numVal) ? '' : numVal + 'px' };
-        case 'paddingRight':
+          return { property: 'padding-left', oldValue, newValue: isNaN(numVal) ? '' : numVal + 'px' };
+        }
+        case 'paddingRight': {
+          const oldValue = cs().paddingRight;
           el.style.paddingRight = isNaN(numVal) ? '' : numVal + 'px';
-          return { property: 'padding-right', oldValue: getComputedStyle(el).paddingRight, newValue: isNaN(numVal) ? '' : numVal + 'px' };
-        case 'paddingTop':
+          return { property: 'padding-right', oldValue, newValue: isNaN(numVal) ? '' : numVal + 'px' };
+        }
+        case 'paddingTop': {
+          const oldValue = cs().paddingTop;
           el.style.paddingTop = isNaN(numVal) ? '' : numVal + 'px';
-          return { property: 'padding-top', oldValue: getComputedStyle(el).paddingTop, newValue: isNaN(numVal) ? '' : numVal + 'px' };
-        case 'paddingBottom':
+          return { property: 'padding-top', oldValue, newValue: isNaN(numVal) ? '' : numVal + 'px' };
+        }
+        case 'paddingBottom': {
+          const oldValue = cs().paddingBottom;
           el.style.paddingBottom = isNaN(numVal) ? '' : numVal + 'px';
-          return { property: 'padding-bottom', oldValue: getComputedStyle(el).paddingBottom, newValue: isNaN(numVal) ? '' : numVal + 'px' };
-        case 'width':
+          return { property: 'padding-bottom', oldValue, newValue: isNaN(numVal) ? '' : numVal + 'px' };
+        }
+        case 'width': {
+          const oldValue = cs().width;
           el.style.width = isNaN(numVal) ? '' : numVal + 'px';
-          return { property: 'width', oldValue: getComputedStyle(el).width, newValue: isNaN(numVal) ? '' : numVal + 'px' };
-        case 'height':
+          return { property: 'width', oldValue, newValue: isNaN(numVal) ? '' : numVal + 'px' };
+        }
+        case 'height': {
+          const oldValue = cs().height;
           el.style.height = isNaN(numVal) ? '' : numVal + 'px';
-          return { property: 'height', oldValue: getComputedStyle(el).height, newValue: isNaN(numVal) ? '' : numVal + 'px' };
-        case 'fontSize':
+          return { property: 'height', oldValue, newValue: isNaN(numVal) ? '' : numVal + 'px' };
+        }
+        case 'fontSize': {
+          const oldValue = cs().fontSize;
           el.style.fontSize = isNaN(numVal) ? '' : numVal + 'px';
-          return { property: 'font-size', oldValue: getComputedStyle(el).fontSize, newValue: isNaN(numVal) ? '' : numVal + 'px' };
-        case 'fontWeight':
+          return { property: 'font-size', oldValue, newValue: isNaN(numVal) ? '' : numVal + 'px' };
+        }
+        case 'fontWeight': {
+          const oldValue = cs().fontWeight;
           el.style.fontWeight = value;
-          return { property: 'font-weight', oldValue: getComputedStyle(el).fontWeight, newValue: value };
+          return { property: 'font-weight', oldValue, newValue: value };
+        }
         case 'colorHex':
         case 'colorOpacity': {
+          const oldValue = cs().color;
           const hex = this._data.colorHex || '#000000';
           const opacity = this._data.colorOpacity ?? 100;
           const rgba = hexOpacityToRgba(hex, opacity);
           el.style.color = rgba;
-          return { property: 'color', oldValue: getComputedStyle(el).color, newValue: rgba };
+          return { property: 'color', oldValue, newValue: rgba };
         }
-        case 'lineHeight':
+        case 'lineHeight': {
+          const oldValue = cs().lineHeight;
           el.style.lineHeight = value || '';
-          return { property: 'line-height', oldValue: getComputedStyle(el).lineHeight, newValue: value || '' };
-        case 'textAlign':
+          return { property: 'line-height', oldValue, newValue: value || '' };
+        }
+        case 'textAlign': {
+          const oldValue = cs().textAlign;
           el.style.textAlign = value;
-          return { property: 'text-align', oldValue: getComputedStyle(el).textAlign, newValue: value };
-        case 'layerOpacity':
+          return { property: 'text-align', oldValue, newValue: value };
+        }
+        case 'layerOpacity': {
+          const oldValue = cs().opacity;
           el.style.opacity = isNaN(numVal) ? '' : (numVal / 100).toString();
-          return { property: 'opacity', oldValue: getComputedStyle(el).opacity, newValue: isNaN(numVal) ? '' : (numVal / 100).toString() };
-        case 'borderRadiusAll':
+          return { property: 'opacity', oldValue, newValue: isNaN(numVal) ? '' : (numVal / 100).toString() };
+        }
+        case 'borderRadiusAll': {
+          const oldValue = cs().borderRadius;
           el.style.borderRadius = isNaN(numVal) ? '' : numVal + 'px';
-          return { property: 'border-radius', oldValue: getComputedStyle(el).borderRadius, newValue: isNaN(numVal) ? '' : numVal + 'px' };
+          return { property: 'border-radius', oldValue, newValue: isNaN(numVal) ? '' : numVal + 'px' };
+        }
         case 'fillHex':
         case 'fillOpacity': {
+          const oldValue = cs().backgroundColor;
           const hex = this._data.fillHex || '#FFFFFF';
           const opacity = this._data.fillOpacity ?? 0;
           const rgba = opacity > 0 ? hexOpacityToRgba(hex, opacity) : 'transparent';
           el.style.backgroundColor = rgba;
-          return { property: 'background-color', oldValue: getComputedStyle(el).backgroundColor, newValue: rgba };
+          return { property: 'background-color', oldValue, newValue: rgba };
         }
         case 'strokeHex':
         case 'strokeOpacity':
         case 'strokeWidth': {
+          const oldValue = cs().border;
           const hex = this._data.strokeHex || '#000000';
           const opacity = this._data.strokeOpacity ?? 0;
           const width = parseFloat(this._data.strokeWidth) || 0;
@@ -1705,16 +1749,17 @@
           el.style.borderWidth = width > 0 ? width + 'px' : '';
           el.style.borderStyle = width > 0 ? 'solid' : '';
           el.style.borderColor = color;
-          return { property: 'border', oldValue: getComputedStyle(el).border, newValue: width > 0 ? `${width}px solid ${color}` : '' };
+          return { property: 'border', oldValue, newValue: width > 0 ? `${width}px solid ${color}` : '' };
         }
-        case 'strokePosition':
-          // CSS 不直接支持内/外描边位置，MVP 用 outline 模拟内描边
+        case 'strokePosition': {
+          const oldValue = cs().boxShadow;
           if (value === 'inside') {
             el.style.boxShadow = 'inset 0 0 0 ' + (parseFloat(this._data.strokeWidth) || 1) + 'px ' + hexOpacityToRgba(this._data.strokeHex || '#000000', this._data.strokeOpacity ?? 100);
           } else {
             el.style.boxShadow = '';
           }
-          return { property: 'box-shadow', oldValue: getComputedStyle(el).boxShadow, newValue: value === 'inside' ? el.style.boxShadow : '' };
+          return { property: 'box-shadow', oldValue, newValue: value === 'inside' ? el.style.boxShadow : '' };
+        }
         case 'shadowHex':
         case 'shadowOpacity':
         case 'shadowX':
@@ -1722,6 +1767,7 @@
         case 'shadowBlur':
         case 'shadowSpread':
         case 'shadowInset': {
+          const oldValue = cs().boxShadow;
           const hex = this._data.shadowHex || '#000000';
           const opacity = this._data.shadowOpacity ?? 0;
           const x = parseFloat(this._data.shadowX) || 0;
@@ -1733,10 +1779,10 @@
             const color = hexOpacityToRgba(hex, opacity);
             const shadowStr = `${inset ? 'inset ' : ''}${x}px ${y}px ${blur}px ${spread}px ${color}`;
             el.style.boxShadow = shadowStr;
-            return { property: 'box-shadow', oldValue: getComputedStyle(el).boxShadow, newValue: shadowStr };
+            return { property: 'box-shadow', oldValue, newValue: shadowStr };
           } else {
             el.style.boxShadow = 'none';
-            return { property: 'box-shadow', oldValue: getComputedStyle(el).boxShadow, newValue: 'none' };
+            return { property: 'box-shadow', oldValue, newValue: 'none' };
           }
         }
         default:
@@ -2201,7 +2247,9 @@
       });
       // 点击外部关闭子面板
       document.addEventListener('pointerdown', (e) => {
-        if (!e.target.closest || !e.target.closest('wego-walkthrough')) {
+        if (!e.target.closest) return;
+        if (isWalkthroughElement(e.target)) return; // 工具自身 UI 内的 pointerdown 不关闭子面板
+        if (!e.target.closest('wego-walkthrough')) {
           this._closeSubpanels();
         }
       }, true);
@@ -2507,52 +2555,57 @@
     }
 
     _bindTouchEvents() {
-      this._touchStartX = 0;
-      this._touchStartY = 0;
-      this._touchStartTime = 0;
+      this._ptStartX = 0;
+      this._ptStartY = 0;
+      this._ptStartTime = 0;
       this._isSwiping = false;
-      document.addEventListener('touchstart', this._onTouchStart, { passive: true });
-      document.addEventListener('touchmove', this._onTouchMove, { passive: true });
-      document.addEventListener('touchend', this._onTouchEnd, { passive: false });
-      document.addEventListener('mousedown', this._onMouseDown, true);
+      this._pointerActive = false;
+      document.addEventListener('pointerdown', this._onPointerDown, true);
+      document.addEventListener('pointermove', this._onPointerMove, true);
+      document.addEventListener('pointerup', this._onPointerUp, true);
+      document.addEventListener('click', this._onClickCapture, true);
     }
 
     _unbindTouchEvents() {
-      document.removeEventListener('touchstart', this._onTouchStart);
-      document.removeEventListener('touchmove', this._onTouchMove);
-      document.removeEventListener('touchend', this._onTouchEnd);
-      document.removeEventListener('mousedown', this._onMouseDown, true);
+      document.removeEventListener('pointerdown', this._onPointerDown, true);
+      document.removeEventListener('pointermove', this._onPointerMove, true);
+      document.removeEventListener('pointerup', this._onPointerUp, true);
+      document.removeEventListener('click', this._onClickCapture, true);
+      this._pointerActive = false;
     }
 
-    _onTouchStart = (e) => {
-      const touch = e.touches[0];
-      this._touchStartX = touch.clientX;
-      this._touchStartY = touch.clientY;
-      this._touchStartTime = Date.now();
+    // 走查模式：在捕获阶段最早吞掉页面元素的指针事件，避免误触发其自身监听；
+    // 但不在 pointerdown 调 preventDefault，保留原生滚动（滑动手势放行）。
+    _onPointerDown = (e) => {
+      if (e.button !== undefined && e.button !== 0) return; // 仅主键
+      if (isWalkthroughElement(e.target)) return;          // 工具自身 UI 放行
+      e.stopPropagation();                                 // 阻断页面元素监听器
+      this._pointerActive = true;
+      this._ptStartX = e.clientX;
+      this._ptStartY = e.clientY;
+      this._ptStartTime = Date.now();
       this._isSwiping = false;
-    }
-    _onTouchMove = (e) => {
-      const touch = e.touches[0];
-      const dx = Math.abs(touch.clientX - this._touchStartX);
-      const dy = Math.abs(touch.clientY - this._touchStartY);
+    };
+    _onPointerMove = (e) => {
+      if (!this._pointerActive) return;
+      const dx = Math.abs(e.clientX - this._ptStartX);
+      const dy = Math.abs(e.clientY - this._ptStartY);
       if (dx > 10 || dy > 10) this._isSwiping = true;
-    }
-    _onTouchEnd = (e) => {
-      if (this._isSwiping) return;
-      if (Date.now() - this._touchStartTime >= 500) return;
-      const touch = e.changedTouches[0];
-      this._handlePointSelection(touch.clientX, touch.clientY, e);
-    }
-    _onMouseDown = (e) => {
-      if (e.button !== 0) return;
-      const startX = e.clientX, startY = e.clientY;
-      const onUp = (ev) => {
-        document.removeEventListener('mouseup', onUp, true);
-        if (Math.abs(ev.clientX - startX) > 5 || Math.abs(ev.clientY - startY) > 5) return;
-        this._handlePointSelection(ev.clientX, ev.clientY, ev);
-      };
-      document.addEventListener('mouseup', onUp, true);
-    }
+    };
+    _onPointerUp = (e) => {
+      if (!this._pointerActive) return;
+      this._pointerActive = false;
+      if (this._isSwiping) return;                          // 滑动：放行页面滚动
+      if (Date.now() - this._ptStartTime >= 500) return;    // 长按：MVP 不处理
+      this._handlePointSelection(e.clientX, e.clientY, e);
+    };
+    // 拦截走查模式下落到页面元素的合成 click，避免误触发（如导航跳转）
+    _onClickCapture = (e) => {
+      if (this._walkthroughMode && !isWalkthroughElement(e.target)) {
+        e.stopPropagation();
+        e.preventDefault();
+      }
+    };
 
     _handlePointSelection(clientX, clientY, event) {
       const el = document.elementFromPoint(clientX, clientY);
@@ -2572,8 +2625,38 @@
       el.setAttribute('data-wt-selected', 'true');
       this._components.overlay.removeAttribute('hidden');
       this._components.overlay.showForElement(el);
-      state.selectedSelector = generateSelector(el);
-      bus.emit('element-selected', { element: el, selector: state.selectedSelector });
+      const selector = generateSelector(el);
+      state.selectedSelector = selector;
+      // 快照元素原始样式（走查态进入前的计算值），用于「改回原值即视为无变更」
+      // 关键：用 route::selector 作 key，且仅在首次选中时建立一次，后续重新选中不覆盖，
+      // 否则关闭面板再打开时元素已带 inline 修改，getComputedStyle 读到的是污染值。
+      const snapKey = state.currentRoute + '::' + selector;
+      if (!state.originalStyles[snapKey]) {
+        const cs = getComputedStyle(el);
+        state.originalStyles[snapKey] = {
+          'flex-direction': cs.flexDirection,
+          'justify-content': cs.justifyContent,
+          'align-items': cs.alignItems,
+          'gap': cs.gap,
+          'padding-left': cs.paddingLeft,
+          'padding-right': cs.paddingRight,
+          'padding-top': cs.paddingTop,
+          'padding-bottom': cs.paddingBottom,
+          'width': cs.width,
+          'height': cs.height,
+          'font-size': cs.fontSize,
+          'font-weight': cs.fontWeight,
+          'color': cs.color,
+          'line-height': cs.lineHeight,
+          'text-align': cs.textAlign,
+          'opacity': cs.opacity,
+          'border-radius': cs.borderRadius,
+          'background-color': cs.backgroundColor,
+          'border': cs.border,
+          'box-shadow': cs.boxShadow,
+        };
+      }
+      bus.emit('element-selected', { element: el, selector });
     }
 
     _clearSelection() {
@@ -2646,6 +2729,27 @@
 
     // ── 变更记录 ──────────────────────────────────────────
     _recordChange(change) {
+      const snapKey = state.currentRoute + '::' + change.selector;
+      const original = state.originalStyles[snapKey];
+      // 改回原始值 = 净变更为零，删除该属性的变更记录（而非保留 X→X）
+      if (original && change.property in original && change.newValue === original[change.property]) {
+        const existing = state.changes.find(c =>
+          c.selector === change.selector && c.property === change.property
+        );
+        if (existing) {
+          try {
+            const el = document.querySelector(change.selector);
+            if (el) el.style[change.property] = ''; // 还原元素样式
+          } catch (e) {}
+          state.changes = state.changes.filter(c => c.id !== existing.id);
+          this._saveChanges();
+          this._updateChangeCount();
+          if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
+            this._components.overviewPanel.refresh(state.changes, state.currentRoute);
+          }
+        }
+        return;
+      }
       const existing = state.changes.find(c =>
         c.selector === change.selector && c.property === change.property
       );
