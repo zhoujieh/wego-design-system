@@ -1,0 +1,10 @@
+{
+  "routeId": "friend-list",
+  "pattern": "composed",
+  "entry": {
+    "type": "host-tab",
+    "tab": "haoyou"
+  },
+  "style": "scenes/好友列表/scene.css",
+  "script": "scenes/好友列表/scene.js"
+}
