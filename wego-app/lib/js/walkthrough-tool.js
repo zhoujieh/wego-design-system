@@ -42,6 +42,7 @@
     changes: [],
     currentRoute: '',
     originalStyles: {}, // selector -> { 'css-property': 原始计算值 }
+    pseudoStyles: {}, // "selector||before|after" -> { 'css-property': 值 }（注入 <head> 的规则）
   };
 
   /** 获取当前场景路由 */
@@ -51,11 +52,12 @@
     return match ? match[1] : 'default';
   }
 
+
   /** 判断元素是否属于走查工具自身（包括 Shadow DOM 内部） */
   function isWalkthroughElement(el) {
     if (!el) return false;
     // 检查 Light DOM 中的祖先
-    const lightTags = 'wego-walkthrough,wego-wt-style-panel,wego-wt-overview-panel,wego-wt-color-picker,wego-wt-toast,wego-wt-overlay';
+    const lightTags = 'wego-walkthrough,wego-wt-style-panel,wego-wt-overview-panel,wego-wt-color-picker,wego-wt-toast,wego-wt-overlay,wego-wt-highlight';
     if (el.closest && el.closest(lightTags)) return true;
     // 检查 Shadow DOM：元素的根节点是否为走查工具的 shadowRoot
     try {
@@ -63,6 +65,65 @@
       if (root && root.host && root.host.tagName === 'WEGO-WALKTHROUGH') return true;
     } catch (e) { /* ignore */ }
     return false;
+  }
+
+  /** 纯 nth 兜底链（原逻辑，用于优雅降级） */
+  function buildNthChain(el) {
+    const parts = [];
+    let node = el;
+    while (node && node.nodeType === 1 && node !== document.body) {
+      let part = node.tagName.toLowerCase();
+      if (node.className && typeof node.className === 'string') {
+        const classes = node.className.trim().split(/\s+/).filter(c => c && !c.startsWith('wt-') && !c.startsWith('wego-') && !c.startsWith('data-wt'));
+        if (classes.length) part += '.' + classes.slice(0, 4).join('.');
+      }
+      const parent = node.parentNode;
+      if (parent) {
+        const siblings = Array.from(parent.children).filter(c => c.tagName === node.tagName);
+        if (siblings.length > 1) {
+          const idx = siblings.indexOf(node) + 1;
+          part += `:nth-of-type(${idx})`;
+        }
+      }
+      parts.unshift(part);
+      if (node.id && document.querySelectorAll('#' + CSS.escape(node.id)).length === 1) {
+        parts[0] = '#' + node.id;
+        break;
+      }
+      node = node.parentNode;
+    }
+    return parts.join(' > ');
+  }
+
+  /**
+   * 意图→语义类映射规则表（通用、可扩展）
+   * 每条规则：{ klass, note, test(el, rec) }
+   *   test 命中即认为"该改动应在源码加 klass 而非内联 CSS"
+   * 未来新增套路（如 sticky-region 显隐、card--outlined 变体）只需追加一条。
+   */
+  const CLASS_INTENTS = [
+    {
+      klass: 'card--vertical',
+      note: '卡片内"标题/网格"等段落需上下竖排，建议加 card--vertical 语义类，而非内联 flex-direction',
+      test: (el, rec) => {
+        if (!el || !el.className) return false;
+        const cls = (' ' + el.className + ' ').replace(/\s+/g, ' ');
+        const isCard = /(^| )card(-|--)/.test(cls.trim());
+        return isCard && rec.property === 'flex-direction' && /column/.test(rec.newValue || '');
+      },
+    },
+  ];
+
+  /** 运行意图识别，返回 { intent, intentClass, skipCss, note } */
+  function deriveIntent(rec, el) {
+    for (const rule of CLASS_INTENTS) {
+      try {
+        if (rule.test(el, rec)) {
+          return { intent: 'add-class', intentClass: rule.klass, skipCss: true, note: rule.note || '' };
+        }
+      } catch (e) { /* 规则异常不影响主流程 */ }
+    }
+    return { intent: 'css', intentClass: '', skipCss: false, note: '' };
   }
 
   /** 生成 CSS 选择器 */
@@ -77,43 +138,63 @@
     for (const attr of stableAttrs) {
       const val = el.getAttribute(attr);
       if (val) {
-        const selector = `${el.tagName.toLowerCase()}[${attr}="${val}"]`;
+        const selfCls = (el.className && typeof el.className === 'string')
+          ? el.className.trim().split(/\s+/).filter(c => c && !c.startsWith('wt-') && !c.startsWith('wego-') && !c.startsWith('data-wt'))[0]
+          : '';
+        const selector = `${el.tagName.toLowerCase()}[${attr}="${val}"]${selfCls ? '.' + selfCls : ''}`;
         if (document.querySelectorAll(selector).length === 1) return selector;
       }
     }
-    // 3. tagname.class:nth-child(n) 路径链
+    // 3. 语义锚点 + 类名链（弱化 nth，提升跨顺序稳定性）
+    // 3a. 沿祖先向上找稳定锚点：唯一 id / data-component-slug / 强语义类（含下划线设计系统类）
+    const STABLE_CLASS = /(__|\b(card|navbar|section|dialog|panel|list|grid|tab|form|page|app|home)\b)/i;
+    let anchor = null;
+    let anchorNode = el;
+    while (anchorNode && anchorNode.nodeType === 1 && anchorNode !== document.body) {
+      if (anchorNode.id && document.querySelectorAll('#' + CSS.escape(anchorNode.id)).length === 1) {
+        anchor = '#' + anchorNode.id; break;
+      }
+      const slug = anchorNode.getAttribute && anchorNode.getAttribute('data-component-slug');
+      if (slug) { anchor = `${anchorNode.tagName.toLowerCase()}[data-component-slug="${slug}"]`; break; }
+      if (anchorNode.className && typeof anchorNode.className === 'string' && STABLE_CLASS.test(anchorNode.className)) {
+        const cls = anchorNode.className.trim().split(/\s+/).filter(c => c && !c.startsWith('wt-') && !c.startsWith('wego-') && !c.startsWith('data-wt'))[0];
+        const sel = cls ? '.' + cls : anchorNode.tagName.toLowerCase();
+        if (document.querySelectorAll(sel).length === 1) { anchor = sel; break; }
+        anchor = sel;
+      }
+      anchorNode = anchorNode.parentNode;
+    }
+    // 3b. 从目标到锚点（不含锚）拼接类名链，仅在不唯一时才加 nth
+    const classesOf = (n) => (n.className && typeof n.className === 'string')
+      ? n.className.trim().split(/\s+/).filter(c => c && !c.startsWith('wt-') && !c.startsWith('wego-') && !c.startsWith('data-wt'))
+      : [];
     const parts = [];
     let node = el;
     while (node && node.nodeType === 1 && node !== document.body) {
+      if (anchor && (node === anchorNode || node.id || (node.getAttribute && node.getAttribute('data-component-slug')))) break;
       let part = node.tagName.toLowerCase();
-      if (node.className && typeof node.className === 'string') {
-        // 保留完整语义 class（最多取前 4 个，避免选择器过长），过滤工具自身注入类
-        const classes = node.className.trim().split(/\s+/).filter(c => c && !c.startsWith('wt-') && !c.startsWith('wego-') && !c.startsWith('data-wt'));
-        if (classes.length) part += '.' + classes.slice(0, 4).join('.');
-      }
-      // nth-child
+      const nodeClasses = classesOf(node);
+      if (nodeClasses.length) part += '.' + nodeClasses.slice(0, 4).join('.');
       const parent = node.parentNode;
       if (parent) {
         const siblings = Array.from(parent.children).filter(c => c.tagName === node.tagName);
-        if (siblings.length > 1) {
+        if (siblings.length > 1 && nodeClasses.length === 0) {
           const idx = siblings.indexOf(node) + 1;
           part += `:nth-of-type(${idx})`;
         }
       }
       parts.unshift(part);
-      // 遇到稳定祖先就停止
-      if (node.id && document.querySelectorAll('#' + CSS.escape(node.id)).length === 1) {
-        parts[0] = '#' + node.id;
-        break;
-      }
       node = node.parentNode;
     }
-    const selector = parts.join(' > ');
-    // 验证唯一性
+    let selector;
+    if (anchor && parts.length) selector = anchor + ' > ' + parts.join(' > ');
+    else if (parts.length) selector = parts.join(' > ');
+    else selector = anchor || el.tagName.toLowerCase();
+    // 验证唯一性：唯一则直接用，否则回退到完整 nth 链
     try {
       if (document.querySelectorAll(selector).length === 1) return selector;
     } catch (e) { /* ignore */ }
-    return selector;
+    return buildNthChain(el);
   }
 
   // ============================================================
@@ -175,6 +256,13 @@
     return match ? parseFloat(match[1]) : 0;
   }
 
+  /** 宽/高是否为语义值（非固定 px） */
+  function isSemanticSize(value) {
+    return /^(100%|auto|fit-content|min-content|max-content|inherit|initial|unset)$/i.test(String(value || '').trim());
+  }
+  function isSemanticWidth(v) { return isSemanticSize(v); }
+  function isSemanticHeight(v) { return isSemanticSize(v); }
+
   /** 解析 box-shadow 字符串为图层数组 */
   function parseBoxShadow(shadowStr) {
     if (!shadowStr || shadowStr === 'none') return [];
@@ -213,9 +301,9 @@
     return layers;
   }
 
-  /** 从元素读取样式，转换为面板数据 */
-  function getElementStyleData(el) {
-    const cs = getComputedStyle(el);
+  /** 从元素读取样式，转换为面板数据（target: '' | 'before' | 'after'） */
+  function getElementStyleData(el, target) {
+    const cs = getComputedStyle(el, target ? '::' + target : null);
     const color = parseColor(cs.color);
     const bgColor = parseColor(cs.backgroundColor);
     const borderColor = parseColor(cs.borderColor);
@@ -243,8 +331,12 @@
       paddingRight: parseNumeric(cs.paddingRight),
       paddingBottom: parseNumeric(cs.paddingBottom),
       paddingLeft: parseNumeric(cs.paddingLeft),
-      width: parseNumeric(cs.width),
-      height: parseNumeric(cs.height),
+      marginTop: parseNumeric(cs.marginTop),
+      marginRight: parseNumeric(cs.marginRight),
+      marginBottom: parseNumeric(cs.marginBottom),
+      marginLeft: parseNumeric(cs.marginLeft),
+      width: cs.width,        // 保留原始字符串：px / 100% / auto / fit-content
+      height: cs.height,
       display,
       // 字体
       fontSize: parseNumeric(cs.fontSize),
@@ -283,6 +375,93 @@
     const oldValue = getComputedStyle(el)[property];
     el.style[property] = value;
     return { property, oldValue, newValue: value };
+  }
+
+  /** 快照元素（或伪元素）的计算样式原始值，用于「改回即无变更」判定 */
+  function snapshotStyle(cs) {
+    return {
+      'flex-direction': cs.flexDirection,
+      'justify-content': cs.justifyContent,
+      'align-items': cs.alignItems,
+      'gap': cs.gap,
+      'padding-left': cs.paddingLeft,
+      'padding-right': cs.paddingRight,
+      'padding-top': cs.paddingTop,
+      'padding-bottom': cs.paddingBottom,
+      'margin-left': cs.marginLeft,
+      'margin-right': cs.marginRight,
+      'margin-top': cs.marginTop,
+      'margin-bottom': cs.marginBottom,
+      'width': cs.width,
+      'height': cs.height,
+      'font-size': cs.fontSize,
+      'font-weight': cs.fontWeight,
+      'color': cs.color,
+      'line-height': cs.lineHeight,
+      'text-align': cs.textAlign,
+      'opacity': cs.opacity,
+      'border-radius': cs.borderRadius,
+      'background-color': cs.backgroundColor,
+      'border': cs.border,
+      'box-shadow': cs.boxShadow,
+    };
+  }
+
+  /** 伪元素 key */
+  function pseudoKey(selector, pseudo) {
+    return selector + '||' + pseudo;
+  }
+
+  /** 判断元素的 ::before / ::after 是否真实渲染。
+   *  注意：content:""（空字符串）也是真实渲染（如分割线占位），
+   *  getComputedStyle 对其返回 ""，不能用 !!cs.content 判断；
+   *  仅 content 为 none / normal 才算未渲染。 */
+  function isPseudoRendered(el, pseudo) {
+    try {
+      const cs = getComputedStyle(el, '::' + pseudo);
+      const c = cs.content;
+      let rendered;
+      if (!c) rendered = false;            // 取不到 / 空
+      else if (c === 'none' || c === 'normal') rendered = false;
+      else rendered = true;               // 包括 "" 空内容（占位分割线）
+      return rendered;
+    } catch (e) { return false; }
+  }
+
+  /** 重建注入到 <head> 的伪元素样式规则 */
+  function rebuildPseudoStyleElement() {
+    let el = document.getElementById('wego-wt-pseudo-styles');
+    if (!el) {
+      el = document.createElement('style');
+      el.id = 'wego-wt-pseudo-styles';
+      (document.head || document.documentElement).appendChild(el);
+    }
+    let css = '';
+    for (const k in state.pseudoStyles) {
+      const parts = k.split('||');
+      const selector = parts[0];
+      const pseudo = parts[1];
+      const props = state.pseudoStyles[k];
+      if (!props) continue;
+      // 加 !important：走查工具伪元素编辑是"覆盖式调参"，必须压过场景原始规则（特异性可能更高）
+      const entries = Object.keys(props).map(p => `${p}: ${props[p]} !important;`).join(' ');
+      if (entries) css += `${selector}::${pseudo} { ${entries} }
+`;
+    }
+    el.textContent = css;
+  }
+
+  /** 设置/删除某元素伪元素的单个样式属性（空值=删除） */
+  function applyPseudoStyle(selector, pseudo, property, value) {
+    const k = pseudoKey(selector, pseudo);
+    if (!state.pseudoStyles[k]) state.pseudoStyles[k] = {};
+    if (value === '' || value == null) {
+      delete state.pseudoStyles[k][property];
+    } else {
+      state.pseudoStyles[k][property] = value;
+    }
+    if (Object.keys(state.pseudoStyles[k]).length === 0) delete state.pseudoStyles[k];
+    rebuildPseudoStyleElement();
   }
 
   // ============================================================
@@ -435,6 +614,106 @@
         <div class="bubble">
           <span class="bubble-text"></span>
         </div>
+      `;
+    }
+  }
+
+  // ============================================================
+  // wego-wt-highlight: 视口级固定高亮框（替代 outline，避免祖先 overflow 裁切）
+  // ============================================================
+  class WegoWtHighlight extends HTMLElement {
+    constructor() {
+      super();
+      this._shadow = this.attachShadow({ mode: 'open' });
+      this._targetEl = null;
+      this._label = '';
+      this._rafId = null;
+    }
+    connectedCallback() {
+      this._render();
+    }
+    disconnectedCallback() {
+      this._stopTracking();
+    }
+    showForElement(el, label) {
+      this._targetEl = el;
+      this._label = label || '';
+      this._update();
+      this._startTracking();
+    }
+    hide() {
+      this._targetEl = null;
+      this._stopTracking();
+      this.style.display = 'none';
+    }
+    _startTracking() {
+      this._stopTracking();
+      const update = () => {
+        if (this._targetEl) {
+          this._update();
+          this._rafId = requestAnimationFrame(update);
+        }
+      };
+      this._rafId = requestAnimationFrame(update);
+    }
+    _stopTracking() {
+      if (this._rafId) {
+        cancelAnimationFrame(this._rafId);
+        this._rafId = null;
+      }
+    }
+    _update() {
+      if (!this._targetEl) return;
+      const rect = this._targetEl.getBoundingClientRect();
+      const box = this._shadow.querySelector('.box');
+      if (!box) return;
+      box.style.top = rect.top + 'px';
+      box.style.left = rect.left + 'px';
+      box.style.width = Math.max(0, rect.width) + 'px';
+      box.style.height = Math.max(0, rect.height) + 'px';
+      const tag = this._targetEl.tagName.toLowerCase();
+      const w = Math.round(rect.width);
+      const h = Math.round(rect.height);
+      const labelEl = this._shadow.querySelector('.label');
+      if (labelEl) {
+        labelEl.textContent = `${this._label ? this._label + '  ' : ''}${tag} · ${w}×${h}`;
+        labelEl.style.top = (rect.top >= 18 ? rect.top - 16 : rect.top) + 'px';
+        labelEl.style.left = rect.left + 'px';
+      }
+      this.style.display = 'block';
+    }
+    _render() {
+      this._shadow.innerHTML = `
+        <style>
+          :host {
+            position: fixed;
+            inset: 0;
+            z-index: 9540;
+            pointer-events: none;
+            display: none;
+          }
+          .box {
+            position: absolute;
+            border: 2px solid var(--text-brand, #00b96b);
+            border-radius: 2px;
+            box-sizing: border-box;
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.12);
+          }
+          .label {
+            position: absolute;
+            transform: translateY(-100%);
+            padding: 1px 6px;
+            border-radius: 4px;
+            background: var(--text-brand, #00b96b);
+            color: #fff;
+            font-size: 11px;
+            line-height: 16px;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", sans-serif;
+            white-space: nowrap;
+          }
+        </style>
+        <div class="box"></div>
+        <div class="label"></div>
       `;
     }
   }
@@ -699,15 +978,17 @@
       // 按选择器分组
       const groups = {};
       changes.forEach(c => {
-        if (!groups[c.selector]) {
-          groups[c.selector] = {
+        const gkey = c.selector + (c.target ? '::' + c.target : '');
+        if (!groups[gkey]) {
+          groups[gkey] = {
             selector: c.selector,
+            target: c.target || '',
             elementTag: c.elementTag,
             elementText: c.elementText,
             changes: [],
           };
         }
-        groups[c.selector].changes.push(c);
+        groups[gkey].changes.push(c);
       });
       const groupList = Object.values(groups);
 
@@ -952,7 +1233,7 @@
                   </div>
                   ${g.changes.map((c, ci) => `
                     <div class="change-row">
-                      <span class="change-prop">${c.property}</span>
+                      <span class="change-prop">${c.property}${c.target ? ' · ' + c.target : ''}</span>
                       <span class="change-old" title="${c.oldValue}">${c.oldValue || '-'}</span>
                       <span class="change-arrow">→</span>
                       <span class="change-new" title="${c.newValue}">${c.newValue || '-'}</span>
@@ -1050,7 +1331,7 @@
       if (changes.length === 0) {
         return `## Page Feedback: ${route}\n**Viewport:** ${viewport}\n\n当前还没有记录到任何配置修改。`;
       }
-      // 按选择器分组
+      // 按选择器分组（同一元素的所有改动归一条）
       const groups = {};
       changes.forEach(c => {
         if (!groups[c.selector]) {
@@ -1069,19 +1350,50 @@
         `## Page Feedback: ${route}`,
         `**Viewport:** ${viewport}`,
         '',
+        '> 施工单：按你调好的最终效果整理，可直接照做。改法优先用设计系统语义类；定位用稳定标识。',
+        '',
       ];
+      const machine = [];
       groupList.forEach((g, i) => {
-        const heading = `${g.elementTag}${g.elementText ? ' · ' + g.elementText : ''}`;
-        const source = `${g.elementTag}${g.elementText ? ' · ' + g.elementText : ''}`;
-        const target = g.elementText || g.elementClass || g.elementTag;
-        const feedback = g.changes.map(c => `${c.property}: ${c.oldValue || '-'} → ${c.newValue || '-'}`).join(' | ');
-        lines.push(`### ${i + 1}. ${heading}`);
-        lines.push(`**Location:** ${g.selector}`);
-        lines.push(`**Source:** ${source}`);
-        lines.push(`**Targets:** ${target}`);
-        lines.push(`**Feedback:** ${feedback}`);
-        lines.push('');
+        // 业务锚点：取首段有意义文案（截断，不再整段糊）
+        const anchor = (g.elementText || '').replace(/\s+/g, ' ').trim();
+        const shortAnchor = anchor.length > 12 ? anchor.slice(0, 12) + '…' : anchor;
+        // 语义类名锚点：优先 elementClass，缺失时从 selector 末段提取（如 .business-home__quick-card）
+        const classAnchor = (() => {
+          if (g.elementClass) return g.elementClass.split(/\s+/)[0];
+          const m = g.selector.match(/\.([a-zA-Z0-9_-]+)\s*$/) || g.selector.match(/\[data-component-slug="[^"]+"\]\.([a-zA-Z0-9_-]+)/);
+          return m ? m[1] : '';
+        })();
+        const role = shortAnchor || classAnchor || g.elementTag;
+        const addClassChanges = g.changes.filter(c => c.intent === 'add-class');
+        const cssChanges = g.changes.filter(c => !c.skipCss);
+        const lines2 = [];
+        lines2.push(`### ${i + 1}. ${g.elementTag} · ${role}`);
+        lines2.push(`**定位:** \`${g.selector}\``);
+        if (anchor) lines2.push(`**业务锚点:** ${anchor}`);
+        if (addClassChanges.length) {
+          const clsNote = addClassChanges.map(c => c.note).filter(Boolean)[0] || '';
+          const want = addClassChanges.map(c => `加结构类 \`${c.intentClass}\``).join('；');
+          lines2.push(`**你要的:** ${want}`);
+          lines2.push(`**改法:** ${(classAnchor ? '在类 `' + classAnchor + '` 上加 ' : '元素加 ') + addClassChanges.map(c => '`' + c.intentClass + '`').join(' ')}`);
+          if (clsNote) lines2.push(`**提醒:** ${clsNote}`);
+        }
+        if (cssChanges.length) {
+          const wantCsv = cssChanges.map(c => `${c.property} → ${c.newValue || '-'}`).join('；');
+          lines2.push(`**你要的:** 调整样式 ${wantCsv}`);
+          lines2.push(`**改法:** 在源码对应 CSS 中设置：${cssChanges.map(c => `${c.property}: ${c.newValue || '-'}`).join('; ')}`);
+        }
+        lines2.push('');
+        lines.push(...lines2);
+        machine.push({
+          selector: g.selector,
+          elementText: anchor,
+          role,
+          adds: addClassChanges.map(c => c.intentClass).filter(Boolean),
+          css: cssChanges.map(c => ({ property: c.property, value: c.newValue })),
+        });
       });
+      lines.push('<!-- WEGo_CHANGES_JSON ' + JSON.stringify(machine) + ' -->');
       return lines.join('\n');
     }
 
@@ -1105,6 +1417,7 @@
       this._targetEl = null;
       this._selector = '';
       this._data = null;
+      this._target = ''; // '' | 'before' | 'after'
       this._commitTimer = null;
     }
     connectedCallback() {
@@ -1115,10 +1428,23 @@
       this._targetEl = null;
     }
 
-    openForElement(el, selector) {
+    /** 切换编辑目标（元素本体 / ::before / ::after） */
+    setTarget(target) {
+      if (!this._targetEl || target === this._target) return;
+      this._target = target;
+      // 伪元素：从已注入的 state.pseudoStyles 读取当前值，无则取计算值快照
+      this._data = getElementStyleData(this._targetEl, target);
+      this._render();
+      this._bindEvents();
+      this._updatePosition();
+      this.removeAttribute('hidden');
+    }
+
+    openForElement(el, selector, target) {
       this._targetEl = el;
       this._selector = selector;
-      this._data = getElementStyleData(el);
+      this._target = target || '';
+      this._data = getElementStyleData(el, this._target);
       this._render();
       this._bindEvents();
       this._updatePosition();
@@ -1160,6 +1486,9 @@
       const d = this._data || {};
       const tag = this._targetEl ? this._targetEl.tagName.toLowerCase() : '';
       const text = this._targetEl ? (this._targetEl.textContent || '').trim().substring(0, 20) : '';
+      const t = this._target || '';
+      const hasBefore = this._targetEl ? isPseudoRendered(this._targetEl, 'before') : false;
+      const hasAfter = this._targetEl ? isPseudoRendered(this._targetEl, 'after') : false;
       this._shadow.innerHTML = `
         <style>
           :host {
@@ -1242,6 +1571,39 @@
             color: var(--text-tertiary, #888);
             text-transform: uppercase;
             letter-spacing: 0.5px;
+          }
+          .sub-label {
+            margin: 10px 0 4px;
+            font-size: 10px;
+            font-weight: 500;
+            color: var(--text-tertiary, #999);
+          }
+          .target-switch {
+            display: flex;
+            gap: 3px;
+            padding: 3px;
+            margin-top: 2px;
+            border-radius: 8px;
+            background: rgba(0,0,0,0.04);
+          }
+          .target-switch button {
+            flex: 1;
+            height: 24px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--text-tertiary, #888);
+            font-size: 11px;
+            cursor: pointer;
+          }
+          .target-switch button.active {
+            background: var(--bg-surface, #fff);
+            color: var(--text-brand, #00b96b);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+          }
+          .target-switch button:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
           }
           .field-row {
             display: flex;
@@ -1405,6 +1767,14 @@
             <button class="close-btn" type="button" data-action="close">×</button>
           </div>
 
+          ${hasBefore || hasAfter ? `
+          <div class="target-switch" data-target-switch>
+            <button type="button" data-target="" class="${t === '' ? 'active' : ''}">元素</button>
+            <button type="button" data-target="before" ${hasBefore ? '' : 'disabled'} class="${t === 'before' ? 'active' : ''}">::before</button>
+            <button type="button" data-target="after" ${hasAfter ? '' : 'disabled'} class="${t === 'after' ? 'active' : ''}">::after</button>
+          </div>
+          ` : ''}
+
           <!-- 自动布局 -->
           <div class="section">
             <p class="section-title">自动布局</p>
@@ -1425,6 +1795,7 @@
                 <input class="text-input" type="text" value="${d.layoutGap || ''}" data-field="layoutGap" inputmode="numeric" placeholder="gap" />
               </div>
             </div>
+            <p class="sub-label">内边距 padding</p>
             <div class="field-row two-col">
               <div class="field"><span class="field-icon">L</span><input class="text-input" type="text" value="${d.paddingLeft || ''}" data-field="paddingLeft" inputmode="numeric" placeholder="左" /></div>
               <div class="field"><span class="field-icon">T</span><input class="text-input" type="text" value="${d.paddingTop || ''}" data-field="paddingTop" inputmode="numeric" placeholder="上" /></div>
@@ -1433,9 +1804,34 @@
               <div class="field"><span class="field-icon">R</span><input class="text-input" type="text" value="${d.paddingRight || ''}" data-field="paddingRight" inputmode="numeric" placeholder="右" /></div>
               <div class="field"><span class="field-icon">B</span><input class="text-input" type="text" value="${d.paddingBottom || ''}" data-field="paddingBottom" inputmode="numeric" placeholder="下" /></div>
             </div>
+            <p class="sub-label">外边距 margin</p>
             <div class="field-row two-col">
-              <div class="field"><span class="field-icon">W</span><input class="text-input" type="text" value="${d.width || ''}" data-field="width" inputmode="numeric" placeholder="宽" /></div>
-              <div class="field"><span class="field-icon">H</span><input class="text-input" type="text" value="${d.height || ''}" data-field="height" inputmode="numeric" placeholder="高" /></div>
+              <div class="field"><span class="field-icon">L</span><input class="text-input" type="text" value="${d.marginLeft || ''}" data-field="marginLeft" inputmode="numeric" placeholder="左" /></div>
+              <div class="field"><span class="field-icon">T</span><input class="text-input" type="text" value="${d.marginTop || ''}" data-field="marginTop" inputmode="numeric" placeholder="上" /></div>
+            </div>
+            <div class="field-row two-col">
+              <div class="field"><span class="field-icon">R</span><input class="text-input" type="text" value="${d.marginRight || ''}" data-field="marginRight" inputmode="numeric" placeholder="右" /></div>
+              <div class="field"><span class="field-icon">B</span><input class="text-input" type="text" value="${d.marginBottom || ''}" data-field="marginBottom" inputmode="numeric" placeholder="下" /></div>
+            </div>
+            <div class="field-row two-col">
+              <div class="field"><span class="field-icon">W</span>
+                <select class="text-input size-mode" data-size-field="width" data-size-input="width">
+                  <option value="px" ${!isSemanticWidth(d.width) ? 'selected' : ''}>px</option>
+                  <option value="100%" ${d.width === '100%' ? 'selected' : ''}>100%</option>
+                  <option value="auto" ${d.width === 'auto' ? 'selected' : ''}>auto</option>
+                  <option value="fit-content" ${d.width === 'fit-content' ? 'selected' : ''}>fit-content</option>
+                </select>
+                <input class="text-input" type="text" value="${isSemanticWidth(d.width) ? '' : String(d.width || '').replace(/px$/i, '')}" data-field="width" inputmode="numeric" placeholder="宽" ${isSemanticWidth(d.width) ? 'disabled' : ''} />
+              </div>
+              <div class="field"><span class="field-icon">H</span>
+                <select class="text-input size-mode" data-size-field="height" data-size-input="height">
+                  <option value="px" ${!isSemanticHeight(d.height) ? 'selected' : ''}>px</option>
+                  <option value="100%" ${d.height === '100%' ? 'selected' : ''}>100%</option>
+                  <option value="auto" ${d.height === 'auto' ? 'selected' : ''}>auto</option>
+                  <option value="fit-content" ${d.height === 'fit-content' ? 'selected' : ''}>fit-content</option>
+                </select>
+                <input class="text-input" type="text" value="${isSemanticHeight(d.height) ? '' : String(d.height || '').replace(/px$/i, '')}" data-field="height" inputmode="numeric" placeholder="高" ${isSemanticHeight(d.height) ? 'disabled' : ''} />
+              </div>
             </div>
           </div>
 
@@ -1568,6 +1964,19 @@
           bus.emit('close-style-panel');
         });
       }
+      // 伪元素目标切换
+      const switchEl = this._shadow.querySelector('[data-target-switch]');
+      if (switchEl) {
+        switchEl.querySelectorAll('[data-target]').forEach(btn => {
+          if (btn.disabled) return;
+          btn.addEventListener('click', () => {
+            const target = btn.dataset.target || '';
+            this.setTarget(target);
+            const app = document.querySelector('wego-walkthrough');
+            if (app && typeof app._onTargetChanged === 'function') app._onTargetChanged(target);
+          });
+        });
+      }
       // 所有 data-field 控件
       this._shadow.querySelectorAll('[data-field]').forEach(el => {
         const field = el.dataset.field;
@@ -1581,6 +1990,64 @@
             }
           });
         }
+      });
+      // 宽高模式下拉：px/100%/auto/fit-content，选语义值时禁用数值输入
+      this._shadow.querySelectorAll('.size-mode').forEach(sel => {
+        sel.addEventListener('change', () => {
+          const field = sel.dataset.sizeField;
+          const val = sel.value;
+          if (!field) return;
+          const input = this._shadow.querySelector(`[data-field="${field}"]`);
+          const isPx = val === 'px';
+          if (input) {
+            input.disabled = !isPx;
+            if (isPx) {
+              // 切回 px：保留现有数值，若当前是语义值则清空让用户重填，并暂存原语义值便于回退
+              if (isSemanticSize(input.value)) {
+                input.dataset.prevSemantic = input.value;
+                input.value = '';
+              }
+              input.focus();
+            } else {
+              input.value = val;
+              input.dataset.prevSemantic = '';
+              this._onFieldChange(field, val);
+            }
+          }
+        });
+      });
+      // 宽高输入数值后，模式下拉回到 px（与输入保持联动）；空输入时回退原语义值
+      this._shadow.querySelectorAll('input[data-field="width"], input[data-field="height"]').forEach(input => {
+        input.addEventListener('change', () => {
+          const field = input.dataset.field;
+          const sel = this._shadow.querySelector(`.size-mode[data-size-field="${field}"]`);
+          if (!sel) return;
+          if (input.value.trim() === '') {
+            if (input.dataset.prevSemantic) {
+              sel.value = input.dataset.prevSemantic;
+              this._onFieldChange(field, input.dataset.prevSemantic);
+              input.value = input.dataset.prevSemantic;
+              input.disabled = true;
+            }
+          } else {
+            sel.value = 'px';
+          }
+        });
+        input.addEventListener('blur', () => {
+          const field = input.dataset.field;
+          const sel = this._shadow.querySelector(`.size-mode[data-size-field="${field}"]`);
+          if (!sel) return;
+          if (input.value.trim() === '') {
+            if (input.dataset.prevSemantic) {
+              sel.value = input.dataset.prevSemantic;
+              this._onFieldChange(field, input.dataset.prevSemantic);
+              input.value = input.dataset.prevSemantic;
+              input.disabled = true;
+            }
+          } else {
+            sel.value = 'px';
+          }
+        });
       });
       // 对齐矩阵
       this._shadow.querySelectorAll('[data-align-preset]').forEach(btn => {
@@ -1614,7 +2081,27 @@
     _onFieldChange(field, value) {
       if (!this._targetEl || !this._data) return;
       this._data[field] = value;
-      // 应用到元素
+      // 伪元素目标：编辑通过注入 <head> 的样式规则生效，property 写为 css-property
+      if (this._target) {
+        const cssProp = this._fieldToCssProp(field);
+        const cssVal = this._fieldToCssValue(field);
+        applyPseudoStyle(this._selector, this._target, cssProp, cssVal);
+        bus.emit('style-change', {
+          selector: this._selector,
+          target: this._target,
+          elementTag: this._targetEl.tagName.toLowerCase(),
+          elementText: (this._targetEl.textContent || '').trim().substring(0, 50),
+          elementClass: (this._targetEl.className && typeof this._targetEl.className === 'string')
+            ? this._targetEl.className.trim().split(/\s+/).filter(c => c && !c.startsWith('wt-') && !c.startsWith('wego-') && !c.startsWith('data-wt'))[0] || ''
+            : '',
+          property: cssProp,
+          oldValue: '',
+          newValue: cssVal,
+          el: this._targetEl,
+        });
+        return;
+      }
+      // 应用到元素（本体）
       const result = this._applyField(field, value);
       if (result) {
         // 记录变更
@@ -1628,16 +2115,194 @@
           property: result.property,
           oldValue: result.oldValue,
           newValue: result.newValue,
+          el: this._targetEl,
         });
       }
       // 更新 UI（按钮 active 态等）
       this._updateActiveStates();
     }
 
+    /** 面板字段名 → CSS 属性名 */
+    _fieldToCssProp(field) {
+      const map = {
+        layoutMode: 'flex-direction',
+        justifyContent: 'justify-content',
+        alignItems: 'align-items',
+        layoutGap: 'gap',
+        paddingLeft: 'padding-left',
+        paddingRight: 'padding-right',
+        paddingTop: 'padding-top',
+        paddingBottom: 'padding-bottom',
+        marginTop: 'margin-top',
+        marginRight: 'margin-right',
+        marginBottom: 'margin-bottom',
+        marginLeft: 'margin-left',
+        width: 'width',
+        height: 'height',
+        fontSize: 'font-size',
+        fontWeight: 'font-weight',
+        colorHex: 'color',
+        colorOpacity: 'color',
+        lineHeight: 'line-height',
+        textAlign: 'text-align',
+        layerOpacity: 'opacity',
+        borderRadiusAll: 'border-radius',
+        fillHex: 'background-color',
+        fillOpacity: 'background-color',
+        strokeHex: 'border',
+        strokeOpacity: 'border',
+        strokeWidth: 'border',
+        strokePosition: 'box-shadow',
+        shadowHex: 'box-shadow',
+        shadowOpacity: 'box-shadow',
+        shadowX: 'box-shadow',
+        shadowY: 'box-shadow',
+        shadowBlur: 'box-shadow',
+        shadowSpread: 'box-shadow',
+        shadowInset: 'box-shadow',
+      };
+      return map[field] || field;
+    }
+
+    /** 面板字段名 → 当前 CSS 值（从 _data 推导） */
+    _fieldToCssValue(field) {
+      const d = this._data || {};
+      const num = (v) => (isNaN(parseFloat(v)) ? '' : parseFloat(v));
+      switch (field) {
+        case 'width':
+        case 'height': {
+          const raw = (d[field] || '').toString().trim();
+          // 支持语义值：100% / auto / fit-content / min-content 等非纯数值
+          if (/^(100%|auto|fit-content|min-content|max-content|inherit|initial|unset)$/i.test(raw)) return raw;
+          const n = parseFloat(raw);
+          return isNaN(n) ? '' : n + 'px';
+        }
+        case 'colorHex':
+        case 'colorOpacity': {
+          const op = d.colorOpacity ?? 100;
+          return hexOpacityToRgba(hex, op);
+        }
+        case 'fillHex':
+        case 'fillOpacity': {
+          const hex = d.fillHex || '#FFFFFF';
+          const op = d.fillOpacity ?? 0;
+          return op > 0 ? hexOpacityToRgba(hex, op) : 'transparent';
+        }
+        case 'strokeHex':
+        case 'strokeOpacity':
+        case 'strokeWidth': {
+          const hex = d.strokeHex || '#000000';
+          const op = d.strokeOpacity ?? 0;
+          const w = num(d.strokeWidth);
+          return op > 0 && w > 0 ? `${w}px solid ${hexOpacityToRgba(hex, op)}` : 'none';
+        }
+        case 'strokePosition':
+          return d.strokePosition === 'inside' ? `inset 0 0 0 ${num(d.strokeWidth) || 1}px ${hexOpacityToRgba(d.strokeHex || '#000000', d.strokeOpacity ?? 100)}` : 'none';
+        case 'shadowHex':
+        case 'shadowOpacity':
+        case 'shadowX':
+        case 'shadowY':
+        case 'shadowBlur':
+        case 'shadowSpread':
+        case 'shadowInset': {
+          const hex = d.shadowHex || '#000000';
+          const op = d.shadowOpacity ?? 0;
+          const x = num(d.shadowX);
+          const y = num(d.shadowY);
+          const blur = num(d.shadowBlur);
+          const spread = num(d.shadowSpread);
+          const inset = d.shadowInset === true || d.shadowInset === 'true';
+          if (op > 0 && (blur > 0 || x !== 0 || y !== 0 || spread !== 0)) {
+            return `${inset ? 'inset ' : ''}${x}px ${y}px ${blur}px ${spread}px ${hexOpacityToRgba(hex, op)}`;
+          }
+          return 'none';
+        }
+        case 'width':
+        case 'height':
+        case 'fontSize':
+        case 'paddingLeft':
+        case 'paddingRight':
+        case 'paddingTop':
+        case 'paddingBottom':
+        case 'marginLeft':
+        case 'marginRight':
+        case 'marginTop':
+        case 'marginBottom':
+        case 'borderRadiusAll':
+        case 'layoutGap':
+          return num(d[field]) ? num(d[field]) + 'px' : '';
+        case 'layerOpacity':
+          return d.layerOpacity != null ? (num(d.layerOpacity) / 100).toString() : '';
+        case 'lineHeight':
+          return d.lineHeight || '';
+        case 'layoutMode':
+          return d.layoutMode || '';
+        case 'justifyContent':
+          return d.justifyContent || '';
+        case 'alignItems':
+          return d.alignItems || '';
+        case 'textAlign':
+          return d.textAlign || '';
+        case 'fontWeight':
+          return d.fontWeight || '';
+        default:
+          return d[field] != null ? d[field] : '';
+      }
+    }
+
+    /** 输入守门：拦截会污染施工单的非法操作 */
+    _validateFieldValue(field, value) {
+      const el = this._targetEl;
+      const numVal = parseFloat(value);
+      const display = getComputedStyle(el).display;
+      const isFlexOrGrid = display === 'flex' || display === 'grid';
+      switch (field) {
+        case 'layoutGap':
+          if (isNaN(numVal) || numVal < 0) return { ok: false, reason: '间距（gap）不能为空或负数' };
+          break;
+        case 'paddingLeft':
+        case 'paddingRight':
+        case 'paddingTop':
+        case 'paddingBottom':
+        case 'marginLeft':
+        case 'marginRight':
+        case 'marginTop':
+        case 'marginBottom':
+        case 'width':
+        case 'height':
+        case 'fontSize':
+        case 'borderRadiusAll': {
+          const raw = String(value || '').trim();
+          const isSemantic = /^(100%|auto|fit-content|min-content|max-content|inherit|initial|unset)$/i.test(raw);
+          if (isSemantic) break;
+          if (isNaN(numVal) || numVal < 0) return { ok: false, reason: '尺寸/间距不能为空或负数' };
+          break;
+        }
+        case 'layoutMode':
+          if (!isFlexOrGrid && display !== 'block' && display !== 'inline-block') {
+            return { ok: false, reason: '该元素不是 block/flex/grid 容器，无法调整布局方向' };
+          }
+          break;
+        case 'justifyContent':
+        case 'alignItems':
+          if (!isFlexOrGrid) return { ok: false, reason: 'justify/align 仅对 flex/grid 容器有效，当前元素不是' };
+          break;
+        default:
+          break;
+      }
+      return { ok: true };
+    }
+
     _applyField(field, value) {
       const el = this._targetEl;
       const numVal = parseFloat(value);
       const cs = () => getComputedStyle(el);
+      // 输入守门：拦截会污染施工单的非法操作（返回 null → 调用方跳过记录）
+      const guard = this._validateFieldValue(field, value);
+      if (!guard.ok) {
+        this._showToast('已拦截：' + guard.reason);
+        return null;
+      }
       switch (field) {
         case 'layoutMode': {
           const oldValue = cs().flexDirection;
@@ -1682,13 +2347,17 @@
         }
         case 'width': {
           const oldValue = cs().width;
-          el.style.width = isNaN(numVal) ? '' : numVal + 'px';
-          return { property: 'width', oldValue, newValue: isNaN(numVal) ? '' : numVal + 'px' };
+          const SEM = /^(100%|auto|fit-content|min-content|max-content|inherit|initial|unset)$/i;
+          const out = SEM.test(String(value).trim()) ? value.trim() : (isNaN(numVal) ? '' : numVal + 'px');
+          el.style.width = out;
+          return { property: 'width', oldValue, newValue: out };
         }
         case 'height': {
           const oldValue = cs().height;
-          el.style.height = isNaN(numVal) ? '' : numVal + 'px';
-          return { property: 'height', oldValue, newValue: isNaN(numVal) ? '' : numVal + 'px' };
+          const SEM = /^(100%|auto|fit-content|min-content|max-content|inherit|initial|unset)$/i;
+          const out = SEM.test(String(value).trim()) ? value.trim() : (isNaN(numVal) ? '' : numVal + 'px');
+          el.style.height = out;
+          return { property: 'height', oldValue, newValue: out };
         }
         case 'fontSize': {
           const oldValue = cs().fontSize;
@@ -2173,7 +2842,7 @@
           </button>
         </div>
         <!-- 子组件（走查模式相关） -->
-        <wego-wt-overlay hidden></wego-wt-overlay>
+        <wego-wt-highlight hidden></wego-wt-highlight>
         <wego-wt-style-panel hidden></wego-wt-style-panel>
         <wego-wt-color-picker hidden></wego-wt-color-picker>
         <wego-wt-overview-panel hidden></wego-wt-overview-panel>
@@ -2182,7 +2851,7 @@
     }
 
     _initComponents() {
-      this._components.overlay = this._shadow.querySelector('wego-wt-overlay');
+      this._components.highlight = this._shadow.querySelector('wego-wt-highlight');
       this._components.stylePanel = this._shadow.querySelector('wego-wt-style-panel');
       this._components.colorPicker = this._shadow.querySelector('wego-wt-color-picker');
       this._components.overviewPanel = this._shadow.querySelector('wego-wt-overview-panel');
@@ -2260,8 +2929,8 @@
       bus.on('delete-change', ({ id }) => this._deleteChange(id));
       bus.on('reset-changes', () => this._resetChanges());
       bus.on('toast', ({ message }) => this._showToast(message));
-      bus.on('element-selected', ({ element, selector }) => {
-        this._components.stylePanel.openForElement(element, selector);
+      bus.on('element-selected', ({ element, selector, target }) => {
+        this._components.stylePanel.openForElement(element, selector, target || '');
       });
       bus.on('element-deselected', () => this._components.stylePanel.close());
     }
@@ -2605,7 +3274,6 @@
     _handlePointSelection(clientX, clientY, event) {
       const el = document.elementFromPoint(clientX, clientY);
       if (!el) return;
-      if (isWalkthroughElement(el)) return;
       if (el === document.body || el === document.documentElement) {
         this._clearSelection();
         return;
@@ -2617,54 +3285,42 @@
     _selectElement(el) {
       this._clearSelection();
       state.selectedElement = el;
-      el.setAttribute('data-wt-selected', 'true');
-      this._components.overlay.removeAttribute('hidden');
-      this._components.overlay.showForElement(el);
+      this._components.highlight.removeAttribute('hidden');
+      this._components.highlight.showForElement(el);
       const selector = generateSelector(el);
       state.selectedSelector = selector;
+      state.selectedTarget = '';
       // 快照元素原始样式（走查态进入前的计算值），用于「改回原值即视为无变更」
       // 关键：用 route::selector 作 key，且仅在首次选中时建立一次，后续重新选中不覆盖，
       // 否则关闭面板再打开时元素已带 inline 修改，getComputedStyle 读到的是污染值。
       const snapKey = state.currentRoute + '::' + selector;
       if (!state.originalStyles[snapKey]) {
         const cs = getComputedStyle(el);
-        state.originalStyles[snapKey] = {
-          'flex-direction': cs.flexDirection,
-          'justify-content': cs.justifyContent,
-          'align-items': cs.alignItems,
-          'gap': cs.gap,
-          'padding-left': cs.paddingLeft,
-          'padding-right': cs.paddingRight,
-          'padding-top': cs.paddingTop,
-          'padding-bottom': cs.paddingBottom,
-          'width': cs.width,
-          'height': cs.height,
-          'font-size': cs.fontSize,
-          'font-weight': cs.fontWeight,
-          'color': cs.color,
-          'line-height': cs.lineHeight,
-          'text-align': cs.textAlign,
-          'opacity': cs.opacity,
-          'border-radius': cs.borderRadius,
-          'background-color': cs.backgroundColor,
-          'border': cs.border,
-          'box-shadow': cs.boxShadow,
-        };
+        state.originalStyles[snapKey] = snapshotStyle(cs);
       }
-      bus.emit('element-selected', { element: el, selector });
+      bus.emit('element-selected', { element: el, selector, target: '' });
     }
 
     _clearSelection() {
       if (state.selectedElement) {
-        state.selectedElement.removeAttribute('data-wt-selected');
         state.selectedElement = null;
       }
-      if (this._components.overlay) {
-        this._components.overlay.hide();
-        this._components.overlay.setAttribute('hidden', '');
+      if (this._components.highlight) {
+        this._components.highlight.hide();
+        this._components.highlight.setAttribute('hidden', '');
       }
       state.selectedSelector = '';
+      state.selectedTarget = '';
       bus.emit('element-deselected');
+    }
+
+    /** 样式面板切换伪元素目标时，更新高亮层标注（伪元素无法量几何，仅框宿主+标注） */
+    _onTargetChanged(target) {
+      state.selectedTarget = target || '';
+      if (this._components.highlight && state.selectedElement) {
+        const label = target ? '::' + target : '';
+        this._components.highlight.showForElement(state.selectedElement, label);
+      }
     }
 
     _jumpToElement(selector) {
@@ -2727,16 +3383,13 @@
     _recordChange(change) {
       const snapKey = state.currentRoute + '::' + change.selector;
       const original = state.originalStyles[snapKey];
+      const isPseudo = !!change.target;
+      const matchExisting = (c) => c.selector === change.selector && c.property === change.property && (c.target || '') === (change.target || '');
       // 改回原始值 = 净变更为零，删除该属性的变更记录（而非保留 X→X）
       if (original && change.property in original && change.newValue === original[change.property]) {
-        const existing = state.changes.find(c =>
-          c.selector === change.selector && c.property === change.property
-        );
+        const existing = state.changes.find(matchExisting);
         if (existing) {
-          try {
-            const el = document.querySelector(change.selector);
-            if (el) el.style[change.property] = ''; // 还原元素样式
-          } catch (e) {}
+          this._revertChange(existing);
           state.changes = state.changes.filter(c => c.id !== existing.id);
           this._saveChanges();
           this._updateChangeCount();
@@ -2746,24 +3399,26 @@
         }
         return;
       }
-      const existing = state.changes.find(c =>
-        c.selector === change.selector && c.property === change.property
-      );
+      const existing = state.changes.find(matchExisting);
       if (existing) {
         existing.newValue = change.newValue;
         existing.timestamp = Date.now();
         existing.elementText = change.elementText;
+        Object.assign(existing, deriveIntent(existing, change.el));
       } else {
-        state.changes.push({
+        const rec = {
           id: 'change-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
           selector: change.selector,
+          target: change.target || '',
           elementTag: change.elementTag,
           elementText: change.elementText,
           property: change.property,
           oldValue: change.oldValue,
           newValue: change.newValue,
           timestamp: Date.now(),
-        });
+        };
+        Object.assign(rec, deriveIntent(rec, change.el));
+        state.changes.push(rec);
       }
       this._saveChanges();
       this._updateChangeCount();
@@ -2772,13 +3427,22 @@
       }
     }
 
+    /** 还原单条变更（本体=清 inline；伪元素=清注入规则） */
+    _revertChange(change) {
+      if (change.target) {
+        applyPseudoStyle(change.selector, change.target, change.property, '');
+        return;
+      }
+      try {
+        const el = document.querySelector(change.selector);
+        if (el) el.style[change.property] = '';
+      } catch (e) {}
+    }
+
     _deleteChange(id) {
       const change = state.changes.find(c => c.id === id);
       if (change) {
-        try {
-          const el = document.querySelector(change.selector);
-          if (el) el.style[change.property] = '';
-        } catch (e) {}
+        this._revertChange(change);
         state.changes = state.changes.filter(c => c.id !== id);
         this._saveChanges();
         this._updateChangeCount();
@@ -2791,17 +3455,7 @@
         this._showToast('当前没有修改');
         return;
       }
-      const bySelector = {};
-      state.changes.forEach(c => {
-        if (!bySelector[c.selector]) bySelector[c.selector] = [];
-        bySelector[c.selector].push(c);
-      });
-      Object.keys(bySelector).forEach(selector => {
-        try {
-          const el = document.querySelector(selector);
-          if (el) bySelector[selector].forEach(c => { el.style[c.property] = ''; });
-        } catch (e) {}
-      });
+      state.changes.forEach(c => this._revertChange(c));
       state.changes = [];
       this._saveChanges();
       this._updateChangeCount();
@@ -2816,6 +3470,13 @@
         const key = `wego.walkthrough.data.${state.currentRoute}`;
         const raw = localStorage.getItem(key);
         state.changes = raw ? (JSON.parse(raw).changes || []) : [];
+        // 同步持久化的伪元素变更到注入规则，刷新后保持生效
+        state.changes.forEach(c => {
+          if (c.target && c.property) {
+            applyPseudoStyle(c.selector, c.target, c.property, c.newValue || '');
+          }
+        });
+        rebuildPseudoStyleElement();
         this._updateChangeCount();
       } catch (e) {}
     }
@@ -2861,6 +3522,7 @@
   function register() {
     if (!customElements.get('wego-wt-toast')) customElements.define('wego-wt-toast', WegoWtToast);
     if (!customElements.get('wego-wt-overlay')) customElements.define('wego-wt-overlay', WegoWtOverlay);
+    if (!customElements.get('wego-wt-highlight')) customElements.define('wego-wt-highlight', WegoWtHighlight);
     if (!customElements.get('wego-wt-style-panel')) customElements.define('wego-wt-style-panel', WegoWtStylePanel);
     if (!customElements.get('wego-wt-color-picker')) customElements.define('wego-wt-color-picker', WegoWtColorPicker);
     if (!customElements.get('wego-wt-overview-panel')) customElements.define('wego-wt-overview-panel', WegoWtOverviewPanel);
