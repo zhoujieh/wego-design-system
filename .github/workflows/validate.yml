@@ -19,6 +19,8 @@ jobs:
       # 以下为硬门禁：均为仓库内新增的协作一致性检查，必须全部通过。
       - name: 认领冲突检查
         run: node scripts/validate-claims.mjs
+      - name: 孤儿认领检查
+        run: node scripts/validate-claims.mjs --check-stale
       - name: 场景修改认领检查
         if: github.event_name == 'pull_request'
         run: >-
