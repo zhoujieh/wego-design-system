@@ -249,6 +249,27 @@
     return `rgba(${r}, ${g}, ${b}, ${a})`;
   }
 
+  /** 判断值是否为 CSS 变量引用格式 var(--xxx) */
+  function isTokenValue(value) {
+    return /^var\(--[a-zA-Z0-9-]+\)$/.test(String(value || '').trim());
+  }
+
+  /** 解析 CSS 表达式（含 var()）的实际计算值，用临时元素让浏览器完成计算 */
+  function resolveCssValue(expr, property) {
+    if (!expr) return '';
+    try {
+      const el = document.createElement('div');
+      el.style.display = 'none';
+      el.style.setProperty(property || 'color', expr);
+      document.body.appendChild(el);
+      const computed = getComputedStyle(el).getPropertyValue(property || 'color');
+      document.body.removeChild(el);
+      return computed.trim();
+    } catch (e) {
+      return '';
+    }
+  }
+
   /** 解析数值（去掉单位） */
   function parseNumeric(value) {
     if (!value) return 0;
@@ -1483,6 +1504,67 @@
   }
 
   // ============================================================
+  // 设计系统 Token 数据（颜色 / 字号）
+  // ============================================================
+  const COLOR_TOKEN_GROUPS = [
+    {
+      label: '文字色',
+      tokens: [
+        { name: 'text-default', var: '--text-default', label: '默认' },
+        { name: 'text-secondary', var: '--text-secondary', label: '次要' },
+        { name: 'text-tertiary', var: '--text-tertiary', label: '三级' },
+        { name: 'text-disabled', var: '--text-disabled', label: '禁用' },
+        { name: 'text-inverse', var: '--text-inverse', label: '反白' },
+        { name: 'text-brand', var: '--text-brand', label: '品牌' },
+        { name: 'text-promotion', var: '--text-promotion', label: '促销' },
+      ],
+    },
+    {
+      label: '背景色',
+      tokens: [
+        { name: 'bg-surface', var: '--bg-surface', label: '表面' },
+        { name: 'bg-panel', var: '--bg-panel', label: '面板' },
+        { name: 'bg-muted', var: '--bg-muted', label: '弱化' },
+        { name: 'bg-subtle', var: '--bg-subtle', label: '微弱' },
+        { name: 'bg-active', var: '--bg-active', label: '激活' },
+        { name: 'bg-inverse', var: '--bg-inverse', label: '反色' },
+        { name: 'bg-brand', var: '--bg-brand', label: '品牌' },
+        { name: 'bg-page', var: '--bg-page', label: '页面' },
+      ],
+    },
+    {
+      label: '边框色',
+      tokens: [
+        { name: 'border-brand', var: '--border-brand', label: '品牌' },
+        { name: 'border-danger', var: '--border-danger', label: '危险' },
+        { name: 'border-info', var: '--border-info', label: '信息' },
+        { name: 'border-success', var: '--border-success', label: '成功' },
+        { name: 'border-warning', var: '--border-warning', label: '警告' },
+        { name: 'border-control', var: '--border-control', label: '控件' },
+      ],
+    },
+    {
+      label: '状态色',
+      tokens: [
+        { name: 'status-success', var: '--status-success-default', label: '成功' },
+        { name: 'status-warning', var: '--status-warning-default', label: '警告' },
+        { name: 'status-danger', var: '--status-danger-default', label: '危险' },
+        { name: 'status-info', var: '--status-info-default', label: '信息' },
+        { name: 'status-promotion', var: '--status-promotion-default', label: '促销' },
+      ],
+    },
+    {
+      label: '强调色',
+      tokens: [
+        { name: 'accent-yellow', var: '--accent-yellow', label: '黄' },
+        { name: 'accent-green', var: '--accent-green', label: '绿' },
+        { name: 'accent-purple', var: '--accent-purple', label: '紫' },
+        { name: 'accent-gold', var: '--accent-gold', label: '金' },
+      ],
+    },
+  ];
+
+  // ============================================================
   // wego-wt-style-panel: 样式编辑浮动面板
   // ============================================================
   class WegoWtStylePanel extends HTMLElement {
@@ -1494,6 +1576,7 @@
       this._data = null;
       this._target = ''; // '' | 'before' | 'after'
       this._commitTimer = null;
+      this._tokenPanel = { open: false, type: '', trigger: null };
     }
     connectedCallback() {
       this._render();
@@ -3321,11 +3404,19 @@
         if (collapseBtn) collapseBtn.textContent = dir === 'left' ? '›' : '‹';
       }
 
-      // 3. 测量目标态宽度（关闭过渡，切 auto 量实际渲染宽度）
+      // 3. 测量目标态宽度
+      //    收起态宽度由 CSS .is-collapsed { width: 48px } 确定，直接用 48，
+      //    避免切 auto 测量时因 padding 算得 56px，与最终 48px 不一致导致收起后位置偏移；
+      //    展开态宽度由内容决定，需切 auto 测量
       toolbar.style.transition = 'none';
-      toolbar.style.width = 'auto';
-      void toolbar.offsetHeight;
-      const endWidth = toolbar.getBoundingClientRect().width || (collapsed ? 48 : 233);
+      let endWidth;
+      if (collapsed) {
+        endWidth = 48;
+      } else {
+        toolbar.style.width = 'auto';
+        void toolbar.offsetHeight;
+        endWidth = toolbar.getBoundingClientRect().width || 233;
+      }
 
       // 4. 计算 left 起始/目标值
       //    右侧(dir=left)：以起始态右边缘为锚点，展开向左扩展、收起向右收缩
