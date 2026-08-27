@@ -2524,7 +2524,7 @@ body[data-order-layout="landscape"] .phone-indicator {
 
   .order-desktop-modal--add .order-add-note-entry .link {
     display: inline-flex;
-    align-items: flex-start;
+    align-items: center;
     gap: var(--spacer-4);
     width: 100%;
     height: auto;
@@ -2539,6 +2539,7 @@ body[data-order-layout="landscape"] .phone-indicator {
 
   .order-desktop-modal--add .order-add-note-entry .link i {
     flex: 0 0 auto;
+    color: var(--text-secondary);
     font-size: var(--size-16);
   }
 
