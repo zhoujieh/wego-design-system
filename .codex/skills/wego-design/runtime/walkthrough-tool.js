@@ -1404,9 +1404,12 @@
 
     _bindEvents() {
       // 复制 Prompt
-      this._shadow.querySelector('[data-action="copy"]').addEventListener('click', () => {
-        this._copyPrompt();
-      });
+      const copyBtn = this._shadow.querySelector('[data-action="copy"]');
+      if (copyBtn) {
+        copyBtn.addEventListener('click', () => {
+          this._copyPrompt();
+        });
+      }
       // Tab 切换
       this._shadow.querySelectorAll('[data-tab]').forEach(btn => {
         btn.addEventListener('click', () => {
