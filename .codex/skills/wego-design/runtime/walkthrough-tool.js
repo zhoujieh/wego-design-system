@@ -1538,21 +1538,22 @@
       const rect = this._targetEl.getBoundingClientRect();
       const panelWidth = 300;
       const gap = 12;
-      // 优先显示在右侧
+      // 强制 reflow 确保读取到实际高度（面板刚渲染时 offsetHeight 可能为 0）
+      void this.offsetHeight;
+      const panelHeight = this.getBoundingClientRect().height || this.offsetHeight || 400;
+      // 水平方向：优先右侧，不够则左侧，再不够则居中
       let left = rect.right + gap;
       if (left + panelWidth > window.innerWidth - 8) {
-        // 右侧空间不够，显示在左侧
         left = rect.left - panelWidth - gap;
         if (left < 8) {
-          // 左右都不够，居中显示在元素下方
           left = Math.max(8, (window.innerWidth - panelWidth) / 2);
         }
       }
-      // 垂直方向：顶部对齐元素顶部，不超出视口
+      // 垂直方向：顶部对齐元素顶部，底部超出视口时自动上移
       let top = rect.top;
-      const panelHeight = this.offsetHeight || 400;
-      if (top + panelHeight > window.innerHeight - 8) {
-        top = window.innerHeight - panelHeight - 8;
+      const viewportBottom = window.innerHeight - 8;
+      if (top + panelHeight > viewportBottom) {
+        top = viewportBottom - panelHeight;
       }
       if (top < 40) top = 40;
       this.style.left = left + 'px';
@@ -1625,15 +1626,24 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
-            overflow-y: auto;
-            overflow-x: hidden;
             border-radius: 16px;
             border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
             background: var(--bg-surface, rgba(30, 30, 30, 0.78));
             box-shadow: 0 20px 100px rgba(0, 0, 0, 0.12);
           }
-          .panel::-webkit-scrollbar { width: 4px; }
-          .panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
+          .panel-body {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding-right: 4px;
+            margin-right: -4px;
+          }
+          .panel-body::-webkit-scrollbar { width: 0; height: 0; display: none; }
+          .panel-body { scrollbar-width: none; -ms-overflow-style: none; }
           .header {
             display: flex;
             align-items: center;
@@ -1953,6 +1963,7 @@
             <button class="close-btn" type="button" data-action="close">×</button>
           </div>
 
+          <div class="panel-body">
           ${hasBefore || hasAfter ? `
           <div class="target-switch" data-target-switch>
             <button type="button" data-target="" class="${t === '' ? 'active' : ''}">元素</button>
@@ -2137,6 +2148,7 @@
               <button data-field="shadowInset" data-value="false" class="${!d.shadowInset ? 'active' : ''}">外阴影</button>
               <button data-field="shadowInset" data-value="true" class="${d.shadowInset ? 'active' : ''}">内阴影</button>
             </div>
+          </div>
           </div>
         </div>
       `;
