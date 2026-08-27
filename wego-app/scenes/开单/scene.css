@@ -2334,7 +2334,7 @@ body[data-order-layout="landscape"] .phone-indicator {
   .order-desktop-modal--add .order-add-product--pricing {
     min-height: calc(var(--size-72) + var(--spacer-2));
     gap: var(--spacer-12);
-    padding: var(--spacer-16);
+    padding: var(--spacer-16) var(--spacer-16) var(--spacer-8);
     background: var(--bg-surface);
     border: 0;
     border-radius: 0;
@@ -2357,15 +2357,36 @@ body[data-order-layout="landscape"] .phone-indicator {
   }
 
   .order-desktop-modal--add .order-add-product__actions {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: var(--spacer-4);
+    margin-top: 0;
+  }
+
+  .order-desktop-modal--add .order-add-product__operation-buttons {
+    display: flex;
     align-items: center;
     gap: var(--spacer-12);
-    margin-top: 0;
   }
 
   .order-desktop-modal--add .order-add-current-price {
     min-height: var(--size-24);
     margin-right: 0;
-    font-size: var(--heading-sm-font-size);
+    font-family: var(--number-lg2-font-family);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--number-lg2-line-height);
+  }
+
+  .order-desktop-modal--add .order-add-price__currency,
+  .order-desktop-modal--add .order-add-price__decimal {
+    font-family: var(--number-sm-font-family);
+    font-size: var(--number-sm-font-size);
+    font-weight: var(--number-sm-font-weight);
+    line-height: var(--number-sm-line-height);
+  }
+
+  .order-desktop-modal--add .order-add-price__major {
+    font-size: var(--number-lg2-font-size);
   }
 
   .order-desktop-modal--add .order-add-product__actions button {
@@ -2388,6 +2409,18 @@ body[data-order-layout="landscape"] .phone-indicator {
     padding-right: var(--spacer-12);
     padding-left: var(--spacer-12);
     border-radius: var(--radius-6);
+  }
+
+  .order-desktop-modal--add .order-add-price-modes .tag__label {
+    color: var(--text-default);
+    font-family: var(--body-md-font-family);
+    font-size: var(--body-md-font-size);
+    font-weight: var(--font-weight-regular);
+  }
+
+  .order-desktop-modal--add .order-add-price-modes .tag--selected .tag__label {
+    color: var(--text-brand);
+    font-weight: var(--font-weight-medium);
   }
 
   .order-desktop-modal--add .order-single-picker,

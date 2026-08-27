@@ -297,6 +297,11 @@
     return '¥' + Number(value || 0).toFixed(2);
   }
 
+  function addProductPrice(value) {
+    var parts = Number(value || 0).toFixed(2).split('.');
+    return '<span class="order-add-price__currency">¥</span><span class="order-add-price__major">' + parts[0] + '</span><span class="order-add-price__decimal">.' + parts[1] + '</span>';
+  }
+
   function splitSpec(spec) {
     var parts = String(spec || '').split('/');
     return { color: parts[0] || '默认', size: parts.slice(1).join('/') || '均码' };
@@ -2058,10 +2063,12 @@
       +   '<div class="order-add-product order-add-product--pricing">' + image(product, 'order-add-product__image')
       +     '<div class="order-add-product__content"><div><strong>' + escapeHtml(product.name) + '</strong><small>' + escapeHtml(product.code) + '</small></div>'
       +       '<div class="order-add-product__actions">'
-      +         '<strong class="order-add-current-price">' + money(unitPrice) + '</strong>'
-      +         '<button type="button" data-toggle-add-discount aria-expanded="' + String(Boolean(draft.discountOpen)) + '"><i class="wego-iconfont-s icon-youhui" aria-hidden="true"></i>优惠</button>'
-      +         '<button type="button" data-edit-add-product><i class="wego-iconfont-s icon-bianji16" aria-hidden="true"></i>编辑商品</button>'
-      +         '<button type="button" data-add-purchase-history><i class="wego-iconfont-s icon-shijian" aria-hidden="true"></i>采购记录</button>'
+      +         '<strong class="order-add-current-price">' + (desktop ? addProductPrice(unitPrice) : money(unitPrice)) + '</strong>'
+      +         (desktop ? '<div class="order-add-product__operation-buttons">' : '')
+      +           '<button type="button" data-toggle-add-discount aria-expanded="' + String(Boolean(draft.discountOpen)) + '"><i class="wego-iconfont-s icon-youhui order-add-discount-icon" aria-hidden="true"></i>优惠</button>'
+      +           '<button type="button" data-edit-add-product><i class="wego-iconfont-s icon-bianji16" aria-hidden="true"></i>编辑商品</button>'
+      +           '<button type="button" data-add-purchase-history><i class="wego-iconfont-s icon-shijian" aria-hidden="true"></i>采购记录</button>'
+      +         (desktop ? '</div>' : '')
       +       '</div>'
       +       (draft.lastDiscountTipVisible ? '<div class="order-add-last-price">上次优惠价 ' + money(lastDiscountPrice) + '<button type="button" data-use-last-discount>使用</button></div>' : '')
       +     '</div></div>'
