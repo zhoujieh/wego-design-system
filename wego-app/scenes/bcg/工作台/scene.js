@@ -95,14 +95,14 @@
     +         metricMarkup('粉丝浏览', '123', '+12%', '昨日102', 'is-up')
     +         metricMarkup('员工业绩', '3人', '', '查看排行', '')
     +       '</div>'
-    +       '<div class="card card--surface business-home__quick-card" data-component-slug="card"><div class="card__body business-home__quick-grid">'
+    +       '<div class="card card--surface card--vertical business-home__quick-card" data-component-slug="card"><div class="card__body business-home__quick-grid">'
     +         quickActions.map(function (item) { return actionMarkup(item, 'business-home__quick-action'); }).join('')
     +       '</div><div class="business-home__pager"><i></i><i></i></div></div>'
     +     '</section>'
     +     '<section class="card card--surface business-home__limit-card" data-component-slug="card">'
     +       '<div class="card__body"><span>收款限额3000元，完善资料立即解除</span><button type="button" class="btn btn--strong btn--sm business-home__warning-button" data-component-slug="button" data-action="complete-profile">去完善</button></div>'
     +     '</section>'
-    +     '<section class="card card--surface business-home__section-card" data-component-slug="card">'
+    +     '<section class="card card--surface card--vertical business-home__section-card" data-component-slug="card">'
     +       '<div class="business-home__section-title"><strong>我的销售单</strong><button type="button" data-action="revenue">查看收益<i class="wego-iconfont-s icon-youjiantou16"></i></button></div>'
     +       '<div class="business-home__orders">'
     +         orderMarkup('29', '待收款', false)
@@ -112,7 +112,7 @@
     +         '<button type="button" class="business-home__order" data-action="order" data-label="全部销售单"><i class="wego-iconfont-s icon-dingdan"></i><span>全部销售单</span></button>'
     +       '</div>'
     +     '</section>'
-    +     '<section class="card card--surface business-home__section-card" data-component-slug="card">'
+    +     '<section class="card card--surface card--vertical business-home__section-card" data-component-slug="card">'
     +       '<div class="business-home__section-title"><strong>常用应用</strong></div>'
     +       '<div class="business-home__apps">' + commonApps.map(function (item) { return actionMarkup(item, 'business-home__app'); }).join('') + '</div>'
     +     '</section>'
