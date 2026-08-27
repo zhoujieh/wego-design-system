@@ -7,7 +7,7 @@ const sceneManagerTemplate = `
         <div class="navbar__right"></div>
       </div>
     </div>
-    <div class="scene-manager-page__body" data-dom-id="scene-manager-body">
+    <div class="scene-manager-page__body">
       <div class="scene-manager-page__hint">点击入口跳转到对应业务场景原型</div>
       <div class="scene-manager-page__list" data-region="scenes"></div>
     </div>

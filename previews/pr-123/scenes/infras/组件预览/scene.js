@@ -7,7 +7,7 @@ const componentPreviewTemplate = `
         <div class="navbar__right"></div>
       </div>
     </div>
-    <div class="component-preview-page__body" data-dom-id="component-preview-body">
+    <div class="component-preview-page__body">
       <iframe class="component-preview-page__frame" src="./.codex/skills/wego-design/preview/index.html" title="组件预览总览"></iframe>
     </div>
   </section>

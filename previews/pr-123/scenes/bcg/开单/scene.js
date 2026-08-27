@@ -1,17 +1,17 @@
 (function () {
   var CUSTOMERS = [
-    { id: 'c1', name: '玛尼轰', phone: '玛尼大吉', mobile: '13800138001', address: '广东省深圳市南山区科技园18号', tag: '老客 · 微信好友、回头客', priceType: '8.5折', factor: 0.85, lastDelivery: 'express', lastAddress: { name: '玛尼大吉', phone: '13800138001', detail: '广东省深圳市南山区科技园18号' }, avatar: './scenes/开单/assets/customer-picker/customer-mani.png', number: '99812', level: 'V3', balance: 4000, points: 132, amount: '¥800.00', pieces: '2250', contact: '玛尼大吉', employee: '员工名称' },
-    { id: 'c2', name: 'HZP-广州', phone: '刘嘿嘿', mobile: '13600136002', address: '广东省广州市越秀区站西路57号', tag: '老客 · 微信好友、回头客', priceType: '9.5折', factor: 0.95, lastDelivery: 'pickup', lastAddress: null, avatar: './scenes/开单/assets/customer-picker/customer-mani.png', number: '12345', level: 'V1', balance: 0, points: 100, amount: '¥0.00', pieces: '210', contact: '刘嘿嘿', employee: '员工名称' },
-    { id: 'c3', name: '3857-简静', phone: '旺仔小馒头', mobile: '13583084433', address: '浙江省杭州市余杭区财富大厦3楼', tag: '老客 · 微信好友、回头客', priceType: '9.5折', factor: 0.95, lastDelivery: 'freight', lastAddress: { name: '旺仔小馒头', phone: '13583084433', detail: '浙江省杭州市余杭区财富大厦3楼' }, avatar: './scenes/开单/assets/customer-picker/customer-flower.jpg', number: '3857', level: 'V1', balance: 50, points: 100, amount: '¥50.00', pieces: '1030', contact: '旺仔小馒头', employee: '员工名称' }
+    { id: 'c1', name: '玛尼轰', phone: '玛尼大吉', mobile: '13800138001', address: '广东省深圳市南山区科技园18号', tag: '老客 · 微信好友、回头客', priceType: '8.5折', factor: 0.85, lastDelivery: 'express', lastAddress: { name: '玛尼大吉', phone: '13800138001', detail: '广东省深圳市南山区科技园18号' }, avatar: './scenes/bcg/开单/assets/customer-picker/customer-mani.png', number: '99812', level: 'V3', balance: 4000, points: 132, amount: '¥800.00', pieces: '2250', contact: '玛尼大吉', employee: '员工名称' },
+    { id: 'c2', name: 'HZP-广州', phone: '刘嘿嘿', mobile: '13600136002', address: '广东省广州市越秀区站西路57号', tag: '老客 · 微信好友、回头客', priceType: '9.5折', factor: 0.95, lastDelivery: 'pickup', lastAddress: null, avatar: './scenes/bcg/开单/assets/customer-picker/customer-mani.png', number: '12345', level: 'V1', balance: 0, points: 100, amount: '¥0.00', pieces: '210', contact: '刘嘿嘿', employee: '员工名称' },
+    { id: 'c3', name: '3857-简静', phone: '旺仔小馒头', mobile: '13583084433', address: '浙江省杭州市余杭区财富大厦3楼', tag: '老客 · 微信好友、回头客', priceType: '9.5折', factor: 0.95, lastDelivery: 'freight', lastAddress: { name: '旺仔小馒头', phone: '13583084433', detail: '浙江省杭州市余杭区财富大厦3楼' }, avatar: './scenes/bcg/开单/assets/customer-picker/customer-flower.jpg', number: '3857', level: 'V1', balance: 50, points: 100, amount: '¥50.00', pieces: '1030', contact: '旺仔小馒头', employee: '员工名称' }
   ];
 
   var RECENT_CUSTOMERS = [
-    { name: 'Chen', avatar: './scenes/开单/assets/customer-picker/recent-chen.png', customerId: 'c3' },
-    { name: '玛尼轰', avatar: './scenes/开单/assets/customer-picker/customer-mani.png', customerId: 'c1' },
-    { name: '-FJW-', avatar: './scenes/开单/assets/customer-picker/recent-fjw.png', customerId: 'c2' },
-    { name: 'A元气爬宠', avatar: './scenes/开单/assets/customer-picker/recent-pet.jpg', customerId: 'c3' },
-    { name: '浮光记', avatar: './scenes/开单/assets/customer-picker/recent-light.jpg', customerId: 'c2' },
-    { name: '🌸123FA', avatar: './scenes/开单/assets/customer-picker/customer-flower.jpg', customerId: 'c3' }
+    { name: 'Chen', avatar: './scenes/bcg/开单/assets/customer-picker/recent-chen.png', customerId: 'c3' },
+    { name: '玛尼轰', avatar: './scenes/bcg/开单/assets/customer-picker/customer-mani.png', customerId: 'c1' },
+    { name: '-FJW-', avatar: './scenes/bcg/开单/assets/customer-picker/recent-fjw.png', customerId: 'c2' },
+    { name: 'A元气爬宠', avatar: './scenes/bcg/开单/assets/customer-picker/recent-pet.jpg', customerId: 'c3' },
+    { name: '浮光记', avatar: './scenes/bcg/开单/assets/customer-picker/recent-light.jpg', customerId: 'c2' },
+    { name: '🌸123FA', avatar: './scenes/bcg/开单/assets/customer-picker/customer-flower.jpg', customerId: 'c3' }
   ];
 
   var PRODUCTS = [
@@ -30,12 +30,12 @@
   ];
 
   var PHONE_PRODUCTS = [
-    { id: 'm1', code: 'APL-IP16P-OB-8-256', name: 'Apple iPhone 16 Pro 曜石黑 8GB+256GB', category: 'Apple', tags: ['Apple'], source: '采购入库', listPrice: 4299, stock: 1, image: './scenes/开单/assets/phones/phone-black.png', specs: ['标准规格'] },
-    { id: 'm2', code: 'HW-M70-GB-12-256', name: 'HUAWEI Mate 70 冰川蓝 12GB+256GB', category: 'HUAWEI', tags: ['HUAWEI'], source: '采购入库', listPrice: 3699, stock: 1, image: './scenes/开单/assets/phones/phone-blue.png', specs: ['标准规格'] },
-    { id: 'm3', code: 'HONOR-MV3-MS-16-512', name: 'HONOR Magic V3 月影银 16GB+512GB', category: 'HONOR', tags: ['HONOR'], source: '手动创建', listPrice: 7999, stock: 1, image: './scenes/开单/assets/phones/phone-fold.png', specs: ['标准规格'] },
-    { id: 'm4', code: 'MI-15P-SG-16-512', name: 'Xiaomi 15 Pro 松林绿 16GB+512GB', category: 'Xiaomi', tags: ['Xiaomi'], source: '采购入库', listPrice: 5999, stock: 1, image: './scenes/开单/assets/phones/phone-green.png', specs: ['标准规格'] },
-    { id: 'm5', code: 'OPPO-R14-OB-12-256', name: 'OPPO Reno14 曜石黑 12GB+256GB', category: 'OPPO', tags: ['OPPO'], source: '手动创建', listPrice: 2299, stock: 1, image: './scenes/开单/assets/phones/phone-black.png', specs: ['标准规格'] },
-    { id: 'm6', code: 'VIVO-X200-GB-12-256', name: 'vivo X200 冰川蓝 12GB+256GB', category: 'vivo', tags: ['vivo'], source: '采购入库', listPrice: 6599, stock: 1, image: './scenes/开单/assets/phones/phone-fold.png', specs: ['标准规格'] }
+    { id: 'm1', code: 'APL-IP16P-OB-8-256', name: 'Apple iPhone 16 Pro 曜石黑 8GB+256GB', category: 'Apple', tags: ['Apple'], source: '采购入库', listPrice: 4299, stock: 1, image: './scenes/bcg/开单/assets/phones/phone-black.png', specs: ['标准规格'] },
+    { id: 'm2', code: 'HW-M70-GB-12-256', name: 'HUAWEI Mate 70 冰川蓝 12GB+256GB', category: 'HUAWEI', tags: ['HUAWEI'], source: '采购入库', listPrice: 3699, stock: 1, image: './scenes/bcg/开单/assets/phones/phone-blue.png', specs: ['标准规格'] },
+    { id: 'm3', code: 'HONOR-MV3-MS-16-512', name: 'HONOR Magic V3 月影银 16GB+512GB', category: 'HONOR', tags: ['HONOR'], source: '手动创建', listPrice: 7999, stock: 1, image: './scenes/bcg/开单/assets/phones/phone-fold.png', specs: ['标准规格'] },
+    { id: 'm4', code: 'MI-15P-SG-16-512', name: 'Xiaomi 15 Pro 松林绿 16GB+512GB', category: 'Xiaomi', tags: ['Xiaomi'], source: '采购入库', listPrice: 5999, stock: 1, image: './scenes/bcg/开单/assets/phones/phone-green.png', specs: ['标准规格'] },
+    { id: 'm5', code: 'OPPO-R14-OB-12-256', name: 'OPPO Reno14 曜石黑 12GB+256GB', category: 'OPPO', tags: ['OPPO'], source: '手动创建', listPrice: 2299, stock: 1, image: './scenes/bcg/开单/assets/phones/phone-black.png', specs: ['标准规格'] },
+    { id: 'm6', code: 'VIVO-X200-GB-12-256', name: 'vivo X200 冰川蓝 12GB+256GB', category: 'vivo', tags: ['vivo'], source: '采购入库', listPrice: 6599, stock: 1, image: './scenes/bcg/开单/assets/phones/phone-fold.png', specs: ['标准规格'] }
   ];
 
   var MERCHANT_RECENT_PRODUCT_IDS = ['p3', 'p1', 'p2', 'p4'];
@@ -57,10 +57,10 @@
   ];
 
   var PICKUP_POINTS = [
-    { id: 'pp1', name: '南山科技园自提点', address: '深圳市南山区科技园18号一楼', image: './scenes/开单/assets/pickup-store-1.png' },
-    { id: 'pp2', name: '福田中心自提点', address: '深圳市福田区福华一路88号', image: './scenes/开单/assets/pickup-store-2.png' },
-    { id: 'pp3', name: '湖南门店', address: '湖南省株洲市醴陵市来龙门街道15幢268室', image: './scenes/开单/assets/pickup-store-2.png' },
-    { id: 'pp4', name: '湖南门店', address: '湖南省株洲市醴陵市来龙门街道15幢268室', image: './scenes/开单/assets/pickup-store-2.png' }
+    { id: 'pp1', name: '南山科技园自提点', address: '深圳市南山区科技园18号一楼', image: './scenes/bcg/开单/assets/pickup-store-1.png' },
+    { id: 'pp2', name: '福田中心自提点', address: '深圳市福田区福华一路88号', image: './scenes/bcg/开单/assets/pickup-store-2.png' },
+    { id: 'pp3', name: '湖南门店', address: '湖南省株洲市醴陵市来龙门街道15幢268室', image: './scenes/bcg/开单/assets/pickup-store-2.png' },
+    { id: 'pp4', name: '湖南门店', address: '湖南省株洲市醴陵市来龙门街道15幢268室', image: './scenes/bcg/开单/assets/pickup-store-2.png' }
   ];
 
   var PAYMENT_METHODS = [
@@ -772,7 +772,7 @@
       +   '<button type="button" class="order-entry-primary" data-open-panel="products"><i class="wego-iconfont-s icon-jia16"></i><span>选择商品</span></button>'
       +   '<div class="order-entry-tools">'
       +     '<button type="button" data-open-panel="products"><i class="wego-iconfont-s icon-sousuo"></i><span>搜索</span></button>'
-      +     '<button type="button" data-scan><img src="./scenes/开单/assets/icon-barcode.svg" alt=""><span>扫条码</span></button>'
+      +     '<button type="button" data-scan><img src="./scenes/bcg/开单/assets/icon-barcode.svg" alt=""><span>扫条码</span></button>'
       +     '<button type="button" data-ai-entry><i class="wego-iconfont-s icon-tupian"></i><span>AI开单</span><small>即将开放</small></button>'
       +   '</div>'
       + '</section>';
@@ -1076,7 +1076,7 @@
       return ''
         + '<article class="order-catalog-item card card--surface card--vertical order-catalog-item--desktop' + (editable ? ' order-catalog-item--editable' : '') + '" data-component-slug="card">'
         +   '<button type="button" class="order-catalog-item__select" data-product-id="' + item.id + '" aria-label="添加' + escapeHtml(item.name) + '">' + content + '</button>'
-        +   '<button type="button" class="order-catalog-item__image-mark" data-product-activity="' + item.id + '" aria-label="查看' + escapeHtml(item.name) + '详情" title="查看详情"><img src="./scenes/开单/assets/icon-view-detail.svg" width="17" height="19" alt="" aria-hidden="true"></button>'
+        +   '<button type="button" class="order-catalog-item__image-mark" data-product-activity="' + item.id + '" aria-label="查看' + escapeHtml(item.name) + '详情" title="查看详情"><img src="./scenes/bcg/开单/assets/icon-view-detail.svg" width="17" height="19" alt="" aria-hidden="true"></button>'
         +   (editable ? '<span class="order-catalog-item__actions"><span class="order-catalog-item__grid-price">' + priceMarkup + '</span><button type="button" class="order-catalog-item__edit" data-edit-catalog-product="' + item.id + '" aria-label="编辑' + escapeHtml(item.name) + '" title="编辑商品"><i class="wego-iconfont-s icon-bianji16" aria-hidden="true"></i></button><span class="order-catalog-item__list-stock">库存' + escapeHtml(String(catalogInventory)) + '</span></span>' : '')
         + '</article>';
     }).join('');
@@ -1214,7 +1214,7 @@
       +     '<input type="file" accept="image/*" data-header-image-input hidden>'
       +     (inCatalog ? '' : '<button type="button" class="btn btn--medium btn--sm order-desktop-product-search__submit" data-component-slug="button" data-submit-header-search ' + (state.desktopProductKeyword.trim() ? '' : 'hidden') + '>搜索</button>')
       +     (inCatalog ? sidebarFilterButton : '')
-      +     '<button type="button" class="btn btn--weak btn--sm btn--icon-only order-desktop-barcode-search is-active ' + scannerConnectedClass + '" data-component-slug="button" data-scan aria-label="扫条码" title="扫条码"><img class="btn__icon" src="./scenes/开单/assets/icon-barcode.svg" alt="" aria-hidden="true"></button>'
+      +     '<button type="button" class="btn btn--weak btn--sm btn--icon-only order-desktop-barcode-search is-active ' + scannerConnectedClass + '" data-component-slug="button" data-scan aria-label="扫条码" title="扫条码"><img class="btn__icon" src="./scenes/bcg/开单/assets/icon-barcode.svg" alt="" aria-hidden="true"></button>'
       +   '</div>'
       +   (inCatalog ? '' : desktopSearchResultDropdown())
       + '</div>';
@@ -1433,7 +1433,7 @@
     var emptyLine = !state.delivery;
     var deliveryIcon = state.delivery === 'pickup' ? 'icon-daohang' : 'icon-che';
     var deliveryIconMarkup = state.delivery === 'none'
-      ? '<img class="order-desktop-site-pickup-icon" src="./scenes/开单/assets/site-pickup.svg" alt="">'
+      ? '<img class="order-desktop-site-pickup-icon" src="./scenes/bcg/开单/assets/site-pickup.svg" alt="">'
       : '<i class="wego-iconfont-s ' + deliveryIcon + '" aria-hidden="true"></i>';
     var deliveryContent = singleLine
       ? '<small>' + deliveryIconMarkup + escapeHtml(summaryParts.label) + '</small><span class="order-desktop-delivery-tail"><strong>' + escapeHtml(summaryParts.primary) + '</strong><i class="wego-iconfont-s icon-youjiantou16" aria-hidden="true"></i></span>'
@@ -1647,7 +1647,7 @@
       +   '<span class="order-customer-person__content">'
       +     '<span class="order-customer-person__title"><strong>' + escapeHtml(item.name) + '</strong><em class="order-customer-vip order-customer-vip--' + item.level.toLowerCase() + '"><b>' + item.level + '</b><span>' + escapeHtml(item.priceType) + '</span></em></span>'
       +     '<span class="order-customer-person__metrics"><small>' + escapeHtml(item.amount) + '</small><small>' + escapeHtml(item.pieces) + '</small><span>' + escapeHtml(item.contact) + '</span></span>'
-      +     '<span class="order-customer-person__tags"><small class="order-customer-employee"><img src="./scenes/开单/assets/customer-picker/icon-employee.svg" alt="">' + escapeHtml(item.employee) + '</small><span>老客</span><span>微信好友、回头客</span></span>'
+      +     '<span class="order-customer-person__tags"><small class="order-customer-employee"><img src="./scenes/bcg/开单/assets/customer-picker/icon-employee.svg" alt="">' + escapeHtml(item.employee) + '</small><span>老客</span><span>微信好友、回头客</span></span>'
       +   '</span>'
       + '</button>';
   }
@@ -1671,7 +1671,7 @@
       +     '<section class="order-customer-recent"><div>'
       +       (recent.length ? recent.map(function (item) { return '<button type="button" data-customer-id="' + item.customerId + '">' + customerAvatar(item) + '<span>' + escapeHtml(item.name) + '</span></button>'; }).join('') : '<small>没有匹配客户</small>')
       +     '</div></section>'
-      +     '<section class="order-customer-all"><header><h3>全部</h3><button type="button" data-new-customer><img src="./scenes/开单/assets/customer-picker/icon-add-circle.svg" alt=""><span>新建</span></button></header>'
+      +     '<section class="order-customer-all"><header><h3>全部</h3><button type="button" data-new-customer><img src="./scenes/bcg/开单/assets/customer-picker/icon-add-circle.svg" alt=""><span>新建</span></button></header>'
       +       '<div class="order-customer-all__list">'
       +         (rows.length ? rows.map(customerRow).join('') : '<div class="order-customer-empty"><span>没有找到“' + escapeHtml(state.customerKeyword.trim()) + '”</span>' + button('新建客户', 'medium', 'md', 'data-new-customer') + '</div>')
       +       '</div>'
@@ -1749,7 +1749,7 @@
     var createdBalance = Math.max(0, balance + gift);
     var created = {
       id: 'c' + Date.now(), name: name, phone: phone || '未填写手机号', mobile: phone || '未填写手机号', address: '暂未填写收货地址', tag: '新客户', priceType: '零售价', factor: 1,
-      lastDelivery: null, lastAddress: null, avatar: './scenes/开单/assets/customer-picker/customer-flower.jpg', number: number || '新客',
+      lastDelivery: null, lastAddress: null, avatar: './scenes/bcg/开单/assets/customer-picker/customer-flower.jpg', number: number || '新客',
       level: 'V1', balance: createdBalance, amount: money(createdBalance), pieces: String(Math.max(0, points)),
       contact: wechat || '未填写微信号', employee: '当前员工'
     };
@@ -2064,13 +2064,14 @@
       +     '<div class="order-add-product__content"><div><strong>' + escapeHtml(product.name) + '</strong><small>' + escapeHtml(product.code) + '</small></div>'
       +       '<div class="order-add-product__actions">'
       +         '<strong class="order-add-current-price">' + (desktop ? addProductPrice(unitPrice) : money(unitPrice)) + '</strong>'
+      +         (desktop && draft.lastDiscountTipVisible ? '<div class="order-add-last-price">上次优惠价 ' + money(lastDiscountPrice) + '<button type="button" data-use-last-discount>使用</button></div>' : '')
       +         (desktop ? '<div class="order-add-product__operation-buttons">' : '')
       +           '<button type="button" data-toggle-add-discount aria-expanded="' + String(Boolean(draft.discountOpen)) + '"><i class="wego-iconfont-s icon-youhui order-add-discount-icon" aria-hidden="true"></i>优惠</button>'
       +           '<button type="button" data-edit-add-product><i class="wego-iconfont-s icon-bianji16" aria-hidden="true"></i>编辑商品</button>'
       +           '<button type="button" data-add-purchase-history><i class="wego-iconfont-s icon-shijian" aria-hidden="true"></i>采购记录</button>'
       +         (desktop ? '</div>' : '')
       +       '</div>'
-      +       (draft.lastDiscountTipVisible ? '<div class="order-add-last-price">上次优惠价 ' + money(lastDiscountPrice) + '<button type="button" data-use-last-discount>使用</button></div>' : '')
+      +       (!desktop && draft.lastDiscountTipVisible ? '<div class="order-add-last-price">上次优惠价 ' + money(lastDiscountPrice) + '<button type="button" data-use-last-discount>使用</button></div>' : '')
       +     '</div></div>'
       +   '<fieldset class="order-add-price-modes" aria-label="开单价格">'
       +     '<span class="order-add-price-option tag tag--28 ' + (draft.priceMode === 'cost' ? 'tag--brand tag--selected' : 'tag--white tag--normal') + '" data-component-slug="tag"><button type="button" class="order-add-cost-visibility" data-toggle-cost-price aria-label="' + (draft.costPriceVisible ? '隐藏拿货价' : '显示拿货价') + '"><i class="wego-iconfont-s ' + (draft.costPriceVisible ? 'icon-xianshi' : 'icon-yincang') + '" aria-hidden="true"></i></button><button type="button" class="order-add-price-select" data-add-price-mode="cost" aria-pressed="' + String(draft.priceMode === 'cost') + '"><span class="tag__label">拿货价 ' + (draft.costPriceVisible ? money(productCostPrice(product)) : '***') + '</span></button></span>'
@@ -2079,8 +2080,12 @@
       +   (draft.discountOpen ? '<div class="order-add-discount-editor"><label for="order-add-discount-value">优惠后单价</label><input id="order-add-discount-value" type="text" inputmode="decimal" value="' + escapeHtml(draft.discountValue) + '" placeholder="请输入金额" data-add-discount-value><button type="button" data-apply-add-discount>应用</button></div>' : '')
       +   (desktop ? '' : '<div class="order-segment order-add-mode-switch"><button class="' + (draft.mode === 'single' ? 'is-active' : '') + '" data-add-mode="single">单买</button><button class="' + (draft.mode === 'batch' ? 'is-active' : '') + '" data-add-mode="batch">多买</button></div>')
       +   (draft.mode === 'batch' ? addBatchPicker(draft, desktop) : addSinglePicker(draft, desktop))
-      +   '<div class="order-add-note-entry"><button type="button" class="link link--14" data-component-slug="link" data-toggle-add-note>' + (draft.note ? '编辑备注' : '添加备注') + '</button>'
-      +     (draft.noteOpen ? '<div class="input-group input-group--surface-white order-note-input" data-component-slug="input"><textarea id="product-note" placeholder="例如：单独打包、缺码先联系" data-add-note>' + escapeHtml(draft.note) + '</textarea></div>' : '')
+      +   '<div class="order-add-note-entry' + (draft.noteOpen ? ' is-active' : '') + (draft.note ? ' has-note' : '') + '">'
+      +     (draft.noteOpen
+              ? '<div class="input-group input-group--surface-white order-note-input" data-component-slug="input">' + (desktop
+                  ? '<input id="product-note" type="text" value="' + escapeHtml(draft.note) + '" placeholder="请输入备注" data-add-note>'
+                  : '<textarea id="product-note" placeholder="例如：单独打包、缺码先联系" data-add-note>' + escapeHtml(draft.note) + '</textarea>') + '</div>'
+              : '<button type="button" class="link link--14" data-component-slug="link" data-toggle-add-note>' + (draft.note ? '备注：' + escapeHtml(draft.note) + '<i class="wego-iconfont-s icon-bianji" aria-hidden="true"></i>' : '添加备注') + '</button>')
       +   '</div>'
       + '</div>'
       + '<div class="order-add-footer"><span>' + (desktop ? '<strong data-add-total-amount>' + addProductPrice(total * unitPrice) + '</strong><small>共 <b data-add-total-qty>' + total + '</b> 件</small>' : '合计：<b data-add-total-qty>' + total + '</b> 件 <strong data-add-total-amount>' + money(total * unitPrice) + '</strong>') + '</span><div class="order-add-footer__actions">' + button('取消', 'weak', 'md', 'data-close-panel') + button('添加', 'strong', 'md', 'data-confirm-add') + '</div></div>';
@@ -4672,6 +4677,8 @@
         state.addDraft.note = event.target.value.trim();
         state.addDraft.noteOpen = false;
         renderActive();
+        var activeAddScroll = activeContext.root.querySelector('.order-add-scroll');
+        if (activeAddScroll) activeAddScroll.scrollTop = activeAddScroll.scrollHeight;
         return;
       }
       if (!event.target.matches('[data-row-qty]')) return;
