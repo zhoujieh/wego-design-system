@@ -3526,12 +3526,15 @@
           }
         });
       });
-      // 点击外部关闭子面板
+      // 点击外部关闭子面板和配置列表
       document.addEventListener('pointerdown', (e) => {
         if (!e.target.closest) return;
-        if (isWalkthroughElement(e.target)) return; // 工具自身 UI 内的 pointerdown 不关闭子面板
+        if (isWalkthroughElement(e.target)) return; // 工具自身 UI 内的 pointerdown 不关闭
         if (!e.target.closest('wego-walkthrough')) {
           this._closeSubpanels();
+          if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
+            this._components.overviewPanel.close();
+          }
         }
       }, true);
 
@@ -3778,7 +3781,11 @@
           this._toggleSubpanel('datamock');
           break;
         case 'overview':
-          this._openOverview();
+          if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
+            this._components.overviewPanel.close();
+          } else {
+            this._openOverview();
+          }
           break;
         case 'more':
           this._toggleSubpanel('more');
