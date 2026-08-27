@@ -2748,6 +2748,7 @@
       this._subpanelOpen = null;
       this._components = {};
       this._suppressClick = false;
+      this._anchorDir = null; // 展开时确定的锚点方向，收起时复用，避免展开态中心偏移导致方向误判
     }
 
     connectedCallback() {
@@ -3294,7 +3295,15 @@
       // 1. 记录起始态（切换内容前，确保拿到真实的起始宽度和位置）
       const startHostRect = this.getBoundingClientRect();
       const startWidth = toolbar.getBoundingClientRect().width;
-      const dir = this._getExpandDirection();
+      // 展开时基于当前位置判断方向并保存；收起时复用展开时保存的方向，
+      // 避免展开态中心比收起态偏左导致方向误判（收起后位置偏移）
+      let dir;
+      if (!collapsed) {
+        dir = this._getExpandDirection();
+        this._anchorDir = dir;
+      } else {
+        dir = this._anchorDir || this._getExpandDirection();
+      }
 
       // 2. 切换内容显示与 class
       this._collapsed = collapsed;
@@ -3307,6 +3316,9 @@
         fab.style.display = 'none';
         main.style.display = 'inline-flex';
         main.style.flexDirection = dir === 'left' ? 'row-reverse' : 'row';
+        // 收起按钮箭头方向：右侧展开(row-reverse，按钮在最右)显示向右箭头›，左侧展开显示向左箭头‹
+        const collapseBtn = this._shadow.querySelector('[data-collapse-btn]');
+        if (collapseBtn) collapseBtn.textContent = dir === 'left' ? '›' : '‹';
       }
 
       // 3. 测量目标态宽度（关闭过渡，切 auto 量实际渲染宽度）
