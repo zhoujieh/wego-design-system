@@ -3948,11 +3948,21 @@
       return;
     }
     if (target.matches('[data-toggle-add-note]')) {
-      var noteField = panelScope(target, root).querySelector('[data-add-note]');
+      var addPanel = panelScope(target, root);
+      var addScroll = addPanel.querySelector('.order-add-scroll');
+      var addScrollTop = addScroll ? addScroll.scrollTop : 0;
+      var noteField = addPanel.querySelector('[data-add-note]');
       if (noteField) state.addDraft.note = noteField.value.trim();
       state.addDraft.noteOpen = !state.addDraft.noteOpen;
       renderActive();
+      var nextAddScroll = activeContext.root.querySelector(isDesktopWorkbench()
+        ? '.order-desktop-modal--add .order-add-scroll'
+        : '.order-v2-modal--add .order-add-scroll');
+      if (nextAddScroll) nextAddScroll.scrollTop = addScrollTop;
       if (state.addDraft.noteOpen) activeContext.root.querySelector('[data-add-note]')?.focus({ preventScroll: true });
+      window.requestAnimationFrame(function () {
+        if (nextAddScroll && nextAddScroll.isConnected) nextAddScroll.scrollTop = addScrollTop;
+      });
       return;
     }
     if (target.closest('[data-toggle-order-note]')) {

@@ -2374,6 +2374,10 @@ body[data-order-layout="landscape"] .phone-indicator {
     align-self: flex-start;
   }
 
+  .order-desktop-modal--add .order-add-scroll {
+    overflow-anchor: none;
+  }
+
   .order-desktop-modal--add .order-add-current-price {
     min-height: var(--size-24);
     margin-right: 0;
