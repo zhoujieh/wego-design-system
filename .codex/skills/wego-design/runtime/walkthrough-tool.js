@@ -1832,9 +1832,12 @@
         { name: 'text-secondary', var: '--text-secondary', label: '次要', desc: '次级说明文字' },
         { name: 'text-tertiary', var: '--text-tertiary', label: '三级', desc: '辅助/占位文字' },
         { name: 'text-disabled', var: '--text-disabled', label: '禁用', desc: '不可用状态文字' },
+        { name: 'text-placeholder', var: '--text-placeholder', label: '占位', desc: '输入框占位文字' },
         { name: 'text-inverse', var: '--text-inverse', label: '反白', desc: '深色背景上的文字' },
         { name: 'text-brand', var: '--text-brand', label: '品牌', desc: '品牌色/可点击文字' },
+        { name: 'text-link', var: '--text-link', label: '链接', desc: '蓝色文字链接' },
         { name: 'text-promotion', var: '--text-promotion', label: '促销', desc: '价格/促销强调文字' },
+        { name: 'text-promotion-strong', var: '--text-promotion-strong', label: '强促销', desc: '强促销红色文字' },
       ],
     },
     {
@@ -1882,20 +1885,34 @@
     },
   ];
 
-  // 字号 Token
+  // 字号 Token（设计系统语义化排版 token）
   const FONT_SIZE_TOKEN_GROUPS = [
     {
-      label: '字号',
+      label: '正文',
       tokens: [
-        { name: 'font-size-xs', var: '--font-size-xs', label: 'XS', desc: '极小/辅助文字', value: '10px' },
-        { name: 'font-size-sm', var: '--font-size-sm', label: 'SM', desc: '小字/说明文字', value: '12px' },
-        { name: 'font-size-base', var: '--font-size-base', label: 'BASE', desc: '正文默认', value: '14px' },
-        { name: 'font-size-md', var: '--font-size-md', label: 'MD', desc: '小标题/强调', value: '16px' },
-        { name: 'font-size-lg', var: '--font-size-lg', label: 'LG', desc: '标题', value: '18px' },
-        { name: 'font-size-xl', var: '--font-size-xl', label: 'XL', desc: '大标题', value: '20px' },
-        { name: 'font-size-2xl', var: '--font-size-2xl', label: '2XL', desc: '特大标题', value: '24px' },
-        { name: 'font-size-3xl', var: '--font-size-3xl', label: '3XL', desc: '超大标题', value: '28px' },
-        { name: 'font-size-4xl', var: '--font-size-4xl', label: '4XL', desc: '巨型标题', value: '32px' },
+        { name: 'body-xs', var: '--body-xs-font-size', label: 'XS', desc: '极小正文 10px', value: '10px' },
+        { name: 'body-sm', var: '--body-sm-font-size', label: 'SM', desc: '小正文 12px', value: '12px' },
+        { name: 'body-md', var: '--body-md-font-size', label: 'MD', desc: '正文默认 14px', value: '14px' },
+        { name: 'body-lg', var: '--body-lg-font-size', label: 'LG', desc: '大正文 16px', value: '16px' },
+        { name: 'body-xl', var: '--body-xl-font-size', label: 'XL', desc: '特大正文 18px', value: '18px' },
+      ],
+    },
+    {
+      label: '标题',
+      tokens: [
+        { name: 'heading-xs', var: '--heading-xs-font-size', label: 'HXS', desc: '小标题 16px', value: '16px' },
+        { name: 'heading-sm', var: '--heading-sm-font-size', label: 'HSM', desc: '中小标题 18px', value: '18px' },
+        { name: 'heading-md', var: '--heading-md-font-size', label: 'HMD', desc: '中标题 22px', value: '22px' },
+        { name: 'heading-lg', var: '--heading-lg-font-size', label: 'HLG', desc: '大标题 24px', value: '24px' },
+      ],
+    },
+    {
+      label: '数字',
+      tokens: [
+        { name: 'number-lg', var: '--number-lg-font-size', label: 'NLG', desc: '大数字 16px', value: '16px' },
+        { name: 'number-xl', var: '--number-xl-font-size', label: 'NXL', desc: '特大数字 20px', value: '20px' },
+        { name: 'number-xxl', var: '--number-xxl-font-size', label: 'NXXL', desc: '超大数字 24px', value: '24px' },
+        { name: 'number-display', var: '--number-display-font-size', label: 'DSP', desc: '展示数字 32px', value: '32px' },
       ],
     },
   ];
@@ -1905,24 +1922,43 @@
     {
       label: '字重',
       tokens: [
-        { name: 'font-weight-light', var: '--font-weight-light', label: 'Light', desc: '细体/轻盈', value: '300' },
-        { name: 'font-weight-regular', var: '--font-weight-regular', label: 'Regular', desc: '常规/正文', value: '400' },
-        { name: 'font-weight-medium', var: '--font-weight-medium', label: 'Medium', desc: '中等/强调', value: '500' },
-        { name: 'font-weight-semibold', var: '--font-weight-semibold', label: 'Semibold', desc: '半粗/小标题', value: '600' },
-        { name: 'font-weight-bold', var: '--font-weight-bold', label: 'Bold', desc: '粗体/标题', value: '700' },
+        { name: 'font-weight-regular', var: '--font-weight-regular', label: 'Regular', desc: '常规 400', value: '400' },
+        { name: 'font-weight-medium', var: '--font-weight-medium', label: 'Medium', desc: '中等 500', value: '500' },
+        { name: 'font-weight-semibold', var: '--font-weight-semibold', label: 'Semibold', desc: '半粗 600', value: '600' },
       ],
     },
   ];
 
-  // 行高 Token
+  // 行高 Token（设计系统语义化排版 token）
   const LINE_HEIGHT_TOKEN_GROUPS = [
     {
-      label: '行高',
+      label: '正文',
       tokens: [
-        { name: 'line-height-tight', var: '--line-height-tight', label: 'Tight', desc: '紧凑/标题', value: '1.2' },
-        { name: 'line-height-normal', var: '--line-height-normal', label: 'Normal', desc: '常规/正文', value: '1.4' },
-        { name: 'line-height-relaxed', var: '--line-height-relaxed', label: 'Relaxed', desc: '宽松/阅读', value: '1.6' },
-        { name: 'line-height-loose', var: '--line-height-loose', label: 'Loose', desc: '疏松/大段', value: '1.8' },
+        { name: 'body-xs-lh', var: '--body-xs-line-height', label: 'XS', desc: '极小正文 14px', value: '14px' },
+        { name: 'body-sm-lh', var: '--body-sm-line-height', label: 'SM', desc: '小正文 18px', value: '18px' },
+        { name: 'body-md-lh', var: '--body-md-line-height', label: 'MD', desc: '正文默认 22px', value: '22px' },
+        { name: 'body-lg-lh', var: '--body-lg-line-height', label: 'LG', desc: '大正文 24px', value: '24px' },
+        { name: 'body-xl-lh', var: '--body-xl-line-height', label: 'XL', desc: '特大正文 26px', value: '26px' },
+      ],
+    },
+    {
+      label: '标题',
+      tokens: [
+        { name: 'heading-xs-lh', var: '--heading-xs-line-height', label: 'HXS', desc: '小标题 24px', value: '24px' },
+        { name: 'heading-sm-lh', var: '--heading-sm-line-height', label: 'HSM', desc: '中小标题 28px', value: '28px' },
+        { name: 'heading-md-lh', var: '--heading-md-line-height', label: 'HMD', desc: '中标题 32px', value: '32px' },
+        { name: 'heading-lg-lh', var: '--heading-lg-line-height', label: 'HLG', desc: '大标题 34px', value: '34px' },
+      ],
+    },
+    {
+      label: '数字',
+      tokens: [
+        { name: 'number-sm-lh', var: '--number-sm-line-height', label: 'NSM', desc: '小数字 16px', value: '16px' },
+        { name: 'number-md-lh', var: '--number-md-line-height', label: 'NMD', desc: '中数字 18px', value: '18px' },
+        { name: 'number-lg-lh', var: '--number-lg-line-height', label: 'NLG', desc: '大数字 20px', value: '20px' },
+        { name: 'number-xl-lh', var: '--number-xl-line-height', label: 'NXL', desc: '特大数字 24px', value: '24px' },
+        { name: 'number-xxl-lh', var: '--number-xxl-line-height', label: 'NXXL', desc: '超大数字 30px', value: '30px' },
+        { name: 'number-display-lh', var: '--number-display-line-height', label: 'DSP', desc: '展示数字 38px', value: '38px' },
       ],
     },
   ];
@@ -2325,7 +2361,7 @@
           .token-panel {
             position: absolute;
             z-index: 9650;
-            width: 260px;
+            width: 288px;
             border-radius: 14px;
             /* 外层只负责模糊，不设背景色 */
             backdrop-filter: blur(20px) saturate(160%);
@@ -2334,9 +2370,10 @@
           }
           .token-panel.open { display: block; }
           .token-panel-inner {
-            max-height: 340px;
+            max-height: 360px;
             overflow-y: auto;
-            padding: 12px;
+            overflow-x: hidden;
+            padding: 14px;
             border-radius: 14px;
             border: 1px solid rgba(255, 255, 255, 0.08);
             /* 内层负责半透明背景色 */
@@ -2345,18 +2382,17 @@
           }
           .token-panel-inner::-webkit-scrollbar { width: 0; }
           .token-group-title {
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 600;
             color: var(--text-tertiary, rgba(255,255,255,0.5));
-            margin: 10px 0 6px;
+            margin: 12px 0 8px;
             letter-spacing: 0.3px;
           }
           .token-group-title:first-child { margin-top: 0; }
           .token-grid {
             display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 6px;
-            padding-right: 2px;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
           }
           .token-item {
             position: relative;
@@ -3467,7 +3503,7 @@
           }
         }
         // opacity 输入框禁用 + 值回显
-        const opacityInput = this._shadow.querySelector(`[data-field="${opacityField}"]`);
+        const opacityInput = this._shadow.querySelector(`input[data-field="${opacityField}"]`);
         if (opacityInput) {
           opacityInput.disabled = isTok;
           const opacityVal = d[opacityField] ?? 100;
@@ -3475,8 +3511,8 @@
             opacityInput.value = opacityVal;
           }
         }
-        // hex 输入框值回显
-        const hexInput = this._shadow.querySelector(`[data-field="${field}"]`);
+        // hex 输入框值回显（用 input 限定，避免匹配到颜色色块按钮）
+        const hexInput = this._shadow.querySelector(`input[data-field="${field}"]`);
         if (hexInput && hexInput.value !== val) {
           hexInput.value = val;
         }
@@ -3496,7 +3532,8 @@
             if (tokenBtn.textContent.trim() !== 'T') tokenBtn.textContent = 'T';
           }
         }
-        const input = this._shadow.querySelector(`[data-field="${field}"]`);
+        // 输入框值回显（用 input/select 限定，避免匹配到 Token 按钮；fontWeight 是 select）
+        const input = this._shadow.querySelector(`input[data-field="${field}"], select[data-field="${field}"]`);
         if (input && input.value !== val) {
           input.value = val;
         }
@@ -3518,7 +3555,7 @@
       // 定位到触发按钮下方，下方空间不够时自动上翻
       const rect = trigger.getBoundingClientRect();
       const panelRect = this.getBoundingClientRect();
-      const panelWidth = 260;
+      const panelWidth = 288;
       const panelHeight = panel.offsetHeight || 200;
       let left = rect.left - panelRect.left;
       // 水平方向：优先左对齐触发按钮，超出则右移
@@ -3590,14 +3627,13 @@
         group.tokens.forEach(token => {
           const varExpr = `var(${token.var})`;
           const selected = currentVal === varExpr;
-          // 颜色类型显示色块，其他类型显示数值预览
+          // 颜色类型显示色块，其他类型显示数值预览（统一固定字号，避免大字号溢出）
           let previewHtml;
           if (type === 'color') {
             const color = resolveCssValue(varExpr, 'color') || 'transparent';
             previewHtml = `<span class="token-swatch" style="background:${color}"></span>`;
           } else {
-            const previewStyle = type === 'fontSize' ? `font-size:${token.value}` : (type === 'fontWeight' ? `font-weight:${token.value}` : '');
-            previewHtml = `<span class="token-value" style="${previewStyle}">${token.label}</span>`;
+            previewHtml = `<span class="token-value">${token.label}</span>`;
           }
           html += `
             <button class="token-item ${selected ? 'selected' : ''}" type="button"
