@@ -874,6 +874,18 @@
             width: 260px;
             display: none;
             font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", sans-serif;
+            /* 暗色毛玻璃主题，与其他面板统一 */
+            --bg-surface: rgba(30, 30, 30, 0.82);
+            --bg-subtle: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-default: #fff;
+            --text-secondary: rgba(255, 255, 255, 0.6);
+            --text-tertiary: rgba(255, 255, 255, 0.42);
+            --text-disabled: rgba(255, 255, 255, 0.35);
+            --text-brand: #00b96b;
+            color: #fff;
+            backdrop-filter: blur(18px) saturate(140%);
+            -webkit-backdrop-filter: blur(18px) saturate(140%);
           }
           :host(:not([hidden])) { display: block; }
           .picker {
@@ -1054,17 +1066,36 @@
     connectedCallback() {
       this._render();
     }
-    open(changes, route) {
+    open(changes, route, anchorEl) {
       this._changes = changes || [];
       this._route = route || '';
       this._render();
       this._bindEvents();
-      // 居中显示
-      const panelWidth = 340;
-      const left = Math.max(8, (window.innerWidth - panelWidth) / 2);
-      this.style.left = left + 'px';
-      this.style.top = '60px';
-      this.removeAttribute('hidden');
+      if (anchorEl) {
+        // 绑定到工具条锚点：优先下方展开，空间不够翻上方；水平与锚点右对齐
+        const rect = anchorEl.getBoundingClientRect();
+        const panelWidth = 320;
+        const gap = 8;
+        let left = rect.right - panelWidth;
+        if (left < 8) left = 8;
+        if (left + panelWidth > window.innerWidth - 8) left = window.innerWidth - panelWidth - 8;
+        // 先显示以测量真实高度
+        this.style.left = left + 'px';
+        this.style.top = rect.bottom + gap + 'px';
+        this.removeAttribute('hidden');
+        void this.offsetHeight;
+        const panelHeight = this.getBoundingClientRect().height;
+        let top = rect.bottom + gap;
+        if (top + panelHeight > window.innerHeight - 8) top = rect.top - panelHeight - gap;
+        if (top < 8) top = 8;
+        this.style.top = top + 'px';
+      } else {
+        // 兜底：居中显示
+        const left = Math.max(8, (window.innerWidth - 320) / 2);
+        this.style.left = left + 'px';
+        this.style.top = '60px';
+        this.removeAttribute('hidden');
+      }
     }
     close() {
       this.setAttribute('hidden', '');
@@ -1093,24 +1124,36 @@
           :host {
             position: fixed;
             z-index: 9600;
-            width: 340px;
+            width: 320px;
             max-width: calc(100vw - 16px);
             display: none;
             font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", sans-serif;
+            /* 暗色毛玻璃主题，与工具条/样式面板统一 */
+            --bg-surface: rgba(30, 30, 30, 0.82);
+            --bg-subtle: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-default: #fff;
+            --text-secondary: rgba(255, 255, 255, 0.6);
+            --text-tertiary: rgba(255, 255, 255, 0.42);
+            --text-disabled: rgba(255, 255, 255, 0.35);
+            --text-brand: #00b96b;
+            color: #fff;
+            backdrop-filter: blur(18px) saturate(140%);
+            -webkit-backdrop-filter: blur(18px) saturate(140%);
           }
           :host(:not([hidden])) { display: block; }
           .panel {
             box-sizing: border-box;
             width: 100%;
-            max-height: calc(100vh - 100px);
+            max-height: calc(100vh - 120px);
             padding: 14px;
             display: flex;
             flex-direction: column;
             gap: 12px;
             border-radius: 14px;
-            border: 1px solid var(--border-color, rgba(0,0,0,0.08));
-            background: var(--bg-surface, #fff);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            border: 1px solid var(--border-color, rgba(255,255,255,0.08));
+            background: var(--bg-surface, rgba(30,30,30,0.82));
+            box-shadow: 0 12px 40px rgba(0,0,0,0.25);
           }
           .header {
             display: flex;
@@ -1162,13 +1205,13 @@
             justify-content: center;
             padding: 0;
           }
-          .close-btn:hover { background: rgba(0,0,0,0.05); }
+          .close-btn:hover { background: rgba(255,255,255,0.06); }
           .tabs {
             display: flex;
             gap: 4px;
             padding: 3px;
             border-radius: 9px;
-            background: rgba(0,0,0,0.04);
+            background: rgba(255,255,255,0.04);
           }
           .tab {
             flex: 1;
@@ -1177,30 +1220,30 @@
             background: transparent;
             border-radius: 7px;
             font-size: 12px;
-            color: var(--text-tertiary, #888);
+            color: var(--text-tertiary, rgba(255,255,255,0.42));
             cursor: pointer;
           }
           .tab.active {
-            background: var(--bg-surface, #fff);
+            background: var(--bg-surface, rgba(30,30,30,0.82));
             color: var(--text-brand, #00b96b);
             font-weight: 500;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
           }
           .list {
             display: flex;
             flex-direction: column;
             gap: 8px;
             overflow-y: auto;
-            max-height: calc(100vh - 260px);
+            max-height: calc(100vh - 280px);
             padding-right: 4px;
           }
           .list::-webkit-scrollbar { width: 4px; }
-          .list::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 2px; }
+          .list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
           .item {
             padding: 10px;
             border-radius: 10px;
-            background: rgba(0,0,0,0.02);
-            border: 1px solid rgba(0,0,0,0.04);
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
           }
           .item-top {
             display: flex;
@@ -1274,7 +1317,7 @@
             flex-shrink: 0;
             border-radius: 4px;
           }
-          .change-delete:hover { color: var(--text-error, #e53935); background: rgba(0,0,0,0.04); }
+          .change-delete:hover { color: var(--text-error, #e53935); background: rgba(255,255,255,0.06); }
           .empty {
             text-align: center;
             padding: 32px 16px;
@@ -1286,7 +1329,7 @@
             display: flex;
             justify-content: flex-end;
             padding-top: 4px;
-            border-top: 1px solid rgba(0,0,0,0.06);
+            border-top: 1px solid rgba(255,255,255,0.06);
           }
           .reset-btn {
             height: 28px;
@@ -1678,6 +1721,12 @@
       const t = this._target || '';
       const hasBefore = this._targetEl ? isPseudoRendered(this._targetEl, 'before') : false;
       const hasAfter = this._targetEl ? isPseudoRendered(this._targetEl, 'after') : false;
+      // 颜色 token 模式判断
+      const colorIsToken = isTokenValue(d.colorHex);
+      const colorTokenName = colorIsToken ? d.colorHex.match(/var\((--[^)]+)\)/)[1].replace(/^--/, '') : '';
+      const colorSwatchBg = colorIsToken
+        ? (resolveCssValue(d.colorHex, 'color') || 'transparent')
+        : hexOpacityToRgba(d.colorHex || '#000000', d.colorOpacity ?? 100);
       this._shadow.innerHTML = `
         <style>
           :host {
@@ -1894,6 +1943,109 @@
             flex: 0 0 48px;
             width: 48px;
             text-align: right;
+          }
+          .text-input:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+          }
+          .token-btn {
+            flex-shrink: 0;
+            min-width: 28px;
+            height: 24px;
+            padding: 0 6px;
+            border: 1px solid var(--border-color, rgba(255,255,255,0.1));
+            border-radius: 6px;
+            background: rgba(255,255,255,0.04);
+            color: var(--text-tertiary, rgba(255,255,255,0.5));
+            font-size: 10px;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 80px;
+            transition: all 0.15s;
+          }
+          .token-btn:hover {
+            border-color: var(--text-brand, #00b96b);
+            color: var(--text-brand, #00b96b);
+          }
+          .token-btn.active {
+            border-color: var(--text-brand, #00b96b);
+            background: rgba(0,185,107,0.12);
+            color: var(--text-brand, #00b96b);
+          }
+          /* Token 选择弹出面板 */
+          .token-panel {
+            position: absolute;
+            z-index: 9650;
+            width: 240px;
+            max-height: 320px;
+            overflow-y: auto;
+            padding: 12px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(30, 30, 30, 0.78);
+            backdrop-filter: blur(18px) saturate(140%);
+            -webkit-backdrop-filter: blur(18px) saturate(140%);
+            box-shadow: 0 20px 100px rgba(0, 0, 0, 0.12);
+            display: none;
+          }
+          .token-panel.open { display: block; }
+          .token-panel::-webkit-scrollbar { width: 0; }
+          .token-group-title {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-tertiary, rgba(255,255,255,0.45));
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 8px 0 4px;
+          }
+          .token-group-title:first-child { margin-top: 0; }
+          .token-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 6px 8px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--text-default, #fff);
+            font-size: 11px;
+            font-family: inherit;
+            cursor: pointer;
+            text-align: left;
+            transition: background 0.1s;
+          }
+          .token-item:hover {
+            background: rgba(255,255,255,0.06);
+          }
+          .token-item.selected {
+            background: rgba(0,185,107,0.15);
+          }
+          .token-swatch {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.15);
+            flex-shrink: 0;
+          }
+          .token-label {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+          .token-name {
+            font-size: 10px;
+            color: var(--text-tertiary, rgba(255,255,255,0.4));
+            flex-shrink: 0;
           }
           .layout-tabs {
             display: flex;
@@ -2151,10 +2303,13 @@
             </div>
             <div class="field-row">
               <button class="color-button" type="button" data-field="colorHex" data-color-trigger>
-                <span class="swatch" style="background:${hexOpacityToRgba(d.colorHex || '#000000', d.colorOpacity ?? 100)}"></span>
+                <span class="swatch" style="background:${colorSwatchBg}"></span>
               </button>
               <input class="text-input" type="text" value="${d.colorHex || ''}" data-field="colorHex" />
-              <input class="text-input opacity-input" type="text" value="${d.colorOpacity ?? 100}" data-field="colorOpacity" inputmode="numeric" />
+              <input class="text-input opacity-input" type="text" value="${d.colorOpacity ?? 100}" data-field="colorOpacity" inputmode="numeric" ${colorIsToken ? 'disabled' : ''} />
+              <button class="token-btn ${colorIsToken ? 'active' : ''}" type="button" data-token-trigger="color" title="选择设计系统 Token">
+                ${colorIsToken ? colorTokenName : 'T'}
+              </button>
             </div>
             <div class="field-row two-col">
               <div class="field"><span class="field-icon">LH</span><input class="text-input" type="text" value="${d.lineHeight || ''}" data-field="lineHeight" inputmode="decimal" placeholder="行高" /></div>
@@ -2233,6 +2388,11 @@
             </div>
           </div>
           </div>
+          <!-- Token 选择弹出面板 -->
+          <div class="token-panel" data-token-panel>
+            <div class="token-group-title">设计系统 Token</div>
+            <div data-token-list></div>
+          </div>
         </div>
       `;
     }
@@ -2257,6 +2417,11 @@
     _bindEvents() {
       // 面板拖拽（header 按住移动）
       this._initPanelDrag();
+      // 滚动样式面板时关闭 token 选择面板
+      const panelBody = this._shadow.querySelector('.panel-body');
+      if (panelBody) {
+        panelBody.addEventListener('scroll', () => this._closeTokenPanel());
+      }
       // 关闭按钮
       const closeBtn = this._shadow.querySelector('[data-action="close"]');
       if (closeBtn) {
@@ -2372,6 +2537,18 @@
           });
         });
       });
+      // Token 按钮 → 打开 Token 选择面板
+      this._shadow.querySelectorAll('[data-token-trigger]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const type = btn.dataset.tokenTrigger;
+          if (this._tokenPanel.open && this._tokenPanel.type === type) {
+            this._closeTokenPanel();
+          } else {
+            this._openTokenPanel(btn, type);
+          }
+        });
+      });
     }
 
     _onFieldChange(field, value) {
@@ -2478,6 +2655,9 @@
         }
         case 'colorHex':
         case 'colorOpacity': {
+          const hex = d.colorHex || '#000000';
+          // Token 模式：直接返回 var(--xxx)
+          if (isTokenValue(hex)) return hex;
           const op = d.colorOpacity ?? 100;
           return hexOpacityToRgba(hex, op);
         }
@@ -2672,6 +2852,11 @@
         case 'colorOpacity': {
           const oldValue = cs().color;
           const hex = this._data.colorHex || '#000000';
+          // Token 模式：直接应用 var(--xxx)，忽略 opacity
+          if (isTokenValue(hex)) {
+            el.style.color = hex;
+            return { property: 'color', oldValue, newValue: hex };
+          }
           const opacity = this._data.colorOpacity ?? 100;
           const rgba = hexOpacityToRgba(hex, opacity);
           el.style.color = rgba;
@@ -2802,15 +2987,115 @@
       this._shadow.querySelectorAll('[data-color-trigger]').forEach(btn => {
         const field = btn.dataset.field;
         const opacityField = field.replace('Hex', 'Opacity');
-        const hex = d[field] || '#000000';
+        const val = d[field] || '#000000';
         const opacity = d[opacityField] ?? 100;
         const swatch = btn.querySelector('.swatch');
-        if (swatch) swatch.style.background = hexOpacityToRgba(hex, opacity);
+        if (swatch) {
+          swatch.style.background = isTokenValue(val)
+            ? (resolveCssValue(val, 'color') || 'transparent')
+            : hexOpacityToRgba(val, opacity);
+        }
       });
+      // 颜色 Token 按钮状态 + opacity 输入框联动
+      const colorTokenBtn = this._shadow.querySelector('[data-token-trigger="color"]');
+      const colorOpacityInput = this._shadow.querySelector('[data-field="colorOpacity"]');
+      const colorVal = d.colorHex || '';
+      if (colorTokenBtn) {
+        const isTok = isTokenValue(colorVal);
+        colorTokenBtn.classList.toggle('active', isTok);
+        if (isTok) {
+          const tokName = colorVal.match(/var\((--[^)]+)\)/)[1].replace(/^--/, '');
+          if (colorTokenBtn.textContent.trim() !== tokName) colorTokenBtn.textContent = tokName;
+        } else {
+          if (colorTokenBtn.textContent.trim() !== 'T') colorTokenBtn.textContent = 'T';
+        }
+      }
+      if (colorOpacityInput) {
+        colorOpacityInput.disabled = isTokenValue(colorVal);
+      }
       // 对齐矩阵
       this._shadow.querySelectorAll('[data-align-preset]').forEach(btn => {
         const [jc, ai] = btn.dataset.alignPreset.split('|');
         btn.classList.toggle('active', jc === d.justifyContent && ai === d.alignItems);
+      });
+    }
+
+    // ── Token 选择面板 ──────────────────────────────────────
+    _openTokenPanel(trigger, type) {
+      const panel = this._shadow.querySelector('[data-token-panel]');
+      if (!panel) return;
+      this._tokenPanel = { open: true, type, trigger };
+      this._renderTokenList(type);
+      panel.classList.add('open');
+      // 定位到触发按钮下方
+      const rect = trigger.getBoundingClientRect();
+      const panelRect = this.getBoundingClientRect();
+      let left = rect.left - panelRect.left;
+      let top = rect.bottom - panelRect.top + 6;
+      const panelWidth = 240;
+      if (left + panelWidth > panelRect.width - 8) {
+        left = panelRect.width - panelWidth - 8;
+      }
+      if (left < 8) left = 8;
+      panel.style.left = left + 'px';
+      panel.style.top = top + 'px';
+      // 点击外部关闭
+      this._tokenOutsideHandler = (e) => {
+        if (!panel.contains(e.target) && e.target !== trigger && !trigger.contains(e.target)) {
+          this._closeTokenPanel();
+        }
+      };
+      setTimeout(() => document.addEventListener('mousedown', this._tokenOutsideHandler, true), 0);
+      setTimeout(() => document.addEventListener('touchstart', this._tokenOutsideHandler, true), 0);
+    }
+
+    _closeTokenPanel() {
+      const panel = this._shadow.querySelector('[data-token-panel]');
+      if (panel) panel.classList.remove('open');
+      this._tokenPanel = { open: false, type: '', trigger: null };
+      if (this._tokenOutsideHandler) {
+        document.removeEventListener('mousedown', this._tokenOutsideHandler, true);
+        document.removeEventListener('touchstart', this._tokenOutsideHandler, true);
+        this._tokenOutsideHandler = null;
+      }
+    }
+
+    _renderTokenList(type) {
+      const listEl = this._shadow.querySelector('[data-token-list]');
+      if (!listEl) return;
+      const currentVal = this._data ? (this._data.colorHex || '') : '';
+      let html = '';
+      if (type === 'color') {
+        COLOR_TOKEN_GROUPS.forEach(group => {
+          html += `<div class="token-group-title">${group.label}</div>`;
+          group.tokens.forEach(token => {
+            const varExpr = `var(${token.var})`;
+            const selected = currentVal === varExpr;
+            const color = resolveCssValue(varExpr, 'color') || 'transparent';
+            html += `
+              <button class="token-item ${selected ? 'selected' : ''}" type="button"
+                data-token-value="${varExpr}" data-token-name="${token.name}">
+                <span class="token-swatch" style="background:${color}"></span>
+                <span class="token-label">${token.label}</span>
+                <span class="token-name">${token.name}</span>
+              </button>`;
+          });
+        });
+      }
+      listEl.innerHTML = html;
+      // 绑定 token 项点击
+      listEl.querySelectorAll('.token-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const value = item.dataset.tokenValue;
+          if (this._tokenPanel.type === 'color') {
+            this._onFieldChange('colorHex', value);
+          }
+          this._closeTokenPanel();
+          // 更新输入框显示
+          const input = this._shadow.querySelector('[data-field="colorHex"]');
+          if (input) input.value = value;
+        });
       });
     }
   }
@@ -3723,7 +4008,8 @@
     // ── 配置列表 ──────────────────────────────────────────
     _openOverview() {
       this._closeSubpanels();
-      this._components.overviewPanel.open(state.changes, state.currentRoute);
+      const countBtn = this._shadow.querySelector('[data-tool="overview"]');
+      this._components.overviewPanel.open(state.changes, state.currentRoute, countBtn);
       this._clearSelection();
     }
 
