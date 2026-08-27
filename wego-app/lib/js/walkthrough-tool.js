@@ -2328,32 +2328,32 @@
           .token-panel {
             position: absolute;
             z-index: 9650;
-            width: 280px;
-            max-height: 360px;
+            width: 260px;
+            max-height: 340px;
             overflow-y: auto;
-            padding: 14px;
-            border-radius: 16px;
+            padding: 12px;
+            border-radius: 14px;
             border: 1px solid rgba(255, 255, 255, 0.08);
-            background: rgba(30, 30, 30, 0.82);
-            backdrop-filter: blur(20px) saturate(160%);
-            -webkit-backdrop-filter: blur(20px) saturate(160%);
-            box-shadow: 0 20px 100px rgba(0, 0, 0, 0.12);
+            background: rgba(28, 28, 30, 0.68);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
             display: none;
           }
           .token-panel.open { display: block; }
           .token-panel::-webkit-scrollbar { width: 0; }
           .token-group-title {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 600;
             color: var(--text-tertiary, rgba(255,255,255,0.45));
-            margin: 12px 0 8px;
+            margin: 10px 0 6px;
             letter-spacing: 0.3px;
           }
           .token-group-title:first-child { margin-top: 0; }
           .token-grid {
             display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 8px;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
           }
           .token-item {
             position: relative;
@@ -2361,7 +2361,7 @@
             aspect-ratio: 1;
             padding: 0;
             border: 2px solid transparent;
-            border-radius: 8px;
+            border-radius: 6px;
             background: transparent;
             cursor: pointer;
             transition: border-color 0.12s, transform 0.12s;
@@ -2370,7 +2370,7 @@
             justify-content: center;
           }
           .token-item:hover {
-            transform: scale(1.08);
+            transform: scale(1.12);
             z-index: 2;
           }
           .token-item.selected {
@@ -2379,7 +2379,7 @@
           .token-swatch {
             width: 100%;
             height: 100%;
-            border-radius: 6px;
+            border-radius: 4px;
             border: 1px solid rgba(255,255,255,0.12);
           }
           /* hover tooltip：变量名 + 语义 */
@@ -3408,7 +3408,7 @@
       const panelRect = this.getBoundingClientRect();
       let left = rect.left - panelRect.left;
       let top = rect.bottom - panelRect.top + 6;
-      const panelWidth = 280;
+      const panelWidth = 260;
       if (left + panelWidth > panelRect.width - 8) {
         left = panelRect.width - panelWidth - 8;
       }
