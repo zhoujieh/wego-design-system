@@ -1988,7 +1988,7 @@
       + '<div class="order-side-actions">' + button('保存地址', 'strong', 'md', 'data-save-delivery') + '</div></div>';
   }
 
-  function addSinglePicker(draft) {
+  function addSinglePicker(draft, desktop) {
     var product = draft.product;
     var matrix = addProductMatrix(product);
     var selectedColor = draft.selectedColor || '';
@@ -2001,7 +2001,7 @@
     var stock = spec ? specStock(product, spec) : 0;
     return ''
       + '<div class="order-single-picker">'
-      +   '<section><small>颜色</small><div class="order-add-choice-list order-add-choice-list--colors">' + matrix.colors.map(function (color) {
+      +   '<section>' + (desktop ? '<div class="order-add-selection-head"><small>颜色</small><button type="button" class="link link--14" data-component-slug="link" data-add-mode="batch"><i class="wego-iconfont-s icon-qiehuan" aria-hidden="true"></i>一次买多件</button></div>' : '<small>颜色</small>') + '<div class="order-add-choice-list order-add-choice-list--colors">' + matrix.colors.map(function (color) {
             return '<button type="button" class="btn btn--weak btn--sm ' + (selectedColor === color ? 'is-selected' : '') + '" data-component-slug="button" data-add-color="' + encodeURIComponent(color) + '">' + escapeHtml(color) + '</button>';
           }).join('') + '</div></section>'
       +   '<section><small>规格</small><div class="order-add-choice-list">' + availableSizes.map(function (size) {
@@ -2018,11 +2018,12 @@
       + '</div>';
   }
 
-  function addBatchPicker(draft) {
+  function addBatchPicker(draft, desktop) {
     var product = draft.product;
     var matrix = addProductMatrix(product);
     return ''
       + '<div class="order-batch-picker">'
+      +   (desktop ? '<div class="order-add-selection-head"><strong>批量选择规格</strong><button type="button" class="link link--14" data-component-slug="link" data-add-mode="single"><i class="wego-iconfont-s icon-qiehuan" aria-hidden="true"></i>一次买一件</button></div>' : '')
       +   '<div class="order-batch-tools">'
       +     button('每色每码 ×1', 'weak', 'sm', 'data-batch-fill="1"')
       +     button('每色每码 ×2', 'weak', 'sm', 'data-batch-fill="2"')
@@ -2044,7 +2045,7 @@
       + '</div>';
   }
 
-  function addPanel() {
+  function addPanel(desktop) {
     var draft = state.addDraft;
     if (!draft) return '';
     var product = draft.product;
@@ -2069,13 +2070,13 @@
       +     '<button type="button" class="tag tag--28 ' + (draft.priceMode !== 'cost' ? 'tag--brand tag--selected' : 'tag--white tag--normal') + '" data-component-slug="tag" data-add-price-mode="retail" aria-pressed="' + String(draft.priceMode !== 'cost') + '"><span class="tag__label">' + (draft.priceMode === 'discount' ? '优惠价 ' + money(unitPrice) : '售价 ' + money(customerPrice(product))) + '</span></button>'
       +   '</fieldset>'
       +   (draft.discountOpen ? '<div class="order-add-discount-editor"><label for="order-add-discount-value">优惠后单价</label><input id="order-add-discount-value" type="text" inputmode="decimal" value="' + escapeHtml(draft.discountValue) + '" placeholder="请输入金额" data-add-discount-value><button type="button" data-apply-add-discount>应用</button></div>' : '')
-      +   '<div class="order-segment order-add-mode-switch"><button class="' + (draft.mode === 'single' ? 'is-active' : '') + '" data-add-mode="single">单买</button><button class="' + (draft.mode === 'batch' ? 'is-active' : '') + '" data-add-mode="batch">多买</button></div>'
-      +   (draft.mode === 'batch' ? addBatchPicker(draft) : addSinglePicker(draft))
+      +   (desktop ? '' : '<div class="order-segment order-add-mode-switch"><button class="' + (draft.mode === 'single' ? 'is-active' : '') + '" data-add-mode="single">单买</button><button class="' + (draft.mode === 'batch' ? 'is-active' : '') + '" data-add-mode="batch">多买</button></div>')
+      +   (draft.mode === 'batch' ? addBatchPicker(draft, desktop) : addSinglePicker(draft, desktop))
       +   '<div class="order-add-note-entry"><button type="button" class="link link--14" data-component-slug="link" data-toggle-add-note>' + (draft.note ? '编辑备注' : '添加备注') + '</button>'
       +     (draft.noteOpen ? '<div class="input-group input-group--surface-white order-note-input" data-component-slug="input"><textarea id="product-note" placeholder="例如：单独打包、缺码先联系" data-add-note>' + escapeHtml(draft.note) + '</textarea></div>' : '')
       +   '</div>'
       + '</div>'
-      + '<div class="order-add-footer"><span>合计：<b data-add-total-qty>' + total + '</b> 件 <strong data-add-total-amount>' + money(total * unitPrice) + '</strong></span><div class="order-add-footer__actions">' + button('取消', 'weak', 'md', 'data-close-panel') + button('添加', 'strong', 'md', 'data-confirm-add') + '</div></div>';
+      + '<div class="order-add-footer"><span>' + (desktop ? '<strong data-add-total-amount>' + money(total * unitPrice) + '</strong><small>共 <b data-add-total-qty>' + total + '</b> 件</small>' : '合计：<b data-add-total-qty>' + total + '</b> 件 <strong data-add-total-amount>' + money(total * unitPrice) + '</strong>') + '</span><div class="order-add-footer__actions">' + button('取消', 'weak', 'md', 'data-close-panel') + button('添加', 'strong', 'md', 'data-confirm-add') + '</div></div>';
   }
 
   function pricePanel() {
@@ -2118,7 +2119,7 @@
     if (state.panel === 'drafts') return draftsPanel();
     if (state.panel === 'delivery') return deliveryPanel();
     if (state.panel === 'address') return addressPanel();
-    if (state.panel === 'add') return addPanel();
+    if (state.panel === 'add') return addPanel(false);
     if (state.panel === 'price') return pricePanel();
     if (state.panel === 'note') return spuNotePanel();
     if (state.panel === 'checkout' || state.panel === 'payment') return checkoutPanel();
@@ -2353,7 +2354,7 @@
       + '<div class="order-desktop-modal ' + (isCustomerCreate || isDelivery ? 'order-desktop-modal--customer' : '') + (isDelivery ? ' order-desktop-modal--delivery' : '') + (isNote ? ' order-desktop-modal--note' : (isCheckout ? ' order-desktop-modal--checkout' : ' order-desktop-modal--add')) + '" role="dialog" aria-modal="true" aria-labelledby="order-desktop-modal-title" data-state="open">'
       +   '<div class="order-desktop-modal__panel">'
       +     '<div class="order-desktop-modal__head"><strong id="order-desktop-modal-title">' + (isCustomerCreate ? '新建客户' : (isDelivery ? '选择发货方式' : (isNote ? '商品备注' : (isCheckout ? '支付结算' : '添加商品')))) + '</strong><button type="button" class="btn btn--weak btn--sm btn--icon-only" data-component-slug="button" data-close-panel aria-label="关闭"><i class="btn__icon ' + (isDelivery ? 'icon-cha-cu' : 'icon-cha16') + '" aria-hidden="true"></i></button></div>'
-      +     '<div class="order-desktop-modal__body">' + (isCustomerCreate ? desktopNewCustomerModalContent() : (isDelivery ? deliveryPanel() : (isNote ? spuNotePanel() : (isCheckout ? checkoutPanel() : addPanel())))) + '</div>'
+      +     '<div class="order-desktop-modal__body">' + (isCustomerCreate ? desktopNewCustomerModalContent() : (isDelivery ? deliveryPanel() : (isNote ? spuNotePanel() : (isCheckout ? checkoutPanel() : addPanel(true))))) + '</div>'
       +   '</div>'
       + '</div>';
   }

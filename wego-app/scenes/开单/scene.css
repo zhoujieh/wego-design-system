@@ -2279,7 +2279,9 @@ body[data-order-layout="landscape"] .phone-indicator {
   }
 
   .order-desktop-modal--add .order-desktop-modal__panel {
-    height: min(calc(var(--size-104) * 6), calc(100% - var(--spacer-48)));
+    width: min(calc(var(--size-104) * 4 + var(--size-64)), calc(100% - var(--spacer-48)));
+    height: min(calc(var(--size-104) * 5 + var(--size-40) + var(--spacer-2) + var(--stroke-1)), calc(100% - var(--spacer-48)));
+    background: var(--bg-page);
   }
 
   .order-desktop-modal--add .order-desktop-modal__body {
@@ -2291,7 +2293,8 @@ body[data-order-layout="landscape"] .phone-indicator {
   }
 
   .order-desktop-modal--add .order-add-scroll {
-    padding: 0 var(--spacer-16) var(--spacer-16);
+    padding: 0;
+    background: var(--bg-page);
   }
 
   .order-desktop-modal--add .order-add-scroll > .order-side-panel__head {
@@ -2306,6 +2309,184 @@ body[data-order-layout="landscape"] .phone-indicator {
     min-height: var(--size-48);
     padding: 0 var(--spacer-16);
     border-bottom: var(--stroke-hairline) solid var(--border-neutral-l2);
+  }
+
+  .order-desktop-modal--add .order-desktop-modal__head {
+    min-height: var(--size-56);
+    background: var(--bg-page);
+    border-bottom: 0;
+  }
+
+  .order-desktop-modal--add .order-desktop-modal__head > strong {
+    font-size: var(--body-lg-font-size);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .order-desktop-modal--add .order-desktop-modal__head > .btn {
+    width: var(--size-24);
+    min-width: var(--size-24);
+    height: var(--size-24);
+    min-height: var(--size-24);
+    padding: 0;
+    border-radius: var(--radius-full);
+  }
+
+  .order-desktop-modal--add .order-add-product--pricing {
+    min-height: calc(var(--size-72) + var(--spacer-2));
+    gap: var(--spacer-12);
+    padding: var(--spacer-16);
+    background: var(--bg-surface);
+    border: 0;
+    border-radius: 0;
+  }
+
+  .order-desktop-modal--add .order-add-product__image {
+    width: calc(var(--size-48) + var(--spacer-2));
+    height: calc(var(--size-48) + var(--spacer-2));
+  }
+
+  .order-desktop-modal--add .order-add-product__content {
+    display: flex;
+    align-self: stretch;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .order-desktop-modal--add .order-add-product__content > div:first-child {
+    display: none;
+  }
+
+  .order-desktop-modal--add .order-add-product__actions {
+    align-items: center;
+    gap: var(--spacer-12);
+    margin-top: 0;
+  }
+
+  .order-desktop-modal--add .order-add-current-price {
+    min-height: var(--size-24);
+    margin-right: 0;
+    font-size: var(--heading-sm-font-size);
+  }
+
+  .order-desktop-modal--add .order-add-product__actions button {
+    min-height: var(--size-24);
+    padding: 0 var(--spacer-8);
+    background: var(--bg-overlay-l1);
+    border-radius: var(--radius-4);
+  }
+
+  .order-desktop-modal--add .order-add-price-modes {
+    min-height: calc(var(--size-48) + var(--stroke-1));
+    gap: var(--spacer-12);
+    margin: 0;
+    padding: var(--spacer-8) var(--spacer-16);
+    background: var(--bg-surface);
+  }
+
+  .order-desktop-modal--add .order-add-price-modes .tag {
+    min-height: var(--size-32);
+    padding-right: var(--spacer-12);
+    padding-left: var(--spacer-12);
+    border-radius: var(--radius-6);
+  }
+
+  .order-desktop-modal--add .order-single-picker,
+  .order-desktop-modal--add .order-batch-picker {
+    gap: 0;
+    padding: 0 var(--spacer-16) var(--spacer-12);
+    background: var(--bg-surface);
+    border-top: var(--spacer-8) solid var(--bg-page);
+  }
+
+  .order-add-selection-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: calc(var(--size-40) + var(--spacer-4));
+  }
+
+  .order-add-selection-head small,
+  .order-add-selection-head strong {
+    color: var(--text-default);
+    font-size: var(--body-lg-font-size);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .order-add-selection-head .link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacer-4);
+  }
+
+  .order-add-selection-head .link i {
+    font-size: var(--size-16);
+  }
+
+  .order-desktop-modal--add .order-single-picker section {
+    gap: 0;
+  }
+
+  .order-desktop-modal--add .order-single-picker section:not(:first-child) > small {
+    display: flex;
+    align-items: center;
+    min-height: calc(var(--size-40) + var(--spacer-4));
+    font-weight: var(--font-weight-medium);
+  }
+
+  .order-desktop-modal--add .order-add-choice-list {
+    gap: var(--spacer-12);
+    min-height: calc(var(--size-40) + var(--spacer-4));
+  }
+
+  .order-desktop-modal--add .order-add-choice-list .btn {
+    min-width: calc(var(--size-48) + var(--spacer-4));
+    height: var(--size-32);
+    min-height: var(--size-32);
+    border: 0;
+    border-radius: var(--radius-6);
+  }
+
+  .order-desktop-modal--add .order-single-picker .order-single-qty {
+    min-height: calc(var(--size-56) + var(--spacer-4));
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .order-desktop-modal--add .order-add-note-entry {
+    margin-top: 0;
+    padding: var(--spacer-8) var(--spacer-16) var(--spacer-16);
+    background: var(--bg-surface);
+    border-top: 0;
+  }
+
+  .order-desktop-modal--add .order-add-footer {
+    min-height: var(--size-64);
+    padding: var(--spacer-12) var(--spacer-16);
+    border-top: var(--spacer-8) solid var(--bg-page);
+  }
+
+  .order-desktop-modal--add .order-add-footer > span {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .order-desktop-modal--add .order-add-footer > span small {
+    color: var(--text-secondary);
+    font-size: var(--body-xs-font-size);
+  }
+
+  .order-desktop-modal--add .order-add-footer > span strong {
+    margin-left: 0;
+    color: var(--text-default);
+  }
+
+  .order-desktop-modal--add .order-add-footer__actions .btn {
+    width: calc(var(--size-72) + var(--spacer-4));
+    min-width: calc(var(--size-72) + var(--spacer-4));
+    height: var(--size-40);
+    min-height: var(--size-40);
+    border-radius: var(--radius-8);
   }
 
   .order-desktop-modal__body {
