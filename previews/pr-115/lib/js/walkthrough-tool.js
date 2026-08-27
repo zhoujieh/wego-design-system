@@ -41,6 +41,8 @@
     selectedElement: null,
     changes: [],
     currentRoute: '',
+    originalStyles: {}, // selector -> { 'css-property': 原始计算值 }
+    pseudoStyles: {}, // "selector||before|after" -> { 'css-property': 值 }（注入 <head> 的规则）
   };
 
   /** 获取当前场景路由 */
@@ -50,11 +52,12 @@
     return match ? match[1] : 'default';
   }
 
+
   /** 判断元素是否属于走查工具自身（包括 Shadow DOM 内部） */
   function isWalkthroughElement(el) {
     if (!el) return false;
     // 检查 Light DOM 中的祖先
-    const lightTags = 'wego-walkthrough,wego-wt-style-panel,wego-wt-overview-panel,wego-wt-color-picker,wego-wt-toast,wego-wt-overlay';
+    const lightTags = 'wego-walkthrough,wego-wt-style-panel,wego-wt-overview-panel,wego-wt-color-picker,wego-wt-toast,wego-wt-overlay,wego-wt-highlight';
     if (el.closest && el.closest(lightTags)) return true;
     // 检查 Shadow DOM：元素的根节点是否为走查工具的 shadowRoot
     try {
@@ -62,6 +65,65 @@
       if (root && root.host && root.host.tagName === 'WEGO-WALKTHROUGH') return true;
     } catch (e) { /* ignore */ }
     return false;
+  }
+
+  /** 纯 nth 兜底链（原逻辑，用于优雅降级） */
+  function buildNthChain(el) {
+    const parts = [];
+    let node = el;
+    while (node && node.nodeType === 1 && node !== document.body) {
+      let part = node.tagName.toLowerCase();
+      if (node.className && typeof node.className === 'string') {
+        const classes = node.className.trim().split(/\s+/).filter(c => c && !c.startsWith('wt-') && !c.startsWith('wego-') && !c.startsWith('data-wt'));
+        if (classes.length) part += '.' + classes.slice(0, 4).join('.');
+      }
+      const parent = node.parentNode;
+      if (parent) {
+        const siblings = Array.from(parent.children).filter(c => c.tagName === node.tagName);
+        if (siblings.length > 1) {
+          const idx = siblings.indexOf(node) + 1;
+          part += `:nth-of-type(${idx})`;
+        }
+      }
+      parts.unshift(part);
+      if (node.id && document.querySelectorAll('#' + CSS.escape(node.id)).length === 1) {
+        parts[0] = '#' + node.id;
+        break;
+      }
+      node = node.parentNode;
+    }
+    return parts.join(' > ');
+  }
+
+  /**
+   * 意图→语义类映射规则表（通用、可扩展）
+   * 每条规则：{ klass, note, test(el, rec) }
+   *   test 命中即认为"该改动应在源码加 klass 而非内联 CSS"
+   * 未来新增套路（如 sticky-region 显隐、card--outlined 变体）只需追加一条。
+   */
+  const CLASS_INTENTS = [
+    {
+      klass: 'card--vertical',
+      note: '卡片内"标题/网格"等段落需上下竖排，建议加 card--vertical 语义类，而非内联 flex-direction',
+      test: (el, rec) => {
+        if (!el || !el.className) return false;
+        const cls = (' ' + el.className + ' ').replace(/\s+/g, ' ');
+        const isCard = /(^| )card(-|--)/.test(cls.trim());
+        return isCard && rec.property === 'flex-direction' && /column/.test(rec.newValue || '');
+      },
+    },
+  ];
+
+  /** 运行意图识别，返回 { intent, intentClass, skipCss, note } */
+  function deriveIntent(rec, el) {
+    for (const rule of CLASS_INTENTS) {
+      try {
+        if (rule.test(el, rec)) {
+          return { intent: 'add-class', intentClass: rule.klass, skipCss: true, note: rule.note || '' };
+        }
+      } catch (e) { /* 规则异常不影响主流程 */ }
+    }
+    return { intent: 'css', intentClass: '', skipCss: false, note: '' };
   }
 
   /** 生成 CSS 选择器 */
@@ -76,42 +138,63 @@
     for (const attr of stableAttrs) {
       const val = el.getAttribute(attr);
       if (val) {
-        const selector = `${el.tagName.toLowerCase()}[${attr}="${val}"]`;
+        const selfCls = (el.className && typeof el.className === 'string')
+          ? el.className.trim().split(/\s+/).filter(c => c && !c.startsWith('wt-') && !c.startsWith('wego-') && !c.startsWith('data-wt'))[0]
+          : '';
+        const selector = `${el.tagName.toLowerCase()}[${attr}="${val}"]${selfCls ? '.' + selfCls : ''}`;
         if (document.querySelectorAll(selector).length === 1) return selector;
       }
     }
-    // 3. tagname.class:nth-child(n) 路径链
+    // 3. 语义锚点 + 类名链（弱化 nth，提升跨顺序稳定性）
+    // 3a. 沿祖先向上找稳定锚点：唯一 id / data-component-slug / 强语义类（含下划线设计系统类）
+    const STABLE_CLASS = /(__|\b(card|navbar|section|dialog|panel|list|grid|tab|form|page|app|home)\b)/i;
+    let anchor = null;
+    let anchorNode = el;
+    while (anchorNode && anchorNode.nodeType === 1 && anchorNode !== document.body) {
+      if (anchorNode.id && document.querySelectorAll('#' + CSS.escape(anchorNode.id)).length === 1) {
+        anchor = '#' + anchorNode.id; break;
+      }
+      const slug = anchorNode.getAttribute && anchorNode.getAttribute('data-component-slug');
+      if (slug) { anchor = `${anchorNode.tagName.toLowerCase()}[data-component-slug="${slug}"]`; break; }
+      if (anchorNode.className && typeof anchorNode.className === 'string' && STABLE_CLASS.test(anchorNode.className)) {
+        const cls = anchorNode.className.trim().split(/\s+/).filter(c => c && !c.startsWith('wt-') && !c.startsWith('wego-') && !c.startsWith('data-wt'))[0];
+        const sel = cls ? '.' + cls : anchorNode.tagName.toLowerCase();
+        if (document.querySelectorAll(sel).length === 1) { anchor = sel; break; }
+        anchor = sel;
+      }
+      anchorNode = anchorNode.parentNode;
+    }
+    // 3b. 从目标到锚点（不含锚）拼接类名链，仅在不唯一时才加 nth
+    const classesOf = (n) => (n.className && typeof n.className === 'string')
+      ? n.className.trim().split(/\s+/).filter(c => c && !c.startsWith('wt-') && !c.startsWith('wego-') && !c.startsWith('data-wt'))
+      : [];
     const parts = [];
     let node = el;
     while (node && node.nodeType === 1 && node !== document.body) {
+      if (anchor && (node === anchorNode || node.id || (node.getAttribute && node.getAttribute('data-component-slug')))) break;
       let part = node.tagName.toLowerCase();
-      if (node.className && typeof node.className === 'string') {
-        const classes = node.className.trim().split(/\s+/).filter(c => c && !c.startsWith('wt-') && !c.startsWith('wego-'));
-        if (classes.length) part += '.' + classes.slice(0, 2).join('.');
-      }
-      // nth-child
+      const nodeClasses = classesOf(node);
+      if (nodeClasses.length) part += '.' + nodeClasses.slice(0, 4).join('.');
       const parent = node.parentNode;
       if (parent) {
         const siblings = Array.from(parent.children).filter(c => c.tagName === node.tagName);
-        if (siblings.length > 1) {
+        if (siblings.length > 1 && nodeClasses.length === 0) {
           const idx = siblings.indexOf(node) + 1;
           part += `:nth-of-type(${idx})`;
         }
       }
       parts.unshift(part);
-      // 遇到稳定祖先就停止
-      if (node.id && document.querySelectorAll('#' + CSS.escape(node.id)).length === 1) {
-        parts[0] = '#' + node.id;
-        break;
-      }
       node = node.parentNode;
     }
-    const selector = parts.join(' > ');
-    // 验证唯一性
+    let selector;
+    if (anchor && parts.length) selector = anchor + ' > ' + parts.join(' > ');
+    else if (parts.length) selector = parts.join(' > ');
+    else selector = anchor || el.tagName.toLowerCase();
+    // 验证唯一性：唯一则直接用，否则回退到完整 nth 链
     try {
       if (document.querySelectorAll(selector).length === 1) return selector;
     } catch (e) { /* ignore */ }
-    return selector;
+    return buildNthChain(el);
   }
 
   // ============================================================
@@ -166,12 +249,40 @@
     return `rgba(${r}, ${g}, ${b}, ${a})`;
   }
 
+  /** 判断值是否为 CSS 变量引用格式 var(--xxx) */
+  function isTokenValue(value) {
+    return /^var\(--[a-zA-Z0-9-]+\)$/.test(String(value || '').trim());
+  }
+
+  /** 解析 CSS 表达式（含 var()）的实际计算值，用临时元素让浏览器完成计算 */
+  function resolveCssValue(expr, property) {
+    if (!expr) return '';
+    try {
+      const el = document.createElement('div');
+      el.style.display = 'none';
+      el.style.setProperty(property || 'color', expr);
+      document.body.appendChild(el);
+      const computed = getComputedStyle(el).getPropertyValue(property || 'color');
+      document.body.removeChild(el);
+      return computed.trim();
+    } catch (e) {
+      return '';
+    }
+  }
+
   /** 解析数值（去掉单位） */
   function parseNumeric(value) {
     if (!value) return 0;
     const match = String(value).match(/^([\d.-]+)/);
     return match ? parseFloat(match[1]) : 0;
   }
+
+  /** 宽/高是否为语义值（非固定 px） */
+  function isSemanticSize(value) {
+    return /^(100%|auto|fit-content|min-content|max-content|inherit|initial|unset)$/i.test(String(value || '').trim());
+  }
+  function isSemanticWidth(v) { return isSemanticSize(v); }
+  function isSemanticHeight(v) { return isSemanticSize(v); }
 
   /** 解析 box-shadow 字符串为图层数组 */
   function parseBoxShadow(shadowStr) {
@@ -211,9 +322,9 @@
     return layers;
   }
 
-  /** 从元素读取样式，转换为面板数据 */
-  function getElementStyleData(el) {
-    const cs = getComputedStyle(el);
+  /** 从元素读取样式，转换为面板数据（target: '' | 'before' | 'after'） */
+  function getElementStyleData(el, target) {
+    const cs = getComputedStyle(el, target ? '::' + target : null);
     const color = parseColor(cs.color);
     const bgColor = parseColor(cs.backgroundColor);
     const borderColor = parseColor(cs.borderColor);
@@ -241,9 +352,15 @@
       paddingRight: parseNumeric(cs.paddingRight),
       paddingBottom: parseNumeric(cs.paddingBottom),
       paddingLeft: parseNumeric(cs.paddingLeft),
-      width: parseNumeric(cs.width),
-      height: parseNumeric(cs.height),
+      marginTop: parseNumeric(cs.marginTop),
+      marginRight: parseNumeric(cs.marginRight),
+      marginBottom: parseNumeric(cs.marginBottom),
+      marginLeft: parseNumeric(cs.marginLeft),
+      width: cs.width,        // 保留原始字符串：px / 100% / auto / fit-content
+      height: cs.height,
       display,
+      position: cs.position,
+      zIndex: parseNumeric(cs.zIndex),
       // 字体
       fontSize: parseNumeric(cs.fontSize),
       fontWeight: cs.fontWeight,
@@ -281,6 +398,93 @@
     const oldValue = getComputedStyle(el)[property];
     el.style[property] = value;
     return { property, oldValue, newValue: value };
+  }
+
+  /** 快照元素（或伪元素）的计算样式原始值，用于「改回即无变更」判定 */
+  function snapshotStyle(cs) {
+    return {
+      'flex-direction': cs.flexDirection,
+      'justify-content': cs.justifyContent,
+      'align-items': cs.alignItems,
+      'gap': cs.gap,
+      'padding-left': cs.paddingLeft,
+      'padding-right': cs.paddingRight,
+      'padding-top': cs.paddingTop,
+      'padding-bottom': cs.paddingBottom,
+      'margin-left': cs.marginLeft,
+      'margin-right': cs.marginRight,
+      'margin-top': cs.marginTop,
+      'margin-bottom': cs.marginBottom,
+      'width': cs.width,
+      'height': cs.height,
+      'font-size': cs.fontSize,
+      'font-weight': cs.fontWeight,
+      'color': cs.color,
+      'line-height': cs.lineHeight,
+      'text-align': cs.textAlign,
+      'opacity': cs.opacity,
+      'border-radius': cs.borderRadius,
+      'background-color': cs.backgroundColor,
+      'border': cs.border,
+      'box-shadow': cs.boxShadow,
+    };
+  }
+
+  /** 伪元素 key */
+  function pseudoKey(selector, pseudo) {
+    return selector + '||' + pseudo;
+  }
+
+  /** 判断元素的 ::before / ::after 是否真实渲染。
+   *  注意：content:""（空字符串）也是真实渲染（如分割线占位），
+   *  getComputedStyle 对其返回 ""，不能用 !!cs.content 判断；
+   *  仅 content 为 none / normal 才算未渲染。 */
+  function isPseudoRendered(el, pseudo) {
+    try {
+      const cs = getComputedStyle(el, '::' + pseudo);
+      const c = cs.content;
+      let rendered;
+      if (!c) rendered = false;            // 取不到 / 空
+      else if (c === 'none' || c === 'normal') rendered = false;
+      else rendered = true;               // 包括 "" 空内容（占位分割线）
+      return rendered;
+    } catch (e) { return false; }
+  }
+
+  /** 重建注入到 <head> 的伪元素样式规则 */
+  function rebuildPseudoStyleElement() {
+    let el = document.getElementById('wego-wt-pseudo-styles');
+    if (!el) {
+      el = document.createElement('style');
+      el.id = 'wego-wt-pseudo-styles';
+      (document.head || document.documentElement).appendChild(el);
+    }
+    let css = '';
+    for (const k in state.pseudoStyles) {
+      const parts = k.split('||');
+      const selector = parts[0];
+      const pseudo = parts[1];
+      const props = state.pseudoStyles[k];
+      if (!props) continue;
+      // 加 !important：走查工具伪元素编辑是"覆盖式调参"，必须压过场景原始规则（特异性可能更高）
+      const entries = Object.keys(props).map(p => `${p}: ${props[p]} !important;`).join(' ');
+      if (entries) css += `${selector}::${pseudo} { ${entries} }
+`;
+    }
+    el.textContent = css;
+  }
+
+  /** 设置/删除某元素伪元素的单个样式属性（空值=删除） */
+  function applyPseudoStyle(selector, pseudo, property, value) {
+    const k = pseudoKey(selector, pseudo);
+    if (!state.pseudoStyles[k]) state.pseudoStyles[k] = {};
+    if (value === '' || value == null) {
+      delete state.pseudoStyles[k][property];
+    } else {
+      state.pseudoStyles[k][property] = value;
+    }
+    if (Object.keys(state.pseudoStyles[k]).length === 0) delete state.pseudoStyles[k];
+    rebuildPseudoStyleElement();
   }
 
   // ============================================================
@@ -438,6 +642,179 @@
   }
 
   // ============================================================
+  // wego-wt-highlight: 视口级固定高亮框（替代 outline，避免祖先 overflow 裁切）
+  // ============================================================
+  // wego-wt-highlight: 视口级固定高亮框（替代 outline，避免祖先 overflow 裁切）
+  // 支持 hover（虚线预览）与 selected（实线+8手柄）双模式，对齐 Liaison 视觉
+  // ============================================================
+  class WegoWtHighlight extends HTMLElement {
+    constructor() {
+      super();
+      this._shadow = this.attachShadow({ mode: 'open' });
+      this._targetEl = null;
+      this._label = '';
+      this._mode = 'selected'; // 'hover' | 'selected'
+      this._rafId = null;
+    }
+    connectedCallback() {
+      this._render();
+    }
+    disconnectedCallback() {
+      this._stopTracking();
+    }
+    setMode(mode) {
+      this._mode = mode === 'hover' ? 'hover' : 'selected';
+      this._applyMode();
+    }
+    showForElement(el, label) {
+      this._targetEl = el;
+      this._label = label || '';
+      this._update();
+      this._startTracking();
+    }
+    hide() {
+      this._targetEl = null;
+      this._stopTracking();
+      this.style.display = 'none';
+    }
+    _startTracking() {
+      this._stopTracking();
+      const update = () => {
+        if (this._targetEl) {
+          this._update();
+          this._rafId = requestAnimationFrame(update);
+        }
+      };
+      this._rafId = requestAnimationFrame(update);
+    }
+    _stopTracking() {
+      if (this._rafId) {
+        cancelAnimationFrame(this._rafId);
+        this._rafId = null;
+      }
+    }
+    _applyMode() {
+      const box = this._shadow.querySelector('.box');
+      const handles = this._shadow.querySelector('.handles');
+      const labelEl = this._shadow.querySelector('.label');
+      if (!box) return;
+      box.classList.toggle('box--hover', this._mode === 'hover');
+      box.classList.toggle('box--selected', this._mode === 'selected');
+      if (handles) handles.style.display = this._mode === 'selected' ? 'block' : 'none';
+      if (labelEl) {
+        labelEl.style.background = this._mode === 'hover'
+          ? 'var(--wt-hover-color)'
+          : 'var(--wt-selected-color)';
+      }
+    }
+    _update() {
+      if (!this._targetEl) return;
+      const rect = this._targetEl.getBoundingClientRect();
+      const box = this._shadow.querySelector('.box');
+      if (!box) return;
+      box.style.top = rect.top + 'px';
+      box.style.left = rect.left + 'px';
+      box.style.width = Math.max(0, rect.width) + 'px';
+      box.style.height = Math.max(0, rect.height) + 'px';
+
+      // 标签：固定在左上角，空间不足时嵌入框内顶部
+      const tag = this._targetEl.tagName.toLowerCase();
+      const w = Math.round(rect.width);
+      const h = Math.round(rect.height);
+      const labelEl = this._shadow.querySelector('.label');
+      if (labelEl) {
+        labelEl.textContent = this._mode === 'hover'
+          ? `${w}×${h}`
+          : `${this._label ? this._label + '  ' : ''}${tag} · ${w}×${h}`;
+        const labelH = 18;
+        if (rect.top >= labelH + 2) {
+          labelEl.style.top = (rect.top - labelH) + 'px';
+        } else {
+          labelEl.style.top = rect.top + 'px';
+        }
+        labelEl.style.left = rect.left + 'px';
+      }
+      this.style.display = 'block';
+    }
+    _render() {
+      this._shadow.innerHTML = `
+        <style>
+          :host {
+            position: fixed;
+            inset: 0;
+            z-index: 9540;
+            pointer-events: none;
+            display: none;
+            --wt-hover-color: hsl(267, 100%, 58%);
+            --wt-selected-color: #ff00ff;
+          }
+          @supports (color: color(display-p3 1 0 1)) {
+            :host { --wt-selected-color: color(display-p3 1 0 1); }
+          }
+          .box {
+            position: absolute;
+            box-sizing: border-box;
+            border-radius: 2px;
+          }
+          .box--hover {
+            border: 1px dashed var(--wt-hover-color);
+          }
+          .box--selected {
+            border: 2px solid var(--wt-selected-color);
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.12);
+          }
+          .handles {
+            position: absolute;
+            inset: 0;
+            display: none;
+          }
+          .handle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #fff;
+            border: 1px solid var(--wt-selected-color);
+            border-radius: 1px;
+            box-sizing: border-box;
+          }
+          .handle--tl { top: -4px; left: -4px; cursor: nwse-resize; }
+          .handle--tc { top: -4px; left: 50%; transform: translateX(-50%); cursor: ns-resize; }
+          .handle--tr { top: -4px; right: -4px; cursor: nesw-resize; }
+          .handle--mr { top: 50%; right: -4px; transform: translateY(-50%); cursor: ew-resize; }
+          .handle--br { bottom: -4px; right: -4px; cursor: nwse-resize; }
+          .handle--bc { bottom: -4px; left: 50%; transform: translateX(-50%); cursor: ns-resize; }
+          .handle--bl { bottom: -4px; left: -4px; cursor: nesw-resize; }
+          .handle--ml { top: 50%; left: -4px; transform: translateY(-50%); cursor: ew-resize; }
+          .label {
+            position: absolute;
+            padding: 1px 6px;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 11px;
+            line-height: 16px;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", sans-serif;
+            white-space: nowrap;
+          }
+        </style>
+        <div class="box box--selected">
+          <div class="handles">
+            <div class="handle handle--tl"></div>
+            <div class="handle handle--tc"></div>
+            <div class="handle handle--tr"></div>
+            <div class="handle handle--mr"></div>
+            <div class="handle handle--br"></div>
+            <div class="handle handle--bc"></div>
+            <div class="handle handle--bl"></div>
+            <div class="handle handle--ml"></div>
+          </div>
+        </div>
+        <div class="label"></div>
+      `;
+      this._applyMode();
+    }
+  }
+
+  // ============================================================
   // wego-wt-color-picker: 颜色选择器
   // ============================================================
   class WegoWtColorPicker extends HTMLElement {
@@ -452,7 +829,18 @@
       this._render();
     }
     open(triggerEl, hex, opacity, callback) {
-      this._hex = hex || '#000000';
+      // token 值（var(--xxx)）需要解析成实际 hex，否则原生 <input type="color"> 会报错
+      let resolvedHex = hex || '#000000';
+      if (isTokenValue(resolvedHex)) {
+        const rgb = resolveCssValue(resolvedHex, 'color');
+        const match = rgb && rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+        if (match) {
+          resolvedHex = '#' + [1, 2, 3].map(i => parseInt(match[i], 10).toString(16).padStart(2, '0')).join('');
+        } else {
+          resolvedHex = '#000000';
+        }
+      }
+      this._hex = resolvedHex;
       this._opacity = opacity !== undefined ? opacity : 100;
       this._callback = callback;
       this._render();
@@ -497,6 +885,18 @@
             width: 260px;
             display: none;
             font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", sans-serif;
+            /* 暗色毛玻璃主题，与其他面板统一 */
+            --bg-surface: rgba(30, 30, 30, 0.82);
+            --bg-subtle: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-default: #fff;
+            --text-secondary: rgba(255, 255, 255, 0.6);
+            --text-tertiary: rgba(255, 255, 255, 0.42);
+            --text-disabled: rgba(255, 255, 255, 0.35);
+            --text-brand: #00b96b;
+            color: #fff;
+            backdrop-filter: blur(18px) saturate(140%);
+            -webkit-backdrop-filter: blur(18px) saturate(140%);
           }
           :host(:not([hidden])) { display: block; }
           .picker {
@@ -677,17 +1077,36 @@
     connectedCallback() {
       this._render();
     }
-    open(changes, route) {
+    open(changes, route, anchorEl) {
       this._changes = changes || [];
       this._route = route || '';
       this._render();
       this._bindEvents();
-      // 居中显示
-      const panelWidth = 340;
-      const left = Math.max(8, (window.innerWidth - panelWidth) / 2);
-      this.style.left = left + 'px';
-      this.style.top = '60px';
-      this.removeAttribute('hidden');
+      if (anchorEl) {
+        // 绑定到工具条锚点：优先下方展开，空间不够翻上方；水平与锚点右对齐
+        const rect = anchorEl.getBoundingClientRect();
+        const panelWidth = 320;
+        const gap = 8;
+        let left = rect.right - panelWidth;
+        if (left < 8) left = 8;
+        if (left + panelWidth > window.innerWidth - 8) left = window.innerWidth - panelWidth - 8;
+        // 先显示以测量真实高度
+        this.style.left = left + 'px';
+        this.style.top = rect.bottom + gap + 'px';
+        this.removeAttribute('hidden');
+        void this.offsetHeight;
+        const panelHeight = this.getBoundingClientRect().height;
+        let top = rect.bottom + gap;
+        if (top + panelHeight > window.innerHeight - 8) top = rect.top - panelHeight - gap;
+        if (top < 8) top = 8;
+        this.style.top = top + 'px';
+      } else {
+        // 兜底：居中显示
+        const left = Math.max(8, (window.innerWidth - 320) / 2);
+        this.style.left = left + 'px';
+        this.style.top = '60px';
+        this.removeAttribute('hidden');
+      }
     }
     close() {
       this.setAttribute('hidden', '');
@@ -697,15 +1116,17 @@
       // 按选择器分组
       const groups = {};
       changes.forEach(c => {
-        if (!groups[c.selector]) {
-          groups[c.selector] = {
+        const gkey = c.selector + (c.target ? '::' + c.target : '');
+        if (!groups[gkey]) {
+          groups[gkey] = {
             selector: c.selector,
+            target: c.target || '',
             elementTag: c.elementTag,
             elementText: c.elementText,
             changes: [],
           };
         }
-        groups[c.selector].changes.push(c);
+        groups[gkey].changes.push(c);
       });
       const groupList = Object.values(groups);
 
@@ -714,24 +1135,36 @@
           :host {
             position: fixed;
             z-index: 9600;
-            width: 340px;
+            width: 320px;
             max-width: calc(100vw - 16px);
             display: none;
             font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", sans-serif;
+            /* 暗色毛玻璃主题，与工具条/样式面板统一 */
+            --bg-surface: rgba(30, 30, 30, 0.82);
+            --bg-subtle: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-default: #fff;
+            --text-secondary: rgba(255, 255, 255, 0.6);
+            --text-tertiary: rgba(255, 255, 255, 0.42);
+            --text-disabled: rgba(255, 255, 255, 0.35);
+            --text-brand: #00b96b;
+            color: #fff;
+            backdrop-filter: blur(18px) saturate(140%);
+            -webkit-backdrop-filter: blur(18px) saturate(140%);
           }
           :host(:not([hidden])) { display: block; }
           .panel {
             box-sizing: border-box;
             width: 100%;
-            max-height: calc(100vh - 100px);
+            max-height: calc(100vh - 120px);
             padding: 14px;
             display: flex;
             flex-direction: column;
             gap: 12px;
             border-radius: 14px;
-            border: 1px solid var(--border-color, rgba(0,0,0,0.08));
-            background: var(--bg-surface, #fff);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            border: 1px solid var(--border-color, rgba(255,255,255,0.08));
+            background: var(--bg-surface, rgba(30,30,30,0.82));
+            box-shadow: 0 12px 40px rgba(0,0,0,0.25);
           }
           .header {
             display: flex;
@@ -783,13 +1216,13 @@
             justify-content: center;
             padding: 0;
           }
-          .close-btn:hover { background: rgba(0,0,0,0.05); }
+          .close-btn:hover { background: rgba(255,255,255,0.06); }
           .tabs {
             display: flex;
             gap: 4px;
             padding: 3px;
             border-radius: 9px;
-            background: rgba(0,0,0,0.04);
+            background: rgba(255,255,255,0.04);
           }
           .tab {
             flex: 1;
@@ -798,30 +1231,30 @@
             background: transparent;
             border-radius: 7px;
             font-size: 12px;
-            color: var(--text-tertiary, #888);
+            color: var(--text-tertiary, rgba(255,255,255,0.42));
             cursor: pointer;
           }
           .tab.active {
-            background: var(--bg-surface, #fff);
+            background: var(--bg-surface, rgba(30,30,30,0.82));
             color: var(--text-brand, #00b96b);
             font-weight: 500;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
           }
           .list {
             display: flex;
             flex-direction: column;
             gap: 8px;
             overflow-y: auto;
-            max-height: calc(100vh - 260px);
+            max-height: calc(100vh - 280px);
             padding-right: 4px;
           }
           .list::-webkit-scrollbar { width: 4px; }
-          .list::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 2px; }
+          .list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
           .item {
             padding: 10px;
             border-radius: 10px;
-            background: rgba(0,0,0,0.02);
-            border: 1px solid rgba(0,0,0,0.04);
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
           }
           .item-top {
             display: flex;
@@ -895,7 +1328,7 @@
             flex-shrink: 0;
             border-radius: 4px;
           }
-          .change-delete:hover { color: var(--text-error, #e53935); background: rgba(0,0,0,0.04); }
+          .change-delete:hover { color: var(--text-error, #e53935); background: rgba(255,255,255,0.06); }
           .empty {
             text-align: center;
             padding: 32px 16px;
@@ -906,8 +1339,10 @@
           .footer {
             display: flex;
             justify-content: flex-end;
+            align-items: center;
+            gap: 8px;
             padding-top: 4px;
-            border-top: 1px solid rgba(0,0,0,0.06);
+            border-top: 1px solid rgba(255,255,255,0.06);
           }
           .reset-btn {
             height: 28px;
@@ -926,10 +1361,6 @@
             <div>
               <span class="header-title">配置列表</span>
               <span class="header-count">${changes.length} 项变更</span>
-            </div>
-            <div class="header-actions">
-              <button class="copy-btn" type="button" data-action="copy">复制 Prompt</button>
-              <button class="close-btn" type="button" data-action="close">×</button>
             </div>
           </div>
           <div class="tabs">
@@ -950,7 +1381,7 @@
                   </div>
                   ${g.changes.map((c, ci) => `
                     <div class="change-row">
-                      <span class="change-prop">${c.property}</span>
+                      <span class="change-prop">${c.property}${c.target ? ' · ' + c.target : ''}</span>
                       <span class="change-old" title="${c.oldValue}">${c.oldValue || '-'}</span>
                       <span class="change-arrow">→</span>
                       <span class="change-new" title="${c.newValue}">${c.newValue || '-'}</span>
@@ -963,6 +1394,7 @@
           `}
           ${groupList.length > 0 ? `
             <div class="footer">
+              <button class="copy-btn" type="button" data-action="copy">复制 Prompt</button>
               <button class="reset-btn" type="button" data-action="reset">重置所有修改</button>
             </div>
           ` : ''}
@@ -971,14 +1403,13 @@
     }
 
     _bindEvents() {
-      // 关闭
-      this._shadow.querySelector('[data-action="close"]').addEventListener('click', () => {
-        bus.emit('close-overview');
-      });
       // 复制 Prompt
-      this._shadow.querySelector('[data-action="copy"]').addEventListener('click', () => {
-        this._copyPrompt();
-      });
+      const copyBtn = this._shadow.querySelector('[data-action="copy"]');
+      if (copyBtn) {
+        copyBtn.addEventListener('click', () => {
+          this._copyPrompt();
+        });
+      }
       // Tab 切换
       this._shadow.querySelectorAll('[data-tab]').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1048,7 +1479,7 @@
       if (changes.length === 0) {
         return `## Page Feedback: ${route}\n**Viewport:** ${viewport}\n\n当前还没有记录到任何配置修改。`;
       }
-      // 按选择器分组
+      // 按选择器分组（同一元素的所有改动归一条）
       const groups = {};
       changes.forEach(c => {
         if (!groups[c.selector]) {
@@ -1056,6 +1487,7 @@
             selector: c.selector,
             elementTag: c.elementTag,
             elementText: c.elementText,
+            elementClass: c.elementClass || '',
             changes: [],
           };
         }
@@ -1066,17 +1498,50 @@
         `## Page Feedback: ${route}`,
         `**Viewport:** ${viewport}`,
         '',
+        '> 施工单：按你调好的最终效果整理，可直接照做。改法优先用设计系统语义类；定位用稳定标识。',
+        '',
       ];
+      const machine = [];
       groupList.forEach((g, i) => {
-        const heading = `${g.elementTag}${g.elementText ? ' · ' + g.elementText : ''}`;
-        const source = `${g.elementTag}${g.elementText ? ' · ' + g.elementText : ''}`;
-        const feedback = g.changes.map(c => `${c.property}: ${c.oldValue || '-'} → ${c.newValue || '-'}`).join(' | ');
-        lines.push(`### ${i + 1}. ${heading}`);
-        lines.push(`**Location:** ${g.selector}`);
-        lines.push(`**Source:** ${source}`);
-        lines.push(`**Feedback:** ${feedback}`);
-        lines.push('');
+        // 业务锚点：取首段有意义文案（截断，不再整段糊）
+        const anchor = (g.elementText || '').replace(/\s+/g, ' ').trim();
+        const shortAnchor = anchor.length > 12 ? anchor.slice(0, 12) + '…' : anchor;
+        // 语义类名锚点：优先 elementClass，缺失时从 selector 末段提取（如 .business-home__quick-card）
+        const classAnchor = (() => {
+          if (g.elementClass) return g.elementClass.split(/\s+/)[0];
+          const m = g.selector.match(/\.([a-zA-Z0-9_-]+)\s*$/) || g.selector.match(/\[data-component-slug="[^"]+"\]\.([a-zA-Z0-9_-]+)/);
+          return m ? m[1] : '';
+        })();
+        const role = shortAnchor || classAnchor || g.elementTag;
+        const addClassChanges = g.changes.filter(c => c.intent === 'add-class');
+        const cssChanges = g.changes.filter(c => !c.skipCss);
+        const lines2 = [];
+        lines2.push(`### ${i + 1}. ${g.elementTag} · ${role}`);
+        lines2.push(`**定位:** \`${g.selector}\``);
+        if (anchor) lines2.push(`**业务锚点:** ${anchor}`);
+        if (addClassChanges.length) {
+          const clsNote = addClassChanges.map(c => c.note).filter(Boolean)[0] || '';
+          const want = addClassChanges.map(c => `加结构类 \`${c.intentClass}\``).join('；');
+          lines2.push(`**你要的:** ${want}`);
+          lines2.push(`**改法:** ${(classAnchor ? '在类 `' + classAnchor + '` 上加 ' : '元素加 ') + addClassChanges.map(c => '`' + c.intentClass + '`').join(' ')}`);
+          if (clsNote) lines2.push(`**提醒:** ${clsNote}`);
+        }
+        if (cssChanges.length) {
+          const wantCsv = cssChanges.map(c => `${c.property} → ${c.newValue || '-'}`).join('；');
+          lines2.push(`**你要的:** 调整样式 ${wantCsv}`);
+          lines2.push(`**改法:** 在源码对应 CSS 中设置：${cssChanges.map(c => `${c.property}: ${c.newValue || '-'}`).join('; ')}`);
+        }
+        lines2.push('');
+        lines.push(...lines2);
+        machine.push({
+          selector: g.selector,
+          elementText: anchor,
+          role,
+          adds: addClassChanges.map(c => c.intentClass).filter(Boolean),
+          css: cssChanges.map(c => ({ property: c.property, value: c.newValue })),
+        });
       });
+      lines.push('<!-- WEGo_CHANGES_JSON ' + JSON.stringify(machine) + ' -->');
       return lines.join('\n');
     }
 
@@ -1091,6 +1556,67 @@
   }
 
   // ============================================================
+  // 设计系统 Token 数据（颜色 / 字号）
+  // ============================================================
+  const COLOR_TOKEN_GROUPS = [
+    {
+      label: '文字色',
+      tokens: [
+        { name: 'text-default', var: '--text-default', label: '默认' },
+        { name: 'text-secondary', var: '--text-secondary', label: '次要' },
+        { name: 'text-tertiary', var: '--text-tertiary', label: '三级' },
+        { name: 'text-disabled', var: '--text-disabled', label: '禁用' },
+        { name: 'text-inverse', var: '--text-inverse', label: '反白' },
+        { name: 'text-brand', var: '--text-brand', label: '品牌' },
+        { name: 'text-promotion', var: '--text-promotion', label: '促销' },
+      ],
+    },
+    {
+      label: '背景色',
+      tokens: [
+        { name: 'bg-surface', var: '--bg-surface', label: '表面' },
+        { name: 'bg-panel', var: '--bg-panel', label: '面板' },
+        { name: 'bg-muted', var: '--bg-muted', label: '弱化' },
+        { name: 'bg-subtle', var: '--bg-subtle', label: '微弱' },
+        { name: 'bg-active', var: '--bg-active', label: '激活' },
+        { name: 'bg-inverse', var: '--bg-inverse', label: '反色' },
+        { name: 'bg-brand', var: '--bg-brand', label: '品牌' },
+        { name: 'bg-page', var: '--bg-page', label: '页面' },
+      ],
+    },
+    {
+      label: '边框色',
+      tokens: [
+        { name: 'border-brand', var: '--border-brand', label: '品牌' },
+        { name: 'border-danger', var: '--border-danger', label: '危险' },
+        { name: 'border-info', var: '--border-info', label: '信息' },
+        { name: 'border-success', var: '--border-success', label: '成功' },
+        { name: 'border-warning', var: '--border-warning', label: '警告' },
+        { name: 'border-control', var: '--border-control', label: '控件' },
+      ],
+    },
+    {
+      label: '状态色',
+      tokens: [
+        { name: 'status-success', var: '--status-success-default', label: '成功' },
+        { name: 'status-warning', var: '--status-warning-default', label: '警告' },
+        { name: 'status-danger', var: '--status-danger-default', label: '危险' },
+        { name: 'status-info', var: '--status-info-default', label: '信息' },
+        { name: 'status-promotion', var: '--status-promotion-default', label: '促销' },
+      ],
+    },
+    {
+      label: '强调色',
+      tokens: [
+        { name: 'accent-yellow', var: '--accent-yellow', label: '黄' },
+        { name: 'accent-green', var: '--accent-green', label: '绿' },
+        { name: 'accent-purple', var: '--accent-purple', label: '紫' },
+        { name: 'accent-gold', var: '--accent-gold', label: '金' },
+      ],
+    },
+  ];
+
+  // ============================================================
   // wego-wt-style-panel: 样式编辑浮动面板
   // ============================================================
   class WegoWtStylePanel extends HTMLElement {
@@ -1100,7 +1626,9 @@
       this._targetEl = null;
       this._selector = '';
       this._data = null;
+      this._target = ''; // '' | 'before' | 'after'
       this._commitTimer = null;
+      this._tokenPanel = { open: false, type: '', trigger: null };
     }
     connectedCallback() {
       this._render();
@@ -1110,14 +1638,27 @@
       this._targetEl = null;
     }
 
-    openForElement(el, selector) {
-      this._targetEl = el;
-      this._selector = selector;
-      this._data = getElementStyleData(el);
+    /** 切换编辑目标（元素本体 / ::before / ::after） */
+    setTarget(target) {
+      if (!this._targetEl || target === this._target) return;
+      this._target = target;
+      // 伪元素：从已注入的 state.pseudoStyles 读取当前值，无则取计算值快照
+      this._data = getElementStyleData(this._targetEl, target);
       this._render();
       this._bindEvents();
-      this._updatePosition();
       this.removeAttribute('hidden');
+      this._updatePosition();
+    }
+
+    openForElement(el, selector, target) {
+      this._targetEl = el;
+      this._selector = selector;
+      this._target = target || '';
+      this._data = getElementStyleData(el, this._target);
+      this._render();
+      this._bindEvents();
+      this.removeAttribute('hidden');
+      this._updatePosition();
     }
 
     close() {
@@ -1126,35 +1667,75 @@
     }
 
     _updatePosition() {
+      // 用户手动拖拽面板后锁定位置（_dragLocks 置位），不再跟随元素
+      if (this._dragLocks) return;
       if (!this._targetEl) return;
       const rect = this._targetEl.getBoundingClientRect();
       const panelWidth = 300;
       const gap = 12;
-      // 优先显示在右侧
+      // 强制 reflow 确保读取到实际高度（面板刚渲染时 offsetHeight 可能为 0）
+      void this.offsetHeight;
+      const panelHeight = this.getBoundingClientRect().height || this.offsetHeight || 400;
+      // 水平方向：优先右侧，不够则左侧，再不够则居中
       let left = rect.right + gap;
       if (left + panelWidth > window.innerWidth - 8) {
-        // 右侧空间不够，显示在左侧
         left = rect.left - panelWidth - gap;
         if (left < 8) {
-          // 左右都不够，居中显示在元素下方
           left = Math.max(8, (window.innerWidth - panelWidth) / 2);
         }
       }
-      // 垂直方向：顶部对齐元素顶部，不超出视口
+      // 垂直方向：顶部对齐元素顶部，底部超出视口时自动上移
       let top = rect.top;
-      const panelHeight = this.offsetHeight || 400;
-      if (top + panelHeight > window.innerHeight - 8) {
-        top = window.innerHeight - panelHeight - 8;
+      const viewportBottom = window.innerHeight - 8;
+      if (top + panelHeight > viewportBottom) {
+        top = viewportBottom - panelHeight;
       }
       if (top < 40) top = 40;
       this.style.left = left + 'px';
       this.style.top = top + 'px';
     }
 
+    /** 面板拖拽：header 按住拖动（对齐 Liaison 浮动面板可拖拽） */
+    _initPanelDrag() {
+      this._dragLocks = false;
+      const header = this._shadow.querySelector('.header');
+      if (!header) return;
+      header.addEventListener('pointerdown', (e) => {
+        if (e.target.closest('button, select, input')) return;
+        e.preventDefault();
+        const startX = e.clientX, startY = e.clientY;
+        const origLeft = parseInt(this.style.left, 10) || 0;
+        const origTop = parseInt(this.style.top, 10) || 0;
+        const move = (ev) => {
+          const dx = ev.clientX - startX, dy = ev.clientY - startY;
+          this.style.left = Math.max(0, Math.min(origLeft + dx, window.innerWidth - 40)) + 'px';
+          this.style.top = Math.max(0, Math.min(origTop + dy, window.innerHeight - 40)) + 'px';
+        };
+        const up = () => {
+          this._dragLocks = true;
+          header.classList.remove('is-dragging');
+          window.removeEventListener('pointermove', move);
+          window.removeEventListener('pointerup', up);
+        };
+        header.classList.add('is-dragging');
+        window.addEventListener('pointermove', move);
+        window.addEventListener('pointerup', up);
+      });
+    }
+
     _render() {
       const d = this._data || {};
       const tag = this._targetEl ? this._targetEl.tagName.toLowerCase() : '';
       const text = this._targetEl ? (this._targetEl.textContent || '').trim().substring(0, 20) : '';
+      const t = this._target || '';
+      const hasBefore = this._targetEl ? isPseudoRendered(this._targetEl, 'before') : false;
+      const hasAfter = this._targetEl ? isPseudoRendered(this._targetEl, 'after') : false;
+      // 颜色 token 模式判断
+      const colorIsToken = isTokenValue(d.colorHex);
+      const colorTokenName = colorIsToken ? d.colorHex.match(/var\((--[^)]+)\)/)[1].replace(/^--/, '') : '';
+      const colorSwatchBg = colorIsToken
+        ? (resolveCssValue(d.colorHex, 'color') || 'transparent')
+        : hexOpacityToRgba(d.colorHex || '#000000', d.colorOpacity ?? 100);
       this._shadow.innerHTML = `
         <style>
           :host {
@@ -1164,39 +1745,79 @@
             max-width: calc(100vw - 16px);
             display: none;
             font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", sans-serif;
+            /* Liaison 暗色主题：面板内所有 var(--bg-surface) / 文字变量自动变暗 */
+            --bg-surface: rgba(30, 30, 30, 0.78);
+            --bg-subtle: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-default: #fff;
+            --text-secondary: rgba(255, 255, 255, 0.6);
+            --text-tertiary: rgba(255, 255, 255, 0.42);
+            --text-disabled: rgba(255, 255, 255, 0.35);
+            --text-brand: #00b96b;
+            color: #fff;
+            backdrop-filter: blur(18px) saturate(140%);
+            -webkit-backdrop-filter: blur(18px) saturate(140%);
           }
           :host(:not([hidden])) { display: block; }
           .panel {
             box-sizing: border-box;
             width: 100%;
             max-height: 70vh;
-            padding: 14px;
+            padding: 16px;
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 20px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+            background: var(--bg-surface, rgba(30, 30, 30, 0.78));
+            box-shadow: 0 20px 100px rgba(0, 0, 0, 0.12);
+          }
+          .panel-body {
+            flex: 1;
+            min-height: 0;
             overflow-y: auto;
             overflow-x: hidden;
-            border-radius: 14px;
-            border: 1px solid var(--border-color, rgba(0,0,0,0.08));
-            background: var(--bg-surface, #fff);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding-right: 4px;
+            margin-right: -4px;
           }
-          .panel::-webkit-scrollbar { width: 4px; }
-          .panel::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 2px; }
+          .panel-body::-webkit-scrollbar { width: 0; height: 0; display: none; }
+          .panel-body { scrollbar-width: none; -ms-overflow-style: none; }
           .header {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 8px;
+            cursor: grab;
+            user-select: none;
+            -webkit-user-select: none;
+            padding: 2px 0;
+            border-radius: 8px;
+          }
+          .header.is-dragging {
+            cursor: grabbing;
           }
           .header-info {
             flex: 1;
             min-width: 0;
           }
           .header-tag {
-            font-size: 12px;
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            font-size: 13px;
             font-weight: 600;
-            color: var(--text-default, #1a1a1a);
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+          .header-selector {
+            font-size: 11px;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.45);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -1232,11 +1853,42 @@
           }
           .section-title {
             margin: 0;
-            font-size: 11px;
-            font-weight: 600;
+            font-size: 12px;
+            font-weight: 500;
+            color: #fff;
+          }
+          .sub-label {
+            margin: 10px 0 4px;
+            font-size: 10px;
+            font-weight: 500;
+            color: var(--text-tertiary, #999);
+          }
+          .target-switch {
+            display: flex;
+            gap: 3px;
+            padding: 3px;
+            margin-top: 2px;
+            border-radius: 8px;
+            background: rgba(0,0,0,0.04);
+          }
+          .target-switch button {
+            flex: 1;
+            height: 24px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
             color: var(--text-tertiary, #888);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-size: 11px;
+            cursor: pointer;
+          }
+          .target-switch button.active {
+            background: var(--bg-surface, #fff);
+            color: var(--text-brand, #00b96b);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+          }
+          .target-switch button:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
           }
           .field-row {
             display: flex;
@@ -1245,15 +1897,26 @@
           }
           .field-row.two-col {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(2, minmax(0, 130px));
+            gap: 8px;
+          }
+          .field-row.three-col {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 6px;
           }
           .field {
+            box-sizing: border-box;
+            min-width: 0;
+            min-height: 32px;
             display: flex;
             align-items: center;
             gap: 4px;
             flex: 1;
-            min-width: 0;
+            padding: 4px 12px 4px 4px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid transparent;
           }
           .field-icon {
             width: 20px;
@@ -1262,28 +1925,136 @@
             align-items: center;
             justify-content: center;
             font-size: 11px;
-            color: var(--text-tertiary, #888);
+            color: var(--text-tertiary, rgba(255,255,255,0.6));
             flex-shrink: 0;
           }
           .text-input {
+            all: unset;
             flex: 1;
             min-width: 0;
-            height: 30px;
-            padding: 0 8px;
-            border: 1px solid var(--border-color, rgba(0,0,0,0.1));
-            border-radius: 7px;
+            min-height: 20px;
+            font-family: inherit;
             font-size: 12px;
-            color: var(--text-default, #1a1a1a);
-            background: var(--bg-surface, #fff);
-            outline: none;
+            line-height: 20px;
+            font-weight: 400;
+            color: #fff;
             box-sizing: border-box;
           }
+          .text-input::placeholder {
+            color: rgba(255, 255, 255, 0.35);
+          }
           .text-input:focus {
-            border-color: var(--text-brand, #00b96b);
+            outline: 1px solid var(--text-brand, #00b96b);
+            outline-offset: -1px;
+            border-radius: 4px;
           }
           .text-input.opacity-input {
             flex: 0 0 48px;
             width: 48px;
+            text-align: right;
+          }
+          .text-input:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+          }
+          .token-btn {
+            flex-shrink: 0;
+            min-width: 28px;
+            height: 24px;
+            padding: 0 6px;
+            border: 1px solid var(--border-color, rgba(255,255,255,0.1));
+            border-radius: 6px;
+            background: rgba(255,255,255,0.04);
+            color: var(--text-tertiary, rgba(255,255,255,0.5));
+            font-size: 10px;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 80px;
+            transition: all 0.15s;
+          }
+          .token-btn:hover {
+            border-color: var(--text-brand, #00b96b);
+            color: var(--text-brand, #00b96b);
+          }
+          .token-btn.active {
+            border-color: var(--text-brand, #00b96b);
+            background: rgba(0,185,107,0.12);
+            color: var(--text-brand, #00b96b);
+          }
+          /* Token 选择弹出面板 */
+          .token-panel {
+            position: absolute;
+            z-index: 9650;
+            width: 240px;
+            max-height: 320px;
+            overflow-y: auto;
+            padding: 12px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(30, 30, 30, 0.78);
+            backdrop-filter: blur(18px) saturate(140%);
+            -webkit-backdrop-filter: blur(18px) saturate(140%);
+            box-shadow: 0 20px 100px rgba(0, 0, 0, 0.12);
+            display: none;
+          }
+          .token-panel.open { display: block; }
+          .token-panel::-webkit-scrollbar { width: 0; }
+          .token-group-title {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-tertiary, rgba(255,255,255,0.45));
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 8px 0 4px;
+          }
+          .token-group-title:first-child { margin-top: 0; }
+          .token-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 6px 8px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--text-default, #fff);
+            font-size: 11px;
+            font-family: inherit;
+            cursor: pointer;
+            text-align: left;
+            transition: background 0.1s;
+          }
+          .token-item:hover {
+            background: rgba(255,255,255,0.06);
+          }
+          .token-item.selected {
+            background: rgba(0,185,107,0.15);
+          }
+          .token-swatch {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.15);
+            flex-shrink: 0;
+          }
+          .token-label {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+          .token-name {
+            font-size: 10px;
+            color: var(--text-tertiary, rgba(255,255,255,0.4));
+            flex-shrink: 0;
           }
           .layout-tabs {
             display: flex;
@@ -1383,6 +2154,42 @@
             color: var(--text-brand, #00b96b);
             box-shadow: 0 1px 2px rgba(0,0,0,0.08);
           }
+          .field.metric-field {
+            padding: 0 4px 0 0;
+          }
+          .field-select-wrap {
+            position: relative;
+            flex: 0 0 auto;
+            min-width: 28px;
+            height: 20px;
+            margin-left: 4px;
+            display: inline-flex;
+            align-items: center;
+            align-self: center;
+          }
+          .field-select-trigger {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            font-size: 12px;
+            line-height: 12px;
+            color: rgba(255, 255, 255, 0.72);
+            pointer-events: none;
+          }
+          .field-select {
+            appearance: none;
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+          }
+          .field-select option {
+            color: #111;
+          }
           select.text-input {
             appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23999'/%3E%3C/svg%3E");
@@ -1392,13 +2199,33 @@
           }
         </style>
         <div class="panel">
-          <div class="header">
+          <div class="header" title="按住可拖动面板">
             <div class="header-info">
-              <div class="header-tag">${tag}${this._selector ? ' · ' + this._selector.substring(0, 30) : ''}</div>
+              <div class="header-tag">${tag || '—'}${this._selector ? `<span class="header-selector">${this._selector.substring(0, 40)}</span>` : ''}</div>
               ${text ? `<div class="header-text">${text}</div>` : ''}
             </div>
             <button class="close-btn" type="button" data-action="close">×</button>
           </div>
+
+          <div class="panel-body">
+          ${hasBefore || hasAfter ? `
+          <div class="target-switch" data-target-switch>
+            <button type="button" data-target="" class="${t === '' ? 'active' : ''}">元素</button>
+            <button type="button" data-target="before" ${hasBefore ? '' : 'disabled'} class="${t === 'before' ? 'active' : ''}">::before</button>
+            <button type="button" data-target="after" ${hasAfter ? '' : 'disabled'} class="${t === 'after' ? 'active' : ''}">::after</button>
+          </div>
+          ` : ''}
+
+          <!-- 定位栏暂屏蔽：display/position/zIndex 文本输入体验差，走查场景不常用，后续补全 top/right/bottom/left 后再恢复
+          <div class="section">
+            <p class="section-title">定位</p>
+            <div class="field-row three-col">
+              <div class="field"><span class="field-icon">◈</span><input class="text-input" type="text" value="${d.display || ''}" data-field="display" placeholder="display" /></div>
+              <div class="field"><span class="field-icon">◎</span><input class="text-input" type="text" value="${d.position || ''}" data-field="position" placeholder="position" /></div>
+              <div class="field"><span class="field-icon">Z</span><input class="text-input" type="text" value="${d.zIndex || ''}" data-field="zIndex" inputmode="numeric" placeholder="z" /></div>
+            </div>
+          </div>
+          -->
 
           <!-- 自动布局 -->
           <div class="section">
@@ -1420,6 +2247,7 @@
                 <input class="text-input" type="text" value="${d.layoutGap || ''}" data-field="layoutGap" inputmode="numeric" placeholder="gap" />
               </div>
             </div>
+            <p class="sub-label">内边距 padding</p>
             <div class="field-row two-col">
               <div class="field"><span class="field-icon">L</span><input class="text-input" type="text" value="${d.paddingLeft || ''}" data-field="paddingLeft" inputmode="numeric" placeholder="左" /></div>
               <div class="field"><span class="field-icon">T</span><input class="text-input" type="text" value="${d.paddingTop || ''}" data-field="paddingTop" inputmode="numeric" placeholder="上" /></div>
@@ -1428,9 +2256,40 @@
               <div class="field"><span class="field-icon">R</span><input class="text-input" type="text" value="${d.paddingRight || ''}" data-field="paddingRight" inputmode="numeric" placeholder="右" /></div>
               <div class="field"><span class="field-icon">B</span><input class="text-input" type="text" value="${d.paddingBottom || ''}" data-field="paddingBottom" inputmode="numeric" placeholder="下" /></div>
             </div>
+            <p class="sub-label">外边距 margin</p>
             <div class="field-row two-col">
-              <div class="field"><span class="field-icon">W</span><input class="text-input" type="text" value="${d.width || ''}" data-field="width" inputmode="numeric" placeholder="宽" /></div>
-              <div class="field"><span class="field-icon">H</span><input class="text-input" type="text" value="${d.height || ''}" data-field="height" inputmode="numeric" placeholder="高" /></div>
+              <div class="field"><span class="field-icon">L</span><input class="text-input" type="text" value="${d.marginLeft || ''}" data-field="marginLeft" inputmode="numeric" placeholder="左" /></div>
+              <div class="field"><span class="field-icon">T</span><input class="text-input" type="text" value="${d.marginTop || ''}" data-field="marginTop" inputmode="numeric" placeholder="上" /></div>
+            </div>
+            <div class="field-row two-col">
+              <div class="field"><span class="field-icon">R</span><input class="text-input" type="text" value="${d.marginRight || ''}" data-field="marginRight" inputmode="numeric" placeholder="右" /></div>
+              <div class="field"><span class="field-icon">B</span><input class="text-input" type="text" value="${d.marginBottom || ''}" data-field="marginBottom" inputmode="numeric" placeholder="下" /></div>
+            </div>
+            <div class="field-row two-col">
+              <label class="field metric-field">
+                <span class="field-icon">W</span>
+                <input class="text-input" type="text" value="${d.width || ''}" data-field="width" inputmode="numeric" placeholder="—" />
+                <span class="field-select-wrap" title="宽度模式">
+                  <span class="field-select-trigger">${d.widthMode === 'auto' ? '适应' : (d.widthMode === 'fill' ? '填充' : '固定')}</span>
+                  <select class="field-select" data-field="widthMode">
+                    <option value="fixed" ${d.widthMode !== 'auto' && d.widthMode !== 'fill' ? 'selected' : ''}>固定宽度</option>
+                    <option value="auto" ${d.widthMode === 'auto' ? 'selected' : ''}>自适应宽度</option>
+                    <option value="fill" ${d.widthMode === 'fill' ? 'selected' : ''}>填充</option>
+                  </select>
+                </span>
+              </label>
+              <label class="field metric-field">
+                <span class="field-icon">H</span>
+                <input class="text-input" type="text" value="${d.height || ''}" data-field="height" inputmode="numeric" placeholder="—" />
+                <span class="field-select-wrap" title="高度模式">
+                  <span class="field-select-trigger">${d.heightMode === 'auto' ? '适应' : (d.heightMode === 'fill' ? '填充' : '固定')}</span>
+                  <select class="field-select" data-field="heightMode">
+                    <option value="fixed" ${d.heightMode !== 'auto' && d.heightMode !== 'fill' ? 'selected' : ''}>固定高度</option>
+                    <option value="auto" ${d.heightMode === 'auto' ? 'selected' : ''}>自适应高度</option>
+                    <option value="fill" ${d.heightMode === 'fill' ? 'selected' : ''}>填充</option>
+                  </select>
+                </span>
+              </label>
             </div>
           </div>
 
@@ -1453,10 +2312,13 @@
             </div>
             <div class="field-row">
               <button class="color-button" type="button" data-field="colorHex" data-color-trigger>
-                <span class="swatch" style="background:${hexOpacityToRgba(d.colorHex || '#000000', d.colorOpacity ?? 100)}"></span>
+                <span class="swatch" style="background:${colorSwatchBg}"></span>
               </button>
               <input class="text-input" type="text" value="${d.colorHex || ''}" data-field="colorHex" />
-              <input class="text-input opacity-input" type="text" value="${d.colorOpacity ?? 100}" data-field="colorOpacity" inputmode="numeric" />
+              <input class="text-input opacity-input" type="text" value="${d.colorOpacity ?? 100}" data-field="colorOpacity" inputmode="numeric" ${colorIsToken ? 'disabled' : ''} />
+              <button class="token-btn ${colorIsToken ? 'active' : ''}" type="button" data-token-trigger="color" title="选择设计系统 Token">
+                ${colorIsToken ? colorTokenName : 'T'}
+              </button>
             </div>
             <div class="field-row two-col">
               <div class="field"><span class="field-icon">LH</span><input class="text-input" type="text" value="${d.lineHeight || ''}" data-field="lineHeight" inputmode="decimal" placeholder="行高" /></div>
@@ -1534,6 +2396,12 @@
               <button data-field="shadowInset" data-value="true" class="${d.shadowInset ? 'active' : ''}">内阴影</button>
             </div>
           </div>
+          </div>
+          <!-- Token 选择弹出面板 -->
+          <div class="token-panel" data-token-panel>
+            <div class="token-group-title">设计系统 Token</div>
+            <div data-token-list></div>
+          </div>
         </div>
       `;
     }
@@ -1556,11 +2424,31 @@
     }
 
     _bindEvents() {
+      // 面板拖拽（header 按住移动）
+      this._initPanelDrag();
+      // 滚动样式面板时关闭 token 选择面板
+      const panelBody = this._shadow.querySelector('.panel-body');
+      if (panelBody) {
+        panelBody.addEventListener('scroll', () => this._closeTokenPanel());
+      }
       // 关闭按钮
       const closeBtn = this._shadow.querySelector('[data-action="close"]');
       if (closeBtn) {
         closeBtn.addEventListener('click', () => {
           bus.emit('close-style-panel');
+        });
+      }
+      // 伪元素目标切换
+      const switchEl = this._shadow.querySelector('[data-target-switch]');
+      if (switchEl) {
+        switchEl.querySelectorAll('[data-target]').forEach(btn => {
+          if (btn.disabled) return;
+          btn.addEventListener('click', () => {
+            const target = btn.dataset.target || '';
+            this.setTarget(target);
+            const app = document.querySelector('wego-walkthrough');
+            if (app && typeof app._onTargetChanged === 'function') app._onTargetChanged(target);
+          });
         });
       }
       // 所有 data-field 控件
@@ -1576,6 +2464,60 @@
             }
           });
         }
+      });
+      // Liaison 式宽高交互：数值输入（blur/Enter 自动回 fixed 模式 + commit）+ 模式 select（commit）
+      const sizeFields = ['width', 'height'];
+      sizeFields.forEach(field => {
+        const input = this._shadow.querySelector(`[data-field="${field}"]`);
+        if (!input) return;
+        input.addEventListener('input', () => {
+          input.value = input.value.replace(/[^\d]/g, '');
+        });
+        const commit = () => {
+          // 输入数值 ⇒ 自动回 fixed 模式（对齐 Liaison ensureFixedSizeMode）
+          const modeSel = this._shadow.querySelector(`[data-field="${field}Mode"]`);
+          if (modeSel && modeSel.value !== 'fixed') {
+            modeSel.value = 'fixed';
+            this._updateSizeModeTrigger(field);
+            this._onFieldChange(field + 'Mode', 'fixed');
+          }
+          this._onFieldChange(field, input.value || '');
+        };
+        input.addEventListener('blur', commit);
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') { commit(); input.blur(); }
+        });
+        // 数值上下步进（对齐 Liaison stepper）
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+            e.preventDefault();
+            const cur = parseInt(input.value, 10) || 0;
+            const next = e.key === 'ArrowUp' ? cur + 1 : cur - 1;
+            input.value = String(Math.max(0, next));
+            commit();
+          }
+        });
+      });
+      // 模式 select change：根据模式直接改 width/height 的 CSS 值（fixed=保留数值 / auto=auto / fill=100%）
+      this._shadow.querySelectorAll('[data-field="widthMode"], [data-field="heightMode"]').forEach(sel => {
+        sel.addEventListener('change', () => {
+          const modeField = sel.dataset.field; // widthMode / heightMode
+          const axis = modeField.replace(/Mode$/, ''); // width / height
+          this._updateSizeModeTrigger(axis);
+          const mode = sel.value;
+          const input = this._shadow.querySelector(`[data-field="${axis}"]`);
+          if (mode === 'auto') {
+            this._onFieldChange(axis, 'auto');
+            if (input) input.value = 'auto';
+          } else if (mode === 'fill') {
+            this._onFieldChange(axis, '100%');
+            if (input) input.value = '100%';
+          } else if (input) {
+            // fixed：若之前是 auto/100%，清空让用户重填数值
+            const cur = String(input.value || '').trim();
+            if (/^(auto|100%)$/.test(cur)) input.value = '';
+          }
+        });
       });
       // 对齐矩阵
       this._shadow.querySelectorAll('[data-align-preset]').forEach(btn => {
@@ -1604,12 +2546,44 @@
           });
         });
       });
+      // Token 按钮 → 打开 Token 选择面板
+      this._shadow.querySelectorAll('[data-token-trigger]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const type = btn.dataset.tokenTrigger;
+          if (this._tokenPanel.open && this._tokenPanel.type === type) {
+            this._closeTokenPanel();
+          } else {
+            this._openTokenPanel(btn, type);
+          }
+        });
+      });
     }
 
     _onFieldChange(field, value) {
       if (!this._targetEl || !this._data) return;
       this._data[field] = value;
-      // 应用到元素
+      // 伪元素目标：编辑通过注入 <head> 的样式规则生效，property 写为 css-property
+      if (this._target) {
+        const cssProp = this._fieldToCssProp(field);
+        const cssVal = this._fieldToCssValue(field);
+        applyPseudoStyle(this._selector, this._target, cssProp, cssVal);
+        bus.emit('style-change', {
+          selector: this._selector,
+          target: this._target,
+          elementTag: this._targetEl.tagName.toLowerCase(),
+          elementText: (this._targetEl.textContent || '').trim().substring(0, 50),
+          elementClass: (this._targetEl.className && typeof this._targetEl.className === 'string')
+            ? this._targetEl.className.trim().split(/\s+/).filter(c => c && !c.startsWith('wt-') && !c.startsWith('wego-') && !c.startsWith('data-wt'))[0] || ''
+            : '',
+          property: cssProp,
+          oldValue: '',
+          newValue: cssVal,
+          el: this._targetEl,
+        });
+        return;
+      }
+      // 应用到元素（本体）
       const result = this._applyField(field, value);
       if (result) {
         // 记录变更
@@ -1617,104 +2591,101 @@
           selector: this._selector,
           elementTag: this._targetEl.tagName.toLowerCase(),
           elementText: (this._targetEl.textContent || '').trim().substring(0, 50),
+          elementClass: (this._targetEl.className && typeof this._targetEl.className === 'string')
+            ? this._targetEl.className.trim().split(/\s+/).filter(c => c && !c.startsWith('wt-') && !c.startsWith('wego-') && !c.startsWith('data-wt'))[0] || ''
+            : '',
           property: result.property,
           oldValue: result.oldValue,
           newValue: result.newValue,
+          el: this._targetEl,
         });
       }
       // 更新 UI（按钮 active 态等）
       this._updateActiveStates();
     }
 
-    _applyField(field, value) {
-      const el = this._targetEl;
-      const numVal = parseFloat(value);
+    /** 面板字段名 → CSS 属性名 */
+    _fieldToCssProp(field) {
+      const map = {
+        layoutMode: 'flex-direction',
+        justifyContent: 'justify-content',
+        alignItems: 'align-items',
+        layoutGap: 'gap',
+        paddingLeft: 'padding-left',
+        paddingRight: 'padding-right',
+        paddingTop: 'padding-top',
+        paddingBottom: 'padding-bottom',
+        marginTop: 'margin-top',
+        marginRight: 'margin-right',
+        marginBottom: 'margin-bottom',
+        marginLeft: 'margin-left',
+        width: 'width',
+        height: 'height',
+        display: 'display',
+        position: 'position',
+        zIndex: 'z-index',
+        fontSize: 'font-size',
+        fontWeight: 'font-weight',
+        colorHex: 'color',
+        colorOpacity: 'color',
+        lineHeight: 'line-height',
+        textAlign: 'text-align',
+        layerOpacity: 'opacity',
+        borderRadiusAll: 'border-radius',
+        fillHex: 'background-color',
+        fillOpacity: 'background-color',
+        strokeHex: 'border',
+        strokeOpacity: 'border',
+        strokeWidth: 'border',
+        strokePosition: 'box-shadow',
+        shadowHex: 'box-shadow',
+        shadowOpacity: 'box-shadow',
+        shadowX: 'box-shadow',
+        shadowY: 'box-shadow',
+        shadowBlur: 'box-shadow',
+        shadowSpread: 'box-shadow',
+        shadowInset: 'box-shadow',
+      };
+      return map[field] || field;
+    }
+
+    /** 面板字段名 → 当前 CSS 值（从 _data 推导） */
+    _fieldToCssValue(field) {
+      const d = this._data || {};
+      const num = (v) => (isNaN(parseFloat(v)) ? '' : parseFloat(v));
       switch (field) {
-        case 'layoutMode':
-          el.style.display = 'flex';
-          el.style.flexDirection = value;
-          return { property: 'flex-direction', oldValue: getComputedStyle(el).flexDirection, newValue: value };
-        case 'justifyContent':
-          el.style.justifyContent = value;
-          return { property: 'justify-content', oldValue: getComputedStyle(el).justifyContent, newValue: value };
-        case 'alignItems':
-          el.style.alignItems = value;
-          return { property: 'align-items', oldValue: getComputedStyle(el).alignItems, newValue: value };
-        case 'layoutGap':
-          el.style.gap = isNaN(numVal) ? '' : numVal + 'px';
-          return { property: 'gap', oldValue: getComputedStyle(el).gap, newValue: isNaN(numVal) ? '' : numVal + 'px' };
-        case 'paddingLeft':
-          el.style.paddingLeft = isNaN(numVal) ? '' : numVal + 'px';
-          return { property: 'padding-left', oldValue: getComputedStyle(el).paddingLeft, newValue: isNaN(numVal) ? '' : numVal + 'px' };
-        case 'paddingRight':
-          el.style.paddingRight = isNaN(numVal) ? '' : numVal + 'px';
-          return { property: 'padding-right', oldValue: getComputedStyle(el).paddingRight, newValue: isNaN(numVal) ? '' : numVal + 'px' };
-        case 'paddingTop':
-          el.style.paddingTop = isNaN(numVal) ? '' : numVal + 'px';
-          return { property: 'padding-top', oldValue: getComputedStyle(el).paddingTop, newValue: isNaN(numVal) ? '' : numVal + 'px' };
-        case 'paddingBottom':
-          el.style.paddingBottom = isNaN(numVal) ? '' : numVal + 'px';
-          return { property: 'padding-bottom', oldValue: getComputedStyle(el).paddingBottom, newValue: isNaN(numVal) ? '' : numVal + 'px' };
         case 'width':
-          el.style.width = isNaN(numVal) ? '' : numVal + 'px';
-          return { property: 'width', oldValue: getComputedStyle(el).width, newValue: isNaN(numVal) ? '' : numVal + 'px' };
-        case 'height':
-          el.style.height = isNaN(numVal) ? '' : numVal + 'px';
-          return { property: 'height', oldValue: getComputedStyle(el).height, newValue: isNaN(numVal) ? '' : numVal + 'px' };
-        case 'fontSize':
-          el.style.fontSize = isNaN(numVal) ? '' : numVal + 'px';
-          return { property: 'font-size', oldValue: getComputedStyle(el).fontSize, newValue: isNaN(numVal) ? '' : numVal + 'px' };
-        case 'fontWeight':
-          el.style.fontWeight = value;
-          return { property: 'font-weight', oldValue: getComputedStyle(el).fontWeight, newValue: value };
+        case 'height': {
+          const raw = (d[field] || '').toString().trim();
+          // 支持语义值：100% / auto / fit-content / min-content 等非纯数值
+          if (/^(100%|auto|fit-content|min-content|max-content|inherit|initial|unset)$/i.test(raw)) return raw;
+          const n = parseFloat(raw);
+          return isNaN(n) ? '' : n + 'px';
+        }
         case 'colorHex':
         case 'colorOpacity': {
-          const hex = this._data.colorHex || '#000000';
-          const opacity = this._data.colorOpacity ?? 100;
-          const rgba = hexOpacityToRgba(hex, opacity);
-          el.style.color = rgba;
-          return { property: 'color', oldValue: getComputedStyle(el).color, newValue: rgba };
+          const hex = d.colorHex || '#000000';
+          // Token 模式：直接返回 var(--xxx)
+          if (isTokenValue(hex)) return hex;
+          const op = d.colorOpacity ?? 100;
+          return hexOpacityToRgba(hex, op);
         }
-        case 'lineHeight':
-          el.style.lineHeight = value || '';
-          return { property: 'line-height', oldValue: getComputedStyle(el).lineHeight, newValue: value || '' };
-        case 'textAlign':
-          el.style.textAlign = value;
-          return { property: 'text-align', oldValue: getComputedStyle(el).textAlign, newValue: value };
-        case 'layerOpacity':
-          el.style.opacity = isNaN(numVal) ? '' : (numVal / 100).toString();
-          return { property: 'opacity', oldValue: getComputedStyle(el).opacity, newValue: isNaN(numVal) ? '' : (numVal / 100).toString() };
-        case 'borderRadiusAll':
-          el.style.borderRadius = isNaN(numVal) ? '' : numVal + 'px';
-          return { property: 'border-radius', oldValue: getComputedStyle(el).borderRadius, newValue: isNaN(numVal) ? '' : numVal + 'px' };
         case 'fillHex':
         case 'fillOpacity': {
-          const hex = this._data.fillHex || '#FFFFFF';
-          const opacity = this._data.fillOpacity ?? 0;
-          const rgba = opacity > 0 ? hexOpacityToRgba(hex, opacity) : 'transparent';
-          el.style.backgroundColor = rgba;
-          return { property: 'background-color', oldValue: getComputedStyle(el).backgroundColor, newValue: rgba };
+          const hex = d.fillHex || '#FFFFFF';
+          const op = d.fillOpacity ?? 0;
+          return op > 0 ? hexOpacityToRgba(hex, op) : 'transparent';
         }
         case 'strokeHex':
         case 'strokeOpacity':
         case 'strokeWidth': {
-          const hex = this._data.strokeHex || '#000000';
-          const opacity = this._data.strokeOpacity ?? 0;
-          const width = parseFloat(this._data.strokeWidth) || 0;
-          const color = opacity > 0 && width > 0 ? hexOpacityToRgba(hex, opacity) : 'transparent';
-          el.style.borderWidth = width > 0 ? width + 'px' : '';
-          el.style.borderStyle = width > 0 ? 'solid' : '';
-          el.style.borderColor = color;
-          return { property: 'border', oldValue: getComputedStyle(el).border, newValue: width > 0 ? `${width}px solid ${color}` : '' };
+          const hex = d.strokeHex || '#000000';
+          const op = d.strokeOpacity ?? 0;
+          const w = num(d.strokeWidth);
+          return op > 0 && w > 0 ? `${w}px solid ${hexOpacityToRgba(hex, op)}` : 'none';
         }
         case 'strokePosition':
-          // CSS 不直接支持内/外描边位置，MVP 用 outline 模拟内描边
-          if (value === 'inside') {
-            el.style.boxShadow = 'inset 0 0 0 ' + (parseFloat(this._data.strokeWidth) || 1) + 'px ' + hexOpacityToRgba(this._data.strokeHex || '#000000', this._data.strokeOpacity ?? 100);
-          } else {
-            el.style.boxShadow = '';
-          }
-          return { property: 'box-shadow', oldValue: getComputedStyle(el).boxShadow, newValue: value === 'inside' ? el.style.boxShadow : '' };
+          return d.strokePosition === 'inside' ? `inset 0 0 0 ${num(d.strokeWidth) || 1}px ${hexOpacityToRgba(d.strokeHex || '#000000', d.strokeOpacity ?? 100)}` : 'none';
         case 'shadowHex':
         case 'shadowOpacity':
         case 'shadowX':
@@ -1722,6 +2693,245 @@
         case 'shadowBlur':
         case 'shadowSpread':
         case 'shadowInset': {
+          const hex = d.shadowHex || '#000000';
+          const op = d.shadowOpacity ?? 0;
+          const x = num(d.shadowX);
+          const y = num(d.shadowY);
+          const blur = num(d.shadowBlur);
+          const spread = num(d.shadowSpread);
+          const inset = d.shadowInset === true || d.shadowInset === 'true';
+          if (op > 0 && (blur > 0 || x !== 0 || y !== 0 || spread !== 0)) {
+            return `${inset ? 'inset ' : ''}${x}px ${y}px ${blur}px ${spread}px ${hexOpacityToRgba(hex, op)}`;
+          }
+          return 'none';
+        }
+        case 'width':
+        case 'height':
+        case 'fontSize':
+        case 'paddingLeft':
+        case 'paddingRight':
+        case 'paddingTop':
+        case 'paddingBottom':
+        case 'marginLeft':
+        case 'marginRight':
+        case 'marginTop':
+        case 'marginBottom':
+        case 'borderRadiusAll':
+        case 'layoutGap':
+          return num(d[field]) ? num(d[field]) + 'px' : '';
+        case 'layerOpacity':
+          return d.layerOpacity != null ? (num(d.layerOpacity) / 100).toString() : '';
+        case 'lineHeight':
+          return d.lineHeight || '';
+        case 'layoutMode':
+          return d.layoutMode || '';
+        case 'justifyContent':
+          return d.justifyContent || '';
+        case 'alignItems':
+          return d.alignItems || '';
+        case 'textAlign':
+          return d.textAlign || '';
+        case 'fontWeight':
+          return d.fontWeight || '';
+        default:
+          return d[field] != null ? d[field] : '';
+      }
+    }
+
+    /** 输入守门：拦截会污染施工单的非法操作 */
+    _validateFieldValue(field, value) {
+      const el = this._targetEl;
+      const numVal = parseFloat(value);
+      const display = getComputedStyle(el).display;
+      const isFlexOrGrid = display === 'flex' || display === 'grid';
+      switch (field) {
+        case 'layoutGap':
+          if (isNaN(numVal) || numVal < 0) return { ok: false, reason: '间距（gap）不能为空或负数' };
+          break;
+        case 'paddingLeft':
+        case 'paddingRight':
+        case 'paddingTop':
+        case 'paddingBottom':
+        case 'marginLeft':
+        case 'marginRight':
+        case 'marginTop':
+        case 'marginBottom':
+        case 'width':
+        case 'height':
+        case 'fontSize':
+        case 'borderRadiusAll': {
+          const raw = String(value || '').trim();
+          const isSemantic = /^(100%|auto|fit-content|min-content|max-content|inherit|initial|unset)$/i.test(raw);
+          if (isSemantic) break;
+          if (isNaN(numVal) || numVal < 0) return { ok: false, reason: '尺寸/间距不能为空或负数' };
+          break;
+        }
+        case 'layoutMode':
+          if (!isFlexOrGrid && display !== 'block' && display !== 'inline-block') {
+            return { ok: false, reason: '该元素不是 block/flex/grid 容器，无法调整布局方向' };
+          }
+          break;
+        case 'justifyContent':
+        case 'alignItems':
+          if (!isFlexOrGrid) return { ok: false, reason: 'justify/align 仅对 flex/grid 容器有效，当前元素不是' };
+          break;
+        default:
+          break;
+      }
+      return { ok: true };
+    }
+
+    _applyField(field, value) {
+      const el = this._targetEl;
+      const numVal = parseFloat(value);
+      const cs = () => getComputedStyle(el);
+      // 输入守门：拦截会污染施工单的非法操作（返回 null → 调用方跳过记录）
+      const guard = this._validateFieldValue(field, value);
+      if (!guard.ok) {
+        this._showToast('已拦截：' + guard.reason);
+        return null;
+      }
+      switch (field) {
+        case 'layoutMode': {
+          const oldValue = cs().flexDirection;
+          el.style.display = 'flex';
+          el.style.flexDirection = value;
+          return { property: 'flex-direction', oldValue, newValue: value };
+        }
+        case 'justifyContent': {
+          const oldValue = cs().justifyContent;
+          el.style.justifyContent = value;
+          return { property: 'justify-content', oldValue, newValue: value };
+        }
+        case 'alignItems': {
+          const oldValue = cs().alignItems;
+          el.style.alignItems = value;
+          return { property: 'align-items', oldValue, newValue: value };
+        }
+        case 'layoutGap': {
+          const oldValue = cs().gap;
+          el.style.gap = isNaN(numVal) ? '' : numVal + 'px';
+          return { property: 'gap', oldValue, newValue: isNaN(numVal) ? '' : numVal + 'px' };
+        }
+        case 'paddingLeft': {
+          const oldValue = cs().paddingLeft;
+          el.style.paddingLeft = isNaN(numVal) ? '' : numVal + 'px';
+          return { property: 'padding-left', oldValue, newValue: isNaN(numVal) ? '' : numVal + 'px' };
+        }
+        case 'paddingRight': {
+          const oldValue = cs().paddingRight;
+          el.style.paddingRight = isNaN(numVal) ? '' : numVal + 'px';
+          return { property: 'padding-right', oldValue, newValue: isNaN(numVal) ? '' : numVal + 'px' };
+        }
+        case 'paddingTop': {
+          const oldValue = cs().paddingTop;
+          el.style.paddingTop = isNaN(numVal) ? '' : numVal + 'px';
+          return { property: 'padding-top', oldValue, newValue: isNaN(numVal) ? '' : numVal + 'px' };
+        }
+        case 'paddingBottom': {
+          const oldValue = cs().paddingBottom;
+          el.style.paddingBottom = isNaN(numVal) ? '' : numVal + 'px';
+          return { property: 'padding-bottom', oldValue, newValue: isNaN(numVal) ? '' : numVal + 'px' };
+        }
+        case 'width': {
+          const oldValue = cs().width;
+          const SEM = /^(100%|auto|fit-content|min-content|max-content|inherit|initial|unset)$/i;
+          const out = SEM.test(String(value).trim()) ? value.trim() : (isNaN(numVal) ? '' : numVal + 'px');
+          el.style.width = out;
+          return { property: 'width', oldValue, newValue: out };
+        }
+        case 'height': {
+          const oldValue = cs().height;
+          const SEM = /^(100%|auto|fit-content|min-content|max-content|inherit|initial|unset)$/i;
+          const out = SEM.test(String(value).trim()) ? value.trim() : (isNaN(numVal) ? '' : numVal + 'px');
+          el.style.height = out;
+          return { property: 'height', oldValue, newValue: out };
+        }
+        case 'fontSize': {
+          const oldValue = cs().fontSize;
+          el.style.fontSize = isNaN(numVal) ? '' : numVal + 'px';
+          return { property: 'font-size', oldValue, newValue: isNaN(numVal) ? '' : numVal + 'px' };
+        }
+        case 'fontWeight': {
+          const oldValue = cs().fontWeight;
+          el.style.fontWeight = value;
+          return { property: 'font-weight', oldValue, newValue: value };
+        }
+        case 'colorHex':
+        case 'colorOpacity': {
+          const oldValue = cs().color;
+          const hex = this._data.colorHex || '#000000';
+          const isTok = isTokenValue(hex);
+          // Token 模式：直接应用 var(--xxx)，忽略 opacity
+          if (isTok) {
+            el.style.color = hex;
+            const computedAfter = getComputedStyle(el).color;
+            return { property: 'color', oldValue, newValue: hex };
+          }
+          const opacity = this._data.colorOpacity ?? 100;
+          const rgba = hexOpacityToRgba(hex, opacity);
+          el.style.color = rgba;
+          return { property: 'color', oldValue, newValue: rgba };
+        }
+        case 'lineHeight': {
+          const oldValue = cs().lineHeight;
+          el.style.lineHeight = value || '';
+          return { property: 'line-height', oldValue, newValue: value || '' };
+        }
+        case 'textAlign': {
+          const oldValue = cs().textAlign;
+          el.style.textAlign = value;
+          return { property: 'text-align', oldValue, newValue: value };
+        }
+        case 'layerOpacity': {
+          const oldValue = cs().opacity;
+          el.style.opacity = isNaN(numVal) ? '' : (numVal / 100).toString();
+          return { property: 'opacity', oldValue, newValue: isNaN(numVal) ? '' : (numVal / 100).toString() };
+        }
+        case 'borderRadiusAll': {
+          const oldValue = cs().borderRadius;
+          el.style.borderRadius = isNaN(numVal) ? '' : numVal + 'px';
+          return { property: 'border-radius', oldValue, newValue: isNaN(numVal) ? '' : numVal + 'px' };
+        }
+        case 'fillHex':
+        case 'fillOpacity': {
+          const oldValue = cs().backgroundColor;
+          const hex = this._data.fillHex || '#FFFFFF';
+          const opacity = this._data.fillOpacity ?? 0;
+          const rgba = opacity > 0 ? hexOpacityToRgba(hex, opacity) : 'transparent';
+          el.style.backgroundColor = rgba;
+          return { property: 'background-color', oldValue, newValue: rgba };
+        }
+        case 'strokeHex':
+        case 'strokeOpacity':
+        case 'strokeWidth': {
+          const oldValue = cs().border;
+          const hex = this._data.strokeHex || '#000000';
+          const opacity = this._data.strokeOpacity ?? 0;
+          const width = parseFloat(this._data.strokeWidth) || 0;
+          const color = opacity > 0 && width > 0 ? hexOpacityToRgba(hex, opacity) : 'transparent';
+          el.style.borderWidth = width > 0 ? width + 'px' : '';
+          el.style.borderStyle = width > 0 ? 'solid' : '';
+          el.style.borderColor = color;
+          return { property: 'border', oldValue, newValue: width > 0 ? `${width}px solid ${color}` : '' };
+        }
+        case 'strokePosition': {
+          const oldValue = cs().boxShadow;
+          if (value === 'inside') {
+            el.style.boxShadow = 'inset 0 0 0 ' + (parseFloat(this._data.strokeWidth) || 1) + 'px ' + hexOpacityToRgba(this._data.strokeHex || '#000000', this._data.strokeOpacity ?? 100);
+          } else {
+            el.style.boxShadow = '';
+          }
+          return { property: 'box-shadow', oldValue, newValue: value === 'inside' ? el.style.boxShadow : '' };
+        }
+        case 'shadowHex':
+        case 'shadowOpacity':
+        case 'shadowX':
+        case 'shadowY':
+        case 'shadowBlur':
+        case 'shadowSpread':
+        case 'shadowInset': {
+          const oldValue = cs().boxShadow;
           const hex = this._data.shadowHex || '#000000';
           const opacity = this._data.shadowOpacity ?? 0;
           const x = parseFloat(this._data.shadowX) || 0;
@@ -1733,15 +2943,40 @@
             const color = hexOpacityToRgba(hex, opacity);
             const shadowStr = `${inset ? 'inset ' : ''}${x}px ${y}px ${blur}px ${spread}px ${color}`;
             el.style.boxShadow = shadowStr;
-            return { property: 'box-shadow', oldValue: getComputedStyle(el).boxShadow, newValue: shadowStr };
+            return { property: 'box-shadow', oldValue, newValue: shadowStr };
           } else {
             el.style.boxShadow = 'none';
-            return { property: 'box-shadow', oldValue: getComputedStyle(el).boxShadow, newValue: 'none' };
+            return { property: 'box-shadow', oldValue, newValue: 'none' };
           }
+        }
+        case 'display': {
+          const oldValue = cs().display;
+          el.style.display = value || '';
+          return { property: 'display', oldValue, newValue: value || '' };
+        }
+        case 'position': {
+          const oldValue = cs().position;
+          el.style.position = value || '';
+          return { property: 'position', oldValue, newValue: value || '' };
+        }
+        case 'zIndex': {
+          const oldValue = cs().zIndex;
+          const out = isNaN(numVal) ? '' : String(Math.round(numVal));
+          el.style.zIndex = out;
+          return { property: 'z-index', oldValue, newValue: out };
         }
         default:
           return null;
       }
+    }
+
+    /** 更新宽高模式 trigger 文字（固定/适应/填充） */
+    _updateSizeModeTrigger(axis) {
+      const sel = this._shadow.querySelector(`[data-field="${axis}Mode"]`);
+      const trigger = this._shadow.querySelector(`[data-field="${axis}"] + .field-select-wrap .field-select-trigger`);
+      if (!sel || !trigger) return;
+      const v = sel.value;
+      trigger.textContent = v === 'auto' ? '适应' : (v === 'fill' ? '填充' : '固定');
     }
 
     _updateActiveStates() {
@@ -1763,15 +2998,140 @@
       this._shadow.querySelectorAll('[data-color-trigger]').forEach(btn => {
         const field = btn.dataset.field;
         const opacityField = field.replace('Hex', 'Opacity');
-        const hex = d[field] || '#000000';
+        const val = d[field] || '#000000';
         const opacity = d[opacityField] ?? 100;
         const swatch = btn.querySelector('.swatch');
-        if (swatch) swatch.style.background = hexOpacityToRgba(hex, opacity);
+        if (swatch) {
+          swatch.style.background = isTokenValue(val)
+            ? (resolveCssValue(val, 'color') || 'transparent')
+            : hexOpacityToRgba(val, opacity);
+        }
       });
+      // 颜色 Token 按钮状态 + opacity 输入框联动
+      const colorTokenBtn = this._shadow.querySelector('[data-token-trigger="color"]');
+      const colorOpacityInput = this._shadow.querySelector('[data-field="colorOpacity"]');
+      const colorVal = d.colorHex || '';
+      if (colorTokenBtn) {
+        const isTok = isTokenValue(colorVal);
+        colorTokenBtn.classList.toggle('active', isTok);
+        if (isTok) {
+          const tokName = colorVal.match(/var\((--[^)]+)\)/)[1].replace(/^--/, '');
+          if (colorTokenBtn.textContent.trim() !== tokName) colorTokenBtn.textContent = tokName;
+        } else {
+          if (colorTokenBtn.textContent.trim() !== 'T') colorTokenBtn.textContent = 'T';
+        }
+      }
+      if (colorOpacityInput) {
+        colorOpacityInput.disabled = isTokenValue(colorVal);
+      }
+      // 颜色输入框值回显（统一同步，不依赖焦点状态）
+      const colorInput = this._shadow.querySelector('[data-field="colorHex"]');
+      if (colorInput) {
+        if (colorInput.value !== colorVal) {
+          colorInput.value = colorVal;
+        }
+      } else {
+      }
       // 对齐矩阵
       this._shadow.querySelectorAll('[data-align-preset]').forEach(btn => {
         const [jc, ai] = btn.dataset.alignPreset.split('|');
         btn.classList.toggle('active', jc === d.justifyContent && ai === d.alignItems);
+      });
+    }
+
+    // ── Token 选择面板 ──────────────────────────────────────
+    _openTokenPanel(trigger, type) {
+      const panel = this._shadow.querySelector('[data-token-panel]');
+      if (!panel) return;
+      this._tokenPanel = { open: true, type, trigger };
+      this._renderTokenList(type);
+      panel.classList.add('open');
+      // 定位到触发按钮下方
+      const rect = trigger.getBoundingClientRect();
+      const panelRect = this.getBoundingClientRect();
+      let left = rect.left - panelRect.left;
+      let top = rect.bottom - panelRect.top + 6;
+      const panelWidth = 240;
+      if (left + panelWidth > panelRect.width - 8) {
+        left = panelRect.width - panelWidth - 8;
+      }
+      if (left < 8) left = 8;
+      panel.style.left = left + 'px';
+      panel.style.top = top + 'px';
+      // 阻止面板和触发按钮内部 mousedown/touchstart 冒泡，避免 shadow DOM 事件重定向导致外部关闭逻辑误关
+      this._tokenPanelStopProp = (e) => e.stopPropagation();
+      panel.addEventListener('mousedown', this._tokenPanelStopProp);
+      panel.addEventListener('touchstart', this._tokenPanelStopProp);
+      trigger.addEventListener('mousedown', this._tokenPanelStopProp);
+      trigger.addEventListener('touchstart', this._tokenPanelStopProp);
+      // 点击外部关闭（用 composedPath 穿透 shadow DOM 边界判断，避免事件重定向误判）
+      this._tokenOutsideHandler = (e) => {
+        const path = e.composedPath ? e.composedPath() : [];
+        const inPanel = path.includes(panel);
+        const inTrigger = path.includes(trigger);
+        if (!inPanel && !inTrigger) {
+          this._closeTokenPanel();
+        }
+      };
+      setTimeout(() => document.addEventListener('mousedown', this._tokenOutsideHandler, true), 0);
+      setTimeout(() => document.addEventListener('touchstart', this._tokenOutsideHandler, true), 0);
+    }
+
+    _closeTokenPanel() {
+      const panel = this._shadow.querySelector('[data-token-panel]');
+      if (panel) panel.classList.remove('open');
+      // 移除阻止冒泡监听
+      if (this._tokenPanelStopProp) {
+        panel.removeEventListener('mousedown', this._tokenPanelStopProp);
+        panel.removeEventListener('touchstart', this._tokenPanelStopProp);
+        if (this._tokenPanel.trigger) {
+          this._tokenPanel.trigger.removeEventListener('mousedown', this._tokenPanelStopProp);
+          this._tokenPanel.trigger.removeEventListener('touchstart', this._tokenPanelStopProp);
+        }
+        this._tokenPanelStopProp = null;
+      }
+      this._tokenPanel = { open: false, type: '', trigger: null };
+      if (this._tokenOutsideHandler) {
+        document.removeEventListener('mousedown', this._tokenOutsideHandler, true);
+        document.removeEventListener('touchstart', this._tokenOutsideHandler, true);
+        this._tokenOutsideHandler = null;
+      }
+    }
+
+    _renderTokenList(type) {
+      const listEl = this._shadow.querySelector('[data-token-list]');
+      if (!listEl) return;
+      const currentVal = this._data ? (this._data.colorHex || '') : '';
+      let html = '';
+      if (type === 'color') {
+        COLOR_TOKEN_GROUPS.forEach(group => {
+          html += `<div class="token-group-title">${group.label}</div>`;
+          group.tokens.forEach(token => {
+            const varExpr = `var(${token.var})`;
+            const selected = currentVal === varExpr;
+            const color = resolveCssValue(varExpr, 'color') || 'transparent';
+            html += `
+              <button class="token-item ${selected ? 'selected' : ''}" type="button"
+                data-token-value="${varExpr}" data-token-name="${token.name}">
+                <span class="token-swatch" style="background:${color}"></span>
+                <span class="token-label">${token.label}</span>
+                <span class="token-name">${token.name}</span>
+              </button>`;
+          });
+        });
+      }
+      listEl.innerHTML = html;
+      // 绑定 token 项点击
+      listEl.querySelectorAll('.token-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const value = item.dataset.tokenValue;
+          const name = item.dataset.tokenName;
+          if (this._tokenPanel.type === 'color') {
+            this._onFieldChange('colorHex', value);
+          }
+          this._closeTokenPanel();
+        });
       });
     }
   }
@@ -1788,10 +3148,11 @@
       this._collapsed = true;
       this._drag = { active: false, moved: false, pointerId: null, startX: 0, startY: 0, origX: 0, origY: 0 };
       this._walkthroughMode = false;
-      this._faultState = { load: false, save: false, delete: false };
+      this._faultState = { load: false, save: false, delete: false, slow: false };
       this._subpanelOpen = null;
       this._components = {};
       this._suppressClick = false;
+      this._anchorDir = null; // 展开时确定的锚点方向，收起时复用，避免展开态中心偏移导致方向误判
     }
 
     connectedCallback() {
@@ -1810,7 +3171,7 @@
       window.WegoApp = window.WegoApp || {};
       window.WegoApp.faultInjection = {
         isEnabled: (key) => !!this._faultState[key],
-        setEnabled: (key, on) => { this._faultState[key] = !!on; this._persistFaultState(); this._updateToolbarState(); },
+        setEnabled: (key, on) => { this._faultState[key] = !!on; this._persistFaultState(); this._updateFaultSwitches(); this._updateToolbarState(); },
       };
     }
 
@@ -1832,6 +3193,8 @@
             overflow: visible;
             -webkit-tap-highlight-color: transparent;
             touch-action: none;
+            /* Liaison 暗色风格：面板容器保持暗色，但强调色沿用设计系统绿色 */
+            --text-brand: #00b96b;
             user-select: none;
             -webkit-user-select: none;
           }
@@ -2109,9 +3472,9 @@
             <span class="switch" data-fault-switch="delete"></span>
           </button>
           <div class="subpanel-sep"></div>
-          <button class="subpanel-item is-disabled" data-slowload>
-            <span class="item-label">慢加载模式 <span class="dev-tag">开发中</span></span>
-            <span class="subpanel-arrow">›</span>
+          <button class="subpanel-item" data-fault="slow">
+            <span>慢加载(约9s)</span>
+            <span class="switch" data-fault-switch="slow"></span>
           </button>
         </div>
         <!-- 更多菜单 -->
@@ -2127,7 +3490,7 @@
           </button>
         </div>
         <!-- 子组件（走查模式相关） -->
-        <wego-wt-overlay hidden></wego-wt-overlay>
+        <wego-wt-highlight hidden></wego-wt-highlight>
         <wego-wt-style-panel hidden></wego-wt-style-panel>
         <wego-wt-color-picker hidden></wego-wt-color-picker>
         <wego-wt-overview-panel hidden></wego-wt-overview-panel>
@@ -2136,7 +3499,7 @@
     }
 
     _initComponents() {
-      this._components.overlay = this._shadow.querySelector('wego-wt-overlay');
+      this._components.highlight = this._shadow.querySelector('wego-wt-highlight');
       this._components.stylePanel = this._shadow.querySelector('wego-wt-style-panel');
       this._components.colorPicker = this._shadow.querySelector('wego-wt-color-picker');
       this._components.overviewPanel = this._shadow.querySelector('wego-wt-overview-panel');
@@ -2160,7 +3523,7 @@
       this._shadow.querySelector('[data-collapse-btn]').addEventListener('click', (e) => {
         if (this._suppressClick) { e.preventDefault(); e.stopPropagation(); this._suppressClick = false; return; }
         this.setCollapsed(true);
-        this._closeSubpanels();
+        this._closeAllPanels();
       });
       // 工具条按钮
       this._shadow.querySelectorAll('[data-tool]').forEach(btn => {
@@ -2194,15 +3557,15 @@
           }
         });
       });
-      // 慢加载（禁用）
-      this._shadow.querySelector('[data-slowload]').addEventListener('click', (e) => {
-        e.stopPropagation();
-        this._showToast('慢加载模式开发中');
-      });
-      // 点击外部关闭子面板
+      // 点击外部关闭子面板和配置列表
       document.addEventListener('pointerdown', (e) => {
-        if (!e.target.closest || !e.target.closest('wego-walkthrough')) {
+        if (!e.target.closest) return;
+        if (isWalkthroughElement(e.target)) return; // 工具自身 UI 内的 pointerdown 不关闭
+        if (!e.target.closest('wego-walkthrough')) {
           this._closeSubpanels();
+          if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
+            this._components.overviewPanel.close();
+          }
         }
       }, true);
 
@@ -2217,8 +3580,8 @@
       bus.on('delete-change', ({ id }) => this._deleteChange(id));
       bus.on('reset-changes', () => this._resetChanges());
       bus.on('toast', ({ message }) => this._showToast(message));
-      bus.on('element-selected', ({ element, selector }) => {
-        this._components.stylePanel.openForElement(element, selector);
+      bus.on('element-selected', ({ element, selector, target }) => {
+        this._components.stylePanel.openForElement(element, selector, target || '');
       });
       bus.on('element-deselected', () => this._components.stylePanel.close());
     }
@@ -2336,7 +3699,20 @@
         this._collapsedTransitionEnd = null;
       }
 
-      // 切换内容显示与 class（先切 class 让测量时内容就位）
+      // 1. 记录起始态（切换内容前，确保拿到真实的起始宽度和位置）
+      const startHostRect = this.getBoundingClientRect();
+      const startWidth = toolbar.getBoundingClientRect().width;
+      // 展开时基于当前位置判断方向并保存；收起时复用展开时保存的方向，
+      // 避免展开态中心比收起态偏左导致方向误判（收起后位置偏移）
+      let dir;
+      if (!collapsed) {
+        dir = this._getExpandDirection();
+        this._anchorDir = dir;
+      } else {
+        dir = this._anchorDir || this._getExpandDirection();
+      }
+
+      // 2. 切换内容显示与 class
       this._collapsed = collapsed;
       toolbar.classList.toggle('is-collapsed', collapsed);
       toolbar.classList.toggle('is-expanded', !collapsed);
@@ -2346,43 +3722,75 @@
       } else {
         fab.style.display = 'none';
         main.style.display = 'inline-flex';
-        const dir = this._getExpandDirection();
         main.style.flexDirection = dir === 'left' ? 'row-reverse' : 'row';
+        // 收起按钮箭头方向：右侧展开(row-reverse，按钮在最右)显示向右箭头›，左侧展开显示向左箭头‹
+        const collapseBtn = this._shadow.querySelector('[data-collapse-btn]');
+        if (collapseBtn) collapseBtn.textContent = dir === 'left' ? '›' : '‹';
       }
 
-      // 起点：关闭过渡，测量 from → inline 写死起点；再开过渡；下一帧写终点
-      const startW = toolbar.getBoundingClientRect().width;
+      // 3. 测量目标态宽度
+      //    收起态宽度由 CSS .is-collapsed { width: 48px } 确定，直接用 48，
+      //    避免切 auto 测量时因 padding 算得 56px，与最终 48px 不一致导致收起后位置偏移；
+      //    展开态宽度由内容决定，需切 auto 测量
       toolbar.style.transition = 'none';
-      toolbar.style.width = startW + 'px';
-      // 强制重排，确保起点被接受
+      let endWidth;
+      if (collapsed) {
+        endWidth = 48;
+      } else {
+        toolbar.style.width = 'auto';
+        void toolbar.offsetHeight;
+        endWidth = toolbar.getBoundingClientRect().width || 233;
+      }
+
+      // 4. 计算 left 起始/目标值
+      //    右侧(dir=left)：以起始态右边缘为锚点，展开向左扩展、收起向右收缩
+      //    左侧(dir=right)向右展开：边界检查，避免右侧超出视口
+      let startLeft = null, endLeft = null;
+      if (dir === 'left') {
+        const rightEdge = startHostRect.left + startWidth;
+        startLeft = rightEdge - startWidth;
+        endLeft = Math.max(8, rightEdge - endWidth);
+      } else if (!collapsed) {
+        const maxLeft = window.innerWidth - endWidth - 8;
+        if (startHostRect.left + endWidth > window.innerWidth - 8 && startHostRect.left > maxLeft) {
+          startLeft = Math.max(8, maxLeft);
+          endLeft = startLeft;
+        }
+      }
+
+      // 5. 设置起始态（关闭过渡，强制重排确保起点被接受）
+      toolbar.style.width = startWidth + 'px';
+      if (startLeft != null) {
+        this.style.transition = 'none';
+        this.style.left = startLeft + 'px';
+        this.style.right = 'auto';
+      }
       void toolbar.offsetHeight;
 
-      // 计算终点（无过渡下切 auto 测实际渲染宽度）
-      let endW = 48;
-      if (!collapsed) {
-        toolbar.style.width = 'auto';
-        endW = toolbar.getBoundingClientRect().width || 233;
-        toolbar.style.width = startW + 'px';
-        void toolbar.offsetHeight;
+      // 6. 开过渡（带回弹缓冲，参考 Liaison/Figma 浮动工具条动效）
+      const easing = 'cubic-bezier(0.34, 1.56, 0.64, 1)';
+      toolbar.style.transition = `width 320ms ${easing}`;
+      if (startLeft != null) {
+        this.style.transition = `left 320ms ${easing}`;
       }
 
-      // 开过渡 + 下一帧写终点
-      toolbar.style.transition = 'width 300ms ease-out';
+      // 7. 下一帧写目标态
       requestAnimationFrame(() => {
-        toolbar.style.width = endW + 'px';
+        toolbar.style.width = endWidth + 'px';
+        if (endLeft != null) {
+          this.style.left = endLeft + 'px';
+        }
       });
 
-      // 展开时调整位置和子面板
-      if (!collapsed) {
-        this._adjustPositionAfterExpand(endW, this._getExpandDirection());
-        this._updateSubpanelPosition();
-      }
+      // 8. 子面板位置
+      this._updateSubpanelPosition();
 
-      // 过渡结束清理
+      // 9. 过渡结束清理
       const onEnd = (e) => {
         if (e.target !== toolbar || e.propertyName !== 'width') return;
         toolbar.style.width = collapsed ? '48px' : '';
         toolbar.style.transition = '';
+        this.style.transition = '';
         toolbar.removeEventListener('transitionend', onEnd);
         if (this._collapsedTransitionEnd === onEnd) this._collapsedTransitionEnd = null;
       };
@@ -2394,37 +3802,22 @@
 
 
 
-
-    _adjustPositionAfterExpand(toolbarWidth, dir) {
-      const rect = this.getBoundingClientRect();
-      if (dir === 'right') {
-        // 向右展开，检查右侧是否超出
-        const rightEdge = rect.left + toolbarWidth;
-        const maxLeft = window.innerWidth - toolbarWidth - 8;
-        if (rightEdge > window.innerWidth - 8 && rect.left > maxLeft) {
-          this.style.left = Math.max(8, maxLeft) + 'px';
-          this.style.right = 'auto';
-        }
-      } else {
-        // 向左展开，检查左侧是否超出
-        if (rect.left < 8) {
-          this.style.left = '8px';
-          this.style.right = 'auto';
-        }
-      }
-    }
-
     // ── 工具条按钮 ────────────────────────────────────────
     _onToolClick(tool, btn) {
       switch (tool) {
         case 'walkthrough':
+          this._closeAllPanels();
           this._setWalkthroughMode(!this._walkthroughMode);
           break;
         case 'datamock':
           this._toggleSubpanel('datamock');
           break;
         case 'overview':
-          this._openOverview();
+          if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
+            this._components.overviewPanel.close();
+          } else {
+            this._openOverview();
+          }
           break;
         case 'more':
           this._toggleSubpanel('more');
@@ -2436,7 +3829,7 @@
       const panel = this._shadow.querySelector(`[data-subpanel="${name}"]`);
       if (!panel) return;
       const isOpen = panel.classList.contains('is-open');
-      this._closeSubpanels();
+      this._closeAllPanels();
       if (!isOpen) {
         panel.classList.add('is-open');
         this._updateSubpanelPosition();
@@ -2447,6 +3840,13 @@
 
     _closeSubpanels() {
       this._shadow.querySelectorAll('[data-subpanel]').forEach(p => p.classList.remove('is-open'));
+    }
+
+    _closeAllPanels() {
+      this._closeSubpanels();
+      if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
+        this._components.overviewPanel.close();
+      }
     }
 
     _updateSubpanelPosition() {
@@ -2507,57 +3907,91 @@
     }
 
     _bindTouchEvents() {
-      this._touchStartX = 0;
-      this._touchStartY = 0;
-      this._touchStartTime = 0;
+      this._ptStartX = 0;
+      this._ptStartY = 0;
+      this._ptStartTime = 0;
       this._isSwiping = false;
-      document.addEventListener('touchstart', this._onTouchStart, { passive: true });
-      document.addEventListener('touchmove', this._onTouchMove, { passive: true });
-      document.addEventListener('touchend', this._onTouchEnd, { passive: false });
-      document.addEventListener('mousedown', this._onMouseDown, true);
+      this._pointerActive = false;
+      this._hoveredElement = null;
+      document.addEventListener('pointerdown', this._onPointerDown, true);
+      document.addEventListener('pointermove', this._onPointerMove, true);
+      document.addEventListener('pointerup', this._onPointerUp, true);
+      document.addEventListener('click', this._onClickCapture, true);
     }
 
     _unbindTouchEvents() {
-      document.removeEventListener('touchstart', this._onTouchStart);
-      document.removeEventListener('touchmove', this._onTouchMove);
-      document.removeEventListener('touchend', this._onTouchEnd);
-      document.removeEventListener('mousedown', this._onMouseDown, true);
+      document.removeEventListener('pointerdown', this._onPointerDown, true);
+      document.removeEventListener('pointermove', this._onPointerMove, true);
+      document.removeEventListener('pointerup', this._onPointerUp, true);
+      document.removeEventListener('click', this._onClickCapture, true);
+      this._pointerActive = false;
     }
 
-    _onTouchStart = (e) => {
-      const touch = e.touches[0];
-      this._touchStartX = touch.clientX;
-      this._touchStartY = touch.clientY;
-      this._touchStartTime = Date.now();
+    // 走查模式：在捕获阶段最早吞掉页面元素的指针事件，避免误触发其自身监听；
+    // 但不在 pointerdown 调 preventDefault，保留原生滚动（滑动手势放行）。
+    _onPointerDown = (e) => {
+      if (e.button !== undefined && e.button !== 0) return; // 仅主键
+      if (isWalkthroughElement(e.target)) return;          // 工具自身 UI 放行
+      e.stopPropagation();                                 // 阻断页面元素监听器
+      this._clearHover();
+      this._pointerActive = true;
+      this._ptStartX = e.clientX;
+      this._ptStartY = e.clientY;
+      this._ptStartTime = Date.now();
       this._isSwiping = false;
+    };
+    _onPointerMove = (e) => {
+      if (this._pointerActive) {
+        const dx = Math.abs(e.clientX - this._ptStartX);
+        const dy = Math.abs(e.clientY - this._ptStartY);
+        if (dx > 10 || dy > 10) this._isSwiping = true;
+        return;
+      }
+      // 非点击/滑动过程中：hover 预览元素布局（仅在无选中元素时生效）
+      if (state.selectedElement) return;
+      this._updateHover(e.clientX, e.clientY);
+    };
+    _onPointerUp = (e) => {
+      if (!this._pointerActive) return;
+      this._pointerActive = false;
+      if (this._isSwiping) return;                          // 滑动：放行页面滚动
+      if (Date.now() - this._ptStartTime >= 500) return;    // 长按：MVP 不处理
+      this._handlePointSelection(e.clientX, e.clientY, e);
+    };
+    // 拦截走查模式下落到页面元素的合成 click，避免误触发（如导航跳转）
+    _onClickCapture = (e) => {
+      if (this._walkthroughMode && !isWalkthroughElement(e.target)) {
+        e.stopPropagation();
+        e.preventDefault();
+      }
+    };
+
+    _updateHover(clientX, clientY) {
+      const el = document.elementFromPoint(clientX, clientY);
+      if (!el || el === document.body || el === document.documentElement || isWalkthroughElement(el)) {
+        this._clearHover();
+        return;
+      }
+      if (this._hoveredElement === el) return;
+      this._hoveredElement = el;
+      this._components.highlight.setMode('hover');
+      this._components.highlight.removeAttribute('hidden');
+      this._components.highlight.showForElement(el);
     }
-    _onTouchMove = (e) => {
-      const touch = e.touches[0];
-      const dx = Math.abs(touch.clientX - this._touchStartX);
-      const dy = Math.abs(touch.clientY - this._touchStartY);
-      if (dx > 10 || dy > 10) this._isSwiping = true;
-    }
-    _onTouchEnd = (e) => {
-      if (this._isSwiping) return;
-      if (Date.now() - this._touchStartTime >= 500) return;
-      const touch = e.changedTouches[0];
-      this._handlePointSelection(touch.clientX, touch.clientY, e);
-    }
-    _onMouseDown = (e) => {
-      if (e.button !== 0) return;
-      const startX = e.clientX, startY = e.clientY;
-      const onUp = (ev) => {
-        document.removeEventListener('mouseup', onUp, true);
-        if (Math.abs(ev.clientX - startX) > 5 || Math.abs(ev.clientY - startY) > 5) return;
-        this._handlePointSelection(ev.clientX, ev.clientY, ev);
-      };
-      document.addEventListener('mouseup', onUp, true);
+
+    _clearHover() {
+      if (this._hoveredElement) {
+        this._hoveredElement = null;
+        if (!state.selectedElement && this._components.highlight) {
+          this._components.highlight.hide();
+          this._components.highlight.setAttribute('hidden', '');
+        }
+      }
     }
 
     _handlePointSelection(clientX, clientY, event) {
       const el = document.elementFromPoint(clientX, clientY);
       if (!el) return;
-      if (isWalkthroughElement(el)) return;
       if (el === document.body || el === document.documentElement) {
         this._clearSelection();
         return;
@@ -2569,24 +4003,44 @@
     _selectElement(el) {
       this._clearSelection();
       state.selectedElement = el;
-      el.setAttribute('data-wt-selected', 'true');
-      this._components.overlay.removeAttribute('hidden');
-      this._components.overlay.showForElement(el);
-      state.selectedSelector = generateSelector(el);
-      bus.emit('element-selected', { element: el, selector: state.selectedSelector });
+      this._components.highlight.setMode('selected');
+      this._components.highlight.removeAttribute('hidden');
+      this._components.highlight.showForElement(el);
+      const selector = generateSelector(el);
+      state.selectedSelector = selector;
+      state.selectedTarget = '';
+      // 快照元素原始样式（走查态进入前的计算值），用于「改回原值即视为无变更」
+      // 关键：用 route::selector 作 key，且仅在首次选中时建立一次，后续重新选中不覆盖，
+      // 否则关闭面板再打开时元素已带 inline 修改，getComputedStyle 读到的是污染值。
+      const snapKey = state.currentRoute + '::' + selector;
+      if (!state.originalStyles[snapKey]) {
+        const cs = getComputedStyle(el);
+        state.originalStyles[snapKey] = snapshotStyle(cs);
+      }
+      bus.emit('element-selected', { element: el, selector, target: '' });
     }
 
     _clearSelection() {
       if (state.selectedElement) {
-        state.selectedElement.removeAttribute('data-wt-selected');
         state.selectedElement = null;
       }
-      if (this._components.overlay) {
-        this._components.overlay.hide();
-        this._components.overlay.setAttribute('hidden', '');
+      this._hoveredElement = null;
+      if (this._components.highlight) {
+        this._components.highlight.hide();
+        this._components.highlight.setAttribute('hidden', '');
       }
       state.selectedSelector = '';
+      state.selectedTarget = '';
       bus.emit('element-deselected');
+    }
+
+    /** 样式面板切换伪元素目标时，更新高亮层标注（伪元素无法量几何，仅框宿主+标注） */
+    _onTargetChanged(target) {
+      state.selectedTarget = target || '';
+      if (this._components.highlight && state.selectedElement) {
+        const label = target ? '::' + target : '';
+        this._components.highlight.showForElement(state.selectedElement, label);
+      }
     }
 
     _jumpToElement(selector) {
@@ -2605,7 +4059,8 @@
     // ── 配置列表 ──────────────────────────────────────────
     _openOverview() {
       this._closeSubpanels();
-      this._components.overviewPanel.open(state.changes, state.currentRoute);
+      const countBtn = this._shadow.querySelector('[data-tool="overview"]');
+      this._components.overviewPanel.open(state.changes, state.currentRoute, countBtn);
       this._clearSelection();
     }
 
@@ -2618,6 +4073,7 @@
           this._faultState.load = !!p.load;
           this._faultState.save = !!p.save;
           this._faultState['delete'] = !!p['delete'];
+          this._faultState.slow = !!p.slow;
         }
       } catch (e) {}
       this._updateFaultSwitches();
@@ -2638,7 +4094,7 @@
     }
 
     _updateFaultSwitches() {
-      ['load', 'save', 'delete'].forEach(key => {
+      ['load', 'save', 'delete', 'slow'].forEach(key => {
         const sw = this._shadow.querySelector(`[data-fault-switch="${key}"]`);
         if (sw) sw.classList.toggle('is-on', !!this._faultState[key]);
       });
@@ -2646,24 +4102,44 @@
 
     // ── 变更记录 ──────────────────────────────────────────
     _recordChange(change) {
-      const existing = state.changes.find(c =>
-        c.selector === change.selector && c.property === change.property
-      );
+      const snapKey = state.currentRoute + '::' + change.selector;
+      const original = state.originalStyles[snapKey];
+      const isPseudo = !!change.target;
+      const matchExisting = (c) => c.selector === change.selector && c.property === change.property && (c.target || '') === (change.target || '');
+      // 改回原始值 = 净变更为零，删除该属性的变更记录（而非保留 X→X）
+      if (original && change.property in original && change.newValue === original[change.property]) {
+        const existing = state.changes.find(matchExisting);
+        if (existing) {
+          this._revertChange(existing);
+          state.changes = state.changes.filter(c => c.id !== existing.id);
+          this._saveChanges();
+          this._updateChangeCount();
+          if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
+            this._components.overviewPanel.refresh(state.changes, state.currentRoute);
+          }
+        }
+        return;
+      }
+      const existing = state.changes.find(matchExisting);
       if (existing) {
         existing.newValue = change.newValue;
         existing.timestamp = Date.now();
         existing.elementText = change.elementText;
+        Object.assign(existing, deriveIntent(existing, change.el));
       } else {
-        state.changes.push({
+        const rec = {
           id: 'change-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
           selector: change.selector,
+          target: change.target || '',
           elementTag: change.elementTag,
           elementText: change.elementText,
           property: change.property,
           oldValue: change.oldValue,
           newValue: change.newValue,
           timestamp: Date.now(),
-        });
+        };
+        Object.assign(rec, deriveIntent(rec, change.el));
+        state.changes.push(rec);
       }
       this._saveChanges();
       this._updateChangeCount();
@@ -2672,13 +4148,22 @@
       }
     }
 
+    /** 还原单条变更（本体=清 inline；伪元素=清注入规则） */
+    _revertChange(change) {
+      if (change.target) {
+        applyPseudoStyle(change.selector, change.target, change.property, '');
+        return;
+      }
+      try {
+        const el = document.querySelector(change.selector);
+        if (el) el.style[change.property] = '';
+      } catch (e) {}
+    }
+
     _deleteChange(id) {
       const change = state.changes.find(c => c.id === id);
       if (change) {
-        try {
-          const el = document.querySelector(change.selector);
-          if (el) el.style[change.property] = '';
-        } catch (e) {}
+        this._revertChange(change);
         state.changes = state.changes.filter(c => c.id !== id);
         this._saveChanges();
         this._updateChangeCount();
@@ -2691,17 +4176,7 @@
         this._showToast('当前没有修改');
         return;
       }
-      const bySelector = {};
-      state.changes.forEach(c => {
-        if (!bySelector[c.selector]) bySelector[c.selector] = [];
-        bySelector[c.selector].push(c);
-      });
-      Object.keys(bySelector).forEach(selector => {
-        try {
-          const el = document.querySelector(selector);
-          if (el) bySelector[selector].forEach(c => { el.style[c.property] = ''; });
-        } catch (e) {}
-      });
+      state.changes.forEach(c => this._revertChange(c));
       state.changes = [];
       this._saveChanges();
       this._updateChangeCount();
@@ -2716,6 +4191,13 @@
         const key = `wego.walkthrough.data.${state.currentRoute}`;
         const raw = localStorage.getItem(key);
         state.changes = raw ? (JSON.parse(raw).changes || []) : [];
+        // 同步持久化的伪元素变更到注入规则，刷新后保持生效
+        state.changes.forEach(c => {
+          if (c.target && c.property) {
+            applyPseudoStyle(c.selector, c.target, c.property, c.newValue || '');
+          }
+        });
+        rebuildPseudoStyleElement();
         this._updateChangeCount();
       } catch (e) {}
     }
@@ -2735,14 +4217,14 @@
       const count = state.changes.length;
       if (this._components.countValue) this._components.countValue.textContent = count > 99 ? '99+' : count;
       // 收起态红点
-      const hasIndicator = count > 0 || this._walkthroughMode || this._faultState.load || this._faultState.save || this._faultState['delete'];
+      const hasIndicator = count > 0 || this._walkthroughMode || this._faultState.load || this._faultState.save || this._faultState['delete'] || this._faultState.slow;
       this._components.fabBtn.setAttribute('data-has-indicator', String(hasIndicator));
       // 走查模式按钮激活态
       const wtBtn = this._shadow.querySelector('[data-tool="walkthrough"]');
       if (wtBtn) wtBtn.setAttribute('data-active', String(this._walkthroughMode));
       // 数据模拟按钮激活态
       const dmBtn = this._shadow.querySelector('[data-tool="datamock"]');
-      if (dmBtn) dmBtn.setAttribute('data-active', String(this._faultState.load || this._faultState.save || this._faultState['delete']));
+      if (dmBtn) dmBtn.setAttribute('data-active', String(this._faultState.load || this._faultState.save || this._faultState['delete'] || this._faultState.slow));
       // 配置列表按钮变更标记
       const ovBtn = this._shadow.querySelector('[data-tool="overview"]');
       if (ovBtn) ovBtn.setAttribute('data-has-changes', String(count > 0));
@@ -2761,6 +4243,7 @@
   function register() {
     if (!customElements.get('wego-wt-toast')) customElements.define('wego-wt-toast', WegoWtToast);
     if (!customElements.get('wego-wt-overlay')) customElements.define('wego-wt-overlay', WegoWtOverlay);
+    if (!customElements.get('wego-wt-highlight')) customElements.define('wego-wt-highlight', WegoWtHighlight);
     if (!customElements.get('wego-wt-style-panel')) customElements.define('wego-wt-style-panel', WegoWtStylePanel);
     if (!customElements.get('wego-wt-color-picker')) customElements.define('wego-wt-color-picker', WegoWtColorPicker);
     if (!customElements.get('wego-wt-overview-panel')) customElements.define('wego-wt-overview-panel', WegoWtOverviewPanel);

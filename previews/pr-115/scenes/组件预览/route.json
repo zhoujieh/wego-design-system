@@ -1,9 +1,0 @@
-{
-  "routeId": "component-preview",
-  "entry": {
-    "type": "cell-entry",
-    "label": "组件预览",
-    "group": "workspace-tools",
-    "tab": "workspace"
-  }
-}

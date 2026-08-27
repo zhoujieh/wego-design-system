@@ -4,10 +4,17 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         <div class="navbar__body navbar__body--split">
           <div class="navbar__left navbar__left--custom">
             <button type="button" class="my-tab-identity" data-action="album-switch" aria-label="切换相册">
-              <div class="avatar avatar--image my-tab-identity__avatar" data-component-slug="avatar">
+              <div class="my-tab-identity__skeleton" data-role="profile-skeleton" aria-hidden="true">
+                <span class="wg-skeleton wg-skeleton--circle sk-circle-avatar" data-component-slug="skeleton"></span>
+                <span class="my-tab-identity__skeleton-copy">
+                  <span class="wg-skeleton wg-skeleton--text sk-text-name" data-component-slug="skeleton"></span>
+                  <span class="wg-skeleton wg-skeleton--text sk-text-role" data-component-slug="skeleton"></span>
+                </span>
+              </div>
+              <div class="avatar avatar--image avatar--40 my-tab-identity__avatar" data-skeleton-real data-component-slug="avatar">
                 <img data-role="profile-avatar" alt="">
               </div>
-              <span class="my-tab-identity__copy">
+              <span class="my-tab-identity__copy" data-skeleton-real>
                 <span class="my-tab-identity__album"><span data-role="profile-album"></span><i class="wego-iconfont-s icon-shangxiajiantou16 my-tab-identity__switch" aria-hidden="true"></i></span>
                 <span class="my-tab-identity__meta">
                   <span class="my-tab-identity__name" data-role="profile-name"></span>
@@ -17,11 +24,15 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
             </button>
           </div>
           <div class="navbar__right navbar__right--icon">
-            <button type="button" class="navbar__action" data-action="settings" aria-label="设置">
+            <div class="my-tab-navbar__skeleton" data-role="navbar-actions-skeleton" aria-hidden="true">
+              <span class="wg-skeleton wg-skeleton--rect sk-rect-action" data-component-slug="skeleton"></span>
+              <span class="wg-skeleton wg-skeleton--rect sk-rect-action" data-component-slug="skeleton"></span>
+            </div>
+            <button type="button" class="navbar__action" data-skeleton-real data-action="settings" aria-label="设置">
               <span class="navbar__action-icon"><i class="wego-iconfont-s icon-shezhi" aria-hidden="true"></i></span>
               <span class="navbar__action-label">设置</span>
             </button>
-            <button type="button" class="navbar__action" data-action="share-homepage" aria-label="分享主页">
+            <button type="button" class="navbar__action" data-skeleton-real data-action="share-homepage" aria-label="分享主页">
               <span class="navbar__action-icon"><i class="wego-iconfont-s icon-fenxiang" aria-hidden="true"></i></span>
               <span class="navbar__action-label">分享</span>
             </button>
@@ -35,7 +46,11 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         <section class="layout-section my-tab-section my-tab-section--membership" data-component-slug="layout-section" data-edge="M8">
           <div class="card card--surface my-membership-card" data-component-slug="card">
             <div class="card__content my-membership-card__content">
-              <div class="my-membership-card__row">
+              <div class="my-membership-card__skeleton" data-role="membership-skeleton" aria-hidden="true">
+                <span class="wg-skeleton wg-skeleton--rect sk-rect-membership-brand" data-component-slug="skeleton"></span>
+                <span class="wg-skeleton wg-skeleton--text sk-text-membership-ticker" data-component-slug="skeleton"></span>
+              </div>
+              <div class="my-membership-card__row" data-skeleton-real>
                 <div class="my-membership-card__brand">
                   <img class="my-membership-card__vip" src="./lib/assets/icons/vicon_vip.svg" alt="会员" aria-hidden="true">
                   <span>会员中心</span>
@@ -58,7 +73,8 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
           <div class="card card--surface card--vertical my-entry-card" data-component-slug="card">
             <div class="card__content my-entry-card__content">
               <div class="card__header my-section-heading">
-                <h2>数据资产</h2>
+                <span class="my-section-heading__skeleton" data-role="assets-title-skeleton" aria-hidden="true"><span class="wg-skeleton wg-skeleton--text sk-text-title" data-component-slug="skeleton"></span></span>
+                <h2 data-skeleton-real>数据资产</h2>
               </div>
               <div class="card__body" data-region="assets"></div>
             </div>
@@ -69,7 +85,8 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
           <div class="card card--surface card--vertical my-entry-card" data-component-slug="card">
             <div class="card__content my-entry-card__content">
               <div class="card__header my-section-heading">
-                <h2>常用应用</h2>
+                <span class="my-section-heading__skeleton" data-role="apps-title-skeleton" aria-hidden="true"><span class="wg-skeleton wg-skeleton--text sk-text-title" data-component-slug="skeleton"></span></span>
+                <h2 data-skeleton-real>常用应用</h2>
               </div>
               <div class="card__body" data-region="apps"></div>
             </div>
@@ -80,7 +97,12 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
           <div class="sticky-region__motion">
             <div class="sticky-region__inner">
               <div class="wg-tabs wg-tabs--mini wg-tabs--divide my-content-tabs" data-component-slug="tabs" role="tablist" aria-label="内容类型">
-                <div class="wg-tabs__scroll">
+                <div class="my-content-tabs__skeleton" data-role="tabs-skeleton" aria-hidden="true">
+                  <div class="sk-tab-item"><span class="wg-skeleton wg-skeleton--rect sk-rect-tab" data-component-slug="skeleton"></span></div>
+                  <div class="sk-tab-item"><span class="wg-skeleton wg-skeleton--rect sk-rect-tab" data-component-slug="skeleton"></span></div>
+                  <div class="sk-tab-item"><span class="wg-skeleton wg-skeleton--rect sk-rect-tab" data-component-slug="skeleton"></span></div>
+                </div>
+                <div class="wg-tabs__scroll" data-skeleton-real>
                   <button class="wg-tabs__item" type="button" role="tab" aria-selected="true" data-content-type="product">
                     <span class="wg-tabs__content"><span class="wg-tabs__label">产品</span></span>
                   </button>
@@ -101,7 +123,14 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
           <div class="sticky-region__motion">
             <div class="sticky-region__inner">
               <div class="search-toolbar my-content-toolbar">
-                <div class="searchbox searchbox--sm searchbox--gray" data-component-slug="search">
+                <div class="my-content-toolbar__skeleton" data-role="search-skeleton" aria-hidden="true">
+                  <div class="sk-search-field"><span class="wg-skeleton wg-skeleton--rect" data-component-slug="skeleton"></span></div>
+                  <div class="sk-search-actions">
+                    <span class="wg-skeleton wg-skeleton--rect" data-component-slug="skeleton"></span>
+                    <span class="wg-skeleton wg-skeleton--rect" data-component-slug="skeleton"></span>
+                  </div>
+                </div>
+                <div class="searchbox searchbox--md searchbox--gray" data-skeleton-real data-component-slug="search">
                   <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
                   <div class="searchbox__input">
                     <input class="searchbox__field" data-role="content-search" type="search" placeholder="搜索产品" aria-label="搜索产品">
@@ -110,7 +139,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
                     <button class="searchbox__action searchbox__clear wego-iconfont-s icon-yuancha-mian" data-action="clear-search" type="button" aria-label="清除搜索" hidden></button>
                   </div>
                 </div>
-                <div class="search-toolbar__actions">
+                <div class="search-toolbar__actions" data-skeleton-real>
                   <button class="search-toolbar__action" data-action="view-toggle" type="button">
                     <span class="search-toolbar__action-icon wego-iconfont-s icon-liebiao" data-role="view-icon" aria-hidden="true"></span>
                     <span data-role="view-label">列表</span>
@@ -127,8 +156,16 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
 
         <section class="layout-section my-content-management-section" data-component-slug="layout-section" data-edge="M0">
           <div class="my-content-management" data-role="content-management">
-            <span class="my-content-management__count" data-role="content-count">共 0 条</span>
-            <div class="my-content-management__actions">
+            <div class="my-content-management__skeleton" data-role="mgmt-skeleton" aria-hidden="true">
+              <span class="wg-skeleton wg-skeleton--text sk-mgmt-count" data-component-slug="skeleton"></span>
+              <div class="my-content-management__skeleton-actions">
+                <span class="wg-skeleton wg-skeleton--text sk-mgmt-link" data-component-slug="skeleton"></span>
+                <span class="wg-skeleton wg-skeleton--text sk-mgmt-link" data-component-slug="skeleton"></span>
+                <span class="wg-skeleton wg-skeleton--text sk-mgmt-link" data-component-slug="skeleton"></span>
+              </div>
+            </div>
+            <span class="my-content-management__count" data-skeleton-real data-role="content-count">共 0 条</span>
+            <div class="my-content-management__actions" data-skeleton-real>
               <a class="link link--12" data-component-slug="link" href="javascript:void(0)" role="button" data-management-action="sort">排序</a>
               <a class="link link--12" data-component-slug="link" href="javascript:void(0)" role="button" data-management-action="category">分类</a>
               <a class="link link--12" data-component-slug="link" href="javascript:void(0)" role="button" data-management-action="batch">批量</a>
@@ -148,6 +185,80 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
 
 (function registerMyTabScene() {
   'use strict';
+
+  /* 结构骨架：严格按「我的」页真实 DOM 区块绘制
+     - 数据资产：横向滚动行，每项 = 数字 metric 块 + 下方标签
+     - 常用应用：横向滚动行，每项 = 圆角方块图标 + 下方标签
+     - 内容区（默认产品视图）：按日期分组的商品列表占位（组标题 + 商品卡 + 底部计数）
+     复用设计系统 .wg-skeleton 原子块；挂载首帧同步填充 region，内容就绪后由 setRegion 淡入替换 */
+  function skeletonScrollRow(entryHtml, count) {
+    var items = '';
+    for (var i = 0; i < count; i++) items += entryHtml;
+    return '<div class="my-tab-skeleton-scroll" aria-hidden="true">' + items + '</div>';
+  }
+
+  function skeletonAssets() {
+    var entry = '<div class="my-tab-skeleton-entry">'
+      + '<span class="wg-skeleton wg-skeleton--rect" style="width:48px;height:28px"></span>'
+      + '<span class="wg-skeleton wg-skeleton--text" style="width:44px;height:12px"></span></div>';
+    return skeletonScrollRow(entry, 4);
+  }
+
+  function skeletonApps() {
+    var entry = '<div class="my-tab-skeleton-entry">'
+      + '<span class="wg-skeleton wg-skeleton--rect" style="width:48px;height:48px"></span>'
+      + '<span class="wg-skeleton wg-skeleton--text" style="width:48px;height:12px"></span></div>';
+    return skeletonScrollRow(entry, 5);
+  }
+
+  function skeletonProductCard() {
+    return '<div class="my-tab-skeleton-goods-card">'
+      + '<span class="wg-skeleton wg-skeleton--rect sk-goods-media" data-component-slug="skeleton"></span>'
+      + '<div class="my-tab-skeleton-goods-card__info">'
+      + '<span class="wg-skeleton wg-skeleton--text sk-goods-title" data-component-slug="skeleton"></span>'
+      + '<span class="wg-skeleton wg-skeleton--rect sk-goods-price" data-component-slug="skeleton"></span>'
+      + '<div class="sk-goods-meta">'
+      + '<span class="wg-skeleton wg-skeleton--text sk-goods-meta-text" data-component-slug="skeleton"></span>'
+      + '<span class="wg-skeleton wg-skeleton--rect sk-goods-meta-divider" data-component-slug="skeleton"></span>'
+      + '<span class="wg-skeleton wg-skeleton--text sk-goods-meta-text" data-component-slug="skeleton"></span>'
+      + '</div>'
+      + '<div class="sk-goods-ops">'
+      + '<span class="wg-skeleton wg-skeleton--text sk-goods-op" data-component-slug="skeleton"></span>'
+      + '<span class="wg-skeleton wg-skeleton--text sk-goods-op" data-component-slug="skeleton"></span>'
+      + '<span class="wg-skeleton wg-skeleton--text sk-goods-op" data-component-slug="skeleton"></span>'
+      + '<span class="wg-skeleton wg-skeleton--text sk-goods-op" data-component-slug="skeleton"></span>'
+      + '<span class="wg-skeleton wg-skeleton--rect sk-goods-more" data-component-slug="skeleton"></span>'
+      + '<span class="wg-skeleton wg-skeleton--rect sk-goods-cart" data-component-slug="skeleton"></span>'
+      + '<span class="wg-skeleton wg-skeleton--rect sk-goods-share" data-component-slug="skeleton"></span>'
+      + '</div></div></div>';
+  }
+
+  function skeletonDateGroup() {
+    return '<section class="my-content-date-group my-goods-group my-tab-skeleton-date-group">'
+      + '<div class="my-content-date-group__heading sk-date-head">'
+      + '<div class="sk-date-toggle"><span class="wg-skeleton wg-skeleton--text sk-date-label" data-component-slug="skeleton"></span><span class="wg-skeleton wg-skeleton--rect sk-date-arrow" data-component-slug="skeleton"></span></div>'
+      + '<span class="sk-date-more wg-skeleton wg-skeleton--rect" data-component-slug="skeleton"></span>'
+      + '</div>'
+      + '<div class="my-goods-group__items">'
+      + skeletonProductCard() + skeletonProductCard() + skeletonProductCard()
+      + '</div></section>';
+  }
+
+  function skeletonPinRow() {
+    var thumb = '<span class="wg-skeleton wg-skeleton--rect sk-pin-thumb" data-component-slug="skeleton"></span>';
+    return '<div class="my-pin-row my-tab-skeleton-pin-row">'
+      + '<span class="wg-skeleton wg-skeleton--text sk-pin-label" data-component-slug="skeleton"></span>'
+      + '<div class="my-tab-skeleton-pin-thumbs">' + thumb + thumb + thumb + '</div>'
+      + '<span class="wg-skeleton wg-skeleton--rect sk-pin-more" data-component-slug="skeleton"></span>'
+      + '</div>';
+  }
+
+  function skeletonContent() {
+    return '<div class="my-goods-surface my-tab-skeleton-surface">'
+      + skeletonPinRow() + skeletonDateGroup() + skeletonDateGroup()
+      + '<div class="my-goods-footer"><span class="wg-skeleton wg-skeleton--text" style="width:96px;height:12px"></span></div>'
+      + '</div>';
+  }
 
   function escapeHtml(value) {
     return String(value == null ? '' : value)
@@ -192,51 +303,6 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
     routeId: 'my',
     presentation: { type: 'host-tab' },
     template: myTabTemplate,
-    skeletonMode: 'explicit',
-    // SKELETON-TEMPLATE-START
-  skeletonTemplate: `
-<div class="wg-skeleton wg-skeleton--circle" style="position:absolute;top:6.984%;left:2.406%;width:10.160%;height:5.646%;border-radius:999px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:7.281%;left:15.241%;width:21.925%;height:2.972%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:10.550%;left:15.241%;width:19.251%;height:1.783%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:7.429%;left:78.877%;width:4.813%;height:2.675%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:10.401%;left:78.877%;width:4.813%;height:1.783%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:7.429%;left:90.642%;width:4.813%;height:2.675%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:10.401%;left:90.642%;width:4.813%;height:1.783%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:15.602%;left:5.615%;width:88.770%;height:2.972%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:19.762%;left:5.615%;width:88.770%;height:2.377%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:26.003%;left:5.615%;width:16.578%;height:3.269%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:30.163%;left:2.406%;width:16.578%;height:8.321%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:30.163%;left:19.519%;width:16.578%;height:8.321%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:30.163%;left:36.631%;width:16.578%;height:8.321%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:30.163%;left:53.743%;width:16.578%;height:8.321%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:30.163%;left:70.856%;width:16.578%;height:8.321%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:30.163%;left:87.968%;width:11.765%;height:8.321%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:42.348%;left:5.615%;width:16.578%;height:3.269%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:46.508%;left:2.406%;width:16.578%;height:9.510%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:46.508%;left:19.519%;width:16.578%;height:9.510%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:46.508%;left:36.631%;width:16.578%;height:9.510%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:46.508%;left:53.743%;width:16.578%;height:9.510%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:46.508%;left:70.856%;width:16.578%;height:9.510%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:46.508%;left:87.968%;width:11.765%;height:9.510%;border-radius:8px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:60.550%;left:13.189%;width:6.952%;height:2.972%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:60.550%;left:46.524%;width:6.952%;height:2.972%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:60.550%;left:79.859%;width:6.952%;height:2.972%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:67.756%;left:10.963%;width:61.765%;height:4.458%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:70.579%;left:78.342%;width:4.813%;height:1.783%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:76.003%;left:3.476%;width:9.738%;height:2.377%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:75.854%;left:71.390%;width:5.882%;height:2.675%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:75.854%;left:81.016%;width:5.882%;height:2.675%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:75.854%;left:90.642%;width:5.882%;height:2.675%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:85.736%;left:4.545%;width:8.021%;height:3.269%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:81.575%;left:17.380%;width:20.856%;height:11.590%;border-radius:4px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:81.575%;left:40.909%;width:20.856%;height:11.590%;border-radius:4px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:81.575%;left:64.439%;width:20.856%;height:11.590%;border-radius:4px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:81.575%;left:87.968%;width:11.765%;height:11.590%;border-radius:4px;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:86.330%;left:91.711%;width:3.743%;height:2.080%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:96.285%;left:4.545%;width:12.299%;height:3.269%;box-sizing:border-box" aria-hidden="true"></div>
-<div class="wg-skeleton wg-skeleton--rect" style="position:absolute;top:96.880%;left:91.711%;width:3.743%;height:2.080%;box-sizing:border-box" aria-hidden="true"></div>
-  `,
-  // SKELETON-TEMPLATE-END
     init: function init(ctx) {
       var root = ctx.root.querySelector('[data-route-id="my"]');
       var db = window.WEGO_PROTOTYPE_DB || {};
@@ -348,6 +414,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
             title: product.name || '穿搭笔记',
             summary: dynamic.text_content,
             cover: media ? media.poster_or_src : (product.image_list && product.image_list[0]),
+            images: (product.image_list || []).slice(0, 4),
             published: index % 3 !== 2,
             updatedAt: dynamic.published_at,
             order: index
@@ -363,6 +430,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
             type: 'live',
             title: product.name + '专场',
             cover: product.image_list && product.image_list[0],
+            images: (product.image_list || []).slice(0, 4),
             host: currentUser.display_name || currentUser.merchant_name,
             time: schedule[index],
             order: index
@@ -375,6 +443,35 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
           function markLoaded() { image.classList.add('is-loaded'); }
           image.addEventListener('load', markLoaded, { once: true });
           if (image.complete && image.naturalWidth) markLoaded();
+        });
+      }
+
+      /* 模拟『我的』页数据请求：返回 Promise，内部用 setTimeout 模拟网络延迟。
+         这是本场景的 mock 边界点——后续若要全局化，把此处实现替换为设计系统的统一 mockRequest 即可，
+         场景消费方（init 流程）无需变动。slow 开关开启时延迟拉长到约 9s，模拟弱网。 */
+      function fetchMyTabData() {
+        var slow = window.WegoApp && window.WegoApp.faultInjection && window.WegoApp.faultInjection.isEnabled('slow');
+        var delay = slow ? 9000 : 700;
+        return new Promise(function (resolve) {
+          window.setTimeout(function () {
+            resolve({
+              profile: currentUser,
+              products: products,
+              dynamics: dynamics
+            });
+          }, delay);
+        });
+      }
+
+      /* 整页骨架→真实切换：隐藏所有 [data-role$="-skeleton"]，显示所有 [data-skeleton-real] 并淡入。
+         真实节点直接作为原父容器的子项（无包裹层），不破坏原有 flex/子选择器布局。 */
+      function revealAllSkeletons() {
+        var skeletons = root.querySelectorAll('[data-role$="-skeleton"]');
+        var reals = root.querySelectorAll('[data-skeleton-real]');
+        skeletons.forEach(function (el) { el.hidden = true; });
+        reals.forEach(function (el) {
+          el.hidden = false;
+          el.classList.add('scene-fade-in');
         });
       }
 
@@ -444,12 +541,22 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
           + '</div>';
       }
 
+      /* 单图场景统一走 wg-image-grid--product 组件（1 图撑满分支），尺寸由消费方容器决定 */
+      function singleImageHtml(src, alt, className) {
+        return '<div class="wg-image-grid wg-image-grid--product ' + className + '" data-component-slug="image">'
+          + '<div class="wg-image wg-image-grid__item">'
+          + '<img class="wg-image__src" src="' + escapeHtml(src) + '" alt="' + escapeHtml(alt) + '">'
+          + '</div></div>';
+      }
+
       function productMedia(item) {
-        var images = (item.images || []).filter(Boolean).slice(0, 4);
-        if (!images.length) images = ['./lib/assets/icons/default-diagram.svg'];
-        return '<div class="my-product-card__media my-product-card__media--count-' + images.length + '">'
-          + images.map(function (src, index) { return imageHtml(src, item.title + '图片 ' + (index + 1), 'my-product-card__image'); }).join('')
-          + '</div>';
+        /* 网格视图只展示单图：取首图；多图仅在列出视图（goodsMedia）以四宫格呈现 */
+        var src = (item.images || [])[0] || './lib/assets/icons/default-diagram.svg';
+        return '<div class="my-product-card__media">'
+          + '<div class="wg-image-grid wg-image-grid--product" data-component-slug="image">'
+          + '<div class="wg-image wg-image-grid__item">'
+          + '<img class="wg-image__src" src="' + escapeHtml(src) + '" alt="' + escapeHtml(item.title) + '">'
+          + '</div></div></div>';
       }
 
       function productCardGrid(item) {
@@ -468,8 +575,17 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
       }
 
       function goodsMedia(item) {
-        var src = (item.images || [])[0] || './lib/assets/icons/default-diagram.svg';
-        return '<div class="my-goods-item__media">' + imageHtml(src, item.title, 'my-goods-item__image') + '</div>';
+        /* 列出视图采用四宫格：1 图撑满 / 2 图两列 / 3 图左大右小 / 4 图 2×2，布局由组件接管 */
+        var images = (item.images || []).filter(Boolean).slice(0, 4);
+        if (!images.length) images = ['./lib/assets/icons/default-diagram.svg'];
+        return '<div class="my-goods-item__media">'
+          + '<div class="wg-image-grid wg-image-grid--product" data-component-slug="image">'
+          + images.map(function (src, index) {
+              return '<div class="wg-image wg-image-grid__item">'
+                + '<img class="wg-image__src" src="' + escapeHtml(src) + '" alt="' + escapeHtml(item.title + '图片 ' + (index + 1)) + '">'
+                + '</div>';
+            }).join('')
+          + '</div></div>';
       }
 
       function priceMetricBlack(price) {
@@ -505,7 +621,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
 
       function noteCard(item, view) {
         if (view === 'grid') {
-          var gridImage = item.cover ? imageHtml(item.cover, item.title, 'my-note-card__media') : '';
+          var gridImage = item.cover ? singleImageHtml(item.cover, item.title, 'my-note-card__media') : '';
           return '<article class="card card--surface card--vertical my-content-card my-note-card my-note-card--grid' + (gridImage ? '' : ' my-note-card--no-image') + '" data-component-slug="card">'
             + '<div class="card__content my-content-card__content">'
             + '<div class="my-note-card__main"><div class="my-note-card__copy"><h3 class="my-content-card__title">' + escapeHtml(item.title) + '</h3>'
@@ -513,7 +629,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
             + '<div class="card__footer my-content-card__operation-row">' + contentActions(item) + '</div>'
             + '</div></article>';
         }
-        var listImage = item.cover ? imageHtml(item.cover, item.title, 'my-note-item__image') : '';
+        var listImage = item.cover ? singleImageHtml(item.cover, item.title, 'my-note-item__image') : '';
         return '<article class="my-note-item" data-content-id="' + escapeHtml(item.id) + '">'
           + '<div class="my-note-item__main">'
           + '<div class="my-note-item__copy"><h3 class="my-note-item__title">' + escapeHtml(item.title) + '</h3>'
@@ -532,7 +648,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
       }
 
       function liveCard(item) {
-        return '<article class="my-live-card">' + imageHtml(item.cover, item.title, 'my-live-card__media') + '</article>';
+        return '<article class="my-live-card">' + singleImageHtml(item.cover, item.title, 'my-live-card__media') + '</article>';
       }
 
       /* 真实发布的商品（publish-product 场景写入 wego.album-feed.published）回显到我的页产品 tab */
@@ -653,7 +769,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
           + '<div class="my-pin-row__thumbs">'
           + pinned.map(function (item) {
             return '<button type="button" class="my-pin-row__thumb" data-pin-scroll="' + escapeHtml(item.id) + '" aria-label="' + escapeHtml(item.title) + '">'
-              + imageHtml((item.images || [])[0] || './lib/assets/icons/default-diagram.svg', item.title, 'my-pin-row__image')
+              + goodsMedia(item)
               + '</button>';
           }).join('')
           + '</div>'
@@ -662,6 +778,16 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
       }
 
       function renderContent() {
+        var slow = window.WegoApp && window.WegoApp.faultInjection && window.WegoApp.faultInjection.isEnabled('slow');
+        if (slow) {
+          /* 模拟弱网：保持当前骨架/加载态，约 9s 后再渲染真实内容 */
+          window.setTimeout(function () { renderContentNow(); }, 9000);
+          return;
+        }
+        renderContentNow();
+      }
+
+      function renderContentNow() {
         destroyContentPopovers();
         var type = state.activeType;
         var view = type === 'live' ? 'grid' : state.viewByType[type];
@@ -938,11 +1064,32 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         renderContent();
       }
 
-      setProfile();
-      renderAssets();
-      renderApps();
-      syncControls();
-      renderContent();
+      /* 挂载首帧：先隐藏所有真实节点，显示整页结构骨架（navbar 模板已预置骨架；资产/应用/内容区填骨架） */
+      root.querySelectorAll('[data-skeleton-real]').forEach(function (el) { el.hidden = true; });
+      var assetsRegion = root.querySelector('[data-region="assets"]');
+      var appsRegion = root.querySelector('[data-region="apps"]');
+      var contentRegion = root.querySelector('[data-region="content"]');
+      if (assetsRegion) assetsRegion.innerHTML = skeletonAssets();
+      if (appsRegion) appsRegion.innerHTML = skeletonApps();
+      if (contentRegion) contentRegion.innerHTML = skeletonContent();
+
+      /* 完整模拟链路：发起『数据请求』→ 期间整页骨架 → resolve 后统一填充并淡显 */
+      fetchMyTabData().then(function () {
+        if (destroyed) return;
+        revealAllSkeletons();
+        setProfile();
+        renderAssets();
+        renderApps();
+        syncControls();
+        renderContentNow();
+        /* 渐显动画结束后移除 .scene-fade-in，避免 host-tab 切换时 panel 从 display:none
+           恢复可见导致动画重播（闪烁）。首次加载的渐显保留，只执行一次。 */
+        root.querySelectorAll('.scene-fade-in').forEach(function (el) {
+          el.addEventListener('animationend', function () {
+            el.classList.remove('scene-fade-in');
+          }, { once: true });
+        });
+      });
       ctx.bindTabs({ root: root });
       ctx.bindScrollLayout({
         scrollRoot: '.my-tab-scroll',

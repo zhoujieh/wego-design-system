@@ -6,33 +6,315 @@
   color: var(--text-default);
 }
 
+/* 结构骨架：严格按「我的」页真实 DOM 区块绘制
+   - 数据资产/常用应用：横向滚动行（.my-tab-skeleton-scroll / entry）
+   - 内容区（默认产品视图）：按日期分组的商品列表（.my-tab-skeleton-surface / date-group / goods-card）
+   复用设计系统 .wg-skeleton 原子块，进入时由 setRegion 触发 scene-fade-in 渐显 */
+
+.my-tab-skeleton-scroll {
+  display: flex;
+  flex-direction: row;
+  gap: var(--spacer-16);
+  overflow: hidden;
+  padding: var(--spacer-4) 0;
+}
+
+.my-tab-skeleton-entry {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacer-8);
+  flex: 0 0 auto;
+}
+
+/* 导航栏骨架：头像+昵称区、设置/分享区 */
+.my-tab-identity__skeleton,
+.my-tab-navbar__skeleton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-8);
+  padding-right: var(--spacer-8);
+}
+
+.my-tab-identity__skeleton[hidden],
+.my-tab-navbar__skeleton[hidden] {
+  display: none;
+}
+
+/* 导航栏骨架尺寸类（替代 inline style） */
+.sk-circle-avatar { width: 36px; height: 36px; }
+.sk-text-name { width: 72px; height: 14px; }
+.sk-text-role { width: 48px; height: 12px; }
+.sk-rect-action { width: 40px; height: 20px; }
+
+.my-tab-identity__skeleton-copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-4);
+}
+
+.my-tab-navbar__skeleton {
+  gap: var(--spacer-12);
+}
+
+/* 整页各区块骨架容器：默认显示，hidden 时隐藏（避免 display 覆盖 [hidden]） */
+.my-membership-card__skeleton,
+.my-section-heading__skeleton,
+.my-content-tabs__skeleton,
+.my-content-toolbar__skeleton,
+.my-content-management__skeleton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-12);
+}
+.my-membership-card__skeleton[hidden],
+.my-section-heading__skeleton[hidden],
+.my-content-tabs__skeleton[hidden],
+.my-content-toolbar__skeleton[hidden],
+.my-content-management__skeleton[hidden] {
+  display: none;
+}
+
+/* 真实节点初始 hidden（由 init 设置），reveal 时由 JS 移除 hidden 并淡入；
+   通用 [hidden] 兜底，确保带 display 的节点（如 .my-tab-identity__copy flex）也能隐藏 */
+[data-skeleton-real][hidden] {
+  display: none;
+}
+
+.my-section-heading__skeleton {
+  padding: var(--spacer-4) 0;
+}
+
+.my-content-tabs__skeleton {
+  width: 100%;
+  gap: var(--spacer-24);
+  padding: var(--spacer-4) var(--spacer-16);
+}
+.sk-tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacer-6);
+  flex: 1 1 0;
+  min-width: 0;
+}
+.sk-tab-indicator {
+  width: 24px;
+  height: 3px;
+  border-radius: var(--radius-4);
+  background: var(--bg-skeleton);
+}
+
+.my-content-toolbar__skeleton {
+  width: 100%;
+  min-width: 0;
+  gap: var(--spacer-8);
+}
+
+.sk-search-field {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+}
+.sk-search-field .wg-skeleton {
+  width: 100%;
+  height: var(--size-36);
+  border-radius: var(--radius-8);
+}
+.sk-search-actions {
+  flex: 0 0 auto;
+  display: flex;
+  gap: var(--spacer-12);
+}
+.sk-search-actions .wg-skeleton {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-6);
+}
+
+.my-content-management__skeleton {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sk-mgmt-count { width: 56px; height: 14px; }
+.my-content-management__skeleton-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-12);
+}
+.sk-mgmt-link { width: 24px; height: 12px; }
+
+/* 真实节点初始 hidden，reveal 时由 JS 移除并淡入 */
+
+/* 骨架占位尺寸工具类（替代 inline style，满足校验器） */
+.sk-rect-membership-brand { width: 96px; height: 16px; }
+.sk-text-membership-ticker { width: 120px; height: 12px; margin-left: auto; }
+.sk-text-title { width: 64px; height: 16px; }
+.sk-rect-tab { width: 48px; height: 24px; border-radius: var(--radius-4); }
+.sk-rec...ield { flex: 1 1 auto; min-width: 0; height: 32px; border-radius: var(--radius-4); }
+.sk-rec...tion { width: 56px; height: 32px; border-radius: var(--radius-4); }
+
+
+/* 置顶行骨架（复刻真实 .my-pin-row） */
+.my-tab-skeleton-pin-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-16);
+  padding: var(--spacer-8) var(--spacer-12) var(--spacer-8) var(--spacer-16);
+}
+.sk-pin-label {
+  flex: 0 0 auto;
+  /* 真实「置顶」label 实测渲染宽 32px；占位须等宽，保证置顶图左缘与商品行图片同落 64px */
+  width: 32px;
+  height: 16px;
+}
+.my-tab-skeleton-pin-thumbs {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  gap: var(--spacer-8);
+  overflow: hidden;
+}
+.sk-pin-thumb {
+  flex: 0 0 auto;
+  width: clamp(80px, 24vw, 160px);
+  height: clamp(80px, 24vw, 160px);
+  border-radius: var(--radius-4);
+}
+.sk-pin-more {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+}
+/* 内容区：按日期分组的商品列表骨架 */
 .my-tab-skeleton-surface {
-  position: absolute;
-  inset: 0;
-  background: var(--bg-page);
+  display: block;
 }
 
-.my-tab-skeleton-panel {
-  position: absolute;
-  background: var(--bg-surface);
+.my-tab-skeleton-date-group {
+  margin-bottom: var(--spacer-8);
 }
 
-/* 覆盖框架 scene-skeleton.css 默认过渡：去掉 translateY 位移，真实内容在骨架色块原位淡入 */
-@keyframes my-tab-scene-fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+.my-tab-skeleton-date-group .wg-skeleton--text {
+  display: block;
+  margin: var(--spacer-8) 0;
+}
+.sk-date-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  padding-inline: var(--spacer-16) var(--spacer-8);
+}
+.sk-date-head .wg-skeleton--text {
+  margin: 0;
 }
 
-.my-tab-page .scene-fade-in {
-  animation-name: my-tab-scene-fade-in;
+.sk-date-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacer-4);
+}
+.sk-date-label {
+  width: 64px;
+  height: 16px;
+}
+.sk-date-arrow {
+  width: 12px;
+  height: 12px;
+}
+.sk-date-more {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-4);
+}
+.my-goods-group__items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-8);
 }
 
-.my-tab-page ~ .sk-overlay {
-  z-index: calc(var(--z-sticky) + 1);
+.my-tab-skeleton-goods-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacer-8);
+  padding: var(--spacer-8) var(--spacer-12) var(--spacer-8) var(--size-64);
+}
+
+.sk-goods-media {
+  flex: 0 0 auto;
+  width: clamp(80px, 24vw, 160px);
+  height: clamp(80px, 24vw, 160px);
+  border-radius: var(--radius-4);
+}
+
+.my-tab-skeleton-goods-card__info {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 80px;
+  flex-direction: column;
+}
+
+.sk-goods-title {
+  width: 70%;
+  height: 16px;
+}
+
+.sk-goods-price {
+  width: 56px;
+  height: 16px;
+  margin-top: var(--spacer-2);
+}
+
+.sk-goods-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-4);
+  margin-top: var(--spacer-2);
+}
+
+.sk-goods-meta-text {
+  width: 48px;
+  height: 12px;
+}
+
+.sk-goods-meta-divider {
+  width: 1px;
+  height: 6px;
+}
+
+.sk-goods-ops {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-8);
+  margin-top: auto;
+  padding-top: var(--spacer-2);
+}
+
+.sk-goods-op {
+  width: 28px;
+  height: 14px;
+}
+
+.sk-goods-more {
+  width: 24px;
+  height: 24px;
+}
+
+.sk-goods-cart {
+  width: 24px;
+  height: 24px;
+  margin-left: auto;
+}
+
+.sk-goods-share {
+  width: 48px;
+  height: 24px;
+  border-radius: var(--radius-4);
 }
 
 .my-tab-navbar {
@@ -81,8 +363,6 @@
 
 .my-tab-identity__avatar {
   flex: 0 0 auto;
-  width: var(--size-36);
-  height: var(--size-36);
 }
 
 .my-tab-identity__album {
@@ -538,8 +818,6 @@
 
 .my-pin-row__thumb {
   flex: 0 0 auto;
-  width: 80px;
-  height: 80px;
   padding: var(--spacer-0);
   border: 0;
   border-radius: var(--radius-4);
@@ -548,9 +826,9 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.my-pin-row__thumb .wg-image {
-  width: 80px;
-  height: 80px;
+/* 置顶缩略图与列表行媒体同源同尺寸：随视口 clamp(80,24vw,160) 动态缩放 */
+.my-pin-row__thumb .wg-image-grid {
+  width: clamp(80px, 24vw, 160px);
 }
 
 .my-pin-row__more {
@@ -577,14 +855,11 @@
 
 .my-goods-item__media {
   flex: 0 0 auto;
-  width: 80px;
-  height: 80px;
 }
 
-.my-goods-item__media .wg-image {
-  width: 80px;
-  height: 80px;
-  border-radius: var(--radius-4);
+/* 列出视图四宫格：尺寸交由 wg-image-grid--product 的 clamp(80, 100%, 160) 主导 */
+.my-goods-item__media .wg-image-grid {
+  width: clamp(80px, 24vw, 160px);
 }
 
 .my-goods-item__info {
@@ -802,13 +1077,10 @@
   position: relative;
   flex: 0 0 auto;
   width: 68px;
-  height: 68px;
 }
 
-.my-note-item__media .wg-image {
+.my-note-item__media .wg-image-grid {
   width: 68px;
-  height: 68px;
-  border-radius: var(--radius-8);
 }
 
 .my-note-item__status {
@@ -895,45 +1167,23 @@
 
 .my-product-card__main {
   display: grid;
-  grid-template-columns: var(--size-104) minmax(0, 1fr);
+  grid-template-columns: minmax(0, max-content) minmax(0, 1fr);
   gap: var(--spacer-12);
   align-items: start;
 }
 
+/* 尺寸交由 wg-image-grid--product 的 clamp(80, 100%, 160) 逻辑主导：随卡片宽度自适应，封顶 160 */
 .my-product-card__media {
-  display: grid;
-  width: var(--size-104);
-  height: var(--size-104);
-  gap: var(--spacer-2);
-  overflow: hidden;
-  border-radius: var(--radius-8);
-  background: var(--bg-subtle);
+  width: clamp(var(--size-104), 44vw, 160px);
 }
 
-.my-product-card__media--count-1 {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.my-product-card__media--count-2,
-.my-product-card__media--count-4 {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.my-product-card__media--count-3 {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-}
-
-.my-product-card__media--count-3 .my-product-card__image:first-child {
-  grid-row: 1 / span 2;
-}
-
-.my-product-card__media .wg-image {
+.my-product-card__media .wg-image-grid {
   width: 100%;
-  height: 100%;
+}
+
+.my-product-card__media .wg-image-grid__item {
   min-width: 0;
   min-height: 0;
-  border-radius: var(--radius-0);
 }
 
 .my-product-card__details {
@@ -1034,7 +1284,10 @@
 
 .my-note-card__media {
   width: var(--size-104);
-  height: var(--size-104);
+}
+
+.my-note-card__media .wg-image-grid {
+  width: 100%;
 }
 
 .my-note-card__summary {
@@ -1049,9 +1302,12 @@
 
 .my-live-card__media {
   width: 100%;
-  height: auto;
+}
+
+/* 直播封面：3:4 竖版比例由消费方容器定（覆盖组件默认 1:1），图片内容层由组件接管 */
+.my-live-card__media.wg-image-grid {
   aspect-ratio: 3 / 4;
-  border-radius: var(--radius-0);
+  width: 100%;
 }
 
 .my-content-list--live {
