@@ -824,8 +824,8 @@
       this._callback = null;
       this._hex = '#000000';
       this._opacity = 100;
-      this._hsl = { h: 0, s: 0, l: 0 };
-      this._format = 'hex'; // hex | rgb | hsl
+      this._hsv = { h: 0, s: 0, v: 0 };
+      this._format = 'hex'; // hex | rgb | hsb
       this._dragType = null;
     }
     connectedCallback() {
@@ -845,13 +845,13 @@
       }
       this._hex = resolvedHex;
       this._opacity = opacity !== undefined ? opacity : 100;
-      this._hsl = this._hexToHsl(this._hex);
+      this._hsv = this._hexToHsv(this._hex);
       this._callback = callback;
       this._render();
       // 定位到触发按钮附近，优先下方，空间不足翻上方
       const rect = triggerEl.getBoundingClientRect();
-      const pickerWidth = 280;
-      const pickerHeight = 440;
+      const pickerWidth = 260;
+      const pickerHeight = 380;
       let left = rect.left;
       let top = rect.bottom + 6;
       if (left + pickerWidth > window.innerWidth - 8) left = window.innerWidth - pickerWidth - 8;
@@ -880,17 +880,18 @@
       }
     }
 
-    // ── 颜色转换 ──────────────────────────────────────────
-    _hexToHsl(hex) {
+    // ── 颜色转换（HSV 模型） ─────────────────────────────
+    _hexToHsv(hex) {
       const r = parseInt(hex.slice(1, 3), 16) / 255;
       const g = parseInt(hex.slice(3, 5), 16) / 255;
       const b = parseInt(hex.slice(5, 7), 16) / 255;
       const max = Math.max(r, g, b), min = Math.min(r, g, b);
-      let h, s, l = (max + min) / 2;
-      if (max === min) { h = s = 0; }
-      else {
-        const d = max - min;
-        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      const d = max - min;
+      let h, s, v = max;
+      s = max === 0 ? 0 : d / max;
+      if (max === min) {
+        h = 0;
+      } else {
         switch (max) {
           case r: h = (g - b) / d + (g < b ? 6 : 0); break;
           case g: h = (b - r) / d + 2; break;
@@ -898,30 +899,27 @@
         }
         h /= 6;
       }
-      return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
+      return { h: Math.round(h * 360), s: Math.round(s * 100), v: Math.round(v * 100) };
     }
-    _hslToHex(h, s, l) {
-      h /= 360; s /= 100; l /= 100;
+    _hsvToHex(h, s, v) {
+      h /= 360; s /= 100; v /= 100;
+      const i = Math.floor(h * 6);
+      const f = h * 6 - i;
+      const p = v * (1 - s);
+      const q = v * (1 - f * s);
+      const t = v * (1 - (1 - f) * s);
       let r, g, b;
-      if (s === 0) { r = g = b = l; }
-      else {
-        const hue2rgb = (p, q, t) => {
-          if (t < 0) t += 1;
-          if (t > 1) t -= 1;
-          if (t < 1 / 6) return p + (q - p) * 6 * t;
-          if (t < 1 / 2) return q;
-          if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-          return p;
-        };
-        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-        const p = 2 * l - q;
-        r = hue2rgb(p, q, h + 1 / 3);
-        g = hue2rgb(p, q, h);
-        b = hue2rgb(p, q, h - 1 / 3);
+      switch (i % 6) {
+        case 0: r = v; g = t; b = p; break;
+        case 1: r = q; g = v; b = p; break;
+        case 2: r = p; g = v; b = t; break;
+        case 3: r = p; g = q; b = v; break;
+        case 4: r = t; g = p; b = v; break;
+        case 5: r = v; g = p; b = q; break;
       }
       const toHex = x => {
-        const v = Math.round(x * 255).toString(16);
-        return v.length === 1 ? '0' + v : v;
+        const val = Math.round(x * 255).toString(16);
+        return val.length === 1 ? '0' + val : val;
       };
       return '#' + toHex(r) + toHex(g) + toHex(b);
     }
@@ -934,24 +932,24 @@
     }
     _rgbToHex(r, g, b) {
       const toHex = x => {
-        const v = Math.round(x).toString(16);
-        return v.length === 1 ? '0' + v : v;
+        const val = Math.round(x).toString(16);
+        return val.length === 1 ? '0' + val : val;
       };
       return '#' + toHex(r) + toHex(g) + toHex(b);
     }
     _getFormatValue() {
-      const { h, s, l } = this._hsl;
+      const { h, s, v } = this._hsv;
       const rgb = this._hexToRgb(this._hex);
       switch (this._format) {
         case 'rgb': return `${rgb.r}, ${rgb.g}, ${rgb.b}`;
-        case 'hsl': return `${h}, ${s}%, ${l}%`;
+        case 'hsb': return `${h}, ${s}%, ${v}%`;
         default: return this._hex.toUpperCase();
       }
     }
 
     // ── 渲染 ──────────────────────────────────────────────
     _render() {
-      const { h } = this._hsl;
+      const { h } = this._hsv;
       const formatValue = this._getFormatValue();
       const hasEyedropper = typeof window !== 'undefined' && 'EyeDropper' in window;
 
@@ -960,7 +958,7 @@
           :host {
             position: fixed;
             z-index: 9700;
-            width: 280px;
+            width: 260px;
             display: none;
             font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", sans-serif;
             --bg-surface: rgba(30, 30, 30, 0.82);
@@ -978,14 +976,14 @@
           .picker {
             box-sizing: border-box;
             width: 100%;
-            padding: 12px;
-            border-radius: 14px;
+            padding: 10px 10px 8px;
+            border-radius: 12px;
             border: 1px solid var(--border-color);
             background: var(--bg-surface);
             box-shadow: 0 12px 40px rgba(0,0,0,0.3);
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
           }
           .header {
             display: flex;
@@ -1001,49 +999,28 @@
           }
           .close-btn:hover { background: rgba(255,255,255,0.06); color: var(--text-default); }
 
-          /* 颜色预览 */
-          .preview {
-            width: 100%; height: 48px; border-radius: 8px;
-            position: relative; overflow: hidden;
-            border: 1px solid var(--border-color);
-          }
-          .preview-checker {
-            position: absolute; inset: 0;
-            background-image:
-              linear-gradient(45deg, #555 25%, transparent 25%),
-              linear-gradient(-45deg, #555 25%, transparent 25%),
-              linear-gradient(45deg, transparent 75%, #555 75%),
-              linear-gradient(-45deg, transparent 75%, #555 75%);
-            background-size: 10px 10px;
-            background-position: 0 0, 0 5px, 5px -5px, -5px 0;
-          }
-          .preview-color {
-            position: absolute; inset: 0;
-            transition: background 0.05s linear;
-          }
-
-          /* SV 取色面板 */
+          /* SV 二维取色面板 — 不裁剪，选点可超出边缘 */
           .sv-panel {
-            position: relative; width: 100%; height: 160px;
-            border-radius: 8px; overflow: hidden; cursor: crosshair;
+            position: relative; width: 100%; height: 150px;
+            border-radius: 8px; cursor: crosshair;
             user-select: none; -webkit-user-select: none;
             touch-action: none;
           }
-          .sv-layer { position: absolute; inset: 0; pointer-events: none; }
+          .sv-layer { position: absolute; inset: 0; pointer-events: none; border-radius: 8px; }
           .sv-white { background: linear-gradient(to right, #fff, rgba(255,255,255,0)); }
           .sv-black { background: linear-gradient(to top, #000, rgba(0,0,0,0)); }
           .sv-cursor {
-            position: absolute; width: 16px; height: 16px;
+            position: absolute; width: 14px; height: 14px;
             border: 2px solid #fff; border-radius: 50%;
             transform: translate(-50%, -50%);
             box-shadow: 0 0 0 1px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3);
             pointer-events: none;
           }
 
-          /* 色相条 */
+          /* 色相条 — 不裁剪 */
           .hue-slider {
-            position: relative; width: 100%; height: 12px;
-            border-radius: 6px; cursor: pointer;
+            position: relative; width: 100%; height: 10px;
+            border-radius: 5px; cursor: pointer;
             background: linear-gradient(to right,
               #ff0000 0%, #ffff00 17%, #00ff00 33%,
               #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%);
@@ -1051,22 +1028,22 @@
             touch-action: none;
           }
           .hue-cursor {
-            position: absolute; top: 50%; width: 16px; height: 16px;
+            position: absolute; top: 50%; width: 14px; height: 14px;
             border: 2px solid #fff; border-radius: 50%;
             transform: translate(-50%, -50%);
             box-shadow: 0 0 0 1px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3);
             pointer-events: none;
           }
 
-          /* 不透明度 */
-          .opacity-wrap { display: flex; flex-direction: column; gap: 6px; }
+          /* 不透明度 — 不裁剪，选点可超出边缘 */
+          .opacity-wrap { display: flex; flex-direction: column; gap: 4px; }
           .opacity-label {
             display: flex; align-items: center; justify-content: space-between;
             font-size: 11px; color: var(--text-tertiary);
           }
           .opacity-num-wrap { display: flex; align-items: center; gap: 2px; }
           .opacity-num {
-            width: 36px; height: 22px; padding: 0 4px;
+            width: 34px; height: 20px; padding: 0 4px;
             border: 1px solid var(--border-color); border-radius: 5px;
             background: var(--bg-subtle); color: var(--text-default);
             font-size: 11px; text-align: center; outline: none;
@@ -1076,12 +1053,12 @@
           .opacity-unit { font-size: 11px; color: var(--text-tertiary); }
           .opacity-slider {
             position: relative; width: 100%; height: 10px;
-            border-radius: 5px; cursor: pointer; overflow: hidden;
+            border-radius: 5px; cursor: pointer;
             user-select: none; -webkit-user-select: none;
             touch-action: none;
           }
           .opacity-checker {
-            position: absolute; inset: 0;
+            position: absolute; inset: 0; border-radius: 5px;
             background-image:
               linear-gradient(45deg, #555 25%, transparent 25%),
               linear-gradient(-45deg, #555 25%, transparent 25%),
@@ -1091,7 +1068,7 @@
             background-position: 0 0, 0 4px, 4px -4px, -4px 0;
           }
           .opacity-fill {
-            position: absolute; inset: 0; pointer-events: none;
+            position: absolute; inset: 0; border-radius: 5px; pointer-events: none;
           }
           .opacity-cursor {
             position: absolute; top: 50%; width: 14px; height: 14px;
@@ -1107,7 +1084,7 @@
           }
           .format-select-wrap { position: relative; flex-shrink: 0; }
           .format-select {
-            height: 30px; padding: 0 24px 0 8px;
+            height: 28px; padding: 0 22px 0 8px;
             border: 1px solid var(--border-color); border-radius: 7px;
             background: var(--bg-subtle); color: var(--text-default);
             font-size: 11px; font-weight: 500; outline: none;
@@ -1120,7 +1097,7 @@
             color: var(--text-tertiary); pointer-events: none;
           }
           .format-input {
-            flex: 1; height: 30px; padding: 0 8px;
+            flex: 1; height: 28px; padding: 0 8px;
             border: 1px solid var(--border-color); border-radius: 7px;
             background: var(--bg-subtle); color: var(--text-default);
             font-size: 12px; font-family: "SF Mono", Menlo, monospace;
@@ -1129,7 +1106,7 @@
           }
           .format-input:focus { border-color: var(--text-brand); }
           .eyedropper-btn {
-            width: 30px; height: 30px; flex-shrink: 0;
+            width: 28px; height: 28px; flex-shrink: 0;
             border: 1px solid var(--border-color); border-radius: 7px;
             background: var(--bg-subtle); color: var(--text-secondary);
             cursor: pointer; display: flex; align-items: center;
@@ -1144,17 +1121,11 @@
             <button class="close-btn" type="button" data-action="close">×</button>
           </div>
 
-          <!-- 颜色预览 -->
-          <div class="preview">
-            <div class="preview-checker"></div>
-            <div class="preview-color" data-preview-color style="background:${this._hex};opacity:${this._opacity / 100};"></div>
-          </div>
-
           <!-- SV 二维取色面板 -->
           <div class="sv-panel" data-sv-panel style="background:hsl(${h},100%,50%);">
             <div class="sv-layer sv-white"></div>
             <div class="sv-layer sv-black"></div>
-            <div class="sv-cursor" data-sv-cursor style="left:${this._hsl.s}%;top:${100 - this._hsl.l}%;"></div>
+            <div class="sv-cursor" data-sv-cursor style="left:${this._hsv.s}%;top:${100 - this._hsv.v}%;"></div>
           </div>
 
           <!-- 色相条 -->
@@ -1184,13 +1155,13 @@
               <select class="format-select" data-format-select>
                 <option value="hex" ${this._format === 'hex' ? 'selected' : ''}>HEX</option>
                 <option value="rgb" ${this._format === 'rgb' ? 'selected' : ''}>RGB</option>
-                <option value="hsl" ${this._format === 'hsl' ? 'selected' : ''}>HSL</option>
+                <option value="hsb" ${this._format === 'hsb' ? 'selected' : ''}>HSB</option>
               </select>
             </div>
             <input class="format-input" type="text" value="${formatValue}" data-format-input spellcheck="false" />
             ${hasEyedropper ? `
             <button class="eyedropper-btn" type="button" data-eyedropper title="从页面取色">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M2 22l4-1 11-11-3-3L3 18l-1 4z"/>
                 <path d="M14 7l3 3"/>
                 <path d="M17 4l3 3"/>
@@ -1210,19 +1181,19 @@
       this._setupDrag(this._shadow.querySelector('[data-sv-panel]'), 'sv', (clientX, clientY, rect) => {
         const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
         const y = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
-        this._hsl.s = Math.round(x * 100);
-        this._hsl.l = Math.round((1 - y) * 100);
-        this._hex = this._hslToHex(this._hsl.h, this._hsl.s, this._hsl.l);
-        this._syncFromHsl();
+        this._hsv.s = Math.round(x * 100);
+        this._hsv.v = Math.round((1 - y) * 100);
+        this._hex = this._hsvToHex(this._hsv.h, this._hsv.s, this._hsv.v);
+        this._syncFromHsv();
         this._emitChange();
       });
 
       // 色相条拖动
       this._setupDrag(this._shadow.querySelector('[data-hue-slider]'), 'hue', (clientX, clientY, rect) => {
         const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-        this._hsl.h = Math.round(x * 360);
-        this._hex = this._hslToHex(this._hsl.h, this._hsl.s, this._hsl.l);
-        this._syncFromHsl();
+        this._hsv.h = Math.round(x * 360);
+        this._hex = this._hsvToHex(this._hsv.h, this._hsv.s, this._hsv.v);
+        this._syncFromHsv();
         this._emitChange();
       });
 
@@ -1270,8 +1241,8 @@
             const result = await eyeDropper.open();
             if (result && result.sRGBHex) {
               this._hex = result.sRGBHex.toUpperCase();
-              this._hsl = this._hexToHsl(this._hex);
-              this._syncFromHsl();
+              this._hsv = this._hexToHsv(this._hex);
+              this._syncFromHsv();
               this._emitChange();
             }
           } catch (err) { /* 用户取消取色 */ }
@@ -1312,8 +1283,8 @@
           if (!val.startsWith('#')) val = '#' + val;
           if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
             this._hex = val.toUpperCase();
-            this._hsl = this._hexToHsl(this._hex);
-            this._syncFromHsl();
+            this._hsv = this._hexToHsv(this._hex);
+            this._syncFromHsv();
             this._emitChange();
             return;
           }
@@ -1324,20 +1295,20 @@
             const g = Math.max(0, Math.min(255, parseInt(m[2], 10)));
             const b = Math.max(0, Math.min(255, parseInt(m[3], 10)));
             this._hex = this._rgbToHex(r, g, b);
-            this._hsl = this._hexToHsl(this._hex);
-            this._syncFromHsl();
+            this._hsv = this._hexToHsv(this._hex);
+            this._syncFromHsv();
             this._emitChange();
             return;
           }
-        } else if (this._format === 'hsl') {
+        } else if (this._format === 'hsb') {
           const m = val.match(/(\d+)\s*[, ]\s*(\d+)%?\s*[, ]\s*(\d+)%?/);
           if (m) {
             const h = Math.max(0, Math.min(360, parseInt(m[1], 10)));
             const s = Math.max(0, Math.min(100, parseInt(m[2], 10)));
-            const l = Math.max(0, Math.min(100, parseInt(m[3], 10)));
-            this._hsl = { h, s, l };
-            this._hex = this._hslToHex(h, s, l);
-            this._syncFromHsl();
+            const v = Math.max(0, Math.min(100, parseInt(m[3], 10)));
+            this._hsv = { h, s, v };
+            this._hex = this._hsvToHex(h, s, v);
+            this._syncFromHsv();
             this._emitChange();
             return;
           }
@@ -1348,21 +1319,19 @@
     }
 
     // ── UI 同步 ───────────────────────────────────────────
-    _syncFromHsl() {
+    _syncFromHsv() {
       // SV 面板背景（色相）
       const svPanel = this._shadow.querySelector('[data-sv-panel]');
-      if (svPanel) svPanel.style.background = `hsl(${this._hsl.h},100%,50%)`;
-      // SV 选点
+      if (svPanel) svPanel.style.background = `hsl(${this._hsv.h},100%,50%)`;
+      // SV 选点 — X=饱和度, Y=100-明度
       const svCursor = this._shadow.querySelector('[data-sv-cursor]');
       if (svCursor) {
-        svCursor.style.left = this._hsl.s + '%';
-        svCursor.style.top = (100 - this._hsl.l) + '%';
+        svCursor.style.left = this._hsv.s + '%';
+        svCursor.style.top = (100 - this._hsv.v) + '%';
       }
       // 色相选点
       const hueCursor = this._shadow.querySelector('[data-hue-cursor]');
-      if (hueCursor) hueCursor.style.left = (this._hsl.h / 360 * 100) + '%';
-      // 预览
-      this._updatePreview();
+      if (hueCursor) hueCursor.style.left = (this._hsv.h / 360 * 100) + '%';
       // 不透明度填充条颜色
       this._updateOpacityFill();
       // 格式输入
@@ -1373,14 +1342,6 @@
       if (opacityCursor) opacityCursor.style.left = this._opacity + '%';
       const opacityNum = this._shadow.querySelector('[data-opacity-num]');
       if (opacityNum) opacityNum.value = this._opacity;
-      this._updatePreview();
-    }
-    _updatePreview() {
-      const preview = this._shadow.querySelector('[data-preview-color]');
-      if (preview) {
-        preview.style.background = this._hex;
-        preview.style.opacity = this._opacity / 100;
-      }
     }
     _updateOpacityFill() {
       const fill = this._shadow.querySelector('[data-opacity-fill]');
@@ -2324,28 +2285,33 @@
             background: rgba(0,185,107,0.12);
             color: var(--text-brand, #00b96b);
           }
-          /* Token 选择弹出面板 — 横向网格色板，毛玻璃与样式面板统一 */
+          /* Token 选择弹出面板 — 分层毛玻璃（与主面板 :host+.panel 结构一致） */
           .token-panel {
             position: absolute;
             z-index: 9650;
             width: 260px;
+            border-radius: 14px;
+            /* 外层只负责模糊，不设背景色 */
+            backdrop-filter: blur(20px) saturate(160%);
+            -webkit-backdrop-filter: blur(20px) saturate(160%);
+            display: none;
+          }
+          .token-panel.open { display: block; }
+          .token-panel-inner {
             max-height: 340px;
             overflow-y: auto;
             padding: 12px;
             border-radius: 14px;
             border: 1px solid rgba(255, 255, 255, 0.08);
-            background: rgba(28, 28, 30, 0.68);
-            backdrop-filter: blur(24px) saturate(180%);
-            -webkit-backdrop-filter: blur(24px) saturate(180%);
-            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
-            display: none;
+            /* 内层负责半透明背景色 */
+            background: rgba(30, 30, 30, 0.78);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
           }
-          .token-panel.open { display: block; }
-          .token-panel::-webkit-scrollbar { width: 0; }
+          .token-panel-inner::-webkit-scrollbar { width: 0; }
           .token-group-title {
             font-size: 10px;
             font-weight: 600;
-            color: var(--text-tertiary, rgba(255,255,255,0.45));
+            color: var(--text-tertiary, rgba(255,255,255,0.5));
             margin: 10px 0 6px;
             letter-spacing: 0.3px;
           }
@@ -2354,6 +2320,7 @@
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 6px;
+            padding-right: 2px;
           }
           .token-item {
             position: relative;
@@ -2382,36 +2349,36 @@
             border-radius: 4px;
             border: 1px solid rgba(255,255,255,0.12);
           }
-          /* hover tooltip：变量名 + 语义 */
-          .token-tooltip {
+          /* 独立 tooltip 容器（在 token-panel 外部，不受 overflow 裁剪） */
+          .token-tooltip-root {
             position: absolute;
-            bottom: calc(100% + 8px);
-            left: 50%;
-            transform: translateX(-50%);
-            display: none;
+            z-index: 9700;
+            display: flex;
             flex-direction: column;
-            gap: 2px;
+            gap: 3px;
             padding: 8px 10px;
             border-radius: 8px;
-            background: rgba(20, 20, 20, 0.95);
+            background: rgba(18, 18, 20, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-            white-space: nowrap;
-            z-index: 10;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+            max-width: 200px;
             pointer-events: none;
           }
-          .token-item:hover .token-tooltip {
-            display: flex;
-          }
+          .token-tooltip-root[hidden] { display: none; }
           .token-tooltip-name {
             font-size: 11px;
             font-weight: 600;
             color: var(--text-default, #fff);
-            font-family: "SF Mono", Menlo, monospace;
+            font-family: "SF Mono", Menlo, Consolas, monospace;
+            white-space: nowrap;
           }
           .token-tooltip-desc {
             font-size: 10px;
-            color: var(--text-tertiary, rgba(255,255,255,0.5));
+            color: var(--text-tertiary, rgba(255,255,255,0.55));
+            line-height: 1.4;
+            word-break: break-word;
           }
           .layout-tabs {
             display: flex;
@@ -2754,10 +2721,16 @@
             </div>
           </div>
           </div>
-          <!-- Token 选择弹出面板 -->
+          <!-- Token 选择弹出面板（分层毛玻璃：外层 backdrop-filter，内层背景色，与主面板一致） -->
           <div class="token-panel" data-token-panel>
-            <div class="token-group-title">设计系统 Token</div>
-            <div data-token-list></div>
+            <div class="token-panel-inner">
+              <div data-token-list></div>
+            </div>
+          </div>
+          <!-- Token tooltip（独立容器，避免被 token-panel overflow 裁剪） -->
+          <div class="token-tooltip-root" data-token-tooltip hidden>
+            <div class="token-tooltip-name"></div>
+            <div class="token-tooltip-desc"></div>
           </div>
         </div>
       `;
@@ -3403,16 +3376,25 @@
       this._tokenPanel = { open: true, type, trigger };
       this._renderTokenList(type);
       panel.classList.add('open');
-      // 定位到触发按钮下方
+      // 定位到触发按钮下方，下方空间不够时自动上翻
       const rect = trigger.getBoundingClientRect();
       const panelRect = this.getBoundingClientRect();
-      let left = rect.left - panelRect.left;
-      let top = rect.bottom - panelRect.top + 6;
       const panelWidth = 260;
+      const panelHeight = panel.offsetHeight || 200;
+      let left = rect.left - panelRect.left;
+      // 水平方向：优先左对齐触发按钮，超出则右移
       if (left + panelWidth > panelRect.width - 8) {
         left = panelRect.width - panelWidth - 8;
       }
       if (left < 8) left = 8;
+      // 垂直方向：优先下方，下方空间不够则上方
+      const spaceBelow = window.innerHeight - rect.bottom - 8;
+      let top;
+      if (spaceBelow >= panelHeight) {
+        top = rect.bottom - panelRect.top + 6;
+      } else {
+        top = rect.top - panelRect.top - panelHeight - 6;
+      }
       panel.style.left = left + 'px';
       panel.style.top = top + 'px';
       // 阻止面板和触发按钮内部 mousedown/touchstart 冒泡，避免 shadow DOM 事件重定向导致外部关闭逻辑误关
@@ -3435,6 +3417,7 @@
     }
 
     _closeTokenPanel() {
+      this._hideTokenTooltip();
       const panel = this._shadow.querySelector('[data-token-panel]');
       if (panel) panel.classList.remove('open');
       // 移除阻止冒泡监听
@@ -3459,6 +3442,7 @@
       const listEl = this._shadow.querySelector('[data-token-list]');
       if (!listEl) return;
       const currentVal = this._data ? (this._data.colorHex || '') : '';
+      const tooltip = this._shadow.querySelector('[data-token-tooltip]');
       let html = '';
       if (type === 'color') {
         COLOR_TOKEN_GROUPS.forEach(group => {
@@ -3470,30 +3454,55 @@
             const color = resolveCssValue(varExpr, 'color') || 'transparent';
             html += `
               <button class="token-item ${selected ? 'selected' : ''}" type="button"
-                data-token-value="${varExpr}" data-token-name="${token.name}">
+                data-token-value="${varExpr}" data-token-name="${token.name}"
+                data-token-var="${token.var}" data-token-desc="${token.label} · ${token.desc || ''}">
                 <span class="token-swatch" style="background:${color}"></span>
-                <span class="token-tooltip">
-                  <span class="token-tooltip-name">${token.var}</span>
-                  <span class="token-tooltip-desc">${token.label} · ${token.desc || ''}</span>
-                </span>
               </button>`;
           });
           html += `</div>`;
         });
       }
       listEl.innerHTML = html;
-      // 绑定 token 项点击
+      // 绑定 token 项事件：click 选择 + mouseenter/mouseleave 显示 tooltip
       listEl.querySelectorAll('.token-item').forEach(item => {
         item.addEventListener('click', (e) => {
           e.stopPropagation();
           const value = item.dataset.tokenValue;
-          const name = item.dataset.tokenName;
           if (this._tokenPanel.type === 'color') {
             this._onFieldChange('colorHex', value);
           }
+          this._hideTokenTooltip();
           this._closeTokenPanel();
         });
+        item.addEventListener('mouseenter', () => this._showTokenTooltip(item));
+        item.addEventListener('mouseleave', () => this._hideTokenTooltip());
       });
+    }
+
+    _showTokenTooltip(item) {
+      const tooltip = this._shadow.querySelector('[data-token-tooltip]');
+      if (!tooltip) return;
+      tooltip.querySelector('.token-tooltip-name').textContent = item.dataset.tokenVar || '';
+      tooltip.querySelector('.token-tooltip-desc').textContent = item.dataset.tokenDesc || '';
+      tooltip.hidden = false;
+      // 定位到色块上方居中
+      const itemRect = item.getBoundingClientRect();
+      const hostRect = this.getBoundingClientRect();
+      const tooltipRect = tooltip.getBoundingClientRect();
+      let left = itemRect.left - hostRect.left + itemRect.width / 2 - tooltipRect.width / 2;
+      let top = itemRect.top - hostRect.top - tooltipRect.height - 8;
+      // 边界保护：左侧不超出，右侧不超出
+      if (left < 4) left = 4;
+      if (left + tooltipRect.width > hostRect.width - 4) left = hostRect.width - tooltipRect.width - 4;
+      // 上方空间不够时显示在色块下方
+      if (top < 4) top = itemRect.bottom - hostRect.top + 8;
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+    }
+
+    _hideTokenTooltip() {
+      const tooltip = this._shadow.querySelector('[data-token-tooltip]');
+      if (tooltip) tooltip.hidden = true;
     }
   }
 
