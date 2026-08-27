@@ -848,10 +848,11 @@
       this._hsv = this._hexToHsv(this._hex);
       this._callback = callback;
       this._render();
-      // 定位到触发按钮附近，优先下方，空间不足翻上方
+      // 先显示以测量实际尺寸，再定位到触发按钮附近，优先下方，空间不足翻上方
+      this.removeAttribute('hidden');
       const rect = triggerEl.getBoundingClientRect();
-      const pickerWidth = 260;
-      const pickerHeight = 380;
+      const pickerWidth = this.offsetWidth || 260;
+      const pickerHeight = this.offsetHeight || 300;
       let left = rect.left;
       let top = rect.bottom + 6;
       if (left + pickerWidth > window.innerWidth - 8) left = window.innerWidth - pickerWidth - 8;
@@ -860,10 +861,12 @@
       if (top < 8) top = 8;
       this.style.left = left + 'px';
       this.style.top = top + 'px';
-      this.removeAttribute('hidden');
-      // 点击外部关闭
+      // 点击外部关闭（用 composedPath 穿透 shadow DOM 边界判断，避免事件重定向误判）
       this._outsideHandler = (e) => {
-        if (!this.contains(e.target) && e.target !== triggerEl && !triggerEl.contains(e.target)) {
+        const path = e.composedPath ? e.composedPath() : [];
+        const inPicker = path.includes(this);
+        const inTrigger = e.target === triggerEl || triggerEl.contains(e.target);
+        if (!inPicker && !inTrigger) {
           this.close();
         }
       };
@@ -1369,7 +1372,6 @@
       this._shadow = this.attachShadow({ mode: 'open' });
       this._changes = [];
       this._route = '';
-      this._activeTab = 'all'; // all | config
     }
     connectedCallback() {
       this._render();
@@ -1514,29 +1516,6 @@
             padding: 0;
           }
           .close-btn:hover { background: rgba(255,255,255,0.06); }
-          .tabs {
-            display: flex;
-            gap: 4px;
-            padding: 3px;
-            border-radius: 9px;
-            background: rgba(255,255,255,0.04);
-          }
-          .tab {
-            flex: 1;
-            height: 30px;
-            border: none;
-            background: transparent;
-            border-radius: 7px;
-            font-size: 12px;
-            color: var(--text-tertiary, rgba(255,255,255,0.42));
-            cursor: pointer;
-          }
-          .tab.active {
-            background: var(--bg-surface, rgba(30,30,30,0.82));
-            color: var(--text-brand, #00b96b);
-            font-weight: 500;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-          }
           .list {
             display: flex;
             flex-direction: column;
@@ -1660,10 +1639,6 @@
               <span class="header-count">${changes.length} 项变更</span>
             </div>
           </div>
-          <div class="tabs">
-            <button class="tab ${this._activeTab === 'all' ? 'active' : ''}" data-tab="all">全部</button>
-            <button class="tab ${this._activeTab === 'config' ? 'active' : ''}" data-tab="config">配置</button>
-          </div>
           ${groupList.length === 0 ? `
             <div class="empty">
               当前还没有配置修改<br/>
@@ -1707,14 +1682,6 @@
           this._copyPrompt();
         });
       }
-      // Tab 切换
-      this._shadow.querySelectorAll('[data-tab]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          this._activeTab = btn.dataset.tab;
-          this._render();
-          this._bindEvents();
-        });
-      });
       // 点击元素选择器 → 跳转选中
       this._shadow.querySelectorAll('[data-selector]').forEach(el => {
         el.addEventListener('click', () => {
@@ -1733,6 +1700,7 @@
       const resetBtn = this._shadow.querySelector('[data-action="reset"]');
       if (resetBtn) {
         resetBtn.addEventListener('click', () => {
+          this.close();
           bus.emit('reset-changes');
         });
       }
@@ -1913,6 +1881,59 @@
     },
   ];
 
+  // 字号 Token
+  const FONT_SIZE_TOKEN_GROUPS = [
+    {
+      label: '字号',
+      tokens: [
+        { name: 'font-size-xs', var: '--font-size-xs', label: 'XS', desc: '极小/辅助文字', value: '10px' },
+        { name: 'font-size-sm', var: '--font-size-sm', label: 'SM', desc: '小字/说明文字', value: '12px' },
+        { name: 'font-size-base', var: '--font-size-base', label: 'BASE', desc: '正文默认', value: '14px' },
+        { name: 'font-size-md', var: '--font-size-md', label: 'MD', desc: '小标题/强调', value: '16px' },
+        { name: 'font-size-lg', var: '--font-size-lg', label: 'LG', desc: '标题', value: '18px' },
+        { name: 'font-size-xl', var: '--font-size-xl', label: 'XL', desc: '大标题', value: '20px' },
+        { name: 'font-size-2xl', var: '--font-size-2xl', label: '2XL', desc: '特大标题', value: '24px' },
+        { name: 'font-size-3xl', var: '--font-size-3xl', label: '3XL', desc: '超大标题', value: '28px' },
+        { name: 'font-size-4xl', var: '--font-size-4xl', label: '4XL', desc: '巨型标题', value: '32px' },
+      ],
+    },
+  ];
+
+  // 字重 Token
+  const FONT_WEIGHT_TOKEN_GROUPS = [
+    {
+      label: '字重',
+      tokens: [
+        { name: 'font-weight-light', var: '--font-weight-light', label: 'Light', desc: '细体/轻盈', value: '300' },
+        { name: 'font-weight-regular', var: '--font-weight-regular', label: 'Regular', desc: '常规/正文', value: '400' },
+        { name: 'font-weight-medium', var: '--font-weight-medium', label: 'Medium', desc: '中等/强调', value: '500' },
+        { name: 'font-weight-semibold', var: '--font-weight-semibold', label: 'Semibold', desc: '半粗/小标题', value: '600' },
+        { name: 'font-weight-bold', var: '--font-weight-bold', label: 'Bold', desc: '粗体/标题', value: '700' },
+      ],
+    },
+  ];
+
+  // 行高 Token
+  const LINE_HEIGHT_TOKEN_GROUPS = [
+    {
+      label: '行高',
+      tokens: [
+        { name: 'line-height-tight', var: '--line-height-tight', label: 'Tight', desc: '紧凑/标题', value: '1.2' },
+        { name: 'line-height-normal', var: '--line-height-normal', label: 'Normal', desc: '常规/正文', value: '1.4' },
+        { name: 'line-height-relaxed', var: '--line-height-relaxed', label: 'Relaxed', desc: '宽松/阅读', value: '1.6' },
+        { name: 'line-height-loose', var: '--line-height-loose', label: 'Loose', desc: '疏松/大段', value: '1.8' },
+      ],
+    },
+  ];
+
+  // 类型 → Token 组映射
+  const TOKEN_GROUPS_MAP = {
+    color: COLOR_TOKEN_GROUPS,
+    fontSize: FONT_SIZE_TOKEN_GROUPS,
+    fontWeight: FONT_WEIGHT_TOKEN_GROUPS,
+    lineHeight: LINE_HEIGHT_TOKEN_GROUPS,
+  };
+
   // ============================================================
   // wego-wt-style-panel: 样式编辑浮动面板
   // ============================================================
@@ -2033,6 +2054,20 @@
       const colorSwatchBg = colorIsToken
         ? (resolveCssValue(d.colorHex, 'color') || 'transparent')
         : hexOpacityToRgba(d.colorHex || '#000000', d.colorOpacity ?? 100);
+      // 填充/描边/投影 token 模式判断
+      const fillIsToken = isTokenValue(d.fillHex);
+      const fillTokenName = fillIsToken ? d.fillHex.match(/var\((--[^)]+)\)/)[1].replace(/^--/, '') : '';
+      const strokeIsToken = isTokenValue(d.strokeHex);
+      const strokeTokenName = strokeIsToken ? d.strokeHex.match(/var\((--[^)]+)\)/)[1].replace(/^--/, '') : '';
+      const shadowIsToken = isTokenValue(d.shadowHex);
+      const shadowTokenName = shadowIsToken ? d.shadowHex.match(/var\((--[^)]+)\)/)[1].replace(/^--/, '') : '';
+      // 字号/字重/行高 token 模式判断
+      const fontSizeIsToken = isTokenValue(d.fontSize);
+      const fontSizeTokenName = fontSizeIsToken ? d.fontSize.match(/var\((--[^)]+)\)/)[1].replace(/^--/, '') : '';
+      const fontWeightIsToken = isTokenValue(d.fontWeight);
+      const fontWeightTokenName = fontWeightIsToken ? d.fontWeight.match(/var\((--[^)]+)\)/)[1].replace(/^--/, '') : '';
+      const lineHeightIsToken = isTokenValue(d.lineHeight);
+      const lineHeightTokenName = lineHeightIsToken ? d.lineHeight.match(/var\((--[^)]+)\)/)[1].replace(/^--/, '') : '';
       this._shadow.innerHTML = `
         <style>
           :host {
@@ -2349,6 +2384,22 @@
             border-radius: 4px;
             border: 1px solid rgba(255,255,255,0.12);
           }
+          /* 非颜色类型的数值预览（字号/字重/行高） */
+          .token-value {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 400;
+            color: var(--text-default, #fff);
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.04);
+            overflow: hidden;
+            white-space: nowrap;
+          }
           /* 独立 tooltip 容器（在 token-panel 外部，不受 overflow 裁剪） */
           .token-tooltip-root {
             position: absolute;
@@ -2620,19 +2671,27 @@
           <!-- 字体 -->
           <div class="section">
             <p class="section-title">字体</p>
-            <div class="field-row two-col">
-              <div class="field"><span class="field-icon">A</span><input class="text-input" type="text" value="${d.fontSize || ''}" data-field="fontSize" inputmode="numeric" placeholder="字号" /></div>
-              <div class="field">
-                <select class="text-input" data-field="fontWeight">
-                  <option value="normal" ${d.fontWeight === 'normal' ? 'selected' : ''}>normal</option>
-                  <option value="300" ${d.fontWeight === '300' ? 'selected' : ''}>300</option>
-                  <option value="400" ${d.fontWeight === '400' ? 'selected' : ''}>400</option>
-                  <option value="500" ${d.fontWeight === '500' ? 'selected' : ''}>500</option>
-                  <option value="600" ${d.fontWeight === '600' ? 'selected' : ''}>600</option>
-                  <option value="700" ${d.fontWeight === '700' ? 'selected' : ''}>700</option>
-                  <option value="bold" ${d.fontWeight === 'bold' ? 'selected' : ''}>bold</option>
-                </select>
-              </div>
+            <div class="field-row">
+              <span class="field-icon">A</span>
+              <input class="text-input" type="text" value="${d.fontSize || ''}" data-field="fontSize" inputmode="numeric" placeholder="字号" />
+              <button class="token-btn ${fontSizeIsToken ? 'active' : ''}" type="button" data-token-trigger="fontSize" data-field="fontSize" title="选择设计系统 Token">
+                ${fontSizeIsToken ? fontSizeTokenName : 'T'}
+              </button>
+            </div>
+            <div class="field-row">
+              <span class="field-icon">W</span>
+              <select class="text-input" data-field="fontWeight">
+                <option value="normal" ${d.fontWeight === 'normal' ? 'selected' : ''}>normal</option>
+                <option value="300" ${d.fontWeight === '300' ? 'selected' : ''}>300</option>
+                <option value="400" ${d.fontWeight === '400' ? 'selected' : ''}>400</option>
+                <option value="500" ${d.fontWeight === '500' ? 'selected' : ''}>500</option>
+                <option value="600" ${d.fontWeight === '600' ? 'selected' : ''}>600</option>
+                <option value="700" ${d.fontWeight === '700' ? 'selected' : ''}>700</option>
+                <option value="bold" ${d.fontWeight === 'bold' ? 'selected' : ''}>bold</option>
+              </select>
+              <button class="token-btn ${fontWeightIsToken ? 'active' : ''}" type="button" data-token-trigger="fontWeight" data-field="fontWeight" title="选择设计系统 Token">
+                ${fontWeightIsToken ? fontWeightTokenName : 'T'}
+              </button>
             </div>
             <div class="field-row">
               <button class="color-button" type="button" data-field="colorHex" data-color-trigger>
@@ -2640,12 +2699,18 @@
               </button>
               <input class="text-input" type="text" value="${d.colorHex || ''}" data-field="colorHex" />
               <input class="text-input opacity-input" type="text" value="${d.colorOpacity ?? 100}" data-field="colorOpacity" inputmode="numeric" ${colorIsToken ? 'disabled' : ''} />
-              <button class="token-btn ${colorIsToken ? 'active' : ''}" type="button" data-token-trigger="color" title="选择设计系统 Token">
+              <button class="token-btn ${colorIsToken ? 'active' : ''}" type="button" data-token-trigger="color" data-field="colorHex" title="选择设计系统 Token">
                 ${colorIsToken ? colorTokenName : 'T'}
               </button>
             </div>
+            <div class="field-row">
+              <span class="field-icon">LH</span>
+              <input class="text-input" type="text" value="${d.lineHeight || ''}" data-field="lineHeight" inputmode="decimal" placeholder="行高" />
+              <button class="token-btn ${lineHeightIsToken ? 'active' : ''}" type="button" data-token-trigger="lineHeight" data-field="lineHeight" title="选择设计系统 Token">
+                ${lineHeightIsToken ? lineHeightTokenName : 'T'}
+              </button>
+            </div>
             <div class="field-row two-col">
-              <div class="field"><span class="field-icon">LH</span><input class="text-input" type="text" value="${d.lineHeight || ''}" data-field="lineHeight" inputmode="decimal" placeholder="行高" /></div>
               <div class="btn-group">
                 <button data-field="textAlign" data-value="left" class="${d.textAlign === 'left' ? 'active' : ''}">左</button>
                 <button data-field="textAlign" data-value="center" class="${d.textAlign === 'center' ? 'active' : ''}">中</button>
@@ -2668,10 +2733,13 @@
             <p class="section-title">填充</p>
             <div class="field-row">
               <button class="color-button" type="button" data-field="fillHex" data-color-trigger>
-                <span class="swatch" style="background:${hexOpacityToRgba(d.fillHex || '#FFFFFF', d.fillOpacity ?? 0)}"></span>
+                <span class="swatch" style="background:${fillIsToken ? (resolveCssValue(d.fillHex, 'color') || 'transparent') : hexOpacityToRgba(d.fillHex || '#FFFFFF', d.fillOpacity ?? 0)}"></span>
               </button>
               <input class="text-input" type="text" value="${d.fillHex || ''}" data-field="fillHex" />
-              <input class="text-input opacity-input" type="text" value="${d.fillOpacity ?? 0}" data-field="fillOpacity" inputmode="numeric" />
+              <input class="text-input opacity-input" type="text" value="${d.fillOpacity ?? 0}" data-field="fillOpacity" inputmode="numeric" ${fillIsToken ? 'disabled' : ''} />
+              <button class="token-btn ${fillIsToken ? 'active' : ''}" type="button" data-token-trigger="color" data-field="fillHex" title="选择设计系统 Token">
+                ${fillIsToken ? fillTokenName : 'T'}
+              </button>
             </div>
           </div>
 
@@ -2680,10 +2748,13 @@
             <p class="section-title">描边</p>
             <div class="field-row">
               <button class="color-button" type="button" data-field="strokeHex" data-color-trigger>
-                <span class="swatch" style="background:${hexOpacityToRgba(d.strokeHex || '#000000', d.strokeOpacity ?? 0)}"></span>
+                <span class="swatch" style="background:${strokeIsToken ? (resolveCssValue(d.strokeHex, 'color') || 'transparent') : hexOpacityToRgba(d.strokeHex || '#000000', d.strokeOpacity ?? 0)}"></span>
               </button>
               <input class="text-input" type="text" value="${d.strokeHex || ''}" data-field="strokeHex" />
-              <input class="text-input opacity-input" type="text" value="${d.strokeOpacity ?? 0}" data-field="strokeOpacity" inputmode="numeric" />
+              <input class="text-input opacity-input" type="text" value="${d.strokeOpacity ?? 0}" data-field="strokeOpacity" inputmode="numeric" ${strokeIsToken ? 'disabled' : ''} />
+              <button class="token-btn ${strokeIsToken ? 'active' : ''}" type="button" data-token-trigger="color" data-field="strokeHex" title="选择设计系统 Token">
+                ${strokeIsToken ? strokeTokenName : 'T'}
+              </button>
             </div>
             <div class="field-row two-col">
               <div class="field"><span class="field-icon">▢</span><input class="text-input" type="text" value="${d.strokeWidth || ''}" data-field="strokeWidth" inputmode="numeric" placeholder="宽度" /></div>
@@ -2702,10 +2773,13 @@
             <p class="section-title">投影</p>
             <div class="field-row">
               <button class="color-button" type="button" data-field="shadowHex" data-color-trigger>
-                <span class="swatch" style="background:${hexOpacityToRgba(d.shadowHex || '#000000', d.shadowOpacity ?? 0)}"></span>
+                <span class="swatch" style="background:${shadowIsToken ? (resolveCssValue(d.shadowHex, 'color') || 'transparent') : hexOpacityToRgba(d.shadowHex || '#000000', d.shadowOpacity ?? 0)}"></span>
               </button>
               <input class="text-input" type="text" value="${d.shadowHex || ''}" data-field="shadowHex" />
-              <input class="text-input opacity-input" type="text" value="${d.shadowOpacity ?? 0}" data-field="shadowOpacity" inputmode="numeric" />
+              <input class="text-input opacity-input" type="text" value="${d.shadowOpacity ?? 0}" data-field="shadowOpacity" inputmode="numeric" ${shadowIsToken ? 'disabled' : ''} />
+              <button class="token-btn ${shadowIsToken ? 'active' : ''}" type="button" data-token-trigger="color" data-field="shadowHex" title="选择设计系统 Token">
+                ${shadowIsToken ? shadowTokenName : 'T'}
+              </button>
             </div>
             <div class="field-row two-col">
               <div class="field"><span class="field-icon">X</span><input class="text-input" type="text" value="${d.shadowX || ''}" data-field="shadowX" inputmode="numeric" placeholder="X" /></div>
@@ -2756,10 +2830,13 @@
     _bindEvents() {
       // 面板拖拽（header 按住移动）
       this._initPanelDrag();
-      // 滚动样式面板时关闭 token 选择面板
+      // 滚动样式面板时关闭 token 选择面板和颜色选择器
       const panelBody = this._shadow.querySelector('.panel-body');
       if (panelBody) {
-        panelBody.addEventListener('scroll', () => this._closeTokenPanel());
+        panelBody.addEventListener('scroll', () => {
+          this._closeTokenPanel();
+          bus.emit('close-color-picker');
+        });
       }
       // 关闭按钮
       const closeBtn = this._shadow.querySelector('[data-action="close"]');
@@ -2881,10 +2958,11 @@
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
           const type = btn.dataset.tokenTrigger;
-          if (this._tokenPanel.open && this._tokenPanel.type === type) {
+          const field = btn.dataset.field;
+          if (this._tokenPanel.open && this._tokenPanel.field === field) {
             this._closeTokenPanel();
           } else {
-            this._openTokenPanel(btn, type);
+            this._openTokenPanel(btn, type, field);
           }
         });
       });
@@ -3003,6 +3081,7 @@
         case 'fillHex':
         case 'fillOpacity': {
           const hex = d.fillHex || '#FFFFFF';
+          if (isTokenValue(hex)) return hex;
           const op = d.fillOpacity ?? 0;
           return op > 0 ? hexOpacityToRgba(hex, op) : 'transparent';
         }
@@ -3012,6 +3091,7 @@
           const hex = d.strokeHex || '#000000';
           const op = d.strokeOpacity ?? 0;
           const w = num(d.strokeWidth);
+          if (isTokenValue(hex)) return w > 0 ? `${w}px solid ${hex}` : 'none';
           return op > 0 && w > 0 ? `${w}px solid ${hexOpacityToRgba(hex, op)}` : 'none';
         }
         case 'strokePosition':
@@ -3030,7 +3110,11 @@
           const blur = num(d.shadowBlur);
           const spread = num(d.shadowSpread);
           const inset = d.shadowInset === true || d.shadowInset === 'true';
-          if (op > 0 && (blur > 0 || x !== 0 || y !== 0 || spread !== 0)) {
+          const hasOffset = blur > 0 || x !== 0 || y !== 0 || spread !== 0;
+          if (isTokenValue(hex)) {
+            return hasOffset ? `${inset ? 'inset ' : ''}${x}px ${y}px ${blur}px ${spread}px ${hex}` : 'none';
+          }
+          if (op > 0 && hasOffset) {
             return `${inset ? 'inset ' : ''}${x}px ${y}px ${blur}px ${spread}px ${hexOpacityToRgba(hex, op)}`;
           }
           return 'none';
@@ -3048,6 +3132,7 @@
         case 'marginBottom':
         case 'borderRadiusAll':
         case 'layoutGap':
+          if (isTokenValue(d[field])) return d[field];
           return num(d[field]) ? num(d[field]) + 'px' : '';
         case 'layerOpacity':
           return d.layerOpacity != null ? (num(d.layerOpacity) / 100).toString() : '';
@@ -3179,6 +3264,10 @@
         }
         case 'fontSize': {
           const oldValue = cs().fontSize;
+          if (isTokenValue(value)) {
+            el.style.fontSize = value;
+            return { property: 'font-size', oldValue, newValue: value };
+          }
           el.style.fontSize = isNaN(numVal) ? '' : numVal + 'px';
           return { property: 'font-size', oldValue, newValue: isNaN(numVal) ? '' : numVal + 'px' };
         }
@@ -3207,8 +3296,7 @@
           const oldValue = cs().lineHeight;
           el.style.lineHeight = value || '';
           return { property: 'line-height', oldValue, newValue: value || '' };
-        }
-        case 'textAlign': {
+        }        case 'textAlign': {
           const oldValue = cs().textAlign;
           el.style.textAlign = value;
           return { property: 'text-align', oldValue, newValue: value };
@@ -3227,6 +3315,10 @@
         case 'fillOpacity': {
           const oldValue = cs().backgroundColor;
           const hex = this._data.fillHex || '#FFFFFF';
+          if (isTokenValue(hex)) {
+            el.style.backgroundColor = hex;
+            return { property: 'background-color', oldValue, newValue: hex };
+          }
           const opacity = this._data.fillOpacity ?? 0;
           const rgba = opacity > 0 ? hexOpacityToRgba(hex, opacity) : 'transparent';
           el.style.backgroundColor = rgba;
@@ -3237,8 +3329,14 @@
         case 'strokeWidth': {
           const oldValue = cs().border;
           const hex = this._data.strokeHex || '#000000';
-          const opacity = this._data.strokeOpacity ?? 0;
           const width = parseFloat(this._data.strokeWidth) || 0;
+          if (isTokenValue(hex)) {
+            el.style.borderWidth = width > 0 ? width + 'px' : '';
+            el.style.borderStyle = width > 0 ? 'solid' : '';
+            el.style.borderColor = hex;
+            return { property: 'border', oldValue, newValue: width > 0 ? `${width}px solid ${hex}` : '' };
+          }
+          const opacity = this._data.strokeOpacity ?? 0;
           const color = opacity > 0 && width > 0 ? hexOpacityToRgba(hex, opacity) : 'transparent';
           el.style.borderWidth = width > 0 ? width + 'px' : '';
           el.style.borderStyle = width > 0 ? 'solid' : '';
@@ -3263,12 +3361,23 @@
         case 'shadowInset': {
           const oldValue = cs().boxShadow;
           const hex = this._data.shadowHex || '#000000';
-          const opacity = this._data.shadowOpacity ?? 0;
           const x = parseFloat(this._data.shadowX) || 0;
           const y = parseFloat(this._data.shadowY) || 0;
           const blur = parseFloat(this._data.shadowBlur) || 0;
           const spread = parseFloat(this._data.shadowSpread) || 0;
           const inset = this._data.shadowInset === true || this._data.shadowInset === 'true';
+          // Token 模式：直接用 var(--xxx) 作为阴影颜色
+          if (isTokenValue(hex)) {
+            if (blur > 0 || x !== 0 || y !== 0 || spread !== 0) {
+              const shadowStr = `${inset ? 'inset ' : ''}${x}px ${y}px ${blur}px ${spread}px ${hex}`;
+              el.style.boxShadow = shadowStr;
+              return { property: 'box-shadow', oldValue, newValue: shadowStr };
+            } else {
+              el.style.boxShadow = 'none';
+              return { property: 'box-shadow', oldValue, newValue: 'none' };
+            }
+          }
+          const opacity = this._data.shadowOpacity ?? 0;
           if (opacity > 0 && (blur > 0 || x !== 0 || y !== 0 || spread !== 0)) {
             const color = hexOpacityToRgba(hex, opacity);
             const shadowStr = `${inset ? 'inset ' : ''}${x}px ${y}px ${blur}px ${spread}px ${color}`;
@@ -3337,31 +3446,58 @@
             : hexOpacityToRgba(val, opacity);
         }
       });
-      // 颜色 Token 按钮状态 + opacity 输入框联动
-      const colorTokenBtn = this._shadow.querySelector('[data-token-trigger="color"]');
-      const colorOpacityInput = this._shadow.querySelector('[data-field="colorOpacity"]');
-      const colorVal = d.colorHex || '';
-      if (colorTokenBtn) {
-        const isTok = isTokenValue(colorVal);
-        colorTokenBtn.classList.toggle('active', isTok);
-        if (isTok) {
-          const tokName = colorVal.match(/var\((--[^)]+)\)/)[1].replace(/^--/, '');
-          if (colorTokenBtn.textContent.trim() !== tokName) colorTokenBtn.textContent = tokName;
-        } else {
-          if (colorTokenBtn.textContent.trim() !== 'T') colorTokenBtn.textContent = 'T';
+      // 颜色 Token 按钮状态 + opacity 输入框联动 + 输入框回显（统一处理4个颜色字段）
+      const colorFields = ['colorHex', 'fillHex', 'strokeHex', 'shadowHex'];
+      colorFields.forEach(field => {
+        const opacityField = field.replace('Hex', 'Opacity');
+        const val = d[field] || '';
+        const isTok = isTokenValue(val);
+        // T 按钮状态
+        const tokenBtn = this._shadow.querySelector(`[data-token-trigger="color"][data-field="${field}"]`);
+        if (tokenBtn) {
+          tokenBtn.classList.toggle('active', isTok);
+          if (isTok) {
+            const tokName = val.match(/var\((--[^)]+)\)/)[1].replace(/^--/, '');
+            if (tokenBtn.textContent.trim() !== tokName) tokenBtn.textContent = tokName;
+          } else {
+            if (tokenBtn.textContent.trim() !== 'T') tokenBtn.textContent = 'T';
+          }
         }
-      }
-      if (colorOpacityInput) {
-        colorOpacityInput.disabled = isTokenValue(colorVal);
-      }
-      // 颜色输入框值回显（统一同步，不依赖焦点状态）
-      const colorInput = this._shadow.querySelector('[data-field="colorHex"]');
-      if (colorInput) {
-        if (colorInput.value !== colorVal) {
-          colorInput.value = colorVal;
+        // opacity 输入框禁用 + 值回显
+        const opacityInput = this._shadow.querySelector(`[data-field="${opacityField}"]`);
+        if (opacityInput) {
+          opacityInput.disabled = isTok;
+          const opacityVal = d[opacityField] ?? 100;
+          if (opacityInput.value !== String(opacityVal)) {
+            opacityInput.value = opacityVal;
+          }
         }
-      } else {
-      }
+        // hex 输入框值回显
+        const hexInput = this._shadow.querySelector(`[data-field="${field}"]`);
+        if (hexInput && hexInput.value !== val) {
+          hexInput.value = val;
+        }
+      });
+      // 字号/字重/行高 Token 按钮状态 + 输入框回显
+      const textFields = ['fontSize', 'fontWeight', 'lineHeight'];
+      textFields.forEach(field => {
+        const val = d[field] || '';
+        const isTok = isTokenValue(val);
+        const tokenBtn = this._shadow.querySelector(`[data-token-trigger="${field}"][data-field="${field}"]`);
+        if (tokenBtn) {
+          tokenBtn.classList.toggle('active', isTok);
+          if (isTok) {
+            const tokName = val.match(/var\((--[^)]+)\)/)[1].replace(/^--/, '');
+            if (tokenBtn.textContent.trim() !== tokName) tokenBtn.textContent = tokName;
+          } else {
+            if (tokenBtn.textContent.trim() !== 'T') tokenBtn.textContent = 'T';
+          }
+        }
+        const input = this._shadow.querySelector(`[data-field="${field}"]`);
+        if (input && input.value !== val) {
+          input.value = val;
+        }
+      });
       // 对齐矩阵
       this._shadow.querySelectorAll('[data-align-preset]').forEach(btn => {
         const [jc, ai] = btn.dataset.alignPreset.split('|');
@@ -3370,10 +3506,10 @@
     }
 
     // ── Token 选择面板 ──────────────────────────────────────
-    _openTokenPanel(trigger, type) {
+    _openTokenPanel(trigger, type, field) {
       const panel = this._shadow.querySelector('[data-token-panel]');
       if (!panel) return;
-      this._tokenPanel = { open: true, type, trigger };
+      this._tokenPanel = { open: true, type, field, trigger };
       this._renderTokenList(type);
       panel.classList.add('open');
       // 定位到触发按钮下方，下方空间不够时自动上翻
@@ -3441,36 +3577,41 @@
     _renderTokenList(type) {
       const listEl = this._shadow.querySelector('[data-token-list]');
       if (!listEl) return;
-      const currentVal = this._data ? (this._data.colorHex || '') : '';
-      const tooltip = this._shadow.querySelector('[data-token-tooltip]');
+      const field = this._tokenPanel.field || 'colorHex';
+      const currentVal = this._data ? (this._data[field] || '') : '';
+      const groups = TOKEN_GROUPS_MAP[type] || [];
       let html = '';
-      if (type === 'color') {
-        COLOR_TOKEN_GROUPS.forEach(group => {
-          html += `<div class="token-group-title">${group.label}</div>`;
-          html += `<div class="token-grid">`;
-          group.tokens.forEach(token => {
-            const varExpr = `var(${token.var})`;
-            const selected = currentVal === varExpr;
+      groups.forEach(group => {
+        html += `<div class="token-group-title">${group.label}</div>`;
+        html += `<div class="token-grid">`;
+        group.tokens.forEach(token => {
+          const varExpr = `var(${token.var})`;
+          const selected = currentVal === varExpr;
+          // 颜色类型显示色块，其他类型显示数值预览
+          let previewHtml;
+          if (type === 'color') {
             const color = resolveCssValue(varExpr, 'color') || 'transparent';
-            html += `
-              <button class="token-item ${selected ? 'selected' : ''}" type="button"
-                data-token-value="${varExpr}" data-token-name="${token.name}"
-                data-token-var="${token.var}" data-token-desc="${token.label} · ${token.desc || ''}">
-                <span class="token-swatch" style="background:${color}"></span>
-              </button>`;
-          });
-          html += `</div>`;
+            previewHtml = `<span class="token-swatch" style="background:${color}"></span>`;
+          } else {
+            const previewStyle = type === 'fontSize' ? `font-size:${token.value}` : (type === 'fontWeight' ? `font-weight:${token.value}` : '');
+            previewHtml = `<span class="token-value" style="${previewStyle}">${token.label}</span>`;
+          }
+          html += `
+            <button class="token-item ${selected ? 'selected' : ''}" type="button"
+              data-token-value="${varExpr}" data-token-name="${token.name}"
+              data-token-var="${token.var}" data-token-desc="${token.label} · ${token.desc || ''}">
+              ${previewHtml}
+            </button>`;
         });
-      }
+        html += `</div>`;
+      });
       listEl.innerHTML = html;
       // 绑定 token 项事件：click 选择 + mouseenter/mouseleave 显示 tooltip
       listEl.querySelectorAll('.token-item').forEach(item => {
         item.addEventListener('click', (e) => {
           e.stopPropagation();
           const value = item.dataset.tokenValue;
-          if (this._tokenPanel.type === 'color') {
-            this._onFieldChange('colorHex', value);
-          }
+          this._onFieldChange(field, value);
           this._hideTokenTooltip();
           this._closeTokenPanel();
         });
@@ -3943,6 +4084,9 @@
       bus.on('style-change', (change) => this._recordChange(change));
       bus.on('open-color-picker', ({ trigger, hex, opacity, callback }) => {
         this._components.colorPicker.open(trigger, hex, opacity, callback);
+      });
+      bus.on('close-color-picker', () => {
+        this._components.colorPicker.close();
       });
       bus.on('close-style-panel', () => this._clearSelection());
       bus.on('close-overview', () => this._components.overviewPanel.close());
