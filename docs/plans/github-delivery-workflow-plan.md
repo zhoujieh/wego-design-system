@@ -1,5 +1,7 @@
 # GitHub 交付规则独立化计划
 
+> **历史计划文档（2026-08-03）**：本文件描述的方向已落地到正式规则。当前执行以 `AGENTS.md`、`.codex/skills/wego-github-delivery/SKILL.md` 和 `references/` 下的正式文档为准，本文件不参与当前执行。
+
 更新时间：2026-08-03
 
 ## 背景
