@@ -1834,7 +1834,7 @@
       this._collapsed = true;
       this._drag = { active: false, moved: false, pointerId: null, startX: 0, startY: 0, origX: 0, origY: 0 };
       this._walkthroughMode = false;
-      this._faultState = { load: false, save: false, delete: false };
+      this._faultState = { load: false, save: false, delete: false, slow: false };
       this._subpanelOpen = null;
       this._components = {};
       this._suppressClick = false;
@@ -1856,7 +1856,7 @@
       window.WegoApp = window.WegoApp || {};
       window.WegoApp.faultInjection = {
         isEnabled: (key) => !!this._faultState[key],
-        setEnabled: (key, on) => { this._faultState[key] = !!on; this._persistFaultState(); this._updateToolbarState(); },
+        setEnabled: (key, on) => { this._faultState[key] = !!on; this._persistFaultState(); this._updateFaultSwitches(); this._updateToolbarState(); },
       };
     }
 
@@ -2155,9 +2155,9 @@
             <span class="switch" data-fault-switch="delete"></span>
           </button>
           <div class="subpanel-sep"></div>
-          <button class="subpanel-item is-disabled" data-slowload>
-            <span class="item-label">慢加载模式 <span class="dev-tag">开发中</span></span>
-            <span class="subpanel-arrow">›</span>
+          <button class="subpanel-item" data-fault="slow">
+            <span>慢加载(约9s)</span>
+            <span class="switch" data-fault-switch="slow"></span>
           </button>
         </div>
         <!-- 更多菜单 -->
@@ -2239,11 +2239,6 @@
             window.location.hash = '#/' + route;
           }
         });
-      });
-      // 慢加载（禁用）
-      this._shadow.querySelector('[data-slowload]').addEventListener('click', (e) => {
-        e.stopPropagation();
-        this._showToast('慢加载模式开发中');
       });
       // 点击外部关闭子面板
       document.addEventListener('pointerdown', (e) => {
@@ -2701,6 +2696,7 @@
           this._faultState.load = !!p.load;
           this._faultState.save = !!p.save;
           this._faultState['delete'] = !!p['delete'];
+          this._faultState.slow = !!p.slow;
         }
       } catch (e) {}
       this._updateFaultSwitches();
@@ -2721,7 +2717,7 @@
     }
 
     _updateFaultSwitches() {
-      ['load', 'save', 'delete'].forEach(key => {
+      ['load', 'save', 'delete', 'slow'].forEach(key => {
         const sw = this._shadow.querySelector(`[data-fault-switch="${key}"]`);
         if (sw) sw.classList.toggle('is-on', !!this._faultState[key]);
       });
@@ -2839,14 +2835,14 @@
       const count = state.changes.length;
       if (this._components.countValue) this._components.countValue.textContent = count > 99 ? '99+' : count;
       // 收起态红点
-      const hasIndicator = count > 0 || this._walkthroughMode || this._faultState.load || this._faultState.save || this._faultState['delete'];
+      const hasIndicator = count > 0 || this._walkthroughMode || this._faultState.load || this._faultState.save || this._faultState['delete'] || this._faultState.slow;
       this._components.fabBtn.setAttribute('data-has-indicator', String(hasIndicator));
       // 走查模式按钮激活态
       const wtBtn = this._shadow.querySelector('[data-tool="walkthrough"]');
       if (wtBtn) wtBtn.setAttribute('data-active', String(this._walkthroughMode));
       // 数据模拟按钮激活态
       const dmBtn = this._shadow.querySelector('[data-tool="datamock"]');
-      if (dmBtn) dmBtn.setAttribute('data-active', String(this._faultState.load || this._faultState.save || this._faultState['delete']));
+      if (dmBtn) dmBtn.setAttribute('data-active', String(this._faultState.load || this._faultState.save || this._faultState['delete'] || this._faultState.slow));
       // 配置列表按钮变更标记
       const ovBtn = this._shadow.querySelector('[data-tool="overview"]');
       if (ovBtn) ovBtn.setAttribute('data-has-changes', String(count > 0));
