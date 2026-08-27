@@ -41,7 +41,7 @@ function expectFailureCode(result, code, label) {
 
 const fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'wego-scene-static-guard-'));
 const sceneName = '静态守卫夹具';
-const sceneRoot = path.join(fixtureRoot, sceneName);
+const sceneRoot = path.join(fixtureRoot, 'infras', sceneName);
 const sceneJs = path.join(sceneRoot, 'scene.js');
 const sceneCss = path.join(sceneRoot, 'scene.css');
 const routesFile = path.join(fixtureRoot, 'routes.js');
@@ -94,8 +94,8 @@ window.WEGO_APP_ROUTES = [
   {
     routeId: 'guard-fixture',
     scene: '${sceneName}',
-    script: 'scenes/${sceneName}/scene.js',
-    style: 'scenes/${sceneName}/scene.css'
+    script: 'scenes/infras/${sceneName}/scene.js',
+    style: 'scenes/infras/${sceneName}/scene.css'
   }
 ];
 `;

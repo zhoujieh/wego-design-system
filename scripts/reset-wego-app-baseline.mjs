@@ -42,14 +42,22 @@ function isGitKeepOnly(entries) {
 
 function listSceneDirs() {
   if (!fs.existsSync(scenesRoot)) return [];
-  return fs
-    .readdirSync(scenesRoot, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => entry.name);
+  const dirs = [];
+  for (const category of fs.readdirSync(scenesRoot, { withFileTypes: true })) {
+    if (!category.isDirectory()) continue;
+    const categoryRoot = path.join(scenesRoot, category.name);
+    for (const entry of fs.readdirSync(categoryRoot, { withFileTypes: true })) {
+      if (entry.isDirectory()) dirs.push(`${category.name}/${entry.name}`);
+    }
+  }
+  return dirs;
 }
 
 function currentBaselineScene() {
-  return listSceneDirs().filter((dir) => !isGitKeepOnly(fs.readdirSync(path.join(scenesRoot, dir))));
+  return listSceneDirs().filter((dir) => {
+    const entries = fs.readdirSync(path.join(scenesRoot, dir));
+    return !isGitKeepOnly(entries);
+  });
 }
 
 function listClaims() {
@@ -118,6 +126,15 @@ function resetBaseline() {
       const abs = path.join(scenesRoot, dir);
       fs.rmSync(abs, { recursive: true, force: true });
       console.log(`[reset-baseline] 已删除场景目录 wego-app/scenes/${dir}`);
+    }
+    // 清理空的分类目录
+    for (const category of fs.readdirSync(scenesRoot, { withFileTypes: true })) {
+      if (!category.isDirectory()) continue;
+      const categoryRoot = path.join(scenesRoot, category.name);
+      const remaining = fs.readdirSync(categoryRoot);
+      if (remaining.length === 0 || (remaining.length === 1 && remaining[0] === GITKEEP)) {
+        fs.rmSync(categoryRoot, { recursive: true, force: true });
+      }
     }
   }
 

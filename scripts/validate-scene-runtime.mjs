@@ -11,7 +11,7 @@ const jsonOutput = args.includes('--json');
 const validateAll = args.includes('--all');
 const positional = args.filter(arg => !arg.startsWith('--'));
 if ((!validateAll && positional.length !== 1) || (validateAll && positional.length > 0)) {
-  console.error('用法：node scripts/validate-scene-runtime.mjs wego-app/scenes/{中文业务场景} [--json]，或使用 --all');
+  console.error('用法：node scripts/validate-scene-runtime.mjs wego-app/scenes/{分类}/{中文业务场景} [--json]，或使用 --all');
   process.exit(2);
 }
 
@@ -61,10 +61,17 @@ try {
 function discoverScenes() {
   if (!validateAll) return [path.resolve(root, positional[0])];
   if (!fs.existsSync(scenesRoot)) return [];
-  return fs.readdirSync(scenesRoot, { withFileTypes: true })
-    .filter(entry => entry.isDirectory() && !entry.name.startsWith('_'))
-    .map(entry => path.join(scenesRoot, entry.name))
-    .filter(directory => fs.existsSync(path.join(directory, 'scene.js')));
+  const directories = [];
+  for (const category of fs.readdirSync(scenesRoot, { withFileTypes: true })) {
+    if (!category.isDirectory() || category.name.startsWith('_')) continue;
+    const categoryRoot = path.join(scenesRoot, category.name);
+    for (const entry of fs.readdirSync(categoryRoot, { withFileTypes: true })) {
+      if (!entry.isDirectory() || entry.name.startsWith('_')) continue;
+      const directory = path.join(categoryRoot, entry.name);
+      if (fs.existsSync(path.join(directory, 'scene.js'))) directories.push(directory);
+    }
+  }
+  return directories;
 }
 
 function contentType(file) {
