@@ -1,0 +1,10 @@
+{
+  "agent": "kiro-order-query-app-center",
+  "scene": "应用中心",
+  "routeId": "app-center",
+  "branch": "feature/kiro-order-query",
+  "claimedAt": "2026-08-27T01:12:07.044Z",
+  "files": [
+    "wego-app/scenes/应用中心/scene.js"
+  ]
+}

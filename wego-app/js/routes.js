@@ -102,5 +102,17 @@ window.WEGO_APP_ROUTES = [
   },
   style: './scenes/开单/scene.css',
   script: './scenes/开单/scene.js'
+},
+{
+  routeId: 'workspace-order-query',
+  entry: {
+    type: 'grid-entry',
+    label: '订单查询',
+    group: 'order-trade',
+    tab: 'workspace',
+    icon: './lib/assets/icons/app-center/查订单-查快递.svg'
+  },
+  style: './scenes/订单查询/scene.css',
+  script: './scenes/订单查询/scene.js'
 }
 ];
