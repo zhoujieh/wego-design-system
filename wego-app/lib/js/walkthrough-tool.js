@@ -1511,8 +1511,8 @@
       this._data = getElementStyleData(this._targetEl, target);
       this._render();
       this._bindEvents();
-      this._updatePosition();
       this.removeAttribute('hidden');
+      this._updatePosition();
     }
 
     openForElement(el, selector, target) {
@@ -1522,8 +1522,8 @@
       this._data = getElementStyleData(el, this._target);
       this._render();
       this._bindEvents();
-      this._updatePosition();
       this.removeAttribute('hidden');
+      this._updatePosition();
     }
 
     close() {
@@ -3323,8 +3323,20 @@
 
       // 开过渡 + 下一帧写终点
       toolbar.style.transition = 'width 300ms ease-out';
+      // 向左展开时，left 同步过渡以锚定右边缘（右边缘不动，左边缘向左扩展）
+      let pendingLeft = null;
+      if (!collapsed && this._getExpandDirection() === 'left') {
+        const hostRect = this.getBoundingClientRect();
+        const rightEdge = hostRect.left + hostRect.width;
+        pendingLeft = Math.max(8, rightEdge - endW);
+        this.style.transition = 'left 300ms ease-out';
+        this.style.right = 'auto';
+      }
       requestAnimationFrame(() => {
         toolbar.style.width = endW + 'px';
+        if (pendingLeft != null) {
+          this.style.left = pendingLeft + 'px';
+        }
       });
 
       // 展开时调整位置和子面板
@@ -3338,6 +3350,7 @@
         if (e.target !== toolbar || e.propertyName !== 'width') return;
         toolbar.style.width = collapsed ? '48px' : '';
         toolbar.style.transition = '';
+        this.style.transition = '';
         toolbar.removeEventListener('transitionend', onEnd);
         if (this._collapsedTransitionEnd === onEnd) this._collapsedTransitionEnd = null;
       };
@@ -3360,13 +3373,8 @@
           this.style.left = Math.max(8, maxLeft) + 'px';
           this.style.right = 'auto';
         }
-      } else {
-        // 向左展开，检查左侧是否超出
-        if (rect.left < 8) {
-          this.style.left = '8px';
-          this.style.right = 'auto';
-        }
       }
+      // dir === 'left' 时，定位已由 setCollapsed 的 left 过渡处理（锚定右边缘向左扩展）
     }
 
     // ── 工具条按钮 ────────────────────────────────────────
