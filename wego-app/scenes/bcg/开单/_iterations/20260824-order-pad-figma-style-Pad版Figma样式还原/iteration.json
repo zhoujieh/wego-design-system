@@ -7,7 +7,7 @@
     "primary_scene": "开单",
     "related_scenes": []
   },
-  "status": "in-development",
+  "status": "frozen",
   "scope_revision": 17,
   "prototype_brief": {
     "goal": "将收银开单优化为按视口宽度切换的竖版与横版两套视觉：手机宽度保留竖版，Pad 横屏与桌面宽度采用指定 Figma 节点的横版样式，横版右侧商品库按独立 Figma 节点精确还原，并在横版顶部导航展示当前开单员的今日订单汇总。\n\n---",
@@ -262,9 +262,35 @@
     "scope_revision": 17,
     "scope_sha256": "6946e8ae14811009dada8b673fa38892ddcb426c4f913ada9b54481f6954bc62"
   },
-  "brief_confirmation": null,
-  "prototype_submission": null,
-  "prototype_confirmation": null,
+  "brief_confirmation": {
+    "at": "2026-08-28T06:15:04.560Z",
+    "scope_revision": 17,
+    "scope_sha256": "6946e8ae14811009dada8b673fa38892ddcb426c4f913ada9b54481f6954bc62"
+  },
+  "prototype_submission": {
+    "at": "2026-08-28T06:15:04.840Z",
+    "scope_revision": 17,
+    "affected_scenes": [
+      "开单"
+    ],
+    "fingerprints": {
+      "@route-entry/%E5%BC%80%E5%8D%95": "929c95d86cc26ae0f96494ddec21d4e9ca7d2771fb565995dc6f7b92ffbea9eb",
+      "wego-app/scenes/bcg/开单/scene.css": "eaeee69704cb9f767ef3f378ba0d3804a9327d041dcb01f580d12c3c8758f915",
+      "wego-app/scenes/bcg/开单/scene.js": "ca625c68f6730cd7bb0dd162a2f56bdca132e05349084a3892730c50ab1b1e5a"
+    }
+  },
+  "prototype_confirmation": {
+    "at": "2026-08-28T06:15:04.860Z",
+    "scope_revision": 17,
+    "affected_scenes": [
+      "开单"
+    ],
+    "fingerprints": {
+      "@route-entry/%E5%BC%80%E5%8D%95": "929c95d86cc26ae0f96494ddec21d4e9ca7d2771fb565995dc6f7b92ffbea9eb",
+      "wego-app/scenes/bcg/开单/scene.css": "eaeee69704cb9f767ef3f378ba0d3804a9327d041dcb01f580d12c3c8758f915",
+      "wego-app/scenes/bcg/开单/scene.js": "ca625c68f6730cd7bb0dd162a2f56bdca132e05349084a3892730c50ab1b1e5a"
+    }
+  },
   "affected_scenes": [
     "开单"
   ],
@@ -274,7 +300,7 @@
       "valid": true
     },
     "design": {
-      "valid": false
+      "valid": true
     }
   },
   "change_log": [
@@ -494,8 +520,25 @@
     {
       "action": "submit-brief",
       "at": "2026-08-27T11:19:43.026Z"
+    },
+    {
+      "action": "confirm-brief",
+      "at": "2026-08-28T06:15:04.562Z"
+    },
+    {
+      "action": "submit-prototype",
+      "at": "2026-08-28T06:15:04.863Z"
     }
   ],
-  "freeze": null,
+  "freeze": {
+    "at": "2026-08-28T06:15:04.860Z",
+    "design_system_version": 554,
+    "scope_revision": 17,
+    "fingerprints": {
+      "@route-entry/%E5%BC%80%E5%8D%95": "929c95d86cc26ae0f96494ddec21d4e9ca7d2771fb565995dc6f7b92ffbea9eb",
+      "wego-app/scenes/bcg/开单/scene.css": "eaeee69704cb9f767ef3f378ba0d3804a9327d041dcb01f580d12c3c8758f915",
+      "wego-app/scenes/bcg/开单/scene.js": "ca625c68f6730cd7bb0dd162a2f56bdca132e05349084a3892730c50ab1b1e5a"
+    }
+  },
   "brief_file": "order-pad-figma-style-Pad版Figma样式还原-20260824.md"
 }
