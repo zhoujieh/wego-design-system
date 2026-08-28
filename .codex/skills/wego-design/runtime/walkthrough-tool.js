@@ -3930,7 +3930,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             align-items: center;
             gap: 0;
             min-width: 0;
-            overflow: hidden;
             padding: 0 2px;
           }
 
@@ -3938,7 +3937,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             width: 40px;
             height: 40px;
             border: 0;
-            border-radius: 10px;
+            border-radius: 999px;
             background: transparent;
             color: rgba(255,255,255,0.7);
             display: inline-flex;
@@ -3989,7 +3988,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             height: 40px;
             padding: 0 10px;
             border: 0;
-            border-radius: 10px;
+            border-radius: 999px;
             background: rgba(255,255,255,0.06);
             color: #fff;
             font-size: 12px;
