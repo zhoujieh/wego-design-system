@@ -8,7 +8,7 @@ const componentPreviewTemplate = `
       </div>
     </div>
     <div class="component-preview-page__body">
-      <iframe class="component-preview-page__frame" src="./.codex/skills/wego-design/preview/index.html" title="组件预览总览"></iframe>
+      <iframe class="component-preview-page__frame" src="./lib/preview/index.html" title="组件预览总览"></iframe>
     </div>
   </section>
 `;
