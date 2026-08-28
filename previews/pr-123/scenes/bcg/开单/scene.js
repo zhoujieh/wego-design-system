@@ -379,6 +379,51 @@
     return Object.keys(draft.skuQty).reduce(function (sum, key) { return sum + Number(draft.skuQty[key] || 0); }, 0);
   }
 
+  function copyAddSkuQty(product, source) {
+    var copy = {};
+    product.specs.forEach(function (spec) { copy[spec] = Number((source && source[spec]) || 0); });
+    return copy;
+  }
+
+  function saveAddModeRecord(draft) {
+    if (draft.mode === 'batch') {
+      if (draft.batchRecordTouched) draft.batchRecord = copyAddSkuQty(draft.product, draft.skuQty);
+      return;
+    }
+    draft.singleRecord = {
+      skuQty: copyAddSkuQty(draft.product, draft.skuQty),
+      selectedColor: draft.selectedColor,
+      selectedSize: draft.selectedSize
+    };
+  }
+
+  function restoreAddModeRecord(draft, nextMode) {
+    if (nextMode === 'single') {
+      draft.skuQty = copyAddSkuQty(draft.product, draft.singleRecord && draft.singleRecord.skuQty);
+      draft.selectedColor = draft.singleRecord ? draft.singleRecord.selectedColor : '';
+      draft.selectedSize = draft.singleRecord ? draft.singleRecord.selectedSize : '';
+      return;
+    }
+    if (draft.batchRecord) {
+      draft.skuQty = copyAddSkuQty(draft.product, draft.batchRecord);
+      draft.batchRecordTouched = true;
+    } else {
+      draft.skuQty = copyAddSkuQty(draft.product, null);
+      var singleRecord = draft.singleRecord;
+      var singleSpec = singleRecord ? specKey(draft.product, singleRecord.selectedColor, singleRecord.selectedSize) : '';
+      var singleQuantity = singleSpec ? Number(singleRecord.skuQty[singleSpec] || 0) : 0;
+      if (singleSpec && singleQuantity !== 0) {
+        draft.skuQty[singleSpec] = singleQuantity;
+        draft.batchRecord = copyAddSkuQty(draft.product, draft.skuQty);
+        draft.batchRecordTouched = true;
+      } else {
+        draft.batchRecordTouched = false;
+      }
+    }
+    draft.selectedColor = '';
+    draft.selectedSize = '';
+  }
+
   function isSkuMode(mode) {
     return mode === 'single' || mode === 'batch' || mode === 'precise';
   }
@@ -2711,6 +2756,13 @@
       discountOpen: false,
       discountValue: '',
       skuQty: skuQty,
+      singleRecord: {
+        skuQty: copyAddSkuQty(product, skuQty),
+        selectedColor: '',
+        selectedSize: ''
+      },
+      batchRecord: null,
+      batchRecordTouched: false,
       selectedColor: '',
       selectedSize: '',
       note: '',
@@ -3595,6 +3647,14 @@
         var validSpecs = {};
         editedProduct.specs.forEach(function (spec) { validSpecs[spec] = Number(state.addDraft.skuQty[spec] || 0); });
         state.addDraft.skuQty = validSpecs;
+        if (state.addDraft.singleRecord) {
+          state.addDraft.singleRecord.skuQty = copyAddSkuQty(editedProduct, state.addDraft.singleRecord.skuQty);
+          if (!specKey(editedProduct, state.addDraft.singleRecord.selectedColor, state.addDraft.singleRecord.selectedSize)) {
+            state.addDraft.singleRecord.selectedColor = '';
+            state.addDraft.singleRecord.selectedSize = '';
+          }
+        }
+        if (state.addDraft.batchRecord) state.addDraft.batchRecord = copyAddSkuQty(editedProduct, state.addDraft.batchRecord);
         if (state.addDraft.priceMode === 'retail') state.addDraft.unitPrice = customerPrice(editedProduct);
         if (state.addDraft.priceMode === 'cost') state.addDraft.unitPrice = productCostPrice(editedProduct);
         state.addDraft.lastDiscountPrice = productLastDiscountPrice(editedProduct);
@@ -3879,11 +3939,10 @@
       if (activeNote) state.addDraft.note = activeNote.value.trim();
       var nextAddMode = target.dataset.addMode;
       if (nextAddMode !== state.addDraft.mode) {
+        saveAddModeRecord(state.addDraft);
         state.addDraft.mode = nextAddMode;
-        state.addDraft.selectedColor = '';
-        state.addDraft.selectedSize = '';
         state.addDraft.batchSelection = null;
-        state.addDraft.product.specs.forEach(function (spec) { state.addDraft.skuQty[spec] = 0; });
+        restoreAddModeRecord(state.addDraft, nextAddMode);
       }
       rememberAddMode(state.addDraft.mode);
       target.classList.toggle('switch--on', nextAddMode === 'batch');
@@ -3969,6 +4028,7 @@
     if (target.matches('[data-batch-fill]')) {
       var batchFill = Number(target.dataset.batchFill);
       state.addDraft.product.specs.forEach(function (spec) { state.addDraft.skuQty[spec] = Math.min(batchQuantityLimit(state.addDraft.product, spec), batchFill); });
+      state.addDraft.batchRecordTouched = true;
       state.addDraft.batchSelection = null;
       renderActive();
       return;
@@ -4538,6 +4598,7 @@
       var batchQuantity = Number((batchNegative + batchDigits) || 0);
       batchQuantity = Math.max(-9999, Math.min(batchQuantityLimit(state.addDraft.product, batchSpec), batchQuantity));
       target.value = batchHasValue ? batchQuantity : '';
+      state.addDraft.batchRecordTouched = true;
       var batchSelection = state.addDraft.batchSelection;
       var batchScope = root.querySelector(isDesktopWorkbench() ? '.order-desktop-modal--add' : '.order-v2-modal--add') || root;
       state.addDraft.product.specs.forEach(function (spec) {
