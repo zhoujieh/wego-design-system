@@ -1,4 +1,76 @@
 {
   "schemaVersion": 3,
-  "candidates": []
+  "candidates": [
+    {
+      "id": "exp-001",
+      "class": "workflow-lesson",
+      "title": "Spec 多轮更新后必须全文检查前后一致性",
+      "lesson": "spec 文档经过多轮澄清更新后，纳入范围、关键路径、原型边界、状态、澄清记录等模块容易残留旧描述，导致前后不一致。用户检查时会发现并要求修正，影响效率和信任。",
+      "action": "spec 全部确认后、提交 submit-brief 校验前，必须全文搜索关键词（如入口名、操作方式、功能名）统一检查，替换所有旧描述，确保各模块表述一致后再提交。",
+      "status": "observing",
+      "ownerSkill": "wego-product",
+      "evidenceIds": ["ev-001", "ev-004"],
+      "occurrenceCount": 2,
+      "firstObserved": "2026-08-28",
+      "lastObserved": "2026-08-28",
+      "tags": ["spec文档", "多轮更新", "前后不一致", "质量检查"],
+      "targetAuthority": null,
+      "relatedRuleId": null,
+      "upgradeHistory": []
+    },
+    {
+      "id": "exp-002",
+      "class": "workflow-lesson",
+      "title": "新任务接入本地存储前必须盘点现有 key 并遵循命名规范",
+      "lesson": "新任务/新 agent 接入 localStorage 时缺乏统一规则，各场景各自定义 key，存在命名冲突、数据格式不一致、场景互相干扰的风险。用户明确要求建立接入规则，避免打架。",
+      "action": "新任务开工前必须 grep 全仓库现有 wego.* localStorage key 并列清单；新功能必须用新 key，遵循 wego.{domain}.{entity} 命名规范；WegoApp.db 只是统一封装层，不改变现有 key 和数据格式，不做自动迁移；现有场景不迁移，新场景走统一接口。",
+      "status": "observing",
+      "ownerSkill": "wego-uxsystem-iterate",
+      "evidenceIds": ["ev-002"],
+      "occurrenceCount": 1,
+      "firstObserved": "2026-08-28",
+      "lastObserved": "2026-08-28",
+      "tags": ["数据库接入", "localStorage", "key冲突", "命名规范"],
+      "targetAuthority": null,
+      "relatedRuleId": null,
+      "upgradeHistory": []
+    },
+    {
+      "id": "exp-003",
+      "class": "workflow-lesson",
+      "title": "经验沉淀必须走 wego-uxsystem-iterate 标准流程，禁止手动编辑 EXPERIENCE.md",
+      "lesson": "经验沉淀时未调用对应技能，直接手动编辑了自动生成的 EXPERIENCE.md，未写入 evidence.json 和 candidates.json，违反标准流程。EXPERIENCE.md 是从经验库自动提炼的视图，手动编辑会被下次提炼覆盖。",
+      "action": "遇到用户纠正、返工、踩坑等触发信号时，必须调用 wego-uxsystem-iterate 技能，按标准流程：①写入 evidence.json 事实事件；②写入/更新 candidates.json 经验归纳；③运行 node scripts/refine-experience.mjs 自动生成 EXPERIENCE.md；④告知用户已沉淀。禁止手动编辑 EXPERIENCE.md。",
+      "status": "observing",
+      "ownerSkill": "wego-uxsystem-iterate",
+      "evidenceIds": ["ev-003"],
+      "occurrenceCount": 1,
+      "firstObserved": "2026-08-28",
+      "lastObserved": "2026-08-28",
+      "tags": ["经验沉淀", "流程规范", "EXPERIENCE.md", "标准流程"],
+      "targetAuthority": {
+        "path": ".codex/skills/wego-uxsystem-iterate/references/workflow-iteration.md",
+        "anchor": "沉淀流程"
+      },
+      "relatedRuleId": "experience-must-stay-inside-uxsystem-iterate",
+      "upgradeHistory": []
+    },
+    {
+      "id": "exp-004",
+      "class": "workflow-lesson",
+      "title": "Spec 入口逻辑必须明确触发方式和对象，避免理解偏差",
+      "lesson": "spec 文档中入口逻辑容易理解偏差，如长按 vs 点击、自己的产品 vs 别人的产品、主按钮 vs 次级按钮等。初始 spec 凭猜测写入，后续需要多轮澄清修正，影响效率。",
+      "action": "写 spec 入口部分时，每条入口必须明确：①触发方式（点击/长按/滑动）；②触发对象（自己的/别人的/特定类型）；③按钮位置和层级；④后续行为。不明确的点列入 open_questions，不凭猜测写入正文。",
+      "status": "observing",
+      "ownerSkill": "wego-product",
+      "evidenceIds": ["ev-004"],
+      "occurrenceCount": 1,
+      "firstObserved": "2026-08-28",
+      "lastObserved": "2026-08-28",
+      "tags": ["spec文档", "入口逻辑", "需求澄清", "理解偏差"],
+      "targetAuthority": null,
+      "relatedRuleId": null,
+      "upgradeHistory": []
+    }
+  ]
 }

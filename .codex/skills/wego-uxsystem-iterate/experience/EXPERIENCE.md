@@ -2,22 +2,7 @@
 
 > 从经验库自动提炼的高频高价值经验，会话前置读取。手动编辑会被下次提炼覆盖。
 
-## 数据库接入规则（shop243 沉淀）
-
-**问题**：新任务接入 localStorage 时，各场景各自为政，key 命名不统一，存在冲突风险，可能导致场景无法正常运行。
-
-**规则**：
-1. 新任务开工前必须先 `grep` 全仓库现有 `wego.*` localStorage key，列出现有 key 清单
-2. 新功能必须用新 key，遵循 `wego.{domain}.{entity}` 命名规范，禁止复用或修改现有 key
-3. WegoApp.db 只是统一封装层（get/set/push/remove），不改变现有 key 和数据格式，不做自动迁移
-4. 现有场景不迁移，继续用各自的读写方式；新场景走 WegoApp.db 统一接口
-5. 数据格式约定：数组结构统一带 id 字段，时间戳用 ISO 字符串，布尔字段明确命名
-
-**现有 key 清单（截至 shop243）**：
-- `wego.album-feed.published` — 动态页发布的动态
-- `wego.friend-list.friends` — 好友列表
-- `wego.fault-switch.enabled` — 故障注入开关
-- `wego.walkthrough.data.` — 新手引导
-- `wego.wgf-position` — 位置数据
-
-**后续**：数据库接入规范应沉淀到 wego-uxsystem-iterate 的设计系统消费规则中，作为所有新任务的强制守卫。
+- [工作流] Spec 多轮更新后必须全文检查前后一致性：spec 全部确认后、提交 submit-brief 校验前，必须全文搜索关键词（如入口名、操作方式、功能名）统一检查，替换所有旧描述，确保各模块表述一致后再提交。（2次，最近2026-08-28）
+- [工作流] 新任务接入本地存储前必须盘点现有 key 并遵循命名规范：新任务开工前必须 grep 全仓库现有 wego.* localStorage key 并列清单；新功能必须用新 key，遵循 wego.{domain}.{entity} 命名规范；WegoApp.db 只是统一封装层，不改变现有 key 和数据格式，不做自动迁移；现有场景不迁移，新场景走统一接口。（1次，最近2026-08-28）
+- [工作流] 经验沉淀必须走 wego-uxsystem-iterate 标准流程，禁止手动编辑 EXPERIENCE.md：遇到用户纠正、返工、踩坑等触发信号时，必须调用 wego-uxsystem-iterate 技能，按标准流程：①写入 evidence.json 事实事件；②写入/更新 candidates.json 经验归纳；③运行 node scripts/refine-experience.mjs 自动生成 EXPERIENCE.md；④告知用户已沉淀。禁止手动编辑 EXPERIENCE.md。（1次，最近2026-08-28）
+- [工作流] Spec 入口逻辑必须明确触发方式和对象，避免理解偏差：写 spec 入口部分时，每条入口必须明确：①触发方式（点击/长按/滑动）；②触发对象（自己的/别人的/特定类型）；③按钮位置和层级；④后续行为。不明确的点列入 open_questions，不凭猜测写入正文。（1次，最近2026-08-28）
