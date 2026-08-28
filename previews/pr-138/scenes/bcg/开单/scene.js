@@ -1317,13 +1317,13 @@
       + '</div>';
   }
 
-  function desktopBarcodeScanner() {
+  function desktopBarcodeScanner(inTabletDrawer) {
     var imagePreview = state.scannerImagePreview
       ? '<img class="order-barcode-scanner__image-preview" src="' + state.scannerImagePreview + '" alt="图搜所选图片" aria-hidden="true">'
       : '';
     var recognizingClass = state.scannerImageRecognizing ? ' is-recognizing' : '';
     return ''
-      + '<aside class="order-desktop__catalog order-desktop__catalog--scanner' + recognizingClass + '" aria-label="扫一扫">'
+      + '<aside class="order-desktop__catalog order-desktop__catalog--scanner' + (inTabletDrawer ? ' order-tablet-drawer' : '') + recognizingClass + '"' + (inTabletDrawer ? ' role="dialog" aria-modal="true"' : '') + ' aria-label="扫一扫">'
       +   '<div class="order-barcode-scanner">'
       +     '<video class="order-barcode-scanner__video" data-barcode-video autoplay muted playsinline aria-label="摄像头实时画面"></video>'
       +     imagePreview
@@ -1331,7 +1331,7 @@
       +       '<button type="button" class="btn btn--weak btn--sm btn--icon-only order-barcode-scanner__image-pick" data-component-slug="button" data-scanner-image-pick aria-label="图搜选图" title="图搜选图"' + (state.scannerImageRecognizing ? ' disabled' : '') + '><i class="btn__icon wego-iconfont-s icon-tupian" aria-hidden="true"></i></button>'
       +     '</div>'
       +     '<input type="file" accept="image/*" data-scanner-image-input hidden>'
-      +     '<button type="button" class="btn btn--weak btn--sm btn--icon-only order-barcode-scanner__close" data-component-slug="button" data-close-barcode-scanner aria-label="返回商品库"><i class="btn__icon icon-cha16" aria-hidden="true"></i></button>'
+      +     '<button type="button" class="btn btn--weak btn--sm btn--icon-only order-barcode-scanner__close" data-component-slug="button" data-close-barcode-scanner aria-label="关闭扫码"><i class="btn__icon icon-cha16" aria-hidden="true"></i></button>'
       +     '<div class="order-barcode-scanner__beam" aria-hidden="true"></div>'
       +     '<p class="order-barcode-scanner__message" data-barcode-message>' + escapeHtml(state.scannerMessage) + '</p>'
       +   '</div>'
@@ -1339,7 +1339,11 @@
   }
 
   function desktopCatalog() {
-    if (state.scannerOpen) return desktopBarcodeScanner();
+    if (state.scannerOpen) {
+      return isTabletPortrait()
+        ? '<div class="order-tablet-drawer-mask" data-clickable data-close-barcode-scanner aria-hidden="true"></div>' + desktopBarcodeScanner(true)
+        : desktopBarcodeScanner(false);
+    }
     if (effectiveCatalogCollapsed()) {
       return ''
         + '<aside class="order-desktop__catalog order-desktop__catalog--collapsed">'
@@ -1501,7 +1505,7 @@
       return ''
         + '<div class="order-desktop-customer-empty">'
         +   '<button type="button" class="order-desktop-customer-select" data-open-panel="customer" aria-haspopup="dialog" aria-expanded="' + (state.panel === 'customer' && !state.customerPopoverClosing) + '" aria-controls="order-desktop-customer-popover"><span class="avatar avatar--40 avatar--image" data-component-slug="avatar"><img src="./lib/assets/image/avatar-defult.png" alt="默认头像"></span><span class="order-desktop-customer-entry"><strong>选择客户</strong><i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></span></button>'
-        +   '<button type="button" class="link order-desktop-customer-add" data-component-slug="link" data-open-panel="customer-create"><i class="wego-iconfont-s icon-yuanjia" aria-hidden="true"></i>新建客户</button>'
+        +   '<button type="button" class="link order-desktop-customer-add" data-component-slug="link" data-open-panel="customer-create" aria-label="新建客户"><i class="wego-iconfont-s icon-yuanjia" aria-hidden="true"></i><span>新建客户</span></button>'
         + '</div>';
     }
     var customerTags = String(state.customer.tag || '').replace(/\s*·\s*/g, '、');
@@ -2407,6 +2411,7 @@
 
   function beginProductCreate(type) {
     var temporary = type === 'temporary';
+    if (isTabletPortrait()) state.tabletCatalogAutoCollapsed = true;
     state.catalogCreateMenuOpen = false;
     state.productCreateDraft = {
       type: temporary ? 'temporary' : 'product',
@@ -2480,7 +2485,7 @@
     return ''
       + '<div class="order-desktop-modal ' + (isCustomerCreate || isDelivery ? 'order-desktop-modal--customer' : '') + (isDelivery ? ' order-desktop-modal--delivery' : '') + (isNote ? ' order-desktop-modal--note' : (isCheckout ? ' order-desktop-modal--checkout' : ' order-desktop-modal--add')) + '" role="dialog" aria-modal="true" aria-labelledby="order-desktop-modal-title" data-state="open">'
       +   '<div class="order-desktop-modal__panel">'
-      +     '<div class="order-desktop-modal__head"><strong id="order-desktop-modal-title">' + (isCustomerCreate ? '新建客户' : (isDelivery ? '选择发货方式' : (isNote ? '商品备注' : (isCheckout ? '支付结算' : '添加商品')))) + '</strong><button type="button" class="btn btn--weak btn--sm btn--icon-only" data-component-slug="button" data-close-panel aria-label="关闭"><i class="btn__icon ' + (isDelivery ? 'icon-cha-cu' : 'icon-cha16') + '" aria-hidden="true"></i></button></div>'
+      +     '<div class="order-desktop-modal__head"><strong id="order-desktop-modal-title">' + (isCustomerCreate ? '新建客户' : (isDelivery ? '选择发货方式' : (isNote ? '商品备注' : (isCheckout ? '支付结算' : '添加商品')))) + '</strong><button type="button" class="btn btn--weak btn--sm btn--icon-only" data-component-slug="button" data-close-panel aria-label="关闭"><i class="btn__icon ' + (isDelivery ? 'icon-cha' : 'icon-cha16') + '" aria-hidden="true"></i></button></div>'
       +     '<div class="order-desktop-modal__body">' + (isCustomerCreate ? desktopNewCustomerModalContent() : (isDelivery ? deliveryPanel() : (isNote ? spuNotePanel() : (isCheckout ? checkoutPanel() : addPanel(true))))) + '</div>'
       +   '</div>'
       + '</div>';
@@ -2490,7 +2495,7 @@
     state.clerkDailyTotal = storedClerkDailyTotal();
     var scanning = state.scannerOpen;
     var tabletPortraitLayout = isTabletPortrait();
-    var catalogCollapsedClass = desktopShowsCatalog() && !scanning && (effectiveCatalogCollapsed() || tabletPortraitLayout) ? ' order-desktop__workspace--catalog-collapsed' : '';
+    var catalogCollapsedClass = desktopShowsCatalog() && (tabletPortraitLayout || (!scanning && effectiveCatalogCollapsed())) ? ' order-desktop__workspace--catalog-collapsed' : '';
     var catalogResizableClass = desktopShowsCatalog() && !tabletPortraitLayout && (!effectiveCatalogCollapsed() || scanning) ? ' order-desktop__workspace--with-resizer' : '';
     var catalogResizeHandle = desktopShowsCatalog() && !tabletPortraitLayout && (!effectiveCatalogCollapsed() || scanning)
       ? '<div class="order-desktop__catalog-resizer" role="separator" aria-orientation="vertical" aria-label="拖动调整商品库宽度" data-catalog-resizer></div>'
@@ -2587,7 +2592,7 @@
         failBarcodeScanner(ctx);
       });
     }
-    if (state.scannerOpen && isDesktopWorkbench()) {
+    if (state.scannerOpen && isDesktopWorkbench() && !isTabletPortrait()) {
       var scannerWidth = state.catalogWidth != null ? state.catalogWidth : 379;
       var scanningWorkspace = root.querySelector('.order-desktop__workspace');
       if (scanningWorkspace) {
@@ -2765,6 +2770,7 @@
   function startAdd(productId) {
     var product = activeCatalogProducts().find(function (item) { return item.id === productId; });
     if (!product) return;
+    if (isTabletPortrait()) state.tabletCatalogAutoCollapsed = true;
     var skuQty = {};
     product.specs.forEach(function (spec) { skuQty[spec] = 0; });
     state.addDraft = {
@@ -2817,6 +2823,7 @@
 
   function closeBarcodeScanner(shouldRender) {
     stopBarcodeScanner();
+    if (isTabletPortrait()) state.tabletCatalogAutoCollapsed = true;
     state.scannerOpen = false;
     state.scannerRequesting = false;
     state.scannerMessage = '扫描商品条码';
@@ -2859,6 +2866,7 @@
     }
     stopBarcodeScanner();
     state.scannerOpen = false;
+    if (isTabletPortrait()) state.tabletCatalogAutoCollapsed = true;
     state.scannerMessage = '扫描商品条码';
     if (product.specs.length === 1) {
       addSingleSpecProduct(product.id, ctx);
@@ -2922,6 +2930,7 @@
       probeVideo.srcObject = null;
       state.scannerRequesting = false;
       state.scannerOpen = true;
+      if (isTabletPortrait()) state.tabletCatalogAutoCollapsed = false;
       state.scannerMessage = '扫描商品条码';
       renderActive();
       scanBarcodeFrame(ctx);
@@ -2963,6 +2972,7 @@
     }
     stopBarcodeScanner();
     state.scannerOpen = false;
+    if (isTabletPortrait()) state.tabletCatalogAutoCollapsed = true;
     renderActive();
     if (product.specs.length === 1) {
       addSingleSpecProduct(product.id, ctx);
