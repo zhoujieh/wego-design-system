@@ -62,17 +62,17 @@
      分享渠道配置（11个渠道分两组）
      ═══════════════════════════════════════════════════════════════ */
   var CHANNELS = [
-    { key: 'moments', name: '朋友圈', icon: 'icon-pengyouquan', group: 1, supportTextOnly: false },
-    { key: 'poster', name: '海报分享', icon: 'icon-haibao', group: 1, supportTextOnly: true },
-    { key: 'wechat', name: '微信好友', icon: 'icon-weixin', group: 1, supportTextOnly: true },
-    { key: 'channels', name: '视频号', icon: 'icon-shipinhao', group: 1, supportTextOnly: false },
-    { key: 'xianyu', name: '闲鱼', icon: 'icon-xianyu', group: 1, supportTextOnly: false },
-    { key: 'xiaohongshu', name: '小红书', icon: 'icon-xiaohongshu', group: 1, supportTextOnly: false },
-    { key: 'kuaishou', name: '快手', icon: 'icon-kuaishou', group: 1, supportTextOnly: false },
-    { key: 'douyin', name: '抖音', icon: 'icon-douyin', group: 1, supportTextOnly: false },
-    { key: 'weibo', name: '微博', icon: 'icon-weibo', group: 1, supportTextOnly: true },
-    { key: 'zhuanzhuan', name: '转转', icon: 'icon-zhuanzhuan', group: 2, supportTextOnly: false },
-    { key: 'more', name: '更多', icon: 'icon-gengduo', group: 2, supportTextOnly: true }
+    { key: 'moments', name: '朋友圈', icon: 'icon-pengyouquan', iconSvg: './lib/assets/icons/share/moments-you-biankuang.svg', group: 1, supportTextOnly: false },
+    { key: 'poster', name: '海报分享', icon: 'icon-haibao', iconSvg: './lib/assets/icons/share/moments-you-biankuang.svg', badge: '防折叠', group: 1, supportTextOnly: true },
+    { key: 'wechat', name: '微信好友', icon: 'icon-weixin', iconSvg: './lib/assets/icons/share/wechat.svg', group: 1, supportTextOnly: true },
+    { key: 'channels', name: '视频号', icon: 'icon-shipinhao', iconSvg: './lib/assets/icons/share/channels.svg', group: 1, supportTextOnly: false },
+    { key: 'xianyu', name: '闲鱼', icon: 'icon-xianyu', iconSvg: './lib/assets/icons/share/xianyu.svg', group: 1, supportTextOnly: false },
+    { key: 'xiaohongshu', name: '小红书', icon: 'icon-xiaohongshu', iconSvg: './lib/assets/icons/share/xiaohongshu.svg', group: 1, supportTextOnly: false },
+    { key: 'kuaishou', name: '快手', icon: 'icon-kuaishou', iconSvg: './lib/assets/icons/share/kuaishou.svg', group: 1, supportTextOnly: false },
+    { key: 'douyin', name: '抖音', icon: 'icon-douyin', iconSvg: './lib/assets/icons/share/douyin.svg', group: 1, supportTextOnly: false },
+    { key: 'weibo', name: '微博', icon: 'icon-weibo', iconSvg: './lib/assets/icons/share/weibo.svg', group: 1, supportTextOnly: true },
+    { key: 'zhuanzhuan', name: '转转', icon: 'icon-zhuanzhuan', iconSvg: './lib/assets/icons/share/zhuanzhuan.svg', group: 2, supportTextOnly: false },
+    { key: 'more', name: '更多', icon: 'icon-gengduo', iconSvg: null, group: 2, supportTextOnly: true }
   ];
 
   function getChannel(key) {
@@ -150,16 +150,24 @@
       { key: 'barcode', label: '打商品条码', icon: 'icon-tiaoma', style: 'icon-text' }
     ];
 
-    /* 渠道栏：按 group 分组渲染 */
+    /* 渠道栏：按 group 分组渲染，每组 flex-wrap，item 固定 68px */
     var group1 = CHANNELS.filter(function (c) { return c.group === 1 && channels.indexOf(c.key) >= 0; });
     var group2 = CHANNELS.filter(function (c) { return c.group === 2 && channels.indexOf(c.key) >= 0; });
     var hasMultipleGroups = group1.length > 0 && group2.length > 0;
 
+    function renderChannelIcon(c) {
+      if (c.iconSvg) {
+        return '<img class="share-panel__channel-svg" src="' + c.iconSvg + '" alt="' + c.name + '" />';
+      }
+      return '<i class="wego-iconfont-s ' + c.icon + '" aria-hidden="true"></i>';
+    }
+
     function renderChannelGroup(group) {
       var html = '<div class="share-panel__channel-group">';
       group.forEach(function (c) {
+        var badgeHtml = c.badge ? '<span class="share-panel__channel-badge">' + c.badge + '</span>' : '';
         html += '<button type="button" class="share-panel__channel-item" data-component-slug="button" data-channel="' + c.key + '">'
-          + '<span class="share-panel__channel-icon"><i class="wego-iconfont-s ' + c.icon + '" aria-hidden="true"></i></span>'
+          + '<span class="share-panel__channel-icon">' + renderChannelIcon(c) + badgeHtml + '</span>'
           + '<span class="share-panel__channel-name">' + c.name + '</span>'
           + '</button>';
       });
@@ -167,21 +175,27 @@
       return html;
     }
 
-    /* 配置栏 */
+    /* 配置栏：checkbox 组件实现单选 */
     var configHtml = '<div class="share-panel__config">';
     configItems.forEach(function (item) {
       if (item.type === 'radio') {
         configHtml += '<div class="share-panel__config-row">';
         item.options.forEach(function (opt) {
-          var checked = opt.value === item.defaultValue ? ' checked' : '';
-          configHtml += '<label class="share-panel__config-option">'
-            + '<input type="radio" name="share-config-' + item.key + '" value="' + opt.value + '"' + checked + ' data-config-key="' + item.key + '" />'
-            + '<span>' + opt.label + '</span>'
+          var checked = opt.value === item.defaultValue;
+          configHtml += '<label class="checkbox-field share-panel__config-option" role="radio" aria-checked="' + checked + '" data-config-key="' + item.key + '" data-config-value="' + opt.value + '">'
+            + '<span class="checkbox checkbox--sm' + (checked ? ' checkbox--checked' : '') + '">'
+            + '<span class="checkbox__inner"></span>'
+            + (checked ? '<span class="checkbox__icon"><img class="checkbox__asset" src="./lib/assets/icons/checkbox-check.svg" alt=""></span>' : '')
+            + '</span>'
+            + '<span class="checkbox-field__text' + (checked ? ' is-active' : '') + '">' + opt.label + '</span>'
             + '</label>';
         });
         configHtml += '</div>';
       } else if (item.type === 'button') {
-        configHtml += '<button type="button" class="share-panel__config-btn" data-action="config-btn" data-config-key="' + item.key + '">' + item.label + '</button>';
+        configHtml += '<button type="button" class="share-panel__config-link" data-action="config-btn" data-config-key="' + item.key + '">'
+          + '<span>' + item.label + '</span>'
+          + '<i class="wego-iconfont-s icon-youjiantou-mian16" aria-hidden="true"></i>'
+          + '</button>';
       }
     });
     configHtml += '</div>';
@@ -196,26 +210,42 @@
     });
     actionsHtml += '</div>';
 
-    /* 滚动指示器 */
+    /* 滚动指示器：32px 宽 2px 高，按组数显示 */
     var indicatorHtml = '';
     if (hasMultipleGroups) {
-      indicatorHtml = '<div class="share-panel__indicator">'
-        + '<span class="share-panel__indicator-dot share-panel__indicator-dot--active"></span>'
-        + '<span class="share-panel__indicator-dot"></span>'
+      indicatorHtml = '<div class="share-panel__indicator">';
+      var groups = [group1, group2];
+      groups.forEach(function (g, idx) {
+        if (g.length > 0) {
+          indicatorHtml += '<span class="share-panel__indicator-dot' + (idx === 0 ? ' share-panel__indicator-dot--active' : '') + '"></span>';
+        }
+      });
+      indicatorHtml += '</div>';
+    }
+
+    /* 标题栏右侧按钮：图标+文字 */
+    var headerActionsHtml = '';
+    if (showHeaderActions) {
+      headerActionsHtml = '<div class="share-panel__header-actions">'
+        + '<button type="button" class="share-panel__header-btn" data-action="display-mode" aria-label="展示方式">'
+        + '<i class="wego-iconfont-s icon-zhanshi" aria-hidden="true"></i>'
+        + '<span class="share-panel__header-btn-text">展示方式</span>'
+        + '</button>'
+        + '<button type="button" class="share-panel__header-btn" data-action="share-settings" aria-label="分享设置">'
+        + '<i class="wego-iconfont-s icon-shezhi" aria-hidden="true"></i>'
+        + '<span class="share-panel__header-btn-text">分享设置</span>'
+        + '</button>'
         + '</div>';
     }
 
-    return '<div class="share-panel" role="dialog" aria-modal="true" aria-label="' + title + '">'
-      + '<div class="share-panel__panel">'
+    return '<div class="modal share-panel-modal" data-component-slug="modal" role="dialog" aria-modal="true" aria-label="' + title + '" style="--modal-panel-bg: var(--bg-panel);">'
+      + '<div class="modal__panel share-panel__panel">'
       + '<div class="share-panel__header">'
       + '<span class="share-panel__title">' + title + '</span>'
-      + (showHeaderActions ? '<div class="share-panel__header-actions">'
-        + '<button type="button" class="share-panel__header-btn" data-action="display-mode" aria-label="展示方式"><i class="wego-iconfont-s icon-zhanshi" aria-hidden="true"></i></button>'
-        + '<button type="button" class="share-panel__header-btn" data-action="share-settings" aria-label="分享设置"><i class="wego-iconfont-s icon-shezhi" aria-hidden="true"></i></button>'
-        + '</div>' : '')
+      + headerActionsHtml
       + '</div>'
       + configHtml
-      + '<div class="share-panel__channels" data-channel-scroll>'
+      + '<div class="share-panel__channels layout-scroll-row" data-snap="start" data-channel-scroll>'
       + renderChannelGroup(group1)
       + (hasMultipleGroups ? renderChannelGroup(group2) : '')
       + '</div>'
@@ -282,7 +312,8 @@
   /* 灰度弹窗 */
   function grayPopupTemplate(type) {
     var isForced = type === 'forced';
-    return '<div class="modal modal--fullscreen gray-popup-modal" data-component-slug="modal" data-state="open" role="dialog" aria-modal="true" aria-label="发现新版本">'
+    var forcedClass = isForced ? ' gray-popup-modal--forced' : '';
+    return '<div class="modal modal--fullscreen gray-popup-modal' + forcedClass + '" data-component-slug="modal" data-state="open" role="dialog" aria-modal="true" aria-label="发现新版本">'
       + '<div class="modal__panel gray-popup__panel">'
       + '<div class="gray-popup__header"></div>'
       + '<div class="gray-popup__body">'
@@ -464,6 +495,37 @@
                 if (callbacks.onSuccess) callbacks.onSuccess();
               }
             });
+          });
+        });
+
+        /* 配置栏单选切换 */
+        root.querySelectorAll('.share-panel__config-option').forEach(function (option) {
+          option.addEventListener('click', function () {
+            var configKey = option.getAttribute('data-config-key');
+            var value = option.getAttribute('data-config-value');
+            /* 同组其他选项取消选中 */
+            root.querySelectorAll('.share-panel__config-option[data-config-key="' + configKey + '"]').forEach(function (other) {
+              other.setAttribute('aria-checked', 'false');
+              var checkbox = other.querySelector('.checkbox');
+              if (checkbox) checkbox.classList.remove('checkbox--checked');
+              var icon = other.querySelector('.checkbox__icon');
+              if (icon) icon.remove();
+              var text = other.querySelector('.checkbox-field__text');
+              if (text) text.classList.remove('is-active');
+            });
+            /* 当前选项选中 */
+            option.setAttribute('aria-checked', 'true');
+            var checkbox = option.querySelector('.checkbox');
+            if (checkbox) checkbox.classList.add('checkbox--checked');
+            var iconEl = checkbox.querySelector('.checkbox__icon');
+            if (!iconEl) {
+              iconEl = document.createElement('span');
+              iconEl.className = 'checkbox__icon';
+              iconEl.innerHTML = '<img class="checkbox__asset" src="./lib/assets/icons/checkbox-check.svg" alt="">';
+              checkbox.appendChild(iconEl);
+            }
+            var text = option.querySelector('.checkbox-field__text');
+            if (text) text.classList.add('is-active');
           });
         });
 

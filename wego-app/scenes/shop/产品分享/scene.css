@@ -2,36 +2,18 @@
    分享面板、下载进度、灰度弹窗、分享结果弹窗 */
 
 /* ═══════════════════════════════════════════════════════════════
-   分享面板
+   分享面板（复用 .modal 组件，背景色通过 --modal-panel-bg 内联设置为 --bg-panel）
    ═══════════════════════════════════════════════════════════════ */
-.share-panel {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  z-index: 1000;
-  animation: share-panel-fade-in 0.2s ease;
-}
 
-@keyframes share-panel-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
+/* 面板容器 */
 .share-panel__panel {
   width: 100%;
   max-width: 430px;
-  background: var(--bg-surface, #fff);
+  background: var(--bg-panel, #f6f6f6);
   border-radius: 16px 16px 0 0;
   padding: 16px 0 0;
-  animation: share-panel-slide-up 0.3s ease;
-}
-
-@keyframes share-panel-slide-up {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
+  display: flex;
+  flex-direction: column;
 }
 
 /* 标题栏 */
@@ -40,7 +22,6 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 16px 12px;
-  border-bottom: 1px solid var(--border-light, #f0f0f0);
 }
 
 .share-panel__title {
@@ -51,30 +32,41 @@
 
 .share-panel__header-actions {
   display: flex;
-  gap: 12px;
+  gap: 16px;
 }
 
 .share-panel__header-btn {
-  width: 32px;
-  height: 32px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  gap: 2px;
   border: none;
   background: transparent;
   cursor: pointer;
   color: var(--text-secondary, #666);
   font-size: 18px;
+  padding: 4px 6px;
+  border-radius: 8px;
+  transition: background var(--duration-fast, 0.15s) ease;
 }
 
 .share-panel__header-btn:active {
-  opacity: 0.6;
+  background: var(--bg-state-pressed, rgba(32, 47, 100, 0.06));
+}
+
+.share-panel__header-btn-text {
+  font-size: 10px;
+  color: var(--text-tertiary, #999);
+  line-height: 1.2;
 }
 
 /* 配置栏 */
 .share-panel__config {
   padding: 12px 16px;
-  border-bottom: 1px solid var(--border-light, #f0f0f0);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .share-panel__config-row {
@@ -90,39 +82,57 @@
   font-size: 13px;
   color: var(--text-default, #1a1a1a);
   cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: background var(--duration-fast, 0.15s) ease;
 }
 
-.share-panel__config-option input[type="radio"] {
-  accent-color: var(--brand-primary, #07c160);
+.share-panel__config-option:active {
+  background: var(--bg-state-pressed, rgba(32, 47, 100, 0.06));
 }
 
-.share-panel__config-btn {
+.share-panel__config-option .checkbox-field__text.is-active {
+  color: var(--text-brand, #07c160);
+}
+
+.share-panel__config-link {
+  display: flex;
+  align-items: center;
+  gap: 2px;
   font-size: 13px;
-  color: var(--brand-primary, #07c160);
+  color: var(--text-secondary, #666);
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 4px 8px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: background var(--duration-fast, 0.15s) ease;
+  flex-shrink: 0;
 }
 
-/* 渠道栏 */
+.share-panel__config-link:active {
+  background: var(--bg-state-pressed, rgba(32, 47, 100, 0.06));
+}
+
+.share-panel__config-link i {
+  font-size: 12px;
+}
+
+/* 渠道栏（复用 .layout-scroll-row 横向滚动） */
 .share-panel__channels {
-  padding: 16px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-}
-
-.share-panel__channels::-webkit-scrollbar {
-  display: none;
+  padding: 8px 0 12px;
+  gap: 0;
 }
 
 .share-panel__channel-group {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px 8px;
-  scroll-snap-align: start;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 12px 0;
+  padding: 0 8px;
   min-width: 100%;
+  flex: 0 0 100%;
+  box-sizing: border-box;
 }
 
 .share-panel__channel-item {
@@ -133,11 +143,16 @@
   border: none;
   background: transparent;
   cursor: pointer;
-  padding: 0;
+  padding: 6px 4px;
+  width: 68px;
+  flex: 0 0 68px;
+  box-sizing: border-box;
+  border-radius: 10px;
+  transition: background var(--duration-fast, 0.15s) ease;
 }
 
 .share-panel__channel-item:active {
-  opacity: 0.6;
+  background: var(--bg-state-pressed, rgba(32, 47, 100, 0.06));
 }
 
 .share-panel__channel-icon {
@@ -146,19 +161,43 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
-  background: var(--bg-gray, #f5f5f5);
-  font-size: 24px;
+  position: relative;
+}
+
+.share-panel__channel-svg {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  display: block;
+}
+
+.share-panel__channel-icon .wego-iconfont-s {
+  font-size: 40px;
   color: var(--text-default, #1a1a1a);
+}
+
+.share-panel__channel-badge {
+  position: absolute;
+  top: -2px;
+  right: -4px;
+  background: linear-gradient(135deg, #ff9500, #ff6b00);
+  color: #fff;
+  font-size: 9px;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 6px;
+  white-space: nowrap;
+  font-weight: 500;
 }
 
 .share-panel__channel-name {
   font-size: 11px;
   color: var(--text-secondary, #666);
   white-space: nowrap;
+  line-height: 1.2;
 }
 
-/* 滚动指示器 */
+/* 滚动指示器（32px 宽 2px 高，按组数显示） */
 .share-panel__indicator {
   display: flex;
   justify-content: center;
@@ -167,7 +206,7 @@
 }
 
 .share-panel__indicator-dot {
-  width: 16px;
+  width: 32px;
   height: 2px;
   border-radius: 1px;
   background: var(--border-light, #e0e0e0);
@@ -176,7 +215,6 @@
 
 .share-panel__indicator-dot--active {
   background: var(--text-secondary, #999);
-  width: 32px;
 }
 
 /* 其他操作栏 */
@@ -195,11 +233,13 @@
   border: none;
   background: transparent;
   cursor: pointer;
-  padding: 0;
+  padding: 6px 12px;
+  border-radius: 10px;
+  transition: background var(--duration-fast, 0.15s) ease;
 }
 
 .share-panel__action-item:active {
-  opacity: 0.6;
+  background: var(--bg-state-pressed, rgba(32, 47, 100, 0.06));
 }
 
 .share-panel__action-icon {
@@ -229,10 +269,12 @@
   font-size: 16px;
   color: var(--text-default, #1a1a1a);
   cursor: pointer;
+  text-align: center;
+  transition: background var(--duration-fast, 0.15s) ease;
 }
 
 .share-panel__cancel:active {
-  background: var(--bg-gray, #f5f5f5);
+  background: var(--bg-state-pressed, rgba(32, 47, 100, 0.06));
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -418,11 +460,15 @@
 .gray-popup__header {
   position: relative;
   height: 130px;
-  background: url('assets/update.png') center -30px / cover no-repeat;
+  background: url('assets/update.png') center / cover no-repeat;
 }
 
 .gray-popup__body {
   padding: 16px 16px 0;
+  margin-top: -30px;
+  background: #fff;
+  position: relative;
+  z-index: 1;
 }
 
 .gray-popup__list {
@@ -430,6 +476,8 @@
   padding: 0;
   list-style: none;
   counter-reset: gray-popup-counter;
+  max-height: 220px;
+  overflow-y: auto;
 }
 
 .gray-popup__list li {
@@ -455,7 +503,12 @@
 }
 
 .gray-popup__actions {
-  padding: 16px 24px 24px;
+  padding: 16px 24px 8px;
+}
+
+/* 强制型弹窗（无近期不再提醒按钮）底部间距 24px */
+.gray-popup-modal--forced .gray-popup__actions {
+  padding-bottom: 24px;
 }
 
 .gray-popup__confirm {
@@ -480,7 +533,7 @@
 
 .gray-popup__later {
   width: 100%;
-  height: 36px;
+  height: 32px;
   background: transparent;
   color: #576b95;
   border: none;
