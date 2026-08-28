@@ -381,8 +381,9 @@
    灰度弹窗（基于 modal fullscreen 变体覆盖为居中淡入弹窗）
    ═══════════════════════════════════════════════════════════════ */
 /* 居中布局（覆盖 modal 默认的底部对齐） */
-.gray-popup-modal {
+.modal.gray-popup-modal {
   align-items: center;
+  z-index: var(--z-modal, 600);
 }
 /* 恢复蒙层（fullscreen 变体默认 ::before 为 display:none） */
 .gray-popup-modal::before {
