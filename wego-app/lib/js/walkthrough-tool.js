@@ -4185,6 +4185,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             padding: 12px;
           }
           .annotation-bubble[hidden] { display: none; }
+          .count-bubble[hidden] { display: none; }
           .annotation-bubble-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
           .annotation-bubble-title { color: rgba(255,255,255,0.9); font-size: 13px; font-weight: 600; }
           .annotation-bubble-close {
@@ -4929,6 +4930,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       input.value = ann.text || '';
       deleteBtn.hidden = !ann.text;
       bubble.removeAttribute('hidden');
+      bubble.style.display = ''; // 清除可能残留的内联 display:none，确保 [hidden] 移除后正常显示
       this._annotationBubbleRect = rect;
       this._updateAnnotationBubblePosition();
       // 自动聚焦输入框，延迟确保点击事件后的焦点转移已完成
