@@ -4933,10 +4933,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       bubble.style.display = ''; // 清除可能残留的内联 display:none，确保 [hidden] 移除后正常显示
       this._annotationBubbleRect = rect;
       this._updateAnnotationBubblePosition();
-      // 自动聚焦输入框，延迟确保点击事件后的焦点转移已完成
+      // 自动聚焦输入框，延迟确保点击事件后的焦点转移已完成；移动端 focus 会拉起键盘
       setTimeout(() => {
         input.focus();
-        if (ann.text) input.select();
+        // 光标定位到内容末尾，直接进入输入状态（不全选已有内容）
+        const len = input.value.length;
+        input.setSelectionRange(len, len);
       }, 80);
     }
 
