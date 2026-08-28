@@ -568,6 +568,24 @@
           }
         });
 
+        /* 渠道栏滚动指示器跟随 */
+        var channelScroll = root.querySelector('[data-channel-scroll]');
+        var indicatorDots = root.querySelectorAll('.share-panel__indicator-dot');
+        if (channelScroll && indicatorDots.length > 1) {
+          channelScroll.addEventListener('scroll', function () {
+            var scrollLeft = channelScroll.scrollLeft;
+            var groupWidth = channelScroll.offsetWidth;
+            var activeIndex = Math.round(scrollLeft / groupWidth);
+            indicatorDots.forEach(function (dot, idx) {
+              if (idx === activeIndex) {
+                dot.classList.add('share-panel__indicator-dot--active');
+              } else {
+                dot.classList.remove('share-panel__indicator-dot--active');
+              }
+            });
+          }, { passive: true });
+        }
+
         /* 遮罩点击关闭 */
         root.addEventListener('click', function (e) {
           if (e.target === root) {
