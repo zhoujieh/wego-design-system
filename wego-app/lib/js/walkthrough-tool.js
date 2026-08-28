@@ -45,6 +45,44 @@
     pseudoStyles: {}, // "selector||before|after" -> { 'css-property': 值 }（注入 <head> 的规则）
   };
 
+  // ============================================================
+  // Liaison 风格图标集（1.5px 线宽，圆角端点，20×20 视口）
+  // ============================================================
+  const ICON_SVG = 'width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"';
+  const ICONS = {
+    // 工具条
+    pointer: `<svg ${ICON_SVG}><path d="M5 3l6 12 2-5 5-2z" fill="currentColor" stroke="none"/></svg>`,
+    chevronLeft: `<svg ${ICON_SVG}><path d="M12 5l-5 5 5 5"/></svg>`,
+    chevronRight: `<svg ${ICON_SVG}><path d="M8 5l5 5-5 5"/></svg>`,
+    list: `<svg ${ICON_SVG}><path d="M6 6h10M6 10h10M6 14h10"/><circle cx="3.5" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="3.5" cy="10" r="1" fill="currentColor" stroke="none"/><circle cx="3.5" cy="14" r="1" fill="currentColor" stroke="none"/></svg>`,
+    more: `<svg ${ICON_SVG}><circle cx="5" cy="10" r="1.2" fill="currentColor" stroke="none"/><circle cx="10" cy="10" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="10" r="1.2" fill="currentColor" stroke="none"/></svg>`,
+    database: `<svg ${ICON_SVG}><ellipse cx="10" cy="5" rx="6" ry="2"/><path d="M4 5v5c0 1.1 2.7 2 6 2s6-.9 6-2V5"/><path d="M4 10v5c0 1.1 2.7 2 6 2s6-.9 6-2v-5"/></svg>`,
+    close: `<svg ${ICON_SVG}><path d="M6 6l8 8M14 6l-8 8"/></svg>`,
+    // 布局
+    layoutColumn: `<svg ${ICON_SVG}><rect x="4" y="3.5" width="12" height="5.5" rx="1.5"/><rect x="4" y="11" width="12" height="5.5" rx="1.5"/></svg>`,
+    layoutRow: `<svg ${ICON_SVG}><rect x="3.5" y="4" width="5.5" height="12" rx="1.5"/><rect x="11" y="4" width="5.5" height="12" rx="1.5"/></svg>`,
+    gap: `<svg ${ICON_SVG}><rect x="3" y="7" width="5" height="6" rx="1"/><rect x="12" y="7" width="5" height="6" rx="1"/><path d="M8.5 10h3M9.5 8.5L11.5 10l-2 1.5" stroke-dasharray="0"/></svg>`,
+    padding: `<svg ${ICON_SVG}><rect x="3" y="3" width="14" height="14" rx="2"/><rect x="7" y="7" width="6" height="6" rx="1"/></svg>`,
+    margin: `<svg ${ICON_SVG}><rect x="3" y="3" width="14" height="14" rx="2" stroke-dasharray="2.5 2"/><rect x="7" y="7" width="6" height="6" rx="1"/></svg>`,
+    width: `<svg ${ICON_SVG}><path d="M3 10h14M6.5 7L4 10l2.5 3M13.5 7L16 10l-2.5 3"/></svg>`,
+    height: `<svg ${ICON_SVG}><path d="M10 3v14M7 6.5L10 4l3 2.5M7 13.5L10 16l3-2.5"/></svg>`,
+    // 字体
+    fontSize: `<svg ${ICON_SVG}><path d="M6 14l2.5-7 2.5 7M7.2 11.5h2.6"/><path d="M13 14l1.5-4 1.5 4M13.7 12h1.6"/></svg>`,
+    fontWeight: `<svg ${ICON_SVG}><path d="M6 14l2.5-7 2.5 7M7.2 11.5h2.6" stroke-width="2"/></svg>`,
+    lineHeight: `<svg ${ICON_SVG}><path d="M4 6h12M4 10h12M4 14h12"/><path d="M2.5 5l1.5 1-1.5 1M17.5 5l-1.5 1 1.5 1"/></svg>`,
+    alignLeft: `<svg ${ICON_SVG}><path d="M4 6h12M4 10h8M4 14h10"/></svg>`,
+    alignCenter: `<svg ${ICON_SVG}><path d="M4 6h12M6 10h8M5 14h10"/></svg>`,
+    alignRight: `<svg ${ICON_SVG}><path d="M4 6h12M8 10h8M6 14h10"/></svg>`,
+    // 外观
+    opacity: `<svg ${ICON_SVG}><circle cx="10" cy="10" r="6"/><path d="M7 13c1-1.5 2.5-2.5 5-3"/></svg>`,
+    radius: `<svg ${ICON_SVG}><path d="M4 10V7a3 3 0 013-3h3"/></svg>`,
+    stroke: `<svg ${ICON_SVG}><rect x="4" y="4" width="12" height="12" rx="1.5"/></svg>`,
+    shadow: `<svg ${ICON_SVG}><rect x="3.5" y="3.5" width="10" height="10" rx="1.5"/><path d="M7 17h7a1.5 1.5 0 001.5-1.5v-7" stroke-dasharray="2 2"/></svg>`,
+    token: `<svg ${ICON_SVG}><path d="M10 3l6 4v6l-6 4-6-4V7z"/><path d="M10 8v4M8 10h4"/></svg>`,
+    // 颜色选择器
+    eyedropper: `<svg ${ICON_SVG}><path d="M13 3l4 4-8 8-4 1 1-4z"/><path d="M11 5l4 4"/></svg>`,
+  };
+
   /** 获取当前场景路由 */
   function getCurrentRoute() {
     const hash = window.location.hash || '';
@@ -1122,7 +1160,7 @@
         <div class="picker">
           <div class="header">
             <span class="title">颜色</span>
-            <button class="close-btn" type="button" data-action="close">×</button>
+            <button class="close-btn" type="button" data-action="close">${ICONS.close}</button>
           </div>
 
           <!-- SV 二维取色面板 -->
@@ -1165,11 +1203,7 @@
             <input class="format-input" type="text" value="${formatValue}" data-format-input spellcheck="false" />
             ${hasEyedropper ? `
             <button class="eyedropper-btn" type="button" data-eyedropper title="从页面取色">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M2 22l4-1 11-11-3-3L3 18l-1 4z"/>
-                <path d="M14 7l3 3"/>
-                <path d="M17 4l3 3"/>
-              </svg>
+              ${ICONS.eyedropper}
             </button>` : ''}
           </div>
         </div>
@@ -1658,7 +1692,7 @@
                       <span class="change-old" title="${c.oldValue}">${c.oldValue || '-'}</span>
                       <span class="change-arrow">→</span>
                       <span class="change-new" title="${c.newValue}">${c.newValue || '-'}</span>
-                      <button class="change-delete" type="button" data-delete="${c.id}" title="删除此变更">×</button>
+                      <button class="change-delete" type="button" data-delete="${c.id}" title="删除此变更">${ICONS.close}</button>
                     </div>
                   `).join('')}
                 </div>
@@ -2616,7 +2650,7 @@
               <div class="header-tag">${tag || '—'}${this._selector ? `<span class="header-selector">${this._selector.substring(0, 40)}</span>` : ''}</div>
               ${text ? `<div class="header-text">${text}</div>` : ''}
             </div>
-            <button class="close-btn" type="button" data-action="close">×</button>
+            <button class="close-btn" type="button" data-action="close">${ICONS.close}</button>
           </div>
 
           <div class="panel-body">
@@ -2644,10 +2678,10 @@
             <p class="section-title">自动布局</p>
             <div class="layout-tabs">
               <button class="layout-tab ${d.layoutMode === 'column' ? 'active' : ''}" data-field="layoutMode" data-value="column">
-                <span class="icon">↕</span><span>纵向</span>
+                <span class="icon">${ICONS.layoutColumn}</span><span>纵向</span>
               </button>
               <button class="layout-tab ${d.layoutMode === 'row' ? 'active' : ''}" data-field="layoutMode" data-value="row">
-                <span class="icon">↔</span><span>横向</span>
+                <span class="icon">${ICONS.layoutRow}</span><span>横向</span>
               </button>
             </div>
             <div class="field-row">
@@ -2655,7 +2689,7 @@
                 ${this._renderAlignMatrix(d)}
               </div>
               <div class="field">
-                <span class="field-icon">⇔</span>
+                <span class="field-icon">${ICONS.gap}</span>
                 <input class="text-input" type="text" value="${d.layoutGap || ''}" data-field="layoutGap" inputmode="numeric" placeholder="gap" />
               </div>
             </div>
@@ -2679,7 +2713,7 @@
             </div>
             <div class="field-row two-col">
               <label class="field metric-field">
-                <span class="field-icon">W</span>
+                <span class="field-icon">${ICONS.width}</span>
                 <input class="text-input" type="text" value="${d.width || ''}" data-field="width" inputmode="numeric" placeholder="—" />
                 <span class="field-select-wrap" title="宽度模式">
                   <span class="field-select-trigger">${d.widthMode === 'auto' ? '适应' : (d.widthMode === 'fill' ? '填充' : '固定')}</span>
@@ -2691,7 +2725,7 @@
                 </span>
               </label>
               <label class="field metric-field">
-                <span class="field-icon">H</span>
+                <span class="field-icon">${ICONS.height}</span>
                 <input class="text-input" type="text" value="${d.height || ''}" data-field="height" inputmode="numeric" placeholder="—" />
                 <span class="field-select-wrap" title="高度模式">
                   <span class="field-select-trigger">${d.heightMode === 'auto' ? '适应' : (d.heightMode === 'fill' ? '填充' : '固定')}</span>
@@ -2709,14 +2743,14 @@
           <div class="section">
             <p class="section-title">字体</p>
             <div class="field-row">
-              <span class="field-icon">A</span>
+              <span class="field-icon">${ICONS.fontSize}</span>
               <input class="text-input" type="text" value="${d.fontSize || ''}" data-field="fontSize" inputmode="numeric" placeholder="字号" />
               <button class="token-btn ${fontSizeIsToken ? 'active' : ''}" type="button" data-token-trigger="fontSize" data-field="fontSize" title="选择设计系统 Token">
-                ${fontSizeIsToken ? fontSizeTokenName : 'T'}
+                ${fontSizeIsToken ? fontSizeTokenName : ICONS.token}
               </button>
             </div>
             <div class="field-row">
-              <span class="field-icon">W</span>
+              <span class="field-icon">${ICONS.fontWeight}</span>
               <select class="text-input" data-field="fontWeight">
                 <option value="normal" ${d.fontWeight === 'normal' ? 'selected' : ''}>normal</option>
                 <option value="300" ${d.fontWeight === '300' ? 'selected' : ''}>300</option>
@@ -2727,7 +2761,7 @@
                 <option value="bold" ${d.fontWeight === 'bold' ? 'selected' : ''}>bold</option>
               </select>
               <button class="token-btn ${fontWeightIsToken ? 'active' : ''}" type="button" data-token-trigger="fontWeight" data-field="fontWeight" title="选择设计系统 Token">
-                ${fontWeightIsToken ? fontWeightTokenName : 'T'}
+                ${fontWeightIsToken ? fontWeightTokenName : ICONS.token}
               </button>
             </div>
             <div class="field-row">
@@ -2737,14 +2771,14 @@
               <input class="text-input" type="text" value="${d.colorHex || ''}" data-field="colorHex" />
               <input class="text-input opacity-input" type="text" value="${d.colorOpacity ?? 100}" data-field="colorOpacity" inputmode="numeric" ${colorIsToken ? 'disabled' : ''} />
               <button class="token-btn ${colorIsToken ? 'active' : ''}" type="button" data-token-trigger="color" data-field="colorHex" title="选择设计系统 Token">
-                ${colorIsToken ? colorTokenName : 'T'}
+                ${colorIsToken ? colorTokenName : ICONS.token}
               </button>
             </div>
             <div class="field-row">
-              <span class="field-icon">LH</span>
+              <span class="field-icon">${ICONS.lineHeight}</span>
               <input class="text-input" type="text" value="${d.lineHeight || ''}" data-field="lineHeight" inputmode="decimal" placeholder="行高" />
               <button class="token-btn ${lineHeightIsToken ? 'active' : ''}" type="button" data-token-trigger="lineHeight" data-field="lineHeight" title="选择设计系统 Token">
-                ${lineHeightIsToken ? lineHeightTokenName : 'T'}
+                ${lineHeightIsToken ? lineHeightTokenName : ICONS.token}
               </button>
             </div>
             <div class="field-row two-col">
@@ -2760,8 +2794,8 @@
           <div class="section">
             <p class="section-title">外观</p>
             <div class="field-row two-col">
-              <div class="field"><span class="field-icon">○</span><input class="text-input" type="text" value="${d.layerOpacity ?? 100}" data-field="layerOpacity" inputmode="numeric" placeholder="透明" /></div>
-              <div class="field"><span class="field-icon">⌐</span><input class="text-input" type="text" value="${d.borderRadiusAll || ''}" data-field="borderRadiusAll" inputmode="numeric" placeholder="圆角" /></div>
+              <div class="field"><span class="field-icon">${ICONS.opacity}</span><input class="text-input" type="text" value="${d.layerOpacity ?? 100}" data-field="layerOpacity" inputmode="numeric" placeholder="透明" /></div>
+              <div class="field"><span class="field-icon">${ICONS.radius}</span><input class="text-input" type="text" value="${d.borderRadiusAll || ''}" data-field="borderRadiusAll" inputmode="numeric" placeholder="圆角" /></div>
             </div>
           </div>
 
@@ -2775,7 +2809,7 @@
               <input class="text-input" type="text" value="${d.fillHex || ''}" data-field="fillHex" />
               <input class="text-input opacity-input" type="text" value="${d.fillOpacity ?? 0}" data-field="fillOpacity" inputmode="numeric" ${fillIsToken ? 'disabled' : ''} />
               <button class="token-btn ${fillIsToken ? 'active' : ''}" type="button" data-token-trigger="color" data-field="fillHex" title="选择设计系统 Token">
-                ${fillIsToken ? fillTokenName : 'T'}
+                ${fillIsToken ? fillTokenName : ICONS.token}
               </button>
             </div>
           </div>
@@ -2790,11 +2824,11 @@
               <input class="text-input" type="text" value="${d.strokeHex || ''}" data-field="strokeHex" />
               <input class="text-input opacity-input" type="text" value="${d.strokeOpacity ?? 0}" data-field="strokeOpacity" inputmode="numeric" ${strokeIsToken ? 'disabled' : ''} />
               <button class="token-btn ${strokeIsToken ? 'active' : ''}" type="button" data-token-trigger="color" data-field="strokeHex" title="选择设计系统 Token">
-                ${strokeIsToken ? strokeTokenName : 'T'}
+                ${strokeIsToken ? strokeTokenName : ICONS.token}
               </button>
             </div>
             <div class="field-row two-col">
-              <div class="field"><span class="field-icon">▢</span><input class="text-input" type="text" value="${d.strokeWidth || ''}" data-field="strokeWidth" inputmode="numeric" placeholder="宽度" /></div>
+              <div class="field"><span class="field-icon">${ICONS.stroke}</span><input class="text-input" type="text" value="${d.strokeWidth || ''}" data-field="strokeWidth" inputmode="numeric" placeholder="宽度" /></div>
               <div class="field">
                 <select class="text-input" data-field="strokePosition">
                   <option value="outside" ${d.strokePosition === 'outside' ? 'selected' : ''}>外描边</option>
@@ -2815,7 +2849,7 @@
               <input class="text-input" type="text" value="${d.shadowHex || ''}" data-field="shadowHex" />
               <input class="text-input opacity-input" type="text" value="${d.shadowOpacity ?? 0}" data-field="shadowOpacity" inputmode="numeric" ${shadowIsToken ? 'disabled' : ''} />
               <button class="token-btn ${shadowIsToken ? 'active' : ''}" type="button" data-token-trigger="color" data-field="shadowHex" title="选择设计系统 Token">
-                ${shadowIsToken ? shadowTokenName : 'T'}
+                ${shadowIsToken ? shadowTokenName : ICONS.token}
               </button>
             </div>
             <div class="field-row two-col">
@@ -3499,7 +3533,7 @@
             const tokName = val.match(/var\((--[^)]+)\)/)[1].replace(/^--/, '');
             if (tokenBtn.textContent.trim() !== tokName) tokenBtn.textContent = tokName;
           } else {
-            if (tokenBtn.textContent.trim() !== 'T') tokenBtn.textContent = 'T';
+            if (tokenBtn.innerHTML.trim() !== ICONS.token.trim()) tokenBtn.innerHTML = ICONS.token;
           }
         }
         // opacity 输入框禁用 + 值回显
@@ -3529,7 +3563,7 @@
             const tokName = val.match(/var\((--[^)]+)\)/)[1].replace(/^--/, '');
             if (tokenBtn.textContent.trim() !== tokName) tokenBtn.textContent = tokName;
           } else {
-            if (tokenBtn.textContent.trim() !== 'T') tokenBtn.textContent = 'T';
+            if (tokenBtn.innerHTML.trim() !== ICONS.token.trim()) tokenBtn.innerHTML = ICONS.token;
           }
         }
         // 输入框值回显（用 input/select 限定，避免匹配到 Token 按钮；fontWeight 是 select）
@@ -3982,26 +4016,26 @@
           <div class="toolbar-clip">
             <!-- 收起态：圆形按钮 -->
             <button class="fab-btn" data-fab-btn data-has-indicator="false">
-              <span>◎</span>
+              ${ICONS.pointer}
               <span class="fab-dot"></span>
             </button>
             <!-- 展开态：工具条内容 -->
             <div class="toolbar-main" data-toolbar-main style="display:none;">
-              <button class="collapse-btn" data-collapse-btn title="收起">‹</button>
+              <button class="collapse-btn" data-collapse-btn title="收起">${ICONS.chevronLeft}</button>
               <button class="tool-btn" data-tool="walkthrough" data-active="false" title="走查模式">
-                <span>◆</span>
+                ${ICONS.pointer}
               </button>
               <button class="tool-btn" data-tool="datamock" data-active="false" title="数据模拟">
-                <span>⚠</span>
+                ${ICONS.database}
                 <span class="badge-dot"></span>
               </button>
               <div class="divider"></div>
               <button class="count-btn" data-tool="overview" title="配置列表">
                 <span class="count-value" data-count-value>0</span>
-                <span class="count-icon">≡</span>
+                <span class="count-icon">${ICONS.list}</span>
               </button>
               <button class="tool-btn" data-tool="more" title="更多">
-                <span>⋯</span>
+                ${ICONS.more}
               </button>
             </div>
           </div>
@@ -4032,11 +4066,11 @@
           <div class="subpanel-title">更多</div>
           <button class="subpanel-item" data-nav="scene-manager">
             <span>场景管理</span>
-            <span class="subpanel-arrow">›</span>
+            <span class="subpanel-arrow">${ICONS.chevronRight}</span>
           </button>
           <button class="subpanel-item" data-nav="component-preview">
             <span>组件库</span>
-            <span class="subpanel-arrow">›</span>
+            <span class="subpanel-arrow">${ICONS.chevronRight}</span>
           </button>
         </div>
         <!-- 子组件（走查模式相关） -->
@@ -4137,6 +4171,27 @@
         this._components.stylePanel.openForElement(element, selector, target || '');
       });
       bus.on('element-deselected', () => this._components.stylePanel.close());
+
+      // ESC 键：按层级优先级逐级关闭面板，全部关闭后退出走查模式
+      document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        // 1. 颜色选择器（最上层）
+        const cp = this._components.colorPicker;
+        if (cp && !cp.hasAttribute('hidden')) { cp.close(); return; }
+        // 2. Token 选择面板（样式面板内部浮层）
+        const sp = this._components.stylePanel;
+        if (sp && sp._tokenPanel && sp._tokenPanel.open) { sp._closeTokenPanel(); return; }
+        // 3. 样式编辑面板（有选中元素）
+        if (state.selectedElement) { this._clearSelection(); return; }
+        // 4. 配置列表面板
+        const ov = this._components.overviewPanel;
+        if (ov && !ov.hasAttribute('hidden')) { ov.close(); return; }
+        // 5. 工具条子面板（数据模拟 / 更多）
+        const anySubpanel = this._shadow.querySelector('[data-subpanel].is-open');
+        if (anySubpanel) { this._closeSubpanels(); return; }
+        // 6. 走查模式
+        if (this._walkthroughMode) { this._setWalkthroughMode(false); return; }
+      });
     }
 
     // ── 拖动 ──────────────────────────────────────────────
@@ -4276,9 +4331,9 @@
         fab.style.display = 'none';
         main.style.display = 'inline-flex';
         main.style.flexDirection = dir === 'left' ? 'row-reverse' : 'row';
-        // 收起按钮箭头方向：右侧展开(row-reverse，按钮在最右)显示向右箭头›，左侧展开显示向左箭头‹
+        // 收起按钮箭头方向：右侧展开(row-reverse，按钮在最右)显示向右箭头，左侧展开显示向左箭头
         const collapseBtn = this._shadow.querySelector('[data-collapse-btn]');
-        if (collapseBtn) collapseBtn.textContent = dir === 'left' ? '›' : '‹';
+        if (collapseBtn) collapseBtn.innerHTML = dir === 'left' ? ICONS.chevronRight : ICONS.chevronLeft;
       }
 
       // 3. 测量目标态宽度
@@ -4350,6 +4405,12 @@
       this._collapsedTransitionEnd = onEnd;
       toolbar.addEventListener('transitionend', onEnd);
 
+      // 展开自动激活走查模式，收起自动退出并清除选中
+      if (!collapsed) {
+        this._setWalkthroughMode(true);
+      } else {
+        this._setWalkthroughMode(false);
+      }
       this._updateToolbarState();
     }
 
