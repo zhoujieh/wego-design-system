@@ -1,0 +1,514 @@
+/* 产品分享场景样式（shop243）
+   分享面板、下载进度、灰度弹窗、分享结果弹窗 */
+
+/* ═══════════════════════════════════════════════════════════════
+   分享面板
+   ═══════════════════════════════════════════════════════════════ */
+.share-panel {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 1000;
+  animation: share-panel-fade-in 0.2s ease;
+}
+
+@keyframes share-panel-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.share-panel__panel {
+  width: 100%;
+  max-width: 430px;
+  background: var(--bg-surface, #fff);
+  border-radius: 16px 16px 0 0;
+  padding: 16px 0 0;
+  animation: share-panel-slide-up 0.3s ease;
+}
+
+@keyframes share-panel-slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+/* 标题栏 */
+.share-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px 12px;
+  border-bottom: 1px solid var(--border-light, #f0f0f0);
+}
+
+.share-panel__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-default, #1a1a1a);
+}
+
+.share-panel__header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.share-panel__header-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-secondary, #666);
+  font-size: 18px;
+}
+
+.share-panel__header-btn:active {
+  opacity: 0.6;
+}
+
+/* 配置栏 */
+.share-panel__config {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-light, #f0f0f0);
+}
+
+.share-panel__config-row {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.share-panel__config-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-default, #1a1a1a);
+  cursor: pointer;
+}
+
+.share-panel__config-option input[type="radio"] {
+  accent-color: var(--brand-primary, #07c160);
+}
+
+.share-panel__config-btn {
+  font-size: 13px;
+  color: var(--brand-primary, #07c160);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+/* 渠道栏 */
+.share-panel__channels {
+  padding: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.share-panel__channels::-webkit-scrollbar {
+  display: none;
+}
+
+.share-panel__channel-group {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px 8px;
+  scroll-snap-align: start;
+  min-width: 100%;
+}
+
+.share-panel__channel-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+}
+
+.share-panel__channel-item:active {
+  opacity: 0.6;
+}
+
+.share-panel__channel-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: var(--bg-gray, #f5f5f5);
+  font-size: 24px;
+  color: var(--text-default, #1a1a1a);
+}
+
+.share-panel__channel-name {
+  font-size: 11px;
+  color: var(--text-secondary, #666);
+  white-space: nowrap;
+}
+
+/* 滚动指示器 */
+.share-panel__indicator {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 0 12px;
+}
+
+.share-panel__indicator-dot {
+  width: 16px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--border-light, #e0e0e0);
+  transition: background 0.2s;
+}
+
+.share-panel__indicator-dot--active {
+  background: var(--text-secondary, #999);
+  width: 32px;
+}
+
+/* 其他操作栏 */
+.share-panel__actions {
+  display: flex;
+  justify-content: space-around;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border-light, #f0f0f0);
+}
+
+.share-panel__action-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+}
+
+.share-panel__action-item:active {
+  opacity: 0.6;
+}
+
+.share-panel__action-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: var(--bg-gray, #f5f5f5);
+  font-size: 20px;
+  color: var(--text-default, #1a1a1a);
+}
+
+.share-panel__action-name {
+  font-size: 11px;
+  color: var(--text-secondary, #666);
+}
+
+/* 取消按钮 */
+.share-panel__cancel {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-top: 1px solid var(--border-light, #f0f0f0);
+  background: transparent;
+  font-size: 16px;
+  color: var(--text-default, #1a1a1a);
+  cursor: pointer;
+}
+
+.share-panel__cancel:active {
+  background: var(--bg-gray, #f5f5f5);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   分享至 XX 弹窗
+   ═══════════════════════════════════════════════════════════════ */
+.share-result-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+  padding: 32px;
+}
+
+.share-result-modal__panel {
+  width: 100%;
+  max-width: 320px;
+  background: var(--bg-surface, #fff);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.share-result-modal__title {
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 16px;
+  color: var(--text-default, #1a1a1a);
+}
+
+.share-result-modal__body {
+  margin-bottom: 20px;
+}
+
+.share-result-modal__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  font-size: 14px;
+  color: var(--text-default, #1a1a1a);
+}
+
+.share-result-modal__check {
+  color: var(--brand-primary, #07c160);
+  font-size: 16px;
+}
+
+.share-result-modal__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.share-result-modal__goto {
+  width: 100%;
+}
+
+.share-result-modal__clean {
+  width: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   下载进度弹窗
+   ═══════════════════════════════════════════════════════════════ */
+.download-progress {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+  padding: 32px;
+}
+
+.download-progress__panel {
+  width: 100%;
+  max-width: 280px;
+  background: var(--bg-surface, #fff);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.download-progress__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px 12px;
+}
+
+.download-progress__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-default, #1a1a1a);
+}
+
+.download-progress__close {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-secondary, #999);
+  font-size: 16px;
+}
+
+.download-progress__body {
+  padding: 0 16px 20px;
+}
+
+.download-progress__filename {
+  font-size: 13px;
+  color: var(--text-secondary, #666);
+  margin-bottom: 10px;
+}
+
+.download-progress__bar {
+  width: 100%;
+  height: 6px;
+  background: var(--bg-gray, #f0f0f0);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.download-progress__bar-fill {
+  height: 100%;
+  background: var(--brand-primary, #07c160);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.download-progress__percent {
+  font-size: 12px;
+  color: var(--text-secondary, #999);
+  text-align: right;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   灰度弹窗
+   ═══════════════════════════════════════════════════════════════ */
+.gray-popup {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1002;
+  padding: 32px;
+}
+
+.gray-popup__panel {
+  width: 100%;
+  max-width: 300px;
+  background: var(--bg-surface, #fff);
+  border-radius: 20px;
+  padding: 28px 20px 20px;
+  position: relative;
+  text-align: center;
+}
+
+.gray-popup__icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #07c160, #10ad56);
+  color: #fff;
+  font-size: 32px;
+}
+
+.gray-popup__title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-default, #1a1a1a);
+  margin-bottom: 8px;
+}
+
+.gray-popup__desc {
+  font-size: 14px;
+  color: var(--text-secondary, #666);
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.gray-popup__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gray-popup__confirm {
+  width: 100%;
+}
+
+.gray-popup__later {
+  width: 100%;
+}
+
+.gray-popup__close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-secondary, #999);
+  font-size: 16px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   动态页产品卡片：已分享/已转发标识
+   ═══════════════════════════════════════════════════════════════ */
+.album-feed__share-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  background: rgba(7, 193, 96, 0.1);
+  color: var(--brand-primary, #07c160);
+  margin-left: 8px;
+}
+
+.album-feed__share-badge--forwarded {
+  background: rgba(255, 149, 0, 0.1);
+  color: #ff9500;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   发布页导航栏分享/快捷分享按钮
+   ═══════════════════════════════════════════════════════════════ */
+.publish-product__nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.publish-product__quick-share {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: var(--bg-gray, #f5f5f5);
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-default, #1a1a1a);
+}
+
+.publish-product__quick-share:active {
+  opacity: 0.6;
+}
+
+.publish-product__quick-share-icon {
+  font-size: 14px;
+}
+
+.publish-product__share-btn {
+  padding: 6px 12px;
+  font-size: 13px;
+}
