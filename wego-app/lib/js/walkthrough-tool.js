@@ -38,8 +38,10 @@
   /** 全局状态 */
   const state = {
     walkthroughMode: false,
+    annotationMode: false,
     selectedElement: null,
     changes: [],
+    annotations: [],
     currentRoute: '',
     originalStyles: {}, // selector -> { 'css-property': 原始计算值 }
     pseudoStyles: {}, // "selector||before|after" -> { 'css-property': 值 }（注入 <head> 的规则）
@@ -76,6 +78,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     shadow: `<svg ${ICON_SVG}><path d="M120,206H72a6,6,0,0,1,0-12h48a6,6,0,0,1,0,12Zm64-12H160a6,6,0,0,0,0,12h24a6,6,0,0,0,0-12Zm-24,32H104a6,6,0,0,0,0,12h56a6,6,0,0,0,0-12Zm70-126a74.09,74.09,0,0,1-74,74H76A50,50,0,1,1,86.2,75,74.08,74.08,0,0,1,230,100Zm-12,0A62.06,62.06,0,0,0,94,96.35a6,6,0,0,1-12-.7,75.84,75.84,0,0,1,1.07-9A38,38,0,1,0,76,162h80A62.07,62.07,0,0,0,218,100Z"/></svg>`,
     token: `<svg ${ICON_SVG}><path d="M222.72,67.91l-88-48.18a13.9,13.9,0,0,0-13.44,0l-88,48.18A14,14,0,0,0,26,80.18v95.64a14,14,0,0,0,7.28,12.27l88,48.18a13.92,13.92,0,0,0,13.44,0l88-48.18A14,14,0,0,0,230,175.82V80.18A14,14,0,0,0,222.72,67.91ZM218,175.82a2,2,0,0,1-1,1.75l-88,48.18a2,2,0,0,1-1.92,0L39,177.57a2,2,0,0,1-1-1.75V80.18a2,2,0,0,1,1-1.75l88-48.18a2,2,0,0,1,1.92,0l88,48.18a2,2,0,0,1,1,1.75Z"/></svg>`,
     eyedropper: `<svg ${ICON_SVG}><path d="M222,67.34a33.81,33.81,0,0,0-10.64-24.25C198.12,30.56,176.68,31,163.54,44.18L142.82,65l-.63-.63a22,22,0,0,0-31.11,0l-9,9a14,14,0,0,0,0,19.81l3.47,3.47L53.14,149.1a37.79,37.79,0,0,0-9.84,36.73l-8.31,19a11.68,11.68,0,0,0,2.46,13A13.91,13.91,0,0,0,47.32,222,14.15,14.15,0,0,0,53,220.82L71,212.92a37.92,37.92,0,0,0,35.84-10.07l52.44-52.46,3.47,3.48a14,14,0,0,0,19.8,0l9-9a22,22,0,0,0,0-31.12l-.66-.66L212,91.85A33.76,33.76,0,0,0,222,67.34Zm-123.61,127a26,26,0,0,1-26,6.47,6,6,0,0,0-4.16.24l-20,8.75a2,2,0,0,1-2.09-.31l9.12-20.9a5.94,5.94,0,0,0,.19-4.31,25.88,25.88,0,0,1,6.26-26.72l52.44-52.45,36.76,36.78Zm105.16-111L178.17,108.9a6,6,0,0,0,0,8.47l4.88,4.89a10,10,0,0,1,0,14.15l-9,9a2,2,0,0,1-2.82,0l-60.69-60.7a2,2,0,0,1,0-2.83l9-9a10,10,0,0,1,14.14,0l4.89,4.89a6,6,0,0,0,4.24,1.75h0a6,6,0,0,0,4.25-1.77L172,52.66c8.58-8.58,22.52-9,31.08-.85a22,22,0,0,1,.44,31.57Z"/></svg>`,
+    annotation: `<svg ${ICON_SVG}><path d="M90,96a6,6,0,0,1,6-6h64a6,6,0,0,1,0,12H96A6,6,0,0,1,90,96Zm6,38h64a6,6,0,0,0,0-12H96a6,6,0,0,0,0,12Zm32,20H96a6,6,0,0,0,0,12h32a6,6,0,0,0,0-12ZM222,48V156.69a13.94,13.94,0,0,1-4.1,9.9L166.59,217.9a13.94,13.94,0,0,1-9.9,4.1H48a14,14,0,0,1-14-14V48A14,14,0,0,1,48,34H208A14,14,0,0,1,222,48ZM48,210H154V160a6,6,0,0,1,6-6h50V48a2,2,0,0,0-2-2H48a2,2,0,0,0-2,2V208A2,2,0,0,0,48,210Zm153.52-44H166v35.52Z"/></svg>`,
   };
 
   /** 获取当前场景路由 */
@@ -1401,13 +1404,15 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       super();
       this._shadow = this.attachShadow({ mode: 'open' });
       this._changes = [];
+      this._annotations = [];
       this._route = '';
     }
     connectedCallback() {
       this._render();
     }
-    open(changes, route, anchorEl) {
+    open(changes, route, anchorEl, annotations) {
       this._changes = changes || [];
+      this._annotations = annotations || [];
       this._route = route || '';
       this._render();
       this._bindEvents();
@@ -1441,8 +1446,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this.setAttribute('hidden', '');
     }
     _render() {
-      const changes = this._changes;
-      // 按选择器分组
+      const changes = this._changes || [];
+      const annotations = this._annotations || [];
+      // 按选择器分组（合并样式变更和批注）
       const groups = {};
       changes.forEach(c => {
         const gkey = c.selector + (c.target ? '::' + c.target : '');
@@ -1453,11 +1459,34 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             elementTag: c.elementTag,
             elementText: c.elementText,
             changes: [],
+            annotation: '',
           };
         }
         groups[gkey].changes.push(c);
       });
+      annotations.forEach(a => {
+        if (!a.text) return;
+        if (!groups[a.selector]) {
+          groups[a.selector] = {
+            selector: a.selector,
+            target: '',
+            elementTag: a.elementTag,
+            elementText: a.elementText,
+            changes: [],
+            annotation: a.text,
+          };
+        } else {
+          groups[a.selector].annotation = a.text;
+          if (!groups[a.selector].elementText && a.elementText) {
+            groups[a.selector].elementText = a.elementText;
+          }
+          if (!groups[a.selector].elementTag && a.elementTag) {
+            groups[a.selector].elementTag = a.elementTag;
+          }
+        }
+      });
       const groupList = Object.values(groups);
+      const totalCount = changes.length + annotations.filter(a => a.text).length;
 
       this._shadow.innerHTML = `
         <style>
@@ -1661,18 +1690,40 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             border-radius: 6px;
           }
           .reset-btn:hover { background: rgba(229,57,53,0.06); }
+          .annotation-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+          }
+          .annotation-label {
+            flex-shrink: 0;
+            font-size: 11px;
+            color: #ff6b35;
+            background: rgba(255,107,53,0.12);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+          }
+          .annotation-text {
+            font-size: 12px;
+            color: rgba(255,255,255,0.85);
+            line-height: 1.5;
+            word-break: break-all;
+          }
         </style>
         <div class="panel">
           <div class="header">
             <div>
               <span class="header-title">配置列表</span>
-              <span class="header-count">${changes.length} 项变更</span>
+              <span class="header-count">${totalCount} 项</span>
             </div>
           </div>
           ${groupList.length === 0 ? `
             <div class="empty">
-              当前还没有配置修改<br/>
-              选中元素后在样式面板中修改
+              当前还没有配置修改或批注<br/>
+              选中元素后在样式面板中修改，或开启批注模式添加批注
             </div>
           ` : `
             <div class="list">
@@ -1681,6 +1732,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
                   <div class="item-top">
                     <span class="item-selector" data-selector="${g.selector}" data-gi="${gi}">${g.elementTag}${g.elementText ? ' · ' + g.elementText : ''}</span>
                   </div>
+                  ${g.annotation ? `
+                    <div class="annotation-row">
+                      <span class="annotation-label">备注</span>
+                      <span class="annotation-text">${g.annotation}</span>
+                    </div>
+                  ` : ''}
                   ${g.changes.map((c, ci) => `
                     <div class="change-row">
                       <span class="change-prop">${c.property}${c.target ? ' · ' + c.target : ''}</span>
@@ -1770,11 +1827,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     _buildPrompt() {
       const route = this._route || 'default';
       const viewport = `${window.innerWidth}×${window.innerHeight}`;
-      const changes = this._changes;
-      if (changes.length === 0) {
-        return `## Page Feedback: ${route}\n**Viewport:** ${viewport}\n\n当前还没有记录到任何配置修改。`;
+      const changes = this._changes || [];
+      const annotations = this._annotations || [];
+      if (changes.length === 0 && annotations.length === 0) {
+        return `## Page Feedback: ${route}\n**Viewport:** ${viewport}\n\n当前还没有记录到任何配置修改或批注。`;
       }
-      // 按选择器分组（同一元素的所有改动归一条）
+      // 按选择器分组（同一元素的样式变更和批注归一条）
       const groups = {};
       changes.forEach(c => {
         if (!groups[c.selector]) {
@@ -1784,9 +1842,31 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             elementText: c.elementText,
             elementClass: c.elementClass || '',
             changes: [],
+            annotation: '',
           };
         }
         groups[c.selector].changes.push(c);
+      });
+      annotations.forEach(a => {
+        if (!a.text) return;
+        if (!groups[a.selector]) {
+          groups[a.selector] = {
+            selector: a.selector,
+            elementTag: a.elementTag,
+            elementText: a.elementText,
+            elementClass: '',
+            changes: [],
+            annotation: a.text,
+          };
+        } else {
+          groups[a.selector].annotation = a.text;
+          if (!groups[a.selector].elementText && a.elementText) {
+            groups[a.selector].elementText = a.elementText;
+          }
+          if (!groups[a.selector].elementTag && a.elementTag) {
+            groups[a.selector].elementTag = a.elementTag;
+          }
+        }
       });
       const groupList = Object.values(groups);
       const lines = [
@@ -1801,7 +1881,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         // 业务锚点：取首段有意义文案（截断，不再整段糊）
         const anchor = (g.elementText || '').replace(/\s+/g, ' ').trim();
         const shortAnchor = anchor.length > 12 ? anchor.slice(0, 12) + '…' : anchor;
-        // 语义类名锚点：优先 elementClass，缺失时从 selector 末段提取（如 .business-home__quick-card）
+        // 语义类名锚点：优先 elementClass，缺失时从 selector 末段提取
         const classAnchor = (() => {
           if (g.elementClass) return g.elementClass.split(/\s+/)[0];
           const m = g.selector.match(/\.([a-zA-Z0-9_-]+)\s*$/) || g.selector.match(/\[data-component-slug="[^"]+"\]\.([a-zA-Z0-9_-]+)/);
@@ -1826,6 +1906,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           lines2.push(`**你要的:** 调整样式 ${wantCsv}`);
           lines2.push(`**改法:** 在源码对应 CSS 中设置：${cssChanges.map(c => `${c.property}: ${c.newValue || '-'}`).join('; ')}`);
         }
+        if (g.annotation) {
+          lines2.push(`**备注:** ${g.annotation}`);
+        }
         lines2.push('');
         lines.push(...lines2);
         machine.push({
@@ -1834,14 +1917,16 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           role,
           adds: addClassChanges.map(c => c.intentClass).filter(Boolean),
           css: cssChanges.map(c => ({ property: c.property, value: c.newValue })),
+          annotation: g.annotation || '',
         });
       });
       lines.push('<!-- WEGo_CHANGES_JSON ' + JSON.stringify(machine) + ' -->');
       return lines.join('\n');
     }
 
-    refresh(changes, route) {
+    refresh(changes, route, annotations) {
       this._changes = changes || [];
+      this._annotations = annotations || this._annotations || [];
       this._route = route || '';
       if (!this.hasAttribute('hidden')) {
         this._render();
@@ -3744,6 +3829,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       window.addEventListener('hashchange', () => {
         state.currentRoute = getCurrentRoute();
         this._loadChanges();
+        if (this._annotationMode) this._syncAnnotationMarkers();
       });
       this._loadChanges();
       // 暴露失败注入 API（兼容现有场景代码）
@@ -4006,6 +4092,54 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           .switch.is-on::after { transform: translateX(14px); }
           .subpanel-sep { height: 1px; margin: 6px 8px; background: rgba(255,255,255,0.08); }
           .subpanel-arrow { color: rgba(255,255,255,0.4); font-size: 14px; }
+          /* 批注标记层 */
+          .annotation-marker-layer { position: fixed; inset: 0; pointer-events: none; z-index: 9300; }
+          .annotation-marker-layer[hidden] { display: none; }
+          .annotation-marker {
+            position: fixed; width: 24px; height: 24px;
+            border-radius: 8px 8px 8px 2px; /* 左下角圆角小一些 */
+            background: #ff6b35; color: #fff;
+            border: 2px solid #fff; box-shadow: 0 4px 12px rgba(255,107,53,0.4);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; pointer-events: auto;
+            transition: transform 150ms ease, box-shadow 150ms ease;
+            z-index: 9301;
+          }
+          .annotation-marker:hover { transform: scale(1.1); box-shadow: 0 6px 16px rgba(255,107,53,0.5); }
+          .annotation-marker svg { width: 14px; height: 14px; }
+          /* 批注气泡 */
+          .annotation-bubble {
+            position: fixed; width: 280px; z-index: 9650;
+            background: #1a1a2e; border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            padding: 12px;
+          }
+          .annotation-bubble[hidden] { display: none; }
+          .annotation-bubble-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+          .annotation-bubble-title { color: rgba(255,255,255,0.9); font-size: 13px; font-weight: 600; }
+          .annotation-bubble-close {
+            background: none; border: none; color: rgba(255,255,255,0.5);
+            cursor: pointer; padding: 4px; border-radius: 4px;
+            display: flex; align-items: center; justify-content: center;
+          }
+          .annotation-bubble-close:hover { background: rgba(255,255,255,0.1); color: #fff; }
+          .annotation-bubble-close svg { width: 14px; height: 14px; }
+          .annotation-bubble-input {
+            width: 100%; min-height: 80px; max-height: 200px;
+            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px; color: #fff; font-size: 13px; line-height: 1.5;
+            padding: 8px 10px; resize: vertical; outline: none;
+            font-family: inherit; box-sizing: border-box;
+          }
+          .annotation-bubble-input:focus { border-color: #ff6b35; background: rgba(255,255,255,0.08); }
+          .annotation-bubble-input::placeholder { color: rgba(255,255,255,0.3); }
+          .annotation-bubble-delete {
+            margin-top: 8px; background: none; border: none;
+            color: #ff6b6b; font-size: 12px; cursor: pointer;
+            padding: 4px 8px; border-radius: 4px;
+          }
+          .annotation-bubble-delete:hover { background: rgba(255,107,107,0.1); }
+          .annotation-bubble-delete[hidden] { display: none; }
         </style>
         <div class="toolbar-container is-collapsed" data-toolbar>
           <div class="toolbar-clip">
@@ -4019,6 +4153,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
               <button class="collapse-btn" data-collapse-btn title="收起">${ICONS.chevronLeft}</button>
               <button class="tool-btn" data-tool="walkthrough" data-active="false" title="走查模式">
                 ${ICONS.pointer}
+              </button>
+              <button class="tool-btn" data-tool="annotation" data-active="false" title="批注模式">
+                ${ICONS.annotation}
               </button>
               <button class="tool-btn" data-tool="datamock" data-active="false" title="数据模拟">
                 ${ICONS.database}
@@ -4074,6 +4211,17 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         <wego-wt-color-picker hidden></wego-wt-color-picker>
         <wego-wt-overview-panel hidden></wego-wt-overview-panel>
         <wego-wt-toast></wego-wt-toast>
+        <!-- 批注标记层 -->
+        <div class="annotation-marker-layer" data-annotation-marker-layer hidden></div>
+        <!-- 批注气泡（单例） -->
+        <div class="annotation-bubble" data-annotation-bubble hidden>
+          <div class="annotation-bubble-header">
+            <span class="annotation-bubble-title">批注</span>
+            <button class="annotation-bubble-close" data-annotation-close title="关闭">${ICONS.close}</button>
+          </div>
+          <textarea class="annotation-bubble-input" data-annotation-input placeholder="输入批注内容，自动保存..."></textarea>
+          <button class="annotation-bubble-delete" data-annotation-delete>删除批注</button>
+        </div>
       `;
     }
 
@@ -4087,6 +4235,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._components.toolbarMain = this._shadow.querySelector('[data-toolbar-main]');
       this._components.fabBtn = this._shadow.querySelector('[data-fab-btn]');
       this._components.countValue = this._shadow.querySelector('[data-count-value]');
+      this._components.annotationMarkerLayer = this._shadow.querySelector('[data-annotation-marker-layer]');
+      this._components.annotationBubble = this._shadow.querySelector('[data-annotation-bubble]');
+      this._components.annotationInput = this._shadow.querySelector('[data-annotation-input]');
+      this._components.annotationClose = this._shadow.querySelector('[data-annotation-close]');
+      this._components.annotationDelete = this._shadow.querySelector('[data-annotation-delete]');
     }
 
     _bindEvents() {
@@ -4145,8 +4298,33 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
             this._components.overviewPanel.close();
           }
+          // 批注模式下点击外部关闭批注气泡
+          if (this._annotationMode && !this._components.annotationBubble.hasAttribute('hidden')) {
+            this._closeAnnotationBubble();
+          }
         }
       }, true);
+
+      // 批注气泡事件
+      this._components.annotationClose.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this._closeAnnotationBubble();
+      });
+      this._components.annotationDelete.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this._deleteCurrentAnnotation();
+      });
+      this._components.annotationInput.addEventListener('input', (e) => {
+        if (this._currentAnnotation) {
+          this._currentAnnotation.text = e.target.value;
+          this._currentAnnotation.timestamp = Date.now();
+          this._components.annotationDelete.hidden = !e.target.value;
+          this._saveChanges();
+        }
+      });
+      this._components.annotationBubble.addEventListener('pointerdown', (e) => {
+        e.stopPropagation();
+      });
 
       // 事件总线
       bus.on('style-change', (change) => this._recordChange(change));
@@ -4173,19 +4351,24 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         // 1. 颜色选择器（最上层）
         const cp = this._components.colorPicker;
         if (cp && !cp.hasAttribute('hidden')) { cp.close(); return; }
-        // 2. Token 选择面板（样式面板内部浮层）
+        // 2. 批注气泡
+        const ab = this._components.annotationBubble;
+        if (ab && !ab.hasAttribute('hidden')) { this._closeAnnotationBubble(); return; }
+        // 3. Token 选择面板（样式面板内部浮层）
         const sp = this._components.stylePanel;
         if (sp && sp._tokenPanel && sp._tokenPanel.open) { sp._closeTokenPanel(); return; }
-        // 3. 样式编辑面板（有选中元素）
+        // 4. 样式编辑面板（有选中元素）
         if (state.selectedElement) { this._clearSelection(); return; }
-        // 4. 配置列表面板
+        // 5. 配置列表面板
         const ov = this._components.overviewPanel;
         if (ov && !ov.hasAttribute('hidden')) { ov.close(); return; }
-        // 5. 工具条子面板（数据模拟 / 更多）
+        // 6. 工具条子面板（数据模拟 / 更多）
         const anySubpanel = this._shadow.querySelector('[data-subpanel].is-open');
         if (anySubpanel) { this._closeSubpanels(); return; }
-        // 6. 走查模式
+        // 7. 走查模式
         if (this._walkthroughMode) { this._setWalkthroughMode(false); return; }
+        // 8. 批注模式
+        if (this._annotationMode) { this._setAnnotationMode(false); return; }
       });
     }
 
@@ -4418,6 +4601,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           this._closeAllPanels();
           this._setWalkthroughMode(!this._walkthroughMode);
           break;
+        case 'annotation':
+          this._closeAllPanels();
+          this._setAnnotationMode(!this._annotationMode);
+          break;
         case 'datamock':
           this._toggleSubpanel('datamock');
           break;
@@ -4456,6 +4643,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
         this._components.overviewPanel.close();
       }
+      this._closeAnnotationBubble();
     }
 
     _updateSubpanelPosition() {
@@ -4505,6 +4693,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     _setWalkthroughMode(enabled) {
       this._walkthroughMode = enabled;
       if (enabled) {
+        this._setAnnotationMode(false);
         document.body.setAttribute('data-walkthrough-mode', 'true');
         this._bindTouchEvents();
       } else {
@@ -4513,6 +4702,211 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         this._clearSelection();
       }
       this._updateToolbarState();
+    }
+
+    // ── 批注模式 ──────────────────────────────────────────
+    _setAnnotationMode(enabled) {
+      this._annotationMode = enabled;
+      if (enabled) {
+        this._setWalkthroughMode(false);
+        document.body.setAttribute('data-annotation-mode', 'true');
+        this._bindAnnotationEvents();
+        this._components.annotationMarkerLayer.removeAttribute('hidden');
+        this._syncAnnotationMarkers();
+      } else {
+        document.body.removeAttribute('data-annotation-mode');
+        this._unbindAnnotationEvents();
+        this._components.annotationMarkerLayer.setAttribute('hidden', '');
+        this._closeAnnotationBubble();
+      }
+      this._updateToolbarState();
+    }
+
+    _bindAnnotationEvents() {
+      this._annotationPointerActive = false;
+      this._annotationStartX = 0;
+      this._annotationStartY = 0;
+      this._annotationIsSwiping = false;
+      document.addEventListener('pointerdown', this._onAnnotationPointerDown, true);
+      document.addEventListener('pointermove', this._onAnnotationPointerMove, true);
+      document.addEventListener('pointerup', this._onAnnotationPointerUp, true);
+      document.addEventListener('click', this._onAnnotationClickCapture, true);
+      window.addEventListener('scroll', this._onAnnotationScroll, true);
+      window.addEventListener('resize', this._onAnnotationScroll);
+    }
+
+    _unbindAnnotationEvents() {
+      document.removeEventListener('pointerdown', this._onAnnotationPointerDown, true);
+      document.removeEventListener('pointermove', this._onAnnotationPointerMove, true);
+      document.removeEventListener('pointerup', this._onAnnotationPointerUp, true);
+      document.removeEventListener('click', this._onAnnotationClickCapture, true);
+      window.removeEventListener('scroll', this._onAnnotationScroll, true);
+      window.removeEventListener('resize', this._onAnnotationScroll);
+    }
+
+    _onAnnotationPointerDown = (e) => {
+      if (e.button !== undefined && e.button !== 0) return;
+      if (isWalkthroughElement(e.target)) return;
+      // 点击批注标记本身，由标记的 click 事件处理
+      if (e.target.closest && e.target.closest('.annotation-marker')) return;
+      e.stopPropagation();
+      this._annotationPointerActive = true;
+      this._annotationStartX = e.clientX;
+      this._annotationStartY = e.clientY;
+      this._annotationIsSwiping = false;
+    };
+
+    _onAnnotationPointerMove = (e) => {
+      if (this._annotationPointerActive) {
+        const dx = Math.abs(e.clientX - this._annotationStartX);
+        const dy = Math.abs(e.clientY - this._annotationStartY);
+        if (dx > 10 || dy > 10) this._annotationIsSwiping = true;
+      }
+    };
+
+    _onAnnotationPointerUp = (e) => {
+      if (!this._annotationPointerActive) return;
+      this._annotationPointerActive = false;
+      if (this._annotationIsSwiping) return;
+      const el = document.elementFromPoint(e.clientX, e.clientY);
+      if (!el || el === document.body || el === document.documentElement) {
+        this._closeAnnotationBubble();
+        return;
+      }
+      if (isWalkthroughElement(el)) return;
+      if (e.cancelable) e.preventDefault();
+      this._openAnnotationForElement(el, e.clientX, e.clientY);
+    };
+
+    _onAnnotationClickCapture = (e) => {
+      if (this._annotationMode && !isWalkthroughElement(e.target)) {
+        e.stopPropagation();
+        e.preventDefault();
+      }
+    };
+
+    _onAnnotationScroll = () => {
+      this._syncAnnotationMarkers();
+      if (!this._components.annotationBubble.hasAttribute('hidden')) {
+        this._updateAnnotationBubblePosition();
+      }
+    };
+
+    _syncAnnotationMarkers() {
+      const layer = this._components.annotationMarkerLayer;
+      if (!layer || layer.hasAttribute('hidden')) return;
+      layer.innerHTML = '';
+      state.annotations.forEach((ann, idx) => {
+        try {
+          const el = document.querySelector(ann.selector);
+          if (!el || !el.isConnected) return;
+          const rect = el.getBoundingClientRect();
+          if (rect.width === 0 || rect.height === 0) return;
+          const marker = document.createElement('div');
+          marker.className = 'annotation-marker';
+          marker.dataset.annotationId = ann.id;
+          marker.style.left = Math.max(4, rect.left - 8) + 'px';
+          marker.style.top = Math.max(4, rect.top - 8) + 'px';
+          marker.innerHTML = ICONS.annotation;
+          marker.title = ann.text ? ann.text.slice(0, 30) : '批注';
+          marker.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this._openAnnotationBubble(ann, rect);
+          });
+          layer.appendChild(marker);
+        } catch (err) {}
+      });
+    }
+
+    _openAnnotationForElement(el, clickX, clickY) {
+      const selector = generateSelector(el);
+      const elementTag = el.tagName.toLowerCase();
+      const elementText = (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 50);
+      // 查找已有批注
+      let ann = state.annotations.find(a => a.selector === selector);
+      if (!ann) {
+        ann = {
+          id: 'ann-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+          selector: selector,
+          elementTag: elementTag,
+          elementText: elementText,
+          text: '',
+          timestamp: Date.now(),
+        };
+        state.annotations.push(ann);
+        this._saveChanges();
+      }
+      const rect = el.getBoundingClientRect();
+      this._openAnnotationBubble(ann, rect);
+      this._syncAnnotationMarkers();
+    }
+
+    _openAnnotationBubble(ann, rect) {
+      this._closeAnnotationBubble();
+      this._currentAnnotation = ann;
+      const bubble = this._components.annotationBubble;
+      const input = this._components.annotationInput;
+      const deleteBtn = this._components.annotationDelete;
+      input.value = ann.text || '';
+      deleteBtn.hidden = !ann.text;
+      bubble.removeAttribute('hidden');
+      this._annotationBubbleRect = rect;
+      this._updateAnnotationBubblePosition();
+      setTimeout(() => input.focus(), 50);
+    }
+
+    _updateAnnotationBubblePosition() {
+      const bubble = this._components.annotationBubble;
+      const rect = this._annotationBubbleRect;
+      if (!rect) return;
+      const bubbleWidth = 280;
+      const bubbleHeight = bubble.offsetHeight || 160;
+      const gap = 8;
+      // 优先显示在元素右侧
+      let left = rect.right + gap;
+      let top = rect.top;
+      // 右侧空间不够，显示在左侧
+      if (left + bubbleWidth > window.innerWidth - 8) {
+        left = rect.left - bubbleWidth - gap;
+      }
+      // 左侧也不够，显示在元素下方
+      if (left < 8) {
+        left = Math.max(8, rect.left);
+        top = rect.bottom + gap;
+      }
+      // 垂直方向不超出屏幕
+      if (top + bubbleHeight > window.innerHeight - 8) {
+        top = Math.max(8, window.innerHeight - bubbleHeight - 8);
+      }
+      if (top < 8) top = 8;
+      bubble.style.left = left + 'px';
+      bubble.style.top = top + 'px';
+    }
+
+    _closeAnnotationBubble() {
+      if (this._currentAnnotation) {
+        // 自动保存
+        const input = this._components.annotationInput;
+        if (input && this._currentAnnotation.text !== input.value) {
+          this._currentAnnotation.text = input.value;
+          this._currentAnnotation.timestamp = Date.now();
+          this._saveChanges();
+          this._syncAnnotationMarkers();
+        }
+        this._currentAnnotation = null;
+      }
+      this._components.annotationBubble.setAttribute('hidden', '');
+    }
+
+    _deleteCurrentAnnotation() {
+      if (!this._currentAnnotation) return;
+      const id = this._currentAnnotation.id;
+      state.annotations = state.annotations.filter(a => a.id !== id);
+      this._currentAnnotation = null;
+      this._components.annotationBubble.setAttribute('hidden', '');
+      this._saveChanges();
+      this._syncAnnotationMarkers();
+      this._showToast('已删除批注');
     }
 
     _bindTouchEvents() {
@@ -4669,7 +5063,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     _openOverview() {
       this._closeSubpanels();
       const countBtn = this._shadow.querySelector('[data-tool="overview"]');
-      this._components.overviewPanel.open(state.changes, state.currentRoute, countBtn);
+      this._components.overviewPanel.open(state.changes, state.currentRoute, countBtn, state.annotations);
       this._clearSelection();
     }
 
@@ -4724,7 +5118,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           this._saveChanges();
           this._updateChangeCount();
           if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
-            this._components.overviewPanel.refresh(state.changes, state.currentRoute);
+            this._components.overviewPanel.refresh(state.changes, state.currentRoute, state.annotations);
           }
         }
         return;
@@ -4753,7 +5147,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._saveChanges();
       this._updateChangeCount();
       if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
-        this._components.overviewPanel.refresh(state.changes, state.currentRoute);
+        this._components.overviewPanel.refresh(state.changes, state.currentRoute, state.annotations);
       }
     }
 
@@ -4776,22 +5170,25 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         state.changes = state.changes.filter(c => c.id !== id);
         this._saveChanges();
         this._updateChangeCount();
-        this._components.overviewPanel.refresh(state.changes, state.currentRoute);
+        this._components.overviewPanel.refresh(state.changes, state.currentRoute, state.annotations);
       }
     }
 
     _resetChanges() {
-      if (state.changes.length === 0) {
+      if (state.changes.length === 0 && state.annotations.length === 0) {
         this._showToast('当前没有修改');
         return;
       }
       state.changes.forEach(c => this._revertChange(c));
       state.changes = [];
+      state.annotations = [];
+      this._closeAnnotationBubble();
+      this._syncAnnotationMarkers();
       this._saveChanges();
       this._updateChangeCount();
       this._showToast('已重置所有修改');
       if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
-        this._components.overviewPanel.refresh(state.changes, state.currentRoute);
+        this._components.overviewPanel.refresh(state.changes, state.currentRoute, state.annotations);
       }
     }
 
@@ -4799,7 +5196,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       try {
         const key = `wego.walkthrough.data.${state.currentRoute}`;
         const raw = localStorage.getItem(key);
-        state.changes = raw ? (JSON.parse(raw).changes || []) : [];
+        const data = raw ? JSON.parse(raw) : {};
+        state.changes = data.changes || [];
+        state.annotations = data.annotations || [];
         // 同步持久化的伪元素变更到注入规则，刷新后保持生效
         state.changes.forEach(c => {
           if (c.target && c.property) {
@@ -4818,6 +5217,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           sceneRoute: state.currentRoute,
           lastModified: Date.now(),
           changes: state.changes,
+          annotations: state.annotations,
         }));
       } catch (e) {}
     }
@@ -4826,17 +5226,20 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const count = state.changes.length;
       if (this._components.countValue) this._components.countValue.textContent = count > 99 ? '99+' : count;
       // 收起态红点
-      const hasIndicator = count > 0 || this._walkthroughMode || this._faultState.load || this._faultState.save || this._faultState['delete'] || this._faultState.slow;
+      const hasIndicator = count > 0 || state.annotations.length > 0 || this._walkthroughMode || this._annotationMode || this._faultState.load || this._faultState.save || this._faultState['delete'] || this._faultState.slow;
       this._components.fabBtn.setAttribute('data-has-indicator', String(hasIndicator));
       // 走查模式按钮激活态
       const wtBtn = this._shadow.querySelector('[data-tool="walkthrough"]');
       if (wtBtn) wtBtn.setAttribute('data-active', String(this._walkthroughMode));
+      // 批注模式按钮激活态
+      const annBtn = this._shadow.querySelector('[data-tool="annotation"]');
+      if (annBtn) annBtn.setAttribute('data-active', String(this._annotationMode));
       // 数据模拟按钮激活态
       const dmBtn = this._shadow.querySelector('[data-tool="datamock"]');
       if (dmBtn) dmBtn.setAttribute('data-active', String(this._faultState.load || this._faultState.save || this._faultState['delete'] || this._faultState.slow));
       // 配置列表按钮变更标记
       const ovBtn = this._shadow.querySelector('[data-tool="overview"]');
-      if (ovBtn) ovBtn.setAttribute('data-has-changes', String(count > 0));
+      if (ovBtn) ovBtn.setAttribute('data-has-changes', String(count > 0 || state.annotations.length > 0));
     }
 
     _updateToolbarState() {
