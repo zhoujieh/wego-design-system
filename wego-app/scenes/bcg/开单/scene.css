@@ -7522,3 +7522,73 @@ body[data-order-layout="landscape"] .phone-indicator {
   overflow-y: auto;
   padding-bottom: var(--safe-area-bottom-content);
 }
+
+/* 竖屏平板（宽 ≥768px 且高 > 宽）：商品库默认折叠为抽屉，订单区保持全宽自适应 */
+@media (min-width: 768px) and (orientation: portrait) {
+  .order-tablet-drawer-mask {
+    position: absolute;
+    inset: 0;
+    z-index: var(--z-modal);
+    background: var(--bg-mask-light);
+  }
+
+  .order-tablet-drawer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: calc(var(--z-modal) + 1);
+    width: 50%;
+    min-width: 320px;
+    max-width: 560px;
+    overflow: visible;
+    border-left: var(--stroke-hairline) solid var(--border-neutral-l2);
+    box-shadow: var(--shadow-lg);
+    animation: order-tablet-drawer-in var(--duration-normal) var(--ease-standard);
+  }
+
+  @keyframes order-tablet-drawer-in {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
+  .order-tablet-drawer .order-desktop-catalog-toggle {
+    position: static;
+    width: auto;
+    min-height: var(--size-48);
+    padding: 0 var(--spacer-16);
+    line-height: var(--size-48);
+    white-space: nowrap;
+    writing-mode: horizontal-tb;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .order-tablet-drawer .order-desktop-catalog-toggle .btn__icon {
+    position: static;
+    transform: none;
+    writing-mode: horizontal-tb;
+  }
+
+  .order-desktop__lines {
+    min-width: 0;
+  }
+
+  .order-desktop__lines .order-note-bar__note {
+    width: 100%;
+  }
+
+  .order-desktop__table-head,
+  .order-desktop-product-row {
+    grid-template-columns: minmax(96px, 1.2fr) var(--size-48) minmax(76px, .9fr) minmax(60px, .65fr) 88px minmax(64px, .75fr) minmax(64px, .75fr) var(--size-32);
+    gap: var(--spacer-6);
+  }
+
+  .order-desktop__table-head {
+    min-width: 0;
+  }
+}
