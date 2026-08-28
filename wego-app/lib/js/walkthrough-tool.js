@@ -679,8 +679,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
   // ============================================================
   // wego-wt-highlight: 视口级固定高亮框（替代 outline，避免祖先 overflow 裁切）
-  // ============================================================
-  // wego-wt-highlight: 视口级固定高亮框（替代 outline，避免祖先 overflow 裁切）
   // 支持 hover（虚线预览）与 selected（实线+8手柄）双模式，对齐 Liaison 视觉
   // ============================================================
   class WegoWtHighlight extends HTMLElement {
@@ -874,7 +872,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const rgb = resolveCssValue(resolvedHex, 'color');
         const match = rgb && rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
         if (match) {
-          resolvedHex = '#' + [1, 2, 3].map(i => parseInt(match[i], 10).toString(16).padStart(2, '0')).join('');
+          resolvedHex = '#' + [1, 2, 3].map(i => parseInt(match[i], 10).toString(16).padStart(2, '0')).join('').toUpperCase();
         } else {
           resolvedHex = '#000000';
         }
@@ -3278,8 +3276,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           }
           return 'none';
         }
-        case 'width':
-        case 'height':
         case 'fontSize':
         case 'paddingLeft':
         case 'paddingRight':
@@ -3445,7 +3441,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           // Token 模式：直接应用 var(--xxx)，忽略 opacity
           if (isTok) {
             el.style.color = hex;
-            const computedAfter = getComputedStyle(el).color;
             return { property: 'color', oldValue, newValue: hex };
           }
           const opacity = this._data.colorOpacity ?? 100;
@@ -4889,7 +4884,14 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           marker.title = ann.text ? ann.text.slice(0, 30) : '批注';
           marker.addEventListener('click', (e) => {
             e.stopPropagation();
-            this._openAnnotationBubble(ann, rect);
+            // 点击时实时获取元素 rect，避免使用 _syncAnnotationMarkers 时缓存的过时坐标（滚动后位置已变）
+            try {
+              const el = document.querySelector(ann.selector);
+              const currentRect = el && el.isConnected ? el.getBoundingClientRect() : rect;
+              this._openAnnotationBubble(ann, currentRect);
+            } catch (err) {
+              this._openAnnotationBubble(ann, rect);
+            }
           });
           layer.appendChild(marker);
         } catch (err) {}
@@ -4939,7 +4941,17 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
     _updateAnnotationBubblePosition() {
       const bubble = this._components.annotationBubble;
-      const rect = this._annotationBubbleRect;
+      let rect = this._annotationBubbleRect;
+      // 滚动/resize 时根据当前批注的 selector 重新获取元素位置，避免使用打开时缓存的过时 rect
+      if (this._currentAnnotation) {
+        try {
+          const el = document.querySelector(this._currentAnnotation.selector);
+          if (el && el.isConnected) {
+            rect = el.getBoundingClientRect();
+            this._annotationBubbleRect = rect;
+          }
+        } catch (e) {}
+      }
       if (!rect) return;
       const bubbleWidth = 280;
       const bubbleHeight = bubble.offsetHeight || 160;
@@ -4967,15 +4979,21 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
     _closeAnnotationBubble() {
       if (this._currentAnnotation) {
-        // 自动保存
+        // 自动保存输入内容
         const input = this._components.annotationInput;
         if (input && this._currentAnnotation.text !== input.value) {
           this._currentAnnotation.text = input.value;
           this._currentAnnotation.timestamp = Date.now();
-          this._saveChanges();
-          this._syncAnnotationMarkers();
         }
+        const ann = this._currentAnnotation;
         this._currentAnnotation = null;
+        // 空批注清理：未输入内容的批注不保留标记和持久化数据，避免残留空标记
+        if (!ann.text || !ann.text.trim()) {
+          state.annotations = state.annotations.filter(a => a.id !== ann.id);
+        }
+        this._saveChanges();
+        this._syncAnnotationMarkers();
+        this._updateChangeCount();
       }
       this._components.annotationBubble.setAttribute('hidden', '');
     }
@@ -5102,6 +5120,17 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const cs = getComputedStyle(el);
         state.originalStyles[snapKey] = snapshotStyle(cs);
       }
+      // 为已渲染的伪元素建立原始样式快照（key 含 ::before/::after），
+      // 使伪元素样式改回原值时也能自动删除变更记录。
+      ['before', 'after'].forEach(pseudo => {
+        if (isPseudoRendered(el, pseudo)) {
+          const pKey = state.currentRoute + '::' + selector + '::' + pseudo;
+          if (!state.originalStyles[pKey]) {
+            const cs = getComputedStyle(el, '::' + pseudo);
+            state.originalStyles[pKey] = snapshotStyle(cs);
+          }
+        }
+      });
       bus.emit('element-selected', { element: el, selector, target: '' });
     }
 
@@ -5187,9 +5216,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
     // ── 变更记录 ──────────────────────────────────────────
     _recordChange(change) {
-      const snapKey = state.currentRoute + '::' + change.selector;
-      const original = state.originalStyles[snapKey];
       const isPseudo = !!change.target;
+      // 伪元素使用独立的 snapKey（含 ::before/::after），与 _selectElement 中建立的伪元素快照对应
+      const snapKey = isPseudo
+        ? state.currentRoute + '::' + change.selector + '::' + change.target
+        : state.currentRoute + '::' + change.selector;
+      const original = state.originalStyles[snapKey];
       const matchExisting = (c) => c.selector === change.selector && c.property === change.property && (c.target || '') === (change.target || '');
       // 改回原始值 = 净变更为零，删除该属性的变更记录（而非保留 X→X）
       if (original && change.property in original && change.newValue === original[change.property]) {
@@ -5281,10 +5313,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const data = raw ? JSON.parse(raw) : {};
         state.changes = data.changes || [];
         state.annotations = data.annotations || [];
-        // 同步持久化的伪元素变更到注入规则，刷新后保持生效
+        // 批量收集伪元素变更到 state.pseudoStyles，循环结束后统一重建一次，
+        // 避免 applyPseudoStyle 内部每次都 rebuildPseudoStyleElement 导致 N+1 次 DOM 操作。
         state.changes.forEach(c => {
-          if (c.target && c.property) {
-            applyPseudoStyle(c.selector, c.target, c.property, c.newValue || '');
+          if (c.target && c.property && c.newValue) {
+            const k = pseudoKey(c.selector, c.target);
+            if (!state.pseudoStyles[k]) state.pseudoStyles[k] = {};
+            state.pseudoStyles[k][c.property] = c.newValue;
           }
         });
         rebuildPseudoStyleElement();
