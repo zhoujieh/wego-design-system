@@ -7,6 +7,9 @@
 - 全程用中文沟通，与用户沟通用业务场景与需求语言，不展开实现层面的技术细节。
 - 每项任务只给出一个推荐方案，直接请用户确认；不列举多方案让用户选择。
 
+<!-- rule-id: experience-auto-sediment-on-signals -->
+- 遇到用户纠正、返工、踩坑时，按 wego-uxsystem-iterate 经验沉淀流程自动沉淀并告知用户；普通代码错误、需求临时变化、单次视觉微调、单场景特例不沉淀。
+
 <!-- rule-id: agent-must-read-host-code-before-asking -->
 - 接收任务后不立即执行：先结合宿主代码现状理清本次要修改的内容与范围，与用户确认（须得到明确肯定）后再开始；禁止未经确认需求细节就改代码。
 
@@ -20,9 +23,6 @@
 
 <!-- rule-id: agent-must-read-experience-before-task -->
 - 处理 wego 任务前，会话前置读取 `EXPERIENCE.md`，了解历史经验与踩坑教训。
-
-<!-- rule-id: experience-md-is-auto-generated -->
-- `EXPERIENCE.md` 是从经验库自动提炼的视图，**禁止手动编辑**；经验沉淀必须写入 `evidence.json`（事实事件）和 `candidates.json`（经验归纳），再运行 `node scripts/refine-experience.mjs` 自动生成；手动编辑会被下次提炼覆盖。
 
 ## 固定产物与边界
 
