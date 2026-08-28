@@ -2160,7 +2160,7 @@
       +         '<strong class="order-add-current-price">' + (desktop ? addProductPrice(unitPrice) : money(unitPrice)) + '</strong>'
       +         (desktop && draft.lastDiscountTipVisible ? '<div class="order-add-last-price">上次优惠价 ' + money(lastDiscountPrice) + '<button type="button" data-use-last-discount>使用</button></div>' : '')
       +         (desktop ? '<div class="order-add-product__operation-buttons">' : '')
-      +           '<button type="button" data-toggle-add-discount aria-expanded="' + String(Boolean(draft.discountOpen)) + '"><i class="wego-iconfont-s icon-youhui order-add-discount-icon" aria-hidden="true"></i>优惠</button>'
+      +           '<button type="button" data-toggle-add-discount><i class="wego-iconfont-s icon-youhui order-add-discount-icon" aria-hidden="true"></i>优惠</button>'
       +           '<button type="button" data-edit-add-product><i class="wego-iconfont-s icon-bianji16" aria-hidden="true"></i>编辑商品</button>'
       +           '<button type="button" data-add-purchase-history><i class="wego-iconfont-s icon-shijian" aria-hidden="true"></i>采购记录</button>'
       +         (desktop ? '</div>' : '')
@@ -2171,7 +2171,6 @@
       +     '<span class="order-add-price-option tag tag--28 ' + (draft.priceMode === 'cost' ? 'tag--brand tag--selected' : 'tag--white tag--normal') + '" data-component-slug="tag"><button type="button" class="order-add-cost-visibility" data-toggle-cost-price aria-label="' + (draft.costPriceVisible ? '隐藏拿货价' : '显示拿货价') + '"><i class="wego-iconfont-s ' + (draft.costPriceVisible ? 'icon-xianshi' : 'icon-yincang') + '" aria-hidden="true"></i></button><button type="button" class="order-add-price-select" data-add-price-mode="cost" aria-pressed="' + String(draft.priceMode === 'cost') + '"><span class="tag__label">拿货价 ' + (draft.costPriceVisible ? money(productCostPrice(product)) : '***') + '</span></button></span>'
       +     '<button type="button" class="tag tag--28 ' + (draft.priceMode !== 'cost' ? 'tag--brand tag--selected' : 'tag--white tag--normal') + '" data-component-slug="tag" data-add-price-mode="retail" aria-pressed="' + String(draft.priceMode !== 'cost') + '"><span class="tag__label">' + (draft.priceMode === 'discount' ? '优惠价 ' + money(unitPrice) : '售价 ' + money(customerPrice(product))) + '</span></button>'
       +   '</fieldset>'
-      +   (draft.discountOpen ? '<div class="order-add-discount-editor"><label for="order-add-discount-value">优惠后单价</label><input id="order-add-discount-value" type="text" inputmode="decimal" value="' + escapeHtml(draft.discountValue) + '" placeholder="请输入金额" data-add-discount-value><button type="button" data-apply-add-discount>应用</button></div>' : '')
       +   (desktop ? '' : '<div class="order-segment order-add-mode-switch"><button class="' + (draft.mode === 'single' ? 'is-active' : '') + '" data-add-mode="single">单买</button><button class="' + (draft.mode === 'batch' ? 'is-active' : '') + '" data-add-mode="batch">多买</button></div>')
       +   (draft.mode === 'batch' ? addBatchPicker(draft, desktop) : addSinglePicker(draft, desktop))
       +   '<div class="order-add-note-entry' + (draft.noteOpen ? ' is-active' : '') + (draft.note ? ' has-note' : '') + '">'
@@ -2753,8 +2752,6 @@
       lastDiscountPrice: productLastDiscountPrice(product),
       lastDiscountTipVisible: true,
       costPriceVisible: false,
-      discountOpen: false,
-      discountValue: '',
       skuQty: skuQty,
       singleRecord: {
         skuQty: copyAddSkuQty(product, skuQty),
@@ -3954,7 +3951,6 @@
     if (target.matches('[data-add-price-mode]') && state.addDraft) {
       state.addDraft.priceMode = target.dataset.addPriceMode;
       state.addDraft.unitPrice = state.addDraft.priceMode === 'cost' ? productCostPrice(state.addDraft.product) : customerPrice(state.addDraft.product);
-      state.addDraft.discountOpen = false;
       renderActive();
       return;
     }
@@ -3964,29 +3960,13 @@
       return;
     }
     if (target.matches('[data-toggle-add-discount]') && state.addDraft) {
-      state.addDraft.discountOpen = !state.addDraft.discountOpen;
-      if (state.addDraft.discountOpen && !state.addDraft.discountValue) state.addDraft.discountValue = String(state.addDraft.unitPrice);
-      renderActive();
+      ctx.toast('弹出优惠弹窗');
       return;
     }
     if (target.matches('[data-use-last-discount]') && state.addDraft) {
       state.addDraft.priceMode = 'discount';
       state.addDraft.unitPrice = Number(state.addDraft.lastDiscountPrice || 0);
-      state.addDraft.discountValue = String(state.addDraft.unitPrice);
-      state.addDraft.discountOpen = false;
       state.addDraft.lastDiscountTipVisible = false;
-      renderActive();
-      return;
-    }
-    if (target.matches('[data-apply-add-discount]') && state.addDraft) {
-      var discountPrice = Number(state.addDraft.discountValue);
-      if (!Number.isFinite(discountPrice) || discountPrice < 0) {
-        ctx.toast('请输入有效优惠价');
-        return;
-      }
-      state.addDraft.priceMode = 'discount';
-      state.addDraft.unitPrice = Math.round(discountPrice * 100) / 100;
-      state.addDraft.discountOpen = false;
       renderActive();
       return;
     }
@@ -4623,11 +4603,6 @@
     }
     if (target.matches('[data-order-note-buyer]')) {
       state.orderNoteBuyer = target.value;
-      return;
-    }
-    if (target.matches('[data-add-discount-value]') && state.addDraft) {
-      state.addDraft.discountValue = String(target.value || '').replace(/[^\d.]/g, '');
-      target.value = state.addDraft.discountValue;
       return;
     }
     if (target.matches('[data-split]') && state.paymentDraft) {
