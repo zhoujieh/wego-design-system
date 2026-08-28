@@ -4882,8 +4882,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           marker.style.top = Math.max(4, rect.top - 8) + 'px';
           marker.innerHTML = ICONS.annotation;
           marker.title = ann.text ? ann.text.slice(0, 30) : '批注';
-          marker.addEventListener('click', (e) => {
+          // 使用 pointerdown 而非 click：移动端浏览器要求 focus() 必须在触摸的直接回调中调用才能拉起键盘，
+          // click 是移动端合成事件（touchstart→touchend→click），链路太长可能被判定为非直接交互。
+          marker.addEventListener('pointerdown', (e) => {
             e.stopPropagation();
+            e.preventDefault();
             // 点击时实时获取元素 rect，避免使用 _syncAnnotationMarkers 时缓存的过时坐标（滚动后位置已变）
             try {
               const el = document.querySelector(ann.selector);
@@ -4935,6 +4938,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._updateAnnotationBubblePosition();
       // 同步聚焦输入框：移动端浏览器要求 focus() 必须在用户交互的同步回调中调用才能拉起键盘，
       // 不能放在 setTimeout 异步回调中（会被判定为非用户直接触发，键盘不弹出）。
+      // 先 click() 再 focus()：部分移动端浏览器需要 click 事件激活输入框才弹出软键盘。
+      input.click();
       input.focus();
       // 光标定位到内容末尾，直接进入输入状态（不全选已有内容）
       const len = input.value.length;
