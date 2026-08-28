@@ -345,7 +345,18 @@
     if (!selection) return false;
     if (selection.type === 'all') return true;
     if (selection.type === 'row') return selection.value === size;
-    return selection.type === 'column' && selection.value === color;
+    if (selection.type === 'column') return selection.value === color;
+    return selection.type === 'cell' && selection.color === color && selection.size === size;
+  }
+
+  function batchSelectionCellClasses(selection, color, size, colorIndex, sizeIndex, colorCount, sizeCount) {
+    if (!batchSelectionMatches(selection, color, size)) return '';
+    var classes = ['is-selected'];
+    if (selection.type === 'cell' || selection.type === 'row' || sizeIndex === 0) classes.push('is-range-top');
+    if (selection.type === 'cell' || selection.type === 'row' || sizeIndex === sizeCount - 1) classes.push('is-range-bottom');
+    if (selection.type === 'cell' || selection.type === 'column' || colorIndex === 0) classes.push('is-range-left');
+    if (selection.type === 'cell' || selection.type === 'column' || colorIndex === colorCount - 1) classes.push('is-range-right');
+    return classes.join(' ');
   }
 
   function focusBatchSelection(root, selection) {
@@ -355,7 +366,9 @@
       ? '[data-batch-qty]'
       : selection.type === 'row'
         ? '[data-batch-row="' + CSS.escape(selection.value) + '"] [data-batch-qty]'
-        : '[data-batch-column="' + CSS.escape(selection.value) + '"][data-batch-qty]';
+        : selection.type === 'column'
+          ? '[data-batch-column="' + CSS.escape(selection.value) + '"][data-batch-qty]'
+          : '[data-batch-qty="' + CSS.escape(encodeURIComponent(selection.value)) + '"]';
     var input = scope.querySelector(selector);
     if (!input) return;
     input.focus({ preventScroll: true });
@@ -2067,16 +2080,20 @@
     return ''
       + '<div class="order-batch-picker' + (showInventory ? ' order-batch-picker--with-inventory' : '') + '">'
       +   (desktop ? '<div class="order-add-selection-head">' + quickTools + '<label class="order-add-batch-switch-label"><span>一次买多件</span><button type="button" class="switch switch--on" role="switch" aria-checked="true" aria-label="一次买多件" data-component-slug="switch" data-add-mode="single"><span class="switch__thumb"></span></button></label></div>' : quickTools)
-      +   '<div class="order-batch-matrix-wrap"><table class="order-batch-matrix"><thead><tr><th class="order-batch-corner' + (selection && selection.type === 'all' ? ' is-selected' : '') + '"><button type="button" data-batch-select-all aria-label="选择全部规格"><span class="order-batch-corner-mark" aria-hidden="true"></span></button></th>' + matrix.colors.map(function (color) { return '<th class="' + (selection && selection.type === 'column' && selection.value === color ? 'is-selected' : '') + '"><button type="button" data-batch-select-column="' + encodeURIComponent(color) + '">' + escapeHtml(color) + '</button></th>'; }).join('') + '</tr></thead><tbody>'
+      +   '<div class="order-batch-matrix-wrap"><table class="order-batch-matrix"><thead><tr><th class="order-batch-corner"><button type="button" data-batch-select-all aria-label="选择全部规格"><span class="order-batch-corner-mark" aria-hidden="true"></span></button></th>' + matrix.colors.map(function (color) {
+            var colorSelected = selection && (selection.type === 'all' || selection.type === 'row' || (selection.type === 'column' && selection.value === color) || (selection.type === 'cell' && selection.color === color));
+            return '<th class="' + (colorSelected ? 'is-selected' : '') + '"><button type="button" data-batch-select-column="' + encodeURIComponent(color) + '">' + escapeHtml(color) + '</button></th>';
+          }).join('') + '</tr></thead><tbody>'
       +     matrix.sizes.map(function (size) {
-              var cells = matrix.colors.map(function (color) {
+              var cells = matrix.colors.map(function (color, colorIndex) {
                 var spec = specKey(product, color, size);
                 var stock = specStock(product, spec);
                 var qty = Number(draft.skuQty[spec] || 0);
-                var selected = batchSelectionMatches(selection, color, size);
-                return '<td class="' + (selected ? 'is-selected' : '') + '">' + (spec ? '<div class="number-input number-input--surface-white" data-component-slug="input"><input class="number-input__field" type="text" inputmode="numeric" maxlength="5" value="' + (qty === 0 ? '' : qty) + '" data-batch-qty="' + encodeURIComponent(spec) + '" data-batch-column="' + escapeHtml(color) + '" aria-label="' + escapeHtml(color + ' ' + size) + '数量"></div>' : '<span class="order-batch-unavailable">—</span>') + (showInventory ? '<small>库存' + (spec && stock > 0 ? stock : '--') + '</small>' : '') + '</td>';
+                var cellClasses = batchSelectionCellClasses(selection, color, size, colorIndex, matrix.sizes.indexOf(size), matrix.colors.length, matrix.sizes.length);
+                return '<td class="' + cellClasses + '">' + (spec ? '<div class="number-input number-input--surface-white" data-component-slug="input"><input class="number-input__field" type="text" inputmode="numeric" maxlength="5" value="' + (qty === 0 ? '' : qty) + '" data-batch-qty="' + encodeURIComponent(spec) + '" data-batch-column="' + escapeHtml(color) + '" aria-label="' + escapeHtml(color + ' ' + size) + '数量"></div>' : '<span class="order-batch-unavailable">—</span>') + (showInventory ? '<small>库存' + (spec && stock > 0 ? stock : '--') + '</small>' : '') + '</td>';
               }).join('');
-              return '<tr data-batch-row="' + escapeHtml(size) + '"><th class="' + (selection && selection.type === 'row' && selection.value === size ? 'is-selected' : '') + '"><button type="button" data-batch-select-row="' + encodeURIComponent(size) + '">' + escapeHtml(size) + '</button></th>' + cells + '</tr>';
+              var sizeSelected = selection && (selection.type === 'all' || selection.type === 'column' || (selection.type === 'row' && selection.value === size) || (selection.type === 'cell' && selection.size === size));
+              return '<tr data-batch-row="' + escapeHtml(size) + '"><th class="' + (sizeSelected ? 'is-selected' : '') + '"><button type="button" data-batch-select-row="' + encodeURIComponent(size) + '">' + escapeHtml(size) + '</button></th>' + cells + '</tr>';
             }).join('')
       +   '</tbody></table></div>'
       + '</div>';
@@ -3952,9 +3969,8 @@
     if (target.matches('[data-batch-fill]')) {
       var batchFill = Number(target.dataset.batchFill);
       state.addDraft.product.specs.forEach(function (spec) { state.addDraft.skuQty[spec] = Math.min(batchQuantityLimit(state.addDraft.product, spec), batchFill); });
-      state.addDraft.batchSelection = { type: 'all', value: '' };
+      state.addDraft.batchSelection = null;
       renderActive();
-      window.requestAnimationFrame(function () { focusBatchSelection(activeContext.root, state.addDraft && state.addDraft.batchSelection); });
       return;
     }
     if (target.matches('[data-batch-select-row], [data-batch-select-column], [data-batch-select-all]')) {
@@ -4617,6 +4633,18 @@
       openOrderRowContextMenu(Number(row.dataset.rowSelect), row.dataset.rowSpec ? decodeURIComponent(row.dataset.rowSpec) : '', x, y);
     });
     root.addEventListener('click', function (event) {
+      var clickedBatchInput = event.target.closest('[data-batch-qty]');
+      if (clickedBatchInput && state.addDraft && state.addDraft.mode === 'batch') {
+        var selectedBatchSpec = decodeURIComponent(clickedBatchInput.dataset.batchQty);
+        var currentBatchSelection = state.addDraft.batchSelection;
+        if (!currentBatchSelection || currentBatchSelection.type !== 'cell' || currentBatchSelection.value !== selectedBatchSpec) {
+          var selectedBatchPair = splitSpec(selectedBatchSpec);
+          state.addDraft.batchSelection = { type: 'cell', value: selectedBatchSpec, color: selectedBatchPair.color, size: selectedBatchPair.size };
+          renderActive();
+          window.requestAnimationFrame(function () { focusBatchSelection(activeContext.root, state.addDraft && state.addDraft.batchSelection); });
+        }
+        return;
+      }
       var shouldCloseCustomerPopover = isDesktopWorkbench()
         && state.panel === 'customer'
         && !event.target.closest('.order-desktop-customer-anchor');
@@ -4649,6 +4677,10 @@
       var shouldCloseDisplayModeMenu = isDesktopWorkbench()
         && state.displayModeMenuOpen
         && !event.target.closest('[data-toggle-display-menu], .order-display-mode-menu');
+      var shouldClearBatchSelection = state.addDraft
+        && state.addDraft.mode === 'batch'
+        && state.addDraft.batchSelection
+        && !event.target.closest('.order-batch-matrix');
       handleClick(event, root, ctx);
       if (shouldCloseCustomerPopover && state.panel === 'customer') {
         closeDesktopCustomerPopover();
@@ -4679,6 +4711,10 @@
       } else if (shouldCloseDisplayModeMenu && state.displayModeMenuOpen) {
         state.displayModeMenuOpen = false;
         renderDesktopOrderPreservingScroll(root);
+      }
+      if (shouldClearBatchSelection && state.addDraft && state.addDraft.batchSelection) {
+        state.addDraft.batchSelection = null;
+        renderActive();
       }
     });
     root.addEventListener('input', function (event) { handleInput(event, root, ctx); });

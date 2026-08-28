@@ -1672,9 +1672,39 @@ body[data-order-layout="landscape"] .phone-indicator {
   color: var(--text-disabled);
 }
 
-.order-batch-matrix th.is-selected,
+.order-batch-matrix th.is-selected {
+  background: var(--bg-active);
+}
+
 .order-batch-matrix td.is-selected {
-  background: var(--bg-brand-surface-l1);
+  position: relative;
+  background: var(--bg-surface);
+}
+
+.order-batch-matrix td.is-selected::after {
+  position: absolute;
+  inset: calc(var(--stroke-1) * -1);
+  z-index: 2;
+  box-sizing: border-box;
+  pointer-events: none;
+  content: '';
+  border: 0 solid var(--border-brand);
+}
+
+.order-batch-matrix td.is-range-top::after {
+  border-top-width: var(--stroke-1);
+}
+
+.order-batch-matrix td.is-range-right::after {
+  border-right-width: var(--stroke-1);
+}
+
+.order-batch-matrix td.is-range-bottom::after {
+  border-bottom-width: var(--stroke-1);
+}
+
+.order-batch-matrix td.is-range-left::after {
+  border-left-width: var(--stroke-1);
 }
 
 .order-batch-corner button {
