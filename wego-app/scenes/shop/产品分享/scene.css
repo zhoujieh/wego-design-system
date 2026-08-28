@@ -378,8 +378,18 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   灰度弹窗
+   灰度弹窗（基于 modal fullscreen 变体覆盖为居中淡入弹窗）
    ═══════════════════════════════════════════════════════════════ */
+/* 居中布局（覆盖 modal 默认的底部对齐） */
+.gray-popup-modal {
+  align-items: center;
+}
+/* 恢复蒙层（fullscreen 变体默认 ::before 为 display:none） */
+.gray-popup-modal::before {
+  display: block;
+  background: var(--bg-mask-light, rgba(0, 0, 0, 0.5));
+}
+/* 面板：覆盖 fullscreen 的全屏样式为居中卡片，动画改为 scale+opacity 淡入 */
 .gray-popup-modal .modal__panel.gray-popup__panel {
   width: 268px;
   max-width: 80vw;
@@ -392,12 +402,22 @@
   margin: auto;
   display: block;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --modal-panel-width: 268px;
+  max-width: none;
+  transform: scale(1);
+  opacity: 1;
+  transition: transform 0.25s ease-out, opacity 0.25s ease-out;
+}
+.gray-popup-modal[data-state="closed"] .modal__panel.gray-popup__panel {
+  transform: scale(0.95);
+  opacity: 0;
+  transition: transform 0.25s ease-in, opacity 0.25s ease-in;
 }
 
 .gray-popup__header {
   position: relative;
   height: 130px;
-  background: url('assets/update.png') center/cover no-repeat;
+  background: url('assets/update.png') center -30px / cover no-repeat;
 }
 
 .gray-popup__body {
