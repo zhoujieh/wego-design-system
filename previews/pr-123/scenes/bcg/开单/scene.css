@@ -1560,7 +1560,34 @@ body[data-order-layout="landscape"] .phone-indicator {
 .order-batch-picker {
   display: flex;
   flex-direction: column;
+  gap: var(--spacer-8);
+}
+
+.order-add-batch-switch-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacer-8);
+  color: var(--text-default);
+  font-size: var(--body-md-font-size);
+  cursor: pointer;
+}
+
+.order-batch-tools {
+  min-height: var(--size-32);
+  align-items: center;
   gap: var(--spacer-12);
+}
+
+.order-batch-tools .link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacer-2);
+}
+
+.order-batch-tools .link i {
+  color: var(--icon-disabled);
+  font-size: var(--body-md-font-size);
+  transform: scaleY(-1);
 }
 
 .order-batch-matrix-wrap {
@@ -1573,15 +1600,19 @@ body[data-order-layout="landscape"] .phone-indicator {
   width: 100%;
   min-width: calc(var(--size-104) * 4);
   border-collapse: collapse;
+  table-layout: fixed;
   text-align: center;
 }
 
 .order-batch-matrix th,
 .order-batch-matrix td {
-  min-width: var(--size-64);
-  padding: var(--spacer-8);
+  min-width: 0;
+  height: var(--size-40);
+  padding: var(--spacer-4) var(--spacer-8);
   border-right: var(--stroke-hairline) solid var(--border-neutral-l2);
   border-bottom: var(--stroke-hairline) solid var(--border-neutral-l2);
+  box-sizing: border-box;
+  transition: background-color var(--duration-fast) var(--ease-standard);
 }
 
 .order-batch-matrix tr > :last-child {
@@ -1589,13 +1620,20 @@ body[data-order-layout="landscape"] .phone-indicator {
 }
 
 .order-batch-matrix th {
-  color: var(--text-secondary);
+  color: var(--text-default);
   font-weight: var(--font-weight-medium);
   background: var(--bg-subtle);
 }
 
+.order-batch-matrix tr > :first-child {
+  width: calc(var(--size-64) + var(--spacer-2));
+  min-width: calc(var(--size-64) + var(--spacer-2));
+  max-width: calc(var(--size-64) + var(--spacer-2));
+}
+
 .order-batch-matrix th button {
   width: 100%;
+  height: 100%;
   padding: 0;
   color: inherit;
   font: inherit;
@@ -1603,20 +1641,24 @@ body[data-order-layout="landscape"] .phone-indicator {
   border: 0;
 }
 
-.order-batch-matrix td input {
-  width: var(--size-48);
+.order-batch-matrix td .number-input {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
   height: var(--size-32);
-  color: var(--text-default);
-  font: inherit;
-  text-align: center;
-  background: var(--bg-surface);
-  border: var(--stroke-hairline) solid var(--border-neutral-l2);
-  border-radius: var(--radius-4);
+  min-height: var(--size-32);
+  margin: 0 auto;
+  padding: var(--spacer-4);
+  border-color: transparent;
 }
 
-.order-batch-matrix td input:focus {
-  border-color: var(--border-brand);
-  outline: 0;
+.order-batch-picker--with-inventory .order-batch-matrix td .number-input {
+  border-color: var(--border-neutral-l2);
+}
+
+.order-batch-matrix td .number-input__field {
+  font-size: var(--body-md-font-size);
+  font-weight: var(--font-weight-regular);
 }
 
 .order-batch-matrix td small {
@@ -1628,6 +1670,25 @@ body[data-order-layout="landscape"] .phone-indicator {
 
 .order-batch-unavailable {
   color: var(--text-disabled);
+}
+
+.order-batch-matrix th.is-selected,
+.order-batch-matrix td.is-selected {
+  background: var(--bg-brand-surface-l1);
+}
+
+.order-batch-corner button {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: var(--spacer-4);
+}
+
+.order-batch-corner-mark {
+  width: var(--size-12);
+  height: var(--size-12);
+  background: var(--border-control);
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
 }
 
 .order-batch-hint {
@@ -2357,6 +2418,7 @@ body[data-order-layout="landscape"] .phone-indicator {
   }
 
   .order-desktop-modal--add .order-add-product__actions {
+    position: relative;
     align-items: flex-start;
     flex-direction: column;
     gap: var(--spacer-4);
@@ -2370,8 +2432,10 @@ body[data-order-layout="landscape"] .phone-indicator {
   }
 
   .order-desktop-modal--add .order-add-last-price {
-    position: static;
-    align-self: flex-start;
+    position: absolute;
+    top: calc(var(--spacer-4) * -1);
+    bottom: auto;
+    left: calc(var(--size-56) + var(--spacer-4));
   }
 
   .order-desktop-modal--add .order-add-scroll {
@@ -2539,6 +2603,10 @@ body[data-order-layout="landscape"] .phone-indicator {
     overflow-wrap: anywhere;
     text-align: left;
     white-space: normal;
+  }
+
+  .order-desktop-modal--add .order-add-note-entry:not(.has-note) .link {
+    color: var(--text-link);
   }
 
   .order-desktop-modal--add .order-add-note-entry .link i {
