@@ -118,21 +118,6 @@ function validate() {
     }
   }
 
-  // 检查经验数据中引用的 rule-id
-  const candidatePath = path.join(root, '.codex/skills/wego-uxsystem-iterate/experience/candidates.json');
-  if (fs.existsSync(candidatePath)) {
-    try {
-      const doc = JSON.parse(fs.readFileSync(candidatePath, 'utf8'));
-      for (const candidate of doc.candidates || []) {
-        if (candidate.relatedRuleId && !allRuleIds.has(candidate.relatedRuleId)) {
-          warnings.push({ code: 'doc-drift.experience-rule-id-missing', file: 'candidates.json', message: `经验 ${candidate.id} 引用的 rule-id 未找到：${candidate.relatedRuleId}` });
-        }
-      }
-    } catch (e) {
-      // 忽略解析错误，由 experience 验证脚本处理
-    }
-  }
-
   return {
     errors,
     warnings,

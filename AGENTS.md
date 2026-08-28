@@ -21,8 +21,8 @@
 <!-- rule-id: agent-must-read-experience-before-task -->
 - 处理 wego 任务前，会话前置读取 `EXPERIENCE.md`，了解历史经验与踩坑教训。
 
-<!-- rule-id: experience-md-is-auto-generated -->
-- `EXPERIENCE.md` 是从经验库自动提炼的视图，**禁止手动编辑**；经验沉淀必须写入 `evidence.json`（事实事件）和 `candidates.json`（经验归纳），再运行 `node scripts/refine-experience.mjs` 自动生成；手动编辑会被下次提炼覆盖。
+<!-- rule-id: experience-is-ai-curated -->
+- `EXPERIENCE.md` 由 `wego-uxsystem-iterate` 技能内的 AI 基于 `evidence.json` 事实推理维护，用 `§` 分隔多条自然语言经验；每条经验必须追溯到 `evidence.json` 中的事实事件，表述不得与事实矛盾；禁止脚本机械化生成内容。`node scripts/refine-experience.mjs` 仅做事实一致性校验和格式检查，不生成内容。
 
 ## 固定产物与边界
 
