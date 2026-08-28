@@ -282,16 +282,21 @@
   /* 灰度弹窗 */
   function grayPopupTemplate(type) {
     var isForced = type === 'forced';
-    return '<div class="gray-popup" role="dialog" aria-modal="true">'
-      + '<div class="gray-popup__panel">'
-      + '<div class="gray-popup__icon"><i class="wego-iconfont-s icon-gengxin" aria-hidden="true"></i></div>'
-      + '<div class="gray-popup__title">发现新版本</div>'
-      + '<div class="gray-popup__desc">相册云分享能力升级，支持更多平台一键分享</div>'
-      + '<div class="gray-popup__actions">'
-      + '<button type="button" class="btn btn--strong btn--md gray-popup__confirm" data-action="gray-confirm">立即体验</button>'
-      + (isForced ? '' : '<button type="button" class="btn btn--weak btn--md gray-popup__later" data-action="gray-later">近期不再提醒</button>')
+    return '<div class="modal modal--fullscreen gray-popup-modal" data-component-slug="modal" data-state="open" role="dialog" aria-modal="true" aria-label="发现新版本">'
+      + '<div class="modal__panel gray-popup__panel">'
+      + '<div class="gray-popup__header"></div>'
+      + '<div class="gray-popup__body">'
+      + '<ol class="gray-popup__list">'
+      + '<li>浏览相册更流畅，无需等待体验更好</li>'
+      + '<li>动态顶部显示上新好友，方便看款转图</li>'
+      + '<li>可开启微商相册输入法，和客户边聊天边推款</li>'
+      + '<li>修复已知问题</li>'
+      + '</ol>'
       + '</div>'
-      + (isForced ? '' : '<button type="button" class="gray-popup__close" data-action="gray-close" aria-label="关闭"><i class="wego-iconfont-s icon-guanbi" aria-hidden="true"></i></button>')
+      + '<div class="gray-popup__actions">'
+      + '<button type="button" class="gray-popup__confirm" data-action="gray-confirm">立即体验</button>'
+      + (isForced ? '' : '<button type="button" class="gray-popup__later" data-action="gray-later">近期不再提醒</button>')
+      + '</div>'
       + '</div>'
       + '</div>';
   }
@@ -563,13 +568,12 @@
     if (!shouldShowGrayPopup(type)) return;
     markGrayPopupShown(type);
 
-    ctx.openSheet(grayPopupTemplate(type), {
+    ctx.openFullScreenModal(grayPopupTemplate(type), {
       label: '灰度升级',
-      init: function (sheetCtx) {
-        var root = sheetCtx.root;
+      init: function (overlayCtx) {
+        var root = overlayCtx.root;
         var confirmBtn = root.querySelector('[data-action="gray-confirm"]');
         var laterBtn = root.querySelector('[data-action="gray-later"]');
-        var closeBtn = root.querySelector('[data-action="gray-close"]');
 
         if (confirmBtn) {
           confirmBtn.addEventListener('click', function () {
@@ -582,9 +586,10 @@
             ctx.closeOverlay();
           });
         }
-        if (closeBtn) {
-          closeBtn.addEventListener('click', function () {
-            ctx.closeOverlay();
+        /* 点击遮罩关闭（仅可关闭型） */
+        if (type !== 'forced') {
+          root.addEventListener('click', function (e) {
+            if (e.target === root) ctx.closeOverlay();
           });
         }
       }
