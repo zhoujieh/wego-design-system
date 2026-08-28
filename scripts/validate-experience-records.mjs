@@ -11,17 +11,11 @@ const testing = args.includes('test');
 const candidatePath = '.codex/skills/wego-uxsystem-iterate/experience/candidates.json';
 const evidencePath = '.codex/skills/wego-uxsystem-iterate/experience/evidence.json';
 
-const categoryTypes = {
-  requirement: new Set(['requirement-gap', 'business-rule-conflict', 'scenario-boundary-gap']),
-  design: new Set(['design-principle-gap', 'page-architecture-issue', 'page-pattern-gap', 'interaction-pattern-gap', 'visual-hierarchy-issue']),
-  system: new Set(['component-gap', 'component-variant-gap', 'component-state-gap', 'token-gap', 'asset-gap', 'copy-pattern-gap']),
-  execution: new Set(['rule-execution-failure', 'workflow-gap', 'ownership-drift', 'sync-gap']),
-  validation: new Set(['preview-gap', 'guard-gap', 'guard-false-positive', 'guard-false-negative', 'validation-coverage-gap']),
-  governance: new Set(['duplicate-rule', 'rule-conflict', 'overgeneralized-rule', 'obsolete-rule', 'non-executable-rule', 'insufficient-evidence', 'scene-exception'])
-};
+const classes = new Set(['workflow-lesson', 'design-knowledge']);
 const ownerSkills = new Set(['wego-product', 'wego-design', 'wego-uxsystem-iterate']);
-const statuses = new Set(['observing', 'proposed', 'upgraded']);
-const proposalReasons = new Set(['threshold', 'explicit-upgrade', 'post-upgrade-recurrence']);
+const statuses = new Set(['observing', 'proposed', 'upgraded', 'stale', 'obsolete']);
+const sources = new Set(['user-correction', 'rework', 'ci-failure', 'guard-block', 'acceptance-rejection', 'user-preference']);
+const proposalReasons = new Set(['explicit-upgrade', 'post-upgrade-recurrence']);
 
 function isNonEmptyString(value) {
   return typeof value === 'string' && value.trim().length > 0;
@@ -67,8 +61,8 @@ function validate(root) {
   const evidenceDoc = readJson(root, evidencePath, errors);
   if (!candidatesDoc || !evidenceDoc) return { errors, warnings, metrics: {} };
 
-  if (candidatesDoc.schemaVersion !== 2) errors.push(`${candidatePath}.schemaVersion 必须为 2`);
-  if (evidenceDoc.schemaVersion !== 1) errors.push(`${evidencePath}.schemaVersion 必须为 1`);
+  if (candidatesDoc.schemaVersion !== 3) errors.push(`${candidatePath}.schemaVersion 必须为 3`);
+  if (evidenceDoc.schemaVersion !== 2) errors.push(`${evidencePath}.schemaVersion 必须为 2`);
   if (!Array.isArray(candidatesDoc.candidates)) errors.push(`${candidatePath}.candidates 必须是数组`);
   if (!Array.isArray(evidenceDoc.events)) errors.push(`${evidencePath}.events 必须是数组`);
   if (errors.length) return { errors, warnings, metrics: {} };
@@ -82,18 +76,16 @@ function validate(root) {
     }
     if (eventsById.has(event.id)) errors.push(`重复事实事件 id：${event.id}`);
     eventsById.set(event.id, event);
-    if (!isNonEmptyString(event.experienceId)) errors.push(`${label}.experienceId 不能为空`);
-    if (!parseDate(event.occurredAt)) errors.push(`${label}.occurredAt 不是有效日期`);
-    if (!isNonEmptyString(event.taskRef)) errors.push(`${label}.taskRef 不能为空`);
-    if (!Array.isArray(event.scenes)) errors.push(`${label}.scenes 必须是数组`);
-    if (!isNonEmptyString(event.fact)) errors.push(`${label}.fact 不能为空`);
-    if (!Array.isArray(event.evidence) || !event.evidence.length || event.evidence.some(item => !isNonEmptyString(item))) {
-      errors.push(`${label}.evidence 必须是非空字符串数组`);
+    if (!parseDate(event.date)) errors.push(`${label}.date 不是有效日期`);
+    if (!isNonEmptyString(event.summary)) errors.push(`${label}.summary 不能为空`);
+    if (!sources.has(event.source)) errors.push(`${label}.source 无效：${event.source}`);
+    if (event.scene != null && !isNonEmptyString(event.scene)) errors.push(`${label}.scene 必须为字符串或省略`);
+    if (!Array.isArray(event.tags) || event.tags.some(item => !isNonEmptyString(item))) {
+      errors.push(`${label}.tags 必须是字符串数组`);
     }
   }
 
   const candidatesById = new Map();
-  const normalizedKeys = new Map();
   const referencedEvents = new Map();
 
   for (const candidate of candidatesDoc.candidates) {
@@ -105,34 +97,27 @@ function validate(root) {
     if (candidatesById.has(candidate.id)) errors.push(`重复经验 id：${candidate.id}`);
     candidatesById.set(candidate.id, candidate);
 
-    if (!isNonEmptyString(candidate.normalizedKey)) errors.push(`${label}.normalizedKey 不能为空`);
-    else if (normalizedKeys.has(candidate.normalizedKey)) errors.push(`重复 normalizedKey：${candidate.normalizedKey}`);
-    else normalizedKeys.set(candidate.normalizedKey, candidate.id);
-
-    if (!categoryTypes[candidate.category]) errors.push(`${label}.category 无效：${candidate.category}`);
-    else if (!categoryTypes[candidate.category].has(candidate.type)) {
-      errors.push(`${label}.type ${candidate.type} 不属于 category ${candidate.category}`);
-    }
+    if (!classes.has(candidate.class)) errors.push(`${label}.class 无效：${candidate.class}`);
     if (!ownerSkills.has(candidate.ownerSkill)) errors.push(`${label}.ownerSkill 无效：${candidate.ownerSkill}`);
-    for (const field of ['problem', 'rootCause', 'resolution']) {
+    for (const field of ['title', 'lesson', 'action']) {
       if (!isNonEmptyString(candidate[field])) errors.push(`${label}.${field} 不能为空`);
     }
-    if (candidate.type === 'rule-execution-failure' && !isNonEmptyString(candidate.relatedRuleId)) {
-      errors.push(`${label}.relatedRuleId：rule-execution-failure 必须关联已有 rule-id`);
-    }
-    if (candidate.relatedRuleId != null && !isNonEmptyString(candidate.relatedRuleId)) {
-      errors.push(`${label}.relatedRuleId 必须为字符串或 null`);
+    if (!statuses.has(candidate.status)) errors.push(`${label}.status 无效：${candidate.status}`);
+
+    if (candidate.status === 'proposed') {
+      if (!proposalReasons.has(candidate.proposalReason)) errors.push(`${label}.proposalReason 无效`);
+    } else if (candidate.proposalReason != null) {
+      errors.push(`${label}.proposalReason 仅能在 proposed 状态使用`);
     }
 
-    if (!Array.isArray(candidate.evidenceRefs) || !candidate.evidenceRefs.length) {
-      errors.push(`${label}.evidenceRefs 必须是非空数组`);
+    if (!Array.isArray(candidate.evidenceIds) || !candidate.evidenceIds.length) {
+      errors.push(`${label}.evidenceIds 必须是非空数组`);
     } else {
-      const uniqueRefs = new Set(candidate.evidenceRefs);
-      if (uniqueRefs.size !== candidate.evidenceRefs.length) errors.push(`${label}.evidenceRefs 存在重复`);
-      for (const ref of candidate.evidenceRefs) {
+      const uniqueIds = new Set(candidate.evidenceIds);
+      if (uniqueIds.size !== candidate.evidenceIds.length) errors.push(`${label}.evidenceIds 存在重复`);
+      for (const ref of candidate.evidenceIds) {
         const event = eventsById.get(ref);
-        if (!event) errors.push(`${label}.evidenceRefs 引用了不存在的事件：${ref}`);
-        else if (event.experienceId !== candidate.id) errors.push(`${label} 与事件 ${ref} 的 experienceId 不一致`);
+        if (!event) errors.push(`${label}.evidenceIds 引用了不存在的事件：${ref}`);
         if (referencedEvents.has(ref) && referencedEvents.get(ref) !== candidate.id) {
           errors.push(`事实事件 ${ref} 被多个经验引用`);
         } else referencedEvents.set(ref, candidate.id);
@@ -141,25 +126,21 @@ function validate(root) {
 
     if (!Number.isInteger(candidate.occurrenceCount) || candidate.occurrenceCount < 1) {
       errors.push(`${label}.occurrenceCount 必须为正整数`);
-    } else if (Array.isArray(candidate.evidenceRefs) && candidate.occurrenceCount !== candidate.evidenceRefs.length) {
+    } else if (Array.isArray(candidate.evidenceIds) && candidate.occurrenceCount !== candidate.evidenceIds.length) {
       errors.push(`${label}.occurrenceCount 必须等于独立事实事件数量`);
     }
 
-    if (!statuses.has(candidate.status)) errors.push(`${label}.status 无效：${candidate.status}`);
-    if (candidate.status === 'proposed') {
-      if (!proposalReasons.has(candidate.proposalReason)) errors.push(`${label}.proposalReason 无效`);
-    } else if (candidate.proposalReason != null) {
-      errors.push(`${label}.proposalReason 仅能在 proposed 状态使用`);
+    if (!parseDate(candidate.firstObserved)) errors.push(`${label}.firstObserved 不是有效日期`);
+    if (!parseDate(candidate.lastObserved)) errors.push(`${label}.lastObserved 不是有效日期`);
+    if (!Array.isArray(candidate.tags) || candidate.tags.some(item => !isNonEmptyString(item))) {
+      errors.push(`${label}.tags 必须是字符串数组`);
+    }
+    if (candidate.relatedRuleId != null && !isNonEmptyString(candidate.relatedRuleId)) {
+      errors.push(`${label}.relatedRuleId 必须为字符串或 null`);
     }
 
-    if (candidate.status === 'observing' && candidate.occurrenceCount >= 3) {
-      errors.push(`${label} 已达到 3 次但仍为 observing`);
-    }
     validateTargetAuthority(candidate.targetAuthority, label, errors, ['proposed', 'upgraded'].includes(candidate.status));
 
-    if (!Array.isArray(candidate.scenes)) errors.push(`${label}.scenes 必须是数组`);
-    if (!parseDate(candidate.createdAt)) errors.push(`${label}.createdAt 不是有效日期`);
-    if (!parseDate(candidate.updatedAt)) errors.push(`${label}.updatedAt 不是有效日期`);
     if (!Array.isArray(candidate.upgradeHistory)) {
       errors.push(`${label}.upgradeHistory 必须是数组`);
       continue;
@@ -172,9 +153,9 @@ function validate(root) {
       const upgradedAt = parseDate(upgrade.upgradedAt);
       if (!upgradedAt) errors.push(`${upgradeLabel}.upgradedAt 不是有效日期`);
       else latestUpgradeAt = Math.max(latestUpgradeAt ?? upgradedAt, upgradedAt);
-      if (!Array.isArray(upgrade.evidenceRefs) || !upgrade.evidenceRefs.length) errors.push(`${upgradeLabel}.evidenceRefs 必须是非空数组`);
-      else for (const ref of upgrade.evidenceRefs) {
-        if (!candidate.evidenceRefs.includes(ref)) errors.push(`${upgradeLabel} 引用了不属于该经验的事件：${ref}`);
+      if (!Array.isArray(upgrade.evidenceIds) || !upgrade.evidenceIds.length) errors.push(`${upgradeLabel}.evidenceIds 必须是非空数组`);
+      else for (const ref of upgrade.evidenceIds) {
+        if (!candidate.evidenceIds.includes(ref)) errors.push(`${upgradeLabel} 引用了不属于该经验的事件：${ref}`);
       }
       validateTargetAuthority(upgrade.targetAuthority, upgradeLabel, errors, true);
       if (!Array.isArray(upgrade.ruleIds) || !upgrade.ruleIds.length || upgrade.ruleIds.some(item => !isNonEmptyString(item))) {
@@ -190,9 +171,9 @@ function validate(root) {
       errors.push(`${label} 为 upgraded 但没有 upgradeHistory`);
     }
 
-    if (latestUpgradeAt != null && Array.isArray(candidate.evidenceRefs)) {
-      const hasPostUpgradeEvent = candidate.evidenceRefs.some(ref => {
-        const time = parseDate(eventsById.get(ref)?.occurredAt);
+    if (latestUpgradeAt != null && Array.isArray(candidate.evidenceIds)) {
+      const hasPostUpgradeEvent = candidate.evidenceIds.some(ref => {
+        const time = parseDate(eventsById.get(ref)?.date);
         return time != null && time > latestUpgradeAt;
       });
       if (hasPostUpgradeEvent && !(candidate.status === 'proposed' && candidate.proposalReason === 'post-upgrade-recurrence')) {
@@ -205,7 +186,6 @@ function validate(root) {
   }
 
   for (const event of evidenceDoc.events) {
-    if (!candidatesById.has(event.experienceId)) errors.push(`事实事件 ${event.id} 关联了不存在的经验：${event.experienceId}`);
     if (!referencedEvents.has(event.id)) warnings.push(`事实事件 ${event.id} 尚未被经验引用`);
   }
 
@@ -216,7 +196,9 @@ function validate(root) {
       candidates: candidatesDoc.candidates.length,
       events: evidenceDoc.events.length,
       upgraded: candidatesDoc.candidates.filter(item => item.status === 'upgraded').length,
-      proposed: candidatesDoc.candidates.filter(item => item.status === 'proposed').length
+      proposed: candidatesDoc.candidates.filter(item => item.status === 'proposed').length,
+      stale: candidatesDoc.candidates.filter(item => item.status === 'stale').length,
+      obsolete: candidatesDoc.candidates.filter(item => item.status === 'obsolete').length
     }
   };
 }
@@ -226,35 +208,32 @@ function writeFixture(root, { status = 'observing', occurrenceCount = 1, proposa
   fs.mkdirSync(experienceDir, { recursive: true });
   const fixtureEvents = events ?? [{
     id: 'evt-1',
-    experienceId: 'exp-1',
-    occurredAt: '2026-08-01',
-    taskRef: 'fixture',
-    scenes: ['fixture'],
-    fact: '事实',
-    evidence: ['证据']
+    date: '2026-08-01',
+    summary: '事实',
+    source: 'user-correction',
+    scene: 'fixture',
+    tags: ['fixture']
   }];
-  fs.writeFileSync(path.join(root, evidencePath), `${JSON.stringify({ schemaVersion: 1, events: fixtureEvents }, null, 2)}\n`);
+  fs.writeFileSync(path.join(root, evidencePath), `${JSON.stringify({ schemaVersion: 2, events: fixtureEvents }, null, 2)}\n`);
   fs.writeFileSync(path.join(root, candidatePath), `${JSON.stringify({
-    schemaVersion: 2,
+    schemaVersion: 3,
     candidates: [{
       id: 'exp-1',
-      normalizedKey: 'fixture-rule-execution-failure',
-      category: 'execution',
-      type: 'rule-execution-failure',
-      ownerSkill: 'wego-design',
-      problem: '问题',
-      rootCause: '根因',
-      resolution: '处理',
-      targetAuthority: status === 'observing' ? null : { path: 'AGENTS.md', anchor: 'fixture-rule' },
-      relatedRuleId: 'fixture-rule',
-      evidenceRefs: fixtureEvents.map(item => item.id),
-      scenes: ['fixture'],
+      class: 'workflow-lesson',
+      title: 'fixture',
+      lesson: '教训',
+      action: '以后怎么做',
+      ownerSkill: 'wego-uxsystem-iterate',
+      evidenceIds: fixtureEvents.map(item => item.id),
       occurrenceCount,
+      firstObserved: '2026-08-01',
+      lastObserved: '2026-08-01',
+      tags: ['fixture'],
+      targetAuthority: status === 'observing' ? null : { path: 'AGENTS.md', anchor: 'fixture-rule' },
+      relatedRuleId: null,
       status,
       proposalReason,
-      upgradeHistory,
-      createdAt: '2026-08-01',
-      updatedAt: '2026-08-01'
+      upgradeHistory
     }]
   }, null, 2)}\n`);
 }
@@ -266,35 +245,23 @@ if (testing) {
     if (validate(fixture).errors.length) throw new Error('有效 observing fixture 应通过');
 
     writeFixture(fixture);
-    const invalidCategory = JSON.parse(fs.readFileSync(path.join(fixture, candidatePath), 'utf8'));
-    invalidCategory.candidates[0].category = 'system';
-    fs.writeFileSync(path.join(fixture, candidatePath), JSON.stringify(invalidCategory, null, 2));
-    if (!validate(fixture).errors.some(item => item.includes('不属于 category'))) throw new Error('必须拦截 category/type 不匹配');
-
-    const threeEvents = [1, 2, 3].map(index => ({
-      id: `evt-${index}`,
-      experienceId: 'exp-1',
-      occurredAt: `2026-08-0${index}`,
-      taskRef: `fixture-${index}`,
-      scenes: ['fixture'],
-      fact: `事实 ${index}`,
-      evidence: [`证据 ${index}`]
-    }));
-    writeFixture(fixture, { occurrenceCount: 3, events: threeEvents });
-    if (!validate(fixture).errors.some(item => item.includes('达到 3 次'))) throw new Error('达到阈值必须 proposed');
+    const invalidClass = JSON.parse(fs.readFileSync(path.join(fixture, candidatePath), 'utf8'));
+    invalidClass.candidates[0].class = 'invalid';
+    fs.writeFileSync(path.join(fixture, candidatePath), JSON.stringify(invalidClass, null, 2));
+    if (!validate(fixture).errors.some(item => item.includes('class 无效'))) throw new Error('必须拦截无效 class');
 
     const history = [{
       version: 1,
       upgradedAt: '2026-08-02',
-      evidenceRefs: ['evt-1'],
+      evidenceIds: ['evt-1'],
       targetAuthority: { path: 'AGENTS.md', anchor: 'fixture-rule' },
       ruleIds: ['fixture-rule'],
       summary: '修复',
       commitSha: 'abcdef1'
     }];
     const recurrenceEvents = [
-      { id: 'evt-1', experienceId: 'exp-1', occurredAt: '2026-08-01', taskRef: 'before', scenes: ['fixture'], fact: '首次', evidence: ['证据'] },
-      { id: 'evt-2', experienceId: 'exp-1', occurredAt: '2026-08-03', taskRef: 'after', scenes: ['fixture'], fact: '复发', evidence: ['证据'] }
+      { id: 'evt-1', date: '2026-08-01', summary: '首次', source: 'user-correction', scene: 'fixture', tags: ['fixture'] },
+      { id: 'evt-2', date: '2026-08-03', summary: '复发', source: 'rework', scene: 'fixture', tags: ['fixture'] }
     ];
     writeFixture(fixture, { status: 'upgraded', occurrenceCount: 2, upgradeHistory: history, events: recurrenceEvents });
     if (!validate(fixture).errors.some(item => item.includes('必须立即回到 proposed'))) throw new Error('升级后复发必须重新 proposed');
@@ -307,6 +274,9 @@ if (testing) {
       events: recurrenceEvents
     });
     if (validate(fixture).errors.length) throw new Error(`正确的升级后复发状态应通过：${validate(fixture).errors.join('；')}`);
+
+    writeFixture(fixture, { status: 'stale', occurrenceCount: 1 });
+    if (validate(fixture).errors.length) throw new Error('stale 状态应通过');
   } finally {
     fs.rmSync(fixture, { recursive: true, force: true });
   }

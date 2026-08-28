@@ -1,0 +1,13 @@
+{
+  "routeId": "app-center",
+  "pattern": "composed",
+  "entry": {
+    "type": "grid-entry",
+    "label": "全部应用",
+    "group": "workspace-tools",
+    "tab": "workspace",
+    "icon": "./lib/assets/icons/app-center/全部应用.svg"
+  },
+  "style": "scenes/infras/应用中心/scene.css",
+  "script": "scenes/infras/应用中心/scene.js"
+}

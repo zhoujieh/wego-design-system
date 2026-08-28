@@ -10,13 +10,10 @@
 | `validate-scene-contract.mjs` | 从源码验证单个场景的路由、组件、Token、交互和布局硬约束；含 `layout-page` 唯一、`layout-scroll` 唯一（modal/overlay 内部豁免）、`position:absolute` 兼容 `layout-page` 等 Layout 守卫 |
 | `validate-scene-runtime.mjs` | 用 Playwright 检查场景 375/393 运行结果；当前验证流程默认不调用，保留脚本备用 |
 | `iteration-record.mjs` | 创建、提交、确认、失效、冻结或检查业务迭代；`prototyping` 承载本地迭代，用户验收通过后执行 `submit-prototype` 一步完成确认与冻结 |
-| `resolve-delivery-unit.mjs` | 开工前从全部 worktree 核对场景认领、未冻结迭代和可选开放 PR；单一候选即接手，允许本地迭代阶段尚未创建 PR |
+| `resolve-delivery-unit.mjs` | 开工前从全部 worktree 核对未冻结迭代和可选开放 PR；单一候选即接手，允许本地迭代阶段尚未创建 PR |
 | `validate-component-contract-parity.mjs` | 验证组件契约、Preview、索引与生成 CSS 一致性 |
 | `sync-wego-app-lib.mjs` | 设计系统源变化后同步部署副本 |
 | `build-routes.mjs` | 由各场景 `route.json` 汇总生成 `wego-app/js/routes.js`；`--check` 校验一致性 |
-| `claim-scene.mjs` | 认领场景（`npm run claim`）：声明 scene/branch/files 并写 `claims/<agent>.json`，消除手写 JSON |
-| `release-claim.mjs` | 释放认领（`npm run release-claim`）：PR 合并/关闭后删除 `claims/<agent>.json`（文件存在即持有租约，删除即释放）；`--sweep` 扫描释放孤儿认领 |
-| `validate-claims.mjs` | 校验 `claims/` 下场景认领无冲突（含 schema 强校验与 `files` 范围并行）；CI 结合 PR base/head 与 branch 强制每个场景目录变更都有对应认领 |
 | `build-pages-artifact.mjs` | 构建 GitHub Pages 发布产物；在本地迭代和合并阶段使用 PR 在线预览 |
 
 场景源码变化后直接运行静态守卫，无需生成中间证据文件。本地迭代阶段只运行与改动相称的检查；用户验收通过后的合并阶段运行完整静态验证。
@@ -25,7 +22,7 @@
 
 | 脚本 | 使用时机 |
 | --- | --- |
-| `reset-wego-app-baseline.mjs` | 清空全部业务场景、释放活跃场景认领并重建空白路由；支持 `--check` 与 `--dry-run` |
+| `reset-wego-app-baseline.mjs` | 清空全部业务场景并重建空白路由；支持 `--check` 与 `--dry-run` |
 | `cleanup-task-artifacts.mjs` | 清理 `.uploads/`、`output/`、`.tasks/`、`.playwright-cli/` 临时产物；不得删除仍处于本地迭代的预览服务记录 |
 | `generate-scene-skeleton.mjs` | 仅在需要重新采样显式骨架模板时运行 |
 
@@ -41,7 +38,6 @@
 - `test-scroll-layout.mjs`
 - `iteration-record.mjs test`
 - `validate-scene-iteration-binding.mjs test`
-- `validate-claims.mjs test`
 - `resolve-delivery-unit.mjs test`
 
 守卫只验证 Schema、源码或结构化数据，不检查文档标题、固定句子、引用顺序或人工自证字段。

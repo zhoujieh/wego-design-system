@@ -6,12 +6,12 @@
 
 ```text
 wego-app/js/routes.js
-wego-app/scenes/{中文业务场景}/route.json
-wego-app/scenes/{中文业务场景}/scene.js
-wego-app/scenes/{中文业务场景}/scene.css
+wego-app/scenes/{分类}/{中文业务场景}/route.json
+wego-app/scenes/{分类}/{中文业务场景}/scene.js
+wego-app/scenes/{分类}/{中文业务场景}/scene.css
 ```
 
-`route.json` 保存场景路由元数据（routeId、入口、展示方式等），被 `build-routes.mjs` 和场景认领脚本消费。
+`route.json` 保存场景路由元数据（routeId、入口、展示方式等），被 `build-routes.mjs` 消费。
 
 禁止创建独立场景 HTML、第二个宿主、`style.css`、以 route_id 命名的目录或运行时 `fetch/XHR`。
 
@@ -81,8 +81,8 @@ wego-app/scenes/{中文业务场景}/scene.css
 源码守卫直接提取并验证路由、根属性、组件实例、Token、交互触发器、overlay 调用、滚动和 sticky/fixed 关系：
 
 ```bash
-node scripts/validate-scene-contract.mjs wego-app/scenes/{中文业务场景}
-node scripts/validate-scene-runtime.mjs wego-app/scenes/{中文业务场景}
+node scripts/validate-scene-contract.mjs wego-app/scenes/{分类}/{中文业务场景}
+node scripts/validate-scene-runtime.mjs wego-app/scenes/{分类}/{中文业务场景}
 ```
 
 运行时守卫自动启动并清理本地服务，在真实浏览器的 375px 和 393px 视口检查控制台与资源错误、横向溢出、运行时组件结构和变体、交互 listener，以及可发现的 overlay 打开/关闭。主行动、必要状态反馈和核心路径仍需结合实际页面验收。证据保留在运行结果中，不写回场景。

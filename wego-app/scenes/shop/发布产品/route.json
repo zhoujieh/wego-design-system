@@ -1,0 +1,12 @@
+{
+  "routeId": "publish-product",
+  "pattern": "composed",
+  "entry": {
+    "type": "cell-entry",
+    "label": "发布产品",
+    "group": "dongtai-tools",
+    "tab": "dongtai"
+  },
+  "style": "scenes/shop/发布产品/scene.css",
+  "script": "scenes/shop/发布产品/scene.js"
+}

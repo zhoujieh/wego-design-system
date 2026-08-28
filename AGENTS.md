@@ -15,11 +15,15 @@
 - 技能路由：`.codex/skills/README.md`
 - 设计原则：`.codex/skills/wego-design/references/design-principles.md`
 - 各技能方法：对应技能 `references/`
+- 经验视图：`.codex/skills/wego-uxsystem-iterate/experience/EXPERIENCE.md`
 - 本文件只定义跨任务硬约束，不预读完整工作流。
+
+<!-- rule-id: agent-must-read-experience-before-task -->
+- 处理 wego 任务前，会话前置读取 `EXPERIENCE.md`，了解历史经验与踩坑教训。
 
 ## 固定产物与边界
 
-- `wego-app/index.html` 是唯一 App 入口；业务场景位于 `wego-app/scenes/{中文业务场景}/`，通过 `#/route-id` 访问；场景产物不得散落到仓库根目录。
+- `wego-app/index.html` 是唯一 App 入口；业务场景位于 `wego-app/scenes/{shop|bcg|customer|infras}/{中文业务场景}/`，通过 `#/route-id` 访问；场景产物不得散落到仓库根目录。
 - `wego-app/js/routes.js`、`wego-app/lib/`、`components.css` 是生成物，禁止直接编辑；权威源在 `.codex/skills/wego-design/`，仅 `wego-uxsystem-iterate` 可改。
 - `.trae/skills/*` 与 `.codebuddy/skills/*` 必须以逐项符号链接指向 `.codex/skills/*`，或以整目录符号链接指向 `.codex/skills`；不得保留副本。
 
@@ -40,6 +44,9 @@
 
 - 禁止直接提交 `main`，所有任务默认使用独立分支。
 
+<!-- rule-id: task-intake-must-follow-checklist -->
+- 新任务开工前必须按 `wego-github-delivery/references/task-intake.md` 执行启动清单；该清单统一定义会话上下文判断、完整/轻量启动分流、交付单元核对、需求确认和工作环境就绪的顺序，各技能不得自行另起启动步骤。
+
 <!-- rule-id: delivery-unit-must-use-independent-worktree -->
 - 每个交付单元必须使用独立 worktree（`git worktree add ../<owner>-<task> -b <分支>`），不得与其它交付单元共享主 worktree；主 worktree 只保留 `main` 用于 `git pull` 同步。
 
@@ -52,11 +59,8 @@
 <!-- rule-id: delivery-intake-must-precede-business-workflow -->
 - 业务页面请求进入 `wego-product` 或 `wego-design` 前必须先经 `wego-github-delivery` 完成交付单元核对。
 
-<!-- rule-id: scene-must-claim-before-edit -->
-- 场景认领强制前置：开工前用 `npm run claim -- --agent <agent-id> --scene <场景> [--route-id <id>] [--branch <分支>] [--files <文件范围>]` 认领场景目录并记录分支；同场景不同文件可声明 `files` 范围并行。释放推迟到 PR 合并/关闭后，用 `npm run release-claim` 统一释放（释放即删除认领文件，`claims/` 只保留活跃认领）；运行 `npm run claims:validate` 确认无冲突。
-
 <!-- rule-id: agent-must-pull-before-task-start -->
-- 开工前先 `git pull --rebase origin main` 同步最新 `main`。
+- 开工前先 `git pull --rebase origin main` 同步最新 `main`；具体执行时机见启动清单（完整启动时执行，轻量启动时按需）。
 
 <!-- rule-id: open-pr-must-sync-main-when-behind -->
 - 接手交付单元或更新开放 PR 前，其分支落后 `main` 时先 merge 最新 `main` 并解决冲突再继续；等待合并的 PR 同样适用，闲置不是豁免理由。

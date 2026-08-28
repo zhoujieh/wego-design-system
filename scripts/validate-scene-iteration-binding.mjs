@@ -88,18 +88,35 @@ function boundScenes() {
   return bound;
 }
 
+function resolveSceneDir(scene) {
+  if (!fs.existsSync(scenesRoot)) return null;
+  for (const category of fs.readdirSync(scenesRoot, { withFileTypes: true })) {
+    if (!category.isDirectory() || category.name.startsWith('_')) continue;
+    const candidate = path.join(scenesRoot, category.name, scene);
+    if (fs.existsSync(candidate)) return candidate;
+  }
+  return null;
+}
+
 function sceneDirectories() {
   if (!fs.existsSync(scenesRoot)) return [];
-  return fs.readdirSync(scenesRoot, { withFileTypes: true })
-    .filter(entry => entry.isDirectory() && !entry.name.startsWith('_'))
-    .map(entry => entry.name)
-    .filter(scene => ['scene.js', 'scene.css'].some(file => fs.existsSync(path.join(scenesRoot, scene, file))))
-    .sort();
+  const scenes = [];
+  for (const category of fs.readdirSync(scenesRoot, { withFileTypes: true })) {
+    if (!category.isDirectory() || category.name.startsWith('_')) continue;
+    const categoryRoot = path.join(scenesRoot, category.name);
+    for (const entry of fs.readdirSync(categoryRoot, { withFileTypes: true })) {
+      if (!entry.isDirectory() || entry.name.startsWith('_')) continue;
+      if (['scene.js', 'scene.css'].some(file => fs.existsSync(path.join(categoryRoot, entry.name, file)))) {
+        scenes.push(entry.name);
+      }
+    }
+  }
+  return scenes.sort();
 }
 
 function implementedScene(scene) {
-  const directory = path.join(scenesRoot, scene);
-  if (!fs.existsSync(directory)) return false;
+  const directory = resolveSceneDir(scene);
+  if (!directory) return false;
   return ['scene.js', 'scene.css'].some(file => fs.existsSync(path.join(directory, file)));
 }
 
@@ -111,10 +128,11 @@ function main() {
     if (!implementedScene(scene)) continue;
     if (systemToolScenes.has(scene)) continue;
     if (!bound.has(scene)) {
+      const rel = path.relative(root, resolveSceneDir(scene) || path.join(scenesRoot, scene));
       errors.push({
         code: 'scene.iteration_unbound',
         message: `场景 ${scene} 没有关联 prototype_brief 已确认(prototyping 及以上)的迭代;必须先经 wego-product 创建迭代并确认简报,再实现页面`,
-        file: `wego-app/scenes/${scene}`
+        file: rel.split(path.sep).join('/')
       });
     }
   }
@@ -128,7 +146,7 @@ function test() {
   const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'wego-iteration-binding-'));
   try {
     const scene = '测试场景';
-    const sceneRoot = path.join(fixture, 'wego-app/scenes', scene);
+    const sceneRoot = path.join(fixture, 'wego-app/scenes/infras', scene);
     const iterationRoot = path.join(sceneRoot, '_iterations/20260803-test-测试');
     fs.mkdirSync(iterationRoot, { recursive: true });
     fs.writeFileSync(path.join(sceneRoot, 'scene.js'), 'window.test = true;\n');

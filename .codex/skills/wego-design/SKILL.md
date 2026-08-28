@@ -21,15 +21,12 @@ description: 基于已确认原型简报消费微购设计系统，在一次任�
 
 ## 执行约束
 
-<!-- rule-id: agent-must-pull-before-task-start -->
-- 新会话/新任务开场先执行 `git pull --rebase origin main` 同步最新 `main`，再进入简报消费或场景实现（交付细节见 `wego-github-delivery`）。
-
 <!-- rule-id: scene-contract-precheck-mandatory -->
 - 每轮场景实现完成后，必须运行 `node scripts/validate-scene-contract.mjs <场景路径>` 做场景契约预检，通过后再推送 PR。场景契约问题不得留到合并阶段全量门禁才发现。
 
 ## 输出与交接
 
-业务实现只输出或更新场景目录中的 `route.json`、`scene.js` 和 `scene.css`；迭代记录、场景认领（`npm run claim` / `npm run release-claim`）和生成路由按工作流同步维护。路由发生新增或变化时运行 `node scripts/build-routes.mjs` 生成 `wego-app/js/routes.js`；`routes.js` 是生成物，禁止直接编辑。
+业务实现只输出或更新场景目录中的 `route.json`、`scene.js` 和 `scene.css`；迭代记录和生成路由按工作流同步维护。路由发生新增或变化时运行 `node scripts/build-routes.mjs` 生成 `wego-app/js/routes.js`；`routes.js` 是生成物，禁止直接编辑。
 
 在已确认范围内自主完成信息分组、布局、组件、Token、反馈和 overlay，不建立第二次确认门禁。实现过程默认处于**本地迭代中**，直到用户明确验收通过：
 

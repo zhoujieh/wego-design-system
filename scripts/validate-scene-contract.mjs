@@ -11,7 +11,7 @@ const jsonOutput = args.includes('--json');
 const routesFlag = args.indexOf('--routes');
 
 if (!sceneArgument) {
-  console.error('用法：node scripts/validate-scene-contract.mjs wego-app/scenes/{中文业务场景} [--json] [--routes 路径]');
+  console.error('用法：node scripts/validate-scene-contract.mjs wego-app/scenes/{分类}/{中文业务场景} [--json] [--routes 路径]');
   process.exit(2);
 }
 if (routesFlag >= 0 && !args[routesFlag + 1]) {
@@ -826,7 +826,18 @@ if (registeredScene && surfaceRoot) {
   if (!routeRecord) {
     add('scene.route', `routes.js 未注册 routeId：${routeId}`, routesFile);
   } else {
-    const expectedBase = `scenes/${path.basename(sceneRoot)}`;
+    const appRoot = path.join(root, 'wego-app');
+    const relToApp = path.relative(appRoot, sceneRoot).split(path.sep).join('/');
+    let expectedBase;
+    if (relToApp.startsWith('scenes/') && !relToApp.includes('..')) {
+      expectedBase = relToApp;
+    } else {
+      // 测试夹具等仓库外场景：若父目录是合法分类代号则使用两层路径，否则回退 basename
+      const parent = path.basename(path.dirname(sceneRoot));
+      expectedBase = ['shop', 'bcg', 'customer', 'infras'].includes(parent)
+        ? `scenes/${parent}/${path.basename(sceneRoot)}`
+        : `scenes/${path.basename(sceneRoot)}`;
+    }
     if (routeRecord.script !== `${expectedBase}/scene.js` || routeRecord.style !== `${expectedBase}/scene.css`) {
       add('scene.route_asset', `route ${routeId} 必须指向当前场景 scene.js 与 scene.css`, routesFile);
     }

@@ -2,24 +2,26 @@
 
 ## 交付单元识别
 
-业务页面请求在进入 `wego-product` 或 `wego-design` 前，必须先完成交付单元核对。核对必须遍历全部 Git worktree，而不是只读取当前目录或 `main`，并同时读取：
+> 启动清单的完整顺序见 [`task-intake.md`](./task-intake.md)；本节只定义交付单元核对的详细规则。
 
-- 开放 PR 的 head 分支；
-- 每个 worktree 的有效场景认领；
-- 每个 worktree 中未冻结的业务迭代；
-- `.tasks/preview-servers/` 中仍有效的本地迭代服务。
+业务页面请求在进入 `wego-product` 或 `wego-design` 前，必须先完成交付单元核对。核对使用 `node scripts/resolve-delivery-unit.mjs --scene {场景}`，该脚本遍历全部 Git worktree 中的未冻结业务迭代，并关联开放 PR。
 
-使用 `node scripts/resolve-delivery-unit.mjs --scene {场景}` 输出核对结果；routeId 已知时同步传入 `--route-id {routeId}`。结果只能按以下方式处理：
+结果只能按以下方式处理：
 
 - `matched`：接手结果指定的分支、worktree 和可选开放 PR。已确认简报范围内的视觉、布局、组件或交互反馈留在原迭代中处理；只有改变业务事实时才回到 `wego-product` 更新简报。
 - `new`：确认无匹配且无冲突后，才允许创建新迭代和新分支，并默认进入本地迭代。
-- `conflict`：多个候选、认领与 PR 不一致，或无法完成必要核对。必须停止并说明阻塞原因，不得自行选择候选。
+- `conflict`：多个候选或无法完成必要核对。必须停止并说明阻塞原因，不得自行选择候选。
+
+**人工兜底（必须执行）**：核对返回 `new` 后，再用 `git branch -vv` 扫一遍所有本地分支，检查是否有同场景或相关场景的悬空分支（无 worktree 但分支存在，或分支上有该场景的迭代但 worktree 已清理）。有则先确认是否为同一任务，是则恢复 worktree 而不是新建。
+
+**本地分支归属盘点**：用 `git branch -vv` 盘点全部本地分支；凡非 `main`、非当前任务、无开放 PR、无挂起登记的分支均为悬空交付单元，先向用户报告并收口（推送创建 PR、登记挂起任务或确认废弃删除），不得静默跨会话保留。
+
+**开放 PR 同步**：CI（`sync-open-prs.yml`）在 main 每次 push 后自动对所有开放 PR 执行 merge main；无需人工逐个检查落后情况。只需检查是否有带 `needs-sync` 标签的 PR（CI 同步冲突时会打此标签），有则先处理冲突。
 
 先用以下信息匹配已有交付单元：
 
 - 业务原型：已确认迭代 ID，及场景目录或 routeId；
 - 设计系统或工作流：目标权威源和明确的改动范围；
-- 场景认领：认领中的 `branch`、`scene` 和 `routeId`；
 - 本地预览记录：worktree、branch、target 和可空 PR 编号。
 
 新建对话不构成交付单元。命中同一任务即复用其分支和 worktree；已有开放 PR 时继续复用原 PR。
@@ -30,7 +32,6 @@
 - 一个交付单元固定一个工作分支和 worktree，同一需求固定复用同一个 PR，最多只有一个开放 PR；进入自动推进后即创建该 PR 并持续更新。
 <!-- rule-id: delivery-unit-must-use-independent-worktree -->
 - 每个交付单元必须使用独立 worktree（`git worktree add ../<owner>-<task> -b <分支>`），不得与其它交付单元共享主 worktree；主 worktree 只保留 `main` 用于 `git pull` 同步。多个交付单元并行时必须隔离，避免 checkout 互相覆盖导致 commit 落错分支。
-- 场景改动先认领，并在认领中记录当前分支。认领用 `npm run claim -- --agent <agent-id> --scene <场景> [--route-id <id>] [--branch <分支>] [--files <文件范围>]`，不再手写 JSON；同场景不同文件可声明 `files` 范围并行，文件重叠或未声明 `files` 视为整场景独占。释放推迟到 PR 合并/关闭或交付单元确认废弃后，用 `npm run release-claim -- --agent <agent-id>` 统一释放（释放即删除认领文件，`claims/` 只保留活跃认领，不堆积历史文件）。
 
 ### 本地迭代中（自动推进，默认）
 
@@ -53,7 +54,7 @@
 <!-- rule-id: workflow-maintenance-exempt-from-submission-authorization -->
 **工作流维护例外**：见 `AGENTS.md`，由 `wego-uxsystem-iterate` 执行的权威源维护免明确提交授权与业务验收，通过短周期 PR 自动合并；业务原型和设计系统组件/Token/Preview/UI Kit 变更不适用。
 
-多人或多 Agent 确有远端协调需要时，可仅推送用于暴露认领和分支的最小协调提交，但不得创建 PR，也不得把后续本地小改动自动推送；执行前必须说明这是并发协调例外。
+多人或多 Agent 确有远端协调需要时，可仅推送用于暴露分支的最小协调提交，但不得创建 PR，也不得把后续本地小改动自动推送；执行前必须说明这是并发协调例外。
 
 ### 合并阶段（用户验收通过后）
 
@@ -121,23 +122,22 @@ PR 已存在时，用户继续提出小问题，回到本地迭代累计修改�
 - 工作流维护：由 `wego-uxsystem-iterate` 判断并按 `AGENTS.md` 的例外执行，免明确提交授权与业务验收；完成严格系统验证后通过短周期 PR 进入 `main`，必要检查通过后自动合并并删除分支。
 - 合并或关闭 PR 前先停止对应本地预览服务并删除服务记录；随后默认删除远端分支、本地分支和干净的关联 worktree。
 - 确需保留分支时，为 PR 添加 `keep-branch` 标签；标签是唯一 PR 分支保留例外，但不会自动保留本地预览服务。
-- 没有 PR 的分支可以在任务仍处于本地迭代时保留；用户明确废弃或任务确认结束且不提交时，先确认没有需要保留的改动，再停止服务、释放认领并删除分支/worktree。
+- 没有 PR 的分支可以在任务仍处于本地迭代时保留；用户明确废弃或任务确认结束且不提交时，先确认没有需要保留的改动，再停止服务并删除分支/worktree。
 
 <!-- rule-id: delivery-closeout-checklist -->
 ### 交付单元收口清单
 
-PR 合并、PR 关闭或交付单元确认废弃后，必须**逐项执行并确认**以下五步，不得遗漏任何一步：
+PR 合并、PR 关闭或交付单元确认废弃后，必须**逐项执行并确认**以下四步，不得遗漏任何一步：
 
 1. **停止本地预览服务并删除服务记录** — 确认 `.tasks/preview-servers/` 中对应记录已清除，进程已退出。
-2. **释放场景认领** — 执行 `npm run release-claim -- --agent <agent-id>`，确认 `claims/` 中对应文件已删除。
-3. **删除远端分支** — PR 合并时自动删除；手动关闭或废弃时执行 `git push origin --delete <branch>`。
-4. **删除本地 worktree** — 执行 `git worktree remove <path>`，确认 `git worktree list` 中已无该 worktree。
-5. **同步主 worktree 到最新 main** — 回到主 worktree 执行 `git pull --rebase origin main`。
+2. **删除远端分支** — PR 合并时自动删除；手动关闭或废弃时执行 `git push origin --delete <branch>`。
+3. **删除本地 worktree** — 执行 `git worktree remove <path>`，确认 `git worktree list` 中已无该 worktree。
+4. **同步主 worktree 到最新 main** — 回到主 worktree 执行 `git pull --rebase origin main`。
 
 > 收口完成后可运行 `npm run worktrees:stale` 巡检是否有遗漏的孤儿 worktree；发现孤儿时用 `npm run worktrees:prune` 清理。有未提交改动的 worktree 不会被自动清理，需人工确认。
 
 ## 分支盘点
 
 - 保留：正在本地迭代、有开放 PR，或带 `keep-branch` 标签。
-- 收口：已合并、已关闭或用户明确废弃的交付单元；先停止关联本地预览服务，再释放认领并删除对应分支与干净 worktree。
-- 清理：无法关联到有效任务、预览记录、认领或 PR 的分支；删除前确认没有未提交或仅本地的重要改动。
+- 收口：已合并、已关闭或用户明确废弃的交付单元；先停止关联本地预览服务，再删除对应分支与干净 worktree。
+- 清理：无法关联到有效任务、预览记录或 PR 的分支；删除前确认没有未提交或仅本地的重要改动。
