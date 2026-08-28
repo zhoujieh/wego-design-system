@@ -3965,8 +3965,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           .tool-btn[data-has-changes="true"] .badge-dot { display: block; }
           .tool-btn .count-bubble {
             position: absolute;
-            top: -2px;
-            right: -2px;
+            top: 2px;
+            right: 2px;
             min-width: 16px;
             height: 16px;
             padding: 0 4px;
@@ -4006,8 +4006,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           .count-btn .count-icon { font-size: 14px; }
           .count-btn .count-bubble {
             position: absolute;
-            top: -2px;
-            right: -2px;
+            top: 2px;
+            right: 2px;
             min-width: 16px;
             height: 16px;
             padding: 0 4px;
