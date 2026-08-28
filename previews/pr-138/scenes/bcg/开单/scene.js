@@ -1303,24 +1303,27 @@
     return ''
       + '<div class="order-desktop-product-search ' + (inCatalog ? 'order-desktop-product-search--catalog' : 'order-desktop-product-search--collapsed') + listSearchResultClass + '">'
       +   '<div class="order-desktop-product-search__row">'
-      +     (inCatalog ? '' : collapsedFilterButton)
       +     '<div class="input-group input-group--surface-white order-desktop-context-search" data-component-slug="input"><label class="field-label" for="order-v2-context-search">搜索商品</label><div class="input-wrapper"><input id="order-v2-context-search" type="text" value="' + escapeHtml(state.desktopProductKeyword) + '" placeholder="搜索商品名称、货号" enterkeyhint="search" autocomplete="off" data-header-catalog-search><button type="button" class="input-clear" aria-label="清空搜索" data-clear-header-search><i class="icon-yuancha-mian" aria-hidden="true"></i></button><button type="button" class="order-desktop-inline-image-search" data-trigger-image-search aria-label="图搜" title="图搜"><i class="wego-iconfont-s icon-tupian" aria-hidden="true"></i></button></div></div>'
       +     '<input type="file" accept="image/*" data-header-image-input hidden>'
       +     (inCatalog ? '' : '<button type="button" class="btn btn--medium btn--sm order-desktop-product-search__submit" data-component-slug="button" data-submit-header-search ' + (state.desktopProductKeyword.trim() ? '' : 'hidden') + '>搜索</button>')
-      +     (inCatalog ? sidebarFilterButton : '')
+      +     (inCatalog ? sidebarFilterButton : collapsedFilterButton)
       +     '<button type="button" class="btn btn--weak btn--sm btn--icon-only order-desktop-barcode-search is-active ' + scannerConnectedClass + '" data-component-slug="button" data-scan aria-label="扫条码" title="扫条码"><img class="btn__icon" src="./scenes/bcg/开单/assets/icon-barcode.svg" alt="" aria-hidden="true"></button>'
       +   '</div>'
       +   (inCatalog ? '' : desktopSearchResultDropdown())
       + '</div>';
   }
 
-  function desktopBarcodeScanner(inTabletDrawer) {
+  function desktopBarcodeScanner(inDrawer) {
     var imagePreview = state.scannerImagePreview
       ? '<img class="order-barcode-scanner__image-preview" src="' + state.scannerImagePreview + '" alt="图搜所选图片" aria-hidden="true">'
       : '';
     var recognizingClass = state.scannerImageRecognizing ? ' is-recognizing' : '';
+    var drawerClass = inDrawer ? (isTabletPortrait() ? ' order-tablet-drawer' : ' order-landscape-scanner-drawer') : '';
+    var drawerStyle = inDrawer && !isTabletPortrait()
+      ? ' style="width:' + Math.max(320, Math.min(560, state.catalogWidth != null ? state.catalogWidth : 379)) + 'px"'
+      : '';
     return ''
-      + '<aside class="order-desktop__catalog order-desktop__catalog--scanner' + (inTabletDrawer ? ' order-tablet-drawer' : '') + recognizingClass + '"' + (inTabletDrawer ? ' role="dialog" aria-modal="true"' : '') + ' aria-label="扫一扫">'
+      + '<aside class="order-desktop__catalog order-desktop__catalog--scanner' + drawerClass + recognizingClass + '"' + (inDrawer ? ' role="dialog" aria-modal="true"' : '') + drawerStyle + ' aria-label="扫一扫">'
       +   '<div class="order-barcode-scanner">'
       +     '<video class="order-barcode-scanner__video" data-barcode-video autoplay muted playsinline aria-label="摄像头实时画面"></video>'
       +     imagePreview
@@ -1337,8 +1340,9 @@
 
   function desktopCatalog() {
     if (state.scannerOpen) {
-      return isTabletPortrait()
-        ? '<div class="order-tablet-drawer-mask" data-clickable data-close-barcode-scanner aria-hidden="true"></div>' + desktopBarcodeScanner(true)
+      var scannerUsesDrawer = isTabletPortrait() || effectiveCatalogCollapsed();
+      return scannerUsesDrawer
+        ? '<div class="order-tablet-drawer-mask order-scanner-drawer-mask" data-clickable data-close-barcode-scanner aria-hidden="true"></div>' + desktopBarcodeScanner(true)
         : desktopBarcodeScanner(false);
     }
     if (effectiveCatalogCollapsed()) {
@@ -2492,9 +2496,9 @@
     state.clerkDailyTotal = storedClerkDailyTotal();
     var scanning = state.scannerOpen;
     var tabletPortraitLayout = isTabletPortrait();
-    var catalogCollapsedClass = desktopShowsCatalog() && (tabletPortraitLayout || (!scanning && effectiveCatalogCollapsed())) ? ' order-desktop__workspace--catalog-collapsed' : '';
-    var catalogResizableClass = desktopShowsCatalog() && !tabletPortraitLayout && (!effectiveCatalogCollapsed() || scanning) ? ' order-desktop__workspace--with-resizer' : '';
-    var catalogResizeHandle = desktopShowsCatalog() && !tabletPortraitLayout && (!effectiveCatalogCollapsed() || scanning)
+    var catalogCollapsedClass = desktopShowsCatalog() && (tabletPortraitLayout || effectiveCatalogCollapsed()) ? ' order-desktop__workspace--catalog-collapsed' : '';
+    var catalogResizableClass = desktopShowsCatalog() && !tabletPortraitLayout && !effectiveCatalogCollapsed() ? ' order-desktop__workspace--with-resizer' : '';
+    var catalogResizeHandle = desktopShowsCatalog() && !tabletPortraitLayout && !effectiveCatalogCollapsed()
       ? '<div class="order-desktop__catalog-resizer" role="separator" aria-orientation="vertical" aria-label="拖动调整商品库宽度" data-catalog-resizer></div>'
       : '';
     var modalBackgroundAttrs = state.panel === 'product-edit' || state.panel === 'product-create' || state.panel === 'product-temp-create' ? ' inert aria-hidden="true"' : '';
@@ -2589,7 +2593,7 @@
         failBarcodeScanner(ctx);
       });
     }
-    if (state.scannerOpen && isDesktopWorkbench() && !isTabletPortrait()) {
+    if (state.scannerOpen && isDesktopWorkbench() && !isTabletPortrait() && !effectiveCatalogCollapsed()) {
       var scannerWidth = state.catalogWidth != null ? state.catalogWidth : 379;
       var scanningWorkspace = root.querySelector('.order-desktop__workspace');
       if (scanningWorkspace) {
