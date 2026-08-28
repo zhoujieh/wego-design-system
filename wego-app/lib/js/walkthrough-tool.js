@@ -4826,9 +4826,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     _onAnnotationPointerDown = (e) => {
       if (e.button !== undefined && e.button !== 0) return;
       if (isWalkthroughElement(e.target)) return;
-      // 点击批注标记本身，由标记的 click 事件处理
-      if (e.target.closest && e.target.closest('.annotation-marker')) return;
       e.stopPropagation();
+      this._clearHover();
       this._annotationPointerActive = true;
       this._annotationStartX = e.clientX;
       this._annotationStartY = e.clientY;
@@ -4931,7 +4930,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       bubble.removeAttribute('hidden');
       this._annotationBubbleRect = rect;
       this._updateAnnotationBubblePosition();
-      setTimeout(() => input.focus(), 50);
+      // 自动聚焦输入框，延迟确保点击事件后的焦点转移已完成
+      setTimeout(() => {
+        input.focus();
+        if (ann.text) input.select();
+      }, 80);
     }
 
     _updateAnnotationBubblePosition() {
