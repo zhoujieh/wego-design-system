@@ -7,7 +7,7 @@
     "primary_scene": "开单",
     "related_scenes": []
   },
-  "status": "in-development",
+  "status": "frozen",
   "scope_revision": 2,
   "brief_file": "bcg001-竖屏商品库抽屉折叠-20260828.md",
   "prototype_brief": {
@@ -129,9 +129,35 @@
     "scope_revision": 2,
     "scope_sha256": "646f311f7bbfe781c3dad29acb09de609db9dfa341ca782de358f51cb4ce76b4"
   },
-  "brief_confirmation": null,
-  "prototype_submission": null,
-  "prototype_confirmation": null,
+  "brief_confirmation": {
+    "at": "2026-08-28T08:05:36.223Z",
+    "scope_revision": 2,
+    "scope_sha256": "646f311f7bbfe781c3dad29acb09de609db9dfa341ca782de358f51cb4ce76b4"
+  },
+  "prototype_submission": {
+    "at": "2026-08-28T08:05:45.141Z",
+    "scope_revision": 2,
+    "affected_scenes": [
+      "开单"
+    ],
+    "fingerprints": {
+      "@route-entry/%E5%BC%80%E5%8D%95": "929c95d86cc26ae0f96494ddec21d4e9ca7d2771fb565995dc6f7b92ffbea9eb",
+      "wego-app/scenes/bcg/开单/scene.css": "dab5fd11c327d7e2d8da92e9ba5c0226a099aaaa22a4ab91576f5b4582a9abb9",
+      "wego-app/scenes/bcg/开单/scene.js": "0a73be9b0c4e080c8d526e91fd38d48cc37d59744744975926bab97476d29605"
+    }
+  },
+  "prototype_confirmation": {
+    "at": "2026-08-28T08:05:45.158Z",
+    "scope_revision": 2,
+    "affected_scenes": [
+      "开单"
+    ],
+    "fingerprints": {
+      "@route-entry/%E5%BC%80%E5%8D%95": "929c95d86cc26ae0f96494ddec21d4e9ca7d2771fb565995dc6f7b92ffbea9eb",
+      "wego-app/scenes/bcg/开单/scene.css": "dab5fd11c327d7e2d8da92e9ba5c0226a099aaaa22a4ab91576f5b4582a9abb9",
+      "wego-app/scenes/bcg/开单/scene.js": "0a73be9b0c4e080c8d526e91fd38d48cc37d59744744975926bab97476d29605"
+    }
+  },
   "affected_scenes": [
     "开单"
   ],
@@ -141,7 +167,7 @@
       "valid": true
     },
     "design": {
-      "valid": false
+      "valid": true
     }
   },
   "change_log": [
@@ -172,7 +198,24 @@
     {
       "action": "submit-brief",
       "at": "2026-08-28T07:50:16.571Z"
+    },
+    {
+      "action": "confirm-brief",
+      "at": "2026-08-28T08:05:36.223Z"
+    },
+    {
+      "action": "submit-prototype",
+      "at": "2026-08-28T08:05:45.161Z"
     }
   ],
-  "freeze": null
+  "freeze": {
+    "at": "2026-08-28T08:05:45.159Z",
+    "design_system_version": 554,
+    "scope_revision": 2,
+    "fingerprints": {
+      "@route-entry/%E5%BC%80%E5%8D%95": "929c95d86cc26ae0f96494ddec21d4e9ca7d2771fb565995dc6f7b92ffbea9eb",
+      "wego-app/scenes/bcg/开单/scene.css": "dab5fd11c327d7e2d8da92e9ba5c0226a099aaaa22a4ab91576f5b4582a9abb9",
+      "wego-app/scenes/bcg/开单/scene.js": "0a73be9b0c4e080c8d526e91fd38d48cc37d59744744975926bab97476d29605"
+    }
+  }
 }
