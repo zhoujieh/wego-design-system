@@ -80,7 +80,7 @@ function parse(result, name) {
 
 const coreArgs = args.filter(arg => arg !== '--json');
 const coreReport = parse(run('scripts/validate-wego-design-core.mjs', coreArgs), 'core');
-const experienceReport = parse(run('scripts/validate-experience-records.mjs', []), 'experience');
+const experienceReport = parse(run('scripts/refine-experience.mjs', ['--check', '--json']), 'experience');
 const runParity = ['system', 'full'].includes(requestedScope)
   || (requestedScope === 'changed' && changedFiles().some(affectsComponentParity));
 const parityReport = runParity

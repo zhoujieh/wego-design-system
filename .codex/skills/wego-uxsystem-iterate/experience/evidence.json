@@ -1,4 +1,45 @@
 {
   "schemaVersion": 2,
-  "events": []
+  "events": [
+    {
+      "id": "ev-001",
+      "date": "2026-08-28",
+      "summary": "shop243 spec 文档多轮澄清更新后，纳入范围、关键路径、澄清记录等模块存在旧描述残留，前后不一致，用户检查时发现并要求修正",
+      "source": "user-correction",
+      "scene": "shop243-鸿蒙13分享能力升级",
+      "tags": ["spec文档", "多轮更新", "前后不一致", "wego-product"]
+    },
+    {
+      "id": "ev-002",
+      "date": "2026-08-28",
+      "summary": "新任务接入 localStorage 时缺乏统一规则，各场景各自为政，存在 key 命名冲突、数据格式不一致风险，用户要求明确接入规则",
+      "source": "user-correction",
+      "scene": "shop243-鸿蒙13分享能力升级",
+      "tags": ["数据库接入", "localStorage", "key冲突", "wego-uxsystem-iterate"]
+    },
+    {
+      "id": "ev-003",
+      "date": "2026-08-28",
+      "summary": "经验沉淀时未调用 wego-uxsystem-iterate 技能，直接手动编辑了自动生成的 EXPERIENCE.md，未写入 evidence.json 和 candidates.json，用户指出流程不规范",
+      "source": "user-correction",
+      "scene": "shop243-鸿蒙13分享能力升级",
+      "tags": ["经验沉淀", "流程规范", "EXPERIENCE.md", "wego-uxsystem-iterate"]
+    },
+    {
+      "id": "ev-004",
+      "date": "2026-08-28",
+      "summary": "spec 文档输出过程中，入口逻辑（长按/点击、自己/别人产品）、转发机制、配置栏作用等关键点需要多轮澄清，初始 spec 存在理解偏差",
+      "source": "user-correction",
+      "scene": "shop243-鸿蒙13分享能力升级",
+      "tags": ["spec文档", "入口逻辑", "需求澄清", "wego-product"]
+    },
+    {
+      "id": "ev-005",
+      "date": "2026-08-28",
+      "summary": "经验沉淀机制重构：参考 Hermes 记忆管理机制，将 EXPERIENCE.md 从脚本机械化生成改为 AI 基于 evidence.json 事实推理维护，移除 candidates.json 中间层，refine-experience.mjs 降级为校验工具。用户确认核心原则是经验和事实不能冲突",
+      "source": "user-preference",
+      "scene": "workflow-experience-rule",
+      "tags": ["经验沉淀", "机制重构", "AI推理", "Hermes参考", "wego-uxsystem-iterate"]
+    }
+  ]
 }
