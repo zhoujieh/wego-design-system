@@ -1,0 +1,11 @@
+{
+  "agent": "codex",
+  "scene": "开单",
+  "routeId": "workspace-order-create",
+  "branch": "feature/codex-order-add-modal",
+  "claimedAt": "2026-08-27T03:20:28.901Z",
+  "files": [
+    "scene.js",
+    "scene.css"
+  ]
+}
