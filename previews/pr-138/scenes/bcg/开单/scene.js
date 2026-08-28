@@ -1208,10 +1208,6 @@
     }).join('') + '</div></div>';
   }
 
-  function catalogScopeLabel() {
-    return state.catalogScopeType === 'all' ? '全部商品' : state.catalogScopeValue;
-  }
-
   function desktopProductMatches(keyword) {
     var normalized = String(keyword || '').trim().toLowerCase();
     if (!normalized) return [];
@@ -1303,10 +1299,11 @@
       ? ' order-desktop-product-search--list-results'
       : '';
     var sidebarFilterButton = '<div class="order-catalog-filter-anchor order-catalog-filter-anchor--search"><button type="button" class="btn btn--weak btn--sm btn--icon-only" data-component-slug="button" data-toggle-sidebar-catalog-filter aria-label="筛选" title="筛选" aria-haspopup="dialog" aria-expanded="' + state.catalogSidebarFilterOpen + '"><i class="btn__icon icon-shaixuan" aria-hidden="true"></i></button>' + catalogSidebarFilterMenu() + '</div>';
+    var collapsedFilterButton = '<div class="order-desktop-search-filter order-catalog-filter-anchor order-catalog-filter-anchor--search"><button type="button" class="btn btn--weak btn--sm btn--icon-only" data-component-slug="button" data-toggle-catalog-filter aria-label="筛选" title="筛选" aria-haspopup="dialog" aria-expanded="' + state.catalogFilterOpen + '"><i class="btn__icon icon-shaixuan" aria-hidden="true"></i></button>' + catalogFilterMenu() + '</div>';
     return ''
-      + '<div class="order-desktop-product-search' + (inCatalog ? ' order-desktop-product-search--catalog' : '') + listSearchResultClass + '">'
+      + '<div class="order-desktop-product-search ' + (inCatalog ? 'order-desktop-product-search--catalog' : 'order-desktop-product-search--collapsed') + listSearchResultClass + '">'
       +   '<div class="order-desktop-product-search__row">'
-      +     (inCatalog ? '' : '<div class="order-desktop-search-filter"><button type="button" class="btn btn--weak btn--sm" data-component-slug="button" data-toggle-catalog-filter aria-haspopup="dialog" aria-expanded="' + state.catalogFilterOpen + '"><span>' + escapeHtml(catalogScopeLabel()) + '</span><i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button>' + catalogFilterMenu() + '</div>')
+      +     (inCatalog ? '' : collapsedFilterButton)
       +     '<div class="input-group input-group--surface-white order-desktop-context-search" data-component-slug="input"><label class="field-label" for="order-v2-context-search">搜索商品</label><div class="input-wrapper"><input id="order-v2-context-search" type="text" value="' + escapeHtml(state.desktopProductKeyword) + '" placeholder="搜索商品名称、货号" enterkeyhint="search" autocomplete="off" data-header-catalog-search><button type="button" class="input-clear" aria-label="清空搜索" data-clear-header-search><i class="icon-yuancha-mian" aria-hidden="true"></i></button><button type="button" class="order-desktop-inline-image-search" data-trigger-image-search aria-label="图搜" title="图搜"><i class="wego-iconfont-s icon-tupian" aria-hidden="true"></i></button></div></div>'
       +     '<input type="file" accept="image/*" data-header-image-input hidden>'
       +     (inCatalog ? '' : '<button type="button" class="btn btn--medium btn--sm order-desktop-product-search__submit" data-component-slug="button" data-submit-header-search ' + (state.desktopProductKeyword.trim() ? '' : 'hidden') + '>搜索</button>')
