@@ -297,6 +297,11 @@
     return '¥' + Number(value || 0).toFixed(2);
   }
 
+  function addProductPrice(value) {
+    var parts = Number(value || 0).toFixed(2).split('.');
+    return '<span class="order-add-price__currency">¥</span><span class="order-add-price__major">' + parts[0] + '</span><span class="order-add-price__decimal">.' + parts[1] + '</span>';
+  }
+
   function splitSpec(spec) {
     var parts = String(spec || '').split('/');
     return { color: parts[0] || '默认', size: parts.slice(1).join('/') || '均码' };
@@ -326,8 +331,97 @@
     return index === product.specs.length - 1 ? 0 : 18 + index * 11;
   }
 
+  function productTracksInventory(product) {
+    return product.inventory != null || product.stock != null;
+  }
+
+  function batchQuantityLimit(product, spec) {
+    if (!productTracksInventory(product)) return 9999;
+    var stock = specStock(product, spec);
+    return stock > 0 ? stock : 9999;
+  }
+
+  function batchSelectionMatches(selection, color, size) {
+    if (!selection) return false;
+    if (selection.type === 'all') return true;
+    if (selection.type === 'row') return selection.value === size;
+    if (selection.type === 'column') return selection.value === color;
+    return selection.type === 'cell' && selection.color === color && selection.size === size;
+  }
+
+  function batchSelectionCellClasses(selection, color, size, colorIndex, sizeIndex, colorCount, sizeCount) {
+    if (!batchSelectionMatches(selection, color, size)) return '';
+    var classes = ['is-selected'];
+    if (selection.type === 'cell' || selection.type === 'row' || sizeIndex === 0) classes.push('is-range-top');
+    if (selection.type === 'cell' || selection.type === 'row' || sizeIndex === sizeCount - 1) classes.push('is-range-bottom');
+    if (selection.type === 'cell' || selection.type === 'column' || colorIndex === 0) classes.push('is-range-left');
+    if (selection.type === 'cell' || selection.type === 'column' || colorIndex === colorCount - 1) classes.push('is-range-right');
+    return classes.join(' ');
+  }
+
+  function focusBatchSelection(root, selection) {
+    if (!selection) return;
+    var scope = root.querySelector(isDesktopWorkbench() ? '.order-desktop-modal--add' : '.order-v2-modal--add') || root;
+    var selector = selection.type === 'all'
+      ? '[data-batch-qty]'
+      : selection.type === 'row'
+        ? '[data-batch-row="' + CSS.escape(selection.value) + '"] [data-batch-qty]'
+        : selection.type === 'column'
+          ? '[data-batch-column="' + CSS.escape(selection.value) + '"][data-batch-qty]'
+          : '[data-batch-qty="' + CSS.escape(encodeURIComponent(selection.value)) + '"]';
+    var input = scope.querySelector(selector);
+    if (!input) return;
+    input.focus({ preventScroll: true });
+    input.select();
+  }
+
   function addDraftTotal(draft) {
     return Object.keys(draft.skuQty).reduce(function (sum, key) { return sum + Number(draft.skuQty[key] || 0); }, 0);
+  }
+
+  function copyAddSkuQty(product, source) {
+    var copy = {};
+    product.specs.forEach(function (spec) { copy[spec] = Number((source && source[spec]) || 0); });
+    return copy;
+  }
+
+  function saveAddModeRecord(draft) {
+    if (draft.mode === 'batch') {
+      if (draft.batchRecordTouched) draft.batchRecord = copyAddSkuQty(draft.product, draft.skuQty);
+      return;
+    }
+    draft.singleRecord = {
+      skuQty: copyAddSkuQty(draft.product, draft.skuQty),
+      selectedColor: draft.selectedColor,
+      selectedSize: draft.selectedSize
+    };
+  }
+
+  function restoreAddModeRecord(draft, nextMode) {
+    if (nextMode === 'single') {
+      draft.skuQty = copyAddSkuQty(draft.product, draft.singleRecord && draft.singleRecord.skuQty);
+      draft.selectedColor = draft.singleRecord ? draft.singleRecord.selectedColor : '';
+      draft.selectedSize = draft.singleRecord ? draft.singleRecord.selectedSize : '';
+      return;
+    }
+    if (draft.batchRecord) {
+      draft.skuQty = copyAddSkuQty(draft.product, draft.batchRecord);
+      draft.batchRecordTouched = true;
+    } else {
+      draft.skuQty = copyAddSkuQty(draft.product, null);
+      var singleRecord = draft.singleRecord;
+      var singleSpec = singleRecord ? specKey(draft.product, singleRecord.selectedColor, singleRecord.selectedSize) : '';
+      var singleQuantity = singleSpec ? Number(singleRecord.skuQty[singleSpec] || 0) : 0;
+      if (singleSpec && singleQuantity !== 0) {
+        draft.skuQty[singleSpec] = singleQuantity;
+        draft.batchRecord = copyAddSkuQty(draft.product, draft.skuQty);
+        draft.batchRecordTouched = true;
+      } else {
+        draft.batchRecordTouched = false;
+      }
+    }
+    draft.selectedColor = '';
+    draft.selectedSize = '';
   }
 
   function isSkuMode(mode) {
@@ -1988,7 +2082,7 @@
       + '<div class="order-side-actions">' + button('保存地址', 'strong', 'md', 'data-save-delivery') + '</div></div>';
   }
 
-  function addSinglePicker(draft) {
+  function addSinglePicker(draft, desktop) {
     var product = draft.product;
     var matrix = addProductMatrix(product);
     var selectedColor = draft.selectedColor || '';
@@ -2001,7 +2095,7 @@
     var stock = spec ? specStock(product, spec) : 0;
     return ''
       + '<div class="order-single-picker">'
-      +   '<section><small>颜色</small><div class="order-add-choice-list order-add-choice-list--colors">' + matrix.colors.map(function (color) {
+      +   '<section>' + (desktop ? '<div class="order-add-selection-head"><small>颜色</small><label class="order-add-batch-switch-label"><span>一次买多件</span><button type="button" class="switch switch--off" role="switch" aria-checked="false" aria-label="一次买多件" data-component-slug="switch" data-add-mode="batch"><span class="switch__thumb"></span></button></label></div>' : '<small>颜色</small>') + '<div class="order-add-choice-list order-add-choice-list--colors">' + matrix.colors.map(function (color) {
             return '<button type="button" class="btn btn--weak btn--sm ' + (selectedColor === color ? 'is-selected' : '') + '" data-component-slug="button" data-add-color="' + encodeURIComponent(color) + '">' + escapeHtml(color) + '</button>';
           }).join('') + '</div></section>'
       +   '<section><small>规格</small><div class="order-add-choice-list">' + availableSizes.map(function (size) {
@@ -2018,33 +2112,39 @@
       + '</div>';
   }
 
-  function addBatchPicker(draft) {
+  function addBatchPicker(draft, desktop) {
     var product = draft.product;
     var matrix = addProductMatrix(product);
+    var selection = draft.batchSelection;
+    var showInventory = productTracksInventory(product);
+    var quickTools = ''
+      + '<div class="order-batch-tools">'
+      +   '<button type="button" class="link link--14" data-component-slug="link" data-batch-fill="1">每色每码各1<i class="wego-iconfont-s icon-youshangjiantou" aria-hidden="true"></i></button>'
+      +   '<button type="button" class="link link--14" data-component-slug="link" data-batch-fill="2">每色每码各2<i class="wego-iconfont-s icon-youshangjiantou" aria-hidden="true"></i></button>'
+      + '</div>';
     return ''
-      + '<div class="order-batch-picker">'
-      +   '<div class="order-batch-tools">'
-      +     button('每色每码 ×1', 'weak', 'sm', 'data-batch-fill="1"')
-      +     button('每色每码 ×2', 'weak', 'sm', 'data-batch-fill="2"')
-      +     button('复制上次', 'weak', 'sm', 'data-batch-copy')
-      +     button('清空', 'danger', 'sm', 'data-batch-clear')
-      +   '</div>'
-      +   '<div class="order-batch-matrix-wrap"><table class="order-batch-matrix"><thead><tr><th>颜色／尺码</th>' + matrix.sizes.map(function (size) { return '<th><button type="button" data-batch-col-fill="' + encodeURIComponent(size) + '">' + escapeHtml(size) + '</button></th>'; }).join('') + '</tr></thead><tbody>'
-      +     matrix.colors.map(function (color) {
-              var cells = matrix.sizes.map(function (size) {
+      + '<div class="order-batch-picker' + (showInventory ? ' order-batch-picker--with-inventory' : '') + '">'
+      +   (desktop ? '<div class="order-add-selection-head">' + quickTools + '<label class="order-add-batch-switch-label"><span>一次买多件</span><button type="button" class="switch switch--on" role="switch" aria-checked="true" aria-label="一次买多件" data-component-slug="switch" data-add-mode="single"><span class="switch__thumb"></span></button></label></div>' : quickTools)
+      +   '<div class="order-batch-matrix-wrap"><table class="order-batch-matrix"><thead><tr><th class="order-batch-corner"><button type="button" data-batch-select-all aria-label="选择全部规格"><span class="order-batch-corner-mark" aria-hidden="true"></span></button></th>' + matrix.colors.map(function (color) {
+            var colorSelected = selection && (selection.type === 'all' || selection.type === 'row' || (selection.type === 'column' && selection.value === color) || (selection.type === 'cell' && selection.color === color));
+            return '<th class="' + (colorSelected ? 'is-selected' : '') + '"><button type="button" data-batch-select-column="' + encodeURIComponent(color) + '">' + escapeHtml(color) + '</button></th>';
+          }).join('') + '</tr></thead><tbody>'
+      +     matrix.sizes.map(function (size) {
+              var cells = matrix.colors.map(function (color, colorIndex) {
                 var spec = specKey(product, color, size);
                 var stock = specStock(product, spec);
                 var qty = Number(draft.skuQty[spec] || 0);
-                return '<td>' + (spec && stock > 0 ? '<input type="text" inputmode="numeric" maxlength="5" value="' + qty + '" data-batch-qty="' + encodeURIComponent(spec) + '" aria-label="' + escapeHtml(color + ' ' + size) + '数量"><small>库存' + stock + '</small>' : '<span class="order-batch-unavailable">—</span>') + '</td>';
+                var cellClasses = batchSelectionCellClasses(selection, color, size, colorIndex, matrix.sizes.indexOf(size), matrix.colors.length, matrix.sizes.length);
+                return '<td class="' + cellClasses + '">' + (spec ? '<div class="number-input number-input--surface-white" data-component-slug="input"><input class="number-input__field" type="text" inputmode="numeric" maxlength="5" value="' + (qty === 0 ? '' : qty) + '" data-batch-qty="' + encodeURIComponent(spec) + '" data-batch-column="' + escapeHtml(color) + '" aria-label="' + escapeHtml(color + ' ' + size) + '数量"></div>' : '<span class="order-batch-unavailable">—</span>') + (showInventory ? '<small>库存' + (spec && stock > 0 ? stock : '--') + '</small>' : '') + '</td>';
               }).join('');
-              return '<tr><th><button type="button" data-batch-row-fill="' + encodeURIComponent(color) + '">' + escapeHtml(color) + '</button></th>' + cells + '</tr>';
+              var sizeSelected = selection && (selection.type === 'all' || selection.type === 'column' || (selection.type === 'row' && selection.value === size) || (selection.type === 'cell' && selection.size === size));
+              return '<tr data-batch-row="' + escapeHtml(size) + '"><th class="' + (sizeSelected ? 'is-selected' : '') + '"><button type="button" data-batch-select-row="' + encodeURIComponent(size) + '">' + escapeHtml(size) + '</button></th>' + cells + '</tr>';
             }).join('')
       +   '</tbody></table></div>'
-      +   '<div class="order-batch-hint">点击颜色或尺码标题，可将对应可售规格快速配 1 件</div>'
       + '</div>';
   }
 
-  function addPanel() {
+  function addPanel(desktop) {
     var draft = state.addDraft;
     if (!draft) return '';
     var product = draft.product;
@@ -2057,25 +2157,31 @@
       +   '<div class="order-add-product order-add-product--pricing">' + image(product, 'order-add-product__image')
       +     '<div class="order-add-product__content"><div><strong>' + escapeHtml(product.name) + '</strong><small>' + escapeHtml(product.code) + '</small></div>'
       +       '<div class="order-add-product__actions">'
-      +         '<strong class="order-add-current-price">' + money(unitPrice) + '</strong>'
-      +         '<button type="button" data-toggle-add-discount aria-expanded="' + String(Boolean(draft.discountOpen)) + '"><i class="wego-iconfont-s icon-youhui" aria-hidden="true"></i>优惠</button>'
-      +         '<button type="button" data-edit-add-product><i class="wego-iconfont-s icon-bianji16" aria-hidden="true"></i>编辑商品</button>'
-      +         '<button type="button" data-add-purchase-history><i class="wego-iconfont-s icon-shijian" aria-hidden="true"></i>采购记录</button>'
+      +         '<strong class="order-add-current-price">' + (desktop ? addProductPrice(unitPrice) : money(unitPrice)) + '</strong>'
+      +         (desktop && draft.lastDiscountTipVisible ? '<div class="order-add-last-price">上次优惠价 ' + money(lastDiscountPrice) + '<button type="button" data-use-last-discount>使用</button></div>' : '')
+      +         (desktop ? '<div class="order-add-product__operation-buttons">' : '')
+      +           '<button type="button" data-toggle-add-discount><i class="wego-iconfont-s icon-youhui order-add-discount-icon" aria-hidden="true"></i>优惠</button>'
+      +           '<button type="button" data-edit-add-product><i class="wego-iconfont-s icon-bianji16" aria-hidden="true"></i>编辑商品</button>'
+      +           '<button type="button" data-add-purchase-history><i class="wego-iconfont-s icon-shijian" aria-hidden="true"></i>采购记录</button>'
+      +         (desktop ? '</div>' : '')
       +       '</div>'
-      +       (draft.lastDiscountTipVisible ? '<div class="order-add-last-price">上次优惠价 ' + money(lastDiscountPrice) + '<button type="button" data-use-last-discount>使用</button></div>' : '')
+      +       (!desktop && draft.lastDiscountTipVisible ? '<div class="order-add-last-price">上次优惠价 ' + money(lastDiscountPrice) + '<button type="button" data-use-last-discount>使用</button></div>' : '')
       +     '</div></div>'
       +   '<fieldset class="order-add-price-modes" aria-label="开单价格">'
       +     '<span class="order-add-price-option tag tag--28 ' + (draft.priceMode === 'cost' ? 'tag--brand tag--selected' : 'tag--white tag--normal') + '" data-component-slug="tag"><button type="button" class="order-add-cost-visibility" data-toggle-cost-price aria-label="' + (draft.costPriceVisible ? '隐藏拿货价' : '显示拿货价') + '"><i class="wego-iconfont-s ' + (draft.costPriceVisible ? 'icon-xianshi' : 'icon-yincang') + '" aria-hidden="true"></i></button><button type="button" class="order-add-price-select" data-add-price-mode="cost" aria-pressed="' + String(draft.priceMode === 'cost') + '"><span class="tag__label">拿货价 ' + (draft.costPriceVisible ? money(productCostPrice(product)) : '***') + '</span></button></span>'
       +     '<button type="button" class="tag tag--28 ' + (draft.priceMode !== 'cost' ? 'tag--brand tag--selected' : 'tag--white tag--normal') + '" data-component-slug="tag" data-add-price-mode="retail" aria-pressed="' + String(draft.priceMode !== 'cost') + '"><span class="tag__label">' + (draft.priceMode === 'discount' ? '优惠价 ' + money(unitPrice) : '售价 ' + money(customerPrice(product))) + '</span></button>'
       +   '</fieldset>'
-      +   (draft.discountOpen ? '<div class="order-add-discount-editor"><label for="order-add-discount-value">优惠后单价</label><input id="order-add-discount-value" type="text" inputmode="decimal" value="' + escapeHtml(draft.discountValue) + '" placeholder="请输入金额" data-add-discount-value><button type="button" data-apply-add-discount>应用</button></div>' : '')
-      +   '<div class="order-segment order-add-mode-switch"><button class="' + (draft.mode === 'single' ? 'is-active' : '') + '" data-add-mode="single">单买</button><button class="' + (draft.mode === 'batch' ? 'is-active' : '') + '" data-add-mode="batch">多买</button></div>'
-      +   (draft.mode === 'batch' ? addBatchPicker(draft) : addSinglePicker(draft))
-      +   '<div class="order-add-note-entry"><button type="button" class="link link--14" data-component-slug="link" data-toggle-add-note>' + (draft.note ? '编辑备注' : '添加备注') + '</button>'
-      +     (draft.noteOpen ? '<div class="input-group input-group--surface-white order-note-input" data-component-slug="input"><textarea id="product-note" placeholder="例如：单独打包、缺码先联系" data-add-note>' + escapeHtml(draft.note) + '</textarea></div>' : '')
+      +   (desktop ? '' : '<div class="order-segment order-add-mode-switch"><button class="' + (draft.mode === 'single' ? 'is-active' : '') + '" data-add-mode="single">单买</button><button class="' + (draft.mode === 'batch' ? 'is-active' : '') + '" data-add-mode="batch">多买</button></div>')
+      +   (draft.mode === 'batch' ? addBatchPicker(draft, desktop) : addSinglePicker(draft, desktop))
+      +   '<div class="order-add-note-entry' + (draft.noteOpen ? ' is-active' : '') + (draft.note ? ' has-note' : '') + '">'
+      +     (draft.noteOpen
+              ? '<div class="input-group input-group--surface-white order-note-input" data-component-slug="input">' + (desktop
+                  ? '<input id="product-note" type="text" value="' + escapeHtml(draft.note) + '" placeholder="请输入备注" data-add-note>'
+                  : '<textarea id="product-note" placeholder="例如：单独打包、缺码先联系" data-add-note>' + escapeHtml(draft.note) + '</textarea>') + '</div>'
+              : '<button type="button" class="link link--14" data-component-slug="link" data-toggle-add-note>' + (draft.note ? '备注：' + escapeHtml(draft.note) + '<i class="wego-iconfont-s icon-bianji" aria-hidden="true"></i>' : '添加备注') + '</button>')
       +   '</div>'
       + '</div>'
-      + '<div class="order-add-footer"><span>合计：<b data-add-total-qty>' + total + '</b> 件 <strong data-add-total-amount>' + money(total * unitPrice) + '</strong></span><div class="order-add-footer__actions">' + button('取消', 'weak', 'md', 'data-close-panel') + button('添加', 'strong', 'md', 'data-confirm-add') + '</div></div>';
+      + '<div class="order-add-footer"><span>' + (desktop ? '<strong data-add-total-amount>' + addProductPrice(total * unitPrice) + '</strong><small>共 <b data-add-total-qty>' + total + '</b> 件</small>' : '合计：<b data-add-total-qty>' + total + '</b> 件 <strong data-add-total-amount>' + money(total * unitPrice) + '</strong>') + '</span><div class="order-add-footer__actions">' + button('取消', 'weak', 'md', 'data-close-panel') + button('添加', 'strong', 'md', 'data-confirm-add') + '</div></div>';
   }
 
   function pricePanel() {
@@ -2118,7 +2224,7 @@
     if (state.panel === 'drafts') return draftsPanel();
     if (state.panel === 'delivery') return deliveryPanel();
     if (state.panel === 'address') return addressPanel();
-    if (state.panel === 'add') return addPanel();
+    if (state.panel === 'add') return addPanel(false);
     if (state.panel === 'price') return pricePanel();
     if (state.panel === 'note') return spuNotePanel();
     if (state.panel === 'checkout' || state.panel === 'payment') return checkoutPanel();
@@ -2352,8 +2458,8 @@
     return ''
       + '<div class="order-desktop-modal ' + (isCustomerCreate || isDelivery ? 'order-desktop-modal--customer' : '') + (isDelivery ? ' order-desktop-modal--delivery' : '') + (isNote ? ' order-desktop-modal--note' : (isCheckout ? ' order-desktop-modal--checkout' : ' order-desktop-modal--add')) + '" role="dialog" aria-modal="true" aria-labelledby="order-desktop-modal-title" data-state="open">'
       +   '<div class="order-desktop-modal__panel">'
-      +     '<div class="order-desktop-modal__head"><strong id="order-desktop-modal-title">' + (isCustomerCreate ? '新建客户' : (isDelivery ? '选择发货方式' : (isNote ? '商品备注' : (isCheckout ? '支付结算' : '添加商品')))) + '</strong><button type="button" class="btn btn--weak btn--sm btn--icon-only" data-component-slug="button" data-close-panel aria-label="关闭"><i class="btn__icon ' + (isDelivery ? 'icon-cha-cu' : 'icon-cha16') + '" aria-hidden="true"></i></button></div>'
-      +     '<div class="order-desktop-modal__body">' + (isCustomerCreate ? desktopNewCustomerModalContent() : (isDelivery ? deliveryPanel() : (isNote ? spuNotePanel() : (isCheckout ? checkoutPanel() : addPanel())))) + '</div>'
+      +     '<div class="order-desktop-modal__head"><strong id="order-desktop-modal-title">' + (isCustomerCreate ? '新建客户' : (isDelivery ? '选择发货方式' : (isNote ? '商品备注' : (isCheckout ? '支付结算' : '添加商品')))) + '</strong><button type="button" class="btn btn--weak btn--sm btn--icon-only" data-component-slug="button" data-close-panel aria-label="关闭"><i class="btn__icon ' + (isDelivery ? 'icon-cha' : 'icon-cha16') + '" aria-hidden="true"></i></button></div>'
+      +     '<div class="order-desktop-modal__body">' + (isCustomerCreate ? desktopNewCustomerModalContent() : (isDelivery ? deliveryPanel() : (isNote ? spuNotePanel() : (isCheckout ? checkoutPanel() : addPanel(true))))) + '</div>'
       +   '</div>'
       + '</div>';
   }
@@ -2646,13 +2752,19 @@
       lastDiscountPrice: productLastDiscountPrice(product),
       lastDiscountTipVisible: true,
       costPriceVisible: false,
-      discountOpen: false,
-      discountValue: '',
       skuQty: skuQty,
+      singleRecord: {
+        skuQty: copyAddSkuQty(product, skuQty),
+        selectedColor: '',
+        selectedSize: ''
+      },
+      batchRecord: null,
+      batchRecordTouched: false,
       selectedColor: '',
       selectedSize: '',
       note: '',
-      noteOpen: false
+      noteOpen: false,
+      batchSelection: null
     };
     state.panel = 'add';
     renderActive();
@@ -2877,7 +2989,11 @@
     if (!draft) return;
     var total = addDraftTotal(draft);
     root.querySelectorAll('[data-add-total-qty]').forEach(function (node) { node.textContent = total; });
-    root.querySelectorAll('[data-add-total-amount]').forEach(function (node) { node.textContent = money(total * addDraftUnitPrice(draft)); });
+    root.querySelectorAll('[data-add-total-amount]').forEach(function (node) {
+      var amount = total * addDraftUnitPrice(draft);
+      if (node.querySelector('.order-add-price__major')) node.innerHTML = addProductPrice(amount);
+      else node.textContent = money(amount);
+    });
   }
 
   function restoreDraft(ctx) {
@@ -3066,6 +3182,7 @@
       state.dailyTotalRecorded = true;
     }
     state.panel = null;
+    renderActive();
     ctx.navigate('workspace-order-success');
   }
 
@@ -3528,6 +3645,14 @@
         var validSpecs = {};
         editedProduct.specs.forEach(function (spec) { validSpecs[spec] = Number(state.addDraft.skuQty[spec] || 0); });
         state.addDraft.skuQty = validSpecs;
+        if (state.addDraft.singleRecord) {
+          state.addDraft.singleRecord.skuQty = copyAddSkuQty(editedProduct, state.addDraft.singleRecord.skuQty);
+          if (!specKey(editedProduct, state.addDraft.singleRecord.selectedColor, state.addDraft.singleRecord.selectedSize)) {
+            state.addDraft.singleRecord.selectedColor = '';
+            state.addDraft.singleRecord.selectedSize = '';
+          }
+        }
+        if (state.addDraft.batchRecord) state.addDraft.batchRecord = copyAddSkuQty(editedProduct, state.addDraft.batchRecord);
         if (state.addDraft.priceMode === 'retail') state.addDraft.unitPrice = customerPrice(editedProduct);
         if (state.addDraft.priceMode === 'cost') state.addDraft.unitPrice = productCostPrice(editedProduct);
         state.addDraft.lastDiscountPrice = productLastDiscountPrice(editedProduct);
@@ -3812,19 +3937,21 @@
       if (activeNote) state.addDraft.note = activeNote.value.trim();
       var nextAddMode = target.dataset.addMode;
       if (nextAddMode !== state.addDraft.mode) {
+        saveAddModeRecord(state.addDraft);
         state.addDraft.mode = nextAddMode;
-        state.addDraft.selectedColor = '';
-        state.addDraft.selectedSize = '';
-        state.addDraft.product.specs.forEach(function (spec) { state.addDraft.skuQty[spec] = 0; });
+        state.addDraft.batchSelection = null;
+        restoreAddModeRecord(state.addDraft, nextAddMode);
       }
       rememberAddMode(state.addDraft.mode);
-      renderActive();
+      target.classList.toggle('switch--on', nextAddMode === 'batch');
+      target.classList.toggle('switch--off', nextAddMode !== 'batch');
+      target.setAttribute('aria-checked', String(nextAddMode === 'batch'));
+      window.setTimeout(renderActive, 140);
       return;
     }
     if (target.matches('[data-add-price-mode]') && state.addDraft) {
       state.addDraft.priceMode = target.dataset.addPriceMode;
       state.addDraft.unitPrice = state.addDraft.priceMode === 'cost' ? productCostPrice(state.addDraft.product) : customerPrice(state.addDraft.product);
-      state.addDraft.discountOpen = false;
       renderActive();
       return;
     }
@@ -3834,29 +3961,13 @@
       return;
     }
     if (target.matches('[data-toggle-add-discount]') && state.addDraft) {
-      state.addDraft.discountOpen = !state.addDraft.discountOpen;
-      if (state.addDraft.discountOpen && !state.addDraft.discountValue) state.addDraft.discountValue = String(state.addDraft.unitPrice);
-      renderActive();
+      ctx.toast('弹出优惠弹窗');
       return;
     }
     if (target.matches('[data-use-last-discount]') && state.addDraft) {
       state.addDraft.priceMode = 'discount';
       state.addDraft.unitPrice = Number(state.addDraft.lastDiscountPrice || 0);
-      state.addDraft.discountValue = String(state.addDraft.unitPrice);
-      state.addDraft.discountOpen = false;
       state.addDraft.lastDiscountTipVisible = false;
-      renderActive();
-      return;
-    }
-    if (target.matches('[data-apply-add-discount]') && state.addDraft) {
-      var discountPrice = Number(state.addDraft.discountValue);
-      if (!Number.isFinite(discountPrice) || discountPrice < 0) {
-        ctx.toast('请输入有效优惠价');
-        return;
-      }
-      state.addDraft.priceMode = 'discount';
-      state.addDraft.unitPrice = Math.round(discountPrice * 100) / 100;
-      state.addDraft.discountOpen = false;
       renderActive();
       return;
     }
@@ -3897,45 +4008,38 @@
     }
     if (target.matches('[data-batch-fill]')) {
       var batchFill = Number(target.dataset.batchFill);
-      state.addDraft.product.specs.forEach(function (spec) { state.addDraft.skuQty[spec] = specStock(state.addDraft.product, spec) > 0 ? batchFill : 0; });
+      state.addDraft.product.specs.forEach(function (spec) { state.addDraft.skuQty[spec] = Math.min(batchQuantityLimit(state.addDraft.product, spec), batchFill); });
+      state.addDraft.batchRecordTouched = true;
+      state.addDraft.batchSelection = null;
       renderActive();
       return;
     }
-    if (target.matches('[data-batch-copy]')) {
-      var lastPattern = storedBatchPattern();
-      if (!lastPattern) {
-        ctx.toast('暂无上次批量配码记录');
-        return;
-      }
-      state.addDraft.product.specs.forEach(function (spec, index) {
-        state.addDraft.skuQty[spec] = Math.min(specStock(state.addDraft.product, spec), Number(lastPattern[index] || 0));
-      });
+    if (target.matches('[data-batch-select-row], [data-batch-select-column], [data-batch-select-all]')) {
+      state.addDraft.batchSelection = target.matches('[data-batch-select-all]')
+        ? { type: 'all', value: '' }
+        : target.matches('[data-batch-select-row]')
+          ? { type: 'row', value: decodeURIComponent(target.dataset.batchSelectRow) }
+          : { type: 'column', value: decodeURIComponent(target.dataset.batchSelectColumn) };
       renderActive();
-      return;
-    }
-    if (target.matches('[data-batch-clear]')) {
-      state.addDraft.product.specs.forEach(function (spec) { state.addDraft.skuQty[spec] = 0; });
-      renderActive();
-      return;
-    }
-    if (target.matches('[data-batch-row-fill], [data-batch-col-fill]')) {
-      var rowColor = target.dataset.batchRowFill ? decodeURIComponent(target.dataset.batchRowFill) : '';
-      var columnSize = target.dataset.batchColFill ? decodeURIComponent(target.dataset.batchColFill) : '';
-      state.addDraft.product.specs.forEach(function (spec) {
-        var pair = splitSpec(spec);
-        if ((rowColor && pair.color === rowColor) || (columnSize && pair.size === columnSize)) {
-          state.addDraft.skuQty[spec] = specStock(state.addDraft.product, spec) > 0 ? 1 : 0;
-        }
-      });
-      renderActive();
+      window.requestAnimationFrame(function () { focusBatchSelection(activeContext.root, state.addDraft && state.addDraft.batchSelection); });
       return;
     }
     if (target.matches('[data-toggle-add-note]')) {
-      var noteField = panelScope(target, root).querySelector('[data-add-note]');
+      var addPanel = panelScope(target, root);
+      var addScroll = addPanel.querySelector('.order-add-scroll');
+      var addScrollTop = addScroll ? addScroll.scrollTop : 0;
+      var noteField = addPanel.querySelector('[data-add-note]');
       if (noteField) state.addDraft.note = noteField.value.trim();
       state.addDraft.noteOpen = !state.addDraft.noteOpen;
       renderActive();
+      var nextAddScroll = activeContext.root.querySelector(isDesktopWorkbench()
+        ? '.order-desktop-modal--add .order-add-scroll'
+        : '.order-v2-modal--add .order-add-scroll');
+      if (nextAddScroll) nextAddScroll.scrollTop = addScrollTop;
       if (state.addDraft.noteOpen) activeContext.root.querySelector('[data-add-note]')?.focus({ preventScroll: true });
+      window.requestAnimationFrame(function () {
+        if (nextAddScroll && nextAddScroll.isConnected) nextAddScroll.scrollTop = addScrollTop;
+      });
       return;
     }
     if (target.closest('[data-toggle-order-note]')) {
@@ -4468,14 +4572,25 @@
     }
     if (target.matches('[data-batch-qty]') && state.addDraft) {
       var batchSpec = decodeURIComponent(target.dataset.batchQty);
-      var batchStock = specStock(state.addDraft.product, batchSpec);
       var batchRaw = String(target.value || '').replace(/[^\d-]/g, '');
       var batchNegative = batchRaw.charAt(0) === '-' ? '-' : '';
       var batchDigits = batchRaw.replace(/-/g, '').slice(0, 4);
+      var batchHasValue = batchDigits.length > 0;
       var batchQuantity = Number((batchNegative + batchDigits) || 0);
-      batchQuantity = Math.max(-9999, Math.min(batchStock, batchQuantity));
-      target.value = batchQuantity;
-      state.addDraft.skuQty[batchSpec] = batchQuantity;
+      batchQuantity = Math.max(-9999, Math.min(batchQuantityLimit(state.addDraft.product, batchSpec), batchQuantity));
+      target.value = batchHasValue ? batchQuantity : '';
+      state.addDraft.batchRecordTouched = true;
+      var batchSelection = state.addDraft.batchSelection;
+      var batchScope = root.querySelector(isDesktopWorkbench() ? '.order-desktop-modal--add' : '.order-v2-modal--add') || root;
+      state.addDraft.product.specs.forEach(function (spec) {
+        var pair = splitSpec(spec);
+        if (!batchSelection || spec === batchSpec || batchSelectionMatches(batchSelection, pair.color, pair.size)) {
+          var nextQuantity = Math.min(batchQuantityLimit(state.addDraft.product, spec), batchQuantity);
+          state.addDraft.skuQty[spec] = nextQuantity;
+          var nextInput = batchScope.querySelector('[data-batch-qty="' + CSS.escape(encodeURIComponent(spec)) + '"]');
+          if (nextInput) nextInput.value = batchHasValue ? nextQuantity : '';
+        }
+      });
       updateAddDraftTotals(root);
       return;
     }
@@ -4489,11 +4604,6 @@
     }
     if (target.matches('[data-order-note-buyer]')) {
       state.orderNoteBuyer = target.value;
-      return;
-    }
-    if (target.matches('[data-add-discount-value]') && state.addDraft) {
-      state.addDraft.discountValue = String(target.value || '').replace(/[^\d.]/g, '');
-      target.value = state.addDraft.discountValue;
       return;
     }
     if (target.matches('[data-split]') && state.paymentDraft) {
@@ -4560,6 +4670,18 @@
       openOrderRowContextMenu(Number(row.dataset.rowSelect), row.dataset.rowSpec ? decodeURIComponent(row.dataset.rowSpec) : '', x, y);
     });
     root.addEventListener('click', function (event) {
+      var clickedBatchInput = event.target.closest('[data-batch-qty]');
+      if (clickedBatchInput && state.addDraft && state.addDraft.mode === 'batch') {
+        var selectedBatchSpec = decodeURIComponent(clickedBatchInput.dataset.batchQty);
+        var currentBatchSelection = state.addDraft.batchSelection;
+        if (!currentBatchSelection || currentBatchSelection.type !== 'cell' || currentBatchSelection.value !== selectedBatchSpec) {
+          var selectedBatchPair = splitSpec(selectedBatchSpec);
+          state.addDraft.batchSelection = { type: 'cell', value: selectedBatchSpec, color: selectedBatchPair.color, size: selectedBatchPair.size };
+          renderActive();
+          window.requestAnimationFrame(function () { focusBatchSelection(activeContext.root, state.addDraft && state.addDraft.batchSelection); });
+        }
+        return;
+      }
       var shouldCloseCustomerPopover = isDesktopWorkbench()
         && state.panel === 'customer'
         && !event.target.closest('.order-desktop-customer-anchor');
@@ -4592,6 +4714,10 @@
       var shouldCloseDisplayModeMenu = isDesktopWorkbench()
         && state.displayModeMenuOpen
         && !event.target.closest('[data-toggle-display-menu], .order-display-mode-menu');
+      var shouldClearBatchSelection = state.addDraft
+        && state.addDraft.mode === 'batch'
+        && state.addDraft.batchSelection
+        && !event.target.closest('.order-batch-matrix');
       handleClick(event, root, ctx);
       if (shouldCloseCustomerPopover && state.panel === 'customer') {
         closeDesktopCustomerPopover();
@@ -4622,6 +4748,10 @@
       } else if (shouldCloseDisplayModeMenu && state.displayModeMenuOpen) {
         state.displayModeMenuOpen = false;
         renderDesktopOrderPreservingScroll(root);
+      }
+      if (shouldClearBatchSelection && state.addDraft && state.addDraft.batchSelection) {
+        state.addDraft.batchSelection = null;
+        renderActive();
       }
     });
     root.addEventListener('input', function (event) { handleInput(event, root, ctx); });
@@ -4660,6 +4790,8 @@
         state.addDraft.note = event.target.value.trim();
         state.addDraft.noteOpen = false;
         renderActive();
+        var activeAddScroll = activeContext.root.querySelector('.order-add-scroll');
+        if (activeAddScroll) activeAddScroll.scrollTop = activeAddScroll.scrollHeight;
         return;
       }
       if (!event.target.matches('[data-row-qty]')) return;
@@ -4764,17 +4896,16 @@
     var resultTitle = isUnpaid ? '订单已生成，待收款' : (isDebt ? '订单已生成，已记欠款' : '收款成功，订单已生成');
     var paymentState = isUnpaid ? '未收款' : (isDebt ? '已记欠款' : '已收款');
     return ''
-      + '<section class="order-success-v2" data-bg="page">'
-      +   '<nav class="navbar" data-component-slug="navbar"><div class="navbar__body"><div class="navbar__left"></div><div class="navbar__center"><span class="navbar__title">开单完成</span></div><div class="navbar__right"></div></div></nav>'
+      + '<div class="modal__panel">'
       +   '<main class="order-success-v2__body">'
       +     '<div class="order-success-v2__icon" aria-hidden="true">✓</div>'
-      +     '<h1>' + resultTitle + '</h1>'
+      +     '<h1 id="order-success-title">' + resultTitle + '</h1>'
       +     '<p>' + escapeHtml(state.paymentSummary || '已收款') + ' · ' + money(t.payable) + '</p>'
       +     '<dl><div><dt>订单号</dt><dd>' + escapeHtml(state.orderNo) + '</dd></div><div><dt>客户</dt><dd>' + escapeHtml(state.customer ? state.customer.name : '散客') + '</dd></div><div><dt>仓库</dt><dd>' + escapeHtml(state.warehouse.name) + '</dd></div><div><dt>商品</dt><dd>' + t.styles + '款 ' + t.pieces + '件</dd></div><div><dt>收款状态</dt><dd>' + paymentState + '</dd></div></dl>'
       +     '<div class="order-success-v2__actions">' + button('继续开单', 'strong', 'lg', 'data-new-order') + button('查看订单', 'weak', 'lg', 'data-view-order') + '</div>'
       +     '<small>配货、发货等后续流程不在本期原型范围内</small>'
       +   '</main>'
-      + '</section>';
+      + '</div>';
   }
 
   function resetOrder() {
@@ -4812,17 +4943,31 @@
     routeId: 'workspace-order-success',
     title: '开单完成',
     presentation: { type: 'full-screen-modal', transition: 'slide-up-enter, slide-down-exit', coversTabBar: true },
-    template: '<div class="order-success-v2-mount" data-surface-id="workspace-order-success" data-route-id="workspace-order-success" data-layout-mode="composed"></div>',
+    template: '<div class="modal modal--frame order-success-v2 order-success-v2-mount" data-component-slug="modal" data-state="open" role="dialog" aria-modal="true" aria-labelledby="order-success-title" data-surface-id="workspace-order-success" data-route-id="workspace-order-success" data-layout-mode="composed"></div>',
     init: function (ctx) {
       var successRoot = ctx.root.querySelector('.order-success-v2-mount') || ctx.root;
-      successRoot.innerHTML = successTemplate();
-      successRoot.querySelector('[data-new-order]')?.addEventListener('click', function () {
+      var autoCloseTimer = 0;
+      var isClosing = false;
+
+      function closeSuccess() {
+        if (isClosing) return;
+        isClosing = true;
+        if (autoCloseTimer) window.clearTimeout(autoCloseTimer);
         resetOrder();
         ctx.back();
         setTimeout(renderActive, 0);
+      }
+
+      successRoot.innerHTML = successTemplate();
+      successRoot.querySelector('[data-new-order]')?.addEventListener('click', function () {
+        closeSuccess();
       });
       successRoot.querySelector('[data-view-order]')?.addEventListener('click', function () {
         ctx.toast('订单详情入口已保留，本期不展开');
+      });
+      autoCloseTimer = window.setTimeout(closeSuccess, 3000);
+      ctx.onDestroy(function () {
+        if (autoCloseTimer) window.clearTimeout(autoCloseTimer);
       });
     }
   });
