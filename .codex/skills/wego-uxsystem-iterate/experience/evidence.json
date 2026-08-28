@@ -32,6 +32,14 @@
       "source": "user-correction",
       "scene": "shop243-鸿蒙13分享能力升级",
       "tags": ["spec文档", "入口逻辑", "需求澄清", "wego-product"]
+    },
+    {
+      "id": "ev-005",
+      "date": "2026-08-28",
+      "summary": "经验沉淀机制重构：参考 Hermes 记忆管理机制，将 EXPERIENCE.md 从脚本机械化生成改为 AI 基于 evidence.json 事实推理维护，移除 candidates.json 中间层，refine-experience.mjs 降级为校验工具。用户确认核心原则是经验和事实不能冲突",
+      "source": "user-preference",
+      "scene": "workflow-experience-rule",
+      "tags": ["经验沉淀", "机制重构", "AI推理", "Hermes参考", "wego-uxsystem-iterate"]
     }
   ]
 }

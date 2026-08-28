@@ -7,6 +7,6 @@
 §
 [工作流] 新任务接入本地存储前必须盘点现有 key 并遵循命名规范：新任务开工前必须 grep 全仓库现有 wego.* localStorage key 并列清单；新功能必须用新 key，遵循 wego.{domain}.{entity} 命名规范；WegoApp.db 只是统一封装层，不改变现有 key 和数据格式，不做自动迁移；现有场景不迁移，新场景走统一接口。[ev-002] ×1，最近 2026-08-28
 §
-[工作流] 经验沉淀必须走标准流程，禁止脚本机械化生成：遇到用户纠正、返工、踩坑等触发信号时，先写入 evidence.json 事实事件，AI 阅读事实后推理归纳，直接写入 EXPERIENCE.md（用 section 符号分隔多条），再运行 node scripts/refine-experience.mjs --check 校验事实一致性。禁止用脚本从结构化数据模板生成 EXPERIENCE.md。[ev-003] ×1，最近 2026-08-28
+[工作流] 经验沉淀必须走标准流程，禁止脚本机械化生成：遇到用户纠正、返工、踩坑等触发信号时，先写入 evidence.json 事实事件，AI 阅读事实后推理归纳，直接写入 EXPERIENCE.md（用 section 符号分隔多条），再运行 node scripts/refine-experience.mjs --check 校验事实一致性。禁止用脚本从结构化数据模板生成 EXPERIENCE.md。[ev-003, ev-005] ×2，最近 2026-08-28
 §
 [工作流] Spec 入口逻辑必须明确触发方式和对象，避免理解偏差：写 spec 入口部分时，每条入口必须明确①触发方式（点击/长按/滑动）②触发对象（自己的/别人的/特定类型）③按钮位置和层级④后续行为。不明确的点列入 open_questions，不凭猜测写入正文。[ev-004] ×1，最近 2026-08-28

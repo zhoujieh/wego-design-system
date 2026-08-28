@@ -79,9 +79,18 @@ function parseEntries(content) {
 }
 
 function extractEvidenceIds(entry) {
-  const matches = entry.match(/\[ev-\d+\]/g);
-  if (!matches) return [];
-  return matches.map((m) => m.slice(1, -1)); // 去掉方括号
+  // 支持 [ev-001] 和 [ev-001, ev-002] 两种格式
+  const bracketMatches = entry.match(/\[([^\]]+)\]/g);
+  if (!bracketMatches) return [];
+  const ids = [];
+  for (const bracket of bracketMatches) {
+    const inner = bracket.slice(1, -1);
+    const parts = inner.split(',').map((s) => s.trim());
+    for (const part of parts) {
+      if (/^ev-\d+$/.test(part)) ids.push(part);
+    }
+  }
+  return ids;
 }
 
 function checkFormat(content) {
