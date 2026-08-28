@@ -21,6 +21,9 @@
 <!-- rule-id: agent-must-read-experience-before-task -->
 - 处理 wego 任务前，会话前置读取 `EXPERIENCE.md`，了解历史经验与踩坑教训。
 
+<!-- rule-id: experience-md-is-auto-generated -->
+- `EXPERIENCE.md` 是从经验库自动提炼的视图，**禁止手动编辑**；经验沉淀必须写入 `evidence.json`（事实事件）和 `candidates.json`（经验归纳），再运行 `node scripts/refine-experience.mjs` 自动生成；手动编辑会被下次提炼覆盖。
+
 ## 固定产物与边界
 
 - `wego-app/index.html` 是唯一 App 入口；业务场景位于 `wego-app/scenes/{shop|bcg|customer|infras}/{中文业务场景}/`，通过 `#/route-id` 访问；场景产物不得散落到仓库根目录。
