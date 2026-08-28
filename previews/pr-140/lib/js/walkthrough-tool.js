@@ -48,6 +48,33 @@
   };
 
   // ============================================================
+  // 调试日志系统（用于移动端排查键盘不弹出、气泡不显示等问题）
+  // ============================================================
+  const debugLog = {
+    entries: [],
+    maxEntries: 300,
+    add(type, message) {
+      const now = new Date();
+      const time = now.toLocaleTimeString('zh-CN', { hour12: false }) + '.' + String(now.getMilliseconds()).padStart(3, '0');
+      this.entries.push({ time, type, message });
+      if (this.entries.length > this.maxEntries) this.entries.shift();
+      // 实时更新日志面板（如果已打开）
+      try {
+        const app = document.querySelector('wego-walkthrough');
+        if (app && app._components && app._components.debugPanel && !app._components.debugPanel.hasAttribute('hidden')) {
+          app._refreshDebugLog();
+        }
+      } catch (e) {}
+    },
+    format() {
+      return this.entries.map(e => `[${e.time}] [${e.type}] ${e.message}`).join('\n');
+    },
+    clear() {
+      this.entries = [];
+    },
+  };
+
+  // ============================================================
   // Liaison 风格图标集（1.5px 线宽，圆角端点，20×20 视口）
   // ============================================================
 const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColor"';
@@ -4211,6 +4238,25 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           }
           .annotation-bubble-delete:hover { background: rgba(255,107,107,0.1); }
           .annotation-bubble-delete[hidden] { display: none; }
+          /* 调试日志面板 */
+          .debug-panel {
+            position: fixed; z-index: 9700;
+            width: 320px; max-height: 60vh;
+            background: #1a1a2e; border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            display: flex; flex-direction: column; overflow: hidden;
+          }
+          .debug-panel[hidden] { display: none; }
+          .debug-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+          .debug-panel-title { color: rgba(255,255,255,0.9); font-size: 13px; font-weight: 600; }
+          .debug-panel-close { background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; padding: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
+          .debug-panel-close:hover { background: rgba(255,255,255,0.1); color: #fff; }
+          .debug-panel-close svg { width: 14px; height: 14px; }
+          .debug-panel-content { flex: 1; overflow-y: auto; margin: 0; padding: 10px 12px; font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 11px; line-height: 1.5; color: rgba(255,255,255,0.8); white-space: pre-wrap; word-break: break-all; max-height: 40vh; }
+          .debug-panel-footer { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid rgba(255,255,255,0.08); }
+          .debug-panel-btn { flex: 1; padding: 6px 12px; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; background: rgba(255,255,255,0.06); color: #fff; font-size: 12px; cursor: pointer; }
+          .debug-panel-btn:hover { background: rgba(255,255,255,0.12); }
+          .debug-panel-btn:active { background: rgba(255,255,255,0.18); }
         </style>
         <div class="toolbar-container is-collapsed" data-toolbar>
           <div class="toolbar-clip">
@@ -4276,6 +4322,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             <span>组件库</span>
             <span class="subpanel-arrow">${ICONS.chevronRight}</span>
           </button>
+          <div class="subpanel-sep"></div>
+          <button class="subpanel-item" data-action="debug-log">
+            <span>调试日志</span>
+            <span class="subpanel-arrow">${ICONS.chevronRight}</span>
+          </button>
         </div>
         <!-- 子组件（走查模式相关） -->
         <wego-wt-highlight hidden></wego-wt-highlight>
@@ -4293,6 +4344,18 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           </div>
           <textarea class="annotation-bubble-input" data-annotation-input placeholder="输入批注内容，自动保存..."></textarea>
           <button class="annotation-bubble-delete" data-annotation-delete>删除批注</button>
+        </div>
+        <!-- 调试日志面板 -->
+        <div class="debug-panel" data-debug-panel hidden>
+          <div class="debug-panel-header">
+            <span class="debug-panel-title">调试日志</span>
+            <button class="debug-panel-close" data-debug-close title="关闭">${ICONS.close}</button>
+          </div>
+          <pre class="debug-panel-content" data-debug-content></pre>
+          <div class="debug-panel-footer">
+            <button class="debug-panel-btn" data-debug-copy>复制日志</button>
+            <button class="debug-panel-btn" data-debug-clear>清空</button>
+          </div>
         </div>
       `;
     }
@@ -4314,6 +4377,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._components.annotationInput = this._shadow.querySelector('[data-annotation-input]');
       this._components.annotationClose = this._shadow.querySelector('[data-annotation-close]');
       this._components.annotationDelete = this._shadow.querySelector('[data-annotation-delete]');
+      this._components.debugPanel = this._shadow.querySelector('[data-debug-panel]');
+      this._components.debugContent = this._shadow.querySelector('[data-debug-content]');
+      this._components.debugClose = this._shadow.querySelector('[data-debug-close]');
+      this._components.debugCopy = this._shadow.querySelector('[data-debug-copy]');
+      this._components.debugClear = this._shadow.querySelector('[data-debug-clear]');
     }
 
     _bindEvents() {
@@ -4363,6 +4431,43 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           }
         });
       });
+      // 调试日志入口
+      const debugLogBtn = this._shadow.querySelector('[data-action="debug-log"]');
+      if (debugLogBtn) {
+        debugLogBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this._closeSubpanels();
+          this._openDebugPanel();
+        });
+      }
+      // 调试日志面板事件
+      if (this._components.debugClose) {
+        this._components.debugClose.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this._closeDebugPanel();
+        });
+      }
+      if (this._components.debugCopy) {
+        this._components.debugCopy.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const text = debugLog.format();
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(() => {
+              this._showToast('日志已复制到剪贴板');
+            }).catch(() => this._fallbackCopy(text));
+          } else {
+            this._fallbackCopy(text);
+          }
+        });
+      }
+      if (this._components.debugClear) {
+        this._components.debugClear.addEventListener('click', (e) => {
+          e.stopPropagation();
+          debugLog.clear();
+          this._refreshDebugLog();
+          this._showToast('日志已清空');
+        });
+      }
       // 点击外部关闭子面板和配置列表
       document.addEventListener('pointerdown', (e) => {
         if (!e.target.closest) return;
@@ -4781,6 +4886,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     // ── 批注模式 ──────────────────────────────────────────
     _setAnnotationMode(enabled) {
       this._annotationMode = enabled;
+      debugLog.add('ANNOTATION', `批注模式切换: ${enabled ? '开启' : '关闭'}`);
       if (enabled) {
         this._setWalkthroughMode(false);
         document.body.setAttribute('data-annotation-mode', 'true');
@@ -4827,6 +4933,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._annotationStartX = e.clientX;
       this._annotationStartY = e.clientY;
       this._annotationIsSwiping = false;
+      debugLog.add('TOUCH', `pointerdown 页面元素: (${e.clientX}, ${e.clientY}) tag=${e.target.tagName}`);
     };
 
     _onAnnotationPointerMove = (e) => {
@@ -4840,14 +4947,22 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     _onAnnotationPointerUp = (e) => {
       if (!this._annotationPointerActive) return;
       this._annotationPointerActive = false;
-      if (this._annotationIsSwiping) return;
+      if (this._annotationIsSwiping) {
+        debugLog.add('TOUCH', 'pointerup 判定为滑动，忽略');
+        return;
+      }
       const el = document.elementFromPoint(e.clientX, e.clientY);
       if (!el || el === document.body || el === document.documentElement) {
+        debugLog.add('TOUCH', 'pointerup 命中 body/documentElement，关闭气泡');
         this._closeAnnotationBubble();
         return;
       }
-      if (isWalkthroughElement(el)) return;
+      if (isWalkthroughElement(el)) {
+        debugLog.add('TOUCH', `pointerup 命中工具元素: ${el.tagName}`);
+        return;
+      }
       if (e.cancelable) e.preventDefault();
+      debugLog.add('TOUCH', `pointerup 命中页面元素: ${el.tagName}，准备打开批注`);
       this._openAnnotationForElement(el, e.clientX, e.clientY);
     };
 
@@ -4869,12 +4984,14 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const layer = this._components.annotationMarkerLayer;
       if (!layer || layer.hasAttribute('hidden')) return;
       layer.innerHTML = '';
+      let count = 0;
       state.annotations.forEach((ann, idx) => {
         try {
           const el = document.querySelector(ann.selector);
           if (!el || !el.isConnected) return;
           const rect = el.getBoundingClientRect();
           if (rect.width === 0 || rect.height === 0) return;
+          count++;
           const marker = document.createElement('div');
           marker.className = 'annotation-marker';
           marker.dataset.annotationId = ann.id;
@@ -4887,18 +5004,21 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           marker.addEventListener('pointerdown', (e) => {
             e.stopPropagation();
             e.preventDefault();
+            debugLog.add('MARKER', `标记 pointerdown: annId=${ann.id} text="${(ann.text || '').slice(0, 20)}"`);
             // 点击时实时获取元素 rect，避免使用 _syncAnnotationMarkers 时缓存的过时坐标（滚动后位置已变）
             try {
               const el = document.querySelector(ann.selector);
               const currentRect = el && el.isConnected ? el.getBoundingClientRect() : rect;
               this._openAnnotationBubble(ann, currentRect);
             } catch (err) {
+              debugLog.add('MARKER', `获取元素 rect 失败: ${err.message}`);
               this._openAnnotationBubble(ann, rect);
             }
           });
           layer.appendChild(marker);
         } catch (err) {}
       });
+      debugLog.add('MARKER', `_syncAnnotationMarkers 完成: 共创建 ${count} 个标记 (state.annotations=${state.annotations.length})`);
     }
 
     _openAnnotationForElement(el, clickX, clickY) {
@@ -4907,6 +5027,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const elementText = (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 50);
       // 查找已有批注
       let ann = state.annotations.find(a => a.selector === selector);
+      const isNew = !ann;
       if (!ann) {
         ann = {
           id: 'ann-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
@@ -4919,12 +5040,14 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         state.annotations.push(ann);
         this._saveChanges();
       }
+      debugLog.add('BUBBLE', `_openAnnotationForElement: ${isNew ? '新建批注' : '已有批注'} selector=${selector.slice(0, 50)}`);
       const rect = el.getBoundingClientRect();
       this._openAnnotationBubble(ann, rect);
       this._syncAnnotationMarkers();
     }
 
     _openAnnotationBubble(ann, rect) {
+      debugLog.add('BUBBLE', `_openAnnotationBubble 开始: annId=${ann.id} text="${(ann.text || '').slice(0, 20)}" rect=(${Math.round(rect.left)},${Math.round(rect.top)},${Math.round(rect.width)}x${Math.round(rect.height)})`);
       this._closeAnnotationBubble();
       this._currentAnnotation = ann;
       const bubble = this._components.annotationBubble;
@@ -4936,14 +5059,31 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       bubble.style.display = ''; // 清除可能残留的内联 display:none，确保 [hidden] 移除后正常显示
       this._annotationBubbleRect = rect;
       this._updateAnnotationBubblePosition();
+      debugLog.add('BUBBLE', `气泡已显示: left=${bubble.style.left} top=${bubble.style.top} offsetHeight=${bubble.offsetHeight}`);
       // 同步聚焦输入框：移动端浏览器要求 focus() 必须在用户交互的同步回调中调用才能拉起键盘，
       // 不能放在 setTimeout 异步回调中（会被判定为非用户直接触发，键盘不弹出）。
       // 先 click() 再 focus()：部分移动端浏览器需要 click 事件激活输入框才弹出软键盘。
-      input.click();
-      input.focus();
+      try {
+        input.click();
+        debugLog.add('KEYBOARD', 'input.click() 已调用');
+      } catch (e) {
+        debugLog.add('KEYBOARD', `input.click() 异常: ${e.message}`);
+      }
+      try {
+        input.focus();
+        debugLog.add('KEYBOARD', `input.focus() 已调用, document.activeElement=${document.activeElement ? document.activeElement.tagName : 'null'}`);
+      } catch (e) {
+        debugLog.add('KEYBOARD', `input.focus() 异常: ${e.message}`);
+      }
       // 光标定位到内容末尾，直接进入输入状态（不全选已有内容）
       const len = input.value.length;
-      input.setSelectionRange(len, len);
+      try {
+        input.setSelectionRange(len, len);
+        debugLog.add('KEYBOARD', `setSelectionRange(${len}, ${len}) 已调用`);
+      } catch (e) {
+        debugLog.add('KEYBOARD', `setSelectionRange 异常: ${e.message}`);
+      }
+      debugLog.add('BUBBLE', '_openAnnotationBubble 完成');
     }
 
     _updateAnnotationBubblePosition() {
@@ -4995,9 +5135,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const ann = this._currentAnnotation;
         this._currentAnnotation = null;
         // 空批注清理：未输入内容的批注不保留标记和持久化数据，避免残留空标记
-        if (!ann.text || !ann.text.trim()) {
+        const isEmpty = !ann.text || !ann.text.trim();
+        if (isEmpty) {
           state.annotations = state.annotations.filter(a => a.id !== ann.id);
         }
+        debugLog.add('BUBBLE', `_closeAnnotationBubble: annId=${ann.id} text="${(ann.text || '').slice(0, 20)}" 空批注=${isEmpty} 剩余批注=${state.annotations.length}`);
         this._saveChanges();
         this._syncAnnotationMarkers();
         this._updateChangeCount();
@@ -5014,6 +5156,52 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._saveChanges();
       this._syncAnnotationMarkers();
       this._showToast('已删除批注');
+    }
+
+    // ── 调试日志面板 ──────────────────────────────────────
+    _openDebugPanel() {
+      const panel = this._components.debugPanel;
+      if (!panel) return;
+      panel.removeAttribute('hidden');
+      // 定位到屏幕中央偏下，避免被键盘遮挡
+      const panelWidth = 320;
+      const panelHeight = Math.min(window.innerHeight * 0.6, 500);
+      panel.style.left = Math.max(8, (window.innerWidth - panelWidth) / 2) + 'px';
+      panel.style.top = Math.max(8, window.innerHeight - panelHeight - 40) + 'px';
+      this._refreshDebugLog();
+      debugLog.add('DEBUG', '调试日志面板已打开');
+    }
+
+    _closeDebugPanel() {
+      if (this._components.debugPanel) {
+        this._components.debugPanel.setAttribute('hidden', '');
+      }
+    }
+
+    _refreshDebugLog() {
+      if (this._components.debugContent) {
+        this._components.debugContent.textContent = debugLog.format() || '（暂无日志）';
+        // 滚动到底部
+        this._components.debugContent.scrollTop = this._components.debugContent.scrollHeight;
+      }
+    }
+
+    /** 复制失败兜底：创建临时 textarea + execCommand('copy') */
+    _fallbackCopy(text) {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        this._showToast('日志已复制到剪贴板');
+      } catch (e) {
+        this._showToast('复制失败，请手动选择文本复制');
+      }
     }
 
     _bindTouchEvents() {
@@ -5296,6 +5484,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     }
 
     _resetChanges() {
+      debugLog.add('RESET', `_resetChanges 开始: changes=${state.changes.length} annotations=${state.annotations.length}`);
       if (state.changes.length === 0 && state.annotations.length === 0) {
         this._showToast('当前没有修改');
         return;
@@ -5308,6 +5497,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._saveChanges();
       this._updateChangeCount();
       this._showToast('已重置所有修改');
+      debugLog.add('RESET', `_resetChanges 完成: changes=${state.changes.length} annotations=${state.annotations.length}`);
       if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
         this._components.overviewPanel.refresh(state.changes, state.currentRoute, state.annotations);
       }
@@ -5320,6 +5510,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const data = raw ? JSON.parse(raw) : {};
         state.changes = data.changes || [];
         state.annotations = data.annotations || [];
+        debugLog.add('LOAD', `_loadChanges: route=${state.currentRoute} changes=${state.changes.length} annotations=${state.annotations.length}`);
         // 批量收集伪元素变更到 state.pseudoStyles，循环结束后统一重建一次，
         // 避免 applyPseudoStyle 内部每次都 rebuildPseudoStyleElement 导致 N+1 次 DOM 操作。
         state.changes.forEach(c => {
@@ -5331,7 +5522,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         });
         rebuildPseudoStyleElement();
         this._updateChangeCount();
-      } catch (e) {}
+      } catch (e) {
+        debugLog.add('LOAD', `_loadChanges 异常: ${e.message}`);
+      }
     }
 
     _saveChanges() {
@@ -5424,6 +5617,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         if (app) app._showToast(msg);
       },
     };
+    // 记录环境信息，便于排查移动端键盘问题
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    debugLog.add('INIT', `走查工具初始化: 移动端=${isMobile} 触摸=${isTouch} UA=${navigator.userAgent.slice(0, 80)}`);
     console.log('[Walkthrough] MVP initialized');
   }
 
