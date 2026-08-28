@@ -1444,39 +1444,6 @@ body[data-order-layout="landscape"] .phone-indicator {
   border: 0;
 }
 
-.order-add-discount-editor {
-  display: flex;
-  align-items: center;
-  gap: var(--spacer-8);
-  margin-bottom: var(--spacer-12);
-  padding: var(--spacer-10) var(--spacer-12);
-  background: var(--bg-subtle);
-  border-radius: var(--radius-8);
-}
-
-.order-add-discount-editor label {
-  flex: 0 0 auto;
-  font-size: var(--body-sm-font-size);
-}
-
-.order-add-discount-editor input {
-  min-width: 0;
-  flex: 1;
-  height: var(--size-36);
-  padding: 0 var(--spacer-10);
-  border: var(--stroke-1) solid var(--border-neutral-l2);
-  border-radius: var(--radius-6);
-}
-
-.order-add-discount-editor button {
-  min-height: var(--size-36);
-  padding: 0 var(--spacer-12);
-  color: var(--text-inverse);
-  background: var(--bg-brand);
-  border: 0;
-  border-radius: var(--radius-6);
-}
-
 .order-add-product small {
   color: var(--text-secondary);
 }
