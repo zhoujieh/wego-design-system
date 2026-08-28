@@ -331,6 +331,37 @@
     return index === product.specs.length - 1 ? 0 : 18 + index * 11;
   }
 
+  function productTracksInventory(product) {
+    return product.inventory != null || product.stock != null;
+  }
+
+  function batchQuantityLimit(product, spec) {
+    if (!productTracksInventory(product)) return 9999;
+    var stock = specStock(product, spec);
+    return stock > 0 ? stock : 9999;
+  }
+
+  function batchSelectionMatches(selection, color, size) {
+    if (!selection) return false;
+    if (selection.type === 'all') return true;
+    if (selection.type === 'row') return selection.value === size;
+    return selection.type === 'column' && selection.value === color;
+  }
+
+  function focusBatchSelection(root, selection) {
+    if (!selection) return;
+    var scope = root.querySelector(isDesktopWorkbench() ? '.order-desktop-modal--add' : '.order-v2-modal--add') || root;
+    var selector = selection.type === 'all'
+      ? '[data-batch-qty]'
+      : selection.type === 'row'
+        ? '[data-batch-row="' + CSS.escape(selection.value) + '"] [data-batch-qty]'
+        : '[data-batch-column="' + CSS.escape(selection.value) + '"][data-batch-qty]';
+    var input = scope.querySelector(selector);
+    if (!input) return;
+    input.focus({ preventScroll: true });
+    input.select();
+  }
+
   function addDraftTotal(draft) {
     return Object.keys(draft.skuQty).reduce(function (sum, key) { return sum + Number(draft.skuQty[key] || 0); }, 0);
   }
@@ -2006,7 +2037,7 @@
     var stock = spec ? specStock(product, spec) : 0;
     return ''
       + '<div class="order-single-picker">'
-      +   '<section>' + (desktop ? '<div class="order-add-selection-head"><small>颜色</small><button type="button" class="link link--14" data-component-slug="link" data-add-mode="batch"><i class="wego-iconfont-s icon-qiehuan" aria-hidden="true"></i>一次买多件</button></div>' : '<small>颜色</small>') + '<div class="order-add-choice-list order-add-choice-list--colors">' + matrix.colors.map(function (color) {
+      +   '<section>' + (desktop ? '<div class="order-add-selection-head"><small>颜色</small><label class="order-add-batch-switch-label"><span>一次买多件</span><button type="button" class="switch switch--off" role="switch" aria-checked="false" aria-label="一次买多件" data-component-slug="switch" data-add-mode="batch"><span class="switch__thumb"></span></button></label></div>' : '<small>颜色</small>') + '<div class="order-add-choice-list order-add-choice-list--colors">' + matrix.colors.map(function (color) {
             return '<button type="button" class="btn btn--weak btn--sm ' + (selectedColor === color ? 'is-selected' : '') + '" data-component-slug="button" data-add-color="' + encodeURIComponent(color) + '">' + escapeHtml(color) + '</button>';
           }).join('') + '</div></section>'
       +   '<section><small>规格</small><div class="order-add-choice-list">' + availableSizes.map(function (size) {
@@ -2026,27 +2057,28 @@
   function addBatchPicker(draft, desktop) {
     var product = draft.product;
     var matrix = addProductMatrix(product);
+    var selection = draft.batchSelection;
+    var showInventory = productTracksInventory(product);
+    var quickTools = ''
+      + '<div class="order-batch-tools">'
+      +   '<button type="button" class="link link--14" data-component-slug="link" data-batch-fill="1">每色每码各1<i class="wego-iconfont-s icon-youshangjiantou" aria-hidden="true"></i></button>'
+      +   '<button type="button" class="link link--14" data-component-slug="link" data-batch-fill="2">每色每码各2<i class="wego-iconfont-s icon-youshangjiantou" aria-hidden="true"></i></button>'
+      + '</div>';
     return ''
-      + '<div class="order-batch-picker">'
-      +   (desktop ? '<div class="order-add-selection-head"><strong>批量选择规格</strong><button type="button" class="link link--14" data-component-slug="link" data-add-mode="single"><i class="wego-iconfont-s icon-qiehuan" aria-hidden="true"></i>一次买一件</button></div>' : '')
-      +   '<div class="order-batch-tools">'
-      +     button('每色每码 ×1', 'weak', 'sm', 'data-batch-fill="1"')
-      +     button('每色每码 ×2', 'weak', 'sm', 'data-batch-fill="2"')
-      +     button('复制上次', 'weak', 'sm', 'data-batch-copy')
-      +     button('清空', 'danger', 'sm', 'data-batch-clear')
-      +   '</div>'
-      +   '<div class="order-batch-matrix-wrap"><table class="order-batch-matrix"><thead><tr><th>颜色／尺码</th>' + matrix.sizes.map(function (size) { return '<th><button type="button" data-batch-col-fill="' + encodeURIComponent(size) + '">' + escapeHtml(size) + '</button></th>'; }).join('') + '</tr></thead><tbody>'
-      +     matrix.colors.map(function (color) {
-              var cells = matrix.sizes.map(function (size) {
+      + '<div class="order-batch-picker' + (showInventory ? ' order-batch-picker--with-inventory' : '') + '">'
+      +   (desktop ? '<div class="order-add-selection-head">' + quickTools + '<label class="order-add-batch-switch-label"><span>一次买多件</span><button type="button" class="switch switch--on" role="switch" aria-checked="true" aria-label="一次买多件" data-component-slug="switch" data-add-mode="single"><span class="switch__thumb"></span></button></label></div>' : quickTools)
+      +   '<div class="order-batch-matrix-wrap"><table class="order-batch-matrix"><thead><tr><th class="order-batch-corner' + (selection && selection.type === 'all' ? ' is-selected' : '') + '"><button type="button" data-batch-select-all aria-label="选择全部规格"><span class="order-batch-corner-mark" aria-hidden="true"></span></button></th>' + matrix.colors.map(function (color) { return '<th class="' + (selection && selection.type === 'column' && selection.value === color ? 'is-selected' : '') + '"><button type="button" data-batch-select-column="' + encodeURIComponent(color) + '">' + escapeHtml(color) + '</button></th>'; }).join('') + '</tr></thead><tbody>'
+      +     matrix.sizes.map(function (size) {
+              var cells = matrix.colors.map(function (color) {
                 var spec = specKey(product, color, size);
                 var stock = specStock(product, spec);
                 var qty = Number(draft.skuQty[spec] || 0);
-                return '<td>' + (spec && stock > 0 ? '<input type="text" inputmode="numeric" maxlength="5" value="' + qty + '" data-batch-qty="' + encodeURIComponent(spec) + '" aria-label="' + escapeHtml(color + ' ' + size) + '数量"><small>库存' + stock + '</small>' : '<span class="order-batch-unavailable">—</span>') + '</td>';
+                var selected = batchSelectionMatches(selection, color, size);
+                return '<td class="' + (selected ? 'is-selected' : '') + '">' + (spec ? '<div class="number-input number-input--surface-white" data-component-slug="input"><input class="number-input__field" type="text" inputmode="numeric" maxlength="5" value="' + (qty === 0 ? '' : qty) + '" data-batch-qty="' + encodeURIComponent(spec) + '" data-batch-column="' + escapeHtml(color) + '" aria-label="' + escapeHtml(color + ' ' + size) + '数量"></div>' : '<span class="order-batch-unavailable">—</span>') + (showInventory ? '<small>库存' + (spec && stock > 0 ? stock : '--') + '</small>' : '') + '</td>';
               }).join('');
-              return '<tr><th><button type="button" data-batch-row-fill="' + encodeURIComponent(color) + '">' + escapeHtml(color) + '</button></th>' + cells + '</tr>';
+              return '<tr data-batch-row="' + escapeHtml(size) + '"><th class="' + (selection && selection.type === 'row' && selection.value === size ? 'is-selected' : '') + '"><button type="button" data-batch-select-row="' + encodeURIComponent(size) + '">' + escapeHtml(size) + '</button></th>' + cells + '</tr>';
             }).join('')
       +   '</tbody></table></div>'
-      +   '<div class="order-batch-hint">点击颜色或尺码标题，可将对应可售规格快速配 1 件</div>'
       + '</div>';
   }
 
@@ -2665,7 +2697,8 @@
       selectedColor: '',
       selectedSize: '',
       note: '',
-      noteOpen: false
+      noteOpen: false,
+      batchSelection: null
     };
     state.panel = 'add';
     renderActive();
@@ -3832,10 +3865,14 @@
         state.addDraft.mode = nextAddMode;
         state.addDraft.selectedColor = '';
         state.addDraft.selectedSize = '';
+        state.addDraft.batchSelection = null;
         state.addDraft.product.specs.forEach(function (spec) { state.addDraft.skuQty[spec] = 0; });
       }
       rememberAddMode(state.addDraft.mode);
-      renderActive();
+      target.classList.toggle('switch--on', nextAddMode === 'batch');
+      target.classList.toggle('switch--off', nextAddMode !== 'batch');
+      target.setAttribute('aria-checked', String(nextAddMode === 'batch'));
+      window.setTimeout(renderActive, 140);
       return;
     }
     if (target.matches('[data-add-price-mode]') && state.addDraft) {
@@ -3914,37 +3951,20 @@
     }
     if (target.matches('[data-batch-fill]')) {
       var batchFill = Number(target.dataset.batchFill);
-      state.addDraft.product.specs.forEach(function (spec) { state.addDraft.skuQty[spec] = specStock(state.addDraft.product, spec) > 0 ? batchFill : 0; });
+      state.addDraft.product.specs.forEach(function (spec) { state.addDraft.skuQty[spec] = Math.min(batchQuantityLimit(state.addDraft.product, spec), batchFill); });
+      state.addDraft.batchSelection = { type: 'all', value: '' };
       renderActive();
+      window.requestAnimationFrame(function () { focusBatchSelection(activeContext.root, state.addDraft && state.addDraft.batchSelection); });
       return;
     }
-    if (target.matches('[data-batch-copy]')) {
-      var lastPattern = storedBatchPattern();
-      if (!lastPattern) {
-        ctx.toast('暂无上次批量配码记录');
-        return;
-      }
-      state.addDraft.product.specs.forEach(function (spec, index) {
-        state.addDraft.skuQty[spec] = Math.min(specStock(state.addDraft.product, spec), Number(lastPattern[index] || 0));
-      });
+    if (target.matches('[data-batch-select-row], [data-batch-select-column], [data-batch-select-all]')) {
+      state.addDraft.batchSelection = target.matches('[data-batch-select-all]')
+        ? { type: 'all', value: '' }
+        : target.matches('[data-batch-select-row]')
+          ? { type: 'row', value: decodeURIComponent(target.dataset.batchSelectRow) }
+          : { type: 'column', value: decodeURIComponent(target.dataset.batchSelectColumn) };
       renderActive();
-      return;
-    }
-    if (target.matches('[data-batch-clear]')) {
-      state.addDraft.product.specs.forEach(function (spec) { state.addDraft.skuQty[spec] = 0; });
-      renderActive();
-      return;
-    }
-    if (target.matches('[data-batch-row-fill], [data-batch-col-fill]')) {
-      var rowColor = target.dataset.batchRowFill ? decodeURIComponent(target.dataset.batchRowFill) : '';
-      var columnSize = target.dataset.batchColFill ? decodeURIComponent(target.dataset.batchColFill) : '';
-      state.addDraft.product.specs.forEach(function (spec) {
-        var pair = splitSpec(spec);
-        if ((rowColor && pair.color === rowColor) || (columnSize && pair.size === columnSize)) {
-          state.addDraft.skuQty[spec] = specStock(state.addDraft.product, spec) > 0 ? 1 : 0;
-        }
-      });
-      renderActive();
+      window.requestAnimationFrame(function () { focusBatchSelection(activeContext.root, state.addDraft && state.addDraft.batchSelection); });
       return;
     }
     if (target.matches('[data-toggle-add-note]')) {
@@ -4495,14 +4515,24 @@
     }
     if (target.matches('[data-batch-qty]') && state.addDraft) {
       var batchSpec = decodeURIComponent(target.dataset.batchQty);
-      var batchStock = specStock(state.addDraft.product, batchSpec);
       var batchRaw = String(target.value || '').replace(/[^\d-]/g, '');
       var batchNegative = batchRaw.charAt(0) === '-' ? '-' : '';
       var batchDigits = batchRaw.replace(/-/g, '').slice(0, 4);
+      var batchHasValue = batchDigits.length > 0;
       var batchQuantity = Number((batchNegative + batchDigits) || 0);
-      batchQuantity = Math.max(-9999, Math.min(batchStock, batchQuantity));
-      target.value = batchQuantity;
-      state.addDraft.skuQty[batchSpec] = batchQuantity;
+      batchQuantity = Math.max(-9999, Math.min(batchQuantityLimit(state.addDraft.product, batchSpec), batchQuantity));
+      target.value = batchHasValue ? batchQuantity : '';
+      var batchSelection = state.addDraft.batchSelection;
+      var batchScope = root.querySelector(isDesktopWorkbench() ? '.order-desktop-modal--add' : '.order-v2-modal--add') || root;
+      state.addDraft.product.specs.forEach(function (spec) {
+        var pair = splitSpec(spec);
+        if (!batchSelection || spec === batchSpec || batchSelectionMatches(batchSelection, pair.color, pair.size)) {
+          var nextQuantity = Math.min(batchQuantityLimit(state.addDraft.product, spec), batchQuantity);
+          state.addDraft.skuQty[spec] = nextQuantity;
+          var nextInput = batchScope.querySelector('[data-batch-qty="' + CSS.escape(encodeURIComponent(spec)) + '"]');
+          if (nextInput) nextInput.value = batchHasValue ? nextQuantity : '';
+        }
+      });
       updateAddDraftTotals(root);
       return;
     }
