@@ -1,0 +1,66 @@
+/* ── 场景选择页 ── */
+/* layout-scroll 主滚动区声明(组件 CSS 同源,供静态守卫推导主滚动区) */
+.layout-scroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-block-end: var(--safe-area-bottom-content);
+}
+.agent-resale-scene__intro {
+  padding: var(--spacer-16);
+  background: var(--bg-surface);
+  border-bottom: 0.5px solid var(--border-neutral-l2);
+}
+.agent-resale-scene__intro-title {
+  font-size: var(--heading-sm-font-size);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-default);
+  margin: 0 0 var(--spacer-4);
+}
+.agent-resale-scene__intro-desc {
+  font-size: var(--body-sm-font-size);
+  color: var(--text-secondary);
+  line-height: var(--body-sm-line-height);
+  margin: 0;
+}
+.agent-resale-scene__group + .agent-resale-scene__group {
+  margin-top: var(--spacer-8);
+}
+.agent-resale-scene__group-title {
+  padding: var(--spacer-12) var(--spacer-16) var(--spacer-8);
+  font-size: var(--body-sm-font-size);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-tertiary);
+}
+.agent-resale-scene__card-desc {
+  margin-top: var(--spacer-2);
+  font-size: var(--body-sm-font-size);
+  color: var(--text-tertiary);
+  line-height: var(--body-sm-line-height);
+}
+.agent-resale-scene__card-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--spacer-8);
+  height: var(--size-24);
+  border-radius: var(--radius-4);
+  font-size: var(--body-xs-font-size);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--body-xs-line-height);
+}
+.agent-resale-scene__card-badge--free {
+  background: var(--bg-brand-surface-l1);
+  color: var(--text-brand);
+}
+.agent-resale-scene__card-badge--fixed {
+  background: var(--bg-overlay-l1);
+  color: var(--text-secondary);
+}
+.agent-resale-scene__card-badge--live {
+  background: var(--status-danger-surface-l1);
+  color: var(--status-danger-default);
+}
+.agent-resale-scene__card-badge--error {
+  background: var(--status-warning-surface-l1);
+  color: var(--status-warning-default);
+}
