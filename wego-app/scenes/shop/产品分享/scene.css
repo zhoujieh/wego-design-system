@@ -440,7 +440,7 @@
   min-height: 0;
   background: #fff;
   border-radius: 16px;
-  overflow: hidden;
+  overflow: visible;
   position: relative;
   margin: auto;
   display: block;
@@ -460,7 +460,15 @@
 .gray-popup__header {
   position: relative;
   height: 130px;
-  background: url('assets/update.png') center / cover no-repeat;
+  overflow: visible;
+}
+
+.gray-popup__header-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  position: relative;
+  top: -30px;
 }
 
 .gray-popup__body {

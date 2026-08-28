@@ -315,7 +315,7 @@
     var forcedClass = isForced ? ' gray-popup-modal--forced' : '';
     return '<div class="modal modal--fullscreen gray-popup-modal' + forcedClass + '" data-component-slug="modal" data-state="open" role="dialog" aria-modal="true" aria-label="发现新版本">'
       + '<div class="modal__panel gray-popup__panel">'
-      + '<div class="gray-popup__header"></div>'
+      + '<div class="gray-popup__header"><img src="scenes/shop/产品分享/assets/update.png" alt="" class="gray-popup__header-img"></div>'
       + '<div class="gray-popup__body">'
       + '<ol class="gray-popup__list">'
       + '<li>浏览相册更流畅，无需等待体验更好</li>'
