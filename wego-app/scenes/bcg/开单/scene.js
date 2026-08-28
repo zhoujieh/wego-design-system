@@ -3182,6 +3182,7 @@
       state.dailyTotalRecorded = true;
     }
     state.panel = null;
+    renderActive();
     ctx.navigate('workspace-order-success');
   }
 
@@ -4895,17 +4896,16 @@
     var resultTitle = isUnpaid ? '订单已生成，待收款' : (isDebt ? '订单已生成，已记欠款' : '收款成功，订单已生成');
     var paymentState = isUnpaid ? '未收款' : (isDebt ? '已记欠款' : '已收款');
     return ''
-      + '<section class="order-success-v2" data-bg="page">'
-      +   '<nav class="navbar" data-component-slug="navbar"><div class="navbar__body"><div class="navbar__left"></div><div class="navbar__center"><span class="navbar__title">开单完成</span></div><div class="navbar__right"></div></div></nav>'
+      + '<div class="modal__panel">'
       +   '<main class="order-success-v2__body">'
       +     '<div class="order-success-v2__icon" aria-hidden="true">✓</div>'
-      +     '<h1>' + resultTitle + '</h1>'
+      +     '<h1 id="order-success-title">' + resultTitle + '</h1>'
       +     '<p>' + escapeHtml(state.paymentSummary || '已收款') + ' · ' + money(t.payable) + '</p>'
       +     '<dl><div><dt>订单号</dt><dd>' + escapeHtml(state.orderNo) + '</dd></div><div><dt>客户</dt><dd>' + escapeHtml(state.customer ? state.customer.name : '散客') + '</dd></div><div><dt>仓库</dt><dd>' + escapeHtml(state.warehouse.name) + '</dd></div><div><dt>商品</dt><dd>' + t.styles + '款 ' + t.pieces + '件</dd></div><div><dt>收款状态</dt><dd>' + paymentState + '</dd></div></dl>'
       +     '<div class="order-success-v2__actions">' + button('继续开单', 'strong', 'lg', 'data-new-order') + button('查看订单', 'weak', 'lg', 'data-view-order') + '</div>'
       +     '<small>配货、发货等后续流程不在本期原型范围内</small>'
       +   '</main>'
-      + '</section>';
+      + '</div>';
   }
 
   function resetOrder() {
@@ -4943,17 +4943,31 @@
     routeId: 'workspace-order-success',
     title: '开单完成',
     presentation: { type: 'full-screen-modal', transition: 'slide-up-enter, slide-down-exit', coversTabBar: true },
-    template: '<div class="order-success-v2-mount" data-surface-id="workspace-order-success" data-route-id="workspace-order-success" data-layout-mode="composed"></div>',
+    template: '<div class="modal modal--frame order-success-v2 order-success-v2-mount" data-component-slug="modal" data-state="open" role="dialog" aria-modal="true" aria-labelledby="order-success-title" data-surface-id="workspace-order-success" data-route-id="workspace-order-success" data-layout-mode="composed"></div>',
     init: function (ctx) {
       var successRoot = ctx.root.querySelector('.order-success-v2-mount') || ctx.root;
-      successRoot.innerHTML = successTemplate();
-      successRoot.querySelector('[data-new-order]')?.addEventListener('click', function () {
+      var autoCloseTimer = 0;
+      var isClosing = false;
+
+      function closeSuccess() {
+        if (isClosing) return;
+        isClosing = true;
+        if (autoCloseTimer) window.clearTimeout(autoCloseTimer);
         resetOrder();
         ctx.back();
         setTimeout(renderActive, 0);
+      }
+
+      successRoot.innerHTML = successTemplate();
+      successRoot.querySelector('[data-new-order]')?.addEventListener('click', function () {
+        closeSuccess();
       });
       successRoot.querySelector('[data-view-order]')?.addEventListener('click', function () {
         ctx.toast('订单详情入口已保留，本期不展开');
+      });
+      autoCloseTimer = window.setTimeout(closeSuccess, 3000);
+      ctx.onDestroy(function () {
+        if (autoCloseTimer) window.clearTimeout(autoCloseTimer);
       });
     }
   });
