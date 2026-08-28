@@ -33,32 +33,36 @@ body {
   margin-bottom: 0;
   padding-bottom: 0;
   border-bottom: 0;
-}
-
-.pv-header__title-row {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
 }
 
-.pv-header__title-row h1 {
-  margin: 0;
+.pv-header__main {
+  flex: 1;
+  min-width: 0;
 }
 
 .pv-header__back {
   flex-shrink: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--text-brand);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border: 1px solid var(--border-neutral-l2);
+  border-radius: var(--radius-8);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
   font-size: var(--body-sm-font-size);
   line-height: var(--body-sm-line-height);
   cursor: pointer;
-  text-decoration: none;
+  transition: border-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
 }
 
 .pv-header__back:hover {
-  text-decoration: underline;
+  border-color: var(--text-brand);
+  color: var(--text-brand);
 }
 
 .pv-header__back[hidden] {
@@ -173,10 +177,6 @@ body {
   color: var(--text-tertiary);
 }
 
-.overview-tabs {
-  display: none;
-}
-
 .overview-sidebar__empty {
   padding: 24px 16px;
   text-align: center;
@@ -266,6 +266,21 @@ body {
   line-height: var(--body-xs-line-height);
 }
 
+.overview-nav-item__status {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--bg-overlay-l1);
+  color: var(--text-secondary);
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+}
+
+.overview-nav-item.is-active .overview-nav-item__status {
+  background: var(--bg-surface);
+  color: var(--status-success-default);
+}
+
 .overview-viewer {
   display: flex;
   flex-direction: column;
@@ -298,201 +313,27 @@ body {
   display: none;
 }
 
-@media (max-width: 1400px) {
-  html,
-  body {
-    height: auto;
-    min-height: 100vh;
-    overflow-x: hidden;
-    overflow-y: auto;
-    background: var(--bg-page);
-  }
-
-  body {
-    display: block;
-    padding: 0;
-  }
-
-  .pv-header {
-    background: var(--bg-surface);
-    padding: 16px;
-    margin-bottom: 8px;
-  }
-
+@media (max-width: 991px) {
   .overview-layout {
-    display: block;
-    margin-top: 0;
-    background: var(--bg-surface);
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-columns: 1fr;
   }
 
   .overview-sidebar {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    max-height: none;
-    overflow: visible;
-    border: 0;
-    background: var(--bg-surface);
-    box-shadow: none;
-    padding: 0 0 8px;
-  }
-
-  .overview-sidebar__header {
-    position: static;
-    padding: 8px 16px 0;
-    background: transparent;
-  }
-
-  .overview-sidebar__title,
-  .overview-sidebar__sub {
-    display: none;
-  }
-
-  .overview-sidebar__search {
-    margin-top: 0;
-  }
-
-  .overview-sidebar__search-input {
-    background: rgba(32, 47, 100, 0.03);
-    border-color: transparent;
-  }
-
-  .overview-tabs {
-    display: flex;
-    gap: 24px;
-    margin-top: 8px;
-    overflow-x: auto;
-    scrollbar-width: none;
-    padding: 0 16px;
-    border-bottom: 1px solid var(--border-neutral-l2);
-  }
-
-  .overview-tabs::-webkit-scrollbar {
-    display: none;
-  }
-
-  .overview-tab {
+    max-height: 240px;
     flex-shrink: 0;
-    padding: 8px 0;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    color: var(--text-secondary);
-    font-size: var(--body-md-font-size);
-    line-height: var(--body-md-line-height);
-    cursor: pointer;
-    position: relative;
-    transition: color var(--duration-fast) var(--ease-standard);
-  }
-
-  .overview-tab.is-active {
-    color: var(--text-default);
-    font-weight: 600;
-  }
-
-  .overview-tab.is-active::after {
-    content: "";
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: var(--status-success-default);
-    border-radius: 1px;
-  }
-
-  .overview-nav-group__title {
-    display: none;
-  }
-
-  .overview-nav-group:not(.is-active) {
-    display: none;
   }
 
   .overview-nav-list {
-    display: flex;
-    flex-direction: row;
-    overflow-x: auto;
-    flex-wrap: nowrap;
-    gap: 0;
-    margin: 8px 16px 0;
-    padding: 0;
-    background: var(--bg-page);
-    border-radius: 8px;
-    scrollbar-width: none;
-    width: fit-content;
-    max-width: calc(100% - 32px);
-  }
-
-  .overview-nav-list::-webkit-scrollbar {
-    display: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 8px;
+    padding: 0 8px;
   }
 
   .overview-nav-item {
-    flex-shrink: 0;
-    width: auto;
-    margin: 0;
-    padding: 6px 14px;
-    gap: 0;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    color: var(--text-secondary);
-    justify-content: center;
-    text-align: center;
-    white-space: nowrap;
-    font-size: var(--body-sm-font-size);
-    line-height: var(--body-sm-line-height);
-    position: relative;
-  }
-
-  .overview-nav-item:not(:last-child)::after {
-    content: "";
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 1px;
-    height: 12px;
-    background: var(--border-neutral-l2);
-  }
-
-  .overview-nav-item.is-active {
-    color: var(--text-default);
-    font-weight: 600;
-    background: transparent;
-  }
-
-  .overview-nav-item__main {
-    flex: none;
-  }
-
-  .overview-nav-item__name {
-    font-size: var(--body-sm-font-size);
-    line-height: var(--body-sm-line-height);
-  }
-
-  .overview-nav-item__slug {
-    display: none;
-  }
-
-  .overview-viewer {
-    margin-top: 12px;
-    height: auto;
-    min-height: 0;
-    border: 0;
-    border-radius: 0;
-    box-shadow: none;
-    padding: 0;
-    background: #fff;
-  }
-
-  .overview-viewer iframe {
-    border: 0;
-    border-radius: 0;
-    background: #fff;
     width: 100%;
-    height: 600px;
+    margin: 0;
   }
 }
 
@@ -507,15 +348,16 @@ body {
 
 <div class="pv-header">
   <div class="pv-header__main">
-    <div class="pv-header__title-row">
-      <h1>组件预览总览</h1>
-      <button type="button" class="pv-header__back" id="back-to-app" aria-label="返回 App 动态页" hidden>动态</button>
-    </div>
+    <h1>组件预览总览</h1>
     <p>仅供人工验收查看的聚合入口。这里不复制组件内容，只关联现有单组件预览页，并在右侧按需切换显示。</p>
     <div class="pv-header__intro">
       <strong>维护规则：</strong> 每次新增已注册组件时，除了补 `components/{slug}.json`、`preview/component-{slug}.html`、注册表和聚合样式，也必须把新组件补到这个页面。
     </div>
   </div>
+  <button type="button" class="pv-header__back" id="back-to-app" aria-label="返回 App 动态页" hidden>
+    <i class="wego-iconfont-s icon-fanhui" aria-hidden="true"></i>
+    <span>动态</span>
+  </button>
 </div>
 
 <div class="overview-layout">
@@ -529,14 +371,6 @@ body {
           <input type="search" id="component-search" placeholder="搜索组件名称或 slug" aria-label="搜索组件" autocomplete="off" />
         </label>
       </div>
-      <div class="overview-tabs" id="overview-tabs">
-        <button type="button" class="overview-tab is-active" data-group-index="0">操作类</button>
-        <button type="button" class="overview-tab" data-group-index="1">展示类</button>
-        <button type="button" class="overview-tab" data-group-index="2">导航类</button>
-        <button type="button" class="overview-tab" data-group-index="3">布局类</button>
-        <button type="button" class="overview-tab" data-group-index="4">表单类</button>
-        <button type="button" class="overview-tab" data-group-index="5">反馈类</button>
-      </div>
     </div>
     <div class="overview-sidebar__empty" id="component-search-empty" hidden>未找到匹配的组件</div>
     <div class="overview-search-results" id="search-results" hidden></div>
@@ -549,18 +383,21 @@ body {
             <span class="overview-nav-item__name">按钮</span>
             <span class="overview-nav-item__slug">button</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
         <button class="overview-nav-item" type="button" data-name="链接" data-slug="link" data-status="stable" data-src="./component-link.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">链接</span>
             <span class="overview-nav-item__slug">link</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
         <button class="overview-nav-item" type="button" data-name="底部操作栏" data-slug="bottom-action-bar" data-status="stable" data-src="./component-bottom-action-bar.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">底部操作栏</span>
             <span class="overview-nav-item__slug">bottom-action-bar</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
       </div>
     </section>
@@ -573,42 +410,49 @@ body {
             <span class="overview-nav-item__name">卡片</span>
             <span class="overview-nav-item__slug">card</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
         <button class="overview-nav-item" type="button" data-name="头像" data-slug="avatar" data-status="stable" data-src="./component-avatar.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">头像</span>
             <span class="overview-nav-item__slug">avatar</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
         <button class="overview-nav-item" type="button" data-name="标签" data-slug="tag" data-status="stable" data-src="./component-tag.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">标签</span>
             <span class="overview-nav-item__slug">tag</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
         <button class="overview-nav-item" type="button" data-name="角标" data-slug="badge" data-status="stable" data-src="./component-badge.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">角标</span>
             <span class="overview-nav-item__slug">badge</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
         <button class="overview-nav-item" type="button" data-name="列表单元格" data-slug="cell" data-status="stable" data-src="./component-cell.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">列表单元格</span>
             <span class="overview-nav-item__slug">cell</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
         <button class="overview-nav-item" type="button" data-name="图片" data-slug="image" data-status="stable" data-src="./component-image.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">图片</span>
             <span class="overview-nav-item__slug">image</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
         <button class="overview-nav-item" type="button" data-name="数值展示" data-slug="metric" data-status="stable" data-src="./component-metric.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">数值展示</span>
             <span class="overview-nav-item__slug">metric</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
       </div>
     </section>
@@ -621,30 +465,35 @@ body {
             <span class="overview-nav-item__name">底部导航</span>
             <span class="overview-nav-item__slug">bottom-nav</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
         <button class="overview-nav-item" type="button" data-name="导航栏" data-slug="navbar" data-status="stable" data-src="./component-navbar.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">导航栏</span>
             <span class="overview-nav-item__slug">navbar</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
         <button class="overview-nav-item" type="button" data-name="动态吸顶区域" data-slug="sticky-region" data-status="stable" data-src="./component-sticky-region.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">动态吸顶区域</span>
             <span class="overview-nav-item__slug">sticky-region</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
         <button class="overview-nav-item" type="button" data-name="选项卡" data-slug="stack" data-status="stable" data-src="./component-stack.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">选项卡</span>
             <span class="overview-nav-item__slug">stack</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
         <button class="overview-nav-item" type="button" data-name="标签栏" data-slug="tabs" data-status="stable" data-src="./component-tabs.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">标签栏</span>
             <span class="overview-nav-item__slug">tabs</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
       </div>
     </section>
@@ -657,42 +506,49 @@ body {
             <span class="overview-nav-item__name">页面总框架</span>
             <span class="overview-nav-item__slug">layout-page</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
         <button class="overview-nav-item" type="button" data-name="主纵向滚动区" data-slug="layout-scroll" data-status="stable" data-src="./component-layout-scroll.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">主纵向滚动区</span>
             <span class="overview-nav-item__slug">layout-scroll</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
         <button class="overview-nav-item" type="button" data-name="大型信息分区" data-slug="layout-section" data-status="stable" data-src="./component-layout-section.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">大型信息分区</span>
             <span class="overview-nav-item__slug">layout-section</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
         <button class="overview-nav-item" type="button" data-name="线性排列" data-slug="layout-flow" data-status="stable" data-src="./component-layout-flow.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">线性排列</span>
             <span class="overview-nav-item__slug">layout-flow</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
         <button class="overview-nav-item" type="button" data-name="双区主次分栏" data-slug="layout-split" data-status="stable" data-src="./component-layout-split.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">双区主次分栏</span>
             <span class="overview-nav-item__slug">layout-split</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
         <button class="overview-nav-item" type="button" data-name="多栏网格" data-slug="layout-grid" data-status="stable" data-src="./component-layout-grid.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">多栏网格</span>
             <span class="overview-nav-item__slug">layout-grid</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
         <button class="overview-nav-item" type="button" data-name="横向滚动区" data-slug="layout-scroll-row" data-status="stable" data-src="./component-layout-scroll-row.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">横向滚动区</span>
             <span class="overview-nav-item__slug">layout-scroll-row</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
       </div>
     </section>
@@ -705,48 +561,56 @@ body {
             <span class="overview-nav-item__name">输入框</span>
             <span class="overview-nav-item__slug">input</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
         <button class="overview-nav-item" type="button" data-name="搜索框" data-slug="search" data-status="stable" data-src="./component-search.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">搜索框</span>
             <span class="overview-nav-item__slug">search</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
         <button class="overview-nav-item" type="button" data-name="计数器" data-slug="counter" data-status="stable" data-src="./component-counter.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">计数器</span>
             <span class="overview-nav-item__slug">counter</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
         <button class="overview-nav-item" type="button" data-name="数字键盘" data-slug="numeric-keypad" data-status="stable" data-src="./component-numeric-keypad.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">数字键盘</span>
             <span class="overview-nav-item__slug">numeric-keypad</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
         <button class="overview-nav-item" type="button" data-name="复选框" data-slug="checkbox" data-status="stable" data-src="./component-checkbox.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">复选框</span>
             <span class="overview-nav-item__slug">checkbox</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
         <button class="overview-nav-item" type="button" data-name="表单容器" data-slug="form" data-status="stable" data-src="./component-form.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">表单容器</span>
             <span class="overview-nav-item__slug">form</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
         <button class="overview-nav-item" type="button" data-name="单选" data-slug="radio" data-status="stable" data-src="./component-radio.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">单选</span>
             <span class="overview-nav-item__slug">radio</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
         <button class="overview-nav-item" type="button" data-name="开关" data-slug="switch" data-status="stable" data-src="./component-switch.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">开关</span>
             <span class="overview-nav-item__slug">switch</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
       </div>
     </section>
@@ -759,54 +623,63 @@ body {
             <span class="overview-nav-item__name">提示</span>
             <span class="overview-nav-item__slug">toast</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
         <button class="overview-nav-item" type="button" data-name="对话框" data-slug="dialog" data-status="stable" data-src="./component-dialog.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">对话框</span>
             <span class="overview-nav-item__slug">dialog</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
         <button class="overview-nav-item" type="button" data-name="底部操作表单" data-slug="actionsheet" data-status="stable" data-src="./component-actionsheet.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">底部操作表单</span>
             <span class="overview-nav-item__slug">actionsheet</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
         <button class="overview-nav-item" type="button" data-name="底部模态框" data-slug="modal" data-status="stable" data-src="./component-modal.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">底部模态框</span>
             <span class="overview-nav-item__slug">modal</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
         <button class="overview-nav-item" type="button" data-name="气泡菜单" data-slug="popmenu" data-status="stable" data-src="./component-popmenu.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">气泡菜单</span>
             <span class="overview-nav-item__slug">popmenu</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
         <button class="overview-nav-item" type="button" data-name="气泡提示" data-slug="popover" data-status="stable" data-src="./component-popover.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">气泡提示</span>
             <span class="overview-nav-item__slug">popover</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
         <button class="overview-nav-item" type="button" data-name="骨架屏" data-slug="skeleton" data-status="stable" data-src="./component-skeleton.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">骨架屏</span>
             <span class="overview-nav-item__slug">skeleton</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
         <button class="overview-nav-item" type="button" data-name="加载" data-slug="loading" data-status="stable" data-src="./component-loading.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">加载</span>
             <span class="overview-nav-item__slug">loading</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
         <button class="overview-nav-item" type="button" data-name="结果" data-slug="result" data-status="stable" data-src="./component-result.html">
           <span class="overview-nav-item__main">
             <span class="overview-nav-item__name">结果</span>
             <span class="overview-nav-item__slug">result</span>
           </span>
+          <span class="overview-nav-item__status">stable</span>
         </button>
       </div>
     </section>
@@ -833,33 +706,8 @@ const backToAppBtn = document.getElementById("back-to-app");
 if (backToAppBtn && window.parent === window) {
   backToAppBtn.hidden = false;
   backToAppBtn.addEventListener("click", function () {
-    window.location.href = "../../../../index.html#/album-product-feed";
+    window.location.href = "../../../../wego-app/index.html#/album-product-feed";
   });
-}
-
-// 移动端 Tab 栏切换分组
-const tabs = Array.from(document.querySelectorAll(".overview-tab"));
-const tabsContainer = document.getElementById("overview-tabs");
-
-function activateGroup(index) {
-  tabs.forEach(function (tab, i) {
-    tab.classList.toggle("is-active", i === index);
-  });
-  navGroups.forEach(function (group, i) {
-    group.classList.toggle("is-active", i === index);
-  });
-}
-
-tabs.forEach(function (tab) {
-  tab.addEventListener("click", function () {
-    var idx = parseInt(tab.dataset.groupIndex, 10);
-    if (!isNaN(idx)) activateGroup(idx);
-  });
-});
-
-// 默认选中第一个分组
-if (navGroups.length > 0) {
-  navGroups[0].classList.add("is-active");
 }
 
 navItems.forEach(function (item) {
@@ -962,11 +810,8 @@ function filterComponents(query) {
   if (terms.length === 0) {
     searchResults.hidden = true;
     searchEmpty.hidden = true;
-    if (tabsContainer) tabsContainer.hidden = false;
     return;
   }
-
-  if (tabsContainer) tabsContainer.hidden = true;
 
   var matched = [];
   navItems.forEach(function (item) {
@@ -1041,25 +886,7 @@ viewerFrame.addEventListener("load", () => {
     if (doc && doc.body) {
       doc.body.style.scrollbarWidth = "none";
     }
-    if (window.innerWidth <= 991 && doc && doc.documentElement) {
-      viewerFrame.style.height = doc.documentElement.scrollHeight + "px";
-    } else {
-      viewerFrame.style.height = "";
-    }
   } catch (e) {}
-});
-
-window.addEventListener("resize", function () {
-  if (window.innerWidth <= 991) {
-    try {
-      const doc = viewerFrame.contentDocument;
-      if (doc && doc.documentElement) {
-        viewerFrame.style.height = doc.documentElement.scrollHeight + "px";
-      }
-    } catch (e) {}
-  } else {
-    viewerFrame.style.height = "";
-  }
 });
 </script>
 
