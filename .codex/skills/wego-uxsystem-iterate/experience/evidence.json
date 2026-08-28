@@ -40,6 +40,30 @@
       "source": "user-preference",
       "scene": "workflow-experience-rule",
       "tags": ["经验沉淀", "机制重构", "AI推理", "Hermes参考", "wego-uxsystem-iterate"]
+    },
+    {
+      "id": "ev-006",
+      "date": "2026-08-28",
+      "summary": "灰度弹窗用 modal fullscreen 变体实现居中弹窗时，蒙层未盖住全屏。原因：fullscreen 变体默认 ::before 蒙层 display:none，z-index 用 --z-raised:10 低于导航栏的 100，面板从底部 translateY 滑入。验收打回后场景级覆盖恢复蒙层、z-index 提升到 --z-modal:600、动画改 scale+opacity 淡入、容器居中对齐",
+      "source": "user-correction",
+      "scene": "shop243-鸿蒙13分享能力升级",
+      "tags": ["modal组件", "fullscreen变体", "蒙层", "z-index", "居中弹窗", "踩坑", "wego-design"]
+    },
+    {
+      "id": "ev-007",
+      "date": "2026-08-28",
+      "summary": "灰度弹窗顶部切图需要往上偏移30px且不被裁剪。初始用 CSS background-position: center -30px + background-size: cover 实现，导致切图顶部被 background-clip 裁剪（overflow 对背景图无效）。用户提示'外容器不裁剪不就可以了吗'，最终改用 img 标签 + 容器 overflow:visible + position:relative; top:-30px 实现偏移且完整显示。另发现 img src 路径相对于 HTML 页面解析而非 CSS 文件",
+      "source": "user-correction",
+      "scene": "shop243-鸿蒙13分享能力升级",
+      "tags": ["切图", "背景图裁剪", "img标签", "overflow", "路径解析", "踩坑", "wego-design"]
+    },
+    {
+      "id": "ev-008",
+      "date": "2026-08-28",
+      "summary": "灰度弹窗样式还原任务中，未看设计稿就凭 modal 组件常见模式猜测为底部 sheet 样式，用户纠正'你从哪里看到是这样的？你都不看设计稿吗？'。后续涉及 Figma 设计稿还原的任务，若无法直接访问 Figma 内容，必须请用户描述关键样式或提供切图，确认后再实施",
+      "source": "user-correction",
+      "scene": "shop243-鸿蒙13分享能力升级",
+      "tags": ["设计稿", "Figma", "样式还原", "误读", "需求确认", "wego-design"]
     }
   ]
 }
