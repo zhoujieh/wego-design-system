@@ -1,7 +1,7 @@
 name: Sync Open PRs from Main
 
 # main 每次前进后，自动对开放 PR 执行 merge main：
-# 无冲突自动推送同步；有冲突打 needs-sync 标签提醒认领人处理，不自动解决。
+# 无冲突自动推送同步；有冲突打 needs-sync 标签提醒 PR 负责人处理，不自动解决。
 
 on:
   push:

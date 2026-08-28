@@ -83,9 +83,8 @@ AI 会先和你**澄清需求细节并生成需求简报**，你确认简报后�
 
 - 各人开 `feature/<你>-<场景>` 分支，不要直接提交 `main`。
 - 每次开工前先 `git pull --rebase origin main` 基于最新代码。
-- 开工前用 `npm run claim -- --agent <你> --scene <场景>` 认领场景、记录当前 `branch`（同场景不同文件可声明 `files` 并行），并跑 `npm run claims:validate`，避免两人改同一场景；CI 会核对场景变更与分支认领一致。
 - 一个交付单元固定一个功能分支和 worktree；首次开始任务不自动创建 PR。
-- 本地迭代期间每轮改完自动推送并更新当前 PR。确有多人远端协调需要时，可以只推送最小认领提交暴露分支，但不创建 PR。
+- 本地迭代期间每轮改完自动推送并更新当前 PR。确有多人远端协调需要时，可以只推送最小协调提交暴露分支，但不创建 PR。
 - 完成一轮实现并通过本地验证后，自动提交并推送当前分支，创建或更新同一个 PR。
 - 业务原型同时获得两个预览链接：当前 PR 分支 worktree 的本地 HTTP 预览，以及 `https://zhoujieh.github.io/wego-design-system/previews/pr-{PR编号}/` 在线预览；两个链接进入同一场景入口。
 - 设计系统组件、Token、Preview 或 UI Kit 维护只提供本地 HTTP 预览，不以 GitHub Pages 作为验收入口。
@@ -95,3 +94,4 @@ AI 会先和你**澄清需求细节并生成需求简报**，你确认简报后�
 - 完整协作约定见 [`AGENTS.md`](AGENTS.md)；脚本与验证命令见 [`scripts/README.md`](scripts/README.md)。
 
 > 普通设计任务把设计系统当**只读**用，不要改 `wego-app/lib/` 和 `components.css`；只有做设计系统维护任务才改源。
+
