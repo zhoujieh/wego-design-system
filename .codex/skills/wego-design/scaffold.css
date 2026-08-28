@@ -15,14 +15,14 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body {
-  background: var(--bg-page);
+  background: var(--bg-surface);
   color: var(--text-default);
   font-family: var(--body-md-font-family);
   min-height: 100%;
   overflow-x: hidden;
   max-width: 100%;
 }
-body { padding: 32px; }
+body { padding: 16px; }
 img, svg, video, canvas { max-width: 100%; }
 a { color: var(--text-default); text-decoration: none; }
 
