@@ -131,6 +131,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     return false;
   }
 
+  /** 移动端 UA 判定（模块级，供面板定位等类方法使用） */
+  const IS_MOBILE_UA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
   /** 选择器中应剔除的易变状态类（激活/展开/选中等运行时态，场景重建后会变化导致选择器失效） */
   const VOLATILE_CLASS_RE = /(^|--|-)(active|open|closed|hidden|visible|selected|current|focus|focused|hover|pressed|dragging|expanded|collapsed|disabled|loading|entering|leaving|shown|show)$/i;
   function isStableSelectorClass(c) {
@@ -1081,7 +1084,14 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             backdrop-filter: blur(18px) saturate(140%);
             -webkit-backdrop-filter: blur(18px) saturate(140%);
           }
-          :host(:not([hidden])) { display: block; }
+          :host(:not([hidden])) {
+            display: block;
+            animation: wt-panel-in 200ms cubic-bezier(0.22, 0.9, 0.32, 1) both;
+          }
+          @keyframes wt-panel-in {
+            from { opacity: 0; transform: translateY(6px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+          }
           .picker {
             box-sizing: border-box;
             width: 100%;
@@ -1568,10 +1578,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             z-index: 9600;
             width: 320px;
             max-width: calc(100vw - 16px);
-            opacity: 0;
-            transform: translateY(-8px) scale(0.97);
             transform-origin: top right;
-            transition: opacity 220ms cubic-bezier(0.34, 1.4, 0.64, 1), transform 220ms cubic-bezier(0.34, 1.4, 0.64, 1);
             pointer-events: none;
             font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", sans-serif;
             /* 暗色毛玻璃主题，与工具条/样式面板统一 */
@@ -1588,9 +1595,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             -webkit-backdrop-filter: blur(18px) saturate(140%);
           }
           :host(:not([hidden])) {
-            opacity: 1;
-            transform: translateY(0) scale(1);
+            /* 统一面板打开动画：透明度 + 轻微上浮 + 缩放，200ms 同一缓动 */
+            animation: wt-panel-in-top 200ms cubic-bezier(0.22, 0.9, 0.32, 1) both;
             pointer-events: auto;
+          }
+          @keyframes wt-panel-in-top {
+            from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
           }
           .panel {
             box-sizing: border-box;
@@ -1661,6 +1672,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             flex-direction: column;
             gap: 8px;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch; /* iOS 惯性滚动 */
             max-height: calc(100vh - 280px);
             padding-right: 4px;
           }
@@ -2348,7 +2360,14 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             backdrop-filter: blur(18px) saturate(140%);
             -webkit-backdrop-filter: blur(18px) saturate(140%);
           }
-          :host(:not([hidden])) { display: block; }
+          :host(:not([hidden])) {
+            display: block;
+            animation: wt-panel-in 200ms cubic-bezier(0.22, 0.9, 0.32, 1) both;
+          }
+          @keyframes wt-panel-in {
+            from { opacity: 0; transform: translateY(6px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+          }
           .panel {
             box-sizing: border-box;
             width: 100%;
@@ -2367,6 +2386,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             min-height: 0;
             overflow-y: auto;
             overflow-x: hidden;
+            -webkit-overflow-scrolling: touch; /* iOS 惯性滚动 */
             display: flex;
             flex-direction: column;
             gap: 20px;
@@ -2589,11 +2609,19 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             -webkit-backdrop-filter: blur(20px) saturate(160%);
             display: none;
           }
-          .token-panel.open { display: block; }
+          .token-panel.open {
+            display: block;
+            animation: wt-panel-in-top 200ms cubic-bezier(0.22, 0.9, 0.32, 1) both;
+          }
+          @keyframes wt-panel-in-top {
+            from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+          }
           .token-panel-inner {
             max-height: 360px;
             overflow-y: auto;
             overflow-x: hidden;
+            -webkit-overflow-scrolling: touch; /* iOS 惯性滚动 */
             padding: 14px;
             border-radius: 14px;
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -4272,23 +4300,43 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           /* 批注气泡 */
           .annotation-bubble {
             position: fixed; width: 280px; z-index: 9650;
-            background: #1a1a2e; border: 1px solid rgba(255,255,255,0.1);
+            /* 统一毛玻璃：与工具条/配置列表/样式面板同一套材质 */
+            background: rgba(30, 30, 30, 0.82);
+            backdrop-filter: blur(18px) saturate(140%);
+            -webkit-backdrop-filter: blur(18px) saturate(140%);
+            border: 1px solid rgba(255,255,255,0.08);
             border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-            padding: 12px;
+            padding: 10px 12px; box-sizing: border-box;
+            animation: wt-bubble-in 200ms cubic-bezier(0.22, 0.9, 0.32, 1) both;
           }
+          @keyframes wt-bubble-in {
+            from { opacity: 0; transform: translateY(6px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+          }
+          /* 移动端底部输入条：从键盘方向上浮，统一时长与缓动 */
+          .annotation-bubble--sheet {
+            border-radius: 14px;
+            animation-name: wt-sheet-in;
+          }
+          @keyframes wt-sheet-in {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          /* 移动端输入框字号 ≥16px，避免 iOS 聚焦时页面自动放大 */
+          .annotation-bubble--sheet .annotation-bubble-input { font-size: 16px; min-height: 96px; }
           .annotation-bubble[hidden] { display: none; }
           .count-bubble[hidden] { display: none; }
-          .annotation-bubble-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-          .annotation-bubble-title { color: rgba(255,255,255,0.9); font-size: 13px; font-weight: 600; }
+          .annotation-bubble-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+          .annotation-bubble-title { color: rgba(255,255,255,0.75); font-size: 12px; font-weight: 600; line-height: 18px; }
           .annotation-bubble-close {
             background: none; border: none; color: rgba(255,255,255,0.5);
-            cursor: pointer; padding: 4px; border-radius: 4px;
+            cursor: pointer; padding: 2px; border-radius: 4px;
             display: flex; align-items: center; justify-content: center;
           }
           .annotation-bubble-close:hover { background: rgba(255,255,255,0.1); color: #fff; }
-          .annotation-bubble-close svg { width: 14px; height: 14px; }
+          .annotation-bubble-close svg { width: 13px; height: 13px; }
           .annotation-bubble-input {
-            width: 100%; min-height: 80px; max-height: 200px;
+            width: 100%; min-height: 72px; max-height: 200px;
             background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
             border-radius: 8px; color: #fff; font-size: 13px; line-height: 1.5;
             padding: 8px 10px; resize: vertical; outline: none;
@@ -4297,7 +4345,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           .annotation-bubble-input:focus { border-color: #ff6b35; background: rgba(255,255,255,0.08); }
           .annotation-bubble-input::placeholder { color: rgba(255,255,255,0.3); }
           .annotation-bubble-delete {
-            margin-top: 8px; background: none; border: none;
+            margin-top: 6px; background: none; border: none;
             color: #ff6b6b; font-size: 12px; cursor: pointer;
             padding: 4px 8px; border-radius: 4px;
           }
@@ -5113,8 +5161,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       input.value = ann.text || '';
       this._components.annotationDelete.hidden = !(ann.text && ann.text.trim());
       this._annotationBubbleRect = rect;
+      // 移动端：同一个面板切换为底部输入条形态（贴键盘上沿）；桌面端保持贴元素气泡
+      bubble.classList.toggle('annotation-bubble--sheet', IS_MOBILE_UA);
       bubble.removeAttribute('hidden');
       this._updateAnnotationBubblePosition();
+      if (IS_MOBILE_UA) this._bindSheetViewport();
       try {
         input.focus({ preventScroll: true });
         const len = input.value.length;
@@ -5125,6 +5176,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
     _updateAnnotationBubblePosition() {
       const bubble = this._components.annotationBubble;
+      // 移动端底部输入条：锚定可视视口底部（键盘弹起时由 visualViewport 事件驱动跟随）
+      if (IS_MOBILE_UA) { this._positionMobileSheet(); return; }
       let rect = this._annotationBubbleRect;
       // 滚动/resize 时根据当前批注的 selector 重新获取元素位置，避免使用打开时缓存的过时 rect
       if (this._currentAnnotation) {
@@ -5161,6 +5214,50 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       bubble.style.top = top + 'px';
     }
 
+    // 移动端底部输入条定位：横向铺满、底边贴可视视口（键盘上沿）上方 8px
+    _positionMobileSheet() {
+      const bubble = this._components.annotationBubble;
+      const vv = window.visualViewport;
+      const vw = vv ? vv.width : window.innerWidth;
+      const vLeft = vv ? vv.offsetLeft : 0;
+      const vTop = vv ? vv.offsetTop : 0;
+      const vH = vv ? vv.height : window.innerHeight;
+      const h = bubble.offsetHeight || 160;
+      bubble.style.width = Math.max(0, vw - 16) + 'px';
+      bubble.style.left = (vLeft + 8) + 'px';
+      bubble.style.top = Math.max(8, vTop + vH - h - 8) + 'px';
+    }
+
+    // 监听可视视口：键盘弹起时输入条跟随上移，键盘收起时直接关闭面板（内容自动保存）
+    _bindSheetViewport() {
+      const vv = window.visualViewport;
+      if (!vv) return;
+      if (!this._vvFullHeight) this._vvFullHeight = vv.height;
+      this._onSheetResize = () => {
+        if (this._components.annotationBubble.hasAttribute('hidden')) return;
+        // 记录见过的最大可视高度作为"无键盘"基准（规避地址栏伸缩干扰）
+        this._vvFullHeight = Math.max(this._vvFullHeight, vv.height);
+        if (this._vvFullHeight - vv.height > 120) {
+          this._positionMobileSheet(); // 键盘弹起：贴键盘上沿
+        } else {
+          this._closeAnnotationBubble(); // 键盘收起：关闭并保存
+        }
+      };
+      this._onSheetScroll = () => {
+        if (!this._components.annotationBubble.hasAttribute('hidden')) this._positionMobileSheet();
+      };
+      vv.addEventListener('resize', this._onSheetResize);
+      vv.addEventListener('scroll', this._onSheetScroll);
+    }
+
+    _unbindSheetViewport() {
+      const vv = window.visualViewport;
+      if (vv && this._onSheetResize) vv.removeEventListener('resize', this._onSheetResize);
+      if (vv && this._onSheetScroll) vv.removeEventListener('scroll', this._onSheetScroll);
+      this._onSheetResize = null;
+      this._onSheetScroll = null;
+    }
+
     _closeAnnotationBubble() {
       if (this._currentAnnotation) {
         // 自动保存输入内容
@@ -5180,6 +5277,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         this._syncAnnotationMarkers();
         this._updateChangeCount();
       }
+      this._unbindSheetViewport();
       this._components.annotationBubble.setAttribute('hidden', '');
     }
 
