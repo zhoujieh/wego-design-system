@@ -5109,9 +5109,18 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       try {
         input.readOnly = false;
         input.focus({ preventScroll: true });
+        let focused = input.matches(':focus');
+        // focus 失败重试：快速连续点击时 :focus 伪类可能偶发未生效，
+        // 在同一用户交互同步回调中立即重试一次，提升键盘弹出成功率。
+        if (!focused) {
+          debugLog.add('KEYBOARD', '首次focus未生效，立即重试');
+          input.blur();
+          input.focus({ preventScroll: true });
+          focused = input.matches(':focus');
+        }
         const outerActive = document.activeElement;
         const innerActive = outerActive && outerActive.shadowRoot ? outerActive.shadowRoot.activeElement : null;
-        debugLog.add('KEYBOARD', `focus() 完成: forceLayout=${forceLayout} outerActive=${outerActive ? outerActive.tagName : 'null'} innerActive=${innerActive ? innerActive.tagName : 'null'} input.matches(':focus')=${input.matches(':focus')}`);
+        debugLog.add('KEYBOARD', `focus() 完成: forceLayout=${forceLayout} retry=${!focused ? 'failed' : 'ok'} outerActive=${outerActive ? outerActive.tagName : 'null'} innerActive=${innerActive ? innerActive.tagName : 'null'} input.matches(':focus')=${focused}`);
       } catch (e) {
         debugLog.add('KEYBOARD', `focus() 异常: ${e.message}`);
       }
