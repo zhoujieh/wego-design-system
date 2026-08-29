@@ -297,6 +297,30 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     }).join('').toUpperCase();
   }
 
+  /** hsl(h, s, l) → [r, g, b]，h 为 0-360，s/l 为 0-1 */
+  function hslToRgb(h, s, l) {
+    h = ((h % 360) + 360) % 360 / 360;
+    let r, g, b;
+    if (s === 0) {
+      r = g = b = l;
+    } else {
+      const hue2rgb = (p, q, t) => {
+        if (t < 0) t += 1;
+        if (t > 1) t -= 1;
+        if (t < 1 / 6) return p + (q - p) * 6 * t;
+        if (t < 1 / 2) return q;
+        if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+        return p;
+      };
+      const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+      const p = 2 * l - q;
+      r = hue2rgb(p, q, h + 1 / 3);
+      g = hue2rgb(p, q, h);
+      b = hue2rgb(p, q, h - 1 / 3);
+    }
+    return [r * 255, g * 255, b * 255];
+  }
+
   /** 解析颜色字符串为 {hex, opacity} */
   function parseColor(colorStr) {
     if (!colorStr || colorStr === 'transparent' || colorStr === 'rgba(0, 0, 0, 0)') {
@@ -309,6 +333,16 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const g = parseInt(rgbaMatch[2]);
       const b = parseInt(rgbaMatch[3]);
       const a = rgbaMatch[4] !== undefined ? parseFloat(rgbaMatch[4]) : 1;
+      return { hex: rgbToHex(r, g, b), opacity: Math.round(a * 100) };
+    }
+    // hsla(h, s%, l%, a) — 部分 CSS 变量或过渡态可能返回此格式
+    const hslMatch = colorStr.match(/hsla?\(\s*([\d.]+)\s*,\s*([\d.]+)%\s*,\s*([\d.]+)%(?:\s*,\s*([\d.]+))?\s*\)/i);
+    if (hslMatch) {
+      const h = parseFloat(hslMatch[1]);
+      const s = parseFloat(hslMatch[2]) / 100;
+      const l = parseFloat(hslMatch[3]) / 100;
+      const a = hslMatch[4] !== undefined ? parseFloat(hslMatch[4]) : 1;
+      const [r, g, b] = hslToRgb(h, s, l);
       return { hex: rgbToHex(r, g, b), opacity: Math.round(a * 100) };
     }
     // #RRGGBB or #RGB
@@ -420,6 +454,38 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     return layers;
   }
 
+  /**
+   * 读取元素某个 CSS 属性的原始声明值（specified value），而非 getComputedStyle 返回的计算像素值。
+   * 优先级：内联 style → 匹配的样式表规则 → 空字符串（调用方 fallback 到计算值）。
+   * 用于 width/height 的尺寸模式判断：getComputedStyle 总是返回 px，无法区分 auto/100%/fit-content。
+   */
+  function getSpecifiedValue(el, prop) {
+    // 1. 内联样式优先
+    const inline = el.style.getPropertyValue(prop);
+    if (inline) return inline.trim();
+    // 2. 遍历同源样式表规则，找最后一个匹配的声明
+    try {
+      let result = '';
+      for (const sheet of document.styleSheets) {
+        if (sheet.disabled) continue;
+        let rules;
+        try { rules = sheet.cssRules; } catch (e) { continue; } // 跨域跳过
+        if (!rules) continue;
+        for (const rule of rules) {
+          if (rule.type !== 1) continue; // 只看 STYLE_RULE
+          try {
+            if (el.matches(rule.selectorText)) {
+              const v = rule.style.getPropertyValue(prop);
+              if (v) result = v.trim(); // 后匹配的覆盖先匹配的（CSS 层叠顺序）
+            }
+          } catch (e) { /* selectorText 可能非法，跳过 */ }
+        }
+      }
+      if (result) return result;
+    } catch (e) { /* ignore */ }
+    return '';
+  }
+
   /** 从元素读取样式，转换为面板数据（target: '' | 'before' | 'after'） */
   function getElementStyleData(el, target) {
     const cs = getComputedStyle(el, target ? '::' + target : null);
@@ -440,15 +506,23 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     const alignPreset = `${jc}|${ai}`;
 
     // 宽高：推导尺寸模式（fixed 固定 / auto 适应 / fill 填充），固定值去掉 px 只留数值回显
+    // 优先用 CSS 原始声明值判断模式（getComputedStyle 总是返回 px，无法区分 auto/100%/fit-content）；
+    // 原始值取不到时 fallback 到计算值（默认 fixed）
     const sizeModeOf = (v) => {
       const s = String(v || '').trim().toLowerCase();
       if (s === '100%') return 'fill';
       if (/^(auto|fit-content|min-content|max-content|inherit|initial|unset)$/.test(s)) return 'auto';
       return 'fixed';
     };
-    const sizeInputOf = (v) => sizeModeOf(v) === 'fixed' ? String(parseNumeric(v)) : String(v || '').trim();
-    const widthMode = sizeModeOf(cs.width);
-    const heightMode = sizeModeOf(cs.height);
+    const sizeInputOf = (v, specified) => {
+      const mode = sizeModeOf(specified);
+      if (mode === 'fixed') return String(parseNumeric(v));
+      return String(specified || '').trim();
+    };
+    const specifiedWidth = getSpecifiedValue(el, 'width');
+    const specifiedHeight = getSpecifiedValue(el, 'height');
+    const widthMode = sizeModeOf(specifiedWidth || cs.width);
+    const heightMode = sizeModeOf(specifiedHeight || cs.height);
 
     return {
       // 自动布局
@@ -467,8 +541,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       marginLeft: parseNumeric(cs.marginLeft),
       widthMode,
       heightMode,
-      width: sizeInputOf(cs.width),   // 固定值只回显纯数值；语义值（auto/100%）原样保留
-      height: sizeInputOf(cs.height),
+      width: sizeInputOf(cs.width, specifiedWidth),   // 固定值回显计算像素数值；语义值（auto/100%）原样保留
+      height: sizeInputOf(cs.height, specifiedHeight),
       display,
       position: cs.position,
       zIndex: parseNumeric(cs.zIndex),
@@ -956,6 +1030,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._opacity = opacity !== undefined ? opacity : 100;
       this._hsv = this._hexToHsv(this._hex);
       this._callback = callback;
+      // 先关闭旧实例，移除上一轮 document mousedown/touchstart 监听器，避免累积泄漏
+      this.close();
       this._render();
       // 先显示以测量实际尺寸，再定位到触发按钮附近，优先下方，空间不足翻上方
       this.removeAttribute('hidden');
@@ -3263,6 +3339,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._data[field] = value;
       // 伪元素目标：编辑通过注入 <head> 的样式规则生效，property 写为 css-property
       if (this._target) {
+        // 输入守门：与普通元素路径一致，拦截负数尺寸、非 flex 容器布局方向等非法操作
+        const guard = this._validateFieldValue(field, value);
+        if (!guard.ok) {
+          bus.emit('toast', { message: guard.reason });
+          this._data[field] = this._data[field]; // 还原面板数据
+          return;
+        }
         const cssProp = this._fieldToCssProp(field);
         let cssVal = this._fieldToCssValue(field);
         // 清空输入 = 移除该伪元素属性注入（数值字段的 0 兜底不适用此场景）
@@ -5238,9 +5321,17 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         // 记录见过的最大可视高度作为"无键盘"基准（规避地址栏伸缩干扰）
         this._vvFullHeight = Math.max(this._vvFullHeight, vv.height);
         if (this._vvFullHeight - vv.height > 120) {
-          this._positionMobileSheet(); // 键盘弹起：贴键盘上沿
+          // 键盘弹起：贴键盘上沿，取消可能挂起的手动收起定时器
+          clearTimeout(this._sheetCloseTimer);
+          this._sheetCloseTimer = null;
+          this._positionMobileSheet();
         } else {
-          this._closeAnnotationBubble(); // 键盘收起：关闭并保存
+          // 键盘收起：防抖 200ms 确认，避免地址栏伸缩或键盘动画瞬态抖动误关气泡
+          clearTimeout(this._sheetCloseTimer);
+          this._sheetCloseTimer = setTimeout(() => {
+            this._sheetCloseTimer = null;
+            this._closeAnnotationBubble();
+          }, 200);
         }
       };
       this._onSheetScroll = () => {
@@ -5254,6 +5345,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const vv = window.visualViewport;
       if (vv && this._onSheetResize) vv.removeEventListener('resize', this._onSheetResize);
       if (vv && this._onSheetScroll) vv.removeEventListener('scroll', this._onSheetScroll);
+      clearTimeout(this._sheetCloseTimer);
+      this._sheetCloseTimer = null;
       this._onSheetResize = null;
       this._onSheetScroll = null;
     }
@@ -5708,9 +5801,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const nextRoute = getCurrentRoute();
       // 同路由的 hash 抖动（锚点、历史记录写回等）不做收尾与重载，避免误关正在输入的批注气泡、误清回放
       if (nextRoute === state.currentRoute) return;
-      // 1. 旧场景收尾：关闭批注气泡（写回输入）、选中态、样式面板、颜色选择器，
+      // 1. 旧场景收尾：关闭批注气泡（写回输入）、选中态、工具条子面板、样式面板、颜色选择器，
       //    避免持有已销毁的旧场景节点
       this._closeAnnotationBubble();
+      this._closeAllPanels();
       this._clearSelection();
       if (this._components.stylePanel) {
         if (this._components.stylePanel._closeTokenPanel) this._components.stylePanel._closeTokenPanel();
