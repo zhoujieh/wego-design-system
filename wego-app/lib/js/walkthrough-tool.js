@@ -131,6 +131,27 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     return false;
   }
 
+  /** 选择器中应剔除的易变状态类（激活/展开/选中等运行时态，场景重建后会变化导致选择器失效） */
+  const VOLATILE_CLASS_RE = /(^|--|-)(active|open|closed|hidden|visible|selected|current|focus|focused|hover|pressed|dragging|expanded|collapsed|disabled|loading|entering|leaving|shown|show)$/i;
+  function isStableSelectorClass(c) {
+    return !!c && !c.startsWith('wt-') && !c.startsWith('wego-') && !c.startsWith('data-wt') && !VOLATILE_CLASS_RE.test(c);
+  }
+  /** 按记录的选择器找元素；精确匹配失败时剔除易变状态类后重试，兼容历史数据 */
+  function queryTargetEl(selector) {
+    if (!selector) return null;
+    let el = null;
+    try { el = document.querySelector(selector); } catch (e) { return null; }
+    if (el) return el;
+    try {
+      const relaxed = selector.replace(/\.([A-Za-z0-9_-]+)/g, (m, cls) => VOLATILE_CLASS_RE.test(cls) ? '' : m);
+      if (relaxed !== selector) {
+        const list = document.querySelectorAll(relaxed);
+        if (list.length) return list[0];
+      }
+    } catch (e) { /* ignore */ }
+    return null;
+  }
+
   /** 纯 nth 兜底链（原逻辑，用于优雅降级） */
   function buildNthChain(el) {
     const parts = [];
@@ -138,7 +159,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     while (node && node.nodeType === 1 && node !== document.body) {
       let part = node.tagName.toLowerCase();
       if (node.className && typeof node.className === 'string') {
-        const classes = node.className.trim().split(/\s+/).filter(c => c && !c.startsWith('wt-') && !c.startsWith('wego-') && !c.startsWith('data-wt'));
+        const classes = node.className.trim().split(/\s+/).filter(c => isStableSelectorClass(c));
         if (classes.length) part += '.' + classes.slice(0, 4).join('.');
       }
       const parent = node.parentNode;
@@ -203,7 +224,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const val = el.getAttribute(attr);
       if (val) {
         const selfCls = (el.className && typeof el.className === 'string')
-          ? el.className.trim().split(/\s+/).filter(c => c && !c.startsWith('wt-') && !c.startsWith('wego-') && !c.startsWith('data-wt'))[0]
+          ? el.className.trim().split(/\s+/).filter(c => isStableSelectorClass(c))[0]
           : '';
         const selector = `${el.tagName.toLowerCase()}[${attr}="${val}"]${selfCls ? '.' + selfCls : ''}`;
         if (document.querySelectorAll(selector).length === 1) return selector;
@@ -221,7 +242,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const slug = anchorNode.getAttribute && anchorNode.getAttribute('data-component-slug');
       if (slug) { anchor = `${anchorNode.tagName.toLowerCase()}[data-component-slug="${slug}"]`; break; }
       if (anchorNode.className && typeof anchorNode.className === 'string' && STABLE_CLASS.test(anchorNode.className)) {
-        const cls = anchorNode.className.trim().split(/\s+/).filter(c => c && !c.startsWith('wt-') && !c.startsWith('wego-') && !c.startsWith('data-wt'))[0];
+        const cls = anchorNode.className.trim().split(/\s+/).filter(c => isStableSelectorClass(c))[0];
         const sel = cls ? '.' + cls : anchorNode.tagName.toLowerCase();
         if (document.querySelectorAll(sel).length === 1) { anchor = sel; break; }
         anchor = sel;
@@ -230,7 +251,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     }
     // 3b. 从目标到锚点（不含锚）拼接类名链，仅在不唯一时才加 nth
     const classesOf = (n) => (n.className && typeof n.className === 'string')
-      ? n.className.trim().split(/\s+/).filter(c => c && !c.startsWith('wt-') && !c.startsWith('wego-') && !c.startsWith('data-wt'))
+      ? n.className.trim().split(/\s+/).filter(c => isStableSelectorClass(c))
       : [];
     const parts = [];
     let node = el;
@@ -1515,7 +1536,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         groups[gkey].changes.push(c);
       });
       annotations.forEach(a => {
-        if (!a.text) return;
+        if (!a.text || !a.text.trim()) return;
         if (!groups[a.selector]) {
           groups[a.selector] = {
             selector: a.selector,
@@ -1538,7 +1559,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         }
       });
       const groupList = Object.values(groups);
-      const totalCount = changes.length + annotations.filter(a => a.text).length;
+      const totalCount = changes.length + annotations.filter(a => a.text && a.text.trim()).length;
 
       this._shadow.innerHTML = `
         <style>
@@ -1934,7 +1955,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         groups[c.selector].changes.push(c);
       });
       annotations.forEach(a => {
-        if (!a.text) return;
+        if (!a.text || !a.text.trim()) return;
         if (!groups[a.selector]) {
           groups[a.selector] = {
             selector: a.selector,
@@ -3225,7 +3246,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           elementTag: this._targetEl.tagName.toLowerCase(),
           elementText: (this._targetEl.textContent || '').trim().substring(0, 50),
           elementClass: (this._targetEl.className && typeof this._targetEl.className === 'string')
-            ? this._targetEl.className.trim().split(/\s+/).filter(c => c && !c.startsWith('wt-') && !c.startsWith('wego-') && !c.startsWith('data-wt'))[0] || ''
+            ? this._targetEl.className.trim().split(/\s+/).filter(c => isStableSelectorClass(c))[0] || ''
             : '',
           property: cssProp,
           oldValue: '',
@@ -3243,7 +3264,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           elementTag: this._targetEl.tagName.toLowerCase(),
           elementText: (this._targetEl.textContent || '').trim().substring(0, 50),
           elementClass: (this._targetEl.className && typeof this._targetEl.className === 'string')
-            ? this._targetEl.className.trim().split(/\s+/).filter(c => c && !c.startsWith('wt-') && !c.startsWith('wego-') && !c.startsWith('data-wt'))[0] || ''
+            ? this._targetEl.className.trim().split(/\s+/).filter(c => isStableSelectorClass(c))[0] || ''
             : '',
           property: result.property,
           oldValue: result.oldValue,
@@ -4519,18 +4540,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
             this._components.overviewPanel.close();
           }
-          // 批注模式下点击外部关闭批注气泡。
-          // 例外：批注输入框正在聚焦（移动端键盘会话进行中）时不关闭——键盘弹起过程中
-          // iOS 可能产生杂散 pointerdown，此时关闭气泡会连带收起键盘、打断输入；
-          // 若点的是另一个页面元素，批注手势处理器会自行关闭旧气泡并打开新的。
-          if (this._annotationMode && !this._components.annotationBubble.hasAttribute('hidden')) {
-            if (this._isAnnotationInputFocused()) {
-              debugLog.add('BUBBLE', `外部 pointerdown 命中键盘会话，忽略关闭: tag=${e.target.tagName} button=${e.button}`);
-            } else {
-              debugLog.add('BUBBLE', `外部 pointerdown 关闭气泡: tag=${e.target.tagName} button=${e.button}`);
-              this._closeAnnotationBubble();
-            }
-          }
         }
       }, true);
 
@@ -4547,24 +4556,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         if (this._currentAnnotation) {
           this._currentAnnotation.text = e.target.value;
           this._currentAnnotation.timestamp = Date.now();
-          this._components.annotationDelete.hidden = !e.target.value;
+          this._components.annotationDelete.hidden = !e.target.value.trim();
           this._saveChanges();
           // 角标计数实时跟随输入变化，不等气泡关闭
           this._updateChangeCount();
-        }
-      });
-      // 失焦诊断：记录键盘被谁打断（移动端键盘收起时会先 blur）；键盘会话结束后补一次定位
-      this._components.annotationInput.addEventListener('blur', () => {
-        const ae = document.activeElement;
-        const aeTag = ae ? (ae.shadowRoot && ae.shadowRoot.activeElement ? ae.tagName + '>' + ae.shadowRoot.activeElement.tagName : ae.tagName) : 'null';
-        debugLog.add('KEYBOARD', `批注输入框 blur: 气泡${this._components.annotationBubble.hasAttribute('hidden') ? '已隐藏' : '仍显示'} 新焦点=${aeTag}`);
-        if (!this._components.annotationBubble.hasAttribute('hidden')) {
-          // 等键盘收起动画后的最终布局稳定再定位
-          setTimeout(() => {
-            if (!this._components.annotationBubble.hasAttribute('hidden') && !this._isAnnotationInputFocused()) {
-              this._updateAnnotationBubblePosition();
-            }
-          }, 320);
         }
       });
       this._components.annotationBubble.addEventListener('pointerdown', (e) => {
@@ -4969,11 +4964,29 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         this._bindAnnotationEvents();
         this._components.annotationMarkerLayer.removeAttribute('hidden');
         this._syncAnnotationMarkers();
+        // 场景内部 tab/折叠/弹层等显隐切换不会触发 scroll/resize，
+        // 监听 class/style/hidden 变化，让标记在目标重新可见时自动补绘
+        if (typeof MutationObserver !== 'undefined' && !this._annotationDomObserver) {
+          this._annotationDomObserver = new MutationObserver((mutations) => {
+            const layer = this._components.annotationMarkerLayer;
+            const bubble = this._components.annotationBubble;
+            const fromTool = mutations.every(m =>
+              (layer && layer.contains(m.target)) || (bubble && bubble.contains(m.target)));
+            if (!fromTool) this._onAnnotationScroll();
+          });
+          this._annotationDomObserver.observe(document, {
+            subtree: true, attributes: true, attributeFilter: ['class', 'style', 'hidden']
+          });
+        }
       } else {
         document.body.removeAttribute('data-annotation-mode');
         this._unbindAnnotationEvents();
         this._components.annotationMarkerLayer.setAttribute('hidden', '');
         this._closeAnnotationBubble();
+        if (this._annotationDomObserver) {
+          this._annotationDomObserver.disconnect();
+          this._annotationDomObserver = null;
+        }
         // 取消待处理的滚动 rAF，避免模式关闭后仍执行
         if (this._annotationScrollRaf) {
           cancelAnimationFrame(this._annotationScrollRaf);
@@ -4984,13 +4997,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     }
 
     _bindAnnotationEvents() {
-      this._annotationPointerActive = false;
-      this._annotationStartX = 0;
-      this._annotationStartY = 0;
-      this._annotationIsSwiping = false;
       document.addEventListener('pointerdown', this._onAnnotationPointerDown, true);
-      document.addEventListener('pointermove', this._onAnnotationPointerMove, true);
-      document.addEventListener('pointerup', this._onAnnotationPointerUp, true);
       document.addEventListener('click', this._onAnnotationClickCapture, true);
       window.addEventListener('scroll', this._onAnnotationScroll, true);
       window.addEventListener('resize', this._onAnnotationScroll);
@@ -4998,92 +5005,27 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
     _unbindAnnotationEvents() {
       document.removeEventListener('pointerdown', this._onAnnotationPointerDown, true);
-      document.removeEventListener('pointermove', this._onAnnotationPointerMove, true);
-      document.removeEventListener('pointerup', this._onAnnotationPointerUp, true);
       document.removeEventListener('click', this._onAnnotationClickCapture, true);
       window.removeEventListener('scroll', this._onAnnotationScroll, true);
       window.removeEventListener('resize', this._onAnnotationScroll);
     }
 
+    // 批注模式：点页面元素即创建/打开批注气泡并聚焦输入框
+    // （Web 端 pointerdown 属于用户手势，其中的 focus() 可直接生效）
     _onAnnotationPointerDown = (e) => {
       if (e.button !== undefined && e.button !== 0) return;
       if (isWalkthroughElement(e.target)) return;
       e.stopPropagation();
-      // 注意：普通元素的 pointerdown 不能 preventDefault。iOS Safari 中对 pointerdown 调 preventDefault
-      // 会让浏览器把整段手势判定为"脚本已接管"，随后同一回调里的 input.focus() 拉起软键盘的成功率显著下降。
-      // 但页面自身的输入框/可编辑元素需要阻止默认聚焦，否则它会和批注输入框争抢键盘。
-      const t = e.target;
-      const editableTag = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable);
-      if (editableTag && e.cancelable) e.preventDefault();
-      this._clearHover();
-      this._annotationPointerActive = true;
-      this._annotationStartX = e.clientX;
-      this._annotationStartY = e.clientY;
-      this._annotationIsSwiping = false;
-      this._annotationPendingId = null;
-      debugLog.add('TOUCH', `pointerdown 页面元素: (${e.clientX}, ${e.clientY}) tag=${e.target.tagName}`);
-      // 关键：在 pointerdown（触摸序列开始）中立即打开气泡并 focus。
-      // iOS Safari 对 focus() 的用户直接交互判定中，pointerdown 比 pointerup 更可靠。
-      // pointerup 是合成事件（touchstart→touchmove→touchend→pointerup→click），
-      // 链路太长，即使 focus 成功设置焦点也可能不弹键盘。
-      const el = e.target;
-      if (el && el !== document.body && el !== document.documentElement && !isWalkthroughElement(el)) {
-        this._openAnnotationForElement(el, e.clientX, e.clientY, true);
-        // 记录当前批注 ID，如果后续判定为滑动则删除这个临时空批注
-        if (this._currentAnnotation) this._annotationPendingId = this._currentAnnotation.id;
-      }
-    };
-
-    _onAnnotationPointerMove = (e) => {
-      if (this._annotationPointerActive) {
-        const dx = Math.abs(e.clientX - this._annotationStartX);
-        const dy = Math.abs(e.clientY - this._annotationStartY);
-        if (dx > 10 || dy > 10) {
-          this._annotationIsSwiping = true;
-          // 滑动时关闭气泡，并删除 pointerdown 中创建的临时空批注
-          if (this._annotationPendingId) {
-            const pending = state.annotations.find(a => a.id === this._annotationPendingId);
-            if (pending && (!pending.text || !pending.text.trim())) {
-              state.annotations = state.annotations.filter(a => a.id !== this._annotationPendingId);
-              this._saveChanges();
-            }
-            this._annotationPendingId = null;
-          }
-          this._closeAnnotationBubble();
-          debugLog.add('TOUCH', 'pointermove 判定为滑动，关闭气泡并清理临时批注');
-        }
-      }
-    };
-
-    _onAnnotationPointerUp = (e) => {
-      if (!this._annotationPointerActive) return;
-      this._annotationPointerActive = false;
-      if (this._annotationIsSwiping) {
-        debugLog.add('TOUCH', 'pointerup 判定为滑动，忽略');
-        return;
-      }
-      // 非滑动：pointerdown 中已经打开气泡，这里只需确认并保存
-      if (this._currentAnnotation) {
-        this._annotationPendingId = null;
-        this._saveChanges();
-        this._syncAnnotationMarkers();
-        debugLog.add('TOUCH', 'pointerup 确认为点击，批注已保存');
-        return;
-      }
-      // 如果 pointerdown 中没有成功打开气泡（如命中 body），这里做兜底处理
-      const el = document.elementFromPoint(e.clientX, e.clientY);
-      if (!el || el === document.body || el === document.documentElement) {
-        debugLog.add('TOUCH', 'pointerup 命中 body/documentElement，关闭气泡');
-        this._closeAnnotationBubble();
-        return;
-      }
-      if (isWalkthroughElement(el)) {
-        debugLog.add('TOUCH', `pointerup 命中工具元素: ${el.tagName}`);
-        return;
-      }
+      // 阻止页面元素自身的默认行为（按钮激活、页面输入框抢焦点等）
       if (e.cancelable) e.preventDefault();
-      debugLog.add('TOUCH', `pointerup 兜底打开批注: ${el.tagName}`);
-      this._openAnnotationForElement(el, e.clientX, e.clientY);
+      this._clearHover();
+      const el = e.target;
+      if (el === document.body || el === document.documentElement) {
+        // 点页面空白处：关闭并保存当前气泡
+        this._closeAnnotationBubble();
+      } else if (el) {
+        this._openAnnotationForElement(el);
+      }
     };
 
     _onAnnotationClickCapture = (e) => {
@@ -5094,40 +5036,27 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     };
 
     _onAnnotationScroll = () => {
-      // rAF 节流：scroll 事件高频触发，避免每次都 innerHTML='' 重建标记导致闪烁和性能问题
+      // rAF 节流：scroll 高频触发，避免每次都 innerHTML='' 重建标记导致闪烁
       if (this._annotationScrollRaf) return;
       this._annotationScrollRaf = requestAnimationFrame(() => {
         this._annotationScrollRaf = null;
         this._syncAnnotationMarkers();
-        // 输入框聚焦（移动端键盘会话）期间冻结气泡位置：键盘弹起会连续触发 scroll/resize，
-        // 每帧移动装着聚焦输入框的气泡会与 WebKit 的"聚焦元素滚入可视区"形成对抗，进而失焦收键盘。
-        // 标记层不含聚焦元素，可以照常跟随滚动。
-        if (!this._components.annotationBubble.hasAttribute('hidden') && !this._isAnnotationInputFocused()) {
+        if (!this._components.annotationBubble.hasAttribute('hidden')) {
           this._updateAnnotationBubblePosition();
         }
       });
     };
 
-    /** 批注输入框是否正处于聚焦态（穿透 shadowRoot 判断，等价于移动端键盘会话进行中） */
-    _isAnnotationInputFocused() {
-      const input = this._components.annotationInput;
-      if (!input) return false;
-      const root = input.getRootNode ? input.getRootNode() : null;
-      return !!(root && root.activeElement === input);
-    }
-
     _syncAnnotationMarkers() {
       const layer = this._components.annotationMarkerLayer;
       if (!layer || layer.hasAttribute('hidden')) return;
       layer.innerHTML = '';
-      let count = 0;
-      state.annotations.forEach((ann, idx) => {
+      state.annotations.forEach((ann) => {
         try {
-          const el = document.querySelector(ann.selector);
+          const el = queryTargetEl(ann.selector);
           if (!el || !el.isConnected) return;
           const rect = el.getBoundingClientRect();
           if (rect.width === 0 || rect.height === 0) return;
-          count++;
           const marker = document.createElement('div');
           marker.className = 'annotation-marker';
           marker.dataset.annotationId = ann.id;
@@ -5135,106 +5064,64 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           marker.style.top = Math.max(4, rect.top - 8) + 'px';
           marker.innerHTML = ICONS.annotation;
           marker.title = ann.text ? ann.text.slice(0, 30) : '批注';
-          // 使用 pointerdown 而非 click：移动端浏览器要求 focus() 必须在触摸的直接回调中调用才能拉起键盘，
-          // click 是移动端合成事件（touchstart→touchend→click），链路太长可能被判定为非直接交互。
+          // 点标记重新打开对应批注；点击时实时取 rect，避免滚动后用了缓存坐标
           marker.addEventListener('pointerdown', (e) => {
             e.stopPropagation();
             e.preventDefault();
-            debugLog.add('MARKER', `标记 pointerdown: annId=${ann.id} text="${(ann.text || '').slice(0, 20)}"`);
-            // 点击时实时获取元素 rect，避免使用 _syncAnnotationMarkers 时缓存的过时坐标（滚动后位置已变）
+            let currentRect = rect;
             try {
-              const el = document.querySelector(ann.selector);
-              const currentRect = el && el.isConnected ? el.getBoundingClientRect() : rect;
-              this._openAnnotationBubble(ann, currentRect);
-            } catch (err) {
-              debugLog.add('MARKER', `获取元素 rect 失败: ${err.message}`);
-              this._openAnnotationBubble(ann, rect);
-            }
+              const target = queryTargetEl(ann.selector);
+              if (target && target.isConnected) currentRect = target.getBoundingClientRect();
+            } catch (err) {}
+            this._openAnnotationBubble(ann, currentRect);
           });
           layer.appendChild(marker);
         } catch (err) {}
       });
-      debugLog.add('MARKER', `_syncAnnotationMarkers 完成: 共创建 ${count} 个标记 (state.annotations=${state.annotations.length})`);
     }
 
-    _openAnnotationForElement(el, clickX, clickY, skipSave = false) {
+    /** 为页面元素创建（或复用）批注并打开气泡 */
+    _openAnnotationForElement(el) {
       const selector = this._resolveCanonicalSelector(el, generateSelector(el));
-      const elementTag = el.tagName.toLowerCase();
-      const elementText = (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 50);
-      // 查找已有批注
+      // 同一元素的气泡已打开时直接无操作，避免先关再开的闪烁与焦点抖动
+      if (this._currentAnnotation && this._currentAnnotation.selector === selector &&
+          !this._components.annotationBubble.hasAttribute('hidden')) return;
       let ann = state.annotations.find(a => a.selector === selector);
-      const isNew = !ann;
       if (!ann) {
         ann = {
           id: 'ann-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
           selector: selector,
-          elementTag: elementTag,
-          elementText: elementText,
+          elementTag: el.tagName.toLowerCase(),
+          elementText: (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 50),
           text: '',
           timestamp: Date.now(),
         };
         state.annotations.push(ann);
-        // pointerdown 中调用时暂不保存：如果后续判定为滑动，这个临时空批注会被删除
-        if (!skipSave) this._saveChanges();
+        this._saveChanges();
       }
-      debugLog.add('BUBBLE', `_openAnnotationForElement: ${isNew ? '新建批注' : '已有批注'} skipSave=${skipSave} selector=${selector.slice(0, 50)}`);
-      const rect = el.getBoundingClientRect();
-      this._openAnnotationBubble(ann, rect);
-      // pointerdown 触发的待确认手势不在此重建标记：标记会出现在触点附近，
-      // 中途插入会让 pointerup/合成 click 的命中目标改变；pointerup 确认时会统一重绘。
-      if (!skipSave) this._syncAnnotationMarkers();
+      this._openAnnotationBubble(ann, el.getBoundingClientRect());
+      this._syncAnnotationMarkers();
     }
 
     _openAnnotationBubble(ann, rect) {
-      debugLog.add('BUBBLE', `_openAnnotationBubble 开始: annId=${ann.id} text="${(ann.text || '').slice(0, 20)}" rect=(${Math.round(rect.left)},${Math.round(rect.top)},${Math.round(rect.width)}x${Math.round(rect.height)})`);
+      // 先写回并关闭上一个气泡
       this._closeAnnotationBubble();
       this._currentAnnotation = ann;
       const bubble = this._components.annotationBubble;
       const input = this._components.annotationInput;
-      const deleteBtn = this._components.annotationDelete;
-      // 顺序：先显示气泡、填值、定位并强制布局，最后 focus。
-      // 这样 focus 时输入框已在最终位置，聚焦之后不再移动其容器——iOS WebKit 在键盘弹起期间
-      // 若检测到聚焦元素容器发生位移，可能主动失焦收起键盘。
-      bubble.removeAttribute('hidden');
-      bubble.style.display = '';
+      // 先填值定位、再显示并聚焦，聚焦后不再移动输入框容器
       input.value = ann.text || '';
-      deleteBtn.hidden = !ann.text;
+      this._components.annotationDelete.hidden = !(ann.text && ann.text.trim());
       this._annotationBubbleRect = rect;
+      bubble.removeAttribute('hidden');
       this._updateAnnotationBubblePosition();
-      // 强制浏览器完成布局：气泡刚从 hidden 变为显示，若不强制布局就 focus，
-      // :focus 伪类可能未生效（日志显示 innerActive=TEXTAREA 但 input.matches(':focus')=false），
-      // iOS Safari 因此不弹键盘。读取 offsetHeight 触发同步布局，确保元素已渲染。
-      const forceLayout = bubble.offsetHeight;
       try {
-        input.readOnly = false;
-        // 关键：focus 必须在用户手势同步回调中尽早调用，且重试时不能先 blur()——
-        // iOS Safari 上手势回调内一旦 blur，键盘会话会被判定结束，再次 focus 也无法拉起键盘。
         input.focus({ preventScroll: true });
-        let focused = input.matches(':focus');
-        // focus 失败重试：快速连续点击时 :focus 伪类可能偶发未生效，
-        // 在同一用户交互同步回调中立即再聚焦一次（不 blur），提升键盘弹出成功率。
-        if (!focused) {
-          debugLog.add('KEYBOARD', '首次focus未生效，立即重试');
-          input.focus({ preventScroll: true });
-          focused = input.matches(':focus');
-        }
-        const outerActive = document.activeElement;
-        const innerActive = outerActive && outerActive.shadowRoot ? outerActive.shadowRoot.activeElement : null;
-        debugLog.add('KEYBOARD', `focus() 完成: forceLayout=${forceLayout} retry=${!focused ? 'failed' : 'ok'} outerActive=${outerActive ? outerActive.tagName : 'null'} innerActive=${innerActive ? innerActive.tagName : 'null'} input.matches(':focus')=${focused}`);
-      } catch (e) {
-        debugLog.add('KEYBOARD', `focus() 异常: ${e.message}`);
-      }
-      debugLog.add('BUBBLE', `气泡已显示: left=${bubble.style.left} top=${bubble.style.top} offsetHeight=${bubble.offsetHeight}`);
-      // 光标定位到内容末尾
-      const len = input.value.length;
-      try {
-        input.setSelectionRange(len, len);
-        debugLog.add('KEYBOARD', `setSelectionRange(${len}, ${len}) 已调用, selectionStart=${input.selectionStart}`);
-      } catch (e) {
-        debugLog.add('KEYBOARD', `setSelectionRange 异常: ${e.message}`);
-      }
-      debugLog.add('BUBBLE', '_openAnnotationBubble 完成');
+        const len = input.value.length;
+        input.setSelectionRange(len, len); // 光标落到内容末尾
+      } catch (e) { /* 聚焦失败不阻塞批注流程 */ }
     }
+
 
     _updateAnnotationBubblePosition() {
       const bubble = this._components.annotationBubble;
@@ -5242,7 +5129,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 滚动/resize 时根据当前批注的 selector 重新获取元素位置，避免使用打开时缓存的过时 rect
       if (this._currentAnnotation) {
         try {
-          const el = document.querySelector(this._currentAnnotation.selector);
+          const el = queryTargetEl(this._currentAnnotation.selector);
           if (el && el.isConnected) {
             rect = el.getBoundingClientRect();
             this._annotationBubbleRect = rect;
@@ -5289,13 +5176,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         if (isEmpty) {
           state.annotations = state.annotations.filter(a => a.id !== ann.id);
         }
-        const caller = (() => {
-          try {
-            const lines = new Error().stack.split('\n').slice(2, 4).map(l => l.trim().replace(/^at /, ''));
-            return (lines.find(l => !l.includes('_closeAnnotationBubble')) || lines[0] || '').slice(0, 60);
-          } catch (e) { return ''; }
-        })();
-        debugLog.add('BUBBLE', `_closeAnnotationBubble: annId=${ann.id} text="${(ann.text || '').slice(0, 20)}" 空批注=${isEmpty} 剩余批注=${state.annotations.length} 调用方=${caller}`);
         this._flushSave();
         this._syncAnnotationMarkers();
         this._updateChangeCount();
@@ -5479,7 +5359,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       state.changes.forEach(c => { if (c.selector && !seen.has(c.selector)) { seen.add(c.selector); candidates.push(c.selector); } });
       state.annotations.forEach(a => { if (a.selector && !seen.has(a.selector)) { seen.add(a.selector); candidates.push(a.selector); } });
       for (const sel of candidates) {
-        try { if (document.querySelector(sel) === el) return sel; } catch (e) {}
+        if (queryTargetEl(sel) === el) return sel;
       }
       return generated;
     }
@@ -5539,24 +5419,37 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     }
 
     _jumpToElement(selector) {
-      try {
-        const el = document.querySelector(selector);
-        if (el) {
-          this._components.overviewPanel.close();
-          // 列表跳转即"要查看/调整该元素样式"，自动进入走查模式（会顺带退出批注模式），
-          // 否则批注模式下只会滚动、不会选中，样式面板打不开
-          if (!this._walkthroughMode) this._setWalkthroughMode(true);
-          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          setTimeout(() => {
-            if (this._walkthroughMode && el.isConnected) this._selectElement(el);
-          }, 300);
-        }
-      } catch (e) {}
+      let el;
+      el = queryTargetEl(selector);
+      this._components.overviewPanel.close();
+      if (!el) {
+        this._showToast('元素在当前页面不存在，无法定位');
+        return;
+      }
+      const hasStyleChange = state.changes.some(c => c.selector === selector);
+      if (hasStyleChange) {
+        // 含样式修改：进入走查模式并选中元素，打开样式面板
+        if (!this._walkthroughMode) this._setWalkthroughMode(true);
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => {
+          if (this._walkthroughMode && el.isConnected) this._selectElement(el);
+        }, 300);
+      } else {
+        // 纯批注：留在批注模式，滚动定位后直接打开该元素的批注气泡
+        if (!this._annotationMode) this._setAnnotationMode(true);
+        const ann = state.annotations.find(a => a.selector === selector);
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => {
+          if (!ann || !el.isConnected) return;
+          this._openAnnotationBubble(ann, el.getBoundingClientRect());
+        }, 300);
+      }
     }
 
     // ── 配置列表 ──────────────────────────────────────────
     _openOverview() {
       this._closeSubpanels();
+      this._closeAnnotationBubble(); // 打开配置列表前先写回并收起批注气泡
       const countBtn = this._shadow.querySelector('[data-tool="overview"]');
       this._components.overviewPanel.open(state.changes, state.currentRoute, countBtn, state.annotations);
       this._clearSelection();
@@ -5669,7 +5562,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         return;
       }
       try {
-        const el = document.querySelector(change.selector);
+        const el = queryTargetEl(change.selector);
         // 用 setProperty 兼容 kebab-case 属性名（如 flex-direction）
         if (el) el.style.setProperty(change.property, '');
       } catch (e) {}
@@ -5715,7 +5608,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     /** 路由切换统一收尾：旧场景落盘与浮层清理 → 新场景数据加载 → 标记重绘 */
     _handleRouteChange() {
       const nextRoute = getCurrentRoute();
-      debugLog.add('ROUTE', `hashchange 收到: ${state.currentRoute} -> ${nextRoute}`);
       // 同路由的 hash 抖动（锚点、历史记录写回等）不做收尾与重载，避免误关正在输入的批注气泡、误清回放
       if (nextRoute === state.currentRoute) return;
       // 1. 旧场景收尾：关闭批注气泡（写回输入）、选中态、样式面板、颜色选择器，
@@ -5794,13 +5686,25 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       let matched = 0;
       pending.forEach(c => {
         let el = null;
-        try { el = document.querySelector(c.selector); } catch (e) { el = null; }
+        try { el = queryTargetEl(c.selector); } catch (e) { el = null; }
         if (!el || !el.isConnected) return;
         matched++;
         try { el.style.setProperty(c.property, c.newValue); } catch (e) {}
       });
+      // 批注标记随回放重试一起重绘：场景脚本异步挂载/内部面板激活时，首次同步可能还找不到可见锚点
+      let annMatched = 0;
+      if (this._annotationMode) {
+        state.annotations.forEach(a => {
+          const aEl = queryTargetEl(a.selector);
+          if (aEl && aEl.isConnected) {
+            const ar = aEl.getBoundingClientRect();
+            if (ar.width > 0 && ar.height > 0) annMatched++;
+          }
+        });
+        this._syncAnnotationMarkers();
+      }
       // 最多重试 10 次（约 2s），覆盖场景脚本异步渲染完成的时机
-      if (matched < pending.length && round < 10) {
+      if ((matched < pending.length || annMatched < state.annotations.length) && round < 10) {
         if (this._replayTimer) clearTimeout(this._replayTimer);
         this._replayTimer = setTimeout(() => this._replayInlineChanges(round + 1), 200);
       }
@@ -5837,7 +5741,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     }
 
     _updateChangeCount() {
-      const count = state.changes.length + state.annotations.filter(a => a.text).length;
+      // 纯空格批注视为空，不计入角标（与关闭气泡时的空批注清理口径一致）
+      const count = state.changes.length + state.annotations.filter(a => a.text && a.text.trim()).length;
       // 配置列表按钮数字气泡（计数为 0 时也同步清空文本，避免隐藏后残留旧数字）
       if (this._components.overviewCount) {
         this._components.overviewCount.textContent = count > 99 ? '99+' : count;
