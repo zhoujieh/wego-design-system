@@ -5063,27 +5063,26 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const bubble = this._components.annotationBubble;
       const input = this._components.annotationInput;
       const deleteBtn = this._components.annotationDelete;
-      input.value = ann.text || '';
-      deleteBtn.hidden = !ann.text;
+      // 关键：先显示气泡，然后立即 focus，减少 focus 前的同步操作延迟。
+      // iOS Safari 要求 focus() 在用户交互的直接回调中尽早调用，延迟过久会被判定为非直接交互而不弹键盘。
       bubble.removeAttribute('hidden');
-      bubble.style.display = ''; // 清除可能残留的内联 display:none，确保 [hidden] 移除后正常显示
-      this._annotationBubbleRect = rect;
-      this._updateAnnotationBubblePosition();
-      debugLog.add('BUBBLE', `气泡已显示: left=${bubble.style.left} top=${bubble.style.top} offsetHeight=${bubble.offsetHeight}`);
-      // 同步聚焦输入框：移动端浏览器要求 focus() 必须在用户交互的同步回调中调用才能拉起键盘。
-      // 移除 input.click()：click 事件可能干扰 focus 导致焦点停留在 shadow host 而非 textarea。
-      // 先确保非只读，再 focus，最后 setSelectionRange 激活光标。
+      bubble.style.display = '';
       try {
         input.readOnly = false;
         input.focus({ preventScroll: true });
-        // 检查 shadow DOM 内部真正获得焦点的元素
         const outerActive = document.activeElement;
         const innerActive = outerActive && outerActive.shadowRoot ? outerActive.shadowRoot.activeElement : null;
         debugLog.add('KEYBOARD', `focus() 完成: outerActive=${outerActive ? outerActive.tagName : 'null'} innerActive=${innerActive ? innerActive.tagName : 'null'} input.matches(':focus')=${input.matches(':focus')}`);
       } catch (e) {
         debugLog.add('KEYBOARD', `focus() 异常: ${e.message}`);
       }
-      // 光标定位到内容末尾，直接进入输入状态（不全选已有内容）
+      // focus 之后再设置值和定位，避免延迟 focus
+      input.value = ann.text || '';
+      deleteBtn.hidden = !ann.text;
+      this._annotationBubbleRect = rect;
+      this._updateAnnotationBubblePosition();
+      debugLog.add('BUBBLE', `气泡已显示: left=${bubble.style.left} top=${bubble.style.top} offsetHeight=${bubble.offsetHeight}`);
+      // 光标定位到内容末尾
       const len = input.value.length;
       try {
         input.setSelectionRange(len, len);
