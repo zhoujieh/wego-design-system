@@ -4125,6 +4125,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             flex-shrink: 0;
             transition: background-color 140ms ease, color 140ms ease;
           }
+          .collapse-btn:hover { background: rgba(255,255,255,0.06); }
           .collapse-btn:active { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.92); }
 
           .toolbar-main {
@@ -4151,6 +4152,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             transition: background-color 140ms ease, color 140ms ease, transform 140ms ease;
             position: relative;
           }
+          .tool-btn:hover { background: rgba(255,255,255,0.06); }
           .tool-btn:active { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.92); }
           .tool-btn[data-active="true"] { background: rgba(255,255,255,0.12); color: #fff; }
           .tool-btn .badge-dot {
@@ -4191,7 +4193,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             padding: 0 10px;
             border: 0;
             border-radius: 999px;
-            background: rgba(255,255,255,0.06);
+            background: transparent;
             color: #fff;
             font-size: 12px;
             font-weight: 700;
@@ -4204,6 +4206,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             transition: background-color 140ms ease;
             position: relative;
           }
+          .count-btn:hover { background: rgba(255,255,255,0.06); }
           .count-btn:active { background: rgba(255,255,255,0.12); }
           .count-btn .count-icon { font-size: 14px; }
           .count-btn .count-bubble {
@@ -4251,6 +4254,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             padding: 0;
             position: relative;
           }
+          .fab-btn:hover { background: rgba(255,255,255,0.06); }
+          .fab-btn:active { background: rgba(255,255,255,0.1); }
           .fab-btn .fab-dot {
             position: absolute;
             top: 8px;
@@ -4440,8 +4445,17 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             background: #1a1a2e; border: 1px solid rgba(255,255,255,0.1);
             border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.4);
             display: flex; flex-direction: column; overflow: hidden;
+            transform-origin: top right;
+          }
+          .debug-panel:not([hidden]) {
+            /* 统一面板打开动画：透明度 + 轻微上浮 + 缩放，200ms 同一缓动 */
+            animation: wt-panel-in-top 200ms cubic-bezier(0.22, 0.9, 0.32, 1) both;
           }
           .debug-panel[hidden] { display: none; }
+          @keyframes wt-panel-in-top {
+            from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+          }
           .debug-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.08); }
           .debug-panel-title { color: rgba(255,255,255,0.9); font-size: 13px; font-weight: 600; }
           .debug-panel-close { background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; padding: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
@@ -4624,13 +4638,17 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           }
         });
       });
-      // 调试日志入口
+      // 调试日志入口（toggle：已打开则关闭）
       const debugLogBtn = this._shadow.querySelector('[data-action="debug-log"]');
       if (debugLogBtn) {
         debugLogBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           this._closeSubpanels();
-          this._openDebugPanel();
+          if (this._components.debugPanel && !this._components.debugPanel.hasAttribute('hidden')) {
+            this._closeDebugPanel();
+          } else {
+            this._openDebugPanel();
+          }
         });
       }
       // 调试日志面板事件
@@ -4661,7 +4679,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           this._showToast('日志已清空');
         });
       }
-      // 点击外部关闭子面板和配置列表
+      // 点击外部关闭子面板、配置列表和调试日志面板
       document.addEventListener('pointerdown', (e) => {
         if (!e.target.closest) return;
         if (isWalkthroughElement(e.target)) return; // 工具自身 UI 内的 pointerdown 不关闭
@@ -4670,6 +4688,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
             this._components.overviewPanel.close();
           }
+          this._closeDebugPanel();
         }
       }, true);
 
@@ -4730,15 +4749,17 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         if (sp && sp._tokenPanel && sp._tokenPanel.open) { sp._closeTokenPanel(); return; }
         // 4. 样式编辑面板（有选中元素）
         if (state.selectedElement) { this._clearSelection(); return; }
-        // 5. 配置列表面板
+        // 5. 调试日志面板
+        if (this._components.debugPanel && !this._components.debugPanel.hasAttribute('hidden')) { this._closeDebugPanel(); return; }
+        // 6. 配置列表面板
         const ov = this._components.overviewPanel;
         if (ov && !ov.hasAttribute('hidden')) { ov.close(); return; }
-        // 6. 工具条子面板（数据模拟 / 更多）
+        // 7. 工具条子面板（数据模拟 / 更多）
         const anySubpanel = this._shadow.querySelector('[data-subpanel].is-open');
         if (anySubpanel) { this._closeSubpanels(); return; }
-        // 7. 走查模式
+        // 8. 走查模式
         if (this._walkthroughMode) { this._setWalkthroughMode(false); return; }
-        // 8. 批注模式
+        // 9. 批注模式
         if (this._annotationMode) { this._setAnnotationMode(false); return; }
       });
     }
@@ -4769,6 +4790,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           this._drag.moved = true;
           this._suppressClick = true;
           this._closeSubpanels();
+          this._closeDebugPanel();
         }
         if (this._drag.moved) {
           ev.preventDefault();
@@ -5017,6 +5039,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         this._components.overviewPanel.close();
       }
       this._closeAnnotationBubble();
+      this._closeDebugPanel();
     }
 
     _updateSubpanelPosition() {
@@ -5402,13 +5425,49 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     _openDebugPanel() {
       const panel = this._components.debugPanel;
       if (!panel) return;
-      panel.removeAttribute('hidden');
-      // 定位到屏幕中央偏下，避免被键盘遮挡
-      const panelWidth = 320;
-      const panelHeight = Math.min(window.innerHeight * 0.6, 500);
-      panel.style.left = Math.max(8, (window.innerWidth - panelWidth) / 2) + 'px';
-      panel.style.top = Math.max(8, window.innerHeight - panelHeight - 40) + 'px';
       this._refreshDebugLog();
+      // 绑定到虫子按钮锚点：右对齐、优先下方展开，空间不够翻上方；先显示测高再 clamp 到视口
+      const anchor = this._shadow.querySelector('[data-action="debug-log"]');
+      const panelWidth = 320;
+      const gap = 8;
+      const place = () => {
+        if (!anchor) {
+          // 兜底：居中显示
+          panel.style.left = Math.max(8, (window.innerWidth - panelWidth) / 2) + 'px';
+          panel.style.top = '60px';
+          panel.removeAttribute('hidden');
+          return;
+        }
+        const rect = anchor.getBoundingClientRect();
+        let left = rect.right - panelWidth;
+        if (left < 8) left = 8;
+        if (left + panelWidth > window.innerWidth - 8) left = window.innerWidth - panelWidth - 8;
+        // 先显示以测量真实高度（用 offsetHeight 布局高度，避免入场动画 scale 影响 getBoundingClientRect 测高）
+        panel.style.left = left + 'px';
+        panel.style.top = rect.bottom + gap + 'px';
+        panel.removeAttribute('hidden');
+        void panel.offsetHeight;
+        const panelHeight = panel.offsetHeight;
+        let top = rect.bottom + gap;
+        if (top + panelHeight > window.innerHeight - 8) top = rect.top - panelHeight - gap;
+        if (top < 8) top = 8;
+        panel.style.top = top + 'px';
+      };
+      place();
+      // 字体/布局稳定后再校正一次垂直位置：内容重排可能导致面板长高，与锚点按钮重叠或越出视口
+      const settle = () => {
+        if (!anchor || panel.hasAttribute('hidden')) return;
+        const rect = anchor.getBoundingClientRect();
+        const panelHeight = panel.offsetHeight;
+        let top = rect.bottom + gap;
+        if (top + panelHeight > window.innerHeight - 8) top = rect.top - panelHeight - gap;
+        if (top < 8) top = 8;
+        panel.style.top = top + 'px';
+      };
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(() => requestAnimationFrame(settle));
+      }
+      setTimeout(settle, 220); // 入场动画结束后兜底校正
       debugLog.add('DEBUG', '调试日志面板已打开');
     }
 
@@ -5953,9 +6012,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 批注模式按钮激活态
       const annBtn = this._shadow.querySelector('[data-tool="annotation"]');
       if (annBtn) annBtn.setAttribute('data-active', String(this._annotationMode));
-      // 数据模拟按钮激活态
+      // 数据模拟按钮：有开关打开时只显示红点（badge-dot），不高亮（选中态只留给走查/批注）
       const dmBtn = this._shadow.querySelector('[data-tool="datamock"]');
-      if (dmBtn) dmBtn.setAttribute('data-active', String(this._faultState.load || this._faultState.save || this._faultState['delete'] || this._faultState.slow));
+      if (dmBtn) dmBtn.setAttribute('data-has-changes', String(this._faultState.load || this._faultState.save || this._faultState['delete'] || this._faultState.slow));
       // 配置列表按钮变更标记
       const ovBtn = this._shadow.querySelector('[data-tool="overview"]');
       if (ovBtn) ovBtn.setAttribute('data-has-changes', String(count > 0));
