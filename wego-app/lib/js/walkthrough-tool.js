@@ -4898,6 +4898,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         this._unbindAnnotationEvents();
         this._components.annotationMarkerLayer.setAttribute('hidden', '');
         this._closeAnnotationBubble();
+        // 取消待处理的滚动 rAF，避免模式关闭后仍执行
+        if (this._annotationScrollRaf) {
+          cancelAnimationFrame(this._annotationScrollRaf);
+          this._annotationScrollRaf = null;
+        }
       }
       this._updateToolbarState();
     }
@@ -4974,10 +4979,15 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     };
 
     _onAnnotationScroll = () => {
-      this._syncAnnotationMarkers();
-      if (!this._components.annotationBubble.hasAttribute('hidden')) {
-        this._updateAnnotationBubblePosition();
-      }
+      // rAF 节流：scroll 事件高频触发，避免每次都 innerHTML='' 重建标记导致闪烁和性能问题
+      if (this._annotationScrollRaf) return;
+      this._annotationScrollRaf = requestAnimationFrame(() => {
+        this._annotationScrollRaf = null;
+        this._syncAnnotationMarkers();
+        if (!this._components.annotationBubble.hasAttribute('hidden')) {
+          this._updateAnnotationBubblePosition();
+        }
+      });
     };
 
     _syncAnnotationMarkers() {
@@ -5060,26 +5070,24 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._annotationBubbleRect = rect;
       this._updateAnnotationBubblePosition();
       debugLog.add('BUBBLE', `气泡已显示: left=${bubble.style.left} top=${bubble.style.top} offsetHeight=${bubble.offsetHeight}`);
-      // 同步聚焦输入框：移动端浏览器要求 focus() 必须在用户交互的同步回调中调用才能拉起键盘，
-      // 不能放在 setTimeout 异步回调中（会被判定为非用户直接触发，键盘不弹出）。
-      // 先 click() 再 focus()：部分移动端浏览器需要 click 事件激活输入框才弹出软键盘。
+      // 同步聚焦输入框：移动端浏览器要求 focus() 必须在用户交互的同步回调中调用才能拉起键盘。
+      // 移除 input.click()：click 事件可能干扰 focus 导致焦点停留在 shadow host 而非 textarea。
+      // 先确保非只读，再 focus，最后 setSelectionRange 激活光标。
       try {
-        input.click();
-        debugLog.add('KEYBOARD', 'input.click() 已调用');
+        input.readOnly = false;
+        input.focus({ preventScroll: true });
+        // 检查 shadow DOM 内部真正获得焦点的元素
+        const outerActive = document.activeElement;
+        const innerActive = outerActive && outerActive.shadowRoot ? outerActive.shadowRoot.activeElement : null;
+        debugLog.add('KEYBOARD', `focus() 完成: outerActive=${outerActive ? outerActive.tagName : 'null'} innerActive=${innerActive ? innerActive.tagName : 'null'} input.matches(':focus')=${input.matches(':focus')}`);
       } catch (e) {
-        debugLog.add('KEYBOARD', `input.click() 异常: ${e.message}`);
-      }
-      try {
-        input.focus();
-        debugLog.add('KEYBOARD', `input.focus() 已调用, document.activeElement=${document.activeElement ? document.activeElement.tagName : 'null'}`);
-      } catch (e) {
-        debugLog.add('KEYBOARD', `input.focus() 异常: ${e.message}`);
+        debugLog.add('KEYBOARD', `focus() 异常: ${e.message}`);
       }
       // 光标定位到内容末尾，直接进入输入状态（不全选已有内容）
       const len = input.value.length;
       try {
         input.setSelectionRange(len, len);
-        debugLog.add('KEYBOARD', `setSelectionRange(${len}, ${len}) 已调用`);
+        debugLog.add('KEYBOARD', `setSelectionRange(${len}, ${len}) 已调用, selectionStart=${input.selectionStart}`);
       } catch (e) {
         debugLog.add('KEYBOARD', `setSelectionRange 异常: ${e.message}`);
       }
