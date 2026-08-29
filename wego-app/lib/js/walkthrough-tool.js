@@ -507,22 +507,21 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
     // 宽高：推导尺寸模式（fixed 固定 / auto 适应 / fill 填充），固定值去掉 px 只留数值回显
     // 优先用 CSS 原始声明值判断模式（getComputedStyle 总是返回 px，无法区分 auto/100%/fit-content）；
-    // 原始值取不到时 fallback 到计算值（默认 fixed）
+    // 无显式声明 = CSS 默认 auto（内容自适应），不能 fallback 到计算像素值误判为 fixed
     const sizeModeOf = (v) => {
       const s = String(v || '').trim().toLowerCase();
       if (s === '100%') return 'fill';
       if (/^(auto|fit-content|min-content|max-content|inherit|initial|unset)$/.test(s)) return 'auto';
       return 'fixed';
     };
-    const sizeInputOf = (v, specified) => {
-      const mode = sizeModeOf(specified);
+    const sizeInputOf = (v, specified, mode) => {
       if (mode === 'fixed') return String(parseNumeric(v));
       return String(specified || '').trim();
     };
     const specifiedWidth = getSpecifiedValue(el, 'width');
     const specifiedHeight = getSpecifiedValue(el, 'height');
-    const widthMode = sizeModeOf(specifiedWidth || cs.width);
-    const heightMode = sizeModeOf(specifiedHeight || cs.height);
+    const widthMode = specifiedWidth ? sizeModeOf(specifiedWidth) : 'auto';
+    const heightMode = specifiedHeight ? sizeModeOf(specifiedHeight) : 'auto';
 
     return {
       // 自动布局
@@ -541,8 +540,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       marginLeft: parseNumeric(cs.marginLeft),
       widthMode,
       heightMode,
-      width: sizeInputOf(cs.width, specifiedWidth),   // 固定值回显计算像素数值；语义值（auto/100%）原样保留
-      height: sizeInputOf(cs.height, specifiedHeight),
+      width: sizeInputOf(cs.width, specifiedWidth, widthMode),   // 固定值回显计算像素数值；语义值（auto/100%）原样保留
+      height: sizeInputOf(cs.height, specifiedHeight, heightMode),
       display,
       position: cs.position,
       zIndex: parseNumeric(cs.zIndex),
@@ -3336,16 +3335,16 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
     _onFieldChange(field, value) {
       if (!this._targetEl || !this._data) return;
+      // 输入守门：拦截负数尺寸、非 flex 容器布局方向等非法操作（伪元素与普通元素路径统一），
+      // 必须在写 _data 之前拦截，避免污染面板数据
+      const guard = this._validateFieldValue(field, value);
+      if (!guard.ok) {
+        bus.emit('toast', { message: guard.reason });
+        return;
+      }
       this._data[field] = value;
       // 伪元素目标：编辑通过注入 <head> 的样式规则生效，property 写为 css-property
       if (this._target) {
-        // 输入守门：与普通元素路径一致，拦截负数尺寸、非 flex 容器布局方向等非法操作
-        const guard = this._validateFieldValue(field, value);
-        if (!guard.ok) {
-          bus.emit('toast', { message: guard.reason });
-          this._data[field] = this._data[field]; // 还原面板数据
-          return;
-        }
         const cssProp = this._fieldToCssProp(field);
         let cssVal = this._fieldToCssValue(field);
         // 清空输入 = 移除该伪元素属性注入（数值字段的 0 兜底不适用此场景）
