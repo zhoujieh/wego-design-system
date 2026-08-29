@@ -4933,19 +4933,44 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (e.button !== undefined && e.button !== 0) return;
       if (isWalkthroughElement(e.target)) return;
       e.stopPropagation();
+      if (e.cancelable) e.preventDefault();
       this._clearHover();
       this._annotationPointerActive = true;
       this._annotationStartX = e.clientX;
       this._annotationStartY = e.clientY;
       this._annotationIsSwiping = false;
+      this._annotationPendingId = null;
       debugLog.add('TOUCH', `pointerdown 页面元素: (${e.clientX}, ${e.clientY}) tag=${e.target.tagName}`);
+      // 关键：在 pointerdown（触摸序列开始）中立即打开气泡并 focus。
+      // iOS Safari 对 focus() 的用户直接交互判定中，pointerdown 比 pointerup 更可靠。
+      // pointerup 是合成事件（touchstart→touchmove→touchend→pointerup→click），
+      // 链路太长，即使 focus 成功设置焦点也可能不弹键盘。
+      const el = e.target;
+      if (el && el !== document.body && el !== document.documentElement && !isWalkthroughElement(el)) {
+        this._openAnnotationForElement(el, e.clientX, e.clientY, true);
+        // 记录当前批注 ID，如果后续判定为滑动则删除这个临时空批注
+        if (this._currentAnnotation) this._annotationPendingId = this._currentAnnotation.id;
+      }
     };
 
     _onAnnotationPointerMove = (e) => {
       if (this._annotationPointerActive) {
         const dx = Math.abs(e.clientX - this._annotationStartX);
         const dy = Math.abs(e.clientY - this._annotationStartY);
-        if (dx > 10 || dy > 10) this._annotationIsSwiping = true;
+        if (dx > 10 || dy > 10) {
+          this._annotationIsSwiping = true;
+          // 滑动时关闭气泡，并删除 pointerdown 中创建的临时空批注
+          if (this._annotationPendingId) {
+            const pending = state.annotations.find(a => a.id === this._annotationPendingId);
+            if (pending && (!pending.text || !pending.text.trim())) {
+              state.annotations = state.annotations.filter(a => a.id !== this._annotationPendingId);
+              this._saveChanges();
+            }
+            this._annotationPendingId = null;
+          }
+          this._closeAnnotationBubble();
+          debugLog.add('TOUCH', 'pointermove 判定为滑动，关闭气泡并清理临时批注');
+        }
       }
     };
 
@@ -4956,6 +4981,15 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         debugLog.add('TOUCH', 'pointerup 判定为滑动，忽略');
         return;
       }
+      // 非滑动：pointerdown 中已经打开气泡，这里只需确认并保存
+      if (this._currentAnnotation) {
+        this._annotationPendingId = null;
+        this._saveChanges();
+        this._syncAnnotationMarkers();
+        debugLog.add('TOUCH', 'pointerup 确认为点击，批注已保存');
+        return;
+      }
+      // 如果 pointerdown 中没有成功打开气泡（如命中 body），这里做兜底处理
       const el = document.elementFromPoint(e.clientX, e.clientY);
       if (!el || el === document.body || el === document.documentElement) {
         debugLog.add('TOUCH', 'pointerup 命中 body/documentElement，关闭气泡');
@@ -4967,7 +5001,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         return;
       }
       if (e.cancelable) e.preventDefault();
-      debugLog.add('TOUCH', `pointerup 命中页面元素: ${el.tagName}，准备打开批注`);
+      debugLog.add('TOUCH', `pointerup 兜底打开批注: ${el.tagName}`);
       this._openAnnotationForElement(el, e.clientX, e.clientY);
     };
 
@@ -5031,7 +5065,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       debugLog.add('MARKER', `_syncAnnotationMarkers 完成: 共创建 ${count} 个标记 (state.annotations=${state.annotations.length})`);
     }
 
-    _openAnnotationForElement(el, clickX, clickY) {
+    _openAnnotationForElement(el, clickX, clickY, skipSave = false) {
       const selector = generateSelector(el);
       const elementTag = el.tagName.toLowerCase();
       const elementText = (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 50);
@@ -5048,9 +5082,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           timestamp: Date.now(),
         };
         state.annotations.push(ann);
-        this._saveChanges();
+        // pointerdown 中调用时暂不保存：如果后续判定为滑动，这个临时空批注会被删除
+        if (!skipSave) this._saveChanges();
       }
-      debugLog.add('BUBBLE', `_openAnnotationForElement: ${isNew ? '新建批注' : '已有批注'} selector=${selector.slice(0, 50)}`);
+      debugLog.add('BUBBLE', `_openAnnotationForElement: ${isNew ? '新建批注' : '已有批注'} skipSave=${skipSave} selector=${selector.slice(0, 50)}`);
       const rect = el.getBoundingClientRect();
       this._openAnnotationBubble(ann, rect);
       this._syncAnnotationMarkers();
