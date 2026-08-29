@@ -4412,7 +4412,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._components.toolbar = this._shadow.querySelector('[data-toolbar]');
       this._components.toolbarMain = this._shadow.querySelector('[data-toolbar-main]');
       this._components.fabBtn = this._shadow.querySelector('[data-fab-btn]');
-      this._components.countValue = this._shadow.querySelector('[data-count-value]');
       this._components.overviewCount = this._shadow.querySelector('[data-overview-count]');
       this._components.fabCount = this._shadow.querySelector('[data-fab-count]');
       this._components.annotationMarkerLayer = this._shadow.querySelector('[data-annotation-marker-layer]');
@@ -4520,9 +4519,17 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
             this._components.overviewPanel.close();
           }
-          // 批注模式下点击外部关闭批注气泡
+          // 批注模式下点击外部关闭批注气泡。
+          // 例外：批注输入框正在聚焦（移动端键盘会话进行中）时不关闭——键盘弹起过程中
+          // iOS 可能产生杂散 pointerdown，此时关闭气泡会连带收起键盘、打断输入；
+          // 若点的是另一个页面元素，批注手势处理器会自行关闭旧气泡并打开新的。
           if (this._annotationMode && !this._components.annotationBubble.hasAttribute('hidden')) {
-            this._closeAnnotationBubble();
+            if (this._isAnnotationInputFocused()) {
+              debugLog.add('BUBBLE', `外部 pointerdown 命中键盘会话，忽略关闭: tag=${e.target.tagName} button=${e.button}`);
+            } else {
+              debugLog.add('BUBBLE', `外部 pointerdown 关闭气泡: tag=${e.target.tagName} button=${e.button}`);
+              this._closeAnnotationBubble();
+            }
           }
         }
       }, true);
@@ -4544,6 +4551,20 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           this._saveChanges();
           // 角标计数实时跟随输入变化，不等气泡关闭
           this._updateChangeCount();
+        }
+      });
+      // 失焦诊断：记录键盘被谁打断（移动端键盘收起时会先 blur）；键盘会话结束后补一次定位
+      this._components.annotationInput.addEventListener('blur', () => {
+        const ae = document.activeElement;
+        const aeTag = ae ? (ae.shadowRoot && ae.shadowRoot.activeElement ? ae.tagName + '>' + ae.shadowRoot.activeElement.tagName : ae.tagName) : 'null';
+        debugLog.add('KEYBOARD', `批注输入框 blur: 气泡${this._components.annotationBubble.hasAttribute('hidden') ? '已隐藏' : '仍显示'} 新焦点=${aeTag}`);
+        if (!this._components.annotationBubble.hasAttribute('hidden')) {
+          // 等键盘收起动画后的最终布局稳定再定位
+          setTimeout(() => {
+            if (!this._components.annotationBubble.hasAttribute('hidden') && !this._isAnnotationInputFocused()) {
+              this._updateAnnotationBubblePosition();
+            }
+          }, 320);
         }
       });
       this._components.annotationBubble.addEventListener('pointerdown', (e) => {
@@ -4988,7 +5009,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (e.button !== undefined && e.button !== 0) return;
       if (isWalkthroughElement(e.target)) return;
       e.stopPropagation();
-      if (e.cancelable) e.preventDefault();
+      // 注意：普通元素的 pointerdown 不能 preventDefault。iOS Safari 中对 pointerdown 调 preventDefault
+      // 会让浏览器把整段手势判定为"脚本已接管"，随后同一回调里的 input.focus() 拉起软键盘的成功率显著下降。
+      // 但页面自身的输入框/可编辑元素需要阻止默认聚焦，否则它会和批注输入框争抢键盘。
+      const t = e.target;
+      const editableTag = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable);
+      if (editableTag && e.cancelable) e.preventDefault();
       this._clearHover();
       this._annotationPointerActive = true;
       this._annotationStartX = e.clientX;
@@ -5073,11 +5099,22 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._annotationScrollRaf = requestAnimationFrame(() => {
         this._annotationScrollRaf = null;
         this._syncAnnotationMarkers();
-        if (!this._components.annotationBubble.hasAttribute('hidden')) {
+        // 输入框聚焦（移动端键盘会话）期间冻结气泡位置：键盘弹起会连续触发 scroll/resize，
+        // 每帧移动装着聚焦输入框的气泡会与 WebKit 的"聚焦元素滚入可视区"形成对抗，进而失焦收键盘。
+        // 标记层不含聚焦元素，可以照常跟随滚动。
+        if (!this._components.annotationBubble.hasAttribute('hidden') && !this._isAnnotationInputFocused()) {
           this._updateAnnotationBubblePosition();
         }
       });
     };
+
+    /** 批注输入框是否正处于聚焦态（穿透 shadowRoot 判断，等价于移动端键盘会话进行中） */
+    _isAnnotationInputFocused() {
+      const input = this._components.annotationInput;
+      if (!input) return false;
+      const root = input.getRootNode ? input.getRootNode() : null;
+      return !!(root && root.activeElement === input);
+    }
 
     _syncAnnotationMarkers() {
       const layer = this._components.annotationMarkerLayer;
@@ -5143,7 +5180,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       debugLog.add('BUBBLE', `_openAnnotationForElement: ${isNew ? '新建批注' : '已有批注'} skipSave=${skipSave} selector=${selector.slice(0, 50)}`);
       const rect = el.getBoundingClientRect();
       this._openAnnotationBubble(ann, rect);
-      this._syncAnnotationMarkers();
+      // pointerdown 触发的待确认手势不在此重建标记：标记会出现在触点附近，
+      // 中途插入会让 pointerup/合成 click 的命中目标改变；pointerup 确认时会统一重绘。
+      if (!skipSave) this._syncAnnotationMarkers();
     }
 
     _openAnnotationBubble(ann, rect) {
@@ -5153,23 +5192,29 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const bubble = this._components.annotationBubble;
       const input = this._components.annotationInput;
       const deleteBtn = this._components.annotationDelete;
-      // 关键：先显示气泡，然后立即 focus，减少 focus 前的同步操作延迟。
-      // iOS Safari 要求 focus() 在用户交互的直接回调中尽早调用，延迟过久会被判定为非直接交互而不弹键盘。
+      // 顺序：先显示气泡、填值、定位并强制布局，最后 focus。
+      // 这样 focus 时输入框已在最终位置，聚焦之后不再移动其容器——iOS WebKit 在键盘弹起期间
+      // 若检测到聚焦元素容器发生位移，可能主动失焦收起键盘。
       bubble.removeAttribute('hidden');
       bubble.style.display = '';
+      input.value = ann.text || '';
+      deleteBtn.hidden = !ann.text;
+      this._annotationBubbleRect = rect;
+      this._updateAnnotationBubblePosition();
       // 强制浏览器完成布局：气泡刚从 hidden 变为显示，若不强制布局就 focus，
       // :focus 伪类可能未生效（日志显示 innerActive=TEXTAREA 但 input.matches(':focus')=false），
       // iOS Safari 因此不弹键盘。读取 offsetHeight 触发同步布局，确保元素已渲染。
       const forceLayout = bubble.offsetHeight;
       try {
         input.readOnly = false;
+        // 关键：focus 必须在用户手势同步回调中尽早调用，且重试时不能先 blur()——
+        // iOS Safari 上手势回调内一旦 blur，键盘会话会被判定结束，再次 focus 也无法拉起键盘。
         input.focus({ preventScroll: true });
         let focused = input.matches(':focus');
         // focus 失败重试：快速连续点击时 :focus 伪类可能偶发未生效，
-        // 在同一用户交互同步回调中立即重试一次，提升键盘弹出成功率。
+        // 在同一用户交互同步回调中立即再聚焦一次（不 blur），提升键盘弹出成功率。
         if (!focused) {
           debugLog.add('KEYBOARD', '首次focus未生效，立即重试');
-          input.blur();
           input.focus({ preventScroll: true });
           focused = input.matches(':focus');
         }
@@ -5179,11 +5224,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       } catch (e) {
         debugLog.add('KEYBOARD', `focus() 异常: ${e.message}`);
       }
-      // focus 之后再设置值和定位，避免延迟 focus
-      input.value = ann.text || '';
-      deleteBtn.hidden = !ann.text;
-      this._annotationBubbleRect = rect;
-      this._updateAnnotationBubblePosition();
       debugLog.add('BUBBLE', `气泡已显示: left=${bubble.style.left} top=${bubble.style.top} offsetHeight=${bubble.offsetHeight}`);
       // 光标定位到内容末尾
       const len = input.value.length;
@@ -5249,7 +5289,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         if (isEmpty) {
           state.annotations = state.annotations.filter(a => a.id !== ann.id);
         }
-        debugLog.add('BUBBLE', `_closeAnnotationBubble: annId=${ann.id} text="${(ann.text || '').slice(0, 20)}" 空批注=${isEmpty} 剩余批注=${state.annotations.length}`);
+        const caller = (() => {
+          try {
+            const lines = new Error().stack.split('\n').slice(2, 4).map(l => l.trim().replace(/^at /, ''));
+            return (lines.find(l => !l.includes('_closeAnnotationBubble')) || lines[0] || '').slice(0, 60);
+          } catch (e) { return ''; }
+        })();
+        debugLog.add('BUBBLE', `_closeAnnotationBubble: annId=${ann.id} text="${(ann.text || '').slice(0, 20)}" 空批注=${isEmpty} 剩余批注=${state.annotations.length} 调用方=${caller}`);
         this._flushSave();
         this._syncAnnotationMarkers();
         this._updateChangeCount();
@@ -5668,6 +5714,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
     /** 路由切换统一收尾：旧场景落盘与浮层清理 → 新场景数据加载 → 标记重绘 */
     _handleRouteChange() {
+      const nextRoute = getCurrentRoute();
+      debugLog.add('ROUTE', `hashchange 收到: ${state.currentRoute} -> ${nextRoute}`);
+      // 同路由的 hash 抖动（锚点、历史记录写回等）不做收尾与重载，避免误关正在输入的批注气泡、误清回放
+      if (nextRoute === state.currentRoute) return;
       // 1. 旧场景收尾：关闭批注气泡（写回输入）、选中态、样式面板、颜色选择器，
       //    避免持有已销毁的旧场景节点
       this._closeAnnotationBubble();
@@ -5681,7 +5731,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._flushSave();
       if (this._replayTimer) { clearTimeout(this._replayTimer); this._replayTimer = null; }
       // 3. 切换路由并加载新场景数据（内部会重建伪元素注入、快照并回放内联样式）
-      state.currentRoute = getCurrentRoute();
+      state.currentRoute = nextRoute;
       this._loadChanges();
       // 4. 批注标记按新场景重绘
       if (this._annotationMode) this._syncAnnotationMarkers();
@@ -5788,7 +5838,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
     _updateChangeCount() {
       const count = state.changes.length + state.annotations.filter(a => a.text).length;
-      if (this._components.countValue) this._components.countValue.textContent = count > 99 ? '99+' : count;
       // 配置列表按钮数字气泡（计数为 0 时也同步清空文本，避免隐藏后残留旧数字）
       if (this._components.overviewCount) {
         this._components.overviewCount.textContent = count > 99 ? '99+' : count;
