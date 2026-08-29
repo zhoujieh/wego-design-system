@@ -3215,7 +3215,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 伪元素目标：编辑通过注入 <head> 的样式规则生效，property 写为 css-property
       if (this._target) {
         const cssProp = this._fieldToCssProp(field);
-        const cssVal = this._fieldToCssValue(field);
+        let cssVal = this._fieldToCssValue(field);
+        // 清空输入 = 移除该伪元素属性注入（数值字段的 0 兜底不适用此场景）
+        if (value === '' || value == null) cssVal = '';
         applyPseudoStyle(this._selector, this._target, cssProp, cssVal);
         bus.emit('style-change', {
           selector: this._selector,
@@ -3412,6 +3414,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     _validateFieldValue(field, value) {
       // Token 值（var(--xxx)）跳过数值验证
       if (isTokenValue(value)) return { ok: true };
+      // 空值 = 清除该属性覆盖（下游会移除变更记录），不做非法拦截
+      if (value === '' || value == null) return { ok: true };
       const el = this._targetEl;
       const numVal = parseFloat(value);
       const display = getComputedStyle(el).display;
@@ -3460,7 +3464,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 输入守门：拦截会污染施工单的非法操作（返回 null → 调用方跳过记录）
       const guard = this._validateFieldValue(field, value);
       if (!guard.ok) {
-        this._showToast('已拦截：' + guard.reason);
+        bus.emit('toast', { message: '已拦截：' + guard.reason });
         return null;
       }
       switch (field) {
@@ -5117,7 +5121,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     }
 
     _openAnnotationForElement(el, clickX, clickY, skipSave = false) {
-      const selector = generateSelector(el);
+      const selector = this._resolveCanonicalSelector(el, generateSelector(el));
       const elementTag = el.tagName.toLowerCase();
       const elementText = (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 50);
       // 查找已有批注
@@ -5418,13 +5422,29 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._selectElement(el);
     }
 
+    /**
+     * 选择器归一化：同一元素可能因 sticky 克隆等渲染差异在不同时刻生成不同选择器
+     * （短类名选择器 vs 完整 nth-of-type 链）。若已有变更/批注记录的选择器当前恰好
+     * 指向该元素，复用记录中的选择器，保证同一元素的后续编辑并入同一条记录。
+     */
+    _resolveCanonicalSelector(el, generated) {
+      const seen = new Set();
+      const candidates = [];
+      state.changes.forEach(c => { if (c.selector && !seen.has(c.selector)) { seen.add(c.selector); candidates.push(c.selector); } });
+      state.annotations.forEach(a => { if (a.selector && !seen.has(a.selector)) { seen.add(a.selector); candidates.push(a.selector); } });
+      for (const sel of candidates) {
+        try { if (document.querySelector(sel) === el) return sel; } catch (e) {}
+      }
+      return generated;
+    }
+
     _selectElement(el) {
       this._clearSelection();
       state.selectedElement = el;
       this._components.highlight.setMode('selected');
       this._components.highlight.removeAttribute('hidden');
       this._components.highlight.showForElement(el);
-      const selector = generateSelector(el);
+      const selector = this._resolveCanonicalSelector(el, generateSelector(el));
       state.selectedSelector = selector;
       state.selectedTarget = '';
       // 快照元素原始样式（走查态进入前的计算值），用于「改回原值即视为无变更」
@@ -5769,23 +5789,15 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     _updateChangeCount() {
       const count = state.changes.length + state.annotations.filter(a => a.text).length;
       if (this._components.countValue) this._components.countValue.textContent = count > 99 ? '99+' : count;
-      // 配置列表按钮数字气泡
+      // 配置列表按钮数字气泡（计数为 0 时也同步清空文本，避免隐藏后残留旧数字）
       if (this._components.overviewCount) {
-        if (count > 0) {
-          this._components.overviewCount.textContent = count > 99 ? '99+' : count;
-          this._components.overviewCount.hidden = false;
-        } else {
-          this._components.overviewCount.hidden = true;
-        }
+        this._components.overviewCount.textContent = count > 99 ? '99+' : count;
+        this._components.overviewCount.hidden = count === 0;
       }
       // 收起态 FAB 数字气泡
       if (this._components.fabCount) {
-        if (count > 0) {
-          this._components.fabCount.textContent = count > 99 ? '99+' : count;
-          this._components.fabCount.hidden = false;
-        } else {
-          this._components.fabCount.hidden = true;
-        }
+        this._components.fabCount.textContent = count > 99 ? '99+' : count;
+        this._components.fabCount.hidden = count === 0;
       }
       // 收起态红点
       const hasIndicator = count > 0 || this._walkthroughMode || this._annotationMode || this._faultState.load || this._faultState.save || this._faultState['delete'] || this._faultState.slow;
