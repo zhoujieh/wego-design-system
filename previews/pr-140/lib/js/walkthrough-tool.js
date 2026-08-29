@@ -5165,7 +5165,30 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       bubble.classList.toggle('annotation-bubble--sheet', IS_MOBILE_UA);
       bubble.removeAttribute('hidden');
       this._updateAnnotationBubblePosition();
-      if (IS_MOBILE_UA) this._bindSheetViewport();
+      if (IS_MOBILE_UA) {
+        this._bindSheetViewport();
+        const vv0 = window.visualViewport;
+        const keyboardAlreadyOpen = vv0 && (this._vvFullHeight - vv0.height) > 120;
+        const cachedKeyboardH = keyboardAlreadyOpen ? 0 : this._readCachedKeyboardHeight();
+        if (keyboardAlreadyOpen || cachedKeyboardH > 0) {
+          // 键盘已开（切换批注）：按当前可视区直接落位；
+          // 已知本机键盘高度：打开即落在键盘上方最终位置，键盘弹起过程中不再移动
+          this._sheetRevealed = true;
+          this._positionMobileSheet(cachedKeyboardH);
+        } else {
+          // 首次使用：等键盘弹出落定后直接在最终位置显示，避免从屏幕底部上移；
+          // 500ms 内键盘未弹出（聚焦被拦截）则回退贴底显示，保证面板可见
+          this._sheetRevealed = false;
+          bubble.style.visibility = 'hidden';
+          this._sheetFallbackTimer = setTimeout(() => {
+            if (!this._sheetRevealed && !bubble.hasAttribute('hidden')) {
+              this._sheetRevealed = true;
+              bubble.style.visibility = '';
+              this._positionMobileSheet(0);
+            }
+          }, 500);
+        }
+      }
       try {
         input.focus({ preventScroll: true });
         const len = input.value.length;
@@ -5176,8 +5199,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
     _updateAnnotationBubblePosition() {
       const bubble = this._components.annotationBubble;
-      // 移动端底部输入条：锚定可视视口底部（键盘弹起时由 visualViewport 事件驱动跟随）
-      if (IS_MOBILE_UA) { this._positionMobileSheet(); return; }
+      // 移动端底部输入条：锚定可视视口底部；键盘弹起动画期间不参与重定位，避免逐帧移动
+      if (IS_MOBILE_UA) {
+        if (!this._sheetSettleTimer && this._sheetRevealed) this._positionMobileSheet(0);
+        return;
+      }
       let rect = this._annotationBubbleRect;
       // 滚动/resize 时根据当前批注的 selector 重新获取元素位置，避免使用打开时缓存的过时 rect
       if (this._currentAnnotation) {
@@ -5215,7 +5241,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     }
 
     // 移动端底部输入条定位：横向铺满、底边贴可视视口（键盘上沿）上方 8px
-    _positionMobileSheet() {
+    // keyboardInset：键盘尚未弹出时，用本机缓存的键盘高度提前预留，避免面板先出现在屏幕底部再上移
+    _positionMobileSheet(keyboardInset = 0) {
       const bubble = this._components.annotationBubble;
       const vv = window.visualViewport;
       const vw = vv ? vv.width : window.innerWidth;
@@ -5225,26 +5252,52 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const h = bubble.offsetHeight || 160;
       bubble.style.width = Math.max(0, vw - 16) + 'px';
       bubble.style.left = (vLeft + 8) + 'px';
-      bubble.style.top = Math.max(8, vTop + vH - h - 8) + 'px';
+      bubble.style.top = Math.max(8, vTop + vH - h - 8 - (keyboardInset || 0)) + 'px';
     }
 
-    // 监听可视视口：键盘弹起时输入条跟随上移，键盘收起时直接关闭面板（内容自动保存）
+    _readCachedKeyboardHeight() {
+      try {
+        const v = parseInt(localStorage.getItem('wego.walkthrough.keyboard-h'), 10);
+        return Number.isFinite(v) && v >= 120 && v <= 1200 ? v : 0;
+      } catch (e) { return 0; }
+    }
+
+    _writeCachedKeyboardHeight(h) {
+      try { localStorage.setItem('wego.walkthrough.keyboard-h', String(Math.round(h))); } catch (e) {}
+    }
+
+    // 监听可视视口：键盘弹起时输入条直接落在键盘上方（无逐帧移动），键盘收起时关闭面板（内容自动保存）
     _bindSheetViewport() {
       const vv = window.visualViewport;
       if (!vv) return;
       if (!this._vvFullHeight) this._vvFullHeight = vv.height;
+      // 键盘弹起是连续动画：resize 会逐帧触发，统一防抖到动画结束只定位一次，避免面板跟着逐帧上移
       this._onSheetResize = () => {
         if (this._components.annotationBubble.hasAttribute('hidden')) return;
         // 记录见过的最大可视高度作为"无键盘"基准（规避地址栏伸缩干扰）
         this._vvFullHeight = Math.max(this._vvFullHeight, vv.height);
-        if (this._vvFullHeight - vv.height > 120) {
-          this._positionMobileSheet(); // 键盘弹起：贴键盘上沿
+        const keyboardH = this._vvFullHeight - vv.height;
+        if (keyboardH > 120) {
+          clearTimeout(this._sheetSettleTimer);
+          this._sheetSettleTimer = setTimeout(() => {
+            this._positionMobileSheet(0); // 落定时 vv 已是最终可视区，直接定位到键盘上沿
+            const finalH = this._vvFullHeight - vv.height;
+            if (finalH > 120) this._writeCachedKeyboardHeight(finalH);
+            // 首次无缓存：面板一直等到此刻才在最终位置显示
+            if (!this._sheetRevealed) {
+              this._sheetRevealed = true;
+              this._components.annotationBubble.style.visibility = '';
+            }
+          }, 120);
         } else {
           this._closeAnnotationBubble(); // 键盘收起：关闭并保存
         }
       };
       this._onSheetScroll = () => {
-        if (!this._components.annotationBubble.hasAttribute('hidden')) this._positionMobileSheet();
+        // 键盘动画落定期间不跟随，避免移动过程；落定后页面滚动才实时贴键盘
+        if (this._sheetRevealed && !this._sheetSettleTimer && !this._components.annotationBubble.hasAttribute('hidden')) {
+          this._positionMobileSheet(0);
+        }
       };
       vv.addEventListener('resize', this._onSheetResize);
       vv.addEventListener('scroll', this._onSheetScroll);
@@ -5254,8 +5307,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const vv = window.visualViewport;
       if (vv && this._onSheetResize) vv.removeEventListener('resize', this._onSheetResize);
       if (vv && this._onSheetScroll) vv.removeEventListener('scroll', this._onSheetScroll);
+      clearTimeout(this._sheetSettleTimer);
+      clearTimeout(this._sheetFallbackTimer);
       this._onSheetResize = null;
       this._onSheetScroll = null;
+      this._sheetRevealed = false;
+      this._components.annotationBubble.style.visibility = '';
     }
 
     _closeAnnotationBubble() {
