@@ -4125,7 +4125,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             flex-shrink: 0;
             transition: background-color 140ms ease, color 140ms ease;
           }
-          .collapse-btn:hover { background: rgba(255,255,255,0.06); }
           .collapse-btn:active { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.92); }
 
           .toolbar-main {
@@ -4152,7 +4151,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             transition: background-color 140ms ease, color 140ms ease, transform 140ms ease;
             position: relative;
           }
-          .tool-btn:hover { background: rgba(255,255,255,0.06); }
           .tool-btn:active { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.92); }
           .tool-btn[data-active="true"] { background: rgba(255,255,255,0.12); color: #fff; }
           .tool-btn .badge-dot {
@@ -4206,7 +4204,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             transition: background-color 140ms ease;
             position: relative;
           }
-          .count-btn:hover { background: rgba(255,255,255,0.06); }
           .count-btn:active { background: rgba(255,255,255,0.12); }
           .count-btn .count-icon { font-size: 14px; }
           .count-btn .count-bubble {
@@ -4254,8 +4251,14 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             padding: 0;
             position: relative;
           }
-          .fab-btn:hover { background: rgba(255,255,255,0.06); }
           .fab-btn:active { background: rgba(255,255,255,0.1); }
+          /* hover 反馈仅作用于可悬停设备（鼠标），避免移动端触摸后残留状态背景 */
+          @media (hover: hover) and (pointer: fine) {
+            .collapse-btn:hover,
+            .tool-btn:hover,
+            .count-btn:hover,
+            .fab-btn:hover { background: rgba(255,255,255,0.06); }
+          }
           .fab-btn .fab-dot {
             position: absolute;
             top: 8px;
@@ -4438,12 +4441,15 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           }
           .annotation-bubble-delete:hover { background: rgba(255,107,107,0.1); }
           .annotation-bubble-delete[hidden] { display: none; }
-          /* 调试日志面板 */
+          /* 调试日志面板（暗色毛玻璃主题，与工具条/子面板/overview 统一） */
           .debug-panel {
             position: fixed; z-index: 9700;
             width: 320px; max-height: 60vh;
-            background: #1a1a2e; border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            background: rgba(30, 30, 30, 0.82);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(18px) saturate(145%);
+            -webkit-backdrop-filter: blur(18px) saturate(145%);
             display: flex; flex-direction: column; overflow: hidden;
             transform-origin: top right;
           }
@@ -5426,48 +5432,43 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const panel = this._components.debugPanel;
       if (!panel) return;
       this._refreshDebugLog();
-      // 绑定到虫子按钮锚点：右对齐、优先下方展开，空间不够翻上方；先显示测高再 clamp 到视口
+      // 绑定到虫子按钮锚点：右对齐、优先下方展开，空间不够翻上方；高度按视口可用空间动态计算
       const anchor = this._shadow.querySelector('[data-action="debug-log"]');
       const panelWidth = 320;
       const gap = 8;
-      const place = () => {
-        if (!anchor) {
-          // 兜底：居中显示
-          panel.style.left = Math.max(8, (window.innerWidth - panelWidth) / 2) + 'px';
-          panel.style.top = '60px';
-          panel.removeAttribute('hidden');
-          return;
-        }
-        const rect = anchor.getBoundingClientRect();
-        let left = rect.right - panelWidth;
-        if (left < 8) left = 8;
-        if (left + panelWidth > window.innerWidth - 8) left = window.innerWidth - panelWidth - 8;
-        // 先显示以测量真实高度（用 offsetHeight 布局高度，避免入场动画 scale 影响 getBoundingClientRect 测高）
-        panel.style.left = left + 'px';
-        panel.style.top = rect.bottom + gap + 'px';
+      const margin = 8;
+      if (!anchor) {
+        // 兜底：居中显示
+        panel.style.left = Math.max(8, (window.innerWidth - panelWidth) / 2) + 'px';
+        panel.style.top = '60px';
+        panel.style.bottom = 'auto';
+        panel.style.maxHeight = '60vh';
         panel.removeAttribute('hidden');
-        void panel.offsetHeight;
-        const panelHeight = panel.offsetHeight;
-        let top = rect.bottom + gap;
-        if (top + panelHeight > window.innerHeight - 8) top = rect.top - panelHeight - gap;
-        if (top < 8) top = 8;
-        panel.style.top = top + 'px';
-      };
-      place();
-      // 字体/布局稳定后再校正一次垂直位置：内容重排可能导致面板长高，与锚点按钮重叠或越出视口
-      const settle = () => {
-        if (!anchor || panel.hasAttribute('hidden')) return;
-        const rect = anchor.getBoundingClientRect();
-        const panelHeight = panel.offsetHeight;
-        let top = rect.bottom + gap;
-        if (top + panelHeight > window.innerHeight - 8) top = rect.top - panelHeight - gap;
-        if (top < 8) top = 8;
-        panel.style.top = top + 'px';
-      };
-      if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(() => requestAnimationFrame(settle));
+        debugLog.add('DEBUG', '调试日志面板已打开');
+        return;
       }
-      setTimeout(settle, 220); // 入场动画结束后兜底校正
+      const rect = anchor.getBoundingClientRect();
+      // 水平：右对齐，越界时 clamp 到视口内
+      let left = rect.right - panelWidth;
+      if (left < 8) left = 8;
+      if (left + panelWidth > window.innerWidth - 8) left = window.innerWidth - panelWidth - 8;
+      panel.style.left = left + 'px';
+      // 垂直：比较上下可用空间，动态计算高度自适应视口
+      // - 显示在工具条下方：以顶部锚定，从顶部往下自适应高度
+      // - 显示在工具条上方：以底部锚定，从底部往上自适应高度
+      const viewportH = window.innerHeight;
+      const spaceBelow = viewportH - rect.bottom - gap - margin;
+      const spaceAbove = rect.top - gap - margin;
+      if (spaceBelow >= spaceAbove) {
+        panel.style.top = (rect.bottom + gap) + 'px';
+        panel.style.bottom = 'auto';
+        panel.style.maxHeight = Math.max(0, spaceBelow) + 'px';
+      } else {
+        panel.style.top = 'auto';
+        panel.style.bottom = (viewportH - rect.top + gap) + 'px';
+        panel.style.maxHeight = Math.max(0, spaceAbove) + 'px';
+      }
+      panel.removeAttribute('hidden');
       debugLog.add('DEBUG', '调试日志面板已打开');
     }
 
