@@ -7,51 +7,63 @@ const appCenterTemplate = `
         <div class="navbar__right"></div>
       </div>
     </div>
-    <div class="app-center-page__search">
-      <div class="searchbox searchbox--md searchbox--white" data-component-slug="search" data-dom-id="app-center-search">
-        <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
-        <div class="searchbox__input">
-          <input class="searchbox__field" type="search" placeholder="搜索应用" aria-label="搜索应用" />
-        </div>
-        <div class="searchbox__actions"></div>
-      </div>
-    </div>
-    <div class="wg-tabs wg-tabs--mini wg-tabs--scroll app-center-page__tabs" data-component-slug="tabs" data-dom-id="app-center-tabs" role="tablist">
-      <div class="wg-tabs__scroll app-center-page__tabs-scroll">
-        <button class="wg-tabs__item wg-tabs__item--first" type="button" role="tab" aria-selected="true" data-category-id="store-manage">
-          <span class="wg-tabs__content"><span class="wg-tabs__label">店铺管理</span></span>
-        </button>
-        <button class="wg-tabs__item" type="button" role="tab" aria-selected="false" data-category-id="product-ops">
-          <span class="wg-tabs__content"><span class="wg-tabs__label">商品运营</span></span>
-        </button>
-        <button class="wg-tabs__item" type="button" role="tab" aria-selected="false" data-category-id="marketing">
-          <span class="wg-tabs__content"><span class="wg-tabs__label">营销推广</span></span>
-        </button>
-        <button class="wg-tabs__item" type="button" role="tab" aria-selected="false" data-category-id="traffic">
-          <span class="wg-tabs__content"><span class="wg-tabs__label">引流获客</span></span>
-        </button>
-        <button class="wg-tabs__item" type="button" role="tab" aria-selected="false" data-category-id="customer">
-          <span class="wg-tabs__content"><span class="wg-tabs__label">客户管理</span></span>
-        </button>
-        <button class="wg-tabs__item" type="button" role="tab" aria-selected="false" data-category-id="order-trade">
-          <span class="wg-tabs__content"><span class="wg-tabs__label">订单交易</span></span>
-        </button>
-        <button class="wg-tabs__item" type="button" role="tab" aria-selected="false" data-category-id="stock-supply">
-          <span class="wg-tabs__content"><span class="wg-tabs__label">库存采购</span></span>
-        </button>
-        <button class="wg-tabs__item" type="button" role="tab" aria-selected="false" data-category-id="team-tools">
-          <span class="wg-tabs__content"><span class="wg-tabs__label">团队工具</span></span>
-        </button>
-        <button class="wg-tabs__item" type="button" role="tab" aria-selected="false" data-category-id="price-finance">
-          <span class="wg-tabs__content"><span class="wg-tabs__label">价格财务</span></span>
-        </button>
-        <button class="wg-tabs__item" type="button" role="tab" aria-selected="false" data-category-id="hardware-learn">
-          <span class="wg-tabs__content"><span class="wg-tabs__label">硬件学习</span></span>
-        </button>
-        <span class="wg-tabs__active-indicator" aria-hidden="true"></span>
-      </div>
-    </div>
     <div class="app-center-page__body" data-dom-id="app-center-body">
+      <div class="sticky-region app-center-page__search-sticky" data-component-slug="sticky-region" data-edge="top" data-visibility="direction-reveal" data-state="visible">
+        <div class="sticky-region__motion">
+          <div class="sticky-region__inner">
+            <div class="app-center-page__search">
+              <div class="searchbox searchbox--md searchbox--white" data-component-slug="search" data-dom-id="app-center-search">
+                <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
+                <div class="searchbox__input">
+                  <input class="searchbox__field" type="search" placeholder="搜索应用" aria-label="搜索应用" />
+                </div>
+                <div class="searchbox__actions"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sticky-region app-center-page__tabs-sticky" data-component-slug="sticky-region" data-edge="top" data-visibility="always" data-state="visible">
+        <div class="sticky-region__motion">
+          <div class="sticky-region__inner">
+            <div class="wg-tabs wg-tabs--mini wg-tabs--scroll app-center-page__tabs" data-component-slug="tabs" data-dom-id="app-center-tabs" role="tablist">
+              <div class="wg-tabs__scroll app-center-page__tabs-scroll">
+                <button class="wg-tabs__item wg-tabs__item--first" type="button" role="tab" aria-selected="true" data-category-id="store-manage">
+                  <span class="wg-tabs__content"><span class="wg-tabs__label">店铺管理</span></span>
+                </button>
+                <button class="wg-tabs__item" type="button" role="tab" aria-selected="false" data-category-id="product-ops">
+                  <span class="wg-tabs__content"><span class="wg-tabs__label">商品运营</span></span>
+                </button>
+                <button class="wg-tabs__item" type="button" role="tab" aria-selected="false" data-category-id="marketing">
+                  <span class="wg-tabs__content"><span class="wg-tabs__label">营销推广</span></span>
+                </button>
+                <button class="wg-tabs__item" type="button" role="tab" aria-selected="false" data-category-id="traffic">
+                  <span class="wg-tabs__content"><span class="wg-tabs__label">引流获客</span></span>
+                </button>
+                <button class="wg-tabs__item" type="button" role="tab" aria-selected="false" data-category-id="customer">
+                  <span class="wg-tabs__content"><span class="wg-tabs__label">客户管理</span></span>
+                </button>
+                <button class="wg-tabs__item" type="button" role="tab" aria-selected="false" data-category-id="order-trade">
+                  <span class="wg-tabs__content"><span class="wg-tabs__label">订单交易</span></span>
+                </button>
+                <button class="wg-tabs__item" type="button" role="tab" aria-selected="false" data-category-id="stock-supply">
+                  <span class="wg-tabs__content"><span class="wg-tabs__label">库存采购</span></span>
+                </button>
+                <button class="wg-tabs__item" type="button" role="tab" aria-selected="false" data-category-id="team-tools">
+                  <span class="wg-tabs__content"><span class="wg-tabs__label">团队工具</span></span>
+                </button>
+                <button class="wg-tabs__item" type="button" role="tab" aria-selected="false" data-category-id="price-finance">
+                  <span class="wg-tabs__content"><span class="wg-tabs__label">价格财务</span></span>
+                </button>
+                <button class="wg-tabs__item" type="button" role="tab" aria-selected="false" data-category-id="hardware-learn">
+                  <span class="wg-tabs__content"><span class="wg-tabs__label">硬件学习</span></span>
+                </button>
+                <span class="wg-tabs__active-indicator" aria-hidden="true"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="app-center-page__content-group" data-region="categories"></div>
       <div class="app-center-page__empty">
         <div class="result" data-component-slug="result" role="group" aria-label="无搜索结果">
@@ -289,18 +301,89 @@ const appCenterTemplate = `
         if (tabsHandle && typeof tabsHandle.update === 'function') tabsHandle.update();
       }
 
-      // tabs 点击：定位分类
+      // tabs 激活：统一更新 aria-selected 与指示条
       var tabItems = Array.prototype.slice.call(tabsScroll.querySelectorAll('.wg-tabs__item'));
+      function setActiveTab(categoryId) {
+        var item = null;
+        for (var i = 0; i < tabItems.length; i++) {
+          if (tabItems[i].dataset.categoryId === categoryId) { item = tabItems[i]; break; }
+        }
+        if (!item) return;
+        tabItems.forEach(function (t) { t.setAttribute('aria-selected', String(t === item)); });
+        updateIndicator();
+      }
+
+      // tabs 点击：定位分类（对齐到吸顶 tabs 底部，避免目标被遮挡）
+      function smoothScrollBodyTo(targetScrollTop) {
+        var start = bodyContainer.scrollTop;
+        var diff = targetScrollTop - start;
+        if (Math.abs(diff) < 1) return;
+        var duration = Math.min(320, 160 + Math.abs(diff) * 0.12);
+        var startTime = null;
+        function step(now) {
+          if (startTime === null) startTime = now;
+          var p = Math.min((now - startTime) / duration, 1);
+          var eased = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+          bodyContainer.scrollTop = start + diff * eased;
+          if (p < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+      }
       tabsContainer.addEventListener('click', function (event) {
         var item = event.target.closest('.wg-tabs__item');
         if (!item) return;
         var categoryId = item.dataset.categoryId;
         var targetSection = contentGroup.querySelector('[data-category-id="' + esc(categoryId) + '"]');
         if (!targetSection) return;
-        tabItems.forEach(function (t) { t.setAttribute('aria-selected', String(t === item)); });
-        updateIndicator();
-        targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setActiveTab(categoryId);
+        var sectionTop = targetSection.getBoundingClientRect().top;
+        var tabsBottom = tabsSticky.getBoundingClientRect().bottom;
+        smoothScrollBodyTo(bodyContainer.scrollTop + (sectionTop - tabsBottom));
       });
+
+      // 滚动布局：搜索栏上滑隐藏/下滑显示、tabs 吸附顶部（公共 sticky-region 运行时接管）
+      var tabsSticky = root.querySelector('.app-center-page__tabs-sticky');
+      try {
+        ctx.bindScrollLayout({
+          scrollRoot: '.app-center-page__body',
+          regions: [
+            { selector: '.app-center-page__search-sticky', policy: 'direction-reveal', edge: 'top', essential: false, threshold: 8 },
+            { selector: '.app-center-page__tabs-sticky', policy: 'always', edge: 'top', essential: true }
+          ]
+        });
+      } catch (e) {
+        // 滚动布局运行时缺失时降级：tabs 保持常规吸顶，搜索栏不参与滚动收展
+      }
+
+      // tabs 滚动联动：页面滚动时实时高亮当前所在分类
+      var BOUNDARY_TOLERANCE = 24;
+      var spyTimer = null;
+      function updateActiveTabFromScroll() {
+        var sections = contentGroup.querySelectorAll('.app-center-page__category');
+        if (!sections.length) return;
+        var bodyRect = bodyContainer.getBoundingClientRect();
+        var boundary = tabsSticky.getBoundingClientRect().bottom - bodyRect.top + BOUNDARY_TOLERANCE;
+        var atBottom = bodyContainer.scrollTop + bodyContainer.clientHeight >= bodyContainer.scrollHeight - 1;
+        var activeId = null;
+        if (atBottom) {
+          var last = sections[sections.length - 1];
+          activeId = last.getAttribute('data-category-id');
+        } else {
+          for (var i = 0; i < sections.length; i++) {
+            if (sections[i].hidden) continue;
+            if (sections[i].getBoundingClientRect().top - bodyRect.top <= boundary) {
+              activeId = sections[i].getAttribute('data-category-id');
+            } else {
+              break;
+            }
+          }
+        }
+        if (activeId) setActiveTab(activeId);
+      }
+      bodyContainer.addEventListener('scroll', function () {
+        if (spyTimer) clearTimeout(spyTimer);
+        spyTimer = setTimeout(updateActiveTabFromScroll, 80);
+      }, { passive: true });
 
       // 搜索：实时过滤 + clear 按钮显隐（search 运行时未在宿主加载，场景自实现 clear 交互）
       var searchClear = searchBox.querySelector('.searchbox__actions') || null;
@@ -352,6 +435,7 @@ const appCenterTemplate = `
           if (!section.hidden) totalVisible += 1;
         });
         root.classList.toggle('app-center-page--empty', totalVisible === 0);
+        updateActiveTabFromScroll();
       }
 
       searchBox.addEventListener('input', applyFilter);
