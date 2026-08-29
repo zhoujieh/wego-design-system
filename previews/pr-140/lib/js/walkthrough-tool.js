@@ -106,6 +106,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     token: `<svg ${ICON_SVG}><path d="M223.68,66.15,135.68,18h0a15.88,15.88,0,0,0-15.36,0l-88,48.17a16,16,0,0,0-8.32,14v95.64a16,16,0,0,0,8.32,14l88,48.17a15.88,15.88,0,0,0,15.36,0l88-48.17a16,16,0,0,0,8.32-14V80.18A16,16,0,0,0,223.68,66.15ZM216,175.82,128,224,40,175.82V80.18L128,32h0l88,48.17Z"/></svg>`,
     eyedropper: `<svg ${ICON_SVG}><path d="M224,67.3a35.79,35.79,0,0,0-11.26-25.66c-14-13.28-36.72-12.78-50.62,1.13L142.8,62.2a24,24,0,0,0-33.14.77l-9,9a16,16,0,0,0,0,22.64l2,2.06-51,51a39.75,39.75,0,0,0-10.53,38l-8,18.41A13.68,13.68,0,0,0,36,219.3a15.92,15.92,0,0,0,17.71,3.35L71.23,215a39.89,39.89,0,0,0,37.06-10.75l51-51,2.06,2.06a16,16,0,0,0,22.62,0l9-9a24,24,0,0,0,.74-33.18l19.75-19.87A35.75,35.75,0,0,0,224,67.3ZM97,193a24,24,0,0,1-24,6,8,8,0,0,0-5.55.31l-18.1,7.91L57,189.41a8,8,0,0,0,.25-5.75A23.88,23.88,0,0,1,63,159l51-51,33.94,34ZM202.13,82l-25.37,25.52a8,8,0,0,0,0,11.3l4.89,4.89a8,8,0,0,1,0,11.32l-9,9L112,83.26l9-9a8,8,0,0,1,11.31,0l4.89,4.89a8,8,0,0,0,11.33,0l24.94-25.09c7.81-7.82,20.5-8.18,28.29-.81a20,20,0,0,1,.39,28.7Z"/></svg>`,
     annotation: `<svg ${ICON_SVG}><path d="M88,96a8,8,0,0,1,8-8h64a8,8,0,0,1,0,16H96A8,8,0,0,1,88,96Zm8,40h64a8,8,0,0,0,0-16H96a8,8,0,0,0,0,16Zm32,16H96a8,8,0,0,0,0,16h32a8,8,0,0,0,0-16ZM224,48V156.69A15.86,15.86,0,0,1,219.31,168L168,219.31A15.86,15.86,0,0,1,156.69,224H48a16,16,0,0,1-16-16V48A16,16,0,0,1,48,32H208A16,16,0,0,1,224,48ZM48,208H152V160a8,8,0,0,1,8-8h48V48H48Zm120-40v28.7L196.69,168Z"/></svg>`,
+    bug: `<svg ${ICON_SVG}><path d="M160,96a32,32,0,0,0-64,0v8H56a8,8,0,0,0,0,16H88.4A47.61,47.61,0,0,0,80,144v8H56a8,8,0,0,0,0,16H80v16a8,8,0,0,0,16,0V168h64v16a8,8,0,0,0,16,0V168h24a8,8,0,0,0,0-16H176v-8a47.61,47.61,0,0,0-8.4-24H200a8,8,0,0,0,0-16H160Zm-48,0a16,16,0,0,1,32,0v8H112Zm8,56a8,8,0,1,1,8-8A8,8,0,0,1,120,152Zm40,0a8,8,0,1,1,8-8A8,8,0,0,1,160,152Z"/></svg>`,
   };
 
   /** 获取当前场景路由 */
@@ -312,6 +313,16 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     return `rgba(${r}, ${g}, ${b}, ${a})`;
   }
 
+  /** HTML 转义：页面文案/选择器/样式值插入 innerHTML 前必须转义，避免引号或尖括号破坏面板结构 */
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   /** 判断值是否为 CSS 变量引用格式 var(--xxx) */
   function isTokenValue(value) {
     return /^var\(--[a-zA-Z0-9-]+\)$/.test(String(value || '').trim());
@@ -404,6 +415,17 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     const ai = cs.alignItems;
     const alignPreset = `${jc}|${ai}`;
 
+    // 宽高：推导尺寸模式（fixed 固定 / auto 适应 / fill 填充），固定值去掉 px 只留数值回显
+    const sizeModeOf = (v) => {
+      const s = String(v || '').trim().toLowerCase();
+      if (s === '100%') return 'fill';
+      if (/^(auto|fit-content|min-content|max-content|inherit|initial|unset)$/.test(s)) return 'auto';
+      return 'fixed';
+    };
+    const sizeInputOf = (v) => sizeModeOf(v) === 'fixed' ? String(parseNumeric(v)) : String(v || '').trim();
+    const widthMode = sizeModeOf(cs.width);
+    const heightMode = sizeModeOf(cs.height);
+
     return {
       // 自动布局
       layoutMode,
@@ -419,8 +441,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       marginRight: parseNumeric(cs.marginRight),
       marginBottom: parseNumeric(cs.marginBottom),
       marginLeft: parseNumeric(cs.marginLeft),
-      width: cs.width,        // 保留原始字符串：px / 100% / auto / fit-content
-      height: cs.height,
+      widthMode,
+      heightMode,
+      width: sizeInputOf(cs.width),   // 固定值只回显纯数值；语义值（auto/100%）原样保留
+      height: sizeInputOf(cs.height),
       display,
       position: cs.position,
       zIndex: parseNumeric(cs.zIndex),
@@ -1473,10 +1497,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     _render() {
       const changes = this._changes || [];
       const annotations = this._annotations || [];
-      // 按选择器分组（合并样式变更和批注）
+      // 按选择器分组（元素本体与 ::before/::after 变更合并为同一元素分组，避免重复卡片）
       const groups = {};
       changes.forEach(c => {
-        const gkey = c.selector + (c.target ? '::' + c.target : '');
+        const gkey = c.selector;
         if (!groups[gkey]) {
           groups[gkey] = {
             selector: c.selector,
@@ -1485,6 +1509,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             elementText: c.elementText,
             changes: [],
             annotation: '',
+            annotationId: '',
           };
         }
         groups[gkey].changes.push(c);
@@ -1499,9 +1524,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             elementText: a.elementText,
             changes: [],
             annotation: a.text,
+            annotationId: a.id,
           };
         } else {
           groups[a.selector].annotation = a.text;
+          groups[a.selector].annotationId = a.id;
           if (!groups[a.selector].elementText && a.elementText) {
             groups[a.selector].elementText = a.elementText;
           }
@@ -1740,11 +1767,29 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             font-weight: 500;
           }
           .annotation-text {
+            flex: 1;
+            min-width: 0;
             font-size: 12px;
             color: rgba(255,255,255,0.85);
             line-height: 1.5;
             word-break: break-all;
           }
+          .annotation-delete {
+            flex-shrink: 0;
+            width: 20px;
+            height: 20px;
+            border: none;
+            background: transparent;
+            color: var(--text-tertiary, #aaa);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            border-radius: 4px;
+          }
+          .annotation-delete:hover { color: #e53935; background: rgba(255,255,255,0.06); }
+          .annotation-delete svg { width: 12px; height: 12px; }
         </style>
         <div class="panel">
           <div class="header">
@@ -1763,20 +1808,21 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
               ${groupList.map((g, gi) => `
                 <div class="item">
                   <div class="item-top">
-                    <span class="item-selector" data-selector="${g.selector}" data-gi="${gi}">${g.elementTag}${g.elementText ? ' · ' + g.elementText : ''}</span>
+                    <span class="item-selector" data-selector="${escapeHtml(g.selector)}" data-gi="${gi}">${escapeHtml(g.elementTag || '')}${g.elementText ? ' · ' + escapeHtml(g.elementText) : ''}</span>
                   </div>
                   ${g.annotation ? `
                     <div class="annotation-row">
                       <span class="annotation-label">备注</span>
-                      <span class="annotation-text">${g.annotation}</span>
+                      <span class="annotation-text">${escapeHtml(g.annotation)}</span>
+                      <button class="annotation-delete" type="button" data-delete-annotation="${g.annotationId}" title="删除批注">${ICONS.close}</button>
                     </div>
                   ` : ''}
-                  ${g.changes.map((c, ci) => `
+                  ${g.changes.map((c) => `
                     <div class="change-row">
-                      <span class="change-prop">${c.property}${c.target ? ' · ' + c.target : ''}</span>
-                      <span class="change-old" title="${c.oldValue}">${c.oldValue || '-'}</span>
+                      <span class="change-prop">${escapeHtml(c.property)}${c.target ? ' · ' + escapeHtml(c.target) : ''}</span>
+                      <span class="change-old" title="${escapeHtml(c.oldValue)}">${escapeHtml(c.oldValue || '-')}</span>
                       <span class="change-arrow">→</span>
-                      <span class="change-new" title="${c.newValue}">${c.newValue || '-'}</span>
+                      <span class="change-new" title="${escapeHtml(c.newValue)}">${escapeHtml(c.newValue || '-')}</span>
                       <button class="change-delete" type="button" data-delete="${c.id}" title="删除此变更">${ICONS.close}</button>
                     </div>
                   `).join('')}
@@ -1814,6 +1860,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         btn.addEventListener('click', () => {
           const id = btn.dataset.delete;
           bus.emit('delete-change', { id });
+        });
+      });
+      // 单条批注删除（含元素已失效、标记不显示的孤儿批注）
+      this._shadow.querySelectorAll('[data-delete-annotation]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.deleteAnnotation;
+          bus.emit('delete-annotation', { id });
         });
       });
       // 重置
@@ -2760,8 +2813,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         <div class="panel">
           <div class="header" title="按住可拖动面板">
             <div class="header-info">
-              <div class="header-tag">${tag || '—'}${this._selector ? `<span class="header-selector">${this._selector.substring(0, 40)}</span>` : ''}</div>
-              ${text ? `<div class="header-text">${text}</div>` : ''}
+              <div class="header-tag">${tag || '—'}${this._selector ? `<span class="header-selector">${escapeHtml(this._selector.substring(0, 40))}</span>` : ''}</div>
+              ${text ? `<div class="header-text">${escapeHtml(text)}</div>` : ''}
             </div>
             <button class="close-btn" type="button" data-action="close">${ICONS.close}</button>
           </div>
@@ -3104,9 +3157,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             this._onFieldChange(axis, '100%');
             if (input) input.value = '100%';
           } else if (input) {
-            // fixed：若之前是 auto/100%，清空让用户重填数值
+            // fixed：若之前是 auto/100% 等语义值，清空输入并同步清除实际样式与变更记录，
+            // 避免界面显示"固定"但元素样式仍是 auto/100%、记录也残留
             const cur = String(input.value || '').trim();
-            if (/^(auto|100%)$/.test(cur)) input.value = '';
+            if (/^(auto|100%|fit-content|min-content|max-content)$/i.test(cur)) {
+              input.value = '';
+              this._onFieldChange(axis, '');
+            }
           }
         });
       });
@@ -3196,6 +3253,37 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._updateActiveStates();
     }
 
+    /** 组合内描边（inset 环）+ 投影为单一 box-shadow 值，避免两处编辑互相覆盖同一条 CSS */
+    _combineBoxShadow() {
+      const d = this._data || {};
+      const num = (v) => (isNaN(parseFloat(v)) ? 0 : parseFloat(v));
+      const parts = [];
+      // 内描边：inset 0 0 0 Npx color
+      if (d.strokePosition === 'inside') {
+        const w = num(d.strokeWidth) || 1;
+        const strokeHex = d.strokeHex || '#000000';
+        const color = isTokenValue(strokeHex) ? strokeHex : hexOpacityToRgba(strokeHex, d.strokeOpacity ?? 100);
+        parts.push(`inset 0 0 0 ${w}px ${color}`);
+      }
+      // 投影
+      const hex = d.shadowHex || '#000000';
+      const x = num(d.shadowX);
+      const y = num(d.shadowY);
+      const blur = num(d.shadowBlur);
+      const spread = num(d.shadowSpread);
+      const inset = d.shadowInset === true || d.shadowInset === 'true';
+      const hasOffset = blur > 0 || x !== 0 || y !== 0 || spread !== 0;
+      if (hasOffset) {
+        if (isTokenValue(hex)) {
+          parts.push(`${inset ? 'inset ' : ''}${x}px ${y}px ${blur}px ${spread}px ${hex}`);
+        } else {
+          const op = d.shadowOpacity ?? 0;
+          if (op > 0) parts.push(`${inset ? 'inset ' : ''}${x}px ${y}px ${blur}px ${spread}px ${hexOpacityToRgba(hex, op)}`);
+        }
+      }
+      return parts.length ? parts.join(', ') : 'none';
+    }
+
     /** 面板字段名 → CSS 属性名 */
     _fieldToCssProp(field) {
       const map = {
@@ -3279,30 +3367,15 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           return op > 0 && w > 0 ? `${w}px solid ${hexOpacityToRgba(hex, op)}` : 'none';
         }
         case 'strokePosition':
-          return d.strokePosition === 'inside' ? `inset 0 0 0 ${num(d.strokeWidth) || 1}px ${hexOpacityToRgba(d.strokeHex || '#000000', d.strokeOpacity ?? 100)}` : 'none';
         case 'shadowHex':
         case 'shadowOpacity':
         case 'shadowX':
         case 'shadowY':
         case 'shadowBlur':
         case 'shadowSpread':
-        case 'shadowInset': {
-          const hex = d.shadowHex || '#000000';
-          const op = d.shadowOpacity ?? 0;
-          const x = num(d.shadowX);
-          const y = num(d.shadowY);
-          const blur = num(d.shadowBlur);
-          const spread = num(d.shadowSpread);
-          const inset = d.shadowInset === true || d.shadowInset === 'true';
-          const hasOffset = blur > 0 || x !== 0 || y !== 0 || spread !== 0;
-          if (isTokenValue(hex)) {
-            return hasOffset ? `${inset ? 'inset ' : ''}${x}px ${y}px ${blur}px ${spread}px ${hex}` : 'none';
-          }
-          if (op > 0 && hasOffset) {
-            return `${inset ? 'inset ' : ''}${x}px ${y}px ${blur}px ${spread}px ${hexOpacityToRgba(hex, op)}`;
-          }
-          return 'none';
-        }
+        case 'shadowInset':
+          // 内描边与投影共用 box-shadow，统一组合输出，避免互相覆盖
+          return this._combineBoxShadow();
         case 'fontSize':
         case 'paddingLeft':
         case 'paddingRight':
@@ -3526,15 +3599,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           el.style.borderColor = color;
           return { property: 'border', oldValue, newValue: width > 0 ? `${width}px solid ${color}` : '' };
         }
-        case 'strokePosition': {
-          const oldValue = cs().boxShadow;
-          if (value === 'inside') {
-            el.style.boxShadow = 'inset 0 0 0 ' + (parseFloat(this._data.strokeWidth) || 1) + 'px ' + hexOpacityToRgba(this._data.strokeHex || '#000000', this._data.strokeOpacity ?? 100);
-          } else {
-            el.style.boxShadow = '';
-          }
-          return { property: 'box-shadow', oldValue, newValue: value === 'inside' ? el.style.boxShadow : '' };
-        }
+        case 'strokePosition':
         case 'shadowHex':
         case 'shadowOpacity':
         case 'shadowX':
@@ -3542,34 +3607,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         case 'shadowBlur':
         case 'shadowSpread':
         case 'shadowInset': {
+          // 内描边与投影共用 box-shadow：任一字段变化都重新组合整体值，保证两者可共存、记录只有一条
           const oldValue = cs().boxShadow;
-          const hex = this._data.shadowHex || '#000000';
-          const x = parseFloat(this._data.shadowX) || 0;
-          const y = parseFloat(this._data.shadowY) || 0;
-          const blur = parseFloat(this._data.shadowBlur) || 0;
-          const spread = parseFloat(this._data.shadowSpread) || 0;
-          const inset = this._data.shadowInset === true || this._data.shadowInset === 'true';
-          // Token 模式：直接用 var(--xxx) 作为阴影颜色
-          if (isTokenValue(hex)) {
-            if (blur > 0 || x !== 0 || y !== 0 || spread !== 0) {
-              const shadowStr = `${inset ? 'inset ' : ''}${x}px ${y}px ${blur}px ${spread}px ${hex}`;
-              el.style.boxShadow = shadowStr;
-              return { property: 'box-shadow', oldValue, newValue: shadowStr };
-            } else {
-              el.style.boxShadow = 'none';
-              return { property: 'box-shadow', oldValue, newValue: 'none' };
-            }
-          }
-          const opacity = this._data.shadowOpacity ?? 0;
-          if (opacity > 0 && (blur > 0 || x !== 0 || y !== 0 || spread !== 0)) {
-            const color = hexOpacityToRgba(hex, opacity);
-            const shadowStr = `${inset ? 'inset ' : ''}${x}px ${y}px ${blur}px ${spread}px ${color}`;
-            el.style.boxShadow = shadowStr;
-            return { property: 'box-shadow', oldValue, newValue: shadowStr };
-          } else {
-            el.style.boxShadow = 'none';
-            return { property: 'box-shadow', oldValue, newValue: 'none' };
-          }
+          const out = this._combineBoxShadow();
+          el.style.boxShadow = out === 'none' ? '' : out;
+          return { property: 'box-shadow', oldValue, newValue: out };
         }
         case 'display': {
           const oldValue = cs().display;
@@ -3856,11 +3898,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._restorePosition();
       this._restoreFaultState();
       state.currentRoute = getCurrentRoute();
-      window.addEventListener('hashchange', () => {
-        state.currentRoute = getCurrentRoute();
-        this._loadChanges();
-        if (this._annotationMode) this._syncAnnotationMarkers();
-      });
+      window.addEventListener('hashchange', () => this._handleRouteChange());
+      // 离开页面前把防抖窗口内未落盘的最后修改立即写入
+      window.addEventListener('pagehide', () => this._flushSave());
       this._loadChanges();
       // 暴露失败注入 API（兼容现有场景代码）
       window.WegoApp = window.WegoApp || {};
@@ -4284,6 +4324,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
                 <span class="count-icon">${ICONS.list}</span>
                 <span class="count-bubble" data-overview-count hidden>0</span>
               </button>
+              <div class="divider"></div>
+              <button class="tool-btn" data-action="debug-log" title="调试日志">
+                ${ICONS.bug}
+              </button>
               <button class="tool-btn" data-tool="more" title="更多">
                 ${ICONS.more}
               </button>
@@ -4320,11 +4364,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           </button>
           <button class="subpanel-item" data-nav="component-preview">
             <span>组件库</span>
-            <span class="subpanel-arrow">${ICONS.chevronRight}</span>
-          </button>
-          <div class="subpanel-sep"></div>
-          <button class="subpanel-item" data-action="debug-log">
-            <span>调试日志</span>
             <span class="subpanel-arrow">${ICONS.chevronRight}</span>
           </button>
         </div>
@@ -4499,6 +4538,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           this._currentAnnotation.timestamp = Date.now();
           this._components.annotationDelete.hidden = !e.target.value;
           this._saveChanges();
+          // 角标计数实时跟随输入变化，不等气泡关闭
+          this._updateChangeCount();
         }
       });
       this._components.annotationBubble.addEventListener('pointerdown', (e) => {
@@ -4517,6 +4558,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       bus.on('close-overview', () => this._components.overviewPanel.close());
       bus.on('jump-to-element', ({ selector }) => this._jumpToElement(selector));
       bus.on('delete-change', ({ id }) => this._deleteChange(id));
+      bus.on('delete-annotation', ({ id }) => this._deleteAnnotation(id));
       bus.on('reset-changes', () => this._resetChanges());
       bus.on('toast', ({ message }) => this._showToast(message));
       bus.on('element-selected', ({ element, selector, target }) => {
@@ -4762,11 +4804,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._collapsedTransitionEnd = onEnd;
       toolbar.addEventListener('transitionend', onEnd);
 
-      // 展开自动激活走查模式，收起自动退出并清除选中
+      // 展开自动激活走查模式；收起时两种模式都退出并清除选中，
+      // 避免收起后批注模式仍拦截页面点击、标记层残留
       if (!collapsed) {
         this._setWalkthroughMode(true);
       } else {
         this._setWalkthroughMode(false);
+        this._setAnnotationMode(false);
       }
       this._updateToolbarState();
     }
@@ -4871,6 +4915,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     // ── 走查模式 ──────────────────────────────────────────
     _setWalkthroughMode(enabled) {
       this._walkthroughMode = enabled;
+      state.walkthroughMode = enabled;
       if (enabled) {
         this._setAnnotationMode(false);
         document.body.setAttribute('data-walkthrough-mode', 'true');
@@ -4879,6 +4924,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         document.body.removeAttribute('data-walkthrough-mode');
         this._unbindTouchEvents();
         this._clearSelection();
+        // 退出走查模式时一并关闭颜色选择器和 Token 面板，避免浮层脱离选中元素残留
+        if (this._components.colorPicker) this._components.colorPicker.close();
+        if (this._components.stylePanel && this._components.stylePanel._closeTokenPanel) {
+          this._components.stylePanel._closeTokenPanel();
+        }
       }
       this._updateToolbarState();
     }
@@ -4886,6 +4936,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     // ── 批注模式 ──────────────────────────────────────────
     _setAnnotationMode(enabled) {
       this._annotationMode = enabled;
+      state.annotationMode = enabled;
       debugLog.add('ANNOTATION', `批注模式切换: ${enabled ? '开启' : '关闭'}`);
       if (enabled) {
         this._setWalkthroughMode(false);
@@ -5195,7 +5246,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           state.annotations = state.annotations.filter(a => a.id !== ann.id);
         }
         debugLog.add('BUBBLE', `_closeAnnotationBubble: annId=${ann.id} text="${(ann.text || '').slice(0, 20)}" 空批注=${isEmpty} 剩余批注=${state.annotations.length}`);
-        this._saveChanges();
+        this._flushSave();
         this._syncAnnotationMarkers();
         this._updateChangeCount();
       }
@@ -5204,12 +5255,26 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
     _deleteCurrentAnnotation() {
       if (!this._currentAnnotation) return;
-      const id = this._currentAnnotation.id;
+      this._deleteAnnotation(this._currentAnnotation.id, { closeBubble: true });
+    }
+
+    /** 删除单条批注（气泡删除按钮 / 配置列表删除共用），同步标记、角标、列表与存储 */
+    _deleteAnnotation(id, options) {
+      const ann = state.annotations.find(a => a.id === id);
+      if (!ann) return;
       state.annotations = state.annotations.filter(a => a.id !== id);
-      this._currentAnnotation = null;
-      this._components.annotationBubble.setAttribute('hidden', '');
-      this._saveChanges();
+      const bubbleIsCurrent = this._currentAnnotation && this._currentAnnotation.id === id;
+      if (bubbleIsCurrent || (options && options.closeBubble)) {
+        this._currentAnnotation = null;
+        this._components.annotationBubble.setAttribute('hidden', '');
+        this._components.annotationInput.value = '';
+      }
+      this._flushSave();
       this._syncAnnotationMarkers();
+      this._updateChangeCount();
+      if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
+        this._components.overviewPanel.refresh(state.changes, state.currentRoute, state.annotations);
+      }
       this._showToast('已删除批注');
     }
 
@@ -5412,9 +5477,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const el = document.querySelector(selector);
         if (el) {
           this._components.overviewPanel.close();
+          // 列表跳转即"要查看/调整该元素样式"，自动进入走查模式（会顺带退出批注模式），
+          // 否则批注模式下只会滚动、不会选中，样式面板打不开
+          if (!this._walkthroughMode) this._setWalkthroughMode(true);
           el.scrollIntoView({ behavior: 'smooth', block: 'center' });
           setTimeout(() => {
-            if (this._walkthroughMode) this._selectElement(el);
+            if (this._walkthroughMode && el.isConnected) this._selectElement(el);
           }, 300);
         }
       } catch (e) {}
@@ -5465,6 +5533,24 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     }
 
     // ── 变更记录 ──────────────────────────────────────────
+    /** CSS 值等价判断：归一化空格/逗号/大小写；'' / 0 / 0px / normal 视为等价（清除覆盖 = 原始零值） */
+    _cssValueEqual(a, b) {
+      const norm = (v) => String(v == null ? '' : v).trim().replace(/\s*,\s*/g, ',').replace(/\s+/g, ' ').toLowerCase();
+      const na = norm(a), nb = norm(b);
+      if (na === nb) return true;
+      const zeroish = (s) => s === '' || s === '0' || s === '0px' || s === 'normal';
+      return zeroish(na) && zeroish(nb);
+    }
+
+    /** 变更写入后的统一同步：防抖落盘、刷新角标、配置列表打开时同步刷新 */
+    _syncAfterRecordsChanged() {
+      this._saveChanges();
+      this._updateChangeCount();
+      if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
+        this._components.overviewPanel.refresh(state.changes, state.currentRoute, state.annotations);
+      }
+    }
+
     _recordChange(change) {
       const isPseudo = !!change.target;
       // 伪元素使用独立的 snapKey（含 ::before/::after），与 _selectElement 中建立的伪元素快照对应
@@ -5473,17 +5559,16 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         : state.currentRoute + '::' + change.selector;
       const original = state.originalStyles[snapKey];
       const matchExisting = (c) => c.selector === change.selector && c.property === change.property && (c.target || '') === (change.target || '');
-      // 改回原始值 = 净变更为零，删除该属性的变更记录（而非保留 X→X）
-      if (original && change.property in original && change.newValue === original[change.property]) {
+      // 改回原始值 = 净变更为零，删除该属性的变更记录（而非保留 X→X）；归一化比较，兼容 rgb 空格、0px 等格式差异
+      const backToOriginal = original && (change.property in original) && this._cssValueEqual(change.newValue, original[change.property]);
+      // 清空输入 = 撤销该属性：还原样式并移除已有记录，且不允许新增空值脏记录
+      const isCleared = change.newValue === '' || change.newValue == null;
+      if (backToOriginal || isCleared) {
         const existing = state.changes.find(matchExisting);
         if (existing) {
           this._revertChange(existing);
           state.changes = state.changes.filter(c => c.id !== existing.id);
-          this._saveChanges();
-          this._updateChangeCount();
-          if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
-            this._components.overviewPanel.refresh(state.changes, state.currentRoute, state.annotations);
-          }
+          this._syncAfterRecordsChanged();
         }
         return;
       }
@@ -5508,11 +5593,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         Object.assign(rec, deriveIntent(rec, change.el));
         state.changes.push(rec);
       }
-      this._saveChanges();
-      this._updateChangeCount();
-      if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
-        this._components.overviewPanel.refresh(state.changes, state.currentRoute, state.annotations);
-      }
+      this._syncAfterRecordsChanged();
     }
 
     /** 还原单条变更（本体=清 inline；伪元素=清注入规则） */
@@ -5523,7 +5604,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       }
       try {
         const el = document.querySelector(change.selector);
-        if (el) el.style[change.property] = '';
+        // 用 setProperty 兼容 kebab-case 属性名（如 flex-direction）
+        if (el) el.style.setProperty(change.property, '');
       } catch (e) {}
     }
 
@@ -5532,9 +5614,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (change) {
         this._revertChange(change);
         state.changes = state.changes.filter(c => c.id !== id);
-        this._saveChanges();
+        this._flushSave();
         this._updateChangeCount();
-        this._components.overviewPanel.refresh(state.changes, state.currentRoute, state.annotations);
+        if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
+          this._components.overviewPanel.refresh(state.changes, state.currentRoute, state.annotations);
+        }
       }
     }
 
@@ -5544,12 +5628,16 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         this._showToast('当前没有修改');
         return;
       }
+      // 先关气泡（把输入框内容写回逻辑走完），再统一还原与清空
+      this._closeAnnotationBubble();
       state.changes.forEach(c => this._revertChange(c));
       state.changes = [];
       state.annotations = [];
-      this._closeAnnotationBubble();
+      // 伪元素注入池整体清空并重建，避免其它场景的注入规则残留
+      state.pseudoStyles = {};
+      rebuildPseudoStyleElement();
       this._syncAnnotationMarkers();
-      this._saveChanges();
+      this._flushSave();
       this._updateChangeCount();
       this._showToast('已重置所有修改');
       debugLog.add('RESET', `_resetChanges 完成: changes=${state.changes.length} annotations=${state.annotations.length}`);
@@ -5558,14 +5646,41 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       }
     }
 
+    /** 路由切换统一收尾：旧场景落盘与浮层清理 → 新场景数据加载 → 标记重绘 */
+    _handleRouteChange() {
+      // 1. 旧场景收尾：关闭批注气泡（写回输入）、选中态、样式面板、颜色选择器，
+      //    避免持有已销毁的旧场景节点
+      this._closeAnnotationBubble();
+      this._clearSelection();
+      if (this._components.stylePanel) {
+        if (this._components.stylePanel._closeTokenPanel) this._components.stylePanel._closeTokenPanel();
+        this._components.stylePanel.close();
+      }
+      if (this._components.colorPicker) this._components.colorPicker.close();
+      // 2. 立即落盘旧场景，防止防抖窗口内的延迟保存把旧场景数据错存到新场景 key
+      this._flushSave();
+      if (this._replayTimer) { clearTimeout(this._replayTimer); this._replayTimer = null; }
+      // 3. 切换路由并加载新场景数据（内部会重建伪元素注入、快照并回放内联样式）
+      state.currentRoute = getCurrentRoute();
+      this._loadChanges();
+      // 4. 批注标记按新场景重绘
+      if (this._annotationMode) this._syncAnnotationMarkers();
+      this._updateToolbarState();
+    }
+
     _loadChanges() {
       try {
         const key = `wego.walkthrough.data.${state.currentRoute}`;
         const raw = localStorage.getItem(key);
         const data = raw ? JSON.parse(raw) : {};
-        state.changes = data.changes || [];
-        state.annotations = data.annotations || [];
+        // 兼容旧版本残留：丢弃新值为空的脏变更记录、没有正文的空批注
+        state.changes = (data.changes || []).filter(c => c.newValue !== '' && c.newValue != null);
+        state.annotations = (data.annotations || []).filter(a => a.text && String(a.text).trim());
         debugLog.add('LOAD', `_loadChanges: route=${state.currentRoute} changes=${state.changes.length} annotations=${state.annotations.length}`);
+        // 伪元素注入池与原始值快照都按路由隔离：先清空上一场景残留再整体重建，
+        // 否则 A 场景的注入规则会带到 B 场景，污染通用类名元素
+        state.pseudoStyles = {};
+        state.originalStyles = {};
         // 批量收集伪元素变更到 state.pseudoStyles，循环结束后统一重建一次，
         // 避免 applyPseudoStyle 内部每次都 rebuildPseudoStyleElement 导致 N+1 次 DOM 操作。
         state.changes.forEach(c => {
@@ -5576,13 +5691,70 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           }
         });
         rebuildPseudoStyleElement();
+        // 用记录中的 oldValue 重建原始值快照，保证回放后"改回原值自动消记录"仍可用
+        this._rebuildOriginalSnapshots();
+        // 普通元素内联样式回放到页面，保证页面效果/样式面板/配置列表/角标四处一致
+        this._replayInlineChanges();
         this._updateChangeCount();
       } catch (e) {
         debugLog.add('LOAD', `_loadChanges 异常: ${e.message}`);
       }
     }
 
+    /** 依据变更记录的 oldValue 重建原始样式快照（仅记录首个 oldValue，即首次修改前的原值） */
+    _rebuildOriginalSnapshots() {
+      state.changes.forEach(c => {
+        if (!c.property || c.oldValue === undefined || c.oldValue === null) return;
+        const snapKey = c.target
+          ? state.currentRoute + '::' + c.selector + '::' + c.target
+          : state.currentRoute + '::' + c.selector;
+        if (!state.originalStyles[snapKey]) state.originalStyles[snapKey] = {};
+        if (!(c.property in state.originalStyles[snapKey])) {
+          state.originalStyles[snapKey][c.property] = c.oldValue;
+        }
+      });
+    }
+
+    /** 把普通元素变更回放到页面 DOM；场景为异步渲染（骨架屏→真实内容），未命中时短重试 */
+    _replayInlineChanges(round) {
+      round = round || 0;
+      const pending = state.changes.filter(c =>
+        !c.target && c.property && c.newValue !== '' && c.newValue != null && !c.skipCss
+      );
+      let matched = 0;
+      pending.forEach(c => {
+        let el = null;
+        try { el = document.querySelector(c.selector); } catch (e) { el = null; }
+        if (!el || !el.isConnected) return;
+        matched++;
+        try { el.style.setProperty(c.property, c.newValue); } catch (e) {}
+      });
+      // 最多重试 10 次（约 2s），覆盖场景脚本异步渲染完成的时机
+      if (matched < pending.length && round < 10) {
+        if (this._replayTimer) clearTimeout(this._replayTimer);
+        this._replayTimer = setTimeout(() => this._replayInlineChanges(round + 1), 200);
+      }
+    }
+
+    /** 自动保存（300ms 防抖）：颜色拖动等高频交互不再每帧写 localStorage */
     _saveChanges() {
+      if (this._saveTimer) clearTimeout(this._saveTimer);
+      this._saveTimer = setTimeout(() => {
+        this._saveTimer = null;
+        this._persistChanges();
+      }, 300);
+    }
+
+    /** 立即落盘：关闭气泡/删除/重置/切场景/离开页面等关键节点调用 */
+    _flushSave() {
+      if (this._saveTimer) {
+        clearTimeout(this._saveTimer);
+        this._saveTimer = null;
+      }
+      this._persistChanges();
+    }
+
+    _persistChanges() {
       try {
         const key = `wego.walkthrough.data.${state.currentRoute}`;
         localStorage.setItem(key, JSON.stringify({
