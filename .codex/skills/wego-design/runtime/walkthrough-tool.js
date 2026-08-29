@@ -5102,12 +5102,16 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // iOS Safari 要求 focus() 在用户交互的直接回调中尽早调用，延迟过久会被判定为非直接交互而不弹键盘。
       bubble.removeAttribute('hidden');
       bubble.style.display = '';
+      // 强制浏览器完成布局：气泡刚从 hidden 变为显示，若不强制布局就 focus，
+      // :focus 伪类可能未生效（日志显示 innerActive=TEXTAREA 但 input.matches(':focus')=false），
+      // iOS Safari 因此不弹键盘。读取 offsetHeight 触发同步布局，确保元素已渲染。
+      const forceLayout = bubble.offsetHeight;
       try {
         input.readOnly = false;
         input.focus({ preventScroll: true });
         const outerActive = document.activeElement;
         const innerActive = outerActive && outerActive.shadowRoot ? outerActive.shadowRoot.activeElement : null;
-        debugLog.add('KEYBOARD', `focus() 完成: outerActive=${outerActive ? outerActive.tagName : 'null'} innerActive=${innerActive ? innerActive.tagName : 'null'} input.matches(':focus')=${input.matches(':focus')}`);
+        debugLog.add('KEYBOARD', `focus() 完成: forceLayout=${forceLayout} outerActive=${outerActive ? outerActive.tagName : 'null'} innerActive=${innerActive ? innerActive.tagName : 'null'} input.matches(':focus')=${input.matches(':focus')}`);
       } catch (e) {
         debugLog.add('KEYBOARD', `focus() 异常: ${e.message}`);
       }
