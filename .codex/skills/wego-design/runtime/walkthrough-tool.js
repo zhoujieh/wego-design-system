@@ -2724,10 +2724,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._recordMoveChange(mv.el, mv, false);
       // 若与兄弟交换了 order（已显式不同），兄弟也记录
       if (mv.nbNew !== mv.nbOrder) this._recordMoveChange(mv.neighbor, mv, true);
-      // 共享同步：同类元素（如其它卡片的同款按钮）一起换位（order 已在布局豁免集合内）
-      this._scheduleSharedSync({ property: 'order', oldValue: String(mv.elOrder), newValue: String(mv.elNew) });
+      // 共享同步：目标元素与兄弟元素分别以各自元素为基准，同类元素（如其它卡片的同款按钮）一起换位。
+      // 必须分别传入各自 targetEl（order 属性相同），否则防抖合并会把其中一个的同步覆盖掉
+      this._scheduleSharedSync({ property: 'order', oldValue: String(mv.elOrder), newValue: String(mv.elNew) }, mv.el);
       if (mv.nbNew !== mv.nbOrder) {
-        this._scheduleSharedSync({ property: 'order', oldValue: String(mv.nbOrder), newValue: String(mv.nbNew) });
+        this._scheduleSharedSync({ property: 'order', oldValue: String(mv.nbOrder), newValue: String(mv.nbNew) }, mv.neighbor);
       }
       this._updateMoveControls();
     }
@@ -3902,19 +3903,21 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     }
 
     /** 样式同步防抖调度：高频输入（颜色拖动/步进）只同步最终值。
-     *  同一元素同一属性的多次输入只保留最后一次；不同属性/不同元素在停顿后各自执行一次同步。 */
-    _scheduleSharedSync(result) {
-      const targetEl = this._targetEl;
-      if (!targetEl || !result || !result.property) return;
+     *  同一元素同一属性的多次输入只保留最后一次；不同属性/不同元素在停顿后各自执行一次同步。
+     *  targetEl 可选：默认当前选中元素；顺序移动等一次改动多个元素（目标+兄弟）时分别传入各自元素，
+     *  避免同属性被合并覆盖导致其中一个元素的同类同步丢失。 */
+    _scheduleSharedSync(result, targetEl) {
+      const el = targetEl || this._targetEl;
+      if (!el || !result || !result.property) return;
       if (!this._sharedSyncPending) this._sharedSyncPending = [];
-      const idx = this._sharedSyncPending.findIndex(p => p.targetEl === targetEl && p.result.property === result.property);
+      const idx = this._sharedSyncPending.findIndex(p => p.targetEl === el && p.result.property === result.property);
       if (idx >= 0) {
         // 同一元素同一属性在防抖窗口内连续触发（change+blur/步进等）：保留最早 oldValue（编辑起点），
         // 只更新最终 newValue，避免 oldValue 被第二次读成"改后值"导致找不到共享同类、同步失效
         const existing = this._sharedSyncPending[idx];
-        this._sharedSyncPending[idx] = { targetEl, result: { ...existing.result, newValue: result.newValue } };
+        this._sharedSyncPending[idx] = { targetEl: el, result: { ...existing.result, newValue: result.newValue } };
       } else {
-        this._sharedSyncPending.push({ targetEl, result });
+        this._sharedSyncPending.push({ targetEl: el, result });
       }
       if (this._sharedSyncTimer) clearTimeout(this._sharedSyncTimer);
       this._sharedSyncTimer = setTimeout(() => {
@@ -6432,8 +6435,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         : state.currentRoute + '::' + change.selector;
       const original = state.originalStyles[snapKey];
       const matchExisting = (c) => c.selector === change.selector && c.property === change.property && (c.target || '') === (change.target || '');
-      // 改回原始值 = 净变更为零，删除该属性的变更记录（而非保留 X→X）；归一化比较，兼容 rgb 空格、0px 等格式差异
-      const backToOriginal = original && (change.property in original) && this._cssValueEqual(change.newValue, original[change.property]);
+      // 改回原始值 = 净变更为零，删除该属性的变更记录（而非保留 X→X）；归一化比较，兼容 rgb 空格、0px 等格式差异。
+      // 顺序移动（order）例外：order 是相对显示顺序，绝对值回到原始 0 不等于顺序未变
+      // （如交换后 label 从 -1 回到 0，视觉位置仍从第 1 位变到第 2 位），必须保留记录供追踪与还原
+      const isOrderMove = change.property === 'order';
+      const backToOriginal = !isOrderMove && original && (change.property in original) && this._cssValueEqual(change.newValue, original[change.property]);
       // 清空输入 = 撤销该属性：还原样式并移除已有记录，且不允许新增空值脏记录
       const isCleared = change.newValue === '' || change.newValue == null;
       if (backToOriginal || isCleared) {
