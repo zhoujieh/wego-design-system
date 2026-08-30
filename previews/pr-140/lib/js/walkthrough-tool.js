@@ -1712,21 +1712,27 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             align-items: center;
             gap: 6px;
           }
-          .copy-btn {
+          /* 底部操作按钮：与调试日志面板底部按钮统一（描边 + 半透明底 + 6px 圆角） */
+          .copy-btn,
+          .reset-btn {
+            flex: 1;
             height: 30px;
             padding: 0 12px;
-            border: none;
-            border-radius: 8px;
-            background: var(--text-brand, #00b96b);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 6px;
+            background: rgba(255,255,255,0.06);
             color: #fff;
             font-size: 12px;
-            font-weight: 500;
             cursor: pointer;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 4px;
           }
-          .copy-btn:active { opacity: 0.8; }
+          .copy-btn:hover,
+          .reset-btn:hover { background: rgba(255,255,255,0.12); }
+          .copy-btn:active,
+          .reset-btn:active { background: rgba(255,255,255,0.18); }
           .close-btn {
             width: 28px;
             height: 28px;
@@ -1847,17 +1853,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             padding-top: 4px;
             border-top: 1px solid rgba(255,255,255,0.06);
           }
-          .reset-btn {
-            height: 28px;
-            padding: 0 10px;
-            border: none;
-            background: transparent;
-            color: var(--text-error, #e53935);
-            font-size: 12px;
-            cursor: pointer;
-            border-radius: 6px;
-          }
-          .reset-btn:hover { background: rgba(229,57,53,0.06); }
           .annotation-row {
             display: flex;
             align-items: flex-start;
@@ -1940,8 +1935,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           `}
           ${groupList.length > 0 ? `
             <div class="footer">
-              <button class="copy-btn" type="button" data-action="copy">复制 Prompt</button>
               <button class="reset-btn" type="button" data-action="reset">重置所有修改</button>
+              <button class="copy-btn" type="button" data-action="copy">复制 Prompt</button>
             </div>
           ` : ''}
         </div>
@@ -4567,8 +4562,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           </div>
           <pre class="debug-panel-content" data-debug-content></pre>
           <div class="debug-panel-footer">
-            <button class="debug-panel-btn" data-debug-copy>复制日志</button>
             <button class="debug-panel-btn" data-debug-clear>清空</button>
+            <button class="debug-panel-btn" data-debug-copy>复制日志</button>
           </div>
         </div>
       `;
@@ -4644,15 +4639,15 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           }
         });
       });
-      // 调试日志入口（toggle：已打开则关闭）
+      // 调试日志入口（toggle：已打开则关闭；打开时与其他功能面板互斥）
       const debugLogBtn = this._shadow.querySelector('[data-action="debug-log"]');
       if (debugLogBtn) {
         debugLogBtn.addEventListener('click', (e) => {
           e.stopPropagation();
-          this._closeSubpanels();
           if (this._components.debugPanel && !this._components.debugPanel.hasAttribute('hidden')) {
             this._closeDebugPanel();
           } else {
+            this._closeAllPanels();
             this._openDebugPanel();
           }
         });
@@ -5698,8 +5693,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
     // ── 配置列表 ──────────────────────────────────────────
     _openOverview() {
-      this._closeSubpanels();
-      this._closeAnnotationBubble(); // 打开配置列表前先写回并收起批注气泡
+      // 与其他功能面板互斥：打开配置列表前关闭子面板/调试日志/批注气泡
+      this._closeAllPanels();
       const countBtn = this._shadow.querySelector('[data-tool="overview"]');
       this._components.overviewPanel.open(state.changes, state.currentRoute, countBtn, state.annotations);
       this._clearSelection();
