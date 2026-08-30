@@ -7,7 +7,7 @@
     "primary_scene": "应用中心",
     "related_scenes": []
   },
-  "status": "in-development",
+  "status": "frozen",
   "scope_revision": 1,
   "brief_file": "infras001-应用中心布局交互优化-20260829.md",
   "prototype_brief": {
@@ -74,9 +74,35 @@
     "scope_revision": 1,
     "scope_sha256": "99aa36c61c88997e51df9afc644da679ba1913aed92de48551cf9963ae26fb17"
   },
-  "brief_confirmation": null,
-  "prototype_submission": null,
-  "prototype_confirmation": null,
+  "brief_confirmation": {
+    "at": "2026-08-30T07:25:00.564Z",
+    "scope_revision": 1,
+    "scope_sha256": "99aa36c61c88997e51df9afc644da679ba1913aed92de48551cf9963ae26fb17"
+  },
+  "prototype_submission": {
+    "at": "2026-08-30T07:25:17.936Z",
+    "scope_revision": 1,
+    "affected_scenes": [
+      "应用中心"
+    ],
+    "fingerprints": {
+      "@route-entry/%E5%BA%94%E7%94%A8%E4%B8%AD%E5%BF%83": "4d9fea54bf55611c762a502981756413815044665096a018edbe4edd23733d3d",
+      "wego-app/scenes/infras/应用中心/scene.css": "32f4963842aa0e3735460f564def400e1e5dbce78e805c2fb1fed739aedf4eec",
+      "wego-app/scenes/infras/应用中心/scene.js": "15032c898c10b562c24faf21d84b496affc5dc3cb7c40ea774dfa3244e715d99"
+    }
+  },
+  "prototype_confirmation": {
+    "at": "2026-08-30T07:25:17.969Z",
+    "scope_revision": 1,
+    "affected_scenes": [
+      "应用中心"
+    ],
+    "fingerprints": {
+      "@route-entry/%E5%BA%94%E7%94%A8%E4%B8%AD%E5%BF%83": "4d9fea54bf55611c762a502981756413815044665096a018edbe4edd23733d3d",
+      "wego-app/scenes/infras/应用中心/scene.css": "32f4963842aa0e3735460f564def400e1e5dbce78e805c2fb1fed739aedf4eec",
+      "wego-app/scenes/infras/应用中心/scene.js": "15032c898c10b562c24faf21d84b496affc5dc3cb7c40ea774dfa3244e715d99"
+    }
+  },
   "affected_scenes": [
     "应用中心"
   ],
@@ -86,7 +112,7 @@
       "valid": true
     },
     "design": {
-      "valid": false
+      "valid": true
     }
   },
   "change_log": [
@@ -97,7 +123,24 @@
     {
       "action": "submit-brief",
       "at": "2026-08-29T15:06:06.799Z"
+    },
+    {
+      "action": "confirm-brief",
+      "at": "2026-08-30T07:25:00.572Z"
+    },
+    {
+      "action": "submit-prototype",
+      "at": "2026-08-30T07:25:17.975Z"
     }
   ],
-  "freeze": null
+  "freeze": {
+    "at": "2026-08-30T07:25:17.969Z",
+    "design_system_version": 554,
+    "scope_revision": 1,
+    "fingerprints": {
+      "@route-entry/%E5%BA%94%E7%94%A8%E4%B8%AD%E5%BF%83": "4d9fea54bf55611c762a502981756413815044665096a018edbe4edd23733d3d",
+      "wego-app/scenes/infras/应用中心/scene.css": "32f4963842aa0e3735460f564def400e1e5dbce78e805c2fb1fed739aedf4eec",
+      "wego-app/scenes/infras/应用中心/scene.js": "15032c898c10b562c24faf21d84b496affc5dc3cb7c40ea774dfa3244e715d99"
+    }
+  }
 }
