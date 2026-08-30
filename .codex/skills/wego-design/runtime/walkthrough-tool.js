@@ -2421,7 +2421,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         if (!v) return '-';
         if (v === '0 1 auto') return '适应（内容宽度）';
         if (v === '1 1 0%' || v === '1 1 0') return '填充（剩余空间）';
-        if (/^0 0 \d+px$/.test(v)) return `固定 ${v.match(/\d+/)[0]}px`;
+        const fixedMatch = v.match(/^0 0 (\d+px)$/);
+        if (fixedMatch) return `固定 ${fixedMatch[1]}`;
         return v;
       };
       const lines = [
