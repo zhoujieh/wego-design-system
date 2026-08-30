@@ -301,8 +301,20 @@ const appCenterTemplate = `
         if (tabsHandle && typeof tabsHandle.update === 'function') tabsHandle.update();
       }
 
-      // tabs 激活：统一更新 aria-selected 与指示条
+      // tabs 激活：统一更新 aria-selected 与指示条，并将当前 tab 滚入可视区
       var tabItems = Array.prototype.slice.call(tabsScroll.querySelectorAll('.wg-tabs__item'));
+      function ensureTabVisible(item) {
+        var itemLeft = item.offsetLeft;
+        var itemWidth = item.offsetWidth;
+        var viewLeft = tabsScroll.scrollLeft;
+        var viewWidth = tabsScroll.clientWidth;
+        if (itemLeft < viewLeft || itemLeft + itemWidth > viewLeft + viewWidth) {
+          var targetLeft = itemLeft - (viewWidth - itemWidth) / 2;
+          var maxLeft = tabsScroll.scrollWidth - viewWidth;
+          if (maxLeft < 0) maxLeft = 0;
+          tabsScroll.scrollLeft = Math.max(0, Math.min(targetLeft, maxLeft));
+        }
+      }
       function setActiveTab(categoryId) {
         var item = null;
         for (var i = 0; i < tabItems.length; i++) {
@@ -311,6 +323,7 @@ const appCenterTemplate = `
         if (!item) return;
         tabItems.forEach(function (t) { t.setAttribute('aria-selected', String(t === item)); });
         updateIndicator();
+        ensureTabVisible(item);
       }
 
       // tabs 点击：定位分类（对齐到吸顶 tabs 底部，避免目标被遮挡）
