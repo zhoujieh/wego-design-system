@@ -604,6 +604,17 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
   /** 不参与自动同步的属性（结构性/元素专属，跨元素同步极易误改，如定位与层叠；尺寸在同类组件下放开同步） */
   const SHARED_SYNC_EXCLUDED_PROPS = new Set(['display', 'position', 'z-index']);
 
+  /** 同类组件下放开声明检查的「布局/外观」属性：这些是"同类统一视觉/布局"的公共样式，
+   *  即使未在 CSS 显式声明（CSS 默认值，如容器 justify-content/align-items 默认、按钮 flex 默认），
+   *  同类组件也应一起同步成一致的最终值；仍以「同类 + 计算值一致」双校验兜底防误判。 */
+  const LAYOUT_SYNC_EXEMPT_PROPS = new Set([
+    'width', 'height', 'flex',
+    'justify-content', 'align-items', 'align-self', 'align-content',
+    'gap', 'row-gap', 'column-gap',
+    'flex-direction', 'flex-wrap',
+    'text-align',
+  ]);
+
   /** CSS 值归一化（与 _cssValueEqual 的 norm 对齐），用于公共样式值匹配 */
   function normalizeCssValue(v) {
     return String(v == null ? '' : v).trim().replace(/\s*,\s*/g, ',').replace(/\s+/g, ' ').toLowerCase();
@@ -740,8 +751,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
   /** 找出与目标元素「被同一条样式（同一组件类）控制」的其它元素（自动同步目标集）。
    *  仅当该属性确为「公共样式」时返回命中列表，否则返回 []（不自动同步，只改当前元素）。
    *  防误判规则：
-   *   - 结构/层叠类属性（display/position/z-index）不同步；尺寸（宽/高）与 flex（宽度布局）在同类组件下放开；
-   *   - 目标自身未声明该属性（继承/默认值）→ 属局部覆盖，不同步（尺寸与 flex 除外：同类统一外观/布局）；
+   *   - 结构/层叠类属性（display/position/z-index）不同步；尺寸、flex 及同类布局视觉属性（对齐/间距/文字对齐）放开；
+   *   - 目标自身未声明该属性（继承/默认值）→ 属局部覆盖，不同步（上述布局视觉属性除外：同类统一外观/布局）；
    *   - 只认「同类组件」：与目标共享同一组件类（如所有头像/所有转发按钮/所有正文标题），
    *     值碰巧相同的不同元素（如正文与昵称字号相同）不会被误判为同类；
    *   - 同类内再按「该属性计算值一致」过滤，避免同组件不同尺寸/颜色变体被误改；
@@ -749,12 +760,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
    *   - 命中数（含当前）超过上限 → 视为页面级基础，不同步。 */
   function findSharedStyleElements(targetEl, property, oldValue) {
     if (!targetEl || !property || !oldValue || SHARED_SYNC_EXCLUDED_PROPS.has(property)) return [];
-    // 尺寸（宽/高）与 flex（宽度布局表达）是"同类组件统一外观/布局"的公共样式：目标与被改同类即使未显式声明
-    // （如 flex 拉伸撑满、内容自适应、默认 flex）也应同步成一致的固定值；其余属性仍要求目标自身声明，
-    // 避免把继承/默认值当成公共样式误同步
-    const isSize = property === 'width' || property === 'height';
-    const isFlex = property === 'flex';
-    if (!isSize && !isFlex && !declaresProperty(targetEl, property)) return [];
+    // 尺寸（宽/高）、flex（宽度布局）与同类布局视觉属性（对齐/间距/文字对齐等）是"同类组件统一外观/布局"的
+    // 公共样式：目标与被改同类即使未显式声明（如 flex 拉伸撑满、内容自适应、容器对齐默认值）也应同步成一致的
+    // 固定值；其余属性仍要求目标自身声明，避免把继承/默认值当成公共样式误同步
+    const isExempt = LAYOUT_SYNC_EXEMPT_PROPS.has(property);
+    if (!isExempt && !declaresProperty(targetEl, property)) return [];
     const componentClass = pickComponentClass(targetEl);
     if (!componentClass) return [];
     const targetNorm = normalizeCssValue(oldValue);
@@ -772,7 +782,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     } catch (e) {}
     if (candidates.length === 0) return [];
     if (candidates.length + 1 > MAX_SHARED_STYLE_COUNT) return [];
-    return candidates.filter(el => isSize || isFlex || declaresProperty(el, property));
+    return candidates.filter(el => isExempt || declaresProperty(el, property));
   }
 
   /** 快照元素（或伪元素）的计算样式原始值，用于「改回即无变更」判定 */
