@@ -2357,10 +2357,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (changes.length === 0 && annotations.length === 0) {
         return `## Page Feedback: ${route}\n**Viewport:** ${viewport}\n\n当前还没有记录到任何配置修改或批注。`;
       }
-      // 按选择器分组（同一元素的样式变更和批注归一条）；共享同步的变更按 sharedKey 合并为一组
+      // 分组逻辑：共享样式按组件类（sharedKey 去掉 ::属性名）分组，同一组件类的所有属性合并为一条；
+      // 非共享样式按 selector 分组，同一元素的多个属性合并为一条。
       const groups = {};
       changes.forEach(c => {
-        const gkey = c.sharedKey || c.selector;
+        const componentClass = c.sharedKey ? c.sharedKey.split('::')[0] : '';
+        const gkey = c.sharedKey ? componentClass : c.selector;
         if (!groups[gkey]) {
           groups[gkey] = {
             selector: c.selector,
@@ -2369,102 +2371,136 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             elementClass: c.elementClass || '',
             changes: [],
             shared: !!c.sharedKey,
-            sharedKey: c.sharedKey || '',
+            componentClass,
             annotation: '',
           };
         }
         groups[gkey].changes.push(c);
       });
+      // 批注归组：有样式变更的并入对应组，纯备注单独成组
+      const pureAnnotations = [];
       annotations.forEach(a => {
         if (!a.text || !a.text.trim()) return;
-        if (!groups[a.selector]) {
-          groups[a.selector] = {
-            selector: a.selector,
-            elementTag: a.elementTag,
-            elementText: a.elementText,
-            elementClass: '',
-            changes: [],
-            shared: false,
-            sharedKey: '',
-            annotation: a.text,
-          };
+        // 尝试匹配已有组（按 selector 或 componentClass）
+        const aComponentClass = (a.elementClass || '').split(/\s+/)[0] || '';
+        let matched = null;
+        for (const g of Object.values(groups)) {
+          if (g.selector === a.selector) { matched = g; break; }
+          if (g.componentClass && aComponentClass && g.componentClass === aComponentClass) { matched = g; break; }
+        }
+        if (matched) {
+          matched.annotation = a.text;
+          if (!matched.elementText && a.elementText) matched.elementText = a.elementText;
+          if (!matched.elementTag && a.elementTag) matched.elementTag = a.elementTag;
         } else {
-          groups[a.selector].annotation = a.text;
-          if (!groups[a.selector].elementText && a.elementText) {
-            groups[a.selector].elementText = a.elementText;
-          }
-          if (!groups[a.selector].elementTag && a.elementTag) {
-            groups[a.selector].elementTag = a.elementTag;
-          }
+          pureAnnotations.push(a);
         }
       });
+      // 计算共享数：不同属性的共享数可能不同，取去重元素数的最大值
       const groupList = Object.values(groups).map(g => {
-        if (g.shared && g.changes.length) g.sharedCount = new Set(g.changes.map(c => c.selector)).size;
+        if (g.shared && g.changes.length) {
+          const propCounts = {};
+          g.changes.forEach(c => {
+            const pk = c.property + '||' + c.newValue;
+            if (!propCounts[pk]) propCounts[pk] = new Set();
+            propCounts[pk].add(c.selector);
+          });
+          g.sharedCount = Math.max(...Object.values(propCounts).map(s => s.size));
+        }
         return g;
       });
+      // 辅助：提取类名锚点
+      const getClassAnchor = (g) => {
+        if (g.componentClass) return g.componentClass;
+        if (g.elementClass) return g.elementClass.split(/\s+/)[0];
+        const m = g.selector.match(/\.([a-zA-Z0-9_-]+)\s*$/) || g.selector.match(/\[data-component-slug="[^"]+"\]\.([a-zA-Z0-9_-]+)/);
+        return m ? m[1] : '';
+      };
+      // 辅助：格式化 flex 值为友好描述
+      const formatFlexLabel = (v) => {
+        if (!v) return '-';
+        if (v === '0 1 auto') return '适应（内容宽度）';
+        if (v === '1 1 0%' || v === '1 1 0') return '填充（剩余空间）';
+        if (/^0 0 \d+px$/.test(v)) return `固定 ${v.match(/\d+/)[0]}px`;
+        return v;
+      };
       const lines = [
-        `## Page Feedback: ${route}`,
+        `## 走查变更单 #/${route}`,
         `**Viewport:** ${viewport}`,
         '',
-        '> 施工单：按你调好的最终效果整理，可直接照做。改法优先用设计系统语义类；定位用稳定标识。',
+        '> 施工单：按最终效果整理，改法优先用设计系统语义类；主定位用组件类，完整选择器见文末备选。',
         '',
       ];
       const machine = [];
-      groupList.forEach((g, i) => {
-        // 业务锚点：取首段有意义文案（截断，不再整段糊）
+      const fullSelectors = [];
+      // 样式变更组
+      const styleGroups = groupList.filter(g => g.changes.length > 0);
+      const noteOnlyGroups = pureAnnotations;
+      if (styleGroups.length) {
+        lines.push(`### 样式变更（${styleGroups.length} 组）`);
+        lines.push('');
+      }
+      styleGroups.forEach((g, i) => {
         const anchor = (g.elementText || '').replace(/\s+/g, ' ').trim();
-        const shortAnchor = anchor.length > 12 ? anchor.slice(0, 12) + '…' : anchor;
-        // 语义类名锚点：优先 elementClass，缺失时从 selector 末段提取
-        const classAnchor = (() => {
-          if (g.elementClass) return g.elementClass.split(/\s+/)[0];
-          const m = g.selector.match(/\.([a-zA-Z0-9_-]+)\s*$/) || g.selector.match(/\[data-component-slug="[^"]+"\]\.([a-zA-Z0-9_-]+)/);
-          return m ? m[1] : '';
-        })();
+        const shortAnchor = anchor.length > 16 ? anchor.slice(0, 16) + '…' : anchor;
+        const classAnchor = getClassAnchor(g);
         const role = shortAnchor || classAnchor || g.elementTag;
+        // 标题行
+        let title = `#### ${i + 1}. ${role}`;
+        if (classAnchor) title += ` · .${classAnchor}`;
+        if (g.shared) title += `（共享 ${g.sharedCount} 个元素）`;
+        lines.push(title);
+        // 变更列表
         const addClassChanges = g.changes.filter(c => c.intent === 'add-class');
-        // 共享组内多条记录为同一改动，去重后合并为一条展示，避免重复行
         const cssMap = new Map();
         g.changes.filter(c => !c.skipCss).forEach(c => {
           const k = c.property + '||' + c.newValue;
           if (!cssMap.has(k)) cssMap.set(k, c);
         });
         const cssChanges = Array.from(cssMap.values());
-        const lines2 = [];
-        lines2.push(`### ${i + 1}. ${g.elementTag} · ${role}`);
-        lines2.push(`**定位:** \`${g.selector}\``);
-        if (anchor) lines2.push(`**业务锚点:** ${anchor}`);
-        if (g.shared) {
-          const isSizeGroup = !!g.sharedKey && g.sharedKey.endsWith('::size');
-          lines2.push(`**共享样式同步:** 该样式为公共样式，本次已自动同步应用到 ${g.sharedCount || g.changes.length} 个元素${isSizeGroup ? '（该尺寸为公共样式，建议在源码公共类/Token 上统一修改）' : '（共用同一属性值，建议在源码公共类/Token 上统一修改）'}`);
+        const orderChanges = cssChanges.filter(c => c.property === 'order');
+        const otherChanges = cssChanges.filter(c => c.property !== 'order');
+        const changeLines = [];
+        // 加类
+        addClassChanges.forEach(c => {
+          changeLines.push(`- 加结构类 \`${c.intentClass}\``);
+        });
+        // 顺序移动
+        orderChanges.forEach(c => {
+          const posTxt = (c.displayOld && c.displayNew) ? `${c.displayOld} → ${c.displayNew}` : `order ${c.oldValue} → ${c.newValue}`;
+          changeLines.push(`- 顺序：${posTxt}`);
+        });
+        // 其他样式
+        otherChanges.forEach(c => {
+          const propLabel = c.property === 'flex' ? '宽度' : c.property;
+          const valLabel = c.property === 'flex' ? formatFlexLabel(c.newValue) : (c.newValue || '-');
+          changeLines.push(`- ${propLabel} → ${valLabel}（\`${c.property}: ${c.newValue || '-'}\`）`);
+        });
+        if (changeLines.length) {
+          lines.push('- 变更：');
+          changeLines.forEach(l => lines.push('  ' + l));
         }
-        if (addClassChanges.length) {
-          const clsNote = addClassChanges.map(c => c.note).filter(Boolean)[0] || '';
-          const want = addClassChanges.map(c => `加结构类 \`${c.intentClass}\``).join('；');
-          lines2.push(`**你要的:** ${want}`);
-          lines2.push(`**改法:** ${(classAnchor ? '在类 `' + classAnchor + '` 上加 ' : '元素加 ') + addClassChanges.map(c => '`' + c.intentClass + '`').join(' ')}`);
-          if (clsNote) lines2.push(`**提醒:** ${clsNote}`);
+        // 改法
+        const cssSnippet = otherChanges.map(c => `${c.property}: ${c.newValue || '-'}`).join('; ');
+        const orderSnippet = orderChanges.length ? `order: ${orderChanges[0].orderValue || orderChanges[0].newValue}` : '';
+        const addSnippet = addClassChanges.map(c => c.intentClass).join(' ');
+        let fixLine = '- 改法：';
+        if (classAnchor) {
+          fixLine += `修改 \`.${classAnchor}\``;
+          if (cssSnippet || orderSnippet) fixLine += `：\`${[cssSnippet, orderSnippet].filter(Boolean).join('; ')}\``;
+          if (addSnippet) fixLine += `，加类 \`${addSnippet}\``;
+        } else {
+          fixLine += `在源码对应 CSS 中设置：\`${[cssSnippet, orderSnippet].filter(Boolean).join('; ')}\``;
         }
-        if (cssChanges.length) {
-          const orderChanges = cssChanges.filter(c => c.property === 'order');
-          const otherChanges = cssChanges.filter(c => c.property !== 'order');
-          if (orderChanges.length) {
-            const oc = orderChanges[0];
-            const posTxt = (oc.displayOld && oc.displayNew) ? `${oc.displayOld} → ${oc.displayNew}` : `order ${oc.oldValue} → ${oc.newValue}`;
-            const targetPos = oc.displayNew ? String(oc.displayNew).replace(/第|位/g, '') : oc.newValue;
-            lines2.push(`**你要的:** 调整顺序 ${posTxt}`);
-            lines2.push(`**改法:** 调整该元素在父容器中的排列顺序，使其显示为第 ${targetPos} 位（源码对应：调整该按钮在父容器中的代码顺序，或给该按钮设置 flex order: ${oc.orderValue || oc.newValue}）`);
-          }
-          if (otherChanges.length) {
-            const wantCsv = otherChanges.map(c => `${c.property === 'flex' ? '宽度' : c.property} → ${(c.property === 'flex' ? formatFlexValue(c.newValue) : c.newValue) || '-'}`).join('；');
-            lines2.push(`**你要的:** 调整样式 ${wantCsv}`);
-            lines2.push(`**改法:** 在源码对应 CSS 中设置：${otherChanges.map(c => `${c.property}: ${c.newValue || '-'}`).join('; ')}`);
-          }
-        }
+        lines.push(fixLine);
+        // 组内备注
         if (g.annotation) {
-          lines2.push(`**备注:** ${g.annotation}`);
+          lines.push(`- 备注：${g.annotation}`);
         }
-        lines2.push('');
-        lines.push(...lines2);
+        lines.push('');
+        // 完整选择器备选
+        fullSelectors.push({ idx: i + 1, classAnchor, selector: g.selector });
+        // machine JSON（保持向后兼容）
         machine.push({
           selector: g.selector,
           elementText: anchor,
@@ -2476,6 +2512,31 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           sharedCount: g.shared ? (g.sharedCount || g.changes.length) : 0,
         });
       });
+      // 纯备注（无样式变更）
+      if (noteOnlyGroups.length) {
+        lines.push(`### 备注（${noteOnlyGroups.length} 条）`);
+        lines.push('');
+        noteOnlyGroups.forEach((a, i) => {
+          const anchor = (a.elementText || '').replace(/\s+/g, ' ').trim();
+          const shortAnchor = anchor.length > 16 ? anchor.slice(0, 16) + '…' : anchor;
+          const aClass = (a.elementClass || '').split(/\s+/)[0] || '';
+          const role = shortAnchor || aClass || a.elementTag;
+          lines.push(`${i + 1}. ${role}：${a.text}`);
+          fullSelectors.push({ idx: '备注' + (i + 1), classAnchor: aClass, selector: a.selector });
+        });
+        lines.push('');
+      }
+      // 完整定位选择器备选（折叠区）
+      if (fullSelectors.length) {
+        lines.push('<details><summary>完整定位选择器（备选，主定位失效时使用）</summary>');
+        lines.push('');
+        fullSelectors.forEach(f => {
+          lines.push(`${f.idx}. ${f.classAnchor ? '.' + f.classAnchor + ' → ' : ''}\`${f.selector}\``);
+        });
+        lines.push('');
+        lines.push('</details>');
+        lines.push('');
+      }
       lines.push('<!-- WEGo_CHANGES_JSON ' + JSON.stringify(machine) + ' -->');
       return lines.join('\n');
     }
