@@ -511,10 +511,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
     // 宽高：推导尺寸模式（fixed 固定 / auto 适应 / fill 填充），固定值去掉 px 只留数值回显
     // 优先用 CSS 原始声明值判断模式（getComputedStyle 总是返回 px，无法区分 auto/100%/fit-content）；
-    // 无显式声明 = CSS 默认 auto（内容自适应），不能 fallback 到计算像素值误判为 fixed
+    // 无显式声明时：flex 子项按 flex-grow/basis 判断（拉伸→填充），块级默认填充，inline/绝对定位适应
     const sizeModeOf = (v) => {
       const s = String(v || '').trim().toLowerCase();
-      if (s === '100%') return 'fill';
+      if (s.includes('%')) return 'fill';
       if (/^(auto|fit-content|min-content|max-content|inherit|initial|unset)$/.test(s)) return 'auto';
       return 'fixed';
     };
@@ -524,8 +524,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     };
     const specifiedWidth = getSpecifiedValue(el, 'width');
     const specifiedHeight = getSpecifiedValue(el, 'height');
-    const widthMode = specifiedWidth ? sizeModeOf(specifiedWidth) : 'auto';
-    const heightMode = specifiedHeight ? sizeModeOf(specifiedHeight) : 'auto';
+    const flexChild = isFlexChild(el);
+    const widthMode = inferSizeMode(specifiedWidth, flexChild, cs, 'width');
+    const heightMode = inferSizeMode(specifiedHeight, flexChild, cs, 'height');
 
     return {
       // 自动布局
@@ -626,9 +627,57 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     return [{ property: '尺寸·高', oldValue: hOld, newValue: hNew }, ...rest];
   }
 
-  /** 属性名展示文案（尺寸组显示为中文"尺寸"） */
+  /** 属性名展示文案（尺寸组显示为中文"尺寸"，flex 表达宽度模式显示为"宽度"） */
   function propertyLabel(p) {
-    return p === 'size' ? '尺寸' : p;
+    if (p === 'size') return '尺寸';
+    if (p === 'flex') return '宽度';
+    return p;
+  }
+
+  /** flex 值展示美化：尺寸模式下 fill/auto/fixed 的可读文案 */
+  function formatFlexValue(v) {
+    const s = String(v || '').trim();
+    if (s === '1 1 0%') return '填充（拉伸占满）';
+    if (s === '0 1 auto') return '适应（内容宽度）';
+    const m = s.match(/^0 0 ([\d.]+)px$/);
+    if (m) return '固定宽 ' + m[1] + 'px';
+    return s;
+  }
+
+  /** 判断元素是否为 flex 容器的直接子项（决定尺寸模式切换用 flex 表达还是 width 表达） */
+  function isFlexChild(el) {
+    if (!el || el.nodeType !== 1) return false;
+    const parent = el.parentElement;
+    if (!parent) return false;
+    try {
+      const pcs = getComputedStyle(parent);
+      return pcs.display === 'flex' || pcs.display === 'inline-flex';
+    } catch (e) { return false; }
+  }
+
+  /** 推断元素的尺寸模式（fill 填充 / auto 适应 / fixed 固定）：
+   *  1) 有显式声明：百分比→填充，auto/fit-content→适应，像素→固定；
+   *  2) 无显式声明且为 flex 子项：flex-grow>0 或 basis=0 → 填充，basis 具体值 → 固定，否则适应；
+   *  3) 无显式声明的非 flex 子项：块级宽度默认占满（100%）→ 填充、块级高度默认内容自适应 → 适应；
+   *     inline/绝对定位 → 适应。 */
+  function inferSizeMode(specified, flexChild, cs, axis) {
+    if (specified) {
+      const s = String(specified).trim().toLowerCase();
+      if (s.includes('%')) return 'fill';
+      if (/^(auto|fit-content|min-content|max-content|inherit|initial|unset)$/.test(s)) return 'auto';
+      return 'fixed';
+    }
+    if (flexChild) {
+      const grow = parseFloat(cs.flexGrow) || 0;
+      const basis = cs.flexBasis;
+      if (grow > 0 || basis === '0%' || basis === '0px') return 'fill';
+      if (basis && basis !== 'auto') return 'fixed';
+      return 'auto';
+    }
+    const display = cs.display;
+    if (display === 'inline' || display === 'inline-block' || display === 'inline-flex' || display === 'inline-grid') return 'auto';
+    if (cs.position === 'absolute' || cs.position === 'fixed') return 'auto';
+    return axis === 'height' ? 'auto' : 'fill';
   }
 
   /** 判断元素是否由自身（内联样式或命中的样式规则）声明了该属性；
@@ -691,8 +740,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
   /** 找出与目标元素「被同一条样式（同一组件类）控制」的其它元素（自动同步目标集）。
    *  仅当该属性确为「公共样式」时返回命中列表，否则返回 []（不自动同步，只改当前元素）。
    *  防误判规则：
-   *   - 结构/层叠类属性（display/position/z-index）不同步；尺寸在同类组件下放开；
-   *   - 目标自身未声明该属性（继承/默认值）→ 属局部覆盖，不同步；
+   *   - 结构/层叠类属性（display/position/z-index）不同步；尺寸（宽/高）与 flex（宽度布局）在同类组件下放开；
+   *   - 目标自身未声明该属性（继承/默认值）→ 属局部覆盖，不同步（尺寸与 flex 除外：同类统一外观/布局）；
    *   - 只认「同类组件」：与目标共享同一组件类（如所有头像/所有转发按钮/所有正文标题），
    *     值碰巧相同的不同元素（如正文与昵称字号相同）不会被误判为同类；
    *   - 同类内再按「该属性计算值一致」过滤，避免同组件不同尺寸/颜色变体被误改；
@@ -700,7 +749,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
    *   - 命中数（含当前）超过上限 → 视为页面级基础，不同步。 */
   function findSharedStyleElements(targetEl, property, oldValue) {
     if (!targetEl || !property || !oldValue || SHARED_SYNC_EXCLUDED_PROPS.has(property)) return [];
-    if (!declaresProperty(targetEl, property)) return [];
+    // 尺寸（宽/高）与 flex（宽度布局表达）是"同类组件统一外观/布局"的公共样式：目标与被改同类即使未显式声明
+    // （如 flex 拉伸撑满、内容自适应、默认 flex）也应同步成一致的固定值；其余属性仍要求目标自身声明，
+    // 避免把继承/默认值当成公共样式误同步
+    const isSize = property === 'width' || property === 'height';
+    const isFlex = property === 'flex';
+    if (!isSize && !isFlex && !declaresProperty(targetEl, property)) return [];
     const componentClass = pickComponentClass(targetEl);
     if (!componentClass) return [];
     const targetNorm = normalizeCssValue(oldValue);
@@ -718,7 +772,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     } catch (e) {}
     if (candidates.length === 0) return [];
     if (candidates.length + 1 > MAX_SHARED_STYLE_COUNT) return [];
-    return candidates.filter(el => declaresProperty(el, property));
+    return candidates.filter(el => isSize || isFlex || declaresProperty(el, property));
   }
 
   /** 快照元素（或伪元素）的计算样式原始值，用于「改回即无变更」判定 */
@@ -2094,9 +2148,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
                   ${(g.shared ? (g.sharedRows || g.changes) : g.changes).map((c) => `
                     <div class="change-row">
                       <span class="change-prop">${escapeHtml(propertyLabel(c.property))}${c.target ? ' · ' + escapeHtml(c.target) : ''}</span>
-                      <span class="change-old" title="${escapeHtml(c.oldValue)}">${escapeHtml(c.oldValue || '-')}</span>
+                      <span class="change-old" title="${escapeHtml(c.oldValue)}">${escapeHtml(c.property === 'flex' ? formatFlexValue(c.oldValue) : (c.oldValue || '-'))}</span>
                       <span class="change-arrow">→</span>
-                      <span class="change-new" title="${escapeHtml(c.newValue)}">${escapeHtml(c.newValue || '-')}</span>
+                      <span class="change-new" title="${escapeHtml(c.newValue)}">${escapeHtml(c.property === 'flex' ? formatFlexValue(c.newValue) : (c.newValue || '-'))}</span>
                       ${g.shared && g.sharedRows && g.sharedRows.length === 1
                         ? `<button class="change-delete" type="button" data-delete-group="${escapeHtml(g.sharedKey)}" title="删除整组共享变更">${ICONS.close}</button>`
                         : `<button class="change-delete" type="button" data-delete="${c.id}" title="删除此变更">${ICONS.close}</button>`}
@@ -2289,7 +2343,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           if (clsNote) lines2.push(`**提醒:** ${clsNote}`);
         }
         if (cssChanges.length) {
-          const wantCsv = cssChanges.map(c => `${c.property} → ${c.newValue || '-'}`).join('；');
+          const wantCsv = cssChanges.map(c => `${c.property === 'flex' ? '宽度' : c.property} → ${(c.property === 'flex' ? formatFlexValue(c.newValue) : c.newValue) || '-'}`).join('；');
           lines2.push(`**你要的:** 调整样式 ${wantCsv}`);
           lines2.push(`**改法:** 在源码对应 CSS 中设置：${cssChanges.map(c => `${c.property}: ${c.newValue || '-'}`).join('; ')}`);
         }
@@ -3461,29 +3515,14 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           }
         });
       });
-      // 模式 select change：根据模式直接改 width/height 的 CSS 值（fixed=保留数值 / auto=auto / fill=100%）
+      // 模式 select change：走 widthMode/heightMode 字段，由 _applyField 按"父容器是否 flex"分派
+      // （flex 子项用 flex 表达填充/适应/固定，普通块级用 width 表达），切换结果进配置列表可一键还原
       this._shadow.querySelectorAll('[data-field="widthMode"], [data-field="heightMode"]').forEach(sel => {
         sel.addEventListener('change', () => {
           const modeField = sel.dataset.field; // widthMode / heightMode
           const axis = modeField.replace(/Mode$/, ''); // width / height
           this._updateSizeModeTrigger(axis);
-          const mode = sel.value;
-          const input = this._shadow.querySelector(`[data-field="${axis}"]`);
-          if (mode === 'auto') {
-            this._onFieldChange(axis, 'auto');
-            if (input) input.value = 'auto';
-          } else if (mode === 'fill') {
-            this._onFieldChange(axis, '100%');
-            if (input) input.value = '100%';
-          } else if (input) {
-            // fixed：若之前是 auto/100% 等语义值，清空输入并同步清除实际样式与变更记录，
-            // 避免界面显示"固定"但元素样式仍是 auto/100%、记录也残留
-            const cur = String(input.value || '').trim();
-            if (/^(auto|100%|fit-content|min-content|max-content)$/i.test(cur)) {
-              input.value = '';
-              this._onFieldChange(axis, '');
-            }
-          }
+          this._onFieldChange(modeField, sel.value);
         });
       });
       // 对齐矩阵
@@ -3581,9 +3620,57 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         // 样式同步（共享元素模式）：高频输入（颜色拖动等）下防抖，停顿后按最终值执行一次同步扫描，
         // 避免每帧全页扫描卡顿、避免中途值把共享元素改错
         this._scheduleSharedSync(result);
+        // 伴随属性（如切尺寸模式时关闭拉伸/写入固定宽）：只记录当前元素；需同步类同的才 schedule 共享同步
+        if (result.extra && result.extra.length) {
+          result.extra.forEach(extra => {
+            bus.emit('style-change', {
+              selector: this._selector,
+              elementTag: this._targetEl.tagName.toLowerCase(),
+              elementText: (this._targetEl.textContent || '').trim().substring(0, 50),
+              elementClass: (this._targetEl.className && typeof this._targetEl.className === 'string')
+                ? this._targetEl.className.trim().split(/\s+/).filter(c => isStableSelectorClass(c))[0] || ''
+                : '',
+              property: extra.property,
+              oldValue: extra.oldValue,
+              newValue: extra.newValue,
+              el: this._targetEl,
+              shared: false,
+              sharedKey: '',
+            });
+            if (extra.sync !== false) this._scheduleSharedSync(extra);
+          });
+        }
       }
       // 更新 UI（按钮 active 态等）
       this._updateActiveStates();
+      // 手动输入宽度/高度数值 → 该轴模式应显示为「固定」（flex 子项用 flex-basis 表达，普通元素用 width/height）
+      if (field === 'width' || field === 'height') {
+        const v = String(value || '').trim();
+        const isSemantic = /^(100%|auto|fit-content|min-content|max-content|inherit|initial|unset)$/i.test(v);
+        if (v && !isSemantic) {
+          const modeField = field + 'Mode';
+          this._data[modeField] = 'fixed';
+          const sel = this._shadow.querySelector(`[data-field="${modeField}"]`);
+          if (sel && sel.value !== 'fixed') sel.value = 'fixed';
+          this._updateSizeModeTrigger(field);
+        }
+      }
+      // 尺寸模式切换后：同步面板宽度/高度输入框的回显，保证界面与元素实际样式一致
+      if (field === 'widthMode' || field === 'heightMode') {
+        const axis = field.replace(/Mode$/, '');
+        const input = this._shadow.querySelector(`[data-field="${axis}"]`);
+        if (input && this._targetEl) {
+          if (value === 'fixed') {
+            const csAxis = getComputedStyle(this._targetEl)[axis];
+            input.value = String(parseNumeric(csAxis));
+          } else if (result && result.property === 'flex') {
+            input.value = ''; // flex 子项的填充/适应：宽度由 flex 表达，输入框无固定数值
+          } else if (result) {
+            input.value = result.newValue; // 普通块级：100% / fit-content / auto
+          }
+          this._data[axis] = input.value;
+        }
+      }
     }
 
     /** 样式同步防抖调度：高频输入（颜色拖动/步进）只同步最终值。
@@ -3922,7 +4009,25 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         case 'width': {
           const oldValue = cs().width;
           const SEM = /^(100%|auto|fit-content|min-content|max-content|inherit|initial|unset)$/i;
-          const out = SEM.test(String(value).trim()) ? value.trim() : (isNaN(numVal) ? '' : numVal + 'px');
+          const trimmed = String(value).trim();
+          const flexChild = isFlexChild(this._targetEl);
+          // flex 子项的宽度由 flex-basis 控制：输入数值 → 写 flex 0 0 Npx（自动关闭拉伸，单一属性表达，
+          // 无 width inline 残留）；语义值（auto/100%/fit-content）走普通 width 逻辑
+          if (flexChild && !SEM.test(trimmed)) {
+            const oldFlex = cs().flex;
+            const hadWidth = !!el.style.getPropertyValue('width');
+            const n = parseFloat(trimmed);
+            if (isNaN(n)) { // 清空 = 清除该元素 flex 覆盖（下游按空值撤销记录）
+              if (hadWidth) el.style.width = '';
+              el.style.flex = '';
+              return { property: 'flex', oldValue: oldFlex, newValue: '' };
+            }
+            el.style.flex = '0 0 ' + n + 'px';
+            let extra = [];
+            if (hadWidth) { const ow = cs().width; el.style.width = ''; extra = [{ property: 'width', oldValue: ow, newValue: '', sync: false }]; }
+            return { property: 'flex', oldValue: oldFlex, newValue: '0 0 ' + n + 'px', extra };
+          }
+          const out = SEM.test(trimmed) ? trimmed : (isNaN(numVal) ? '' : numVal + 'px');
           el.style.width = out;
           return { property: 'width', oldValue, newValue: out };
         }
@@ -3932,6 +4037,57 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           const out = SEM.test(String(value).trim()) ? value.trim() : (isNaN(numVal) ? '' : numVal + 'px');
           el.style.height = out;
           return { property: 'height', oldValue, newValue: out };
+        }
+        case 'widthMode':
+        case 'heightMode': {
+          // 尺寸模式切换（fill 填充 / auto 适应 / fixed 固定），参考 Figma Auto Layout：
+          // - 宽度轴 flex 子项：fill→flex:1 1 0%、auto→flex:0 1 auto、fixed→flex:0 0 Npx（basis 表达固定宽），
+          //   单一 flex 属性表达、无 width inline 残留、切回填充/适应无需额外清理；
+          //   非 flex 子项：fill→width:100%、auto→width:fit-content、fixed→width:Npx；
+          // - 高度轴统一用 height 表达（fill→100%、auto→auto、fixed→Npx）。
+          const axis = field === 'widthMode' ? 'width' : 'height';
+          const flexChild = isFlexChild(this._targetEl);
+          const oldAxis = cs()[axis];
+          const cur = String(parseNumeric(oldAxis));
+          // 仅接受纯数字输入作为固定值（parseNumeric('') 会返回 0，需避免把空输入当 0px 写入）
+          const rawAxis = this._data ? String(this._data[axis] || '') : '';
+          const inputVal = /^\d+(\.\d+)?$/.test(rawAxis) ? String(parseNumeric(rawAxis)) : '';
+          const useVal = inputVal || cur || '';
+          const num = useVal || cur || '0';
+          // 固定：写入固定值（有输入用输入值，无输入回填当前计算值，避免视觉坍塌）
+          if (value === 'fixed') {
+            if (axis === 'width' && flexChild) {
+              const oldFlex = cs().flex;
+              const hadWidth = !!el.style.getPropertyValue('width');
+              el.style.flex = '0 0 ' + num + 'px';
+              let extra = [];
+              if (hadWidth) { const ow = cs().width; el.style.width = ''; extra = [{ property: 'width', oldValue: ow, newValue: '', sync: false }]; }
+              return { property: 'flex', oldValue: oldFlex, newValue: '0 0 ' + num + 'px', extra };
+            }
+            const nv = num + 'px';
+            el.style[axis] = nv;
+            return { property: axis, oldValue: oldAxis, newValue: nv };
+          }
+          // 填充 / 适应：flex 子项用 flex 表达，非 flex 子项用 width 表达
+          if (axis === 'width' && flexChild) {
+            const oldFlex = cs().flex;
+            const hadWidth = !!el.style.getPropertyValue('width');
+            el.style.flex = value === 'fill' ? '1 1 0%' : '0 1 auto';
+            let extra = [];
+            if (hadWidth) {
+              const oldW = cs().width;
+              el.style.width = '';   // 清历史残留固定宽（空值会触发已有 width 记录的撤销；仅当前元素，不联动同类）
+              extra = [{ property: 'width', oldValue: oldW, newValue: '', sync: false }];
+            }
+            return { property: 'flex', oldValue: oldFlex, newValue: value === 'fill' ? '1 1 0%' : '0 1 auto', extra };
+          }
+          if (value === 'fill') {
+            el.style[axis] = '100%';
+            return { property: axis, oldValue: oldAxis, newValue: '100%' };
+          }
+          const outAuto = axis === 'width' ? 'fit-content' : 'auto';
+          el.style[axis] = outAuto;
+          return { property: axis, oldValue: oldAxis, newValue: outAuto };
         }
         case 'fontSize': {
           const oldValue = cs().fontSize;
