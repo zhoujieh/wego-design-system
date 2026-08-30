@@ -2980,15 +2980,19 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             font-weight: 500;
             color: var(--text-tertiary, #999);
           }
+          .layout-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+          }
+          .layout-row .layout-tabs { flex: 1; min-width: 0; }
           .move-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-areas: ". up ." "left . right" ". down .";
-            gap: 5px;
-            max-width: 132px;
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
           }
           .move-btn {
-            grid-area: auto;
+            width: 26px;
             height: 26px;
             border: 1px solid rgba(255,255,255,0.14);
             border-radius: 7px;
@@ -3002,10 +3006,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             justify-content: center;
             transition: background .15s ease, border-color .15s ease, opacity .15s ease;
           }
-          .move-btn[data-move="up"] { grid-area: up; }
-          .move-btn[data-move="left"] { grid-area: left; }
-          .move-btn[data-move="right"] { grid-area: right; }
-          .move-btn[data-move="down"] { grid-area: down; }
           .move-btn:not(:disabled):hover {
             background: rgba(255,255,255,0.14);
             border-color: rgba(0,185,107,0.7);
@@ -3434,13 +3434,21 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           <!-- 自动布局 -->
           <div class="section">
             <p class="section-title">自动布局</p>
-            <div class="layout-tabs">
-              <button class="layout-tab ${d.layoutMode === 'column' ? 'active' : ''}" data-field="layoutMode" data-value="column">
-                <span class="icon">${ICONS.layoutColumn}</span><span>纵向</span>
-              </button>
-              <button class="layout-tab ${d.layoutMode === 'row' ? 'active' : ''}" data-field="layoutMode" data-value="row">
-                <span class="icon">${ICONS.layoutRow}</span><span>横向</span>
-              </button>
+            <div class="layout-row">
+              <div class="layout-tabs">
+                <button class="layout-tab ${d.layoutMode === 'column' ? 'active' : ''}" data-field="layoutMode" data-value="column">
+                  <span class="icon">${ICONS.layoutColumn}</span><span>纵向</span>
+                </button>
+                <button class="layout-tab ${d.layoutMode === 'row' ? 'active' : ''}" data-field="layoutMode" data-value="row">
+                  <span class="icon">${ICONS.layoutRow}</span><span>横向</span>
+                </button>
+              </div>
+              <div class="move-grid" title="顺序（调整在父容器中的位置）">
+                <button type="button" class="move-btn" data-move="up" title="上移" aria-label="上移"><span class="move-arrow">↑</span></button>
+                <button type="button" class="move-btn" data-move="left" title="左移" aria-label="左移"><span class="move-arrow">←</span></button>
+                <button type="button" class="move-btn" data-move="right" title="右移" aria-label="右移"><span class="move-arrow">→</span></button>
+                <button type="button" class="move-btn" data-move="down" title="下移" aria-label="下移"><span class="move-arrow">↓</span></button>
+              </div>
             </div>
             <div class="field-row">
               <div class="alignment-matrix" data-align-matrix>
@@ -3494,13 +3502,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
                   </select>
                 </span>
               </label>
-            </div>
-            <p class="sub-label">顺序（调整在父容器中的位置）</p>
-            <div class="move-grid">
-              <button type="button" class="move-btn" data-move="up" title="上移" aria-label="上移"><span class="move-arrow">↑</span></button>
-              <button type="button" class="move-btn" data-move="left" title="左移" aria-label="左移"><span class="move-arrow">←</span></button>
-              <button type="button" class="move-btn" data-move="right" title="右移" aria-label="右移"><span class="move-arrow">→</span></button>
-              <button type="button" class="move-btn" data-move="down" title="下移" aria-label="下移"><span class="move-arrow">↓</span></button>
             </div>
           </div>
 
