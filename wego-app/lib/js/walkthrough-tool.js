@@ -1981,27 +1981,27 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             box-sizing: border-box;
             width: 100%;
             max-height: calc(100vh - 120px);
-            padding: 14px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
             border-radius: 14px;
             border: 1px solid var(--border-color, rgba(255,255,255,0.08));
             background: var(--bg-surface, rgba(30,30,30,0.82));
             box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+            overflow: hidden;
           }
           .header {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 8px;
-            padding-bottom: 10px;
+            padding: 10px 12px;
             border-bottom: 1px solid var(--border-color, rgba(255,255,255,0.08));
+            flex-shrink: 0;
           }
           .header-title {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
-            color: var(--text-default, #fff);
+            color: rgba(255,255,255,0.5);
           }
           .header-count {
             font-size: 12px;
@@ -2056,10 +2056,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             overflow-y: auto;
             -webkit-overflow-scrolling: touch; /* iOS 惯性滚动 */
             max-height: calc(100vh - 280px);
-            padding-right: 4px;
+            padding: 10px 12px;
+            flex: 1;
           }
-          .list::-webkit-scrollbar { width: 4px; }
-          .list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+          .list::-webkit-scrollbar { width: 0; height: 0; display: none; }
+          .list { scrollbar-width: none; -ms-overflow-style: none; }
           .item {
             padding: 10px;
             border-radius: 10px;
@@ -2151,18 +2152,20 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           .change-delete:hover { color: var(--text-error, #e53935); background: rgba(255,255,255,0.06); }
           .empty {
             text-align: center;
-            padding: 32px 16px;
+            padding: 32px 12px;
             color: var(--text-tertiary, #888);
             font-size: 12px;
             line-height: 1.6;
+            flex: 1;
           }
           .footer {
             display: flex;
             justify-content: flex-end;
             align-items: center;
             gap: 8px;
-            padding-top: 10px;
+            padding: 10px 12px;
             border-top: 1px solid var(--border-color, rgba(255,255,255,0.08));
+            flex-shrink: 0;
           }
           .annotation-row {
             display: flex;
@@ -4847,10 +4850,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           .tool-btn .tool-icon { display: inline-flex; align-items: center; justify-content: center; }
           .tool-btn .tool-count {
             display: none;
-            font-size: 13px;
-            font-weight: 700;
+            font-size: 12px;
+            font-weight: 600;
             color: #fff;
             line-height: 1;
+            white-space: nowrap;
           }
           .tool-btn[data-has-count="true"] .tool-icon { display: none; }
           .tool-btn[data-has-count="true"] .tool-count { display: inline-flex; }
@@ -4962,10 +4966,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           .fab-btn .fab-icon { display: inline-flex; align-items: center; justify-content: center; }
           .fab-btn .fab-count {
             display: none;
-            font-size: 16px;
-            font-weight: 700;
+            font-size: 15px;
+            font-weight: 600;
             color: #fff;
             line-height: 1;
+            white-space: nowrap;
           }
           .fab-btn[data-has-count="true"] .fab-icon { display: none; }
           .fab-btn[data-has-count="true"] .fab-count { display: inline-flex; }
@@ -4975,7 +4980,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             position: absolute;
             top: calc(100% + 8px);
             width: 180px;
-            padding: 8px;
             border-radius: 12px;
             background: rgba(30, 30, 30, 0.82);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -4988,24 +4992,39 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             transition: opacity 220ms cubic-bezier(0.34, 1.4, 0.64, 1), transform 220ms cubic-bezier(0.34, 1.4, 0.64, 1);
             pointer-events: none;
             z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
           }
           .subpanel.is-open {
             opacity: 1;
             transform: translateY(0) scale(1);
             pointer-events: auto;
           }
+          .subpanel-header {
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            flex-shrink: 0;
+          }
           .subpanel-title {
-            font-size: 13px;
-            color: rgba(255,255,255,0.9);
-            padding: 2px 8px 8px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
             font-weight: 600;
           }
+          .subpanel-content {
+            padding: 8px 12px;
+            overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            max-height: 50vh;
+          }
+          .subpanel-content::-webkit-scrollbar { width: 0; height: 0; display: none; }
           .subpanel-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
             width: 100%;
-            padding: 9px 8px;
+            padding: 9px 0;
             border: 0;
             border-radius: 8px;
             background: transparent;
@@ -5143,11 +5162,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             to { opacity: 1; transform: translateY(0) scale(1); }
           }
           .debug-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.08); }
-          .debug-panel-title { color: rgba(255,255,255,0.9); font-size: 13px; font-weight: 600; }
+          .debug-panel-title { color: rgba(255,255,255,0.5); font-size: 12px; font-weight: 600; }
           .debug-panel-close { background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; padding: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
           .debug-panel-close:hover { background: rgba(255,255,255,0.1); color: #fff; }
           .debug-panel-close svg { width: 14px; height: 14px; }
-          .debug-panel-content { flex: 1; overflow-y: auto; margin: 0; padding: 10px 12px; font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 11px; line-height: 1.5; color: rgba(255,255,255,0.8); white-space: pre-wrap; word-break: break-all; max-height: 40vh; }
+          .debug-panel-content { flex: 1; overflow-y: auto; margin: 0; padding: 10px 12px; font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 11px; line-height: 1.5; color: rgba(255,255,255,0.8); white-space: pre-wrap; word-break: break-all; max-height: 40vh; scrollbar-width: none; -ms-overflow-style: none; }
+          .debug-panel-content::-webkit-scrollbar { width: 0; height: 0; display: none; }
           .debug-panel-footer { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid rgba(255,255,255,0.08); }
           .debug-panel-btn { flex: 1; padding: 6px 12px; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; background: rgba(255,255,255,0.06); color: #fff; font-size: 12px; cursor: pointer; }
           .debug-panel-btn:hover { background: rgba(255,255,255,0.12); }
@@ -5191,36 +5211,44 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         </div>
         <!-- 数据模拟子面板 -->
         <div class="subpanel" data-subpanel="datamock">
-          <div class="subpanel-title">数据模拟</div>
-          <button class="subpanel-item" data-fault="load">
-            <span>加载失败</span>
-            <span class="switch" data-fault-switch="load"></span>
-          </button>
-          <button class="subpanel-item" data-fault="save">
-            <span>新增保存失败</span>
-            <span class="switch" data-fault-switch="save"></span>
-          </button>
-          <button class="subpanel-item" data-fault="delete">
-            <span>删除失败</span>
-            <span class="switch" data-fault-switch="delete"></span>
-          </button>
-          <div class="subpanel-sep"></div>
-          <button class="subpanel-item" data-fault="slow">
-            <span>慢加载(约9s)</span>
-            <span class="switch" data-fault-switch="slow"></span>
-          </button>
+          <div class="subpanel-header">
+            <span class="subpanel-title">数据模拟</span>
+          </div>
+          <div class="subpanel-content">
+            <button class="subpanel-item" data-fault="load">
+              <span>加载失败</span>
+              <span class="switch" data-fault-switch="load"></span>
+            </button>
+            <button class="subpanel-item" data-fault="save">
+              <span>新增保存失败</span>
+              <span class="switch" data-fault-switch="save"></span>
+            </button>
+            <button class="subpanel-item" data-fault="delete">
+              <span>删除失败</span>
+              <span class="switch" data-fault-switch="delete"></span>
+            </button>
+            <div class="subpanel-sep"></div>
+            <button class="subpanel-item" data-fault="slow">
+              <span>慢加载(约9s)</span>
+              <span class="switch" data-fault-switch="slow"></span>
+            </button>
+          </div>
         </div>
         <!-- 更多菜单 -->
         <div class="subpanel" data-subpanel="more">
-          <div class="subpanel-title">更多</div>
-          <button class="subpanel-item" data-nav="scene-manager">
-            <span>场景管理</span>
-            <span class="subpanel-arrow">${ICONS.chevronRight}</span>
-          </button>
-          <button class="subpanel-item" data-nav="component-preview">
-            <span>组件库</span>
-            <span class="subpanel-arrow">${ICONS.chevronRight}</span>
-          </button>
+          <div class="subpanel-header">
+            <span class="subpanel-title">更多</span>
+          </div>
+          <div class="subpanel-content">
+            <button class="subpanel-item" data-nav="scene-manager">
+              <span>场景管理</span>
+              <span class="subpanel-arrow">${ICONS.chevronRight}</span>
+            </button>
+            <button class="subpanel-item" data-nav="component-preview">
+              <span>组件库</span>
+              <span class="subpanel-arrow">${ICONS.chevronRight}</span>
+            </button>
+          </div>
         </div>
         <!-- 子组件（走查模式相关） -->
         <wego-wt-highlight hidden></wego-wt-highlight>
@@ -5349,9 +5377,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           e.stopPropagation();
           const text = debugLog.format();
           if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(text).then(() => {
-              this._showToast('日志已复制到剪贴板');
-            }).catch(() => this._fallbackCopy(text));
+            navigator.clipboard.writeText(text).catch(() => this._fallbackCopy(text));
           } else {
             this._fallbackCopy(text);
           }
@@ -5362,7 +5388,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           e.stopPropagation();
           debugLog.clear();
           this._refreshDebugLog();
-          this._showToast('日志已清空');
         });
       }
       // 点击外部关闭子面板、配置列表和调试日志面板
@@ -6143,7 +6168,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
         this._components.overviewPanel.refresh(state.changes, state.currentRoute, state.annotations);
       }
-      this._showToast('已删除批注');
     }
 
     // ── 调试日志面板 ──────────────────────────────────────
@@ -6217,10 +6241,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         ta.select();
         document.execCommand('copy');
         document.body.removeChild(ta);
-        this._showToast('日志已复制到剪贴板');
-      } catch (e) {
-        this._showToast('复制失败，请手动选择文本复制');
-      }
+      } catch (e) { /* 静默失败 */ }
     }
 
     _bindTouchEvents() {
@@ -6392,7 +6413,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       el = queryTargetEl(selector);
       this._components.overviewPanel.close();
       if (!el) {
-        this._showToast('元素在当前页面不存在，无法定位');
         return;
       }
       const hasStyleChange = state.changes.some(c => c.selector === selector);
@@ -6587,7 +6607,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     _resetChanges() {
       debugLog.add('RESET', `_resetChanges 开始: changes=${state.changes.length} annotations=${state.annotations.length}`);
       if (state.changes.length === 0 && state.annotations.length === 0) {
-        this._showToast('当前没有修改');
         return;
       }
       // 先关气泡（把输入框内容写回逻辑走完），再统一还原与清空
@@ -6601,7 +6620,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._syncAnnotationMarkers();
       this._flushSave();
       this._updateChangeCount();
-      this._showToast('已重置所有修改');
       debugLog.add('RESET', `_resetChanges 完成: changes=${state.changes.length} annotations=${state.annotations.length}`);
       if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
         this._components.overviewPanel.refresh(state.changes, state.currentRoute, state.annotations);
