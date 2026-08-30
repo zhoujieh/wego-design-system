@@ -1995,11 +1995,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             align-items: center;
             justify-content: space-between;
             gap: 8px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color, rgba(255,255,255,0.08));
           }
           .header-title {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
-            color: var(--text-default, #1a1a1a);
+            color: var(--text-default, #fff);
           }
           .header-count {
             font-size: 12px;
@@ -2159,8 +2161,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             justify-content: flex-end;
             align-items: center;
             gap: 8px;
-            padding-top: 4px;
-            border-top: 1px solid rgba(255,255,255,0.06);
+            padding-top: 10px;
+            border-top: 1px solid var(--border-color, rgba(255,255,255,0.08));
           }
           .annotation-row {
             display: flex;
@@ -2208,6 +2210,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             <div>
               <span class="header-title">配置列表</span>
               <span class="header-count">${totalCount} 项</span>
+            </div>
+            <div class="header-actions">
+              <button class="close-btn" type="button" data-action="close" title="关闭">${ICONS.close}</button>
             </div>
           </div>
           ${groupList.length === 0 ? `
@@ -2293,6 +2298,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           bus.emit('delete-annotation', { id });
         });
       });
+      // 关闭面板
+      const closeBtn = this._shadow.querySelector('[data-action="close"]');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+          this.close();
+        });
+      }
       // 重置
       const resetBtn = this._shadow.querySelector('[data-action="reset"]');
       if (resetBtn) {
@@ -4743,7 +4755,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             align-items: center;
             justify-content: center;
             height: 48px;
-            padding: 4px;
+            padding: 3px;
             border-radius: 999px;
             background: rgba(30, 30, 30, 0.76);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -4832,6 +4844,16 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             display: none;
           }
           .tool-btn[data-has-changes="true"] .badge-dot { display: block; }
+          .tool-btn .tool-icon { display: inline-flex; align-items: center; justify-content: center; }
+          .tool-btn .tool-count {
+            display: none;
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1;
+          }
+          .tool-btn[data-has-count="true"] .tool-icon { display: none; }
+          .tool-btn[data-has-count="true"] .tool-count { display: inline-flex; }
           .tool-btn .count-bubble {
             position: absolute;
             top: 2px;
@@ -4937,25 +4959,16 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             display: none;
           }
           .fab-btn[data-has-indicator="true"] .fab-dot { display: block; }
-          .fab-btn .count-bubble {
-            position: absolute;
-            top: 2px;
-            right: 2px;
-            min-width: 18px;
-            height: 18px;
-            padding: 0 5px;
-            border-radius: 9px;
-            background: #ff6b35;
-            color: #fff;
-            font-size: 11px;
+          .fab-btn .fab-icon { display: inline-flex; align-items: center; justify-content: center; }
+          .fab-btn .fab-count {
+            display: none;
+            font-size: 16px;
             font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            color: #fff;
             line-height: 1;
-            border: 2px solid rgba(30,30,30,0.85);
-            pointer-events: none;
           }
+          .fab-btn[data-has-count="true"] .fab-icon { display: none; }
+          .fab-btn[data-has-count="true"] .fab-count { display: inline-flex; }
 
           /* 子面板 */
           .subpanel {
@@ -4982,9 +4995,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             pointer-events: auto;
           }
           .subpanel-title {
-            font-size: 12px;
-            color: rgba(255,255,255,0.5);
-            padding: 4px 8px 8px;
+            font-size: 13px;
+            color: rgba(255,255,255,0.9);
+            padding: 2px 8px 8px;
             font-weight: 600;
           }
           .subpanel-item {
@@ -5143,10 +5156,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         <div class="toolbar-container is-collapsed" data-toolbar>
           <div class="toolbar-clip">
             <!-- 收起态：圆形按钮 -->
-            <button class="fab-btn" data-fab-btn data-has-indicator="false">
-              ${ICONS.pointer}
+            <button class="fab-btn" data-fab-btn data-has-indicator="false" data-has-count="false">
+              <span class="fab-icon">${ICONS.pointer}</span>
+              <span class="fab-count" data-fab-count hidden>0</span>
               <span class="fab-dot"></span>
-              <span class="count-bubble" data-fab-count hidden>0</span>
             </button>
             <!-- 展开态：工具条内容 -->
             <div class="toolbar-main" data-toolbar-main style="display:none;">
@@ -5162,9 +5175,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
                 <span class="badge-dot"></span>
               </button>
               <div class="divider"></div>
-              <button class="count-btn" data-tool="overview" title="配置列表">
-                <span class="count-icon">${ICONS.list}</span>
-                <span class="count-bubble" data-overview-count hidden>0</span>
+              <button class="tool-btn" data-tool="overview" data-has-count="false" title="配置列表">
+                <span class="tool-icon" data-overview-icon>${ICONS.list}</span>
+                <span class="tool-count" data-overview-count hidden>0</span>
               </button>
               <div class="divider"></div>
               <button class="tool-btn" data-action="debug-log" title="调试日志">
@@ -5468,7 +5481,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         }
         if (this._drag.moved) {
           ev.preventDefault();
-          const x = Math.max(0, Math.min(this._drag.origX + dx, window.innerWidth - this.offsetWidth));
+          const x = Math.max(16, Math.min(this._drag.origX + dx, window.innerWidth - this.offsetWidth - 16));
           const y = Math.max(0, Math.min(this._drag.origY + dy, window.innerHeight - this.offsetHeight));
           this.style.left = x + 'px';
           this.style.top = y + 'px';
@@ -5487,9 +5500,23 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         if (this._drag.moved) {
           ev.preventDefault();
           ev.stopPropagation();
-          this._savePosition();
-          this.style.transition = '';
-          this.getBoundingClientRect();
+          // 自动吸附边缘：根据中心位置判断吸附到左/右边缘，带平滑过渡
+          const rect = this.getBoundingClientRect();
+          const centerX = rect.left + rect.width / 2;
+          const snapX = centerX < window.innerWidth / 2
+            ? 16
+            : window.innerWidth - this.offsetWidth - 16;
+          this.style.transition = 'left 250ms cubic-bezier(0.22, 0.9, 0.32, 1)';
+          this.style.left = snapX + 'px';
+          // 过渡结束后保存位置
+          const saveAfterSnap = () => {
+            this._savePosition();
+            this.style.transition = '';
+            this.removeEventListener('transitionend', saveAfterSnap);
+          };
+          this.addEventListener('transitionend', saveAfterSnap);
+          // 兜底：250ms 后如果 transitionend 没触发（如属性未变化），也保存
+          setTimeout(() => { if (this.style.transition) saveAfterSnap(); }, 300);
         } else {
           this.style.transition = '';
         }
@@ -5516,7 +5543,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         if (raw) {
           const p = JSON.parse(raw);
           if (typeof p.x === 'number' && typeof p.y === 'number') {
-            const x = Math.max(0, Math.min(p.x, window.innerWidth - 48));
+            const x = Math.max(16, Math.min(p.x, window.innerWidth - 48 - 16));
             const y = Math.max(0, Math.min(p.y, window.innerHeight - 48));
             this.style.left = x + 'px';
             this.style.top = y + 'px';
@@ -5526,8 +5553,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           }
         }
       } catch (e) {}
-      // 默认位置：左下角
-      this.style.left = '12px';
+      // 默认位置：左下角（左右边距 16px，与发布入口一致）
+      this.style.left = '16px';
       this.style.bottom = '96px';
       this.style.top = 'auto';
       this.style.right = 'auto';
@@ -5825,6 +5852,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
     _bindAnnotationEvents() {
       document.addEventListener('pointerdown', this._onAnnotationPointerDown, true);
+      document.addEventListener('pointermove', this._onAnnotationPointerMove, true);
+      document.addEventListener('pointerup', this._onAnnotationPointerUp, true);
       document.addEventListener('click', this._onAnnotationClickCapture, true);
       window.addEventListener('scroll', this._onAnnotationScroll, true);
       window.addEventListener('resize', this._onAnnotationScroll);
@@ -5832,25 +5861,47 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
     _unbindAnnotationEvents() {
       document.removeEventListener('pointerdown', this._onAnnotationPointerDown, true);
+      document.removeEventListener('pointermove', this._onAnnotationPointerMove, true);
+      document.removeEventListener('pointerup', this._onAnnotationPointerUp, true);
       document.removeEventListener('click', this._onAnnotationClickCapture, true);
       window.removeEventListener('scroll', this._onAnnotationScroll, true);
       window.removeEventListener('resize', this._onAnnotationScroll);
     }
 
-    // 批注模式：点页面元素即创建/打开批注气泡并聚焦输入框
-    // （Web 端 pointerdown 属于用户手势，其中的 focus() 可直接生效）
+    // 批注模式：pointerdown 记录起始位置，不立即触发；区分点击与滑动（与走查模式一致）
     _onAnnotationPointerDown = (e) => {
       if (e.button !== undefined && e.button !== 0) return;
       if (isWalkthroughElement(e.target)) return;
+      this._annotationPending = true;
+      this._annotationStartX = e.clientX;
+      this._annotationStartY = e.clientY;
+      this._annotationTarget = e.target;
+    };
+
+    _onAnnotationPointerMove = (e) => {
+      if (!this._annotationPending) return;
+      const dx = e.clientX - this._annotationStartX;
+      const dy = e.clientY - this._annotationStartY;
+      // 移动超过 10px 判定为滑动，取消待触发的批注，让页面正常滚动
+      if (Math.hypot(dx, dy) > 10) {
+        this._annotationPending = false;
+        this._annotationTarget = null;
+      }
+    };
+
+    _onAnnotationPointerUp = (e) => {
+      if (!this._annotationPending) return;
+      this._annotationPending = false;
+      const el = this._annotationTarget;
+      this._annotationTarget = null;
+      if (!el || isWalkthroughElement(el)) return;
       e.stopPropagation();
-      // 阻止页面元素自身的默认行为（按钮激活、页面输入框抢焦点等）
       if (e.cancelable) e.preventDefault();
       this._clearHover();
-      const el = e.target;
       if (el === document.body || el === document.documentElement) {
         // 点页面空白处：关闭并保存当前气泡
         this._closeAnnotationBubble();
-      } else if (el) {
+      } else {
         this._openAnnotationForElement(el);
       }
     };
@@ -6700,15 +6751,18 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 共享同步的多个元素变更合并为一条计数（与配置列表合并展示口径一致）
       const changeGroupCount = new Set(state.changes.map(c => c.sharedKey || c.selector)).size;
       const count = changeGroupCount + state.annotations.filter(a => a.text && a.text.trim()).length;
-      // 配置列表按钮数字气泡（计数为 0 时也同步清空文本，避免隐藏后残留旧数字）
+      // 配置列表按钮数字（有数据时直接显示数字，替换图标；无数据时显示图标）
       if (this._components.overviewCount) {
         this._components.overviewCount.textContent = count > 99 ? '99+' : count;
         this._components.overviewCount.hidden = count === 0;
+        const ovBtn = this._shadow.querySelector('[data-tool="overview"]');
+        if (ovBtn) ovBtn.setAttribute('data-has-count', String(count > 0));
       }
-      // 收起态 FAB 数字气泡
+      // 收起态 FAB 数字（有数据时直接显示数字，替换图标；无数据时显示图标）
       if (this._components.fabCount) {
         this._components.fabCount.textContent = count > 99 ? '99+' : count;
         this._components.fabCount.hidden = count === 0;
+        if (this._components.fabBtn) this._components.fabBtn.setAttribute('data-has-count', String(count > 0));
       }
       // 收起态红点
       const hasIndicator = count > 0 || this._walkthroughMode || this._annotationMode || this._faultState.load || this._faultState.save || this._faultState['delete'] || this._faultState.slow;
