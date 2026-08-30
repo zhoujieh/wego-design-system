@@ -608,6 +608,29 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     return String(v == null ? '' : v).trim().replace(/\s*,\s*/g, ',').replace(/\s+/g, ' ').toLowerCase();
   }
 
+  /** 把一组变更中的宽度/高度记录合并为一行「尺寸」，其余属性原样保留。
+   *  宽高都改：显示 "尺寸 40px × 40px → 44px × 44px"；
+   *  只改宽/只改高：显示 "尺寸·宽 40px → 48px" / "尺寸·高 40px → 48px"。 */
+  function mergeSizeRows(changes) {
+    const w = changes.filter(c => c.property === 'width');
+    const h = changes.filter(c => c.property === 'height');
+    if (!w.length && !h.length) return changes;
+    const rest = changes.filter(c => c.property !== 'width' && c.property !== 'height');
+    const wc = w[0], hc = h[0];
+    const o = (c, s) => (c ? (s === 'old' ? c.oldValue : c.newValue) : null);
+    const wOld = o(wc, 'old'), wNew = o(wc, 'new'), hOld = o(hc, 'old'), hNew = o(hc, 'new');
+    if (wc && hc) {
+      return [{ property: '尺寸', oldValue: `${wOld} × ${hOld}`, newValue: `${wNew} × ${hNew}` }, ...rest];
+    }
+    if (wc) return [{ property: '尺寸·宽', oldValue: wOld, newValue: wNew }, ...rest];
+    return [{ property: '尺寸·高', oldValue: hOld, newValue: hNew }, ...rest];
+  }
+
+  /** 属性名展示文案（尺寸组显示为中文"尺寸"） */
+  function propertyLabel(p) {
+    return p === 'size' ? '尺寸' : p;
+  }
+
   /** 判断元素是否由自身（内联样式或命中的样式规则）声明了该属性；
    *  继承自祖先、浏览器默认值、@import 不可读样式表等一律视为未声明 → 不参与同步 */
   function declaresProperty(el, property) {
@@ -1762,13 +1785,19 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           }
         }
       });
-      // 共享组：全部记录一致时合并为一行展示；不一致（后续单元素再编辑）则逐条展示
+      // 共享组：全部记录一致时合并为一行展示；不一致（后续单元素再编辑）则逐条展示。
+      // 尺寸组（sharedKey 以 ::size 结尾）：宽度/高度合并为一行「尺寸」，共享数按去重元素数计
       const groupList = Object.values(groups).map(g => {
         if (g.shared && g.changes.length) {
           const first = g.changes[0];
-          const allSame = g.changes.every(c => c.property === first.property && c.newValue === first.newValue);
-          g.sharedCount = g.changes.length;
-          g.sharedRows = allSame ? [first] : g.changes;
+          const isSizeGroup = !!g.sharedKey && g.sharedKey.endsWith('::size');
+          g.sharedCount = new Set(g.changes.map(c => c.selector)).size;
+          if (isSizeGroup) {
+            g.sharedRows = mergeSizeRows(g.changes);
+          } else {
+            const allSame = g.changes.every(c => c.property === first.property && c.newValue === first.newValue);
+            g.sharedRows = allSame ? [first] : g.changes;
+          }
         }
         return g;
       });
@@ -2051,7 +2080,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
                 <div class="item">
                   <div class="item-top">
                     <span class="item-selector" data-selector="${escapeHtml(g.selector)}" data-gi="${gi}">${g.shared
-                      ? '共享样式 · ' + escapeHtml((g.sharedRows && g.sharedRows[0] ? g.sharedRows[0].property : (g.changes[0] ? g.changes[0].property : '')))
+                      ? '共享样式 · ' + escapeHtml(propertyLabel(g.sharedRows && g.sharedRows[0] ? g.sharedRows[0].property : (g.changes[0] ? g.changes[0].property : '')))
                       : escapeHtml(g.elementTag || '') + (g.elementText ? ' · ' + escapeHtml(g.elementText) : '')}</span>
                     ${g.shared ? `<span class="shared-badge">共享 ${g.sharedCount} 个元素</span>` : ''}
                   </div>
@@ -2064,7 +2093,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
                   ` : ''}
                   ${(g.shared ? (g.sharedRows || g.changes) : g.changes).map((c) => `
                     <div class="change-row">
-                      <span class="change-prop">${escapeHtml(c.property)}${c.target ? ' · ' + escapeHtml(c.target) : ''}</span>
+                      <span class="change-prop">${escapeHtml(propertyLabel(c.property))}${c.target ? ' · ' + escapeHtml(c.target) : ''}</span>
                       <span class="change-old" title="${escapeHtml(c.oldValue)}">${escapeHtml(c.oldValue || '-')}</span>
                       <span class="change-arrow">→</span>
                       <span class="change-new" title="${escapeHtml(c.newValue)}">${escapeHtml(c.newValue || '-')}</span>
@@ -2214,7 +2243,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         }
       });
       const groupList = Object.values(groups).map(g => {
-        if (g.shared && g.changes.length) g.sharedCount = g.changes.length;
+        if (g.shared && g.changes.length) g.sharedCount = new Set(g.changes.map(c => c.selector)).size;
         return g;
       });
       const lines = [
@@ -2249,7 +2278,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         lines2.push(`**定位:** \`${g.selector}\``);
         if (anchor) lines2.push(`**业务锚点:** ${anchor}`);
         if (g.shared) {
-          lines2.push(`**共享样式同步:** 该样式为公共样式，本次已自动同步应用到 ${g.sharedCount || g.changes.length} 个元素（共用同一属性值，建议在源码公共类/Token 上统一修改）`);
+          const isSizeGroup = !!g.sharedKey && g.sharedKey.endsWith('::size');
+          lines2.push(`**共享样式同步:** 该样式为公共样式，本次已自动同步应用到 ${g.sharedCount || g.changes.length} 个元素${isSizeGroup ? '（该尺寸为公共样式，建议在源码公共类/Token 上统一修改）' : '（共用同一属性值，建议在源码公共类/Token 上统一修改）'}`);
         }
         if (addClassChanges.length) {
           const clsNote = addClassChanges.map(c => c.note).filter(Boolean)[0] || '';
@@ -3590,7 +3620,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (!synced.length) return;
       const componentClass = pickComponentClass(targetEl);
       if (!componentClass) return;
-      const sharedKey = componentClass + '::' + result.property;
+      // 尺寸（宽度/高度）归入同一「size」共享组：配置列表合并为一条「尺寸」记录
+      const sharedKey = componentClass + '::' + ((result.property === 'width' || result.property === 'height') ? 'size' : result.property);
       const sharedCount = synced.length + 1;
       synced.forEach(el => {
         let applied = false;
