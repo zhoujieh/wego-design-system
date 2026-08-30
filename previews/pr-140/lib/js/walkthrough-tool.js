@@ -600,8 +600,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
    *  同时挡住页级基础 Token 的静默全局改写。待用户侧增加"是否自动同步"开关后可再行放开。 */
   const MAX_SHARED_STYLE_COUNT = 60;
 
-  /** 不参与自动同步的属性（结构性/元素专属，跨元素同步极易误改，如布局定位与尺寸） */
-  const SHARED_SYNC_EXCLUDED_PROPS = new Set(['display', 'position', 'z-index', 'width', 'height']);
+  /** 不参与自动同步的属性（结构性/元素专属，跨元素同步极易误改，如定位与层叠；尺寸在同类组件下放开同步） */
+  const SHARED_SYNC_EXCLUDED_PROPS = new Set(['display', 'position', 'z-index']);
 
   /** CSS 值归一化（与 _cssValueEqual 的 norm 对齐），用于公共样式值匹配 */
   function normalizeCssValue(v) {
@@ -638,31 +638,64 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     return false;
   }
 
-  /** 找出与目标元素共用同一属性值的其它元素（自动同步目标集）。
+  /** 提取目标元素的「组件类」：作为「同一条样式控制」该元素的标识。
+   *  取稳定类中在页面可见元素出现 ≥2 次、类名字符串最长（BEM 块元素/场景组件类通常最具体）的那个；
+   *  没有可共享的组件类则返回 ''（表示无同类可同步）。
+   *  例：转发按钮 .btn.btn--strong.btn--md.album-feed__primary → 取 album-feed__primary；
+   *      正文 .album-feed__text → 取 album-feed__text（昵称 .album-feed__publisher 不含此 class，不同步）。 */
+  function pickComponentClass(el) {
+    if (!el || el.nodeType !== 1) return '';
+    const classes = (el.className && typeof el.className === 'string')
+      ? el.className.trim().split(/\s+/).filter(isStableSelectorClass)
+      : [];
+    let best = '';
+    for (const c of classes) {
+      if (!c) continue;
+      let n = 0;
+      try {
+        const list = document.querySelectorAll('.' + CSS.escape(c));
+        for (let i = 0; i < list.length; i++) {
+          const it = list[i];
+          if (it.isConnected && it.getClientRects && it.getClientRects().length) n++;
+        }
+      } catch (e) { continue; }
+      if (n < 2) continue;                    // 单实例类不算共享
+      if (c.length > best.length) best = c;   // 越具体（越长）优先，避免通用基类(btn/avatar)跨组件误连
+    }
+    return best;
+  }
+
+  /** 找出与目标元素「被同一条样式（同一组件类）控制」的其它元素（自动同步目标集）。
    *  仅当该属性确为「公共样式」时返回命中列表，否则返回 []（不自动同步，只改当前元素）。
    *  防误判规则：
-   *   - 结构/布局类属性（display/position/z-index/width/height）不同步；
+   *   - 结构/层叠类属性（display/position/z-index）不同步；尺寸在同类组件下放开；
    *   - 目标自身未声明该属性（继承/默认值）→ 属局部覆盖，不同步；
-   *   - 命中元素未声明该属性（继承/默认值）→ 不纳入；
+   *   - 只认「同类组件」：与目标共享同一组件类（如所有头像/所有转发按钮/所有正文标题），
+   *     值碰巧相同的不同元素（如正文与昵称字号相同）不会被误判为同类；
+   *   - 同类内再按「该属性计算值一致」过滤，避免同组件不同尺寸/颜色变体被误改；
    *   - 仅扫描当前可见场景（未布局/隐藏 tab/未挂载元素跳过）；
-   *   - 命中数（含当前）超过上限 → 视为页面级默认，不同步。 */
+   *   - 命中数（含当前）超过上限 → 视为页面级基础，不同步。 */
   function findSharedStyleElements(targetEl, property, oldValue) {
     if (!targetEl || !property || !oldValue || SHARED_SYNC_EXCLUDED_PROPS.has(property)) return [];
     if (!declaresProperty(targetEl, property)) return [];
+    const componentClass = pickComponentClass(targetEl);
+    if (!componentClass) return [];
     const targetNorm = normalizeCssValue(oldValue);
-    const valueHits = [];
-    const all = document.querySelectorAll('*');
-    for (let i = 0; i < all.length; i++) {
-      const el = all[i];
-      if (el === targetEl || isWalkthroughElement(el)) continue;
-      if (!el.isConnected || !el.getClientRects || !el.getClientRects().length) continue;
-      let val = '';
-      try { val = getComputedStyle(el).getPropertyValue(property); } catch (e) { continue; }
-      if (normalizeCssValue(val) === targetNorm) valueHits.push(el);
-    }
-    if (valueHits.length === 0) return [];
-    if (valueHits.length + 1 > MAX_SHARED_STYLE_COUNT) return [];
-    return valueHits.filter(el => declaresProperty(el, property));
+    const candidates = [];
+    try {
+      const list = document.querySelectorAll('.' + CSS.escape(componentClass));
+      for (let i = 0; i < list.length; i++) {
+        const el = list[i];
+        if (el === targetEl || isWalkthroughElement(el)) continue;
+        if (!el.isConnected || !el.getClientRects || !el.getClientRects().length) continue;
+        let val = '';
+        try { val = getComputedStyle(el).getPropertyValue(property); } catch (e) { continue; }
+        if (normalizeCssValue(val) === targetNorm) candidates.push(el);
+      }
+    } catch (e) {}
+    if (candidates.length === 0) return [];
+    if (candidates.length + 1 > MAX_SHARED_STYLE_COUNT) return [];
+    return candidates.filter(el => declaresProperty(el, property));
   }
 
   /** 快照元素（或伪元素）的计算样式原始值，用于「改回即无变更」判定 */
@@ -3530,8 +3563,14 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (!targetEl || !result || !result.property) return;
       if (!this._sharedSyncPending) this._sharedSyncPending = [];
       const idx = this._sharedSyncPending.findIndex(p => p.targetEl === targetEl && p.result.property === result.property);
-      const entry = { targetEl, result };
-      if (idx >= 0) this._sharedSyncPending[idx] = entry; else this._sharedSyncPending.push(entry);
+      if (idx >= 0) {
+        // 同一元素同一属性在防抖窗口内连续触发（change+blur/步进等）：保留最早 oldValue（编辑起点），
+        // 只更新最终 newValue，避免 oldValue 被第二次读成"改后值"导致找不到共享同类、同步失效
+        const existing = this._sharedSyncPending[idx];
+        this._sharedSyncPending[idx] = { targetEl, result: { ...existing.result, newValue: result.newValue } };
+      } else {
+        this._sharedSyncPending.push({ targetEl, result });
+      }
       if (this._sharedSyncTimer) clearTimeout(this._sharedSyncTimer);
       this._sharedSyncTimer = setTimeout(() => {
         this._sharedSyncTimer = null;
@@ -3549,7 +3588,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     _applySharedSync(result, targetEl) {
       const synced = findSharedStyleElements(targetEl, result.property, result.oldValue);
       if (!synced.length) return;
-      const sharedKey = result.property + '::' + normalizeCssValue(result.oldValue);
+      const componentClass = pickComponentClass(targetEl);
+      if (!componentClass) return;
+      const sharedKey = componentClass + '::' + result.property;
       const sharedCount = synced.length + 1;
       synced.forEach(el => {
         let applied = false;
