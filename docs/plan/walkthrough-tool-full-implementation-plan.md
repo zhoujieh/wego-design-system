@@ -1,10 +1,12 @@
 # 走查工具（Walkthrough Tool）完整实现计划
 
-> 版本：v2.1（全功能版，基于 Liaison v1.0.6 源码研究，含手机端交互适配）  
+> 版本：v2.2（全功能版，MVP 已完成，进入功能扩展迭代）  
 > 创建日期：2026-08-26  
+> 最后更新：2026-08-30  
 > 负责人：用户体验设计中心  
-> 状态：规划中  
+> 状态：✅ MVP 已完成，功能扩展迭代中（共享同步/顺序移动/自动布局优化已上线，Grid 网格布局待实现）  
 > 参考源码：`docs/plan/research/liaison-extension-source/`（仅研究参考，不直接拷贝）
+> 关联 PR：#140（走查工具 UX 优化 + 共享样式同步 + 顺序移动 + 自动布局优化）
 
 ---
 
@@ -309,13 +311,19 @@ wego-app 是 375px 手机原型，Liaison 的桌面端交互（右侧面板、�
 
 | 属性 | 控件 | 说明 |
 |------|------|------|
-| display | 按钮组 | block / flex / grid / inline-block / none |
-| flex-direction | 按钮组 | row / column / row-reverse / column-reverse |
-| justify-content | 对齐网格按钮 | flex-start / center / flex-end / space-between / space-around |
-| align-items | 对齐网格按钮 | flex-start / center / flex-end / stretch / baseline |
-| gap | 数值输入 | px |
-| flex-wrap | 开关 | wrap / nowrap |
-| 布局顺序 | 上下移动按钮 | 调整 flex 子元素顺序（对齐 Liaison 的「布局顺序已调整」） |
+| 布局方向 | 三档按钮组 | 纵向（flex column）/ 横向（flex row）/ 网格（grid） |
+| 网格列数 | 快速预设 1/2/3/4 + 手动输入 | 仅网格模式；`repeat(N, 1fr)`，九宫格用 3 |
+| 网格列宽类型 | 分段按钮 | 仅网格模式；Stretch（等宽 1fr，默认）/ Fixed（固定 px）/ Auto（内容自适应） |
+| 自定义列宽 | 文本输入 | 仅网格模式；直接写 CSS 值如 `1fr 2fr`、`200px 1fr`，留空用列数预设 |
+| 对齐方式 | 3×3 矩阵点 | flex 模式=主轴/交叉轴对齐（justify-content + align-items）；grid 模式=格子内内容对齐（justify-items + align-items） |
+| 间距 gap | 数值输入 | px；flex 和 grid 通用 |
+| 内边距 padding | 4 项数值输入 | 左/上/右/下，px |
+| 外边距 margin | 4 项数值输入 | 左/上/右/下，px |
+| 宽度 | 数值输入 + 模式 | 固定 / 适应（auto）/ 填充（fill/100%） |
+| 高度 | 数值输入 + 模式 | 固定 / 适应 / 填充 |
+| 布局顺序 | 上下左右移动按钮 | 调整 flex/grid 子元素顺序（order），同类自动同步，不可移动方向置灰 |
+
+> **Grid 网格布局**（2026-08-30 新增需求）：参考 Figma 列网格交互（Count + Type + Gutter），走查场景以快速预设为主（九宫格点「3」），复杂布局保留自定义列宽入口。flex 模式下不显示网格专属控件，通过模式切换动态显示。
 
 ##### 分组 3：字体
 
@@ -749,107 +757,128 @@ wego.walkthrough.data.{routeId}    # 其他场景
 
 ## 五、实施步骤与里程碑
 
-### M1：框架搭建与基础架构（1 个工作单元）
+> 进度更新（2026-08-30）：MVP 范围（M1-M4 + M6 + M7 + M10）已全部完成；功能扩展期已完成共享样式同步、顺序移动、尺寸模式、自动布局优化、设计系统 Token。剩余全功能版功能见各里程碑 `[ ]` 项。
 
-- [ ] 创建 `walkthrough-tool.js` / `walkthrough-tool.css` 权威源文件
-- [ ] 实现 `wego-walkthrough` 根元素 + Shadow DOM 基础
-- [ ] 实现悬浮按钮（wego-wt-fab）
-- [ ] 实现底部工具条（wego-wt-bottom-bar）：走查模式、配置列表、测量、网格、更多按钮，支持横向滚动
-- [ ] 实现走查模式顶部横幅（wego-wt-banner）
-- [ ] 实现 Toast 提示组件（wego-wt-toast）
-- [ ] 实现 `ToolRegistry` 扩展注册中心
-- [ ] 在 `index.html` 引入文件
-- [ ] 验证：悬浮按钮正常显示，点击展开底部工具条，工具条按钮可点击，横幅正常显示
+### M1：框架搭建与基础架构 ✅ 已完成
 
-### M2：元素选中与高亮（1.5 个工作单元）
+- [x] 创建 `walkthrough-tool.js` / `walkthrough-tool.css` 权威源文件
+- [x] 实现 `wego-walkthrough` 根元素 + Shadow DOM 基础
+- [x] 实现悬浮按钮（wego-wt-fab）
+- [x] 实现底部工具条（走查模式、配置列表、批注模式、数据模拟、更多按钮）
+- [x] 实现 Toast 提示组件（wego-wt-toast）
+- [x] 在 `index.html` 引入文件
+- [x] 验证：悬浮按钮正常显示，点击展开底部工具条，工具条按钮可点击
 
-- [ ] 实现走查模式开关（事件拦截、触摸与滑动区分、页面横幅提示）
-- [ ] 实现 `wego-wt-overlay` 覆盖层
-- [ ] 实现触摸选中（实线边框 + 元素信息气泡，气泡位置自动适配）
-- [ ] 实现元素信息气泡（标签名+尺寸，pointer-events: none）
+### M2：元素选中与高亮 ✅ 核心完成
+
+- [x] 实现走查模式开关（事件拦截、触摸与滑动区分）
+- [x] 实现 `wego-wt-overlay` 覆盖层
+- [x] 实现触摸选中（实线边框 + 元素信息气泡，气泡位置自动适配）
+- [x] 实现元素信息气泡（标签名+尺寸，pointer-events: none）
+- [x] 实现 CSS 选择器生成（id / data-* / nth-child 路径链 + 唯一性验证）
 - [ ] 实现长按拖拽移动（500ms 触发，半透明+阴影，坐标偏移气泡，网格吸附）
 - [ ] 实现文本内联编辑（双击/长按，contenteditable，编辑时隐藏选中边框）
-- [ ] 实现 CSS 选择器生成（id / data-* / nth-child 路径链 + 唯一性验证）
-- [ ] 验证：在任意场景能正常触摸选中元素、长按拖拽、编辑文本、生成稳定选择器，滑动页面不误选中
+- [x] 验证：在任意场景能正常触摸选中元素、生成稳定选择器，滑动页面不误选中
 
-### M3：样式编辑面板核心（2 个工作单元）
+### M3：样式编辑面板核心 ✅ 已完成（6 分组，定位分组暂屏蔽）
 
-- [ ] 实现 `wego-wt-style-panel` 底部抽屉面板（滑入/收起、高度拖拽 40%-85%、下滑关闭、半透明遮罩）
-- [ ] 实现面板结构：拖拽条+关闭、元素信息行（标签名+选择器+共享元素开关）、属性分组 Tab 栏（横向滚动 8 个 Tab）、属性内容区、底部操作栏
-- [ ] 实现「定位」分组（position、top/right/bottom/left、z-index、width/height 数值输入+步进、宽高比锁定）
-- [ ] 实现「自动布局」分组（display、flex-direction、justify-content、align-items、gap、flex-wrap、布局顺序）
-- [ ] 实现「字体」分组（font-family 搜索菜单、font-weight、font-size、line-height、letter-spacing、text-align、text-transform、text-decoration）
-- [ ] 实现「外观」分组（opacity、visibility、overflow、宽度模式、高度模式）
-- [ ] 实现「圆角」分组（wego-wt-corners，联动/四角独立切换）
-- [ ] 实现样式读取（getComputedStyle）和实时应用（element.style）
-- [ ] 实现变更记录（每次修改记录到变更列表，共享元素标记）
-- [ ] 实现撤销/重做栈（wego-wt 会话级）
-- [ ] 验证：选中元素后底部抽屉自动滑出，属性修改实时生效，变更被记录，Tab 切换正常
+- [x] 实现 `wego-wt-style-panel` 浮动面板（位置智能适配，纵向 section）
+- [x] 实现面板结构：元素信息行（标签名+选择器+尺寸）、属性分组 section、关闭按钮
+- [x] 实现「自动布局」分组（布局方向纵向/横向、对齐矩阵、gap、padding、margin、width/height + 尺寸模式）
+- [x] 实现「字体」分组（font-size、font-weight、color、line-height、text-align）
+- [x] 实现「外观」分组（opacity、border-radius）
+- [x] 实现「圆角」联动/四角独立切换
+- [x] 实现样式读取（getComputedStyle）和实时应用（element.style）
+- [x] 实现变更记录（每次修改记录到变更列表，共享元素标记）
+- [x] 实现尺寸模式（固定/适应/填充，flex 多态尺寸兼容）
+- [x] 实现顺序移动（上下左右移动子元素，同类自动同步，边界置灰）
+- [ ] 实现「定位」分组（position、top/right/bottom/left、z-index）— 暂屏蔽，体验差待补全
+- [ ] 实现撤销/重做栈
+- [x] 验证：选中元素后面板自动弹出，属性修改实时生效，变更被记录
 
-### M4：颜色、填充、描边、投影（1.5 个工作单元）
+### M4：颜色、填充、描边、投影 ✅ 单层已完成
 
-- [ ] 实现 `wego-wt-color-picker` 颜色选择器（Hex 输入、颜色面板、透明度滑块、屏幕取色 EyeDropper API）
-- [ ] 实现 `wego-wt-gradient-editor` 渐变编辑器（线性/径向、色标增删拖拽、角度、调转位置）
-- [ ] 实现「填充」分组（多层、实色/渐变、添加/删除层）
-- [ ] 实现「描边」分组（多层、内/外/居中描边、颜色、宽度、添加/删除层）
-- [ ] 实现「投影」分组（多层、内/外阴影、x/y/blur/spread/color、添加/删除层）
-- [ ] 验证：多层填充/描边/投影正常工作，渐变编辑正常
+- [x] 实现 `wego-wt-color-picker` 颜色选择器（Hex 输入、颜色面板、透明度滑块、屏幕取色 EyeDropper API）
+- [x] 实现「填充」分组（单层纯色）
+- [x] 实现「描边」分组（单层、内/外/居中描边）
+- [x] 实现「投影」分组（单层、内/外阴影）
+- [ ] 实现 `wego-wt-gradient-editor` 渐变编辑器（线性/径向、色标增删拖拽、角度）
+- [ ] 实现多层填充/描边/投影（添加/删除层）
+- [x] 验证：单层填充/描边/投影正常工作，颜色选择器正常
 
-### M5：共享元素 + 测量 + 网格（1 个工作单元）
+### M5：共享元素 + 测量 + 网格辅助线 ⏳ 部分完成
 
-- [ ] 实现共享元素模式（批量应用到同类元素、命中数量显示）
+- [x] 实现共享样式自动同步（修改公共样式时同类元素自动同步，配置列表合并为共享记录）
 - [ ] 实现 `wego-wt-measure` 测量模式（十字光标、横向/纵向距离、标尺）
 - [ ] 实现 `wego-wt-gridlines` 网格与辅助线（网格显示、拖拽吸附）
-- [ ] 验证：共享元素批量修改生效，测量距离准确，网格显示正常
+- [x] 验证：共享元素批量修改生效
 
-### M6：配置列表面板 + 导出（1.5 个工作单元）
+### M6：配置列表面板 + 导出 ✅ 核心完成
 
-- [ ] 实现 `wego-wt-overview-panel` 配置列表底部抽屉（滑入/收起、高度拖拽 50%-90%、与样式抽屉互斥）
-- [ ] 实现三 Tab（全部 / 配置 / 评论）
-- [ ] 实现配置项展示（按元素分组、属性列表、单条删除、代码视图切换）
-- [ ] 实现复制 Prompt（严格对齐 Liaison 格式 + 剪贴板复制 + toast 成功/失败提示）
+- [x] 实现 `wego-wt-overview-panel` 配置列表浮动面板（全部/配置/评论三 Tab）
+- [x] 实现配置项展示（按元素分组、属性列表、单条删除、点击跳转选中）
+- [x] 实现复制 Prompt（对齐 Liaison 格式 + 剪贴板复制 + toast）
+- [x] 实现重置修改（清空当前场景变更 + toast）
+- [x] 实现代码视图切换
 - [ ] 实现 JSON 导出（文件下载）
-- [ ] 实现 JSON 导入（文件读取 + 合并/替换选择弹窗）
-- [ ] 实现重置修改（清空当前场景变更 + toast 成功提示）
-- [ ] 验证：Prompt 格式正确，导入导出正常，重置正常，与样式抽屉互斥
+- [ ] 实现 JSON 导入（文件读取 + 合并/替换选择）
+- [x] 验证：Prompt 格式正确，重置正常，与样式面板互斥
 
-### M7：批注系统（1 个工作单元）
+### M7：批注系统 ✅ 已完成
 
-- [ ] 实现 `wego-wt-comment-panel` 批注输入面板
-- [ ] 实现 `wego-wt-comment-list` 批注列表（展示、编辑、删除、跳转定位）
-- [ ] 批注纳入配置列表「评论」Tab
-- [ ] 批注纳入 Prompt / JSON 导出
-- [ ] 验证：批注添加、编辑、删除、跳转正常，导出包含批注
+- [x] 实现工具条批注模式按钮（与走查模式互斥）
+- [x] 实现批注模式下点击元素添加批注，气泡直接可编辑
+- [x] 实现批注持久化（localStorage，按场景路由隔离）
+- [x] 实现配置列表合并展示批注（橙色"备注"标签）
+- [x] 实现导出 Prompt 包含批注
+- [x] 实现重置修改同时清除批注
+- [x] 验证：批注添加/编辑/删除/跳转正常，导出包含批注
 
-### M8：失败注入迁移 + 数据持久化（1 个工作单元）
+### M8：失败注入迁移 + 数据持久化 ⏳ 部分完成
 
-- [ ] 将 `app.js` 中 `mountFaultSwitch` 迁移到 `wego-wt-fault-injection`
-- [ ] 失败注入接入「更多」菜单
-- [ ] 保持 `window.WegoApp.faultInjection` API 完全兼容
-- [ ] 实现 localStorage 数据持久化（按场景路由隔离、自动保存/加载）
+- [ ] 将 `app.js` 中 `mountFaultSwitch` 迁移到走查工具（当前共存，未迁移）
+- [x] 保持 `window.WegoApp.faultInjection` API 完全兼容
+- [x] 实现 localStorage 数据持久化（按场景路由隔离、自动保存/加载）
+- [x] 实现悬浮按钮红点指示（有未导出变更时）
 - [ ] 实现导入配置的数据合并
 - [ ] 实现撤销/重做栈（会话级）
-- [ ] 验证：失败注入功能与迁移前一致，刷新页面后数据恢复，API 兼容
+- [x] 验证：失败注入功能正常，刷新页面后数据恢复
 
-### M9：快捷键 + 体验打磨（0.5 个工作单元）
+### M9：快捷键 + 体验打磨 ⏳ 部分完成
 
-- [ ] 实现核心快捷键（Alt+W、L、Tab、Esc、Ctrl+Z、Ctrl+Shift+Z、方向键、M、G）
-- [ ] 空状态提示文案（配置列表空、评论列表空、字体搜索无结果）
-- [ ] 操作成功/失败 toast 提示（统一 wego-wt-toast 组件）
+- [x] 实现 ESC 逐级退出面板（颜色选择器 → 批注气泡 → Token 面板 → 样式面板 → 配置列表 → 走查模式 → 批注模式）
+- [x] 实现全部图标替换为 Phosphor Icons Light
+- [x] 实现自动布局栏视觉优化（方向+顺序同一行、gap 紧凑化、视觉统一）
+- [x] 实现设计系统 Token 选择（字号/颜色等）
+- [x] 实现操作成功/失败 toast 提示（统一 wego-wt-toast 组件）
+- [ ] 实现核心快捷键（Alt+W、L、Tab、Ctrl+Z、Ctrl+Shift+Z、方向键、M、G）
+- [ ] 空状态提示文案优化
 - [ ] 面板高度拖拽跟手优化
-- [ ] 性能优化（高亮层 rAF 节流、事件委托、触摸滑动区分阈值优化）
-- [ ] 验证：快捷键正常，体验流畅，无明显卡顿，375px 宽度下所有面板内容不溢出
+- [ ] 性能优化（高亮层 rAF 节流、事件委托）
+- [x] 验证：ESC 逐级退出正常，体验流畅
 
-### M10：设计系统同步 + 验证 + 预览（0.5 个工作单元）
+### M10：设计系统同步 + 验证 + 预览 ✅ 已完成
 
-- [ ] 权威源同步到 `wego-app/lib/`
-- [ ] 运行 `node scripts/validate-wego-design.mjs --scope=system --strict`
-- [ ] 运行场景合同验证
-- [ ] 启动本地预览服务，多场景验证
-- [ ] 在线预览环境验证
-- [ ] 编写使用说明
+- [x] 权威源同步到 `wego-app/lib/`
+- [x] 运行 `node scripts/validate-wego-design.mjs --scope=system --strict` 守门验证
+- [x] 启动本地预览服务，多场景验证
+- [x] 375px 宽度下所有面板内容不溢出
+- [ ] 编写使用说明（用户决策：暂不需要）
 
-**合计：约 11.5 个工作单元**
+### M11：CSS Grid 网格布局 ⏳ 待实现（2026-08-30 新增）
+
+- [ ] 布局方向新增第三档「网格」（display: grid）
+- [ ] 网格模式专属控件：列数快速预设（1/2/3/4）+ 手动输入
+- [ ] 列宽类型：Stretch（等宽 1fr，默认）/ Fixed（固定 px）/ Auto（内容自适应）
+- [ ] 自定义列宽输入框（直接写 CSS 值如 `1fr 2fr`）
+- [ ] 对齐矩阵在 grid 模式下映射到格子内内容对齐（justify-items + align-items）
+- [ ] gap / padding / margin / 宽高 / 顺序移动在 grid 模式下通用
+- [ ] 共享样式同步支持 grid 属性（grid-template-columns 等）
+- [ ] 配置列表与施工单支持 grid 属性变更记录
+- [ ] 九宫格图片场景优先验证（动态商品流、相册等）
+- [ ] 参考 Figma 列网格交互（Count + Type + Gutter）
+
+**合计：MVP 约 3.5 个工作单元已完成；全功能版剩余约 6-8 个工作单元**
 
 ---
 
