@@ -608,7 +608,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
    *  即使未在 CSS 显式声明（CSS 默认值，如容器 justify-content/align-items 默认、按钮 flex 默认），
    *  同类组件也应一起同步成一致的最终值；仍以「同类 + 计算值一致」双校验兜底防误判。 */
   const LAYOUT_SYNC_EXEMPT_PROPS = new Set([
-    'width', 'height', 'flex',
+    'width', 'height', 'flex', 'order',
     'justify-content', 'align-items', 'align-self', 'align-content',
     'gap', 'row-gap', 'column-gap',
     'flex-direction', 'flex-wrap',
@@ -638,10 +638,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     return [{ property: '尺寸·高', oldValue: hOld, newValue: hNew }, ...rest];
   }
 
-  /** 属性名展示文案（尺寸组显示为中文"尺寸"，flex 表达宽度模式显示为"宽度"） */
+  /** 属性名展示文案（尺寸组显示为中文"尺寸"，flex 表达宽度模式显示为"宽度"，order 表达顺序显示为"顺序"） */
   function propertyLabel(p) {
     if (p === 'size') return '尺寸';
     if (p === 'flex') return '宽度';
+    if (p === 'order') return '顺序';
     return p;
   }
 
@@ -664,6 +665,82 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const pcs = getComputedStyle(parent);
       return pcs.display === 'flex' || pcs.display === 'inline-flex';
     } catch (e) { return false; }
+  }
+
+  /** 容器内参与 flex 布局的直接子元素（跳过 display:none） */
+  function flexItems(parent) {
+    if (!parent) return [];
+    try {
+      return Array.from(parent.children).filter(ch => {
+        const d = getComputedStyle(ch).display;
+        return d !== 'none';
+      });
+    } catch (e) { return []; }
+  }
+
+  /** 元素的 order 计算值（未显式设置时浏览器返回 0） */
+  function computedOrder(el) {
+    try { return Number(getComputedStyle(el).order) || 0; } catch (e) { return 0; }
+  }
+
+  /** 在主轴方向把元素向前/向后移动一位（用 CSS order 表达显示顺序，不改 DOM 结构）。
+   *  dir: 'left'|'right'|'up'|'down'；仅主轴方向有效（row → 左右，column → 上下），
+   *  交叉轴方向无顺序可调返回 null。
+   *  返回 null 表示不可移动（非 flex 子项 / 交叉轴方向 / 已在边界）。
+   *  返回 { el, neighbor, elOrder, elNew, nbOrder, nbNew, idxOld, idxNew }。
+   *  移动规则：相邻两元素 order 相同（都未显式设置，默认 0）时，仅把目标元素设为相对值
+   *  （前移 -1 / 后移 +1），兄弟不动；已显式设置且不同则互换两者。同类元素一起同步时各容器显示一致。
+   *  注意：位置判断一律基于「显示顺序」（order 升序、同 order 按 DOM 顺序），
+   *  因为 order 已表达显示顺序，DOM 顺序可能不再与视觉顺序一致。 */
+  function moveFlexItem(el, dir) {
+    if (!el || el.nodeType !== 1) return null;
+    const parent = el.parentElement;
+    if (!parent) return null;
+    let pcs;
+    try { pcs = getComputedStyle(parent); } catch (e) { return null; }
+    if (!/flex/.test(pcs.display)) return null;
+    const fd = pcs.flexDirection || 'row';
+    const isColumn = fd.indexOf('column') === 0;
+    const reverse = fd.indexOf('reverse') > 0;
+    const onMainAxis = (dir === 'left' || dir === 'right') === !isColumn;
+    if (!onMainAxis) return null;
+    const ordered = flexItems(parent)
+      .map((ch, i) => ({ ch, i }))
+      .sort((a, b) => computedOrder(a.ch) - computedOrder(b.ch) || a.i - b.i)
+      .map(x => x.ch);
+    const idx = ordered.indexOf(el);
+    if (idx < 0) return null;
+    // 前 = 主轴起点方向（row 的 left / column 的 up；reverse 布局则相反）
+    const fwd = (dir === 'left' || dir === 'up') !== reverse;
+    const neighbor = fwd ? ordered[idx - 1] : ordered[idx + 1];
+    if (!neighbor) return null;
+    const elOrder = computedOrder(el);
+    const nbOrder = computedOrder(neighbor);
+    let elNew = elOrder, nbNew = nbOrder;
+    if (elOrder === nbOrder) {
+      elNew = fwd ? elOrder - 1 : elOrder + 1;
+    } else {
+      elNew = nbOrder; nbNew = elOrder;
+    }
+    if (elNew !== elOrder) el.style.order = String(elNew);
+    if (nbNew !== nbOrder) neighbor.style.order = String(nbNew);
+    return { el, neighbor, elOrder, elNew, nbOrder, nbNew, idxOld: idx, idxNew: fwd ? idx - 1 : idx + 1 };
+  }
+
+  /** 元素在父 flex 容器内的主轴显示位次（1-based，供顺序记录友好展示）；非 flex 子项返回 0 */
+  function flexPositionOf(el) {
+    if (!el || el.nodeType !== 1) return 0;
+    const parent = el.parentElement;
+    if (!parent) return 0;
+    let pcs;
+    try { pcs = getComputedStyle(parent); } catch (e) { return 0; }
+    if (!/flex/.test(pcs.display)) return 0;
+    const ordered = flexItems(parent)
+      .map((ch, i) => ({ ch, i }))
+      .sort((a, b) => computedOrder(a.ch) - computedOrder(b.ch) || a.i - b.i)
+      .map(x => x.ch);
+    const idx = ordered.indexOf(el);
+    return idx < 0 ? 0 : idx + 1;
   }
 
   /** 推断元素的尺寸模式（fill 填充 / auto 适应 / fixed 固定）：
@@ -2158,9 +2235,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
                   ${(g.shared ? (g.sharedRows || g.changes) : g.changes).map((c) => `
                     <div class="change-row">
                       <span class="change-prop">${escapeHtml(propertyLabel(c.property))}${c.target ? ' · ' + escapeHtml(c.target) : ''}</span>
-                      <span class="change-old" title="${escapeHtml(c.oldValue)}">${escapeHtml(c.property === 'flex' ? formatFlexValue(c.oldValue) : (c.oldValue || '-'))}</span>
+                      <span class="change-old" title="${escapeHtml(c.oldValue)}">${escapeHtml(c.property === 'flex' ? formatFlexValue(c.oldValue) : (c.displayOld || c.oldValue || '-'))}</span>
                       <span class="change-arrow">→</span>
-                      <span class="change-new" title="${escapeHtml(c.newValue)}">${escapeHtml(c.property === 'flex' ? formatFlexValue(c.newValue) : (c.newValue || '-'))}</span>
+                      <span class="change-new" title="${escapeHtml(c.newValue)}">${escapeHtml(c.property === 'flex' ? formatFlexValue(c.newValue) : (c.displayNew || c.newValue || '-'))}</span>
                       ${g.shared && g.sharedRows && g.sharedRows.length === 1
                         ? `<button class="change-delete" type="button" data-delete-group="${escapeHtml(g.sharedKey)}" title="删除整组共享变更">${ICONS.close}</button>`
                         : `<button class="change-delete" type="button" data-delete="${c.id}" title="删除此变更">${ICONS.close}</button>`}
@@ -2353,9 +2430,20 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           if (clsNote) lines2.push(`**提醒:** ${clsNote}`);
         }
         if (cssChanges.length) {
-          const wantCsv = cssChanges.map(c => `${c.property === 'flex' ? '宽度' : c.property} → ${(c.property === 'flex' ? formatFlexValue(c.newValue) : c.newValue) || '-'}`).join('；');
-          lines2.push(`**你要的:** 调整样式 ${wantCsv}`);
-          lines2.push(`**改法:** 在源码对应 CSS 中设置：${cssChanges.map(c => `${c.property}: ${c.newValue || '-'}`).join('; ')}`);
+          const orderChanges = cssChanges.filter(c => c.property === 'order');
+          const otherChanges = cssChanges.filter(c => c.property !== 'order');
+          if (orderChanges.length) {
+            const oc = orderChanges[0];
+            const posTxt = (oc.displayOld && oc.displayNew) ? `${oc.displayOld} → ${oc.displayNew}` : `order ${oc.oldValue} → ${oc.newValue}`;
+            const targetPos = oc.displayNew ? String(oc.displayNew).replace(/第|位/g, '') : oc.newValue;
+            lines2.push(`**你要的:** 调整顺序 ${posTxt}`);
+            lines2.push(`**改法:** 调整该元素在父容器中的排列顺序，使其显示为第 ${targetPos} 位（源码对应：调整该按钮在父容器中的代码顺序，或给该按钮设置 flex order: ${oc.orderValue || oc.newValue}）`);
+          }
+          if (otherChanges.length) {
+            const wantCsv = otherChanges.map(c => `${c.property === 'flex' ? '宽度' : c.property} → ${(c.property === 'flex' ? formatFlexValue(c.newValue) : c.newValue) || '-'}`).join('；');
+            lines2.push(`**你要的:** 调整样式 ${wantCsv}`);
+            lines2.push(`**改法:** 在源码对应 CSS 中设置：${otherChanges.map(c => `${c.property}: ${c.newValue || '-'}`).join('; ')}`);
+          }
         }
         if (g.annotation) {
           lines2.push(`**备注:** ${g.annotation}`);
@@ -2367,7 +2455,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           elementText: anchor,
           role,
           adds: addClassChanges.map(c => c.intentClass).filter(Boolean),
-          css: cssChanges.map(c => ({ property: c.property, value: c.newValue })),
+          css: cssChanges.map(c => ({ property: c.property, value: c.property === 'order' ? (c.orderValue || c.newValue) : c.newValue })),
           annotation: g.annotation || '',
           shared: g.shared || false,
           sharedCount: g.shared ? (g.sharedCount || g.changes.length) : 0,
@@ -2570,6 +2658,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._bindEvents();
       this.removeAttribute('hidden');
       this._updatePosition();
+      this._updateMoveControls();
     }
 
     openForElement(el, selector, target) {
@@ -2581,11 +2670,94 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._bindEvents();
       this.removeAttribute('hidden');
       this._updatePosition();
+      this._updateMoveControls();
     }
 
     close() {
       this._targetEl = null;
       this.setAttribute('hidden', '');
+    }
+
+    /** 根据选中元素在父 flex 容器中的显示位置，更新顺序移动按钮可用性（不可移动方向置灰）。
+     *  row 布局只有左/右可移动（上/下置灰），column 布局只有上/下可移动（左/右置灰）；
+     *  已在容器边界或非 flex 子项时对应方向置灰；伪元素编辑目标一律置灰。 */
+    _updateMoveControls() {
+      const btns = this._shadow.querySelectorAll('[data-move]');
+      if (!btns.length) return;
+      const disableAll = () => btns.forEach(b => { b.disabled = true; });
+      const el = this._targetEl;
+      if (!el || this._target) { disableAll(); return; }
+      const parent = el.parentElement;
+      if (!parent) { disableAll(); return; }
+      let pcs;
+      try { pcs = getComputedStyle(parent); } catch (e) { disableAll(); return; }
+      if (!/flex/.test(pcs.display)) { disableAll(); return; }
+      const items = flexItems(parent)
+        .map((ch, i) => ({ ch, i }))
+        .sort((a, b) => computedOrder(a.ch) - computedOrder(b.ch) || a.i - b.i)
+        .map(x => x.ch);
+      const idx = items.indexOf(el);
+      if (idx < 0) { disableAll(); return; }
+      const fd = pcs.flexDirection || 'row';
+      const isColumn = fd.indexOf('column') === 0;
+      const reverse = fd.indexOf('reverse') > 0;
+      const hasPrev = idx > 0;
+      const hasNext = idx < items.length - 1;
+      const avail = { up: false, down: false, left: false, right: false };
+      if (isColumn) {
+        avail.up = reverse ? hasNext : hasPrev;
+        avail.down = reverse ? hasPrev : hasNext;
+      } else {
+        avail.left = reverse ? hasNext : hasPrev;
+        avail.right = reverse ? hasPrev : hasNext;
+      }
+      btns.forEach(b => { b.disabled = !avail[b.dataset.move]; });
+    }
+
+    /** 顺序移动：按方向把选中元素在父 flex 容器中前/后移动一位，并同类同步 + 记录 */
+    _moveSelected(dir) {
+      const el = this._targetEl;
+      if (!el || this._target) return;
+      const mv = moveFlexItem(el, dir);
+      if (!mv) { this._updateMoveControls(); return; }
+      // 记录目标元素（位置：第X位 → 第Y位；真实 order 值见 orderValue）
+      this._recordMoveChange(mv.el, mv, false);
+      // 若与兄弟交换了 order（已显式不同），兄弟也记录
+      if (mv.nbNew !== mv.nbOrder) this._recordMoveChange(mv.neighbor, mv, true);
+      // 共享同步：同类元素（如其它卡片的同款按钮）一起换位（order 已在布局豁免集合内）
+      this._scheduleSharedSync({ property: 'order', oldValue: String(mv.elOrder), newValue: String(mv.elNew) });
+      if (mv.nbNew !== mv.nbOrder) {
+        this._scheduleSharedSync({ property: 'order', oldValue: String(mv.nbOrder), newValue: String(mv.nbNew) });
+      }
+      this._updateMoveControls();
+    }
+
+    /** 记录一次顺序移动变更（property='order'；oldValue/newValue 存真实 order 值供同步匹配与还原，
+     *  displayOld/displayNew 存友好位次供配置列表展示） */
+    _recordMoveChange(el, mv, isNeighbor) {
+      const elNewPos = flexPositionOf(mv.el);
+      const elOldPos = mv.idxOld + 1;
+      const oldPos = isNeighbor ? elNewPos : elOldPos;
+      const newPos = isNeighbor ? elOldPos : elNewPos;
+      const oldVal = String(isNeighbor ? mv.nbOrder : mv.elOrder);
+      const newVal = String(isNeighbor ? mv.nbNew : mv.elNew);
+      bus.emit('style-change', {
+        selector: generateSelector(el),
+        elementTag: el.tagName.toLowerCase(),
+        elementText: (el.textContent || '').trim().substring(0, 50),
+        elementClass: (el.className && typeof el.className === 'string')
+          ? el.className.trim().split(/\s+/).filter(c => isStableSelectorClass(c))[0] || ''
+          : '',
+        property: 'order',
+        oldValue: oldVal,
+        newValue: newVal,
+        orderValue: newVal,
+        displayOld: '第' + oldPos + '位',
+        displayNew: '第' + newPos + '位',
+        el,
+        shared: false,
+        sharedKey: '',
+      });
     }
 
     _updatePosition() {
@@ -2806,6 +2978,42 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             font-size: 10px;
             font-weight: 500;
             color: var(--text-tertiary, #999);
+          }
+          .move-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-areas: ". up ." "left . right" ". down .";
+            gap: 5px;
+            max-width: 132px;
+          }
+          .move-btn {
+            grid-area: auto;
+            height: 26px;
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 7px;
+            background: rgba(255,255,255,0.06);
+            color: var(--text-default, #fff);
+            font-size: 13px;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background .15s ease, border-color .15s ease, opacity .15s ease;
+          }
+          .move-btn[data-move="up"] { grid-area: up; }
+          .move-btn[data-move="left"] { grid-area: left; }
+          .move-btn[data-move="right"] { grid-area: right; }
+          .move-btn[data-move="down"] { grid-area: down; }
+          .move-btn:not(:disabled):hover {
+            background: rgba(255,255,255,0.14);
+            border-color: rgba(0,185,107,0.7);
+          }
+          .move-btn:not(:disabled):active { transform: translateY(1px); }
+          .move-btn:disabled {
+            opacity: 0.32;
+            cursor: not-allowed;
+            color: rgba(255,255,255,0.45);
           }
           .target-switch {
             display: flex;
@@ -3286,6 +3494,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
                 </span>
               </label>
             </div>
+            <p class="sub-label">顺序（调整在父容器中的位置）</p>
+            <div class="move-grid">
+              <button type="button" class="move-btn" data-move="up" title="上移" aria-label="上移"><span class="move-arrow">↑</span></button>
+              <button type="button" class="move-btn" data-move="left" title="左移" aria-label="左移"><span class="move-arrow">←</span></button>
+              <button type="button" class="move-btn" data-move="right" title="右移" aria-label="右移"><span class="move-arrow">→</span></button>
+              <button type="button" class="move-btn" data-move="down" title="下移" aria-label="下移"><span class="move-arrow">↓</span></button>
+            </div>
           </div>
 
           <!-- 字体 -->
@@ -3492,9 +3707,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           });
         }
       });
+      // 自动布局：顺序移动（上下左右，按 flex 主轴方向前后移动一位，不可移动方向置灰）
+      this._shadow.querySelectorAll('[data-move]').forEach(btn => {
+        btn.addEventListener('click', () => this._moveSelected(btn.dataset.move));
+      });
       // Liaison 式宽高交互：数值输入（blur/Enter 自动回 fixed 模式 + commit）+ 模式 select（commit）
-      const sizeFields = ['width', 'height'];
-      sizeFields.forEach(field => {
+      const sizeFields = ['width', 'height'];      sizeFields.forEach(field => {
         const input = this._shadow.querySelector(`[data-field="${field}"]`);
         if (!input) return;
         input.addEventListener('input', () => {
@@ -6235,6 +6453,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         existing.elementText = change.elementText;
         existing.shared = !!change.shared;
         existing.sharedKey = change.sharedKey || '';
+        existing.orderValue = change.orderValue || existing.orderValue || '';
+        existing.displayOld = change.displayOld || existing.displayOld || '';
+        existing.displayNew = change.displayNew || existing.displayNew || '';
         Object.assign(existing, deriveIntent(existing, change.el));
         if (change.el) changeElRefs.set(existing.id, change.el);
       } else {
@@ -6247,6 +6468,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           property: change.property,
           oldValue: change.oldValue,
           newValue: change.newValue,
+          orderValue: change.orderValue || '',
+          displayOld: change.displayOld || '',
+          displayNew: change.displayNew || '',
           shared: !!change.shared,
           sharedKey: change.sharedKey || '',
           timestamp: Date.now(),
