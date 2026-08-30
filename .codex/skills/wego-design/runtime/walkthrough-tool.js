@@ -47,6 +47,10 @@
     pseudoStyles: {}, // "selector||before|after" -> { 'css-property': 值 }（注入 <head> 的规则）
   };
 
+  /** 变更记录 id → 元素引用（会话内存映射，不参与持久化）。
+   *  还原时优先命中实际被改动的元素，避免 sticky 克隆/重复结构下 selector 解析歧义还原到错误的同构元素 */
+  const changeElRefs = new Map();
+
   // ============================================================
   // 调试日志系统（用于移动端排查键盘不弹出、气泡不显示等问题）
   // ============================================================
@@ -582,6 +586,83 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     const oldValue = getComputedStyle(el)[property];
     el.style[property] = value;
     return { property, oldValue, newValue: value };
+  }
+
+  // ============================================================
+  // 样式同步（共享元素模式）：编辑某属性时，若该属性为公共样式
+  // （页面上多个元素共用同一属性值且由自身声明），自动同步应用到全部命中元素。
+  // 对齐竞品 Liaison「共享元素模式」思路，但按「共用属性值」匹配，并强化防误判。
+  // ============================================================
+
+  /** 自动同步的命中数上限（含当前元素）；超过视为页面级基础样式/全局横扫，不自动同步。
+   *  校准依据：真实场景探测显示公共属性命中多在 30~220（字号 219、行高 143、颜色 122、左边距 39、宽高比 46），
+   *  上限过小（如 8）会让"公共样式同步"在真实页面上几乎不触发；60 可覆盖常见组件组（卡片/按钮/网格），
+   *  同时挡住页级基础 Token 的静默全局改写。待用户侧增加"是否自动同步"开关后可再行放开。 */
+  const MAX_SHARED_STYLE_COUNT = 60;
+
+  /** 不参与自动同步的属性（结构性/元素专属，跨元素同步极易误改，如布局定位与尺寸） */
+  const SHARED_SYNC_EXCLUDED_PROPS = new Set(['display', 'position', 'z-index', 'width', 'height']);
+
+  /** CSS 值归一化（与 _cssValueEqual 的 norm 对齐），用于公共样式值匹配 */
+  function normalizeCssValue(v) {
+    return String(v == null ? '' : v).trim().replace(/\s*,\s*/g, ',').replace(/\s+/g, ' ').toLowerCase();
+  }
+
+  /** 判断元素是否由自身（内联样式或命中的样式规则）声明了该属性；
+   *  继承自祖先、浏览器默认值、@import 不可读样式表等一律视为未声明 → 不参与同步 */
+  function declaresProperty(el, property) {
+    if (!el || el.nodeType !== 1 || !property) return false;
+    // 内联样式直接声明
+    try {
+      if (el.style && typeof el.style.getPropertyValue === 'function' && el.style.getPropertyValue(property)) return true;
+    } catch (e) {}
+    // 命中样式规则（含 @media / @supports 嵌套规则）声明
+    const ruleDeclares = (rule) => {
+      try {
+        if (!rule) return false;
+        if (rule.type === 1) {
+          if (rule.selectorText && rule.style && rule.style.getPropertyValue(property) && el.matches(rule.selectorText)) return true;
+        } else if (rule.cssRules) {
+          for (let i = 0; i < rule.cssRules.length; i++) {
+            if (ruleDeclares(rule.cssRules[i])) return true;
+          }
+        }
+      } catch (e) { /* 跨域/非法规则跳过 */ }
+      return false;
+    };
+    try {
+      for (let i = 0; i < document.styleSheets.length; i++) {
+        try { if (ruleDeclares(document.styleSheets[i])) return true; } catch (e) {}
+      }
+    } catch (e) {}
+    return false;
+  }
+
+  /** 找出与目标元素共用同一属性值的其它元素（自动同步目标集）。
+   *  仅当该属性确为「公共样式」时返回命中列表，否则返回 []（不自动同步，只改当前元素）。
+   *  防误判规则：
+   *   - 结构/布局类属性（display/position/z-index/width/height）不同步；
+   *   - 目标自身未声明该属性（继承/默认值）→ 属局部覆盖，不同步；
+   *   - 命中元素未声明该属性（继承/默认值）→ 不纳入；
+   *   - 仅扫描当前可见场景（未布局/隐藏 tab/未挂载元素跳过）；
+   *   - 命中数（含当前）超过上限 → 视为页面级默认，不同步。 */
+  function findSharedStyleElements(targetEl, property, oldValue) {
+    if (!targetEl || !property || !oldValue || SHARED_SYNC_EXCLUDED_PROPS.has(property)) return [];
+    if (!declaresProperty(targetEl, property)) return [];
+    const targetNorm = normalizeCssValue(oldValue);
+    const valueHits = [];
+    const all = document.querySelectorAll('*');
+    for (let i = 0; i < all.length; i++) {
+      const el = all[i];
+      if (el === targetEl || isWalkthroughElement(el)) continue;
+      if (!el.isConnected || !el.getClientRects || !el.getClientRects().length) continue;
+      let val = '';
+      try { val = getComputedStyle(el).getPropertyValue(property); } catch (e) { continue; }
+      if (normalizeCssValue(val) === targetNorm) valueHits.push(el);
+    }
+    if (valueHits.length === 0) return [];
+    if (valueHits.length + 1 > MAX_SHARED_STYLE_COUNT) return [];
+    return valueHits.filter(el => declaresProperty(el, property));
   }
 
   /** 快照元素（或伪元素）的计算样式原始值，用于「改回即无变更」判定 */
@@ -1603,10 +1684,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     _render() {
       const changes = this._changes || [];
       const annotations = this._annotations || [];
-      // 按选择器分组（元素本体与 ::before/::after 变更合并为同一元素分组，避免重复卡片）
+      // 按选择器分组（元素本体与 ::before/::after 变更合并为同一元素分组，避免重复卡片）；
+      // 共享同步的变更按 sharedKey 合并为一组（同一公共样式），展示为一条「共享 N 个元素」
       const groups = {};
       changes.forEach(c => {
-        const gkey = c.selector;
+        const gkey = c.sharedKey || c.selector;
         if (!groups[gkey]) {
           groups[gkey] = {
             selector: c.selector,
@@ -1614,6 +1696,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             elementTag: c.elementTag,
             elementText: c.elementText,
             changes: [],
+            shared: !!c.sharedKey,
+            sharedKey: c.sharedKey || '',
             annotation: '',
             annotationId: '',
           };
@@ -1629,6 +1713,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             elementTag: a.elementTag,
             elementText: a.elementText,
             changes: [],
+            shared: false,
+            sharedKey: '',
             annotation: a.text,
             annotationId: a.id,
           };
@@ -1643,8 +1729,18 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           }
         }
       });
-      const groupList = Object.values(groups);
-      const totalCount = changes.length + annotations.filter(a => a.text && a.text.trim()).length;
+      // 共享组：全部记录一致时合并为一行展示；不一致（后续单元素再编辑）则逐条展示
+      const groupList = Object.values(groups).map(g => {
+        if (g.shared && g.changes.length) {
+          const first = g.changes[0];
+          const allSame = g.changes.every(c => c.property === first.property && c.newValue === first.newValue);
+          g.sharedCount = g.changes.length;
+          g.sharedRows = allSame ? [first] : g.changes;
+        }
+        return g;
+      });
+      const changeGroupCount = new Set(changes.map(c => c.sharedKey || c.selector)).size;
+      const totalCount = changeGroupCount + annotations.filter(a => a.text && a.text.trim()).length;
 
       this._shadow.innerHTML = `
         <style>
@@ -1784,6 +1880,16 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             min-width: 0;
           }
           .item-selector:hover { color: var(--text-brand, #00b96b); }
+          .shared-badge {
+            flex-shrink: 0;
+            font-size: 10px;
+            color: #00b96b;
+            background: rgba(0, 185, 107, 0.12);
+            border: 1px solid rgba(0, 185, 107, 0.25);
+            padding: 1px 6px;
+            border-radius: 999px;
+            white-space: nowrap;
+          }
           .item-text {
             font-size: 11px;
             color: var(--text-tertiary, #888);
@@ -1911,7 +2017,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
               ${groupList.map((g, gi) => `
                 <div class="item">
                   <div class="item-top">
-                    <span class="item-selector" data-selector="${escapeHtml(g.selector)}" data-gi="${gi}">${escapeHtml(g.elementTag || '')}${g.elementText ? ' · ' + escapeHtml(g.elementText) : ''}</span>
+                    <span class="item-selector" data-selector="${escapeHtml(g.selector)}" data-gi="${gi}">${g.shared
+                      ? '共享样式 · ' + escapeHtml((g.sharedRows && g.sharedRows[0] ? g.sharedRows[0].property : (g.changes[0] ? g.changes[0].property : '')))
+                      : escapeHtml(g.elementTag || '') + (g.elementText ? ' · ' + escapeHtml(g.elementText) : '')}</span>
+                    ${g.shared ? `<span class="shared-badge">共享 ${g.sharedCount} 个元素</span>` : ''}
                   </div>
                   ${g.annotation ? `
                     <div class="annotation-row">
@@ -1920,13 +2029,15 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
                       <button class="annotation-delete" type="button" data-delete-annotation="${g.annotationId}" title="删除批注">${ICONS.close}</button>
                     </div>
                   ` : ''}
-                  ${g.changes.map((c) => `
+                  ${(g.shared ? (g.sharedRows || g.changes) : g.changes).map((c) => `
                     <div class="change-row">
                       <span class="change-prop">${escapeHtml(c.property)}${c.target ? ' · ' + escapeHtml(c.target) : ''}</span>
                       <span class="change-old" title="${escapeHtml(c.oldValue)}">${escapeHtml(c.oldValue || '-')}</span>
                       <span class="change-arrow">→</span>
                       <span class="change-new" title="${escapeHtml(c.newValue)}">${escapeHtml(c.newValue || '-')}</span>
-                      <button class="change-delete" type="button" data-delete="${c.id}" title="删除此变更">${ICONS.close}</button>
+                      ${g.shared && g.sharedRows && g.sharedRows.length === 1
+                        ? `<button class="change-delete" type="button" data-delete-group="${escapeHtml(g.sharedKey)}" title="删除整组共享变更">${ICONS.close}</button>`
+                        : `<button class="change-delete" type="button" data-delete="${c.id}" title="删除此变更">${ICONS.close}</button>`}
                     </div>
                   `).join('')}
                 </div>
@@ -1963,6 +2074,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         btn.addEventListener('click', () => {
           const id = btn.dataset.delete;
           bus.emit('delete-change', { id });
+        });
+      });
+      // 共享组整组删除（合并展示的一条公共样式变更，一次性还原全部命中元素）
+      this._shadow.querySelectorAll('[data-delete-group]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const sharedKey = btn.dataset.deleteGroup;
+          bus.emit('delete-change-group', { sharedKey });
         });
       });
       // 单条批注删除（含元素已失效、标记不显示的孤儿批注）
@@ -2021,20 +2139,23 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (changes.length === 0 && annotations.length === 0) {
         return `## Page Feedback: ${route}\n**Viewport:** ${viewport}\n\n当前还没有记录到任何配置修改或批注。`;
       }
-      // 按选择器分组（同一元素的样式变更和批注归一条）
+      // 按选择器分组（同一元素的样式变更和批注归一条）；共享同步的变更按 sharedKey 合并为一组
       const groups = {};
       changes.forEach(c => {
-        if (!groups[c.selector]) {
-          groups[c.selector] = {
+        const gkey = c.sharedKey || c.selector;
+        if (!groups[gkey]) {
+          groups[gkey] = {
             selector: c.selector,
             elementTag: c.elementTag,
             elementText: c.elementText,
             elementClass: c.elementClass || '',
             changes: [],
+            shared: !!c.sharedKey,
+            sharedKey: c.sharedKey || '',
             annotation: '',
           };
         }
-        groups[c.selector].changes.push(c);
+        groups[gkey].changes.push(c);
       });
       annotations.forEach(a => {
         if (!a.text || !a.text.trim()) return;
@@ -2045,6 +2166,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             elementText: a.elementText,
             elementClass: '',
             changes: [],
+            shared: false,
+            sharedKey: '',
             annotation: a.text,
           };
         } else {
@@ -2057,7 +2180,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           }
         }
       });
-      const groupList = Object.values(groups);
+      const groupList = Object.values(groups).map(g => {
+        if (g.shared && g.changes.length) g.sharedCount = g.changes.length;
+        return g;
+      });
       const lines = [
         `## Page Feedback: ${route}`,
         `**Viewport:** ${viewport}`,
@@ -2078,11 +2204,20 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         })();
         const role = shortAnchor || classAnchor || g.elementTag;
         const addClassChanges = g.changes.filter(c => c.intent === 'add-class');
-        const cssChanges = g.changes.filter(c => !c.skipCss);
+        // 共享组内多条记录为同一改动，去重后合并为一条展示，避免重复行
+        const cssMap = new Map();
+        g.changes.filter(c => !c.skipCss).forEach(c => {
+          const k = c.property + '||' + c.newValue;
+          if (!cssMap.has(k)) cssMap.set(k, c);
+        });
+        const cssChanges = Array.from(cssMap.values());
         const lines2 = [];
         lines2.push(`### ${i + 1}. ${g.elementTag} · ${role}`);
         lines2.push(`**定位:** \`${g.selector}\``);
         if (anchor) lines2.push(`**业务锚点:** ${anchor}`);
+        if (g.shared) {
+          lines2.push(`**共享样式同步:** 该样式为公共样式，本次已自动同步应用到 ${g.sharedCount || g.changes.length} 个元素（共用同一属性值，建议在源码公共类/Token 上统一修改）`);
+        }
         if (addClassChanges.length) {
           const clsNote = addClassChanges.map(c => c.note).filter(Boolean)[0] || '';
           const want = addClassChanges.map(c => `加结构类 \`${c.intentClass}\``).join('；');
@@ -2107,6 +2242,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           adds: addClassChanges.map(c => c.intentClass).filter(Boolean),
           css: cssChanges.map(c => ({ property: c.property, value: c.newValue })),
           annotation: g.annotation || '',
+          shared: g.shared || false,
+          sharedCount: g.shared ? (g.sharedCount || g.changes.length) : 0,
         });
       });
       lines.push('<!-- WEGo_CHANGES_JSON ' + JSON.stringify(machine) + ' -->');
@@ -3363,7 +3500,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 应用到元素（本体）
       const result = this._applyField(field, value);
       if (result) {
-        // 记录变更
+        // 记录当前元素变更（无条件；若后续命中公共样式同步，由 _applySharedSync 补标 shared 标记）
         bus.emit('style-change', {
           selector: this._selector,
           elementTag: this._targetEl.tagName.toLowerCase(),
@@ -3375,10 +3512,85 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           oldValue: result.oldValue,
           newValue: result.newValue,
           el: this._targetEl,
+          shared: false,
+          sharedKey: '',
         });
+        // 样式同步（共享元素模式）：高频输入（颜色拖动等）下防抖，停顿后按最终值执行一次同步扫描，
+        // 避免每帧全页扫描卡顿、避免中途值把共享元素改错
+        this._scheduleSharedSync(result);
       }
       // 更新 UI（按钮 active 态等）
       this._updateActiveStates();
+    }
+
+    /** 样式同步防抖调度：高频输入（颜色拖动/步进）只同步最终值。
+     *  同一元素同一属性的多次输入只保留最后一次；不同属性/不同元素在停顿后各自执行一次同步。 */
+    _scheduleSharedSync(result) {
+      const targetEl = this._targetEl;
+      if (!targetEl || !result || !result.property) return;
+      if (!this._sharedSyncPending) this._sharedSyncPending = [];
+      const idx = this._sharedSyncPending.findIndex(p => p.targetEl === targetEl && p.result.property === result.property);
+      const entry = { targetEl, result };
+      if (idx >= 0) this._sharedSyncPending[idx] = entry; else this._sharedSyncPending.push(entry);
+      if (this._sharedSyncTimer) clearTimeout(this._sharedSyncTimer);
+      this._sharedSyncTimer = setTimeout(() => {
+        this._sharedSyncTimer = null;
+        const pending = this._sharedSyncPending;
+        this._sharedSyncPending = null;
+        if (!pending) return;
+        pending.forEach(p => {
+          if (!p.targetEl || !p.targetEl.isConnected) return;
+          this._applySharedSync(p.result, p.targetEl);
+        });
+      }, 160);
+    }
+
+    /** 执行共享样式同步：按最终值扫描命中元素并批量应用 + 记录（含目标元素补标共享） */
+    _applySharedSync(result, targetEl) {
+      const synced = findSharedStyleElements(targetEl, result.property, result.oldValue);
+      if (!synced.length) return;
+      const sharedKey = result.property + '::' + normalizeCssValue(result.oldValue);
+      const sharedCount = synced.length + 1;
+      synced.forEach(el => {
+        let applied = false;
+        try { applyStyleProperty(el, result.property, result.newValue); applied = true; } catch (e) {}
+        if (!applied) return;
+        // 命中元素各自记录一条变更（带共享标记），保证可单独还原、刷新后回放一致
+        bus.emit('style-change', {
+          selector: generateSelector(el),
+          elementTag: el.tagName.toLowerCase(),
+          elementText: (el.textContent || '').trim().substring(0, 50),
+          elementClass: (el.className && typeof el.className === 'string')
+            ? el.className.trim().split(/\s+/).filter(c => isStableSelectorClass(c))[0] || ''
+            : '',
+          property: result.property,
+          oldValue: result.oldValue,
+          newValue: result.newValue,
+          el,
+          shared: true,
+          sharedKey,
+        });
+      });
+      // 目标元素补标共享：仅当对应变更记录仍存在时补标（避免误新增记录）
+      const tSel = (targetEl === this._targetEl) ? this._selector : generateSelector(targetEl);
+      const existingTarget = state.changes.find(c => c.selector === tSel && !c.target && c.property === result.property);
+      if (existingTarget) {
+        bus.emit('style-change', {
+          selector: tSel,
+          elementTag: targetEl.tagName.toLowerCase(),
+          elementText: (targetEl.textContent || '').trim().substring(0, 50),
+          elementClass: (targetEl.className && typeof targetEl.className === 'string')
+            ? targetEl.className.trim().split(/\s+/).filter(c => isStableSelectorClass(c))[0] || ''
+            : '',
+          property: result.property,
+          oldValue: result.oldValue,
+          newValue: result.newValue,
+          el: targetEl,
+          shared: true,
+          sharedKey,
+        });
+      }
+      bus.emit('toast', { message: `该样式为公共样式，已自动同步 ${sharedCount} 个元素` });
     }
 
     /** 组合内描边（inset 环）+ 投影为单一 box-shadow 值，避免两处编辑互相覆盖同一条 CSS */
@@ -4728,6 +4940,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       bus.on('close-overview', () => this._components.overviewPanel.close());
       bus.on('jump-to-element', ({ selector }) => this._jumpToElement(selector));
       bus.on('delete-change', ({ id }) => this._deleteChange(id));
+      bus.on('delete-change-group', ({ sharedKey }) => this._deleteChangeGroup(sharedKey));
       bus.on('delete-annotation', ({ id }) => this._deleteAnnotation(id));
       bus.on('reset-changes', () => this._resetChanges());
       bus.on('toast', ({ message }) => this._showToast(message));
@@ -5772,6 +5985,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         if (existing) {
           this._revertChange(existing);
           state.changes = state.changes.filter(c => c.id !== existing.id);
+          changeElRefs.delete(existing.id);
           this._syncAfterRecordsChanged();
         }
         return;
@@ -5781,7 +5995,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         existing.newValue = change.newValue;
         existing.timestamp = Date.now();
         existing.elementText = change.elementText;
+        existing.shared = !!change.shared;
+        existing.sharedKey = change.sharedKey || '';
         Object.assign(existing, deriveIntent(existing, change.el));
+        if (change.el) changeElRefs.set(existing.id, change.el);
       } else {
         const rec = {
           id: 'change-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
@@ -5792,10 +6009,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           property: change.property,
           oldValue: change.oldValue,
           newValue: change.newValue,
+          shared: !!change.shared,
+          sharedKey: change.sharedKey || '',
           timestamp: Date.now(),
         };
         Object.assign(rec, deriveIntent(rec, change.el));
         state.changes.push(rec);
+        if (change.el) changeElRefs.set(rec.id, change.el);
       }
       this._syncAfterRecordsChanged();
     }
@@ -5807,10 +6027,14 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         return;
       }
       try {
-        const el = queryTargetEl(change.selector);
+        // 优先还原会话内实际改动的那个元素（避免 sticky 克隆等重复结构下 selector 歧义命中错误元素）；
+        // 元素已不在文档中（如刷新后）则退回按 selector 解析
+        let el = changeElRefs.get(change.id);
+        if (!el || !el.isConnected) el = queryTargetEl(change.selector);
         // 用 setProperty 兼容 kebab-case 属性名（如 flex-direction）
         if (el) el.style.setProperty(change.property, '');
       } catch (e) {}
+      changeElRefs.delete(change.id);
     }
 
     _deleteChange(id) {
@@ -5823,6 +6047,20 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
           this._components.overviewPanel.refresh(state.changes, state.currentRoute, state.annotations);
         }
+      }
+    }
+
+    /** 删除整组共享同步变更：还原全部命中元素并移除记录（配置列表合并展示的「共享 N 个元素」一条） */
+    _deleteChangeGroup(sharedKey) {
+      if (!sharedKey) return;
+      const group = state.changes.filter(c => c.sharedKey === sharedKey);
+      if (!group.length) return;
+      group.forEach(c => this._revertChange(c));
+      state.changes = state.changes.filter(c => c.sharedKey !== sharedKey);
+      this._flushSave();
+      this._updateChangeCount();
+      if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
+        this._components.overviewPanel.refresh(state.changes, state.currentRoute, state.annotations);
       }
     }
 
@@ -5884,6 +6122,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         // 兼容旧版本残留：丢弃新值为空的脏变更记录、没有正文的空批注
         state.changes = (data.changes || []).filter(c => c.newValue !== '' && c.newValue != null);
         state.annotations = (data.annotations || []).filter(a => a.text && String(a.text).trim());
+        // 新场景加载的记录来自持久化，无会话内元素引用，清空引用映射避免残留指向旧场景节点
+        changeElRefs.clear();
         debugLog.add('LOAD', `_loadChanges: route=${state.currentRoute} changes=${state.changes.length} annotations=${state.annotations.length}`);
         // 伪元素注入池与原始值快照都按路由隔离：先清空上一场景残留再整体重建，
         // 否则 A 场景的注入规则会带到 B 场景，污染通用类名元素
@@ -5987,8 +6227,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     }
 
     _updateChangeCount() {
-      // 纯空格批注视为空，不计入角标（与关闭气泡时的空批注清理口径一致）
-      const count = state.changes.length + state.annotations.filter(a => a.text && a.text.trim()).length;
+      // 纯空格批注视为空，不计入角标（与关闭气泡时的空批注清理口径一致）；
+      // 共享同步的多个元素变更合并为一条计数（与配置列表合并展示口径一致）
+      const changeGroupCount = new Set(state.changes.map(c => c.sharedKey || c.selector)).size;
+      const count = changeGroupCount + state.annotations.filter(a => a.text && a.text.trim()).length;
       // 配置列表按钮数字气泡（计数为 0 时也同步清空文本，避免隐藏后残留旧数字）
       if (this._components.overviewCount) {
         this._components.overviewCount.textContent = count > 99 ? '99+' : count;
