@@ -156,23 +156,26 @@
 }
 
 .share-panel__channel-icon {
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
+  background: var(--bg-panel, #f6f6f6);
+  border-radius: 12px;
+  box-sizing: border-box;
 }
 
 .share-panel__channel-svg {
-  width: 48px;
-  height: 48px;
+  width: 28px;
+  height: 28px;
   object-fit: contain;
   display: block;
 }
 
 .share-panel__channel-icon .wego-iconfont-s {
-  font-size: 40px;
+  font-size: 28px;
   color: var(--text-default, #1a1a1a);
 }
 
