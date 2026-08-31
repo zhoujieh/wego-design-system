@@ -151,7 +151,14 @@
   transition: background var(--duration-fast, 0.15s) ease;
 }
 
-.share-panel__channel-item:active {
+.share-panel__channel-item:active,
+.share-panel__channel-item.is-pressed {
+  background: transparent;
+}
+
+/* 点击态仅反馈到图标方框背景，用设计系统 pressed token */
+.share-panel__channel-item:active .share-panel__channel-icon,
+.share-panel__channel-item.is-pressed .share-panel__channel-icon {
   background: var(--bg-state-pressed, rgba(32, 47, 100, 0.06));
 }
 
