@@ -5157,7 +5157,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._collapsed = true;
       this._drag = { active: false, moved: false, pointerId: null, startX: 0, startY: 0, origX: 0, origY: 0 };
       this._walkthroughMode = false;
-      this._faultState = { load: false, save: false, delete: false, slow: false };
+      this._faultState = { load: false, save: false, delete: false, slow: false, upgradePopup: false };
       this._subpanelOpen = null;
       this._components = {};
       this._suppressClick = false;
@@ -5708,6 +5708,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             <button class="subpanel-item" data-fault="slow">
               <span>慢加载(约9s)</span>
               <span class="switch" data-fault-switch="slow"></span>
+            </button>
+            <div class="subpanel-sep"></div>
+            <button class="subpanel-item" data-fault="upgradePopup">
+              <span>升级弹窗显示</span>
+              <span class="switch" data-fault-switch="upgradePopup"></span>
             </button>
           </div>
         </div>
@@ -6937,6 +6942,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           this._faultState.save = !!p.save;
           this._faultState['delete'] = !!p['delete'];
           this._faultState.slow = !!p.slow;
+          this._faultState.upgradePopup = !!p.upgradePopup;
         }
       } catch (e) {}
       this._updateFaultSwitches();
@@ -6954,13 +6960,59 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._persistFaultState();
       this._updateFaultSwitches();
       this._updateToolbarState();
+      if (key === 'upgradePopup') {
+        if (this._faultState.upgradePopup) this._showUpgradePopupMock();
+        else this._hideUpgradePopupMock();
+      }
     }
 
     _updateFaultSwitches() {
-      ['load', 'save', 'delete', 'slow'].forEach(key => {
+      ['load', 'save', 'delete', 'slow', 'upgradePopup'].forEach(key => {
         const sw = this._shadow.querySelector(`[data-fault-switch="${key}"]`);
         if (sw) sw.classList.toggle('is-on', !!this._faultState[key]);
       });
+    }
+
+    /** 升级弹窗数据模拟：清空显示记录后立即弹出（走查工具直接显示，不改业务组件逻辑） */
+    _showUpgradePopupMock() {
+      try {
+        localStorage.removeItem('wego.upgrade-popup.dismissible');
+        localStorage.removeItem('wego.upgrade-popup.forced');
+      } catch (e) {}
+      try {
+        if (!window.WegoApp || !window.WegoApp.openUpgradePopup) return;
+        /* 先移除页面上已有升级弹窗（场景自动弹出的 overlay 或上次 mock），避免叠加 */
+        document.querySelectorAll('.gray-popup-modal').forEach(function (m) { m.remove(); });
+        /* 挂载式 ctx：openFullScreenModal 直接把模板挂到 body（等价于场景 overlay），
+           closeOverlay 移除弹窗 DOM；仅用于调试预览，不进入 overlay 栈。
+           挂载节点带 data-wt-mock 标记，关闭开关时仅移除本工具挂载的弹窗 */
+        window.WegoApp.openUpgradePopup({
+          openFullScreenModal: function (html, options) {
+            const old = document.querySelector('.gray-popup-modal[data-wt-mock]');
+            if (old) old.remove();
+            const wrap = document.createElement('div');
+            wrap.innerHTML = html;
+            const node = wrap.firstElementChild;
+            node.setAttribute('data-wt-mock', '1');
+            document.body.appendChild(node);
+            /* 与场景 overlay 一致：调用 init 绑定弹窗内按钮/遮罩交互 */
+            if (options && typeof options.init === 'function') options.init({ root: node });
+          },
+          closeOverlay: function () {
+            const m = document.querySelector('.gray-popup-modal[data-wt-mock]');
+            if (m) m.remove();
+          },
+          toast: function (msg) { bus.emit('toast', { message: msg }); },
+        }, 'dismissible');
+      } catch (e) { /* 弹窗 API 不可用时静默，不影响走查工具其它功能 */ }
+    }
+
+    /** 关闭升级弹窗数据模拟：移除走查工具挂载的调试弹窗，恢复正常显示逻辑 */
+    _hideUpgradePopupMock() {
+      try {
+        const m = document.querySelector('.gray-popup-modal[data-wt-mock]');
+        if (m) m.remove();
+      } catch (e) {}
     }
 
     // ── 变更记录 ──────────────────────────────────────────
