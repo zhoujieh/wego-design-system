@@ -65,8 +65,8 @@
       + '</ol>'
       + '</div>'
       + '<div class="gray-popup__actions">'
-      + '<button type="button" data-component-slug="button" class="btn btn--strong btn--lg gray-popup__confirm" data-action="gray-confirm">立即体验</button>'
-      + (isForced ? '' : '<button type="button" data-component-slug="button" class="btn btn--weak btn--lg gray-popup__later" data-action="gray-later">近期不再提醒</button>')
+      + '<button type="button" data-component-slug="button" class="btn btn--strong btn--md gray-popup__confirm" data-action="gray-confirm">立即体验</button>'
+      + (isForced ? '' : '<button type="button" data-component-slug="link" class="link gray-popup__later" data-action="gray-later">近期不再提醒</button>')
       + '</div>'
       + '</div>'
       + '</div>';
