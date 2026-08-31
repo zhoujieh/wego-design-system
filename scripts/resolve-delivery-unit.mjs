@@ -71,16 +71,23 @@ function readJson(file) {
 }
 
 function activeIterations(worktree, scene) {
-  const directory = path.join(worktree.path, 'wego-app', 'scenes', scene, '_iterations');
-  if (!fs.existsSync(directory)) return [];
+  // 场景位于 scenes/{分类}/{中文业务场景}/，需遍历全部分类定位迭代目录。
+  const scenesRoot = path.join(worktree.path, 'wego-app', 'scenes');
+  if (!fs.existsSync(scenesRoot)) return [];
   const records = [];
-  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
-    if (!entry.isDirectory()) continue;
-    const file = path.join(directory, entry.name, 'iteration.json');
-    if (!fs.existsSync(file)) continue;
-    const iteration = readJson(file);
-    if (iteration.identity?.primary_scene === scene && !['frozen', 'cancelled', 'superseded'].includes(iteration.status)) {
-      records.push({ id: iteration.identity.iteration_id, status: iteration.status, file });
+  const categories = fs.readdirSync(scenesRoot, { withFileTypes: true })
+    .filter(entry => entry.isDirectory() && !entry.name.startsWith('_'));
+  for (const category of categories) {
+    const directory = path.join(scenesRoot, category.name, scene, '_iterations');
+    if (!fs.existsSync(directory)) continue;
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const file = path.join(directory, entry.name, 'iteration.json');
+      if (!fs.existsSync(file)) continue;
+      const iteration = readJson(file);
+      if (iteration.identity?.primary_scene === scene && !['frozen', 'cancelled', 'superseded'].includes(iteration.status)) {
+        records.push({ id: iteration.identity.iteration_id, status: iteration.status, file });
+      }
     }
   }
   return records;
@@ -92,32 +99,42 @@ function allLocalBranches() {
 }
 
 function branchActiveIterations(branch, scene) {
-  const treePath = `wego-app/scenes/${scene}/_iterations`;
-  let listing;
+  // 与 activeIterations 对齐：遍历 scenes/{分类}/ 全部分类，查找 {scene}/_iterations。
+  const records = [];
+  let categories;
   try {
-    listing = command('git', ['ls-tree', '-d', '--name-only', branch, treePath]);
+    categories = command('git', ['ls-tree', '-d', '--name-only', branch, 'wego-app/scenes/'])
+      .split('\n').map(line => line.trim()).filter(Boolean);
   } catch {
     return [];
   }
-  const dirs = listing.split('\n').map(line => line.trim()).filter(Boolean);
-  if (!dirs.length) return [];
-  const records = [];
-  for (const dir of dirs) {
-    const iterationFile = `${dir}/iteration.json`;
-    let raw;
+  for (const category of categories) {
+    const treePath = `wego-app/scenes/${category}/${scene}/_iterations`;
+    let listing;
     try {
-      raw = command('git', ['show', `${branch}:${iterationFile}`]);
+      listing = command('git', ['ls-tree', '-d', '--name-only', branch, treePath]);
     } catch {
       continue;
     }
-    let iteration;
-    try {
-      iteration = JSON.parse(raw);
-    } catch {
-      continue;
-    }
-    if (iteration.identity?.primary_scene === scene && !['frozen', 'cancelled', 'superseded'].includes(iteration.status)) {
-      records.push({ id: iteration.identity.iteration_id, status: iteration.status, file: iterationFile });
+    const dirs = listing.split('\n').map(line => line.trim()).filter(Boolean);
+    if (!dirs.length) continue;
+    for (const dir of dirs) {
+      const iterationFile = `${dir}/iteration.json`;
+      let raw;
+      try {
+        raw = command('git', ['show', `${branch}:${iterationFile}`]);
+      } catch {
+        continue;
+      }
+      let iteration;
+      try {
+        iteration = JSON.parse(raw);
+      } catch {
+        continue;
+      }
+      if (iteration.identity?.primary_scene === scene && !['frozen', 'cancelled', 'superseded'].includes(iteration.status)) {
+        records.push({ id: iteration.identity.iteration_id, status: iteration.status, file: iterationFile });
+      }
     }
   }
   return records;
