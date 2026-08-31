@@ -113,11 +113,24 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     bug: `<svg ${ICON_SVG}><path d="M160,96a32,32,0,0,0-64,0v8H56a8,8,0,0,0,0,16H88.4A47.61,47.61,0,0,0,80,144v8H56a8,8,0,0,0,0,16H80v16a8,8,0,0,0,16,0V168h64v16a8,8,0,0,0,16,0V168h24a8,8,0,0,0,0-16H176v-8a47.61,47.61,0,0,0-8.4-24H200a8,8,0,0,0,0-16H160Zm-48,0a16,16,0,0,1,32,0v8H112Zm8,56a8,8,0,1,1,8-8A8,8,0,0,1,120,152Zm40,0a8,8,0,1,1,8-8A8,8,0,0,1,160,152Z"/></svg>`,
   };
 
-  /** 获取当前场景路由 ID（用于 localStorage 数据隔离，保持稳定不变） */
+  /** 获取当前场景路由 ID（用于 localStorage 数据隔离，保持稳定不变）
+   *  wego-app 主 tab 切换会清空 hash，所以无 hash 时从当前激活的 panel 映射 routeId */
   function getCurrentRoute() {
+    // 优先从 hash 获取子场景/弹窗路由（如代理商帮卖弹窗、全部应用等）
     const hash = window.location.hash || '';
     const match = hash.match(/#\/(.+)/);
-    return match ? match[1] : 'default';
+    if (match) return match[1];
+    // 无 hash 时，从当前激活的主 tab panel 获取场景（动态/好友/我的/工作台）
+    try {
+      const activePanel = document.querySelector('.host-shell-page__panel--active');
+      if (activePanel && activePanel.dataset.hostTab) {
+        const hostTab = activePanel.dataset.hostTab;
+        const routes = window.WEGO_APP_ROUTES || [];
+        const route = routes.find(r => r.entry && r.entry.type === 'host-tab' && r.entry.tab === hostTab);
+        if (route) return route.routeId;
+      }
+    } catch (e) { /* DOM 或路由配置不可用时降级为 default */ }
+    return 'default';
   }
 
   /** 获取场景显示名称（用于 Prompt 标题展示）
@@ -5030,6 +5043,15 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._restoreFaultState();
       state.currentRoute = getCurrentRoute();
       window.addEventListener('hashchange', () => this._handleRouteChange());
+      // 主 tab 切换会清空 hash（hashchange 不触发），用 MutationObserver 监听激活 panel 变化
+      this._tabObserver = new MutationObserver(() => {
+        clearTimeout(this._tabChangeTimer);
+        this._tabChangeTimer = setTimeout(() => this._handleRouteChange(), 100);
+      });
+      try {
+        const hostPage = document.querySelector('.host-shell-page') || document.body;
+        this._tabObserver.observe(hostPage, { subtree: true, attributes: true, attributeFilter: ['class'] });
+      } catch (e) { /* 监听目标不可用时降级，仅靠 hashchange */ }
       // 离开页面前把防抖窗口内未落盘的最后修改立即写入
       window.addEventListener('pagehide', () => this._flushSave());
       this._loadChanges();
@@ -5043,6 +5065,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
     disconnectedCallback() {
       this._cleanupDrag();
+      if (this._tabObserver) { this._tabObserver.disconnect(); this._tabObserver = null; }
+      if (this._tabChangeTimer) { clearTimeout(this._tabChangeTimer); this._tabChangeTimer = null; }
     }
 
     // ── 渲染 ──────────────────────────────────────────────
