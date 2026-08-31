@@ -93,11 +93,11 @@
 }
 
 .gray-popup__actions {
-  padding: 16px 24px 8px;
+  padding: 16px 24px 16px;
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 0;
+  gap: 8px;
 }
 
 /* 强制型弹窗（无近期不再提醒按钮）底部间距 24px */
@@ -113,12 +113,10 @@
 }
 
 /* 次按钮：link 组件基础上覆盖为弹窗内居中文字链接（设计稿还原）
-   - 高度保持 32px，宽度内容自适应（align-self:center 覆盖 actions 的 stretch）
-   - 点击态（:active 背景）仅在文字链接区域，不占满整行 */
+   - 高度随组件默认（auto）、宽度内容自适应（align-self:center 覆盖 actions 的 stretch）
+   - 与主按钮间距由 actions 的 gap 承担，点击态（:active 背景）仅在文字链接区域 */
 .link.gray-popup__later {
   align-self: center;
-  height: 32px;
-  margin-top: 8px;
   color: #576b95;
   font-size: 14px;
   border-radius: 0;
