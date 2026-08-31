@@ -64,6 +64,14 @@
       "source": "user-correction",
       "scene": "shop243-鸿蒙13分享能力升级",
       "tags": ["设计稿", "Figma", "样式还原", "误读", "需求确认", "wego-design"]
+    },
+    {
+      "id": "ev-009",
+      "date": "2026-08-31",
+      "summary": "用户盘点本地分支时发现 7 个已合入 main 的分支本地长期残留（远端已删、本地未清理），指出工作流对分支收口控制有缺口：PR 合并是异步事件（网页端/CI 自动合并），本地收口依赖人工在场，错过即长期残留；工作流维护短周期 PR 自动合并后本地清理未绑定。已升级为正式规则：新增 prune-merged-branches.mjs 巡检脚本、task-intake 启动必做分支巡检、github-delivery-rules 合并即触发收口（异步闭环）、AGENTS.md merge-must-complete-closeout 硬约束，PR #142 合入 main",
+      "source": "user-correction",
+      "scene": "workflow-branch-closeout",
+      "tags": ["分支残留", "收口闭环", "异步合并", "巡检脚本", "wego-github-delivery", "wego-uxsystem-iterate"]
     }
   ]
 }
