@@ -1,12 +1,12 @@
 # 走查工具（Walkthrough Tool）完整实现计划
 
-> 版本：v2.2（全功能版，MVP 已完成，进入功能扩展迭代）  
+> 版本：v2.3（全功能版，MVP 已完成，进入功能扩展迭代）  
 > 创建日期：2026-08-26  
-> 最后更新：2026-08-30  
+> 最后更新：2026-08-31  
 > 负责人：用户体验设计中心  
-> 状态：✅ MVP 已完成，功能扩展迭代中（共享同步/顺序移动/自动布局优化已上线，Grid 网格布局待实现）  
+> 状态：✅ MVP 已完成，功能扩展迭代中（共享同步/顺序移动/自动布局优化已上线；场景路由识别修复 + 跨场景施工单 + default 残留迁移已上线，Grid 网格布局待实现）  
 > 参考源码：`docs/plan/research/liaison-extension-source/`（仅研究参考，不直接拷贝）
-> 关联 PR：#140（走查工具 UX 优化 + 共享样式同步 + 顺序移动 + 自动布局优化）
+> 关联 PR：#140（走查工具 UX 优化 + 场景识别修复 + 跨场景施工单 + default 残留迁移）
 
 ---
 
@@ -818,11 +818,24 @@ wego.walkthrough.data.{routeId}    # 其他场景
 - [x] 实现 `wego-wt-overview-panel` 配置列表浮动面板（全部/配置/评论三 Tab）
 - [x] 实现配置项展示（按元素分组、属性列表、单条删除、点击跳转选中）
 - [x] 实现复制 Prompt（对齐 Liaison 格式 + 剪贴板复制 + toast）
+- [x] **复制 Prompt 改为跨场景汇总**（2026-08-31：`_buildAllScenesPrompt` 收集全部场景变更按场景分组输出，当前场景排第一，JSON 带 routeId/routeLabel）
 - [x] 实现重置修改（清空当前场景变更 + toast）
 - [x] 实现代码视图切换
 - [ ] 实现 JSON 导出（文件下载）
 - [ ] 实现 JSON 导入（文件读取 + 合并/替换选择）
 - [x] 验证：Prompt 格式正确，重置正常，与样式面板互斥
+
+### M6a：场景路由识别 + default 残留迁移 ✅ 已完成（2026-08-31）
+
+> 根因：主 tab 切换会清空 hash，`getCurrentRoute()` 一直返回 `default`，所有主 tab 的变更/批注混在 default 下无法拆分，施工单错误显示「首页」且混场景。
+
+- [x] 场景路由识别修复：无 hash 时从当前激活的 `host-shell-page__panel--active` 的 hostTab 映射 routeId（动态/好友/我的/工作台），hash 子场景/弹窗优先
+- [x] 场景名称显示修复：优先 entry.label，主 tab 场景从 style 路径提取场景目录名，default 显示「首页」
+- [x] 场景切换统一收尾：`_handleRouteChange` 同路由 hash 抖动短路、旧场景立即落盘、新场景加载、批注气泡/面板/选中态清理
+- [x] 跨场景汇总施工单：全部场景变更按场景分组输出，不再混场景
+- [x] **default 残留自动迁移**：模块级 `migrateLegacyDefaultData()` 逐条按 selector 定位元素 → host-tab 面板映射 routeId → 归并到正确场景 key；已挂载场景立即迁移，未挂载元素保留在 default，访问该 tab 后兜底补迁；迁移完成自动清空 default
+- [x] **迁移去重**：归并目标场景时按 selector+target+property 去重，同元素同属性不重复追加
+- [x] 验证：跨场景施工单正确分场景输出，default 残留完整迁移后清空，无 TypeError
 
 ### M7：批注系统 ✅ 已完成
 
