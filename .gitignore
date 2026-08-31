@@ -13,3 +13,5 @@ node_modules/
 # IDE 工具工作目录（Codex / Trae 临时产物，不进入仓库）
 .workbuddy/
 .trae-html-share-packages/
+# 模型调用迁移的一次性标记文件（本地工具生成，不进入仓库）
+.codex/skills/.disable_to_model_invocation_migration.json
