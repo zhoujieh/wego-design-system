@@ -169,7 +169,7 @@
   align-items: center;
   justify-content: center;
   position: relative;
-  background: var(--bg-panel, #f6f6f6);
+  background: var(--bg-surface, #ffffff);
   border-radius: 12px;
   box-sizing: border-box;
 }
