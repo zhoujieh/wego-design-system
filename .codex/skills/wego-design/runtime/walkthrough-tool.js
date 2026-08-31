@@ -200,6 +200,22 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     return null;
   }
 
+  /** 从元素最近的 host-tab 面板映射 routeId（用于 default 残留数据的场景归属迁移）；
+   *  元素不在任何 host-tab 面板内（如 hash 子场景/弹窗）时返回 null */
+  function routeIdFromHostPanel(el) {
+    if (!el || !el.closest) return null;
+    try {
+      const panel = el.closest('.host-shell-page__panel');
+      if (panel && panel.dataset.hostTab) {
+        const hostTab = panel.dataset.hostTab;
+        const routes = window.WEGO_APP_ROUTES || [];
+        const route = routes.find(r => r.entry && r.entry.type === 'host-tab' && r.entry.tab === hostTab);
+        if (route) return route.routeId;
+      }
+    } catch (e) { /* 结构或路由配置异常时按未命中处理 */ }
+    return null;
+  }
+
   /** 纯 nth 兜底链（原逻辑，用于优雅降级） */
   function buildNthChain(el) {
     const parts = [];
@@ -226,6 +242,96 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       node = node.parentNode;
     }
     return parts.join(' > ');
+  }
+
+  /** 执行一轮 default 残留数据迁移（模块级，walkthrough 与 overview-panel 共用）
+   *  修复前主 tab 切换清空 hash，getCurrentRoute() 一直返回 default，所有主 tab 的变更/批注
+   *  都混在 default 下无法自动拆分。此函数逐条按 selector 在 DOM 中定位元素 →
+   *  routeIdFromHostPanel 映射 routeId → 归并到正确场景 key；全部迁移（或无可迁移）后清空 default，
+   *  未命中的元素（场景未挂载/已不存在）保留在 default 等待下次调用补迁。
+   *  注：用户在某一主 tab 录过数据即访问过该场景（场景内容已挂载并保留在 DOM），故可定位。
+   *  @returns {{ migratedCount:number, allMigrated:boolean }} 本轮迁移条数 & 是否已全部迁移 */
+  function migrateLegacyDefaultData() {
+    const KEY = 'wego.walkthrough.data.default';
+    let migratedCount = 0;
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (!raw) return { migratedCount: 0, allMigrated: true }; // 无残留
+      const data = JSON.parse(raw);
+      const changes = (data.changes || []).filter(c => c.newValue !== '' && c.newValue != null);
+      const annotations = (data.annotations || []).filter(a => a.text && String(a.text).trim());
+      if (!changes.length && !annotations.length) {
+        localStorage.removeItem(KEY); // 空残留直接清理
+        return { migratedCount: 0, allMigrated: true };
+      }
+      // 按 routeId 归集；无法定位的元素保留在 default
+      const perRoute = {};
+      const rest = { changes: [], annotations: [] };
+      const pushRec = (routeId, kind, item) => {
+        if (!perRoute[routeId]) perRoute[routeId] = { changes: [], annotations: [] };
+        perRoute[routeId][kind].push(item);
+        migratedCount++;
+      };
+      const resolveRoute = (selector) => {
+        if (!selector) return null;
+        let el = null;
+        try { el = queryTargetEl(selector); } catch (e) { el = null; }
+        if (!el || !el.isConnected) return null;
+        return routeIdFromHostPanel(el);
+      };
+      changes.forEach(c => {
+        const rid = resolveRoute(c.selector);
+        if (rid) pushRec(rid, 'changes', c);
+        else rest.changes.push(c);
+      });
+      annotations.forEach(a => {
+        const rid = resolveRoute(a.selector);
+        if (rid) pushRec(rid, 'annotations', a);
+        else rest.annotations.push(a);
+      });
+      // 归并到目标场景 key（追加，不覆盖已有数据；同元素同属性已有记录时去重跳过，避免重复）
+      Object.entries(perRoute).forEach(([routeId, rec]) => {
+        if (!rec.changes.length && !rec.annotations.length) return;
+        const targetKey = `wego.walkthrough.data.${routeId}`;
+        let target = {};
+        try { target = JSON.parse(localStorage.getItem(targetKey) || '{}'); } catch (e) { target = {}; }
+        const existingChanges = target.changes || [];
+        const keyOf = (item) => `${item.selector}||${item.target || ''}||${item.property}`;
+        const existingKeys = new Set(existingChanges.map(keyOf));
+        rec.changes.forEach(c => {
+          if (existingKeys.has(keyOf(c))) return; // 目标场景已有同元素同属性记录，跳过避免重复
+          existingChanges.push(c);
+        });
+        const existingAnn = target.annotations || [];
+        const annKeyOf = (item) => `${item.selector}||${(item.text || '').trim()}`;
+        const existingAnnKeys = new Set(existingAnn.map(annKeyOf));
+        rec.annotations.forEach(a => {
+          if (existingAnnKeys.has(annKeyOf(a))) return;
+          existingAnn.push(a);
+        });
+        target.changes = existingChanges;
+        target.annotations = existingAnn;
+        target.lastModified = Date.now();
+        if (!target.sceneRoute) target.sceneRoute = routeId;
+        localStorage.setItem(targetKey, JSON.stringify(target));
+      });
+      const allMigrated = rest.changes.length === 0 && rest.annotations.length === 0;
+      if (allMigrated) {
+        localStorage.removeItem(KEY);
+      } else if (migratedCount > 0) {
+        // 部分迁移成功：写回 default 剩余数据，等待下次调用补迁
+        localStorage.setItem(KEY, JSON.stringify({
+          sceneRoute: 'default',
+          lastModified: Date.now(),
+          changes: rest.changes,
+          annotations: rest.annotations,
+        }));
+      }
+      return { migratedCount, allMigrated };
+    } catch (e) {
+      debugLog.add('MIGRATE', `default 数据迁移异常: ${e.message}`);
+      return { migratedCount: 0, allMigrated: false };
+    }
   }
 
   /**
@@ -2586,6 +2692,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
     /** 从 localStorage 收集所有有变更的场景数据 */
     _loadAllScenesChanges() {
+      // 兜底迁移：页面已完全渲染时同步补迁一轮 default 残留（若加载时场景未就绪而未迁完）
+      migrateLegacyDefaultData();
       const scenes = [];
       try {
         for (let i = 0; i < localStorage.length; i++) {
@@ -5055,6 +5163,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 离开页面前把防抖窗口内未落盘的最后修改立即写入
       window.addEventListener('pagehide', () => this._flushSave());
       this._loadChanges();
+      // 迁移修复前遗留的 default 场景残留数据（主 tab 识别修复前的历史数据）：
+      // 按选择器在 DOM 中定位元素 → 从 host-tab 面板映射 routeId → 归并到正确场景。
+      // 场景为异步渲染，未命中的变更会在方法内延时重试补迁。
+      this._migrateLegacyDefaultData();
       // 暴露失败注入 API（兼容现有场景代码）
       window.WegoApp = window.WegoApp || {};
       window.WegoApp.faultInjection = {
@@ -5067,6 +5179,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._cleanupDrag();
       if (this._tabObserver) { this._tabObserver.disconnect(); this._tabObserver = null; }
       if (this._tabChangeTimer) { clearTimeout(this._tabChangeTimer); this._tabChangeTimer = null; }
+      if (this._migrateTimer) { clearTimeout(this._migrateTimer); this._migrateTimer = null; }
     }
 
     // ── 渲染 ──────────────────────────────────────────────
@@ -7022,6 +7135,30 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         this._updateChangeCount();
       } catch (e) {
         debugLog.add('LOAD', `_loadChanges 异常: ${e.message}`);
+      }
+    }
+
+    /** 迁移修复前遗留的 default 场景残留数据到正确场景
+     *  根因：修复前主 tab 切换会清空 hash，getCurrentRoute() 一直返回 default，
+     *  所有主 tab 的变更/批注都混在 default 下无法自动拆分，导致施工单错误显示「首页」且混场景。
+     *  此方法包装模块级 migrateLegacyDefaultData()：逐条按 selector 在 DOM 中定位元素 →
+     *  host-tab 面板映射 routeId → 归并到正确场景 key；场景异步渲染时未命中的元素延时重试补迁。
+     *  @param {number} round 重试轮次（最多 10 次约 3s） */
+    _migrateLegacyDefaultData(round) {
+      round = round || 0;
+      const { migratedCount, allMigrated } = migrateLegacyDefaultData();
+      // 未全部迁移且有进展 → 延时重试（补迁异步渲染后命中的元素）
+      if (!allMigrated && migratedCount > 0 && round < 10) {
+        if (this._migrateTimer) clearTimeout(this._migrateTimer);
+        this._migrateTimer = setTimeout(() => this._migrateLegacyDefaultData(round + 1), 300);
+      }
+      // 迁移可能把数据并入当前场景 key：若当前场景有数据则刷新加载，保证配置列表/施工单即时正确
+      if (migratedCount > 0 && state.currentRoute && state.currentRoute !== 'default') {
+        const curKey = `wego.walkthrough.data.${state.currentRoute}`;
+        if (localStorage.getItem(curKey)) {
+          this._loadChanges();
+          this._updateChangeCount();
+        }
       }
     }
 
