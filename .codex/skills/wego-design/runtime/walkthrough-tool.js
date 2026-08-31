@@ -113,11 +113,19 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     bug: `<svg ${ICON_SVG}><path d="M160,96a32,32,0,0,0-64,0v8H56a8,8,0,0,0,0,16H88.4A47.61,47.61,0,0,0,80,144v8H56a8,8,0,0,0,0,16H80v16a8,8,0,0,0,16,0V168h64v16a8,8,0,0,0,16,0V168h24a8,8,0,0,0,0-16H176v-8a47.61,47.61,0,0,0-8.4-24H200a8,8,0,0,0,0-16H160Zm-48,0a16,16,0,0,1,32,0v8H112Zm8,56a8,8,0,1,1,8-8A8,8,0,0,1,120,152Zm40,0a8,8,0,1,1,8-8A8,8,0,0,1,160,152Z"/></svg>`,
   };
 
-  /** 获取当前场景路由 */
+  /** 获取当前场景名称（优先从 WEGO_APP_ROUTES 路由配置查找 label，无 hash 显示"首页"） */
   function getCurrentRoute() {
     const hash = window.location.hash || '';
     const match = hash.match(/#\/(.+)/);
-    return match ? match[1] : 'default';
+    const routeId = match ? match[1] : 'default';
+    if (routeId === 'default') return '首页';
+    // 从路由配置查找场景名称
+    try {
+      const routes = window.WEGO_APP_ROUTES || [];
+      const route = routes.find(r => r.routeId === routeId);
+      if (route && route.entry && route.entry.label) return route.entry.label;
+    } catch (e) { /* 路由配置不可用时降级为 routeId */ }
+    return routeId;
   }
 
 
