@@ -112,14 +112,15 @@
   min-width: 0;
 }
 
-/* 次按钮：link 组件基础上覆盖为弹窗内居中文字链接（设计稿还原） */
+/* 次按钮：link 组件基础上覆盖为弹窗内居中文字链接（设计稿还原）
+   - 高度保持 32px，宽度内容自适应（align-self:center 覆盖 actions 的 stretch）
+   - 点击态（:active 背景）仅在文字链接区域，不占满整行 */
 .link.gray-popup__later {
-  width: 100%;
+  align-self: center;
   height: 32px;
   margin-top: 8px;
   color: #576b95;
   font-size: 14px;
-  justify-content: center;
   border-radius: 0;
 }
 

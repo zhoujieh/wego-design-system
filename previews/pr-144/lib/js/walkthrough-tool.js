@@ -4761,6 +4761,27 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
               el.style.width = '';   // 清历史残留固定宽（空值会触发已有 width 记录的撤销；仅当前元素，不联动同类）
               extra = [{ property: 'width', oldValue: oldW, newValue: '', sync: false }];
             }
+            /* BUGFIX：column 容器交叉轴 align-items:stretch（默认）会把子项横向拉满，
+               flex:0 1 auto 只控制主轴（垂直），auto 适应宽度不生效。auto 时用 align-self
+               取消交叉轴拉伸；fill 时清理残留 align-self 恢复 stretch。 */
+            const _alignParent = el.parentElement;
+            let _alignIsColumn = false;
+            if (_alignParent) {
+              try { _alignIsColumn = /^column/.test(getComputedStyle(_alignParent).flexDirection); } catch (e) { _alignIsColumn = false; }
+            }
+            if (value === 'auto' && _alignIsColumn) {
+              let _pAlign = 'stretch';
+              if (_alignParent) { try { _pAlign = getComputedStyle(_alignParent).alignItems; } catch (e) { _pAlign = 'stretch'; } }
+              if (_pAlign === 'stretch' || _pAlign === 'normal') {
+                const oldAlignSelf = cs().alignSelf;
+                el.style.alignSelf = 'flex-start';
+                extra.push({ property: 'align-self', oldValue: oldAlignSelf, newValue: 'flex-start', sync: false });
+              }
+            } else if (value === 'fill' && _alignIsColumn && el.style.getPropertyValue('align-self')) {
+              const oldAlignSelf = cs().alignSelf;
+              el.style.alignSelf = '';
+              extra.push({ property: 'align-self', oldValue: oldAlignSelf, newValue: '', sync: false });
+            }
             return { property: 'flex', oldValue: oldFlex, newValue: value === 'fill' ? '1 1 0%' : '0 1 auto', extra };
           }
           if (value === 'fill') {
