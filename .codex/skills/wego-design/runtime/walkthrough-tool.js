@@ -113,13 +113,17 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     bug: `<svg ${ICON_SVG}><path d="M160,96a32,32,0,0,0-64,0v8H56a8,8,0,0,0,0,16H88.4A47.61,47.61,0,0,0,80,144v8H56a8,8,0,0,0,0,16H80v16a8,8,0,0,0,16,0V168h64v16a8,8,0,0,0,16,0V168h24a8,8,0,0,0,0-16H176v-8a47.61,47.61,0,0,0-8.4-24H200a8,8,0,0,0,0-16H160Zm-48,0a16,16,0,0,1,32,0v8H112Zm8,56a8,8,0,1,1,8-8A8,8,0,0,1,120,152Zm40,0a8,8,0,1,1,8-8A8,8,0,0,1,160,152Z"/></svg>`,
   };
 
-  /** 获取当前场景名称（优先从 WEGO_APP_ROUTES 路由配置查找 label，无 hash 显示"首页"） */
+  /** 获取当前场景路由 ID（用于 localStorage 数据隔离，保持稳定不变） */
   function getCurrentRoute() {
     const hash = window.location.hash || '';
     const match = hash.match(/#\/(.+)/);
-    const routeId = match ? match[1] : 'default';
+    return match ? match[1] : 'default';
+  }
+
+  /** 获取当前场景显示名称（用于 Prompt 标题展示，从 WEGO_APP_ROUTES 查找 label） */
+  function getCurrentRouteLabel() {
+    const routeId = getCurrentRoute();
     if (routeId === 'default') return '首页';
-    // 从路由配置查找场景名称
     try {
       const routes = window.WEGO_APP_ROUTES || [];
       const route = routes.find(r => r.routeId === routeId);
@@ -2359,11 +2363,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
     _buildPrompt() {
       const route = this._route || 'default';
+      const routeLabel = getCurrentRouteLabel();
       const viewport = `${window.innerWidth}×${window.innerHeight}`;
       const changes = this._changes || [];
       const annotations = this._annotations || [];
       if (changes.length === 0 && annotations.length === 0) {
-        return `## Page Feedback: ${route}\n**Viewport:** ${viewport}\n\n当前还没有记录到任何配置修改或批注。`;
+        return `## 走查变更单 #/${routeLabel}\n**Viewport:** ${viewport}\n\n当前还没有记录到任何配置修改或批注。`;
       }
       // 分组逻辑：共享样式按组件类（sharedKey 去掉 ::属性名）分组，同一组件类的所有属性合并为一条；
       // 非共享样式按 selector 分组，同一元素的多个属性合并为一条。
@@ -2434,7 +2439,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         return v;
       };
       const lines = [
-        `## 走查变更单 #/${route}`,
+        `## 走查变更单 #/${routeLabel}`,
         `**Viewport:** ${viewport}`,
         '',
         '> 施工单：按最终效果整理，改法优先用设计系统语义类；主定位用组件类，完整选择器见文末备选。',
