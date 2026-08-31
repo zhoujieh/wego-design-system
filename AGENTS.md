@@ -74,5 +74,8 @@
 <!-- rule-id: session-end-must-clean-worktree -->
 - 回复结束、任务暂停或会话结束时，任务 worktree 不得遗留未提交改动：成组改动提交 checkpoint，零散改动还原或登记任务记录；禁止未提交改动跨会话存活。
 
+<!-- rule-id: merge-must-complete-closeout -->
+- PR 合并后必须完成本地收口：远端分支删除后，本地分支、worktree 与预览服务记录一并清理。合并发生在本地会话之外（网页端合并 / CI 自动合并 / 工作流维护短周期 PR 自动合并）时，由后续任务启动时的分支巡检兜底补齐，禁止远端已删除、本地长期残留。
+
 <!-- rule-id: local-server-must-auto-exit -->
 - 临时验证用本地服务必须自动退出；本地迭代与验收预览服务是唯一例外。
