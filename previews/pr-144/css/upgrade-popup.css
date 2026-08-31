@@ -94,6 +94,10 @@
 
 .gray-popup__actions {
   padding: 16px 24px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
 }
 
 /* 强制型弹窗（无近期不再提醒按钮）底部间距 24px */
@@ -101,37 +105,25 @@
   padding-bottom: 24px;
 }
 
-.gray-popup__confirm {
+/* 主按钮：btn 组件（btn--strong 品牌绿）基础上弹窗内全宽 */
+.btn.gray-popup__confirm {
   width: 100%;
-  height: 48px;
-  background: #07c160;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s;
+  max-width: none;
+  min-width: 0;
 }
 
-.gray-popup__confirm:active {
-  background: #06ad56;
-}
-
-.gray-popup__later {
+/* 次按钮：btn 组件（btn--weak）基础上覆盖为文字链接视觉（设计稿：透明底蓝字小按钮） */
+.btn.gray-popup__later {
   width: 100%;
+  max-width: none;
+  min-width: 0;
   height: 32px;
+  margin-top: 8px;
   background: transparent;
   color: #576b95;
-  border: none;
   font-size: 14px;
-  cursor: pointer;
-  margin-top: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-weight: 400;
+  border-radius: 0;
+  box-shadow: none;
 }
 
