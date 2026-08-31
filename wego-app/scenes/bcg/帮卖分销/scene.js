@@ -1,6 +1,6 @@
 /* 代理商帮卖弹窗场景（agent-resale）
    - 本场景为「帮卖弹窗」可复用组件的演示入口：选择不同样例数据，拉起同一套帮卖弹窗。
-   - 弹窗逻辑已抽到全局组件 wego-app/lib/js/agent-resale-popup.js（window.WegoApp.openAgentResalePopup），
+   - 弹窗逻辑已抽到全局组件 wego-app/lib/js/resale-popup.js（window.WegoApp.openResalePopup），
      任意业务场景（动态流、发布页等）均可直接调用，本场景只负责样例数据与入口。 */
 
 (function () {
@@ -170,7 +170,7 @@
         var key = card.getAttribute('data-scene-key');
         var sample = SCENE_SAMPLES.find(function (s) { return s.key === key; });
         if (!sample) return;
-        window.WegoApp.openAgentResalePopup(ctx, { sample: sample });
+        window.WegoApp.openResalePopup(ctx, { sample: sample });
       });
     });
   }
@@ -373,7 +373,7 @@
       if (entryCard) {
         entryCard.addEventListener('click', function () {
           var sample = SCENE_SAMPLES.find(function (s) { return s.key === 'first-resale-free-single'; });
-          if (sample) window.WegoApp.openAgentResalePopup(ctx, { sample: sample });
+          if (sample) window.WegoApp.openResalePopup(ctx, { sample: sample });
         });
       }
       mountSelection(ctx);

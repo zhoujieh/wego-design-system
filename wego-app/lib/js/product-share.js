@@ -1,9 +1,11 @@
-/* 产品分享场景（shop243 鸿蒙1.3分享能力升级）
-   - WegoApp.db 统一数据层（渐进式接入，不碰现有 key）
-   - 通用分享面板组件 window.WegoApp.openSharePanel
-   - 转发编辑页（复用发布产品页，发布按钮改转发）
-   - 灰度升级弹窗
-   - 分享流程模拟（下载进度、第三方跳转、小程序链接等） */
+/* 产品分享（业务组件，全局加载）
+   - 业务场景：内容跨平台分发——把产品分享到第三方平台获客（微信/朋友圈/视频号/闲鱼/小红书/快手/抖音/微博/转转），
+     支持小程序码/文案带链接/保存图片/系统分享；按内容类型（product/列表/主页/单据/海报/订单）扩展。
+   - 适用场景：动态页（商品分享、分享流程）、我的页（我的产品分享、转发记录）。
+   - 消费方式：window.WegoApp.openProductShare(ctx, options)
+   - 架构：数据层（WegoApp.db 本地记录：转发记录/快捷渠道）+ UI 层（分享面板/分享至XX/下载进度/小程序链接模板）
+          + 业务层（openProductShare 统一入口 + 渠道分发 + 流程模拟 + SHARE_TYPES 类型注册表，新增分享类型注册 render+config 即可）。
+   - 依赖：window.WegoApp（app.js）；分享图标 ./lib/assets/icons/share/。 */
 
 (function () {
   'use strict';
@@ -104,29 +106,6 @@
   }
   function addForwardedProduct(product) {
     DB.push('wego.product.forwarded', product);
-  }
-
-  /* ═══════════════════════════════════════════════════════════════
-     灰度弹窗状态
-     ═══════════════════════════════════════════════════════════════ */
-  function shouldShowGrayPopup(type) {
-    var key = 'wego.gray-popup.' + type;
-    var record = DB.get(key);
-    var today = new Date().toISOString().slice(0, 10);
-    if (type === 'dismissible') {
-      return !record || record.lastShownDate !== today;
-    } else {
-      return !record || !record.shown;
-    }
-  }
-  function markGrayPopupShown(type) {
-    var key = 'wego.gray-popup.' + type;
-    var today = new Date().toISOString().slice(0, 10);
-    if (type === 'dismissible') {
-      DB.set(key, { lastShownDate: today });
-    } else {
-      DB.set(key, { shown: true });
-    }
   }
 
   /* ═══════════════════════════════════════════════════════════════
@@ -308,30 +287,6 @@
       + '</div>'
       + '</div>';
   }
-
-  /* 灰度弹窗 */
-  function grayPopupTemplate(type) {
-    var isForced = type === 'forced';
-    var forcedClass = isForced ? ' gray-popup-modal--forced' : '';
-    return '<div class="modal modal--fullscreen gray-popup-modal' + forcedClass + '" data-component-slug="modal" data-state="open" role="dialog" aria-modal="true" aria-label="发现新版本">'
-      + '<div class="modal__panel gray-popup__panel">'
-      + '<div class="gray-popup__header"><img src="scenes/shop/产品分享/assets/update.png" alt="" class="gray-popup__header-img"></div>'
-      + '<div class="gray-popup__body">'
-      + '<ol class="gray-popup__list">'
-      + '<li>浏览相册更流畅，无需等待体验更好</li>'
-      + '<li>动态顶部显示上新好友，方便看款转图</li>'
-      + '<li>可开启微商相册输入法，和客户边聊天边推款</li>'
-      + '<li>修复已知问题</li>'
-      + '</ol>'
-      + '</div>'
-      + '<div class="gray-popup__actions">'
-      + '<button type="button" class="gray-popup__confirm" data-action="gray-confirm">立即体验</button>'
-      + (isForced ? '' : '<button type="button" class="gray-popup__later" data-action="gray-later">近期不再提醒</button>')
-      + '</div>'
-      + '</div>'
-      + '</div>';
-  }
-
   /* ═══════════════════════════════════════════════════════════════
      分享流程模拟
      ═══════════════════════════════════════════════════════════════ */
@@ -469,16 +424,17 @@
   }
 
   /* ═══════════════════════════════════════════════════════════════
-     公开 API：openSharePanel
+     公开 API：openProductShare（分享类型由 SHARE_TYPES 注册表分发）
      ═══════════════════════════════════════════════════════════════ */
-  function openSharePanel(ctx, options) {
+  function openProductShare(ctx, options) {
     options = options || {};
     var content = options.content || {};
     var config = options.config || {};
     var callbacks = options.callbacks || {};
     var title = options.title || '分享产品';
 
-    ctx.openSheet(sharePanelTemplate({ title: title, config: config }), {
+    var handler = SHARE_TYPES[options.contentType || 'panel'] || SHARE_TYPES.panel;
+    ctx.openSheet(handler.render({ title: title, config: config }), {
       label: title,
       init: function (sheetCtx) {
         var root = sheetCtx.root;
@@ -641,68 +597,15 @@
     });
   }
 
-  /* ═══════════════════════════════════════════════════════════════
-     灰度弹窗
-     ═══════════════════════════════════════════════════════════════ */
-  function openGrayPopup(ctx, type) {
-    if (!shouldShowGrayPopup(type)) return;
-    markGrayPopupShown(type);
 
-    ctx.openFullScreenModal(grayPopupTemplate(type), {
-      label: '灰度升级',
-      init: function (overlayCtx) {
-        var root = overlayCtx.root;
-        var confirmBtn = root.querySelector('[data-action="gray-confirm"]');
-        var laterBtn = root.querySelector('[data-action="gray-later"]');
+  /* SHARE_TYPES 分享类型注册表：新增内容类型（列表页/个人主页/单据/海报/订单等）在此注册 render + config，
+     业务层 openProductShare 按 contentType 分发，不改核心逻辑。 */
+  var SHARE_TYPES = {
+    panel: { label: '产品分享', render: sharePanelTemplate }
+  };
 
-        if (confirmBtn) {
-          confirmBtn.addEventListener('click', function () {
-            ctx.closeOverlay();
-            ctx.toast('跳转应用市场（模拟）');
-          });
-        }
-        if (laterBtn) {
-          laterBtn.addEventListener('click', function () {
-            ctx.closeOverlay();
-          });
-        }
-        /* 点击遮罩关闭（仅可关闭型） */
-        if (type !== 'forced') {
-          root.addEventListener('click', function (e) {
-            if (e.target === root) ctx.closeOverlay();
-          });
-        }
-      }
-    });
-  }
-
-  /* ═══════════════════════════════════════════════════════════════
-     转发编辑页（复用发布产品页，发布按钮改转发）
-     ═══════════════════════════════════════════════════════════════ */
-  function openForwardEditor(ctx, product, onForward) {
-    /* 复用发布产品模态，传入 forward 模式 */
-    if (window.WegoApp.openPublishProductModal) {
-      window.WegoApp.openPublishProductModal(ctx, {
-        mode: 'forward',
-        product: product,
-        onForward: function (forwardedProduct) {
-          addForwardedProduct(forwardedProduct);
-          ctx.toast('转发成功');
-          if (onForward) onForward(forwardedProduct);
-        }
-      });
-    } else {
-      /* fallback：简单模拟 */
-      ctx.toast('转发编辑页（演示）');
-    }
-  }
-
-  /* ═══════════════════════════════════════════════════════════════
-     暴露公开 API
-     ═══════════════════════════════════════════════════════════════ */
-  window.WegoApp.openSharePanel = openSharePanel;
-  window.WegoApp.openGrayPopup = openGrayPopup;
-  window.WegoApp.openForwardEditor = openForwardEditor;
+  /* 暴露公开 API */
+  window.WegoApp.openProductShare = openProductShare;
   window.WegoApp.getQuickChannel = getQuickChannel;
   window.WegoApp.setQuickChannel = setQuickChannel;
   window.WegoApp.getForwardedProducts = getForwardedProducts;

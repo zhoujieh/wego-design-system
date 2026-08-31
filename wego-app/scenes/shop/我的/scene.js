@@ -912,7 +912,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         /* 发布产品：作为 overlay 模态打开发布场景（与动态页一致，来源页保持挂载，
            写入动态流 + 回写我的页产品 tab），不再内联演示 */
         if (type === 'product') {
-          window.WegoApp.openPublishProductModal(ctx);
+          window.WegoApp.openProductEditor(ctx);
           return;
         }
         /* 笔记 / 直播：内联演示，写入我的页内容管理 */
@@ -973,8 +973,8 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
           /* 调用通用分享面板 */
           var items = contentFor(state.activeType);
           var item = items.find(function (it) { return it.id === itemId; });
-          if (window.WegoApp && window.WegoApp.openSharePanel && item) {
-            window.WegoApp.openSharePanel(ctx, {
+          if (window.WegoApp && window.WegoApp.openProductShare && item) {
+            window.WegoApp.openProductShare(ctx, {
               title: '分享产品',
               content: {
                 id: item.id,

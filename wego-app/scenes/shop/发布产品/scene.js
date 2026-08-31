@@ -51,8 +51,8 @@
 
 
 /* 发布产品场景（直链 #/publish-product 注册）
-   实际实现已抽离到 lib/js/publish-product-modal.js（全局加载），
-   本文件仅注册直链路由，init 复用全局 WegoApp.initPublishProduct。 */
+   实际实现已抽离到 lib/js/product-editor.js（全局加载），
+   本文件仅注册直链路由，init 复用全局 WegoApp.initProductEditor。 */
 
 const PUBLISH_TEMPLATE = `
 <div class="modal modal--fullscreen publish-product" data-surface-id="publish-product" data-route-id="publish-product" data-layout-mode="composed" data-component-slug="modal" data-state="open" role="dialog" aria-modal="true" aria-label="发布产品" style="--modal-panel-bg: var(--bg-page)">
@@ -149,6 +149,6 @@ const PUBLISH_TEMPLATE = `
     routeId: 'publish-product',
     template: PUBLISH_TEMPLATE,
     presentation: { type: 'full-screen-modal', transition: 'slide-up-enter, slide-down-exit', coversTabBar: false },
-    init: function (ctx) { window.WegoApp.initPublishProduct(ctx, null); }
+    init: function (ctx) { window.WegoApp.initProductEditor(ctx, null); }
   });
 })();

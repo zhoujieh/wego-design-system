@@ -1,6 +1,6 @@
 /* 帮卖弹窗（代理商帮卖 / 加价卖 / 赚佣金）可复用组件
    - 抽出自 wego-app/scenes/帮卖分销/scene.js，改为全局加载，供任意业务场景拉起。
-   - 暴露 window.WegoApp.openAgentResalePopup(ctx, options)
+   - 暴露 window.WegoApp.openResalePopup(ctx, options)
        options.sample: 帮卖样例数据（与帮卖分销 SCENE_SAMPLES 同契约）
          { product_id, distribution_type(1=自由定价/2=固定佣金), distribution_config,
            supply_price(数字 或 [min,max] 区间), skus, my_item, current_price,
@@ -17,8 +17,8 @@
   var WegoApp = (window.WegoApp = window.WegoApp || {});
 
   var STORAGE_KEYS = {
-    customAddPrice: 'agent-resale-custom-add-price',
-    showEditFreeTip: 'agent-resale-show-edit-free-tip'
+    customAddPrice: 'resale-custom-add-price',
+    showEditFreeTip: 'resale-show-edit-free-tip'
   };
 
   // ── 工具函数 ──
@@ -878,7 +878,7 @@
   }
 
   // ── 对外 API ──
-  WegoApp.openAgentResalePopup = function (ctx, options) {
+  WegoApp.openResalePopup = function (ctx, options) {
     options = options || {};
     var sample = options.sample || {};
     var mode = options.mode || 'resale';

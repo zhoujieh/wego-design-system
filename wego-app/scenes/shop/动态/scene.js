@@ -544,7 +544,7 @@
               // supply_price 取帮卖配置里的供货价（低于零售价）；未配置时回退零售价演示
               var supplyPrice = (cfg && cfg.supply_price != null) ? Number(cfg.supply_price) : retailPrice;
               var isFixed = cfg && cfg.distribution_type === 2;
-              window.WegoApp.openAgentResalePopup(ctx, {
+              window.WegoApp.openResalePopup(ctx, {
                 sample: {
                   product_id: product ? product.product_id : '',
                   distribution_type: cfg.distribution_type,
@@ -562,8 +562,8 @@
             /* 自己的产品：一键分享 */
             var shareDyn = dynamicById(target.getAttribute('data-dyn-id'));
             var shareProduct = shareDyn ? productOf(shareDyn) : null;
-            if (window.WegoApp && window.WegoApp.openSharePanel) {
-              window.WegoApp.openSharePanel(ctx, {
+            if (window.WegoApp && window.WegoApp.openProductShare) {
+              window.WegoApp.openProductShare(ctx, {
                 title: '分享产品',
                 content: {
                   id: shareProduct ? shareProduct.product_id : '',
@@ -585,9 +585,13 @@
             /* 别人的产品：点击一键转发进入转发编辑页 */
             var fwdDyn = dynamicById(target.getAttribute('data-dyn-id'));
             var fwdProduct = fwdDyn ? productOf(fwdDyn) : null;
-            if (window.WegoApp && window.WegoApp.openForwardEditor) {
-              window.WegoApp.openForwardEditor(ctx, fwdProduct, function () {
-                renderList(ctx, listEl);
+            if (window.WegoApp && window.WegoApp.openProductEditor) {
+              window.WegoApp.openProductEditor(ctx, {
+                mode: 'forward',
+                product: fwdProduct,
+                onForward: function () {
+                  renderList(ctx, listEl);
+                }
               });
             } else {
               ctx.toast('转发编辑页（演示）');
@@ -595,7 +599,7 @@
           } else if (action === 'more-actions') {
             openActionSheet(ctx);
           } else if (action === 'empty-publish') {
-            window.WegoApp.openPublishProductModal(ctx);
+            window.WegoApp.openProductEditor(ctx);
           } else if (action === 'retry-load') {
             renderList(ctx, listEl);
           }
@@ -609,8 +613,8 @@
           longPressTimer = setTimeout(function () {
             var fwdDyn = dynamicById(target.getAttribute('data-dyn-id'));
             var fwdProduct = fwdDyn ? productOf(fwdDyn) : null;
-            if (window.WegoApp && window.WegoApp.openSharePanel) {
-              window.WegoApp.openSharePanel(ctx, {
+            if (window.WegoApp && window.WegoApp.openProductShare) {
+              window.WegoApp.openProductShare(ctx, {
                 title: '分享产品',
                 content: {
                   id: fwdProduct ? fwdProduct.product_id : '',
@@ -653,8 +657,8 @@
 
       /* 灰度升级弹窗：首次进入动态页弹出（可关闭型） */
       setTimeout(function () {
-        if (window.WegoApp && window.WegoApp.openGrayPopup) {
-          window.WegoApp.openGrayPopup(ctx, 'dismissible');
+        if (window.WegoApp && window.WegoApp.openUpgradePopup) {
+          window.WegoApp.openUpgradePopup(ctx, 'dismissible');
         }
       }, 800);
 
@@ -662,7 +666,7 @@
         fabSelector: '[data-dom-id="open-publish-sheet"]',
         onPublish: function (type) {
           if (type === 'product') {
-            window.WegoApp.openPublishProductModal(ctx);
+            window.WegoApp.openProductEditor(ctx);
           } else {
             var typeLabel = type === 'note' ? '笔记' : '直播';
             ctx.toast('发布' + typeLabel + '（演示）');
@@ -794,8 +798,8 @@
         var shareBtn = r.querySelector('[data-action="detail-share"]');
         if (shareBtn) {
           shareBtn.addEventListener('click', function () {
-            if (window.WegoApp && window.WegoApp.openSharePanel) {
-              window.WegoApp.openSharePanel(ctx, {
+            if (window.WegoApp && window.WegoApp.openProductShare) {
+              window.WegoApp.openProductShare(ctx, {
                 title: '分享产品',
                 content: {
                   id: product ? product.product_id : '',

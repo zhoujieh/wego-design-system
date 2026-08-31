@@ -1,11 +1,10 @@
-/* 发布产品模态（全局加载组件）
-   - 从原 scenes/发布产品/scene.js 抽离实现，改为全局加载（index.html 引入），
-     确保 window.WegoApp.openPublishProductModal 在任意来源页（动态/我的）调用时均已定义，
-     不再因场景脚本懒加载而未定义导致静默失败（TypeError: ... is not a function）。
-   - 直链场景 #/publish-product 仍由 scenes/发布产品/scene.js 注册，
-     其 init 调用本文件暴露的 WegoApp.initPublishProduct。
+/* 产品编辑页（统一产品编辑，业务组件，全局加载）
+   - 业务场景：产品发布/编辑/转发——统一产品信息编辑入口，发布/转发/编辑三模式共用。
+   - 适用场景：动态页（FAB 发布/转发/编辑）、我的页（发布/编辑）、发布产品（直链 #/publish-product）。
+   - 消费方式：window.WegoApp.openProductEditor(ctx, options)；options.mode 为 publish/forward/edit。
+   - 直链场景 #/publish-product 仍由 scenes/发布产品/scene.js 注册，其 init 调用 WegoApp.initProductEditor。
    - 依赖：window.WegoApp（app.js）、window.WEGO_PROTOTYPE_DB（prototype-db.js）、
-     window.WegoApp.openAgentResalePopup（agent-resale-popup.js，需在其后加载）。 */
+     window.WegoApp.openResalePopup（resale-popup.js，需在其后加载）。 */
 
 (function () {
   'use strict';
@@ -197,9 +196,9 @@
   }
 
   /* 发布产品初始化（场景直链 / overlay 模态 共用）
-     - ctx：场景上下文或 overlay 上下文（overlay 模式下由 openPublishProductModal 补齐 openSheet/closeOverlay API）
+     - ctx：场景上下文或 overlay 上下文（overlay 模式下由 openProductEditor 补齐 openSheet/closeOverlay API）
      - triggerCtx：拉起本模态的来源场景上下文（用于发布成功后跳转 album-product-feed）；overlay 模式必传 */
-  function initPublishProduct(ctx, triggerCtx) {
+  function initProductEditor(ctx, triggerCtx) {
     var root = ctx.root;
     var scroll = root.querySelector('.publish-product__scroll');
 
@@ -410,8 +409,8 @@
         doPublish();
         /* 拉起分享面板 */
         setTimeout(function () {
-          if (window.WegoApp && window.WegoApp.openSharePanel) {
-            window.WegoApp.openSharePanel(ctx, {
+          if (window.WegoApp && window.WegoApp.openProductShare) {
+            window.WegoApp.openProductShare(ctx, {
               title: '分享产品',
               content: collectShareContent(),
               callbacks: {
@@ -453,7 +452,7 @@
     function openResaleSheet() {
       var resale = formState.resale || { distribution_type: 1, distribution_config: { amountType: 1, value: 30 } };
       var supplyPrice = Number(formState.takePrice) || Number(formState.wholesalePrice) || 0;
-      window.WegoApp.openAgentResalePopup(ctx, {
+      window.WegoApp.openResalePopup(ctx, {
         mode: 'configure',
         sample: {
           product_id: 'pub-product',
@@ -495,9 +494,9 @@
   /* 公共入口：作为 overlay 模态打开发布产品（与「点搜索」同源机制），来源页（动态/我的）保持挂载、内容不卸载。
      triggerCtx：来源场景上下文，需提供 openFullScreenModal / openSheet / navigate。
      在 overlay 上下文中补齐嵌套 openSheet / closeOverlay 所需 API（overlay 原生 init 上下文不携带这些方法）。 */
-  window.WegoApp.openPublishProductModal = function (triggerCtx, options) {
+  window.WegoApp.openProductEditor = function (triggerCtx, options) {
     if (!triggerCtx || typeof triggerCtx.openFullScreenModal !== 'function') {
-      console.warn('[wego-app] openPublishProductModal 需要有效的场景 ctx');
+      console.warn('[wego-app] openProductEditor 需要有效的场景 ctx');
       return;
     }
     options = options || {};
@@ -515,7 +514,7 @@
         });
         api._publishMode = mode;
         api._publishOptions = options;
-        initPublishProduct(api, triggerCtx);
+        initProductEditor(api, triggerCtx);
 
         /* forward 模式：预填充产品数据 */
         if (mode === 'forward' && options.product) {
@@ -546,6 +545,6 @@
 
   
   // 暴露给直链场景 init 与全局入口
-  WegoApp.initPublishProduct = initPublishProduct;
+  WegoApp.initProductEditor = initProductEditor;
   WegoApp.PUBLISH_TEMPLATE = PUBLISH_TEMPLATE;
 })();
