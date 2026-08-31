@@ -120,15 +120,16 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     return match ? match[1] : 'default';
   }
 
-  /** 获取当前场景显示名称（用于 Prompt 标题展示）
+  /** 获取场景显示名称（用于 Prompt 标题展示）
    *  优先用 entry.label；主 tab 场景（动态/好友/我的/工作台）没有 label，从 style 路径提取场景目录名；
-   *  都没有时降级为路由 ID。 */
-  function getCurrentRouteLabel() {
-    const routeId = getCurrentRoute();
-    if (routeId === 'default') return '首页';
+   *  都没有时降级为路由 ID。
+   *  @param {string} [routeId] 可选，不传时用当前路由 */
+  function getRouteLabel(routeId) {
+    const id = routeId || getCurrentRoute();
+    if (id === 'default') return '首页';
     try {
       const routes = window.WEGO_APP_ROUTES || [];
-      const route = routes.find(r => r.routeId === routeId);
+      const route = routes.find(r => r.routeId === id);
       if (route) {
         // 优先用 entry.label（弹窗、工具类场景）
         if (route.entry && route.entry.label) return route.entry.label;
@@ -139,7 +140,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         }
       }
     } catch (e) { /* 路由配置不可用时降级为 routeId */ }
-    return routeId;
+    return id;
+  }
+
+  /** 获取当前场景显示名称（兼容旧调用） */
+  function getCurrentRouteLabel() {
+    return getRouteLabel();
   }
 
 
@@ -2341,7 +2347,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     }
 
     _copyPrompt() {
-      const prompt = this._buildPrompt();
+      const prompt = this._buildAllScenesPrompt();
       // 复制到剪贴板
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(prompt).then(() => {
@@ -2562,6 +2568,229 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         lines.push('');
       }
       lines.push('<!-- WEGo_CHANGES_JSON ' + JSON.stringify(machine) + ' -->');
+      return lines.join('\n');
+    }
+
+    /** 从 localStorage 收集所有有变更的场景数据 */
+    _loadAllScenesChanges() {
+      const scenes = [];
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (!key || !key.startsWith('wego.walkthrough.data.')) continue;
+          const routeId = key.replace('wego.walkthrough.data.', '');
+          try {
+            const raw = localStorage.getItem(key);
+            const data = raw ? JSON.parse(raw) : {};
+            const changes = (data.changes || []).filter(c => c.newValue !== '' && c.newValue != null);
+            const annotations = (data.annotations || []).filter(a => a.text && String(a.text).trim());
+            if (changes.length > 0 || annotations.length > 0) {
+              scenes.push({ routeId, routeLabel: getRouteLabel(routeId), changes, annotations });
+            }
+          } catch (e) { /* 单个场景解析失败不影响其他场景 */ }
+        }
+      } catch (e) { /* localStorage 不可用时返回空 */ }
+      // 按场景名称排序，当前场景排第一
+      const currentRoute = getCurrentRoute();
+      scenes.sort((a, b) => {
+        if (a.routeId === currentRoute) return -1;
+        if (b.routeId === currentRoute) return 1;
+        return a.routeLabel.localeCompare(b.routeLabel, 'zh-CN');
+      });
+      return scenes;
+    }
+
+    /** 生成跨场景汇总 Prompt（按场景分组输出） */
+    _buildAllScenesPrompt() {
+      const viewport = `${window.innerWidth}×${window.innerHeight}`;
+      const scenes = this._loadAllScenesChanges();
+      if (scenes.length === 0) {
+        return `## 走查变更单（跨场景汇总）\n**Viewport:** ${viewport}\n\n当前还没有记录到任何配置修改或批注。`;
+      }
+      // 只有一个场景时，直接用单场景格式
+      if (scenes.length === 1) {
+        const s = scenes[0];
+        const savedChanges = this._changes;
+        const savedAnnotations = this._annotations;
+        const savedRoute = this._route;
+        this._changes = s.changes;
+        this._annotations = s.annotations;
+        this._route = s.routeId;
+        // 临时覆盖 getCurrentRouteLabel 用场景名
+        const prompt = this._buildPrompt();
+        this._changes = savedChanges;
+        this._annotations = savedAnnotations;
+        this._route = savedRoute;
+        return prompt;
+      }
+      // 多场景：按场景分组输出
+      const lines = [
+        `## 走查变更单（跨场景汇总，共 ${scenes.length} 个场景）`,
+        `**Viewport:** ${viewport}`,
+        '',
+        '> 施工单：按最终效果整理，改法优先用设计系统语义类；主定位用组件类，完整选择器见文末备选。',
+        '',
+      ];
+      const allMachine = [];
+      const allFullSelectors = [];
+      // 辅助函数（复用 _buildPrompt 中的逻辑）
+      const getClassAnchor = (g) => {
+        if (g.componentClass) return g.componentClass;
+        if (g.elementClass) return g.elementClass.split(/\s+/)[0];
+        const m = g.selector.match(/\.([a-zA-Z0-9_-]+)\s*$/) || g.selector.match(/\[data-component-slug="[^"]+"\]\.([a-zA-Z0-9_-]+)/);
+        return m ? m[1] : '';
+      };
+      const formatFlexLabel = (v) => {
+        if (!v) return '-';
+        if (v === '0 1 auto') return '适应（内容宽度）';
+        if (v === '1 1 0%' || v === '1 1 0') return '填充（剩余空间）';
+        const fixedMatch = v.match(/^0 0 (\d+px)$/);
+        if (fixedMatch) return `固定 ${fixedMatch[1]}`;
+        return v;
+      };
+      scenes.forEach((scene, sceneIdx) => {
+        lines.push(`### 场景 ${sceneIdx + 1}：${scene.routeLabel}（#/${scene.routeId}）`);
+        lines.push('');
+        // 分组逻辑（同 _buildPrompt）
+        const groups = {};
+        scene.changes.forEach(c => {
+          const componentClass = c.sharedKey ? c.sharedKey.split('::')[0] : '';
+          const gkey = c.sharedKey ? componentClass : c.selector;
+          if (!groups[gkey]) {
+            groups[gkey] = { selector: c.selector, elementTag: c.elementTag, elementText: c.elementText, elementClass: c.elementClass || '', changes: [], shared: !!c.sharedKey, componentClass, annotation: '' };
+          }
+          groups[gkey].changes.push(c);
+        });
+        const pureAnnotations = [];
+        scene.annotations.forEach(a => {
+          if (!a.text || !a.text.trim()) return;
+          const aComponentClass = (a.elementClass || '').split(/\s+/)[0] || '';
+          let matched = null;
+          for (const g of Object.values(groups)) {
+            if (g.selector === a.selector) { matched = g; break; }
+            if (g.componentClass && aComponentClass && g.componentClass === aComponentClass) { matched = g; break; }
+          }
+          if (matched) {
+            matched.annotation = a.text;
+            if (!matched.elementText && a.elementText) matched.elementText = a.elementText;
+            if (!matched.elementTag && a.elementTag) matched.elementTag = a.elementTag;
+          } else {
+            pureAnnotations.push(a);
+          }
+        });
+        const groupList = Object.values(groups).map(g => {
+          if (g.shared && g.changes.length) {
+            const propCounts = {};
+            g.changes.forEach(c => {
+              const pk = c.property + '||' + c.newValue;
+              if (!propCounts[pk]) propCounts[pk] = new Set();
+              propCounts[pk].add(c.selector);
+            });
+            g.sharedCount = Math.max(...Object.values(propCounts).map(s => s.size));
+          }
+          return g;
+        });
+        const styleGroups = groupList.filter(g => g.changes.length > 0);
+        const noteOnlyGroups = pureAnnotations;
+        if (styleGroups.length) {
+          lines.push(`#### 样式变更（${styleGroups.length} 组）`);
+          lines.push('');
+        }
+        styleGroups.forEach((g, i) => {
+          const anchor = (g.elementText || '').replace(/\s+/g, ' ').trim();
+          const shortAnchor = anchor.length > 16 ? anchor.slice(0, 16) + '…' : anchor;
+          const classAnchor = getClassAnchor(g);
+          const role = shortAnchor || classAnchor || g.elementTag;
+          let title = `##### ${i + 1}. ${role}`;
+          if (classAnchor) title += ` · .${classAnchor}`;
+          if (g.shared) title += `（共享 ${g.sharedCount} 个元素）`;
+          lines.push(title);
+          const addClassChanges = g.changes.filter(c => c.intent === 'add-class');
+          const cssMap = new Map();
+          g.changes.filter(c => !c.skipCss).forEach(c => {
+            const k = c.property + '||' + c.newValue;
+            if (!cssMap.has(k)) cssMap.set(k, c);
+          });
+          const cssChanges = Array.from(cssMap.values());
+          const orderChanges = cssChanges.filter(c => c.property === 'order');
+          const otherChanges = cssChanges.filter(c => c.property !== 'order');
+          const changeLines = [];
+          addClassChanges.forEach(c => { changeLines.push(`- 加结构类 \`${c.intentClass}\``); });
+          orderChanges.forEach(c => {
+            const posTxt = (c.displayOld && c.displayNew) ? `${c.displayOld} → ${c.displayNew}` : `order ${c.oldValue} → ${c.newValue}`;
+            changeLines.push(`- 顺序：${posTxt}`);
+          });
+          otherChanges.forEach(c => {
+            const propLabel = c.property === 'flex' ? '宽度' : c.property;
+            const valLabel = c.property === 'flex' ? formatFlexLabel(c.newValue) : (c.newValue || '-');
+            changeLines.push(`- ${propLabel} → ${valLabel}（\`${c.property}: ${c.newValue || '-'}\`）`);
+          });
+          if (changeLines.length) {
+            lines.push('- 变更：');
+            changeLines.forEach(l => lines.push('  ' + l));
+          }
+          const cssSnippet = otherChanges.map(c => `${c.property}: ${c.newValue || '-'}`).join('; ');
+          const orderSnippet = orderChanges.length ? `order: ${orderChanges[0].orderValue || orderChanges[0].newValue}` : '';
+          const addSnippet = addClassChanges.map(c => c.intentClass).join(' ');
+          let fixLine = '- 改法：';
+          if (classAnchor) {
+            fixLine += `修改 \`.${classAnchor}\``;
+            if (cssSnippet || orderSnippet) fixLine += `：\`${[cssSnippet, orderSnippet].filter(Boolean).join('; ')}\``;
+            if (addSnippet) fixLine += `，加类 \`${addSnippet}\``;
+          } else {
+            fixLine += `在源码对应 CSS 中设置：\`${[cssSnippet, orderSnippet].filter(Boolean).join('; ')}\``;
+          }
+          lines.push(fixLine);
+          if (g.annotation) lines.push(`- 备注：${g.annotation}`);
+          lines.push('');
+          allFullSelectors.push({ scene: scene.routeLabel, idx: i + 1, classAnchor, selector: g.selector });
+          allMachine.push({
+            routeId: scene.routeId,
+            routeLabel: scene.routeLabel,
+            selector: g.selector,
+            elementText: anchor,
+            role,
+            adds: addClassChanges.map(c => c.intentClass).filter(Boolean),
+            css: cssChanges.map(c => ({ property: c.property, value: c.property === 'order' ? (c.orderValue || c.newValue) : c.newValue })),
+            annotation: g.annotation || '',
+            shared: g.shared || false,
+            sharedCount: g.shared ? (g.sharedCount || g.changes.length) : 0,
+          });
+        });
+        if (noteOnlyGroups.length) {
+          lines.push(`#### 备注（${noteOnlyGroups.length} 条）`);
+          lines.push('');
+          noteOnlyGroups.forEach((a, i) => {
+            const anchor = (a.elementText || '').replace(/\s+/g, ' ').trim();
+            const shortAnchor = anchor.length > 16 ? anchor.slice(0, 16) + '…' : anchor;
+            const aClass = (a.elementClass || '').split(/\s+/)[0] || '';
+            const role = shortAnchor || aClass || a.elementTag;
+            lines.push(`${i + 1}. ${role}：${a.text}`);
+            allFullSelectors.push({ scene: scene.routeLabel, idx: '备注' + (i + 1), classAnchor: aClass, selector: a.selector });
+          });
+          lines.push('');
+        }
+      });
+      // 完整定位选择器备选（折叠区，按场景分组）
+      if (allFullSelectors.length) {
+        lines.push('<details><summary>完整定位选择器（备选，主定位失效时使用）</summary>');
+        lines.push('');
+        const byScene = {};
+        allFullSelectors.forEach(f => {
+          if (!byScene[f.scene]) byScene[f.scene] = [];
+          byScene[f.scene].push(f);
+        });
+        Object.entries(byScene).forEach(([sceneName, sels]) => {
+          lines.push(`**${sceneName}**`);
+          sels.forEach(f => {
+            lines.push(`${f.idx}. ${f.classAnchor ? '.' + f.classAnchor + ' → ' : ''}\`${f.selector}\``);
+          });
+          lines.push('');
+        });
+        lines.push('</details>');
+        lines.push('');
+      }
+      lines.push('<!-- WEGo_CHANGES_JSON ' + JSON.stringify(allMachine) + ' -->');
       return lines.join('\n');
     }
 
