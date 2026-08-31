@@ -120,14 +120,24 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     return match ? match[1] : 'default';
   }
 
-  /** 获取当前场景显示名称（用于 Prompt 标题展示，从 WEGO_APP_ROUTES 查找 label） */
+  /** 获取当前场景显示名称（用于 Prompt 标题展示）
+   *  优先用 entry.label；主 tab 场景（动态/好友/我的/工作台）没有 label，从 style 路径提取场景目录名；
+   *  都没有时降级为路由 ID。 */
   function getCurrentRouteLabel() {
     const routeId = getCurrentRoute();
     if (routeId === 'default') return '首页';
     try {
       const routes = window.WEGO_APP_ROUTES || [];
       const route = routes.find(r => r.routeId === routeId);
-      if (route && route.entry && route.entry.label) return route.entry.label;
+      if (route) {
+        // 优先用 entry.label（弹窗、工具类场景）
+        if (route.entry && route.entry.label) return route.entry.label;
+        // 主 tab 场景从 style 路径提取场景目录名（如 ./scenes/shop/动态/scene.css → 动态）
+        if (route.style) {
+          const match = route.style.match(/\/scenes\/[^/]+\/([^/]+)\//);
+          if (match) return match[1];
+        }
+      }
     } catch (e) { /* 路由配置不可用时降级为 routeId */ }
     return routeId;
   }
