@@ -128,10 +128,9 @@
   display: flex;
   flex-wrap: wrap;
   align-content: flex-start;
-  gap: 12px 0;
+  gap: 0;
   padding: 0 8px;
-  min-width: 100%;
-  flex: 0 0 100%;
+  flex: 0 0 auto;
   box-sizing: border-box;
 }
 
@@ -143,7 +142,7 @@
   border: none;
   background: transparent;
   cursor: pointer;
-  padding: 6px 4px;
+  padding: 4px;
   width: 68px;
   flex: 0 0 68px;
   box-sizing: border-box;
@@ -203,28 +202,35 @@
 .share-panel__channel-name {
   font-size: 11px;
   color: var(--text-secondary, #666);
-  white-space: nowrap;
   line-height: 1.2;
+  text-align: center;
+  word-break: break-all;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-width: 100%;
 }
 
-/* 滚动指示器（32px 宽 2px 高，按组数显示） */
+/* 滚动指示器：滚动条式进度条（track + thumb），仅多组时显示 */
 .share-panel__indicator {
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  padding: 0 0 12px;
-}
-
-.share-panel__indicator-dot {
-  width: 32px;
+  width: 160px;
   height: 2px;
+  margin: 0 auto 12px;
   border-radius: 1px;
   background: var(--border-light, #e0e0e0);
-  transition: background 0.2s;
+  position: relative;
+  overflow: hidden;
 }
 
-.share-panel__indicator-dot--active {
+.share-panel__indicator-thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: 1px;
   background: var(--text-secondary, #999);
+  transition: transform 0.15s ease;
 }
 
 /* 其他操作栏 */

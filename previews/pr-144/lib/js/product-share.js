@@ -189,18 +189,8 @@
     });
     actionsHtml += '</div>';
 
-    /* 滚动指示器：32px 宽 2px 高，按组数显示 */
-    var indicatorHtml = '';
-    if (hasMultipleGroups) {
-      indicatorHtml = '<div class="share-panel__indicator">';
-      var groups = [group1, group2];
-      groups.forEach(function (g, idx) {
-        if (g.length > 0) {
-          indicatorHtml += '<span class="share-panel__indicator-dot' + (idx === 0 ? ' share-panel__indicator-dot--active' : '') + '"></span>';
-        }
-      });
-      indicatorHtml += '</div>';
-    }
+    /* 滚动指示器：滚动条式进度条（track + thumb），是否有第二组由实际分组决定（init 时控制显隐） */
+    var indicatorHtml = '<div class="share-panel__indicator"><div class="share-panel__indicator-thumb"></div></div>';
 
     /* 标题栏右侧按钮：图标+文字 */
     var headerActionsHtml = '';
@@ -224,7 +214,7 @@
       + headerActionsHtml
       + '</div>'
       + configHtml
-      + '<div class="share-panel__channels layout-scroll-row" data-snap="start" data-channel-scroll>'
+      + '<div class="share-panel__channels layout-scroll-row" data-channel-scroll>'
       + renderChannelGroup(group1)
       + (hasMultipleGroups ? renderChannelGroup(group2) : '')
       + '</div>'
@@ -524,22 +514,60 @@
           }
         });
 
-        /* 渠道栏滚动指示器跟随 */
+        /* 渠道栏：动态分组 + 组宽按屏幕计算（item 68px，每行 N=(可用宽-16)/68，组宽=N×68+16）+ 滚动条式指示器跟随 */
         var channelScroll = root.querySelector('[data-channel-scroll]');
-        var indicatorDots = root.querySelectorAll('.share-panel__indicator-dot');
-        if (channelScroll && indicatorDots.length > 1) {
-          channelScroll.addEventListener('scroll', function () {
-            var scrollLeft = channelScroll.scrollLeft;
-            var groupWidth = channelScroll.offsetWidth;
-            var activeIndex = Math.round(scrollLeft / groupWidth);
-            indicatorDots.forEach(function (dot, idx) {
-              if (idx === activeIndex) {
-                dot.classList.add('share-panel__indicator-dot--active');
-              } else {
-                dot.classList.remove('share-panel__indicator-dot--active');
-              }
-            });
-          }, { passive: true });
+        var indicatorThumb = root.querySelector('.share-panel__indicator-thumb');
+        var indicatorEl = root.querySelector('.share-panel__indicator');
+        if (channelScroll) {
+          /* 每行 item 数量与组宽（减左右 8px 内边距） */
+          var available = channelScroll.clientWidth - 16;
+          var perRow = Math.max(1, Math.floor(available / 68));
+          var perGroup = perRow * 2;
+          var groupWidth = perRow * 68 + 16;
+
+          /* 动态分组：渠道按配置顺序，每组最多 2N 个（双行），剩余进下一组 */
+          var allItems = Array.prototype.slice.call(channelScroll.querySelectorAll('.share-panel__channel-item'));
+          channelScroll.querySelectorAll('.share-panel__channel-group').forEach(function (g) {
+            g.parentNode.removeChild(g);
+          });
+          var groupCount = Math.max(1, Math.ceil(allItems.length / perGroup));
+          var groupEls = [];
+          for (var gi = 0; gi < groupCount; gi++) {
+            var gEl = document.createElement('div');
+            gEl.className = 'share-panel__channel-group';
+            gEl.style.flexBasis = groupWidth + 'px';
+            gEl.style.minWidth = groupWidth + 'px';
+            channelScroll.appendChild(gEl);
+            groupEls.push(gEl);
+          }
+          allItems.forEach(function (item, idx) {
+            groupEls[Math.min(groupCount - 1, Math.floor(idx / perGroup))].appendChild(item);
+          });
+
+          /* 指示器：仅有多组（有第二组）时显示 */
+          if (indicatorEl) {
+            indicatorEl.style.display = groupCount > 1 ? '' : 'none';
+          }
+
+          /* 滚动条式指示器：thumb 位置/宽度随滚动进度 */
+          var updateThumb = function () {
+            if (!indicatorThumb) return;
+            var maxScroll = channelScroll.scrollWidth - channelScroll.clientWidth;
+            if (maxScroll <= 0) {
+              indicatorThumb.style.width = '100%';
+              indicatorThumb.style.transform = 'translateX(0)';
+              return;
+            }
+            var track = indicatorThumb.parentElement;
+            var trackW = track.clientWidth;
+            var thumbW = Math.max(16, trackW * (channelScroll.clientWidth / channelScroll.scrollWidth));
+            var maxTrack = trackW - thumbW;
+            var x = maxTrack * (channelScroll.scrollLeft / maxScroll);
+            indicatorThumb.style.width = thumbW + 'px';
+            indicatorThumb.style.transform = 'translateX(' + x + 'px)';
+          };
+          updateThumb();
+          channelScroll.addEventListener('scroll', updateThumb, { passive: true });
         }
 
         /* 遮罩点击关闭 */
