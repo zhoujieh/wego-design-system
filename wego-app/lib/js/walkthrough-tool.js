@@ -5150,7 +5150,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._restorePosition();
       this._restoreFaultState();
       state.currentRoute = getCurrentRoute();
-      window.addEventListener('hashchange', () => this._handleRouteChange());
+      window.addEventListener('hashchange', this._onHashChange);
       // 主 tab 切换会清空 hash（hashchange 不触发），用 MutationObserver 监听激活 panel 变化
       this._tabObserver = new MutationObserver(() => {
         clearTimeout(this._tabChangeTimer);
@@ -5161,7 +5161,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         this._tabObserver.observe(hostPage, { subtree: true, attributes: true, attributeFilter: ['class'] });
       } catch (e) { /* 监听目标不可用时降级，仅靠 hashchange */ }
       // 离开页面前把防抖窗口内未落盘的最后修改立即写入
-      window.addEventListener('pagehide', () => this._flushSave());
+      window.addEventListener('pagehide', this._onPageHide);
       this._loadChanges();
       // 迁移修复前遗留的 default 场景残留数据（主 tab 识别修复前的历史数据）：
       // 按选择器在 DOM 中定位元素 → 从 host-tab 面板映射 routeId → 归并到正确场景。
@@ -5177,6 +5177,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
     disconnectedCallback() {
       this._cleanupDrag();
+      // 移除全局监听器，避免组件销毁后闭包持有 this 造成泄漏、重建后事件重复处理
+      window.removeEventListener('hashchange', this._onHashChange);
+      window.removeEventListener('pagehide', this._onPageHide);
+      document.removeEventListener('pointerdown', this._onDocPointerDown, true);
+      document.removeEventListener('keydown', this._onDocKeyDown);
       if (this._tabObserver) { this._tabObserver.disconnect(); this._tabObserver = null; }
       if (this._tabChangeTimer) { clearTimeout(this._tabChangeTimer); this._tabChangeTimer = null; }
       if (this._migrateTimer) { clearTimeout(this._migrateTimer); this._migrateTimer = null; }
@@ -5842,17 +5847,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         });
       }
       // 点击外部关闭子面板、配置列表和调试日志面板
-      document.addEventListener('pointerdown', (e) => {
-        if (!e.target.closest) return;
-        if (isWalkthroughElement(e.target)) return; // 工具自身 UI 内的 pointerdown 不关闭
-        if (!e.target.closest('wego-walkthrough')) {
-          this._closeSubpanels();
-          if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
-            this._components.overviewPanel.close();
-          }
-          this._closeDebugPanel();
-        }
-      }, true);
+      document.addEventListener('pointerdown', this._onDocPointerDown, true);
 
       // 批注气泡事件
       this._components.annotationClose.addEventListener('click', (e) => {
@@ -5899,33 +5894,49 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       bus.on('element-deselected', () => this._components.stylePanel.close());
 
       // ESC 键：按层级优先级逐级关闭面板，全部关闭后退出走查模式
-      document.addEventListener('keydown', (e) => {
-        if (e.key !== 'Escape') return;
-        // 1. 颜色选择器（最上层）
-        const cp = this._components.colorPicker;
-        if (cp && !cp.hasAttribute('hidden')) { cp.close(); return; }
-        // 2. 批注气泡
-        const ab = this._components.annotationBubble;
-        if (ab && !ab.hasAttribute('hidden')) { this._closeAnnotationBubble(); return; }
-        // 3. Token 选择面板（样式面板内部浮层）
-        const sp = this._components.stylePanel;
-        if (sp && sp._tokenPanel && sp._tokenPanel.open) { sp._closeTokenPanel(); return; }
-        // 4. 样式编辑面板（有选中元素）
-        if (state.selectedElement) { this._clearSelection(); return; }
-        // 5. 调试日志面板
-        if (this._components.debugPanel && !this._components.debugPanel.hasAttribute('hidden')) { this._closeDebugPanel(); return; }
-        // 6. 配置列表面板
-        const ov = this._components.overviewPanel;
-        if (ov && !ov.hasAttribute('hidden')) { ov.close(); return; }
-        // 7. 工具条子面板（数据模拟 / 更多）
-        const anySubpanel = this._shadow.querySelector('[data-subpanel].is-open');
-        if (anySubpanel) { this._closeSubpanels(); return; }
-        // 8. 走查模式
-        if (this._walkthroughMode) { this._setWalkthroughMode(false); return; }
-        // 9. 批注模式
-        if (this._annotationMode) { this._setAnnotationMode(false); return; }
-      });
+      document.addEventListener('keydown', this._onDocKeyDown);
     }
+
+    // 全局监听器（类字段箭头函数，保证 disconnected 时能 removeEventListener）
+    _onHashChange = () => this._handleRouteChange();
+    _onPageHide = () => this._flushSave();
+    _onDocPointerDown = (e) => {
+      if (!e.target.closest) return;
+      if (isWalkthroughElement(e.target)) return; // 工具自身 UI 内的 pointerdown 不关闭
+      if (!e.target.closest('wego-walkthrough')) {
+        this._closeSubpanels();
+        if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
+          this._components.overviewPanel.close();
+        }
+        this._closeDebugPanel();
+      }
+    };
+    _onDocKeyDown = (e) => {
+      if (e.key !== 'Escape') return;
+      // 1. 颜色选择器（最上层）
+      const cp = this._components.colorPicker;
+      if (cp && !cp.hasAttribute('hidden')) { cp.close(); return; }
+      // 2. 批注气泡
+      const ab = this._components.annotationBubble;
+      if (ab && !ab.hasAttribute('hidden')) { this._closeAnnotationBubble(); return; }
+      // 3. Token 选择面板（样式面板内部浮层）
+      const sp = this._components.stylePanel;
+      if (sp && sp._tokenPanel && sp._tokenPanel.open) { sp._closeTokenPanel(); return; }
+      // 4. 样式编辑面板（有选中元素）
+      if (state.selectedElement) { this._clearSelection(); return; }
+      // 5. 调试日志面板
+      if (this._components.debugPanel && !this._components.debugPanel.hasAttribute('hidden')) { this._closeDebugPanel(); return; }
+      // 6. 配置列表面板
+      const ov = this._components.overviewPanel;
+      if (ov && !ov.hasAttribute('hidden')) { ov.close(); return; }
+      // 7. 工具条子面板（数据模拟 / 更多）
+      const anySubpanel = this._shadow.querySelector('[data-subpanel].is-open');
+      if (anySubpanel) { this._closeSubpanels(); return; }
+      // 8. 走查模式
+      if (this._walkthroughMode) { this._setWalkthroughMode(false); return; }
+      // 9. 批注模式
+      if (this._annotationMode) { this._setAnnotationMode(false); return; }
+    };
 
     // ── 拖动 ──────────────────────────────────────────────
     _startDrag(e, toolbar) {
