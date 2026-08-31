@@ -1,0 +1,10 @@
+{
+  "at": "2026-08-30T07:25:17.969Z",
+  "design_system_version": 554,
+  "scope_revision": 1,
+  "fingerprints": {
+    "@route-entry/%E5%BA%94%E7%94%A8%E4%B8%AD%E5%BF%83": "4d9fea54bf55611c762a502981756413815044665096a018edbe4edd23733d3d",
+    "wego-app/scenes/infras/应用中心/scene.css": "32f4963842aa0e3735460f564def400e1e5dbce78e805c2fb1fed739aedf4eec",
+    "wego-app/scenes/infras/应用中心/scene.js": "15032c898c10b562c24faf21d84b496affc5dc3cb7c40ea774dfa3244e715d99"
+  }
+}
