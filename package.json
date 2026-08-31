@@ -9,7 +9,11 @@
   "scripts": {
     "worktrees:stale": "node scripts/prune-worktrees.mjs",
     "worktrees:prune": "node scripts/prune-worktrees.mjs --force",
-    "worktrees:test": "node scripts/prune-worktrees.mjs test"
+    "worktrees:test": "node scripts/prune-worktrees.mjs test",
+    "branches:stale": "node scripts/prune-merged-branches.mjs",
+    "branches:prune": "node scripts/prune-merged-branches.mjs --force",
+    "branches:prune-gone": "node scripts/prune-merged-branches.mjs --force-gone",
+    "branches:test": "node scripts/prune-merged-branches.mjs test"
   },
   "devDependencies": {
     "playwright": "^1.48.0"

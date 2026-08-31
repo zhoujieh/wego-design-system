@@ -118,6 +118,8 @@ PR 已存在时，用户继续提出小问题，回到本地迭代累计修改�
 
 ## 合并与清理
 
+<!-- rule-id: merge-triggers-closeout-regardless-of-trigger -->
+- **合并即触发收口（异步闭环）**：PR 合并是异步事件（网页端合并 / CI 自动合并 / 工作流维护短周期 PR 自动合并），触发者可能与本地收口执行者不是同一方。无论合并由谁触发，本地分支、worktree 与预览服务的收口都必须完成：合并发生时本地会话在场则当场收口；不在场则由后续任何任务启动时的分支巡检（`npm run branches:stale`）兜底补齐。禁止出现远端已删除、本地分支/工作树长期残留的情况。
 - 业务原型、设计系统变更：用户明确验收通过后才合并。合并前同步最新 `main`、完成验证并遵守分支保护。
 - 工作流维护：由 `wego-uxsystem-iterate` 判断并按 `AGENTS.md` 的例外执行，免明确提交授权与业务验收；完成严格系统验证后通过短周期 PR 进入 `main`，必要检查通过后自动合并并删除分支。
 - 合并或关闭 PR 前先停止对应本地预览服务并删除服务记录；随后默认删除远端分支、本地分支和干净的关联 worktree。
@@ -141,3 +143,6 @@ PR 合并、PR 关闭或交付单元确认废弃后，必须**逐项执行并确
 - 保留：正在本地迭代、有开放 PR，或带 `keep-branch` 标签。
 - 收口：已合并、已关闭或用户明确废弃的交付单元；先停止关联本地预览服务，再删除对应分支与干净 worktree。
 - 清理：无法关联到有效任务、预览记录或 PR 的分支；删除前确认没有未提交或仅本地的重要改动。
+
+<!-- rule-id: branch-scan-uses-automated-script -->
+- 巡检使用 `npm run branches:stale`（`scripts/prune-merged-branches.mjs`）自动分类：tip 是 main 祖先的 merged 分支直接收口（`branches:prune`）；上游已删除且内容与 main 一致的 gone 分支需确认内容已进 main 后收口（`branches:prune-gone`）；有 worktree / 开放 PR / 无法归属的分支保留。禁止静默跨会话保留无法归属的分支。
