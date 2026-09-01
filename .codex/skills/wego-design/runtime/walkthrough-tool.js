@@ -2068,6 +2068,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     _render() {
       const changes = this._changes || [];
       const annotations = this._annotations || [];
+      const route = this._route || '';
       // 按选择器分组（元素本体与 ::before/::after 变更合并为同一元素分组，避免重复卡片）；
       // 共享同步的变更按 sharedKey 合并为一组（同一公共样式），展示为一条「共享 N 个元素」
       const groups = {};
@@ -2134,11 +2135,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 跨场景提示：扫描其它场景是否还有修改（当前场景之外），提示条展示并支持点击跳转
       let otherScenes = [];
       try {
-        const host = document.querySelector('wego-walkthrough');
-        if (host && typeof host._loadAllScenesChanges === 'function') {
-          const all = host._loadAllScenesChanges();
-          otherScenes = all.filter(s => s.routeId !== route);
-        }
+        const all = this._loadAllScenesChanges();
+        otherScenes = all.filter(s => s.routeId !== route);
       } catch (e) { /* 跨场景扫描失败不影响面板渲染 */ }
 
       this._shadow.innerHTML = `
@@ -7393,6 +7391,34 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     }
 
     /** 统计所有场景（含当前场景）的变更/批注组数，供角标与提示使用 */
+    /** 扫描所有场景的修改（遍历 localStorage 中所有 wego.walkthrough.data.* 记录） */
+    _loadAllScenesChanges() {
+      const scenes = [];
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (!key || !key.startsWith('wego.walkthrough.data.')) continue;
+          const routeId = key.replace('wego.walkthrough.data.', '');
+          try {
+            const raw = localStorage.getItem(key);
+            const data = raw ? JSON.parse(raw) : {};
+            const changes = (data.changes || []).filter(c => c.newValue !== '' && c.newValue != null);
+            const annotations = (data.annotations || []).filter(a => a.text && String(a.text).trim());
+            if (changes.length > 0 || annotations.length > 0) {
+              scenes.push({ routeId, routeLabel: getRouteLabel(routeId), prNumber: data.prNumber || null, changes, annotations });
+            }
+          } catch (e) { /* 单个场景解析失败不影响其他场景 */ }
+        }
+      } catch (e) { /* localStorage 不可用时返回空 */ }
+      const currentRoute = getCurrentRoute();
+      scenes.sort((a, b) => {
+        if (a.routeId === currentRoute) return -1;
+        if (b.routeId === currentRoute) return 1;
+        return a.routeLabel.localeCompare(b.routeLabel, 'zh-CN');
+      });
+      return scenes;
+    }
+
     _countAllScenesChanges() {
       let total = 0;
       try {
