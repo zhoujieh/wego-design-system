@@ -39,7 +39,7 @@
         } else if (key === 'minimal') {
           opts.config = { showHeaderActions: false, configItems: [], actions: [
             { key: 'miniprogramLink', label: '小程序链接', icon: 'icon-lianjie', style: 'icon-text' },
-            { key: 'saveImages', label: '保存图片', icon: 'icon-baocun', style: 'icon-text' }
+            { key: 'saveImages', label: '保存图片', icon: 'icon-xiazai', style: 'icon-text' }
           ] };
         }
         if (WegoApp && WegoApp.openProductShare) {
