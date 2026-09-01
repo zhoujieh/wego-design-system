@@ -11,7 +11,7 @@
   max-width: 430px;
   background: var(--bg-panel, #f6f6f6);
   border-radius: 16px 16px 0 0;
-  padding: 16px 0 0;
+  padding-top: 0px;
   display: flex;
   flex-direction: column;
 }
@@ -20,24 +20,28 @@
 .share-panel__header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 16px 12px;
+  justify-content: flex-start;
+  padding: 0 4px 0 16px;
+  height: 64px;
 }
 
 .share-panel__title {
-  font-size: 16px;
+  flex: 1 1 0%;
+  font-size: var(--body-lg-font-size);
   font-weight: 600;
   color: var(--text-default, #1a1a1a);
 }
 
 .share-panel__header-actions {
   display: flex;
-  gap: 16px;
+  height: 100%;
+  gap: 0px;
 }
 
 .share-panel__header-btn {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
   gap: 2px;
   border: none;
@@ -45,7 +49,8 @@
   cursor: pointer;
   color: var(--text-secondary, #666);
   font-size: 18px;
-  padding: 4px 6px;
+  padding: 0 4px;
+  height: auto;
   border-radius: 8px;
   transition: background var(--duration-fast, 0.15s) ease;
 }
@@ -56,8 +61,13 @@
 
 .share-panel__header-btn-text {
   font-size: 10px;
-  color: var(--text-tertiary, #999);
+  color: var(--text-default);
   line-height: 1.2;
+}
+
+.share-panel__header-btn .icon-shezhi {
+  font-size: 20px;
+  color: var(--text-default);
 }
 
 /* 配置栏 */

@@ -55,13 +55,11 @@
     routeId: 'product-share-demo',
     title: '产品分享面板',
     template: `
-<div class="layout-page" data-bg="page" data-surface-id="product-share-demo" data-route-id="product-share-demo" data-layout-mode="composed">
+<div class="layout-page" data-bg="page" data-component-slug="layout-page" data-surface-id="product-share-demo" data-route-id="product-share-demo" data-layout-mode="composed">
   <div class="layout-page__top">
     <div class="navbar" data-component-slug="navbar">
       <div class="navbar__body navbar__body--spaced">
-        <div class="navbar__left">
-          <div class="navbar__left-btn navbar__left-btn--circle" data-back-btn><i class="wego-iconfont-s icon-zuojiantou16"></i></div>
-        </div>
+        <div class="navbar__left"><button type="button" class="navbar__left-btn" data-back-btn aria-label="返回"><i class="wego-iconfont-s icon-fanhui" aria-hidden="true"></i></button></div>
         <div class="navbar__center"><span class="navbar__title">产品分享面板</span></div>
         <div class="navbar__right"></div>
       </div>
