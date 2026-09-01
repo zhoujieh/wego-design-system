@@ -1153,13 +1153,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._render();
       this.style.display = 'flex';
       this.style.opacity = '1';
-      this.style.transform = 'translateY(0)';
+      this.style.transform = 'translateX(-50%) translateY(0)';
       if (this._timer) clearTimeout(this._timer);
       this._timer = setTimeout(() => this.hide(), duration);
     }
     hide() {
       this.style.opacity = '0';
-      this.style.transform = 'translateY(10px)';
+      this.style.transform = 'translateX(-50%) translateY(10px)';
       setTimeout(() => { this.style.display = 'none'; }, 200);
     }
     _render() {
