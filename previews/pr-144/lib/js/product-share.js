@@ -125,8 +125,8 @@
     ];
     var actions = config.actions || [
       { key: 'miniprogramLink', label: '小程序链接', icon: 'icon-lianjie', style: 'icon-text' },
-      { key: 'saveImages', label: '保存图片', icon: 'icon-baocun', style: 'icon-text' },
-      { key: 'barcode', label: '打商品条码', icon: 'icon-tiaoma', style: 'icon-text' }
+      { key: 'saveImages', label: '保存图片', icon: 'icon-xiazai', style: 'icon-text' },
+      { key: 'barcode', label: '打商品条码', icon: 'icon-dayinshangpintiaoma', style: 'icon-text' }
     ];
 
     /* 渠道栏：按 group 分组渲染，每组 flex-wrap，item 固定 68px */
@@ -561,7 +561,7 @@
             }
             var track = indicatorThumb.parentElement;
             var trackW = track.clientWidth;
-            var thumbW = Math.max(16, trackW * (channelScroll.clientWidth / channelScroll.scrollWidth));
+            var thumbW = Math.max(32, trackW * (channelScroll.clientWidth / channelScroll.scrollWidth));
             var maxTrack = trackW - thumbW;
             var x = maxTrack * (channelScroll.scrollLeft / maxScroll);
             indicatorThumb.style.width = thumbW + 'px';
