@@ -2131,6 +2131,15 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       });
       const changeGroupCount = new Set(changes.map(c => c.sharedKey || c.selector)).size;
       const totalCount = changeGroupCount + annotations.filter(a => a.text && a.text.trim()).length;
+      // 跨场景提示：扫描其它场景是否还有修改（当前场景之外），提示条展示并支持点击跳转
+      let otherScenes = [];
+      try {
+        const host = document.querySelector('wego-walkthrough');
+        if (host && typeof host._loadAllScenesChanges === 'function') {
+          const all = host._loadAllScenesChanges();
+          otherScenes = all.filter(s => s.routeId !== route);
+        }
+      } catch (e) { /* 跨场景扫描失败不影响面板渲染 */ }
 
       this._shadow.innerHTML = `
         <style>
@@ -2394,6 +2403,29 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           }
           .annotation-delete:hover { color: #e53935; background: rgba(255,255,255,0.06); }
           .annotation-delete svg { width: 12px; height: 12px; }
+          .scene-hint {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin: 10px 12px 2px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            background: rgba(255, 184, 77, 0.12);
+            border: 1px solid rgba(255, 184, 77, 0.35);
+          }
+          .scene-hint-label { font-size: 12px; color: #ffb84d; line-height: 1.5; }
+          .scene-hint-list { display: flex; flex-wrap: wrap; gap: 6px; }
+          .scene-hint-jump {
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            cursor: pointer;
+            line-height: 1.6;
+          }
+          .scene-hint-jump:hover { background: rgba(255,255,255,0.14); }
         </style>
         <div class="panel">
           <div class="header">
@@ -2405,6 +2437,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
               <button class="close-btn" type="button" data-action="close" title="关闭">${ICONS.close}</button>
             </div>
           </div>
+          ${otherScenes.length > 0 ? `
+            <div class="scene-hint">
+              <span class="scene-hint-label">⚠️ 还有 ${otherScenes.length} 个场景有修改</span>
+              <span class="scene-hint-list">${otherScenes.map(s => `<button type="button" class="scene-hint-jump" data-jump-scene="${escapeHtml(s.routeId)}">${escapeHtml(s.routeLabel)}</button>`).join('')}</span>
+            </div>
+          ` : ''}
           ${groupList.length === 0 ? `
             <div class="empty">
               当前还没有配置修改或批注<br/>
@@ -2465,6 +2503,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         el.addEventListener('click', () => {
           const selector = el.dataset.selector;
           bus.emit('jump-to-element', { selector });
+        });
+      });
+      // 点击跨场景提示条的场景按钮 → 跳转到对应场景查看其修改
+      this._shadow.querySelectorAll('[data-jump-scene]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const route = btn.dataset.jumpScene;
+          if (route) window.location.hash = '#/' + route;
         });
       });
       // 单条删除
@@ -7142,8 +7187,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       }
     }
 
-    _resetChanges() {
-      debugLog.add('RESET', `_resetChanges 开始: changes=${state.changes.length} annotations=${state.annotations.length}`);
+    /** 清空当前场景的所有修改（还原 DOM + 清 state + 落盘） */
+    _resetCurrentSceneChanges() {
       if (state.changes.length === 0 && state.annotations.length === 0) {
         return;
       }
@@ -7158,10 +7203,30 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._syncAnnotationMarkers();
       this._flushSave();
       this._updateChangeCount();
-      debugLog.add('RESET', `_resetChanges 完成: changes=${state.changes.length} annotations=${state.annotations.length}`);
+      debugLog.add('RESET', `当前场景还原完成: changes=${state.changes.length} annotations=${state.annotations.length}`);
       if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
         this._components.overviewPanel.refresh(state.changes, state.currentRoute, state.annotations);
       }
+    }
+
+    /** 跨场景一键重置：清空所有场景的修改（含 localStorage 中其它场景的记录，不二次确认） */
+    _resetChanges() {
+      debugLog.add('RESET', '跨场景重置开始');
+      // 先清理其它场景的 localStorage 记录（其 DOM 不在当前视口，切到该场景时 _loadChanges 读到空即干净）
+      const currentKey = `wego.walkthrough.data.${state.currentRoute}`;
+      try {
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('wego.walkthrough.data.') && key !== currentKey) {
+            keysToRemove.push(key);
+          }
+        }
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+      } catch (e) { /* localStorage 不可用时忽略 */ }
+      // 再清当前场景
+      this._resetCurrentSceneChanges();
+      debugLog.add('RESET', '跨场景重置完成');
     }
 
     /** 路由切换统一收尾：旧场景落盘与浮层清理 → 新场景数据加载 → 标记重绘 */
@@ -7327,11 +7392,27 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       } catch (e) {}
     }
 
+    /** 统计所有场景（含当前场景）的变更/批注组数，供角标与提示使用 */
+    _countAllScenesChanges() {
+      let total = 0;
+      try {
+        const all = this._loadAllScenesChanges();
+        all.forEach(s => {
+          const changeGroupCount = new Set(s.changes.map(c => c.sharedKey || c.selector)).size;
+          total += changeGroupCount + s.annotations.filter(a => a.text && String(a.text).trim()).length;
+        });
+      } catch (e) { /* 跨场景统计失败时退回当前场景 */ }
+      if (total === 0) {
+        // 兜底：当前场景内存态（localStorage 尚未落盘时）
+        const changeGroupCount = new Set(state.changes.map(c => c.sharedKey || c.selector)).size;
+        total = changeGroupCount + state.annotations.filter(a => a.text && a.text.trim()).length;
+      }
+      return total;
+    }
+
     _updateChangeCount() {
-      // 纯空格批注视为空，不计入角标（与关闭气泡时的空批注清理口径一致）；
-      // 共享同步的多个元素变更合并为一条计数（与配置列表合并展示口径一致）
-      const changeGroupCount = new Set(state.changes.map(c => c.sharedKey || c.selector)).size;
-      const count = changeGroupCount + state.annotations.filter(a => a.text && a.text.trim()).length;
+      // 角标显示跨场景总数（所有场景的修改合计），避免切换场景后遗漏其它场景的修改
+      const count = this._countAllScenesChanges();
       // 配置列表按钮数字（有数据时直接显示数字，替换图标；无数据时显示图标）
       if (this._components.overviewCount) {
         this._components.overviewCount.textContent = count > 99 ? '99+' : count;
