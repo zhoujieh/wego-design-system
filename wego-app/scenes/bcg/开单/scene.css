@@ -5397,10 +5397,10 @@ body[data-order-layout="landscape"] .phone-indicator {
   .order-summary-discount__detail {
     display: block;
     max-width: 100%;
-    color: var(--text-secondary);
+    color: var(--text-promotion);
     font-family: var(--body-sm-font-family);
     font-size: var(--body-xs-font-size);
-    line-height: var(--body-md-line-height);
+    line-height: var(--body-xs-line-height);
     font-weight: var(--font-weight-regular);
     text-align: right;
     white-space: normal;
