@@ -232,14 +232,19 @@
     catalogFilterOpen: false,
     catalogSidebarFilterOpen: false,
     discount: 100,
+    discountMode: null,
+    discountValue: 0,
     freight: 0,
     rounding: 0,
+    roundingMode: null,
     freightEditOpen: false,
     totalEditOpen: false,
     memberDiscount: 100,
+    couponCount: 0,
     couponDiscount: 0,
     pointsUsed: 0,
     pointsMode: null,
+    promotionThreshold: 0,
     promotionDiscount: 0,
     quickOp: null,
     saveStatus: '已自动保存 18:26',
@@ -439,14 +444,34 @@
       memberDiscountAmount += (item.listPrice - item.listPrice * effectiveMemberRate) * item.qty;
       return sum + item.listPrice * effectiveMemberRate * item.qty;
     }, 0);
-    var discountAmount = memberAmount * (100 - state.discount) / 100;
+    var discountMode = state.discountMode;
+    var discountValue = Math.max(0, Number(state.discountValue || 0));
+    var discountAmount = discountMode === 'item-rate' || discountMode === 'order-rate'
+      ? memberAmount * (100 - Math.min(discountValue, 100)) / 100
+      : discountMode === 'item-amount'
+        ? state.products.reduce(function (sum, item) { return sum + item.qty; }, 0) * discountValue
+        : discountMode === 'order-amount'
+          ? discountValue
+          : memberAmount * (100 - state.discount) / 100;
+    discountAmount = Math.min(Math.max(discountAmount, 0), memberAmount);
     var pointsAmount = Number(state.pointsUsed || 0) / 100;
     var couponAmount = Number(state.couponDiscount || 0);
-    var promotionAmount = Number(state.promotionDiscount || 0);
+    var promotionAmount = Number(state.promotionThreshold || 0) > 0 && memberAmount < Number(state.promotionThreshold)
+      ? 0
+      : Number(state.promotionDiscount || 0);
     var freight = Number(state.freight || 0);
     var freightIncluded = state.delivery === 'express' || state.delivery === 'freight';
     var payableBeforeRounding = Math.max(memberAmount - discountAmount - pointsAmount - couponAmount - promotionAmount + (freightIncluded ? freight : 0), 0);
-    var roundingAmount = Math.min(Number(state.rounding || 0), payableBeforeRounding);
+    var roundingTarget = state.roundingMode === 'integer'
+      ? Math.floor(payableBeforeRounding)
+      : state.roundingMode === 'ones'
+        ? Math.floor(payableBeforeRounding / 10) * 10
+        : state.roundingMode === 'tens'
+          ? Math.floor(payableBeforeRounding / 100) * 100
+          : null;
+    var roundingAmount = roundingTarget == null
+      ? Math.min(Number(state.rounding || 0), payableBeforeRounding)
+      : Math.max(0, Math.round((payableBeforeRounding - roundingTarget) * 100) / 100);
     var payable = Math.max(payableBeforeRounding - roundingAmount, 0);
     return {
       productAmount: productAmount,
@@ -1549,10 +1574,23 @@
     freight: { title: '运费', unit: '元', inputmode: 'decimal', hint: '输入本单运费金额', get: function () { return state.freight; }, apply: function (value) { state.freight = value; } },
     member: { title: '会员折扣', unit: '%', inputmode: 'decimal', hint: '已自动带入当前会员等级折扣，可手动修改并以本次输入为准', get: function () { return state.memberDiscount; }, apply: function (value) { state.memberDiscount = Math.min(Math.max(Math.round(value * 100) / 100, 0), 100); recalculateCustomerPrices(); } },
     points: { title: '积分抵扣', unit: '分', inputmode: 'numeric', hint: '100 积分抵 1 元，填 500 即抵 5 元', get: function () { return state.pointsUsed; }, apply: function (value) { state.pointsUsed = Math.min(availablePoints(), Math.max(0, Math.round(value))); } },
-    coupon: { title: '优惠券', unit: '元', inputmode: 'decimal', hint: '输入本单优惠券抵扣金额', get: function () { return state.couponDiscount; }, apply: function (value) { state.couponDiscount = Math.round(value * 100) / 100; } },
-    promotion: { title: '满减促销', unit: '元', inputmode: 'decimal', hint: '输入本单满减活动优惠金额', get: function () { return state.promotionDiscount; }, apply: function (value) { state.promotionDiscount = Math.round(value * 100) / 100; } },
-    discount: { title: '整单优惠', unit: '%', inputmode: 'decimal', hint: '填 90 表示整单 9 折', get: function () { return state.discount; }, apply: function (value) { state.discount = Math.min(Math.round(value), 100); } },
-    rounding: { title: '整单抹零', unit: '元', inputmode: 'decimal', hint: '输入本单抹零金额，直接减免订单零头', get: function () { return state.rounding; }, apply: function (value) { state.rounding = Math.max(0, Math.round(value * 100) / 100); } }
+    coupon: { title: '优惠券' },
+    promotion: { title: '满减促销' },
+    discount: { title: '整单优惠' },
+    rounding: { title: '整单抹零' }
+  };
+
+  var DISCOUNT_MODE_LABELS = {
+    'item-rate': '每件折扣',
+    'order-rate': '整单折扣',
+    'item-amount': '每件优惠',
+    'order-amount': '整单优惠'
+  };
+
+  var ROUNDING_MODE_LABELS = {
+    integer: '整数抹零',
+    ones: '个位抹零',
+    tens: '十位抹零'
   };
 
   function freightPopover() {
@@ -1602,54 +1640,107 @@
       + '</div>';
   }
 
-  function quickOpButton(icon, label, op) {
-    var amount = quickOpAmount(op);
-    var trigger = '<button type="button" class="order-quick-op' + (amount > 0 ? ' is-used' : '') + '" data-open-panel="quick" data-quick-op="' + op + '" aria-haspopup="dialog" aria-expanded="' + (state.panel === 'quick' && state.quickOp === op) + '"><i class="wego-iconfont-s ' + icon + '" aria-hidden="true"></i><span>' + label + '</span>' + (amount > 0 ? '<strong>-' + compactMoney(amount) + '</strong>' : '') + '</button>';
+  function quickOpStatus(op) {
+    if (op === 'member' && Number(state.memberDiscount) < 100) return compactNumber(Number(state.memberDiscount) / 10) + '折';
+    if (op === 'points' && Number(state.pointsUsed) > 0) return '扣' + Math.round(Number(state.pointsUsed)) + '积分';
+    if (op === 'coupon' && Number(state.couponCount) > 0 && Number(state.couponDiscount) > 0) return '用' + Math.round(Number(state.couponCount)) + '张';
+    if (op === 'promotion' && Number(state.promotionThreshold) > 0 && Number(state.promotionDiscount) > 0) return '满' + compactNumber(state.promotionThreshold) + '减' + compactNumber(state.promotionDiscount);
+    if (op === 'discount' && state.discountMode && Number(state.discountValue) > 0) return DISCOUNT_MODE_LABELS[state.discountMode] || null;
+    if (op === 'rounding' && state.roundingMode) return ROUNDING_MODE_LABELS[state.roundingMode] || null;
+    return null;
+  }
+
+  function quickOpButton(label, op) {
+    var status = quickOpStatus(op);
+    var statusHtml = status
+      ? '<span class="order-quick-op__status">' + escapeHtml(status) + '</span>'
+      : '<span class="order-quick-op__status order-quick-op__status--add" aria-label="添加' + label + '"><i class="wego-iconfont-s icon-jia16" aria-hidden="true"></i></span>';
+    var trigger = '<button type="button" class="order-quick-op' + (status ? ' is-used' : '') + '" data-open-panel="quick" data-quick-op="' + op + '" aria-haspopup="dialog" aria-expanded="' + (state.panel === 'quick' && state.quickOp === op) + '"><span class="order-quick-op__label">' + label + '</span>' + statusHtml + '</button>';
     if (op === 'freight') return '<div class="order-quick-op-anchor order-quick-op-anchor--freight">' + trigger + (state.panel === 'quick' && state.quickOp === 'freight' ? freightPopover() : '') + '</div>';
     if (op === 'points') return '<div class="order-quick-op-anchor order-quick-op-anchor--points">' + trigger + (state.panel === 'quick' && state.quickOp === 'points' ? pointsPopover() : '') + '</div>';
     return trigger;
   }
 
-  function quickOpUsed(op) {
-    return quickOpAmount(op) > 0;
-  }
-
-  function quickOpAmount(op) {
-    var t = totals();
-    return {
-      freight: t.freight,
-      member: t.memberDiscountAmount,
-      points: t.pointsAmount,
-      coupon: t.couponAmount,
-      promotion: t.promotionAmount,
-      discount: t.discountAmount,
-      rounding: t.roundingAmount
-    }[op] || 0;
-  }
-
-  function compactMoney(amount) {
-    return money(amount).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1');
+  function compactNumber(value) {
+    var rounded = Math.round(Number(value || 0) * 100) / 100;
+    return String(rounded).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1');
   }
 
   function quickOps() {
     return '<div class="order-desktop__quick-ops" aria-label="快捷优惠操作">'
-      + quickOpButton('icon-dianpuhuiyuan', '会员折扣', 'member')
-      + quickOpButton('icon-jifen1', '积分抵扣', 'points')
-      + quickOpButton('icon-quan', '优惠券', 'coupon')
-      + quickOpButton('icon-youhuigou', '满减促销', 'promotion')
-      + quickOpButton('icon-youhui', '整单优惠', 'discount')
-      + quickOpButton('icon-mopi', '整单抹零', 'rounding')
+      + quickOpButton('会员折扣', 'member')
+      + quickOpButton('积分抵扣', 'points')
+      + quickOpButton('优惠券', 'coupon')
+      + quickOpButton('满减促销', 'promotion')
+      + quickOpButton('整单优惠', 'discount')
+      + quickOpButton('整单抹零', 'rounding')
       + '</div>';
+  }
+
+  function quickNumberField(label, value, suffix, attr, inputmode) {
+    return '<label class="order-quick-field"><span>' + label + '</span><div class="number-input" data-component-slug="input"><input class="number-input__field" type="text" inputmode="' + (inputmode || 'decimal') + '" value="' + escapeHtml(value || '') + '" ' + attr + ' aria-label="' + label + '"><span class="number-input__suffix">' + suffix + '</span></div></label>';
+  }
+
+  function quickModeOption(group, value, label, selected) {
+    return '<div class="radio-field order-quick-mode-option" tabindex="0" role="radio" aria-checked="' + selected + '" data-clickable data-quick-mode="' + value + '"><div class="radio radio--sm' + (selected ? ' radio--checked' : '') + '" data-group="' + group + '" data-component-slug="radio"><div class="radio__inner"></div><div class="radio__dot"></div></div><span class="radio-field__text">' + label + '</span></div>';
+  }
+
+  function quickModeGroup(group, labels, selected) {
+    return '<div class="radio-field-group order-quick-mode-options" role="radiogroup" aria-label="' + (group === 'discount' ? '整单优惠方式' : '抹零方式') + '">' + Object.keys(labels).map(function (value) { return quickModeOption(group, value, labels[value], selected === value); }).join('') + '</div>';
+  }
+
+  function resetQuickOp(op) {
+    if (op === 'member') {
+      QUICK_OP_DEFS.member.apply(100);
+    } else if (op === 'points') {
+      state.pointsUsed = 0;
+      state.pointsMode = null;
+    } else if (op === 'coupon') {
+      state.couponCount = 0;
+      state.couponDiscount = 0;
+    } else if (op === 'promotion') {
+      state.promotionThreshold = 0;
+      state.promotionDiscount = 0;
+    } else if (op === 'discount') {
+      state.discount = 100;
+      state.discountMode = null;
+      state.discountValue = 0;
+    } else if (op === 'rounding') {
+      state.rounding = 0;
+      state.roundingMode = null;
+    }
   }
 
   function quickOpPanel() {
     var op = state.quickOp && QUICK_OP_DEFS[state.quickOp] ? state.quickOp : 'member';
     var def = QUICK_OP_DEFS[op];
+    var content = '';
+    if (op === 'coupon') {
+      content = '<div class="order-quick-fields">'
+        + quickNumberField('使用张数', state.couponCount, '张', 'data-quick-coupon-count', 'numeric')
+        + quickNumberField('抵扣金额', state.couponDiscount, '元', 'data-quick-coupon-amount')
+        + '</div><small>张数用于快捷入口回显，抵扣金额计入本单优惠</small>';
+    } else if (op === 'promotion') {
+      content = '<div class="order-quick-fields">'
+        + quickNumberField('满额门槛', state.promotionThreshold, '元', 'data-quick-promotion-threshold')
+        + quickNumberField('减免金额', state.promotionDiscount, '元', 'data-quick-promotion-amount')
+        + '</div><small>确认后按“满额减免额”回显并计入本单优惠</small>';
+    } else if (op === 'discount') {
+      var discountMode = state.discountMode || 'order-rate';
+      var discountValue = state.discountMode ? state.discountValue : 100;
+      content = quickModeGroup('discount', DISCOUNT_MODE_LABELS, discountMode)
+        + '<div class="order-quick-fields">' + quickNumberField(discountMode.indexOf('rate') >= 0 ? '折扣比例' : '优惠金额', discountValue, discountMode.indexOf('rate') >= 0 ? '%' : '元', 'data-quick-discount-value') + '</div>'
+        + '<small data-quick-discount-hint>' + (discountMode.indexOf('rate') >= 0 ? '填95表示9.5折' : '输入大于0的优惠金额') + '</small>';
+    } else if (op === 'rounding') {
+      content = quickModeGroup('rounding', ROUNDING_MODE_LABELS, state.roundingMode || 'integer')
+        + '<small>整数抹零去掉小数，个位抹零取整到十元，十位抹零取整到百元</small>';
+    } else {
+      content = '<label>' + def.title + '<div class="number-input" data-component-slug="input"><input class="number-input__field" type="text" inputmode="' + def.inputmode + '" value="' + def.get() + '" data-quick-op-value aria-label="' + def.title + '"><span class="number-input__suffix">' + def.unit + '</span></div></label><small>' + def.hint + '</small>';
+    }
     return ''
       + '<div class="order-side-panel__head"><strong>' + def.title + '</strong><button class="link link--12" data-component-slug="link" data-close-panel>关闭</button></div>'
       + '<div class="order-quick-edit">'
-      +   '<label>' + def.title + '<div class="number-input" data-component-slug="input"><input class="number-input__field" type="text" inputmode="' + def.inputmode + '" value="' + def.get() + '" data-quick-op-value aria-label="' + def.title + '"><span class="number-input__suffix">' + def.unit + '</span></div></label>'
-      +   '<small>' + def.hint + '</small>'
+      +   content
       + '</div>'
       + '<div class="order-side-actions">' + button('清除', 'weak', 'md', 'data-clear-quick-op') + button('确定', 'strong', 'md', 'data-apply-quick-op') + '</div>';
   }
@@ -3447,29 +3538,93 @@
       }
       return;
     }
+    if (target.matches('[data-quick-mode]')) {
+      var modeGroup = target.closest('.order-quick-mode-options');
+      if (!modeGroup) return;
+      modeGroup.querySelectorAll('[data-quick-mode]').forEach(function (option) {
+        var selected = option === target;
+        option.setAttribute('aria-checked', String(selected));
+        var radio = option.querySelector('.radio');
+        if (radio) radio.classList.toggle('radio--checked', selected);
+      });
+      if (state.quickOp === 'discount') {
+        var discountMode = target.dataset.quickMode;
+        var discountField = root.querySelector('[data-quick-discount-value]');
+        var discountFieldLabel = discountField && discountField.closest('.order-quick-field') ? discountField.closest('.order-quick-field').querySelector(':scope > span') : null;
+        var discountSuffix = discountField ? discountField.parentElement.querySelector('.number-input__suffix') : null;
+        var discountHint = root.querySelector('[data-quick-discount-hint]');
+        var isRate = discountMode.indexOf('rate') >= 0;
+        if (discountFieldLabel) discountFieldLabel.textContent = isRate ? '折扣比例' : '优惠金额';
+        if (discountField) discountField.setAttribute('aria-label', isRate ? '折扣比例' : '优惠金额');
+        if (discountSuffix) discountSuffix.textContent = isRate ? '%' : '元';
+        if (discountHint) discountHint.textContent = isRate ? '填95表示9.5折' : '输入大于0的优惠金额';
+        if (discountField && !state.discountMode) discountField.value = isRate ? '100' : '';
+      }
+      return;
+    }
     if (target.matches('[data-apply-quick-op]')) {
-      var quickInput = root.querySelector('[data-quick-op-value]');
-      var rawQuick = quickInput ? String(quickInput.value).trim() : '';
       var opType = state.quickOp && QUICK_OP_DEFS[state.quickOp] ? state.quickOp : null;
       if (!opType) return;
-      if (opType === 'points') {
-        var selectedPointsMode = root.querySelector('[data-points-mode][aria-checked="true"]');
-        state.pointsMode = selectedPointsMode ? selectedPointsMode.dataset.pointsMode : 'max';
+      if (opType === 'coupon') {
+        var couponCount = Math.floor(Number(root.querySelector('[data-quick-coupon-count]')?.value || 0));
+        var couponAmount = Math.round(Number(root.querySelector('[data-quick-coupon-amount]')?.value || 0) * 100) / 100;
+        if (couponCount <= 0 || couponAmount <= 0) {
+          ctx.toast('请输入有效的优惠券张数和抵扣金额');
+          return;
+        }
+        state.couponCount = couponCount;
+        state.couponDiscount = couponAmount;
+      } else if (opType === 'promotion') {
+        var promotionThreshold = Math.round(Number(root.querySelector('[data-quick-promotion-threshold]')?.value || 0) * 100) / 100;
+        var promotionAmount = Math.round(Number(root.querySelector('[data-quick-promotion-amount]')?.value || 0) * 100) / 100;
+        if (promotionThreshold <= 0 || promotionAmount <= 0 || promotionAmount > promotionThreshold) {
+          ctx.toast('请输入有效的满额和减免金额');
+          return;
+        }
+        state.promotionThreshold = promotionThreshold;
+        state.promotionDiscount = promotionAmount;
+      } else if (opType === 'discount') {
+        var selectedDiscountMode = root.querySelector('.order-quick-mode-options [data-quick-mode][aria-checked="true"]');
+        var nextDiscountMode = selectedDiscountMode ? selectedDiscountMode.dataset.quickMode : '';
+        var nextDiscountValue = Math.round(Number(root.querySelector('[data-quick-discount-value]')?.value || 0) * 100) / 100;
+        var discountIsRate = nextDiscountMode.indexOf('rate') >= 0;
+        if (!nextDiscountMode || nextDiscountValue <= 0 || (discountIsRate && nextDiscountValue >= 100)) {
+          ctx.toast(discountIsRate ? '请输入小于100的有效折扣' : '请输入有效的优惠金额');
+          return;
+        }
+        state.discountMode = nextDiscountMode;
+        state.discountValue = discountIsRate ? Math.min(nextDiscountValue, 100) : nextDiscountValue;
+        state.discount = discountIsRate ? state.discountValue : 100;
+      } else if (opType === 'rounding') {
+        var selectedRoundingMode = root.querySelector('.order-quick-mode-options [data-quick-mode][aria-checked="true"]');
+        if (!selectedRoundingMode) {
+          ctx.toast('请选择抹零方式');
+          return;
+        }
+        state.roundingMode = selectedRoundingMode.dataset.quickMode;
+        state.rounding = 0;
+      } else {
+        var quickInput = root.querySelector('[data-quick-op-value]');
+        var rawQuick = quickInput ? String(quickInput.value).trim() : '';
+        if (opType === 'points') {
+          var selectedPointsMode = root.querySelector('[data-points-mode][aria-checked="true"]');
+          state.pointsMode = selectedPointsMode ? selectedPointsMode.dataset.pointsMode : 'max';
+        }
+        var numQuick = parseFloat(rawQuick);
+        if (rawQuick === '') {
+          resetQuickOp(opType);
+          state.panel = null;
+          markDirty(ctx);
+          renderActive();
+          ctx.toast('已清除' + QUICK_OP_DEFS[opType].title);
+          return;
+        }
+        if (isNaN(numQuick) || numQuick < 0) {
+          ctx.toast('请输入有效数字');
+          return;
+        }
+        QUICK_OP_DEFS[opType].apply(numQuick);
       }
-      var numQuick = parseFloat(rawQuick);
-      if (rawQuick === '') {
-        QUICK_OP_DEFS[opType].apply(opType === 'member' || opType === 'discount' ? 100 : 0);
-        state.panel = null;
-        markDirty(ctx);
-        renderActive();
-        ctx.toast('已清除' + QUICK_OP_DEFS[opType].title);
-        return;
-      }
-      if (isNaN(numQuick) || numQuick < 0) {
-        ctx.toast('请输入有效数字');
-        return;
-      }
-      QUICK_OP_DEFS[opType].apply(numQuick);
       state.panel = null;
       markDirty(ctx);
       renderActive();
@@ -3478,9 +3633,7 @@
     }
     if (target.matches('[data-clear-quick-op]')) {
       var clearOp = state.quickOp && QUICK_OP_DEFS[state.quickOp] ? state.quickOp : null;
-      if (clearOp) {
-        QUICK_OP_DEFS[clearOp].apply(clearOp === 'member' || clearOp === 'discount' ? 100 : 0);
-      }
+      if (clearOp) resetQuickOp(clearOp);
       state.panel = null;
       markDirty(ctx);
       renderActive();
@@ -4097,9 +4250,9 @@
         return;
       }
       var nextDiscountAmount = payableWithoutWholeDiscount - nextPayable;
-      state.discount = currentTotals.memberAmount > 0
-        ? Math.min(100, Math.max(0, Math.round((100 - nextDiscountAmount / currentTotals.memberAmount * 100) * 10000) / 10000))
-        : 100;
+      state.discountMode = nextDiscountAmount > 0 ? 'order-amount' : null;
+      state.discountValue = Math.max(0, Math.round(nextDiscountAmount * 100) / 100);
+      state.discount = 100;
       state.totalEditOpen = false;
       markDirty(ctx);
       renderActive();
@@ -4524,6 +4677,8 @@
     }
     if (target.matches('[data-discount]')) {
       state.discount = Math.min(100, Math.max(0, Number(target.value || 0)));
+      state.discountMode = state.discount < 100 ? 'order-rate' : null;
+      state.discountValue = state.discount < 100 ? state.discount : 0;
       if (event.type === 'change') markDirty(ctx);
       return;
     }
@@ -4799,6 +4954,12 @@
       markDirty(ctx);
     }, true);
     root.addEventListener('keydown', function (event) {
+      var quickModeOption = event.target.closest && event.target.closest('[data-quick-mode]');
+      if (quickModeOption && (event.key === ' ' || event.key === 'Enter')) {
+        event.preventDefault();
+        quickModeOption.click();
+        return;
+      }
       var rowContextMenuItem = event.target.closest && event.target.closest('.order-row-context-menu [role="menuitem"]');
       if (rowContextMenuItem && ['ArrowDown', 'ArrowUp', 'Home', 'End'].indexOf(event.key) >= 0) {
         event.preventDefault();
@@ -4920,8 +5081,17 @@
     state.freightEditOpen = false;
     state.selectedRow = null;
     state.discount = 100;
+    state.discountMode = null;
+    state.discountValue = 0;
     state.freight = 0;
     state.rounding = 0;
+    state.roundingMode = null;
+    state.couponCount = 0;
+    state.couponDiscount = 0;
+    state.pointsUsed = 0;
+    state.pointsMode = null;
+    state.promotionThreshold = 0;
+    state.promotionDiscount = 0;
     state.orderNo = '';
     state.paymentStatus = 'idle';
     state.paymentDraft = null;
