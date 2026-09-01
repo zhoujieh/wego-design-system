@@ -170,6 +170,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     return null;
   }
 
+  /** 生成工单头部环境/PR 元信息：在线预览输出 PR 号；本地预览输出环境标记（便于 Agent 区分定位路径） */
+  function getPreviewMetaLine() {
+    const pr = getCurrentPrNumber();
+    if (pr) return `**PR:** #${pr}`;
+    return `**环境：本地预览（无 PR）**`;
+  }
+
   /** 判断元素是否属于走查工具自身（包括 Shadow DOM 内部） */
   function isWalkthroughElement(el) {
     if (!el) return false;
@@ -2511,8 +2518,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const changes = this._changes || [];
       const annotations = this._annotations || [];
       if (changes.length === 0 && annotations.length === 0) {
-        const prInfo = getCurrentPrNumber() ? `**PR:** #${getCurrentPrNumber()}\n` : '';
-        return `## 走查变更单 #/${routeLabel}\n${prInfo}**Viewport:** ${viewport}\n\n当前还没有记录到任何配置修改或批注。`;
+        const metaLine = getPreviewMetaLine();
+        return `## 走查变更单 #/${routeLabel}\n${metaLine}\n**Viewport:** ${viewport}\n\n当前还没有记录到任何配置修改或批注。`;
       }
       // 分组逻辑：共享样式按组件类（sharedKey 去掉 ::属性名）分组，同一组件类的所有属性合并为一条；
       // 非共享样式按 selector 分组，同一元素的多个属性合并为一条。
@@ -2593,10 +2600,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         if (fixedMatch) return `固定 ${fixedMatch[1]}`;
         return v;
       };
-      const prNumber = getCurrentPrNumber();
+      const metaLine = getPreviewMetaLine();
       const lines = [
         `## 走查变更单 #/${routeLabel}`,
-        ...(prNumber ? [`**PR:** #${prNumber}`] : []),
+        metaLine,
         `**Viewport:** ${viewport}`,
         '',
         '> 施工单：按最终效果整理，改法优先用设计系统语义类；主定位用组件类，完整选择器见文末备选。',
@@ -2753,8 +2760,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const viewport = `${window.innerWidth}×${window.innerHeight}`;
       const scenes = this._loadAllScenesChanges();
       if (scenes.length === 0) {
-        const prInfo = getCurrentPrNumber() ? `**PR:** #${getCurrentPrNumber()}\n` : '';
-        return `## 走查变更单（跨场景汇总）\n${prInfo}**Viewport:** ${viewport}\n\n当前还没有记录到任何配置修改或批注。`;
+        const metaLine = getPreviewMetaLine();
+        return `## 走查变更单（跨场景汇总）\n${metaLine}\n**Viewport:** ${viewport}\n\n当前还没有记录到任何配置修改或批注。`;
       }
       // 只有一个场景时，直接用单场景格式
       if (scenes.length === 1) {
@@ -2772,11 +2779,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         this._route = savedRoute;
         return prompt;
       }
-      // 多场景：按场景分组输出（PR 号取场景数据中的记录，优先当前场景；无记录时回退 URL 解析）
+      // 多场景：按场景分组输出（PR 号取场景数据中的记录，优先当前场景；无记录时回退 URL 解析，均无则标本地预览）
       const scenePr = scenes.find(s => s.prNumber)?.prNumber || getCurrentPrNumber();
+      const metaLine = scenePr ? `**PR:** #${scenePr}` : getPreviewMetaLine();
       const lines = [
         `## 走查变更单（跨场景汇总，共 ${scenes.length} 个场景）`,
-        ...(scenePr ? [`**PR:** #${scenePr}`] : []),
+        metaLine,
         `**Viewport:** ${viewport}`,
         '',
         '> 施工单：按最终效果整理，改法优先用设计系统语义类；主定位用组件类，完整选择器见文末备选。',
