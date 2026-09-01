@@ -74,7 +74,7 @@
     { key: 'douyin', name: '抖音', icon: 'icon-douyin', iconSvg: './lib/assets/icons/share/douyin.svg', group: 1, supportTextOnly: false },
     { key: 'weibo', name: '微博', icon: 'icon-weibo', iconSvg: './lib/assets/icons/share/weibo.svg', group: 1, supportTextOnly: true },
     { key: 'zhuanzhuan', name: '转转', icon: 'icon-zhuanzhuan', iconSvg: './lib/assets/icons/share/zhuanzhuan.svg', group: 2, supportTextOnly: false },
-    { key: 'more', name: '更多', icon: 'icon-gengduo', iconSvg: null, group: 2, supportTextOnly: true }
+    { key: 'more', name: '更多', icon: 'icon-sandian16', iconSvg: null, group: 2, supportTextOnly: true }
   ];
 
   function getChannel(key) {
@@ -173,14 +173,15 @@
       } else if (item.type === 'button') {
         configHtml += '<button type="button" class="share-panel__config-link" data-action="config-btn" data-config-key="' + item.key + '">'
           + '<span>' + item.label + '</span>'
-          + '<i class="wego-iconfont-s icon-youjiantou-mian16" aria-hidden="true"></i>'
+          + '<i class="wego-iconfont-s icon-youjiantou16" aria-hidden="true"></i>'
           + '</button>';
       }
     });
     configHtml += '</div>';
 
-    /* 其他操作栏 */
-    var actionsHtml = '<div class="share-panel__actions">';
+    /* 其他操作栏：分割线独立占位 + 单行横向滚动，样式与分享渠道一致（52px 图标框 + 下方文字），图标用 iconfont */
+    var actionsHtml = '<div class="share-panel__actions-divider" aria-hidden="true"></div>';
+    actionsHtml += '<div class="share-panel__actions layout-scroll-row">';
     actions.forEach(function (a) {
       actionsHtml += '<button type="button" class="share-panel__action-item" data-component-slug="button" data-action="' + a.key + '">'
         + '<span class="share-panel__action-icon"><i class="wego-iconfont-s ' + a.icon + '" aria-hidden="true"></i></span>'
@@ -197,7 +198,7 @@
     if (showHeaderActions) {
       headerActionsHtml = '<div class="share-panel__header-actions">'
         + '<button type="button" class="share-panel__header-btn" data-action="display-mode" aria-label="展示方式">'
-        + '<i class="wego-iconfont-s icon-duotu" aria-hidden="true"></i>'
+        + '<i class="wego-iconfont-s icon-liebiao" aria-hidden="true"></i>'
         + '<span class="share-panel__header-btn-text">展示方式</span>'
         + '</button>'
         + '<button type="button" class="share-panel__header-btn" data-action="share-settings" aria-label="分享设置">'
