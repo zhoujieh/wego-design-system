@@ -8,7 +8,6 @@
 /* 面板容器 */
 .share-panel__panel {
   width: 100%;
-  max-width: 430px;
   background: var(--bg-panel, #f6f6f6);
   border-radius: 16px 16px 0 0;
   padding-top: 0px;
