@@ -985,6 +985,42 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     return false;
   }
 
+  /** 读取元素该属性的「源码声明信息」：判定属性是否由样式表规则声明，并返回命中的源码原文。
+   *  sourceValue 保留 token 原文（如 var(--body-md-strong-font-size)）而非计算像素值，供施工单展示。
+   *  只查样式表规则、不查内联样式：走查工具的所有修改都以内联注入（el.style）落地，
+   *  查内联必然读到工具改后的值，无法回溯源码；场景自身用内联设置样式的属性不计为源码声明。 */
+  function readSourceDeclaration(el, property) {
+    if (!el || el.nodeType !== 1 || !property) return { declared: false, sourceValue: '' };
+    const ruleDeclares = (rule) => {
+      try {
+        if (!rule) return null;
+        if (rule.type === 1) {
+          if (rule.selectorText && rule.style && el.matches(rule.selectorText)) {
+            const v = rule.style.getPropertyValue(property);
+            if (v) return { declared: true, sourceValue: String(v).trim() };
+          }
+        } else if (rule.cssRules) {
+          for (let i = 0; i < rule.cssRules.length; i++) {
+            const hit = ruleDeclares(rule.cssRules[i]);
+            if (hit) return hit;
+          }
+        }
+      } catch (e) { /* 跨域/非法规则跳过 */ }
+      return null;
+    };
+    try {
+      for (let i = 0; i < document.styleSheets.length; i++) {
+        const sheet = document.styleSheets[i];
+        try {
+          if (sheet.ownerNode && sheet.ownerNode.id === 'wego-wt-pseudo-styles') continue;
+          const hit = ruleDeclares(sheet);
+          if (hit) return hit;
+        } catch (e) {}
+      }
+    } catch (e) {}
+    return { declared: false, sourceValue: '' };
+  }
+
   /** 提取目标元素的「组件类」：作为「同一条样式控制」该元素的标识。
    *  取稳定类中在页面可见元素出现 ≥2 次、类名字符串最长（BEM 块元素/场景组件类通常最具体）的那个；
    *  没有可共享的组件类则返回 ''（表示无同类可同步）。
@@ -2715,16 +2751,21 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         // 顺序移动
         orderChanges.forEach(c => {
           const posTxt = (c.displayOld && c.displayNew) ? `${c.displayOld} → ${c.displayNew}` : `order ${c.oldValue} → ${c.newValue}`;
-          changeLines.push(`- 顺序：${posTxt}`);
+          const orderTxt = (c.orderValue || c.newValue) ? `（order: ${c.oldValue || 0} → ${c.orderValue || c.newValue}）` : '';
+          changeLines.push(`- 顺序：${posTxt}${orderTxt}`);
         });
         // 其他样式
         otherChanges.forEach(c => {
           const propLabel = c.property === 'flex' ? '宽度' : c.property;
           const valLabel = c.property === 'flex' ? formatFlexLabel(c.newValue) : (c.newValue || '-');
-          const curLabel = c.property === 'flex'
-            ? (c.oldValue ? formatFlexLabel(c.oldValue) : '-')
-            : (c.oldValue || '-');
-          changeLines.push(`- ${propLabel}：${curLabel} → ${valLabel}（\`${c.property}: ${c.newValue || '-'}\`）`);
+          // 源码是否已声明：未声明 → 标注"新增"；已声明 → 展示源码值（优先 token 原文，其次原值）
+          const srcDeclared = !!c.sourceDeclared;
+          const srcVal = c.sourceValue || c.oldValue;
+          const curLabel = srcDeclared
+            ? (c.property === 'flex' ? formatFlexLabel(srcVal) : (srcVal || '-'))
+            : '（未声明）';
+          const tag = srcDeclared ? '' : '新增 ';
+          changeLines.push(`- ${tag}${propLabel}：${curLabel} → ${valLabel}（\`${c.property}: ${c.newValue || '-'}\`）`);
         });
         if (changeLines.length) {
           lines.push('- 变更：');
@@ -2758,7 +2799,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           elementText: anchor,
           role,
           adds: addClassChanges.map(c => c.intentClass).filter(Boolean),
-          css: cssChanges.map(c => ({ property: c.property, value: c.property === 'order' ? (c.orderValue || c.newValue) : c.newValue })),
+          css: cssChanges.map(c => ({ property: c.property, value: c.property === 'order' ? (c.orderValue || c.newValue) : c.newValue, sourceDeclared: !!c.sourceDeclared, sourceValue: c.sourceValue || '' })),
           annotation: g.annotation || '',
           shared: g.shared || false,
           sharedCount: g.shared ? (g.sharedCount || g.changes.length) : 0,
@@ -2954,15 +2995,20 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           addClassChanges.forEach(c => { changeLines.push(`- 加结构类 \`${c.intentClass}\``); });
           orderChanges.forEach(c => {
             const posTxt = (c.displayOld && c.displayNew) ? `${c.displayOld} → ${c.displayNew}` : `order ${c.oldValue} → ${c.newValue}`;
-            changeLines.push(`- 顺序：${posTxt}`);
+            const orderTxt = (c.orderValue || c.newValue) ? `（order: ${c.oldValue || 0} → ${c.orderValue || c.newValue}）` : '';
+            changeLines.push(`- 顺序：${posTxt}${orderTxt}`);
           });
           otherChanges.forEach(c => {
             const propLabel = c.property === 'flex' ? '宽度' : c.property;
             const valLabel = c.property === 'flex' ? formatFlexLabel(c.newValue) : (c.newValue || '-');
-            const curLabel = c.property === 'flex'
-              ? (c.oldValue ? formatFlexLabel(c.oldValue) : '-')
-              : (c.oldValue || '-');
-            changeLines.push(`- ${propLabel}：${curLabel} → ${valLabel}（\`${c.property}: ${c.newValue || '-'}\`）`);
+            // 源码是否已声明：未声明 → 标注"新增"；已声明 → 展示源码值（优先 token 原文，其次原值）
+            const srcDeclared = !!c.sourceDeclared;
+            const srcVal = c.sourceValue || c.oldValue;
+            const curLabel = srcDeclared
+              ? (c.property === 'flex' ? formatFlexLabel(srcVal) : (srcVal || '-'))
+              : '（未声明）';
+            const tag = srcDeclared ? '' : '新增 ';
+            changeLines.push(`- ${tag}${propLabel}：${curLabel} → ${valLabel}（\`${c.property}: ${c.newValue || '-'}\`）`);
           });
           if (changeLines.length) {
             lines.push('- 变更：');
@@ -2992,7 +3038,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             elementText: anchor,
             role,
             adds: addClassChanges.map(c => c.intentClass).filter(Boolean),
-            css: cssChanges.map(c => ({ property: c.property, value: c.property === 'order' ? (c.orderValue || c.newValue) : c.newValue })),
+            css: cssChanges.map(c => ({ property: c.property, value: c.property === 'order' ? (c.orderValue || c.newValue) : c.newValue, sourceDeclared: !!c.sourceDeclared, sourceValue: c.sourceValue || '' })),
             annotation: g.annotation || '',
             shared: g.shared || false,
             sharedCount: g.shared ? (g.sharedCount || g.changes.length) : 0,
@@ -7117,6 +7163,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         Object.assign(existing, deriveIntent(existing, change.el));
         if (change.el) changeElRefs.set(existing.id, change.el);
       } else {
+        const srcInfo = (change.el && !change.target)
+          ? readSourceDeclaration(change.el, change.property)
+          : { declared: false, sourceValue: '' };
         const rec = {
           id: 'change-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
           selector: change.selector,
@@ -7132,6 +7181,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           displayNew: change.displayNew || '',
           shared: !!change.shared,
           sharedKey: change.sharedKey || '',
+          sourceDeclared: srcInfo.declared,
+          sourceValue: srcInfo.sourceValue,
           timestamp: Date.now(),
         };
         Object.assign(rec, deriveIntent(rec, change.el));
