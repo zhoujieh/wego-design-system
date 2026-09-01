@@ -33,6 +33,9 @@
 - `wego-app/js/routes.js`、`wego-app/lib/`、`components.css` 是生成物，禁止直接编辑；权威源在 `.codex/skills/wego-design/`，仅 `wego-uxsystem-iterate` 可改。
 - `.trae/skills/*` 与 `.codebuddy/skills/*` 必须以逐项符号链接指向 `.codex/skills/*`，或以整目录符号链接指向 `.codex/skills`；不得保留副本。
 
+<!-- rule-id: business-component-must-have-demo-scene -->
+- **业务组件必须配套状态展示场景**：每个全局加载的业务组件（`wego-app/lib/js/` 下的业务组件，如 `resale-popup` / `upgrade-popup` / `product-share` / `product-editor`）必须有一个独立状态展示场景——场景页分组列出组件全部状态、点击拉起同一组件实例，并关联进场景管理列表（`wego-app/scenes/infras/场景管理/scene.js` 的 `scenes` 数组）；展示页位于该组件的业务归属场景目录下；组件新增状态时必须同步补入展示页。建法见 `wego-uxsystem-iterate/references/component-demo-scene.md`。
+
 ## 三技能主链路
 
 - 新需求或业务范围变化：`wego-product` 形成并确认 `prototype_brief`。

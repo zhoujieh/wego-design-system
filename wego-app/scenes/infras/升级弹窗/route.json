@@ -1,0 +1,9 @@
+{
+  "routeId": "upgrade-popup-demo",
+  "entry": {
+    "type": "cell-entry",
+    "label": "升级弹窗",
+    "group": "workspace-tools",
+    "tab": "workspace"
+  }
+}

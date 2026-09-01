@@ -5511,7 +5511,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             text-align: left;
             font-family: inherit;
           }
-          .subpanel-item:hover { background: rgba(255,255,255,0.06); }
+          /* 数据模拟面板 item：整行无 hover/点击按压反馈，交互只体现在右侧 switch 上 */
+          .subpanel-item:hover,
+          .subpanel-item:active { background: transparent; }
           .subpanel-item.is-disabled {
             opacity: 0.4;
             cursor: not-allowed;
