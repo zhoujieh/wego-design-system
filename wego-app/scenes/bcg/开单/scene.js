@@ -1620,13 +1620,20 @@
   }
 
   function pointsPopover() {
+    return ''
+      + '<div class="order-points-popover" role="dialog" aria-label="积分抵扣">'
+      +   '<header><strong>积分(剩余' + availablePoints() + ')</strong><button type="button" class="btn btn--weak btn--sm btn--icon-only" data-component-slug="button" data-close-panel aria-label="关闭"><i class="btn__icon icon-cha16" aria-hidden="true"></i></button></header>'
+      +   pointsEditorContent()
+      +   '<div class="order-side-actions">' + button('取消', 'weak', 'md', 'data-close-panel') + button('确定', 'strong', 'md', 'data-apply-quick-op') + '</div>'
+      + '</div>';
+  }
+
+  function pointsEditorContent() {
     var maxPoints = availablePoints();
     var currentPoints = Math.min(maxPoints, Math.max(0, Math.round(Number(state.pointsUsed || 0))));
     var currentMode = state.pointsMode || (currentPoints > 0 ? (currentPoints === maxPoints ? 'max' : 'custom') : 'max');
     var draftPoints = currentMode === 'max' ? maxPoints : (currentMode === 'none' ? 0 : currentPoints);
     return ''
-      + '<div class="order-points-popover" role="dialog" aria-label="积分抵扣">'
-      +   '<header><strong>积分(剩余' + maxPoints + ')</strong><button type="button" class="btn btn--weak btn--sm btn--icon-only" data-component-slug="button" data-close-panel aria-label="关闭"><i class="btn__icon icon-cha16" aria-hidden="true"></i></button></header>'
       +   '<div class="order-points-options" role="radiogroup" aria-label="积分使用方式">'
       +     pointsOption('none', '暂不使用积分', false)
       +     pointsOption('max', '最高可使用' + maxPoints + '积分，抵扣<span class="order-points-amount">' + money(pointsDeduction(maxPoints)) + '</span>', currentMode === 'max')
@@ -1635,8 +1642,6 @@
       +   '<div class="order-points-custom' + (currentMode === 'custom' ? ' is-active' : '') + '"' + (currentMode === 'custom' ? '' : ' hidden') + '>'
       +     '<span>使用</span><div class="number-input" data-component-slug="input"><input class="number-input__field" type="text" inputmode="numeric" value="' + (draftPoints || '') + '" placeholder="请输入" data-points-custom-input data-quick-op-value aria-label="使用积分"><span class="number-input__suffix">积分</span></div>'
       +     '<span>抵扣<strong class="order-points-amount" data-points-deduction>' + money(pointsDeduction(draftPoints)) + '</strong></span>'
-      +   '</div>'
-      +   '<div class="order-side-actions">' + button('取消', 'weak', 'md', 'data-close-panel') + button('确定', 'strong', 'md', 'data-apply-quick-op') + '</div>'
       + '</div>';
   }
 
@@ -1657,7 +1662,10 @@
       : '<span class="order-quick-op__status order-quick-op__status--add" aria-label="添加' + label + '"><i class="wego-iconfont-s icon-jia16" aria-hidden="true"></i></span>';
     var trigger = '<button type="button" class="order-quick-op' + (status ? ' is-used' : '') + '" data-open-panel="quick" data-quick-op="' + op + '" aria-haspopup="dialog" aria-expanded="' + (state.panel === 'quick' && state.quickOp === op) + '"><span class="order-quick-op__label">' + label + '</span>' + statusHtml + '</button>';
     if (op === 'freight') return '<div class="order-quick-op-anchor order-quick-op-anchor--freight">' + trigger + (state.panel === 'quick' && state.quickOp === 'freight' ? freightPopover() : '') + '</div>';
-    if (op === 'points') return '<div class="order-quick-op-anchor order-quick-op-anchor--points">' + trigger + (state.panel === 'quick' && state.quickOp === 'points' ? pointsPopover() : '') + '</div>';
+    if (op === 'points') {
+      if (isDesktopWorkbench()) return trigger;
+      return '<div class="order-quick-op-anchor order-quick-op-anchor--points">' + trigger + (state.panel === 'quick' && state.quickOp === 'points' ? pointsPopover() : '') + '</div>';
+    }
     return trigger;
   }
 
@@ -1711,11 +1719,13 @@
     }
   }
 
-  function quickOpPanel() {
+  function quickOpPanel(useDesktopPointsEditor) {
     var op = state.quickOp && QUICK_OP_DEFS[state.quickOp] ? state.quickOp : 'member';
     var def = QUICK_OP_DEFS[op];
     var content = '';
-    if (op === 'coupon') {
+    if (op === 'points' && useDesktopPointsEditor) {
+      content = pointsEditorContent();
+    } else if (op === 'coupon') {
       content = '<div class="order-quick-fields">'
         + quickNumberField('使用张数', state.couponCount, '张', 'data-quick-coupon-count', 'numeric')
         + quickNumberField('抵扣金额', state.couponDiscount, '元', 'data-quick-coupon-amount')
@@ -2391,7 +2401,7 @@
   }
 
   function desktopShowsCatalog() {
-    return !state.panel || state.panel === 'add' || state.panel === 'customer' || state.panel === 'customer-create' || state.panel === 'delivery' || state.panel === 'address' || state.panel === 'note' || state.panel === 'checkout' || state.panel === 'payment' || state.panel === 'product-edit' || state.panel === 'product-create' || state.panel === 'product-temp-create' || (state.panel === 'quick' && (state.quickOp === 'freight' || state.quickOp === 'points'));
+    return !state.panel || state.panel === 'add' || state.panel === 'customer' || state.panel === 'customer-create' || state.panel === 'delivery' || state.panel === 'address' || state.panel === 'note' || state.panel === 'checkout' || state.panel === 'payment' || state.panel === 'product-edit' || state.panel === 'product-create' || state.panel === 'product-temp-create' || state.panel === 'quick';
   }
 
   function desktopWorkspaceStyle() {
@@ -2540,17 +2550,19 @@
   function desktopModal() {
     if (state.panel === 'product-edit') return productEditModal();
     if (state.panel === 'product-create' || state.panel === 'product-temp-create') return productCreateModal();
-    if (state.panel !== 'add' && state.panel !== 'customer-create' && state.panel !== 'delivery' && state.panel !== 'note' && state.panel !== 'checkout' && state.panel !== 'payment') return '';
+    if (state.panel !== 'add' && state.panel !== 'customer-create' && state.panel !== 'delivery' && state.panel !== 'note' && state.panel !== 'checkout' && state.panel !== 'payment' && state.panel !== 'quick') return '';
     var isCustomerCreate = state.panel === 'customer-create';
     var isDelivery = state.panel === 'delivery';
     var isNote = state.panel === 'note';
     var isCheckout = state.panel === 'checkout' || state.panel === 'payment';
+    var isQuick = state.panel === 'quick';
+    var modalTitle = isQuick && QUICK_OP_DEFS[state.quickOp] ? QUICK_OP_DEFS[state.quickOp].title : (isCustomerCreate ? '新建客户' : (isDelivery ? '选择发货方式' : (isNote ? '商品备注' : (isCheckout ? '支付结算' : '添加商品'))));
     // Exception: 宿主 modal 当前只有全宽面板，无法承载 PC 中宽新建客户、发货方式与商品录入；此处仅回退承载层，内容仍消费正式组件。
     return ''
-      + '<div class="order-desktop-modal ' + (isCustomerCreate || isDelivery ? 'order-desktop-modal--customer' : '') + (isDelivery ? ' order-desktop-modal--delivery' : '') + (isNote ? ' order-desktop-modal--note' : (isCheckout ? ' order-desktop-modal--checkout' : ' order-desktop-modal--add')) + '" role="dialog" aria-modal="true" aria-labelledby="order-desktop-modal-title" data-state="open">'
+      + '<div class="order-desktop-modal ' + (isQuick ? 'order-desktop-modal--quick' : ((isCustomerCreate || isDelivery ? 'order-desktop-modal--customer' : '') + (isDelivery ? ' order-desktop-modal--delivery' : '') + (isNote ? ' order-desktop-modal--note' : (isCheckout ? ' order-desktop-modal--checkout' : ' order-desktop-modal--add')))) + '" role="dialog" aria-modal="true" aria-labelledby="order-desktop-modal-title" data-state="open">'
       +   '<div class="order-desktop-modal__panel">'
-      +     '<div class="order-desktop-modal__head"><strong id="order-desktop-modal-title">' + (isCustomerCreate ? '新建客户' : (isDelivery ? '选择发货方式' : (isNote ? '商品备注' : (isCheckout ? '支付结算' : '添加商品')))) + '</strong><button type="button" class="btn btn--weak btn--sm btn--icon-only" data-component-slug="button" data-close-panel aria-label="关闭"><i class="btn__icon ' + (isDelivery ? 'icon-cha' : 'icon-cha16') + '" aria-hidden="true"></i></button></div>'
-      +     '<div class="order-desktop-modal__body">' + (isCustomerCreate ? desktopNewCustomerModalContent() : (isDelivery ? deliveryPanel() : (isNote ? spuNotePanel() : (isCheckout ? checkoutPanel() : addPanel(true))))) + '</div>'
+      +     '<div class="order-desktop-modal__head"><strong id="order-desktop-modal-title">' + modalTitle + '</strong><button type="button" class="btn btn--weak btn--sm btn--icon-only" data-component-slug="button" data-close-panel aria-label="关闭"><i class="btn__icon ' + (isDelivery ? 'icon-cha' : 'icon-cha16') + '" aria-hidden="true"></i></button></div>'
+      +     '<div class="order-desktop-modal__body">' + (isQuick ? quickOpPanel(true) : (isCustomerCreate ? desktopNewCustomerModalContent() : (isDelivery ? deliveryPanel() : (isNote ? spuNotePanel() : (isCheckout ? checkoutPanel() : addPanel(true)))))) + '</div>'
       +   '</div>'
       + '</div>';
   }
@@ -3501,8 +3513,8 @@
             customerSearch.focus({ preventScroll: true });
             customerSearch.setSelectionRange(customerSearch.value.length, customerSearch.value.length);
           }
-        } else if (type === 'quick' && (state.quickOp === 'freight' || state.quickOp === 'points') && isDesktopWorkbench()) {
-          var anchoredQuickInput = root.querySelector((state.quickOp === 'freight' ? '.order-freight-popover' : '.order-points-popover') + ' [data-quick-op-value]');
+        } else if (type === 'quick' && isDesktopWorkbench()) {
+          var anchoredQuickInput = root.querySelector((state.quickOp === 'freight' ? '.order-freight-popover' : '.order-desktop-modal--quick') + ' [data-quick-op-value]');
           if (anchoredQuickInput) {
             anchoredQuickInput.focus({ preventScroll: true });
             anchoredQuickInput.select();
@@ -4847,6 +4859,7 @@
       var shouldClosePointsPopover = isDesktopWorkbench()
         && state.panel === 'quick'
         && state.quickOp === 'points'
+        && !event.target.closest('.order-desktop-modal--quick')
         && !event.target.closest('.order-quick-op-anchor--points');
       var shouldCloseCatalogFilter = isDesktopWorkbench()
         && state.catalogFilterOpen
