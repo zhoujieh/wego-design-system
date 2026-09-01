@@ -110,9 +110,9 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 4px 6px;
+  padding: 4px 0;
   border-radius: 6px;
-  transition: background var(--duration-fast, 0.15s) ease;
+  transition: opacity var(--duration-fast, 0.15s) ease;
   flex-shrink: 0;
 }
 
@@ -121,7 +121,7 @@
 }
 
 .share-panel__config-link:active {
-  background: var(--bg-state-pressed, rgba(32, 47, 100, 0.06));
+  opacity: 0.6;
 }
 
 .share-panel__config-link i {
@@ -130,7 +130,7 @@
 
 /* 渠道栏（复用 .layout-scroll-row 横向滚动） */
 .share-panel__channels {
-  padding: 8px 0 12px;
+  padding: 8px 8px 12px;
   gap: 0;
 }
 
@@ -139,7 +139,7 @@
   flex-wrap: wrap;
   align-content: flex-start;
   gap: 0;
-  padding: 0 8px;
+  padding: 0;
   flex: 0 0 auto;
   box-sizing: border-box;
 }
