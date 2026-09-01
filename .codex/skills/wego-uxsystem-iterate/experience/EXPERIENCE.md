@@ -16,3 +16,5 @@
 [实现方式] 切图需要偏移且不裁剪时用 img 标签而非 CSS 背景图：CSS 背景图用 background-position 偏移后，超出容器部分会被 background-clip 裁剪，overflow:visible 对背景图无效。若切图需要偏移且完整显示（如顶部插画往上偏移 N px），应改用 img 标签 + 容器 overflow:visible + img position:relative; top:-Npx。注意 img src 路径相对于 HTML 页面解析而非 CSS 文件，场景内图片需写相对于 index.html 的路径（如 scenes/shop/xxx/assets/yyy.png）。[ev-007] ×1，最近 2026-08-28
 §
 [工作流] 涉及设计稿还原的任务必须先确认设计稿内容再实施：用户提供 Figma 设计稿链接后，不能凭组件名或常见模式猜测设计稿内容（如把居中弹窗误认为底部 sheet 样式）。若无法直接访问 Figma 内容，必须请用户描述关键样式（布局方式、蒙层有无、动画方向、间距数值、切图位置）或提供切图，确认后再实施，禁止凭猜测直接写代码。[ev-008] ×1，最近 2026-08-28
+§
+[工作流] 工作流维护免验收例外只适用于文档/规则类内容，涉及可视输出的工具改动仍须用户验收：wego-uxsystem-iterate 权威源维护中，AGENTS.md、SKILL.md、references/、experience/ 等纯文档/规则（用户无法直观验收的内容）验证通过可直接走短周期 PR 合并；但 walkthrough-tool.js 这类会产出施工单、预览等用户每日查看的可视内容的工具改动，不适用免验收例外，必须先推送 PR 保留待用户验收，用户确认后再合并。判断边界：改的是"用户能直接看到效果的内容"就要验收。[ev-010] ×1，最近 2026-09-01
