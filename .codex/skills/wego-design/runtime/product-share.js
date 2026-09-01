@@ -197,7 +197,7 @@
     if (showHeaderActions) {
       headerActionsHtml = '<div class="share-panel__header-actions">'
         + '<button type="button" class="share-panel__header-btn" data-action="display-mode" aria-label="展示方式">'
-        + '<i class="wego-iconfont-s icon-zhanshi" aria-hidden="true"></i>'
+        + '<i class="wego-iconfont-s icon-duotu" aria-hidden="true"></i>'
         + '<span class="share-panel__header-btn-text">展示方式</span>'
         + '</button>'
         + '<button type="button" class="share-panel__header-btn" data-action="share-settings" aria-label="分享设置">'
