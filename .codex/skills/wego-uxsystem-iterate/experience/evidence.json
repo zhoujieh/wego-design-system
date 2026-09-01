@@ -72,6 +72,14 @@
       "source": "user-correction",
       "scene": "workflow-branch-closeout",
       "tags": ["分支残留", "收口闭环", "异步合并", "巡检脚本", "wego-github-delivery", "wego-uxsystem-iterate"]
+    },
+    {
+      "id": "ev-010",
+      "date": "2026-09-01",
+      "summary": "走查工具 walkthrough-tool.js 施工单增强改动推送后，我按'工作流维护免业务验收'规则准备直接短周期 PR 自动合并，用户纠正'走查工具是要验收的，规则里面说不需要验收直接合并吗？'。用户明确规则边界：文档/规则类维护（AGENTS.md、SKILL.md、references、experience 等无法直观验收的内容）验证通过直接合并；涉及样式/可视输出的工具改动（walkthrough-tool.js 产出的施工单是用户每日查看的可视内容）必须等用户验收后再合并。已将 PR #145 保留为待验收状态，并修正 PR 描述去掉'免业务验收'措辞",
+      "source": "user-correction",
+      "scene": "workflow-walkthrough-tool-maintenance",
+      "tags": ["工作流维护例外", "免验收边界", "走查工具", "可视内容验收", "PR合并", "wego-uxsystem-iterate"]
     }
   ]
 }
