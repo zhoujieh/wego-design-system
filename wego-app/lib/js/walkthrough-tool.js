@@ -199,6 +199,31 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
   function isStableSelectorClass(c) {
     return !!c && !c.startsWith('wt-') && !c.startsWith('wego-') && !c.startsWith('data-wt') && !VOLATILE_CLASS_RE.test(c);
   }
+  /** 提取元素完整稳定类列表（保留全部业务/组件类，供施工单区分组件类与业务类；易变状态类剔除） */
+  function getStableClasses(el) {
+    try {
+      if (!el || !el.className || typeof el.className !== 'string') return [];
+      return el.className.trim().split(/\s+/).filter(isStableSelectorClass);
+    } catch (e) { return []; }
+  }
+  /** 取首个稳定类（历史兼容：elementClass 单类字段的取值来源） */
+  function getFirstStableClass(el) {
+    return getStableClasses(el)[0] || '';
+  }
+  /** 设计系统通用组件根类（业务类判定时排除，避免 btn/icon/card 等基类被误当业务类标注） */
+  const GENERIC_COMPONENT_CLASSES = new Set([
+    'btn','icon','card','cell','tag','badge','avatar','switch','input','search','checkbox','radio',
+    'stack','navbar','dialog','modal','actionsheet','popmenu','popover','toast','metric','skeleton',
+    'loading','result','layout-page','layout-scroll','layout-section','layout-flow','layout-split',
+    'layout-grid','layout-scroll-row','sticky-region','bottom-nav','bottom-action-bar','counter',
+    'numeric-keypad','tabs','form','image','link','field','label','title','content','footer','header',
+  ]);
+  /** 是否为通用组件基类（精确匹配根类，或 -- 变体属于通用组件） */
+  function isGenericComponentClass(c) {
+    if (!c) return true;
+    const base = c.split('--')[0].split('__')[0];
+    return GENERIC_COMPONENT_CLASSES.has(base) || GENERIC_COMPONENT_CLASSES.has(c);
+  }
   /** 按记录的选择器找元素；精确匹配失败时剔除易变状态类后重试，兼容历史数据 */
   function queryTargetEl(selector) {
     if (!selector) return null;
@@ -2533,6 +2558,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             elementTag: c.elementTag,
             elementText: c.elementText,
             elementClass: c.elementClass || '',
+            elementClasses: c.elementClasses || [],
             changes: [],
             shared: !!c.sharedKey,
             componentClass,
@@ -2580,15 +2606,15 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const m = g.selector.match(/\.([a-zA-Z0-9_-]+)\s*$/) || g.selector.match(/\[data-component-slug="[^"]+"\]\.([a-zA-Z0-9_-]+)/);
         return m ? m[1] : '';
       };
-      // 辅助：提取业务类锚点（组件类之外的元素类；共享组组件类与业务类同元素时，业务类常是 elementClass 首类）
+      // 辅助：提取业务类锚点（组件类之外的业务类；从完整稳定类列表挑"非组件类且非通用组件基类"的类）
       const getBusinessClass = (g) => {
         const componentClass = g.componentClass;
-        const classes = (g.elementClass || '').split(/\s+/).filter(Boolean);
-        if (classes.length) {
-          const first = classes[0];
-          // 业务类 ≠ 组件类时返回业务类；相同（如纯业务组件）则返回空避免重复
-          return first && first !== componentClass ? first : '';
-        }
+        const classes = (g.elementClasses && g.elementClasses.length) ? g.elementClasses : (g.elementClass ? [g.elementClass] : []);
+        if (!classes.length) return '';
+        // 业务类 = 非组件类、非通用组件基类（btn/icon/card…）的类；组件类与业务类同元素时才能区分
+        const biz = classes.find(c => c !== componentClass && !isGenericComponentClass(c));
+        if (biz) return biz;
+        // 全部是通用组件类或与组件类相同 → 无独立业务类，返回空避免误标
         return '';
       };
       // 辅助：格式化 flex 值为友好描述
@@ -2809,11 +2835,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       };
       const getBusinessClass = (g) => {
         const componentClass = g.componentClass;
-        const classes = (g.elementClass || '').split(/\s+/).filter(Boolean);
-        if (classes.length) {
-          const first = classes[0];
-          return first && first !== componentClass ? first : '';
-        }
+        const classes = (g.elementClasses && g.elementClasses.length) ? g.elementClasses : (g.elementClass ? [g.elementClass] : []);
+        if (!classes.length) return '';
+        const biz = classes.find(c => c !== componentClass && !isGenericComponentClass(c));
+        if (biz) return biz;
         return '';
       };
       scenes.forEach((scene, sceneIdx) => {
@@ -2825,7 +2850,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           const componentClass = c.sharedKey ? c.sharedKey.split('::')[0] : '';
           const gkey = c.sharedKey ? componentClass : c.selector;
           if (!groups[gkey]) {
-            groups[gkey] = { selector: c.selector, elementTag: c.elementTag, elementText: c.elementText, elementClass: c.elementClass || '', changes: [], shared: !!c.sharedKey, componentClass, annotation: '' };
+            groups[gkey] = { selector: c.selector, elementTag: c.elementTag, elementText: c.elementText, elementClass: c.elementClass || '', elementClasses: c.elementClasses || [], changes: [], shared: !!c.sharedKey, componentClass, annotation: '' };
           }
           groups[gkey].changes.push(c);
         });
@@ -4321,9 +4346,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           target: this._target,
           elementTag: this._targetEl.tagName.toLowerCase(),
           elementText: (this._targetEl.textContent || '').trim().substring(0, 50),
-          elementClass: (this._targetEl.className && typeof this._targetEl.className === 'string')
-            ? this._targetEl.className.trim().split(/\s+/).filter(c => isStableSelectorClass(c))[0] || ''
-            : '',
+          elementClass: getFirstStableClass(this._targetEl),
+          elementClasses: getStableClasses(this._targetEl),
           property: cssProp,
           oldValue: '',
           newValue: cssVal,
@@ -4339,9 +4363,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           selector: this._selector,
           elementTag: this._targetEl.tagName.toLowerCase(),
           elementText: (this._targetEl.textContent || '').trim().substring(0, 50),
-          elementClass: (this._targetEl.className && typeof this._targetEl.className === 'string')
-            ? this._targetEl.className.trim().split(/\s+/).filter(c => isStableSelectorClass(c))[0] || ''
-            : '',
+          elementClass: getFirstStableClass(this._targetEl),
+          elementClasses: getStableClasses(this._targetEl),
           property: result.property,
           oldValue: result.oldValue,
           newValue: result.newValue,
@@ -4359,9 +4382,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
               selector: this._selector,
               elementTag: this._targetEl.tagName.toLowerCase(),
               elementText: (this._targetEl.textContent || '').trim().substring(0, 50),
-              elementClass: (this._targetEl.className && typeof this._targetEl.className === 'string')
-                ? this._targetEl.className.trim().split(/\s+/).filter(c => isStableSelectorClass(c))[0] || ''
-                : '',
+              elementClass: getFirstStableClass(this._targetEl),
+              elementClasses: getStableClasses(this._targetEl),
               property: extra.property,
               oldValue: extra.oldValue,
               newValue: extra.newValue,
@@ -7043,6 +7065,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         existing.newValue = change.newValue;
         existing.timestamp = Date.now();
         existing.elementText = change.elementText;
+        existing.elementClasses = change.elementClasses || existing.elementClasses || [];
         existing.shared = !!change.shared;
         existing.sharedKey = change.sharedKey || '';
         existing.orderValue = change.orderValue || existing.orderValue || '';
@@ -7057,6 +7080,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           target: change.target || '',
           elementTag: change.elementTag,
           elementText: change.elementText,
+          elementClasses: change.elementClasses || [],
           property: change.property,
           oldValue: change.oldValue,
           newValue: change.newValue,
