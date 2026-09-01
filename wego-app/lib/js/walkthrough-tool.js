@@ -161,6 +161,14 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     return getRouteLabel();
   }
 
+  /** 从预览 URL 解析 PR 号（GitHub Pages 预览路径固定为 /previews/pr-<N>/；本地预览无此路径返回 null） */
+  function getCurrentPrNumber() {
+    try {
+      const m = (window.location.pathname || '').match(/\/previews\/pr-(\d+)\//);
+      if (m && m[1]) return Number(m[1]);
+    } catch (e) { /* ignore */ }
+    return null;
+  }
 
   /** 判断元素是否属于走查工具自身（包括 Shadow DOM 内部） */
   function isWalkthroughElement(el) {
@@ -2503,7 +2511,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const changes = this._changes || [];
       const annotations = this._annotations || [];
       if (changes.length === 0 && annotations.length === 0) {
-        return `## 走查变更单 #/${routeLabel}\n**Viewport:** ${viewport}\n\n当前还没有记录到任何配置修改或批注。`;
+        const prInfo = getCurrentPrNumber() ? `**PR:** #${getCurrentPrNumber()}\n` : '';
+        return `## 走查变更单 #/${routeLabel}\n${prInfo}**Viewport:** ${viewport}\n\n当前还没有记录到任何配置修改或批注。`;
       }
       // 分组逻辑：共享样式按组件类（sharedKey 去掉 ::属性名）分组，同一组件类的所有属性合并为一条；
       // 非共享样式按 selector 分组，同一元素的多个属性合并为一条。
@@ -2564,6 +2573,17 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const m = g.selector.match(/\.([a-zA-Z0-9_-]+)\s*$/) || g.selector.match(/\[data-component-slug="[^"]+"\]\.([a-zA-Z0-9_-]+)/);
         return m ? m[1] : '';
       };
+      // 辅助：提取业务类锚点（组件类之外的元素类；共享组组件类与业务类同元素时，业务类常是 elementClass 首类）
+      const getBusinessClass = (g) => {
+        const componentClass = g.componentClass;
+        const classes = (g.elementClass || '').split(/\s+/).filter(Boolean);
+        if (classes.length) {
+          const first = classes[0];
+          // 业务类 ≠ 组件类时返回业务类；相同（如纯业务组件）则返回空避免重复
+          return first && first !== componentClass ? first : '';
+        }
+        return '';
+      };
       // 辅助：格式化 flex 值为友好描述
       const formatFlexLabel = (v) => {
         if (!v) return '-';
@@ -2573,8 +2593,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         if (fixedMatch) return `固定 ${fixedMatch[1]}`;
         return v;
       };
+      const prNumber = getCurrentPrNumber();
       const lines = [
         `## 走查变更单 #/${routeLabel}`,
+        ...(prNumber ? [`**PR:** #${prNumber}`] : []),
         `**Viewport:** ${viewport}`,
         '',
         '> 施工单：按最终效果整理，改法优先用设计系统语义类；主定位用组件类，完整选择器见文末备选。',
@@ -2623,7 +2645,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         otherChanges.forEach(c => {
           const propLabel = c.property === 'flex' ? '宽度' : c.property;
           const valLabel = c.property === 'flex' ? formatFlexLabel(c.newValue) : (c.newValue || '-');
-          changeLines.push(`- ${propLabel} → ${valLabel}（\`${c.property}: ${c.newValue || '-'}\`）`);
+          const curLabel = c.property === 'flex'
+            ? (c.oldValue ? formatFlexLabel(c.oldValue) : '-')
+            : (c.oldValue || '-');
+          changeLines.push(`- ${propLabel}：${curLabel} → ${valLabel}（\`${c.property}: ${c.newValue || '-'}\`）`);
         });
         if (changeLines.length) {
           lines.push('- 变更：');
@@ -2635,7 +2660,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const addSnippet = addClassChanges.map(c => c.intentClass).join(' ');
         let fixLine = '- 改法：';
         if (classAnchor) {
+          const businessClass = getBusinessClass(g);
           fixLine += `修改 \`.${classAnchor}\``;
+          if (businessClass && businessClass !== classAnchor) fixLine += `（业务类 \`.${businessClass}\`）`;
           if (cssSnippet || orderSnippet) fixLine += `：\`${[cssSnippet, orderSnippet].filter(Boolean).join('; ')}\``;
           if (addSnippet) fixLine += `，加类 \`${addSnippet}\``;
         } else {
@@ -2706,7 +2733,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             const changes = (data.changes || []).filter(c => c.newValue !== '' && c.newValue != null);
             const annotations = (data.annotations || []).filter(a => a.text && String(a.text).trim());
             if (changes.length > 0 || annotations.length > 0) {
-              scenes.push({ routeId, routeLabel: getRouteLabel(routeId), changes, annotations });
+              scenes.push({ routeId, routeLabel: getRouteLabel(routeId), prNumber: data.prNumber || null, changes, annotations });
             }
           } catch (e) { /* 单个场景解析失败不影响其他场景 */ }
         }
@@ -2726,7 +2753,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const viewport = `${window.innerWidth}×${window.innerHeight}`;
       const scenes = this._loadAllScenesChanges();
       if (scenes.length === 0) {
-        return `## 走查变更单（跨场景汇总）\n**Viewport:** ${viewport}\n\n当前还没有记录到任何配置修改或批注。`;
+        const prInfo = getCurrentPrNumber() ? `**PR:** #${getCurrentPrNumber()}\n` : '';
+        return `## 走查变更单（跨场景汇总）\n${prInfo}**Viewport:** ${viewport}\n\n当前还没有记录到任何配置修改或批注。`;
       }
       // 只有一个场景时，直接用单场景格式
       if (scenes.length === 1) {
@@ -2744,9 +2772,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         this._route = savedRoute;
         return prompt;
       }
-      // 多场景：按场景分组输出
+      // 多场景：按场景分组输出（PR 号取场景数据中的记录，优先当前场景；无记录时回退 URL 解析）
+      const scenePr = scenes.find(s => s.prNumber)?.prNumber || getCurrentPrNumber();
       const lines = [
         `## 走查变更单（跨场景汇总，共 ${scenes.length} 个场景）`,
+        ...(scenePr ? [`**PR:** #${scenePr}`] : []),
         `**Viewport:** ${viewport}`,
         '',
         '> 施工单：按最终效果整理，改法优先用设计系统语义类；主定位用组件类，完整选择器见文末备选。',
@@ -2768,6 +2798,15 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const fixedMatch = v.match(/^0 0 (\d+px)$/);
         if (fixedMatch) return `固定 ${fixedMatch[1]}`;
         return v;
+      };
+      const getBusinessClass = (g) => {
+        const componentClass = g.componentClass;
+        const classes = (g.elementClass || '').split(/\s+/).filter(Boolean);
+        if (classes.length) {
+          const first = classes[0];
+          return first && first !== componentClass ? first : '';
+        }
+        return '';
       };
       scenes.forEach((scene, sceneIdx) => {
         lines.push(`### 场景 ${sceneIdx + 1}：${scene.routeLabel}（#/${scene.routeId}）`);
@@ -2844,7 +2883,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           otherChanges.forEach(c => {
             const propLabel = c.property === 'flex' ? '宽度' : c.property;
             const valLabel = c.property === 'flex' ? formatFlexLabel(c.newValue) : (c.newValue || '-');
-            changeLines.push(`- ${propLabel} → ${valLabel}（\`${c.property}: ${c.newValue || '-'}\`）`);
+            const curLabel = c.property === 'flex'
+              ? (c.oldValue ? formatFlexLabel(c.oldValue) : '-')
+              : (c.oldValue || '-');
+            changeLines.push(`- ${propLabel}：${curLabel} → ${valLabel}（\`${c.property}: ${c.newValue || '-'}\`）`);
           });
           if (changeLines.length) {
             lines.push('- 变更：');
@@ -2855,7 +2897,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           const addSnippet = addClassChanges.map(c => c.intentClass).join(' ');
           let fixLine = '- 改法：';
           if (classAnchor) {
+            const businessClass = getBusinessClass(g);
             fixLine += `修改 \`.${classAnchor}\``;
+            if (businessClass && businessClass !== classAnchor) fixLine += `（业务类 \`.${businessClass}\`）`;
             if (cssSnippet || orderSnippet) fixLine += `：\`${[cssSnippet, orderSnippet].filter(Boolean).join('; ')}\``;
             if (addSnippet) fixLine += `，加类 \`${addSnippet}\``;
           } else {
@@ -7244,6 +7288,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         localStorage.setItem(key, JSON.stringify({
           sceneRoute: state.currentRoute,
           lastModified: Date.now(),
+          prNumber: getCurrentPrNumber(),
           changes: state.changes,
           annotations: state.annotations,
         }));
