@@ -7,6 +7,10 @@
  * (status >= prototyping,即 brief_confirmation 已存在)的迭代;否则视为跳过 wego-product
  * 直接做页面,直接报错拦截。
  *
+ * 例外:已冻结(frozen)归档场景豁免绑定检查——frozen 是走完产品流程并验收收口的归档态,
+ * 场景本身已确认过简报并冻结,不再要求 prototyping 迭代绑定;但冻结迭代不作为其它
+ * 未归档场景的绑定来源。
+ *
  * 用法:
  *   node scripts/validate-scene-iteration-binding.mjs --all [--json]
  *   node scripts/validate-scene-iteration-binding.mjs [--json] {scene} ...
@@ -88,6 +92,34 @@ function boundScenes() {
   return bound;
 }
 
+// 收集所有已冻结(frozen)迭代覆盖的场景名(主场景 + affected_scenes)。
+// 已冻结迭代是走完产品流程并验收收口的归档场景：场景本身已确认过简报并冻结，
+// 不再要求必须有 prototyping 迭代在绑定;但冻结历史迭代不得作为"当前场景修改"的
+// 绑定来源(见 test 中对应断言),仅用于豁免 unbound 误拦已归档场景。
+function frozenArchiveScenes() {
+  const archived = new Set();
+  if (!fs.existsSync(scenesRoot)) return archived;
+  const visit = directory => {
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      const target = path.join(directory, entry.name);
+      if (entry.isDirectory()) visit(target);
+      else if (entry.isFile() && entry.name === 'iteration.json') {
+        const record = loadIteration(target);
+        if (!isPlainObject(record)) continue;
+        if (record.status !== 'frozen') continue;
+        if (record.freeze === null || record.freeze === undefined) continue;
+        const primary = record.identity?.primary_scene;
+        if (isSafeSceneName(primary)) archived.add(primary);
+        if (Array.isArray(record.affected_scenes)) {
+          for (const scene of record.affected_scenes) if (isSafeSceneName(scene)) archived.add(scene);
+        }
+      }
+    }
+  };
+  visit(scenesRoot);
+  return archived;
+}
+
 function resolveSceneDir(scene) {
   if (!fs.existsSync(scenesRoot)) return null;
   for (const category of fs.readdirSync(scenesRoot, { withFileTypes: true })) {
@@ -122,11 +154,13 @@ function implementedScene(scene) {
 
 function main() {
   const bound = boundScenes();
+  const archived = frozenArchiveScenes();
   const targets = all ? sceneDirectories() : scenes.filter(isSafeSceneName);
   const errors = [];
   for (const scene of targets) {
     if (!implementedScene(scene)) continue;
     if (systemToolScenes.has(scene)) continue;
+    if (archived.has(scene)) continue;
     if (!bound.has(scene)) {
       const rel = path.relative(root, resolveSceneDir(scene) || path.join(scenesRoot, scene));
       errors.push({
@@ -145,34 +179,71 @@ function main() {
 function test() {
   const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'wego-iteration-binding-'));
   try {
+    const script = fs.realpathSync(path.resolve(root, process.argv[1]));
     const scene = '测试场景';
     const sceneRoot = path.join(fixture, 'wego-app/scenes/infras', scene);
     const iterationRoot = path.join(sceneRoot, '_iterations/20260803-test-测试');
     fs.mkdirSync(iterationRoot, { recursive: true });
     fs.writeFileSync(path.join(sceneRoot, 'scene.js'), 'window.test = true;\n');
-    const record = {
+    const recordFile = path.join(iterationRoot, 'iteration.json');
+    const writeRecord = record => fs.writeFileSync(recordFile, `${JSON.stringify(record, null, 2)}\n`);
+
+    // 场景没有任何迭代（从未走产品流程）→ 必须拦截 unbound
+    writeRecord({
+      status: 'draft',
+      identity: { primary_scene: scene },
+      affected_scenes: [scene],
+      brief_confirmation: null
+    });
+    let noIter = spawnSync(process.execPath, [script, '--all', '--json'], { cwd: fixture, encoding: 'utf8' });
+    if (noIter.status === 0 || !(noIter.stdout || '').includes('scene.iteration_unbound')) {
+      throw new Error('从未走产品流程的场景必须拦截 unbound');
+    }
+
+    // 已冻结归档迭代（有 freeze）→ 场景已走完产品流程，豁免 unbound
+    writeRecord({
       status: 'frozen',
       identity: { primary_scene: scene },
       affected_scenes: [scene],
-      brief_confirmation: { at: new Date().toISOString() }
-    };
-    const recordFile = path.join(iterationRoot, 'iteration.json');
-    fs.writeFileSync(recordFile, `${JSON.stringify(record, null, 2)}\n`);
-    const script = fs.realpathSync(path.resolve(root, process.argv[1]));
-    const frozen = spawnSync(process.execPath, [script, '--all', '--json'], { cwd: fixture, encoding: 'utf8' });
-    if (frozen.status === 0 || !(frozen.stdout || '').includes('scene.iteration_unbound')) {
-      throw new Error('冻结历史迭代不得继续绑定当前场景修改');
+      brief_confirmation: { at: new Date().toISOString() },
+      freeze: { at: new Date().toISOString() }
+    });
+    const archived = spawnSync(process.execPath, [script, '--all', '--json'], { cwd: fixture, encoding: 'utf8' });
+    if (archived.status !== 0 || (archived.stdout || '').includes('scene.iteration_unbound')) {
+      throw new Error(`已冻结归档场景应豁免 unbound：${archived.stderr || archived.stdout}`);
     }
-    record.status = 'prototyping';
-    fs.writeFileSync(recordFile, `${JSON.stringify(record, null, 2)}\n`);
+    // 冻结历史迭代不得继续绑定当前场景修改：frozen 场景不进入 boundScenes 绑定集合，
+    // 仅由 frozenArchiveScenes 归档豁免。验证方式——冻结迭代不参与"已确认简报"绑定，
+    // 不覆盖其它未归档场景(用独立未归档场景验证该语义)。
+    const otherScene = '独立未归档场景';
+    const otherRoot = path.join(fixture, 'wego-app/scenes/infras', otherScene);
+    fs.mkdirSync(otherRoot, { recursive: true });
+    fs.writeFileSync(path.join(otherRoot, 'scene.js'), 'window.other = true;\n');
+    const otherUnbound = spawnSync(process.execPath, [script, '--all', '--json'], { cwd: fixture, encoding: 'utf8' });
+    if (otherUnbound.status === 0 || !(otherUnbound.stdout || '').includes(otherScene)) {
+      throw new Error('冻结迭代不得作为绑定来源覆盖其它未归档场景');
+    }
+    // 移除辅助未归档场景,避免干扰后续 --all 断言
+    fs.rmSync(otherRoot, { recursive: true, force: true });
+
+    // prototyping 迭代 → 绑定场景
+    writeRecord({
+      status: 'prototyping',
+      identity: { primary_scene: scene },
+      affected_scenes: [scene],
+      brief_confirmation: { at: new Date().toISOString() }
+    });
     const active = spawnSync(process.execPath, [script, '--all', '--json'], { cwd: fixture, encoding: 'utf8' });
     if (active.status !== 0) throw new Error(`已确认且未冻结的活动迭代应绑定场景：${active.stderr || active.stdout}`);
 
     // --dev 模式下 in-development 状态应绑定场景
-    record.status = 'in-development';
-    record.brief_confirmation = null;
-    record.brief_submission = { at: new Date().toISOString(), scope_revision: 1, scope_sha256: '0'.repeat(64) };
-    fs.writeFileSync(recordFile, `${JSON.stringify(record, null, 2)}\n`);
+    writeRecord({
+      status: 'in-development',
+      identity: { primary_scene: scene },
+      affected_scenes: [scene],
+      brief_confirmation: null,
+      brief_submission: { at: new Date().toISOString(), scope_revision: 1, scope_sha256: '0'.repeat(64) }
+    });
     const devActive = spawnSync(process.execPath, [script, '--all', '--json', '--dev'], { cwd: fixture, encoding: 'utf8' });
     if (devActive.status !== 0) throw new Error(`--dev 模式下 in-development 迭代应绑定场景：${devActive.stderr || devActive.stdout}`);
     // 严格模式下 in-development 不应绑定场景
