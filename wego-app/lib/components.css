@@ -1361,20 +1361,24 @@
 
 /* ── Divider ───────────────────────────────────────────────── */
 /* @anatomy
-   <div class="pv-header"><h1>分割线</h1><p>0.5px 固定粗细，水平/竖向；缩进由消费方按布局上下文设置，常用 inset / center 预设。</p></div>
+   <div class="pv-header"><h1>分割线</h1><p>固定 1 物理像素（1px 基准 + 高 DPR 屏幕 scale 缩放），水平/竖向；缩进由消费方按布局上下文设置，常用 inset / center 预设。</p></div>
 */
 /* 分割线 Divider：水平分隔区块/列表项，或竖向分隔相邻元素。
-   粗细固定 0.5px（var(--stroke-hairline)），无其他尺寸。
+   粗细固定 1 物理像素：基准 1px CSS 像素，高 DPR 屏幕通过 transform scale 缩放（DPR2→scaleY(.5)，DPR3→scaleY(.333)），普通屏幕保持 1px，跨屏幕渲染一致。
    默认：水平全宽（左右不缩进），缩进由消费方按布局上下文通过 --divider-left / --divider-right 设置。
    常用预设：divider--inset（左缩进16右到边，页内区块分隔）、divider--center（两侧缩进16）。
    竖向：固定高度（不撑满父级），默认 16px，常用 8/12/16，通过 --divider-height 覆盖，竖向居中。
    参数化：--divider-color 颜色、--divider-left / --divider-right 左右缩进、--divider-height 竖向高度。 */
 .divider{position:relative;display:block;width:100%;box-sizing:border-box;--divider-color:var(--border-neutral-l2);--divider-left:0;--divider-right:0;--divider-height:16px}
-.divider::after{content:"";position:absolute;top:0;left:var(--divider-left);right:var(--divider-right);height:var(--stroke-hairline);background:var(--divider-color);pointer-events:none}
+.divider::after{content:"";position:absolute;top:0;left:var(--divider-left);right:var(--divider-right);height:1px;background:var(--divider-color);pointer-events:none;transform-origin:0 0}
+@media (-webkit-min-device-pixel-ratio:2){.divider::after{transform:scaleY(.5)}}
+@media (-webkit-min-device-pixel-ratio:3){.divider::after{transform:scaleY(.333)}}
 .divider--inset{--divider-left:16px;--divider-right:0}
 .divider--center{--divider-left:16px;--divider-right:16px}
-.divider--vertical{display:inline-block;width:var(--stroke-hairline);height:var(--divider-height);align-self:center;--divider-left:0;--divider-right:0}
-.divider--vertical::after{top:0;bottom:auto;left:0;right:auto;width:var(--stroke-hairline);height:100%}
+.divider--vertical{display:inline-block;width:1px;height:var(--divider-height);align-self:center;--divider-left:0;--divider-right:0}
+.divider--vertical::after{top:0;bottom:auto;left:0;right:auto;width:1px;height:100%;transform-origin:0 0}
+@media (-webkit-min-device-pixel-ratio:2){.divider--vertical::after{transform:scaleX(.5)}}
+@media (-webkit-min-device-pixel-ratio:3){.divider--vertical::after{transform:scaleX(.333)}}
 
 /* ── Form ──────────────────────────────────────────────────── */
 /* @anatomy
