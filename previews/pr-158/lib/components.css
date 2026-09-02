@@ -1889,8 +1889,8 @@
   pointer-events:auto;
   transition:opacity var(--duration-normal) var(--ease-enter), visibility 0s;
 }
-/* 遮罩形态(--mask):浮层下层覆盖全屏透明遮罩,阻断页面底部内容交互;浮层内容与中断按钮仍可操作 */
-.loading-overlay--mask::before{
+/* 遮罩阻断(默认规则):居中浮层下层覆盖全屏透明遮罩,阻断页面底部内容交互,防止加载期间误操作;浮层内容与中断按钮仍可操作 */
+.loading-overlay::before{
   content:"";
   position:fixed;
   inset:0;
