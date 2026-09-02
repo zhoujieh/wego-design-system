@@ -1831,7 +1831,7 @@
 
 /* ── Loading ───────────────────────────────────────────────── */
 /* @anatomy
-   <div class="pv-header"><h1>加载</h1><p>三点依次脉冲加载指示器，用于内容区或弹窗等待态。</p></div>
+   <div class="pv-header"><h1>加载</h1><p>三点依次脉冲加载指示器，用于内容区或弹窗等待态；含居中浮层形态（外壳同 Toast，固定屏幕正中，分不带进度/带进度两场景）。</p></div>
 */
 /* ── Loading 加载指示器(位置传递式循环:1→2→3→1 依次放大变亮) ── */
 .loading { --loading-size:var(--size-24); display:inline-flex; align-items:center; justify-content:center; width:var(--loading-size); height:var(--loading-size); }
@@ -1852,6 +1852,57 @@
   .loading__dot { animation:loading-fade 1.4s ease-in-out infinite; }
   @keyframes loading-fade { 0%,100% { opacity:0.4; } 50% { opacity:1; } }
 }
+/* ── 居中浮层加载(外壳同 Toast,固定屏幕正中;不带进度=三点+单行文案,带进度=进度环+两行文案) ── */
+.loading-overlay{
+  --loading-overlay-pad-x: 28px;
+  --loading-overlay-pad-y: 20px;
+  --loading-overlay-gap: 12px;
+  position:fixed;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  z-index:var(--z-toast);
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:var(--loading-overlay-gap);
+  min-width:120px;
+  padding:var(--loading-overlay-pad-y) var(--loading-overlay-pad-x);
+  background:var(--bg-toast);
+  border:var(--stroke-hairline) solid var(--border-toast);
+  border-radius:var(--radius-8);
+  box-shadow:var(--shadow-sm);
+  color:var(--text-inverse);
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transition:opacity var(--duration-normal) var(--ease-enter), visibility 0s linear var(--duration-normal);
+}
+.loading-overlay.is-visible{
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
+  transition:opacity var(--duration-normal) var(--ease-enter), visibility 0s;
+}
+.loading-overlay__indicator{ display:flex; align-items:center; justify-content:center; }
+.loading-overlay__indicator .loading__dot{ background-color:var(--text-inverse); }
+.loading-overlay__text{ display:flex; flex-direction:column; align-items:center; gap:2px; }
+.loading-overlay__label{ font-family:var(--body-md-font-family); font-size:var(--body-md-font-size); line-height:var(--body-md-line-height); font-weight:var(--font-weight-medium); color:var(--text-inverse); white-space:nowrap; }
+.loading-overlay__percent{ font-family:var(--body-md-font-family); font-size:var(--body-sm-font-size); line-height:var(--body-sm-line-height); color:var(--text-inverse); opacity:0.82; }
+/* 进度环:双 circle(低透明度轨道+白色进度弧),--progress 由宿主注入 0-100,默认 0 */
+.loading-ring{
+  --ring-size:32px;
+  --ring-stroke:3px;
+  --ring-circumference:125.6;
+  --progress:0;
+  width:var(--ring-size);
+  height:var(--ring-size);
+  transform:rotate(-90deg);
+}
+.loading-ring__track{ fill:none; stroke:var(--text-inverse); stroke-opacity:0.24; stroke-width:var(--ring-stroke); }
+.loading-ring__bar{ fill:none; stroke:var(--text-inverse); stroke-width:var(--ring-stroke); stroke-linecap:round; stroke-dasharray:calc(var(--ring-circumference) * var(--progress,0) / 100) var(--ring-circumference); }
 
 /* ── Metric ────────────────────────────────────────────────── */
 /* @anatomy
