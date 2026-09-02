@@ -46,6 +46,8 @@
     originalStyles: {}, // selector -> { 'css-property': 原始计算值 }
     pseudoStyles: {}, // "selector||before|after" -> { 'css-property': 值 }（注入 <head> 的规则）
     orderBaselines: {}, // 顺序移动：容器 selector -> 首次移动前的显示顺序快照（净零往返判断）
+    undoStack: [], // 会话级撤销栈：{ selector, target, property, prevValue, nextValue }，不持久化
+    redoStack: [], // 会话级重做栈
   };
 
   /** 变更记录 id → 元素引用（会话内存映射，不参与持久化）。
@@ -737,6 +739,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       height: sizeInputOf(cs.height, specifiedHeight, heightMode),
       display,
       position: cs.position,
+      top: parseNumeric(cs.top),
+      right: parseNumeric(cs.right),
+      bottom: parseNumeric(cs.bottom),
+      left: parseNumeric(cs.left),
       zIndex: parseNumeric(cs.zIndex),
       // 字体
       fontSize: parseNumeric(cs.fontSize),
@@ -2337,6 +2343,19 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           .reset-btn:hover { background: rgba(255,255,255,0.12); }
           .copy-btn:active,
           .reset-btn:active { background: rgba(255,255,255,0.18); }
+          .import-btn {
+            flex: 1;
+            height: 30px;
+            padding: 0 12px;
+            border: 1px dashed rgba(255,255,255,0.25);
+            border-radius: 6px;
+            background: transparent;
+            color: rgba(255,255,255,0.72);
+            font-size: 12px;
+            cursor: pointer;
+          }
+          .import-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
+          .import-row { justify-content: stretch; padding-top: 0; }
           .close-btn {
             width: 28px;
             height: 28px;
@@ -2590,9 +2609,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           ${groupList.length > 0 ? `
             <div class="footer">
               <button class="reset-btn" type="button" data-action="reset">重置所有修改</button>
+              <button class="copy-btn" type="button" data-action="export">导出 JSON</button>
               <button class="copy-btn" type="button" data-action="copy">复制 Prompt</button>
             </div>
           ` : ''}
+          <div class="footer import-row">
+            <button class="import-btn" type="button" data-action="import">导入 JSON 配置</button>
+          </div>
         </div>
       `;
     }
@@ -2653,6 +2676,41 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         resetBtn.addEventListener('click', () => {
           this.close();
           bus.emit('reset-changes');
+        });
+      }
+      // 导出 JSON
+      const exportBtn = this._shadow.querySelector('[data-action="export"]');
+      if (exportBtn) {
+        exportBtn.addEventListener('click', () => {
+          bus.emit('export-json');
+        });
+      }
+      // 导入 JSON
+      const importBtn = this._shadow.querySelector('[data-action="import"]');
+      if (importBtn) {
+        importBtn.addEventListener('click', () => {
+          const fileInput = document.createElement('input');
+          fileInput.type = 'file';
+          fileInput.accept = '.json,application/json';
+          fileInput.style.display = 'none';
+          document.body.appendChild(fileInput);
+          fileInput.addEventListener('change', () => {
+            const file = fileInput.files && fileInput.files[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = () => {
+                try {
+                  const data = JSON.parse(reader.result);
+                  bus.emit('import-json', { data });
+                } catch (e) {
+                  bus.emit('toast', { message: '导入失败：JSON 格式不正确' });
+                }
+              };
+              reader.readAsText(file);
+            }
+            document.body.removeChild(fileInput);
+          });
+          fileInput.click();
         });
       }
     }
@@ -3923,6 +3981,26 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             flex-shrink: 0;
           }
           .close-btn:hover { background: rgba(0,0,0,0.05); }
+          /* 撤销/重做小按钮 */
+          .undo-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-tertiary, #888);
+            font-size: 15px;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            flex-shrink: 0;
+            opacity: 0.85;
+          }
+          .undo-btn:hover:not(.is-disabled) { background: rgba(0,0,0,0.05); color: var(--text-default, #fff); }
+          .undo-btn.is-disabled { opacity: 0.3; cursor: default; }
           .section {
             display: flex;
             flex-direction: column;
@@ -4379,6 +4457,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
               <div class="header-tag">${tag || '—'}${this._selector ? `<span class="header-selector">${escapeHtml(this._selector.substring(0, 40))}</span>` : ''}</div>
               ${text ? `<div class="header-text">${escapeHtml(text)}</div>` : ''}
             </div>
+            <button class="undo-btn" type="button" data-action="undo" title="撤销 (Ctrl+Z)">↶</button>
+            <button class="undo-btn" type="button" data-action="redo" title="重做 (Ctrl+Shift+Z)">↷</button>
             <button class="close-btn" type="button" data-action="close">${ICONS.close}</button>
           </div>
 
@@ -4393,16 +4473,32 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           </div>
           ` : ''}
 
-          <!-- 定位栏暂屏蔽：display/position/zIndex 文本输入体验差，走查场景不常用，后续补全 top/right/bottom/left 后再恢复
+          <!-- 定位分组：position + 四向偏移 + z-index（对齐 Figma/DevTools 定位面板） -->
           <div class="section">
             <p class="section-title">定位</p>
-            <div class="field-row three-col">
-              <div class="field"><span class="field-icon">◈</span><input class="text-input" type="text" value="${d.display || ''}" data-field="display" placeholder="display" /></div>
-              <div class="field"><span class="field-icon">◎</span><input class="text-input" type="text" value="${d.position || ''}" data-field="position" placeholder="position" /></div>
-              <div class="field"><span class="field-icon">Z</span><input class="text-input" type="text" value="${d.zIndex || ''}" data-field="zIndex" inputmode="numeric" placeholder="z" /></div>
+            <div class="field-row">
+              <span class="field-icon">◎</span>
+              <select class="text-input" data-field="position">
+                <option value="static" ${d.position === 'static' ? 'selected' : ''}>static</option>
+                <option value="relative" ${d.position === 'relative' ? 'selected' : ''}>relative</option>
+                <option value="absolute" ${d.position === 'absolute' ? 'selected' : ''}>absolute</option>
+                <option value="fixed" ${d.position === 'fixed' ? 'selected' : ''}>fixed</option>
+                <option value="sticky" ${d.position === 'sticky' ? 'selected' : ''}>sticky</option>
+              </select>
+            </div>
+            <div class="field-row two-col">
+              <div class="field"><span class="field-icon">T</span><input class="text-input" type="text" value="${d.top || ''}" data-field="top" inputmode="numeric" placeholder="top" /></div>
+              <div class="field"><span class="field-icon">R</span><input class="text-input" type="text" value="${d.right || ''}" data-field="right" inputmode="numeric" placeholder="right" /></div>
+            </div>
+            <div class="field-row two-col">
+              <div class="field"><span class="field-icon">B</span><input class="text-input" type="text" value="${d.bottom || ''}" data-field="bottom" inputmode="numeric" placeholder="bottom" /></div>
+              <div class="field"><span class="field-icon">L</span><input class="text-input" type="text" value="${d.left || ''}" data-field="left" inputmode="numeric" placeholder="left" /></div>
+            </div>
+            <div class="field-row">
+              <span class="field-icon">Z</span>
+              <input class="text-input" type="text" value="${d.zIndex || ''}" data-field="zIndex" inputmode="numeric" placeholder="z-index" />
             </div>
           </div>
-          -->
 
           <!-- 自动布局 -->
           <div class="section">
@@ -4665,6 +4761,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           bus.emit('close-style-panel');
         });
       }
+      // 撤销 / 重做按钮
+      const undoBtn = this._shadow.querySelector('[data-action="undo"]');
+      if (undoBtn) undoBtn.addEventListener('click', () => bus.emit('undo'));
+      const redoBtn = this._shadow.querySelector('[data-action="redo"]');
+      if (redoBtn) redoBtn.addEventListener('click', () => bus.emit('redo'));
+      const app2 = document.querySelector('wego-walkthrough');
+      if (app2 && typeof app2._updateUndoRedoUI === 'function') app2._updateUndoRedoUI();
       // 层级面包屑：点击任一层直接选中该祖先
       this._shadow.querySelectorAll('[data-crumb]').forEach(crumb => {
         crumb.addEventListener('click', () => {
@@ -5515,6 +5618,15 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           const oldValue = cs().position;
           el.style.position = value || '';
           return { property: 'position', oldValue, newValue: value || '' };
+        }
+        case 'top':
+        case 'right':
+        case 'bottom':
+        case 'left': {
+          const oldValue = cs()[field];
+          const out = (value === '' || value == null) ? '' : (String(value).trim() || '');
+          el.style[field] = out;
+          return { property: field, oldValue, newValue: out };
         }
         case 'zIndex': {
           const oldValue = cs().zIndex;
@@ -6587,6 +6699,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       bus.on('delete-change-group', ({ sharedKey }) => this._deleteChangeGroup(sharedKey));
       bus.on('delete-annotation', ({ id }) => this._deleteAnnotation(id));
       bus.on('reset-changes', () => this._resetChanges());
+      bus.on('export-json', () => this._exportJson());
+      bus.on('import-json', (payload) => this._importJson(payload || {}));
+      bus.on('undo', () => this._undoLast());
+      bus.on('redo', () => this._redoLast());
       bus.on('toast', ({ message }) => this._showToast(message));
       bus.on('element-selected', ({ element, selector, target }) => {
         this._components.stylePanel.openForElement(element, selector, target || '');
@@ -6612,6 +6728,25 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       }
     };
     _onDocKeyDown = (e) => {
+      // 撤销/重做：Ctrl/Cmd+Z / Ctrl/Cmd+Shift+Z（输入框内让给原生文本撤销）
+      if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && (e.key === 'z' || e.key === 'Z')) {
+        const t = e.target;
+        const inInput = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || (t.isContentEditable));
+        if (!inInput) {
+          e.preventDefault();
+          this._undoLast();
+        }
+        return;
+      }
+      if ((e.ctrlKey || e.metaKey) && !e.altKey && e.shiftKey && (e.key === 'z' || e.key === 'Z')) {
+        const t = e.target;
+        const inInput = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || (t.isContentEditable));
+        if (!inInput) {
+          e.preventDefault();
+          this._redoLast();
+        }
+        return;
+      }
       if (e.key !== 'Escape') return;
       // 1. 颜色选择器（最上层）
       const cp = this._components.colorPicker;
@@ -7820,6 +7955,18 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         return;
       }
       const existing = state.changes.find(matchExisting);
+      // —— 撤销栈记录：在真正产生修改前压入「修改前状态」，供 Ctrl+Z 还原 ——
+      // prevValue = 该属性修改前的现有值（首次修改为 null → 撤销=删除记录还原初始）
+      state.undoStack.push({
+        selector: change.selector,
+        target: change.target || '',
+        property: change.property,
+        prevValue: existing ? existing.newValue : null,
+        nextValue: change.newValue,
+      });
+      if (state.undoStack.length > 100) state.undoStack.shift();
+      state.redoStack = []; // 新修改打断重做链
+      this._updateUndoRedoUI();
       if (existing) {
         existing.newValue = change.newValue;
         existing.timestamp = Date.now();
@@ -7880,6 +8027,104 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       changeElRefs.delete(change.id);
     }
 
+    /** 直接把属性值应用到元素/伪元素（撤销/重做用） */
+    _applyPropertyValue(selector, target, property, value) {
+      try {
+        if (target) {
+          applyPseudoStyle(selector, target, property, value);
+          return;
+        }
+        const el = queryTargetEl(selector);
+        if (el) el.style.setProperty(property, value);
+      } catch (e) {}
+    }
+
+    /** 刷新样式面板撤销/重做按钮可用态 */
+    _updateUndoRedoUI() {
+      const sp = this._components.stylePanel;
+      if (!sp || !sp._shadow) return;
+      const undoBtn = sp._shadow.querySelector('[data-action="undo"]');
+      const redoBtn = sp._shadow.querySelector('[data-action="redo"]');
+      if (undoBtn) undoBtn.classList.toggle('is-disabled', state.undoStack.length === 0);
+      if (redoBtn) redoBtn.classList.toggle('is-disabled', state.redoStack.length === 0);
+    }
+
+    /** 撤销上一次样式修改（Ctrl+Z / 面板撤销按钮） */
+    _undoLast() {
+      const item = state.undoStack.pop();
+      if (!item) {
+        this._showToast('没有可撤销的修改');
+        return false;
+      }
+      const existing = state.changes.find(c =>
+        c.selector === item.selector && (c.target || '') === item.target && c.property === item.property);
+      if (item.prevValue == null || item.prevValue === '') {
+        // 原本不存在该修改 → 还原初始并删除记录
+        if (existing) {
+          this._revertChange(existing);
+          state.changes = state.changes.filter(c => c.id !== existing.id);
+          changeElRefs.delete(existing.id);
+        } else {
+          this._applyPropertyValue(item.selector, item.target, item.property, '');
+        }
+      } else {
+        // 恢复为修改前的值
+        this._applyPropertyValue(item.selector, item.target, item.property, item.prevValue);
+        if (existing) {
+          existing.newValue = item.prevValue;
+          existing.timestamp = Date.now();
+        }
+      }
+      state.redoStack.push(item);
+      this._syncAfterRecordsChanged();
+      this._updateUndoRedoUI();
+      this._showToast('已撤销');
+      return true;
+    }
+
+    /** 重做被撤销的修改（Ctrl+Shift+Z / 面板重做按钮） */
+    _redoLast() {
+      const item = state.redoStack.pop();
+      if (!item) {
+        this._showToast('没有可重做的修改');
+        return false;
+      }
+      this._applyPropertyValue(item.selector, item.target, item.property, item.nextValue);
+      const existing = state.changes.find(c =>
+        c.selector === item.selector && (c.target || '') === item.target && c.property === item.property);
+      if (existing) {
+        existing.newValue = item.nextValue;
+        existing.timestamp = Date.now();
+      } else {
+        const el = queryTargetEl(item.selector);
+        const srcInfo = (!item.target && el) ? readSourceDeclaration(el, item.property) : { declared: false, sourceValue: '' };
+        const rec = {
+          id: 'change-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+          selector: item.selector,
+          target: item.target,
+          elementTag: el ? el.tagName.toLowerCase() : '',
+          elementText: el ? (el.textContent || '').trim().slice(0, 30) : '',
+          elementClasses: el ? Array.from(el.classList) : [],
+          property: item.property,
+          oldValue: item.prevValue || '',
+          newValue: item.nextValue,
+          shared: false,
+          sharedKey: '',
+          sourceDeclared: srcInfo.declared,
+          sourceValue: srcInfo.sourceValue,
+          timestamp: Date.now(),
+        };
+        Object.assign(rec, deriveIntent(rec, el));
+        state.changes.push(rec);
+        if (el) changeElRefs.set(rec.id, el);
+      }
+      state.undoStack.push(item);
+      this._syncAfterRecordsChanged();
+      this._updateUndoRedoUI();
+      this._showToast('已重做');
+      return true;
+    }
+
     _deleteChange(id) {
       const change = state.changes.find(c => c.id === id);
       if (change) {
@@ -7927,6 +8172,120 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
         this._components.overviewPanel.refresh(state.changes, state.currentRoute, state.annotations);
       }
+    }
+
+    /** 构建 JSON 导出内容（对齐计划 3.7.6：按元素归并 configs/comments） */
+    _buildAnnotationsForJson() {
+      const map = {};
+      state.changes.forEach(c => {
+        const key = c.selector + '||' + (c.target || '');
+        if (!map[key]) map[key] = { elements: [c.selector], configs: [], comments: [], text: c.elementText || '' };
+        map[key].configs.push({
+          property: c.property,
+          oldValue: c.oldValue,
+          newValue: c.newValue,
+          target: c.target || '',
+          shared: !!c.shared,
+        });
+      });
+      state.annotations.forEach(a => {
+        const key = a.selector + '||';
+        if (!map[key]) map[key] = { elements: [a.selector], configs: [], comments: [], text: '' };
+        map[key].comments.push(a.text);
+      });
+      return Object.values(map);
+    }
+
+    /** 导出当前场景配置为 JSON 文件下载 */
+    _exportJson() {
+      const route = state.currentRoute || 'default';
+      const routeLabel = getCurrentRouteLabel();
+      const data = {
+        app: 'wego-walkthrough',
+        version: 1,
+        page: {
+          path: route,
+          label: routeLabel,
+          viewport: { width: window.innerWidth, height: window.innerHeight },
+        },
+        exportedAt: new Date().toISOString(),
+        annotations: this._buildAnnotationsForJson(),
+      };
+      try {
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `walkthrough-${route}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        this._showToast('已导出 JSON');
+      } catch (e) {
+        this._showToast('导出失败');
+      }
+    }
+
+    /** 导入 JSON 配置：合并到当前场景（默认）或替换当前场景 */
+    _importJson({ data }) {
+      if (!data || !Array.isArray(data.annotations)) {
+        this._showToast('导入失败：文件格式不正确');
+        return;
+      }
+      const hasContent = data.annotations.some(g =>
+        (g.configs && g.configs.length > 0) || (g.comments && g.comments.length > 0));
+      if (!hasContent) {
+        this._showToast('导入失败：文件内容为空');
+        return;
+      }
+      const replace = window.confirm('导入方式：\n[确定] 合并到当前场景\n[取消] 替换当前场景（先清空再导入）') === false;
+      const applyGroup = (group) => {
+        const sel = group.elements && group.elements[0];
+        if (!sel) return;
+        const el = queryTargetEl(sel);
+        (group.configs || []).forEach(cfg => {
+          if (cfg.target) {
+            applyPseudoStyle(sel, cfg.target, cfg.property, cfg.newValue || '');
+          } else if (el) {
+            try { el.style.setProperty(cfg.property, cfg.newValue || ''); } catch (e) {}
+          }
+          const rec = {
+            id: 'change-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+            selector: sel,
+            target: cfg.target || '',
+            elementTag: el ? el.tagName.toLowerCase() : '',
+            elementText: el ? (el.textContent || '').trim().slice(0, 30) : '',
+            elementClasses: el ? Array.from(el.classList) : [],
+            property: cfg.property,
+            oldValue: cfg.oldValue || '',
+            newValue: cfg.newValue || '',
+            shared: !!cfg.shared,
+            sharedKey: '',
+            timestamp: Date.now(),
+          };
+          Object.assign(rec, deriveIntent(rec, el));
+          state.changes.push(rec);
+          if (el) changeElRefs.set(rec.id, el);
+        });
+        (group.comments || []).forEach(text => {
+          state.annotations.push({
+            id: 'ann-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+            selector: sel,
+            text: String(text),
+            timestamp: Date.now(),
+          });
+        });
+      };
+      if (replace) this._resetCurrentSceneChanges();
+      data.annotations.forEach(applyGroup);
+      this._flushSave();
+      this._updateChangeCount();
+      this._syncAnnotationMarkers();
+      if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
+        this._components.overviewPanel.refresh(state.changes, state.currentRoute, state.annotations);
+      }
+      this._showToast(replace ? '已导入并替换当前场景' : '已导入并合并到当前场景');
     }
 
     /** 跨场景一键重置：清空所有场景的修改（含 localStorage 中其它场景的记录，不二次确认） */
