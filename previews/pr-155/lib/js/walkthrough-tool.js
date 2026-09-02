@@ -1129,6 +1129,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       'background-color': cs.backgroundColor,
       'border': cs.border,
       'box-shadow': cs.boxShadow,
+      'order': cs.order,
     };
   }
 
@@ -3440,6 +3441,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         orderValue: newVal,
         displayOld: '第' + oldPos + '位',
         displayNew: '第' + newPos + '位',
+        initPos: isNeighbor ? 0 : (mv.idxOld + 1),
         el,
         shared: false,
         sharedKey: '',
@@ -7220,11 +7222,33 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         : state.currentRoute + '::' + change.selector;
       const original = state.originalStyles[snapKey];
       const matchExisting = (c) => c.selector === change.selector && c.property === change.property && (c.target || '') === (change.target || '');
-      // 改回原始值 = 净变更为零，删除该属性的变更记录（而非保留 X→X）；归一化比较，兼容 rgb 空格、0px 等格式差异。
-      // 顺序移动（order）例外：order 是相对显示顺序，绝对值回到原始 0 不等于顺序未变
-      // （如交换后 label 从 -1 回到 0，视觉位置仍从第 1 位变到第 2 位），必须保留记录供追踪与还原
+      // —— 统一净变更守卫（所有属性、所有路径、首次+后续都判）——
+      // 修改后与元素初始快照值等价 = 净变更为零 → 还原已有记录且不新增（避免 X→X / 往返残留等脏记录）。
+      // 例外：
+      //  - order（顺序移动）：值回初始不等于顺序未变（真交换时位置变了），需显示位置也回到初始位置；
+      //  - flex-direction（layoutMode）：对非 flex 容器设 row 会带 display:flex 副作用，
+      //    仅当元素当前已是 flex/grid 时才真正无效果。
       const isOrderMove = change.property === 'order';
-      const backToOriginal = !isOrderMove && original && (change.property in original) && this._cssValueEqual(change.newValue, original[change.property]);
+      const isLayoutDir = change.property === 'flex-direction';
+      let netZero = false;
+      if (!isPseudo && original && (change.property in original)) {
+        const valBack = this._cssValueEqual(change.newValue, original[change.property]);
+        if (valBack) {
+          if (isOrderMove) {
+            const existing0 = state.changes.find(matchExisting);
+            const initPos = existing0 ? (existing0.initPos || 0) : (Number(change.initPos) || 0);
+            const curPos = change.el ? flexPositionOf(change.el) : 0;
+            netZero = initPos > 0 && curPos === initPos;
+          } else if (isLayoutDir && change.el) {
+            let d = '';
+            try { d = getComputedStyle(change.el).display; } catch (e) {}
+            netZero = d === 'flex' || d === 'grid';
+          } else {
+            netZero = true;
+          }
+        }
+      }
+      const backToOriginal = netZero;
       // 清空输入 = 撤销该属性：还原样式并移除已有记录，且不允许新增空值脏记录
       const isCleared = change.newValue === '' || change.newValue == null;
       if (backToOriginal || isCleared) {
@@ -7267,6 +7291,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           orderValue: change.orderValue || '',
           displayOld: change.displayOld || '',
           displayNew: change.displayNew || '',
+          initPos: Number(change.initPos) || 0,
           shared: !!change.shared,
           sharedKey: change.sharedKey || '',
           sourceDeclared: srcInfo.declared,
