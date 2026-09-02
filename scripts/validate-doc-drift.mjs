@@ -43,6 +43,8 @@ function extractFilePaths(content) {
     const p = match[1].trim();
     // 跳过通配符和模板路径
     if (p.includes('*') || p.includes('{') || p.includes('}')) continue;
+    // .tasks/ 是运行时工作目录（gitignore，交付单元运行时才生成），不做静态存在性校验
+    if (p.startsWith('.tasks/')) continue;
     if (p.startsWith('.') || p.startsWith('scripts/') || p.startsWith('.codex/') || p.startsWith('wego-app/') || p === 'AGENTS.md' || p.startsWith('.github/')) {
       paths.add(p);
     }
@@ -74,10 +76,24 @@ function extractReferencedRuleIds(content) {
   return ids;
 }
 
+// 固定四个技能目录之外，动态纳入经验毕业产生的 wego-scene-* 场景技能目录
+function collectDocDirs(root) {
+  const dirs = [...docDirs];
+  const skillsRoot = path.join(root, '.codex/skills');
+  if (fs.existsSync(skillsRoot)) {
+    for (const entry of fs.readdirSync(skillsRoot, { withFileTypes: true })) {
+      if (entry.isDirectory() && entry.name.startsWith('wego-scene-')) {
+        dirs.push(path.join('.codex/skills', entry.name));
+      }
+    }
+  }
+  return dirs;
+}
+
 function validate() {
   const root = process.cwd();
   const mdFiles = [];
-  for (const dir of docDirs) {
+  for (const dir of collectDocDirs(root)) {
     collectMdFiles(root, dir, mdFiles);
   }
 

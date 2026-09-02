@@ -10,22 +10,79 @@
  *   1. 事实追溯：每条经验引用的 evidence ID 必须存在于 evidence.json
  *   2. 表述一致性：经验描述不得与对应事实存在明显矛盾
  *   3. 格式合规：用 § 分隔，每条非空，头部说明完整
- *   4. 容量检查：总字符数不超过 3000
+ *   4. 容量检查：核心摘要总字符数不超过 CHAR_LIMIT（细节应毕业到场景技能）
+ *   5. 场景技能：.codex/skills/wego-scene-* 必须具备合规 frontmatter，
+ *      且正文中引用的 evidence ID 必须存在
+ *
+ * 另提供只读查询，供沉淀时按关键词取相关事实、避免全量读取 evidence.json：
+ *   node scripts/refine-experience.mjs --related <关键词...>
  *
  * Usage:
  *   node scripts/refine-experience.mjs --check
  *   node scripts/refine-experience.mjs --json
+ *   node scripts/refine-experience.mjs --related 设计稿 modal
  */
 
 import fs from 'node:fs';
 import path from 'node:path';
 
-const experienceDir = '.codex/skills/wego-uxsystem-iterate/experience';
+const skillsRoot = '.codex/skills';
+const experienceDir = path.join(skillsRoot, 'wego-uxsystem-iterate', 'experience');
 const evidencePath = path.join(experienceDir, 'evidence.json');
 const experiencePath = path.join(experienceDir, 'EXPERIENCE.md');
-const CHAR_LIMIT = 3000;
+const CHAR_LIMIT = 1500;
+const SCENE_SKILL_PREFIX = 'wego-scene-';
 
-const args = new Set(process.argv.slice(2));
+const rawArgs = process.argv.slice(2);
+
+// ───────────────────────── 只读查询：--related ─────────────────────────
+
+function runRelated(keywords) {
+  if (!fs.existsSync(evidencePath)) {
+    console.error(`evidence.json 不存在：${evidencePath}`);
+    process.exit(1);
+  }
+  let events;
+  try {
+    events = JSON.parse(fs.readFileSync(evidencePath, 'utf8')).events || [];
+  } catch (error) {
+    console.error(`evidence.json 解析失败：${error.message}`);
+    process.exit(1);
+  }
+  const kws = keywords.map((k) => k.toLowerCase());
+  const matched = events.filter((e) => {
+    const haystack = [e.summary, e.scene, ...(e.tags || [])]
+      .filter(Boolean).join(' ').toLowerCase();
+    return kws.some((k) => haystack.includes(k));
+  });
+  if (matched.length === 0) {
+    console.log(`无匹配事实事件（关键词：${keywords.join('、')}），全库共 ${events.length} 条。`);
+    return;
+  }
+  console.log(`匹配 ${matched.length}/${events.length} 条事实事件：\n`);
+  for (const e of matched) {
+    console.log(`- ${e.id}｜${e.date}｜${e.source}｜scene: ${e.scene || '-'}`);
+    console.log(`  ${e.summary}`);
+    if (e.tags?.length) console.log(`  tags: ${e.tags.join(', ')}`);
+    console.log('');
+  }
+}
+
+const relatedIndex = rawArgs.indexOf('--related');
+if (relatedIndex !== -1) {
+  const keywords = rawArgs.slice(relatedIndex + 1)
+    .filter((a) => !a.startsWith('--'));
+  if (keywords.length === 0) {
+    console.error('--related 需要至少一个关键词');
+    process.exit(1);
+  }
+  runRelated(keywords);
+  process.exit(0);
+}
+
+// ───────────────────────── 校验模式 ─────────────────────────
+
+const args = new Set(rawArgs);
 const jsonOutput = args.has('--json');
 // 默认就是 check 模式，--check 参数保留为显式声明
 const checkOnly = true;
@@ -34,7 +91,7 @@ const report = {
   valid: true,
   errors: [],
   warnings: [],
-  stats: { evidenceCount: 0, experienceCount: 0, charCount: 0 },
+  stats: { evidenceCount: 0, experienceCount: 0, charCount: 0, sceneSkillCount: 0 },
 };
 
 function fail(message) {
@@ -148,9 +205,37 @@ function checkCapacity(content) {
   const charCount = content.length;
   report.stats.charCount = charCount;
   if (charCount > CHAR_LIMIT) {
-    fail(`EXPERIENCE.md 超过字符上限：${charCount}/${CHAR_LIMIT}（需 AI 合并或淘汰经验）`);
+    fail(`EXPERIENCE.md 超过核心摘要上限：${charCount}/${CHAR_LIMIT}（细节应毕业到 wego-scene-* 场景技能或合并同类条目）`);
   } else if (charCount > CHAR_LIMIT * 0.8) {
-    warn(`EXPERIENCE.md 容量接近上限：${charCount}/${CHAR_LIMIT}`);
+    warn(`EXPERIENCE.md 摘要容量接近上限：${charCount}/${CHAR_LIMIT}`);
+  }
+}
+
+// 场景技能校验：结构合规 + evidence 追溯（当前无场景技能时自然跳过）
+function checkSceneSkills(validIds) {
+  if (!fs.existsSync(skillsRoot)) return;
+  const sceneDirs = fs.readdirSync(skillsRoot, { withFileTypes: true })
+    .filter((d) => d.isDirectory() && d.name.startsWith(SCENE_SKILL_PREFIX))
+    .map((d) => d.name);
+  report.stats.sceneSkillCount = sceneDirs.length;
+  for (const dir of sceneDirs) {
+    const skillPath = path.join(skillsRoot, dir, 'SKILL.md');
+    if (!fs.existsSync(skillPath)) {
+      fail(`场景技能 ${dir} 缺少 SKILL.md`);
+      continue;
+    }
+    const body = fs.readFileSync(skillPath, 'utf8');
+    const fm = body.match(/^---\n([\s\S]*?)\n---/);
+    if (!fm) {
+      fail(`场景技能 ${dir}/SKILL.md 缺少 frontmatter（name/description）`);
+      continue;
+    }
+    if (!/^name:\s*.+/m.test(fm[1])) fail(`场景技能 ${dir} frontmatter 缺少 name`);
+    if (!/^description:\s*.+/m.test(fm[1])) fail(`场景技能 ${dir} frontmatter 缺少 description（可观察触发信号）`);
+    const ids = [...body.matchAll(/ev-\d+/g)].map((m) => m[0]);
+    for (const id of new Set(ids)) {
+      if (!validIds.has(id)) fail(`场景技能 ${dir} 引用了不存在的 evidence ID：${id}`);
+    }
   }
 }
 
@@ -172,6 +257,7 @@ function main() {
   }
 
   checkCapacity(content);
+  checkSceneSkills(new Set(events.map((e) => e.id)));
 
   return finish(report.valid ? 0 : 1);
 }
@@ -187,7 +273,7 @@ function finish(code) {
     }, null, 2));
   } else {
     if (report.valid) {
-      console.log(`✓ 经验校验通过（${report.stats.experienceCount} 条经验，${report.stats.evidenceCount} 条事实，${report.stats.charCount} 字符）`);
+      console.log(`✓ 经验校验通过（${report.stats.experienceCount} 条摘要，${report.stats.evidenceCount} 条事实，${report.stats.sceneSkillCount} 个场景技能，${report.stats.charCount} 字符）`);
     } else {
       console.log(`✗ 经验校验失败（${report.errors.length} 个错误）`);
       report.errors.forEach((e) => console.log(`  - ${e}`));
