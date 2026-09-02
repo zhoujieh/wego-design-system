@@ -82,6 +82,28 @@
 .loading-overlay__percent{ font-family:var(--body-md-font-family); font-size:var(--body-sm-font-size); line-height:var(--body-sm-line-height); color:var(--text-inverse); opacity:0.82; }
 /* 结果态:加载完成后勾/叉图标(icon-goutoast/icon-chatoast),外壳与加载浮层一致(居中/正方形最小/长文案自适应) */
 .loading-overlay__result-icon{ font-family:var(--font-family-icon); font-size:var(--size-24); line-height:1; color:var(--text-inverse); }
+/* 中断按钮(带进度浮层默认携带):右上角叉叉 icon-cha 16,点击触发宿主中断回调 */
+.loading-overlay__close{
+  position:absolute;
+  top:2px;
+  right:2px;
+  z-index:1;
+  width:28px;
+  height:28px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:none;
+  background:transparent;
+  cursor:pointer;
+  color:var(--text-inverse);
+  font-family:var(--font-family-icon);
+  font-size:var(--size-16);
+  line-height:1;
+  opacity:0.72;
+  padding:0;
+}
+.loading-overlay__close:active{ opacity:1; }
 /* 进度环:双 circle(低透明度轨道+白色进度弧),--progress 由宿主注入 0-100,默认 0 */
 .loading-ring{
   --ring-size:32px;
@@ -142,9 +164,10 @@
   </div>
 </div>
 
-<div class="pv-section__title">居中浮层 — 带进度（进度环 + 两行文案：状态文案 / 百分比）</div>
+<div class="pv-section__title">居中浮层 — 带进度（进度环 + 两行文案：状态文案 / 百分比，右上角默认带叉叉中断按钮）</div>
 <div class="loading-demo-overlay-wrap">
   <div class="loading-overlay is-visible" role="status" aria-live="polite">
+    <button type="button" class="loading-overlay__close" aria-label="取消下载"><i class="wego-iconfont-s icon-cha" aria-hidden="true"></i></button>
     <svg class="loading-ring" viewBox="0 0 48 48" role="img" aria-label="加载中" style="--progress:63">
       <circle class="loading-ring__track" cx="24" cy="24" r="20"></circle>
       <circle class="loading-ring__bar" cx="24" cy="24" r="20"></circle>
@@ -265,10 +288,14 @@
     var p = 0;
     host.innerHTML =
       '<div class="loading-overlay is-visible" role="status" aria-live="polite">' +
+      '<button type="button" class="loading-overlay__close" aria-label="取消下载"><i class="wego-iconfont-s icon-cha" aria-hidden="true"></i></button>' +
       '<svg class="loading-ring" viewBox="0 0 48 48" role="img" aria-label="加载中" style="--progress:0"><circle class="loading-ring__track" cx="24" cy="24" r="20"></circle><circle class="loading-ring__bar" cx="24" cy="24" r="20"></circle></svg>' +
       '<div class="loading-overlay__text"><span class="loading-overlay__label">正在下载</span><span class="loading-overlay__percent">0%</span></div></div>';
     var bar = host.querySelector('.loading-ring');
     var pct = host.querySelector('.loading-overlay__percent');
+    // 中断按钮：点击停止进度并关闭浮层（演示宿主中断回调）
+    var close = host.querySelector('.loading-overlay__close');
+    close.addEventListener('click', function () { clearTimers(); hideLoading(); });
     timers.push(setInterval(function () {
       p = Math.min(p + 7, 100);
       bar.style.setProperty('--progress', p);
