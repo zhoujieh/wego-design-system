@@ -7,7 +7,7 @@
     "primary_scene": "产品分享",
     "related_scenes": []
   },
-  "status": "in-development",
+  "status": "prototyping",
   "scope_revision": 3,
   "brief_file": "shop243-鸿蒙1.3分享能力升级-20260827.md",
   "prototype_brief": {
@@ -260,7 +260,11 @@
     "scope_revision": 3,
     "scope_sha256": "d71687c1ce736491a620bdccaedff0bd762dec7df60a9f71b0de216763a59044"
   },
-  "brief_confirmation": null,
+  "brief_confirmation": {
+    "at": "2026-09-02T06:23:22.500Z",
+    "scope_revision": 3,
+    "scope_sha256": "d71687c1ce736491a620bdccaedff0bd762dec7df60a9f71b0de216763a59044"
+  },
   "prototype_submission": null,
   "prototype_confirmation": null,
   "affected_scenes": [
@@ -401,6 +405,10 @@
     {
       "action": "submit-brief",
       "at": "2026-09-02T06:22:04.451Z"
+    },
+    {
+      "action": "confirm-brief",
+      "at": "2026-09-02T06:23:22.502Z"
     }
   ],
   "freeze": null
