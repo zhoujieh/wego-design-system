@@ -6,7 +6,7 @@
   "status": "stable",
   "sourceKind": "figma",
   "confidence": "high",
-  "description": "三点位置传递式循环加载指示器，用于内容区或弹窗内容区等待态；默认 24px,三点共用同一关键帧,通过 delay 错峰形成亮点从点1→点2→点3→点1 依次放大变亮的循环传递动画;支持 16/24/32 尺寸按比例缩放;内联形态不承载文案，文案由宿主组合。另提供居中浮层加载形态(usage=overlay):复用 Toast 外壳样式(深灰底/8px 圆角/白色描边/阴影)悬浮于屏幕正中,外壳最小尺寸为正方形(120×120),文案较长时左右自适应变宽;分不带进度(三点+单行文案)与带进度(白色进度环+两行文案:状态文案行+百分比数字行)两种场景,文案可配置。浮层默认不阻断页面交互;需要阻断底部内容时加 mask=blocking 修饰符(loading-overlay--mask),浮层下层覆盖全屏透明遮罩,页面内容不可操作,浮层内内容/中断按钮仍可点击。带进度场景加载完成后默认衔接居中结果提示(外壳与加载浮层一致、正方形最小):成功用 icon-goutoast 勾、失败用 icon-chatoast 叉 + 结果文案;业务需引导下一步时(如下载完成后去分享)可配置为底部可操作长 Toast,直接调用已有 Toast 组件(引导变体)。",
+  "description": "三点位置传递式循环加载指示器，用于内容区或弹窗内容区等待态；默认 24px,三点共用同一关键帧,通过 delay 错峰形成亮点从点1→点2→点3→点1 依次放大变亮的循环传递动画;支持 16/24/32 尺寸按比例缩放;内联形态不承载文案，文案由宿主组合。另提供居中浮层加载形态(usage=overlay):复用 Toast 外壳样式(深灰底/8px 圆角/白色描边/阴影)悬浮于屏幕正中,外壳最小尺寸为正方形(120×120),文案较长时左右自适应变宽;分不带进度(三点+单行文案)与带进度(白色进度环+两行文案:状态文案行+百分比数字行)两种场景,文案可配置。居中浮层默认覆盖全屏透明遮罩阻断页面交互(必要规则)：加载期间页面底部内容不可操作防止误触，浮层内内容/中断按钮仍可点击，所有浮层场景(不带进度/带进度/结果提示)统一此行为。带进度场景加载完成后默认衔接居中结果提示(外壳与加载浮层一致、正方形最小):成功用 icon-goutoast 勾、失败用 icon-chatoast 叉 + 结果文案;业务需引导下一步时(如下载完成后去分享)可配置为底部可操作长 Toast,直接调用已有 Toast 组件(引导变体，非居中浮层不阻断)。",
   "semanticTypeCandidates": [
     "spinner",
     "loading-indicator",
@@ -25,10 +25,6 @@
     "progress": [
       "none",
       "percent"
-    ],
-    "mask": [
-      "none",
-      "blocking"
     ]
   },
   "representativeVariants": [
@@ -50,12 +46,6 @@
       "size": "24",
       "usage": "overlay",
       "progress": "percent"
-    },
-    {
-      "size": "24",
-      "usage": "overlay",
-      "progress": "none",
-      "mask": "blocking"
     }
   ],
   "anatomy": [
@@ -77,7 +67,7 @@
     {
       "name": "overlay",
       "selector": ".loading-overlay",
-      "role": "居中浮层外壳容器，fixed 于屏幕正中，复用 Toast 外壳样式(--bg-toast/--border-toast/--radius-8/--shadow-sm)；加 --mask 修饰符时下层覆盖全屏透明遮罩阻断页面交互"
+      "role": "居中浮层外壳容器，fixed 于屏幕正中(inset:0 + margin:auto，不依赖 transform)，复用 Toast 外壳样式(--bg-toast/--border-toast/--radius-8/--shadow-sm)；默认以 ::before 全屏透明遮罩阻断页面交互"
     },
     {
       "name": "overlayIndicator",
@@ -121,7 +111,7 @@
     "带进度(progress=percent)：指示器用 .loading-ring 白色进度环，文案区两行(label + percent)，percent 行由宿主按实际进度更新，环中心不显示数字。",
     "居中浮层外壳最小尺寸为正方形(120×120，--loading-overlay-min-size)，width:fit-content 使长文案时左右自适应变宽，宽高比不小于正方形。",
     "带进度场景加载完成后默认衔接居中结果提示：同一 .loading-overlay 外壳，指示器换成 .loading-overlay__result-icon(icon-goutoast 勾/icon-chatoast 叉，font-family 用 --font-family-icon) + 单行结果文案(如“下载完成”“下载失败”)，外壳仍正方形最小、长文案横向自适应。",
-    "遮罩形态(mask=blocking)：浮层加 .loading-overlay--mask 修饰符，其 ::before 以 position:fixed + inset:0 覆盖全屏、background:transparent + z-index:-1，位于浮层 stacking context 底层(浮层背景之上、页面内容之上)，阻断页面底部内容点击；浮层内内容(指示器/文案/中断按钮)仍在遮罩之上可操作；默认(mask=none)不带遮罩不阻断交互。",
+    "遮罩阻断(默认规则)：居中浮层统一以 .loading-overlay::before 覆盖全屏(position:fixed + inset:0 + background:transparent + z-index:-1)，位于浮层 stacking context 底层(浮层背景之上、页面内容之上)，阻断页面底部内容点击，防止加载期间误操作；浮层内内容(指示器/文案/中断按钮)仍在遮罩之上可操作；隐藏时(is-visible 移除)遮罩随浮层一并隐藏不拦截。",
     "业务需引导下一步时(如下载完成后去分享)，可配置为底部可操作长 Toast：直接调用已有 Toast 组件引导变体(toast--guide，图标+文案+操作按钮、底部显示)，如 icon-goutoast“下载完成/去分享”、icon-chatoast“下载失败/重试”。"
   ],
   "behavior": {
@@ -130,7 +120,7 @@
     "overlayCentering": "居中浮层用 fixed + inset:0 + margin:auto + width/height:fit-content 固定于屏幕正中（不设 transform，避免固定定位子元素 containing block 偏移、确保 --mask 遮罩 ::before 全屏覆盖），z-index 使用 --z-toast 与 Toast 同层；默认 opacity:0 + visibility:hidden，加 .is-visible 后淡入，时长 --duration-normal 缓动 --ease-enter。",
     "overlaySizing": "外壳最小尺寸为正方形(--loading-overlay-min-size 120px 用于 min-width/min-height)，width:fit-content 使内容超出最小宽度时左右自适应变宽，保证最小宽高比不小于正方形；文案较长时横向伸展，不换行堆叠。",
     "ringProgress": "进度环用 SVG 双 circle:轨道(白色 24% 透明度)+进度弧(白色,stroke-linecap:round)，stroke-dasharray = 周长(2πr) × --progress/100 绘制弧形进度；--progress 由宿主按实际进度注入(0-100)，仅作静态进度展示，不做自动循环动画。",
-    "overlayMask": "遮罩阻断(mask=blocking)：浮层加 .loading-overlay--mask 修饰符后，::before 以 position:fixed + inset:0 全屏覆盖视口(浮层自身不设 transform，::before 方可相对视口定位)、background:transparent + z-index:-1 拦截页面底部点击；遮罩仅阻断交互不改变视觉(transparent)；浮层自身 stacking context(--z-toast)保证遮罩在页面内容之上、浮层内容之下；隐藏时(is-visible 移除)遮罩随浮层一并隐藏不拦截。",
+    "overlayMask": "遮罩阻断(默认规则)：居中浮层统一带全屏透明遮罩，.loading-overlay::before 以 position:fixed + inset:0 覆盖视口(浮层自身不设 transform，::before 方可相对视口定位)、background:transparent + z-index:-1 拦截页面底部点击；遮罩仅阻断交互不改变视觉(transparent)；浮层自身 stacking context(--z-toast)保证遮罩在页面内容之上、浮层内容之下；隐藏时(is-visible 移除)遮罩随浮层一并隐藏不拦截。",
     "completionResult": "带进度场景加载完成后(100%)默认衔接居中结果提示：复用 .loading-overlay 外壳(居中/正方形最小/长文案横向自适应)，内容为 .loading-overlay__result-icon(成功 icon-goutoast 勾、失败 icon-chatoast 叉，白色 24px)+ 单行结果文案，停留后自动消失(时长由宿主控制，建议 2s 级)。业务需引导下一步时可选配置为底部可操作长 Toast——直接调用已有 Toast 组件引导变体(图标+文案+操作按钮、底部距底 106px、同屏互斥、时长遵循 Toast 组件)。"
   },
   "accessibility": {
@@ -151,7 +141,7 @@
   "doNotInvent": [
     "不要把内联 loading 扩成进度条或骨架屏；进度能力仅限居中浮层(usage=overlay)的 progress=percent 场景。",
     "不要给内联 loading 加文案或图标变体，文案走 result 或宿主文本；居中浮层按契约支持 label/percent 文案。",
-    "居中浮层默认不带蒙层、不阻断交互；需要阻断页面交互时用 mask=blocking 修饰符(loading-overlay--mask，全屏透明遮罩，浮层内容/中断按钮仍可操作)。遮罩仅透明阻断点击，不提供视觉蒙层/暗化效果；如需视觉蒙层请走 modal/overlay 体系。"
+    "居中浮层默认带全屏透明遮罩阻断页面交互(必要规则)，所有浮层场景统一，不再提供不阻断选项；遮罩仅透明阻断点击，不提供视觉蒙层/暗化效果；如需视觉蒙层请走 modal/overlay 体系。"
   ],
   "domAnatomy": {
     "root": ".loading",
@@ -159,8 +149,7 @@
       ".loading--16",
       ".loading--32",
       ".loading-overlay",
-      ".loading-overlay.is-visible",
-      ".loading-overlay--mask"
+      ".loading-overlay.is-visible"
     ],
     "optionalChildren": [
       ".loading__icon",
