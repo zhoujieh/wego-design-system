@@ -75,7 +75,8 @@
   background:transparent;
   z-index:-1;
 }
-/* 滚动锁定(默认规则):浮层可见时锁定页面滚动,防止加载期间误滚;浮层消失后恢复 */
+/* 滚动锁定(默认规则):浮层可见时锁定页面滚动,防止加载期间误滚;浮层消失后恢复。html+body 双锁兼容移动端(视口滚动由 html 承担);宿主 JS 应同步锁定(见交互演示) */
+html:has(.loading-overlay.is-visible),
 body:has(.loading-overlay.is-visible){ overflow:hidden; }
 .loading-overlay__indicator{ display:flex; align-items:center; justify-content:center; }
 .loading-overlay__indicator .loading__dot{ background-color:var(--text-inverse); }
@@ -249,7 +250,10 @@ body:has(.loading-overlay.is-visible){ overflow:hidden; }
     timers.forEach(function (t) { clearTimeout(t); clearInterval(t); });
     timers = [];
   }
-  function hideLoading() { host.innerHTML = ''; }
+  // 滚动锁定:浮层显示时锁 html/body 滚动(移动端视口滚动由 html 承担),隐藏时恢复;与 CSS :has 双锁互为兜底
+  function lockScroll() { document.documentElement.style.overflow = 'hidden'; document.body.style.overflow = 'hidden'; }
+  function unlockScroll() { document.documentElement.style.overflow = ''; document.body.style.overflow = ''; }
+  function hideLoading() { host.innerHTML = ''; unlockScroll(); }
   function hideToast() { toastHost.innerHTML = ''; }
 
   // 默认结果提示：居中浮层（复用 loading-overlay 外壳，勾/叉图标 + 结果文案），同屏互斥
@@ -260,6 +264,7 @@ body:has(.loading-overlay.is-visible){ overflow:hidden; }
       '<div class="loading-overlay is-visible" role="status" aria-live="polite">' +
       '<span class="loading-overlay__result-icon ' + icon + '"></span>' +
       '<div class="loading-overlay__text"><span class="loading-overlay__label">' + text + '</span></div></div>';
+    lockScroll();
     timers.push(setTimeout(hideLoading, duration || 2200));
   }
 
@@ -272,6 +277,7 @@ body:has(.loading-overlay.is-visible){ overflow:hidden; }
       '<div class="loading-overlay is-visible" role="status" aria-live="polite">' +
       '<span class="loading loading--24 loading-overlay__indicator" role="img" aria-label="加载中"><span class="loading__icon"><span class="loading__dot loading__dot--1"></span><span class="loading__dot loading__dot--2"></span><span class="loading__dot loading__dot--3"></span></span></span>' +
       '<div class="loading-overlay__text"><span class="loading-overlay__label">正在加载</span></div></div>';
+    lockScroll();
     timers.push(setTimeout(hideLoading, 2200));
   });
 
@@ -283,6 +289,7 @@ body:has(.loading-overlay.is-visible){ overflow:hidden; }
       '<div class="loading-overlay is-visible" role="status" aria-live="polite">' +
       '<span class="loading loading--24 loading-overlay__indicator" role="img" aria-label="加载中"><span class="loading__icon"><span class="loading__dot loading__dot--1"></span><span class="loading__dot loading__dot--2"></span><span class="loading__dot loading__dot--3"></span></span></span>' +
       '<div class="loading-overlay__text"><span class="loading-overlay__label">正在加载</span></div></div>';
+    lockScroll();
     timers.push(setTimeout(hideLoading, 6000));
   });
 
@@ -293,6 +300,7 @@ body:has(.loading-overlay.is-visible){ overflow:hidden; }
       '<button type="button" class="loading-overlay__close" aria-label="取消下载"><i class="wego-iconfont-s icon-cha" aria-hidden="true"></i></button>' +
       '<svg class="loading-ring" viewBox="0 0 48 48" role="img" aria-label="加载中" style="--progress:0"><circle class="loading-ring__track" cx="24" cy="24" r="20"></circle><circle class="loading-ring__bar" cx="24" cy="24" r="20"></circle></svg>' +
       '<div class="loading-overlay__text"><span class="loading-overlay__label">正在下载</span><span class="loading-overlay__percent">0%</span></div></div>';
+    lockScroll();
     var bar = host.querySelector('.loading-ring');
     var pct = host.querySelector('.loading-overlay__percent');
     // 中断按钮：点击停止进度并关闭浮层（演示宿主中断回调）
