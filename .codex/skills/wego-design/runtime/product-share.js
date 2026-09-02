@@ -311,7 +311,7 @@
   function showOverlayProgress(label) {
     var el = mountOverlay(
       '<button type="button" class="loading-overlay__close" data-action="cancel-download" aria-label="取消下载">'
-      + '<i class="wego-iconfont-s icon-guanbi" aria-hidden="true"></i>'
+      + '<i class="wego-iconfont-s icon-cha" aria-hidden="true"></i>'
       + '</button>'
       + '<svg class="loading-ring" viewBox="0 0 48 48" role="img" aria-label="加载中" style="--progress:0">'
       + '<circle class="loading-ring__track" cx="24" cy="24" r="20"></circle>'
