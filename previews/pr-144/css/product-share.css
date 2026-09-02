@@ -430,3 +430,25 @@
 
 /* ═══════════════════════════════════════════════════════════════
    发布页导航栏分享/快捷分享按钮
+
+/* ═══════════════════════════════════════════════════════════════
+   Loading 浮层右上角中断按钮（保存图片/视频下载进度浮层）
+   ═══════════════════════════════════════════════════════════════ */
+.loading-overlay__close {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  z-index: 1;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-inverse, #fff);
+  font-size: 16px;
+  opacity: 0.72;
+}
+.loading-overlay__close:active { opacity: 1; }
