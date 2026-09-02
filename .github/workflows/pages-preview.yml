@@ -111,13 +111,14 @@ jobs:
           else
             deployment_url="$BASE_URL"
           fi
-          for attempt in $(seq 1 18); do
+          # GitHub Pages 部署常超过 90 秒（排队时更久），等待窗口放宽到约 6 分钟避免误报
+          for attempt in $(seq 1 36); do
             published_sha=$(curl --fail --silent --show-error "$deployment_url/.wego-deployment-sha" || true)
             if [ "$published_sha" = "$GITHUB_SHA" ]; then
               echo "Pages deployment verified: $deployment_url/"
               exit 0
             fi
-            sleep 5
+            sleep 10
           done
           echo "Pages deployment is not reachable or does not match $GITHUB_SHA: $deployment_url/" >&2
           echo "Confirm repository Pages uses the gh-pages branch root as its source." >&2
