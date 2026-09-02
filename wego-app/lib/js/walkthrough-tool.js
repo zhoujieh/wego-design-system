@@ -3618,7 +3618,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (!this._targetEl || target === this._target) return;
       this._target = target;
       // 伪元素：从已注入的 state.pseudoStyles 读取当前值，无则取计算值快照
-      this._data = getElementStyleData(this._targetEl, target);
+      this._data = this._buildData(this._targetEl, target);
       this._hydrateSourceTokens();
       this._render();
       this._bindEvents();
@@ -3631,13 +3631,28 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._targetEl = el;
       this._selector = selector;
       this._target = target || '';
-      this._data = getElementStyleData(el, this._target);
+      this._data = this._buildData(el, this._target);
       this._hydrateSourceTokens();
       this._render();
       this._bindEvents();
       this.removeAttribute('hidden');
       this._updatePosition();
       this._updateMoveControls();
+    }
+
+    /** 组装面板数据：基础单层来自计算值；同一元素/目标连续编辑时保留已添加的追加层 */
+    _buildData(el, target) {
+      const fresh = getElementStyleData(el, target);
+      if (this._targetEl === el && this._target === target && this._data) {
+        fresh.fillLayers = this._data.fillLayers || [];
+        fresh.strokeLayers = this._data.strokeLayers || [];
+        fresh.shadowLayers = this._data.shadowLayers || [];
+      } else {
+        fresh.fillLayers = [];
+        fresh.strokeLayers = [];
+        fresh.shadowLayers = [];
+      }
+      return fresh;
     }
 
     /** 面板字段 → 对应 CSS 属性（用于读取源码声明中的 token 原文） */
@@ -4627,6 +4642,51 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             flex-shrink: 0;
           }
           .angle-btn:hover { background: rgba(255,255,255,0.1); }
+          /* 多层效果：追加层列表 */
+          .layer-list { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+          .layer-row {
+            display: flex; align-items: center; gap: 5px;
+            padding: 6px; border-radius: 8px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+          }
+          .layer-row .layer-fields { display: flex; align-items: center; gap: 4px; flex: 1; min-width: 0; }
+          .layer-row .layer-type { flex: 0 0 auto; }
+          .layer-row .layer-pos { flex: 0 0 46px; }
+          .layer-row .layer-w { flex: 0 0 38px; }
+          .layer-row .layer-cc { flex: 1; min-width: 0; }
+          .layer-row .layer-angle { flex: 0 0 44px; }
+          .layer-row .layer-num { flex: 1; min-width: 0; }
+          .layer-remove {
+            flex: 0 0 auto;
+            width: 22px; height: 22px;
+            border: none; border-radius: 50%;
+            background: rgba(255,255,255,0.06);
+            color: var(--text-tertiary, #999);
+            font-size: 13px; line-height: 1;
+            cursor: pointer;
+          }
+          .layer-remove:hover { background: rgba(255,255,255,0.16); color: #ff6b6b; }
+          .layer-inset-toggle {
+            flex: 0 0 auto;
+            height: 26px; padding: 0 8px;
+            border: 1px solid var(--border-color, rgba(255,255,255,0.1));
+            border-radius: 6px; background: rgba(255,255,255,0.04);
+            color: var(--text-tertiary, #888); font-size: 11px; cursor: pointer;
+          }
+          .layer-inset-toggle.active { border-color: var(--text-brand, #00b96b); color: var(--text-brand, #00b96b); }
+          .add-layer {
+            margin-top: 8px;
+            width: 100%;
+            height: 28px;
+            border: 1px dashed var(--border-color, rgba(255,255,255,0.18));
+            border-radius: 7px;
+            background: transparent;
+            color: var(--text-tertiary, #999);
+            font-size: 11px;
+            cursor: pointer;
+          }
+          .add-layer:hover { border-color: var(--text-brand, #00b96b); color: var(--text-brand, #00b96b); }
           /* 自动布局：主轴对齐（左/右/左右）与间距输入 上下合并容器（对齐在上、输入在下） */
           .gap-align-wrap {
             display: flex;
@@ -4938,6 +4998,26 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
               </div>
             </div>
             ` : ''}
+            ${(d.fillLayers || []).length ? `
+            <div class="layer-list">
+              ${(d.fillLayers || []).map(l => `
+                <div class="layer-row layer-fill" data-layer="fill">
+                  <div class="btn-group layer-type">
+                    <button type="button" data-layer-field="fill:${l.id}:type" data-value="linear" class="${l.type === 'linear' ? 'active' : ''}">线性</button>
+                    <button type="button" data-layer-field="fill:${l.id}:type" data-value="radial" class="${l.type === 'radial' ? 'active' : ''}">径向</button>
+                  </div>
+                  <div class="layer-fields">
+                    <button class="color-button small" type="button" data-layer-color="fill:${l.id}:start" title="起点颜色"><span class="swatch" style="background:${l.start || '#ffffff'}"></span></button>
+                    <input class="text-input layer-cc" type="text" value="${l.start || ''}" data-layer-field="fill:${l.id}:start" />
+                    <button class="color-button small" type="button" data-layer-color="fill:${l.id}:end" title="终点颜色"><span class="swatch" style="background:${l.end || '#000000'}"></span></button>
+                    <input class="text-input layer-cc" type="text" value="${l.end || ''}" data-layer-field="fill:${l.id}:end" />
+                    <input class="text-input layer-angle" type="text" value="${l.angle ?? 180}" data-layer-field="fill:${l.id}:angle" inputmode="numeric" title="角度" />
+                  </div>
+                  <button class="layer-remove" type="button" data-layer-remove="fill:${l.id}" title="删除该层">×</button>
+                </div>`).join('')}
+            </div>
+            ` : ''}
+            <button class="add-layer" type="button" data-layer-add="fill">＋ 添加渐变填充层</button>
           </div>
 
           <!-- 描边 -->
@@ -4963,6 +5043,23 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
                 </select>
               </div>
             </div>
+            ${(d.strokeLayers || []).length ? `
+            <div class="layer-list">
+              ${(d.strokeLayers || []).map(l => `
+                <div class="layer-row layer-stroke" data-layer="stroke">
+                  <select class="text-input layer-pos" data-layer-field="stroke:${l.id}:position">
+                    <option value="outside" ${l.position === 'outside' ? 'selected' : ''}>外</option>
+                    <option value="inside" ${l.position === 'inside' ? 'selected' : ''}>内</option>
+                    <option value="center" ${l.position === 'center' ? 'selected' : ''}>居中</option>
+                  </select>
+                  <input class="text-input layer-w" type="text" value="${l.width ?? ''}" data-layer-field="stroke:${l.id}:width" inputmode="numeric" placeholder="宽" />
+                  <button class="color-button small" type="button" data-layer-color="stroke:${l.id}:hex" title="颜色"><span class="swatch" style="background:${l.hex || '#000000'}"></span></button>
+                  <input class="text-input layer-cc" type="text" value="${l.hex || ''}" data-layer-field="stroke:${l.id}:hex" />
+                  <button class="layer-remove" type="button" data-layer-remove="stroke:${l.id}" title="删除该层">×</button>
+                </div>`).join('')}
+            </div>
+            ` : ''}
+            <button class="add-layer" type="button" data-layer-add="stroke">＋ 添加描边层</button>
           </div>
 
           <!-- 投影 -->
@@ -4990,6 +5087,21 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
               <button data-field="shadowInset" data-value="false" class="${!d.shadowInset ? 'active' : ''}">外阴影</button>
               <button data-field="shadowInset" data-value="true" class="${d.shadowInset ? 'active' : ''}">内阴影</button>
             </div>
+            ${(d.shadowLayers || []).length ? `
+            <div class="layer-list">
+              ${(d.shadowLayers || []).map(l => `
+                <div class="layer-row layer-shadow" data-layer="shadow">
+                  <button class="layer-inset-toggle ${l.inset === true || l.inset === 'true' ? 'active' : ''}" type="button" data-layer-inset="shadow:${l.id}" title="内/外阴影">${l.inset === true || l.inset === 'true' ? '内' : '外'}</button>
+                  <input class="text-input layer-num" type="text" value="${l.x ?? 0}" data-layer-field="shadow:${l.id}:x" inputmode="numeric" placeholder="x" />
+                  <input class="text-input layer-num" type="text" value="${l.y ?? 0}" data-layer-field="shadow:${l.id}:y" inputmode="numeric" placeholder="y" />
+                  <input class="text-input layer-num" type="text" value="${l.blur ?? 0}" data-layer-field="shadow:${l.id}:blur" inputmode="numeric" placeholder="模糊" />
+                  <input class="text-input layer-num" type="text" value="${l.spread ?? 0}" data-layer-field="shadow:${l.id}:spread" inputmode="numeric" placeholder="扩散" />
+                  <button class="color-button small" type="button" data-layer-color="shadow:${l.id}:hex" title="颜色"><span class="swatch" style="background:${l.hex || '#000000'}"></span></button>
+                  <button class="layer-remove" type="button" data-layer-remove="shadow:${l.id}" title="删除该层">×</button>
+                </div>`).join('')}
+            </div>
+            ` : ''}
+            <button class="add-layer" type="button" data-layer-add="shadow">＋ 添加投影层</button>
           </div>
           </div>
           <!-- Token 选择弹出面板（分层毛玻璃：外层 backdrop-filter，内层背景色，与主面板一致） -->
@@ -5129,6 +5241,56 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           this._onFieldChange('gradientFlip', this._data.gradientFlip ? 'false' : 'true');
         });
       }
+      // 多层效果：添加 / 删除 / 编辑追加层
+      this._shadow.querySelectorAll('[data-layer-add]').forEach(btn => {
+        btn.addEventListener('click', () => this._onLayerAdd(btn.dataset.layerAdd));
+      });
+      this._shadow.querySelectorAll('[data-layer-remove]').forEach(btn => {
+        const parts = btn.dataset.layerRemove.split(':');
+        btn.addEventListener('click', () => this._onLayerRemove(parts[0], parts[1]));
+      });
+      this._shadow.querySelectorAll('[data-layer-field]').forEach(el => {
+        const parts = el.dataset.layerField.split(':');
+        const kind = parts[0], id = parts[1], sub = parts[2];
+        if (el.tagName === 'INPUT' || el.tagName === 'SELECT') {
+          const commit = () => this._onLayerField(kind, id, sub, el.value);
+          el.addEventListener('change', commit);
+          el.addEventListener('blur', commit);
+        } else if (el.tagName === 'BUTTON' && el.dataset.value !== undefined) {
+          el.addEventListener('click', () => this._onLayerField(kind, id, sub, el.dataset.value));
+        }
+      });
+      this._shadow.querySelectorAll('[data-layer-color]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const parts = btn.dataset.layerColor.split(':');
+          const kind = parts[0], id = parts[1], sub = parts[2];
+          const layers = this._data[kind + 'Layers'] || [];
+          const layer = layers.find(l => l.id === id);
+          if (!layer) return;
+          bus.emit('open-color-picker', {
+            trigger: btn,
+            hex: layer[sub] || '#000000',
+            opacity: 100,
+            callback: (newHex) => this._onLayerField(kind, id, sub, newHex),
+          });
+        });
+      });
+      // 投影追加层：内/外阴影翻转
+      this._shadow.querySelectorAll('[data-layer-inset]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const parts = btn.dataset.layerInset.split(':');
+          const kind = parts[0], id = parts[1];
+          const layers = this._data[kind + 'Layers'] || [];
+          const layer = layers.find(l => l.id === id);
+          if (!layer) return;
+          const next = !(layer.inset === true || layer.inset === 'true');
+          layer.inset = next;
+          this._commitLayer(kind);
+          btn.textContent = next ? '内' : '外';
+          btn.classList.toggle('active', next);
+        });
+      });
       // 自动布局：顺序移动（上下左右，按 flex 主轴方向前后移动一位，不可移动方向置灰）
       this._shadow.querySelectorAll('[data-move]').forEach(btn => {
         btn.addEventListener('click', () => this._moveSelected(btn.dataset.move));
@@ -5220,6 +5382,82 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           }
         });
       });
+    }
+
+    /** 多层效果：添加一层（填充→渐变层；描边→位置/宽/色；投影→x/y/blur/spread/色） */
+    _onLayerAdd(kind) {
+      if (!this._targetEl || !this._data || this._target) return;
+      const layers = this._data[kind + 'Layers'] || [];
+      const id = 'l' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      if (kind === 'fill') layers.push({ id, type: 'linear', start: '#ffffff', end: '#000000', angle: 180 });
+      else if (kind === 'stroke') layers.push({ id, width: '1', position: 'outside', hex: '#000000', opacity: 100 });
+      else layers.push({ id, x: 0, y: 2, blur: 4, spread: 0, hex: '#000000', opacity: 40, inset: false });
+      this._data[kind + 'Layers'] = layers;
+      this._commitLayer(kind);
+      this._render();
+      this._bindEvents();
+      bus.emit('toast', { message: kind === 'fill' ? '已添加渐变填充层' : (kind === 'stroke' ? '已添加描边层' : '已添加投影层') });
+    }
+
+    /** 多层效果：删除一层 */
+    _onLayerRemove(kind, id) {
+      if (!this._targetEl || !this._data || this._target) return;
+      this._data[kind + 'Layers'] = (this._data[kind + 'Layers'] || []).filter(l => l.id !== id);
+      this._commitLayer(kind);
+      this._render();
+      this._bindEvents();
+    }
+
+    /** 多层效果：编辑一层字段（sub 为层内字段名） */
+    _onLayerField(kind, id, sub, value) {
+      if (!this._targetEl || !this._data || this._target) return;
+      const layers = this._data[kind + 'Layers'] || [];
+      const layer = layers.find(l => l.id === id);
+      if (!layer) return;
+      layer[sub] = value;
+      this._commitLayer(kind);
+      // 轻量更新：仅刷新 active 态与色块，不整行重渲染（避免输入失焦）
+      this._updateActiveStates();
+      const sw = this._shadow.querySelector(`[data-layer-color="${kind}:${id}:${sub}"] .swatch`);
+      if (sw) sw.style.background = value || '';
+      // 渐变层类型切换按钮 active 态
+      this._shadow.querySelectorAll(`[data-layer-field^="fill:${id}:type"]`).forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.value === layer.type);
+      });
+    }
+
+    /** 多层效果：把当前全部层合并写入元素并记录一条变更（填充→background-image；描边/投影→box-shadow） */
+    _commitLayer(kind) {
+      const el = this._targetEl;
+      if (!el || this._target) return;
+      const csNow = getComputedStyle(el);
+      let result = null;
+      if (kind === 'fill') {
+        const oldValue = csNow.backgroundImage;
+        const out = this._mergedBackgroundImage();
+        el.style.backgroundImage = out === 'none' ? '' : out;
+        result = { property: 'background-image', oldValue, newValue: out };
+      } else {
+        const oldValue = csNow.boxShadow;
+        const out = this._combineBoxShadow();
+        el.style.boxShadow = out === 'none' ? '' : out;
+        result = { property: 'box-shadow', oldValue, newValue: out };
+      }
+      if (!result) return;
+      bus.emit('style-change', {
+        selector: this._selector,
+        elementTag: el.tagName.toLowerCase(),
+        elementText: (el.textContent || '').trim().substring(0, 50),
+        elementClass: getFirstStableClass(el),
+        elementClasses: getStableClasses(el),
+        property: result.property,
+        oldValue: result.oldValue,
+        newValue: result.newValue,
+        el,
+        shared: false,
+        sharedKey: '',
+      });
+      this._scheduleSharedSync(result);
     }
 
     _onFieldChange(field, value) {
@@ -5451,6 +5689,16 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const color = isTokenValue(strokeHex) ? strokeHex : hexOpacityToRgba(strokeHex, d.strokeOpacity ?? 100);
         parts.push(`inset 0 0 0 ${w}px ${color}`);
       }
+      // 追加描边层（每层独立位置/宽度/颜色）
+      (d.strokeLayers || []).forEach(l => {
+        const w = num(l.width) || 1;
+        if (w <= 0) return;
+        const hex = l.hex || '#000000';
+        const color = isTokenValue(hex) ? hex : hexOpacityToRgba(hex, l.opacity ?? 100);
+        if (l.position === 'inside') parts.push(`inset 0 0 0 ${w}px ${color}`);
+        else if (l.position === 'center') parts.push(`0 0 0 ${w / 2}px ${color}`, `inset 0 0 0 ${w / 2}px ${color}`);
+        else parts.push(`0 0 0 ${w}px ${color}`);
+      });
       // 投影
       const hex = d.shadowHex || '#000000';
       const x = num(d.shadowX);
@@ -5467,7 +5715,42 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           if (op > 0) parts.push(`${inset ? 'inset ' : ''}${x}px ${y}px ${blur}px ${spread}px ${hexOpacityToRgba(hex, op)}`);
         }
       }
+      // 追加投影层
+      (d.shadowLayers || []).forEach(l => {
+        const lx = num(l.x), ly = num(l.y), lb = num(l.blur), ls = num(l.spread);
+        if (lb <= 0 && lx === 0 && ly === 0 && ls === 0) return;
+        const lHex = l.hex || '#000000';
+        const lInset = l.inset === true || l.inset === 'true';
+        const color = isTokenValue(lHex) ? lHex : hexOpacityToRgba(lHex, l.opacity ?? 100);
+        parts.push(`${lInset ? 'inset ' : ''}${lx}px ${ly}px ${lb}px ${ls}px ${color}`);
+      });
       return parts.length ? parts.join(', ') : 'none';
+    }
+
+    /** 合并基础实色 + 追加渐变层 → background-color 值（基础实色为准） */
+    _mergedBackgroundColor() {
+      const d = this._data || {};
+      const hex = d.fillHex || '#FFFFFF';
+      if (isTokenValue(hex)) return hex;
+      const opacity = d.fillOpacity ?? 0;
+      return opacity > 0 ? hexOpacityToRgba(hex, opacity) : 'transparent';
+    }
+
+    /** 合并基础渐变 + 追加渐变层 → background-image 值（多背景逗号分隔） */
+    _mergedBackgroundImage() {
+      const images = [];
+      const base = buildGradient(this._data);
+      if (base) images.push(base);
+      (this._data.fillLayers || []).forEach(l => {
+        const s = l.start || '#ffffff';
+        const e = l.end || '#000000';
+        const flip = l.flip === true || l.flip === 'true';
+        const a = flip ? e : s;
+        const b = flip ? s : e;
+        if (l.type === 'radial') images.push(`radial-gradient(circle, ${a} 0%, ${b} 100%)`);
+        else images.push(`linear-gradient(${(parseFloat(l.angle) || 180)}deg, ${a} 0%, ${b} 100%)`);
+      });
+      return images.length ? images.join(', ') : 'none';
     }
 
     /** 面板字段名 → CSS 属性名 */
@@ -5901,14 +6184,19 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         case 'fillOpacity': {
           const oldValue = cs().backgroundColor;
           const hex = this._data.fillHex || '#FFFFFF';
+          let newVal;
           if (isTokenValue(hex)) {
             el.style.backgroundColor = hex;
-            return { property: 'background-color', oldValue, newValue: hex };
+            newVal = hex;
+          } else {
+            const opacity = this._data.fillOpacity ?? 0;
+            newVal = opacity > 0 ? hexOpacityToRgba(hex, opacity) : 'transparent';
+            el.style.backgroundColor = newVal;
           }
-          const opacity = this._data.fillOpacity ?? 0;
-          const rgba = opacity > 0 ? hexOpacityToRgba(hex, opacity) : 'transparent';
-          el.style.backgroundColor = rgba;
-          return { property: 'background-color', oldValue, newValue: rgba };
+          // 保持追加渐变层与基础渐变的 background-image 一致
+          const mergedImg = this._mergedBackgroundImage();
+          if (mergedImg !== 'none') el.style.backgroundImage = mergedImg;
+          return { property: 'background-color', oldValue, newValue: newVal };
         }
         case 'strokeHex':
         case 'strokeOpacity':
@@ -5957,8 +6245,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         case 'gradientAngle':
         case 'gradientFlip': {
           const oldValue = cs().backgroundImage;
-          const out = buildGradient(this._data);
-          el.style.backgroundImage = out;
+          const out = this._mergedBackgroundImage();
+          el.style.backgroundImage = out === 'none' ? '' : out;
           return { property: 'background-image', oldValue, newValue: out };
         }
         case 'display': {
