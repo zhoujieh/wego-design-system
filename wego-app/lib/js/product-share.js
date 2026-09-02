@@ -74,6 +74,7 @@
     { key: 'douyin', name: '抖音', icon: 'icon-douyin', iconSvg: './lib/assets/icons/share/douyin.svg', group: 1, supportTextOnly: false },
     { key: 'weibo', name: '微博', icon: 'icon-weibo', iconSvg: './lib/assets/icons/share/weibo.svg', group: 1, supportTextOnly: true },
     { key: 'zhuanzhuan', name: '转转', icon: 'icon-zhuanzhuan', iconSvg: './lib/assets/icons/share/zhuanzhuan.svg', group: 2, supportTextOnly: false },
+    { key: 'copy', name: '复制链接', icon: 'icon-fuzhi', iconSvg: null, group: 2, supportTextOnly: true, miniprogramOnly: true },
     { key: 'more', name: '更多', icon: 'icon-sandian16', iconSvg: null, group: 2, supportTextOnly: true }
   ];
 
@@ -114,7 +115,7 @@
   function sharePanelTemplate(opts) {
     var title = opts.title || '分享产品';
     var config = opts.config || {};
-    var channels = config.channels || CHANNELS.map(function (c) { return c.key; });
+    var channels = config.channels || CHANNELS.filter(function (c) { return !c.miniprogramOnly; }).map(function (c) { return c.key; });
     var showHeaderActions = config.showHeaderActions !== false;
     var configItems = config.configItems || [
       { key: 'miniprogram', type: 'checkbox', label: '小程序码', defaultValue: true },
@@ -186,15 +187,18 @@
       configHtml += '</div>';
     }
 
-    /* 其他操作栏：单行横向滚动，样式与分享渠道一致（52px 图标框 + 下方文字），图标用 iconfont */
-    var actionsHtml = '<div class="share-panel__actions layout-scroll-row">';
-    actions.forEach(function (a) {
-      actionsHtml += '<button type="button" class="share-panel__action-item" data-component-slug="button" data-action="' + a.key + '">'
-        + '<span class="share-panel__action-icon"><i class="wego-iconfont-s ' + a.icon + '" aria-hidden="true"></i></span>'
-        + '<span class="share-panel__action-name">' + a.label + '</span>'
-        + '</button>';
-    });
-    actionsHtml += '</div>';
+    /* 其他操作栏：单行横向滚动，样式与分享渠道一致（52px 图标框 + 下方文字），图标用 iconfont；无操作项时不渲染容器 */
+    var actionsHtml = '';
+    if (actions.length > 0) {
+      actionsHtml = '<div class="share-panel__actions layout-scroll-row">';
+      actions.forEach(function (a) {
+        actionsHtml += '<button type="button" class="share-panel__action-item" data-component-slug="button" data-action="' + a.key + '">'
+          + '<span class="share-panel__action-icon"><i class="wego-iconfont-s ' + a.icon + '" aria-hidden="true"></i></span>'
+          + '<span class="share-panel__action-name">' + a.label + '</span>'
+          + '</button>';
+      });
+      actionsHtml += '</div>';
+    }
 
     /* 滚动指示器：滚动条式进度条（track + thumb），是否有第二组由实际分组决定（init 时控制显隐） */
     var indicatorHtml = '<div class="share-panel__indicator"><div class="share-panel__indicator-thumb"></div></div>';
@@ -266,24 +270,6 @@
       + '</div>';
   }
 
-  /* 小程序链接二级面板 */
-  function miniprogramLinkTemplate() {
-    return '<div class="share-panel share-panel--miniprogram" role="dialog" aria-modal="true" aria-label="分享小程序链接">'
-      + '<div class="share-panel__panel">'
-      + '<div class="share-panel__header">'
-      + '<span class="share-panel__title">分享小程序链接</span>'
-      + '</div>'
-      + '<div class="share-panel__channels">'
-      + '<div class="share-panel__channel-group">'
-      + '<button type="button" class="share-panel__channel-item" data-miniprogram-channel="wechat"><span class="share-panel__channel-icon"><i class="wego-iconfont-s icon-weixin" aria-hidden="true"></i></span><span class="share-panel__channel-name">微信好友</span></button>'
-      + '<button type="button" class="share-panel__channel-item" data-miniprogram-channel="moments"><span class="share-panel__channel-icon"><i class="wego-iconfont-s icon-pengyouquan" aria-hidden="true"></i></span><span class="share-panel__channel-name">朋友圈</span></button>'
-      + '<button type="button" class="share-panel__channel-item" data-miniprogram-channel="copy"><span class="share-panel__channel-icon"><i class="wego-iconfont-s icon-fuzhi" aria-hidden="true"></i></span><span class="share-panel__channel-name">复制链接</span></button>'
-      + '</div>'
-      + '</div>'
-      + '<button type="button" class="share-panel__cancel" data-action="cancel-miniprogram">取消</button>'
-      + '</div>'
-      + '</div>';
-  }
   /* ═══════════════════════════════════════════════════════════════
      分享流程模拟
      ═══════════════════════════════════════════════════════════════ */
@@ -338,6 +324,13 @@
         ctx.toast('下载成功，文字已复制 去微信分享');
         if (callbacks && callbacks.onSuccess) callbacks.onSuccess();
       });
+      return;
+    }
+
+    /* 复制链接（小程序链接二级面板渠道）：直接复制 */
+    if (channelKey === 'copy') {
+      ctx.toast('复制成功');
+      if (callbacks && callbacks.onSuccess) callbacks.onSuccess();
       return;
     }
 
@@ -429,8 +422,11 @@
     var config = options.config || {};
     var callbacks = options.callbacks || {};
     var title = options.title || '分享产品';
+    var contentType = options.contentType || 'panel';
+    /* 内部机制：二级面板（如小程序链接）取消/遮罩时恢复主分享面板，由上层在 options._reopenMain 注入 */
+    var reopenMain = options._reopenMain || null;
 
-    var handler = SHARE_TYPES[options.contentType || 'panel'] || SHARE_TYPES.panel;
+    var handler = SHARE_TYPES[contentType] || SHARE_TYPES.panel;
     ctx.openSheet(handler.render({ title: title, config: config }), {
       label: title,
       init: function (sheetCtx) {
@@ -487,7 +483,9 @@
           if (action === 'cancel') {
             btn.addEventListener('click', function () {
               ctx.closeOverlay();
-              if (callbacks.onClose) callbacks.onClose();
+              /* 二级面板取消：关闭并恢复主面板；主面板取消：仅关闭 */
+              if (reopenMain) reopenMain();
+              else if (callbacks.onClose) callbacks.onClose();
             });
           } else if (action === 'display-mode' || action === 'share-settings') {
             btn.addEventListener('click', function () {
@@ -507,10 +505,28 @@
             });
           } else if (action === 'miniprogramLink') {
             btn.addEventListener('click', function () {
-              /* 主面板关闭，弹出二级面板 */
+              /* 主面板关闭，从底部重新弹出「分享小程序链接」二级面板（组件化复用：同一 openProductShare 入口 + sharePanelTemplate 渲染） */
               ctx.closeOverlay();
               setTimeout(function () {
-                openMiniprogramLink(ctx, callbacks);
+                openProductShare(ctx, {
+                  contentType: 'miniprogram',
+                  title: '分享小程序链接',
+                  config: {
+                    channels: ['wechat', 'moments', 'copy'],
+                    showHeaderActions: false,
+                    configItems: [],
+                    actions: []
+                  },
+                  callbacks: callbacks,
+                  /* 取消/遮罩二级面板时自动恢复主分享面板 */
+                  _reopenMain: function () {
+                    openProductShare(ctx, {
+                      title: title,
+                      config: config,
+                      callbacks: callbacks
+                    });
+                  }
+                });
               }, 200);
             });
           } else if (action === 'barcode') {
@@ -595,66 +611,23 @@
           window.addEventListener('resize', onResize);
         }
 
-        /* 遮罩点击关闭 */
+        /* 遮罩点击关闭：二级面板点遮罩关闭并恢复主面板；主面板点遮罩仅关闭 */
         root.addEventListener('click', function (e) {
           if (e.target === root) {
             ctx.closeOverlay();
-            if (callbacks.onClose) callbacks.onClose();
+            if (reopenMain) reopenMain();
+            else if (callbacks.onClose) callbacks.onClose();
           }
         });
       }
     });
   }
-
-  function openMiniprogramLink(ctx, callbacks) {
-    ctx.openSheet(miniprogramLinkTemplate(), {
-      label: '分享小程序链接',
-      init: function (sheetCtx) {
-        var root = sheetCtx.root;
-        var reopenMain = false;
-
-        root.querySelectorAll('[data-miniprogram-channel]').forEach(function (btn) {
-          btn.addEventListener('click', function () {
-            var ch = btn.getAttribute('data-miniprogram-channel');
-            ctx.closeOverlay();
-            if (ch === 'copy') {
-              ctx.toast('复制成功');
-            } else {
-              ctx.toast('分享成功');
-            }
-            if (callbacks.onMiniprogramShare) callbacks.onMiniprogramShare(ch);
-          });
-        });
-
-        var cancelBtn = root.querySelector('[data-action="cancel-miniprogram"]');
-        if (cancelBtn) {
-          cancelBtn.addEventListener('click', function () {
-            reopenMain = true;
-            ctx.closeOverlay();
-            /* 取消时重新打开主面板 */
-            setTimeout(function () {
-              if (callbacks.onReopenMain) callbacks.onReopenMain();
-            }, 200);
-          });
-        }
-
-        root.addEventListener('click', function (e) {
-          if (e.target === root) {
-            ctx.closeOverlay();
-            setTimeout(function () {
-              if (callbacks.onReopenMain) callbacks.onReopenMain();
-            }, 200);
-          }
-        });
-      }
-    });
-  }
-
 
   /* SHARE_TYPES 分享类型注册表：新增内容类型（列表页/个人主页/单据/海报/订单等）在此注册 render + config，
      业务层 openProductShare 按 contentType 分发，不改核心逻辑。 */
   var SHARE_TYPES = {
-    panel: { label: '产品分享', render: sharePanelTemplate }
+    panel: { label: '产品分享', render: sharePanelTemplate },
+    miniprogram: { label: '分享小程序链接', render: sharePanelTemplate }
   };
 
   /* 暴露公开 API */
