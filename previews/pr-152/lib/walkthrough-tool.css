@@ -1,0 +1,14 @@
+/* 走查工具页面级样式 */
+/* 注：选中态高亮已由 wego-wt-highlight 组件（视口级固定框，不受祖先 overflow 裁切）接管，
+   不再使用 [data-wt-selected] 的 outline 方案。 */
+
+/* 走查模式下禁止文本选择（避免选中元素时选中文本） */
+[data-walkthrough-mode="true"] {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* 走查模式下触摸操作优化 */
+[data-walkthrough-mode="true"] * {
+  -webkit-tap-highlight-color: transparent;
+}
