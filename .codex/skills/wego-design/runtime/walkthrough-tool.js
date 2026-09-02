@@ -887,13 +887,25 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     return true;
   }
 
+  /** 调试用：元素的简短标识（稳定类名 + 首段文本），便于顺序移动日志核对 */
+  function elLabel(el) {
+    if (!el || el.nodeType !== 1) return '(null)';
+    const cls = getFirstStableClass(el);
+    const text = (el.textContent || '').trim().substring(0, 6);
+    return (cls || el.tagName.toLowerCase()) + (text ? '「' + text + '」' : '');
+  }
+
   /** 在主轴方向把元素向前/向后移动一位（用 CSS order 表达显示顺序，不改 DOM 结构）。
    *  dir: 'left'|'right'|'up'|'down'；仅主轴方向有效（row → 左右，column → 上下），
    *  交叉轴方向无顺序可调返回 null。
    *  返回 null 表示不可移动（非 flex 子项 / 交叉轴方向 / 已在边界）。
-   *  返回 { el, neighbor, elOrder, elNew, nbOrder, nbNew, idxOld, idxNew }。
-   *  移动规则：相邻两元素 order 相同（都未显式设置，默认 0）时，仅把目标元素设为相对值
-   *  （前移 -1 / 后移 +1），兄弟不动；已显式设置且不同则互换两者。同类元素一起同步时各容器显示一致。
+   *  返回 { el, neighbor, elOrder, elNew, nbOrder, nbNew, idxOld, idxNew, shifted }。
+   *  shifted：同档换位时被顺延（order 值改写）的同档元素列表 [{ el, oldOrder, newOrder, idx }]。
+   *  移动规则（只与相邻的同级元素换位，不越位）：
+   *  - 相邻两元素 order 不同：互换两者 order。
+   *  - 相邻两元素 order 相同（如都未显式设置，默认 0）：目标是相邻元素换位，但 order 是整数
+   *    且同档按 DOM 序排列，目标要插到相邻元素之后/之前，必须把同档中相邻元素后/前的元素
+   *    统一顺延一档（order+1 / order-1），保持组内相对顺序，避免目标越过中间元素跳到组尾。
    *  注意：位置判断一律基于「显示顺序」（order 升序、同 order 按 DOM 顺序），
    *  因为 order 已表达显示顺序，DOM 顺序可能不再与视觉顺序一致。 */
   function moveFlexItem(el, dir) {
@@ -920,15 +932,37 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     if (!neighbor) return null;
     const elOrder = computedOrder(el);
     const nbOrder = computedOrder(neighbor);
+    debugLog.add('MOVE', `[${dir}] 移动前 容器显示顺序=[${ordered.map(elLabel).join('>')}] 目标=${elLabel(el)}(order=${elOrder}) 相邻=${elLabel(neighbor)}(order=${nbOrder})`);
     let elNew = elOrder, nbNew = nbOrder;
+    const shifted = [];
     if (elOrder === nbOrder) {
-      elNew = fwd ? elOrder - 1 : elOrder + 1;
+      // 同档换位：目标与相邻元素交换显示位置。顺延相邻元素后/前的同档元素到新档位，
+      // 使目标恰好落在相邻元素之后/之前（只换一格，不越过中间元素）。
+      const g = fwd ? elOrder - 1 : elOrder + 1;
+      elNew = g;
+      ordered.forEach((ch, i) => {
+        if (ch === el || ch === neighbor) return;
+        if (computedOrder(ch) !== elOrder) return;
+        const between = fwd ? (i < idx) : (i > idx); // 左移取相邻之前、右移取相邻之后
+        if (between) {
+          ch.style.order = String(g);
+          shifted.push({ el: ch, oldOrder: elOrder, newOrder: g, idx: i });
+        }
+      });
+      debugLog.add('MOVE', `  同档(order=${elOrder} 相同)→ 目标与相邻换位: 目标 ${elOrder}→${g}` + (shifted.length ? `，顺延同档 ${shifted.map(s => elLabel(s.el)).join('、')} → ${g}` : ''));
     } else {
       elNew = nbOrder; nbNew = elOrder;
+      debugLog.add('MOVE', `  异档 → 互换两者 order ${elOrder}↔${nbOrder}`);
     }
     if (elNew !== elOrder) el.style.order = String(elNew);
     if (nbNew !== nbOrder) neighbor.style.order = String(nbNew);
-    return { el, neighbor, elOrder, elNew, nbOrder, nbNew, idxOld: idx, idxNew: fwd ? idx - 1 : idx + 1 };
+    // 移动后容器显示顺序（重新按 order+DOM 序计算）
+    const afterSeq = flexItems(parent)
+      .map((ch, i) => ({ ch, i }))
+      .sort((a, b) => computedOrder(a.ch) - computedOrder(b.ch) || a.i - b.i)
+      .map(x => x.ch);
+    debugLog.add('MOVE', `  移动后 容器显示顺序=[${afterSeq.map(elLabel).join('>')}] 目标order=${elNew} 相邻order=${nbNew}` + (shifted.length ? ` 顺延元素order=${g}` : ''));
+    return { el, neighbor, elOrder, elNew, nbOrder, nbNew, idxOld: idx, idxNew: fwd ? idx - 1 : idx + 1, shifted };
   }
 
   /** 元素在父 flex 容器内的主轴显示位次（1-based，供顺序记录友好展示）；非 flex 子项返回 0 */
@@ -3372,6 +3406,14 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._recordMoveChange(mv.el, mv, false);
       // 若与兄弟交换了 order（已显式不同），兄弟也记录
       if (mv.nbNew !== mv.nbOrder) this._recordMoveChange(mv.neighbor, mv, true);
+      // 同档换位时被顺延的同档元素（order 值被改写），一并记录 + 共享同步，
+      // 保证施工单还原与其它卡片同款元素联动与实际显示一致
+      if (mv.shifted && mv.shifted.length) {
+        mv.shifted.forEach(sh => {
+          this._recordMoveChange(sh.el, { idxOld: sh.idx, elOrder: sh.oldOrder, elNew: sh.newOrder }, false);
+          this._scheduleSharedSync({ property: 'order', oldValue: String(sh.oldOrder), newValue: String(sh.newOrder) }, sh.el);
+        });
+      }
       // 共享同步：目标元素与兄弟元素分别以各自元素为基准，同类元素（如其它卡片的同款按钮）一起换位。
       // 必须分别传入各自 targetEl（order 属性相同），否则防抖合并会把其中一个的同步覆盖掉
       this._scheduleSharedSync({ property: 'order', oldValue: String(mv.elOrder), newValue: String(mv.elNew) }, mv.el);
@@ -4152,6 +4194,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
               <div class="field">
                 <span class="field-icon">${ICONS.gap}</span>
                 <input class="text-input" type="text" value="${d.layoutGap || ''}" data-field="layoutGap" inputmode="numeric" placeholder="gap" />
+              </div>
+              <div class="btn-group" title="主轴对齐方式">
+                <button type="button" data-field="justifyContent" data-value="flex-start" class="${d.justifyContent === 'flex-start' ? 'active' : ''}" title="左对齐">左</button>
+                <button type="button" data-field="justifyContent" data-value="flex-end" class="${d.justifyContent === 'flex-end' ? 'active' : ''}" title="右对齐">右</button>
+                <button type="button" data-field="justifyContent" data-value="space-between" class="${d.justifyContent === 'space-between' ? 'active' : ''}" title="左右对齐（两端贴边）">左右</button>
               </div>
             </div>
             <p class="sub-label">内边距 padding</p>
@@ -5165,6 +5212,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // text align
       this._shadow.querySelectorAll('[data-field="textAlign"]').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.value === d.textAlign);
+      });
+      // 自动布局：主轴对齐（左/右/左右）
+      this._shadow.querySelectorAll('[data-field="justifyContent"]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.value === d.justifyContent);
       });
       // shadow inset
       this._shadow.querySelectorAll('[data-field="shadowInset"]').forEach(btn => {
