@@ -7619,10 +7619,15 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._hoveredElement = null;
       // 连续点击层级链锚点：同位置连点逐级上移选中父级
       this._pickAnchor = null;
+      // 长按拖拽移动：500ms 长按触发，拖拽中 transform 平移 + 偏移气泡
+      this._longPressTimer = null;
+      this._dragging = null;
+      this._dragOrigTransform = '';
       document.addEventListener('pointerdown', this._onPointerDown, true);
       document.addEventListener('pointermove', this._onPointerMove, true);
       document.addEventListener('pointerup', this._onPointerUp, true);
       document.addEventListener('click', this._onClickCapture, true);
+      document.addEventListener('dblclick', this._onDblClickCapture, true);
     }
 
     _unbindTouchEvents() {
@@ -7630,6 +7635,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       document.removeEventListener('pointermove', this._onPointerMove, true);
       document.removeEventListener('pointerup', this._onPointerUp, true);
       document.removeEventListener('click', this._onClickCapture, true);
+      document.removeEventListener('dblclick', this._onDblClickCapture, true);
       this._pointerActive = false;
     }
 
@@ -7645,12 +7651,32 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._ptStartY = e.clientY;
       this._ptStartTime = Date.now();
       this._isSwiping = false;
+      // 启动长按拖拽定时器（500ms 未松手且未滑动 → 进入拖拽）
+      clearTimeout(this._longPressTimer);
+      this._longPressTimer = setTimeout(() => this._startLongPressDrag(), 500);
     };
     _onPointerMove = (e) => {
+      // 拖拽进行中：跟随指针平移元素
+      if (this._dragging) {
+        const dx = e.clientX - this._dragging.startX;
+        const dy = e.clientY - this._dragging.startY;
+        if (Math.abs(dx) > 1 || Math.abs(dy) > 1) this._dragging.moved = true;
+        const tx = Math.round(dx);
+        const ty = Math.round(dy);
+        this._dragging.el.style.transform = `${this._dragOrigTransform ? this._dragOrigTransform + ' ' : ''}translate(${tx}px, ${ty}px)`;
+        this._components.highlight.showForElement(this._dragging.el, `+${tx}, +${ty}`);
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
       if (this._pointerActive) {
         const dx = Math.abs(e.clientX - this._ptStartX);
         const dy = Math.abs(e.clientY - this._ptStartY);
-        if (dx > 10 || dy > 10) this._isSwiping = true;
+        if (dx > 10 || dy > 10) {
+          this._isSwiping = true;
+          clearTimeout(this._longPressTimer);
+          this._longPressTimer = null;
+        }
         return;
       }
       // 非点击/滑动过程中：hover 预览元素布局（仅在无选中元素时生效）
@@ -7658,12 +7684,72 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._updateHover(e.clientX, e.clientY);
     };
     _onPointerUp = (e) => {
+      clearTimeout(this._longPressTimer);
+      this._longPressTimer = null;
+      // 长按拖拽结束：提交位移变更
+      if (this._dragging) {
+        this._endLongPressDrag(e);
+        return;
+      }
       if (!this._pointerActive) return;
       this._pointerActive = false;
       if (this._isSwiping) return;                          // 滑动：放行页面滚动
-      if (Date.now() - this._ptStartTime >= 500) return;    // 长按：MVP 不处理
+      if (Date.now() - this._ptStartTime >= 500) return;    // 长按未触发拖拽（如根元素）：不选中
       this._handlePointSelection(e.clientX, e.clientY, e);
     };
+
+    /** 长按 500ms 进入拖拽模式（对齐计划 3.2.5：半透明 + 偏移气泡 + 松手固定） */
+    _startLongPressDrag() {
+      if (this._isSwiping || !this._pointerActive) return;
+      const el = document.elementFromPoint(this._ptStartX, this._ptStartY);
+      if (!el || this._isSelectionRoot(el)) return;
+      if (state.selectedElement !== el) this._selectElement(el);
+      const target = state.selectedElement || el;
+      this._dragOrigTransform = target.style.transform || '';
+      this._dragging = { el: target, startX: this._ptStartX, startY: this._ptStartY, moved: false };
+      target.style.transition = 'none';
+      target.style.opacity = '0.8';
+      target.style.cursor = 'move';
+      this._components.highlight.setMode('selected');
+      this._components.highlight.setHandles(false);
+      this._components.highlight.showForElement(target, '拖动中');
+    }
+
+    /** 松手结束拖拽：发生位移则记录 transform 变更，否则还原 */
+    _endLongPressDrag(e) {
+      const drag = this._dragging;
+      this._dragging = null;
+      this._pointerActive = false;
+      if (!drag) return;
+      const el = drag.el;
+      el.style.transition = '';
+      el.style.opacity = '';
+      el.style.cursor = '';
+      const dx = Math.round(e.clientX - drag.startX);
+      const dy = Math.round(e.clientY - drag.startY);
+      if (drag.moved && (dx !== 0 || dy !== 0)) {
+        const newValue = `translate(${dx}px, ${dy}px)`;
+        el.style.transform = newValue;
+        bus.emit('style-change', {
+          selector: this._resolveCanonicalSelector(el, generateSelector(el)),
+          elementTag: el.tagName.toLowerCase(),
+          elementText: (el.textContent || '').trim().substring(0, 50),
+          elementClass: getFirstStableClass(el),
+          elementClasses: getStableClasses(el),
+          property: 'transform',
+          oldValue: this._dragOrigTransform || '',
+          newValue,
+          el,
+          shared: false,
+          sharedKey: '',
+        });
+        this._showToast(`已移动 +${dx}, +${dy}`);
+      } else {
+        el.style.transform = this._dragOrigTransform || '';
+        this._showToast('未移动，已还原');
+      }
+      this._updateUndoRedoUI();
+    }
     // 拦截走查模式下落到页面元素的合成 click，避免误触发（如导航跳转）
     _onClickCapture = (e) => {
       if (this._walkthroughMode && !isWalkthroughElement(e.target)) {
@@ -7727,6 +7813,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         Math.abs(clientY - this._pickAnchor.y) <= 16 &&
         now - this._pickAnchor.time <= 1200;
       if (samePoint && state.selectedElement) {
+        // 双击语义优先：快速双击（<350ms）可编辑文本元素 → 让位给 dblclick 文本内联编辑，不做层级上移
+        const isDblText = (now - this._pickAnchor.time < 350) && this._isTextEditable(state.selectedElement);
+        if (isDblText) {
+          this._pickAnchor = null;
+          return;
+        }
         const parent = state.selectedElement.parentElement;
         if (parent && !this._isSelectionRoot(parent)) {
           this._pickAnchor.level += 1;
@@ -7743,6 +7835,81 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       }
       // 新位置点击：重置层级链，选中最深层
       this._pickAnchor = { x: clientX, y: clientY, time: now, level: 0 };
+      this._selectElement(el);
+    }
+
+    /** 双击进入文本内联编辑（对齐计划 3.2.6 / Figma 双击编辑文本） */
+    _onDblClickCapture = (e) => {
+      if (!this._walkthroughMode) return;
+      if (isWalkthroughElement(e.target)) return;
+      if (this._dragging || this._editingEl) return;
+      e.preventDefault();
+      e.stopPropagation();
+      this._startTextEdit(e.target);
+    };
+
+    /** 判定元素是否适合文本内联编辑（含直接文本节点且非空，或已是可编辑态） */
+    _isTextEditable(el) {
+      if (!el || el.isContentEditable) return !!el;
+      if (el.childElementCount > 0) return false; // 复合容器不进编辑（避免误改整块结构）
+      const t = (el.textContent || '').trim();
+      return t.length > 0 && t.length <= 200;
+    }
+
+    /** 进入文本编辑：contenteditable + 全选，隐藏选中边框，blur/Enter 提交 */
+    _startTextEdit(el) {
+      if (!el || !this._isTextEditable(el)) return;
+      this._editingEl = el;
+      this._editingOrig = el.textContent || '';
+      this._components.highlight.hide();
+      this._components.highlight.setAttribute('hidden', '');
+      state.selectedElement = null;
+      state.selectedSelector = '';
+      state.selectedTarget = '';
+      el.contentEditable = 'true';
+      el.focus();
+      try {
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      } catch (e) {}
+      const finish = () => this._finishTextEdit(el);
+      el.addEventListener('blur', finish, { once: true });
+      el.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter' && !ev.shiftKey) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          el.blur();
+        }
+      }, { once: true });
+    }
+
+    /** 结束文本编辑：文本变化则记录变更，恢复选中 */
+    _finishTextEdit(el) {
+      if (this._editingEl !== el) return;
+      const orig = this._editingOrig;
+      const now = el.textContent || '';
+      this._editingEl = null;
+      this._editingOrig = '';
+      el.contentEditable = 'false';
+      if (orig !== now) {
+        bus.emit('style-change', {
+          selector: this._resolveCanonicalSelector(el, generateSelector(el)),
+          elementTag: el.tagName.toLowerCase(),
+          elementText: now.trim().substring(0, 50),
+          elementClass: getFirstStableClass(el),
+          elementClasses: getStableClasses(el),
+          property: 'text-content',
+          oldValue: orig,
+          newValue: now,
+          el,
+          shared: false,
+          sharedKey: '',
+        });
+        this._showToast('已更新文本');
+      }
       this._selectElement(el);
     }
 
@@ -7980,7 +8147,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         Object.assign(existing, deriveIntent(existing, change.el));
         if (change.el) changeElRefs.set(existing.id, change.el);
       } else {
-        const srcInfo = (change.el && !change.target)
+        const srcInfo = (change.el && !change.target && change.property !== 'text-content')
           ? readSourceDeclaration(change.el, change.property)
           : { declared: false, sourceValue: '' };
         const rec = {
@@ -8010,10 +8177,19 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._syncAfterRecordsChanged();
     }
 
-    /** 还原单条变更（本体=清 inline；伪元素=清注入规则） */
+    /** 还原单条变更（本体=清 inline；伪元素=清注入规则；文本=恢复原文） */
     _revertChange(change) {
       if (change.target) {
         applyPseudoStyle(change.selector, change.target, change.property, '');
+        return;
+      }
+      if (change.property === 'text-content') {
+        try {
+          let el = changeElRefs.get(change.id);
+          if (!el || !el.isConnected) el = queryTargetEl(change.selector);
+          if (el) el.textContent = change.oldValue || '';
+        } catch (e) {}
+        changeElRefs.delete(change.id);
         return;
       }
       try {
@@ -8027,9 +8203,14 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       changeElRefs.delete(change.id);
     }
 
-    /** 直接把属性值应用到元素/伪元素（撤销/重做用） */
+    /** 直接把属性值应用到元素/伪元素（撤销/重做用）；文本用 textContent 恢复 */
     _applyPropertyValue(selector, target, property, value) {
       try {
+        if (property === 'text-content') {
+          const el = queryTargetEl(selector);
+          if (el) el.textContent = value || '';
+          return;
+        }
         if (target) {
           applyPseudoStyle(selector, target, property, value);
           return;
