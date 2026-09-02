@@ -177,7 +177,10 @@
   border: none;
   background: transparent;
   cursor: pointer;
-  padding: 4px;
+  padding-top: 0;
+  padding-right: 4px;
+  padding-bottom: 0;
+  padding-left: 4px;
   width: 68px;
   flex: 0 0 68px;
   box-sizing: border-box;
