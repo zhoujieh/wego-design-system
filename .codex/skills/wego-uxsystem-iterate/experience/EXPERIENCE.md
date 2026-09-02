@@ -22,3 +22,5 @@
 [工作流] 业务组件运行时改动必须同步权威源与 lib 副本：改 .codex/skills/wego-design/runtime/*.js 后必须同步 wego-app/lib/js/ 对应副本，严禁只改 lib 副本（会触发 CI 同步一致性检查失败）。注意 scripts/sync-wego-app-lib.mjs 仅 --check 是只读校验，默认/--json 均为写入模式（清空再复制），误当 dry-run 运行会覆盖 lib 副本丢失业务改造；核对一致性用 --check，回灌方向错误时先确认哪个版本正确再覆盖。[ev-011] ×1，最近 2026-09-02
 §
 [工作流] GitHub Pages 部署延迟会导致 Pages Preview 误报标红：构建与 push gh-pages 均完成后，Verify published URL 在 90 秒内等不到部署生效即判定未就绪，但预览实际最终部署完成。已放宽验证等待窗口至 36 次×10 秒≈6 分钟（PR #156 合入 main）；排查时先 curl 预览 URL 的 .wego-deployment-sha 与 CI 期望 sha 比对，一致即部署完成，勿误判为构建异常。[ev-012] ×1，最近 2026-09-02
+§
+[工作流] 每次推送 PR 后必须返回在线预览链接，且等部署完成再交付：规则虽已写"返回本地与在线两个链接"，但执行断点在在线部署延迟（publish CI + GitHub Pages 排队，推送后在线链接不能立即可用），导致只给本地链接、漏补在线链接。推送后须等 publish 通过并 curl 校验 previews/pr-N 部署产物（.wego-deployment-sha 一致、入口 200）后再返回在线链接；未就绪时明确告知等待状态并补齐，不得只交付本地链接。[ev-013] ×1，最近 2026-09-03
