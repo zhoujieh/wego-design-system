@@ -174,6 +174,20 @@
         "误报",
         "wego-uxsystem-iterate"
       ]
+    },
+    {
+      "id": "ev-013",
+      "date": "2026-09-03",
+      "summary": "用户反馈每次推送PR后都要返回在线预览链接，不要等提醒，且指出此前已明确过为什么没执行到位。核查确认规则已存在（wego-design/wego-github-delivery 均写同时返回本地与在线两个链接），执行断点在部署时序：在线部署有延迟（publish CI + GitHub Pages 排队），推送后在线链接立即可用不成立，执行时只返回本地链接、漏等部署完成补在线链接。已在两技能强化每次推送必须返回在线预览链接+部署完成校验时序（publish通过+curl校验previews/pr-N部署产物）",
+      "source": "user-correction",
+      "scene": "workflow-online-link",
+      "tags": [
+        "在线预览链接",
+        "部署时序",
+        "交付规范",
+        "用户纠正",
+        "wego-uxsystem-iterate"
+      ]
     }
   ]
 }
