@@ -45,6 +45,7 @@
     currentRoute: '',
     originalStyles: {}, // selector -> { 'css-property': 原始计算值 }
     pseudoStyles: {}, // "selector||before|after" -> { 'css-property': 值 }（注入 <head> 的规则）
+    orderBaselines: {}, // 顺序移动：容器 selector -> 首次移动前的显示顺序快照（净零往返判断）
   };
 
   /** 变更记录 id → 元素引用（会话内存映射，不参与持久化）。
@@ -868,6 +869,22 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
   /** 元素的 order 计算值（未显式设置时浏览器返回 0） */
   function computedOrder(el) {
     try { return Number(getComputedStyle(el).order) || 0; } catch (e) { return 0; }
+  }
+
+  /** 父 flex 容器的显示顺序快照（order 升序、同 order 按 DOM 序），元素用 selector 标识；
+   *  供顺序移动的净零往返判断（容器显示顺序回到首次移动前即视为无净变更）。 */
+  function displaySeq(parent) {
+    return flexItems(parent)
+      .map((ch, i) => ({ ch, i }))
+      .sort((a, b) => computedOrder(a.ch) - computedOrder(b.ch) || a.i - b.i)
+      .map(x => generateSelector(x.ch));
+  }
+
+  /** 两个显示顺序快照是否一致 */
+  function seqEqual(a, b) {
+    if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+    return true;
   }
 
   /** 在主轴方向把元素向前/向后移动一位（用 CSS order 表达显示顺序，不改 DOM 结构）。
@@ -3334,6 +3351,15 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     _moveSelected(dir) {
       const el = this._targetEl;
       if (!el || this._target) return;
+      const parent = el.parentElement;
+      // 首次对某容器做顺序移动前，记录该容器的初始显示顺序基线（供净零往返判断）
+      let baseKey = null;
+      if (parent) {
+        baseKey = 'orderBase::' + generateSelector(parent);
+        if (!state.orderBaselines[baseKey]) {
+          state.orderBaselines[baseKey] = displaySeq(parent);
+        }
+      }
       const mv = moveFlexItem(el, dir);
       if (!mv) { this._updateMoveControls(); return; }
       // 记录目标元素（位置：第X位 → 第Y位；真实 order 值见 orderValue）
@@ -3346,7 +3372,50 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (mv.nbNew !== mv.nbOrder) {
         this._scheduleSharedSync({ property: 'order', oldValue: String(mv.nbOrder), newValue: String(mv.nbNew) }, mv.neighbor);
       }
+      // 净零往返：容器显示顺序回到首次移动前的基线（如"右移→左移"快速改回）→ 无净变更，
+      // 整体还原本次容器内的顺序移动（本地目标/兄弟记录 + 已落地的共享同步 + 残留 DOM），
+      // 避免施工单留下 order 0→0 / 兄弟 0→1 这类无视觉变化的脏条目。
+      if (baseKey && state.orderBaselines[baseKey] && seqEqual(displaySeq(parent), state.orderBaselines[baseKey])) {
+        this._rollbackContainerOrder(parent, baseKey);
+      }
       this._updateMoveControls();
+    }
+
+    /** 净零往返还原：容器显示顺序已回到首次移动前基线，还原该容器全部顺序移动产物 */
+    _rollbackContainerOrder(parent, baseKey) {
+      // 1. 取消防抖窗口内未执行的共享同步（order 相关），避免后续再落地无效果同步
+      if (this._sharedSyncTimer) { clearTimeout(this._sharedSyncTimer); this._sharedSyncTimer = null; }
+      if (this._sharedSyncPending) {
+        this._sharedSyncPending = this._sharedSyncPending.filter(p => !(p.result && p.result.property === 'order'));
+        if (!this._sharedSyncPending.length) this._sharedSyncPending = null;
+      }
+      // 2. 还原并移除该容器的顺序移动记录：本容器内的记录（el 经 changeElRefs 关联），
+      //    以及由本容器组件同步出去的共享记录（sharedKey 命中本容器组件类，el 在其他同构容器内）
+      const compClasses = [];
+      Array.from(parent.children).forEach(ch => {
+        const cc = pickComponentClass(ch);
+        if (cc && !compClasses.includes(cc)) compClasses.push(cc);
+      });
+      const related = state.changes.filter(c => {
+        if (c.property !== 'order') return false;
+        const relEl = changeElRefs.get(c.id);
+        if (relEl && parent.contains(relEl)) return true;
+        if (c.shared && c.sharedKey) {
+          const [cc] = String(c.sharedKey).split('::');
+          return compClasses.includes(cc);
+        }
+        return false;
+      });
+      const app = document.querySelector('wego-walkthrough');
+      if (app && typeof app._revertChange === 'function') {
+        related.forEach(c => app._revertChange(c));
+      }
+      state.changes = state.changes.filter(c => !related.includes(c));
+      // 3. 兜底清掉容器内残留的 order 内联（恢复到基线无 order 状态）
+      Array.from(parent.children).forEach(ch => { try { ch.style.removeProperty('order'); } catch (e) {} });
+      // 4. 清基线：容器已回初始，后续新移动重新建立基线
+      delete state.orderBaselines[baseKey];
+      if (app && app._syncAfterRecordsChanged) app._syncAfterRecordsChanged();
     }
 
     /** 记录一次顺序移动变更（property='order'；oldValue/newValue 存真实 order 值供同步匹配与还原，
