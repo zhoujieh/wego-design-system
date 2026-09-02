@@ -1897,6 +1897,8 @@
   background:transparent;
   z-index:-1;
 }
+/* 滚动锁定(默认规则):浮层可见时锁定页面滚动,防止加载期间误滚;浮层消失后恢复 */
+body:has(.loading-overlay.is-visible){ overflow:hidden; }
 .loading-overlay__indicator{ display:flex; align-items:center; justify-content:center; }
 .loading-overlay__indicator .loading__dot{ background-color:var(--text-inverse); }
 .loading-overlay__text{ display:flex; flex-direction:column; align-items:center; gap:2px; }
