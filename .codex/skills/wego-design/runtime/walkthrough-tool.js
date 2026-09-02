@@ -114,6 +114,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     eyedropper: `<svg ${ICON_SVG}><path d="M224,67.3a35.79,35.79,0,0,0-11.26-25.66c-14-13.28-36.72-12.78-50.62,1.13L142.8,62.2a24,24,0,0,0-33.14.77l-9,9a16,16,0,0,0,0,22.64l2,2.06-51,51a39.75,39.75,0,0,0-10.53,38l-8,18.41A13.68,13.68,0,0,0,36,219.3a15.92,15.92,0,0,0,17.71,3.35L71.23,215a39.89,39.89,0,0,0,37.06-10.75l51-51,2.06,2.06a16,16,0,0,0,22.62,0l9-9a24,24,0,0,0,.74-33.18l19.75-19.87A35.75,35.75,0,0,0,224,67.3ZM97,193a24,24,0,0,1-24,6,8,8,0,0,0-5.55.31l-18.1,7.91L57,189.41a8,8,0,0,0,.25-5.75A23.88,23.88,0,0,1,63,159l51-51,33.94,34ZM202.13,82l-25.37,25.52a8,8,0,0,0,0,11.3l4.89,4.89a8,8,0,0,1,0,11.32l-9,9L112,83.26l9-9a8,8,0,0,1,11.31,0l4.89,4.89a8,8,0,0,0,11.33,0l24.94-25.09c7.81-7.82,20.5-8.18,28.29-.81a20,20,0,0,1,.39,28.7Z"/></svg>`,
     annotation: `<svg ${ICON_SVG}><path d="M88,96a8,8,0,0,1,8-8h64a8,8,0,0,1,0,16H96A8,8,0,0,1,88,96Zm8,40h64a8,8,0,0,0,0-16H96a8,8,0,0,0,0,16Zm32,16H96a8,8,0,0,0,0,16h32a8,8,0,0,0,0-16ZM224,48V156.69A15.86,15.86,0,0,1,219.31,168L168,219.31A15.86,15.86,0,0,1,156.69,224H48a16,16,0,0,1-16-16V48A16,16,0,0,1,48,32H208A16,16,0,0,1,224,48ZM48,208H152V160a8,8,0,0,1,8-8h48V48H48Zm120-40v28.7L196.69,168Z"/></svg>`,
     bug: `<svg ${ICON_SVG}><path d="M160,96a32,32,0,0,0-64,0v8H56a8,8,0,0,0,0,16H88.4A47.61,47.61,0,0,0,80,144v8H56a8,8,0,0,0,0,16H80v16a8,8,0,0,0,16,0V168h64v16a8,8,0,0,0,16,0V168h24a8,8,0,0,0,0-16H176v-8a47.61,47.61,0,0,0-8.4-24H200a8,8,0,0,0,0-16H160Zm-48,0a16,16,0,0,1,32,0v8H112Zm8,56a8,8,0,1,1,8-8A8,8,0,0,1,120,152Zm40,0a8,8,0,1,1,8-8A8,8,0,0,1,160,152Z"/></svg>`,
+    measure: `<svg ${ICON_SVG}><path d="M72,208a8,8,0,0,1-8-8V56a8,8,0,0,1,16,0V200A8,8,0,0,1,72,208Zm40,0a8,8,0,0,1-8-8V56a8,8,0,0,1,16,0V200A8,8,0,0,1,112,208Zm72-96V56a8,8,0,0,0-16,0V112a8,8,0,0,0,16,0Zm16,32a8,8,0,0,0-8,8V200a8,8,0,0,0,16,0V152A8,8,0,0,0,200,144Z"/></svg>`,
+    grid: `<svg ${ICON_SVG}><path d="M80,32H48A16,16,0,0,0,32,48V80a16,16,0,0,0,16,16H80a16,16,0,0,0,16-16V48A16,16,0,0,0,80,32Zm0,48H48V48H80Zm96-48H144a16,16,0,0,0-16,16V80a16,16,0,0,0,16,16h32a16,16,0,0,0,16-16V48A16,16,0,0,0,176,32Zm0,48H144V48h32ZM80,128H48a16,16,0,0,0-16,16v32a16,16,0,0,0,16,16H80a16,16,0,0,0,16-16V144A16,16,0,0,0,80,128Zm0,48H48V144H80Zm96-48H144a16,16,0,0,0-16,16v32a16,16,0,0,0,16,16h32a16,16,0,0,0,16-16V144A16,16,0,0,0,176,128Zm0,48H144V144h32Z"/></svg>`,
   };
 
   /** 获取当前场景路由 ID（用于 localStorage 数据隔离，保持稳定不变）
@@ -1573,6 +1575,81 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         <div class="label"></div>
       `;
       this._applyMode();
+    }
+  }
+
+  // ============================================================
+  // wego-wt-measure: 测量模式 overlay（两点横/纵距离虚线 + 数值气泡）
+  // ============================================================
+  class WegoWtMeasure extends HTMLElement {
+    constructor() {
+      super();
+      this._shadow = this.attachShadow({ mode: 'open' });
+    }
+    connectedCallback() {
+      this._render();
+    }
+    _render() {
+      this._shadow.innerHTML = `
+        <style>
+          :host {
+            position: fixed;
+            inset: 0;
+            z-index: 9541;
+            pointer-events: none;
+            display: none;
+            --wt-measure-color: #ff00ff;
+          }
+          @supports (color: color(display-p3 1 0 1)) {
+            :host { --wt-measure-color: color(display-p3 1 0 1); }
+          }
+          svg { width: 100%; height: 100%; display: block; }
+          .dot { fill: var(--wt-measure-color); }
+          .cross { stroke: var(--wt-measure-color); stroke-width: 1.5; }
+          .line { stroke: var(--wt-measure-color); stroke-width: 1.5; stroke-dasharray: 6 4; }
+          .num {
+            fill: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: -apple-system, 'PingFang SC', sans-serif;
+            paint-order: stroke;
+            stroke: var(--wt-measure-color);
+            stroke-width: 4px;
+            stroke-linejoin: round;
+          }
+        </style>
+        <svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg>
+      `;
+      this._svg = this._shadow.getElementById('svg');
+    }
+    /** 起点：圆点 + 十字准星（对齐计划 3.5 data-measuring 标记） */
+    setStart(cx, cy) {
+      this.style.display = 'block';
+      this._svg.innerHTML = `
+        <line class="cross" x1="${cx - 12}" y1="${cy}" x2="${cx + 12}" y2="${cy}"/>
+        <line class="cross" x1="${cx}" y1="${cy - 12}" x2="${cx}" y2="${cy + 12}"/>
+        <circle class="dot" cx="${cx}" cy="${cy}" r="4"/>
+      `;
+    }
+    /** 完整测量：起点→终点横向/纵向虚线 + 距离数值气泡 */
+    setMeasure(sx, sy, ex, ey) {
+      this.style.display = 'block';
+      const dx = Math.round(ex - sx);
+      const dy = Math.round(ey - sy);
+      const midHx = (sx + ex) / 2;
+      const midVy = (sy + ey) / 2;
+      this._svg.innerHTML = `
+        <circle class="dot" cx="${sx}" cy="${sy}" r="4"/>
+        <circle class="dot" cx="${ex}" cy="${ey}" r="4"/>
+        <line class="line" x1="${sx}" y1="${sy}" x2="${ex}" y2="${sy}"/>
+        <line class="line" x1="${sx}" y1="${sy}" x2="${sx}" y2="${ey}"/>
+        <text class="num" x="${midHx}" y="${sy - 6}" text-anchor="middle">${Math.abs(dx)}px</text>
+        <text class="num" x="${sx + 6}" y="${midVy + 4}" text-anchor="start">${Math.abs(dy)}px</text>
+      `;
+    }
+    clear() {
+      if (this._svg) this._svg.innerHTML = '';
+      this.style.display = 'none';
     }
   }
 
@@ -6455,6 +6532,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
               <button class="tool-btn" data-tool="walkthrough" data-active="false" title="走查模式">
                 ${ICONS.pointer}
               </button>
+              <button class="tool-btn" data-tool="measure" data-active="false" title="测量模式">
+                ${ICONS.measure}
+              </button>
               <button class="tool-btn" data-tool="annotation" data-active="false" title="批注模式">
                 ${ICONS.annotation}
               </button>
@@ -6520,6 +6600,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         </div>
         <!-- 子组件（走查模式相关） -->
         <wego-wt-highlight hidden></wego-wt-highlight>
+        <wego-wt-measure hidden></wego-wt-measure>
         <wego-wt-style-panel hidden></wego-wt-style-panel>
         <wego-wt-color-picker hidden></wego-wt-color-picker>
         <wego-wt-overview-panel hidden></wego-wt-overview-panel>
@@ -6552,6 +6633,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
     _initComponents() {
       this._components.highlight = this._shadow.querySelector('wego-wt-highlight');
+      this._components.measure = this._shadow.querySelector('wego-wt-measure');
       this._components.stylePanel = this._shadow.querySelector('wego-wt-style-panel');
       this._components.colorPicker = this._shadow.querySelector('wego-wt-color-picker');
       this._components.overviewPanel = this._shadow.querySelector('wego-wt-overview-panel');
@@ -7019,6 +7101,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           this._closeAllPanels();
           this._setWalkthroughMode(!this._walkthroughMode);
           break;
+        case 'measure':
+          this._toggleMeasureMode();
+          break;
         case 'annotation':
           this._closeAllPanels();
           this._setAnnotationMode(!this._annotationMode);
@@ -7112,6 +7197,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     _setWalkthroughMode(enabled) {
       this._walkthroughMode = enabled;
       state.walkthroughMode = enabled;
+      if (!enabled && this._measureMode) {
+        // 切换走查模式时退出测量
+        this._measureMode = false;
+        this._measureAnchor = null;
+        if (this._components.measure) this._components.measure.clear();
+      }
       if (enabled) {
         this._setAnnotationMode(false);
         document.body.setAttribute('data-walkthrough-mode', 'true');
@@ -7619,6 +7710,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._hoveredElement = null;
       // 连续点击层级链锚点：同位置连点逐级上移选中父级
       this._pickAnchor = null;
+      // 测量模式：两点横/纵距离（对齐计划 3.5）
+      this._measureMode = false;
+      this._measureAnchor = null;
       // 长按拖拽移动：500ms 长按触发，拖拽中 transform 平移 + 偏移气泡
       this._longPressTimer = null;
       this._dragging = null;
@@ -7646,6 +7740,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (isWalkthroughElement(e.target)) return;          // 工具自身 UI 放行
       e.stopPropagation();                                 // 阻断页面元素监听器
       this._clearHover();
+      // 测量模式：每次点击捕获起点/终点，不进入选择/拖拽流程
+      if (this._measureMode) {
+        this._pointerActive = false;
+        this._measureTap(e.clientX, e.clientY);
+        return;
+      }
       this._pointerActive = true;
       this._ptStartX = e.clientX;
       this._ptStartY = e.clientY;
@@ -7911,6 +8011,46 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         this._showToast('已更新文本');
       }
       this._selectElement(el);
+    }
+
+    /** 测量模式开关（对齐计划 3.5：切换/点空白/切走查退出） */
+    _toggleMeasureMode() {
+      this._closeAllPanels();
+      this._measureMode = !this._measureMode;
+      if (this._measureMode) {
+        if (!this._walkthroughMode) this._setWalkthroughMode(true);
+        this._measureAnchor = null;
+        if (this._components.measure) this._components.measure.clear();
+        this._showToast('测量模式：点第一个元素 → 点第二个元素');
+      } else {
+        this._measureAnchor = null;
+        if (this._components.measure) this._components.measure.clear();
+        this._showToast('已退出测量模式');
+      }
+      this._updateToolbarState();
+    }
+
+    /** 测量点击：第一次捕获起点，第二次捕获终点并绘制横/纵距离；点空白退出 */
+    _measureTap(clientX, clientY) {
+      const el = document.elementFromPoint(clientX, clientY);
+      if (!el || el === document.body || el === document.documentElement || isWalkthroughElement(el)) {
+        this._toggleMeasureMode();
+        return;
+      }
+      const rect = el.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const measure = this._components.measure;
+      if (!measure) return;
+      if (!this._measureAnchor) {
+        this._measureAnchor = { cx, cy, el };
+        measure.setStart(cx, cy);
+        this._showToast('已选起点，再点第二个元素');
+      } else {
+        measure.setMeasure(this._measureAnchor.cx, this._measureAnchor.cy, cx, cy);
+        this._measureAnchor = null;
+        this._showToast('测量完成');
+      }
     }
 
     /**
@@ -8724,6 +8864,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 走查模式按钮激活态
       const wtBtn = this._shadow.querySelector('[data-tool="walkthrough"]');
       if (wtBtn) wtBtn.setAttribute('data-active', String(this._walkthroughMode));
+      // 测量模式按钮激活态
+      const msBtn = this._shadow.querySelector('[data-tool="measure"]');
+      if (msBtn) msBtn.setAttribute('data-active', String(this._measureMode));
       // 批注模式按钮激活态
       const annBtn = this._shadow.querySelector('[data-tool="annotation"]');
       if (annBtn) annBtn.setAttribute('data-active', String(this._annotationMode));
@@ -8749,6 +8892,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     if (!customElements.get('wego-wt-toast')) customElements.define('wego-wt-toast', WegoWtToast);
     if (!customElements.get('wego-wt-overlay')) customElements.define('wego-wt-overlay', WegoWtOverlay);
     if (!customElements.get('wego-wt-highlight')) customElements.define('wego-wt-highlight', WegoWtHighlight);
+    if (!customElements.get('wego-wt-measure')) customElements.define('wego-wt-measure', WegoWtMeasure);
     if (!customElements.get('wego-wt-style-panel')) customElements.define('wego-wt-style-panel', WegoWtStylePanel);
     if (!customElements.get('wego-wt-color-picker')) customElements.define('wego-wt-color-picker', WegoWtColorPicker);
     if (!customElements.get('wego-wt-overview-panel')) customElements.define('wego-wt-overview-panel', WegoWtOverviewPanel);
