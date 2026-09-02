@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../scaffold.css">
+<link rel="stylesheet" href="../iconfont.css">
+<style>
+body{background:#f0f0f0}
+.page{max-width:420px;margin:0 auto;padding:0 0 32px}
+.demo-block{background:#fff;margin:0 12px 12px;border-radius:12px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04)}
+.demo-block__title{padding:var(--spacer-16) var(--spacer-16) var(--spacer-8);font-size:var(--body-sm-font-size);font-weight:var(--font-weight-medium);color:var(--text-tertiary);line-height:var(--body-sm-line-height)}
+.demo-cell{display:flex;align-items:center;justify-content:space-between;min-height:56px;padding:var(--spacer-12) var(--spacer-16);box-sizing:border-box;font-size:var(--body-md-font-size);color:var(--text-default)}
+.demo-cell__label{color:var(--text-default)}
+.demo-cell__meta{font-size:var(--body-sm-font-size);color:var(--text-tertiary)}
+.demo-vbox{display:flex;align-items:center;height:120px;padding:0 var(--spacer-16)}
+.demo-vbox__label{flex:1;font-size:var(--body-sm-font-size);color:var(--text-tertiary)}
+.demo-vbox__item{display:flex;align-items:center;justify-content:center;width:80px;height:100%;flex-shrink:0;font-size:var(--body-sm-font-size);color:var(--text-default)}
+.demo-note{padding:var(--spacer-12) var(--spacer-16);background:var(--bg-subtle);font-size:var(--body-sm-font-size);color:var(--text-secondary);line-height:1.6}
+.demo-note code{background:var(--bg-surface);padding:1px 6px;border-radius:4px}
+
+/* @component-css-start */
+/* 分割线 Divider：水平分隔区块/列表项，或竖向分隔相邻元素。
+   粗细固定 0.5px（var(--stroke-hairline)），无其他尺寸。
+   默认：水平全宽（左右不缩进），缩进由消费方按布局上下文通过 --divider-left / --divider-right 设置。
+   常用预设：divider--inset（左缩进16右到边，页内区块分隔）、divider--center（两侧缩进16）。
+   竖向：固定高度（不撑满父级），默认 16px，常用 8/12/16，通过 --divider-height 覆盖，竖向居中。
+   参数化：--divider-color 颜色、--divider-left / --divider-right 左右缩进、--divider-height 竖向高度。 */
+.divider{position:relative;display:block;width:100%;box-sizing:border-box;--divider-color:var(--border-neutral-l2);--divider-left:0;--divider-right:0;--divider-height:16px}
+.divider::after{content:"";position:absolute;top:0;left:var(--divider-left);right:var(--divider-right);height:var(--stroke-hairline);background:var(--divider-color);pointer-events:none}
+.divider--inset{--divider-left:16px;--divider-right:0}
+.divider--center{--divider-left:16px;--divider-right:16px}
+.divider--vertical{display:inline-block;width:var(--stroke-hairline);height:var(--divider-height);align-self:center;--divider-left:0;--divider-right:0}
+.divider--vertical::after{top:0;bottom:auto;left:0;right:auto;width:var(--stroke-hairline);height:100%}
+/* @component-css-end */
+</style>
+</head>
+<body>
+<div class="pv-header"><h1>分割线</h1><p>0.5px 固定粗细，水平/竖向；缩进由消费方按布局上下文设置，常用 inset / center 预设。</p></div>
+<div class="page">
+
+  <div class="demo-block">
+    <div class="demo-block__title">默认 · 全宽（actionsheet / dialog / 列表项分隔）</div>
+    <div class="demo-cell">操作项一</div>
+    <div class="divider"></div>
+    <div class="demo-cell">操作项二</div>
+    <div class="divider"></div>
+    <div class="demo-cell">操作项三</div>
+  </div>
+
+  <div class="demo-block">
+    <div class="demo-block__title">inset · 左缩进16右到边（页内区块分隔）</div>
+    <div class="demo-cell">分享产品</div>
+    <div class="divider divider--inset"></div>
+    <div class="demo-cell">配置栏<span class="demo-cell__meta">0.5px · border-neutral-l2</span></div>
+  </div>
+
+  <div class="demo-block">
+    <div class="demo-block__title">center · 两侧缩进 16px</div>
+    <div class="demo-cell">单元格一</div>
+    <div class="divider divider--center"></div>
+    <div class="demo-cell">单元格二</div>
+  </div>
+
+  <div class="demo-block">
+    <div class="demo-block__title">自定义缩进（按布局上下文，如 Cell 第二层）</div>
+    <div class="demo-cell">第一层 · 左缩进 16px</div>
+    <div class="divider" style="--divider-left:16px"></div>
+    <div class="demo-cell" style="padding-left:40px">第二层 · 左缩进 40px</div>
+    <div class="divider" style="--divider-left:40px"></div>
+    <div class="demo-note">缩进不预设固定值，消费方通过 <code>--divider-left</code> / <code>--divider-right</code> 按当前布局层级设置；Cell 场景下可跟随 <code>--cell-divider-left</code> 自动适配。</div>
+  </div>
+
+  <div class="demo-block">
+    <div class="demo-block__title">竖向 · 固定高度（默认 16px，不撑满父级）</div>
+    <div class="demo-vbox">
+      <span class="demo-vbox__label">商品信息区</span>
+      <div class="divider divider--vertical"></div>
+      <span class="demo-vbox__item">操作区</span>
+    </div>
+    <div class="demo-note">竖向高度固定，默认 16px；通过 <code>--divider-height</code> 覆盖，常用 8 / 12 / 16px，竖向居中对齐。</div>
+  </div>
+
+  <div class="demo-block">
+    <div class="demo-block__title">竖向 · 不同高度（8 / 12 / 16px）</div>
+    <div class="demo-vbox">
+      <span class="demo-vbox__label">8px</span>
+      <div class="divider divider--vertical" style="--divider-height:8px"></div>
+      <span class="demo-vbox__item">12px</span>
+      <div class="divider divider--vertical" style="--divider-height:12px"></div>
+      <span class="demo-vbox__item">16px</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
