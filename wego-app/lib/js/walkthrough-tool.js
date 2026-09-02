@@ -5644,7 +5644,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         let applied = false;
         try { applyStyleProperty(el, result.property, result.newValue); applied = true; } catch (e) {}
         if (!applied) return;
-        // 命中元素各自记录一条变更（带共享标记），保证可单独还原、刷新后回放一致
+        // 命中元素各自记录一条变更（带共享标记），保证刷新后回放一致；
+        // noUndo：共享同步是一次整体操作，由主元素的一条撤销栈项统一撤销，不再为每个同步元素单独压栈
         bus.emit('style-change', {
           selector: generateSelector(el),
           elementTag: el.tagName.toLowerCase(),
@@ -5658,12 +5659,15 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           el,
           shared: true,
           sharedKey,
+          noUndo: true,
         });
       });
       // 目标元素补标共享：仅当对应变更记录仍存在时补标（避免误新增记录）
       const tSel = (targetEl === this._targetEl) ? this._selector : generateSelector(targetEl);
       const existingTarget = state.changes.find(c => c.selector === tSel && !c.target && c.property === result.property);
       if (existingTarget) {
+        // noUndo：补标共享只是把已有记录标记为 shared，主元素的撤销栈项已由首次 style-change 压入，
+        // 若再压一次会导致撤销栈顶是「prevValue=现新值」的无效果项（撤销后看起来没还原）
         bus.emit('style-change', {
           selector: tSel,
           elementTag: targetEl.tagName.toLowerCase(),
@@ -5677,6 +5681,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           el: targetEl,
           shared: true,
           sharedKey,
+          noUndo: true,
         });
       }
       bus.emit('toast', { message: `该样式为公共样式，已自动同步 ${sharedCount} 个元素` });
@@ -9019,16 +9024,19 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const existing = state.changes.find(matchExisting);
       // —— 撤销栈记录：在真正产生修改前压入「修改前状态」，供 Ctrl+Z 还原 ——
       // prevValue = 该属性修改前的现有值（首次修改为 null → 撤销=删除记录还原初始）
-      state.undoStack.push({
-        selector: change.selector,
-        target: change.target || '',
-        property: change.property,
-        prevValue: existing ? existing.newValue : null,
-        nextValue: change.newValue,
-      });
-      if (state.undoStack.length > 100) state.undoStack.shift();
-      state.redoStack = []; // 新修改打断重做链
-      this._updateUndoRedoUI();
+      // noUndo（共享补标）不压栈：主元素的撤销栈项已由首次 style-change 压入
+      if (!change.noUndo) {
+        state.undoStack.push({
+          selector: change.selector,
+          target: change.target || '',
+          property: change.property,
+          prevValue: existing ? existing.newValue : null,
+          nextValue: change.newValue,
+        });
+        if (state.undoStack.length > 100) state.undoStack.shift();
+        state.redoStack = []; // 新修改打断重做链
+        this._updateUndoRedoUI();
+      }
       if (existing) {
         existing.newValue = change.newValue;
         existing.timestamp = Date.now();
@@ -9134,6 +9142,21 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       }
       const existing = state.changes.find(c =>
         c.selector === item.selector && (c.target || '') === item.target && c.property === item.property);
+      // 共享修改（主元素记录带 sharedKey）：同组记录整体还原，一次共享操作 = 一个撤销单元，
+      // 避免「改一个按钮 → Ctrl+Z 却先撤销另一个同步按钮」的困惑
+      const groupKey = existing && existing.sharedKey ? existing.sharedKey : '';
+      const group = groupKey ? state.changes.filter(c => c.sharedKey === groupKey && c.property === item.property) : null;
+      if (group && group.length) {
+        group.forEach(c => this._revertChange(c));
+        state.changes = state.changes.filter(c => !(c.sharedKey === groupKey && c.property === item.property));
+        // 把整组记录快照放进重做项，重做时按组恢复全部元素与记录
+        item.groupRecords = group.map(c => ({ ...c }));
+        state.redoStack.push(item);
+        this._syncAfterRecordsChanged();
+        this._updateUndoRedoUI();
+        this._showToast(`已撤销（含 ${group.length} 个共享元素）`);
+        return true;
+      }
       if (item.prevValue == null || item.prevValue === '') {
         // 原本不存在该修改 → 还原初始并删除记录
         if (existing) {
@@ -9164,6 +9187,21 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (!item) {
         this._showToast('没有可重做的修改');
         return false;
+      }
+      // 共享组重做：按快照恢复全部同步元素的样式与记录
+      if (item.groupRecords && item.groupRecords.length) {
+        item.groupRecords.forEach(rec => {
+          const el = queryTargetEl(rec.selector);
+          try { applyStyleProperty(el, rec.property, rec.newValue); } catch (e) {}
+          const rec2 = { ...rec, id: 'change-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4) };
+          state.changes.push(rec2);
+          if (el) changeElRefs.set(rec2.id, el);
+        });
+        state.undoStack.push(item);
+        this._syncAfterRecordsChanged();
+        this._updateUndoRedoUI();
+        this._showToast(`已重做（含 ${item.groupRecords.length} 个共享元素）`);
+        return true;
       }
       this._applyPropertyValue(item.selector, item.target, item.property, item.nextValue);
       const existing = state.changes.find(c =>
@@ -9238,6 +9276,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       state.changes.forEach(c => this._revertChange(c));
       state.changes = [];
       state.annotations = [];
+      // 重置场景 = 会话内修改历史作废：清空撤销/重做栈，避免旧栈项还原到已重置的上下文
+      state.undoStack = [];
+      state.redoStack = [];
+      this._updateUndoRedoUI();
       // 伪元素注入池整体清空并重建，避免其它场景的注入规则残留
       state.pseudoStyles = {};
       rebuildPseudoStyleElement();
@@ -9404,6 +9446,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (this._replayTimer) { clearTimeout(this._replayTimer); this._replayTimer = null; }
       // 3. 切换路由并加载新场景数据（内部会重建伪元素注入、快照并回放内联样式）
       state.currentRoute = nextRoute;
+      // 撤销/重做栈是会话内本次场景的修改历史：切场景后旧栈项指向的上下文已失效，必须清空避免错乱
+      state.undoStack = [];
+      state.redoStack = [];
+      this._updateUndoRedoUI();
       this._loadChanges();
       // 4. 批注标记按新场景重绘
       if (this._annotationMode) this._syncAnnotationMarkers();
