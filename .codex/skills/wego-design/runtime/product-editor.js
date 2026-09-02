@@ -95,14 +95,17 @@
       <div class="navbar" data-component-slug="navbar">
         <div class="navbar__body navbar__body--spaced">
           <div class="navbar__left"><button type="button" class="navbar__left-text" data-dom-id="publish-cancel" aria-label="取消">取消</button></div>
-          <div class="navbar__center"><span class="navbar__title" data-publish-title>发布产品</span></div>
+          <div class="navbar__center"></div>
           <div class="navbar__right navbar__right--button">
-            <div class="navbar__action navbar__action--button publish-product__nav-actions">
-              <button type="button" class="publish-product__quick-share" data-component-slug="button" data-dom-id="quick-share" aria-label="快捷分享">
-                <i class="wego-iconfont-s icon-pengyouquan publish-product__quick-share-icon" aria-hidden="true"></i>
-                <span data-quick-share-label>朋友圈</span>
+            <div class="navbar__action navbar__action--button">
+              <button type="button" class="btn btn--weak btn--sm btn--icon-only" data-component-slug="button" data-dom-id="quick-share" aria-label="快捷分享">
+                <i class="btn__icon icon-pengyouquan" data-quick-share-icon aria-hidden="true"></i>
               </button>
-              <button type="button" class="btn btn--weak btn--sm publish-product__share-btn" data-component-slug="button" data-dom-id="publish-share">分享</button>
+            </div>
+            <div class="navbar__action navbar__action--button">
+              <button type="button" class="btn btn--weak btn--sm" data-component-slug="button" data-dom-id="publish-share">分享</button>
+            </div>
+            <div class="navbar__action navbar__action--button">
               <button type="button" class="btn btn--strong btn--sm" data-component-slug="button" data-dom-id="publish-submit" data-publish-submit-label>发布</button>
             </div>
           </div>
@@ -244,13 +247,15 @@
       if (v) v.textContent = resaleSummary();
     }
 
-    function doPublish() {
+    /* 发布前校验 + 保存当前产品（不关闭页面、不提示成功）。
+       分享/快捷分享前置复用：校验通过后才保存并继续分享，取消分享保持页面继续编辑。 */
+    function saveProduct() {
       collectForm();
-      if (!formState.name) { ctx.toast('请填写产品名'); return; }
-      if (!formState.salePrice) { ctx.toast('请填写售价'); return; }
+      if (!formState.name) { ctx.toast('请填写产品名'); return false; }
+      if (!formState.salePrice) { ctx.toast('请填写售价'); return false; }
       if (window.WegoApp.faultInjection && window.WegoApp.faultInjection.isEnabled('save')) {
         ctx.toast('发布失败，请稍后重试');
-        return;
+        return false;
       }
 
       var ts = Date.now();
@@ -285,6 +290,11 @@
       published.unshift(newDynamic);
       savePublished(published);
       window.dispatchEvent(new CustomEvent('wego:product-published'));
+      return true;
+    }
+
+    function doPublish() {
+      if (!saveProduct()) return;
       ctx.toast('发布成功');
       ctx.closeOverlay();
       /* overlay 模式：标记待跳转，等本模态退场（onDestroy）后再 navigate，
@@ -339,22 +349,18 @@
     /* 分享和快捷分享按钮 */
     var shareBtn = root.querySelector('[data-dom-id="publish-share"]');
     var quickShareBtn = root.querySelector('[data-dom-id="quick-share"]');
-    var quickShareLabel = root.querySelector('[data-quick-share-label]');
-    var quickShareIcon = quickShareBtn ? quickShareBtn.querySelector('.publish-product__quick-share-icon') : null;
-    var publishTitle = root.querySelector('[data-publish-title]');
+    var quickShareIcon = quickShareBtn ? quickShareBtn.querySelector('[data-quick-share-icon]') : null;
     var submitLabel = root.querySelector('[data-publish-submit-label]');
 
-    /* 根据模式更新标题和按钮文案 */
+    /* 根据模式更新提交按钮文案（发布/编辑不显示导航栏标题） */
     var mode = ctx._publishMode || 'publish';
     if (mode === 'forward') {
-      if (publishTitle) publishTitle.textContent = '转发产品';
       if (submitLabel) submitLabel.textContent = '转发';
     } else if (mode === 'edit') {
-      if (publishTitle) publishTitle.textContent = '编辑产品';
       if (submitLabel) submitLabel.textContent = '保存';
     }
 
-    /* 更新快捷分享按钮显示 */
+    /* 更新快捷分享按钮图标（纯图标正方形按钮，样式与「分享」按钮一致） */
     function refreshQuickShare() {
       if (!window.WegoApp || !window.WegoApp.getQuickChannel) return;
       var ch = window.WegoApp.getQuickChannel();
@@ -372,10 +378,8 @@
         more: { label: '更多', icon: 'icon-gengduo' }
       };
       var info = channelMap[ch] || channelMap.moments;
-      if (quickShareLabel) quickShareLabel.textContent = info.label;
-      if (quickShareIcon) {
-        quickShareIcon.className = 'wego-iconfont-s ' + info.icon + ' publish-product__quick-share-icon';
-      }
+      if (quickShareIcon) quickShareIcon.className = 'btn__icon ' + info.icon;
+      if (quickShareBtn) quickShareBtn.setAttribute('aria-label', '快捷分享到' + info.label);
     }
     refreshQuickShare();
 
@@ -405,41 +409,36 @@
 
     if (shareBtn) {
       shareBtn.addEventListener('click', function () {
-        /* 先自动保存产品 */
-        doPublish();
-        /* 拉起分享面板 */
-        setTimeout(function () {
-          if (window.WegoApp && window.WegoApp.openProductShare) {
-            window.WegoApp.openProductShare(ctx, {
-              title: '分享产品',
-              content: collectShareContent(),
-              callbacks: {
-                onSuccess: function () {
-                  refreshQuickShare();
-                  onShareComplete();
-                }
+        /* 发布前校验 + 保存（不关闭页面）；通过后才拉起分享面板，取消分享保持当前页继续编辑 */
+        if (!saveProduct()) return;
+        if (window.WegoApp && window.WegoApp.openProductShare) {
+          window.WegoApp.openProductShare(ctx, {
+            title: '分享产品',
+            content: collectShareContent(),
+            callbacks: {
+              onSuccess: function () {
+                refreshQuickShare();
+                onShareComplete();
               }
-            });
-          }
-        }, 300);
+              /* 取消/关闭分享面板：无 onClose 处理 → 保持当前发布页 */
+            }
+          });
+        }
       });
     }
 
     if (quickShareBtn) {
       quickShareBtn.addEventListener('click', function () {
-        /* 先自动保存产品 */
-        doPublish();
-        /* 直接执行快捷分享 */
-        setTimeout(function () {
-          if (window.WegoApp && window.WegoApp.simulateShare) {
-            var ch = window.WegoApp.getQuickChannel();
-            window.WegoApp.simulateShare(ctx, ch, collectShareContent(), {
-              onSuccess: function () {
-                onShareComplete();
-              }
-            });
-          }
-        }, 300);
+        /* 发布前校验 + 保存（不关闭页面）；通过后才执行快捷分享 */
+        if (!saveProduct()) return;
+        if (window.WegoApp && window.WegoApp.simulateShare) {
+          var ch = window.WegoApp.getQuickChannel();
+          window.WegoApp.simulateShare(ctx, ch, collectShareContent(), {
+            onSuccess: function () {
+              onShareComplete();
+            }
+          });
+        }
       });
     }
     if (autoSku) autoSku.addEventListener('click', function () {
