@@ -1607,6 +1607,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           .dot { fill: var(--wt-measure-color); }
           .cross { stroke: var(--wt-measure-color); stroke-width: 1.5; }
           .line { stroke: var(--wt-measure-color); stroke-width: 1.5; stroke-dasharray: 6 4; }
+          .snap-line { stroke: #ff4d4f; stroke-width: 1.5; stroke-dasharray: 5 3; }
           .num {
             fill: #fff;
             font-size: 12px;
@@ -1646,6 +1647,17 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         <text class="num" x="${midHx}" y="${sy - 6}" text-anchor="middle">${Math.abs(dx)}px</text>
         <text class="num" x="${sx + 6}" y="${midVy + 4}" text-anchor="start">${Math.abs(dy)}px</text>
       `;
+    }
+    /** 拖拽吸附辅助线（红色虚线，计划 3.6 对齐提示） */
+    showSnap(lines) {
+      this.style.display = 'block';
+      const parts = lines.map(l => {
+        if (l.orient === 'v') {
+          return `<line class="snap-line" x1="${l.x}" y1="${l.y1}" x2="${l.x}" y2="${l.y2}"/>`;
+        }
+        return `<line class="snap-line" x1="${l.x1}" y1="${l.y}" x2="${l.x2}" y2="${l.y}"/>`;
+      }).join('');
+      this._svg.innerHTML = `<g>${parts}</g>`;
     }
     clear() {
       if (this._svg) this._svg.innerHTML = '';
@@ -6460,6 +6472,16 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           .annotation-bubble--sheet .annotation-bubble-input { font-size: 16px; min-height: 96px; }
           .annotation-bubble[hidden] { display: none; }
           .count-bubble[hidden] { display: none; }
+          /* 网格辅助线（计划 3.6：半透明网格，8px 基准，配合拖拽吸附） */
+          .grid-overlay {
+            position: fixed; inset: 0; z-index: 9539;
+            pointer-events: none;
+            background-image:
+              linear-gradient(to right, rgba(255,255,255,0.06) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(255,255,255,0.06) 1px, transparent 1px);
+            background-size: 8px 8px;
+          }
+          .grid-overlay[hidden] { display: none; }
           .annotation-bubble-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
           .annotation-bubble-title { color: rgba(255,255,255,0.75); font-size: 12px; font-weight: 600; line-height: 18px; }
           .annotation-bubble-close {
@@ -6535,6 +6557,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
               <button class="tool-btn" data-tool="measure" data-active="false" title="测量模式">
                 ${ICONS.measure}
               </button>
+              <button class="tool-btn" data-tool="grid" data-active="false" title="网格辅助线">
+                ${ICONS.grid}
+              </button>
               <button class="tool-btn" data-tool="annotation" data-active="false" title="批注模式">
                 ${ICONS.annotation}
               </button>
@@ -6601,6 +6626,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         <!-- 子组件（走查模式相关） -->
         <wego-wt-highlight hidden></wego-wt-highlight>
         <wego-wt-measure hidden></wego-wt-measure>
+        <div class="grid-overlay" data-grid-overlay hidden></div>
         <wego-wt-style-panel hidden></wego-wt-style-panel>
         <wego-wt-color-picker hidden></wego-wt-color-picker>
         <wego-wt-overview-panel hidden></wego-wt-overview-panel>
@@ -7103,6 +7129,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           break;
         case 'measure':
           this._toggleMeasureMode();
+          break;
+        case 'grid':
+          this._toggleGridMode();
           break;
         case 'annotation':
           this._closeAllPanels();
@@ -7713,6 +7742,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 测量模式：两点横/纵距离（对齐计划 3.5）
       this._measureMode = false;
       this._measureAnchor = null;
+      // 网格辅助线（对齐计划 3.6）
+      this._gridMode = false;
       // 长按拖拽移动：500ms 长按触发，拖拽中 transform 平移 + 偏移气泡
       this._longPressTimer = null;
       this._dragging = null;
@@ -7758,13 +7789,23 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     _onPointerMove = (e) => {
       // 拖拽进行中：跟随指针平移元素
       if (this._dragging) {
-        const dx = e.clientX - this._dragging.startX;
-        const dy = e.clientY - this._dragging.startY;
+        let dx = e.clientX - this._dragging.startX;
+        let dy = e.clientY - this._dragging.startY;
         if (Math.abs(dx) > 1 || Math.abs(dy) > 1) this._dragging.moved = true;
-        const tx = Math.round(dx);
-        const ty = Math.round(dy);
+        let tx = Math.round(dx);
+        let ty = Math.round(dy);
+        let snapLines = null;
+        // 网格开启时吸附到 8px 网格线
+        if (this._gridMode) {
+          const snapped = this._snapDragToGrid(tx, ty);
+          tx = Math.round(snapped.dx);
+          ty = Math.round(snapped.dy);
+          snapLines = snapped.snapLines;
+          if (snapLines.length && navigator.vibrate) navigator.vibrate(15); // 轻震动反馈
+        }
         this._dragging.el.style.transform = `${this._dragOrigTransform ? this._dragOrigTransform + ' ' : ''}translate(${tx}px, ${ty}px)`;
         this._components.highlight.showForElement(this._dragging.el, `+${tx}, +${ty}`);
+        this._showSnapLines(snapLines);
         e.preventDefault();
         e.stopPropagation();
         return;
@@ -7820,6 +7861,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const drag = this._dragging;
       this._dragging = null;
       this._pointerActive = false;
+      this._showSnapLines(null); // 清除吸附辅助线
       if (!drag) return;
       const el = drag.el;
       el.style.transition = '';
@@ -8011,6 +8053,67 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         this._showToast('已更新文本');
       }
       this._selectElement(el);
+    }
+
+    /** 网格辅助线开关（计划 3.6：覆盖半透明网格线，配合拖拽吸附） */
+    _toggleGridMode() {
+      this._gridMode = !this._gridMode;
+      const ov = this._shadow.querySelector('[data-grid-overlay]');
+      if (ov) ov.toggleAttribute('hidden', !this._gridMode);
+      this._updateToolbarState();
+      this._showToast(this._gridMode ? '已开启网格辅助线（8px）' : '已关闭网格辅助线');
+    }
+
+    /** 拖拽吸附：元素边缘接近网格线时吸附（阈值 4px），返回修正后的位移与吸附线 */
+    _snapDragToGrid(dx, dy) {
+      const el = this._dragging.el;
+      const rect = el.getBoundingClientRect();
+      const LEFT = rect.left + dx;
+      const TOP = rect.top + dy;
+      const RIGHT = LEFT + rect.width;
+      const BOTTOM = TOP + rect.height;
+      const GRID = 8;
+      const TH = 4;
+      let ndx = dx;
+      let ndy = dy;
+      const snapLines = [];
+      // 垂直对齐：优先左边缘，其次右边缘
+      const lNear = Math.round(LEFT / GRID) * GRID;
+      if (Math.abs(LEFT - lNear) <= TH) {
+        ndx = dx - (LEFT - lNear);
+        snapLines.push({ orient: 'v', x: lNear, y1: TOP, y2: BOTTOM });
+      } else {
+        const rNear = Math.round(RIGHT / GRID) * GRID;
+        if (Math.abs(RIGHT - rNear) <= TH) {
+          ndx = dx - (RIGHT - rNear);
+          snapLines.push({ orient: 'v', x: rNear, y1: TOP, y2: BOTTOM });
+        }
+      }
+      // 水平对齐：优先上边缘，其次下边缘
+      const tNear = Math.round(TOP / GRID) * GRID;
+      if (Math.abs(TOP - tNear) <= TH) {
+        ndy = dy - (TOP - tNear);
+        snapLines.push({ orient: 'h', y: tNear, x1: LEFT, x2: RIGHT });
+      } else {
+        const bNear = Math.round(BOTTOM / GRID) * GRID;
+        if (Math.abs(BOTTOM - bNear) <= TH) {
+          ndy = dy - (BOTTOM - bNear);
+          snapLines.push({ orient: 'h', y: bNear, x1: LEFT, x2: RIGHT });
+        }
+      }
+      return { dx: ndx, dy: ndy, snapLines };
+    }
+
+    /** 显示/隐藏吸附辅助线（红色虚线，复用测量 overlay 图层） */
+    _showSnapLines(lines) {
+      const measure = this._components.measure;
+      if (!measure) return;
+      if (!lines || lines.length === 0) {
+        if (!this._measureAnchor) measure.clear();
+        return;
+      }
+      if (typeof measure.showSnap !== 'function') return;
+      measure.showSnap(lines);
     }
 
     /** 测量模式开关（对齐计划 3.5：切换/点空白/切走查退出） */
@@ -8867,6 +8970,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 测量模式按钮激活态
       const msBtn = this._shadow.querySelector('[data-tool="measure"]');
       if (msBtn) msBtn.setAttribute('data-active', String(this._measureMode));
+      // 网格辅助线按钮激活态
+      const gridBtn = this._shadow.querySelector('[data-tool="grid"]');
+      if (gridBtn) gridBtn.setAttribute('data-active', String(this._gridMode));
       // 批注模式按钮激活态
       const annBtn = this._shadow.querySelector('[data-tool="annotation"]');
       if (annBtn) annBtn.setAttribute('data-active', String(this._annotationMode));
