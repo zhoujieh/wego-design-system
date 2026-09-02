@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="../colors_and_type.css">
 <link rel="stylesheet" href="../scaffold.css">
 <link rel="stylesheet" href="../iconfont.css">
+<link rel="stylesheet" href="../components.css">
 <style>
 
 /* @component-css-start */
@@ -29,15 +30,80 @@
   .loading__dot { animation:loading-fade 1.4s ease-in-out infinite; }
   @keyframes loading-fade { 0%,100% { opacity:0.4; } 50% { opacity:1; } }
 }
+/* ── 居中浮层加载(外壳同 Toast,固定屏幕正中;不带进度=三点+单行文案,带进度=进度环+两行文案) ── */
+.loading-overlay{
+  --loading-overlay-pad-x: 24px;
+  --loading-overlay-pad-y: 16px;
+  --loading-overlay-gap: 12px;
+  --loading-overlay-min-size: 120px;
+  position:fixed;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  z-index:var(--z-toast);
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:var(--loading-overlay-gap);
+  width:fit-content;
+  min-width:var(--loading-overlay-min-size);
+  min-height:var(--loading-overlay-min-size);
+  padding:var(--loading-overlay-pad-y) var(--loading-overlay-pad-x);
+  background:var(--bg-toast);
+  border:var(--stroke-hairline) solid var(--border-toast);
+  border-radius:var(--radius-8);
+  box-shadow:var(--shadow-sm);
+  color:var(--text-inverse);
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transition:opacity var(--duration-normal) var(--ease-enter), visibility 0s linear var(--duration-normal);
+}
+.loading-overlay.is-visible{
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
+  transition:opacity var(--duration-normal) var(--ease-enter), visibility 0s;
+}
+.loading-overlay__indicator{ display:flex; align-items:center; justify-content:center; }
+.loading-overlay__indicator .loading__dot{ background-color:var(--text-inverse); }
+.loading-overlay__text{ display:flex; flex-direction:column; align-items:center; gap:2px; }
+.loading-overlay__label{ font-family:var(--body-md-font-family); font-size:var(--body-md-font-size); line-height:var(--body-md-line-height); font-weight:var(--font-weight-medium); color:var(--text-inverse); white-space:nowrap; }
+.loading-overlay__percent{ font-family:var(--body-md-font-family); font-size:var(--body-sm-font-size); line-height:var(--body-sm-line-height); color:var(--text-inverse); opacity:0.82; }
+/* 结果态:加载完成后勾/叉图标(icon-goutoast/icon-chatoast),外壳与加载浮层一致(居中/正方形最小/长文案自适应) */
+.loading-overlay__result-icon{ font-family:var(--font-family-icon); font-size:var(--size-24); line-height:1; color:var(--text-inverse); }
+/* 进度环:双 circle(低透明度轨道+白色进度弧),--progress 由宿主注入 0-100,默认 0 */
+.loading-ring{
+  --ring-size:32px;
+  --ring-stroke:3px;
+  --ring-circumference:125.6;
+  --progress:0;
+  width:var(--ring-size);
+  height:var(--ring-size);
+  transform:rotate(-90deg);
+}
+.loading-ring__track{ fill:none; stroke:var(--text-inverse); stroke-opacity:0.24; stroke-width:var(--ring-stroke); }
+.loading-ring__bar{ fill:none; stroke:var(--text-inverse); stroke-width:var(--ring-stroke); stroke-linecap:round; stroke-dasharray:calc(var(--ring-circumference) * var(--progress,0) / 100) var(--ring-circumference); }
 /* @component-css-end */
 
 .loading-demo-center { display:flex; align-items:center; justify-content:center; width:100%; height:120px; background:var(--bg-subtle); border-radius:var(--radius-8); }
 .loading-demo-note { font-size:var(--body-sm-font-size); color:var(--text-tertiary); max-width:400px; line-height:1.6; }
 .loading-demo-row { display:flex; align-items:center; gap:var(--spacer-12); }
+/* 演示区容器:把 fixed 居中浮层改为文档流内展示,避免两个演示叠加在视口中央 */
+.loading-demo-overlay-wrap { position:relative; display:flex; justify-content:center; padding:14px 0; background:var(--bg-subtle); border-radius:var(--radius-8); }
+.loading-demo-overlay-wrap .loading-overlay { position:relative; left:auto; top:auto; transform:none; opacity:1; visibility:visible; pointer-events:none; }
+.loading-demo-btn { padding:6px 14px; border:1px solid var(--border-neutral-l3); border-radius:var(--radius-8); background:transparent; font-size:var(--body-sm-font-size); color:var(--text-default); cursor:pointer; }
+/* 默认结果态演示:横向并排展示成功/失败两个居中结果浮层 */
+.loading-demo-result-row { display:flex; flex-wrap:wrap; gap:16px; }
+/* 业务可选演示:底部可操作长 Toast(调用已有 Toast 组件),宽度自适应内容 */
+.loading-demo-toast-wrap { position:relative; display:flex; flex-direction:column; gap:10px; padding:14px; background:var(--bg-subtle); border-radius:var(--radius-8); }
+.loading-demo-toast-wrap .toast { position:relative; left:auto; bottom:auto; transform:none; opacity:1; visibility:visible; width:auto; max-width:100%; }
 </style>
 </head>
 <body>
-<div class="pv-header"><h1>加载</h1><p>三点依次脉冲加载指示器，用于内容区或弹窗等待态。</p></div>
+<div class="pv-header"><h1>加载</h1><p>三点依次脉冲加载指示器，用于内容区或弹窗等待态；含居中浮层形态（外壳同 Toast，固定屏幕正中，分不带进度/带进度两场景）。</p></div>
 
 <div class="pv-section__title">尺寸 24 — 默认</div>
 <div class="loading-demo-center">
@@ -59,6 +125,186 @@
 <div class="loading-demo-note">
   默认 24px 三点位置传递式循环加载图标,三点共用同一关键帧,通过 delay 0/-0.4s/-0.8s 错峰形成"亮点从点1→点2→点3→点1 依次放大变亮"的循环传递动画;1.2s ease-in-out infinite,0% 和 66.66% 处保持暗淡静止(0.2/0.6),33.33% 处达到峰值(opacity 1/scale 1),颜色和大小有 ease-in-out 过渡;纯 span+CSS 实现,支持 16/24/32 尺寸按比例缩放;prefers-reduced-motion 时降级为整体淡入淡出。不内置文案,需提示文案时由宿主以 result 或文本节点组合。
 </div>
+
+<div class="pv-section__title">居中浮层 — 不带进度（三点 + 单行文案）</div>
+<div class="loading-demo-overlay-wrap">
+  <div class="loading-overlay is-visible" role="status" aria-live="polite">
+    <span class="loading loading--24 loading-overlay__indicator" role="img" aria-label="加载中"><span class="loading__icon"><span class="loading__dot loading__dot--1"></span><span class="loading__dot loading__dot--2"></span><span class="loading__dot loading__dot--3"></span></span></span>
+    <div class="loading-overlay__text"><span class="loading-overlay__label">正在加载</span></div>
+  </div>
+</div>
+
+<div class="pv-section__title">居中浮层 — 带进度（进度环 + 两行文案：状态文案 / 百分比）</div>
+<div class="loading-demo-overlay-wrap">
+  <div class="loading-overlay is-visible" role="status" aria-live="polite">
+    <svg class="loading-ring" viewBox="0 0 48 48" role="img" aria-label="加载中" style="--progress:63">
+      <circle class="loading-ring__track" cx="24" cy="24" r="20"></circle>
+      <circle class="loading-ring__bar" cx="24" cy="24" r="20"></circle>
+    </svg>
+    <div class="loading-overlay__text">
+      <span class="loading-overlay__label">正在下载</span>
+      <span class="loading-overlay__percent">63%</span>
+    </div>
+  </div>
+</div>
+
+<div class="pv-section__title">默认结果提示（进度加载完成后：居中、外壳同 Loading、正方形最小）</div>
+<div class="loading-demo-result-row">
+  <div class="loading-demo-overlay-wrap">
+    <div class="loading-overlay is-visible" role="status" aria-live="polite">
+      <span class="loading-overlay__result-icon icon-goutoast"></span>
+      <div class="loading-overlay__text"><span class="loading-overlay__label">分享完成</span></div>
+    </div>
+  </div>
+  <div class="loading-demo-overlay-wrap">
+    <div class="loading-overlay is-visible" role="status" aria-live="polite">
+      <span class="loading-overlay__result-icon icon-chatoast"></span>
+      <div class="loading-overlay__text"><span class="loading-overlay__label">下载失败</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="pv-section__title">业务可选：底部可操作长 Toast（调用已有 Toast 组件）</div>
+<div class="loading-demo-toast-wrap">
+  <div class="loading-demo-note">默认结果为居中浮层；如业务需引导下一步（如下载完成后引导去分享），可配置为底部可操作长 Toast——直接调用已有 Toast 组件（引导变体：图标 + 文案 + 操作按钮）。</div>
+  <div class="toast toast--guide">
+    <span class="toast__icon icon-goutoast"></span>
+    <span class="toast__text">下载完成</span>
+    <button type="button" class="toast__action toast__action--strong">
+      <span class="toast__action-text">去分享</span>
+    </button>
+  </div>
+  <div class="toast toast--guide">
+    <span class="toast__icon icon-chatoast"></span>
+    <span class="toast__text">下载失败</span>
+    <button type="button" class="toast__action toast__action--strong">
+      <span class="toast__action-text">重试</span>
+    </button>
+  </div>
+</div>
+
+<div class="pv-section__title">交互演示（固定屏幕正中的真实浮层）</div>
+<div class="loading-demo-row">
+  <button type="button" id="demoOverlayNoProgress" class="loading-demo-btn">显示居中加载（不带进度）</button>
+  <button type="button" id="demoOverlayProgress" class="loading-demo-btn">显示居中加载（带进度）</button>
+  <button type="button" id="demoOverlayFail" class="loading-demo-btn">加载失败结果（叉）</button>
+  <button type="button" id="demoBottomToast" class="loading-demo-btn">业务配置：底部长 Toast</button>
+</div>
+<div class="loading-demo-note" style="margin-top:12px">带进度场景 100% 后默认衔接居中结果提示（勾/叉图标 + 结果文案，外壳与加载浮层一致）；业务可选配置为底部可操作长 Toast（调用 Toast 组件）。</div>
+
+<script>
+(function () {
+  var host = document.createElement('div');
+  host.id = 'loading-overlay-demo-host';
+  document.body.appendChild(host);
+  var toastHost = document.createElement('div');
+  toastHost.id = 'loading-result-toast-host';
+  document.body.appendChild(toastHost);
+  var timers = [];
+
+  function clearTimers() {
+    timers.forEach(function (t) { clearTimeout(t); clearInterval(t); });
+    timers = [];
+  }
+  function hideLoading() { host.innerHTML = ''; }
+  function hideToast() { toastHost.innerHTML = ''; }
+
+  // 默认结果提示：居中浮层（复用 loading-overlay 外壳，勾/叉图标 + 结果文案），同屏互斥
+  function showCenteredResult(icon, text, duration) {
+    clearTimers();
+    hideToast();
+    host.innerHTML =
+      '<div class="loading-overlay is-visible" role="status" aria-live="polite">' +
+      '<span class="loading-overlay__result-icon ' + icon + '"></span>' +
+      '<div class="loading-overlay__text"><span class="loading-overlay__label">' + text + '</span></div></div>';
+    timers.push(setTimeout(hideLoading, duration || 2200));
+  }
+
+  // 业务可选：底部可操作长 Toast（调用已有 Toast 组件引导变体，图标+文案+操作），进入动画见 demoBottomToast 处理器
+
+  document.getElementById('demoOverlayNoProgress').addEventListener('click', function () {
+    clearTimers();
+    hideToast();
+    host.innerHTML =
+      '<div class="loading-overlay is-visible" role="status" aria-live="polite">' +
+      '<span class="loading loading--24 loading-overlay__indicator" role="img" aria-label="加载中"><span class="loading__icon"><span class="loading__dot loading__dot--1"></span><span class="loading__dot loading__dot--2"></span><span class="loading__dot loading__dot--3"></span></span></span>' +
+      '<div class="loading-overlay__text"><span class="loading-overlay__label">正在加载</span></div></div>';
+    timers.push(setTimeout(hideLoading, 2200));
+  });
+
+  function startProgress(onDone) {
+    var p = 0;
+    host.innerHTML =
+      '<div class="loading-overlay is-visible" role="status" aria-live="polite">' +
+      '<svg class="loading-ring" viewBox="0 0 48 48" role="img" aria-label="加载中" style="--progress:0"><circle class="loading-ring__track" cx="24" cy="24" r="20"></circle><circle class="loading-ring__bar" cx="24" cy="24" r="20"></circle></svg>' +
+      '<div class="loading-overlay__text"><span class="loading-overlay__label">正在下载</span><span class="loading-overlay__percent">0%</span></div></div>';
+    var bar = host.querySelector('.loading-ring');
+    var pct = host.querySelector('.loading-overlay__percent');
+    timers.push(setInterval(function () {
+      p = Math.min(p + 7, 100);
+      bar.style.setProperty('--progress', p);
+      pct.textContent = p + '%';
+      if (p >= 100) {
+        clearTimers();
+        hideLoading();
+        onDone();
+      }
+    }, 120));
+  }
+
+  document.getElementById('demoOverlayProgress').addEventListener('click', function () {
+    startProgress(function () {
+      showCenteredResult('icon-goutoast', '下载完成');
+    });
+  });
+
+  document.getElementById('demoOverlayFail').addEventListener('click', function () {
+    showCenteredResult('icon-chatoast', '下载失败');
+  });
+
+  // 业务可选：底部可操作长 Toast（调用已有 Toast 组件引导变体）。
+  // 进入动画与 Toast 契约一致：先插入未激活的 is-floating，双 rAF 后加 is-visible 触发过渡；退出走 is-leaving。
+  document.getElementById('demoBottomToast').addEventListener('click', function () {
+    clearTimers();
+    hideLoading();
+    var toast = document.createElement('div');
+    toast.className = 'toast toast--guide is-floating';
+    var icon = document.createElement('span');
+    icon.className = 'toast__icon icon-goutoast';
+    toast.appendChild(icon);
+    var text = document.createElement('span');
+    text.className = 'toast__text';
+    text.textContent = '下载完成';
+    toast.appendChild(text);
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'toast__action toast__action--strong';
+    var btnText = document.createElement('span');
+    btnText.className = 'toast__action-text';
+    btnText.textContent = '去分享';
+    btn.appendChild(btnText);
+    btn.addEventListener('click', function () { dismissToast(toast); });
+    toast.appendChild(btn);
+    toastHost.appendChild(toast);
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        toast.classList.add('is-visible');
+      });
+    });
+    timers.push(setTimeout(function () { dismissToast(toast); }, 4500));
+  });
+
+  function dismissToast(toast) {
+    if (!toast.parentNode) return;
+    toast.classList.remove('is-visible');
+    toast.classList.add('is-leaving');
+    var ref = toast;
+    timers.push(setTimeout(function () {
+      if (ref.parentNode) ref.parentNode.removeChild(ref);
+    }, 200));
+  }
+})();
+</script>
 
 </body>
 </html>
