@@ -4447,41 +4447,54 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 应用到元素（本体）
       const result = this._applyField(field, value);
       if (result) {
-        // 记录当前元素变更（无条件；若后续命中公共样式同步，由 _applySharedSync 补标 shared 标记）
-        bus.emit('style-change', {
-          selector: this._selector,
-          elementTag: this._targetEl.tagName.toLowerCase(),
-          elementText: (this._targetEl.textContent || '').trim().substring(0, 50),
-          elementClass: getFirstStableClass(this._targetEl),
-          elementClasses: getStableClasses(this._targetEl),
-          property: result.property,
-          oldValue: result.oldValue,
-          newValue: result.newValue,
-          el: this._targetEl,
-          shared: false,
-          sharedKey: '',
-        });
-        // 样式同步（共享元素模式）：高频输入（颜色拖动等）下防抖，停顿后按最终值执行一次同步扫描，
-        // 避免每帧全页扫描卡顿、避免中途值把共享元素改错
-        this._scheduleSharedSync(result);
-        // 伴随属性（如切尺寸模式时关闭拉伸/写入固定宽）：只记录当前元素；需同步类同的才 schedule 共享同步
-        if (result.extra && result.extra.length) {
-          result.extra.forEach(extra => {
-            bus.emit('style-change', {
-              selector: this._selector,
-              elementTag: this._targetEl.tagName.toLowerCase(),
-              elementText: (this._targetEl.textContent || '').trim().substring(0, 50),
-              elementClass: getFirstStableClass(this._targetEl),
-              elementClasses: getStableClasses(this._targetEl),
-              property: extra.property,
-              oldValue: extra.oldValue,
-              newValue: extra.newValue,
-              el: this._targetEl,
-              shared: false,
-              sharedKey: '',
-            });
-            if (extra.sync !== false) this._scheduleSharedSync(extra);
+        // 无效果守卫：目标新值与当前计算值归一化相等 → 本次改动无视觉差异，撤销已写入 inline，
+        // 不记录、不触发共享同步，避免空元素/默认值被共享同步写成无效果的脏施工单。
+        // layoutMode 附带 display:flex 副作用：仅当元素已处于 flex/grid 时才真正无效果。
+        const _noopSame = normalizeCssValue(result.oldValue) === normalizeCssValue(result.newValue);
+        const _noop = _noopSame && (result.property !== 'flex-direction' || (() => {
+          const d = getComputedStyle(this._targetEl).display;
+          return d === 'flex' || d === 'grid';
+        })());
+        if (_noop) {
+          // 撤销已写入的 inline 样式，保持页面原样
+          try { this._targetEl.style.setProperty(result.property, ''); } catch (e) {}
+        } else {
+          // 记录当前元素变更（若后续命中公共样式同步，由 _applySharedSync 补标 shared 标记）
+          bus.emit('style-change', {
+            selector: this._selector,
+            elementTag: this._targetEl.tagName.toLowerCase(),
+            elementText: (this._targetEl.textContent || '').trim().substring(0, 50),
+            elementClass: getFirstStableClass(this._targetEl),
+            elementClasses: getStableClasses(this._targetEl),
+            property: result.property,
+            oldValue: result.oldValue,
+            newValue: result.newValue,
+            el: this._targetEl,
+            shared: false,
+            sharedKey: '',
           });
+          // 样式同步（共享元素模式）：高频输入（颜色拖动等）下防抖，停顿后按最终值执行一次同步扫描，
+          // 避免每帧全页扫描卡顿、避免中途值把共享元素改错
+          this._scheduleSharedSync(result);
+          // 伴随属性（如切尺寸模式时关闭拉伸/写入固定宽）：只记录当前元素；需同步类同的才 schedule 共享同步
+          if (result.extra && result.extra.length) {
+            result.extra.forEach(extra => {
+              bus.emit('style-change', {
+                selector: this._selector,
+                elementTag: this._targetEl.tagName.toLowerCase(),
+                elementText: (this._targetEl.textContent || '').trim().substring(0, 50),
+                elementClass: getFirstStableClass(this._targetEl),
+                elementClasses: getStableClasses(this._targetEl),
+                property: extra.property,
+                oldValue: extra.oldValue,
+                newValue: extra.newValue,
+                el: this._targetEl,
+                shared: false,
+                sharedKey: '',
+              });
+              if (extra.sync !== false) this._scheduleSharedSync(extra);
+            });
+          }
         }
       }
       // 更新 UI（按钮 active 态等）
