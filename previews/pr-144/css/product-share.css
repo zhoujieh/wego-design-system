@@ -452,3 +452,15 @@
   opacity: 0.72;
 }
 .loading-overlay__close:active { opacity: 1; }
+
+/* ═══════════════════════════════════════════════════════════════
+   Loading 浮层全屏透明遮罩：进入加载/进度浮层期间阻断页面底部内容交互
+   （浮层本身及右上角叉叉仍在遮罩之上可操作；视觉不改变浮层外观）
+   ═══════════════════════════════════════════════════════════════ */
+.loading-overlay::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: transparent;
+  z-index: -1;
+}
