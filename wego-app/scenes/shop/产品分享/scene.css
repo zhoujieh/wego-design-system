@@ -49,10 +49,6 @@
   background: var(--bg-overlay-l1);
   color: var(--text-secondary);
 }
-.product-share-demo__card-badge--live {
-  background: var(--status-danger-surface-l1);
-  color: var(--status-danger-default);
-}
 .product-share-demo__card-badge--video {
   background: var(--status-info-surface-l1);
   color: var(--text-brand);

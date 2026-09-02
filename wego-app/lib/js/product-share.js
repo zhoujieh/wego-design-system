@@ -123,7 +123,7 @@
       { key: 'textLink', type: 'checkbox', label: '文案带链接', defaultValue: false },
       { key: 'customerTag', type: 'button', label: '给客户打标' }
     ];
-    /* 数据状态：S3 纯文字（无图无视频）时隐藏「保存图片」按钮；S5 视频为主（有视频无图片）时保存按钮文案改为「保存视频」 */
+    /* 数据状态：S2 纯文字（无图无视频）时隐藏「保存图片」按钮；S3 视频为主（有视频无图片）时保存按钮文案改为「保存视频」 */
     var hasImages = content.images && content.images.length > 0;
     var hasVideos = content.videos && content.videos.length > 0;
     var isTextOnly = !hasImages && !hasVideos;
@@ -285,13 +285,12 @@
   /* ═══════════════════════════════════════════════════════════════
      分享流程模拟
      ═══════════════════════════════════════════════════════════════ */
-  /* 数据状态判定：S1 完整商品（图+标题）/ S2 视频商品（视频+标题，图可选）/ S3 纯文字（仅标题）/ S5 视频为主（视频+标题，无图） */
+  /* 数据状态判定：S1 完整商品（图+标题，可含视频）/ S2 纯文字（仅标题）/ S3 视频为主（视频+标题，无图） */
   function resolveDataState(content) {
     var hasImages = content && content.images && content.images.length > 0;
     var hasVideos = content && content.videos && content.videos.length > 0;
-    if (!hasImages && !hasVideos) return 'S3';
-    if (hasVideos && !hasImages) return 'S5';
-    if (hasVideos) return 'S2';
+    if (!hasImages && !hasVideos) return 'S2';
+    if (hasVideos && !hasImages) return 'S3';
     return 'S1';
   }
 
@@ -304,7 +303,7 @@
     var hasVideos = content && content.videos && content.videos.length > 0;
 
     /* 数据状态 × 渠道交互差异（场景管理重构） */
-    if (state === 'S3') {
+    if (state === 'S2') {
       /* 纯文字：仅标题，无图无视频 */
       if (channelKey === 'moments' || channelKey === 'poster') {
         ctx.toast('暂无图片');
@@ -327,7 +326,7 @@
       }
     }
 
-    if (state === 'S5' && channelKey === 'poster') {
+    if (state === 'S3' && channelKey === 'poster') {
       ctx.toast('暂无图片');
       return;
     }
