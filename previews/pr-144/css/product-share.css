@@ -434,33 +434,4 @@
 /* ═══════════════════════════════════════════════════════════════
    Loading 浮层右上角中断按钮（保存图片/视频下载进度浮层）
    ═══════════════════════════════════════════════════════════════ */
-.loading-overlay__close {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  z-index: 1;
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  color: var(--text-inverse, #fff);
-  font-size: 16px;
-  opacity: 0.72;
-}
-.loading-overlay__close:active { opacity: 1; }
-
-/* ═══════════════════════════════════════════════════════════════
-   Loading 浮层全屏透明遮罩：进入加载/进度浮层期间阻断页面底部内容交互
-   （浮层本身及右上角叉叉仍在遮罩之上可操作；视觉不改变浮层外观）
-   ═══════════════════════════════════════════════════════════════ */
-.loading-overlay::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: transparent;
-  z-index: -1;
-}
+/* 说明：Loading 浮层遮罩阻断、右上角叉叉中断按钮、页面滚动锁定已沉淀为 Loading 组件默认能力（components.css），业务不再维护场景级覆盖 */
