@@ -204,10 +204,11 @@
 <div class="loading-demo-row">
   <button type="button" id="demoOverlayNoProgress" class="loading-demo-btn">显示居中加载（不带进度）</button>
   <button type="button" id="demoOverlayProgress" class="loading-demo-btn">显示居中加载（带进度）</button>
+  <button type="button" id="demoOverlayMask" class="loading-demo-btn">显示居中加载（遮罩阻断）</button>
   <button type="button" id="demoOverlayFail" class="loading-demo-btn">加载失败结果（叉）</button>
   <button type="button" id="demoBottomToast" class="loading-demo-btn">业务配置：底部长 Toast</button>
 </div>
-<div class="loading-demo-note" style="margin-top:12px">带进度场景 100% 后默认衔接居中结果提示（勾/叉图标 + 结果文案，外壳与加载浮层一致）；业务可选配置为底部可操作长 Toast（调用 Toast 组件）。</div>
+<div class="loading-demo-note" style="margin-top:12px">带进度场景 100% 后默认衔接居中结果提示（勾/叉图标 + 结果文案，外壳与加载浮层一致）；业务可选配置为底部可操作长 Toast（调用 Toast 组件）。点击「遮罩阻断」后浮层下层覆盖全屏透明遮罩，此时点击页面其它区域（包括上方演示按钮）将被阻断，浮层内容仍可交互。</div>
 
 <script>
 (function () {
@@ -247,6 +248,17 @@
       '<span class="loading loading--24 loading-overlay__indicator" role="img" aria-label="加载中"><span class="loading__icon"><span class="loading__dot loading__dot--1"></span><span class="loading__dot loading__dot--2"></span><span class="loading__dot loading__dot--3"></span></span></span>' +
       '<div class="loading-overlay__text"><span class="loading-overlay__label">正在加载</span></div></div>';
     timers.push(setTimeout(hideLoading, 2200));
+  });
+
+  // 遮罩阻断演示：浮层加 loading-overlay--mask，下层全屏透明遮罩拦截页面点击，浮层内容仍可操作
+  document.getElementById('demoOverlayMask').addEventListener('click', function () {
+    clearTimers();
+    hideToast();
+    host.innerHTML =
+      '<div class="loading-overlay loading-overlay--mask is-visible" role="status" aria-live="polite">' +
+      '<span class="loading loading--24 loading-overlay__indicator" role="img" aria-label="加载中"><span class="loading__icon"><span class="loading__dot loading__dot--1"></span><span class="loading__dot loading__dot--2"></span><span class="loading__dot loading__dot--3"></span></span></span>' +
+      '<div class="loading-overlay__text"><span class="loading-overlay__label">正在加载</span></div></div>';
+    timers.push(setTimeout(hideLoading, 6000));
   });
 
   function startProgress(onDone) {
