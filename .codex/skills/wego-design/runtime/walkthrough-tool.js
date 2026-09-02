@@ -8453,6 +8453,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           snapLines = snapped.snapLines;
           if (snapLines.length && navigator.vibrate) navigator.vibrate(15); // 轻震动反馈
         }
+        // 记录最终（含吸附后）位移，松手提交时使用，保证「拖拽中吸附位置 = 提交后位置」
+        this._dragging.snapTx = tx;
+        this._dragging.snapTy = ty;
         this._dragging.el.style.transform = `${this._dragOrigTransform ? this._dragOrigTransform + ' ' : ''}translate(${tx}px, ${ty}px)`;
         this._components.highlight.showForElement(this._dragging.el, `+${tx}, +${ty}`);
         this._showSnapLines(snapLines);
@@ -8519,8 +8522,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       el.style.cursor = '';
       const dx = Math.round(e.clientX - drag.startX);
       const dy = Math.round(e.clientY - drag.startY);
-      if (drag.moved && (dx !== 0 || dy !== 0)) {
-        const newValue = `translate(${dx}px, ${dy}px)`;
+      // 网格吸附：提交时使用拖拽中记录的吸附后位移，保证拖拽中吸附位置与松手后一致
+      const fdx = (drag.snapTx !== undefined) ? drag.snapTx : dx;
+      const fdy = (drag.snapTy !== undefined) ? drag.snapTy : dy;
+      if (drag.moved && (fdx !== 0 || fdy !== 0)) {
+        const newValue = `translate(${fdx}px, ${fdy}px)`;
         el.style.transform = newValue;
         bus.emit('style-change', {
           selector: this._resolveCanonicalSelector(el, generateSelector(el)),
@@ -8535,7 +8541,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           shared: false,
           sharedKey: '',
         });
-        this._showToast(`已移动 +${dx}, +${dy}`);
+        this._showToast(`已移动 +${fdx}, +${fdy}`);
       } else {
         el.style.transform = this._dragOrigTransform || '';
         this._showToast('未移动，已还原');
