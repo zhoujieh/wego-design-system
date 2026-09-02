@@ -1092,6 +1092,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const el = list[i];
         if (el === targetEl || isWalkthroughElement(el)) continue;
         if (!el.isConnected || !el.getClientRects || !el.getClientRects().length) continue;
+        // order（顺序移动）的共享同步排除同一父容器的兄弟元素：兄弟的 order 已由
+        // moveFlexItem 移动逻辑处理，若把兄弟也同步成与目标相同的 order 值（如同容器内
+        // 同类 action 全设 -1），会导致容器内同类元素 order 一致、按 DOM 序排列 → 视觉上
+        // 移动恢复原位。跨容器（其他卡片/实例）的同款元素仍正常同步。
+        if (property === 'order' && el.parentElement === targetEl.parentElement) continue;
         let val = '';
         try { val = getComputedStyle(el).getPropertyValue(property); } catch (e) { continue; }
         if (normalizeCssValue(val) === targetNorm) candidates.push(el);
@@ -3363,7 +3368,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       }
       const mv = moveFlexItem(el, dir);
       if (!mv) { this._updateMoveControls(); return; }
-      debugLog.add('MOVE', `顺序移动: ${dir} @ ${generateSelector(el)}（第${mv.idxOld + 1}位 → 第${flexPositionOf(mv.el)}位，order ${mv.elOrder} → ${mv.elNew}）`);
       // 记录目标元素（位置：第X位 → 第Y位；真实 order 值见 orderValue）
       this._recordMoveChange(mv.el, mv, false);
       // 若与兄弟交换了 order（已显式不同），兄弟也记录
@@ -3378,7 +3382,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 整体还原本次容器内的顺序移动（本地目标/兄弟记录 + 已落地的共享同步 + 残留 DOM），
       // 避免施工单留下 order 0→0 / 兄弟 0→1 这类无视觉变化的脏条目。
       if (baseKey && state.orderBaselines[baseKey] && seqEqual(displaySeq(parent), state.orderBaselines[baseKey])) {
-        debugLog.add('ROLLBACK', `容器净零往返: 容器回初始顺序，整体还原 @ ${generateSelector(parent)}`);
         this._rollbackContainerOrder(parent, baseKey);
       }
       this._updateMoveControls();
@@ -3417,7 +3420,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         related.forEach(c => app._revertChange(c));
       }
       state.changes = state.changes.filter(c => !related.includes(c));
-      debugLog.add('ROLLBACK', `容器净零还原完成: 还原 order 记录 ${related.length} 条，残留 DOM 已清`);
       // 3. 兜底清掉容器内残留的 order 内联（恢复到基线无 order 状态）
       Array.from(parent.children).forEach(ch => { try { ch.style.removeProperty('order'); } catch (e) {} });
       // 4. 清基线：容器已回初始，后续新移动重新建立基线
@@ -4535,10 +4537,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         if (_noop) {
           // 撤销已写入的 inline 样式，保持页面原样
           try { this._targetEl.style.setProperty(result.property, ''); } catch (e) {}
-          debugLog.add('NOOP', `输入无效果拦截: ${field}=${value} @ ${this._selector}（${result.property}: ${result.oldValue} → ${result.newValue} 归一化相等）`);
         } else {
           // 记录当前元素变更（若后续命中公共样式同步，由 _applySharedSync 补标 shared 标记）
-          debugLog.add('CHANGE', `样式修改: ${field}=${value} @ ${this._selector}（${result.property}: ${result.oldValue} → ${result.newValue}）`);
           bus.emit('style-change', {
             selector: this._selector,
             elementTag: this._targetEl.tagName.toLowerCase(),
@@ -4644,7 +4644,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 拦截防抖合并产生的 no-op（用户快速改回原值时，_scheduleSharedSync 合并成 old===new，
       // 会绕过 _onFieldChange 入口守卫，把无效果值写到已是同值的共享元素上产生脏施工单）。
       if (result && result.oldValue !== undefined && normalizeCssValue(result.oldValue) === normalizeCssValue(result.newValue)) {
-        debugLog.add('SHARED', `共享同步跳过(无效果): ${result.property}: ${result.oldValue} → ${result.newValue} @ ${pickComponentClass(targetEl) || generateSelector(targetEl)}`);
         return;
       }
       const synced = findSharedStyleElements(targetEl, result.property, result.oldValue);
@@ -4654,7 +4653,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 尺寸（宽度/高度）归入同一「size」共享组：配置列表合并为一条「尺寸」记录
       const sharedKey = componentClass + '::' + ((result.property === 'width' || result.property === 'height') ? 'size' : result.property);
       const sharedCount = synced.length + 1;
-      debugLog.add('SHARED', `共享同步执行: ${sharedKey} 命中 ${sharedCount} 个元素（${result.property}: ${result.oldValue} → ${result.newValue}）`);
       synced.forEach(el => {
         let applied = false;
         try { applyStyleProperty(el, result.property, result.newValue); applied = true; } catch (e) {}
@@ -7263,11 +7261,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const isCleared = change.newValue === '' || change.newValue == null;
       if (backToOriginal || isCleared) {
         const existing = state.changes.find(matchExisting);
-        if (backToOriginal) {
-          debugLog.add('NETZERO', `净变更归零: ${change.property}: ${change.oldValue} → ${change.newValue} @ ${change.selector}${existing ? '（还原已有记录）' : '（不新增）'}`);
-        } else {
-          debugLog.add('CLEAR', `清空输入撤销: ${change.property} @ ${change.selector}（原 ${change.oldValue}）`);
-        }
         if (existing) {
           this._revertChange(existing);
           state.changes = state.changes.filter(c => c.id !== existing.id);
@@ -7289,7 +7282,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         existing.displayNew = change.displayNew || existing.displayNew || '';
         Object.assign(existing, deriveIntent(existing, change.el));
         if (change.el) changeElRefs.set(existing.id, change.el);
-        debugLog.add('RECORD', `更新记录: ${change.property} ${change.oldValue} → ${change.newValue} @ ${change.selector}${existing.shared ? ' [shared]' : ''}`);
       } else {
         const srcInfo = (change.el && !change.target)
           ? readSourceDeclaration(change.el, change.property)
@@ -7317,7 +7309,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         Object.assign(rec, deriveIntent(rec, change.el));
         state.changes.push(rec);
         if (change.el) changeElRefs.set(rec.id, change.el);
-        debugLog.add('RECORD', `新增记录: ${change.property} ${change.oldValue} → ${change.newValue} @ ${change.selector}${rec.shared ? ' [shared]' : ''}${change.target ? ' [伪元素]' : ''}`);
       }
       this._syncAfterRecordsChanged();
     }
@@ -7344,7 +7335,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (change) {
         this._revertChange(change);
         state.changes = state.changes.filter(c => c.id !== id);
-        debugLog.add('DELETE', `删除记录: ${change.property} ${change.oldValue} → ${change.newValue} @ ${change.selector}`);
         this._flushSave();
         this._updateChangeCount();
         if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
@@ -7360,7 +7350,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (!group.length) return;
       group.forEach(c => this._revertChange(c));
       state.changes = state.changes.filter(c => c.sharedKey !== sharedKey);
-      debugLog.add('DELETE', `删除共享组: ${sharedKey}（${group.length} 条）`);
       this._flushSave();
       this._updateChangeCount();
       if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
