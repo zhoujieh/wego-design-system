@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../scaffold.css">
+<link rel="stylesheet" href="../iconfont.css">
+<style>
+.page{max-width:420px;margin:0 auto}
+.demo-block{background:var(--bg-surface);margin-bottom:var(--spacer-16);overflow:hidden}
+.demo-block__title{padding:var(--spacer-16) var(--spacer-16) var(--spacer-8);font-size:var(--body-sm-font-size);font-weight:var(--font-weight-medium);color:var(--text-tertiary);line-height:var(--body-sm-line-height)}
+.demo-cell{display:flex;align-items:center;justify-content:space-between;min-height:56px;padding:var(--spacer-12) var(--spacer-16);box-sizing:border-box;font-size:var(--body-md-font-size);color:var(--text-default)}
+.demo-cell__label{color:var(--text-default)}
+.demo-cell__meta{font-size:var(--body-sm-font-size);color:var(--text-tertiary)}
+.demo-vbox{display:flex;align-items:center;height:120px;padding:0 var(--spacer-16)}
+.demo-vbox__label{flex:1;font-size:var(--body-sm-font-size);color:var(--text-tertiary)}
+.demo-vbox__item{display:flex;align-items:center;justify-content:center;width:80px;height:100%;flex-shrink:0;font-size:var(--body-sm-font-size);color:var(--text-default)}
+.demo-note{padding:var(--spacer-12) var(--spacer-16);background:var(--bg-subtle);font-size:var(--body-sm-font-size);color:var(--text-secondary);line-height:1.6}
+.demo-note code{background:var(--bg-surface);padding:1px 6px;border-radius:4px}
+
+/* @component-css-start */
+/* 分割线 Divider：水平分隔区块/列表项，或竖向分隔相邻元素。
+   默认：水平 0.5px、颜色 --border-neutral-l2、左侧缩进16px、右侧到边。
+   参数化：--divider-width 粗细（默认 var(--stroke-hairline)）、--divider-color 颜色、
+   --divider-left / --divider-right 左右缩进（默认 16px / 0）。 */
+.divider{position:relative;display:block;width:100%;box-sizing:border-box;--divider-width:var(--stroke-hairline);--divider-color:var(--border-neutral-l2);--divider-left:16px;--divider-right:0}
+.divider::after{content:"";position:absolute;top:0;left:var(--divider-left);right:var(--divider-right);height:var(--divider-width);background:var(--divider-color);pointer-events:none}
+.divider--full{--divider-left:0;--divider-right:0}
+.divider--center{--divider-left:16px;--divider-right:16px}
+.divider--no-left{--divider-left:0}
+.divider--vertical{display:inline-block;width:var(--divider-width);height:100%;align-self:stretch;--divider-left:0;--divider-right:0}
+.divider--vertical::after{top:0;bottom:0;left:0;right:auto;width:var(--divider-width);height:auto}
+/* @component-css-end */
+</style>
+</head>
+<body>
+<div class="pv-header"><h1>分割线</h1><p>0.5px 语义分割线，水平/竖向，缩进与粗细走 CSS 变量，深浅色浮层可换色。</p></div>
+<div class="page">
+
+  <div class="demo-block">
+    <div class="demo-block__title">默认 · 左缩进16右到边（页内区块分隔）</div>
+    <div class="demo-cell">分享产品<span class="demo-cell__label"></span></div>
+    <div class="divider"></div>
+    <div class="demo-cell">配置栏<span class="demo-cell__meta">0.5px · border-neutral-l2</span></div>
+  </div>
+
+  <div class="demo-block">
+    <div class="demo-block__title">全宽（actionsheet / dialog / 列表项分隔）</div>
+    <div class="demo-cell">操作项一</div>
+    <div class="divider divider--full"></div>
+    <div class="demo-cell">操作项二</div>
+    <div class="divider divider--full"></div>
+    <div class="demo-cell">操作项三</div>
+  </div>
+
+  <div class="demo-block">
+    <div class="demo-block__title">两侧缩进 16px（cell--divider-center 形态）</div>
+    <div class="demo-cell">单元格一</div>
+    <div class="divider divider--center"></div>
+    <div class="demo-cell">单元格二</div>
+  </div>
+
+  <div class="demo-block">
+    <div class="demo-block__title">竖向 · 相邻元素分隔</div>
+    <div class="demo-vbox">
+      <span class="demo-vbox__label">商品信息区</span>
+      <div class="divider divider--vertical"></div>
+      <span class="demo-vbox__item">操作区</span>
+    </div>
+  </div>
+
+  <div class="demo-block">
+    <div class="demo-block__title">自定义粗细 / 颜色 / 缩进</div>
+    <div class="demo-cell">1px 加粗</div>
+    <div class="divider" style="--divider-width:1px"></div>
+    <div class="demo-cell">无左缩进</div>
+    <div class="divider divider--no-left" style="--divider-width:1px"></div>
+    <div class="demo-note">深色浮层场景通过 <code>--divider-color</code> 覆盖颜色，无需改粗细。</div>
+  </div>
+
+</div>
+</body>
+</html>

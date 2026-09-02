@@ -1359,6 +1359,22 @@
   flex-shrink:0;
 }
 
+/* ── Divider ───────────────────────────────────────────────── */
+/* @anatomy
+   <div class="pv-header"><h1>分割线</h1><p>0.5px 语义分割线，水平/竖向，缩进与粗细走 CSS 变量，深浅色浮层可换色。</p></div>
+*/
+/* 分割线 Divider：水平分隔区块/列表项，或竖向分隔相邻元素。
+   默认：水平 0.5px、颜色 --border-neutral-l2、左侧缩进16px、右侧到边。
+   参数化：--divider-width 粗细（默认 var(--stroke-hairline)）、--divider-color 颜色、
+   --divider-left / --divider-right 左右缩进（默认 16px / 0）。 */
+.divider{position:relative;display:block;width:100%;box-sizing:border-box;--divider-width:var(--stroke-hairline);--divider-color:var(--border-neutral-l2);--divider-left:16px;--divider-right:0}
+.divider::after{content:"";position:absolute;top:0;left:var(--divider-left);right:var(--divider-right);height:var(--divider-width);background:var(--divider-color);pointer-events:none}
+.divider--full{--divider-left:0;--divider-right:0}
+.divider--center{--divider-left:16px;--divider-right:16px}
+.divider--no-left{--divider-left:0}
+.divider--vertical{display:inline-block;width:var(--divider-width);height:100%;align-self:stretch;--divider-left:0;--divider-right:0}
+.divider--vertical::after{top:0;bottom:0;left:0;right:auto;width:var(--divider-width);height:auto}
+
 /* ── Form ──────────────────────────────────────────────────── */
 /* @anatomy
    <div class="pv-header"><h1>表单容器</h1><p>表单字段容器默认使用左右布局，支持多输入类型、错误与计数共用消息槽位，并在输入恢复合法后自动回到默认态。只有用户或原型简报明确要求上下布局时才使用垂直布局；默认通栏白底，宿主层有横向留白（M8）时才开启 card 圆角修饰。</p></div>
