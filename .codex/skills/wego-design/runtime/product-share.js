@@ -123,17 +123,22 @@
       { key: 'textLink', type: 'checkbox', label: '文案带链接', defaultValue: false },
       { key: 'customerTag', type: 'button', label: '给客户打标' }
     ];
-    /* 数据状态：S3 纯文字（无图无视频）时隐藏「保存图片」按钮 */
+    /* 数据状态：S3 纯文字（无图无视频）时隐藏「保存图片」按钮；S5 视频为主（有视频无图片）时保存按钮文案改为「保存视频」 */
     var hasImages = content.images && content.images.length > 0;
     var hasVideos = content.videos && content.videos.length > 0;
     var isTextOnly = !hasImages && !hasVideos;
+    var isVideoOnly = hasVideos && !hasImages;
     var actions = (config.actions || [
       { key: 'miniprogramLink', label: '小程序链接', icon: 'icon-lianjie', style: 'icon-text' },
       { key: 'saveImages', label: '保存图片', icon: 'icon-xiazai', style: 'icon-text' },
       { key: 'barcode', label: '打商品条码', icon: 'icon-dayinshangpintiaoma', style: 'icon-text' }
-    ]).filter(function (a) {
-      return !(isTextOnly && a.key === 'saveImages');
-    });
+    ]).map(function (a) {
+      if (a.key === 'saveImages') {
+        if (isTextOnly) return null;
+        if (isVideoOnly) return { key: 'saveImages', label: '保存视频', icon: a.icon, style: a.style };
+      }
+      return a;
+    }).filter(Boolean);
 
     /* 渠道栏：按 group 分组渲染，每组 flex-wrap，item 固定 68px */
     var group1 = CHANNELS.filter(function (c) { return c.group === 1 && channels.indexOf(c.key) >= 0; });
