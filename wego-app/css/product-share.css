@@ -17,12 +17,24 @@
 
 /* 标题栏 */
 .share-panel__header {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: flex-start;
   padding: 0 4px 0 16px;
   height: 64px;
+}
+
+/* 标题栏/配置栏下方分割线：0.5px、左侧缩进16px不到边、右侧到边 */
+.share-panel__header::after,
+.share-panel__config::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 16px;
+  right: 0;
   border-bottom: 0.5px solid var(--border-neutral-l2);
+  pointer-events: none;
 }
 
 .share-panel__title {
@@ -73,13 +85,13 @@
 
 /* 配置栏 */
 .share-panel__config {
+  position: relative;
   height: 48px;
   padding: 0 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  border-bottom: 0.5px solid var(--border-neutral-l2);
 }
 
 .share-panel__config-row {
@@ -151,7 +163,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   border: none;
   background: transparent;
   cursor: pointer;

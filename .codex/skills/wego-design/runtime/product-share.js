@@ -117,10 +117,8 @@
     var channels = config.channels || CHANNELS.map(function (c) { return c.key; });
     var showHeaderActions = config.showHeaderActions !== false;
     var configItems = config.configItems || [
-      { key: 'shareType', type: 'radio', options: [
-        { value: 'miniprogram', label: '小程序码' },
-        { value: 'textLink', label: '文案带链接' }
-      ], defaultValue: 'miniprogram' },
+      { key: 'miniprogram', type: 'checkbox', label: '小程序码', defaultValue: true },
+      { key: 'textLink', type: 'checkbox', label: '文案带链接', defaultValue: false },
       { key: 'customerTag', type: 'button', label: '给客户打标' }
     ];
     var actions = config.actions || [
@@ -154,24 +152,21 @@
       return html;
     }
 
-    /* 配置栏：checkbox 组件实现单选；配置项为空时不渲染、不占位 */
+    /* 配置栏：checkbox 独立多选；配置项为空时不渲染、不占位 */
     var configHtml = '';
     if (configItems.length > 0) {
       configHtml = '<div class="share-panel__config">';
+      configHtml += '<div class="share-panel__config-row">';
       configItems.forEach(function (item) {
-        if (item.type === 'radio') {
-          configHtml += '<div class="share-panel__config-row">';
-          item.options.forEach(function (opt) {
-            var checked = opt.value === item.defaultValue;
-            configHtml += '<label class="checkbox-field share-panel__config-option" role="radio" aria-checked="' + checked + '" data-config-key="' + item.key + '" data-config-value="' + opt.value + '">'
-              + '<span class="checkbox checkbox--sm' + (checked ? ' checkbox--checked' : '') + '">'
-              + '<span class="checkbox__inner"></span>'
-              + (checked ? '<span class="checkbox__icon"><img class="checkbox__asset" src="./lib/assets/icons/checkbox-check.svg" alt=""></span>' : '')
-              + '</span>'
-              + '<span class="checkbox-field__text' + (checked ? ' is-active' : '') + '">' + opt.label + '</span>'
-              + '</label>';
-          });
-          configHtml += '</div>';
+        if (item.type === 'checkbox') {
+          var checked = !!item.defaultValue;
+          configHtml += '<label class="checkbox-field share-panel__config-option" role="checkbox" aria-checked="' + checked + '" data-config-key="' + item.key + '" data-config-value="' + item.key + '">'
+            + '<span class="checkbox checkbox--sm' + (checked ? ' checkbox--checked' : '') + '">'
+            + '<span class="checkbox__inner"></span>'
+            + (checked ? '<span class="checkbox__icon"><img class="checkbox__asset" src="./lib/assets/icons/checkbox-check.svg" alt=""></span>' : '')
+            + '</span>'
+            + '<span class="checkbox-field__text' + (checked ? ' is-active' : '') + '">' + item.label + '</span>'
+            + '</label>';
         } else if (item.type === 'button') {
           configHtml += '<button type="button" class="share-panel__config-link" data-action="config-btn" data-config-key="' + item.key + '">'
             + '<span>' + item.label + '</span>'
@@ -179,7 +174,7 @@
             + '</button>';
         }
       });
-      configHtml += '</div>';
+      configHtml += '</div></div>';
     }
 
     /* 其他操作栏：单行横向滚动，样式与分享渠道一致（52px 图标框 + 下方文字），图标用 iconfont */
@@ -447,34 +442,33 @@
           });
         });
 
-        /* 配置栏单选切换 */
+        /* 配置栏 checkbox 独立多选切换：每项独立勾选，互不影响 */
         root.querySelectorAll('.share-panel__config-option').forEach(function (option) {
           option.addEventListener('click', function () {
             var configKey = option.getAttribute('data-config-key');
             var value = option.getAttribute('data-config-value');
-            /* 同组其他选项取消选中 */
-            root.querySelectorAll('.share-panel__config-option[data-config-key="' + configKey + '"]').forEach(function (other) {
-              other.setAttribute('aria-checked', 'false');
-              var checkbox = other.querySelector('.checkbox');
-              if (checkbox) checkbox.classList.remove('checkbox--checked');
-              var icon = other.querySelector('.checkbox__icon');
-              if (icon) icon.remove();
-              var text = other.querySelector('.checkbox-field__text');
-              if (text) text.classList.remove('is-active');
-            });
-            /* 当前选项选中 */
-            option.setAttribute('aria-checked', 'true');
+            var isChecked = option.getAttribute('aria-checked') === 'true';
+            var newChecked = !isChecked;
+            /* 当前项切换选中态 */
+            option.setAttribute('aria-checked', String(newChecked));
             var checkbox = option.querySelector('.checkbox');
-            if (checkbox) checkbox.classList.add('checkbox--checked');
-            var iconEl = checkbox.querySelector('.checkbox__icon');
-            if (!iconEl) {
-              iconEl = document.createElement('span');
-              iconEl.className = 'checkbox__icon';
-              iconEl.innerHTML = '<img class="checkbox__asset" src="./lib/assets/icons/checkbox-check.svg" alt="">';
-              checkbox.appendChild(iconEl);
-            }
             var text = option.querySelector('.checkbox-field__text');
-            if (text) text.classList.add('is-active');
+            if (newChecked) {
+              if (checkbox) checkbox.classList.add('checkbox--checked');
+              var iconEl = checkbox.querySelector('.checkbox__icon');
+              if (checkbox && !iconEl) {
+                iconEl = document.createElement('span');
+                iconEl.className = 'checkbox__icon';
+                iconEl.innerHTML = '<img class="checkbox__asset" src="./lib/assets/icons/checkbox-check.svg" alt="">';
+                checkbox.appendChild(iconEl);
+              }
+              if (text) text.classList.add('is-active');
+            } else {
+              if (checkbox) checkbox.classList.remove('checkbox--checked');
+              var iconEl2 = checkbox.querySelector('.checkbox__icon');
+              if (iconEl2) iconEl2.remove();
+              if (text) text.classList.remove('is-active');
+            }
           });
         });
 
