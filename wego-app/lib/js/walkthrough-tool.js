@@ -7030,6 +7030,78 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       }
     };
     _onDocKeyDown = (e) => {
+      const inInput = (() => {
+        const t = e.target;
+        return t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || (t.isContentEditable));
+      })();
+      // Alt+W：切换走查模式
+      if (e.altKey && (e.key === 'w' || e.key === 'W') && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        this._closeAllPanels();
+        this._setWalkthroughMode(!this._walkthroughMode);
+        return;
+      }
+      // L：打开/关闭配置列表（输入框内放行）
+      if (!e.ctrlKey && !e.metaKey && !e.altKey && (e.key === 'l' || e.key === 'L') && !inInput) {
+        e.preventDefault();
+        const ov = this._components.overviewPanel;
+        if (ov && !ov.hasAttribute('hidden')) { ov.close(); } else { this._openOverview(); }
+        return;
+      }
+      // Tab：展开/收起样式编辑面板（有选中元素时）
+      if (e.key === 'Tab' && !e.ctrlKey && !e.metaKey && !e.altKey && state.selectedElement) {
+        const sp = this._components.stylePanel;
+        if (sp) {
+          e.preventDefault();
+          if (sp.hasAttribute('hidden')) { this._selectElement(state.selectedElement); } else { sp.close(); }
+        }
+        return;
+      }
+      // M：切换测量模式
+      if (!e.ctrlKey && !e.metaKey && !e.altKey && (e.key === 'm' || e.key === 'M') && !inInput) {
+        e.preventDefault();
+        this._toggleMeasureMode();
+        return;
+      }
+      // G：切换网格辅助线
+      if (!e.ctrlKey && !e.metaKey && !e.altKey && (e.key === 'g' || e.key === 'G') && !inInput) {
+        e.preventDefault();
+        this._toggleGridMode();
+        return;
+      }
+      // 方向键：选中元素后微调位置（±1px，Shift ±10px，走查模式生效）
+      if (state.selectedElement && this._walkthroughMode && !inInput &&
+          (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+        e.preventDefault();
+        const step = e.shiftKey ? 10 : 1;
+        const el = state.selectedElement;
+        const csNow = getComputedStyle(el);
+        let t = '';
+        try { t = csNow.transform; } catch (err) {}
+        let tx = 0, ty = 0;
+        if (t && t !== 'none') {
+          const m = t.match(/matrix\(([^)]+)\)/);
+          if (m) {
+            const parts = m[1].split(',').map(s => parseFloat(s.trim()) || 0);
+            tx = parts[4] || 0;
+            ty = parts[5] || 0;
+          } else {
+            const tm = t.match(/translate\(([^)]*)\)/);
+            if (tm && tm[1]) {
+              const pair = tm[1].split(',');
+              tx = parseFloat(pair[0]) || 0;
+              ty = parseFloat(pair[1]) || 0;
+            }
+          }
+        }
+        if (e.key === 'ArrowLeft') tx -= step;
+        if (e.key === 'ArrowRight') tx += step;
+        if (e.key === 'ArrowUp') ty -= step;
+        if (e.key === 'ArrowDown') ty += step;
+        el.style.transform = `translate(${Math.round(tx)}px, ${Math.round(ty)}px)`;
+        this._components.highlight.showForElement(el, `+${Math.round(tx)}, +${Math.round(ty)}`);
+        return;
+      }
       // 撤销/重做：Ctrl/Cmd+Z / Ctrl/Cmd+Shift+Z（输入框内让给原生文本撤销）
       if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && (e.key === 'z' || e.key === 'Z')) {
         const t = e.target;
