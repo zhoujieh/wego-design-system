@@ -1,0 +1,10 @@
+{
+  "at": "2026-09-02T11:34:42.333Z",
+  "design_system_version": 563,
+  "scope_revision": 1,
+  "fingerprints": {
+    "@route-entry/%E5%BC%80%E5%8D%95": "929c95d86cc26ae0f96494ddec21d4e9ca7d2771fb565995dc6f7b92ffbea9eb",
+    "wego-app/scenes/bcg/开单/scene.css": "a5fc498e7e85d1348a486ab3824cee70c61f016fcbdcfce935ff791f30695ac9",
+    "wego-app/scenes/bcg/开单/scene.js": "402f383e315c310c0e0e29031207cf73315a3ee47b2df63a146aa44e1310395f"
+  }
+}
