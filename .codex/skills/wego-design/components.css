@@ -1361,7 +1361,7 @@
 
 /* ── Divider ───────────────────────────────────────────────── */
 /* @anatomy
-   <div class="pv-header"><h1>分割线</h1><p>0.5px 固定粗细，水平/竖向；缩进由消费方按布局上下文设置，常用 inset / center 预设。</p></div>
+   <div class="pv-header"><h1>分割线</h1><p>固定 1 物理像素（1px 基准 + 高 DPR 屏幕 scale 缩放），水平/竖向；缩进由消费方按布局上下文设置，常用 inset / center 预设。</p></div>
 */
 /* 分割线 Divider：水平分隔区块/列表项，或竖向分隔相邻元素。
    粗细固定 1 物理像素：基准 1px CSS 像素，高 DPR 屏幕通过 transform scale 缩放（DPR2→scaleY(.5)，DPR3→scaleY(.333)），普通屏幕保持 1px，跨屏幕渲染一致。
