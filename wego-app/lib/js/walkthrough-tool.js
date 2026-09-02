@@ -45,6 +45,7 @@
     currentRoute: '',
     originalStyles: {}, // selector -> { 'css-property': 原始计算值 }
     pseudoStyles: {}, // "selector||before|after" -> { 'css-property': 值 }（注入 <head> 的规则）
+    orderBaselines: {}, // 顺序移动：容器 selector -> 首次移动前的显示顺序快照（净零往返判断）
   };
 
   /** 变更记录 id → 元素引用（会话内存映射，不参与持久化）。
@@ -870,13 +871,41 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     try { return Number(getComputedStyle(el).order) || 0; } catch (e) { return 0; }
   }
 
+  /** 父 flex 容器的显示顺序快照（order 升序、同 order 按 DOM 序），元素用 selector 标识；
+   *  供顺序移动的净零往返判断（容器显示顺序回到首次移动前即视为无净变更）。 */
+  function displaySeq(parent) {
+    return flexItems(parent)
+      .map((ch, i) => ({ ch, i }))
+      .sort((a, b) => computedOrder(a.ch) - computedOrder(b.ch) || a.i - b.i)
+      .map(x => generateSelector(x.ch));
+  }
+
+  /** 两个显示顺序快照是否一致 */
+  function seqEqual(a, b) {
+    if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+    return true;
+  }
+
+  /** 调试用：元素的简短标识（稳定类名 + 首段文本），便于顺序移动日志核对 */
+  function elLabel(el) {
+    if (!el || el.nodeType !== 1) return '(null)';
+    const cls = getFirstStableClass(el);
+    const text = (el.textContent || '').trim().substring(0, 6);
+    return (cls || el.tagName.toLowerCase()) + (text ? '「' + text + '」' : '');
+  }
+
   /** 在主轴方向把元素向前/向后移动一位（用 CSS order 表达显示顺序，不改 DOM 结构）。
    *  dir: 'left'|'right'|'up'|'down'；仅主轴方向有效（row → 左右，column → 上下），
    *  交叉轴方向无顺序可调返回 null。
    *  返回 null 表示不可移动（非 flex 子项 / 交叉轴方向 / 已在边界）。
-   *  返回 { el, neighbor, elOrder, elNew, nbOrder, nbNew, idxOld, idxNew }。
-   *  移动规则：相邻两元素 order 相同（都未显式设置，默认 0）时，仅把目标元素设为相对值
-   *  （前移 -1 / 后移 +1），兄弟不动；已显式设置且不同则互换两者。同类元素一起同步时各容器显示一致。
+   *  返回 { el, neighbor, elOrder, elNew, nbOrder, nbNew, idxOld, idxNew, shifted }。
+   *  shifted：同档换位时被顺延（order 值改写）的同档元素列表 [{ el, oldOrder, newOrder, idx }]。
+   *  移动规则（只与相邻的同级元素换位，不越位）：
+   *  - 相邻两元素 order 不同：互换两者 order。
+   *  - 相邻两元素 order 相同（如都未显式设置，默认 0）：目标是相邻元素换位，但 order 是整数
+   *    且同档按 DOM 序排列，目标要插到相邻元素之后/之前，必须把同档中相邻元素后/前的元素
+   *    统一顺延一档（order+1 / order-1），保持组内相对顺序，避免目标越过中间元素跳到组尾。
    *  注意：位置判断一律基于「显示顺序」（order 升序、同 order 按 DOM 顺序），
    *  因为 order 已表达显示顺序，DOM 顺序可能不再与视觉顺序一致。 */
   function moveFlexItem(el, dir) {
@@ -903,15 +932,37 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     if (!neighbor) return null;
     const elOrder = computedOrder(el);
     const nbOrder = computedOrder(neighbor);
+    debugLog.add('MOVE', `[${dir}] 移动前 容器显示顺序=[${ordered.map(elLabel).join('>')}] 目标=${elLabel(el)}(order=${elOrder}) 相邻=${elLabel(neighbor)}(order=${nbOrder})`);
     let elNew = elOrder, nbNew = nbOrder;
+    const shifted = [];
     if (elOrder === nbOrder) {
-      elNew = fwd ? elOrder - 1 : elOrder + 1;
+      // 同档换位：目标与相邻元素交换显示位置。顺延相邻元素后/前的同档元素到新档位，
+      // 使目标恰好落在相邻元素之后/之前（只换一格，不越过中间元素）。
+      const g = fwd ? elOrder - 1 : elOrder + 1;
+      elNew = g;
+      ordered.forEach((ch, i) => {
+        if (ch === el || ch === neighbor) return;
+        if (computedOrder(ch) !== elOrder) return;
+        const between = fwd ? (i < idx) : (i > idx); // 左移取相邻之前、右移取相邻之后
+        if (between) {
+          ch.style.order = String(g);
+          shifted.push({ el: ch, oldOrder: elOrder, newOrder: g, idx: i });
+        }
+      });
+      debugLog.add('MOVE', `  同档(order=${elOrder} 相同)→ 目标与相邻换位: 目标 ${elOrder}→${g}` + (shifted.length ? `，顺延同档 ${shifted.map(s => elLabel(s.el)).join('、')} → ${g}` : ''));
     } else {
       elNew = nbOrder; nbNew = elOrder;
+      debugLog.add('MOVE', `  异档 → 互换两者 order ${elOrder}↔${nbOrder}`);
     }
     if (elNew !== elOrder) el.style.order = String(elNew);
     if (nbNew !== nbOrder) neighbor.style.order = String(nbNew);
-    return { el, neighbor, elOrder, elNew, nbOrder, nbNew, idxOld: idx, idxNew: fwd ? idx - 1 : idx + 1 };
+    // 移动后容器显示顺序（重新按 order+DOM 序计算）
+    const afterSeq = flexItems(parent)
+      .map((ch, i) => ({ ch, i }))
+      .sort((a, b) => computedOrder(a.ch) - computedOrder(b.ch) || a.i - b.i)
+      .map(x => x.ch);
+    debugLog.add('MOVE', `  移动后 容器显示顺序=[${afterSeq.map(elLabel).join('>')}] 目标order=${elNew} 相邻order=${nbNew}` + (shifted.length ? ` 顺延元素order=${g}` : ''));
+    return { el, neighbor, elOrder, elNew, nbOrder, nbNew, idxOld: idx, idxNew: fwd ? idx - 1 : idx + 1, shifted };
   }
 
   /** 元素在父 flex 容器内的主轴显示位次（1-based，供顺序记录友好展示）；非 flex 子项返回 0 */
@@ -1075,6 +1126,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const el = list[i];
         if (el === targetEl || isWalkthroughElement(el)) continue;
         if (!el.isConnected || !el.getClientRects || !el.getClientRects().length) continue;
+        // order（顺序移动）的共享同步排除同一父容器的兄弟元素：兄弟的 order 已由
+        // moveFlexItem 移动逻辑处理，若把兄弟也同步成与目标相同的 order 值（如同容器内
+        // 同类 action 全设 -1），会导致容器内同类元素 order 一致、按 DOM 序排列 → 视觉上
+        // 移动恢复原位。跨容器（其他卡片/实例）的同款元素仍正常同步。
+        if (property === 'order' && el.parentElement === targetEl.parentElement) continue;
         let val = '';
         try { val = getComputedStyle(el).getPropertyValue(property); } catch (e) { continue; }
         if (normalizeCssValue(val) === targetNorm) candidates.push(el);
@@ -1112,6 +1168,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       'background-color': cs.backgroundColor,
       'border': cs.border,
       'box-shadow': cs.boxShadow,
+      'order': cs.order,
     };
   }
 
@@ -3334,19 +3391,82 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     _moveSelected(dir) {
       const el = this._targetEl;
       if (!el || this._target) return;
+      const parent = el.parentElement;
+      // 首次对某容器做顺序移动前，记录该容器的初始显示顺序基线（供净零往返判断）
+      let baseKey = null;
+      if (parent) {
+        baseKey = 'orderBase::' + generateSelector(parent);
+        if (!state.orderBaselines[baseKey]) {
+          state.orderBaselines[baseKey] = displaySeq(parent);
+        }
+      }
       const mv = moveFlexItem(el, dir);
       if (!mv) { this._updateMoveControls(); return; }
       // 记录目标元素（位置：第X位 → 第Y位；真实 order 值见 orderValue）
       this._recordMoveChange(mv.el, mv, false);
       // 若与兄弟交换了 order（已显式不同），兄弟也记录
       if (mv.nbNew !== mv.nbOrder) this._recordMoveChange(mv.neighbor, mv, true);
+      // 同档换位时被顺延的同档元素（order 值被改写），一并记录 + 共享同步，
+      // 保证施工单还原与其它卡片同款元素联动与实际显示一致
+      if (mv.shifted && mv.shifted.length) {
+        mv.shifted.forEach(sh => {
+          this._recordMoveChange(sh.el, { idxOld: sh.idx, elOrder: sh.oldOrder, elNew: sh.newOrder }, false);
+          this._scheduleSharedSync({ property: 'order', oldValue: String(sh.oldOrder), newValue: String(sh.newOrder) }, sh.el);
+        });
+      }
       // 共享同步：目标元素与兄弟元素分别以各自元素为基准，同类元素（如其它卡片的同款按钮）一起换位。
       // 必须分别传入各自 targetEl（order 属性相同），否则防抖合并会把其中一个的同步覆盖掉
       this._scheduleSharedSync({ property: 'order', oldValue: String(mv.elOrder), newValue: String(mv.elNew) }, mv.el);
       if (mv.nbNew !== mv.nbOrder) {
         this._scheduleSharedSync({ property: 'order', oldValue: String(mv.nbOrder), newValue: String(mv.nbNew) }, mv.neighbor);
       }
+      // 净零往返：容器显示顺序回到首次移动前的基线（如"右移→左移"快速改回）→ 无净变更，
+      // 整体还原本次容器内的顺序移动（本地目标/兄弟记录 + 已落地的共享同步 + 残留 DOM），
+      // 避免施工单留下 order 0→0 / 兄弟 0→1 这类无视觉变化的脏条目。
+      if (baseKey && state.orderBaselines[baseKey] && seqEqual(displaySeq(parent), state.orderBaselines[baseKey])) {
+        this._rollbackContainerOrder(parent, baseKey);
+      }
       this._updateMoveControls();
+    }
+
+    /** 净零往返还原：容器显示顺序已回到首次移动前基线，还原该容器全部顺序移动产物 */
+    _rollbackContainerOrder(parent, baseKey) {
+      // 1. 取消防抖窗口内未执行的共享同步（order 相关），避免后续再落地无效果同步
+      if (this._sharedSyncTimer) { clearTimeout(this._sharedSyncTimer); this._sharedSyncTimer = null; }
+      if (this._sharedSyncPending) {
+        this._sharedSyncPending = this._sharedSyncPending.filter(p => !(p.result && p.result.property === 'order'));
+        if (!this._sharedSyncPending.length) this._sharedSyncPending = null;
+      }
+      // 2. 还原并移除该容器的顺序移动记录：本容器直接子元素的记录（el 经 changeElRefs 关联），
+      //    以及由本容器组件同步出去的共享记录（sharedKey 命中本容器组件类，el 在其他同构容器内）。
+      //    注意：只用「直接子元素」归属判断（relEl.parentElement === parent），不能用 parent.contains
+      //    （任意后代）——否则会把嵌套子容器内用户已确认的顺序修改（如 product-info 内移动 product-name）
+      //    当作本容器的记录一并还原，导致无关修改被重置。
+      const compClasses = [];
+      Array.from(parent.children).forEach(ch => {
+        const cc = pickComponentClass(ch);
+        if (cc && !compClasses.includes(cc)) compClasses.push(cc);
+      });
+      const related = state.changes.filter(c => {
+        if (c.property !== 'order') return false;
+        const relEl = changeElRefs.get(c.id);
+        if (relEl && relEl.parentElement === parent) return true;
+        if (c.shared && c.sharedKey) {
+          const [cc] = String(c.sharedKey).split('::');
+          return compClasses.includes(cc);
+        }
+        return false;
+      });
+      const app = document.querySelector('wego-walkthrough');
+      if (app && typeof app._revertChange === 'function') {
+        related.forEach(c => app._revertChange(c));
+      }
+      state.changes = state.changes.filter(c => !related.includes(c));
+      // 3. 兜底清掉容器内残留的 order 内联（恢复到基线无 order 状态）
+      Array.from(parent.children).forEach(ch => { try { ch.style.removeProperty('order'); } catch (e) {} });
+      // 4. 清基线：容器已回初始，后续新移动重新建立基线
+      delete state.orderBaselines[baseKey];
+      if (app && app._syncAfterRecordsChanged) app._syncAfterRecordsChanged();
     }
 
     /** 记录一次顺序移动变更（property='order'；oldValue/newValue 存真实 order 值供同步匹配与还原，
@@ -3371,6 +3491,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         orderValue: newVal,
         displayOld: '第' + oldPos + '位',
         displayNew: '第' + newPos + '位',
+        initPos: isNeighbor ? 0 : (mv.idxOld + 1),
         el,
         shared: false,
         sharedKey: '',
@@ -3974,6 +4095,17 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             color: var(--text-brand, #00b96b);
             box-shadow: 0 1px 2px rgba(0,0,0,0.08);
           }
+          /* 自动布局：主轴对齐（左/右/左右）与间距输入 上下合并容器（对齐在上、输入在下） */
+          .gap-align-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+            min-width: 0;
+          }
+          .gap-align-wrap .field {
+            flex: none;
+          }
           .field.metric-field {
             padding: 0 4px 0 0;
           }
@@ -4070,9 +4202,16 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
               <div class="alignment-matrix" data-align-matrix>
                 ${this._renderAlignMatrix(d)}
               </div>
-              <div class="field">
-                <span class="field-icon">${ICONS.gap}</span>
-                <input class="text-input" type="text" value="${d.layoutGap || ''}" data-field="layoutGap" inputmode="numeric" placeholder="gap" />
+              <div class="gap-align-wrap">
+                <div class="btn-group" title="主轴对齐方式">
+                  <button type="button" data-field="justifyContent" data-value="flex-start" class="${d.justifyContent === 'flex-start' ? 'active' : ''}" title="左对齐">左</button>
+                  <button type="button" data-field="justifyContent" data-value="flex-end" class="${d.justifyContent === 'flex-end' ? 'active' : ''}" title="右对齐">右</button>
+                  <button type="button" data-field="justifyContent" data-value="space-between" class="${d.justifyContent === 'space-between' ? 'active' : ''}" title="左右对齐（两端贴边）">左右</button>
+                </div>
+                <div class="field">
+                  <span class="field-icon">${ICONS.gap}</span>
+                  <input class="text-input" type="text" value="${d.justifyContent === 'space-between' ? 'auto' : (d.layoutGap || '')}" data-field="layoutGap" inputmode="numeric" placeholder="gap" />
+                </div>
               </div>
             </div>
             <p class="sub-label">内边距 padding</p>
@@ -4329,6 +4468,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._shadow.querySelectorAll('[data-move]').forEach(btn => {
         btn.addEventListener('click', () => this._moveSelected(btn.dataset.move));
       });
+      // 自动布局：gap 输入框在「左右对齐」显示 auto 态下，聚焦时清空便于直接输入数值
+      const gapInput = this._shadow.querySelector('input[data-field="layoutGap"]');
+      if (gapInput) {
+        gapInput.addEventListener('focus', () => { if (gapInput.value === 'auto') gapInput.value = ''; });
+      }
       // Liaison 式宽高交互：数值输入（blur/Enter 自动回 fixed 模式 + commit）+ 模式 select（commit）
       const sizeFields = ['width', 'height'];      sizeFields.forEach(field => {
         const input = this._shadow.querySelector(`[data-field="${field}"]`);
@@ -4415,6 +4559,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
     _onFieldChange(field, value) {
       if (!this._targetEl || !this._data) return;
+      // auto 是「左右对齐」模式下的间距显示态，不作为可提交的间距值（忽略，避免误提交/误报）
+      if (field === 'layoutGap' && value === 'auto') return;
       // 输入守门：拦截负数尺寸、非 flex 容器布局方向等非法操作（伪元素与普通元素路径统一），
       // 必须在写 _data 之前拦截，避免污染面板数据
       const guard = this._validateFieldValue(field, value);
@@ -4423,6 +4569,14 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         return;
       }
       this._data[field] = value;
+      // 自动布局联动：间距输入数值 → 自动回「左对齐」布局（参考宽高输入数值自动回固定模式）
+      if (!this._target && field === 'layoutGap' && String(value || '').trim() !== '' && !isNaN(parseFloat(value))) {
+        if (this._data.justifyContent !== 'flex-start') this._data.justifyContent = 'flex-start';
+      }
+      // 自动布局联动：切到「左右对齐」→ 间距视为 auto（清空输入值）
+      if (!this._target && field === 'justifyContent' && value === 'space-between') {
+        this._data.layoutGap = '';
+      }
       // 伪元素目标：编辑通过注入 <head> 的样式规则生效，property 写为 css-property
       if (this._target) {
         const cssProp = this._fieldToCssProp(field);
@@ -4447,41 +4601,54 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 应用到元素（本体）
       const result = this._applyField(field, value);
       if (result) {
-        // 记录当前元素变更（无条件；若后续命中公共样式同步，由 _applySharedSync 补标 shared 标记）
-        bus.emit('style-change', {
-          selector: this._selector,
-          elementTag: this._targetEl.tagName.toLowerCase(),
-          elementText: (this._targetEl.textContent || '').trim().substring(0, 50),
-          elementClass: getFirstStableClass(this._targetEl),
-          elementClasses: getStableClasses(this._targetEl),
-          property: result.property,
-          oldValue: result.oldValue,
-          newValue: result.newValue,
-          el: this._targetEl,
-          shared: false,
-          sharedKey: '',
-        });
-        // 样式同步（共享元素模式）：高频输入（颜色拖动等）下防抖，停顿后按最终值执行一次同步扫描，
-        // 避免每帧全页扫描卡顿、避免中途值把共享元素改错
-        this._scheduleSharedSync(result);
-        // 伴随属性（如切尺寸模式时关闭拉伸/写入固定宽）：只记录当前元素；需同步类同的才 schedule 共享同步
-        if (result.extra && result.extra.length) {
-          result.extra.forEach(extra => {
-            bus.emit('style-change', {
-              selector: this._selector,
-              elementTag: this._targetEl.tagName.toLowerCase(),
-              elementText: (this._targetEl.textContent || '').trim().substring(0, 50),
-              elementClass: getFirstStableClass(this._targetEl),
-              elementClasses: getStableClasses(this._targetEl),
-              property: extra.property,
-              oldValue: extra.oldValue,
-              newValue: extra.newValue,
-              el: this._targetEl,
-              shared: false,
-              sharedKey: '',
-            });
-            if (extra.sync !== false) this._scheduleSharedSync(extra);
+        // 无效果守卫：目标新值与当前计算值归一化相等 → 本次改动无视觉差异，撤销已写入 inline，
+        // 不记录、不触发共享同步，避免空元素/默认值被共享同步写成无效果的脏施工单。
+        // layoutMode 附带 display:flex 副作用：仅当元素已处于 flex/grid 时才真正无效果。
+        const _noopSame = normalizeCssValue(result.oldValue) === normalizeCssValue(result.newValue);
+        const _noop = _noopSame && (result.property !== 'flex-direction' || (() => {
+          const d = getComputedStyle(this._targetEl).display;
+          return d === 'flex' || d === 'grid';
+        })());
+        if (_noop) {
+          // 撤销已写入的 inline 样式，保持页面原样
+          try { this._targetEl.style.setProperty(result.property, ''); } catch (e) {}
+        } else {
+          // 记录当前元素变更（若后续命中公共样式同步，由 _applySharedSync 补标 shared 标记）
+          bus.emit('style-change', {
+            selector: this._selector,
+            elementTag: this._targetEl.tagName.toLowerCase(),
+            elementText: (this._targetEl.textContent || '').trim().substring(0, 50),
+            elementClass: getFirstStableClass(this._targetEl),
+            elementClasses: getStableClasses(this._targetEl),
+            property: result.property,
+            oldValue: result.oldValue,
+            newValue: result.newValue,
+            el: this._targetEl,
+            shared: false,
+            sharedKey: '',
           });
+          // 样式同步（共享元素模式）：高频输入（颜色拖动等）下防抖，停顿后按最终值执行一次同步扫描，
+          // 避免每帧全页扫描卡顿、避免中途值把共享元素改错
+          this._scheduleSharedSync(result);
+          // 伴随属性（如切尺寸模式时关闭拉伸/写入固定宽）：只记录当前元素；需同步类同的才 schedule 共享同步
+          if (result.extra && result.extra.length) {
+            result.extra.forEach(extra => {
+              bus.emit('style-change', {
+                selector: this._selector,
+                elementTag: this._targetEl.tagName.toLowerCase(),
+                elementText: (this._targetEl.textContent || '').trim().substring(0, 50),
+                elementClass: getFirstStableClass(this._targetEl),
+                elementClasses: getStableClasses(this._targetEl),
+                property: extra.property,
+                oldValue: extra.oldValue,
+                newValue: extra.newValue,
+                el: this._targetEl,
+                shared: false,
+                sharedKey: '',
+              });
+              if (extra.sync !== false) this._scheduleSharedSync(extra);
+            });
+          }
         }
       }
       // 更新 UI（按钮 active 态等）
@@ -4548,6 +4715,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
     /** 执行共享样式同步：按最终值扫描命中元素并批量应用 + 记录（含目标元素补标共享） */
     _applySharedSync(result, targetEl) {
+      // 无效果兜底守卫：共享同步结果已是无效果值（old===new 归一化相等）时跳过，
+      // 拦截防抖合并产生的 no-op（用户快速改回原值时，_scheduleSharedSync 合并成 old===new，
+      // 会绕过 _onFieldChange 入口守卫，把无效果值写到已是同值的共享元素上产生脏施工单）。
+      if (result && result.oldValue !== undefined && normalizeCssValue(result.oldValue) === normalizeCssValue(result.newValue)) {
+        return;
+      }
       const synced = findSharedStyleElements(targetEl, result.property, result.oldValue);
       if (!synced.length) return;
       const componentClass = pickComponentClass(targetEl);
@@ -4819,7 +4992,16 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         case 'justifyContent': {
           const oldValue = cs().justifyContent;
           el.style.justifyContent = value;
-          return { property: 'justify-content', oldValue, newValue: value };
+          const res = { property: 'justify-content', oldValue, newValue: value };
+          // 左右对齐 → 间距输入显示 auto，清除已显式设置的固定 gap（避免与两端分布矛盾）
+          if (!this._target && value === 'space-between') {
+            const gapOld = cs().gap;
+            if (el.style.getPropertyValue('gap') !== '') {
+              el.style.gap = '';
+              res.extra = [{ property: 'gap', oldValue: gapOld, newValue: '', sync: true }];
+            }
+          }
+          return res;
         }
         case 'alignItems': {
           const oldValue = cs().alignItems;
@@ -4829,7 +5011,16 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         case 'layoutGap': {
           const oldValue = cs().gap;
           el.style.gap = isNaN(numVal) ? '' : numVal + 'px';
-          return { property: 'gap', oldValue, newValue: isNaN(numVal) ? '' : numVal + 'px' };
+          const res = { property: 'gap', oldValue, newValue: isNaN(numVal) ? '' : numVal + 'px' };
+          // 输入固定间距 → 自动回「左对齐」布局（与左右对齐显示 auto 互斥）
+          if (!this._target && !isNaN(numVal)) {
+            const jcOld = cs().justifyContent;
+            if (jcOld !== 'flex-start') {
+              el.style.justifyContent = 'flex-start';
+              res.extra = [{ property: 'justify-content', oldValue: jcOld, newValue: 'flex-start', sync: true }];
+            }
+          }
+          return res;
         }
         case 'paddingLeft': {
           const oldValue = cs().paddingLeft;
@@ -5068,6 +5259,16 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._shadow.querySelectorAll('[data-field="textAlign"]').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.value === d.textAlign);
       });
+      // 自动布局：主轴对齐（左/右/左右）
+      this._shadow.querySelectorAll('[data-field="justifyContent"]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.value === d.justifyContent);
+      });
+      // 自动布局：gap 输入框回显（左右对齐模式显示 auto，否则显示间距值）
+      const gapInput = this._shadow.querySelector('input[data-field="layoutGap"]');
+      if (gapInput) {
+        const gapDisp = d.justifyContent === 'space-between' ? 'auto' : (d.layoutGap || '');
+        if (gapInput.value !== gapDisp) gapInput.value = gapDisp;
+      }
       // shadow inset
       this._shadow.querySelectorAll('[data-field="shadowInset"]').forEach(btn => {
         const isActive = (btn.dataset.value === 'true') === (d.shadowInset === true || d.shadowInset === 'true');
@@ -7132,11 +7333,33 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         : state.currentRoute + '::' + change.selector;
       const original = state.originalStyles[snapKey];
       const matchExisting = (c) => c.selector === change.selector && c.property === change.property && (c.target || '') === (change.target || '');
-      // 改回原始值 = 净变更为零，删除该属性的变更记录（而非保留 X→X）；归一化比较，兼容 rgb 空格、0px 等格式差异。
-      // 顺序移动（order）例外：order 是相对显示顺序，绝对值回到原始 0 不等于顺序未变
-      // （如交换后 label 从 -1 回到 0，视觉位置仍从第 1 位变到第 2 位），必须保留记录供追踪与还原
+      // —— 统一净变更守卫（所有属性、所有路径、首次+后续都判）——
+      // 修改后与元素初始快照值等价 = 净变更为零 → 还原已有记录且不新增（避免 X→X / 往返残留等脏记录）。
+      // 例外：
+      //  - order（顺序移动）：值回初始不等于顺序未变（真交换时位置变了），需显示位置也回到初始位置；
+      //  - flex-direction（layoutMode）：对非 flex 容器设 row 会带 display:flex 副作用，
+      //    仅当元素当前已是 flex/grid 时才真正无效果。
       const isOrderMove = change.property === 'order';
-      const backToOriginal = !isOrderMove && original && (change.property in original) && this._cssValueEqual(change.newValue, original[change.property]);
+      const isLayoutDir = change.property === 'flex-direction';
+      let netZero = false;
+      if (!isPseudo && original && (change.property in original)) {
+        const valBack = this._cssValueEqual(change.newValue, original[change.property]);
+        if (valBack) {
+          if (isOrderMove) {
+            const existing0 = state.changes.find(matchExisting);
+            const initPos = existing0 ? (existing0.initPos || 0) : (Number(change.initPos) || 0);
+            const curPos = change.el ? flexPositionOf(change.el) : 0;
+            netZero = initPos > 0 && curPos === initPos;
+          } else if (isLayoutDir && change.el) {
+            let d = '';
+            try { d = getComputedStyle(change.el).display; } catch (e) {}
+            netZero = d === 'flex' || d === 'grid';
+          } else {
+            netZero = true;
+          }
+        }
+      }
+      const backToOriginal = netZero;
       // 清空输入 = 撤销该属性：还原样式并移除已有记录，且不允许新增空值脏记录
       const isCleared = change.newValue === '' || change.newValue == null;
       if (backToOriginal || isCleared) {
@@ -7179,6 +7402,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           orderValue: change.orderValue || '',
           displayOld: change.displayOld || '',
           displayNew: change.displayNew || '',
+          initPos: Number(change.initPos) || 0,
           shared: !!change.shared,
           sharedKey: change.sharedKey || '',
           sourceDeclared: srcInfo.declared,
@@ -7416,6 +7640,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._saveTimer = setTimeout(() => {
         this._saveTimer = null;
         this._persistChanges();
+        // 落盘后刷新角标：保证净零还原/清空等内存态变化最终与持久化一致，
+        // 避免角标停留在防抖窗口内的旧计数
+        this._updateChangeCount();
       }, 300);
     }
 
@@ -7475,15 +7702,16 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       try {
         const all = this._loadAllScenesChanges();
         all.forEach(s => {
+          // 当前场景以内存态为权威：避免防抖落盘窗口内读到旧 localStorage，
+          // 导致净零还原/清空后角标残留旧计数（需等下次打开才刷新）
+          if (s.routeId === state.currentRoute) return;
           const changeGroupCount = new Set(s.changes.map(c => c.sharedKey || c.selector)).size;
           total += changeGroupCount + s.annotations.filter(a => a.text && String(a.text).trim()).length;
         });
       } catch (e) { /* 跨场景统计失败时退回当前场景 */ }
-      if (total === 0) {
-        // 兜底：当前场景内存态（localStorage 尚未落盘时）
-        const changeGroupCount = new Set(state.changes.map(c => c.sharedKey || c.selector)).size;
-        total = changeGroupCount + state.annotations.filter(a => a.text && a.text.trim()).length;
-      }
+      // 当前场景内存态（实时准确，与配置列表同源）
+      const curGroupCount = new Set(state.changes.map(c => c.sharedKey || c.selector)).size;
+      total += curGroupCount + state.annotations.filter(a => a.text && a.text.trim()).length;
       return total;
     }
 
