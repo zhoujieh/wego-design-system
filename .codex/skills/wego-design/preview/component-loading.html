@@ -67,6 +67,14 @@
   pointer-events:auto;
   transition:opacity var(--duration-normal) var(--ease-enter), visibility 0s;
 }
+/* 遮罩形态(--mask):浮层下层覆盖全屏透明遮罩,阻断页面底部内容交互;浮层内容与中断按钮仍可操作 */
+.loading-overlay--mask::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background:transparent;
+  z-index:-1;
+}
 .loading-overlay__indicator{ display:flex; align-items:center; justify-content:center; }
 .loading-overlay__indicator .loading__dot{ background-color:var(--text-inverse); }
 .loading-overlay__text{ display:flex; flex-direction:column; align-items:center; gap:2px; }
@@ -145,6 +153,15 @@
       <span class="loading-overlay__label">正在下载</span>
       <span class="loading-overlay__percent">63%</span>
     </div>
+  </div>
+</div>
+
+<div class="pv-section__title">居中浮层 — 遮罩形态（--mask，阻断页面底部交互）</div>
+<div class="loading-demo-note">默认浮层不阻断交互；需要阻断页面内容时加 <code>loading-overlay--mask</code> 修饰符，浮层下层覆盖全屏透明遮罩，底部内容不可操作，浮层内内容/中断按钮仍可点击。</div>
+<div class="loading-demo-overlay-wrap">
+  <div class="loading-overlay loading-overlay--mask is-visible" role="status" aria-live="polite">
+    <span class="loading loading--24 loading-overlay__indicator" role="img" aria-label="加载中"><span class="loading__icon"><span class="loading__dot loading__dot--1"></span><span class="loading__dot loading__dot--2"></span><span class="loading__dot loading__dot--3"></span></span></span>
+    <div class="loading-overlay__text"><span class="loading-overlay__label">正在加载</span></div>
   </div>
 </div>
 

@@ -1889,6 +1889,14 @@
   pointer-events:auto;
   transition:opacity var(--duration-normal) var(--ease-enter), visibility 0s;
 }
+/* 遮罩形态(--mask):浮层下层覆盖全屏透明遮罩,阻断页面底部内容交互;浮层内容与中断按钮仍可操作 */
+.loading-overlay--mask::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background:transparent;
+  z-index:-1;
+}
 .loading-overlay__indicator{ display:flex; align-items:center; justify-content:center; }
 .loading-overlay__indicator .loading__dot{ background-color:var(--text-inverse); }
 .loading-overlay__text{ display:flex; flex-direction:column; align-items:center; gap:2px; }
