@@ -4561,6 +4561,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
     /** 执行共享样式同步：按最终值扫描命中元素并批量应用 + 记录（含目标元素补标共享） */
     _applySharedSync(result, targetEl) {
+      // 无效果兜底守卫：共享同步结果已是无效果值（old===new 归一化相等）时跳过，
+      // 拦截防抖合并产生的 no-op（用户快速改回原值时，_scheduleSharedSync 合并成 old===new，
+      // 会绕过 _onFieldChange 入口守卫，把无效果值写到已是同值的共享元素上产生脏施工单）。
+      if (result && result.oldValue !== undefined && normalizeCssValue(result.oldValue) === normalizeCssValue(result.newValue)) {
+        return;
+      }
       const synced = findSharedStyleElements(targetEl, result.property, result.oldValue);
       if (!synced.length) return;
       const componentClass = pickComponentClass(targetEl);
