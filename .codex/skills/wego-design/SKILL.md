@@ -24,6 +24,9 @@ description: 基于已确认原型简报消费微购设计系统，在一次任�
 <!-- rule-id: scene-contract-precheck-mandatory -->
 - 每轮场景实现完成后，必须运行 `node scripts/validate-scene-contract.mjs <场景路径>` 做场景契约预检，通过后再推送 PR。场景契约问题不得留到合并阶段全量门禁才发现。
 
+<!-- rule-id: experience-signal-to-inbox -->
+- 经验信号自检：会话中出现用户纠正、用户表达偏好、返工、踩坑（CI 失败/守卫拦截/验收打回）时，向当前交付单元 `.tasks/experience-inbox.json` 追加一条草稿（字段与分流规则见 `wego-uxsystem-iterate/references/workflow-iteration.md`），不直接改经验权威源，无信号不动作。
+
 ## 输出与交接
 
 业务实现只输出或更新场景目录中的 `route.json`、`scene.js` 和 `scene.css`；迭代记录和生成路由按工作流同步维护。路由发生新增或变化时运行 `node scripts/build-routes.mjs` 生成 `wego-app/js/routes.js`；`routes.js` 是生成物，禁止直接编辑。
@@ -53,8 +56,9 @@ description: 基于已确认原型简报消费微购设计系统，在一次任�
    node scripts/iteration-record.mjs submit-prototype --file {iteration.json} --user-confirmed-prototype {iteration_id}
    ```
 3. 运行与范围相称的完整静态验证，确认自动推送的 PR 已包含全部本次改动。
-4. 停止对应本地预览服务并删除服务记录，再同步最新 `main`、解决冲突并完成验证，最后合并到 `main`。
-5. 每次结果标明：`当前状态：已验收，合并中（PR #<编号>）`。
+4. **经验收口**：扫描 `.tasks/experience-inbox.json`，有草稿则交 `wego-uxsystem-iterate` 按四层分流沉淀（L1/L2 随本 PR，结构性改动另走短周期 PR），无草稿则明示"本轮无经验信号"，随后清空草稿；未完成本步不得进入 worktree 清理。
+5. 停止对应本地预览服务并删除服务记录，再同步最新 `main`、解决冲突并完成验证，最后合并到 `main`。
+6. 每次结果标明：`当前状态：已验收，合并中（PR #<编号>）`。
 
 - 用户在 `prototyping` 阶段要求调整视觉、布局、组件、Token、路由或交互时，直接在原迭代继续修改，不执行 `invalidate`。
 - 用户反馈改变目标、范围、入口、关键路径、状态、数据或可见结果时，退回 `wego-product` 按简报失效流程处理。
