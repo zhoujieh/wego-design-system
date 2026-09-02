@@ -1417,6 +1417,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._mode = mode === 'hover' ? 'hover' : 'selected';
       this._applyMode();
     }
+    /** 控制 8 调整手柄显隐（批注模式选中仅需框选、无尺寸调整手柄） */
+    setHandles(visible) {
+      const handles = this._shadow.querySelector('.handles');
+      if (handles) handles.style.display = visible ? 'block' : 'none';
+    }
     showForElement(el, label) {
       this._targetEl = el;
       this._label = label || '';
@@ -3704,6 +3709,43 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       });
     }
 
+    /** 当前元素从根到自身的祖先链（元素本体在最末），排除 body/html/工具自身 */
+    _crumbChain() {
+      const chain = [];
+      if (!this._targetEl) return chain;
+      let node = this._targetEl;
+      while (node) {
+        if (node.nodeType === 1 && !isWalkthroughElement(node) &&
+            node !== document.body && node !== document.documentElement) {
+          chain.unshift(node);
+        }
+        if (node === document.body || node === document.documentElement) break;
+        node = node.parentElement;
+      }
+      return chain;
+    }
+
+    /** 生成层级面包屑 HTML（对齐 DevTools/Webflow 祖先链）；超过 6 层折叠为首尾 */
+    _buildBreadcrumbs() {
+      const chain = this._crumbChain();
+      if (chain.length < 2) return '';
+      const MAX = 6;
+      let shown = chain;
+      if (chain.length > MAX) {
+        shown = chain.slice(0, 2).concat(chain.slice(chain.length - (MAX - 2)));
+      }
+      let html = '<div class="breadcrumb" data-breadcrumb>';
+      shown.forEach((n) => {
+        const isCurrent = n === this._targetEl;
+        const cls = (n.className || '').toString().split(' ').filter(Boolean).slice(0, 2).join('.');
+        const label = n.tagName.toLowerCase() + (cls ? '.' + cls : '');
+        html += '<span class="crumb-sep">/</span>';
+        html += `<button type="button" class="crumb ${isCurrent ? 'crumb--current' : ''}" data-crumb data-crumb-index="${chain.indexOf(n)}" title="${escapeHtml(label)}">${escapeHtml(label)}</button>`;
+      });
+      html += '</div>';
+      return html;
+    }
+
     _render() {
       const d = this._data || {};
       const tag = this._targetEl ? this._targetEl.tagName.toLowerCase() : '';
@@ -3834,6 +3876,37 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             text-overflow: ellipsis;
             margin-top: 2px;
           }
+          /* 层级面包屑：对齐 Chrome DevTools / Webflow 的祖先链，点击任一层直接选中 */
+          .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            padding: 2px 0 8px;
+            overflow-x: auto;
+            white-space: nowrap;
+            border-bottom: 1px solid var(--border-color);
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+          }
+          .breadcrumb::-webkit-scrollbar { display: none; }
+          .crumb {
+            flex: 0 0 auto;
+            border: none;
+            background: transparent;
+            color: var(--text-tertiary, rgba(255,255,255,0.42));
+            font-size: 10px;
+            line-height: 16px;
+            font-family: inherit;
+            padding: 1px 4px;
+            border-radius: 4px;
+            cursor: pointer;
+            max-width: 110px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+          .crumb:hover { color: var(--text-default, #fff); background: rgba(255,255,255,0.08); }
+          .crumb--current { color: var(--text-brand, #00b96b); font-weight: 600; }
+          .crumb-sep { flex: 0 0 auto; color: var(--text-tertiary, rgba(255,255,255,0.42)); font-size: 10px; }
           .close-btn {
             width: 28px;
             height: 28px;
@@ -4309,6 +4382,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             <button class="close-btn" type="button" data-action="close">${ICONS.close}</button>
           </div>
 
+          ${this._buildBreadcrumbs()}
+
           <div class="panel-body">
           ${hasBefore || hasAfter ? `
           <div class="target-switch" data-target-switch>
@@ -4590,6 +4665,22 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           bus.emit('close-style-panel');
         });
       }
+      // 层级面包屑：点击任一层直接选中该祖先
+      this._shadow.querySelectorAll('[data-crumb]').forEach(crumb => {
+        crumb.addEventListener('click', () => {
+          const idx = parseInt(crumb.dataset.crumbIndex, 10);
+          const chain = this._crumbChain();
+          const el = chain[idx];
+          if (!el) return;
+          const app = document.querySelector('wego-walkthrough');
+          if (app && typeof app._selectElement === 'function') {
+            app._selectElement(el);
+          } else {
+            this._targetEl = el;
+            this.openForElement(el, generateSelector(el), this._target);
+          }
+        });
+      });
       // 伪元素目标切换
       const switchEl = this._shadow.querySelector('[data-target-switch]');
       if (switchEl) {
@@ -6933,6 +7024,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         this._unbindAnnotationEvents();
         this._components.annotationMarkerLayer.setAttribute('hidden', '');
         this._closeAnnotationBubble();
+        this._clearAnnotationSelection();
         if (this._annotationDomObserver) {
           this._annotationDomObserver.disconnect();
           this._annotationDomObserver = null;
@@ -6947,6 +7039,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     }
 
     _bindAnnotationEvents() {
+      this._annotationAnchor = null; // 连续点击层级链锚点（同位置连点逐级上移批注目标）
       document.addEventListener('pointerdown', this._onAnnotationPointerDown, true);
       document.addEventListener('pointermove', this._onAnnotationPointerMove, true);
       document.addEventListener('pointerup', this._onAnnotationPointerUp, true);
@@ -6968,6 +7061,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     _onAnnotationPointerDown = (e) => {
       if (e.button !== undefined && e.button !== 0) return;
       if (isWalkthroughElement(e.target)) return;
+      this._clearHover();
       this._annotationPending = true;
       this._annotationStartX = e.clientX;
       this._annotationStartY = e.clientY;
@@ -6975,31 +7069,95 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     };
 
     _onAnnotationPointerMove = (e) => {
-      if (!this._annotationPending) return;
-      const dx = e.clientX - this._annotationStartX;
-      const dy = e.clientY - this._annotationStartY;
-      // 移动超过 10px 判定为滑动，取消待触发的批注，让页面正常滚动
-      if (Math.hypot(dx, dy) > 10) {
-        this._annotationPending = false;
-        this._annotationTarget = null;
+      if (this._annotationPending) {
+        const dx = e.clientX - this._annotationStartX;
+        const dy = e.clientY - this._annotationStartY;
+        // 移动超过 10px 判定为滑动，取消待触发的批注，让页面正常滚动
+        if (Math.hypot(dx, dy) > 10) {
+          this._annotationPending = false;
+          this._annotationTarget = null;
+        }
+        return;
       }
+      // 非点击/滑动过程：hover 预览目标元素（批注气泡打开时不干扰输入）
+      if (this._currentAnnotation && !this._components.annotationBubble.hasAttribute('hidden')) return;
+      this._updateAnnotationHover(e.clientX, e.clientY);
     };
+
+    /** 批注模式 hover 预览（复用走查高亮组件，虚线框） */
+    _updateAnnotationHover(clientX, clientY) {
+      const el = document.elementFromPoint(clientX, clientY);
+      if (!el || el === document.body || el === document.documentElement || isWalkthroughElement(el)) {
+        this._clearHover();
+        return;
+      }
+      if (this._hoveredElement === el) return;
+      this._hoveredElement = el;
+      this._components.highlight.setMode('hover');
+      this._components.highlight.removeAttribute('hidden');
+      this._components.highlight.showForElement(el);
+    }
+
+    /** 批注模式选中高亮（实线框、无 8 手柄），供用户确认批注锚定元素 */
+    _showAnnotationSelection(el) {
+      if (!el || isWalkthroughElement(el)) return;
+      this._clearHover();
+      const hl = this._components.highlight;
+      hl.setMode('selected');
+      hl.setHandles(false);
+      hl.removeAttribute('hidden');
+      hl.showForElement(el);
+    }
+
+    _clearAnnotationSelection() {
+      if (this._components.highlight) {
+        this._components.highlight.hide();
+        this._components.highlight.setAttribute('hidden', '');
+      }
+    }
 
     _onAnnotationPointerUp = (e) => {
       if (!this._annotationPending) return;
       this._annotationPending = false;
       const el = this._annotationTarget;
       this._annotationTarget = null;
-      if (!el || isWalkthroughElement(el)) return;
+      if (!el || el.nodeType !== 1 || isWalkthroughElement(el)) return;
       e.stopPropagation();
       if (e.cancelable) e.preventDefault();
       this._clearHover();
       if (el === document.body || el === document.documentElement) {
-        // 点页面空白处：关闭并保存当前气泡
+        // 点页面空白处：关闭并保存当前气泡、清除选中高亮
         this._closeAnnotationBubble();
-      } else {
-        this._openAnnotationForElement(el);
+        this._clearAnnotationSelection();
+        return;
       }
+      const now = Date.now();
+      // 同位置连点：批注目标上移一层（±12px 容差、间隔 ≤800ms），气泡重新锚定
+      const samePoint = this._annotationAnchor &&
+        Math.abs(e.clientX - this._annotationAnchor.x) <= 12 &&
+        Math.abs(e.clientY - this._annotationAnchor.y) <= 12 &&
+        now - this._annotationAnchor.time <= 800;
+      if (samePoint) {
+        const cur = this._currentAnnotation ? queryTargetEl(this._currentAnnotation.selector) : null;
+        const parent = cur ? cur.parentElement : null;
+        if (parent && !this._isSelectionRoot(parent)) {
+          this._annotationAnchor.level += 1;
+          this._annotationAnchor.time = now;
+          this._showAnnotationSelection(parent);
+          this._openAnnotationForElement(parent);
+          this._showLevelHint(parent, this._annotationAnchor.level);
+          return;
+        }
+        // 已到最顶层：回环到最深层，重置层级链
+        this._annotationAnchor = null;
+        this._showAnnotationSelection(el);
+        this._openAnnotationForElement(el);
+        return;
+      }
+      // 新位置点击：重置层级链，选中并打开批注
+      this._annotationAnchor = { x: e.clientX, y: e.clientY, time: now, level: 0 };
+      this._showAnnotationSelection(el);
+      this._openAnnotationForElement(el);
     };
 
     _onAnnotationClickCapture = (e) => {
@@ -7043,10 +7201,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             e.stopPropagation();
             e.preventDefault();
             let currentRect = rect;
+            let target = null;
             try {
-              const target = queryTargetEl(ann.selector);
+              target = queryTargetEl(ann.selector);
               if (target && target.isConnected) currentRect = target.getBoundingClientRect();
             } catch (err) {}
+            if (target && target.isConnected) this._showAnnotationSelection(target);
             this._openAnnotationBubble(ann, currentRect);
           });
           layer.appendChild(marker);
@@ -7322,6 +7482,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._isSwiping = false;
       this._pointerActive = false;
       this._hoveredElement = null;
+      // 连续点击层级链锚点：同位置连点逐级上移选中父级
+      this._pickAnchor = null;
       document.addEventListener('pointerdown', this._onPointerDown, true);
       document.addEventListener('pointermove', this._onPointerMove, true);
       document.addEventListener('pointerup', this._onPointerUp, true);
@@ -7398,6 +7560,23 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       }
     }
 
+    /** 判定是否为不可选的层级根（页面 body/html 或走查工具自身 UI） */
+    _isSelectionRoot(el) {
+      if (!el) return true;
+      if (el === document.body || el === document.documentElement) return true;
+      if (isWalkthroughElement(el)) return true;
+      return false;
+    }
+
+    /** 层级切换轻提示（复用 toast） */
+    _showLevelHint(el, level, extra) {
+      const toast = this._components.toast;
+      if (!toast || !el) return;
+      const cls = (el.className || '').toString().split(' ').filter(Boolean).slice(0, 2).join('.');
+      const label = extra || `第 ${level + 1} 层 · ${el.tagName.toLowerCase()}${cls ? ' .' + cls : ''}`;
+      toast.show(label, 1000);
+    }
+
     _handlePointSelection(clientX, clientY, event) {
       const el = document.elementFromPoint(clientX, clientY);
       if (!el) return;
@@ -7406,6 +7585,29 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         return;
       }
       if (event && event.cancelable) event.preventDefault();
+      const now = Date.now();
+      // 同位置连点：从当前选中元素上移一层（±12px 容差、间隔 ≤800ms）
+      const samePoint = this._pickAnchor &&
+        Math.abs(clientX - this._pickAnchor.x) <= 12 &&
+        Math.abs(clientY - this._pickAnchor.y) <= 12 &&
+        now - this._pickAnchor.time <= 800;
+      if (samePoint && state.selectedElement) {
+        const parent = state.selectedElement.parentElement;
+        if (parent && !this._isSelectionRoot(parent)) {
+          this._pickAnchor.level += 1;
+          this._pickAnchor.time = now;
+          this._selectElement(parent);
+          this._showLevelHint(parent, this._pickAnchor.level);
+          return;
+        }
+        // 已到最顶层：回环到最深层，重置层级链
+        this._pickAnchor = null;
+        this._selectElement(el);
+        this._showLevelHint(el, 0, '已回到最深层');
+        return;
+      }
+      // 新位置点击：重置层级链，选中最深层
+      this._pickAnchor = { x: clientX, y: clientY, time: now, level: 0 };
       this._selectElement(el);
     }
 
