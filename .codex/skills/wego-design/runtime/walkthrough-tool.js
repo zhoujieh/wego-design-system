@@ -7529,6 +7529,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._saveTimer = setTimeout(() => {
         this._saveTimer = null;
         this._persistChanges();
+        // 落盘后刷新角标：保证净零还原/清空等内存态变化最终与持久化一致，
+        // 避免角标停留在防抖窗口内的旧计数
+        this._updateChangeCount();
       }, 300);
     }
 
@@ -7588,15 +7591,16 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       try {
         const all = this._loadAllScenesChanges();
         all.forEach(s => {
+          // 当前场景以内存态为权威：避免防抖落盘窗口内读到旧 localStorage，
+          // 导致净零还原/清空后角标残留旧计数（需等下次打开才刷新）
+          if (s.routeId === state.currentRoute) return;
           const changeGroupCount = new Set(s.changes.map(c => c.sharedKey || c.selector)).size;
           total += changeGroupCount + s.annotations.filter(a => a.text && String(a.text).trim()).length;
         });
       } catch (e) { /* 跨场景统计失败时退回当前场景 */ }
-      if (total === 0) {
-        // 兜底：当前场景内存态（localStorage 尚未落盘时）
-        const changeGroupCount = new Set(state.changes.map(c => c.sharedKey || c.selector)).size;
-        total = changeGroupCount + state.annotations.filter(a => a.text && a.text.trim()).length;
-      }
+      // 当前场景内存态（实时准确，与配置列表同源）
+      const curGroupCount = new Set(state.changes.map(c => c.sharedKey || c.selector)).size;
+      total += curGroupCount + state.annotations.filter(a => a.text && a.text.trim()).length;
       return total;
     }
 
