@@ -161,6 +161,21 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     return getRouteLabel();
   }
 
+  /** 从预览 URL 解析 PR 号（GitHub Pages 预览路径固定为 /previews/pr-<N>/；本地预览无此路径返回 null） */
+  function getCurrentPrNumber() {
+    try {
+      const m = (window.location.pathname || '').match(/\/previews\/pr-(\d+)\//);
+      if (m && m[1]) return Number(m[1]);
+    } catch (e) { /* ignore */ }
+    return null;
+  }
+
+  /** 生成工单头部环境/PR 元信息：在线预览输出 PR 号；本地预览输出环境标记（便于 Agent 区分定位路径） */
+  function getPreviewMetaLine() {
+    const pr = getCurrentPrNumber();
+    if (pr) return `**PR:** #${pr}`;
+    return `**环境：本地预览（无 PR）**`;
+  }
 
   /** 判断元素是否属于走查工具自身（包括 Shadow DOM 内部） */
   function isWalkthroughElement(el) {
@@ -183,6 +198,31 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
   const VOLATILE_CLASS_RE = /(^|--|-)(active|open|closed|hidden|visible|selected|current|focus|focused|hover|pressed|dragging|expanded|collapsed|disabled|loading|entering|leaving|shown|show)$/i;
   function isStableSelectorClass(c) {
     return !!c && !c.startsWith('wt-') && !c.startsWith('wego-') && !c.startsWith('data-wt') && !VOLATILE_CLASS_RE.test(c);
+  }
+  /** 提取元素完整稳定类列表（保留全部业务/组件类，供施工单区分组件类与业务类；易变状态类剔除） */
+  function getStableClasses(el) {
+    try {
+      if (!el || !el.className || typeof el.className !== 'string') return [];
+      return el.className.trim().split(/\s+/).filter(isStableSelectorClass);
+    } catch (e) { return []; }
+  }
+  /** 取首个稳定类（历史兼容：elementClass 单类字段的取值来源） */
+  function getFirstStableClass(el) {
+    return getStableClasses(el)[0] || '';
+  }
+  /** 设计系统通用组件根类（业务类判定时排除，避免 btn/icon/card 等基类被误当业务类标注） */
+  const GENERIC_COMPONENT_CLASSES = new Set([
+    'btn','icon','card','cell','tag','badge','avatar','switch','input','search','checkbox','radio',
+    'stack','navbar','dialog','modal','actionsheet','popmenu','popover','toast','metric','skeleton',
+    'loading','result','layout-page','layout-scroll','layout-section','layout-flow','layout-split',
+    'layout-grid','layout-scroll-row','sticky-region','bottom-nav','bottom-action-bar','counter',
+    'numeric-keypad','tabs','form','image','link','field','label','title','content','footer','header',
+  ]);
+  /** 是否为通用组件基类（精确匹配根类，或 -- 变体属于通用组件） */
+  function isGenericComponentClass(c) {
+    if (!c) return true;
+    const base = c.split('--')[0].split('__')[0];
+    return GENERIC_COMPONENT_CLASSES.has(base) || GENERIC_COMPONENT_CLASSES.has(c);
   }
   /** 按记录的选择器找元素；精确匹配失败时剔除易变状态类后重试，兼容历史数据 */
   function queryTargetEl(selector) {
@@ -945,6 +985,42 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     return false;
   }
 
+  /** 读取元素该属性的「源码声明信息」：判定属性是否由样式表规则声明，并返回命中的源码原文。
+   *  sourceValue 保留 token 原文（如 var(--body-md-strong-font-size)）而非计算像素值，供施工单展示。
+   *  只查样式表规则、不查内联样式：走查工具的所有修改都以内联注入（el.style）落地，
+   *  查内联必然读到工具改后的值，无法回溯源码；场景自身用内联设置样式的属性不计为源码声明。 */
+  function readSourceDeclaration(el, property) {
+    if (!el || el.nodeType !== 1 || !property) return { declared: false, sourceValue: '' };
+    const ruleDeclares = (rule) => {
+      try {
+        if (!rule) return null;
+        if (rule.type === 1) {
+          if (rule.selectorText && rule.style && el.matches(rule.selectorText)) {
+            const v = rule.style.getPropertyValue(property);
+            if (v) return { declared: true, sourceValue: String(v).trim() };
+          }
+        } else if (rule.cssRules) {
+          for (let i = 0; i < rule.cssRules.length; i++) {
+            const hit = ruleDeclares(rule.cssRules[i]);
+            if (hit) return hit;
+          }
+        }
+      } catch (e) { /* 跨域/非法规则跳过 */ }
+      return null;
+    };
+    try {
+      for (let i = 0; i < document.styleSheets.length; i++) {
+        const sheet = document.styleSheets[i];
+        try {
+          if (sheet.ownerNode && sheet.ownerNode.id === 'wego-wt-pseudo-styles') continue;
+          const hit = ruleDeclares(sheet);
+          if (hit) return hit;
+        } catch (e) {}
+      }
+    } catch (e) {}
+    return { declared: false, sourceValue: '' };
+  }
+
   /** 提取目标元素的「组件类」：作为「同一条样式控制」该元素的标识。
    *  取稳定类中在页面可见元素出现 ≥2 次、类名字符串最长（BEM 块元素/场景组件类通常最具体）的那个；
    *  没有可共享的组件类则返回 ''（表示无同类可同步）。
@@ -1113,13 +1189,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._render();
       this.style.display = 'flex';
       this.style.opacity = '1';
-      this.style.transform = 'translateY(0)';
+      this.style.transform = 'translateX(-50%) translateY(0)';
       if (this._timer) clearTimeout(this._timer);
       this._timer = setTimeout(() => this.hide(), duration);
     }
     hide() {
       this.style.opacity = '0';
-      this.style.transform = 'translateY(10px)';
+      this.style.transform = 'translateX(-50%) translateY(10px)';
       setTimeout(() => { this.style.display = 'none'; }, 200);
     }
     _render() {
@@ -2028,6 +2104,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     _render() {
       const changes = this._changes || [];
       const annotations = this._annotations || [];
+      const route = this._route || '';
       // 按选择器分组（元素本体与 ::before/::after 变更合并为同一元素分组，避免重复卡片）；
       // 共享同步的变更按 sharedKey 合并为一组（同一公共样式），展示为一条「共享 N 个元素」
       const groups = {};
@@ -2091,6 +2168,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       });
       const changeGroupCount = new Set(changes.map(c => c.sharedKey || c.selector)).size;
       const totalCount = changeGroupCount + annotations.filter(a => a.text && a.text.trim()).length;
+      // 跨场景提示：扫描其它场景是否还有修改（当前场景之外），提示条展示并支持点击跳转
+      let otherScenes = [];
+      try {
+        const all = this._loadAllScenesChanges();
+        otherScenes = all.filter(s => s.routeId !== route);
+      } catch (e) { /* 跨场景扫描失败不影响面板渲染 */ }
 
       this._shadow.innerHTML = `
         <style>
@@ -2354,6 +2437,29 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           }
           .annotation-delete:hover { color: #e53935; background: rgba(255,255,255,0.06); }
           .annotation-delete svg { width: 12px; height: 12px; }
+          .scene-hint {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin: 10px 12px 2px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            background: rgba(255, 184, 77, 0.12);
+            border: 1px solid rgba(255, 184, 77, 0.35);
+          }
+          .scene-hint-label { font-size: 12px; color: #ffb84d; line-height: 1.5; }
+          .scene-hint-list { display: flex; flex-wrap: wrap; gap: 6px; }
+          .scene-hint-jump {
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            cursor: pointer;
+            line-height: 1.6;
+          }
+          .scene-hint-jump:hover { background: rgba(255,255,255,0.14); }
         </style>
         <div class="panel">
           <div class="header">
@@ -2365,6 +2471,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
               <button class="close-btn" type="button" data-action="close" title="关闭">${ICONS.close}</button>
             </div>
           </div>
+          ${otherScenes.length > 0 ? `
+            <div class="scene-hint">
+              <span class="scene-hint-label">⚠️ 还有 ${otherScenes.length} 个场景有修改</span>
+              <span class="scene-hint-list">${otherScenes.map(s => `<button type="button" class="scene-hint-jump" data-jump-scene="${escapeHtml(s.routeId)}">${escapeHtml(s.routeLabel)}</button>`).join('')}</span>
+            </div>
+          ` : ''}
           ${groupList.length === 0 ? `
             <div class="empty">
               当前还没有配置修改或批注<br/>
@@ -2425,6 +2537,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         el.addEventListener('click', () => {
           const selector = el.dataset.selector;
           bus.emit('jump-to-element', { selector });
+        });
+      });
+      // 点击跨场景提示条的场景按钮 → 跳转到对应场景查看其修改
+      this._shadow.querySelectorAll('[data-jump-scene]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const route = btn.dataset.jumpScene;
+          if (route) window.location.hash = '#/' + route;
         });
       });
       // 单条删除
@@ -2503,7 +2622,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const changes = this._changes || [];
       const annotations = this._annotations || [];
       if (changes.length === 0 && annotations.length === 0) {
-        return `## 走查变更单 #/${routeLabel}\n**Viewport:** ${viewport}\n\n当前还没有记录到任何配置修改或批注。`;
+        const metaLine = getPreviewMetaLine();
+        return `## 走查变更单 #/${routeLabel}\n${metaLine}\n**Viewport:** ${viewport}\n\n当前还没有记录到任何配置修改或批注。`;
       }
       // 分组逻辑：共享样式按组件类（sharedKey 去掉 ::属性名）分组，同一组件类的所有属性合并为一条；
       // 非共享样式按 selector 分组，同一元素的多个属性合并为一条。
@@ -2517,6 +2637,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             elementTag: c.elementTag,
             elementText: c.elementText,
             elementClass: c.elementClass || '',
+            elementClasses: c.elementClasses || [],
             changes: [],
             shared: !!c.sharedKey,
             componentClass,
@@ -2564,6 +2685,17 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const m = g.selector.match(/\.([a-zA-Z0-9_-]+)\s*$/) || g.selector.match(/\[data-component-slug="[^"]+"\]\.([a-zA-Z0-9_-]+)/);
         return m ? m[1] : '';
       };
+      // 辅助：提取业务类锚点（组件类之外的业务类；从完整稳定类列表挑"非组件类且非通用组件基类"的类）
+      const getBusinessClass = (g) => {
+        const componentClass = g.componentClass;
+        const classes = (g.elementClasses && g.elementClasses.length) ? g.elementClasses : (g.elementClass ? [g.elementClass] : []);
+        if (!classes.length) return '';
+        // 业务类 = 非组件类、非通用组件基类（btn/icon/card…）的类；组件类与业务类同元素时才能区分
+        const biz = classes.find(c => c !== componentClass && !isGenericComponentClass(c));
+        if (biz) return biz;
+        // 全部是通用组件类或与组件类相同 → 无独立业务类，返回空避免误标
+        return '';
+      };
       // 辅助：格式化 flex 值为友好描述
       const formatFlexLabel = (v) => {
         if (!v) return '-';
@@ -2573,8 +2705,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         if (fixedMatch) return `固定 ${fixedMatch[1]}`;
         return v;
       };
+      const metaLine = getPreviewMetaLine();
       const lines = [
         `## 走查变更单 #/${routeLabel}`,
+        metaLine,
         `**Viewport:** ${viewport}`,
         '',
         '> 施工单：按最终效果整理，改法优先用设计系统语义类；主定位用组件类，完整选择器见文末备选。',
@@ -2617,13 +2751,21 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         // 顺序移动
         orderChanges.forEach(c => {
           const posTxt = (c.displayOld && c.displayNew) ? `${c.displayOld} → ${c.displayNew}` : `order ${c.oldValue} → ${c.newValue}`;
-          changeLines.push(`- 顺序：${posTxt}`);
+          const orderTxt = (c.orderValue || c.newValue) ? `（order: ${c.oldValue || 0} → ${c.orderValue || c.newValue}）` : '';
+          changeLines.push(`- 顺序：${posTxt}${orderTxt}`);
         });
         // 其他样式
         otherChanges.forEach(c => {
           const propLabel = c.property === 'flex' ? '宽度' : c.property;
           const valLabel = c.property === 'flex' ? formatFlexLabel(c.newValue) : (c.newValue || '-');
-          changeLines.push(`- ${propLabel} → ${valLabel}（\`${c.property}: ${c.newValue || '-'}\`）`);
+          // 源码是否已声明：未声明 → 标注"新增"；已声明 → 展示源码值（优先 token 原文，其次原值）
+          const srcDeclared = !!c.sourceDeclared;
+          const srcVal = c.sourceValue || c.oldValue;
+          const curLabel = srcDeclared
+            ? (c.property === 'flex' ? formatFlexLabel(srcVal) : (srcVal || '-'))
+            : '（未声明）';
+          const tag = srcDeclared ? '' : '新增 ';
+          changeLines.push(`- ${tag}${propLabel}：${curLabel} → ${valLabel}（\`${c.property}: ${c.newValue || '-'}\`）`);
         });
         if (changeLines.length) {
           lines.push('- 变更：');
@@ -2635,7 +2777,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const addSnippet = addClassChanges.map(c => c.intentClass).join(' ');
         let fixLine = '- 改法：';
         if (classAnchor) {
+          const businessClass = getBusinessClass(g);
           fixLine += `修改 \`.${classAnchor}\``;
+          if (businessClass && businessClass !== classAnchor) fixLine += `（业务类 \`.${businessClass}\`）`;
           if (cssSnippet || orderSnippet) fixLine += `：\`${[cssSnippet, orderSnippet].filter(Boolean).join('; ')}\``;
           if (addSnippet) fixLine += `，加类 \`${addSnippet}\``;
         } else {
@@ -2655,7 +2799,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           elementText: anchor,
           role,
           adds: addClassChanges.map(c => c.intentClass).filter(Boolean),
-          css: cssChanges.map(c => ({ property: c.property, value: c.property === 'order' ? (c.orderValue || c.newValue) : c.newValue })),
+          css: cssChanges.map(c => ({ property: c.property, value: c.property === 'order' ? (c.orderValue || c.newValue) : c.newValue, sourceDeclared: !!c.sourceDeclared, sourceValue: c.sourceValue || '' })),
           annotation: g.annotation || '',
           shared: g.shared || false,
           sharedCount: g.shared ? (g.sharedCount || g.changes.length) : 0,
@@ -2706,7 +2850,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             const changes = (data.changes || []).filter(c => c.newValue !== '' && c.newValue != null);
             const annotations = (data.annotations || []).filter(a => a.text && String(a.text).trim());
             if (changes.length > 0 || annotations.length > 0) {
-              scenes.push({ routeId, routeLabel: getRouteLabel(routeId), changes, annotations });
+              scenes.push({ routeId, routeLabel: getRouteLabel(routeId), prNumber: data.prNumber || null, changes, annotations });
             }
           } catch (e) { /* 单个场景解析失败不影响其他场景 */ }
         }
@@ -2726,7 +2870,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const viewport = `${window.innerWidth}×${window.innerHeight}`;
       const scenes = this._loadAllScenesChanges();
       if (scenes.length === 0) {
-        return `## 走查变更单（跨场景汇总）\n**Viewport:** ${viewport}\n\n当前还没有记录到任何配置修改或批注。`;
+        const metaLine = getPreviewMetaLine();
+        return `## 走查变更单（跨场景汇总）\n${metaLine}\n**Viewport:** ${viewport}\n\n当前还没有记录到任何配置修改或批注。`;
       }
       // 只有一个场景时，直接用单场景格式
       if (scenes.length === 1) {
@@ -2744,9 +2889,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         this._route = savedRoute;
         return prompt;
       }
-      // 多场景：按场景分组输出
+      // 多场景：按场景分组输出（PR 号取场景数据中的记录，优先当前场景；无记录时回退 URL 解析，均无则标本地预览）
+      const scenePr = scenes.find(s => s.prNumber)?.prNumber || getCurrentPrNumber();
+      const metaLine = scenePr ? `**PR:** #${scenePr}` : getPreviewMetaLine();
       const lines = [
         `## 走查变更单（跨场景汇总，共 ${scenes.length} 个场景）`,
+        metaLine,
         `**Viewport:** ${viewport}`,
         '',
         '> 施工单：按最终效果整理，改法优先用设计系统语义类；主定位用组件类，完整选择器见文末备选。',
@@ -2769,6 +2917,14 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         if (fixedMatch) return `固定 ${fixedMatch[1]}`;
         return v;
       };
+      const getBusinessClass = (g) => {
+        const componentClass = g.componentClass;
+        const classes = (g.elementClasses && g.elementClasses.length) ? g.elementClasses : (g.elementClass ? [g.elementClass] : []);
+        if (!classes.length) return '';
+        const biz = classes.find(c => c !== componentClass && !isGenericComponentClass(c));
+        if (biz) return biz;
+        return '';
+      };
       scenes.forEach((scene, sceneIdx) => {
         lines.push(`### 场景 ${sceneIdx + 1}：${scene.routeLabel}（#/${scene.routeId}）`);
         lines.push('');
@@ -2778,7 +2934,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           const componentClass = c.sharedKey ? c.sharedKey.split('::')[0] : '';
           const gkey = c.sharedKey ? componentClass : c.selector;
           if (!groups[gkey]) {
-            groups[gkey] = { selector: c.selector, elementTag: c.elementTag, elementText: c.elementText, elementClass: c.elementClass || '', changes: [], shared: !!c.sharedKey, componentClass, annotation: '' };
+            groups[gkey] = { selector: c.selector, elementTag: c.elementTag, elementText: c.elementText, elementClass: c.elementClass || '', elementClasses: c.elementClasses || [], changes: [], shared: !!c.sharedKey, componentClass, annotation: '' };
           }
           groups[gkey].changes.push(c);
         });
@@ -2839,12 +2995,20 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           addClassChanges.forEach(c => { changeLines.push(`- 加结构类 \`${c.intentClass}\``); });
           orderChanges.forEach(c => {
             const posTxt = (c.displayOld && c.displayNew) ? `${c.displayOld} → ${c.displayNew}` : `order ${c.oldValue} → ${c.newValue}`;
-            changeLines.push(`- 顺序：${posTxt}`);
+            const orderTxt = (c.orderValue || c.newValue) ? `（order: ${c.oldValue || 0} → ${c.orderValue || c.newValue}）` : '';
+            changeLines.push(`- 顺序：${posTxt}${orderTxt}`);
           });
           otherChanges.forEach(c => {
             const propLabel = c.property === 'flex' ? '宽度' : c.property;
             const valLabel = c.property === 'flex' ? formatFlexLabel(c.newValue) : (c.newValue || '-');
-            changeLines.push(`- ${propLabel} → ${valLabel}（\`${c.property}: ${c.newValue || '-'}\`）`);
+            // 源码是否已声明：未声明 → 标注"新增"；已声明 → 展示源码值（优先 token 原文，其次原值）
+            const srcDeclared = !!c.sourceDeclared;
+            const srcVal = c.sourceValue || c.oldValue;
+            const curLabel = srcDeclared
+              ? (c.property === 'flex' ? formatFlexLabel(srcVal) : (srcVal || '-'))
+              : '（未声明）';
+            const tag = srcDeclared ? '' : '新增 ';
+            changeLines.push(`- ${tag}${propLabel}：${curLabel} → ${valLabel}（\`${c.property}: ${c.newValue || '-'}\`）`);
           });
           if (changeLines.length) {
             lines.push('- 变更：');
@@ -2855,7 +3019,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           const addSnippet = addClassChanges.map(c => c.intentClass).join(' ');
           let fixLine = '- 改法：';
           if (classAnchor) {
+            const businessClass = getBusinessClass(g);
             fixLine += `修改 \`.${classAnchor}\``;
+            if (businessClass && businessClass !== classAnchor) fixLine += `（业务类 \`.${businessClass}\`）`;
             if (cssSnippet || orderSnippet) fixLine += `：\`${[cssSnippet, orderSnippet].filter(Boolean).join('; ')}\``;
             if (addSnippet) fixLine += `，加类 \`${addSnippet}\``;
           } else {
@@ -2872,7 +3038,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             elementText: anchor,
             role,
             adds: addClassChanges.map(c => c.intentClass).filter(Boolean),
-            css: cssChanges.map(c => ({ property: c.property, value: c.property === 'order' ? (c.orderValue || c.newValue) : c.newValue })),
+            css: cssChanges.map(c => ({ property: c.property, value: c.property === 'order' ? (c.orderValue || c.newValue) : c.newValue, sourceDeclared: !!c.sourceDeclared, sourceValue: c.sourceValue || '' })),
             annotation: g.annotation || '',
             shared: g.shared || false,
             sharedCount: g.shared ? (g.sharedCount || g.changes.length) : 0,
@@ -4269,9 +4435,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           target: this._target,
           elementTag: this._targetEl.tagName.toLowerCase(),
           elementText: (this._targetEl.textContent || '').trim().substring(0, 50),
-          elementClass: (this._targetEl.className && typeof this._targetEl.className === 'string')
-            ? this._targetEl.className.trim().split(/\s+/).filter(c => isStableSelectorClass(c))[0] || ''
-            : '',
+          elementClass: getFirstStableClass(this._targetEl),
+          elementClasses: getStableClasses(this._targetEl),
           property: cssProp,
           oldValue: '',
           newValue: cssVal,
@@ -4287,9 +4452,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           selector: this._selector,
           elementTag: this._targetEl.tagName.toLowerCase(),
           elementText: (this._targetEl.textContent || '').trim().substring(0, 50),
-          elementClass: (this._targetEl.className && typeof this._targetEl.className === 'string')
-            ? this._targetEl.className.trim().split(/\s+/).filter(c => isStableSelectorClass(c))[0] || ''
-            : '',
+          elementClass: getFirstStableClass(this._targetEl),
+          elementClasses: getStableClasses(this._targetEl),
           property: result.property,
           oldValue: result.oldValue,
           newValue: result.newValue,
@@ -4307,9 +4471,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
               selector: this._selector,
               elementTag: this._targetEl.tagName.toLowerCase(),
               elementText: (this._targetEl.textContent || '').trim().substring(0, 50),
-              elementClass: (this._targetEl.className && typeof this._targetEl.className === 'string')
-                ? this._targetEl.className.trim().split(/\s+/).filter(c => isStableSelectorClass(c))[0] || ''
-                : '',
+              elementClass: getFirstStableClass(this._targetEl),
+              elementClasses: getStableClasses(this._targetEl),
               property: extra.property,
               oldValue: extra.oldValue,
               newValue: extra.newValue,
@@ -6991,6 +7154,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         existing.newValue = change.newValue;
         existing.timestamp = Date.now();
         existing.elementText = change.elementText;
+        existing.elementClasses = change.elementClasses || existing.elementClasses || [];
         existing.shared = !!change.shared;
         existing.sharedKey = change.sharedKey || '';
         existing.orderValue = change.orderValue || existing.orderValue || '';
@@ -6999,12 +7163,16 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         Object.assign(existing, deriveIntent(existing, change.el));
         if (change.el) changeElRefs.set(existing.id, change.el);
       } else {
+        const srcInfo = (change.el && !change.target)
+          ? readSourceDeclaration(change.el, change.property)
+          : { declared: false, sourceValue: '' };
         const rec = {
           id: 'change-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
           selector: change.selector,
           target: change.target || '',
           elementTag: change.elementTag,
           elementText: change.elementText,
+          elementClasses: change.elementClasses || [],
           property: change.property,
           oldValue: change.oldValue,
           newValue: change.newValue,
@@ -7013,6 +7181,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           displayNew: change.displayNew || '',
           shared: !!change.shared,
           sharedKey: change.sharedKey || '',
+          sourceDeclared: srcInfo.declared,
+          sourceValue: srcInfo.sourceValue,
           timestamp: Date.now(),
         };
         Object.assign(rec, deriveIntent(rec, change.el));
@@ -7066,8 +7236,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       }
     }
 
-    _resetChanges() {
-      debugLog.add('RESET', `_resetChanges 开始: changes=${state.changes.length} annotations=${state.annotations.length}`);
+    /** 清空当前场景的所有修改（还原 DOM + 清 state + 落盘） */
+    _resetCurrentSceneChanges() {
       if (state.changes.length === 0 && state.annotations.length === 0) {
         return;
       }
@@ -7082,10 +7252,30 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._syncAnnotationMarkers();
       this._flushSave();
       this._updateChangeCount();
-      debugLog.add('RESET', `_resetChanges 完成: changes=${state.changes.length} annotations=${state.annotations.length}`);
+      debugLog.add('RESET', `当前场景还原完成: changes=${state.changes.length} annotations=${state.annotations.length}`);
       if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
         this._components.overviewPanel.refresh(state.changes, state.currentRoute, state.annotations);
       }
+    }
+
+    /** 跨场景一键重置：清空所有场景的修改（含 localStorage 中其它场景的记录，不二次确认） */
+    _resetChanges() {
+      debugLog.add('RESET', '跨场景重置开始');
+      // 先清理其它场景的 localStorage 记录（其 DOM 不在当前视口，切到该场景时 _loadChanges 读到空即干净）
+      const currentKey = `wego.walkthrough.data.${state.currentRoute}`;
+      try {
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('wego.walkthrough.data.') && key !== currentKey) {
+            keysToRemove.push(key);
+          }
+        }
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+      } catch (e) { /* localStorage 不可用时忽略 */ }
+      // 再清当前场景
+      this._resetCurrentSceneChanges();
+      debugLog.add('RESET', '跨场景重置完成');
     }
 
     /** 路由切换统一收尾：旧场景落盘与浮层清理 → 新场景数据加载 → 标记重绘 */
@@ -7244,17 +7434,62 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         localStorage.setItem(key, JSON.stringify({
           sceneRoute: state.currentRoute,
           lastModified: Date.now(),
+          prNumber: getCurrentPrNumber(),
           changes: state.changes,
           annotations: state.annotations,
         }));
       } catch (e) {}
     }
 
+    /** 统计所有场景（含当前场景）的变更/批注组数，供角标与提示使用 */
+    /** 扫描所有场景的修改（遍历 localStorage 中所有 wego.walkthrough.data.* 记录） */
+    _loadAllScenesChanges() {
+      const scenes = [];
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (!key || !key.startsWith('wego.walkthrough.data.')) continue;
+          const routeId = key.replace('wego.walkthrough.data.', '');
+          try {
+            const raw = localStorage.getItem(key);
+            const data = raw ? JSON.parse(raw) : {};
+            const changes = (data.changes || []).filter(c => c.newValue !== '' && c.newValue != null);
+            const annotations = (data.annotations || []).filter(a => a.text && String(a.text).trim());
+            if (changes.length > 0 || annotations.length > 0) {
+              scenes.push({ routeId, routeLabel: getRouteLabel(routeId), prNumber: data.prNumber || null, changes, annotations });
+            }
+          } catch (e) { /* 单个场景解析失败不影响其他场景 */ }
+        }
+      } catch (e) { /* localStorage 不可用时返回空 */ }
+      const currentRoute = getCurrentRoute();
+      scenes.sort((a, b) => {
+        if (a.routeId === currentRoute) return -1;
+        if (b.routeId === currentRoute) return 1;
+        return a.routeLabel.localeCompare(b.routeLabel, 'zh-CN');
+      });
+      return scenes;
+    }
+
+    _countAllScenesChanges() {
+      let total = 0;
+      try {
+        const all = this._loadAllScenesChanges();
+        all.forEach(s => {
+          const changeGroupCount = new Set(s.changes.map(c => c.sharedKey || c.selector)).size;
+          total += changeGroupCount + s.annotations.filter(a => a.text && String(a.text).trim()).length;
+        });
+      } catch (e) { /* 跨场景统计失败时退回当前场景 */ }
+      if (total === 0) {
+        // 兜底：当前场景内存态（localStorage 尚未落盘时）
+        const changeGroupCount = new Set(state.changes.map(c => c.sharedKey || c.selector)).size;
+        total = changeGroupCount + state.annotations.filter(a => a.text && a.text.trim()).length;
+      }
+      return total;
+    }
+
     _updateChangeCount() {
-      // 纯空格批注视为空，不计入角标（与关闭气泡时的空批注清理口径一致）；
-      // 共享同步的多个元素变更合并为一条计数（与配置列表合并展示口径一致）
-      const changeGroupCount = new Set(state.changes.map(c => c.sharedKey || c.selector)).size;
-      const count = changeGroupCount + state.annotations.filter(a => a.text && a.text.trim()).length;
+      // 角标显示跨场景总数（所有场景的修改合计），避免切换场景后遗漏其它场景的修改
+      const count = this._countAllScenesChanges();
       // 配置列表按钮数字（有数据时直接显示数字，替换图标；无数据时显示图标）
       if (this._components.overviewCount) {
         this._components.overviewCount.textContent = count > 99 ? '99+' : count;

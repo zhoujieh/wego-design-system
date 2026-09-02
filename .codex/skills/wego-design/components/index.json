@@ -269,6 +269,13 @@
       "preview": "preview/component-layout-grid.html"
     },
     {
+      "slug": "divider",
+      "name": "分割线",
+      "category": "display",
+      "status": "stable",
+      "preview": "preview/component-divider.html"
+    },
+    {
       "slug": "layout-scroll-row",
       "name": "横向滚动区",
       "category": "layout",
