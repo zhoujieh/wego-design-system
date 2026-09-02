@@ -2194,22 +2194,40 @@
     var spec = selectedColor && selectedSize ? specKey(product, selectedColor, selectedSize) : '';
     var quantity = spec ? Number(draft.skuQty[spec] || 0) : 0;
     var stock = spec ? specStock(product, spec) : 0;
+    var desktopSpecRows = availableSizes.map(function (size) {
+      var rowSpec = selectedColor ? specKey(product, selectedColor, size) : '';
+      var rowQuantity = rowSpec ? Number(draft.skuQty[rowSpec] || 0) : 0;
+      var rowStock = rowSpec ? specStock(product, rowSpec) : 0;
+      var rowDisabled = !rowSpec || rowStock <= 0;
+      return '<div class="order-add-spec-counter-row' + (rowDisabled ? ' is-disabled' : '') + '">'
+        + '<span class="order-add-spec-counter-row__label">' + escapeHtml(size) + '</span>'
+        + '<div class="counter' + (rowDisabled ? ' is-disabled' : '') + '" data-component-slug="counter">'
+        +   '<div class="counter__body">'
+        +     '<button type="button" class="counter__btn counter__btn--minus" data-single-qty-delta="-1" data-single-spec="' + encodeURIComponent(rowSpec) + '" aria-label="减少' + escapeHtml(size) + '数量" ' + (rowDisabled || rowQuantity <= 0 ? 'disabled' : '') + '><i class="counter__icon icon-jian16"></i></button>'
+        +     '<input class="counter__value" type="text" inputmode="numeric" maxlength="5" value="' + rowQuantity + '" data-single-qty-input data-single-spec="' + encodeURIComponent(rowSpec) + '" aria-label="' + escapeHtml(size) + '数量" ' + (rowDisabled ? 'disabled' : '') + '>'
+        +     '<button type="button" class="counter__btn counter__btn--plus" data-single-qty-delta="1" data-single-spec="' + encodeURIComponent(rowSpec) + '" aria-label="增加' + escapeHtml(size) + '数量" ' + (rowDisabled || rowQuantity >= rowStock ? 'disabled' : '') + '><i class="counter__icon icon-jia16"></i></button>'
+        +   '</div><div class="counter__message counter__hint"></div><div class="counter__message counter__error"></div>'
+        + '</div>'
+        + '</div>';
+    }).join('');
     return ''
       + '<div class="order-single-picker">'
       +   '<section>' + (desktop ? '<div class="order-add-selection-head"><small>颜色</small><label class="order-add-batch-switch-label"><span>一次买多件</span><button type="button" class="switch switch--off" role="switch" aria-checked="false" aria-label="一次买多件" data-component-slug="switch" data-add-mode="batch"><span class="switch__thumb"></span></button></label></div>' : '<small>颜色</small>') + '<div class="order-add-choice-list order-add-choice-list--colors">' + matrix.colors.map(function (color) {
             return '<button type="button" class="btn btn--weak btn--sm ' + (selectedColor === color ? 'is-selected' : '') + '" data-component-slug="button" data-add-color="' + encodeURIComponent(color) + '">' + escapeHtml(color) + '</button>';
           }).join('') + '</div></section>'
-      +   '<section><small>规格</small><div class="order-add-choice-list">' + availableSizes.map(function (size) {
+      +   (desktop
+        ? '<section class="order-add-spec-counter-section"><div class="order-add-spec-counter-head"><small>规格</small>' + (!selectedColor ? '<span>请先选择颜色</span>' : '') + '</div><div class="order-add-spec-counter-list">' + (desktopSpecRows || '<div class="order-add-spec-counter-empty">暂无可售规格</div>') + '</div></section>'
+        : '<section><small>规格</small><div class="order-add-choice-list">' + availableSizes.map(function (size) {
             return '<button type="button" class="btn btn--weak btn--sm ' + (selectedSize === size ? 'is-selected' : '') + '" data-component-slug="button" data-add-size="' + encodeURIComponent(size) + '">' + escapeHtml(size) + '</button>';
-          }).join('') + '</div></section>'
-      +   '<section class="order-single-qty">'
+          }).join('') + '</div></section>')
+      +   (desktop ? '' : '<section class="order-single-qty">'
       +     '<small>购买数量</small>'
       +     '<div class="counter" data-component-slug="counter"><div class="counter__body">'
       +       '<button type="button" class="counter__btn counter__btn--minus" data-single-qty-delta="-1" data-single-spec="' + encodeURIComponent(spec) + '" aria-label="减少购买数量" ' + (spec && quantity <= 0 ? 'disabled' : '') + '><i class="counter__icon icon-jian16"></i></button>'
       +       '<input class="counter__value" type="text" inputmode="numeric" maxlength="5" value="' + quantity + '" data-single-qty-input aria-label="购买数量">'
       +       '<button type="button" class="counter__btn counter__btn--plus" data-single-qty-delta="1" data-single-spec="' + encodeURIComponent(spec) + '" aria-label="增加购买数量" ' + (spec && quantity >= stock ? 'disabled' : '') + '><i class="counter__icon icon-jia16"></i></button>'
       +     '</div><div class="counter__message counter__hint"></div><div class="counter__message counter__error"></div></div>'
-      +   '</section>'
+      +   '</section>')
       + '</div>';
   }
 
@@ -4140,6 +4158,9 @@
       return;
     }
     if (target.matches('[data-add-color]')) {
+      if (target.closest('.order-desktop-modal--add')) {
+        Object.keys(state.addDraft.skuQty).forEach(function (key) { state.addDraft.skuQty[key] = 0; });
+      }
       state.addDraft.selectedColor = decodeURIComponent(target.dataset.addColor);
       state.addDraft.selectedSize = '';
       renderActive();
@@ -4153,7 +4174,8 @@
     if (target.matches('[data-single-qty-delta]')) {
       var draftNow = state.addDraft;
       var singleSpec = decodeURIComponent(target.dataset.singleSpec || '');
-      if (!draftNow.selectedColor || !draftNow.selectedSize) {
+      var desktopSpecCounter = Boolean(target.closest('.order-add-spec-counter-row'));
+      if (!draftNow.selectedColor || (!desktopSpecCounter && !draftNow.selectedSize)) {
         ctx.toast('请先选择颜色规格');
         return;
       }
@@ -4162,7 +4184,7 @@
         return;
       }
       var singleStock = specStock(draftNow.product, singleSpec);
-      if (Number(target.dataset.singleQtyDelta) > 0) {
+      if (!desktopSpecCounter && Number(target.dataset.singleQtyDelta) > 0) {
         Object.keys(draftNow.skuQty).forEach(function (key) {
           if (key !== singleSpec) draftNow.skuQty[key] = 0;
         });
@@ -4701,13 +4723,15 @@
     }
     if (target.matches('[data-single-qty-input]') && state.addDraft) {
       var singleDraft = state.addDraft;
+      var desktopInputSpec = decodeURIComponent(target.dataset.singleSpec || '');
+      var desktopSpecInput = Boolean(target.closest('.order-add-spec-counter-row'));
       var singleRaw = String(target.value || '').replace(/[^\d-]/g, '');
       var singleNegative = singleRaw.charAt(0) === '-' ? '-' : '';
       var singleDigits = singleRaw.replace(/-/g, '').slice(0, 4);
       var singleParsed = (singleNegative || singleDigits) ? Number(singleNegative + singleDigits) : 0;
       if (Number.isNaN(singleParsed)) singleParsed = 0;
-      var singleMissing = !singleDraft.selectedColor || !singleDraft.selectedSize;
-      var singleInputSpec = singleMissing ? '' : specKey(singleDraft.product, singleDraft.selectedColor, singleDraft.selectedSize);
+      var singleMissing = !singleDraft.selectedColor || (!desktopSpecInput && !singleDraft.selectedSize);
+      var singleInputSpec = desktopSpecInput ? desktopInputSpec : (singleMissing ? '' : specKey(singleDraft.product, singleDraft.selectedColor, singleDraft.selectedSize));
       if (singleMissing || !singleInputSpec) {
         if (event.type === 'input') ctx.toast(singleMissing ? '请先选择颜色规格' : '该颜色暂无此规格');
         target.value = 0;
@@ -4719,15 +4743,17 @@
         return;
       }
       var singleInputStock = specStock(singleDraft.product, singleInputSpec);
-      singleParsed = Math.max(-9999, Math.min(singleInputStock, singleParsed));
+      singleParsed = Math.max(desktopSpecInput ? 0 : -9999, Math.min(singleInputStock, singleParsed));
       target.value = singleParsed;
-      Object.keys(singleDraft.skuQty).forEach(function (key) {
-        if (key !== singleInputSpec) singleDraft.skuQty[key] = 0;
-      });
+      if (!desktopSpecInput) {
+        Object.keys(singleDraft.skuQty).forEach(function (key) {
+          if (key !== singleInputSpec) singleDraft.skuQty[key] = 0;
+        });
+      }
       singleDraft.skuQty[singleInputSpec] = singleParsed;
       updateAddDraftTotals(root);
       if (event.type === 'change') {
-        var singlePickerNode = target.closest('.order-single-picker');
+        var singlePickerNode = desktopSpecInput ? target.closest('.order-add-spec-counter-row') : target.closest('.order-single-picker');
         if (singlePickerNode) {
           var singleMinusNode = singlePickerNode.querySelector('[data-single-qty-delta="-1"]');
           var singlePlusNode = singlePickerNode.querySelector('[data-single-qty-delta="1"]');
