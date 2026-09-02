@@ -24,7 +24,7 @@
       { "selector": ".publish-product", "content_role": "页面字体", "css_property": "font-family", "token": "var(--body-md-font-family)" }
     ],
     "component_bindings": [
-      { "binding_id": "publish-navbar", "slug": "navbar", "reason": "发布产品顶部导航：左侧取消文本、中间标题、右侧发布强按钮（entity-form 底部 sheet 模态）", "variant_dimensions": { "leftControl": "cancel", "titleAlignment": "center", "actions": "button", "rightActionType": "button", "spacing": "default", "pageTransition": "present", "position": "sticky" } }
+      { "binding_id": "publish-navbar", "slug": "navbar", "reason": "发布产品顶部导航：左侧取消文本、无标题（发布/编辑不显示标题，titleAlignment=custom）、右侧快捷分享+分享+发布按钮（entity-form 底部 sheet 模态）", "variant_dimensions": { "leftControl": "cancel", "titleAlignment": "custom", "actions": "button", "rightActionType": "button", "spacing": "default", "pageTransition": "present", "position": "sticky" } }
     ],
     "layout_contract": {
       "mode": "composed",
@@ -61,10 +61,18 @@ const PUBLISH_TEMPLATE = `
       <div class="navbar" data-component-slug="navbar">
         <div class="navbar__body navbar__body--spaced">
           <div class="navbar__left"><button type="button" class="navbar__left-text" data-dom-id="publish-cancel" aria-label="取消">取消</button></div>
-          <div class="navbar__center"><span class="navbar__title">发布产品</span></div>
+          <div class="navbar__center"></div>
           <div class="navbar__right navbar__right--button">
             <div class="navbar__action navbar__action--button">
-              <button type="button" class="btn btn--strong btn--sm" data-component-slug="button" data-dom-id="publish-submit">发布</button>
+              <button type="button" class="btn btn--weak btn--sm btn--icon-only" data-component-slug="button" data-dom-id="quick-share" aria-label="快捷分享">
+                <i class="btn__icon icon-pengyouquan" data-quick-share-icon aria-hidden="true"></i>
+              </button>
+            </div>
+            <div class="navbar__action navbar__action--button">
+              <button type="button" class="btn btn--weak btn--sm" data-component-slug="button" data-dom-id="publish-share">分享</button>
+            </div>
+            <div class="navbar__action navbar__action--button">
+              <button type="button" class="btn btn--strong btn--sm" data-component-slug="button" data-dom-id="publish-submit" data-publish-submit-label>发布</button>
             </div>
           </div>
         </div>

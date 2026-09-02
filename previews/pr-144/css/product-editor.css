@@ -338,38 +338,6 @@
 }
 
 
-/* ═══ 发布页导航栏分享/快捷分享按钮（从产品分享 scene.css 并入） ═══ */
-/* ═══════════════════════════════════════════════════════════════
-   发布页导航栏分享/快捷分享按钮
-   ═══════════════════════════════════════════════════════════════ */
-.publish-product__nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.publish-product__quick-share {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 10px;
-  border-radius: 8px;
-  background: var(--bg-gray, #f5f5f5);
-  border: none;
-  cursor: pointer;
-  font-size: 12px;
-  color: var(--text-default, #1a1a1a);
-}
-
-.publish-product__quick-share:active {
-  opacity: 0.6;
-}
-
-.publish-product__quick-share-icon {
-  font-size: 14px;
-}
-
-.publish-product__share-btn {
-  padding: 6px 12px;
-  font-size: 13px;
-}
+/* ═══ 发布页导航栏分享/快捷分享按钮 ═══
+   分享与快捷分享按钮均按 button 组件配置（btn btn--weak/btn--strong btn--sm，
+   快捷分享为 btn--icon-only 纯图标正方形），不再需要场景自定义样式。 */

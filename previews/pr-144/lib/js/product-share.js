@@ -265,21 +265,101 @@
       + '</div>';
   }
 
-  /* 下载进度弹窗 */
-  function downloadProgressTemplate() {
-    return '<div class="download-progress" role="dialog" aria-modal="true">'
-      + '<div class="download-progress__panel">'
-      + '<div class="download-progress__header">'
-      + '<span class="download-progress__title">正在下载</span>'
-      + '<button type="button" class="download-progress__close" data-action="cancel-download" aria-label="取消"><i class="wego-iconfont-s icon-guanbi" aria-hidden="true"></i></button>'
+  /* ═══════════════════════════════════════════════════════════════
+     居中浮层加载（复用 Loading 组件 usage=overlay 形态，外壳同 Toast）
+     - 不带进度：三点 + 单行文案；带进度：白色进度环 + 状态文案 + 百分比
+     - 结果态：勾(icon-goutoast)/叉(icon-chatoast) + 单行结果文案，停留后自动消失
+     - 挂载到 toast 宿主，z-index 与 Toast 同层（--z-toast）
+     ═══════════════════════════════════════════════════════════════ */
+  function getOverlayHost() {
+    return document.querySelector('[data-toast-host]') || document.body;
+  }
+
+  function mountOverlay(innerHtml) {
+    var host = getOverlayHost();
+    var el = document.createElement('div');
+    el.className = 'loading-overlay';
+    el.setAttribute('role', 'status');
+    el.setAttribute('aria-live', 'polite');
+    el.innerHTML = innerHtml;
+    host.appendChild(el);
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        el.classList.add('is-visible');
+      });
+    });
+    return el;
+  }
+
+  function removeOverlay(el) {
+    if (el && el.parentNode) el.parentNode.removeChild(el);
+  }
+
+  /* 不带进度浮层：三点 + 单行文案；返回关闭函数 */
+  function showOverlayLoading(label) {
+    var el = mountOverlay(
+      '<span class="loading loading--24 loading-overlay__indicator" role="img" aria-label="加载中">'
+      + '<span class="loading__icon"><span class="loading__dot loading__dot--1"></span><span class="loading__dot loading__dot--2"></span><span class="loading__dot loading__dot--3"></span></span>'
+      + '</span>'
+      + '<div class="loading-overlay__text"><span class="loading-overlay__label">' + (label || '正在加载') + '</span></div>'
+    );
+    return function () { removeOverlay(el); };
+  }
+
+  /* 带进度浮层：白色进度环 + 状态文案 + 百分比；返回 { update(pct), done() } */
+  function showOverlayProgress(label) {
+    var el = mountOverlay(
+      '<svg class="loading-ring" viewBox="0 0 48 48" role="img" aria-label="加载中" style="--progress:0">'
+      + '<circle class="loading-ring__track" cx="24" cy="24" r="20"></circle>'
+      + '<circle class="loading-ring__bar" cx="24" cy="24" r="20"></circle>'
+      + '</svg>'
+      + '<div class="loading-overlay__text">'
+      + '<span class="loading-overlay__label">' + (label || '正在下载') + '</span>'
+      + '<span class="loading-overlay__percent">0%</span>'
       + '</div>'
-      + '<div class="download-progress__body">'
-      + '<div class="download-progress__filename" data-download-filename>图片 1/3</div>'
-      + '<div class="download-progress__bar"><div class="download-progress__bar-fill" data-download-fill style="width:0%"></div></div>'
-      + '<div class="download-progress__percent" data-download-percent>0%</div>'
-      + '</div>'
-      + '</div>'
-      + '</div>';
+    );
+    var ring = el.querySelector('.loading-ring');
+    var percentEl = el.querySelector('.loading-overlay__percent');
+    return {
+      update: function (pct) {
+        var p = Math.max(0, Math.min(100, Math.round(pct || 0)));
+        if (ring) ring.style.setProperty('--progress', p);
+        if (percentEl) percentEl.textContent = p + '%';
+      },
+      done: function () { removeOverlay(el); }
+    };
+  }
+
+  /* 居中结果提示：复用 loading-overlay 外壳（勾/叉图标 + 单行结果文案），停留后自动消失；
+     同屏互斥：先移除宿主内残留 toast，避免与居中结果叠加 */
+  function showOverlayResult(icon, text, duration, onDone) {
+    var host = getOverlayHost();
+    Array.prototype.slice.call(host.querySelectorAll('.toast')).forEach(function (n) { n.remove(); });
+    var el = mountOverlay(
+      '<span class="loading-overlay__result-icon ' + icon + '"></span>'
+      + '<div class="loading-overlay__text"><span class="loading-overlay__label">' + (text || '') + '</span></div>'
+    );
+    setTimeout(function () {
+      removeOverlay(el);
+      if (onDone) onDone();
+    }, typeof duration === 'number' ? duration : 1500);
+    return function () { removeOverlay(el); };
+  }
+
+  /* 分享完成：居中结果「分享成功」+ 回调 */
+  function completeShare(callbacks) {
+    showOverlayResult('icon-goutoast', '分享成功', 1500, function () {
+      if (callbacks && callbacks.onSuccess) callbacks.onSuccess();
+    });
+  }
+
+  /* 分享加载：居中浮层（不带进度）→ 完成后居中结果「分享成功」 */
+  function runShareWithLoading(label, delay, callbacks) {
+    var hide = showOverlayLoading(label);
+    setTimeout(function () {
+      hide();
+      completeShare(callbacks);
+    }, delay);
   }
 
   /* ═══════════════════════════════════════════════════════════════
@@ -336,38 +416,31 @@
 
     /* 更多渠道：拉起系统分享 */
     if (channelKey === 'more') {
-      ctx.toast('正在分享...');
-      setTimeout(function () {
-        ctx.toast('分享成功');
-        if (callbacks && callbacks.onSuccess) callbacks.onSuccess();
-      }, 800);
+      runShareWithLoading('正在分享…', 800, callbacks);
       return;
     }
 
     /* 海报分享：模拟流程 */
     if (channelKey === 'poster') {
-      ctx.toast('正在生成海报...');
-      setTimeout(function () {
-        ctx.toast('分享成功');
-        if (callbacks && callbacks.onSuccess) callbacks.onSuccess();
-      }, 1000);
+      runShareWithLoading('正在生成海报…', 1000, callbacks);
       return;
     }
 
     /* 微信好友：直接模拟分享 */
     if (channelKey === 'wechat') {
-      ctx.toast('正在分享...');
-      setTimeout(function () {
-        ctx.toast('分享成功');
-        if (callbacks && callbacks.onSuccess) callbacks.onSuccess();
-      }, 800);
+      runShareWithLoading('正在分享…', 800, callbacks);
       return;
     }
 
     /* 朋友圈：下载9图分享 */
     if (channelKey === 'moments') {
       simulateDownload(ctx, content, function () {
-        ctx.toast('下载成功，文字已复制 去微信分享');
+        ctx.toast({
+          variant: 'guide',
+          icon: 'icon-goutoast',
+          text: '下载成功，文字已复制',
+          action: { label: '去微信分享', mode: 'strong' }
+        });
         if (callbacks && callbacks.onSuccess) callbacks.onSuccess();
       });
       return;
@@ -381,8 +454,9 @@
     }
 
     /* 第三方平台：下载 → 分享至 XX 弹窗 → 跳转 */
-    ctx.toast('正在分享...');
+    var hideThird = showOverlayLoading('正在分享…');
     setTimeout(function () {
+      hideThird();
       openShareToChannel(ctx, channel.name, function () {
         if (callbacks && callbacks.onSuccess) callbacks.onSuccess();
       });
@@ -395,42 +469,20 @@
       if (onComplete) onComplete();
       return;
     }
-    ctx.openSheet(downloadProgressTemplate(), {
-      label: '下载进度',
-      init: function (sheetCtx) {
-        var root = sheetCtx.root;
-        var fill = root.querySelector('[data-download-fill]');
-        var percent = root.querySelector('[data-download-percent]');
-        var filename = root.querySelector('[data-download-filename]');
-        var current = 0;
-        var cancelled = false;
-
-        var closeBtn = root.querySelector('[data-action="cancel-download"]');
-        if (closeBtn) {
-          closeBtn.addEventListener('click', function () {
-            cancelled = true;
-            ctx.closeOverlay();
-            ctx.toast('已取消');
-          });
-        }
-
-        var timer = setInterval(function () {
-          if (cancelled) { clearInterval(timer); return; }
-          current++;
-          var pct = Math.round((current / total) * 100);
-          if (fill) fill.style.width = pct + '%';
-          if (percent) percent.textContent = pct + '%';
-          if (filename) filename.textContent = '图片 ' + current + '/' + total;
-          if (current >= total) {
-            clearInterval(timer);
-            setTimeout(function () {
-              ctx.closeOverlay();
-              if (onComplete) onComplete();
-            }, 300);
-          }
+    /* 下载进度：居中浮层带进度（白色进度环 + 百分比），按素材数推进 */
+    var progress = showOverlayProgress('正在下载');
+    var current = 0;
+    var timer = setInterval(function () {
+      current++;
+      progress.update((current / total) * 100);
+      if (current >= total) {
+        clearInterval(timer);
+        setTimeout(function () {
+          progress.done();
+          if (onComplete) onComplete();
         }, 300);
       }
-    });
+    }, 300);
   }
 
   function openShareToChannel(ctx, channelName, onGoto) {
@@ -442,10 +494,11 @@
         var cleanBtn = root.querySelector('[data-action="clean-images"]');
         if (gotoBtn) {
           gotoBtn.addEventListener('click', function () {
-            ctx.closeOverlay();
+            /* 只关闭本面板，不关闭底层页面（发布页分享时保持当前页继续编辑） */
+            sheetCtx.close();
             ctx.toast('跳转' + channelName + '（模拟）');
             setTimeout(function () {
-              ctx.toast('分享成功');
+              showOverlayResult('icon-goutoast', '分享成功');
               if (onGoto) onGoto();
             }, 800);
           });
@@ -483,7 +536,8 @@
         root.querySelectorAll('[data-channel]').forEach(function (btn) {
           btn.addEventListener('click', function () {
             var channelKey = btn.getAttribute('data-channel');
-            ctx.closeOverlay();
+            /* 只关闭本分享面板，不关闭底层页面（发布页分享时保持当前页继续编辑） */
+            sheetCtx.close();
             simulateShare(ctx, channelKey, content, {
               onSuccess: function () {
                 if (callbacks.onChannelSelect) callbacks.onChannelSelect(channelKey);
@@ -528,7 +582,8 @@
           var action = btn.getAttribute('data-action');
           if (action === 'cancel') {
             btn.addEventListener('click', function () {
-              ctx.closeOverlay();
+              /* 只关闭本分享面板，不关闭底层页面（发布页分享时取消分享保持当前页继续编辑） */
+              sheetCtx.close();
               /* 二级面板取消：关闭并恢复主面板；主面板取消：仅关闭 */
               if (reopenMain) reopenMain();
               else if (callbacks.onClose) callbacks.onClose();
@@ -543,16 +598,22 @@
             });
           } else if (action === 'saveImages') {
             btn.addEventListener('click', function () {
-              ctx.closeOverlay();
+              /* 只关闭本分享面板，不关闭底层页面 */
+              sheetCtx.close();
               simulateDownload(ctx, content, function () {
-                ctx.toast('下载成功，文字已复制 去微信分享');
+                ctx.toast({
+                  variant: 'guide',
+                  icon: 'icon-goutoast',
+                  text: '下载成功，文字已复制',
+                  action: { label: '去微信分享', mode: 'strong' }
+                });
                 if (callbacks.onSaveImages) callbacks.onSaveImages();
               });
             });
           } else if (action === 'miniprogramLink') {
             btn.addEventListener('click', function () {
-              /* 主面板关闭，从底部重新弹出「分享小程序链接」二级面板（组件化复用：同一 openProductShare 入口 + sharePanelTemplate 渲染） */
-              ctx.closeOverlay();
+              /* 只关闭本分享面板，从底部重新弹出「分享小程序链接」二级面板（组件化复用：同一 openProductShare 入口 + sharePanelTemplate 渲染） */
+              sheetCtx.close();
               setTimeout(function () {
                 openProductShare(ctx, {
                   contentType: 'miniprogram',
@@ -658,10 +719,10 @@
           window.addEventListener('resize', onResize);
         }
 
-        /* 遮罩点击关闭：二级面板点遮罩关闭并恢复主面板；主面板点遮罩仅关闭 */
+        /* 遮罩点击关闭：二级面板点遮罩关闭并恢复主面板；主面板点遮罩仅关闭（只关本面板，不关底层页面） */
         root.addEventListener('click', function (e) {
           if (e.target === root) {
-            ctx.closeOverlay();
+            sheetCtx.close();
             if (reopenMain) reopenMain();
             else if (callbacks.onClose) callbacks.onClose();
           }
