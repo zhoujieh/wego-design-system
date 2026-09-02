@@ -2347,7 +2347,7 @@ body[data-order-layout="landscape"] .phone-indicator {
 
   .order-desktop-modal--add .order-desktop-modal__panel {
     width: min(calc(var(--size-104) * 4 + var(--size-64)), calc(100% - var(--spacer-48)));
-    height: min(calc(var(--size-104) * 5 + var(--size-40) + var(--spacer-2) + var(--stroke-1)), calc(100% - var(--spacer-48)));
+    height: min(calc(var(--size-104) * 6), calc(100% - var(--spacer-48)));
     background: var(--bg-page);
   }
 
@@ -2561,6 +2561,62 @@ body[data-order-layout="landscape"] .phone-indicator {
     min-height: var(--size-32);
     border: 0;
     border-radius: var(--radius-6);
+  }
+
+  .order-desktop-modal--add .order-add-spec-counter-section {
+    padding-bottom: var(--spacer-8);
+  }
+
+  .order-add-spec-counter-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: calc(var(--size-40) + var(--spacer-4));
+  }
+
+  .order-add-spec-counter-head small {
+    color: var(--text-default);
+    font-size: var(--body-lg-font-size);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .order-add-spec-counter-head span {
+    color: var(--text-secondary);
+    font-size: var(--body-sm-font-size);
+  }
+
+  .order-add-spec-counter-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .order-add-spec-counter-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: var(--size-48);
+    border-bottom: var(--stroke-hairline) solid var(--border-neutral-l2);
+  }
+
+  .order-add-spec-counter-row:last-child {
+    border-bottom: 0;
+  }
+
+  .order-add-spec-counter-row__label {
+    color: var(--text-default);
+    font-size: var(--body-md-font-size);
+  }
+
+  .order-add-spec-counter-row.is-disabled .order-add-spec-counter-row__label {
+    color: var(--text-disabled);
+  }
+
+  .order-add-spec-counter-empty {
+    display: flex;
+    align-items: center;
+    min-height: var(--size-48);
+    color: var(--text-secondary);
+    font-size: var(--body-md-font-size);
   }
 
   .order-desktop-modal--add .order-single-picker .order-single-qty {
