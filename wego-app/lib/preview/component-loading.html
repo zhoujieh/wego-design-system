@@ -37,9 +37,8 @@
   --loading-overlay-gap: 12px;
   --loading-overlay-min-size: 120px;
   position:fixed;
-  left:50%;
-  top:50%;
-  transform:translate(-50%,-50%);
+  inset:0;
+  margin:auto;
   z-index:var(--z-toast);
   box-sizing:border-box;
   display:flex;
@@ -48,6 +47,7 @@
   justify-content:center;
   gap:var(--loading-overlay-gap);
   width:fit-content;
+  height:fit-content;
   min-width:var(--loading-overlay-min-size);
   min-height:var(--loading-overlay-min-size);
   padding:var(--loading-overlay-pad-y) var(--loading-overlay-pad-x);
