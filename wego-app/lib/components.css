@@ -1365,15 +1365,16 @@
 */
 /* 分割线 Divider：水平分隔区块/列表项，或竖向分隔相邻元素。
    默认：水平 0.5px、颜色 --border-neutral-l2、左侧缩进16px、右侧到边。
+   竖向：固定高度（不撑满父级），默认 16px，常用 8/10/16，通过 --divider-height 覆盖，竖向居中。
    参数化：--divider-width 粗细（默认 var(--stroke-hairline)）、--divider-color 颜色、
-   --divider-left / --divider-right 左右缩进（默认 16px / 0）。 */
-.divider{position:relative;display:block;width:100%;box-sizing:border-box;--divider-width:var(--stroke-hairline);--divider-color:var(--border-neutral-l2);--divider-left:16px;--divider-right:0}
+   --divider-left / --divider-right 左右缩进（默认 16px / 0）、--divider-height 竖向高度（默认 16px）。 */
+.divider{position:relative;display:block;width:100%;box-sizing:border-box;--divider-width:var(--stroke-hairline);--divider-color:var(--border-neutral-l2);--divider-left:16px;--divider-right:0;--divider-height:16px}
 .divider::after{content:"";position:absolute;top:0;left:var(--divider-left);right:var(--divider-right);height:var(--divider-width);background:var(--divider-color);pointer-events:none}
 .divider--full{--divider-left:0;--divider-right:0}
 .divider--center{--divider-left:16px;--divider-right:16px}
 .divider--no-left{--divider-left:0}
-.divider--vertical{display:inline-block;width:var(--divider-width);height:100%;align-self:stretch;--divider-left:0;--divider-right:0}
-.divider--vertical::after{top:0;bottom:0;left:0;right:auto;width:var(--divider-width);height:auto}
+.divider--vertical{display:inline-block;width:var(--divider-width);height:var(--divider-height);align-self:center;--divider-left:0;--divider-right:0}
+.divider--vertical::after{top:0;bottom:auto;left:0;right:auto;width:var(--divider-width);height:100%}
 
 /* ── Form ──────────────────────────────────────────────────── */
 /* @anatomy

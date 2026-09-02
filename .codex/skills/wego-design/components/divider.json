@@ -6,7 +6,7 @@
   "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "0.5px 语义化分割线组件，用于水平分隔区块/列表项或竖向分隔相邻元素；粗细、颜色、左右缩进全部通过 CSS 变量参数化，避免各场景重复调线。",
+  "description": "0.5px 语义化分割线组件，用于水平分隔区块/列表项或竖向分隔相邻元素；粗细、颜色、左右缩进、竖向高度全部通过 CSS 变量参数化，避免各场景重复调线。竖向为固定高度（默认16px，常用8/10/16），不撑满父级。",
   "semanticTypeCandidates": [
     "divider",
     "separator",
@@ -62,8 +62,8 @@
     "默认形态为水平分割线：0.5px（--stroke-hairline）、颜色 --border-neutral-l2、左侧缩进16px、右侧到边，用于页内区块分隔（如分享面板标题栏/配置栏下方）。",
     "divider--full 全宽：与 actionsheet/dialog/popmenu 的 inset 分割线一致。",
     "divider--center 两侧缩进16px：与 cell--divider-center 一致。",
-    "divider--vertical 竖向：分隔相邻元素（如表单手机号内、对话框按钮间），默认撑满父级高度。",
-    "粗细/颜色/缩进参数化：--divider-width（默认 var(--stroke-hairline)）、--divider-color（默认 var(--border-neutral-l2)）、--divider-left（默认16px）、--divider-right（默认0）。"
+    "divider--vertical 竖向：分隔相邻元素（如表单手机号内、对话框按钮间），固定高度不撑满父级，默认16px，常用8/12/16，通过 --divider-height 覆盖，竖向居中。",
+    "粗细/颜色/缩进/竖向高度参数化：--divider-width（默认 var(--stroke-hairline)）、--divider-color（默认 var(--border-neutral-l2)）、--divider-left（默认16px）、--divider-right（默认0）、--divider-height（竖向默认16px）。"
   ],
   "behavior": {},
   "accessibility": {
@@ -72,7 +72,7 @@
   "usageHints": [
     "页内区块分隔（标题栏/配置栏/分区下方）优先使用默认 left-edge 形态（左缩进16右到边）。",
     "列表项/操作项之间的分隔使用 divider--full 或 divider--center，与 cell/actionsheet 既有语义一致。",
-    "相邻字段之间的竖向分隔使用 divider--vertical。",
+    "相邻字段之间的竖向分隔使用 divider--vertical，高度固定（默认16px，常用8/12/16），通过 --divider-height 覆盖，不撑满父级。",
     "深色浮层上只需覆盖 --divider-color，不要改粗细。",
     "细分隔使用 --divider-width 覆盖（如 1px 强调分隔），默认不写死粗细，统一由 token 表达。"
   ],
@@ -127,6 +127,7 @@
     "--divider-width",
     "--divider-color",
     "--divider-left",
-    "--divider-right"
+    "--divider-right",
+    "--divider-height"
   ]
 }
