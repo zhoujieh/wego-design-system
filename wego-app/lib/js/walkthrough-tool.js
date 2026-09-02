@@ -5588,6 +5588,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           this._data[axis] = input.value;
         }
       }
+      // 影响面板结构显隐的字段（渐变开关→渐变面板 / 布局模式→网格控件）：重渲染以显示/收起对应控件
+      if (field === 'gradientEnabled' || field === 'layoutMode') {
+        this._render();
+        this._bindEvents();
+      }
     }
 
     /** 样式同步防抖调度：高频输入（颜色拖动/步进）只同步最终值。
