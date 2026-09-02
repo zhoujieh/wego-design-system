@@ -3392,8 +3392,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         this._sharedSyncPending = this._sharedSyncPending.filter(p => !(p.result && p.result.property === 'order'));
         if (!this._sharedSyncPending.length) this._sharedSyncPending = null;
       }
-      // 2. 还原并移除该容器的顺序移动记录：本容器内的记录（el 经 changeElRefs 关联），
-      //    以及由本容器组件同步出去的共享记录（sharedKey 命中本容器组件类，el 在其他同构容器内）
+      // 2. 还原并移除该容器的顺序移动记录：本容器直接子元素的记录（el 经 changeElRefs 关联），
+      //    以及由本容器组件同步出去的共享记录（sharedKey 命中本容器组件类，el 在其他同构容器内）。
+      //    注意：只用「直接子元素」归属判断（relEl.parentElement === parent），不能用 parent.contains
+      //    （任意后代）——否则会把嵌套子容器内用户已确认的顺序修改（如 product-info 内移动 product-name）
+      //    当作本容器的记录一并还原，导致无关修改被重置。
       const compClasses = [];
       Array.from(parent.children).forEach(ch => {
         const cc = pickComponentClass(ch);
@@ -3402,7 +3405,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const related = state.changes.filter(c => {
         if (c.property !== 'order') return false;
         const relEl = changeElRefs.get(c.id);
-        if (relEl && parent.contains(relEl)) return true;
+        if (relEl && relEl.parentElement === parent) return true;
         if (c.shared && c.sharedKey) {
           const [cc] = String(c.sharedKey).split('::');
           return compClasses.includes(cc);
