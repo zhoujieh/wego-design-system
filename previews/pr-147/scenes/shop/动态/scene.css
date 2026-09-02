@@ -106,7 +106,7 @@
 }
 
 .album-feed__publisher {
-  font-size: var(--body-md-strong-font-size);
+  font-size: var(--body-md-font-size);
   font-weight: var(--font-weight-medium);
   line-height: var(--body-md-strong-line-height);
   color: var(--text-link);
@@ -139,7 +139,7 @@
 .album-feed__text {
   margin: 0;
   padding: var(--spacer-8) var(--spacer-16) var(--spacer-8) calc(var(--spacer-16) + var(--size-40) + var(--spacer-12));
-  font-size: var(--body-md-font-size);
+  font-size: var(--body-lg-font-size);
   line-height: var(--body-md-line-height);
   color: var(--text-default);
   word-break: break-word;
@@ -284,14 +284,17 @@
 .album-feed__actions-row {
   display: flex;
   gap: var(--spacer-8);
+  justify-content: flex-end;
+  align-items: center;
 }
 
 .album-feed__primary {
-  flex: 1;
+  flex: 0 1 auto;
+  order: 1;
 }
 
 .album-feed__forward {
-  flex-shrink: 0;
+  flex: 0 0 76px;
 }
 
 /* ── 骨架屏 ── */
