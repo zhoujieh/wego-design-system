@@ -7132,11 +7132,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         return;
       }
       const now = Date.now();
-      // 同位置连点：批注目标上移一层（±12px 容差、间隔 ≤800ms），气泡重新锚定
+      // 同位置连点：批注目标上移一层（±16px 容差、间隔 ≤1.2s），气泡重新锚定
       const samePoint = this._annotationAnchor &&
-        Math.abs(e.clientX - this._annotationAnchor.x) <= 12 &&
-        Math.abs(e.clientY - this._annotationAnchor.y) <= 12 &&
-        now - this._annotationAnchor.time <= 800;
+        Math.abs(e.clientX - this._annotationAnchor.x) <= 16 &&
+        Math.abs(e.clientY - this._annotationAnchor.y) <= 16 &&
+        now - this._annotationAnchor.time <= 1200;
       if (samePoint) {
         const cur = this._currentAnnotation ? queryTargetEl(this._currentAnnotation.selector) : null;
         const parent = cur ? cur.parentElement : null;
@@ -7586,11 +7586,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       }
       if (event && event.cancelable) event.preventDefault();
       const now = Date.now();
-      // 同位置连点：从当前选中元素上移一层（±12px 容差、间隔 ≤800ms）
+      // 同位置连点：从当前选中元素上移一层（±16px 容差、间隔 ≤1.2s）
       const samePoint = this._pickAnchor &&
-        Math.abs(clientX - this._pickAnchor.x) <= 12 &&
-        Math.abs(clientY - this._pickAnchor.y) <= 12 &&
-        now - this._pickAnchor.time <= 800;
+        Math.abs(clientX - this._pickAnchor.x) <= 16 &&
+        Math.abs(clientY - this._pickAnchor.y) <= 16 &&
+        now - this._pickAnchor.time <= 1200;
       if (samePoint && state.selectedElement) {
         const parent = state.selectedElement.parentElement;
         if (parent && !this._isSelectionRoot(parent)) {
