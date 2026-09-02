@@ -6,7 +6,7 @@
   "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "0.5px 固定粗细的语义化分割线组件，用于水平分隔区块/列表项或竖向分隔相邻元素。粗细无其他尺寸；缩进不预设固定值，由消费方按布局上下文通过 --divider-left / --divider-right 设置，常用 inset（左缩进16右到边）、center（两侧缩进16）预设。竖向为固定高度（默认16px，常用8/12/16），不撑满父级。",
+  "description": "固定 1 物理像素的语义化分割线组件，用于水平分隔区块/列表项或竖向分隔相邻元素。粗细无其他尺寸；实现采用 1px CSS 像素基准 + 高 DPR 屏幕 transform scale 缩放（DPR2→scaleY(.5)，DPR3→scaleY(.333)），普通屏幕保持 1px，跨屏幕渲染一致。缩进不预设固定值，由消费方按布局上下文通过 --divider-left / --divider-right 设置，常用 inset（左缩进16右到边）、center（两侧缩进16）预设。竖向为固定高度（默认16px，常用8/12/16），不撑满父级。",
   "semanticTypeCandidates": [
     "divider",
     "separator",
@@ -50,7 +50,7 @@
     }
   ],
   "structurePatterns": [
-    "默认形态为水平全宽分割线：0.5px（--stroke-hairline）、颜色 --border-neutral-l2、左右不缩进，用于 actionsheet/dialog/列表项分隔。",
+    "默认形态为水平全宽分割线：固定 1 物理像素（1px 基准 + 高 DPR 屏幕 scale 缩放）、颜色 --border-neutral-l2、左右不缩进，用于 actionsheet/dialog/列表项分隔。",
     "divider--inset 左缩进16右到边：用于页内区块分隔（如分享面板标题栏/配置栏下方）。",
     "divider--center 两侧缩进16px：与 cell--divider-center 一致。",
     "divider--vertical 竖向：分隔相邻元素（如表单手机号内、对话框按钮间），固定高度不撑满父级，默认16px，常用8/12/16，通过 --divider-height 覆盖，竖向居中。",
@@ -71,7 +71,7 @@
   "doNotInvent": [
     "不要用 divider 替代卡片间距或留白分隔，留白优先。",
     "不要把 divider 扩成复杂分组容器或带文案的分段控件。",
-    "不要修改粗细，固定 0.5px 是组件契约。"
+    "不要修改粗细，固定 1 物理像素是组件契约。"
   ],
   "assetUsage": {},
   "domAnatomy": {
@@ -98,8 +98,7 @@
     "preview/component-divider.html"
   ],
   "runtimeTokens": [
-    "--border-neutral-l2",
-    "--stroke-hairline"
+    "--border-neutral-l2"
   ],
   "previewOnlyTokens": [
     "--bg-subtle",
