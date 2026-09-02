@@ -275,6 +275,16 @@
     return document.querySelector('[data-toast-host]') || document.body;
   }
 
+  /* 滚动锁定：浮层显示期间锁定页面滚动（组件 CSS :has 双锁 + 此处 JS 兜底，兼容移动端与 :has 兼容性），浮层移除后恢复 */
+  function lockScroll() {
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+  }
+  function unlockScroll() {
+    document.documentElement.style.overflow = '';
+    document.body.style.overflow = '';
+  }
+
   function mountOverlay(innerHtml) {
     var host = getOverlayHost();
     var el = document.createElement('div');
@@ -283,6 +293,7 @@
     el.setAttribute('aria-live', 'polite');
     el.innerHTML = innerHtml;
     host.appendChild(el);
+    lockScroll();
     requestAnimationFrame(function () {
       requestAnimationFrame(function () {
         el.classList.add('is-visible');
@@ -293,6 +304,7 @@
 
   function removeOverlay(el) {
     if (el && el.parentNode) el.parentNode.removeChild(el);
+    unlockScroll();
   }
 
   /* 不带进度浮层：三点 + 单行文案；返回关闭函数 */
