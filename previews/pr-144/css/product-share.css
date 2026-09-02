@@ -98,6 +98,16 @@
   display: flex;
   gap: 8px;
   align-items: center;
+  min-width: 0;
+}
+
+.share-panel__config-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 .share-panel__config-option {
@@ -237,9 +247,9 @@
   max-width: 100%;
 }
 
-/* 滚动指示器：滚动条式进度条（track + thumb），仅多组时显示；与操作栏间距 20px */
+/* 滚动指示器：容器宽 32px，thumb 宽度按分组数动态（两组 50%、三组 33.3%），仅多组时显示 */
 .share-panel__indicator {
-  width: 160px;
+  width: 32px;
   height: 2px;
   margin: 0 auto 20px;
   border-radius: 1px;

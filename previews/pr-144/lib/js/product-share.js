@@ -155,10 +155,13 @@
     /* 配置栏：checkbox 独立多选；配置项为空时不渲染、不占位 */
     var configHtml = '';
     if (configItems.length > 0) {
+      /* 配置栏左右分区：左侧 checkbox 多选（小程序码/文案带链接），右侧 button（给客户打标）右对齐 */
+      var leftItems = configItems.filter(function (item) { return item.type === 'checkbox'; });
+      var rightItems = configItems.filter(function (item) { return item.type === 'button'; });
       configHtml = '<div class="share-panel__config">';
-      configHtml += '<div class="share-panel__config-row">';
-      configItems.forEach(function (item) {
-        if (item.type === 'checkbox') {
+      if (leftItems.length > 0) {
+        configHtml += '<div class="share-panel__config-row">';
+        leftItems.forEach(function (item) {
           var checked = !!item.defaultValue;
           configHtml += '<label class="checkbox-field share-panel__config-option" role="checkbox" aria-checked="' + checked + '" data-config-key="' + item.key + '" data-config-value="' + item.key + '">'
             + '<span class="checkbox checkbox--sm' + (checked ? ' checkbox--checked' : '') + '">'
@@ -167,14 +170,20 @@
             + '</span>'
             + '<span class="checkbox-field__text' + (checked ? ' is-active' : '') + '">' + item.label + '</span>'
             + '</label>';
-        } else if (item.type === 'button') {
+        });
+        configHtml += '</div>';
+      }
+      if (rightItems.length > 0) {
+        configHtml += '<div class="share-panel__config-actions">';
+        rightItems.forEach(function (item) {
           configHtml += '<button type="button" class="share-panel__config-link" data-action="config-btn" data-config-key="' + item.key + '">'
             + '<span>' + item.label + '</span>'
             + '<i class="wego-iconfont-s icon-youjiantou16" aria-hidden="true"></i>'
             + '</button>';
-        }
-      });
-      configHtml += '</div></div>';
+        });
+        configHtml += '</div>';
+      }
+      configHtml += '</div>';
     }
 
     /* 其他操作栏：单行横向滚动，样式与分享渠道一致（52px 图标框 + 下方文字），图标用 iconfont */
@@ -511,60 +520,79 @@
           }
         });
 
-        /* 渠道栏：动态分组 + 组宽按屏幕计算（item 68px，每行 N=(可用宽-16)/68，组宽=N×68+16）+ 滚动条式指示器跟随 */
+        /* 渠道栏：动态分组 + 组宽按屏幕计算（item 68px，每行 N=可用宽/68，组宽=N×68）+ 指示器 thumb 按分组数动态宽度 + 视口变化实时重算 */
         var channelScroll = root.querySelector('[data-channel-scroll]');
         var indicatorThumb = root.querySelector('.share-panel__indicator-thumb');
         var indicatorEl = root.querySelector('.share-panel__indicator');
         if (channelScroll) {
-          /* 每行 item 数量与组宽：渠道栏左右 padding 已在 CSS，clientWidth 即内容区宽 */
-          var available = channelScroll.clientWidth;
-          var perRow = Math.max(1, Math.floor(available / 68));
-          var perGroup = perRow * 2;
-          var groupWidth = perRow * 68;
-
-          /* 动态分组：渠道按配置顺序，每组最多 2N 个（双行），剩余进下一组 */
+          /* 保存所有渠道项引用，重分组时复用 */
           var allItems = Array.prototype.slice.call(channelScroll.querySelectorAll('.share-panel__channel-item'));
-          channelScroll.querySelectorAll('.share-panel__channel-group').forEach(function (g) {
-            g.parentNode.removeChild(g);
-          });
-          var groupCount = Math.max(1, Math.ceil(allItems.length / perGroup));
-          var groupEls = [];
-          for (var gi = 0; gi < groupCount; gi++) {
-            var gEl = document.createElement('div');
-            gEl.className = 'share-panel__channel-group';
-            gEl.style.flexBasis = groupWidth + 'px';
-            gEl.style.minWidth = groupWidth + 'px';
-            channelScroll.appendChild(gEl);
-            groupEls.push(gEl);
-          }
-          allItems.forEach(function (item, idx) {
-            groupEls[Math.min(groupCount - 1, Math.floor(idx / perGroup))].appendChild(item);
-          });
+          var currentGroupCount = 1;
 
-          /* 指示器：仅有多组（有第二组）时显示 */
-          if (indicatorEl) {
-            indicatorEl.style.display = groupCount > 1 ? '' : 'none';
-          }
+          var layoutChannels = function () {
+            var available = channelScroll.clientWidth;
+            var perRow = Math.max(1, Math.floor(available / 68));
+            var perGroup = perRow * 2;
+            var groupWidth = perRow * 68;
 
-          /* 滚动条式指示器：thumb 固定 32px，位置随滚动进度 */
+            /* 移除旧分组 */
+            channelScroll.querySelectorAll('.share-panel__channel-group').forEach(function (g) {
+              g.parentNode.removeChild(g);
+            });
+
+            /* 重新分组 */
+            currentGroupCount = Math.max(1, Math.ceil(allItems.length / perGroup));
+            var groupEls = [];
+            for (var gi = 0; gi < currentGroupCount; gi++) {
+              var gEl = document.createElement('div');
+              gEl.className = 'share-panel__channel-group';
+              gEl.style.flexBasis = groupWidth + 'px';
+              gEl.style.minWidth = groupWidth + 'px';
+              channelScroll.appendChild(gEl);
+              groupEls.push(gEl);
+            }
+            allItems.forEach(function (item, idx) {
+              groupEls[Math.min(currentGroupCount - 1, Math.floor(idx / perGroup))].appendChild(item);
+            });
+
+            /* 指示器显隐 */
+            if (indicatorEl) {
+              indicatorEl.style.display = currentGroupCount > 1 ? '' : 'none';
+            }
+          };
+
+          /* 指示器：thumb 宽度 = 100% / 分组数（两组 50%、三组 33.3%），位置随滚动进度 */
           var updateThumb = function () {
             if (!indicatorThumb) return;
             var maxScroll = channelScroll.scrollWidth - channelScroll.clientWidth;
-            if (maxScroll <= 0) {
+            if (maxScroll <= 0 || currentGroupCount <= 1) {
               indicatorThumb.style.width = '100%';
               indicatorThumb.style.transform = 'translateX(0)';
               return;
             }
             var track = indicatorThumb.parentElement;
             var trackW = track.clientWidth;
-            var thumbW = 32;
+            var thumbW = trackW / currentGroupCount;
             var maxTrack = trackW - thumbW;
             var x = maxTrack * (channelScroll.scrollLeft / maxScroll);
             indicatorThumb.style.width = thumbW + 'px';
             indicatorThumb.style.transform = 'translateX(' + x + 'px)';
           };
+
+          layoutChannels();
           updateThumb();
           channelScroll.addEventListener('scroll', updateThumb, { passive: true });
+
+          /* 视口宽度变化时实时重算分组与指示器（防抖 150ms） */
+          var resizeTimer = null;
+          var onResize = function () {
+            if (resizeTimer) clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function () {
+              layoutChannels();
+              updateThumb();
+            }, 150);
+          };
+          window.addEventListener('resize', onResize);
         }
 
         /* 遮罩点击关闭 */
