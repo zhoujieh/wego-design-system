@@ -1854,9 +1854,10 @@
 }
 /* ── 居中浮层加载(外壳同 Toast,固定屏幕正中;不带进度=三点+单行文案,带进度=进度环+两行文案) ── */
 .loading-overlay{
-  --loading-overlay-pad-x: 28px;
-  --loading-overlay-pad-y: 20px;
+  --loading-overlay-pad-x: 24px;
+  --loading-overlay-pad-y: 16px;
   --loading-overlay-gap: 12px;
+  --loading-overlay-min-size: 120px;
   position:fixed;
   left:50%;
   top:50%;
@@ -1868,7 +1869,9 @@
   align-items:center;
   justify-content:center;
   gap:var(--loading-overlay-gap);
-  min-width:120px;
+  width:fit-content;
+  min-width:var(--loading-overlay-min-size);
+  min-height:var(--loading-overlay-min-size);
   padding:var(--loading-overlay-pad-y) var(--loading-overlay-pad-x);
   background:var(--bg-toast);
   border:var(--stroke-hairline) solid var(--border-toast);

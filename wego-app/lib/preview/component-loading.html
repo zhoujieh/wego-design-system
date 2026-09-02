@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="../colors_and_type.css">
 <link rel="stylesheet" href="../scaffold.css">
 <link rel="stylesheet" href="../iconfont.css">
+<link rel="stylesheet" href="../components.css">
 <style>
 
 /* @component-css-start */
@@ -31,9 +32,10 @@
 }
 /* ── 居中浮层加载(外壳同 Toast,固定屏幕正中;不带进度=三点+单行文案,带进度=进度环+两行文案) ── */
 .loading-overlay{
-  --loading-overlay-pad-x: 28px;
-  --loading-overlay-pad-y: 20px;
+  --loading-overlay-pad-x: 24px;
+  --loading-overlay-pad-y: 16px;
   --loading-overlay-gap: 12px;
+  --loading-overlay-min-size: 120px;
   position:fixed;
   left:50%;
   top:50%;
@@ -45,7 +47,9 @@
   align-items:center;
   justify-content:center;
   gap:var(--loading-overlay-gap);
-  min-width:120px;
+  width:fit-content;
+  min-width:var(--loading-overlay-min-size);
+  min-height:var(--loading-overlay-min-size);
   padding:var(--loading-overlay-pad-y) var(--loading-overlay-pad-x);
   background:var(--bg-toast);
   border:var(--stroke-hairline) solid var(--border-toast);
@@ -89,6 +93,9 @@
 .loading-demo-overlay-wrap { position:relative; display:flex; justify-content:center; padding:14px 0; background:var(--bg-subtle); border-radius:var(--radius-8); }
 .loading-demo-overlay-wrap .loading-overlay { position:relative; left:auto; top:auto; transform:none; opacity:1; visibility:visible; pointer-events:none; }
 .loading-demo-btn { padding:6px 14px; border:1px solid var(--border-neutral-l3); border-radius:var(--radius-8); background:transparent; font-size:var(--body-sm-font-size); color:var(--text-default); cursor:pointer; }
+/* 结果 Toast 配套演示：内联展示引导 toast（图标+文案+可选操作），宽度自适应内容 */
+.loading-demo-toast-wrap { position:relative; display:flex; flex-direction:column; gap:10px; padding:14px; background:var(--bg-subtle); border-radius:var(--radius-8); }
+.loading-demo-toast-wrap .toast { position:relative; left:auto; bottom:auto; transform:none; opacity:1; visibility:visible; width:auto; max-width:100%; }
 </style>
 </head>
 <body>
@@ -137,30 +144,73 @@
   </div>
 </div>
 
+<div class="pv-section__title">配套结果提示（进度加载完成后衔接 Toast，图标来自 Iconfont）</div>
+<div class="loading-demo-toast-wrap">
+  <div class="loading-demo-note">进度加载完成后，紧跟一个带图标的引导 Toast：成功用勾（icon-goutoast）、失败用叉（icon-chatoast），默认底部显示、可配置操作按钮（底部可操作长 toast）。</div>
+  <div class="toast toast--guide">
+    <span class="toast__icon icon-goutoast"></span>
+    <span class="toast__text">分享完成</span>
+    <button type="button" class="toast__action toast__action--strong">
+      <span class="toast__action-text">查看</span>
+    </button>
+  </div>
+  <div class="toast toast--guide">
+    <span class="toast__icon icon-chatoast"></span>
+    <span class="toast__text">下载失败</span>
+    <button type="button" class="toast__action toast__action--strong">
+      <span class="toast__action-text">重试</span>
+    </button>
+  </div>
+</div>
+
 <div class="pv-section__title">交互演示（固定屏幕正中的真实浮层）</div>
 <div class="loading-demo-row">
   <button type="button" id="demoOverlayNoProgress" class="loading-demo-btn">显示居中加载（不带进度）</button>
   <button type="button" id="demoOverlayProgress" class="loading-demo-btn">显示居中加载（带进度）</button>
+  <button type="button" id="demoOverlayFail" class="loading-demo-btn">加载失败结果（叉）</button>
 </div>
-<div class="loading-demo-note" style="margin-top:12px">点击按钮在屏幕正中展示浮层；带进度场景会自动递增百分比并更新进度环与第二行数字，100% 后自动消失。</div>
+<div class="loading-demo-note" style="margin-top:12px">点击按钮在屏幕正中展示浮层；带进度场景会自动递增百分比并更新进度环与第二行数字，100% 后自动衔接底部结果 Toast（勾 + 操作按钮）。</div>
 
 <script>
 (function () {
   var host = document.createElement('div');
   host.id = 'loading-overlay-demo-host';
   document.body.appendChild(host);
-  var timer = null;
-  function hide() { host.innerHTML = ''; }
+  var toastHost = document.createElement('div');
+  toastHost.id = 'loading-result-toast-host';
+  document.body.appendChild(toastHost);
+  var timers = [];
+
+  function clearTimers() {
+    timers.forEach(function (t) { clearTimeout(t); clearInterval(t); });
+    timers = [];
+  }
+  function hideLoading() { host.innerHTML = ''; }
+  function hideToast() { toastHost.innerHTML = ''; }
+
+  // 结果 Toast：引导变体（图标+文案+操作），底部显示，同屏互斥
+  function showResultToast(icon, text, actionLabel, duration) {
+    hideToast();
+    toastHost.innerHTML =
+      '<div class="toast toast--guide is-floating is-visible">' +
+      '<span class="toast__icon ' + icon + '"></span>' +
+      '<span class="toast__text">' + text + '</span>' +
+      (actionLabel ? '<button type="button" class="toast__action toast__action--strong"><span class="toast__action-text">' + actionLabel + '</span></button>' : '') +
+      '</div>';
+    timers.push(setTimeout(hideToast, duration || 4500));
+  }
+
   document.getElementById('demoOverlayNoProgress').addEventListener('click', function () {
-    clearTimeout(timer);
+    clearTimers();
+    hideToast();
     host.innerHTML =
       '<div class="loading-overlay is-visible" role="status" aria-live="polite">' +
       '<span class="loading loading--24 loading-overlay__indicator" role="img" aria-label="加载中"><span class="loading__icon"><span class="loading__dot loading__dot--1"></span><span class="loading__dot loading__dot--2"></span><span class="loading__dot loading__dot--3"></span></span></span>' +
       '<div class="loading-overlay__text"><span class="loading-overlay__label">正在分享</span></div></div>';
-    timer = setTimeout(hide, 2200);
+    timers.push(setTimeout(hideLoading, 2200));
   });
-  document.getElementById('demoOverlayProgress').addEventListener('click', function () {
-    clearInterval(timer);
+
+  function startProgress(onDone) {
     var p = 0;
     host.innerHTML =
       '<div class="loading-overlay is-visible" role="status" aria-live="polite">' +
@@ -168,15 +218,30 @@
       '<div class="loading-overlay__text"><span class="loading-overlay__label">正在分享</span><span class="loading-overlay__percent">0%</span></div></div>';
     var bar = host.querySelector('.loading-ring');
     var pct = host.querySelector('.loading-overlay__percent');
-    timer = setInterval(function () {
+    timers.push(setInterval(function () {
       p = Math.min(p + 7, 100);
       bar.style.setProperty('--progress', p);
       pct.textContent = p + '%';
       if (p >= 100) {
-        clearInterval(timer);
-        timer = setTimeout(hide, 500);
+        clearTimers();
+        hideLoading();
+        onDone();
       }
-    }, 120);
+    }, 120));
+  }
+
+  document.getElementById('demoOverlayProgress').addEventListener('click', function () {
+    clearTimers();
+    hideToast();
+    startProgress(function () {
+      showResultToast('icon-goutoast', '分享完成', '查看');
+    });
+  });
+
+  document.getElementById('demoOverlayFail').addEventListener('click', function () {
+    clearTimers();
+    hideLoading();
+    showResultToast('icon-chatoast', '下载失败', '重试');
   });
 })();
 </script>
