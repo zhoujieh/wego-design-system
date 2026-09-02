@@ -4210,7 +4210,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
                 </div>
                 <div class="field">
                   <span class="field-icon">${ICONS.gap}</span>
-                  <input class="text-input" type="text" value="${d.layoutGap || ''}" data-field="layoutGap" inputmode="numeric" placeholder="gap" />
+                  <input class="text-input" type="text" value="${d.justifyContent === 'space-between' ? 'auto' : (d.layoutGap || '')}" data-field="layoutGap" inputmode="numeric" placeholder="gap" />
                 </div>
               </div>
             </div>
@@ -4468,6 +4468,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._shadow.querySelectorAll('[data-move]').forEach(btn => {
         btn.addEventListener('click', () => this._moveSelected(btn.dataset.move));
       });
+      // 自动布局：gap 输入框在「左右对齐」显示 auto 态下，聚焦时清空便于直接输入数值
+      const gapInput = this._shadow.querySelector('input[data-field="layoutGap"]');
+      if (gapInput) {
+        gapInput.addEventListener('focus', () => { if (gapInput.value === 'auto') gapInput.value = ''; });
+      }
       // Liaison 式宽高交互：数值输入（blur/Enter 自动回 fixed 模式 + commit）+ 模式 select（commit）
       const sizeFields = ['width', 'height'];      sizeFields.forEach(field => {
         const input = this._shadow.querySelector(`[data-field="${field}"]`);
@@ -4554,6 +4559,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
     _onFieldChange(field, value) {
       if (!this._targetEl || !this._data) return;
+      // auto 是「左右对齐」模式下的间距显示态，不作为可提交的间距值（忽略，避免误提交/误报）
+      if (field === 'layoutGap' && value === 'auto') return;
       // 输入守门：拦截负数尺寸、非 flex 容器布局方向等非法操作（伪元素与普通元素路径统一），
       // 必须在写 _data 之前拦截，避免污染面板数据
       const guard = this._validateFieldValue(field, value);
@@ -4562,6 +4569,14 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         return;
       }
       this._data[field] = value;
+      // 自动布局联动：间距输入数值 → 自动回「左对齐」布局（参考宽高输入数值自动回固定模式）
+      if (!this._target && field === 'layoutGap' && String(value || '').trim() !== '' && !isNaN(parseFloat(value))) {
+        if (this._data.justifyContent !== 'flex-start') this._data.justifyContent = 'flex-start';
+      }
+      // 自动布局联动：切到「左右对齐」→ 间距视为 auto（清空输入值）
+      if (!this._target && field === 'justifyContent' && value === 'space-between') {
+        this._data.layoutGap = '';
+      }
       // 伪元素目标：编辑通过注入 <head> 的样式规则生效，property 写为 css-property
       if (this._target) {
         const cssProp = this._fieldToCssProp(field);
@@ -4977,7 +4992,16 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         case 'justifyContent': {
           const oldValue = cs().justifyContent;
           el.style.justifyContent = value;
-          return { property: 'justify-content', oldValue, newValue: value };
+          const res = { property: 'justify-content', oldValue, newValue: value };
+          // 左右对齐 → 间距输入显示 auto，清除已显式设置的固定 gap（避免与两端分布矛盾）
+          if (!this._target && value === 'space-between') {
+            const gapOld = cs().gap;
+            if (el.style.getPropertyValue('gap') !== '') {
+              el.style.gap = '';
+              res.extra = [{ property: 'gap', oldValue: gapOld, newValue: '', sync: true }];
+            }
+          }
+          return res;
         }
         case 'alignItems': {
           const oldValue = cs().alignItems;
@@ -4987,7 +5011,16 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         case 'layoutGap': {
           const oldValue = cs().gap;
           el.style.gap = isNaN(numVal) ? '' : numVal + 'px';
-          return { property: 'gap', oldValue, newValue: isNaN(numVal) ? '' : numVal + 'px' };
+          const res = { property: 'gap', oldValue, newValue: isNaN(numVal) ? '' : numVal + 'px' };
+          // 输入固定间距 → 自动回「左对齐」布局（与左右对齐显示 auto 互斥）
+          if (!this._target && !isNaN(numVal)) {
+            const jcOld = cs().justifyContent;
+            if (jcOld !== 'flex-start') {
+              el.style.justifyContent = 'flex-start';
+              res.extra = [{ property: 'justify-content', oldValue: jcOld, newValue: 'flex-start', sync: true }];
+            }
+          }
+          return res;
         }
         case 'paddingLeft': {
           const oldValue = cs().paddingLeft;
@@ -5230,6 +5263,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._shadow.querySelectorAll('[data-field="justifyContent"]').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.value === d.justifyContent);
       });
+      // 自动布局：gap 输入框回显（左右对齐模式显示 auto，否则显示间距值）
+      const gapInput = this._shadow.querySelector('input[data-field="layoutGap"]');
+      if (gapInput) {
+        const gapDisp = d.justifyContent === 'space-between' ? 'auto' : (d.layoutGap || '');
+        if (gapInput.value !== gapDisp) gapInput.value = gapDisp;
+      }
       // shadow inset
       this._shadow.querySelectorAll('[data-field="shadowInset"]').forEach(btn => {
         const isActive = (btn.dataset.value === 'true') === (d.shadowInset === true || d.shadowInset === 'true');
