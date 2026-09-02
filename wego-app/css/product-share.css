@@ -22,6 +22,7 @@
   justify-content: flex-start;
   padding: 0 4px 0 16px;
   height: 64px;
+  border-bottom: 0.5px solid var(--border-neutral-l2);
 }
 
 .share-panel__title {
@@ -72,11 +73,13 @@
 
 /* 配置栏 */
 .share-panel__config {
+  height: 48px;
   padding: 0 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  border-bottom: 0.5px solid var(--border-neutral-l2);
 }
 
 .share-panel__config-row {
@@ -128,9 +131,9 @@
   font-size: 12px;
 }
 
-/* 渠道栏（复用 .layout-scroll-row 横向滚动） */
+/* 渠道栏（复用 .layout-scroll-row 横向滚动）：上方间距 20px，与指示器间距 20px */
 .share-panel__channels {
-  padding: 8px 8px 12px;
+  padding: 20px 8px 20px;
   gap: 0;
 }
 
@@ -138,7 +141,7 @@
   display: flex;
   flex-wrap: wrap;
   align-content: flex-start;
-  gap: 0;
+  gap: 20px 0;
   padding: 0;
   flex: 0 0 auto;
   box-sizing: border-box;
@@ -222,11 +225,11 @@
   max-width: 100%;
 }
 
-/* 滚动指示器：滚动条式进度条（track + thumb），仅多组时显示 */
+/* 滚动指示器：滚动条式进度条（track + thumb），仅多组时显示；与操作栏间距 20px */
 .share-panel__indicator {
   width: 160px;
   height: 2px;
-  margin: 0 auto 12px;
+  margin: 0 auto 20px;
   border-radius: 1px;
   background: var(--border-light, #e0e0e0);
   position: relative;
@@ -243,15 +246,9 @@
   transition: transform 0.15s ease;
 }
 
-/* 其他操作栏：分割线独立占位 + 单行横向滚动，样式与分享渠道一致（52px 图标框 + 下方文字） */
-.share-panel__actions-divider {
-  height: 1px;
-  margin-left: 16px;
-  background: var(--border-light, #f0f0f0);
-}
-
+/* 其他操作栏：单行横向滚动，样式与分享渠道一致（52px 图标框 + 下方文字），上方由指示器间距承接 */
 .share-panel__actions {
-  padding: 8px 8px 12px;
+  padding: 0 8px 20px;
   gap: 0;
 }
 

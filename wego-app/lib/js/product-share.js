@@ -182,9 +182,8 @@
       configHtml += '</div>';
     }
 
-    /* 其他操作栏：分割线独立占位 + 单行横向滚动，样式与分享渠道一致（52px 图标框 + 下方文字），图标用 iconfont */
-    var actionsHtml = '<div class="share-panel__actions-divider" aria-hidden="true"></div>';
-    actionsHtml += '<div class="share-panel__actions layout-scroll-row">';
+    /* 其他操作栏：单行横向滚动，样式与分享渠道一致（52px 图标框 + 下方文字），图标用 iconfont */
+    var actionsHtml = '<div class="share-panel__actions layout-scroll-row">';
     actions.forEach(function (a) {
       actionsHtml += '<button type="button" class="share-panel__action-item" data-component-slug="button" data-action="' + a.key + '">'
         + '<span class="share-panel__action-icon"><i class="wego-iconfont-s ' + a.icon + '" aria-hidden="true"></i></span>'
