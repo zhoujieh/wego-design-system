@@ -1894,6 +1894,8 @@
 .loading-overlay__text{ display:flex; flex-direction:column; align-items:center; gap:2px; }
 .loading-overlay__label{ font-family:var(--body-md-font-family); font-size:var(--body-md-font-size); line-height:var(--body-md-line-height); font-weight:var(--font-weight-medium); color:var(--text-inverse); white-space:nowrap; }
 .loading-overlay__percent{ font-family:var(--body-md-font-family); font-size:var(--body-sm-font-size); line-height:var(--body-sm-line-height); color:var(--text-inverse); opacity:0.82; }
+/* 结果态:加载完成后勾/叉图标(icon-goutoast/icon-chatoast),外壳与加载浮层一致(居中/正方形最小/长文案自适应) */
+.loading-overlay__result-icon{ font-size:var(--size-24); line-height:1; color:var(--text-inverse); }
 /* 进度环:双 circle(低透明度轨道+白色进度弧),--progress 由宿主注入 0-100,默认 0 */
 .loading-ring{
   --ring-size:32px;
