@@ -115,6 +115,7 @@
   function sharePanelTemplate(opts) {
     var title = opts.title || '分享产品';
     var config = opts.config || {};
+    var content = opts.content || {};
     var channels = config.channels || CHANNELS.filter(function (c) { return !c.miniprogramOnly; }).map(function (c) { return c.key; });
     var showHeaderActions = config.showHeaderActions !== false;
     var configItems = config.configItems || [
@@ -122,11 +123,17 @@
       { key: 'textLink', type: 'checkbox', label: '文案带链接', defaultValue: false },
       { key: 'customerTag', type: 'button', label: '给客户打标' }
     ];
-    var actions = config.actions || [
+    /* 数据状态：S3 纯文字（无图无视频）时隐藏「保存图片」按钮 */
+    var hasImages = content.images && content.images.length > 0;
+    var hasVideos = content.videos && content.videos.length > 0;
+    var isTextOnly = !hasImages && !hasVideos;
+    var actions = (config.actions || [
       { key: 'miniprogramLink', label: '小程序链接', icon: 'icon-lianjie', style: 'icon-text' },
       { key: 'saveImages', label: '保存图片', icon: 'icon-xiazai', style: 'icon-text' },
       { key: 'barcode', label: '打商品条码', icon: 'icon-dayinshangpintiaoma', style: 'icon-text' }
-    ];
+    ]).filter(function (a) {
+      return !(isTextOnly && a.key === 'saveImages');
+    });
 
     /* 渠道栏：按 group 分组渲染，每组 flex-wrap，item 固定 68px */
     var group1 = CHANNELS.filter(function (c) { return c.group === 1 && channels.indexOf(c.key) >= 0; });
@@ -273,15 +280,50 @@
   /* ═══════════════════════════════════════════════════════════════
      分享流程模拟
      ═══════════════════════════════════════════════════════════════ */
+  /* 数据状态判定：S1 完整商品（图+标题）/ S2 视频商品（视频+标题，图可选）/ S3 纯文字（仅标题）/ S5 视频为主（视频+标题，无图） */
+  function resolveDataState(content) {
+    var hasImages = content && content.images && content.images.length > 0;
+    var hasVideos = content && content.videos && content.videos.length > 0;
+    if (!hasImages && !hasVideos) return 'S3';
+    if (hasVideos && !hasImages) return 'S5';
+    if (hasVideos) return 'S2';
+    return 'S1';
+  }
+
   function simulateShare(ctx, channelKey, content, callbacks) {
     var channel = getChannel(channelKey);
     if (!channel) return;
 
-    /* 仅文案校验（微博除外） */
+    var state = resolveDataState(content);
     var hasImages = content && content.images && content.images.length > 0;
     var hasVideos = content && content.videos && content.videos.length > 0;
-    if (!channel.supportTextOnly && !hasImages && !hasVideos) {
-      ctx.toast('请选择图片/视频分享');
+
+    /* 数据状态 × 渠道交互差异（场景管理重构） */
+    if (state === 'S3') {
+      /* 纯文字：仅标题，无图无视频 */
+      if (channelKey === 'moments' || channelKey === 'poster') {
+        ctx.toast('暂无图片');
+        return;
+      }
+      if (channelKey === 'channels') {
+        ctx.toast('暂不支持');
+        return;
+      }
+      if (channelKey === 'wechat') {
+        ctx.toast('复制成功');
+        setQuickChannel(channelKey);
+        if (callbacks && callbacks.onSuccess) callbacks.onSuccess();
+        return;
+      }
+      /* 其他渠道（第三方平台等）：仅文案校验，微博例外 */
+      if (!channel.supportTextOnly) {
+        ctx.toast('请选择图片/视频分享');
+        return;
+      }
+    }
+
+    if (state === 'S5' && channelKey === 'poster') {
+      ctx.toast('暂无图片');
       return;
     }
 
@@ -427,7 +469,7 @@
     var reopenMain = options._reopenMain || null;
 
     var handler = SHARE_TYPES[contentType] || SHARE_TYPES.panel;
-    ctx.openSheet(handler.render({ title: title, config: config }), {
+    ctx.openSheet(handler.render({ title: title, config: config, content: content }), {
       label: title,
       init: function (sheetCtx) {
         var root = sheetCtx.root;
@@ -522,6 +564,7 @@
                   _reopenMain: function () {
                     openProductShare(ctx, {
                       title: title,
+                      content: content,
                       config: config,
                       callbacks: callbacks
                     });
