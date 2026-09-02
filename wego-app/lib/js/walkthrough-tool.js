@@ -733,7 +733,16 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     // 布局方向
     const display = cs.display;
     const isFlex = display === 'flex' || display === 'inline-flex';
-    const layoutMode = isFlex ? (cs.flexDirection === 'row' || cs.flexDirection === 'row-reverse' ? 'row' : 'column') : 'column';
+    const layoutMode = isFlex ? (cs.flexDirection === 'row' || cs.flexDirection === 'row-reverse' ? 'row' : 'column') : (display === 'grid' ? 'grid' : 'column');
+    // Grid 列数解析：repeat(n,1fr) 或逗号分隔计数
+    const gridCols = (() => {
+      if (display !== 'grid') return 3;
+      const gt = cs.gridTemplateColumns || '';
+      const rm = gt.match(/repeat\(\s*(\d+)/);
+      if (rm) return parseInt(rm[1], 10);
+      const parts = gt.split(',').filter(Boolean);
+      return parts.length > 1 ? parts.length : 1;
+    })();
 
     // 对齐矩阵映射
     const jc = cs.justifyContent;
@@ -762,6 +771,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     return {
       // 自动布局
       layoutMode,
+      gridColumns: gridCols,
       justifyContent: jc,
       alignItems: ai,
       alignPreset,
@@ -4460,6 +4470,41 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
           }
           .layout-tab .icon { font-size: 14px; }
+          /* Grid 网格布局控件（计划 3.3.2：列数快速预设） */
+          .grid-controls { display: flex; flex-direction: column; gap: 6px; margin-top: 2px; }
+          .grid-presets { display: flex; gap: 6px; flex-wrap: wrap; }
+          .grid-preset {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            padding: 6px 8px;
+            border: 1px solid var(--border-color, rgba(255,255,255,0.1));
+            border-radius: 8px;
+            background: rgba(255,255,255,0.04);
+            color: var(--text-tertiary, #888);
+            font-size: 10px;
+            cursor: pointer;
+            min-width: 34px;
+          }
+          .grid-preset.active {
+            border-color: var(--text-brand, #00b96b);
+            color: var(--text-brand, #00b96b);
+            background: rgba(0,185,107,0.08);
+          }
+          .grid-preset-dots {
+            display: flex;
+            gap: 2px;
+            height: 12px;
+            align-items: flex-start;
+            justify-content: center;
+          }
+          .grid-preset-dots i {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: currentColor;
+          }
           .alignment-matrix {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -4697,6 +4742,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
                 <button class="layout-tab ${d.layoutMode === 'row' ? 'active' : ''}" data-field="layoutMode" data-value="row">
                   <span class="icon">${ICONS.layoutRow}</span><span>横向</span>
                 </button>
+                <button class="layout-tab ${d.layoutMode === 'grid' ? 'active' : ''}" data-field="layoutMode" data-value="grid">
+                  <span class="icon">${ICONS.grid}</span><span>网格</span>
+                </button>
               </div>
               <div class="move-grid" title="顺序（调整在父容器中的位置）">
                 <button type="button" class="move-btn" data-move="up" title="上移" aria-label="上移"><span class="move-arrow">↑</span></button>
@@ -4705,6 +4753,18 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
                 <button type="button" class="move-btn" data-move="down" title="下移" aria-label="下移"><span class="move-arrow">↓</span></button>
               </div>
             </div>
+            ${d.layoutMode === 'grid' ? `
+            <div class="grid-controls">
+              <p class="sub-label">列数预设</p>
+              <div class="grid-presets">
+                ${[1, 2, 3, 4, 5, 6].map(n => `
+                  <button type="button" class="grid-preset ${(parseInt(d.gridColumns, 10) || 3) === n ? 'active' : ''}" data-field="gridColumns" data-value="${n}" title="${n} 列">
+                    <span class="grid-preset-dots">${Array.from({ length: n }).map(() => '<i></i>').join('')}</span>
+                    <span>${n}</span>
+                  </button>`).join('')}
+              </div>
+            </div>
+            ` : ''}
             <div class="field-row">
               <div class="alignment-matrix" data-align-matrix>
                 ${this._renderAlignMatrix(d)}
@@ -5598,10 +5658,30 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       }
       switch (field) {
         case 'layoutMode': {
+          // grid 模式：display:grid + 列数预设 + gutter（快速预设为主，对齐计划 3.3.2 Grid 需求）
+          if (value === 'grid') {
+            const oldValue = cs().display;
+            el.style.display = 'grid';
+            el.style.flexDirection = '';
+            const cols = Math.max(1, Math.min(12, parseInt(this._data.gridColumns, 10) || 3));
+            el.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+            if (!el.style.getPropertyValue('gap')) el.style.gap = '8px';
+            const res = { property: 'display', oldValue, newValue: 'grid' };
+            res.extra = [
+              { property: 'grid-template-columns', oldValue: cs().gridTemplateColumns, newValue: `repeat(${cols}, 1fr)` },
+            ];
+            return res;
+          }
           const oldValue = cs().flexDirection;
           el.style.display = 'flex';
           el.style.flexDirection = value;
           return { property: 'flex-direction', oldValue, newValue: value };
+        }
+        case 'gridColumns': {
+          const oldValue = cs().gridTemplateColumns;
+          const cols = Math.max(1, Math.min(12, parseInt(value, 10) || 1));
+          el.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+          return { property: 'grid-template-columns', oldValue, newValue: `repeat(${cols}, 1fr)` };
         }
         case 'justifyContent': {
           const oldValue = cs().justifyContent;
@@ -5925,6 +6005,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // layout tabs
       this._shadow.querySelectorAll('[data-field="layoutMode"]').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.value === d.layoutMode);
+      });
+      // Grid 列数预设 active
+      this._shadow.querySelectorAll('[data-field="gridColumns"]').forEach(btn => {
+        btn.classList.toggle('active', (parseInt(d.gridColumns, 10) || 3) === parseInt(btn.dataset.value, 10));
       });
       // text align
       this._shadow.querySelectorAll('[data-field="textAlign"]').forEach(btn => {
@@ -8557,6 +8641,15 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._updateToolbarState();
     }
 
+    /** 强制设置失败注入开关（供 window.WegoApp.faultInjection.setEnabled 使用） */
+    _setFault(key, on) {
+      if (this._faultState[key] === on) return;
+      this._faultState[key] = !!on;
+      this._persistFaultState();
+      this._updateFaultSwitches();
+      this._updateToolbarState();
+    }
+
     _updateFaultSwitches() {
       ['load', 'save', 'delete', 'slow'].forEach(key => {
         const sw = this._shadow.querySelector(`[data-fault-switch="${key}"]`);
@@ -9289,6 +9382,17 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       showToast: (msg) => {
         const app = document.querySelector('wego-walkthrough');
         if (app) app._showToast(msg);
+      },
+    };
+    // 失败注入 API（迁移自 app.js mountFaultSwitch，保持 isEnabled/setEnabled 契约不变）
+    window.WegoApp.faultInjection = {
+      isEnabled: (key) => {
+        const app = document.querySelector('wego-walkthrough');
+        return app ? !!app._faultState[key] : false;
+      },
+      setEnabled: (key, on) => {
+        const app = document.querySelector('wego-walkthrough');
+        if (app) app._setFault(key, !!on);
       },
     };
     // 记录环境信息，便于排查移动端键盘问题
