@@ -4095,6 +4095,17 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             color: var(--text-brand, #00b96b);
             box-shadow: 0 1px 2px rgba(0,0,0,0.08);
           }
+          /* 自动布局：主轴对齐（左/右/左右）与间距输入 上下合并容器（对齐在上、输入在下） */
+          .gap-align-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+            min-width: 0;
+          }
+          .gap-align-wrap .field {
+            flex: none;
+          }
           .field.metric-field {
             padding: 0 4px 0 0;
           }
@@ -4191,14 +4202,16 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
               <div class="alignment-matrix" data-align-matrix>
                 ${this._renderAlignMatrix(d)}
               </div>
-              <div class="field">
-                <span class="field-icon">${ICONS.gap}</span>
-                <input class="text-input" type="text" value="${d.layoutGap || ''}" data-field="layoutGap" inputmode="numeric" placeholder="gap" />
-              </div>
-              <div class="btn-group" title="主轴对齐方式">
-                <button type="button" data-field="justifyContent" data-value="flex-start" class="${d.justifyContent === 'flex-start' ? 'active' : ''}" title="左对齐">左</button>
-                <button type="button" data-field="justifyContent" data-value="flex-end" class="${d.justifyContent === 'flex-end' ? 'active' : ''}" title="右对齐">右</button>
-                <button type="button" data-field="justifyContent" data-value="space-between" class="${d.justifyContent === 'space-between' ? 'active' : ''}" title="左右对齐（两端贴边）">左右</button>
+              <div class="gap-align-wrap">
+                <div class="btn-group" title="主轴对齐方式">
+                  <button type="button" data-field="justifyContent" data-value="flex-start" class="${d.justifyContent === 'flex-start' ? 'active' : ''}" title="左对齐">左</button>
+                  <button type="button" data-field="justifyContent" data-value="flex-end" class="${d.justifyContent === 'flex-end' ? 'active' : ''}" title="右对齐">右</button>
+                  <button type="button" data-field="justifyContent" data-value="space-between" class="${d.justifyContent === 'space-between' ? 'active' : ''}" title="左右对齐（两端贴边）">左右</button>
+                </div>
+                <div class="field">
+                  <span class="field-icon">${ICONS.gap}</span>
+                  <input class="text-input" type="text" value="${d.layoutGap || ''}" data-field="layoutGap" inputmode="numeric" placeholder="gap" />
+                </div>
               </div>
             </div>
             <p class="sub-label">内边距 padding</p>
