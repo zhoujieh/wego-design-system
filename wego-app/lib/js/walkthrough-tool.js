@@ -612,6 +612,45 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
   function isSemanticWidth(v) { return isSemanticSize(v); }
   function isSemanticHeight(v) { return isSemanticSize(v); }
 
+  /** 解析 background-image 渐变字符串（linear/radial），返回 { type, angle, start, end } 或 null */
+  function parseGradient(bg) {
+    if (!bg || bg === 'none' || bg === 'initial') return null;
+    const m = String(bg).match(/^(linear|radial)-gradient\((.*)\)$/);
+    if (!m) return null;
+    const type = m[1];
+    let inner = m[2].trim();
+    let angle = 180;
+    if (type === 'linear') {
+      const am = inner.match(/^(-?\d+(?:\.\d+)?)deg\s*,\s*/);
+      if (am) { angle = parseFloat(am[1]); inner = inner.slice(am[0].length); }
+    } else {
+      const rm = inner.match(/^circle\s*(?:at\s+[^,]+)?\s*,\s*/);
+      if (rm) inner = inner.slice(rm[0].length);
+    }
+    const colors = inner.split(',').map(s => {
+      const c = s.trim().match(/^(#[0-9a-fA-F]{3,8}|rgba?\([^)]*\)|hsla?\([^)]*\))/);
+      return c ? c[1] : null;
+    }).filter(Boolean);
+    const start = colors[0] || '#ffffff';
+    const end = colors[1] || colors[0] || '#000000';
+    return { type, angle, start, end };
+  }
+
+  /** 依据面板渐变字段构建 background-image 值（gradientEnabled 关闭时返回空串清除） */
+  function buildGradient(d) {
+    if (!d) return '';
+    const enabled = d.gradientEnabled === true || d.gradientEnabled === 'true';
+    if (!enabled) return '';
+    const start = d.gradientStart || '#ffffff';
+    const end = d.gradientEnd || '#000000';
+    const flip = d.gradientFlip === true || d.gradientFlip === 'true';
+    const s = flip ? end : start;
+    const e = flip ? start : end;
+    if (d.gradientType === 'radial') return `radial-gradient(circle, ${s} 0%, ${e} 100%)`;
+    const angle = (parseFloat(d.gradientAngle) || 180);
+    return `linear-gradient(${angle}deg, ${s} 0%, ${e} 100%)`;
+  }
+
   /** 解析 box-shadow 字符串为图层数组 */
   function parseBoxShadow(shadowStr) {
     if (!shadowStr || shadowStr === 'none') return [];
@@ -760,6 +799,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       fillHex: bgColor.hex,
       fillOpacity: bgColor.opacity,
       hasFill: bgColor.opacity > 0,
+      // 渐变填充（background-image 解析；无渐变时关闭）
+      gradientEnabled: !!parseGradient(cs.backgroundImage),
+      gradientType: (parseGradient(cs.backgroundImage) || { type: 'linear' }).type,
+      gradientStart: (parseGradient(cs.backgroundImage) || { start: '#ffffff' }).start,
+      gradientEnd: (parseGradient(cs.backgroundImage) || { end: '#000000' }).end,
+      gradientAngle: (parseGradient(cs.backgroundImage) || { angle: 180 }).angle,
+      gradientFlip: false,
       // 描边
       strokeWidth: parseNumeric(cs.borderTopWidth),
       strokeHex: borderColor.hex,
@@ -4485,6 +4531,57 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             color: var(--text-brand, #00b96b);
             box-shadow: 0 1px 2px rgba(0,0,0,0.08);
           }
+          /* 渐变填充 */
+          .gradient-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            height: 28px;
+            padding: 0 10px;
+            border: 1px solid var(--border-color, rgba(255,255,255,0.1));
+            border-radius: 7px;
+            background: rgba(255,255,255,0.04);
+            color: var(--text-secondary, rgba(255,255,255,0.6));
+            font-size: 11px;
+            cursor: pointer;
+          }
+          .gradient-toggle.active {
+            border-color: var(--text-brand, #00b96b);
+            color: var(--text-brand, #00b96b);
+            background: rgba(0,185,107,0.08);
+          }
+          .gradient-swatch {
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ffffff 0%, #000000 100%);
+            border: 1px solid rgba(255,255,255,0.2);
+          }
+          .gradient-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 6px;
+            padding: 8px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+          }
+          .gradient-panel .btn-group button {
+            font-size: 11px;
+          }
+          .color-button.small { width: 26px; height: 26px; }
+          .angle-btn {
+            height: 26px;
+            padding: 0 8px;
+            border: 1px solid var(--border-color, rgba(255,255,255,0.1));
+            border-radius: 6px;
+            background: rgba(255,255,255,0.04);
+            color: var(--text-secondary, rgba(255,255,255,0.6));
+            font-size: 11px;
+            cursor: pointer;
+            flex-shrink: 0;
+          }
+          .angle-btn:hover { background: rgba(255,255,255,0.1); }
           /* 自动布局：主轴对齐（左/右/左右）与间距输入 上下合并容器（对齐在上、输入在下） */
           .gap-align-wrap {
             display: flex;
@@ -4746,6 +4843,41 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
                 ${fillIsToken ? fillTokenName : ICONS.token}
               </button>
             </div>
+            <div class="field-row">
+              <button class="gradient-toggle ${d.gradientEnabled ? 'active' : ''}" type="button" data-grad-toggle title="渐变填充（线性/径向，双色标）">
+                <span class="gradient-swatch"></span>
+                渐变填充
+              </button>
+            </div>
+            ${d.gradientEnabled ? `
+            <div class="gradient-panel">
+              <div class="btn-group">
+                <button class="mode-btn ${d.gradientType === 'linear' ? 'active' : ''}" type="button" data-field="gradientType" data-value="linear">线性</button>
+                <button class="mode-btn ${d.gradientType === 'radial' ? 'active' : ''}" type="button" data-field="gradientType" data-value="radial">径向</button>
+              </div>
+              <div class="field-row two-col">
+                <div class="field">
+                  <button class="color-button small" type="button" data-grad-color="start" title="起点颜色">
+                    <span class="swatch" style="background:${d.gradientStart || '#ffffff'}"></span>
+                  </button>
+                  <input class="text-input" type="text" value="${d.gradientStart || ''}" data-field="gradientStart" />
+                </div>
+                <div class="field">
+                  <button class="color-button small" type="button" data-grad-color="end" title="终点颜色">
+                    <span class="swatch" style="background:${d.gradientEnd || '#000000'}"></span>
+                  </button>
+                  <input class="text-input" type="text" value="${d.gradientEnd || ''}" data-field="gradientEnd" />
+                </div>
+              </div>
+              <div class="field-row">
+                <span class="field-icon">∠</span>
+                <input class="text-input" type="text" value="${d.gradientAngle ?? 180}" data-field="gradientAngle" inputmode="numeric" placeholder="角度" />
+                <button class="angle-btn" type="button" data-grad-angle="-45" title="角度减 45°">−45°</button>
+                <button class="angle-btn" type="button" data-grad-angle="45" title="角度加 45°">+45°</button>
+                <button class="angle-btn" type="button" data-grad-flip title="调转渐变位置">⇄</button>
+              </div>
+            </div>
+            ` : ''}
           </div>
 
           <!-- 描边 -->
@@ -4900,6 +5032,43 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           });
         }
       });
+      // 渐变填充：开关（toggle）
+      const gradToggle = this._shadow.querySelector('[data-grad-toggle]');
+      if (gradToggle) {
+        gradToggle.addEventListener('click', () => {
+          this._onFieldChange('gradientEnabled', this._data.gradientEnabled ? 'false' : 'true');
+        });
+      }
+      // 渐变填充：起止色 → 复用颜色选择器
+      this._shadow.querySelectorAll('[data-grad-color]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const key = btn.dataset.gradColor === 'end' ? 'gradientEnd' : 'gradientStart';
+          const hex = this._data[key] || (key === 'gradientEnd' ? '#000000' : '#ffffff');
+          bus.emit('open-color-picker', {
+            trigger: btn,
+            hex,
+            opacity: 100,
+            callback: (newHex) => {
+              this._onFieldChange(key, newHex);
+            },
+          });
+        });
+      });
+      // 渐变填充：角度 ±45 / 调转位置
+      this._shadow.querySelectorAll('[data-grad-angle]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const delta = parseInt(btn.dataset.gradAngle, 10) || 0;
+          const cur = parseFloat(this._data.gradientAngle) || 180;
+          this._onFieldChange('gradientAngle', String(((cur + delta) % 360 + 360) % 360));
+        });
+      });
+      const gradFlip = this._shadow.querySelector('[data-grad-flip]');
+      if (gradFlip) {
+        gradFlip.addEventListener('click', () => {
+          this._onFieldChange('gradientFlip', this._data.gradientFlip ? 'false' : 'true');
+        });
+      }
       // 自动布局：顺序移动（上下左右，按 flex 主轴方向前后移动一位，不可移动方向置灰）
       this._shadow.querySelectorAll('[data-move]').forEach(btn => {
         btn.addEventListener('click', () => this._moveSelected(btn.dataset.move));
@@ -5017,6 +5186,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       }
       // 伪元素目标：编辑通过注入 <head> 的样式规则生效，property 写为 css-property
       if (this._target) {
+        // 渐变填充不支持伪元素目标（伪元素无独立 background-image 编辑入口），静默忽略
+        if (/^gradient/.test(field) || field === 'gradientFlip') return;
         const cssProp = this._fieldToCssProp(field);
         let cssVal = this._fieldToCssValue(field);
         // 清空输入 = 移除该伪元素属性注入（数值字段的 0 兜底不适用此场景）
@@ -5698,6 +5869,18 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           el.style.boxShadow = out === 'none' ? '' : out;
           return { property: 'box-shadow', oldValue, newValue: out };
         }
+        // 渐变填充（background-image）：任一渐变字段变化都重新组合整体值，记录只有一条
+        case 'gradientEnabled':
+        case 'gradientType':
+        case 'gradientStart':
+        case 'gradientEnd':
+        case 'gradientAngle':
+        case 'gradientFlip': {
+          const oldValue = cs().backgroundImage;
+          const out = buildGradient(this._data);
+          el.style.backgroundImage = out;
+          return { property: 'background-image', oldValue, newValue: out };
+        }
         case 'display': {
           const oldValue = cs().display;
           el.style.display = value || '';
@@ -5775,6 +5958,17 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._shadow.querySelectorAll('[data-field="shadowInset"]').forEach(btn => {
         const isActive = (btn.dataset.value === 'true') === (d.shadowInset === true || d.shadowInset === 'true');
         btn.classList.toggle('active', isActive);
+      });
+      // 渐变填充：开关 + 类型按钮 + 起止色 swatch 回显
+      const gradToggle = this._shadow.querySelector('[data-grad-toggle]');
+      if (gradToggle) gradToggle.classList.toggle('active', d.gradientEnabled === true || d.gradientEnabled === 'true');
+      this._shadow.querySelectorAll('[data-field="gradientType"]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.value === d.gradientType);
+      });
+      this._shadow.querySelectorAll('[data-grad-color]').forEach(btn => {
+        const key = btn.dataset.gradColor === 'end' ? 'gradientEnd' : 'gradientStart';
+        const swatch = btn.querySelector('.swatch');
+        if (swatch) swatch.style.background = d[key] || (key === 'gradientEnd' ? '#000000' : '#ffffff');
       });
       // 颜色色块更新
       this._shadow.querySelectorAll('[data-color-trigger]').forEach(btn => {
