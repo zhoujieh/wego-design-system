@@ -6,7 +6,7 @@
   "status": "stable",
   "sourceKind": "figma",
   "confidence": "high",
-  "description": "三点位置传递式循环加载指示器，用于内容区或弹窗内容区等待态；默认 24px,三点共用同一关键帧,通过 delay 错峰形成亮点从点1→点2→点3→点1 依次放大变亮的循环传递动画;支持 16/24/32 尺寸按比例缩放;内联形态不承载文案，文案由宿主组合。另提供居中浮层加载形态(usage=overlay):复用 Toast 外壳样式(深灰底/8px 圆角/白色描边/阴影)悬浮于屏幕正中,外壳最小尺寸为正方形(120×120),文案较长时左右自适应变宽;分不带进度(三点+单行文案)与带进度(白色进度环+两行文案:状态文案行+百分比数字行)两种场景,文案可配置。带进度场景加载完成后由宿主衔接带图标的引导 Toast 提示(成功用 icon-goutoast 勾、失败用 icon-chatoast 叉,复用 Toast 引导变体,默认底部显示、可配置操作按钮)。",
+  "description": "三点位置传递式循环加载指示器，用于内容区或弹窗内容区等待态；默认 24px,三点共用同一关键帧,通过 delay 错峰形成亮点从点1→点2→点3→点1 依次放大变亮的循环传递动画;支持 16/24/32 尺寸按比例缩放;内联形态不承载文案，文案由宿主组合。另提供居中浮层加载形态(usage=overlay):复用 Toast 外壳样式(深灰底/8px 圆角/白色描边/阴影)悬浮于屏幕正中,外壳最小尺寸为正方形(120×120),文案较长时左右自适应变宽;分不带进度(三点+单行文案)与带进度(白色进度环+两行文案:状态文案行+百分比数字行)两种场景,文案可配置。带进度场景加载完成后默认衔接居中结果提示(外壳与加载浮层一致、正方形最小):成功用 icon-goutoast 勾、失败用 icon-chatoast 叉 + 结果文案;业务需引导下一步时(如下载完成后去分享)可配置为底部可操作长 Toast,直接调用已有 Toast 组件(引导变体)。",
   "semanticTypeCandidates": [
     "spinner",
     "loading-indicator",
@@ -93,6 +93,11 @@
       "name": "percent",
       "selector": ".loading-overlay__percent",
       "role": "百分比数字行(第二行)，仅带进度场景出现，如 63%"
+    },
+    {
+      "name": "resultIcon",
+      "selector": ".loading-overlay__result-icon",
+      "role": "结果态图标(加载完成后)，成功用 icon-goutoast 勾、失败用 icon-chatoast 叉，白色 24px"
     }
   ],
   "structurePatterns": [
@@ -105,7 +110,8 @@
     "不带进度(progress=none)：指示器用三点(圆点覆盖为白色)，文案区仅单行 .loading-overlay__label。",
     "带进度(progress=percent)：指示器用 .loading-ring 白色进度环，文案区两行(label + percent)，percent 行由宿主按实际进度更新，环中心不显示数字。",
     "居中浮层外壳最小尺寸为正方形(120×120，--loading-overlay-min-size)，width:fit-content 使长文案时左右自适应变宽，宽高比不小于正方形。",
-    "带进度场景加载完成后，由宿主用 Toast 引导变体(toast--guide)衔接结果提示：成功 icon-goutoast(勾)+“分享完成/下载完成”，失败 icon-chatoast(叉)+“下载失败”，默认底部显示、可配 action 操作按钮。"
+    "带进度场景加载完成后默认衔接居中结果提示：同一 .loading-overlay 外壳，指示器换成 .loading-overlay__result-icon(icon-goutoast 勾/icon-chatoast 叉) + 单行结果文案(如“分享完成”“下载失败”)，外壳仍正方形最小、长文案横向自适应。",
+    "业务需引导下一步时(如下载完成后去分享)，可配置为底部可操作长 Toast：直接调用已有 Toast 组件引导变体(toast--guide，图标+文案+操作按钮、底部显示)，如 icon-goutoast“下载完成/去分享”、icon-chatoast“下载失败/重试”。"
   ],
   "behavior": {
     "pulse": "位置传递式循环:三点共用 loading-dot 关键帧 1.2s ease-out infinite,关键帧在 0% 和 66.66% 处保持暗淡静止(opacity 0.2 / scale 0.6),33.33% 处达到峰值(opacity 1 / scale 1.3),扩大 scale 峰值(1→1.3)让大小过渡更明显;delay -0.8s/-0.4s/0s 错峰,初始相位点1最小→点2中等→点3最大,传递顺序点1→点2→点3→点1 依次放大变亮循环,ease-out 让放大过程先快后慢;prefers-reduced-motion 时降级为整体淡入淡出。",
@@ -113,7 +119,7 @@
     "overlayCentering": "居中浮层用 fixed + left/top 50% + translate(-50%,-50%) 固定于屏幕正中，z-index 使用 --z-toast 与 Toast 同层；默认 opacity:0 + visibility:hidden，加 .is-visible 后淡入，时长 --duration-normal 缓动 --ease-enter。",
     "overlaySizing": "外壳最小尺寸为正方形(--loading-overlay-min-size 120px 用于 min-width/min-height)，width:fit-content 使内容超出最小宽度时左右自适应变宽，保证最小宽高比不小于正方形；文案较长时横向伸展，不换行堆叠。",
     "ringProgress": "进度环用 SVG 双 circle:轨道(白色 24% 透明度)+进度弧(白色,stroke-linecap:round)，stroke-dasharray = 周长(2πr) × --progress/100 绘制弧形进度；--progress 由宿主按实际进度注入(0-100)，仅作静态进度展示，不做自动循环动画。",
-    "completionToast": "带进度场景加载完成后(100%)由宿主衔接 Toast 引导变体结果提示：成功 icon-goutoast(勾)、“分享完成/下载完成”等，失败 icon-chatoast(叉)、“下载失败”等；默认底部显示(距底部 106px)、同屏互斥，可配置 action 操作按钮(底部可操作长 toast)，时长遵循 Toast 组件。"
+    "completionResult": "带进度场景加载完成后(100%)默认衔接居中结果提示：复用 .loading-overlay 外壳(居中/正方形最小/长文案横向自适应)，内容为 .loading-overlay__result-icon(成功 icon-goutoast 勾、失败 icon-chatoast 叉，白色 24px)+ 单行结果文案，停留后自动消失(时长由宿主控制，建议 2s 级)。业务需引导下一步时可选配置为底部可操作长 Toast——直接调用已有 Toast 组件引导变体(图标+文案+操作按钮、底部距底 106px、同屏互斥、时长遵循 Toast 组件)。"
   },
   "accessibility": {
     "role": "status",
@@ -127,7 +133,8 @@
     "长时间加载搭配 result 失败态，不长期停留在 loading。",
     "整页提交/等待需全局反馈时用居中浮层(usage=overlay)，文案如“正在分享”“正在下载”。",
     "带进度场景(progress=percent)用于可量化进度(如下载、分享上传)，percent 行由宿主按实际进度更新，环中心不显示数字。",
-    "进度加载完成后衔接带图标结果 Toast：成功 icon-goutoast(勾)、失败 icon-chatoast(叉)，复用 Toast 引导变体(底部显示、可配操作按钮)，如“分享完成/查看”“下载失败/重试”。"
+    "进度加载完成后默认衔接居中结果提示(外壳同加载浮层、正方形最小)：成功 icon-goutoast(勾)+“分享完成/下载完成”，失败 icon-chatoast(叉)+“下载失败”。",
+    "业务需引导下一步时配置为底部可操作长 Toast：调用已有 Toast 组件引导变体(图标+文案+操作按钮)，如 icon-goutoast“下载完成/去分享”、icon-chatoast“下载失败/重试”。"
   ],
   "doNotInvent": [
     "不要把内联 loading 扩成进度条或骨架屏；进度能力仅限居中浮层(usage=overlay)的 progress=percent 场景。",
@@ -154,7 +161,8 @@
       ".loading-ring__bar",
       ".loading-overlay__text",
       ".loading-overlay__label",
-      ".loading-overlay__percent"
+      ".loading-overlay__percent",
+      ".loading-overlay__result-icon"
     ],
     "alternatives": []
   },
