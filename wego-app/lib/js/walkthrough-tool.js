@@ -6274,7 +6274,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         case 'bottom':
         case 'left': {
           const oldValue = cs()[field];
-          const out = (value === '' || value == null) ? '' : (String(value).trim() || '');
+          let out = (value === '' || value == null) ? '' : (String(value).trim() || '');
+          // 纯数字（含负偏移）→ 补 px 单位：top/left 等偏移属性无单位值会被浏览器忽略
+          if (out && /^[+-]?\d+(\.\d+)?$/.test(out)) out += 'px';
           el.style[field] = out;
           return { property: field, oldValue, newValue: out };
         }
