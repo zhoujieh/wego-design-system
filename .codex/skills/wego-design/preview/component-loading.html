@@ -37,9 +37,8 @@
   --loading-overlay-gap: 12px;
   --loading-overlay-min-size: 120px;
   position:fixed;
-  left:50%;
-  top:50%;
-  transform:translate(-50%,-50%);
+  inset:0;
+  margin:auto;
   z-index:var(--z-toast);
   box-sizing:border-box;
   display:flex;
@@ -48,6 +47,7 @@
   justify-content:center;
   gap:var(--loading-overlay-gap);
   width:fit-content;
+  height:fit-content;
   min-width:var(--loading-overlay-min-size);
   min-height:var(--loading-overlay-min-size);
   padding:var(--loading-overlay-pad-y) var(--loading-overlay-pad-x);
@@ -67,6 +67,17 @@
   pointer-events:auto;
   transition:opacity var(--duration-normal) var(--ease-enter), visibility 0s;
 }
+/* 遮罩阻断(默认规则):居中浮层下层覆盖全屏透明遮罩,阻断页面底部内容交互,防止加载期间误操作;浮层内容与中断按钮仍可操作 */
+.loading-overlay::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background:transparent;
+  z-index:-1;
+}
+/* 滚动锁定(默认规则):浮层可见时锁定页面滚动,防止加载期间误滚;浮层消失后恢复。html+body 双锁兼容移动端(视口滚动由 html 承担);宿主 JS 应同步锁定(见交互演示) */
+html:has(.loading-overlay.is-visible),
+body:has(.loading-overlay.is-visible){ overflow:hidden; }
 .loading-overlay__indicator{ display:flex; align-items:center; justify-content:center; }
 .loading-overlay__indicator .loading__dot{ background-color:var(--text-inverse); }
 .loading-overlay__text{ display:flex; flex-direction:column; align-items:center; gap:2px; }
@@ -74,6 +85,28 @@
 .loading-overlay__percent{ font-family:var(--body-md-font-family); font-size:var(--body-sm-font-size); line-height:var(--body-sm-line-height); color:var(--text-inverse); opacity:0.82; }
 /* 结果态:加载完成后勾/叉图标(icon-goutoast/icon-chatoast),外壳与加载浮层一致(居中/正方形最小/长文案自适应) */
 .loading-overlay__result-icon{ font-family:var(--font-family-icon); font-size:var(--size-24); line-height:1; color:var(--text-inverse); }
+/* 中断按钮(带进度浮层默认携带):右上角叉叉 icon-cha 16,点击触发宿主中断回调 */
+.loading-overlay__close{
+  position:absolute;
+  top:2px;
+  right:2px;
+  z-index:1;
+  width:28px;
+  height:28px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:none;
+  background:transparent;
+  cursor:pointer;
+  color:var(--text-inverse);
+  font-family:var(--font-family-icon);
+  font-size:var(--size-16);
+  line-height:1;
+  opacity:0.72;
+  padding:0;
+}
+.loading-overlay__close:active{ opacity:1; }
 /* 进度环:双 circle(低透明度轨道+白色进度弧),--progress 由宿主注入 0-100,默认 0 */
 .loading-ring{
   --ring-size:32px;
@@ -128,15 +161,16 @@
 
 <div class="pv-section__title">居中浮层 — 不带进度（三点 + 单行文案）</div>
 <div class="loading-demo-overlay-wrap">
-  <div class="loading-overlay is-visible" role="status" aria-live="polite">
+  <div class="loading-overlay" role="status" aria-live="polite">
     <span class="loading loading--24 loading-overlay__indicator" role="img" aria-label="加载中"><span class="loading__icon"><span class="loading__dot loading__dot--1"></span><span class="loading__dot loading__dot--2"></span><span class="loading__dot loading__dot--3"></span></span></span>
     <div class="loading-overlay__text"><span class="loading-overlay__label">正在加载</span></div>
   </div>
 </div>
 
-<div class="pv-section__title">居中浮层 — 带进度（进度环 + 两行文案：状态文案 / 百分比）</div>
+<div class="pv-section__title">居中浮层 — 带进度（进度环 + 两行文案：状态文案 / 百分比，右上角默认带叉叉中断按钮）</div>
 <div class="loading-demo-overlay-wrap">
-  <div class="loading-overlay is-visible" role="status" aria-live="polite">
+  <div class="loading-overlay" role="status" aria-live="polite">
+    <button type="button" class="loading-overlay__close" aria-label="取消下载"><i class="wego-iconfont-s icon-cha" aria-hidden="true"></i></button>
     <svg class="loading-ring" viewBox="0 0 48 48" role="img" aria-label="加载中" style="--progress:63">
       <circle class="loading-ring__track" cx="24" cy="24" r="20"></circle>
       <circle class="loading-ring__bar" cx="24" cy="24" r="20"></circle>
@@ -148,16 +182,25 @@
   </div>
 </div>
 
+<div class="pv-section__title">居中浮层 — 默认遮罩阻断（加载期间页面底部不可操作）</div>
+<div class="loading-demo-note">居中浮层默认覆盖全屏透明遮罩：加载期间页面底部内容不可操作、页面滚动禁用，防止误触误滚；浮层内内容/中断按钮仍可点击。不带进度、带进度、结果提示所有浮层场景统一此规则。</div>
+<div class="loading-demo-overlay-wrap">
+  <div class="loading-overlay" role="status" aria-live="polite">
+    <span class="loading loading--24 loading-overlay__indicator" role="img" aria-label="加载中"><span class="loading__icon"><span class="loading__dot loading__dot--1"></span><span class="loading__dot loading__dot--2"></span><span class="loading__dot loading__dot--3"></span></span></span>
+    <div class="loading-overlay__text"><span class="loading-overlay__label">正在加载</span></div>
+  </div>
+</div>
+
 <div class="pv-section__title">默认结果提示（进度加载完成后：居中、外壳同 Loading、正方形最小）</div>
 <div class="loading-demo-result-row">
   <div class="loading-demo-overlay-wrap">
-    <div class="loading-overlay is-visible" role="status" aria-live="polite">
+    <div class="loading-overlay" role="status" aria-live="polite">
       <span class="loading-overlay__result-icon icon-goutoast"></span>
       <div class="loading-overlay__text"><span class="loading-overlay__label">分享完成</span></div>
     </div>
   </div>
   <div class="loading-demo-overlay-wrap">
-    <div class="loading-overlay is-visible" role="status" aria-live="polite">
+    <div class="loading-overlay" role="status" aria-live="polite">
       <span class="loading-overlay__result-icon icon-chatoast"></span>
       <div class="loading-overlay__text"><span class="loading-overlay__label">下载失败</span></div>
     </div>
@@ -183,14 +226,15 @@
   </div>
 </div>
 
-<div class="pv-section__title">交互演示（固定屏幕正中的真实浮层）</div>
+<div class="pv-section__title">交互演示（固定屏幕正中的真实浮层，全部默认遮罩阻断）</div>
 <div class="loading-demo-row">
   <button type="button" id="demoOverlayNoProgress" class="loading-demo-btn">显示居中加载（不带进度）</button>
   <button type="button" id="demoOverlayProgress" class="loading-demo-btn">显示居中加载（带进度）</button>
+  <button type="button" id="demoOverlayMask" class="loading-demo-btn">显示居中加载（遮罩阻断）</button>
   <button type="button" id="demoOverlayFail" class="loading-demo-btn">加载失败结果（叉）</button>
   <button type="button" id="demoBottomToast" class="loading-demo-btn">业务配置：底部长 Toast</button>
 </div>
-<div class="loading-demo-note" style="margin-top:12px">带进度场景 100% 后默认衔接居中结果提示（勾/叉图标 + 结果文案，外壳与加载浮层一致）；业务可选配置为底部可操作长 Toast（调用 Toast 组件）。</div>
+<div class="loading-demo-note" style="margin-top:12px">所有居中浮层默认覆盖全屏透明遮罩并锁定页面滚动：点击任一按钮显示浮层后，浮层显示期间点击页面其它区域（包括上方演示按钮）均被阻断、页面无法滚动，浮层内容仍可交互；浮层消失后恢复。带进度场景 100% 后默认衔接居中结果提示（勾/叉图标 + 结果文案，外壳与加载浮层一致，同样遮罩阻断+滚动锁定）；业务可选配置为底部可操作长 Toast（调用 Toast 组件，非居中浮层、不阻断）。</div>
 
 <script>
 (function () {
@@ -206,7 +250,10 @@
     timers.forEach(function (t) { clearTimeout(t); clearInterval(t); });
     timers = [];
   }
-  function hideLoading() { host.innerHTML = ''; }
+  // 滚动锁定:浮层显示时锁 html/body 滚动(移动端视口滚动由 html 承担),隐藏时恢复;与 CSS :has 双锁互为兜底
+  function lockScroll() { document.documentElement.style.overflow = 'hidden'; document.body.style.overflow = 'hidden'; }
+  function unlockScroll() { document.documentElement.style.overflow = ''; document.body.style.overflow = ''; }
+  function hideLoading() { host.innerHTML = ''; unlockScroll(); }
   function hideToast() { toastHost.innerHTML = ''; }
 
   // 默认结果提示：居中浮层（复用 loading-overlay 外壳，勾/叉图标 + 结果文案），同屏互斥
@@ -217,6 +264,7 @@
       '<div class="loading-overlay is-visible" role="status" aria-live="polite">' +
       '<span class="loading-overlay__result-icon ' + icon + '"></span>' +
       '<div class="loading-overlay__text"><span class="loading-overlay__label">' + text + '</span></div></div>';
+    lockScroll();
     timers.push(setTimeout(hideLoading, duration || 2200));
   }
 
@@ -229,17 +277,35 @@
       '<div class="loading-overlay is-visible" role="status" aria-live="polite">' +
       '<span class="loading loading--24 loading-overlay__indicator" role="img" aria-label="加载中"><span class="loading__icon"><span class="loading__dot loading__dot--1"></span><span class="loading__dot loading__dot--2"></span><span class="loading__dot loading__dot--3"></span></span></span>' +
       '<div class="loading-overlay__text"><span class="loading-overlay__label">正在加载</span></div></div>';
+    lockScroll();
     timers.push(setTimeout(hideLoading, 2200));
+  });
+
+  // 遮罩阻断演示：居中浮层默认带全屏透明遮罩，拦截页面点击，浮层内容仍可操作
+  document.getElementById('demoOverlayMask').addEventListener('click', function () {
+    clearTimers();
+    hideToast();
+    host.innerHTML =
+      '<div class="loading-overlay is-visible" role="status" aria-live="polite">' +
+      '<span class="loading loading--24 loading-overlay__indicator" role="img" aria-label="加载中"><span class="loading__icon"><span class="loading__dot loading__dot--1"></span><span class="loading__dot loading__dot--2"></span><span class="loading__dot loading__dot--3"></span></span></span>' +
+      '<div class="loading-overlay__text"><span class="loading-overlay__label">正在加载</span></div></div>';
+    lockScroll();
+    timers.push(setTimeout(hideLoading, 6000));
   });
 
   function startProgress(onDone) {
     var p = 0;
     host.innerHTML =
       '<div class="loading-overlay is-visible" role="status" aria-live="polite">' +
+      '<button type="button" class="loading-overlay__close" aria-label="取消下载"><i class="wego-iconfont-s icon-cha" aria-hidden="true"></i></button>' +
       '<svg class="loading-ring" viewBox="0 0 48 48" role="img" aria-label="加载中" style="--progress:0"><circle class="loading-ring__track" cx="24" cy="24" r="20"></circle><circle class="loading-ring__bar" cx="24" cy="24" r="20"></circle></svg>' +
       '<div class="loading-overlay__text"><span class="loading-overlay__label">正在下载</span><span class="loading-overlay__percent">0%</span></div></div>';
+    lockScroll();
     var bar = host.querySelector('.loading-ring');
     var pct = host.querySelector('.loading-overlay__percent');
+    // 中断按钮：点击停止进度并关闭浮层（演示宿主中断回调）
+    var close = host.querySelector('.loading-overlay__close');
+    close.addEventListener('click', function () { clearTimers(); hideLoading(); });
     timers.push(setInterval(function () {
       p = Math.min(p + 7, 100);
       bar.style.setProperty('--progress', p);

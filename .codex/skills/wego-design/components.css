@@ -1859,9 +1859,8 @@
   --loading-overlay-gap: 12px;
   --loading-overlay-min-size: 120px;
   position:fixed;
-  left:50%;
-  top:50%;
-  transform:translate(-50%,-50%);
+  inset:0;
+  margin:auto;
   z-index:var(--z-toast);
   box-sizing:border-box;
   display:flex;
@@ -1870,6 +1869,7 @@
   justify-content:center;
   gap:var(--loading-overlay-gap);
   width:fit-content;
+  height:fit-content;
   min-width:var(--loading-overlay-min-size);
   min-height:var(--loading-overlay-min-size);
   padding:var(--loading-overlay-pad-y) var(--loading-overlay-pad-x);
@@ -1889,6 +1889,17 @@
   pointer-events:auto;
   transition:opacity var(--duration-normal) var(--ease-enter), visibility 0s;
 }
+/* 遮罩阻断(默认规则):居中浮层下层覆盖全屏透明遮罩,阻断页面底部内容交互,防止加载期间误操作;浮层内容与中断按钮仍可操作 */
+.loading-overlay::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background:transparent;
+  z-index:-1;
+}
+/* 滚动锁定(默认规则):浮层可见时锁定页面滚动,防止加载期间误滚;浮层消失后恢复。html+body 双锁兼容移动端(视口滚动由 html 承担);宿主 JS 应同步锁定(见交互演示) */
+html:has(.loading-overlay.is-visible),
+body:has(.loading-overlay.is-visible){ overflow:hidden; }
 .loading-overlay__indicator{ display:flex; align-items:center; justify-content:center; }
 .loading-overlay__indicator .loading__dot{ background-color:var(--text-inverse); }
 .loading-overlay__text{ display:flex; flex-direction:column; align-items:center; gap:2px; }
@@ -1896,6 +1907,28 @@
 .loading-overlay__percent{ font-family:var(--body-md-font-family); font-size:var(--body-sm-font-size); line-height:var(--body-sm-line-height); color:var(--text-inverse); opacity:0.82; }
 /* 结果态:加载完成后勾/叉图标(icon-goutoast/icon-chatoast),外壳与加载浮层一致(居中/正方形最小/长文案自适应) */
 .loading-overlay__result-icon{ font-family:var(--font-family-icon); font-size:var(--size-24); line-height:1; color:var(--text-inverse); }
+/* 中断按钮(带进度浮层默认携带):右上角叉叉 icon-cha 16,点击触发宿主中断回调 */
+.loading-overlay__close{
+  position:absolute;
+  top:2px;
+  right:2px;
+  z-index:1;
+  width:28px;
+  height:28px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:none;
+  background:transparent;
+  cursor:pointer;
+  color:var(--text-inverse);
+  font-family:var(--font-family-icon);
+  font-size:var(--size-16);
+  line-height:1;
+  opacity:0.72;
+  padding:0;
+}
+.loading-overlay__close:active{ opacity:1; }
 /* 进度环:双 circle(低透明度轨道+白色进度弧),--progress 由宿主注入 0-100,默认 0 */
 .loading-ring{
   --ring-size:32px;
