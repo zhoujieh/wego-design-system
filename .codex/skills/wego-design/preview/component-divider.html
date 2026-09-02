@@ -23,45 +23,54 @@ body{background:#f0f0f0}
 
 /* @component-css-start */
 /* 分割线 Divider：水平分隔区块/列表项，或竖向分隔相邻元素。
-   默认：水平 0.5px、颜色 --border-neutral-l2、左侧缩进16px、右侧到边。
-   竖向：固定高度（不撑满父级），默认 16px，常用 8/10/16，通过 --divider-height 覆盖，竖向居中。
-   参数化：--divider-width 粗细（默认 var(--stroke-hairline)）、--divider-color 颜色、
-   --divider-left / --divider-right 左右缩进（默认 16px / 0）、--divider-height 竖向高度（默认 16px）。 */
-.divider{position:relative;display:block;width:100%;box-sizing:border-box;--divider-width:var(--stroke-hairline);--divider-color:var(--border-neutral-l2);--divider-left:16px;--divider-right:0;--divider-height:16px}
-.divider::after{content:"";position:absolute;top:0;left:var(--divider-left);right:var(--divider-right);height:var(--divider-width);background:var(--divider-color);pointer-events:none}
-.divider--full{--divider-left:0;--divider-right:0}
+   粗细固定 0.5px（var(--stroke-hairline)），无其他尺寸。
+   默认：水平全宽（左右不缩进），缩进由消费方按布局上下文通过 --divider-left / --divider-right 设置。
+   常用预设：divider--inset（左缩进16右到边，页内区块分隔）、divider--center（两侧缩进16）。
+   竖向：固定高度（不撑满父级），默认 16px，常用 8/12/16，通过 --divider-height 覆盖，竖向居中。
+   参数化：--divider-color 颜色、--divider-left / --divider-right 左右缩进、--divider-height 竖向高度。 */
+.divider{position:relative;display:block;width:100%;box-sizing:border-box;--divider-color:var(--border-neutral-l2);--divider-left:0;--divider-right:0;--divider-height:16px}
+.divider::after{content:"";position:absolute;top:0;left:var(--divider-left);right:var(--divider-right);height:var(--stroke-hairline);background:var(--divider-color);pointer-events:none}
+.divider--inset{--divider-left:16px;--divider-right:0}
 .divider--center{--divider-left:16px;--divider-right:16px}
-.divider--no-left{--divider-left:0}
-.divider--vertical{display:inline-block;width:var(--divider-width);height:var(--divider-height);align-self:center;--divider-left:0;--divider-right:0}
-.divider--vertical::after{top:0;bottom:auto;left:0;right:auto;width:var(--divider-width);height:100%}
+.divider--vertical{display:inline-block;width:var(--stroke-hairline);height:var(--divider-height);align-self:center;--divider-left:0;--divider-right:0}
+.divider--vertical::after{top:0;bottom:auto;left:0;right:auto;width:var(--stroke-hairline);height:100%}
 /* @component-css-end */
 </style>
 </head>
 <body>
-<div class="pv-header"><h1>分割线</h1><p>0.5px 语义分割线，水平/竖向，缩进与粗细走 CSS 变量，深浅色浮层可换色。</p></div>
+<div class="pv-header"><h1>分割线</h1><p>0.5px 固定粗细，水平/竖向；缩进由消费方按布局上下文设置，常用 inset / center 预设。</p></div>
 <div class="page">
 
   <div class="demo-block">
-    <div class="demo-block__title">默认 · 左缩进16右到边（页内区块分隔）</div>
-    <div class="demo-cell">分享产品<span class="demo-cell__label"></span></div>
-    <div class="divider"></div>
-    <div class="demo-cell">配置栏<span class="demo-cell__meta">0.5px · border-neutral-l2</span></div>
-  </div>
-
-  <div class="demo-block">
-    <div class="demo-block__title">全宽（actionsheet / dialog / 列表项分隔）</div>
+    <div class="demo-block__title">默认 · 全宽（actionsheet / dialog / 列表项分隔）</div>
     <div class="demo-cell">操作项一</div>
-    <div class="divider divider--full"></div>
+    <div class="divider"></div>
     <div class="demo-cell">操作项二</div>
-    <div class="divider divider--full"></div>
+    <div class="divider"></div>
     <div class="demo-cell">操作项三</div>
   </div>
 
   <div class="demo-block">
-    <div class="demo-block__title">两侧缩进 16px（cell--divider-center 形态）</div>
+    <div class="demo-block__title">inset · 左缩进16右到边（页内区块分隔）</div>
+    <div class="demo-cell">分享产品</div>
+    <div class="divider divider--inset"></div>
+    <div class="demo-cell">配置栏<span class="demo-cell__meta">0.5px · border-neutral-l2</span></div>
+  </div>
+
+  <div class="demo-block">
+    <div class="demo-block__title">center · 两侧缩进 16px</div>
     <div class="demo-cell">单元格一</div>
     <div class="divider divider--center"></div>
     <div class="demo-cell">单元格二</div>
+  </div>
+
+  <div class="demo-block">
+    <div class="demo-block__title">自定义缩进（按布局上下文，如 Cell 第二层）</div>
+    <div class="demo-cell">第一层 · 左缩进 16px</div>
+    <div class="divider" style="--divider-left:16px"></div>
+    <div class="demo-cell" style="padding-left:40px">第二层 · 左缩进 40px</div>
+    <div class="divider" style="--divider-left:40px"></div>
+    <div class="demo-note">缩进不预设固定值，消费方通过 <code>--divider-left</code> / <code>--divider-right</code> 按当前布局层级设置；Cell 场景下可跟随 <code>--cell-divider-left</code> 自动适配。</div>
   </div>
 
   <div class="demo-block">
@@ -83,15 +92,6 @@ body{background:#f0f0f0}
       <div class="divider divider--vertical" style="--divider-height:12px"></div>
       <span class="demo-vbox__item">16px</span>
     </div>
-  </div>
-
-  <div class="demo-block">
-    <div class="demo-block__title">自定义粗细 / 颜色 / 缩进</div>
-    <div class="demo-cell">1px 加粗</div>
-    <div class="divider" style="--divider-width:1px"></div>
-    <div class="demo-cell">无左缩进</div>
-    <div class="divider divider--no-left" style="--divider-width:1px"></div>
-    <div class="demo-note">深色浮层场景通过 <code>--divider-color</code> 覆盖颜色，无需改粗细。</div>
   </div>
 
 </div>

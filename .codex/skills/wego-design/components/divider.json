@@ -6,7 +6,7 @@
   "status": "stable",
   "sourceKind": "inferred",
   "confidence": "high",
-  "description": "0.5px 语义化分割线组件，用于水平分隔区块/列表项或竖向分隔相邻元素；粗细、颜色、左右缩进、竖向高度全部通过 CSS 变量参数化，避免各场景重复调线。竖向为固定高度（默认16px，常用8/10/16），不撑满父级。",
+  "description": "0.5px 固定粗细的语义化分割线组件，用于水平分隔区块/列表项或竖向分隔相邻元素。粗细无其他尺寸；缩进不预设固定值，由消费方按布局上下文通过 --divider-left / --divider-right 设置，常用 inset（左缩进16右到边）、center（两侧缩进16）预设。竖向为固定高度（默认16px，常用8/12/16），不撑满父级。",
   "semanticTypeCandidates": [
     "divider",
     "separator",
@@ -19,36 +19,27 @@
       "vertical"
     ],
     "inset": [
-      "left-edge",
       "full",
-      "center",
-      "no-left"
-    ],
-    "width": [
-      "hairline",
-      "1px"
+      "inset",
+      "center"
     ]
   },
   "representativeVariants": [
     {
       "orientation": "horizontal",
-      "inset": "left-edge",
-      "width": "hairline"
+      "inset": "full"
     },
     {
       "orientation": "horizontal",
-      "inset": "full",
-      "width": "hairline"
+      "inset": "inset"
     },
     {
       "orientation": "horizontal",
-      "inset": "center",
-      "width": "hairline"
+      "inset": "center"
     },
     {
       "orientation": "vertical",
-      "inset": "full",
-      "width": "hairline"
+      "inset": "full"
     }
   ],
   "anatomy": [
@@ -59,26 +50,28 @@
     }
   ],
   "structurePatterns": [
-    "默认形态为水平分割线：0.5px（--stroke-hairline）、颜色 --border-neutral-l2、左侧缩进16px、右侧到边，用于页内区块分隔（如分享面板标题栏/配置栏下方）。",
-    "divider--full 全宽：与 actionsheet/dialog/popmenu 的 inset 分割线一致。",
+    "默认形态为水平全宽分割线：0.5px（--stroke-hairline）、颜色 --border-neutral-l2、左右不缩进，用于 actionsheet/dialog/列表项分隔。",
+    "divider--inset 左缩进16右到边：用于页内区块分隔（如分享面板标题栏/配置栏下方）。",
     "divider--center 两侧缩进16px：与 cell--divider-center 一致。",
     "divider--vertical 竖向：分隔相邻元素（如表单手机号内、对话框按钮间），固定高度不撑满父级，默认16px，常用8/12/16，通过 --divider-height 覆盖，竖向居中。",
-    "粗细/颜色/缩进/竖向高度参数化：--divider-width（默认 var(--stroke-hairline)）、--divider-color（默认 var(--border-neutral-l2)）、--divider-left（默认16px）、--divider-right（默认0）、--divider-height（竖向默认16px）。"
+    "缩进由消费方按布局上下文设置：--divider-left / --divider-right（默认均为0），Cell 场景下可跟随 --cell-divider-left 自动适配层级缩进；颜色通过 --divider-color 覆盖；竖向高度通过 --divider-height 覆盖。"
   ],
   "behavior": {},
   "accessibility": {
     "role": "separator"
   },
   "usageHints": [
-    "页内区块分隔（标题栏/配置栏/分区下方）优先使用默认 left-edge 形态（左缩进16右到边）。",
-    "列表项/操作项之间的分隔使用 divider--full 或 divider--center，与 cell/actionsheet 既有语义一致。",
+    "列表项/操作项之间的分隔使用默认全宽形态，与 actionsheet/dialog 既有语义一致。",
+    "页内区块分隔（标题栏/配置栏/分区下方）使用 divider--inset（左缩进16右到边）。",
+    "Cell 列表内的分隔跟随 Cell 自身的 --cell-divider-left 机制，不额外套 divider 组件；独立 divider 用于非 Cell 场景。",
     "相邻字段之间的竖向分隔使用 divider--vertical，高度固定（默认16px，常用8/12/16），通过 --divider-height 覆盖，不撑满父级。",
-    "深色浮层上只需覆盖 --divider-color，不要改粗细。",
-    "细分隔使用 --divider-width 覆盖（如 1px 强调分隔），默认不写死粗细，统一由 token 表达。"
+    "深色浮层上只需覆盖 --divider-color，粗细固定 0.5px 不可改。",
+    "缩进不预设固定值，按当前布局层级通过 --divider-left / --divider-right 设置；常用预设为 inset（16/0）、center（16/16）。"
   ],
   "doNotInvent": [
     "不要用 divider 替代卡片间距或留白分隔，留白优先。",
-    "不要把 divider 扩成复杂分组容器或带文案的分段控件。"
+    "不要把 divider 扩成复杂分组容器或带文案的分段控件。",
+    "不要修改粗细，固定 0.5px 是组件契约。"
   ],
   "assetUsage": {},
   "domAnatomy": {
@@ -86,9 +79,8 @@
     "requiredChildren": [],
     "optionalChildren": [],
     "modifiers": [
-      ".divider--full",
+      ".divider--inset",
       ".divider--center",
-      ".divider--no-left",
       ".divider--vertical"
     ],
     "alternatives": []
@@ -124,7 +116,6 @@
     "--text-tertiary"
   ],
   "localTokens": [
-    "--divider-width",
     "--divider-color",
     "--divider-left",
     "--divider-right",
