@@ -6,7 +6,7 @@
   "status": "stable",
   "sourceKind": "figma",
   "confidence": "high",
-  "description": "三点位置传递式循环加载指示器，用于内容区或弹窗内容区等待态；默认 24px,三点共用同一关键帧,通过 delay 错峰形成亮点从点1→点2→点3→点1 依次放大变亮的循环传递动画;支持 16/24/32 尺寸按比例缩放;不承载文案，文案由宿主组合。",
+  "description": "三点位置传递式循环加载指示器，用于内容区或弹窗内容区等待态；默认 24px,三点共用同一关键帧,通过 delay 错峰形成亮点从点1→点2→点3→点1 依次放大变亮的循环传递动画;支持 16/24/32 尺寸按比例缩放;内联形态不承载文案，文案由宿主组合。另提供居中浮层加载形态(usage=overlay):复用 Toast 外壳样式(深灰底/8px 圆角/白色描边/阴影)悬浮于屏幕正中,外壳最小尺寸为正方形(120×120),文案较长时左右自适应变宽;分不带进度(三点+单行文案)与带进度(白色进度环+两行文案:状态文案行+百分比数字行)两种场景,文案可配置。带进度场景加载完成后默认衔接居中结果提示(外壳与加载浮层一致、正方形最小):成功用 icon-goutoast 勾、失败用 icon-chatoast 叉 + 结果文案;业务需引导下一步时(如下载完成后去分享)可配置为底部可操作长 Toast,直接调用已有 Toast 组件(引导变体)。",
   "semanticTypeCandidates": [
     "spinner",
     "loading-indicator",
@@ -17,6 +17,14 @@
       "16",
       "24",
       "32"
+    ],
+    "usage": [
+      "inline",
+      "overlay"
+    ],
+    "progress": [
+      "none",
+      "percent"
     ]
   },
   "representativeVariants": [
@@ -28,6 +36,16 @@
     },
     {
       "size": "32"
+    },
+    {
+      "size": "24",
+      "usage": "overlay",
+      "progress": "none"
+    },
+    {
+      "size": "24",
+      "usage": "overlay",
+      "progress": "percent"
     }
   ],
   "anatomy": [
@@ -45,44 +63,106 @@
       "name": "dot",
       "selector": ".loading__dot",
       "role": "脉冲圆点，--1/--2/--3 共用同一关键帧，delay -0.4s/-0.2s/0s 错峰形成位置传递循环，初始相位点1最小→点2中等→点3最大"
+    },
+    {
+      "name": "overlay",
+      "selector": ".loading-overlay",
+      "role": "居中浮层外壳容器，fixed 于屏幕正中，复用 Toast 外壳样式(--bg-toast/--border-toast/--radius-8/--shadow-sm)"
+    },
+    {
+      "name": "overlayIndicator",
+      "selector": ".loading-overlay__indicator",
+      "role": "指示器承载区，内嵌 .loading(三点，圆点改白) 或 .loading-ring(进度环)"
+    },
+    {
+      "name": "ring",
+      "selector": ".loading-ring",
+      "role": "白色进度环 SVG，双 circle(低透明度轨道 + 白色进度弧)，stroke-dasharray 按 --progress 百分比绘制弧形"
+    },
+    {
+      "name": "overlayText",
+      "selector": ".loading-overlay__text",
+      "role": "文案区，垂直排列一至两行，居中"
+    },
+    {
+      "name": "label",
+      "selector": ".loading-overlay__label",
+      "role": "状态文案行(第一行)，如“正在加载”“正在下载”"
+    },
+    {
+      "name": "percent",
+      "selector": ".loading-overlay__percent",
+      "role": "百分比数字行(第二行)，仅带进度场景出现，如 63%"
+    },
+    {
+      "name": "resultIcon",
+      "selector": ".loading-overlay__result-icon",
+      "role": "结果态图标(加载完成后)，成功用 icon-goutoast 勾、失败用 icon-chatoast 叉，白色 24px"
     }
   ],
   "structurePatterns": [
     "纯 span+CSS 实现，无 SVG：root > icon > dot--1/dot--2/dot--3 三圆点。",
     "默认 24px 正方形，icon 用 padding-inline:6.25% + space-between 排布三圆点，圆点 width:20.833% aspect-ratio:1 按比例缩放，尺寸随 --loading-size 等比例变化。",
     "居中于宿主内容区，不占满；宿主用 flex 居中承载。",
-    "不内置文案，需要提示文案时由宿主以 result 或文本节点组合，不在 loading 内堆叠。"
+    "内联形态不内置文案，需要提示文案时由宿主以 result 或文本节点组合，不在 loading 内堆叠。",
+    "居中浮层结构：.loading-overlay > .loading-overlay__indicator(内嵌 .loading 或 .loading-ring) + .loading-overlay__text(.loading-overlay__label [+ .loading-overlay__percent])。",
+    "外壳复用 Toast 的 --bg-toast/--border-toast/--radius-8/--shadow-sm/--stroke-hairline 与 --z-toast 层级；fixed 定位 left:50% top:50% translate(-50%,-50%) 悬浮屏幕正中；.is-visible 控制淡入与可见性。",
+    "不带进度(progress=none)：指示器用三点(圆点覆盖为白色)，文案区仅单行 .loading-overlay__label。",
+    "带进度(progress=percent)：指示器用 .loading-ring 白色进度环，文案区两行(label + percent)，percent 行由宿主按实际进度更新，环中心不显示数字。",
+    "居中浮层外壳最小尺寸为正方形(120×120，--loading-overlay-min-size)，width:fit-content 使长文案时左右自适应变宽，宽高比不小于正方形。",
+    "带进度场景加载完成后默认衔接居中结果提示：同一 .loading-overlay 外壳，指示器换成 .loading-overlay__result-icon(icon-goutoast 勾/icon-chatoast 叉，font-family 用 --font-family-icon) + 单行结果文案(如“下载完成”“下载失败”)，外壳仍正方形最小、长文案横向自适应。",
+    "业务需引导下一步时(如下载完成后去分享)，可配置为底部可操作长 Toast：直接调用已有 Toast 组件引导变体(toast--guide，图标+文案+操作按钮、底部显示)，如 icon-goutoast“下载完成/去分享”、icon-chatoast“下载失败/重试”。"
   ],
   "behavior": {
     "pulse": "位置传递式循环:三点共用 loading-dot 关键帧 1.2s ease-out infinite,关键帧在 0% 和 66.66% 处保持暗淡静止(opacity 0.2 / scale 0.6),33.33% 处达到峰值(opacity 1 / scale 1.3),扩大 scale 峰值(1→1.3)让大小过渡更明显;delay -0.8s/-0.4s/0s 错峰,初始相位点1最小→点2中等→点3最大,传递顺序点1→点2→点3→点1 依次放大变亮循环,ease-out 让放大过程先快后慢;prefers-reduced-motion 时降级为整体淡入淡出。",
-    "centering": "loading 本身是 inline-flex 正方形，由宿主用 flex 居中。"
+    "centering": "loading 本身是 inline-flex 正方形，由宿主用 flex 居中。",
+    "overlayCentering": "居中浮层用 fixed + left/top 50% + translate(-50%,-50%) 固定于屏幕正中，z-index 使用 --z-toast 与 Toast 同层；默认 opacity:0 + visibility:hidden，加 .is-visible 后淡入，时长 --duration-normal 缓动 --ease-enter。",
+    "overlaySizing": "外壳最小尺寸为正方形(--loading-overlay-min-size 120px 用于 min-width/min-height)，width:fit-content 使内容超出最小宽度时左右自适应变宽，保证最小宽高比不小于正方形；文案较长时横向伸展，不换行堆叠。",
+    "ringProgress": "进度环用 SVG 双 circle:轨道(白色 24% 透明度)+进度弧(白色,stroke-linecap:round)，stroke-dasharray = 周长(2πr) × --progress/100 绘制弧形进度；--progress 由宿主按实际进度注入(0-100)，仅作静态进度展示，不做自动循环动画。",
+    "completionResult": "带进度场景加载完成后(100%)默认衔接居中结果提示：复用 .loading-overlay 外壳(居中/正方形最小/长文案横向自适应)，内容为 .loading-overlay__result-icon(成功 icon-goutoast 勾、失败 icon-chatoast 叉，白色 24px)+ 单行结果文案，停留后自动消失(时长由宿主控制，建议 2s 级)。业务需引导下一步时可选配置为底部可操作长 Toast——直接调用已有 Toast 组件引导变体(图标+文案+操作按钮、底部距底 106px、同屏互斥、时长遵循 Toast 组件)。"
   },
   "accessibility": {
     "role": "status",
     "ariaLabel": "加载中",
-    "focusName": "图标应带 aria-label 或配 sr-only 文案"
+    "focusName": "图标应带 aria-label 或配 sr-only 文案",
+    "overlayNote": "居中浮层容器建议 role=\"status\" aria-live=\"polite\"，label 行承载可播报的状态文案，percent 行随进度更新便于辅助技术播报百分比。"
   },
   "usageHints": [
     "半屏弹窗或页面内容区加载态优先居中单图标。",
     "按钮内加载用 16 尺寸，与按钮文字同行。",
-    "长时间加载搭配 result 失败态，不长期停留在 loading。"
+    "长时间加载搭配 result 失败态，不长期停留在 loading。",
+    "整页提交/等待需全局反馈时用居中浮层(usage=overlay)，不带进度示例文案“正在加载”，带进度示例文案“正在下载”。",
+    "带进度场景(progress=percent)用于可量化进度(如下载、分享上传)，percent 行由宿主按实际进度更新，环中心不显示数字。",
+    "进度加载完成后默认衔接居中结果提示(外壳同加载浮层、正方形最小)：成功 icon-goutoast(勾)+“分享完成/下载完成”，失败 icon-chatoast(叉)+“下载失败”。",
+    "业务需引导下一步时配置为底部可操作长 Toast：调用已有 Toast 组件引导变体(图标+文案+操作按钮)，如 icon-goutoast“下载完成/去分享”、icon-chatoast“下载失败/重试”。"
   ],
   "doNotInvent": [
-    "不要把 loading 扩成进度条或骨架屏。",
-    "不要给 loading 加文案或图标变体，文案走 result 或宿主文本。"
+    "不要把内联 loading 扩成进度条或骨架屏；进度能力仅限居中浮层(usage=overlay)的 progress=percent 场景。",
+    "不要给内联 loading 加文案或图标变体，文案走 result 或宿主文本；居中浮层按契约支持 label/percent 文案。",
+    "居中浮层不带蒙层、不阻断交互；如需遮罩阻断请走 modal/overlay 体系。"
   ],
   "domAnatomy": {
     "root": ".loading",
     "modifiers": [
       ".loading--16",
-      ".loading--32"
+      ".loading--32",
+      ".loading-overlay",
+      ".loading-overlay.is-visible"
     ],
     "optionalChildren": [
       ".loading__icon",
       ".loading__dot",
       ".loading__dot--1",
       ".loading__dot--2",
-      ".loading__dot--3"
+      ".loading__dot--3",
+      ".loading-overlay__indicator",
+      ".loading-ring",
+      ".loading-ring__track",
+      ".loading-ring__bar",
+      ".loading-overlay__text",
+      ".loading-overlay__label",
+      ".loading-overlay__percent",
+      ".loading-overlay__result-icon"
     ],
     "alternatives": []
   },
@@ -92,7 +172,8 @@
     "embedded": false,
     "hostComponent": null,
     "externalSources": [
-      "figma:Z4iltAbicAYQMEWhyAWjE0:7207:13957"
+      "figma:Z4iltAbicAYQMEWhyAWjE0:7207:13957",
+      "figma:D9EdlUCZD6AT4bZ6bzU9wP:9022:7682"
     ]
   },
   "unknowns": [],
@@ -102,18 +183,48 @@
     "preview/component-loading.html"
   ],
   "runtimeTokens": [
+    "--bg-toast",
+    "--body-md-font-family",
+    "--body-md-font-size",
+    "--body-md-line-height",
+    "--body-sm-font-size",
+    "--body-sm-line-height",
+    "--border-toast",
+    "--duration-normal",
+    "--ease-enter",
+    "--font-family-icon",
+    "--font-weight-medium",
+    "--radius-8",
+    "--shadow-sm",
     "--size-16",
     "--size-24",
-    "--size-32"
+    "--size-32",
+    "--stroke-hairline",
+    "--text-inverse",
+    "--z-toast"
   ],
   "previewOnlyTokens": [
     "--bg-subtle",
-    "--body-sm-font-size",
-    "--radius-8",
+    "--border-neutral-l3",
     "--spacer-12",
+    "--text-default",
     "--text-tertiary"
   ],
   "localTokens": [
-    "--loading-size"
-  ]
+    "--loading-overlay-gap",
+    "--loading-overlay-min-size",
+    "--loading-overlay-pad-x",
+    "--loading-overlay-pad-y",
+    "--loading-size",
+    "--progress",
+    "--ring-circumference",
+    "--ring-size",
+    "--ring-stroke"
+  ],
+  "layerContract": {
+    "scope": "app-global",
+    "role": "feedback",
+    "mountHost": "app-host",
+    "zToken": "--z-toast"
+  }
 }
