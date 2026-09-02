@@ -1039,16 +1039,27 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
   /** 读取元素该属性的「源码声明信息」：判定属性是否由样式表规则声明，并返回命中的源码原文。
    *  sourceValue 保留 token 原文（如 var(--body-md-strong-font-size)）而非计算像素值，供施工单展示。
    *  只查样式表规则、不查内联样式：走查工具的所有修改都以内联注入（el.style）落地，
-   *  查内联必然读到工具改后的值，无法回溯源码；场景自身用内联设置样式的属性不计为源码声明。 */
-  function readSourceDeclaration(el, property) {
+   *  查内联必然读到工具改后的值，无法回溯源码；场景自身用内联设置样式的属性不计为源码声明。
+   *  target 可选（'' 元素本体 / 'before' / 'after'）：命中伪元素选择器（.a::before）时按目标过滤。 */
+  function readSourceDeclaration(el, property, target) {
     if (!el || el.nodeType !== 1 || !property) return { declared: false, sourceValue: '' };
+    const pseudoTarget = target === 'before' ? '::before' : (target === 'after' ? '::after' : '');
     const ruleDeclares = (rule) => {
       try {
         if (!rule) return null;
         if (rule.type === 1) {
-          if (rule.selectorText && rule.style && el.matches(rule.selectorText)) {
-            const v = rule.style.getPropertyValue(property);
-            if (v) return { declared: true, sourceValue: String(v).trim() };
+          if (rule.selectorText && rule.style) {
+            const sel = String(rule.selectorText).trim();
+            // 伪元素选择器（如 .a::before）需剥掉伪元素后缀后再 el.matches 元素本体，
+            // 并按目标伪元素过滤；请求元素本体时跳过伪元素规则，反之亦然。
+            const m = sel.match(/^(.*?)(::before|::after)$/);
+            const base = (m ? m[1] : sel).trim();
+            const pseudo = m ? m[2] : '';
+            if (pseudo !== pseudoTarget) return null;
+            if (base && el.matches(base)) {
+              const v = rule.style.getPropertyValue(property);
+              if (v) return { declared: true, sourceValue: String(v).trim() };
+            }
           }
         } else if (rule.cssRules) {
           for (let i = 0; i < rule.cssRules.length; i++) {
@@ -3291,13 +3302,85 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     },
   ];
 
+  // 间距 Token（设计系统语义化间距 token，消费于 gap/padding/margin）
+  const SPACER_TOKEN_GROUPS = [
+    {
+      label: '间距',
+      tokens: [
+        { name: 'spacer-0', var: '--spacer-0', label: '0', desc: '无间距 0px', value: '0px' },
+        { name: 'spacer-2', var: '--spacer-2', label: '2', desc: '微间距 2px', value: '2px' },
+        { name: 'spacer-4', var: '--spacer-4', label: '4', desc: '小间距 4px', value: '4px' },
+        { name: 'spacer-6', var: '--spacer-6', label: '6', desc: '间距 6px', value: '6px' },
+        { name: 'spacer-8', var: '--spacer-8', label: '8', desc: '常规间距 8px', value: '8px' },
+        { name: 'spacer-10', var: '--spacer-10', label: '10', desc: '间距 10px', value: '10px' },
+        { name: 'spacer-12', var: '--spacer-12', label: '12', desc: '间距 12px', value: '12px' },
+        { name: 'spacer-14', var: '--spacer-14', label: '14', desc: '间距 14px', value: '14px' },
+        { name: 'spacer-16', var: '--spacer-16', label: '16', desc: '大间距 16px', value: '16px' },
+        { name: 'spacer-20', var: '--spacer-20', label: '20', desc: '间距 20px', value: '20px' },
+        { name: 'spacer-24', var: '--spacer-24', label: '24', desc: '大间距 24px', value: '24px' },
+        { name: 'spacer-32', var: '--spacer-32', label: '32', desc: '大间距 32px', value: '32px' },
+        { name: 'spacer-40', var: '--spacer-40', label: '40', desc: '大间距 40px', value: '40px' },
+        { name: 'spacer-48', var: '--spacer-48', label: '48', desc: '超大间距 48px', value: '48px' },
+        { name: 'spacer-72', var: '--spacer-72', label: '72', desc: '超大间距 72px', value: '72px' },
+      ],
+    },
+  ];
+
+  // 圆角 Token（设计系统语义化圆角 token）
+  const RADIUS_TOKEN_GROUPS = [
+    {
+      label: '圆角',
+      tokens: [
+        { name: 'radius-0', var: '--radius-0', label: '0', desc: '无圆角 0px', value: '0px' },
+        { name: 'radius-4', var: '--radius-4', label: '4', desc: '小圆角 4px', value: '4px' },
+        { name: 'radius-6', var: '--radius-6', label: '6', desc: '圆角 6px', value: '6px' },
+        { name: 'radius-8', var: '--radius-8', label: '8', desc: '默认圆角 8px', value: '8px' },
+        { name: 'radius-12', var: '--radius-12', label: '12', desc: '圆角 12px', value: '12px' },
+        { name: 'radius-16', var: '--radius-16', label: '16', desc: '大圆角 16px', value: '16px' },
+        { name: 'radius-full', var: '--radius-full', label: '∞', desc: '全圆角 999px', value: '999px' },
+      ],
+    },
+  ];
+
+  // 描边宽度 Token（设计系统语义化描边 token）
+  const STROKE_WIDTH_TOKEN_GROUPS = [
+    {
+      label: '描边宽度',
+      tokens: [
+        { name: 'stroke-0', var: '--stroke-0', label: '0', desc: '无描边 0px', value: '0px' },
+        { name: 'stroke-hairline', var: '--stroke-hairline', label: '细', desc: '发丝线 0.5px', value: '0.5px' },
+        { name: 'stroke-1', var: '--stroke-1', label: '1', desc: '常规描边 1px', value: '1px' },
+        { name: 'stroke-strong', var: '--stroke-strong', label: '粗', desc: '加粗描边 1.5px', value: '1.5px' },
+        { name: 'stroke-icon', var: '--stroke-icon', label: '图标', desc: '图标描边 1.5px', value: '1.5px' },
+        { name: 'stroke-icon-strong', var: '--stroke-icon-strong', label: '图标粗', desc: '图标加粗 2.25px', value: '2.25px' },
+      ],
+    },
+  ];
+
   // 类型 → Token 组映射
   const TOKEN_GROUPS_MAP = {
     color: COLOR_TOKEN_GROUPS,
     fontSize: FONT_SIZE_TOKEN_GROUPS,
     fontWeight: FONT_WEIGHT_TOKEN_GROUPS,
     lineHeight: LINE_HEIGHT_TOKEN_GROUPS,
+    spacing: SPACER_TOKEN_GROUPS,
+    radius: RADIUS_TOKEN_GROUPS,
+    strokeWidth: STROKE_WIDTH_TOKEN_GROUPS,
   };
+
+  /** 按 var(--xxx) 表达式查 token 数据中的 value（非颜色 token 自带像素值），查不到返回 ''。
+   *  用于描边宽度等数值型 token 的解析（避免临时元素因 border-style:none 解析 border-top-width 恒为 0）。 */
+  function tokenValueOfVar(varExpr) {
+    if (!varExpr) return '';
+    for (const key in TOKEN_GROUPS_MAP) {
+      for (const group of TOKEN_GROUPS_MAP[key]) {
+        for (const t of group.tokens) {
+          if (varExpr === `var(${t.var})` && t.value != null) return String(t.value);
+        }
+      }
+    }
+    return '';
+  }
 
   // ============================================================
   // wego-wt-style-panel: 样式编辑浮动面板
@@ -3312,6 +3395,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._target = ''; // '' | 'before' | 'after'
       this._commitTimer = null;
       this._tokenPanel = { open: false, type: '', trigger: null };
+      this._sourceTokens = {}; // 字段 → 源码声明的 var(--xxx) 原文，供 token 面板默认选中
     }
     connectedCallback() {
       this._render();
@@ -3327,6 +3411,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._target = target;
       // 伪元素：从已注入的 state.pseudoStyles 读取当前值，无则取计算值快照
       this._data = getElementStyleData(this._targetEl, target);
+      this._hydrateSourceTokens();
       this._render();
       this._bindEvents();
       this.removeAttribute('hidden');
@@ -3339,11 +3424,75 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._selector = selector;
       this._target = target || '';
       this._data = getElementStyleData(el, this._target);
+      this._hydrateSourceTokens();
       this._render();
       this._bindEvents();
       this.removeAttribute('hidden');
       this._updatePosition();
       this._updateMoveControls();
+    }
+
+    /** 面板字段 → 对应 CSS 属性（用于读取源码声明中的 token 原文） */
+    _tokenFieldProps() {
+      return {
+        colorHex: 'color',
+        fillHex: 'background-color',
+        strokeHex: 'border-color',
+        shadowHex: 'box-shadow',
+        fontSize: 'font-size',
+        fontWeight: 'font-weight',
+        lineHeight: 'line-height',
+        layoutGap: 'gap',
+        paddingLeft: 'padding-left',
+        paddingTop: 'padding-top',
+        paddingRight: 'padding-right',
+        paddingBottom: 'padding-bottom',
+        marginLeft: 'margin-left',
+        marginTop: 'margin-top',
+        marginRight: 'margin-right',
+        marginBottom: 'margin-bottom',
+        borderRadiusAll: 'border-radius',
+        strokeWidth: 'border-top-width',
+      };
+    }
+
+    /** 补读样式表源码声明中的 token 原文（var(--xxx)），供 token 面板默认选中与按钮态展示。
+     *  只读样式表规则、不读工具内联注入；读取不到不覆盖，计算值兜底。
+     *  注：shadowHex 不补读——shadow 的复合 token（--shadow-*）未纳入走查面板（投影是拆字段编辑），
+     *  而 shadowHex 面板是颜色 token，补读只会出现按钮显示复合 token 名但列表选不中的不一致。 */
+    _hydrateSourceTokens() {
+      this._sourceTokens = {};
+      if (!this._targetEl) return;
+      const props = this._tokenFieldProps();
+      for (const field in props) {
+        if (field === 'shadowHex') continue;
+        const src = readSourceDeclaration(this._targetEl, props[field], this._target);
+        if (src.declared && isTokenValue(src.sourceValue)) {
+          this._sourceTokens[field] = src.sourceValue;
+        }
+      }
+    }
+
+    /** 统一取某字段"当前应视为的 token 表达式"：本次会话选过的 var() 优先，其次源码声明的 var()；
+     *  具体值（hex/px）不反查 token，返回 ''（即"没有对应 token 无需选中"）。 */
+    _tokenValueOf(field) {
+      const d = this._data || {};
+      if (isTokenValue(d[field])) return d[field];
+      if (this._sourceTokens && this._sourceTokens[field]) return this._sourceTokens[field];
+      return '';
+    }
+
+    /** 某字段当前是否处于 token 模式 */
+    _isTokenField(field) {
+      return !!this._tokenValueOf(field);
+    }
+
+    /** 某字段当前 token 名（去掉 -- 前缀），无 token 返回 '' */
+    _tokenNameOf(field) {
+      const v = this._tokenValueOf(field);
+      if (!v) return '';
+      const m = v.match(/var\((--[^)]+)\)/);
+      return m ? m[1].replace(/^--/, '') : '';
     }
 
     close() {
@@ -3562,26 +3711,27 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const t = this._target || '';
       const hasBefore = this._targetEl ? isPseudoRendered(this._targetEl, 'before') : false;
       const hasAfter = this._targetEl ? isPseudoRendered(this._targetEl, 'after') : false;
-      // 颜色 token 模式判断
-      const colorIsToken = isTokenValue(d.colorHex);
-      const colorTokenName = colorIsToken ? d.colorHex.match(/var\((--[^)]+)\)/)[1].replace(/^--/, '') : '';
+      // 颜色 token 模式判断（含源码声明的 var() 补读）
+      const colorTokenVal = this._tokenValueOf('colorHex');
+      const colorIsToken = !!colorTokenVal;
+      const colorTokenName = this._tokenNameOf('colorHex');
       const colorSwatchBg = colorIsToken
-        ? (resolveCssValue(d.colorHex, 'color') || 'transparent')
+        ? (resolveCssValue(colorTokenVal, 'color') || 'transparent')
         : hexOpacityToRgba(d.colorHex || '#000000', d.colorOpacity ?? 100);
       // 填充/描边/投影 token 模式判断
-      const fillIsToken = isTokenValue(d.fillHex);
-      const fillTokenName = fillIsToken ? d.fillHex.match(/var\((--[^)]+)\)/)[1].replace(/^--/, '') : '';
-      const strokeIsToken = isTokenValue(d.strokeHex);
-      const strokeTokenName = strokeIsToken ? d.strokeHex.match(/var\((--[^)]+)\)/)[1].replace(/^--/, '') : '';
-      const shadowIsToken = isTokenValue(d.shadowHex);
-      const shadowTokenName = shadowIsToken ? d.shadowHex.match(/var\((--[^)]+)\)/)[1].replace(/^--/, '') : '';
+      const fillIsToken = this._isTokenField('fillHex');
+      const fillTokenName = this._tokenNameOf('fillHex');
+      const strokeIsToken = this._isTokenField('strokeHex');
+      const strokeTokenName = this._tokenNameOf('strokeHex');
+      const shadowIsToken = this._isTokenField('shadowHex');
+      const shadowTokenName = this._tokenNameOf('shadowHex');
       // 字号/字重/行高 token 模式判断
-      const fontSizeIsToken = isTokenValue(d.fontSize);
-      const fontSizeTokenName = fontSizeIsToken ? d.fontSize.match(/var\((--[^)]+)\)/)[1].replace(/^--/, '') : '';
-      const fontWeightIsToken = isTokenValue(d.fontWeight);
-      const fontWeightTokenName = fontWeightIsToken ? d.fontWeight.match(/var\((--[^)]+)\)/)[1].replace(/^--/, '') : '';
-      const lineHeightIsToken = isTokenValue(d.lineHeight);
-      const lineHeightTokenName = lineHeightIsToken ? d.lineHeight.match(/var\((--[^)]+)\)/)[1].replace(/^--/, '') : '';
+      const fontSizeIsToken = this._isTokenField('fontSize');
+      const fontSizeTokenName = this._tokenNameOf('fontSize');
+      const fontWeightIsToken = this._isTokenField('fontWeight');
+      const fontWeightTokenName = this._tokenNameOf('fontWeight');
+      const lineHeightIsToken = this._isTokenField('lineHeight');
+      const lineHeightTokenName = this._tokenNameOf('lineHeight');
       this._shadow.innerHTML = `
         <style>
           :host {
@@ -4211,26 +4361,29 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
                 <div class="field">
                   <span class="field-icon">${ICONS.gap}</span>
                   <input class="text-input" type="text" value="${d.justifyContent === 'space-between' ? 'auto' : (d.layoutGap || '')}" data-field="layoutGap" inputmode="numeric" placeholder="gap" />
+                  <button class="token-btn ${this._isTokenField('layoutGap') ? 'active' : ''}" type="button" data-token-trigger="spacing" data-field="layoutGap" title="选择设计系统间距 Token">
+                    ${this._isTokenField('layoutGap') ? this._tokenNameOf('layoutGap') : ICONS.token}
+                  </button>
                 </div>
               </div>
             </div>
             <p class="sub-label">内边距 padding</p>
             <div class="field-row two-col">
-              <div class="field"><span class="field-icon">L</span><input class="text-input" type="text" value="${d.paddingLeft || ''}" data-field="paddingLeft" inputmode="numeric" placeholder="左" /></div>
-              <div class="field"><span class="field-icon">T</span><input class="text-input" type="text" value="${d.paddingTop || ''}" data-field="paddingTop" inputmode="numeric" placeholder="上" /></div>
+              <div class="field"><span class="field-icon">L</span><input class="text-input" type="text" value="${d.paddingLeft || ''}" data-field="paddingLeft" inputmode="numeric" placeholder="左" /><button class="token-btn ${this._isTokenField('paddingLeft') ? 'active' : ''}" type="button" data-token-trigger="spacing" data-field="paddingLeft" title="选择设计系统间距 Token">${this._isTokenField('paddingLeft') ? this._tokenNameOf('paddingLeft') : ICONS.token}</button></div>
+              <div class="field"><span class="field-icon">T</span><input class="text-input" type="text" value="${d.paddingTop || ''}" data-field="paddingTop" inputmode="numeric" placeholder="上" /><button class="token-btn ${this._isTokenField('paddingTop') ? 'active' : ''}" type="button" data-token-trigger="spacing" data-field="paddingTop" title="选择设计系统间距 Token">${this._isTokenField('paddingTop') ? this._tokenNameOf('paddingTop') : ICONS.token}</button></div>
             </div>
             <div class="field-row two-col">
-              <div class="field"><span class="field-icon">R</span><input class="text-input" type="text" value="${d.paddingRight || ''}" data-field="paddingRight" inputmode="numeric" placeholder="右" /></div>
-              <div class="field"><span class="field-icon">B</span><input class="text-input" type="text" value="${d.paddingBottom || ''}" data-field="paddingBottom" inputmode="numeric" placeholder="下" /></div>
+              <div class="field"><span class="field-icon">R</span><input class="text-input" type="text" value="${d.paddingRight || ''}" data-field="paddingRight" inputmode="numeric" placeholder="右" /><button class="token-btn ${this._isTokenField('paddingRight') ? 'active' : ''}" type="button" data-token-trigger="spacing" data-field="paddingRight" title="选择设计系统间距 Token">${this._isTokenField('paddingRight') ? this._tokenNameOf('paddingRight') : ICONS.token}</button></div>
+              <div class="field"><span class="field-icon">B</span><input class="text-input" type="text" value="${d.paddingBottom || ''}" data-field="paddingBottom" inputmode="numeric" placeholder="下" /><button class="token-btn ${this._isTokenField('paddingBottom') ? 'active' : ''}" type="button" data-token-trigger="spacing" data-field="paddingBottom" title="选择设计系统间距 Token">${this._isTokenField('paddingBottom') ? this._tokenNameOf('paddingBottom') : ICONS.token}</button></div>
             </div>
             <p class="sub-label">外边距 margin</p>
             <div class="field-row two-col">
-              <div class="field"><span class="field-icon">L</span><input class="text-input" type="text" value="${d.marginLeft || ''}" data-field="marginLeft" inputmode="numeric" placeholder="左" /></div>
-              <div class="field"><span class="field-icon">T</span><input class="text-input" type="text" value="${d.marginTop || ''}" data-field="marginTop" inputmode="numeric" placeholder="上" /></div>
+              <div class="field"><span class="field-icon">L</span><input class="text-input" type="text" value="${d.marginLeft || ''}" data-field="marginLeft" inputmode="numeric" placeholder="左" /><button class="token-btn ${this._isTokenField('marginLeft') ? 'active' : ''}" type="button" data-token-trigger="spacing" data-field="marginLeft" title="选择设计系统间距 Token">${this._isTokenField('marginLeft') ? this._tokenNameOf('marginLeft') : ICONS.token}</button></div>
+              <div class="field"><span class="field-icon">T</span><input class="text-input" type="text" value="${d.marginTop || ''}" data-field="marginTop" inputmode="numeric" placeholder="上" /><button class="token-btn ${this._isTokenField('marginTop') ? 'active' : ''}" type="button" data-token-trigger="spacing" data-field="marginTop" title="选择设计系统间距 Token">${this._isTokenField('marginTop') ? this._tokenNameOf('marginTop') : ICONS.token}</button></div>
             </div>
             <div class="field-row two-col">
-              <div class="field"><span class="field-icon">R</span><input class="text-input" type="text" value="${d.marginRight || ''}" data-field="marginRight" inputmode="numeric" placeholder="右" /></div>
-              <div class="field"><span class="field-icon">B</span><input class="text-input" type="text" value="${d.marginBottom || ''}" data-field="marginBottom" inputmode="numeric" placeholder="下" /></div>
+              <div class="field"><span class="field-icon">R</span><input class="text-input" type="text" value="${d.marginRight || ''}" data-field="marginRight" inputmode="numeric" placeholder="右" /><button class="token-btn ${this._isTokenField('marginRight') ? 'active' : ''}" type="button" data-token-trigger="spacing" data-field="marginRight" title="选择设计系统间距 Token">${this._isTokenField('marginRight') ? this._tokenNameOf('marginRight') : ICONS.token}</button></div>
+              <div class="field"><span class="field-icon">B</span><input class="text-input" type="text" value="${d.marginBottom || ''}" data-field="marginBottom" inputmode="numeric" placeholder="下" /><button class="token-btn ${this._isTokenField('marginBottom') ? 'active' : ''}" type="button" data-token-trigger="spacing" data-field="marginBottom" title="选择设计系统间距 Token">${this._isTokenField('marginBottom') ? this._tokenNameOf('marginBottom') : ICONS.token}</button></div>
             </div>
             <div class="field-row two-col">
               <label class="field metric-field">
@@ -4316,7 +4469,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             <p class="section-title">外观</p>
             <div class="field-row two-col">
               <div class="field"><span class="field-icon">${ICONS.opacity}</span><input class="text-input" type="text" value="${d.layerOpacity ?? 100}" data-field="layerOpacity" inputmode="numeric" placeholder="透明" /></div>
-              <div class="field"><span class="field-icon">${ICONS.radius}</span><input class="text-input" type="text" value="${d.borderRadiusAll || ''}" data-field="borderRadiusAll" inputmode="numeric" placeholder="圆角" /></div>
+              <div class="field"><span class="field-icon">${ICONS.radius}</span><input class="text-input" type="text" value="${d.borderRadiusAll || ''}" data-field="borderRadiusAll" inputmode="numeric" placeholder="圆角" /><button class="token-btn ${this._isTokenField('borderRadiusAll') ? 'active' : ''}" type="button" data-token-trigger="radius" data-field="borderRadiusAll" title="选择设计系统圆角 Token">${this._isTokenField('borderRadiusAll') ? this._tokenNameOf('borderRadiusAll') : ICONS.token}</button></div>
             </div>
           </div>
 
@@ -4349,7 +4502,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
               </button>
             </div>
             <div class="field-row two-col">
-              <div class="field"><span class="field-icon">${ICONS.stroke}</span><input class="text-input" type="text" value="${d.strokeWidth || ''}" data-field="strokeWidth" inputmode="numeric" placeholder="宽度" /></div>
+              <div class="field"><span class="field-icon">${ICONS.stroke}</span><input class="text-input" type="text" value="${d.strokeWidth || ''}" data-field="strokeWidth" inputmode="numeric" placeholder="宽度" /><button class="token-btn ${this._isTokenField('strokeWidth') ? 'active' : ''}" type="button" data-token-trigger="strokeWidth" data-field="strokeWidth" title="选择设计系统描边宽度 Token">${this._isTokenField('strokeWidth') ? this._tokenNameOf('strokeWidth') : ICONS.token}</button></div>
               <div class="field">
                 <select class="text-input" data-field="strokePosition">
                   <option value="outside" ${d.strokePosition === 'outside' ? 'selected' : ''}>外描边</option>
@@ -4569,6 +4722,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         return;
       }
       this._data[field] = value;
+      // 用户手动改过字段值后，源码 token 匹配失效（改完即脱离 token 语义）
+      if (this._sourceTokens) delete this._sourceTokens[field];
       // 自动布局联动：间距输入数值 → 自动回「左对齐」布局（参考宽高输入数值自动回固定模式）
       if (!this._target && field === 'layoutGap' && String(value || '').trim() !== '' && !isNaN(parseFloat(value))) {
         if (this._data.justifyContent !== 'flex-start') this._data.justifyContent = 'flex-start';
@@ -4879,9 +5034,14 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         case 'strokeWidth': {
           const hex = d.strokeHex || '#000000';
           const op = d.strokeOpacity ?? 0;
-          const w = num(d.strokeWidth);
-          if (isTokenValue(hex)) return w > 0 ? `${w}px solid ${hex}` : 'none';
-          return op > 0 && w > 0 ? `${w}px solid ${hexOpacityToRgba(hex, op)}` : 'none';
+          const widthRaw = d.strokeWidth;
+          const widthToken = isTokenValue(widthRaw) ? widthRaw : '';
+          const widthPx = widthToken
+            ? parseFloat(tokenValueOfVar(widthToken) || resolveCssValue(widthToken, 'border-top-width') || '0')
+            : (num(widthRaw) || 0);
+          const widthVal = widthToken || (widthPx > 0 ? widthPx + 'px' : '');
+          if (isTokenValue(hex)) return widthPx > 0 ? `${widthVal} solid ${hex}` : 'none';
+          return widthPx > 0 && op > 0 ? `${widthVal} solid ${hexOpacityToRgba(hex, op)}` : 'none';
         }
         case 'strokePosition':
         case 'shadowHex':
@@ -5010,10 +5170,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         }
         case 'layoutGap': {
           const oldValue = cs().gap;
-          el.style.gap = isNaN(numVal) ? '' : numVal + 'px';
-          const res = { property: 'gap', oldValue, newValue: isNaN(numVal) ? '' : numVal + 'px' };
-          // 输入固定间距 → 自动回「左对齐」布局（与左右对齐显示 auto 互斥）
-          if (!this._target && !isNaN(numVal)) {
+          const gapVal = isTokenValue(value) ? value : (isNaN(numVal) ? '' : numVal + 'px');
+          el.style.gap = gapVal;
+          const res = { property: 'gap', oldValue, newValue: gapVal };
+          // 输入固定间距 → 自动回「左对齐」布局（与左右对齐显示 auto 互斥）；token 值同样视为固定间距
+          if (!this._target && gapVal !== '') {
             const jcOld = cs().justifyContent;
             if (jcOld !== 'flex-start') {
               el.style.justifyContent = 'flex-start';
@@ -5024,23 +5185,51 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         }
         case 'paddingLeft': {
           const oldValue = cs().paddingLeft;
-          el.style.paddingLeft = isNaN(numVal) ? '' : numVal + 'px';
-          return { property: 'padding-left', oldValue, newValue: isNaN(numVal) ? '' : numVal + 'px' };
+          const out = isTokenValue(value) ? value : (isNaN(numVal) ? '' : numVal + 'px');
+          el.style.paddingLeft = out;
+          return { property: 'padding-left', oldValue, newValue: out };
         }
         case 'paddingRight': {
           const oldValue = cs().paddingRight;
-          el.style.paddingRight = isNaN(numVal) ? '' : numVal + 'px';
-          return { property: 'padding-right', oldValue, newValue: isNaN(numVal) ? '' : numVal + 'px' };
+          const out = isTokenValue(value) ? value : (isNaN(numVal) ? '' : numVal + 'px');
+          el.style.paddingRight = out;
+          return { property: 'padding-right', oldValue, newValue: out };
         }
         case 'paddingTop': {
           const oldValue = cs().paddingTop;
-          el.style.paddingTop = isNaN(numVal) ? '' : numVal + 'px';
-          return { property: 'padding-top', oldValue, newValue: isNaN(numVal) ? '' : numVal + 'px' };
+          const out = isTokenValue(value) ? value : (isNaN(numVal) ? '' : numVal + 'px');
+          el.style.paddingTop = out;
+          return { property: 'padding-top', oldValue, newValue: out };
         }
         case 'paddingBottom': {
           const oldValue = cs().paddingBottom;
-          el.style.paddingBottom = isNaN(numVal) ? '' : numVal + 'px';
-          return { property: 'padding-bottom', oldValue, newValue: isNaN(numVal) ? '' : numVal + 'px' };
+          const out = isTokenValue(value) ? value : (isNaN(numVal) ? '' : numVal + 'px');
+          el.style.paddingBottom = out;
+          return { property: 'padding-bottom', oldValue, newValue: out };
+        }
+        case 'marginLeft': {
+          const oldValue = cs().marginLeft;
+          const out = isTokenValue(value) ? value : (isNaN(numVal) ? '' : numVal + 'px');
+          el.style.marginLeft = out;
+          return { property: 'margin-left', oldValue, newValue: out };
+        }
+        case 'marginRight': {
+          const oldValue = cs().marginRight;
+          const out = isTokenValue(value) ? value : (isNaN(numVal) ? '' : numVal + 'px');
+          el.style.marginRight = out;
+          return { property: 'margin-right', oldValue, newValue: out };
+        }
+        case 'marginTop': {
+          const oldValue = cs().marginTop;
+          const out = isTokenValue(value) ? value : (isNaN(numVal) ? '' : numVal + 'px');
+          el.style.marginTop = out;
+          return { property: 'margin-top', oldValue, newValue: out };
+        }
+        case 'marginBottom': {
+          const oldValue = cs().marginBottom;
+          const out = isTokenValue(value) ? value : (isNaN(numVal) ? '' : numVal + 'px');
+          el.style.marginBottom = out;
+          return { property: 'margin-bottom', oldValue, newValue: out };
         }
         case 'width': {
           const oldValue = cs().width;
@@ -5170,8 +5359,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         }
         case 'borderRadiusAll': {
           const oldValue = cs().borderRadius;
-          el.style.borderRadius = isNaN(numVal) ? '' : numVal + 'px';
-          return { property: 'border-radius', oldValue, newValue: isNaN(numVal) ? '' : numVal + 'px' };
+          const out = isTokenValue(value) ? value : (isNaN(numVal) ? '' : numVal + 'px');
+          el.style.borderRadius = out;
+          return { property: 'border-radius', oldValue, newValue: out };
         }
         case 'fillHex':
         case 'fillOpacity': {
@@ -5191,19 +5381,25 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         case 'strokeWidth': {
           const oldValue = cs().border;
           const hex = this._data.strokeHex || '#000000';
-          const width = parseFloat(this._data.strokeWidth) || 0;
+          const widthRaw = this._data.strokeWidth;
+          // token 宽度：用解析计算值判断是否显示描边，写入时保留 token 原文
+          const widthToken = isTokenValue(widthRaw) ? widthRaw : '';
+          const widthPx = widthToken
+            ? parseFloat(tokenValueOfVar(widthToken) || resolveCssValue(widthToken, 'border-top-width') || '0')
+            : (parseFloat(widthRaw) || 0);
+          const widthVal = widthToken || (widthPx > 0 ? widthPx + 'px' : '');
           if (isTokenValue(hex)) {
-            el.style.borderWidth = width > 0 ? width + 'px' : '';
-            el.style.borderStyle = width > 0 ? 'solid' : '';
+            el.style.borderWidth = widthVal;
+            el.style.borderStyle = widthPx > 0 ? 'solid' : '';
             el.style.borderColor = hex;
-            return { property: 'border', oldValue, newValue: width > 0 ? `${width}px solid ${hex}` : '' };
+            return { property: 'border', oldValue, newValue: widthPx > 0 ? `${widthVal} solid ${hex}` : '' };
           }
           const opacity = this._data.strokeOpacity ?? 0;
-          const color = opacity > 0 && width > 0 ? hexOpacityToRgba(hex, opacity) : 'transparent';
-          el.style.borderWidth = width > 0 ? width + 'px' : '';
-          el.style.borderStyle = width > 0 ? 'solid' : '';
+          const color = opacity > 0 && widthPx > 0 ? hexOpacityToRgba(hex, opacity) : 'transparent';
+          el.style.borderWidth = widthVal;
+          el.style.borderStyle = widthPx > 0 ? 'solid' : '';
           el.style.borderColor = color;
-          return { property: 'border', oldValue, newValue: width > 0 ? `${width}px solid ${color}` : '' };
+          return { property: 'border', oldValue, newValue: widthPx > 0 ? `${widthVal} solid ${color}` : '' };
         }
         case 'strokePosition':
         case 'shadowHex':
@@ -5263,11 +5459,25 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._shadow.querySelectorAll('[data-field="justifyContent"]').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.value === d.justifyContent);
       });
-      // 自动布局：gap 输入框回显（左右对齐模式显示 auto，否则显示间距值）
-      const gapInput = this._shadow.querySelector('input[data-field="layoutGap"]');
-      if (gapInput) {
-        const gapDisp = d.justifyContent === 'space-between' ? 'auto' : (d.layoutGap || '');
-        if (gapInput.value !== gapDisp) gapInput.value = gapDisp;
+      // 自动布局：gap 输入框回显（token 模式显示 var()，左右对齐模式显示 auto，否则显示间距值）
+      {
+        const field = 'layoutGap';
+        const tokenVal = this._tokenValueOf(field);
+        const tokenBtn = this._shadow.querySelector(`[data-token-trigger][data-field="${field}"]`);
+        if (tokenBtn) {
+          tokenBtn.classList.toggle('active', !!tokenVal);
+          if (tokenVal) {
+            const tokName = this._tokenNameOf(field);
+            if (tokenBtn.textContent.trim() !== tokName) tokenBtn.textContent = tokName;
+          } else if (tokenBtn.innerHTML.trim() !== ICONS.token.trim()) {
+            tokenBtn.innerHTML = ICONS.token;
+          }
+        }
+        const gapInput = this._shadow.querySelector('input[data-field="layoutGap"]');
+        if (gapInput) {
+          const gapDisp = tokenVal || (d.justifyContent === 'space-between' ? 'auto' : (d.layoutGap || ''));
+          if (gapInput.value !== gapDisp) gapInput.value = gapDisp;
+        }
       }
       // shadow inset
       this._shadow.querySelectorAll('[data-field="shadowInset"]').forEach(btn => {
@@ -5278,12 +5488,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._shadow.querySelectorAll('[data-color-trigger]').forEach(btn => {
         const field = btn.dataset.field;
         const opacityField = field.replace('Hex', 'Opacity');
-        const val = d[field] || '#000000';
+        const tokenVal = this._tokenValueOf(field);
+        const val = tokenVal || d[field] || '#000000';
         const opacity = d[opacityField] ?? 100;
         const swatch = btn.querySelector('.swatch');
         if (swatch) {
-          swatch.style.background = isTokenValue(val)
-            ? (resolveCssValue(val, 'color') || 'transparent')
+          swatch.style.background = tokenVal
+            ? (resolveCssValue(tokenVal, 'color') || 'transparent')
             : hexOpacityToRgba(val, opacity);
         }
       });
@@ -5291,14 +5502,15 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const colorFields = ['colorHex', 'fillHex', 'strokeHex', 'shadowHex'];
       colorFields.forEach(field => {
         const opacityField = field.replace('Hex', 'Opacity');
-        const val = d[field] || '';
-        const isTok = isTokenValue(val);
+        const tokenVal = this._tokenValueOf(field);
+        const isTok = !!tokenVal;
+        const val = tokenVal || (d[field] || '');
         // T 按钮状态
         const tokenBtn = this._shadow.querySelector(`[data-token-trigger="color"][data-field="${field}"]`);
         if (tokenBtn) {
           tokenBtn.classList.toggle('active', isTok);
           if (isTok) {
-            const tokName = val.match(/var\((--[^)]+)\)/)[1].replace(/^--/, '');
+            const tokName = this._tokenNameOf(field);
             if (tokenBtn.textContent.trim() !== tokName) tokenBtn.textContent = tokName;
           } else {
             if (tokenBtn.innerHTML.trim() !== ICONS.token.trim()) tokenBtn.innerHTML = ICONS.token;
@@ -5313,7 +5525,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             opacityInput.value = opacityVal;
           }
         }
-        // hex 输入框值回显（用 input 限定，避免匹配到颜色色块按钮）
+        // hex 输入框值回显（用 input 限定，避免匹配到颜色色块按钮；token 模式显示 var() 原文）
         const hexInput = this._shadow.querySelector(`input[data-field="${field}"]`);
         if (hexInput && hexInput.value !== val) {
           hexInput.value = val;
@@ -5322,13 +5534,15 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 字号/字重/行高 Token 按钮状态 + 输入框回显
       const textFields = ['fontSize', 'fontWeight', 'lineHeight'];
       textFields.forEach(field => {
-        const val = d[field] || '';
-        const isTok = isTokenValue(val);
+        const tokenVal = this._tokenValueOf(field);
+        const isTok = !!tokenVal;
+        // fontWeight 是 select 无法显示 var()，输入框类（fontSize/lineHeight）token 模式显示 var() 原文
+        const val = field === 'fontWeight' ? (d[field] || '') : (tokenVal || d[field] || '');
         const tokenBtn = this._shadow.querySelector(`[data-token-trigger="${field}"][data-field="${field}"]`);
         if (tokenBtn) {
           tokenBtn.classList.toggle('active', isTok);
           if (isTok) {
-            const tokName = val.match(/var\((--[^)]+)\)/)[1].replace(/^--/, '');
+            const tokName = this._tokenNameOf(field);
             if (tokenBtn.textContent.trim() !== tokName) tokenBtn.textContent = tokName;
           } else {
             if (tokenBtn.innerHTML.trim() !== ICONS.token.trim()) tokenBtn.innerHTML = ICONS.token;
@@ -5345,6 +5559,27 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const [jc, ai] = btn.dataset.alignPreset.split('|');
         btn.classList.toggle('active', jc === d.justifyContent && ai === d.alignItems);
       });
+      // 间距/圆角/描边宽 Token 按钮状态 + 输入框回显（layoutGap 在上面单独处理）
+      const metricTokenFields = ['paddingLeft', 'paddingTop', 'paddingRight', 'paddingBottom', 'marginLeft', 'marginTop', 'marginRight', 'marginBottom', 'borderRadiusAll', 'strokeWidth'];
+      metricTokenFields.forEach(field => {
+        const tokenVal = this._tokenValueOf(field);
+        const isTok = !!tokenVal;
+        const val = tokenVal || (d[field] != null ? d[field] : '');
+        const tokenBtn = this._shadow.querySelector(`[data-token-trigger][data-field="${field}"]`);
+        if (tokenBtn) {
+          tokenBtn.classList.toggle('active', isTok);
+          if (isTok) {
+            const tokName = this._tokenNameOf(field);
+            if (tokenBtn.textContent.trim() !== tokName) tokenBtn.textContent = tokName;
+          } else {
+            if (tokenBtn.innerHTML.trim() !== ICONS.token.trim()) tokenBtn.innerHTML = ICONS.token;
+          }
+        }
+        const input = this._shadow.querySelector(`input[data-field="${field}"]`);
+        if (input && input.value !== String(val)) {
+          input.value = String(val);
+        }
+      });
     }
 
     // ── Token 选择面板 ──────────────────────────────────────
@@ -5354,6 +5589,16 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._tokenPanel = { open: true, type, field, trigger };
       this._renderTokenList(type);
       panel.classList.add('open');
+      // 打开后滚动定位到选中项（若有），让默认选中的 token 可见
+      requestAnimationFrame(() => {
+        const selItem = this._shadow.querySelector('.token-item.selected');
+        if (!selItem) return;
+        const inner = this._shadow.querySelector('.token-panel-inner');
+        if (!inner) return;
+        const innerRect = inner.getBoundingClientRect();
+        const itemRect = selItem.getBoundingClientRect();
+        inner.scrollTop += (itemRect.top + itemRect.height / 2 - innerRect.top - inner.clientHeight / 2);
+      });
       // 定位到触发按钮下方，下方空间不够时自动上翻
       const rect = trigger.getBoundingClientRect();
       const panelRect = this.getBoundingClientRect();
@@ -5420,7 +5665,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const listEl = this._shadow.querySelector('[data-token-list]');
       if (!listEl) return;
       const field = this._tokenPanel.field || 'colorHex';
-      const currentVal = this._data ? (this._data[field] || '') : '';
+      const currentVal = this._tokenValueOf(field);
       const groups = TOKEN_GROUPS_MAP[type] || [];
       let html = '';
       groups.forEach(group => {
