@@ -494,7 +494,8 @@
         var cleanBtn = root.querySelector('[data-action="clean-images"]');
         if (gotoBtn) {
           gotoBtn.addEventListener('click', function () {
-            ctx.closeOverlay();
+            /* 只关闭本面板，不关闭底层页面（发布页分享时保持当前页继续编辑） */
+            sheetCtx.close();
             ctx.toast('跳转' + channelName + '（模拟）');
             setTimeout(function () {
               showOverlayResult('icon-goutoast', '分享成功');
@@ -535,7 +536,8 @@
         root.querySelectorAll('[data-channel]').forEach(function (btn) {
           btn.addEventListener('click', function () {
             var channelKey = btn.getAttribute('data-channel');
-            ctx.closeOverlay();
+            /* 只关闭本分享面板，不关闭底层页面（发布页分享时保持当前页继续编辑） */
+            sheetCtx.close();
             simulateShare(ctx, channelKey, content, {
               onSuccess: function () {
                 if (callbacks.onChannelSelect) callbacks.onChannelSelect(channelKey);
@@ -580,7 +582,8 @@
           var action = btn.getAttribute('data-action');
           if (action === 'cancel') {
             btn.addEventListener('click', function () {
-              ctx.closeOverlay();
+              /* 只关闭本分享面板，不关闭底层页面（发布页分享时取消分享保持当前页继续编辑） */
+              sheetCtx.close();
               /* 二级面板取消：关闭并恢复主面板；主面板取消：仅关闭 */
               if (reopenMain) reopenMain();
               else if (callbacks.onClose) callbacks.onClose();
@@ -595,7 +598,8 @@
             });
           } else if (action === 'saveImages') {
             btn.addEventListener('click', function () {
-              ctx.closeOverlay();
+              /* 只关闭本分享面板，不关闭底层页面 */
+              sheetCtx.close();
               simulateDownload(ctx, content, function () {
                 ctx.toast({
                   variant: 'guide',
@@ -608,8 +612,8 @@
             });
           } else if (action === 'miniprogramLink') {
             btn.addEventListener('click', function () {
-              /* 主面板关闭，从底部重新弹出「分享小程序链接」二级面板（组件化复用：同一 openProductShare 入口 + sharePanelTemplate 渲染） */
-              ctx.closeOverlay();
+              /* 只关闭本分享面板，从底部重新弹出「分享小程序链接」二级面板（组件化复用：同一 openProductShare 入口 + sharePanelTemplate 渲染） */
+              sheetCtx.close();
               setTimeout(function () {
                 openProductShare(ctx, {
                   contentType: 'miniprogram',
@@ -715,10 +719,10 @@
           window.addEventListener('resize', onResize);
         }
 
-        /* 遮罩点击关闭：二级面板点遮罩关闭并恢复主面板；主面板点遮罩仅关闭 */
+        /* 遮罩点击关闭：二级面板点遮罩关闭并恢复主面板；主面板点遮罩仅关闭（只关本面板，不关底层页面） */
         root.addEventListener('click', function (e) {
           if (e.target === root) {
-            ctx.closeOverlay();
+            sheetCtx.close();
             if (reopenMain) reopenMain();
             else if (callbacks.onClose) callbacks.onClose();
           }
