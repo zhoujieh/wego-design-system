@@ -9,16 +9,16 @@ description: 审查或迭代微购设计系统、组件、Preview、UI Kit、消
 
 用于组件、Token、Preview、UI Kit、消费边界、守卫、设计系统缺口和工作流维护。普通业务场景固定交给 `wego-product → wego-design`。本技能修改唯一权威源，不直接修改 `wego-app/lib/`、生成的 `components.css` 或业务场景来掩盖系统问题。
 
-经验沉淀由信号驱动自动触发：遇到用户纠正、用户表达偏好、返工、踩坑（CI失败/守卫拦截/验收打回）时自动沉淀，不需要用户要求。沉淀后告知用户 `🧠已沉淀经验：<简短描述>`。普通代码错误、需求临时变化、单次视觉微调、单场景特例不沉淀。
+经验体系分四层：L1 事实 `evidence.json`（只增不减）→ L2 核心摘要 `EXPERIENCE.md`（一句话索引、会话前置读）→ L3 场景技能 `wego-scene-*`（可被 AI 触发的固定流程）→ L4 正式规则。业务技能在现场只识别信号、写 `.tasks/experience-inbox.json` 草稿；本技能在交付单元收口时扫描草稿并分流沉淀（一次性留 L1+L2，同场景 ×2 或流程固定毕业 L3，跨场景硬约束升格 L4），不需要用户要求，沉淀后告知用户 `🧠已沉淀经验：<简短描述>`。普通代码错误、需求临时变化、单次视觉微调、单场景特例不沉淀；零信号零动作，不新增用户确认门禁。完整流程见[工作流迭代](./references/workflow-iteration.md)。
 
 <!-- rule-id: experience-must-stay-inside-uxsystem-iterate -->
-经验文件只能维护在本技能目录内。事实事件唯一数据源为 `.codex/skills/wego-uxsystem-iterate/experience/evidence.json`，经验视图为 `.codex/skills/wego-uxsystem-iterate/experience/EXPERIENCE.md`（由 AI 基于事实推理维护，用 `§` 分隔多条自然语言经验）；禁止在仓库根目录或其它技能下创建经验目录、记录或副本。写入前必须使用完整仓库路径确认目标位置，发现旧副本时先合并有效内容，再删除旧副本并清理引用。
+L1/L2/L3 经验权威源只能维护在本技能目录及 `.codex/skills/wego-scene-*` 内：事实唯一数据源为 `.codex/skills/wego-uxsystem-iterate/experience/evidence.json`，核心摘要为 `.codex/skills/wego-uxsystem-iterate/experience/EXPERIENCE.md`（AI 基于事实推理维护，`§` 分隔，≤1500 字符）；禁止在仓库根目录或其它技能下创建经验目录、记录或副本。唯一例外是交付单元 `.tasks/experience-inbox.json` 未判定草稿（随 worktree 生灭，业务技能只写草稿、本技能负责转正或清空）。写入前必须使用完整仓库路径确认目标位置，发现旧副本时先合并有效内容，再删除旧副本并清理引用。
 
 ## 按需读取
 
 - 组件、Token、Preview 或 UI Kit：读[组件与 UI Kit 迭代](./references/workflow.md)、[资源同步矩阵](./references/sync-matrix.runtime.md)及受影响的权威源和消费者。
 - 消费规则、守卫或系统缺口：只读直接受影响的规则、源码和运行时消费者。涉及分支、PR、预览或交付收口时，同步读取 `wego-github-delivery` 的交付规则。
-- 经验沉淀或工作流维护：读[工作流迭代](./references/workflow-iteration.md)、[工作流同步矩阵](./references/sync-matrix.md)、事实事件源 `evidence.json` 和经验视图 `EXPERIENCE.md`。
+- 经验沉淀或工作流维护：读[工作流迭代](./references/workflow-iteration.md)、[工作流同步矩阵](./references/sync-matrix.md)、交付单元 `.tasks/experience-inbox.json` 草稿；沉淀时用 `node scripts/refine-experience.mjs --related <关键词>` 只取相关事实，不默认全量读 `evidence.json`。
 
 ## 输出与交接
 

@@ -7,6 +7,10 @@
 | 组件、Token、Preview、UI Kit、消费规则、守卫或工作流维护 | `wego-uxsystem-iterate` |
 | 分支、PR、本地迭代预览、合并或交付分支清理 | `wego-github-delivery` |
 
+## 场景技能（主链路技能的子技能）
+
+`wego-scene-*` 是经验毕业产生的场景技能，沉淀某类任务的固定流程、交付前检查清单与踩坑反例，由对应主链路技能在命中场景时按需读取；它不承接业务阶段路由、不新增主链路节点。场景技能的创建与维护统一由 `wego-uxsystem-iterate` 承担（同场景 ×2 或流程固定才允许创建），毕业标准、四段结构与三重挂载规则见 `wego-uxsystem-iterate/references/workflow-iteration.md`。
+
 ## 输入形态一律先走产品技能
 
 无论用户以哪种形态提出需求，都视为**业务需求**，必须先由 `wego-product` **创建迭代并确认 `prototype_brief`**，再进入 `wego-design` 实现。不得跳过产品技能直接做页面：
