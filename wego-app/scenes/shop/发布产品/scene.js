@@ -151,6 +151,30 @@ const PUBLISH_TEMPLATE = `
     routeId: 'publish-product',
     template: PUBLISH_TEMPLATE,
     presentation: { type: 'full-screen-modal', transition: 'slide-up-enter, slide-down-exit', coversTabBar: false },
-    init: function (ctx) { window.WegoApp.initProductEditor(ctx, null); }
+    init: function (ctx) {
+      /* 直链模式：把场景上下文包装成与 overlay 模式一致的 API，修复直链下关闭/跳转错位：
+         - closeOverlay 映射为 ctx.back()（统一关闭语义：overlay 栈/场景栈都能正确退出）
+         - requestGoToFeed 标记发布后跳转，等本场景退场（onDestroy）后再 navigate('album-product-feed')，
+           避开 navigate 与 overlay 关闭的历史竞争（此前会导致 hash 残留、模态被二次打开）
+         - onDestroy 收尾：发布 → 跳转动态流；直链取消 → 清理残留 #/publish-product hash，
+           避免刷新重开空白发布表单（同步清理会与关闭流程的 popstate 冲突，故延迟到退场后） */
+      var pendingGoToFeed = false;
+      var api = Object.assign({}, ctx, {
+        closeOverlay: function () {
+          ctx.back();
+        },
+        requestGoToFeed: function () { pendingGoToFeed = true; }
+      });
+      window.WegoApp.initProductEditor(api, ctx);
+      ctx.onDestroy(function () {
+        if (pendingGoToFeed) {
+          pendingGoToFeed = false;
+          ctx.navigate('album-product-feed');
+        } else if (window.location.hash === '#/publish-product') {
+          /* 直链取消：overlay 已完全退场，清理残留 hash，避免刷新重开空白发布表单 */
+          try { history.replaceState(null, document.title, window.location.pathname + window.location.search); } catch (e) {}
+        }
+      });
+    }
   });
 })();

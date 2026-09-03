@@ -471,12 +471,14 @@
             b.addEventListener('click', function () {
               var src = b.getAttribute('data-pick-image');
               if (formState.images.indexOf(src) < 0) formState.images.push(src);
-              ctx.closeOverlay();
+              /* 关闭图片选择面板自身（pickerCtx.close），不能调用外层 ctx.closeOverlay()——
+                 overlay 模式下外层 closeOverlay 被绑定为关闭发布产品模态，会把正在编辑的表单一并关掉 */
+              pickerCtx.close();
               refreshImages();
             });
           });
           var cancel = pRoot.querySelector('[data-dom-id="close-picker"]');
-          if (cancel) cancel.addEventListener('click', function () { ctx.closeOverlay(); });
+          if (cancel) cancel.addEventListener('click', function () { pickerCtx.close(); });
         }
       });
     }

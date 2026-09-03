@@ -512,7 +512,7 @@
         var root = overlayCtx.root;
         var closeBtn = root.querySelector('[data-help-close]');
         if (closeBtn) {
-          closeBtn.addEventListener('click', function () { ctx.closeOverlay(); });
+          closeBtn.addEventListener('click', function () { overlayCtx.close(); });
         }
       }
     });
@@ -649,7 +649,7 @@
           },
           onConfirm: function (value, inputMode) {
             if (commitValue(value, inputMode)) {
-              ctx.closeOverlay();
+              overlayCtx.close();
             }
           }
         });
@@ -681,7 +681,7 @@
               }
             }
           }
-          ctx.closeOverlay();
+          overlayCtx.close();
         });
       }
     });
@@ -695,11 +695,11 @@
         init: function (overlayCtx) {
           var root = overlayCtx.root;
           root.addEventListener('click', function (e) {
-            if (!e.target.closest('.modal__panel')) ctx.closeOverlay();
+            if (!e.target.closest('.modal__panel')) overlayCtx.close();
           });
           var closeBtn = root.querySelector('[data-popup-close]');
           if (closeBtn) {
-            closeBtn.addEventListener('click', function () { ctx.closeOverlay(); });
+            closeBtn.addEventListener('click', function () { overlayCtx.close(); });
           }
         }
       });
@@ -712,11 +712,11 @@
         init: function (overlayCtx) {
           var root = overlayCtx.root;
           root.addEventListener('click', function (e) {
-            if (!e.target.closest('.modal__panel')) ctx.closeOverlay();
+            if (!e.target.closest('.modal__panel')) overlayCtx.close();
           });
           var closeBtn = root.querySelector('[data-popup-close]');
           if (closeBtn) {
-            closeBtn.addEventListener('click', function () { ctx.closeOverlay(); });
+            closeBtn.addEventListener('click', function () { overlayCtx.close(); });
           }
           var retryLink = root.querySelector('[data-action="retry"]');
           if (retryLink) {
@@ -765,13 +765,13 @@
 
         root.addEventListener('click', function (e) {
           if (!e.target.closest('.modal__panel')) {
-            ctx.closeOverlay();
+            overlayCtx.close();
           }
         });
 
         var closeBtn = root.querySelector('[data-popup-close]');
         if (closeBtn) {
-          closeBtn.addEventListener('click', function () { ctx.closeOverlay(); });
+          closeBtn.addEventListener('click', function () { overlayCtx.close(); });
         }
 
         var resaleTitle = root.querySelector('[data-resale-title]');
@@ -794,7 +794,7 @@
           } else if (action === 'share') {
             ctx.toast('分享面板已拉起');
           }
-          ctx.closeOverlay();
+          overlayCtx.close();
         }
 
         var saveBtn = root.querySelector('[data-action="save"]');
@@ -818,7 +818,7 @@
         }
         var confirmBtn = root.querySelector('[data-action="confirm"]');
         if (confirmBtn) {
-          confirmBtn.addEventListener('click', function () { ctx.closeOverlay(); });
+          confirmBtn.addEventListener('click', function () { overlayCtx.close(); });
         }
 
         var bubble = root.querySelector('[data-edit-bubble]');
