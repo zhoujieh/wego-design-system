@@ -263,6 +263,77 @@
         "走查工具",
         "wego-design"
       ]
+    },
+    {
+      "id": "ev-019",
+      "date": "2026-09-03",
+      "summary": "走查工具 isWalkthroughElement 判定要逐层穿透 shadow 边界：工具 UI（style-panel/color-picker）内部元素 root.host 是自定义组件，Light DOM closest 不命中，真实点击被走查 document 捕获当页面元素吞掉；每层检查 root.host.closest(lightTags) 才放行工具内部点击",
+      "source": "rework",
+      "scene": "走查工具交互重构-验收修复",
+      "tags": [
+        "shadowDOM穿透",
+        "工具UI判定",
+        "点击拦截",
+        "走查工具",
+        "wego-design"
+      ]
+    },
+    {
+      "id": "ev-020",
+      "date": "2026-09-03",
+      "summary": "走查工具撤销/重做后刷新样式面板（_refreshStylePanelData）用 innerHTML 重建会令旧 input 失焦触发 blur→_onFieldChange 写回旧值，500ms 后覆盖撤销结果；重建前设 _suppressFieldSync 抑制标志（finally 复位），_onFieldChange 开头守卫 return",
+      "source": "rework",
+      "scene": "走查工具交互重构-验收修复",
+      "tags": [
+        "撤销回显",
+        "面板重建",
+        "blur写回",
+        "抑制标志",
+        "走查工具",
+        "wego-design"
+      ]
+    },
+    {
+      "id": "ev-021",
+      "date": "2026-09-03",
+      "summary": "走查工具选中即拖与连点选中父级冲突：pointerdown 立即进拖拽会截胡同位置连点；改 120ms 短定时器 + 移动>8px 双触发（_dragArmed），pointerup 未移动走 _handlePointSelection 恢复连点层级上移",
+      "source": "rework",
+      "scene": "走查工具交互重构-验收修复",
+      "tags": [
+        "拖拽点选互斥",
+        "连点上移",
+        "触发阈值",
+        "走查工具",
+        "wego-design"
+      ]
+    },
+    {
+      "id": "ev-022",
+      "date": "2026-09-03",
+      "summary": "走查工具样式面板 fixed 居中定位会覆盖页面选中宽元素的中心，elementFromPoint 命中面板挡住拖动；水平定位改贴右边缘（window.innerWidth - 面板宽 - 8）",
+      "source": "rework",
+      "scene": "走查工具交互重构-验收修复",
+      "tags": [
+        "面板定位",
+        "遮挡",
+        "贴右边缘",
+        "走查工具",
+        "wego-design"
+      ]
+    },
+    {
+      "id": "ev-023",
+      "date": "2026-09-03",
+      "summary": "走查工具元信息 SVG 色块（padding/margin 高亮）pointer-events:auto 会拦截 pointerdown，选中元素无法拖动；_onPointerDown 对工具元素例外：坐标命中已选中元素 rect（_pointInElement）则继续走拖拽流程",
+      "source": "rework",
+      "scene": "走查工具交互重构-验收修复",
+      "tags": [
+        "工具元素互操作",
+        "pointer-events",
+        "拖动例外",
+        "走查工具",
+        "wego-design"
+      ]
     }
   ]
 }
