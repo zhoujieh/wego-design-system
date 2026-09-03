@@ -53,13 +53,16 @@ function check(name, ok, detail = '') {
       const isr = ins.shadowRoot;
       return {
         guides: isr.querySelectorAll('line.guide').length,
-        bubble: isr.querySelector('.bubble-text')?.textContent || '',
-        pads: isr.querySelectorAll('rect.pad-r').length,
+        ptag: isr.querySelectorAll('g.ptag').length,
+        mtag: isr.querySelectorAll('g.mtag').length,
+        nums: Array.from(isr.querySelectorAll('text.num')).map(t => t.textContent),
+        noBubble: !isr.querySelector('.bubble-text'),
         display: getComputedStyle(ins).display
       };
     });
-    check('⑤ 悬停四边延长线+气泡', insp && insp.display === 'block' && insp.guides === 4 && insp.bubble.includes('×'), insp ? insp.bubble : '无 inspector');
-    check('⑤ padding 青色块', insp && insp.pads >= 1, `pads=${insp ? insp.pads : 0}`);
+    check('⑤ 悬停四边延长线', insp && insp.display === 'block' && insp.guides === 4, insp ? `guides=${insp.guides}` : '无 inspector');
+    check('⑤ padding 蓝色数值标签', insp && insp.ptag >= 1, `ptag=${insp ? insp.ptag : 0}`);
+    check('⑤ 元素信息气泡已去除', insp && insp.noBubble, `noBubble=${insp ? insp.noBubble : 0}`);
 
     // 选中 head（点击中心 + 连点，head 中心命中 publisher 上移到 head）
     const p = await page.evaluate(() => {
