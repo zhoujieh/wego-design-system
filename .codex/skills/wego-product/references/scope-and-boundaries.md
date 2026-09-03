@@ -30,7 +30,7 @@
 ## 需求简报输出要求（充分性守门）
 
 <!-- rule-id: brief-sufficiency-required -->
-每次新迭代的 `spec.md` 必须按以下要求写"足够细"，缺失项在 `submit-brief` 时被守门拒绝（脚本从 spec.md 解析后校验，见 `scripts/iteration-record.mjs` 的 `briefSufficiencyErrors`）。
+简报分两档守门：`submit-brief` 只做**薄档校验**（goal、included、entry_points、critical_paths 非空；states、data_contract、prototype_boundaries 允许为空，open_questions 允许暂存），支持原型循环期间随改随提交；终版全量要求在 `confirm-brief` 终局确认时由脚本守门（全量结构 + 以下充分性要求 + open_questions 清空，见 `scripts/iteration-record.mjs` 的 `briefSufficiencyErrors` 与 `finalBriefErrors`）。
 
 ### A. `states` 状态覆盖
 
@@ -59,7 +59,7 @@
 
 ### E. 确认前置
 
-以上全部在简报沟通阶段确认完成；`open_questions` 清空后才 `submit-brief`。新建需求在简报产出前，需为页面各交互状态（空态、加载、失败、搜索空结果等）与数据产生入口（发布/新建流程）逐一确认，不允许以"本地模拟数据"作为粗糙降级。
+以上 A–D 在原型循环期间可逐步补全（open_questions 暂存待确认项），但**终局确认前必须全部落实**：`open_questions` 清空、states 覆盖齐全、数据闭环成立，`confirm-brief` 才能通过守门。低风险可逆项可先写入 assumptions 继续循环；影响目标、范围、入口、关键路径、状态、数据含义或不可逆结果的仍必须当场询问用户，不允许以"本地模拟数据"作为粗糙降级。
 
 ## 交互视觉要求
 
@@ -80,10 +80,9 @@
 
 ## 交接
 
-`submit-brief` 通过后进入 `in-development` 状态，简报开放开发：可随时修改 spec.md 后重新 `submit-brief` 更新快照，无需 invalidate/confirm 循环。此时即可交给 `wego-design` 开始实现，进入设计前必须满足：
+`submit-brief` 通过后进入 `in-development` 状态，承载原型循环：可随时修改 spec.md 后重新 `submit-brief` 更新快照与验收账本，无需 invalidate/confirm 循环。**立项确认 + 已提交简要简报即原型授权**，此时即可交给 `wego-design` 开始实现，进入实现前必须满足：
 
-- 目标、范围、入口、关键路径、原型边界、必要状态和数据完整。
-- `open_questions` 为空。
-- 已通过 `submit-brief` 校验并生成 prototype_brief 快照。
+- 目标、纳入范围、入口和至少一条关键路径已成形（薄档字段非空）。
+- 已通过 `submit-brief` 薄档校验并生成 prototype_brief 快照与验收账本。
 
-验收统一收口：用户说"验收完成"时，由 `wego-design` 输出 5 维度一致性校验清单（范围/入口/关键路径/状态/数据契约），用户逐项确认后执行 `confirm-brief`。已确认简报即设计授权。范围内未指定的信息分组、布局、组件、Token、反馈和 overlay 由设计阶段自主完成；只有会改变业务事实的缺失或冲突才退回产品阶段。
+终版要求（原型边界、必要状态、数据契约完整，`open_questions` 为空）在终局确认时把关：用户说"验收完成"后，AI 补全终版 spec.md、核对填写账本、展示补全 diff 与账本，用户过目确认后执行 `confirm-brief`（脚本全量守门）。范围内未指定的信息分组、布局、组件、Token、反馈和 overlay 由设计阶段自主完成；只有会改变业务事实的缺失或冲突才退回产品阶段。
