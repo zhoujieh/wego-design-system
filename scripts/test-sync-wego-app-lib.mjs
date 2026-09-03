@@ -32,7 +32,6 @@ try {
   write('.codex/skills/wego-design/components.css', '.button {}\n');
   write('.codex/skills/wego-design/iconfont.css', '@font-face {}\n');
   write('.codex/skills/wego-design/scaffold.css', '.scaffold {}\n');
-  write('.codex/skills/wego-design/runtime/walkthrough-tool.css', '.walkthrough {}\n');
   write('.codex/skills/wego-design/runtime/checkbox.js', '// checkbox\n');
   write('.codex/skills/wego-design/preview/index.html', '<html></html>\n');
   write('.codex/skills/wego-design/assets/fonts/font.woff2', 'font');

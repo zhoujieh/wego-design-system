@@ -105,7 +105,7 @@
     "cssSource": "preview/component-numeric-keypad.html",
     "embedded": false,
     "hostComponent": null,
-    "externalSources": ["wego-app/lib/js/agent-resale-popup.js#buildKeypadTemplate", "wego-app/css/agent-resale-popup.css#keypad"]
+    "externalSources": ["wego-app/js/agent-resale-popup.js#buildKeypadTemplate", "wego-app/css/agent-resale-popup.css#keypad"]
   },
   "unknowns": [],
   "ruleRefs": [

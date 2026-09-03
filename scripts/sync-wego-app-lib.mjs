@@ -36,7 +36,7 @@ const SYNC_MAP = [
   { src: 'components.css', dest: 'components.css', type: 'file' },
   { src: 'iconfont.css', dest: 'iconfont.css', type: 'file' },
   { src: 'scaffold.css', dest: 'scaffold.css', type: 'file' },
-  { src: 'runtime/walkthrough-tool.css', dest: 'walkthrough-tool.css', type: 'file' },
+  // runtime 仅含设计系统通用组件运行时；业务功能（发布产品/帮卖弹窗/走查工具）归属 wego-app/js 与 wego-app/css，不入此映射
   { src: 'runtime', dest: 'js', type: 'dir' },
   { src: 'assets/fonts', dest: 'assets/fonts', type: 'dir' },
   { src: 'assets/icons', dest: 'assets/icons', type: 'dir' },
@@ -49,7 +49,6 @@ const ALLOWED_LIB_ROOT_ENTRIES = new Set([
   'components.css',
   'iconfont.css',
   'scaffold.css',
-  'walkthrough-tool.css',
   'js',
   'assets',
   'preview',

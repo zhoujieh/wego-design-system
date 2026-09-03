@@ -750,7 +750,7 @@ if (fs.existsSync(sceneJs)) js = fs.readFileSync(sceneJs, 'utf8');
 if (fs.existsSync(sceneCss)) css = fs.readFileSync(sceneCss, 'utf8');
 
 // 解析 scene.js 开头的 wego-design-contract 注释，识别实现模式。
-// implementation: "global" 表示模板与交互逻辑均由外部全局模块（lib/js/*.js）提供，
+// implementation: "global" 表示模板与交互逻辑均由外部全局模块（wego-app/js/*.js）提供，
 // scene.js 仅做路由注册与 init 转发；此时跳过依赖完整 init 字面逻辑的检查（页面根定位、交互绑定）。
 function parseContractAnnotation(source) {
   const match = source.match(/\/\*\s*wego-design-contract\s*:\s*([\s\S]*?)\*\//);

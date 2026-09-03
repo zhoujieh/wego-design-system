@@ -27,7 +27,8 @@
 ## 固定产物与边界
 
 - `wego-app/index.html` 是唯一 App 入口；业务场景位于 `wego-app/scenes/{shop|bcg|customer|infras}/{中文业务场景}/`，通过 `#/route-id` 访问；场景产物不得散落到仓库根目录。
-- `wego-app/js/routes.js`、`wego-app/lib/`、`components.css` 是生成物，禁止直接编辑；权威源在 `.codex/skills/wego-design/`，仅 `wego-uxsystem-iterate` 可改。
+- `wego-app/js/routes.js`、`wego-app/lib/`、`components.css` 是生成物，禁止直接编辑；设计系统权威源在 `.codex/skills/wego-design/`（仅限组件、Token、Preview、UI Kit、设计系统运行时组件等设计系统本体），仅 `wego-uxsystem-iterate` 可改。
+- 业务场景实现归属业务代码位置，不得放入技能目录或设计系统权威源：全局业务运行时直接放在 `wego-app/js/`（如 publish-fab.js、publish-product-modal.js、agent-resale-popup.js、walkthrough-tool.js），配套业务样式放在 `wego-app/css/`（如 agent-resale-popup.css、walkthrough-tool.css），均可直接编辑。
 - `.trae/skills/*` 与 `.codebuddy/skills/*` 必须以逐项符号链接指向 `.codex/skills/*`，或以整目录符号链接指向 `.codex/skills`；不得保留副本。
 
 ## 三技能主链路
