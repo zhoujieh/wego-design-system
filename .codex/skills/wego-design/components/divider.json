@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 4,
+  "slug": "divider",
+  "name": "分割线",
+  "category": "display",
+  "status": "stable",
+  "sourceKind": "inferred",
+  "confidence": "high",
+  "description": "固定 1 物理像素的语义化分割线组件，用于水平分隔区块/列表项或竖向分隔相邻元素。粗细无其他尺寸；实现采用 1px CSS 像素基准 + 高 DPR 屏幕 transform scale 缩放（DPR2→scaleY(.5)，DPR3→scaleY(.333)），普通屏幕保持 1px，跨屏幕渲染一致。缩进不预设固定值，由消费方按布局上下文通过 --divider-left / --divider-right 设置，常用 inset（左缩进16右到边）、center（两侧缩进16）预设。竖向为固定高度（默认16px，常用8/12/16），不撑满父级。",
+  "semanticTypeCandidates": [
+    "divider",
+    "separator",
+    "hairline",
+    "rule"
+  ],
+  "variantDimensions": {
+    "orientation": [
+      "horizontal",
+      "vertical"
+    ],
+    "inset": [
+      "full",
+      "inset",
+      "center"
+    ]
+  },
+  "representativeVariants": [
+    {
+      "orientation": "horizontal",
+      "inset": "full"
+    },
+    {
+      "orientation": "horizontal",
+      "inset": "inset"
+    },
+    {
+      "orientation": "horizontal",
+      "inset": "center"
+    },
+    {
+      "orientation": "vertical",
+      "inset": "full"
+    }
+  ],
+  "anatomy": [
+    {
+      "name": "root",
+      "selector": ".divider",
+      "role": "分割线容器"
+    }
+  ],
+  "structurePatterns": [
+    "默认形态为水平全宽分割线：固定 1 物理像素（1px 基准 + 高 DPR 屏幕 scale 缩放）、颜色 --border-neutral-l2、左右不缩进，用于 actionsheet/dialog/列表项分隔。",
+    "divider--inset 左缩进16右到边：用于页内区块分隔（如分享面板标题栏/配置栏下方）。",
+    "divider--center 两侧缩进16px：与 cell--divider-center 一致。",
+    "divider--vertical 竖向：分隔相邻元素（如表单手机号内、对话框按钮间），固定高度不撑满父级，默认16px，常用8/12/16，通过 --divider-height 覆盖，竖向居中。",
+    "缩进由消费方按布局上下文设置：--divider-left / --divider-right（默认均为0），Cell 场景下可跟随 --cell-divider-left 自动适配层级缩进；颜色通过 --divider-color 覆盖；竖向高度通过 --divider-height 覆盖。"
+  ],
+  "behavior": {},
+  "accessibility": {
+    "role": "separator"
+  },
+  "usageHints": [
+    "列表项/操作项之间的分隔使用默认全宽形态，与 actionsheet/dialog 既有语义一致。",
+    "页内区块分隔（标题栏/配置栏/分区下方）使用 divider--inset（左缩进16右到边）。",
+    "Cell 列表内的分隔跟随 Cell 自身的 --cell-divider-left 机制，不额外套 divider 组件；独立 divider 用于非 Cell 场景。",
+    "相邻字段之间的竖向分隔使用 divider--vertical，高度固定（默认16px，常用8/12/16），通过 --divider-height 覆盖，不撑满父级。",
+    "深色浮层上只需覆盖 --divider-color，粗细固定 0.5px 不可改。",
+    "缩进不预设固定值，按当前布局层级通过 --divider-left / --divider-right 设置；常用预设为 inset（16/0）、center（16/16）。"
+  ],
+  "doNotInvent": [
+    "不要用 divider 替代卡片间距或留白分隔，留白优先。",
+    "不要把 divider 扩成复杂分组容器或带文案的分段控件。",
+    "不要修改粗细，固定 1 物理像素是组件契约。"
+  ],
+  "assetUsage": {},
+  "domAnatomy": {
+    "root": ".divider",
+    "requiredChildren": [],
+    "optionalChildren": [],
+    "modifiers": [
+      ".divider--inset",
+      ".divider--center",
+      ".divider--vertical"
+    ],
+    "alternatives": []
+  },
+  "provenance": {
+    "preview": "preview/component-divider.html",
+    "cssSource": "preview/component-divider.html",
+    "embedded": false,
+    "hostComponent": null,
+    "externalSources": []
+  },
+  "unknowns": [],
+  "ruleRefs": [
+    "components.css#divider",
+    "preview/component-divider.html"
+  ],
+  "runtimeTokens": [
+    "--border-neutral-l2"
+  ],
+  "previewOnlyTokens": [
+    "--bg-subtle",
+    "--bg-surface",
+    "--body-md-font-size",
+    "--body-sm-font-size",
+    "--body-sm-line-height",
+    "--font-weight-medium",
+    "--spacer-12",
+    "--spacer-16",
+    "--spacer-8",
+    "--text-default",
+    "--text-secondary",
+    "--text-tertiary"
+  ],
+  "localTokens": [
+    "--divider-color",
+    "--divider-left",
+    "--divider-right",
+    "--divider-height"
+  ]
+}

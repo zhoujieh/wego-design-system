@@ -232,14 +232,19 @@
     catalogFilterOpen: false,
     catalogSidebarFilterOpen: false,
     discount: 100,
+    discountMode: null,
+    discountValue: 0,
     freight: 0,
     rounding: 0,
+    roundingMode: null,
     freightEditOpen: false,
     totalEditOpen: false,
     memberDiscount: 100,
+    couponCount: 0,
     couponDiscount: 0,
     pointsUsed: 0,
     pointsMode: null,
+    promotionThreshold: 0,
     promotionDiscount: 0,
     quickOp: null,
     saveStatus: '已自动保存 18:26',
@@ -439,14 +444,34 @@
       memberDiscountAmount += (item.listPrice - item.listPrice * effectiveMemberRate) * item.qty;
       return sum + item.listPrice * effectiveMemberRate * item.qty;
     }, 0);
-    var discountAmount = memberAmount * (100 - state.discount) / 100;
+    var discountMode = state.discountMode;
+    var discountValue = Math.max(0, Number(state.discountValue || 0));
+    var discountAmount = discountMode === 'item-rate' || discountMode === 'order-rate'
+      ? memberAmount * (100 - Math.min(discountValue, 100)) / 100
+      : discountMode === 'item-amount'
+        ? state.products.reduce(function (sum, item) { return sum + item.qty; }, 0) * discountValue
+        : discountMode === 'order-amount'
+          ? discountValue
+          : memberAmount * (100 - state.discount) / 100;
+    discountAmount = Math.min(Math.max(discountAmount, 0), memberAmount);
     var pointsAmount = Number(state.pointsUsed || 0) / 100;
     var couponAmount = Number(state.couponDiscount || 0);
-    var promotionAmount = Number(state.promotionDiscount || 0);
+    var promotionAmount = Number(state.promotionThreshold || 0) > 0 && memberAmount < Number(state.promotionThreshold)
+      ? 0
+      : Number(state.promotionDiscount || 0);
     var freight = Number(state.freight || 0);
     var freightIncluded = state.delivery === 'express' || state.delivery === 'freight';
     var payableBeforeRounding = Math.max(memberAmount - discountAmount - pointsAmount - couponAmount - promotionAmount + (freightIncluded ? freight : 0), 0);
-    var roundingAmount = Math.min(Number(state.rounding || 0), payableBeforeRounding);
+    var roundingTarget = state.roundingMode === 'integer'
+      ? Math.floor(payableBeforeRounding)
+      : state.roundingMode === 'ones'
+        ? Math.floor(payableBeforeRounding / 10) * 10
+        : state.roundingMode === 'tens'
+          ? Math.floor(payableBeforeRounding / 100) * 100
+          : null;
+    var roundingAmount = roundingTarget == null
+      ? Math.min(Number(state.rounding || 0), payableBeforeRounding)
+      : Math.max(0, Math.round((payableBeforeRounding - roundingTarget) * 100) / 100);
     var payable = Math.max(payableBeforeRounding - roundingAmount, 0);
     return {
       productAmount: productAmount,
@@ -1576,10 +1601,23 @@
     freight: { title: '运费', unit: '元', inputmode: 'decimal', hint: '输入本单运费金额', get: function () { return state.freight; }, apply: function (value) { state.freight = value; } },
     member: { title: '会员折扣', unit: '%', inputmode: 'decimal', hint: '已自动带入当前会员等级折扣，可手动修改并以本次输入为准', get: function () { return state.memberDiscount; }, apply: function (value) { state.memberDiscount = Math.min(Math.max(Math.round(value * 100) / 100, 0), 100); recalculateCustomerPrices(); } },
     points: { title: '积分抵扣', unit: '分', inputmode: 'numeric', hint: '100 积分抵 1 元，填 500 即抵 5 元', get: function () { return state.pointsUsed; }, apply: function (value) { state.pointsUsed = Math.min(availablePoints(), Math.max(0, Math.round(value))); } },
-    coupon: { title: '优惠券', unit: '元', inputmode: 'decimal', hint: '输入本单优惠券抵扣金额', get: function () { return state.couponDiscount; }, apply: function (value) { state.couponDiscount = Math.round(value * 100) / 100; } },
-    promotion: { title: '满减促销', unit: '元', inputmode: 'decimal', hint: '输入本单满减活动优惠金额', get: function () { return state.promotionDiscount; }, apply: function (value) { state.promotionDiscount = Math.round(value * 100) / 100; } },
-    discount: { title: '整单优惠', unit: '%', inputmode: 'decimal', hint: '填 90 表示整单 9 折', get: function () { return state.discount; }, apply: function (value) { state.discount = Math.min(Math.round(value), 100); } },
-    rounding: { title: '整单抹零', unit: '元', inputmode: 'decimal', hint: '输入本单抹零金额，直接减免订单零头', get: function () { return state.rounding; }, apply: function (value) { state.rounding = Math.max(0, Math.round(value * 100) / 100); } }
+    coupon: { title: '优惠券' },
+    promotion: { title: '满减促销' },
+    discount: { title: '整单优惠' },
+    rounding: { title: '整单抹零' }
+  };
+
+  var DISCOUNT_MODE_LABELS = {
+    'item-rate': '每件折扣',
+    'order-rate': '整单折扣',
+    'item-amount': '每件优惠',
+    'order-amount': '整单优惠'
+  };
+
+  var ROUNDING_MODE_LABELS = {
+    integer: '整数抹零',
+    ones: '个位抹零',
+    tens: '十位抹零'
   };
 
   function freightPopover() {
@@ -1609,13 +1647,20 @@
   }
 
   function pointsPopover() {
+    return ''
+      + '<div class="order-points-popover" role="dialog" aria-label="积分抵扣">'
+      +   '<header><strong>积分(剩余' + availablePoints() + ')</strong><button type="button" class="btn btn--weak btn--sm btn--icon-only" data-component-slug="button" data-close-panel aria-label="关闭"><i class="btn__icon icon-cha16" aria-hidden="true"></i></button></header>'
+      +   pointsEditorContent()
+      +   '<div class="order-side-actions">' + button('取消', 'weak', 'md', 'data-close-panel') + button('确定', 'strong', 'md', 'data-apply-quick-op') + '</div>'
+      + '</div>';
+  }
+
+  function pointsEditorContent() {
     var maxPoints = availablePoints();
     var currentPoints = Math.min(maxPoints, Math.max(0, Math.round(Number(state.pointsUsed || 0))));
     var currentMode = state.pointsMode || (currentPoints > 0 ? (currentPoints === maxPoints ? 'max' : 'custom') : 'max');
     var draftPoints = currentMode === 'max' ? maxPoints : (currentMode === 'none' ? 0 : currentPoints);
     return ''
-      + '<div class="order-points-popover" role="dialog" aria-label="积分抵扣">'
-      +   '<header><strong>积分(剩余' + maxPoints + ')</strong><button type="button" class="btn btn--weak btn--sm btn--icon-only" data-component-slug="button" data-close-panel aria-label="关闭"><i class="btn__icon icon-cha16" aria-hidden="true"></i></button></header>'
       +   '<div class="order-points-options" role="radiogroup" aria-label="积分使用方式">'
       +     pointsOption('none', '暂不使用积分', false)
       +     pointsOption('max', '最高可使用' + maxPoints + '积分，抵扣<span class="order-points-amount">' + money(pointsDeduction(maxPoints)) + '</span>', currentMode === 'max')
@@ -1624,59 +1669,115 @@
       +   '<div class="order-points-custom' + (currentMode === 'custom' ? ' is-active' : '') + '"' + (currentMode === 'custom' ? '' : ' hidden') + '>'
       +     '<span>使用</span><div class="number-input" data-component-slug="input"><input class="number-input__field" type="text" inputmode="numeric" value="' + (draftPoints || '') + '" placeholder="请输入" data-points-custom-input data-quick-op-value aria-label="使用积分"><span class="number-input__suffix">积分</span></div>'
       +     '<span>抵扣<strong class="order-points-amount" data-points-deduction>' + money(pointsDeduction(draftPoints)) + '</strong></span>'
-      +   '</div>'
-      +   '<div class="order-side-actions">' + button('取消', 'weak', 'md', 'data-close-panel') + button('确定', 'strong', 'md', 'data-apply-quick-op') + '</div>'
       + '</div>';
   }
 
-  function quickOpButton(icon, label, op) {
-    var amount = quickOpAmount(op);
-    var trigger = '<button type="button" class="order-quick-op' + (amount > 0 ? ' is-used' : '') + '" data-open-panel="quick" data-quick-op="' + op + '" aria-haspopup="dialog" aria-expanded="' + (state.panel === 'quick' && state.quickOp === op) + '"><i class="wego-iconfont-s ' + icon + '" aria-hidden="true"></i><span>' + label + '</span>' + (amount > 0 ? '<strong>-' + compactMoney(amount) + '</strong>' : '') + '</button>';
+  function quickOpStatus(op) {
+    if (op === 'member' && Number(state.memberDiscount) < 100) return compactNumber(Number(state.memberDiscount) / 10) + '折';
+    if (op === 'points' && Number(state.pointsUsed) > 0) return '扣' + Math.round(Number(state.pointsUsed)) + '积分';
+    if (op === 'coupon' && Number(state.couponCount) > 0 && Number(state.couponDiscount) > 0) return '用' + Math.round(Number(state.couponCount)) + '张';
+    if (op === 'promotion' && Number(state.promotionThreshold) > 0 && Number(state.promotionDiscount) > 0) return '满' + compactNumber(state.promotionThreshold) + '减' + compactNumber(state.promotionDiscount);
+    if (op === 'discount' && state.discountMode && Number(state.discountValue) > 0) return DISCOUNT_MODE_LABELS[state.discountMode] || null;
+    if (op === 'rounding' && state.roundingMode) return ROUNDING_MODE_LABELS[state.roundingMode] || null;
+    return null;
+  }
+
+  function quickOpButton(label, op) {
+    var status = quickOpStatus(op);
+    var statusHtml = status
+      ? '<span class="order-quick-op__status">' + escapeHtml(status) + '</span>'
+      : '<span class="order-quick-op__status order-quick-op__status--add" aria-label="添加' + label + '"><i class="wego-iconfont-s icon-jia16" aria-hidden="true"></i></span>';
+    var trigger = '<button type="button" class="order-quick-op' + (status ? ' is-used' : '') + '" data-open-panel="quick" data-quick-op="' + op + '" aria-haspopup="dialog" aria-expanded="' + (state.panel === 'quick' && state.quickOp === op) + '"><span class="order-quick-op__label">' + label + '</span>' + statusHtml + '</button>';
     if (op === 'freight') return '<div class="order-quick-op-anchor order-quick-op-anchor--freight">' + trigger + (state.panel === 'quick' && state.quickOp === 'freight' ? freightPopover() : '') + '</div>';
-    if (op === 'points') return '<div class="order-quick-op-anchor order-quick-op-anchor--points">' + trigger + (state.panel === 'quick' && state.quickOp === 'points' ? pointsPopover() : '') + '</div>';
+    if (op === 'points') {
+      if (isDesktopWorkbench()) return trigger;
+      return '<div class="order-quick-op-anchor order-quick-op-anchor--points">' + trigger + (state.panel === 'quick' && state.quickOp === 'points' ? pointsPopover() : '') + '</div>';
+    }
     return trigger;
   }
 
-  function quickOpUsed(op) {
-    return quickOpAmount(op) > 0;
-  }
-
-  function quickOpAmount(op) {
-    var t = totals();
-    return {
-      freight: t.freight,
-      member: t.memberDiscountAmount,
-      points: t.pointsAmount,
-      coupon: t.couponAmount,
-      promotion: t.promotionAmount,
-      discount: t.discountAmount,
-      rounding: t.roundingAmount
-    }[op] || 0;
-  }
-
-  function compactMoney(amount) {
-    return money(amount).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1');
+  function compactNumber(value) {
+    var rounded = Math.round(Number(value || 0) * 100) / 100;
+    return String(rounded).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1');
   }
 
   function quickOps() {
     return '<div class="order-desktop__quick-ops" aria-label="快捷优惠操作">'
-      + quickOpButton('icon-dianpuhuiyuan', '会员折扣', 'member')
-      + quickOpButton('icon-jifen1', '积分抵扣', 'points')
-      + quickOpButton('icon-quan', '优惠券', 'coupon')
-      + quickOpButton('icon-youhuigou', '满减促销', 'promotion')
-      + quickOpButton('icon-youhui', '整单优惠', 'discount')
-      + quickOpButton('icon-mopi', '整单抹零', 'rounding')
+      + quickOpButton('会员折扣', 'member')
+      + quickOpButton('积分抵扣', 'points')
+      + quickOpButton('优惠券', 'coupon')
+      + quickOpButton('满减促销', 'promotion')
+      + quickOpButton('整单优惠', 'discount')
+      + quickOpButton('整单抹零', 'rounding')
       + '</div>';
   }
 
-  function quickOpPanel() {
+  function quickNumberField(label, value, suffix, attr, inputmode) {
+    return '<label class="order-quick-field"><span>' + label + '</span><div class="number-input" data-component-slug="input"><input class="number-input__field" type="text" inputmode="' + (inputmode || 'decimal') + '" value="' + escapeHtml(value || '') + '" ' + attr + ' aria-label="' + label + '"><span class="number-input__suffix">' + suffix + '</span></div></label>';
+  }
+
+  function quickModeOption(group, value, label, selected) {
+    return '<div class="radio-field order-quick-mode-option" tabindex="0" role="radio" aria-checked="' + selected + '" data-clickable data-quick-mode="' + value + '"><div class="radio radio--sm' + (selected ? ' radio--checked' : '') + '" data-group="' + group + '" data-component-slug="radio"><div class="radio__inner"></div><div class="radio__dot"></div></div><span class="radio-field__text">' + label + '</span></div>';
+  }
+
+  function quickModeGroup(group, labels, selected) {
+    return '<div class="radio-field-group order-quick-mode-options" role="radiogroup" aria-label="' + (group === 'discount' ? '整单优惠方式' : '抹零方式') + '">' + Object.keys(labels).map(function (value) { return quickModeOption(group, value, labels[value], selected === value); }).join('') + '</div>';
+  }
+
+  function resetQuickOp(op) {
+    if (op === 'member') {
+      QUICK_OP_DEFS.member.apply(100);
+    } else if (op === 'points') {
+      state.pointsUsed = 0;
+      state.pointsMode = null;
+    } else if (op === 'coupon') {
+      state.couponCount = 0;
+      state.couponDiscount = 0;
+    } else if (op === 'promotion') {
+      state.promotionThreshold = 0;
+      state.promotionDiscount = 0;
+    } else if (op === 'discount') {
+      state.discount = 100;
+      state.discountMode = null;
+      state.discountValue = 0;
+    } else if (op === 'rounding') {
+      state.rounding = 0;
+      state.roundingMode = null;
+    }
+  }
+
+  function quickOpPanel(useDesktopPointsEditor) {
     var op = state.quickOp && QUICK_OP_DEFS[state.quickOp] ? state.quickOp : 'member';
     var def = QUICK_OP_DEFS[op];
+    var content = '';
+    if (op === 'points' && useDesktopPointsEditor) {
+      content = pointsEditorContent();
+    } else if (op === 'coupon') {
+      content = '<div class="order-quick-fields">'
+        + quickNumberField('使用张数', state.couponCount, '张', 'data-quick-coupon-count', 'numeric')
+        + quickNumberField('抵扣金额', state.couponDiscount, '元', 'data-quick-coupon-amount')
+        + '</div><small>张数用于快捷入口回显，抵扣金额计入本单优惠</small>';
+    } else if (op === 'promotion') {
+      content = '<div class="order-quick-fields">'
+        + quickNumberField('满额门槛', state.promotionThreshold, '元', 'data-quick-promotion-threshold')
+        + quickNumberField('减免金额', state.promotionDiscount, '元', 'data-quick-promotion-amount')
+        + '</div><small>确认后按“满额减免额”回显并计入本单优惠</small>';
+    } else if (op === 'discount') {
+      var discountMode = state.discountMode || 'order-rate';
+      var discountValue = state.discountMode ? state.discountValue : 100;
+      content = quickModeGroup('discount', DISCOUNT_MODE_LABELS, discountMode)
+        + '<div class="order-quick-fields">' + quickNumberField(discountMode.indexOf('rate') >= 0 ? '折扣比例' : '优惠金额', discountValue, discountMode.indexOf('rate') >= 0 ? '%' : '元', 'data-quick-discount-value') + '</div>'
+        + '<small data-quick-discount-hint>' + (discountMode.indexOf('rate') >= 0 ? '填95表示9.5折' : '输入大于0的优惠金额') + '</small>';
+    } else if (op === 'rounding') {
+      content = quickModeGroup('rounding', ROUNDING_MODE_LABELS, state.roundingMode || 'integer')
+        + '<small>整数抹零去掉小数，个位抹零取整到十元，十位抹零取整到百元</small>';
+    } else {
+      content = '<label>' + def.title + '<div class="number-input" data-component-slug="input"><input class="number-input__field" type="text" inputmode="' + def.inputmode + '" value="' + def.get() + '" data-quick-op-value aria-label="' + def.title + '"><span class="number-input__suffix">' + def.unit + '</span></div></label><small>' + def.hint + '</small>';
+    }
     return ''
       + '<div class="order-side-panel__head"><strong>' + def.title + '</strong><button class="link link--12" data-component-slug="link" data-close-panel>关闭</button></div>'
       + '<div class="order-quick-edit">'
-      +   '<label>' + def.title + '<div class="number-input" data-component-slug="input"><input class="number-input__field" type="text" inputmode="' + def.inputmode + '" value="' + def.get() + '" data-quick-op-value aria-label="' + def.title + '"><span class="number-input__suffix">' + def.unit + '</span></div></label>'
-      +   '<small>' + def.hint + '</small>'
+      +   content
       + '</div>'
       + '<div class="order-side-actions">' + button('清除', 'weak', 'md', 'data-clear-quick-op') + button('确定', 'strong', 'md', 'data-apply-quick-op') + '</div>';
   }
@@ -2120,22 +2221,40 @@
     var spec = selectedColor && selectedSize ? specKey(product, selectedColor, selectedSize) : '';
     var quantity = spec ? Number(draft.skuQty[spec] || 0) : 0;
     var stock = spec ? specStock(product, spec) : 0;
+    var desktopSpecRows = availableSizes.map(function (size) {
+      var rowSpec = selectedColor ? specKey(product, selectedColor, size) : '';
+      var rowQuantity = rowSpec ? Number(draft.skuQty[rowSpec] || 0) : 0;
+      var rowStock = rowSpec ? specStock(product, rowSpec) : 0;
+      var rowDisabled = !rowSpec || rowStock <= 0;
+      return '<div class="order-add-spec-counter-row' + (rowDisabled ? ' is-disabled' : '') + '">'
+        + '<span class="order-add-spec-counter-row__label">' + escapeHtml(size) + '</span>'
+        + '<div class="counter' + (rowDisabled ? ' is-disabled' : '') + '" data-component-slug="counter">'
+        +   '<div class="counter__body">'
+        +     '<button type="button" class="counter__btn counter__btn--minus" data-single-qty-delta="-1" data-single-spec="' + encodeURIComponent(rowSpec) + '" aria-label="减少' + escapeHtml(size) + '数量" ' + (rowDisabled || rowQuantity <= 0 ? 'disabled' : '') + '><i class="counter__icon icon-jian16"></i></button>'
+        +     '<input class="counter__value" type="text" inputmode="numeric" maxlength="5" value="' + rowQuantity + '" data-single-qty-input data-single-spec="' + encodeURIComponent(rowSpec) + '" aria-label="' + escapeHtml(size) + '数量" ' + (rowDisabled ? 'disabled' : '') + '>'
+        +     '<button type="button" class="counter__btn counter__btn--plus" data-single-qty-delta="1" data-single-spec="' + encodeURIComponent(rowSpec) + '" aria-label="增加' + escapeHtml(size) + '数量" ' + (rowDisabled || rowQuantity >= rowStock ? 'disabled' : '') + '><i class="counter__icon icon-jia16"></i></button>'
+        +   '</div><div class="counter__message counter__hint"></div><div class="counter__message counter__error"></div>'
+        + '</div>'
+        + '</div>';
+    }).join('');
     return ''
       + '<div class="order-single-picker">'
       +   '<section>' + (desktop ? '<div class="order-add-selection-head"><small>颜色</small><label class="order-add-batch-switch-label"><span>一次买多件</span><button type="button" class="switch switch--off" role="switch" aria-checked="false" aria-label="一次买多件" data-component-slug="switch" data-add-mode="batch"><span class="switch__thumb"></span></button></label></div>' : '<small>颜色</small>') + '<div class="order-add-choice-list order-add-choice-list--colors">' + matrix.colors.map(function (color) {
             return '<button type="button" class="btn btn--weak btn--sm ' + (selectedColor === color ? 'is-selected' : '') + '" data-component-slug="button" data-add-color="' + encodeURIComponent(color) + '">' + escapeHtml(color) + '</button>';
           }).join('') + '</div></section>'
-      +   '<section><small>规格</small><div class="order-add-choice-list">' + availableSizes.map(function (size) {
+      +   (desktop
+        ? '<section class="order-add-spec-counter-section"><div class="order-add-spec-counter-head"><small>规格</small>' + (!selectedColor ? '<span>请先选择颜色</span>' : '') + '</div><div class="order-add-spec-counter-list">' + (desktopSpecRows || '<div class="order-add-spec-counter-empty">暂无可售规格</div>') + '</div></section>'
+        : '<section><small>规格</small><div class="order-add-choice-list">' + availableSizes.map(function (size) {
             return '<button type="button" class="btn btn--weak btn--sm ' + (selectedSize === size ? 'is-selected' : '') + '" data-component-slug="button" data-add-size="' + encodeURIComponent(size) + '">' + escapeHtml(size) + '</button>';
-          }).join('') + '</div></section>'
-      +   '<section class="order-single-qty">'
+          }).join('') + '</div></section>')
+      +   (desktop ? '' : '<section class="order-single-qty">'
       +     '<small>购买数量</small>'
       +     '<div class="counter" data-component-slug="counter"><div class="counter__body">'
       +       '<button type="button" class="counter__btn counter__btn--minus" data-single-qty-delta="-1" data-single-spec="' + encodeURIComponent(spec) + '" aria-label="减少购买数量" ' + (spec && quantity <= 0 ? 'disabled' : '') + '><i class="counter__icon icon-jian16"></i></button>'
       +       '<input class="counter__value" type="text" inputmode="numeric" maxlength="5" value="' + quantity + '" data-single-qty-input aria-label="购买数量">'
       +       '<button type="button" class="counter__btn counter__btn--plus" data-single-qty-delta="1" data-single-spec="' + encodeURIComponent(spec) + '" aria-label="增加购买数量" ' + (spec && quantity >= stock ? 'disabled' : '') + '><i class="counter__icon icon-jia16"></i></button>'
       +     '</div><div class="counter__message counter__hint"></div><div class="counter__message counter__error"></div></div>'
-      +   '</section>'
+      +   '</section>')
       + '</div>';
   }
 
@@ -2327,7 +2446,7 @@
   }
 
   function desktopShowsCatalog() {
-    return !state.panel || state.panel === 'add' || state.panel === 'customer' || state.panel === 'customer-create' || state.panel === 'delivery' || state.panel === 'address' || state.panel === 'note' || state.panel === 'checkout' || state.panel === 'payment' || state.panel === 'product-edit' || state.panel === 'product-create' || state.panel === 'product-temp-create' || (state.panel === 'quick' && (state.quickOp === 'freight' || state.quickOp === 'points'));
+    return !state.panel || state.panel === 'add' || state.panel === 'customer' || state.panel === 'customer-create' || state.panel === 'delivery' || state.panel === 'address' || state.panel === 'note' || state.panel === 'checkout' || state.panel === 'payment' || state.panel === 'product-edit' || state.panel === 'product-create' || state.panel === 'product-temp-create' || state.panel === 'quick';
   }
 
   function desktopWorkspaceStyle() {
@@ -2477,17 +2596,19 @@
   function desktopModal() {
     if (state.panel === 'product-edit') return productEditModal();
     if (state.panel === 'product-create' || state.panel === 'product-temp-create') return productCreateModal();
-    if (state.panel !== 'add' && state.panel !== 'customer-create' && state.panel !== 'delivery' && state.panel !== 'note' && state.panel !== 'checkout' && state.panel !== 'payment') return '';
+    if (state.panel !== 'add' && state.panel !== 'customer-create' && state.panel !== 'delivery' && state.panel !== 'note' && state.panel !== 'checkout' && state.panel !== 'payment' && state.panel !== 'quick') return '';
     var isCustomerCreate = state.panel === 'customer-create';
     var isDelivery = state.panel === 'delivery';
     var isNote = state.panel === 'note';
     var isCheckout = state.panel === 'checkout' || state.panel === 'payment';
+    var isQuick = state.panel === 'quick';
+    var modalTitle = isQuick && QUICK_OP_DEFS[state.quickOp] ? QUICK_OP_DEFS[state.quickOp].title : (isCustomerCreate ? '新建客户' : (isDelivery ? '选择发货方式' : (isNote ? '商品备注' : (isCheckout ? '支付结算' : '添加商品'))));
     // Exception: 宿主 modal 当前只有全宽面板，无法承载 PC 中宽新建客户、发货方式与商品录入；此处仅回退承载层，内容仍消费正式组件。
     return ''
-      + '<div class="order-desktop-modal ' + (isCustomerCreate || isDelivery ? 'order-desktop-modal--customer' : '') + (isDelivery ? ' order-desktop-modal--delivery' : '') + (isNote ? ' order-desktop-modal--note' : (isCheckout ? ' order-desktop-modal--checkout' : ' order-desktop-modal--add')) + '" role="dialog" aria-modal="true" aria-labelledby="order-desktop-modal-title" data-state="open">'
+      + '<div class="order-desktop-modal ' + (isQuick ? 'order-desktop-modal--quick' : ((isCustomerCreate || isDelivery ? 'order-desktop-modal--customer' : '') + (isDelivery ? ' order-desktop-modal--delivery' : '') + (isNote ? ' order-desktop-modal--note' : (isCheckout ? ' order-desktop-modal--checkout' : ' order-desktop-modal--add')))) + '" role="dialog" aria-modal="true" aria-labelledby="order-desktop-modal-title" data-state="open">'
       +   '<div class="order-desktop-modal__panel">'
-      +     '<div class="order-desktop-modal__head"><strong id="order-desktop-modal-title">' + (isCustomerCreate ? '新建客户' : (isDelivery ? '选择发货方式' : (isNote ? '商品备注' : (isCheckout ? '支付结算' : '添加商品')))) + '</strong><button type="button" class="btn btn--weak btn--sm btn--icon-only" data-component-slug="button" data-close-panel aria-label="关闭"><i class="btn__icon ' + (isDelivery ? 'icon-cha' : 'icon-cha16') + '" aria-hidden="true"></i></button></div>'
-      +     '<div class="order-desktop-modal__body">' + (isCustomerCreate ? desktopNewCustomerModalContent() : (isDelivery ? deliveryPanel() : (isNote ? spuNotePanel() : (isCheckout ? checkoutPanel() : addPanel(true))))) + '</div>'
+      +     '<div class="order-desktop-modal__head"><strong id="order-desktop-modal-title">' + modalTitle + '</strong><button type="button" class="btn btn--weak btn--sm btn--icon-only" data-component-slug="button" data-close-panel aria-label="关闭"><i class="btn__icon ' + (isDelivery ? 'icon-cha' : 'icon-cha16') + '" aria-hidden="true"></i></button></div>'
+      +     '<div class="order-desktop-modal__body">' + (isQuick ? quickOpPanel(true) : (isCustomerCreate ? desktopNewCustomerModalContent() : (isDelivery ? deliveryPanel() : (isNote ? spuNotePanel() : (isCheckout ? checkoutPanel() : addPanel(true)))))) + '</div>'
       +   '</div>'
       + '</div>';
   }
@@ -3456,8 +3577,8 @@
             customerSearch.focus({ preventScroll: true });
             customerSearch.setSelectionRange(customerSearch.value.length, customerSearch.value.length);
           }
-        } else if (type === 'quick' && (state.quickOp === 'freight' || state.quickOp === 'points') && isDesktopWorkbench()) {
-          var anchoredQuickInput = root.querySelector((state.quickOp === 'freight' ? '.order-freight-popover' : '.order-points-popover') + ' [data-quick-op-value]');
+        } else if (type === 'quick' && isDesktopWorkbench()) {
+          var anchoredQuickInput = root.querySelector((state.quickOp === 'freight' ? '.order-freight-popover' : '.order-desktop-modal--quick') + ' [data-quick-op-value]');
           if (anchoredQuickInput) {
             anchoredQuickInput.focus({ preventScroll: true });
             anchoredQuickInput.select();
@@ -3493,29 +3614,93 @@
       }
       return;
     }
+    if (target.matches('[data-quick-mode]')) {
+      var modeGroup = target.closest('.order-quick-mode-options');
+      if (!modeGroup) return;
+      modeGroup.querySelectorAll('[data-quick-mode]').forEach(function (option) {
+        var selected = option === target;
+        option.setAttribute('aria-checked', String(selected));
+        var radio = option.querySelector('.radio');
+        if (radio) radio.classList.toggle('radio--checked', selected);
+      });
+      if (state.quickOp === 'discount') {
+        var discountMode = target.dataset.quickMode;
+        var discountField = root.querySelector('[data-quick-discount-value]');
+        var discountFieldLabel = discountField && discountField.closest('.order-quick-field') ? discountField.closest('.order-quick-field').querySelector(':scope > span') : null;
+        var discountSuffix = discountField ? discountField.parentElement.querySelector('.number-input__suffix') : null;
+        var discountHint = root.querySelector('[data-quick-discount-hint]');
+        var isRate = discountMode.indexOf('rate') >= 0;
+        if (discountFieldLabel) discountFieldLabel.textContent = isRate ? '折扣比例' : '优惠金额';
+        if (discountField) discountField.setAttribute('aria-label', isRate ? '折扣比例' : '优惠金额');
+        if (discountSuffix) discountSuffix.textContent = isRate ? '%' : '元';
+        if (discountHint) discountHint.textContent = isRate ? '填95表示9.5折' : '输入大于0的优惠金额';
+        if (discountField && !state.discountMode) discountField.value = isRate ? '100' : '';
+      }
+      return;
+    }
     if (target.matches('[data-apply-quick-op]')) {
-      var quickInput = root.querySelector('[data-quick-op-value]');
-      var rawQuick = quickInput ? String(quickInput.value).trim() : '';
       var opType = state.quickOp && QUICK_OP_DEFS[state.quickOp] ? state.quickOp : null;
       if (!opType) return;
-      if (opType === 'points') {
-        var selectedPointsMode = root.querySelector('[data-points-mode][aria-checked="true"]');
-        state.pointsMode = selectedPointsMode ? selectedPointsMode.dataset.pointsMode : 'max';
+      if (opType === 'coupon') {
+        var couponCount = Math.floor(Number(root.querySelector('[data-quick-coupon-count]')?.value || 0));
+        var couponAmount = Math.round(Number(root.querySelector('[data-quick-coupon-amount]')?.value || 0) * 100) / 100;
+        if (couponCount <= 0 || couponAmount <= 0) {
+          ctx.toast('请输入有效的优惠券张数和抵扣金额');
+          return;
+        }
+        state.couponCount = couponCount;
+        state.couponDiscount = couponAmount;
+      } else if (opType === 'promotion') {
+        var promotionThreshold = Math.round(Number(root.querySelector('[data-quick-promotion-threshold]')?.value || 0) * 100) / 100;
+        var promotionAmount = Math.round(Number(root.querySelector('[data-quick-promotion-amount]')?.value || 0) * 100) / 100;
+        if (promotionThreshold <= 0 || promotionAmount <= 0 || promotionAmount > promotionThreshold) {
+          ctx.toast('请输入有效的满额和减免金额');
+          return;
+        }
+        state.promotionThreshold = promotionThreshold;
+        state.promotionDiscount = promotionAmount;
+      } else if (opType === 'discount') {
+        var selectedDiscountMode = root.querySelector('.order-quick-mode-options [data-quick-mode][aria-checked="true"]');
+        var nextDiscountMode = selectedDiscountMode ? selectedDiscountMode.dataset.quickMode : '';
+        var nextDiscountValue = Math.round(Number(root.querySelector('[data-quick-discount-value]')?.value || 0) * 100) / 100;
+        var discountIsRate = nextDiscountMode.indexOf('rate') >= 0;
+        if (!nextDiscountMode || nextDiscountValue <= 0 || (discountIsRate && nextDiscountValue >= 100)) {
+          ctx.toast(discountIsRate ? '请输入小于100的有效折扣' : '请输入有效的优惠金额');
+          return;
+        }
+        state.discountMode = nextDiscountMode;
+        state.discountValue = discountIsRate ? Math.min(nextDiscountValue, 100) : nextDiscountValue;
+        state.discount = discountIsRate ? state.discountValue : 100;
+      } else if (opType === 'rounding') {
+        var selectedRoundingMode = root.querySelector('.order-quick-mode-options [data-quick-mode][aria-checked="true"]');
+        if (!selectedRoundingMode) {
+          ctx.toast('请选择抹零方式');
+          return;
+        }
+        state.roundingMode = selectedRoundingMode.dataset.quickMode;
+        state.rounding = 0;
+      } else {
+        var quickInput = root.querySelector('[data-quick-op-value]');
+        var rawQuick = quickInput ? String(quickInput.value).trim() : '';
+        if (opType === 'points') {
+          var selectedPointsMode = root.querySelector('[data-points-mode][aria-checked="true"]');
+          state.pointsMode = selectedPointsMode ? selectedPointsMode.dataset.pointsMode : 'max';
+        }
+        var numQuick = parseFloat(rawQuick);
+        if (rawQuick === '') {
+          resetQuickOp(opType);
+          state.panel = null;
+          markDirty(ctx);
+          renderActive();
+          ctx.toast('已清除' + QUICK_OP_DEFS[opType].title);
+          return;
+        }
+        if (isNaN(numQuick) || numQuick < 0) {
+          ctx.toast('请输入有效数字');
+          return;
+        }
+        QUICK_OP_DEFS[opType].apply(numQuick);
       }
-      var numQuick = parseFloat(rawQuick);
-      if (rawQuick === '') {
-        QUICK_OP_DEFS[opType].apply(opType === 'member' || opType === 'discount' ? 100 : 0);
-        state.panel = null;
-        markDirty(ctx);
-        renderActive();
-        ctx.toast('已清除' + QUICK_OP_DEFS[opType].title);
-        return;
-      }
-      if (isNaN(numQuick) || numQuick < 0) {
-        ctx.toast('请输入有效数字');
-        return;
-      }
-      QUICK_OP_DEFS[opType].apply(numQuick);
       state.panel = null;
       markDirty(ctx);
       renderActive();
@@ -3524,9 +3709,7 @@
     }
     if (target.matches('[data-clear-quick-op]')) {
       var clearOp = state.quickOp && QUICK_OP_DEFS[state.quickOp] ? state.quickOp : null;
-      if (clearOp) {
-        QUICK_OP_DEFS[clearOp].apply(clearOp === 'member' || clearOp === 'discount' ? 100 : 0);
-      }
+      if (clearOp) resetQuickOp(clearOp);
       state.panel = null;
       markDirty(ctx);
       renderActive();
@@ -4021,6 +4204,9 @@
       return;
     }
     if (target.matches('[data-add-color]')) {
+      if (target.closest('.order-desktop-modal--add')) {
+        Object.keys(state.addDraft.skuQty).forEach(function (key) { state.addDraft.skuQty[key] = 0; });
+      }
       state.addDraft.selectedColor = decodeURIComponent(target.dataset.addColor);
       state.addDraft.selectedSize = '';
       renderActive();
@@ -4034,7 +4220,8 @@
     if (target.matches('[data-single-qty-delta]')) {
       var draftNow = state.addDraft;
       var singleSpec = decodeURIComponent(target.dataset.singleSpec || '');
-      if (!draftNow.selectedColor || !draftNow.selectedSize) {
+      var desktopSpecCounter = Boolean(target.closest('.order-add-spec-counter-row'));
+      if (!draftNow.selectedColor || (!desktopSpecCounter && !draftNow.selectedSize)) {
         ctx.toast('请先选择颜色规格');
         return;
       }
@@ -4043,7 +4230,7 @@
         return;
       }
       var singleStock = specStock(draftNow.product, singleSpec);
-      if (Number(target.dataset.singleQtyDelta) > 0) {
+      if (!desktopSpecCounter && Number(target.dataset.singleQtyDelta) > 0) {
         Object.keys(draftNow.skuQty).forEach(function (key) {
           if (key !== singleSpec) draftNow.skuQty[key] = 0;
         });
@@ -4143,9 +4330,9 @@
         return;
       }
       var nextDiscountAmount = payableWithoutWholeDiscount - nextPayable;
-      state.discount = currentTotals.memberAmount > 0
-        ? Math.min(100, Math.max(0, Math.round((100 - nextDiscountAmount / currentTotals.memberAmount * 100) * 10000) / 10000))
-        : 100;
+      state.discountMode = nextDiscountAmount > 0 ? 'order-amount' : null;
+      state.discountValue = Math.max(0, Math.round(nextDiscountAmount * 100) / 100);
+      state.discount = 100;
       state.totalEditOpen = false;
       markDirty(ctx);
       renderActive();
@@ -4570,6 +4757,8 @@
     }
     if (target.matches('[data-discount]')) {
       state.discount = Math.min(100, Math.max(0, Number(target.value || 0)));
+      state.discountMode = state.discount < 100 ? 'order-rate' : null;
+      state.discountValue = state.discount < 100 ? state.discount : 0;
       if (event.type === 'change') markDirty(ctx);
       return;
     }
@@ -4580,13 +4769,15 @@
     }
     if (target.matches('[data-single-qty-input]') && state.addDraft) {
       var singleDraft = state.addDraft;
+      var desktopInputSpec = decodeURIComponent(target.dataset.singleSpec || '');
+      var desktopSpecInput = Boolean(target.closest('.order-add-spec-counter-row'));
       var singleRaw = String(target.value || '').replace(/[^\d-]/g, '');
       var singleNegative = singleRaw.charAt(0) === '-' ? '-' : '';
       var singleDigits = singleRaw.replace(/-/g, '').slice(0, 4);
       var singleParsed = (singleNegative || singleDigits) ? Number(singleNegative + singleDigits) : 0;
       if (Number.isNaN(singleParsed)) singleParsed = 0;
-      var singleMissing = !singleDraft.selectedColor || !singleDraft.selectedSize;
-      var singleInputSpec = singleMissing ? '' : specKey(singleDraft.product, singleDraft.selectedColor, singleDraft.selectedSize);
+      var singleMissing = !singleDraft.selectedColor || (!desktopSpecInput && !singleDraft.selectedSize);
+      var singleInputSpec = desktopSpecInput ? desktopInputSpec : (singleMissing ? '' : specKey(singleDraft.product, singleDraft.selectedColor, singleDraft.selectedSize));
       if (singleMissing || !singleInputSpec) {
         if (event.type === 'input') ctx.toast(singleMissing ? '请先选择颜色规格' : '该颜色暂无此规格');
         target.value = 0;
@@ -4598,15 +4789,17 @@
         return;
       }
       var singleInputStock = specStock(singleDraft.product, singleInputSpec);
-      singleParsed = Math.max(-9999, Math.min(singleInputStock, singleParsed));
+      singleParsed = Math.max(desktopSpecInput ? 0 : -9999, Math.min(singleInputStock, singleParsed));
       target.value = singleParsed;
-      Object.keys(singleDraft.skuQty).forEach(function (key) {
-        if (key !== singleInputSpec) singleDraft.skuQty[key] = 0;
-      });
+      if (!desktopSpecInput) {
+        Object.keys(singleDraft.skuQty).forEach(function (key) {
+          if (key !== singleInputSpec) singleDraft.skuQty[key] = 0;
+        });
+      }
       singleDraft.skuQty[singleInputSpec] = singleParsed;
       updateAddDraftTotals(root);
       if (event.type === 'change') {
-        var singlePickerNode = target.closest('.order-single-picker');
+        var singlePickerNode = desktopSpecInput ? target.closest('.order-add-spec-counter-row') : target.closest('.order-single-picker');
         if (singlePickerNode) {
           var singleMinusNode = singlePickerNode.querySelector('[data-single-qty-delta="-1"]');
           var singlePlusNode = singlePickerNode.querySelector('[data-single-qty-delta="1"]');
@@ -4774,6 +4967,7 @@
       var shouldClosePointsPopover = isDesktopWorkbench()
         && state.panel === 'quick'
         && state.quickOp === 'points'
+        && !event.target.closest('.order-desktop-modal--quick')
         && !event.target.closest('.order-quick-op-anchor--points');
       var shouldCloseCatalogFilter = isDesktopWorkbench()
         && state.catalogFilterOpen
@@ -4881,6 +5075,12 @@
       markDirty(ctx);
     }, true);
     root.addEventListener('keydown', function (event) {
+      var quickModeOption = event.target.closest && event.target.closest('[data-quick-mode]');
+      if (quickModeOption && (event.key === ' ' || event.key === 'Enter')) {
+        event.preventDefault();
+        quickModeOption.click();
+        return;
+      }
       var rowContextMenuItem = event.target.closest && event.target.closest('.order-row-context-menu [role="menuitem"]');
       if (rowContextMenuItem && ['ArrowDown', 'ArrowUp', 'Home', 'End'].indexOf(event.key) >= 0) {
         event.preventDefault();
@@ -5002,8 +5202,17 @@
     state.freightEditOpen = false;
     state.selectedRow = null;
     state.discount = 100;
+    state.discountMode = null;
+    state.discountValue = 0;
     state.freight = 0;
     state.rounding = 0;
+    state.roundingMode = null;
+    state.couponCount = 0;
+    state.couponDiscount = 0;
+    state.pointsUsed = 0;
+    state.pointsMode = null;
+    state.promotionThreshold = 0;
+    state.promotionDiscount = 0;
     state.orderNo = '';
     state.paymentStatus = 'idle';
     state.paymentDraft = null;

@@ -7,7 +7,12 @@
       "summary": "shop243 spec 文档多轮澄清更新后，纳入范围、关键路径、澄清记录等模块存在旧描述残留，前后不一致，用户检查时发现并要求修正",
       "source": "user-correction",
       "scene": "shop243-鸿蒙13分享能力升级",
-      "tags": ["spec文档", "多轮更新", "前后不一致", "wego-product"]
+      "tags": [
+        "spec文档",
+        "多轮更新",
+        "前后不一致",
+        "wego-product"
+      ]
     },
     {
       "id": "ev-002",
@@ -15,7 +20,12 @@
       "summary": "新任务接入 localStorage 时缺乏统一规则，各场景各自为政，存在 key 命名冲突、数据格式不一致风险，用户要求明确接入规则",
       "source": "user-correction",
       "scene": "shop243-鸿蒙13分享能力升级",
-      "tags": ["数据库接入", "localStorage", "key冲突", "wego-uxsystem-iterate"]
+      "tags": [
+        "数据库接入",
+        "localStorage",
+        "key冲突",
+        "wego-uxsystem-iterate"
+      ]
     },
     {
       "id": "ev-003",
@@ -23,7 +33,12 @@
       "summary": "经验沉淀时未调用 wego-uxsystem-iterate 技能，直接手动编辑了自动生成的 EXPERIENCE.md，未写入 evidence.json 和 candidates.json，用户指出流程不规范",
       "source": "user-correction",
       "scene": "shop243-鸿蒙13分享能力升级",
-      "tags": ["经验沉淀", "流程规范", "EXPERIENCE.md", "wego-uxsystem-iterate"]
+      "tags": [
+        "经验沉淀",
+        "流程规范",
+        "EXPERIENCE.md",
+        "wego-uxsystem-iterate"
+      ]
     },
     {
       "id": "ev-004",
@@ -31,7 +46,12 @@
       "summary": "spec 文档输出过程中，入口逻辑（长按/点击、自己/别人产品）、转发机制、配置栏作用等关键点需要多轮澄清，初始 spec 存在理解偏差",
       "source": "user-correction",
       "scene": "shop243-鸿蒙13分享能力升级",
-      "tags": ["spec文档", "入口逻辑", "需求澄清", "wego-product"]
+      "tags": [
+        "spec文档",
+        "入口逻辑",
+        "需求澄清",
+        "wego-product"
+      ]
     },
     {
       "id": "ev-005",
@@ -39,7 +59,149 @@
       "summary": "经验沉淀机制重构：参考 Hermes 记忆管理机制，将 EXPERIENCE.md 从脚本机械化生成改为 AI 基于 evidence.json 事实推理维护，移除 candidates.json 中间层，refine-experience.mjs 降级为校验工具。用户确认核心原则是经验和事实不能冲突",
       "source": "user-preference",
       "scene": "workflow-experience-rule",
-      "tags": ["经验沉淀", "机制重构", "AI推理", "Hermes参考", "wego-uxsystem-iterate"]
+      "tags": [
+        "经验沉淀",
+        "机制重构",
+        "AI推理",
+        "Hermes参考",
+        "wego-uxsystem-iterate"
+      ]
+    },
+    {
+      "id": "ev-006",
+      "date": "2026-08-28",
+      "summary": "灰度弹窗用 modal fullscreen 变体实现居中弹窗时，蒙层未盖住全屏。原因：fullscreen 变体默认 ::before 蒙层 display:none，z-index 用 --z-raised:10 低于导航栏的 100，面板从底部 translateY 滑入。验收打回后场景级覆盖恢复蒙层、z-index 提升到 --z-modal:600、动画改 scale+opacity 淡入、容器居中对齐",
+      "source": "user-correction",
+      "scene": "shop243-鸿蒙13分享能力升级",
+      "tags": [
+        "modal组件",
+        "fullscreen变体",
+        "蒙层",
+        "z-index",
+        "居中弹窗",
+        "踩坑",
+        "wego-design"
+      ]
+    },
+    {
+      "id": "ev-007",
+      "date": "2026-08-28",
+      "summary": "灰度弹窗顶部切图需要往上偏移30px且不被裁剪。初始用 CSS background-position: center -30px + background-size: cover 实现，导致切图顶部被 background-clip 裁剪（overflow 对背景图无效）。用户提示'外容器不裁剪不就可以了吗'，最终改用 img 标签 + 容器 overflow:visible + position:relative; top:-30px 实现偏移且完整显示。另发现 img src 路径相对于 HTML 页面解析而非 CSS 文件",
+      "source": "user-correction",
+      "scene": "shop243-鸿蒙13分享能力升级",
+      "tags": [
+        "切图",
+        "背景图裁剪",
+        "img标签",
+        "overflow",
+        "路径解析",
+        "踩坑",
+        "wego-design"
+      ]
+    },
+    {
+      "id": "ev-008",
+      "date": "2026-08-28",
+      "summary": "灰度弹窗样式还原任务中，未看设计稿就凭 modal 组件常见模式猜测为底部 sheet 样式，用户纠正'你从哪里看到是这样的？你都不看设计稿吗？'。后续涉及 Figma 设计稿还原的任务，若无法直接访问 Figma 内容，必须请用户描述关键样式或提供切图，确认后再实施",
+      "source": "user-correction",
+      "scene": "shop243-鸿蒙13分享能力升级",
+      "tags": [
+        "设计稿",
+        "Figma",
+        "样式还原",
+        "误读",
+        "需求确认",
+        "wego-design"
+      ]
+    },
+    {
+      "id": "ev-009",
+      "date": "2026-08-31",
+      "summary": "用户盘点本地分支时发现 7 个已合入 main 的分支本地长期残留（远端已删、本地未清理），指出工作流对分支收口控制有缺口：PR 合并是异步事件（网页端/CI 自动合并），本地收口依赖人工在场，错过即长期残留；工作流维护短周期 PR 自动合并后本地清理未绑定。已升级为正式规则：新增 prune-merged-branches.mjs 巡检脚本、task-intake 启动必做分支巡检、github-delivery-rules 合并即触发收口（异步闭环）、AGENTS.md merge-must-complete-closeout 硬约束，PR #142 合入 main",
+      "source": "user-correction",
+      "scene": "workflow-branch-closeout",
+      "tags": [
+        "分支残留",
+        "收口闭环",
+        "异步合并",
+        "巡检脚本",
+        "wego-github-delivery",
+        "wego-uxsystem-iterate"
+      ]
+    },
+    {
+      "id": "ev-010",
+      "date": "2026-09-01",
+      "summary": "走查工具 walkthrough-tool.js 施工单增强改动推送后，我按'工作流维护免业务验收'规则准备直接短周期 PR 自动合并，用户纠正'走查工具是要验收的，规则里面说不需要验收直接合并吗？'。用户明确规则边界：文档/规则类维护（AGENTS.md、SKILL.md、references、experience 等无法直观验收的内容）验证通过直接合并；涉及样式/可视输出的工具改动（walkthrough-tool.js 产出的施工单是用户每日查看的可视内容）必须等用户验收后再合并。已将 PR #145 保留为待验收状态，并修正 PR 描述去掉'免业务验收'措辞",
+      "source": "user-correction",
+      "scene": "workflow-walkthrough-tool-maintenance",
+      "tags": [
+        "工作流维护例外",
+        "免验收边界",
+        "走查工具",
+        "可视内容验收",
+        "PR合并",
+        "wego-uxsystem-iterate"
+      ]
+    },
+    {
+      "id": "ev-011",
+      "date": "2026-09-02",
+      "summary": "排查 PR 144 CI 失败时发现：上一轮'发布/编辑/转发页分享改造'提交只改了 wego-app/lib/js/product-editor.js 副本、未同步权威源，导致 Validate 的设计系统同步一致性检查失败（lib 副本与源不一致）。修复时误运行 scripts/sync-wego-app-lib.mjs --json（该模式是写入模式，清空再复制），把 lib 副本覆盖回权威源版本、丢失了业务改造，随后恢复副本并回灌权威源修复。教训：业务组件运行时改动必须权威源+lib 副本双份同步；同步脚本仅 --check 是只读校验，默认/--json 均为写入",
+      "source": "ci-failure",
+      "scene": "shop243-鸿蒙13分享能力升级",
+      "tags": [
+        "同步一致性",
+        "权威源",
+        "lib副本",
+        "sync脚本",
+        "写入模式",
+        "CI失败",
+        "wego-github-delivery"
+      ]
+    },
+    {
+      "id": "ev-012",
+      "date": "2026-09-02",
+      "summary": "Pages Preview 工作流连续多次标红但预览实际成功：构建与 push gh-pages 均成功，仅 Verify published URL 步骤超时失败。根因是 GitHub Pages 部署常超过 90 秒（排队更久），而验证轮询窗口仅 18 次×5 秒=90 秒。已升级 pages-preview.yml 为 36 次×10 秒≈6 分钟（PR #156 合入 main）。排查方法：curl 预览 URL 的 .wego-deployment-sha 与 CI 期望 sha 比对，一致即部署成功，避免误判为构建失败",
+      "source": "ci-failure",
+      "scene": "workflow-pages-preview",
+      "tags": [
+        "Pages预览",
+        "部署延迟",
+        "验证超时",
+        "工作流维护",
+        "误报",
+        "wego-uxsystem-iterate"
+      ]
+    },
+    {
+      "id": "ev-013",
+      "date": "2026-09-03",
+      "summary": "用户反馈每次推送PR后都要返回在线预览链接，不要等提醒，且指出此前已明确过为什么没执行到位。核查确认规则已存在（wego-design/wego-github-delivery 均写同时返回本地与在线两个链接），执行断点在部署时序：在线部署有延迟（publish CI + GitHub Pages 排队），推送后在线链接立即可用不成立，执行时只返回本地链接、漏等部署完成补在线链接。已在两技能强化每次推送必须返回在线预览链接+部署完成校验时序（publish通过+curl校验previews/pr-N部署产物）",
+      "source": "user-correction",
+      "scene": "workflow-online-link",
+      "tags": [
+        "在线预览链接",
+        "部署时序",
+        "交付规范",
+        "用户纠正",
+        "wego-uxsystem-iterate"
+      ]
+    },
+    {
+      "id": "ev-014",
+      "date": "2026-09-03",
+      "summary": "经验机制通电（PR #161）后，AGENTS 权威入口把经验文件完整仓库根路径缩成 experience/EXPERIENCE.md 残片与裸文件名，任务 worktree 中的新会话无法直接定位，需先全仓搜索，用户截图反馈出现'文件路径核查/经验文件路径有误'的额外曲折。修复：AGENTS、workflow-iteration、sync-matrix、uxsystem SKILL 中所有定位与操作指令统一写仓库根完整路径，仅章节标题允许裸文件名。教训：面向现场 AI 的权威入口和操作步骤，文件路径必须完整到可直接打开",
+      "source": "user-correction",
+      "scene": "workflow-experience-path",
+      "tags": [
+        "文件路径",
+        "权威入口",
+        "经验机制",
+        "用户纠正",
+        "wego-uxsystem-iterate"
+      ]
     }
   ]
 }
