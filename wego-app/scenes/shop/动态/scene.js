@@ -564,7 +564,6 @@
             var shareProduct = shareDyn ? productOf(shareDyn) : null;
             if (window.WegoApp && window.WegoApp.openProductShare) {
               window.WegoApp.openProductShare(ctx, {
-                title: '分享产品',
                 content: {
                   id: shareProduct ? shareProduct.product_id : '',
                   title: shareDyn ? (shareDyn.text_content || '') : '',
@@ -615,7 +614,6 @@
             var fwdProduct = fwdDyn ? productOf(fwdDyn) : null;
             if (window.WegoApp && window.WegoApp.openProductShare) {
               window.WegoApp.openProductShare(ctx, {
-                title: '分享产品',
                 content: {
                   id: fwdProduct ? fwdProduct.product_id : '',
                   title: fwdDyn ? (fwdDyn.text_content || '') : '',
@@ -800,7 +798,6 @@
           shareBtn.addEventListener('click', function () {
             if (window.WegoApp && window.WegoApp.openProductShare) {
               window.WegoApp.openProductShare(ctx, {
-                title: '分享产品',
                 content: {
                   id: product ? product.product_id : '',
                   title: product ? product.name : '',

@@ -975,7 +975,6 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
           var item = items.find(function (it) { return it.id === itemId; });
           if (window.WegoApp && window.WegoApp.openProductShare && item) {
             window.WegoApp.openProductShare(ctx, {
-              title: '分享产品',
               content: {
                 id: item.id,
                 title: item.title,
