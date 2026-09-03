@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>微购工作流 · 交互式流程图</title>
+<style>
+  :root{
+    --text:#1A1B1C; --text2:#6B7280; --bg:#F4F3EE; --card:#FFFFFF;
+    --border:#E4E3DD; --accent:#3F51B5; --accent-soft:#EEF3FB;
+    --green:#175F47; --green-soft:#E9F6F0; --amber:#7A5B00; --amber-soft:#FFF6E5;
+    --red:#B23A3A; --red-soft:#FBEDED; --purple:#5B4B9E; --purple-soft:#F1EEFB;
+    --line:#D8DCE6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'PingFang SC','Microsoft YaHei','Roboto',sans-serif;color:var(--text);background:var(--bg);line-height:1.6;font-size:14px;}
+  .wrap{max-width:900px;margin:0 auto;padding:24px 16px 60px;}
+  header.page{margin-bottom:8px;}
+  h1{font-size:22px;font-weight:700;margin-bottom:6px;}
+  .sub{font-size:13px;color:var(--text2);margin-bottom:16px;}
+  .legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:12px;color:var(--text2);background:#fff;border:1px solid var(--border);border-radius:10px;padding:8px 12px;margin-bottom:20px;}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .lg{display:inline-block;width:12px;height:12px;border-radius:3px;flex:none;}
+  .tip{font-size:12px;color:var(--accent);background:var(--accent-soft);border-radius:8px;padding:8px 12px;margin-bottom:18px;}
+
+  /* 流程主线（时间线） */
+  .flow{position:relative;}
+  .flow::before{content:"";position:absolute;left:21px;top:8px;bottom:8px;width:2px;background:var(--line);}
+  .step{position:relative;padding-left:52px;margin-bottom:14px;}
+  .step .dot{position:absolute;left:12px;top:14px;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;z-index:1;border:3px solid #fff;box-shadow:0 0 0 1px var(--line);}
+  .step .dot.purple{background:var(--purple);}
+  .step .dot.green{background:#3E9E7C;}
+  .step .dot.gray{background:#7A828E;}
+  .step .dot.gate{background:var(--amber);border-radius:4px;transform:rotate(45deg);}
+  .step .dot.gate b{transform:rotate(-45deg);font-size:11px;font-weight:700;}
+  .step .dot.purple{background:var(--purple);}
+
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:box-shadow .18s ease,border-color .18s ease;}
+  .card.open{border-color:var(--accent);box-shadow:0 4px 18px rgba(63,81,181,.12);}
+  .card.gate{border-color:#EBD9A8;background:#FFFDF6;}
+  .card.gate.open{border-color:var(--amber);box-shadow:0 4px 18px rgba(250,173,20,.15);}
+  .card.bypass{border-style:dashed;border-color:#C9C7BF;background:#FAFAF8;}
+  .card.bypass.open{border-color:var(--purple);box-shadow:0 4px 18px rgba(91,75,158,.12);}
+
+  .head{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;cursor:pointer;user-select:none;}
+  .head .num{flex:none;width:26px;height:26px;border-radius:8px;background:var(--accent-soft);color:var(--accent);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+  .head .num.purple{background:var(--purple-soft);color:var(--purple);}
+  .head .num.green{background:var(--green-soft);color:var(--green);}
+  .head .num.gate{background:var(--amber-soft);color:var(--amber);}
+  .head .txt{flex:1;min-width:0;}
+  .head .tt{font-size:14.5px;font-weight:600;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .head .tt .skill{font-size:11px;font-weight:600;color:var(--purple);background:var(--purple-soft);border-radius:6px;padding:1px 7px;}
+  .head .tt .skill.blue{color:var(--accent);background:var(--accent-soft);}
+  .head .tt .skill.green{color:var(--green);background:var(--green-soft);}
+  .head .abs{font-size:12.5px;color:var(--text2);margin-top:2px;}
+  .head .chev{flex:none;width:20px;height:20px;border-radius:50%;background:#F1EFE8;color:#6B7280;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:transform .2s ease;margin-top:2px;}
+  .card.open .chev{transform:rotate(180deg);background:var(--accent);color:#fff;}
+
+  .detail{display:none;border-top:1px dashed var(--border);padding:12px 14px;background:#FCFCFB;font-size:13px;color:#33343A;}
+  .card.open .detail{display:block;animation:fadein .22s ease;}
+  @keyframes fadein{from{opacity:0;transform:translateY(-3px);}to{opacity:1;transform:none;}}
+  .detail ul{list-style:none;}
+  .detail li{position:relative;padding:3px 0 3px 18px;margin-bottom:2px;}
+  .detail li::before{content:"›";position:absolute;left:2px;color:var(--accent);font-weight:700;}
+  .detail .k{color:var(--accent);font-weight:600;}
+  .detail .g{color:var(--amber);font-weight:600;}
+  .detail .n{color:var(--text2);font-size:12px;background:#F4F3EE;border-radius:6px;padding:4px 8px;margin-top:6px;}
+
+  /* 分支标注 */
+  .branch{position:relative;padding-left:52px;margin:2px 0 14px;font-size:12.5px;color:var(--text2);}
+  .branch .bline{position:absolute;left:21px;top:-4px;bottom:-14px;width:2px;background:var(--line);}
+  .branch .btxt{display:inline-block;background:#fff;border:1px solid var(--border);border-radius:8px;padding:5px 12px;color:#6B7280;}
+
+  /* 决策门 */
+  .gateflow{position:relative;padding-left:52px;margin-bottom:14px;}
+  .gateflow .dot{position:absolute;left:12px;top:14px;width:20px;height:20px;background:var(--amber);border-radius:4px;transform:rotate(45deg);z-index:1;border:3px solid #fff;box-shadow:0 0 0 1px var(--line);}
+  .gateflow .dot b{display:flex;align-items:center;justify-content:center;transform:rotate(-45deg);color:#fff;font-size:11px;font-weight:700;width:100%;height:100%;}
+  .card.gate .head .tt{color:var(--amber);}
+  .gateside{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+  .gateside .yes{font-size:12px;background:var(--green-soft);color:var(--green);border-radius:6px;padding:4px 10px;font-weight:600;}
+  .gateside .no{font-size:12px;background:#F4F3EE;color:#6B7280;border-radius:6px;padding:4px 10px;}
+
+  /* 状态机 */
+  .sm{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:22px;}
+  .sm h2{font-size:16px;font-weight:700;margin-bottom:4px;}
+  .sm .sub2{font-size:12.5px;color:var(--text2);margin-bottom:12px;}
+  .smrow{display:flex;gap:8px;flex-wrap:wrap;align-items:stretch;}
+  .smnode{flex:1 1 130px;min-width:120px;background:#FCFCFB;border:1px solid var(--border);border-radius:10px;padding:9px 10px;text-align:center;}
+  .smnode .s{font-size:13px;font-weight:700;color:var(--accent);}
+  .smnode .s.g{color:#4B5563;}
+  .smnode .t{font-size:11.5px;color:var(--text2);margin-top:3px;}
+  .smarrow{display:flex;align-items:center;color:#9CA3AF;font-size:13px;}
+  .smnote{font-size:12px;color:var(--text2);margin-top:10px;background:#F4F3EE;border-radius:8px;padding:8px 10px;}
+  .smnote b{color:var(--red);}
+
+  footer{font-size:12px;color:#9CA3AF;margin-top:26px;text-align:center;}
+
+  @media(max-width:640px){
+    .flow::before{left:19px;}
+    .step{padding-left:48px;}
+    .step .dot{left:10px;}
+    .branch{padding-left:48px;}
+    .branch .bline{left:19px;}
+    .gateflow{padding-left:48px;}
+    .gateflow .dot{left:10px;}
+    h1{font-size:19px;}
+    .head .tt{font-size:13.5px;}
+  }
+  @media print{
+    .card.open .detail{display:none;}
+    .head .chev{display:none;}
+  }
+  table{width:100%;border-collapse:collapse;font-size:12.5px;margin:8px 0 12px;word-break:break-word;overflow-wrap:anywhere;background:#fff;}
+  th{background:var(--accent-soft);color:#2A3F63;text-align:left;padding:7px 10px;font-weight:600;border:1px solid #DCE3F2;}
+  td{padding:6px 10px;border:1px solid var(--border);vertical-align:top;color:#33343A;word-break:break-word;overflow-wrap:anywhere;}
+  tr:nth-child(even) td{background:#FBFAF7;}
+  .extra{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:22px;}
+  .extra h2{font-size:16px;font-weight:700;margin-bottom:4px;}
+  .extra .sub2{font-size:12.5px;color:var(--text2);margin-bottom:12px;}
+  .filelist{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px;}
+  .filelist span{font-size:11.5px;background:#F4F3EE;border:1px solid var(--border);color:#3F4044;border-radius:6px;padding:3px 8px;word-break:break-all;}
+  .pits{list-style:none;margin:6px 0;}
+  .pits li{font-size:13px;color:#33343A;margin-bottom:6px;padding-left:18px;position:relative;}
+  .pits li::before{content:"·";position:absolute;left:2px;color:var(--red);font-weight:700;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page">
+    <h1>微购工作流 · 交互式流程图</h1>
+    <div class="sub">微购中文移动端原型与设计系统仓库的全流程规则汇总。点击任意环节查看该环节的大致逻辑说明。｜ 依据 AGENTS.md 与 .codex/skills 权威文件梳理</div>
+  </header>
+
+  <div class="legend">
+    <span><i class="lg" style="background:var(--accent)"></i>主链路环节</span>
+    <span><i class="lg" style="background:var(--amber)"></i>决策门 / 硬规则</span>
+    <span><i class="lg" style="background:var(--purple)"></i>旁路（设计系统/工作流维护）</span>
+    <span><i class="lg" style="background:#3E9E7C"></i>贯穿全程（经验沉淀）</span>
+  </div>
+
+  <div class="tip">💡 点击流程图中的任意环节卡片，可在其下方展开该环节的逻辑说明；再次点击收起。</div>
+
+  <div class="flow">
+
+    <!-- 环节0 -->
+    <div class="step">
+      <div class="dot">0</div>
+      <div class="card" data-id="s0">
+        <div class="head">
+          <div class="num">0</div>
+          <div class="txt">
+            <div class="tt">需求输入 <span class="skill blue">不固定技能</span></div>
+            <div class="abs">自然语言 / 参考图 / Figma</div>
+          </div>
+          <div class="chev">⌄</div>
+        </div>
+        <div class="detail">
+          <ul>
+            <li>三种输入形态一律视为业务需求，<span class="k">必须先经产品技能创建迭代并确认简报</span>，不得直接做页面。</li>
+            <li>参考图仅作风格参考、Figma 仅作视觉组件参考，<span class="g">不补造业务事实</span>；缺失的业务逻辑、状态、数据由对话补全。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 环节1 -->
+    <div class="step">
+      <div class="dot">1</div>
+      <div class="card" data-id="s1">
+        <div class="head">
+          <div class="num">1</div>
+          <div class="txt">
+            <div class="tt">任务启动 <span class="skill">wego-github-delivery</span></div>
+            <div class="abs">启动清单 · 分支巡检 · 交付单元核对</div>
+          </div>
+          <div class="chev">⌄</div>
+        </div>
+        <div class="detail">
+          <ul>
+            <li>新任务开工前按启动清单执行：<span class="k">判断上下文 → 分支巡检收口 → 环境同步 → 交付单元核对 → 独立 worktree</span>。</li>
+            <li>核对结果：<span class="k">matched</span> 复用分支/worktree/PR；<span class="k">new</span> 无匹配才新建；<span class="g">conflict 停止询问</span>。</li>
+            <li>每个交付单元使用独立 worktree，主 worktree 只保留 main 用于同步。</li>
+            <li>会话前置读取经验摘要（EXPERIENCE.md），避免重复踩坑。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 环节2 -->
+    <div class="step">
+      <div class="dot">2</div>
+      <div class="card" data-id="s2">
+        <div class="head">
+          <div class="num">2</div>
+          <div class="txt">
+            <div class="tt">需求确认 <span class="skill blue">wego-product</span></div>
+            <div class="abs">创建迭代 · 确认 prototype_brief</div>
+          </div>
+          <div class="chev">⌄</div>
+        </div>
+        <div class="detail">
+          <ul>
+            <li>创建迭代 → 写需求规格说明 spec.md（<span class="k">唯一需求源</span>）→ submit-brief 进入 in-development（简报开放开发，可反复重提）。</li>
+            <li>简报充分性守门：目标/范围/入口/关键路径/状态必须非空，<span class="g">open_questions 必须清空</span>。</li>
+            <li>数据必须有产生入口（发布/新建/录入流程），<span class="g">禁止静态种子降级</span>；关键路径首尾闭环。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 环节3 -->
+    <div class="step">
+      <div class="dot">3</div>
+      <div class="card" data-id="s3">
+        <div class="head">
+          <div class="num">3</div>
+          <div class="txt">
+            <div class="tt">设计实现 <span class="skill blue">wego-design</span></div>
+            <div class="abs">本地迭代 · 场景实现 · 自动推送 PR</div>
+          </div>
+          <div class="chev">⌄</div>
+        </div>
+        <div class="detail">
+          <ul>
+            <li><span class="k">已确认简报即设计授权</span>：范围内布局、组件、Token、反馈由设计阶段自主完成。</li>
+            <li>流程：设计意图 → 语义区域 → 范式匹配/自主组合 → 组件映射 → 实现 scene.js/css/route.json → 场景契约预检。</li>
+            <li>完成一轮实现后自动推送远端分支并创建/更新<span class="k">同一 PR</span>，返回本地 + 在线两个预览链接。</li>
+            <li>场景数据优先取自原型数据库 WEGO_PROTOTYPE_DB，不临时编造。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 旁路 -->
+    <div class="step">
+      <div class="dot purple">✦</div>
+      <div class="card bypass" data-id="sx">
+        <div class="head">
+          <div class="num purple">✦</div>
+          <div class="txt">
+            <div class="tt">旁路 · 设计系统 / 工作流维护 <span class="skill">wego-uxsystem-iterate</span></div>
+            <div class="abs">组件 / Token / Preview / UI Kit · 经验沉淀</div>
+          </div>
+          <div class="chev">⌄</div>
+        </div>
+        <div class="detail">
+          <ul>
+            <li>组件、Token、Preview、UI Kit 变更仍走用户验收流程；<span class="k">工作流权威源维护免业务验收</span>，验证通过走短周期 PR 自动合并 main。</li>
+            <li>经验沉淀：业务技能识别信号（纠正/偏好/返工/踩坑）→ 写草稿 → 收口扫描 → 四层分流（L1 事实 → L2 摘要 → L3 场景技能 → L4 正式规则）。</li>
+            <li>业务场景功能不得放入技能目录或设计系统权威源。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 决策门1 -->
+    <div class="step">
+      <div class="dot gate"><b>?</b></div>
+      <div class="card gate" data-id="s4">
+        <div class="head">
+          <div class="num gate">?</div>
+          <div class="txt">
+            <div class="tt">决策门 · 用户明确验收通过？</div>
+            <div class="abs">普通反馈不构成验收授权</div>
+          </div>
+          <div class="chev">⌄</div>
+        </div>
+        <div class="detail">
+          <ul>
+            <li><span class="g">是（"验收通过""可以合并"）</span> → 进入验收收口，固化、验证并合并 main。</li>
+            <li><span class="g">否（"改好了""继续""再调整"）</span> → 回到本地迭代累计修改，自动更新同一 PR，不合并。</li>
+            <li>实现完成、检查通过、用户查看页面，都不等于合并授权。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 环节5 -->
+    <div class="step">
+      <div class="dot green">5</div>
+      <div class="card" data-id="s5">
+        <div class="head">
+          <div class="num green">5</div>
+          <div class="txt">
+            <div class="tt">验收收口 <span class="skill green">wego-design</span></div>
+            <div class="abs">5 维校验 · 冻结 · 完整验证</div>
+          </div>
+          <div class="chev">⌄</div>
+        </div>
+        <div class="detail">
+          <ul>
+            <li>输出 5 维度一致性校验清单（范围 / 入口 / 关键路径 / 状态 / 数据契约），用户逐项确认。</li>
+            <li>连续执行 <span class="k">confirm-brief</span>（简报确认）→ <span class="k">submit-prototype</span>（一步冻结到 frozen）。</li>
+            <li>运行完整静态验证（full --strict / build-routes --check / sync-lib --check），任一失败先修复再推送。</li>
+            <li><span class="g">经验收口扫描</span>必须在 worktree 清理前完成。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 环节6 -->
+    <div class="step">
+      <div class="dot green">6</div>
+      <div class="card" data-id="s6">
+        <div class="head">
+          <div class="num green">6</div>
+          <div class="txt">
+            <div class="tt">合并 + 收尾 <span class="skill">wego-github-delivery</span></div>
+            <div class="abs">合并 main · 四步收口清理</div>
+          </div>
+          <div class="chev">⌄</div>
+        </div>
+        <div class="detail">
+          <ul>
+            <li>合并前再次同步 main、复验，通过后合并 PR 进 main。</li>
+            <li>四步收口：停预览服务删记录 → 删远端分支 → 删本地 worktree → 主 worktree 同步 main。</li>
+            <li>合并是异步事件，本地收口由后续启动巡检兜底补齐。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 贯穿 -->
+    <div class="step">
+      <div class="dot gray">∞</div>
+      <div class="card bypass" data-id="s7">
+        <div class="head">
+          <div class="num green">∞</div>
+          <div class="txt">
+            <div class="tt">贯穿全程 · 经验沉淀 <span class="skill green">wego-uxsystem-iterate</span></div>
+            <div class="abs">信号 → 草稿 → 收口扫描 → 四层分流</div>
+          </div>
+          <div class="chev">⌄</div>
+        </div>
+        <div class="detail">
+          <ul>
+            <li>识别信号（用户纠正 / 表达偏好 / 返工 / 踩坑）→ 向 .tasks/experience-inbox.json 追加草稿。</li>
+            <li>交付单元收口时扫描草稿并分流：一次性 → L1 事实 + L2 摘要；同场景 ×2 或流程固定 → 毕业 L3 场景技能；跨场景硬约束 → 升格 L4 正式规则。</li>
+            <li>零信号零动作，沉淀后告知用户，不新增确认门禁。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 状态机 -->
+  <div class="sm">
+    <h2>迭代状态机</h2>
+    <div class="sub2">状态由 iteration-record.mjs 维护；只有用户明确表达才推进，时间经过 / 完成修改 / 通过检查都不推进</div>
+    <div class="smrow">
+      <div class="smnode"><div class="s">draft</div><div class="t">写 spec.md</div></div>
+      <div class="smarrow">→</div>
+      <div class="smnode"><div class="s">in-development</div><div class="t">简报开放开发，可反复重提</div></div>
+      <div class="smarrow">→</div>
+      <div class="smnode"><div class="s">prototyping</div><div class="t">设计实现 + 自动推 PR</div></div>
+      <div class="smarrow">→</div>
+      <div class="smnode"><div class="s g">frozen</div><div class="t">历史快照 freeze.json</div></div>
+    </div>
+    <div class="smnote">
+      <b>反馈分流：</b>范围内视觉/布局/组件/交互调整 → 原迭代继续改（不 invalidate）；改变目标/范围/入口/关键路径/状态/数据 → 失效简报重提确认；frozen 后调整 → 先回 prototyping 累计，用户再次明确验收后才重新冻结。暂停/终止状态：blocked | cancelled | superseded。
+    </div>
+  </div>
+
+  <!-- 必读文件 -->
+  <div class="extra">
+    <h2>各环节必读文件</h2>
+    <div class="sub2">每个环节执行时必要读取的权威文件（仓库根相对路径，详见对应 SKILL.md「按需读取」）</div>
+    <table>
+      <tr><th>环节</th><th>必读文件</th></tr>
+      <tr><td>任务启动</td><td>AGENTS.md · .codex/skills/README.md · .codex/skills/wego-github-delivery/references/task-intake.md · references/github-delivery-rules.md · .codex/skills/wego-uxsystem-iterate/experience/EXPERIENCE.md</td></tr>
+      <tr><td>需求确认</td><td>.codex/skills/wego-product/SKILL.md · references/brief-template.md · references/iteration-workflow.md · references/scope-and-boundaries.md · .codex/skills/wego-design/references/design-principles.md</td></tr>
+      <tr><td>设计实现</td><td>.codex/skills/wego-design/SKILL.md · references/design-principles.md · references/interaction-prototype-design.md · references/library-map.md · references/scene-contract.md · 有效迭代 spec.md · wego-app/data/README.md</td></tr>
+      <tr><td>交付与 PR</td><td>.codex/skills/wego-github-delivery/SKILL.md · references/github-delivery-rules.md · references/task-intake.md · .tasks/preview-servers/</td></tr>
+      <tr><td>验收收口</td><td>.codex/skills/wego-design/SKILL.md · .codex/skills/wego-product/references/iteration-workflow.md · .codex/skills/wego-github-delivery/references/github-delivery-rules.md · .tasks/experience-inbox.json</td></tr>
+      <tr><td>经验沉淀</td><td>.codex/skills/wego-uxsystem-iterate/SKILL.md · references/workflow-iteration.md · references/sync-matrix.md · experience/evidence.json · experience/EXPERIENCE.md</td></tr>
+      <tr><td>设计系统维护</td><td>.codex/skills/wego-uxsystem-iterate/references/workflow.md · references/sync-matrix.runtime.md · 组件/Token/Preview 权威源</td></tr>
+    </table>
+  </div>
+
+  <!-- 关键命令 -->
+  <div class="extra">
+    <h2>关键命令速查</h2>
+    <div class="sub2">所有迭代状态与指纹由 scripts/iteration-record.mjs 维护；验证守卫统一从 scripts/ 执行</div>
+    <table>
+      <tr><th>类别</th><th>命令</th><th>用途</th></tr>
+      <tr><td rowspan="5">迭代记录</td><td>iteration-record.mjs suggest-id --scene {场景}</td><td>预查询建议迭代 ID</td></tr>
+      <tr><td>iteration-record.mjs init --file ... --title ... --scene ...</td><td>创建迭代与 spec 模板</td></tr>
+      <tr><td>iteration-record.mjs submit-brief --file ...</td><td>提交简报（充分性守门 + 算哈希）</td></tr>
+      <tr><td>iteration-record.mjs confirm-brief --file ... --user-confirmed-brief {id}</td><td>确认简报（需用户验收完成 + 5 维校验）</td></tr>
+      <tr><td>iteration-record.mjs submit-prototype --file ... --user-confirmed-prototype {id}</td><td>一步冻结到 frozen</td></tr>
+      <tr><td rowspan="4">验证守卫</td><td>validate-wego-design.mjs --scope=changed|full|system --strict</td><td>场景 Token 合规、源/副本同步、原型指纹、完整守门</td></tr>
+      <tr><td>validate-scene-contract.mjs {场景路径}</td><td>场景契约预检（每轮实现后必跑）</td></tr>
+      <tr><td>validate-scene-runtime.mjs {场景路径}</td><td>真实浏览器 375/393px 运行时验证</td></tr>
+      <tr><td>build-routes.mjs [--check]</td><td>生成 / 校验 routes.js</td></tr>
+      <tr><td rowspan="2">设计系统</td><td>sync-wego-app-lib.mjs [--check]</td><td>同步 / 校验 lib 部署副本</td></tr>
+      <tr><td>validate-component-contract-parity.mjs</td><td>组件契约与 Preview 一致性</td></tr>
+      <tr><td rowspan="4">分支 / worktree</td><td>npm run branches:stale / branches:prune / branches:prune-gone</td><td>分支巡检与收口</td></tr>
+      <tr><td>npm run worktrees:stale / worktrees:prune</td><td>孤儿 worktree 巡检与清理</td></tr>
+      <tr><td>resolve-delivery-unit.mjs --scene {场景}</td><td>交付单元核对</td></tr>
+      <tr><td>refine-experience.mjs --check / --related</td><td>经验事实一致性校验 / 相关事实查询</td></tr>
+    </table>
+  </div>
+
+  <!-- 踩坑提示 -->
+  <div class="extra">
+    <h2>高频踩坑提示</h2>
+    <div class="sub2">源自 experience/EXPERIENCE.md 经验摘要，避免重复踩坑</div>
+    <ul class="pits">
+      <li><b>简报</b>：spec 多轮更新后、提交前必须全文搜索统一旧描述，保证前后一致；每个入口写清触发方式、对象、按钮层级与后续行为，不明点入 open_questions 不猜测。</li>
+      <li><b>设计稿</b>：Figma 还原前必须确认设计稿内容，无法访问就请用户描述或给切图，禁止凭组件名猜样式。</li>
+      <li><b>实现</b>：切图要偏移且不裁剪用 img 标签定位（不用 CSS 背景图，会被裁剪），img 路径相对 index.html；新存储 key 按 wego.{domain}.{entity} 命名，不迁移旧 key。</li>
+      <li><b>交付</b>：每次推送 PR 必须等 publish 通过并 curl 校验部署产物后返回在线链接，不得只给本地链接；PR 合并后必须清理本地分支 / worktree / 预览记录。</li>
+      <li><b>CI</b>：改 design/runtime 必须同步 lib 副本；Pages 预览标红多为部署延迟，先比对 .wego-deployment-sha 再排查构建。</li>
+      <li><b>结构</b>：业务场景功能不得放入技能目录 / 设计系统权威源，全局业务运行时直接放 wego-app/js 与 wego-app/css。</li>
+    </ul>
+  </div>
+
+  <footer>微购工作流交互式流程图 · 信息源自仓库权威文件（AGENTS.md、.codex/skills）· 整理 2026-09-03</footer>
+
+</div>
+
+<script>
+(function(){
+  var cards = document.querySelectorAll('.card[data-id]');
+  cards.forEach(function(card){
+    card.querySelector('.head').addEventListener('click', function(e){
+      var isOpen = card.classList.contains('open');
+      cards.forEach(function(o){ o.classList.remove('open'); });
+      if(!isOpen){ card.classList.add('open'); }
+    });
+  });
+})();
+</script>
+</body>
+</html>
