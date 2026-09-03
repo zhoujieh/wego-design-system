@@ -7,6 +7,13 @@
   font-family: var(--body-md-font-family);
 }
 
+/* 发布页导航栏右侧多按钮（快捷分享/分享/发布）为多按钮特殊场景，走 navbar__right--custom：
+   场景自担布局——按钮间 gap 8px、右侧间距 16px（与按钮操作场景右侧间距一致） */
+.publish-product .navbar__right--custom {
+  gap: var(--spacer-8);
+  padding-right: 16px;
+}
+
 .publish-product__scroll {
   overflow-y: auto;
   overflow-x: hidden;

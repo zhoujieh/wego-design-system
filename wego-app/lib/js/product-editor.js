@@ -96,18 +96,12 @@
         <div class="navbar__body navbar__body--spaced">
           <div class="navbar__left"><button type="button" class="navbar__left-text" data-dom-id="publish-cancel" aria-label="取消">取消</button></div>
           <div class="navbar__center"></div>
-          <div class="navbar__right navbar__right--button">
-            <div class="navbar__action navbar__action--button">
-              <button type="button" class="btn btn--weak btn--sm btn--icon-only" data-component-slug="button" data-dom-id="quick-share" aria-label="快捷分享">
-                <i class="btn__icon icon-pengyouquan" data-quick-share-icon aria-hidden="true"></i>
-              </button>
-            </div>
-            <div class="navbar__action navbar__action--button">
-              <button type="button" class="btn btn--weak btn--sm" data-component-slug="button" data-dom-id="publish-share">分享</button>
-            </div>
-            <div class="navbar__action navbar__action--button">
-              <button type="button" class="btn btn--strong btn--sm" data-component-slug="button" data-dom-id="publish-submit" data-publish-submit-label>发布</button>
-            </div>
+          <div class="navbar__right navbar__right--custom">
+            <button type="button" class="btn btn--weak btn--sm btn--icon-only" data-component-slug="button" data-dom-id="quick-share" aria-label="快捷分享">
+              <i class="btn__icon icon-pengyouquan" data-quick-share-icon aria-hidden="true"></i>
+            </button>
+            <button type="button" class="btn btn--weak btn--sm" data-component-slug="button" data-dom-id="publish-share">分享</button>
+            <button type="button" class="btn btn--strong btn--sm" data-component-slug="button" data-dom-id="publish-submit" data-publish-submit-label>发布</button>
           </div>
         </div>
       </div>
@@ -360,26 +354,16 @@
       if (submitLabel) submitLabel.textContent = '保存';
     }
 
-    /* 更新快捷分享按钮图标（纯图标正方形按钮，样式与「分享」按钮一致） */
+    /* 更新快捷分享按钮图标（纯图标正方形按钮，样式与「分享」按钮一致）
+       - 图标/名称统一复用分享面板（product-share.js CHANNELS）同一套渠道定义，不维护第二份映射
+       - 只关联渠道栏内的内容：miniprogramOnly 渠道（如复制链接）不在主分享面板渠道栏，回退默认朋友圈 */
     function refreshQuickShare() {
-      if (!window.WegoApp || !window.WegoApp.getQuickChannel) return;
+      if (!window.WegoApp || !window.WegoApp.getChannel) return;
       var ch = window.WegoApp.getQuickChannel();
-      var channelMap = {
-        moments: { label: '朋友圈', icon: 'icon-pengyouquan' },
-        wechat: { label: '微信', icon: 'icon-weixin' },
-        xiaohongshu: { label: '小红书', icon: 'icon-xiaohongshu' },
-        douyin: { label: '抖音', icon: 'icon-douyin' },
-        weibo: { label: '微博', icon: 'icon-weibo' },
-        kuaishou: { label: '快手', icon: 'icon-kuaishou' },
-        xianyu: { label: '闲鱼', icon: 'icon-xianyu' },
-        zhuanzhuan: { label: '转转', icon: 'icon-zhuanzhuan' },
-        channels: { label: '视频号', icon: 'icon-shipinhao' },
-        poster: { label: '海报', icon: 'icon-haibao' },
-        more: { label: '更多', icon: 'icon-gengduo' }
-      };
-      var info = channelMap[ch] || channelMap.moments;
+      var info = window.WegoApp.getChannel(ch);
+      if (!info || info.miniprogramOnly) info = window.WegoApp.getChannel('moments');
       if (quickShareIcon) quickShareIcon.className = 'btn__icon ' + info.icon;
-      if (quickShareBtn) quickShareBtn.setAttribute('aria-label', '快捷分享到' + info.label);
+      if (quickShareBtn) quickShareBtn.setAttribute('aria-label', '快捷分享到' + info.name);
     }
     refreshQuickShare();
 

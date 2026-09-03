@@ -772,6 +772,7 @@
   window.WegoApp.openProductShare = openProductShare;
   window.WegoApp.getQuickChannel = getQuickChannel;
   window.WegoApp.setQuickChannel = setQuickChannel;
+  window.WegoApp.getChannel = getChannel;
   window.WegoApp.getForwardedProducts = getForwardedProducts;
   window.WegoApp.addForwardedProduct = addForwardedProduct;
   window.WegoApp.simulateShare = simulateShare;
