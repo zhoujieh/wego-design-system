@@ -71,7 +71,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 1500px;
+  width: 4000px;
   transform-origin: 0 0;
   padding: 0 16px 40px;
   box-sizing: border-box;
@@ -297,12 +297,45 @@
   gap: var(--spacer-4);
 }
 
+/* 一个节点（功能点）= 多个状态块横排 */
+.iter-canvas-page__node-states {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.iter-canvas-page__state {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.iter-canvas-page__state-label {
+  font-size: var(--body-xs-font-size);
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 0 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.iter-canvas-page__state-label::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  flex: 0 0 auto;
+}
+
 .iter-canvas-page__frame-wrap {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  width: 300px;
-  min-width: 300px;
+  width: 393px;
+  min-width: 393px;
   box-sizing: border-box;
 }
 
@@ -324,20 +357,13 @@
   color: var(--text-secondary);
 }
 
-.iter-canvas-page__frame {
-  width: 300px;
-  height: 560px;
-  border: 1px solid var(--border-divider);
-  border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-}
-
-/* ── 场景渲染容器（真实 DOM 平铺）── */
+/* ── 场景渲染容器（真实 DOM 平铺）──
+   默认视口 iPhone 15 Pro：393 × 852（高度可拖拽调整） */
 .iter-canvas-page__scene-host {
-  width: 300px;
-  min-height: 480px;
+  --frame-w: 393px;
+  --frame-h: 852px;
+  width: var(--frame-w);
+  height: var(--frame-h);
   border: 1px solid var(--border-divider);
   border-radius: 12px;
   background: #fff;
@@ -349,7 +375,7 @@
 }
 
 .iter-canvas-page__scene-host--loading {
-  min-height: 300px;
+  height: 300px;
   background: linear-gradient(100deg, #f0f2f5 30%, #fafbfc 50%, #f0f2f5 70%);
   background-size: 200% 100%;
   animation: iter-canvas-shimmer 1.2s infinite;
@@ -369,6 +395,40 @@
   pointer-events: auto;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.25), 0 4px 12px rgba(0, 0, 0, 0.12);
+  overflow: auto;
+}
+
+/* 高度拖拽把手：仅编辑态可见 */
+.iter-canvas-page__resize-handle {
+  height: 16px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: ns-resize;
+  color: var(--text-tertiary);
+  background: rgba(22, 119, 255, 0.06);
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1;
+  user-select: none;
+  touch-action: none;
+}
+
+.iter-canvas-page__resize-handle i {
+  font-size: 12px;
+}
+
+.iter-canvas-page__resize-handle::after {
+  content: '';
+  width: 32px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(22, 119, 255, 0.3);
+}
+
+.iter-canvas-page__frame-wrap--active .iter-canvas-page__resize-handle {
+  display: flex;
 }
 
 /* 页面容器内：全屏弹窗/居中弹窗改为流式，内容完整撑开 */
@@ -386,13 +446,6 @@
 
 .iter-canvas-page__scene-host .modal__panel {
   position: static !important;
-  height: auto !important;
-  max-height: none !important;
-  overflow: visible !important;
-}
-
-/* 页面容器内滚动区：展开为完整高度，内容不被裁剪 */
-.iter-canvas-page__scene-host [class*='scroll'] {
   height: auto !important;
   max-height: none !important;
   overflow: visible !important;

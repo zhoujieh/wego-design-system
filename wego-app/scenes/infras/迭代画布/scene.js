@@ -72,12 +72,24 @@ const iterationCanvasTemplate = `
         id: 'publish-product',
         title: '发布产品',
         priority: 'P1',
-        desc: '动态流「发布」入口 → 填写字段 → 上传图片+可见范围 → 提交 → 新产品出现在动态流',
+        desc: '动态流「发布」入口 → 发布表单空状态 → 录入字段 → 帮卖设置子流程 → 提交后新产品出现在动态流',
         nodes: [
-          { label: '动态流', sub: '「发布」入口', routeId: 'album-product-feed' },
-          { label: '发布产品表单', sub: '填写基础字段', routeId: 'publish-product' },
-          { label: '发布产品表单', sub: '上传图片 + 可见范围', routeId: 'publish-product' },
-          { label: '动态流', sub: '新产品出现', routeId: 'album-product-feed' }
+          { label: '动态流', routeId: 'album-product-feed',
+            states: [{ name: '「发布」入口' }] },
+          { label: '发布产品', routeId: 'publish-product',
+            states: [
+              { name: '空状态', sub: '进入表单' },
+              { name: '填写中', sub: '录入基础字段',
+                prepare: [
+                  { action: 'fill', selector: 'input[placeholder*="请输入产品名"]', value: '荷叶边方领短袖上衣' },
+                  { action: 'fill', selector: 'input[placeholder*="请输入售价"]', value: '139' },
+                  { action: 'fill', selector: 'input[placeholder*="请输入货号"]', value: 'HYB-012' }
+                ] },
+              { name: '帮卖设置', sub: '子流程弹窗', routeId: 'agent-resale' },
+              { name: '发布后', sub: '新产品出现在动态流', routeId: 'album-product-feed' }
+            ] },
+          { label: '动态流', routeId: 'album-product-feed',
+            states: [{ name: '新产品出现' }] }
         ]
       },
       {
@@ -171,63 +183,141 @@ const iterationCanvasTemplate = `
       + '</div>';
   }
 
-  // 每个流程 = 一排页面容器，横向排列 + 连线
-  function flowMarkup(flow) {
-    var nodeHtml = flow.nodes.map(function (node, i) {
-      var isSameAsPrev = i > 0 && flow.nodes[i - 1].routeId === node.routeId;
+  // 每个流程 = 一排"功能节点"，节点内部是多个状态块横排，节点之间连线
+  // 返回 { html, blocks }；blocks 供渲染阶段按序找到每个状态块的 routeId 与 prepare
+  function flowMarkup(flow, flowIdx) {
+    var blocks = [];
+    var nodeHtml = flow.nodes.map(function (node, nodeIdx) {
+      var states = (node.states && node.states.length) ? node.states : [{ name: node.sub || node.label, routeId: node.routeId }];
+      var stateHtml = states.map(function (st, si) {
+        var routeId = st.routeId || node.routeId;
+        var key = 'f' + flowIdx + '-n' + nodeIdx + '-s' + si;
+        blocks.push({ key: key, routeId: routeId, prepare: st.prepare || [] });
+        return ''
+          + '<div class="iter-canvas-page__state">'
+          +   '<div class="iter-canvas-page__state-label">' + esc(st.name) + '</div>'
+          +   '<div class="iter-canvas-page__frame-wrap">'
+          +     '<div class="iter-canvas-page__frame-label">'
+          +       '<span class="iter-canvas-page__frame-name">' + esc(node.label) + '</span>'
+          +       (st.sub ? '<span class="iter-canvas-page__frame-sub">' + esc(st.sub) + '</span>' : '')
+          +     '</div>'
+          +     '<div class="iter-canvas-page__scene-host" data-route-id="' + esc(routeId) + '"></div>'
+          +     '<div class="iter-canvas-page__frame-route">' + esc(routeId) + '</div>'
+          +     '<div class="iter-canvas-page__resize-handle" data-role="resize"><i class="wego-iconfont-s icon-tuodong"></i>拖拽调高度</div>'
+          +   '</div>'
+          + '</div>';
+      }).join('');
       return ''
         + '<div class="iter-canvas-page__node">'
-        +   '<div class="iter-canvas-page__frame-wrap">'
-        +     '<div class="iter-canvas-page__frame-label">'
-        +       '<span class="iter-canvas-page__frame-name">' + esc(node.label) + '</span>'
-        +       '<span class="iter-canvas-page__frame-sub">' + esc(node.sub) + '</span>'
-        +     '</div>'
-        +     '<div class="iter-canvas-page__scene-host" data-route-id="' + esc(node.routeId) + '" data-frame-label="' + esc(node.label) + '"></div>'
-        +     '<div class="iter-canvas-page__frame-route">' + esc(node.routeId) + (isSameAsPrev ? ' · 复用' : '') + '</div>'
-        +   '</div>'
-        +   (i < flow.nodes.length - 1 ? '<div class="iter-canvas-page__link" aria-hidden="true"><i class="wego-iconfont-s icon-youjiantou16"></i></div>' : '')
+        +   '<div class="iter-canvas-page__node-states">' + stateHtml + '</div>'
+        +   (nodeIdx < flow.nodes.length - 1 ? '<div class="iter-canvas-page__link" aria-hidden="true"><i class="wego-iconfont-s icon-youjiantou16"></i></div>' : '')
         + '</div>';
     }).join('');
-    return ''
-      + '<div class="iter-canvas-page__flow">'
-      +   '<div class="iter-canvas-page__flow-head">'
-      +     '<span class="iter-canvas-page__flow-priority iter-canvas-page__flow-priority--' + (flow.priority === 'P1' ? 'p1' : 'p0') + '">' + esc(flow.priority) + '</span>'
-      +     '<span class="iter-canvas-page__flow-title">' + esc(flow.title) + '</span>'
-      +   '</div>'
-      +   '<div class="iter-canvas-page__flow-desc">' + esc(flow.desc) + '</div>'
-      +   '<div class="iter-canvas-page__flow-chain">' + nodeHtml + '</div>'
-      + '</div>';
+    return {
+      html: ''
+        + '<div class="iter-canvas-page__flow">'
+        +   '<div class="iter-canvas-page__flow-head">'
+        +     '<span class="iter-canvas-page__flow-priority iter-canvas-page__flow-priority--' + (flow.priority === 'P1' ? 'p1' : 'p0') + '">' + esc(flow.priority) + '</span>'
+        +     '<span class="iter-canvas-page__flow-title">' + esc(flow.title) + '</span>'
+        +   '</div>'
+        +   '<div class="iter-canvas-page__flow-desc">' + esc(flow.desc) + '</div>'
+        +   '<div class="iter-canvas-page__flow-chain">' + nodeHtml + '</div>'
+        + '</div>',
+      blocks: blocks
+    };
   }
 
-  // 将迭代内涉及的每个页面（routeId）渲染到画布对应容器（真实场景 DOM，页面保持可交互）
-  // 关键：运行时直接调用场景渲染，业务场景改动后画布重新加载即为最新内容（实时投影，非快照）
-  function renderSceneIntoHosts(root) {
-    var hosts = Array.prototype.slice.call(root.querySelectorAll('.iter-canvas-page__scene-host'));
-    var byRoute = {};
-    hosts.forEach(function (host) {
-      var routeId = host.getAttribute('data-route-id');
-      if (!routeId) return;
-      (byRoute[routeId] = byRoute[routeId] || []).push(host);
+  // ── 状态脚本：在渲染出的真实场景 DOM 上执行指令，驱动到目标状态 ──
+  function runPrepare(host, prepare) {
+    (prepare || []).forEach(function (step) {
+      if (!step || !step.action) return;
+      try {
+        if (step.action === 'fill') { prepareFill(host, step); }
+        else if (step.action === 'click') { prepareClick(host, step); }
+        else if (step.action === 'scrollTo') { prepareScrollTo(host, step); }
+        else { console.warn('[iter-canvas] unknown prepare action:', step.action); }
+      } catch (e) {
+        console.warn('[iter-canvas] prepare step failed:', step, e);
+      }
     });
-    Object.keys(byRoute).forEach(function (routeId) {
-      var group = byRoute[routeId];
-      group.forEach(function (h) { h.classList.add('iter-canvas-page__scene-host--loading'); });
-      window.WegoApp.renderSceneTo(routeId, group[0]).then(function (handle) {
-        group.forEach(function (h) {
-          h.classList.remove('iter-canvas-page__scene-host--loading');
-          if (h !== group[0]) {
-            h.innerHTML = group[0].innerHTML; // 同一页面复用：拷贝首份渲染 DOM
-            h.classList.add('iter-canvas-page__scene-host--cloned');
-          }
-          h.classList.add('iter-canvas-page__scene-host--ready');
-        });
+  }
+
+  function prepareFill(host, step) {
+    var el = host.querySelector(step.selector);
+    if (!el) return;
+    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+      var proto = el.tagName === 'TEXTAREA' ? window.HTMLTextAreaElement.prototype : window.HTMLInputElement.prototype;
+      var setter = Object.getOwnPropertyDescriptor(proto, 'value').set;
+      setter.call(el, step.value);
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    } else {
+      el.textContent = step.value;
+    }
+  }
+
+  function prepareClick(host, step) {
+    var el = host.querySelector(step.selector);
+    if (el) el.click();
+  }
+
+  function prepareScrollTo(host, step) {
+    var el = host.querySelector(step.selector);
+    if (!el) return;
+    var h = host.getBoundingClientRect().height || host.clientHeight;
+    var top = el.getBoundingClientRect().top - host.getBoundingClientRect().top;
+    host.scrollTop = top - (step.pos === 'top' ? 0 : Math.max(0, (h / 2) - 40));
+  }
+
+  // 将迭代内每个状态块渲染到画布对应容器（真实场景 DOM，页面保持可交互）
+  // 每个状态块独立渲染一次（各自绑定事件），渲染后执行 prepare 驱动到目标状态
+  // 关键：运行时直接调用场景渲染，业务场景改动后画布重新加载即为最新内容（实时投影，非快照）
+  function renderSceneIntoHosts(root, blocks) {
+    var hosts = Array.prototype.slice.call(root.querySelectorAll('.iter-canvas-page__scene-host'));
+    hosts.forEach(function (host, i) {
+      var block = blocks[i];
+      if (!block) return;
+      host.classList.add('iter-canvas-page__scene-host--loading');
+      window.WegoApp.renderSceneTo(block.routeId, host).then(function () {
+        host.classList.remove('iter-canvas-page__scene-host--loading');
+        host.classList.add('iter-canvas-page__scene-host--ready');
+        runPrepare(host, block.prepare);
       });
     });
   }
 
-  // 点选页面 → 进入编辑态（解锁该页面交互）；再次点击/点空白 → 回到浏览态
-  function bindSceneHostSelection(viewport, world) {
+  function deactivateHost(host) {
+    host.classList.remove('iter-canvas-page__scene-host--active');
+    var wrap = host.closest('.iter-canvas-page__frame-wrap');
+    if (wrap) wrap.classList.remove('iter-canvas-page__frame-wrap--active');
+  }
+
+  function activateHost(host) {
+    host.classList.add('iter-canvas-page__scene-host--active');
+    var wrap = host.closest('.iter-canvas-page__frame-wrap');
+    if (wrap) wrap.classList.add('iter-canvas-page__frame-wrap--active');
+  }
+
+  // 激活页面后，若底部高度把手超出视口，自动平移世界让把手可见
+  function ensureHandleVisible(host, canvas) {
+    if (!canvas || !host) return;
+    var vp = host.closest('.iter-canvas-page__viewport');
+    if (!vp) return;
+    var vr = vp.getBoundingClientRect();
+    var wrap = host.closest('.iter-canvas-page__frame-wrap');
+    var handle = wrap ? wrap.querySelector('[data-role="resize"]') : null;
+    var ref = (handle && getComputedStyle(handle).display !== 'none') ? handle : host;
+    var rb = ref.getBoundingClientRect();
+    var overflowY = rb.bottom - vr.bottom + 12;
+    if (overflowY > 0) canvas.panBy(0, -overflowY);
+  }
+
+  // 点选页面 → 进入编辑态（解锁该页面交互）；点空白 → 回到浏览态。
+  // 编辑态页面内部的点击/滚动/输入不退出编辑态。
+  function bindSceneHostSelection(viewport, world, canvas) {
     viewport.addEventListener('click', function (e) {
+      var activeHost = world.querySelector('.iter-canvas-page__scene-host--active');
+      if (activeHost && activeHost.contains(e.target)) return; // 在编辑态页面内操作，保持
       var hosts = world.querySelectorAll('.iter-canvas-page__scene-host');
       var hit = null;
       for (var i = 0; i < hosts.length; i++) {
@@ -237,13 +327,40 @@ const iterationCanvasTemplate = `
           break;
         }
       }
-      var anyActive = world.querySelector('.iter-canvas-page__scene-host--active');
-      if (hit && hit !== anyActive) {
-        if (anyActive) anyActive.classList.remove('iter-canvas-page__scene-host--active');
-        hit.classList.add('iter-canvas-page__scene-host--active');
-      } else if (anyActive) {
-        anyActive.classList.remove('iter-canvas-page__scene-host--active');
+      if (activeHost) deactivateHost(activeHost);
+      if (hit) {
+        activateHost(hit);
+        ensureHandleVisible(hit, canvas);
       }
+    });
+  }
+
+  // 编辑态下拖拽高度把手调整页面块高度（默认 iPhone 15 Pro 视口 393×852）
+  function bindResize(world, canvas) {
+    world.querySelectorAll('[data-role="resize"]').forEach(function (handle) {
+      handle.addEventListener('pointerdown', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var wrap = handle.closest('.iter-canvas-page__frame-wrap');
+        var host = wrap.querySelector('.iter-canvas-page__scene-host');
+        if (!host) return;
+        var startY = e.clientY;
+        var startH = host.offsetHeight;
+        var scale = canvas.getScale();
+        function onMove(ev) {
+          var dy = (ev.clientY - startY) / scale;
+          var h = Math.max(200, Math.min(2200, startH + dy));
+          host.style.height = Math.round(h) + 'px';
+        }
+        function onUp() {
+          window.removeEventListener('pointermove', onMove);
+          window.removeEventListener('pointerup', onUp);
+          window.removeEventListener('pointercancel', onUp);
+        }
+        window.addEventListener('pointermove', onMove);
+        window.addEventListener('pointerup', onUp);
+        window.addEventListener('pointercancel', onUp);
+      });
     });
   }
 
@@ -251,8 +368,15 @@ const iterationCanvasTemplate = `
     root.querySelector('[data-region="info"]').innerHTML = infoMarkup(it);
     root.querySelector('[data-region="scope"]').innerHTML = scopeMarkup(it);
     root.querySelector('[data-region="entry"]').innerHTML = entryMarkup(it);
-    var flows = (it.flows || []).map(flowMarkup).join('');
-    root.querySelector('[data-region="flows"]').innerHTML = flows;
+    var flowHtml = '';
+    var blocks = [];
+    (it.flows || []).forEach(function (f, fi) {
+      var r = flowMarkup(f, fi);
+      flowHtml += r.html;
+      blocks = blocks.concat(r.blocks);
+    });
+    root.querySelector('[data-region="flows"]').innerHTML = flowHtml;
+    renderSceneIntoHosts(root, blocks);
   }
 
   // ── 无限画布：单指拖拽平移 + 双指捏合缩放 + 滚轮缩放（CSS transform，零依赖）──
@@ -326,6 +450,8 @@ const iterationCanvasTemplate = `
 
     function onDown(e) {
       if (e.target.closest('iframe')) return; // iframe 内交互交给页面自身
+      // 编辑态页面内部交互不触发画布拖拽
+      if (e.target.closest && e.target.closest('.iter-canvas-page__scene-host--active')) return;
       pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
       if (Object.keys(pointers).length === 1) {
         gesture = { mode: 'pan', startX: e.clientX, startY: e.clientY, origX: tx, origY: ty };
@@ -401,7 +527,9 @@ const iterationCanvasTemplate = `
     return {
       fit: fit,
       zoomCenter: zoomCenter,
-      apply: apply
+      apply: apply,
+      getScale: function () { return scale; },
+      panBy: function (dx, dy) { tx += dx; ty += dy; apply(); }
     };
   }
 
@@ -421,15 +549,16 @@ const iterationCanvasTemplate = `
 
       renderStatic(root, SAMPLE_ITERATION);
 
-      // 渲染每个流程页面到画布容器（真实场景 DOM）
-      renderSceneIntoHosts(root);
-
-      // 点选页面进入编辑态（解锁交互）
-      bindSceneHostSelection(viewport, world);
-
       var canvas = createCanvas(viewport, world, zoomValueEl);
+
+      // 点选页面进入编辑态（解锁交互），激活时自动平移露出高度把手
+      bindSceneHostSelection(viewport, world, canvas);
+
+      // 编辑态下拖拽把手调整页面块高度
+      bindResize(world, canvas);
+
       // 等场景渲染完成后 fit
-      setTimeout(function () { canvas.fit(); }, 120);
+      setTimeout(function () { canvas.fit(); }, 150);
 
       root.querySelector('[data-action="zoom-in"]').addEventListener('click', function () { canvas.zoomCenter(1.25); });
       root.querySelector('[data-action="zoom-out"]').addEventListener('click', function () { canvas.zoomCenter(0.8); });
