@@ -1,6 +1,9 @@
-// 迭代画布 · 系统工具场景（MVP）
+// 迭代画布 · 系统工具场景（MVP v2：iframe 平铺 + 真无限画布）
 // 数据源：MVP 内置样例迭代（publish-product 发布产品），权威源后续接迭代目录 iteration.json
-// 能力：无限画布（滚轮缩放 + 拖拽平移 + 缩放控件）、流程链（节点+连线+点击跳转真实原型）、范围区
+// 能力：
+//  - 每个关键路径节点以 iframe 平铺真实页面（index.html#/routeId），横向排列 + 连线
+//  - 无限画布：单指拖拽平移 + 双指捏合缩放 + 滚轮缩放 + 缩放控件（- / + / 适配）
+//  - 范围区：纳入 included / 不纳入 excluded / 受影响场景
 
 const iterationCanvasTemplate = `
   <section class="iter-canvas-page" data-surface-id="iteration-canvas" data-route-id="iteration-canvas" data-layout-mode="composed" data-bg="page">
@@ -18,7 +21,7 @@ const iterationCanvasTemplate = `
         <button type="button" class="iter-canvas-page__zb" data-action="zoom-in" aria-label="放大">+</button>
         <button type="button" class="iter-canvas-page__zb" data-action="zoom-fit" aria-label="适配视图">适配</button>
       </div>
-      <div class="iter-canvas-page__hint">滚轮缩放 · 拖拽平移 · 点击节点跳转原型</div>
+      <div class="iter-canvas-page__hint">拖动平移 · 双指缩放 · 点击连线看流程</div>
     </div>
     <div class="iter-canvas-page__viewport" data-region="viewport" data-touch-action="none">
       <div class="iter-canvas-page__world" data-region="world">
@@ -71,10 +74,10 @@ const iterationCanvasTemplate = `
         priority: 'P1',
         desc: '动态流「发布」入口 → 填写字段 → 上传图片+可见范围 → 提交 → 新产品出现在动态流',
         nodes: [
-          { label: '动态流', sub: '「发布」入口', routeId: 'album-product-feed', kind: 'entry' },
-          { label: '发布产品表单', sub: '填写基础字段', routeId: 'publish-product', kind: 'form' },
-          { label: '发布产品表单', sub: '上传图片 + 可见范围', routeId: 'publish-product', kind: 'form' },
-          { label: '动态流', sub: '新产品出现', routeId: 'album-product-feed', kind: 'result' }
+          { label: '动态流', sub: '「发布」入口', routeId: 'album-product-feed' },
+          { label: '发布产品表单', sub: '填写基础字段', routeId: 'publish-product' },
+          { label: '发布产品表单', sub: '上传图片 + 可见范围', routeId: 'publish-product' },
+          { label: '动态流', sub: '新产品出现', routeId: 'album-product-feed' }
         ]
       },
       {
@@ -83,10 +86,10 @@ const iterationCanvasTemplate = `
         priority: 'P1',
         desc: '发布表单 → 打开帮卖设置弹窗 → 设置帮卖方式与加价规则 → 完成回到表单 → 提交',
         nodes: [
-          { label: '发布产品表单', sub: '点击「帮卖分销」', routeId: 'publish-product', kind: 'form' },
-          { label: '帮卖设置弹窗', sub: '自由定价 / 固定佣金', routeId: 'agent-resale', kind: 'popup' },
-          { label: '发布产品表单', sub: '完成回到表单', routeId: 'publish-product', kind: 'form' },
-          { label: '动态流', sub: '带「可帮卖」标识', routeId: 'album-product-feed', kind: 'result' }
+          { label: '发布产品表单', sub: '点击「帮卖分销」', routeId: 'publish-product' },
+          { label: '帮卖设置弹窗', sub: '自由定价 / 固定佣金', routeId: 'agent-resale' },
+          { label: '发布产品表单', sub: '完成回到表单', routeId: 'publish-product' },
+          { label: '动态流', sub: '带「可帮卖」标识', routeId: 'album-product-feed' }
         ]
       },
       {
@@ -95,10 +98,10 @@ const iterationCanvasTemplate = `
         priority: 'P1',
         desc: '动态流「编辑」入口 → 回显已填字段 → 修改 → 保存 → 动态流同步更新',
         nodes: [
-          { label: '动态流', sub: '「编辑」入口', routeId: 'album-product-feed', kind: 'entry' },
-          { label: '发布产品表单', sub: '回显已填字段', routeId: 'publish-product', kind: 'form' },
-          { label: '发布产品表单', sub: '修改后保存', routeId: 'publish-product', kind: 'form' },
-          { label: '动态流', sub: '对应动态同步更新', routeId: 'album-product-feed', kind: 'result' }
+          { label: '动态流', sub: '「编辑」入口', routeId: 'album-product-feed' },
+          { label: '发布产品表单', sub: '回显已填字段', routeId: 'publish-product' },
+          { label: '发布产品表单', sub: '修改后保存', routeId: 'publish-product' },
+          { label: '动态流', sub: '对应动态同步更新', routeId: 'album-product-feed' }
         ]
       },
       {
@@ -107,20 +110,14 @@ const iterationCanvasTemplate = `
         priority: '—',
         desc: '规格 / 颜色 / 标签 / 来源 → 一次录入多个值 → 实时展示已录入项 → 可增删',
         nodes: [
-          { label: '发布产品表单', sub: '多值字段录入', routeId: 'publish-product', kind: 'form' },
-          { label: '发布产品表单', sub: '已录入项实时展示', routeId: 'publish-product', kind: 'form' }
+          { label: '发布产品表单', sub: '多值字段录入', routeId: 'publish-product' },
+          { label: '发布产品表单', sub: '已录入项实时展示', routeId: 'publish-product' }
         ]
       }
     ]
   };
 
   var STATUS_TEXT = { 'in-development': '开发中', prototyping: '原型中', frozen: '已冻结' };
-  var KIND_META = {
-    entry: { label: '入口', cls: 'k-entry' },
-    form: { label: '表单', cls: 'k-form' },
-    popup: { label: '弹窗', cls: 'k-popup' },
-    result: { label: '结果', cls: 'k-result' }
-  };
 
   function esc(value) {
     return String(value == null ? '' : value)
@@ -129,6 +126,11 @@ const iterationCanvasTemplate = `
       .replace(/>/g, '&gt;')
       .replace(/\x22/g, '&quot;')
       .replace(/\x27/g, '&#39;');
+  }
+
+  // iframe 加载同一宿主应用的真实页面；src 相对当前 index.html 解析
+  function frameSrc(routeId) {
+    return './index.html#/' + encodeURIComponent(routeId);
   }
 
   function infoMarkup(it) {
@@ -174,17 +176,20 @@ const iterationCanvasTemplate = `
       + '</div>';
   }
 
+  // 每个流程 = 一排 iframe 平铺页面，横向排列 + 连线
   function flowMarkup(flow) {
     var nodeHtml = flow.nodes.map(function (node, i) {
-      var kind = KIND_META[node.kind] || KIND_META.form;
+      var isSameAsPrev = i > 0 && flow.nodes[i - 1].routeId === node.routeId;
       return ''
         + '<div class="iter-canvas-page__node">'
-        +   '<button type="button" class="iter-canvas-page__node-body" data-route-id="' + esc(node.routeId) + '">'
-        +     '<span class="iter-canvas-page__node-kind ' + kind.cls + '">' + kind.label + '</span>'
-        +     '<span class="iter-canvas-page__node-label">' + esc(node.label) + '</span>'
-        +     '<span class="iter-canvas-page__node-sub">' + esc(node.sub) + '</span>'
-        +     '<span class="iter-canvas-page__node-route">' + esc(node.routeId) + '</span>'
-        +   '</button>'
+        +   '<div class="iter-canvas-page__frame-wrap">'
+        +     '<div class="iter-canvas-page__frame-label">'
+        +       '<span class="iter-canvas-page__frame-name">' + esc(node.label) + '</span>'
+        +       '<span class="iter-canvas-page__frame-sub">' + esc(node.sub) + '</span>'
+        +     '</div>'
+        +     '<iframe class="iter-canvas-page__frame" src="' + frameSrc(node.routeId) + '" title="' + esc(node.label) + '" loading="lazy"></iframe>'
+        +     '<div class="iter-canvas-page__frame-route">' + esc(node.routeId) + (isSameAsPrev ? ' · 复用' : '') + '</div>'
+        +   '</div>'
         +   (i < flow.nodes.length - 1 ? '<div class="iter-canvas-page__link" aria-hidden="true"><i class="wego-iconfont-s icon-youjiantou16"></i></div>' : '')
         + '</div>';
     }).join('');
@@ -207,7 +212,7 @@ const iterationCanvasTemplate = `
     root.querySelector('[data-region="flows"]').innerHTML = flows;
   }
 
-  // ── 无限画布：缩放 / 平移（CSS transform，零依赖）──
+  // ── 无限画布：单指拖拽平移 + 双指捏合缩放 + 滚轮缩放（CSS transform，零依赖）──
   function createCanvas(viewport, world, zoomValueEl) {
     var scale = 1;
     var tx = 0;
@@ -223,13 +228,13 @@ const iterationCanvasTemplate = `
     function fit() {
       var vw = viewport.clientWidth || 320;
       var vh = viewport.clientHeight || 400;
-      var ww = world.scrollWidth || 1200;
-      var wh = world.scrollHeight || 800;
-      // 初始视图保证可读：最小 0.62，最长边优先铺满视口宽
-      var raw = Math.min(vw / ww, vh / wh);
-      scale = Math.max(0.62, Math.min(1.2, raw * 0.96));
+      var ww = world.scrollWidth || 1600;
+      var wh = world.scrollHeight || 900;
+      // 初始视图尽量铺满视口，保证能看清整体布局
+      scale = Math.max(MIN, Math.min(1, Math.min(vw / ww, vh / wh) * 0.98));
+      // 垂直方向：让内容顶部对齐视口（信息/范围/流程依次向下排布）
       tx = (vw - ww * scale) / 2;
-      ty = 16;
+      ty = 12;
       apply();
     }
 
@@ -247,41 +252,97 @@ const iterationCanvasTemplate = `
       zoomAt((viewport.clientWidth || 0) / 2, (viewport.clientHeight || 0) / 2, factor);
     }
 
-    // 滚轮缩放（以光标为锚点）
+    // 滚轮缩放（桌面端，以光标为锚点）
     viewport.addEventListener('wheel', function (e) {
       e.preventDefault();
       var rect = viewport.getBoundingClientRect();
       var px = e.clientX - rect.left;
       var py = e.clientY - rect.top;
-      var factor = Math.pow(1.0018, -e.deltaY);
+      var factor = Math.pow(1.002, -e.deltaY);
       zoomAt(px, py, factor);
     }, { passive: false });
 
-    // 拖拽平移
-    var dragging = false;
-    var startX = 0;
-    var startY = 0;
-    var origX = 0;
-    var origY = 0;
+    // 指针状态：单指拖拽平移，双指捏合缩放
+    var pointers = {};
+    var gesture = null; // { mode: 'pan' | 'pinch', ... }
 
-    viewport.addEventListener('pointerdown', function (e) {
-      if (e.target.closest('[data-route-id]')) return;
-      dragging = true;
-      startX = e.clientX;
-      startY = e.clientY;
-      origX = tx;
-      origY = ty;
-      viewport.setPointerCapture && viewport.setPointerCapture(e.pointerId);
-    });
-    viewport.addEventListener('pointermove', function (e) {
-      if (!dragging) return;
-      tx = origX + (e.clientX - startX);
-      ty = origY + (e.clientY - startY);
-      apply();
-    });
+    function activePointers() {
+      return Object.keys(pointers).map(function (id) { return pointers[id]; });
+    }
+
+    function onDown(e) {
+      if (e.target.closest('iframe')) return; // iframe 内交互交给页面自身
+      pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+      if (Object.keys(pointers).length === 1) {
+        gesture = { mode: 'pan', startX: e.clientX, startY: e.clientY, origX: tx, origY: ty };
+      } else if (Object.keys(pointers).length === 2) {
+        var pts = activePointers();
+        gesture = {
+          mode: 'pinch',
+          dist: Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y),
+          midX: (pts[0].x + pts[1].x) / 2,
+          midY: (pts[0].y + pts[1].y) / 2,
+          scale: scale,
+          tx: tx,
+          ty: ty
+        };
+      }
+      if (viewport.setPointerCapture) {
+        try { viewport.setPointerCapture(e.pointerId); } catch (_) {}
+      }
+    }
+
+    function onMove(e) {
+      if (!gesture) return;
+      if (!pointers[e.pointerId]) return;
+      var prev = pointers[e.pointerId];
+      pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+
+      if (gesture.mode === 'pan' && Object.keys(pointers).length === 1) {
+        tx = gesture.origX + (e.clientX - gesture.startX);
+        ty = gesture.origY + (e.clientY - gesture.startY);
+        apply();
+      } else if (gesture.mode === 'pinch' && Object.keys(pointers).length === 2) {
+        var pts = activePointers();
+        var dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+        var midX = (pts[0].x + pts[1].x) / 2;
+        var midY = (pts[0].y + pts[1].y) / 2;
+        if (gesture.dist > 0) {
+          var ns = Math.max(MIN, Math.min(MAX, gesture.scale * (dist / gesture.dist)));
+          // 以双指中心为锚点缩放 + 平移跟随
+          var rect = viewport.getBoundingClientRect();
+          var cx = midX - rect.left;
+          var cy = midY - rect.top;
+          var wx = (cx - gesture.tx) / gesture.scale;
+          var wy = (cy - gesture.ty) / gesture.scale;
+          tx = cx - wx * ns;
+          ty = cy - wy * ns;
+          scale = ns;
+          apply();
+        }
+      }
+    }
+
+    function onUp(e) {
+      delete pointers[e.pointerId];
+      var remaining = Object.keys(pointers).length;
+      if (remaining === 0) {
+        gesture = null;
+      } else if (remaining === 1) {
+        var pt = activePointers()[0];
+        gesture = { mode: 'pan', startX: pt.x, startY: pt.y, origX: tx, origY: ty };
+      }
+    }
+
+    viewport.addEventListener('pointerdown', onDown);
+    viewport.addEventListener('pointermove', onMove);
     ['pointerup', 'pointercancel'].forEach(function (name) {
-      viewport.addEventListener(name, function () { dragging = false; });
+      viewport.addEventListener(name, onUp);
     });
+    // 防止画布内手势触发页面滚动
+    viewport.addEventListener('touchmove', function (e) {
+      if (gesture) e.preventDefault();
+    }, { passive: false });
 
     return {
       fit: fit,
@@ -307,18 +368,12 @@ const iterationCanvasTemplate = `
       renderStatic(root, SAMPLE_ITERATION);
 
       var canvas = createCanvas(viewport, world, zoomValueEl);
-      canvas.fit();
+      // 等 iframe 布局稳定后再 fit
+      setTimeout(function () { canvas.fit(); }, 60);
 
       root.querySelector('[data-action="zoom-in"]').addEventListener('click', function () { canvas.zoomCenter(1.25); });
       root.querySelector('[data-action="zoom-out"]').addEventListener('click', function () { canvas.zoomCenter(0.8); });
       root.querySelector('[data-action="zoom-fit"]').addEventListener('click', function () { canvas.fit(); });
-
-      // 节点点击 → 跳转真实原型
-      world.addEventListener('click', function (event) {
-        var node = event.target.closest('[data-route-id]');
-        if (!node) return;
-        ctx.navigate(node.getAttribute('data-route-id'));
-      });
     }
   });
 })();
