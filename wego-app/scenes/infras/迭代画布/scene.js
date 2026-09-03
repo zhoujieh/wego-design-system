@@ -228,12 +228,23 @@ const iterationCanvasTemplate = `
     function fit() {
       var vw = viewport.clientWidth || 320;
       var vh = viewport.clientHeight || 400;
-      var ww = world.scrollWidth || 1600;
+      // 以流程链（内容主体）实际宽度为基准，而非整个 world 宽度
+      var chains = world.querySelectorAll('.iter-canvas-page__flow-chain');
+      var firstW = chains.length ? chains[0].scrollWidth : 0;
+      var contentW = 0;
+      for (var i = 0; i < chains.length; i++) {
+        contentW = Math.max(contentW, chains[i].scrollWidth);
+      }
+      var cards = world.querySelectorAll('.iter-canvas-page__card');
+      for (var j = 0; j < cards.length; j++) {
+        contentW = Math.max(contentW, cards[j].scrollWidth);
+      }
+      contentW = Math.max(contentW, 320);
       var wh = world.scrollHeight || 900;
-      // 初始视图尽量铺满视口，保证能看清整体布局
-      scale = Math.max(MIN, Math.min(1, Math.min(vw / ww, vh / wh) * 0.98));
-      // 垂直方向：让内容顶部对齐视口（信息/范围/流程依次向下排布）
-      tx = (vw - ww * scale) / 2;
+      // 初始聚焦第一条流程链，保证页面平铺清晰可读；「适配」则看全貌
+      var baseW = firstW || contentW;
+      scale = Math.max(0.55, Math.min(1, Math.min(vw / baseW, vh / wh) * 0.98));
+      tx = (vw - baseW * scale) / 2;
       ty = 12;
       apply();
     }
