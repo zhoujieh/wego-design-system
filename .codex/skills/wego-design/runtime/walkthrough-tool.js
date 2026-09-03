@@ -4757,9 +4757,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             color: rgba(255, 255, 255, 0.35);
           }
           .text-input:focus {
-            outline: 1px solid var(--text-brand, #00b96b);
-            outline-offset: -1px;
-            border-radius: 4px;
+            /* 数值字段拖动调值：去掉 focus 视觉状态，聚焦仅体现为全选 */
+            outline: none;
           }
           .text-input.opacity-input {
             flex: 0 0 48px;
@@ -4769,6 +4768,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           .text-input:disabled {
             opacity: 0.35;
             cursor: not-allowed;
+          }
+          /* 数值字段拖动调值：桌面端按住光标 ew-resize */
+          .text-input.drag-num {
+            cursor: ew-resize;
           }
           .token-btn {
             flex-shrink: 0;
@@ -5666,6 +5669,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           });
         }
       });
+      // 数值字段拖动调值（功能 3）：按住水平拖动调值（右增左减），Shift×5 / Alt 微调，
+      // 拖动中实时预览（不进撤销栈），松手统一提交一次；点击聚焦自动全选
+      this._shadow.querySelectorAll('input.text-input[data-field]').forEach(input => {
+        this._bindNumberDrag(input, input.dataset.field);
+      });
       // 渐变填充：开关（toggle）
       const gradToggle = this._shadow.querySelector('[data-grad-toggle]');
       if (gradToggle) {
@@ -5988,8 +5996,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._scheduleSharedSync(result);
     }
 
-    _onFieldChange(field, value) {
+    _onFieldChange(field, value, opts) {
       if (!this._targetEl || !this._data) return;
+      opts = opts || {};
       // auto 是「左右对齐」模式下的间距显示态，不作为可提交的间距值（忽略，避免误提交/误报）
       if (field === 'layoutGap' && value === 'auto') return;
       // 输入守门：拦截负数尺寸、非 flex 容器布局方向等非法操作（伪元素与普通元素路径统一），
@@ -6036,10 +6045,18 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 应用到元素（本体）
       const result = this._applyField(field, value);
       if (result) {
+        // 拖动调值预览（功能 3）：样式已应用，不记录、不触发共享同步；松手时统一提交一次
+        if (opts.preview) {
+          this._updateActiveStates();
+          return;
+        }
         // 无效果守卫：目标新值与当前计算值归一化相等 → 本次改动无视觉差异，撤销已写入 inline，
         // 不记录、不触发共享同步，避免空元素/默认值被共享同步写成无效果的脏施工单。
         // layoutMode 附带 display:flex 副作用：仅当元素已处于 flex/grid 时才真正无效果。
-        const _noopSame = normalizeCssValue(result.oldValue) === normalizeCssValue(result.newValue);
+        // 拖动提交（fromDragStart）时以拖动起始值作为 oldValue，保证拖动可整体撤销
+        const _baseOld = (opts.fromDragStart != null && opts.fromDragStart !== '')
+          ? opts.fromDragStart : result.oldValue;
+        const _noopSame = normalizeCssValue(_baseOld) === normalizeCssValue(result.newValue);
         const _noop = _noopSame && (result.property !== 'flex-direction' || (() => {
           const d = getComputedStyle(this._targetEl).display;
           return d === 'flex' || d === 'grid';
@@ -6056,7 +6073,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             elementClass: getFirstStableClass(this._targetEl),
             elementClasses: getStableClasses(this._targetEl),
             property: result.property,
-            oldValue: result.oldValue,
+            oldValue: _baseOld,
             newValue: result.newValue,
             el: this._targetEl,
             shared: false,
@@ -6418,6 +6435,111 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         default:
           return d[field] != null ? d[field] : '';
       }
+    }
+
+    // ── 数值字段拖动调值（功能 3） ─────────────────────────────
+    /** 可拖动的数值字段集合（尺寸/间距/定位/字号/行高/圆角/阴影等） */
+    _numberDragFields() {
+      return new Set([
+        'top', 'right', 'bottom', 'left', 'zIndex',
+        'width', 'height', 'layoutGap',
+        'paddingLeft', 'paddingRight', 'paddingTop', 'paddingBottom',
+        'marginLeft', 'marginRight', 'marginTop', 'marginBottom',
+        'fontSize', 'lineHeight', 'borderRadiusAll',
+        'shadowX', 'shadowY', 'shadowBlur', 'shadowSpread',
+        'gradientAngle',
+      ]);
+    }
+    /** 拖动值边界 clamp（透明度 0-100、角度 0-360、尺寸/间距 ≥0；定位负值字段允许负数） */
+    _clampDragValue(field, v) {
+      if (/Opacity$/.test(field)) return Math.max(0, Math.min(100, v));
+      if (field === 'gradientAngle') return ((v % 360) + 360) % 360;
+      if (/^(width|height|fontSize|layoutGap|paddingLeft|paddingRight|paddingTop|paddingBottom|marginLeft|marginRight|marginTop|marginBottom|borderRadiusAll|shadowBlur|shadowSpread)$/.test(field)) {
+        return Math.max(0, v);
+      }
+      return v;
+    }
+    /** 拖动值显示格式：整数字段去小数点，非整数保留至多 2 位小数 */
+    _formatDragValue(field, v) {
+      const r = Math.round(v * 100) / 100;
+      return String(r);
+    }
+    /**
+     * 数值字段拖动调值：按住水平拖动（右增左减）。
+     * - 步长：整数字段 = 1（每 px 变 1），非整数字段 = 8（每 8px 变 1，更平稳）
+     * - 修饰键：Shift ×5 加速、Alt 微调（步长 ÷8）
+     * - 方向判定：水平 >8px 锁定调值；垂直 >8px 判定为滚动面板，不响应
+     * - 拖动中实时预览（_applyField 应用、不进撤销栈）；松手统一提交一次（oldValue=拖动起始值）
+     * - 非拖动点击 → 聚焦 + 全选，可直接输入覆盖
+     */
+    _bindNumberDrag(input, field) {
+      if (!this._numberDragFields().has(field)) return;
+      input.classList.add('drag-num');
+      let drag = null;
+      input.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        if (input.disabled || input.readOnly) return;
+        const text = input.value.trim();
+        const m = String(text).match(/-?\d+(\.\d+)?/);
+        if (!m) return; // 非数值（token/auto/空/语义值）不进入拖动
+        const startVal = parseFloat(m[0]);
+        drag = {
+          startX: e.clientX, startY: e.clientY,
+          startVal, startText: text,
+          locked: null, moved: false, lastVal: startVal,
+          baseStep: Number.isInteger(startVal) ? 1 : 8,
+        };
+        const onMove = (ev) => {
+          if (!drag) return;
+          const dx = ev.clientX - drag.startX;
+          const dy = ev.clientY - drag.startY;
+          if (!drag.locked) {
+            if (Math.abs(dx) > 8) drag.locked = 'h';
+            else if (Math.abs(dy) > 8) { drag.locked = 'v'; return; }
+            else return;
+          }
+          if (drag.locked !== 'h') return;
+          drag.moved = true;
+          ev.preventDefault();
+          let mod = 1;
+          if (ev.shiftKey) mod = 5;
+          else if (ev.altKey) mod = 1 / 8;
+          const raw = drag.startVal + (dx / drag.baseStep) * mod;
+          let next = Number.isInteger(drag.startVal) ? Math.round(raw) : Math.round(raw * 100) / 100;
+          next = this._clampDragValue(field, next);
+          if (next === drag.lastVal) return;
+          drag.lastVal = next;
+          const display = this._formatDragValue(field, next);
+          input.value = display;
+          this._data[field] = String(next);
+          this._applyField(field, String(next));
+        };
+        const onUp = (ev) => {
+          document.removeEventListener('pointermove', onMove);
+          document.removeEventListener('pointerup', onUp);
+          document.removeEventListener('pointercancel', onUp);
+          const d = drag;
+          drag = null;
+          if (!d) return;
+          const wasDrag = d.locked === 'h' && d.moved;
+          const curText = input.value.trim();
+          if (wasDrag) {
+            // 松手统一提交一次（oldValue = 拖动起始值，拖动整体作为一个撤销单元）
+            this._onFieldChange(field, curText, { fromDragStart: d.startText });
+          } else {
+            // 非拖动：视为点击 → 聚焦 + 全选
+            input.focus();
+            input.select();
+          }
+        };
+        document.addEventListener('pointermove', onMove);
+        document.addEventListener('pointerup', onUp);
+        document.addEventListener('pointercancel', onUp);
+      });
+      // 聚焦即全选（设计：去掉 focus 视觉状态，聚焦仅体现为全选）
+      input.addEventListener('focus', () => {
+        try { input.select(); } catch (e) {}
+      });
     }
 
     /** 输入守门：拦截会污染施工单的非法操作 */
