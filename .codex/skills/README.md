@@ -11,6 +11,12 @@
 
 `wego-scene-*` 是经验毕业产生的场景技能，沉淀某类任务的固定流程、交付前检查清单与踩坑反例，由对应主链路技能在命中场景时按需读取；它不承接业务阶段路由、不新增主链路节点。场景技能的创建与维护统一由 `wego-uxsystem-iterate` 承担（同场景 ×2 或流程固定才允许创建），毕业标准、四段结构与三重挂载规则见 `wego-uxsystem-iterate/references/workflow-iteration.md`。
 
+已登记场景技能：
+
+| 技能 | 触发场景 | 主挂载 |
+| --- | --- | --- |
+| `wego-scene-walkthrough-test` | 走查工具自动化测试/回归/验收/排查（改走查 js/css 后回归、5 项交互验收、走查相关 PR 验证） | `wego-uxsystem-iterate`（副 `wego-design`） |
+
 ## 输入形态一律先走产品技能
 
 无论用户以哪种形态提出需求，都视为**业务需求**，必须先由 `wego-product` **创建迭代并确认 `prototype_brief`**，再进入 `wego-design` 实现。不得跳过产品技能直接做页面：
