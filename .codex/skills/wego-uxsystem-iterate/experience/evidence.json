@@ -485,6 +485,20 @@
         "超限处理",
         "wego-uxsystem-iterate"
       ]
+    },
+    {
+      "id": "ev-035",
+      "date": "2026-09-03",
+      "summary": "经验固化即降载：经验升格 L4 正式规则后必须从 EXPERIENCE.md 删除对应摘要，毕业 L3 场景技能后只留 ≤60 字符指针，目标维持摘要在上限 80%（1200 字符）以下；refine-experience.mjs 校验已毕业主题的摘要正文超指针上限即报错，避免每个会话前置读重复提醒已固化规则",
+      "source": "user-correction",
+      "scene": "wego-uxsystem-iterate-经验降载",
+      "tags": [
+        "经验降载",
+        "固化即降载",
+        "指针",
+        "容量",
+        "wego-uxsystem-iterate"
+      ]
     }
   ]
 }
