@@ -1111,7 +1111,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       .map((ch, i) => ({ ch, i }))
       .sort((a, b) => computedOrder(a.ch) - computedOrder(b.ch) || a.i - b.i)
       .map(x => x.ch);
-    debugLog.add('MOVE', `  移动后 容器显示顺序=[${afterSeq.map(elLabel).join('>')}] 目标order=${elNew} 相邻order=${nbNew}` + (shifted.length ? ` 顺延元素order=${g}` : ''));
+    debugLog.add('MOVE', `  移动后 容器显示顺序=[${afterSeq.map(elLabel).join('>')}] 目标order=${elNew} 相邻order=${nbNew}` + (shifted.length ? ` 顺延元素order=${elNew}` : ''));
     return { el, neighbor, elOrder, elNew, nbOrder, nbNew, idxOld: idx, idxNew: fwd ? idx - 1 : idx + 1, shifted };
   }
 
