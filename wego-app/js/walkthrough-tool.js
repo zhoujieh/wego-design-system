@@ -1847,7 +1847,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         this._rafId = null;
       }
     }
-    /** 布局间距标注：四边到最近参考（相邻兄弟边缘 / 父 content box 边缘） */
+    /** 布局间距标注：四边到父容器 content box 边缘（当前容器） */
     _layoutGaps(el, rect) {
       const gaps = { left: null, top: null, right: null, bottom: null };
       const parent = el.parentElement;
@@ -1858,19 +1858,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const contentTop = pr.top + (parseFloat(pcs.paddingTop) || 0);
       const contentRight = pr.right - (parseFloat(pcs.paddingRight) || 0);
       const contentBottom = pr.bottom - (parseFloat(pcs.paddingBottom) || 0);
-      let refL = null, refT = null, refR = null, refB = null;
-      Array.from(parent.children).forEach(s => {
-        if (s === el) return;
-        const sr = s.getBoundingClientRect();
-        if (sr.right <= rect.left + 0.5 && (refL === null || sr.right > refL)) refL = sr.right;
-        if (sr.left >= rect.right - 0.5 && (refR === null || sr.left < refR)) refR = sr.left;
-        if (sr.bottom <= rect.top + 0.5 && (refT === null || sr.bottom > refT)) refT = sr.bottom;
-        if (sr.top >= rect.bottom - 0.5 && (refB === null || sr.top < refB)) refB = sr.top;
-      });
-      gaps.left = { from: refL !== null ? refL : contentLeft, dist: rect.left - (refL !== null ? refL : contentLeft) };
-      gaps.top = { from: refT !== null ? refT : contentTop, dist: rect.top - (refT !== null ? refT : contentTop) };
-      gaps.right = { from: refR !== null ? refR : contentRight, dist: (refR !== null ? refR : contentRight) - rect.right };
-      gaps.bottom = { from: refB !== null ? refB : contentBottom, dist: (refB !== null ? refB : contentBottom) - rect.bottom };
+      gaps.left = { from: contentLeft, dist: rect.left - contentLeft };
+      gaps.top = { from: contentTop, dist: rect.top - contentTop };
+      gaps.right = { from: contentRight, dist: contentRight - rect.right };
+      gaps.bottom = { from: contentBottom, dist: contentBottom - rect.bottom };
       return gaps;
     }
     /** 元信息气泡文案：优先稳定 class，其次 tagName + 尺寸 */
@@ -1902,24 +1893,24 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       svg += `<line class="guide" x1="${R}" y1="0" x2="${R}" y2="${vh}"/>`;
       svg += `<line class="guide" x1="0" y1="${T}" x2="${vw}" y2="${T}"/>`;
       svg += `<line class="guide" x1="0" y1="${B}" x2="${vw}" y2="${B}"/>`;
-      // 2. 间距标注线 + 数字（有参考时）
+      // 2. 间距标注线 + 数字（仅绘制有值间距；贴边/0 不显示）
       const num = (x, y, d) => `<text class="num" x="${x}" y="${y}" text-anchor="middle">${Math.round(d)}</text>`;
-      if (gaps.left) {
+      if (gaps.left && Math.abs(gaps.left.dist) > 0.5) {
         const gy = this._clamp(T + rect.height / 2, 20, vh - 6);
         svg += `<line class="sp" x1="${gaps.left.from}" y1="${gy}" x2="${L}" y2="${gy}"/>`;
         svg += num((gaps.left.from + L) / 2, gy - 4, gaps.left.dist);
       }
-      if (gaps.right) {
+      if (gaps.right && Math.abs(gaps.right.dist) > 0.5) {
         const gy = this._clamp(T + rect.height / 2, 20, vh - 6);
         svg += `<line class="sp" x1="${R}" y1="${gy}" x2="${gaps.right.from}" y2="${gy}"/>`;
         svg += num((R + gaps.right.from) / 2, gy - 4, gaps.right.dist);
       }
-      if (gaps.top) {
+      if (gaps.top && Math.abs(gaps.top.dist) > 0.5) {
         const gx = this._clamp(L + rect.width / 2, 30, vw - 30);
         svg += `<line class="sp" x1="${gx}" y1="${gaps.top.from}" x2="${gx}" y2="${T}"/>`;
         svg += `<text class="num" x="${gx}" y="${this._clamp((gaps.top.from + T) / 2 + 4, 16, vh - 8)}" text-anchor="middle">${Math.round(gaps.top.dist)}</text>`;
       }
-      if (gaps.bottom) {
+      if (gaps.bottom && Math.abs(gaps.bottom.dist) > 0.5) {
         const gx = this._clamp(L + rect.width / 2, 30, vw - 30);
         svg += `<line class="sp" x1="${gx}" y1="${B}" x2="${gx}" y2="${gaps.bottom.from}"/>`;
         svg += `<text class="num" x="${gx}" y="${this._clamp((B + gaps.bottom.from) / 2 + 4, 16, vh - 8)}" text-anchor="middle">${Math.round(gaps.bottom.dist)}</text>`;
