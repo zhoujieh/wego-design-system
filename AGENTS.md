@@ -15,14 +15,14 @@
 - 技能路由：`.codex/skills/README.md`
 - 设计原则：`.codex/skills/wego-design/references/design-principles.md`
 - 各技能方法：对应技能 `references/`
-- 经验体系：事实 `evidence.json`（只增不减）→ 核心摘要 `experience/EXPERIENCE.md`（会话前置读）→ 场景技能 `.codex/skills/wego-scene-*`（可被 AI 触发）→ 正式规则；完整机制见 `wego-uxsystem-iterate/references/workflow-iteration.md`。
+- 经验体系：事实 `.codex/skills/wego-uxsystem-iterate/experience/evidence.json`（只增不减）→ 核心摘要 `.codex/skills/wego-uxsystem-iterate/experience/EXPERIENCE.md`（会话前置读）→ 场景技能 `.codex/skills/wego-scene-*`（可被 AI 触发）→ 正式规则；完整机制见 `.codex/skills/wego-uxsystem-iterate/references/workflow-iteration.md`。
 - 本文件只定义跨任务硬约束，不预读完整工作流。
 
 <!-- rule-id: agent-must-read-experience-before-task -->
-- 处理 wego 任务前，会话前置读取 `EXPERIENCE.md` 核心摘要，了解历史经验与踩坑教训；命中场景技能挂载点时再按需读取对应 `wego-scene-*`，不预读全部场景技能。
+- 处理 wego 任务前，会话前置读取 `.codex/skills/wego-uxsystem-iterate/experience/EXPERIENCE.md` 核心摘要，了解历史经验与踩坑教训；命中场景技能挂载点时再按需读取对应 `.codex/skills/wego-scene-*`，不预读全部场景技能。
 
 <!-- rule-id: experience-is-ai-curated -->
-- 经验由 `wego-uxsystem-iterate` 技能内的 AI 基于 `evidence.json` 事实推理维护：`EXPERIENCE.md` 用 `§` 分隔一句话摘要（≤1500 字符），场景技能沉淀固定流程；每条经验必须追溯到 `evidence.json` 中的事实事件，表述不得与事实矛盾；禁止脚本机械化生成内容。`node scripts/refine-experience.mjs` 仅做事实一致性校验、格式检查和只读查询，不生成内容。业务技能只允许写 `.tasks/experience-inbox.json` 未判定草稿，不得直接改经验权威源。
+- 经验由 `wego-uxsystem-iterate` 技能内的 AI 基于 `.codex/skills/wego-uxsystem-iterate/experience/evidence.json` 事实推理维护：`.codex/skills/wego-uxsystem-iterate/experience/EXPERIENCE.md` 用 `§` 分隔一句话摘要（≤1500 字符），场景技能沉淀固定流程；每条经验必须追溯到事实事件，表述不得与事实矛盾；禁止脚本机械化生成内容。`node scripts/refine-experience.mjs` 仅做事实一致性校验、格式检查和只读查询，不生成内容。业务技能只允许写 `.tasks/experience-inbox.json` 未判定草稿，不得直接改经验权威源。
 
 ## 固定产物与边界
 

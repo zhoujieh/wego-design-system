@@ -188,6 +188,20 @@
         "用户纠正",
         "wego-uxsystem-iterate"
       ]
+    },
+    {
+      "id": "ev-014",
+      "date": "2026-09-03",
+      "summary": "经验机制通电（PR #161）后，AGENTS 权威入口把经验文件完整仓库根路径缩成 experience/EXPERIENCE.md 残片与裸文件名，任务 worktree 中的新会话无法直接定位，需先全仓搜索，用户截图反馈出现'文件路径核查/经验文件路径有误'的额外曲折。修复：AGENTS、workflow-iteration、sync-matrix、uxsystem SKILL 中所有定位与操作指令统一写仓库根完整路径，仅章节标题允许裸文件名。教训：面向现场 AI 的权威入口和操作步骤，文件路径必须完整到可直接打开",
+      "source": "user-correction",
+      "scene": "workflow-experience-path",
+      "tags": [
+        "文件路径",
+        "权威入口",
+        "经验机制",
+        "用户纠正",
+        "wego-uxsystem-iterate"
+      ]
     }
   ]
 }

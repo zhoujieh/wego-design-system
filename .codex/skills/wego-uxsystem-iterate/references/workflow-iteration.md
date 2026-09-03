@@ -7,12 +7,12 @@
 
 | 层 | 载体 | 性质 | 谁维护 |
 | --- | --- | --- | --- |
-| L1 事实 | `experience/evidence.json` | 只增不减的事实事件 | uxsystem |
-| L2 核心摘要 | `experience/EXPERIENCE.md` | 一句话教训索引，会话前置读，≤1500 字符 | uxsystem |
+| L1 事实 | `.codex/skills/wego-uxsystem-iterate/experience/evidence.json` | 只增不减的事实事件 | uxsystem |
+| L2 核心摘要 | `.codex/skills/wego-uxsystem-iterate/experience/EXPERIENCE.md` | 一句话教训索引，会话前置读，≤1500 字符 | uxsystem |
 | L3 场景技能 | `.codex/skills/wego-scene-*/SKILL.md` | 可被 AI 触发的固定流程，按需读取 | uxsystem |
 | L4 正式规则 | AGENTS.md / SKILL.md / references / 守卫 | 跨场景硬约束 | uxsystem |
 
-经验在四层之间单向流动：事实 → 摘要 → 场景技能 → 正式规则；任一层都不删除 L1 事实。
+经验在四层之间单向流动：事实 → 摘要 → 场景技能 → 正式规则；任一层都不删除 L1 事实。表中 L1/L2/L3 路径均相对仓库根，任何技能引用时直接使用完整路径，不再写 `experience/` 缩写或裸文件名。
 
 ## 基本原则
 
@@ -66,9 +66,9 @@
 
 ### 沉淀步骤（L1+L2 轻沉淀）
 
-1. 用 `node scripts/refine-experience.mjs --related <关键词>` 只取相关事实，不全量读取 evidence.json。
-2. 在 `evidence.json` 追加事实事件（id/date/summary/source/scene/tags）。
-3. AI 基于事实推理，在 `EXPERIENCE.md` 用 `§` 追加或更新一句话摘要。
+1. 用 `node scripts/refine-experience.mjs --related <关键词>` 只取相关事实，不全量读取事实文件。
+2. 在 `.codex/skills/wego-uxsystem-iterate/experience/evidence.json` 追加事实事件（id/date/summary/source/scene/tags）。
+3. AI 基于事实推理，在 `.codex/skills/wego-uxsystem-iterate/experience/EXPERIENCE.md` 用 `§` 追加或更新一句话摘要。
 4. 运行 `node scripts/refine-experience.mjs --check` 校验通过。
 5. 告知用户 `🧠已沉淀经验：<简短描述>`。
 
@@ -105,8 +105,8 @@ L1/L2 是纯文本数据、不影响运行时，随当前业务 PR 一起进 mai
 1. 重新核对经验归属和唯一 `targetAuthority`。
 2. 优先修复真实断点。已有规则已经覆盖时，先检查执行入口、消费者、同步和验证，不得默认再增加同义规则。
 3. 修改正式规则（AGENTS.md / 技能文件 / 守卫脚本），只同步直接消费者。
-4. 运行对应验证，通过后在 evidence.json 追加升级记录事件。
-5. 从 EXPERIENCE.md 删除对应摘要；若已建场景技能，回流后删除技能并清理挂载点。
+4. 运行对应验证，通过后在 `.codex/skills/wego-uxsystem-iterate/experience/evidence.json` 追加升级记录事件。
+5. 从 `.codex/skills/wego-uxsystem-iterate/experience/EXPERIENCE.md` 删除对应摘要；若已建场景技能，回流后删除技能并清理挂载点。
 6. 升级后同类问题再次出现时，立即重新沉淀并复查上次修复内容。
 
 ## 文档漂移检查
