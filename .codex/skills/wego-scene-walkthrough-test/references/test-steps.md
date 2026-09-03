@@ -40,6 +40,13 @@
 4. 注意：元素拖拽换位（拖动越过兄弟中心）已随「连续点击选择」交互迭代移除；旧 localStorage reorder 数据仍被兼容读取（`_applyReorder`/`_queryMoveTarget` 保留）。
 5. 反例：父容器非 flex（display 无 flex）时移动按钮置灰、方向键无操作，属正常（非 bug）；同档（order 相同）换位会顺延中间同档元素，order 可能多次变化。
 
+## ⑥ 连点选择 + 文本改文案（本次交互迭代新增）
+1. 连点逐级上移：鼠标不动（±16px、无时间限制）点击当前选中元素 → 逐级上移父级；到根回环最深层。鼠标移动后点击 → 改选（含选中容器后点内部元素）。
+2. 快速双击（<350ms）可编辑文本 → contentEditable 内联编辑；改字 blur/Enter 提交 → 面板 toast「已更新文本」、bus 'style-change' 记录 text-content。
+3. 撤销 → 文本恢复原值；重做 → 新值；**刷新页面 → 文本保持**（`_replayInlineChanges` 对 text-content 走 `el.textContent = c.newValue`，非 setProperty）。
+4. 样式面板 light 局部更新：上移选择时只更新内容不重建（`.panel-body` 首子节点引用不变）；结构指纹不一致时回落全量渲染。
+5. 反例：顺序移动 ArrowDown 会让同容器兄弟**换位**，改文案前须重取目标元素坐标（原坐标此时命中兄弟）；text-content 若走 `el.style.setProperty` 恢复会静默失败，刷新后文本丢失（曾出现，已修复）。
+
 ## ⑤ 悬停/选中元信息
 1. 悬停元素（不选中）→ 四边 `line.guide` 红虚线延长线 + `.bubble`（类名 + 宽×高）+ `text.num` 间距数字。
 2. 有 padding 元素 → `rect.pad-r` 青色块；悬停显示 `padding: t r b l` 数值。

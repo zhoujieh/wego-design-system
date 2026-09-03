@@ -33,8 +33,10 @@
 | margin 色块（橙） | `rect.mar-r`（rgba(255,170,0,.16)） |
 | hover 数值 tooltip | `.tooltip`（文本形如 `padding: 12px 16px 12px 16px`） |
 
-## 选中与拖拽
+## 选中与连点选择
 
 - 选中元素：`panel._targetEl`（样式面板实例属性）可取当前选中元素。
-- 连点选中父级：同位置连点（≤1.2s、±16px）逐级上移（img→item→grid→media→card）。
-- 拖拽换位：选中即拖（120ms + 移动 >8px 双触发）；`_swapSiblings` 用 FLIP 过渡（transition transform 250ms cubic-bezier(0.22,0.9,0.32,1)）。
+- 连点逐级上移：鼠标不动（±16px、**无时间限制**，停顿慢点亦可）点击当前选中元素 → 逐级上移父级；到根后回环到最深层重新开始（保留连点链）。鼠标移动后点击 → 改选命中最深层（含选中容器后点内部元素→改选内部）。
+- 快速双击（<350ms）可编辑文本（直接文本节点、非空且 ≤200 字）→ 进入文本内联改文案（contentEditable，blur/Enter 提交，bus 'style-change' text-content 记录；优先于上移）。
+- 顺序移动：面板移动按钮或键盘方向键（row→左右、column→上下）→ flex 容器内 CSS order 换位（`_moveSelected`→`moveFlexItem`+`orderBaselines`+`_recordMoveChange`+净零往返）。
+- 元素拖拽换位已移除：`_startLongPressDrag`/`_startElementDrag`/`_swapSiblings` 等拖拽方法已删除；reorder 消费方（`_isReorderable`/`_elementIdentity`/`_applyReorder`/`_queryMoveTarget`）保留以兼容旧 localStorage reorder 数据。
