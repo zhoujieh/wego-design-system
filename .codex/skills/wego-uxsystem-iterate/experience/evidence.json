@@ -499,6 +499,22 @@
         "容量",
         "wego-uxsystem-iterate"
       ]
+    },
+    {
+      "id": "ev-036",
+      "date": "2026-09-03",
+      "summary": "走查工具间距标注按 Figma 式呈现：gap（元素到父容器 content box 四边间距）用洋红间距线+数字直显，padding 用蓝色数值标签，margin 用绿色数值标签，均直接画在页面上；去掉元素信息气泡 .bubble、色块 hover 弹值的 tooltip 及 padding/margin 大面积色块填充；贴边（间距 0）不绘制只显示有值间距",
+      "source": "user-correction",
+      "scene": "wego-scene-walkthrough-test-间距标注Figma式",
+      "tags": [
+        "走查工具",
+        "间距标注",
+        "Figma式",
+        "gap洋红",
+        "padding蓝",
+        "margin绿",
+        "wego-walkthrough"
+      ]
     }
   ]
 }
