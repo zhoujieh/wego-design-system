@@ -8,6 +8,7 @@
 wego-app/scenes/{分类}/{主业务场景}/_iterations/{iteration_id}-{title}-{YYYYMMDD}/
 ├── iteration.json
 ├── {iteration_id}-{title}-{YYYYMMDD}.md   # spec.md 需求规格说明（唯一需求源）
+├── acceptance.json   # 验收勾销账本（submit-brief 生成，AI 逐项核对维护）
 └── freeze.json   # 仅明确冻结后存在
 ```
 
@@ -30,6 +31,8 @@ wego-app/scenes/{分类}/{主业务场景}/_iterations/{iteration_id}-{title}-{Y
 
 `brief_submission`、`brief_confirmation`、`prototype_submission`、`prototype_confirmation`、`stage_outputs`、`change_log`、`freeze`、范围哈希和文件指纹全部由脚本维护，不直接编辑。
 
+`acceptance.json` 验收勾销账本由脚本生成骨架并校验一致性，AI 只逐项填写核对结论：每条 `status`（unverified / implemented / missing / mismatch）与 `evidence`（实现证据，指向真实代码或交互位置）。账本是实现/验收侧结构，禁止把勾销状态写进 spec.md，避免污染范围哈希与漂移检测。
+
 ## spec.md 字段
 
 spec.md 按[简报模板](./brief-template.md)填写，包含以下业务字段（标题中括号内为字段名）：
@@ -50,11 +53,12 @@ spec.md 按[简报模板](./brief-template.md)填写，包含以下业务字段�
 
 ```text
 draft
-  → 写好需求规格说明 → submit-brief（自动解析 MD、校验、算哈希）
-in-development（开发中，需求规格说明可随时修改后重新 submit-brief）
-  → 用户明确说"验收完成"且 5 维度一致性校验通过 → confirm-brief
+  → 写好简要需求规格说明 → submit-brief（薄档校验 + 生成验收账本）
+in-development（原型循环：spec.md 随时修改后重新 submit-brief，每轮用户反馈写回字段）
+  → 用户明确表达"验收完成" → AI 补全终版 spec.md → 重新 submit-brief → 核对填写账本
+  → 展示终版补全 diff + 账本 → 用户过目确认 → confirm-brief（终局守门：全量校验 + 充分性 + 账本全绿）
 prototyping
-  → 用户明确验收通过 → submit-prototype（场景验证 + 固化指纹 + 确认 + 冻结，一步完成）
+  → submit-prototype（账本复验 + 场景验证 + 固化指纹 + 确认 + 冻结，一步完成）
 frozen
 ```
 
@@ -63,7 +67,7 @@ frozen
 - `block`：draft/in-development/prototyping → blocked，暂停迭代；`resume` 恢复到中断前状态。
 - `terminate`：draft/in-development/prototyping/blocked → cancelled（废弃）或 superseded（被取代），须用户明确确认，终态不可恢复。
 
-`in-development` 承载简报开放开发：浏览本地预览、修改需求规格说明、重新 submit-brief、完成一次修改、通过轻量检查，都不改变状态，也不触发 confirm。只有用户明确说"验收完成"并通过一致性校验后才执行 confirm-brief。
+`in-development` 承载原型循环：浏览本地预览、修改需求规格说明、重新 submit-brief、完成一次修改、通过轻量检查，都不改变状态，也不触发 confirm。立项确认（开工前的需求沟通）+ 已提交简要简报即原型授权，可交给 `wego-design` 开始实现；循环中每轮用户反馈必须写回 spec.md 对应字段后重新 submit-brief。`confirm-brief` 是终局确认：只在用户明确表达"验收完成"后，由 AI 补全终版 spec.md、核对填写账本、展示补全 diff 与账本，用户过目确认时执行（须带 `--user-confirmed-brief` 授权参数），全量结构校验、充分性与账本全绿由脚本守门。
 
 所有命令都通过统一脚本执行：
 
@@ -91,9 +95,9 @@ node scripts/iteration-record.mjs check --file {iteration.json}
 
 - `suggest-id`：根据场景名预查询建议的迭代 ID（自动判断分类+递增编号），不创建任何文件。
 - `init`：创建迭代，自动生成需求规格说明空模板和 iteration.json。`--iteration-id` 可选，不传则自动生成；用户主动指定时直接使用，支持 `-1`、`-2` 等修订号后缀。
-- `submit-brief`：从需求规格说明解析 prototype_brief 快照，运行充分性守门，固定范围哈希；从 draft 或 in-development 状态均可执行。
-- `confirm-brief`：只能在用户明确表达"验收完成"且 5 维度一致性校验通过后执行，命令中的迭代 ID 必须与当前记录一致。执行后进入 `prototyping`。
-- `submit-prototype`：用户明确验收通过后执行，一步完成场景验证、固化原型指纹、确认原型和冻结归档。必须传 `--user-confirmed-prototype {iteration_id}`。源码验证失败时不得进入 frozen；执行后生成 freeze.json 快照，状态变为 `frozen`。
+- `submit-brief`：从需求规格说明解析 prototype_brief 快照，运行**薄档守门**（goal、included、entry_points、critical_paths 非空；states、data_contract、prototype_boundaries 允许为空，open_questions 允许暂存），固定范围哈希，并生成/差量迁移验收勾销账本 `acceptance.json`（锚点未变条目保留核对状态与证据，新增条目重置 unverified）；从 draft 或 in-development 状态均可执行。
+- `confirm-brief`：**终局确认**。只能在用户明确表达"验收完成"、AI 补全终版 spec.md 并重新 submit-brief、核对填写账本、展示补全 diff 与账本、用户过目确认后执行。脚本执行终局守门：全量结构校验 + 充分性 + open_questions 清空 + 账本锚点一致且全部 implemented，任一不过即拒绝。命令中的迭代 ID 必须与当前记录一致。执行后进入 `prototyping`。
+- `submit-prototype`：用户终局确认后执行，一步完成账本复验（全绿）、场景验证、固化原型指纹、确认原型和冻结归档。必须传 `--user-confirmed-prototype {iteration_id}`。源码验证失败时不得进入 frozen；执行后生成 freeze.json 快照，状态变为 `frozen`。
 - Agent 不得因为实现完成、检查通过、用户查看了本地页面，或自己判断"可以交付"而执行 `submit-prototype`。
 - `migrate` 只迁移 schemaVersion 5 的历史记录。旧的待验收原型因没有提交指纹会回到 `prototyping`，必须重新获得提交授权并提交后再请求用户验收；不得借迁移伪造验收。
 - `block`：用户要求暂停时执行，进入 `blocked`；不修改任何提交/确认快照，主链路命令在 blocked 期间全部不可执行。
@@ -102,7 +106,7 @@ node scripts/iteration-record.mjs check --file {iteration.json}
 
 ## 本地迭代与验收反馈
 
-- 在 `in-development` 中收到已确认范围内的视觉、布局、组件、Token、路由或交互调整，直接修改需求规格说明并重新 submit-brief，不执行 invalidate。
+- 在 `in-development`（原型循环）中收到任何反馈：业务事实类反馈先写回 spec.md 对应字段再重新 submit-brief（账本差量迁移，未变条目保留核对状态）；视觉、布局、组件、Token、路由或交互类反馈直接修改实现，不动简报。
 - 在 `prototyping` 中收到已确认范围内的视觉、布局、组件、Token、路由或交互调整，直接继续修改，不执行 `invalidate`。
 - 在 `frozen` 中收到上述调整，先执行 `invalidate --stage=prototype` 回到 `prototyping`（自动删除 freeze.json），在本地累计完成新一轮修改；只有用户再次明确表达"验收通过"时，才重新执行 `submit-prototype`。
 - 用户反馈改变目标、范围、入口、关键路径、状态、数据或可见结果时，无论当前处于哪个阶段，都先 `invalidate --stage=brief`，更新需求规格说明并重新提交确认。
