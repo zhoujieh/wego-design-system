@@ -199,6 +199,7 @@ const systemRuntimePrefixes = [
   '.codex/skills/wego-design/assets/',
   '.codex/skills/wego-design/components/',
   '.codex/skills/wego-design/preview/',
+  '.codex/skills/wego-design/runtime/',
   '.codex/skills/wego-design/ui_kits/'
 ];
 const systemRuntimeFiles = new Set([
@@ -232,6 +233,32 @@ function checkSystemMetadata() {
   }
   if (systemRuntimeChanged && !changedSet.has('.codex/skills/wego-design/metadata.json')) {
     add('error', 'metadata.version_required', '设计系统运行时源变化时必须同步递增 metadata.version', path.join(libraryRoot, 'metadata.json'));
+  }
+}
+
+// runtime/ 只允许设计系统通用组件运行时：允许集合由 components/*.json 的 slug 派生，
+// 组件迭代新增时自动放行（无需改守卫）；业务文件（发布产品/帮卖/走查等）必须归属 wego-app/js 与 wego-app/css。
+function checkDesignRuntimeBoundary() {
+  const runtimeDir = path.join(libraryRoot, 'runtime');
+  if (!fs.existsSync(runtimeDir) || !fs.statSync(runtimeDir).isDirectory()) return;
+  const componentsDir = path.join(libraryRoot, 'components');
+  const componentSlugs = new Set();
+  if (fs.existsSync(componentsDir) && fs.statSync(componentsDir).isDirectory()) {
+    for (const entry of fs.readdirSync(componentsDir, { withFileTypes: true })) {
+      if (!entry.isFile() || !entry.name.endsWith('.json') || entry.name === 'index.json') continue;
+      try {
+        const data = JSON.parse(fs.readFileSync(path.join(componentsDir, entry.name), 'utf8'));
+        if (data && typeof data.slug === 'string') componentSlugs.add(data.slug);
+      } catch { /* 单个组件文件解析失败不阻断守卫，交由组件契约校验处理 */ }
+    }
+  }
+  for (const entry of fs.readdirSync(runtimeDir, { withFileTypes: true })) {
+    const base = entry.name.replace(/\.(js|css|json)$/i, '');
+    if (!componentSlugs.has(base)) {
+      add('error', 'runtime.business_file',
+        `runtime/ 只允许设计系统通用组件运行时（允许集合由 components/*.json 的 slug 派生），业务文件应归属 wego-app/js 或 wego-app/css：${entry.name}`,
+        path.join(runtimeDir, entry.name));
+    }
   }
 }
 
@@ -520,6 +547,7 @@ function main() {
   } else {
     checkSkillFlow();
     checkSkillAdapters();
+    checkDesignRuntimeBoundary();
     if (requestedScope === 'changed') runChangedScope();
     else if (requestedScope === 'system') runSystemScope();
     else runFullScope();
