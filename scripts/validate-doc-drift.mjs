@@ -76,6 +76,32 @@ function extractReferencedRuleIds(content) {
   return ids;
 }
 
+// 状态词一致性：从迭代脚本提取合法状态/命令/参数词表，拦截文档引用脚本中不存在的幽灵状态
+const stateMorphemes = ['confirm', 'development', 'prototyp', 'frozen', 'block', 'cancel', 'supersede', 'await', 'terminat', 'resum', 'draft'];
+function extractIterationVocabulary(scriptSource) {
+  const vocabulary = new Set();
+  const statusesMatch = scriptSource.match(/const statuses = new Set\(\[([^\]]*)\]\)/);
+  if (statusesMatch) {
+    for (const [, word] of statusesMatch[1].matchAll(/'([^']+)'/g)) vocabulary.add(word);
+  }
+  for (const [, word] of scriptSource.matchAll(/case '([a-z-]+)'/g)) vocabulary.add(word);
+  for (const [, word] of scriptSource.matchAll(/--([a-z][a-z-]+)/g)) vocabulary.add(word);
+  return vocabulary;
+}
+function extractStateWordIssues(content, vocabulary) {
+  const issues = [];
+  const seen = new Set();
+  for (const [, raw] of content.matchAll(/`([^`\n]+)`/g)) {
+    const token = raw.trim();
+    if (!/^[a-z][a-z-]*$/.test(token)) continue;
+    if (!stateMorphemes.some(morpheme => token.includes(morpheme))) continue;
+    if (vocabulary.has(token) || seen.has(token)) continue;
+    seen.add(token);
+    issues.push(`引用了迭代脚本中不存在的状态/命令/参数词：\`${token}\`（词表来自 scripts/iteration-record.mjs 的 statuses 与命令定义）`);
+  }
+  return issues;
+}
+
 // 固定四个技能目录之外，动态纳入经验毕业产生的 wego-scene-* 场景技能目录
 function collectDocDirs(root) {
   const dirs = [...docDirs];
@@ -134,6 +160,17 @@ function validate() {
     }
   }
 
+  // 第三遍：状态词一致性（文档反引号引用的迭代状态/命令必须存在于迭代脚本）
+  const iterationScriptPath = path.join(root, 'scripts/iteration-record.mjs');
+  if (fs.existsSync(iterationScriptPath)) {
+    const vocabulary = extractIterationVocabulary(fs.readFileSync(iterationScriptPath, 'utf8'));
+    for (const [file, content] of fileContents) {
+      for (const message of extractStateWordIssues(content, vocabulary)) {
+        errors.push({ code: 'doc-drift.state-word-unknown', file, message });
+      }
+    }
+  }
+
   return {
     errors,
     warnings,
@@ -154,6 +191,9 @@ if (testing) {
     fs.writeFileSync(path.join(fixture, '.codex/skills/wego-uxsystem-iterate/SKILL.md'), '引用 rule-id: test-rule 和 rule-id: missing-rule');
     fs.mkdirSync(path.join(fixture, 'scripts'), { recursive: true });
     fs.writeFileSync(path.join(fixture, 'scripts/exists.mjs'), '// exists');
+    fs.writeFileSync(path.join(fixture, 'scripts/iteration-record.mjs'), "const statuses = new Set(['draft', 'in-development']);\ncase 'block': break;\n");
+    fs.mkdirSync(path.join(fixture, '.codex/skills/wego-product'), { recursive: true });
+    fs.writeFileSync(path.join(fixture, '.codex/skills/wego-product/SKILL.md'), '状态 `draft` 合法，`prototype-confirmed` 是幽灵状态');
 
     const originalCwd = process.cwd();
     process.chdir(fixture);
@@ -162,6 +202,7 @@ if (testing) {
 
     if (!report.errors.some(e => e.message.includes('missing.mjs'))) throw new Error('应检测到缺失文件');
     if (!report.warnings.some(w => w.message.includes('missing-rule'))) throw new Error('应检测到缺失 rule-id');
+    if (!report.errors.some(e => e.code === 'doc-drift.state-word-unknown' && e.message.includes('prototype-confirmed'))) throw new Error('应检测到幽灵状态词');
     console.log('文档漂移检查测试通过');
   } finally {
     fs.rmSync(fixture, { recursive: true, force: true });

@@ -67,7 +67,7 @@
 - 业务页面请求进入 `wego-product` 或 `wego-design` 前必须先经 `wego-github-delivery` 完成交付单元核对。
 
 <!-- rule-id: agent-must-pull-before-task-start -->
-- 开工前先 `git pull --rebase origin main` 同步最新 `main`；具体执行时机见启动清单（完整启动时执行，轻量启动时按需）。
+- 开工前先同步最新 `main`（完整启动执行 `git pull --rebase origin main`，轻量启动至少执行 `git fetch origin`）；具体执行时机见启动清单。
 
 <!-- rule-id: open-pr-must-sync-main-when-behind -->
 - 接手交付单元或更新开放 PR 前，其分支落后 `main` 时先 merge 最新 `main` 并解决冲突再继续；等待合并的 PR 同样适用，闲置不是豁免理由。
