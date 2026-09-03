@@ -966,6 +966,16 @@ function invalidationSourceError(record, stage) {
   if (!invalidateSources[stage]?.has(record.status)) return `当前状态 ${record.status} 不能执行 invalidate --stage=${stage}`;
   return null;
 }
+// blocked 不新增顶层字段：恢复目标由不可变的提交/确认快照推导
+// （blocked 期间无任何命令可修改这些快照，推导结果稳定）
+function resumeTargetOf(record) {
+  if (record.brief_confirmation) return 'prototyping';
+  if (record.brief_submission) return 'in-development';
+  return 'draft';
+}
+const blockSources = new Set(['draft', 'in-development', 'prototyping']);
+const terminateSources = new Set(['draft', 'in-development', 'prototyping', 'blocked']);
+const terminateTargets = new Set(['cancelled', 'superseded']);
 function applyInvalidation(record, stage) {
   record.status = stage === 'brief' ? 'draft' : 'prototyping';
   if (stage === 'brief') {
@@ -1330,6 +1340,41 @@ function test() {
     const frozen = JSON.parse(fs.readFileSync(iterationFile, 'utf8'));
     assert(frozen.status === 'frozen', '失效后重新提交未回到 frozen');
 
+    // block / resume / terminate 状态出口测试
+    assert(resumeTargetOf(prototyping) === 'prototyping' && resumeTargetOf(inDevelopment) === 'in-development' && resumeTargetOf(sample) === 'draft', 'resume 目标推导与提交/确认快照不一致');
+    assert(run(['invalidate', '--file', iterationArgument, '--stage=prototype']).status === 0, '出口测试前置 invalidate 失败');
+    const unapprovedTermination = run(['terminate', '--file', iterationArgument, '--target', 'cancelled']);
+    assert(unapprovedTermination.status !== 0 && (unapprovedTermination.stderr || '').includes('用户明确确认'), 'terminate 未拦截缺少用户明确授权的请求');
+    const invalidTerminationTarget = run(['terminate', '--file', iterationArgument, '--user-confirmed-termination', 'test', '--target', 'paused']);
+    assert(invalidTerminationTarget.status !== 0 && (invalidTerminationTarget.stderr || '').includes('--target'), 'terminate 未拦截非法目标状态');
+    const blockedResult = run(['block', '--file', iterationArgument]);
+    assert(blockedResult.status === 0, `合法 block 失败：${(blockedResult.stderr || blockedResult.stdout).trim()}`);
+    assert(JSON.parse(fs.readFileSync(iterationFile, 'utf8')).status === 'blocked', 'block 未进入 blocked');
+    const blockedSubmission = run(['submit-prototype', '--file', iterationArgument, '--user-confirmed-prototype', 'test']);
+    assert(blockedSubmission.status !== 0 && (blockedSubmission.stderr || '').includes('不能执行'), 'blocked 状态不得执行 submit-prototype');
+    const blockedBriefConfirmation = run(['confirm-brief', '--file', iterationArgument, '--user-confirmed-brief', 'test']);
+    assert(blockedBriefConfirmation.status !== 0, 'blocked 状态不得执行 confirm-brief');
+    const doubleBlock = run(['block', '--file', iterationArgument]);
+    assert(doubleBlock.status !== 0 && (doubleBlock.stderr || '').includes('不能执行'), 'blocked 状态不得重复 block');
+    const resumeResult = run(['resume', '--file', iterationArgument]);
+    assert(resumeResult.status === 0, `合法 resume 失败：${(resumeResult.stderr || resumeResult.stdout).trim()}`);
+    assert(JSON.parse(fs.readFileSync(iterationFile, 'utf8')).status === 'prototyping', 'resume 未回到中断前状态');
+    const resumeFromPrototyping = run(['resume', '--file', iterationArgument]);
+    assert(resumeFromPrototyping.status !== 0, '非 blocked 状态不得执行 resume');
+    run(['block', '--file', iterationArgument]);
+    const wrongTargetTermination = run(['terminate', '--file', iterationArgument, '--user-confirmed-termination', 'other-iteration', '--target', 'cancelled']);
+    assert(wrongTargetTermination.status !== 0 && (wrongTargetTermination.stderr || '').includes('必须等于当前 iteration_id'), 'terminate 未拦截授权与目标迭代不一致');
+    const cancelledTermination = run(['terminate', '--file', iterationArgument, '--user-confirmed-termination', 'test', '--target', 'cancelled']);
+    assert(cancelledTermination.status === 0, `合法 terminate 失败：${(cancelledTermination.stderr || cancelledTermination.stdout).trim()}`);
+    const cancelledRecord = JSON.parse(fs.readFileSync(iterationFile, 'utf8'));
+    assert(cancelledRecord.status === 'cancelled' && cancelledRecord.freeze === null, 'terminate 未进入 cancelled');
+    const resumeFromCancelled = run(['resume', '--file', iterationArgument]);
+    assert(resumeFromCancelled.status !== 0, '终态 cancelled 不得 resume');
+    fs.writeFileSync(iterationFile, `${JSON.stringify(sample, null, 2)}\n`);
+    const supersededTermination = run(['terminate', '--file', iterationArgument, '--user-confirmed-termination', 'test', '--target', 'superseded']);
+    assert(supersededTermination.status === 0, `draft 状态 terminate 失败：${(supersededTermination.stderr || supersededTermination.stdout).trim()}`);
+    assert(JSON.parse(fs.readFileSync(iterationFile, 'utf8')).status === 'superseded', 'terminate 未从 draft 进入 superseded');
+
     const emptyFingerprints = clone(frozen);
     emptyFingerprints.freeze.fingerprints = {};
     assert(has(emptyFingerprints, 'freeze.fingerprints 必须是非空对象', iterationFile, fixtureRoot), 'frozen 校验未拦截空 fingerprints');
@@ -1457,7 +1502,49 @@ switch (command) {
     save(file, record, 'invalidate');
     break;
   }
+  case 'block': {
+    const file = requireFile();
+    const record = load(file);
+    const errors = validate(record, file);
+    if (errors.length) fail(errors.join('\n'));
+    if (!blockSources.has(record.status)) fail(`${file}: 当前状态 ${record.status} 不能执行 block`);
+    record.status = 'blocked';
+    const changedErrors = validate(record, file);
+    if (changedErrors.length) fail(`block 后记录非法，未写入文件：\n${changedErrors.join('\n')}`);
+    save(file, record, 'block');
+    console.log(`迭代已暂停，状态：blocked（resume 可恢复到 ${resumeTargetOf(record)}）`);
+    break;
+  }
+  case 'resume': {
+    const file = requireFile();
+    const record = load(file);
+    const errors = validate(record, file);
+    if (errors.length) fail(errors.join('\n'));
+    if (record.status !== 'blocked') fail(`${file}: 当前状态 ${record.status} 不能执行 resume`);
+    record.status = resumeTargetOf(record);
+    const changedErrors = validate(record, file);
+    if (changedErrors.length) fail(`resume 后记录非法，未写入文件：\n${changedErrors.join('\n')}`);
+    save(file, record, 'resume');
+    console.log(`迭代已恢复，状态：${record.status}`);
+    break;
+  }
+  case 'terminate': {
+    const target = value('--target');
+    if (!terminateTargets.has(target)) fail('terminate 需要 --target cancelled|superseded 或 --target=cancelled|superseded');
+    const file = requireFile();
+    const record = load(file);
+    requireUserConfirmation(record, '--user-confirmed-termination', 'terminate');
+    const errors = validate(record, file);
+    if (errors.length) fail(errors.join('\n'));
+    if (!terminateSources.has(record.status)) fail(`${file}: 当前状态 ${record.status} 不能执行 terminate`);
+    record.status = target;
+    const changedErrors = validate(record, file);
+    if (changedErrors.length) fail(`terminate 后记录非法，未写入文件：\n${changedErrors.join('\n')}`);
+    save(file, record, 'terminate');
+    console.log(`迭代已终止，状态：${target}（终态，不可恢复）`);
+    break;
+  }
   case 'check': check(); break;
   case 'test': test(); break;
-  default: fail('用法：init|submit-brief|confirm-brief --user-confirmed-brief <iteration_id>|submit-prototype --user-confirmed-prototype <iteration_id>|invalidate|migrate|check|test');
+  default: fail('用法：init|submit-brief|confirm-brief --user-confirmed-brief <iteration_id>|submit-prototype --user-confirmed-prototype <iteration_id>|invalidate|block|resume|terminate --user-confirmed-termination <iteration_id> --target cancelled|superseded|migrate|check|test');
 }
