@@ -1829,7 +1829,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._targetEl = null;
       this._stopTracking();
       this.style.display = 'none';
-      this._hideTooltip();
     }
     _startTracking() {
       this._stopTracking();
@@ -1847,7 +1846,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         this._rafId = null;
       }
     }
-    /** 布局间距标注：四边到最近参考（相邻兄弟边缘 / 父 content box 边缘） */
+    /** 布局间距标注：四边到父容器 content box 边缘（当前容器） */
     _layoutGaps(el, rect) {
       const gaps = { left: null, top: null, right: null, bottom: null };
       const parent = el.parentElement;
@@ -1858,19 +1857,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const contentTop = pr.top + (parseFloat(pcs.paddingTop) || 0);
       const contentRight = pr.right - (parseFloat(pcs.paddingRight) || 0);
       const contentBottom = pr.bottom - (parseFloat(pcs.paddingBottom) || 0);
-      let refL = null, refT = null, refR = null, refB = null;
-      Array.from(parent.children).forEach(s => {
-        if (s === el) return;
-        const sr = s.getBoundingClientRect();
-        if (sr.right <= rect.left + 0.5 && (refL === null || sr.right > refL)) refL = sr.right;
-        if (sr.left >= rect.right - 0.5 && (refR === null || sr.left < refR)) refR = sr.left;
-        if (sr.bottom <= rect.top + 0.5 && (refT === null || sr.bottom > refT)) refT = sr.bottom;
-        if (sr.top >= rect.bottom - 0.5 && (refB === null || sr.top < refB)) refB = sr.top;
-      });
-      gaps.left = { from: refL !== null ? refL : contentLeft, dist: rect.left - (refL !== null ? refL : contentLeft) };
-      gaps.top = { from: refT !== null ? refT : contentTop, dist: rect.top - (refT !== null ? refT : contentTop) };
-      gaps.right = { from: refR !== null ? refR : contentRight, dist: (refR !== null ? refR : contentRight) - rect.right };
-      gaps.bottom = { from: refB !== null ? refB : contentBottom, dist: (refB !== null ? refB : contentBottom) - rect.bottom };
+      gaps.left = { from: contentLeft, dist: rect.left - contentLeft };
+      gaps.top = { from: contentTop, dist: rect.top - contentTop };
+      gaps.right = { from: contentRight, dist: contentRight - rect.right };
+      gaps.bottom = { from: contentBottom, dist: contentBottom - rect.bottom };
       return gaps;
     }
     /** 元信息气泡文案：优先稳定 class，其次 tagName + 尺寸 */
@@ -1902,86 +1892,50 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       svg += `<line class="guide" x1="${R}" y1="0" x2="${R}" y2="${vh}"/>`;
       svg += `<line class="guide" x1="0" y1="${T}" x2="${vw}" y2="${T}"/>`;
       svg += `<line class="guide" x1="0" y1="${B}" x2="${vw}" y2="${B}"/>`;
-      // 2. 间距标注线 + 数字（有参考时）
+      // 2. 间距标注线 + 数字（仅绘制有值间距；贴边/0 不显示）
       const num = (x, y, d) => `<text class="num" x="${x}" y="${y}" text-anchor="middle">${Math.round(d)}</text>`;
-      if (gaps.left) {
+      if (gaps.left && Math.abs(gaps.left.dist) > 0.5) {
         const gy = this._clamp(T + rect.height / 2, 20, vh - 6);
         svg += `<line class="sp" x1="${gaps.left.from}" y1="${gy}" x2="${L}" y2="${gy}"/>`;
         svg += num((gaps.left.from + L) / 2, gy - 4, gaps.left.dist);
       }
-      if (gaps.right) {
+      if (gaps.right && Math.abs(gaps.right.dist) > 0.5) {
         const gy = this._clamp(T + rect.height / 2, 20, vh - 6);
         svg += `<line class="sp" x1="${R}" y1="${gy}" x2="${gaps.right.from}" y2="${gy}"/>`;
         svg += num((R + gaps.right.from) / 2, gy - 4, gaps.right.dist);
       }
-      if (gaps.top) {
+      if (gaps.top && Math.abs(gaps.top.dist) > 0.5) {
         const gx = this._clamp(L + rect.width / 2, 30, vw - 30);
         svg += `<line class="sp" x1="${gx}" y1="${gaps.top.from}" x2="${gx}" y2="${T}"/>`;
         svg += `<text class="num" x="${gx}" y="${this._clamp((gaps.top.from + T) / 2 + 4, 16, vh - 8)}" text-anchor="middle">${Math.round(gaps.top.dist)}</text>`;
       }
-      if (gaps.bottom) {
+      if (gaps.bottom && Math.abs(gaps.bottom.dist) > 0.5) {
         const gx = this._clamp(L + rect.width / 2, 30, vw - 30);
         svg += `<line class="sp" x1="${gx}" y1="${B}" x2="${gx}" y2="${gaps.bottom.from}"/>`;
         svg += `<text class="num" x="${gx}" y="${this._clamp((B + gaps.bottom.from) / 2 + 4, 16, vh - 8)}" text-anchor="middle">${Math.round(gaps.bottom.dist)}</text>`;
       }
-      // 3. padding 色块（content box，青色）
-      const padRect = { x: L + pad.l, y: T + pad.t, w: Math.max(0, rect.width - pad.l - pad.r), h: Math.max(0, rect.height - pad.t - pad.b) };
-      if (padRect.w > 0 && padRect.h > 0 && (pad.l || pad.r || pad.t || pad.b)) {
-        svg += `<rect class="pad-r" data-kind="pad" x="${padRect.x}" y="${padRect.y}" width="${padRect.w}" height="${padRect.h}" rx="1"/>`;
+      // 3. padding 数值标签（蓝色，直接显示在页面上，不用气泡/填充块）
+      if (pad.l || pad.r || pad.t || pad.b) {
+        const label = `padding ${Math.round(pad.t)} ${Math.round(pad.r)} ${Math.round(pad.b)} ${Math.round(pad.l)}`;
+        const tx = this._clamp(L + 4, 4, vw - this._tagWidth(label) - 4);
+        const ty = this._clamp(T + 4, 4, vh - 24);
+        svg += this._tag(label, 'ptag', tx, ty);
       }
-      // margin 色块（margin box 外扩，橙色）
+      // 4. margin 数值标签（绿色，有 margin 才显示）
       if (mar.l || mar.r || mar.t || mar.b) {
-        const mx = L - mar.l, my = T - mar.t;
-        const mw = rect.width + mar.l + mar.r, mh = rect.height + mar.t + mar.b;
-        // margin 色块画在 border box 外缘（厚度即 margin 值），0 值用 2px 细条保证可见
-        const th = 2;
-        if (mar.t > 0) svg += `<rect class="mar-r" data-kind="mar" x="${mx}" y="${my}" width="${mw}" height="${Math.max(mar.t, th)}"/>`;
-        if (mar.b > 0) svg += `<rect class="mar-r" data-kind="mar" x="${mx}" y="${my + mh - Math.max(mar.b, th)}" width="${mw}" height="${Math.max(mar.b, th)}"/>`;
-        if (mar.l > 0) svg += `<rect class="mar-r" data-kind="mar" x="${mx}" y="${my}" width="${Math.max(mar.l, th)}" height="${mh}"/>`;
-        if (mar.r > 0) svg += `<rect class="mar-r" data-kind="mar" x="${mx + mw - Math.max(mar.r, th)}" y="${my}" width="${Math.max(mar.r, th)}" height="${mh}"/>`;
+        const label = `margin ${Math.round(mar.t)} ${Math.round(mar.r)} ${Math.round(mar.b)} ${Math.round(mar.l)}`;
+        const tx = this._clamp(L + 4, 4, vw - this._tagWidth(label) - 4);
+        const ty = this._clamp(B - 24, 4, vh - 24);
+        svg += this._tag(label, 'mtag', tx, ty);
       }
       this._svg.innerHTML = svg;
-      // 绑定色块 hover/点击 → 显示数值
-      this._bindSwatches(pad, mar);
-      // 气泡
-      const bubble = this._shadow.querySelector('.bubble');
-      bubble.querySelector('.bubble-text').textContent = this._elementLabel(el, rect);
-      const bw = bubble.getBoundingClientRect().width || 120;
-      const bh = bubble.getBoundingClientRect().height || 24;
-      let top = T - bh - 6;
-      if (top < 40) top = B + 6;
-      let left = L + rect.width / 2 - bw / 2;
-      left = this._clamp(left, 8, vw - bw - 8);
-      bubble.style.top = top + 'px';
-      bubble.style.left = left + 'px';
       this.style.display = 'block';
     }
-    _bindSwatches(pad, mar) {
-      const tip = this._shadow.querySelector('.tooltip');
-      const showTip = (text, x, y) => {
-        tip.textContent = text;
-        tip.style.left = this._clamp(x + 10, 8, window.innerWidth - 140) + 'px';
-        tip.style.top = this._clamp(y + 14, 8, window.innerHeight - 30) + 'px';
-        tip.style.display = 'block';
-      };
-      const hideTip = () => this._hideTooltip();
-      const padText = `padding: ${Math.round(pad.t)}px ${Math.round(pad.r)}px ${Math.round(pad.b)}px ${Math.round(pad.l)}px`;
-      const marText = `margin: ${Math.round(mar.t)}px ${Math.round(mar.r)}px ${Math.round(mar.b)}px ${Math.round(mar.l)}px`;
-      const self = this;
-      this._svg.querySelectorAll('rect.pad-r').forEach(r => {
-        r.onmouseenter = (e) => showTip(padText, e.clientX, e.clientY);
-        r.onmouseleave = hideTip;
-        r.onclick = (e) => showTip(padText, e.clientX, e.clientY);
-      });
-      this._svg.querySelectorAll('rect.mar-r').forEach(r => {
-        r.onmouseenter = (e) => showTip(marText, e.clientX, e.clientY);
-        r.onmouseleave = hideTip;
-        r.onclick = (e) => showTip(marText, e.clientX, e.clientY);
-      });
-    }
-    _hideTooltip() {
-      const tip = this._shadow.querySelector('.tooltip');
-      if (tip) tip.style.display = 'none';
+    _tagWidth(text) { return text.length * 6.6 + 14; }
+    /** 数值标签：彩色底圆角矩形 + 白字，直接画在页面上 */
+    _tag(text, cls, x, y) {
+      const w = this._tagWidth(text);
+      return `<g class="${cls}"><rect x="${x}" y="${y}" width="${w}" height="18" rx="4"/><text x="${x + w / 2}" y="${y + 13}" text-anchor="middle">${text}</text></g>`;
     }
     _render() {
       this._shadow.innerHTML = `
@@ -1995,46 +1949,21 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           }
           svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
           .guide { stroke: rgba(255,77,79,0.45); stroke-width: 1; stroke-dasharray: 4 5; }
-          .sp { stroke: rgba(255,77,79,0.9); stroke-width: 1; }
+          /* gap 间距标注：洋红 */
+          .sp { stroke: rgba(255,0,255,0.85); stroke-width: 1; }
           .num {
-            fill: #ff4d4f; font-size: 11px; font-weight: 700;
+            fill: #ff00ff; font-size: 11px; font-weight: 700;
             font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
             paint-order: stroke; stroke: #fff; stroke-width: 4px; stroke-linejoin: round;
           }
-          .pad-r { fill: rgba(64,158,255,0.16); stroke: rgba(64,158,255,0.7); stroke-width: 1; pointer-events: auto; cursor: default; }
-          .pad-r:hover { fill: rgba(64,158,255,0.34); }
-          .mar-r { fill: rgba(255,170,0,0.16); stroke: rgba(255,170,0,0.7); stroke-width: 1; pointer-events: auto; cursor: default; }
-          .mar-r:hover { fill: rgba(255,170,0,0.34); }
-          .bubble {
-            position: absolute;
-            padding: 3px 8px;
-            border-radius: 6px;
-            background: rgba(30, 30, 30, 0.88);
-            color: #fff;
-            font-size: 11px;
-            line-height: 16px;
-            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", sans-serif;
-            white-space: nowrap;
-            pointer-events: none;
-          }
-          .tooltip {
-            position: fixed;
-            padding: 3px 8px;
-            border-radius: 6px;
-            background: #111;
-            color: #fff;
-            font-size: 11px;
-            line-height: 16px;
-            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
-            white-space: nowrap;
-            pointer-events: none;
-            display: none;
-            z-index: 2;
-          }
+          /* padding 数值标签：蓝色 */
+          .ptag rect { fill: rgba(76,141,255,0.92); }
+          .ptag text { fill: #fff; font-size: 11px; font-weight: 600; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; }
+          /* margin 数值标签：绿色 */
+          .mtag rect { fill: rgba(0,181,120,0.92); }
+          .mtag text { fill: #fff; font-size: 11px; font-weight: 600; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; }
         </style>
         <svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg>
-        <div class="bubble"><span class="bubble-text"></span></div>
-        <div class="tooltip"></div>
       `;
       this._svg = this._shadow.getElementById('svg');
     }
