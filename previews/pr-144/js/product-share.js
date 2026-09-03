@@ -113,7 +113,7 @@
      分享面板组件
      ═══════════════════════════════════════════════════════════════ */
   function sharePanelTemplate(opts) {
-    var title = opts.title || '分享产品';
+    var title = opts.title || '分享';
     var config = opts.config || {};
     var content = opts.content || {};
     var channels = config.channels || CHANNELS.filter(function (c) { return !c.miniprogramOnly; }).map(function (c) { return c.key; });
@@ -550,12 +550,12 @@
     var content = options.content || {};
     var config = options.config || {};
     var callbacks = options.callbacks || {};
-    var title = options.title || '分享产品';
     var contentType = options.contentType || 'panel';
+    var handler = SHARE_TYPES[contentType] || SHARE_TYPES.panel;
+    /* 标题默认跟随内容类型 label：单产品分享「分享」；将来接入多素材分享时新增内容类型 label「批量分享」即自动切换 */
+    var title = options.title || handler.label || '分享';
     /* 内部机制：二级面板（如小程序链接）取消/遮罩时恢复主分享面板，由上层在 options._reopenMain 注入 */
     var reopenMain = options._reopenMain || null;
-
-    var handler = SHARE_TYPES[contentType] || SHARE_TYPES.panel;
     ctx.openSheet(handler.render({ title: title, config: config, content: content }), {
       label: title,
       init: function (sheetCtx) {
@@ -614,9 +614,14 @@
             btn.addEventListener('click', function () {
               /* 只关闭本分享面板，不关闭底层页面（发布页分享时取消分享保持当前页继续编辑） */
               sheetCtx.close();
-              /* 二级面板取消：关闭并恢复主面板；主面板取消：仅关闭 */
-              if (reopenMain) reopenMain();
-              else if (callbacks.onClose) callbacks.onClose();
+              /* 二级面板取消：先关当前面板（history.back 异步消费），延迟后再恢复主面板（pushState），
+                 与二级面板打开时的 200ms 延迟对称，避免同一调用栈内 back 与 push 竞争导致 history 错乱
+                 （否则主面板取消时 back 多回退一级，误跳回场景页）；主面板取消：仅关闭 */
+              if (reopenMain) {
+                setTimeout(reopenMain, 200);
+              } else if (callbacks.onClose) {
+                callbacks.onClose();
+              }
             });
           } else if (action === 'display-mode' || action === 'share-settings') {
             btn.addEventListener('click', function () {
@@ -687,19 +692,23 @@
             var available = channelScroll.clientWidth;
             var perRow = Math.max(1, Math.floor(available / 68));
             var perGroup = perRow * 2;
-            var groupWidth = perRow * 68;
 
             /* 移除旧分组 */
             channelScroll.querySelectorAll('.share-panel__channel-group').forEach(function (g) {
               g.parentNode.removeChild(g);
             });
 
-            /* 重新分组 */
+            /* 重新分组：组宽按该组实际渠道数自适应（内容少时收窄到内容宽，多时撑满整行），
+               不打破已有换行适配（每组每行最多 perRow 个渠道项、超出换行、多组分页滚动） */
             currentGroupCount = Math.max(1, Math.ceil(allItems.length / perGroup));
             var groupEls = [];
             for (var gi = 0; gi < currentGroupCount; gi++) {
               var gEl = document.createElement('div');
               gEl.className = 'share-panel__channel-group';
+              /* 该组实际渠道项数：前 N-1 组满 perGroup 个，最后一组为剩余项 */
+              var groupItemCount = Math.min(perGroup, allItems.length - gi * perGroup);
+              /* 组宽 = min(实际渠道数, 每行N) × 68：内容不足一行时按内容自适应，满一行后撑满整行 */
+              var groupWidth = Math.min(groupItemCount, perRow) * 68;
               gEl.style.flexBasis = groupWidth + 'px';
               gEl.style.minWidth = groupWidth + 'px';
               channelScroll.appendChild(gEl);
@@ -749,12 +758,16 @@
           window.addEventListener('resize', onResize);
         }
 
-        /* 遮罩点击关闭：二级面板点遮罩关闭并恢复主面板；主面板点遮罩仅关闭（只关本面板，不关底层页面） */
+        /* 遮罩点击关闭：二级面板点遮罩关闭并恢复主面板；主面板点遮罩仅关闭（只关本面板，不关底层页面）。
+           二级面板恢复主面板同样延迟 200ms，与取消按钮/二级面板打开时对称，避免 history back/push 竞争 */
         root.addEventListener('click', function (e) {
           if (e.target === root) {
             sheetCtx.close();
-            if (reopenMain) reopenMain();
-            else if (callbacks.onClose) callbacks.onClose();
+            if (reopenMain) {
+              setTimeout(reopenMain, 200);
+            } else if (callbacks.onClose) {
+              callbacks.onClose();
+            }
           }
         });
       }
@@ -762,9 +775,11 @@
   }
 
   /* SHARE_TYPES 分享类型注册表：新增内容类型（列表页/个人主页/单据/海报/订单等）在此注册 render + config，
-     业务层 openProductShare 按 contentType 分发，不改核心逻辑。 */
+     业务层 openProductShare 按 contentType 分发，不改核心逻辑。
+     标题默认取各类型 label：panel「分享」；将来接入多素材分享时新增 contentType（如 batch，label「批量分享」）
+     并实现对应 render，openProductShare 不传 title 即自动显示「批量分享」。 */
   var SHARE_TYPES = {
-    panel: { label: '产品分享', render: sharePanelTemplate },
+    panel: { label: '分享', render: sharePanelTemplate },
     miniprogram: { label: '分享小程序链接', render: sharePanelTemplate }
   };
 

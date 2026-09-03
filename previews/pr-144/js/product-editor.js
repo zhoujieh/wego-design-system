@@ -406,7 +406,6 @@
         if (!saveProduct()) return;
         if (window.WegoApp && window.WegoApp.openProductShare) {
           window.WegoApp.openProductShare(ctx, {
-            title: '分享产品',
             content: collectShareContent(),
             callbacks: {
               onSuccess: function () {

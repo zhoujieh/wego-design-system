@@ -62,7 +62,7 @@
     root.querySelectorAll('[data-demo-key]').forEach(function (card) {
       card.addEventListener('click', function () {
         var key = card.getAttribute('data-demo-key');
-        var opts = { title: '分享产品', content: buildContent(key) };
+        var opts = { content: buildContent(key) };
         if (WegoApp && WegoApp.openProductShare) {
           WegoApp.openProductShare(ctx, opts);
         } else {
