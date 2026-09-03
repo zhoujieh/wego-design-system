@@ -157,7 +157,7 @@
         </div>
         <div class="detail">
           <ul>
-            <li>三种输入形态一律视为业务需求，<span class="k">必须先经产品技能创建迭代并确认简报</span>，不得直接做页面。</li>
+            <li>三种输入形态一律视为业务需求，<span class="k">必须先经产品技能创建迭代并提交简要简报</span>（立项确认 + 薄档提交即原型授权），不得直接做页面。</li>
             <li>参考图仅作风格参考、Figma 仅作视觉组件参考，<span class="g">不补造业务事实</span>；缺失的业务逻辑、状态、数据由对话补全。</li>
           </ul>
         </div>
@@ -195,14 +195,14 @@
           <div class="num">2</div>
           <div class="txt">
             <div class="tt">需求确认 <span class="skill blue">wego-product</span></div>
-            <div class="abs">创建迭代 · 确认 prototype_brief</div>
+            <div class="abs">创建迭代 · 薄档提交 · 原型循环</div>
           </div>
           <div class="chev">⌄</div>
         </div>
         <div class="detail">
           <ul>
-            <li>创建迭代 → 写需求规格说明 spec.md（<span class="k">唯一需求源</span>）→ submit-brief 进入 in-development（简报开放开发，可反复重提）。</li>
-            <li>简报充分性守门：目标/范围/入口/关键路径/状态必须非空，<span class="g">open_questions 必须清空</span>。</li>
+            <li>创建迭代 → 写简要需求规格说明 spec.md（<span class="k">唯一需求源</span>）→ submit-brief 进入 in-development <span class="k">原型循环</span>（spec 随改随重提，每轮反馈写回字段）。</li>
+            <li>两档守门：<span class="k">薄档</span>（提交时）目标/范围/入口/关键路径非空即可，states/数据契约可空、open_questions 可暂存；<span class="g">终版</span>（终局确认时）全量结构 + 充分性 + open_questions 清空由脚本守门。</li>
             <li>数据必须有产生入口（发布/新建/录入流程），<span class="g">禁止静态种子降级</span>；关键路径首尾闭环。</li>
           </ul>
         </div>
@@ -223,7 +223,7 @@
         </div>
         <div class="detail">
           <ul>
-            <li><span class="k">已确认简报即设计授权</span>：范围内布局、组件、Token、反馈由设计阶段自主完成。</li>
+            <li><span class="k">立项确认 + 已提交简要简报即原型授权</span>：范围内布局、组件、Token、反馈由设计阶段自主完成。</li>
             <li>流程：设计意图 → 语义区域 → 范式匹配/自主组合 → 组件映射 → 实现 scene.js/css/route.json → 场景契约预检。</li>
             <li>完成一轮实现后自动推送远端分支并创建/更新<span class="k">同一 PR</span>，返回本地 + 在线两个预览链接。</li>
             <li>场景数据优先取自原型数据库 WEGO_PROTOTYPE_DB，不临时编造。</li>
@@ -268,7 +268,7 @@
         </div>
         <div class="detail">
           <ul>
-            <li><span class="g">是（"验收通过""可以合并"）</span> → 进入验收收口，固化、验证并合并 main。</li>
+            <li><span class="g">是（"验收通过""可以合并"）</span> → 进入终局确认：AI 补全终版 spec → 核对填写验收账本 → 展示补全 diff 与账本，用户过目确认后固化、验证并合并 main。</li>
             <li><span class="g">否（"改好了""继续""再调整"）</span> → 回到本地迭代累计修改，自动更新同一 PR，不合并。</li>
             <li>实现完成、检查通过、用户查看页面，都不等于合并授权。</li>
           </ul>
@@ -283,15 +283,15 @@
         <div class="head">
           <div class="num green">5</div>
           <div class="txt">
-            <div class="tt">验收收口 <span class="skill green">wego-design</span></div>
-            <div class="abs">5 维校验 · 冻结 · 完整验证</div>
+            <div class="tt">终局确认（与验收合一） <span class="skill green">wego-design</span></div>
+            <div class="abs">补全终版 spec · 账本勾销 · 冻结</div>
           </div>
           <div class="chev">⌄</div>
         </div>
         <div class="detail">
           <ul>
-            <li>输出 5 维度一致性校验清单（范围 / 入口 / 关键路径 / 状态 / 数据契约），用户逐项确认。</li>
-            <li>连续执行 <span class="k">confirm-brief</span>（简报确认）→ <span class="k">submit-prototype</span>（一步冻结到 frozen）。</li>
+            <li>补全终版 spec.md（只能补细节不能减内容）并重新 submit-brief → 逐项核对填写验收账本 acceptance.json（入口/关键路径/状态/数据契约，每项标状态与证据）→ 展示补全 diff + 账本清单请用户过目。</li>
+            <li>用户过目确认后连续执行 <span class="k">confirm-brief</span>（终局守门：全量结构 + 充分性 + open_questions 清空 + 账本全绿）→ <span class="k">submit-prototype</span>（账本复验 + 一步冻结到 frozen）。</li>
             <li>运行完整静态验证（full --strict / build-routes --check / sync-lib --check），任一失败先修复再推送。</li>
             <li><span class="g">经验收口扫描</span>必须在 worktree 清理前完成。</li>
           </ul>
@@ -352,7 +352,7 @@
     <div class="smrow">
       <div class="smnode"><div class="s">draft</div><div class="t">写 spec.md</div></div>
       <div class="smarrow">→</div>
-      <div class="smnode"><div class="s">in-development</div><div class="t">简报开放开发，可反复重提</div></div>
+      <div class="smnode"><div class="s">in-development</div><div class="t">原型循环，spec 随改随重提</div></div>
       <div class="smarrow">→</div>
       <div class="smnode"><div class="s">prototyping</div><div class="t">设计实现 + 自动推 PR</div></div>
       <div class="smarrow">→</div>
@@ -373,7 +373,7 @@
       <tr><td>需求确认</td><td>.codex/skills/wego-product/SKILL.md · references/brief-template.md · references/iteration-workflow.md · references/scope-and-boundaries.md · .codex/skills/wego-design/references/design-principles.md</td></tr>
       <tr><td>设计实现</td><td>.codex/skills/wego-design/SKILL.md · references/design-principles.md · references/interaction-prototype-design.md · references/library-map.md · references/scene-contract.md · 有效迭代 spec.md · wego-app/data/README.md</td></tr>
       <tr><td>交付与 PR</td><td>.codex/skills/wego-github-delivery/SKILL.md · references/github-delivery-rules.md · references/task-intake.md · .tasks/preview-servers/</td></tr>
-      <tr><td>验收收口</td><td>.codex/skills/wego-design/SKILL.md · .codex/skills/wego-product/references/iteration-workflow.md · .codex/skills/wego-github-delivery/references/github-delivery-rules.md · .tasks/experience-inbox.json</td></tr>
+      <tr><td>终局确认</td><td>.codex/skills/wego-design/SKILL.md · .codex/skills/wego-product/references/iteration-workflow.md · .codex/skills/wego-github-delivery/references/github-delivery-rules.md · .tasks/experience-inbox.json</td></tr>
       <tr><td>经验沉淀</td><td>.codex/skills/wego-uxsystem-iterate/SKILL.md · references/workflow-iteration.md · references/sync-matrix.md · experience/evidence.json · experience/EXPERIENCE.md</td></tr>
       <tr><td>设计系统维护</td><td>.codex/skills/wego-uxsystem-iterate/references/workflow.md · references/sync-matrix.runtime.md · 组件/Token/Preview 权威源</td></tr>
     </table>
@@ -387,9 +387,9 @@
       <tr><th>类别</th><th>命令</th><th>用途</th></tr>
       <tr><td rowspan="5">迭代记录</td><td>iteration-record.mjs suggest-id --scene {场景}</td><td>预查询建议迭代 ID</td></tr>
       <tr><td>iteration-record.mjs init --file ... --title ... --scene ...</td><td>创建迭代与 spec 模板</td></tr>
-      <tr><td>iteration-record.mjs submit-brief --file ...</td><td>提交简报（充分性守门 + 算哈希）</td></tr>
-      <tr><td>iteration-record.mjs confirm-brief --file ... --user-confirmed-brief {id}</td><td>确认简报（需用户验收完成 + 5 维校验）</td></tr>
-      <tr><td>iteration-record.mjs submit-prototype --file ... --user-confirmed-prototype {id}</td><td>一步冻结到 frozen</td></tr>
+      <tr><td>iteration-record.mjs submit-brief --file ...</td><td>提交简报（薄档守门 + 算哈希 + 生成/差量迁移验收账本）</td></tr>
+      <tr><td>iteration-record.mjs confirm-brief --file ... --user-confirmed-brief {id}</td><td>终局确认（全量守门 + 充分性 + 账本全绿）</td></tr>
+      <tr><td>iteration-record.mjs submit-prototype --file ... --user-confirmed-prototype {id}</td><td>账本复验 + 一步冻结到 frozen</td></tr>
       <tr><td rowspan="4">验证守卫</td><td>validate-wego-design.mjs --scope=changed|full|system --strict</td><td>场景 Token 合规、源/副本同步、原型指纹、完整守门</td></tr>
       <tr><td>validate-scene-contract.mjs {场景路径}</td><td>场景契约预检（每轮实现后必跑）</td></tr>
       <tr><td>validate-scene-runtime.mjs {场景路径}</td><td>真实浏览器 375/393px 运行时验证</td></tr>
