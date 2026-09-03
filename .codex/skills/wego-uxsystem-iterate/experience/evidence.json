@@ -364,6 +364,141 @@
         "评测闭环",
         "wego-uxsystem-iterate"
       ]
+    },
+    {
+      "id": "ev-026",
+      "date": "2026-09-03",
+      "summary": "发布产品场景走查时浏览器仍加载旧 JS、改动不生效，需 URL 加 cache-busting 参数/强制刷新绕过 JS 缓存后，断言到的才是最新版本页面；缓存未绕开时看到的假象会误判为 bug 或误以为修复未生效",
+      "source": "rework",
+      "scene": "shop243-发布产品走查",
+      "tags": [
+        "JS缓存",
+        "cache-busting",
+        "走查",
+        "wego-scene-app-test"
+      ]
+    },
+    {
+      "id": "ev-027",
+      "date": "2026-09-03",
+      "summary": "App 场景走查用 bu.click 点元素偶发命中失败（选择器未命中/被其他层遮挡），断言前先 dump DOM 核对选择器与层级（含 shadowRoot），命中失败时改用 elementFromPoint/坐标点击兜底，勿反复重试同一失败选择器",
+      "source": "rework",
+      "scene": "shop243-发布产品走查",
+      "tags": [
+        "bu.click",
+        "命中失败",
+        "DOM探查",
+        "wego-scene-app-test"
+      ]
+    },
+    {
+      "id": "ev-028",
+      "date": "2026-09-03",
+      "summary": "走查环境 Chrome DevTools Protocol 的禁用缓存能力不可用，无法用 CDP 关缓存保证加载最新 JS；缓存绕过改用 URL cache-busting 等应用层手段，依赖 CDP 的方案直接判为不可用",
+      "source": "rework",
+      "scene": "shop243-发布产品走查",
+      "tags": [
+        "CDP",
+        "禁用缓存",
+        "环境限制",
+        "wego-scene-app-test"
+      ]
+    },
+    {
+      "id": "ev-029",
+      "date": "2026-09-03",
+      "summary": "嵌套 overlay（选图面板/帮卖分销弹窗挂在发布模态 overlay 上）关闭时误用外层 ctx.closeOverlay()（overlay 模式下被绑定为关闭宿主发布模态），导致选图/帮卖保存后发布模态被一起关、正在编辑的表单丢失；修复统一改用内层 ctx（pickerCtx/overlayCtx）的 close() 只关自身弹窗。经验：嵌套 overlay 关闭必须用当前层自己的 close 回调，不得复用外层 closeOverlay",
+      "source": "rework",
+      "scene": "shop243-发布产品走查",
+      "tags": [
+        "overlay",
+        "嵌套关闭",
+        "closeOverlay",
+        "发布产品",
+        "wego-scene-app-test"
+      ]
+    },
+    {
+      "id": "ev-030",
+      "date": "2026-09-03",
+      "summary": "发布产品直链模式（#/publish-product）与 overlay 模式行为不同：直链发布/取消后 hash 残留、模态二次打开；修复用场景 init 包装 api（closeOverlay 映射 ctx.back、requestGoToFeed 延迟跳转、onDestroy 收尾清理 hash）。经验：同一场景直链与 overlay 双模式都要测，直链模式须验证 hash 清理与不二次打开",
+      "source": "rework",
+      "scene": "shop243-发布产品走查",
+      "tags": [
+        "直链",
+        "overlay",
+        "双模式",
+        "hash",
+        "发布产品",
+        "wego-scene-app-test"
+      ]
+    },
+    {
+      "id": "ev-031",
+      "date": "2026-09-03",
+      "summary": "动态流页面依赖 hashchange 事件触发重绘，走查时仅改 location 不触发 hashchange 则断言不到新内容；需手动 dispatch hashchange 或走完整跳转动作，才能验证动态流重绘结果",
+      "source": "rework",
+      "scene": "shop243-发布产品走查",
+      "tags": [
+        "动态流",
+        "hashchange",
+        "重绘",
+        "wego-scene-app-test"
+      ]
+    },
+    {
+      "id": "ev-032",
+      "date": "2026-09-03",
+      "summary": "faultInjection 注入的错误在走查中表现为失败假象，须先区分故障注入假象与真实缺陷（结合来源/触发方式核实），先排除缓存/注入等环境假象再判真实 bug，低置信度保持待确认不升 Bug",
+      "source": "user-correction",
+      "scene": "shop243-发布产品走查",
+      "tags": [
+        "faultInjection",
+        "假象",
+        "置信度",
+        "wego-scene-app-test"
+      ]
+    },
+    {
+      "id": "ev-033",
+      "date": "2026-09-03",
+      "summary": "App 场景走查断言 localStorage 数据不能只看存在性，须校验 key 命名、数据结构与写入时序（防抖落盘有延迟），否则会把中间态/旧数据误判为最终结果",
+      "source": "rework",
+      "scene": "shop243-发布产品走查",
+      "tags": [
+        "localStorage",
+        "数据校验",
+        "时序",
+        "wego-scene-app-test"
+      ]
+    },
+    {
+      "id": "ev-034",
+      "date": "2026-09-03",
+      "summary": "EXPERIENCE.md 超 1500 字符上限时，应优先合并同类条目（交付/CI/简报类）与把细节毕业到场景技能来控容，而非逐字机械压缩；现场 AI 只会逐字压缩是执行偏差，控容优先动作须在规则中写明",
+      "source": "user-correction",
+      "scene": "wego-uxsystem-iterate-经验控容",
+      "tags": [
+        "经验控容",
+        "合并同类",
+        "毕业场景技能",
+        "超限处理",
+        "wego-uxsystem-iterate"
+      ]
+    },
+    {
+      "id": "ev-035",
+      "date": "2026-09-03",
+      "summary": "经验固化即降载：经验升格 L4 正式规则后必须从 EXPERIENCE.md 删除对应摘要，毕业 L3 场景技能后只留 ≤60 字符指针，目标维持摘要在上限 80%（1200 字符）以下；refine-experience.mjs 校验已毕业主题的摘要正文超指针上限即报错，避免每个会话前置读重复提醒已固化规则",
+      "source": "user-correction",
+      "scene": "wego-uxsystem-iterate-经验降载",
+      "tags": [
+        "经验降载",
+        "固化即降载",
+        "指针",
+        "容量",
+        "wego-uxsystem-iterate"
+      ]
     }
   ]
 }
