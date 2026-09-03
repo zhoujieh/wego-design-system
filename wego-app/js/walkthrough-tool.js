@@ -1914,28 +1914,52 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         svg += `<line class="sp" x1="${gx}" y1="${B}" x2="${gx}" y2="${gaps.bottom.from}"/>`;
         svg += `<text class="num" x="${gx}" y="${this._clamp((B + gaps.bottom.from) / 2 + 4, 16, vh - 8)}" text-anchor="middle">${Math.round(gaps.bottom.dist)}</text>`;
       }
-      // 3. padding 数值标签（蓝色，直接显示在页面上，不用气泡/填充块）
-      if (pad.l || pad.r || pad.t || pad.b) {
-        const label = `padding ${Math.round(pad.t)} ${Math.round(pad.r)} ${Math.round(pad.b)} ${Math.round(pad.l)}`;
-        const tx = this._clamp(L + 4, 4, vw - this._tagWidth(label) - 4);
-        const ty = this._clamp(T + 4, 4, vh - 24);
-        svg += this._tag(label, 'ptag', tx, ty);
+      // 3. padding 蓝色标注线 + 数字（标记各方向 padding 厚度，数字放在线旁避开线）
+      const numAt = (x, y, val, cls) =>
+        `<text class="${cls}" x="${x}" y="${y}" text-anchor="middle">${Math.round(val)}</text>`;
+      if (pad.l > 0) {
+        const cy = this._clamp(T + rect.height / 2, 16, vh - 10);
+        svg += `<line class="pline" x1="${L}" y1="${cy}" x2="${L + pad.l}" y2="${cy}"/>`;
+        svg += numAt(L + pad.l / 2, cy - 4, pad.l, 'pnum');
       }
-      // 4. margin 数值标签（绿色，有 margin 才显示）
-      if (mar.l || mar.r || mar.t || mar.b) {
-        const label = `margin ${Math.round(mar.t)} ${Math.round(mar.r)} ${Math.round(mar.b)} ${Math.round(mar.l)}`;
-        const tx = this._clamp(L + 4, 4, vw - this._tagWidth(label) - 4);
-        const ty = this._clamp(B - 24, 4, vh - 24);
-        svg += this._tag(label, 'mtag', tx, ty);
+      if (pad.r > 0) {
+        const cy = this._clamp(T + rect.height / 2, 16, vh - 10);
+        svg += `<line class="pline" x1="${R - pad.r}" y1="${cy}" x2="${R}" y2="${cy}"/>`;
+        svg += numAt(R - pad.r / 2, cy - 4, pad.r, 'pnum');
+      }
+      if (pad.t > 0) {
+        const cx = this._clamp(L + rect.width / 2, 24, vw - 24);
+        svg += `<line class="pline" x1="${cx}" y1="${T}" x2="${cx}" y2="${T + pad.t}"/>`;
+        svg += numAt(cx + 6, T + pad.t / 2 + 4, pad.t, 'pnum');
+      }
+      if (pad.b > 0) {
+        const cx = this._clamp(L + rect.width / 2, 24, vw - 24);
+        svg += `<line class="pline" x1="${cx}" y1="${B - pad.b}" x2="${cx}" y2="${B}"/>`;
+        svg += numAt(cx + 6, B - pad.b / 2 + 4, pad.b, 'pnum');
+      }
+      // 4. margin 绿色标注线 + 数字（有 margin 才显示，标在元素外部对应边缘）
+      if (mar.l > 0) {
+        const cy = this._clamp(T + rect.height / 2, 16, vh - 10);
+        svg += `<line class="mline" x1="${L - mar.l}" y1="${cy}" x2="${L}" y2="${cy}"/>`;
+        svg += numAt(L - mar.l / 2, cy - 4, mar.l, 'mnum');
+      }
+      if (mar.r > 0) {
+        const cy = this._clamp(T + rect.height / 2, 16, vh - 10);
+        svg += `<line class="mline" x1="${R}" y1="${cy}" x2="${R + mar.r}" y2="${cy}"/>`;
+        svg += numAt(R + mar.r / 2, cy - 4, mar.r, 'mnum');
+      }
+      if (mar.t > 0) {
+        const cx = this._clamp(L + rect.width / 2, 24, vw - 24);
+        svg += `<line class="mline" x1="${cx}" y1="${T - mar.t}" x2="${cx}" y2="${T}"/>`;
+        svg += numAt(cx + 6, T - mar.t / 2 + 4, mar.t, 'mnum');
+      }
+      if (mar.b > 0) {
+        const cx = this._clamp(L + rect.width / 2, 24, vw - 24);
+        svg += `<line class="mline" x1="${cx}" y1="${B}" x2="${cx}" y2="${B + mar.b}"/>`;
+        svg += numAt(cx + 6, B + mar.b / 2 + 4, mar.b, 'mnum');
       }
       this._svg.innerHTML = svg;
       this.style.display = 'block';
-    }
-    _tagWidth(text) { return text.length * 6.6 + 14; }
-    /** 数值标签：彩色底圆角矩形 + 白字，直接画在页面上 */
-    _tag(text, cls, x, y) {
-      const w = this._tagWidth(text);
-      return `<g class="${cls}"><rect x="${x}" y="${y}" width="${w}" height="18" rx="4"/><text x="${x + w / 2}" y="${y + 13}" text-anchor="middle">${text}</text></g>`;
     }
     _render() {
       this._shadow.innerHTML = `
@@ -1956,12 +1980,20 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
             paint-order: stroke; stroke: #fff; stroke-width: 4px; stroke-linejoin: round;
           }
-          /* padding 数值标签：蓝色 */
-          .ptag rect { fill: rgba(76,141,255,0.92); }
-          .ptag text { fill: #fff; font-size: 11px; font-weight: 600; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; }
-          /* margin 数值标签：绿色 */
-          .mtag rect { fill: rgba(0,181,120,0.92); }
-          .mtag text { fill: #fff; font-size: 11px; font-weight: 600; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; }
+          /* padding 标注线 + 数字：蓝色 */
+          .pline { stroke: rgba(76,141,255,0.9); stroke-width: 1; }
+          .pnum {
+            fill: #4c8dff; font-size: 11px; font-weight: 700;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+            paint-order: stroke; stroke: #fff; stroke-width: 4px; stroke-linejoin: round;
+          }
+          /* margin 标注线 + 数字：绿色 */
+          .mline { stroke: rgba(0,181,120,0.9); stroke-width: 1; }
+          .mnum {
+            fill: #00b578; font-size: 11px; font-weight: 700;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+            paint-order: stroke; stroke: #fff; stroke-width: 4px; stroke-linejoin: round;
+          }
         </style>
         <svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg>
       `;

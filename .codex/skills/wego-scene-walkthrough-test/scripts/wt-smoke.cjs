@@ -53,15 +53,15 @@ function check(name, ok, detail = '') {
       const isr = ins.shadowRoot;
       return {
         guides: isr.querySelectorAll('line.guide').length,
-        ptag: isr.querySelectorAll('g.ptag').length,
-        mtag: isr.querySelectorAll('g.mtag').length,
+        pline: isr.querySelectorAll('line.pline').length,
+        pnum: Array.from(isr.querySelectorAll('text.pnum')).map(t => t.textContent),
         nums: Array.from(isr.querySelectorAll('text.num')).map(t => t.textContent),
         noBubble: !isr.querySelector('.bubble-text'),
         display: getComputedStyle(ins).display
       };
     });
     check('⑤ 悬停四边延长线', insp && insp.display === 'block' && insp.guides === 4, insp ? `guides=${insp.guides}` : '无 inspector');
-    check('⑤ padding 蓝色数值标签', insp && insp.ptag >= 1, `ptag=${insp ? insp.ptag : 0}`);
+    check('⑤ padding 蓝色标注线+数字', insp && insp.pline >= 1 && insp.pnum.length >= 1, `pline=${insp ? insp.pline : 0} pnum=${insp ? insp.pnum.length : 0}`);
     check('⑤ 元素信息气泡已去除', insp && insp.noBubble, `noBubble=${insp ? insp.noBubble : 0}`);
 
     // 选中 head（点击中心 + 连点，head 中心命中 publisher 上移到 head）
