@@ -334,6 +334,70 @@
   overflow: hidden;
 }
 
+/* ── 场景渲染容器（真实 DOM 平铺）── */
+.iter-canvas-page__scene-host {
+  width: 300px;
+  min-height: 480px;
+  border: 1px solid var(--border-divider);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  position: relative;
+  /* 浏览态默认锁定交互：画布可自由拖拽/缩放，不误触页面 */
+  pointer-events: none;
+}
+
+.iter-canvas-page__scene-host--loading {
+  min-height: 300px;
+  background: linear-gradient(100deg, #f0f2f5 30%, #fafbfc 50%, #f0f2f5 70%);
+  background-size: 200% 100%;
+  animation: iter-canvas-shimmer 1.2s infinite;
+}
+
+@keyframes iter-canvas-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+.iter-canvas-page__scene-host--ready {
+  pointer-events: none;
+}
+
+/* 编辑态：点选页面后解锁交互（页面内可点击/滚动/输入） */
+.iter-canvas-page__scene-host--active {
+  pointer-events: auto;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.25), 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* 页面容器内：全屏弹窗/居中弹窗改为流式，内容完整撑开 */
+.iter-canvas-page__scene-host .modal--fullscreen,
+.iter-canvas-page__scene-host .modal,
+.iter-canvas-page__scene-host [data-route-id] > .modal {
+  position: static !important;
+  inset: auto !important;
+  width: 100% !important;
+  height: auto !important;
+  max-height: none !important;
+  transform: none !important;
+  overflow: visible !important;
+}
+
+.iter-canvas-page__scene-host .modal__panel {
+  position: static !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+/* 页面容器内滚动区：展开为完整高度，内容不被裁剪 */
+.iter-canvas-page__scene-host [class*='scroll'] {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
 .iter-canvas-page__frame-route {
   font-size: 10px;
   color: var(--text-tertiary);

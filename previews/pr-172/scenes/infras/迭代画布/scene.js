@@ -128,11 +128,6 @@ const iterationCanvasTemplate = `
       .replace(/\x27/g, '&#39;');
   }
 
-  // iframe 加载同一宿主应用的真实页面；src 相对当前 index.html 解析
-  function frameSrc(routeId) {
-    return './index.html#/' + encodeURIComponent(routeId);
-  }
-
   function infoMarkup(it) {
     var status = STATUS_TEXT[it.status] || it.status;
     var related = (it.identity.related_scenes || []).length ? it.identity.related_scenes.join('、') : '—';
@@ -176,7 +171,7 @@ const iterationCanvasTemplate = `
       + '</div>';
   }
 
-  // 每个流程 = 一排 iframe 平铺页面，横向排列 + 连线
+  // 每个流程 = 一排页面容器，横向排列 + 连线
   function flowMarkup(flow) {
     var nodeHtml = flow.nodes.map(function (node, i) {
       var isSameAsPrev = i > 0 && flow.nodes[i - 1].routeId === node.routeId;
@@ -187,7 +182,7 @@ const iterationCanvasTemplate = `
         +       '<span class="iter-canvas-page__frame-name">' + esc(node.label) + '</span>'
         +       '<span class="iter-canvas-page__frame-sub">' + esc(node.sub) + '</span>'
         +     '</div>'
-        +     '<iframe class="iter-canvas-page__frame" src="' + frameSrc(node.routeId) + '" title="' + esc(node.label) + '" loading="lazy"></iframe>'
+        +     '<div class="iter-canvas-page__scene-host" data-route-id="' + esc(node.routeId) + '" data-frame-label="' + esc(node.label) + '"></div>'
         +     '<div class="iter-canvas-page__frame-route">' + esc(node.routeId) + (isSameAsPrev ? ' · 复用' : '') + '</div>'
         +   '</div>'
         +   (i < flow.nodes.length - 1 ? '<div class="iter-canvas-page__link" aria-hidden="true"><i class="wego-iconfont-s icon-youjiantou16"></i></div>' : '')
@@ -202,6 +197,54 @@ const iterationCanvasTemplate = `
       +   '<div class="iter-canvas-page__flow-desc">' + esc(flow.desc) + '</div>'
       +   '<div class="iter-canvas-page__flow-chain">' + nodeHtml + '</div>'
       + '</div>';
+  }
+
+  // 将迭代内涉及的每个页面（routeId）渲染到画布对应容器（真实场景 DOM，页面保持可交互）
+  // 关键：运行时直接调用场景渲染，业务场景改动后画布重新加载即为最新内容（实时投影，非快照）
+  function renderSceneIntoHosts(root) {
+    var hosts = Array.prototype.slice.call(root.querySelectorAll('.iter-canvas-page__scene-host'));
+    var byRoute = {};
+    hosts.forEach(function (host) {
+      var routeId = host.getAttribute('data-route-id');
+      if (!routeId) return;
+      (byRoute[routeId] = byRoute[routeId] || []).push(host);
+    });
+    Object.keys(byRoute).forEach(function (routeId) {
+      var group = byRoute[routeId];
+      group.forEach(function (h) { h.classList.add('iter-canvas-page__scene-host--loading'); });
+      window.WegoApp.renderSceneTo(routeId, group[0]).then(function (handle) {
+        group.forEach(function (h) {
+          h.classList.remove('iter-canvas-page__scene-host--loading');
+          if (h !== group[0]) {
+            h.innerHTML = group[0].innerHTML; // 同一页面复用：拷贝首份渲染 DOM
+            h.classList.add('iter-canvas-page__scene-host--cloned');
+          }
+          h.classList.add('iter-canvas-page__scene-host--ready');
+        });
+      });
+    });
+  }
+
+  // 点选页面 → 进入编辑态（解锁该页面交互）；再次点击/点空白 → 回到浏览态
+  function bindSceneHostSelection(viewport, world) {
+    viewport.addEventListener('click', function (e) {
+      var hosts = world.querySelectorAll('.iter-canvas-page__scene-host');
+      var hit = null;
+      for (var i = 0; i < hosts.length; i++) {
+        var r = hosts[i].getBoundingClientRect();
+        if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) {
+          hit = hosts[i];
+          break;
+        }
+      }
+      var anyActive = world.querySelector('.iter-canvas-page__scene-host--active');
+      if (hit && hit !== anyActive) {
+        if (anyActive) anyActive.classList.remove('iter-canvas-page__scene-host--active');
+        hit.classList.add('iter-canvas-page__scene-host--active');
+      } else if (anyActive) {
+        anyActive.classList.remove('iter-canvas-page__scene-host--active');
+      }
+    });
   }
 
   function renderStatic(root, it) {
@@ -378,9 +421,15 @@ const iterationCanvasTemplate = `
 
       renderStatic(root, SAMPLE_ITERATION);
 
+      // 渲染每个流程页面到画布容器（真实场景 DOM）
+      renderSceneIntoHosts(root);
+
+      // 点选页面进入编辑态（解锁交互）
+      bindSceneHostSelection(viewport, world);
+
       var canvas = createCanvas(viewport, world, zoomValueEl);
-      // 等 iframe 布局稳定后再 fit
-      setTimeout(function () { canvas.fit(); }, 60);
+      // 等场景渲染完成后 fit
+      setTimeout(function () { canvas.fit(); }, 120);
 
       root.querySelector('[data-action="zoom-in"]').addEventListener('click', function () { canvas.zoomCenter(1.25); });
       root.querySelector('[data-action="zoom-out"]').addEventListener('click', function () { canvas.zoomCenter(0.8); });
