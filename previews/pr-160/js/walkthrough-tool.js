@@ -3183,19 +3183,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           .reset-btn:hover { background: rgba(255,255,255,0.12); }
           .copy-btn:active,
           .reset-btn:active { background: rgba(255,255,255,0.18); }
-          .import-btn {
-            flex: 1;
-            height: 30px;
-            padding: 0 12px;
-            border: 1px dashed rgba(255,255,255,0.25);
-            border-radius: 6px;
-            background: transparent;
-            color: rgba(255,255,255,0.72);
-            font-size: 12px;
-            cursor: pointer;
-          }
-          .import-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
-          .import-row { justify-content: stretch; padding-top: 0; }
           .close-btn {
             width: 28px;
             height: 28px;
@@ -3449,13 +3436,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           ${groupList.length > 0 ? `
             <div class="footer">
               <button class="reset-btn" type="button" data-action="reset">重置所有修改</button>
-              <button class="copy-btn" type="button" data-action="export">导出 JSON</button>
               <button class="copy-btn" type="button" data-action="copy">复制 Prompt</button>
             </div>
           ` : ''}
-          <div class="footer import-row">
-            <button class="import-btn" type="button" data-action="import">导入 JSON 配置</button>
-          </div>
         </div>
       `;
     }
@@ -3516,41 +3499,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         resetBtn.addEventListener('click', () => {
           this.close();
           bus.emit('reset-changes');
-        });
-      }
-      // 导出 JSON
-      const exportBtn = this._shadow.querySelector('[data-action="export"]');
-      if (exportBtn) {
-        exportBtn.addEventListener('click', () => {
-          bus.emit('export-json');
-        });
-      }
-      // 导入 JSON
-      const importBtn = this._shadow.querySelector('[data-action="import"]');
-      if (importBtn) {
-        importBtn.addEventListener('click', () => {
-          const fileInput = document.createElement('input');
-          fileInput.type = 'file';
-          fileInput.accept = '.json,application/json';
-          fileInput.style.display = 'none';
-          document.body.appendChild(fileInput);
-          fileInput.addEventListener('change', () => {
-            const file = fileInput.files && fileInput.files[0];
-            if (file) {
-              const reader = new FileReader();
-              reader.onload = () => {
-                try {
-                  const data = JSON.parse(reader.result);
-                  bus.emit('import-json', { data });
-                } catch (e) {
-                  bus.emit('toast', { message: '导入失败：JSON 格式不正确' });
-                }
-              };
-              reader.readAsText(file);
-            }
-            document.body.removeChild(fileInput);
-          });
-          fileInput.click();
         });
       }
     }
@@ -3686,6 +3634,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         `**Viewport:** ${viewport}`,
         '',
         '> 施工单：按最终效果整理，改法优先用设计系统语义类；主定位用组件类，完整选择器见文末备选。',
+        '> 修复后动作：AI 按本工程单修改源码完成后，调用业务自动化测试技能 `wego-scene-app-test` 对本次修复的问题执行自动化测试与回归验证；修改与测试过程中沉淀的经验，按仓库经验机制记录（写入 `.tasks/experience-inbox.json` 草稿，由 `wego-uxsystem-iterate` 收口沉淀）。',
         '',
       ];
       const machine = [];
@@ -3884,6 +3833,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         `**Viewport:** ${viewport}`,
         '',
         '> 施工单：按最终效果整理，改法优先用设计系统语义类；主定位用组件类，完整选择器见文末备选。',
+        '> 修复后动作：AI 按本工程单修改源码完成后，调用业务自动化测试技能 `wego-scene-app-test` 对本次修复的问题执行自动化测试与回归验证；修改与测试过程中沉淀的经验，按仓库经验机制记录（写入 `.tasks/experience-inbox.json` 草稿，由 `wego-uxsystem-iterate` 收口沉淀）。',
         '',
       ];
       const allMachine = [];
@@ -8400,8 +8350,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       bus.on('delete-change-group', ({ sharedKey }) => this._deleteChangeGroup(sharedKey));
       bus.on('delete-annotation', ({ id }) => this._deleteAnnotation(id));
       bus.on('reset-changes', () => this._resetChanges());
-      bus.on('export-json', () => this._exportJson());
-      bus.on('import-json', (payload) => this._importJson(payload || {}));
       bus.on('undo', () => this._undoLast());
       bus.on('redo', () => this._redoLast());
       bus.on('toast', ({ message }) => this._showToast(message));
@@ -10266,127 +10214,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
         this._components.overviewPanel.refresh(state.changes, state.currentRoute, state.annotations);
       }
-    }
-
-    /** 构建 JSON 导出内容（对齐计划 3.7.6：按元素归并 configs/comments） */
-    _buildAnnotationsForJson() {
-      const map = {};
-      state.changes.forEach(c => {
-        if (c.type === 'reorder') {
-          // reorder 变更（功能 4）单独承载顺序快照，不进 CSS 配置列表
-          const rkey = c.selector + '||';
-          if (!map[rkey]) map[rkey] = { elements: [c.selector], configs: [], comments: [], text: '' };
-          map[rkey].reorder = { order: c.order, oldOrder: c.oldOrder, move: c.move || null };
-          return;
-        }
-        const key = c.selector + '||' + (c.target || '');
-        if (!map[key]) map[key] = { elements: [c.selector], configs: [], comments: [], text: c.elementText || '' };
-        map[key].configs.push({
-          property: c.property,
-          oldValue: c.oldValue,
-          newValue: c.newValue,
-          target: c.target || '',
-          shared: !!c.shared,
-        });
-      });
-      state.annotations.forEach(a => {
-        const key = a.selector + '||';
-        if (!map[key]) map[key] = { elements: [a.selector], configs: [], comments: [], text: '' };
-        map[key].comments.push(a.text);
-      });
-      return Object.values(map);
-    }
-
-    /** 导出当前场景配置为 JSON 文件下载 */
-    _exportJson() {
-      const route = state.currentRoute || 'default';
-      const routeLabel = getCurrentRouteLabel();
-      const data = {
-        app: 'wego-walkthrough',
-        version: 1,
-        page: {
-          path: route,
-          label: routeLabel,
-          viewport: { width: window.innerWidth, height: window.innerHeight },
-        },
-        exportedAt: new Date().toISOString(),
-        annotations: this._buildAnnotationsForJson(),
-      };
-      try {
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `walkthrough-${route}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        this._showToast('已导出 JSON');
-      } catch (e) {
-        this._showToast('导出失败');
-      }
-    }
-
-    /** 导入 JSON 配置：合并到当前场景（默认）或替换当前场景 */
-    _importJson({ data }) {
-      if (!data || !Array.isArray(data.annotations)) {
-        this._showToast('导入失败：文件格式不正确');
-        return;
-      }
-      const hasContent = data.annotations.some(g =>
-        (g.configs && g.configs.length > 0) || (g.comments && g.comments.length > 0));
-      if (!hasContent) {
-        this._showToast('导入失败：文件内容为空');
-        return;
-      }
-      const replace = window.confirm('导入方式：\n[确定] 合并到当前场景\n[取消] 替换当前场景（先清空再导入）') === false;
-      const applyGroup = (group) => {
-        const sel = group.elements && group.elements[0];
-        if (!sel) return;
-        const el = queryTargetEl(sel);
-        (group.configs || []).forEach(cfg => {
-          if (cfg.target) {
-            applyPseudoStyle(sel, cfg.target, cfg.property, cfg.newValue || '');
-          } else if (el) {
-            try { el.style.setProperty(cfg.property, cfg.newValue || ''); } catch (e) {}
-          }
-          const rec = {
-            id: 'change-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
-            selector: sel,
-            target: cfg.target || '',
-            elementTag: el ? el.tagName.toLowerCase() : '',
-            elementText: el ? (el.textContent || '').trim().slice(0, 30) : '',
-            elementClasses: el ? Array.from(el.classList) : [],
-            property: cfg.property,
-            oldValue: cfg.oldValue || '',
-            newValue: cfg.newValue || '',
-            shared: !!cfg.shared,
-            sharedKey: '',
-            timestamp: Date.now(),
-          };
-          Object.assign(rec, deriveIntent(rec, el));
-          state.changes.push(rec);
-          if (el) changeElRefs.set(rec.id, el);
-        });
-        (group.comments || []).forEach(text => {
-          state.annotations.push({
-            id: 'ann-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
-            selector: sel,
-            text: String(text),
-            timestamp: Date.now(),
-          });
-        });
-      };
-      if (replace) this._resetCurrentSceneChanges();
-      data.annotations.forEach(applyGroup);
-      this._flushSave();
-      this._updateChangeCount();
-      this._syncAnnotationMarkers();
-      if (this._components.overviewPanel && !this._components.overviewPanel.hasAttribute('hidden')) {
-        this._components.overviewPanel.refresh(state.changes, state.currentRoute, state.annotations);
-      }
-      this._showToast(replace ? '已导入并替换当前场景' : '已导入并合并到当前场景');
     }
 
     /** 跨场景一键重置：清空所有场景的修改（含 localStorage 中其它场景的记录，不二次确认） */
