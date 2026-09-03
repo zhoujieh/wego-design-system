@@ -48,3 +48,6 @@ description: 创建或变更业务迭代；以需求规格说明为唯一需求�
 
 <!-- rule-id: confirm-brief-must-wait-affirmation -->
 - `confirm-brief` 只能在用户明确表达"验收完成"且 5 维度一致性校验清单逐项确认后执行，必须带当前迭代 ID 作为明确授权参数。
+
+<!-- rule-id: experience-signal-to-inbox -->
+- 经验信号自检：会话中出现用户纠正、用户表达偏好、返工、踩坑（CI 失败/守卫拦截/验收打回）时，向当前交付单元 `.tasks/experience-inbox.json` 追加一条草稿（字段与分流规则见 `wego-uxsystem-iterate/references/workflow-iteration.md`），不直接改经验权威源，无信号不动作、不打断需求流程。

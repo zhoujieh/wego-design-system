@@ -29,12 +29,14 @@
    - 已合入 main（tip 是 main 祖先）或上游已删且内容与 main 一致的分支 → 收口删除：`npm run branches:prune`；上游已删（gone）类需确认内容已进 main 后用 `npm run branches:prune-gone`。
    - 有 worktree 检出、有开放 PR、或无法归属的分支 → 保留，或先关联到交付单元/确认废弃，不得长期静默保留。
 2. 巡检结果与当前交付单元冲突时，先确认归属再处理。
+3. 中断兜底：若待接手/待清理 worktree 的 `.tasks/experience-inbox.json` 留有未处理草稿，交 `wego-uxsystem-iterate` 补做经验收口后再继续，不得直接清理 worktree。
 
 ## 第 2 步：环境同步与清理（仅完整启动）
 
 1. 主 worktree 执行 `git pull --rebase origin main`。
-2. 检查是否有带 `needs-sync` 标签的开放 PR（CI 自动同步 main 时冲突会打此标签），有则先处理冲突。
-3. 检查 `.tasks/preview-servers/` 中的预览服务记录：
+2. 会话前置读取 `.codex/skills/wego-uxsystem-iterate/experience/EXPERIENCE.md` 核心摘要（轻量启动且本会话已读过则不重复读）；命中场景技能挂载点时再按需读取对应 `wego-scene-*`。
+3. 检查是否有带 `needs-sync` 标签的开放 PR（CI 自动同步 main 时冲突会打此标签），有则先处理冲突。
+4. 检查 `.tasks/preview-servers/` 中的预览服务记录：
    - 进程已失效、worktree 已不存在、记录分支与实际分支不一致、或 PR 已关闭/合并 → 停止进程并删除记录。
    - 仍在本地迭代或等待合并的服务 → 保留，不得清理。
 
