@@ -93,6 +93,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     more: `<svg ${ICON_SVG}><path d="M140,128a12,12,0,1,1-12-12A12,12,0,0,1,140,128Zm56-12a12,12,0,1,0,12,12A12,12,0,0,0,196,116ZM60,116a12,12,0,1,0,12,12A12,12,0,0,0,60,116Z"/></svg>`,
     database: `<svg ${ICON_SVG}><path d="M128,24C74.17,24,32,48.6,32,80v96c0,31.4,42.17,56,96,56s96-24.6,96-56V80C224,48.6,181.83,24,128,24Zm80,104c0,9.62-7.88,19.43-21.61,26.92C170.93,163.35,150.19,168,128,168s-42.93-4.65-58.39-13.08C55.88,147.43,48,137.62,48,128V111.36c17.06,15,46.23,24.64,80,24.64s62.94-9.68,80-24.64ZM69.61,53.08C85.07,44.65,105.81,40,128,40s42.93,4.65,58.39,13.08C200.12,60.57,208,70.38,208,80s-7.88,19.43-21.61,26.92C170.93,115.35,150.19,120,128,120s-42.93-4.65-58.39-13.08C55.88,99.43,48,89.62,48,80S55.88,60.57,69.61,53.08ZM186.39,202.92C170.93,211.35,150.19,216,128,216s-42.93-4.65-58.39-13.08C55.88,195.43,48,185.62,48,176V159.36c17.06,15,46.23,24.64,80,24.64s62.94-9.68,80-24.64V176C208,185.62,200.12,195.43,186.39,202.92Z"/></svg>`,
     close: `<svg ${ICON_SVG}><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>`,
+    undo: `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg>`,
+    redo: `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.4 10.6C16.55 8.99 14.15 8 11.5 8c-4.65 0-8.58 3.03-9.96 7.22L3.9 16c1.05-3.19 4.05-5.5 7.6-5.5 1.95 0 3.73.72 5.12 1.88L13 16h9V7l-3.6 3.6z"/></svg>`,
     layoutColumn: `<svg ${ICON_SVG}><path d="M208,136H48a16,16,0,0,0-16,16v40a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V152A16,16,0,0,0,208,136Zm0,56H48V152H208v40Zm0-144H48A16,16,0,0,0,32,64v40a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V64A16,16,0,0,0,208,48Zm0,56H48V64H208v40Z"/></svg>`,
     layoutRow: `<svg ${ICON_SVG}><path d="M104,32H64A16,16,0,0,0,48,48V208a16,16,0,0,0,16,16h40a16,16,0,0,0,16-16V48A16,16,0,0,0,104,32Zm0,176H64V48h40ZM192,32H152a16,16,0,0,0-16,16V208a16,16,0,0,0,16,16h40a16,16,0,0,0,16-16V48A16,16,0,0,0,192,32Zm0,176H152V48h40Z"/></svg>`,
     gap: `<svg ${ICON_SVG}><path d="M237.66,133.66l-32,32a8,8,0,0,1-11.32-11.32L212.69,136H43.31l18.35,18.34a8,8,0,0,1-11.32,11.32l-32-32a8,8,0,0,1,0-11.32l32-32a8,8,0,0,1,11.32,11.32L43.31,120H212.69l-18.35-18.34a8,8,0,0,1,11.32-11.32l32,32A8,8,0,0,1,237.66,133.66Z"/></svg>`,
@@ -4473,18 +4475,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (!root) return;
       const tag = this._targetEl ? this._targetEl.tagName.toLowerCase() : '';
       const text = this._targetEl ? (this._targetEl.textContent || '').trim().substring(0, 20) : '';
-      // 面包屑：HTML 串整体替换
-      const bcHtml = this._buildBreadcrumbs();
-      const bc = root.querySelector('[data-breadcrumb]');
-      if (bcHtml) {
-        if (bc) bc.outerHTML = bcHtml;
-      } else if (bc) {
-        bc.remove();
-      }
-      // header：tag / selector / text
+      // header：tag / text
       const headerTag = root.querySelector('.header-tag');
       if (headerTag) {
-        headerTag.innerHTML = `${tag || '—'}${this._selector ? `<span class="header-selector">${escapeHtml(this._selector.substring(0, 40))}</span>` : ''}`;
+        headerTag.textContent = tag || '—';
       }
       const headerText = root.querySelector('.header-text');
       if (headerText) headerText.textContent = text || '';
@@ -4856,43 +4850,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       });
     }
 
-    /** 当前元素从根到自身的祖先链（元素本体在最末），排除 body/html/工具自身 */
-    _crumbChain() {
-      const chain = [];
-      if (!this._targetEl) return chain;
-      let node = this._targetEl;
-      while (node) {
-        if (node.nodeType === 1 && !isWalkthroughElement(node) &&
-            node !== document.body && node !== document.documentElement) {
-          chain.unshift(node);
-        }
-        if (node === document.body || node === document.documentElement) break;
-        node = node.parentElement;
-      }
-      return chain;
-    }
-
-    /** 生成层级面包屑 HTML（对齐 DevTools/Webflow 祖先链）；超过 6 层折叠为首尾 */
-    _buildBreadcrumbs() {
-      const chain = this._crumbChain();
-      if (chain.length < 2) return '';
-      const MAX = 6;
-      let shown = chain;
-      if (chain.length > MAX) {
-        shown = chain.slice(0, 2).concat(chain.slice(chain.length - (MAX - 2)));
-      }
-      let html = '<div class="breadcrumb" data-breadcrumb>';
-      shown.forEach((n) => {
-        const isCurrent = n === this._targetEl;
-        const cls = (n.className || '').toString().split(' ').filter(Boolean).slice(0, 2).join('.');
-        const label = n.tagName.toLowerCase() + (cls ? '.' + cls : '');
-        html += '<span class="crumb-sep">/</span>';
-        html += `<button type="button" class="crumb ${isCurrent ? 'crumb--current' : ''}" data-crumb data-crumb-index="${chain.indexOf(n)}" title="${escapeHtml(label)}">${escapeHtml(label)}</button>`;
-      });
-      html += '</div>';
-      return html;
-    }
-
     /** 渐变数据 {type, angle, stops} → CSS 渐变字符串（功能 4：swatch/文本渐变共用） */
     _colorGradientCss(g) {
       if (!g || !Array.isArray(g.stops) || g.stops.length < 2) return 'none';
@@ -5040,14 +4997,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             overflow: hidden;
             text-overflow: ellipsis;
           }
-          .header-selector {
-            font-size: 11px;
-            font-weight: 400;
-            color: rgba(255, 255, 255, 0.45);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-          }
           .header-text {
             font-size: 11px;
             color: var(--text-tertiary, #888);
@@ -5056,37 +5005,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             text-overflow: ellipsis;
             margin-top: 2px;
           }
-          /* 层级面包屑：对齐 Chrome DevTools / Webflow 的祖先链，点击任一层直接选中 */
-          .breadcrumb {
-            display: flex;
-            align-items: center;
-            gap: 2px;
-            padding: 2px 0 8px;
-            overflow-x: auto;
-            white-space: nowrap;
-            border-bottom: 1px solid var(--border-color);
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-          }
-          .breadcrumb::-webkit-scrollbar { display: none; }
-          .crumb {
-            flex: 0 0 auto;
-            border: none;
-            background: transparent;
-            color: var(--text-tertiary, rgba(255,255,255,0.42));
-            font-size: 10px;
-            line-height: 16px;
-            font-family: inherit;
-            padding: 1px 4px;
-            border-radius: 4px;
-            cursor: pointer;
-            max-width: 110px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-          }
-          .crumb:hover { color: var(--text-default, #fff); background: rgba(255,255,255,0.08); }
-          .crumb--current { color: var(--text-brand, #00b96b); font-weight: 600; }
-          .crumb-sep { flex: 0 0 auto; color: var(--text-tertiary, rgba(255,255,255,0.42)); font-size: 10px; }
           .close-btn {
             width: 28px;
             height: 28px;
@@ -5103,26 +5021,24 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             flex-shrink: 0;
           }
           .close-btn:hover { background: rgba(0,0,0,0.05); }
-          /* 撤销/重做小按钮 */
+          /* 撤销/重做按钮：SVG 图标 + 浅色底，提升可辨识度 */
           .undo-btn {
             width: 28px;
             height: 28px;
             border: none;
             border-radius: 8px;
-            background: transparent;
-            color: var(--text-tertiary, #888);
-            font-size: 15px;
-            line-height: 1;
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.72);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 0;
             flex-shrink: 0;
-            opacity: 0.85;
+            transition: background .15s ease, color .15s ease, opacity .15s ease;
           }
-          .undo-btn:hover:not(.is-disabled) { background: rgba(0,0,0,0.05); color: var(--text-default, #fff); }
-          .undo-btn.is-disabled { opacity: 0.3; cursor: default; }
+          .undo-btn:hover:not(.is-disabled) { background: rgba(255,255,255,0.14); color: #fff; }
+          .undo-btn.is-disabled { opacity: 0.28; cursor: default; background: transparent; color: rgba(255,255,255,0.4); }
           .section {
             display: flex;
             flex-direction: column;
@@ -5710,15 +5626,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         <div class="panel">
           <div class="header" title="按住可拖动面板">
             <div class="header-info">
-              <div class="header-tag">${tag || '—'}${this._selector ? `<span class="header-selector">${escapeHtml(this._selector.substring(0, 40))}</span>` : ''}</div>
+              <div class="header-tag">${tag || '—'}</div>
               ${text ? `<div class="header-text">${escapeHtml(text)}</div>` : ''}
             </div>
-            <button class="undo-btn" type="button" data-action="undo" title="撤销 (Ctrl+Z)">↶</button>
-            <button class="undo-btn" type="button" data-action="redo" title="重做 (Ctrl+Shift+Z)">↷</button>
+            <button class="undo-btn" type="button" data-action="undo" title="撤销 (Ctrl+Z)">${ICONS.undo}</button>
+            <button class="undo-btn" type="button" data-action="redo" title="重做 (Ctrl+Shift+Z)">${ICONS.redo}</button>
             <button class="close-btn" type="button" data-action="close">${ICONS.close}</button>
           </div>
-
-          ${this._buildBreadcrumbs()}
 
           <div class="panel-body">
           ${hasBefore || hasAfter ? `
@@ -6126,22 +6040,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (redoBtn) redoBtn.addEventListener('click', () => bus.emit('redo'));
       const app2 = document.querySelector('wego-walkthrough');
       if (app2 && typeof app2._updateUndoRedoUI === 'function') app2._updateUndoRedoUI();
-      // 层级面包屑：点击任一层直接选中该祖先
-      this._shadow.querySelectorAll('[data-crumb]').forEach(crumb => {
-        crumb.addEventListener('click', () => {
-          const idx = parseInt(crumb.dataset.crumbIndex, 10);
-          const chain = this._crumbChain();
-          const el = chain[idx];
-          if (!el) return;
-          const app = document.querySelector('wego-walkthrough');
-          if (app && typeof app._selectElement === 'function') {
-            app._selectElement(el);
-          } else {
-            this._targetEl = el;
-            this.openForElement(el, generateSelector(el), this._target);
-          }
-        });
-      });
       // 伪元素目标切换
       const switchEl = this._shadow.querySelector('[data-target-switch]');
       if (switchEl) {
