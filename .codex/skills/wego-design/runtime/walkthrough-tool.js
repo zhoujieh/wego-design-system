@@ -3332,8 +3332,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       }
       // 分组逻辑：共享样式按组件类（sharedKey 去掉 ::属性名）分组，同一组件类的所有属性合并为一条；
       // 非共享样式按 selector 分组，同一元素的多个属性合并为一条。
+      // reorder 变更（功能 4）单独成列，不混入 CSS 属性组。
+      const reorderInfos = [];
       const groups = {};
       changes.forEach(c => {
+        if (c.type === 'reorder') { reorderInfos.push(c); return; }
         const componentClass = c.sharedKey ? c.sharedKey.split('::')[0] : '';
         const gkey = c.sharedKey ? componentClass : c.selector;
         if (!groups[gkey]) {
@@ -3426,6 +3429,18 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const noteOnlyGroups = pureAnnotations;
       if (styleGroups.length) {
         lines.push(`### 样式变更（${styleGroups.length} 组）`);
+        lines.push('');
+      }
+      // 元素顺序调整（功能 4 reorder 变更）
+      if (reorderInfos.length) {
+        lines.push(`### 元素顺序调整（${reorderInfos.length} 处）`);
+        lines.push('');
+        reorderInfos.forEach((c, ri) => {
+          const anchor = (c.elementText || '').replace(/\s+/g, ' ').trim();
+          const containerLabel = anchor ? `（${anchor.slice(0, 16)}）` : '';
+          lines.push(`${ri + 1}. 容器 ${c.selector}${containerLabel} 内 ${c.order.length} 个子元素顺序已调整`);
+          fullSelectors.push({ idx: '顺序' + (ri + 1), classAnchor: '', selector: c.selector });
+        });
         lines.push('');
       }
       styleGroups.forEach((g, i) => {
@@ -9146,6 +9161,15 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         this._measureTap(e.clientX, e.clientY);
         return;
       }
+      // 选中即拖（功能 4）：按下已选中元素 → 立即进入拖拽（无 500ms 定住）
+      if (state.selectedElement && this._hitTargetInSelected(e.target, state.selectedElement)) {
+        this._pointerActive = true;
+        this._ptStartX = e.clientX;
+        this._ptStartY = e.clientY;
+        this._isSwiping = false;
+        this._startElementDrag(state.selectedElement, e.clientX, e.clientY);
+        return;
+      }
       this._pointerActive = true;
       this._ptStartX = e.clientX;
       this._ptStartY = e.clientY;
@@ -9156,13 +9180,25 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._longPressTimer = setTimeout(() => this._startLongPressDrag(), 500);
     };
     _onPointerMove = (e) => {
-      // 拖拽进行中：跟随指针平移元素
+      // 拖拽进行中：跟随指针平移元素（功能 4：增量位移 + 容器内 clamp + 中心越界换位）
       if (this._dragging) {
-        let dx = e.clientX - this._dragging.startX;
-        let dy = e.clientY - this._dragging.startY;
-        if (Math.abs(dx) > 1 || Math.abs(dy) > 1) this._dragging.moved = true;
-        let tx = Math.round(dx);
-        let ty = Math.round(dy);
+        const drag = this._dragging;
+        const dx = e.clientX - drag.lastClientX;
+        const dy = e.clientY - drag.lastClientY;
+        drag.lastClientX = e.clientX;
+        drag.lastClientY = e.clientY;
+        if (Math.abs(dx) > 1 || Math.abs(dy) > 1) drag.moved = true;
+        // 累计位移（换位后由 _swapSiblings 重设基准）
+        let ax = drag.accumDx + dx;
+        let ay = drag.accumDy + dy;
+        // 位移 clamp 在父容器 content box 内（功能 4：左上角锚点不越界）
+        if (drag.container) {
+          const clamped = this._clampDragToContainer(drag, ax, ay);
+          ax = clamped.tx; ay = clamped.ty;
+        }
+        drag.accumDx = ax; drag.accumDy = ay;
+        let tx = Math.round(ax);
+        let ty = Math.round(ay);
         let snapLines = null;
         // 网格开启时吸附到 8px 网格线
         if (this._gridMode) {
@@ -9173,10 +9209,14 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           if (snapLines.length && navigator.vibrate) navigator.vibrate(15); // 轻震动反馈
         }
         // 记录最终（含吸附后）位移，松手提交时使用，保证「拖拽中吸附位置 = 提交后位置」
-        this._dragging.snapTx = tx;
-        this._dragging.snapTy = ty;
-        this._dragging.el.style.transform = `${this._dragOrigTransform ? this._dragOrigTransform + ' ' : ''}translate(${tx}px, ${ty}px)`;
-        this._components.highlight.showForElement(this._dragging.el, `+${tx}, +${ty}`);
+        drag.snapTx = tx;
+        drag.snapTy = ty;
+        drag.el.style.transform = `${this._dragOrigTransform ? this._dragOrigTransform + ' ' : ''}translate(${tx}px, ${ty}px)`;
+        // 换位检测：A 中心越过兄弟中心 → DOM 交换 + FLIP（功能 4）
+        if (!drag.skipReorder && drag.container) {
+          this._detectReorder(drag);
+        }
+        this._components.highlight.showForElement(drag.el, `+${tx}, +${ty}`);
         this._showSnapLines(snapLines);
         e.preventDefault();
         e.stopPropagation();
@@ -9218,17 +9258,306 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (!el || this._isSelectionRoot(el)) return;
       if (state.selectedElement !== el) this._selectElement(el);
       const target = state.selectedElement || el;
-      this._dragOrigTransform = target.style.transform || '';
-      this._dragging = { el: target, startX: this._ptStartX, startY: this._ptStartY, moved: false };
-      target.style.transition = 'none';
-      target.style.opacity = '0.8';
-      target.style.cursor = 'move';
-      this._components.highlight.setMode('selected');
-      this._components.highlight.setHandles(false);
-      this._components.highlight.showForElement(target, '拖动中');
+      this._startElementDrag(target, this._ptStartX, this._ptStartY);
     }
 
-    /** 松手结束拖拽：发生位移则记录 transform 变更，否则还原 */
+    /** 功能 4：元素拖拽核心启动（选中即拖 / 长按拖拽共用）
+     *  - 位移 clamp 在父容器 content box 内
+     *  - 中心越过兄弟中心 → DOM 换位 + FLIP
+     *  - 松手统一提交（位移 + 换位合并为一条 reorder 变更） */
+    _startElementDrag(el, startX, startY) {
+      if (!el || this._isSelectionRoot(el)) return;
+      const container = el.parentElement;
+      this._dragOrigTransform = el.style.transform || '';
+      // 有初始 transform 的元素仅允许位移，不参与换位（避免 transform 基准冲突）
+      const skipReorder = !!this._dragOrigTransform;
+      const originRect = el.getBoundingClientRect();
+      this._dragging = {
+        el,
+        container,
+        startX, startY,
+        lastClientX: startX, lastClientY: startY,
+        accumDx: 0, accumDy: 0,
+        originRect,
+        originCenterX: originRect.left + originRect.width / 2,
+        originCenterY: originRect.top + originRect.height / 2,
+        moved: false,
+        orderDirty: false,
+        oldOrder: null,
+        skipReorder,
+        lastSwapAt: 0,
+      };
+      // 记录初始顺序快照（换位后提交用）
+      if (!skipReorder && container && this._canReorderIn(container)) {
+        this._dragging.oldOrder = this._orderSnapshot(container);
+      }
+      el.style.transition = 'none';
+      el.style.opacity = '0.8';
+      el.style.cursor = 'move';
+      this._components.highlight.setMode('selected');
+      this._components.highlight.setHandles(false);
+      this._components.highlight.showForElement(el, '拖动中');
+    }
+
+    /** 命中判定：目标等于选中元素或是其后代（e.target 可能命中子元素） */
+    _hitTargetInSelected(target, selected) {
+      if (!target || !selected) return false;
+      return target === selected || (typeof selected.contains === 'function' && selected.contains(target));
+    }
+
+    /** 容器是否可参与换位：非 body/html、至少两个可换位子元素 */
+    _canReorderIn(container) {
+      if (!container || container === document.body || container === document.documentElement) return false;
+      if (isWalkthroughElement(container)) return false;
+      const kids = Array.from(container.children).filter(k => this._isReorderable(k));
+      return kids.length >= 2;
+    }
+
+    /** 元素是否可参与换位：排除 body/html/工具 UI/SVG 子元素 */
+    _isReorderable(el) {
+      if (!el || !el.parentElement) return false;
+      if (el === document.body || el === document.documentElement) return false;
+      if (isWalkthroughElement(el)) return false;
+      if (typeof SVGElement !== 'undefined' && el instanceof SVGElement) return false;
+      return true;
+    }
+
+    /** 元素稳定身份签名（换位前后一致）：优先图片 src → 文本 → 类名+序号兜底。
+     *  reorder 的 order/oldOrder 用该签名而非 nth-of-type 选择器（后者随位置漂移） */
+    _elementIdentity(el) {
+      if (!el) return '';
+      const tag = el.tagName.toLowerCase();
+      const cls = getFirstStableClass(el) || '';
+      const img = el.tagName === 'IMG' ? el : (el.querySelector ? el.querySelector('img') : null);
+      if (img && img.currentSrc) return `${tag}#${cls}#${img.currentSrc}`;
+      if (img && img.src) return `${tag}#${cls}#${img.src}`;
+      const text = (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 40);
+      if (text) return `${tag}#${cls}#${text}`;
+      // 无内容特征兜底：类名 + 兄弟序号（换位后序号可能漂移，仅极端场景）
+      const parent = el.parentElement;
+      const idx = parent ? Array.from(parent.children).indexOf(el) : 0;
+      return `${tag}#${cls}#nth${idx}`;
+    }
+
+    /** 容器内可换位子元素的稳定身份顺序快照（换位前后元素身份一致） */
+    _orderSnapshot(container) {
+      return Array.from(container.children)
+        .filter(el => this._isReorderable(el))
+        .map(el => this._elementIdentity(el));
+    }
+
+    /** 容器主轴方向：flex row→'row'、column→'column'、grid→'both'、block→'column' */
+    _containerDirection(container) {
+      const cs = getComputedStyle(container);
+      const d = cs.display;
+      if (d === 'flex' || d === 'inline-flex') {
+        return (cs.flexDirection || 'row').indexOf('column') === 0 ? 'column' : 'row';
+      }
+      if (d === 'grid' || d === 'inline-grid') return 'both';
+      return 'column';
+    }
+
+    /** 功能 4：拖拽位移 clamp 在父容器 content box（padding 内）边界内。
+     *  元素小于容器：左上角限制在 [left, right-w]；大于容器：左上角锚点不越界（本体可超出）。 */
+    _clampDragToContainer(drag, ax, ay) {
+      const el = drag.el, container = drag.container;
+      if (!container || !container.isConnected) return { tx: ax, ty: ay };
+      const o = drag.originRect;
+      const cr = container.getBoundingClientRect();
+      const cs = getComputedStyle(container);
+      const padL = parseFloat(cs.paddingLeft) || 0;
+      const padT = parseFloat(cs.paddingTop) || 0;
+      const padR = parseFloat(cs.paddingRight) || 0;
+      const padB = parseFloat(cs.paddingBottom) || 0;
+      const left = cr.left + padL, top = cr.top + padT;
+      const right = cr.right - padR, bottom = cr.bottom - padB;
+      const cw = Math.max(0, cr.width - padL - padR);
+      const ch = Math.max(0, cr.height - padT - padB);
+      const minTx = left - o.left;
+      const maxTx = (right - Math.min(o.width, cw)) - o.left;
+      const minTy = top - o.top;
+      const maxTy = (bottom - Math.min(o.height, ch)) - o.top;
+      let tx = ax, ty = ay;
+      if (minTx <= maxTx) tx = Math.min(Math.max(ax, minTx), maxTx);
+      if (minTy <= maxTy) ty = Math.min(Math.max(ay, minTy), maxTy);
+      return { tx, ty };
+    }
+
+    /** 功能 4：中心越过兄弟中心 → 与该兄弟 DOM 换位 + FLIP（250ms 防抖锁）
+     *  row 看水平、column 看垂直、grid(both) 两者皆可；
+     *  "越过" = A 中心从初始侧跨过兄弟中心线（避免相邻初始即误换位） */
+    _detectReorder(drag) {
+      const el = drag.el, container = drag.container;
+      if (!container || !container.isConnected) return null;
+      if (Date.now() - (drag.lastSwapAt || 0) < 250) return null;
+      const siblings = Array.from(container.children).filter(s => s !== el && this._isReorderable(s));
+      if (!siblings.length) return null;
+      const er = el.getBoundingClientRect();
+      const ecx = er.left + er.width / 2, ecy = er.top + er.height / 2;
+      const ocx = drag.originCenterX, ocy = drag.originCenterY;
+      const dir = this._containerDirection(container);
+      let target = null;
+      if (dir === 'row' || dir === 'both') {
+        let best = null, bestDist = Infinity;
+        for (const sib of siblings) {
+          const sr = sib.getBoundingClientRect();
+          const scx = sr.left + sr.width / 2;
+          const crossedX = (ocx < scx && ecx > scx) || (ocx > scx && ecx < scx);
+          if (!crossedX) continue;
+          const dist = Math.abs(ecx - scx);
+          if (dist < bestDist) { bestDist = dist; best = sib; }
+        }
+        target = best;
+      }
+      if (!target && (dir === 'column' || dir === 'both')) {
+        let best = null, bestDist = Infinity;
+        for (const sib of siblings) {
+          const sr = sib.getBoundingClientRect();
+          const scy = sr.top + sr.height / 2;
+          const crossedY = (ocy < scy && ecy > scy) || (ocy > scy && ecy < scy);
+          if (!crossedY) continue;
+          const dist = Math.abs(ecy - scy);
+          if (dist < bestDist) { bestDist = dist; best = sib; }
+        }
+        target = best;
+      }
+      if (target) {
+        this._swapSiblings(container, el, target, drag);
+        drag.lastSwapAt = Date.now();
+        drag.orderDirty = true;
+        return target;
+      }
+      return null;
+    }
+
+    /** 功能 4：三节点 DOM 交换 + FLIP 动画。
+     *  - 被让位兄弟 FLIP 流动到新位置
+     *  - 拖动元素视觉连续：transform 调整回换位前视觉位置，并重置拖拽位移基准 */
+    _swapSiblings(container, a, b, drag) {
+      if (a === b) return;
+      const aVisual = a.getBoundingClientRect();
+      const firstB = b.getBoundingClientRect();
+      // DOM 三节点交换（A、B 互换，其余顺序不变）
+      const bNext = b.nextSibling;
+      if (a.nextSibling === b) {
+        container.insertBefore(b, a);
+      } else {
+        container.insertBefore(b, a);
+        container.insertBefore(a, bNext);
+      }
+      // a 的纯 DOM 位置（临时清 transform 求值）
+      const aPrevTransform = a.style.transform;
+      a.style.transform = '';
+      const domA = a.getBoundingClientRect();
+      a.style.transform = aPrevTransform;
+      const lastB = b.getBoundingClientRect();
+      // 拖动元素视觉连续：transform 调整到换位前视觉位置（继续跟手）
+      const fixDx = aVisual.left - domA.left;
+      const fixDy = aVisual.top - domA.top;
+      a.style.transition = 'none';
+      a.style.transform = `translate(${fixDx}px, ${fixDy}px)`;
+      // 被让位兄弟 FLIP：从 firstB 流动到 lastB
+      const invDx = firstB.left - lastB.left;
+      const invDy = firstB.top - lastB.top;
+      b.style.transition = 'none';
+      b.style.transform = `translate(${invDx}px, ${invDy}px)`;
+      void b.getBoundingClientRect(); // force reflow
+      b.style.transition = 'transform 250ms cubic-bezier(0.22, 0.9, 0.32, 1)';
+      b.style.transform = '';
+      // 重置拖拽位移基准（换位后 a 以此 transform 为基准继续增量跟手）
+      if (drag) {
+        drag.accumDx = fixDx;
+        drag.accumDy = fixDy;
+      }
+    }
+
+    /** 功能 4：记录一条 reorder 变更（位移 + 顺序合并，撤销整体还原） */
+    _recordReorder(drag) {
+      const container = drag.container;
+      if (!container) return;
+      const order = this._orderSnapshot(container);
+      const oldOrder = drag.oldOrder || [];
+      if (JSON.stringify(order) === JSON.stringify(oldOrder)) return; // 无实际顺序变化
+      const containerSel = this._resolveCanonicalSelector(container, generateSelector(container));
+      const rec = {
+        id: 'reorder-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+        type: 'reorder',
+        selector: containerSel,
+        property: 'reorder',
+        newValue: 'reorder',
+        oldValue: '',
+        order,
+        oldOrder,
+        timestamp: Date.now(),
+      };
+      // 附带位移（如有）；identity/containerSel 用于换位后按身份定位（nth 选择器已漂移）
+      if (drag.moved && (drag.snapTx || drag.snapTy)) {
+        rec.move = {
+          identity: this._elementIdentity(drag.el),
+          containerSel: this._resolveCanonicalSelector(container, generateSelector(container)),
+          selector: this._resolveCanonicalSelector(drag.el, generateSelector(drag.el)),
+          oldValue: this._dragOrigTransform || '',
+          newValue: `translate(${drag.snapTx}px, ${drag.snapTy}px)`,
+        };
+      }
+      state.changes.push(rec);
+      state.undoStack.push({
+        id: rec.id,
+        type: 'reorder',
+        selector: containerSel,
+        target: '',
+        property: 'reorder',
+        rec: JSON.parse(JSON.stringify(rec)),
+      });
+      if (state.undoStack.length > 100) state.undoStack.shift();
+      state.redoStack = [];
+      this._syncAfterRecordsChanged();
+      this._updateUndoRedoUI();
+    }
+
+    /** 功能 4：按身份顺序快照重排容器子元素（重放/还原用，appendChild 移动已有节点）。
+     *  身份签名相同的元素按容器当前相对顺序放置，不会错乱 */
+    _applyReorder(selector, order) {
+      try {
+        const container = queryTargetEl(selector);
+        if (!container || !Array.isArray(order)) return;
+        const children = Array.from(container.children).filter(el => this._isReorderable(el));
+        const byIdent = {};
+        children.forEach(el => {
+          const id = this._elementIdentity(el);
+          if (!byIdent[id]) byIdent[id] = [];
+          byIdent[id].push(el);
+        });
+        const placed = new Set();
+        order.forEach(id => {
+          const bucket = byIdent[id];
+          if (!bucket) return;
+          const el = bucket.find(e => !placed.has(e));
+          if (el) { container.appendChild(el); placed.add(el); }
+        });
+        // 未匹配子元素保持原相对顺序追加末尾（防御脏数据/内容变化）
+        children.forEach(el => {
+          if (!placed.has(el)) container.appendChild(el);
+        });
+      } catch (e) {}
+    }
+
+    /** 按身份签名在容器内定位 reorder 附带位移的元素（换位后 nth 选择器漂移，优先身份匹配） */
+    _queryMoveTarget(move) {
+      if (!move) return null;
+      if (move.containerSel && move.identity) {
+        try {
+          const container = queryTargetEl(move.containerSel);
+          if (container) {
+            const found = Array.from(container.children).find(el => this._elementIdentity(el) === move.identity);
+            if (found) return found;
+          }
+        } catch (e) {}
+      }
+      try { return queryTargetEl(move.selector); } catch (e) { return null; }
+    }
+
+    /** 松手结束拖拽：发生位移则记录 transform 变更，否则还原（功能 4：位移+换位合并为一条 reorder 变更） */
     _endLongPressDrag(e) {
       const drag = this._dragging;
       this._dragging = null;
@@ -9244,7 +9573,14 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 网格吸附：提交时使用拖拽中记录的吸附后位移，保证拖拽中吸附位置与松手后一致
       const fdx = (drag.snapTx !== undefined) ? drag.snapTx : dx;
       const fdy = (drag.snapTy !== undefined) ? drag.snapTy : dy;
-      if (drag.moved && (fdx !== 0 || fdy !== 0)) {
+      const didMove = drag.moved && (fdx !== 0 || fdy !== 0);
+      const didReorder = drag.orderDirty;
+      if (didReorder && drag.container && drag.oldOrder) {
+        // 换位 + 位移合并为一条 reorder 变更（撤销整体还原）
+        el.style.transform = didMove ? `translate(${fdx}px, ${fdy}px)` : (this._dragOrigTransform || '');
+        this._recordReorder(drag);
+        this._showToast(didMove ? '已移动并调整顺序' : '已调整元素顺序');
+      } else if (didMove) {
         const newValue = `translate(${fdx}px, ${fdy}px)`;
         el.style.transform = newValue;
         bus.emit('style-change', {
@@ -9809,6 +10145,15 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
     /** 还原单条变更（本体=清 inline；伪元素=清注入规则；文本=恢复原文） */
     _revertChange(change) {
+      // 功能 4：reorder 变更 → 重放原顺序 + 还原附带位移
+      if (change.type === 'reorder') {
+        this._applyReorder(change.selector, change.oldOrder);
+        if (change.move) {
+          const mel = this._queryMoveTarget(change.move);
+          if (mel) mel.style.transform = change.move.oldValue || '';
+        }
+        return;
+      }
       if (change.target) {
         applyPseudoStyle(change.selector, change.target, change.property, '');
         return;
@@ -9894,6 +10239,21 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         this._showToast('没有可撤销的修改');
         return false;
       }
+      // 功能 4：reorder 撤销（还原 oldOrder 顺序 + 附带位移）
+      if (item.type === 'reorder' && item.rec) {
+        const rec = item.rec;
+        this._applyReorder(rec.selector, rec.oldOrder);
+        if (rec.move) {
+          const mel = this._queryMoveTarget(rec.move);
+          if (mel) mel.style.transform = rec.move.oldValue || '';
+        }
+        state.changes = state.changes.filter(c => c.id !== rec.id);
+        state.redoStack.push(item);
+        this._syncAfterRecordsChanged();
+        this._updateUndoRedoUI();
+        this._showToast('已撤销（元素顺序还原）');
+        return true;
+      }
       const existing = state.changes.find(c =>
         c.selector === item.selector && (c.target || '') === item.target && c.property === item.property);
       // 共享修改（主元素记录带 sharedKey）：同组记录整体还原，一次共享操作 = 一个撤销单元，
@@ -9941,6 +10301,21 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (!item) {
         this._showToast('没有可重做的修改');
         return false;
+      }
+      // 功能 4：reorder 重做（重放 order 顺序 + 附带位移）
+      if (item.type === 'reorder' && item.rec) {
+        const rec = item.rec;
+        this._applyReorder(rec.selector, rec.order);
+        if (rec.move) {
+          const mel = this._queryMoveTarget(rec.move);
+          if (mel) mel.style.transform = rec.move.newValue || '';
+        }
+        state.changes.push(rec);
+        state.undoStack.push(item);
+        this._syncAfterRecordsChanged();
+        this._updateUndoRedoUI();
+        this._showToast('已重做（元素顺序恢复）');
+        return true;
       }
       // 共享组重做：按快照恢复全部同步元素的样式与记录
       if (item.groupRecords && item.groupRecords.length) {
@@ -10050,6 +10425,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     _buildAnnotationsForJson() {
       const map = {};
       state.changes.forEach(c => {
+        if (c.type === 'reorder') {
+          // reorder 变更（功能 4）单独承载顺序快照，不进 CSS 配置列表
+          const rkey = c.selector + '||';
+          if (!map[rkey]) map[rkey] = { elements: [c.selector], configs: [], comments: [], text: '' };
+          map[rkey].reorder = { order: c.order, oldOrder: c.oldOrder, move: c.move || null };
+          return;
+        }
         const key = c.selector + '||' + (c.target || '');
         if (!map[key]) map[key] = { elements: [c.selector], configs: [], comments: [], text: c.elementText || '' };
         map[key].configs.push({
@@ -10286,8 +10668,21 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     /** 把普通元素变更回放到页面 DOM；场景为异步渲染（骨架屏→真实内容），未命中时短重试 */
     _replayInlineChanges(round) {
       round = round || 0;
+      // 功能 4：reorder 变更重放（重排容器顺序 + 附带位移）
+      const reorders = state.changes.filter(c => c.type === 'reorder');
+      let reorderMatched = 0;
+      reorders.forEach(c => {
+        const container = queryTargetEl(c.selector);
+        if (!container || !container.isConnected) return;
+        reorderMatched++;
+        this._applyReorder(c.selector, c.order);
+        if (c.move) {
+          const mel = this._queryMoveTarget(c.move);
+          if (mel) mel.style.transform = c.move.newValue || '';
+        }
+      });
       const pending = state.changes.filter(c =>
-        !c.target && c.property && c.newValue !== '' && c.newValue != null && !c.skipCss
+        c.type !== 'reorder' && !c.target && c.property && c.newValue !== '' && c.newValue != null && !c.skipCss
       );
       let matched = 0;
       pending.forEach(c => {
@@ -10310,7 +10705,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         this._syncAnnotationMarkers();
       }
       // 最多重试 10 次（约 2s），覆盖场景脚本异步渲染完成的时机
-      if ((matched < pending.length || annMatched < state.annotations.length) && round < 10) {
+      if ((matched < pending.length || reorderMatched < reorders.length || annMatched < state.annotations.length) && round < 10) {
         if (this._replayTimer) clearTimeout(this._replayTimer);
         this._replayTimer = setTimeout(() => this._replayInlineChanges(round + 1), 200);
       }
