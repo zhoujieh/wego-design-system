@@ -355,14 +355,23 @@
     }
 
     /* 更新快捷分享按钮图标（纯图标正方形按钮，样式与「分享」按钮一致）
-       - 图标/名称统一复用分享面板（product-share.js CHANNELS）同一套渠道定义，不维护第二份映射
+       - 图标复用分享面板（product-share.js CHANNELS）同一套渠道图标：有 iconSvg 用 SVG 品牌图标（与分享面板渠道栏一致），
+         无 iconSvg（如更多）退回 iconfont 字形
        - 只关联渠道栏内的内容：miniprogramOnly 渠道（如复制链接）不在主分享面板渠道栏，回退默认朋友圈 */
     function refreshQuickShare() {
       if (!window.WegoApp || !window.WegoApp.getChannel) return;
       var ch = window.WegoApp.getQuickChannel();
       var info = window.WegoApp.getChannel(ch);
       if (!info || info.miniprogramOnly) info = window.WegoApp.getChannel('moments');
-      if (quickShareIcon) quickShareIcon.className = 'btn__icon ' + info.icon;
+      if (quickShareIcon) {
+        if (info.iconSvg) {
+          quickShareIcon.className = 'btn__icon btn__icon--quick';
+          quickShareIcon.innerHTML = '<img class="btn__icon-img" src="' + info.iconSvg + '" alt="' + info.name + '" />';
+        } else {
+          quickShareIcon.className = 'btn__icon ' + info.icon;
+          quickShareIcon.innerHTML = '';
+        }
+      }
       if (quickShareBtn) quickShareBtn.setAttribute('aria-label', '快捷分享到' + info.name);
     }
     refreshQuickShare();
