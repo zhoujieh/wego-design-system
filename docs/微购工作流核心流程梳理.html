@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>微购工作流核心流程梳理</title>
+<style>
+  :root{
+    --text:#1A1B1C; --text2:#6B7280; --bg:#F4F3EE; --card:#FFFFFF;
+    --border:#E4E3DD; --accent:#3F51B5; --accent-soft:#EEF3FB;
+    --green:#175F47; --green-soft:#E9F6F0; --amber:#8A4B1B; --amber-soft:#FBF6EA;
+    --red:#B23A3A; --red-soft:#FBEDED; --purple:#5B4B9E; --purple-soft:#F1EEFB;
+    --code-bg:#F1EFE8; --line-h:1.65;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'PingFang SC','Microsoft YaHei','Roboto',sans-serif;color:var(--text);background:var(--bg);line-height:var(--line-h);font-size:14px;}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 16px;display:flex;gap:28px;align-items:flex-start;}
+  main{width:100%;}
+  /* 侧边导航 */
+  nav{position:sticky;top:0;width:228px;flex:none;padding:22px 0 22px 0;max-height:100vh;overflow:auto;}
+  nav .brand{font-size:15px;font-weight:700;padding:2px 0 10px 0;border-bottom:1px solid var(--border);margin-bottom:10px;}
+  nav a{display:block;font-size:12.5px;color:#3B3C3E;text-decoration:none;padding:5px 8px;border-radius:6px;margin-bottom:2px;}
+  nav a:hover{background:var(--accent-soft);color:var(--accent);}
+  nav a.sub{padding-left:20px;font-size:12px;color:var(--text2);}
+  main{flex:1;min-width:0;padding:22px 0 60px;}
+  /* 区块 */
+  section{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px 24px;margin-bottom:20px;}
+  h1{font-size:23px;font-weight:700;margin-bottom:6px;}
+  .meta{font-size:12.5px;color:var(--text2);margin-bottom:20px;}
+  h2{font-size:18px;font-weight:700;margin-bottom:12px;padding-left:10px;border-left:4px solid var(--accent);}
+  h3{font-size:15px;font-weight:600;margin:16px 0 8px;}
+  h4{font-size:13.5px;font-weight:600;margin:12px 0 6px;color:#2F3032;}
+  p{color:#33343A;margin-bottom:8px;}
+  .lead{color:var(--text2);font-size:13px;}
+  ul,ol{margin:6px 0 10px 20px;}
+  li{margin-bottom:4px;font-size:13.5px;color:#33343A;}
+  /* 表格 */
+  table{width:100%;border-collapse:collapse;font-size:12.5px;margin:8px 0 12px;word-break:break-word;overflow-wrap:anywhere;}
+  th{background:var(--accent-soft);color:#2A3F63;text-align:left;padding:7px 10px;font-weight:600;border:1px solid #DCE3F2;}
+  td{padding:6px 10px;border:1px solid var(--border);vertical-align:top;color:#33343A;word-break:break-word;overflow-wrap:anywhere;}
+  tr:nth-child(even) td{background:#FBFAF7;}
+  /* 标签 */
+  .tag{display:inline-block;font-size:11px;font-weight:600;border-radius:6px;padding:1px 8px;margin-right:4px;vertical-align:1px;}
+  .t-skill{background:var(--purple-soft);color:var(--purple);}
+  .t-status{background:var(--amber-soft);color:var(--amber);}
+  .t-key{background:var(--red-soft);color:var(--red);}
+  .t-file{background:#F4F3EE;color:#4B5563;}
+  /* 步骤块 */
+  .steps{list-style:none;margin:8px 0;counter-reset:st;}
+  .steps>li{counter-increment:st;position:relative;padding:8px 10px 8px 42px;border-left:2px solid #D8DCE6;margin:0 0 6px 10px;font-size:13px;}
+  .steps>li::before{content:counter(st);position:absolute;left:-17px;top:7px;width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+  /* 决策 */
+  .decision{background:var(--amber-soft);border:1px solid #F0E3C0;border-radius:10px;padding:10px 12px;margin:8px 0;font-size:13px;color:#5A3E08;}
+  .note{background:#F4F3EE;border-radius:10px;padding:9px 12px;margin:8px 0;font-size:12.5px;color:#4B5563;}
+  .ok{background:var(--green-soft);border-radius:10px;padding:9px 12px;margin:8px 0;font-size:12.5px;color:var(--green);}
+  .warn{background:var(--red-soft);border-radius:10px;padding:9px 12px;margin:8px 0;font-size:12.5px;color:var(--red);}
+  code{font-family:'SF Mono','Menlo',Consolas,monospace;background:var(--code-bg);color:#3A3B3E;border-radius:4px;padding:1px 5px;font-size:12px;word-break:break-all;}
+  pre{background:#2A2B2E;color:#E8E8E6;border-radius:10px;padding:12px 14px;overflow-x:auto;font-size:12px;line-height:1.6;margin:8px 0;}
+  pre code{background:none;color:inherit;padding:0;font-size:12px;}
+  .flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0;}
+  .flow .step{background:var(--accent-soft);border:1px solid #D3DCF0;color:#2A3F63;border-radius:10px;padding:7px 12px;font-size:12.5px;font-weight:500;word-break:break-all;}
+  .flow .arrow{color:#9CA3AF;font-size:14px;}
+  .flow .gate{background:var(--amber-soft);border:1px solid #F0E3C0;color:#7A5B00;border-radius:10px;padding:7px 12px;font-size:12.5px;font-weight:600;}
+  /* 文件清单 */
+  .filelist{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px;}
+  .filelist span{font-size:11.5px;background:#F4F3EE;border:1px solid var(--border);color:#3F4044;border-radius:6px;padding:3px 8px;word-break:break-all;}
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin:10px 0;}
+  .card{border:1px solid var(--border);border-radius:12px;padding:13px 14px;background:#FEFEFD;}
+  .card .tt{font-weight:600;font-size:13.5px;margin-bottom:6px;}
+  .card .bd{font-size:12.5px;color:#33343A;}
+  @media(max-width:900px){
+    .wrap{flex-direction:column;align-items:stretch;}
+    main{width:100%;min-width:0;}
+    nav{position:static;width:100%;max-height:none;border-bottom:1px solid var(--border);margin-bottom:12px;}
+    nav .links{display:flex;flex-wrap:wrap;gap:4px;}
+    nav a{padding:4px 8px;margin:0;}
+  }
+  @media print{ nav{display:none;} body{background:#fff;} section{break-inside:avoid;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <div class="brand">微购工作流梳理</div>
+    <div class="links">
+      <a href="#overview">一、工作流全景</a>
+      <a href="#step0">二、七个环节细分</a>
+      <a class="sub" href="#s0">0 需求输入</a>
+      <a class="sub" href="#s1">1 任务启动</a>
+      <a class="sub" href="#s2">2 需求确认</a>
+      <a class="sub" href="#s3">3 设计实现</a>
+      <a class="sub" href="#s4">4 交付与PR</a>
+      <a class="sub" href="#s5">5 验收收口</a>
+      <a class="sub" href="#s6">6 合并清理</a>
+      <a class="sub" href="#s7">7 经验沉淀</a>
+      <a href="#machine">三、迭代状态机</a>
+      <a href="#map">四、文件与目录地图</a>
+      <a href="#cmds">五、关键命令速查</a>
+      <a href="#experience">六、经验体系</a>
+      <a href="#pits">七、高频踩坑提示</a>
+    </div>
+  </nav>
+
+  <main>
+    <h1>微购工作流核心流程梳理</h1>
+    <div class="meta">依据仓库权威文件梳理：<code>AGENTS.md</code>、<code>.codex/skills/README.md</code> 及各技能 SKILL.md / references / experience ｜ 整理日期：2026-09-03 ｜ 面向：微购用户体验设计中心</div>
+
+    <!-- ============ 一、全景 ============ -->
+    <section id="overview">
+      <h2>一、工作流全景</h2>
+      <p class="lead">微购是一个「AI 工作流驱动的中文移动端交互原型仓库」：业务原型固定经过 <b>需求确认 → 本地设计迭代 → 自动验证 → 用户验收</b> 这条链路，精简文档或守卫不得绕过。四种技能按用户意图路由，其中三条是业务主链路，交付技能负责分支 / PR / 预览 / 合并支撑。</p>
+
+      <h3>1. 技能路由表</h3>
+      <table>
+        <tr><th>用户意图</th><th>技能</th><th>核心职责</th></tr>
+        <tr><td>新业务需求、页面、流程或业务范围变化</td><td><span class="tag t-skill">wego-product</span></td><td>创建迭代并确认 <code>prototype_brief</code>（需求规格说明是唯一需求源）</td></tr>
+        <tr><td>已确认范围内的页面设计与实现</td><td><span class="tag t-skill">wego-design</span></td><td>消费设计系统，产出可交互 App 场景；不定义业务需求、不改设计系统本体</td></tr>
+        <tr><td>组件、Token、Preview、UI Kit、消费规则、守卫或工作流维护</td><td><span class="tag t-skill">wego-uxsystem-iterate</span></td><td>唯一权威源维护；经验沉淀与工作流迭代</td></tr>
+        <tr><td>分支、PR、本地迭代预览、合并或交付分支清理</td><td><span class="tag t-skill">wego-github-delivery</span></td><td>交付单元核对、worktree、PR、预览服务、合并收口</td></tr>
+      </table>
+
+      <h3>2. 主链路一句话</h3>
+      <div class="flow">
+        <span class="step">需求（自然语言/参考图/Figma）</span><span class="arrow">→</span>
+        <span class="step">启动清单</span><span class="arrow">→</span>
+        <span class="step">wego-product 简报确认</span><span class="arrow">→</span>
+        <span class="step">wego-design 本地迭代</span><span class="arrow">→</span>
+        <span class="step">自动推送同一 PR</span><span class="arrow">→</span>
+        <span class="gate">用户明确验收？</span><span class="arrow">→</span>
+        <span class="step">固化+完整验证+合并 main</span>
+      </div>
+      <ul>
+        <li><b>输入形态一律先走产品技能</b>：无论自然语言、参考图还是 Figma，都视为业务需求，必须先创建迭代并确认 <code>prototype_brief</code> 才能进入设计实现；Figma / 参考图不用于补造业务事实。</li>
+        <li><b>已确认简报即设计授权</b>：范围内信息分组、布局、组件、Token、反馈和 overlay 由 <code>wego-design</code> 自主完成，不建立第二次确认门禁。</li>
+        <li><b>合并必须用户明确验收通过</b>：普通反馈（改好了 / 继续 / 再调整）不构成验收授权；实现完成、检查通过、用户查看页面都不等于授权。</li>
+      </ul>
+    </section>
+
+    <!-- ============ 二、环节细分 ============ -->
+    <section id="step0">
+      <h2>二、七个环节细分（含必读文件与关键命令）</h2>
+      <p class="lead">以下每个环节列出：职责技能、触发条件、执行动作、决策点、产出、<b>必要读取的文件</b>与关键命令。</p>
+
+      <!-- 环节0 -->
+      <h3 id="s0">环节 0｜需求输入</h3>
+      <div class="note"><b>触发</b>：用户以任意形态提出业务需求 —— 自然语言描述 / 参考图（截图、草图，仅风格参考）/ Figma 设计稿（仅视觉组件参考，<b>不代表需求已确认</b>）。</div>
+      <ul>
+        <li>图中缺失的业务逻辑、状态、数据须由对话补全；流程、状态、数据来源与边界必须在简报中确认。</li>
+        <li>此环节无固定必读文件；三种形态最终都汇入「环节 2 需求确认」。</li>
+      </ul>
+
+      <!-- 环节1 -->
+      <h3 id="s1">环节 1｜任务启动（启动清单 · wego-github-delivery）</h3>
+      <p>所有新任务（业务原型、设计系统维护、工作流维护）开工前必须按 <code>.codex/skills/wego-github-delivery/references/task-intake.md</code> 启动清单执行，目的是防止重复建分支、跳过需求确认和环境残留。</p>
+      <ol class="steps">
+        <li><b>判断会话上下文</b>：有活跃上下文（任务 worktree + 未冻结迭代/活跃分支）→ 走轻量启动；无上下文 → 走完整启动。</li>
+        <li><b>分支巡检</b>：<code>git branch -vv</code> + <code>npm run branches:stale</code> 收口已合并 / gone 分支，闭合「PR 合并后本地分支残留」缺口。</li>
+        <li><b>环境同步</b>（完整启动）：主 worktree <code>git pull --rebase origin main</code>；会话前置读经验摘要；处理 <code>needs-sync</code> 标签 PR；清理失效预览服务记录。</li>
+        <li><b>交付单元核对</b>：<code>node scripts/resolve-delivery-unit.mjs --scene {场景}</code>，结果只能是 matched / new / conflict。</li>
+        <li><b>需求规格确认</b>：matched+范围未变跳过；matched+范围变化或 new → 进入 wego-product。</li>
+        <li><b>工作环境就绪</b>：new → <code>git worktree add ../&lt;owner&gt;-&lt;task&gt; -b &lt;分支&gt;</code> 独立 worktree；matched → 切换到已有 worktree。</li>
+      </ol>
+      <div class="decision"><b>决策点</b>：交付单元核对结果 —— <code>matched</code> 接手结果指定的分支/worktree/PR；<code>new</code> 确认无匹配才创建新迭代与分支；<code>conflict</code> 停止并说明阻塞原因，不得自行选择候选。返回 new 后必须用 <code>git branch -vv</code> 扫一遍悬空分支，能恢复 worktree 就不新建。</div>
+      <h4>必读文件</h4>
+      <div class="filelist">
+        <span>AGENTS.md</span><span>.codex/skills/README.md</span>
+        <span>.codex/skills/wego-github-delivery/SKILL.md</span>
+        <span>.codex/skills/wego-github-delivery/references/task-intake.md</span>
+        <span>.codex/skills/wego-github-delivery/references/github-delivery-rules.md</span>
+        <span>.codex/skills/wego-uxsystem-iterate/experience/EXPERIENCE.md（会话前置）</span>
+      </div>
+      <h4>关键命令</h4>
+      <pre><code>git branch -vv &amp;&amp; npm run branches:stale      # 分支巡检
+git pull --rebase origin main                  # 主 worktree 同步
+node scripts/resolve-delivery-unit.mjs --scene {场景}   # 交付单元核对
+git worktree add ../&lt;owner&gt;-&lt;task&gt; -b &lt;分支&gt;   # 独立 worktree</code></pre>
+
+      <!-- 环节2 -->
+      <h3 id="s2">环节 2｜需求确认（wego-product）</h3>
+      <p>负责确认目标、范围、入口、关键路径、原型边界、状态和数据；不决定正式组件、Token、CSS 或设计系统实现。需求阶段唯一产出是需求规格说明（spec.md），按简报模板填写后经 <code>submit-brief</code> 自动解析校验。</p>
+      <ol class="steps">
+        <li><b>创建迭代</b>：<code>iteration-record.mjs init</code>，迭代 ID 形如 <code>shop001</code> / <code>bcg003-2</code>，分类代码 shop（相册云）/ bcg（生意云）/ customer（客户云）/ infras（基础）。</li>
+        <li><b>写 spec.md</b>：按简报模板填 goal / included / excluded / entry_points / critical_paths / prototype_boundaries / states / data_contract / assumptions / open_questions。</li>
+        <li><b>提交简报</b>：<code>submit-brief</code> 解析 MD、运行充分性守门、算范围哈希 → 状态 <code>in-development</code>（简报开放开发，可随时改 spec 后重新 submit）。</li>
+        <li><b>简报开放开发</b>：用户浏览、修改 spec、重新 submit、完成修改都不触发状态推进。</li>
+      </ol>
+      <div class="warn"><b>充分性守门（缺失即被拒）</b>：目标/纳入范围/入口/关键路径/原型边界/状态必须非空；<code>data_contract</code> 必须非空对象；<code>open_questions</code> 必须为空；states 覆盖加载态、失败态、空状态（含数据产生入口引导）；数据必须有产生入口且<b>禁止静态种子降级</b>；关键路径首尾闭环。</div>
+      <h4>必读文件</h4>
+      <div class="filelist">
+        <span>.codex/skills/wego-product/SKILL.md</span>
+        <span>.codex/skills/wego-product/references/brief-template.md</span>
+        <span>.codex/skills/wego-product/references/iteration-workflow.md</span>
+        <span>.codex/skills/wego-product/references/scope-and-boundaries.md</span>
+        <span>.codex/skills/wego-design/references/design-principles.md</span>
+        <span>scripts/iteration-record.mjs（命令入口）</span>
+      </div>
+      <h4>关键命令</h4>
+      <pre><code>node scripts/iteration-record.mjs init --file {iteration.json} --title {标题} --scene {场景} [--iteration-id {id}]
+node scripts/iteration-record.mjs submit-brief --file {iteration.json}
+node scripts/iteration-record.mjs confirm-brief --file {iteration.json} --user-confirmed-brief {iteration_id}
+node scripts/iteration-record.mjs invalidate --stage=brief --file {iteration.json}</code></pre>
+
+      <!-- 环节3 -->
+      <h3 id="s3">环节 3｜页面设计与实现（wego-design）</h3>
+      <p>基于已确认原型简报消费设计系统，在一次任务中完成可交互 App 场景。已确认简报即设计授权，范围内自主完成信息分组、布局、组件、Token、反馈和 overlay。</p>
+      <ol class="steps">
+        <li><b>读输入</b>：有效迭代 spec.md（唯一需求源）+ 设计原则 + 设计方法 + 资产地图 + 原型数据库说明。</li>
+        <li><b>短设计链路</b>：理解进入页面原因 → 确定唯一首要任务/核心对象/必要状态 → 语义区域顺序 → 首屏/滚动/固定/overlay → 精确匹配页面范式（未命中用 composed）→ 组件映射（核对 usageHints / doNotInvent 后复制 Preview 变体完整 DOM）。</li>
+        <li><b>实现</b>：只输出场景目录中 <code>route.json</code> / <code>scene.js</code> / <code>scene.css</code>；路由变化运行 <code>build-routes.mjs</code> 生成 <code>wego-app/js/routes.js</code>（生成物，禁止直接编辑）。</li>
+        <li><b>场景契约预检</b>：<code>validate-scene-contract.mjs &lt;场景路径&gt;</code> 通过后再推送 PR，问题不留到合并阶段全量门禁才发现。</li>
+        <li><b>自动推送</b>：完成一轮验证后由 wego-github-delivery 自动推送远端分支并创建/更新<b>同一 PR</b>；每次推送后必须返回在线预览链接（不只本地链接），等待 publish 部署完成（curl 校验 <code>.wego-deployment-sha</code> 或 <code>gh pr checks</code>）。</li>
+      </ol>
+      <div class="note"><b>状态标注</b>：每轮结果标明「当前状态：本地迭代中（已推送，PR #编号）」或「本地迭代中（未推送）」。</div>
+      <div class="note"><b>数据来源约束</b>：场景中的商品、素材图片、头像、发布者、好友和运营文案必须优先取自 <code>window.WEGO_PROTOTYPE_DB</code>，不在 scene.js 临时编造或硬编码。</div>
+      <h4>必读文件</h4>
+      <div class="filelist">
+        <span>.codex/skills/wego-design/SKILL.md</span>
+        <span>.codex/skills/wego-design/references/design-principles.md</span>
+        <span>.codex/skills/wego-design/references/interaction-prototype-design.md</span>
+        <span>.codex/skills/wego-design/references/library-map.md</span>
+        <span>.codex/skills/wego-design/references/scene-contract.md</span>
+        <span>有效迭代 spec.md</span>
+        <span>wego-app/data/README.md · prototype-db.js</span>
+        <span>.codex/skills/wego-design/colors_and_type.css · css.json</span>
+        <span>.codex/skills/wego-design/components/index.json · components/{slug}.json · preview/component-{slug}.html</span>
+        <span>.codex/skills/wego-design/uikit-plan.json · ui_kits/* · page-layers.json · library-consumption.json</span>
+      </div>
+      <h4>关键命令</h4>
+      <pre><code>node scripts/build-routes.mjs                       # 生成 routes.js（禁止直接编辑）
+node scripts/validate-scene-contract.mjs wego-app/scenes/{分类}/{场景}   # 契约预检
+node scripts/validate-scene-runtime.mjs wego-app/scenes/{分类}/{场景}    # 真实浏览器 375/393px 视口验证</code></pre>
+
+      <!-- 环节4 -->
+      <h3 id="s4">环节 4｜交付与 PR（wego-github-delivery）</h3>
+      <p>统一管理分支、worktree、预览和 PR。一个交付单元固定一个工作分支和 worktree，同一需求固定复用同一个 PR，最多一个开放 PR。</p>
+      <ol class="steps">
+        <li><b>本地迭代中（自动推进，默认）</b>：修改 → 轻量源码检查 / 关键交互检查 → checkpoint commit → 自动推送创建/更新 PR。</li>
+        <li><b>预览服务</b>：从任务 worktree 根目录启动，仅绑定 <code>127.0.0.1</code>；端口/PID/worktree/分支/阶段/PR 编号记录在 <code>.tasks/preview-servers/</code>（不得提交）。</li>
+        <li><b>双链接交付</b>：业务原型在本地迭代和合并阶段都返回「本地 HTTP 预览 + 在线 PR 预览」两个链接；在线链接必须等部署完成（curl 校验部署 SHA）后才返回。</li>
+        <li><b>合并授权门禁</b>：推送与创建 PR 不需要用户授权；合并进 main 必须用户明确验收通过。</li>
+      </ol>
+      <div class="decision"><b>决策点（合并授权）</b>：只有用户明确表达「验收通过」「确认合格」「可以合并」才允许合并；「改好了 / 继续 / 再调整一下」不构成合并授权，必须保持 PR 开放继续本地推进。</div>
+      <h4>必读文件</h4>
+      <div class="filelist">
+        <span>.codex/skills/wego-github-delivery/SKILL.md</span>
+        <span>.codex/skills/wego-github-delivery/references/github-delivery-rules.md</span>
+        <span>.codex/skills/wego-github-delivery/references/task-intake.md</span>
+        <span>.tasks/preview-servers/（预览服务记录）</span>
+        <span>scripts/resolve-delivery-unit.mjs · prune-merged-branches.mjs · prune-worktrees.mjs</span>
+      </div>
+      <h4>关键命令</h4>
+      <pre><code>gh pr checks &lt;N&gt;                    # 检查 PR 的 publish 是否通过
+curl -s https://zhoujieh.github.io/wego-design-system/previews/pr-&lt;N&gt;/.wego-deployment-sha  # 校验部署 SHA
+npm run branches:stale / worktrees:stale   # 合并后遗留分支/worktree 巡检</code></pre>
+
+      <!-- 环节5 -->
+      <h3 id="s5">环节 5｜验收收口（wego-design + wego-github-delivery）</h3>
+      <p>用户明确表达「验收完成 / 确认合格 / 可以合并」后进入收口流程，一次性完成固化、验证与合并准备。</p>
+      <ol class="steps">
+        <li><b>输出 5 维度一致性校验清单</b>，逐项对比 spec.md 与实际实现：范围 / 入口 / 关键路径 / 状态 / 数据契约。</li>
+        <li><b>用户逐项确认</b>后连续执行：<code>confirm-brief</code>（简报确认 → prototyping）+ <code>submit-prototype --user-confirmed-prototype {id}</code>（场景验证 + 固化指纹 + 确认 + 冻结，一步到 frozen）。</li>
+        <li><b>完整静态验证</b>：<code>validate-wego-design.mjs --scope=full --strict</code> + <code>build-routes.mjs --check</code> + <code>sync-wego-app-lib.mjs --check</code>，任一失败先修复再推送。</li>
+        <li><b>经验收口</b>：扫描 <code>.tasks/experience-inbox.json</code>，有草稿交 wego-uxsystem-iterate 四层分流沉淀，无草稿明示「本轮无经验信号」后清空；<b>未完成本步不得进入 worktree 清理</b>。</li>
+        <li><b>合并前</b>：同步最新 main、解决冲突、复验，通过后合并 PR 进 main。</li>
+      </ol>
+      <div class="note"><b>状态标注</b>：每轮结果标明「当前状态：已验收，合并中（PR #编号）」。</div>
+      <h4>必读文件</h4>
+      <div class="filelist">
+        <span>.codex/skills/wego-design/SKILL.md</span>
+        <span>.codex/skills/wego-product/references/iteration-workflow.md（submit-prototype/confirm-brief 契约）</span>
+        <span>.codex/skills/wego-github-delivery/references/github-delivery-rules.md</span>
+        <span>.tasks/experience-inbox.json（经验收口扫描）</span>
+      </div>
+      <h4>关键命令</h4>
+      <pre><code>node scripts/iteration-record.mjs confirm-brief --file {iteration.json} --user-confirmed-brief {iteration_id}
+node scripts/iteration-record.mjs submit-prototype --file {iteration.json} --user-confirmed-prototype {iteration_id}
+node scripts/validate-wego-design.mjs --scope=full --strict
+node scripts/build-routes.mjs --check
+node scripts/sync-wego-app-lib.mjs --check</code></pre>
+
+      <!-- 环节6 -->
+      <h3 id="s6">环节 6｜合并与收尾清理（wego-github-delivery）</h3>
+      <p>PR 合并是异步事件（网页端合并 / CI 自动合并 / 工作流维护短周期 PR 自动合并），无论谁触发，本地收口都必须完成；不在场则由后续任务启动时的分支巡检兜底补齐。</p>
+      <ol class="steps">
+        <li><b>停止本地预览服务并删除服务记录</b>（<code>.tasks/preview-servers/</code>）。</li>
+        <li><b>删除远端分支</b>：PR 合并时自动删除；手动关闭/废弃时 <code>git push origin --delete &lt;branch&gt;</code>。</li>
+        <li><b>删除本地 worktree</b>：<code>git worktree remove &lt;path&gt;</code>。</li>
+        <li><b>主 worktree 同步最新 main</b>：<code>git pull --rebase origin main</code>。</li>
+      </ol>
+      <div class="ok"><b>工作流维护例外</b>：wego-uxsystem-iterate 执行的 AGENTS.md / SKILL.md / references / experience 等权威源维护免业务验收和提交授权，验证通过后直接走短周期 PR 自动合并 main，并立即完成完整收口清理；组件/Token/Preview/UI Kit 变更不适用此例外。</div>
+      <h4>关键命令</h4>
+      <pre><code>npm run worktrees:stale / worktrees:prune   # 孤儿 worktree 巡检与清理
+npm run branches:prune / branches:prune-gone # merged / gone 分支收口
+git worktree remove &lt;path&gt;  &amp;&amp;  git pull --rebase origin main</code></pre>
+
+      <!-- 环节7 -->
+      <h3 id="s7">环节 7｜经验沉淀（wego-uxsystem-iterate）</h3>
+      <p>经验沉淀由信号驱动自动执行，不等待用户触发。业务技能（product / design / delivery）在现场只识别信号、写 <code>.tasks/experience-inbox.json</code> 草稿（L0），不直接改经验权威源。</p>
+      <ul>
+        <li><b>触发信号</b>：用户纠正、用户表达偏好（「以后都」「不要再」）、返工（同一问题第二次出现 / 验收打回重做）、踩坑（CI 失败 / 守卫拦截 / 验收打回）。</li>
+        <li><b>收口扫描时机</b>：wego-design 5 维度验收清单之后、合并之前，且必须在 worktree 清理之前完成（红线）。</li>
+        <li><b>四层分流</b>：一次性未成规律 → L1 事实 + L2 一句话摘要；同场景 ×2 或流程固定 → 毕业 L3 场景技能；已有对应场景技能 → 迭代该技能；跨场景硬约束 → 升格 L4 正式规则。</li>
+      </ul>
+      <h4>必读文件</h4>
+      <div class="filelist">
+        <span>.codex/skills/wego-uxsystem-iterate/SKILL.md</span>
+        <span>.codex/skills/wego-uxsystem-iterate/references/workflow-iteration.md</span>
+        <span>.codex/skills/wego-uxsystem-iterate/references/sync-matrix.md</span>
+        <span>.codex/skills/wego-uxsystem-iterate/experience/evidence.json（L1 事实，只增不减）</span>
+        <span>.codex/skills/wego-uxsystem-iterate/experience/EXPERIENCE.md（L2 摘要，会话前置读）</span>
+        <span>.tasks/experience-inbox.json（L0 草稿，随 worktree 生灭）</span>
+      </div>
+      <h4>关键命令</h4>
+      <pre><code>node scripts/refine-experience.mjs --check              # 事实一致性校验（只读）
+node scripts/refine-experience.mjs --related &lt;关键词&gt;    # 只读查询相关事实</code></pre>
+    </section>
+
+    <!-- ============ 三、状态机 ============ -->
+    <section id="machine">
+      <h2>三、迭代状态机</h2>
+      <div class="flow">
+        <span class="step">draft</span><span class="arrow">→</span>
+        <span class="step">submit-brief</span><span class="arrow">→</span>
+        <span class="step">in-development（简报开放开发）</span><span class="arrow">→</span>
+        <span class="step">confirm-brief（验收完成+5维校验）</span><span class="arrow">→</span>
+        <span class="step">prototyping</span><span class="arrow">→</span>
+        <span class="step">submit-prototype（用户明确验收通过，一步冻结）</span><span class="arrow">→</span>
+        <span class="step">frozen</span>
+      </div>
+      <div class="note">暂停 / 终止状态为 <code>blocked | cancelled | superseded</code>。冻结由脚本生成 <code>freeze.json</code> 快照并禁止覆盖，冻结后的记录是历史快照，不再为场景修改提供有效迭代绑定。</div>
+      <h3>用户反馈分流</h3>
+      <table>
+        <tr><th>当前状态</th><th>反馈类型</th><th>处理方式</th></tr>
+        <tr><td>in-development</td><td>已确认范围内视觉/布局/组件/Token/路由/交互调整</td><td>直接修改 spec 并重新 submit-brief，不 invalidate</td></tr>
+        <tr><td>prototyping</td><td>已确认范围内调整</td><td>直接继续修改，不 invalidate</td></tr>
+        <tr><td>frozen</td><td>已确认范围内调整</td><td>先 <code>invalidate --stage=prototype</code> 回 prototyping（自动删 freeze.json），累计完成后用户再次明确验收通过才重新 submit-prototype</td></tr>
+        <tr><td>任意阶段</td><td>改变目标/范围/入口/关键路径/状态/数据/可见结果</td><td>先 <code>invalidate --stage=brief</code>，更新 spec 并重新提交确认</td></tr>
+      </table>
+      <div class="warn">Agent 不得因为实现完成、检查通过、用户查看了本地页面，或自己判断「可以交付」而执行 <code>submit-prototype</code>；确认、测试、验收、交付、提交、部署或时间经过都不能单独推断冻结意图，冻结必须与验收收口连续执行。</div>
+    </section>
+
+    <!-- ============ 四、目录地图 ============ -->
+    <section id="map">
+      <h2>四、文件与目录地图</h2>
+      <div class="grid2">
+        <div class="card">
+          <div class="tt">唯一入口与场景</div>
+          <div class="bd">
+            <ul>
+              <li><code>wego-app/index.html</code> —— 唯一 App 入口</li>
+              <li><code>wego-app/scenes/{shop|bcg|customer|infras}/{中文业务场景}/route.json · scene.js · scene.css</code> —— 业务场景（可直接编辑）</li>
+              <li><code>#/route-id</code> 访问对应场景</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card">
+          <div class="tt">生成物（禁止直接编辑）</div>
+          <div class="bd">
+            <ul>
+              <li><code>wego-app/js/routes.js</code> —— 由 build-routes.mjs 生成</li>
+              <li><code>wego-app/lib/</code> —— 设计系统部署副本，由 sync-wego-app-lib.mjs 同步</li>
+              <li><code>components.css</code> —— 从 Preview 生成，只读</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card">
+          <div class="tt">设计系统权威源（仅 uxsystem 可改）</div>
+          <div class="bd">
+            <ul>
+              <li><code>.codex/skills/wego-design/</code> —— 组件、Token、Preview、UI Kit</li>
+              <li>组件契约 <code>components/{slug}.json</code> · Preview <code>preview/component-{slug}.html</code> · 注册 <code>components/index.json</code></li>
+              <li>Token <code>colors_and_type.css</code> · 结构索引 <code>css.json</code> · 范式 <code>uikit-plan.json</code> / <code>ui_kits/*</code></li>
+            </ul>
+          </div>
+        </div>
+        <div class="card">
+          <div class="tt">业务运行时（可直接编辑）</div>
+          <div class="bd">
+            <ul>
+              <li><code>wego-app/js/</code> —— 全局业务运行时（publish-fab.js、product-editor.js、resale-popup.js 等）</li>
+              <li><code>wego-app/css/</code> —— 配套业务样式</li>
+              <li>原型数据库 <code>wego-app/data/prototype-db.js</code></li>
+            </ul>
+          </div>
+        </div>
+        <div class="card">
+          <div class="tt">经验体系权威源</div>
+          <div class="bd">
+            <ul>
+              <li>L1 事实 <code>.codex/skills/wego-uxsystem-iterate/experience/evidence.json</code></li>
+              <li>L2 摘要 <code>.codex/skills/wego-uxsystem-iterate/experience/EXPERIENCE.md</code></li>
+              <li>L3 场景技能 <code>.codex/skills/wego-scene-*/SKILL.md</code></li>
+              <li>L0 草稿 <code>.tasks/experience-inbox.json</code>（随 worktree 生灭）</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card">
+          <div class="tt">技能适配器（符号链接）</div>
+          <div class="bd">
+            <ul>
+              <li><code>.trae/skills/*</code> 与 <code>.codebuddy/skills/*</code> 必须逐项/整目录符号链接指向 <code>.codex/skills/*</code>，不得保留副本</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 五、命令速查 ============ -->
+    <section id="cmds">
+      <h2>五、关键命令速查</h2>
+      <table>
+        <tr><th>类别</th><th>命令</th><th>用途</th></tr>
+        <tr><td rowspan="5">迭代记录</td><td><code>iteration-record.mjs suggest-id --scene {场景}</code></td><td>预查询建议迭代 ID</td></tr>
+        <tr><td><code>iteration-record.mjs init --file ... --title ... --scene ...</code></td><td>创建迭代与 spec 模板</td></tr>
+        <tr><td><code>iteration-record.mjs submit-brief --file ...</code></td><td>提交简报（守门+算哈希）</td></tr>
+        <tr><td><code>iteration-record.mjs confirm-brief --file ... --user-confirmed-brief {id}</code></td><td>确认简报（需用户验收完成+5维校验）</td></tr>
+        <tr><td><code>iteration-record.mjs submit-prototype --file ... --user-confirmed-prototype {id}</code></td><td>一步冻结到 frozen</td></tr>
+        <tr><td rowspan="4">验证守卫</td><td><code>validate-wego-design.mjs --scope=changed|full|system --strict</code></td><td>场景 Token 合规、源/副本同步、原型指纹、完整守门</td></tr>
+        <tr><td><code>validate-scene-contract.mjs {场景路径}</code></td><td>场景契约预检（每轮实现后必跑）</td></tr>
+        <tr><td><code>validate-scene-runtime.mjs {场景路径}</code></td><td>真实浏览器 375/393px 运行时验证</td></tr>
+        <tr><td><code>build-routes.mjs [--check]</code></td><td>生成/校验 routes.js</td></tr>
+        <tr><td rowspan="2">设计系统</td><td><code>sync-wego-app-lib.mjs [--check]</code></td><td>同步/校验 lib 部署副本（改 runtime 必须同步）</td></tr>
+        <tr><td><code>validate-component-contract-parity.mjs</code></td><td>组件契约与 Preview 一致性</td></tr>
+        <tr><td rowspan="4">分支/worktree</td><td><code>npm run branches:stale / branches:prune / branches:prune-gone</code></td><td>分支巡检与收口</td></tr>
+        <tr><td><code>npm run worktrees:stale / worktrees:prune</code></td><td>孤儿 worktree 巡检与清理</td></tr>
+        <tr><td><code>resolve-delivery-unit.mjs --scene {场景}</code></td><td>交付单元核对</td></tr>
+        <tr><td><code>refine-experience.mjs --check / --related</code></td><td>经验事实一致性校验 / 相关事实查询</td></tr>
+      </table>
+    </section>
+
+    <!-- ============ 六、经验体系 ============ -->
+    <section id="experience">
+      <h2>六、经验体系（四层单向流动）</h2>
+      <div class="flow">
+        <span class="step">L0 草稿 .tasks/experience-inbox.json</span><span class="arrow">→</span>
+        <span class="step">L1 事实 evidence.json</span><span class="arrow">→</span>
+        <span class="step">L2 摘要 EXPERIENCE.md</span><span class="arrow">→</span>
+        <span class="step">L3 场景技能 wego-scene-*</span><span class="arrow">→</span>
+        <span class="step">L4 正式规则 AGENTS.md / 守卫</span>
+      </div>
+      <ul>
+        <li><b>只增不减</b>：L1 事实不因升级或过时而删除，体量过大按年归档到 <code>evidence-archive/</code>。</li>
+        <li><b>沉淀标准</b>：可复用、可行动、非冗余；单场景特例、普通代码错误、需求临时变化、单次视觉微调不进入经验数据。</li>
+        <li><b>沉淀即告知</b>：🧠已沉淀经验：&lt;简短描述&gt;，不新增任何用户确认门禁；零信号零动作。</li>
+        <li><b>场景技能三重挂载</b>：description 写触发词 + 技能路由 README 登记 + 对应主技能 SKILL.md 硬挂载，三者齐全才能被触发。</li>
+        <li><b>毕业标准</b>：同场景 ×2 或流程固定才允许创建 wego-scene-*；不预防性建技能，达不到只留 L2。</li>
+      </ul>
+    </section>
+
+    <!-- ============ 七、踩坑提示 ============ -->
+    <section id="pits">
+      <h2>七、高频踩坑提示（源自 EXPERIENCE.md 经验摘要）</h2>
+      <table>
+        <tr><th>环节</th><th>教训</th></tr>
+        <tr><td>简报</td><td>spec 多轮更新后、提交前必须全文搜索关键词统一旧描述，保证前后一致；每个入口写清触发方式、对象、按钮层级与后续行为，不明点入 open_questions 不猜测。</td></tr>
+        <tr><td>设计稿</td><td>Figma 还原前必须确认设计稿内容，无法访问就请用户描述或给切图，禁止凭组件名猜样式；modal fullscreen 改居中弹窗须场景级恢复蒙层、提 z-index、改淡入与居中。</td></tr>
+        <tr><td>实现</td><td>切图要偏移且不裁剪用 img 标签定位（不用 CSS 背景图，会被裁剪）；img 路径相对 index.html；新接入本地存储先 grep 现有 wego.* key，新 key 按 wego.{domain}.{entity} 命名，不迁移旧 key。</td></tr>
+        <tr><td>交付</td><td>每次推送 PR 必须等 publish 通过并 curl 校验部署产物后返回在线链接，不得只给本地链接；PR 合并后必须清理本地分支/worktree/预览记录。</td></tr>
+        <tr><td>CI</td><td>改 design/runtime 必须同步 lib 副本（sync-wego-app-lib --check 只读，默认写入）；Pages 预览标红多为部署延迟，先比对 .wego-deployment-sha 再排查构建。</td></tr>
+        <tr><td>结构</td><td>业务场景功能不得放入技能目录/设计系统权威源，全局业务运行时直接放 wego-app/js 与 wego-app/css（runtime.business_file 守卫拦截）。</td></tr>
+      </table>
+    </section>
+
+    <div class="meta" style="margin-top:8px;">本梳理基于当前仓库权威文件（AGENTS.md、.codex/skills/README.md、各技能 SKILL.md 与 references、experience/EXPERIENCE.md），如工作流后续调整请以权威源为准。</div>
+  </main>
+</div>
+</body>
+</html>
