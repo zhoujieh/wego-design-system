@@ -33,4 +33,4 @@
 §
 [交付] 验收冻结后必须核实 PR 已进入 MERGED；启动巡检优先发现已冻结仍开放的 PR。[ev-016] ×1，最近 2026-09-03
 §
-[走查] 走查工具 5 项交互（HSL/渐变/数值拖动/拖拽换位/悬停元信息）验收测回显+撤销重做+刷新持久化；Playwright 长拖动手动 dispatch、先 dump shadow DOM 等坑见场景技能 wego-scene-walkthrough-test。[ev-017, ev-020, ev-024] ×8，最近 2026-09-03
+[走查] 走查工具 5 项交互（HSL/渐变/数值拖动/拖拽换位/悬停元信息）验收测回显+撤销重做+刷新持久化；Playwright 长拖动手动 dispatch、先 dump shadow DOM 等坑见场景技能 wego-scene-walkthrough-test。[ev-017, ev-020, ev-024] ×9，最近 2026-09-03

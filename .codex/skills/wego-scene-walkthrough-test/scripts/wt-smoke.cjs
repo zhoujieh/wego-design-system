@@ -17,8 +17,9 @@ const BASE = args.url || 'http://localhost:8092/wego-app/index.html';
 
 const results = [];
 function check(name, ok, detail = '') {
-  results.push({ name, ok, detail });
-  console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}${detail ? '  → ' + detail : ''}`);
+  const ts = new Date().toISOString().slice(11, 19);
+  results.push({ name, ok, detail, ts });
+  console.log(`${ok ? 'PASS' : 'FAIL'}  [${ts}]  ${name}${detail ? '  → ' + detail : ''}`);
 }
 
 (async () => {
@@ -148,12 +149,23 @@ function check(name, ok, detail = '') {
     const changed = orderAfter[0] !== 'album-feed__head';
     check('④ 拖拽换位（head↔media）', changed, `card0 子序:${orderAfter.join(',')}`);
 
+    // localStorage 落盘核对（真实执行证据：操作已写入本地存储，防"看起来对"假象）
+    const ls = await page.evaluate(() => {
+      const keys = Object.keys(localStorage).filter(k => /wego|walkthrough|changes/i.test(k));
+      const snap = {};
+      keys.forEach(k => { try { snap[k] = String(localStorage.getItem(k)).slice(0, 80); } catch (e) {} });
+      return { keys, snap };
+    });
+    check('操作已落盘 localStorage（真实写入证据）', ls.keys.length > 0, ls.keys.join(',') || '无 wego/walkthrough key');
+
   } catch (e) {
     check('脚本执行无异常', false, e.message.slice(0, 200));
   }
 
   check('无页面报错', errors.length === 0, errors.slice(0, 3).join(' | '));
   const failed = results.filter(r => !r.ok).length;
+  console.log('\n=== 证据清单（操作 → 实测 → 时间戳）===');
+  results.forEach(r => console.log(`[${r.ts}] ${r.ok ? 'PASS' : 'FAIL'}  ${r.name}${r.detail ? ' → ' + r.detail : ''}`));
   console.log(`\n结果：${results.length - failed}/${results.length} 通过`);
   await browser.close();
   process.exit(failed ? 1 : 0);

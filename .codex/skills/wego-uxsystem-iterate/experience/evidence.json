@@ -349,6 +349,21 @@
         "走查工具",
         "wego-design"
       ]
+    },
+    {
+      "id": "ev-025",
+      "date": "2026-09-03",
+      "summary": "走查工具测试技能增强时调研官方/业界 QA 方法论（豆包 doubao-product-qa 证据链、Anthropic 官方 webapp-testing 与 skill-creator 评测闭环、Claude Code /verify 端到端验证），落地三条：轻量化证据记录（操作+DOM+localStorage+时间戳，结论可复核）、置信度分级（先排除缓存/浏览器合成事件等环境假象再判真实 bug，低置信度保持待确认）、测试矩阵前置（功能点×正常/边界/异常含反例）；结论以真实执行与证据为准，不以用例数/截图数/自动化变绿代替质量",
+      "source": "user-correction",
+      "scene": "走查工具测试技能增强-方法论借鉴",
+      "tags": [
+        "场景技能",
+        "证据链",
+        "置信度",
+        "测试矩阵",
+        "评测闭环",
+        "wego-uxsystem-iterate"
+      ]
     }
   ]
 }
