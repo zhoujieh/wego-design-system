@@ -202,6 +202,21 @@
         "用户纠正",
         "wego-uxsystem-iterate"
       ]
+    },
+    {
+      "id": "ev-015",
+      "date": "2026-09-03",
+      "summary": "核验 PR 在线预览时，拿本地 PR head sha 与 previews/pr-N/.wego-deployment-sha 直接比对会误判'部署过期'：pull_request 事件在 GitHub Actions 默认 checkout 的是 merge commit，部署标记实际存的是 refs/pull/N/merge（merge ref）而非 head sha；且在线预览入口在 previews/pr-N/index.html（app 平铺根目录），不是 previews/pr-N/wego-app/index.html（curl 后者 404 会误判部署损坏）。已用部署产物与本地关键文件内容哈希（sha256）逐项一致确认 PR #144 预览为最新，替代 sha 比对",
+      "source": "rework",
+      "scene": "workflow-online-preview",
+      "tags": [
+        "在线预览",
+        "部署核验",
+        "merge-ref",
+        "内容哈希",
+        "返工排查",
+        "wego-uxsystem-iterate"
+      ]
     }
   ]
 }
