@@ -10796,6 +10796,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         try { el = queryTargetEl(c.selector); } catch (e) { el = null; }
         if (!el || !el.isConnected) return;
         matched++;
+        if (c.property === 'text-content') {
+          // 文本改文案：用 textContent 恢复（text-content 非 CSS 属性，setProperty 无效）
+          try { el.textContent = c.newValue; } catch (e) {}
+          return;
+        }
         try { el.style.setProperty(c.property, c.newValue); } catch (e) {}
       });
       // 批注标记随回放重试一起重绘：场景脚本异步挂载/内部面板激活时，首次同步可能还找不到可见锚点
