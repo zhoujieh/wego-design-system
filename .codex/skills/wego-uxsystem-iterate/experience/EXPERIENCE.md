@@ -5,7 +5,7 @@
 §
 [简报] spec 多轮更新后、提交前必须全文搜索关键词统一旧描述，保证前后一致。[ev-001] ×1，最近 2026-08-28
 §
-[实现] 新接入本地存储先 grep 现有 wego.* key 盘点，新 key 按 wego.{domain}.{entity} 命名，不迁移旧 key。[ev-002] ×1，最近 2026-08-28
+[实现] 新接本地存储先 grep wego.* key 盘点，新 key 按 wego.{domain}.{entity} 命名不迁移旧 key。[ev-002] ×1，最近 2026-08-28
 §
 [元规则] 经验沉淀先写 evidence.json 事实，AI 推理后写本文件再跑 refine 校验，禁止脚本机械生成、手动直改。[ev-003, ev-005] ×2，最近 2026-08-28
 §
@@ -21,8 +21,14 @@
 §
 [元规则] 免验收短周期 PR 只限纯文档规则；产出用户可见内容的工具改动仍须验收。[ev-010] ×1，最近 2026-09-01
 §
-[CI] 改 design/runtime 必须同步 lib 副本；sync-wego-app-lib 仅 --check 只读，默认是写入模式。[ev-011] ×1，最近 2026-09-02
+[CI] 改 design/runtime 必须同步 lib 副本；sync-wego-app-lib 仅 --check 只读，默认写入。[ev-011] ×1，最近 2026-09-02
 §
 [CI] Pages 预览标红多为部署延迟，先比对 .wego-deployment-sha 再排查构建。[ev-012] ×1，最近 2026-09-02
 §
-[交付] 每次推送 PR 必须等 publish 通过并 curl 校验部署产物后返回在线链接，不得只给本地链接。[ev-013] ×1，最近 2026-09-03
+[交付] 推送 PR 必须等 publish 通过并 curl 校验部署产物后返回在线链接，不得只给本地。[ev-013] ×1，最近 2026-09-03
+§
+[实现] DOM 换位/重排后 nth 选择器漂移，undo/重放/定位用身份签名（tag+class+稳定属性+文本）而非选择器。[ev-014] ×1，最近 2026-09-03
+§
+[测试] 走查工具实测：防抖落盘（300ms）后读取需等防抖窗口；断言前先 dump shadow DOM 别猜选择器。[ev-015] ×1，最近 2026-09-03
+§
+[交付] 校验 PR preview：pull_request 的 GITHUB_SHA 是 merge ref 非 head；产物被摊平到根（lib/js/...），先读 pages-preview.yml 再 curl。[ev-016] ×1，最近 2026-09-03
