@@ -1,6 +1,6 @@
 /*!
  * wego-app 走查工具 (Walkthrough Tool) - MVP
- * 权威源：.codex/skills/wego-design/runtime/walkthrough-tool.js
+ * 全局业务运行时（wego-app/js/），不属于设计系统组件；配套样式 wego-app/css/walkthrough-tool.css
  * 基于 Web Components + Shadow DOM 实现
  */
 (function () {

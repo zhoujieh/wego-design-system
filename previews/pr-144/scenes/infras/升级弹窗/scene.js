@@ -1,6 +1,6 @@
 /* 升级弹窗状态展示场景（upgrade-popup-demo）
    - 本场景为「升级弹窗」业务组件的状态展示入口：分组列出全部状态，点击拉起同一套升级弹窗。
-   - 弹窗逻辑已抽到全局组件 wego-app/lib/js/upgrade-popup.js（window.WegoApp.openUpgradePopup(ctx, type)），
+   - 弹窗逻辑已抽到全局业务运行时 wego-app/js/upgrade-popup.js（window.WegoApp.openUpgradePopup(ctx, type)），
      本场景只负责状态样例与入口。
    - 升级弹窗带显示守卫（可关闭型每天 1 次 / 强制型仅 1 次），演示前清空本地记录保证每次可弹出。 */
 
@@ -35,7 +35,7 @@
     routeId: 'upgrade-popup-demo',
     title: '升级弹窗',
     template: `
-<div class="layout-page" data-bg="page" data-surface-id="upgrade-popup-demo" data-route-id="upgrade-popup-demo" data-layout-mode="composed">
+<div class="layout-page" data-bg="page" data-component-slug="layout-page" data-surface-id="upgrade-popup-demo" data-route-id="upgrade-popup-demo" data-layout-mode="composed">
   <div class="layout-page__top">
     <div class="navbar" data-component-slug="navbar">
       <div class="navbar__body navbar__body--spaced">
