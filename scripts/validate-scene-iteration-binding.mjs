@@ -38,8 +38,8 @@ const confirmedBriefStatuses = new Set(devMode
 
 const scenesRoot = path.join(root, 'wego-app/scenes');
 
-// 系统工具场景豁免：开发工具类场景（场景导航、组件预览等）非业务需求驱动，不要求迭代绑定。
-const systemToolScenes = new Set(['场景管理', '组件预览']);
+// 系统工具场景豁免：开发工具类场景（场景导航、组件预览、迭代画布等）非业务需求驱动，不要求迭代绑定。
+const systemToolScenes = new Set(['场景管理', '组件预览', '迭代画布']);
 
 function isPlainObject(value) {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value) && Object.getPrototypeOf(value) === Object.prototype;
