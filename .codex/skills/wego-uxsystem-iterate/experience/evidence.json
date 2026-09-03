@@ -192,31 +192,29 @@
     {
       "id": "ev-014",
       "date": "2026-09-03",
-      "summary": "走查工具拖拽换位（功能④）实现时，_applyReorder 用含 nth-of-type 的规范选择器定位子元素重放顺序，换位后 DOM 顺序已变、nth 选择器漂移到错误元素导致重放错乱。改用身份签名（tag+class+稳定属性+文本摘要，_elementIdentity）排序与定位，move 位移还原同用身份优先（_queryMoveTarget），换位后撤销/重做/刷新重放仍稳定",
-      "source": "rework",
-      "scene": "走查工具交互重构-元素拖拽换位",
+      "summary": "经验机制通电（PR #161）后，AGENTS 权威入口把经验文件完整仓库根路径缩成 experience/EXPERIENCE.md 残片与裸文件名，任务 worktree 中的新会话无法直接定位，需先全仓搜索，用户截图反馈出现'文件路径核查/经验文件路径有误'的额外曲折。修复：AGENTS、workflow-iteration、sync-matrix、uxsystem SKILL 中所有定位与操作指令统一写仓库根完整路径，仅章节标题允许裸文件名。教训：面向现场 AI 的权威入口和操作步骤，文件路径必须完整到可直接打开",
+      "source": "user-correction",
+      "scene": "workflow-experience-path",
       "tags": [
-        "DOM排序",
-        "选择器漂移",
-        "身份签名",
-        "undo重放",
-        "拖拽换位",
-        "走查工具",
-        "wego-design"
+        "文件路径",
+        "权威入口",
+        "经验机制",
+        "用户纠正",
+        "wego-uxsystem-iterate"
       ]
     },
     {
       "id": "ev-015",
       "date": "2026-09-03",
-      "summary": "浏览器实测走查工具时，_saveChanges 有 300ms 防抖落盘，测试刚松手就读 localStorage 会读到 0 条变更造成误判，需等 ≥400ms 再读；测试颜色选择器 DOM 凭记忆猜选择器（data-format 按钮 vs data-format-select 下拉）多次落空，应先 dump 组件 shadow DOM 再写断言",
-      "source": "rework",
-      "scene": "走查工具交互重构-浏览器实测",
+      "summary": "用户纠正并明确\"完全不能接受\"：业务场景功能（发布产品模态/帮卖弹窗/走查工具）不应冒充设计系统组件放入 .codex/skills/wego-design/runtime/ 充当全局运行时，应归属业务代码位置 wego-app/js 与 wego-app/css（与 publish-fab.js 同级）。修复：3 个业务 JS + 1 个 CSS 迁出技能目录，runtime 仅保留 12 个设计系统通用组件；同步映射收紧；AGENTS.md 补\"业务实现不入技能目录\"边界；validate-wego-design-core.mjs 新增 runtime.business_file 守卫（允许集合由 components/*.json 的 slug 派生，组件迭代自动放行，业务文件混入即 CI 拦截）。教训：设计系统权威源目录只允许设计系统本体，全局业务运行时直接放业务代码位置",
+      "source": "user-correction",
+      "scene": "publish-product-ux",
       "tags": [
-        "浏览器测试",
-        "防抖落盘",
-        "读取时序",
-        "DOM探查",
-        "走查工具",
+        "技能目录边界",
+        "业务归属",
+        "守卫",
+        "结构",
+        "用户纠正",
         "wego-design"
       ]
     },
@@ -233,6 +231,37 @@
         "产物结构",
         "交付校验",
         "wego-github-delivery"
+      ]
+    },
+    {
+      "id": "ev-017",
+      "date": "2026-09-03",
+      "summary": "走查工具拖拽换位（功能④）实现时，_applyReorder 用含 nth-of-type 的规范选择器定位子元素重放顺序，换位后 DOM 顺序已变、nth 选择器漂移到错误元素导致重放错乱。改用身份签名（tag+class+稳定属性+文本摘要，_elementIdentity）排序与定位，move 位移还原同用身份优先（_queryMoveTarget），换位后撤销/重做/刷新重放仍稳定",
+      "source": "rework",
+      "scene": "走查工具交互重构-元素拖拽换位",
+      "tags": [
+        "DOM排序",
+        "选择器漂移",
+        "身份签名",
+        "undo重放",
+        "拖拽换位",
+        "走查工具",
+        "wego-design"
+      ]
+    },
+    {
+      "id": "ev-018",
+      "date": "2026-09-03",
+      "summary": "浏览器实测走查工具时，_saveChanges 有 300ms 防抖落盘，测试刚松手就读 localStorage 会读到 0 条变更造成误判，需等 ≥400ms 再读；测试颜色选择器 DOM 凭记忆猜选择器（data-format 按钮 vs data-format-select 下拉）多次落空，应先 dump 组件 shadow DOM 再写断言",
+      "source": "rework",
+      "scene": "走查工具交互重构-浏览器实测",
+      "tags": [
+        "浏览器测试",
+        "防抖落盘",
+        "读取时序",
+        "DOM探查",
+        "走查工具",
+        "wego-design"
       ]
     }
   ]
