@@ -1731,8 +1731,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._callback = null;
       this._hex = '#000000';
       this._opacity = 100;
-      this._hsv = { h: 0, s: 0, v: 0 };
-      this._format = 'hex'; // hex | rgb | hsb
+      this._hsl = { h: 0, s: 0, l: 0 };
+      this._format = 'hex'; // hex | rgb | hsl
       this._dragType = null;
     }
     connectedCallback() {
@@ -1752,7 +1752,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       }
       this._hex = resolvedHex;
       this._opacity = opacity !== undefined ? opacity : 100;
-      this._hsv = this._hexToHsv(this._hex);
+      this._hsl = this._hexToHsl(this._hex);
       this._callback = callback;
       // 先关闭旧实例，移除上一轮 document mousedown/touchstart 监听器，避免累积泄漏
       this.close();
@@ -1792,18 +1792,19 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       }
     }
 
-    // ── 颜色转换（HSV 模型） ─────────────────────────────
-    _hexToHsv(hex) {
+    // ── 颜色转换（HSL 模型） ─────────────────────────────
+    _hexToHsl(hex) {
       const r = parseInt(hex.slice(1, 3), 16) / 255;
       const g = parseInt(hex.slice(3, 5), 16) / 255;
       const b = parseInt(hex.slice(5, 7), 16) / 255;
       const max = Math.max(r, g, b), min = Math.min(r, g, b);
       const d = max - min;
-      let h, s, v = max;
-      s = max === 0 ? 0 : d / max;
+      let h, s, l = (max + min) / 2;
       if (max === min) {
         h = 0;
+        s = 0;
       } else {
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
         switch (max) {
           case r: h = (g - b) / d + (g < b ? 6 : 0); break;
           case g: h = (b - r) / d + 2; break;
@@ -1811,29 +1812,20 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         }
         h /= 6;
       }
-      return { h: Math.round(h * 360), s: Math.round(s * 100), v: Math.round(v * 100) };
+      return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
     }
-    _hsvToHex(h, s, v) {
-      h /= 360; s /= 100; v /= 100;
-      const i = Math.floor(h * 6);
-      const f = h * 6 - i;
-      const p = v * (1 - s);
-      const q = v * (1 - f * s);
-      const t = v * (1 - (1 - f) * s);
-      let r, g, b;
-      switch (i % 6) {
-        case 0: r = v; g = t; b = p; break;
-        case 1: r = q; g = v; b = p; break;
-        case 2: r = p; g = v; b = t; break;
-        case 3: r = p; g = q; b = v; break;
-        case 4: r = t; g = p; b = v; break;
-        case 5: r = v; g = p; b = q; break;
-      }
+    _hslToHex(h, s, l) {
+      h = (((h % 360) + 360) % 360) / 360; s /= 100; l /= 100;
+      const a = s * Math.min(l, 1 - l);
+      const f = (n) => {
+        const k = (n + h * 12) % 12;
+        return l - a * Math.max(-1, Math.min(k - 3, Math.min(9 - k, 1)));
+      };
       const toHex = x => {
-        const val = Math.round(x * 255).toString(16);
+        const val = Math.round(f(x) * 255).toString(16);
         return val.length === 1 ? '0' + val : val;
       };
-      return '#' + toHex(r) + toHex(g) + toHex(b);
+      return '#' + toHex(0) + toHex(8) + toHex(4);
     }
     _hexToRgb(hex) {
       return {
@@ -1850,20 +1842,21 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       return '#' + toHex(r) + toHex(g) + toHex(b);
     }
     _getFormatValue() {
-      const { h, s, v } = this._hsv;
+      const { h, s, l } = this._hsl;
       const rgb = this._hexToRgb(this._hex);
       switch (this._format) {
         case 'rgb': return `${rgb.r}, ${rgb.g}, ${rgb.b}`;
-        case 'hsb': return `${h}, ${s}%, ${v}%`;
+        case 'hsl': return `${h}, ${s}%, ${l}%`;
         default: return this._hex.toUpperCase();
       }
     }
 
     // ── 渲染 ──────────────────────────────────────────────
     _render() {
-      const { h } = this._hsv;
-      const formatValue = this._getFormatValue();
+      const { h, s, l } = this._hsl;
+      const rgb = this._hexToRgb(this._hex);
       const hasEyedropper = typeof window !== 'undefined' && 'EyeDropper' in window;
+      const channelInputs = this._renderChannelInputs(h, s, l, rgb);
 
       this._shadow.innerHTML = `
         <style>
@@ -1955,16 +1948,18 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             pointer-events: none;
           }
 
-          /* 不透明度 — 不裁剪，选点可超出边缘 */
-          .opacity-wrap { display: flex; flex-direction: column; gap: 4px; }
-          .opacity-label {
-            display: flex; align-items: center; justify-content: space-between;
-            font-size: 11px; color: var(--text-tertiary);
+          /* 滑块组：吸管 | 色相 | 透明度（水平并排） */
+          .slider-group {
+            display: flex; align-items: center; gap: 6px;
           }
-          .opacity-num-wrap { display: flex; align-items: center; gap: 2px; }
+          .slider-group .hue-slider,
+          .slider-group .opacity-slider {
+            flex: 1; min-width: 0;
+          }
+          .opacity-num-wrap { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
           .opacity-num {
-            width: 34px; height: 20px; padding: 0 4px;
-            border: 1px solid var(--border-color); border-radius: 5px;
+            width: 36px; height: 28px; padding: 0 4px;
+            border: 1px solid var(--border-color); border-radius: 7px;
             background: var(--bg-subtle); color: var(--text-default);
             font-size: 11px; text-align: center; outline: none;
             box-sizing: border-box;
@@ -1998,7 +1993,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             pointer-events: none;
           }
 
-          /* 格式行 */
+          /* 格式行：格式切换 + 通道输入 + 透明度 */
           .format-row {
             display: flex; align-items: center; gap: 6px;
           }
@@ -2016,15 +2011,22 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             transform: translateY(-50%); font-size: 9px;
             color: var(--text-tertiary); pointer-events: none;
           }
-          .format-input {
-            flex: 1; height: 28px; padding: 0 8px;
+          .channel-inputs {
+            flex: 1; min-width: 0;
+            display: flex; align-items: center; gap: 3px;
+          }
+          .channel-label {
+            font-size: 10px; font-family: "SF Mono", Menlo, monospace;
+            color: var(--text-tertiary); flex-shrink: 0;
+          }
+          .channel-input {
+            flex: 1; min-width: 0; height: 28px; padding: 0 4px;
             border: 1px solid var(--border-color); border-radius: 7px;
             background: var(--bg-subtle); color: var(--text-default);
             font-size: 12px; font-family: "SF Mono", Menlo, monospace;
-            outline: none; text-transform: uppercase; box-sizing: border-box;
-            min-width: 0;
+            outline: none; text-align: center; box-sizing: border-box;
           }
-          .format-input:focus { border-color: var(--text-brand); }
+          .channel-input:focus { border-color: var(--text-brand); }
           .eyedropper-btn {
             width: 28px; height: 28px; flex-shrink: 0;
             border: 1px solid var(--border-color); border-radius: 7px;
@@ -2041,26 +2043,21 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             <button class="close-btn" type="button" data-action="close">${ICONS.close}</button>
           </div>
 
-          <!-- SV 二维取色面板 -->
+          <!-- SV 二维取色面板（S 横轴 / L 纵轴） -->
           <div class="sv-panel" data-sv-panel style="background:hsl(${h},100%,50%);">
             <div class="sv-layer sv-white"></div>
             <div class="sv-layer sv-black"></div>
-            <div class="sv-cursor" data-sv-cursor style="left:${this._hsv.s}%;top:${100 - this._hsv.v}%;"></div>
+            <div class="sv-cursor" data-sv-cursor style="left:${s}%;top:${100 - l}%;"></div>
           </div>
 
-          <!-- 色相条 -->
-          <div class="hue-slider" data-hue-slider>
-            <div class="hue-cursor" data-hue-cursor style="left:${h / 360 * 100}%;"></div>
-          </div>
-
-          <!-- 不透明度 -->
-          <div class="opacity-wrap">
-            <div class="opacity-label">
-              <span>不透明度</span>
-              <span class="opacity-num-wrap">
-                <input class="opacity-num" type="text" value="${this._opacity}" data-opacity-num inputmode="numeric" />
-                <span class="opacity-unit">%</span>
-              </span>
+          <!-- 滑块组：吸管 | 色相 | 透明度 -->
+          <div class="slider-group">
+            ${hasEyedropper ? `
+            <button class="eyedropper-btn" type="button" data-eyedropper title="从页面取色">
+              ${ICONS.eyedropper}
+            </button>` : ''}
+            <div class="hue-slider" data-hue-slider>
+              <div class="hue-cursor" data-hue-cursor style="left:${h / 360 * 100}%;"></div>
             </div>
             <div class="opacity-slider" data-opacity-slider>
               <div class="opacity-checker"></div>
@@ -2069,24 +2066,43 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             </div>
           </div>
 
-          <!-- 格式切换 + 输入 + 吸管 -->
+          <!-- 格式切换 + 通道输入 + 透明度 -->
           <div class="format-row">
             <div class="format-select-wrap">
               <select class="format-select" data-format-select>
                 <option value="hex" ${this._format === 'hex' ? 'selected' : ''}>HEX</option>
                 <option value="rgb" ${this._format === 'rgb' ? 'selected' : ''}>RGB</option>
-                <option value="hsb" ${this._format === 'hsb' ? 'selected' : ''}>HSB</option>
+                <option value="hsl" ${this._format === 'hsl' ? 'selected' : ''}>HSL</option>
               </select>
             </div>
-            <input class="format-input" type="text" value="${formatValue}" data-format-input spellcheck="false" />
-            ${hasEyedropper ? `
-            <button class="eyedropper-btn" type="button" data-eyedropper title="从页面取色">
-              ${ICONS.eyedropper}
-            </button>` : ''}
+            <div class="channel-inputs">${channelInputs}</div>
+            <span class="opacity-num-wrap">
+              <input class="opacity-num" type="text" value="${this._opacity}" data-opacity-num inputmode="numeric" />
+              <span class="opacity-unit">%</span>
+            </span>
           </div>
         </div>
       `;
       this._bindEvents();
+    }
+
+    // 通道输入组渲染：hex 单框 / rgb 三框 / hsl 三框
+    _renderChannelInputs(h, s, l, rgb) {
+      if (this._format === 'hex') {
+        return `<input class="channel-input" type="text" value="${this._hex.toUpperCase()}" data-channel="hex" spellcheck="false" />`;
+      }
+      if (this._format === 'rgb') {
+        return [
+          `<span class="channel-label">R</span><input class="channel-input" type="text" inputmode="numeric" value="${rgb.r}" data-channel="r" />`,
+          `<span class="channel-label">G</span><input class="channel-input" type="text" inputmode="numeric" value="${rgb.g}" data-channel="g" />`,
+          `<span class="channel-label">B</span><input class="channel-input" type="text" inputmode="numeric" value="${rgb.b}" data-channel="b" />`,
+        ].join('');
+      }
+      return [
+        `<span class="channel-label">H</span><input class="channel-input" type="text" inputmode="numeric" value="${h}" data-channel="h" />`,
+        `<span class="channel-label">S</span><input class="channel-input" type="text" inputmode="numeric" value="${s}" data-channel="s" />`,
+        `<span class="channel-label">L</span><input class="channel-input" type="text" inputmode="numeric" value="${l}" data-channel="l" />`,
+      ].join('');
     }
 
     // ── 事件绑定 ──────────────────────────────────────────
@@ -2097,19 +2113,19 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._setupDrag(this._shadow.querySelector('[data-sv-panel]'), 'sv', (clientX, clientY, rect) => {
         const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
         const y = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
-        this._hsv.s = Math.round(x * 100);
-        this._hsv.v = Math.round((1 - y) * 100);
-        this._hex = this._hsvToHex(this._hsv.h, this._hsv.s, this._hsv.v);
-        this._syncFromHsv();
+        this._hsl.s = Math.round(x * 100);
+        this._hsl.l = Math.round((1 - y) * 100);
+        this._hex = this._hslToHex(this._hsl.h, this._hsl.s, this._hsl.l);
+        this._syncFromHsl();
         this._emitChange();
       });
 
       // 色相条拖动
       this._setupDrag(this._shadow.querySelector('[data-hue-slider]'), 'hue', (clientX, clientY, rect) => {
         const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-        this._hsv.h = Math.round(x * 360);
-        this._hex = this._hsvToHex(this._hsv.h, this._hsv.s, this._hsv.v);
-        this._syncFromHsv();
+        this._hsl.h = Math.round(x * 360);
+        this._hex = this._hslToHex(this._hsl.h, this._hsl.s, this._hsl.l);
+        this._syncFromHsl();
         this._emitChange();
       });
 
@@ -2135,17 +2151,18 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); }
       });
 
-      // 格式切换
+      // 格式切换（重渲染以切换通道输入组结构）
       this._shadow.querySelector('[data-format-select]').addEventListener('change', (e) => {
         this._format = e.target.value;
-        this._updateFormatInput();
+        this._render();
       });
 
-      // 格式输入
-      const formatInput = this._shadow.querySelector('[data-format-input]');
-      formatInput.addEventListener('change', (e) => this._parseFormatInput(e.target.value));
-      formatInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); }
+      // 通道输入（hex 单框 / rgb、hsl 各通道独立框）
+      this._shadow.querySelectorAll('[data-channel]').forEach(input => {
+        input.addEventListener('change', (e) => this._parseChannelInput(e.target.dataset.channel, e.target.value));
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); }
+        });
       });
 
       // 吸管
@@ -2157,8 +2174,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             const result = await eyeDropper.open();
             if (result && result.sRGBHex) {
               this._hex = result.sRGBHex.toUpperCase();
-              this._hsv = this._hexToHsv(this._hex);
-              this._syncFromHsv();
+              this._hsl = this._hexToHsl(this._hex);
+              this._syncFromHsl();
               this._emitChange();
             }
           } catch (err) { /* 用户取消取色 */ }
@@ -2191,43 +2208,43 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       el.addEventListener('pointerdown', onPointerDown);
     }
 
-    // ── 格式输入解析 ──────────────────────────────────────
-    _parseFormatInput(val) {
+    // ── 通道输入解析 ──────────────────────────────────────
+    _parseChannelInput(channel, val) {
       val = (val || '').trim();
       try {
-        if (this._format === 'hex') {
+        if (channel === 'hex') {
           if (!val.startsWith('#')) val = '#' + val;
           if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
             this._hex = val.toUpperCase();
-            this._hsv = this._hexToHsv(this._hex);
-            this._syncFromHsv();
+            this._hsl = this._hexToHsl(this._hex);
+            this._syncFromHsl();
             this._emitChange();
             return;
           }
         } else if (this._format === 'rgb') {
-          const m = val.match(/(\d+)\s*[, ]\s*(\d+)\s*[, ]\s*(\d+)/);
-          if (m) {
-            const r = Math.max(0, Math.min(255, parseInt(m[1], 10)));
-            const g = Math.max(0, Math.min(255, parseInt(m[2], 10)));
-            const b = Math.max(0, Math.min(255, parseInt(m[3], 10)));
-            this._hex = this._rgbToHex(r, g, b);
-            this._hsv = this._hexToHsv(this._hex);
-            this._syncFromHsv();
-            this._emitChange();
-            return;
+          const num = parseInt(val, 10);
+          if (isNaN(num)) throw new Error('invalid');
+          const rgb = this._hexToRgb(this._hex);
+          rgb[channel] = Math.max(0, Math.min(255, num));
+          this._hex = this._rgbToHex(rgb.r, rgb.g, rgb.b);
+          this._hsl = this._hexToHsl(this._hex);
+          this._syncFromHsl();
+          this._emitChange();
+          return;
+        } else if (this._format === 'hsl') {
+          const num = parseInt(val, 10);
+          if (isNaN(num)) throw new Error('invalid');
+          const hsl = { ...this._hsl };
+          if (channel === 'h') {
+            hsl.h = Math.max(0, Math.min(360, num));
+          } else {
+            hsl[channel] = Math.max(0, Math.min(100, num));
           }
-        } else if (this._format === 'hsb') {
-          const m = val.match(/(\d+)\s*[, ]\s*(\d+)%?\s*[, ]\s*(\d+)%?/);
-          if (m) {
-            const h = Math.max(0, Math.min(360, parseInt(m[1], 10)));
-            const s = Math.max(0, Math.min(100, parseInt(m[2], 10)));
-            const v = Math.max(0, Math.min(100, parseInt(m[3], 10)));
-            this._hsv = { h, s, v };
-            this._hex = this._hsvToHex(h, s, v);
-            this._syncFromHsv();
-            this._emitChange();
-            return;
-          }
+          this._hsl = hsl;
+          this._hex = this._hslToHex(hsl.h, hsl.s, hsl.l);
+          this._syncFromHsl();
+          this._emitChange();
+          return;
         }
       } catch (e) { /* ignore */ }
       // 解析失败，恢复当前值
@@ -2235,22 +2252,22 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     }
 
     // ── UI 同步 ───────────────────────────────────────────
-    _syncFromHsv() {
+    _syncFromHsl() {
       // SV 面板背景（色相）
       const svPanel = this._shadow.querySelector('[data-sv-panel]');
-      if (svPanel) svPanel.style.background = `hsl(${this._hsv.h},100%,50%)`;
-      // SV 选点 — X=饱和度, Y=100-明度
+      if (svPanel) svPanel.style.background = `hsl(${this._hsl.h},100%,50%)`;
+      // SV 选点 — X=饱和度, Y=100-明度（L）
       const svCursor = this._shadow.querySelector('[data-sv-cursor]');
       if (svCursor) {
-        svCursor.style.left = this._hsv.s + '%';
-        svCursor.style.top = (100 - this._hsv.v) + '%';
+        svCursor.style.left = this._hsl.s + '%';
+        svCursor.style.top = (100 - this._hsl.l) + '%';
       }
       // 色相选点
       const hueCursor = this._shadow.querySelector('[data-hue-cursor]');
-      if (hueCursor) hueCursor.style.left = (this._hsv.h / 360 * 100) + '%';
+      if (hueCursor) hueCursor.style.left = (this._hsl.h / 360 * 100) + '%';
       // 不透明度填充条颜色
       this._updateOpacityFill();
-      // 格式输入
+      // 通道输入
       this._updateFormatInput();
     }
     _syncOpacity() {
@@ -2264,10 +2281,25 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (fill) fill.style.background = `linear-gradient(to right, transparent, ${this._hex})`;
     }
     _updateFormatInput() {
-      const input = this._shadow.querySelector('[data-format-input]');
-      if (input && document.activeElement !== input) {
-        input.value = this._getFormatValue();
+      // hex 单框
+      const hexInput = this._shadow.querySelector('[data-channel="hex"]');
+      if (hexInput) {
+        if (document.activeElement !== hexInput) hexInput.value = this._hex.toUpperCase();
+        return;
       }
+      // rgb / hsl 各通道框（编辑中的框不刷新，避免打断输入）
+      const rgb = this._hexToRgb(this._hex);
+      const { h, s, l } = this._hsl;
+      this._shadow.querySelectorAll('[data-channel]').forEach(inp => {
+        if (document.activeElement === inp) return;
+        const ch = inp.dataset.channel;
+        let v;
+        if (this._format === 'rgb') v = rgb[ch];
+        else if (ch === 'h') v = h;
+        else if (ch === 's') v = s;
+        else if (ch === 'l') v = l;
+        if (v !== undefined) inp.value = v;
+      });
     }
     _emitChange() {
       if (this._callback) {
@@ -6163,11 +6195,15 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           // Token 模式：直接应用 var(--xxx)，忽略 opacity
           if (isTok) {
             el.style.color = hex;
+            // 无实际变化守卫：颜色已为目标值（colorHex/colorOpacity 联动二次提交时），
+            // 返回 null 跳过记录/撤销，避免把上一步已写入的 inline 颜色撤销掉
+            if (normalizeCssValue(oldValue) === normalizeCssValue(hex)) return null;
             return { property: 'color', oldValue, newValue: hex };
           }
           const opacity = this._data.colorOpacity ?? 100;
           const rgba = hexOpacityToRgba(hex, opacity);
           el.style.color = rgba;
+          if (normalizeCssValue(oldValue) === normalizeCssValue(rgba)) return null;
           return { property: 'color', oldValue, newValue: rgba };
         }
         case 'lineHeight': {
@@ -6206,6 +6242,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           // 保持追加渐变层与基础渐变的 background-image 一致
           const mergedImg = this._mergedBackgroundImage();
           if (mergedImg !== 'none') el.style.backgroundImage = mergedImg;
+          // 无实际变化守卫：fillHex/fillOpacity 联动二次提交时避免撤销上一步已写入的 inline
+          if (normalizeCssValue(oldValue) === normalizeCssValue(newVal)) return null;
           return { property: 'background-color', oldValue, newValue: newVal };
         }
         case 'strokeHex':
@@ -6224,14 +6262,18 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             el.style.borderWidth = widthVal;
             el.style.borderStyle = widthPx > 0 ? 'solid' : '';
             el.style.borderColor = hex;
-            return { property: 'border', oldValue, newValue: widthPx > 0 ? `${widthVal} solid ${hex}` : '' };
+            const nv = widthPx > 0 ? `${widthVal} solid ${hex}` : '';
+            if (normalizeCssValue(oldValue) === normalizeCssValue(nv)) return null;
+            return { property: 'border', oldValue, newValue: nv };
           }
           const opacity = this._data.strokeOpacity ?? 0;
           const color = opacity > 0 && widthPx > 0 ? hexOpacityToRgba(hex, opacity) : 'transparent';
           el.style.borderWidth = widthVal;
           el.style.borderStyle = widthPx > 0 ? 'solid' : '';
           el.style.borderColor = color;
-          return { property: 'border', oldValue, newValue: widthPx > 0 ? `${widthVal} solid ${color}` : '' };
+          const nv2 = widthPx > 0 ? `${widthVal} solid ${color}` : '';
+          if (normalizeCssValue(oldValue) === normalizeCssValue(nv2)) return null;
+          return { property: 'border', oldValue, newValue: nv2 };
         }
         case 'strokePosition':
         case 'shadowHex':
