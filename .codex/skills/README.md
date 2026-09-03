@@ -16,6 +16,7 @@
 | 技能 | 触发场景 | 主挂载 |
 | --- | --- | --- |
 | `wego-scene-walkthrough-test` | 走查工具自动化测试/回归/验收/排查（改走查 js/css 后回归、5 项交互验收、走查相关 PR 验证） | `wego-uxsystem-iterate`（副 `wego-design`） |
+| `wego-scene-app-test` | WeGo App 业务场景自动化测试/回归/验收（业务场景 js/css 改动后回归、验收前全量走查、相关 PR 验证、业务交互异常排查） | `wego-design`（硬挂载固定环节） |
 
 ## 输入形态一律先走产品技能
 

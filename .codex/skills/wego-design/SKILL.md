@@ -18,6 +18,8 @@ description: 基于已确认原型简报消费微购设计系统，在一次任�
 
 验收或排查走查工具交互（走查 5 项功能：颜色 HSL/渐变、数值拖动、拖拽换位、悬停元信息）：先读场景技能[wego-scene-walkthrough-test](../wego-scene-walkthrough-test/SKILL.md)，按其固定流程与回归脚本执行。
 
+实现或修改业务场景（scene.js/scene.css/业务运行时 js）：先读场景技能[wego-scene-app-test](../wego-scene-app-test/SKILL.md)，按其固定流程做回归/全量走查（证据链、置信度分级、直链/overlay 双模式）。
+
 <!-- rule-id: scene-dom-copy-preview-verbatim -->
 正式组件必须使用目标 Preview 变体的完整 DOM、class 和可选节点位置；不得凭组件名自行重写结构，页面结构也不得从组件或 UI Kit 反推。
 
@@ -25,6 +27,9 @@ description: 基于已确认原型简报消费微购设计系统，在一次任�
 
 <!-- rule-id: scene-contract-precheck-mandatory -->
 - 每轮场景实现完成后，必须运行 `node scripts/validate-scene-contract.mjs <场景路径>` 做场景契约预检，通过后再推送 PR。场景契约问题不得留到合并阶段全量门禁才发现。
+
+<!-- rule-id: scene-app-test-before-delivery -->
+- 每轮场景实现完成后必须按 `wego-scene-app-test` 固定流程做走查测试（硬挂载固定环节，非条件触发）：发现问题先修复、复验通过后，才允许推送 PR 或进入验收；验收前再做一次全量走查。
 
 <!-- rule-id: experience-signal-to-inbox -->
 - 经验信号自检：会话中出现用户纠正、用户表达偏好、返工、踩坑（CI 失败/守卫拦截/验收打回）时，向当前交付单元 `.tasks/experience-inbox.json` 追加一条草稿（字段与分流规则见 `wego-uxsystem-iterate/references/workflow-iteration.md`），不直接改经验权威源，无信号不动作。
