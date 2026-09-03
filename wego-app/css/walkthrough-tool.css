@@ -1,4 +1,4 @@
-/* 走查工具页面级样式 */
+/* 走查工具页面级样式（全局业务运行时配套样式，wego-app/css/） */
 /* 注：选中态高亮已由 wego-wt-highlight 组件（视口级固定框，不受祖先 overflow 裁切）接管，
    不再使用 [data-wt-selected] 的 outline 方案。 */
 

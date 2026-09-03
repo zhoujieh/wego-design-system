@@ -1,6 +1,6 @@
 /* 产品编辑状态展示场景（product-editor-demo）
    - 本场景为「产品编辑/发布」业务组件的状态展示入口：分组列出全部模式，点击拉起同一套产品编辑组件。
-   - 组件逻辑已抽到全局组件 wego-app/lib/js/product-editor.js（window.WegoApp.openProductEditor(ctx, options)），
+   - 组件逻辑已抽到全局业务运行时 wego-app/js/product-editor.js（window.WegoApp.openProductEditor(ctx, options)），
      本场景只负责模式样例与入口。
    - 模式：publish 发布 / forward 转发（可预填产品）/ edit 编辑（回显产品）。 */
 
@@ -41,7 +41,7 @@
     routeId: 'product-editor-demo',
     title: '产品编辑',
     template: `
-<div class="layout-page" data-bg="page" data-surface-id="product-editor-demo" data-route-id="product-editor-demo" data-layout-mode="composed">
+<div class="layout-page" data-bg="page" data-component-slug="layout-page" data-surface-id="product-editor-demo" data-route-id="product-editor-demo" data-layout-mode="composed">
   <div class="layout-page__top">
     <div class="navbar" data-component-slug="navbar">
       <div class="navbar__body navbar__body--spaced">

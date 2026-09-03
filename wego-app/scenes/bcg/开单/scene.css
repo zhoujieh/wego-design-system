@@ -7656,6 +7656,108 @@ body[data-order-layout="landscape"] .phone-indicator {
   .order-desktop__workspace--order-fullscreen .order-desktop__list-card {
     margin: 0;
   }
+
+  .order-desktop-product-search--collapsed {
+    height: calc(var(--size-64) + var(--spacer-12));
+    min-height: calc(var(--size-64) + var(--spacer-12));
+    padding: 0 var(--spacer-12);
+    border: 0;
+    border-radius: var(--radius-8);
+  }
+
+  .order-desktop-product-search--collapsed .order-desktop-product-search__row {
+    gap: var(--spacer-12);
+    min-height: var(--size-36);
+  }
+
+  .order-desktop-product-search--collapsed .order-desktop-context-search .input-wrapper {
+    height: var(--size-36);
+    min-height: var(--size-36);
+    background: var(--bg-overlay-l2);
+    border: 0;
+    border-radius: var(--radius-8);
+  }
+
+  .order-desktop-product-search--collapsed .order-desktop-context-search input {
+    height: var(--size-36);
+    min-height: var(--size-36);
+    background: transparent;
+    border: 0;
+  }
+
+  .order-desktop-product-search--collapsed .order-desktop-context-search input:placeholder-shown {
+    padding-right: calc(var(--size-36) + var(--spacer-8));
+  }
+
+  .order-desktop-product-search--collapsed .order-desktop-inline-image-search {
+    right: 0;
+    width: var(--size-36);
+    height: var(--size-36);
+  }
+
+  .order-desktop-product-search--collapsed .order-desktop-inline-image-search i,
+  .order-desktop-product-search--collapsed .order-catalog-filter-anchor--search .btn__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--size-20);
+    height: var(--size-20);
+    font-size: var(--size-20);
+  }
+
+  .order-desktop-product-search--collapsed .order-catalog-filter-anchor--search > .btn,
+  .order-desktop-product-search--collapsed .order-desktop-barcode-search {
+    flex-basis: var(--size-36);
+    width: var(--size-36);
+    min-width: var(--size-36);
+    height: var(--size-36);
+    min-height: var(--size-36);
+    padding: 0;
+  }
+
+  .order-desktop-product-search--collapsed .order-catalog-filter-anchor--search > .btn {
+    justify-content: center;
+  }
+
+  .order-desktop-product-search--collapsed .order-desktop-barcode-search.is-connected {
+    color: var(--text-default);
+    background: var(--bg-overlay-l1);
+    border-color: transparent;
+  }
+
+  .order-desktop-product-search--collapsed .order-desktop-barcode-search.is-connected img {
+    filter: none;
+  }
+
+  .order-scanner-drawer-mask {
+    position: absolute;
+    inset: 0;
+    z-index: var(--z-modal);
+    background: var(--bg-mask-light);
+  }
+
+  .order-landscape-scanner-drawer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: calc(var(--z-modal) + 1);
+    min-width: 320px;
+    max-width: 560px;
+    overflow: hidden;
+    border-left: var(--stroke-hairline) solid var(--border-neutral-l2);
+    box-shadow: var(--shadow-lg);
+    animation: order-landscape-scanner-drawer-in var(--duration-normal) var(--ease-standard);
+  }
+
+  @keyframes order-landscape-scanner-drawer-in {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
 }
 
 
@@ -7678,4 +7780,124 @@ body[data-order-layout="landscape"] .phone-indicator {
   overflow-x: hidden;
   overflow-y: auto;
   padding-bottom: var(--safe-area-bottom-content);
+}
+
+/* 竖屏平板（宽 ≥768px 且高 > 宽）：商品库默认折叠为抽屉，订单区保持全宽自适应 */
+@media (min-width: 768px) and (orientation: portrait) {
+  .order-desktop__context {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(260px, 1.4fr);
+  }
+
+  .order-desktop-customer-empty {
+    grid-template-columns: minmax(0, 1fr) var(--size-48);
+  }
+
+  .order-desktop-customer-add {
+    width: var(--size-48);
+    min-width: var(--size-48);
+    justify-content: center;
+    padding: 0;
+  }
+
+  .order-desktop-customer-add > span {
+    display: none;
+  }
+
+  .order-desktop-product-search:not(.order-desktop-product-search--catalog) {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .order-desktop-product-search:not(.order-desktop-product-search--catalog) .order-desktop-product-search__row {
+    min-width: 0;
+  }
+
+  .order-desktop-product-search:not(.order-desktop-product-search--catalog) .order-desktop-context-search {
+    min-width: 0;
+  }
+
+  .order-catalog-create-menu {
+    z-index: calc(var(--z-modal) + 2);
+  }
+
+  .order-tablet-drawer-mask {
+    position: absolute;
+    inset: 0;
+    z-index: var(--z-modal);
+    background: var(--bg-mask-light);
+  }
+
+  .order-tablet-drawer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: calc(var(--z-modal) + 1);
+    width: 50%;
+    min-width: 320px;
+    max-width: 560px;
+    overflow: visible;
+    border-left: var(--stroke-hairline) solid var(--border-neutral-l2);
+    box-shadow: var(--shadow-lg);
+    animation: order-tablet-drawer-in var(--duration-normal) var(--ease-standard);
+  }
+
+  @keyframes order-tablet-drawer-in {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
+  .order-tablet-drawer .order-desktop-catalog-toggle {
+    position: static;
+    width: auto;
+    min-height: var(--size-48);
+    padding: 0 var(--spacer-16);
+    line-height: var(--size-48);
+    white-space: nowrap;
+    writing-mode: horizontal-tb;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .order-tablet-drawer .order-desktop-catalog-toggle .btn__icon {
+    position: static;
+    transform: none;
+    writing-mode: horizontal-tb;
+  }
+
+  .order-tablet-drawer .order-tablet-drawer__close {
+    position: absolute;
+    top: 50%;
+    right: 100%;
+    width: auto;
+    min-width: 0;
+    min-height: var(--size-48);
+    padding: 0 var(--spacer-12);
+    border-radius: var(--radius-8) 0 0 var(--radius-8);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-50%);
+  }
+
+  .order-desktop__lines {
+    min-width: 0;
+  }
+
+  .order-desktop__lines .order-note-bar__note {
+    width: 100%;
+  }
+
+  .order-desktop__table-head,
+  .order-desktop-product-row {
+    grid-template-columns: minmax(96px, 1.2fr) var(--size-48) minmax(76px, .9fr) minmax(60px, .65fr) 88px minmax(64px, .75fr) minmax(64px, .75fr) var(--size-32);
+    gap: var(--spacer-6);
+  }
+
+  .order-desktop__table-head {
+    min-width: 0;
+  }
 }

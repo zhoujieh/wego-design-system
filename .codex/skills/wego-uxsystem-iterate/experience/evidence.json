@@ -232,6 +232,21 @@
         "组件vs场景",
         "返工"
       ]
+    },
+    {
+      "id": "ev-017",
+      "date": "2026-09-03",
+      "summary": "用户纠正并明确\"完全不能接受\"：业务场景功能（发布产品模态/帮卖弹窗/走查工具）不应冒充设计系统组件放入 .codex/skills/wego-design/runtime/ 充当全局运行时，应归属业务代码位置 wego-app/js 与 wego-app/css（与 publish-fab.js 同级）。修复：3 个业务 JS + 1 个 CSS 迁出技能目录，runtime 仅保留 12 个设计系统通用组件；同步映射收紧；AGENTS.md 补\"业务实现不入技能目录\"边界；validate-wego-design-core.mjs 新增 runtime.business_file 守卫（允许集合由 components/*.json 的 slug 派生，组件迭代自动放行，业务文件混入即 CI 拦截）。教训：设计系统权威源目录只允许设计系统本体，全局业务运行时直接放业务代码位置",
+      "source": "user-correction",
+      "scene": "publish-product-ux",
+      "tags": [
+        "技能目录边界",
+        "业务归属",
+        "守卫",
+        "结构",
+        "用户纠正",
+        "wego-design"
+      ]
     }
   ]
 }

@@ -15,25 +15,25 @@
       "slug": "resale-popup",
       "api": "openResalePopup",
       "businessScene": "帮卖分销：用户设供货价/加价或固定佣金后帮卖产品赚差价，本弹窗承载设价与帮卖并分享",
-      "load": ["css/resale-popup.css", "lib/js/resale-popup.js"]
+      "load": ["css/resale-popup.css", "js/resale-popup.js"]
     },
     {
       "slug": "product-editor",
       "api": "openProductEditor",
       "businessScene": "产品发布/编辑/转发：统一产品信息编辑入口，发布/转发/编辑三模式共用",
-      "load": ["css/product-editor.css", "lib/js/product-editor.js"]
+      "load": ["css/product-editor.css", "js/product-editor.js"]
     },
     {
       "slug": "product-share",
       "api": "openProductShare",
       "businessScene": "内容跨平台分发：把产品分享到第三方平台获客，按内容类型（product/列表/主页/单据/海报/订单）扩展",
-      "load": ["css/product-share.css", "lib/js/product-share.js"]
+      "load": ["css/product-share.css", "js/product-share.js"]
     },
     {
       "slug": "upgrade-popup",
       "api": "openUpgradePopup",
       "businessScene": "版本升级引导：新能力上线后引导用户体验，可关闭型每天 1 次、强制型仅 1 次",
-      "load": ["css/upgrade-popup.css", "lib/js/upgrade-popup.js"]
+      "load": ["css/upgrade-popup.css", "js/upgrade-popup.js"]
     }
   ],
   "consumptionLayers": {

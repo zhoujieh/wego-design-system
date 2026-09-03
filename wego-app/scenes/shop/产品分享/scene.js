@@ -1,6 +1,6 @@
 /* 产品分享状态展示场景（product-share-demo）
    - 本场景为「产品分享」业务组件的状态展示入口：按业务数据状态分组列出全部状态，点击拉起对应数据状态的分享面板。
-   - 面板逻辑已抽到全局组件 wego-app/lib/js/product-share.js（window.WegoApp.openProductShare(ctx, options)），
+   - 面板逻辑已抽到全局业务运行时 wego-app/js/product-share.js（window.WegoApp.openProductShare(ctx, options)），
      本场景只负责状态样例与入口。
    - 场景管理重构：demo 场景按业务维度组织（产品数据状态 S1 完整商品 / S2 纯文字 / S3 视频为主，共 3 态），
      不再按纯样式维度（标准/窄屏/简洁）组织；S2 视频商品并入 S1 完整商品（有图或图+视频的常规商品形态）不再单列；

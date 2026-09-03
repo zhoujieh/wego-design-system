@@ -1,6 +1,6 @@
 /* 代理商帮卖弹窗场景（agent-resale）
    - 本场景为「帮卖弹窗」可复用组件的演示入口：选择不同样例数据，拉起同一套帮卖弹窗。
-   - 弹窗逻辑已抽到全局组件 wego-app/lib/js/resale-popup.js（window.WegoApp.openResalePopup），
+   - 弹窗逻辑已抽到全局业务运行时 wego-app/js/resale-popup.js（window.WegoApp.openResalePopup），
      任意业务场景（动态流、发布页等）均可直接调用，本场景只负责样例数据与入口。 */
 
 (function () {

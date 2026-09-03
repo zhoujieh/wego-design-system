@@ -32,3 +32,5 @@
 [交付] PR 在线预览核验：previews/pr-N/.wego-deployment-sha 存的是 merge ref（refs/pull/N/merge）而非 PR head，直接对本地 HEAD 或 curl wego-app 路径会误判过期；应拉取 merge ref 比对，或用部署产物与本地文件内容哈希对比。[ev-015] ×1，最近 2026-09-03
 §
 [元规则] 走查备注先追读权威源与渲染机制、形成改哪个文件+验收看什么清单再动手，禁止按字面猜（复用图标落到 iconSvg→img、多按钮走 custom）。[ev-016] ×1，最近 2026-09-03
+§
+[结构] 业务场景功能不得放入技能目录/设计系统权威源（design runtime 只保留通用组件），全局业务运行时直接放 wego-app/js 与 wego-app/css；已由 runtime.business_file 守卫拦截，允许集合按 components slug 派生、组件迭代自动放行。[ev-017] ×1，最近 2026-09-03
