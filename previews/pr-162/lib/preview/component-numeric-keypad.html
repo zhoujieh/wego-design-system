@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数字键盘 - 微购设计系统</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../scaffold.css">
+<link rel="stylesheet" href="../iconfont.css">
+<style>
+.specimen { display: flex; flex-direction: column; gap: var(--spacer-16); }
+.story { display: flex; flex-direction: column; gap: var(--spacer-8); }
+.story-label { font-size: var(--body-sm-font-size); font-weight: var(--font-weight-medium); color: var(--text-secondary); line-height: var(--body-sm-line-height); }
+.keypad-demo { width: 100%; max-width: 400px; border: 1px solid var(--border-neutral-l2); border-radius: var(--radius-8); overflow: hidden; }
+
+/* @component-css-start */
+.numeric-keypad {
+  background: var(--bg-subtle);
+  border-radius: 0;
+  border-top: 0.5px solid var(--border-neutral-l2);
+  display: flex;
+  flex-direction: column;
+  padding-bottom: var(--safe-area-bottom);
+}
+.numeric-keypad__header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-16);
+  height: var(--size-56);
+  padding: 0 var(--spacer-16);
+  background: var(--bg-subtle);
+}
+.numeric-keypad__label {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  font-size: var(--body-lg-font-size);
+  font-weight: var(--font-weight-regular);
+  color: var(--text-default);
+}
+.numeric-keypad__value-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-4);
+  min-width: 0;
+}
+.numeric-keypad__input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  text-align: left;
+  font-family: var(--number-lg-font-family);
+  line-height: var(--body-lg-line-height);
+  font-size: var(--heading-sm-font-size);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-default);
+  padding: 0;
+  font-feature-settings: "zero";
+  caret-color: var(--bg-brand);
+}
+.numeric-keypad__input::placeholder {
+  color: var(--text-placeholder);
+  font-weight: var(--font-weight-regular);
+}
+.numeric-keypad__seg {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: var(--size-32);
+  padding: 0 var(--spacer-2);
+  background: var(--bg-overlay-l1);
+  border-radius: var(--radius-6);
+  flex-shrink: 0;
+}
+.numeric-keypad__seg-thumb {
+  position: absolute;
+  top: var(--spacer-2);
+  left: var(--spacer-2);
+  width: calc(50% - var(--spacer-2));
+  height: var(--size-28);
+  background: var(--bg-surface);
+  border-radius: var(--radius-4);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+.numeric-keypad__seg.is-amount .numeric-keypad__seg-thumb { transform: translateX(0); }
+.numeric-keypad__seg.is-rate .numeric-keypad__seg-thumb { transform: translateX(100%); }
+.numeric-keypad__seg-item {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--size-28);
+  padding: 0 var(--spacer-12);
+  font-size: var(--body-md-font-size);
+  font-weight: var(--font-weight-regular);
+  color: var(--text-secondary);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+.numeric-keypad__seg-item.is-active {
+  color: var(--text-default);
+  font-weight: var(--font-weight-medium);
+}
+.numeric-keypad__keys {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, var(--size-48));
+  gap: var(--spacer-8);
+  padding: var(--spacer-8);
+  background: var(--bg-subtle);
+}
+.numeric-keypad__key {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-surface);
+  border: none;
+  border-radius: var(--radius-6);
+  padding: 0;
+  font-size: var(--heading-lg-font-size);
+  font-family: var(--number-lg-font-family);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-default);
+  font-feature-settings: "zero";
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: background var(--duration-fast) var(--ease-standard);
+}
+.numeric-keypad__key:active,
+.numeric-keypad__key.is-pressed { background: var(--bg-state-pressed); }
+.numeric-keypad__key--delete {
+  grid-column: 4;
+  grid-row: 1;
+}
+.numeric-keypad__key--delete .wego-iconfont-s {
+  font-size: var(--heading-lg-font-size);
+  color: var(--text-default);
+}
+.numeric-keypad__key--confirm {
+  grid-column: 4;
+  grid-row: 2 / span 3;
+  background: var(--bg-brand);
+  color: var(--text-inverse);
+  font-size: var(--heading-sm-font-size);
+  font-family: var(--font-family-system);
+  border-radius: var(--radius-8);
+  padding: 0;
+}
+.numeric-keypad__key--confirm:active { background: var(--bg-brand-hover); }
+.numeric-keypad__key--zero {
+  grid-column: 1 / span 2;
+  grid-row: 4;
+  justify-self: stretch;
+}
+/* @component-css-end */
+</style>
+</head>
+<body>
+<div class="pv-header"><h1>数字键盘</h1><p>底部弹出自定义数字输入键盘，用于价格、加价金额和比例输入；支持纯键盘模式与带分段切换的头部模式，小数点后最多两位，删除键支持长按连续删除。</p></div>
+<div class="pv-section">
+<div class="specimen">
+
+  <div class="story">
+    <span class="story-label">加价金额模式（带头部 + 分段切换）</span>
+    <div class="keypad-demo">
+      <div class="numeric-keypad numeric-keypad--amount" data-numeric-keypad data-mode="amount">
+        <div class="numeric-keypad__header">
+          <span class="numeric-keypad__label" data-keypad-label>加价(元)</span>
+          <div class="numeric-keypad__value-wrap">
+            <input class="numeric-keypad__input" data-keypad-display type="text" inputmode="none" placeholder="0.00" aria-label="加价金额输入">
+          </div>
+          <div class="numeric-keypad__seg is-amount">
+            <div class="numeric-keypad__seg-thumb"></div>
+            <div class="numeric-keypad__seg-item is-active" data-keypad-tab="amount">按金额</div>
+            <div class="numeric-keypad__seg-item" data-keypad-tab="rate">按比例</div>
+          </div>
+        </div>
+        <div class="numeric-keypad__keys">
+          <div class="numeric-keypad__key" data-key="1">1</div>
+          <div class="numeric-keypad__key" data-key="2">2</div>
+          <div class="numeric-keypad__key" data-key="3">3</div>
+          <div class="numeric-keypad__key numeric-keypad__key--delete" data-key="delete"><i class="wego-iconfont-s icon-tuige" aria-hidden="true"></i></div>
+          <div class="numeric-keypad__key" data-key="4">4</div>
+          <div class="numeric-keypad__key" data-key="5">5</div>
+          <div class="numeric-keypad__key" data-key="6">6</div>
+          <button class="numeric-keypad__key numeric-keypad__key--confirm" data-keypad-confirm type="button">确定</button>
+          <div class="numeric-keypad__key" data-key="7">7</div>
+          <div class="numeric-keypad__key" data-key="8">8</div>
+          <div class="numeric-keypad__key" data-key="9">9</div>
+          <div class="numeric-keypad__key numeric-keypad__key--zero" data-key="0">0</div>
+          <div class="numeric-keypad__key" data-key=".">.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="story">
+    <span class="story-label">加价比例模式（带头部 + 分段切换）</span>
+    <div class="keypad-demo">
+      <div class="numeric-keypad numeric-keypad--rate" data-numeric-keypad data-mode="rate">
+        <div class="numeric-keypad__header">
+          <span class="numeric-keypad__label" data-keypad-label>加价(%)</span>
+          <div class="numeric-keypad__value-wrap">
+            <input class="numeric-keypad__input" data-keypad-display type="text" inputmode="none" placeholder="0" aria-label="加价比例输入">
+          </div>
+          <div class="numeric-keypad__seg is-rate">
+            <div class="numeric-keypad__seg-thumb"></div>
+            <div class="numeric-keypad__seg-item" data-keypad-tab="amount">按金额</div>
+            <div class="numeric-keypad__seg-item is-active" data-keypad-tab="rate">按比例</div>
+          </div>
+        </div>
+        <div class="numeric-keypad__keys">
+          <div class="numeric-keypad__key" data-key="1">1</div>
+          <div class="numeric-keypad__key" data-key="2">2</div>
+          <div class="numeric-keypad__key" data-key="3">3</div>
+          <div class="numeric-keypad__key numeric-keypad__key--delete" data-key="delete"><i class="wego-iconfont-s icon-tuige" aria-hidden="true"></i></div>
+          <div class="numeric-keypad__key" data-key="4">4</div>
+          <div class="numeric-keypad__key" data-key="5">5</div>
+          <div class="numeric-keypad__key" data-key="6">6</div>
+          <button class="numeric-keypad__key numeric-keypad__key--confirm" data-keypad-confirm type="button">确定</button>
+          <div class="numeric-keypad__key" data-key="7">7</div>
+          <div class="numeric-keypad__key" data-key="8">8</div>
+          <div class="numeric-keypad__key" data-key="9">9</div>
+          <div class="numeric-keypad__key numeric-keypad__key--zero" data-key="0">0</div>
+          <div class="numeric-keypad__key" data-key=".">.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="story">
+    <span class="story-label">售价模式（纯键盘，无头部）</span>
+    <div class="keypad-demo">
+      <div class="numeric-keypad numeric-keypad--price" data-numeric-keypad data-mode="price">
+        <div class="numeric-keypad__keys">
+          <div class="numeric-keypad__key" data-key="1">1</div>
+          <div class="numeric-keypad__key" data-key="2">2</div>
+          <div class="numeric-keypad__key" data-key="3">3</div>
+          <div class="numeric-keypad__key numeric-keypad__key--delete" data-key="delete"><i class="wego-iconfont-s icon-tuige" aria-hidden="true"></i></div>
+          <div class="numeric-keypad__key" data-key="4">4</div>
+          <div class="numeric-keypad__key" data-key="5">5</div>
+          <div class="numeric-keypad__key" data-key="6">6</div>
+          <button class="numeric-keypad__key numeric-keypad__key--confirm" data-keypad-confirm type="button">确定</button>
+          <div class="numeric-keypad__key" data-key="7">7</div>
+          <div class="numeric-keypad__key" data-key="8">8</div>
+          <div class="numeric-keypad__key" data-key="9">9</div>
+          <div class="numeric-keypad__key numeric-keypad__key--zero" data-key="0">0</div>
+          <div class="numeric-keypad__key" data-key=".">.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script src="../runtime/numeric-keypad.js"></script>
+<script>
+  // 初始化预览页中的所有键盘
+  document.querySelectorAll('[data-numeric-keypad]').forEach(function (root) {
+    WegoNumericKeypad.init(root, {
+      onChange: function (value, mode) {
+        console.log('onChange:', value, mode);
+      },
+      onConfirm: function (value, mode) {
+        console.log('onConfirm:', value, mode);
+        alert('确定：值=' + (value || '空') + '，模式=' + mode);
+      }
+    });
+  });
+</script>
+</body>
+</html>
