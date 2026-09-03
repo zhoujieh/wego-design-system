@@ -1,6 +1,6 @@
 /*!
  * wego-app 走查工具 (Walkthrough Tool) - MVP
- * 权威源：.codex/skills/wego-design/runtime/walkthrough-tool.js
+ * 全局业务运行时（wego-app/js/），不属于设计系统组件；配套样式 wego-app/css/walkthrough-tool.css
  * 基于 Web Components + Shadow DOM 实现
  */
 (function () {
@@ -182,16 +182,28 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     return `**环境：本地预览（无 PR）**`;
   }
 
-  /** 判断元素是否属于走查工具自身（包括 Shadow DOM 内部） */
+  /** 判断元素是否属于走查工具自身（包括 Shadow DOM 内部）
+   *  需穿透多层 shadow 边界：closest 不穿透 shadow，直接宿主可能是
+   *  wego-wt-style-panel / wego-wt-color-picker 等子组件而非 wego-walkthrough，
+   *  逐层向上检查每个宿主的 Light DOM 祖先（含自身）是否命中工具组件列表。 */
   function isWalkthroughElement(el) {
     if (!el) return false;
     // 检查 Light DOM 中的祖先
     const lightTags = 'wego-walkthrough,wego-wt-style-panel,wego-wt-overview-panel,wego-wt-color-picker,wego-wt-toast,wego-wt-overlay,wego-wt-highlight';
     if (el.closest && el.closest(lightTags)) return true;
-    // 检查 Shadow DOM：元素的根节点是否为走查工具的 shadowRoot
+    // 检查 Shadow DOM：逐层穿透 shadow 边界，任一宿主的 Light DOM 祖先（含自身）属于走查工具组件 → 放行
     try {
-      const root = el.getRootNode ? el.getRootNode() : null;
-      if (root && root.host && root.host.tagName === 'WEGO-WALKTHROUGH') return true;
+      let node = el;
+      while (node && node.getRootNode) {
+        const root = node.getRootNode();
+        if (!root || root === document) break;
+        if (root.host) {
+          if (root.host.closest && root.host.closest(lightTags)) return true;
+          node = root.host;
+        } else {
+          break;
+        }
+      }
     } catch (e) { /* ignore */ }
     return false;
   }
@@ -4563,12 +4575,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 强制 reflow 确保读取到实际高度（面板刚渲染时 offsetHeight 可能为 0）
       void this.offsetHeight;
       const panelHeight = this.getBoundingClientRect().height || this.offsetHeight || 400;
-      // 水平方向：优先右侧，不够则左侧，再不够则居中
+      // 水平方向：优先右侧，不够则左侧，再不够则贴右边缘
+      // （不居中：居中会覆盖页面主体/选中元素中心，挡住元素拖拽等页面交互）
       let left = rect.right + gap;
       if (left + panelWidth > window.innerWidth - 8) {
         left = rect.left - panelWidth - gap;
         if (left < 8) {
-          left = Math.max(8, (window.innerWidth - panelWidth) / 2);
+          left = window.innerWidth - panelWidth - 8;
         }
       }
       // 垂直方向：顶部对齐元素顶部，底部超出视口时自动上移
@@ -6253,6 +6266,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     _onFieldChange(field, value, opts) {
       if (!this._targetEl || !this._data) return;
       opts = opts || {};
+      // 面板回显同步重渲染期间（撤销/重做后 _refreshStylePanelData）：抑制由 blur/change 引发的
+      // 旧值写回，避免 _render 重建 DOM 移除聚焦 input 时把旧值覆盖到元素，破坏撤销/重做结果
+      if (this._suppressFieldSync) return;
       // auto 是「左右对齐」模式下的间距显示态，不作为可提交的间距值（忽略，避免误提交/误报）
       if (field === 'layoutGap' && value === 'auto') return;
       // 输入守门：拦截负数尺寸、非 flex 容器布局方向等非法操作（伪元素与普通元素路径统一），
@@ -9341,6 +9357,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._hoveredElement = null;
       // 连续点击层级链锚点：同位置连点逐级上移选中父级
       this._pickAnchor = null;
+      // 选中即拖待启动目标（功能 4）：按下已选中元素后短暂 arm，未移动抬起走点选、移动即拖拽
+      this._dragArmed = null;
       // 测量模式：两点横/纵距离（对齐计划 3.5）
       this._measureMode = false;
       this._measureAnchor = null;
@@ -9368,7 +9386,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     // 但不在 pointerdown 调 preventDefault，保留原生滚动（滑动手势放行）。
     _onPointerDown = (e) => {
       if (e.button !== undefined && e.button !== 0) return; // 仅主键
-      if (isWalkthroughElement(e.target)) return;          // 工具自身 UI 放行
+      // 工具自身 UI：若元信息色块/高亮等工具元素覆盖在已选中元素上（坐标命中选中元素范围），
+      // 仍允许按下即拖（否则选中后无法拖动换位）；真正的面板/工具栏区域则放行。
+      if (isWalkthroughElement(e.target)) {
+        if (!(state.selectedElement && this._pointInElement(e.clientX, e.clientY, state.selectedElement))) {
+          return;
+        }
+      }
       e.stopPropagation();                                 // 阻断页面元素监听器
       this._clearHover();
       // 测量模式：每次点击捕获起点/终点，不进入选择/拖拽流程
@@ -9377,13 +9401,23 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         this._measureTap(e.clientX, e.clientY);
         return;
       }
-      // 选中即拖（功能 4）：按下已选中元素 → 立即进入拖拽（无 500ms 定住）
-      if (state.selectedElement && this._hitTargetInSelected(e.target, state.selectedElement)) {
+      // 选中即拖（功能 4）：按下已选中元素 → 立即进入拖拽（无 500ms 定住）。
+      // 用 120ms 短定时器 + 移动>8px 双触发：快速连点（<120ms 抬起）仍走点选逻辑（同位置连点选中父级），
+      // 按住不动 120ms 或移动即进入拖拽，保持"选中即拖"手感且不破坏连点层级上移。
+      // 命中判定：e.target 是选中元素/其后代，或工具元素（元信息色块）覆盖在选中元素范围上
+      const inSelected = state.selectedElement && (
+        this._hitTargetInSelected(e.target, state.selectedElement) ||
+        (isWalkthroughElement(e.target) && this._pointInElement(e.clientX, e.clientY, state.selectedElement))
+      );
+      if (inSelected) {
         this._pointerActive = true;
         this._ptStartX = e.clientX;
         this._ptStartY = e.clientY;
+        this._ptStartTime = Date.now();
         this._isSwiping = false;
-        this._startElementDrag(state.selectedElement, e.clientX, e.clientY);
+        this._dragArmed = state.selectedElement;
+        clearTimeout(this._longPressTimer);
+        this._longPressTimer = setTimeout(() => this._startElementDrag(state.selectedElement, this._ptStartX, this._ptStartY), 120);
         return;
       }
       this._pointerActive = true;
@@ -9396,6 +9430,17 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._longPressTimer = setTimeout(() => this._startLongPressDrag(), 500);
     };
     _onPointerMove = (e) => {
+      // 选中即拖待启动：移动超过 8px 立即进入拖拽（无需等 120ms 定时器，保持"选中即拖"手感）
+      if (!this._dragging && this._dragArmed && this._pointerActive) {
+        if (Math.abs(e.clientX - this._ptStartX) > 8 || Math.abs(e.clientY - this._ptStartY) > 8) {
+          clearTimeout(this._longPressTimer);
+          this._longPressTimer = null;
+          const armed = this._dragArmed;
+          this._dragArmed = null;
+          this._startElementDrag(armed, this._ptStartX, this._ptStartY);
+          if (!this._dragging) return; // 拖拽被拒绝（如选择根），放行普通逻辑
+        }
+      }
       // 拖拽进行中：跟随指针平移元素（功能 4：增量位移 + 容器内 clamp + 中心越界换位）
       if (this._dragging) {
         const drag = this._dragging;
@@ -9448,6 +9493,15 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 长按拖拽结束：提交位移变更
       if (this._dragging) {
         this._endLongPressDrag(e);
+        return;
+      }
+      // 选中即拖待启动但未移动且未到定时器 → 作为普通点选（同位置连点选中父级等）
+      if (this._dragArmed) {
+        this._dragArmed = null;
+        this._pointerActive = false;
+        if (this._isSwiping) return;
+        if (Date.now() - this._ptStartTime >= 500) return;
+        this._handlePointSelection(e.clientX, e.clientY, e);
         return;
       }
       if (!this._pointerActive) return;
@@ -9509,6 +9563,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     _hitTargetInSelected(target, selected) {
       if (!target || !selected) return false;
       return target === selected || (typeof selected.contains === 'function' && selected.contains(target));
+    }
+
+    /** 坐标是否在元素 rect 内（用于工具元素覆盖在选中元素上时的拖动命中判定） */
+    _pointInElement(x, y, el) {
+      if (!el) return false;
+      const r = el.getBoundingClientRect();
+      return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
     }
 
     /** 容器是否可参与换位：非 body/html、至少两个可换位子元素 */
@@ -10369,6 +10430,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           }
           return;
         }
+        // 像素类属性补单位：撤销/重做恢复的纯数字值（如 padding-left=26）须带 px 才被浏览器接受。
+        // 排除 line-height（无单位是倍数语义）、box-shadow（复合值）等。
+        const PX_PROP_RE = /^(padding|margin|top|right|bottom|left|gap|row-gap|column-gap|font-size|border-radius|border-(top|right|bottom|left)-width|width|height|letter-spacing|text-indent)$/;
+        const vTrim = String(value == null ? '' : value).trim();
+        if (PX_PROP_RE.test(property) && /^-?\d+(\.\d+)?$/.test(vTrim)) {
+          value = vTrim + 'px';
+        }
         el.style.setProperty(property, value);
       } catch (e) {}
     }
@@ -10381,6 +10449,27 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const redoBtn = sp._shadow.querySelector('[data-action="redo"]');
       if (undoBtn) undoBtn.classList.toggle('is-disabled', state.undoStack.length === 0);
       if (redoBtn) redoBtn.classList.toggle('is-disabled', state.redoStack.length === 0);
+    }
+
+    /** 撤销/重做后同步样式面板回显：改动命中当前选中元素时，重读元素样式并重渲染面板，
+     *  保证输入框/色值等与实际样式一致（保持面板位置，不重新定位）。
+     *  渲染期间抑制 _onFieldChange 写回：_render 重建 DOM 移除聚焦的旧 input 会触发 blur/change，
+     *  若把旧值写回元素会覆盖撤销/重做结果。 */
+    _refreshStylePanelData(selector, target) {
+      const sp = this._components.stylePanel;
+      if (!sp || !sp._targetEl || sp.hasAttribute('hidden')) return;
+      let affectedEl = null;
+      try { affectedEl = queryTargetEl(selector); } catch (e) {}
+      if (!affectedEl || affectedEl !== sp._targetEl) return;
+      sp._suppressFieldSync = true;
+      try {
+        sp._data = sp._buildData(sp._targetEl, sp._target || '');
+        if (sp._hydrateSourceTokens) sp._hydrateSourceTokens();
+        sp._render();
+        sp._bindEvents();
+      } finally {
+        sp._suppressFieldSync = false;
+      }
     }
 
     /** 撤销上一次样式修改（Ctrl+Z / 面板撤销按钮） */
@@ -10402,6 +10491,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         state.redoStack.push(item);
         this._syncAfterRecordsChanged();
         this._updateUndoRedoUI();
+        this._refreshStylePanelData(item.selector, item.target || '');
         this._showToast('已撤销（元素顺序还原）');
         return true;
       }
@@ -10419,6 +10509,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         state.redoStack.push(item);
         this._syncAfterRecordsChanged();
         this._updateUndoRedoUI();
+        this._refreshStylePanelData(item.selector, item.target || '');
         this._showToast(`已撤销（含 ${group.length} 个共享元素）`);
         return true;
       }
@@ -10442,6 +10533,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       state.redoStack.push(item);
       this._syncAfterRecordsChanged();
       this._updateUndoRedoUI();
+      this._refreshStylePanelData(item.selector, item.target || '');
       this._showToast('已撤销');
       return true;
     }
@@ -10465,6 +10557,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         state.undoStack.push(item);
         this._syncAfterRecordsChanged();
         this._updateUndoRedoUI();
+        this._refreshStylePanelData(item.selector, item.target || '');
         this._showToast('已重做（元素顺序恢复）');
         return true;
       }
@@ -10480,6 +10573,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         state.undoStack.push(item);
         this._syncAfterRecordsChanged();
         this._updateUndoRedoUI();
+        this._refreshStylePanelData(item.selector, item.target || '');
         this._showToast(`已重做（含 ${item.groupRecords.length} 个共享元素）`);
         return true;
       }
@@ -10515,6 +10609,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       state.undoStack.push(item);
       this._syncAfterRecordsChanged();
       this._updateUndoRedoUI();
+      this._refreshStylePanelData(item.selector, item.target || '');
       this._showToast('已重做');
       return true;
     }
